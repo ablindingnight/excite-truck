@@ -42,7 +42,9 @@ def sext(v): return v - 0x10000 if v & 0x8000 else v
 out_splits, out_names, report = [], {}, []
 for unit in units:
     b, secs, syms, rel = read_elf(f"{obj_root}/{unit}.o")
-    ti = next(i for i, s in enumerate(secs) if s["name"] == ".text")
+    ti = next((i for i, s in enumerate(secs) if s["name"] == ".text" and s["size"]), None)
+    if ti is None:
+        report.append(f"{unit}: no .text; skipping"); continue
     text = b[secs[ti]["off"]:secs[ti]["off"] + secs[ti]["size"]]
     rmap = {o & ~3: (t, si, a) for o, t, si, a in rel[ti]}
     funcs = sorted([s for s in syms if s["shn"] == ti and s["type"] == 2], key=lambda s: s["val"])
@@ -59,7 +61,9 @@ for unit in units:
     n = len(text) // 4
     ws = [struct.unpack(">I", text[4 * k:4 * k + 4])[0] for k in range(n)]
     ms = masks(0, n)
-    anchor = next(k for k in range(n) if ms[k] == 0xFFFFFFFF)
+    anchor = next((k for k in range(n) if ms[k] == 0xFFFFFFFF), None)
+    if anchor is None:
+        report.append(f"{unit}: no anchor; skipping"); continue
     starts = [a - 4 * anchor for a in by_word[ws[anchor]] if all((words.get(a - 4 * anchor + 4 * k, -1) & ms[k]) == (ws[k] & ms[k]) for k in range(n))]
     if len(starts) != 1:
         report.append(f"{unit}: whole .text matched at {len(starts)} places; skipping"); continue

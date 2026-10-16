@@ -48,10 +48,68 @@ Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.text       start:0x8002FF84 end:0x800300F4
 	.rodata     start:0x802EE808 end:0x802EE878
 
+revolution/AX/AXProf.c:
+	.text       start:0x80033EB4 end:0x80033EF4
+	.sbss       start:0x8055D7F0 end:0x8055D800
+
+revolution/BASE/PPCArch.c:
+	.text       start:0x80033EF4 end:0x80034064
+	.data       start:0x80301D60 end:0x80301D98
+
+revolution/DB/db.c:
+	.text       start:0x80034064 end:0x8003414C
+	.data       start:0x80301D98 end:0x80301DB0
+	.sbss       start:0x8055D800 end:0x8055D808
+
+revolution/DVD/dvdqueue.c:
+	.text       start:0x80039CE4 end:0x80039F3C
+	.bss        start:0x8037B610 end:0x8037B630
+
+revolution/DVD/dvderror.c:
+	.text       start:0x80039F3C end:0x8003A244
+	.data       start:0x80302368 end:0x80302394
+	.bss        start:0x8037B640 end:0x8037B820
+	.sbss       start:0x8055D8D0 end:0x8055D8D4
+
+revolution/DVD/dvdidutils.c:
+	.text       start:0x8003A244 end:0x8003A334
+
+revolution/EXI/EXIUart.c:
+	.text       start:0x8003D6DC end:0x8003DA10
+	.sbss       start:0x8055D910 end:0x8055D920
+
+revolution/GX/GXBump.c:
+	.text       start:0x800434D4 end:0x80043920
+	.sdata2     start:0x80560B88 end:0x80560B8C
+
+revolution/GX/GXDisplayList.c:
+	.text       start:0x800445A4 end:0x80044774
+	.bss        start:0x8037C108 end:0x8037C808
+
+revolution/MEM/mem_allocator.c:
+	.text       start:0x800498C8 end:0x8004994C
+	.sdata2     start:0x80560C38 end:0x80560C48
+
+revolution/MEM/mem_list.c:
+	.text       start:0x8004994C end:0x80049A60
+
+revolution/MTX/mtxvec.c:
+	.text       start:0x80049F20 end:0x80049F74
+
+revolution/OS/OSAlarm.c:
+	.text       start:0x8004B554 end:0x8004BD38
+	.data       start:0x803041F8 end:0x80304208
+	.sbss       start:0x8055DA08 end:0x8055DA10
+
 revolution/OS/OSAlloc.c:
 	.text       start:0x8004BD38 end:0x8004C040
 	.sdata      start:0x80558F28 end:0x80558F2C
 	.sbss       start:0x8055DA10 end:0x8055DA20
+
+revolution/OS/OSArena.c:
+	.text       start:0x8004C040 end:0x8004C0D4
+	.sdata      start:0x80558F30 end:0x80558F38
+	.sbss       start:0x8055DA20 end:0x8055DA28
 
 revolution/OS/OSAudioSystem.c:
 	.text       start:0x8004C0D4 end:0x8004C588
@@ -74,6 +132,11 @@ revolution/OS/OSFont.c:
 	.sbss       start:0x8055DA48 end:0x8055DA58
 	.sdata2     start:0x80560CB8 end:0x80560CC0
 
+revolution/OS/OSInterrupt.c:
+	.text       start:0x80050ED8 end:0x8005165C
+	.data       start:0x80305500 end:0x80305530
+	.sbss       start:0x8055DA58 end:0x8055DA6C
+
 revolution/OS/OSMemory.c:
 	.text       start:0x80051878 end:0x8005208C
 	.data       start:0x80305530 end:0x80305540
@@ -84,3 +147,45 @@ revolution/OS/OSMutex.c:
 revolution/OS/OSUtf.c:
 	.text       start:0x80054F38 end:0x80055170
 	.data       start:0x80305618 end:0x80311458
+
+revolution/SI/SISamplingRate.c:
+	.text       start:0x80058920 end:0x80058A00
+	.data       start:0x80311658 end:0x803116EC
+	.sbss       start:0x8055DB30 end:0x8055DB34
+
+revolution/BTE/main/bte_logmsg.c:
+	.text       start:0x80070880 end:0x800709E4
+	.bss        start:0x803BF240 end:0x803BFA10
+	.sdata      start:0x80559040 end:0x80559044
+
+revolution/BTE/bta/sys/ptim.c:
+	.text       start:0x80071510 end:0x800716F0
+
+revolution/TPL/TPL.c:
+	.text       start:0x8009CDD0 end:0x8009CF04
+	.data       start:0x8031AD78 end:0x8031ADA4
+	.sdata      start:0x805590B8 end:0x805590C0
+
+revolution/EUART/euart.c:
+	.text       start:0x8009CF04 end:0x8009D274
+	.sbss       start:0x8055DC98 end:0x8055DCA8
+
+revolution/IPC/ipcMain.c:
+	.text       start:0x8009D274 end:0x8009D2F8
+	.sbss       start:0x8055DCA8 end:0x8055DCBC
+
+revolution/IPC/ipcclt.c:
+	.text       start:0x8009D2F8 end:0x8009E9F8
+	.bss        start:0x803C9278 end:0x803C92C8
+	.sdata      start:0x805590C0 end:0x805590C8
+	.sbss       start:0x8055DCC0 end:0x8055DCCC
+
+revolution/VF/pf_w_clib.c:
+	.text       start:0x800A4B54 end:0x800A4BE8
+
+revolution/VF/pf_cp932.c:
+	.text       start:0x800B6DDC end:0x800B72EC
+	.rodata     start:0x802EEF80 end:0x802F31F4
+
+revolution/VF/pf_init_prfile2.c:
+	.text       start:0x800B76A8 end:0x800B76E8
