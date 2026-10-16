@@ -81,6 +81,8 @@ void _restgpr_29(void);
 void _restgpr_30(void);
 void _restgpr_31(void);
 
+void __cvt_dbl_ull(void);
+
 static const double __constants[] = {
     0.0,
     4294967296.0,
@@ -665,6 +667,7 @@ L_8002FDF0:
 
 asm void __cvt_dbl_usll(void) {
     nofralloc
+    entry __cvt_dbl_ull  // newer compilers emit this name for the same helper
     stwu r1, -0x10(r1)
     stfd f1, 0x8(r1)
     lwz r3, 0x8(r1)

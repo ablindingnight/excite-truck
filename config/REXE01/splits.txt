@@ -13,6 +13,33 @@ Sections:
 	.sdata2     type:rodata align:8
 	.sbss2      type:bss align:16
 
+MSL/alloc.c:
+	extab       start:0x80004520 end:0x80004558
+	extabindex  start:0x80004700 end:0x80004754
+	.text       start:0x8002194C end:0x8002274C
+	.rodata     start:0x802ED860 end:0x802ED878
+	.bss        start:0x8035BB58 end:0x8035BB90
+	.sbss       start:0x8055D678 end:0x8055D67C
+
+MSL/ansi_files.c:
+	extab       start:0x80004558 end:0x80004568
+	extabindex  start:0x80004754 end:0x8000476C
+	.text       start:0x8002274C end:0x8002285C
+	.data       start:0x802FE3F8 end:0x802FE538
+
+MSL/ansi_fp.c:
+	extab       start:0x80004568 end:0x800045A0
+	extabindex  start:0x8000476C end:0x800047C0
+	.text       start:0x8002285C end:0x800241CC
+	.rodata     start:0x802ED878 end:0x802ED958
+	.data       start:0x802FE538 end:0x802FE6A0
+	.sdata2     start:0x80560570 end:0x805605A8
+
+MSL/buffer_io.c:
+	extab       start:0x800045A8 end:0x800045B0
+	extabindex  start:0x800047CC end:0x800047D8
+	.text       start:0x800242CC end:0x800243AC
+
 MSL/direct_io.c:
 	extab       start:0x800045B0 end:0x800045B8
 	extabindex  start:0x800047D8 end:0x800047E4
