@@ -4299,7 +4299,7 @@ ReadAdpcmInfo__Q46nw4hbm3snd6detail14StrmFileReaderCFPQ46nw4hbm3snd6detail9Adpcm
 LoadFileHeader__Q46nw4hbm3snd6detail14StrmFileLoaderFPvUl = .text:0x800FAF10; // type:function size:0x340 scope:global
 __ct__Q46nw4hbm3snd6detail10StrmPlayerFv = .text:0x800FB250; // type:function size:0x108 scope:global
 __ct__Q56nw4hbm3snd6detail10StrmPlayer11LoadCommandFv = .text:0x800FB358; // type:function size:0x1C scope:weak
-__dt__Q56nw4hbm3snd6detail28@unnamed@snd_StrmPlayer_cpp@11BasicPlayerFv = .text:0x800FB374; // type:function size:0x40 scope:local
+__dt__Q56nw4hbm3snd6detail10StrmPlayer11LoadCommandFv = .text:0x800FB374; // type:function size:0x40 scope:weak
 Prepare__Q46nw4hbm3snd6detail10StrmPlayerFPQ46nw4hbm3snd6detail14StrmBufferPoolQ56nw4hbm3snd6detail10StrmPlayer15StartOffsetTypeliPQ56nw4hbm3snd6detail10StrmPlayer12StrmCallbackUl = .text:0x800FB3B4; // type:function size:0xFC scope:global
 Start__Q46nw4hbm3snd6detail10StrmPlayerFv = .text:0x800FB4B0; // type:function size:0x170 scope:global
 Stop__Q46nw4hbm3snd6detail10StrmPlayerFv = .text:0x800FB620; // type:function size:0x14 scope:global
