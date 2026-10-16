@@ -401,6 +401,7 @@ config.libs = [
             Object(Matching, "revolution/MTX/mtxvec.c"),
             Object(Matching, "revolution/OS/OSAlarm.c"),
             Object(Matching, "revolution/OS/OSStateTM.c"),
+            Object(Matching, "revolution/OS/OSPlayRecord.c"),
             Object(Matching, "revolution/OS/OSArena.c"),
             Object(Matching, "revolution/OS/OSInterrupt.c"),
             Object(Matching, "revolution/SI/SISamplingRate.c"),
