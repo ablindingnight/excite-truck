@@ -1,28 +1,42 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-typedef signed char s8;
-typedef signed short s16;
-typedef signed long s32;
-typedef signed long long s64;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
+#ifdef __cplusplus
+#include <cstdarg>
+#include <cstddef>
+#include <new>
+#else
+#include <stdarg.h>
+#include <stddef.h>
+#endif
+
+#include <decomp/compat.h>
+#include <decomp/decomp.h>
+#include <decomp/lang.h>
+
+#include <macros.h>
+
 typedef unsigned long long u64;
+typedef signed long long s64;
+
+typedef unsigned long u32;
+typedef signed long s32;
+
+typedef unsigned short u16;
+typedef signed short s16;
+
+typedef unsigned char u8;
+typedef signed char s8;
 
 typedef float f32;
 typedef double f64;
 
-typedef int BOOL;
-#define TRUE 1
-#define FALSE 0
+typedef int UNKWORD;
+typedef void UNKTYPE;
 
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL 0
-#else
-#define NULL ((void*)0)
-#endif
-#endif
+enum { FALSE, TRUE };
+typedef int BOOL;
+
+typedef void (*funcptr_t)(void);
 
 #endif

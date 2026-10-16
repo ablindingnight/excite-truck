@@ -202,8 +202,9 @@ cflags_base = [
     "-RTTI off",
     "-fp_contract on",
     "-str reuse",
-    "-multibyte",  # For Wii compilers, replace with `-enc SJIS`
     "-i include",
+    "-i include/MSL",
+    "-i include/MSL/internal",
     f"-i build/{config.version}/include",
     f"-DBUILD_VERSION={version_num}",
     f"-DVERSION_{config.version}",
@@ -232,6 +233,14 @@ cflags_runtime = [
     "-gccinc",
     "-common off",
     "-inline auto",
+]
+
+# Revolution SDK flags (matches ogws)
+cflags_rvl = [
+    *cflags_base,
+    "-enc SJIS",
+    "-fp_contract off",
+    "-ipa file",
 ]
 
 # REL flags
@@ -293,6 +302,22 @@ config.libs = [
             Object(Matching, "Runtime.PPCEABI.H/__init_cpp_exceptions.cpp"),
             Object(Matching, "Runtime.PPCEABI.H/Gecko_ExceptionPPC.cp"),
             Object(Matching, "Runtime.PPCEABI.H/GCN_mem_alloc.c"),
+        ],
+    },
+    {
+        "lib": "RVL_SDK",
+        "mw_version": "GC/3.0a5",
+        "cflags": cflags_rvl,
+        "progress_category": "sdk",
+        "objects": [
+            Object(Matching, "revolution/OS/OSAlloc.c"),
+            Object(Matching, "revolution/OS/OSAudioSystem.c"),
+            Object(Matching, "revolution/OS/OSContext.c"),
+            Object(Matching, "revolution/OS/OSFatal.c"),
+            Object(Matching, "revolution/OS/OSFont.c"),
+            Object(Matching, "revolution/OS/OSMemory.c"),
+            Object(Matching, "revolution/OS/OSMutex.c"),
+            Object(Matching, "revolution/OS/OSUtf.c"),
         ],
     },
 ]

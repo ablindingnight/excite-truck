@@ -1,4 +1,4 @@
-#include <revolution/os.h>
+#include <revolution/OS.h>
 
 static void InitDefaultHeap(void) {
     void* arenaLo;
