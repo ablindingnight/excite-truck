@@ -281,7 +281,7 @@ config.warn_missing_source = False
 config.libs = [
     {
         "lib": "Runtime.PPCEABI.H",
-        "mw_version": "GC/3.0a5.2",
+        "mw_version": "GC/3.0a5",
         "cflags": cflags_runtime,
         "progress_category": "sdk",  # str | List[str]
         "objects": [
