@@ -653,6 +653,14 @@ revolution/wpad/WPADEncrypt.c:
 	.data       start:0x80312798 end:0x803130C8
 	.sbss       start:0x8055DC28 end:0x8055DC2C
 
+revolution/wud/WUD.c:
+	.text       start:0x80068DB8 end:0x8006CAA8
+	.data       start:0x803130C8 end:0x80313E8C
+	.bss        start:0x80392960 end:0x803946C0
+	.sdata      start:0x80558FE8 end:0x80558FF0
+	.sbss       start:0x8055DC30 end:0x8055DC4C
+	.sdata2     start:0x80560CF0 end:0x80560CF8
+
 revolution/wud/WUDHidHost.c:
 	.text       start:0x8006CAA8 end:0x8006CFA8
 	.data       start:0x80313E90 end:0x80314110

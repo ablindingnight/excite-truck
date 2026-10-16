@@ -428,6 +428,8 @@ config.libs.append(
             TpRevolution("mem/mem_heapCommon.c", Matching),
             TpRevolution("os/OSError.c", Matching),
             TpRevolution("wpad/WPADEncrypt.c", Matching),
+            TpRevolution("wud/debug_msg.c", NonMatching),
+            TpRevolution("wud/WUD.c", Matching),
             TpRevolution("wud/WUDHidHost.c", Matching),
             TpRevolution("axfx/AXFXReverbHi.c", Matching),
             TpRevolution("ipc/ipcProfile.c", Matching),
