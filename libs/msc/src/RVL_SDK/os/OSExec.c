@@ -202,9 +202,20 @@ static void CheckDVDLowIntType(void)
     if (DVDLowIntType != DVD_INTTYPE_TC)
     {
         OSReport("\nsecurity error(%d) has occurred", DVDLowIntType);
+#ifdef GAME_REXE01
+        __OSLaunchMenu();  // Excite Truck's older OS has no __OSReturnToMenuForError
+#else
         __OSReturnToMenuForError();
+#endif
     }
 }
+
+// Excite Truck's older OS goes back to the menu on these security errors
+#ifdef GAME_REXE01
+#define LAUNCH_SECURITY_EXIT() __OSLaunchMenu()
+#else
+#define LAUNCH_SECURITY_EXIT() __OSHotReset()
+#endif
 
 void __OSLaunchNextFirmware(void)
 {
@@ -271,28 +282,28 @@ void __OSLaunchNextFirmware(void)
     if (rc != IPC_RESULT_OK)
     {
         OSReport("\nsecurity error(%d) has occurred", rc);
-        __OSHotReset();
+        LAUNCH_SECURITY_EXIT();
     }
 
     rc = _ES_GetTicketViews(&fd, version, NULL, &ticketCnt);
     if (ticketCnt != 1 || rc != IPC_RESULT_OK)
     {
         OSReport("\nsecurity error(%d) has occurred", rc);
-        __OSHotReset();
+        LAUNCH_SECURITY_EXIT();
     }
 
     rc = _ES_GetTicketViews(&fd, version, t, &ticketCnt);
     if (rc != IPC_RESULT_OK)
     {
         OSReport("\nsecurity error(%d) has occurred", rc);
-        __OSHotReset();
+        LAUNCH_SECURITY_EXIT();
     }
 
     rc = _ES_LaunchTitle(&fd, version, t);
     if (rc != IPC_RESULT_OK)
     {
         OSReport("\nsecurity error(%d) has occurred", rc);
-        __OSHotReset();
+        LAUNCH_SECURITY_EXIT();
     }
 
     if (fd >= 0 && IOS_Close(fd) == IPC_RESULT_OK)
@@ -377,6 +388,49 @@ void __OSLaunchMenu(void)
     }
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older OS: a single ticket view on the stack, no reset code
+void __OSRelaunchTitle(void)
+{
+    s32 result;
+    u64 titleId ALIGN(32);
+    ESTicketView view ALIGN(32);
+    u32 count = 1;
+    s32 fd = -1;
+
+    if (_ES_InitLib(&fd) != IPC_RESULT_OK)
+    {
+        return;
+    }
+
+    result = _ES_GetTitleId(&fd, &titleId);
+    if (result != IPC_RESULT_OK)
+    {
+        return;
+    }
+
+    result = _ES_GetTicketViews(&fd, titleId, NULL, &count);
+    if (count != 1 || result != IPC_RESULT_OK)
+    {
+        return;
+    }
+
+    result = _ES_GetTicketViews(&fd, titleId, &view, &count);
+    if (result != IPC_RESULT_OK)
+    {
+        return;
+    }
+
+    if (_ES_LaunchTitle(&fd, titleId, &view) != IPC_RESULT_OK)
+    {
+        return;
+    }
+
+    while (TRUE)
+    {
+    }
+}
+#else
 void __OSRelaunchTitle(void)
 {
     s32 result;
@@ -418,19 +472,26 @@ void __OSRelaunchTitle(void)
     {
     }
 }
+#endif
 
 static inline void ReadDisc(void* addr, s32 length, u32 offset)
 {
     DVDCommandBlock block;
     GXColor bg = { 0, 0, 0, 0 };
+#ifndef GAME_REXE01 // its constant isn't in Excite Truck's .sdata2
     GXColor fg = { 255, 255, 255, 0 };
+#endif
 
     DVDReadAbsAsyncPrio(&block, addr, length, offset, NULL, 0);
     while (DVDGetCommandBlockStatus(&block) != DVD_STATE_IDLE)
     {
         if (DVDGetCommandBlockStatus(&block) > DVD_STATE_WAITING || DVDGetCommandBlockStatus(&block) < DVD_STATE_IDLE)
         {
+#ifdef GAME_REXE01
+            __OSLaunchMenu();
+#else
             __OSReturnToMenuForError();
+#endif
         }
     }
 }
