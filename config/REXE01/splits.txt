@@ -1143,8 +1143,8 @@ RVL_SDK/hbm/nw4hbm/db/db_console.cpp:
 	.bss        start:0x804077C0 end:0x80407BD8
 	.sdata      start:0x805597E0 end:0x805597E8
 
-RVL_SDK/hbm/nw4hbm/db/db_directPrint.cpp:
-	.text       start:0x800D2FC8 end:0x800D3824
+revolution/homebuttonLib/nw4hbm/db/db_directPrint.cpp:
+	.text       start:0x800D2E14 end:0x800D3824
 	.rodata     start:0x802F47D8 end:0x802F4A8C
 	.data       start:0x8031EBA0 end:0x8031EC50
 	.bss        start:0x80407BD8 end:0x80407BFC
