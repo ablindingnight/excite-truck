@@ -84,7 +84,9 @@ def fn_hits(text, rmap, f):
           for k in range(n)]
     anchor = next((k for k in range(n) if ms[k] == 0xFFFFFFFF), None)
     if anchor is None:
-        return []
+        # every word is relocated (e.g. a lone tail-call "b"): try known function starts of this size
+        return [a for a, sz in tfuncs.items() if sz == f["size"]
+                and all((words.get(a + 4 * k, -1) & ms[k]) == (ws[k] & ms[k]) for k in range(n))]
     out = []
     for a in by_word.get(ws[anchor], []):
         start = a - 4 * anchor
