@@ -45,8 +45,15 @@ cfg = open("configure.py").read()
 for o in over:
     if f'Object(Matching, "{o}"' in cfg or re.search(r'TpRevolution\("' + re.escape(o.split("/", 1)[-1]) + r'", Matching\)', cfg):
         sys.exit(f"{lo:#x}-{hi:#x} overlaps linked unit {o}; resolve by hand")
+carried = ""  # data sections of a single replaced unit are usually this file's too: keep them
 if over:
     print("replacing unlinked units:", over)
+    if len(over) == 1:
+        sp0 = open("config/REXE01/splits.txt").read()
+        i0 = sp0.index(over[0] + ":\n")
+        j0 = sp0.find("\n\n", i0)
+        blk = sp0[i0:j0 if j0 >= 0 else len(sp0)]
+        carried = "".join(l + "\n" for l in blk.split("\n")[1:] if l.strip() and ".text" not in l)
     run(*py, "tools/refmatch/unsplit.py", *over)
 cfg = open("configure.py").read()
 if entry not in cfg:
@@ -56,7 +63,7 @@ if entry not in cfg:
     open("configure.py", "w", newline="\n").write(cfg)
 sp = open("config/REXE01/splits.txt").read()
 if unit + ":" not in sp:
-    open("config/REXE01/splits.txt", "a", newline="\n").write(f"\n{unit}:\n\t.text       start:0x{lo:08X} end:0x{hi:08X}\n")
+    open("config/REXE01/splits.txt", "a", newline="\n").write(f"\n{unit}:\n\t.text       start:0x{lo:08X} end:0x{hi:08X}\n{carried}")
 build()
 print(run(*py, "tools/refmatch/extend_text.py", unit, "--apply").stdout.strip())
 set_status("Matching")
