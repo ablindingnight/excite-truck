@@ -3,6 +3,13 @@
 
 #include <ctype.h>
 
+// Excite Truck's SDK build has the asserts at different lines
+#ifdef GAME_REXE01
+#define SDK_LINE(et, other) et
+#else
+#define SDK_LINE(et, other) other
+#endif
+
 typedef struct DVDNode {
     union {
         struct {
@@ -157,7 +164,7 @@ s32 DVDConvertPathToEntrynum(const char* path) {
             }
 
             // clang-format off
-#line 443
+#line SDK_LINE(441, 443)
             OS_ASSERT(!illegal_format, "DVDConvertEntrynumToPath(possibly DVDOpen or DVDChangeDir or DVDOpenDir): specified directory or file (%s) doesn't match standard 8.3 format. This is a temporary restriction and will be removed soon\n", backup_path);
             // clang-format on
         } else {
@@ -315,12 +322,12 @@ BOOL DVDGetCurrentDir(char* buffer, u32 maxlen) {
 BOOL DVDReadAsyncPrio(DVDFileInfo* info, void* dst, s32 size, s32 offset,
                       DVDAsyncCallback callback, s32 prio) {
     // clang-format off
-#line 823
+#line SDK_LINE(805, 823)
     OS_ASSERT(offset >= 0 && offset <= info->size, "DVDReadAsync(): specified area is out of the file  ");
     // clang-format on
 
     // clang-format off
-#line 829
+#line SDK_LINE(811, 829)
     OS_ASSERT(offset + size >= 0 && offset + size < info->size + 32, "DVDReadAsync(): specified area is out of the file  ");
     // clang-format on
 
@@ -346,12 +353,12 @@ s32 DVDReadPrio(DVDFileInfo* info, void* dst, s32 size, s32 offset, s32 prio) {
     s32 ret;
 
     // clang-format off
-#line 893
+#line SDK_LINE(875, 893)
     OS_ASSERT(offset >= 0 && offset <= info->size, "DVDRead(): specified area is out of the file  ");
     // clang-format on
 
     // clang-format off
-#line 899
+#line SDK_LINE(881, 899)
     OS_ASSERT(offset + size >= 0 && offset + size < info->size + 32, "DVDRead(): specified area is out of the file  ");
     // clang-format on
 
