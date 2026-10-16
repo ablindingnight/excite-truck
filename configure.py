@@ -245,6 +245,14 @@ cflags_rvl = [
     "-DREVOLUTION",
 ]
 
+# Game code flags (see docs/compiler.md): generic PowerPC scheduling, no fused multiply-add.
+cflags_game = [
+    *cflags_base,
+    "-proc generic",
+    "-fp_contract off",
+    "-enc SJIS",
+]
+
 # Revolution SDK flags for sources from the Twilight Princess decomp (zeldaret/tp, RZDE01_00),
 # which ships the same Sep 2006 SDK build. Kept separate from ogws headers.
 cflags_rvl_tp = [
