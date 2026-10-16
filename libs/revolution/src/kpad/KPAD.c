@@ -8,6 +8,19 @@
 
 #include "__kpad.h"
 
+#ifdef GAME_REXE01
+// Excite Truck's KPAD was built without loop unrolling
+#pragma opt_unroll_loops off
+#endif
+
+#ifdef GAME_REXE01
+// Excite Truck's older KPAD inlines the device check (as an unsigned compare)
+static inline BOOL kpad_is_valid_device(u32 dev_type) {
+    return dev_type != WPAD_DEV_NONE;
+}
+#define is_valid_device kpad_is_valid_device
+#endif
+
 static const char* __KPADVersion = "<< RVL_SDK - KPAD \trelease build: Oct  4 2006 11:56:50 (0x4199_60726) >>";
 
 static Vec2 icenter_org = {0.000f, 0.000f};
@@ -543,6 +556,9 @@ void read_kpad_acc(KPADInsideStatus* kp, KPADUnifiedWpadStatus* uwp, u32 dev_typ
     }
 }
 
+#ifdef GAME_REXE01
+#pragma dont_inline on  // Excite Truck's read_kpad_dpd calls get_kobj
+#endif
 void get_kobj(KPADInsideStatus* kp, KPADUnifiedWpadStatus* status, u32 dev_type) {
     DPDObject* wobj_p = &status->u.core.obj[WPAD_DPD_MAX_OBJECTS - 1];
     const f32 dpd_scale = 2.0f / (f32)KPAD_DPD_RESO_WX;
@@ -566,6 +582,9 @@ void get_kobj(KPADInsideStatus* kp, KPADUnifiedWpadStatus* status, u32 dev_type)
         --wobj_p;
     } while (--kobj_p >= kp->kobj_sample);
 }
+#ifdef GAME_REXE01
+#pragma dont_inline reset
+#endif
 
 s8 select_2obj_first(KPADInsideStatus* kp) {
     KPADObject *op1, *op2, *rp1, *rp2;
@@ -1195,6 +1214,13 @@ static void clamp_stick_cross(Vec2* stick, s32 sx, s32 sy, s32 min, s32 max) {
     }
 }
 
+// Excite Truck's older KPAD always uses the circular stick clamp
+#ifdef GAME_REXE01
+#define CLAMP_STICK clamp_stick_circle
+#else
+#define CLAMP_STICK clamp_stick
+#endif
+
 void read_kpad_stick(KPADInsideStatus* kp, KPADUnifiedWpadStatus* uwp) {
     u32 dev_type;
     s32 probe_res;
@@ -1214,7 +1240,7 @@ void read_kpad_stick(KPADInsideStatus* kp, KPADUnifiedWpadStatus* uwp) {
             }
         }
 
-        clamp_stick(&kp->status.ex_status.fs.stick, uwp->u.fs.fsStickX, uwp->u.fs.fsStickY, kp_fs_fstick_min, kp_fs_fstick_max);
+        CLAMP_STICK(&kp->status.ex_status.fs.stick, uwp->u.fs.fsStickX, uwp->u.fs.fsStickY, kp_fs_fstick_min, kp_fs_fstick_max);
     } else if (kp->status.dev_type == WPAD_DEV_CLASSIC) {
         if (probe_res != 0) {
             if (probe_res == -1) {
@@ -1224,8 +1250,8 @@ void read_kpad_stick(KPADInsideStatus* kp, KPADUnifiedWpadStatus* uwp) {
             }
         }
 
-        clamp_stick(&kp->status.ex_status.cl.lstick, uwp->u.cl.clLStickX, uwp->u.cl.clLStickY, kp_cl_stick_min, kp_cl_stick_max);
-        clamp_stick(&kp->status.ex_status.cl.rstick, uwp->u.cl.clRStickX, uwp->u.cl.clRStickY, kp_cl_stick_min, kp_cl_stick_max);
+        CLAMP_STICK(&kp->status.ex_status.cl.lstick, uwp->u.cl.clLStickX, uwp->u.cl.clLStickY, kp_cl_stick_min, kp_cl_stick_max);
+        CLAMP_STICK(&kp->status.ex_status.cl.rstick, uwp->u.cl.clRStickX, uwp->u.cl.clRStickY, kp_cl_stick_min, kp_cl_stick_max);
         clamp_trigger(&kp->status.ex_status.cl.ltrigger, uwp->u.cl.clTriggerL, kp_cl_trigger_min, kp_cl_trigger_max);
         clamp_trigger(&kp->status.ex_status.cl.rtrigger, uwp->u.cl.clTriggerR, kp_cl_trigger_min, kp_cl_trigger_max);
     }
@@ -1279,7 +1305,12 @@ s32 check_device(s32 chan, KPADInsideStatus* kp) {
             return 1;
         }
         return 0;
+#ifdef GAME_REXE01
+    // FAKEMATCH: Excite Truck reloads dev_type for this check (an inlining artifact we can't reproduce)
+    } else if (is_valid_device(*(volatile u32*)&dev_type)) {
+#else
     } else if (is_valid_device(dev_type)) {
+#endif
         if (kp->is_dpd_enabled != 0) {
             set_dpd_enable(chan, dev_type);
         } else {
@@ -1493,10 +1524,12 @@ void KPADReset(void) {
     } while (--kp >= inside_kpads);
 }
 
+#ifndef GAME_REXE01
 BOOL is_valid_device(s32 dev_type) {
     FORCE_DONT_INLINE;
     return dev_type != WPAD_DEV_NONE;
 }
+#endif
 
 void set_dpd_disable(s32 chan, s32 dev_type) {
     KPADInsideStatus* kp;
