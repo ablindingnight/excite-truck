@@ -1,7 +1,7 @@
 #!/bin/sh
 # Diff one target function (from build/REXE01/asm) against one function in a reference object.
 # Usage: fndiff.sh <target_fn_name> <ref_obj> <ref_fn_name>
-t="$1"; obj="$2"; r="$3"; tmp="${TMPDIR:-/tmp}/fndiff.$$"
+t="$1"; obj="$2"; r="$3"; tmp="${FNDIFF_TMP:-${TMPDIR:-/tmp}}/fndiff.$$"
 mkdir -p "$tmp"
 f=$(grep -l "^\.fn $t," build/REXE01/asm/*.s build/REXE01/asm/*/*.s build/REXE01/asm/*/*/*.s 2>/dev/null | head -1)
 [ -n "$f" ] || { echo "no target asm file defines $t"; rm -rf "$tmp"; exit 1; }

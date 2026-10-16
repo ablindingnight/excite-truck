@@ -23,7 +23,11 @@ void GXSaveCPUFifo(GXFifoObj* fifo);
 void GXSaveGPFifo(GXFifoObj* fifo);
 void GXGetGPStatus(GXBool* overhi, GXBool* underlow, GXBool* readIdle, GXBool* cmdIdle, GXBool* brkpt);
 void GXGetFifoStatus(GXFifoObj* fifo, GXBool* overhi, GXBool* underflow, u32* fifoCount, GXBool* cpuWrite, GXBool* gpRead, GXBool* fifowrap);
+#if defined(GAME_REXE01)
+void GXGetFifoPtrs(const GXFifoObj* fifo, void** readPtr, void** writePtr);
+#else
 void GXGetFifoPtrs(GXFifoObj* fifo, void** readPtr, void** writePtr);
+#endif
 void* GXGetFifoBase(const GXFifoObj* fifo);
 u32 GXGetFifoSize(const GXFifoObj* fifo);
 void GXGetFifoLimits(const GXFifoObj* fifo, u32* hi, u32* lo);
@@ -32,7 +36,11 @@ void GXEnableBreakPt(void* break_pt);
 void GXDisableBreakPt(void);
 OSThread* GXSetCurrentGXThread(void);
 OSThread* GXGetCurrentGXThread(void);
+#if defined(GAME_REXE01)
+GXBool GXGetCPUFifo(GXFifoObj* fifo);  // older API: copies the CPU FIFO out
+#else
 GXFifoObj* GXGetCPUFifo(void);
+#endif
 GXFifoObj* GXGetGPFifo(void);
 u32 GXGetOverflowCount(void);
 u32 GXResetOverflowCount(void);

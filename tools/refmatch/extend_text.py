@@ -37,7 +37,11 @@ def same(addr, size, v):
     for k in range(0, size, 4):
         x, y = t[k:k + 4], text[v + k:v + k + 4]
         if v + k in rel:
-            if x[0] >> 2 != y[0] >> 2: return False
+            xw, yw = struct.unpack(">I", x)[0], struct.unpack(">I", y)[0]
+            if xw >> 26 != yw >> 26: return False
+            if xw >> 26 != 18:  # not a branch: destination register and SDA base must agree
+                if (xw >> 21) & 31 != (yw >> 21) & 31: return False
+                if (yw >> 16) & 31 == 0 and xw >> 26 not in (15,) and (xw >> 16) & 31 not in (0, 2, 13): return False
         elif x != y:
             return False
     return True
