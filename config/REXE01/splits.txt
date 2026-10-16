@@ -987,8 +987,8 @@ RVL_SDK/fs/fs.c:
 	.sdata      start:0x805590C8 end:0x805590D8
 	.sbss       start:0x8055DCD8 end:0x8055DCEC
 
-RVL_SDK/nand/nand.c:
-	.text       start:0x800A0DA0 end:0x800A10CC
+revolution/nand/nand.c:
+	.text       start:0x800A03A4 end:0x800A10CC
 
 RVL_SDK/nand/NANDOpenClose.c:
 	.text       start:0x800A10CC end:0x800A11E0
