@@ -97,9 +97,46 @@ MSL/math_sun.c:
 MSL/extras.c:
 	.text       start:0x8002B130 end:0x8002B1DC
 
+MSL/e_acos.c:
+	.text       start:0x8002B1DC end:0x8002B4A0
+	.sdata2     start:0x80560600 end:0x80560688
+
 MSL/e_atan2.c:
 	.text       start:0x8002B738 end:0x8002B9A8
 	.sdata2     start:0x80560710 end:0x80560768
+
+MSL/e_pow.c:
+	.text       start:0x8002BF8C end:0x8002C7D4
+	.rodata     start:0x802EE4D8 end:0x802EE508
+	.sdata2     start:0x805607E8 end:0x805608F8
+
+MSL/e_rem_pio2.c:
+	.text       start:0x8002C7D4 end:0x8002CB6C
+	.rodata     start:0x802EE508 end:0x802EE690
+	.sdata2     start:0x805608F8 end:0x80560950
+
+MSL/k_cos.c:
+	.text       start:0x8002CB6C end:0x8002CC7C
+	.sdata2     start:0x80560950 end:0x80560998
+
+MSL/k_rem_pio2.c:
+	.text       start:0x8002CC7C end:0x8002E388
+	.rodata     start:0x802EE690 end:0x802EE6E0
+	.sdata2     start:0x80560998 end:0x805609D8
+
+MSL/k_sin.c:
+	.text       start:0x8002E388 end:0x8002E448
+	.sdata2     start:0x805609D8 end:0x80560A10
+
+MSL/k_tan.c:
+	.text       start:0x8002E448 end:0x8002E6A0
+	.rodata     start:0x802EE6E0 end:0x802EE748
+	.sdata2     start:0x80560A10 end:0x80560A48
+
+MSL/s_atan.c:
+	.text       start:0x8002E6A0 end:0x8002E8E0
+	.rodata     start:0x802EE748 end:0x802EE7E0
+	.sdata2     start:0x80560A48 end:0x80560A70
 
 MSL/s_ceil.c:
 	.text       start:0x8002E8E0 end:0x8002EA20
@@ -131,6 +168,10 @@ MSL/s_sin.c:
 MSL/s_tan.c:
 	.text       start:0x8002EF30 end:0x8002EFA8
 	.sdata2     start:0x80560AD0 end:0x80560AD8
+
+MSL/e_sqrt.c:
+	.text       start:0x8002EFC0 end:0x8002F208
+	.sdata2     start:0x80560AD8 end:0x80560AE0
 
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x8002F254 end:0x8002F31C

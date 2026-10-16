@@ -520,6 +520,15 @@ config.libs.append(
             Object(Matching, "MSL/e_atan2.c"),
             Object(Matching, "MSL/s_ceil.c"),
             Object(Matching, "MSL/s_tan.c"),
+            Object(Matching, "MSL/k_cos.c"),
+            Object(Matching, "MSL/k_sin.c"),
+            Object(Matching, "MSL/k_tan.c"),
+            Object(Matching, "MSL/s_atan.c"),
+            Object(Matching, "MSL/e_rem_pio2.c"),
+            Object(Matching, "MSL/k_rem_pio2.c", extra_cflags=['-use_lmw_stmw on']),
+            Object(Matching, "MSL/e_pow.c"),
+            Object(Matching, "MSL/e_acos.c"),
+            Object(Matching, "MSL/e_sqrt.c"),
         ],
     }
 )
