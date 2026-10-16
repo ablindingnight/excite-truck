@@ -281,12 +281,18 @@ config.warn_missing_source = False
 config.libs = [
     {
         "lib": "Runtime.PPCEABI.H",
-        "mw_version": config.linker_version,
+        "mw_version": "GC/3.0a5.2",
         "cflags": cflags_runtime,
         "progress_category": "sdk",  # str | List[str]
         "objects": [
-            Object(NonMatching, "Runtime.PPCEABI.H/global_destructor_chain.c"),
-            Object(NonMatching, "Runtime.PPCEABI.H/__init_cpp_exceptions.cpp"),
+            Object(Matching, "Runtime.PPCEABI.H/__va_arg.c"),
+            Object(Matching, "Runtime.PPCEABI.H/global_destructor_chain.c"),
+            Object(Matching, "Runtime.PPCEABI.H/NMWException.cp", extra_cflags=["-Cpp_exceptions on"]),
+            Object(Matching, "Runtime.PPCEABI.H/ptmf.c"),
+            Object(Matching, "Runtime.PPCEABI.H/runtime.c"),
+            Object(Matching, "Runtime.PPCEABI.H/__init_cpp_exceptions.cpp"),
+            Object(Matching, "Runtime.PPCEABI.H/Gecko_ExceptionPPC.cp"),
+            Object(Matching, "Runtime.PPCEABI.H/GCN_mem_alloc.c"),
         ],
     },
 ]

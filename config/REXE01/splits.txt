@@ -12,3 +12,38 @@ Sections:
 	.sbss       type:bss align:32
 	.sdata2     type:rodata align:8
 	.sbss2      type:bss align:16
+
+Runtime.PPCEABI.H/__va_arg.c:
+	.text       start:0x8002F254 end:0x8002F31C
+
+Runtime.PPCEABI.H/global_destructor_chain.c:
+	.text       start:0x8002F31C end:0x8002F37C
+	.dtors      start:0x802ED640 end:0x802ED644
+	.sbss       start:0x8055D6A0 end:0x8055D6A4
+
+Runtime.PPCEABI.H/NMWException.cp:
+	extab       start:0x800046B8 end:0x80004700
+	extabindex  start:0x80004964 end:0x800049A0
+	.text       start:0x8002F37C end:0x8002F72C
+
+Runtime.PPCEABI.H/ptmf.c:
+	.text       start:0x8002F72C end:0x8002F790
+	.rodata     start:0x802EE7E0 end:0x802EE7F0
+
+Runtime.PPCEABI.H/runtime.c:
+	.text       start:0x8002F790 end:0x8002FEB0
+	.rodata     start:0x802EE7F0 end:0x802EE808
+
+Runtime.PPCEABI.H/__init_cpp_exceptions.cpp:
+	.text       start:0x8002FEB0 end:0x8002FF20
+	.ctors      start:0x802ED060 end:0x802ED064
+	.dtors      start:0x802ED644 end:0x802ED648
+	.sdata      start:0x80558DC8 end:0x80558DCC
+
+Runtime.PPCEABI.H/Gecko_ExceptionPPC.cp:
+	.text       start:0x8002FF20 end:0x8002FF84
+	.bss        start:0x8035BE90 end:0x8035BEA0
+
+Runtime.PPCEABI.H/GCN_mem_alloc.c:
+	.text       start:0x8002FF84 end:0x800300F4
+	.rodata     start:0x802EE808 end:0x802EE878
