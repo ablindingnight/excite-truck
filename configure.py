@@ -151,7 +151,7 @@ if not config.non_matching:
 # Tool versions
 config.binutils_tag = "2.42-1"
 config.compilers_tag = "20250520"
-config.dtk_tag = "v1.6.2"
+config.dtk_tag = "v1.8.0"
 config.objdiff_tag = "v3.0.0-beta.8"
 config.sjiswrap_tag = "v1.2.1"
 config.wibo_tag = "0.6.16"
@@ -304,7 +304,7 @@ cflags_rel = [
     "-sdata2 0",
 ]
 
-config.linker_version = "GC/1.3.2"
+config.linker_version = "GC/3.0a5"
 
 
 # Helper function for Dolphin libraries
@@ -417,6 +417,7 @@ config.libs.append(
             TpRevolution("axfx/AXFXReverbHi.c", Matching),
             TpRevolution("ipc/ipcProfile.c", Matching),
             TpRevolution("os/OSThread.c", Matching),
+            TpRevolution("os/OSSync.c", Matching),
             TpRevolution("exi/EXICommon.c", Matching),
             TpRevolution("gx/GXFrameBuf.c", Matching),
             TpRevolution("gx/GXPerf.c", Matching),

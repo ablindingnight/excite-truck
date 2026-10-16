@@ -23,6 +23,12 @@ Findings:
   The Wii/1.x compilers match only at `-O4,s` (at `-O4,p` they align loops with a `nop`).
 - Not yet determined: exact 3.0a version, `-O4,p` vs `-O4,s`, `-inline auto` vs `noauto`.
   Default to GC/3.0a5 (the SDK's compiler and the version in the banners) until a function disagrees.
-- The Twilight Princess decomp found TP's game code needs GC/3.0a3 (patched for multi-char constants)
-  and the **GC/3.0a5 linker** for Wii builds. Our link currently uses GC/1.3.2 because the 3.0a5 linker
-  crashed with this project's settings; worth revisiting.
+- The project now links with the **GC/3.0a5 linker** (as Twilight Princess does). Two things were needed:
+  - `mw_comment_version: 14` in `config.yml`. With the template's value (8) dtk stamps objects as
+    GC 1.3.2, and every GC 3.0+ linker crashes (access violation) when reading them.
+  - The GC 3.0 runtime ctor/dtor layout: `.ctors$10`, `.dtors$10`, `.dtors$15`, all three entries owned by
+    `__init_cpp_exceptions.cpp` (split with dtk `rename:`). Otherwise the linker stops with
+    "runtime sources ... need to be updated to latest version".
+- With the old GC/1.3.2 linker, splitting OSSync hung the link; with GC/3.0a5 (and clean
+  `__OSSystemCallVectorStart/End` labels) it links normally.
+- Tool versions bumped to match TP where needed: dtk v1.8.0.
