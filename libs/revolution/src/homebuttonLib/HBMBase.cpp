@@ -23,6 +23,24 @@
 #define HBM_START_SIMPLE_SYNC WPADStartFastSimpleSync
 #endif
 
+// Excite Truck's older AX has no master volume: its HBM saves, mutes and restores the three aux
+// return volumes instead (the binary calls AXGet/SetAuxA/B/CReturnVolume in these places)
+#ifdef GAME_REXE01
+#define HBM_AXGetVolume0 AXGetAuxAReturnVolume
+#define HBM_AXGetVolume1 AXGetAuxBReturnVolume
+#define HBM_AXGetVolume2 AXGetAuxCReturnVolume
+#define HBM_AXSetVolume0 AXSetAuxAReturnVolume
+#define HBM_AXSetVolume1 AXSetAuxBReturnVolume
+#define HBM_AXSetVolume2 AXSetAuxCReturnVolume
+#else
+#define HBM_AXGetVolume0 AXGetMasterVolume
+#define HBM_AXGetVolume1 AXGetAuxAReturnVolume
+#define HBM_AXGetVolume2 AXGetAuxBReturnVolume
+#define HBM_AXSetVolume0 AXSetMasterVolume
+#define HBM_AXSetVolume1 AXSetAuxAReturnVolume
+#define HBM_AXSetVolume2 AXSetAuxBReturnVolume
+#endif
+
 // Excite Truck's older HBM has its own assert line numbers
 #ifdef GAME_REXE01
 #define ET_LN(et, other) et
@@ -463,7 +481,7 @@ namespace homebutton {
         }
 
         if (mEndInitSoundFlag) {
-            AXSetMasterVolume(gain * 32768.0f);
+            HBM_AXSetVolume0(gain * 32768.0f);
         }
 
         if (mpSoundArchivePlayer != NULL) {
@@ -474,7 +492,7 @@ namespace homebutton {
     }
 
     void HomeButton::setSoundVolume(f32 volume) {
-        AXSetMasterVolume(volume * 32768.0f);
+        HBM_AXSetVolume0(volume * 32768.0f);
 
         if (mpSoundArchivePlayer != NULL) {
             for (int i = 0; i < mpSoundArchivePlayer->GetSoundPlayerCount(); i++) {
@@ -510,9 +528,9 @@ namespace homebutton {
         AXFXReverbHiShutdown(&mAxFxReverb);
         AXRegisterAuxACallback(mAuxCallback, mpAuxContext);
         AXFXSetHooks(mAxFxAlloc, mAxFxFree);
-        AXSetMasterVolume(mAppVolume[0]);
-        AXSetAuxAReturnVolume(mAppVolume[1]);
-        AXSetAuxBReturnVolume(mAppVolume[2]);
+        HBM_AXSetVolume0(mAppVolume[0]);
+        HBM_AXSetVolume1(mAppVolume[1]);
+        HBM_AXSetVolume2(mAppVolume[2]);
     }
 
     HomeButton::HomeButton(const HBMDataInfo* pHBInfo)
@@ -1012,9 +1030,9 @@ namespace homebutton {
             mpHBInfo->sound_callback(0, 0);
         }
 
-        mAppVolume[0] = AXGetMasterVolume();
-        mAppVolume[1] = AXGetAuxAReturnVolume();
-        mAppVolume[2] = AXGetAuxBReturnVolume();
+        mAppVolume[0] = HBM_AXGetVolume0();
+        mAppVolume[1] = HBM_AXGetVolume1();
+        mAppVolume[2] = HBM_AXGetVolume2();
 
         AXFXGetHooks(&mAxFxAlloc, &mAxFxFree);
         AXGetAuxACallback(&mAuxCallback, &mpAuxContext);
@@ -1029,9 +1047,9 @@ namespace homebutton {
 
         AXFXReverbHiInit(&mAxFxReverb);
         AXRegisterAuxACallback(&AXFXReverbHiCallback, &mAxFxReverb);
-        AXSetMasterVolume(0x8000);
-        AXSetAuxAReturnVolume(0);
-        AXSetAuxBReturnVolume(0);
+        HBM_AXSetVolume0(0x8000);
+        HBM_AXSetVolume1(0);
+        HBM_AXSetVolume2(0);
 
         if (mpHBInfo->sound_callback != NULL) {
             mpHBInfo->sound_callback(1, 0);
@@ -1621,7 +1639,7 @@ namespace homebutton {
         }
 
         if (mEndInitSoundFlag) {
-            AXSetMasterVolume(gain * 32768.0f);
+            HBM_AXSetVolume0(gain * 32768.0f);
         }
 
         if (mpSoundArchivePlayer != NULL) {
@@ -1632,7 +1650,7 @@ namespace homebutton {
     }
 
     void HomeButton::setSoundVolume(f32 volume) {
-        AXSetMasterVolume(volume * 32768.0f);
+        HBM_AXSetVolume0(volume * 32768.0f);
 
         if (mpSoundArchivePlayer != NULL) {
             for (int i = 0; i < mpSoundArchivePlayer->GetSoundPlayerCount(); i++) {

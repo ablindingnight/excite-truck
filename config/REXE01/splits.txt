@@ -1237,8 +1237,11 @@ RVL_SDK/hbm/nw4hbm/math/math_triangular.cpp:
 	.sdata2     start:0x80560F00 end:0x80560F1C
 
 RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp:
-	.text       start:0x800E36D0 end:0x800E3954
+	.text       start:0x800E279C end:0x800E44BC
 	.data       start:0x80321F80 end:0x803221A4
+	.bss        start:0x80407E60 end:0x8040EC78
+	.sbss       start:0x8055DE18 end:0x8055DE20
+	.sdata2     start:0x80560F20 end:0x80560F38
 
 RVL_SDK/hbm/nw4hbm/snd/snd_AxVoice.cpp:
 	.text       start:0x800E6F7C end:0x800E7F40
