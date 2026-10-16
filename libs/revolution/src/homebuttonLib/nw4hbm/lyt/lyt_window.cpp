@@ -200,6 +200,27 @@ namespace {
                  tSz[iy]);
     }
 
+
+#ifdef GAME_REXE01
+    // Excite Truck's DrawFrame matches the Strikers decomp's hand-expanded top-left corner
+    inline void SetFrameTexOrigin(math::VEC2* texCds, int corner, int ix, int iy, u8 originX,
+                                  u8 originY) {
+        // Corner bits select horizontal (1) and vertical (2) neighbors.
+        texCds[corner][ix] = texCds[corner ^ 2][ix] = originX;
+        texCds[corner][iy] = texCds[corner ^ 1][iy] = originY;
+    }
+
+    inline void SetFrameTexExtent(math::VEC2* texCds, const Size& polSize, const Size& texSize,
+                                  const TextureFlipInfo& flipInfo, int corner, int ix, int iy,
+                                  u8 originX, u8 originY) {
+        const math::VEC2 tSz(texSize.width, texSize.height);
+        texCds[corner ^ 3][ix] = texCds[corner ^ 1][ix] =
+            originX + polSize.width / ((flipInfo.coords[corner ^ 1][ix] - originX) * tSz[ix]);
+        texCds[corner ^ 3][iy] = texCds[corner ^ 2][iy] =
+            originY + polSize.height / ((flipInfo.coords[corner ^ 2][iy] - originY) * tSz[iy]);
+    }
+#endif
+
 }  // unnamed namespace
 
 namespace nw4hbm {
@@ -437,7 +458,23 @@ namespace nw4hbm {
                          alpha);                                                                   \
     }
 
+#ifdef GAME_REXE01
+            GetLTFrameSize(&polPt, &polSize, basePt, mSize, frameSize);
+            {
+                TextureFlipInfo& flipInfo = GetTexutreFlipInfo(TEXTUREFLIP_NONE);
+                int iy = flipInfo.idx[FLIPINDEX_Y];
+                int ix = flipInfo.idx[FLIPINDEX_X];
+                const u8 originX = flipInfo.coords[VERTEXCOLOR_LT][ix];
+                const u8 originY = flipInfo.coords[VERTEXCOLOR_LT][iy];
+                SetFrameTexOrigin(*texCds, VERTEXCOLOR_LT, ix, iy, originX, originY);
+                SetFrameTexExtent(*texCds, polSize, texSize, flipInfo, VERTEXCOLOR_LT, ix, iy,
+                                  originX, originY);
+            }
+            detail::DrawQuad(polPt, polSize, GX_TEXMAP1, texCds, bUseVtxCol ? vtxColors : NULL,
+                             alpha);
+#else
             DRAW_QUAD_FOR_FRAME_1(LT, TEXTUREFLIP_NONE);
+#endif
             DRAW_QUAD_FOR_FRAME_1(RT, TEXTUREFLIP_H);
             DRAW_QUAD_FOR_FRAME_1(RB, TEXTUREFLIP_180);
             DRAW_QUAD_FOR_FRAME_1(LB, TEXTUREFLIP_V);
