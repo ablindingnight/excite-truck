@@ -149,6 +149,12 @@ revolution/mem/mem_heapCommon.c:
 	.bss        start:0x8037D808 end:0x8037D830
 	.sbss       start:0x8055D9B8 end:0x8055D9BC
 
+revolution/mem/mem_expHeap.c:
+	.text       start:0x80048B98 end:0x80049304
+
+revolution/MEM/mem_frameHeap.c:
+	.text       start:0x80049304 end:0x800495F0
+
 revolution/MEM/mem_allocator.c:
 	.text       start:0x800498C8 end:0x8004994C
 	.sdata2     start:0x80560C38 end:0x80560C48
