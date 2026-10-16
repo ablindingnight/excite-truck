@@ -7,8 +7,10 @@ namespace homebutton {
     OSAlarm Controller::sAlarmSoundOff[WPAD_MAX_CONTROLLERS];
     Controller* Controller::sThis[WPAD_MAX_CONTROLLERS];
     bool Controller::sSetInfoAsync[WPAD_MAX_CONTROLLERS];
+#ifndef GAME_REXE01  // in Excite Truck these are defined in HBMRemoteSpk.cpp
     RemoteSpk* Controller::sPInstance;
     s32 Controller::lbl_8025DBBC;
+#endif
 
     void Controller::wpadConnectCallback(s32 chan, s32 result) {
         switch (result) {
@@ -73,8 +75,10 @@ namespace homebutton {
     }
 
     Controller::~Controller() {
+#ifndef GAME_REXE01  // Excite Truck's older HBM doesn't cancel the alarms here
         OSCancelAlarm(&sAlarm[mHBController.chan]);
         OSCancelAlarm(&sAlarmSoundOff[mHBController.chan]);
+#endif
     }
 
     void Controller::initCallback() {
@@ -233,6 +237,13 @@ namespace homebutton {
         mCheckSoundIntervalFlag = false;
     }
 
+// Excite Truck's older HBM measures these intervals with 32-bit tick math
+#ifdef GAME_REXE01
+#define HBM_TICK_DIFF(a, b) ((u32)(a) - (u32)(b))
+#else
+#define HBM_TICK_DIFF(a, b) ((a) - (b))
+#endif
+
     void Controller::updateSound() {
         int chan = getChan();
 
@@ -243,7 +254,7 @@ namespace homebutton {
                     mCheckSoundIntervalFlag = true;
                 } else {
                     OSTime time = OSGetTime();
-                    if (OSTicksToMilliseconds(time - mStopSoundTime) >= 1000) {
+                    if (OSTicksToMilliseconds(HBM_TICK_DIFF(time, mStopSoundTime)) >= 1000) {
                         mCheckSoundTimeFlag = false;
                         mCheckSoundIntervalFlag = false;
                     }
@@ -256,7 +267,7 @@ namespace homebutton {
                 mCheckSoundIntervalFlag = false;
 
                 OSTime time = OSGetTime();
-                if (OSTicksToMilliseconds(time - mPlaySoundTime) >= 480000) {
+                if (OSTicksToMilliseconds(HBM_TICK_DIFF(time, mPlaySoundTime)) >= 480000) {
                     mCheckSoundTimeFlag = false;
                     mCheckSoundIntervalFlag = false;
                     soundOff(1000);

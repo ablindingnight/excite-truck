@@ -1119,9 +1119,10 @@ revolution/homebuttonLib/HBMGUIManager.cpp:
 	.sbss       start:0x8055DDA0 end:0x8055DDA4
 	.sdata2     start:0x80560E28 end:0x80560E34
 
-RVL_SDK/hbm/HBMController.cpp:
-	.text       start:0x800D11CC end:0x800D155C
-	.bss        start:0x804076C0 end:0x80407780
+revolution/homebuttonLib/HBMController.cpp:
+	.text       start:0x800D0BD8 end:0x800D16C4
+	.bss        start:0x80407600 end:0x80407790
+	.sbss       start:0x8055DDA8 end:0x8055DDB0
 	.sdata2     start:0x80560E38 end:0x80560E44
 
 RVL_SDK/hbm/HBMRemoteSpk.cpp:
