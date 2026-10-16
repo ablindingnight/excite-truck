@@ -39,3 +39,11 @@ Findings:
   (16-byte struct copies use lfd/stfd only with 3.0a5.2; the Pokémon Battle Revolution decomp pins the same).
 - fdlibm wrappers (`w_*.c`) are compiled with `-D_IEEE_LIBM` (plain tail calls).
 - The runtime helper at 0x8002FE08 is `__cvt_dbl_usll`; GC/3.0a5 emits calls to `__cvt_dbl_ull`, so runtime.c gives it both names.
+
+## Excite Truck-specific differences (`GAME_REXE01`)
+
+`-DGAME_REXE01` is defined for the TP, ogws and Strikers-derived libraries. It guards differences
+from those games' builds, for example the per-library build dates in the SDK version banners
+(SI/GX: Sep 7 2006, DSP: Sep 20 2006), the capitalized English disc-error text in `dvdFatal.c`,
+`BTA_Init` reading `__OSGetSystemTime()` before creating its alarm, and `strncasecmp` being
+defined after `strcasecmp` in MSL `extras.c`.

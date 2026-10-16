@@ -16,8 +16,14 @@ const char* const __DVDErrorMessage[] = {
     // SC_LANG_EN
     "\n\n\nAn error has occurred.\n"
     "Press the Eject Button, remove the\n"
+#ifdef GAME_REXE01
+    // Excite Truck's build capitalizes these words
+    "Game Disc, and turn the power OFF.\n"
+    "Please read the Wii Operations Manual\n"
+#else
     "Game Disc, and turn the power off.\n"
     "Please read the Wii operations manual\n"
+#endif
     "for more information.",
 
     // SC_LANG_DE

@@ -33,10 +33,12 @@ int stricmp(const char* s1, const char* s2)
     }
 }
 
+#if !defined(GAME_REXE01)
 int strncasecmp(const char* s1, const char* s2, size_t n)
 {
     return __msl_strnicmp(s1, s2, n);
 }
+#endif
 
 int strcmpi(const char* str1, const char* str2)
 {
@@ -47,6 +49,14 @@ int strcasecmp(const char* s1, const char* s2)
 {
     return stricmp(s1, s2);
 }
+
+#if defined(GAME_REXE01)
+// Excite Truck's older MSL defines strncasecmp after strcasecmp
+int strncasecmp(const char* s1, const char* s2, size_t n)
+{
+    return __msl_strnicmp(s1, s2, n);
+}
+#endif
 
 char* itoa(int value, char* str, int base)
 {

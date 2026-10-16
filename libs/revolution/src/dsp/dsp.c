@@ -11,6 +11,10 @@
 #else
 #define BUILD_TIME "17:33:06"
 #endif
+#elif SDK_SEP2006 && defined(GAME_REXE01)
+// Excite Truck's DSP library is a different build than the rest of its Sep 2006 SDK
+#define BUILD_DATE  "Sep 20 2006"
+#define BUILD_TIME "22:25:51"
 #elif SDK_SEP2006
 #define BUILD_DATE  "Sep 21 2006"
 #define BUILD_TIME "14:32:13"

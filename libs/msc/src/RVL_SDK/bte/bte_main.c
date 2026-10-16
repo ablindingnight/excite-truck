@@ -67,10 +67,20 @@ static void BTE_InitSys(void)
 
 static void bta_register_os_callbacks(void)
 {
+#if defined(GAME_REXE01)
+	// Excite Truck's older BTE reads the system time before creating the alarm
+	OSTime start = __OSGetSystemTime();
+
+	OSCreateAlarm(&_bte_alarm);
+
+	OSSetPeriodicAlarm(&_bte_alarm, start, OSMillisecondsToTicks(2),
+	                   &BTUInterruptHandler);
+#else
 	OSCreateAlarm(&_bte_alarm);
 
 	OSSetPeriodicAlarm(&_bte_alarm, OSGetTime(), OSMillisecondsToTicks(2),
 	                   &BTUInterruptHandler);
+#endif
 }
 
 #if !defined(NDEBUG)

@@ -10,3 +10,26 @@ Helpers for importing code from other decomp projects that share libraries with 
 6. `datacmp.py` compares data symbols between two objects; `cctest.py` tries one source file on many compilers; `s2mwasm.py` converts dtk asm into MW inline-asm functions.
 
 dtk split ends must be 4-byte aligned, so objdiff may report <100% data from pad bytes; check the linked DOL hash instead.
+
+## Verifying the link (the DOL hash is the only real arbiter)
+
+`config/REXE01/build.sha1` must hash `build/REXE01/main.dol`. (Until 2026-10-16 it pointed at
+`orig/REXE01/sys/main.dol`, an upstream change that made every "OK" vacuous.) objdiff's per-function
+100% does not prove the link matches: it can't see function order, weak-function placement,
+relocation targets, or data a split doesn't cover. When the hash fails, build with
+`python configure.py --map` and:
+
+1. `mapcheck.py`: per section, where the placed address of each object first drifts from its
+   split start, blaming the object placed before it (wrong size, missing data, extra functions).
+2. `extend_data.py [--apply]`: grows a linked unit's data split to the size the linker actually
+   placed, forward or backward (e.g. a version banner before the data), only if the bytes match.
+3. `doldiff.py`: once sections line up, which units still have differing words. `wdiff.py <lo> <hi>`
+   lists them with symbols.
+4. `syncnames.py`: with the layout aligned, the map is ground truth for linked functions' names;
+   lists symbols.txt labels that disagree (swapped look-alike functions from masked matching).
+
+Typical causes found so far: missing `-Cpp_exceptions on` (extab), version-banner build dates,
+data/bss not in a split (double-counted), look-alike functions mislabelled (e.g. `PSMTXRotRad`
+vs `C_MTXRotRad`), function order under `-ipa file`, weak inline functions emitted in a different
+object or position, and MWLD filling alignment padding with junk where the original had zeros
+(extend the split end over the padding).
