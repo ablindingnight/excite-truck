@@ -653,6 +653,69 @@ config.libs.append(
 )
 
 
+# Revolution SDK sources from the Strikers decomp (its Jan 2007 SDK variants).
+cflags_msc_sdk = [
+    *cflags_msc,
+    "-i libs/msc/include",
+    "-DBUILD_VERSION=3",
+    "-DVERSION_R4QJ01",
+]
+
+config.libs.append(
+    {
+        "lib": "RVL_SDK_msc",
+        "mw_version": "GC/3.0a5",
+        "src_dir": "libs/msc/src",
+        "cflags": cflags_msc_sdk,
+        "progress_category": "sdk",
+        "objects": [
+            Object(NonMatching, "RVL_SDK/ai/ai.c"),
+            Object(NonMatching, "RVL_SDK/ax/AXAlloc.c"),
+            Object(NonMatching, "RVL_SDK/ax/AXOut.c"),
+            Object(NonMatching, "RVL_SDK/ax/AXSPB.c"),
+            Object(NonMatching, "RVL_SDK/ax/AXVPB.c"),
+            Object(NonMatching, "RVL_SDK/dvd/dvd.c"),
+            Object(Matching, "RVL_SDK/dvd/dvd_broadway.c"),
+            Object(NonMatching, "RVL_SDK/exi/EXIBios.c"),
+            Object(NonMatching, "RVL_SDK/gx/GXFifo.c"),
+            Object(Matching, "RVL_SDK/gx/GXMisc.c"),
+            Object(Matching, "RVL_SDK/gx/GXLight.c"),
+            Object(NonMatching, "RVL_SDK/gx/GXTexture.c"),
+            Object(Matching, "RVL_SDK/gx/GXTransform.c"),
+            Object(NonMatching, "RVL_SDK/kpad/KPAD.c"),
+            Object(Matching, "RVL_SDK/mem/mem_unitHeap.c"),
+            Object(NonMatching, "RVL_SDK/os/OS.c"),
+            Object(NonMatching, "RVL_SDK/os/OSExec.c"),
+            Object(Matching, "RVL_SDK/os/OSReboot.c"),
+            Object(NonMatching, "RVL_SDK/os/OSReset.c"),
+            Object(NonMatching, "RVL_SDK/os/OSStateTM.c"),
+            Object(NonMatching, "RVL_SDK/os/OSStateFlags.c"),
+            Object(Matching, "RVL_SDK/vi/i2c.c"),
+            Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
+            Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
+            Object(Matching, "RVL_SDK/usb/usb.c"),
+            Object(Matching, "RVL_SDK/axfx/AXFXReverbHiExp.c"),
+            Object(Matching, "RVL_SDK/fs/fs.c"),
+            Object(NonMatching, "RVL_SDK/nand/nand.c"),
+            Object(NonMatching, "RVL_SDK/nand/NANDOpenClose.c"),
+            Object(NonMatching, "RVL_SDK/nand/NANDCore.c"),
+            Object(Matching, "RVL_SDK/vf/pf_clib.c"),
+            Object(Matching, "RVL_SDK/vf/pf_str.c"),
+            Object(Matching, "RVL_SDK/vf/pdm_disk.c"),
+            Object(NonMatching, "RVL_SDK/vf/pf_cache.c"),
+            Object(NonMatching, "RVL_SDK/vf/pf_cluster.c"),
+            Object(Matching, "RVL_SDK/vf/pf_entry.c"),
+            Object(NonMatching, "RVL_SDK/vf/pf_entry_iterator.c"),
+            Object(NonMatching, "RVL_SDK/vf/pf_fat.c"),
+            Object(NonMatching, "RVL_SDK/vf/pf_file.c"),
+            Object(Matching, "RVL_SDK/vf/pf_path.c"),
+            Object(Matching, "RVL_SDK/vf/pf_api_util.c"),
+            Object(NonMatching, "RVL_SDK/arc/arc.c"),
+        ],
+    }
+)
+
+
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
 # This is called once per module, with the module ID and the current link order.
 #

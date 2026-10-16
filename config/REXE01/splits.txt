@@ -278,6 +278,29 @@ Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.text       start:0x8002FF84 end:0x800300F4
 	.rodata     start:0x802EE808 end:0x802EE878
 
+RVL_SDK/ai/ai.c:
+	.text       start:0x80030388 end:0x80030658
+	.sbss       start:0x8055D6AC end:0x8055D6E4
+
+RVL_SDK/ax/AXAlloc.c:
+	.text       start:0x800306CC end:0x8003099C
+	.bss        start:0x8035BEA0 end:0x8035BFA0
+	.sbss       start:0x8055D6E8 end:0x8055D6EC
+
+RVL_SDK/ax/AXOut.c:
+	.text       start:0x80032338 end:0x800324C4
+	.bss        start:0x8035EE60 end:0x8035F400
+	.sbss       start:0x8055D750 end:0x8055D778
+
+RVL_SDK/ax/AXSPB.c:
+	.text       start:0x800324C4 end:0x80032778
+	.bss        start:0x80363BE0 end:0x80363C58
+	.sbss       start:0x8055D790 end:0x8055D7E0
+
+RVL_SDK/ax/AXVPB.c:
+	.text       start:0x80033BD0 end:0x80033C8C
+	.sdata2     start:0x80560AE8 end:0x80560B08
+
 revolution/AX/AXProf.c:
 	.text       start:0x80033EB4 end:0x80033EF4
 	.sbss       start:0x8055D7F0 end:0x8055D800
@@ -305,6 +328,13 @@ revolution/DSP/dsp_task.c:
 	.data       start:0x80301E30 end:0x80301F6C
 	.sbss       start:0x8055D810 end:0x8055D828
 
+RVL_SDK/dvd/dvd.c:
+	.text       start:0x8003773C end:0x80039424
+	.data       start:0x80302120 end:0x80302298
+	.bss        start:0x80376AA0 end:0x8037B5E0
+	.sdata      start:0x80558E04 end:0x80558E18
+	.sbss       start:0x8055D848 end:0x8055D8D0
+
 revolution/DVD/dvdqueue.c:
 	.text       start:0x80039CE4 end:0x80039F3C
 	.bss        start:0x8037B610 end:0x8037B630
@@ -324,6 +354,16 @@ revolution/DVD/dvdFatal.c:
 	.sbss       start:0x8055D8D8 end:0x8055D8DC
 	.sdata2     start:0x80560B08 end:0x80560B0C
 
+RVL_SDK/dvd/dvd_broadway.c:
+	.text       start:0x8003A45C end:0x8003BE48
+	.data       start:0x80302848 end:0x80303440
+	.bss        start:0x8037B820 end:0x8037B8E0
+	.sdata      start:0x80558E18 end:0x80558E28
+	.sbss       start:0x8055D8E0 end:0x8055D904
+
+RVL_SDK/exi/EXIBios.c:
+	.text       start:0x8003C1B4 end:0x8003C258
+
 revolution/EXI/EXIUart.c:
 	.text       start:0x8003D6DC end:0x8003DA10
 	.sbss       start:0x8055D910 end:0x8055D920
@@ -340,10 +380,20 @@ revolution/gx/GXInit.c:
 	.sbss       start:0x8055D920 end:0x8055D948
 	.sdata2     start:0x80560B18 end:0x80560B40
 
+RVL_SDK/gx/GXFifo.c:
+	.text       start:0x8003ED64 end:0x8003F6A0
+	.data       start:0x803036E0 end:0x80303710
+	.bss        start:0x8037C0C0 end:0x8037C108
+	.sbss       start:0x8055D948 end:0x8055D964
+
 revolution/gx/GXAttr.c:
 	.text       start:0x8003FA34 end:0x80040734
 	.data       start:0x80303710 end:0x803038D8
 	.sdata      start:0x80558E38 end:0x80558E44
+
+RVL_SDK/gx/GXMisc.c:
+	.text       start:0x80040734 end:0x8004109C
+	.sbss       start:0x8055D968 end:0x8055D97C
 
 revolution/GX/GXGeometry.c:
 	.text       start:0x8004109C end:0x80041638
@@ -352,6 +402,12 @@ revolution/gx/GXFrameBuf.c:
 	.text       start:0x80041638 end:0x800421B0
 	.data       start:0x803038D8 end:0x80303A04
 	.sdata2     start:0x80560B40 end:0x80560B50
+
+RVL_SDK/gx/GXLight.c:
+	.text       start:0x800422D8 end:0x800425D8
+
+RVL_SDK/gx/GXTexture.c:
+	.text       start:0x80042DB0 end:0x800434D4
 
 revolution/GX/GXBump.c:
 	.text       start:0x800434D4 end:0x80043920
@@ -370,9 +426,17 @@ revolution/GX/GXDisplayList.c:
 	.text       start:0x800445A4 end:0x80044774
 	.bss        start:0x8037C108 end:0x8037C808
 
+RVL_SDK/gx/GXTransform.c:
+	.text       start:0x80044774 end:0x80044C30
+	.sdata2     start:0x80560BC8 end:0x80560BD4
+
 revolution/gx/GXPerf.c:
 	.text       start:0x80044C30 end:0x80045510
 	.data       start:0x80303CC8 end:0x80303DB4
+
+RVL_SDK/kpad/KPAD.c:
+	.text       start:0x800476F4 end:0x8004781C
+	.sdata2     start:0x80560BD8 end:0x80560C30
 
 revolution/mem/mem_heapCommon.c:
 	.text       start:0x8004872C end:0x80048B98
@@ -384,6 +448,9 @@ revolution/mem/mem_expHeap.c:
 
 revolution/MEM/mem_frameHeap.c:
 	.text       start:0x80049304 end:0x800495F0
+
+RVL_SDK/mem/mem_unitHeap.c:
+	.text       start:0x800495F0 end:0x800498C8
 
 revolution/MEM/mem_allocator.c:
 	.text       start:0x800498C8 end:0x8004994C
@@ -407,6 +474,12 @@ revolution/MTX/mtx44.c:
 revolution/mtx/vec.c:
 	.text       start:0x8004A0F8 end:0x8004A258
 	.sdata2     start:0x80560C68 end:0x80560C70
+
+RVL_SDK/os/OS.c:
+	.text       start:0x8004B0B4 end:0x8004B554
+	.data       start:0x80303E08 end:0x80303E78
+	.sdata      start:0x80558F04 end:0x80558F24
+	.sbss       start:0x8055D9C0 end:0x8055D9F8
 
 revolution/OS/OSAlarm.c:
 	.text       start:0x8004B554 end:0x8004BD38
@@ -441,6 +514,12 @@ revolution/os/OSError.c:
 	.bss        start:0x8037D8B0 end:0x8037D8F4
 	.sdata      start:0x80558F38 end:0x80558F40
 
+RVL_SDK/os/OSExec.c:
+	.text       start:0x8004E538 end:0x8004EF34
+	.data       start:0x803049C0 end:0x803049F0
+	.sdata      start:0x80558F40 end:0x80558F4C
+	.sbss       start:0x8055DA28 end:0x8055DA48
+
 revolution/OS/OSFatal.c:
 	.text       start:0x8004EF34 end:0x8004FB58
 	.bss        start:0x8038E060 end:0x8038E334
@@ -469,6 +548,14 @@ revolution/OS/OSMemory.c:
 revolution/OS/OSMutex.c:
 	.text       start:0x8005208C end:0x80052390
 
+RVL_SDK/os/OSReboot.c:
+	.text       start:0x80052390 end:0x80052404
+	.sbss       start:0x8055DA70 end:0x8055DA78
+
+RVL_SDK/os/OSReset.c:
+	.text       start:0x80052404 end:0x800526CC
+	.sbss       start:0x8055DA80 end:0x8055DA88
+
 revolution/os/OSRtc.c:
 	.text       start:0x80052964 end:0x800533F0
 	.bss        start:0x8038E340 end:0x8038E394
@@ -489,6 +576,17 @@ revolution/os/OSTime.c:
 revolution/OS/OSUtf.c:
 	.text       start:0x80054F38 end:0x80055170
 	.data       start:0x80305618 end:0x80311458
+
+RVL_SDK/os/OSStateTM.c:
+	.text       start:0x80055688 end:0x800557E0
+	.data       start:0x80311458 end:0x80311520
+	.bss        start:0x8038EDA0 end:0x8038EDE0
+	.sbss       start:0x8055DAA0 end:0x8055DAC0
+
+RVL_SDK/os/OSStateFlags.c:
+	.text       start:0x80055F88 end:0x800560B0
+	.data       start:0x80311568 end:0x80311590
+	.bss        start:0x8038F060 end:0x8038F080
 
 revolution/OS/__ppc_eabi_init.c:
 	.init       start:0x80004414 end:0x8000446C
@@ -513,12 +611,25 @@ revolution/SI/SISamplingRate.c:
 	.data       start:0x80311658 end:0x803116EC
 	.sbss       start:0x8055DB30 end:0x8055DB34
 
+RVL_SDK/vi/i2c.c:
+	.text       start:0x8005B02C end:0x8005BA48
+	.sdata      start:0x80558FB8 end:0x80558FBC
+	.sbss       start:0x8055DBD8 end:0x8055DBDC
+
 revolution/vi/vi3in1.c:
 	.text       start:0x8005BA48 end:0x8005D0DC
 	.data       start:0x80311B50 end:0x803120C0
 	.bss        start:0x8038F490 end:0x8038F4AC
 	.sdata      start:0x80558FC0 end:0x80558FD4
 	.sbss       start:0x8055DBE0 end:0x8055DBF4
+
+RVL_SDK/wpad/WPAD.c:
+	.text       start:0x8005D4F0 end:0x8005E09C
+	.sdata      start:0x80558FDC end:0x80558FE8
+
+RVL_SDK/wpad/WPADHIDParser.c:
+	.text       start:0x80064840 end:0x80064B1C
+	.data       start:0x80312338 end:0x80312794
 
 revolution/wpad/WPADEncrypt.c:
 	.text       start:0x800684D0 end:0x80068D68
@@ -549,9 +660,20 @@ revolution/BTE/bta/sys/bta_sys_main.c:
 revolution/BTE/bta/sys/ptim.c:
 	.text       start:0x80071510 end:0x800716F0
 
+RVL_SDK/usb/usb.c:
+	.text       start:0x8009AE94 end:0x8009BF34
+	.data       start:0x8031A620 end:0x8031ABD4
+	.sdata      start:0x805590A0 end:0x805590AC
+	.sbss       start:0x8055DC88 end:0x8055DC94
+
 revolution/axfx/AXFXReverbHi.c:
 	.text       start:0x8009BF34 end:0x8009BFC0
 	.sdata2     start:0x80560D50 end:0x80560D58
+
+RVL_SDK/axfx/AXFXReverbHiExp.c:
+	.text       start:0x8009BFC0 end:0x8009CD98
+	.data       start:0x8031ABD8 end:0x8031AD78
+	.sdata2     start:0x80560D58 end:0x80560D98
 
 revolution/TPL/TPL.c:
 	.text       start:0x8009CDD0 end:0x8009CF04
@@ -581,6 +703,23 @@ revolution/ipc/ipcProfile.c:
 	.bss        start:0x803C9348 end:0x803C9448
 	.sbss       start:0x8055DCD0 end:0x8055DCD8
 
+RVL_SDK/fs/fs.c:
+	.text       start:0x8009F0E8 end:0x800A03A4
+	.data       start:0x8031ADA8 end:0x8031ADCC
+	.sdata      start:0x805590C8 end:0x805590D8
+	.sbss       start:0x8055DCD8 end:0x8055DCEC
+
+RVL_SDK/nand/nand.c:
+	.text       start:0x800A0DA0 end:0x800A10CC
+
+RVL_SDK/nand/NANDOpenClose.c:
+	.text       start:0x800A10CC end:0x800A11E0
+
+RVL_SDK/nand/NANDCore.c:
+	.text       start:0x800A2204 end:0x800A24D8
+	.data       start:0x8031AE40 end:0x8031AEEC
+	.sdata      start:0x805590DC end:0x80559100
+
 revolution/nand/NANDCheck.c:
 	.text       start:0x800A27A0 end:0x800A2964
 	.data       start:0x8031AEF0 end:0x8031AF9C
@@ -588,12 +727,46 @@ revolution/nand/NANDCheck.c:
 revolution/SC/scapi.c:
 	.text       start:0x800A4294 end:0x800A466C
 
+RVL_SDK/vf/pf_clib.c:
+	.text       start:0x800A485C end:0x800A499C
+
 revolution/VF/pf_w_clib.c:
 	.text       start:0x800A4B54 end:0x800A4BE8
+
+RVL_SDK/vf/pf_str.c:
+	.text       start:0x800A51B8 end:0x800A52A0
+
+RVL_SDK/vf/pdm_disk.c:
+	.text       start:0x800A5EE8 end:0x800A6048
+
+RVL_SDK/vf/pf_cache.c:
+	.text       start:0x800A82B0 end:0x800A8504
+
+RVL_SDK/vf/pf_cluster.c:
+	.text       start:0x800A939C end:0x800A9470
+
+RVL_SDK/vf/pf_entry.c:
+	.text       start:0x800AA7B8 end:0x800AA924
+
+RVL_SDK/vf/pf_entry_iterator.c:
+	.text       start:0x800AC2A8 end:0x800AC4AC
+
+RVL_SDK/vf/pf_fat.c:
+	.text       start:0x800AD5D8 end:0x800AD7FC
+	.rodata     start:0x802EEF40 end:0x802EEF7C
+
+RVL_SDK/vf/pf_file.c:
+	.text       start:0x800B1868 end:0x800B1A54
+
+RVL_SDK/vf/pf_path.c:
+	.text       start:0x800B49FC end:0x800B4BD8
 
 revolution/VF/pf_cp932.c:
 	.text       start:0x800B6DDC end:0x800B72EC
 	.rodata     start:0x802EEF80 end:0x802F31F4
+
+RVL_SDK/vf/pf_api_util.c:
+	.text       start:0x800B72EC end:0x800B7408
 
 revolution/VF/pf_init_prfile2.c:
 	.text       start:0x800B76A8 end:0x800B76E8
@@ -963,3 +1136,6 @@ RVL_SDK/hbm/nw4hbm/ut/ut_ResFont.cpp:
 RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp:
 	.text       start:0x80108FFC end:0x8010C7DC
 	.data       start:0x80329140 end:0x80329458
+
+RVL_SDK/arc/arc.c:
+	.text       start:0x80116768 end:0x80116BD4
