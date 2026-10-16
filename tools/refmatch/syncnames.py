@@ -26,6 +26,6 @@ for i, cur, new, obj in changes:
 if "--apply" in sys.argv:
     # two-phase so swaps don't collide
     for i, cur, new, obj in changes:
-        lines[i] = re.sub(r"^\S+ =", f"{new} =", lines[i])
+        lines[i] = re.sub(r"^\S+ =", lambda _m: f"{new} =", lines[i])
     open(sp, "w", newline="\n").write("\n".join(lines))
     print(f"applied {len(changes)}")

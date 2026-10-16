@@ -124,7 +124,7 @@ namespace nw4hbm {
             OSReport("NW4HBM:Failed assertion pChild->mpParent == this");
         }
 
-#pragma ppc_iro_level 0
+// (TP sets #pragma ppc_iro_level 0 here; Excite Truck's build uses the default)
 
         const ut::Rect Pane::GetPaneRect(const DrawInfo& drawInfo) const {
             ut::Rect ret;
@@ -143,7 +143,7 @@ namespace nw4hbm {
             return ret;
         }
 
-#pragma ppc_iro_level reset
+// (end of TP's ppc_iro_level region)
 
         ut::Color Pane::GetVtxColor(u32) const {
             return ut::Color(0xFFFFFFFF);

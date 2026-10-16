@@ -18,7 +18,9 @@ comp = {}
 for k in range(0, S[st][5], 16):
     o, v, sz, info, oth, shn = struct.unpack(">IIIBBH", b[S[st][4] + k:S[st][4] + k + 16])
     if 0 < shn < n and names[shn] in start and names[shn] in SECS and (info >> 4) in (1, 2):
-        comp[start[names[shn]] + v] = (b[strs + o:b.index(b"\0", strs + o)].decode(), sz)
+        nm_ = b[strs + o:b.index(b"\0", strs + o)].decode()
+        if not nm_.startswith("..."):  # skip compiler section markers like "...data.0"
+            comp[start[names[shn]] + v] = (nm_, sz)
 p = "config/REXE01/symbols.txt"
 lines = open(p).read().split("\n")
 existing = {l.split(" = ")[0] for l in lines if " = " in l}
@@ -29,7 +31,7 @@ for i, l in enumerate(lines):
     a = int(m.group(3), 16)
     if a in comp and comp[a][0] not in existing:
         nm, sz = comp[a]
-        lines[i] = re.sub(r"^\S+ = ", f"{nm} = ", l)
+        lines[i] = re.sub(r"^\S+ = ", lambda _m: f"{nm} = ", l)
         lines[i] = re.sub(r"size:0x\w+", f"size:0x{sz:X}", lines[i])
         if "scope:" not in lines[i]: lines[i] += " scope:global"
         existing.add(nm); renamed += 1

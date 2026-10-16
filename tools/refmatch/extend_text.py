@@ -105,6 +105,7 @@ if "--apply" in sys.argv and not unmatched:
     for a, f in used.items():
         auto = f"fn_{a:08X}"
         if re.search(rf"^{auto} = ", text_syms, re.M) and f not in existing:
-            text_syms = re.sub(rf"^{auto} = ", f"{f} = ", text_syms, flags=re.M); existing.add(f); renamed += 1
+            text_syms = re.sub(rf"^{auto} = ", lambda _m, f=f: f"{f} = ", text_syms, flags=re.M)
+            existing.add(f); renamed += 1
     open(symp, "w", newline="\n").write(text_syms)
     print(f"applied ({renamed} functions named)")

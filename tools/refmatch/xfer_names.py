@@ -39,7 +39,7 @@ for u in units:
     for k, (tn, ta) in t.items():
         if k in m:
             bn, ba = m[k]
-            if tn != bn and re.match(r"(fn|lbl)_[0-9A-F]{8}$", tn) and not bn.startswith("@") and ta == ba:
+            if tn != bn and re.match(r"(fn|lbl)_[0-9A-F]{8}$", tn) and not bn.startswith(("@", "...")) and ta == ba:
                 if mapping.get(tn, bn) != bn: print("conflict", tn, mapping[tn], bn)
                 mapping[tn] = bn
 lines = open(syms_path).read().splitlines()
