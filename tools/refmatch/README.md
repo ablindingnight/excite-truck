@@ -33,3 +33,9 @@ data/bss not in a split (double-counted), look-alike functions mislabelled (e.g.
 vs `C_MTXRotRad`), function order under `-ipa file`, weak inline functions emitted in a different
 object or position, and MWLD filling alignment padding with junk where the original had zeros
 (extend the split end over the padding).
+
+## Safety net
+
+`python tools/install_hooks.py` installs two git hooks: **pre-commit** rebuilds and refuses the
+commit unless `main.dol` matches the original's SHA-1, and **post-commit** writes a git bundle of
+the whole history to `../backups` (restore with `git clone <bundle>`).
