@@ -57,14 +57,20 @@ stem = unit.rsplit(".", 1)[0]
 print(run(*py, "tools/refmatch/xfer_names.py", "config/REXE01/symbols.txt", "build/REXE01/obj", "build/REXE01/src", stem).stdout.strip()[-800:])
 out = build()
 if "main.dol: OK" not in out:
+    # place data sections by named anchors (vtables etc.), name data labels, then map-based placement
+    print(run(*py, "tools/refmatch/place_data.py", unit, "--truncate", "--apply").stdout.strip())
+    print(run(*py, "tools/refmatch/name_data.py", unit).stdout.strip()[-400:])
+    out = build()
+if "main.dol: OK" not in out:
     print(run(*py, "tools/refmatch/find_missing.py", "--apply").stdout.strip())
     out = build()
 if "main.dol: OK" in out:
     print(f"LINKED {unit}: DOL matches")
 else:
     print("\n".join(l for l in out.splitlines() if l.startswith("#  "))[:2000])
-    print(run(*py, "tools/refmatch/mapcheck.py").stdout[:1500])
-    print(run(*py, "tools/refmatch/doldiff.py").stdout[:1500])
+    mc = [l for l in run(*py, "tools/refmatch/mapcheck.py").stdout.splitlines() if "auto_fn_" not in l]
+    print("\n".join(mc[:8]))
+    print("\n".join(run(*py, "tools/refmatch/doldiff.py").stdout.splitlines()[:8]))
     set_status("NonMatching")
     build()
     print(f"NOT LINKED {unit}: left NonMatching (see above)")

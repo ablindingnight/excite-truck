@@ -295,9 +295,9 @@ cflags_rvl_tp = [
 ]
 
 
-def TpRevolution(path: str, matching: bool) -> Object:
+def TpRevolution(path: str, matching: bool, **kwargs) -> Object:
     # Unit "revolution/<path>", source at libs/revolution/src/<path>
-    return Object(matching, f"revolution/{path}", source=path)
+    return Object(matching, f"revolution/{path}", source=path, **kwargs)
 
 
 # REL flags
@@ -467,6 +467,7 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_layout.cpp", Matching),
+            TpRevolution("homebuttonLib/nw4hbm/snd/snd_SoundPlayer.cpp", NonMatching),
             TpRevolution("homebuttonLib/HBMAnmController.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_pane.cpp", NonMatching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_material.cpp", NonMatching),
@@ -508,6 +509,7 @@ config.libs.append(
             TpRevolution("gx/GXTexture.c", Matching),
             TpRevolution("kpad/KPAD.c", NonMatching),
             TpRevolution("ai/ai.c", Matching),
+            TpRevolution("os/OS.c", Matching, mw_version="GC/3.0a5"),
             TpRevolution("nand/nand.c", Matching),
             TpRevolution("os/OSThread.c", Matching),
             TpRevolution("os/OSSync.c", Matching),
@@ -826,7 +828,6 @@ config.libs.append(
             Object(Matching, "RVL_SDK/gx/GXLight.c"),
             Object(Matching, "RVL_SDK/gx/GXTransform.c"),
             Object(Matching, "RVL_SDK/mem/mem_unitHeap.c"),
-            Object(NonMatching, "RVL_SDK/os/OS.c"),
             Object(NonMatching, "RVL_SDK/os/OSExec.c"),
             Object(Matching, "RVL_SDK/os/OSReboot.c"),
             Object(NonMatching, "RVL_SDK/os/OSReset.c"),
