@@ -386,6 +386,7 @@ config.libs = [
             Object(Matching, "revolution/BTE/gki/common/gki_time.c"),
             Object(Matching, "revolution/BTE/bta/sys/bta_sys_conn.c"),
             Object(Matching, "revolution/BTE/bta/sys/bta_sys_main.c"),
+            Object(Matching, "revolution/SC/scsystem.c"),
             Object(Matching, "revolution/SC/scapi.c"),
             Object(Matching, "revolution/AX/AXProf.c"),
             Object(Matching, "revolution/BASE/PPCArch.c"),
