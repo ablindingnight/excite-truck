@@ -439,9 +439,11 @@ revolution/gx/GXPerf.c:
 	.text       start:0x80044C30 end:0x80045510
 	.data       start:0x80303CC8 end:0x80303DB4
 
-RVL_SDK/kpad/KPAD.c:
-	.text       start:0x800476F4 end:0x8004781C
-	.sdata2     start:0x80560BD8 end:0x80560C30
+revolution/kpad/KPAD.c:
+	.text       start:0x80045E24 end:0x80047284
+	.sdata      start:0x80558EB4 end:0x80558EF4
+	.sbss       start:0x8055D988 end:0x8055D9B4
+	.sdata2     start:0x80560BD8 end:0x80560C34
 
 revolution/mem/mem_heapCommon.c:
 	.text       start:0x8004872C end:0x80048B98
