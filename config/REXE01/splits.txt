@@ -36,6 +36,9 @@ MSL/ansi_fp.c:
 	.data       start:0x802FE538 end:0x802FE6A0
 	.sdata2     start:0x80560570 end:0x805605A8
 
+MSL/arith.c:
+	.text       start:0x800241CC end:0x800241DC
+
 MSL/buffer_io.c:
 	extab       start:0x800045A8 end:0x800045B0
 	extabindex  start:0x800047CC end:0x800047D8

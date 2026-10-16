@@ -549,7 +549,7 @@ config.libs.append(
             Object(Matching, "MSL/alloc.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
             Object(Matching, "MSL/ansi_files.c", extra_cflags=['-Cpp_exceptions on']),
             Object(Matching, "MSL/ansi_fp.c", extra_cflags=['-Cpp_exceptions on', '-rostr', '-use_lmw_stmw on']),
-            Object(NonMatching, "MSL/arith.c"),
+            Object(Matching, "MSL/arith.c"),
             Object(Matching, "MSL/buffer_io.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
             Object(NonMatching, "MSL/char_io.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
             Object(NonMatching, "MSL/ctype.c"),
