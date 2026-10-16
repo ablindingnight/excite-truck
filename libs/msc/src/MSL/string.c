@@ -284,6 +284,26 @@ char* strchr(const char* str, int ch)
     return (c ? 0 : (char*)p);
 }
 
+// Excite Truck keeps strrchr (Mario Strikers Charged stripped it)
+char* strrchr(const char* str, int chr) {
+    const unsigned char* p = (const unsigned char*)str - 1;
+    const unsigned char* q = 0;
+    unsigned long c = (chr & 0xff);
+    unsigned long ch;
+
+    while (ch = *++p) {
+        if (ch == c) {
+            q = p;
+        }
+    }
+
+    if (q) {
+        return (char*)q;
+    }
+
+    return c ? 0 : (char*)p;
+}
+
 size_t strcspn(const char* str, const char* set)
 {
     const unsigned char* pChar;

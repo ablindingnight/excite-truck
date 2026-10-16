@@ -511,6 +511,15 @@ config.libs.append(
             Object(Matching, "MSL/s_frexp.c"),
             Object(Matching, "MSL/s_ldexp.c"),
             Object(Matching, "MSL/s_sin.c"),
+            Object(Matching, "MSL/math_api.c"),
+            Object(Matching, "MSL/misc_io.c"),
+            Object(Matching, "MSL/string.c"),
+            Object(Matching, "MSL/uart_console_io_gcn.c"),
+            Object(Matching, "MSL/math_sun.c", extra_cflags=['-Cpp_exceptions on']),
+            Object(Matching, "MSL/extras.c"),
+            Object(Matching, "MSL/e_atan2.c"),
+            Object(Matching, "MSL/s_ceil.c"),
+            Object(Matching, "MSL/s_tan.c"),
         ],
     }
 )

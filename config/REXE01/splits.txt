@@ -41,6 +41,14 @@ MSL/mem.c:
 MSL/mem_funcs.c:
 	.text       start:0x80024E7C end:0x8002514C
 
+MSL/math_api.c:
+	extab       start:0x800045E0 end:0x800045F8
+	extabindex  start:0x80004820 end:0x80004844
+	.text       start:0x8002514C end:0x80025248
+
+MSL/misc_io.c:
+	.text       start:0x80025248 end:0x80025258
+
 MSL/qsort.c:
 	extab       start:0x80004658 end:0x80004660
 	extabindex  start:0x800048D4 end:0x800048E0
@@ -52,6 +60,9 @@ MSL/scanf.c:
 	.text       start:0x80027790 end:0x80028CFC
 	.rodata     start:0x802EDE90 end:0x802EDEB8
 	.data       start:0x802FEAE8 end:0x802FEC08
+
+MSL/string.c:
+	.text       start:0x80028CFC end:0x800290B8
 
 MSL/strtold.c:
 	extab       start:0x80004678 end:0x80004688
@@ -71,6 +82,28 @@ MSL/wstring.c:
 
 MSL/wchar_io.c:
 	.text       start:0x8002AF04 end:0x8002AF88
+
+MSL/uart_console_io_gcn.c:
+	extab       start:0x800046A0 end:0x800046A8
+	extabindex  start:0x80004940 end:0x8000494C
+	.text       start:0x8002AF88 end:0x8002B058
+	.sbss       start:0x8055D688 end:0x8055D68C
+
+MSL/math_sun.c:
+	extab       start:0x800046A8 end:0x800046B0
+	extabindex  start:0x8000494C end:0x80004958
+	.text       start:0x8002B060 end:0x8002B0A0
+
+MSL/extras.c:
+	.text       start:0x8002B130 end:0x8002B1DC
+
+MSL/e_atan2.c:
+	.text       start:0x8002B738 end:0x8002B9A8
+	.sdata2     start:0x80560710 end:0x80560768
+
+MSL/s_ceil.c:
+	.text       start:0x8002E8E0 end:0x8002EA20
+	.sdata2     start:0x80560A70 end:0x80560A80
 
 MSL/s_copysign.c:
 	.text       start:0x8002EA20 end:0x8002EA4C
@@ -94,6 +127,10 @@ MSL/s_ldexp.c:
 MSL/s_sin.c:
 	.text       start:0x8002EE58 end:0x8002EF30
 	.sdata2     start:0x80560AC8 end:0x80560AD0
+
+MSL/s_tan.c:
+	.text       start:0x8002EF30 end:0x8002EFA8
+	.sdata2     start:0x80560AD0 end:0x80560AD8
 
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x8002F254 end:0x8002F31C

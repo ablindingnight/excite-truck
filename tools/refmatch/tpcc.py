@@ -28,6 +28,8 @@ def flags_of(name):
 
 
 flags = flags_of(var)
+if os.environ.get("EXTRA_CFLAGS"):
+    flags += shlex.split(os.environ["EXTRA_CFLAGS"])
 lang = "-lang=c++" if src.endswith((".cpp", ".cp")) else "-lang=c"
 r = subprocess.run([os.path.abspath("build/tools/sjiswrap.exe"), os.path.abspath(f"build/compilers/{ver}/mwcceppc.exe"),
                     *flags, lang, "-c", src, "-o", out], capture_output=True, text=True)

@@ -4,6 +4,7 @@
 t="$1"; obj="$2"; r="$3"; tmp="${TMPDIR:-/tmp}/fndiff.$$"
 mkdir -p "$tmp"
 f=$(grep -l "^\.fn $t," build/REXE01/asm/*.s build/REXE01/asm/*/*.s build/REXE01/asm/*/*/*.s 2>/dev/null | head -1)
+[ -n "$f" ] || { echo "no target asm file defines $t"; rm -rf "$tmp"; exit 1; }
 build/tools/dtk.exe elf disasm "$obj" "$tmp/ref.s" >/dev/null 2>&1
 norm() { grep -oE "\*/\s+.*" | sed -E 's/\*\/\s*//; s/\.L_[0-9A-F]+/L/g; s/(bl|b) [^ ]+$/ SYM/; s/"?[^ ,(]+"?(\+0x[0-9a-f]+)?@(ha|l|h|sda21)/SYM@/g'; }
 awk "/^\.fn $t,/,/^\.endfn/" "$f" | norm > "$tmp/t.txt"
