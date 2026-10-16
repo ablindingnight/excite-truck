@@ -61,6 +61,12 @@ revolution/DB/db.c:
 	.data       start:0x80301D98 end:0x80301DB0
 	.sbss       start:0x8055D800 end:0x8055D808
 
+revolution/dsp/dsp.c:
+	.text       start:0x8003414C end:0x800343C8
+	.data       start:0x80301DB0 end:0x80301E18
+	.sdata      start:0x80558DE8 end:0x80558DEC
+	.sbss       start:0x8055D808 end:0x8055D80C
+
 revolution/DSP/dsp_task.c:
 	.text       start:0x80034418 end:0x80034CAC
 	.data       start:0x80301E30 end:0x80301F6C
@@ -176,6 +182,10 @@ revolution/OS/OSArena.c:
 revolution/OS/OSAudioSystem.c:
 	.text       start:0x8004C0D4 end:0x8004C588
 	.data       start:0x80304208 end:0x80304288
+
+revolution/OS/OSCache.c:
+	.text       start:0x8004C588 end:0x8004CC4C
+	.data       start:0x80304288 end:0x803044BC
 
 revolution/OS/OSContext.c:
 	.text       start:0x8004CC4C end:0x8004D4D4
