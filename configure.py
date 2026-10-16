@@ -417,6 +417,26 @@ config.libs = [
 ]
 
 
+# TP's Home Button library (same Sep 2006 era as ET's; built with NW4HBM asserts like ET's)
+cflags_rvl_tp_hbm = [
+    *cflags_rvl_tp,
+    "-DNW4HBM_DEBUG",
+    "-i libs/revolution/src/homebuttonLib",
+]
+
+config.libs.append(
+    {
+        "lib": "HBM_tp",
+        "mw_version": "GC/3.0a5",
+        "src_dir": "libs/revolution/src",
+        "cflags": cflags_rvl_tp_hbm,
+        "progress_category": "sdk",
+        "objects": [
+            TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_layout.cpp", Matching),
+        ],
+    }
+)
+
 config.libs.append(
     {
         "lib": "RVL_SDK_tp",
