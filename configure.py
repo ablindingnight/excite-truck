@@ -417,9 +417,43 @@ config.libs = [
 ]
 
 
-# TP's Home Button library (same Sep 2006 era as ET's; built with NW4HBM asserts like ET's)
+# TP's Home Button library (same Sep 2006 era as ET's; built with NW4HBM asserts like ET's).
+# Same as cflags_rvl_tp but WITHOUT -sym on: with debug info MWCC puts out-of-line inline
+# functions in separate .text sections, while ET's HBM has them interleaved at first use.
 cflags_rvl_tp_hbm = [
-    *cflags_rvl_tp,
+    "-nodefaults",
+    "-proc gekko",
+    "-align powerpc",
+    "-enum int",
+    "-fp hardware",
+    "-Cpp_exceptions off",
+    "-O4,p",
+    "-inline auto",
+    '-pragma "cats off"',
+    '-pragma "warn_notinlined off"',
+    "-maxerrors 1",
+    "-nosyspath",
+    "-RTTI off",
+    "-fp_contract on",
+    "-str reuse",
+    "-i libs/tp_include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common_Embedded/Math/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C++/MSL_Common/Include",
+    "-i libs/PowerPC_EABI_Support/Runtime/Inc",
+    "-i libs/revolution/include",
+    "-i libs/revolution/include/revolution",
+    "-ir libs/revolution/src",
+    "-DVERSION=3",
+    "-D__GEKKO__",
+    "-D__REVOLUTION_SDK__",
+    "-DSDK_SEP2006",
+    "-DGAME_REXE01",  # Excite Truck-specific differences from TP's Sep 2006 build
+    "-DNDEBUG=1",
+    "-enc SJIS",
+    "-fp_contract off",
+    "-ipa file",
     "-DNW4HBM_DEBUG",
     "-i libs/revolution/src/homebuttonLib",
 ]
