@@ -7,7 +7,8 @@ import json, os, re, subprocess, sys, tempfile
 
 path = sys.argv[1]
 force = "--force" in sys.argv
-unit = "revolution/" + path
+OG = "--og" in sys.argv  # ogws-derived: path is under src/ (e.g. revolution/DSP/dsp_task.c), lib RVL_SDK
+unit = path if OG else "revolution/" + path
 stem = path[:-2] if path.endswith(".c") else path.rsplit(".", 1)[0]
 tmp = tempfile.mkdtemp()
 py = [sys.executable, "-I"]
@@ -41,12 +42,15 @@ def unit_report():
 objdir = os.path.join(tmp, "obj", os.path.dirname(stem))
 os.makedirs(objdir, exist_ok=True)
 obj = os.path.join(tmp, "obj", stem + ".o")
-r = run(py + ["tools/refmatch/tpcc.py", "libs/revolution/src/" + path, obj])
+r = run(py + ["tools/refmatch/tpcc.py", "src/" + path, obj, "cflags_rvl", "GC/3.0a5"] if OG else
+        py + ["tools/refmatch/tpcc.py", "libs/revolution/src/" + path, obj])
 if r.returncode:
     sys.exit("compile failed:\n" + r.stdout + r.stderr)
 
 cfg = open("configure.py").read()
-already = f'TpRevolution("{path}"' in cfg
+entry_nm = f'Object(NonMatching, "{path}")' if OG else f'TpRevolution("{path}", NonMatching)'
+entry_m = f'Object(Matching, "{path}")' if OG else f'TpRevolution("{path}", Matching)'
+already = (f'"{path}"' in cfg) if OG else (f'TpRevolution("{path}"' in cfg)
 splits = open("config/REXE01/splits.txt").read()
 if unit + ":" not in splits:
     # 2. split
@@ -58,7 +62,7 @@ if unit + ":" not in splits:
     names = os.path.join(tmp, "names.json")
     os.replace("tools/refmatch/names.json", names)
     cand = os.path.join(tmp, "cand.txt")
-    open(cand, "w", newline="\n").write("revolution/" + r.stdout.strip() + "\n")
+    open(cand, "w", newline="\n").write(("" if OG else "revolution/") + r.stdout.strip() + "\n")
     print(open(cand).read())
     # 3. boundaries
     if not force:
@@ -70,8 +74,10 @@ if unit + ":" not in splits:
             sys.exit("boundary check failed (use --force if the neighbours belong to other files)")
     # 4. register + split + names
     if not already:
-        anchor = '            TpRevolution("ipc/ipcProfile.c", Matching),\n'
-        cfg = cfg.replace(anchor, anchor + f'            TpRevolution("{path}", NonMatching),\n')
+        anchor = ('            Object(Matching, "revolution/OS/OSUtf.c"),\n' if OG else
+                  '            TpRevolution("ipc/ipcProfile.c", Matching),\n')
+        assert anchor in cfg
+        cfg = cfg.replace(anchor, anchor + "            " + entry_nm + ",\n")
         open("configure.py", "w", newline="\n").write(cfg)
     open("config/REXE01/splits.txt", "a", newline="\n").write("\n" + open(cand).read())
     subprocess.run(py + ["tools/refmatch/apply_names2.py", "config/REXE01/symbols.txt", names, cand], check=True)
@@ -85,7 +91,7 @@ print(f"{unit}: code {u['measures'].get('fuzzy_match_percent', 0):.2f}%  DOL ok=
 if bad:
     sys.exit(f"not matching yet: {bad}")
 # 5. link it
-cfg = open("configure.py").read().replace(f'TpRevolution("{path}", NonMatching)', f'TpRevolution("{path}", Matching)')
+cfg = open("configure.py").read().replace(entry_nm, entry_m)
 open("configure.py", "w", newline="\n").write(cfg)
 r = run(py + ["tools/refmatch/xfer_names.py", "config/REXE01/symbols.txt", "build/REXE01/obj", "build/REXE01/src", unit.rsplit(".", 1)[0]])
 print(r.stdout.strip())

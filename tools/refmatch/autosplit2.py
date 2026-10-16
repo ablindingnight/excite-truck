@@ -250,6 +250,21 @@ for unit in units:
                         symaddr[k] = c
                         changed = True
                         break
+    # fill in unreferenced symbols when a section's placements all share one base (nothing stripped
+    # between them): e.g. zero-initialized globals used only by other files
+    for shn, s in enumerate(secs):
+        ks = [k for k in symaddr if syms[k]["shn"] == shn]
+        if not ks:
+            continue
+        bases = {symaddr[k] - syms[k]["val"] for k in ks}
+        if len(bases) != 1:
+            continue
+        base = bases.pop()
+        lo_v = min(syms[k]["val"] for k in ks)
+        hi_v = max(syms[k]["val"] + syms[k]["size"] for k in ks)
+        for k, y in enumerate(syms):
+            if y["shn"] == shn and y["type"] == 1 and y["size"] and k not in symaddr and lo_v <= y["val"] < hi_v:
+                symaddr[k] = base + y["val"]
     # order sanity + split ranges per section
     for shn, s in enumerate(secs):
         ks = sorted([k for k in symaddr if syms[k]["shn"] == shn], key=lambda k: syms[k]["val"])

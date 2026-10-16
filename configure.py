@@ -373,6 +373,8 @@ config.libs = [
             Object(Matching, "revolution/OS/OSMemory.c"),
             Object(Matching, "revolution/OS/OSMutex.c"),
             Object(Matching, "revolution/OS/OSUtf.c"),
+            Object(Matching, "revolution/MTX/mtx44.c"),
+            Object(Matching, "revolution/DSP/dsp_task.c"),
             Object(Matching, "revolution/DVD/dvdFatal.c"),
             Object(Matching, "revolution/GX/GXGeometry.c"),
             Object(Matching, "revolution/GX/GXPixel.c"),
