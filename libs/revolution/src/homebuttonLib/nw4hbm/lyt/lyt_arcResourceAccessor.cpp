@@ -5,6 +5,10 @@
 #include <string>
 
 #ifdef GAME_REXE01
+static const int FONTNAMEBUF_MAX = 128;  // as in the Strikers header
+#endif
+
+#ifdef GAME_REXE01
 extern "C" int strcasecmp(const char*, const char*);  // MSL extras; not in TP's headers
 #endif
 
@@ -112,15 +116,20 @@ namespace nw4hbm {
         FontRefLink::FontRefLink() : mpFont(NULL) {}
 
         void FontRefLink::Set(const char* name, ut::Font* pFont) {
+#ifdef GAME_REXE01
+            NW4HBM_ASSERT(203, std::strlen(name) < FONTNAMEBUF_MAX);
+#endif
             strcpy(mFontName, name);
             mpFont = pFont;
         }
 
         ArcResourceAccessor::ArcResourceAccessor() : mArcBuf(NULL) {}
 
+#ifndef GAME_REXE01
         void dummyString() {
             OSReport("NW4HBM:Failed assertion std::strlen(name) < FONTNAMEBUF_MAX");
         }
+#endif
 
         bool ArcResourceAccessor::Attach(void* archiveStart, const char* resourceRootDirectory) {
             // clang-format off
@@ -143,10 +152,20 @@ namespace nw4hbm {
             return true;
         }
 
+#ifdef GAME_REXE01
+        void* ArcResourceAccessor::Detach() {
+            NW4HBM_ASSERT(244, IsAttached());
+
+            void* old = mArcBuf;
+            mArcBuf = NULL;
+            return old;
+        }
+#else
         void dummyString2() {
             OSReport("NW4HBM:Failed assertion IsAttached()");
             OSReport("NW4HBM:Pointer must not be NULL (pLink)");
         }
+#endif
 
         void* ArcResourceAccessor::GetResource(u32 resType, const char* name, u32* pSize) {
             return GetResourceSub(&mArcHandle, mResRootDir, resType, name, pSize);
@@ -164,6 +183,18 @@ namespace nw4hbm {
 
             return true;
         }
+
+#ifdef GAME_REXE01
+        void ArcResourceAccessor::RegistFont(FontRefLink* pLink) {
+            NW4HBM_ASSERT_CHECK_NULL(280, pLink);
+            mFontList.PushBack(pLink);
+        }
+
+        void ArcResourceAccessor::UnregistFont(FontRefLink* pLink) {
+            NW4HBM_ASSERT_CHECK_NULL(287, pLink);
+            mFontList.Erase(pLink);
+        }
+#endif
 
         ut::Font* ArcResourceAccessor::GetFont(const char* name) {
             return detail::FindFont(&mFontList, name);
@@ -192,6 +223,14 @@ namespace nw4hbm {
             }
             return NULL;
         }
+
+#ifdef GAME_REXE01
+        // From the Strikers source: unused (stripped), but its assert strings stay in
+        // Excite Truck's .data
+        ArcResourceLink& FirstArcResource(ArcResourceLinkList* pLinks) {
+            return *pLinks->GetBeginIter();
+        }
+#endif
 
         void MultiArcResourceAccessor::RegistFont(FontRefLink* pLink) {
             mFontList.PushBack(pLink);

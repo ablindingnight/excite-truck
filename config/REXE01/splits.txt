@@ -1163,7 +1163,7 @@ RVL_SDK/hbm/nw4hbm/lyt/lyt_animation.cpp:
 	.sdata      start:0x805597F0 end:0x805597F8
 	.sdata2     start:0x80560E48 end:0x80560E68
 
-RVL_SDK/hbm/nw4hbm/lyt/lyt_arcResourceAccessor.cpp:
+revolution/homebuttonLib/nw4hbm/lyt/lyt_arcResourceAccessor.cpp:
 	.text       start:0x800D50A8 end:0x800D57AC
 	.data       start:0x8031F2C8 end:0x8031F540
 	.sdata      start:0x805597F8 end:0x80559800

@@ -472,6 +472,7 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_layout.cpp", Matching),
+            TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_arcResourceAccessor.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_drawInfo.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/db/db_directPrint.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/snd/snd_SoundPlayer.cpp", NonMatching),
@@ -666,7 +667,6 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_console.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_mapFile.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_animation.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_arcResourceAccessor.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_bounding.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_picture.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_textBox.cpp"),

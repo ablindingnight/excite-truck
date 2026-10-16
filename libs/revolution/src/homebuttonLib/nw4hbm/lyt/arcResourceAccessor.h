@@ -61,6 +61,11 @@ namespace nw4hbm {
             bool Attach(void* archiveStart, const char* resourceRootDirectory);
 
             bool IsAttached(void) { return this->mArcBuf != NULL; }
+#ifdef GAME_REXE01  // in Excite Truck's (Strikers-like) version; unused, stripped
+            void* Detach();
+            void RegistFont(FontRefLink* pLink);
+            void UnregistFont(FontRefLink* pLink);
+#endif
 
         private:
             /* 0x00 (base) */
