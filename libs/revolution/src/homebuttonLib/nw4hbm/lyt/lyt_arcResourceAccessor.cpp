@@ -4,6 +4,10 @@
 
 #include <string>
 
+#ifdef GAME_REXE01
+extern "C" int strcasecmp(const char*, const char*);  // MSL extras; not in TP's headers
+#endif
+
 namespace {
 
     s32 FindNameResource(ARCHandle* pArcHandle, const char* resName) NO_INLINE {
@@ -27,7 +31,11 @@ namespace {
                 if (entryNum != -1) {
                     break;
                 }
+#ifdef GAME_REXE01  // Excite Truck's build calls strcasecmp
+            } else if (strcasecmp(resName, dirEntry.name) == 0) {
+#else
             } else if (stricmp(resName, dirEntry.name) == 0) {
+#endif
                 entryNum = dirEntry.entryNum;
                 break;
             }

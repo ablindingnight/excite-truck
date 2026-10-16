@@ -2,7 +2,7 @@
 # lib: locate it in the DOL, replace overlapping unlinked Strikers HBM units, add its .text split,
 # name its functions, link it, transfer names, place its initialized data, and report the result.
 # Leaves the unit NonMatching (and the DOL unchanged) if anything is left to fix by hand.
-# Usage: python adopt_hbm.py <path under homebuttonLib, e.g. nw4hbm/lyt/lyt_group.cpp>
+# Usage: python adopt_hbm.py <path under homebuttonLib, e.g. nw4hbm/lyt/lyt_group.cpp> [--range LO HI]
 import os, re, subprocess, sys
 rel = sys.argv[1]
 src = f"libs/revolution/src/homebuttonLib/{rel}"
@@ -25,14 +25,22 @@ os.makedirs("build/adopt", exist_ok=True)
 obj = "build/adopt/x.o"  # relative: the compiler wrapper splits paths containing spaces
 r = run(*py, "tools/refmatch/tpcc.py", src, obj, "cflags_rvl_tp_hbm", "GC/3.0a5")
 if r.returncode: sys.exit("compile failed:\n" + r.stdout[-1500:])
-loc = run(*py, "tools/refmatch/locate.py", obj).stdout
-m = re.search(r"unique hits span 0x(\w+)-0x(\w+); overlapping splits: \[(.*)\]", loc)
-if not m: sys.exit("not located:\n" + loc)
-# end = last uniquely-located function's end
-hits = [(int(a, 16), int(z, 16)) for z, a in re.findall(r"\s(0x[0-9a-f]+) (0x[0-9a-f]+)\s*$", loc, re.M)]
-lo = int(m.group(1), 16)
-hi = max(a + z for a, z in hits if lo <= a <= int(m.group(2), 16))
-over = [o.strip().strip("'") for o in m.group(3).split(",") if o.strip()]
+if "--range" in sys.argv:
+    # explicit range, for when weak copies elsewhere in the DOL confuse locate.py
+    k = sys.argv.index("--range")
+    lo, hi = int(sys.argv[k + 1], 16), int(sys.argv[k + 2], 16)
+    sp0 = open("config/REXE01/splits.txt").read()
+    over = [u for u, a, b in re.findall(r"^(\S+):\n\t\.text\s+start:0x(\w+) end:0x(\w+)", sp0, re.M)
+            if int(a, 16) < hi and int(b, 16) > lo and u != unit]
+else:
+    loc = run(*py, "tools/refmatch/locate.py", obj).stdout
+    m = re.search(r"unique hits span 0x(\w+)-0x(\w+); overlapping splits: \[(.*)\]", loc)
+    if not m: sys.exit("not located:\n" + loc)
+    # end = last uniquely-located function's end
+    hits = [(int(a, 16), int(z, 16)) for z, a in re.findall(r"\s(0x[0-9a-f]+) (0x[0-9a-f]+)\s*$", loc, re.M)]
+    lo = int(m.group(1), 16)
+    hi = max(a + z for a, z in hits if lo <= a <= int(m.group(2), 16))
+    over = [o.strip().strip("'") for o in m.group(3).split(",") if o.strip()]
 cfg = open("configure.py").read()
 for o in over:
     if f'Object(Matching, "{o}"' in cfg or re.search(r'TpRevolution\("' + re.escape(o.split("/", 1)[-1]) + r'", Matching\)', cfg):
