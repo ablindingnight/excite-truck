@@ -620,7 +620,7 @@ RVL_SDK/vi/i2c.c:
 
 revolution/vi/vi3in1.c:
 	.text       start:0x8005BA48 end:0x8005D0DC
-	.data       start:0x80311B50 end:0x803120C0
+	.data       start:0x80311B50 end:0x803120E0
 	.bss        start:0x8038F490 end:0x8038F4AC
 	.sdata      start:0x80558FC0 end:0x80558FD4
 	.sbss       start:0x8055DBE0 end:0x8055DBF4

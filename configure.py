@@ -437,7 +437,7 @@ config.libs.append(
             TpRevolution("dsp/dsp_debug.c", Matching),
             TpRevolution("ipc/memory.c", Matching),
             TpRevolution("dsp/dsp.c", Matching),
-            TpRevolution("vi/vi3in1.c", NonMatching),
+            TpRevolution("vi/vi3in1.c", Matching),
             TpRevolution("gx/GXAttr.c", Matching),
             TpRevolution("os/OSRtc.c", Matching),
             TpRevolution("gx/GXTev.c", Matching),

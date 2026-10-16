@@ -234,10 +234,12 @@ void __VISetCGMSClear(void) {
     __VISetCGMS();
 }
 
+#if !defined(GAME_REXE01)  // Excite Truck's VI data has no such string
 // NOTE: function doesn't exist in TP debug, needed for string data
 void VISetCGMS(void) {
     OSReport("VISetCGMS(): Tried to set APS Trigger bit(WORD2[3:2]) \nwhen the scan is progressive in DTV mode, which is forbidden\n");
 }
+#endif
 
 static u8 __gp1 = 0xFF;
 static u8 __gp2 = 0xFF;

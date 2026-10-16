@@ -14869,6 +14869,7 @@ VIEurgb60ACPType3 = .data:0x80312050; // type:object size:0x1A scope:global
 VIMpalACPType1 = .data:0x8031206C; // type:object size:0x1A scope:global
 VIMpalACPType2 = .data:0x80312088; // type:object size:0x1A scope:global
 VIMpalACPType3 = .data:0x803120A4; // type:object size:0x1A scope:global
+lbl_803120BE = .data:0x803120BE; // type:object size:0x22
 @1255 = .data:0x803120E0; // type:object size:0x49 scope:local data:string
 ShutdownFunctionInfo = .data:0x80312130; // type:object size:0x10 scope:local
 @4943 = .data:0x80312140; // type:object size:0x18 scope:local data:string
