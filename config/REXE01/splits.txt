@@ -1266,7 +1266,8 @@ RVL_SDK/hbm/nw4hbm/snd/snd_BasicSound.cpp:
 	.sdata2     start:0x80560FB0 end:0x80560FC0
 
 RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp:
-	.text       start:0x800E9C38 end:0x800EAE58
+	.text       start:0x800E9C38 end:0x800EAECC
+	.ctors      start:0x802ED0EC end:0x802ED0F0
 	.data       start:0x803228E8 end:0x80322B20
 	.bss        start:0x8040EC78 end:0x80412790
 	.sbss       start:0x8055DE28 end:0x8055DE2C

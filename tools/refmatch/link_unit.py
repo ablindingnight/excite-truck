@@ -20,7 +20,10 @@ def set_status(st):
     cfg = re.sub(r'Object\((Matching|NonMatching), "' + re.escape(unit) + '"', f'Object({st}, "{unit}"', cfg)
     open("configure.py", "w", newline="\n").write(cfg)
 def ok(out):
-    return "main.dol: OK" in out
+    # ninja prints nothing about the hash when a step changed nothing, so compare the DOLs directly
+    if "Link failed" in out or "FAILED" in out:
+        return False
+    return "IDENTICAL" in run(*py, "tools/refmatch/doldiff.py").stdout
 
 stem = unit.rsplit(".", 1)[0]
 build()

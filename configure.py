@@ -677,7 +677,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Bank.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_BankFile.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_BasicSound.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_DisposeCallbackManager.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_DvdSoundArchive.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_EnvGenerator.cpp"),
