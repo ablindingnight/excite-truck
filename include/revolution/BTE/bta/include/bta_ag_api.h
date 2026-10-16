@@ -53,7 +53,7 @@ typedef UINT32 tBTA_AG_FEAT;
 
 /* AG parse mode */
 #define BTA_AG_PARSE            0 /* Perform AT command parsing in AG */
-#define BTA_AG_PASS_THROUGH     1 /* Pass data directly to phone’s AT command interpreter */
+#define BTA_AG_PASS_THROUGH     1 /* Pass data directly to phone's AT command interpreter */
 
 typedef UINT8 tBTA_AG_PARSE_MODE;
 

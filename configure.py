@@ -153,7 +153,7 @@ config.binutils_tag = "2.42-1"
 config.compilers_tag = "20250520"
 config.dtk_tag = "v1.8.0"
 config.objdiff_tag = "v3.0.0-beta.8"
-config.sjiswrap_tag = "v1.2.1"
+config.sjiswrap_tag = "v1.2.2"
 config.wibo_tag = "0.6.16"
 
 # Project
@@ -243,6 +243,7 @@ cflags_rvl = [
     "-ipa file",
     "-ir include/revolution/BTE",  # Broadcom stack headers
     "-DREVOLUTION",
+    "-DVERSION_RSPE01_00",  # ogws sources: Excite Truck matches the Wii Sports rev 0 SDK variants
 ]
 
 # Game code flags (see docs/compiler.md): generic PowerPC scheduling, no fused multiply-add.
@@ -372,6 +373,14 @@ config.libs = [
             Object(Matching, "revolution/OS/OSMemory.c"),
             Object(Matching, "revolution/OS/OSMutex.c"),
             Object(Matching, "revolution/OS/OSUtf.c"),
+            Object(Matching, "revolution/DVD/dvdFatal.c"),
+            Object(Matching, "revolution/GX/GXGeometry.c"),
+            Object(Matching, "revolution/GX/GXPixel.c"),
+            Object(Matching, "revolution/OS/__ppc_eabi_init.c"),
+            Object(Matching, "revolution/BTE/gki/common/gki_time.c"),
+            Object(Matching, "revolution/BTE/bta/sys/bta_sys_conn.c"),
+            Object(Matching, "revolution/BTE/bta/sys/bta_sys_main.c"),
+            Object(Matching, "revolution/SC/scapi.c"),
             Object(Matching, "revolution/AX/AXProf.c"),
             Object(Matching, "revolution/BASE/PPCArch.c"),
             Object(Matching, "revolution/DB/db.c"),

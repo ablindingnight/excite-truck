@@ -74,6 +74,12 @@ revolution/DVD/dvderror.c:
 revolution/DVD/dvdidutils.c:
 	.text       start:0x8003A244 end:0x8003A334
 
+revolution/DVD/dvdFatal.c:
+	.text       start:0x8003A334 end:0x8003A45C
+	.rodata     start:0x802EE878 end:0x802EE894
+	.sbss       start:0x8055D8D8 end:0x8055D8DC
+	.sdata2     start:0x80560B08 end:0x80560B0C
+
 revolution/EXI/EXIUart.c:
 	.text       start:0x8003D6DC end:0x8003DA10
 	.sbss       start:0x8055D910 end:0x8055D920
@@ -82,6 +88,9 @@ revolution/exi/EXICommon.c:
 	.text       start:0x8003DA10 end:0x8003DB9C
 	.sdata2     start:0x80560B10 end:0x80560B14
 
+revolution/GX/GXGeometry.c:
+	.text       start:0x8004109C end:0x80041638
+
 revolution/gx/GXFrameBuf.c:
 	.text       start:0x80041638 end:0x800421B0
 	.sdata2     start:0x80560B40 end:0x80560B50
@@ -89,6 +98,11 @@ revolution/gx/GXFrameBuf.c:
 revolution/GX/GXBump.c:
 	.text       start:0x800434D4 end:0x80043920
 	.sdata2     start:0x80560B88 end:0x80560B8C
+
+revolution/GX/GXPixel.c:
+	.text       start:0x80043FA0 end:0x800445A4
+	.data       start:0x80303CA8 end:0x80303CC8
+	.sdata2     start:0x80560B90 end:0x80560BC8
 
 revolution/GX/GXDisplayList.c:
 	.text       start:0x800445A4 end:0x80044774
@@ -191,6 +205,10 @@ revolution/OS/OSUtf.c:
 	.text       start:0x80054F38 end:0x80055170
 	.data       start:0x80305618 end:0x80311458
 
+revolution/OS/__ppc_eabi_init.c:
+	.init       start:0x80004414 end:0x8000446C
+	.text       start:0x800560B0 end:0x80056164
+
 revolution/pad/Pad.c:
 	.text       start:0x80056164 end:0x80057460
 	.data       start:0x80311590 end:0x803115E8
@@ -219,10 +237,22 @@ revolution/wud/WUDHidHost.c:
 	.text       start:0x8006CAA8 end:0x8006CFA8
 	.data       start:0x80313E90 end:0x80314110
 
+revolution/BTE/gki/common/gki_time.c:
+	.text       start:0x8006E43C end:0x8006E994
+
 revolution/BTE/main/bte_logmsg.c:
 	.text       start:0x80070880 end:0x800709E4
 	.bss        start:0x803BF240 end:0x803BFA10
 	.sdata      start:0x80559040 end:0x80559044
+
+revolution/BTE/bta/sys/bta_sys_conn.c:
+	.text       start:0x80071078 end:0x800712CC
+
+revolution/BTE/bta/sys/bta_sys_main.c:
+	.text       start:0x800712CC end:0x80071510
+	.data       start:0x80315010 end:0x80315048
+	.bss        start:0x803C0AD8 end:0x803C0B64
+	.sbss       start:0x8055DC80 end:0x8055DC84
 
 revolution/BTE/bta/sys/ptim.c:
 	.text       start:0x80071510 end:0x800716F0
@@ -258,6 +288,9 @@ revolution/ipc/ipcProfile.c:
 revolution/nand/NANDCheck.c:
 	.text       start:0x800A27A0 end:0x800A2964
 	.data       start:0x8031AEF0 end:0x8031AF9C
+
+revolution/SC/scapi.c:
+	.text       start:0x800A4294 end:0x800A466C
 
 revolution/VF/pf_w_clib.c:
 	.text       start:0x800A4B54 end:0x800A4BE8

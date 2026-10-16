@@ -101,7 +101,7 @@ BTA_API extern void bta_ag_co_data_close(UINT16 handle);
 ** Description      This function is called by the AG to send data to the
 **                  phone when the AG is configured for AT command pass-through.
 **                  The implementation of this function must copy the data to
-**                  the phone’s memory.
+**                  the phone's memory.
 **
 ** Returns          void
 **

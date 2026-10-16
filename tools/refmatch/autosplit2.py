@@ -103,18 +103,24 @@ for unit in units:
         continue
     _, ai = max(uniq)
     placed = {ai: next(iter(hits[ai]))}
-    # walk outward from the anchor; each neighbour is either present right next to it or dead-stripped
-    addr = placed[ai] + funcs[ai]["size"]
-    for j in range(ai + 1, len(funcs)):
-        if addr in hits[j]:
-            placed[j] = addr
-            addr += funcs[j]["size"]
-    addr = placed[ai]
-    for j in range(ai - 1, -1, -1):
-        cand = addr - funcs[j]["size"]
-        if cand in hits[j]:
-            placed[j] = cand
-            addr = cand
+    # grow a contiguous cluster from the anchor: any unplaced reference function whose match sits
+    # directly before or after the cluster joins it (the compiler may emit functions in a different
+    # order than the target, e.g. with -ipa file); unmatched reference functions are dead-stripped
+    lo_c, hi_c = placed[ai], placed[ai] + funcs[ai]["size"]
+    grew = True
+    while grew:
+        grew = False
+        for j in range(len(funcs)):
+            if j in placed:
+                continue
+            if hi_c in hits[j]:
+                placed[j] = hi_c
+                hi_c += funcs[j]["size"]
+                grew = True
+            elif lo_c - funcs[j]["size"] in hits[j]:
+                placed[j] = lo_c - funcs[j]["size"]
+                lo_c = placed[j]
+                grew = True
     lo = min(placed.values())
     hi = max(placed[i] + funcs[i]["size"] for i in placed)
     pset = set(placed.values())
