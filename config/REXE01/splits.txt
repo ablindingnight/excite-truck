@@ -646,7 +646,7 @@ revolution/wpad/WPAD.c:
 
 revolution/wpad/WPADHIDParser.c:
 	.text       start:0x80066630 end:0x80066EB0
-	.data       start:0x803123B8 end:0x80312794
+	.data       start:0x803123B8 end:0x80312798
 	.bss        start:0x803928E8 end:0x80392900
 
 revolution/wpad/WPADEncrypt.c:
