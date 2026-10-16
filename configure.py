@@ -685,7 +685,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_FrameHeap.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_InstancePool.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Lfo.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp"),
