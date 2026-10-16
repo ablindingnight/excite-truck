@@ -739,6 +739,10 @@ cflags_msc_sdk = [
     "-DVERSION_R4QJ01",
 ]
 
+# A few of Excite Truck's SDK files were built at -O3 (flagsearch.py finds these). mwcc keeps the
+# higher of two -O levels, so the base -O4,p has to be replaced rather than overridden.
+cflags_msc_sdk_O3 = ["-O3,p" if f == "-O4,p" else f for f in cflags_msc_sdk]
+
 # Broadcom Bluetooth stack (BTE) from the Strikers decomp.
 cflags_msc_bte = [
     *cflags_msc_sdk,
@@ -830,7 +834,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/dvd/dvdfs.c"),
             Object(Matching, "RVL_SDK/dvd/dvd.c"),
             Object(Matching, "RVL_SDK/dvd/dvd_broadway.c"),
-            Object(NonMatching, "RVL_SDK/exi/EXIBios.c"),
+            Object(Matching, "RVL_SDK/exi/EXIBios.c", cflags=cflags_msc_sdk_O3),
             Object(Matching, "RVL_SDK/gx/GXMisc.c"),
             Object(Matching, "RVL_SDK/gx/GXLight.c"),
             Object(Matching, "RVL_SDK/gx/GXTransform.c"),

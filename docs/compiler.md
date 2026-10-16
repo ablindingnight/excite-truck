@@ -56,7 +56,7 @@ defined after `strcasecmp` in MSL `extras.c`.
 | MSL C | Strikers | `cflags_msc` | GC/3.0a5 | per file: `-Cpp_exceptions on` when the file has extab; some need `-use_lmw_stmw on`; `printf.c` GC/3.0a5.2 + `-str reuse,pool,readonly`; fdlibm wrappers `-D_IEEE_LIBM` |
 | SDK (C) | TP | `cflags_rvl_tp` | GC/3.0a3 (= 3.0a5 for C) | `-ipa file`: functions emitted in definition order, `.sbss` in reverse declaration order |
 | SDK (C) | ogws | `cflags_rvl` | GC/3.0a5 | |
-| SDK (C) | Strikers | `cflags_msc_sdk`, BTE `cflags_msc_bte` | GC/3.0a5 | |
+| SDK (C) | Strikers | `cflags_msc_sdk`, BTE `cflags_msc_bte` | GC/3.0a5 | `exi/EXIBios.c` is `-O3,p` (`cflags_msc_sdk_O3`): mwcc keeps the higher of two `-O` levels, so replace the flag, don't append it |
 | HBM / nw4hbm (C++) | TP | `cflags_rvl_tp_hbm` | GC/3.0a5 | `NW4HBM_DEBUG` (ET's HBM has asserts); **no `-sym on`** (debug info moves out-of-line inline copies into separate sections) |
 | HBM / nw4hbm (C++) | Strikers | `cflags_msc_hbm` | GC/3.0a5.2 | |
 | Game (Monster Games) | (ours) | `cflags_game` | GC/3.0a5 | `-proc generic -fp_contract off` |

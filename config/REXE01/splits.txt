@@ -375,7 +375,11 @@ RVL_SDK/dvd/dvd_broadway.c:
 	.sbss       start:0x8055D8E0 end:0x8055D904
 
 RVL_SDK/exi/EXIBios.c:
-	.text       start:0x8003C1B4 end:0x8003C258
+	.text       start:0x8003BE48 end:0x8003D6DC
+	.data       start:0x80303440 end:0x80303488
+	.bss        start:0x8037B980 end:0x8037BA40
+	.sdata      start:0x80558E28 end:0x80558E2C
+	.sbss       start:0x8055D908 end:0x8055D90C
 
 revolution/EXI/EXIUart.c:
 	.text       start:0x8003D6DC end:0x8003DA10
