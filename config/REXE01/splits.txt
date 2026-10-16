@@ -341,10 +341,10 @@ RVL_SDK/dvd/dvdfs.c:
 	.sbss       start:0x8055D828 end:0x8055D848
 
 RVL_SDK/dvd/dvd.c:
-	.text       start:0x8003773C end:0x80039424
-	.data       start:0x80302120 end:0x80302298
-	.bss        start:0x80376AA0 end:0x8037B5E0
-	.sdata      start:0x80558E04 end:0x80558E18
+	.text       start:0x800356F4 end:0x80039CE4
+	.data       start:0x803020D8 end:0x80302368
+	.bss        start:0x80376A80 end:0x8037B610
+	.sdata      start:0x80558E00 end:0x80558E18
 	.sbss       start:0x8055D848 end:0x8055D8D0
 
 revolution/DVD/dvdqueue.c:

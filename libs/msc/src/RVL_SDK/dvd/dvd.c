@@ -136,7 +136,9 @@ static void defaultOptionalCommandChecker(DVDCommandBlock* block,
                                           DVDLowCallback callback);
 
 const char* __DVDVersion =
-#if defined(VERSION_R4QE01)
+#if defined(GAME_REXE01)
+    "<< RVL_SDK - DVD \trelease build: Sep 28 2006 18:57:56 (0x4200_60422) >>";
+#elif defined(VERSION_R4QE01)
     "<< RVL_SDK - DVD \trelease build: Apr 24 2007 11:44:29 (0x4199_60831) >>";
 #else
     "<< RVL_SDK - DVD \trelease build: Jan  9 2007 01:49:43 (0x4199_60831) >>";
@@ -149,6 +151,9 @@ static BOOL FatalErrorFlag = FALSE;
 static volatile BOOL Canceling = FALSE;
 static volatile u32 ResumeFromHere = 0;
 static volatile s32 NumInternalRetry = 0;
+#ifdef GAME_REXE01
+static volatile BOOL CancelAllSyncComplete = FALSE;
+#endif
 static BOOL FirstTimeInBootrom = FALSE;
 static BOOL Breaking = FALSE;
 static volatile BOOL WaitingForCoverOpen = FALSE;
@@ -182,7 +187,9 @@ static DVDOptionalCommandChecker checkOptionalCommand =
 static DVDBB2 BB2 ALIGN(32);
 static DVDDiskID CurrDiskID ALIGN(32);
 
+#ifndef GAME_REXE01 // Excite Truck's older DVD library has no fatal-message alarm
 static OSAlarm FatalAlarm;
+#endif
 static OSAlarm CoverAlarm;
 static OSAlarm ResetAlarm;
 
@@ -313,7 +320,12 @@ static void stateReadingFST(void) {
     LastState = (DVDCommandState)stateReadingFST;
 
     // clang-format off
-#line 1035
+#ifdef GAME_REXE01
+#define DVD_CHANGEDISK_LINE 1014
+#else
+#define DVD_CHANGEDISK_LINE 1035
+#endif
+#line DVD_CHANGEDISK_LINE
     OS_ASSERT(bootInfo->fstSize >= BB2.fstSize, "DVDChangeDisk(): FST in the new disc is too big.   ");
     // clang-format on
 
@@ -354,21 +366,25 @@ static void cbForStateReadingFST(u32 intType) {
     }
 }
 
+#ifndef GAME_REXE01
 static void FatalAlarmHandler(OSAlarm* alarm, OSContext* ctx) {
 #pragma unused(alarm)
 #pragma unused(ctx)
 
     __DVDPrintFatalMessage();
 }
+#endif
 
 static void cbForStateError(u32 intType) {
     DVDCommandBlock* block;
 
+#ifndef GAME_REXE01
     if (__DVDGetAutoFatalMessaging()) {
         OSCreateAlarm(&FatalAlarm);
         OSSetAlarm(&FatalAlarm, 1, FatalAlarmHandler);
         return;
     }
+#endif
 
     executing->state = DVD_STATE_FATAL;
 
@@ -377,6 +393,10 @@ static void cbForStateError(u32 intType) {
     } else if (intType == DVD_INTTYPE_SERR) {
         stateSecurityError();
     } else {
+#ifdef GAME_REXE01
+        // Excite Truck's older DVD library prints the fatal message directly
+        __DVDPrintFatalMessage();
+#endif
         FatalErrorFlag = TRUE;
 
         block = executing;
@@ -1805,10 +1825,16 @@ BOOL DVDCancelAsync(DVDCommandBlock* block, DVDCommandCallback callback) {
             return FALSE;
         }
 
+#ifdef GAME_REXE01
+        // Excite Truck's older DVD library cancels the cover alarm unconditionally
+        OSCancelAlarm(&CoverAlarm);
+        WaitingForCoverOpen = FALSE;
+#else
         if (WaitingForCoverOpen) {
             OSCancelAlarm(&CoverAlarm);
             WaitingForCoverOpen = FALSE;
         }
+#endif
 
         if (block->state == DVD_STATE_NO_DISK) {
             ResumeFromHere = RESUME_POINT_NO_DISK;
@@ -1906,9 +1932,15 @@ static void cbForCancelSync(s32 result, DVDCommandBlock* block) {
 }
 
 BOOL DVDCancelAllAsync(DVDCommandCallback callback) {
+#ifdef GAME_REXE01
+    BOOL enabled = OSDisableInterrupts();
+    DVDCommandBlock* block;
+    BOOL success;
+#else
     BOOL success;
     DVDCommandBlock* block;
     BOOL enabled = OSDisableInterrupts();
+#endif
     DVDPause();
 
     while ((block = __DVDPopWaitingQueue()) != NULL) {
@@ -1928,6 +1960,43 @@ BOOL DVDCancelAllAsync(DVDCommandCallback callback) {
     OSRestoreInterrupts(enabled);
     return success;
 }
+
+#ifdef GAME_REXE01
+// Excite Truck's older DVD library still has the synchronous DVDCancelAll
+static void cbForCancelAllSync(s32 result, DVDCommandBlock* block);
+
+s32 DVDCancelAll(void) {
+    BOOL result;
+    BOOL enabled = OSDisableInterrupts();
+
+    CancelAllSyncComplete = FALSE;
+
+    result = DVDCancelAllAsync(cbForCancelAllSync);
+    if (result == FALSE) {
+        OSRestoreInterrupts(enabled);
+        return DVD_RESULT_FATAL_ERROR;
+    }
+
+    for (;;) {
+        if (CancelAllSyncComplete) {
+            break;
+        }
+
+        OSSleepThread(&__DVDThreadQueue);
+    }
+
+    OSRestoreInterrupts(enabled);
+    return DVD_RESULT_GOOD;
+}
+
+static void cbForCancelAllSync(s32 result, DVDCommandBlock* block) {
+#pragma unused(result)
+#pragma unused(block)
+
+    CancelAllSyncComplete = TRUE;
+    OSWakeupThread(&__DVDThreadQueue);
+}
+#endif
 
 const DVDDiskID* DVDGetCurrentDiskID(void) {
     return &((OSBootInfo*)OSPhysicalToCached(OS_PHYS_BOOT_INFO))->diskID;

@@ -828,7 +828,7 @@ config.libs.append(
             Object(NonMatching, "RVL_SDK/ax/AXSPB.c"),
             Object(NonMatching, "RVL_SDK/ax/AXVPB.c"),
             Object(Matching, "RVL_SDK/dvd/dvdfs.c"),
-            Object(NonMatching, "RVL_SDK/dvd/dvd.c"),
+            Object(Matching, "RVL_SDK/dvd/dvd.c"),
             Object(Matching, "RVL_SDK/dvd/dvd_broadway.c"),
             Object(NonMatching, "RVL_SDK/exi/EXIBios.c"),
             Object(Matching, "RVL_SDK/gx/GXMisc.c"),
