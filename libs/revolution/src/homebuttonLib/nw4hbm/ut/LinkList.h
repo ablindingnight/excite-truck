@@ -107,8 +107,11 @@ namespace nw4hbm {
                 };  // size = 0x04
 
             protected:
-                static Iterator GetIteratorFromPointer(LinkListNode* pNode) {
-                    return Iterator(pNode);
+                static Iterator GetIteratorFromPointer(LinkListNode* p) {
+#ifdef GAME_REXE01  // Excite Truck's NW4HBM asserts in these
+                    NW4HBM_ASSERT_CHECK_NULL(328, p);
+#endif
+                    return Iterator(p);
                 }
 
                 LinkListImpl() { Initialize_(); }
@@ -348,12 +351,18 @@ namespace nw4hbm {
                 return *--GetEndIter();
             }
 
-            static Iterator GetIteratorFromPointer(T* pElem) {
-                return GetIteratorFromPointer(GetNodeFromPointer(pElem));
+            static Iterator GetIteratorFromPointer(T* p) {
+#ifdef GAME_REXE01
+                NW4HBM_ASSERT_CHECK_NULL(552, p);
+#endif
+                return GetIteratorFromPointer(GetNodeFromPointer(p));
             }
 
-            static Iterator GetIteratorFromPointer(LinkListNode* pNode) {
-                return Iterator(LinkListImpl::GetIteratorFromPointer(pNode));
+            static Iterator GetIteratorFromPointer(LinkListNode* p) {
+#ifdef GAME_REXE01
+                NW4HBM_ASSERT_CHECK_NULL(542, p);
+#endif
+                return Iterator(LinkListImpl::GetIteratorFromPointer(p));
             }
 
             static LinkListNode* GetNodeFromPointer(T* p) {

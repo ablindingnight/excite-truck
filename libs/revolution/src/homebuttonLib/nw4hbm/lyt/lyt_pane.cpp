@@ -111,6 +111,21 @@ namespace nw4hbm {
         typedef nw4hbm::ut::LinkList<void***, 0> DummyLinkList2;
         DECOMP_FORCE_CLASS_METHOD(DummyLinkList2, GetNodeFromPointer(NULL)); */
 
+#ifdef GAME_REXE01
+        // As in the Strikers source: unused (stripped), but their assert strings and the
+        // LinkList ones they pull in stay in Excite Truck's .data
+        void Pane::PrependChild(Pane* pChild) {
+            InsertChild(mChildList.GetBeginIter(), pChild);
+        }
+
+        void Pane::InsertChild(Pane* pNext, Pane* pChild) {
+            NW4HBM_ASSERT_CHECK_NULL(271, pNext);
+            NW4HBM_ASSERT(272, pNext->mpParent == this);
+            InsertChild(mChildList.GetIteratorFromPointer(pNext), pChild);
+        }
+
+#endif
+
         void Pane::InsertChild(PaneList::Iterator next, Pane* pChild) {
             NW4HBM_ASSERT_CHECK_NULL(253, pChild);
             NW4HBM_ASSERT(254, pChild->mpParent == 0);
@@ -118,11 +133,22 @@ namespace nw4hbm {
             pChild->mpParent = this;
         }
 
+#ifdef GAME_REXE01
+        void Pane::RemoveChild(Pane* pChild) {
+            NW4HBM_ASSERT_CHECK_NULL(287, pChild);
+            NW4HBM_ASSERT(288, pChild->mpParent == this);
+            mChildList.Erase(pChild);
+            pChild->mpParent = NULL;
+        }
+#endif
+
+#ifndef GAME_REXE01
         void dummyString() {
             OSReport("NW4HBM:Pointer must not be NULL (pNext)");
             OSReport("NW4HBM:Failed assertion pNext->mpParent == this");
             OSReport("NW4HBM:Failed assertion pChild->mpParent == this");
         }
+#endif
 
 // (TP sets #pragma ppc_iro_level 0 here; Excite Truck's build uses the default)
 
