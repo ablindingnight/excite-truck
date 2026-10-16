@@ -174,6 +174,12 @@ revolution/OS/OSMemory.c:
 revolution/OS/OSMutex.c:
 	.text       start:0x8005208C end:0x80052390
 
+revolution/os/OSThread.c:
+	.text       start:0x80053598 end:0x80054B24
+	.bss        start:0x8038E398 end:0x8038EA78
+	.sdata      start:0x80558F60 end:0x80558F64
+	.sbss       start:0x8055DA88 end:0x8055DA94
+
 revolution/os/OSTime.c:
 	.text       start:0x80054B24 end:0x80054F38
 	.data       start:0x803055B8 end:0x80305618
