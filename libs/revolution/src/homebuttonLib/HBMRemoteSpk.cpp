@@ -4,7 +4,16 @@
 
 #include <string>
 
+#ifdef GAME_REXE01
+#include "nw4hbm/db/assert.h"
+#endif
+
 namespace homebutton {
+
+#ifdef GAME_REXE01  // Excite Truck keeps the speaker instance here, not in HBMController.cpp
+    RemoteSpk* Controller::sPInstance;
+    s32 Controller::lbl_8025DBBC;
+#endif
 
     static bool MakeVolumeData(const s16* src, s16* dst, int vol, u32 size);
 
@@ -48,9 +57,13 @@ namespace homebutton {
         s16 pcmBuffer[40];
         u8 adpcmBuffer[20];
 
+#ifdef GAME_REXE01  // Excite Truck's older HBM asserts instead of returning
+        NW4HBM_ASSERT(63, GetInstance());
+#else
         if (!GetInstance()) {
             return;
         }
+#endif
 
         ChanInfo* pinfo = GetInstance()->info;
         for (int i = 0; i < WPAD_MAX_CONTROLLERS; i++, pinfo++) {
@@ -76,7 +89,7 @@ namespace homebutton {
                 } else {
                     pinfo->cannotSendCnt++;
 
-#if HBM_REVISION == 1
+#if HBM_REVISION == 1 || defined(GAME_REXE01)
                     if (pinfo->cannotSendCnt > 300) {
                         pinfo->in_pcm = NULL;
                     }
@@ -103,12 +116,18 @@ namespace homebutton {
         SetInstance(this);
 
         if (spkSeBuf) {
+#ifdef GAME_REXE01
+            available = ARCInitHandle(spkSeBuf, &handle);
+#else
             available = ARCInitHandle(spkSeBuf, &handle) ? TRUE : FALSE;
+#endif
         } else {
             available = false;
         }
 
+#ifndef GAME_REXE01
         OSCreateAlarm(&speakerAlarm);
+#endif
         for (int i = 0; i < WPAD_MAX_CONTROLLERS; i++) {
             OSCreateAlarm(&info[i].alarm);
             info[i].in_pcm = NULL;
@@ -119,6 +138,10 @@ namespace homebutton {
     }
 
     RemoteSpk::~RemoteSpk(void) {
+#ifdef GAME_REXE01  // Excite Truck's older HBM cancels nothing here
+        SetInstance(NULL);
+        available = false;
+#else
 #if HBM_REVISION > 1
         SetInstance(NULL);
 #endif
@@ -137,6 +160,7 @@ namespace homebutton {
 
 #if HBM_REVISION == 1
         SetInstance(NULL);
+#endif
 #endif
     }
 
@@ -161,9 +185,13 @@ namespace homebutton {
 
     void RemoteSpk::SpeakerOnCallback(s32 chan, s32 result) {
         RemoteSpk* pRmtSpk = GetInstance();
+#ifdef GAME_REXE01
+        NW4HBM_ASSERT(163, pRmtSpk);
+#else
         if (!pRmtSpk) {
             return;
         }
+#endif
 
         switch (result) {
         case WPAD_ESUCCESS:
@@ -187,9 +215,13 @@ namespace homebutton {
 
     void RemoteSpk::SpeakerPlayCallback(s32 chan, s32 result) {
         RemoteSpk* pRmtSpk = GetInstance();
+#ifdef GAME_REXE01
+        NW4HBM_ASSERT(222, pRmtSpk);
+#else
         if (!pRmtSpk) {
             return;
         }
+#endif
 
         switch (result) {
         case WPAD_ESUCCESS:
