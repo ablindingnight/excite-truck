@@ -231,6 +231,11 @@ for unit in units:
             # require real evidence: some non-zero, non-relocated bytes must agree
             return checked >= 1 and checked * 2 >= (y["size"] + 3) // 4
 
+        def aligns(size):
+            # a symbol never needs more alignment than its size suggests (max 32)
+            cap = 4 if size <= 4 else 8 if size <= 8 else 32
+            return [al for al in (1, 2, 4, 8, 16, 32) if al <= cap]
+
         changed = True
         while changed:
             changed = False
@@ -242,10 +247,10 @@ for unit in units:
                 cands = []
                 if prev is not None:
                     cur = symaddr[prev] + syms[prev]["size"]
-                    cands += [(cur + al - 1) & ~(al - 1) for al in (1, 2, 4, 8, 16, 32)]
+                    cands += [(cur + al - 1) & ~(al - 1) for al in aligns(syms[k]["size"])]
                 if nxt is not None:
                     end = symaddr[nxt]
-                    cands += [(end - syms[k]["size"]) & ~(al - 1) for al in (1, 2, 4, 8, 16, 32)]
+                    cands += [(end - syms[k]["size"]) & ~(al - 1) for al in aligns(syms[k]["size"])]
                 for c in dict.fromkeys(cands):
                     if (prev is None or c >= symaddr[prev] + syms[prev]["size"]) and \
                        (nxt is None or c + syms[k]["size"] <= symaddr[nxt]) and fits(k, c):

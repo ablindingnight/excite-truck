@@ -45,6 +45,19 @@ extern inline float fabsf(float x) {
     return __fabsf(x);
 }
 
+#if SDK_SEP2006
+// The Sep 2006 SDK's MSL implements the float functions on top of the double ones.
+double sin(double);
+double cos(double);
+extern inline float sinf(float x) {
+    return (float)sin(x);
+}
+extern inline float cosf(float x) {
+    return (float)cos(x);
+}
+extern float tanf(float);
+extern float acosf(float);
+#else
 extern float cosf(float);
 extern float sinf(float);
 extern float tanf(float);
@@ -53,6 +66,7 @@ extern float acosf(float);
 extern inline float cos(float x) {
     return cosf(x);
 }
+#endif
 
 inline float floor(float x) {
     int i=(int)x;   

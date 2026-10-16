@@ -156,6 +156,11 @@ revolution/MEM/mem_allocator.c:
 revolution/MEM/mem_list.c:
 	.text       start:0x8004994C end:0x80049A60
 
+revolution/mtx/mtx.c:
+	.text       start:0x80049A60 end:0x80049F20
+	.sdata      start:0x80558EF8 end:0x80558F00
+	.sdata2     start:0x80560C48 end:0x80560C50
+
 revolution/MTX/mtxvec.c:
 	.text       start:0x80049F20 end:0x80049F74
 
