@@ -431,7 +431,7 @@ config.libs.append(
             TpRevolution("wud/WUDHidHost.c", Matching),
             TpRevolution("axfx/AXFXReverbHi.c", Matching),
             TpRevolution("ipc/ipcProfile.c", Matching),
-            TpRevolution("wpad/WPAD.c", NonMatching),
+            TpRevolution("wpad/WPAD.c", Matching),
             TpRevolution("mem/mem_expHeap.c", Matching),
             TpRevolution("mtx/mtx.c", Matching),
             TpRevolution("dsp/dsp_debug.c", Matching),
