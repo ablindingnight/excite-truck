@@ -78,6 +78,14 @@ revolution/EXI/EXIUart.c:
 	.text       start:0x8003D6DC end:0x8003DA10
 	.sbss       start:0x8055D910 end:0x8055D920
 
+revolution/exi/EXICommon.c:
+	.text       start:0x8003DA10 end:0x8003DB9C
+	.sdata2     start:0x80560B10 end:0x80560B14
+
+revolution/gx/GXFrameBuf.c:
+	.text       start:0x80041638 end:0x800421B0
+	.sdata2     start:0x80560B40 end:0x80560B50
+
 revolution/GX/GXBump.c:
 	.text       start:0x800434D4 end:0x80043920
 	.sdata2     start:0x80560B88 end:0x80560B8C
@@ -85,6 +93,10 @@ revolution/GX/GXBump.c:
 revolution/GX/GXDisplayList.c:
 	.text       start:0x800445A4 end:0x80044774
 	.bss        start:0x8037C108 end:0x8037C808
+
+revolution/gx/GXPerf.c:
+	.text       start:0x80044C30 end:0x80045510
+	.data       start:0x80303CC8 end:0x80303DB4
 
 revolution/mem/mem_heapCommon.c:
 	.text       start:0x8004872C end:0x80048B98
@@ -100,6 +112,10 @@ revolution/MEM/mem_list.c:
 
 revolution/MTX/mtxvec.c:
 	.text       start:0x80049F20 end:0x80049F74
+
+revolution/mtx/vec.c:
+	.text       start:0x8004A0F8 end:0x8004A258
+	.sdata2     start:0x80560C68 end:0x80560C70
 
 revolution/OS/OSAlarm.c:
 	.text       start:0x8004B554 end:0x8004BD38
@@ -148,6 +164,9 @@ revolution/OS/OSInterrupt.c:
 	.data       start:0x80305500 end:0x80305530
 	.sbss       start:0x8055DA58 end:0x8055DA6C
 
+revolution/os/OSMessage.c:
+	.text       start:0x80051674 end:0x80051878
+
 revolution/OS/OSMemory.c:
 	.text       start:0x80051878 end:0x8005208C
 	.data       start:0x80305530 end:0x80305540
@@ -155,9 +174,27 @@ revolution/OS/OSMemory.c:
 revolution/OS/OSMutex.c:
 	.text       start:0x8005208C end:0x80052390
 
+revolution/os/OSTime.c:
+	.text       start:0x80054B24 end:0x80054F38
+	.data       start:0x803055B8 end:0x80305618
+
 revolution/OS/OSUtf.c:
 	.text       start:0x80054F38 end:0x80055170
 	.data       start:0x80305618 end:0x80311458
+
+revolution/pad/Pad.c:
+	.text       start:0x80056164 end:0x80057460
+	.data       start:0x80311590 end:0x803115E8
+	.bss        start:0x8038F080 end:0x8038F0D0
+	.sdata      start:0x80558F70 end:0x80558F90
+	.sbss       start:0x8055DAF0 end:0x8055DB1C
+
+revolution/si/SIBios.c:
+	.text       start:0x80057460 end:0x80058920
+	.data       start:0x80311630 end:0x80311658
+	.bss        start:0x8038F100 end:0x8038F320
+	.sdata      start:0x80558F90 end:0x80558F94
+	.sbss       start:0x8055DB20 end:0x8055DB30
 
 revolution/SI/SISamplingRate.c:
 	.text       start:0x80058920 end:0x80058A00
@@ -208,6 +245,10 @@ revolution/ipc/ipcProfile.c:
 	.text       start:0x8009EF24 end:0x8009F0E8
 	.bss        start:0x803C9348 end:0x803C9448
 	.sbss       start:0x8055DCD0 end:0x8055DCD8
+
+revolution/nand/NANDCheck.c:
+	.text       start:0x800A27A0 end:0x800A2964
+	.data       start:0x8031AEF0 end:0x8031AF9C
 
 revolution/VF/pf_w_clib.c:
 	.text       start:0x800A4B54 end:0x800A4BE8

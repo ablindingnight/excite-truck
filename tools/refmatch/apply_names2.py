@@ -10,7 +10,7 @@ for l in open(syms_path).read().splitlines():
     m = re.match(r"(\S+) = (\S+):0x([0-9A-F]+);", l)
     if m and inr(int(m.group(3), 16)) and int(m.group(3), 16) in names and "type:label" not in l:
         continue  # replaced below
-    if m and inr(int(m.group(3), 16)) and re.match(r"(lbl_|@|gap_|fn_)", m.group(1)) and "type:object" in l:
+    if m and inr(int(m.group(3), 16)) and re.match(r"(lbl_|@|gap_|fn_|\.\.\.)", m.group(1)) and "type:object" in l:
         continue  # stale auto symbol inside a known range
     out.append(l)
 taken = {l.split(" = ")[0] for l in out}

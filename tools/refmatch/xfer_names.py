@@ -14,13 +14,24 @@ def read(p):
     for k in range(0, st["size"], 16):
         nm, val, sz, info, oth, shn = struct.unpack(">IIIBBH", b[st["off"]+k:st["off"]+k+16])
         syms.append(b[strs+nm:b.index(b"\0", strs+nm)].decode(errors="replace"))
+    # key relocations by (containing function, offset within it) so dead-stripped
+    # functions in either object don't shift the pairing
+    fsyms = []
+    for k in range(0, st["size"], 16):
+        nm, val, sz, info, oth, shn = struct.unpack(">IIIBBH", b[st["off"]+k:st["off"]+k+16])
+        if info & 0xF in (1, 2) and sz:
+            fsyms.append((shn, val, sz, syms[k // 16]))
     rel = {}
     for s in secs:
         if s["typ"] == 4:
-            tgt = secs[s["info"]]["name"]
+            tsec = s["info"]
             for k in range(0, s["size"], 12):
                 off, info, add = struct.unpack(">IIi", b[s["off"]+k:s["off"]+k+12])
-                rel[(tgt, off & ~3, info & 0xFF)] = (syms[info >> 8], add)
+                owner = next((n for shn, v, sz, n in fsyms if shn == tsec and v <= off < v + sz), None)
+                if owner is None:
+                    continue
+                v = next(v for shn, v, sz, n in fsyms if shn == tsec and n == owner and v <= off < v + sz)
+                rel[(owner, (off - v) & ~3, info & 0xFF)] = (syms[info >> 8], add)
     return rel
 mapping = {}
 for u in units:

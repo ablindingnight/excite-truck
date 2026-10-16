@@ -408,6 +408,15 @@ config.libs.append(
             TpRevolution("wud/WUDHidHost.c", Matching),
             TpRevolution("axfx/AXFXReverbHi.c", Matching),
             TpRevolution("ipc/ipcProfile.c", Matching),
+            TpRevolution("exi/EXICommon.c", Matching),
+            TpRevolution("gx/GXFrameBuf.c", Matching),
+            TpRevolution("gx/GXPerf.c", Matching),
+            TpRevolution("mtx/vec.c", Matching),
+            TpRevolution("os/OSMessage.c", Matching),
+            TpRevolution("os/OSTime.c", Matching),
+            TpRevolution("pad/Pad.c", Matching),
+            TpRevolution("si/SIBios.c", Matching),
+            TpRevolution("nand/NANDCheck.c", Matching),
         ],
     }
 )
