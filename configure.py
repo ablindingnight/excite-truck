@@ -772,7 +772,7 @@ config.libs.append(
             Object(NonMatching, "RVL_SDK/os/OSStateFlags.c"),
             Object(Matching, "RVL_SDK/vi/i2c.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
-            Object(NonMatching, "RVL_SDK/usb/usb.c"),
+            Object(Matching, "RVL_SDK/usb/usb.c"),
             Object(Matching, "RVL_SDK/axfx/AXFXReverbHiExp.c"),
             Object(Matching, "RVL_SDK/fs/fs.c"),
             Object(NonMatching, "RVL_SDK/nand/nand.c"),

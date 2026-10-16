@@ -480,6 +480,26 @@ IPCResult IUSB_WriteCtrlMsgAsync(s32 fd, u8 requestType, u8 request, u16 value,
                         callback, callbackArg, TRUE);
 }
 
+#if defined(GAME_REXE01)
+// Excite Truck's older USB library has no ISO transfers or the Open(%s) message
+DECOMP_FORCEACTIVE(usb_c,
+                   "GetStrCb returned: %d\n",
+                   "GetStrCb: buf = 0x%x buflen = %u\n",
+                   "Failed to convert buffer from unicode 2 ascii\n",
+                   "calling cb 0x%x with arg 0x%x\n",
+                   "Failed __CtrlMsg: %d",
+                   "Failed to convert unicode 2 ascii\n",
+                   "GetStr - _GetStrCb\n",
+                   " GetAsciiStrAsync: Not enough memory\n",
+                   "__CtrlMsgInt failed %d\n",
+                   "GetDescrCb returned: %d\n",
+                   "GetDevDescr\n",
+                   "GetDevDescr: Not enough memory\n",
+                   "GetDevDescr: %d\n",
+                   "GetDevDescr - _GetDescrCb\n",
+                   "GetDevDescrAsync: Not enough memory\n",
+                   "DeviceRemovalNotifyAsync\n");
+#else
 DECOMP_FORCEACTIVE(usb_c,
                    "GetStrCb returned: %d\n",
                    "GetStrCb: buf = 0x%x buflen = %u\n",
@@ -500,3 +520,4 @@ DECOMP_FORCEACTIVE(usb_c,
                    "Invalid parameters for ISO transfer request\n",
                    "IUSB_IsoMsgAsync: Not enough memory\n",
                    "Open(%s) failed\n");
+#endif
