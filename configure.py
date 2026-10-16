@@ -651,7 +651,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_LinkList.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_list.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFont.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp"),
         ],
     }
 )
