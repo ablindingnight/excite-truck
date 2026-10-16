@@ -445,6 +445,7 @@ config.libs.append(
             TpRevolution("gx/GXFifo.c", Matching),
             TpRevolution("gx/GXTexture.c", Matching),
             TpRevolution("kpad/KPAD.c", NonMatching),
+            TpRevolution("ai/ai.c", Matching),
             TpRevolution("os/OSThread.c", Matching),
             TpRevolution("os/OSSync.c", Matching),
             TpRevolution("exi/EXICommon.c", Matching),
@@ -752,7 +753,6 @@ config.libs.append(
         "cflags": cflags_msc_sdk,
         "progress_category": "sdk",
         "objects": [
-            Object(NonMatching, "RVL_SDK/ai/ai.c"),
             Object(NonMatching, "RVL_SDK/ax/AXAlloc.c"),
             Object(NonMatching, "RVL_SDK/ax/AXOut.c"),
             Object(NonMatching, "RVL_SDK/ax/AXSPB.c"),
