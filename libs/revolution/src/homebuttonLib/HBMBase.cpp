@@ -16,6 +16,20 @@
 #define LN(rev1, rev2) rev2
 #endif
 
+// Excite Truck's older WPAD has no fast simple sync
+#ifdef GAME_REXE01
+#define HBM_START_SIMPLE_SYNC WPADStartSimpleSync
+#else
+#define HBM_START_SIMPLE_SYNC WPADStartFastSimpleSync
+#endif
+
+// Excite Truck's older HBM has its own assert line numbers
+#ifdef GAME_REXE01
+#define ET_LN(et, other) et
+#else
+#define ET_LN(et, other) other
+#endif
+
 struct AnmControllerTable {
     /* 0x00 */ int pane;
     /* 0x04 */ int anm;
@@ -78,6 +92,12 @@ void HBMSetAdjustFlag(bool flag) {
     gpHomeButton->setAdjustFlag(flag);
 }
 
+#ifdef GAME_REXE01
+BOOL HBMIsReassignedControllers() {
+    return gpHomeButton->getReassignedFlag();
+}
+#endif
+
 void HBMStartBlackOut() {
     gpHomeButton->startBlackOut();
 }
@@ -90,18 +110,37 @@ void HBMUpdateSoundArchivePlayer(void) {
     gpHomeButton->updateSoundArchivePlayer();
 }
 
+#ifndef GAME_REXE01  // not in Excite Truck's older HBM (its float constant would come first)
 void HBMSetSoundVolume(f32 volume) {
     gpHomeButton->setSoundVolume(volume);
 }
+#endif
 
 void HBMStopSound(void) {
     gpHomeButton->stopSound(false);
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's HBM can also load its sounds from the disc or NAND (unused, stripped;
+// these names are guesses, but their assert strings keep their place in .data)
+void HBMCreateDvdSound(const char* path, void* memBuf, u32 memSize) {
+    MEMInitAllocatorForFrmHeap(&sSoundAllocator, MEMCreateFrmHeapEx(memBuf, memSize, 0), 32);
+    gpHomeButton->createDvdSound(path);
+}
+
+#endif
+
 void HBMCreateSound(const char* path, void* memBuf, u32 memSize) {
     MEMInitAllocatorForFrmHeap(&sSoundAllocator, MEMCreateFrmHeapEx(memBuf, memSize, 0), 32);
     gpHomeButton->initSound(path);
 }
+
+#ifdef GAME_REXE01
+void HBMCreateNandSound(const char* path, void* memBuf, u32 memSize) {
+    MEMInitAllocatorForFrmHeap(&sSoundAllocator, MEMCreateFrmHeapEx(memBuf, memSize, 0), 32);
+    gpHomeButton->createNandSound(path);
+}
+#endif
 
 void HBMDeleteSound(void) {
     gpHomeButton->deleteSound();
@@ -130,6 +169,70 @@ static HBMAllocatorType getAllocatorType(const HBMDataInfo* pHBInfo) {
 
 namespace homebutton {
 
+#ifdef GAME_REXE01
+    void HomeButton::createDvdSound(const char* path) {
+        if (!AICheckInit()) {
+            AIInit(NULL);
+            AXInit();
+        }
+
+        nw4hbm::snd::SoundSystem::InitSoundSystem();
+
+        void* pvVar4 =
+            MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::DvdSoundArchive));
+        if (pvVar4 != NULL) {
+            mpDvdSoundArchive = new (pvVar4) nw4hbm::snd::DvdSoundArchive();
+        }
+
+        NW4HBM_ASSERT(3814, mpDvdSoundArchive);
+        NW4R_DB_ASSERTMSG(3819, mpDvdSoundArchive->Open(path), "Cannot open \"%s\"", path);
+
+        u32 size = mpDvdSoundArchive->GetHeaderSize();
+        mpDvdSoundArchive->LoadHeader(MEMAllocFromAllocator(&sSoundAllocator, size), size);
+        createSound(mpDvdSoundArchive, true);
+    }
+
+    void HomeButton::initSound(const char* path) {
+        if (!AICheckInit()) {
+            AIInit(NULL);
+            AXInit();
+        }
+
+        nw4hbm::snd::SoundSystem::InitSoundSystem();
+
+        void* pvVar4 =
+            MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::MemorySoundArchive));
+        if (pvVar4 != NULL) {
+            mpMemorySoundArchive = new (pvVar4) nw4hbm::snd::MemorySoundArchive();
+        }
+
+        NW4HBM_ASSERT(3836, mpMemorySoundArchive);
+        NW4R_DB_ASSERTMSG(3841, mpMemorySoundArchive->Setup(path), "Cannot setup MemorySoundArchive");
+        createSound(mpMemorySoundArchive, false);
+    }
+
+    void HomeButton::createNandSound(const char* path) {
+        if (!AICheckInit()) {
+            AIInit(NULL);
+            AXInit();
+        }
+
+        nw4hbm::snd::SoundSystem::InitSoundSystem();
+
+        void* pvVar4 =
+            MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::NandSoundArchive));
+        if (pvVar4 != NULL) {
+            mpNandSoundArchive = new (pvVar4) nw4hbm::snd::NandSoundArchive();
+        }
+
+        NW4HBM_ASSERT(3858, mpNandSoundArchive);
+        NW4R_DB_ASSERTMSG(3863, mpNandSoundArchive->Open(path), "Cannot open \"%s\"", path);
+
+        u32 size = mpNandSoundArchive->GetHeaderSize();
+        mpNandSoundArchive->LoadHeader(MEMAllocFromAllocator(&sSoundAllocator, size), size);
+        createSound(mpNandSoundArchive, true);
+    }
+#else
     void HomeButton::initSound(const char* path) {
         if (!AICheckInit()) {
             AIInit(NULL);
@@ -152,6 +255,7 @@ namespace homebutton {
         mpNandSoundArchive->LoadHeader(MEMAllocFromAllocator(&sSoundAllocator, size), size);
         createSound(mpNandSoundArchive, 1);
     }
+#endif
 
     void HomeButton::updateSound() {
         updateSoundArchivePlayer();
@@ -352,6 +456,7 @@ namespace homebutton {
         }
     }
 
+#ifndef GAME_REXE01  // Excite Truck defines these after calc() (the order its float constants are pooled in)
     void HomeButton::fadeout_sound(f32 gain) {
         if (mSelectBtnNum == HBM_SELECT_BTN3) {
             return;
@@ -378,6 +483,7 @@ namespace homebutton {
         }
     }
 
+#endif
     void HomeButton::play_sound(int id) {
         int ret = 0;
 
@@ -489,12 +595,14 @@ namespace homebutton {
         HBMFreeMem(mpLayoutName);
         HBMFreeMem(mpAnmName);
 
+#ifndef GAME_REXE01  // Excite Truck's older HBM doesn't cancel its alarms here
         for (int i = 0; i < WPAD_MAX_CONTROLLERS; i++) {
             OSCancelAlarm(&mAlarm[i]);
             OSCancelAlarm(&mSpeakerAlarm[i]);
         }
 
         OSCancelAlarm(&mSimpleSyncAlarm);
+#endif
     }
 
     void HomeButton::create() {
@@ -512,7 +620,7 @@ namespace homebutton {
             mpResAccessor = new (pMem) nw4hbm::lyt::ArcResourceAccessor();
         }
 
-        NW4HBM_ASSERT(623, mpResAccessor);
+        NW4HBM_ASSERT(ET_LN(588, 623), mpResAccessor);
         mpResAccessor->Attach(mpHBInfo->layoutBuf, "arc");
 
         if (!mpHBInfo->cursor) {
@@ -521,7 +629,7 @@ namespace homebutton {
                     mpCursorLayout[i] = new (pMem) nw4hbm::lyt::Layout();
                 }
 
-                NW4HBM_ASSERT(635, mpCursorLayout[i]);
+                NW4HBM_ASSERT(ET_LN(600, 635), mpCursorLayout[i]);
 
                 void* lytRes = mpResAccessor->GetResource(0, scCursorLytName[i], NULL);
 
@@ -543,13 +651,13 @@ namespace homebutton {
             std::strcat(anmNameBuf, scAnimName[scAnmTable[i].anm]);
 
             void* lpaRes = mpResAccessor->GetResource(0, anmNameBuf, NULL);
-            NW4HBM_ASSERT_CHECK_NULL(665, lpaRes);
+            NW4HBM_ASSERT_CHECK_NULL(ET_LN(630, 665), lpaRes);
 
             if (void* pMem = HBMAllocMem(sizeof(*mpAnmController)[i])) {
                 mpAnmController[i] = new (pMem) GroupAnmController();
             }
 
-            NW4HBM_ASSERT(671, mpAnmController[i]);
+            NW4HBM_ASSERT(ET_LN(636, 671), mpAnmController[i]);
 
             mpAnmController[i]->mpAnimGroup = mpLayout->CreateAnimTransform(lpaRes, mpResAccessor);
 
@@ -575,13 +683,13 @@ namespace homebutton {
 
             void* lpaRes = mpResAccessor->GetResource(0, anmNameBuf, NULL);
 
-            NW4HBM_ASSERT_CHECK_NULL(697, lpaRes);
+            NW4HBM_ASSERT_CHECK_NULL(ET_LN(662, 697), lpaRes);
 
             if (void* pMem = HBMAllocMem(sizeof(*mpGroupAnmController)[i])) {
                 mpGroupAnmController[i] = new (pMem) GroupAnmController();
             }
 
-            NW4HBM_ASSERT(703, mpGroupAnmController[i]);
+            NW4HBM_ASSERT(ET_LN(668, 703), mpGroupAnmController[i]);
 
             mpGroupAnmController[i]->mpAnimGroup =
                 mpLayout->CreateAnimTransform(lpaRes, mpResAccessor);
@@ -608,13 +716,13 @@ namespace homebutton {
 
             void* lpaRes = mpResAccessor->GetResource(0, anmNameBuf, NULL);
 
-            NW4HBM_ASSERT_CHECK_NULL(729, lpaRes);
+            NW4HBM_ASSERT_CHECK_NULL(ET_LN(694, 729), lpaRes);
 
             if (void* pMem = HBMAllocMem(sizeof(*mpPairGroupAnmController)[i])) {
                 mpPairGroupAnmController[i] = new (pMem) GroupAnmController();
             }
 
-            NW4HBM_ASSERT(735, mpPairGroupAnmController[i]);
+            NW4HBM_ASSERT(ET_LN(700, 735), mpPairGroupAnmController[i]);
 
             mpPairGroupAnmController[i]->mpAnimGroup =
                 mpLayout->CreateAnimTransform(lpaRes, mpResAccessor);
@@ -639,14 +747,14 @@ namespace homebutton {
             mpHomeButtonEventHandler = new (pMem) HomeButtonEventHandler(this);
         }
 
-        NW4HBM_ASSERT(758, mpHomeButtonEventHandler);
+        NW4HBM_ASSERT(ET_LN(723, 758), mpHomeButtonEventHandler);
 
         if (void* pMem = HBMAllocMem(sizeof(*mpPaneManager))) {
             mpPaneManager =
                 new (pMem) gui::PaneManager(mpHomeButtonEventHandler, NULL, spAllocator);
         }
 
-        NW4HBM_ASSERT(765, mpPaneManager);
+        NW4HBM_ASSERT(ET_LN(730, 765), mpPaneManager);
 
         mpPaneManager->createLayoutScene(*mpLayout);
         mpPaneManager->setAllComponentTriggerTarget(false);
@@ -701,7 +809,7 @@ namespace homebutton {
 
         mpLayoutName = static_cast<char*>(HBMAllocMem(len + 1));
 
-        NW4HBM_ASSERT(827, mpLayoutName);
+        NW4HBM_ASSERT(ET_LN(792, 827), mpLayoutName);
 
         std::strncpy(mpLayoutName, pConfig, len);
         mpLayoutName[len] = '\0';
@@ -711,7 +819,7 @@ namespace homebutton {
         len = get_comma_length(pConfig);
         mpAnmName = static_cast<char*>(HBMAllocMem(len + 1));
 
-        NW4HBM_ASSERT(837, mpAnmName);
+        NW4HBM_ASSERT(ET_LN(802, 837), mpAnmName);
 
         std::strncpy(mpAnmName, pConfig, len);
         mpAnmName[len] = '\0';
@@ -893,6 +1001,13 @@ namespace homebutton {
     }
 
     void HomeButton::init_sound() {
+#ifdef GAME_REXE01
+        // Excite Truck's older HBM skips sound setup when button 3 was selected
+        if (mSelectBtnNum == HBM_SELECT_BTN3) {
+            return;
+        }
+
+#endif
         if (mpHBInfo->sound_callback != NULL) {
             mpHBInfo->sound_callback(0, 0);
         }
@@ -1053,6 +1168,14 @@ namespace homebutton {
                 mpPairGroupAnmController[0]->setState(0);
             }
 
+#ifdef GAME_REXE01
+            // Excite Truck's older HBM: a simpler form of the revision-1 check below
+            if (mpPairGroupAnmController[14]->isPlaying() &&
+                mpPairGroupAnmController[14]->getCurrentFrame() == 0.0f)
+            {
+                mpPairGroupAnmController[14]->setState(0);
+            }
+#endif
 #if HBM_REVISION == 1
             if (mpPairGroupAnmController[14]->isPlaying() &&
                 mpPairGroupAnmController[14]->getCurrentFrame() <
@@ -1108,7 +1231,7 @@ namespace homebutton {
             mSimpleSyncCallback = WPADSetSimpleSyncCallback(&SimpleSyncCallback);
             mEndSimpleSyncFlag = false;
 
-            mSimpleSyncFlag = WPADStartFastSimpleSync();
+            mSimpleSyncFlag = HBM_START_SIMPLE_SYNC();
 
             if (!mSimpleSyncFlag) {
                 setSimpleSyncAlarm(0);
@@ -1298,10 +1421,17 @@ namespace homebutton {
                 mState = 19;
                 mFadeOutSeTime = mFader.getMaxFrame();
 
+#ifdef GAME_REXE01
+                // Excite Truck's older HBM has no fade-out callback for button 3
+                if (mSelectBtnNum != HBM_SELECT_BTN3 && mpHBInfo->sound_callback != NULL) {
+                    mpHBInfo->sound_callback(3, mFadeOutSeTime);
+                }
+#else
                 if (mpHBInfo->sound_callback != NULL) {
                     mpHBInfo->sound_callback(mSelectBtnNum != HBM_SELECT_BTN3 ? 3 : 6,
                                              mFadeOutSeTime);
                 }
+#endif
             } else {
                 updateTrigPane();
                 mSelectAnmNum = 13;
@@ -1329,9 +1459,15 @@ namespace homebutton {
             mState = 19;
             mFadeOutSeTime = mFader.getMaxFrame();
 
+#ifdef GAME_REXE01
+            if (mSelectBtnNum != HBM_SELECT_BTN3 && mpHBInfo->sound_callback != NULL) {
+                mpHBInfo->sound_callback(3, mFadeOutSeTime);
+            }
+#else
             if (mpHBInfo->sound_callback != NULL) {
                 mpHBInfo->sound_callback(mSelectBtnNum != HBM_SELECT_BTN3 ? 3 : 6, mFadeOutSeTime);
             }
+#endif
 
             break;
 
@@ -1356,7 +1492,11 @@ namespace homebutton {
             }
 
             setVolume(mVolumeNum);
+#ifdef GAME_REXE01
+            BOOL result = WPADSaveConfig(NULL);
+#else
             bool result = WPADSaveConfig(NULL);
+#endif
             mpRemoteSpk->Stop();
 
             for (int i = 0; i < WPAD_MAX_CONTROLLERS; i++) {
@@ -1365,7 +1505,7 @@ namespace homebutton {
                 }
             }
 
-            NW4HBM_ASSERT(LN(1671, 1649), result);
+            NW4HBM_ASSERT(ET_LN(1614, LN(1671, 1649)), result);
 
             if (mSelectBtnNum != HBM_SELECT_BTN3 && mpHBInfo->sound_callback != NULL) {
                 mpHBInfo->sound_callback(4, 0);
@@ -1474,6 +1614,34 @@ namespace homebutton {
         }
     }
 
+#ifdef GAME_REXE01
+    void HomeButton::fadeout_sound(f32 gain) {
+        if (mSelectBtnNum == HBM_SELECT_BTN3) {
+            return;
+        }
+
+        if (mEndInitSoundFlag) {
+            AXSetMasterVolume(gain * 32768.0f);
+        }
+
+        if (mpSoundArchivePlayer != NULL) {
+            for (int i = 0; i < mpSoundArchivePlayer->GetSoundPlayerCount(); i++) {
+                mpSoundArchivePlayer->GetSoundPlayer(i).SetVolume(gain);
+            }
+        }
+    }
+
+    void HomeButton::setSoundVolume(f32 volume) {
+        AXSetMasterVolume(volume * 32768.0f);
+
+        if (mpSoundArchivePlayer != NULL) {
+            for (int i = 0; i < mpSoundArchivePlayer->GetSoundPlayerCount(); i++) {
+                mpSoundArchivePlayer->GetSoundPlayer(i).SetVolume(volume);
+            }
+        }
+    }
+
+#endif
     void HomeButton::calc_fadeoutAnm() {
         mpLayout->GetRootPane()->FindPaneByName(scFuncTextPaneName[2], true)->SetVisible(false);
 
@@ -1553,7 +1721,7 @@ namespace homebutton {
         bool retrySuccessFlag = false;
 
         if (type == 0) {
-            if (WPADStartFastSimpleSync()) {
+            if (HBM_START_SIMPLE_SYNC()) {
                 pHBObj->setSimpleSyncFlag(true);
                 retrySuccessFlag = true;
             }
@@ -2772,7 +2940,7 @@ namespace homebutton {
     }
 
     static void drawBlackPlate(f32 left, f32 top, f32 right, f32 bottom) {
-#if HBM_REVISION == 1
+#if HBM_REVISION == 1 || defined(GAME_REXE01)  // Excite Truck uses revision 1's vertex order
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
         GXPosition2f32(left, top);
         GXPosition2f32(right, top);
@@ -2827,6 +2995,48 @@ namespace homebutton {
 #endif
     }
 
+#ifdef GAME_REXE01
+    void HomeButton::createSound(nw4hbm::snd::SoundArchive* pSoundArchive, bool bCreateSoundHeap) {
+        void* buffer =
+            MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::SoundArchivePlayer));
+        if (buffer != NULL) {
+            mpSoundArchivePlayer = new (buffer) nw4hbm::snd::SoundArchivePlayer();
+        }
+        NW4HBM_ASSERT(3682, mpSoundArchivePlayer);
+
+        void* memBuffer;
+        void* strmBuffer;
+        u32 memSize = mpSoundArchivePlayer->GetRequiredMemSize(pSoundArchive);
+        u32 strmSize = mpSoundArchivePlayer->GetRequiredStrmBufferSize(pSoundArchive);
+        strmBuffer = MEMAllocFromAllocator(&sSoundAllocator, strmSize);
+        memBuffer = MEMAllocFromAllocator(&sSoundAllocator, memSize);
+        bool result = mpSoundArchivePlayer->Setup(pSoundArchive, memBuffer, memSize, strmBuffer,
+                                                  strmSize);
+        NW4HBM_ASSERT(3700, result);
+
+        buffer = MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::SoundHandle));
+        if (buffer != NULL) {
+            mpSoundHandle = new (buffer) nw4hbm::snd::SoundHandle();
+        }
+        NW4HBM_ASSERT(3707, mpSoundHandle);
+
+        if (bCreateSoundHeap) {
+            buffer = MEMAllocFromAllocator(&sSoundAllocator, sizeof(nw4hbm::snd::SoundHeap));
+            if (buffer != NULL) {
+                mpSoundHeap = new (buffer) nw4hbm::snd::SoundHeap();
+            }
+            NW4HBM_ASSERT(3716, mpSoundHeap);
+
+            mpSoundHeap->Create(MEMAllocFromAllocator(&sSoundAllocator, 0x60000), 0x60000);
+            NW4HBM_ASSERT(3723, mpSoundHeap->IsValid());
+
+            bool result = mpSoundArchivePlayer->LoadGroup(0, mpSoundHeap, 0);
+            NW4HBM_ASSERT(3726, result);
+        } else {
+            mpSoundHeap = NULL;
+        }
+    }
+#else
     void HomeButton::createSound(nw4hbm::snd::NandSoundArchive* pNandSoundArchive,
                                  bool bCreateSoundHeap) {
         void* buffer =
@@ -2869,6 +3079,7 @@ namespace homebutton {
             mpSoundHeap = NULL;
         }
     }
+#endif
 
     void HomeButton::deleteSound() {
         if (mpDvdSoundArchive != NULL) {

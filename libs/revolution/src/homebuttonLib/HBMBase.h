@@ -178,7 +178,13 @@ namespace homebutton {
 
     public:
         void play_sound(int id);
+#ifdef GAME_REXE01
+        void createSound(nw4hbm::snd::SoundArchive* pSoundArchive, bool bCreateSoundHeap);
+        void createDvdSound(const char* path);
+        void createNandSound(const char* path);
+#else
         void createSound(nw4hbm::snd::NandSoundArchive* pNandSoundArchive, bool bCreateSoundHeap);
+#endif
         void deleteSound();
         void draw_impl();
         void updateSoundArchivePlayer();
