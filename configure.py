@@ -485,6 +485,14 @@ cflags_msc = [
     "-fp_contract off",
 ]
 
+# Home Button Menu (nw4hbm) from the Strikers decomp: its SDK flags plus HBM assertions.
+cflags_msc_hbm = [
+    *cflags_msc,
+    "-i libs/msc/src/RVL_SDK/hbm",
+    "-DHBM_ASSERT",
+    "-DVERSION_R4QJ01",
+]
+
 config.libs.append(
     {
         "lib": "MSL_C",
@@ -559,6 +567,91 @@ config.libs.append(
         ],
     }
 )
+
+config.libs.append(
+    {
+        "lib": "HBM",
+        "mw_version": "GC/3.0a5.2",
+        "src_dir": "libs/msc/src",
+        "cflags": cflags_msc_hbm,
+        "progress_category": "sdk",
+        "objects": [
+            Object(NonMatching, "RVL_SDK/hbm/HBMBase.cpp"),
+            Object(Matching, "RVL_SDK/hbm/HBMFrameController.cpp"),
+            Object(Matching, "RVL_SDK/hbm/HBMGUIManager.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/HBMController.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/HBMRemoteSpk.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_assert.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_console.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/db/db_directPrint.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_mapFile.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_animation.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_arcResourceAccessor.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_bounding.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_common.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_drawInfo.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_picture.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_textBox.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_window.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/math/math_triangular.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_AxVoice.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Bank.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_BankFile.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_BasicSound.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_DisposeCallbackManager.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_DvdSoundArchive.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_EnvGenerator.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_ExternalSoundPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_FrameHeap.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_InstancePool.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Lfo.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeaker.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeakerManager.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqFile.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqSound.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqSoundHandle.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqTrack.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchive.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveLoader.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundHandle.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundHeap.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundStartable.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundSystem.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundThread.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmChannel.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmFile.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmSoundHandle.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_TaskManager.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_TaskThread.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Util.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveFile.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WavePlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdFile.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_binaryFileFormat.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_CharStrmReader.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/ut/ut_CharWriter.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_FileStream.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_Font.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_IOStream.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_LinkList.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_list.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFont.cpp"),
+            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp"),
+        ],
+    }
+)
+
 
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
 # This is called once per module, with the module ID and the current link order.

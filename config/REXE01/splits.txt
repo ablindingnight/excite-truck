@@ -597,3 +597,369 @@ revolution/VF/pf_cp932.c:
 
 revolution/VF/pf_init_prfile2.c:
 	.text       start:0x800B76A8 end:0x800B76E8
+
+RVL_SDK/hbm/HBMBase.cpp:
+	.text       start:0x800CED18 end:0x800CEF60
+
+RVL_SDK/hbm/HBMFrameController.cpp:
+	.text       start:0x800CF3B4 end:0x800CF554
+	.sdata2     start:0x80560E20 end:0x80560E24
+
+RVL_SDK/hbm/HBMGUIManager.cpp:
+	.text       start:0x800CF554 end:0x800D0BD8
+	.data       start:0x8031E780 end:0x8031E960
+	.sdata      start:0x805597D0 end:0x805597D8
+	.sbss       start:0x8055DDA0 end:0x8055DDA4
+	.sdata2     start:0x80560E28 end:0x80560E34
+
+RVL_SDK/hbm/HBMController.cpp:
+	.text       start:0x800D11CC end:0x800D155C
+	.bss        start:0x804076C0 end:0x80407780
+	.sdata2     start:0x80560E38 end:0x80560E44
+
+RVL_SDK/hbm/HBMRemoteSpk.cpp:
+	.text       start:0x800D1D44 end:0x800D1EC4
+
+RVL_SDK/hbm/nw4hbm/db/db_assert.cpp:
+	.text       start:0x800D1EC4 end:0x800D24D4
+	.data       start:0x8031E9D0 end:0x8031EA80
+	.bss        start:0x80407790 end:0x804077C0
+	.sdata      start:0x805597D8 end:0x805597E0
+	.sbss       start:0x8055DDB8 end:0x8055DDC4
+
+RVL_SDK/hbm/nw4hbm/db/db_console.cpp:
+	.text       start:0x800D24D4 end:0x800D2DD4
+	.data       start:0x8031EA80 end:0x8031EBA0
+	.bss        start:0x804077C0 end:0x80407BD8
+	.sdata      start:0x805597E0 end:0x805597E8
+
+RVL_SDK/hbm/nw4hbm/db/db_directPrint.cpp:
+	.text       start:0x800D2FC8 end:0x800D3824
+	.rodata     start:0x802F47D8 end:0x802F4A8C
+	.data       start:0x8031EBA0 end:0x8031EC50
+	.bss        start:0x80407BD8 end:0x80407BFC
+	.sbss       start:0x8055DDC8 end:0x8055DDCC
+
+RVL_SDK/hbm/nw4hbm/db/db_mapFile.cpp:
+	.text       start:0x800D3824 end:0x800D4138
+	.data       start:0x8031EC50 end:0x8031EE58
+	.bss        start:0x80407C00 end:0x80407E3C
+	.sdata      start:0x805597E8 end:0x805597EC
+	.sbss       start:0x8055DDD0 end:0x8055DDDC
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_animation.cpp:
+	.text       start:0x800D4138 end:0x800D50A8
+	.data       start:0x8031EE58 end:0x8031F2C4
+	.sdata      start:0x805597F0 end:0x805597F8
+	.sdata2     start:0x80560E48 end:0x80560E68
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_arcResourceAccessor.cpp:
+	.text       start:0x800D50A8 end:0x800D57AC
+	.data       start:0x8031F2C8 end:0x8031F540
+	.sdata      start:0x805597F8 end:0x80559800
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_bounding.cpp:
+	.text       start:0x800D57AC end:0x800D58C4
+	.ctors      start:0x802ED0D4 end:0x802ED0D8
+	.data       start:0x8031F540 end:0x8031F5A4
+	.sbss       start:0x8055DDE0 end:0x8055DDE4
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_common.cpp:
+	.text       start:0x800D58C4 end:0x800D6744
+	.data       start:0x8031F5A8 end:0x8031F614
+	.bss        start:0x80407E40 end:0x80407E60
+	.sbss       start:0x8055DDE8 end:0x8055DDEC
+	.sdata2     start:0x80560E68 end:0x80560E78
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_drawInfo.cpp:
+	.text       start:0x800D6744 end:0x800D67F8
+	.data       start:0x8031F618 end:0x8031F624
+	.sdata2     start:0x80560E78 end:0x80560E80
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_picture.cpp:
+	.text       start:0x800DC6F0 end:0x800DCE50
+	.ctors      start:0x802ED0DC end:0x802ED0E0
+	.data       start:0x80320320 end:0x80320544
+	.sbss       start:0x8055DE00 end:0x8055DE04
+	.sdata2     start:0x80560EC8 end:0x80560ECC
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_textBox.cpp:
+	.text       start:0x800DDDF4 end:0x800DF208
+	.data       start:0x80320560 end:0x80320BD4
+	.sdata      start:0x80559800 end:0x8055980C
+	.sdata2     start:0x80560ED0 end:0x80560EE8
+
+RVL_SDK/hbm/nw4hbm/lyt/lyt_window.cpp:
+	.text       start:0x800E0564 end:0x800E252C
+	.ctors      start:0x802ED0E4 end:0x802ED0E8
+	.data       start:0x80320BD8 end:0x80320CFC
+	.sbss       start:0x8055DE10 end:0x8055DE14
+	.sdata2     start:0x80560EE8 end:0x80560F00
+
+RVL_SDK/hbm/nw4hbm/math/math_triangular.cpp:
+	.text       start:0x800E252C end:0x800E279C
+	.data       start:0x80320E38 end:0x80321F50
+	.sdata2     start:0x80560F00 end:0x80560F1C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp:
+	.text       start:0x800E36D0 end:0x800E3954
+	.data       start:0x80321F80 end:0x803221A4
+
+RVL_SDK/hbm/nw4hbm/snd/snd_AxVoice.cpp:
+	.text       start:0x800E6F7C end:0x800E7F40
+	.data       start:0x803221A8 end:0x80322498
+	.sdata2     start:0x80560F38 end:0x80560F84
+
+RVL_SDK/hbm/nw4hbm/snd/snd_Bank.cpp:
+	.text       start:0x800E80B8 end:0x800E82E0
+	.sdata2     start:0x80560F88 end:0x80560FA8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_BankFile.cpp:
+	.text       start:0x800E82E0 end:0x800E8930
+	.data       start:0x803224F0 end:0x8032278C
+	.sdata      start:0x80559818 end:0x80559838
+	.sdata2     start:0x80560FA8 end:0x80560FAC
+
+RVL_SDK/hbm/nw4hbm/snd/snd_BasicSound.cpp:
+	.text       start:0x800E8930 end:0x800E9C38
+	.ctors      start:0x802ED0E8 end:0x802ED0EC
+	.data       start:0x80322790 end:0x803228E4
+	.sbss       start:0x8055DE20 end:0x8055DE24
+	.sdata2     start:0x80560FB0 end:0x80560FC0
+
+RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp:
+	.text       start:0x800E9C38 end:0x800EAE58
+	.data       start:0x803228E8 end:0x80322B20
+	.bss        start:0x8040EC78 end:0x80412790
+	.sbss       start:0x8055DE28 end:0x8055DE2C
+	.sdata2     start:0x80560FC0 end:0x80560FE8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_DisposeCallbackManager.cpp:
+	.text       start:0x800EAECC end:0x800EB36C
+	.data       start:0x80322B20 end:0x80322B80
+	.bss        start:0x80412790 end:0x804127A8
+	.sbss       start:0x8055DE30 end:0x8055DE34
+
+RVL_SDK/hbm/nw4hbm/snd/snd_DvdSoundArchive.cpp:
+	.text       start:0x800EB36C end:0x800EB3AC
+
+RVL_SDK/hbm/nw4hbm/snd/snd_EnvGenerator.cpp:
+	.text       start:0x800EB3AC end:0x800EB9BC
+	.rodata     start:0x802F4A90 end:0x802F4D90
+	.data       start:0x80322B80 end:0x80322CD0
+	.sdata2     start:0x80560FE8 end:0x80561018
+
+RVL_SDK/hbm/nw4hbm/snd/snd_ExternalSoundPlayer.cpp:
+	.text       start:0x800EB9BC end:0x800EBB88
+	.data       start:0x80322CD0 end:0x80322D60
+
+RVL_SDK/hbm/nw4hbm/snd/snd_FrameHeap.cpp:
+	.text       start:0x800EBB88 end:0x800EC5E0
+	.data       start:0x80322D60 end:0x80323058
+
+RVL_SDK/hbm/nw4hbm/snd/snd_InstancePool.cpp:
+	.text       start:0x800EC5E0 end:0x800EC890
+	.data       start:0x80323058 end:0x8032309C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_Lfo.cpp:
+	.text       start:0x800EC890 end:0x800ECAEC
+	.rodata     start:0x802F4D90 end:0x802F4DB4
+	.data       start:0x803230A0 end:0x803230E8
+	.sdata2     start:0x80561018 end:0x80561048
+
+RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp:
+	.text       start:0x800ECAEC end:0x800ED058
+	.data       start:0x803230E8 end:0x80323258
+
+RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp:
+	.text       start:0x800ED058 end:0x800ED0F4
+
+RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp:
+	.text       start:0x800ED134 end:0x800EE268
+	.data       start:0x80323268 end:0x8032374C
+	.sdata      start:0x80559838 end:0x80559844
+	.sbss       start:0x8055DE38 end:0x8055DE3C
+	.sdata2     start:0x80561048 end:0x80561068
+
+RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp:
+	.text       start:0x800EE2F4 end:0x800EE47C
+	.data       start:0x80323770 end:0x803237B8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp:
+	.text       start:0x800EE47C end:0x800EE4F0
+	.data       start:0x803237D0 end:0x80323810
+
+RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeaker.cpp:
+	.text       start:0x800EE4F0 end:0x800EEA00
+	.data       start:0x80323840 end:0x803238F8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeakerManager.cpp:
+	.text       start:0x800EEA00 end:0x800EECD8
+	.data       start:0x803238F8 end:0x803239C0
+	.bss        start:0x804127A8 end:0x80412A60
+	.sbss       start:0x8055DE40 end:0x8055DE44
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SeqFile.cpp:
+	.text       start:0x800EECD8 end:0x800EEE8C
+	.data       start:0x803239C0 end:0x80323B24
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp:
+	.text       start:0x800EEE8C end:0x800EF500
+	.data       start:0x80323B28 end:0x80324060
+	.bss        start:0x80412A6C end:0x80412A78
+	.sdata2     start:0x80561068 end:0x80561078
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SeqSound.cpp:
+	.text       start:0x800F07EC end:0x800F0E64
+	.ctors      start:0x802ED0F4 end:0x802ED0F8
+	.data       start:0x80324060 end:0x80324390
+	.sbss       start:0x8055DE48 end:0x8055DE4C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SeqSoundHandle.cpp:
+	.text       start:0x800F0E64 end:0x800F0E9C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SeqTrack.cpp:
+	.text       start:0x800F0E9C end:0x800F26D8
+	.rodata     start:0x802F4DB8 end:0x802F4DDC
+	.data       start:0x80324390 end:0x803247DC
+	.sdata2     start:0x80561078 end:0x805610A8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchive.cpp:
+	.text       start:0x800F26D8 end:0x800F2D28
+	.data       start:0x803247E0 end:0x80324868
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveLoader.cpp:
+	.text       start:0x800F41D0 end:0x800F4B78
+	.data       start:0x80324E40 end:0x80324E88
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundHandle.cpp:
+	.text       start:0x800F8244 end:0x800F8310
+	.data       start:0x80325C00 end:0x80325C40
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundHeap.cpp:
+	.text       start:0x800F8310 end:0x800F849C
+	.data       start:0x80325C40 end:0x80325C50
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundStartable.cpp:
+	.text       start:0x800FA198 end:0x800FA204
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundSystem.cpp:
+	.text       start:0x800FA204 end:0x800FA3E8
+	.data       start:0x803263B8 end:0x80326450
+	.sbss       start:0x8055DE60 end:0x8055DE64
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundThread.cpp:
+	.text       start:0x800FA5F0 end:0x800FA940
+	.data       start:0x80326450 end:0x803264DC
+	.bss        start:0x80412CB8 end:0x80415060
+	.sbss       start:0x8055DE68 end:0x8055DE6C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_StrmChannel.cpp:
+	.text       start:0x800FA940 end:0x800FAB88
+	.data       start:0x803264E0 end:0x80326514
+
+RVL_SDK/hbm/nw4hbm/snd/snd_StrmFile.cpp:
+	.text       start:0x800FAB88 end:0x800FB250
+	.data       start:0x80326518 end:0x80326764
+	.sdata      start:0x805598E0 end:0x80559900
+
+RVL_SDK/hbm/nw4hbm/snd/snd_StrmPlayer.cpp:
+	.text       start:0x800FB250 end:0x800FDA20
+	.ctors      start:0x802ED0F8 end:0x802ED0FC
+	.data       start:0x80326768 end:0x80326C88
+	.bss        start:0x80415060 end:0x804190A0
+	.sdata2     start:0x805610C0 end:0x805610C8
+
+RVL_SDK/hbm/nw4hbm/snd/snd_StrmSoundHandle.cpp:
+	.text       start:0x800FDE28 end:0x800FDE60
+
+RVL_SDK/hbm/nw4hbm/snd/snd_TaskManager.cpp:
+	.text       start:0x800FDE60 end:0x800FE648
+	.data       start:0x80326E08 end:0x80326FD4
+	.bss        start:0x804190A0 end:0x8041B0E4
+	.sbss       start:0x8055DE78 end:0x8055DE7C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_TaskThread.cpp:
+	.text       start:0x800FE648 end:0x800FE880
+	.data       start:0x80326FD8 end:0x80327010
+	.bss        start:0x8041B138 end:0x8041D4A0
+	.sbss       start:0x8055DE80 end:0x8055DE84
+
+RVL_SDK/hbm/nw4hbm/snd/snd_Util.cpp:
+	.text       start:0x800FE880 end:0x800FEC1C
+	.rodata     start:0x802F4DE0 end:0x802F6528
+	.data       start:0x80327010 end:0x8032703C
+	.sdata      start:0x80559900 end:0x80559904
+	.sdata2     start:0x805610C8 end:0x80561110
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WaveFile.cpp:
+	.text       start:0x800FEC1C end:0x800FEE4C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WavePlayer.cpp:
+	.text       start:0x800FEE4C end:0x800FFA10
+	.ctors      start:0x802ED100 end:0x802ED104
+	.data       start:0x80327040 end:0x803274FC
+	.bss        start:0x8041D4A0 end:0x8041D4B8
+	.sdata2     start:0x80561110 end:0x80561114
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp:
+	.text       start:0x800FFE94 end:0x800FFECC
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WsdFile.cpp:
+	.text       start:0x800FFECC end:0x80100404
+	.data       start:0x803276F0 end:0x80327930
+	.sdata      start:0x80559908 end:0x80559928
+	.sdata2     start:0x80561118 end:0x8056111C
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WsdPlayer.cpp:
+	.text       start:0x80100404 end:0x80100654
+	.data       start:0x80327930 end:0x80327CB8
+	.bss        start:0x8041D4C4 end:0x8041D4D0
+	.sdata2     start:0x80561120 end:0x80561128
+
+RVL_SDK/hbm/nw4hbm/ut/ut_binaryFileFormat.cpp:
+	.text       start:0x8010206C end:0x801022C4
+	.data       start:0x80327EE0 end:0x80328030
+
+RVL_SDK/hbm/nw4hbm/ut/ut_CharStrmReader.cpp:
+	.text       start:0x801022C4 end:0x80102C24
+	.data       start:0x80328030 end:0x80328178
+
+RVL_SDK/hbm/nw4hbm/ut/ut_CharWriter.cpp:
+	.text       start:0x80102C24 end:0x80107180
+	.data       start:0x80328178 end:0x80328454
+	.bss        start:0x8041D4D0 end:0x8041D4F0
+	.sbss       start:0x8055DE90 end:0x8055DE98
+	.sdata2     start:0x80561150 end:0x80561170
+
+RVL_SDK/hbm/nw4hbm/ut/ut_FileStream.cpp:
+	.text       start:0x8010718C end:0x801072D0
+	.ctors      start:0x802ED110 end:0x802ED114
+	.data       start:0x80328458 end:0x803284E0
+	.sbss       start:0x8055DEA0 end:0x8055DEA4
+
+RVL_SDK/hbm/nw4hbm/ut/ut_Font.cpp:
+	.text       start:0x801072D0 end:0x80107494
+	.data       start:0x80328540 end:0x8032854C
+
+RVL_SDK/hbm/nw4hbm/ut/ut_IOStream.cpp:
+	.text       start:0x80107494 end:0x801076D0
+	.ctors      start:0x802ED114 end:0x802ED118
+	.data       start:0x803285B8 end:0x8032863C
+	.sbss       start:0x8055DEA8 end:0x8055DEAC
+
+RVL_SDK/hbm/nw4hbm/ut/ut_LinkList.cpp:
+	.text       start:0x801076D0 end:0x80107C3C
+	.data       start:0x80328680 end:0x80328828
+
+RVL_SDK/hbm/nw4hbm/ut/ut_list.cpp:
+	.text       start:0x80107C3C end:0x80107FE4
+	.data       start:0x80328828 end:0x80328888
+
+RVL_SDK/hbm/nw4hbm/ut/ut_ResFont.cpp:
+	.text       start:0x80107FE4 end:0x80108FFC
+	.data       start:0x80328888 end:0x80329140
+
+RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp:
+	.text       start:0x80108FFC end:0x8010C7DC
+	.data       start:0x80329140 end:0x80329458
