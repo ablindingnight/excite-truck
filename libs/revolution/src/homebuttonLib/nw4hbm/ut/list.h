@@ -38,7 +38,11 @@ namespace nw4hbm {
         }
 
         inline u16 List_GetSize(const List* list) {
+#ifdef GAME_REXE01  // Excite Truck's string has the NW4HBM: prefix
+            NW4HBM_ASSERT_CHECK_NULL(207, list);
+#else
             NW4R_ASSERT_CHECK_NULL(207, list);
+#endif
             return list->numObjects;
         }
 

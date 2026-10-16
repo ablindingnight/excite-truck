@@ -475,6 +475,7 @@ config.libs.append(
             TpRevolution("homebuttonLib/nw4hbm/snd/snd_SoundPlayer.cpp", NonMatching),
             TpRevolution("homebuttonLib/HBMBase.cpp", Matching),
             TpRevolution("homebuttonLib/HBMAnmController.cpp", Matching),
+            TpRevolution("homebuttonLib/HBMGUIManager.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_pane.cpp", NonMatching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_material.cpp", NonMatching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_common.cpp", Matching),
@@ -657,7 +658,6 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             Object(Matching, "RVL_SDK/hbm/HBMFrameController.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/HBMGUIManager.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/HBMController.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/HBMRemoteSpk.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_assert.cpp"),

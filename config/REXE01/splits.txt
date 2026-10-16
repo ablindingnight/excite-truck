@@ -1112,7 +1112,7 @@ RVL_SDK/hbm/HBMFrameController.cpp:
 	.text       start:0x800CF3B4 end:0x800CF554
 	.sdata2     start:0x80560E20 end:0x80560E24
 
-RVL_SDK/hbm/HBMGUIManager.cpp:
+revolution/homebuttonLib/HBMGUIManager.cpp:
 	.text       start:0x800CF554 end:0x800D0BD8
 	.data       start:0x8031E780 end:0x8031E960
 	.sdata      start:0x805597D0 end:0x805597D8

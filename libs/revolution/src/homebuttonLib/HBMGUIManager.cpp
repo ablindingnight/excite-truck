@@ -33,7 +33,11 @@ namespace homebutton {
 
             GXSetNumTexGens(0);
             GXSetNumTevStages(1);
+#ifdef GAME_REXE01  // as in lyt_common's DrawLine
+            GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+#else
             GXSetTevOp(GX_TEVSTAGE0, GX_BLEND);
+#endif
             GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
             GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_NOOP);
 
