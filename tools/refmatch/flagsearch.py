@@ -59,12 +59,14 @@ def variant(flags, change):
         return [f for f in flags if not re.match(r"-O\d", f)] + [change]
     if change == "no -sym":
         return without(flags, "-sym")
+    if opt == "-pragma":  # extra pragmas are added, not swapped for the existing ones
+        return flags + shlex.split(change)
     return without(flags, opt) + shlex.split(change)
 
 CHANGES = ["", "no -sym", "-sym on", "-ipa function", "-ipa file", "-inline deferred", "-inline off",
            "-inline noauto", "-Cpp_exceptions on", "-Cpp_exceptions off", "-fp_contract on",
            "-fp_contract off", "-O4,s", "-O3,p", "-use_lmw_stmw on", "-str reuse,pool,readonly",
-           "-RTTI on"]
+           "-RTTI on", '-pragma "opt_unroll_loops off"']
 VERSIONS = [base_ver] if quick else ["GC/3.0a3", "GC/3.0a3.2", "GC/3.0a3.3", "GC/3.0a3.4", "GC/3.0a5", "GC/3.0a5.2"]
 
 # --- original functions in the unit's .text range ---------------------------------------------
