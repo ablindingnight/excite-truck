@@ -1181,7 +1181,7 @@ revolution/homebuttonLib/nw4hbm/lyt/lyt_common.cpp:
 	.sbss       start:0x8055DDE8 end:0x8055DDEC
 	.sdata2     start:0x80560E68 end:0x80560E78
 
-RVL_SDK/hbm/nw4hbm/lyt/lyt_drawInfo.cpp:
+revolution/homebuttonLib/nw4hbm/lyt/lyt_drawInfo.cpp:
 	.text       start:0x800D6744 end:0x800D67F8
 	.data       start:0x8031F618 end:0x8031F624
 	.sdata2     start:0x80560E78 end:0x80560E80
