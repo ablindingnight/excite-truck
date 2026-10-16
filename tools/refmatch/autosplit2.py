@@ -257,7 +257,7 @@ for unit in units:
             continue
         ads = [symaddr[k] for k in ks]
         if ads != sorted(ads):
-            bad.append(s["name"])
+            bad.append(s["name"] + ": " + ", ".join(f"{syms[k]['name']}@{symaddr[k]:#x}" for k in ks))
             continue
         lo_d = ads[0]
         hi_d = max(symaddr[k] + syms[k]["size"] for k in ks)

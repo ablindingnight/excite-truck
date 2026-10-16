@@ -425,6 +425,7 @@ config.libs.append(
             TpRevolution("wud/WUDHidHost.c", Matching),
             TpRevolution("axfx/AXFXReverbHi.c", Matching),
             TpRevolution("ipc/ipcProfile.c", Matching),
+            TpRevolution("vi/vi3in1.c", Matching),
             TpRevolution("gx/GXAttr.c", Matching),
             TpRevolution("os/OSRtc.c", Matching),
             TpRevolution("gx/GXTev.c", Matching),
