@@ -1,0 +1,3 @@
+#!/bin/sh
+# Back up the full history to ../backups after every commit.
+python tools/backup.py | head -1

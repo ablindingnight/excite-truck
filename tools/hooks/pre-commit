@@ -1,0 +1,12 @@
+#!/bin/sh
+# Refuse to commit unless the project builds and the built DOL matches the original's SHA-1.
+# Skip in an emergency with: git commit --no-verify
+echo "pre-commit: building and checking the DOL hash..."
+python configure.py > /dev/null || { echo "pre-commit: configure.py failed"; exit 1; }
+out=$(ninja 2>&1); status=$?
+if [ $status -ne 0 ] || [ ! -f build/REXE01/ok ]; then
+    echo "$out" | grep -E "main.dol|FAILED|rror" | head -20
+    echo "pre-commit: build or DOL hash check FAILED - commit aborted"
+    exit 1
+fi
+echo "pre-commit: main.dol matches"
