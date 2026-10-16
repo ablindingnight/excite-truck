@@ -49,6 +49,9 @@ if unit + ":" not in splits:
     sd = re.search(r'"src_dir":\s*"([^"]+)"', lib_blk)
     src_dir = sd.group(1) if sd else "src"
     line = cfg[pos:cfg.find("\n", pos)]
+    mv = re.search(r'mw_version="([^"]+)"', line)
+    if mv:
+        ver = mv.group(1)
     ex = re.search(r"extra_cflags=\[([^\]]*)\]", line)
     extra = " ".join(re.findall(r"['\"](-[^'\"]+)['\"]", ex.group(1))) if ex else ""
     src_rel = unit.split("/", 1)[1] if tp_style else unit

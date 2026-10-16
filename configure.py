@@ -541,7 +541,6 @@ config.libs.append(
             Object(NonMatching, "MSL/float.c"),
             Object(NonMatching, "MSL/locale.c", extra_cflags=['-rostr']),
             Object(NonMatching, "MSL/math_ppc.c"),
-            Object(NonMatching, "MSL/printf.c"),
             Object(NonMatching, "MSL/rand.c"),
             Object(Matching, "MSL/w_acos.c", extra_cflags=["-D_IEEE_LIBM"]),
             Object(Matching, "MSL/w_atan2.c", extra_cflags=["-D_IEEE_LIBM"]),
@@ -556,6 +555,7 @@ config.libs.append(
             Object(Matching, "MSL/w_asin.c", extra_cflags=["-D_IEEE_LIBM"]),
             Object(Matching, "MSL/w_log.c", extra_cflags=["-D_IEEE_LIBM"]),
             Object(Matching, "MSL/w_fmod.c", extra_cflags=["-D_IEEE_LIBM"]),
+            Object(Matching, "MSL/printf.c", mw_version="GC/3.0a5.2", extra_cflags=["-use_lmw_stmw on", "-str reuse,pool,readonly"]),
         ],
     }
 )

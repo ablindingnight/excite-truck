@@ -32,3 +32,10 @@ Findings:
 - With the old GC/1.3.2 linker, splitting OSSync hung the link; with GC/3.0a5 (and clean
   `__OSSystemCallVectorStart/End` labels) it links normally.
 - Tool versions bumped to match TP where needed: dtk v1.8.0.
+
+## MSL C library
+- Most MSL files match GC/3.0a5 with the Mario Strikers Charged per-file flags (`libs/msc`).
+- **printf.c is built with GC/3.0a5.2** plus `-use_lmw_stmw on -str reuse,pool,readonly`
+  (16-byte struct copies use lfd/stfd only with 3.0a5.2; the Pokémon Battle Revolution decomp pins the same).
+- fdlibm wrappers (`w_*.c`) are compiled with `-D_IEEE_LIBM` (plain tail calls).
+- The runtime helper at 0x8002FE08 is `__cvt_dbl_usll`; GC/3.0a5 emits calls to `__cvt_dbl_ull`, so runtime.c gives it both names.

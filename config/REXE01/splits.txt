@@ -76,6 +76,15 @@ MSL/math_api.c:
 MSL/misc_io.c:
 	.text       start:0x80025248 end:0x80025258
 
+MSL/printf.c:
+	extab       start:0x800045F8 end:0x80004658
+	extabindex  start:0x80004844 end:0x800048D4
+	.text       start:0x80025258 end:0x80027620
+	.rodata     start:0x802EDE60 end:0x802EDE8C
+	.data       start:0x802FE898 end:0x802FEAE8
+	.sdata      start:0x80558DA8 end:0x80558DAC
+	.sdata2     start:0x805605C0 end:0x805605C8
+
 MSL/qsort.c:
 	extab       start:0x80004658 end:0x80004660
 	extabindex  start:0x800048D4 end:0x800048E0
