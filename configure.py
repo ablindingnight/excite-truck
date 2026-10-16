@@ -388,6 +388,7 @@ config.libs = [
             Object(Matching, "revolution/BTE/bta/sys/bta_sys_main.c"),
             Object(Matching, "revolution/SC/scsystem.c"),
             Object(Matching, "revolution/SC/scapi.c"),
+            Object(Matching, "revolution/SC/scapi_prdinfo.c"),
             Object(Matching, "revolution/AX/AXProf.c"),
             Object(Matching, "revolution/BASE/PPCArch.c"),
             Object(Matching, "revolution/DB/db.c"),

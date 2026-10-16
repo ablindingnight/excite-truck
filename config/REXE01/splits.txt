@@ -1031,6 +1031,11 @@ revolution/SC/scsystem.c:
 revolution/SC/scapi.c:
 	.text       start:0x800A4294 end:0x800A466C
 
+revolution/SC/scapi_prdinfo.c:
+	.text       start:0x800A466C end:0x800A485C
+	.data       start:0x8031B120 end:0x8031B168
+	.sdata      start:0x805591E8 end:0x805591F0
+
 RVL_SDK/vf/pf_clib.c:
 	.text       start:0x800A485C end:0x800A499C
 
