@@ -22,10 +22,22 @@ void GXInitTexObjWrapMode(GXTexObj* obj, GXTexWrapMode s, GXTexWrapMode t);
 void GXInitTexObjTlut(GXTexObj* obj, u32 tlut_name);
 void GXInitTexObjUserData(GXTexObj* obj, void* user_data);
 void* GXGetTexObjUserData(const GXTexObj* obj);
+#if defined(GAME_REXE01)
+void GXLoadTexObjPreLoaded(const GXTexObj* obj, const GXTexRegion* region, GXTexMapID id);
+#else
 void GXLoadTexObjPreLoaded(GXTexObj* obj, GXTexRegion* region, GXTexMapID id);
+#endif
+#if defined(GAME_REXE01)
+void GXLoadTexObj(const GXTexObj* obj, GXTexMapID id);
+#else
 void GXLoadTexObj(GXTexObj* obj, GXTexMapID id);
+#endif
 void GXInitTlutObj(GXTlutObj* tlut_obj, void* lut, GXTlutFmt fmt, u16 n_entries);
+#if defined(GAME_REXE01)
+void GXLoadTlut(const GXTlutObj* tlut_obj, u32 tlut_name);
+#else
 void GXLoadTlut(GXTlutObj* tlut_obj, u32 tlut_name);
+#endif
 void GXInitTexCacheRegion(GXTexRegion* region, u8 is_32b_mipmap, u32 tmem_even, GXTexCacheSize size_even, u32 tmem_odd, GXTexCacheSize size_odd);
 void GXInitTexPreLoadRegion(GXTexRegion* region, u32 tmem_even, u32 size_even, u32 tmem_odd, u32 size_odd);
 void GXInitTlutRegion(GXTlutRegion* region, u32 tmem_addr, GXTlutSize tlut_size);

@@ -91,4 +91,14 @@ if "--order-out" in sys.argv:
 if "--apply" in sys.argv and not unmatched:
     new = re.sub(r"(\.text\s+)start:0x\w+ end:0x\w+", rf"\g<1>start:0x{lo:08X} end:0x{hi:08X}", blk, count=1)
     open("config/REXE01/splits.txt", "w", newline="\n").write(sp.replace(blk, new, 1))
-    print("applied")
+    # name auto-labelled functions (fn_XXXXXXXX) after the compiled function they matched
+    symp = "config/REXE01/symbols.txt"
+    text_syms = open(symp).read()
+    existing = set(re.findall(r"^(\S+) =", text_syms, re.M))
+    renamed = 0
+    for a, f in used.items():
+        auto = f"fn_{a:08X}"
+        if re.search(rf"^{auto} = ", text_syms, re.M) and f not in existing:
+            text_syms = re.sub(rf"^{auto} = ", f"{f} = ", text_syms, flags=re.M); existing.add(f); renamed += 1
+    open(symp, "w", newline="\n").write(text_syms)
+    print(f"applied ({renamed} functions named)")

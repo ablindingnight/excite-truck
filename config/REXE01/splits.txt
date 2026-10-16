@@ -402,14 +402,17 @@ revolution/GX/GXGeometry.c:
 
 revolution/gx/GXFrameBuf.c:
 	.text       start:0x80041638 end:0x800421B0
-	.data       start:0x803038D8 end:0x80303A04
+	.data       start:0x803038D8 end:0x80303A08
 	.sdata2     start:0x80560B40 end:0x80560B50
 
 RVL_SDK/gx/GXLight.c:
 	.text       start:0x800422D8 end:0x800425D8
 
-RVL_SDK/gx/GXTexture.c:
-	.text       start:0x80042DB0 end:0x800434D4
+revolution/gx/GXTexture.c:
+	.text       start:0x800425D8 end:0x800434D4
+	.data       start:0x80303A08 end:0x80303C30
+	.sdata      start:0x80558E48 end:0x80558E88
+	.sdata2     start:0x80560B60 end:0x80560B88
 
 revolution/GX/GXBump.c:
 	.text       start:0x800434D4 end:0x80043920
