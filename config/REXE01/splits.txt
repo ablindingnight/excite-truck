@@ -88,11 +88,20 @@ revolution/exi/EXICommon.c:
 	.text       start:0x8003DA10 end:0x8003DB9C
 	.sdata2     start:0x80560B10 end:0x80560B14
 
+revolution/gx/GXInit.c:
+	.text       start:0x8003DB9C end:0x8003ED64
+	.data       start:0x803034A0 end:0x803036E0
+	.bss        start:0x8037BA40 end:0x8037BAC0
+	.sdata      start:0x80558E30 end:0x80558E34
+	.sbss       start:0x8055D920 end:0x8055D948
+	.sdata2     start:0x80560B18 end:0x80560B40
+
 revolution/GX/GXGeometry.c:
 	.text       start:0x8004109C end:0x80041638
 
 revolution/gx/GXFrameBuf.c:
 	.text       start:0x80041638 end:0x800421B0
+	.data       start:0x803038D8 end:0x80303A04
 	.sdata2     start:0x80560B40 end:0x80560B50
 
 revolution/GX/GXBump.c:

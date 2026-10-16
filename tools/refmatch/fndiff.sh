@@ -5,7 +5,7 @@ t="$1"; obj="$2"; r="$3"; tmp="${TMPDIR:-/tmp}/fndiff.$$"
 mkdir -p "$tmp"
 f=$(grep -l "^\.fn $t," build/REXE01/asm/*.s build/REXE01/asm/*/*.s build/REXE01/asm/*/*/*.s 2>/dev/null | head -1)
 build/tools/dtk.exe elf disasm "$obj" "$tmp/ref.s" >/dev/null 2>&1
-norm() { grep -oE "\*/\s+.*" | sed 's/\*\/\s*//; s/\.L_[0-9A-F]*/L/g; s/fn_[0-9A-F]*/FN/g; s/lbl_[0-9A-F]*/LBL/g; s/_[0-9A-F]\{8\}@/@/g'; }
+norm() { grep -oE "\*/\s+.*" | sed -E 's/\*\/\s*//; s/\.L_[0-9A-F]+/L/g; s/(bl|b) [^ ]+$/ SYM/; s/"?[^ ,(]+"?(\+0x[0-9a-f]+)?@(ha|l|h|sda21)/SYM@/g'; }
 awk "/^\.fn $t,/,/^\.endfn/" "$f" | norm > "$tmp/t.txt"
 awk "/^\.fn $r,/,/^\.endfn/" "$tmp/ref.s" | norm > "$tmp/r.txt"
 echo "target $t: $(wc -l < "$tmp/t.txt") insns   ref $r: $(wc -l < "$tmp/r.txt") insns"
