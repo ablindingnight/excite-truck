@@ -716,7 +716,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WavePlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdFile.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdPlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_binaryFileFormat.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_CharStrmReader.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_FileStream.cpp"),
