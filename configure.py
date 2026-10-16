@@ -704,7 +704,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundPlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundStartable.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundSystem.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundThread.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundThread.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmChannel.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmFile.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmPlayer.cpp"),

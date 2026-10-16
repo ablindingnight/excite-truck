@@ -8,7 +8,11 @@ extern "C" {
 #endif
 
 #define AX_SAMPLE_RATE 32000
+#ifdef GAME_REXE01
+#define AX_VOICE_MAX 64  // Excite Truck's older AX has 64 voices
+#else
 #define AX_VOICE_MAX 96
+#endif
 
 typedef enum {
     AX_PBSYNC_SELECT = (1 << 0),

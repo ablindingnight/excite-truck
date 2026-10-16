@@ -1389,7 +1389,7 @@ RVL_SDK/hbm/nw4hbm/snd/snd_SoundSystem.cpp:
 	.sbss       start:0x8055DE60 end:0x8055DE64
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SoundThread.cpp:
-	.text       start:0x800FA5F0 end:0x800FA940
+	.text       start:0x800FA3E8 end:0x800FA940
 	.data       start:0x80326450 end:0x803264E0
 	.bss        start:0x80412CB8 end:0x80415060
 	.sbss       start:0x8055DE68 end:0x8055DE6C
