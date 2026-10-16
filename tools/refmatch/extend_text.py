@@ -13,17 +13,22 @@ sh, = struct.unpack(">I", b[0x20:0x24]); es, n, si = struct.unpack(">HHH", b[0x2
 S = [struct.unpack(">10I", b[sh + i * es:sh + i * es + 40]) for i in range(n)]; so = S[si][4]
 nm = lambda o, base: b[base + o:b.index(b"\0", base + o)].decode()
 names = [nm(s[0], so) for s in S]
-ti = names.index(".text"); text = b[S[ti][4]:S[ti][4] + S[ti][5]]
+# C++ objects put out-of-line inline/template copies in extra .text sections: read them all
+texts = [i for i, x in enumerate(names) if x == ".text"]
 st = [i for i, s in enumerate(S) if s[1] == 2][0]; strs = S[S[st][6]][4]
-fns = []
+relsec = {}
+for s in S:
+    if s[1] == 4 and s[7] in texts:
+        relsec.setdefault(s[7], set()).update(struct.unpack(">I", b[s[4] + k:s[4] + k + 4])[0] & ~3 for k in range(0, s[5], 12))
+code, fns = {}, []
 for k in range(0, S[st][5], 16):
     o, v, sz, info, oth, shn = struct.unpack(">IIIBBH", b[S[st][4] + k:S[st][4] + k + 16])
-    if shn == ti and (info & 15) == 2 and sz: fns.append((v, sz, nm(o, strs)))
+    if shn in texts and (info & 15) == 2 and sz:
+        name = nm(o, strs)
+        sec = b[S[shn][4]:S[shn][4] + S[shn][5]]
+        code[name] = (sec[v:v + sz], {r - v for r in relsec.get(shn, ()) if v <= r < v + sz})
+        fns.append(((texts.index(shn), v), sz, name))
 fns.sort()
-rel = set()
-for s in S:
-    if s[1] == 4 and s[7] == ti:
-        for k in range(0, s[5], 12): rel.add(struct.unpack(">I", b[s[4] + k:s[4] + k + 4])[0] & ~3)
 
 d = open("orig/REXE01/sys/main.dol", "rb").read()
 O = struct.unpack(">18I", d[0:72]); A = struct.unpack(">18I", d[72:144]); Z = struct.unpack(">18I", d[144:216])
@@ -31,12 +36,13 @@ def rd(x, n):
     for i in range(18):
         if Z[i] and A[i] <= x and x + n <= A[i] + Z[i]: return d[O[i] + x - A[i]:O[i] + x - A[i] + n]
 
-def same(addr, size, v):
+def same(addr, size, fname):
     t = rd(addr, size)
     if t is None: return False
+    body, rel = code[fname]
     for k in range(0, size, 4):
-        x, y = t[k:k + 4], text[v + k:v + k + 4]
-        if v + k in rel:
+        x, y = t[k:k + 4], body[k:k + 4]
+        if k in rel:
             xw, yw = struct.unpack(">I", x)[0], struct.unpack(">I", y)[0]
             if xw >> 26 != yw >> 26: return False
             if xw >> 26 != 18:  # not a branch: destination register and SDA base must agree
@@ -57,7 +63,7 @@ claims = [(int(a, 16), int(e, 16)) for a, e in re.findall(r"\.text\s+start:0x(\w
 used = {}
 def match_at(addr, size):
     for v, sz, fname in fns:
-        if sz == size and fname not in used.values() and same(addr, size, v):
+        if sz == size and fname not in used.values() and same(addr, size, fname):
             return fname
 # claim the current range first
 for a, z, _ in syms:

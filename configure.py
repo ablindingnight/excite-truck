@@ -433,6 +433,7 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_layout.cpp", Matching),
+            TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_material.cpp", NonMatching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_common.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_group.cpp", NonMatching),
         ],
