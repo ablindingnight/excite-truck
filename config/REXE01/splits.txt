@@ -623,9 +623,14 @@ revolution/vi/vi3in1.c:
 	.sdata      start:0x80558FC0 end:0x80558FD4
 	.sbss       start:0x8055DBE0 end:0x8055DBF4
 
-RVL_SDK/wpad/WPAD.c:
-	.text       start:0x8005D4F0 end:0x8005E09C
-	.sdata      start:0x80558FDC end:0x80558FE8
+revolution/wpad/WPAD.c:
+	.text       start:0x8005D0DC end:0x80063C34
+	.rodata     start:0x802EE898 end:0x802EE8D4
+	.data       start:0x803120E0 end:0x80312338
+	.bss        start:0x8038F4C0 end:0x80390510
+	.sdata      start:0x80558FD8 end:0x80558FE8
+	.sbss       start:0x8055DBF8 end:0x8055DC1C
+	.sdata2     start:0x80560CC0 end:0x80560CC8
 
 RVL_SDK/wpad/WPADHIDParser.c:
 	.text       start:0x80064840 end:0x80064B1C

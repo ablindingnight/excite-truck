@@ -155,10 +155,11 @@ for unit in units:
     for i in placed:
         f = funcs[i]
         out_names[placed[i]] = (f["name"], ".text", f["size"], "function", f["bind"])
-    secaddr = defaultdict(set)
-    for i in placed:
+    def data_refs(i, at):
+        # (data symbol index, resolved target address) for each data relocation of funcs[i] placed at `at`
         f = funcs[i]
-        base = placed[i] - f["val"]
+        base = at - f["val"]
+        out = []
         for o in range(f["val"], f["val"] + f["size"], 4):
             if o not in rmap:
                 continue
@@ -166,7 +167,6 @@ for unit in units:
             sym = syms[si]
             if not (0 < sym["shn"] < len(secs)) or sym["shn"] == ti:
                 continue
-            sec = secs[sym["shn"]]["name"]
             w = words[base + o]
             if t == 109:
                 ra = (w >> 16) & 0x1F
@@ -188,10 +188,80 @@ for unit in units:
                 a = tgt - (off_in - syms[k]["val"])
             else:
                 k, a = si, tgt - add
-            secaddr[k].add(a)
+            out.append((k, a))
+        return out
+
+    def resolve():
+        sa, wh = defaultdict(set), {}
+        for i in placed:
+            for k, a in data_refs(i, placed[i]):
+                sa[k].add(a)
+                wh.setdefault(k, []).append((i, a))
+        return sa, wh
+
+    secaddr, who = resolve()
+    # Tiny look-alike functions (one-variable getters/setters) can be placed on each other's
+    # spots. Resolve conflicts by majority vote and swap an outvoted function for an unplaced
+    # reference function with identical code whose variable agrees with the majority.
+    from collections import Counter
+    for _ in range(12):
+        # votes weighted by function size: big functions are unambiguous, tiny ones are not
+        majority, weight = {}, {}
+        for k in secaddr:
+            c = Counter()
+            for i2, a2 in who[k]:
+                c[a2] += funcs[i2]["size"]
+            majority[k], weight[k] = c.most_common(1)[0]
+        # an address can belong to only one symbol: the best-supported claim wins
+        claimed = {}
+        for k in secaddr:
+            a = majority[k]
+            if a not in claimed or weight[k] > weight[claimed[a]]:
+                claimed[a] = k
+        conflicts = [k for k in secaddr if len(secaddr[k]) != 1 or claimed[majority[k]] != k]
+        if not conflicts:
+            break
+        swapped = False
+        for k in conflicts:
+            for i, a in who[k]:
+                if (a == majority[k] and claimed[a] == k) or i not in placed:
+                    continue
+                at = placed[i]
+                agrees = lambda refs: refs and all(majority.get(kk, aa) == aa and claimed.get(aa, kk) == kk
+                                                   for kk, aa in refs)
+                for g in range(len(funcs)):
+                    if g == i or funcs[g]["size"] != funcs[i]["size"] or at not in hits[g]:
+                        continue
+                    if g not in placed:
+                        if agrees(data_refs(g, at)):
+                            del placed[i]
+                            placed[g] = at
+                            swapped = True
+                            break
+                    else:
+                        # two look-alikes placed on each other's spots: exchange them
+                        at2 = placed[g]
+                        if at2 in hits[i] and agrees(data_refs(g, at)) and agrees(data_refs(i, at2)):
+                            placed[i], placed[g] = at2, at
+                            swapped = True
+                            break
+        if not swapped:
+            break
+        secaddr, who = resolve()
+    if os.environ.get("AS2_DEBUG"):
+        for k, v in sorted(who.items(), key=lambda kv: syms[kv[0]]["name"]):
+            if secs[syms[k]["shn"]]["name"] in (".sbss", ".sdata"):
+                print("DBG", syms[k]["name"], sorted(set((funcs[i]["name"], hex(placed[i]), hex(a)) for i, a in v)), file=sys.stderr)
+    who = {k: [(funcs[i]["name"], hex(a)) for i, a in v] for k, v in who.items()}
+    for i in placed:
+        f = funcs[i]
+        out_names[placed[i]] = (f["name"], ".text", f["size"], "function", f["bind"])
     bad = [syms[k]["name"] for k, v in secaddr.items() if len(v) != 1]
     if bad:
         report.append(f"{unit}: conflicting addresses for {bad[:4]}")
+        for k, v in secaddr.items():
+            if len(v) != 1:
+                report.append(f"    {syms[k]['name']}: " + ", ".join(sorted(set(f"{fn}->{ad}" for fn, ad in who[k]))))
         continue
     symaddr = {k: next(iter(v)) for k, v in secaddr.items()}
     # .ctors/.dtors: find the entry pointing at our placed function
