@@ -86,6 +86,11 @@ revolution/GX/GXDisplayList.c:
 	.text       start:0x800445A4 end:0x80044774
 	.bss        start:0x8037C108 end:0x8037C808
 
+revolution/mem/mem_heapCommon.c:
+	.text       start:0x8004872C end:0x80048B98
+	.bss        start:0x8037D808 end:0x8037D830
+	.sbss       start:0x8055D9B8 end:0x8055D9BC
+
 revolution/MEM/mem_allocator.c:
 	.text       start:0x800498C8 end:0x8004994C
 	.sdata2     start:0x80560C38 end:0x80560C48
@@ -118,6 +123,12 @@ revolution/OS/OSAudioSystem.c:
 revolution/OS/OSContext.c:
 	.text       start:0x8004CC4C end:0x8004D4D4
 	.data       start:0x803044C0 end:0x8030469C
+
+revolution/os/OSError.c:
+	.text       start:0x8004D4D4 end:0x8004DC08
+	.data       start:0x803046A0 end:0x803049BC
+	.bss        start:0x8037D8B0 end:0x8037D8F4
+	.sdata      start:0x80558F38 end:0x80558F40
 
 revolution/OS/OSFatal.c:
 	.text       start:0x8004EF34 end:0x8004FB58
@@ -153,6 +164,15 @@ revolution/SI/SISamplingRate.c:
 	.data       start:0x80311658 end:0x803116EC
 	.sbss       start:0x8055DB30 end:0x8055DB34
 
+revolution/wpad/WPADEncrypt.c:
+	.text       start:0x800684D0 end:0x80068D68
+	.data       start:0x80312798 end:0x803130C8
+	.sbss       start:0x8055DC28 end:0x8055DC2C
+
+revolution/wud/WUDHidHost.c:
+	.text       start:0x8006CAA8 end:0x8006CFA8
+	.data       start:0x80313E90 end:0x80314110
+
 revolution/BTE/main/bte_logmsg.c:
 	.text       start:0x80070880 end:0x800709E4
 	.bss        start:0x803BF240 end:0x803BFA10
@@ -160,6 +180,10 @@ revolution/BTE/main/bte_logmsg.c:
 
 revolution/BTE/bta/sys/ptim.c:
 	.text       start:0x80071510 end:0x800716F0
+
+revolution/axfx/AXFXReverbHi.c:
+	.text       start:0x8009BF34 end:0x8009BFC0
+	.sdata2     start:0x80560D50 end:0x80560D58
 
 revolution/TPL/TPL.c:
 	.text       start:0x8009CDD0 end:0x8009CF04
@@ -179,6 +203,11 @@ revolution/IPC/ipcclt.c:
 	.bss        start:0x803C9278 end:0x803C92C8
 	.sdata      start:0x805590C0 end:0x805590C8
 	.sbss       start:0x8055DCC0 end:0x8055DCCC
+
+revolution/ipc/ipcProfile.c:
+	.text       start:0x8009EF24 end:0x8009F0E8
+	.bss        start:0x803C9348 end:0x803C9448
+	.sbss       start:0x8055DCD0 end:0x8055DCD8
 
 revolution/VF/pf_w_clib.c:
 	.text       start:0x800A4B54 end:0x800A4BE8

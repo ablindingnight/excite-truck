@@ -245,6 +245,50 @@ cflags_rvl = [
     "-DREVOLUTION",
 ]
 
+# Revolution SDK flags for sources from the Twilight Princess decomp (zeldaret/tp, RZDE01_00),
+# which ships the same Sep 2006 SDK build. Kept separate from ogws headers.
+cflags_rvl_tp = [
+    "-nodefaults",
+    "-proc gekko",
+    "-align powerpc",
+    "-enum int",
+    "-fp hardware",
+    "-Cpp_exceptions off",
+    "-O4,p",
+    "-inline auto",
+    '-pragma "cats off"',
+    '-pragma "warn_notinlined off"',
+    "-maxerrors 1",
+    "-nosyspath",
+    "-RTTI off",
+    "-fp_contract on",
+    "-str reuse",
+    "-i libs/tp_include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common_Embedded/Math/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Include",
+    "-i libs/PowerPC_EABI_Support/MSL/MSL_C++/MSL_Common/Include",
+    "-i libs/PowerPC_EABI_Support/Runtime/Inc",
+    "-i libs/revolution/include",
+    "-i libs/revolution/include/revolution",
+    "-ir libs/revolution/src",
+    "-DVERSION=3",
+    "-D__GEKKO__",
+    "-D__REVOLUTION_SDK__",
+    "-DSDK_SEP2006",
+    "-DNDEBUG=1",
+    "-enc SJIS",
+    "-fp_contract off",
+    "-sym on",
+    "-ipa file",
+]
+
+
+def TpRevolution(path: str, matching: bool) -> Object:
+    # Unit "revolution/<path>", source at libs/revolution/src/<path>
+    return Object(matching, f"revolution/{path}", source=path)
+
+
 # REL flags
 cflags_rel = [
     *cflags_base,
@@ -348,6 +392,25 @@ config.libs = [
         ],
     },
 ]
+
+
+config.libs.append(
+    {
+        "lib": "RVL_SDK_tp",
+        "mw_version": "GC/3.0a3",
+        "src_dir": "libs/revolution/src",
+        "cflags": cflags_rvl_tp,
+        "progress_category": "sdk",
+        "objects": [
+            TpRevolution("mem/mem_heapCommon.c", Matching),
+            TpRevolution("os/OSError.c", Matching),
+            TpRevolution("wpad/WPADEncrypt.c", Matching),
+            TpRevolution("wud/WUDHidHost.c", Matching),
+            TpRevolution("axfx/AXFXReverbHi.c", Matching),
+            TpRevolution("ipc/ipcProfile.c", Matching),
+        ],
+    }
+)
 
 
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
