@@ -217,7 +217,7 @@ namespace nw4hbm {
                 GXSetNumIndStages(0);
 
                 GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-                GXSetTevOp(GX_TEVSTAGE0, GX_BLEND);
+                GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);  // ET's nw4hbm draws these lines with PASSCLR
                 GXSetTevDirect(GX_TEVSTAGE0);
 
                 GXSetTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
