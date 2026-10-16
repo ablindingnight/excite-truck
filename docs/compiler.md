@@ -47,3 +47,23 @@ from those games' builds, for example the per-library build dates in the SDK ver
 (SI/GX: Sep 7 2006, DSP: Sep 20 2006), the capitalized English disc-error text in `dvdFatal.c`,
 `BTA_Init` reading `__OSGetSystemTime()` before creating its alarm, and `strncasecmp` being
 defined after `strcasecmp` in MSL `extras.c`.
+
+## Build settings by library (cheat sheet)
+
+| Code | Source | Flags (configure.py) | Compiler | Notes |
+|---|---|---|---|---|
+| Runtime | ogws/TP | runtime flags | GC/3.0a5 | `.ctors$10`/`.dtors$10/$15` sections |
+| MSL C | Strikers | `cflags_msc` | GC/3.0a5 | per file: `-Cpp_exceptions on` when the file has extab; some need `-use_lmw_stmw on`; `printf.c` GC/3.0a5.2 + `-str reuse,pool,readonly`; fdlibm wrappers `-D_IEEE_LIBM` |
+| SDK (C) | TP | `cflags_rvl_tp` | GC/3.0a3 (= 3.0a5 for C) | `-ipa file`: functions emitted in definition order, `.sbss` in reverse declaration order |
+| SDK (C) | ogws | `cflags_rvl` | GC/3.0a5 | |
+| SDK (C) | Strikers | `cflags_msc_sdk`, BTE `cflags_msc_bte` | GC/3.0a5 | |
+| HBM / nw4hbm (C++) | TP | `cflags_rvl_tp_hbm` | GC/3.0a5 | `NW4HBM_DEBUG` (ET's HBM has asserts); **no `-sym on`** (debug info moves out-of-line inline copies into separate sections) |
+| HBM / nw4hbm (C++) | Strikers | `cflags_msc_hbm` | GC/3.0a5.2 | |
+| Game (Monster Games) | (ours) | `cflags_game` | GC/3.0a5 | `-proc generic -fp_contract off` |
+
+Linker: GC/3.0a5 with `mw_comment_version: 14`. MWLD keeps the first definition of a weak function
+or `@STRING@` object, so the first copy in the original must carry the right name.
+
+To find settings for a new file automatically: `python tools/refmatch/flagsearch.py <unit>` compiles
+it with every compiler version x single flag change and ranks the results by matching functions/bytes,
+number of `.text` sections and function order.
