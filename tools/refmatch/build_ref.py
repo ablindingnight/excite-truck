@@ -23,6 +23,16 @@ PRESETS = {
                     "-enc", "SJIS", "-ir", "libs/revolution/src", "-fp_contract", "off", "-sym", "on",
                     "-inline", "auto", "-ipa", "file", "-DSDK_SEP2006", "-DNW4HBM_DEBUG"],
 }
+# Mario Strikers Charged (complete decomp); VERSION_R4QJ01 selects its Jan 2007 SDK variants
+PRESETS["msc"] = ["-nodefaults", "-proc", "gekko", "-align", "powerpc", "-enum", "int", "-fp", "hardware",
+                  "-Cpp_exceptions", "off", "-O4,p", "-pragma", "cats off", "-pragma", "warn_notinlined off",
+                  "-maxerrors", "1", "-nosyspath", "-RTTI", "off", "-fp_contract", "on", "-str", "reuse",
+                  "-enc", "SJIS", "-i", "include", "-i", "libs/Runtime/include", "-i", "libs/MSL_C/include",
+                  "-i", "libs/RVL_SDK/include", "-i", "libs/MetroTRK/include", "-DBUILD_VERSION=3",
+                  "-DVERSION_R4QJ01", "-DNDEBUG=1", "-inline", "auto", "-ipa", "file", "-fp_contract", "off"]
+PRESETS["msc_msl"] = [f for f in PRESETS["msc"][:-6]] + ["-use_lmw_stmw", "on", "-str", "reuse,pool,readonly",
+                      "-gccinc", "-common", "off", "-inline", "auto"]
+
 preset, ref, cc, out, sub = sys.argv[1:6]
 flags = PRESETS[preset] + sys.argv[6:]
 srcs = []

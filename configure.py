@@ -455,6 +455,66 @@ config.libs.append(
 )
 
 
+
+# MSL C library from the Mario Strikers Charged decomp (yannicksuter/mscharged-decomp, CC0),
+# built with its SDK flags and per-file extras.
+cflags_msc = [
+    "-nodefaults",
+    "-proc gekko",
+    "-align powerpc",
+    "-enum int",
+    "-fp hardware",
+    "-Cpp_exceptions off",
+    "-O4,p",
+    '-pragma "cats off"',
+    '-pragma "warn_notinlined off"',
+    "-maxerrors 1",
+    "-nosyspath",
+    "-RTTI off",
+    "-fp_contract on",
+    "-str reuse",
+    "-enc SJIS",
+    "-i libs/msc/include",
+    "-i libs/msc/libs/Runtime/include",
+    "-i libs/msc/libs/MSL_C/include",
+    "-i libs/msc/libs/RVL_SDK/include",
+    "-i libs/msc/libs/MetroTRK/include",
+    "-DNDEBUG=1",
+    "-inline auto",
+    "-ipa file",
+    "-fp_contract off",
+]
+
+config.libs.append(
+    {
+        "lib": "MSL_C",
+        "mw_version": "GC/3.0a5",
+        "src_dir": "libs/msc/src",
+        "cflags": cflags_msc,
+        "progress_category": "sdk",
+        "objects": [
+            Object(Matching, "MSL/direct_io.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
+            Object(Matching, "MSL/file_io.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
+            Object(Matching, "MSL/FILE_POS.c", extra_cflags=['-Cpp_exceptions on', '-use_lmw_stmw on']),
+            Object(Matching, "MSL/mbstring.c", extra_cflags=['-use_lmw_stmw on']),
+            Object(Matching, "MSL/mem.c"),
+            Object(Matching, "MSL/mem_funcs.c"),
+            Object(Matching, "MSL/qsort.c", extra_cflags=["-use_lmw_stmw on"]),
+            Object(Matching, "MSL/scanf.c"),
+            Object(Matching, "MSL/strtold.c"),
+            Object(Matching, "MSL/strtoul.c", extra_cflags=["-use_lmw_stmw on"]),
+            Object(Matching, "MSL/wstring.c"),
+            Object(Matching, "MSL/wchar_io.c"),
+            Object(Matching, "MSL/s_copysign.c"),
+            Object(Matching, "MSL/s_cos.c"),
+            Object(Matching, "MSL/s_floor.c"),
+            Object(Matching, "MSL/s_frexp.c"),
+            Object(Matching, "MSL/s_ldexp.c"),
+            Object(Matching, "MSL/s_sin.c"),
+        ],
+    }
+)
+
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
 # This is called once per module, with the module ID and the current link order.
 #

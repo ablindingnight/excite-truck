@@ -13,6 +13,88 @@ Sections:
 	.sdata2     type:rodata align:8
 	.sbss2      type:bss align:16
 
+MSL/direct_io.c:
+	extab       start:0x800045B0 end:0x800045B8
+	extabindex  start:0x800047D8 end:0x800047E4
+	.text       start:0x800243AC end:0x800246B4
+
+MSL/file_io.c:
+	extab       start:0x800045B8 end:0x800045C8
+	extabindex  start:0x800047E4 end:0x800047FC
+	.text       start:0x800246B4 end:0x80024964
+
+MSL/FILE_POS.c:
+	extab       start:0x800045C8 end:0x800045D0
+	extabindex  start:0x800047FC end:0x80004808
+	.text       start:0x80024964 end:0x80024BD4
+
+MSL/mbstring.c:
+	extab       start:0x800045D0 end:0x800045D8
+	extabindex  start:0x80004808 end:0x80004814
+	.text       start:0x80024BD4 end:0x80024D0C
+
+MSL/mem.c:
+	extab       start:0x800045D8 end:0x800045E0
+	extabindex  start:0x80004814 end:0x80004820
+	.text       start:0x80024D0C end:0x80024E7C
+
+MSL/mem_funcs.c:
+	.text       start:0x80024E7C end:0x8002514C
+
+MSL/qsort.c:
+	extab       start:0x80004658 end:0x80004660
+	extabindex  start:0x800048D4 end:0x800048E0
+	.text       start:0x80027620 end:0x80027790
+
+MSL/scanf.c:
+	extab       start:0x80004660 end:0x80004678
+	extabindex  start:0x800048E0 end:0x80004904
+	.text       start:0x80027790 end:0x80028CFC
+	.rodata     start:0x802EDE90 end:0x802EDEB8
+	.data       start:0x802FEAE8 end:0x802FEC08
+
+MSL/strtold.c:
+	extab       start:0x80004678 end:0x80004688
+	extabindex  start:0x80004904 end:0x8000491C
+	.text       start:0x800290B8 end:0x8002A530
+	.rodata     start:0x802EDEB8 end:0x802EDEC4
+	.sdata2     start:0x805605C8 end:0x80560600
+
+MSL/strtoul.c:
+	extab       start:0x80004688 end:0x800046A0
+	extabindex  start:0x8000491C end:0x80004940
+	.text       start:0x8002A530 end:0x8002AEE8
+	.data       start:0x802FEC08 end:0x802FEC90
+
+MSL/wstring.c:
+	.text       start:0x8002AEE8 end:0x8002AF04
+
+MSL/wchar_io.c:
+	.text       start:0x8002AF04 end:0x8002AF88
+
+MSL/s_copysign.c:
+	.text       start:0x8002EA20 end:0x8002EA4C
+
+MSL/s_cos.c:
+	.text       start:0x8002EA4C end:0x8002EB20
+	.sdata2     start:0x80560A80 end:0x80560A88
+
+MSL/s_floor.c:
+	.text       start:0x8002EB20 end:0x8002EC64
+	.sdata2     start:0x80560A88 end:0x80560A98
+
+MSL/s_frexp.c:
+	.text       start:0x8002EC64 end:0x8002ECEC
+	.sdata2     start:0x80560A98 end:0x80560AA0
+
+MSL/s_ldexp.c:
+	.text       start:0x8002ECEC end:0x8002EE58
+	.sdata2     start:0x80560AA0 end:0x80560AC8
+
+MSL/s_sin.c:
+	.text       start:0x8002EE58 end:0x8002EF30
+	.sdata2     start:0x80560AC8 end:0x80560AD0
+
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x8002F254 end:0x8002F31C
 
