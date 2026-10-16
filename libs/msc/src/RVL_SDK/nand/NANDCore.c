@@ -24,11 +24,17 @@ static s32 _ES_GetTitleId(s32* fd, u64* tidOut);
 static s32 _ES_CloseLib(s32* fd);
 
 const char* __NANDVersion =
+#ifdef GAME_REXE01
+    "<< RVL_SDK - NAND \trelease build: Sep 22 2006 02:01:36 (0x4200_60422) >>";
+#else
     "<< RVL_SDK - NAND \trelease build: Nov 30 2006 03:32:57 (0x4199_60831) >>";
+#endif
 
 static NANDLibState s_libState = NAND_LIB_UNINITIALIZED;
 static char s_currentDir[64] ALIGN(32) = "/";
+#ifndef GAME_REXE01 // Excite Truck's older NAND library has no shutdown hook
 static OSShutdownFunctionInfo s_shutdownFuncInfo = {nandOnShutdown, 255};
+#endif
 
 static char s_homeDir[64] ALIGN(32);
 
@@ -176,7 +182,9 @@ s32 nandConvertErrorCode(s32 result) {
                             IPC_RESULT_OPENFD,                NAND_RESULT_OPENFD,
                             -117,                             NAND_RESULT_UNKNOWN,
                             IPC_RESULT_BUSY,                  NAND_RESULT_BUSY,
+#ifndef GAME_REXE01 // not mapped in Excite Truck's older NAND library
                             IPC_RESULT_FATAL_ERROR,           NAND_RESULT_FATAL_ERROR,
+#endif
                             IPC_RESULT_ACCESS_INTERNAL,       NAND_RESULT_ACCESS,
                             IPC_RESULT_EXISTS_INTERNAL,       NAND_RESULT_EXISTS,
                             -3,                               NAND_RESULT_UNKNOWN,
@@ -295,7 +303,9 @@ s32 NANDInit(void) {
             OSReport("Failed to set home directory.\n");
         }
 
+#ifndef GAME_REXE01
         OSRegisterShutdownFunction(&s_shutdownFuncInfo);
+#endif
         enabled = OSDisableInterrupts();
         s_libState = NAND_LIB_INITIALIZED;
         OSRestoreInterrupts(enabled);

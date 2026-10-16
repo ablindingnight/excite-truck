@@ -57,7 +57,9 @@ s32 NANDOpen(const char* path, NANDFileInfo* info, u8 mode) {
     result = nandOpen(path, mode, NULL, FALSE, FALSE);
     if (result >= 0) {
         info->fd = result;
+#ifndef GAME_REXE01
         info->mark = 1;
+#endif
         return NAND_RESULT_OK;
     }
 
@@ -74,7 +76,9 @@ s32 NANDPrivateOpen(const char* path, NANDFileInfo* info, u8 mode) {
     result = nandOpen(path, mode, NULL, FALSE, TRUE);
     if (result >= 0) {
         info->fd = result;
+#ifndef GAME_REXE01
         info->mark = 1;
+#endif
         return NAND_RESULT_OK;
     }
 
@@ -108,8 +112,10 @@ static void nandOpenCallback(s32 result, void* arg) {
 
     if (result >= 0) {
         block->info->fd = result;
+#ifndef GAME_REXE01
         block->info->stage = 2;
         block->info->mark = 1;
+#endif
         block->callback(NAND_RESULT_OK, block);
     } else {
         block->callback(nandConvertErrorCode(result), block);
@@ -123,6 +129,10 @@ s32 NANDClose(NANDFileInfo* info) {
         return NAND_RESULT_FATAL_ERROR;
     }
 
+#ifdef GAME_REXE01
+    // Excite Truck's older NAND library doesn't track whether the file is open
+    result = ISFS_Close(info->fd);
+#else
     if (info->mark != 1) {
         return NAND_RESULT_INVALID;
     }
@@ -131,6 +141,7 @@ s32 NANDClose(NANDFileInfo* info) {
     if (result == IPC_RESULT_OK) {
         info->mark = 2;
     }
+#endif
 
     return nandConvertErrorCode(result);
 }
@@ -141,6 +152,11 @@ s32 NANDCloseAsync(NANDFileInfo* info, NANDAsyncCallback callback,
         return NAND_RESULT_FATAL_ERROR;
     }
 
+#ifdef GAME_REXE01
+    block->callback = callback;
+    return nandConvertErrorCode(
+        ISFS_CloseAsync(info->fd, nandCallback, block));
+#else
     if (info->mark != 1) {
         return NAND_RESULT_INVALID;
     }
@@ -149,6 +165,7 @@ s32 NANDCloseAsync(NANDFileInfo* info, NANDAsyncCallback callback,
     block->info = info;
     return nandConvertErrorCode(
         ISFS_CloseAsync(info->fd, nandCloseCallback, block));
+#endif
 }
 
 s32 NANDPrivateSafeOpenAsync(const char* path, NANDFileInfo* info, u8 access,

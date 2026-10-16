@@ -1014,12 +1014,15 @@ revolution/nand/nand.c:
 	.text       start:0x800A03A4 end:0x800A10CC
 
 RVL_SDK/nand/NANDOpenClose.c:
-	.text       start:0x800A10CC end:0x800A11E0
+	.text       start:0x800A10CC end:0x800A146C
 
 RVL_SDK/nand/NANDCore.c:
-	.text       start:0x800A2204 end:0x800A24D8
-	.data       start:0x8031AE40 end:0x8031AEF0
-	.sdata      start:0x805590DC end:0x80559100
+	.text       start:0x800A146C end:0x800A27A0
+	.rodata     start:0x802EED50 end:0x802EEE88
+	.data       start:0x8031ADE0 end:0x8031AEF0
+	.bss        start:0x803C9460 end:0x803C94A0
+	.sdata      start:0x805590D8 end:0x80559100
+	.sbss       start:0x8055DCF0 end:0x8055DCF4
 
 revolution/nand/NANDCheck.c:
 	.text       start:0x800A27A0 end:0x800A2964
