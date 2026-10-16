@@ -63,7 +63,11 @@ void __OSModuleInit(void);
 void __OSInitIPCBuffer(void);
 
 // OSLaunch
+#if defined(GAME_REXE01)
+void __OSRelaunchTitle(void);  // Excite Truck's older OS takes no reset code
+#else
 void __OSRelaunchTitle(u32 resetCode);
+#endif
 
 // OSMemory
 void __OSInitMemoryProtection(void);
