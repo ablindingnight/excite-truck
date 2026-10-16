@@ -96,6 +96,11 @@ revolution/gx/GXInit.c:
 	.sbss       start:0x8055D920 end:0x8055D948
 	.sdata2     start:0x80560B18 end:0x80560B40
 
+revolution/gx/GXAttr.c:
+	.text       start:0x8003FA34 end:0x80040734
+	.data       start:0x80303710 end:0x803038D8
+	.sdata      start:0x80558E38 end:0x80558E44
+
 revolution/GX/GXGeometry.c:
 	.text       start:0x8004109C end:0x80041638
 
@@ -107,6 +112,10 @@ revolution/gx/GXFrameBuf.c:
 revolution/GX/GXBump.c:
 	.text       start:0x800434D4 end:0x80043920
 	.sdata2     start:0x80560B88 end:0x80560B8C
+
+revolution/gx/GXTev.c:
+	.text       start:0x80043920 end:0x80043FA0
+	.data       start:0x80303C30 end:0x80303CA4
 
 revolution/GX/GXPixel.c:
 	.text       start:0x80043FA0 end:0x800445A4
@@ -196,6 +205,10 @@ revolution/OS/OSMemory.c:
 
 revolution/OS/OSMutex.c:
 	.text       start:0x8005208C end:0x80052390
+
+revolution/os/OSRtc.c:
+	.text       start:0x80052964 end:0x800533F0
+	.bss        start:0x8038E340 end:0x8038E394
 
 revolution/os/OSSync.c:
 	.text       start:0x80053518 end:0x80053598

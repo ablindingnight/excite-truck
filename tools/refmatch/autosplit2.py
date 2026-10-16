@@ -67,6 +67,16 @@ def sext(v):
 MASK = {10: 0xFC000003, 11: 0xFFFF0003, 109: 0xFFE00000}
 
 
+_starts = sorted(tfuncs)
+
+
+def inside_known(a):
+    # True if a lies strictly inside a known target function (so it cannot be a function start)
+    import bisect
+    i = bisect.bisect_right(_starts, a) - 1
+    return i >= 0 and _starts[i] < a < _starts[i] + tfuncs[_starts[i]]
+
+
 def fn_hits(text, rmap, f):
     n = f["size"] // 4
     ws = [struct.unpack(">I", text[f["val"] + 4 * k:f["val"] + 4 * k + 4])[0] for k in range(n)]
@@ -79,7 +89,8 @@ def fn_hits(text, rmap, f):
     for a in by_word.get(ws[anchor], []):
         start = a - 4 * anchor
         if all((words.get(start + 4 * k, -1) & ms[k]) == (ws[k] & ms[k]) for k in range(n)):
-            out.append(start)
+            if not inside_known(start):
+                out.append(start)
     return out
 
 
