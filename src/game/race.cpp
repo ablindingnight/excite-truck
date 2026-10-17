@@ -223,8 +223,17 @@ extern "C" void fn_8000824C(Unk_8000822C* obj, s32 id) {
     obj->unk4 = src->unk8;
 }
 
-static LocString lbl_8034F120[12] = {
-    "CameraNames:Cockpit",   "CameraNames:Bumper",   "CameraNames:Chassis", "CameraNames:Rear",
-    "CameraNames:NearChase", "CameraNames:Chase",    "CameraNames:FarChase", "CameraNames:RearChase",
-    "CameraNames:Overhead",  "CameraNames:Aerial",   "CameraNames:Blimp",   "CameraNames:TV",
-};
+// Twelve separate statics, not an array: MWCC then pools their .bss addresses off one base
+// register in the static initializer, as in the original.
+static LocString s_cameraCockpit("CameraNames:Cockpit");
+static LocString s_cameraBumper("CameraNames:Bumper");
+static LocString s_cameraChassis("CameraNames:Chassis");
+static LocString s_cameraRear("CameraNames:Rear");
+static LocString s_cameraNearChase("CameraNames:NearChase");
+static LocString s_cameraChase("CameraNames:Chase");
+static LocString s_cameraFarChase("CameraNames:FarChase");
+static LocString s_cameraRearChase("CameraNames:RearChase");
+static LocString s_cameraOverhead("CameraNames:Overhead");
+static LocString s_cameraAerial("CameraNames:Aerial");
+static LocString s_cameraBlimp("CameraNames:Blimp");
+static LocString s_cameraTV("CameraNames:TV");
