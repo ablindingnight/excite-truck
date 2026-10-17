@@ -17,28 +17,28 @@
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
-    s32 cnt[3];
-    s32 ch;
-    s32 i;
-    s32 b;
-    s32 k;
-    s32 w;
-    u32 flags;
-    s16 gi;
-    s16 row;
-    s16 g;
-    u32 e0;
-    s16 v;
-    s16 x;
-    s16 idx;
-    s16 m;
-    u16 e;
-    s32 p;
-    s32 t;
-    s32 r;
     const s32* c;
+    s16 idx;
+    u32 e0;
+    s32 k;
+    u32 flags;
     const s16* lt;
+    u16 e;
+    s32 t;
+    s32 i;
+    s16 row;
+    s32 cnt[3];
+    s16 x;
+    s32 b;
+    s16 m;
+    s16 gi;
+    s32 p;
+    s32 ch;
     const s16* st;
+    s16 v;
+    s32 w;
+    s16 g;
+    s32 r;
 
     if (d->unk9CC[3] == 0) {
         d->unk9CC[3] = 1;
@@ -88,9 +88,9 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
         if (gi < 0) {
             gi = 0;
         }
+        e0 = lbl_802F38E8[gi];
         flags = *block_flags;
         g = lbl_80560DB0[gi & 3];
-        e0 = lbl_802F38E8[gi];
 
         if (flags & 7) {
             /* long blocks */
