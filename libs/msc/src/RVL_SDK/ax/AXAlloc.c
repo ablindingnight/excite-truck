@@ -28,6 +28,9 @@ void __AXServiceCallbackStack(void) {
     }
 }
 
+#ifdef GAME_REXE01
+static inline
+#endif
 void __AXInitVoiceStacks(void) {
     u32 prio;
 
@@ -41,6 +44,12 @@ void __AXInitVoiceStacks(void) {
 void __AXAllocInit(void) {
     __AXInitVoiceStacks();
 }
+
+#ifdef GAME_REXE01
+void __AXAllocQuit(void) {
+    __AXInitVoiceStacks();
+}
+#endif
 
 void __AXPushFreeStack(AXVPB* vpb) {
     vpb->next = __AXStackHead[AX_PRIORITY_FREE];

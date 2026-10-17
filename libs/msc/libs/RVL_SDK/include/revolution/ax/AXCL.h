@@ -24,6 +24,9 @@ void* __AXGetCommandListAddress(void);
 void __AXWriteToCommandList(u16 cmd);
 void __AXNextFrame(void* surround, void* lr, void* rmt);
 void __AXClInit(void);
+#ifdef GAME_REXE01
+void __AXClQuit(void);
+#endif
 void AXSetMode(u32 mode);
 u32 AXGetMode(void);
 u16 AXGetAuxAReturnVolume(void);

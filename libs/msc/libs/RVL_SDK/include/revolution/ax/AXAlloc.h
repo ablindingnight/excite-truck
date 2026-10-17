@@ -13,8 +13,13 @@ extern "C" {
 
 AXVPB* __AXGetStackHead(u32 prio);
 void __AXServiceCallbackStack(void);
+#ifndef GAME_REXE01
 void __AXInitVoiceStacks(void);
+#endif
 void __AXAllocInit(void);
+#ifdef GAME_REXE01
+void __AXAllocQuit(void);
+#endif
 void __AXPushFreeStack(AXVPB* vpb);
 AXVPB* __AXPopFreeStack(void);
 void __AXPushCallbackStack(AXVPB* vpb);

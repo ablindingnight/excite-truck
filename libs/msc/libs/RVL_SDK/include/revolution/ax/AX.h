@@ -6,6 +6,9 @@ extern "C" {
 #endif
 
 void AXInit(void);
+#ifdef GAME_REXE01
+void AXQuit(void);
+#endif
 BOOL AXIsInit(void);
 void AXInitEx(u32 mode);
 

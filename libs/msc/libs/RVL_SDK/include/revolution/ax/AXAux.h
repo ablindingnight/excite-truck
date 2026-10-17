@@ -34,6 +34,9 @@ typedef enum {
 typedef void (*AXAuxCallback)(void* chans, void* context);
 
 void __AXAuxInit(void);
+#ifdef GAME_REXE01
+void __AXAuxQuit(void);
+#endif
 void __AXGetAuxAInput(void** out);
 void __AXGetAuxAOutput(void** out);
 void __AXGetAuxAInputDpl2(void** out);
