@@ -12,7 +12,21 @@ s32 VFipdm_part_open_partition(struct PDM_DISK* p_disk, u16 part_id, struct PDM_
 s32 VFipdm_part_close_partition(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_get_permission(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_release_permission(struct PDM_PARTITION* p_part, u32 mode);
+#ifdef GAME_REXE01
+// ET's older pdm layer (0x800A6048-0x800A7774). Names not taken from a reference are guessed.
+typedef struct PDM_MEDIA_CALLBACK {
+    void (*insert)(void* p_part);
+    void (*eject)(void* p_part);
+} PDM_MEDIA_CALLBACK;
+
+s32 VFipdm_part_format(struct PDM_PARTITION* p_part);
+s32 VFipdm_part_set_media_callback(struct PDM_PARTITION* p_part, struct PDM_MEDIA_CALLBACK* p_callback);
+s32 VFipdm_part_clear_media_callback(struct PDM_PARTITION* p_part);
+s32 VFipdm_part_open(struct PDM_PARTITION* p_part);
+s32 VFipdm_part_close(struct PDM_PARTITION* p_part);
+#else
 s32 VFipdm_part_format(struct PDM_PARTITION* p_part, const u8* param);
+#endif
 s32 VFipdm_part_logical_read(struct PDM_PARTITION* p_part, u8* buf, u32 lsector, u32 num_sector, u16 bps, u32* p_num_success);
 s32 VFipdm_part_logical_write(struct PDM_PARTITION* p_part, const u8* buf, u32 lsector, u32 num_sector, u16 bps, u32* p_num_success);
 s32 VFipdm_part_get_media_information(struct PDM_PARTITION* p_part, struct PDM_DISK_INFO* p_disk_info);

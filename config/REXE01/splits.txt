@@ -1094,6 +1094,9 @@ RVL_SDK/vf/pf_service.c:
 RVL_SDK/vf/pf_str.c:
 	.text       start:0x800A4D3C end:0x800A52A0
 
+RVL_SDK/vf/pf_driver.c:
+	.text       start:0x800A52A0 end:0x800A5954
+
 RVL_SDK/vf/pdm_disk.c:
 	.text       start:0x800A5EE8 end:0x800A6048
 

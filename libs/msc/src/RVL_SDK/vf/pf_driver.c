@@ -1,6 +1,258 @@
 #include <revolution/vf.h>
 
+#ifdef GAME_REXE01
+// ET's driver layer: the partition reports media insertion/ejection through callbacks that
+// update the volume flags, and BPB/FSINFO parsing is done by the pdm layer straight into the
+// volume.
 
+void VFiPFVOL_LoadVolumeLabelFromBuf(struct PF_VOLUME* p_vol, const u8* buf) {
+    VFipf_memcpy(p_vol->label, (void*)buf, 11);
+    p_vol->label[11] = '\0';
+}
+
+static void VFiPFDRV_EjectCallback(void* p_part) {
+    struct PF_VOLUME* p_vol;
+    s32 i;
+
+    p_vol = VFipf_vol_set.volumes;
+    for (i = 0; i < 26; p_vol++, i++) {
+        if (p_vol->p_part == p_part) {
+            if ((p_vol->flags & 8) != 0) {
+                p_vol->flags |= 0x20;
+            }
+            p_vol->flags &= ~0xC;
+        }
+    }
+}
+
+static void VFiPFDRV_InsertCallback(void* p_part) {
+    struct PF_VOLUME* p_vol;
+    s32 i;
+
+    p_vol = VFipf_vol_set.volumes;
+    for (i = 0; i < 26; p_vol++, i++) {
+        if (p_vol->p_part == p_part) {
+            p_vol->flags |= 0x14;
+        }
+    }
+}
+
+static void VFiPFDRV_notifyExecuteFormatAfterMount(PF_VOLUME* p_vol, const u8* format_param) {
+    p_vol->flags |= 0x40;
+    p_vol->format_param = format_param;
+}
+
+static void VFiPFDRV_notifyNoExecuteLogicalFormat(struct PF_VOLUME* p_vol) {
+    p_vol->flags |= 0x80;
+}
+
+u32 VFiPFDRV_IsInserted(struct PF_VOLUME* p_vol) {
+    return (p_vol->flags >> 2) & 1;
+}
+
+u32 VFiPFDRV_IsDetected(struct PF_VOLUME* p_vol) {
+    return (p_vol->flags >> 4) & 1;
+}
+
+void VFiPFDRV_ClearDetected(struct PF_VOLUME* p_vol) {
+    p_vol->flags &= ~0x10;
+}
+
+u32 VFiPFDRV_IsEjected(struct PF_VOLUME* p_vol) {
+    return (p_vol->flags >> 5) & 1;
+}
+
+void VFiPFDRV_ClearEjected(struct PF_VOLUME* p_vol) {
+    p_vol->flags &= ~0x20;
+}
+
+s32 VFiPFDRV_init(struct PF_VOLUME* p_vol) {
+    s32 err;
+    struct PDM_MEDIA_CALLBACK callback;
+
+    callback.insert = VFiPFDRV_InsertCallback;
+    callback.eject = VFiPFDRV_EjectCallback;
+    if (VFipdm_part_set_media_callback(p_vol->p_part, &callback)) {
+        return -1;
+    }
+
+    err = VFipdm_part_open(p_vol->p_part);
+    if (err) {
+        VFipdm_part_clear_media_callback(p_vol->p_part);
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_finalize(struct PF_VOLUME* p_vol) {
+    s32 err;
+
+    if (VFipdm_part_clear_media_callback(p_vol->p_part)) {
+        return -1;
+    }
+
+    err = VFipdm_part_close(p_vol->p_part);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_mount(struct PF_VOLUME* p_vol) {
+    s32 err;
+    struct PDM_DISK_INFO disk_inf;
+    u32 is_hit;
+    struct PF_CACHE_PAGE* p_page;
+    u32 nSector;
+
+    err = VFipdm_part_get_permission(p_vol->p_part);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+
+    if (VFipdm_part_get_media_information(p_vol->p_part, &disk_inf)) {
+        VFipdm_part_release_permission(p_vol->p_part, 0);
+        return -1;
+    }
+
+    if ((disk_inf.media_attr & 1) != 0) {
+        p_vol->flags |= 2;
+    } else {
+        p_vol->flags &= ~2;
+    }
+    if ((disk_inf.media_attr & 2) != 0) {
+        VFiPFDRV_notifyExecuteFormatAfterMount(p_vol, disk_inf.format_param);
+    }
+    if ((disk_inf.media_attr & 8) != 0) {
+        VFiPFDRV_notifyNoExecuteLogicalFormat(p_vol);
+    }
+
+    VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page, &is_hit);
+    err = VFipdm_part_logical_read(p_vol->p_part, p_page->buffer, 0, 1, 512, &nSector);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            err = 4096;
+        } else {
+            err = -1;
+        }
+        VFipdm_part_release_permission(p_vol->p_part, 0);
+        return err;
+    }
+
+    if (VFipdm_bpb_get_volume_bpb(p_vol, p_page->buffer)) {
+        VFipdm_part_release_permission(p_vol->p_part, 0);
+        return 7;
+    }
+
+    p_vol->num_free_clusters = -1;
+    p_vol->last_free_cluster = -1;
+    if (p_vol->bpb.fat_type == FAT_32) {
+        err = VFipdm_part_logical_read(p_vol->p_part, p_page->buffer, p_vol->bpb.fs_info_sector, 1, 512, &nSector);
+        if (err) {
+            if (err == 21) {
+                err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+                VFipf_vol_set.last_driver_error = err;
+                p_vol->last_driver_error = err;
+                err = 4096;
+            } else {
+                err = -1;
+            }
+            VFipdm_part_release_permission(p_vol->p_part, 0);
+            return err;
+        }
+        if (VFipdm_bpb_get_volume_fsinfo(p_vol, p_page->buffer, &p_vol->num_free_clusters, &p_vol->last_free_cluster)) {
+            VFipdm_part_release_permission(p_vol->p_part, 0);
+            return -1;
+        }
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_unmount(struct PF_VOLUME* p_vol, u32 mode) {
+    s32 err;
+
+    err = VFipdm_part_release_permission(p_vol->p_part, mode == 1);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_format(struct PF_VOLUME* p_vol, const u8* param) {
+    s32 err;
+
+    err = VFipdm_part_format(p_vol->p_part);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_lread(struct PF_VOLUME* p_vol, u8* buf, u32 sector, u32 num_sectors, u32* p_num_success) {
+    s32 err;
+
+    err = VFipdm_part_logical_read(p_vol->p_part, buf, sector, num_sectors, p_vol->bpb.bytes_per_sector, p_num_success);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+s32 VFiPFDRV_lwrite(struct PF_VOLUME* p_vol, const u8* buf, u32 sector, u32 num_sectors, u32* p_num_success) {
+    s32 err;
+
+    err = VFipdm_part_logical_write(p_vol->p_part, buf, sector, num_sectors, p_vol->bpb.bytes_per_sector, p_num_success);
+    if (err) {
+        if (err == 21) {
+            err = VFipdm_part_get_driver_error_code(p_vol->p_part);
+            VFipf_vol_set.last_driver_error = err;
+            p_vol->last_driver_error = err;
+            return 4096;
+        }
+        return -1;
+    }
+    return 0;
+}
+#else
 s32 VFiPFDRV_GetBPBInformation(u8* p_buf, struct PF_BPB* p_bpb) {
     s32 err;  // Present in DWARF but unused here.
     struct PDM_BPB bpb;
@@ -357,3 +609,4 @@ s32 VFiPFDRV_lwrite(struct PF_VOLUME* p_vol, const u8* buf, u32 sector, u32 num_
 
     return 0;
 }
+#endif
