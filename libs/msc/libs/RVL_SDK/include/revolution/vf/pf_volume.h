@@ -16,7 +16,11 @@ s32 VFiPFVOL_GetCurrentDir(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_current
 void VFiPFVOL_SetCurrentVolume(struct PF_VOLUME* p_vol);
 struct PF_VOLUME* VFiPFVOL_GetCurrentVolume();
 struct PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char);
+#ifdef GAME_REXE01
+void VFiPFVOL_LoadVolumeLabelFromBuf(struct PF_VOLUME* p_vol, const u8* buf);
+#else
 void VFiPFVOL_LoadVolumeLabelFromBuf(const u8* buf, struct PF_VOLUME* p_vol);
+#endif
 s32 VFiPFVOL_errnum();
 s32 VFiPFVOL_getdev(s8 drv_char, struct PF_DEV_INF* dev_inf);
 s32 VFiPFVOL_attach(struct PF_DRV_TBL* p_drv);

@@ -9,10 +9,12 @@ s32 VFiPFPATH_DoSplitPath(struct PF_STR* p_path, struct PF_STR* p_dir_path, stru
     struct PF_STR token_prev;
     s32 err;
 
+#ifndef GAME_REXE01
     if (p_dir_path == NULL) {
         return 10;
     }
 
+#endif
     code_mode = VFiPFSTR_GetCodeMode(p_path);
     VFiPFSTR_SetCodeMode(p_dir_path, code_mode);
     VFiPFSTR_SetCodeMode(p_filename, code_mode);
@@ -81,6 +83,9 @@ s32 VFiPFPATH_DoSplitPath(struct PF_STR* p_path, struct PF_STR* p_dir_path, stru
     return 0;
 }
 
+#ifdef GAME_REXE01
+inline
+#endif
 static u32 VFiPFPATH_UNI_ConvertFWchar(u16 src, u16* dst) {
     if (0xFF41 <= src && src <= 0xFF5A) {
         *dst = src - 0x20;
@@ -90,6 +95,9 @@ static u32 VFiPFPATH_UNI_ConvertFWchar(u16 src, u16* dst) {
     }
 }
 
+#ifdef GAME_REXE01
+inline
+#endif
 static u32 VFiPFPATH_OEM_ConvertFWchar(const s8* src, u16* dst) {
     VFipf_vol_set.codeset.oem2unicode(src, dst);
     if (VFiPFPATH_UNI_ConvertFWchar(*dst, dst) == 1) {
@@ -162,9 +170,18 @@ u16 VFiPFPATH_GetNextCharOfPattern(struct PF_STR* p_pattern, u32 is_long_name) {
         if (VFipf_vol_set.codeset.is_oem_mb_char(pattern[0], 1) != 0) {
             pattern[1] = *p_pattern->p_head++;
             twc = ((u8)pattern[0] << 8) + (u8)pattern[1];
+#ifdef GAME_REXE01
+        } else if ((VFipf_vol_set.config & 0x10000) || (u8)pattern[0] >= 0x80 ||
+                   ((u8)pattern[0] >= 0x20 && (VFipf_valid_fn_char[(u8)pattern[0] - 0x20] & 2))) {
+            twc = pattern[0];
+        } else {
+            twc = '_';
+        }
+#else
         } else {
             twc = pattern[0];
         }
+#endif
 
         if (is_long_name != 0) {
             VFipf_vol_set.codeset.oem2unicode(pattern, &twc);
@@ -185,9 +202,18 @@ u16 VFiPFPATH_GetNextCharOfPattern(struct PF_STR* p_pattern, u32 is_long_name) {
             VFipf_vol_set.codeset.unicode2oem(&twc, (s8*)&wc);
             if (VFipf_vol_set.codeset.is_oem_mb_char(wc >> 8, 1) != 0) {
                 twc = wc;
+#ifdef GAME_REXE01
+            } else if ((VFipf_vol_set.config & 0x10000) || (u8)pattern[0] >= 0x80 ||
+                       ((u8)pattern[0] >= 0x20 && (VFipf_valid_fn_char[(u8)pattern[0] - 0x20] & 2))) {
+                twc = pattern[0];
+            } else {
+                twc = '_';
+            }
+#else
             } else {
                 twc = pattern[0];
             }
+#endif
         }
     }
 
@@ -484,10 +510,24 @@ s32 VFiPFPATH_SplitPath(struct PF_STR* p_path, struct PF_STR* p_dir_path, struct
     return VFiPFPATH_DoSplitPath(p_path, p_dir_path, p_filename, 0);
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFPATH_SplitPathPattern(struct PF_STR* p_path, struct PF_STR* p_dir_path, struct PF_STR* p_pattern) {
+    return VFiPFPATH_DoSplitPath(p_path, p_dir_path, p_pattern, 1);
+}
+#endif
+
 struct PF_VOLUME* VFiPFPATH_GetVolumeFromPath(struct PF_STR* p_path) {
     struct PF_VOLUME* p_vol;
     s8 drv_char[2];
 
+#ifdef GAME_REXE01
+    if (VFiPFSTR_StrNumChar(p_path, 1) >= 2 && VFiPFSTR_StrNCmp(p_path, (const s8*)":", 1, 1, 1) == 0) {
+        VFiPFSTR_ToUpperNStr(p_path, 1, drv_char);
+        p_vol = VFiPFVOL_GetVolumeFromDrvChar(drv_char[0]);
+    } else {
+        p_vol = VFiPFVOL_GetCurrentVolume();
+    }
+#else
     if (VFiPFSTR_StrLen(p_path) == 0) {
         p_vol = 0;
     } else {
@@ -498,9 +538,51 @@ struct PF_VOLUME* VFiPFPATH_GetVolumeFromPath(struct PF_STR* p_path) {
             p_vol = VFiPFVOL_GetCurrentVolume();
         }
     }
+#endif
     return p_vol;
 }
 
+#ifdef GAME_REXE01
+u32 VFiPFPATH_MatchFileNameWithPattern(const s8* file_name, struct PF_STR* p_pattern, u32 is_long_name) {
+    u16 c_name;
+    u16 c_pat;
+    struct PF_FILE_NAME_ITER name;
+    struct PF_STR pattern;
+    u32 is_match;
+
+    is_match = 1;
+
+    name.buf = file_name;
+    name.dot_inserted = 0;
+    name.is_long_name = is_long_name;
+    name.index = 0;
+
+    pattern = *p_pattern;
+
+    if ((u32)VFiPFSTR_GetCodeMode(p_pattern) == 1) {
+        // ET checks the pattern's signature twice; the file name itself is not compared here
+        if (is_long_name == 0 && (VFipf_vol_set.setting & 2) == 2 && (u32)VFiPFPATH_CheckExtShortNameSignature(&pattern) == 1) {
+            is_match = VFiPFPATH_CheckExtShortNameSignature(&pattern);
+            if (is_match == 1) {
+                name.index += 2;
+                pattern.p_head += 2;
+            }
+        }
+    } else {
+        if ((VFipf_vol_set.setting & 2) == 2 && is_long_name == 0 && VFiPFSTR_StrNCmp(p_pattern, (const s8*)".", 1, 0, 1) != 0 && VFiPFSTR_StrNCmp(p_pattern, (const s8*)"..", 1, 0, 2) != 0 && VFiPFPATH_CheckExtShortName(p_pattern, 1, 0) == 0) {
+            is_match = 0;
+        }
+    }
+
+    if (is_match == 1) {
+        c_name = VFiPFPATH_GetNextCharOfFileName(&name);
+        c_pat = VFiPFPATH_GetNextCharOfPattern(&pattern, is_long_name);
+        is_match = VFiPFPATH_DoMatchFileNameWithPattern(c_name, &name, c_pat, &pattern, is_long_name);
+    }
+
+    return is_match;
+}
+#else
 u32 VFiPFPATH_MatchFileNameWithPattern(const s8* file_name, struct PF_STR* p_pattern, u32 is_long_name) {
     u16 c_name;
     u16 c_pat;
@@ -537,6 +619,7 @@ u32 VFiPFPATH_MatchFileNameWithPattern(const s8* file_name, struct PF_STR* p_pat
 
     return is_match;
 }
+#endif
 
 s32 VFiPFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr) {
     s32 i;
@@ -555,9 +638,11 @@ s32 VFiPFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr) {
         }
     }
 
+#ifndef GAME_REXE01
     if (i > 8) {
         return 10;
     }
+#endif
 
     if ((attr & 8) == 0) {
         while (i < 8) {
@@ -598,9 +683,11 @@ s32 VFiPFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr) {
     }
 
     short_name += (nLen += 1);
+#ifndef GAME_REXE01
     if (nLen == 0) {
         return 10;
     }
+#endif
 
     nLen = 7;
     for (i = 8; i < 11; i++) {
@@ -1020,15 +1107,50 @@ s32 VFiPFPATH_parseShortNameNumeric(s8* p_char, u32 count) {
     return 0;
 }
 
+#ifdef GAME_REXE01
+void VFiPFPATH_SetSearchPattern(s8* p_buf_local, u16* p_buf_unicode, struct PF_STR* p_pattern) {
+    u16 wc[2];
+
+    if (VFiPFSTR_GetCodeMode(p_pattern) == 1) {
+        if (VFipf_strcmp(p_pattern->p_head, (s8*)"*.*") == 0) {
+            VFipf_strcpy(p_buf_local, (s8*)"*");
+            return;
+        }
+        VFipf_strcpy(p_buf_local, p_pattern->p_head);
+        return;
+    }
+    if (VFiPFSTR_StrCmp(p_pattern, (s8*)"*.*") == 0) {
+        wc[0] = '*';
+        wc[1] = 0;
+        VFipf_w_strcpy(p_buf_unicode, wc);
+    } else {
+        VFipf_w_strcpy(p_buf_unicode, (u16*)p_pattern->p_head);
+    }
+    if ((VFipf_vol_set.setting & 2) == 2) {
+        VFiPF_LockCritical(&VFipf_vol_set.critical);
+        VFipf_vol_set.setting &= ~3;
+        VFipf_vol_set.setting |= 1;
+        VFiPFPATH_transformFromUnicodeToNormal(p_buf_local, p_buf_unicode);
+        VFipf_vol_set.setting &= ~3;
+        VFipf_vol_set.setting |= 2;
+        VFiPF_UnlockCritical(&VFipf_vol_set.critical);
+        return;
+    }
+    VFiPFPATH_transformFromUnicodeToNormal(p_buf_local, p_buf_unicode);
+}
+
+#endif
 u32 VFiPFPATH_CheckExtShortNameSignature(struct PF_STR* p_str) {
     u32 result;
     s8 sig[2] = {1, 2};
 
     result = 0;
 
+#ifndef GAME_REXE01
     if (p_str == NULL) {
         return 10;
     }
+#endif
     if (VFiPFSTR_StrNCmp(p_str, sig, 1, 0, 2) == 0) {
         result = 1;
     }
@@ -1047,9 +1169,11 @@ u32 VFiPFPATH_CheckExtShortName(struct PF_STR* p_str, u32 target, u32 wildcard) 
     result = 0;
     is_wildcard = 0;
 
+#ifndef GAME_REXE01
     if (p_str == NULL) {
         return 10;
     }
+#endif
 
     if (VFiPFSTR_StrNCmp(p_str, sig, target, 0, 2) == 0 || (VFiPFSTR_StrNCmp(p_str, (const s8*)"?", target, 0, 1) == 0 && (VFiPFSTR_StrNCmp(p_str, (const s8*)"?", target, 1, 1) == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)"*", target, 0, 1) == 0)) || VFiPFSTR_StrNCmp(p_str, (const s8*)"*", target, 0, 1) == 0) {
         i = 2;
@@ -1107,9 +1231,11 @@ u32 VFiPFPATH_GetExtShortNameIndex(struct PF_STR* p_str, u32* p_index) {
 
     result = 0;
 
+#ifndef GAME_REXE01
     if (p_str == NULL || p_index == NULL) {
         return 10;
     }
+#endif
 
     if (VFiPFSTR_StrNCmp(p_str, sig, 1, 0, 2) == 0) {
         index = 0;
@@ -1155,9 +1281,11 @@ s32 VFiPFPATH_AdjustExtShortName(s8* pName, u32 position) {
 
     s8** pName_copy;
 
+#ifndef GAME_REXE01
     if (pName == 0) {
         return 10;
     }
+#endif
 
     pName += 7;
     i = 7;

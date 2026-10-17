@@ -419,7 +419,11 @@ struct PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char) {
     return &VFipf_vol_set.volumes[vol_idx];
 }
 
+#ifdef GAME_REXE01
+void VFiPFVOL_LoadVolumeLabelFromBuf(struct PF_VOLUME* p_vol, const u8* buf) {
+#else
 void VFiPFVOL_LoadVolumeLabelFromBuf(const u8* buf, struct PF_VOLUME* p_vol) {
+#endif
     VFipf_memcpy(p_vol->label, (void*)buf, 11);
     p_vol->label[11] = '\0';
 }

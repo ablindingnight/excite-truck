@@ -466,6 +466,7 @@ s32 VFiPFENT_findEntryPos(struct PF_FFD* p_ffd, struct PF_DIR_ENT* p_ent, u32 in
 
     is_extsfn = 0;
 
+#ifndef GAME_REXE01
     if (!p_ffd) {
         *p_lpos = 999999;
         *p_ppos = 999999;
@@ -496,6 +497,7 @@ s32 VFiPFENT_findEntryPos(struct PF_FFD* p_ffd, struct PF_DIR_ENT* p_ent, u32 in
         return 10;
     }
 
+#endif
     *p_lpos = 0;
     *p_ppos = 0;
 
@@ -604,6 +606,7 @@ s32 VFiPFENT_allocateEntryPos(struct PF_DIR_ENT* p_ent, u8 num_entries, struct P
     u32 physical_index;
     u32 dummy_index;
 
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
@@ -617,6 +620,7 @@ s32 VFiPFENT_allocateEntryPos(struct PF_DIR_ENT* p_ent, u8 num_entries, struct P
         return 10;
     }
 
+#endif
     if ((VFipf_vol_set.setting & 2) == 2) {
         if ((u32)VFiPFPATH_CheckExtShortNameSignature(p_filename) == 1) {
             return 1;
@@ -643,9 +647,11 @@ s32 VFiPFENT_allocateEntryPos(struct PF_DIR_ENT* p_ent, u8 num_entries, struct P
 
     while (1) {
         if (err != 0) {
+#ifndef GAME_REXE01
             if (err == 16) {
                 break;
             }
+#endif
             return err;
         }
 
@@ -722,6 +728,7 @@ s32 VFiPFENT_allocateEntry(struct PF_DIR_ENT* p_ent, u8 num_entries, struct PF_F
 }
 
 s32 VFiPFENT_GetRootDir(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_ent) {
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
@@ -732,6 +739,7 @@ s32 VFiPFENT_GetRootDir(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_ent) {
         return 9;
     }
 
+#endif
     p_ent->long_name[0] = 92;
     p_ent->long_name[1] = 0;
 
@@ -763,17 +771,19 @@ s32 VFiPFENT_GetRootDir(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_ent) {
 }
 
 s32 VFiPFENT_MakeRootDir(struct PF_VOLUME* p_vol) {
-#ifdef GAME_REXE01
-    u32 is_hit;
-#endif
     struct PF_CACHE_PAGE* p_page;
     u32 sector;
     u32 success_size;
     s32 err;
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
 
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
+#endif
 
     switch (p_vol->bpb.fat_type) {
         case FAT_32:
@@ -808,7 +818,13 @@ s32 VFiPFENT_MakeRootDir(struct PF_VOLUME* p_vol) {
     }
 
     // VFiPFVOL_LoadVolumeLabelFromBuf((const u8*)"NO NAME    ", p_vol);
+#ifdef GAME_REXE01
+    VFiPF_LockCritical(&VFipf_vol_set.critical);
+    VFiPFVOL_LoadVolumeLabelFromBuf(p_vol, (const u8*)"NO NAME    \0\0\0\0");
+    VFiPF_UnlockCritical(&VFipf_vol_set.critical);
+#else
     VFiPFVOL_LoadVolumeLabelFromBuf((const u8*)"NO NAME    \0\0\0\0", p_vol);
+#endif
     return 0;
 }
 
@@ -818,6 +834,9 @@ s32 VFiPFENT_updateEntry(struct PF_DIR_ENT* p_ent, u32 flag) {
     u8 buf[32];
     s32 err;
 
+#ifdef GAME_REXE01
+    p_vol = p_ent->p_vol;
+#else
     if (!p_ent) {
         return 10;
     }
@@ -835,6 +854,7 @@ s32 VFiPFENT_updateEntry(struct PF_DIR_ENT* p_ent, u32 flag) {
         return 16;
     }
 
+#endif
     if (p_ent->start_cluster == 1) {
         return 14;
     }
