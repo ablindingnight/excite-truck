@@ -270,6 +270,38 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
+/* 6-tap Q20 dot product over four 6-sample groups; outputs at word offsets 0, 2, 6, 8 (strides 2 and 4).
+ * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
+ * but the original adds each low product word (addc) before computing its high word (mulhw). */
+void fn_800C1E88(s32* coeff, s32* input, s32* output) {
+    s32 n;
+    s32 c0 = coeff[0];
+    s32 c1 = coeff[1];
+    s32 c2 = coeff[2];
+    s32 c3 = coeff[3];
+
+    for (n = 0; n < 4; n++) {
+        s64 acc;
+
+        acc = 0;
+        acc += (s64)c0 * input[0];
+        acc += (s64)c1 * input[1];
+        acc += (s64)c2 * input[2];
+        acc += (s64)c3 * input[3];
+        acc += (s64)coeff[4] * input[4];
+        acc += (s64)coeff[5] * input[5];
+
+        *output = (s32)(acc >> 20);
+
+        input += 6;
+        if (n & 1) {
+            output += 4;
+        } else {
+            output += 2;
+        }
+    }
+}
+
 /* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
  * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
