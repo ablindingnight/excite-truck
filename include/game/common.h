@@ -67,6 +67,22 @@ public:
     virtual const char* GetString(const char* key, const char* def);  // 0x18
     virtual s32 GetIntValue(const char* key);                         // 0x1C
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
+    virtual void vf9(void);                                           // 0x24
+    virtual void vf10(void);                                          // 0x28
+    virtual void vf11(void);                                          // 0x2C
+    virtual void vf12(void);                                          // 0x30
+    virtual void vf13(void);                                          // 0x34
+    virtual void vf14(void);                                          // 0x38
+    virtual void vf15(void);                                          // 0x3C
+    virtual void vf16(void);                                          // 0x40
+    virtual void vf17(void);                                          // 0x44
+    virtual void vf18(void);                                          // 0x48
+    virtual void vf19(void);                                          // 0x4C
+    virtual void vf20(void);                                          // 0x50
+    virtual void vf21(void);                                          // 0x54
+    virtual void vf22(void);                                          // 0x58
+    virtual void vf23(void);                                          // 0x5C
+    virtual ValueNode* GetChildAt(int index);                         // 0x60
 };
 
 #endif
