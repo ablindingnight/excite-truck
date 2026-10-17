@@ -1223,6 +1223,13 @@ RVL_SDK/vf/pfk.c:
 	.text       start:0x800B7EAC end:0x800B808C
 	.data       start:0x8031B190 end:0x8031B2B0
 
+RVL_SDK/vf/nand_drv.c:
+	.text       start:0x800B808C end:0x800B9BB4
+	.rodata     start:0x802F31F8 end:0x802F3218
+	.bss        start:0x80405D18 end:0x80407300
+	.sdata      start:0x80559240 end:0x80559248
+	.sbss       start:0x8055DD28 end:0x8055DD34
+
 revolution/homebuttonLib/HBMBase.cpp:
 	.text       start:0x800C64DC end:0x800CF294
 	.rodata     start:0x802F4528 end:0x802F47D8

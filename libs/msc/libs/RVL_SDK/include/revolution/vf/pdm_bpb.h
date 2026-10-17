@@ -21,7 +21,8 @@ s32 VFipdm_bpb_check_fsinfo_sector(u8* buf, u32* is_fsinfo);
 // 16-bit fields are read bytewise when
 // unaligned; otherwise through a naturally aligned view of the boot sector, so an odd field
 // offset reads the halfword at the next even offset.
-#define PDM_LE16(buf, off) (((u32)((buf) + (off)) & 1) != 0 ? (u16)((buf)[(off)] | ((buf)[(off) + 1] << 8)) : (u16)SWAP16(*(u16*)((buf) + (((off) + 1) & ~1))))
+// (ET's macro has no outer parentheses: `PDM_LE16(...) * 32` scales only the aligned branch.)
+#define PDM_LE16(buf, off) ((u32)((buf) + (off)) & 1) != 0 ? (u16)((buf)[(off)] | ((buf)[(off) + 1] << 8)) : (u16)(SWAP16(*(u16*)((buf) + (((off) + 1) & ~1))))
 #define PDM_LE32(p) (u32)(SWAP32(*(u32*)(p)))
 
 s32 VFipdm_bpb_get_volume_bpb(struct PF_VOLUME* p_vol, u8* buf);

@@ -416,7 +416,7 @@ s32 VFiPFVOL_attach(struct PF_DRV_TBL* p_drv, const s8* dev_name, u32 dev_param)
     p_drv->drive = 0;
 
     VFiPF_LockCritical(&VFipf_vol_set.critical);
-    if (dev_name != NULL && VFiPF_ET_RegisterDevice(dev_name, dev_param) != 0) {
+    if (dev_name != NULL && VFi_nanddrv_register_image(dev_name, dev_param) != 0) {
         VFiPF_UnlockCritical(&VFipf_vol_set.critical);
         VFipf_vol_set.last_error = 17;
         return 17;

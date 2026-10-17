@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#ifndef GAME_REXE01  // ET's NAND drive is the older design in nand_drv.c (see vf_et.h)
 extern s32 VF_nand_retry_max;
 extern s32 VF_nand_sleep_msec;
 
@@ -36,6 +37,8 @@ s32 nanddrv_get_disk_info(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_
 s32 VFi_nanddrv_init_drv_tbl(struct PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);
 s32 nanddrv_physical_read(u32 num_blocks, u8* buf, u32 block, u32 bps, u32* p_num_success, struct PDM_DISK* p_disk);
 s32 nanddrv_physical_write(u32 num_blocks, const u8* buf, u32 block, u32 bps, u32* p_num_success, struct PDM_DISK* p_disk);
+
+#endif
 
 #ifdef __cplusplus
 }

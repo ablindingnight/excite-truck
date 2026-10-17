@@ -897,6 +897,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pf_system.c"),
             Object(Matching, "RVL_SDK/vf/vf_et_api.c"),
             Object(Matching, "RVL_SDK/vf/pfk.c"),
+            Object(Matching, "RVL_SDK/vf/nand_drv.c"),
             Object(Matching, "RVL_SDK/arc/arc.c"),
         ],
     }

@@ -26,6 +26,7 @@ s32 VFUnmountDrive(s8 drive, u32 mode);
 
 // Drives
 s32 VFi_nanddrv_init_drv_tbl(struct PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);  // name from msc nand_drv.h
+s32 VFi_nanddrv_register_image(const s8* path, u32 size);
 s32 VFi_sddrv_init_drv_tbl(struct PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);
 s32 VFiSD_SetCallback(void (*insert)(s32), void (*eject)(s32));
 s32 VFiSD_IsInserted(void);

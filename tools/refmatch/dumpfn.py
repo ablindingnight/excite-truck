@@ -3,6 +3,7 @@
 import os, re, sys
 lo, hi = int(sys.argv[1], 16), int(sys.argv[2], 16)
 out = []
+seen = set()  # stale split files can repeat addresses; keep the first copy
 for f in sorted(os.listdir("build/REXE01/asm")):
     if not f.endswith("_text.s"):
         continue
@@ -13,7 +14,8 @@ for f in sorted(os.listdir("build/REXE01/asm")):
             cur = m[1]
             continue
         m = re.match(r"/\* ([0-9A-F]{8}) [0-9A-F]+  [0-9A-F ]{11} \*/\s*(.*)", l)
-        if m and cur and lo <= int(m[1], 16) < hi:
+        if m and cur and lo <= int(m[1], 16) < hi and int(m[1], 16) not in seen:
+            seen.add(int(m[1], 16))
             if not out or out[-1][0] != cur:
                 out.append((cur, "=== " + cur))
             out.append((cur, m[2]))
