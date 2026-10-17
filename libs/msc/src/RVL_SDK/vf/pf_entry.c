@@ -2,6 +2,9 @@
 
 static u8 FAT_DELETED = 0xE5;
 
+#ifdef GAME_REXE01
+inline
+#endif
 static u32 VFiPFENT_compareAttr(u8 attr, u8 attr_required, u8 attr_unwanted) {
     u32 is_valid;
 
@@ -23,6 +26,74 @@ static u32 VFiPFENT_compareAttr(u8 attr, u8 attr_required, u8 attr_unwanted) {
     return is_valid;
 }
 
+#ifdef GAME_REXE01
+static s32 VFiPFENT_compareEntryName(struct PF_DIR_ENT* p_ent, const u8* buf, struct PF_STR* p_pattern, u8 attr,
+                                     u8 attr_required, u8 attr_unwanted, u32* logical_index) {
+    u32 is_label;
+    s32 is_match;
+    u32 is_valid;
+
+    is_match = 1;
+    is_valid = 1;
+    if ((attr & 0xF) == 0xF) {
+        is_match = 1;
+    } else {
+        // attribute filter (VFiPFENT_compareAttr, written out here)
+        if (attr == 0) {
+            attr = 0x40;
+        }
+        if (attr_required & 0x80) {
+            s32 unw = attr_unwanted & 0x7F;
+            s32 req = attr_required & 0x7F;
+            if ((req != 0 && req != (req & attr)) || (unw != 0 && unw == (unw & attr))) {
+                is_valid = 0;
+            }
+        } else {
+            if ((attr_required != 0x7F && attr != attr_required) && (!(attr & attr_required) || (attr & attr_unwanted))) {
+                is_valid = 0;
+            }
+        }
+
+        if (is_valid == 0) {
+            is_match = 1;
+        } else {
+            is_label = attr & 8;
+            if (is_label != 0) {
+                p_ent->num_entry_LFNs = 0;
+                p_ent->long_name[0] = 0;
+            }
+
+            VFiPFPATH_getShortName((s8*)p_ent->short_name, buf, buf[11]);
+            if (p_ent->short_name[0] == 5) {
+                p_ent->short_name[0] = 0xE5;
+            }
+
+            if (p_ent->num_entry_LFNs != 0 && p_ent->ordinal == 1) {
+                if (p_ent->check_sum == VFiPFENT_CalcCheckSum(p_ent)) {
+                    is_match = !(VFiPFPATH_cmpNameUni((u16*)p_ent, p_pattern) == 0);
+                }
+            }
+
+            if (is_match == 1) {
+                if ((VFipf_vol_set.setting & 2) == 2 && is_label == 0) {
+                    if (VFiPFPATH_cmpName((s8*)p_ent->short_name, p_pattern, 0) == 0) {
+                        is_match = 0;
+                    }
+                } else {
+                    if (VFiPFPATH_cmpName((s8*)p_ent->short_name, p_pattern, 1) == 0) {
+                        is_match = 0;
+                    }
+                }
+            }
+
+            if (is_match == 1) {
+                (*logical_index)++;
+            }
+        }
+    }
+    return is_match;
+}
+#else
 static s32 VFiPFENT_compareEntryName(struct PF_DIR_ENT* p_ent, struct PF_STR* p_pattern, u8 attr) {
     s32 is_match;
 
@@ -52,6 +123,7 @@ static s32 VFiPFENT_compareEntryName(struct PF_DIR_ENT* p_ent, struct PF_STR* p_
 
     return is_match;
 }
+#endif
 
 static s32 VFiPFENT_getEntry(struct PF_DIR_ENT* p_ent, struct PF_ENT_ITER* p_iter, struct PF_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* logical_index) {
     s32 err;
@@ -62,6 +134,9 @@ static s32 VFiPFENT_getEntry(struct PF_DIR_ENT* p_ent, struct PF_ENT_ITER* p_ite
     s8 filename[13];
 
     attr = p_iter->buf[11];
+#ifdef GAME_REXE01
+    is_match = VFiPFENT_compareEntryName(p_ent, p_iter->buf, p_pattern, attr, attr_required, attr_unwanted, logical_index);
+#else
     is_valid = attr & 0xF;
 
     if ((s32)is_valid == 0xF) {
@@ -87,9 +162,14 @@ static s32 VFiPFENT_getEntry(struct PF_DIR_ENT* p_ent, struct PF_ENT_ITER* p_ite
             }
         }
     }
+#endif
 
     if (is_match == 1) {
+#ifdef GAME_REXE01
+        if ((attr & 0xF) == 0xF) {
+#else
         if ((s32)is_valid == 0xF) {
+#endif
             if (VFiPFENT_LoadLFNEntryFieldsFromBuf(p_ent, p_iter->buf) != 0) {
                 p_ent->num_entry_LFNs = 0;
                 p_ent->long_name[0] = 0;
@@ -266,7 +346,11 @@ s32 VFiPFENT_LoadLFNEntryFieldsFromBuf(struct PF_DIR_ENT* p_ent, const u8* buf) 
     ordinal = buf[0];
     check_sum = buf[13];
 
+#ifdef GAME_REXE01
+    if ((ordinal & ~0x40u) > 20) {
+#else
     if ((ordinal & ~0x40) > 20) {
+#endif
         p_ent->ordinal = 0;
         p_ent->check_sum = 0;
         p_ent->num_entry_LFNs = 0;
@@ -875,8 +959,13 @@ u8 VFiPFENT_getcurrentDateTimeForEnt(u16* p_date, u16* p_time) {
 
     VFiPFSYS_TimeStamp(&sys_date, &sys_time);
 
+#ifdef GAME_REXE01
+    *p_date = ((sys_date.sys_day & 0x1F) << 0) | ((sys_date.sys_month & 0x0F) << 5) | (((sys_date.sys_year - 1980) & 0x7F) << 9);
+    *p_time = ((sys_time.sys_sec >> 1) & 0x1F) | ((sys_time.sys_min & 0x3F) << 5) | ((sys_time.sys_hour & 0x1F) << 11);
+#else
     *p_date = (((sys_date.sys_year - 1980) & 0x7F) << 9) | ((sys_date.sys_month & 0x0F) << 5) | ((sys_date.sys_day & 0x1F) << 0);
     *p_time = ((sys_time.sys_hour & 0x1F) << 11) | ((sys_time.sys_min & 0x3F) << 5) | ((sys_time.sys_sec >> 1) & 0x1F);
+#endif
 
     return sys_time.sys_ms;
 }

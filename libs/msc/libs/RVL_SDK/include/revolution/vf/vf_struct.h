@@ -449,13 +449,31 @@ typedef struct PF_STR {
     unsigned long code_mode;     // offset 0xC, size 0x4
 } PF_STR;
 
+#ifdef GAME_REXE01
+typedef struct PF_SYS_DATE {
+    // ET: 32-bit fields
+    unsigned long sys_year;
+    unsigned long sys_month;
+    unsigned long sys_day;
+} PF_SYS_DATE;
+#else
 typedef struct PF_SYS_DATE {
     // total size: 0x6
     unsigned short sys_year;   // offset 0x0, size 0x2
     unsigned short sys_month;  // offset 0x2, size 0x2
     unsigned short sys_day;    // offset 0x4, size 0x2
 } PF_SYS_DATE;
+#endif
 
+#ifdef GAME_REXE01
+typedef struct PF_SYS_TIME {
+    // ET: 32-bit fields
+    unsigned long sys_hour;
+    unsigned long sys_min;
+    unsigned long sys_sec;
+    unsigned long sys_ms;
+} PF_SYS_TIME;
+#else
 typedef struct PF_SYS_TIME {
     // total size: 0x8
     unsigned short sys_hour;  // offset 0x0, size 0x2
@@ -463,6 +481,7 @@ typedef struct PF_SYS_TIME {
     unsigned short sys_sec;   // offset 0x4, size 0x2
     unsigned short sys_ms;    // offset 0x6, size 0x2
 } PF_SYS_TIME;
+#endif
 
 typedef struct PF_ENT_ITER {
     // total size: 0x70
