@@ -4,7 +4,8 @@
  * Build: cflags_rvl_tp, GC/3.0a3, plus -use_lmw_stmw on -inline noauto (every function saves with
  * stmw; WENCGetEncodeData right after it does not, so it is a separate object).
  * Matching so far: MP3_Create, MP3_GetInfo, MP3_Fill, MP3_ArenaInit/Alloc/Set. Close (register or
- * scheduling only): FindSync, GetBits, GetBitsRing, ParseHeader, HuffLookup, PeekBitsRing. */
+ * scheduling only): FindSync, GetBits, GetBitsRing, ParseHeader, HuffLookup, PeekBitsRing,
+ * DecodeQuads (0x800C08A8, same 176 instructions). */
 typedef unsigned char u8;
 typedef signed char s8;
 typedef unsigned short u16;
@@ -296,4 +297,74 @@ u32 MP3_PeekBitsRing(const u8* buf, u32 n, u32* pos) {
         b2 = buf[idx];
     }
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
+}
+
+extern const u8 lbl_8031C2E0[];  /* count1 table A: (unused bits << 4) | vwxy */
+
+typedef struct BitStream {
+    u8 pad0[0xC];
+    u32 pos;   /* 0xC */
+    u32 end;   /* 0x10 */
+} BitStream;
+
+static inline s16 MP3_GetSign(BitStream* bs, const u8* buf) {
+    u32 p = bs->pos;
+
+    bs->pos = p + 1;
+    return (buf[(p >> 3) & 0x1FFF] >> (8 - (p & 7) - 1)) & 1;
+}
+
+void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
+    s16* q = out + i;
+
+    for (; i < end; i += 4, q += 4) {
+        u32 p = bs->pos;
+        u32 idx;
+        s32 sh;
+        u32 code;
+        u8 e;
+        s16 v;
+        s16 w;
+        s16 x;
+        s16 y;
+
+        bs->pos = p + 6;
+        idx = (p >> 3) & 0x1FFF;
+        sh = 16 - (p & 7);
+        code = (u16)((((buf[idx] << 8) | buf[(idx + 1) & 0x1FFF]) & lbl_802F3F54[sh]) >> (sh - 6));
+        e = lbl_8031C2E0[code];
+        bs->pos = p + 6 - (e >> 4);
+        v = (e >> 3) & 1;
+        w = (e >> 2) & 1;
+        x = (e >> 1) & 1;
+        y = e & 1;
+        if (v && MP3_GetSign(bs, buf)) {
+            v = -v;
+        }
+        if (w && MP3_GetSign(bs, buf)) {
+            w = -w;
+        }
+        if (x && MP3_GetSign(bs, buf)) {
+            x = -x;
+        }
+        if (y && MP3_GetSign(bs, buf)) {
+            y = -y;
+        }
+        q[0] = v;
+        q[1] = w;
+        q[2] = x;
+        q[3] = y;
+        if (bs->pos > bs->end) {
+            if (track == 1 && *zero_start == 0) {
+                *zero_start = i;
+            }
+            for (; i < end; i += 4) {
+                out[i] = 0;
+                out[i + 1] = 0;
+                out[i + 2] = 0;
+                out[i + 3] = 0;
+            }
+            return;
+        }
+    }
 }
