@@ -472,6 +472,84 @@ void fn_800C2090(s32* dst, s32* a, s32* b) {
     dst[1088] = -(a[17] + b[17]);
 }
 
+/* IMDCT output, first window half: copies prev[0..5] and writes prev[17-i] - cur[i] backwards from out2;
+ * the last three use Q20 window coefficients. Math verified against a simulation of the original.
+ * NonMatching: 96/100 (the original keeps both products live and spills r31). */
+void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* w = lbl_8031D700;
+    s32 i;
+    s32 x, c0, c1, y0, y1;
+
+    for (i = 0; i < 6; i++) {
+        x = -cur[i];
+        out1[i * 64] = prev[i];
+        out2[-i * 64] = x + prev[17 - i];
+    }
+    x = cur[6];
+    c0 = w[0];
+    c1 = w[1];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[384] = y0 + prev[6];
+    out2[-384] = y1 + prev[11];
+    x = cur[7];
+    c0 = w[2];
+    c1 = w[3];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[448] = y0 + prev[7];
+    out2[-448] = y1 + prev[10];
+    x = cur[8];
+    c0 = w[4];
+    c1 = w[5];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[512] = y0 + prev[8];
+    out2[-512] = y1 + prev[9];
+}
+
+/* Second window half: like fn_800C2A88 with lbl_8031D718 and alternating signs (verified 100/100 against
+ * a simulation of the original). NonMatching: 105/105, registers/scheduling. */
+void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* w = lbl_8031D718;
+    s32 i;
+    s32 x, c0, c1;
+
+    x = -cur[0];
+    out1[0] = prev[0];
+    out2[0] = -(x + prev[17]);
+    x = -cur[1];
+    out1[64] = -prev[1];
+    out2[-64] = x + prev[16];
+    x = -cur[2];
+    out1[128] = prev[2];
+    out2[-128] = -(x + prev[15]);
+    x = -cur[3];
+    out1[192] = -prev[3];
+    out2[-192] = x + prev[14];
+    x = -cur[4];
+    out1[256] = prev[4];
+    out2[-256] = -(x + prev[13]);
+    x = -cur[5];
+    out1[320] = -prev[5];
+    out2[-320] = x + prev[12];
+    x = cur[6];
+    c0 = w[0];
+    c1 = w[1];
+    out1[384] = ((s32)(((s64)x * c0) >> 20) + prev[6]);
+    out2[-384] = -((s32)(((s64)x * c1) >> 20) + prev[11]);
+    x = cur[7];
+    c0 = w[2];
+    c1 = w[3];
+    out1[448] = -((s32)(((s64)x * c0) >> 20) + prev[7]);
+    out2[-448] = ((s32)(((s64)x * c1) >> 20) + prev[10]);
+    x = cur[8];
+    c0 = w[4];
+    c1 = w[5];
+    out1[512] = ((s32)(((s64)x * c0) >> 20) + prev[8]);
+    out2[-512] = -((s32)(((s64)x * c1) >> 20) + prev[9]);
+}
+
 /* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
  * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
