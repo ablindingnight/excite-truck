@@ -616,29 +616,30 @@ void fn_800C2DBC(s32* in, s32* out1, s32* out2) {
 }
 
 /* IMDCT output for the first block: copies in[0..5] forward, zeroes out2 backwards, and the last three
- * are Q20 window pairs (lbl_8031D778). NonMatching: 61/60 (the original forms the table address with lwzu). */
-void fn_800C2F98(s32* in, s32* out1, s32* out2) {
+ * are Q20 window pairs (lbl_8031D778, walked with *w++). */
+void fn_800C2F98(s32* cur, s32* out1, s32* out2) {
     s32* w = lbl_8031D778;
     s32 i;
     s32 x, c0, c1;
 
     for (i = 0; i < 6; i++) {
-        out1[i] = in[i];
+        x = cur[i];
+        out1[i] = x;
         out2[-i] = 0;
     }
-    x = in[6];
-    c0 = w[0];
-    c1 = w[1];
+    x = cur[6];
+    c0 = *w++;
+    c1 = *w++;
     out1[6] = (s32)(((s64)x * c0) >> 20);
     out2[-6] = (s32)(((s64)x * c1) >> 20);
-    x = in[7];
-    c0 = w[2];
-    c1 = w[3];
+    x = cur[7];
+    c0 = *w++;
+    c1 = *w++;
     out1[7] = (s32)(((s64)x * c0) >> 20);
     out2[-7] = (s32)(((s64)x * c1) >> 20);
-    x = in[8];
-    c0 = w[4];
-    c1 = w[5];
+    x = cur[8];
+    c0 = *w++;
+    c1 = *w++;
     out1[8] = (s32)(((s64)x * c0) >> 20);
     out2[-8] = (s32)(((s64)x * c1) >> 20);
 }
