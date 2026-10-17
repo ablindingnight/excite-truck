@@ -7,7 +7,8 @@ static s16* lbl_8055DD88;
 static s32 lbl_8055DD8C;
 
 /* Frame decode (fn_800BDF4C): header, side info, main data, then per granule the scalefactors, Huffman
- * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 928 of 933. */
+ * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 930 of 933; behaviour verified against the original in a PPC simulation
+ * (200 random frames, heavy stages stubbed, bit readers from the original). */
 s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
     s16 id;
     s16 prot;
@@ -23,7 +24,7 @@ s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* 
     s32 frame_bits;
     s32 end;
     s32 n;
-    s32 i;
+    s16 i;
     u8* p;
     s16 bound[2];
     s8 mixed[2][2];
