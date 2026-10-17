@@ -1320,6 +1320,9 @@ RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp:
 	.sbss       start:0x8055DE38 end:0x8055DE3C
 	.sdata2     start:0x80561048 end:0x80561068
 
+RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrack.cpp:
+	.text       start:0x800EE268 end:0x800EE334
+
 RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp:
 	.text       start:0x800EE334 end:0x800EE47C
 	.data       start:0x80323770 end:0x803237B8
@@ -1343,7 +1346,8 @@ RVL_SDK/hbm/nw4hbm/snd/snd_SeqFile.cpp:
 	.data       start:0x803239C0 end:0x80323B24
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp:
-	.text       start:0x800EEE8C end:0x800EF500
+	.text       start:0x800EEE8C end:0x800F07EC
+	.ctors      start:0x802ED0F0 end:0x802ED0F4
 	.data       start:0x80323B28 end:0x80324060
 	.bss        start:0x80412A6C end:0x80412A78
 	.sdata2     start:0x80561068 end:0x80561078
@@ -1367,9 +1371,15 @@ RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchive.cpp:
 	.text       start:0x800F26D8 end:0x800F2D28
 	.data       start:0x803247E0 end:0x80324868
 
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveFile.cpp:
+	.text       start:0x800F2D28 end:0x800F41D0
+
 RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveLoader.cpp:
 	.text       start:0x800F41D0 end:0x800F4B78
 	.data       start:0x80324E40 end:0x80324E88
+
+RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchivePlayer.cpp:
+	.text       start:0x800F4B78 end:0x800F8244
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SoundHandle.cpp:
 	.text       start:0x800F8244 end:0x800F8310
@@ -1414,6 +1424,10 @@ RVL_SDK/hbm/nw4hbm/snd/snd_StrmPlayer.cpp:
 	.bss        start:0x80415060 end:0x804190A0
 	.sdata2     start:0x805610C0 end:0x805610C8
 
+RVL_SDK/hbm/nw4hbm/snd/snd_StrmSound.cpp:
+	.text       start:0x800FDA20 end:0x800FDE28
+	.ctors      start:0x802ED0FC end:0x802ED100
+
 RVL_SDK/hbm/nw4hbm/snd/snd_StrmSoundHandle.cpp:
 	.text       start:0x800FDE28 end:0x800FDE60
 
@@ -1446,6 +1460,10 @@ RVL_SDK/hbm/nw4hbm/snd/snd_WavePlayer.cpp:
 	.bss        start:0x8041D4A0 end:0x8041D4B8
 	.sdata2     start:0x80561110 end:0x80561114
 
+RVL_SDK/hbm/nw4hbm/snd/snd_WaveSound.cpp:
+	.text       start:0x800FFA10 end:0x800FFE94
+	.ctors      start:0x802ED104 end:0x802ED108
+
 RVL_SDK/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp:
 	.text       start:0x800FFE94 end:0x800FFECC
 
@@ -1461,6 +1479,9 @@ RVL_SDK/hbm/nw4hbm/snd/snd_WsdPlayer.cpp:
 	.data       start:0x80327930 end:0x80327CB8
 	.bss        start:0x8041D4B8 end:0x8041D4D0
 	.sdata2     start:0x80561120 end:0x80561128
+
+RVL_SDK/hbm/nw4hbm/snd/snd_WsdTrack.cpp:
+	.text       start:0x801014E4 end:0x8010206C
 
 RVL_SDK/hbm/nw4hbm/ut/ut_binaryFileFormat.cpp:
 	.text       start:0x8010206C end:0x801022C4
