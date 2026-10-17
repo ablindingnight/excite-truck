@@ -81,6 +81,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag);
 
+void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g);
+
 #endif
 
 void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l);
@@ -132,5 +134,7 @@ void fn_800C55D8(s32* dst, s32* src, s32* c);
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag);
+
+void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g);
 
 #endif

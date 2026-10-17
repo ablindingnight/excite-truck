@@ -1461,3 +1461,89 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
     dst[30] = src[20];
     dst[31] = src[21];
 }
+
+/* Mid/side stereo: left = a + b, right = a - b over the long spectrum (count0 lines), the mixed layout (36 long
+ * lines plus count1 lines of each short window from line 12) or the three short windows (count1 lines each).
+ * From ChatGPT's candidate B (round 23), verified against the original in a PPC simulation (40/40) and by
+ * ChatGPT (792 cases). NonMatching: 661/661, identical opcode sequence, register numbers differ. */
+void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
+    s32 i;
+    s32 *left;
+    s32 *right;
+    s32 a, b;
+
+    if (flags & 7) {
+        /* Full selected region of the last 576-sample spectral block. */
+        left  = g[0].xr;
+        right = g[1].xr;
+        for (i = 0; i < count0; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+    } else if (flags & 8) {
+        /* Mixed/special mode: 36 spectral values + three other bands,
+         * each beginning 12 words into its 576-word area. */
+        left  = g[0].xr;
+        right = g[1].xr;
+        for (i = 0; i < 36; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+
+        left  = (s32*)((u8*)g + 0x30);
+        right = (s32*)((u8*)g + 0x2430);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+        left  = (s32*)((u8*)g + 0x930);
+        right = (s32*)((u8*)g + 0x2D30);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+        left  = (s32*)((u8*)g + 0x1230);
+        right = (s32*)((u8*)g + 0x3630);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+    } else if (flags & 16) {
+        /* Three complete 576-word regions, starting at region index 0. */
+        left  = (s32*)((u8*)g + 0x0000);
+        right = (s32*)((u8*)g + 0x2400);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+        left  = (s32*)((u8*)g + 0x0900);
+        right = (s32*)((u8*)g + 0x2D00);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+        left  = (s32*)((u8*)g + 0x1200);
+        right = (s32*)((u8*)g + 0x3600);
+        for (i = 0; i < count1; i++) {
+            a = *left;
+            b = *right;
+            *left++  = a + b;
+            *right++ = a - b;
+        }
+    }
+}
+
