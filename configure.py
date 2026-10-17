@@ -932,6 +932,7 @@ config.libs.append(
             Object(Matching, "game/driver.cpp"),
             Object(NonMatching, "game/loading.cpp"),
             Object(NonMatching, "game/stats.cpp"),
+            Object(NonMatching, "game/davmap.cpp"),
         ],
     }
 )

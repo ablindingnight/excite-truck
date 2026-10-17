@@ -14,14 +14,14 @@ struct Option {
 };
 
 void SetDirectToTrackName(const char* name);
+void SetForceChassis(const char* arg);
+void SetForcedRacers(const char* arg);
+void SetDefaultColors(const char* arg);
 
 extern "C" {
 void fn_80203F0C(const char* arg);
-void fn_800187B8(const char* arg);
 void fn_8023BF68(const char* arg);
-void fn_80018794(const char* arg);
 void fn_802BC328(const char* arg);
-void fn_800187F8(const char* arg);
 void fn_80131368(const char* arg);
 }
 
@@ -37,15 +37,15 @@ Option lbl_802FD528[] = {
     {"-autogen_envmap", 0x20, fn_80203F0C},
     {"-gx_test", 0x40, NULL},
     {"-profile", 0x80, NULL},
-    {"-car_image", 0x100, fn_800187B8},
-    {"-car_icon", 0x1000, fn_800187B8},
-    {"-force_chassis", 0, fn_800187B8},
+    {"-car_image", 0x100, SetForceChassis},
+    {"-car_icon", 0x1000, SetForceChassis},
+    {"-force_chassis", 0, SetForceChassis},
     {"-widescreen", 0x200, NULL},
     {"-e3_demo", 0x400, NULL},
     {"-players", 0, fn_8023BF68},
-    {"-cars", 0, fn_80018794},
+    {"-cars", 0, SetForcedRacers},
     {"-wmapgen", 0x800, fn_802BC328},
-    {"-default_colors", 0, fn_800187F8},
+    {"-default_colors", 0, SetDefaultColors},
     {"-locale", 0, fn_80131368},
     {"", 0, NULL},
     {NULL, 0, NULL},
