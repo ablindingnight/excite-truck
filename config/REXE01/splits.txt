@@ -1381,6 +1381,11 @@ RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveLoader.cpp:
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchivePlayer.cpp:
 	.text       start:0x800F4B78 end:0x800F8244
+	.data       start:0x80324E88 end:0x80325C00
+	.bss        start:0x80412AA0 end:0x80412CB8
+	.sdata      start:0x805598D8 end:0x805598E0
+	.sbss       start:0x8055DE58 end:0x8055DE60
+	.sdata2     start:0x805610A8 end:0x805610B8
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SoundHandle.cpp:
 	.text       start:0x800F8244 end:0x800F8310
