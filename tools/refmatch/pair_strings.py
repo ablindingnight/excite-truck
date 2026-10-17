@@ -31,8 +31,8 @@ et, ours = fns(et_asm), fns(tmp)
 pairs = {}
 for name, ins in et.items():
     for a, b in zip(ins, ours.get(name, [])):
-        ma = re.search(r"(lbl_[0-9A-F]{8})@(ha|l)\b", a)
-        mb = re.search(r'"?(@STRING@[^"@]+(?:@\d+)?)"?@(ha|l)\b', b)
+        ma = re.search(r"(lbl_[0-9A-F]{8})@(ha|l|sda21)\b", a)
+        mb = re.search(r'"?(@STRING@[^"@]+(?:@\d+)?)"?@(ha|l|sda21)\b', b)
         if ma and mb:
             pairs[ma.group(1)] = mb.group(1)
 
