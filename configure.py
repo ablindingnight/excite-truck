@@ -919,6 +919,7 @@ config.libs.append(
             Object(Matching, "game/flags.cpp"),
             Object(Matching, "game/stubs.cpp"),
             Object(Matching, "game/version.cpp"),
+            Object(Matching, "game/rep.cpp"),
         ],
     }
 )

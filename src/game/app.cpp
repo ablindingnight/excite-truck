@@ -9,6 +9,8 @@
 
 void FlagsInit(void);
 void FlagsShutdown(void);
+void RepInit(void);
+void RepShutdown(void);
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -49,7 +51,6 @@ void fn_80141454(void);
 void fn_8027DAF4(void);
 void fn_8021031C(void);
 void fn_801AED54(void);
-void fn_80019864(void);
 void fn_80018F40(void);
 void fn_802789A8(void);
 void fn_8020CA30(void);
@@ -80,7 +81,6 @@ void fn_800218F8(void);
 void fn_8020CA34(void);
 void fn_802789B0(void);
 void fn_80018F7C(void);
-void fn_80019884(void);
 void fn_801AED58(void);
 void fn_80141458(void);
 void fn_8001EFCC(void);
@@ -272,7 +272,7 @@ void AppInit(void) {
     fn_8027DAF4();
     fn_8021031C();
     fn_801AED54();
-    fn_80019864();
+    RepInit();
     fn_80018F40();
     fn_802789A8();
     fn_8020CA30();
@@ -305,7 +305,7 @@ void AppShutdown(void) {
     fn_8020CA34();
     fn_802789B0();
     fn_80018F7C();
-    fn_80019884();
+    RepShutdown();
     fn_801AED58();
     fn_80141458();
     FlagsShutdown();

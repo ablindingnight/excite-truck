@@ -39,6 +39,12 @@ game/version.cpp:
 	.data       start:0x802FC200 end:0x802FC23C
 	.sbss       start:0x8055D448 end:0x8055D454
 
+game/rep.cpp:
+	.text       start:0x80019864 end:0x80019898
+	.ctors      start:0x802ED0B4 end:0x802ED0B8
+	.bss        start:0x803582B0 end:0x803582BC
+	.sbss       start:0x8055D590 end:0x8055D598
+
 MSL/alloc.c:
 	extab       start:0x80004520 end:0x80004558
 	extabindex  start:0x80004700 end:0x80004754
