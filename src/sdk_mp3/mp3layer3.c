@@ -472,6 +472,65 @@ void fn_800C2090(s32* dst, s32* a, s32* b) {
     dst[1088] = -(a[17] + b[17]);
 }
 
+/* Windows two 9-sample halves in place: a[i] = Q20(a[i] * w[2i]), b[-i] = Q20(a[i] * w[2i+1]), then the same
+ * on a + 18 / b + 18 with the next 18 coefficients (lbl_8031D5E0). Math verified against a simulation of the
+ * original. NonMatching: 237/238 (the original keeps a + 18 / b + 18 in their own registers and walks one
+ * table pointer). */
+static inline void MP3_Window9(s32* a, s32* b, s32* w) {
+    s32 x, c0, c1;
+
+    x = a[0];
+    c0 = *w++;
+    c1 = *w++;
+    a[0] = (s32)(((s64)x * c0) >> 20);
+    b[0] = (s32)(((s64)x * c1) >> 20);
+    x = a[1];
+    c0 = *w++;
+    c1 = *w++;
+    a[1] = (s32)(((s64)x * c0) >> 20);
+    b[-1] = (s32)(((s64)x * c1) >> 20);
+    x = a[2];
+    c0 = *w++;
+    c1 = *w++;
+    a[2] = (s32)(((s64)x * c0) >> 20);
+    b[-2] = (s32)(((s64)x * c1) >> 20);
+    x = a[3];
+    c0 = *w++;
+    c1 = *w++;
+    a[3] = (s32)(((s64)x * c0) >> 20);
+    b[-3] = (s32)(((s64)x * c1) >> 20);
+    x = a[4];
+    c0 = *w++;
+    c1 = *w++;
+    a[4] = (s32)(((s64)x * c0) >> 20);
+    b[-4] = (s32)(((s64)x * c1) >> 20);
+    x = a[5];
+    c0 = *w++;
+    c1 = *w++;
+    a[5] = (s32)(((s64)x * c0) >> 20);
+    b[-5] = (s32)(((s64)x * c1) >> 20);
+    x = a[6];
+    c0 = *w++;
+    c1 = *w++;
+    a[6] = (s32)(((s64)x * c0) >> 20);
+    b[-6] = (s32)(((s64)x * c1) >> 20);
+    x = a[7];
+    c0 = *w++;
+    c1 = *w++;
+    a[7] = (s32)(((s64)x * c0) >> 20);
+    b[-7] = (s32)(((s64)x * c1) >> 20);
+    x = a[8];
+    c0 = *w++;
+    c1 = *w++;
+    a[8] = (s32)(((s64)x * c0) >> 20);
+    b[-8] = (s32)(((s64)x * c1) >> 20);
+}
+
+void fn_800C21D8(s32* a, s32* b) {
+    MP3_Window9(a, b, lbl_8031D5E0);
+    MP3_Window9(a + 18, b + 18, lbl_8031D5E0 + 18);
+}
+
 /* IMDCT overlap-add, all nine steps windowed: out1[i*64] = Q20(cur[i] * w[2i]) + prev[i],
  * out2[-i*64] = Q20(cur[i] * w[2i+1]) + prev[17-i] (table walked with *w++). Steps 5-6 compute both
  * products first, which is where the original needs r31. NonMatching: same size and opcodes. */
