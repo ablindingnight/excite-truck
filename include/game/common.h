@@ -59,4 +59,16 @@ public:
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
 };
 
+// A node inside a .val table (an entry's key/value pairs).
+class ValueNode {
+public:
+    virtual const char* GetName(void);                                // 0x8
+    virtual int Has(const char* key);                                 // 0xC
+    virtual void vf2(void);                                           // 0x10
+    virtual const char* GetValue(const char* key);                    // 0x14
+    virtual const char* GetString(const char* key, const char* def);  // 0x18
+    virtual s32 GetIntValue(const char* key);                         // 0x1C
+    virtual s32 GetInt(const char* key, s32 def);                     // 0x20
+};
+
 #endif

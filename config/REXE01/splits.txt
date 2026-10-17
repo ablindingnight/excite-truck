@@ -61,6 +61,13 @@ game/fwd126b4.cpp:
 	.ctors      start:0x802ED098 end:0x802ED09C
 	.sbss       start:0x8055D4F0 end:0x8055D4F8
 
+game/carstats.cpp:
+	.text       start:0x8001880C end:0x80018B70
+	.ctors      start:0x802ED0AC end:0x802ED0B0
+	.data       start:0x802FD1B0 end:0x802FD2A0
+	.sdata      start:0x80558C28 end:0x80558C30
+	.sbss       start:0x8055D568 end:0x8055D580
+
 game/rep.cpp:
 	.text       start:0x80019864 end:0x80019898
 	.ctors      start:0x802ED0B4 end:0x802ED0B8
