@@ -30,7 +30,7 @@ static s32 VFiPFFAT_ReadFATEntry(struct PF_VOLUME* p_vol, u32 cluster, u32* p_va
     return 15;
 }
 
-static s32 VFiPFFAT_ReadFATEntryPage(struct PF_VOLUME* p_vol, u32 cluster, u32* p_value, struct PF_CACHE_PAGE** p_page) {
+static s32 VFiPFFAT_ReadFATEntryPage(struct PF_VOLUME* p_vol, u32 cluster, u32* p_value, PF_ET_PAGE p_page) {
     s32 err;
 
     err = 0xf;
@@ -70,7 +70,62 @@ static s32 VFiPFFAT_WriteFATEntry(struct PF_VOLUME* p_vol, u32 cluster, u32 valu
     return 15;
 }
 
-s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** p_page, u32 cluster) {
+#ifdef GAME_REXE01
+s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, PF_ET_PAGE p_page, u32 cluster) {
+    s32 err;
+    u32 offset;
+    u32 current_fat;
+    s32 result;
+
+    switch (p_vol->bpb.fat_type) {
+        case FAT_12:
+            offset = (u16)(cluster + (cluster >> 1));
+            break;
+        case FAT_16:
+            offset = cluster * 2;
+            break;
+        case FAT_32:
+            offset = cluster * 4;
+            break;
+        default:
+            return 15;
+    }
+
+    p_page->sector = (u16)(p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector));
+
+    if (p_vol->bpb.ext_flags & 0x80) {
+        current_fat = (p_vol->bpb.ext_flags & 7);
+    } else {
+        current_fat = 1;
+    }
+
+    while (1) {
+        err = VFiPFSEC_ReadFAT(p_vol, p_page->p_buf, p_page->sector, 0, p_vol->bpb.bytes_per_sector);
+        if (err == 0x1000 && p_vol->p_callback != NULL) {
+            result = ((s32 (*)(s32))p_vol->p_callback)(p_vol->last_driver_error);
+            if (result != 0) {
+                if (result == 1 && p_vol->bpb.num_active_FATs >= 2 && current_fat < p_vol->bpb.num_active_FATs) {
+                    current_fat++;
+                    p_page->sector += p_vol->bpb.sectors_per_FAT;
+                    goto skip;
+                }
+            } else {
+                goto skip;
+            }
+        }
+
+        if (err) {
+            return err;
+        }
+
+    skip:
+        if (!err) {
+            return err;
+        }
+    }
+}
+#else
+s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, PF_ET_PAGE p_page, u32 cluster) {
     s32 err;
     u32 offset;
     u32 current_fat;
@@ -124,8 +179,9 @@ s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** p_pag
         }
     }
 }
+#endif
 
-static s32 VFiPFFAT_WriteFATEntryPage(struct PF_VOLUME* p_vol, u32 cluster, u32 value, struct PF_CACHE_PAGE** p_page) {
+static s32 VFiPFFAT_WriteFATEntryPage(struct PF_VOLUME* p_vol, u32 cluster, u32 value, PF_ET_PAGE p_page) {
     switch (p_vol->bpb.fat_type) {
         case FAT_12:
             if (value > 0xFFF) {
@@ -157,6 +213,9 @@ s32 VFiPFFAT_SearchForNumFreeClusters(struct PF_VOLUME* p_vol, u32 start_cluster
     s32 err;
     u32 search_flg;
     u32 temp_start_cluster;
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     struct PF_CACHE_PAGE* p_page;
 
     search_flg = 0;
@@ -176,17 +235,29 @@ s32 VFiPFFAT_SearchForNumFreeClusters(struct PF_VOLUME* p_vol, u32 start_cluster
     }
 
     temp_start_cluster = start_cluster;
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_cluster);
+#ifdef GAME_REXE01
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
     if (err) {
         return err;
     }
+    err = VFiPFFAT_ReadFATSector(p_vol, p_page, start_cluster);
+    if (err) {
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+        return err;
+    }
+#else
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), start_cluster);
+    if (err) {
+        return err;
+    }
+#endif
     p_page->option = 0;
 
     while (start_cluster <= end_cluster) {
         if (upper_bound_cluster <= start_cluster) {
             start_cluster = 2;
         }
-        err = VFiPFFAT_ReadFATEntryPage(p_vol, start_cluster, &fat_entry, &p_page);
+        err = VFiPFFAT_ReadFATEntryPage(p_vol, start_cluster, &fat_entry, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -198,6 +269,9 @@ s32 VFiPFFAT_SearchForNumFreeClusters(struct PF_VOLUME* p_vol, u32 start_cluster
             success_num++;
             if (success_num >= num_cluster) {
                 *p_last_free_cluster = start_cluster;
+#ifdef GAME_REXE01
+                VFiPFCACHE_FreeDataPage(p_vol, p_page);
+#endif
                 return 0;
             }
         } else {
@@ -224,11 +298,50 @@ s32 VFiPFFAT_SearchForNumFreeClusters(struct PF_VOLUME* p_vol, u32 start_cluster
 
     if (save_success_num != 0) {
         *p_start_free_cluster = save_start_cluster;
+#ifdef GAME_REXE01
+        *p_last_free_cluster = save_success_num + save_start_cluster - 1;
+    }
+    VFiPFCACHE_FreeDataPage(p_vol, p_page);
+#else
         *p_last_free_cluster = save_start_cluster;
         *p_last_free_cluster = ((*p_last_free_cluster) + save_success_num) - 1;
     }
+#endif
     return 0;
 }
+
+#ifdef GAME_REXE01
+// Name unknown: zero-fills a newly allocated cluster.
+static s32 VFiPFFAT_ClearCluster(struct PF_VOLUME* p_vol, u32 cluster) {
+    s32 err;
+    struct PF_CACHE_PAGE* p_page;
+    u32 is_hit;
+    u32 success_size;
+    u32 sector;
+    u32 i;
+
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
+    if (err) {
+        return err;
+    }
+
+    sector = p_vol->bpb.first_data_sector + ((cluster - 2) << p_vol->bpb.log2_sectors_per_cluster);
+    for (i = 0; i < p_vol->bpb.sectors_per_cluster; i++) {
+        err = VFiPFSEC_ReadData(p_vol, p_page->p_buf, sector + i, 0, p_vol->bpb.bytes_per_sector, &success_size, 1);
+        if (err != 0 || success_size != p_vol->bpb.bytes_per_sector) {
+            break;
+        }
+        VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+        err = VFiPFSEC_WriteData(p_vol, p_page->p_buf, sector + i, 0, p_vol->bpb.bytes_per_sector, &success_size, 1);
+        if (err != 0 || success_size != p_vol->bpb.bytes_per_sector) {
+            break;
+        }
+    }
+
+    VFiPFCACHE_FreeDataPage(p_vol, p_page);
+    return 0;
+}
+#endif
 
 static s32 VFiPFFAT_UpdateClusterLink(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index) {
     if (p_ffd->cluster_link.max_count > p_ffd->cluster_link.position && p_ffd->cluster_link.max_count) {
@@ -286,12 +399,18 @@ s32 VFiPFFAT_FindClusterLink(struct PF_FFD* p_ffd, u32 chain_index, u32* p_clust
             *is_found = 1;
         } else {
             current_cluster = p_ffd->cluster_link.buffer[position];
-            err = VFiPFFAT_ReadFATSector(p_ffd->p_vol, &p_page, current_cluster);
+#ifndef GAME_REXE01
+            err = VFiPFFAT_ReadFATSector(p_ffd->p_vol, PF_ET_PAGE_ARG(p_page), current_cluster);
             if (err) {
                 return err;
             }
+#endif
             for (i = offset; i != 0; i--) {
-                err = VFiPFFAT_ReadFATEntryPage(p_ffd->p_vol, current_cluster, &next_cluster, &p_page);
+#ifdef GAME_REXE01
+                err = VFiPFFAT_ReadFATEntry(p_ffd->p_vol, current_cluster, &next_cluster);
+#else
+                err = VFiPFFAT_ReadFATEntryPage(p_ffd->p_vol, current_cluster, &next_cluster, PF_ET_PAGE_ARG(p_page));
+#endif
                 if (err) {
                     return err;
                 }
@@ -342,7 +461,7 @@ s32 VFiPFFAT_FindClusterLinkPage(struct PF_FFD* p_ffd, u32 chain_index, u32* p_c
         } else {
             current_cluster = p_ffd->cluster_link.buffer[position];
             for (i = offset; i != 0; i--) {
-                err = VFiPFFAT_ReadFATEntryPage(p_ffd->p_vol, current_cluster, &next_cluster, &p_page);
+                err = VFiPFFAT_ReadFATEntryPage(p_ffd->p_vol, current_cluster, &next_cluster, PF_ET_PAGE_ARG(p_page));
                 if (err) {
                     return err;
                 }
@@ -367,13 +486,49 @@ s32 VFiPFFAT_FindClusterLinkPage(struct PF_FFD* p_ffd, u32 chain_index, u32* p_c
     return err;
 }
 
-s32 VFiPFFAT_ReadClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk, struct PF_CACHE_PAGE** p_page) {
+#ifdef GAME_REXE01
+s32 VFiPFFAT_ReadCluster(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk) {
     s32 err;
 
     *next_cluster = -1;
     if (p_ffd->cluster_link.buffer != NULL) {
         if (*chk_clstlnk == 1) {
-            err = VFiPFFAT_FindClusterLinkPage(p_ffd, chain_index, next_cluster, chk_clstlnk, *p_page);
+            err = VFiPFFAT_FindClusterLink(p_ffd, chain_index, next_cluster, chk_clstlnk);
+            if (err != 0) {
+                return err;
+            }
+        }
+    }
+
+    if (p_ffd->cluster_link.buffer == NULL || (*chk_clstlnk == 0)) {
+        err = VFiPFFAT_ReadFATEntry(p_ffd->p_vol, cluster, next_cluster);
+        if (err) {
+            return err;
+        }
+        if (*next_cluster == 0) {
+            return 13;
+        }
+        if (*next_cluster == -1) {
+            return 6;
+        }
+
+        if (p_ffd->cluster_link.buffer != NULL) {
+            if (*next_cluster != fat_special_values[p_ffd->p_vol->bpb.fat_type].eoc2) {
+                VFiPFFAT_UpdateClusterLink(p_ffd, *next_cluster, chain_index);
+            }
+        }
+    }
+    return 0;
+}
+#endif
+
+s32 VFiPFFAT_ReadClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk, PF_ET_PAGE p_page) {
+    s32 err;
+
+    *next_cluster = -1;
+    if (p_ffd->cluster_link.buffer != NULL) {
+        if (*chk_clstlnk == 1) {
+            err = VFiPFFAT_FindClusterLinkPage(p_ffd, chain_index, next_cluster, chk_clstlnk, PF_ET_PAGE_DEREF(p_page));
             if (err != 0) {
                 return err;
             }
@@ -432,7 +587,7 @@ s32 VFiPFFAT_WriteCluster(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u3
     return 0;
 }
 
-s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk, struct PF_CACHE_PAGE** p_page) {
+s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk, PF_ET_PAGE p_page) {
     s32 err;
     u32 access_cluster;
 
@@ -450,7 +605,7 @@ s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index
             VFiPFFAT_ClearClusterLink(p_ffd, chain_index);
         } else {
             if (cluster != fat_special_values[p_ffd->p_vol->bpb.fat_type].eoc2) {
-                err = VFiPFFAT_FindClusterLinkPage(p_ffd, chain_index, &access_cluster, &use_clstlnk, *p_page);
+                err = VFiPFFAT_FindClusterLinkPage(p_ffd, chain_index, &access_cluster, &use_clstlnk, PF_ET_PAGE_DEREF(p_page));
                 if (err) {
                     return err;
                 }
@@ -463,6 +618,129 @@ s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index
     return 0;
 }
 
+#ifdef GAME_REXE01
+// ET writes the page back to every FAT copy itself.
+s32 VFiPFFAT_UpdateFATEntry(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page) {
+    s32 err;
+    u16 fat_no;
+    u32 sector;
+    s32 first_err;
+
+    first_err = 0;
+    sector = p_page->sector;
+    for (fat_no = 0; fat_no < p_vol->bpb.num_active_FATs; fat_no++) {
+        err = VFiPFSEC_WriteFAT(p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector);
+        if (err != 0 && first_err == 0) {
+            first_err = err;
+        }
+        sector += p_vol->bpb.sectors_per_FAT;
+    }
+    return first_err;
+}
+#endif
+
+#ifdef GAME_REXE01
+s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated, u32 clear) {
+    struct PF_VOLUME* p_vol;
+    u32 eoc2;
+    enum FatType fat_type;
+    u32 first_allocated_cluster;
+    u32 last_allocated_cluster;
+    s32 err;
+    u32 is_hit;
+    struct PF_CACHE_PAGE* p_page;
+    u32 i;
+
+    p_vol = p_ffd->p_vol;
+    fat_type = p_vol->bpb.fat_type;
+    eoc2 = fat_special_values[fat_type].eoc2;
+    *p_chain_start = -1;
+    *p_last_allocated = -1;
+    last_allocated_cluster = -1;
+
+    err = VFiPFFAT_SearchForNumFreeClusters(p_vol, p_vol->last_free_cluster, -1, chain_len, &first_allocated_cluster, &last_allocated_cluster);
+    if (err) {
+        return err;
+    }
+    if (first_allocated_cluster == -1) {
+        return 0;
+    }
+
+    if (clear) {
+        err = VFiPFFAT_ClearCluster(p_vol, first_allocated_cluster);
+        if (err) {
+            return err;
+        }
+    }
+
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
+    if (err) {
+        return err;
+    }
+
+    err = VFiPFFAT_ReadFATSector(p_vol, p_page, first_allocated_cluster);
+    if (err) {
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+        return err;
+    }
+
+    p_page->option = 0;
+    for (i = first_allocated_cluster; i < last_allocated_cluster; i++) {
+        err = VFiPFFAT_WriteClusterPage(p_ffd, i, chain_index, i + 1, 1, p_page);
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return err;
+        }
+        if ((p_vol->fsi_flag & 4) && p_vol->num_free_clusters != -1 && p_vol->num_free_clusters != 0) {
+            if (p_vol->bpb.fat_type != FAT_32 || last_allocated_cluster != p_vol->bpb.root_dir_cluster) {
+                p_vol->num_free_clusters--;
+            }
+        }
+        if (*p_chain_start == -1) {
+            *p_chain_start = i;
+        }
+        *p_last_allocated = i;
+        chain_index++;
+    }
+
+    if (last_allocated_cluster != -1) {
+        err = VFiPFFAT_WriteClusterPage(p_ffd, last_allocated_cluster, chain_index, eoc2, 1, p_page);
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return err;
+        }
+        if (*p_chain_start == -1) {
+            *p_chain_start = i;
+        }
+        *p_last_allocated = i;
+        if (p_vol->num_free_clusters != -1 && p_vol->num_free_clusters != 0) {
+            if (p_vol->bpb.fat_type != FAT_32 || last_allocated_cluster != p_vol->bpb.root_dir_cluster) {
+                p_vol->num_free_clusters--;
+            }
+        }
+    }
+
+    p_vol->last_free_cluster = last_allocated_cluster + 1;
+    p_ffd->last_cluster.num_last_cluster = last_allocated_cluster;
+    p_ffd->last_cluster.max_chain_index = chain_index;
+    *p_last_allocated = last_allocated_cluster;
+
+    err = VFiPFFAT_UpdateFATEntry(p_vol, p_page);
+    if (err) {
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+        return err;
+    }
+    VFiPFCACHE_FreeDataPage(p_vol, p_page);
+
+    if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2)) {
+        if (VFiPFFAT_RefreshFSINFO(p_vol)) {
+            p_vol->num_free_clusters = -1;
+            p_vol->fsi_flag &= ~4;
+        }
+    }
+    return 0;
+}
+#else
 s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated) {
     struct PF_VOLUME* p_vol;
     u32 eoc2;
@@ -490,14 +768,14 @@ s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_inde
         return 0;
     }
 
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, first_allocated_cluster);
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), first_allocated_cluster);
     if (err) {
         return err;
     }
 
     p_page->option = 0;
     for (i = first_allocated_cluster; i < last_allocated_cluster; i++) {
-        err = VFiPFFAT_WriteClusterPage(p_ffd, i, chain_index, i + 1, 1, &p_page);
+        err = VFiPFFAT_WriteClusterPage(p_ffd, i, chain_index, i + 1, 1, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -514,7 +792,7 @@ s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_inde
     }
 
     if (last_allocated_cluster != -1) {
-        err = VFiPFFAT_WriteClusterPage(p_ffd, last_allocated_cluster, chain_index, eoc2, 1, &p_page);
+        err = VFiPFFAT_WriteClusterPage(p_ffd, last_allocated_cluster, chain_index, eoc2, 1, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -547,11 +825,16 @@ s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_inde
     }
     return 0;
 }
+#endif
 
 static s32 VFiPFFAT_AllocateChain(PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated) {
     s32 err;
 
+#ifdef GAME_REXE01
+    err = VFiPFFAT_DoAllocateChain(p_ffd, chain_len, chain_index, p_chain_start, p_last_allocated, 0);
+#else
     err = VFiPFFAT_DoAllocateChain(p_ffd, chain_len, chain_index, p_chain_start, p_last_allocated);
+#endif
     if (err) {
         if (*p_chain_start != -1) {
             VFiPFFAT_FreeChain(p_ffd, *p_chain_start, chain_index, -1);
@@ -574,10 +857,15 @@ s32 VFiPFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, 
     u32 search_index;
     u32* p_chain_start;
     u32 chain_start;
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     u32 check_use;
     struct PF_CACHE_PAGE* p_page;
 
+#ifndef GAME_REXE01
     p_page = 0;
+#endif
     bad = fat_special_values[p_ffd->p_vol->bpb.fat_type].bad;
     eoc1 = fat_special_values[p_ffd->p_vol->bpb.fat_type].eoc1;
     *locate_end = -1;
@@ -619,17 +907,32 @@ s32 VFiPFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, 
     }
 
     if (trace_cnt != 0) {
-        err = VFiPFFAT_ReadFATSector(p_ffd->p_vol, &p_page, current_cluster);
+#ifdef GAME_REXE01
+        err = VFiPFCACHE_AllocateDataPage(p_ffd->p_vol, -1, &p_page, &is_hit);
         if (err) {
             return err;
         }
+        err = VFiPFFAT_ReadFATSector(p_ffd->p_vol, p_page, current_cluster);
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+            return err;
+        }
+#else
+        err = VFiPFFAT_ReadFATSector(p_ffd->p_vol, PF_ET_PAGE_ARG(p_page), current_cluster);
+        if (err) {
+            return err;
+        }
+#endif
         p_page->option = 0;
         check_use = 1;
 
         while (trace_cnt-- != 0 && current_cluster < bad) {
             if (current_cluster != 0) {
-                err = VFiPFFAT_ReadClusterPage(p_ffd, current_cluster, search_index, &next_cluster, &check_use, &p_page);
+                err = VFiPFFAT_ReadClusterPage(p_ffd, current_cluster, search_index, &next_cluster, &check_use, PF_ET_PAGE_ARG(p_page));
                 if (err != 0 && next_cluster != (u32)-1) {
+#ifdef GAME_REXE01
+                    VFiPFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+#endif
                     return err;
                 }
             } else {
@@ -638,6 +941,9 @@ s32 VFiPFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, 
             }
 
             if ((next_cluster < 2 || next_cluster >= (p_ffd->p_vol->bpb.num_clusters + 2)) && next_cluster < eoc1) {
+#ifdef GAME_REXE01
+                VFiPFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+#endif
                 return 14;
             }
 
@@ -649,6 +955,9 @@ s32 VFiPFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, 
             search_index++;
         }
         append_cnt = trace_cnt;
+#ifdef GAME_REXE01
+        VFiPFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+#endif
     }
 
     if (mode != 0 && next_cluster >= eoc1) {
@@ -697,7 +1006,11 @@ static s32 VFiPFFAT_GetNumberOfCluster(struct PF_FFD* p_ffd, u32 chain_index, u3
     return 0;
 }
 
+#ifdef GAME_REXE01
+static s32 VFiPFFAT_GetNumberOfAllocatedCluster(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster) {
+#else
 static s32 VFiPFFAT_GetNumberOfAllocatedCluster(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster, u32* p_num_cluster) {
+#endif
     s32 err;
     u32 locate_start;
     u32 locate_end;
@@ -707,7 +1020,9 @@ static s32 VFiPFFAT_GetNumberOfAllocatedCluster(struct PF_FFD* p_ffd, u32 chain_
     if (err) {
         return err;
     }
+#ifndef GAME_REXE01
     *p_num_cluster = locate_end - locate_start + 1;
+#endif
     if (locate_start >= 2 && locate_start < p_ffd->p_vol->bpb.num_clusters + 2) {
         *p_cluster = locate_start;
     }
@@ -726,13 +1041,19 @@ s32 VFiPFFAT_GetClusterContinuousSectorInChain(struct PF_FFD* p_ffd, u32 initial
     next_cluster = -1;
     cluster = initial_cluster;
     check_use = 1;
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, initial_cluster);
+#ifndef GAME_REXE01
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), initial_cluster);
     if (err) {
         return err;
     }
+#endif
 
     while (next_cluster) {
-        err = VFiPFFAT_ReadClusterPage(p_ffd, cluster, chain_index, &next_cluster, &check_use, &p_page);
+#ifdef GAME_REXE01
+        err = VFiPFFAT_ReadCluster(p_ffd, cluster, chain_index, &next_cluster, &check_use);
+#else
+        err = VFiPFFAT_ReadClusterPage(p_ffd, cluster, chain_index, &next_cluster, &check_use, PF_ET_PAGE_ARG(p_page));
+#endif
         if (err) {
             return err;
         }
@@ -769,7 +1090,7 @@ s32 VFiPFFAT_GetClusterAllocatedInChain(struct PF_FFD* p_ffd, u32 initial_cluste
     cluster = initial_cluster;
     check_use = 1;
     total_size = 0;
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, initial_cluster);
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), initial_cluster);
     if (err) {
         return err;
     }
@@ -780,7 +1101,7 @@ s32 VFiPFFAT_GetClusterAllocatedInChain(struct PF_FFD* p_ffd, u32 initial_cluste
         if (total_size >= size) {
             break;
         }
-        err = VFiPFFAT_ReadClusterPage(p_ffd, cluster, chain_index, &next_cluster, &check_use, &p_page);
+        err = VFiPFFAT_ReadClusterPage(p_ffd, cluster, chain_index, &next_cluster, &check_use, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -849,7 +1170,11 @@ s32 VFiPFFAT_GetClusterSpecified(struct PF_FFD* p_ffd, u32 chain_index, u32 may_
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster) {
+#else
 s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster, u32* p_num_cluster) {
+#endif
     struct PF_VOLUME* p_vol;
     struct PF_FAT_HINT* p_hint;
     enum FatType fat_type;
@@ -866,7 +1191,11 @@ s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_
         }
         *p_ffd->p_start_cluster = p_vol->bpb.root_dir_cluster;
     }
+#ifdef GAME_REXE01
+    err = VFiPFFAT_GetNumberOfAllocatedCluster(p_ffd, chain_index, num_cluster, p_cluster);
+#else
     err = VFiPFFAT_GetNumberOfAllocatedCluster(p_ffd, chain_index, num_cluster, p_cluster, p_num_cluster);
+#endif
     if (err) {
         return err;
     }
@@ -881,9 +1210,11 @@ s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_
 }
 
 static s32 VFiPFFAT_GetSectorInRootDirRegion(PF_VOLUME* p_vol, u32 sector_offset, u32* p_sector) {
+#ifndef GAME_REXE01
     if (p_vol->bpb.fat_type != FAT_12 && (s32)p_vol->bpb.fat_type != FAT_16) {
         return 12;
     }
+#endif
     if (sector_offset >= p_vol->bpb.num_root_dir_sectors) {
         *p_sector = -1;
         return 0;
@@ -893,7 +1224,11 @@ static s32 VFiPFFAT_GetSectorInRootDirRegion(PF_VOLUME* p_vol, u32 sector_offset
     }
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u32 size, u32* p_sector) {
+#else
 s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u32 size, u32* p_sector, u32* p_num_sector) {
+#endif
     s32 err;
     struct PF_VOLUME* p_vol;
     enum FatType fat_type;
@@ -902,18 +1237,41 @@ s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u3
     u32 num_divide;
     u32 num_remaind;
     u32 num_cluster;
+#ifndef GAME_REXE01
     u32 num_success;
+#endif
 
+#ifndef GAME_REXE01
     num_success = 0;
+#endif
     p_vol = p_ffd->p_vol;
     fat_type = p_vol->bpb.fat_type;
 
     if (*p_ffd->p_start_cluster == 1 && (u32)fat_type <= FAT_16) {
         err = VFiPFFAT_GetSectorInRootDirRegion(p_vol, file_sector_index, p_sector);
+#ifdef GAME_REXE01
+        if (err) {
+            return err;
+        }
+        return 0;
+#else
         return err ? err : 0;
+#endif
     } else {
         chain_index = file_sector_index >> p_vol->bpb.log2_sectors_per_cluster;
         if (mode == 2) {
+#ifdef GAME_REXE01
+            num_divide = size / p_vol->bpb.bytes_per_sector;
+            num_remaind = (size % p_vol->bpb.bytes_per_sector) != 0;
+            num_cluster = num_divide + num_remaind;
+            num_divide = num_cluster / p_vol->bpb.sectors_per_cluster;
+            num_remaind = (num_cluster % p_vol->bpb.sectors_per_cluster) != 0;
+            num_divide += num_remaind;
+            err = VFiPFFAT_GetClusterAllocated(p_ffd, chain_index, num_divide, &cluster);
+            if (err) {
+                return err;
+            }
+#else
             num_divide = size >> p_vol->bpb.log2_bytes_per_sector;
             num_remaind = (size & (p_vol->bpb.bytes_per_sector - 1)) != 0;
             num_cluster = (num_divide + num_remaind) >> p_vol->bpb.log2_sectors_per_cluster;
@@ -923,12 +1281,15 @@ s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u3
                 return err;
             }
             *p_num_sector = num_success << p_vol->bpb.log2_sectors_per_cluster;
+#endif
         } else {
             err = VFiPFFAT_GetClusterSpecified(p_ffd, chain_index, mode, &cluster);
             if (err) {
                 return err;
             }
+#ifndef GAME_REXE01
             *p_num_sector = 1 << p_vol->bpb.log2_sectors_per_cluster;
+#endif
         }
         if (cluster == -1) {
             *p_sector = -1;
@@ -941,6 +1302,7 @@ s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u3
     return err;
 }
 
+#ifndef GAME_REXE01
 s32 VFiPFFAT_UpdateFATEntry(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page) {
     s32 err;
 
@@ -950,6 +1312,7 @@ s32 VFiPFFAT_UpdateFATEntry(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_pag
     }
     return err;
 }
+#endif
 
 s32 VFiPFFAT_UpdateAlternateFATEntry(struct PF_VOLUME* p_vol, u8* p_buf, u32 sector, u32 size) {
     s32 err;
@@ -995,6 +1358,7 @@ s32 VFiPFFAT_GetSectorSpecified(struct PF_FFD* p_ffd, u32 file_sector_index, u32
     u32 mode;
     u32 num_sector;
 
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
@@ -1013,18 +1377,24 @@ s32 VFiPFFAT_GetSectorSpecified(struct PF_FFD* p_ffd, u32 file_sector_index, u32
     if (file_sector_index >= (u32)(0xFFFFFFFF >> p_ffd->p_vol->bpb.log2_bytes_per_sector) + 1) {
         return 37;
     }
+#endif
     if (may_allocate) {
         mode = 1;
     } else {
         mode = 0;
     }
+#ifdef GAME_REXE01
+    err = VFiPFFAT_GetSector(p_ffd, file_sector_index, mode, 0, p_sector);
+#else
     err = VFiPFFAT_GetSector(p_ffd, file_sector_index, mode, 0, p_sector, &num_sector);
+#endif
     if (err) {
         return err;
     }
     return 0;
 }
 
+#ifndef GAME_REXE01
 s32 VFiPFFAT_GetSectorAllocated(struct PF_FFD* p_ffd, u32 file_sector_index, u32 size, u32* p_sector, u32* p_num_sector) {
     s32 err;
 
@@ -1052,6 +1422,7 @@ s32 VFiPFFAT_GetSectorAllocated(struct PF_FFD* p_ffd, u32 file_sector_index, u32
     }
     return err;
 }
+#endif
 
 s32 VFiPFFAT_GetContinuousSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 size, u32* p_sector, u32* p_num_sector) {
     struct PF_VOLUME* p_vol;
@@ -1060,6 +1431,7 @@ s32 VFiPFFAT_GetContinuousSector(struct PF_FFD* p_ffd, u32 file_sector_index, u3
     s32 err;
 
     cluster = -1;
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
@@ -1072,13 +1444,16 @@ s32 VFiPFFAT_GetContinuousSector(struct PF_FFD* p_ffd, u32 file_sector_index, u3
     if (p_ffd->p_hint->file_version > p_ffd->file_version) {
         return 10;
     }
+#endif
     p_vol = p_ffd->p_vol;
+#ifndef GAME_REXE01
     if (p_ffd->p_vol->drv_char < 'A' || p_ffd->p_vol->drv_char > 'Z') {
         return 35;
     }
     if (file_sector_index >= (u32)(0xFFFFFFFF >> p_vol->bpb.log2_bytes_per_sector) + 1) {
         return 37;
     }
+#endif
 
     if (*p_sector != -1) {
         cluster = ((*p_sector - p_vol->bpb.first_data_sector) >> p_vol->bpb.log2_sectors_per_cluster) + 2;
@@ -1187,13 +1562,13 @@ s32 VFiPFFAT_CountFreeClusters(struct PF_VOLUME* p_vol, u32* p_num_free_clusters
         *p_num_free_clusters = p_vol->num_free_clusters;
     }
     if (*p_num_free_clusters == -1) {
-        err = VFiPFFAT_ReadFATSector(p_vol, &p_page, 2);
+        err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), 2);
         if (err) {
             return err;
         }
         p_page->option = 0;
         while (free_cluster >= 2 && free_cluster < p_vol->bpb.num_clusters + 2) {
-            err = VFiPFFAT_ReadFATEntryPage(p_vol, free_cluster, &next_cluster, &p_page);
+            err = VFiPFFAT_ReadFATEntryPage(p_vol, free_cluster, &next_cluster, PF_ET_PAGE_ARG(p_page));
             if (err) {
                 return err;
             }
@@ -1214,6 +1589,104 @@ s32 VFiPFFAT_CountFreeClusters(struct PF_VOLUME* p_vol, u32* p_num_free_clusters
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index, u32 size) {
+    s32 err;
+    struct PF_VOLUME* p_vol;
+    u32 eoc1;
+    u32 next_cluster;
+    u32 file_size;
+    u32 clst_size;
+    u32 is_hit;
+    struct PF_CACHE_PAGE* p_page;
+    u32 current_cluster;
+
+    p_vol = p_ffd->p_vol;
+    if (start_cluster == 0) {
+        return 0;
+    }
+
+    eoc1 = fat_special_values[p_vol->bpb.fat_type].eoc1;
+    if (size != 0) {
+        file_size = size;
+        clst_size = p_vol->bpb.bytes_per_sector << p_vol->bpb.log2_sectors_per_cluster;
+    } else {
+        return 0;
+    }
+
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
+    if (err) {
+        return err;
+    }
+    err = VFiPFFAT_ReadFATSector(p_vol, p_page, start_cluster);
+    if (err) {
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+        return err;
+    }
+    p_page->option = 1;
+
+    current_cluster = start_cluster;
+    next_cluster = start_cluster;
+
+    while (current_cluster < eoc1) {
+        if (size != 0 && file_size == 0) {
+            break;
+        }
+        err = VFiPFFAT_ReadFATEntryPage(p_vol, current_cluster, &next_cluster, p_page);
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return err;
+        }
+        if (next_cluster == 0) {
+            err = VFiPFFAT_UpdateFATEntry(p_vol, p_page);
+            if (err) {
+                VFiPFCACHE_FreeDataPage(p_vol, p_page);
+                return err;
+            }
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return 0;
+        }
+
+        if (chain_index != 0xFFFFFFFF) {
+            err = VFiPFFAT_WriteClusterPage(p_ffd, current_cluster, chain_index, 0, 1, p_page);
+            chain_index++;
+        } else {
+            err = VFiPFFAT_WriteFATEntryPage(p_vol, current_cluster, 0, p_page);
+        }
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return err;
+        }
+
+        if (size != 0 && file_size != 0) {
+            if (clst_size >= file_size) {
+                file_size = 0;
+            } else {
+                file_size -= clst_size;
+            }
+        }
+        if (p_vol->num_free_clusters != -1) {
+            p_vol->num_free_clusters++;
+        }
+        current_cluster = next_cluster;
+    }
+
+    err = VFiPFFAT_UpdateFATEntry(p_vol, p_page);
+    if (err) {
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+        return err;
+    }
+    VFiPFCACHE_FreeDataPage(p_vol, p_page);
+
+    if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2)) {
+        if (VFiPFFAT_RefreshFSINFO(p_vol)) {
+            p_vol->num_free_clusters = -1;
+            p_vol->fsi_flag &= ~4;
+        }
+    }
+    return 0;
+}
+#else
 s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index, u32 size) {
     s32 err;
     struct PF_VOLUME* p_vol;
@@ -1247,7 +1720,7 @@ s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index,
         return 0;
     }
 
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_cluster);
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), start_cluster);
     if (err) {
         return err;
     }
@@ -1263,7 +1736,7 @@ s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index,
             break;
         }
         sector = p_page->sector;
-        err = VFiPFFAT_ReadFATEntryPage(p_vol, current_cluster, &next_cluster, &p_page);
+        err = VFiPFFAT_ReadFATEntryPage(p_vol, current_cluster, &next_cluster, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -1276,26 +1749,26 @@ s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index,
         }
 
         if (sector != p_page->sector) {
-            err = VFiPFFAT_ReadFATSector(p_vol, &p_page, current_cluster);
+            err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), current_cluster);
             if (err) {
                 return err;
             }
         }
 
         if (chain_index != 0xFFFFFFFF) {
-            err = VFiPFFAT_WriteClusterPage(p_ffd, current_cluster, chain_index, 0, 1, &p_page);
+            err = VFiPFFAT_WriteClusterPage(p_ffd, current_cluster, chain_index, 0, 1, PF_ET_PAGE_ARG(p_page));
             chain_index++;
         } else {
-            // err = VFiPFFAT_WriteFATEntryPage(p_vol, current_cluster, 0, &p_page);
+            // err = VFiPFFAT_WriteFATEntryPage(p_vol, current_cluster, 0, PF_ET_PAGE_ARG(p_page));
             switch (p_vol->bpb.fat_type) {
                 case FAT_12:
-                    err = VFiPFFAT12_WriteFATEntryPage(p_vol, (u16)current_cluster, 0, &p_page);
+                    err = VFiPFFAT12_WriteFATEntryPage(p_vol, (u16)current_cluster, 0, PF_ET_PAGE_ARG(p_page));
                     break;
                 case FAT_16:
-                    err = VFiPFFAT16_WriteFATEntryPage(p_vol, current_cluster, 0, &p_page);
+                    err = VFiPFFAT16_WriteFATEntryPage(p_vol, current_cluster, 0, PF_ET_PAGE_ARG(p_page));
                     break;
                 case FAT_32:
-                    err = VFiPFFAT32_WriteFATEntryPage(p_vol, current_cluster, 0, &p_page);
+                    err = VFiPFFAT32_WriteFATEntryPage(p_vol, current_cluster, 0, PF_ET_PAGE_ARG(p_page));
                     break;
                 default:
                     err = 15;
@@ -1334,13 +1807,53 @@ s32 VFiPFFAT_FreeChain(struct PF_FFD* p_ffd, u32 start_cluster, u32 chain_index,
     }
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2 reads the chain entry by entry through a data page
+s32 VFiPFFAT_GetBeforeChain(struct PF_VOLUME* p_vol, u32 start_cluster, u32 lActive, u32* p_cluster) {
+    s32 err;
+    u32 eoc1;
+    u32 next_cluster;
+    struct PF_CACHE_PAGE* p_page;
+    u32 is_hit;
+
+    eoc1 = fat_special_values[p_vol->bpb.fat_type].eoc1;
+    *p_cluster = -1;
+
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
+    if (err) {
+        return err;
+    }
+
+    p_page->option = 0;
+    while (start_cluster < eoc1) {
+        err = VFiPFFAT_ReadFATEntryPage(p_vol, start_cluster, &next_cluster, p_page);
+        if (err) {
+            VFiPFCACHE_FreeDataPage(p_vol, p_page);
+            return err;
+        }
+        if (lActive == next_cluster) {
+            *p_cluster = start_cluster;
+            return 0;
+        }
+        start_cluster--;
+        if ((start_cluster < 2 || start_cluster >= p_vol->bpb.num_clusters + 2) && start_cluster < eoc1) {
+            *p_cluster = lActive;
+            return 0;
+        }
+    }
+    VFiPFCACHE_FreeDataPage(p_vol, p_page);
+    return 13;
+}
+#else
 s32 VFiPFFAT_GetBeforeChain(struct PF_VOLUME* p_vol, u32 start_cluster, u32 lActive, u32* p_cluster) {
     s32 err;
     u32 eoc1;
     u32 next_cluster;
     struct PF_CACHE_PAGE* p_page;
 
+#ifndef GAME_REXE01
     if (p_vol == NULL) {
         *p_cluster = -1;
         return 10;
@@ -1350,17 +1863,18 @@ s32 VFiPFFAT_GetBeforeChain(struct PF_VOLUME* p_vol, u32 start_cluster, u32 lAct
         return 10;
     }
 
+#endif
     eoc1 = fat_special_values[p_vol->bpb.fat_type].eoc1;
     *p_cluster = -1;
 
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_cluster);
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), start_cluster);
     if (err) {
         return err;
     }
 
     p_page->option = 0;
     while (start_cluster < eoc1) {
-        err = VFiPFFAT_ReadFATEntryPage(p_vol, start_cluster, &next_cluster, &p_page);
+        err = VFiPFFAT_ReadFATEntryPage(p_vol, start_cluster, &next_cluster, PF_ET_PAGE_ARG(p_page));
         if (err) {
             return err;
         }
@@ -1376,6 +1890,7 @@ s32 VFiPFFAT_GetBeforeChain(struct PF_VOLUME* p_vol, u32 start_cluster, u32 lAct
     }
     return 13;
 }
+#endif
 
 s32 VFiPFFAT_InitFATRegion(struct PF_VOLUME* p_vol) {
     u32 sector;
@@ -1385,12 +1900,14 @@ s32 VFiPFFAT_InitFATRegion(struct PF_VOLUME* p_vol) {
     u32 is_hit;
 #endif
 
+#ifndef GAME_REXE01
     if (p_vol == NULL) {
         return 10;
     }
     if (p_vol->bpb.fat_type != FAT_12 && p_vol->bpb.fat_type != FAT_16 && p_vol->bpb.fat_type != FAT_32) {
         return 15;
     }
+#endif
     err = VFiPFCACHE_AllocateFATPage(p_vol, -1, &p_page PF_ET_IS_HIT_ARG);
     if (err) {
         return err;
@@ -1427,10 +1944,10 @@ s32 VFiPFFAT_MakeRootDir(struct PF_VOLUME* p_vol) {
     u32 sector;
     u32 success_size;
     u32 num_sectors;
-    struct PF_CACHE_PAGE* p_page;
 #ifdef GAME_REXE01
     u32 is_hit;
 #endif
+    struct PF_CACHE_PAGE* p_page;
 
     err = VFiPFFAT_WriteFATEntry(p_vol, p_vol->bpb.root_dir_cluster, fat_special_values[p_vol->bpb.fat_type].eoc2);
     if (err) {
@@ -1466,6 +1983,43 @@ s32 VFiPFFAT_MakeRootDir(struct PF_VOLUME* p_vol) {
     return 0;
 }
 
+#ifdef GAME_REXE01
+static s32 VFiPFFAT_RefreshFSINFO(PF_VOLUME* p_vol) {
+    s32 err;
+    struct PF_CACHE_PAGE* p_page;
+    u32 is_hit;
+    u32 success_size;
+
+    err = 0;
+    if ((p_vol->fsi_flag & 4) != 0) {
+        err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page, &is_hit);
+        if (err) {
+            return err;
+        }
+
+        err = VFiPFSEC_ReadData(p_vol, p_page->p_buf, p_vol->bpb.fs_info_sector, 0, p_vol->bpb.bytes_per_sector, &success_size, 0);
+        if (err == 0 && success_size != p_vol->bpb.bytes_per_sector) {
+            err = 17;
+        }
+        if (err == 0) {
+            if (((u32)(p_page->p_buf + 488) & 3) != 0) {
+                *(p_page->p_buf + 488) = (u8)p_vol->num_free_clusters;
+                p_page->p_buf[489] = (u8)(p_vol->num_free_clusters >> 8);
+                p_page->p_buf[490] = (u8)(p_vol->num_free_clusters >> 16);
+                p_page->p_buf[491] = (u8)(p_vol->num_free_clusters >> 24);
+            } else {
+                ((u32*)p_page->p_buf)[122] = SWAP32(p_vol->num_free_clusters);
+            }
+            err = VFiPFSEC_WriteData(p_vol, p_page->p_buf, p_vol->bpb.fs_info_sector, 0, p_vol->bpb.bytes_per_sector, &success_size, 0);
+            if (err == 0 && success_size != p_vol->bpb.bytes_per_sector) {
+                err = 17;
+            }
+        }
+        VFiPFCACHE_FreeDataPage(p_vol, p_page);
+    }
+    return err;
+}
+#else
 static s32 VFiPFFAT_RefreshFSINFO(PF_VOLUME* p_vol) {
     s32 err;
 
@@ -1480,6 +2034,7 @@ static s32 VFiPFFAT_RefreshFSINFO(PF_VOLUME* p_vol) {
     }
     return err;
 }
+#endif
 
 void VFiPFFAT_InitHint(struct PF_FAT_HINT* p_hint) {
     p_hint->chain_index = 0;
@@ -1489,12 +2044,12 @@ void VFiPFFAT_InitHint(struct PF_FAT_HINT* p_hint) {
 
 s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, u32* p_target_clst, u32* p_next_clst) {
     s32 err;
-    struct PF_VOLUME* p_vol;
     u32 next_cluster;
     u32 save_cluster;
     u32 chain_index;
     u32 clst_size;
     u32 clst_cnt;
+    struct PF_VOLUME* p_vol;
     u32 cnt;
     u32 check_use;
     struct PF_CACHE_PAGE* p_page;
@@ -1504,6 +2059,7 @@ s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, 
     *p_target_clst = 0;
     *p_next_clst = 0;
 
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
@@ -1523,6 +2079,7 @@ s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, 
     if (p_vol == NULL) {
         return 10;
     }
+#endif
     if (*p_ffd->p_start_cluster < 2) {
         return 0;
     }
@@ -1532,6 +2089,9 @@ s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, 
     if (size == 0) {
         return 0;
     }
+#ifdef GAME_REXE01
+    p_vol = p_ffd->p_vol;
+#endif
 
     if (size == -1 && p_ffd->last_cluster.num_last_cluster != 0) {
         *p_target_clst = p_ffd->last_cluster.num_last_cluster;
@@ -1539,7 +2099,11 @@ s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, 
         return 0;
     }
 
+#ifdef GAME_REXE01
+    clst_size = p_vol->bpb.bytes_per_sector * p_vol->bpb.sectors_per_cluster;
+#else
     clst_size = p_vol->bpb.bytes_per_sector << p_vol->bpb.log2_sectors_per_cluster;
+#endif
     clst_cnt = size / clst_size;
     if (size % clst_size) {
         clst_cnt++;
@@ -1553,13 +2117,19 @@ s32 VFiPFFAT_TraceClustersChain(struct PF_FFD* p_ffd, u32 start_clst, u32 size, 
 
     next_cluster = -1;
     check_use = 1;
-    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_clst);
+#ifndef GAME_REXE01
+    err = VFiPFFAT_ReadFATSector(p_vol, PF_ET_PAGE_ARG(p_page), start_clst);
     if (err) {
         return err;
     }
+#endif
 
     for (cnt = 0; cnt < clst_cnt; cnt++) {
-        err = VFiPFFAT_ReadClusterPage(p_ffd, start_clst, chain_index, &next_cluster, &check_use, &p_page);
+#ifdef GAME_REXE01
+        err = VFiPFFAT_ReadCluster(p_ffd, start_clst, chain_index, &next_cluster, &check_use);
+#else
+        err = VFiPFFAT_ReadClusterPage(p_ffd, start_clst, chain_index, &next_cluster, &check_use, PF_ET_PAGE_ARG(p_page));
+#endif
         if (err) {
             return err;
         }
@@ -1591,12 +2161,14 @@ s32 VFiPFFAT_ReadValueToSpecifiedCluster(struct PF_VOLUME* p_vol, u32 cluster, u
 }
 
 s32 VFiPFFAT_ResetFFD(struct PF_FFD* p_ffd, u32* p_start_cluster) {
+#ifndef GAME_REXE01
     if (p_ffd == NULL) {
         return 10;
     }
     if (p_start_cluster == NULL) {
         return 10;
     }
+#endif
     p_ffd->p_start_cluster = p_start_cluster;
     p_ffd->file_version = 1;
     if (p_ffd->p_hint) {
@@ -1611,12 +2183,14 @@ s32 VFiPFFAT_ResetFFD(struct PF_FFD* p_ffd, u32* p_start_cluster) {
 }
 
 s32 VFiPFFAT_InitFFD(struct PF_FFD* p_ffd, struct PF_FAT_HINT* p_hint, struct PF_VOLUME* p_vol, u32* p_start_cluster) {
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
     if (!p_start_cluster) {
         return 10;
     }
+#endif
     p_ffd->p_hint = p_hint;
     p_ffd->p_vol = p_vol;
     VFiPFFAT_ResetFFD(p_ffd, p_start_cluster);
@@ -1624,9 +2198,11 @@ s32 VFiPFFAT_InitFFD(struct PF_FFD* p_ffd, struct PF_FAT_HINT* p_hint, struct PF
 }
 
 s32 VFiPFFAT_FinalizeFFD(struct PF_FFD* p_ffd) {
+#ifndef GAME_REXE01
     if (!p_ffd) {
         return 10;
     }
+#endif
     p_ffd->cluster_link.buffer = 0;
     return 0;
 }

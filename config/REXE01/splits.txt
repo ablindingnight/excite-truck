@@ -1115,8 +1115,17 @@ RVL_SDK/vf/pf_entry_iterator.c:
 	.sdata      start:0x805591F0 end:0x80559208
 
 RVL_SDK/vf/pf_fat.c:
-	.text       start:0x800AD5D8 end:0x800AD7FC
+	.text       start:0x800ACA5C end:0x800AF5A0
 	.rodata     start:0x802EEF40 end:0x802EEF7C
+
+RVL_SDK/vf/pf_fat12.c:
+	.text       start:0x800AF5A0 end:0x800AFE14
+
+RVL_SDK/vf/pf_fat16.c:
+	.text       start:0x800AFE14 end:0x800B0258
+
+RVL_SDK/vf/pf_fat32.c:
+	.text       start:0x800B0258 end:0x800B0748
 
 RVL_SDK/vf/pf_file.c:
 	.text       start:0x800B1868 end:0x800B1A54

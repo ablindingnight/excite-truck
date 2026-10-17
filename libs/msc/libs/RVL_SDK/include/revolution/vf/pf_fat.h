@@ -5,20 +5,46 @@
 extern "C" {
 #endif
 
-s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** p_page, u32 cluster);
+// ET passes a single caller-owned FAT page by pointer; later SDKs pass the cache page by reference.
+#ifdef GAME_REXE01
+typedef struct PF_CACHE_PAGE* PF_ET_PAGE;
+#define PF_ET_PAGE_ARG(p) (p)
+#define PF_ET_PAGE_DEREF(p) (p)
+#else
+typedef struct PF_CACHE_PAGE** PF_ET_PAGE;
+#define PF_ET_PAGE_ARG(p) (&(p))
+#define PF_ET_PAGE_DEREF(p) (*(p))
+#endif
+
+s32 VFiPFFAT_ReadFATSector(struct PF_VOLUME* p_vol, PF_ET_PAGE p_page, u32 cluster);
 s32 VFiPFFAT_SearchForNumFreeClusters(struct PF_VOLUME* p_vol, u32 start_cluster, u32 end_cluster, u32 num_cluster, u32* p_start_free_cluster, u32* p_last_free_cluster);
 s32 VFiPFFAT_FindClusterLink(struct PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found);
 s32 VFiPFFAT_FindClusterLinkPage(struct PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found, struct PF_CACHE_PAGE* p_page);
-s32 VFiPFFAT_ReadClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk, struct PF_CACHE_PAGE** p_page);
+#ifdef GAME_REXE01
+s32 VFiPFFAT_ReadCluster(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk);
+#endif
+s32 VFiPFFAT_ReadClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* next_cluster, u32* chk_clstlnk, PF_ET_PAGE p_page);
 s32 VFiPFFAT_WriteCluster(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk);
-s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk, struct PF_CACHE_PAGE** p_page);
+s32 VFiPFFAT_WriteClusterPage(struct PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk, PF_ET_PAGE p_page);
+#ifdef GAME_REXE01
+s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated, u32 clear);
+#else
 s32 VFiPFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated);
+#endif
 s32 VFiPFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, u32 num_cluster, u32* locate_start, u32* locate_end);
 s32 VFiPFFAT_GetClusterContinuousSectorInChain(struct PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_sector);
 s32 VFiPFFAT_GetClusterAllocatedInChain(struct PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_clusters);
 s32 VFiPFFAT_GetClusterSpecified(struct PF_FFD* p_ffd, u32 chain_index, u32 may_allocate, u32* p_cluster);
+#ifdef GAME_REXE01
+s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster);
+#else
 s32 VFiPFFAT_GetClusterAllocated(struct PF_FFD* p_ffd, u32 chain_index, u32 num_cluster, u32* p_cluster, u32* p_num_cluster);
+#endif
+#ifdef GAME_REXE01
+s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u32 size, u32* p_sector);
+#else
 s32 VFiPFFAT_GetSector(struct PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u32 size, u32* p_sector, u32* p_num_sector);
+#endif
 s32 VFiPFFAT_UpdateFATEntry(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page);
 s32 VFiPFFAT_UpdateAlternateFATEntry(struct PF_VOLUME* p_vol, u8* p_buf, u32 sector, u32 size);
 s32 VFiPFFAT_GetSectorSpecified(struct PF_FFD* p_ffd, u32 file_sector_index, u32 may_allocate, u32* p_sector);
