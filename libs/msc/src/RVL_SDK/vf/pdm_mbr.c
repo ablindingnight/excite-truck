@@ -1,5 +1,77 @@
 #include <revolution/vf.h>
 
+#ifdef GAME_REXE01
+// ET's MBR check works on the sector buffer and the disk size; it has no table helpers.
+s32 VFipdm_mbr_check_master_boot_record(u8* buf, u32 total_sectors, u32* is_master_boot) {
+    u32 start_sector[4];
+    u32 num_sectors[4];
+    s16 part_cnt;
+
+    *is_master_boot = 0;
+    if (buf[0x1FE] != 0x55 || buf[0x1FF] != 0xAA) {
+        return 2;
+    }
+
+    for (part_cnt = 0; part_cnt < 4; part_cnt++, buf += 16) {
+        start_sector[part_cnt] = 0;
+        start_sector[part_cnt] = buf[0x1C6] + (buf[0x1C7] << 8) + (buf[0x1C8] << 16) + (buf[0x1C9] << 24);
+        num_sectors[part_cnt] = buf[0x1CA] + (buf[0x1CB] << 8) + (buf[0x1CC] << 16) + (buf[0x1CD] << 24);
+        if (start_sector[part_cnt] != 0 && num_sectors[part_cnt] != 0) {
+            if (part_cnt == 0) {
+                *is_master_boot = 1;
+            }
+        } else if (part_cnt == 0) {
+            return 2;
+        }
+    }
+
+    for (part_cnt = 0; part_cnt < 4; part_cnt++) {
+        if (start_sector[part_cnt] + num_sectors[part_cnt] > total_sectors) {
+            if (part_cnt == 0) {
+                *is_master_boot = 0;
+            }
+            return 2;
+        }
+    }
+    return 0;
+}
+
+u32 VFipdm_ET_IsBootSector(u8* buf) {
+    u32 is_boot;
+    u16 byte_per_sector;
+    u8 sector_per_cluster;
+    u8 media;
+
+    is_boot = 1;
+
+    if (buf[0] != 0xEB || buf[2] != 0x90) {
+        if (buf[0] != 0xE9) {
+            is_boot = 0;
+        }
+    }
+
+    if (buf[0x1FE] != 0x55 || buf[0x1FF] != 0xAA) {
+        is_boot = 0;
+    }
+
+    byte_per_sector = PDM_LE16(buf, 0xB);
+    if (byte_per_sector != 512 && byte_per_sector != 1024 && byte_per_sector != 2048 && byte_per_sector != 4096) {
+        is_boot = 0;
+    }
+
+    sector_per_cluster = buf[0xD];
+    if (sector_per_cluster != 1 && sector_per_cluster != 2 && sector_per_cluster != 4 && sector_per_cluster != 8 && sector_per_cluster != 16 && sector_per_cluster != 32 && sector_per_cluster != 64 && sector_per_cluster != 128) {
+        is_boot = 0;
+    }
+
+    media = buf[0x15];
+    if (media != 0xF0 && media != 0xF8 && media != 0xF9 && media != 0xFA && media != 0xFB && media != 0xFC && media != 0xFD && media != 0xFE && media != 0xFF) {
+        is_boot = 0;
+    }
+
+    return is_boot;
+}
+#else
 s32 VFipdm_mbr_get_table(u8* buf, u32 sector, struct PDM_MBR* p_mbr_tbl) {
     u8* p_buf;
     u16 cs_val;
@@ -159,3 +231,4 @@ s32 VFipdm_mbr_check_master_boot_record(struct PDM_DISK* p_disk, u8* buf, u32* i
     }
     return 0;
 }
+#endif

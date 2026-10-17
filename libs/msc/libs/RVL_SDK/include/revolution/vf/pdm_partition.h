@@ -8,7 +8,11 @@ extern "C" {
 s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part);
 u32 VFipdm_part_chg_ltop(struct PDM_PARTITION* p_part, u32 lsector, u16 lbps);
 s32 VFipdm_part_get_handle(struct PDM_DISK* p_disk, u16 part_id, struct PDM_PARTITION** pp_part, u16* p_part_no, u16* p_handle_no);
+#ifdef GAME_REXE01
+s32 VFipdm_part_open_partition(struct PDM_DISK* p_disk, s32 part_id, struct PDM_PARTITION** pp_part);
+#else
 s32 VFipdm_part_open_partition(struct PDM_DISK* p_disk, u16 part_id, struct PDM_PARTITION** pp_part);
+#endif
 s32 VFipdm_part_close_partition(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_get_permission(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_release_permission(struct PDM_PARTITION* p_part, u32 mode);

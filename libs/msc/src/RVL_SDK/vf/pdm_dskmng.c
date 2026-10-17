@@ -2,6 +2,48 @@
 
 PDM_DISK_SET VFipdm_disk_set;
 
+#ifdef GAME_REXE01
+// ET's disk manager only forwards to the disk and partition layers.
+s32 VFipdm_init_diskmanager(u32 config, void* param) {
+    return VFipdm_disk_init_disk_set();
+}
+
+s32 VFipdm_open_disk(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK** pp_disk) {
+    s32 err;
+
+    *pp_disk = 0;
+    err = VFipdm_disk_open_disk(p_init_disk_tbl, pp_disk);
+    if (!err) {
+        return 0;
+    }
+    return err;
+}
+
+s32 VFipdm_close_disk(struct PDM_DISK* p_disk) {
+    return VFipdm_disk_close_disk(p_disk);
+}
+
+s32 VFipdm_open_partition(struct PDM_DISK* p_disk, s32 part_id, struct PDM_PARTITION** pp_part) {
+    s32 err;
+
+    *pp_part = 0;
+    err = VFipdm_part_open_partition(p_disk, part_id, pp_part);
+    if (!err) {
+        return 0;
+    }
+    return err;
+}
+
+s32 VFipdm_close_partition(struct PDM_PARTITION* p_part) {
+    s32 err;
+
+    err = VFipdm_part_close_partition(p_part);
+    if (!err) {
+        return 0;
+    }
+    return err;
+}
+#else
 s32 VFipdm_init_diskmanager(u32 config, void* param) {
     u32 i;
 
@@ -80,3 +122,4 @@ s32 VFipdm_close_partition(struct PDM_PARTITION* p_part) {
 
     return err;
 }
+#endif

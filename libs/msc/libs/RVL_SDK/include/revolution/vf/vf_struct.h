@@ -104,6 +104,21 @@ typedef struct PDM_BPB {
     unsigned long sectors_per_FAT;           // offset 0x6C, size 0x4
 } PDM_BPB;
 
+#ifdef GAME_REXE01
+// ET's older pdm layer (layouts reconstructed from code).
+typedef struct PDM_PARTITION {
+    // total size: 0x28
+    unsigned long status;           // offset 0x0 (1 allocated, 2 media changed, 4 opened, 8 permission)
+    struct PDM_DISK* p_disk;        // offset 0x4
+    long part_id;                   // offset 0x8
+    unsigned long start_sector;     // offset 0xC
+    unsigned long total_sector;     // offset 0x10
+    long driver_last_error;         // offset 0x14
+    unsigned long reserved[2];      // offset 0x18
+    void (*insert_callback)(void*); // offset 0x20
+    void (*eject_callback)(void*);  // offset 0x24
+} PDM_PARTITION;
+#else
 typedef struct PDM_PARTITION {
     // total size: 0x2C
     unsigned long status;                    // offset 0x0, size 0x4
@@ -119,6 +134,7 @@ typedef struct PDM_PARTITION {
     long driver_last_error;                  // offset 0x24, size 0x4
     void* p_vol;                             // offset 0x28, size 0x4
 } PDM_PARTITION;
+#endif
 
 typedef struct PDM_FSINFO {
     // total size: 0x8
@@ -543,6 +559,20 @@ typedef struct PDM_INIT_DISK {
     unsigned long ui_ext;                                 // offset 0x4, size 0x4
 } PDM_INIT_DISK;
 
+#ifdef GAME_REXE01
+typedef struct PDM_DISK {
+    // total size: 0x3C
+    unsigned long status;                // offset 0x0 (1 allocated, 2 write protected, 4 inserted)
+    struct PDM_DISK_TBL disk_tbl;        // offset 0x4
+    short open_disk_cnt;                 // offset 0xC
+    short disk_lock_cnt;                 // offset 0xE
+    unsigned long reserved;              // offset 0x10
+    long sem_id;                         // offset 0x14
+    struct PDM_DISK_INFO disk_info;      // offset 0x18
+    struct PDM_PARTITION* p_cur_part;    // offset 0x2C
+    unsigned char sem_buf[0xC];          // offset 0x30
+} PDM_DISK;
+#else
 typedef struct PDM_DISK {
     // total size: 0x34
     unsigned long status;                   // offset 0x0, size 0x4
@@ -555,6 +585,7 @@ typedef struct PDM_DISK {
     struct PDM_INIT_DISK* p_init_disk_tbl;  // offset 0x2C, size 0x4
     struct PDM_PARTITION* p_cur_part;       // offset 0x30, size 0x4
 } PDM_DISK;
+#endif
 
 struct PDM_DISK_HANDLE {
     // total size: 0x8
@@ -568,6 +599,15 @@ struct PDM_PARTITION_HANDLE {
     struct PDM_PARTITION* handle;  // offset 0x4, size 0x4
 };
 
+#ifdef GAME_REXE01
+typedef struct PDM_DISK_SET {
+    // total size: 0xA2C
+    unsigned short num_partition;        // offset 0x0
+    unsigned short num_allocated_disk;   // offset 0x2
+    struct PDM_DISK disk[26];            // offset 0x4
+    struct PDM_PARTITION partition[26];  // offset 0x61C
+} PDM_DISK_SET;
+#else
 typedef struct PDM_DISK_SET {
     // total size: 0xB64
     unsigned short num_partition;                      // offset 0x0, size 0x2
@@ -577,6 +617,7 @@ typedef struct PDM_DISK_SET {
     struct PDM_DISK disk[26];                          // offset 0x1A4, size 0x548
     struct PDM_PARTITION partition[26];                // offset 0x6EC, size 0x478
 } PDM_DISK_SET;
+#endif
 
 typedef struct PDM_PART_TBL {
     // total size: 0x14

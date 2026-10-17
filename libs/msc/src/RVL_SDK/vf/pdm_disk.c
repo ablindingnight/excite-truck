@@ -72,6 +72,266 @@ s32 VFipdm_disk_convert_block_into_sector(struct PDM_DISK* p_disk, u32 block, u3
     return err;
 }
 
+#ifdef GAME_REXE01
+// ET's disk layer: each disk is driven through the function table its init routine fills in,
+// serialized by a per-disk semaphore; driver errors are recorded on the current partition.
+static struct PDM_DISK_TBL VFipdm_disk_tbl[26];
+
+s32 VFipdm_disk_init_disk_set(void) {
+    VFipf_memset(&VFipdm_disk_set, 0, sizeof(VFipdm_disk_set));
+    return 0;
+}
+
+s32 VFipdm_disk_open_disk(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK** pp_disk) {
+    u16 disk_no;
+    struct PDM_DISK_TBL* p_tbl;
+    struct PDM_DISK* p_disk;
+    struct PF_ET_SEMAPHORE_PARAM param;
+    s32 sem_id;
+
+    *pp_disk = NULL;
+    if (VFipdm_disk_set.num_allocated_disk >= 26) {
+        return 8;
+    }
+
+    for (disk_no = 0; disk_no < 26; disk_no++) {
+        if ((VFipdm_disk_set.disk[disk_no].status & 1) == 0) {
+            break;
+        }
+    }
+    if (disk_no >= 26) {
+        return 8;
+    }
+
+    p_tbl = &VFipdm_disk_tbl[disk_no];
+    p_init_disk_tbl->p_func(p_tbl, p_init_disk_tbl->ui_ext);
+
+    p_disk = &VFipdm_disk_set.disk[disk_no];
+    p_disk->disk_tbl = *p_tbl;
+    param.initial_count = 1;
+    param.max_count = 1;
+    param.p_buf = p_disk->sem_buf;
+    sem_id = VFiPF_ET_CreateSemaphore(&param);
+    if (sem_id == 0) {
+        return 19;
+    }
+    p_disk->sem_id = sem_id;
+
+    p_disk->status |= 1;
+    VFipdm_disk_set.num_allocated_disk++;
+    *pp_disk = p_disk;
+    return 0;
+}
+
+s32 VFipdm_disk_close_disk(struct PDM_DISK* p_disk) {
+    if (p_disk->open_disk_cnt != 0) {
+        return 16;
+    }
+    if (p_disk->disk_lock_cnt != 0) {
+        return 17;
+    }
+    if (VFiPF_ET_DeleteSemaphore(p_disk->sem_id) != 0) {
+        return 19;
+    }
+
+    p_disk->status &= ~1;
+    VFipdm_disk_set.num_allocated_disk--;
+    return 0;
+}
+
+s32 VFipdm_disk_set_disk(struct PDM_DISK* p_disk, struct PDM_PARTITION* p_part) {
+    p_disk->p_cur_part = p_part;
+    return 0;
+}
+
+s32 VFipdm_disk_get_media_information(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_info) {
+    *p_disk_info = p_disk->disk_info;
+    return 0;
+}
+
+s32 VFipdm_disk_get_lba_size(struct PDM_DISK* p_disk, u16* p_lba_size) {
+    *p_lba_size = p_disk->disk_info.bytes_per_sector;
+    return 0;
+}
+
+s32 VFipdm_disk_open(struct PDM_DISK* p_disk) {
+    s32 err;
+
+    if (p_disk->open_disk_cnt == 0) {
+        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        err = p_disk->disk_tbl.p_func->init(p_disk);
+        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        if (err != 0) {
+            VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+            return 21;
+        }
+    }
+    p_disk->open_disk_cnt++;
+    return 0;
+}
+
+s32 VFipdm_disk_get_part_permission(struct PDM_DISK* p_disk) {
+    s32 err;
+
+    if (p_disk->disk_lock_cnt == 0) {
+        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        err = p_disk->disk_tbl.p_func->mount(p_disk);
+        if (err != 0) {
+            if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+                return 20;
+            }
+            VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+            return 21;
+        }
+        err = p_disk->disk_tbl.p_func->get_disk_info(p_disk, &p_disk->disk_info);
+        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        if (err != 0) {
+            VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+            return 21;
+        }
+        if ((p_disk->disk_info.media_attr & 1) != 0) {
+            p_disk->status |= 2;
+        } else {
+            p_disk->status &= ~2;
+        }
+    }
+    p_disk->disk_lock_cnt++;
+    return 0;
+}
+
+s32 VFipdm_disk_format(struct PDM_DISK* p_disk, const u8* param) {
+    s32 err;
+
+    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    err = p_disk->disk_tbl.p_func->format(p_disk, (u8*)param);
+    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    if (err != 0) {
+        VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+        return 21;
+    }
+    return 0;
+}
+
+s32 VFipdm_disk_physical_read(struct PDM_DISK* p_disk, u8* buf, u32 psector, u32 num_sector, u16 bps, u32* p_num_success) {
+    s32 err;
+    u32 block;
+    u32 num_block;
+    u32 sector;
+
+    err = VFipdm_disk_convert_sector_into_block(p_disk, psector, num_sector, bps, &block, &num_block);
+    if (err != 0) {
+        return err;
+    }
+    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    err = p_disk->disk_tbl.p_func->physical_read(p_disk, buf, block, num_block, p_num_success);
+    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    VFipdm_disk_convert_block_into_sector(p_disk, block, *p_num_success, bps, &sector, p_num_success);
+    if (err != 0) {
+        VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+        return 21;
+    }
+    return 0;
+}
+
+s32 VFipdm_disk_physical_write(struct PDM_DISK* p_disk, const u8* buf, u32 psector, u32 num_sector, u16 bps, u32* p_num_success) {
+    s32 err;
+    u32 block;
+    u32 num_block;
+    u32 sector;
+
+    err = VFipdm_disk_convert_sector_into_block(p_disk, psector, num_sector, bps, &block, &num_block);
+    if (err != 0) {
+        return err;
+    }
+    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    err = p_disk->disk_tbl.p_func->physical_write(p_disk, (u8*)buf, block, num_block, p_num_success);
+    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        return 20;
+    }
+    VFipdm_disk_convert_block_into_sector(p_disk, block, *p_num_success, bps, &sector, p_num_success);
+    if (err != 0) {
+        VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+        return 21;
+    }
+    return 0;
+}
+
+s32 VFipdm_disk_release_part_permission(struct PDM_DISK* p_disk, u32 mode) {
+    s32 err;
+
+    err = 0;
+    if (p_disk->disk_lock_cnt == 1) {
+        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        err = p_disk->disk_tbl.p_func->unmount(p_disk);
+        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        if (err != 0) {
+            VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+            err = 21;
+        }
+    } else if (p_disk->disk_lock_cnt == 0) {
+        return 14;
+    }
+
+    if (err == 0 || mode == 1) {
+        p_disk->disk_lock_cnt--;
+    }
+    return err;
+}
+
+s32 VFipdm_disk_close(struct PDM_DISK* p_disk) {
+    s32 err;
+
+    if (p_disk->open_disk_cnt == 1) {
+        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        err = p_disk->disk_tbl.p_func->finalize(p_disk);
+        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+            return 20;
+        }
+        if (err != 0) {
+            VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
+            return 21;
+        }
+    } else if (p_disk->open_disk_cnt == 0) {
+        return 13;
+    }
+    p_disk->open_disk_cnt--;
+    return 0;
+}
+
+void VFipdm_disk_notify_media_eject(struct PDM_DISK* p_disk) {
+    p_disk->status &= ~4;
+    VFipdm_part_set_change_media_state(p_disk, 0);
+}
+
+void VFipdm_disk_notify_media_insert(struct PDM_DISK* p_disk) {
+    p_disk->status |= 4;
+    VFipdm_part_set_change_media_state(p_disk, 1);
+}
+#else
 s32 VFipdm_disk_get_handle(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK** pp_disk, u16* p_disk_no, u16* p_handle_no) {
     u16 handle_no;
     u16 disk_no;
@@ -537,3 +797,4 @@ void VFipdm_disk_notify_media_insert(struct PDM_DISK* p_disk) {
     lp_disk->status |= 0x2C;
     VFipdm_part_set_change_media_state(p_disk, 1);
 }
+#endif

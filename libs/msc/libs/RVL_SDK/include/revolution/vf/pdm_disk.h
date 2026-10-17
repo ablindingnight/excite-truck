@@ -23,6 +23,14 @@ s32 VFipdm_disk_check_media_insert(struct PDM_DISK* p_disk, u32* is_insert);
 s32 VFipdm_disk_set_disk(struct PDM_DISK* p_disk, struct PDM_PARTITION* p_part);
 void VFipdm_disk_notify_media_insert(struct PDM_DISK* p_disk);
 
+#ifdef GAME_REXE01
+// Names guessed where msc has no equivalent.
+s32 VFipdm_disk_init_disk_set(void);
+s32 VFipdm_disk_open(struct PDM_DISK* p_disk);
+s32 VFipdm_disk_close(struct PDM_DISK* p_disk);
+void VFipdm_disk_notify_media_eject(struct PDM_DISK* p_disk);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

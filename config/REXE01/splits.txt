@@ -1097,8 +1097,16 @@ RVL_SDK/vf/pf_str.c:
 RVL_SDK/vf/pf_driver.c:
 	.text       start:0x800A52A0 end:0x800A5954
 
+RVL_SDK/vf/pdm_dskmng.c:
+	.text       start:0x800A5954 end:0x800A59FC
+	.bss        start:0x803D1640 end:0x803D2070
+
+RVL_SDK/vf/pdm_bpb.c:
+	.text       start:0x800A59FC end:0x800A5EE8
+
 RVL_SDK/vf/pdm_disk.c:
-	.text       start:0x800A5EE8 end:0x800A6048
+	.text       start:0x800A5EE8 end:0x800A68F0
+	.bss        start:0x803D2070 end:0x803D2140
 
 RVL_SDK/vf/pf_cache.c:
 	.text       start:0x800A7774 end:0x800A939C
