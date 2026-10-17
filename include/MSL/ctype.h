@@ -6,7 +6,9 @@ extern "C" {
 #endif
 
 typedef struct __CMap {
-    char UNK_0x0[0x10];
+    char UNK_0x0[0x8];
+    const unsigned short* ctype_map; // at 0x8
+    char UNK_0xC[0x10 - 0xC];
     const u8* to_lower_table; // at 0x10
     const u8* to_upper_table; // at 0x14
 } __CMap;
@@ -18,6 +20,10 @@ typedef struct __Locale {
 } __Locale;
 
 extern __Locale _current_locale;
+
+inline int isspace(int x) {
+    return (x < 0 || x >= 256) ? 0 : (&_current_locale)->cmap->ctype_map[x] & (1 << 8);
+}
 
 inline int tolower(int x) {
     return (x < 0 || x >= 256)

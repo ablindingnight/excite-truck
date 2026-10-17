@@ -11,6 +11,11 @@ void FlagsInit(void);
 void FlagsShutdown(void);
 void RepInit(void);
 void RepShutdown(void);
+void ParseOptions(const char* cmdline);
+BOOL OptDirectToTrack(void);
+BOOL OptPaTest(void);
+BOOL OptModelTest(void);
+BOOL OptGxTest(void);
 void RaceShutdown(void);
 void RaceInit(void);
 void LoadTimerShutdown(void);
@@ -100,14 +105,9 @@ void fn_802C2B18(void);
 void fn_80133144(void);
 void fn_8000D878(void);
 
-void fn_800199B8(void);
 
 void fn_80265D48(void);
 void fn_80129BD4(void);
-int fn_80019B6C(void);
-int fn_80019B48(void);
-int fn_80019B54(void);
-int fn_80019B3C(void);
 void fn_801E78A0(void);
 void fn_8024BE04(void);
 void fn_8023B6B0(void);
@@ -304,7 +304,7 @@ void AppShutdown(void) {
 
 int ParseCommandLine(const char* args) {
     if (args != NULL) {
-        fn_800199B8();
+        ParseOptions(args);
         while (*args != '\0') {
             switch (*args) {
             case '-':
@@ -328,14 +328,14 @@ void AppMain(void) {
     fn_80129BD4();
     AppInit();
     fn_802E30C8("AppMain is 0x%x", AppMain);
-    if (fn_80019B6C()) {
+    if (OptGxTest()) {
         fn_801E78A0();
-    } else if (fn_80019B48()) {
+    } else if (OptModelTest()) {
         fn_8024BE04();
-    } else if (fn_80019B54()) {
+    } else if (OptPaTest()) {
         void PlayEves(void);
         PlayEves();
-    } else if (fn_80019B3C()) {
+    } else if (OptDirectToTrack()) {
         void DirectToTrackDefault(void);
         DirectToTrackDefault();
     } else {
