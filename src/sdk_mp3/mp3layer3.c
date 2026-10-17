@@ -270,6 +270,50 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
+/* 18-point IMDCT front end: fn_800C1984 into a stack buffer, then out[0..8] = tmp[9..17] and
+ * out[18..26] = -tmp[8..0]. */
+void fn_800C18A0(s32* in, s32* out) {
+    s32 tmp[18];
+
+    fn_800C1984(in, tmp);
+    out[0] = tmp[9];
+    out[1] = tmp[10];
+    out[2] = tmp[11];
+    out[3] = tmp[12];
+    out[4] = tmp[13];
+    out[5] = tmp[14];
+    out[6] = tmp[15];
+    out[7] = tmp[16];
+    out[8] = tmp[17];
+    out[18] = -tmp[8];
+    out[19] = -tmp[7];
+    out[20] = -tmp[6];
+    out[21] = -tmp[5];
+    out[22] = -tmp[4];
+    out[23] = -tmp[3];
+    out[24] = -tmp[2];
+    out[25] = -tmp[1];
+    out[26] = -tmp[0];
+}
+
+/* 9 Q20 butterflies (in[i] with in[17 - i]) into sum/difference halves for fn_800C1A80.
+ * NonMatching: only the order of the first two loads differs. */
+void fn_800C1984(s32* in, s32* out) {
+    s32 a[9];
+    s32 b[9];
+    s32 i;
+    s32 p, q;
+
+    for (i = 0; i < 9; i++) {
+        p = (s32)(((s64)lbl_802F4018[i] * in[i]) >> 20);
+        q = (s32)(((s64)in[17 - i] * lbl_802F4018[17 - i]) >> 20);
+        a[i] = p + q;
+        p = p - q;
+        b[i] = (s32)(((s64)p * lbl_802F4060[i]) >> 20);
+    }
+    fn_800C1A80(a, b, out);
+}
+
 /* 6-tap Q20 dot product over four 6-sample groups; outputs at word offsets 0, 2, 6, 8 (strides 2 and 4).
  * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
  * but the original adds each low product word (addc) before computing its high word (mulhw). */
