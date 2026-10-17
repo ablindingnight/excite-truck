@@ -11,6 +11,185 @@
 static s32 lbl_8055DD88;
 static s32 lbl_8055DD8C;
 
+/* Intensity stereo (fn_800BC538): for lines at or above the intensity bound, rebuild the right channel from the
+ * left with fn_800BD710. Long, short and mixed layouts; the band-limit tables are copied into the decoder on first
+ * use (short rows from twelve pooled arrays at 0x8031BFA8). Behaviour verified identical to the original in a PPC
+ * simulation (60 random cases). NonMatching: 1142/1142, same opcodes. */
+void MP3_IntensityStereo(MP3Decoder* d, u8* long_map, s16* long_edges, u32 flags, MP3ChannelBuf* out, s16* sf_long,
+                         s16 (*sf_short)[3], s16* is_scale, s16 bound) {
+    s32 i;
+    s32 b;
+    s32 w;
+    s32 lim;
+    s32 band;
+
+    if (flags & 7) {
+        if (d->unk9CC[5] == 0) {
+            d->unk9CC[5] = 1;
+            for (b = 0; b < 21; b++) {
+                d->is_lb[b + 1] = long_edges[b];
+            }
+            d->is_lb[0] = 0;
+        }
+        for (i = 0; i < d->long_end; i++) {
+            if (out[0].xr[i] == 0) {
+                out[1].xr[i] = 0;
+                continue;
+            }
+            for (b = 20; b >= 0; b--) {
+                if (bound > d->is_lb[b]) {
+                    lim = d->is_lb[b + 1];
+                    break;
+                }
+            }
+            if (i >= lim) {
+                fn_800BD710(d, is_scale[1], sf_long[21 + long_map[i]], &out[0].xr[i], &out[1].xr[i]);
+            }
+        }
+    } else if (flags & 0x10) {
+        if (d->unk9CC[6] == 0) {
+            d->unk9CC[6] = 1;
+            if (d->lsf == 0 && d->sr_index == 0) {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031BFA8[b];
+                    d->is_sw[b] = lbl_8031BFC0[b];
+                }
+            } else if (d->lsf == 0 && d->sr_index == 1) {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031BFD0[b];
+                    d->is_sw[b] = lbl_8031BFE8[b];
+                }
+            } else if (d->lsf == 0 && d->sr_index == 2) {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031BFF8[b];
+                    d->is_sw[b] = lbl_8031C010[b];
+                }
+            } else if (d->lsf == 1 && d->sr_index == 0) {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031C020[b];
+                    d->is_sw[b] = lbl_8031C038[b];
+                }
+            } else if (d->lsf == 1 && d->sr_index == 1) {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031C048[b];
+                    d->is_sw[b] = lbl_8031C060[b];
+                }
+            } else {
+                for (b = 0; b < 12; b++) {
+                    d->is_sb[b] = lbl_8031C070[b];
+                    d->is_sw[b] = lbl_8031C088[b];
+                }
+            }
+        }
+        for (i = 0; i < d->short_bands; i++) {
+            if (out[0].xr[i] == 0) {
+                out[1].xr[i] = 0;
+                continue;
+            }
+            for (b = 0; b < 12; b++) {
+                if (bound > d->is_sb[b]) {
+                    lim = d->is_sw[b];
+                    break;
+                }
+            }
+            if (i >= lim) {
+                for (b = 11; b >= 0; b--) {
+                    if (i < d->is_sw[b]) {
+                        band = 11 - b;
+                        break;
+                    }
+                }
+                for (w = 0; w < 3; w++) {
+                    fn_800BD710(d, is_scale[1], sf_short[12 + band][w], &out[0].sxr[w][i], &out[1].sxr[w][i]);
+                }
+            }
+        }
+    } else {
+        if (d->unk9CC[4] == 0) {
+            d->unk9CC[4] = 1;
+            if (d->lsf == 0) {
+                for (b = 0; b < 8; b++) {
+                    d->is_mb[b] = lbl_80559250[b];
+                    d->is_mlim[b] = lbl_80559258[b];
+                }
+                if (d->sr_index == 0) {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031BFA8[b];
+                        d->is_sw[b] = lbl_8031BFC0[b];
+                    }
+                } else if (d->sr_index == 1) {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031BFD0[b];
+                        d->is_sw[b] = lbl_8031BFE8[b];
+                    }
+                } else {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031BFF8[b];
+                        d->is_sw[b] = lbl_8031C010[b];
+                    }
+                }
+            } else {
+                for (b = 0; b < 6; b++) {
+                    d->is_mb[b] = lbl_80559260[b];
+                    d->is_mlim[b] = lbl_80559268[b];
+                }
+                if (d->sr_index == 0) {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031C020[b];
+                        d->is_sw[b] = lbl_8031C038[b];
+                    }
+                } else if (d->sr_index == 1) {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031C048[b];
+                        d->is_sw[b] = lbl_8031C060[b];
+                    }
+                } else {
+                    for (b = 0; b < 12; b++) {
+                        d->is_sb[b] = lbl_8031C070[b];
+                        d->is_sw[b] = lbl_8031C088[b];
+                    }
+                }
+            }
+        }
+        for (i = 0; i < 36; i++) {
+            for (b = 0; b < 8; b++) {
+                if (bound > d->is_mb[b]) {
+                    lim = d->is_mlim[b];
+                    break;
+                }
+            }
+            if (i >= lim) {
+                for (b = 0; b < 8; b++) {
+                    if (i < d->is_mlim[7 - b]) {
+                        band = b;
+                        break;
+                    }
+                }
+                fn_800BD710(d, is_scale[1], sf_long[21 + band], &out[0].xr[i], &out[1].xr[i]);
+            }
+        }
+        for (i = 12; i < d->short_bands; i++) {
+            for (b = 0; b < 10; b++) {
+                if (bound > d->is_sb[b]) {
+                    lim = d->is_sw[b];
+                    break;
+                }
+            }
+            if (i >= lim) {
+                for (b = 8; b >= 0; b--) {
+                    if (i < d->is_sw[b]) {
+                        band = 11 - b;
+                        break;
+                    }
+                }
+                for (w = 0; w < 3; w++) {
+                    fn_800BD710(d, is_scale[1], sf_short[12 + band][w], &out[0].sxr[w][i], &out[1].sxr[w][i]);
+                }
+            }
+        }
+    }
+}
+
 /* Intensity stereo for one value pair. MPEG-1: two Q20 ratio tables indexed by the scalefactor.
  * MPEG-2: on first use, copies one of two 33-entry ratio tables (by channel mode) into the decoder,
  * then odd scalefactors scale the right channel and copy it left, even ones scale into the left. */

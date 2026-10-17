@@ -43,7 +43,12 @@ typedef struct MP3Decoder {
     s32 band_count;           /* 0x9C8 */
     s32 unk9CC[7];            /* 0x9CC: [0] mixed map built, [1] long map built, [2] short map built, [3] band tables copied */
     s32 is_init;              /* 0x9E8: MPEG-2 intensity table built */
-    u8 pad9EC[0xA6E - 0x9EC];
+    u8 is_sw[12];             /* 0x9EC: intensity stereo short-band line limits */
+    u8 is_mlim[8];            /* 0x9F8: mixed-block long-band line limits */
+    u8 is_mb[8];              /* 0xA00: mixed-block long-band bounds */
+    u8 padA08[0xA2A - 0xA08];
+    s16 is_lb[22];            /* 0xA2A: 0 + the 21 long band edges */
+    s16 is_sb[12];            /* 0xA56: short band edges */
     s16 is_table[33];         /* 0xA6E: MPEG-2 intensity ratios (low halves of the Q20 table) */
     u8 padAB0[0xED70 - 0xAB0];
     s32 frame_bytes;          /* 0xED70 */
@@ -85,6 +90,8 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g);
 
 #endif
 
+void MP3_IntensityStereo(MP3Decoder* d, u8* long_map, s16* long_edges, u32 flags, MP3ChannelBuf* out, s16* sf_long,
+                         s16 (*sf_short)[3], s16* is_scale, s16 bound);
 void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l);
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g);
 s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);

@@ -14,7 +14,8 @@ def rb(a, n):
 
 RANGES = {"rodata": (0x802F3238, 0x802F44E8), "data": (0x8031BFA8, 0x8031D840), "sdata": (0x80559250, 0x80559708),
           "sdata2": (0x80560DA0, 0x80560DB8)}
-EXTRA_SPLITS = {0x8031C298: "data", 0x8031D580: "data", 0x802F34D8: "rodata",
+EXTRA_SPLITS = {0x8031BFA8: "data", 0x8031BFC0: "data", 0x8031BFD0: "data", 0x8031BFE8: "data", 0x8031BFF8: "data", 0x8031C010: "data", 0x8031C020: "data", 0x8031C038: "data", 0x8031C048: "data", 0x8031C060: "data", 0x8031C070: "data", 0x8031C088: "data",
+                0x8031C298: "data", 0x8031D580: "data", 0x802F34D8: "rodata",
                 0x802F3E20: "rodata", 0x802F3F10: "rodata", 0x802F3F30: "rodata", 0x802F3F54: "rodata",
                 0x802F3258: "rodata", 0x802F3278: "rodata", 0x802F32FC: "rodata", 0x802F3320: "rodata", 0x802F33A4: "rodata",
                 # dequantizer pool (0x802F34E8): pow43, exponent bases, pretab, multipliers, exponent offsets, band edges
@@ -56,7 +57,7 @@ def kind(a):
 
 # Element types for non-pointer objects.
 TYPES = {
-    0x802F3408: ("u8", 1), 0x802F3418: ("s16", 2), 0x802F3478: ("s16", 2), 0x8031BFA8: ("s16", 2),
+    0x802F3408: ("u8", 1), 0x802F3418: ("s16", 2), 0x802F3478: ("s16", 2), 
     0x8031C2E0: ("u8", 1), 0x8031C298: ("s8", 1), 0x80559250: ("u8", 1), 0x80559258: ("u8", 1),
     0x80559260: ("u8", 1), 0x80559268: ("u8", 1), 0x80560DA0: ("s16", 2), 0x80560DA8: ("s16", 2),
     0x80560DB0: ("s16", 2), 0x802F3F54: ("u32", 4), 0x8031C2B8: ("u32", 4),
@@ -72,6 +73,18 @@ SHAPES = {
     0x802F33A4: ("const s32 %s[9]", "s32", 4),  # unreferenced so far, so not static  # 4-bit popcount; unreferenced, so not static (MWCC would drop it)
     0x802F3F30: ("MP3_STATIC const s16 %s[18]", "s16", 2),  # Huffman lookup depth per table
     0x802F38E8: ("MP3_STATIC const u8 %s[256]", "u8", 1),  # dequant: exponent base by global gain
+    0x8031BFA8: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031BFC0: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
+    0x8031BFD0: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031BFE8: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
+    0x8031BFF8: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031C010: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
+    0x8031C020: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031C038: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
+    0x8031C048: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031C060: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
+    0x8031C070: ("MP3_STATIC s16 %s[12]", "s16", 2),  # intensity stereo short-band edges
+    0x8031C088: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
     0x8031C098: ("MP3_STATIC s32 %s[32][4]", "s32", 4),  # dequant: large values, x^(4/3) per 256-wide segment
     0x802F39E8: ("MP3_STATIC const s8 %s[22]", "s8", 1),  # dequant: pretab
     0x802F3A00: ("MP3_STATIC const s16 %s[2][35]", "s16", 2),  # dequant: multiplier by scalefac_scale
