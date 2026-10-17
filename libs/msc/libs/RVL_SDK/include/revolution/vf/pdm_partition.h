@@ -23,7 +23,8 @@ typedef struct PDM_MEDIA_CALLBACK {
     void (*eject)(void* p_part);
 } PDM_MEDIA_CALLBACK;
 
-s32 VFipdm_part_format(struct PDM_PARTITION* p_part);
+s32 VFipdm_part_format(struct PDM_PARTITION* p_part, const u8* param);
+u32 VFipdm_part_is_open(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_set_media_callback(struct PDM_PARTITION* p_part, struct PDM_MEDIA_CALLBACK* p_callback);
 s32 VFipdm_part_clear_media_callback(struct PDM_PARTITION* p_part);
 s32 VFipdm_part_open(struct PDM_PARTITION* p_part);

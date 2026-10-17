@@ -865,6 +865,8 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pdm_dskmng.c"),
             Object(Matching, "RVL_SDK/vf/pdm_bpb.c"),
             Object(Matching, "RVL_SDK/vf/pdm_disk.c"),
+            Object(NonMatching, "RVL_SDK/vf/pdm_mbr.c"),
+            Object(NonMatching, "RVL_SDK/vf/pdm_partition.c"),
             Object(Matching, "RVL_SDK/vf/pf_cache.c"),
             Object(Matching, "RVL_SDK/vf/pf_cluster.c"),
             Object(Matching, "RVL_SDK/vf/pf_dir.c"),

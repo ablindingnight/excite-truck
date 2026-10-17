@@ -26,6 +26,8 @@ def score(lines):
     if r.returncode:
         return 10**6
     d = subprocess.run(["sh", "tools/refmatch/fndiff.sh", target, obj, ref], capture_output=True, text=True, env=env).stdout
+    if not d.startswith("target "):
+        return 10**6  # function missing from the object
     return len(d.splitlines()) - 1
 
 

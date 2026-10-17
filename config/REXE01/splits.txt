@@ -1108,6 +1108,12 @@ RVL_SDK/vf/pdm_disk.c:
 	.text       start:0x800A5EE8 end:0x800A68F0
 	.bss        start:0x803D2070 end:0x803D2140
 
+RVL_SDK/vf/pdm_mbr.c:
+	.text       start:0x800A68F0 end:0x800A6B74
+
+RVL_SDK/vf/pdm_partition.c:
+	.text       start:0x800A6B74 end:0x800A7774
+
 RVL_SDK/vf/pf_cache.c:
 	.text       start:0x800A7774 end:0x800A939C
 

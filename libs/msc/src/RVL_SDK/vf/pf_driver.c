@@ -208,7 +208,7 @@ s32 VFiPFDRV_unmount(struct PF_VOLUME* p_vol, u32 mode) {
 s32 VFiPFDRV_format(struct PF_VOLUME* p_vol, const u8* param) {
     s32 err;
 
-    err = VFipdm_part_format(p_vol->p_part);
+    err = VFipdm_part_format(p_vol->p_part, param);
     if (err) {
         if (err == 21) {
             err = VFipdm_part_get_driver_error_code(p_vol->p_part);
