@@ -18,6 +18,9 @@ def build():
 def set_status(st):
     cfg = open("configure.py").read()
     cfg = re.sub(r'Object\((Matching|NonMatching), "' + re.escape(unit) + '"', f'Object({st}, "{unit}"', cfg)
+    if unit.startswith("revolution/"):  # TP sources: TpRevolution("<path>", Matching)
+        tp = re.escape(unit[len("revolution/"):])
+        cfg = re.sub(r'TpRevolution\("' + tp + r'", (Matching|NonMatching)', f'TpRevolution("{unit[len("revolution/"):]}", {st}', cfg)
     open("configure.py", "w", newline="\n").write(cfg)
 def ok(out):
     # ninja prints nothing about the hash when a step changed nothing, so compare the DOLs directly

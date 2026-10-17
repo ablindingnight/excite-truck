@@ -72,8 +72,14 @@ static u8 checkInvalidData[21] = {
 };
 static u8 checkBuffer[21];
 
+#ifdef GAME_REXE01
+static
+#endif
 WPADExtensionCallback initExtension(s32 chan, WPADControlBlock*);
 
+#ifdef GAME_REXE01
+void abortInitExtension(s32 chan, s32 result);
+#else
 void abortInitExtension(s32 chan, s32 result) {
     WPADControlBlock* p_wpd = _wpdcb[chan];
     u32 type;
@@ -95,6 +101,7 @@ void abortInitExtension(s32 chan, s32 result) {
         }
     }
 }
+#endif
 
 #define PI 3.141592f
 
@@ -157,6 +164,42 @@ static inline void __parse_dpd_data(s32 chan, WPADStatus** p_status, u8 fmt, u8*
         }
     }
 }
+
+#ifdef GAME_REXE01
+// Excite Truck's older parser handles the four DPD objects one by one
+static inline void __parse_dpd_std_obj(WPADStatus* p_status, u8 i, u8* p_data) {
+    p_status->obj[i].x = (s16)((s16)((s16)(((u16)p_data[i * 3]) & 0xFF) | (u16)(((u16)p_data[i * 3 + 2] & 0x30) << 4)));
+    p_status->obj[i].y = (s16)(WPAD_DPD_IMG_RESO_WY - 1 - (s16)((s16)(((u16)p_data[i * 3 + 1]) & 0xFF) | (u16)(((u16)p_data[i * 3 + 2] & 0xC0) << 2)));
+    p_status->obj[i].size = (u16)(((p_data[i * 3 + 2] & 0xF) & 0xFF));
+    p_status->obj[i].size = (u8)((f32)(p_status->obj[i].size) * (f32)(p_status->obj[i].size) * PI);
+    if (p_status->obj[i].size == 0 || p_status->obj[i].x == (s16)(WPAD_DPD_IMG_RESO_WX - 1) ||
+        p_status->obj[i].y == (s16)(WPAD_DPD_IMG_RESO_WY - 1)) {
+        p_status->obj[i].x = (s16)0;
+        p_status->obj[i].y = (s16)(WPAD_DPD_IMG_RESO_WY - 1);
+        p_status->obj[i].size = 0;
+    }
+    p_status->obj[i].traceId = i;
+}
+
+// xmask: the high-x bits of odd objects; ET's code for object 3 uses the y bits (0x0C) here
+static inline void __parse_dpd_basic_obj(WPADStatus* p_status, u8 i, u8* p_data, WPADControlBlock* p_cb, u8 xmask) {
+    if ((i % 2) == 0) {
+        p_status->obj[i].x = (s16)((s16)((s16)(((u16)p_data[i * 3 - (i / 2)]) & 0xFF) | (u16)(((u16)(p_data[(i / 2) * 5 + 2] & 0x30)) << 4)));
+        p_status->obj[i].y = (s16)(WPAD_DPD_IMG_RESO_WY - 1 - (s16)((s16)(((u16)p_data[i * 3 - (i / 2) + 1]) & 0xFF) | (u16)(((u16)(p_data[(i / 2) * 5 + 2] & 0xC0)) << 2)));
+    } else {
+        p_status->obj[i].x = (s16)((s16)((s16)(((u16)p_data[i * 3 - (i / 2)]) & 0xFF) | (u16)(((u16)(p_data[(i / 2) * 5 + 2] & xmask)) << 8)));
+        p_status->obj[i].y = (s16)(WPAD_DPD_IMG_RESO_WY - 1 - (s16)((s16)(((u16)p_data[i * 3 - (i / 2) + 1]) & 0xFF) | (u16)(((u16)(p_data[(i / 2) * 5 + 2] & (u8)(0xC0 >> 4))) << 6)));
+    }
+    if (p_status->obj[i].x == (s16)(WPAD_DPD_IMG_RESO_WX - 1) || p_status->obj[i].y == (s16)(WPAD_DPD_IMG_RESO_WY - 1)) {
+        p_status->obj[i].x = (s16)0;
+        p_status->obj[i].y = (s16)(WPAD_DPD_IMG_RESO_WY - 1);
+        p_status->obj[i].size = 0;
+    } else {
+        p_status->obj[i].size = p_cb->dpdDummyObjSize;
+    }
+    p_status->obj[i].traceId = i;
+}
+#endif
 
 // getDevConfig follows the Strikers decomp's form, which matches ET's build
 void getDevConfig(s32 chan, s32 result, WPADStatus* p_status, u8* data)
@@ -446,6 +489,9 @@ void getGameInfo(s32 chan, s32 result, u8 index) {
     }
 }
 
+#ifdef GAME_REXE01
+static
+#endif
 WPADExtensionCallback initExtension(s32 chan, WPADControlBlock* p_wpd) {
     WPADCmdQueue* cmdQueue = &p_wpd->extCmdQueue;
     WPADExtensionCallback extCallback = p_wpd->extensionCallback;
@@ -480,6 +526,31 @@ s32 WPADiHIDParser(u8 chan, u8* data) {
 
     return ret;
 }
+
+#ifdef GAME_REXE01
+// Excite Truck's build emits this after WPADiHIDParser
+void abortInitExtension(s32 chan, s32 result) {
+    WPADControlBlock* p_wpd = _wpdcb[chan];
+    u32 type;
+
+    if (result != WPAD_ERR_OK) {
+        WPADiClearQueue(&p_wpd->extCmdQueue);
+
+        if (result == WPAD_ERR_NO_CONTROLLER) {
+            type = WPAD_DEV_NONE;
+        } else if (p_wpd->info.attach) {
+            type = WPAD_DEV_NOT_SUPPORTED;
+        } else {
+            type = WPAD_DEV_CORE;
+        }
+
+        p_wpd->devType = (u8)type;
+        if (p_wpd->extensionCallback) {
+            p_wpd->extensionCallback(chan, (s32)type);
+        }
+    }
+}
+#endif
 
 void __a1_20_status_report(u8 chan, u8* data) {
     WPADControlBlock* p_wpd;
@@ -1020,11 +1091,19 @@ void __a1_33_data_type(u8 chan, u8* data) {
     p_status->button =
         (u16)((u16)(((u16)((u16)(data[HID_IDX_BYTE7]) & 0xFF) | (u16)((u16)(data[HID_IDX_BYTE8] << 8) & 0xFF00))) & (u16)HID_WPAD_BUTTON_MASK);
 
+#ifdef GAME_REXE01
+    if (p_cb->dataFormat == WPAD_FMT_CORE_BTN || p_cb->dataFormat == WPAD_FMT_CORE_BTN_ACC || p_cb->dataFormat == WPAD_FMT_CORE_BTN_ACC_DPD) {
+        p_status->err = p_cb->status;
+    } else if (p_cb->status == 0) {
+        p_status->err = WPAD_ERR_INVALID;
+    }
+#else
     if (p_cb->dataFormat == WPAD_FMT_CORE_BTN || p_cb->dataFormat == WPAD_FMT_CORE_BTN_ACC || p_cb->dataFormat == WPAD_FMT_CORE_BTN_ACC_DPD) {
         p_status->err = WPAD_ERR_OK;
     } else {
         p_status->err = WPAD_ERR_INVALID;
     }
+#endif
 
     p_status->dev = p_cb->devType;
     p_cb->info.nearempty = (u8)((data[HID_IDX_BYTE7] & HID_NEAREMPTY_MASK) >> 7);
@@ -1038,7 +1117,14 @@ void __a1_33_data_type(u8 chan, u8* data) {
                                        (s16)((s16)((u16)(data[HID_IDX_BYTE8] >> 5)) & (s16)0x0002))) -
                            (s16)(p_cb->devConf.acc_0g.z));
 
+#ifdef GAME_REXE01
+    __parse_dpd_std_obj(p_status, 0, data + HID_IDX_BYTE12);
+    __parse_dpd_std_obj(p_status, 1, data + HID_IDX_BYTE12);
+    __parse_dpd_std_obj(p_status, 2, data + HID_IDX_BYTE12);
+    __parse_dpd_std_obj(p_status, 3, data + HID_IDX_BYTE12);
+#else
     __parse_dpd_data(chan, &p_status, WPAD_DPD_STANDARD, data + HID_IDX_BYTE12, 12);
+#endif
 
     old = OSDisableInterrupts();
     p_cb->rxBufIndex = (u8)((p_cb->rxBufIndex) ? 0 : 1);
@@ -1308,7 +1394,14 @@ void __a1_37_data_type(u8 chan, u8* data) {
                                  (s16)((s16)(u16)(data[HID_IDX_BYTE8] >> 5) & (s16)0x0002)) -
                            p_cb->devConf.acc_0g.z);
 
+#ifdef GAME_REXE01
+    __parse_dpd_basic_obj(p_status, 0, data + HID_IDX_BYTE12, p_cb, 0x03);
+    __parse_dpd_basic_obj(p_status, 1, data + HID_IDX_BYTE12, p_cb, 0x03);
+    __parse_dpd_basic_obj(p_status, 2, data + HID_IDX_BYTE12, p_cb, 0x03);
+    __parse_dpd_basic_obj(p_status, 3, data + HID_IDX_BYTE12, p_cb, 0x0C);
+#else
     __parse_dpd_data(chan, &p_status, WPAD_DPD_BASIC, data + HID_IDX_BYTE12, 10);
+#endif
 
     memcpy(checkBuffer, data + HID_IDX_BYTE22, 6);
     WPADiDecode(chan, data + HID_IDX_BYTE22, 6, 0);
