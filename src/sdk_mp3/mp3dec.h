@@ -22,21 +22,35 @@ typedef struct MP3Info {
     s32 out_bytes;    /* 0x10 */
 } MP3Info;
 
+/* Per-channel granule buffer (0x2400 bytes); the frame decoder passes decoder + 0xAB0. */
+typedef struct MP3ChannelBuf {
+    s32 sxr[3][576];          /* 0x0: dequantized short-block windows */
+    s32 xr[576];              /* 0x1B00: dequantized spectrum */
+} MP3ChannelBuf;
+
 typedef struct MP3Decoder {
     s8 channels;              /* 0x0 */
     u8 pad1[3];
     s32 lsf;                  /* 0x4: MPEG-2 low sampling frequency */
     s32 unk8;                 /* 0x8 */
     s32 unkC;                 /* 0xC */
-    u8 pad10[4];
+    s32 unk10;                /* 0x10: main data start (bits) */
     s32 unk14;                /* 0x14 */
     s32 unk18;                /* 0x18 */
     s16 sr_index;             /* 0x1C */
     s16 mode_ext;             /* 0x1E: bit 1 = M/S stereo */
-    u8 pad20[0x278 - 0x20];
+    s16 sf_long[2][2][21];    /* 0x20: long-block scalefactors [gr][ch] */
+    s16 sf_short[2][2][12][3]; /* 0xC8: short-block scalefactors [gr][ch][band][win] */
+    u8 pad1E8[0x278 - 0x1E8];
     u32 unk278;               /* 0x278 */
     s16 unk27C;               /* 0x27C: synthesis window position */
-    u8 pad27E[0x9BC - 0x27E];
+    u8 pad27E[0x288 - 0x27E];
+    s16 count1_end;           /* 0x288 */
+    u8 long_map[576];         /* 0x28A */
+    u8 short_map[576];        /* 0x4CA */
+    u8 mixed_map[576];        /* 0x70A */
+    s16 long_edges[21];       /* 0x94A */
+    s16 short_edges[36];      /* 0x974 */
     s32 long_end;             /* 0x9BC: lines covered by the long-block bands */
     s32 short_bands;          /* 0x9C0: short-block bands per window */
     s32 short_end;            /* 0x9C4: lines covered by the short-block bands */
@@ -50,16 +64,16 @@ typedef struct MP3Decoder {
     s16 is_lb[22];            /* 0xA2A: 0 + the 21 long band edges */
     s16 is_sb[12];            /* 0xA56: short band edges */
     s16 is_table[33];         /* 0xA6E: MPEG-2 intensity ratios (low halves of the Q20 table) */
-    u8 padAB0[0xED70 - 0xAB0];
+    MP3ChannelBuf gr_out[2];  /* 0xAB0 */
+    s32 synth_buf[0x800];     /* 0x52B0 */
+    s32 imdct_work[2][32][36]; /* 0x72B0 */
+    s32 imdct_prev[2][576];   /* 0x96B0 */
+    s32 imdct_out[0x480];     /* 0xA8B0 */
+    s16 huff_out[2][2][600];  /* 0xBAB0: Huffman-decoded lines [gr][ch] */
+    u8 ring[0x2000];          /* 0xCD70: main data ring buffer */
     s32 frame_bytes;          /* 0xED70 */
     s32 out_bytes;            /* 0xED74 */
 } MP3Decoder;
-
-/* Per-channel granule buffer (0x2400 bytes); the frame decoder passes decoder + 0xAB0. */
-typedef struct MP3ChannelBuf {
-    s32 sxr[3][576];          /* 0x0: dequantized short-block windows */
-    s32 xr[576];              /* 0x1B00: dequantized spectrum */
-} MP3ChannelBuf;
 
 typedef struct BitStream {
     u8 pad0[0xC];
@@ -97,6 +111,9 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
 s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);
 u32 MP3_GetBits(u32 unused, u8* buf, u32 n, s32* pos);
 u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos);
+void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0, s16* sf_short, s16 part2_3,
+                 s16 sfc, s16* scfsi, s8 gr, u8 ch, s16* bound, s16* region0, s16* region1, s16* preflag,
+                 s16* is_scale);
 void MP3_GetInfo(MP3Decoder* d, MP3Info* info);
 s32 MP3_ParseHeader(MP3Decoder* d, u8* buf);
 void MP3_Fill(u32* p, u32 value, u32 size);

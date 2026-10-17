@@ -87,6 +87,8 @@ SHAPES = {
     0x8031C088: ("MP3_STATIC u8 %s[16]", "u8", 1),  # intensity stereo short-band line limits
     0x8031C098: ("MP3_STATIC s32 %s[32][4]", "s32", 4),  # dequant: large values, x^(4/3) per 256-wide segment
     0x802F39E8: ("MP3_STATIC const s8 %s[22]", "s8", 1),  # dequant: pretab
+    0x802F44C8: ("MP3_STATIC const s8 %s[16]", "s8", 1),  # MPEG-1 slen1 by scalefac_compress
+    0x802F44D8: ("MP3_STATIC const s8 %s[16]", "s8", 1),  # MPEG-1 slen2 by scalefac_compress
     0x802F3A00: ("MP3_STATIC const s16 %s[2][35]", "s16", 2),  # dequant: multiplier by scalefac_scale
     0x802F3A8C: ("MP3_STATIC const u8 %s[2][35]", "u8", 1),  # dequant: exponent offset by scalefac_scale
     0x802F3AD4: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges

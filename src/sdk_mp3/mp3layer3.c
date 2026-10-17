@@ -1200,6 +1200,213 @@ void fn_800C3960(s32* v, const s32* w, s32 pos, u8* out, s32 mask, s32 mode) {
     }
 }
 
+/* Scalefactor decode (fn_800C3DA0). Draft from ChatGPT round 24: behaviour checked against the
+ * Photo Channel twin (0x800C0BF0); compiles to 689 of 879 instructions. */
+void fn_800C3DA0(MP3Decoder* d, u8* bitbuf, u32 flags,
+                 s16* long_sf, s16* previous_long_sf, s16* short_sf,
+                 s16 bit_count, s16 scf_compress,
+                 s16* scfsi, s8 granule, u8 channel,
+                 s16* reset_field, s16* short_marker, s16* band_marker,
+                 s16* compression_kind, s16* intensity_scale) {
+    s32 i, g, n;
+    s32 slen[4];
+    s32 count[4];
+    s32 mixed, short_only;
+    s32 base;
+
+    if (d->lsf == 0) {
+        s32 len1, len2;
+        d->unkC = d->unk10;
+        d->unk10 += bit_count;
+        len1 = lbl_802F44C8[(u16)scf_compress & 15];
+        len2 = lbl_802F44D8[(u16)scf_compress & 15];
+        *reset_field = 0;
+
+        if ((flags & 7) != 0) {
+            if (flags & 6) {
+                *short_marker = 7;
+                *band_marker = 36;
+            }
+            if (scfsi[0] == 0 || granule == 0) {
+                for (i = 0; i < 6; ++i) {
+                    long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len1, (u32*)&d->unkC);
+                }
+            }
+            if (scfsi[1] == 0 || granule == 0) {
+                for (i = 6; i < 11; ++i) {
+                    long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len1, (u32*)&d->unkC);
+                }
+            }
+            if (scfsi[2] == 0 || granule == 0) {
+                for (i = 11; i < 16; ++i) {
+                    long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len2, (u32*)&d->unkC);
+                }
+            }
+            if (scfsi[3] == 0 || granule == 0) {
+                for (i = 16; i < 21; ++i) {
+                    long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len2, (u32*)&d->unkC);
+                }
+            }
+            if (granule == 1) {
+                if (scfsi[0] == 1) {
+                    for (i = 0; i < 6; ++i) {
+                        long_sf[i] = previous_long_sf[i];
+                    }
+                }
+                if (scfsi[1] == 1) {
+                    for (i = 6; i < 11; ++i) {
+                        long_sf[i] = previous_long_sf[i];
+                    }
+                }
+                if (scfsi[2] == 1) {
+                    for (i = 11; i < 16; ++i) {
+                        long_sf[i] = previous_long_sf[i];
+                    }
+                }
+                if (scfsi[3] == 1) {
+                    for (i = 16; i < 21; ++i) {
+                        long_sf[i] = previous_long_sf[i];
+                    }
+                }
+            }
+        } else if (flags & 8) {
+            *short_marker = 7;
+            *band_marker = 36;
+            for (i = 0; i < 8; ++i) {
+                long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len1, (u32*)&d->unkC);
+            }
+            for (i = 9; i < 18; ++i) {
+                short_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len1, (u32*)&d->unkC);
+            }
+            for (i = 18; i < 36; ++i) {
+                short_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len2, (u32*)&d->unkC);
+            }
+        } else if (flags & 16) {
+            *short_marker = 8;
+            *band_marker = 36;
+            for (i = 0; i < 18; ++i) {
+                short_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len1, (u32*)&d->unkC);
+            }
+            for (i = 18; i < 36; ++i) {
+                short_sf[i] = (s16)MP3_GetBitsRing(bitbuf, len2, (u32*)&d->unkC);
+            }
+        }
+        return;
+    }
+
+    /* MPEG-2 / low sampling frequency scalefactor-compress decomposition.
+     * `flags & 8` selects mixed block; `flags & 16` selects short-only.
+     * Preserve the original short band grouping in multiples of 3. */
+    for (g = 0; g < 4; g++) {
+        slen[g] = 0;
+        count[g] = 0;
+    }
+    mixed = (flags & 8) != 0;
+    short_only = (flags & 16) != 0;
+    if ((d->mode_ext == 1 || d->mode_ext == 3) && channel == 1) {
+        s32 c = scf_compress >> 1;
+        *intensity_scale = (s16)(scf_compress & 1);
+        if (c < 180) {
+            slen[0] = c / 36;
+            slen[1] = (c % 36) / 6;
+            slen[2] = c % 6;
+            if (mixed || short_only) {
+                if (mixed) { count[0]=6; count[1]=15; count[2]=12; }
+                else { count[0]=12; count[1]=12; count[2]=12; }
+            } else { count[0]=7; count[1]=7; count[2]=7; }
+        } else if (c < 244) {
+            c -= 180;
+            slen[0] = (c >> 4) & 3;
+            slen[1] = (c >> 2) & 3;
+            slen[2] = c & 3;
+            if (mixed || short_only) {
+                if (mixed) { count[0]=6; count[1]=12; count[2]=9; count[3]=6; }
+                else { count[0]=12; count[1]=9; count[2]=9; count[3]=6; }
+            } else { count[0]=6; count[1]=6; count[2]=6; count[3]=3; }
+        } else if (c <= 255) {
+            c -= 244;
+            slen[0] = c / 3;
+            slen[1] = c % 3;
+            if (mixed || short_only) {
+                if (mixed) { count[0]=6; count[1]=18; count[2]=9; }
+                else { count[0]=15; count[1]=12; count[2]=9; }
+            } else { count[0]=8; count[1]=8; count[2]=5; }
+        }
+        *compression_kind = 0;
+    } else {
+        s32 c = scf_compress;
+        if (c < 400) {
+            slen[0] = (c >> 4) / 5;
+            slen[1] = (c >> 4) % 5;
+            slen[2] = (c >> 2) & 3;
+            slen[3] = c & 3;
+            if (mixed || short_only) {
+                if (short_only) { count[0]=9; count[1]=9; count[2]=9; count[3]=9; }
+                else { count[0]=6; count[1]=9; count[2]=9; count[3]=9; }
+            } else { count[0]=6; count[1]=5; count[2]=5; count[3]=5; }
+        } else if (c < 500) {
+            c -= 400;
+            slen[0] = (c >> 2) / 5;
+            slen[1] = (c >> 2) % 5;
+            slen[2] = c & 3;
+            if (mixed || short_only) {
+                if (short_only) { count[0]=9; count[1]=9; count[2]=12; count[3]=6; }
+                else { count[0]=6; count[1]=9; count[2]=12; count[3]=6; }
+            } else { count[0]=6; count[1]=5; count[2]=7; count[3]=3; }
+        } else if (c < 512) {
+            c -= 500;
+            slen[0] = c / 3;
+            slen[1] = c % 3;
+            if (mixed || short_only) {
+                if (short_only) { count[0]=18; count[1]=18; }
+                else { count[0]=15; count[1]=18; }
+            } else { count[0]=11; count[1]=10; }
+        }
+        *compression_kind = (s16)(scf_compress >= 500 && scf_compress < 512);
+    }
+
+    for (i = 0; i < 21; ++i) long_sf[i] = 0;
+    for (i = 0; i < 36; ++i) short_sf[i] = 0;
+    d->unkC = d->unk10;
+    d->unk10 += bit_count;
+    *reset_field = 0;
+
+    if (mixed || short_only) {
+        *short_marker = (s16)(mixed ? 7 : 8);
+        *band_marker = 36;
+        if (mixed) {
+            for (i = 0; i < 6; ++i) {
+                long_sf[i] = (s16)MP3_GetBitsRing(bitbuf, slen[0], (u32*)&d->unkC);
+            }
+            /* The first short band starts at 9; the groups count a 6-long-value prefix. */
+            base = 9;
+            n = count[0] - 6;
+            for (i = 0; i < n; ++i) short_sf[base+i] = (s16)MP3_GetBitsRing(bitbuf, slen[0], (u32*)&d->unkC);
+            base += n;
+        } else {
+            base = 0;
+            for (i = 0; i < count[0]; ++i) short_sf[base+i] = (s16)MP3_GetBitsRing(bitbuf, slen[0], (u32*)&d->unkC);
+            base += count[0];
+        }
+        for (g = 1; g < 4; ++g) {
+            for (i = 0; i < count[g]; ++i) {
+                short_sf[base+i] = (s16)MP3_GetBitsRing(bitbuf, slen[g], (u32*)&d->unkC);
+            }
+            base += count[g];
+        }
+    } else {
+        if (flags & 6) {
+            *short_marker = 7;
+            *band_marker = 36;
+        }
+        base = 0;
+        for (g = 0; g < 4; ++g) {
+            for (i = 0; i < count[g]; ++i) long_sf[base+i] = (s16)MP3_GetBitsRing(bitbuf, slen[g], (u32*)&d->unkC);
+            base += count[g];
+        }
+    }
+}
+
 MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
     MP3Decoder* d;
 
