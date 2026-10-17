@@ -102,7 +102,7 @@ void fn_800C1E88(s32* coeff, s32* input, s32* output);
 void fn_800C1F6C(s32* dst, s32* a, s32* b);
 void fn_800C2090(s32* dst, s32* a, s32* b);
 void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mode);
-void fn_800C4E5C(s32* vb, s32* p);
+s32 fn_800C4E5C(s32* in, s32* out);
 void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2);
 void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2);
 void fn_800C2DBC(s32* in, s32* out1, s32* out2);
