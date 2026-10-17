@@ -147,6 +147,10 @@ void __AXSPBInit(void) {
     __AXSpbAL = 0;
 }
 
+#ifdef GAME_REXE01
+void __AXSPBQuit(void) {}
+
+#endif
 void __AXDepopVoice(AXPB* pb) {
     __AXSpbAL += pb->dpop.aL;
     __AXSpbAAL += pb->dpop.aAuxAL;

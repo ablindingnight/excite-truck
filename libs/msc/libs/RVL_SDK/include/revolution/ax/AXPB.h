@@ -248,7 +248,9 @@ typedef union __AXPBRMTIIR {
 #ifdef GAME_REXE01
 // Excite Truck's older AX still has the parameter-update block
 typedef struct _AXPBUPDATE {
-    u16 updNum[5]; // at 0x0
+    u16 updNum[3]; // at 0x0
+    u16 dataHi;    // at 0x6
+    u16 dataLo;    // at 0x8
 } AXPBUPDATE;
 
 #endif
@@ -274,15 +276,21 @@ typedef struct _AXPB {
     AXPBSRC src;               // at 0xA6
     AXPBADPCMLOOP adpcmLoop;   // at 0xB4
     AXPBLPF lpf;               // at 0xBA
+#ifdef GAME_REXE01
+    AXPBLPF biquad;            // at 0xCC; ET's older AX: a 4-field filter in the biquad slot
+#else
     AXPBBIQUAD biquad;         // at 0xC2
+#endif
     u16 remote;                // at 0xD6
     u16 rmtMixerCtrl;          // at 0xD8
     AXPBRMTMIX rmtMix;         // at 0xDA
     AXPBRMTDPOP rmtDpop;       // at 0xFA
     AXPBRMTSRC rmtSrc;         // at 0x10A
+#ifndef GAME_REXE01  // not in Excite Truck's older AX
     AXPBRMTIIR rmtIIR;         // at 0x114
+#endif
 #ifdef GAME_REXE01
-    u8 padding[0x140 - 0x132]; // at 0x132
+    u8 padding[0x120 - 0x112]; // at 0x112 (ET's PB is 0x120 bytes)
 #else
     u8 padding[0x140 - 0x128]; // at 0x128
 #endif

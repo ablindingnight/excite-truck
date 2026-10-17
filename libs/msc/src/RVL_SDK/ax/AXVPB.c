@@ -35,28 +35,50 @@ typedef struct _AXITD {
     u8 UNK_0x0[0x40];
 } AXITD;
 
+#ifdef GAME_REXE01
+static AXPB __AXPB[AX_VOICE_MAX] ALIGN(32);
+static u32 __AXUpdates[AX_VOICE_MAX][64] ALIGN(32);  // per-voice parameter-update data
+#else
 static AXPB* __AXPB = NULL;
 static AXPB __s_AXPB[AX_VOICE_MAX] ALIGN(32);
+#endif
 
+#ifdef GAME_REXE01
+static AXITD __AXITD[AX_VOICE_MAX] ALIGN(32);
+#else
 static AXITD* __AXITD = NULL;
 static AXITD __s_AXITD[AX_VOICE_MAX] ALIGN(32);
+#endif
 
+#ifdef GAME_REXE01
+static AXVPB __AXVPB[AX_VOICE_MAX] ALIGN(32);
+#else
 // Did they forget the alignment here?
 static AXVPB* __AXVPB = NULL;
 static AXVPB __s_AXVPB[AX_VOICE_MAX];
+#endif
 
+#ifndef GAME_REXE01
 s32 __AXMaxVoices = 0;
+#endif
 static s32 __AXNumVoices = 0;
 
 static u32 __AXRecDspCycles = 0;
 static u32 __AXMaxDspCycles = 0;
 
+#ifdef GAME_REXE01
+static u32 __AXMixCycles[] = {0,    760,  760,  1470, 0,    1265, 1265, 2470,
+                              760,  1520, 1520, 2230, 760,  2025, 2025, 3230,
+                              0,    760,  760,  1470, 0,    1265, 1265, 2470,
+                              1265, 2025, 2025, 2735, 1265, 2530, 2530, 3735};
+#else
 static u32 __AXMixCycles[] = {2,   408,  408,  810,  1404, 1404, 1404, 1404,
                               408, 816,  816,  1218, 1812, 1812, 1812, 1812,
                               707, 1115, 1115, 1517, 2111, 2111, 2111, 2111,
                               707, 1115, 1115, 1517, 2111, 2111, 2111, 2111};
 
 static u32 __AXRmtMixCycles[] = {4, 86, 151, 151};
+#endif
 
 static void __AXVPBInitCommon(void);
 static u32 __AXGetSrcCycles(u16 select, const AXPBSRC* src);
@@ -65,6 +87,182 @@ s32 __AXGetNumVoices(void) {
     return __AXNumVoices;
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older AX: parameter updates, a 4-field filter in the biquad slot, no remote IIR
+void __AXServiceVPB(AXVPB* vpb) {
+    AXPB* dst;
+    AXPB* src;
+    u32 sync;
+
+    __AXNumVoices++;
+
+    dst = &__AXPB[vpb->index];
+    src = &vpb->pb;
+    sync = vpb->sync;
+
+    if (sync == 0) {
+        src->state = dst->state;
+        src->ve.currentVolume = dst->ve.currentVolume;
+        src->addr.currentAddressHi = dst->addr.currentAddressHi;
+        src->addr.currentAddressLo = dst->addr.currentAddressLo;
+        return;
+    }
+
+    if (sync & AX_PBSYNC_ALL) {
+        void* from = src;
+        void* to = dst;
+
+        memcpy(to, from, sizeof(AXPB));
+
+        if (vpb->updateCounter != 0) {
+            u32* updDst = __AXUpdates[vpb->index];
+            u32* updSrc = (u32*)vpb->updateData;
+            u32 count;
+
+            for (count = vpb->updateCounter; count; count--) {
+                *updDst++ = *updSrc++;
+            }
+        }
+        return;
+    }
+
+    if (sync & AX_PBSYNC_SELECT) {
+        dst->srcSelect = src->srcSelect;
+        dst->coefSelect = src->coefSelect;
+    }
+
+    if (sync & AX_PBSYNC_MIXER_CTRL) {
+        dst->mixerCtrl = src->mixerCtrl;
+    }
+
+    if (sync & AX_PBSYNC_STATE) {
+        dst->state = src->state;
+    } else {
+        src->state = dst->state;
+    }
+
+    if (sync & AX_PBSYNC_TYPE) {
+        dst->type = src->type;
+    }
+
+    if (sync & AX_PBSYNC_MIX) {
+        AXPBMIX* mix = &src->mix;
+        memcpy(&dst->mix, mix, sizeof(AXPBMIX));
+    }
+
+    if (sync & AX_PBSYNC_ITD_SHIFT) {
+        dst->itd.targetShiftL = src->itd.targetShiftL;
+        dst->itd.targetShiftR = src->itd.targetShiftR;
+    } else if (sync & AX_PBSYNC_ITD) {
+        FUNNY_COPY(&dst->itd, &src->itd, u16, sizeof(AXPBITD));
+        __memclr(vpb->itdBuffer, sizeof(AXITD));
+    }
+
+    if (sync & AX_PBSYNC_UPDATE) {
+        memcpy(&dst->update, &src->update, sizeof(AXPBUPDATE));
+
+        if (vpb->updateCounter != 0) {
+            u32* updDst = __AXUpdates[vpb->index];
+            u32* updSrc = (u32*)vpb->updateData;
+            u32 count;
+
+            for (count = vpb->updateCounter; count; count--) {
+                *updDst++ = *updSrc++;
+            }
+        }
+    }
+
+    if (sync & AX_PBSYNC_DPOP) {
+        memcpy(&dst->dpop, &src->dpop, sizeof(AXPBDPOP));
+    }
+
+    if (sync & AX_PBSYNC_VE_DELTA) {
+        src->ve.currentVolume = dst->ve.currentVolume;
+        dst->ve.currentDelta = src->ve.currentDelta;
+    } else if (sync & AX_PBSYNC_VE) {
+        dst->ve.currentVolume = src->ve.currentVolume;
+        dst->ve.currentDelta = src->ve.currentDelta;
+    }
+
+    if (sync & (AX_PBSYNC_LOOP_FLAG | AX_PBSYNC_LOOP_ADDR | AX_PBSYNC_END_ADDR |
+                AX_PBSYNC_CURR_ADDR)) {
+        if (sync & AX_PBSYNC_LOOP_FLAG) {
+            dst->addr.loopFlag = src->addr.loopFlag;
+        }
+
+        if (sync & AX_PBSYNC_LOOP_ADDR) {
+            *(u32*)&dst->addr.loopAddressHi = *(u32*)&src->addr.loopAddressHi;
+        }
+
+        if (sync & AX_PBSYNC_END_ADDR) {
+            *(u32*)&dst->addr.endAddressHi = *(u32*)&src->addr.endAddressHi;
+        }
+
+        if (sync & AX_PBSYNC_CURR_ADDR) {
+            *(u32*)&dst->addr.currentAddressHi =
+                *(u32*)&src->addr.currentAddressHi;
+        } else {
+            *(u32*)&src->addr.currentAddressHi =
+                *(u32*)&dst->addr.currentAddressHi;
+        }
+    } else if (sync & AX_PBSYNC_ADDR) {
+        FUNNY_COPY(&dst->addr, &src->addr, u32, sizeof(AXPBADDR));
+    } else {
+        src->addr.currentAddressHi = dst->addr.currentAddressHi;
+        src->addr.currentAddressLo = dst->addr.currentAddressLo;
+    }
+
+    if (sync & AX_PBSYNC_ADPCM) {
+        FUNNY_COPY(&dst->adpcm, &src->adpcm, u32, sizeof(AXPBADPCM));
+    }
+
+    if (sync & AX_PBSYNC_SRC_RATIO) {
+        dst->src.ratioHi = src->src.ratioHi;
+        dst->src.ratioLo = src->src.ratioLo;
+    } else if (sync & AX_PBSYNC_SRC) {
+        FUNNY_COPY(&dst->src, &src->src, u16, sizeof(AXPBSRC));
+    }
+
+    if (sync & AX_PBSYNC_ADPCM_LOOP) {
+        FUNNY_COPY(&dst->adpcmLoop, &src->adpcmLoop, u16,
+                   sizeof(AXPBADPCMLOOP));
+    }
+
+    if (sync & AX_PBSYNC_LPF_COEFS) {
+        dst->lpf.a0 = src->lpf.a0;
+        dst->lpf.b0 = src->lpf.b0;
+    } else if (sync & AX_PBSYNC_LPF) {
+        FUNNY_COPY(&dst->lpf, &src->lpf, u16, sizeof(AXPBLPF));
+    }
+
+    if (sync & AX_PBSYNC_BIQUAD_COEFS) {
+        dst->biquad.a0 = src->biquad.a0;
+        dst->biquad.b0 = src->biquad.b0;
+    } else if (sync & AX_PBSYNC_BIQUAD) {
+        FUNNY_COPY(&dst->biquad, &src->biquad, u16, sizeof(AXPBLPF));
+    }
+
+    if (sync & AX_PBSYNC_REMOTE) {
+        dst->remote = src->remote;
+    }
+
+    if (sync & AX_PBSYNC_RMT_MIXER_CTRL) {
+        dst->rmtMixerCtrl = src->rmtMixerCtrl;
+    }
+
+    if (sync & AX_PBSYNC_RMTMIX) {
+        memcpy(&dst->rmtMix, &src->rmtMix, sizeof(AXPBRMTMIX));
+    }
+
+    if (sync & AX_PBSYNC_RMTDPOP) {
+        memcpy(&dst->rmtDpop, &src->rmtDpop, sizeof(AXPBRMTDPOP));
+    }
+
+    if (sync & AX_PBSYNC_RMTSRC) {
+        memcpy(&dst->rmtSrc, &src->rmtSrc, sizeof(AXPBRMTSRC));
+    }
+}
+#else
 void __AXServiceVPB(AXVPB* vpb) {
     AXPB* dst;
     AXPB* src;
@@ -226,7 +424,22 @@ void __AXServiceVPB(AXVPB* vpb) {
         FUNNY_COPY(&dst->rmtIIR, &src->rmtIIR, u16, sizeof(AXPBRMTIIR));
     }
 }
+#endif
 
+#ifdef GAME_REXE01
+static inline void __AXDumpVPB(AXVPB* vpb) {
+    AXPB* pb = &__AXPB[vpb->index];
+
+    if (pb->state == AX_VOICE_RUN) {
+        __AXDepopVoice(pb);
+    }
+
+    vpb->pb.state = pb->state = pb->update.updNum[0] = pb->update.updNum[1] =
+        pb->update.updNum[2] = AX_VOICE_STOP;
+
+    __AXPushCallbackStack(vpb);
+}
+#else
 void __AXDumpVPB(AXVPB* vpb) {
     AXPB* pb = &__AXPB[vpb->index];
 
@@ -239,7 +452,80 @@ void __AXDumpVPB(AXVPB* vpb) {
 
     __AXPushCallbackStack(vpb);
 }
+#endif
 
+#ifdef GAME_REXE01
+// Excite Truck's older AX: GameCube-style cycle estimate and parameter-update bookkeeping
+void __AXSyncPBs(u32 baseCycles) {
+    u32 cycles;
+    u32 prio;
+    AXVPB* head;
+
+    __AXNumVoices = 0;
+
+    DCInvalidateRange(__AXPB, sizeof(__AXPB));
+    DCInvalidateRange(__AXITD, sizeof(__AXITD));
+
+    cycles = __AXGetCommandListCycles() + 0x10000 - 0x55F0 + baseCycles;
+
+    for (prio = AX_PRIORITY_MAX; prio > AX_PRIORITY_FREE; prio--) {
+        for (head = __AXGetStackHead(prio); head != NULL; head = head->next) {
+            if (head->depop) {
+                __AXDepopVoice(&__AXPB[head->index]);
+            }
+
+            if (head->pb.state == AX_VOICE_RUN || head->updateCounter != 0) {
+                if (head->pb.srcSelect != 2) {
+                    u32 ratio = head->pb.src.ratioHi << 16 | head->pb.src.ratioLo;
+                    cycles += ((ratio * 132 + 0x8000) / 0x10000 + 728) * 6;
+                }
+
+                if (head->pb.lpf.on) {
+                    cycles += 555;
+                }
+
+                if (head->pb.biquad.on) {
+                    cycles += 555;
+                }
+
+                cycles += __AXMixCycles[head->pb.mixerCtrl >> 0 & 31] +
+                          __AXMixCycles[head->pb.mixerCtrl >> 16 & 31] +
+                          __AXMixCycles[head->pb.mixerCtrl >> 21 & 31] +
+                          __AXMixCycles[head->pb.mixerCtrl >> 26 & 31] + 140;
+
+                if (__AXMaxDspCycles > cycles) {
+                    __AXServiceVPB(head);
+                } else {
+                    __AXDumpVPB(head);
+                }
+            } else {
+                __AXServiceVPB(head);
+            }
+
+            head->sync = 0;
+            head->depop = FALSE;
+            head->updateMS = head->updateCounter = 0;
+            head->updateWrite = head->updateData;
+        }
+    }
+
+    __AXRecDspCycles = cycles;
+
+    for (head = __AXGetStackHead(AX_PRIORITY_FREE); head != NULL; head = head->next) {
+        if (head->depop) {
+            __AXDepopVoice(&__AXPB[head->index]);
+        }
+
+        head->depop = FALSE;
+        __AXPB[head->index].state = __AXPB[head->index].update.updNum[0] =
+            __AXPB[head->index].update.updNum[1] = __AXPB[head->index].update.updNum[2] = 0;
+    }
+
+    DCFlushRange(__AXPB, sizeof(__AXPB));
+    DCFlushRange(__AXITD, sizeof(__AXITD));
+    DCFlushRange(__AXUpdates, sizeof(__AXUpdates));
+}
+#else
 void __AXSyncPBs(u32 baseCycles) {
     u32 cycles;
     u32 prio;
@@ -333,11 +619,96 @@ void __AXSyncPBs(u32 baseCycles) {
     DCFlushRange(__AXPB, __AXMaxVoices * sizeof(AXPB));
     DCFlushRange(__AXITD, __AXMaxVoices * sizeof(AXITD));
 }
+#endif
 
 AXPB* __AXGetPBs(void) {
     return __AXPB;
 }
 
+#ifdef GAME_REXE01
+void __AXSetPBDefault(AXVPB* vpb) {
+    vpb->pb.state = AX_VOICE_STOP;
+    vpb->pb.itd.flag = 0;
+    vpb->sync = AX_PBSYNC_STATE | AX_PBSYNC_ITD | AX_PBSYNC_UPDATE |
+                AX_PBSYNC_LPF | AX_PBSYNC_BIQUAD | AX_PBSYNC_REMOTE |
+                AX_PBSYNC_RMTSRC;
+    vpb->updateMS = vpb->updateCounter = 0;
+    vpb->updateWrite = vpb->updateData;
+    vpb->pb.update.updNum[0] = vpb->pb.update.updNum[1] =
+        vpb->pb.update.updNum[2] = 0;
+    vpb->pb.lpf.on = 0;
+    vpb->pb.biquad.on = 0;
+    vpb->pb.remote = 0;
+    vpb->pb.rmtSrc.currentAddressFrac = 0;
+    vpb->pb.rmtSrc.last_samples[0] = 0;
+    vpb->pb.rmtSrc.last_samples[1] = 0;
+    vpb->pb.rmtSrc.last_samples[2] = 0;
+    vpb->pb.rmtSrc.last_samples[3] = 0;
+}
+
+void __AXVPBInit(void) {
+    u32 i;
+    u32* dst;
+
+    __AXMaxDspCycles = OS_BUS_CLOCK_SPEED / 667;
+    __AXRecDspCycles = 0;
+
+    for (dst = (u32*)__AXPB, i = sizeof(__AXPB) / sizeof(u32); i > 0; i--) {
+        *dst++ = 0;
+    }
+
+    for (dst = (u32*)__AXITD, i = sizeof(__AXITD) / sizeof(u32); i > 0; i--) {
+        *dst++ = 0;
+    }
+
+    for (dst = (u32*)__AXVPB, i = sizeof(__AXVPB) / sizeof(u32); i > 0; i--) {
+        *dst++ = 0;
+    }
+
+    for (i = 0; i < AX_VOICE_MAX; i++) {
+        AXPB* pb = &__AXPB[i];
+        AXITD* itd = &__AXITD[i];
+        u32* upd = __AXUpdates[i];
+        AXVPB* vpb = &__AXVPB[i];
+
+        vpb->index = i;
+        vpb->itdBuffer = itd;
+        __AXSetPBDefault(vpb);
+
+        if (i == AX_VOICE_MAX - 1) {
+            vpb->pb.nextHi = pb->nextHi = vpb->pb.nextLo = pb->nextLo = 0;
+        } else {
+            vpb->pb.nextHi = ADDRHI((uintptr_t)pb + sizeof(AXPB));
+            pb->nextHi = ADDRHI((uintptr_t)pb + sizeof(AXPB));
+            vpb->pb.nextLo = ADDRLO((uintptr_t)pb + sizeof(AXPB));
+            pb->nextLo = ADDRLO((uintptr_t)pb + sizeof(AXPB));
+        }
+
+        vpb->pb.currHi = ADDRHI(pb);
+        vpb->pb.currLo = ADDRLO(pb);
+        pb->currHi = ADDRHI(pb);
+        pb->currLo = ADDRLO(pb);
+
+        vpb->pb.itd.bufferHi = ADDRHI(itd);
+        vpb->pb.itd.bufferLo = ADDRLO(itd);
+        pb->itd.bufferHi = ADDRHI(itd);
+        pb->itd.bufferLo = ADDRLO(itd);
+
+        vpb->pb.update.dataHi = ADDRHI(upd);
+        vpb->pb.update.dataLo = ADDRLO(upd);
+        pb->update.dataHi = ADDRHI(upd);
+        pb->update.dataLo = ADDRLO(upd);
+
+        vpb->priority = AX_PRIORITY_MIN;
+        __AXPushFreeStack(vpb);
+    }
+
+    DCFlushRange(__AXPB, sizeof(__AXPB));
+}
+
+void __AXVPBQuit(void) {}
+
+#else
 void __AXSetPBDefault(AXVPB* vpb) {
     vpb->pb.state = AX_VOICE_STOP;
     vpb->pb.itd.flag = 0;
@@ -425,6 +796,7 @@ static void __AXVPBInitCommon(void) {
 
     DCFlushRange(__AXPB, __AXMaxVoices * sizeof(AXPB));
 }
+#endif
 
 void AXSetVoiceSrcType(AXVPB* vpb, u32 type) {
     BOOL old;
@@ -550,6 +922,7 @@ void AXSetVoiceMix(AXVPB* vpb, AXPBMIX* mix) {
     OSRestoreInterrupts(old);
 }
 
+#ifndef GAME_REXE01
 void AXSetVoiceItdTarget(AXVPB* p, u16 lShift, u16 rShift) {
     BOOL old;
 
@@ -559,6 +932,7 @@ void AXSetVoiceItdTarget(AXVPB* p, u16 lShift, u16 rShift) {
     p->sync |= AX_PBSYNC_ITD_SHIFT;
     OSRestoreInterrupts(old);
 }
+#endif
 
 void AXSetVoiceVe(AXVPB* vpb, AXPBVE* ve) {
     BOOL old;
@@ -630,6 +1004,7 @@ void AXSetVoiceAddr(AXVPB* vpb, AXPBADDR* addr) {
     OSRestoreInterrupts(enabled);
 }
 
+#ifndef GAME_REXE01
 void AXSetVoiceLoop(AXVPB* p, u16 loop) {
     BOOL old;
 
@@ -638,7 +1013,9 @@ void AXSetVoiceLoop(AXVPB* p, u16 loop) {
     p->sync |= AX_PBSYNC_LOOP_FLAG;
     OSRestoreInterrupts(old);
 }
+#endif
 
+#ifndef GAME_REXE01
 void AXSetVoiceLoopAddr(AXVPB* p, u32 addr) {
     BOOL old;
 
@@ -648,7 +1025,9 @@ void AXSetVoiceLoopAddr(AXVPB* p, u32 addr) {
     p->sync |= AX_PBSYNC_LOOP_ADDR;
     OSRestoreInterrupts(old);
 }
+#endif
 
+#ifndef GAME_REXE01
 void AXSetVoiceEndAddr(AXVPB* p, u32 addr) {
     BOOL old;
 
@@ -658,7 +1037,9 @@ void AXSetVoiceEndAddr(AXVPB* p, u32 addr) {
     p->sync |= AX_PBSYNC_END_ADDR;
     OSRestoreInterrupts(old);
 }
+#endif
 
+#ifndef GAME_REXE01
 void AXSetVoiceCurrentAddr(AXVPB* p, u32 addr) {
     BOOL old;
 
@@ -668,6 +1049,7 @@ void AXSetVoiceCurrentAddr(AXVPB* p, u32 addr) {
     p->sync |= AX_PBSYNC_CURR_ADDR;
     OSRestoreInterrupts(old);
 }
+#endif
 
 void AXSetVoiceAdpcm(AXVPB* vpb, AXPBADPCM* adpcm) {
     BOOL old;
@@ -845,9 +1227,11 @@ void AXSetVoiceRmtMix(AXVPB* vpb, AXPBRMTMIX* mix) {
     OSRestoreInterrupts(old);
 }
 
+#ifndef GAME_REXE01
 void AXSetMaxDspCycles(u32 num) {
     __AXMaxDspCycles = num;
 }
+#endif
 
 static u32 __AXGetSrcCycles(u16 select, const AXPBSRC* src) {
     u32 ratio = src->ratioHi << 16 | src->ratioLo;
@@ -863,6 +1247,8 @@ static u32 __AXGetSrcCycles(u16 select, const AXPBSRC* src) {
     return 605;
 }
 
+#ifndef GAME_REXE01
 s32 AXGetMaxVoices(void) {
     return __AXMaxVoices;
 }
+#endif

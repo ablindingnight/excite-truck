@@ -74,6 +74,9 @@ void __AXDepopFadeMain(s32* all, s32* value, s16* depop) DECOMP_DONT_INLINE;
 void __AXDepopFadeRmt(s32* all, s32* value, s16* depop) DECOMP_DONT_INLINE;
 void __AXPrintStudio(void);
 void __AXSPBInit(void);
+#ifdef GAME_REXE01
+void __AXSPBQuit(void);
+#endif
 void __AXDepopVoice(AXPB* pb);
 
 #ifdef __cplusplus
