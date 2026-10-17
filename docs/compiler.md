@@ -21,7 +21,8 @@ Findings:
 - GC/2.x is ruled out (wrong code size).
 - GC/3.0a3, 3.0a5 and 3.0a5.2 match everything so far at both `-O4,p` and `-O4,s`.
   The Wii/1.x compilers match only at `-O4,s` (at `-O4,p` they align loops with a `nop`).
-- Not yet determined: exact 3.0a version, `-O4,p` vs `-O4,s`, `-inline auto` vs `noauto`.
+- **`-inline noauto`**: tiny non-inline helpers (app.cpp `ResolveResName`, `LoadResidentRes`) stay calls; explicit `inline`/in-class methods still inline.
+- Not yet determined: exact 3.0a version, `-O4,p` vs `-O4,s`.
   Default to GC/3.0a5 (the SDK's compiler and the version in the banners) until a function disagrees.
 - The project now links with the **GC/3.0a5 linker** (as Twilight Princess does). Two things were needed:
   - `mw_comment_version: 14` in `config.yml`. With the template's value (8) dtk stamps objects as

@@ -250,6 +250,7 @@ cflags_rvl = [
 # Game code flags (see docs/compiler.md): generic PowerPC scheduling, no fused multiply-add.
 cflags_game = [
     *cflags_base,
+    "-inline noauto",  # tiny helpers stay out of line (app.cpp ResolveResName etc.)
     "-proc generic",
     "-fp_contract off",
     "-enc SJIS",
@@ -905,6 +906,19 @@ config.libs.append(
     }
 )
 
+
+# Monster Games' engine and Excite Truck's own code (no reference; names are guesses).
+config.libs.append(
+    {
+        "lib": "game",
+        "mw_version": "GC/3.0a5",
+        "cflags": cflags_game,
+        "progress_category": "game",
+        "objects": [
+            Object(Matching, "game/app.cpp"),
+        ],
+    }
+)
 
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
 # This is called once per module, with the module ID and the current link order.
