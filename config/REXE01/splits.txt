@@ -1152,6 +1152,33 @@ revolution/VF/pf_cp932.c:
 RVL_SDK/vf/pf_api_util.c:
 	.text       start:0x800B72EC end:0x800B7408
 
+RVL_SDK/vf/pf_attach.c:
+	.text       start:0x800B7408 end:0x800B74B8
+
+RVL_SDK/vf/pf_detach.c:
+	.text       start:0x800B74B8 end:0x800B74E0
+
+RVL_SDK/vf/pf_fclose.c:
+	.text       start:0x800B74E0 end:0x800B7504
+
+RVL_SDK/vf/pf_finfo.c:
+	.text       start:0x800B7504 end:0x800B7528
+
+RVL_SDK/vf/pf_fopen.c:
+	.text       start:0x800B7528 end:0x800B75C4
+
+RVL_SDK/vf/pf_fread.c:
+	.text       start:0x800B75C4 end:0x800B75EC
+
+RVL_SDK/vf/pf_fseek.c:
+	.text       start:0x800B75EC end:0x800B7610
+
+RVL_SDK/vf/pf_fsfirst.c:
+	.text       start:0x800B7610 end:0x800B7684
+
+RVL_SDK/vf/pf_fsnext.c:
+	.text       start:0x800B7684 end:0x800B76A8
+
 revolution/VF/pf_init_prfile2.c:
 	.text       start:0x800B76A8 end:0x800B76E8
 
