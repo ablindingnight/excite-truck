@@ -875,6 +875,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pf_file.c"),
             Object(Matching, "RVL_SDK/vf/pf_path.c"),
             Object(Matching, "RVL_SDK/vf/pf_sector.c"),
+            Object(Matching, "RVL_SDK/vf/pf_volume.c"),
             Object(Matching, "RVL_SDK/vf/pf_api_util.c"),
             Object(Matching, "RVL_SDK/arc/arc.c"),
         ],

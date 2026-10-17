@@ -23,7 +23,13 @@ void VFiPFVOL_LoadVolumeLabelFromBuf(const u8* buf, struct PF_VOLUME* p_vol);
 #endif
 s32 VFiPFVOL_errnum();
 s32 VFiPFVOL_getdev(s8 drv_char, struct PF_DEV_INF* dev_inf);
+#ifdef GAME_REXE01
+s32 VFiPFVOL_attach(struct PF_DRV_TBL* p_drv, const s8* dev_name, u32 dev_param);
+// Name unknown (0x800B94EC): registers a device name with the drive layer.
+s32 VFiPF_ET_RegisterDevice(const s8* dev_name, u32 dev_param);
+#else
 s32 VFiPFVOL_attach(struct PF_DRV_TBL* p_drv);
+#endif
 s32 VFiPFVOL_detach(s8 drv_char);
 s32 VFiPFVOL_unmount(s8 drv_char, u32 mode);
 

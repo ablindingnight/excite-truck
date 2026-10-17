@@ -10,5 +10,6 @@ build/tools/dtk.exe elf disasm "$obj" "$tmp/ref.s" >/dev/null 2>&1
 words() { grep -E "^/\* [0-9A-F]+ " | sed -E 's/^\/\* ([0-9A-F]+ )?[0-9A-F]+  ([0-9A-F ]{11}) \*\/\s*/\2 /'; }
 awk "/^\.fn $t,/,/^\.endfn/" "$f" | words > "$tmp/t.txt"
 awk "/^\.fn $r,/,/^\.endfn/" "$tmp/ref.s" | words > "$tmp/r.txt"
-paste -d'|' "$tmp/t.txt" "$tmp/r.txt" | awk -F'|' '{split($1,a," "); split($2,b," "); if (a[1]a[2]a[3]a[4] != b[1]b[2]b[3]b[4] && a[1] !~ /^4B|^48/) print NR": "$1"  <>  "$2}' | head -20
+# Words differing only by relocation (same disassembly text, e.g. lis/addi of a symbol) are skipped.
+paste -d'|' "$tmp/t.txt" "$tmp/r.txt" | awk -F'|' '{split($1,a," "); split($2,b," "); ta=$1; tb=$2; sub(/^([0-9A-F][0-9A-F] ){4}/,"",ta); sub(/^([0-9A-F][0-9A-F] ){4}/,"",tb); if (a[1]a[2]a[3]a[4] != b[1]b[2]b[3]b[4] && a[1] !~ /^4B|^48/ && (ta != tb || ta ~ /\.L_/)) print NR": "$1"  <>  "$2}' | head -20
 rm -rf "$tmp"

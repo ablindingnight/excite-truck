@@ -1141,6 +1141,10 @@ RVL_SDK/vf/pf_path.c:
 RVL_SDK/vf/pf_sector.c:
 	.text       start:0x800B5260 end:0x800B5988
 
+RVL_SDK/vf/pf_volume.c:
+	.text       start:0x800B5988 end:0x800B6DDC
+	.bss        start:0x803D2140 end:0x80405C30
+
 revolution/VF/pf_cp932.c:
 	.text       start:0x800B6DDC end:0x800B72EC
 	.rodata     start:0x802EEF80 end:0x802F31F4
