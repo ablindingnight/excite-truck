@@ -1079,10 +1079,16 @@ revolution/SC/scapi_prdinfo.c:
 	.sdata      start:0x805591E8 end:0x805591F0
 
 RVL_SDK/vf/pf_clib.c:
-	.text       start:0x800A485C end:0x800A499C
+	.text       start:0x800A485C end:0x800A4B54
 
 revolution/VF/pf_w_clib.c:
 	.text       start:0x800A4B54 end:0x800A4BE8
+
+RVL_SDK/vf/pf_code.c:
+	.text       start:0x800A4BE8 end:0x800A4C04
+
+RVL_SDK/vf/pf_service.c:
+	.text       start:0x800A4C04 end:0x800A4D3C
 
 RVL_SDK/vf/pf_str.c:
 	.text       start:0x800A51B8 end:0x800A52A0

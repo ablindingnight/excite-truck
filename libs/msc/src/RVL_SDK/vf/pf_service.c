@@ -9,7 +9,11 @@ void VFiPF_LE16_TO_U16_STR(u8* sSrc, u32 num) {
     s8 tmp_src;
 
     for (cnt = 0; cnt < num; cnt += sizeof(u16)) {
+#ifdef GAME_REXE01
+        tmp_src = ((s8*)sSrc)[cnt];
+#else
         tmp_src = sSrc[cnt];
+#endif
         sSrc[cnt] = sSrc[cnt + 1];
         sSrc[cnt + 1] = tmp_src;
     }

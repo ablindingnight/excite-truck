@@ -37,7 +37,12 @@ void* VFipf_memset(void* dst, s32 c, u32 length) {
     s8* d;
     u32* ld;
     u32 lc;
+#ifdef GAME_REXE01
+    // Excite Truck's older PrFILE2 aligns without checking the length
+    for (d = dst; (((u32)d) & 3) != 0; ++d) {
+#else
     for (d = dst; ((((u32)d) & 3) != 0) && length; ++d) {
+#endif
         --length;
         *d = c;
     }
