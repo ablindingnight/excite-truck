@@ -23,6 +23,22 @@ game/app.cpp:
 	.sbss       start:0x8055D320 end:0x8055D330
 	.sdata2     start:0x80560100 end:0x80560104
 
+game/flags.cpp:
+	.text       start:0x8000D7D8 end:0x8000D7F0
+	.ctors      start:0x802ED080 end:0x802ED084
+	.sbss       start:0x8055D428 end:0x8055D434
+
+game/stubs.cpp:
+	.text       start:0x8000D7F0 end:0x8000D82C
+	.ctors      start:0x802ED084 end:0x802ED088
+	.sbss       start:0x8055D438 end:0x8055D444
+
+game/version.cpp:
+	.text       start:0x8000D82C end:0x8000D884
+	.ctors      start:0x802ED088 end:0x802ED08C
+	.data       start:0x802FC200 end:0x802FC23C
+	.sbss       start:0x8055D448 end:0x8055D454
+
 MSL/alloc.c:
 	extab       start:0x80004520 end:0x80004558
 	extabindex  start:0x80004700 end:0x80004754

@@ -916,6 +916,9 @@ config.libs.append(
         "progress_category": "game",
         "objects": [
             Object(Matching, "game/app.cpp"),
+            Object(Matching, "game/flags.cpp"),
+            Object(Matching, "game/stubs.cpp"),
+            Object(Matching, "game/version.cpp"),
         ],
     }
 )

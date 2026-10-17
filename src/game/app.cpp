@@ -5,6 +5,10 @@
 #include <types.h>
 #include <string.h>
 #include <stdio.h>
+#include "game/common.h"
+
+void FlagsInit(void);
+void FlagsShutdown(void);
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -41,7 +45,6 @@ void fn_80007F40(void);
 void fn_8000D8C8(void);
 void fn_8001BA78(void);
 void fn_8001EF38(void);
-void fn_8000D7D8(void);
 void fn_80141454(void);
 void fn_8027DAF4(void);
 void fn_8021031C(void);
@@ -80,7 +83,6 @@ void fn_80018F7C(void);
 void fn_80019884(void);
 void fn_801AED58(void);
 void fn_80141458(void);
-void fn_8000D7E4(void);
 void fn_8001EFCC(void);
 void fn_8001BA84(void);
 void fn_8000D94C(void);
@@ -154,25 +156,6 @@ public:
     virtual int Get(int key);
 };
 
-class Unk_8000D838 {
-public:
-    Unk_8000D838(void);
-    u8 unk0[0x8];
-};
-
-// Values set up by the static initializer.
-class Unk_D328 {
-public:
-    Unk_D328(void) { value = 0xFFFF0000; }
-    u32 value;
-};
-
-class Unk_D32C {
-public:
-    Unk_D32C(void) { value = 0x7F000000; }
-    u32 value;
-};
-
 class Unk_EC40 {
 public:
     Unk_EC40(void) {
@@ -202,12 +185,12 @@ struct GameTime {
     u8 unkC[0xC];
 };
 
-Unk_8000D838 lbl_8055D320;
-Unk_D328 lbl_8055D328;
+ModuleTag lbl_8055D320;
+UnkStaticFFFF lbl_8055D328;
 int lbl_80558900 = 2;
 const char* lbl_8055890C = "winky";
 Unk_EC40 lbl_8034EC40;
-Unk_D32C lbl_8055D32C;
+UnkStatic7F lbl_8055D32C;
 char lbl_8034EC58[0x20];
 
 // Plays the logos, then one of the attract movies picked from the clock.
@@ -284,7 +267,7 @@ void AppInit(void) {
     fn_8000D8C8();
     fn_8001BA78();
     fn_8001EF38();
-    fn_8000D7D8();
+    FlagsInit();
     fn_80141454();
     fn_8027DAF4();
     fn_8021031C();
@@ -325,7 +308,7 @@ void AppShutdown(void) {
     fn_80019884();
     fn_801AED58();
     fn_80141458();
-    fn_8000D7E4();
+    FlagsShutdown();
     fn_8001EFCC();
     fn_8001BA84();
     fn_8000D94C();
