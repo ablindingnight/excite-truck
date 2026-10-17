@@ -72,21 +72,21 @@ typedef struct HuffState {
 #endif
 
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g);
-s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos);
-u32 MP3_GetBits(u32 unused, const u8* buf, u32 n, s32* pos);
-u32 MP3_GetBitsRing(const u8* buf, s32 n, u32* pos);
+s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);
+u32 MP3_GetBits(u32 unused, u8* buf, u32 n, s32* pos);
+u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos);
 void MP3_GetInfo(MP3Decoder* d, MP3Info* info);
-s32 MP3_ParseHeader(MP3Decoder* d, const u8* buf);
+s32 MP3_ParseHeader(MP3Decoder* d, u8* buf);
 void MP3_Fill(u32* p, u32 value, u32 size);
-MP3Decoder* MP3_Create(const u8* header, u32 b, s32 buf, s32 size);
+MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size);
 void MP3_Delete(u32 p);
 void MP3_ArenaInit(s32 base, s32 size);
 void* MP3_ArenaAlloc(u32 size);
 void MP3_ArenaSet(u32 p);
-u32 MP3_HuffLookup(s32 bits, s32 n, const HuffTable* t);
-u32 MP3_PeekBitsRing(const u8* buf, u32 n, u32* pos);
-void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
-void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
+u32 MP3_HuffLookup(s32 bits, s32 n, HuffTable* t);
+u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos);
+void MP3_DecodeQuads(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
+void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start);
 void MP3_Reorder32(u32* dst, u32* src, s32 mode);

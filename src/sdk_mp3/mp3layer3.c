@@ -11,7 +11,7 @@
 static u32 lbl_8055DD90;  /* arena end */
 static u32 lbl_8055DD94;  /* arena current */
 
-static inline s32 MP3_GetSign(BitStream* bs, const u8* buf) {
+static inline s32 MP3_GetSign(BitStream* bs, u8* buf) {
     u32 p = bs->pos;
     s32 avail;
 
@@ -46,7 +46,7 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
     q = out;
     nregions = 2 + (mixed != 0);
     for (region = 0; region < nregions; region++, table_select++) {
-        const HuffTable* ht;
+        HuffTable* ht;
         s32 tbl = *table_select;
         s32 linbits = lbl_8031C298[tbl];
 
@@ -130,7 +130,7 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
     return 0;
 }
 
-u32 MP3_HuffLookup(s32 bits, s32 n, const HuffTable* t) {
+u32 MP3_HuffLookup(s32 bits, s32 n, HuffTable* t) {
     s32 node = 0;
     u32 mask = 0xF;
     s32 shift = 28;
@@ -147,24 +147,29 @@ u32 MP3_HuffLookup(s32 bits, s32 n, const HuffTable* t) {
     return 0;
 }
 
-void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
+void MP3_DecodeQuads(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
     s16* q = out + i;
 
-    for (; i < end; i += 4, q += 4) {
-        u32 p = bs->pos;
-        u32 idx;
-        s32 sh;
+    for (; i < end; q += 4, i += 4) {
         u32 code;
-        u8 e;
-        s16 w;
+        u32 p = bs->pos;
         s16 v;
+        u32 b0;
+        s16 w;
         s16 x;
+        s32 sh;
+        u32 b1;
+        u32 idx;
+        u8 e;
         s16 y;
 
         bs->pos = p + 6;
         idx = (p >> 3) & 0x1FFF;
         sh = 16 - (p & 7);
-        code = (u16)((((buf[idx] << 8) | buf[(idx + 1) & 0x1FFF]) & lbl_802F3F54[sh]) >> (sh - 6));
+        b0 = buf[idx++];
+        idx &= 0x1FFF;
+        b1 = buf[idx];
+        code = (u16)((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 6));
         e = lbl_8031C2E0[code];
         bs->pos = p + 6 - (e >> 4);
         v = (e >> 3) & 1;
@@ -187,7 +192,7 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
         q[1] = w;
         q[2] = x;
         q[3] = y;
-        if (bs->pos > bs->end) {
+        if ((s32)bs->pos > (s32)bs->end) {
             if (track == 1 && *zero_start == 0) {
                 *zero_start = i;
             }
@@ -202,10 +207,10 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
     }
 }
 
-void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
+void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
     s16* q = out + i;
 
-    for (; i < end; i += 4, q += 4) {
+    for (; i < end; q += 4, i += 4) {
         u32 e = ~MP3_GetBitsRing(buf, 4, &bs->pos);
         s16 v = (e >> 3) & 1;
         s16 w = (e >> 2) & 1;
@@ -228,7 +233,7 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s3
         q[1] = w;
         q[2] = x;
         q[3] = y;
-        if (bs->pos > bs->end) {
+        if ((s32)bs->pos > (s32)bs->end) {
             if (track == 1 && *zero_start == 0) {
                 *zero_start = i;
             }
@@ -243,7 +248,7 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s3
     }
 }
 
-u32 MP3_PeekBitsRing(const u8* buf, u32 n, u32* pos) {
+u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     u32 idx = (*pos >> 3) & 0x1FFF;
     s32 sh = 24 - (*pos & 7);
     u32 b0;
@@ -265,7 +270,7 @@ u32 MP3_PeekBitsRing(const u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
-MP3Decoder* MP3_Create(const u8* header, u32 b, s32 buf, s32 size) {
+MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
     MP3Decoder* d;
 
     MP3_ArenaInit(buf, size);

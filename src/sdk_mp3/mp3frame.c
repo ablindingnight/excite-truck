@@ -56,7 +56,7 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
     }
 }
 
-s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos) {
+s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos) {
     s32 word = MP3_GetBits(ctx, buf, 12, pos);
 
     while ((u16)word != 0xFFF) {
@@ -68,7 +68,7 @@ s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos) {
     return 1;
 }
 
-u32 MP3_GetBits(u32 unused, const u8* buf, u32 n, s32* pos) {
+u32 MP3_GetBits(u32 unused, u8* buf, u32 n, s32* pos) {
     u16 result = 0;
     s32 left = n;
     u32 avail;
@@ -90,7 +90,7 @@ u32 MP3_GetBits(u32 unused, const u8* buf, u32 n, s32* pos) {
     return result;
 }
 
-u32 MP3_GetBitsRing(const u8* buf, s32 n, u32* pos) {
+u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos) {
     u16 result = 0;
     u32 p;
     u32 idx;
@@ -137,7 +137,7 @@ void MP3_GetInfo(MP3Decoder* d, MP3Info* info) {
     info->frame_bytes = d->frame_bytes;
 }
 
-s32 MP3_ParseHeader(MP3Decoder* d, const u8* buf) {
+s32 MP3_ParseHeader(MP3Decoder* d, u8* buf) {
     s32 pos = 0;
     s16 id;
     u16 bits;
