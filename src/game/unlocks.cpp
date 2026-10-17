@@ -25,6 +25,8 @@ public:
         capacity = N;
         count = 0;
     }
+    s32 Size(void) const { return count; }
+    T* Add(void) { return &data[count++]; }
     ~FixedArray(void) {
         data = NULL;
         count = 0;
@@ -132,8 +134,8 @@ void LoadChassisUnlocks(void) {
             base = node->GetValue("base_chassis");
             idx = FindChassisUnlock(base);
             if (idx < 0) {
-                idx = lbl_803580A4.count;
-                lbl_803580A4.data[lbl_803580A4.count++].name = base;
+                idx = lbl_803580A4.Size();
+                lbl_803580A4.Add()->name = base;
             }
             c = &lbl_803580A4.data[idx];
             c->req.races_run = node->GetIntValue("races_run");
