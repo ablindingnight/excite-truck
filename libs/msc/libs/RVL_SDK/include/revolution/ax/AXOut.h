@@ -11,7 +11,11 @@ extern "C" {
 typedef void (*AXOutCallback)(void);
 typedef void (*AXExceedCallback)(u32 cycles);
 
+#ifdef GAME_REXE01
+void __AXOutNewFrame(u32 lessDspCycles);
+#else
 u32 __AXOutNewFrame(void);
+#endif
 void __AXOutAiCallback(void);
 void __AXOutInitDSP(void);
 void __AXOutInit(u32 mode);

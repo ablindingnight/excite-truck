@@ -34,8 +34,15 @@
 AXPROFILE __AXLocalProfile;
 
 static volatile u32 __AXOutFrame;
+#ifdef GAME_REXE01
+static volatile u32 __AXAiDmaFrame;
+#else
 static u32 __AXAiDmaFrame;
+#endif
 static u32 __AXOutDspReady;
+#ifdef GAME_REXE01
+static volatile OSTime __AXOsTime;
+#endif
 static AXOutCallback __AXUserFrameCallback;
 static volatile BOOL __AXDSPInitFlag;
 static volatile BOOL __AXDSPDoneFlag;
@@ -45,7 +52,9 @@ static u32 __AXOutputBufferMode;
 static s32 __AXRmtBuffLen;
 static s32 __AXRmtDspPtr;
 static s32 __AXRmtCpuPtr;
+#ifndef GAME_REXE01
 static AXExceedCallback __AXExceedCallback;
+#endif
 
 static s16 __AXRmtOutBuffer[AX_RMT_MAX]
                            [AX_SAMPLES_PER_FRAME_RMT * RMT_FRAME_MAX] ALIGN(32);
@@ -54,13 +63,80 @@ static u8 __AXOutSBuffer[768] ALIGN(32);
 static u32 __AXOutBuffer[OUT_RING_MAX][AX_SAMPLES_PER_FRAME] ALIGN(32);
 
 static DSPTask __AXDSPTask ALIGN(32);
+#ifdef GAME_REXE01
+static u16 __AXDramImage[8192];
+#else
 static u8 __AXDramImage[64] ALIGN(32);
+#endif
 
 static void __AXDSPInitCallback(DSPTask* task);
 static void __AXDSPResumeCallback(DSPTask* task);
 static void __AXDSPDoneCallback(DSPTask* task);
 static void __AXDSPRequestCallback(DSPTask* task);
 
+#ifdef GAME_REXE01
+void __AXOutNewFrame(u32 lessDspCycles) {
+    AXPROFILE* current;
+    void* list;
+    void* rmt[AX_RMT_MAX];
+    s32 ptr;
+
+    __AXLocalProfile.timeBegin = OSGetTime();
+
+    __AXSyncPBs(lessDspCycles);
+    __AXPrintStudio();
+
+    list = __AXGetCommandListAddress();
+    DSP_SEND_MAIL_SYNC(DSP_MAIL_CLSIZE(AX_CL_SIZE));
+    DSP_SEND_MAIL_SYNC(list);
+
+    __AXServiceCallbackStack();
+
+    __AXLocalProfile.timeProcessAuxBegin = OSGetTime();
+    __AXProcessAux();
+    __AXLocalProfile.timeProcessAuxEnd = OSGetTime();
+
+    __AXLocalProfile.timeUserFrameBegin = OSGetTime();
+    if (__AXUserFrameCallback != NULL) {
+        __AXUserFrameCallback();
+    }
+    __AXLocalProfile.timeUserFrameEnd = OSGetTime();
+
+    rmt[0] = &__AXRmtOutBuffer[0][__AXRmtDspPtr];
+    rmt[1] = &__AXRmtOutBuffer[1][__AXRmtDspPtr];
+    rmt[2] = &__AXRmtOutBuffer[2][__AXRmtDspPtr];
+    rmt[3] = &__AXRmtOutBuffer[3][__AXRmtDspPtr];
+
+    ptr = __AXRmtDspPtr + AX_SAMPLES_PER_FRAME_RMT;
+    if (ptr >= __AXRmtBuffLen) {
+        ptr = 0;
+    }
+
+    if (__AXRmtCpuPtr >= __AXRmtDspPtr &&
+        __AXRmtCpuPtr < __AXRmtDspPtr + AX_SAMPLES_PER_FRAME_RMT) {
+        __AXRmtCpuPtr = ptr;
+    }
+
+    __AXRmtDspPtr = ptr;
+    __AXNextFrame(__AXOutSBuffer, __AXOutBuffer[__AXOutFrame], rmt);
+    __AXOutFrame++;
+
+    if (__AXOutputBufferMode == 1) {
+        __AXOutFrame %= OUT_RING_MAX;
+    } else {
+        __AXOutFrame &= 1;
+        AIInitDMA(__AXOutBuffer[__AXOutFrame], AX_FRAME_SIZE);
+    }
+
+    __AXLocalProfile.timeEnd = OSGetTime();
+    __AXLocalProfile.numVoices = __AXGetNumVoices();
+
+    current = __AXGetCurrentProfile();
+    if (current != NULL) {
+        FUNNY_COPY(current, &__AXLocalProfile, u8, sizeof(AXPROFILE));
+    }
+}
+#else
 u32 __AXOutNewFrame(void) {
     AXPROFILE* current;
     u32 cycles;
@@ -134,7 +210,29 @@ u32 __AXOutNewFrame(void) {
 
     return cycles;
 }
+#endif
 
+#ifdef GAME_REXE01
+void __AXOutAiCallback(void) {
+    if (__AXOutDspReady == 0) {
+        __AXOsTime = OSGetTime();
+    }
+
+    if (__AXOutDspReady == 1) {
+        __AXOutDspReady = 0;
+        __AXOutNewFrame(0);
+    } else {
+        __AXOutDspReady = 2;
+        DSPAssertTask(&__AXDSPTask);
+    }
+
+    if (__AXOutputBufferMode == 1) {
+        AIInitDMA(__AXOutBuffer[__AXAiDmaFrame], AX_FRAME_SIZE);
+        __AXAiDmaFrame++;
+        __AXAiDmaFrame %= OUT_RING_MAX;
+    }
+}
+#else
 void __AXOutAiCallback(void) {
     u32 frame;
 
@@ -157,6 +255,7 @@ void __AXOutAiCallback(void) {
         }
     }
 }
+#endif
 
 static void __AXDSPInitCallback(DSPTask* task) {
 #pragma unused(task)
@@ -164,6 +263,18 @@ static void __AXDSPInitCallback(DSPTask* task) {
     __AXDSPInitFlag = TRUE;
 }
 
+#ifdef GAME_REXE01
+static void __AXDSPResumeCallback(DSPTask* task) {
+#pragma unused(task)
+
+    if (__AXOutDspReady == 2) {
+        __AXOutDspReady = 0;
+        __AXOutNewFrame((u32)(OSGetTime() - __AXOsTime) / 4);
+    } else {
+        __AXOutDspReady = 1;
+    }
+}
+#else
 static void __AXDSPResumeCallback(DSPTask* task) {
 #pragma unused(task)
 
@@ -182,6 +293,7 @@ static void __AXDSPResumeCallback(DSPTask* task) {
         __AXOutDspReady = 1;
     }
 }
+#endif
 
 static void __AXDSPDoneCallback(DSPTask* task) {
 #pragma unused(task)
@@ -200,8 +312,16 @@ void __AXOutInitDSP(void) {
     __AXDSPTask.iramDspAddr = NULL;
 
     __AXDSPTask.dramMmemAddr = __AXDramImage;
+#ifdef GAME_REXE01
+    __AXDSPTask.dramMmemLen = 0x2000;
+#else
     __AXDSPTask.dramMmemLen = sizeof(__AXDramImage);
+#endif
+#ifdef GAME_REXE01
+    __AXDSPTask.dramDspAddr = 0;
+#else
     __AXDSPTask.dramDspAddr = DRAM_IMAGE_DSP_ADDR;
+#endif
 
     __AXDSPTask.startVector = axDspInitVector;
     __AXDSPTask.resumeVector = axDspResumeVector;
@@ -281,13 +401,31 @@ void __AXOutInit(u32 mode) {
     if (__AXOutputBufferMode == 1) {
         AIInitDMA(__AXOutBuffer[__AXAiDmaFrame], AX_FRAME_SIZE);
         __AXAiDmaFrame++;
+#ifdef GAME_REXE01
+        __AXAiDmaFrame &= 1;
+#endif
     } else {
         AIInitDMA(__AXOutBuffer[__AXOutFrame], AX_FRAME_SIZE);
     }
 
     AIStartDMA();
+#ifndef GAME_REXE01
     __AXExceedCallback = NULL;
+#endif
 }
+
+#ifdef GAME_REXE01
+void __AXOutQuit(void) {
+    BOOL enabled = OSDisableInterrupts();
+
+    __AXUserFrameCallback = NULL;
+    DSPCancelTask(&__AXDSPTask);
+    OSSleepThread(&__AXOutThreadQueue);
+    AIStopDMA();
+
+    OSRestoreInterrupts(enabled);
+}
+#endif
 
 AXOutCallback AXRegisterCallback(AXOutCallback callback) {
     AXOutCallback old = __AXUserFrameCallback;
