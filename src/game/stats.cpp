@@ -46,7 +46,7 @@ struct Units {
     f32 speed_scale;  // offset 0x10
 };
 
-extern "C" EventInfo* fn_8001285C(s32 event);
+EventInfo* GetEvent(int event);
 extern "C" Units* lbl_8055E050;
 
 VehicleInfo* GetPlayerVehicle(int slot);
@@ -442,7 +442,7 @@ BOOL RealStatistic::IsNewRecord(f32 v) {
         if (type == 0x20507) {
             s32 ev = GetEvent();
             if (ev >= 0) {
-                EventInfo* e = fn_8001285C(ev);
+                EventInfo* e = ::GetEvent(ev);
                 compare = STF_COMPARE_HIGHER;
                 if (e->type == 0x180302) {
                     compare = STF_COMPARE_LOWER;
@@ -794,7 +794,7 @@ HighScore* GetHighScore(int identity, const char* name, s32 key, int index) {
 }
 
 int FindHighScorePos(HighScoreList* list, s32 event, s32 score, f32 time) {
-    EventInfo* ev = fn_8001285C(event);
+    EventInfo* ev = GetEvent(event);
     int i;
 
     for (i = 0; i < list->count; i++) {
@@ -867,7 +867,7 @@ void UnpackChoice(u32 packed, s32* vehicle, s32* color, bool* flag) {
 }
 
 const char* GetContestName(s32 event) {
-    return fn_8001285C(event)->node->GetString("name", NULL);
+    return GetEvent(event)->node->GetString("name", NULL);
 }
 
 void MarkIdentityUsed(int identity) {

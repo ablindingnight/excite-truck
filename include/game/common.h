@@ -62,7 +62,7 @@ class ValueNode {
 public:
     virtual const char* GetName(void);                                // 0x8
     virtual int Has(const char* key);                                 // 0xC
-    virtual void vf2(void);                                           // 0x10
+    virtual int GetPair(int index, const char** key, const char** value);  // 0x10
     virtual const char* GetValue(const char* key);                    // 0x14
     virtual const char* GetString(const char* key, const char* def);  // 0x18
     virtual s32 GetIntValue(const char* key);                         // 0x1C
@@ -79,7 +79,7 @@ public:
     virtual void vf18(void);                                          // 0x48
     virtual void vf19(void);                                          // 0x4C
     virtual void vf20(void);                                          // 0x50
-    virtual void vf21(void);                                          // 0x54
+    virtual int GetEnum(const char* key, const char* names);          // 0x54
     virtual void vf22(void);                                          // 0x58
     virtual ValueNode* FindChild(const char* name);                   // 0x5C
     virtual ValueNode* GetChildAt(int index);                         // 0x60

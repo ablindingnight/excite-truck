@@ -134,10 +134,10 @@ struct Track {
 };
 
 extern "C" {
-int fn_80012818(void);
-Track* fn_80012820(int track);
-Eve* fn_80012870(int track, int eve);
 }
+int GetNumTracks(void);
+Track* GetTrack(int track);
+Eve* FindTrackEvent(int track, int eve);
 
 class Checker {
 public:
@@ -366,10 +366,10 @@ int FindContest(int* out_track, int* out_eve, const char* name) {
     int eve_idx;
 
     found = 0;
-    for (track_idx = 0; track_idx < fn_80012818(); track_idx++) {
-        track = fn_80012820(track_idx);
+    for (track_idx = 0; track_idx < GetNumTracks(); track_idx++) {
+        track = GetTrack(track_idx);
         for (eve_idx = 0; eve_idx < track->num_eves; eve_idx++) {
-            if (strcasecmp(fn_80012870(track_idx, eve_idx)->vals->GetString("name", ""), name) == 0) {
+            if (strcasecmp(FindTrackEvent(track_idx, eve_idx)->vals->GetString("name", ""), name) == 0) {
                 *out_track = track_idx;
                 found = 1;
                 *out_eve = eve_idx;
@@ -395,8 +395,8 @@ int FindTrack(int* out_track, int* out_eve, const char* name) {
     int track_idx;
 
     found = 0;
-    for (track_idx = 0; track_idx < fn_80012818(); track_idx++) {
-        if (strcasecmp(name, fn_80012820(track_idx)->name) == 0) {
+    for (track_idx = 0; track_idx < GetNumTracks(); track_idx++) {
+        if (strcasecmp(name, GetTrack(track_idx)->name) == 0) {
             *out_track = track_idx;
             found = 1;
             *out_eve = 0;
@@ -411,8 +411,8 @@ int FindEve(int* out_track, int* out_eve, const char* name) {
     int track_idx;
 
     found = 0;
-    for (track_idx = 0; track_idx < fn_80012818(); track_idx++) {
-        if (strcasecmp(fn_80012820(track_idx)->name2, name) == 0) {
+    for (track_idx = 0; track_idx < GetNumTracks(); track_idx++) {
+        if (strcasecmp(GetTrack(track_idx)->name2, name) == 0) {
             *out_track = track_idx;
             found = 1;
             *out_eve = 0;
@@ -441,7 +441,7 @@ int DirectToTrack(const char* name) {
     {
         FlagGuard guard;
         int eve = 0;
-        int track = fn_80012818();
+        int track = GetNumTracks();
 
         if (lbl_8034EC58[0] == '$' || lbl_8034EC58[0] == '@') {
             found = FindContest(&track, &eve, lbl_8034EC58 + 1);

@@ -59,10 +59,10 @@ struct Eve {
 struct EventInfo;
 
 extern "C" {
-Track* fn_80012820(s32 track);
-Eve* fn_80012870(s32 track, int eve);
-Eve* fn_8001285C(s32 event);
 }
+Track* GetTrack(int track);
+Eve* FindTrackEvent(int track, int eve);
+Eve* GetEvent(int event);
 
 VehicleInfo* FindVehicle(s32 id);
 int GetNumPlayers(void);
@@ -308,11 +308,11 @@ int GetNumRacers(s32 track) {
         return GetNumPlayers();
     } else {
         int best = 0;
-        Track* t = fn_80012820(track);
+        Track* t = GetTrack(track);
         int i;
 
         for (i = 0; i < t->num_eves; i++) {
-            Eve* e = fn_80012870(track, i);
+            Eve* e = FindTrackEvent(track, i);
             if (e->num_racers > best) {
                 best = e->num_racers;
             }
@@ -322,7 +322,7 @@ int GetNumRacers(s32 track) {
 }
 
 void ApplyForceChassis(DAVMap* map, s32 track) {
-    const char* chassis = fn_80012820(track)->node->GetString("force_chassis", lbl_80357DC0);
+    const char* chassis = GetTrack(track)->node->GetString("force_chassis", lbl_80357DC0);
 
     if (chassis != NULL && *chassis != '\0') {
         int i;
@@ -335,7 +335,7 @@ void ApplyForceChassis(DAVMap* map, s32 track) {
 }
 
 void ApplyVehicleMap(DAVMap* map, s32 track) {
-    ValueNode* vm = fn_80012820(track)->node->FindChild("vehicle_map");
+    ValueNode* vm = GetTrack(track)->node->FindChild("vehicle_map");
 
     if (vm != NULL) {
         const char* def;
@@ -433,7 +433,7 @@ int GetNumRacersForEve(Eve* eve) {
 }
 
 void BuildReversedMap(DAVMap* out, s32 event, const DAVMap* src) {
-    int n = GetNumRacersForEve(fn_8001285C(event));
+    int n = GetNumRacersForEve(GetEvent(event));
     int i;
 
     memset(out, 0, sizeof(DAVMap));

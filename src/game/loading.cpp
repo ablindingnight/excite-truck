@@ -140,14 +140,14 @@ void fn_80230AD8(DrawContext* ctx);
 void fn_80230B38(void);
 void fn_80130FCC(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
-Track* fn_80012820(s32 track);
-const char* fn_80012910(s32 event);
-EventInfo* fn_8001285C(s32 event);
 const char* fn_80205268(const char* fmt, s32 difficulty, s32 event);
 int fn_8027DED0(void);
 f32 fn_8014E7DC(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
 }
+Track* GetTrack(int track);
+const char* GetEventDisplayName(int event);
+EventInfo* GetEvent(int event);
 
 class LocString {
 public:
@@ -697,8 +697,8 @@ void LoadingBegin(EventInfo* info, s32 difficulty) {
 
     lbl_8055D62C = 1;
     LoadingResetTimers();
-    lbl_8055D660 = GetTrackFriendlyName(GetTrackEnviron(fn_80012820(info->track)->name));
-    lbl_8055D664 = info->node->GetString("friendly_name", fn_80012910(info->id));
+    lbl_8055D660 = GetTrackFriendlyName(GetTrackEnviron(GetTrack(info->track)->name));
+    lbl_8055D664 = info->node->GetString("friendly_name", GetEventDisplayName(info->id));
     lbl_8055D646 = info->node->Has("tutorial");
     if (lbl_8055D646) {
         lbl_8055D660 = fn_80131234("TIPS:TutorialTitle");
@@ -707,8 +707,8 @@ void LoadingBegin(EventInfo* info, s32 difficulty) {
     lbl_8055D668 = info->id;
     lbl_8055D66C = difficulty;
     lbl_8055D647 = type != 0x180302;
-    ev = fn_8001285C(lbl_8055D668);
-    fn_80012820(ev->track);
+    ev = GetEvent(lbl_8055D668);
+    GetTrack(ev->track);
     lbl_8035BAD8.laps = ev->laps;
     {
         ValueNode* table = ev->node->FindChild(fn_80205268("grade_table", lbl_8055D66C, lbl_8055D668));

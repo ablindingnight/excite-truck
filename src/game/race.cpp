@@ -13,10 +13,10 @@ void fn_802E317C(const char* fmt, ...);  // warning print
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 void fn_80279464(void);
-void fn_80012778(void);
-void fn_80012794(void);
 void fn_80279488(void);
 }
+void LoadArcadeEves(void);
+void UnloadEves(void);
 
 struct Unk_8001285C {
     s32 unk0;
@@ -25,7 +25,7 @@ struct Unk_8001285C {
     s32 unkC;
 };
 
-extern "C" Unk_8001285C* fn_8001285C(s32 id);
+Unk_8001285C* GetEvent(int id);
 
 class LocString {
 public:
@@ -108,11 +108,11 @@ void FreeTracks(void) {
 void RaceInit(void) {
     LoadTracks();
     fn_80279464();
-    fn_80012778();
+    LoadArcadeEves();
 }
 
 void RaceShutdown(void) {
-    fn_80012794();
+    UnloadEves();
     fn_80279488();
     FreeTracks();
 }
@@ -200,7 +200,7 @@ const char* GetTrackEnviron(const char* name) {
 
 extern "C" s32 fn_800081F0(Unk_8000822C* obj) {
     if ((obj->flags & 1) == 0) {
-        return fn_8001285C(obj->id)->unkC;
+        return GetEvent(obj->id)->unkC;
     } else {
         return 200;
     }
@@ -218,7 +218,7 @@ extern "C" void fn_8000824C(Unk_8000822C* obj, s32 id) {
     Unk_8001285C* src;
 
     fn_8000822C(obj);
-    src = fn_8001285C(id);
+    src = GetEvent(id);
     obj->id = src->unk0;
     obj->unk4 = src->unk8;
 }

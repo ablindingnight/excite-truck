@@ -933,6 +933,7 @@ config.libs.append(
             Object(NonMatching, "game/loading.cpp"),
             Object(NonMatching, "game/stats.cpp"),
             Object(NonMatching, "game/davmap.cpp"),
+            Object(NonMatching, "game/eve.cpp"),
         ],
     }
 )
