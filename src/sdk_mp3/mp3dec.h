@@ -93,6 +93,7 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode);
 void fn_800C18A0(s32* in, s32* out);
 void fn_800C1984(s32* in, s32* out);
 void fn_800C1A80(s32* a, s32* b, s32* out);
+void fn_800C1C1C(s32* in, s32* out);
 void fn_800C1E88(s32* coeff, s32* input, s32* output);
 void fn_800C1F6C(s32* dst, s32* a, s32* b);
 void fn_800C2090(s32* dst, s32* a, s32* b);

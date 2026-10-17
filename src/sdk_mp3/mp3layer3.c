@@ -314,6 +314,45 @@ void fn_800C1984(s32* in, s32* out) {
     fn_800C1A80(a, b, out);
 }
 
+/* IMDCT stage: fn_800C1C1C on both halves, then the interleaved recombination (odd outputs from the
+ * running differences of tmp2). From DeepSeek's draft, with out[1] computed from out[0]. */
+void fn_800C1A80(s32* a, s32* b, s32* out);
+void fn_800C1C1C(s32* in, s32* out);
+void fn_800C1A80(s32* a, s32* b, s32* out) {
+    s32 tmp1[9];
+    s32 tmp2[9];
+
+    fn_800C1C1C(a, tmp1);
+    fn_800C1C1C(b, tmp2);
+
+    out[0] = tmp1[0];
+    out[1] = tmp2[0] - out[0];
+    out[2] = tmp1[1] - out[1];
+    tmp2[1] = tmp2[1] - tmp2[0];
+    out[3] = tmp2[1] - out[2];
+    out[4] = tmp1[2] - out[3];
+    tmp2[2] = tmp2[2] - tmp2[1];
+    out[5] = tmp2[2] - out[4];
+    out[6] = tmp1[3] - out[5];
+    tmp2[3] = tmp2[3] - tmp2[2];
+    out[7] = tmp2[3] - out[6];
+    out[8] = tmp1[4] - out[7];
+    tmp2[4] = tmp2[4] - tmp2[3];
+    out[9] = tmp2[4] - out[8];
+    out[10] = tmp1[5] - out[9];
+    tmp2[5] = tmp2[5] - tmp2[4];
+    out[11] = tmp2[5] - out[10];
+    out[12] = tmp1[6] - out[11];
+    tmp2[6] = tmp2[6] - tmp2[5];
+    out[13] = tmp2[6] - out[12];
+    out[14] = tmp1[7] - out[13];
+    tmp2[7] = tmp2[7] - tmp2[6];
+    out[15] = tmp2[7] - out[14];
+    out[16] = tmp1[8] - out[15];
+    tmp2[8] = tmp2[8] - tmp2[7];
+    out[17] = tmp2[8] - out[16];
+}
+
 /* 6-tap Q20 dot product over four 6-sample groups; outputs at word offsets 0, 2, 6, 8 (strides 2 and 4).
  * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
  * but the original adds each low product word (addc) before computing its high word (mulhw). */
