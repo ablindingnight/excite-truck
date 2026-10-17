@@ -278,7 +278,7 @@ s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos) {
     return 1;
 }
 
-u32 MP3_GetBits(u32 unused, u8* buf, u32 n, s32* pos) {
+u32 MP3_GetBits(u32 unused, u8* buf, s16 n, s32* pos) {
     u16 result = 0;
     s32 left = n;
     u32 avail;

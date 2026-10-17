@@ -100,11 +100,11 @@ s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* 
     if (prot == 0) {
         MP3_GetBits(d->unk278, buf, 16, &d->unk8);
     }
-    mdb = MP3_GetBits(d->unk278, buf, (s16)(9 - d->lsf), &d->unk8);
+    mdb = MP3_GetBits(d->unk278, buf, 9 - d->lsf, &d->unk8);
     if (stereo == 3) {
-        MP3_GetBits(d->unk278, buf, (s16)(5 - d->lsf * 4), &d->unk8);
+        MP3_GetBits(d->unk278, buf, 5 - d->lsf * 4, &d->unk8);
     } else {
-        MP3_GetBits(d->unk278, buf, (s16)(3 - d->lsf), &d->unk8);
+        MP3_GetBits(d->unk278, buf, 3 - d->lsf, &d->unk8);
     }
     if (d->lsf == 0) {
         for (ch = 0; ch < d->channels; ch++) {
@@ -252,10 +252,12 @@ void MP3_GetInfo(MP3Decoder* d, MP3Info* info) {
     info->frame_bytes = d->frame_bytes;
 }
 
+/* Parse a frame header into the decoder (fn_800BEE64): MPEG version, sample rate, channels, frame and output
+ * sizes. Matches. */
 s32 MP3_ParseHeader(MP3Decoder* d, u8* buf) {
     s32 pos = 0;
     s16 id;
-    u16 bits;
+    u32 bits;
     s16 bitrate;
     s32 size;
 
