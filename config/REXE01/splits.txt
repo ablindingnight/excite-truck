@@ -1350,7 +1350,7 @@ RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp:
 	.text       start:0x800EEE8C end:0x800F07EC
 	.ctors      start:0x802ED0F0 end:0x802ED0F4
 	.data       start:0x80323B28 end:0x80324060
-	.bss        start:0x80412A6C end:0x80412A78
+	.bss        start:0x80412A60 end:0x80412A98
 	.sdata2     start:0x80561068 end:0x80561078
 
 RVL_SDK/hbm/nw4hbm/snd/snd_SeqSound.cpp:

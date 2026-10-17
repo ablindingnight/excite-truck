@@ -699,7 +699,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeaker.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeakerManager.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqFile.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqPlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqSound.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqSoundHandle.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_SeqTrack.cpp"),
