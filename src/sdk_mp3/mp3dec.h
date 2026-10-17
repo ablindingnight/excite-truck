@@ -101,6 +101,7 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
 void fn_800C4E5C(s32* vb, s32* p);
 void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2);
 void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2);
+void fn_800C2DBC(s32* in, s32* out1, s32* out2);
 void fn_800C2F98(s32* in, s32* out1, s32* out2);
 void fn_800C5298(s32* dst, s32* src, s32* c);
 void fn_800C3960(s32* dst, const s32* tbl, s32 win, u8* src, s32 n, s32 mode);
