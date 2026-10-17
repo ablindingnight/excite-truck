@@ -929,7 +929,7 @@ config.libs.append(
             Object(NonMatching, "game/unlocks.cpp"),
             Object(NonMatching, "game/ident.cpp"),
             Object(NonMatching, "game/achieve.cpp"),
-            Object(NonMatching, "game/driver.cpp"),
+            Object(Matching, "game/driver.cpp"),
         ],
     }
 )

@@ -609,7 +609,8 @@ void ResetPlayer(int slot) {
     lbl_80357C20[slot].valid = 0;
 }
 
-// 0x80017708: matches except that the original keeps "stb unk8" before "cmpwi c, 0" (ours swaps them).
+// Only this function needs 604 scheduling (found with ChatGPT); file-wide it breaks the others.
+#pragma scheduling 604
 void PickVehicleColor(VehicleInfo* v, int slot, VehicleColor* out) {
     int c;
 
@@ -626,6 +627,7 @@ void PickVehicleColor(VehicleInfo* v, int slot, VehicleColor* out) {
         out->trim = c;
     }
 }
+#pragma scheduling reset
 
 
 void ResetVehicleColors(void) {
