@@ -79,7 +79,7 @@ typedef struct HuffState {
 #define MP3_STATIC static
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
-                    s16* sf_scale, s16* sf_long, s16* sf_short, s16* preflag);
+                    s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag);
 
 #endif
 
@@ -131,6 +131,6 @@ void fn_800C55D8(s32* dst, s32* src, s32* c);
 
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
-                    s16* sf_scale, s16* sf_long, s16* sf_short, s16* preflag);
+                    s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag);
 
 #endif
