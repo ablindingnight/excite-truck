@@ -503,6 +503,7 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             Object(NonMatching, "sdk_mp3/mp3frame.c"),
+            Object(NonMatching, "sdk_mp3/mp3decode.c"),
             Object(NonMatching, "sdk_mp3/mp3dequant.c"),
             Object(NonMatching, "sdk_mp3/mp3layer3.c"),
         ],

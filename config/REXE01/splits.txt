@@ -1389,10 +1389,14 @@ revolution/sd/isd.c:
 	.sbss       start:0x8055DD68 end:0x8055DD88
 
 sdk_mp3/mp3frame.c:
-	.text       start:0x800BC538 end:0x800BF048
-	.rodata     start:0x802F3238 end:0x802F34E8
+	.text       start:0x800BC538 end:0x800BDF4C
+	.rodata     start:0x802F3238 end:0x802F3418
 	.data       start:0x8031BFA8 end:0x8031C098
 	.sdata      start:0x80559250 end:0x80559270
+
+sdk_mp3/mp3decode.c:
+	.text       start:0x800BDF4C end:0x800BF048
+	.rodata     start:0x802F3418 end:0x802F34E8
 	.sbss       start:0x8055DD88 end:0x8055DD90
 	.sdata2     start:0x80560DA0 end:0x80560DB0
 

@@ -1,15 +1,13 @@
 /* Nintendo-supplied SDK MP3 (Layer III) decoder, 0x800BC538-0x800C6204 in REXE01 (the same tables ship in
- * the Wii Photo Channel). Library/module and file names unknown. It is three translation units: MWCC addresses
- * pooled tables from the start of each unit's .rodata, and the original does so from 0x802F34E8 (dequantizer)
- * and 0x802F3D60 (Huffman decoder), which puts unit boundaries at text 0x800BF048 and 0x800C0440.
+ * the Wii Photo Channel). Library/module and file names unknown. It is four translation units: MWCC addresses
+ * pooled tables from the start of each unit's .rodata, and the original does so from 0x802F3418 (frame decoder),
+ * 0x802F34E8 (dequantizer) and 0x802F3D60 (Huffman decoder), which puts unit boundaries at text 0x800BDF4C,
+ * 0x800BF048 and 0x800C0440.
  * Build: cflags_rvl_tp, GC/3.0a3, plus -use_lmw_stmw on -inline noauto (every function saves with stmw;
  * WENCGetEncodeData right after the decoder does not, so it is a separate object). */
-/* Unit 1 of 3: header parsing, bit reading, stereo, alias reduction, frame decoding (0x800BC538-0x800BF048). */
+/* Unit 1 of 4: intensity stereo, alias reduction, bit reading (0x800BC538-0x800BDF4C). */
 #include "mp3dec.h"
 #include "mp3frame_tables.inc"
-
-static s32 lbl_8055DD88;
-static s32 lbl_8055DD8C;
 
 /* Intensity stereo (fn_800BC538): for lines at or above the intensity bound, rebuild the right channel from the
  * left with fn_800BD710. Long, short and mixed layouts; the band-limit tables are copied into the decoder on first
@@ -327,78 +325,4 @@ u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos) {
         n -= take;
     }
     return result;
-}
-
-void MP3_GetInfo(MP3Decoder* d, MP3Info* info) {
-    s32 rate = 44100;
-
-    info->mpeg1 = d->lsf == 0;
-    if (d->sr_index == 0) {
-        rate = 44100;
-    } else if (d->sr_index == 1) {
-        rate = 48000;
-    } else if (d->sr_index == 2) {
-        rate = 32000;
-    }
-    if (info->mpeg1 == 0) {
-        rate /= 2;
-    }
-    info->sample_rate = rate;
-    info->channels = d->channels;
-    info->out_bytes = d->out_bytes;
-    info->frame_bytes = d->frame_bytes;
-}
-
-s32 MP3_ParseHeader(MP3Decoder* d, u8* buf) {
-    s32 pos = 0;
-    s16 id;
-    u16 bits;
-    s16 bitrate;
-    s32 size;
-
-    if ((s16)MP3_FindSync(0x400, buf, &pos) == 0) {
-        return 8;
-    }
-    id = MP3_GetBits(d->unk278, buf, 1, &pos);
-    if ((s16)MP3_GetBits(d->unk278, buf, 2, &pos) != 1) {
-        return 0xD;
-    }
-    if (id == 0) {
-        d->lsf = 1;
-    } else {
-        d->lsf = 0;
-    }
-    MP3_GetBits(d->unk278, buf, 1, &pos);
-    bits = MP3_GetBits(d->unk278, buf, 16, &pos);
-    bitrate = (bits >> 12) & 0xF;
-    if (bitrate == 0) {
-        return 0xE;
-    }
-    if (bitrate == 0xF) {
-        return 0xE;
-    }
-    d->sr_index = (bits >> 10) & 3;
-    if (d->sr_index == 3) {
-        return 0xF;
-    }
-    if ((s16)((bits >> 6) & 3) == 3) {
-        d->channels = 1;
-    } else {
-        d->channels = 2;
-    }
-    if (d->lsf == 0) {
-        size = lbl_802F3418[d->sr_index][bitrate] * 8;
-    } else {
-        size = lbl_802F3478[d->sr_index][bitrate] * 8;
-    }
-    d->frame_bytes = (size + 8) / 8;
-    if ((size + 8) & 7) {
-        d->frame_bytes++;
-    }
-    if (d->lsf == 0) {
-        d->out_bytes = d->channels * 0x900;
-    } else {
-        d->out_bytes = d->channels * 0x480;
-    }
-    return 0;
 }

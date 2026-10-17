@@ -1205,7 +1205,7 @@ void fn_800C3960(s32* v, const s32* w, s32 pos, u8* out, s32 mask, s32 mode) {
 void fn_800C3DA0(MP3Decoder* d, u8* bitbuf, u32 flags,
                  s16* long_sf, s16* previous_long_sf, s16* short_sf,
                  s16 bit_count, s16 scf_compress,
-                 s16* scfsi, s8 granule, u8 channel,
+                 s16* scfsi, s8 granule, s8 channel,
                  s16* reset_field, s16* short_marker, s16* band_marker,
                  s16* compression_kind, s16* intensity_scale) {
     s32 i, g, n;

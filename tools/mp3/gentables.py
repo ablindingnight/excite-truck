@@ -103,6 +103,7 @@ SHAPES = {
     0x802F3CD0: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
     0x802F3D18: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
 }
+GLOBAL = set()  # objects to declare without MP3_STATIC
 NODE_LO, NODE_HI = 0x8031C320, 0x8031D478
 
 def elem(a):
@@ -153,13 +154,15 @@ def emit(a):
     lines = []
     for i in range(0, len(vals), 12):
         lines.append("    " + ", ".join(vals[i:i + 12]) + ",")
-    return "MP3_STATIC %s%s %s[%d] = {\n%s\n};\n" % (const, t, name(a), len(vals), "\n".join(lines))
+    st = "" if a in GLOBAL else "MP3_STATIC "
+    return "%s%s%s %s[%d] = {\n%s\n};\n" % (st, const, t, name(a), len(vals), "\n".join(lines))
 
-# The decoder is three translation units (MWCC addresses pooled tables from the start of each unit's
-# .rodata, which puts unit boundaries at 0x802F34E8 and 0x802F3D60). Each unit gets its own table file.
+# The decoder is four translation units (MWCC addresses pooled tables from the start of each unit's
+# .rodata, which puts unit boundaries at 0x802F3418, 0x802F34E8 and 0x802F3D60). Each unit gets its own table file.
 UNITS = [
-    ("src/sdk_mp3/mp3frame_tables.inc", {"rodata": (0x802F3238, 0x802F34E8), "data": (0x8031BFA8, 0x8031C098),
-                                         "sdata": (0x80559250, 0x80559270), "sdata2": (0x80560DA0, 0x80560DB0)}),
+    ("src/sdk_mp3/mp3frame_tables.inc", {"rodata": (0x802F3238, 0x802F3418), "data": (0x8031BFA8, 0x8031C098),
+                                         "sdata": (0x80559250, 0x80559270)}),
+    ("src/sdk_mp3/mp3decode_tables.inc", {"rodata": (0x802F3418, 0x802F34E8), "sdata2": (0x80560DA0, 0x80560DB0)}),
     ("src/sdk_mp3/mp3dequant_tables.inc", {"rodata": (0x802F34E8, 0x802F3D60), "data": (0x8031C098, 0x8031C298),
                                            "sdata2": (0x80560DB0, 0x80560DB8)}),
     ("src/sdk_mp3/mp3layer3_tables.inc", {"rodata": (0x802F3D60, 0x802F44E8), "data": (0x8031C298, 0x8031D840),
