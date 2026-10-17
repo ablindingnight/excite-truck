@@ -353,6 +353,49 @@ void fn_800C1A80(s32* a, s32* b, s32* out) {
     out[17] = tmp2[8] - out[16];
 }
 
+/* 9-point IMDCT core. Formulas derived from a symbolic trace of the original and checked against a PPC
+ * simulation of it on random inputs (200/200 identical). Products are 64 x 64-bit: the constants are
+ * long long. NonMatching: 155/155 with the same opcodes, scheduled differently. */
+#define MP3_Q20(x, k) ((s32)(((s64)(x) * (k)) >> 20))
+void fn_800C1C1C(s32* in, s32* out) {
+    s32 s08, s26, s35, s17, d17, d62, d80, d35, t, u, m, x4;
+    s32 a, b, c, d, e, f, g, h;
+
+    d17 = in[1] - in[7];
+    s08 = in[0] + in[8];
+    s26 = in[2] + in[6];
+    s35 = in[3] + in[5];
+    t = s26 + s08;
+    d62 = in[6] - in[2];
+    d80 = in[8] - in[0];
+    s17 = in[1] + in[7];
+    u = s35 + t;
+    d35 = in[3] - in[5];
+    x4 = in[4] + s17;
+
+    a = MP3_Q20(d17, -1816186LL);
+    b = MP3_Q20(s26 - s08, 1970683LL);
+    c = MP3_Q20(s35 - s08, -364166LL);
+    d = MP3_Q20(s35 - s26, -1606512LL);
+    e = MP3_Q20(d62 + d80, -717267LL);
+    f = MP3_Q20(d35 - d80, -2065296LL);
+    g = MP3_Q20(d35 + d62, -1348028LL);
+    h = MP3_Q20(d35 - d62 + d80, -1816186LL);
+
+    m = in[4] * 2 - s17;
+    out[0] = x4 + u;
+    out[2] = d - (m + b);
+    out[6] = x4 * -2 + u;
+    out[8] = m + (c + d);
+    out[4] = m - b - c;
+    out[5] = a - e - f;
+    out[7] = a + (e + g);
+    out[1] = g - (a + f);
+    out[3] = h;
+}
+
+#undef MP3_Q20
+
 /* 6-tap Q20 dot product over four 6-sample groups; outputs at word offsets 0, 2, 6, 8 (strides 2 and 4).
  * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
  * but the original adds each low product word (addc) before computing its high word (mulhw). */
