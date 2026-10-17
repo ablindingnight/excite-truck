@@ -472,6 +472,120 @@ void fn_800C2090(s32* dst, s32* a, s32* b) {
     dst[1088] = -(a[17] + b[17]);
 }
 
+/* IMDCT overlap-add, all nine steps windowed: out1[i*64] = Q20(cur[i] * w[2i]) + prev[i],
+ * out2[-i*64] = Q20(cur[i] * w[2i+1]) + prev[17-i] (table walked with *w++). Steps 5-6 compute both
+ * products first, which is where the original needs r31. NonMatching: same size and opcodes. */
+void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* w = lbl_8031D670;
+    s32 x, c0, c1, y0, y1, p0;
+
+    x = cur[0];
+    c0 = *w++;
+    c1 = *w++;
+    out1[0] = (s32)(((s64)x * c0) >> 20) + prev[0];
+    out2[0] = (s32)(((s64)x * c1) >> 20) + prev[17];
+    x = cur[1];
+    c0 = *w++;
+    c1 = *w++;
+    out1[64] = (s32)(((s64)x * c0) >> 20) + prev[1];
+    out2[-64] = (s32)(((s64)x * c1) >> 20) + prev[16];
+    x = cur[2];
+    c0 = *w++;
+    c1 = *w++;
+    out1[128] = (s32)(((s64)x * c0) >> 20) + prev[2];
+    out2[-128] = (s32)(((s64)x * c1) >> 20) + prev[15];
+    x = cur[3];
+    c0 = *w++;
+    c1 = *w++;
+    out1[192] = (s32)(((s64)x * c0) >> 20) + prev[3];
+    out2[-192] = (s32)(((s64)x * c1) >> 20) + prev[14];
+    x = cur[4];
+    c0 = *w++;
+    c1 = *w++;
+    out1[256] = (s32)(((s64)x * c0) >> 20) + prev[4];
+    out2[-256] = (s32)(((s64)x * c1) >> 20) + prev[13];
+    x = cur[5];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[320] = y0 + prev[5];
+    out2[-320] = y1 + prev[12];
+    x = cur[6];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[384] = y0 + prev[6];
+    out2[-384] = y1 + prev[11];
+    x = cur[7];
+    c0 = *w++;
+    c1 = *w++;
+    out1[448] = (s32)(((s64)x * c0) >> 20) + prev[7];
+    out2[-448] = (s32)(((s64)x * c1) >> 20) + prev[10];
+    x = cur[8];
+    c0 = *w++;
+    c1 = *w++;
+    out1[512] = (s32)(((s64)x * c0) >> 20) + prev[8];
+    out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
+}
+
+/* Same as fn_800C2590 with the other window table. NonMatching: same size and opcodes. */
+void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* w = lbl_8031D6B8;
+    s32 x, c0, c1, y0, y1, p0;
+
+    x = cur[0];
+    c0 = *w++;
+    c1 = *w++;
+    out1[0] = (s32)(((s64)x * c0) >> 20) + prev[0];
+    out2[0] = (s32)(((s64)x * c1) >> 20) + prev[17];
+    x = cur[1];
+    c0 = *w++;
+    c1 = *w++;
+    out1[64] = (s32)(((s64)x * c0) >> 20) + prev[1];
+    out2[-64] = (s32)(((s64)x * c1) >> 20) + prev[16];
+    x = cur[2];
+    c0 = *w++;
+    c1 = *w++;
+    out1[128] = (s32)(((s64)x * c0) >> 20) + prev[2];
+    out2[-128] = (s32)(((s64)x * c1) >> 20) + prev[15];
+    x = cur[3];
+    c0 = *w++;
+    c1 = *w++;
+    out1[192] = (s32)(((s64)x * c0) >> 20) + prev[3];
+    out2[-192] = (s32)(((s64)x * c1) >> 20) + prev[14];
+    x = cur[4];
+    c0 = *w++;
+    c1 = *w++;
+    out1[256] = (s32)(((s64)x * c0) >> 20) + prev[4];
+    out2[-256] = (s32)(((s64)x * c1) >> 20) + prev[13];
+    x = cur[5];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[320] = y0 + prev[5];
+    out2[-320] = y1 + prev[12];
+    x = cur[6];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[384] = y0 + prev[6];
+    out2[-384] = y1 + prev[11];
+    x = cur[7];
+    c0 = *w++;
+    c1 = *w++;
+    out1[448] = (s32)(((s64)x * c0) >> 20) + prev[7];
+    out2[-448] = (s32)(((s64)x * c1) >> 20) + prev[10];
+    x = cur[8];
+    c0 = *w++;
+    c1 = *w++;
+    out1[512] = (s32)(((s64)x * c0) >> 20) + prev[8];
+    out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
+}
+
 /* IMDCT output, first window half: copies prev[0..5] and writes prev[17-i] - cur[i] backwards from out2;
  * the last three use Q20 window coefficients. Math verified against a simulation of the original.
  * NonMatching: 96/100 (the original keeps both products live and spills r31). */
