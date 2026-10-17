@@ -14,11 +14,23 @@ typedef short s16;
 typedef unsigned int u32;
 typedef int s32;
 
-extern const u8 lbl_802F3408[];        /* bit masks: (1 << n) - 1 */
-extern const s16 lbl_802F3418[3][16];  /* MPEG-1 frame size / 8 by [sample rate][bitrate] */
-extern const s16 lbl_802F3478[3][16];  /* MPEG-2 */
 extern u32 lbl_8055DD90;
 extern u32 lbl_8055DD94;
+
+typedef struct HuffTable {
+    u16** nodes;
+} HuffTable;
+
+typedef struct HuffMeta {
+    s16 long_bands[2][3][16];   /* 0x0 */
+    s16 short_bands[2][3][20];  /* 0xC0 */
+    s16 unk1B0[16];             /* 0x1B0 */
+    s16 depth[18];              /* 0x1D0 */
+    u32 masks[25];              /* 0x1F4: (1 << n) - 1, n = 0..24 */
+} HuffMeta;
+
+#define NULL 0
+#include "mp3_tables.inc"
 
 typedef struct MP3Info {
     s32 mpeg1;        /* 0x0 */
@@ -261,12 +273,7 @@ void MP3_ArenaSet(u32 p) {
     lbl_8055DD94 = p;
 }
 
-extern const u32 lbl_802F3F54[];  /* (1 << n) - 1, n = 0..24 */
-extern const u32 lbl_8031C2B8[];  /* (1 << n) - 1, n = 0..8 */
 
-typedef struct HuffTable {
-    const u16** nodes;
-} HuffTable;
 
 u32 MP3_HuffLookup(s32 bits, s32 n, const HuffTable* t) {
     s32 node = 0;
@@ -304,10 +311,9 @@ u32 MP3_PeekBitsRing(const u8* buf, u32 n, u32* pos) {
         idx = (idx + 1) & 0x1FFF;
         b2 = buf[idx];
     }
-    return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
+    return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3D60.masks[sh]) >> (sh - n));
 }
 
-extern const u8 lbl_8031C2E0[];  /* count1 table A: (unused bits << 4) | vwxy */
 
 typedef struct BitStream {
     u8 pad0[0xC];
@@ -341,7 +347,7 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
         bs->pos = p + 6;
         idx = (p >> 3) & 0x1FFF;
         sh = 16 - (p & 7);
-        code = (u16)((((buf[idx] << 8) | buf[(idx + 1) & 0x1FFF]) & lbl_802F3F54[sh]) >> (sh - 6));
+        code = (u16)((((buf[idx] << 8) | buf[(idx + 1) & 0x1FFF]) & lbl_802F3D60.masks[sh]) >> (sh - 6));
         e = lbl_8031C2E0[code];
         bs->pos = p + 6 - (e >> 4);
         v = (e >> 3) & 1;
@@ -420,17 +426,7 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s3
     }
 }
 
-typedef struct HuffMeta {
-    s16 long_bands[2][3][16];   /* 0x0 */
-    s16 short_bands[2][3][20];  /* 0xC0 */
-    s16 unk1B0[16];             /* 0x1B0 */
-    s16 depth[18];              /* 0x1D0 */
-} HuffMeta;
 
-extern const HuffMeta lbl_802F3D60;
-extern const s8 lbl_8031C298[];          /* linbits per table */
-extern const HuffTable lbl_8031D580[];
-extern const s32 lbl_80559270[2];         /* region1 start for short blocks by lsf */
 
 void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
 void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
@@ -515,7 +511,7 @@ s32 MP3_DecodeBigValues(HuffState* d, const u8* buf, s16* out, s32 big_values, u
                 idx = (idx + 1) & 0x1FFF;
                 b1 = buf[idx];
                 d->pos -= 20;
-                bits |= ((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 4) & 0xF) << 12;
+                bits |= ((((b0 << 8) | b1) & lbl_802F3D60.masks[sh]) >> (sh - 4) & 0xF) << 12;
             } else {
                 d->pos -= 16;
             }
