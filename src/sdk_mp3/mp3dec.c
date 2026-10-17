@@ -13,6 +13,7 @@ typedef unsigned short u16;
 typedef short s16;
 typedef unsigned int u32;
 typedef int s32;
+typedef long long s64;
 
 
 typedef struct HuffTable {
@@ -72,6 +73,57 @@ typedef struct MP3Decoder {
 
 
 u32 MP3_GetBits(u32 unused, const u8* buf, u32 n, s32* pos);
+
+/* Per-channel granule buffer (0x2400 bytes); the frame decoder passes decoder + 0xAB0. */
+typedef struct MP3ChannelBuf {
+    u8 pad[0x1B00];
+    s32 xr[576];              /* 0x1B00: dequantized spectrum */
+} MP3ChannelBuf;
+
+/* Alias reduction between subbands (Q24 butterflies with the cs^2 / cs*ca tables). With a non-zero
+ * block-type field the butterflies run on every subband boundary below sblim and the spectrum from
+ * start up to sblim*18 is cleared; otherwise only the boundary between subbands 0 and 1 is processed. */
+void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g) {
+    s8 ch;
+    s8 sb;
+    s32 i;
+    s32 j;
+    s16 idx;
+    s32* lo;
+    s32* hi;
+    s32 bu;
+    s32 bd;
+
+    if (mixed & 7) {
+        for (ch = 0; ch < channels; ch++, g++) {
+            for (sb = 1; sb < sblim; sb++) {
+                idx = (sb << 4) + (sb << 1);
+                hi = &g->xr[idx];
+                lo = &g->xr[idx - 1];
+                for (i = 0; i < 8; i++) {
+                    bd = hi[i];
+                    bu = *lo;
+                    *lo-- = (s32)(((s64)bu * lbl_802F33C8[i]) >> 24) - (s32)(((s64)bd * lbl_802F33E8[i]) >> 24);
+                    hi[i] = (s32)(((s64)bd * lbl_802F33C8[i]) >> 24) + (s32)(((s64)bu * lbl_802F33E8[i]) >> 24);
+                }
+            }
+            for (j = start; j < sblim * 18; j++) {
+                g->xr[j] = 0;
+            }
+        }
+    } else {
+        for (ch = 0; ch < channels; ch++, g++) {
+            hi = &g->xr[18];
+            lo = &g->xr[17];
+            for (i = 0; i < 8; i++) {
+                bd = hi[i];
+                bu = *lo;
+                *lo-- = (s32)(((s64)bu * lbl_802F33C8[i]) >> 24) - (s32)(((s64)bd * lbl_802F33E8[i]) >> 24);
+                hi[i] = (s32)(((s64)bd * lbl_802F33C8[i]) >> 24) + (s32)(((s64)bu * lbl_802F33E8[i]) >> 24);
+            }
+        }
+    }
+}
 
 s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos) {
     s32 word = MP3_GetBits(ctx, buf, 12, pos);
