@@ -930,6 +930,7 @@ config.libs.append(
             Object(NonMatching, "game/ident.cpp"),
             Object(NonMatching, "game/achieve.cpp"),
             Object(Matching, "game/driver.cpp"),
+            Object(NonMatching, "game/loading.cpp"),
         ],
     }
 )

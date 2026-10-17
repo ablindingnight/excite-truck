@@ -67,7 +67,7 @@ public:
     virtual const char* GetString(const char* key, const char* def);  // 0x18
     virtual s32 GetIntValue(const char* key);                         // 0x1C
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
-    virtual void vf9(void);                                           // 0x24
+    virtual f32 GetFloat(const char* key);                            // 0x24
     virtual void vf10(void);                                          // 0x28
     virtual void vf11(void);                                          // 0x2C
     virtual int GetBool(const char* key, int def);                    // 0x30
@@ -81,7 +81,7 @@ public:
     virtual void vf20(void);                                          // 0x50
     virtual void vf21(void);                                          // 0x54
     virtual void vf22(void);                                          // 0x58
-    virtual void vf23(void);                                          // 0x5C
+    virtual ValueNode* FindChild(const char* name);                   // 0x5C
     virtual ValueNode* GetChildAt(int index);                         // 0x60
 };
 

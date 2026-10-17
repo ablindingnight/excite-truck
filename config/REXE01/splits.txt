@@ -118,8 +118,18 @@ game/achieve.cpp:
 	.ctors      start:0x802ED0CC end:0x802ED0D0
 	.data       start:0x802FDE68 end:0x802FE138
 	.bss        start:0x80358698 end:0x8035B758
-	.sdata      start:0x80558D30 end:0x80558D74
+	.sdata      start:0x80558D30 end:0x80558D78
 	.sbss       start:0x8055D608 end:0x8055D620
+
+game/loading.cpp:
+	.text       start:0x8001FD7C end:0x8002194C
+	.ctors      start:0x802ED0D0 end:0x802ED0D4
+	.rodata     start:0x802ED850 end:0x802ED860
+	.data       start:0x802FE138 end:0x802FE3F8
+	.bss        start:0x8035B758 end:0x8035BB58
+	.sdata      start:0x80558D78 end:0x80558DA8
+	.sbss       start:0x8055D620 end:0x8055D678
+	.sdata2     start:0x805604A8 end:0x80560570
 
 MSL/alloc.c:
 	extab       start:0x80004520 end:0x80004558
