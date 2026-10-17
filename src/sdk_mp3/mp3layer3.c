@@ -270,6 +270,18 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
+/* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
+ * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
+void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
+    if (mode == 0) {
+        fn_800C3960(dst, lbl_802F4088, win, src, 0x3ff, mode);
+        fn_800C3574(dst, lbl_802F4108, win + 1, src + 4, mode);
+    } else {
+        fn_800C3960(dst, lbl_802F4088, win, src, 0x3ff, mode);
+        fn_800C3574(dst, lbl_802F4108, win + 1, src + 2, mode);
+    }
+}
+
 MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
     MP3Decoder* d;
 
@@ -333,6 +345,26 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
     }
     while (n4-- != 0) {
         *p++ = value;
+    }
+}
+
+/* Q24 butterfly over the even words of four 8-word blocks: dst = d + s, src = (d - s) * m.
+ * NonMatching: only the last unrolled step's register pair (d / d - s) differs. */
+void fn_800C55D8(s32* dst, s32* src, s32* mult) {
+    s32 m = *mult;
+    s32 i, j;
+    s32 s, d;
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 8; j += 2) {
+            s = src[j];
+            d = dst[j];
+            dst[j] = d + s;
+            s = d - s;
+            src[j] = (s32)(((s64)s * m) >> 24);
+        }
+        dst += 8;
+        src += 8;
     }
 }
 
