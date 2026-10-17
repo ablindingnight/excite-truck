@@ -658,56 +658,69 @@ void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
 
 /* Polyphase synthesis: samples 1..15 and their mirrors 31..17 for one channel. 16 Q25 MACs per sample
  * over the 1024-entry ring v (positions pos + off and pos + 0x3E0 - off), clamped to 16 bits. Math verified
- * against a simulation of the original (60/60). NonMatching: 257/251 (extra spills). */
+ * against a simulation of the original (60/60). lo/hi locals from DeepSeek; MAC order per group searched.
+ * NonMatching: 251/251, one li/stw differs plus scheduling. */
 void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
     s32 j;
-    s64 a;
-    s64 b;
+    s64 a, b;
     s32 sa, sb;
+    s32 lo, hi;
 
     for (j = 0; j < 15; j++) {
         a = 0;
         b = 0;
-        a += (s64)v[pos & 0x3ff] * w[0];
-        a += (s64)v[(pos + 0x3e0) & 0x3ff] * w[8];
-        b += (s64)v[pos & 0x3ff] * w[8];
-        b += (s64)v[(pos + 0x3e0) & 0x3ff] * -w[0];
-        a += (s64)v[(pos + 0x60) & 0x3ff] * w[1];
-        a += (s64)v[(pos + 0x380) & 0x3ff] * -w[9];
-        b += (s64)v[(pos + 0x60) & 0x3ff] * w[9];
-        b += (s64)v[(pos + 0x380) & 0x3ff] * w[1];
-        a += (s64)v[(pos + 0x80) & 0x3ff] * w[2];
-        a += (s64)v[(pos + 0x360) & 0x3ff] * w[10];
-        b += (s64)v[(pos + 0x80) & 0x3ff] * w[10];
-        b += (s64)v[(pos + 0x360) & 0x3ff] * -w[2];
-        a += (s64)v[(pos + 0xe0) & 0x3ff] * w[3];
-        a += (s64)v[(pos + 0x300) & 0x3ff] * -w[11];
-        b += (s64)v[(pos + 0xe0) & 0x3ff] * w[11];
-        b += (s64)v[(pos + 0x300) & 0x3ff] * w[3];
-        a += (s64)v[(pos + 0x100) & 0x3ff] * w[4];
-        a += (s64)v[(pos + 0x2e0) & 0x3ff] * w[12];
-        b += (s64)v[(pos + 0x100) & 0x3ff] * w[12];
-        b += (s64)v[(pos + 0x2e0) & 0x3ff] * -w[4];
-        a += (s64)v[(pos + 0x160) & 0x3ff] * w[5];
-        a += (s64)v[(pos + 0x280) & 0x3ff] * -w[13];
-        b += (s64)v[(pos + 0x160) & 0x3ff] * w[13];
-        b += (s64)v[(pos + 0x280) & 0x3ff] * w[5];
-        a += (s64)v[(pos + 0x180) & 0x3ff] * w[6];
-        a += (s64)v[(pos + 0x260) & 0x3ff] * w[14];
-        b += (s64)v[(pos + 0x180) & 0x3ff] * w[14];
-        b += (s64)v[(pos + 0x260) & 0x3ff] * -w[6];
-        a += (s64)v[(pos + 0x1e0) & 0x3ff] * w[7];
-        a += (s64)v[(pos + 0x200) & 0x3ff] * -w[15];
-        b += (s64)v[(pos + 0x1e0) & 0x3ff] * w[15];
-        b += (s64)v[(pos + 0x200) & 0x3ff] * w[7];
+        lo = v[pos & 0x3ff];
+        hi = v[(pos + 0x3e0) & 0x3ff];
+        a += (s64)hi * w[8];
+        a += (s64)lo * w[0];
+        b += (s64)hi * -w[0];
+        b += (s64)lo * w[8];
+        lo = v[(pos + 0x60) & 0x3ff];
+        hi = v[(pos + 0x380) & 0x3ff];
+        a += (s64)hi * -w[9];
+        a += (s64)lo * w[1];
+        b += (s64)hi * w[1];
+        b += (s64)lo * w[9];
+        lo = v[(pos + 0x80) & 0x3ff];
+        hi = v[(pos + 0x360) & 0x3ff];
+        a += (s64)hi * w[10];
+        a += (s64)lo * w[2];
+        b += (s64)hi * -w[2];
+        b += (s64)lo * w[10];
+        lo = v[(pos + 0xe0) & 0x3ff];
+        hi = v[(pos + 0x300) & 0x3ff];
+        a += (s64)hi * -w[11];
+        a += (s64)lo * w[3];
+        b += (s64)hi * w[3];
+        b += (s64)lo * w[11];
+        lo = v[(pos + 0x100) & 0x3ff];
+        hi = v[(pos + 0x2e0) & 0x3ff];
+        a += (s64)hi * w[12];
+        a += (s64)lo * w[4];
+        b += (s64)hi * -w[4];
+        b += (s64)lo * w[12];
+        lo = v[(pos + 0x160) & 0x3ff];
+        hi = v[(pos + 0x280) & 0x3ff];
+        a += (s64)hi * -w[13];
+        a += (s64)lo * w[5];
+        b += (s64)hi * w[5];
+        b += (s64)lo * w[13];
+        lo = v[(pos + 0x180) & 0x3ff];
+        hi = v[(pos + 0x260) & 0x3ff];
+        a += (s64)hi * w[14];
+        a += (s64)lo * w[6];
+        b += (s64)hi * -w[6];
+        b += (s64)lo * w[14];
+        lo = v[(pos + 0x1e0) & 0x3ff];
+        hi = v[(pos + 0x200) & 0x3ff];
+        a += (s64)hi * -w[15];
+        a += (s64)lo * w[7];
+        b += (s64)hi * w[7];
+        b += (s64)lo * w[15];
         sa = (s32)(a >> 25);
         sb = (s32)(b >> 25);
-        if ((sa >> 31) != (sa >> 15)) {
-            sa = (sa >> 31) ^ 0x7FFF;
-        }
-        if ((sb >> 31) != (sb >> 15)) {
-            sb = (sb >> 31) ^ 0x7FFF;
-        }
+        if ((sa >> 31) != (sa >> 15)) sa = (sa >> 31) ^ 0x7FFF;
+        if ((sb >> 31) != (sb >> 15)) sb = (sb >> 31) ^ 0x7FFF;
         if (mode == 0) {
             ((s16*)out)[2 * j] = sa;
             ((s16*)out)[60 - 2 * j] = sb;
