@@ -921,6 +921,7 @@ config.libs.append(
             Object(Matching, "game/version.cpp"),
             Object(Matching, "game/rep.cpp"),
             Object(Matching, "game/loadtimer.cpp"),
+            Object(Matching, "game/fwd126b4.cpp"),
         ],
     }
 )

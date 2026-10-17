@@ -48,6 +48,11 @@ game/loadtimer.cpp:
 	.sbss       start:0x8055D4E0 end:0x8055D4F0
 	.sdata2     start:0x80560348 end:0x80560354
 
+game/fwd126b4.cpp:
+	.text       start:0x800126B4 end:0x800126CC
+	.ctors      start:0x802ED098 end:0x802ED09C
+	.sbss       start:0x8055D4F0 end:0x8055D4F8
+
 game/rep.cpp:
 	.text       start:0x80019864 end:0x80019898
 	.ctors      start:0x802ED0B4 end:0x802ED0B8
