@@ -330,3 +330,43 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
         *p++ = value;
     }
 }
+
+/* Reorders 16 words (and, unless mode == 1, the next 16) into the synthesis input order. src is not const:
+ * the original reloads after every store, as when the compiler cannot rule out aliasing. */
+void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
+    dst[ 0] = src[ 0];
+    dst[ 1] = src[ 1];
+    dst[ 2] = src[ 3];
+    dst[ 3] = src[ 2];
+    dst[ 4] = src[ 7];
+    dst[ 5] = src[ 6];
+    dst[ 6] = src[ 4];
+    dst[ 7] = src[ 5];
+    dst[ 8] = src[15];
+    dst[ 9] = src[14];
+    dst[10] = src[12];
+    dst[11] = src[13];
+    dst[12] = src[ 8];
+    dst[13] = src[ 9];
+    dst[14] = src[11];
+    dst[15] = src[10];
+    if (mode == 1) {
+        return;
+    }
+    dst[16] = src[31];
+    dst[17] = src[30];
+    dst[18] = src[28];
+    dst[19] = src[29];
+    dst[20] = src[24];
+    dst[21] = src[25];
+    dst[22] = src[27];
+    dst[23] = src[26];
+    dst[24] = src[16];
+    dst[25] = src[17];
+    dst[26] = src[19];
+    dst[27] = src[18];
+    dst[28] = src[23];
+    dst[29] = src[22];
+    dst[30] = src[20];
+    dst[31] = src[21];
+}

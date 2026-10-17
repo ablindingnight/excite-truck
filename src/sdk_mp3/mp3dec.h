@@ -89,5 +89,6 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
 void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start);
+void MP3_Reorder32(u32* dst, u32* src, s32 mode);
 
 #endif
