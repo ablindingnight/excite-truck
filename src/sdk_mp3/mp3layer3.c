@@ -550,6 +550,34 @@ void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-512] = -((s32)(((s64)x * c1) >> 20) + prev[9]);
 }
 
+/* IMDCT output for the first block: copies in[0..5] forward, zeroes out2 backwards, and the last three
+ * are Q20 window pairs (lbl_8031D778). NonMatching: 61/60 (the original forms the table address with lwzu). */
+void fn_800C2F98(s32* in, s32* out1, s32* out2) {
+    s32* w = lbl_8031D778;
+    s32 i;
+    s32 x, c0, c1;
+
+    for (i = 0; i < 6; i++) {
+        out1[i] = in[i];
+        out2[-i] = 0;
+    }
+    x = in[6];
+    c0 = w[0];
+    c1 = w[1];
+    out1[6] = (s32)(((s64)x * c0) >> 20);
+    out2[-6] = (s32)(((s64)x * c1) >> 20);
+    x = in[7];
+    c0 = w[2];
+    c1 = w[3];
+    out1[7] = (s32)(((s64)x * c0) >> 20);
+    out2[-7] = (s32)(((s64)x * c1) >> 20);
+    x = in[8];
+    c0 = w[4];
+    c1 = w[5];
+    out1[8] = (s32)(((s64)x * c0) >> 20);
+    out2[-8] = (s32)(((s64)x * c1) >> 20);
+}
+
 /* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
  * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
@@ -689,6 +717,26 @@ void fn_800C51BC(s32* dst, s32* src, s32* c) {
         dst += 4;
         src += 4;
         c += 4;
+    }
+}
+
+/* Q24 butterfly stage: two 16-word blocks, coefficients c[0..7] reused for both.
+ * NonMatching: 102/102, registers differ. */
+void fn_800C5298(s32* dst, s32* src, s32* c) {
+    s32 i;
+    s32 s, d, u;
+
+    for (i = 0; i < 2; i++) {
+        s = src[0]; d = dst[0]; u = d + s; dst[0] = u; src[0] = (s32)(((s64)(d - s) * c[0]) >> 24);
+        s = src[1]; d = dst[1]; u = d + s; dst[1] = u; src[1] = (s32)(((s64)(d - s) * c[1]) >> 24);
+        s = src[2]; d = dst[2]; u = d + s; dst[2] = u; src[2] = (s32)(((s64)(d - s) * c[2]) >> 24);
+        s = src[3]; d = dst[3]; u = d + s; dst[3] = u; src[3] = (s32)(((s64)(d - s) * c[3]) >> 24);
+        s = src[4]; d = dst[4]; u = d + s; dst[4] = u; src[4] = (s32)(((s64)(d - s) * c[4]) >> 24);
+        s = src[5]; d = dst[5]; u = d + s; dst[5] = u; src[5] = (s32)(((s64)(d - s) * c[5]) >> 24);
+        s = src[6]; d = dst[6]; u = d + s; dst[6] = u; src[6] = (s32)(((s64)(d - s) * c[6]) >> 24);
+        s = src[7]; d = dst[7]; dst[7] = d + s; d = d - s; src[7] = (s32)(((s64)d * c[7]) >> 24);
+        dst += 16;
+        src += 16;
     }
 }
 
