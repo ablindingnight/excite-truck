@@ -18,10 +18,13 @@ static void VFiPFFILE_Cursor_Recalc(struct PF_FILE* p_file) {
 }
 
 static void VFiPFFILE_Cursor_SetPosition(struct PF_FILE* p_file, u32 pos) {
+#ifndef GAME_REXE01
     struct PF_VOLUME* p_vol;
     u32 pre_sec_off;
     u32 post_sec_off;
+#endif
 
+#ifndef GAME_REXE01
     if (p_file == 0) {
         p_vol = 0;
     } else {
@@ -33,6 +36,7 @@ static void VFiPFFILE_Cursor_SetPosition(struct PF_FILE* p_file, u32 pos) {
     if (pre_sec_off != post_sec_off) {
         p_file->cursor.sector = -1;
     }
+#endif
 
     p_file->cursor.position = pos;
     VFiPFFILE_Cursor_Recalc(p_file);
@@ -73,8 +77,15 @@ u32 VFiPFFILE_Cursor_AdvanceToRead(struct PF_FILE* p_file, u32 n, u32 sector) {
     return res;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_Cursor_ReadHeadSector(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#else
 s32 VFiPFFILE_Cursor_ReadHeadSector(struct PF_VOLUME* p_vol, struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#endif
     s32 err;
+#ifdef GAME_REXE01
+    struct PF_VOLUME* p_vol;
+#endif
     u32 max_readable_size;
     u32 success_size;
 
@@ -82,6 +93,9 @@ s32 VFiPFFILE_Cursor_ReadHeadSector(struct PF_VOLUME* p_vol, struct PF_FILE* p_f
     if (p_file->cursor.offset_in_sector == 0) {
         return 0;
     }
+#ifdef GAME_REXE01
+    p_vol = (p_file == 0) ? 0 : p_file->p_sfd->dir_entry.p_vol;
+#endif
 
     max_readable_size = p_vol->bpb.bytes_per_sector - p_file->cursor.offset_in_sector;
     if (size > max_readable_size) {
@@ -116,17 +130,32 @@ s32 VFiPFFILE_Cursor_ReadHeadSector(struct PF_VOLUME* p_vol, struct PF_FILE* p_f
     }
     *p_size_read = success_size;
     VFiPFFILE_Cursor_AdvanceToRead(p_file, success_size, p_file->cursor.sector);
+#ifdef GAME_REXE01
+    if (success_size != size) {
+        return err;
+    }
+#endif
 
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_Cursor_ReadBodySectors(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#else
 s32 VFiPFFILE_Cursor_ReadBodySectors(struct PF_VOLUME* p_vol, struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#endif
     s32 err;
+#ifdef GAME_REXE01
+    struct PF_VOLUME* p_vol;
+#endif
     u32 num_sector;
     u32 max_readable_size;  // Present in DWARF but unused here.
     u32 success_size;
 
     *p_size_read = 0;
+#ifdef GAME_REXE01
+    p_vol = (p_file == 0) ? 0 : p_file->p_sfd->dir_entry.p_vol;
+#endif
     num_sector = 0;
 
     err = VFiPFFAT_GetContinuousSector(&p_file->p_sfd->ffd, p_file->cursor.file_sector_index, size, &p_file->cursor.sector, &num_sector);
@@ -157,15 +186,30 @@ s32 VFiPFFILE_Cursor_ReadBodySectors(struct PF_VOLUME* p_vol, struct PF_FILE* p_
     }
     *p_size_read = success_size;
     VFiPFFILE_Cursor_AdvanceToRead(p_file, success_size, p_file->cursor.sector);
+#ifdef GAME_REXE01
+    if (success_size != size - (size & (p_vol->bpb.bytes_per_sector - 1))) {
+        return err;
+    }
+#endif
 
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_Cursor_ReadTailSector(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#else
 s32 VFiPFFILE_Cursor_ReadTailSector(struct PF_VOLUME* p_vol, struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
+#endif
     s32 err;
+#ifdef GAME_REXE01
+    struct PF_VOLUME* p_vol;
+#endif
     u32 success_size;
 
     *p_size_read = 0;
+#ifdef GAME_REXE01
+    p_vol = (p_file == 0) ? 0 : p_file->p_sfd->dir_entry.p_vol;
+#endif
     if (size == 0) {
         return 0;
     }
@@ -198,6 +242,11 @@ s32 VFiPFFILE_Cursor_ReadTailSector(struct PF_VOLUME* p_vol, struct PF_FILE* p_f
     }
     *p_size_read = success_size;
     VFiPFFILE_Cursor_AdvanceToRead(p_file, success_size, p_file->cursor.sector);
+#ifdef GAME_REXE01
+    if (success_size != size) {
+        return err;
+    }
+#endif
 
     return 0;
 }
@@ -210,9 +259,15 @@ s32 VFiPFFILE_Cursor_Read(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_si
     p_file->p_sfd->ffd.p_hint = &p_file->hint;
     *p_size_read = 0;
 
+#ifndef GAME_REXE01
     p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+#endif
 
+#ifdef GAME_REXE01
+    err = VFiPFFILE_Cursor_ReadHeadSector(p_file, p_buf, size, &size_read);
+#else
     err = VFiPFFILE_Cursor_ReadHeadSector(p_vol, p_file, p_buf, size, &size_read);
+#endif
     *p_size_read += size_read;
     if (err) {
         return err;
@@ -222,8 +277,15 @@ s32 VFiPFFILE_Cursor_Read(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_si
     }
 
     size = size - size_read;
+#ifdef GAME_REXE01
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+#endif
     while (size >= p_vol->bpb.bytes_per_sector) {
-        err = VFiPFFILE_Cursor_ReadBodySectors(p_vol, p_file, p_buf + *p_size_read, size, &size_read);
+    #ifdef GAME_REXE01
+    err = VFiPFFILE_Cursor_ReadBodySectors(p_file, p_buf + *p_size_read, size, &size_read);
+#else
+    err = VFiPFFILE_Cursor_ReadBodySectors(p_vol, p_file, p_buf + *p_size_read, size, &size_read);
+#endif
         *p_size_read += size_read;
         if (err) {
             return err;
@@ -234,7 +296,11 @@ s32 VFiPFFILE_Cursor_Read(struct PF_FILE* p_file, u8* p_buf, u32 size, u32* p_si
         size -= size_read;
     }
 
+#ifdef GAME_REXE01
+    err = VFiPFFILE_Cursor_ReadTailSector(p_file, p_buf + *p_size_read, size, &size_read);
+#else
     err = VFiPFFILE_Cursor_ReadTailSector(p_vol, p_file, p_buf + *p_size_read, size, &size_read);
+#endif
     *p_size_read += size_read;
     if (err) {
         return err;
@@ -521,7 +587,11 @@ void VFiPFFILE_Cursor_MoveToClusterEnd(struct PF_FILE* p_file, u32 size) {
 
 static void VFiPFFILE_InitSFD(struct PF_SFD* p_sfd, struct PF_DIR_ENT* p_dir_entry) {
     p_sfd->stat = 3;
+#ifdef GAME_REXE01
+    p_sfd->num_handlers = 0;
+#else
     p_sfd->num_handlers = 1;
+#endif
     p_sfd->dir_entry = *p_dir_entry;
     p_sfd->lock.mode = 0;
     p_sfd->lock.count = 0;
@@ -555,7 +625,9 @@ struct PF_SFD* VFiPFFILE_GetSFD(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_en
             }
         } else {
             if (p_ent->p_vol == p_vol->sfds[i].dir_entry.p_vol && p_ent->entry_sector == p_vol->sfds[i].dir_entry.entry_sector && p_ent->entry_offset == p_vol->sfds[i].dir_entry.entry_offset) {
+#ifndef GAME_REXE01
                 ++p_vol->sfds[i].num_handlers;
+#endif
                 return &p_vol->sfds[i];
             }
         }
@@ -609,7 +681,11 @@ static s32 VFiPFFILE_ReleaseUFD(struct PF_FILE* p_file) {
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_createEmptyFile(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_file_ent, struct PF_STR* p_filename) {
+#else
 s32 VFiPFFILE_createEmptyFile(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_file_ent, struct PF_STR* p_filename, u32 namelength) {
+#endif
     struct PF_DIR_ENT ent;
     u8 buf[32];
     u32 position;
@@ -623,8 +699,20 @@ s32 VFiPFFILE_createEmptyFile(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_file
     u32 success_size;
     s32 pozIdx;
     s32 err;
+#ifdef GAME_REXE01
+    s32 namelength;
+#endif
 
     ent = *p_file_ent;
+#ifdef GAME_REXE01
+    namelength = (u16)VFiPFSTR_StrNumChar(p_filename, 1);
+    if (namelength + ent.path_len > 259) {
+        return 1;
+    }
+    if (namelength > 255) {
+        return 1;
+    }
+#endif
     VFiPFFAT_InitFFD(&ffd, &hint, ent.p_vol, &ent.start_cluster);
 
     if (p_vol->num_opened_files >= 5) {
@@ -729,6 +817,140 @@ static s32 VFiPFFILE_p_remove(struct PF_VOLUME* p_vol, struct PF_STR* p_path_str
     return err;
 }
 
+#ifdef GAME_REXE01
+static u32 VFiPFFILE_ET_IsOpened(struct PF_DIR_ENT* p_ent) {
+    struct PF_SFD* p_sfd;
+    s32 i;
+
+    p_sfd = p_ent->p_vol->sfds;
+    for (i = 0; i < 5; i++, p_sfd++) {
+        if ((p_sfd->stat & 1) != 0 && (p_sfd->stat & 2) != 0 && p_ent->p_vol == p_sfd->dir_entry.p_vol && p_ent->entry_sector == p_sfd->dir_entry.entry_sector && p_ent->entry_offset == p_sfd->dir_entry.entry_offset) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+s32 VFiPFFILE_p_fopen(struct PF_VOLUME* p_vol, struct PF_STR* p_path_str, s32 mode, struct PF_FILE** pp_file) {
+    struct PF_DIR_ENT ent;
+    struct PF_ENT_ITER iter;
+    struct PF_SFD* p_sfd;
+    struct PF_FILE* p_file;
+    s32 err;
+    u16 access_time;
+    struct PF_STR file_str;
+    struct PF_STR dir_str;
+    struct PF_FFD ffd;
+    struct PF_FAT_HINT hint;
+    s8 tmp_local[512];
+
+    *pp_file = NULL;
+
+    err = VFiPFPATH_SplitPath(p_path_str, &dir_str, &file_str);
+    if (err != 0) {
+        return 1;
+    }
+
+    err = VFiPFENT_ITER_GetEntryOfPath(&iter, &ent, p_vol, p_path_str, 1);
+    if (err != 0) {
+        return err;
+    }
+
+    if ((ent.attr & 0x10) == 0) {
+        return 1;
+    }
+
+    if (VFiPFSTR_GetCodeMode(&file_str) == 2) {
+        if ((s32)VFiPFSTR_StrNumChar(&file_str, 1) > 255) {
+            return 1;
+        }
+        VFiPFPATH_transformFromUnicodeToNormal(tmp_local, (const u16*)VFiPFSTR_GetStrPos(&file_str, 1));
+    }
+    VFiPFSTR_SetLocalStr(&file_str, tmp_local);
+
+    if ((mode & 2) != 0) {
+        VFiPFFAT_InitFFD(&ffd, &hint, ent.p_vol, &ent.start_cluster);
+        err = VFiPFENT_findEntry(&ffd, &ent, 0, &file_str, 0x7F, 0);
+        if (err != 0) {
+            return 3;
+        }
+
+        if ((mode & 8) != 0 && (ent.attr & 1) != 0) {
+            return 10;
+        }
+
+        if ((ent.attr & 0x10) != 0) {
+            return 23;
+        }
+
+        VFiPFENT_getcurrentDateTimeForEnt(&ent.access_date, &access_time);
+    } else {
+        err = VFiPFFILE_createEmptyFile(p_vol, &ent, &file_str);
+        if (err == 8) {
+            if ((mode & 0x10) != 0) {
+                return 8;
+            }
+
+            if ((mode & 1) != 0 && VFiPFFILE_ET_IsOpened(&ent)) {
+                return 8;
+            }
+
+            if ((ent.attr & 1) != 0 && ((mode & 1) != 0 || (mode & 4) != 0 || (mode & 8) != 0)) {
+                return 10;
+            }
+
+            if ((ent.attr & 0x10) != 0) {
+                return 23;
+            }
+
+            if ((mode & 1) != 0) {
+                if (ent.start_cluster >= 2 && ent.start_cluster != (u32)-1 && ent.file_size != 0) {
+                    VFiPFFAT_FreeChain(&iter.ffd, ent.start_cluster, -1, ent.file_size);
+                }
+                ent.start_cluster = 0;
+                ent.file_size = 0;
+                VFiPFENT_getcurrentDateTimeForEnt(&ent.modify_date, &ent.modify_time);
+                ent.access_date = ent.modify_date;
+            } else {
+                VFiPFENT_getcurrentDateTimeForEnt(&ent.access_date, &access_time);
+            }
+        } else if (err != 0) {
+            return err;
+        }
+    }
+
+    p_vol = ent.p_vol;
+    p_sfd = VFiPFFILE_GetSFD(p_vol, &ent);
+    if (p_sfd == NULL) {
+        return 21;
+    }
+
+    p_file = VFiPFFILE_GetFreeUFD(p_vol);
+    if (p_file == NULL) {
+        return 22;
+    }
+
+    p_file->p_sfd = p_sfd;
+    p_file->stat = 1;
+    p_file->open_mode = mode;
+    p_file->last_error = 0;
+    p_file->lock_count = 0;
+    VFiPFFAT_InitHint(&p_file->hint);
+
+    VFiPFFILE_Cursor_Initialize(p_file);
+
+    if ((mode & 0x1) != 0) {
+        p_file->p_sfd->stat |= 4u;
+    }
+    if ((p_file->open_mode & 4) != 0) {
+        VFiPFFILE_Cursor_MoveToEnd(p_file);
+    }
+
+    p_sfd->num_handlers++;
+    *pp_file = p_file;
+    return 0;
+}
+#else
 s32 VFiPFFILE_p_fopen(struct PF_VOLUME* p_vol, struct PF_STR* p_path_str, s32 mode, struct PF_FILE** pp_file) {
     struct PF_DIR_ENT ent;
     struct PF_ENT_ITER iter;
@@ -790,7 +1012,11 @@ s32 VFiPFFILE_p_fopen(struct PF_VOLUME* p_vol, struct PF_STR* p_path_str, s32 mo
             return 1;
         }
 
+#ifdef GAME_REXE01
+        err = VFiPFFILE_createEmptyFile(p_vol, &ent, &file_str);
+#else
         err = VFiPFFILE_createEmptyFile(p_vol, &ent, &file_str, namelength);
+#endif
         if (err == 8) {
             if ((mode & 0x10) != 0) {
                 return 8;
@@ -870,6 +1096,7 @@ s32 VFiPFFILE_p_fopen(struct PF_VOLUME* p_vol, struct PF_STR* p_path_str, s32 mo
     *pp_file = p_file;
     return 0;
 }
+#endif
 
 s32 VFiPFFILE_p_fread(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_read) {
     u32 size_read;
@@ -1120,6 +1347,35 @@ s32 VFiPFFILE_remove(struct PF_STR* p_path_str) {
     return err;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_fopen(struct PF_STR* p_path_str, s32 mode, struct PF_FILE** pp_file) {
+    struct PF_VOLUME* p_vol;
+    s32 err;
+
+    *pp_file = NULL;
+    p_vol = VFiPFPATH_GetVolumeFromPath(p_path_str);
+    VFiPF_LockCritical(&p_vol->critical);
+
+    // A write-protected volume can still be opened for reading.
+    err = VFiPFVOL_CheckForWrite(p_vol);
+    if (err != 0 && (err != 11 || mode != 2)) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+
+    err = VFiPFFILE_p_fopen(p_vol, p_path_str, mode, pp_file);
+    if (err) {
+        VFipf_vol_set.last_error = err;
+        p_vol->last_error = err;
+    } else {
+        p_vol->num_opened_files++;
+    }
+    VFiPF_UnlockCritical(&p_vol->critical);
+    return err;
+}
+#else
 s32 VFiPFFILE_fopen(struct PF_STR* p_path_str, s32 mode, struct PF_FILE** pp_file) {
     struct PF_VOLUME* p_vol;
     s32 err;
@@ -1163,7 +1419,92 @@ s32 VFiPFFILE_fopen(struct PF_STR* p_path_str, s32 mode, struct PF_FILE** pp_fil
     }
     return err;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_fclose(struct PF_FILE* p_file) {
+    struct PF_VOLUME* p_vol;
+    s32 err;
+    s32 check_err;
+
+    err = 0;
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    VFiPF_LockCritical(&p_vol->critical);
+
+    check_err = VFiPFVOL_CheckForWrite(p_vol);
+    if (check_err != 0 && (check_err != 11 || p_file->open_mode != 2)) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = check_err;
+        p_vol->last_error = check_err;
+        return check_err;
+    }
+
+    if ((p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+    p_vol->cache.signature = p_file;
+
+    if (p_file->p_sfd->num_handlers - 1 <= 0 && (p_file->p_sfd->dir_entry.attr & 0x19) == 0 && (check_err & 11) == 0 && ((p_file->p_sfd->stat & 4) || (p_vol->file_config & 1) != 1)) {
+        err = VFiPFENT_updateEntry(&p_file->p_sfd->dir_entry, 1);
+    }
+
+    if (p_file->lock_count > 0) {
+        if (p_file->p_sfd->lock.mode & 1) {
+            p_file->p_sfd->lock.count -= p_file->lock_count;
+            p_file->lock_count = 0;
+            if (p_file->p_sfd->lock.count == 0) {
+                VFiPF_UnLockFile(p_file);
+            }
+            p_file->p_sfd->lock.mode &= ~3;
+        } else if (p_file->p_sfd->lock.owner != p_file) {
+            err = 25;
+        } else {
+            p_file->p_sfd->lock.count = 0;
+            p_file->lock_count = 0;
+            p_file->p_sfd->lock.owner = NULL;
+            VFiPF_UnLockFile(p_file);
+            p_file->p_sfd->lock.mode &= ~3;
+        }
+    }
+
+    if (err) {
+        VFipf_vol_set.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+    } else {
+        if (p_vol->cache.mode & 2) {
+            err = VFiPFCACHE_FlushFATCache(p_vol);
+            if (err) {
+                VFipf_vol_set.last_error = err;
+                p_file->p_sfd->ffd.p_vol->last_error = err;
+                p_file->last_error = err;
+            } else {
+                err = VFiPFCACHE_FlushDataCacheSpecific(p_vol, p_file);
+                if (err) {
+                    VFipf_vol_set.last_error = err;
+                    p_file->p_sfd->ffd.p_vol->last_error = err;
+                    p_file->last_error = err;
+                }
+            }
+        }
+        if (err == 0) {
+            if (--p_file->p_sfd->num_handlers == 0) {
+                p_file->p_sfd->stat &= ~1u;
+                p_file->p_sfd->ffd.cluster_link.buffer = 0;
+            }
+            p_file->stat &= ~1u;
+            p_vol->num_opened_files--;
+        }
+    }
+
+    p_vol->cache.signature = NULL;
+    VFiPF_UnlockCritical(&p_vol->critical);
+    return err;
+}
+#else
 s32 VFiPFFILE_fclose(struct PF_FILE* p_file) {
     struct PF_VOLUME* p_vol;
     s32 err;
@@ -1256,7 +1597,48 @@ s32 VFiPFFILE_fclose(struct PF_FILE* p_file) {
     p_vol->cache.signature = NULL;
     return err;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_fread(u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_read) {
+    struct PF_VOLUME* p_vol;
+    u32 count_read;
+    s32 err;
+
+    *p_count_read = 0;
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    VFiPF_LockCritical(&p_vol->critical);
+
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+
+    if ((p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = 38;
+        p_vol->last_error = 38;
+        return 38;
+    }
+
+    p_vol->cache.signature = p_file;
+    err = VFiPFFILE_p_fread(p_vol, p_buf, size, count, p_file, &count_read);
+    *p_count_read = count_read;
+    p_vol->cache.signature = NULL;
+
+    if (err) {
+        VFipf_vol_set.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+    }
+
+    VFiPF_UnlockCritical(&p_vol->critical);
+    return err;
+}
+#else
 s32 VFiPFFILE_fread(u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_read) {
     struct PF_VOLUME* p_vol;
     u32 count_read;
@@ -1320,6 +1702,7 @@ s32 VFiPFFILE_fread(u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32*
 
     return err;
 }
+#endif
 
 s32 VFiPFFILE_fwrite(u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_written) {
     struct PF_VOLUME* p_vol;
@@ -1391,6 +1774,73 @@ s32 VFiPFFILE_fwrite(u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32
     return err;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_fseek(struct PF_FILE* p_file, s32 lOffset, s32 nOrigin) {
+    struct PF_VOLUME* p_vol;
+    s32 err;
+    u32 file_io;
+    u32 wk_offset;
+
+    p_vol = (p_file == 0) ? (0) : (p_file->p_sfd->dir_entry.p_vol);
+    VFiPF_LockCritical(&p_vol->critical);
+
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    if (((p_file->p_sfd->stat & 1) == 0) || ((p_file->p_sfd->stat & 2) == 0)) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = 38;
+        p_vol->last_error = 38;
+        return 38;
+    }
+    switch (nOrigin) {
+        case 1:
+            file_io = p_file->cursor.position;
+            break;
+        case 0:
+            file_io = 0;
+            break;
+        case 2:
+            file_io = p_file->p_sfd->dir_entry.file_size;
+            break;
+        default:
+            VFiPF_UnlockCritical(&p_vol->critical);
+            VFipf_vol_set.last_error = 10;
+            p_file->p_sfd->ffd.p_vol->last_error = 10;
+            p_file->last_error = 10;
+            return 10;
+    }
+
+    if (lOffset & 0x80000000) {
+        wk_offset = ((~lOffset) & 0x7FFFFFFF) + 1;
+        if (file_io < wk_offset) {
+            VFiPF_UnlockCritical(&p_vol->critical);
+            VFipf_vol_set.last_error = 10;
+            p_file->p_sfd->ffd.p_vol->last_error = 10;
+            p_file->last_error = 10;
+            return 10;
+        }
+        file_io -= wk_offset;
+    } else {
+        if (((u32)lOffset) > (0xFFFFFFFF - file_io)) {
+            VFiPF_UnlockCritical(&p_vol->critical);
+            VFipf_vol_set.last_error = 37;
+            p_file->p_sfd->ffd.p_vol->last_error = 37;
+            p_file->last_error = 37;
+            return 37;
+        }
+        file_io += lOffset;
+    }
+    VFiPFFILE_Cursor_Initialize(p_file);
+    VFiPFFILE_Cursor_SetPosition(p_file, file_io);
+    VFiPF_UnlockCritical(&p_vol->critical);
+    return err;
+}
+#else
 s32 VFiPFFILE_fseek(struct PF_FILE* p_file, s32 lOffset, s32 nOrigin) {
     struct PF_VOLUME* p_vol;
     s32 err;
@@ -1461,7 +1911,56 @@ s32 VFiPFFILE_fseek(struct PF_FILE* p_file, s32 lOffset, s32 nOrigin) {
     VFiPFFILE_Cursor_SetPosition(p_file, file_io);
     return err;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFFILE_finfo(struct PF_FILE* p_file, struct PF_INFO* p_info) {
+    struct PF_VOLUME* p_vol;
+    struct PF_CURSOR save_cursor;
+    struct PF_FAT_HINT save_hint;
+    s32 err;
+
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    VFiPF_LockCritical(&p_vol->critical);
+
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+        return err;
+    }
+
+    if ((p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
+        VFiPF_UnlockCritical(&p_vol->critical);
+        VFipf_vol_set.last_error = 38;
+        p_vol->last_error = 38;
+        return 38;
+    }
+
+    p_vol->cache.signature = p_file;
+    save_cursor = p_file->cursor;
+    save_hint = p_file->hint;
+
+    err = VFiPFFILE_p_finfo(p_file, p_info);
+
+    p_file->cursor = save_cursor;
+    p_file->hint = save_hint;
+    p_vol->cache.signature = NULL;
+
+    if (err) {
+        VFipf_vol_set.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+        VFiPF_UnlockCritical(&p_vol->critical);
+        return err;
+    }
+
+    VFiPF_UnlockCritical(&p_vol->critical);
+    return 0;
+}
+#else
 s32 VFiPFFILE_finfo(struct PF_FILE* p_file, struct PF_INFO* p_info) {
     struct PF_VOLUME* p_vol;
     struct PF_CURSOR save_cursor;
@@ -1525,3 +2024,4 @@ s32 VFiPFFILE_finfo(struct PF_FILE* p_file, struct PF_INFO* p_info) {
 
     return 0;
 }
+#endif

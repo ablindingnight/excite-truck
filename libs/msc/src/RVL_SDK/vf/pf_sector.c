@@ -6,15 +6,22 @@ s32 VFiPFSEC_ReadFAT(struct PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset,
     struct PF_CACHE_PAGE* p_page;
     s32 err;
 
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
     if (!p_buf) {
         return 10;
     }
+#endif
     if (((p_vol->flags & 1) == 0) || !VFiPFDRV_IsInserted(p_vol)) {
         return 9;
     }
+#ifdef GAME_REXE01
+    if (sector >= p_vol->bpb.total_sectors || offset >= p_vol->bpb.bytes_per_sector || offset + size > p_vol->bpb.bytes_per_sector) {
+        return 10;
+    }
+#endif
     err = VFiPFCACHE_ReadFATPage(p_vol, sector, &p_page);
     if (err) {
         return err;
@@ -35,15 +42,22 @@ s32 VFiPFSEC_ReadData(struct PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset
     u32 cache_remaining_sectors;  // Extra variable. Not in DWARF.
 
     *p_success_size = 0;
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
     if (!p_buf) {
         return 10;
     }
+#endif
     if (((p_vol->flags & 1) == 0) || !VFiPFDRV_IsInserted(p_vol)) {
         return 9;
     }
+#ifdef GAME_REXE01
+    if ((sector >= p_vol->bpb.total_sectors || offset >= p_vol->bpb.bytes_per_sector || offset + size > p_vol->bpb.bytes_per_sector) && offset != 0) {
+        return 10;
+    }
+#endif
     if (offset != 0 || size < p_vol->bpb.bytes_per_sector) {
         err = VFiPFCACHE_ReadDataPage(p_vol, sector, &p_page, set_sig);
         if (err) {
@@ -116,15 +130,28 @@ s32 VFiPFSEC_WriteFAT(struct PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 
     struct PF_CACHE_PAGE* p_page;
     s32 err;
 
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
     if (!p_buf) {
         return 10;
     }
+#endif
+#ifdef GAME_REXE01
+    if ((p_vol->flags & 1) == 0 || !VFiPFDRV_IsInserted(p_vol) || (p_vol->flags & 2)) {
+        return 9;
+    }
+#else
     if ((p_vol->flags & 1) == 0 || !VFiPFDRV_IsInserted(p_vol) || VFiPFDRV_IsWProtected(p_vol)) {
         return 9;
     }
+#endif
+#ifdef GAME_REXE01
+    if (sector >= p_vol->bpb.total_sectors || offset >= p_vol->bpb.bytes_per_sector || offset + size > p_vol->bpb.bytes_per_sector) {
+        return 10;
+    }
+#endif
     err = VFiPFCACHE_ReadFATPage(p_vol, sector, &p_page);
     if (err) {
         return err;
@@ -149,15 +176,28 @@ s32 VFiPFSEC_WriteData(struct PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16
 
     *p_success_size = 0;
 
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 10;
     }
     if (!p_buf) {
         return 10;
     }
+#endif
+#ifdef GAME_REXE01
+    if (((p_vol->flags & 1) == 0) || !VFiPFDRV_IsInserted(p_vol) || (p_vol->flags & 2)) {
+        return 9;
+    }
+#else
     if (((p_vol->flags & 1) == 0) || !VFiPFDRV_IsInserted(p_vol) || VFiPFDRV_IsWProtected(p_vol)) {
         return 9;
     }
+#endif
+#ifdef GAME_REXE01
+    if ((sector >= p_vol->bpb.total_sectors || offset >= p_vol->bpb.bytes_per_sector || offset + size > p_vol->bpb.bytes_per_sector) && offset != 0) {
+        return 10;
+    }
+#endif
     if (offset != 0 || size < p_vol->bpb.bytes_per_sector) {
         err = VFiPFCACHE_ReadDataPageAndFlushIfNeeded(p_vol, sector, &p_page, set_sig);
         if (err) {

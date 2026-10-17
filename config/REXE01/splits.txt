@@ -1127,13 +1127,19 @@ RVL_SDK/vf/pf_fat16.c:
 RVL_SDK/vf/pf_fat32.c:
 	.text       start:0x800B0258 end:0x800B0748
 
+RVL_SDK/vf/pf_fatfs.c:
+	.text       start:0x800B0748 end:0x800B074C
+
 RVL_SDK/vf/pf_file.c:
-	.text       start:0x800B1868 end:0x800B1A54
+	.text       start:0x800B074C end:0x800B23F8
 
 RVL_SDK/vf/pf_path.c:
 	.text       start:0x800B23F8 end:0x800B5260
 	.sdata      start:0x80559208 end:0x80559238
 	.sdata2     start:0x80560D98 end:0x80560DA0
+
+RVL_SDK/vf/pf_sector.c:
+	.text       start:0x800B5260 end:0x800B5988
 
 revolution/VF/pf_cp932.c:
 	.text       start:0x800B6DDC end:0x800B72EC
