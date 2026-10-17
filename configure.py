@@ -927,6 +927,7 @@ config.libs.append(
             Object(Matching, "game/grades.cpp"),
             Object(Matching, "game/carstats.cpp"),
             Object(NonMatching, "game/unlocks.cpp"),
+            Object(NonMatching, "game/ident.cpp"),
         ],
     }
 )
