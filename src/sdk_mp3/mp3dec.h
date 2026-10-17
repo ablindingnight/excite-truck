@@ -36,8 +36,11 @@ typedef struct MP3Decoder {
     u32 unk278;               /* 0x278 */
     s16 unk27C;               /* 0x27C: synthesis window position */
     u8 pad27E[0x9CC - 0x27E];
-    s32 unk9CC[8];            /* 0x9CC */
-    u8 pad9EC[0xED70 - 0x9EC];
+    s32 unk9CC[7];            /* 0x9CC */
+    s32 is_init;              /* 0x9E8: MPEG-2 intensity table built */
+    u8 pad9EC[0xA6E - 0x9EC];
+    s16 is_table[33];         /* 0xA6E: MPEG-2 intensity ratios (low halves of the Q20 table) */
+    u8 padAB0[0xED70 - 0xAB0];
     s32 frame_bytes;          /* 0xED70 */
     s32 out_bytes;            /* 0xED74 */
 } MP3Decoder;
@@ -71,6 +74,7 @@ typedef struct HuffState {
 #define MP3_STATIC static
 #endif
 
+void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l);
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g);
 s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);
 u32 MP3_GetBits(u32 unused, u8* buf, u32 n, s32* pos);

@@ -674,7 +674,7 @@ MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
     d->unk9CC[4] = 0;
     d->unk9CC[5] = 0;
     d->unk9CC[6] = 0;
-    d->unk9CC[7] = 0;
+    d->is_init = 0;
     d->unk27C = 0x400;
     d->unk278 = b;
     MP3_ParseHeader(d, header);

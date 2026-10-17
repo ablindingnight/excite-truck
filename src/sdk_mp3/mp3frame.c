@@ -11,6 +11,39 @@
 static s32 lbl_8055DD88;
 static s32 lbl_8055DD8C;
 
+/* Intensity stereo for one value pair. MPEG-1: two Q20 ratio tables indexed by the scalefactor.
+ * MPEG-2: on first use, copies one of two 33-entry ratio tables (by channel mode) into the decoder,
+ * then odd scalefactors scale the right channel and copy it left, even ones scale into the left. */
+void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l) {
+    s32 i;
+    s32 k;
+
+    if (d->lsf == 0) {
+        *l = (s32)(((s64)*r * lbl_802F3258[sf]) >> 20);
+        *r = (s32)(((s64)*r * lbl_802F3238[sf]) >> 20);
+        return;
+    }
+    if (d->is_init == 0) {
+        d->is_init = 1;
+        if (ch == 1) {
+            for (i = 0; i < 33; i++) {
+                d->is_table[i] = lbl_802F3320[i];
+            }
+        } else {
+            for (i = 0; i < 33; i++) {
+                d->is_table[i] = lbl_802F3278[i];
+            }
+        }
+    }
+    if ((sf & 1) == 1) {
+        k = d->is_table[(s16)(sf + 1)];
+        *l = *r;
+        *r = (s32)(((s64)*r * k) >> 20);
+    } else {
+        *l = (s32)(((s64)*r * d->is_table[sf]) >> 20);
+    }
+}
+
 /* Alias reduction between subbands (Q24 butterflies with the cs^2 / cs*ca tables). With a non-zero
  * block-type field the butterflies run on every subband boundary below sblim and the spectrum from
  * start up to sblim*18 is cleared; otherwise only the boundary between subbands 0 and 1 is processed. */

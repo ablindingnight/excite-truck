@@ -15,7 +15,8 @@ def rb(a, n):
 RANGES = {"rodata": (0x802F3238, 0x802F44E8), "data": (0x8031BFA8, 0x8031D840), "sdata": (0x80559250, 0x80559708),
           "sdata2": (0x80560DA0, 0x80560DB8)}
 EXTRA_SPLITS = {0x8031C298: "data", 0x8031D580: "data", 0x802F34D8: "rodata",
-                0x802F3E20: "rodata", 0x802F3F10: "rodata", 0x802F3F30: "rodata", 0x802F3F54: "rodata"}  # objects found from code, not relocations
+                0x802F3E20: "rodata", 0x802F3F10: "rodata", 0x802F3F30: "rodata", 0x802F3F54: "rodata",
+                0x802F3258: "rodata", 0x802F3278: "rodata", 0x802F32FC: "rodata", 0x802F3320: "rodata", 0x802F33A4: "rodata"}  # objects found from code, not relocations
 
 starts = {}
 for l in open("config/REXE01/symbols.txt"):
@@ -61,7 +62,9 @@ SHAPES = {
     0x802F3478: ("MP3_STATIC const s16 %s[3][16]", "s16", 2),
     0x802F3D60: ("MP3_STATIC const s16 %s[2][3][16]", "s16", 2),  # long-block band boundaries
     0x802F3E20: ("MP3_STATIC const s16 %s[2][3][20]", "s16", 2),  # short-block band boundaries
-    0x802F3F10: ("const s16 %s[16]", "s16", 2),  # 4-bit popcount; unreferenced, so not static (MWCC would drop it)
+    0x802F3F10: ("const s16 %s[16]", "s16", 2),
+    0x802F32FC: ("const s32 %s[9]", "s32", 4),  # unreferenced so far, so not static (MWCC would drop it)
+    0x802F33A4: ("const s32 %s[9]", "s32", 4),  # unreferenced so far, so not static  # 4-bit popcount; unreferenced, so not static (MWCC would drop it)
     0x802F3F30: ("MP3_STATIC const s16 %s[18]", "s16", 2),  # Huffman lookup depth per table
 }
 NODE_LO, NODE_HI = 0x8031C320, 0x8031D478
