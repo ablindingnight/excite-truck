@@ -5,7 +5,8 @@
  * stmw; WENCGetEncodeData right after it does not, so it is a separate object).
  * Matching so far: MP3_Create, MP3_GetInfo, MP3_Fill, MP3_ArenaInit/Alloc/Set. Close (register or
  * scheduling only): FindSync, GetBits, GetBitsRing, ParseHeader, HuffLookup, PeekBitsRing,
- * DecodeQuads (0x800C08A8, same 176 instructions). */
+ * DecodeQuads (0x800C08A8, 176/176), DecodeQuadsB (0x800C0B68, 164/164). Drafted: DecodeBigValues
+ * (0x800C0440, 256 vs 255; needs the .rodata tables defined here so MWCC pools their addresses). */
 typedef unsigned char u8;
 typedef signed char s8;
 typedef unsigned short u16;
@@ -88,7 +89,7 @@ u32 MP3_GetBits(u32 unused, const u8* buf, u32 n, s32* pos) {
     return result;
 }
 
-u16 MP3_GetBitsRing(const u8* buf, s32 n, u32* pos) {
+u32 MP3_GetBitsRing(const u8* buf, s32 n, u32* pos) {
     u16 result = 0;
     u32 p;
     u32 idx;
@@ -307,11 +308,13 @@ typedef struct BitStream {
     u32 end;   /* 0x10 */
 } BitStream;
 
-static inline s16 MP3_GetSign(BitStream* bs, const u8* buf) {
+static inline s32 MP3_GetSign(BitStream* bs, const u8* buf) {
     u32 p = bs->pos;
+    s32 avail;
 
     bs->pos = p + 1;
-    return (buf[(p >> 3) & 0x1FFF] >> (8 - (p & 7) - 1)) & 1;
+    avail = 8 - (p & 7);
+    return (buf[(p >> 3) & 0x1FFF] >> (avail - 1)) & 1;
 }
 
 void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
@@ -367,4 +370,179 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
             return;
         }
     }
+}
+
+void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start) {
+    s16* q = out + i;
+
+    for (; i < end; i += 4, q += 4) {
+        u32 e = ~MP3_GetBitsRing(buf, 4, &bs->pos);
+        s16 v = (e >> 3) & 1;
+        s16 w = (e >> 2) & 1;
+        s16 x = (e >> 1) & 1;
+        s16 y = e & 1;
+
+        if (v && MP3_GetSign(bs, buf)) {
+            v = -v;
+        }
+        if (w && MP3_GetSign(bs, buf)) {
+            w = -w;
+        }
+        if (x && MP3_GetSign(bs, buf)) {
+            x = -x;
+        }
+        if (y && MP3_GetSign(bs, buf)) {
+            y = -y;
+        }
+        q[0] = v;
+        q[1] = w;
+        q[2] = x;
+        q[3] = y;
+        if (bs->pos > bs->end) {
+            if (track == 1 && *zero_start == 0) {
+                *zero_start = i;
+            }
+            for (; i < end; i += 4) {
+                out[i] = 0;
+                out[i + 1] = 0;
+                out[i + 2] = 0;
+                out[i + 3] = 0;
+            }
+            return;
+        }
+    }
+}
+
+typedef struct HuffMeta {
+    s16 long_bands[2][3][16];   /* 0x0 */
+    s16 short_bands[2][3][20];  /* 0xC0 */
+    s16 unk1B0[16];             /* 0x1B0 */
+    s16 depth[18];              /* 0x1D0 */
+} HuffMeta;
+
+extern const HuffMeta lbl_802F3D60;
+extern const s8 lbl_8031C298[];          /* linbits per table */
+extern const HuffTable lbl_8031D580[];
+extern const s32 lbl_80559270[2];         /* region1 start for short blocks by lsf */
+
+void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
+void MP3_DecodeQuadsB(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32 track, s16* zero_start);
+
+typedef struct HuffState {
+    u8 pad0[0x4];
+    s32 lsf;      /* 0x4 */
+    u8 pad8[0x4];
+    u32 pos;      /* 0xC */
+    u32 end;      /* 0x10 */
+    u8 pad14[0x8];
+    s16 sr_index; /* 0x1C */
+    u8 pad1E[0x288 - 0x1E];
+    s16 count1_end; /* 0x288 */
+} HuffState;
+
+s32 MP3_DecodeBigValues(HuffState* d, const u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
+                        s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start) {
+    s32 mixed = block_flags & 1;
+    s16 region1_end;
+    s16 region2_end;
+    s32 limit;
+    s32 nregions;
+    s32 region;
+    s32 i;
+    s32 end;
+    s16* q = out;
+
+    if (mixed) {
+        region1_end = lbl_802F3D60.long_bands[d->lsf][d->sr_index][region0];
+        region2_end = lbl_802F3D60.short_bands[d->lsf][d->sr_index][region0 + region1];
+    } else if (block_flags & 0x10) {
+        region1_end = 36;
+    } else {
+        region1_end = lbl_80559270[d->lsf];
+    }
+    limit = big_values * 2;
+    i = 0;
+    nregions = 2 + (mixed != 0);
+    for (region = 0; region < nregions; region++, table_select++) {
+        s32 tbl = *table_select;
+        s32 linbits = lbl_8031C298[tbl];
+        const HuffTable* ht;
+
+        if (tbl > 23) {
+            tbl = 17;
+        } else if (tbl > 15) {
+            tbl = 16;
+        }
+        if (region == 0) {
+            end = region1_end;
+        }
+        if (mixed) {
+            if (region == 1) {
+                end = region2_end;
+            }
+            if (region == 2) {
+                end = limit;
+            }
+        } else if (region == 1) {
+            end = limit;
+        }
+        if (end > limit) {
+            end = limit;
+        }
+        ht = &lbl_8031D580[tbl];
+        for (; i < end; i += 2, q += 2) {
+            s32 bits = MP3_PeekBitsRing(buf, 16, &d->pos) << 16;
+            u32 r;
+            s16 x;
+            s16 y;
+
+            if (tbl == 13 || tbl == 16) {
+                u32 p = d->pos;
+                u32 idx = (p >> 3) & 0x1FFF;
+                s32 sh = 16 - (p & 7);
+                u32 b0;
+                u32 b1;
+
+                d->pos = p + 4;
+                b0 = buf[idx];
+                idx = (idx + 1) & 0x1FFF;
+                b1 = buf[idx];
+                d->pos -= 20;
+                bits |= ((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 4) & 0xF) << 12;
+            } else {
+                d->pos -= 16;
+            }
+            r = MP3_HuffLookup(bits, lbl_802F3D60.depth[tbl], ht);
+            x = (r & 0xF0) >> 4;
+            y = r & 0xF;
+            d->pos += (s16)r >> 8;
+            if (x == 15 && linbits != 0) {
+                x += (u16)MP3_GetBitsRing(buf, linbits, &d->pos);
+            }
+            if (x && MP3_GetSign((BitStream*)d, buf)) {
+                x = -x;
+            }
+            if (y == 15 && linbits != 0) {
+                y += (u16)MP3_GetBitsRing(buf, linbits, &d->pos);
+            }
+            if (y && MP3_GetSign((BitStream*)d, buf)) {
+                y = -y;
+            }
+            q[0] = x;
+            q[1] = y;
+            if (d->pos > d->end) {
+                if (track == 1 && *zero_start == 0) {
+                    *zero_start = i;
+                }
+                q[0] = 0;
+                q[1] = 0;
+            }
+        }
+    }
+    if (count1_table == 0) {
+        MP3_DecodeQuads((BitStream*)d, d->count1_end, buf, out, i, track, zero_start);
+    } else {
+        MP3_DecodeQuadsB((BitStream*)d, d->count1_end, buf, out, i, track, zero_start);
+    }
+    return 0;
 }
