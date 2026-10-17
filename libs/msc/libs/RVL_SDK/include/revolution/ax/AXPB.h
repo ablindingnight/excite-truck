@@ -245,6 +245,13 @@ typedef union __AXPBRMTIIR {
     AXPBBIQUAD biquad;
 } AXPBRMTIIR;
 
+#ifdef GAME_REXE01
+// Excite Truck's older AX still has the parameter-update block
+typedef struct _AXPBUPDATE {
+    u16 updNum[5]; // at 0x0
+} AXPBUPDATE;
+
+#endif
 typedef struct _AXPB {
     u16 nextHi;                // at 0x0
     u16 nextLo;                // at 0x2
@@ -257,6 +264,9 @@ typedef struct _AXPB {
     u16 type;                  // at 0x12
     AXPBMIX mix;               // at 0x14
     AXPBITD itd;               // at 0x44
+#ifdef GAME_REXE01
+    AXPBUPDATE update;         // at 0x52 (Excite Truck's older AX)
+#endif
     AXPBDPOP dpop;             // at 0x52
     AXPBVE ve;                 // at 0x6A
     AXPBADDR addr;             // at 0x6E
@@ -271,7 +281,11 @@ typedef struct _AXPB {
     AXPBRMTDPOP rmtDpop;       // at 0xFA
     AXPBRMTSRC rmtSrc;         // at 0x10A
     AXPBRMTIIR rmtIIR;         // at 0x114
+#ifdef GAME_REXE01
+    u8 padding[0x140 - 0x132]; // at 0x132
+#else
     u8 padding[0x140 - 0x128]; // at 0x128
+#endif
 } AXPB;
 
 #ifdef __cplusplus

@@ -790,7 +790,7 @@ bool AxVoice::UpdateAxVe() {
             }
 
             pbVe.currentVolume = initVol;
-            pbVe.currentDelta = (targetVol - initVol) / AX_VOICE_MAX;
+            pbVe.currentDelta = (targetVol - initVol) / AX_SAMPLES_PER_FRAME;
             AXSetVoiceVe(mVpb[j][i], &pbVe);
 
             if (targetVol != initVol) {
@@ -1402,8 +1402,8 @@ void SetVoiceLoop(AXVPB* vpb, u32 loopFlag) {
 
     vpb->pb.addr.loopFlag = loopFlag;
 
-    if (!(vpb->sync & 0x400)) {
-        vpb->sync |= 0x800;
+    if (!(vpb->sync & AX_PBSYNC_ADDR)) {
+        vpb->sync |= AX_PBSYNC_LOOP_FLAG;
     }
 }
 
@@ -1413,8 +1413,8 @@ void SetVoiceLoopAddr(AXVPB* vpb, u32 loopAddr) {
     vpb->pb.addr.loopAddressHi = (loopAddr >> 16);
     vpb->pb.addr.loopAddressLo = loopAddr & 0xFFFF;
 
-    if (!(vpb->sync & 0x400)) {
-        vpb->sync |= 0x1000;
+    if (!(vpb->sync & AX_PBSYNC_ADDR)) {
+        vpb->sync |= AX_PBSYNC_LOOP_ADDR;
     }
 }
 
@@ -1424,8 +1424,8 @@ void SetVoiceEndAddr(AXVPB* vpb, u32 endAddr) {
     vpb->pb.addr.endAddressHi = (endAddr >> 16);
     vpb->pb.addr.endAddressLo = endAddr & 0xFFFF;
 
-    if (!(vpb->sync & 0x400)) {
-        vpb->sync |= 0x2000;
+    if (!(vpb->sync & AX_PBSYNC_ADDR)) {
+        vpb->sync |= AX_PBSYNC_END_ADDR;
     }
 }
 } // namespace

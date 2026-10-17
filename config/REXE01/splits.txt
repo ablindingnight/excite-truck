@@ -1244,8 +1244,8 @@ RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp:
 	.sdata2     start:0x80560F20 end:0x80560F38
 
 RVL_SDK/hbm/nw4hbm/snd/snd_AxVoice.cpp:
-	.text       start:0x800E6F7C end:0x800E7F40
-	.data       start:0x803221A8 end:0x80322498
+	.text       start:0x800E44BC end:0x800E80B8
+	.data       start:0x803221A8 end:0x803224F0
 	.sdata2     start:0x80560F38 end:0x80560F84
 
 RVL_SDK/hbm/nw4hbm/snd/snd_Bank.cpp:
