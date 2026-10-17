@@ -1466,6 +1466,8 @@ RVL_SDK/hbm/nw4hbm/snd/snd_WavePlayer.cpp:
 RVL_SDK/hbm/nw4hbm/snd/snd_WaveSound.cpp:
 	.text       start:0x800FFA10 end:0x800FFE94
 	.ctors      start:0x802ED104 end:0x802ED108
+	.data       start:0x80327500 end:0x803276F0
+	.sbss       start:0x8055DE88 end:0x8055DE90
 
 RVL_SDK/hbm/nw4hbm/snd/snd_WaveSoundHandle.cpp:
 	.text       start:0x800FFE94 end:0x800FFECC

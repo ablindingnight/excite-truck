@@ -693,7 +693,7 @@ config.libs.append(
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveFile.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchivePlayer.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmSound.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveSound.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveSound.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdTrack.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_RemoteSpeaker.cpp"),
