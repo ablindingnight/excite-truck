@@ -113,6 +113,7 @@ void fn_800C2F98(s32* cur, s32* out1, s32* out2);
 void fn_800C5298(s32* dst, s32* src, s32* c);
 void fn_800C3960(s32* v, const s32* w, s32 pos, u8* out, s32 mask, s32 mode);
 void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode);
+void fn_800C3088(s32* out, s32* in1, s32* in2, s32* in3);
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode);
 void fn_800C51BC(s32* dst, s32* src, s32* c);
 void fn_800C5430(s32* dst, s32* src, s32* c);

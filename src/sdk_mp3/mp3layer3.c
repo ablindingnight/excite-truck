@@ -819,6 +819,63 @@ void fn_800C2F98(s32* cur, s32* out1, s32* out2) {
     out2[-8] = (s32)(((s64)x * c1) >> 20);
 }
 
+/* Short-block windowing of three 6-sample windows into 36 outputs (lbl_8031D790): out[0..5] and out[30..35]
+ * are zero, the middle overlaps window k's tail with window k+1's head. Math verified against a simulation of
+ * the original. NonMatching: 267/267, same opcodes, scheduling differs. */
+void fn_800C3088(s32* out, s32* in1, s32* in2, s32* in3) {
+    s32* w = lbl_8031D790;
+    s32 c, x;
+
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[5] = 0;
+    x = in1[0];
+    c = *w++;
+    out[6] = (s32)(((s64)x * c) >> 20);
+    x = in1[1];
+    c = *w++;
+    out[7] = (s32)(((s64)x * c) >> 20);
+    x = in1[2];
+    c = *w++;
+    out[8] = (s32)(((s64)x * c) >> 20);
+    x = in1[2];
+    c = *w++;
+    out[9] = (s32)(((s64)x * c) >> 20);
+    x = in1[1];
+    c = *w++;
+    out[10] = (s32)(((s64)x * c) >> 20);
+    x = in1[0];
+    c = *w++;
+    out[11] = (s32)(((s64)x * c) >> 20);
+    out[12] = (s32)(((s64)in1[6] * w[0]) >> 20) + (s32)(((s64)in2[0] * w[-6]) >> 20);
+    out[13] = (s32)(((s64)in1[7] * w[1]) >> 20) + (s32)(((s64)in2[1] * w[-5]) >> 20);
+    out[14] = (s32)(((s64)in1[8] * w[2]) >> 20) + (s32)(((s64)in2[2] * w[-4]) >> 20);
+    out[15] = (s32)(((s64)in1[8] * w[3]) >> 20) + (s32)(((s64)in2[2] * w[-3]) >> 20);
+    out[16] = (s32)(((s64)in1[7] * w[4]) >> 20) + (s32)(((s64)in2[1] * w[-2]) >> 20);
+    out[17] = (s32)(((s64)in1[6] * w[5]) >> 20) + (s32)(((s64)in2[0] * w[-1]) >> 20);
+    out[18] = (s32)(((s64)in2[6] * w[0]) >> 20) + (s32)(((s64)in3[0] * w[-6]) >> 20);
+    out[19] = (s32)(((s64)in2[7] * w[1]) >> 20) + (s32)(((s64)in3[1] * w[-5]) >> 20);
+    out[20] = (s32)(((s64)in2[8] * w[2]) >> 20) + (s32)(((s64)in3[2] * w[-4]) >> 20);
+    out[21] = (s32)(((s64)in2[8] * w[3]) >> 20) + (s32)(((s64)in3[2] * w[-3]) >> 20);
+    out[22] = (s32)(((s64)in2[7] * w[4]) >> 20) + (s32)(((s64)in3[1] * w[-2]) >> 20);
+    out[23] = (s32)(((s64)in2[6] * w[5]) >> 20) + (s32)(((s64)in3[0] * w[-1]) >> 20);
+    out[24] = (s32)(((s64)in3[6] * w[0]) >> 20);
+    out[25] = (s32)(((s64)in3[7] * w[1]) >> 20);
+    out[26] = (s32)(((s64)in3[8] * w[2]) >> 20);
+    out[27] = (s32)(((s64)in3[8] * w[3]) >> 20);
+    out[28] = (s32)(((s64)in3[7] * w[4]) >> 20);
+    out[29] = (s32)(((s64)in3[6] * w[5]) >> 20);
+    out[30] = 0;
+    out[31] = 0;
+    out[32] = 0;
+    out[33] = 0;
+    out[34] = 0;
+    out[35] = 0;
+}
+
 /* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
  * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
