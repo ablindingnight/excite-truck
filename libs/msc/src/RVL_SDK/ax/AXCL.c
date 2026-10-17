@@ -9,6 +9,21 @@
 // Space is allocated for two commands lists
 #define LIST_MAX 2
 
+#ifdef GAME_REXE01
+// Excite Truck's older microcode costs
+#define CYCLES_SETUP 4246
+#define CYCLES_AUX_DPL2 1747
+#define CYCLES_AUX 1249
+#define CYCLES_OUTPUT_DPL2 687
+#define CYCLES_OUTPUT 665
+#else
+#define CYCLES_SETUP 4126
+#define CYCLES_AUX_DPL2 3036
+#define CYCLES_AUX 2235
+#define CYCLES_OUTPUT_DPL2 1195
+#define CYCLES_OUTPUT 1172
+#endif
+
 #define LIST_WRITE_16(x)                                                       \
     do {                                                                       \
         __AXWriteToCommandList((x));                                           \
@@ -28,6 +43,9 @@ typedef enum {
     COMMAND_ADD_TO_LR,
     COMMAND_SUB_TO_LR,
     COMMAND_ADD_SUB_TO_LR,
+#ifdef GAME_REXE01
+    COMMAND_PB_ADDR, // older microcode: PB address set separately
+#endif
     COMMAND_PROCESS,
     COMMAND_MIX_AUXA,
     COMMAND_MIX_AUXB,
@@ -47,11 +65,19 @@ static u16* __AXClWrite;
 u32 __AXClMode;
 
 static u32 __AXCommandListCycles;
+#ifdef GAME_REXE01
+static u16 __AXCommandList[LIST_MAX][384];
+#undef AX_CL_SIZE
+#define AX_CL_SIZE sizeof(__AXCommandList[0])
+#else
 static u8 __AXCommandList[AX_CL_SIZE * LIST_MAX];
+#endif
 
 static BOOL __AXCompressor;
 
+#ifndef GAME_REXE01
 static volatile u16 __AXMasterVolume;
+#endif
 static u16 __AXAuxAVolume;
 static u16 __AXAuxBVolume;
 static u16 __AXAuxCVolume;
@@ -60,6 +86,17 @@ u32 __AXGetCommandListCycles(void) {
     return __AXCommandListCycles;
 }
 
+#ifdef GAME_REXE01
+void* __AXGetCommandListAddress(void) {
+    void* list = __AXCommandList[__AXCommandListPosition];
+
+    __AXCommandListPosition++;
+    __AXCommandListPosition &= 1;
+    __AXClWrite = __AXCommandList[__AXCommandListPosition];
+
+    return list;
+}
+#else
 void* __AXGetCommandListAddress(void) {
     void* list = __AXCommandList + __AXCommandListPosition * AX_CL_SIZE;
 
@@ -70,7 +107,11 @@ void* __AXGetCommandListAddress(void) {
 
     return list;
 }
+#endif
 
+#ifdef GAME_REXE01
+static inline
+#endif
 void __AXWriteToCommandList(u16 cmd) {
     *__AXClWrite = cmd;
     __AXClWrite++;
@@ -86,7 +127,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
 
     LIST_WRITE_16(COMMAND_SETUP);
     LIST_WRITE_32((uintptr_t)imm);
-    __AXCommandListCycles += 4126;
+    __AXCommandListCycles += CYCLES_SETUP;
 
     switch (__AXClMode) {
     case AX_OUTPUT_STEREO:
@@ -107,8 +148,14 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
     }
 
     imm = __AXGetPBs();
+#ifdef GAME_REXE01
+    LIST_WRITE_16(COMMAND_PB_ADDR);
+    LIST_WRITE_32((uintptr_t)imm);
+    LIST_WRITE_16(COMMAND_PROCESS);
+#else
     LIST_WRITE_16(COMMAND_PROCESS);
     LIST_WRITE_32((uintptr_t)imm);
+#endif
 
     if (__AXClMode == AX_OUTPUT_DPL2) {
         __AXGetAuxAInput(&imm);
@@ -132,7 +179,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxAOutputDpl2Rs(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 3036;
+            __AXCommandListCycles += CYCLES_AUX_DPL2;
         }
 
         __AXGetAuxBInput(&imm);
@@ -156,7 +203,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxBOutputDpl2Rs(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 3036;
+            __AXCommandListCycles += CYCLES_AUX_DPL2;
         }
     } else {
         __AXGetAuxAInput(&imm);
@@ -168,7 +215,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxAOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += CYCLES_AUX;
         }
 
         __AXGetAuxBInput(&imm);
@@ -180,7 +227,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxBOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += CYCLES_AUX;
         }
 
         __AXGetAuxCInput(&imm);
@@ -192,7 +239,7 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
             __AXGetAuxCOutput(&imm);
             LIST_WRITE_32((uintptr_t)imm);
 
-            __AXCommandListCycles += 2235;
+            __AXCommandListCycles += CYCLES_AUX;
         }
     }
 
@@ -213,16 +260,20 @@ void __AXNextFrame(void* surround, void* lr, void* rmt) {
 
     if (__AXClMode == AX_OUTPUT_DPL2) {
         LIST_WRITE_16(COMMAND_OUTPUT_DPL2);
+#ifndef GAME_REXE01
         LIST_WRITE_16(__AXMasterVolume);
+#endif
         LIST_WRITE_32((uintptr_t)surround);
         LIST_WRITE_32((uintptr_t)lr);
-        __AXCommandListCycles += 1195;
+        __AXCommandListCycles += CYCLES_OUTPUT_DPL2;
     } else {
         LIST_WRITE_16(COMMAND_OUTPUT);
+#ifndef GAME_REXE01
         LIST_WRITE_16(__AXMasterVolume);
+#endif
         LIST_WRITE_32((uintptr_t)surround);
         LIST_WRITE_32((uintptr_t)lr);
-        __AXCommandListCycles += 1172;
+        __AXCommandListCycles += CYCLES_OUTPUT;
     }
 
     LIST_WRITE_16(COMMAND_END);
@@ -237,17 +288,27 @@ void __AXClInit(void) {
     __AXClWrite = (u16*)__AXCommandList;
     __AXCompressor = TRUE;
 
+#ifdef GAME_REXE01
+    __AXAuxCVolume = __AXAuxBVolume = __AXAuxAVolume = AX_MAX_VOLUME;
+#else
     __AXAuxCVolume = __AXAuxBVolume = __AXAuxAVolume = __AXMasterVolume =
         AX_MAX_VOLUME;
+#endif
 }
+
+#ifdef GAME_REXE01
+void __AXClQuit(void) {}
+#endif
 
 void AXSetMode(u32 mode) {
     __AXClMode = mode;
 }
 
+#ifndef GAME_REXE01
 u32 AXGetMode(void) {
     return __AXClMode;
 }
+#endif
 
 u16 AXGetAuxAReturnVolume(void) {
     return __AXAuxAVolume;
@@ -261,6 +322,7 @@ u16 AXGetAuxCReturnVolume(void) {
     return __AXAuxCVolume;
 }
 
+#ifndef GAME_REXE01
 void AXSetMasterVolume(u16 volume) {
     if (volume > AX_MAX_VOLUME) {
         volume = AX_MAX_VOLUME;
@@ -268,6 +330,7 @@ void AXSetMasterVolume(u16 volume) {
 
     __AXMasterVolume = volume;
 }
+#endif
 
 void AXSetAuxAReturnVolume(u16 volume) {
     __AXAuxAVolume = volume;

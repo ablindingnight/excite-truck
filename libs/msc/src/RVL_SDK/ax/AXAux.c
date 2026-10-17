@@ -38,6 +38,244 @@
 #define DPL2_SAMPLE_LS_BEGIN (AUX_CHAN_SIZE * 2)
 #define DPL2_SAMPLE_RS_BEGIN (AUX_CHAN_SIZE * 3)
 
+#ifdef GAME_REXE01
+/**
+ * Excite Truck's older AX: every aux ring holds one stereo frame. In DPL2 mode
+ * Aux A and B take their surround-right channel from Aux C's buffer.
+ */
+#define DPL2_AUXA_RS_BEGIN (AUX_CHAN_SIZE * 1)
+#define DPL2_AUXB_RS_BEGIN (AUX_CHAN_SIZE * 2)
+
+static u8 __AXBufferAuxA[AUX_RING_MAX][STEREO_FRAME_SIZE] ALIGN(32);
+static u8 __AXBufferAuxB[AUX_RING_MAX][STEREO_FRAME_SIZE] ALIGN(32);
+static u8 __AXBufferAuxC[AUX_RING_MAX][STEREO_FRAME_SIZE] ALIGN(32);
+
+static AXAuxCallback __AXCallbackAuxA;
+static AXAuxCallback __AXCallbackAuxB;
+static AXAuxCallback __AXCallbackAuxC;
+
+static void* __AXContextAuxA;
+static void* __AXContextAuxB;
+static void* __AXContextAuxC;
+
+static void* __AXAuxADspWrite;
+static void* __AXAuxADspRead;
+
+static void* __AXAuxBDspWrite;
+static void* __AXAuxBDspRead;
+
+static void* __AXAuxCDspWrite;
+static void* __AXAuxCDspRead;
+
+static u32 __AXAuxDspWritePosition;
+static u32 __AXAuxDspReadPosition;
+static u32 __AXAuxCpuReadWritePosition;
+
+void __AXAuxInit(void) {
+    int i;
+    u32* bufferA = (u32*)__AXBufferAuxA;
+    u32* bufferB = (u32*)__AXBufferAuxB;
+    u32* bufferC = (u32*)__AXBufferAuxC;
+
+    __AXCallbackAuxA = NULL;
+    __AXCallbackAuxB = NULL;
+    __AXCallbackAuxC = NULL;
+
+    __AXContextAuxA = NULL;
+    __AXContextAuxB = NULL;
+    __AXContextAuxC = NULL;
+
+    __AXAuxDspWritePosition = 0;
+    __AXAuxDspReadPosition = 1;
+    __AXAuxCpuReadWritePosition = 2;
+
+    for (i = 0; i < STEREO_FRAME_SIZE / sizeof(u32); i++) {
+        *bufferA++ = 0;
+        *bufferB++ = 0;
+        *bufferC++ = 0;
+    }
+}
+
+void __AXAuxQuit(void) {
+    __AXCallbackAuxA = NULL;
+    __AXCallbackAuxB = NULL;
+    __AXCallbackAuxC = NULL;
+}
+
+void __AXGetAuxAInput(void** out) {
+    if (__AXCallbackAuxA != NULL) {
+        *out = __AXBufferAuxA[__AXAuxDspWritePosition];
+    } else {
+        *out = NULL;
+    }
+}
+
+void __AXGetAuxAOutput(void** out) {
+    *out = __AXBufferAuxA[__AXAuxDspReadPosition];
+}
+
+void __AXGetAuxAInputDpl2(void** out) {
+    *out = &__AXBufferAuxC[__AXAuxDspWritePosition][DPL2_AUXA_RS_BEGIN];
+}
+
+void __AXGetAuxAOutputDpl2R(void** out) {
+    *out = &__AXBufferAuxA[__AXAuxDspReadPosition][STEREO_SAMPLE_R_BEGIN];
+}
+
+void __AXGetAuxAOutputDpl2Ls(void** out) {
+    *out = &__AXBufferAuxA[__AXAuxDspReadPosition][STEREO_SAMPLE_S_BEGIN];
+}
+
+void __AXGetAuxAOutputDpl2Rs(void** out) {
+    *out = &__AXBufferAuxC[__AXAuxDspReadPosition][DPL2_AUXA_RS_BEGIN];
+}
+
+void __AXGetAuxBInput(void** out) {
+    if (__AXCallbackAuxB != NULL) {
+        *out = __AXBufferAuxB[__AXAuxDspWritePosition];
+    } else {
+        *out = NULL;
+    }
+}
+
+void __AXGetAuxBOutput(void** out) {
+    *out = __AXBufferAuxB[__AXAuxDspReadPosition];
+}
+
+void __AXGetAuxBInputDpl2(void** out) {
+    *out = &__AXBufferAuxC[__AXAuxDspWritePosition][DPL2_AUXB_RS_BEGIN];
+}
+
+void __AXGetAuxBOutputDpl2R(void** out) {
+    *out = &__AXBufferAuxB[__AXAuxDspReadPosition][STEREO_SAMPLE_R_BEGIN];
+}
+
+void __AXGetAuxBOutputDpl2Ls(void** out) {
+    *out = &__AXBufferAuxB[__AXAuxDspReadPosition][STEREO_SAMPLE_S_BEGIN];
+}
+
+void __AXGetAuxBOutputDpl2Rs(void** out) {
+    *out = &__AXBufferAuxC[__AXAuxDspReadPosition][DPL2_AUXB_RS_BEGIN];
+}
+
+void __AXGetAuxCInput(void** out) {
+    if (__AXCallbackAuxC != NULL) {
+        *out = __AXBufferAuxC[__AXAuxDspWritePosition];
+    } else {
+        *out = NULL;
+    }
+}
+
+void __AXGetAuxCOutput(void** out) {
+    *out = __AXBufferAuxC[__AXAuxDspReadPosition];
+}
+
+void __AXProcessAux(void) {
+    __AXAuxADspWrite = __AXBufferAuxA[__AXAuxDspWritePosition];
+    __AXAuxADspRead = __AXBufferAuxA[__AXAuxDspReadPosition];
+
+    __AXAuxBDspWrite = __AXBufferAuxB[__AXAuxDspWritePosition];
+    __AXAuxBDspRead = __AXBufferAuxB[__AXAuxDspReadPosition];
+
+    __AXAuxCDspWrite = __AXBufferAuxC[__AXAuxDspWritePosition];
+    __AXAuxCDspRead = __AXBufferAuxC[__AXAuxDspReadPosition];
+
+    if (__AXCallbackAuxA != NULL) {
+        if (__AXClMode == AX_OUTPUT_DPL2) {
+            void* chans[AX_DPL2_MAX];
+            // clang-format off
+            chans[AX_DPL2_L]  = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_L_BEGIN];
+            chans[AX_DPL2_R]  = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_R_BEGIN];
+            chans[AX_DPL2_LS] = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_S_BEGIN];
+            chans[AX_DPL2_RS] = &__AXBufferAuxC[__AXAuxCpuReadWritePosition][DPL2_AUXA_RS_BEGIN];
+            // clang-format on
+
+            DCInvalidateRange(chans[AX_DPL2_L], STEREO_FRAME_SIZE);
+            DCInvalidateRange(chans[AX_DPL2_RS], AUX_CHAN_SIZE);
+            __AXCallbackAuxA(chans, __AXContextAuxA);
+            DCFlushRangeNoSync(chans[AX_DPL2_L], STEREO_FRAME_SIZE);
+            DCFlushRangeNoSync(chans[AX_DPL2_RS], AUX_CHAN_SIZE);
+        } else {
+            void* chans[AX_STEREO_MAX];
+            // clang-format off
+            chans[AX_STEREO_L] = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_L_BEGIN];
+            chans[AX_STEREO_R] = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_R_BEGIN];
+            chans[AX_STEREO_S] = &__AXBufferAuxA[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_S_BEGIN];
+            // clang-format on
+
+            DCInvalidateRange(chans[0], STEREO_FRAME_SIZE);
+            __AXCallbackAuxA(chans, __AXContextAuxA);
+            DCFlushRangeNoSync(chans[0], STEREO_FRAME_SIZE);
+        }
+    }
+
+    if (__AXCallbackAuxB != NULL) {
+        if (__AXClMode == AX_OUTPUT_DPL2) {
+            void* chans[AX_DPL2_MAX];
+            // clang-format off
+            chans[AX_DPL2_L]  = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_L_BEGIN];
+            chans[AX_DPL2_R]  = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_R_BEGIN];
+            chans[AX_DPL2_LS] = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_S_BEGIN];
+            chans[AX_DPL2_RS] = &__AXBufferAuxC[__AXAuxCpuReadWritePosition][DPL2_AUXB_RS_BEGIN];
+            // clang-format on
+
+            DCInvalidateRange(chans[AX_DPL2_L], STEREO_FRAME_SIZE);
+            DCInvalidateRange(chans[AX_DPL2_RS], AUX_CHAN_SIZE);
+            __AXCallbackAuxB(chans, __AXContextAuxB);
+            DCFlushRangeNoSync(chans[AX_DPL2_L], STEREO_FRAME_SIZE);
+            DCFlushRangeNoSync(chans[AX_DPL2_RS], AUX_CHAN_SIZE);
+        } else {
+            void* chans[AX_STEREO_MAX];
+            // clang-format off
+            chans[AX_STEREO_L] = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_L_BEGIN];
+            chans[AX_STEREO_R] = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_R_BEGIN];
+            chans[AX_STEREO_S] = &__AXBufferAuxB[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_S_BEGIN];
+            // clang-format on
+
+            DCInvalidateRange(chans[0], STEREO_FRAME_SIZE);
+            __AXCallbackAuxB(chans, __AXContextAuxB);
+            DCFlushRangeNoSync(chans[0], STEREO_FRAME_SIZE);
+        }
+    }
+
+    if (__AXCallbackAuxC != NULL && __AXClMode != AX_OUTPUT_DPL2) {
+        void* chans[AX_STEREO_MAX];
+        // clang-format off
+        chans[AX_STEREO_L] = &__AXBufferAuxC[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_L_BEGIN];
+        chans[AX_STEREO_R] = &__AXBufferAuxC[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_R_BEGIN];
+        chans[AX_STEREO_S] = &__AXBufferAuxC[__AXAuxCpuReadWritePosition][STEREO_SAMPLE_S_BEGIN];
+        // clang-format on
+
+        DCInvalidateRange(chans[0], STEREO_FRAME_SIZE);
+        __AXCallbackAuxC(chans, __AXContextAuxC);
+        DCFlushRangeNoSync(chans[0], STEREO_FRAME_SIZE);
+    }
+
+    __AXAuxDspWritePosition++;
+    __AXAuxDspWritePosition %= AX_STEREO_MAX;
+
+    __AXAuxDspReadPosition++;
+    __AXAuxDspReadPosition %= AX_STEREO_MAX;
+
+    __AXAuxCpuReadWritePosition++;
+    __AXAuxCpuReadWritePosition %= AX_STEREO_MAX;
+}
+
+void AXRegisterAuxACallback(AXAuxCallback callback, void* context) {
+    __AXCallbackAuxA = callback;
+    __AXContextAuxA = context;
+}
+
+void AXRegisterAuxBCallback(AXAuxCallback callback, void* context) {
+    __AXCallbackAuxB = callback;
+    __AXContextAuxB = context;
+}
+
+void AXRegisterAuxCCallback(AXAuxCallback callback, void* context) {
+    __AXCallbackAuxC = callback;
+    __AXContextAuxC = context;
+}
+#else
 static u8 __AXBufferAuxA[AUX_RING_MAX][DPL2_FRAME_SIZE] ALIGN(32);
 static u8 __AXBufferAuxB[AUX_RING_MAX][DPL2_FRAME_SIZE] ALIGN(32);
 static u8 __AXBufferAuxC[AUX_RING_MAX][STEREO_FRAME_SIZE] ALIGN(32);
@@ -307,6 +545,8 @@ void AXRegisterAuxCCallback(AXAuxCallback callback, void* context) {
 
     OSRestoreInterrupts(enabled);
 }
+
+#endif
 
 void AXGetAuxACallback(AXAuxCallback* callback, void** context) {
     *callback = __AXCallbackAuxA;

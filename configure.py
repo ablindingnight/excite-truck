@@ -835,6 +835,8 @@ config.libs.append(
         "objects": [
             Object(Matching, "RVL_SDK/ax/AX.c"),
             Object(Matching, "RVL_SDK/ax/AXAlloc.c"),
+            Object(Matching, "RVL_SDK/ax/AXAux.c"),
+            Object(Matching, "RVL_SDK/ax/AXCL.c"),
             Object(NonMatching, "RVL_SDK/ax/AXOut.c"),
             Object(Matching, "RVL_SDK/ax/AXSPB.c"),
             Object(Matching, "RVL_SDK/ax/AXVPB.c"),

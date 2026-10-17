@@ -21,7 +21,9 @@ extern u32 __AXClMode;
 
 u32 __AXGetCommandListCycles(void);
 void* __AXGetCommandListAddress(void);
+#ifndef GAME_REXE01
 void __AXWriteToCommandList(u16 cmd);
+#endif
 void __AXNextFrame(void* surround, void* lr, void* rmt);
 void __AXClInit(void);
 #ifdef GAME_REXE01
