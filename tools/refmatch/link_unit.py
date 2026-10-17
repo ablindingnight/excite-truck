@@ -26,6 +26,8 @@ def ok(out):
     return "IDENTICAL" in run(*py, "tools/refmatch/doldiff.py").stdout
 
 stem = unit.rsplit(".", 1)[0]
+# snapshot the config so a failed attempt leaves no renamed symbols or moved data splits behind
+SNAP = {p: open(p).read() for p in ("config/REXE01/symbols.txt", "config/REXE01/splits.txt")}
 build()
 print(run(*py, "tools/refmatch/extend_text.py", unit, "--apply").stdout.strip())
 set_status("Matching")
@@ -46,5 +48,7 @@ else:
     print("\n".join([l for l in run(*py, "tools/refmatch/mapcheck.py").stdout.splitlines() if "auto_fn_" not in l][:6]))
     print("\n".join(run(*py, "tools/refmatch/doldiff.py").stdout.splitlines()[:6]))
     set_status("NonMatching")
-    build()
-    print(f"NOT LINKED {unit}: left NonMatching")
+    for p, text in SNAP.items():
+        open(p, "w", newline="\n").write(text)
+    out = build()
+    print(f"NOT LINKED {unit}: left NonMatching, config restored ({'DOL OK' if ok(out) else 'DOL STILL DIFFERS'})")
