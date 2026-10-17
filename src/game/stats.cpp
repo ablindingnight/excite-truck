@@ -142,6 +142,10 @@ public:
         max = 0;
     }
 
+    s32 Size(void) const { return count; }
+    StatEntry* Add(void) { return &entries[count++]; }
+    StatEntry* At(s32 i) { return &entries[i]; }
+
     StatEntry* entries;  // offset 0x0
     s32 count;           // offset 0x4
     s32 max;             // offset 0x8
@@ -510,8 +514,8 @@ BOOL StatEntry::Matches(u32 type, const char* name) {
 StatEntry* FindStat(int identity, u32 type, const char* name) {
     int i;
 
-    for (i = 0; i < lbl_80358658[identity]->count; i++) {
-        StatEntry* e = &lbl_80358658[identity]->entries[i];
+    for (i = 0; i < lbl_80358658[identity]->Size(); i++) {
+        StatEntry* e = lbl_80358658[identity]->At(i);
         if (e->Matches(type, name)) {
             return e;
         }
@@ -527,7 +531,7 @@ StatEntry* CreateStat(int identity, u32 type, const char* name) {
                     "from %d",
                     identity, MAX_STATS_PER_IDENTITY);
     }
-    e = &lbl_80358658[identity]->entries[lbl_80358658[identity]->count++];
+    e = lbl_80358658[identity]->Add();
     e->type = type;
     e->name = lbl_8055D5D0->Intern(name);
     e->values[0].set = 0;
