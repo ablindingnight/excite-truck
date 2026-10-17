@@ -80,10 +80,10 @@ int CompareUnlockables(const void* a, const void* b) {
 }
 
 void LoadUnlockables(void) {
-    ValueNode* node;
     Unlockable* u;
     int order;
     int i;
+    ValueNode* node;
 
     order = 0;
     for (i = 0;; i++) {
@@ -121,10 +121,10 @@ static inline UnlockReq* FindUnlockReq(const char* name) {
 }
 
 void LoadChassisUnlocks(void) {
-    ValueNode* node;
     ChassisUnlock* c;
-    const char* base;
     int idx;
+    const char* base;
+    ValueNode* node;
     int i;
 
     for (i = 0; (node = lbl_8055D58C->GetChild(i)) != NULL; i++) {
@@ -197,14 +197,15 @@ BOOL IsCarUnlocked(const char* name) {
 }
 
 s32 GetMaxExcitePoints(void) {
+    const char* type = "MAX_EXCITE_POINTS";
     int i;
 
     for (i = 0; i < lbl_80357E0C.count; i++) {
-        if (strcasecmp(lbl_80357E0C.data[i].type, "MAX_EXCITE_POINTS") == 0) {
+        if (strcasecmp(lbl_80357E0C.data[i].type, type) == 0) {
             return lbl_80357E0C.data[i].points;
         }
     }
-    fn_802E317C("Unlockable: didn't find \"%s\" unlockable!", "MAX_EXCITE_POINTS");
+    fn_802E317C("Unlockable: didn't find \"%s\" unlockable!", type);
     return 0;
 }
 
