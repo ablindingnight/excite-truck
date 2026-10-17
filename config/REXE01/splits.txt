@@ -1573,4 +1573,6 @@ RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp:
 	.data       start:0x80329140 end:0x80329458
 
 RVL_SDK/arc/arc.c:
-	.text       start:0x80116768 end:0x80116BD4
+	.text       start:0x801166C8 end:0x80116BD4
+	.data       start:0x80329B28 end:0x80329B50
+	.sdata      start:0x80559930 end:0x80559938

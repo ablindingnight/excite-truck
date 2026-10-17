@@ -868,7 +868,7 @@ config.libs.append(
             Object(NonMatching, "RVL_SDK/vf/pf_file.c"),
             Object(Matching, "RVL_SDK/vf/pf_path.c"),
             Object(Matching, "RVL_SDK/vf/pf_api_util.c"),
-            Object(NonMatching, "RVL_SDK/arc/arc.c"),
+            Object(Matching, "RVL_SDK/arc/arc.c"),
         ],
     }
 )

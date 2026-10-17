@@ -37,7 +37,11 @@ BOOL ARCInitHandle(void* arcStart, ARCHandle* handle) {
     ARCHeader* arcHeader = (ARCHeader*)arcStart;
 
     if (arcHeader->magic != ARC_FILE_MAGIC) {
+#ifdef GAME_REXE01
+#line 68  // OS_ERROR below then reports line 71
+#else
 #line 74
+#endif
         OS_ERROR("ARCInitHandle: bad archive format");
     }
 
@@ -56,6 +60,7 @@ BOOL ARCInitHandle(void* arcStart, ARCHandle* handle) {
     return TRUE;
 }
 
+#ifndef GAME_REXE01
 BOOL ARCOpen(ARCHandle* handle, const char* fileName, ARCFileInfo* af) {
     s32 entry;
     char currentDir[128];
@@ -82,6 +87,7 @@ BOOL ARCOpen(ARCHandle* handle, const char* fileName, ARCFileInfo* af) {
 
     return TRUE;
 }
+#endif
 
 BOOL ARCFastOpen(ARCHandle* handle, s32 entrynum, ARCFileInfo* af) {
     FSTEntry* FSTEntries = (FSTEntry*)handle->FSTStart;
@@ -225,12 +231,15 @@ s32 ARCConvertPathToEntrynum(ARCHandle* handle, const char* pathPtr) {
     return -1;
 }
 
+#ifndef GAME_REXE01
 BOOL ARCEntrynumIsDir(const ARCHandle* handle, s32 entrynum) {
     FSTEntry* FSTEntries = (FSTEntry*)handle->FSTStart;
     return IS_DIR(FSTEntries, entrynum);
 }
+#endif
 
 // Subroutine for ARCConvertEntrynumToPath
+#ifndef GAME_REXE01
 static u32 myStrncpy(char* dest, char* src, u32 maxlen) {
     u32 i = maxlen;
     for (; i != 0 && *src != '\0'; --i) {
@@ -238,8 +247,10 @@ static u32 myStrncpy(char* dest, char* src, u32 maxlen) {
     }
     return maxlen - i;
 }
+#endif
 
 // Subroutine for ARCConvertEntrynumToPath
+#ifndef GAME_REXE01
 static u32 entryToPath(ARCHandle* handle, u32 entry, char* path, u32 maxlen) {
     char* name;
     u32 loc;
@@ -260,7 +271,9 @@ static u32 entryToPath(ARCHandle* handle, u32 entry, char* path, u32 maxlen) {
     loc += myStrncpy(path + loc, name, maxlen - loc);
     return loc;
 }
+#endif
 
+#ifndef GAME_REXE01
 static BOOL ARCConvertEntrynumToPath(ARCHandle* handle, s32 entrynum,
                                      char* path, u32 maxlen) {
     u32 loc;
@@ -284,19 +297,24 @@ static BOOL ARCConvertEntrynumToPath(ARCHandle* handle, s32 entrynum,
     path[loc] = '\0';
     return TRUE;
 }
+#endif
 
+#ifndef GAME_REXE01
 BOOL ARCGetCurrentDir(ARCHandle* handle, char* path, u32 maxlen) {
     return ARCConvertEntrynumToPath(handle, handle->currDir, path, maxlen);
 }
+#endif
 
 void* ARCGetStartAddrInMem(ARCFileInfo* af) {
     ARCHandle* handle = af->handle;
     return ADD_PTR(handle->archiveStartAddr, af->startOffset);
 }
 
+#ifndef GAME_REXE01
 u32 ARCGetStartOffset(ARCFileInfo* af) {
     return af->startOffset;
 }
+#endif
 
 u32 ARCGetLength(ARCFileInfo* af) {
     return af->length;
