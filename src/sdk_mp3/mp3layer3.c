@@ -348,21 +348,59 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
     }
 }
 
-/* Q24 butterfly over the even words of four 8-word blocks: dst = d + s, src = (d - s) * m.
- * NonMatching: only the last unrolled step's register pair (d / d - s) differs. */
-void fn_800C55D8(s32* dst, s32* src, s32* mult) {
-    s32 m = *mult;
-    s32 i, j;
-    s32 s, d;
+/* Q24 butterfly stage: words 0-3 of four 8-word blocks, coefficients c[0..3].
+ * The last step keeps d - s in its own variable, the others reuse s: that is what reproduces the
+ * original's register pairs (same in fn_800C5430/5508/55D8). */
+void fn_800C5430(s32* dst, s32* src, s32* c) {
+    s32 m0 = c[0];
+    s32 m1 = c[1];
+    s32 m2 = c[2];
+    s32 m3 = c[3];
+    s32 i;
+    s32 s, d, t;
 
     for (i = 0; i < 4; i++) {
-        for (j = 0; j < 8; j += 2) {
-            s = src[j];
-            d = dst[j];
-            dst[j] = d + s;
-            s = d - s;
-            src[j] = (s32)(((s64)s * m) >> 24);
-        }
+        s = src[0]; d = dst[0]; dst[0] = d + s; s = d - s; src[0] = (s32)(((s64)s * m0) >> 24);
+        s = src[1]; d = dst[1]; dst[1] = d + s; s = d - s; src[1] = (s32)(((s64)s * m1) >> 24);
+        s = src[2]; d = dst[2]; dst[2] = d + s; s = d - s; src[2] = (s32)(((s64)s * m2) >> 24);
+        s = src[3]; d = dst[3]; t = d - s; dst[3] = d + s; src[3] = (s32)(((s64)t * m3) >> 24);
+        dst += 8;
+        src += 8;
+    }
+}
+
+/* Q24 butterfly stage: words 0,1,4,5 of four 8-word blocks, coefficients c[0], c[1].
+ * The last step keeps d - s in its own variable, the others reuse s: that is what reproduces the
+ * original's register pairs (same in fn_800C5430/5508/55D8). */
+void fn_800C5508(s32* dst, s32* src, s32* c) {
+    s32 m0 = c[0];
+    s32 m1 = c[1];
+    s32 i;
+    s32 s, d, t;
+
+    for (i = 0; i < 4; i++) {
+        s = src[0]; d = dst[0]; dst[0] = d + s; s = d - s; src[0] = (s32)(((s64)s * m0) >> 24);
+        s = src[1]; d = dst[1]; dst[1] = d + s; s = d - s; src[1] = (s32)(((s64)s * m1) >> 24);
+        s = src[4]; d = dst[4]; dst[4] = d + s; s = d - s; src[4] = (s32)(((s64)s * m0) >> 24);
+        s = src[5]; d = dst[5]; t = d - s; dst[5] = d + s; src[5] = (s32)(((s64)t * m1) >> 24);
+        dst += 8;
+        src += 8;
+    }
+}
+
+/* Q24 butterfly stage: even words of four 8-word blocks, coefficient *c.
+ * The last step keeps d - s in its own variable, the others reuse s: that is what reproduces the
+ * original's register pairs (same in fn_800C5430/5508/55D8). */
+void fn_800C55D8(s32* dst, s32* src, s32* c) {
+    s32 m = *c;
+    s32 i;
+    s32 s, d, t;
+
+    for (i = 0; i < 4; i++) {
+        s = src[0]; d = dst[0]; dst[0] = d + s; s = d - s; src[0] = (s32)(((s64)s * m) >> 24);
+        s = src[2]; d = dst[2]; dst[2] = d + s; s = d - s; src[2] = (s32)(((s64)s * m) >> 24);
+        s = src[4]; d = dst[4]; dst[4] = d + s; s = d - s; src[4] = (s32)(((s64)s * m) >> 24);
+        s = src[6]; d = dst[6]; t = d - s; dst[6] = d + s; src[6] = (s32)(((s64)t * m) >> 24);
         dst += 8;
         src += 8;
     }

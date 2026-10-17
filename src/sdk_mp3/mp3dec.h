@@ -93,6 +93,8 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode);
 void fn_800C3960(s32* dst, const s32* tbl, s32 win, u8* src, s32 n, s32 mode);
 void fn_800C3574(s32* dst, const s32* tbl, s32 win, u8* src, s32 mode);
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode);
-void fn_800C55D8(s32* dst, s32* src, s32* mult);
+void fn_800C5430(s32* dst, s32* src, s32* c);
+void fn_800C5508(s32* dst, s32* src, s32* c);
+void fn_800C55D8(s32* dst, s32* src, s32* c);
 
 #endif
