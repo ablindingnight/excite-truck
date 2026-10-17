@@ -2,15 +2,15 @@
 
 
 static s32 VFiPFENT_RecalcEntryIterator(struct PF_ENT_ITER* p_iter, u32 may_allocate) {
-#ifdef GAME_REXE01
-    u32 is_hit;
-#endif
     s32 err;
     u32 is_initialize;
     u32 file_sector_index;
     struct PF_CACHE_PAGE* p_page;
     u32 num_sectors;
     u32 success_size;
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
 
     is_initialize = p_iter->file_sector_index;
     file_sector_index = p_iter->index >> p_iter->log2_entries_per_sector;
@@ -86,6 +86,7 @@ static u32 VFiPFENT_ITER_IsAtPhysicalEnd(struct PF_ENT_ITER* p_iter) {
     return p_iter->sector == 0xFFFFFFFF;
 }
 
+#ifndef GAME_REXE01
 s32 VFiPFENT_ITER_FindCluster(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, u32 cluster, u32* p_is_found) {
     u8 attr;
     s32 err;
@@ -171,7 +172,195 @@ s32 VFiPFENT_ITER_FindCluster(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_e
 
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFENT_ITER_DoFindEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* p_is_found) {
+    u8 attr;
+    s32 err;
+    s32 lengthName;
+    s8 filename[13];
+    u32 index_search_from;
+    u32 is_extsfn;
+
+    err = 0;
+    *p_is_found = 0;
+    is_extsfn = 0;
+
+    if (VFiPFSTR_StrCmp(p_pattern, (const s8*)"..") == 0 && (p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 1) {
+        return 2;
+    } else {
+        if (VFiPFSTR_StrCmp(p_pattern, (const s8*)".") == 0) {
+            *p_is_found = 1;
+            return 0;
+        }
+
+        p_ent->num_entry_LFNs = 0;
+        p_ent->ordinal = 0;
+        p_ent->check_sum = 0;
+        p_ent->long_name[0] = 0;
+
+        if ((VFipf_vol_set.setting & 2) == 2) {
+            is_extsfn = VFiPFPATH_GetExtShortNameIndex(p_pattern, &index_search_from);
+        }
+
+        if (is_extsfn == 1) {
+            err = VFiPFENT_ITER_IteratorInitialize(p_iter, index_search_from - 1);
+
+            while (1) {
+                if (err) {
+                    return err;
+                }
+
+                attr = p_iter->buf[11];
+                if ((attr & 0xF) == 0xF) {
+                    if (VFiPFENT_LoadLFNEntryFieldsFromBuf(p_ent, p_iter->buf) != 0) {
+                        return 3;
+                    }
+                    if ((p_iter->buf[0] & 0x40) == 0) {
+                        goto retreat;
+                    }
+                } else {
+                    return 0;
+                }
+
+                err = VFiPFENT_ITER_IteratorInitialize(p_iter, index_search_from);
+                if (err != 0) {
+                    return err;
+                }
+
+                attr = p_iter->buf[11];
+                if (attr == 0) {
+                    attr = 0x40;
+                }
+
+                if ((attr_required & 0x80) != 0) {
+                    attr_required &= 0x7F;
+                    attr_unwanted &= 0x7F;
+                    if ((attr_required != 0 && attr_required != (attr_required & attr)) || (attr_unwanted != 0 && attr_unwanted == (attr_unwanted & attr))) {
+                        err = -1;
+                    }
+                } else {
+                    if (attr_required != 0x7F && attr != attr_required && ((attr & attr_required) == 0 || (attr & attr_unwanted) != 0)) {
+                        err = -1;
+                    }
+                }
+
+                if (err == -1) {
+                    return 0;
+                } else if ((attr & 8) != 0) {
+                    return 3;
+                } else {
+                    VFiPFENT_LoadShortNameFromBuf(p_ent, p_iter->buf);
+                    if (!VFiPFPATH_MatchFileNameWithPattern(p_ent->short_name, p_pattern, 0)) {
+                        break;
+                    }
+                    VFiPFENT_loadEntryNumericFieldsFromBuf(p_ent, p_iter->buf);
+                    p_ent->entry_sector = p_iter->sector;
+                    p_ent->entry_offset = p_iter->offset;
+                    p_ent->p_vol = p_iter->ffd.p_vol;
+
+                    if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 0) {
+                        p_ent->start_cluster = 1;
+                    }
+                    *p_is_found = 1;
+                    return 0;
+                }
+
+            retreat:
+                err = VFiPFENT_ITER_Retreat(p_iter, 0);
+            }
+        } else {
+            while (!VFiPFENT_ITER_IsAtLogicalEnd(p_iter)) {
+                if (err != 0) {
+                    return err;
+                }
+                if (p_iter->buf[0] == 0) {
+                    break;
+                }
+                if (p_iter->buf[0] == 0xE5) {
+                    p_ent->num_entry_LFNs = 0;
+                    p_ent->long_name[0] = 0;
+                } else {
+                    attr = p_iter->buf[11];
+                    if ((attr & 0xF) == 0xF) {
+                        if (VFiPFENT_LoadLFNEntryFieldsFromBuf(p_ent, p_iter->buf) != 0) {
+                            p_ent->num_entry_LFNs = 0;
+                            p_ent->long_name[0] = 0;
+                        }
+                    } else {
+                        if (attr == 0) {
+                            attr = 0x40;
+                        }
+
+                        if ((attr_required & 0x80) != 0) {
+                            attr_required &= 0x7F;
+                            attr_unwanted &= 0x7F;
+                            if ((attr_required != 0 && attr_required != (attr_required & attr)) || (attr_unwanted != 0 && attr_unwanted == (attr_unwanted & attr))) {
+                                err = -1;
+                            }
+                        } else {
+                            if (attr_required != 0x7F && attr != attr_required && ((attr & attr_required) == 0 || (attr & attr_unwanted) != 0)) {
+                                err = -1;
+                            }
+                        }
+
+                        if (err == -1) {
+                            p_ent->num_entry_LFNs = 0;
+                            p_ent->long_name[0] = 0;
+                        } else {
+                            if ((attr & 8) != 0) {
+                                p_ent->num_entry_LFNs = 0;
+                                p_ent->long_name[0] = 0;
+                            }
+                            VFiPFENT_LoadShortNameFromBuf(p_ent, p_iter->buf);
+
+                            if (p_ent->num_entry_LFNs != 0 && p_ent->ordinal == 1 && p_ent->check_sum == VFiPFENT_CalcCheckSum(p_ent) && VFiPFPATH_MatchFileNameWithPattern((const s8*)p_ent->long_name, p_pattern, 1) != 0) {
+                                VFiPFENT_loadEntryNumericFieldsFromBuf(p_ent, p_iter->buf);
+                                p_ent->entry_sector = p_iter->sector;
+                                p_ent->entry_offset = p_iter->offset;
+                                p_ent->p_vol = p_iter->ffd.p_vol;
+
+                                if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 0) {
+                                    p_ent->start_cluster = 1;
+                                }
+                                *p_is_found = 1;
+                                return 0;
+                            }
+
+                            err = VFiPFPATH_MatchFileNameWithPattern(p_ent->short_name, p_pattern, 0);
+                            if (err != 0) {
+                                if ((p_iter->buf[12] & 0x18) != 0) {
+                                    VFiPFPATH_getLongNameformShortName(p_ent->short_name, filename, p_iter->buf[12]);
+                                    lengthName = VFiPFPATH_transformInUnicode(p_ent->long_name, filename);
+                                    p_ent->num_entry_LFNs = (lengthName / 13) + ((lengthName % 13) != 0);
+                                    p_ent->check_sum = VFiPFENT_CalcCheckSum(p_ent);
+                                    p_ent->ordinal = 1;
+                                }
+                                VFiPFENT_loadEntryNumericFieldsFromBuf(p_ent, p_iter->buf);
+                                p_ent->entry_sector = p_iter->sector;
+                                p_ent->entry_offset = p_iter->offset;
+                                p_ent->p_vol = p_iter->ffd.p_vol;
+
+                                if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 0) {
+                                    p_ent->start_cluster = 1;
+                                }
+                                *p_is_found = 1;
+                                return 0;
+                            }
+
+                            p_ent->num_entry_LFNs = 0;
+                            p_ent->long_name[0] = 0;
+                        }
+                    }
+                }
+                err = VFiPFENT_ITER_Advance(p_iter, 0);
+            }
+        }
+    }
+    return 0;
+}
+#else
 s32 VFiPFENT_ITER_DoFindEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* p_is_found, u32 is_skip) {
     u8 attr;
     s32 err;
@@ -369,7 +558,124 @@ s32 VFiPFENT_ITER_DoFindEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_e
     }
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFENT_ITER_DoGetEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path, u32 wildcard, u32 no_look_last_token) {
+    s8* p;
+    struct PF_STR token;
+    u32 is_found;
+    struct PF_FAT_HINT hint;
+    u32 start_cluster;
+    struct PF_DIR_ENT current_ent;
+    s32 err;
+    u32 code_mode;
+
+    err = VFiPFSTR_StrNCmp(p_path, (const s8*)":", 1, 1, 1);
+    if (err == 0) {
+        VFiPFSTR_MoveStrPos(p_path, 2);
+    }
+
+    err = VFiPFSTR_StrNCmp(p_path, (const s8*)"\\", 1, 0, 1);
+    if (err == 0 || VFiPFSTR_StrNCmp(p_path, (const s8*)"/", 1, 0, 1) == 0) {
+        err = VFiPFENT_GetRootDir(p_vol, p_ent);
+        if (err != 0) {
+            return err;
+        }
+        if (VFiPFSTR_StrNumChar(p_path, 1) == 1 && VFiPFSTR_StrNCmp(p_path, (const s8*)"\0\0", 2, 0, 1) == 0) {
+            return 0;
+        }
+    } else {
+        err = VFiPFVOL_GetCurrentDir(p_vol, p_ent);
+        if (err != 0) {
+            return err;
+        }
+    }
+
+    p = VFiPFSTR_GetStrPos(p_path, 1);
+    VFiPFFAT_InitFFD(&p_iter->ffd, &hint, p_vol, &p_iter->ffd.start_cluster);
+    p_iter->ffd.start_cluster = p_ent->start_cluster;
+    code_mode = VFiPFSTR_GetCodeMode(p_path);
+    VFiPFPATH_InitTokenOfPath(&token, p, code_mode);
+    err = VFiPFPATH_GetNextTokenOfPath(&token, wildcard);
+
+    while (*(void**)&token != NULL) {
+        if (err != 0) {
+            return err;
+        }
+        if (no_look_last_token != 0 && VFiPFSTR_StrNCmp(&token, (const s8*)"\0\0", 2, 0, 1) == 0) {
+            break;
+        }
+        if ((p_ent->attr & 0x10) == 0) {
+            return 2;
+        }
+        if (VFiPFSTR_StrLen(&token) == 0) {
+            return 2;
+        }
+
+        p_iter->ffd.start_cluster = p_ent->start_cluster;
+        err = VFiPFFAT_ResetFFD(&p_iter->ffd, &p_iter->ffd.start_cluster);
+        err = VFiPFENT_ITER_IteratorInitialize(p_iter, 0);
+        if (err != 0) {
+            return err;
+        }
+
+        start_cluster = *p_iter->ffd.p_start_cluster;
+#ifdef GAME_REXE01
+        err = VFiPFENT_ITER_DoFindEntry(p_iter, p_ent, &token, 0x7F, 0, &is_found);
+#else
+        err = VFiPFENT_ITER_DoFindEntry(p_iter, p_ent, &token, 0x7F, 0, &is_found, 1);
+#endif
+        if (err != 0) {
+            return err;
+        }
+
+        if (is_found == 0) {
+            err = VFiPFPATH_GetNextTokenOfPath(&token, wildcard);
+            if (err != 0) {
+                return err;
+            }
+            return (*(void**)&token == NULL) ? 3 : 2;
+        }
+
+        if (wildcard == 0) {
+            if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 1) {
+                p_ent->path_len = 3;
+            } else if ((p_ent->attr & 0x10) != 0 && p_ent->short_name[0] == '.' && p_ent->short_name[1] == '.') {
+                err = VFiPFFAT_ResetFFD(&p_iter->ffd, &p_ent->start_cluster);
+                err = VFiPFENT_ITER_IteratorInitialize(p_iter, 0);
+                if (err != 0) {
+                    return err;
+                }
+                current_ent.attr = p_ent->attr;
+                current_ent.start_cluster = p_ent->start_cluster;
+                err = VFiPFENT_ITER_FindCluster(p_iter, &current_ent, start_cluster, &is_found);
+                if (err != 0) {
+                    return err;
+                }
+                if (is_found == 0) {
+                    return 2;
+                }
+                if (current_ent.num_entry_LFNs != 0) {
+                    p_ent->path_len -= VFiPFPATH_GetLengthFromUnicode(current_ent.long_name);
+                } else {
+                    p_ent->path_len -= VFiPFPATH_GetLengthFromShortname(current_ent.short_name);
+                }
+                p_ent->path_len--;
+            } else if ((p_ent->attr & 0x10) == 0 || p_ent->short_name[0] != '.') {
+                p_ent->path_len += VFiPFSTR_StrNumChar(&token, 1) + 1;
+                if (VFiPFSTR_StrNCmp(&token, (const s8*)"\0\0", 2, 0, 1) != 0) {
+                    p_ent->path_len -= VFiPFSTR_StrNumChar(&token, 2);
+                }
+            }
+        }
+
+        err = VFiPFPATH_GetNextTokenOfPath(&token, wildcard);
+    }
+
+    return 0;
+}
+#else
 s32 VFiPFENT_ITER_DoGetEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path, u32 wildcard, u32 no_look_last_token) {
     s8* p;
     struct PF_STR token;
@@ -440,7 +746,11 @@ s32 VFiPFENT_ITER_DoGetEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_en
             }
         }
 
+#ifdef GAME_REXE01
+        err = VFiPFENT_ITER_DoFindEntry(p_iter, p_ent, &token, 0x7F, 0, &is_found);
+#else
         err = VFiPFENT_ITER_DoFindEntry(p_iter, p_ent, &token, 0x7F, 0, &is_found, 1);
+#endif
         if (err != 0) {
             return err;
         }
@@ -492,14 +802,17 @@ s32 VFiPFENT_ITER_DoGetEntry(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_en
 
     return 0;
 }
+#endif
 
 s32 VFiPFENT_ITER_IteratorInitialize(struct PF_ENT_ITER* p_iter, u32 index_start_from) {
     s32 err;
 
     p_iter->p_vol = p_iter->ffd.p_vol;
+#ifndef GAME_REXE01
     if (p_iter->ffd.p_vol == NULL) {
         return 0xA;
     }
+#endif
     p_iter->log2_entries_per_sector = p_iter->ffd.p_vol->bpb.log2_bytes_per_sector - 5;
     p_iter->offset_mask = (1 << p_iter->log2_entries_per_sector) - 1;
     p_iter->file_sector_index = 0xFFFFFFFF;
@@ -554,9 +867,11 @@ s32 VFiPFENT_ITER_Retreat(struct PF_ENT_ITER* p_iter, u32 may_allocate) {
     u32 cur_cluster;
     s32 err;
 
+#ifndef GAME_REXE01
     if (p_iter == NULL) {
         return 0xA;
     }
+#endif
     if (p_iter->index == 0) {
         return 0;
     }
@@ -588,12 +903,115 @@ s32 VFiPFENT_ITER_Retreat(struct PF_ENT_ITER* p_iter, u32 may_allocate) {
         }
 
         p_iter->offset = (p_iter->index & p_iter->offset_mask) << 5;
+#ifdef GAME_REXE01
+        return 0;
+#else
         return VFiPFENT_ITER_MoveTo(p_iter, p_iter->index, may_allocate);
+#endif
     } else {
         return VFiPFENT_ITER_MoveTo(p_iter, p_iter->index - 1, may_allocate);
     }
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFENT_ITER_FindCluster(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, u32 cluster, u32* p_is_found) {
+    u8 attr;
+    s32 err;
+    s32 lengthName;
+    s8 filename[13];
+
+    err = 0;
+    *p_is_found = 0;
+    p_ent->num_entry_LFNs = 0;
+    p_ent->ordinal = 0;
+    p_ent->check_sum = 0;
+
+    if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 1) {
+        return 2;
+    }
+
+    while (!VFiPFENT_ITER_IsAtLogicalEnd(p_iter)) {
+        if (err != 0) {
+            return err;
+        }
+
+        if (p_iter->buf[0] == 0xE5) {
+            p_ent->num_entry_LFNs = 0;
+            p_ent->long_name[0] = 0;
+        } else {
+            attr = p_iter->buf[11];
+            if ((attr & 0xF) == 0xF) {
+                err = VFiPFENT_LoadLFNEntryFieldsFromBuf(p_ent, p_iter->buf);
+                if (err != 0) {
+                    p_ent->num_entry_LFNs = 0;
+                    p_ent->long_name[0] = 0;
+                }
+            } else if ((attr & 0x8) != 0) {
+                p_ent->num_entry_LFNs = 0;
+                p_ent->long_name[0] = 0;
+            } else if ((attr & 0x10) == 0) {
+                p_ent->num_entry_LFNs = 0;
+                p_ent->long_name[0] = 0;
+            } else {
+                VFiPFENT_LoadShortNameFromBuf(p_ent, p_iter->buf);
+
+                if (p_ent->num_entry_LFNs != 0 && p_ent->ordinal == 1 && p_ent->check_sum == VFiPFENT_CalcCheckSum(p_ent)) {
+                    VFiPFENT_loadEntryNumericFieldsFromBuf(p_ent, p_iter->buf);
+                    p_ent->entry_sector = p_iter->sector;
+                    p_ent->entry_offset = p_iter->offset;
+                    p_ent->p_vol = p_iter->ffd.p_vol;
+
+                    if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster != cluster) {
+                        p_ent->num_entry_LFNs = 0;
+                        p_ent->long_name[0] = 0;
+                        goto next_entry;
+                    }
+                    if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 0) {
+                        p_ent->start_cluster = 1;
+                    }
+                    *p_is_found = 1;
+                }
+
+                if ((p_iter->buf[12] & 0x18) != 0) {
+                    VFiPFPATH_getLongNameformShortName(p_ent->short_name, filename, p_iter->buf[12]);
+                    lengthName = VFiPFPATH_transformInUnicode(p_ent->long_name, filename);
+                    p_ent->num_entry_LFNs = (lengthName / 13) + ((lengthName % 13) != 0);
+                    p_ent->check_sum = VFiPFENT_CalcCheckSum(p_ent);
+                    p_ent->ordinal = 1;
+                }
+
+                VFiPFENT_loadEntryNumericFieldsFromBuf(p_ent, p_iter->buf);
+                p_ent->entry_sector = p_iter->sector;
+                p_ent->entry_offset = p_iter->offset;
+                p_ent->p_vol = p_iter->ffd.p_vol;
+
+                if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster != cluster) {
+                    p_ent->num_entry_LFNs = 0;
+                    p_ent->long_name[0] = 0;
+                    *p_is_found = 0;
+                    goto next_entry;
+                }
+                if ((p_ent->attr & 0x10) != 0 && p_ent->start_cluster == 0) {
+                    p_ent->start_cluster = 1;
+                }
+                *p_is_found = 1;
+                return 0;
+            }
+        }
+    next_entry:
+        err = VFiPFENT_ITER_Advance(p_iter, 0);
+    }
+
+    return 0;
+}
+#endif
+
 s32 VFiPFENT_ITER_GetEntryOfPath(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path, u32 no_look_last_token) {
     return VFiPFENT_ITER_DoGetEntry(p_iter, p_ent, p_vol, p_path, 0, no_look_last_token);
 }
+
+#ifdef GAME_REXE01
+s32 VFiPFENT_ITER_GetEntryOfPattern(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path) {
+    return VFiPFENT_ITER_DoGetEntry(p_iter, p_ent, p_vol, p_path, 1, 1);
+}
+#endif

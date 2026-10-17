@@ -1111,7 +1111,8 @@ RVL_SDK/vf/pf_entry.c:
 	.data       start:0x8031B168 end:0x8031B178
 
 RVL_SDK/vf/pf_entry_iterator.c:
-	.text       start:0x800AC2A8 end:0x800AC4AC
+	.text       start:0x800AB378 end:0x800ACA5C
+	.sdata      start:0x805591F0 end:0x80559208
 
 RVL_SDK/vf/pf_fat.c:
 	.text       start:0x800AD5D8 end:0x800AD7FC

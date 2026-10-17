@@ -903,13 +903,13 @@ s32 VFiPFFILE_p_fread(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, s
 }
 
 s32 VFiPFFILE_p_fwrite(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_written) {
-#ifdef GAME_REXE01
-    u32 is_hit;
-#endif
     u32 append_size;
     struct PF_CACHE_PAGE* p_page;
     u32 size_written;
     s32 err;
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
 
     size_written = 0;
     *p_count_written = 0;
