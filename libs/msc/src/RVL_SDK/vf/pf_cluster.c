@@ -102,6 +102,7 @@ s32 VFiPFCLUSTER_GetAppendSize(struct PF_FILE* p_file, u32* p_size) {
 
     *p_size = 0;
 
+#ifndef GAME_REXE01
     if ((u32)&VFipf_vol_set > (u32)p_file || (u32)&VFipf_vol_set + 0x27FB8 < (u32)p_file) {
         return 10;
     }
@@ -110,6 +111,7 @@ s32 VFiPFCLUSTER_GetAppendSize(struct PF_FILE* p_file, u32* p_size) {
         return 38;
     }
 
+#endif
     if ((p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
         return 38;
     }
@@ -120,10 +122,12 @@ s32 VFiPFCLUSTER_GetAppendSize(struct PF_FILE* p_file, u32* p_size) {
         p_vol = p_file->p_sfd->dir_entry.p_vol;
     }
 
+#ifndef GAME_REXE01
     if (!p_vol) {
         return 38;
     }
 
+#endif
     cluster_size = p_vol->bpb.bytes_per_sector << p_vol->bpb.log2_sectors_per_cluster;
 
     if (p_file->p_sfd->dir_entry.start_cluster != 0) {

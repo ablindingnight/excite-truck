@@ -16,6 +16,10 @@ void VFiPFPATH_InitTokenOfPath(struct PF_STR* p_str, s8* path, u32 code_mode);
 s32 VFiPFPATH_GetNextTokenOfPath(struct PF_STR* p_str, u32 wildcard);
 s32 VFiPFPATH_SplitPath(struct PF_STR* p_path, struct PF_STR* p_dir_path, struct PF_STR* p_filename);
 struct PF_VOLUME* VFiPFPATH_GetVolumeFromPath(struct PF_STR* p_path);
+#ifdef GAME_REXE01
+s32 VFiPFPATH_SplitPathPattern(struct PF_STR* p_path, struct PF_STR* p_dir_path, struct PF_STR* p_pattern);
+void VFiPFPATH_SetSearchPattern(s8* p_buf_local, u16* p_buf_unicode, struct PF_STR* p_pattern);
+#endif
 u32 VFiPFPATH_MatchFileNameWithPattern(const s8* file_name, struct PF_STR* p_pattern, u32 is_long_name);
 s32 VFiPFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr);
 s32 VFiPFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr);

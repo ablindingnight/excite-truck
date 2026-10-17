@@ -9,6 +9,15 @@ extern "C" {
 void VFiPF_InitLockFile(void);
 s32 VFiPF_UnLockFile(struct PF_FILE* p_file);
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2 guards volumes with recursive critical sections (in pf_filelock.c).
+// The original names of these functions are not known.
+void VFiPF_InitCritical(struct PF_CRITICAL* p_critical);
+void VFiPF_DeleteCritical(struct PF_CRITICAL* p_critical);
+void VFiPF_LockCritical(struct PF_CRITICAL* p_critical);
+void VFiPF_UnlockCritical(struct PF_CRITICAL* p_critical);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

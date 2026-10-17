@@ -15,6 +15,10 @@ s32 VFiPFENT_ITER_Advance(struct PF_ENT_ITER* p_iter, u32 may_allocate);
 s32 VFiPFENT_ITER_Retreat(struct PF_ENT_ITER* p_iter, u32 may_allocate);
 s32 VFiPFENT_ITER_GetEntryOfPath(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path, u32 no_look_last_token);
 
+#ifdef GAME_REXE01
+s32 VFiPFENT_ITER_GetEntryOfPattern(struct PF_ENT_ITER* p_iter, struct PF_DIR_ENT* p_ent, struct PF_VOLUME* p_vol, struct PF_STR* p_path);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

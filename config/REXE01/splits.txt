@@ -1100,7 +1100,10 @@ RVL_SDK/vf/pf_cache.c:
 	.text       start:0x800A7774 end:0x800A939C
 
 RVL_SDK/vf/pf_cluster.c:
-	.text       start:0x800A939C end:0x800A9470
+	.text       start:0x800A939C end:0x800A95B4
+
+RVL_SDK/vf/pf_dir.c:
+	.text       start:0x800A95B4 end:0x800A9BB4
 
 RVL_SDK/vf/pf_entry.c:
 	.text       start:0x800AA7B8 end:0x800AA924
