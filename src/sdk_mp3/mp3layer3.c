@@ -348,6 +348,23 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
     }
 }
 
+/* Q24 butterfly stage with a coefficient per word (c advances with the data, 4 words per block).
+ * NonMatching: same opcodes, register pairs differ (42 diff lines; per-step forms don't change it). */
+void fn_800C51BC(s32* dst, s32* src, s32* c) {
+    s32 i;
+    s32 s, d, u;
+
+    for (i = 0; i < 4; i++) {
+        s = src[0]; d = dst[0]; u = d + s; dst[0] = u; src[0] = (s32)(((s64)(d - s) * c[0]) >> 24);
+        s = src[1]; d = dst[1]; u = d + s; dst[1] = u; src[1] = (s32)(((s64)(d - s) * c[1]) >> 24);
+        s = src[2]; d = dst[2]; u = d + s; dst[2] = u; src[2] = (s32)(((s64)(d - s) * c[2]) >> 24);
+        s = src[3]; d = dst[3]; u = d + s; dst[3] = u; src[3] = (s32)(((s64)(d - s) * c[3]) >> 24);
+        dst += 4;
+        src += 4;
+        c += 4;
+    }
+}
+
 /* Q24 butterfly stage: words 0-3 of four 8-word blocks, coefficients c[0..3].
  * The last step keeps d - s in its own variable, the others reuse s: that is what reproduces the
  * original's register pairs (same in fn_800C5430/5508/55D8). */
