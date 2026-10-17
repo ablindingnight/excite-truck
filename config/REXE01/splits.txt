@@ -1326,7 +1326,7 @@ RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrack.cpp:
 
 RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp:
 	.text       start:0x800EE334 end:0x800EE47C
-	.data       start:0x80323770 end:0x803237B8
+	.data       start:0x80323770 end:0x803237D0
 
 RVL_SDK/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp:
 	.text       start:0x800EE47C end:0x800EE4F0
