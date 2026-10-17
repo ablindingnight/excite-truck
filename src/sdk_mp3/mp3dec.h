@@ -105,6 +105,7 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 trac
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start);
 void MP3_Reorder32(u32* dst, u32* src, s32 mode);
+void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out);
 void fn_800C18A0(s32* in, s32* out);
 void fn_800C1984(s32* in, s32* out);
 void fn_800C1A80(s32* a, s32* b, s32* out);

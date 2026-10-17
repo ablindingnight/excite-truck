@@ -270,6 +270,187 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
+/* IMDCT and overlap-add for one granule of every channel (fn_800C0E7C): per subband the 18-point IMDCT, the
+ * long/start/stop window stages, or for short and mixed blocks three 6-point transforms per window
+ * (fn_800C1E88 plus an inline butterfly) and fn_800C3088; then the overlap pass into prev. Behaviour verified
+ * identical to the original in a PPC simulation (callees run from the original). NonMatching: 649/649, same
+ * opcodes. */
+void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out) {
+    s16 ch;
+    s16 sb;
+    u32 flags;
+    s32* pa;
+    s32* pb;
+    s32* pc;
+    s32* pc2;
+    s32* p;
+    s32* outbuf2;
+    s32 t0, t1;
+    s32 tmp0[12];
+    s32 tmp1[12];
+    s32 tmp2[12];
+
+    outbuf2 = outbuf + 0x440;
+    for (ch = 0; ch < d->channels; ch++) {
+        flags = *block_flags;
+        if (flags & 7) {
+            if (flags & 1) {
+                pa = work[0];
+                pc2 = outbuf2;
+                pc = outbuf;
+                pb = prev;
+                for (sb = 0; sb < d->band_count; sb++) {
+                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                    if (!(sb & 1)) {
+                        fn_800C2590(pa, pb, pc, pc2);
+                    } else {
+                        fn_800C280C(pa, pb, pc, pc2);
+                    }
+                    fn_800C2DBC(pa + 18, pb, pb + 17);
+                    pa += 36;
+                    pc2++;
+                    pc++;
+                    pb += 18;
+                }
+            } else {
+                pa = work[0];
+                pc2 = outbuf2;
+                pc = outbuf;
+                pb = prev;
+                for (sb = 0; sb < d->band_count; sb++) {
+                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                    if (*block_flags & 2) {
+                        if (!(sb & 1)) {
+                            fn_800C2590(pa, pb, pc, pc2);
+                        } else {
+                            fn_800C280C(pa, pb, pc, pc2);
+                        }
+                        fn_800C2F98(pa + 18, pb, pb + 17);
+                    }
+                    if (*block_flags & 4) {
+                        if (!(sb & 1)) {
+                            fn_800C2A88(pa, pb, pc, pc2);
+                        } else {
+                            fn_800C2C18(pa, pb, pc, pc2);
+                        }
+                        fn_800C2DBC(pa + 18, pb, pb + 17);
+                    }
+                    pa += 36;
+                    pc2++;
+                    pc++;
+                    pb += 18;
+                }
+            }
+        } else if (flags & 8) {
+            pa = work[0];
+            for (sb = 0; sb < 2; sb++) {
+                fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                fn_800C21D8(pa, pa + 17);
+                pa += 36;
+            }
+            pa = work[d->band_count - 1];
+            pa[0] = 0; pa[1] = 0; pa[2] = 0; pa[3] = 0; pa[4] = 0; pa[5] = 0;
+            pa[6] = 0; pa[7] = 0; pa[8] = 0; pa[9] = 0; pa[10] = 0; pa[11] = 0;
+            pa[12] = 0; pa[13] = 0; pa[14] = 0; pa[15] = 0; pa[16] = 0; pa[17] = 0;
+            pa[18] = 0; pa[19] = 0; pa[20] = 0; pa[21] = 0; pa[22] = 0; pa[23] = 0;
+            pa[24] = 0; pa[25] = 0; pa[26] = 0; pa[27] = 0; pa[28] = 0; pa[29] = 0;
+            pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
+            pa = work[2];
+            for (sb = 2; sb < d->band_count - 1; sb++) {
+                p = &out->sxr[0][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp0);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                p = &out->sxr[1][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp1);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                p = &out->sxr[2][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp2);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                fn_800C3088(pa, tmp0, tmp1, tmp2);
+                pa += 36;
+            }
+            pb = prev;
+            pa = work[0];
+            pc = outbuf;
+            for (sb = 0; sb < d->band_count; sb++) {
+                if (!(sb & 1)) {
+                    fn_800C1F6C(pc, pa, pb);
+                } else {
+                    fn_800C2090(pc, pa, pb);
+                }
+                pc++;
+                pb[0] = pa[18]; pb[1] = pa[19]; pb[2] = pa[20]; pb[3] = pa[21]; pb[4] = pa[22]; pb[5] = pa[23];
+                pb[6] = pa[24]; pb[7] = pa[25]; pb[8] = pa[26]; pb[9] = pa[27]; pb[10] = pa[28]; pb[11] = pa[29];
+                pb[12] = pa[30]; pb[13] = pa[31]; pb[14] = pa[32]; pb[15] = pa[33]; pb[16] = pa[34]; pb[17] = pa[35];
+                pa += 36;
+                pb += 18;
+            }
+        } else if (flags & 0x10) {
+            pa = work[d->band_count - 1];
+            pa[0] = 0; pa[1] = 0; pa[2] = 0; pa[3] = 0; pa[4] = 0; pa[5] = 0;
+            pa[6] = 0; pa[7] = 0; pa[8] = 0; pa[9] = 0; pa[10] = 0; pa[11] = 0;
+            pa[12] = 0; pa[13] = 0; pa[14] = 0; pa[15] = 0; pa[16] = 0; pa[17] = 0;
+            pa[18] = 0; pa[19] = 0; pa[20] = 0; pa[21] = 0; pa[22] = 0; pa[23] = 0;
+            pa[24] = 0; pa[25] = 0; pa[26] = 0; pa[27] = 0; pa[28] = 0; pa[29] = 0;
+            pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
+            pa = work[0];
+            for (sb = 0; sb < d->band_count - 1; sb++) {
+                p = &out->sxr[0][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp0);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                p = &out->sxr[1][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp1);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                p = &out->sxr[2][(sb << 2) + (sb << 1)];
+                fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp2);
+                t0 = p[0] - p[3] - p[4];
+                t1 = p[1] - p[2] - p[5];
+                tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
+                tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                fn_800C3088(pa, tmp0, tmp1, tmp2);
+                pa += 36;
+            }
+            pb = prev;
+            pa = work[0];
+            pc = outbuf;
+            for (sb = 0; sb < d->band_count; sb++) {
+                if (!(sb & 1)) {
+                    fn_800C1F6C(pc, pa, pb);
+                } else {
+                    fn_800C2090(pc, pa, pb);
+                }
+                pc++;
+                pb[0] = pa[18]; pb[1] = pa[19]; pb[2] = pa[20]; pb[3] = pa[21]; pb[4] = pa[22]; pb[5] = pa[23];
+                pb[6] = pa[24]; pb[7] = pa[25]; pb[8] = pa[26]; pb[9] = pa[27]; pb[10] = pa[28]; pb[11] = pa[29];
+                pb[12] = pa[30]; pb[13] = pa[31]; pb[14] = pa[32]; pb[15] = pa[33]; pb[16] = pa[34]; pb[17] = pa[35];
+                pa += 36;
+                pb += 18;
+            }
+        }
+        block_flags++;
+        work += 32;
+        out++;
+        outbuf2 += 32;
+        outbuf += 32;
+        prev += 0x240;
+    }
+}
+
 /* 18-point IMDCT front end: fn_800C1984 into a stack buffer, then out[0..8] = tmp[9..17] and
  * out[18..26] = -tmp[8..0]. */
 void fn_800C18A0(s32* in, s32* out) {
