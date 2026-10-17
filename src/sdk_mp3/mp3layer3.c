@@ -530,42 +530,44 @@ void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
 }
 
-/* Same as fn_800C2590 with the other window table. NonMatching: 159/159, a few opcodes differ in order. */
+/* Like fn_800C2590 with the other window table (lbl_8031D6B8) and alternating signs on prev: even steps
+ * add to out1 and subtract from out2, odd steps the reverse (verified against a simulation of the
+ * original). NonMatching: 159/159, same opcodes. */
 void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     s32* w = lbl_8031D6B8;
-    s32 x, c0, c1, y0, y1, p0;
+    s32 x, c0, c1, y0, y1;
 
     x = cur[0];
     c0 = *w++;
     c1 = *w++;
     out1[0] = (s32)(((s64)x * c0) >> 20) + prev[0];
-    out2[0] = (s32)(((s64)x * c1) >> 20) + prev[17];
+    out2[0] = (s32)(((s64)x * c1) >> 20) - prev[17];
     x = cur[1];
     c0 = *w++;
     c1 = *w++;
-    out1[64] = (s32)(((s64)x * c0) >> 20) + prev[1];
+    out1[64] = (s32)(((s64)x * c0) >> 20) - prev[1];
     out2[-64] = (s32)(((s64)x * c1) >> 20) + prev[16];
     x = cur[2];
     c0 = *w++;
     c1 = *w++;
     out1[128] = (s32)(((s64)x * c0) >> 20) + prev[2];
-    out2[-128] = (s32)(((s64)x * c1) >> 20) + prev[15];
+    out2[-128] = (s32)(((s64)x * c1) >> 20) - prev[15];
     x = cur[3];
     c0 = *w++;
     c1 = *w++;
-    out1[192] = (s32)(((s64)x * c0) >> 20) + prev[3];
+    out1[192] = (s32)(((s64)x * c0) >> 20) - prev[3];
     out2[-192] = (s32)(((s64)x * c1) >> 20) + prev[14];
     x = cur[4];
     c0 = *w++;
     c1 = *w++;
     out1[256] = (s32)(((s64)x * c0) >> 20) + prev[4];
-    out2[-256] = (s32)(((s64)x * c1) >> 20) + prev[13];
+    out2[-256] = (s32)(((s64)x * c1) >> 20) - prev[13];
     x = cur[5];
     c0 = *w++;
     c1 = *w++;
     y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
-    out1[320] = y0 + prev[5];
+    out1[320] = y0 - prev[5];
     out2[-320] = y1 + prev[12];
     x = cur[6];
     c0 = *w++;
@@ -573,17 +575,17 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
     out1[384] = y0 + prev[6];
-    out2[-384] = y1 + prev[11];
+    out2[-384] = y1 - prev[11];
     x = cur[7];
     c0 = *w++;
     c1 = *w++;
-    out1[448] = (s32)(((s64)x * c0) >> 20) + prev[7];
+    out1[448] = (s32)(((s64)x * c0) >> 20) - prev[7];
     out2[-448] = (s32)(((s64)x * c1) >> 20) + prev[10];
     x = cur[8];
     c0 = *w++;
     c1 = *w++;
     out1[512] = (s32)(((s64)x * c0) >> 20) + prev[8];
-    out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
+    out2[-512] = (s32)(((s64)x * c1) >> 20) - prev[9];
 }
 
 /* IMDCT output, first window half: copies prev[0..5] and writes prev[17-i] - cur[i] backwards from out2;
