@@ -156,8 +156,8 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, const u8* buf, s16* out, s32 i, s32
         s32 sh;
         u32 code;
         u8 e;
-        s16 v;
         s16 w;
+        s16 v;
         s16 x;
         s16 y;
 
