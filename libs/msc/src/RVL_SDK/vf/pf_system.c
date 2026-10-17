@@ -13,7 +13,7 @@ void VFiPFSYS_initializeSYS() {
 #ifdef GAME_REXE01
 // ET uses the system layer's task id as the context id.
 s32 VFiPFSYS_GetCurrentContextID(s32* context_id) {
-    return VFiPF_ET_GetTaskID((u32*)context_id);
+    return pfk_get_task_id((u32*)context_id);
 }
 #else
 s32 VFiPFSYS_GetCurrentContextID(s32* context_id) {

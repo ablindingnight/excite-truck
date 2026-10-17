@@ -17,18 +17,18 @@ void VFiPF_DeleteCritical(struct PF_CRITICAL* p_critical);
 void VFiPF_LockCritical(struct PF_CRITICAL* p_critical);
 void VFiPF_UnlockCritical(struct PF_CRITICAL* p_critical);
 
-// ET's system layer semaphores (0x800B7EAC-0x800B808C); original names unknown.
+// PrFILE2 kernel layer (pfk.c, 0x800B7EAC-0x800B808C); names from its error messages.
 typedef struct PF_ET_SEMAPHORE_PARAM {
     u32 initial_count;
     u32 max_count;
     void* p_buf;
 } PF_ET_SEMAPHORE_PARAM;
 
-s32 VFiPF_ET_GetTaskID(u32* p_task_id);
-s32 VFiPF_ET_CreateSemaphore(struct PF_ET_SEMAPHORE_PARAM* p_param);
-s32 VFiPF_ET_DeleteSemaphore(s32 sem_id);
-s32 VFiPF_ET_WaitSemaphore(s32 sem_id);
-s32 VFiPF_ET_SignalSemaphore(s32 sem_id);
+s32 pfk_get_task_id(u32* p_task_id);
+s32 pfk_create_semaphore(struct PF_ET_SEMAPHORE_PARAM* p_param);
+s32 pfk_delete_semaphore(s32 sem_id);
+s32 pfk_get_semaphore(s32 sem_id);
+s32 pfk_release_semaphore(s32 sem_id);
 #endif
 
 #ifdef __cplusplus

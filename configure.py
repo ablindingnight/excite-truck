@@ -517,6 +517,7 @@ config.libs.append(
             TpRevolution("vi/vi3in1.c", Matching),
             TpRevolution("gx/GXAttr.c", Matching),
             TpRevolution("os/OSRtc.c", Matching),
+            TpRevolution("os/OSSemaphore.c", Matching),
             TpRevolution("gx/GXTev.c", Matching),
             TpRevolution("gx/GXInit.c", Matching),
             TpRevolution("gx/GXFifo.c", Matching),
@@ -894,6 +895,8 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pf_unmount.c"),
             Object(Matching, "RVL_SDK/vf/pf_filelock.c"),
             Object(Matching, "RVL_SDK/vf/pf_system.c"),
+            Object(Matching, "RVL_SDK/vf/vf_et_api.c"),
+            Object(Matching, "RVL_SDK/vf/pfk.c"),
             Object(Matching, "RVL_SDK/arc/arc.c"),
         ],
     }

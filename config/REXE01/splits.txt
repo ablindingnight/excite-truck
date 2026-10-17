@@ -604,6 +604,9 @@ revolution/os/OSRtc.c:
 	.text       start:0x80052964 end:0x800533F0
 	.bss        start:0x8038E340 end:0x8038E394
 
+revolution/os/OSSemaphore.c:
+	.text       start:0x800533F0 end:0x80053518
+
 revolution/os/OSSync.c:
 	.text       start:0x80053518 end:0x80053598
 
@@ -1208,6 +1211,17 @@ RVL_SDK/vf/pf_filelock.c:
 
 RVL_SDK/vf/pf_system.c:
 	.text       start:0x800B78EC end:0x800B7968
+
+RVL_SDK/vf/vf_et_api.c:
+	.text       start:0x800B7968 end:0x800B7EAC
+	.data       start:0x8031B178 end:0x8031B190
+	.bss        start:0x80405C30 end:0x80405D18
+	.sdata      start:0x80559238 end:0x80559240
+	.sbss       start:0x8055DD18 end:0x8055DD28
+
+RVL_SDK/vf/pfk.c:
+	.text       start:0x800B7EAC end:0x800B808C
+	.data       start:0x8031B190 end:0x8031B2B0
 
 revolution/homebuttonLib/HBMBase.cpp:
 	.text       start:0x800C64DC end:0x800CF294

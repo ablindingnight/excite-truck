@@ -111,7 +111,7 @@ s32 VFipdm_disk_open_disk(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK
     param.initial_count = 1;
     param.max_count = 1;
     param.p_buf = p_disk->sem_buf;
-    sem_id = VFiPF_ET_CreateSemaphore(&param);
+    sem_id = pfk_create_semaphore(&param);
     if (sem_id == 0) {
         return 19;
     }
@@ -130,7 +130,7 @@ s32 VFipdm_disk_close_disk(struct PDM_DISK* p_disk) {
     if (p_disk->disk_lock_cnt != 0) {
         return 17;
     }
-    if (VFiPF_ET_DeleteSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_delete_semaphore(p_disk->sem_id) != 0) {
         return 19;
     }
 
@@ -158,11 +158,11 @@ s32 VFipdm_disk_open(struct PDM_DISK* p_disk) {
     s32 err;
 
     if (p_disk->open_disk_cnt == 0) {
-        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_get_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         err = p_disk->disk_tbl.p_func->init(p_disk);
-        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_release_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         if (err != 0) {
@@ -178,19 +178,19 @@ s32 VFipdm_disk_get_part_permission(struct PDM_DISK* p_disk) {
     s32 err;
 
     if (p_disk->disk_lock_cnt == 0) {
-        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_get_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         err = p_disk->disk_tbl.p_func->mount(p_disk);
         if (err != 0) {
-            if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+            if (pfk_release_semaphore(p_disk->sem_id) != 0) {
                 return 20;
             }
             VFipdm_part_set_driver_error_code(p_disk->p_cur_part, err);
             return 21;
         }
         err = p_disk->disk_tbl.p_func->get_disk_info(p_disk, &p_disk->disk_info);
-        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_release_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         if (err != 0) {
@@ -210,11 +210,11 @@ s32 VFipdm_disk_get_part_permission(struct PDM_DISK* p_disk) {
 s32 VFipdm_disk_format(struct PDM_DISK* p_disk, const u8* param) {
     s32 err;
 
-    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_get_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     err = p_disk->disk_tbl.p_func->format(p_disk, (u8*)param);
-    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_release_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     if (err != 0) {
@@ -234,11 +234,11 @@ s32 VFipdm_disk_physical_read(struct PDM_DISK* p_disk, u8* buf, u32 psector, u32
     if (err != 0) {
         return err;
     }
-    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_get_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     err = p_disk->disk_tbl.p_func->physical_read(p_disk, buf, block, num_block, p_num_success);
-    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_release_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     VFipdm_disk_convert_block_into_sector(p_disk, block, *p_num_success, bps, &sector, p_num_success);
@@ -259,11 +259,11 @@ s32 VFipdm_disk_physical_write(struct PDM_DISK* p_disk, const u8* buf, u32 psect
     if (err != 0) {
         return err;
     }
-    if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_get_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     err = p_disk->disk_tbl.p_func->physical_write(p_disk, (u8*)buf, block, num_block, p_num_success);
-    if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+    if (pfk_release_semaphore(p_disk->sem_id) != 0) {
         return 20;
     }
     VFipdm_disk_convert_block_into_sector(p_disk, block, *p_num_success, bps, &sector, p_num_success);
@@ -279,11 +279,11 @@ s32 VFipdm_disk_release_part_permission(struct PDM_DISK* p_disk, u32 mode) {
 
     err = 0;
     if (p_disk->disk_lock_cnt == 1) {
-        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_get_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         err = p_disk->disk_tbl.p_func->unmount(p_disk);
-        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_release_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         if (err != 0) {
@@ -304,11 +304,11 @@ s32 VFipdm_disk_close(struct PDM_DISK* p_disk) {
     s32 err;
 
     if (p_disk->open_disk_cnt == 1) {
-        if (VFiPF_ET_WaitSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_get_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         err = p_disk->disk_tbl.p_func->finalize(p_disk);
-        if (VFiPF_ET_SignalSemaphore(p_disk->sem_id) != 0) {
+        if (pfk_release_semaphore(p_disk->sem_id) != 0) {
             return 20;
         }
         if (err != 0) {

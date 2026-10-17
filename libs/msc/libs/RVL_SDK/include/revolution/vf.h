@@ -51,7 +51,11 @@ extern "C" {
 #include <revolution/vf/pf_unmount.h>
 #include <revolution/vf/pf_filelock.h>
 #include <revolution/vf/pf_system.h>
+#ifdef GAME_REXE01
+#include <revolution/vf/vf_et.h>
+#else
 #include <revolution/vf/d_vf.h>
+#endif
 #include <revolution/vf/d_vf_sys.h>
 #include <revolution/vf/d_hash.h>
 #include <revolution/vf/d_time.h>
