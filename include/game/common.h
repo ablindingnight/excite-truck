@@ -47,16 +47,14 @@ public:
     u32 unk14;
 };
 
-// Parsed .val table node (vtable slots from the callers; names are guesses).
+class ValueNode;
+
+// A parsed .val file (root): its entries are ValueNodes. Slot names are guesses.
 class ValueTable {
 public:
-    virtual const char* GetName(void);                                // 0x8
-    virtual ValueTable* GetChild(int index);                          // 0xC
-    virtual void vf2(void);                                           // 0x10
-    virtual const char* GetValue(const char* key);                    // 0x14
-    virtual const char* GetString(const char* key, const char* def);  // 0x18
-    virtual void vf5(void);                                           // 0x1C
-    virtual s32 GetInt(const char* key, s32 def);                     // 0x20
+    virtual ValueNode* FindChild(const char* name);  // 0x8
+    virtual ValueNode* GetChild(int index);          // 0xC
+    virtual int HasChild(const char* name);          // 0x10
 };
 
 // A node inside a .val table (an entry's key/value pairs).

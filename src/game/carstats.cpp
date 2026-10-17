@@ -26,15 +26,9 @@ struct CarStats {
     CarStat stats[MAX_CAR_STATS];      // offset 0x4
 };
 
-class CarStatsTable {
-public:
-    virtual void vf0(void);
-    virtual ValueNode* GetChild(int index);  // 0xC
-};
-
 ModuleTag lbl_8055D568;
 u8 lbl_8055D570;
-CarStatsTable* lbl_8055D574;
+ValueTable* lbl_8055D574;
 CarStats* lbl_8055D578;
 s32 lbl_8055D57C;
 
@@ -45,7 +39,7 @@ void CarStatsInit(void) {
     int n;
 
     lbl_8055D570 = 1;
-    lbl_8055D574 = (CarStatsTable*)fn_80131808("car_stats.val");
+    lbl_8055D574 = fn_80131808("car_stats.val");
     lbl_8055D57C = 0;
     for (i = 0; (entry = lbl_8055D574->GetChild(i)) != NULL; i++) {
         if (strcasecmp(entry->GetName(), "carstats") == 0 && entry->Has("chassis")) {
@@ -101,5 +95,5 @@ void CarStatsShutdown(void) {
     delete[] lbl_8055D578;
     lbl_8055D578 = NULL;
     lbl_8055D57C = 0;
-    fn_80131818((ValueTable*)lbl_8055D574);
+    fn_80131818(lbl_8055D574);
 }

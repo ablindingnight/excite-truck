@@ -12,8 +12,8 @@ const char* const lbl_802ED82C[NUM_GRADES] = {"\\GRADE_S", "A", "B", "C", "D"};
 
 class Grades {
 public:
-    Grades(ValueTable* table);
-    void Load(ValueTable* table);
+    Grades(ValueNode* table);
+    void Load(ValueNode* table);
     int Find(int score);
     int GetThreshold(int grade);
     void Reset(void);
@@ -47,11 +47,11 @@ void Grades::Reset(void) {
     thresholds[4] = -1;
 }
 
-Grades::Grades(ValueTable* table) {
+Grades::Grades(ValueNode* table) {
     Load(table);
 }
 
-void Grades::Load(ValueTable* table) {
+void Grades::Load(ValueNode* table) {
     const char* name;
     int i;
 

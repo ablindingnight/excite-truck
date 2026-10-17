@@ -11,6 +11,8 @@ void FlagsInit(void);
 void FlagsShutdown(void);
 void RepInit(void);
 void RepShutdown(void);
+void UnlocksShutdown(void);
+void UnlocksInit(void);
 void ParseOptions(const char* cmdline);
 BOOL OptDirectToTrack(void);
 BOOL OptPaTest(void);
@@ -58,7 +60,6 @@ void fn_80141454(void);
 void fn_8027DAF4(void);
 void fn_8021031C(void);
 void fn_801AED54(void);
-void fn_80018F40(void);
 void fn_802789A8(void);
 void fn_8020CA30(void);
 void fn_800218F4(void);
@@ -87,7 +88,6 @@ void fn_80211F4C(void);
 void fn_800218F8(void);
 void fn_8020CA34(void);
 void fn_802789B0(void);
-void fn_80018F7C(void);
 void fn_801AED58(void);
 void fn_80141458(void);
 void fn_8001EFCC(void);
@@ -123,7 +123,7 @@ void fn_8023BFBC(int eve, int track);
 
 struct Eve {
     u8 unk0[0x20];
-    ValueTable* vals;  // offset 0x20
+    ValueNode* vals;  // offset 0x20
 };
 
 struct Track {
@@ -247,7 +247,7 @@ void AppInit(void) {
     fn_8021031C();
     fn_801AED54();
     RepInit();
-    fn_80018F40();
+    UnlocksInit();
     fn_802789A8();
     fn_8020CA30();
     fn_80127464();
@@ -278,7 +278,7 @@ void AppShutdown(void) {
     fn_800218F8();
     fn_8020CA34();
     fn_802789B0();
-    fn_80018F7C();
+    UnlocksShutdown();
     RepShutdown();
     fn_801AED58();
     fn_80141458();

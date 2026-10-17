@@ -77,7 +77,7 @@ int CompareTracks(const void* a, const void* b) {
 
 void LoadTracks(void) {
     int i;
-    ValueTable* track;
+    ValueNode* track;
 
     lbl_8034EF38.table = fn_80131808("tracks.val");
     lbl_8034EF38.count = 0;
