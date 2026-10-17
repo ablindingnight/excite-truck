@@ -306,6 +306,9 @@ typedef struct PF_LOCK {
     unsigned long wcount;   // offset 0x4, size 0x4
     struct PF_FILE* owner;  // offset 0x8, size 0x4
     long resource;          // offset 0xC, size 0x4
+#ifdef GAME_REXE01
+    unsigned char sem_buf[0xC];  // offset 0x10, size 0xC (semaphore storage)
+#endif
 } PF_LOCK;
 
 typedef struct PF_SFD {
@@ -316,6 +319,20 @@ typedef struct PF_SFD {
     struct PF_LOCK lock;          // offset 0x27C, size 0x10
     unsigned short num_handlers;  // offset 0x28C, size 0x2
 } PF_SFD;
+
+#ifdef GAME_REXE01
+// Number of contexts (tasks) ET's PrFILE2 was configured for
+#define PF_ET_NUM_CONTEXT 4
+
+typedef struct PF_CRITICAL {
+    // total size: 0x1C
+    unsigned long initialized;   // offset 0x0, size 0x4
+    unsigned long count;         // offset 0x4, size 0x4 (recursion depth)
+    long sem_id;                 // offset 0x8, size 0x4
+    long owner;                  // offset 0xC, size 0x4 (owning context id)
+    unsigned char sem_buf[0xC];  // offset 0x10, size 0xC (semaphore storage)
+} PF_CRITICAL;
+#endif
 
 typedef struct PF_VOLUME {
     // total size: 0x1898
@@ -330,13 +347,20 @@ typedef struct PF_VOLUME {
     long num_opened_directories;              // offset 0x15E4, size 0x4
     struct PF_SECTOR_CACHE cache;             // offset 0x15E8, size 0x24
     signed char label[12];                    // offset 0x160C, size 0xC
+#ifdef GAME_REXE01
+    struct PF_CUR_DIR current_dir[PF_ET_NUM_CONTEXT];  // ET: offset 0x1654, size 0x920
+#else
     struct PF_CUR_DIR current_dir[1];         // offset 0x1618, size 0x248
+#endif
     struct PF_DIR_TAIL tail_entry;            // offset 0x1860, size 0xC
     long last_error;                          // offset 0x186C, size 0x4
     long last_driver_error;                   // offset 0x1870, size 0x4
     unsigned long file_config;                // offset 0x1874, size 0x4
     unsigned short flags;                     // offset 0x1878, size 0x2
     signed char drv_char;                     // offset 0x187A, size 0x1
+#ifdef GAME_REXE01
+    struct PF_CRITICAL critical;              // ET: offset 0x1F90, size 0x1C
+#endif
     unsigned short fsi_flag;                  // offset 0x187C, size 0x2
     struct PF_CLUSTER_LINK_VOL cluster_link;  // offset 0x1880, size 0xC
     void* p_part;                             // offset 0x188C, size 0x4
@@ -369,7 +393,11 @@ typedef struct PF_CHARCODE {
 
 typedef struct PF_VOLUME_SET {
     // total size: 0x27FB8
+#ifdef GAME_REXE01
+    struct PF_CUR_VOLUME current_vol[PF_ET_NUM_CONTEXT];  // ET: offset 0x0, size 0x30
+#else
     struct PF_CUR_VOLUME current_vol[1];  // offset 0x0, size 0xC
+#endif
     long num_attached_drives;             // offset 0xC, size 0x4
     long num_mounted_volumes;             // offset 0x10, size 0x4
     unsigned long config;                 // offset 0x14, size 0x4
@@ -378,7 +406,12 @@ typedef struct PF_VOLUME_SET {
     long last_driver_error;               // offset 0x20, size 0x4
     struct PF_CHARCODE codeset;           // offset 0x24, size 0x18
     unsigned long setting;                // offset 0x3C, size 0x4
+#ifdef GAME_REXE01
+    struct PF_CRITICAL critical;          // ET: offset 0x64, size 0x1C
+    struct PF_CONTEXT context[PF_ET_NUM_CONTEXT];  // ET: offset 0x80, size 0x20
+#else
     struct PF_CONTEXT context[1];         // offset 0x40, size 0x8
+#endif
     struct PF_VOLUME volumes[26];         // offset 0x48, size 0x27F70
 } PF_VOLUME_SET;
 
