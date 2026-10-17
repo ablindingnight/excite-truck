@@ -886,6 +886,9 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pf_fseek.c"),
             Object(Matching, "RVL_SDK/vf/pf_fsfirst.c"),
             Object(Matching, "RVL_SDK/vf/pf_fsnext.c"),
+            Object(Matching, "RVL_SDK/vf/pf_unmount.c"),
+            Object(Matching, "RVL_SDK/vf/pf_filelock.c"),
+            Object(Matching, "RVL_SDK/vf/pf_system.c"),
             Object(Matching, "RVL_SDK/arc/arc.c"),
         ],
     }

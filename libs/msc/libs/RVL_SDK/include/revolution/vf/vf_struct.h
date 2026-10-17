@@ -329,7 +329,7 @@ typedef struct PF_CRITICAL {
     unsigned long initialized;   // offset 0x0, size 0x4
     unsigned long count;         // offset 0x4, size 0x4 (recursion depth)
     long sem_id;                 // offset 0x8, size 0x4
-    long owner;                  // offset 0xC, size 0x4 (owning context id)
+    unsigned long owner;         // offset 0xC, size 0x4 (owning task id)
     unsigned char sem_buf[0xC];  // offset 0x10, size 0xC (semaphore storage)
 } PF_CRITICAL;
 #endif

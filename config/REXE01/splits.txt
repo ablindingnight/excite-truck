@@ -1182,6 +1182,16 @@ RVL_SDK/vf/pf_fsnext.c:
 revolution/VF/pf_init_prfile2.c:
 	.text       start:0x800B76A8 end:0x800B76E8
 
+RVL_SDK/vf/pf_unmount.c:
+	.text       start:0x800B76E8 end:0x800B7710
+
+RVL_SDK/vf/pf_filelock.c:
+	.text       start:0x800B7710 end:0x800B78EC
+	.sbss       start:0x8055DD10 end:0x8055DD18
+
+RVL_SDK/vf/pf_system.c:
+	.text       start:0x800B78EC end:0x800B7968
+
 revolution/homebuttonLib/HBMBase.cpp:
 	.text       start:0x800C64DC end:0x800CF294
 	.rodata     start:0x802F4528 end:0x802F47D8
