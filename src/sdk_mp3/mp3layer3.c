@@ -656,6 +656,124 @@ void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
     }
 }
 
+/* Polyphase synthesis: samples 1..15 and their mirrors 31..17 for one channel. 16 Q25 MACs per sample
+ * over the 1024-entry ring v (positions pos + off and pos + 0x3E0 - off), clamped to 16 bits. Math verified
+ * against a simulation of the original (60/60). NonMatching: 257/251 (extra spills). */
+void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
+    s32 j;
+    s64 a;
+    s64 b;
+    s32 sa, sb;
+
+    for (j = 0; j < 15; j++) {
+        a = 0;
+        b = 0;
+        a += (s64)v[pos & 0x3ff] * w[0];
+        a += (s64)v[(pos + 0x3e0) & 0x3ff] * w[8];
+        b += (s64)v[pos & 0x3ff] * w[8];
+        b += (s64)v[(pos + 0x3e0) & 0x3ff] * -w[0];
+        a += (s64)v[(pos + 0x60) & 0x3ff] * w[1];
+        a += (s64)v[(pos + 0x380) & 0x3ff] * -w[9];
+        b += (s64)v[(pos + 0x60) & 0x3ff] * w[9];
+        b += (s64)v[(pos + 0x380) & 0x3ff] * w[1];
+        a += (s64)v[(pos + 0x80) & 0x3ff] * w[2];
+        a += (s64)v[(pos + 0x360) & 0x3ff] * w[10];
+        b += (s64)v[(pos + 0x80) & 0x3ff] * w[10];
+        b += (s64)v[(pos + 0x360) & 0x3ff] * -w[2];
+        a += (s64)v[(pos + 0xe0) & 0x3ff] * w[3];
+        a += (s64)v[(pos + 0x300) & 0x3ff] * -w[11];
+        b += (s64)v[(pos + 0xe0) & 0x3ff] * w[11];
+        b += (s64)v[(pos + 0x300) & 0x3ff] * w[3];
+        a += (s64)v[(pos + 0x100) & 0x3ff] * w[4];
+        a += (s64)v[(pos + 0x2e0) & 0x3ff] * w[12];
+        b += (s64)v[(pos + 0x100) & 0x3ff] * w[12];
+        b += (s64)v[(pos + 0x2e0) & 0x3ff] * -w[4];
+        a += (s64)v[(pos + 0x160) & 0x3ff] * w[5];
+        a += (s64)v[(pos + 0x280) & 0x3ff] * -w[13];
+        b += (s64)v[(pos + 0x160) & 0x3ff] * w[13];
+        b += (s64)v[(pos + 0x280) & 0x3ff] * w[5];
+        a += (s64)v[(pos + 0x180) & 0x3ff] * w[6];
+        a += (s64)v[(pos + 0x260) & 0x3ff] * w[14];
+        b += (s64)v[(pos + 0x180) & 0x3ff] * w[14];
+        b += (s64)v[(pos + 0x260) & 0x3ff] * -w[6];
+        a += (s64)v[(pos + 0x1e0) & 0x3ff] * w[7];
+        a += (s64)v[(pos + 0x200) & 0x3ff] * -w[15];
+        b += (s64)v[(pos + 0x1e0) & 0x3ff] * w[15];
+        b += (s64)v[(pos + 0x200) & 0x3ff] * w[7];
+        sa = (s32)(a >> 25);
+        sb = (s32)(b >> 25);
+        if ((sa >> 31) != (sa >> 15)) {
+            sa = (sa >> 31) ^ 0x7FFF;
+        }
+        if ((sb >> 31) != (sb >> 15)) {
+            sb = (sb >> 31) ^ 0x7FFF;
+        }
+        if (mode == 0) {
+            ((s16*)out)[2 * j] = sa;
+            ((s16*)out)[60 - 2 * j] = sb;
+        } else {
+            ((s16*)out)[j] = sa;
+            ((s16*)out)[30 - j] = sb;
+        }
+        pos++;
+        w += 16;
+    }
+}
+
+/* Polyphase synthesis: samples 0 and 16 (16 + 8 MACs). Verified 100/100 against a simulation of the original.
+ * NonMatching: 223/223, same opcodes, scheduling differs. */
+void fn_800C3960(s32* v, const s32* w, s32 pos, u8* out, s32 mask, s32 mode) {
+    s64 a;
+    s64 b;
+    s32 sa, sb;
+    s32* v2;
+
+    v2 = v + 16;
+    a = 0;
+    b = 0;
+    a += (s64)v[(pos + 0x0) & mask] * w[0];
+    a += (s64)v[(pos + 0x60) & mask] * w[1];
+    b += (s64)v2[(pos + 0x60) & mask] * w[17];
+    a += (s64)v[(pos + 0x80) & mask] * w[2];
+    a += (s64)v[(pos + 0xe0) & mask] * w[3];
+    b += (s64)v2[(pos + 0xe0) & mask] * w[19];
+    a += (s64)v[(pos + 0x100) & mask] * w[4];
+    a += (s64)v[(pos + 0x160) & mask] * w[5];
+    b += (s64)v2[(pos + 0x160) & mask] * w[21];
+    a += (s64)v[(pos + 0x180) & mask] * w[6];
+    a += (s64)v[(pos + 0x1e0) & mask] * w[7];
+    b += (s64)v2[(pos + 0x1e0) & mask] * w[23];
+    a += (s64)v[(pos + 0x200) & mask] * w[8];
+    a += (s64)v[(pos + 0x260) & mask] * w[9];
+    b += (s64)v2[(pos + 0x260) & mask] * w[25];
+    a += (s64)v[(pos + 0x280) & mask] * w[10];
+    a += (s64)v[(pos + 0x2e0) & mask] * w[11];
+    b += (s64)v2[(pos + 0x2e0) & mask] * w[27];
+    a += (s64)v[(pos + 0x300) & mask] * w[12];
+    a += (s64)v[(pos + 0x360) & mask] * w[13];
+    b += (s64)v2[(pos + 0x360) & mask] * w[29];
+    a += (s64)v[(pos + 0x380) & mask] * w[14];
+    a += (s64)v[(pos + 0x3e0) & mask] * w[15];
+    b += (s64)v2[(pos + 0x3e0) & mask] * w[31];
+    a >>= 25;
+    b >>= 25;
+    sa = (s32)a;
+    sb = (s32)b;
+    if ((sa >> 31) != (sa >> 15)) {
+        sa = (sa >> 31) ^ 0x7FFF;
+    }
+    if ((sb >> 31) != (sb >> 15)) {
+        sb = (sb >> 31) ^ 0x7FFF;
+    }
+    if (mode == 0) {
+        ((s16*)out)[0] = sa;
+        ((s16*)out)[32] = sb;
+    } else {
+        ((s16*)out)[0] = sa;
+        ((s16*)out)[16] = sb;
+    }
+}
+
 MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
     MP3Decoder* d;
 
