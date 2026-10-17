@@ -920,6 +920,7 @@ config.libs.append(
             Object(Matching, "game/stubs.cpp"),
             Object(Matching, "game/version.cpp"),
             Object(Matching, "game/rep.cpp"),
+            Object(Matching, "game/loadtimer.cpp"),
         ],
     }
 )

@@ -21,6 +21,7 @@ if "\n%s:\n" % a.unit in s:
 lines = []
 for sec in a.sec:
     name, lo, hi = sec.split(":")
+    hi = "0x%08X" % ((int(hi, 16) + 3) & ~3)  # dtk needs 4-aligned split ends
     lines.append("\t%-11s start:%s end:%s" % (name, lo.upper().replace("0X", "0x"), hi.upper().replace("0X", "0x")))
 anchor = "\n%s:\n" % a.before
 assert anchor in s, a.before
