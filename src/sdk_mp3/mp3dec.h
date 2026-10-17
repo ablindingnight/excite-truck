@@ -32,11 +32,16 @@ typedef struct MP3Decoder {
     s32 unk14;                /* 0x14 */
     s32 unk18;                /* 0x18 */
     s16 sr_index;             /* 0x1C */
-    u8 pad1E[0x278 - 0x1E];
+    s16 mode_ext;             /* 0x1E: bit 1 = M/S stereo */
+    u8 pad20[0x278 - 0x20];
     u32 unk278;               /* 0x278 */
     s16 unk27C;               /* 0x27C: synthesis window position */
-    u8 pad27E[0x9CC - 0x27E];
-    s32 unk9CC[7];            /* 0x9CC */
+    u8 pad27E[0x9BC - 0x27E];
+    s32 long_end;             /* 0x9BC: lines covered by the long-block bands */
+    s32 short_bands;          /* 0x9C0: short-block bands per window */
+    s32 short_end;            /* 0x9C4: lines covered by the short-block bands */
+    s32 band_count;           /* 0x9C8 */
+    s32 unk9CC[7];            /* 0x9CC: [0] mixed map built, [1] long map built, [2] short map built, [3] band tables copied */
     s32 is_init;              /* 0x9E8: MPEG-2 intensity table built */
     u8 pad9EC[0xA6E - 0x9EC];
     s16 is_table[33];         /* 0xA6E: MPEG-2 intensity ratios (low halves of the Q20 table) */
@@ -47,7 +52,7 @@ typedef struct MP3Decoder {
 
 /* Per-channel granule buffer (0x2400 bytes); the frame decoder passes decoder + 0xAB0. */
 typedef struct MP3ChannelBuf {
-    u8 pad[0x1B00];
+    s32 sxr[3][576];          /* 0x0: dequantized short-block windows */
     s32 xr[576];              /* 0x1B00: dequantized spectrum */
 } MP3ChannelBuf;
 
@@ -72,6 +77,10 @@ typedef struct HuffState {
 #define NULL 0
 #ifndef MP3_STATIC
 #define MP3_STATIC static
+void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
+                    u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
+                    s16* sf_scale, s16* sf_long, s16* sf_short, s16* preflag);
+
 #endif
 
 void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l);
@@ -119,5 +128,9 @@ void fn_800C51BC(s32* dst, s32* src, s32* c);
 void fn_800C5430(s32* dst, s32* src, s32* c);
 void fn_800C5508(s32* dst, s32* src, s32* c);
 void fn_800C55D8(s32* dst, s32* src, s32* c);
+
+void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
+                    u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
+                    s16* sf_scale, s16* sf_long, s16* sf_short, s16* preflag);
 
 #endif

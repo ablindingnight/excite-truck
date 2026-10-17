@@ -16,7 +16,12 @@ RANGES = {"rodata": (0x802F3238, 0x802F44E8), "data": (0x8031BFA8, 0x8031D840), 
           "sdata2": (0x80560DA0, 0x80560DB8)}
 EXTRA_SPLITS = {0x8031C298: "data", 0x8031D580: "data", 0x802F34D8: "rodata",
                 0x802F3E20: "rodata", 0x802F3F10: "rodata", 0x802F3F30: "rodata", 0x802F3F54: "rodata",
-                0x802F3258: "rodata", 0x802F3278: "rodata", 0x802F32FC: "rodata", 0x802F3320: "rodata", 0x802F33A4: "rodata"}  # objects found from code, not relocations
+                0x802F3258: "rodata", 0x802F3278: "rodata", 0x802F32FC: "rodata", 0x802F3320: "rodata", 0x802F33A4: "rodata",
+                # dequantizer pool (0x802F34E8): pow43, exponent bases, pretab, multipliers, exponent offsets, band edges
+                0x802F38E8: "rodata", 0x802F39E8: "rodata", 0x802F3A00: "rodata", 0x802F3A8C: "rodata",
+                0x802F3AD4: "rodata", 0x802F3B00: "rodata", 0x802F3B2C: "rodata", 0x802F3B58: "rodata", 0x802F3B84: "rodata",
+                0x802F3BB0: "rodata", 0x802F3BF8: "rodata", 0x802F3C40: "rodata", 0x802F3C88: "rodata", 0x802F3CD0: "rodata",
+                0x802F3D18: "rodata"}  # objects found from code, not relocations
 
 starts = {}
 for l in open("config/REXE01/symbols.txt"):
@@ -66,6 +71,22 @@ SHAPES = {
     0x802F32FC: ("const s32 %s[9]", "s32", 4),  # unreferenced so far, so not static (MWCC would drop it)
     0x802F33A4: ("const s32 %s[9]", "s32", 4),  # unreferenced so far, so not static  # 4-bit popcount; unreferenced, so not static (MWCC would drop it)
     0x802F3F30: ("MP3_STATIC const s16 %s[18]", "s16", 2),  # Huffman lookup depth per table
+    0x802F38E8: ("MP3_STATIC const u8 %s[256]", "u8", 1),  # dequant: exponent base by global gain
+    0x8031C098: ("MP3_STATIC s32 %s[32][4]", "s32", 4),  # dequant: large values, x^(4/3) per 256-wide segment
+    0x802F39E8: ("MP3_STATIC const s8 %s[22]", "s8", 1),  # dequant: pretab
+    0x802F3A00: ("MP3_STATIC const s16 %s[2][35]", "s16", 2),  # dequant: multiplier by scalefac_scale
+    0x802F3A8C: ("MP3_STATIC const u8 %s[2][35]", "u8", 1),  # dequant: exponent offset by scalefac_scale
+    0x802F3AD4: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges
+    0x802F3B00: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges
+    0x802F3B2C: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges
+    0x802F3B58: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges
+    0x802F3B84: ("MP3_STATIC const s16 %s[21]", "s16", 2),  # long-block band edges
+    0x802F3BB0: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
+    0x802F3BF8: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
+    0x802F3C40: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
+    0x802F3C88: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
+    0x802F3CD0: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
+    0x802F3D18: ("MP3_STATIC const s16 %s[36]", "s16", 2),  # short-block band edges
 }
 NODE_LO, NODE_HI = 0x8031C320, 0x8031D478
 
@@ -101,7 +122,10 @@ def emit(a):
         return "MP3_STATIC HuffTable %s[%d] = {%s};\n" % (name(a), len(ws), ", ".join("{%s}" % (name(w) if w else "NULL") for w in ws))
     if a in SHAPES:
         decl, t, sz = SHAPES[a]
-        vals = fmt_vals(a, n, t, sz)
+        dims = [int(x) for x in re.findall(r"\[(\d+)\]", decl)]
+        cnt = 1
+        for x in dims: cnt *= x
+        vals = fmt_vals(a, min(n, cnt * sz), t, sz)
         lines = ["    " + ", ".join(vals[i:i + 12]) + "," for i in range(0, len(vals), 12)]
         return (decl % name(a)) + " = {\n%s\n};\n" % "\n".join(lines)
     if k != "plain":
