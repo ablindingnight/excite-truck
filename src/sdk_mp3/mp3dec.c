@@ -14,8 +14,6 @@ typedef short s16;
 typedef unsigned int u32;
 typedef int s32;
 
-extern u32 lbl_8055DD90;
-extern u32 lbl_8055DD94;
 
 typedef struct HuffTable {
     u16** nodes;
@@ -30,7 +28,15 @@ typedef struct HuffMeta {
 } HuffMeta;
 
 #define NULL 0
+#ifndef MP3_STATIC
+#define MP3_STATIC static
+#endif
 #include "mp3_tables.inc"
+
+static s32 lbl_8055DD88;
+static s32 lbl_8055DD8C;
+static u32 lbl_8055DD90;  /* arena end */
+static u32 lbl_8055DD94;  /* arena current */
 
 typedef struct MP3Info {
     s32 mpeg1;        /* 0x0 */

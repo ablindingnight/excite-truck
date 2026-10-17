@@ -492,6 +492,21 @@ config.libs.append(
     }
 )
 
+# Nintendo-supplied SDK MP3 (Layer III) decoder linked between SD and WENC (same tables as the Wii Photo
+# Channel); library/object name unknown. Every function saves registers with stmw.
+config.libs.append(
+    {
+        "lib": "SDK_mp3",
+        "mw_version": "GC/3.0a3",
+        "src_dir": "src",
+        "cflags": [*cflags_rvl_tp, "-use_lmw_stmw on", "-inline noauto", "-i src/sdk_mp3"],
+        "progress_category": "sdk",
+        "objects": [
+            Object(NonMatching, "sdk_mp3/mp3dec.c"),
+        ],
+    }
+)
+
 config.libs.append(
     {
         "lib": "RVL_SDK_tp",
