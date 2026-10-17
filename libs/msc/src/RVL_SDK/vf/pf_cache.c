@@ -7,9 +7,15 @@ s32 VFiPFCACHE_InitPageList(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_h
     *pp_head = pages;
     bps_per_buf = (p_vol->bpb.bytes_per_sector >> 9) * size;
 
+#ifdef GAME_REXE01
+    if (num / bps_per_buf == 0) {
+        return 30;
+    }
+#else
     if (is_fat == 1 && num / bps_per_buf < 1 || !is_fat && num / bps_per_buf < 2) {
         return 30;
     }
+#endif
 
     if (num / bps_per_buf == 1) {
         pages->p_prev = pages;
@@ -198,6 +204,42 @@ static void VFiPFCACHE_MovePageToTail(struct PF_CACHE_PAGE** pp_head, struct PF_
     }
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: a page without a modified range is written whole, and the
+// alternate FAT is not updated here
+s32 VFiPFCACHE_FlushPageIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page) {
+    u8* p_buf;
+    s32 err;
+    u32 num_success;
+    u32 size;
+    u32 sector;
+
+    if (p_page != NULL && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) {
+        p_buf = p_page->p_mod_sbuf;
+        if (p_buf == NULL) {
+            size = p_page->size;
+            err = VFiPFDRV_lwrite(p_vol, p_page->buffer, p_page->sector, size, &num_success);
+        } else {
+            sector = p_page->sector + ((u32)(p_buf - p_page->buffer) >> p_vol->bpb.log2_bytes_per_sector);
+            size = ((u32)p_page->p_mod_ebuf >> p_vol->bpb.log2_bytes_per_sector) - ((u32)p_buf >> p_vol->bpb.log2_bytes_per_sector) + 1;
+            err = VFiPFDRV_lwrite(p_vol, p_buf, sector, size, &num_success);
+        }
+
+        if (err != 0) {
+            return err;
+        }
+
+        if (num_success != size) {
+            return 0x11;
+        }
+
+        p_page->p_mod_sbuf = NULL;
+        p_page->p_mod_ebuf = NULL;
+        p_page->stat &= ~2;
+    }
+    return 0;
+}
+#else
 s32 VFiPFCACHE_FlushPageIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page) {
     u8* p_buf;
     s32 err;
@@ -231,6 +273,7 @@ s32 VFiPFCACHE_FlushPageIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* 
     }
     return 0;
 }
+#endif
 
 static s32 VFiPFCACHE_ClearModified(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_head) {
     struct PF_CACHE_PAGE* p_page;
@@ -247,6 +290,59 @@ static s32 VFiPFCACHE_ClearModified(struct PF_VOLUME* p_vol, struct PF_CACHE_PAG
     return 0;
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: no device flush
+s32 VFiPFCACHE_DoAllocatePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit) {
+    s32 err;
+    u32 offset;             // Present in DWARF but unused here.
+    u32 data_start_sector;  // Present in DWARF but unused here.
+    struct PF_CACHE_PAGE* p_page;  // Present in DWARF but unused here.
+
+    *pp_page = VFiPFCACHE_SearchForPage(p_vol, *pp_head, sector);
+    if (*pp_page) {
+        *p_is_hit = 1;
+    } else {
+        *p_is_hit = 0;
+        if (!VFiPFCACHE_SearchForFreePage(*pp_head, pp_page)) {
+            if (!*pp_page) {
+                *pp_page = 0;
+                return 30;
+            }
+
+            err = VFiPFCACHE_FlushPageIfNeeded(p_vol, *pp_page);
+            if (err != 0) {
+                *pp_page = NULL;
+                return err;
+            }
+
+            (*pp_page)->p_mod_sbuf = 0;
+            (*pp_page)->p_mod_ebuf = 0;
+        }
+
+        if (sector != -1) {
+            if (((*pp_page)->stat & 4) != 0) {
+                (*pp_page)->sector = sector - (sector % (*pp_page)->size);
+                (*pp_page)->p_buf = &(*pp_page)->buffer[(sector % (*pp_page)->size) << p_vol->bpb.log2_bytes_per_sector];
+            } else {
+                if (p_vol->bpb.fat_type == FAT_32 && (sector < p_vol->bpb.first_data_sector || sector >= p_vol->bpb.total_sectors)) {
+                    if (sector == p_vol->bpb.fs_info_sector) {
+                        (*pp_page)->size = 1;
+                    }
+                }
+                (*pp_page)->sector = sector - (sector % (*pp_page)->size);
+                (*pp_page)->p_buf = &(*pp_page)->buffer[(sector % (*pp_page)->size) << p_vol->bpb.log2_bytes_per_sector];
+            }
+        } else {
+            (*pp_page)->sector = sector;
+            (*pp_page)->p_buf = (*pp_page)->buffer;
+        }
+
+        (*pp_page)->stat |= 1u;
+    }
+    VFiPFCACHE_MovePageToHead(pp_head, *pp_page);
+    return 0;
+}
+#else
 s32 VFiPFCACHE_DoAllocatePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit) {
     s32 err;
     u32 offset;             // Present in DWARF but unused here.
@@ -309,6 +405,7 @@ s32 VFiPFCACHE_DoAllocatePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp
     VFiPFCACHE_MovePageToHead(pp_head, *pp_page);
     return 0;
 }
+#endif
 
 static void VFiPFCACHE_DoFreeCachePage(struct PF_CACHE_PAGE** pp_head, struct PF_CACHE_PAGE* p_page) {
     p_page->stat &= ~0x1;
@@ -354,6 +451,53 @@ s32 VFiPFCACHE_DoReadPage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_hea
     return 0;
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: no device flush
+s32 VFiPFCACHE_DoReadPageAndFlushIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, u32 sector, struct PF_CACHE_PAGE** pp_page, u32 set_sig) {
+    u32 num_success;
+    u32 is_hit;
+    s32 err;
+    struct PF_CACHE_PAGE* p_page;  // Present in DWARF but unused here.
+
+    err = VFiPFCACHE_DoAllocatePage(p_vol, pp_head, sector, pp_page, &is_hit);
+    if (err) {
+        return err;
+    }
+
+    if (!is_hit) {
+        err = VFiPFDRV_lread(p_vol, (*pp_page)->buffer, (*pp_page)->sector, (*pp_page)->size, &num_success);
+        if (err) {
+            VFiPFCACHE_DoFreeCachePage(pp_head, *pp_page);
+            return err;
+        }
+        if (num_success != (*pp_page)->size && p_vol->bpb.total_sectors != (*pp_page)->sector + num_success) {
+            VFiPFCACHE_DoFreeCachePage(pp_head, *pp_page);
+            return 17;
+        }
+
+        (*pp_page)->stat &= ~2u;
+        (*pp_page)->p_mod_sbuf = 0;
+        (*pp_page)->p_mod_ebuf = 0;
+
+        if (set_sig) {
+            (*pp_page)->signature = p_vol->cache.signature;
+        } else {
+            (*pp_page)->signature = 0;
+        }
+
+    } else {
+        if (set_sig && (*pp_page)->stat & 2 && p_vol->cache.mode & 2 && (*pp_page)->signature != p_vol->cache.signature) {
+            err = VFiPFCACHE_FlushPageIfNeeded(p_vol, *pp_page);
+            if (err) {
+                *pp_page = NULL;
+                return err;
+            }
+        }
+    }
+
+    return 0;
+}
+#else
 s32 VFiPFCACHE_DoReadPageAndFlushIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, u32 sector, struct PF_CACHE_PAGE** pp_page, u32 set_sig) {
     u32 num_success;
     u32 is_hit;
@@ -412,6 +556,7 @@ s32 VFiPFCACHE_DoReadPageAndFlushIfNeeded(struct PF_VOLUME* p_vol, struct PF_CAC
 
     return 0;
 }
+#endif
 
 s32 VFiPFCACHE_DoReadNumSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
     struct PF_CACHE_PAGE* p_page;
@@ -457,6 +602,41 @@ s32 VFiPFCACHE_DoReadNumSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** p
     }
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: always marks the page modified, no device flush
+s32 VFiPFCACHE_DoWritePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, struct PF_CACHE_PAGE* p_page, u32 set_sig) {
+    s32 err;
+
+    VFiPFCACHE_MovePageToHead(pp_head, p_page);
+
+    p_page->stat |= 2;
+    if (p_page->p_mod_sbuf == 0) {
+        p_page->p_mod_sbuf = p_page->p_buf;
+        p_page->p_mod_ebuf = p_page->p_buf;
+    } else {
+        if (p_page->p_buf < p_page->p_mod_sbuf) {
+            p_page->p_mod_sbuf = p_page->p_buf;
+        } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+            p_page->p_mod_ebuf = p_page->p_buf;
+        }
+    }
+
+    if (set_sig) {
+        p_page->signature = p_vol->cache.signature;
+    } else {
+        p_page->signature = 0;
+    }
+
+    if ((p_vol->cache.mode & 1) != 0 || ((p_vol->cache.mode & 4) != 0 && (p_page->stat & 4) != 0)) {
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err) {
+            return err;
+        }
+    }
+
+    return 0;
+}
+#else
 s32 VFiPFCACHE_DoWritePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, struct PF_CACHE_PAGE* p_page, u32 set_sig) {
     s32 err;
     s32 do_flush;
@@ -500,7 +680,50 @@ s32 VFiPFCACHE_DoWritePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_he
 
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: no device flush
+s32 VFiPFCACHE_DoWriteSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector) {
+    struct PF_CACHE_PAGE* p_page;
+    u32 num_success;
+    s32 err;
+
+    p_page = VFiPFCACHE_SearchForPage(p_vol, *pp_head, sector);
+
+    if (p_page) {
+        VFipf_memcpy(p_page->p_buf, (void*)p_buf, p_vol->bpb.bytes_per_sector);
+
+        p_page->stat |= 2;
+        if (p_page->p_mod_sbuf == 0) {
+            p_page->p_mod_sbuf = p_page->p_buf;
+            p_page->p_mod_ebuf = p_page->p_buf;
+        } else {
+            if (p_page->p_buf < p_page->p_mod_sbuf) {
+                p_page->p_mod_sbuf = p_page->p_buf;
+            } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+                p_page->p_mod_ebuf = p_page->p_buf;
+            }
+        }
+
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err) {
+            return err;
+        }
+    } else {
+        err = VFiPFDRV_lwrite(p_vol, p_buf, sector, 1, &num_success);
+        if (err) {
+            return err;
+        }
+
+        if (num_success != 1) {
+            return 17;
+        }
+    }
+
+    return 0;
+}
+#else
 s32 VFiPFCACHE_DoWriteSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector) {
     struct PF_CACHE_PAGE* p_page;
     u32 num_success;
@@ -556,7 +779,81 @@ s32 VFiPFCACHE_DoWriteSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_
 
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: no write-through mode or device flush
+s32 VFiPFCACHE_DoWriteNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
+    struct PF_CACHE_PAGE* p_page;
+    s32 err;
+    u32 num_rest_sector;
+    u8* p_sbuf;
+    u8* p_ebuf;
+
+    p_page = NULL;
+    num_rest_sector = num_sector;
+    *p_num_success = 0;
+
+    do {
+        p_page = VFiPFCACHE_SearchForUsedPage(p_vol, pp_head, p_page);
+
+        if (p_page != NULL && p_page->sector != 0xFFFFFFFF) {
+            if (p_page->sector <= sector && p_page->sector + p_page->size >= sector + num_sector) {
+                VFipf_memcpy(&p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (void*)p_buf, num_sector << p_vol->bpb.log2_bytes_per_sector);
+                *p_num_success += num_rest_sector;
+                num_rest_sector = 0;
+                p_page->stat |= 2;
+                p_sbuf = &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector];
+                p_ebuf = p_sbuf + ((num_sector - 1) << p_vol->bpb.log2_bytes_per_sector);
+                if (!p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                    p_page->p_mod_ebuf = p_ebuf;
+                } else if (p_sbuf < p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                } else if (p_page->p_mod_ebuf < p_ebuf) {
+                    p_page->p_mod_ebuf = p_ebuf;
+                }
+            } else if (p_page->sector >= sector && p_page->sector + p_page->size <= sector + num_sector) {
+                VFipf_memcpy(p_page->buffer, (void*)&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->size << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size;
+                *p_num_success += p_page->size;
+                p_page->stat |= 2;
+                p_page->p_mod_sbuf = p_page->buffer;
+                p_page->p_mod_ebuf = &p_page->buffer[(p_page->size - 1) << p_vol->bpb.log2_bytes_per_sector];
+            } else if (p_page->sector > sector && p_page->sector < sector + num_sector && p_page->sector + p_page->size >= sector + num_sector) {
+                VFipf_memcpy(p_page->buffer, (void*)&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], (p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector))) << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector));
+                *p_num_success += p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector));
+                p_page->stat |= 2;
+                p_ebuf = &p_page->buffer[(p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector)) - 1) << p_vol->bpb.log2_bytes_per_sector];
+                p_page->p_mod_sbuf = p_page->buffer;
+                if (!p_page->p_mod_ebuf || p_page->p_mod_ebuf < p_ebuf) {
+                    p_page->p_mod_ebuf = p_ebuf;
+                }
+            } else if (p_page->sector < sector && p_page->sector + p_page->size > sector && p_page->sector + p_page->size <= sector + num_sector) {
+                VFipf_memcpy(&p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (void*)p_buf, (p_page->size - (sector - p_page->sector)) << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size - (sector - p_page->sector);
+                *p_num_success += p_page->size - (sector - p_page->sector);
+                p_page->stat |= 2;
+                p_sbuf = &p_page->buffer[(p_page->size - (sector - p_page->sector) - 1) << p_vol->bpb.log2_bytes_per_sector];
+                if (!p_page->p_mod_sbuf || p_sbuf < p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                }
+                p_page->p_mod_ebuf = &p_page->buffer[(p_page->size - 1) << p_vol->bpb.log2_bytes_per_sector];
+            }
+        }
+    } while (p_page && num_rest_sector);
+
+    if (num_rest_sector != 0) {
+        err = VFiPFDRV_lwrite(p_vol, p_buf, sector, num_sector, p_num_success);
+        if (err) {
+            return err;
+        }
+    }
+
+    return 0;
+}
+#else
 s32 VFiPFCACHE_DoWriteNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
     struct PF_CACHE_PAGE* p_page;
     s32 err;
@@ -634,7 +931,42 @@ s32 VFiPFCACHE_DoWriteNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, struct P
 
     return 0;
 }
+#endif
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: honours the cache mode here and has no device flush
+s32 VFiPFCACHE_DoFlushCache(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_head) {
+    struct PF_CACHE_PAGE* p_page;
+    s32 err;
+    s32 first_err;
+
+    first_err = 0;
+    p_page = p_head;
+
+    if ((p_head->stat & 1) == 0) {
+        return 0;
+    }
+
+    if ((p_vol->cache.mode & 1) != 0 || ((p_vol->cache.mode & 4) != 0 && (p_head->stat & 4) != 0)) {
+        return 0;
+    }
+
+    do {
+        if ((p_page->stat & 1) == 0) {
+            break;
+        }
+
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0 && first_err == 0) {
+            first_err = err;
+        }
+
+        p_page = p_page->p_next;
+    } while (p_page != p_head);
+
+    return first_err;
+}
+#else
 s32 VFiPFCACHE_DoFlushCache(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_head) {
     struct PF_CACHE_PAGE* p_page;
     s32 err;
@@ -688,6 +1020,7 @@ s32 VFiPFCACHE_DoFlushCache(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_hea
 
     return first_err;
 }
+#endif
 
 void VFiPFCACHE_SetCache(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_cache_page, u8 (*p_cache_buf)[512], u16 num_fat_pages, u16 num_data_pages) {
     p_vol->cache.pages = p_cache_page;
@@ -744,6 +1077,24 @@ s32 VFiPFCACHE_UpdateModifiedSector(struct PF_CACHE_PAGE* p_page) {
     return 0;
 }
 
+#ifdef GAME_REXE01
+s32 VFiPFCACHE_AllocateFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit) {
+    s32 err;
+
+    if (!p_vol->cache.p_current_fat) {
+        p_vol->cache.pages->buffer = *p_vol->cache.buffers;
+        p_vol->cache.pages->p_buf = *p_vol->cache.buffers;
+        *pp_page = p_vol->cache.pages;
+        return 0;
+    }
+
+    err = VFiPFCACHE_DoAllocatePage(p_vol, &p_vol->cache.p_current_fat, sector, pp_page, p_is_hit);
+    if (!err) {
+        return 0;
+    }
+    return err;
+}
+#else
 s32 VFiPFCACHE_AllocateFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page) {
     s32 err;
     u32 is_hit;
@@ -761,7 +1112,26 @@ s32 VFiPFCACHE_AllocateFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CA
     }
     return err;
 }
+#endif
 
+#ifdef GAME_REXE01
+s32 VFiPFCACHE_AllocateDataPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit) {
+    s32 err;
+
+    if (!p_vol->cache.p_current_data) {
+        p_vol->cache.pages->buffer = *p_vol->cache.buffers;
+        p_vol->cache.pages->p_buf = *p_vol->cache.buffers;
+        *pp_page = p_vol->cache.pages;
+        return 0;
+    } else {
+        err = VFiPFCACHE_DoAllocatePage(p_vol, &p_vol->cache.p_current_data, sector, pp_page, p_is_hit);
+        if (!err) {
+            return 0;
+        }
+    }
+    return err;
+}
+#else
 s32 VFiPFCACHE_AllocateDataPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page) {
     s32 err;
     u32 is_hit;
@@ -779,6 +1149,7 @@ s32 VFiPFCACHE_AllocateDataPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_C
     }
     return err;
 }
+#endif
 
 void VFiPFCACHE_FreeFATPage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page) {
     if (p_vol->cache.p_current_fat) {
@@ -902,6 +1273,41 @@ s32 VFiPFCACHE_FlushFATCache(struct PF_VOLUME* p_vol) {
     return err;
 }
 
+#ifdef GAME_REXE01
+// Excite Truck's older PrFILE2: no device flush after writing the pages back
+s32 VFiPFCACHE_FlushDataCacheSpecific(struct PF_VOLUME* p_vol, void* signature) {
+    s32 err;
+    struct PF_CACHE_PAGE* p_head;
+    struct PF_CACHE_PAGE* p_page;
+
+    err = 0;
+
+    if ((p_vol->cache.mode & 0x7)) {
+        p_head = p_vol->cache.p_current_data;
+        p_page = p_head;
+
+        if (p_page->signature == 0 || p_page->signature == signature) {
+            err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+            if (err) {
+                return err;
+            }
+        }
+
+        p_page = p_head->p_next;
+        while (p_page != p_head) {
+            if (p_page->signature == 0 || p_page->signature == signature) {
+                err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+                if (err) {
+                    return err;
+                }
+            }
+            p_page = p_page->p_next;
+        }
+    }
+
+    return err;
+}
+#else
 s32 VFiPFCACHE_FlushDataCacheSpecific(struct PF_VOLUME* p_vol, void* signature) {
     s32 err;
     struct PF_CACHE_PAGE* p_head;
@@ -960,6 +1366,7 @@ s32 VFiPFCACHE_FlushDataCacheSpecific(struct PF_VOLUME* p_vol, void* signature) 
 
     return err;
 }
+#endif
 
 s32 VFiPFCACHE_FlushAllCaches(struct PF_VOLUME* p_vol) {
     s32 err;

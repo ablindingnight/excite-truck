@@ -903,6 +903,9 @@ s32 VFiPFFILE_p_fread(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, s
 }
 
 s32 VFiPFFILE_p_fwrite(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, struct PF_FILE* p_file, u32* p_count_written) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     u32 append_size;
     struct PF_CACHE_PAGE* p_page;
     u32 size_written;
@@ -926,7 +929,7 @@ s32 VFiPFFILE_p_fwrite(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, 
         p_file->cursor.position = p_file->p_sfd->dir_entry.file_size;
         p_file->cursor.file_sector_index = p_file->cursor.position >> p_vol->bpb.log2_bytes_per_sector;
         p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol->bpb.bytes_per_sector - 1);
-        err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page);
+        err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page PF_ET_IS_HIT_ARG);
         if (err) {
             return err;
         }

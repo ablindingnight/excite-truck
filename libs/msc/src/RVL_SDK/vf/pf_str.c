@@ -66,18 +66,22 @@ void VFiPFSTR_MoveStrPos(struct PF_STR* p_str, s16 num_char) {
 }
 
 s32 VFiPFSTR_InitStr(struct PF_STR* p_str, const s8* s, u32 code_mode) {
+#ifndef GAME_REXE01
     if (p_str == NULL || s == NULL) {
         return 10;
     }
 
+#endif
     if (code_mode == PF_STR_CODEMODE_OEM) {
         p_str->p_head = s;
         p_str->p_tail = s + VFipf_strlen(s);
     } else if (code_mode == PF_STR_CODEMODE_UNICODE) {
         p_str->p_head = s;
         p_str->p_tail = s + (2 * VFipf_w_strlen((const u16*)s));
+#ifndef GAME_REXE01
     } else {
         return 10;
+#endif
     }
 
     p_str->code_mode = code_mode;

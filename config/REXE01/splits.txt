@@ -1091,13 +1091,13 @@ RVL_SDK/vf/pf_service.c:
 	.text       start:0x800A4C04 end:0x800A4D3C
 
 RVL_SDK/vf/pf_str.c:
-	.text       start:0x800A51B8 end:0x800A52A0
+	.text       start:0x800A4D3C end:0x800A52A0
 
 RVL_SDK/vf/pdm_disk.c:
 	.text       start:0x800A5EE8 end:0x800A6048
 
 RVL_SDK/vf/pf_cache.c:
-	.text       start:0x800A82B0 end:0x800A8504
+	.text       start:0x800A7774 end:0x800A939C
 
 RVL_SDK/vf/pf_cluster.c:
 	.text       start:0x800A939C end:0x800A9470

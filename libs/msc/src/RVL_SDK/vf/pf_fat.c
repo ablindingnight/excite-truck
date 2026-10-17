@@ -1378,6 +1378,9 @@ s32 VFiPFFAT_GetBeforeChain(struct PF_VOLUME* p_vol, u32 start_cluster, u32 lAct
 }
 
 s32 VFiPFFAT_InitFATRegion(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     u32 sector;
     struct PF_CACHE_PAGE* p_page;
     s32 err;
@@ -1388,7 +1391,7 @@ s32 VFiPFFAT_InitFATRegion(struct PF_VOLUME* p_vol) {
     if (p_vol->bpb.fat_type != FAT_12 && p_vol->bpb.fat_type != FAT_16 && p_vol->bpb.fat_type != FAT_32) {
         return 15;
     }
-    err = VFiPFCACHE_AllocateFATPage(p_vol, -1, &p_page);
+    err = VFiPFCACHE_AllocateFATPage(p_vol, -1, &p_page PF_ET_IS_HIT_ARG);
     if (err) {
         return err;
     }
@@ -1420,6 +1423,9 @@ s32 VFiPFFAT_InitFATRegion(struct PF_VOLUME* p_vol) {
 }
 
 s32 VFiPFFAT_MakeRootDir(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     s32 err;
     u32 sector;
     u32 success_size;
@@ -1435,7 +1441,7 @@ s32 VFiPFFAT_MakeRootDir(struct PF_VOLUME* p_vol) {
         return err;
     }
 
-    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page);
+    err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page PF_ET_IS_HIT_ARG);
     if (err) {
         return err;
     }

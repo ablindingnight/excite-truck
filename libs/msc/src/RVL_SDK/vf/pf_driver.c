@@ -58,12 +58,15 @@ static void VFiPFDRV_notifyNoExecuteLogicalFormat(struct PF_VOLUME* p_vol) {
 }
 
 s32 VFiPFDRV_GetFSINFOInformation(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     s32 err;
     struct PF_CACHE_PAGE* p_page;
     u32 nSector;
     u32 is_valid;
 
-    err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page);
+    err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page PF_ET_IS_HIT_ARG);
     if (err) {
         return err;
     }
@@ -104,11 +107,14 @@ s32 VFiPFDRV_GetFSINFOInformation(struct PF_VOLUME* p_vol) {
 }
 
 s32 VFiPFDRV_StoreFreeCountToFSINFO(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     s32 err;
     struct PF_CACHE_PAGE* p_page;
     u32 num_success;
 
-    err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page);
+    err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page PF_ET_IS_HIT_ARG);
     if (err) {
         return err;
     }
@@ -164,6 +170,9 @@ s32 VFiPFDRV_finalize(struct PF_VOLUME* p_vol) {
 }
 
 s32 VFiPFDRV_mount(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     s32 err;
     struct PF_CACHE_PAGE* p_page;
     u32 nSector;
@@ -193,7 +202,7 @@ s32 VFiPFDRV_mount(struct PF_VOLUME* p_vol) {
         if ((disk_inf.media_attr & 8) != 0) {
             VFiPFDRV_notifyNoExecuteLogicalFormat(p_vol);
         }
-        VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page);
+        VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page PF_ET_IS_HIT_ARG);
         err = VFipdm_part_logical_read(p_vol->p_part, p_page->buffer, 0, 1, 512, &nSector);
         if (err) {
             if (err == 21) {

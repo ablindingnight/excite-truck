@@ -679,6 +679,9 @@ s32 VFiPFENT_GetRootDir(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_ent) {
 }
 
 s32 VFiPFENT_MakeRootDir(struct PF_VOLUME* p_vol) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     struct PF_CACHE_PAGE* p_page;
     u32 sector;
     u32 success_size;
@@ -694,7 +697,7 @@ s32 VFiPFENT_MakeRootDir(struct PF_VOLUME* p_vol) {
             break;
         case FAT_12:
         case FAT_16:
-            err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page);
+            err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page PF_ET_IS_HIT_ARG);
             if (err != 0) {
                 return err;
             }

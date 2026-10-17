@@ -862,7 +862,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/vf/pf_service.c"),
             Object(Matching, "RVL_SDK/vf/pf_str.c"),
             Object(Matching, "RVL_SDK/vf/pdm_disk.c"),
-            Object(NonMatching, "RVL_SDK/vf/pf_cache.c"),
+            Object(Matching, "RVL_SDK/vf/pf_cache.c"),
             Object(NonMatching, "RVL_SDK/vf/pf_cluster.c"),
             Object(Matching, "RVL_SDK/vf/pf_entry.c"),
             Object(NonMatching, "RVL_SDK/vf/pf_entry_iterator.c"),

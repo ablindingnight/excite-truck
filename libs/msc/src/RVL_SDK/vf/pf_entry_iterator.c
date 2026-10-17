@@ -2,6 +2,9 @@
 
 
 static s32 VFiPFENT_RecalcEntryIterator(struct PF_ENT_ITER* p_iter, u32 may_allocate) {
+#ifdef GAME_REXE01
+    u32 is_hit;
+#endif
     s32 err;
     u32 is_initialize;
     u32 file_sector_index;
@@ -23,7 +26,7 @@ static s32 VFiPFENT_RecalcEntryIterator(struct PF_ENT_ITER* p_iter, u32 may_allo
                 return err;
             }
             if (p_iter->sector != 0xFFFFFFFF && is_initialize != 0xFFFFFFFF) {
-                err = VFiPFCACHE_AllocateDataPage(p_iter->p_vol, 0xFFFFFFFF, &p_page);
+                err = VFiPFCACHE_AllocateDataPage(p_iter->p_vol, 0xFFFFFFFF, &p_page PF_ET_IS_HIT_ARG);
                 if (err != 0) {
                     return err;
                 }

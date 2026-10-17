@@ -22,8 +22,22 @@ void VFiPFCACHE_SetFATBufferSize(struct PF_VOLUME* p_vol, u32 size);
 void VFiPFCACHE_SetDataBufferSize(struct PF_VOLUME* p_vol, u32 size);
 s32 VFiPFCACHE_InitCaches(struct PF_VOLUME* p_vol);
 s32 VFiPFCACHE_UpdateModifiedSector(struct PF_CACHE_PAGE* p_page);
+#ifdef GAME_REXE01
+#define PF_ET_IS_HIT_ARG , &is_hit
+#else
+#define PF_ET_IS_HIT_ARG
+#endif
+
+#ifdef GAME_REXE01
+s32 VFiPFCACHE_AllocateFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit);
+#else
 s32 VFiPFCACHE_AllocateFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page);
+#endif
+#ifdef GAME_REXE01
+s32 VFiPFCACHE_AllocateDataPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page, u32* p_is_hit);
+#else
 s32 VFiPFCACHE_AllocateDataPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page);
+#endif
 void VFiPFCACHE_FreeFATPage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page);
 void VFiPFCACHE_FreeDataPage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page);
 s32 VFiPFCACHE_ReadFATPage(struct PF_VOLUME* p_vol, u32 sector, struct PF_CACHE_PAGE** pp_page);
