@@ -7,43 +7,44 @@ static s16* lbl_8055DD88;
 static s32 lbl_8055DD8C;
 
 /* Frame decode (fn_800BDF4C): header, side info, main data, then per granule the scalefactors, Huffman
- * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 930 of 933; behaviour verified against the original in a PPC simulation
+ * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 931 of 933; behaviour verified against the original in a PPC simulation
  * (200 random frames, heavy stages stubbed, bit readers from the original). */
 s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
-    s16 id;
-    s16 prot;
-    s16 bitrate;
-    s16 stereo;
-    s16 padding;
-    s16 mdb;
+    u32 bits;
+    s16 table_select[2][2][3];
     u8 ngr;
     s8 gr;
-    s8 ch;
-    u32 bits;
-    s32 start;
-    s32 frame_bits;
-    s32 end;
-    s32 n;
-    s16 i;
-    u8* p;
-    s16 bound[2];
-    s8 mixed[2][2];
-    s8 window_switching[2][2];
-    s8 block_type[2][2];
-    s16 preflag[2][2];
-    s16 big_values[2][2];
-    s16 global_gain[2][2];
     s16 sf_scale[2][2];
-    s16 part2_3[2][2];
+    s32 start;
     s16 region1[2][2];
-    s16 region0[2][2];
     s16 is_scale[2][2];
-    s16 sfc[2][2];
-    s16 count1_table[2][2];
-    u32 flags[2][2];
+    s16 bitrate;
+    s16 prot;
     s16 scfsi[2][4];
+    s16 mdb;
+    s32 frame_bits;
+    s16 region0[2][2];
+    s16 i;
+    s32 neg_unk10;
+    s32 n;
+    s32 end;
+    u32 flags[2][2];
+    s16 id;
+    s16 padding;
+    s16 sfc[2][2];
+    s16 part2_3[2][2];
+    s8 block_type[2][2];
+    s16 count1_table[2][2];
+    s16 stereo;
     s16 subblock_gain[2][2][3];
-    s16 table_select[2][2][3];
+    s8 window_switching[2][2];
+    s8 mixed[2][2];
+    s8 ch;
+    u8* p;
+    s16 global_gain[2][2];
+    s16 big_values[2][2];
+    s16 preflag[2][2];
+    s16 bound[2];
 
     d->unk278 = ctx;
     d->unk8 = 0;
@@ -187,7 +188,8 @@ s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* 
         d->unk10 = d->unk14 - mdb * 8 - (frame_bits - ((const s16(*)[2])lbl_80560DA8)[d->channels - 1][prot]);
     }
     d->count1_end = ((const s16(*)[3])lbl_802F34D8)[d->lsf][d->sr_index];
-    if (d->unk10 < 0 && d->unkC == 0 && 0x200000 - d->unk10 - d->unkC > 0x200000) {
+    neg_unk10 = -d->unk10;
+    if (d->unk10 < 0 && d->unkC == 0 && neg_unk10 + 0x200000 - d->unkC > 0x200000) {
         for (gr = 0; gr < ngr; gr++) {
             for (i = 0; i < 0x480; i++) {
                 *lbl_8055DD88++ = 0;
