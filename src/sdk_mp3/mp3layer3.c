@@ -530,7 +530,7 @@ void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
 }
 
-/* Same as fn_800C2590 with the other window table. NonMatching: same size and opcodes. */
+/* Same as fn_800C2590 with the other window table. NonMatching: 159/159, a few opcodes differ in order. */
 void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     s32* w = lbl_8031D6B8;
     s32 x, c0, c1, y0, y1, p0;
