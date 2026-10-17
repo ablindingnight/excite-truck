@@ -4,33 +4,40 @@
 #define DEPOP_MIN (-20)
 #define DEPOP_MAX 20
 
+// Excite Truck's older AX voice code (AXVPB.c) adds into these depop totals directly
+#ifdef GAME_REXE01
+#define AXSPB_DEPOP_STATIC
+#else
+#define AXSPB_DEPOP_STATIC static
+#endif
+
 static AXSTUDIO __AXStudio ALIGN(32);
 
-static s32 __AXSpbAux3 = 0;
-static s32 __AXSpbAux2 = 0;
-static s32 __AXSpbAux1 = 0;
-static s32 __AXSpbAux0 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAux3 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAux2 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAux1 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAux0 = 0;
 
-static s32 __AXSpbMain3 = 0;
-static s32 __AXSpbMain2 = 0;
-static s32 __AXSpbMain1 = 0;
-static s32 __AXSpbMain0 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbMain3 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbMain2 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbMain1 = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbMain0 = 0;
 
-static s32 __AXSpbACS = 0;
-static s32 __AXSpbACR = 0;
-static s32 __AXSpbACL = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbACS = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbACR = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbACL = 0;
 
-static s32 __AXSpbABS = 0;
-static s32 __AXSpbABR = 0;
-static s32 __AXSpbABL = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbABS = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbABR = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbABL = 0;
 
-static s32 __AXSpbAAS = 0;
-static s32 __AXSpbAAR = 0;
-static s32 __AXSpbAAL = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAAS = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAAR = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAAL = 0;
 
-static s32 __AXSpbAS = 0;
-static s32 __AXSpbAR = 0;
-static s32 __AXSpbAL = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAS = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAR = 0;
+AXSPB_DEPOP_STATIC s32 __AXSpbAL = 0;
 
 AXSTUDIO* __AXGetStudio(void) {
     return &__AXStudio;
