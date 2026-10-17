@@ -302,6 +302,50 @@ void fn_800C1E88(s32* coeff, s32* input, s32* output) {
     }
 }
 
+/* Sums 18 pairs into every 64th word (stride 0x100 bytes). */
+void fn_800C1F6C(s32* dst, s32* a, s32* b) {
+    dst[0] = a[0] + b[0];
+    dst[64] = a[1] + b[1];
+    dst[128] = a[2] + b[2];
+    dst[192] = a[3] + b[3];
+    dst[256] = a[4] + b[4];
+    dst[320] = a[5] + b[5];
+    dst[384] = a[6] + b[6];
+    dst[448] = a[7] + b[7];
+    dst[512] = a[8] + b[8];
+    dst[576] = a[9] + b[9];
+    dst[640] = a[10] + b[10];
+    dst[704] = a[11] + b[11];
+    dst[768] = a[12] + b[12];
+    dst[832] = a[13] + b[13];
+    dst[896] = a[14] + b[14];
+    dst[960] = a[15] + b[15];
+    dst[1024] = a[16] + b[16];
+    dst[1088] = a[17] + b[17];
+}
+
+/* Like fn_800C1F6C, but odd entries are negated. */
+void fn_800C2090(s32* dst, s32* a, s32* b) {
+    dst[0] = a[0] + b[0];
+    dst[64] = -(a[1] + b[1]);
+    dst[128] = a[2] + b[2];
+    dst[192] = -(a[3] + b[3]);
+    dst[256] = a[4] + b[4];
+    dst[320] = -(a[5] + b[5]);
+    dst[384] = a[6] + b[6];
+    dst[448] = -(a[7] + b[7]);
+    dst[512] = a[8] + b[8];
+    dst[576] = -(a[9] + b[9]);
+    dst[640] = a[10] + b[10];
+    dst[704] = -(a[11] + b[11]);
+    dst[768] = a[12] + b[12];
+    dst[832] = -(a[13] + b[13]);
+    dst[896] = a[14] + b[14];
+    dst[960] = -(a[15] + b[15]);
+    dst[1024] = a[16] + b[16];
+    dst[1088] = -(a[17] + b[17]);
+}
+
 /* IMDCT stage dispatcher: window stage, then the butterfly stage on win + 1 and src advanced by 4 bytes
  * (mode 0) or 2 bytes. win/src are byte-addressed in the original (addi 1 / 4 / 2). */
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
@@ -377,6 +421,53 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
     }
     while (n4-- != 0) {
         *p++ = value;
+    }
+}
+
+/* Synthesis for one granule: 18 steps; each moves the window position (decoder +0x27C) back by 0x40
+ * (wrapping to 0x3C0), runs fn_800C4E5C per channel, then fn_800C34B4 per output channel (stereo
+ * interleaved when mode == 0, else planar with the second channel n samples later).
+ * NonMatching: 90/90, the original keeps byte offsets as loop variables where ours keeps pointers. */
+void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mode) {
+    s32 k;
+    s8 ch;
+    s32 n;
+    s32* p;
+    s32* v;
+    s32 i2;
+    s32 i1;
+
+    n = 0x480;
+    if (d->lsf == 1) {
+        n = 0x240;
+    }
+    i2 = 0;
+    i1 = 0;
+    for (k = 0; k < 18; k++) {
+        if ((d->unk27C -= 0x40) < 0) {
+            d->unk27C = 0x3C0;
+        }
+        p = buf;
+        v = vb;
+        for (ch = 0; ch < channels; ch++) {
+            fn_800C4E5C(v, p + d->unk27C);
+            p += 1024;
+            v += 32;
+        }
+        if (channels == 2) {
+            if (mode == 0) {
+                fn_800C34B4(buf, (u8*)&out[i2], d->unk27C, mode);
+                fn_800C34B4(buf + 1024, (u8*)&out[i2 + 1], d->unk27C, mode);
+            } else {
+                fn_800C34B4(buf, (u8*)&out[i1], d->unk27C, mode);
+                fn_800C34B4(buf + 1024, (u8*)&out[i1 + n], d->unk27C, mode);
+            }
+        } else {
+            fn_800C34B4(buf, (u8*)&out[i1], d->unk27C, 1);
+        }
+        vb += 64;
+        i2 += 64;
+        i1 += 32;
     }
 }
 

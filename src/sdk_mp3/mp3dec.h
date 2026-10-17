@@ -34,7 +34,7 @@ typedef struct MP3Decoder {
     s16 sr_index;             /* 0x1C */
     u8 pad1E[0x278 - 0x1E];
     u32 unk278;               /* 0x278 */
-    u16 unk27C;               /* 0x27C */
+    s16 unk27C;               /* 0x27C: synthesis window position */
     u8 pad27E[0x9CC - 0x27E];
     s32 unk9CC[8];            /* 0x9CC */
     u8 pad9EC[0xED70 - 0x9EC];
@@ -91,6 +91,10 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start);
 void MP3_Reorder32(u32* dst, u32* src, s32 mode);
 void fn_800C1E88(s32* coeff, s32* input, s32* output);
+void fn_800C1F6C(s32* dst, s32* a, s32* b);
+void fn_800C2090(s32* dst, s32* a, s32* b);
+void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mode);
+void fn_800C4E5C(s32* vb, s32* p);
 void fn_800C3960(s32* dst, const s32* tbl, s32 win, u8* src, s32 n, s32 mode);
 void fn_800C3574(s32* dst, const s32* tbl, s32 win, u8* src, s32 mode);
 void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode);
