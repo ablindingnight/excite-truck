@@ -741,8 +741,6 @@ exit:
     return rc;
 }
 
-#pragma push
-#pragma dont_inline on
 s32 ISD_ReadCardRegister(ISDDevice* dev, s32 reg, u32* buf, u32 size) {
     u32 resp[4];
     u32 resp_type;
@@ -826,7 +824,6 @@ exit:
     return rc;
 }
 
-#pragma pop
 
 s32 sduDatabuswidth(ISDDevice* dev, u32 width) {
     u32 resp[4];
@@ -865,6 +862,8 @@ s32 sduDatabuswidth(ISDDevice* dev, u32 width) {
     return rc;
 }
 
+#pragma push
+#pragma dont_inline on
 s32 sduGetSCR(ISDDevice* dev, u32* buf) {
     u32 resp[4];
     s32 rc;
@@ -888,6 +887,7 @@ s32 sduGetSCR(ISDDevice* dev, u32* buf) {
     }
     return rc;
 }
+#pragma pop
 
 // Stripped from ET.
 s32 ISD_GetCardSize(ISDDevice* dev, u32* p_size) {
