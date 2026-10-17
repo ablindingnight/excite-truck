@@ -13,10 +13,10 @@ const char* fn_80131234(const char* key);  // localize
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
 void fn_802E6BD8(u32 code, int, void* buf, u32 size, void (*cb)(int));
-const char* fn_80016720(const char* model);
 int fn_801E8838(void);
 }
 
+const char* GetBaseChassisName(const char* chassis);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
@@ -465,7 +465,7 @@ static inline s32 AchSumModel(AchStats* stats, int category, const char* name) {
 }
 
 s32 AchGetModelStat(int category, const char* model) {
-    const char* name = fn_80016720(model);
+    const char* name = GetBaseChassisName(model);
     s32 total = 0;
     AchStats* p = &s_profiles[IdentGetCurrentSlot()];
     u32 i;
@@ -497,7 +497,7 @@ void AchAddModelStat(int category, const char* model, s32 value) {
     if (!AchIsRecording()) {
         return;
     }
-    name = fn_80016720(model);
+    name = GetBaseChassisName(model);
     found = -1;
     empty = -1;
     for (i = 0; i < NUM_MODELS; i++) {

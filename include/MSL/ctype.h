@@ -8,9 +8,8 @@ extern "C" {
 typedef struct __CMap {
     char UNK_0x0[0x8];
     const unsigned short* ctype_map; // at 0x8
-    char UNK_0xC[0x10 - 0xC];
+    const u8* to_upper_table; // at 0xC
     const u8* to_lower_table; // at 0x10
-    const u8* to_upper_table; // at 0x14
 } __CMap;
 
 typedef struct __Locale {
