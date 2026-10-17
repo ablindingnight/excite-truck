@@ -550,57 +550,69 @@ void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-512] = -((s32)(((s64)x * c1) >> 20) + prev[9]);
 }
 
-/* Nine Q20 window pairs: out1[i] = x * w[2i], out2[-i] = x * w[2i + 1] (lbl_8031D730).
- * NonMatching: 120/119; the original forms the table address with lwzu (see fn_800C2F98). */
+/* Nine Q20 window pairs: out1[i] = x * w[2i], out2[-i] = x * w[2i + 1] (lbl_8031D730). The table is walked
+ * with *w++ (gives the original's lwzu). */
 void fn_800C2DBC(s32* in, s32* out1, s32* out2) {
     s32* w = lbl_8031D730;
-    s32 x, c0, c1;
+    s32 x, c0, c1, y0, y1;
 
     x = in[0];
-    c0 = w[0];
-    c1 = w[1];
+    c0 = *w++;
+    c1 = *w++;
     out1[0] = (s32)(((s64)x * c0) >> 20);
     out2[0] = (s32)(((s64)x * c1) >> 20);
     x = in[1];
-    c0 = w[2];
-    c1 = w[3];
+    c0 = *w++;
+    c1 = *w++;
     out1[1] = (s32)(((s64)x * c0) >> 20);
     out2[-1] = (s32)(((s64)x * c1) >> 20);
     x = in[2];
-    c0 = w[4];
-    c1 = w[5];
+    c0 = *w++;
+    c1 = *w++;
     out1[2] = (s32)(((s64)x * c0) >> 20);
     out2[-2] = (s32)(((s64)x * c1) >> 20);
     x = in[3];
-    c0 = w[6];
-    c1 = w[7];
-    out1[3] = (s32)(((s64)x * c0) >> 20);
-    out2[-3] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[3] = y0;
+    out2[-3] = y1;
     x = in[4];
-    c0 = w[8];
-    c1 = w[9];
-    out1[4] = (s32)(((s64)x * c0) >> 20);
-    out2[-4] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[4] = y0;
+    out2[-4] = y1;
     x = in[5];
-    c0 = w[10];
-    c1 = w[11];
-    out1[5] = (s32)(((s64)x * c0) >> 20);
-    out2[-5] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[5] = y0;
+    out2[-5] = y1;
     x = in[6];
-    c0 = w[12];
-    c1 = w[13];
-    out1[6] = (s32)(((s64)x * c0) >> 20);
-    out2[-6] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[6] = y0;
+    out2[-6] = y1;
     x = in[7];
-    c0 = w[14];
-    c1 = w[15];
-    out1[7] = (s32)(((s64)x * c0) >> 20);
-    out2[-7] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[7] = y0;
+    out2[-7] = y1;
     x = in[8];
-    c0 = w[16];
-    c1 = w[17];
-    out1[8] = (s32)(((s64)x * c0) >> 20);
-    out2[-8] = (s32)(((s64)x * c1) >> 20);
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[8] = y0;
+    out2[-8] = y1;
 }
 
 /* IMDCT output for the first block: copies in[0..5] forward, zeroes out2 backwards, and the last three
