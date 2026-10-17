@@ -833,7 +833,7 @@ config.libs.append(
         "cflags": cflags_msc_sdk,
         "progress_category": "sdk",
         "objects": [
-            Object(NonMatching, "RVL_SDK/ax/AXAlloc.c"),
+            Object(Matching, "RVL_SDK/ax/AXAlloc.c"),
             Object(NonMatching, "RVL_SDK/ax/AXOut.c"),
             Object(NonMatching, "RVL_SDK/ax/AXSPB.c"),
             Object(NonMatching, "RVL_SDK/ax/AXVPB.c"),

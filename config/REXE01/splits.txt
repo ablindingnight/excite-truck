@@ -289,7 +289,7 @@ revolution/ai/ai.c:
 	.sbss       start:0x8055D6A8 end:0x8055D6E4
 
 RVL_SDK/ax/AXAlloc.c:
-	.text       start:0x800306CC end:0x8003099C
+	.text       start:0x800306CC end:0x80030C34
 	.bss        start:0x8035BEA0 end:0x8035BFA0
 	.sbss       start:0x8055D6E8 end:0x8055D6EC
 
