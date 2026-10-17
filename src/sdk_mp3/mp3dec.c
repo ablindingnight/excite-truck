@@ -3,7 +3,7 @@
  * decompiled out of address order and will be reordered when the unit is registered.
  * Build: cflags_rvl_tp, GC/3.0a3, plus -use_lmw_stmw on -inline noauto (every function saves with
  * stmw; WENCGetEncodeData right after it does not, so it is a separate object).
- * Matching so far: MP3_Create, MP3_GetInfo, MP3_Fill, MP3_ArenaInit/Alloc/Set. Close (register or
+ * Matching so far: MP3_Create, MP3_GetInfo, MP3_Delete, MP3_Fill, MP3_ArenaInit/Alloc/Set. Close (register or
  * scheduling only): FindSync, GetBits, GetBitsRing, ParseHeader, HuffLookup, PeekBitsRing,
  * DecodeQuads (0x800C08A8, 176/176), DecodeQuadsB (0x800C0B68, 164/164). Drafted: DecodeBigValues
  * (0x800C0440, 256 vs 255; needs the .rodata tables defined here so MWCC pools their addresses). */
@@ -232,6 +232,13 @@ MP3Decoder* MP3_Create(const u8* header, u32 b, s32 buf, s32 size) {
     d->unk278 = b;
     MP3_ParseHeader(d, header);
     return d;
+}
+
+void MP3_ArenaSet(u32 p);
+
+/* Frees a decoder: the arena is a bump allocator, so resetting it to the decoder's address releases it. */
+void MP3_Delete(u32 p) {
+    MP3_ArenaSet(p);
 }
 
 void MP3_ArenaInit(s32 base, s32 size) {
