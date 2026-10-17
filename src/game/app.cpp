@@ -11,6 +11,8 @@ void FlagsInit(void);
 void FlagsShutdown(void);
 void RepInit(void);
 void RepShutdown(void);
+void RaceShutdown(void);
+void RaceInit(void);
 void LoadTimerShutdown(void);
 void LoadTimerProgress(void);
 void LoadTimerBegin(const char* name, int, int, f32 duration);
@@ -44,7 +46,6 @@ void fn_80232230(void);
 void fn_80137B20(void);
 void fn_80016354(void);
 void fn_801E3C04(void);
-void fn_80007F40(void);
 void fn_8000D8C8(void);
 void fn_8001BA78(void);
 void fn_8001EF38(void);
@@ -87,7 +88,6 @@ void fn_80141458(void);
 void fn_8001EFCC(void);
 void fn_8001BA84(void);
 void fn_8000D94C(void);
-void fn_80007F68(void);
 void fn_801E3C88(void);
 void fn_800163F0(void);
 void fn_80137BE4(void);
@@ -121,15 +121,6 @@ void fn_8020A600(void);
 void fn_8023BFBC(int eve, int track);
 }
 
-class ValueTable {
-public:
-    virtual void vf0(void);
-    virtual void vf1(void);
-    virtual void vf2(void);
-    virtual void vf3(void);
-    virtual const char* GetString(const char* key, const char* def);
-};
-
 struct Eve {
     u8 unk0[0x20];
     ValueTable* vals;  // offset 0x20
@@ -156,23 +147,6 @@ public:
     virtual int Get(int key);
 };
 
-class Unk_EC40 {
-public:
-    Unk_EC40(void) {
-        unk4 = 123;
-        unk0 = 0;
-        unk8 = 0;
-        unkC = 0;
-        unk10 = 0;
-    }
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-    u32 unk14;
-};
-
 extern u32 lbl_8055D430;
 extern u8 lbl_8055F63C;
 
@@ -189,7 +163,7 @@ ModuleTag lbl_8055D320;
 UnkStaticFFFF lbl_8055D328;
 int lbl_80558900 = 2;
 const char* lbl_8055890C = "winky";
-Unk_EC40 lbl_8034EC40;
+UnkStatic123 lbl_8034EC40;
 UnkStatic7F lbl_8055D32C;
 char lbl_8034EC58[0x20];
 
@@ -263,7 +237,7 @@ void AppInit(void) {
     LoadTimerProgress();
     fn_80127464();
     fn_801E3C04();
-    fn_80007F40();
+    RaceInit();
     fn_8000D8C8();
     fn_8001BA78();
     fn_8001EF38();
@@ -312,7 +286,7 @@ void AppShutdown(void) {
     fn_8001EFCC();
     fn_8001BA84();
     fn_8000D94C();
-    fn_80007F68();
+    RaceShutdown();
     fn_801E3C88();
     fn_800163F0();
     fn_80137BE4();

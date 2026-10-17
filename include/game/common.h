@@ -29,4 +29,32 @@ public:
     u32 value;
 };
 
+// Static object built by an inline constructor storing (0, 123, 0, 0, 0).
+class UnkStatic123 {
+public:
+    UnkStatic123(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+    u32 unk14;
+};
+
+// Parsed .val table node (vtable slots from the callers; names are guesses).
+class ValueTable {
+public:
+    virtual const char* GetName(void);                                // 0x8
+    virtual ValueTable* GetChild(int index);                          // 0xC
+    virtual void vf2(void);                                           // 0x10
+    virtual const char* GetValue(const char* key);                    // 0x14
+    virtual const char* GetString(const char* key, const char* def);  // 0x18
+};
+
 #endif
