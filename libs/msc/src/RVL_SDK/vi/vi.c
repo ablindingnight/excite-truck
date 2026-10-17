@@ -18,7 +18,11 @@
 
 #define MARK_CHANGED(index) (changed |= 1LL << (63 - (index)))
 
+#ifdef GAME_REXE01
+const char* __VIVersion = "<< RVL_SDK - VI \trelease build: Sep 26 2006 17:27:57 (0x4200_60422) >>";
+#else
 const char* __VIVersion = "<< RVL_SDK - VI \trelease build: Nov 30 2006 03:31:49 (0x4199_60831) >>";
+#endif
 
 static void __VIRetraceHandler(__OSInterrupt, OSContext*);
 static inline VIScanMode VIGetScanMode(void);
@@ -64,10 +68,17 @@ static OSThreadQueue retraceQueue;
 
 #define VI_NUMREGS ARRAY_COUNT(VI_HW_REGS)
 
+#ifdef GAME_REXE01
+static u16 shdwRegs[VI_NUMREGS] = {0};
+static HorVer_s HorVer;
+static vu32 __VIDimmingFlag_DEV_IDLE[10];
+static u16 regs[VI_NUMREGS];
+#else
 static u16 shdwRegs[VI_NUMREGS] = {0};
 static u16 regs[VI_NUMREGS] = {0};
 static HorVer_s HorVer;
 static vu32 __VIDimmingFlag_DEV_IDLE[10];
+#endif
 
 static VIRetraceCallback PreCB;
 static VIRetraceCallback PostCB;
@@ -78,6 +89,12 @@ static u32 NextBufAddr;
 static u32 CurrBufAddr;
 
 static bool OnShutdown(bool final, u32 event);
+
+#ifdef GAME_REXE01
+#define VI_CONFIGURE_PANIC_LINE 2465
+#else
+#define VI_CONFIGURE_PANIC_LINE 2544
+#endif
 
 static timing_s timing[] = {
     {6, 240, 24, 25, 3, 2, 12, 13, 12, 13, 520, 519, 520, 519, 525, 429, 64, 71, 105, 162, 373, 122, 412},
@@ -100,6 +117,33 @@ static u16 taps[] = {
 
 static OSShutdownFunctionInfo ShutdownFunctionInfo = {OnShutdown, 127};
 
+#ifdef GAME_REXE01
+// Excite Truck's older SDK: switch to RGB mode right away, no wait for a retrace
+static bool OnShutdown(bool final, u32 event) {
+    bool retval;
+
+    if (final == false) {
+        switch (event) {
+            case 3:
+            case 1:
+            case 2:
+                __VISetRGBModeImm();
+                retval = true;
+                break;
+            case 4:
+            case 0:
+            case 6:
+            case 5:
+                retval = true;
+                break;
+        }
+    } else {
+        retval = true;
+    }
+
+    return retval;
+}
+#else
 static bool OnShutdown(bool final, u32 event) {
     bool retval;
     static bool first = true;
@@ -137,6 +181,7 @@ static bool OnShutdown(bool final, u32 event) {
 
     return retval;
 }
+#endif
 
 static void GetCurrentDisplayPosition(u32* hct, u32* vct) {
     u32 hcount, vcount0, vcount;
@@ -273,6 +318,18 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
             __VISetFilter4EURGB60(VI_DISABLE);
         }
 
+#ifdef GAME_REXE01
+        switch (now_tvtype) {
+            case VI_PAL:
+                THD_TIME_TO_DIMMING = 15000;
+                THD_TIME_TO_DVD_STOP = 90000;
+                break;
+            default:
+                THD_TIME_TO_DIMMING = 18000;
+                THD_TIME_TO_DVD_STOP = 108000;
+                break;
+        }
+#else
         switch (now_tvtype) {
             case VI_PAL:
                 switch (g_current_time_to_dim) {
@@ -303,6 +360,7 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
                 THD_TIME_TO_DVD_STOP = 108000;
                 break;
         }
+#endif
 
         _gIdleCount_dimming = 0;
         _gIdleCount_dvd = 0;
@@ -337,9 +395,11 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
                 case 0x40:
                     __VISetRGBOverDrive();
                     break;
+#ifndef GAME_REXE01
                 case 0x80:
                     __VISetRGBModeImm();
                     break;
+#endif
             }
 
             Vdac_Flag_Changed &= ~regIndex;
@@ -389,7 +449,9 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
 
         _gIdleCount_dimming = 0;
         _gIdleCount_dvd = 0;
+#ifndef GAME_REXE01
         THD_TIME_TO_DIMMING = NEW_TIME_TO_DIMMING;
+#endif
     }
 
     if (__VIDimmingFlag_Enable_old != __VIDimmingFlag_Enable) {
@@ -400,7 +462,9 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
         }
 
         _gIdleCount_dimming = 0;
+#ifndef GAME_REXE01
         THD_TIME_TO_DIMMING = NEW_TIME_TO_DIMMING;
+#endif
     }
 
     if (_gIdleCount_dimming == THD_TIME_TO_DIMMING) {
@@ -410,14 +474,18 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
     if (DimmingOFF_Pending) {
         if (__OSSetVIForceDimming(false, 2, 2) == true) {
             DimmingOFF_Pending = 0;
+#ifndef GAME_REXE01
             __VIDimmingState = false;
+#endif
         }
     }
 
     if (DimmingON_Pending) {
         if (__OSSetVIForceDimming(true, 2, 2) == true) {
             DimmingON_Pending = 0;
+#ifndef GAME_REXE01
             __VIDimmingState = true;
+#endif
         }
     }
 
@@ -444,9 +512,11 @@ static void __VIRetraceHandler(__OSInterrupt interrupt, OSContext* context) {
     __VIDimmingFlag_Enable_old = __VIDimmingFlag_Enable;
     __VIDVDStopFlag_Enable_old = __VIDVDStopFlag_Enable;
 
+#ifndef GAME_REXE01
     if ((NEW_TIME_TO_DIMMING > _gIdleCount_dimming) && (__VIDimmingState == false)) {
         THD_TIME_TO_DIMMING = NEW_TIME_TO_DIMMING;
     }
+#endif
 }
 
 static void setScalingRegs(u16 panSizeX, u16 dispSizeX, bool threeD) {
@@ -772,21 +842,29 @@ void VIInit(void) {
     switch (VIGetTvFormat()) {
         case VI_PAL:
             THD_TIME_TO_DIMMING = 15000;
+#ifndef GAME_REXE01
             NEW_TIME_TO_DIMMING = 15000;
+#endif
             THD_TIME_TO_DVD_STOP = 90000;
             break;
         default:
             THD_TIME_TO_DIMMING = 18000;
+#ifndef GAME_REXE01
             NEW_TIME_TO_DIMMING = 18000;
+#endif
             THD_TIME_TO_DVD_STOP = 108000;
             break;
     }
 
     _gIdleCount_dimming = 0;
     _gIdleCount_dvd = 0;
+#ifndef GAME_REXE01
     g_current_time_to_dim = VI_DM_DEFAULT;
+#endif
     __VIDimming_All_Clear = VI_DM_10M;
+#ifndef GAME_REXE01
     __VIDimmingState = false;
+#endif
 
     VIEnableDimming(true);
 
@@ -1032,7 +1110,7 @@ void VIConfigure(const GXRenderModeObj* rm) {
             }
         default:
         panic:
-            OSPanic("vi.c", 2544, "VIConfigure(): Tried to change mode from (%d) to (%d), which is forbidden\n",
+            OSPanic("vi.c", VI_CONFIGURE_PANIC_LINE, "VIConfigure(): Tried to change mode from (%d) to (%d), which is forbidden\n",
                     tvInBootrom, tvInGame);
     }
 
@@ -1180,6 +1258,19 @@ void VISetBlack(BOOL black) {
 
 u32 VIGetRetraceCount(void) { return retraceCount; }
 
+#ifdef GAME_REXE01
+u32 VIGetNextField(void) {
+    u32 nextField;
+    BOOL enabled;
+
+    enabled = OSDisableInterrupts();
+    nextField = getCurrentFieldEvenOdd() ^ 1;
+    OSRestoreInterrupts(enabled);
+
+    return nextField ^ (HorVer.AdjustedDispPosY & 1);
+}
+
+#endif
 u32 VIGetCurrentLine(void) {
     u32 halfLine;
     timing_s* tm;
@@ -1348,6 +1439,7 @@ static inline bool VIEnableDimming(bool enable) {
     return old;
 }
 
+#ifndef GAME_REXE01
 VITimeToDIM VISetTimeToDimming(VITimeToDIM time) {
     VITimeToDIM old_time = g_current_time_to_dim;
     g_current_time_to_dim = time;
@@ -1382,8 +1474,13 @@ VITimeToDIM VISetTimeToDimming(VITimeToDIM time) {
     }
     return old_time;
 }
+#endif
 
+#ifdef GAME_REXE01
+BOOL VIResetRFIdle(void) {
+#else
 BOOL __VIResetRFIdle(void) {
+#endif
     __VIDimmingFlag_RF_IDLE = 0;
     return true;
 }

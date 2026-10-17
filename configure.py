@@ -850,6 +850,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/mem/mem_unitHeap.c"),
             Object(Matching, "RVL_SDK/os/OSExec.c"),
             Object(Matching, "RVL_SDK/os/OSReboot.c"),
+            Object(Matching, "RVL_SDK/vi/vi.c"),
             Object(Matching, "RVL_SDK/vi/i2c.c"),
             Object(Matching, "RVL_SDK/usb/usb.c"),
             Object(Matching, "RVL_SDK/axfx/AXFXReverbHiExp.c"),

@@ -30,6 +30,9 @@ VITimeToDIM VISetTimeToDimming(VITimeToDIM time);
 void __VIInit(VITVMode mode);
 void __VIDisplayPositionToXY(unsigned long hct, unsigned long vct, short* x, short* y);
 int __VIResetRFIdle(void);
+#ifdef GAME_REXE01
+int VIResetRFIdle(void);
+#endif
 int __VIResetSIIdle(void);
 
 #ifdef __cplusplus
