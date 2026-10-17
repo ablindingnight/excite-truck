@@ -931,6 +931,7 @@ config.libs.append(
             Object(NonMatching, "game/achieve.cpp"),
             Object(Matching, "game/driver.cpp"),
             Object(NonMatching, "game/loading.cpp"),
+            Object(NonMatching, "game/stats.cpp"),
         ],
     }
 )

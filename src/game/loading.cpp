@@ -11,6 +11,11 @@ struct Vec {
         y = y_;
         z = z_;
     }
+    void Set(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
 
     f32 x;
     f32 y;
@@ -133,10 +138,6 @@ int fn_8020DE1C(void);
 void fn_80230B5C(DrawContext* ctx);
 void fn_80230AD8(DrawContext* ctx);
 void fn_80230B38(void);
-u32 fn_8001BA90(int slot, u32 kind, s32 event, s32 difficulty, int unk);
-void fn_8001BA70(u32 kind, u32 value, char* buf, int size);
-const char* fn_8001BA6C(u32 kind);
-RecordEntry* fn_8001BB58(int slot, s32 event, s32 difficulty, int unk);
 void fn_80130FCC(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
 Track* fn_80012820(s32 track);
@@ -164,6 +165,10 @@ public:
 };
 
 int IdentGetCurrentSlot(void);
+u32 StatsGetValue(int identity, u32 type, s32 event, int slot, u32 def);
+char* StatsFormatValue(u32 type, u32 value, char* buf, int size);
+const char* StatsGetLabel(u32 type);
+RecordEntry* StatsGetHighScore(int identity, s32 event, s32 key, int index);
 int GetNumPlayers(void);
 const char* GetGradeDisplayName(int grade);
 const char* GetTrackFriendlyName(const char* name);
@@ -295,12 +300,14 @@ void GetTipKey(int idx, s32 type, char* buf, u32 size) {
 
 void OrthonormalizeFrame(CamFrame* f) {
     Vec up(0.0f, 1.0f, 0.0f);
+    Vec fwd;
+    Vec newUp;
+    Vec right;
 
     PSVECCrossProduct(&up, &f->fwd, (Vec*)&f->axes[0]);
     PSVECCrossProduct(&f->fwd, (Vec*)&f->axes[0], (Vec*)&f->axes[1]);
-    Vec fwd(f->fwd.x, f->fwd.y, f->fwd.z);
-    Vec newUp;
-    Vec right(f->axes[0].x, f->axes[0].y, f->axes[0].z);
+    right.Set(f->axes[0].x, f->axes[0].y, f->axes[0].z);
+    fwd.Set(f->fwd.x, f->fwd.y, f->fwd.z);
     PSVECCrossProduct(&fwd, &right, &newUp);
     PSVECNormalize(&right, &right);
     PSVECNormalize(&newUp, &newUp);
@@ -472,10 +479,10 @@ void DrawLoadingBackground(int alpha) {
 
 
 void GetRecordString(u32 kind, char* buf, int size) {
-    u32 value = fn_8001BA90(IdentGetCurrentSlot(), kind, lbl_8055D668, lbl_8055D66C, -1);
+    u32 value = StatsGetValue(IdentGetCurrentSlot(), kind, lbl_8055D668, lbl_8055D66C, -1);
 
     if (value != 0xFFFFFFFF) {
-        fn_8001BA70(kind, value, buf, size);
+        StatsFormatValue(kind, value, buf, size);
     } else {
         COPY_STRING(buf, lbl_80558D8C, size);
     }
@@ -555,23 +562,23 @@ void DrawLoadingScreen(int alpha, f32 t) {
 
             switch (kind) {
             case 4:
-                label = fn_8001BA6C(0x22205);
+                label = StatsGetLabel(0x22205);
                 GetRecordString(0x22205, value, sizeof(value));
                 break;
             case 0:
-                label = fn_8001BA6C(0x40901);
+                label = StatsGetLabel(0x40901);
                 GetRecordString(0x40901, value, sizeof(value));
                 break;
             case 1:
-                label = fn_8001BA6C(0x40902);
+                label = StatsGetLabel(0x40902);
                 GetRecordString(0x40902, value, sizeof(value));
                 break;
             case 2:
-                label = fn_8001BA6C(0x41206);
+                label = StatsGetLabel(0x41206);
                 GetRecordString(0x41206, value, sizeof(value));
                 break;
             case 5:
-                label = fn_8001BA6C(0x20507);
+                label = StatsGetLabel(0x20507);
                 GetRecordString(0x20507, value, sizeof(value));
                 break;
             case 3:
@@ -601,7 +608,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
                 }
                 break;
             case 6: {
-                RecordEntry* rec = fn_8001BB58(IdentGetCurrentSlot(), lbl_8055D668, lbl_8055D66C, 0);
+                RecordEntry* rec = StatsGetHighScore(IdentGetCurrentSlot(), lbl_8055D668, lbl_8055D66C, 0);
                 if (rec != NULL && rec->grade >= 0) {
                     COPY_STRING(value, GetGradeDisplayName(rec->grade), sizeof(value));
                 } else {
@@ -611,7 +618,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
                 break;
             }
             case 7: {
-                RecordEntry* rec = fn_8001BB58(IdentGetCurrentSlot(), lbl_8055D668, lbl_8055D66C, 0);
+                RecordEntry* rec = StatsGetHighScore(IdentGetCurrentSlot(), lbl_8055D668, lbl_8055D66C, 0);
                 if (rec != NULL && rec->score >= 0) {
                     fn_80130FCC(value, sizeof(value), rec->score);
                 } else {
