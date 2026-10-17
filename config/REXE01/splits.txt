@@ -74,6 +74,14 @@ game/cmdline.cpp:
 	.sdata      start:0x80558C58 end:0x80558C70
 	.sbss       start:0x8055D598 end:0x8055D5A4
 
+game/grades.cpp:
+	.text       start:0x8001D7D8 end:0x8001DA5C
+	.ctors      start:0x802ED0C4 end:0x802ED0C8
+	.rodata     start:0x802ED818 end:0x802ED840
+	.data       start:0x802FDB38 end:0x802FDB68
+	.sdata      start:0x80558CE8 end:0x80558CFC
+	.sbss       start:0x8055D5E0 end:0x8055D5E8
+
 MSL/alloc.c:
 	extab       start:0x80004520 end:0x80004558
 	extabindex  start:0x80004700 end:0x80004754

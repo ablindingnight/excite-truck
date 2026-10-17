@@ -924,6 +924,7 @@ config.libs.append(
             Object(Matching, "game/fwd126b4.cpp"),
             Object(Matching, "game/race.cpp"),
             Object(Matching, "game/cmdline.cpp"),
+            Object(Matching, "game/grades.cpp"),
         ],
     }
 )
