@@ -1237,6 +1237,13 @@ RVL_SDK/vf/sd_drv.c:
 	.bss        start:0x80407300 end:0x80407560
 	.sbss       start:0x8055DD40 end:0x8055DD64
 
+revolution/sd/isd.c:
+	.text       start:0x800BAA8C end:0x800BC538
+	.data       start:0x8031B838 end:0x8031BFA8
+	.bss        start:0x80407560 end:0x804075E0
+	.sdata      start:0x80559248 end:0x8055924C
+	.sbss       start:0x8055DD68 end:0x8055DD88
+
 revolution/homebuttonLib/HBMBase.cpp:
 	.text       start:0x800C64DC end:0x800CF294
 	.rodata     start:0x802F4528 end:0x802F47D8

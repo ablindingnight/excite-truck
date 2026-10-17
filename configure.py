@@ -518,6 +518,7 @@ config.libs.append(
             TpRevolution("gx/GXAttr.c", Matching),
             TpRevolution("os/OSRtc.c", Matching),
             TpRevolution("os/OSSemaphore.c", Matching),
+            TpRevolution("sd/isd.c", NonMatching),  # ISD_ReadCardRegister: 2 insns scheduled differently
             TpRevolution("gx/GXTev.c", Matching),
             TpRevolution("gx/GXInit.c", Matching),
             TpRevolution("gx/GXFifo.c", Matching),
