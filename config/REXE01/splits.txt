@@ -1428,6 +1428,8 @@ RVL_SDK/hbm/nw4hbm/snd/snd_StrmPlayer.cpp:
 RVL_SDK/hbm/nw4hbm/snd/snd_StrmSound.cpp:
 	.text       start:0x800FDA20 end:0x800FDE28
 	.ctors      start:0x802ED0FC end:0x802ED100
+	.data       start:0x80326C88 end:0x80326E08
+	.sbss       start:0x8055DE70 end:0x8055DE78
 
 RVL_SDK/hbm/nw4hbm/snd/snd_StrmSoundHandle.cpp:
 	.text       start:0x800FDE28 end:0x800FDE60

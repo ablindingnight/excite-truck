@@ -692,7 +692,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrack.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchiveFile.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_SoundArchivePlayer.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmSound.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_StrmSound.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WaveSound.cpp"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/snd/snd_WsdTrack.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_NandSoundArchive.cpp"),
