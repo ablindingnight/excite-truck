@@ -388,7 +388,7 @@ struct CarState {
             timeLeft = Clamp01(old + dt / 5.0f);
             if (old < timeLeft) {
                 gainT = timeLeft - old;
-            } else if (NearZero(timeLeft) && !NearZero(old)) {
+            } else if (NearZero(timeLeft) && !((f32)__fabs(old) <= lbl_80558DC4[0])) {
                 EndCombo();
                 EndStreak();
                 tA8.Start();
@@ -889,7 +889,7 @@ public:
     virtual int vf64(void);
     virtual int vf68(void);
 
-    Gate* NextGate(Gate* g) {
+    Gate* NextGate(Gate* g) const {
         ZoneLevel* l = &levels->levels[level];
         if (g == l->gates + l->n - 1) {
             return l->gates;
@@ -910,10 +910,11 @@ public:
     void DrawRing(Gate* g, int c);
     CarState* GetCar(int i) { return &cars[i]; }
     int Paused(f32 now) { return 0; }
-    ZoneLevel* CurLevel(void) { return &levels->levels[level]; }
-    Gate* FirstGate(int car) {
+    ZoneLevel* CurLevel(void) const { return &levels->levels[level]; }
+    Gate* FirstGate(int car) const {
         Truck* t = fn_8017960C(car);
-        return NextGate(fn_8013D148(CurLevel(), t->path->GetPos()->dist));
+        f32 d = t->path->GetPos()->dist;
+        return NextGate(fn_8013D148(CurLevel(), d));
     }
     int NextLevel(void) {
         int r = 0;
@@ -925,7 +926,7 @@ public:
         }
         return r;
     }
-    int MaxBonus(int lvl) {
+    int MaxBonus(int lvl) const {
         ZoneLevel* l = &levels->levels[lvl];
         return Round(lbl_8042FB3C.timeBonus * l->score * l->mult);
     }
