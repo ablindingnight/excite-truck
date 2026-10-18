@@ -2160,3 +2160,11 @@ game/aiwidth.cpp:
 	.ctors      start:0x802ED190 end:0x802ED194
 	.sbss       start:0x8055E108 end:0x8055E118
 	.sdata2     start:0x805613D8 end:0x805613E0
+
+game/radar.cpp:
+	.text       start:0x801390B0 end:0x8013990C
+	.ctors      start:0x802ED194 end:0x802ED198
+	.data       start:0x8032BFA0 end:0x8032BFD8
+	.bss        start:0x8042F7A8 end:0x8042F7C0
+	.sbss       start:0x8055E118 end:0x8055E130
+	.sdata2     start:0x805613E0 end:0x80561410
