@@ -366,8 +366,8 @@ inline void ScoreOverlay::Update(int player, int score) {
         p = layout->Find("score");
         if (p) {
             item = *p;
-            int none = GetNumPlayers() < 1;
-            if (!none) {
+            int multi = GetNumPlayers() > 1;
+            if (!multi) {
                 fn_801476C4(layout->Find("score_slash"));
                 fn_801308F4(total, sizeof(total), fn_80160A90());
                 fn_801473F8(layout, "score_denominator", "%s", total);
@@ -426,30 +426,11 @@ inline void OverheatOverlay::Update(int player, int unused) {
 }
 
 inline void OverheatOverlay::Reset(void) {
-    state[0].start = -999.0f;
-    state[0].level = 0.0f;
-    state[0].rate = 0.0f;
-    state[1].start = -999.0f;
-    state[1].level = 0.0f;
-    state[1].rate = 0.0f;
-    state[2].start = -999.0f;
-    state[2].level = 0.0f;
-    state[2].rate = 0.0f;
-    state[3].start = -999.0f;
-    state[3].level = 0.0f;
-    state[3].rate = 0.0f;
-    state[4].start = -999.0f;
-    state[4].level = 0.0f;
-    state[4].rate = 0.0f;
-    state[5].start = -999.0f;
-    state[5].level = 0.0f;
-    state[5].rate = 0.0f;
-    state[6].start = -999.0f;
-    state[6].level = 0.0f;
-    state[6].rate = 0.0f;
-    state[7].start = -999.0f;
-    state[7].level = 0.0f;
-    state[7].rate = 0.0f;
+    for (int i = 0; i < sizeof(state) / sizeof(state[0]); i++) {
+        state[i].start = -999.0f;
+        state[i].level = 0.0f;
+        state[i].rate = 0.0f;
+    }
 }
 
 inline GradeOverlay::~GradeOverlay(void) {
@@ -527,20 +508,20 @@ inline void GradeOverlay::Reset(void) {
 inline LapTitleOverlay::~LapTitleOverlay(void) {}
 
 inline void LapTitleOverlay::Update(int player, int unused) {
-    Racer* racer = fn_801EA9A0(player);
-    f32 now = fn_801E7E18();
-    LapState* s = &state[player];
-    int side;
-    int i;
-    int seg;
-    LapInfo* info;
-    f32 t;
-    LayoutItem** items;
     const char* str;
     char name[32];
+    Racer* racer = fn_801EA9A0(player);
+    f32 now = fn_801E7E18();
+    f32 t;
+    LapInfo* info;
     char leftText[32];
+    LayoutItem** items;
     char rightText[32];
+    int seg;
+    int i;
     char key[30];
+    int side;
+    LapState* s = &state[player];
 
     if (racer->lap > s->lap) {
         s->start = now;
