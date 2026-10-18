@@ -971,6 +971,7 @@ config.libs.append(
             Object(NonMatching, "game/joy.cpp"),
             Object(Matching, "game/sysinit.cpp"),
             Object(NonMatching, "game/random.cpp"),
+            Object(NonMatching, "game/pool.cpp"),
         ],
     }
 )
