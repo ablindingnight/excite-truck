@@ -992,6 +992,7 @@ config.libs.append(
             Object(Matching, "game/aiwidth.cpp"),
             Object(NonMatching, "game/radar.cpp"),
             Object(NonMatching, "game/arenabnd.cpp"),
+            Object(NonMatching, "game/aistub.cpp"),
         ],
     }
 )
