@@ -139,6 +139,16 @@ game/grades.cpp:
 	.sdata      start:0x80558CE8 end:0x80558CFC
 	.sbss       start:0x8055D5E0 end:0x8055D5E8
 
+game/stdoverlay.cpp:
+	.text       start:0x8001DA5C end:0x8001EF38
+	.ctors      start:0x802ED0C8 end:0x802ED0CC
+	.rodata     start:0x802ED840 end:0x802ED850
+	.data       start:0x802FDB68 end:0x802FDE68
+	.bss        start:0x80358668 end:0x80358698
+	.sdata      start:0x80558CFC end:0x80558D30
+	.sbss       start:0x8055D5E8 end:0x8055D608
+	.sdata2     start:0x80560460 end:0x805604A8
+
 game/achieve.cpp:
 	.text       start:0x8001EF38 end:0x8001FD7C
 	.ctors      start:0x802ED0CC end:0x802ED0D0
