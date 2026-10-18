@@ -195,7 +195,7 @@ public:
         dir.y = -t;
         lap = 0;
         unk10 = 0.0f;
-        angle = atan2(dir.x, dir.y);
+        angle = atan2(dir.y, dir.x);
     }
     ~SFMarker(void) { fn_80235380(art); }
 
@@ -312,9 +312,16 @@ void fn_80019BBC(void) {
     lbl_803582C0[20].z = 0.0f;
 }
 
+// Stripped from ET; only its constants remain.
+void GetMapDefaults(f32* half, f32* scale) {
+    *half = 0.5f;
+    *scale = 1.0f;
+}
+
 TrackMap* fn_80019C68(int player) {
-    TrackMap* map;
+    const char* name;
     ValueTable* table;
+    TrackMap* map;
     ValueNode* node;
 
     fn_80019BBC();
@@ -324,48 +331,49 @@ TrackMap* fn_80019C68(int player) {
     } else {
         lbl_8055D5B8++;
     }
-    if (!fn_8012C33C("trackmap.val")) {
-        return 0;
+    name = "trackmap.val";
+    if (fn_8012C33C(name)) {
+        map = &lbl_80358508[player];
+        map->tex = -2;
+        map->target = -2;
+        map->line2Tex = -2;
+        map->lineTex = -2;
+        map->backTex = -2;
+        map->frontTex = -2;
+        table = fn_80131808(name);
+        node = table->FindChild("TrackMap");
+        if (node) {
+            union {
+                u64 raw;
+                Vec2 v;
+            } origin;
+            map->width = node->GetFloat("width");
+            map->texSize = node->GetFloat("tex_size");
+            origin.raw = node->GetPoint("origin");
+            map->origin.x = origin.v.x;
+            map->origin.x = origin.v.x - map->texSize / 2;
+            map->origin.y = origin.v.y - map->texSize / 2;
+            map->minSpeed = node->GetFloat("min_speed", 70.0f);
+            map->maxSpeed = node->GetFloat("max_speed", 120.0f);
+            map->minWidth = node->GetFloat("min_wid", map->width / 4.5f);
+            map->maxWidth = node->GetFloat("max_wid", map->width / 3.5f);
+            map->lineWidth = node->GetFloat("line_wid", 50.0f);
+            map->iconScale = node->GetFloat("icon_scale", 1.0f);
+        }
+        fn_80131818(table);
+        map->target = fn_802CB128(map->texSize, map->texSize, 0, 0x21);
+        map->lineTex = fn_802CAC28("mapline.tex", 0);
+        map->line2Tex = fn_802CAC28("mapline2.tex", 0);
+        fn_802C8530();
+        fn_8001B7BC(map);
+        fn_802C855C();
+        map->trucks = new ("truckdraw") TruckDraw;
+        map->backTex = fn_802CAC28("mapback.tex", 0);
+        map->frontTex = fn_802CAC28("mapfront.tex", 0);
+        map->player = player;
+        return map;
     }
-    map = &lbl_80358508[player];
-    map->tex = -2;
-    map->target = -2;
-    map->line2Tex = -2;
-    map->lineTex = -2;
-    map->backTex = -2;
-    map->frontTex = -2;
-    table = fn_80131808("trackmap.val");
-    node = table->FindChild("TrackMap");
-    if (node) {
-        union {
-            u64 raw;
-            Vec2 v;
-        } origin;
-        map->width = node->GetFloat("width");
-        map->texSize = node->GetFloat("tex_size");
-        origin.raw = node->GetPoint("origin");
-        map->origin = origin.v;
-        map->origin.x = origin.v.x - map->texSize * 0.5f;
-        map->origin.y = origin.v.y - map->texSize * 0.5f;
-        map->minSpeed = node->GetFloat("min_speed", 70.0f);
-        map->maxSpeed = node->GetFloat("max_speed", 120.0f);
-        map->minWidth = node->GetFloat("min_wid", map->width / 4.5f);
-        map->maxWidth = node->GetFloat("max_wid", map->width / 3.5f);
-        map->lineWidth = node->GetFloat("line_wid", 50.0f);
-        map->iconScale = node->GetFloat("icon_scale", 1.0f);
-    }
-    fn_80131818(table);
-    map->target = fn_802CB128(map->texSize, map->texSize, 0, 0x21);
-    map->lineTex = fn_802CAC28("mapline.tex", 0);
-    map->line2Tex = fn_802CAC28("mapline2.tex", 0);
-    fn_802C8530();
-    fn_8001B7BC(map);
-    fn_802C855C();
-    map->trucks = new ("truckdraw") TruckDraw;
-    map->backTex = fn_802CAC28("mapback.tex", 0);
-    map->frontTex = fn_802CAC28("mapfront.tex", 0);
-    map->player = player;
-    return map;
+    return 0;
 }
 
 void fn_8001A04C(TrackMap* map) {
