@@ -980,6 +980,7 @@ config.libs.append(
             Object(NonMatching, "game/locale.cpp"),
             Object(NonMatching, "game/valtable.cpp"),
             Object(Matching, "game/crc.cpp"),
+            Object(NonMatching, "game/options.cpp"),
         ],
     }
 )

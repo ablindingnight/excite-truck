@@ -2085,3 +2085,13 @@ game/crc.cpp:
 	.ctors      start:0x802ED168 end:0x802ED16C
 	.rodata     start:0x802F8F08 end:0x802F9308
 	.sbss       start:0x8055E068 end:0x8055E070
+
+game/options.cpp:
+	.text       start:0x80133010 end:0x8013420C
+	.ctors      start:0x802ED16C end:0x802ED170
+	.rodata     start:0x802F9308 end:0x802F9350
+	.data       start:0x8032B868 end:0x8032BB18
+	.bss        start:0x8042F558 end:0x8042F758
+	.sdata      start:0x80559B58 end:0x80559BD0
+	.sbss       start:0x8055E070 end:0x8055E088
+	.sdata2     start:0x805612D0 end:0x805612E8
