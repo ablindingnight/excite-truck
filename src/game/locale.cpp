@@ -78,6 +78,22 @@ struct DigitGlyph {
     const char* esc;
 };
 
+// Same 123-tag pattern as common.h's UnkStatic123, but only five words.
+struct UnkStatic5 {
+    UnkStatic5(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+};
+
 struct Unk40 {
     Unk40(void) { v = 0x7F000000; }
     u32 v;
@@ -108,7 +124,7 @@ inline const char* LocString::Get(void) {
 }
 
 ModuleTag lbl_8055E038;
-static UnkStatic123 s_unk;
+static UnkStatic5 s_unk;
 Unk40 lbl_8055E040;
 u32 lbl_8055E044;  // localization version
 u8 lbl_8055E048;    // initialised
@@ -144,14 +160,18 @@ UnitSystem lbl_8032B14C = {
     false,
 };
 
-static LocString s_abbr[12] = {
-    LocString("Units:MetersAbbreviation"),        LocString("Units:KilometersAbbreviation"),
-    LocString("Units:KilometersPerHourAbbreviation"), LocString("Units:LitersAbbreviation"),
-    LocString("Units:CubicCentimetersAbbreviation"),  LocString("Units:KilogramsAbbreviation"),
-    LocString("Units:FeetAbbreviation"),          LocString("Units:MilesAbbreviation"),
-    LocString("Units:MilesPerHourAbbreviation"),  LocString("Units:GallonsAbbreviation"),
-    LocString("Units:CubicInchesAbbreviation"),   LocString("Units:PoundsAbbreviation"),
-};
+static LocString s_metersAbbr("Units:MetersAbbreviation");
+static LocString s_kmAbbr("Units:KilometersAbbreviation");
+static LocString s_kmhAbbr("Units:KilometersPerHourAbbreviation");
+static LocString s_litersAbbr("Units:LitersAbbreviation");
+static LocString s_ccAbbr("Units:CubicCentimetersAbbreviation");
+static LocString s_kgAbbr("Units:KilogramsAbbreviation");
+static LocString s_feetAbbr("Units:FeetAbbreviation");
+static LocString s_milesAbbr("Units:MilesAbbreviation");
+static LocString s_mphAbbr("Units:MilesPerHourAbbreviation");
+static LocString s_gallonsAbbr("Units:GallonsAbbreviation");
+static LocString s_ciAbbr("Units:CubicInchesAbbreviation");
+static LocString s_lbsAbbr("Units:PoundsAbbreviation");
 
 static UnitSystem s_custom = lbl_8032B14C;
 
@@ -196,24 +216,24 @@ static inline void ReadUnit(ValueNode* n, Unit* u) {
 extern "C" {
 
 void fn_8012FAB8(const char* valName) {
-    lbl_8032B0C8.s_dist.name = s_abbr[0].Get();
-    lbl_8032B0C8.l_dist.name = s_abbr[1].Get();
-    lbl_8032B0C8.speed.name = s_abbr[2].Get();
-    lbl_8032B0C8.liquid.name = s_abbr[3].Get();
-    lbl_8032B0C8.eng.name = s_abbr[4].Get();
-    lbl_8032B0C8.mass.name = s_abbr[5].Get();
-    lbl_8032B14C.s_dist.name = s_abbr[6].Get();
-    lbl_8032B14C.l_dist.name = s_abbr[7].Get();
-    lbl_8032B14C.speed.name = s_abbr[8].Get();
-    lbl_8032B14C.liquid.name = s_abbr[9].Get();
-    lbl_8032B14C.eng.name = s_abbr[10].Get();
-    lbl_8032B14C.mass.name = s_abbr[11].Get();
+    lbl_8032B0C8.s_dist.name = s_metersAbbr.Get();
+    lbl_8032B0C8.l_dist.name = s_kmAbbr.Get();
+    lbl_8032B0C8.speed.name = s_kmhAbbr.Get();
+    lbl_8032B0C8.liquid.name = s_litersAbbr.Get();
+    lbl_8032B0C8.eng.name = s_ccAbbr.Get();
+    lbl_8032B0C8.mass.name = s_kgAbbr.Get();
+    lbl_8032B14C.s_dist.name = s_feetAbbr.Get();
+    lbl_8032B14C.l_dist.name = s_milesAbbr.Get();
+    lbl_8032B14C.speed.name = s_mphAbbr.Get();
+    lbl_8032B14C.liquid.name = s_gallonsAbbr.Get();
+    lbl_8032B14C.eng.name = s_ciAbbr.Get();
+    lbl_8032B14C.mass.name = s_lbsAbbr.Get();
     if (valName) {
         ValueTable* t = fn_80131808(valName);
         if (t) {
-            int i = 1;
+            int i = 0;
             ValueNode* n;
-            for (n = t->GetChild(0); n; n = t->GetChild(i++)) {
+            for (n = t->GetChild(i++); n; n = t->GetChild(i++)) {
                 if (!strcasecmp("s_dist", n->GetName())) {
                     ReadUnit(n, &s_custom.s_dist);
                 }
@@ -328,11 +348,15 @@ void fn_801305C4(char* buf, s32 size, Unit* u, int mode, f32 value) {
 }
 
 char* fn_8013072C(char* buf, s32 size, s32 value) {
-    s32 n = value < 0 ? -value : value;
-    s32 groups = 0;
+    int neg = value < 0;
+    s32 groups;
+    s32 n;
+    s32 rest;
     s32 lead;
     char* p;
-    s32 rest = n / 1000;
+    n = value < 0 ? -value : value;
+    groups = 0;
+    rest = n / 1000;
     while (rest > 0) {
         n = rest;
         rest /= 1000;
@@ -343,7 +367,7 @@ char* fn_8013072C(char* buf, s32 size, s32 value) {
     } else {
         lead = n < 100 ? 2 : 3;
     }
-    p = buf + groups * 4 + lead + (value < 0);
+    p = &buf[groups * 4 + lead + neg];
     p[1] = 0;
     if (value == 0) {
         *p-- = '0';
@@ -352,17 +376,19 @@ char* fn_8013072C(char* buf, s32 size, s32 value) {
         while (n > 0) {
             if (n >= 1000) {
                 p[0] = n % 10 + '0';
-                p[-1] = n / 10 % 10 + '0';
-                p[-2] = n / 100 % 10 + '0';
+                n /= 10;
+                p[-1] = n % 10 + '0';
+                n /= 10;
+                p[-2] = n % 10 + '0';
+                n /= 10;
                 p[-3] = ',';
-                n /= 1000;
                 p -= 4;
             } else {
                 *p-- = n % 10 + '0';
                 n /= 10;
             }
         }
-        if (value < 0) {
+        if (neg) {
             *p-- = '-';
         }
     }
