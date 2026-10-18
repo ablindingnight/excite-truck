@@ -237,8 +237,10 @@ int fn_80133780(const void* a, const void* b) {
     const OptItem* x = (const OptItem*)a;
     const OptItem* y = (const OptItem*)b;
     int d = x->section - y->section;
-    if (d == 0) {
+    switch (d) {
+    case 0:
         d = strncasecmp(x->name, y->name, 19);
+        break;
     }
     return d;
 }
@@ -278,8 +280,8 @@ f32 fn_80133960(const char* s) {
 
 int fn_80133A08(const char** pp, s32 avail, char* buf, s32 size) {
     const char* p = *pp;
-    const char* end = p + avail;
     char* start = buf;
+    const char* end = p + avail;
     char* last = buf + size - 1;
     while (p < end && isspace(*p)) {
         p++;
@@ -375,13 +377,14 @@ int fn_80133E10(OptItem** out, int section, const char* name) {
     int i;
     for (i = 0; i < lbl_8055E07C->count; i++) {
         OptItem* it = &lbl_8055E07C->items[i];
-        if (it->section == section && !strncasecmp(name, it->name, 19)) {
+        if (section == it->section && !strncasecmp(name, it->name, 19)) {
             *out = &lbl_8055E07C->items[i];
             return 1;
         }
     }
     if (lbl_8055E07C->count < OPT_MAX_ITEMS) {
-        OptItem* it = &lbl_8055E07C->items[lbl_8055E07C->count++];
+        OptItem* it = &lbl_8055E07C->items[lbl_8055E07C->count];
+        lbl_8055E07C->count++;
         it->section = section;
         strncpy(it->name, name, sizeof(it->name));
         it->name[19] = 0;
@@ -441,9 +444,11 @@ void fn_80133FCC(int event) {
 }
 
 void fn_801341B4(int slot, int cleared) {
-    if (!cleared) {
+    switch (cleared) {
+    case 0:
         fn_802E30C8("Opt: Identity called to say that %d was cleared", slot);
         fn_80133F3C(slot + 12);
+        break;
     }
 }
 
