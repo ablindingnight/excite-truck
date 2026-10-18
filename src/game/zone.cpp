@@ -483,7 +483,20 @@ struct RacerInfo {
     s32 rank;  // offset 0x10
 };
 
-class CSubTaskMgr {
+class ISubTaskMgr {
+public:
+    virtual ~ISubTaskMgr(void) {}
+    virtual int vf0C(void) = 0;
+    virtual int vf10(void) = 0;
+    virtual int vf14(int car) = 0;
+    virtual void vf18(void) = 0;
+    virtual int vf1C(int x) = 0;
+    virtual void vf20(void) = 0;
+    virtual void vf24(void) = 0;
+    virtual int vf28(void) = 0;
+};
+
+class CSubTaskMgr : public ISubTaskMgr {
 public:
     virtual ~CSubTaskMgr(void) {}
     virtual int vf0C(void);
