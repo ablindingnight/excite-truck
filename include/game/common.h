@@ -67,9 +67,7 @@ struct ValPoint {
 
 struct ValMatrix {
     ValMatrix(void) {}
-    ValVec3 basis_x;
-    ValVec3 basis_y;
-    ValVec3 basis_z;
+    ValVec3 basis[3];  // basis_x, basis_y, basis_z
     ValVec3 origin;
 };
 

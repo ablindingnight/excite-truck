@@ -152,9 +152,9 @@ public:
                 Swap4((u8*)&w[i]);
             }
         } else {
-            m.basis_x = GetVec3("basis_x");
-            m.basis_y = GetVec3("basis_y");
-            m.basis_z = GetVec3("basis_z");
+            m.basis[0] = GetVec3("basis_x");
+            m.basis[1] = GetVec3("basis_y");
+            m.basis[2] = GetVec3("basis_z");
             m.origin = GetVec3("origin");
         }
         return m;
