@@ -69,7 +69,7 @@ public:
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
     virtual f32 GetFloat(const char* key);                            // 0x24
     virtual void vf10(void);                                          // 0x28
-    virtual void vf11(void);                                          // 0x2C
+    virtual s32 GetIntValue2(const char* key);                        // 0x2C
     virtual int GetBool(const char* key, int def);                    // 0x30
     virtual void vf13(void);                                          // 0x34
     virtual void vf14(void);                                          // 0x38
