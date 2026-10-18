@@ -979,6 +979,7 @@ config.libs.append(
             Object(Matching, "game/base64.cpp"),
             Object(NonMatching, "game/locale.cpp"),
             Object(NonMatching, "game/valtable.cpp"),
+            Object(Matching, "game/crc.cpp"),
         ],
     }
 )

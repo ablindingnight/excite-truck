@@ -2079,3 +2079,9 @@ game/valtable.cpp:
 	.bss        start:0x8042F530 end:0x8042F558
 	.sdata      start:0x80559B08 end:0x80559B58
 	.sbss       start:0x8055E058 end:0x8055E068
+
+game/crc.cpp:
+	.text       start:0x80132E7C end:0x80133010
+	.ctors      start:0x802ED168 end:0x802ED16C
+	.rodata     start:0x802F8F08 end:0x802F9308
+	.sbss       start:0x8055E068 end:0x8055E070
