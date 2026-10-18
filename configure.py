@@ -995,6 +995,7 @@ config.libs.append(
             Object(NonMatching, "game/aistub.cpp"),
             Object(Matching, "game/pushpass.cpp"),
             Object(NonMatching, "game/aiskill.cpp"),
+            Object(NonMatching, "game/catchupval.cpp"),
         ],
     }
 )
