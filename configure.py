@@ -989,6 +989,7 @@ config.libs.append(
             Object(Matching, "game/league.cpp"),
             Object(NonMatching, "game/idealres.cpp"),
             Object(NonMatching, "game/catchup.cpp"),
+            Object(Matching, "game/aiwidth.cpp"),
         ],
     }
 )

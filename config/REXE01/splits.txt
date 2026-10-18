@@ -2154,3 +2154,9 @@ game/catchup.cpp:
 	.ctors      start:0x802ED18C end:0x802ED190
 	.sbss       start:0x8055E0F8 end:0x8055E108
 	.sdata2     start:0x805613B8 end:0x805613D8
+
+game/aiwidth.cpp:
+	.text       start:0x80139044 end:0x801390B0
+	.ctors      start:0x802ED190 end:0x802ED194
+	.sbss       start:0x8055E108 end:0x8055E118
+	.sdata2     start:0x805613D8 end:0x805613E0
