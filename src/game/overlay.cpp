@@ -15,10 +15,14 @@
 void* operator new(size_t size, const char* tag);
 
 // One element of a layout set (0x20 bytes).
+struct LayoutPos {
+    f32 x;
+    f32 y;
+};
+
 struct LayoutItem {
-    u32 unk0;   // offset 0x0
-    f32 x;      // offset 0x4
-    u32 unk8;   // offset 0x8
+    u32 unk0;       // offset 0x0
+    LayoutPos pos;  // offset 0x4
     u32 unkC;   // offset 0xC
     f32 scale;  // offset 0x10
     u32 unk14;  // offset 0x14
@@ -28,10 +32,9 @@ struct LayoutItem {
 
 // A layout art element (0x1C bytes).
 struct LayoutArtItem {
-    u32 unk0;   // offset 0x0
-    f32 x;      // offset 0x4
-    f32 y;      // offset 0x8
-    u32 unkC;   // offset 0xC
+    u32 unk0;       // offset 0x0
+    LayoutPos pos;  // offset 0x4
+    u32 unkC;       // offset 0xC
     f32 w;      // offset 0x10
     f32 h;      // offset 0x14
     u32 color;  // offset 0x18
@@ -39,12 +42,13 @@ struct LayoutArtItem {
 
 class LayoutArt;
 
+// Its vtable (0x8032D260) lives in the layout unit; only the inline dtor is emitted here.
 class Layout {
 public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);            // 0xC
-    virtual LayoutArt* FindArt(const char* name);          // 0x10
-    virtual LayoutArtItem* FindArtItem(const char* name);  // 0x14
+    virtual ~Layout(void) {}
+    virtual LayoutItem* Find(const char* name) = 0;            // 0xC
+    virtual LayoutArt* FindArt(const char* name) = 0;          // 0x10
+    virtual LayoutArtItem* FindArtItem(const char* name) = 0;  // 0x14
 };
 
 struct Event {
@@ -977,6 +981,7 @@ void ResultsOverlay::DrawMenu(void) {
     u32 i;
     f32 elapsed;
     int selected;
+    int frame;
     LayoutItem text;
     LayoutArtItem button;
     u8 alpha;
@@ -985,6 +990,8 @@ void ResultsOverlay::DrawMenu(void) {
     fn_8027AA48();
     fn_80011E70();
     fn_80011E90();
+    int layer = 2;
+    f32 z = layer;
     fn_800109E4(-428.0f, 241.0f, 855.0f, 482.0f, 0x7F000000);
     if (layout) {
         fn_8014784C(layout, "back_art", "back_artset", 0);
@@ -1008,22 +1015,23 @@ void ResultsOverlay::DrawMenu(void) {
                 fn_8027AA48();
             }
             text = *layout->Find(item->text);
-            text.x += item->x;
+            text.pos.x += item->x;
             selected = item->index == selection;
             alpha = 0xFF;
             pulse = 0.0f;
             if (selected) {
                 fn_80230F78(&alpha, &pulse, &text.color, 1);
             }
+            frame = selected ? 1 : 2;
             button = *layout->FindArtItem(item->button);
-            button.x += item->x;
-            fn_80147940(layout, &button, "menu_artset", selected ? 1 : 2);
+            button.pos.x += item->x;
+            fn_80147940(layout, &button, "menu_artset", frame);
             if (selected) {
-                button.x -= 0.5f * button.w * pulse;
-                button.y -= 0.5f * button.h * pulse;
+                button.pos.x -= 0.5f * button.w * pulse;
+                button.pos.y -= 0.5f * button.h * pulse;
                 button.w *= 1.0f + pulse;
                 button.h *= 1.0f + pulse;
-                button.color = (button.color & 0xFFFFFF) | (alpha << 24);
+                button.color = (button.color & 0xFF0000) | (alpha << 24) | (button.color & 0xFFFF);
                 fn_80147940(layout, &button, "menu_artset", 1);
             }
             fn_801476C4(&text);
