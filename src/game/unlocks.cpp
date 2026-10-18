@@ -61,8 +61,18 @@ struct ChassisUnlock {
 ModuleTag lbl_8055D580;
 u8 lbl_8055D588;
 ValueTable* lbl_8055D58C;
-FixedArray<Unlockable, 32> lbl_80357E0C;
-FixedArray<ChassisUnlock, 32> lbl_803580A4;
+// Both lists live in wrapper objects; the registered dtors are the wrappers' implicit ones.
+struct UnlockableTable {
+    FixedArray<Unlockable, 32> list;
+};
+struct ChassisTableInner {
+    FixedArray<ChassisUnlock, 32> list;
+};
+struct ChassisTable {
+    ChassisTableInner inner;
+};
+UnlockableTable lbl_80357E0C;
+ChassisTable lbl_803580A4;
 
 s32 GetExcitePoints(void) {
     return fn_8027DEAC();
@@ -94,7 +104,7 @@ void LoadUnlockables(void) {
             break;
         }
         if (strcmp(node->GetName(), "schedule") == 0) {
-            u = &lbl_80357E0C.data[lbl_80357E0C.count++];
+            u = &lbl_80357E0C.list.data[lbl_80357E0C.list.count++];
             u->type = node->GetValue("type");
             u->name = node->GetValue("name");
             u->points = node->GetIntValue("points");
@@ -102,14 +112,14 @@ void LoadUnlockables(void) {
             u->order = order++;
         }
     }
-    fn_80265DCC(lbl_80357E0C.data, lbl_80357E0C.count, sizeof(Unlockable), CompareUnlockables);
+    fn_80265DCC(lbl_80357E0C.list.data, lbl_80357E0C.list.count, sizeof(Unlockable), CompareUnlockables);
 }
 
 static inline int FindChassisUnlock(const char* name) {
     int i;
 
-    for (i = 0; i < lbl_803580A4.count; i++) {
-        if (strcasecmp(lbl_803580A4.data[i].name, name) == 0) {
+    for (i = 0; i < lbl_803580A4.inner.list.count; i++) {
+        if (strcasecmp(lbl_803580A4.inner.list.data[i].name, name) == 0) {
             return i;
         }
     }
@@ -119,7 +129,7 @@ static inline int FindChassisUnlock(const char* name) {
 static inline UnlockReq* FindUnlockReq(const char* name) {
     int i = FindChassisUnlock(name);
 
-    return i < 0 ? NULL : &lbl_803580A4.data[i].req;
+    return i < 0 ? NULL : &lbl_803580A4.inner.list.data[i].req;
 }
 
 void LoadChassisUnlocks(void) {
@@ -134,10 +144,10 @@ void LoadChassisUnlocks(void) {
             base = node->GetValue("base_chassis");
             idx = FindChassisUnlock(base);
             if (idx < 0) {
-                idx = lbl_803580A4.Size();
-                lbl_803580A4.Add()->name = base;
+                idx = lbl_803580A4.inner.list.Size();
+                lbl_803580A4.inner.list.Add()->name = base;
             }
-            c = &lbl_803580A4.data[idx];
+            c = &lbl_803580A4.inner.list.data[idx];
             c->req.races_run = node->GetIntValue("races_run");
             c->req.aaas = node->GetIntValue("AAAs");
             c->req.special = node->GetValue("special_chassis");
@@ -165,9 +175,9 @@ BOOL IsUnlocked(const char* type, const char* name) {
     } else {
         points = GetExcitePoints2();
     }
-    for (i = 0; i < lbl_80357E0C.count; i++) {
-        if (strcasecmp(name, lbl_80357E0C.data[i].name) == 0 && strcasecmp(type, lbl_80357E0C.data[i].type) == 0) {
-            Unlockable* u = &lbl_80357E0C.data[i];
+    for (i = 0; i < lbl_80357E0C.list.count; i++) {
+        if (strcasecmp(name, lbl_80357E0C.list.data[i].name) == 0 && strcasecmp(type, lbl_80357E0C.list.data[i].type) == 0) {
+            Unlockable* u = &lbl_80357E0C.list.data[i];
 
             {
                 BOOL unlocked = TRUE;
@@ -202,9 +212,9 @@ s32 GetMaxExcitePoints(void) {
     const char* type = "MAX_EXCITE_POINTS";
     int i;
 
-    for (i = 0; i < lbl_80357E0C.count; i++) {
-        if (strcasecmp(lbl_80357E0C.data[i].type, type) == 0) {
-            return lbl_80357E0C.data[i].points;
+    for (i = 0; i < lbl_80357E0C.list.count; i++) {
+        if (strcasecmp(lbl_80357E0C.list.data[i].type, type) == 0) {
+            return lbl_80357E0C.list.data[i].points;
         }
     }
     fn_802E317C("Unlockable: didn't find \"%s\" unlockable!", type);
@@ -212,14 +222,14 @@ s32 GetMaxExcitePoints(void) {
 }
 
 Unlockable* GetUnlockable(int i) {
-    if (i >= 0 && i < lbl_80357E0C.count) {
-        return &lbl_80357E0C.data[i];
+    if (i >= 0 && i < lbl_80357E0C.list.count) {
+        return &lbl_80357E0C.list.data[i];
     }
     return NULL;
 }
 
 int GetUnlockableCount(void) {
-    return lbl_80357E0C.count;
+    return lbl_80357E0C.list.count;
 }
 
 const char* GetSpecialChassis(const char* name) {
