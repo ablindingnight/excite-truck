@@ -124,15 +124,15 @@ static inline void CopyString(const char* src, int size, char* dst) {
 }
 
 void fn_80009DC8(RaceSetup* rs) {
-    RacerList* list = &rs->racers;
-    int n = rs->racers.count;
-    int i;
-    int p;
-    RacerSlot* s;
-    DriverInfo* d;
-    VehicleInfo* v;
-    RacerSlot tmp;
     s32 vehicle;
+    RacerSlot* s;
+    int p;
+    RacerSlot tmp;
+    int i;
+    DriverInfo* d;
+    int n = rs->racers.count;
+    RacerList* list = &rs->racers;
+    VehicleInfo* v;
 
     for (i = 0, s = list->slots; i < n; s++, i++) {
         d = FindDriver(s->driver);
