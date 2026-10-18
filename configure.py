@@ -955,6 +955,7 @@ config.libs.append(
             Object(NonMatching, "game/stdoverlay.cpp"),
             Object(NonMatching, "game/overlay.cpp"),
             Object(NonMatching, "game/escape.cpp"),
+            Object(NonMatching, "game/replay.cpp"),
         ],
     }
 )
