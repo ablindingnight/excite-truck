@@ -866,45 +866,52 @@ void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2) {
 }
 
 /* Second window half: like fn_800C2A88 with lbl_8031D718 and alternating signs (verified 100/100 against
- * a simulation of the original). NonMatching: 105/105, registers/scheduling. */
+ * a simulation of the original), with the same downward prev pointer and *w++ coefficients. NonMatching:
+ * 105/105, same instructions; the original keeps prev + 17 as the base for prev[10]/prev[9]. */
 void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* pp = prev + 17;
     s32* w = lbl_8031D718;
-    s32 i;
-    s32 x, c0, c1;
+    s32 x, c0, c1, y0, y1;
 
     x = -cur[0];
     out1[0] = prev[0];
-    out2[0] = -(x + prev[17]);
+    out2[0] = -(x + *pp--);
     x = -cur[1];
     out1[64] = -prev[1];
-    out2[-64] = x + prev[16];
+    out2[-64] = x + *pp--;
     x = -cur[2];
     out1[128] = prev[2];
-    out2[-128] = -(x + prev[15]);
+    out2[-128] = -(x + *pp--);
     x = -cur[3];
     out1[192] = -prev[3];
-    out2[-192] = x + prev[14];
+    out2[-192] = x + *pp--;
     x = -cur[4];
     out1[256] = prev[4];
-    out2[-256] = -(x + prev[13]);
+    out2[-256] = -(x + *pp--);
     x = -cur[5];
     out1[320] = -prev[5];
-    out2[-320] = x + prev[12];
+    out2[-320] = x + *pp--;
     x = cur[6];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[384] = (y0 + prev[6]);
+    out2[-384] = -(y1 + *pp--);
+    x = cur[7];
     c0 = w[0];
     c1 = w[1];
-    out1[384] = ((s32)(((s64)x * c0) >> 20) + prev[6]);
-    out2[-384] = -((s32)(((s64)x * c1) >> 20) + prev[11]);
-    x = cur[7];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    out1[448] = -(y0 + prev[7]);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out2[-448] = (y1 + *pp--);
+    x = cur[8];
     c0 = w[2];
     c1 = w[3];
-    out1[448] = -((s32)(((s64)x * c0) >> 20) + prev[7]);
-    out2[-448] = ((s32)(((s64)x * c1) >> 20) + prev[10]);
-    x = cur[8];
-    c0 = w[4];
-    c1 = w[5];
-    out1[512] = ((s32)(((s64)x * c0) >> 20) + prev[8]);
-    out2[-512] = -((s32)(((s64)x * c1) >> 20) + prev[9]);
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[512] = (y0 + prev[8]);
+    out2[-512] = -(y1 + *pp--);
 }
 
 /* Nine Q20 window pairs: out1[i] = x * w[2i], out2[-i] = x * w[2i + 1] (lbl_8031D730). The table is walked
