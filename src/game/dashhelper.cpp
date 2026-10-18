@@ -194,7 +194,7 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_800108C8(const char* text, f32 scale);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
-void fn_80010A50(u32 color0, u32 color1, f32 x, f32 y, f32 w, f32 h);
+void fn_80010A50(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1);
 void fn_80010B74(void);
 void fn_80010B7C(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
@@ -264,12 +264,13 @@ class DashSoundPlayer {
 public:
     DashSoundPlayer(void) {
         int i;
+        int j;
         index = 0;
         for (i = 0; i < 3; i++) {
             sounds[0][i] = fn_80207848("rd_press.sfx", 0);
         }
-        for (i = 0; i < 3; i++) {
-            sounds[1][i] = fn_80207848("rd_accept.sfx", 0);
+        for (j = 0; j < 3; j++) {
+            sounds[1][j] = fn_80207848("rd_accept.sfx", 0);
         }
         UpdateVolume();
     }
@@ -287,16 +288,13 @@ public:
     void UpdateVolume(void) {
         f32 vol = 1.0f;
         int i;
+        int j;
         fn_801331C4(4, "effects_volume", &vol);
         for (i = 0; i < 2; i++) {
-            if (sounds[i][0]) {
-                sounds[i][0]->SetVolume(vol);
-            }
-            if (sounds[i][1]) {
-                sounds[i][1]->SetVolume(vol);
-            }
-            if (sounds[i][2]) {
-                sounds[i][2]->SetVolume(vol);
+            for (j = 0; j < 3; j++) {
+                if (sounds[i][j]) {
+                    sounds[i][j]->SetVolume(vol);
+                }
             }
         }
     }
@@ -684,9 +682,10 @@ f32 fn_8000EEC8(int player, f32 height) {
 
 void fn_8000EF74(int player) {
     f32 x;
-    f32 total;
-    f32 y;
     DashRow* row;
+    f32 total;
+    int j;
+    f32 y;
     int i;
 
     if (lbl_803514A0.count == 0) {
@@ -698,15 +697,16 @@ void fn_8000EF74(int player) {
         x = fn_80011E04(player);
     }
     total = 0.0f;
-    for (i = 0, row = lbl_803514A0.rows; i < lbl_803514A0.count; i++, row++) {
-        total += fn_8000EDC0(row->type);
+    for (i = 0; i < lbl_803514A0.count; i++) {
+        total += fn_8000EDC0(lbl_803514A0.rows[i].type);
     }
     total *= lbl_80558A90;
     y = fn_8000EEC8(player, total);
-    for (i = 0, row = lbl_803514A0.rows; i < lbl_803514A0.count; i++, row++) {
+    for (j = 0, row = lbl_803514A0.rows; j < lbl_803514A0.count; row++, j++) {
         f32 scale = fn_8000EDC0(row->type);
         f32 lineH = scale * lbl_80558A90;
-        fn_80010074(fn_8000EE54(row->type), 0x14, row->text, scale, x, y - 0.5f * lineH);
+        f32 ty = y - 0.5f * lineH;
+        fn_80010074(fn_8000EE54(row->type), 0x14, row->text, scale, x, ty);
         y -= lineH;
     }
 }
@@ -1094,17 +1094,17 @@ f32 fn_800109A0(int size) { return (f32)size / (f32)lbl_80558A90; }
 
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h) {
     fn_80010B74();
-    fn_80010A50(color, color, x, y, w, h);
+    fn_80010A50(x, y, w, h, color, color);
     fn_80010B7C();
 }
 
-void fn_80010A50(u32 color0, u32 color1, f32 x, f32 y, f32 w, f32 h) {
+void fn_80010A50(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1) {
     Vertex v[4] __attribute__((aligned(16)));
-    u16 idx[6] = {0, 1, 3, 0, 3, 2};
     fn_80231380(&v[0], color0, x, y, 1.0f, 0.0f, 0.0f);
     fn_80231380(&v[1], color1, x + w, y, 1.0f, 0.0f, 0.0f);
     fn_80231380(&v[2], color0, x, y - h, 1.0f, 0.0f, 0.0f);
     fn_80231380(&v[3], color1, x + w, y - h, 1.0f, 0.0f, 0.0f);
+    u16 idx[6] = {0, 1, 3, 0, 3, 2};
     fn_802C8DB8(v, 4, idx, 6);
 }
 
@@ -1130,8 +1130,9 @@ void fn_80010BEC(void) {
     QueuedRect* r;
     if (lbl_8055D4A8 > 0) {
         fn_80010B74();
-        for (i = 0, r = lbl_8034F6B0; i < lbl_8055D4A8; i++, r++) {
-            fn_80010A50(r->color0, r->color1, r->x, r->y, r->w, r->h);
+        for (i = 0; i < lbl_8055D4A8; i++) {
+            r = &lbl_8034F6B0[i];
+            fn_80010A50(r->x, r->y, r->w, r->h, r->color0, r->color1);
         }
         fn_80010B7C();
         lbl_8055D4A8 = 0;
@@ -1201,25 +1202,22 @@ void fn_80010F38(const char* text, s32 a, s32 b, s32 type, f32 slide) {
 }
 
 void fn_80010FDC(const char* text, int type) {
+    char buf[0x200];
+    int n;
+    int space;
+    DashRow* row;
     f32 wrap = lbl_8055D4D8;
     f32 scale = fn_8000EDC0(type);
     if (fn_800108C8(text, scale) > wrap) {
         while (*text) {
-            char buf[0x200];
-            char* d;
-            int n;
-            int space;
-            DashRow* row;
             memset(buf, 0, sizeof(buf));
-            d = buf;
             n = 0;
             space = -1;
             while (*text && *text != '\n' && fn_800108C8(buf, scale) < wrap) {
                 if (*text == ' ') {
                     space = n;
                 }
-                *d++ = *text++;
-                n++;
+                buf[n++] = *text++;
             }
             if (*text == '\n') {
                 text++;
@@ -1237,7 +1235,7 @@ void fn_80010FDC(const char* text, int type) {
             row->slide = 1.0f;
         }
     } else {
-        DashRow* row = AddRow(&lbl_803514A0);
+        row = AddRow(&lbl_803514A0);
         strncpy(row->text, text, 40);
         row->text[40] = 0;
         row->a = 0;
