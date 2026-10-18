@@ -1000,6 +1000,7 @@ config.libs.append(
             Object(Matching, "game/carclass.cpp"),
             Object(NonMatching, "game/subtask.cpp"),
             Object(NonMatching, "game/zone.cpp"),
+            Object(NonMatching, "game/modeinl.cpp"),
         ],
     }
 )
