@@ -24,6 +24,10 @@ inline int isspace(int x) {
     return (x < 0 || x >= 256) ? 0 : (&_current_locale)->cmap->ctype_map[x] & (1 << 8);
 }
 
+inline int isdigit(int x) {
+    return (x < 0 || x >= 256) ? 0 : (&_current_locale)->cmap->ctype_map[x] & (1 << 3);
+}
+
 inline int tolower(int x) {
     return (x < 0 || x >= 256)
                ? x

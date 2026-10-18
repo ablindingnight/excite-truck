@@ -235,7 +235,9 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     return 0;
 }
 
-void MP3_GetInfo(MP3Decoder* d, MP3Info* info) {
+/* TMCCMP3GetInfo (fn_800BEDE0), formerly MP3_GetInfo: name from the Photo Channel counterpart ("TMCCMP3GetInfo()
+ * failed."), not an ET symbol; ET's void signature and behaviour are kept. */
+void TMCCMP3GetInfo(MP3Decoder* d, MP3Info* info) {
     s32 rate = 44100;
 
     info->mpeg1 = d->lsf == 0;

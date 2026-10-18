@@ -117,7 +117,10 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
 /* TMCCMP3Decode: formerly MP3_DecodeFrame. Name from the diagnostic string "mp3: TMCCMP3Decode returns ..."
  * at its verified caller (strongly supported API name, not an original linker symbol). */
 s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode);
-void MP3_GetInfo(MP3Decoder* d, MP3Info* info);
+/* TMCCMP3GetInfo: formerly MP3_GetInfo. Name from the directly identified Wii Photo Channel counterpart
+ * (its caller prints "TMCCMP3GetInfo() failed."); not an original Excite Truck symbol. ET's version keeps
+ * its own void signature (Photo's returns a status). */
+void TMCCMP3GetInfo(MP3Decoder* d, MP3Info* info);
 s32 MP3_ParseHeader(MP3Decoder* d, u8* buf);
 void MP3_Fill(u32* p, u32 value, u32 size);
 /* TMCCMP3Init: formerly MP3_Create. Name from the diagnostic string "mp3: TMCCMP3Init fails" at its
