@@ -355,6 +355,8 @@ f32 lbl_8055D4D8;  // centre text wrap width
 static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 InvLerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
+static inline f32 Clamp01(f32 x) { return Max(Min(1.0f, x), 0.0f); }
 
 static inline DashRow* AddRow(DashRowList* list) { return &list->rows[list->count++]; }
 
@@ -824,46 +826,43 @@ static inline void CopyString(const char* src, int size, char* dst) {
     }
 }
 
-static inline u32 WithAlpha(u32 color, u8 alpha) { return (color & 0xFFFFFF) | (alpha << 24); }
+static inline u32 WithAlpha(u32 color, s32 alpha) { return (color & 0xFFFFFF) | (alpha << 24); }
 
 void fn_8000F4F0(void) {
     Viewport vp;
     f32 t;
     int num;
-    char text[32] = {0};
     u8 alpha;
     f32 phase;
 
     fn_802C86F0(&vp, 0, 0, lbl_8055CFF0, lbl_8055CFF4);
     t = fn_801E7E3C()->elapsed;
     num = -1;
+    char text[32] = {0};
     alpha = 255;
     phase = 0.0f;
-    if (t <= 3.0f) {
-        if (t > 0.01f && t <= 3.0f) {
-            char key[20];
-            num = (f32)ceil(t);
-            if (num != lbl_80558A98) {
-                lbl_8055D4B4->Play();
-            }
-            phase = num - t;
-            fn_801345D8(key, sizeof(key), "BigText:321_GO_%d", num);
-            CopyString(fn_80131268(key), sizeof(text), text);
-        } else if (-t < 1.5f) {
-            f32 s;
-            f32 left;
-            num = 0;
-            if (lbl_80558A98 != 0) {
-                lbl_8055D4B8->Play();
-            }
-            s = Max(Min(1.0f, (-t - 0.5f) / 1.0f), 0.0f);
-            left = 1.5f - -t;
-            phase = 0.0f + s * 1.0f;
-            if (left < 0.7f) {
-                alpha = alpha * (left / 0.7f);
-            }
-            CopyString(fn_80131268("BigText:321_GO_GO"), sizeof(text), text);
+    if (t > 3.0f) {
+    } else if (t > 0.01f && t <= 3.0f) {
+        char key[20];
+        num = (f32)ceil(t);
+        if (num != lbl_80558A98) {
+            lbl_8055D4B4->Play();
         }
+        phase = num - t;
+        fn_801345D8(key, sizeof(key), "BigText:321_GO_%d", num);
+        CopyString(fn_80131268(key), sizeof(text), text);
+    } else if (-t < 1.5f) {
+        f32 left;
+        num = 0;
+        if (lbl_80558A98 != 0) {
+            lbl_8055D4B8->Play();
+        }
+        phase = Lerp(0.0f, 1.0f, Clamp01(InvLerp(-t, 0.5f, 1.5f)));
+        left = 1.5f - -t;
+        if (left < 0.7f) {
+            alpha = alpha * (left / 0.7f);
+        }
+        CopyString(fn_80131268("BigText:321_GO_GO"), sizeof(text), text);
     }
     lbl_80558A98 = num;
     if (lbl_8055D4B0) {
@@ -874,7 +873,7 @@ void fn_8000F4F0(void) {
             LayoutItem b;
             a = *in;
             b = *out;
-            a.color = WithAlpha(a.color, alpha);
+            a.color = (alpha << 24) | (a.color & 0xFFFFFF);
             b.color = a.color;
             fn_80232928(-1);
             fn_80147ABC(&a, &b, "%s", phase, text);
@@ -884,8 +883,6 @@ void fn_8000F4F0(void) {
     fn_802C8750(&vp, -1);
 }
 
-
-static inline f32 Clamp01(f32 x) { return Max(Min(1.0f, x), 0.0f); }
 
 static inline f32 ArcU(f32 c) { return Clamp01((c - -1.0f) * 0.5f); }
 
@@ -1387,10 +1384,10 @@ void fn_80011A50(void) {
 }
 
 void fn_80011A5C(int n) {
-    int bottom;
-    int top;
-    int right;
     int left;
+    int right;
+    int top;
+    int bottom;
     ScreenBox views[4];
     f32 l;
     f32 r;
@@ -1417,33 +1414,33 @@ void fn_80011A5C(int n) {
         views[0].bottom = 0.0f;
         views[0].left = l;
         views[0].right = r;
-        views[0].width = 320.0f;
         views[1].top = 0.0f;
         views[1].bottom = b;
         views[1].left = l;
         views[1].right = r;
+        views[0].width = 320.0f;
         views[1].width = 320.0f;
     } else {
         views[0].top = t;
         views[0].bottom = 0.0f;
         views[0].left = l;
         views[0].right = 5.0f;
-        views[0].width = (5.0f - l) * 0.5f;
         views[1].top = t;
         views[1].bottom = 0.0f;
         views[1].left = 5.0f;
         views[1].right = r;
-        views[1].width = (r - 5.0f) * 0.5f;
         views[2].top = 0.0f;
         views[2].bottom = b;
         views[2].left = l;
         views[2].right = 5.0f;
-        views[2].width = (5.0f - l) * 0.5f;
         views[3].top = 0.0f;
         views[3].bottom = b;
         views[3].left = 5.0f;
         views[3].right = r;
-        views[3].width = (r - 5.0f) * 0.5f;
+        views[0].width = (5.0f - l) / 2;
+        views[1].width = (r - 5.0f) / 2;
+        views[2].width = (5.0f - l) / 2;
+        views[3].width = (r - 5.0f) / 2;
     }
     lbl_80350EC4.top = 240.0f - t;
     lbl_80350EC4.bottom = -240.0f + b;
@@ -1457,18 +1454,16 @@ void fn_80011A5C(int n) {
         lbl_80350EB0.left = -160.0f + l;
         lbl_80350EB0.right = 160.0f - r;
     }
-    rows = ((n > 1) + 1) * 2;
-    cols = ((n > 2) + 1) * 2;
+    rows = ((lbl_8055D4A0 > 1) + 1) * 2;
+    cols = ((lbl_8055D4A0 > 2) + 1) * 2;
     for (i = 0; i < lbl_8055D4A0; i++) {
-        ScreenBox* v = &lbl_80350ED8[i];
-        ViewLayout* lay = &lbl_80350F28[i];
-        *v = views[i];
-        lay->top = 480.0f / rows - v->top;
-        lay->bottom = -480.0f / rows + v->bottom;
-        lay->left = -640.0f / cols + v->left;
-        lay->right = 640.0f / cols - v->right;
-        lay->centerX = (lay->left + lay->right) * 0.5f;
-        lay->centerY = (lay->top + lay->bottom) * 0.5f;
+        lbl_80350ED8[i] = views[i];
+        lbl_80350F28[i].top = 480.0f / rows - views[i].top;
+        lbl_80350F28[i].bottom = -480.0f / rows + views[i].bottom;
+        lbl_80350F28[i].left = -640.0f / cols + views[i].left;
+        lbl_80350F28[i].right = 640.0f / cols - views[i].right;
+        lbl_80350F28[i].centerX = (lbl_80350F28[i].left + lbl_80350F28[i].right) / 2;
+        lbl_80350F28[i].centerY = (lbl_80350F28[i].top + lbl_80350F28[i].bottom) / 2;
     }
     lbl_8055D4A4 = 1;
 }
