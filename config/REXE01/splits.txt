@@ -2141,3 +2141,10 @@ game/league.cpp:
 	.bss        start:0x8042F788 end:0x8042F7A8
 	.sdata      start:0x80559C00 end:0x80559C40
 	.sbss       start:0x8055E0D8 end:0x8055E0E8
+
+game/idealres.cpp:
+	.text       start:0x80137D58 end:0x80138BE4
+	.ctors      start:0x802ED188 end:0x802ED18C
+	.data       start:0x8032BF00 end:0x8032BFA0
+	.sbss       start:0x8055E0E8 end:0x8055E0F8
+	.sdata2     start:0x80561398 end:0x805613B8
