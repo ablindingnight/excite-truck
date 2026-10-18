@@ -1416,9 +1416,10 @@ extern "C" void fn_8012DD00(void) {
 }
 
 extern "C" void fn_8012DDA8(const char* name) {
+    int found;
     AsyncSetQueue* q;
     if (!fn_8012BD3C(lbl_8055E000, name) && (q = lbl_8055E014) != 0) {
-        int found = 0;
+        found = 0;
         QueueNode* n;
         for (n = q->pending.First(); n; n = n->next) {
             if (!strcasecmp(n->name, name)) {
