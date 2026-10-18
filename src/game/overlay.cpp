@@ -352,8 +352,8 @@ static inline int GetTime(void) { return fn_80009C84() ? lbl_8055D348 : fn_802E2
 class EndOverlay : public GameOverlay {
 public:
     EndOverlay(void) {}
-    virtual int IsDone(void);         // 0x38
-    virtual void DrawContinue(void);  // 0x3C
+    virtual int IsDone(void) = 0;         // 0x38
+    virtual void DrawContinue(void) = 0;  // 0x3C
 };
 
 class ClosureOverlay : public EndOverlay {
@@ -485,8 +485,8 @@ public:
 class WaitOverlay : public GameOverlay {
 public:
     WaitOverlay(void) {}
-    virtual int IsDone(void);         // 0x38
-    virtual void DrawContinue(void);  // 0x3C
+    virtual int IsDone(void) = 0;         // 0x38
+    virtual void DrawContinue(void) = 0;  // 0x3C
 };
 
 class InterludeOverlay : public GameOverlay {
@@ -505,6 +505,7 @@ public:
     virtual void Reset(void);
     virtual void Draw(void);
     virtual int IsDone(void);
+    virtual void DrawContinue(void);
     virtual void Update(void);
     virtual int HandleKey(int player, u32 type, int key);
     virtual const char* GetName(void);
