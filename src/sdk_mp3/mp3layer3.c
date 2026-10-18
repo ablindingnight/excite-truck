@@ -1642,20 +1642,23 @@ void MP3_Fill(u32* p, u32 value, u32 size) {
 /* Synthesis for one granule: 18 steps; each moves the window position (decoder +0x27C) back by 0x40
  * (wrapping to 0x3C0), runs fn_800C4E5C per channel, then fn_800C34B4 per output channel (stereo
  * interleaved when mode == 0, else planar with the second channel n samples later).
- * NonMatching: 90/90, the original keeps byte offsets as loop variables where ours keeps pointers. */
+ * The first call per channel indexes out[k * 64] / out[k * 32] and the second out[i2 + 1] / out[i1 + n], which gives
+ * the original's four counters. NonMatching: 90/90, same instructions; registers differ. */
 void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mode) {
-    s32 k;
-    s8 ch;
+    s32* w;
+    s32 i1;
     s32 n;
+    s32 i2;
     s32* p;
     s32* v;
-    s32 i2;
-    s32 i1;
+    s8 ch;
+    s32 k;
 
     n = 0x480;
     if (d->lsf == 1) {
         n = 0x240;
     }
+    w = vb;
     i2 = 0;
     i1 = 0;
     for (k = 0; k < 18; k++) {
@@ -1663,7 +1666,7 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
             d->unk27C = 0x3C0;
         }
         p = buf;
-        v = vb;
+        v = w;
         for (ch = 0; ch < channels; ch++) {
             fn_800C4E5C(v, p + d->unk27C);
             p += 1024;
@@ -1671,16 +1674,16 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
         }
         if (channels == 2) {
             if (mode == 0) {
-                fn_800C34B4(buf, (u8*)&out[i2], d->unk27C, mode);
+                fn_800C34B4(buf, (u8*)&out[k * 64], d->unk27C, mode);
                 fn_800C34B4(buf + 1024, (u8*)&out[i2 + 1], d->unk27C, mode);
             } else {
-                fn_800C34B4(buf, (u8*)&out[i1], d->unk27C, mode);
+                fn_800C34B4(buf, (u8*)&out[k * 32], d->unk27C, mode);
                 fn_800C34B4(buf + 1024, (u8*)&out[i1 + n], d->unk27C, mode);
             }
         } else {
-            fn_800C34B4(buf, (u8*)&out[i1], d->unk27C, 1);
+            fn_800C34B4(buf, (u8*)&out[k * 32], d->unk27C, 1);
         }
-        vb += 64;
+        w += 64;
         i2 += 64;
         i1 += 32;
     }
