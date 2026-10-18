@@ -251,20 +251,20 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 trac
 u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     u32 idx = (*pos >> 3) & 0x1FFF;
     s32 sh = 24 - (*pos & 7);
-    u32 b0;
-    u32 b1;
-    u32 b2;
+    u8 b0;
+    u8 b1;
+    u8 b2;
 
     *pos += n;
     if (idx < 0x1FFE) {
-        b0 = buf[idx];
-        b1 = buf[++idx];
-        b2 = buf[++idx];
+        b0 = buf[idx++];
+        b1 = buf[idx++];
+        b2 = buf[idx];
     } else {
-        b0 = buf[idx];
-        idx = (idx + 1) & 0x1FFF;
-        b1 = buf[idx];
-        idx = (idx + 1) & 0x1FFF;
+        b0 = buf[idx++];
+        idx &= 0x1FFF;
+        b1 = buf[idx++];
+        idx &= 0x1FFF;
         b2 = buf[idx];
     }
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
