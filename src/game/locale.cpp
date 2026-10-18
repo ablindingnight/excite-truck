@@ -259,8 +259,8 @@ void fn_801301E0(LangFile* f) {
     for (i = 0; i < f->count; i++) {
         Swap4((u8*)&f->entries[i].key);
         Swap4((u8*)&f->entries[i].text);
-        *(u32*)&f->entries[i].key += (u32)f;
-        *(u32*)&f->entries[i].text += (u32)f;
+        f->entries[i].key += (u32)f;
+        f->entries[i].text += (u32)f;
     }
 }
 
@@ -497,25 +497,27 @@ void fn_80131308(void);
 
 void fn_8013111C(int lang) {
     if (lang >= 0 && lang < sizeof(lbl_802F8E60) / sizeof(lbl_802F8E60[0])) {
-        bool swap;
-        u32 version;
-        s32 size = 0;
-        void* data;
         fn_8013028C();
         fn_80131308();
         fn_8012BEF0(lbl_802F8E60[lang].res);
-        data = fn_8012C370("lang.lng", 'LANG', &version, &size, 0, &swap);
-        if (data) {
-            memcpy(s_lang.buf, data, size);
-            fn_8012C4D8(data);
-            if (version == 1) {
-                fn_801301E0((LangFile*)s_lang.buf);
+        {
+            const char* name = "lang.lng";
+            s32 size = 0;
+            u32 version;
+            bool swap;
+            void* data = fn_8012C370(name, 'LANG', &version, &size, 0, &swap);
+            if (data) {
+                memcpy(s_lang.buf, data, size);
+                fn_8012C4D8(data);
+                if (version == 1) {
+                    fn_801301E0((LangFile*)s_lang.buf);
+                } else {
+                    fn_802E30C8("Bad version on %s", name);
+                }
+                s_lang.file = (LangFile*)s_lang.buf;
             } else {
-                fn_802E30C8("Bad version on %s", "lang.lng");
+                fn_802E30C8("Can't load %s", name);
             }
-            s_lang.file = (LangFile*)s_lang.buf;
-        } else {
-            fn_802E30C8("Can't load %s", "lang.lng");
         }
         fn_8012FAB8("units.val");
         s_lang.cur = lang;
