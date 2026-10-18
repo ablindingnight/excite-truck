@@ -1959,3 +1959,9 @@ game/prof.cpp:
 	.data       start:0x80329E30 end:0x80329F90
 	.bss        start:0x8041D790 end:0x8041DF58
 	.sbss       start:0x8055DF10 end:0x8055DF48
+
+game/eventq.cpp:
+	.text       start:0x80127A24 end:0x80127B5C
+	.ctors      start:0x802ED124 end:0x802ED128
+	.bss        start:0x8041DF58 end:0x8041E098
+	.sbss       start:0x8055DF48 end:0x8055DF68
