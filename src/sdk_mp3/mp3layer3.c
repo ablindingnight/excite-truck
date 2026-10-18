@@ -794,8 +794,10 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     x = cur[1];
     c0 = *w++;
     c1 = *w++;
-    out1[64] = (s32)(((s64)x * c0) >> 20) - prev[1];
-    out2[-64] = (s32)(((s64)x * c1) >> 20) + prev[16];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[64] = y0 - prev[1];
+    out2[-64] = y1 + prev[16];
     x = cur[2];
     c0 = *w++;
     c1 = *w++;
@@ -804,8 +806,10 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     x = cur[3];
     c0 = *w++;
     c1 = *w++;
-    out1[192] = (s32)(((s64)x * c0) >> 20) - prev[3];
-    out2[-192] = (s32)(((s64)x * c1) >> 20) + prev[14];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[192] = y0 - prev[3];
+    out2[-192] = y1 + prev[14];
     x = cur[4];
     c0 = *w++;
     c1 = *w++;
@@ -821,10 +825,8 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     x = cur[6];
     c0 = *w++;
     c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out1[384] = y0 + prev[6];
-    out2[-384] = y1 - prev[11];
+    out1[384] = (s32)(((s64)x * c0) >> 20) + prev[6];
+    out2[-384] = (s32)(((s64)x * c1) >> 20) - prev[11];
     x = cur[7];
     c0 = *w++;
     c1 = *w++;
@@ -836,6 +838,7 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     out1[512] = (s32)(((s64)x * c0) >> 20) + prev[8];
     out2[-512] = (s32)(((s64)x * c1) >> 20) - prev[9];
 }
+
 
 /* IMDCT output, first window half: copies prev[0..5] and writes prev[17-i] - cur[i] backwards from out2;
  * the last three use Q20 window coefficients. prev[17-i] is read through a pointer walking down from prev + 17,
