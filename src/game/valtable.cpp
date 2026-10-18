@@ -67,26 +67,8 @@ public:
     virtual u32 Checksum(void);
     virtual ~ValueNodeImpl(void) {}
 
-    ValuePair* FindPair(const char* key) {
-        struct {
-            const char* key;
-            s32 unk;
-        } k = {key, 0};
-        int i;
-        for (i = 0; i < count; i++) {
-            if (!strcasecmp(key, pairs[i].key)) {
-                return &pairs[i];
-            }
-        }
-        return 0;
-    }
-    ValuePair* FindPairInherited(const char* key) {
-        ValuePair* p = FindPair(key);
-        if (!p && parent) {
-            p = parent->FindPairInherited(key);
-        }
-        return p;
-    }
+    inline ValuePair* FindPair(const char* key);
+    inline ValuePair* FindPairInherited(const char* key);
 
     const char* name;          // offset 0x4
     const char* parentName;    // offset 0x8
@@ -255,12 +237,36 @@ u32 ValueFileNode::Checksum(void) {
     return h;
 }
 
+inline ValuePair* ValueNodeImpl::FindPair(const char* key) {
+    struct {
+        const char* key;
+        s32 unk;
+    } k = {key, 0};
+    ValuePair* r = 0;
+    int i;
+    for (i = 0; i < count; i++) {
+        if (!strcasecmp(key, pairs[i].key)) {
+            r = &pairs[i];
+            break;
+        }
+    }
+    return r;
+}
+
 int ValueNodeImpl::Has(const char* key) {
     ValuePair* p = FindPair(key);
     if (!p && parent) {
         p = parent->FindPairInherited(key);
     }
     return p != 0;
+}
+
+inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
+    ValuePair* p = FindPair(key);
+    if (!p && parent) {
+        p = parent->FindPairInherited(key);
+    }
+    return p;
 }
 
 int ValueNodeImpl::GetPair(int index, const char** key, const char** value) {
