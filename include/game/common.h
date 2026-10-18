@@ -57,6 +57,21 @@ public:
     virtual int HasChild(const char* name);          // 0x10
 };
 
+struct ValVec3 {
+    f32 x, y, z;
+};
+
+struct ValPoint {
+    f32 x, y;
+};
+
+struct ValMatrix {
+    ValVec3 basis_x;
+    ValVec3 basis_y;
+    ValVec3 basis_z;
+    ValVec3 origin;
+};
+
 // A node inside a .val table (an entry's key/value pairs).
 class ValueNode {
 public:
@@ -69,18 +84,18 @@ public:
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
     virtual f32 GetFloat(const char* key);                            // 0x24
     virtual f32 GetFloat(const char* key, f32 def) { return Has(key) ? GetFloat(key) : def; }  // 0x28
-    virtual s32 GetIntValue2(const char* key);                        // 0x2C
+    virtual s32 GetIntValue2(const char* key);                        // 0x2C (bool: "yes"/"true")
     virtual int GetBool(const char* key, int def);                    // 0x30
-    virtual void vf13(void);                                          // 0x34
-    virtual void vf14(void);                                          // 0x38
+    virtual ValVec3 GetVec3(const char* key);                         // 0x34
+    virtual ValVec3 GetVec3(const char* key, const ValVec3& def);     // 0x38
     virtual u64 GetPoint(const char* key);                            // 0x3C
-    virtual void vf16(void);                                          // 0x40
-    virtual void vf17(void);                                          // 0x44
-    virtual void vf18(void);                                          // 0x48
-    virtual void vf19(void);                                          // 0x4C
-    virtual void vf20(void);                                          // 0x50
+    virtual u64 GetPoint(const char* key, const ValPoint& def);       // 0x40
+    virtual ValMatrix GetMatrix(const char* key);                     // 0x44
+    virtual ValMatrix GetMatrix(const char* key, const ValMatrix& def);  // 0x48
+    virtual f32 GetReal(const char* key);                             // 0x4C (base64 float)
+    virtual f32 GetReal(const char* key, f32 def);                    // 0x50
     virtual int GetEnum(const char* key, const char* names);          // 0x54
-    virtual void vf22(void);                                          // 0x58
+    virtual f32 GetScale(const char* key, f32 t);                     // 0x58
     virtual ValueNode* FindChild(const char* name);                   // 0x5C
     virtual ValueNode* GetChildAt(int index);                         // 0x60
 };
