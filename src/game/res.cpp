@@ -128,7 +128,7 @@ int fn_8012A470(ResourceSet* set, int idx, ResEntry* e, u8* base);
 int fn_8012AA60(ResourceSet* set, s32 size);
 int fn_8012ACA0(ResourceSet* set, u8* base, s32 size);
 int fn_8012AC98(const char* name);
-int fn_8012BA1C(ResourceSet* set);
+void fn_8012BA1C(ResourceSet* set);
 void fn_8012BC24(ResourceSet** list, ResourceSet* set);
 ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name);
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, u8* first, u8* got);
@@ -151,8 +151,9 @@ static inline void FourCC(char* s, u32 v) {
     s[4] = 0;
 }
 
-static inline void StrNCpy(char* dst, const char* src, int n) {
+static inline void StrNCpy(char* dst, const char* src, int len) {
     char* d = dst;
+    int n = len;
     const char* s = src;
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
@@ -173,6 +174,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
 }
 
 static inline ResToc* GetToc(const char* name) {
+    u32 i;
     char buf[0x80];
     u8 swap;
     u32 info;
@@ -185,7 +187,6 @@ static inline ResToc* GetToc(const char* name) {
     fn_8002B0D8(buf);
     toc = (ResToc*)fn_8012C370(buf, 'ETOC', &info, 0, 0, &swap);
     if (toc && swap) {
-        u32 i;
         Swap4((u8*)&toc->version);
         Swap4((u8*)&toc->size);
         Swap4((u8*)&toc->createTime);
@@ -373,11 +374,13 @@ void fn_8012A67C(void) {
 }
 
 int fn_8012A6C8(ResSetHeader* h, const char* name, u32 fileSize) {
+    u32 magic;
     fn_80132E7C(h, 0x30);
-    if (h->magic != 'RST0') {
+    magic = h->magic;
+    if (magic != 'RST0') {
         char s[5];
         FourCC(s, 'RST0');
-        fn_802E30C8("res: bad set header on %s: bad cookie '0x%x' != '0x%x'", name, h->magic, s);
+        fn_802E30C8("res: bad set header on %s: bad cookie '0x%x' != '0x%x'", name, magic, s);
     } else if (h->version != 8) {
         fn_802E30C8("res: bad set header on %s: bad version '%d' != '%d'", name, h->version, 8);
     } else if (h->headerSize != 0x34) {
@@ -611,8 +614,8 @@ int fn_8012B50C(ResEntry* a, ResEntry* b) {
 
 ResourceSet* fn_8012B534(const char* name, int* idx, int flags) {
     bool star;
-    char setName[0x100];
     char resName[0x100];
+    char setName[0x100];
     int any = flags & 1;
     int quiet = (flags >> 1) & 1;
     ResourceSet* found;
@@ -730,7 +733,7 @@ void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, u8* first
     return data;
 }
 
-int fn_8012BA1C(ResourceSet* set) {
+void fn_8012BA1C(ResourceSet* set) {
     int i;
     for (i = 0; i < set->hdr.resCount; i++) {
         ResEntry* e = &set->entries[i];
@@ -746,7 +749,6 @@ int fn_8012BA1C(ResourceSet* set) {
             }
         }
     }
-    return 0;
 }
 
 int fn_8012BB18(ResourceSet* set) { return 1; }
@@ -795,7 +797,8 @@ int fn_8012BC50(void* data, void (*cb)(void*, void*), void* arg) {
     return e->refs == 0;
 }
 
-ResourceSet* fn_8012BD3C(ResourceSet* s, const char* name) {
+ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name) {
+    ResourceSet* s = list;
     while (s) {
         if (!strcasecmp(name, s->name)) {
             break;
@@ -808,8 +811,8 @@ ResourceSet* fn_8012BD3C(ResourceSet* s, const char* name) {
 ResourceSet* fn_8012BD98(const char* name, ResourceSet** list) {
     ResourceSet* set = fn_8012BD3C(*list, name);
     if (!set) {
-        int tries = 0;
-        do {
+        int tries;
+        for (tries = 0; tries < 10; tries++) {
             lbl_8055DFF9 = 0;
             set = fn_8012B32C(name);
             if (set) {
@@ -819,7 +822,10 @@ ResourceSet* fn_8012BD98(const char* name, ResourceSet** list) {
                 fn_802E30C8("get_resource_set(%s): BAD READ, retrying", name);
                 fn_80127464();
             }
-        } while (lbl_8055DFF9 && !set && ++tries < 10);
+            if (!lbl_8055DFF9 || set) {
+                break;
+            }
+        }
         if (!set) {
             fn_802E30C8("Can't load resource set \"%s\"", name);
             fn_8012748C(2);
@@ -908,8 +914,8 @@ int fn_8012C33C(const char* name) {
 
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, u8* first, u8* got) {
     void* data;
-    int tries = 0;
-    do {
+    int tries;
+    for (tries = 0; tries < 10; tries++) {
         lbl_8055DFF9 = 0;
         data = fn_8012B85C(name, type, info, size, first, got);
         if (!lbl_8055DFF9 || data) {
@@ -917,7 +923,7 @@ void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, u8* first, u
         }
         fn_802E30C8("ResourceGet(%s): BAD READ, retrying", name);
         fn_80127464();
-    } while (++tries < 10);
+    }
     return data;
 }
 
@@ -1573,16 +1579,15 @@ extern "C" void fn_8012E498(const char* name) {
 }
 
 void NodePool::Free(QueueNode* n) {
-    QueueNode** p = &used;
     int found = 0;
-    QueueNode* c;
-    while ((c = *p) != 0) {
-        if (c == n) {
-            *p = n->link;
+    QueueNode** p = &used;
+    while (*p) {
+        if (*p == n) {
+            *p = *(QueueNode**)*p;
             found = 1;
             break;
         }
-        p = &c->link;
+        p = (QueueNode**)*p;
     }
     if (found) {
         n->link = free;
@@ -1737,8 +1742,8 @@ extern "C" StreamBuf* fn_8012EC90(s32 size) {
 }
 
 extern "C" void fn_8012ED20(StreamBuf* b) {
-    int i;
     StreamSlot* s = b->slots;
+    int i;
     for (i = 0; i < 2; i++, s++) {
         if (s->res) {
             s->res->Cancel();
