@@ -135,16 +135,13 @@ public:
         }
         return v;
     }
-    virtual u64 GetPoint(const char* key) {
-        union {
-            ValPoint p;
-            u64 u;
-        } v;
+    virtual ValPoint GetPoint(const char* key) {
+        ValPoint v;
         const char* s = GetValue(key);
-        if (sscanf(s, "%f, %f", &v.p.x, &v.p.y) != 2) {
+        if (sscanf(s, "%f, %f", &v.x, &v.y) != 2) {
             fn_802E317C("Bad vector value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
         }
-        return v.u;
+        return v;
     }
     virtual ValMatrix GetMatrix(const char* key) {
         ValMatrix m;
@@ -193,26 +190,11 @@ public:
         return 0;
     }
     virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def) { return Has(key) ? GetVec3(key) : def; }
-    virtual u64 GetPointOr(const char* key, const ValPoint& def) {
-        union {
-            ValPoint p;
-            u64 u;
-        } v;
-        if (Has(key)) {
-            v.u = GetPoint(key);
-        } else {
-            v.p = def;
-        }
-        return v.u;
+    virtual ValPoint GetPointOr(const char* key, const ValPoint& def) {
+        return Has(key) ? GetPoint(key) : def;
     }
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def) {
-        ValMatrix m;
-        const ValMatrix* src = &def;
-        if (Has(key)) {
-            m = GetMatrix(key);
-            src = &m;
-        }
-        return *src;
+        return Has(key) ? GetMatrix(key) : def;
     }
     virtual f32 GetRealOr(const char* key, f32 def) { return Has(key) ? GetReal(key) : def; }
     const char* name;          // offset 0x4

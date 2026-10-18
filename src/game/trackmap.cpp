@@ -346,16 +346,13 @@ TrackMap* fn_80019C68(int player) {
         table = fn_80131808(name);
         node = table->FindChild("TrackMap");
         if (node) {
-            union {
-                u64 raw;
-                Vec2 v;
-            } origin;
+            ValPoint origin;
             map->width = node->GetFloat("width");
             map->texSize = node->GetFloat("tex_size");
-            origin.raw = node->GetPoint("origin");
-            map->origin.x = origin.v.x;
-            map->origin.x = origin.v.x - map->texSize / 2;
-            map->origin.y = origin.v.y - map->texSize / 2;
+            origin = node->GetPoint("origin");
+            map->origin.x = origin.x;
+            map->origin.x = origin.x - map->texSize / 2;
+            map->origin.y = origin.y - map->texSize / 2;
             map->minSpeed = node->GetFloat("min_speed", 70.0f);
             map->maxSpeed = node->GetFloat("max_speed", 120.0f);
             map->minWidth = node->GetFloat("min_wid", map->width / 4.5f);

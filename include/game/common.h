@@ -66,6 +66,7 @@ struct ValPoint {
 };
 
 struct ValMatrix {
+    ValMatrix(void) {}
     ValVec3 basis_x;
     ValVec3 basis_y;
     ValVec3 basis_z;
@@ -88,8 +89,8 @@ public:
     virtual int GetBool(const char* key, int def);                    // 0x30
     virtual ValVec3 GetVec3(const char* key);                         // 0x34
     virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);     // 0x38
-    virtual u64 GetPoint(const char* key);                            // 0x3C
-    virtual u64 GetPointOr(const char* key, const ValPoint& def);       // 0x40
+    virtual ValPoint GetPoint(const char* key);                       // 0x3C (returned in r3:r4)
+    virtual ValPoint GetPointOr(const char* key, const ValPoint& def);  // 0x40
     virtual ValMatrix GetMatrix(const char* key);                     // 0x44
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def);  // 0x48
     virtual f32 GetReal(const char* key);                             // 0x4C (base64 float)
