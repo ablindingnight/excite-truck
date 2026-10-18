@@ -136,9 +136,9 @@ public:
     virtual ~GameMode(void);
 };
 
-extern "C" {
+GameMode::GameMode(void) {}
 
-void fn_80144504(GameMode* m);
+extern "C" {
 
 
 void fn_80144B44(Vec3* v, f32 x, f32 y, f32 z) {
