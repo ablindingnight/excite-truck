@@ -320,13 +320,15 @@ int fn_80133BA0(const char* name, int quiet, int section) {
     const char* cur;
     char line[0x100];
     OptItem* it;
-    int ok = 0;
     const char* data = (const char*)fn_8012C370(name, 'BOPT', &info, &size, 0, 0);
+    int ok = 0;
     if (data) {
-        int versionOk = 0;
-        int curSection = 0;
+        int curSection;
+        int versionOk;
         cur = data;
+        versionOk = 0;
         ok = 1;
+        curSection = 0;
         while (ok && fn_80133A08(&cur, size - (cur - data), line, sizeof(line))) {
             char c = line[0];
             if (c == '[') {
@@ -407,7 +409,7 @@ void fn_80133F3C(int section) {
     for (i = 0; i < lbl_8055E07C->count; i++) {
         if (lbl_8055E07C->items[i].section == section) {
             lbl_8055E07C->count--;
-            memmove(&lbl_8055E07C->items[i], &lbl_8055E07C->items[i + 1],
+            memmove(&lbl_8055E07C->items[i], &lbl_8055E07C->items[i] + 1,
                     (lbl_8055E07C->count - i) * sizeof(OptItem));
             i--;
         }
