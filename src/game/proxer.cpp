@@ -290,7 +290,7 @@ extern "C" {
 
 bool fn_8013705C(f32 a, f32 b) { return a * b >= 0.0f; }
 
-bool fn_80137078(Body* a, Body* b, f32 ta, f32 tb) {
+bool fn_80137078(const Body* a, const Body* b, f32 ta, f32 tb) {
     V3 pa;
     V3 pb;
     V3 d;
