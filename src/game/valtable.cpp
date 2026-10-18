@@ -37,6 +37,7 @@ class ValueFile;
 
 class ValueNodeImpl : public ValueNode {
 public:
+    ValueNodeImpl(void) { parent = 0; }
     virtual const char* GetName(void) {
         const char* n = name;
         if (*n == '$') {
@@ -208,7 +209,6 @@ public:
 class ValueNodeStatic : public ValueNodeImpl {
 public:
     ValueNodeStatic(void) {
-        parent = 0;
         name = "";
         parentName = "";
         count = 0;
@@ -362,12 +362,11 @@ ValueNode* fn_8013184C(void) {
 
 ValueFileNode::ValueFileNode(ValueFile* base) {
     int i;
+    Swap4((u8*)&pairs);
+    pairs = (ValuePair*)((u8*)pairs + (u32)base);
+    Swap4((u8*)&count);
     Swap4((u8*)&name);
     Swap4((u8*)&parentName);
-    Swap4((u8*)&count);
-    Swap4((u8*)&pairs);
-    parent = 0;
-    pairs = (ValuePair*)((u8*)pairs + (u32)base);
     if (name) {
         name += (u32)base;
     }
