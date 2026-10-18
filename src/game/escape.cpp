@@ -187,17 +187,17 @@ static int fn_8000C848(int key) {
 }
 
 static void fn_8000C964(void) {
-    Camera cam;
-    int i;
-    int selected;
-    const char** text;
     LayoutArtItem* art;
-    LayoutItem item;
-    LayoutArtItem button;
-    u8 alpha;
+    const char** text;
+    int i;
     f32 pulse;
+    Camera cam;
     char name[32];
     char label[32];
+    int selected;
+    LayoutItem item;
+    u8 alpha;
+    LayoutArtItem button;
 
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
@@ -365,17 +365,17 @@ void fn_8000D19C(void) {
 }
 
 void fn_8000D1DC(void) {
-    Camera cam;
-    int i;
-    int selected;
-    const char** text;
     LayoutArtItem* art;
-    LayoutItem item;
-    LayoutArtItem button;
-    u8 alpha;
+    const char** text;
+    int i;
     f32 pulse;
+    Camera cam;
     char name[32];
     char label[32];
+    int selected;
+    LayoutItem item;
+    u8 alpha;
+    LayoutArtItem button;
 
     if (lbl_8055D405) {
         fn_8000C964();
@@ -398,7 +398,7 @@ void fn_8000D1DC(void) {
             if (fn_8000C7F4(i)) {
                 fn_801345D8(name, sizeof(name), "item%d_button", i);
                 fn_801345D8(label, sizeof(label), "item%d", i);
-                selected = lbl_8055D400 == i;
+                selected = i == lbl_8055D400;
                 item = *lbl_8055D414->Find(label);
                 alpha = 0xFF;
                 pulse = 0.0f;
