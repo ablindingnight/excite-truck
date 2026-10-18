@@ -2220,3 +2220,10 @@ game/lineinfo.cpp:
 	.sdata      start:0x80559CE0 end:0x80559CF8
 	.sbss       start:0x8055E178 end:0x8055E180
 	.sdata2     start:0x80561480 end:0x80561498
+
+game/carclass.cpp:
+	.text       start:0x8013C748 end:0x8013C9F4
+	.ctors      start:0x802ED1B0 end:0x802ED1B4
+	.data       start:0x8032C458 end:0x8032C4F0
+	.sdata      start:0x80559CF8 end:0x80559D18
+	.sbss       start:0x8055E180 end:0x8055E190
