@@ -2000,3 +2000,11 @@ game/scratch.cpp:
 	.ctors      start:0x802ED138 end:0x802ED13C
 	.bss        start:0x8041E180 end:0x80422180
 	.sbss       start:0x8055DFB8 end:0x8055DFC8
+
+game/joy.cpp:
+	.text       start:0x80129400 end:0x80129BD4
+	.ctors      start:0x802ED13C end:0x802ED140
+	.data       start:0x8032A5B0 end:0x8032A5C0
+	.bss        start:0x80422180 end:0x804223F8
+	.sbss       start:0x8055DFC8 end:0x8055DFD8
+	.sdata2     start:0x80561248 end:0x80561250

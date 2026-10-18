@@ -968,6 +968,7 @@ config.libs.append(
             Object(Matching, "game/spubank.cpp"),
             Object(Matching, "game/sndrate.cpp"),
             Object(Matching, "game/scratch.cpp"),
+            Object(NonMatching, "game/joy.cpp"),
         ],
     }
 )
