@@ -2041,3 +2041,9 @@ game/strtab.cpp:
 	.ctors      start:0x802ED150 end:0x802ED154
 	.data       start:0x8032AF68 end:0x8032AFB8
 	.sbss       start:0x8055E018 end:0x8055E020
+
+game/memstream.cpp:
+	.text       start:0x8012F31C end:0x8012F57C
+	.ctors      start:0x802ED154 end:0x802ED158
+	.data       start:0x8032AFB8 end:0x8032AFE0
+	.sbss       start:0x8055E020 end:0x8055E028
