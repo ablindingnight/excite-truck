@@ -3,6 +3,7 @@
 // movie tool. Names come from the "Replay:" / "replay:" strings; function names are guesses.
 #include <stdio.h>
 #include "game/common.h"
+#include "macros.h"
 
 template <class T, int N>
 class FixedArray {
@@ -274,38 +275,31 @@ void fn_80008618(u32 bit) {
 int fn_8000865C(void) { return (fn_801E87A8()->flags >> 1) & 1; }
 
 static inline f32 Clamp01(f32 x) {
-    f32 v = 1.0f < x ? 1.0f : x;
-    return v > 0.0f ? v : 0.0f;
+    f32 v = MIN(1.0f, x);
+    return MAX(v, 0.0f);
 }
 
 void fn_80008684(int camera) {
-    static LocString s_cameras("Replay:CAMERAS");
-    static LocString s_changeCar("Replay:CHANGE_CAR");
-    static LocString s_pause("Replay:PAUSE");
-    static LocString s_restart("Replay:RESTART");
-    static LocString s_exit("Replay:EXIT");
-    static LocString s_basic("Replay:BASIC_OVERLAY");
-    static LocString s_advanced("Replay:ADVANCED_OVERLAY");
-    static LocString s_pauseTitle("Replay:PAUSE_TITLE");
-    static LocString s_playTitle("Replay:PLAY_TITLE");
+    ActionPrompt* prompt;
+    int dt;
+    DrawOffset off;
     f32 t;
     f32 x;
-    f32 y;
-    ActionPrompt* prompt;
+    int now;
+    s32 action;
+    int n;
     u32 i;
     int j;
-    int n;
-    char label[64];
     char name[64];
-    DrawOffset off;
-    int dt;
-    int now;
+    f32 y;
+    char label[64];
 
     if (lbl_8055D374) {
         now = lbl_8055D380.time;
         dt = now - lbl_8034F44C.shown;
         if (dt < 600) {
-            t = Clamp01(dt / 600.0f);
+            t = dt / 600.0f;
+            t = Clamp01(t);
         } else {
             t = 1.0f;
         }
@@ -314,6 +308,15 @@ void fn_80008684(int camera) {
         }
         x = 400.0f * t;
         y = 0.0f;
+        static LocString s_cameras("Replay:CAMERAS");
+        static LocString s_changeCar("Replay:CHANGE_CAR");
+        static LocString s_pause("Replay:PAUSE");
+        static LocString s_restart("Replay:RESTART");
+        static LocString s_exit("Replay:EXIT");
+        static LocString s_basic("Replay:BASIC_OVERLAY");
+        static LocString s_advanced("Replay:ADVANCED_OVERLAY");
+        static LocString s_pauseTitle("Replay:PAUSE_TITLE");
+        static LocString s_playTitle("Replay:PLAY_TITLE");
         static struct LabelInit {
             LabelInit(void) {
                 lbl_802FB8F0[0].label = s_cameras.Get();
@@ -328,8 +331,9 @@ void fn_80008684(int camera) {
         fn_8014819C(&off, x, y);
         n = 0;
         for (i = 0, prompt = lbl_802FB8F0; i < 7; i++, prompt++) {
+            action = prompt->action;
             for (j = 0; j < lbl_8034F3D0.list.count; j++) {
-                if (prompt->action == lbl_8034F3D0.list.data[j]) {
+                if (action == lbl_8034F3D0.list.data[j]) {
                     fn_801345D8(name, sizeof(name), "prompt%d", n);
                     fn_801345D8(label, sizeof(label), "label%d", n);
                     if (lbl_8055D374) {
