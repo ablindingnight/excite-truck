@@ -1952,3 +1952,10 @@ RVL_SDK/arc/arc.c:
 	.text       start:0x801166C8 end:0x80116BD4
 	.data       start:0x80329B28 end:0x80329B50
 	.sdata      start:0x80559930 end:0x80559938
+
+game/prof.cpp:
+	.text       start:0x801274C8 end:0x80127A24
+	.ctors      start:0x802ED120 end:0x802ED124
+	.data       start:0x80329E30 end:0x80329F90
+	.bss        start:0x8041D790 end:0x8041DF58
+	.sbss       start:0x8055DF10 end:0x8055DF48
