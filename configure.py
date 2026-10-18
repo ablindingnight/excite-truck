@@ -1001,6 +1001,7 @@ config.libs.append(
             Object(NonMatching, "game/subtask.cpp"),
             Object(NonMatching, "game/zone.cpp"),
             Object(NonMatching, "game/modeinl.cpp"),
+            Object(NonMatching, "game/records.cpp"),
         ],
     }
 )

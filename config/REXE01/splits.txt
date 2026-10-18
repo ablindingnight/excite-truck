@@ -2252,3 +2252,8 @@ game/modeinl.cpp:
 	.bss        start:0x8042FB88 end:0x8042FBA0
 	.sbss       start:0x8055E1D0 end:0x8055E1E0
 	.sdata2     start:0x805615B8 end:0x805615D0
+
+game/records.cpp:
+	.text       start:0x80144E38 end:0x80144F40
+	.ctors      start:0x802ED1C0 end:0x802ED1C4
+	.sbss       start:0x8055E1E0 end:0x8055E1F0
