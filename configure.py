@@ -988,6 +988,7 @@ config.libs.append(
             Object(NonMatching, "game/proxer.cpp"),
             Object(Matching, "game/league.cpp"),
             Object(NonMatching, "game/idealres.cpp"),
+            Object(NonMatching, "game/catchup.cpp"),
         ],
     }
 )

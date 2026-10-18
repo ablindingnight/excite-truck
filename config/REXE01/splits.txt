@@ -2148,3 +2148,9 @@ game/idealres.cpp:
 	.data       start:0x8032BF00 end:0x8032BFA0
 	.sbss       start:0x8055E0E8 end:0x8055E0F8
 	.sdata2     start:0x80561398 end:0x805613B8
+
+game/catchup.cpp:
+	.text       start:0x80138BE4 end:0x80139044
+	.ctors      start:0x802ED18C end:0x802ED190
+	.sbss       start:0x8055E0F8 end:0x8055E108
+	.sdata2     start:0x805613B8 end:0x805613D8
