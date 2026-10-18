@@ -131,7 +131,7 @@ int fn_8012AC98(const char* name);
 void fn_8012BA1C(ResourceSet* set);
 void fn_8012BC24(ResourceSet** list, ResourceSet* set);
 ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name);
-void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, u8* first, u8* got);
+void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);
 void fn_8012D908(const char* name);
 }
@@ -176,7 +176,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
 static inline ResToc* GetToc(const char* name) {
     u32 i;
     char buf[0x80];
-    u8 swap;
+    bool swap;
     u32 info;
     ResToc* toc;
     StrNCpy(buf, name, 0x80);
@@ -210,11 +210,7 @@ public:
         loaded = 0;
         Init(n, p, h, f);
     }
-    ~ResourceSet(void) {
-        if (loaded) {
-            Unload();
-        }
-    }
+    ~ResourceSet(void);
 
     void Init(const char* n, const char* p, ResSetHeader* h, int f) {
         StrNCpy(name, n, sizeof(name));
@@ -415,13 +411,14 @@ void fn_8012A80C(ResSetHeader* h) {
 }
 
 int fn_8012AA60(ResourceSet* set, s32 size) {
-    s32 count = set->hdr.resCount;
     ResEntry* e = set->entries;
+    s32 count = set->hdr.resCount;
     u8* base = (u8*)e;
-    int ok = set->hdr.tocCrc == fn_80132E7C(e, count * sizeof(ResEntry));
+    u32 crc = set->hdr.tocCrc;
+    int ok = crc == fn_80132E7C(e, count * sizeof(ResEntry));
     if (ok) {
         int i;
-        for (i = 0; i < count; i++, e++) {
+        for (i = 0; i < count; e++, i++) {
             fn_8012A388(e);
             if (e->offset + e->size <= size && !fn_8012A470(set, i, e, base)) {
                 ok = 0;
@@ -529,7 +526,12 @@ ResourceSet* fn_8012AFE0(const char* path, const char* name) {
         }
         if (!ok) {
             fn_8012A7FC();
-            delete set;
+            if (set) {
+                if (set->loaded) {
+                    set->Unload();
+                }
+                operator delete(set);
+            }
             set = 0;
         }
         fn_802E3734(&fd);
@@ -692,7 +694,7 @@ int fn_8012B6FC(ResourceSet* set, int idx) {
     return (e->flags >> 3) & 1;
 }
 
-void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, u8* first, u8* got) {
+void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, bool* first, bool* got) {
     int idx;
     void* data = 0;
     ResourceSet* set = fn_8012B534(name, &idx, 0);
@@ -757,7 +759,12 @@ void fn_8012BB20(ResourceSet** list, ResourceSet* set) {
     if (fn_8012BB18(set)) {
         fn_8012BA1C(set);
         fn_8012BC24(list, set);
-        delete set;
+        if (set) {
+            if (set->loaded) {
+                set->Unload();
+            }
+            operator delete(set);
+        }
     }
 }
 
@@ -912,7 +919,7 @@ int fn_8012C33C(const char* name) {
     return fn_8012B534(name, &idx, 0) != 0;
 }
 
-void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, u8* first, u8* got) {
+void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got) {
     void* data;
     int tries;
     for (tries = 0; tries < 10; tries++) {
@@ -1016,13 +1023,14 @@ void AsyncResource::Load(u8* dst, s32 n, s32 offs) {
 }
 
 u8* AsyncResource::Poll(s32* sizeOut) {
+    ResEntry* e;
     u8* data = 0;
     if (handle != -1 && fn_802E7544(handle)) {
         fn_802E7548(handle);
         handle = -1;
     }
     if (handle == -1 && buf) {
-        ResEntry* e = entry;
+        e = entry;
         if (size < e->size || fn_80132E7C(buf, e->size) == e->crc) {
             data = buf;
             if (sizeOut) {
@@ -1120,7 +1128,7 @@ public:
     int Restart(const char* name);
     int StartLoad(const char* name);
     void Reset(void);
-    static void CopyHeader(ResSetHeader* d, ResSetHeader* s);
+    static void CopyHeader(ResSetHeader* d, const ResSetHeader* s);
     int Ready(void);
     void Finish(void);
     void Update(void);
@@ -1165,6 +1173,12 @@ extern "C" AsyncResourceSet* fn_8012CAA0(s32 size, const char* name) {
     return new ("arsb") AsyncResourceSet(size, name);
 }
 
+ResourceSet::~ResourceSet(void) {
+    if (loaded) {
+        Unload();
+    }
+}
+
 extern "C" int fn_8012CC20(AsyncResourceSet* s, const char* name) { return s->Restart(name); }
 
 int AsyncResourceSet::Restart(const char* name) {
@@ -1206,7 +1220,7 @@ int AsyncResourceSet::StartLoad(const char* name) { return Begin(name); }
 
 void AsyncResourceSet::Reset(void) { Stop(); }
 
-void AsyncResourceSet::CopyHeader(ResSetHeader* d, ResSetHeader* s) { *d = *s; }
+void AsyncResourceSet::CopyHeader(ResSetHeader* d, const ResSetHeader* s) { *d = *s; }
 
 int AsyncResourceSet::Ready(void) { return 1; }
 
@@ -1757,7 +1771,9 @@ extern "C" void fn_8012ED20(StreamBuf* b) {
 
 extern "C" int fn_8012EDA8(StreamBuf* b, const char* name, u32 type, u32* info) {
     int i;
-    StreamSlot* s = b->slots;
+    int j;
+    StreamSlot* slots = b->slots;
+    StreamSlot* s = slots;
     for (i = 0; i < 2; i++, s++) {
         if (s->res) {
             s->res->Cancel();
@@ -1767,13 +1783,12 @@ extern "C" int fn_8012EDA8(StreamBuf* b, const char* name, u32 type, u32* info) 
         }
     }
     b->pos = 0;
-    s = b->slots;
-    for (i = 0; i < 2; i++, s++) {
-        s->res = fn_8012C5B8(name, type, info);
-        if (!s->res) {
+    for (j = 0; j < 2; j++, slots++) {
+        slots->res = fn_8012C5B8(name, type, info);
+        if (!slots->res) {
             return 0;
         }
-        b->total = s->res->Span();
+        b->total = slots->res->Span();
     }
     fn_8012EE80(b);
     return 1;
@@ -1819,12 +1834,11 @@ extern "C" void fn_8012EE80(StreamBuf* b) {
 
 extern "C" int fn_8012EFB0(StreamBuf* b, void* dst, s32 n) {
     int i;
-    StreamSlot* s;
     if (b->pos + n >= b->total) {
         return 0;
     }
-    s = b->slots;
-    for (i = 0; i < 2; i++, s++) {
+    for (i = 0; i < 2; i++) {
+        StreamSlot* s = &b->slots[i];
         if (s->state == 2 && b->pos >= s->pos && b->pos < s->pos + b->size) {
             memcpy(dst, s->buf + (b->pos - s->pos), n);
             b->pos += n;
