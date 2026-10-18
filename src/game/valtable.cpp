@@ -33,8 +33,6 @@ static inline void Swap4(u8* p) {
     p[2] = t;
 }
 
-namespace {
-
 class ValueFile;
 
 class ValueNodeImpl : public ValueNode {
@@ -46,30 +44,177 @@ public:
         }
         return n;
     }
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-    virtual s32 GetIntValue(const char* key);
-    virtual f32 GetFloat(const char* key);
-    virtual s32 GetIntValue2(const char* key);
-    virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3(const char* key, const ValVec3& def);
-    virtual u64 GetPoint(const char* key);
-    virtual u64 GetPoint(const char* key, const ValPoint& def);
-    virtual ValMatrix GetMatrix(const char* key);
-    virtual ValMatrix GetMatrix(const char* key, const ValMatrix& def);
-    virtual f32 GetReal(const char* key);
-    virtual f32 GetReal(const char* key, f32 def);
-    virtual int GetEnum(const char* key, const char* names);
-    virtual f32 GetScale(const char* key, f32 t);
-    virtual ValueNode* FindChild(const char* name);
-    virtual ValueNode* GetChildAt(int index);
-    virtual u32 Checksum(void);
     virtual ~ValueNodeImpl(void) {}
 
-    inline ValuePair* FindPair(const char* key);
-    inline ValuePair* FindPairInherited(const char* key);
+    ValuePair* FindPair(const char* key) {
+        struct {
+            const char* key;
+            s32 unk;
+        } k = {key, 0};
+        ValuePair* r = 0;
+        int i;
+        for (i = 0; i < count; i++) {
+            if (!strcasecmp(key, pairs[i].key)) {
+                r = &pairs[i];
+                break;
+            }
+        }
+        return r;
+    }
+    virtual int Has(const char* key) {
+        ValuePair* p = FindPair(key);
+        if (!p && parent) {
+            p = parent->FindPairInherited(key);
+        }
+        return p != 0;
+    }
+    ValuePair* FindPairInherited(const char* key) {
+        ValuePair* p = FindPair(key);
+        if (!p && parent) {
+            p = parent->FindPairInherited(key);
+        }
+        return p;
+    }
 
+    virtual int GetPair(int index, const char** key, const char** value) {
+        if (index >= 0 && index < count) {
+            ValuePair* p = pairs;
+            *key = p[index].key;
+            *value = p[index].value;
+            return 1;
+        }
+        return 0;
+    }
+    virtual const char* GetValue(const char* key) {
+        ValuePair* p = FindPair(key);
+        if (!p && parent) {
+            p = parent->FindPairInherited(key);
+        }
+        if (!p) {
+            fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
+        }
+        return p->value;
+    }
+    virtual s32 GetIntValue(const char* key) { return atoi(GetValue(key)); }
+    virtual f32 GetFloat(const char* key) { return atof(GetValue(key)); }
+    virtual s32 GetIntValue2(const char* key) {
+        int r;
+        const char* s = GetValue(key);
+        r = 0;
+        if (!strcasecmp(s, "yes") || !strcasecmp(s, "true")) {
+            r = 1;
+        }
+        return r;
+    }
+    virtual int GetEnum(const char* key, const char* names) {
+        const char* s = GetValue(key);
+        int i;
+        for (i = 0; *names; i++) {
+            if (!strcasecmp(names, s)) {
+                return i;
+            }
+            names += strlen(names) + 1;
+        }
+        fn_802E317C("Can't find enum value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
+        return -1;
+    }
+    virtual f32 GetScale(const char* key, f32 t) {
+        f32 a;
+        f32 b;
+        const char* s = GetValue(key);
+        if (sscanf(s, "%f, %f", &a, &b) != 2) {
+            fn_802E317C("Bad scale value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
+        }
+        return a + t * (b - a);
+    }
+    virtual ValVec3 GetVec3(const char* key) {
+        ValVec3 v;
+        const char* s = GetValue(key);
+        if (sscanf(s, "%f, %f, %f", &v.x, &v.y, &v.z) != 3) {
+            fn_802E317C("Bad vector value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
+        }
+        return v;
+    }
+    virtual u64 GetPoint(const char* key) {
+        union {
+            ValPoint p;
+            u64 u;
+        } v;
+        const char* s = GetValue(key);
+        if (sscanf(s, "%f, %f", &v.p.x, &v.p.y) != 2) {
+            fn_802E317C("Bad vector value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
+        }
+        return v.u;
+    }
+    virtual ValMatrix GetMatrix(const char* key) {
+        ValMatrix m;
+        if (fn_8012F9E8(&m, sizeof(m), GetValue(key))) {
+            int i;
+            u32* w = (u32*)&m;
+            for (i = 0; i < 12; i++) {
+                Swap4((u8*)&w[i]);
+            }
+        } else {
+            m.basis_x = GetVec3("basis_x");
+            m.basis_y = GetVec3("basis_y");
+            m.basis_z = GetVec3("basis_z");
+            m.origin = GetVec3("origin");
+        }
+        return m;
+    }
+    virtual f32 GetReal(const char* key) {
+        f32 v;
+        const char* s = GetValue(key);
+        if (fn_8012F9E8(&v, sizeof(v), s)) {
+            Swap4((u8*)&v);
+        } else {
+            fn_802E317C("Bad real64 value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
+        }
+        return v;
+    }
+    virtual ValueNode* GetChildAt(int index) {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (pairs[i].key[0] == '@' && index-- == 0) {
+                return ((ValueTable*)file)->FindChild(pairs[i].value);
+            }
+        }
+        if (parent) {
+            return parent->GetChildAt(index);
+        }
+        return 0;
+    }
+    virtual ValueNode* FindChild(const char* child) {
+        char buf[0x40];
+        sprintf(buf, "@%s", child);
+        if (Has(buf)) {
+            return ((ValueTable*)file)->FindChild(GetValue(buf));
+        }
+        return 0;
+    }
+    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def) { return Has(key) ? GetVec3(key) : def; }
+    virtual u64 GetPointOr(const char* key, const ValPoint& def) {
+        union {
+            ValPoint p;
+            u64 u;
+        } v;
+        if (Has(key)) {
+            v.u = GetPoint(key);
+        } else {
+            v.p = def;
+        }
+        return v.u;
+    }
+    virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def) {
+        ValMatrix m;
+        const ValMatrix* src = &def;
+        if (Has(key)) {
+            m = GetMatrix(key);
+            src = &m;
+        }
+        return *src;
+    }
+    virtual f32 GetRealOr(const char* key, f32 def) { return Has(key) ? GetReal(key) : def; }
     const char* name;          // offset 0x4
     const char* parentName;    // offset 0x8
     s32 count;                 // offset 0xC
@@ -95,18 +240,63 @@ public:
 class ValueFileNode : public ValueNodeImpl {
 public:
     ValueFileNode(ValueFile* base);
-    virtual u32 Checksum(void);
-    virtual ~ValueFileNode(void);
+    virtual ~ValueFileNode(void) {}
+    virtual u32 Checksum(void) {
+        u32 h = 0xBABBA;
+        int i;
+        for (i = 0; i < count; i++) {
+            const char* s;
+            for (s = pairs[i].key; *s; s++) {
+                h += *s;
+                h += 0xBAF;
+            }
+            for (s = pairs[i].value; *s; s++) {
+                h += *s;
+                h += 0xFABACAB;
+            }
+        }
+        return h;
+    }
 };
 
 class ValueFile : public ValueTable {
 public:
     ValueFile(void) { nodes = (ValueFileNode*)data; }
-    virtual ValueNode* FindChild(const char* name);
-    virtual ValueNode* GetChild(int index);
-    virtual int HasChild(const char* name);
-    virtual u32 Checksum(void);
-    virtual ~ValueFile(void);
+    virtual ValueNode* GetChild(int index) {
+        if (index < unk8) {
+            return &nodes[index];
+        }
+        return 0;
+    }
+    virtual ValueNode* FindChild(const char* name) {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (!strcasecmp(nodes[i].name, name)) {
+                return &nodes[i];
+            }
+        }
+        fn_802E317C("ValueTable \"%s\" not found in %d tables", name, count);
+        return 0;
+    }
+    virtual int HasChild(const char* name) {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (!strcasecmp(nodes[i].name, name)) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    virtual u32 Checksum(void) {
+        u32 h = 0xFEEDFACE;
+        int i;
+        for (i = 0; i < count; i++) {
+            h += nodes[i].Checksum();
+            h += 0x123B;
+        }
+        return h;
+    }
+    virtual ~ValueFile(void) {}
 
     void ResolveParents(void) {
         int i;
@@ -139,8 +329,6 @@ public:
     ValueFileNode* nodes;   // offset 0xC
     u8 data[4];             // offset 0x10
 };
-
-}  // namespace
 
 ModuleTag lbl_8055E058;
 
@@ -217,252 +405,3 @@ ValueFileNode::ValueFileNode(ValueFile* base) {
         }
     }
 }
-
-ValueFileNode::~ValueFileNode(void) {}
-
-u32 ValueFileNode::Checksum(void) {
-    u32 h = 0xBABBA;
-    int i;
-    for (i = 0; i < count; i++) {
-        const char* s;
-        for (s = pairs[i].key; *s; s++) {
-            h += *s;
-            h += 0xBAF;
-        }
-        for (s = pairs[i].value; *s; s++) {
-            h += *s;
-            h += 0xFABACAB;
-        }
-    }
-    return h;
-}
-
-inline ValuePair* ValueNodeImpl::FindPair(const char* key) {
-    struct {
-        const char* key;
-        s32 unk;
-    } k = {key, 0};
-    ValuePair* r = 0;
-    int i;
-    for (i = 0; i < count; i++) {
-        if (!strcasecmp(key, pairs[i].key)) {
-            r = &pairs[i];
-            break;
-        }
-    }
-    return r;
-}
-
-int ValueNodeImpl::Has(const char* key) {
-    ValuePair* p = FindPair(key);
-    if (!p && parent) {
-        p = parent->FindPairInherited(key);
-    }
-    return p != 0;
-}
-
-inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
-    ValuePair* p = FindPair(key);
-    if (!p && parent) {
-        p = parent->FindPairInherited(key);
-    }
-    return p;
-}
-
-int ValueNodeImpl::GetPair(int index, const char** key, const char** value) {
-    if (index >= 0 && index < count) {
-        ValuePair* p = pairs;
-        *key = p[index].key;
-        *value = p[index].value;
-        return 1;
-    }
-    return 0;
-}
-
-const char* ValueNodeImpl::GetValue(const char* key) {
-    ValuePair* p = FindPair(key);
-    if (!p && parent) {
-        p = parent->FindPairInherited(key);
-    }
-    if (!p) {
-        fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
-    }
-    return p->value;
-}
-
-s32 ValueNodeImpl::GetIntValue(const char* key) { return atoi(GetValue(key)); }
-
-f32 ValueNodeImpl::GetFloat(const char* key) { return atof(GetValue(key)); }
-
-s32 ValueNodeImpl::GetIntValue2(const char* key) {
-    int r;
-    const char* s = GetValue(key);
-    r = 0;
-    if (!strcasecmp(s, "yes") || !strcasecmp(s, "true")) {
-        r = 1;
-    }
-    return r;
-}
-
-int ValueNodeImpl::GetEnum(const char* key, const char* names) {
-    const char* s = GetValue(key);
-    int i;
-    for (i = 0; *names; i++) {
-        if (!strcasecmp(names, s)) {
-            return i;
-        }
-        names += strlen(names) + 1;
-    }
-    fn_802E317C("Can't find enum value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
-    return -1;
-}
-
-f32 ValueNodeImpl::GetScale(const char* key, f32 t) {
-    f32 a;
-    f32 b;
-    const char* s = GetValue(key);
-    if (sscanf(s, "%f, %f", &a, &b) != 2) {
-        fn_802E317C("Bad scale value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
-    }
-    return a + t * (b - a);
-}
-
-ValVec3 ValueNodeImpl::GetVec3(const char* key) {
-    ValVec3 v;
-    const char* s = GetValue(key);
-    if (sscanf(s, "%f, %f, %f", &v.x, &v.y, &v.z) != 3) {
-        fn_802E317C("Bad vector value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
-    }
-    return v;
-}
-
-u64 ValueNodeImpl::GetPoint(const char* key) {
-    union {
-        ValPoint p;
-        u64 u;
-    } v;
-    const char* s = GetValue(key);
-    if (sscanf(s, "%f, %f", &v.p.x, &v.p.y) != 2) {
-        fn_802E317C("Bad vector value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
-    }
-    return v.u;
-}
-
-ValMatrix ValueNodeImpl::GetMatrix(const char* key) {
-    ValMatrix m;
-    if (fn_8012F9E8(&m, sizeof(m), GetValue(key))) {
-        int i;
-        u32* w = (u32*)&m;
-        for (i = 0; i < 12; i++) {
-            Swap4((u8*)&w[i]);
-        }
-    } else {
-        m.basis_x = GetVec3("basis_x");
-        m.basis_y = GetVec3("basis_y");
-        m.basis_z = GetVec3("basis_z");
-        m.origin = GetVec3("origin");
-    }
-    return m;
-}
-
-f32 ValueNodeImpl::GetReal(const char* key) {
-    f32 v;
-    const char* s = GetValue(key);
-    if (fn_8012F9E8(&v, sizeof(v), s)) {
-        Swap4((u8*)&v);
-    } else {
-        fn_802E317C("Bad real64 value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
-    }
-    return v;
-}
-
-ValueNode* ValueNodeImpl::GetChildAt(int index) {
-    int i;
-    for (i = 0; i < count; i++) {
-        if (pairs[i].key[0] == '@' && index-- == 0) {
-            return ((ValueTable*)file)->FindChild(pairs[i].value);
-        }
-    }
-    if (parent) {
-        return parent->GetChildAt(index);
-    }
-    return 0;
-}
-
-ValueNode* ValueNodeImpl::FindChild(const char* child) {
-    char buf[0x40];
-    sprintf(buf, "@%s", child);
-    if (Has(buf)) {
-        return ((ValueTable*)file)->FindChild(GetValue(buf));
-    }
-    return 0;
-}
-
-ValVec3 ValueNodeImpl::GetVec3(const char* key, const ValVec3& def) { return Has(key) ? GetVec3(key) : def; }
-
-u64 ValueNodeImpl::GetPoint(const char* key, const ValPoint& def) {
-    union {
-        ValPoint p;
-        u64 u;
-    } v;
-    if (Has(key)) {
-        v.u = GetPoint(key);
-    } else {
-        v.p = def;
-    }
-    return v.u;
-}
-
-ValMatrix ValueNodeImpl::GetMatrix(const char* key, const ValMatrix& def) {
-    ValMatrix m;
-    const ValMatrix* src = &def;
-    if (Has(key)) {
-        m = GetMatrix(key);
-        src = &m;
-    }
-    return *src;
-}
-
-f32 ValueNodeImpl::GetReal(const char* key, f32 def) { return Has(key) ? GetReal(key) : def; }
-
-u32 ValueNodeImpl::Checksum(void) { return 0; }
-
-ValueNode* ValueFile::GetChild(int index) {
-    if (index < unk8) {
-        return &nodes[index];
-    }
-    return 0;
-}
-
-ValueNode* ValueFile::FindChild(const char* name) {
-    int i;
-    for (i = 0; i < count; i++) {
-        if (!strcasecmp(nodes[i].name, name)) {
-            return &nodes[i];
-        }
-    }
-    fn_802E317C("ValueTable \"%s\" not found in %d tables", name, count);
-    return 0;
-}
-
-int ValueFile::HasChild(const char* name) {
-    int i;
-    for (i = 0; i < count; i++) {
-        if (!strcasecmp(nodes[i].name, name)) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-u32 ValueFile::Checksum(void) {
-    u32 h = 0xFEEDFACE;
-    int i;
-    for (i = 0; i < count; i++) {
-        h += nodes[i].Checksum();
-        h += 0x123B;
-    }
-    return h;
-}
-
-ValueFile::~ValueFile(void) {}

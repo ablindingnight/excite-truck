@@ -87,17 +87,18 @@ public:
     virtual s32 GetIntValue2(const char* key);                        // 0x2C (bool: "yes"/"true")
     virtual int GetBool(const char* key, int def);                    // 0x30
     virtual ValVec3 GetVec3(const char* key);                         // 0x34
-    virtual ValVec3 GetVec3(const char* key, const ValVec3& def);     // 0x38
+    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);     // 0x38
     virtual u64 GetPoint(const char* key);                            // 0x3C
-    virtual u64 GetPoint(const char* key, const ValPoint& def);       // 0x40
+    virtual u64 GetPointOr(const char* key, const ValPoint& def);       // 0x40
     virtual ValMatrix GetMatrix(const char* key);                     // 0x44
-    virtual ValMatrix GetMatrix(const char* key, const ValMatrix& def);  // 0x48
+    virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def);  // 0x48
     virtual f32 GetReal(const char* key);                             // 0x4C (base64 float)
-    virtual f32 GetReal(const char* key, f32 def);                    // 0x50
+    virtual f32 GetRealOr(const char* key, f32 def);                    // 0x50
     virtual int GetEnum(const char* key, const char* names);          // 0x54
     virtual f32 GetScale(const char* key, f32 t);                     // 0x58
     virtual ValueNode* FindChild(const char* name);                   // 0x5C
     virtual ValueNode* GetChildAt(int index);                         // 0x60
+    virtual u32 Checksum(void) { return 0; }                          // 0x64
 };
 
 #endif
