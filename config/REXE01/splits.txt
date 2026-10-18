@@ -2108,3 +2108,12 @@ game/strfunc.cpp:
 	.ctors      start:0x802ED174 end:0x802ED178
 	.data       start:0x8032BBC0 end:0x8032BBE8
 	.sbss       start:0x8055E090 end:0x8055E098
+
+game/aidriver.cpp:
+	.text       start:0x8013471C end:0x80135278
+	.ctors      start:0x802ED178 end:0x802ED17C
+	.data       start:0x8032BBE8 end:0x8032BDB8
+	.bss        start:0x8042F758 end:0x8042F778
+	.sdata      start:0x80559BD8 end:0x80559BF8
+	.sbss       start:0x8055E098 end:0x8055E0B8
+	.sdata2     start:0x805612E8 end:0x80561320
