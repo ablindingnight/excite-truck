@@ -984,6 +984,7 @@ config.libs.append(
             Object(Matching, "game/loadpool.cpp"),
             Object(NonMatching, "game/strfunc.cpp"),
             Object(NonMatching, "game/aidriver.cpp"),
+            Object(NonMatching, "game/idealline.cpp"),
         ],
     }
 )

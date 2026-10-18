@@ -2117,3 +2117,10 @@ game/aidriver.cpp:
 	.sdata      start:0x80559BD8 end:0x80559BF8
 	.sbss       start:0x8055E098 end:0x8055E0B8
 	.sdata2     start:0x805612E8 end:0x80561320
+
+game/idealline.cpp:
+	.text       start:0x80135278 end:0x801368F8
+	.ctors      start:0x802ED17C end:0x802ED180
+	.data       start:0x8032BDB8 end:0x8032BE98
+	.sbss       start:0x8055E0B8 end:0x8055E0C8
+	.sdata2     start:0x80561320 end:0x80561368
