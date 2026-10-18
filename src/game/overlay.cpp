@@ -1033,19 +1033,20 @@ void ResultsOverlay::DrawMenu(void) {
 void ResultsOverlay::DrawTimes(void) {
     f32 x0 = fn_80011E34();
     f32 y0 = fn_80011E54() - 24.0f;
+    char place[16];
+    f32 x;
+    f32 y;
     int i;
     ResultRacer* r;
-    f32 y;
-    f32 x;
     char buf[8];
-    char place[16];
     f32 t;
 
     for (i = 0; i < fn_801EA994(); i++) {
         r = fn_801EA9B0(i);
         y = y0 - 54.0f * i;
         fn_80010E94(art, 0, x0, y - 21.6f, 200.0f, 27.0f);
-        x = x0 + 54.0f;
+        x = x0;
+        x += 54.0f;
         if (r->flags & 1) {
             fn_8000FF88(0xFFFFFF00, 0x41, "%d", 1.5f, x, y - 21.6f - 27.0f, r->place);
             x += 85.0f;
