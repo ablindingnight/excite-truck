@@ -153,7 +153,7 @@ public:
     }
 
     s32 count;              // offset 0x4
-    u32 unk8;
+    s32 unk8;
     ValueFileNode* nodes;   // offset 0xC
     u8 data[4];             // offset 0x10
 };
@@ -239,15 +239,17 @@ ValueFileNode::ValueFileNode(ValueFile* base) {
 ValueFileNode::~ValueFileNode(void) {}
 
 u32 ValueFileNode::Checksum(void) {
-    u32 h = 0xBABA;
+    u32 h = 0xBABBA;
     int i;
     for (i = 0; i < count; i++) {
         const char* s;
         for (s = pairs[i].key; *s; s++) {
-            h += *s + 0xBAF;
+            h += *s;
+            h += 0xBAF;
         }
         for (s = pairs[i].value; *s; s++) {
-            h += *s + 0xFABACAB;
+            h += *s;
+            h += 0xFABACAB;
         }
     }
     return h;
@@ -263,8 +265,9 @@ int ValueNodeImpl::Has(const char* key) {
 
 int ValueNodeImpl::GetPair(int index, const char** key, const char** value) {
     if (index >= 0 && index < count) {
-        *key = pairs[index].key;
-        *value = pairs[index].value;
+        ValuePair* p = pairs;
+        *key = p[index].key;
+        *value = p[index].value;
         return 1;
     }
     return 0;
@@ -286,8 +289,9 @@ s32 ValueNodeImpl::GetIntValue(const char* key) { return atoi(GetValue(key)); }
 f32 ValueNodeImpl::GetFloat(const char* key) { return atof(GetValue(key)); }
 
 s32 ValueNodeImpl::GetIntValue2(const char* key) {
+    int r;
     const char* s = GetValue(key);
-    int r = 0;
+    r = 0;
     if (!strcasecmp(s, "yes") || !strcasecmp(s, "true")) {
         r = 1;
     }
@@ -418,7 +422,7 @@ f32 ValueNodeImpl::GetReal(const char* key, f32 def) { return Has(key) ? GetReal
 u32 ValueNodeImpl::Checksum(void) { return 0; }
 
 ValueNode* ValueFile::GetChild(int index) {
-    if (index < count) {
+    if (index < unk8) {
         return &nodes[index];
     }
     return 0;
@@ -449,7 +453,8 @@ u32 ValueFile::Checksum(void) {
     u32 h = 0xFEEDFACE;
     int i;
     for (i = 0; i < count; i++) {
-        h += nodes[i].Checksum() + 0x123B;
+        h += nodes[i].Checksum();
+        h += 0x123B;
     }
     return h;
 }
