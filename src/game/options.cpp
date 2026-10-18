@@ -419,8 +419,8 @@ void fn_80133F3C(int section) {
 void fn_80133FCC(int event) {
     if (event == 1) {
         int k;
-        OptItem* p = lbl_8042F558;
-        for (k = 0; k < lbl_8055E080; k++, p++) {
+        for (k = 0; k < lbl_8055E080; k++) {
+            OptItem* p = &lbl_8042F558[k];
             int i;
             for (i = 0; i < lbl_8055E07C->count; i++) {
                 OptItem* it = &lbl_8055E07C->items[i];
@@ -429,12 +429,9 @@ void fn_80133FCC(int event) {
                 }
             }
         }
-        {
-            int j;
-            for (j = 0; j < OPT_MAX_CALLBACKS; j++) {
-                if (lbl_8042F718[j].fn) {
-                    lbl_8042F718[j].fn();
-                }
+        for (k = 0; k < OPT_MAX_CALLBACKS; k++) {
+            if (lbl_8042F718[k].fn) {
+                lbl_8042F718[k].fn();
             }
         }
     } else if (event == 2) {
