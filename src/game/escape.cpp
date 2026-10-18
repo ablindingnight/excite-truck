@@ -365,17 +365,17 @@ void fn_8000D19C(void) {
 }
 
 void fn_8000D1DC(void) {
-    LayoutArtItem* art;
-    const char** text;
-    int i;
-    f32 pulse;
-    Camera cam;
-    char name[32];
-    char label[32];
-    int selected;
-    LayoutItem item;
     u8 alpha;
+    Camera cam;
+    int i;
+    char name[32];
+    f32 pulse;
+    const char** text;
+    int selected;
+    char label[32];
+    LayoutItem item;
     LayoutArtItem button;
+    LayoutArtItem* art;
 
     if (lbl_8055D405) {
         fn_8000C964();
