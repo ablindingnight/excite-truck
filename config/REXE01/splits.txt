@@ -1972,3 +1972,12 @@ game/bg.cpp:
 	.data       start:0x80329FA0 end:0x8032A000
 	.bss        start:0x8041E098 end:0x8041E140
 	.sbss       start:0x8055DF68 end:0x8055DF78
+
+game/mem.cpp:
+	.text       start:0x801281A0 end:0x801292CC
+	.ctors      start:0x802ED12C end:0x802ED130
+	.rodata     start:0x802F8E40 end:0x802F8E50
+	.data       start:0x8032A000 end:0x8032A588
+	.bss        start:0x8041E140 end:0x8041E180
+	.sdata      start:0x80559958 end:0x80559978
+	.sbss       start:0x8055DF78 end:0x8055DFA0

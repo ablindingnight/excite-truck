@@ -964,6 +964,7 @@ config.libs.append(
             Object(NonMatching, "game/prof.cpp"),
             Object(Matching, "game/eventq.cpp"),
             Object(Matching, "game/bg.cpp"),
+            Object(NonMatching, "game/mem.cpp"),
         ],
     }
 )
