@@ -111,7 +111,7 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
 s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);
 u32 MP3_GetBits(u32 unused, u8* buf, s16 n, s32* pos);
 u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos);
-void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0, s16* sf_short, s16 part2_3,
+void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0, s16 (*sf_short)[3], s16 part2_3,
                  s16 sfc, s16* scfsi, s8 gr, s8 ch, s16* bound, s16* region0, s16* region1, s16* preflag,
                  s16* is_scale);
 s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode);

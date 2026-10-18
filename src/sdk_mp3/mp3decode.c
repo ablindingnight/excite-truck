@@ -200,7 +200,7 @@ s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* 
 
     for (gr = 0; gr < ngr; gr++) {
         for (ch = 0; ch < d->channels; ch++) {
-            fn_800C3DA0(d, d->ring, flags[gr][ch], d->sf_long[gr][ch], d->sf_long[0][ch], d->sf_short[gr][ch][0],
+            fn_800C3DA0(d, d->ring, flags[gr][ch], d->sf_long[gr][ch], d->sf_long[0][ch], d->sf_short[gr][ch],
                         part2_3[gr][ch], sfc[gr][ch], scfsi[ch], gr, ch, &bound[gr], &region0[gr][ch],
                         &region1[gr][ch], &preflag[gr][ch], &is_scale[gr][ch]);
             MP3_DecodeBigValues((HuffState*)d, d->ring, d->huff_out[gr][ch], big_values[gr][ch], flags[gr][ch],
