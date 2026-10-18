@@ -2124,3 +2124,12 @@ game/idealline.cpp:
 	.data       start:0x8032BDB8 end:0x8032BE98
 	.sbss       start:0x8055E0B8 end:0x8055E0C8
 	.sdata2     start:0x80561320 end:0x80561368
+
+game/proxer.cpp:
+	.text       start:0x801368F8 end:0x80137950
+	.ctors      start:0x802ED180 end:0x802ED184
+	.data       start:0x8032BE98 end:0x8032BEC0
+	.bss        start:0x8042F778 end:0x8042F788
+	.sdata      start:0x80559BF8 end:0x80559C00
+	.sbss       start:0x8055E0C8 end:0x8055E0D8
+	.sdata2     start:0x80561368 end:0x80561398
