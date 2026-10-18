@@ -959,6 +959,7 @@ config.libs.append(
             Object(NonMatching, "game/raceload.cpp"),
             Object(NonMatching, "game/gameloop.cpp"),
             Object(NonMatching, "game/racing.cpp"),
+            Object(NonMatching, "game/dashhelper.cpp"),
         ],
     }
 )

@@ -102,6 +102,16 @@ game/ident.cpp:
 	.sdata      start:0x80558A88 end:0x80558A90
 	.sbss       start:0x8055D458 end:0x8055D474
 
+game/dashhelper.cpp:
+	.text       start:0x8000DFA8 end:0x800123EC
+	.ctors      start:0x802ED090 end:0x802ED094
+	.rodata     start:0x802ED748 end:0x802ED7B8
+	.data       start:0x802FC2A8 end:0x802FC600
+	.bss        start:0x8034F6B0 end:0x80351790
+	.sdata      start:0x80558A90 end:0x80558AD0
+	.sbss       start:0x8055D478 end:0x8055D4E0
+	.sdata2     start:0x80560250 end:0x80560348
+
 game/loadtimer.cpp:
 	.text       start:0x800123EC end:0x800126B4
 	.ctors      start:0x802ED094 end:0x802ED098
