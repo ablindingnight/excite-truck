@@ -981,6 +981,7 @@ config.libs.append(
             Object(NonMatching, "game/valtable.cpp"),
             Object(Matching, "game/crc.cpp"),
             Object(Matching, "game/options.cpp"),
+            Object(Matching, "game/loadpool.cpp"),
         ],
     }
 )
