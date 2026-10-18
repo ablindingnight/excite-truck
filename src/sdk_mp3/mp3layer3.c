@@ -829,9 +829,10 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
 }
 
 /* IMDCT output, first window half: copies prev[0..5] and writes prev[17-i] - cur[i] backwards from out2;
- * the last three use Q20 window coefficients. Math verified against a simulation of the original.
- * NonMatching: 96/100 (the original keeps both products live and spills r31). */
+ * the last three use Q20 window coefficients. prev[17-i] is read through a pointer walking down from prev + 17,
+ * and the coefficients through *w++ then w[k]. Matches; behaviour also checked in a PPC simulation. */
 void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2) {
+    s32* pp = prev + 17;
     s32* w = lbl_8031D700;
     s32 i;
     s32 x, c0, c1, y0, y1;
@@ -839,29 +840,29 @@ void fn_800C2A88(s32* cur, s32* prev, s32* out1, s32* out2) {
     for (i = 0; i < 6; i++) {
         x = -cur[i];
         out1[i * 64] = prev[i];
-        out2[-i * 64] = x + prev[17 - i];
+        out2[-i * 64] = x + *pp--;
     }
     x = cur[6];
+    c0 = *w++;
+    c1 = *w++;
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[384] = y0 + prev[6];
+    out2[-384] = y1 + *pp--;
+    x = cur[7];
     c0 = w[0];
     c1 = w[1];
     y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
-    out1[384] = y0 + prev[6];
-    out2[-384] = y1 + prev[11];
-    x = cur[7];
+    out1[448] = y0 + prev[7];
+    out2[-448] = y1 + *pp--;
+    x = cur[8];
     c0 = w[2];
     c1 = w[3];
     y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
-    out1[448] = y0 + prev[7];
-    out2[-448] = y1 + prev[10];
-    x = cur[8];
-    c0 = w[4];
-    c1 = w[5];
-    y0 = (s32)(((s64)x * c0) >> 20);
-    y1 = (s32)(((s64)x * c1) >> 20);
     out1[512] = y0 + prev[8];
-    out2[-512] = y1 + prev[9];
+    out2[-512] = y1 + *pp--;
 }
 
 /* Second window half: like fn_800C2A88 with lbl_8031D718 and alternating signs (verified 100/100 against
