@@ -2008,3 +2008,8 @@ game/joy.cpp:
 	.bss        start:0x80422180 end:0x804223F8
 	.sbss       start:0x8055DFC8 end:0x8055DFD8
 	.sdata2     start:0x80561248 end:0x80561250
+
+game/sysinit.cpp:
+	.text       start:0x80129BD4 end:0x80129C24
+	.ctors      start:0x802ED140 end:0x802ED144
+	.sbss       start:0x8055DFD8 end:0x8055DFE0
