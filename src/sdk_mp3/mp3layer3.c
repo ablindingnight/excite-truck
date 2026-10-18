@@ -23,15 +23,15 @@ static inline s32 MP3_GetSign(BitStream* bs, u8* buf) {
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start) {
     s32 nregions;
-    s16* q;
-    s32 mixed = block_flags & 1;
     s32 c1end;
-    s32 end;
-    s16 region1_end;
+    s32 mixed = block_flags & 1;
+    s16* q;
     s32 limit;
-    s16 region2_end;
-    s32 i;
+    s16 region1_end;
     s32 region;
+    s32 i;
+    s32 end;
+    s16 region2_end;
 
     if (mixed) {
         region1_end = lbl_802F3D60[d->lsf][d->sr_index][region0];
@@ -73,16 +73,16 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
         }
         ht = &lbl_8031D580[tbl];
         for (; i < end; i += 2, q += 2) {
-            s16 x;
-            s16 y;
             s32 r;
+            s16 x;
             s32 bits = MP3_PeekBitsRing(buf, 16, &d->pos) << 16;
+            s16 y;
 
             if (tbl == 13 || tbl == 16) {
-                u32 b1;
                 u32 b0;
                 u32 p = d->pos;
                 s32 sh = 16 - (p & 7);
+                u32 b1;
                 u32 idx = (p >> 3) & 0x1FFF;
 
                 d->pos = p + 4;
