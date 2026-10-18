@@ -68,12 +68,12 @@ public:
     virtual s32 GetIntValue(const char* key);                         // 0x1C
     virtual s32 GetInt(const char* key, s32 def);                     // 0x20
     virtual f32 GetFloat(const char* key);                            // 0x24
-    virtual void vf10(void);                                          // 0x28
+    virtual f32 GetFloat(const char* key, f32 def) { return Has(key) ? GetFloat(key) : def; }  // 0x28
     virtual s32 GetIntValue2(const char* key);                        // 0x2C
     virtual int GetBool(const char* key, int def);                    // 0x30
     virtual void vf13(void);                                          // 0x34
     virtual void vf14(void);                                          // 0x38
-    virtual void vf15(void);                                          // 0x3C
+    virtual u64 GetPoint(const char* key);                            // 0x3C
     virtual void vf16(void);                                          // 0x40
     virtual void vf17(void);                                          // 0x44
     virtual void vf18(void);                                          // 0x48

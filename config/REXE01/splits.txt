@@ -188,6 +188,15 @@ game/cmdline.cpp:
 	.sdata      start:0x80558C58 end:0x80558C70
 	.sbss       start:0x8055D598 end:0x8055D5A4
 
+game/trackmap.cpp:
+	.text       start:0x80019BBC end:0x8001BA68
+	.ctors      start:0x802ED0BC end:0x802ED0C0
+	.data       start:0x802FD618 end:0x802FD6D8
+	.bss        start:0x803582C0 end:0x80358628
+	.sdata      start:0x80558C70 end:0x80558C90
+	.sbss       start:0x8055D5A8 end:0x8055D5C0
+	.sdata2     start:0x80560418 end:0x80560460
+
 game/stats.cpp:
 	.text       start:0x8001BA68 end:0x8001D7D8
 	.ctors      start:0x802ED0C0 end:0x802ED0C4
