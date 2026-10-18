@@ -125,6 +125,15 @@ game/eve.cpp:
 	.sbss       start:0x8055D4F8 end:0x8055D520
 	.sdata2     start:0x80560358 end:0x80560360
 
+game/racing.cpp:
+	.text       start:0x80013BD0 end:0x80016354
+	.ctors      start:0x802ED0A0 end:0x802ED0A4
+	.data       start:0x802FCB98 end:0x802FCEA8
+	.bss        start:0x803577A0 end:0x803577F0
+	.sdata      start:0x80558B80 end:0x80558BD0
+	.sbss       start:0x8055D520 end:0x8055D530
+	.sdata2     start:0x80560360 end:0x80560418
+
 game/driver.cpp:
 	.text       start:0x80016354 end:0x8001786C
 	.ctors      start:0x802ED0A4 end:0x802ED0A8
