@@ -719,23 +719,29 @@ void fn_800C21D8(s32* a, s32* b) {
  * products first, which is where the original needs r31. NonMatching: same size and opcodes. */
 void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     s32* w = lbl_8031D670;
-    s32 x, c0, c1, y0, y1, p0;
+    s32 x, c0, c1, y0, y1;
 
     x = cur[0];
     c0 = *w++;
     c1 = *w++;
-    out1[0] = (s32)(((s64)x * c0) >> 20) + prev[0];
-    out2[0] = (s32)(((s64)x * c1) >> 20) + prev[17];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[0] = y0 + prev[0];
+    out2[0] = y1 + prev[17];
     x = cur[1];
     c0 = *w++;
     c1 = *w++;
-    out1[64] = (s32)(((s64)x * c0) >> 20) + prev[1];
-    out2[-64] = (s32)(((s64)x * c1) >> 20) + prev[16];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[64] = y0 + prev[1];
+    out2[-64] = y1 + prev[16];
     x = cur[2];
     c0 = *w++;
     c1 = *w++;
-    out1[128] = (s32)(((s64)x * c0) >> 20) + prev[2];
-    out2[-128] = (s32)(((s64)x * c1) >> 20) + prev[15];
+    y0 = (s32)(((s64)x * c0) >> 20);
+    y1 = (s32)(((s64)x * c1) >> 20);
+    out1[128] = y0 + prev[2];
+    out2[-128] = y1 + prev[15];
     x = cur[3];
     c0 = *w++;
     c1 = *w++;
@@ -771,6 +777,7 @@ void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     out1[512] = (s32)(((s64)x * c0) >> 20) + prev[8];
     out2[-512] = (s32)(((s64)x * c1) >> 20) + prev[9];
 }
+
 
 /* Like fn_800C2590 with the other window table (lbl_8031D6B8) and alternating signs on prev: even steps
  * add to out1 and subtract from out2, odd steps the reverse (verified against a simulation of the
