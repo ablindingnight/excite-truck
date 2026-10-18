@@ -180,7 +180,7 @@ void fn_80133460(int section, const char* name, bool v) {
     it->type = 1;
 }
 
-void fn_801334F4(int section, const char* name, char* buf, s32 size) {
+void fn_801334F4(int section, const char* name, char* buf, int size) {
     OptItem* it;
     if (fn_80133E10(&it, section, name)) {
         strncpy(buf, it->value.s, size);
