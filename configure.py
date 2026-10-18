@@ -954,6 +954,7 @@ config.libs.append(
             Object(NonMatching, "game/eve.cpp"),
             Object(NonMatching, "game/stdoverlay.cpp"),
             Object(NonMatching, "game/overlay.cpp"),
+            Object(NonMatching, "game/escape.cpp"),
         ],
     }
 )

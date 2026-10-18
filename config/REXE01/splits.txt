@@ -41,6 +41,15 @@ game/race.cpp:
 	.sdata      start:0x80558950 end:0x805589B0
 	.sbss       start:0x8055D358 end:0x8055D360
 
+game/escape.cpp:
+	.text       start:0x8000C7CC end:0x8000D7D8
+	.ctors      start:0x802ED07C end:0x802ED080
+	.data       start:0x802FC058 end:0x802FC200
+	.bss        start:0x8034F610 end:0x8034F628
+	.sdata      start:0x80558A70 end:0x80558A88
+	.sbss       start:0x8055D3F0 end:0x8055D428
+	.sdata2     start:0x80560210 end:0x80560250
+
 game/flags.cpp:
 	.text       start:0x8000D7D8 end:0x8000D7F0
 	.ctors      start:0x802ED080 end:0x802ED084
