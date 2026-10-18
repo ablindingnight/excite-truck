@@ -162,7 +162,7 @@ struct Viewport {
 };
 
 struct Camera {
-    u8 data[0x34];
+    u8 data[0x30];
 };
 
 class GameOverlay {
@@ -556,8 +556,10 @@ f32 lbl_8055D34C;
 
 FrameTimes lbl_8034EC78;
 RaceInfo lbl_8034EE84;
+
 Overlays lbl_8034EEB8;
-RaceInfo* lbl_8055D350 = &lbl_8034EE84;
+static inline RaceInfo* GetRaceInfo(void) { return &lbl_8034EE84; }
+RaceInfo* lbl_8055D350 = GetRaceInfo();
 void* lbl_8055D354;
 
 static void fn_800053CC(void) {
@@ -787,8 +789,8 @@ void fn_80005C20(void) {
 
 void fn_80005C88(void) {
     int arena = (lbl_8055D350->event->type >> 9) & 1;
-    int i;
     int n;
+    int i;
 
     if (arena) {
         lbl_8034EEB8.intro = new ("ArenaIntroOverlay") ArenaIntroOverlay;
@@ -1175,7 +1177,9 @@ void fn_80007238(void) {
     lbl_8034EE84.numViews = fn_801E85A4();
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, lbl_8034EE84.numViews > 2 ? 0.82625633f : 1.4396f);
+    f32 wide = 1.4396f;
+    f32 narrow = 0.82625633f;
+    fn_802C974C(1.0f, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
     fn_800057D0();
     fn_80161C18();
     if (!LoadingDraw() && !fn_801DF110() && !fn_80161A70()) {
