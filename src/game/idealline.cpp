@@ -162,11 +162,15 @@ ModuleTag lbl_8055E0B8;
 
 extern "C" {
 
+static inline f32 Dot4(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }
+static inline f32 Sq(f32 x) { return x * x; }
+static inline f32 Sum(f32 a, f32 b) { return a + b; }
+static inline f32 Len2(f32 x, f32 y) { return x * x + y * y; }
 f32 fn_80135278(const V2* dir, const V2* p, const V2* origin) {
     V2 d;
     d.x = p->x - origin->x;
     d.y = p->y - origin->y;
-    return dir->x * d.x + dir->y * d.y;
+    return Dot4(dir->x, dir->y, d.x, d.y);
 }
 
 }  // extern "C"
@@ -216,7 +220,7 @@ IdealPoint* fn_80135420(V2* p, V2* d, CenterLine* line) {
             f32 x;
             v.x = p->x - seg->pos.x;
             v.y = p->y - seg->pos.y;
-            x = __fabs(seg->dir.y * v.x + -seg->dir.x * v.y);
+            x = __fabs(Dot4(seg->dir.y, -seg->dir.x, v.x, v.y));
             if (x < best) {
                 found = seg;
                 best = x;
@@ -229,14 +233,10 @@ IdealPoint* fn_80135420(V2* p, V2* d, CenterLine* line) {
         seg = line->points;
         do {
             V2 v;
-            f32 x;
             f32 a;
             v.x = p->x - seg->pos.x;
             v.y = p->y - seg->pos.y;
-            x = seg->dir.y * v.x + -seg->dir.x * v.y;
-            x = x * x;
-            a = fn_80135278(&seg->dir, p, &seg->pos);
-            a = a * a + x;
+            a = Sum(Sq(fn_80135278(&seg->dir, p, &seg->pos)), Sq(Dot4(seg->dir.y, -seg->dir.x, v.x, v.y)));
             if (a < best) {
                 found = seg;
                 best = a;
@@ -511,7 +511,7 @@ void IdealFollower::Start(V2* p, V2* d, int resetTimes, IdealPoint* start) {
     SetPosition(p, d, start);
     UpdatePerp();
     if (resetTimes && times.data) {
-        f32 v = 1000000.0f + lbl_8055E3C8;
+        f32 v = Sum(1000000.0f, lbl_8055E3C8);
         int i;
         for (i = 0; i < times.n; i++) {
             times.data[i] = v;
@@ -523,7 +523,7 @@ void IdealFollower::Start(V2* p, V2* d, int resetTimes, IdealPoint* start) {
     latSpeed = 0.0f;
     speed = 0.0f;
     travel = il.seg->dist + il.seg->len * il.t;
-    lateral = dir.y * off.x + -dir.x * off.y;
+    lateral = Dot4(dir.y, -dir.x, off.x, off.y);
     last = 0;
     prev = 0;
 }
@@ -576,7 +576,7 @@ int IdealFollower::Track(V2* p, f32* progress) {
     oldTravel = travel;
     oldLateral = lateral;
     travel = il.seg->dist + il.seg->len * il.t;
-    lateral = dir.y * off.x + -dir.x * off.y;
+    lateral = Dot4(dir.y, -dir.x, off.x, off.y);
     jump = true;
     if (!moved) {
         bool diff = true;
