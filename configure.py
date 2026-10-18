@@ -999,6 +999,7 @@ config.libs.append(
             Object(NonMatching, "game/lineinfo.cpp"),
             Object(Matching, "game/carclass.cpp"),
             Object(NonMatching, "game/subtask.cpp"),
+            Object(NonMatching, "game/zone.cpp"),
         ],
     }
 )

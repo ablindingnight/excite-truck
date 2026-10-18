@@ -2234,3 +2234,13 @@ game/subtask.cpp:
 	.data       start:0x8032C4F0 end:0x8032C530
 	.bss        start:0x8042FB10 end:0x8042FB28
 	.sbss       start:0x8055E190 end:0x8055E1A8
+
+game/zone.cpp:
+	.text       start:0x8013CB10 end:0x80144504
+	.ctors      start:0x802ED1B8 end:0x802ED1BC
+	.rodata     start:0x802F9398 end:0x802F93D0
+	.data       start:0x8032C530 end:0x8032CE98
+	.bss        start:0x8042FB28 end:0x8042FB88
+	.sdata      start:0x80559D18 end:0x80559DA0
+	.sbss       start:0x8055E1A8 end:0x8055E1D0
+	.sdata2     start:0x80561498 end:0x805615B8
