@@ -207,6 +207,7 @@ Layout* lbl_8055D600;
 Layout* lbl_8055D604;
 Overlay* lbl_80358680[6];
 
+static inline f32 InvLerp(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
 static inline Layout* GetLayout(void) {
     return fn_801E85A4() == 2 ? lbl_8055D5F8 : lbl_8055D5F4;
 }
@@ -567,7 +568,7 @@ inline void LapTitleOverlay::Update(int player, int unused) {
             } else if (elapsed < keys[3]) {
                 seg = 2;
             }
-            t = Lerp(0.0f, 1.0f, Clamp01((elapsed - keys[seg]) / (keys[seg + 1] - keys[seg])));
+            t = Lerp(0.0f, 1.0f, Clamp01(InvLerp(elapsed, keys[seg], keys[seg + 1])));
             fn_80232928(0xFFFFFFFF);
             fn_80147ABC(left[seg], left[seg + 1], "%s", t, leftText);
             fn_80147ABC(right[seg], right[seg + 1], "%s", t, rightText);
