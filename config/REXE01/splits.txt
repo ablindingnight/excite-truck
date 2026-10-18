@@ -2227,3 +2227,10 @@ game/carclass.cpp:
 	.data       start:0x8032C458 end:0x8032C4F0
 	.sdata      start:0x80559CF8 end:0x80559D18
 	.sbss       start:0x8055E180 end:0x8055E190
+
+game/subtask.cpp:
+	.text       start:0x8013C9F4 end:0x8013CB10
+	.ctors      start:0x802ED1B4 end:0x802ED1B8
+	.data       start:0x8032C4F0 end:0x8032C530
+	.bss        start:0x8042FB10 end:0x8042FB28
+	.sbss       start:0x8055E190 end:0x8055E1A8
