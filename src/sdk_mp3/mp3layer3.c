@@ -1642,7 +1642,9 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
     }
 }
 
-MP3Decoder* MP3_Create(u8* header, u32 b, s32 buf, s32 size) {
+/* TMCCMP3Init (fn_800C3CDC), formerly MP3_Create: API name from the game's "mp3: TMCCMP3Init fails"
+ * diagnostic at the verified caller (strongly supported, not an original linker symbol). */
+MP3Decoder* TMCCMP3Init(u8* header, u32 b, s32 buf, s32 size) {
     MP3Decoder* d;
 
     MP3_ArenaInit(buf, size);

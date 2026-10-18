@@ -6,10 +6,11 @@
 static s16* lbl_8055DD88;
 static s32 lbl_8055DD8C;
 
-/* Frame decode (fn_800BDF4C): header, side info, main data, then per granule the scalefactors, Huffman
+/* Frame decode (fn_800BDF4C), TMCCMP3Decode (formerly MP3_DecodeFrame; API name from the game's
+ * "mp3: TMCCMP3Decode returns ..." diagnostic at the verified caller, not a linker symbol): header, side info, main data, then per granule the scalefactors, Huffman
  * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 931 of 933; behaviour verified against the original in a PPC simulation
  * (200 random frames, heavy stages stubbed, bit readers from the original). */
-s32 MP3_DecodeFrame(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
+s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
     u32 bits;
     s16 table_select[2][2][3];
     u8 ngr;
