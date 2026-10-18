@@ -975,6 +975,7 @@ config.libs.append(
             Object(NonMatching, "game/res.cpp"),
             Object(Matching, "game/strtab.cpp"),
             Object(Matching, "game/memstream.cpp"),
+            Object(NonMatching, "game/quat.cpp"),
         ],
     }
 )
