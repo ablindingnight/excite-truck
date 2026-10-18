@@ -28,6 +28,7 @@ struct StackBlock {
     StackBlock* prev;    // offset 0x34
     u8 pad38[0x4];
     u32 cookie2;  // offset 0x3C
+    u8 data[];    // offset 0x40
 };
 
 namespace {
@@ -37,7 +38,7 @@ public:
     Allocator(void) {}
     virtual void Init(void* base, u32 size) = 0;                   // 0x8
     virtual void Shutdown(void) = 0;                               // 0xC
-    virtual void* Alloc(u32 size, const char* name, int type) = 0; // 0x10
+    virtual void* Alloc(s32 size, const char* name, int type) = 0; // 0x10
     virtual void Free(void* p, int type) = 0;                      // 0x14
     virtual void* Avail(u32 size) = 0;                             // 0x18
     virtual int Contains(void* p) = 0;                             // 0x1C
@@ -56,7 +57,7 @@ class LightStack : public Allocator {
 public:
     virtual void Init(void* base, u32 size);
     virtual void Shutdown(void);
-    virtual void* Alloc(u32 size, const char* name, int type);
+    virtual void* Alloc(s32 size, const char* name, int type);
     virtual void Free(void* p, int type);
     virtual void* Avail(u32 size);
     virtual int Contains(void* p) { return (u8*)p >= base && (u8*)p < base + size; }
@@ -82,7 +83,7 @@ class StackHeap : public Allocator {
 public:
     virtual void Init(void* base, u32 size);
     virtual void Shutdown(void);
-    virtual void* Alloc(u32 size, const char* name, int type);
+    virtual void* Alloc(s32 size, const char* name, int type);
     virtual void Free(void* p, int type);
     virtual void* Avail(u32 size);
     virtual int Contains(void* p) { return (u8*)p >= base && (u8*)p < base + size; }
@@ -192,7 +193,7 @@ s32 fn_80128314(int arena) {
     return 0;
 }
 
-void* fn_8012834C(const char* name, u32 size, int type) {
+void* fn_8012834C(const char* name, s32 size, int type) {
     void* p;
     fn_80127964();
     if (!lbl_8055DF80 && lbl_8055DF88) {
@@ -325,17 +326,15 @@ void StackHeap::Shutdown(void) {
 
 StackBlock* StackHeap::FindFree(u32 size) { return 0; }
 
-void* StackHeap::Alloc(u32 size, const char* name, int type) {
-    u32 request = size;
+void* StackHeap::Alloc(s32 size, const char* name, int type) {
     StackBlock* b;
-    u8* data;
-    u8* q;
+    s32 orig = size;
     size = AlignUp(size, 64);
     b = FindFree(size);
     if (b) {
         sprintf(b->name, "?%s (%d)", name, size);
         b->inUse = 1;
-        return b + 1;
+        return b->data;
     }
     if (size + used + 64 >= this->size) {
         Dump(1);
@@ -347,28 +346,35 @@ void* StackHeap::Alloc(u32 size, const char* name, int type) {
     b->inUse = 1;
     b->type = type;
     b->size = size;
-    b->request = request;
+    b->request = orig;
     b->cookie = STACK_COOKIE;
     b->prev = top;
     b->cookie2 = STACK_COOKIE;
     top = b;
-    memset(b + 1, FILL_BYTE, size);
-    data = (u8*)(b + 1);
-    for (q = data + b->request; q < data + AlignUp(b->request, 4); q++) {
-        *q = FILL_BYTE;
+    memset(b->data, FILL_BYTE, size);
+    {
+        u8* data = b->data;
+        u8* q;
+        for (q = data + b->request; q < data + AlignUp(b->request, 4); q++) {
+            *q = FILL_BYTE;
+        }
     }
     used = size + used + 64;
     if (used < this->size) {
-        *(u32*)(data + AlignUp(b->request, 4)) = STACK_COOKIE;
+        *(u32*)&b->data[AlignUp(b->request, 4)] = STACK_COOKIE;
     }
     peak = peak < used ? used : peak;
-    if ((u8*)b + size + 64 >= highest) {
-        highest = (u8*)b + size + 64;
+    {
+        u8* end = (u8*)b + size + 64;
+        u8* data = b->data;
+        if (end >= highest) {
+            highest = end;
+        }
+        if (data < lowest) {
+            lowest = data;
+        }
     }
-    if (data < lowest) {
-        lowest = data;
-    }
-    return b + 1;
+    return b->data;
 }
 
 void StackHeap::Free(void* p, int type) {
@@ -489,20 +495,25 @@ void LightStack::Align(s32 align) {
 
 void LightStack::Shutdown(void) { fn_802E30C8("LightStackAllocator: Max alloc %dK/%dK", peak / 1024, (s32)size / 1024); }
 
-void* LightStack::Alloc(u32 s, const char* name, int type) {
-    u32 aligned = AlignUp(s, 16);
+void* LightStack::Alloc(s32 s, const char* name, int type) {
+    s32 aligned = AlignUp(s, 16);
     u32 total = aligned + 0x20;
-    u8* blk;
     u8* data;
-    if (used + total > size) {
-        fn_802E317C("LightStackAlloc: Out of room for %s:%dK", name, (s32)aligned / 1024);
+    if (total + used > size) {
+        fn_802E317C("LightStackAlloc: Out of room for %s:%dK", name, aligned / 1024);
     }
-    *(u32*)(base + used) = 0xAAAA5555;
-    blk = base + used;
-    ((s32*)blk)[1] = type;
-    data = blk + 0x10;
-    *(u32*)(base + used + aligned + 0x10) = 0xFEEDFACE;
-    *(u32*)(base + used + aligned + 0x14) = aligned;
+    {
+        u8* blk = base + used;
+        *(u32*)blk = 0xAAAA5555;
+        ((s32*)blk)[1] = type;
+        data = blk + 0x10;
+    }
+    {
+        u8* end = base + used;
+        u32* foot = (u32*)(end + aligned);
+        foot[4] = 0xFEEDFACE;
+        foot[5] = aligned;
+    }
     used += total;
     memset(data, FILL_BYTE, aligned);
     peak = used > peak ? used : peak;
