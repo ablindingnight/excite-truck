@@ -12,10 +12,13 @@ struct Vec2 {
 };
 
 struct Vec3 {
-    Vec3(void) {}
     f32 x;
     f32 y;
     f32 z;
+};
+
+struct CirclePoint : public Vec3 {
+    CirclePoint(void) {}
 };
 
 // Rows: right, forward, up, position.
@@ -286,7 +289,7 @@ public:
 
 ModuleTag lbl_8055D5A8;
 UnkStatic7F lbl_8055D5B0;
-Vec3 lbl_803582C0[21];
+CirclePoint lbl_803582C0[21];
 MapMarker lbl_803583C8[16];
 TrackMap lbl_80358508[4];
 SFMarker* lbl_8055D5B4;
@@ -465,7 +468,7 @@ static inline f32 Ease(f32 t) {
 }
 
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
-    Vertex verts[42] __attribute__((aligned(16)));
+    Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
     Basis basis;
     Vec3 path;
