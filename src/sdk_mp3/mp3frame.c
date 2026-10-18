@@ -302,12 +302,15 @@ u32 MP3_GetBits(u32 unused, u8* buf, s16 n, s32* pos) {
     return result;
 }
 
+/* Read n bits from the main-data ring buffer (fn_800BDEB4). Matches (in-place shift of the masked byte from
+ * DeepSeek, round 52). */
 u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos) {
     u16 result = 0;
     u32 p;
     u32 idx;
     u32 avail;
     u32 take;
+    s32 val;
 
     if (n == 0) {
         return 0;
@@ -323,7 +326,9 @@ u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos) {
             avail = 8;
         }
         take = n < avail ? n : avail;
-        result |= ((lbl_802F3408[avail] & buf[idx]) >> (avail - take)) << (n - take);
+        val = lbl_802F3408[avail] & buf[idx];
+        val >>= avail - take;
+        result |= val << (n - take);
         avail -= take;
         n -= take;
     }
