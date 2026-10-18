@@ -12,7 +12,6 @@ class Pool {
 public:
     Pool(const char* name, s32 count, s32 size);
     virtual ~Pool(void);
-    virtual void vf0C(void) = 0;
 
     void Init(const char* name, s32 count, s32 size, void* buffer);
     void Reset(void);
