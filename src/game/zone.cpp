@@ -197,6 +197,11 @@ struct Race {
 };
 
 static inline ValPoint GetPt(ValueNode* n, const char* k) { return n->GetPoint(k); }
+static inline void ScaleV(Vec3* d, const Vec3* s, f32 k) {
+    d->x = s->x * k;
+    d->y = s->y * k;
+    d->z = s->z * k;
+}
 static inline void Perp(ValPoint* v) {
     f32 t = v->x;
     v->x = v->y;
@@ -282,6 +287,11 @@ struct Tune {
     f32 secondaryTimerLen;   // offset 0x30
     f32 gatePenalty;         // offset 0x34
     f32 ringTimeBonus;       // offset 0x38
+
+    f32 BonusAt(f32 t) const {
+        f32 v = timeBonus;
+        return Lerp(v, 0.0f, Clamp01(InvLerp(0.0f, timeBonusLen, t - timeBonusStartT)));
+    }
 };
 
 // Interval timer on the race clock (0x8001DAE0..): length, start time.
@@ -836,13 +846,11 @@ struct Path {
     f32 len;  // offset 0x8
 };
 
+// Ideal-path walker from the track map unit (0x801352B8..).
 struct PathIter {
-    PathIter(void) { fn_801352B8_(this); }
-    ~PathIter(void) { fn_8013530C_(this); }
-    int Set(int index) { return fn_80135D60_(this, index); }
-    static void fn_801352B8_(PathIter* it);
-    static void fn_8013530C_(PathIter* it);
-    static int fn_80135D60_(PathIter* it, int index);
+    PathIter(void);
+    ~PathIter(void);
+    int Set(int index);
     u8 pad0[0x2C];
     Path* path;  // offset 0x2C
     u8 pad30[0x38 - 0x30];
@@ -922,9 +930,7 @@ public:
         return Round(lbl_8042FB3C.timeBonus * l->score * l->mult);
     }
     int TimeBonusPoints(CarState* c) {
-        f32 u = Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
-                                fn_8013CB3C() - c->bonusT - lbl_8042FB3C.timeBonusStartT));
-        if (Lerp(lbl_8042FB3C.timeBonus, 0.0f, u) > 0.0f) {
+        if (lbl_8042FB3C.BonusAt(fn_8013CB3C() - c->bonusT) > 0.0f) {
             return Round(lbl_8042FB3C.timeBonus);
         }
         return 0;
@@ -1024,7 +1030,38 @@ static inline void LoadSound(Sound*& s, const char* name) {
     }
 }
 
+// Static object built by an inline constructor storing (0, 123, 0, 0, 0); 0x14 bytes here.
+class UnkStatic123s {
+public:
+    UnkStatic123s(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+};
+
+class Color {
+public:
+    Color(u32 c) { rgba = c; }
+    u32 rgba;
+};
+
 ModuleTag lbl_8055E1A8;
+UnkStaticFFFF lbl_8055E1B0;
+UnkStaticFFFF lbl_8055E1B4;
+static UnkStatic123s lbl_8042FB28;
+UnkStatic7F lbl_8055E1B8;
+u8 lbl_8055E1BC;
+ZoneMaster* lbl_8055E1C0;
+Color lbl_8055E1C4(0xFF2A85F0);
+Tune lbl_8042FB3C;
 
 extern "C" {
 
@@ -1175,7 +1212,7 @@ Gate* fn_8013D148(ZoneLevel* l, f32 x) {
 }
 
 u32 fn_8013D18C(u32 i) {
-    u32 colors[6] = {0xFF00FF00, 0xFFFF4040, 0xFF00FFFF, 0xFFFFFF00, 0xFFFF00FF, 0xFFFFFF7F};
+    u32 colors[6] = {0xFF00FF00, 0xFFFF4040, 0xFF00FFFF, 0xFFFFFF00, 0xFFFF00FF, 0xFFFF7F00};
     return colors[i % 6];
 }
 
@@ -1220,7 +1257,6 @@ extern "C" CSubTaskMgr* fn_8013D288(void) { return new ("zstm") ZoneSubTask; }
 
 extern Tune lbl_8042FB3C;
 extern "C" void fn_8013E3A8(Tune* t, ValueNode* n);
-ZoneMaster* lbl_8055E1C0;
 
 ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
     int i;
@@ -1684,6 +1720,9 @@ void ZoneMaster::vf44(void) {
     }
 }
 
+// Stripped by the linker; keeps its constant in place.
+extern "C" f32 fn_zone_StubM2(f32 x) { return x * -2.0f; }
+
 extern "C" f32 fn_8013EFB0(f32 x) { return x - 320.0f; }
 
 extern "C" f32 fn_8013EFBC(f32 y) { return 240.0f - y; }
@@ -1709,15 +1748,37 @@ int ZoneMaster::vf68(void) { return hud.state == 2; }
 
 void ZoneMaster::vf4C(int p) { DrawHud(p); }
 
+extern "C" void fn_801475D0(Layout* l, const char* name, const char* fmt, ...);
+
+// Stripped by the linker; keep their literals in place.
+extern "C" void fn_zone_TextElem(int len, const char* fmt) {
+    fn_802E317C(" oversized text elem (len %d, fmt \"%s\")", len, fmt);
+}
+
+extern "C" void fn_zone_WideOpen(Layout* l, int mode, int mult, f32* out) {
+    out[0] = out[1] * 0.25f;
+    out[2] = out[3] * 255.0f;
+    const char* msg;
+    if (mode == 0) {
+        msg = "HURRY UP!";
+    } else if (mode == 1) {
+        msg = "GREAT SPEED";
+    } else {
+        msg = "WIDE OPEN";
+    }
+    fn_801475D0(l, "wideopen_msg", "%s", msg);
+    fn_801475D0(l, "wideopen_mult", "%d", mult);
+}
+
 void ZoneMaster::DrawBonus(int p, CarState* c) {
     if (c->gate) {
         f32 k = c->BonusScale();
         f32 a = Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
                                                  fn_8013CB3C() - c->bonusT - lbl_8042FB3C.timeBonusStartT)));
         LayoutArt* pie = mainLyt->FindArt("bonus_pie");
+        f32 r = pie->w * k;
         f32 x = pie->pos.x;
         f32 y = pie->pos.y;
-        f32 r = pie->w * k;
         int n = a * 360.0f;
         if (n > 0) {
             fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, tex[4], 1.5707964f, 0.017453292f, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -1759,6 +1820,14 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
     a->y = c.y + d1.y;
     b->x = c.x + d2.x;
     b->y = c.y + d2.y;
+}
+
+// Stripped by the linker; keeps its literals in place.
+extern "C" void fn_zone_LevelTitle(Layout* l) {
+    l->Find("level_title");
+    l->Find("level_fade_in");
+    l->Find("level_number");
+    l->Find("level_fade_out");
 }
 
 void ZoneMaster::DrawLevel(int p, CarState* c) {
@@ -1865,7 +1934,6 @@ void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_80130980(char* buf, int size, int digits, f32 t);
-void fn_801475D0(Layout* l, const char* name, const char* fmt, ...);
 void fn_8014784C(Layout* l, const char* name, const char* set, int index);
 void fn_80147CEC(LayoutItem* out, LayoutItem* a, LayoutItem* b, f32 t);
 void fn_801474EC(LayoutItem* item, const char* fmt, ...);
@@ -1877,8 +1945,6 @@ void fn_802C70AC(int model, void* mtx, int a, int b);
 void fn_802A96E8(Vec3* pts, int n, int c, s32 lite, s32 glow);
 }
 
-u8 lbl_8055E1BC;
-u32 lbl_8055E1C4 = 0xFF2A85F0;
 
 static inline f32 Ease(f32 x) {
     if (x < -1.0f) {
@@ -1907,7 +1973,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
             fn_802C8E00(-1, 0, x, y - h, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(-1, 1, x + w, y, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(-1, 1, x + w, y - h, 0.0f, 0.46484375f, 0.98828125f);
-            col = lbl_8055E1C4;
+            col = lbl_8055E1C4.rgba;
             fn_802C8E00(col, 0, x, y, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(col, 0, x, y - h, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(col, 1, x + w * c->timeLeft, y, 0.0f, 0.46484375f, 0.98828125f);
@@ -2556,9 +2622,7 @@ int ZoneMaster::vfA0(Cam* cam) {
     it.Set((int)((PathSet*)fn_80156A40())->Get(0));
     path = it.path;
     PlaceCamera(cam, &it, 0.0f, path->len - 25.0f - 35.0f);
-    cam->v30.x = cam->v18.x * 4.4444447f;
-    cam->v30.y = cam->v18.y * 4.4444447f;
-    cam->v30.z = cam->v18.z * 4.4444447f;
+    ScaleV(&cam->v30, &cam->v18, 4.4444447f);
     cam->i44 = 1;
     return 1;
 }
@@ -2637,7 +2701,8 @@ int ZoneMaster::vf8C(int p, int key) {
 
 int ZoneMaster::vf3C(int p) {
     f32 t = ((RaceClock*)fn_801E7E3C())->t;
-    f32 t1 = 6.75f - 0.8f;
+    f32 t0 = 6.75f;
+    f32 t1 = t0 - 0.8f;
     f32 t2 = t1 - 0.3f;
     f32 t3 = t2 - 0.15f;
     f32 t4 = t3 - 0.8f;
