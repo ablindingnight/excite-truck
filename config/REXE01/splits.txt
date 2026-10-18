@@ -2035,3 +2035,9 @@ game/res.cpp:
 	.data       start:0x8032A630 end:0x8032AF68
 	.sdata      start:0x80559980 end:0x805599E8
 	.sbss       start:0x8055DFF0 end:0x8055E018
+
+game/strtab.cpp:
+	.text       start:0x8012F150 end:0x8012F31C
+	.ctors      start:0x802ED150 end:0x802ED154
+	.data       start:0x8032AF68 end:0x8032AFB8
+	.sbss       start:0x8055E018 end:0x8055E020
