@@ -266,11 +266,13 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
     }
 }
 
+/* Find the next frame sync word (fn_800BDD7C): twelve 1 bits after at least four 0 bits. Matches. */
 s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos) {
     s32 word = MP3_GetBits(ctx, buf, 12, pos);
 
     while ((u16)word != 0xFFF) {
-        word = (u16)(word << 1) | MP3_GetBits(ctx, buf, 1, pos);
+        word = (word << 1) & 0xFFFF;
+        word |= MP3_GetBits(ctx, buf, 1, pos);
         if (*pos > 0x3FFF) {
             return 0;
         }
@@ -311,12 +313,13 @@ u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos) {
         return 0;
     }
     p = *pos;
-    *pos = p + n;
     idx = (p >> 3) & 0x1FFF;
     avail = 8 - (p & 7);
+    *pos = p + n;
     while (n > 0) {
         if (avail == 0) {
-            idx = (idx + 1) & 0x1FFF;
+            idx++;
+            idx &= 0x1FFF;
             avail = 8;
         }
         take = n < avail ? n : avail;
