@@ -1965,3 +1965,10 @@ game/eventq.cpp:
 	.ctors      start:0x802ED124 end:0x802ED128
 	.bss        start:0x8041DF58 end:0x8041E098
 	.sbss       start:0x8055DF48 end:0x8055DF68
+
+game/bg.cpp:
+	.text       start:0x80127B5C end:0x801281A0
+	.ctors      start:0x802ED128 end:0x802ED12C
+	.data       start:0x80329FA0 end:0x8032A000
+	.bss        start:0x8041E098 end:0x8041E140
+	.sbss       start:0x8055DF68 end:0x8055DF78

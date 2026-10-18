@@ -963,6 +963,7 @@ config.libs.append(
             Object(NonMatching, "game/trackmap.cpp"),
             Object(NonMatching, "game/prof.cpp"),
             Object(Matching, "game/eventq.cpp"),
+            Object(Matching, "game/bg.cpp"),
         ],
     }
 )
