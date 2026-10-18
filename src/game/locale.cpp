@@ -155,7 +155,10 @@ static LocString s_abbr[12] = {
 
 static UnitSystem s_custom = lbl_8032B14C;
 
-static inline void StrNCpy(char* d, const char* s, int n) {
+static inline void StrNCpy(char* dst, const char* src, int len) {
+    char* d = dst;
+    int n = len;
+    const char* s = src;
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -313,6 +316,8 @@ void fn_801305C4(char* buf, s32 size, Unit* u, int mode, f32 value) {
         fn_801345D8(buf, size, "%c%.*f", 1, u->precis, value * u->conv);
     }
     switch (mode) {
+    case 0:
+        break;
     case 1:
         StrNCat(buf, u->sname + 1, size);
         break;
@@ -382,10 +387,6 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs);
 void fn_80130978(char* buf, s32 size, f32 secs) { fn_80130980(buf, size, 3, secs); }
 
 void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
-    const DigitGlyph glyphs[] = {
-        {'0', "\\d0"}, {'1', "\\d1"}, {'2', "\\d2"}, {'3', "\\d3"}, {'4', "\\d4"}, {'5', "\\d5"}, {'6', "\\d6"},
-        {'7', "\\d7"}, {'8', "\\d8"}, {'9', "\\d9"}, {'-', "\\d-"}, {':', "\\d:"}, {'.', "\\d."},
-    };
     char out[100];
     char hBuf[10];
     char mBuf[10];
@@ -454,6 +455,11 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
         started = 1;
     }
     fn_801345D8(buf, size, "%c", 1);
+    {
+        const DigitGlyph glyphs[] = {
+            {'0', "\\d0"}, {'1', "\\d1"}, {'2', "\\d2"}, {'3', "\\d3"}, {'4', "\\d4"}, {'5', "\\d5"}, {'6', "\\d6"},
+            {'7', "\\d7"}, {'8', "\\d8"}, {'9', "\\d9"}, {'-', "\\d-"}, {':', "\\d:"}, {'.', "\\d."},
+        };
     for (p = out; *p; p++) {
         int found = 0;
         u32 j;
@@ -468,6 +474,7 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
             one[0] = *p;
             StrNCat(buf, one, size);
         }
+    }
     }
 }
 
