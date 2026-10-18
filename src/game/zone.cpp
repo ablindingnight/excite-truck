@@ -107,8 +107,8 @@ class Sound {
 public:
     virtual ~Sound(void);
     void Play(void) {
-        b4B = 0;
         play = 1;
+        b4B = 0;
         b4A = 0;
     }
     void SetPitch(f32 f) {
@@ -685,10 +685,10 @@ struct EventRing {
     };
     int Count(void) { return (cap + (tail - head)) % cap; }
     Entry* Get(int i) {
-        if (i < Count()) {
-            return &data[(i + (cap + head)) % cap];
+        if (i >= Count()) {
+            return 0;
         }
-        return 0;
+        return &data[(head + i + cap) % cap];
     }
     Entry* Push(void) {
         Entry* e = &data[tail];
@@ -908,13 +908,14 @@ public:
         return NextGate(fn_8013D148(CurLevel(), t->path->GetPos()->dist));
     }
     int NextLevel(void) {
+        int r = 0;
         if (level < levels->n - 1) {
             level++;
             t6C.Start();
             i288 = fn_8013D18C(level);
-            return 1;
+            r = 1;
         }
-        return 0;
+        return r;
     }
     int MaxBonus(int lvl) {
         ZoneLevel* l = &levels->levels[lvl];
@@ -1186,6 +1187,9 @@ public:
     virtual RacerInfo* GetInfo(void);
 };
 extern "C" Racer* fn_801B2EC0(int i);
+
+// Ring-hit pitch per ring in the current chain.
+const f32 lbl_802F93B0[5] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f};
 
 int fn_8013D1F0(int i) { return fn_801B2EC0(i)->GetInfo()->rank; }
 
@@ -1870,7 +1874,7 @@ void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
 void PSVECNormalize(const Vec3* a, Vec3* b);
 void PSVECCrossProduct(const Vec3* a, const Vec3* b, Vec3* c);
 void fn_802C70AC(int model, void* mtx, int a, int b);
-void fn_802A96E8(Vec3* pts, int n, int c, s32 glow, s32 lite);
+void fn_802A96E8(Vec3* pts, int n, int c, s32 lite, s32 glow);
 }
 
 u8 lbl_8055E1BC;
@@ -2266,9 +2270,8 @@ Glow::~Glow(void) {
     fn_802CAC54(glow);
 }
 
-void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, glow, lite); }
+void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
 
-extern f32 lbl_802F93B0[];
 
 // Nothing is inlined into the per-frame update in the original build: every helper it uses is a call to
 // a weak copy emitted right after it.
@@ -2693,30 +2696,32 @@ void ZoneMaster::vfF8(void) {
 }
 
 struct HudBinding {
+    HudBinding(s32 type, const char* name, void* ptr) : type(type), name(name), ptr(ptr) {}
     s32 type;
     const char* name;
     void* ptr;
 };
+extern const HudBinding lbl_802FAA40;  // list terminator
 
 void ZoneHud::Init(void) {
     HudBinding b[] = {
-        {3, "time_left", &i10C},
-        {3, "time_bonus", &i110},
-        {3, "grade", &i114},
-        {3, "final_score", &i118},
-        {1, "gate_count", score},
-        {1, "time_bonus", bonus},
-        {1, "time_bonus_title_caps", bonusTitle},
-        {1, "ring_bonus", finalText},
-        {1, "final_score", totalText},
-        {1, "grade", grade},
-        {1, "final_score_no_time_bonus", noBonusText},
-        {1, "time_left", timeLeft},
-        {1, "challenge_complete_1", textC6},
-        {1, "challenge_complete_2", textDA},
-        {1, "out_of_time_message", failText},
-        {2, "difficulty_level", &level},
-        {0, 0, 0},
+        HudBinding(3, "time_left", &i10C),
+        HudBinding(3, "time_bonus", &i110),
+        HudBinding(3, "grade", &i114),
+        HudBinding(3, "final_score", &i118),
+        HudBinding(1, "gate_count", score),
+        HudBinding(1, "time_bonus", bonus),
+        HudBinding(1, "time_bonus_title_caps", bonusTitle),
+        HudBinding(1, "ring_bonus", finalText),
+        HudBinding(1, "final_score", totalText),
+        HudBinding(1, "grade", grade),
+        HudBinding(1, "final_score_no_time_bonus", noBonusText),
+        HudBinding(1, "time_left", timeLeft),
+        HudBinding(1, "challenge_complete_1", textC6),
+        HudBinding(1, "challenge_complete_2", textDA),
+        HudBinding(1, "out_of_time_message", failText),
+        HudBinding(2, "difficulty_level", &level),
+        lbl_802FAA40,
     };
     StrCopyN(noBonusText, 0x14, "100");
     StrCopyN(bonus, 0x14, "50");
