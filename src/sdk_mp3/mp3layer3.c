@@ -248,12 +248,14 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 trac
     }
 }
 
+/* Peek up to 16 bits from the main-data ring without consuming them past n (fn_800C0DF8): reads three bytes
+ * (wrapping at 0x2000) and advances *pos by n. Matches. */
 u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
-    u32 idx = (*pos >> 3) & 0x1FFF;
-    s32 sh = 24 - (*pos & 7);
     u8 b0;
+    u32 idx = (*pos >> 3) & 0x1FFF;
     u8 b1;
     u8 b2;
+    s32 sh = 24 - (*pos & 7);
 
     *pos += n;
     if (idx < 0x1FFE) {
