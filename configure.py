@@ -1046,6 +1046,7 @@ config.libs.append(
             Object(Matching, "game/stub12.cpp"),
             Object(Matching, "game/drawline.cpp"),
             Object(Matching, "game/stub13.cpp"),
+            Object(Matching, "game/trkefx.cpp"),
             Object(Matching, "game/stub14.cpp"),
             Object(NonMatching, "game/swlmap.cpp"),
             Object(Matching, "game/preload.cpp"),
