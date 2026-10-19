@@ -63,7 +63,7 @@ s32 fn_8012F500(s32 s, s32* pos);
 s32 fn_8012F450(s32 s);
 void fn_8012F550(s32 s, void* dst, s32 n);
 void fn_8012F448(s32 s, s32 pos);
-s32 fn_8012F3CC(void);
+s32 fn_8012F3CC(s32 a);
 void fn_8012F43C(s32 s);
 void fn_8012F418(s32 s);
 int OptProfile__Fv(void);
@@ -406,13 +406,14 @@ f32 lbl_80430700[76];
 RaceCarRec* lbl_80430830[8];
 PhysClock lbl_80430850;
 MsgBuf lbl_80430870;
-struct EventBufs {
-    MsgBuf ev;    // offset 0x0
-    MsgBuf ev2;   // offset 0x1004
-    s32 f2008;    // offset 0x2008
+struct MsgBuf2 {
+    s32 len;          // offset 0x0
+    u8 data[0x1000];  // offset 0x4
+    s32 f1004;        // offset 0x1004
 };
 
-EventBufs lbl_80431874;
+MsgBuf lbl_80431874;
+MsgBuf2 lbl_80432878;
 HistEntry lbl_80433880[8];
 Phob* lbl_804340C0[0x200];
 
@@ -609,7 +610,7 @@ void fn_80177F40(void) {
             fn_80134B50();
         }
         fn_80177CEC();
-        lbl_80431874.ev2.len = 0;
+        lbl_80432878.len = 0;
         fn_80177EE4();
         fn_8017FF4C(0.016683351f);
         fn_801778C0();
@@ -796,9 +797,10 @@ int fn_80178604(PhobMsg* m) {
 }
 
 int fn_80178678(s32 s, Phob** out, int pass) {
-    PhobMsg* m = 0;
     s32 pos;
+    PhobMsg* m = 0;
     s32 at;
+    Phob* r;
     fn_8012F500(s, &pos);
     if (pos < 0) {
         return 0;
@@ -808,10 +810,11 @@ int fn_80178678(s32 s, Phob** out, int pass) {
     fn_8012F448(s, at);
     fn_8012F550(s, &m, m->size);
     if (pass == fn_80178604(m)) {
-        *out = fn_801783A8(m, pos);
+        r = fn_801783A8(m, pos);
     } else {
-        *out = 0;
+        r = 0;
     }
+    *out = r;
     return 1;
 }
 
@@ -1068,10 +1071,10 @@ void fn_80178DD4(s32 stream) {
     lbl_8055E45C = 0;
     lbl_8055E45D = 0;
     lbl_8055E438 = 0;
-    lbl_80431874.ev2.len = 0;
+    lbl_80432878.len = 0;
     lbl_80430870.len = 0;
-    lbl_80431874.ev.len = 0;
-    s = fn_8012F3CC();
+    lbl_80431874.len = 0;
+    s = fn_8012F3CC(stream);
     fn_801AE4C4();
     fn_80127464();
     for (pass = 0; pass < 3; pass++) {
@@ -1297,7 +1300,7 @@ u8 fn_801796C4(void) { return lbl_8055E45F; }
 
 void fn_801796CC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80430870, type, data, n); }
 
-void fn_801796EC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80431874.ev, type, data, n); }
+void fn_801796EC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80431874, type, data, n); }
 
 f32 fn_8017970C(void) {
     const char* asserts[] = {"ConvertPTimeToPhysicsTime: bad approximation", "ConvertPhysicsTickToPTime: bad approximation",
@@ -1348,8 +1351,8 @@ StatePacket* fn_80179824(void) {
         p->forces[i] = lbl_804305D4[i];
     }
     fn_80176C0C(p->msgs, &lbl_80430870);
-    fn_80176C0C(p->events, &lbl_80431874.ev);
-    lbl_80431874.ev.len = 0;
+    fn_80176C0C(p->events, &lbl_80431874);
+    lbl_80431874.len = 0;
     return p;
 }
 
