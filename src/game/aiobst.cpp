@@ -19,7 +19,7 @@ void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const vo
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-#define CLAMP01(x) MAX(MIN(1.0f, (x)), 0.0f)
+#define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 #define LERP(a, b, t) ((a) + (t) * ((b) - (a)))
 
 struct Vec3 {
@@ -28,22 +28,26 @@ struct Vec3 {
     f32 z;
 };
 
+struct Pt {
+    f32 x;
+    f32 y;
+};
+
 struct Vec2 {
     Vec2(void) {}
     Vec2(f32 a, f32 b) {
-        x = a;
-        y = b;
+        v.x = a;
+        v.y = b;
     }
     void Set(f32 a, f32 b) {
-        x = a;
-        y = b;
+        v.x = a;
+        v.y = b;
     }
-    void SetXZ(const Vec3& v) {
-        x = v.x;
-        y = v.z;
+    void SetXZ(const Vec3& p) {
+        v.x = p.x;
+        v.y = p.z;
     }
-    f32 x;
-    f32 y;
+    Pt v;
 };
 
 // A difference of two points (kept in memory, like the original's temporaries).
@@ -52,10 +56,6 @@ struct Delta {
     f32 z;
 };
 
-struct Pt {
-    f32 x;
-    f32 y;
-};
 
 struct Frame {
     Vec3* Right(void) { return &basis[0]; }
@@ -162,7 +162,10 @@ struct DynArray {
     DynArray(int n) : a(new ("dsa_buf") T[n], n) { alloc = a.data; }
     ~DynArray(void) { delete[] alloc; }
     T* Add(void) { return &a.data[a.count++]; }
-    void Push(T v) { a.data[a.count++] = v; }
+    void Push(T v) {
+        T* p = &a.data[a.count++];
+        *p = v;
+    }
     int Count(void) { return a.count; }
     T* At(int i) { return &a.data[i]; }
     void Remove(int k) {
@@ -197,7 +200,7 @@ extern const f32 kGap;
 f32 lbl_8055E2A4 = kWidth * kBin;               // bin width
 s32 lbl_8055E2A8 = 64.0f * (kGap / kWidth) + 1;  // bins a car needs
 
-static inline const char* Plural(int n) { return n != 1 ? "s" : ""; }
+static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
 
 extern "C" {
 
@@ -244,8 +247,8 @@ void fn_8015EE14(ValueNode* list, Track* trk) {
                 Obst* o = lbl_8055E29C->Add();
                 const char* type;
                 ValPoint p = n->GetPoint("p");
-                o->pos.x = p.x;
-                o->pos.y = p.y;
+                o->pos.v.x = p.x;
+                o->pos.v.y = p.y;
                 fn_8015EC50(o, trk);
                 type = n->GetString("type", "");
                 if (strcmp(type, "left_arrow") == 0) {
@@ -270,18 +273,18 @@ void fn_8015EF84(ValueNode* list) {
         ValueNode* n;
         for (i = 0; (n = list->GetChildAt(i)) != 0; i++) {
             if (fn_8015ED54(n)) {
-                ValPoint p;
-                f32 r2;
-                int j;
                 erased++;
-                p = n->GetPoint("p");
-                r2 = n->GetFloat("rad");
+                ValPoint p;
+                ValPoint t = n->GetPoint("p");
+                p = t;
+                f32 r2 = n->GetFloat("rad");
+                int j;
                 r2 = r2 * r2;
                 j = 0;
                 while (j < lbl_8055E29C->a.count) {
                     Obst* o = &lbl_8055E29C->a.data[j];
-                    Vec2 d(p.x - o->pos.x, p.y - o->pos.y);
-                    if (d.x * d.x + d.y * d.y < r2) {
+                    Vec2 d(p.x - o->pos.v.x, p.y - o->pos.v.y);
+                    if (d.v.x * d.v.x + d.v.y * d.v.y < r2) {
                         lbl_8055E29C->Remove(j);
                     } else {
                         j++;
@@ -312,25 +315,26 @@ int fn_8015F148(Group** groups, int n) {
     return count;
 }
 
-void fn_8015F1E4(Obst* o, TrackObj* t) {
-    Frame* m = t->mtx;
+void fn_8015F1E4(Obst* o, const TrackObj* t) {
     f32 r = t->rad;
-    Vec2 axis(m->basis[2].x, m->basis[2].z);
+    Delta axis;
     Vec3 c;
-    o->rad = r + 0.5f * (3.05f * (f32)sqrt(axis.x * axis.x + axis.y * axis.y));
-    if (m->basis[2].y < 0.0f) {
+    axis.x = t->mtx->basis[2].x;
+    axis.z = t->mtx->basis[2].z;
+    o->rad = r + 0.5f * (3.05f * (f32)sqrt(axis.x * axis.x + axis.z * axis.z));
+    if (t->mtx->basis[2].y < 0.0f) {
         f32 k = t->half - 1.525f;
-        c.x = m->origin.x + m->basis[2].x * k;
-        c.y = m->origin.y + m->basis[2].y * k;
-        c.z = m->origin.z + m->basis[2].z * k;
+        c.x = t->mtx->origin.x + t->mtx->basis[2].x * k;
+        c.y = t->mtx->origin.y + t->mtx->basis[2].y * k;
+        c.z = t->mtx->origin.z + t->mtx->basis[2].z * k;
     } else {
         f32 k = -(t->half - 1.525f);
-        c.x = m->origin.x + m->basis[2].x * k;
-        c.y = m->origin.y + m->basis[2].y * k;
-        c.z = m->origin.z + m->basis[2].z * k;
+        c.x = t->mtx->origin.x + t->mtx->basis[2].x * k;
+        c.y = t->mtx->origin.y + t->mtx->basis[2].y * k;
+        c.z = t->mtx->origin.z + t->mtx->basis[2].z * k;
     }
-    o->pos.x = c.x;
-    o->pos.y = c.z;
+    o->pos.v.x = c.x;
+    o->pos.v.y = c.z;
     o->type = 0;
 }
 
@@ -400,12 +404,9 @@ void fn_8015F670(Group** groups, int n) {
     ValueTable* vt = fn_80131810("aiobst.val");
     ValueNode* objs;
     int total;
-    if (vt) {
-        objs = vt->FindChild("objects");
-    } else {
-        objs = 0;
-    }
-    total = fn_8015F148(groups, n) + fn_8015ED90(objs);
+    objs = vt ? vt->FindChild("objects") : 0;
+    total = fn_8015F148(groups, n);
+    total += fn_8015ED90(objs);
     if (total > 0) {
         lbl_8055E29C = new ("ai-obstable") DynArray<Obst>(total);
         fn_8015F320(groups, n, trk);
@@ -420,9 +421,9 @@ void fn_8015F670(Group** groups, int n) {
 
 // The lateral bin (-n/2..n/2) that the car's velocity points at.
 int fn_8015F7A0(int n, const Vec3* vel, const Vec3* right) {
-    f32 half = (f32)n * 0.25f;
+    f32 half = n / 4.0f;
     f32 t = (PSVECDotProduct(vel, right) - -13.333333f) / 26.666666f;
-    t = CLAMP01(t);
+    CLAMP01(t);
     return LERP(-half, half, t);
 }
 
@@ -440,13 +441,14 @@ struct Bin {
 extern "C" {
 
 int fn_8015F848(Bin* bins, f32 range) {
-    int last = -1;
     int i;
+    int last = -1;
+    f32 bw = lbl_8055E2A4;
     for (i = 0; i < 64; i++) {
         f32 d = bins[i].dist;
         if (d < range) {
             if (last > 0 && (f32)__fabs(bins[last].dist - d) < range * 0.5f &&
-                lbl_8055E2A4 * (f32)(i - last) < kGap) {
+                bw * (f32)(i - last) < kGap) {
                 Bin* a = &bins[last];
                 Bin* b = &bins[i];
                 for (; last <= i; last++) {
@@ -539,14 +541,14 @@ struct View {
     }
     f32 Ahead(const Vec2* p, const Pt* o) const {
         Delta d;
-        d.x = p->x - o->x;
-        d.z = p->y - o->y;
+        d.x = p->v.x - o->x;
+        d.z = p->v.y - o->y;
         return fwd.x * d.x + fwd.y * d.z;
     }
     f32 Side(const Vec2* p, const Pt* o) const {
         Delta d;
-        d.x = p->x - o->x;
-        d.z = p->y - o->y;
+        d.x = p->v.x - o->x;
+        d.z = p->v.y - o->y;
         return fwd.y * d.x + -fwd.x * d.z;
     }
     Pt fwd;    // offset 0x0
@@ -572,23 +574,23 @@ struct Bins {
                 switch (o->type) {
                 case 0: {
                     f32 t = (s - o->rad - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
-                    t = CLAMP01(t);
+                    CLAMP01(t);
                     lo = LERP(0.0f, 64.0f, t);
                     t = (lbl_8055E2A4 + (s + o->rad) - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
-                    t = CLAMP01(t);
+                    CLAMP01(t);
                     hi = LERP(0.0f, 64.0f, t);
                     break;
                 }
                 case 2: {
                     f32 t = (s + lbl_8055E2A4 - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     lo = 0;
-                    t = CLAMP01(t);
+                    CLAMP01(t);
                     hi = LERP(0.0f, 64.0f, t);
                     break;
                 }
                 case 1: {
                     f32 t = (s - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
-                    t = CLAMP01(t);
+                    CLAMP01(t);
                     hi = 64;
                     lo = LERP(0.0f, 64.0f, t);
                     break;
@@ -613,9 +615,9 @@ struct Bins {
 struct Spot {
     Vec3 pos;
     void From(const Vec2& v) {
-        pos.x = v.x;
+        pos.x = v.v.x;
         pos.y = 0.0f;
-        pos.z = v.y;
+        pos.z = v.v.y;
     }
 };
 
@@ -669,8 +671,8 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 xz.SetXZ(p);
                 car.seg = 0;
                 car.type = 0;
-                car.pos.x = 0.0f;
-                car.pos.y = 0.0f;
+                car.pos.v.x = 0.0f;
+                car.pos.v.y = 0.0f;
                 car.rad = 0.0f;
                 car.pos = xz;
                 car.rad = 2.0f;
