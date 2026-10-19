@@ -982,7 +982,7 @@ config.libs.append(
             Object(Matching, "game/crc.cpp"),
             Object(Matching, "game/options.cpp"),
             Object(Matching, "game/loadpool.cpp"),
-            Object(NonMatching, "game/strfunc.cpp"),
+            Object(Matching, "game/strfunc.cpp"),
             Object(NonMatching, "game/aidriver.cpp"),
             Object(NonMatching, "game/idealline.cpp"),
             Object(NonMatching, "game/proxer.cpp"),

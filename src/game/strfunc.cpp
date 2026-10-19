@@ -24,10 +24,9 @@ void fn_801345D8(char* buf, int size, const char* fmt, ...) {
 }
 
 void fn_801346B4(char* dst, int size, const char* src) {
-    char* d = dst;
     int i;
-    for (i = 0; i < size && *src; i++, src++, d++) {
-        *d = *src == ' ' ? '_' : *src;
+    for (i = 0; i < size && src[i]; i++) {
+        dst[i] = src[i] == ' ' ? '_' : src[i];
     }
     dst[size - 1 < i ? size - 1 : i] = 0;
 }
