@@ -21,6 +21,7 @@ void fn_802CE860(int n) { fn_801E4F20(n * 4); }
 
 void fn_802CE868(void) { fn_801E4FF4(); }
 
+// NonMatching: float register numbering in the corner loop.
 void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     ValVec3 pos;
     CamMtx* right;
