@@ -155,6 +155,11 @@ struct Ramp {
     f32 to;    // offset 0x4
     f32 t0;    // offset 0x8
     f32 t1;    // offset 0xC
+    Ramp(f32 r) {
+        rate = r;
+        from = to = 0.0f;
+        t0 = t1 = 0.0f;
+    }
     f32 rate;  // offset 0x10
 };
 
@@ -164,6 +169,7 @@ struct Osc {
     f32 max;    // offset 0x4
     f32 half;   // offset 0x8
     f32 start;  // offset 0xC
+    f32 Period(void) { return 2.0f * half; }
 };
 
 struct Role : Osc {
@@ -202,8 +208,47 @@ struct OrbitConfig {
     f32 rjLon;          // offset 0x68
 };
 
+struct OrbitCarState;
+
+ModuleTag lbl_8055E310;
+f32 lbl_8055E318;  // time
+f32 lbl_8055E31C;  // player speed factor
+f32 lbl_8055E320;  // player total lon
+f32 lbl_8055E324;  // race length
+u8 lbl_8055E328;   // debug prints
+bool lbl_8055E329;
+u8 lbl_8055E32A;   // enabled
+u8 lbl_8055E32B;   // turtle
+DynArray<OrbitCarState>* lbl_8055E32C;
+s32 lbl_8055E330;
+void* lbl_8055E334;  // boost bounds
+
+OrbitConfig lbl_8042FE38;
+FixedArr<Role, 8> lbl_8042FEB0;
+
 struct OrbitCarState {
     OrbitCarState(void);
+    void Reset(void) {
+        sf.from = sf.to = 1.0f;
+        sf.t0 = sf.t1 = 0.0f;
+        setTime = lbl_8055E318 + fn_80129DC4(3, 5.0f, 10.0f);
+        laneTime = 0.0f;
+        factor = 1.0f;
+        dist = 0.0f;
+        lane.from = lane.to = 0.0f;
+        lane.t0 = lane.t1 = 0.0f;
+        wander.start = lbl_8055E318 - fn_80129DC4(3, 0.0f, 2.0f * wander.half);
+        role = 0;
+        suicide = 0;
+        infTurbo = 0;
+        park = 0;
+        close = 0;
+        tree = 0;
+        lowGrav = 0;
+        frozen = 0;
+        frozenDist = 0.0f;
+        memset(x64, 0, 0x24);
+    }
     void Set(int i, bool h) {
         id = i;
         human = h;
@@ -231,23 +276,15 @@ struct OrbitCarState {
     f32 x78[4];      // offset 0x78
 };
 
-ModuleTag lbl_8055E310;
-f32 lbl_8055E318;  // time
-f32 lbl_8055E31C;  // player speed factor
-f32 lbl_8055E320;  // player total lon
-f32 lbl_8055E324;  // race length
-u8 lbl_8055E328;   // debug prints
-u8 lbl_8055E329;
-u8 lbl_8055E32A;   // enabled
-u8 lbl_8055E32B;   // turtle
-DynArray<OrbitCarState>* lbl_8055E32C;
-s32 lbl_8055E330;
-void* lbl_8055E334;  // boost bounds
-
-OrbitConfig lbl_8042FE38;
-FixedArr<Role, 8> lbl_8042FEB0;
 
 #define NearEq(a, b) ((f32)__fabs((a) - (b)) <= lbl_80558DC4[0])
+
+static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+    f32 t = (x - a) / (b - a);
+    CLAMP01(t);
+    return t;
+}
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline f32 RampValue(Ramp* r) {
     f32 t1 = r->t1;
@@ -276,7 +313,7 @@ static inline f32 Smooth(f32 t) {
 }
 
 static inline f32 OscValue(Osc* o) {
-    f32 t = fmod(lbl_8055E318 - o->start, 2.0f * o->half);
+    f32 t = fmod(lbl_8055E318 - o->start, o->Period());
     if (t > o->half) {
         t = 2.0f * o->half - t;
     }
@@ -421,12 +458,12 @@ f32 fn_80166274(void) {
 
 void fn_801662FC(void) {
     if ((lbl_8055E329 = (u8)lbl_8055E330++ == 0xFF) && lbl_8055E328) {
-        if (NearEq(lbl_8055E31C, 1.0f)) {
-            fn_802E30C8("G: plon %.2f hold @%.2f, pspeed_f: %.3f", lbl_8055E320, lbl_8042FE38.freezeLon,
-                        fn_80166274());
-        } else {
+        if (!NearEq(lbl_8055E31C, 1.0f)) {
             fn_802E30C8("G: g_speed_factor: %.2f, p_total_lon: %.2f (hold at %.2f) (player %.3f)", lbl_8055E31C,
                         lbl_8055E320, lbl_8042FE38.freezeLon, fn_80166274());
+        } else {
+            fn_802E30C8("G: plon %.2f hold @%.2f, pspeed_f: %.3f", lbl_8055E320, lbl_8042FE38.freezeLon,
+                        fn_80166274());
         }
     }
 }
@@ -455,16 +492,12 @@ void fn_801663C8(int n, const CarSetup* cars, const RaceDesc* race) {
 
 }  // extern "C"
 
-OrbitCarState::OrbitCarState(void) {
-    sf.from = sf.to = 0.0f;
-    sf.t0 = sf.t1 = 0.0f;
-    sf.rate = lbl_8042FE38.setSpeed;
-    lane.from = lane.to = 0.0f;
-    lane.t0 = lane.t1 = 0.0f;
-    lane.rate = 0.4f;
-    wander.max = lbl_8042FE38.crazyWid;
-    wander.min = -lbl_8042FE38.crazyWid;
-    wander.half = fn_80129DC4(3, 8.0f, 15.0f) * 0.5f;
+OrbitCarState::OrbitCarState(void) : sf(lbl_8042FE38.setSpeed), lane(0.4f) {
+    f32 cycle = fn_80129DC4(3, 8.0f, 15.0f);
+    f32 w = lbl_8042FE38.crazyWid;
+    wander.max = w;
+    wander.min = -w;
+    wander.half = cycle / 2.0f;
 }
 
 extern "C" {
@@ -487,26 +520,7 @@ void fn_80166898(void) {
     lbl_8055E320 = 0.0f;
     lbl_8055E31C = 0.0f;
     for (i = 0; i < lbl_8055E32C->Count(); i++) {
-        OrbitCarState* s = lbl_8055E32C->At(i);
-        s->sf.from = s->sf.to = 1.0f;
-        s->sf.t0 = s->sf.t1 = 0.0f;
-        s->setTime = lbl_8055E318 + fn_80129DC4(3, 5.0f, 10.0f);
-        s->laneTime = 0.0f;
-        s->factor = 1.0f;
-        s->dist = 0.0f;
-        s->lane.from = s->lane.to = 0.0f;
-        s->lane.t0 = s->lane.t1 = 0.0f;
-        s->wander.start = lbl_8055E318 - fn_80129DC4(3, 0.0f, 2.0f * s->wander.half);
-        s->role = 0;
-        s->suicide = 0;
-        s->infTurbo = 0;
-        s->park = 0;
-        s->close = 0;
-        s->tree = 0;
-        s->lowGrav = 0;
-        s->frozen = 0;
-        s->frozenDist = 0.0f;
-        memset(s->x64, 0, 0x24);
+        lbl_8055E32C->At(i)->Reset();
     }
     for (i = 0; i < lbl_8042FEB0.count; i++) {
         Role* r = &lbl_8042FEB0.data[i];
@@ -659,7 +673,6 @@ u8 fn_801671AC(int i) {
     return 0;
 }
 
-static inline int InBounds(void* b, f32 x, f32 z) { return b && fn_80139EC4(b, x, z); }
 
 f32 fn_801671FC(int i) {
     if (fn_801667F0()) {
@@ -671,13 +684,12 @@ f32 fn_801671FC(int i) {
         if (top && behind) {
             if (lbl_8055E334) {
                 CarRec* rec = fn_8017960C(i);
-                if (InBounds(lbl_8055E334, rec->x, rec->z)) {
+                if (lbl_8055E334 && fn_80139EC4(lbl_8055E334, rec->x, rec->z)) {
                     boost = 0.5f;
                 }
             } else {
-                f32 t = (fn_801B2EC0(i)->Physics()->engine->throttle - 0.0f) / 0.002f;
-                CLAMP01(t);
-                boost = 0.6f + t * (0.0f - 0.6f);
+                f32 t = Unlerp(0.0f, 0.002f, fn_801B2EC0(i)->Physics()->engine->throttle);
+                boost = Lerp(0.6f, 0.0f, t);
             }
             lbl_8055E32C->a.data[i].boost = boost;
             f += boost;
