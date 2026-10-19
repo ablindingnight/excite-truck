@@ -2458,6 +2458,14 @@ game/stub7.cpp:
 	.ctors      start:0x802ED250 end:0x802ED254
 	.sbss       start:0x8055E658 end:0x8055E660
 
+game/phoblist.cpp:
+	.text       start:0x801B5F40 end:0x801B64B4
+	.ctors      start:0x802ED264 end:0x802ED268
+	.data       start:0x80335EE0 end:0x80335F40
+	.sdata      start:0x8055A8D0 end:0x8055A8D8
+	.sbss       start:0x8055E6F8 end:0x8055E718
+	.sdata2     start:0x805626B0 end:0x805626C0
+
 game/pgfx.cpp:
 	.text       start:0x801B64B4 end:0x801B664C
 	.ctors      start:0x802ED268 end:0x802ED26C
