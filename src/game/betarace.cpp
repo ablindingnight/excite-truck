@@ -161,6 +161,7 @@ public:
     virtual ArtElem* FindArt(const char* name) = 0;
     virtual GartElem* FindBox(const char* name) = 0;
     virtual int FindSet(const char* name) = 0;
+    virtual void Edit(void) = 0;
 };
 
 extern "C" {
@@ -197,9 +198,9 @@ public:
     virtual void vf4C(int p);
     virtual void vf50(int p);
     virtual int vf54(void);
-    virtual void vf58(void);
+    virtual int vf58(void);
     virtual int vf5C(int p);
-    virtual void vf60(void);
+    virtual void vf60(int view);
     virtual int vf64(void);
     virtual int vf68(void);
     virtual void vf6C(void) {}
@@ -239,7 +240,21 @@ public:
     virtual void vfF4(void) {}
     virtual void vfF8(void);
     virtual void vfFC(void);
+
+    void FillResults(void* r);  // 0x801B8A7C
 };
+
+struct ResultEntry {
+    u8 pad0[0x10];
+    s32 score;  // offset 0x10
+};
+
+struct RaceResults {
+    u8 pad0[0x8];
+    ResultEntry e[8];  // offset 0x8
+};
+
+extern s32 lbl_8055E4D0;  // cars in the race
 
 // Race event listeners BetaMaster registers itself with.
 class IRaceListener {
@@ -960,7 +975,8 @@ extern s32 lbl_80559EC0;
 class BetaCar {
 public:
     void Update(PickupList* stars, PuddleList* puddles);
-    void DrawHud(ILayout* l, void* view);
+    void DrawHud(ILayout* l, int view);
+    void DrawResults(ILayout* l, int view);
     void StopBonus(void);
     int Results(FinishAnimation* a);
     void SetResultsView(FinishAnimation* a);
@@ -1095,6 +1111,15 @@ public:
     BetaMaster(void);
     virtual ~BetaMaster(void);
     BetaCar* CarFor(RaceCarRec* rc) { return &cars[rc->index]; }
+    int AllDone(int n) {
+        int i;
+        for (i = 0; i < n; i++) {
+            if (anims[i].state != 4) {
+                return 0;
+            }
+        }
+        return 1;
+    }
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car) {
@@ -1118,9 +1143,9 @@ public:
     virtual void vf4C(int p);
     virtual void vf50(int p);
     virtual int vf54(void);
-    virtual void vf58(void);
+    virtual int vf58(void);
     virtual int vf5C(int p);
-    virtual void vf60(void);
+    virtual void vf60(int view);
     virtual int vf64(void);
     virtual int vf68(void);
     virtual int vf88(void);
@@ -1131,7 +1156,17 @@ public:
     virtual int vfA0(void* cam);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vfA8(int car);
-    virtual void vfB8(void* r);
+    virtual void vfB8(void* r) {
+        RaceResults* res = (RaceResults*)r;
+        int i;
+        GameMode::FillResults(r);
+        fn_802E30C8("BetaRace: FillResults");
+        for (i = 0; i < lbl_8055E4D0; i++) {
+            s32 t = cars[i].result.total;
+            res->e[i].score = t;
+            fn_802E30C8("  car %d scored %d", i, t);
+        }
+    }
     virtual void vfC0(void);
     virtual void vfC4(void);
     virtual int vfDC(void);
@@ -2783,3 +2818,93 @@ void BetaMaster::vf48(void) {
         }
     }
 }
+
+extern "C" {
+void fn_801CB7BC(int a);
+void fn_8001DFCC(void);
+}
+
+void BetaMaster::vf4C(int view) {
+    if (b9E0) {
+        vf88();
+        return;
+    }
+    (fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238)->Edit();
+    {
+        BetaCar* c = &cars[fn_801E866C(view)];
+        if (c) {
+            c->DrawHud(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, view);
+            fn_801CB7BC(0);
+        }
+    }
+}
+
+void BetaMaster::vf50(int view) {
+    BetaCar* c = &cars[fn_801E866C(view)];
+    if (c) {
+        c->DrawResults(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, view);
+    }
+}
+
+int BetaMaster::vf58(void) { return 0; }
+
+int BetaMaster::vf68(void) {
+    int i;
+    fn_80179650();
+    for (i = 0; i < fn_801E85A4(); i++) {
+        if (!cars[fn_801E86F8(i)].result.dnf && anims[i].state != 2) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int BetaMaster::vf64(void) { return 1; }
+
+int BetaMaster::vf5C(int view) {
+    int n = fn_80179650();
+    BetaCar* mine = &cars[fn_801E86F8(view)];
+    if (!mine->result.dnf) {
+        BetaCar* c = &cars[fn_801E866C(view)];
+        if (c && view >= 0 && view < ARRAY_COUNT(anims)) {
+            c->SetResultsView(&anims[view]);
+        }
+    } else {
+        mine->StopBonus();
+    }
+    if (vf68() && n > 1) {
+        int any = 0;
+        int i;
+        for (i = 0; i < nCars; i++) {
+            BetaCar* c = &cars[i];
+            if (!c->result.dnf) {
+                any = 1;
+            }
+        }
+        if (any) {
+            mine->DrawWinner(lbl_8055E248);
+        }
+    }
+    if (vf68() && view == 0) {
+        fn_8001DFCC();
+    }
+    return !AllDone(n);
+}
+
+void BetaMaster::vf60(int view) {
+    int n = fn_801E85A4();
+    if (n > 1) {
+        int any = 0;
+        int i;
+        for (i = 0; i < n; i++) {
+            any = (any | vf20(fn_801E866C(i))) != 0;
+        }
+        if (any) {
+            cars[fn_801E86F8(view)].DrawBonusStar(lbl_8055E240, view);
+        }
+    }
+}
+
+int BetaMaster::vf88(void) { return 1; }
+
+f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
