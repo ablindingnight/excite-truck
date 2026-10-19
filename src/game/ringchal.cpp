@@ -308,10 +308,13 @@ static inline void PlayIdle(RSound* s) {
     }
 }
 
-static inline void StrCopyN(char* dst, const char* src, int n) {
-    while ((*dst++ = *src++) != '\0') {
+static inline void StrCopyN(char* dst, const char* src, int len) {
+    char* d = dst;
+    int n = len;
+    const char* s = src;
+    while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
-            dst[-1] = '\0';
+            d[-1] = 0;
             break;
         }
     }
@@ -339,7 +342,7 @@ public:
     }
     const char* key;   // offset 0x0
     const char* text;  // offset 0x4
-    s32 lang;          // offset 0x8
+    u32 lang;          // offset 0x8
 };
 
 extern "C" void fn_80131318(LocString* s);
