@@ -2404,7 +2404,7 @@ game/phob.cpp:
 	.ctors      start:0x802ED204 end:0x802ED208
 	.data       start:0x803318F8 end:0x80331BF8
 	.bss        start:0x80430590 end:0x804348C0
-	.sdata      start:0x8055A300 end:0x8055A30C
+	.sdata      start:0x8055A300 end:0x8055A310
 	.sbss       start:0x8055E408 end:0x8055E478
 	.sdata2     start:0x80561B48 end:0x80561B78
 
@@ -2664,3 +2664,10 @@ game/sysconfig.cpp:
 	.data       start:0x8034E238 end:0x8034E260
 	.sbss       start:0x80560038 end:0x80560058
 	.sdata2     start:0x805651A8 end:0x805651B8
+
+game/movieinfo.cpp:
+	.text       start:0x802ECCE4 end:0x802ED050
+	.ctors      start:0x802ED62C end:0x802ED630
+	.data       start:0x8034EBF8 end:0x8034EC28
+	.sdata      start:0x8055D300 end:0x8055D310
+	.sbss       start:0x805600F0 end:0x805600FC
