@@ -1044,6 +1044,7 @@ config.libs.append(
             Object(Matching, "game/lightset.cpp"),
             Object(Matching, "game/cartype.cpp"),
             Object(Matching, "game/camdefs.cpp"),
+            Object(Matching, "game/carreg.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(Matching, "game/drawline.cpp"),
             Object(Matching, "game/stub13.cpp"),
