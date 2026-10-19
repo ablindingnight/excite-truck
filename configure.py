@@ -1009,6 +1009,7 @@ config.libs.append(
             Object(NonMatching, "game/aiobst.cpp"),
             Object(Matching, "game/gradesched.cpp"),
             Object(Matching, "game/aiutil.cpp"),
+            Object(NonMatching, "game/tutorial.cpp"),
         ],
     }
 )

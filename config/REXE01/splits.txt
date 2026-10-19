@@ -2319,3 +2319,13 @@ game/aiutil.cpp:
 	.bss        start:0x8042FD78 end:0x8042FDE0
 	.sbss       start:0x8055E2C0 end:0x8055E2D0
 	.sdata2     start:0x80561830 end:0x80561838
+
+game/tutorial.cpp:
+	.text       start:0x80160CE4 end:0x801659D0
+	.ctors      start:0x802ED1E0 end:0x802ED1E4
+	.rodata     start:0x802F94A8 end:0x802F94B8
+	.data       start:0x8032F588 end:0x8032FCC0
+	.bss        start:0x8042FDE0 end:0x8042FE38
+	.sdata      start:0x8055A0B0 end:0x8055A150
+	.sbss       start:0x8055E2D0 end:0x8055E310
+	.sdata2     start:0x80561838 end:0x80561890
