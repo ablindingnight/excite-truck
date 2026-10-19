@@ -3113,6 +3113,14 @@ game/memarena.cpp:
 	.data       start:0x8034D020 end:0x8034D038
 	.sbss       start:0x8055FF28 end:0x8055FF30
 
+game/keybd.cpp:
+	.text       start:0x802E46AC end:0x802E4C14
+	.ctors      start:0x802ED5FC end:0x802ED600
+	.data       start:0x8034D1C0 end:0x8034D1D0
+	.bss        start:0x804FC3B0 end:0x804FC558
+	.sdata      start:0x8055D1C0 end:0x8055D1C8
+	.sbss       start:0x8055FF48 end:0x8055FF68
+
 game/vmem.cpp:
 	.text       start:0x802E4C14 end:0x802E4D84
 	.ctors      start:0x802ED600 end:0x802ED604
