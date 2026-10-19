@@ -63,14 +63,14 @@ public:
     virtual int vf38(void) = 0;
     virtual void vf3C(void) = 0;
     virtual void vf40(void) = 0;
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-    virtual void vf50(void);
+    virtual void vf44(f32 v);
+    virtual void vf48(f32 v);
+    virtual void vf4C(f32 v);
+    virtual void vf50(u32 mask);
     virtual void vf54(void) = 0;
     virtual void vf58(void) = 0;
     virtual void vf5C(void) = 0;
-    virtual void vf60(void);
+    virtual f32 vf60(void);
 };
 
 // A sound that only keeps its state.
@@ -121,9 +121,9 @@ public:
     virtual void vf20(void) = 0;
     virtual void Activate(void) = 0;
     virtual void vf28(void);
-    virtual void vf2C(void);
+    virtual void vf2C(int a);
     virtual void vf30(void);
-    virtual void vf34(void);
+    virtual void vf34(int a);
     virtual void vf38(void);
     virtual void vf3C(void);
     virtual void vf40(void);

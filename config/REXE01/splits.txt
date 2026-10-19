@@ -2672,6 +2672,16 @@ game/difficulty.cpp:
 	.sdata      start:0x8055B468 end:0x8055B4C0
 	.sbss       start:0x8055ED50 end:0x8055ED60
 
+game/sound.cpp:
+	.text       start:0x802062E8 end:0x80207960
+	.ctors      start:0x802ED378 end:0x802ED37C
+	.rodata     start:0x802F9DA0 end:0x802F9DC8
+	.data       start:0x8033BC50 end:0x8033BDD8
+	.bss        start:0x804891E8 end:0x804891F8
+	.sdata      start:0x8055B4C0 end:0x8055B4D0
+	.sbss       start:0x8055ED78 end:0x8055ED98
+	.sdata2     start:0x805631F8 end:0x80563228
+
 game/soundmgr.cpp:
 	.text       start:0x80207960 end:0x80208A18
 	.ctors      start:0x802ED37C end:0x802ED380

@@ -59,9 +59,9 @@ public:
     virtual void SetListeners(void* listeners) = 0;
     virtual void Shutdown(void) = 0;
     virtual void vf28(void);
-    virtual void vf2C(void);
+    virtual void vf2C(int a);
     virtual void vf30(void);
-    virtual void vf34(void);
+    virtual void vf34(int a);
     virtual void vf38(void);
     virtual void vf3C(void);
     virtual void vf40(void);
