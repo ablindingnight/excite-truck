@@ -761,11 +761,15 @@ f32 AirTracker::Rate(RaceCarRec* rc) {
 
 void AirTracker::Stop(RaceCarRec* rc) {
     s32 n;
-    Unused(&rc);
+    RaceCarRec* p = rc;
+    Unused(&p);
     if (dur > 0.0f) {
-        Finish(rc);
+        Finish(p);
     }
-    n = ranks.a.data[ranks.a.count - 1].scored;
+    {
+        int last = ranks.a.count - 1;
+        n = ranks.a.data[last].scored;
+    }
     if (n > 0 && fn_80179650() == 1 && rc->kind == 0x50 && !fn_801CF064()) {
         AchievementsAdd(3, n);
     }
@@ -868,11 +872,15 @@ public:
 
 void DriftTracker::Stop(RaceCarRec* rc) {
     s32 n;
-    Unused(&rc);
+    RaceCarRec* p = rc;
+    Unused(&p);
     if (dur > 0.0f) {
-        Finish(rc);
+        Finish(p);
     }
-    n = ranks.a.data[ranks.a.count - 1].scored;
+    {
+        int last = ranks.a.count - 1;
+        n = ranks.a.data[last].scored;
+    }
     if (n > 0 && fn_80179650() == 1 && rc->kind == 0x50 && !fn_801CF064()) {
         AchievementsAdd(5, n);
     }
@@ -1022,11 +1030,15 @@ f32 CloseCallTracker::Rate(RaceCarRec* rc) {
 
 void CloseCallTracker::Stop(RaceCarRec* rc) {
     s32 n;
-    Unused(&rc);
+    RaceCarRec* p = rc;
+    Unused(&p);
     if (count > 0) {
-        Collect(rc);
+        Collect(p);
     }
-    n = ranks.a.data[ranks.a.count - 1].scored;
+    {
+        int last = ranks.a.count - 1;
+        n = ranks.a.data[last].scored;
+    }
     if (n > 0 && fn_80179650() == 1 && rc->kind == 0x50 && !fn_801CF064()) {
         AchievementsAdd(4, n);
     }
@@ -1198,7 +1210,10 @@ public:
             Score(&pts);
             Hide();
         }
-        n = ranks.a.data[ranks.a.count - 1].scored;
+        {
+            int last = ranks.a.count - 1;
+            n = ranks.a.data[last].scored;
+        }
         if (n > 0 && fn_80179650() == 1 && rc->kind == 0x50 && !fn_801CF064()) {
             AchievementsAdd(7, n);
         }
@@ -1599,11 +1614,11 @@ f32 ThrowTracker::Rate(RaceCarRec* rc) {
 f32 SpinTracker::Rate(RaceCarRec* rc) {
     f32 r;
     int full;
-    if (!NearZero(angle)) {
+    if (!((f32)__fabs(angle) <= lbl_80558DC4[0])) {
         spins += rolls;
         if (Round(angle) > 0) {
             int add = rolls ? 0 : Round(angle);
-            count = playing = spins + add;
+            playing = count = spins + add;
             timer = window;
             mult = 1.0f;
             Show();
@@ -1706,11 +1721,15 @@ f32 RingTracker::Rate(RaceCarRec* rc) {
 
 void RingTracker::Stop(RaceCarRec* rc) {
     s32 n;
-    Unused(&rc);
+    RaceCarRec* p = rc;
+    Unused(&p);
     if (count > 0) {
-        Collect(rc);
+        Collect(p);
     }
-    n = ranks.a.data[ranks.a.count - 1].scored;
+    {
+        int last = ranks.a.count - 1;
+        n = ranks.a.data[last].scored;
+    }
     if (n > 0 && fn_80179650() == 1 && rc->kind == 0x50 && !fn_801CF064()) {
         AchievementsAdd(6, n);
     }
