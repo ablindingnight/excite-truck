@@ -2732,6 +2732,14 @@ game/stub12.cpp:
 	.ctors      start:0x802ED4FC end:0x802ED500
 	.sbss       start:0x8055F770 end:0x8055F780
 
+game/shadowvol.cpp:
+	.text       start:0x802978B8 end:0x80297D5C
+	.ctors      start:0x802ED508 end:0x802ED50C
+	.data       start:0x803493D8 end:0x80349408
+	.bss        start:0x804B4F10 end:0x804B5010
+	.sbss       start:0x8055F798 end:0x8055F7B8
+	.sdata2     start:0x80564580 end:0x80564590
+
 game/drawline.cpp:
 	.text       start:0x8029EF70 end:0x8029F03C
 	.ctors      start:0x802ED514 end:0x802ED518

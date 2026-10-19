@@ -1064,6 +1064,7 @@ config.libs.append(
             Object(Matching, "game/carstate.cpp"),
             Object(Matching, "game/carreg.cpp"),
             Object(Matching, "game/stub12.cpp"),
+            Object(NonMatching, "game/shadowvol.cpp"),
             Object(Matching, "game/drawline.cpp"),
             Object(NonMatching, "game/fence.cpp"),
             Object(Matching, "game/stub13.cpp"),
