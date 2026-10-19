@@ -113,6 +113,11 @@ struct Vec3 {
 
 struct ActZone {
     void Load(ValueNode* n);
+    void Check(int c);
+    void Free(void) {
+        fn_80128658(bound);
+        bound = 0;
+    }
     Vec3 pt[2];    // offset 0x0
     Bound* bound;  // offset 0x18
     s32 seq;       // offset 0x1C
@@ -146,9 +151,7 @@ inline TechDemoMaster::~TechDemoMaster(void) {
     int i;
     fn_801777D0(this);
     for (i = 0; i < zones.count; i++) {
-        ActZone* z = &zones.data[i];
-        fn_80128658(z->bound);
-        z->bound = 0;
+        zones.data[i].Free();
     }
 }
 
@@ -164,24 +167,27 @@ inline void TechDemoMaster::Draw(void) {
 
 inline void TechDemoMaster::a4(void) {}
 
+inline void ActZone::Check(int c) {
+    if (!done && fn_801B2F54(c) >= lap && fn_80139B5C(fn_8017960C(c), bound)) {
+        f32 m[3];
+        m[0] = pt[0].x + pt[1].x;
+        m[1] = pt[0].y + pt[1].y;
+        m[2] = pt[0].z + pt[1].z;
+        m[0] *= 0.5f;
+        m[1] *= 0.5f;
+        m[2] *= 0.5f;
+        fn_801D488C(seq, 1, 1, m);
+        done = 1;
+    }
+}
+
 inline void TechDemoMaster::a3(void) {
     int n = fn_801B2F24();
     int c;
     for (c = 0; c < n; c++) {
         int i;
         for (i = 0; i < zones.count; i++) {
-            ActZone* z = &zones.data[i];
-            if (!z->done && fn_801B2F54(c) >= z->lap && fn_80139B5C(fn_8017960C(c), z->bound)) {
-                f32 m[3];
-                m[0] = z->pt[0].x + z->pt[1].x;
-                m[1] = z->pt[0].y + z->pt[1].y;
-                m[2] = z->pt[0].z + z->pt[1].z;
-                m[0] *= 0.5f;
-                m[1] *= 0.5f;
-                m[2] *= 0.5f;
-                fn_801D488C(z->seq, 1, 1, m);
-                z->done = 1;
-            }
+            zones.data[i].Check(c);
         }
     }
 }
