@@ -2189,7 +2189,7 @@ Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
     TrackerArray* m;
     lbl_8042FD08[car] = 1.0f;
     m = new ("arraytracker") TrackerArray(hispeed);
-    if (m) {
+    {
         int i;
         m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
         m->Add(new ("airtracker") AirTracker(hud, car, m->cnt));
