@@ -453,8 +453,8 @@ struct ArrayRef {
 
 template <typename T>
 struct DynArray {
-    DynArray(int n) {
-        a.data = new ("dsa_buf") T[n];
+    DynArray(int n, const char* tag = "dsa_buf") {
+        a.data = new (tag) T[n];
         a.cap = n;
         a.count = 0;
         mem = a.data;
