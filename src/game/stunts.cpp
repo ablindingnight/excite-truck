@@ -1336,8 +1336,9 @@ public:
     virtual void Award(f32 v, RaceCarRec* rc, int kind) {
         if (kind == 3) {
             int i;
+            f32 t = v;
             active = 1;
-            handle = *(s32*)&v;
+            handle = *(s32*)&t;
             for (i = 0; i < 8; i++) {
                 if (i == rc->id) {
                     targets[i].car = -1;
