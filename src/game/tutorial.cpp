@@ -137,6 +137,12 @@ struct ArrayRef {
     s32 cap;    // offset 0x8
 };
 
+template <typename T, int N>
+struct FixedArr : ArrayRef<T> {
+    FixedArr(void) : ArrayRef<T>(storage, N) {}
+    T storage[N];
+};
+
 struct TaskList : ArrayRef<Task*> {
     TaskList(void) : ArrayRef<Task*>(storage, 16) {}
     Task* storage[16];
@@ -360,7 +366,7 @@ public:
 // The challenges' common part: help pages, the result and place targets.
 class ChallengeBase : public ChallengeIF {
 public:
-    ChallengeBase(ValueNode* n) : pages(pageStore, 8) { node = n; }
+    ChallengeBase(ValueNode* n) { node = n; }
     virtual ~ChallengeBase(void) {}
     virtual void Init(void) {}
     virtual void Shutdown(void) {}
@@ -443,14 +449,13 @@ public:
     f32 resultTime;            // offset 0xC
     u8 resultSet;              // offset 0x10
     f32 speed[8];              // offset 0x14
-    ArrayRef<HelpPage> pages;  // offset 0x34
-    HelpPage pageStore[8];     // offset 0x40
+    FixedArr<HelpPage, 8> pages;  // offset 0x34
 };
 
 // A timed challenge: collect the tokens (and, in the subclasses, do the stunts) before the time runs out.
 class Challenge : public ChallengeBase {
 public:
-    Challenge(ValueNode* n) : ChallengeBase(n), tokens(tokenStore, 16) {
+    Challenge(ValueNode* n) : ChallengeBase(n) {
         needed = 0;
         limit = n->GetFloat("time_limit", 10.0f);
         radius = 5.5f;
@@ -507,7 +512,7 @@ public:
                 cont = 1;
                 return 1;
             }
-            if (k == 0x1B) {
+            if (k == 0x1Bu) {
                 lbl_8055E2DD = 1;
                 return 1;
             }
@@ -515,9 +520,15 @@ public:
         return 0;
     }
     virtual void Event(int a, int b, int c) {
-        if (!IsDone() && a == 0 && lbl_804348E8[b]->model == 'PCAR') {
-            SetResult(2);
-            crashed = 1;
+        if (!IsDone()) {
+            switch (a) {
+            case 0:
+                if (lbl_804348E8[b]->model == 'PCAR') {
+                    SetResult(2);
+                    crashed = 1;
+                }
+                break;
+            }
         }
     }
     virtual int Draw(int a) {
@@ -560,14 +571,13 @@ public:
     u32 color;       // offset 0xD4
     u8 pillars;      // offset 0xD8
     Sound* snd;      // offset 0xDC
-    ArrayRef<Token> tokens;  // offset 0xE0
-    Token tokenStore[16];    // offset 0xEC
+    FixedArr<Token, 16> tokens;  // offset 0xE0
 };
 
 // A stunt challenge: also do the listed stunts (only stunts: the stunts alone pass it).
 class StuntChallenge : public Challenge, public StuntWatcher {
 public:
-    StuntChallenge(ValueNode* n) : Challenge(n), stunts(stuntStore, 4) {
+    StuntChallenge(ValueNode* n) : Challenge(n) {
         int i;
         ValueNode* s;
         onlyStunts = n->GetBool("only_stunts", 0);
@@ -671,8 +681,7 @@ public:
         return 1;
     }
 
-    ArrayRef<StuntReq> stunts;  // offset 0x570
-    StuntReq stuntStore[4];     // offset 0x57C
+    FixedArr<StuntReq, 4> stunts;  // offset 0x570
     s32 done;                   // offset 0x5AC
     u8 onlyStunts;              // offset 0x5B0
     f32 stuntTime;              // offset 0x5B4
