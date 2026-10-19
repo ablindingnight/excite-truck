@@ -6,6 +6,8 @@
 #include <math.h>
 #include "game/common.h"
 
+#define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
+
 extern "C" {
 void* memset(void* d, int c, size_t n);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
@@ -18,12 +20,22 @@ void fn_801308F4(char* buf, s32 size, s32 value);             // format a score
 void fn_801308F8(char* buf, s32 size, s32 value);
 int fn_80179650(void);
 int fn_801609C4(s32 score);  // grade for a score
-void fn_802AE168(s32 anim);
-void fn_802ADFF4(s32 anim, s32 arg);
-void fn_802AE02C(s32 anim, s32 arg);
-void fn_802AE0B8(s32 anim, s32 arg);
-void fn_802AE0E0(s32 anim);
-void fn_802ADE60(s32 anim, int arg);
+}
+
+// The results-screen art animation player.
+class ArtAnimMan {
+public:
+    ArtAnimMan(int n);
+    u8 pad0[0x8];
+};
+
+extern "C" {
+void fn_802AE168(ArtAnimMan* anim);
+void fn_802ADFF4(ArtAnimMan* anim, s32 arg);
+void fn_802AE02C(ArtAnimMan* anim, s32 arg);
+void fn_802AE0B8(ArtAnimMan* anim, s32 arg);
+void fn_802AE0E0(ArtAnimMan* anim);
+void fn_802ADE60(ArtAnimMan* anim, int arg);
 }
 
 const char* GetGradeDisplayName(int grade);
@@ -282,10 +294,6 @@ struct CoinCar {
     u32 next;      // offset 0x18
 };
 
-class CoinObj {
-public:
-    virtual ~CoinObj(void);
-};
 
 extern "C" void fn_80167EEC(void);
 
@@ -304,7 +312,7 @@ struct Coins {
 
     u8 enabled;       // offset 0x0
     CoinCar cars[8];  // offset 0x4
-    CoinObj* obj;     // offset 0xE4
+    ILayout* obj;     // offset 0xE4
     s32 value;        // offset 0xE8
 };
 
@@ -377,6 +385,7 @@ extern "C" {
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 }
+void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
 // Points for each finishing place, read from place_bonus.val (multiplayer: base + rate per second).
@@ -473,17 +482,18 @@ struct CarResult {
     u8 dnf;            // offset 0x34
 };
 
-struct StuntLine {
-    u8 pad0[0x4];
+// One line of the stunt summary on the results screen.
+class StuntLine {
+public:
+    virtual ~StuntLine(void) {}
     char label[0xA0];  // offset 0x4
     char value[0x54];  // offset 0xA4
 };
 
 class StuntList {
 public:
-    virtual ~StuntList(void);
-    StuntLine* lines;  // offset 0x4
-    s32 count;         // offset 0x8
+    virtual ~StuntList(void) {}
+    FixedList<StuntLine, 16> lines;  // offset 0x4
 };
 
 // The results-screen animation of one player: place, bonus count-up, grade and stunt list.
@@ -500,10 +510,11 @@ public:
         SafeDelete(transitionSnd);
     }
     int Update(const CarResult* r, const StuntList* s, s32 coins);
+    void Setup(void);
 
     s32 state;              // offset 0x0
     f32 bonusStart;         // offset 0x4
-    s32 anim;               // offset 0x8
+    ArtAnimMan* anim;       // offset 0x8
     u8 go;                  // offset 0xC
     Sound* bonusSnd;        // offset 0x10
     Sound* noBonusSnd;      // offset 0x14
@@ -573,12 +584,12 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     } else {
         grade2.Set("");
     }
-    for (i = 0; i < s->count; i++) {
-        const StuntLine* l = &s->lines[i];
+    for (i = 0; i < s->lines.a.count; i++) {
+        const StuntLine* l = &s->lines.a.data[i];
         stuntLabel[i].Set(l->label);
         stuntValue[i].Set(l->value);
     }
-    for (; i < 9; i++) {
+    for (; i < ARRAY_COUNT(stuntLabel); i++) {
         stuntLabel[i].Set("");
         stuntValue[i].Set("");
     }
@@ -648,11 +659,11 @@ inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 class StuntEvent {
 public:
-    virtual void vf08(void);
+    virtual ~StuntEvent(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
-    virtual void SetShown(f32 v);
+    virtual void SetValue(f32 v) { value = v; }
     void Tick(void) {
         if (running) {
             t0C += FrameDt();
@@ -661,7 +672,6 @@ public:
     int IsRunning(void) { return running; }
     int IsReady(void) { return ready; }
     f32 Value(void) { return value; }
-    void SetValue(f32 v) { value = v; }
     s32 Type(void) { return type; }
     void Start(void) { start = lbl_8055E3C8; }
     void Age(void) { age += FrameDt(); }
@@ -681,6 +691,7 @@ public:
     StuntEvent* next;   // offset 0x11C
     StuntEvent* prev;   // offset 0x120
 };
+
 
 struct StuntQueue {
     void Unlink(StuntEvent* n) {
@@ -759,8 +770,15 @@ struct StuntIter {
 
 class CarHud {
 public:
-    virtual ~CarHud(void);
-    u8 pad4[0x1244 - 0x4];
+    virtual ~CarHud(void) {
+        if (bigSnd) {
+            delete bigSnd;
+        }
+        if (bonusSnd) {
+            delete bonusSnd;
+        }
+    }
+    StuntEvent pool[16];   // offset 0x4
     StuntQueue shown;      // offset 0x1244
     StuntQueue pending;    // offset 0x124C
     StuntEvent* current;   // offset 0x1254
@@ -1100,7 +1118,14 @@ public:
     virtual int vfDC(void);
     virtual void* vfE8(void);
     virtual void vfF4(void);
-    virtual void vfF8(void);
+    virtual void vfF8(void) {
+        int i;
+        for (i = 0; i < ARRAY_COUNT(anims); i++) {
+            anims[i].anim = new ("artanim_man") ArtAnimMan(2);
+            anims[i].Setup();
+        }
+        coins.obj = fn_80145E70("bonanza.val");
+    }
     virtual void vfFC(void);
     virtual void a0(void);
     virtual void a4(void);
@@ -1209,7 +1234,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             it->Tick();
             if (!it->IsRunning()) {
                 if (it->IsReady()) {
-                    it->SetShown(Floor(it->Value()));
+                    it->SetValue(Floor(it->Value()));
                     if (!h->current) {
                         if (NearZero(fn_8017960C(h->racer)->F2690()) || it->Type() == 13) {
                             h->played = 0;
@@ -1444,7 +1469,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
 extern "C" {
 void fn_8001DFF0(void);
 void fn_801E7E18(void);
-void fn_802AE220(s32 anim, const f32* rect);
+void fn_802AE220(ArtAnimMan* anim, const f32* rect);
 }
 int GetNumPlayers(void);
 
@@ -1455,7 +1480,7 @@ void BetaCar::StopBonus(void) {
 }
 
 int BetaCar::Results(FinishAnimation* a) {
-    stunts->count = 0;
+    stunts->lines.a.count = 0;
     meterObj->Fill(stunts);
     return a->Update(&result, stunts, master->coins.Count(id));
 }
@@ -1464,7 +1489,7 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
     fn_801E7E18();
     if (!result.dnf) {
         if (GetNumPlayers() == 2) {
-            s32 h = a->anim;
+            ArtAnimMan* h = a->anim;
             f32 r[4];
             r[0] = 1.5f;
             r[1] = 8.5f;
@@ -1636,7 +1661,6 @@ static inline void InitBeta(BetaMaster* m) {
 
 inline BetaMaster::BetaMaster(void) { InitBeta(this); }
 
-void* operator new(size_t size, const char* tag);
 
 extern "C" GameMode* fn_8014DE50(void) { return new ("betamaster") BetaMaster; }
 
@@ -1808,4 +1832,94 @@ BetaMaster::~BetaMaster(void) {
     lbl_8055E268 = 0;
     fn_80167838();
     fn_8016A68C();
+}
+
+// One named value the results animation can show: 1 = text, 2 = int, 3 = signal, 4 = model.
+struct AnimBinding {
+    s32 type;         // offset 0x0
+    const char* name;  // offset 0x4
+    const void* ptr;   // offset 0x8
+};
+
+extern const AnimBinding lbl_802FAA40;  // end of a binding table
+
+static inline const char* OptNot(int off, const char* str) { return off ? "" : str; }
+static inline const char* Opt(int on, const char* str) { return on ? str : ""; }
+
+static inline AnimBinding Bind(s32 t, const char* n, const void* p) {
+    AnimBinding b;
+    b.type = t;
+    b.name = n;
+    b.ptr = p;
+    return b;
+}
+
+extern "C" {
+s32 fn_80204CF0(void);  // difficulty
+s32 fn_802ADF34(ArtAnimMan* anim, const char* file, const AnimBinding* table);
+}
+
+void FinishAnimation::Setup(void) {
+    int multi = fn_80179650() > 1;
+    int ws = fn_802C9A58();
+    int i;
+    AnimBinding table[40] = {
+        Bind(3, "place_bonus", &signal[0]),
+        Bind(3, "grade", &signal[1]),
+        Bind(3, "total_score", &signal[2]),
+        Bind(1, "place", Opt(!multi && !ws, place.s)),
+        Bind(1, "place_suffix", Opt(!multi && !ws, suffix.s)),
+        Bind(1, "place_ws", Opt(!multi && ws, place.s)),
+        Bind(1, "place_suffix_ws", Opt(!multi && ws, suffix.s)),
+        Bind(1, "place_mp", Opt(multi && !ws, place.s)),
+        Bind(1, "place_suffix_mp", Opt(multi && !ws, suffix.s)),
+        Bind(1, "place_ws_mp", Opt(multi && ws, place.s)),
+        Bind(1, "place_suffix_ws_mp", Opt(multi && ws, suffix.s)),
+        Bind(1, "place_bonus", bonus.s),
+        Bind(1, "total_score_no_bonus", base.s),
+        Bind(1, "total_score", total.s),
+        Bind(1, "grade_no_bonus", grade.s),
+        Bind(1, "grade", OptNot(multi, grade2.s)),
+        Bind(1, "grade_title", multi ? "" : fn_80131234("ResultsOverlay:GRADE")),
+        Bind(1, "stunt_label_1", stuntLabel[0].s),
+        Bind(1, "stunt_value_1", stuntValue[0].s),
+        Bind(1, "stunt_label_2", stuntLabel[1].s),
+        Bind(1, "stunt_value_2", stuntValue[1].s),
+        Bind(1, "stunt_label_3", stuntLabel[2].s),
+        Bind(1, "stunt_value_3", stuntValue[2].s),
+        Bind(1, "stunt_label_4", stuntLabel[3].s),
+        Bind(1, "stunt_value_4", stuntValue[3].s),
+        Bind(1, "stunt_label_5", stuntLabel[4].s),
+        Bind(1, "stunt_value_5", stuntValue[4].s),
+        Bind(1, "stunt_label_6", stuntLabel[5].s),
+        Bind(1, "stunt_value_6", stuntValue[5].s),
+        Bind(1, "stunt_label_7", stuntLabel[6].s),
+        Bind(1, "stunt_value_7", stuntValue[6].s),
+        Bind(1, "stunt_label_8", stuntLabel[7].s),
+        Bind(1, "stunt_value_8", stuntValue[7].s),
+        Bind(1, "stunt_label_9", stuntLabel[8].s),
+        Bind(1, "stunt_value_9", stuntValue[8].s),
+        Bind(1, "time_bonus_value", count.s),
+        Bind(1, "finish_bonus_label", title.s),
+        Bind(4, "background_box", multi ? "pr_box1_mp.mod" : "pr_box1.mod"),
+        Bind(2, "difficulty_level", &x23C),
+        lbl_802FAA40,
+    };
+    place.Set("1");
+    suffix.Set("st");
+    bonus.Set("50");
+    base.Set("150");
+    total.Set("200");
+    grade.Set(GetGradeDisplayName(3));
+    grade2.Set(GetGradeDisplayName(2));
+    title.Set("3rd Bonus");
+    for (i = 0; i < 9; i++) {
+        stuntLabel[i].Set("BIG AIR!!!11");
+        stuntValue[i].Set("33");
+    }
+    x23C = fn_80204CF0() + 1;
+    animArg = fn_802ADF34(anim, "a_beta_finish.val", table);
+    bonusSnd = fn_80207848("pr_score.sfx", 1);
+    noBonusSnd = fn_80207848("pr_score_nobonus.sfx", 1);
+    transitionSnd = fn_80207848("pr_transition.sfx", 1);
 }
