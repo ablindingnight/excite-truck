@@ -1013,6 +1013,7 @@ config.libs.append(
             Object(NonMatching, "game/orbit.cpp"),
             Object(Matching, "game/stub5.cpp"),
             Object(NonMatching, "game/pickup.cpp"),
+            Object(NonMatching, "game/ring.cpp"),
         ],
     }
 )

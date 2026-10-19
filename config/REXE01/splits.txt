@@ -2353,3 +2353,12 @@ game/pickup.cpp:
 	.sdata      start:0x8055A198 end:0x8055A1D0
 	.sbss       start:0x8055E348 end:0x8055E358
 	.sdata2     start:0x80561918 end:0x80561958
+
+game/ring.cpp:
+	.text       start:0x8016A0B0 end:0x8016B964
+	.ctors      start:0x802ED1F0 end:0x802ED1F4
+	.data       start:0x80330460 end:0x803306D0
+	.bss        start:0x804302E0 end:0x80430358
+	.sdata      start:0x8055A1D0 end:0x8055A208
+	.sbss       start:0x8055E358 end:0x8055E368
+	.sdata2     start:0x80561958 end:0x80561980
