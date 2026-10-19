@@ -1183,19 +1183,18 @@ public:
         wrecked = 0;
         f290 = 0.0f;
         f28C = 0.0f;
-        for (i = 0; i < ARRAY_COUNT(hits); i++) {
-            CarHit* h = &hits[i];
-            if (h->timer > lbl_80558DC4[0]) {
+        for (i = 0; i < 8; i++) {
+            if ((hits[i].timer > lbl_80558DC4[0]) != 0) {
                 int w;
-                f28C = f28C > h->mag ? f28C : h->mag;
-                if (h->timer > lbl_80558DC4[0]) {
-                    h->timer -= 0.016683351f;
+                f28C = hits[i].mag > f28C ? hits[i].mag : f28C;
+                if ((hits[i].timer > lbl_80558DC4[0]) != 0) {
+                    hits[i].timer -= 0.016683351f;
                 }
                 w = Wrecked(i);
-                if (w || !(h->timer > lbl_80558DC4[0])) {
-                    h->timer = 0.0f;
+                if (w || (hits[i].timer > lbl_80558DC4[0]) == 0) {
+                    hits[i].timer = 0.0f;
                     wrecked = w;
-                    f290 = f290 > h->mag ? f290 : h->mag;
+                    f290 = f290 > hits[i].mag ? f290 : hits[i].mag;
                 }
             }
         }
@@ -1717,7 +1716,7 @@ f32 RingTracker::Rate(const RaceCarRec* rc) {
         mult = 1.0f;
         Show();
         if (evt && blip) {
-            blip->Clear();
+            blip->x8 = 0;
         }
     }
     pending = 0;
