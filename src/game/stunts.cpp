@@ -174,7 +174,7 @@ struct ArrayRef {
 template <typename T, int N>
 struct FixedList {
     FixedList(void) : a(storage, N) {}
-    s32 Count(void) { return a.count; }
+    s32 Count(void) const { return a.count; }
     T* At(int i) { return &a.data[i]; }
     T* Push(const T& v) {
         T* p = &a.data[a.count++];
@@ -236,11 +236,11 @@ public:
     virtual void Award(f32 v, RaceCarRec* rc, int kind) {}  // 0x2C
     virtual void Start(const RaceCarRec* rc) {}         // 0x30
     virtual void Land(const RaceCarRec* rc) {}          // 0x34
-    virtual s32 Total(void) { return 0; }         // 0x38
+    virtual s32 Total(void) const { return 0; }         // 0x38
     virtual void Crash(const RaceCarRec* rc) = 0;       // 0x3C
     virtual int Pending(f32* out) const { return 0; }   // 0x40
-    virtual int Count(void) { return 0; }         // 0x44
-    virtual void Fill(StuntList* l) = 0;          // 0x48
+    virtual int Count(void) const { return 0; }         // 0x44
+    virtual void Fill(StuntList* l) const = 0;          // 0x48
 };
 
 struct Rank {
@@ -268,7 +268,7 @@ struct RankTable : FixedList<struct Rank, 10> {
             a.data[i].total = 0.0f;
         }
     }
-    s32 First(void) {
+    s32 First(void) const {
         int i;
         for (i = 0; i < a.count; i++) {
             if (a.data[i].thresh >= 0) {
@@ -277,7 +277,7 @@ struct RankTable : FixedList<struct Rank, 10> {
         }
         return 0;
     }
-    s32 Last(void) {
+    s32 Last(void) const {
         int i = a.count;
         while (i-- > 0) {
             if (a.data[i].thresh >= 0) {
@@ -318,8 +318,8 @@ public:
         fn_802E30C8("Total count: %d (%d unscored) (%.0f points)", count, count - scored, total);
     }
     virtual void Start(const RaceCarRec* rc) {}
-    virtual s32 Total(void) { return 0; }
-    virtual void Fill(StuntList* l) {
+    virtual s32 Total(void) const { return 0; }
+    virtual void Fill(StuntList* l) const {
         int n = 0;
         int i;
         StuntText* line;
@@ -347,14 +347,14 @@ public:
             }
         }
     }
-    virtual int FirstRank(void) { return 1; }  // 0x4C
-    virtual f32 Points(int rank) {             // 0x50
+    virtual int FirstRank(void) const { return 1; }  // 0x4C
+    virtual f32 Points(int rank) const {             // 0x50
         if (rank >= FirstRank()) {
             return ranks.a.data[rank].pts;
         }
         return 0.0f;
     }
-    virtual int FindRank(s32 v) {  // 0x54
+    virtual int FindRank(s32 v) const {  // 0x54
         int i;
         for (i = 0; i < ranks.a.count; i++) {
             s32 t = ranks.a.data[i].thresh;
@@ -366,9 +366,9 @@ public:
     done:
         return i;
     }
-    virtual s32 Value(void) = 0;                          // 0x58
-    virtual int Rank(void) { return FindRank(Value()); }  // 0x5C
-    virtual f32 Progress(void) {                          // 0x60
+    virtual s32 Value(void) const = 0;                          // 0x58
+    virtual int Rank(void) const { return FindRank(Value()); }  // 0x5C
+    virtual f32 Progress(void) const {                          // 0x60
         int r = Rank();
         f32 f = 0.0f;
         if (r < ranks.a.count - 1) {
@@ -382,13 +382,13 @@ public:
         }
         return (f32)r + f;
     }
-    virtual const char* Label(void) { return fn_80131234(lbl_8032E668[Type()]); }       // 0x64
-    virtual const char* SuperLabel(void) { return fn_80131234(lbl_8032E7F8[Type()]); }  // 0x68
-    virtual const char* StatsLabel(void) { return fn_80131234(lbl_8032E9E0[Type()]); }  // 0x6C
-    virtual const char* Name(void) { return lbl_8032E540[Type()]; }                     // 0x70
-    virtual s32 MinThresh(void) { return ranks.First(); }  // 0x74
-    virtual s32 MaxThresh(void) { return ranks.Last(); }  // 0x78
-    virtual s32 Type(void) = 0;  // 0x7C
+    virtual const char* Label(void) const { return fn_80131234(lbl_8032E668[Type()]); }       // 0x64
+    virtual const char* SuperLabel(void) const { return fn_80131234(lbl_8032E7F8[Type()]); }  // 0x68
+    virtual const char* StatsLabel(void) const { return fn_80131234(lbl_8032E9E0[Type()]); }  // 0x6C
+    virtual const char* Name(void) const { return lbl_8032E540[Type()]; }                     // 0x70
+    virtual s32 MinThresh(void) const { return ranks.First(); }  // 0x74
+    virtual s32 MaxThresh(void) const { return ranks.Last(); }  // 0x78
+    virtual s32 Type(void) const = 0;  // 0x7C
     virtual void Show(void) {    // 0x80
         if (!evt) {
             evt = hud->Alloc();
@@ -439,9 +439,9 @@ public:
             fn_801584D4(Type(), car, Rank());
         }
     }
-    virtual int InAir(void) { return 0; }  // 0x90
+    virtual int InAir(void) const { return 0; }  // 0x90
 
-    int NumRanks(void);
+    int NumRanks(void) const;
 
     s32 car;                                 // offset 0x4
     RankTable ranks;                         // offset 0x8
@@ -522,7 +522,7 @@ public:
         }
     }
     virtual void Crash(const RaceCarRec* rc) { End(); }
-    virtual s32 Value(void) { return dur; }
+    virtual s32 Value(void) const { return dur; }
     virtual int Airborne(const RaceCarRec* rc) = 0;  // 0x94
     virtual void Ended(f32 d) {}               // 0x98
 
@@ -635,10 +635,10 @@ public:
         }
     }
     virtual void Crash(const RaceCarRec* rc) { Take(); }
-    virtual s32 Value(void) { return count; }
-    virtual int Grounded(void) { return 1; }  // 0x94
-    virtual s32 Shown(void) { return count; }  // 0x98
-    virtual int Capped(void) { return 1; }    // 0x9C
+    virtual s32 Value(void) const { return count; }
+    virtual int Grounded(void) const { return 1; }  // 0x94
+    virtual s32 Shown(void) const { return count; }  // 0x98
+    virtual int Capped(void) const { return 1; }    // 0x9C
 
     f32 Take(void) {
         f32 pts = Points(Rank()) * mult;
@@ -697,8 +697,8 @@ public:
         }
         return 0;
     }
-    virtual int Count(void) { return Rank() > 0; }
-    virtual f32 Points(int rank) {
+    virtual int Count(void) const { return Rank() > 0; }
+    virtual f32 Points(int rank) const {
         f32 p = Tracker::Points(rank);
         if (fn_801769CC()->flags & 0x200000) {
             if (b271) {
@@ -708,7 +708,7 @@ public:
         }
         return p;
     }
-    virtual s32 Type(void) { return 0; }
+    virtual s32 Type(void) const { return 0; }
     virtual int Airborne(const RaceCarRec* rc) { return rc->air == 0; }
     virtual void Ended(f32 d) {
         last = d;
@@ -835,7 +835,7 @@ public:
             }
         }
     }
-    virtual s32 Type(void) { return 3; }
+    virtual s32 Type(void) const { return 3; }
     virtual int Airborne(const RaceCarRec* rc) {
         u8 was;
         f32 amount;
@@ -937,9 +937,9 @@ public:
             turboTime = lbl_8055E3C8;
         }
     }
-    virtual s32 Total(void) { return turbo; }
-    virtual const char* Label(void) { return fn_80131234(lbl_8032E668[Type()]); }
-    virtual s32 Type(void) { return 4; }
+    virtual s32 Total(void) const { return turbo; }
+    virtual const char* Label(void) const { return fn_80131234(lbl_8032E668[Type()]); }
+    virtual s32 Type(void) const { return 4; }
 
     CloseCallSlot slots[8];  // offset 0x26C
     s32 flags;               // offset 0x2CC
@@ -1125,7 +1125,7 @@ public:
         }
     }
     virtual void Crash(const RaceCarRec* rc) {}
-    virtual s32 Value(void) { return Round(value); }
+    virtual s32 Value(void) const { return Round(value); }
     virtual void Refresh(void) {
         Tracker::Refresh();
         if (evt) {
@@ -1138,7 +1138,7 @@ public:
             evt->Text1("%s", Label());
         }
     }
-    virtual int Kind(void) = 0;            // 0x94
+    virtual int Kind(void) const = 0;            // 0x94
     virtual void Set(f32 v) { value = v; }  // 0x98
 
     s32 car2;   // offset 0x24C
@@ -1233,7 +1233,7 @@ public:
         Score(&pts);
         Hide();
     }
-    virtual s32 Value(void) {
+    virtual s32 Value(void) const {
         if (wrecked) {
             return 0x7FFFFFFF;
         }
@@ -1242,7 +1242,7 @@ public:
         }
         return f28C;
     }
-    virtual s32 Type(void) { return 12; }
+    virtual s32 Type(void) const { return 12; }
 
     int Wrecked(int i) {
         RaceCarRec* o = fn_8017960C(i);
@@ -1284,7 +1284,7 @@ public:
             jumped = 1;
         }
     }
-    virtual s32 Type(void) { return 10; }
+    virtual s32 Type(void) const { return 10; }
 
     u8 jumped;    // offset 0x26C
     f32 ground;   // offset 0x270
@@ -1332,7 +1332,7 @@ public:
             }
         }
     }
-    virtual s32 Type(void) { return 9; }
+    virtual s32 Type(void) const { return 9; }
 
     s32 handle;              // offset 0x26C
     ThrowTarget targets[8];  // offset 0x270
@@ -1382,7 +1382,7 @@ public:
         }
     }
     virtual void Crash(const RaceCarRec* rc);
-    virtual s32 Type(void) { return 7; }
+    virtual s32 Type(void) const { return 7; }
     virtual void Score(f32* pts) {
         int deg;
         Tracker::Score(pts);
@@ -1392,7 +1392,7 @@ public:
             evt->Text0("%s %d", SuperLabel(), deg);
         }
     }
-    virtual int Capped(void) { return 0; }
+    virtual int Capped(void) const { return 0; }
 
     s32 spins;  // offset 0x26C
     s32 car2;   // offset 0x270
@@ -1406,7 +1406,7 @@ class CrashTracker : public ValueTracker {
 public:
     CrashTracker(StuntHud* h, int c);
     virtual ~CrashTracker(void) {}
-    virtual s32 Type(void) { return 13; }
+    virtual s32 Type(void) const { return 13; }
     virtual void Refresh(void) {
         ValueTracker::Refresh();
         if (evt) {
@@ -1419,8 +1419,8 @@ public:
             evt->Text1("%s", Label());
         }
     }
-    virtual int InAir(void) { return 1; }
-    virtual int Kind(void) { return 4; }
+    virtual int InAir(void) const { return 1; }
+    virtual int Kind(void) const { return 4; }
 };
 
 static const f32 lbl_802F9478[6] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f, 0.0f};
@@ -1452,7 +1452,7 @@ public:
             pending += Round(v);
         }
     }
-    virtual s32 Type(void) { return 14; }
+    virtual s32 Type(void) const { return 14; }
 
     s32 pending;  // offset 0x26C
     s32 queued;   // offset 0x270
@@ -1876,7 +1876,7 @@ public:
             list.a.data[i]->Start(rc);
         }
     }
-    virtual int Count(void) {
+    virtual int Count(void) const {
         int i;
         for (i = 0; i < list.a.count; i++) {
             if (list.a.data[i]->Count()) {
@@ -1894,7 +1894,7 @@ public:
         }
         return 0;
     }
-    virtual void Fill(StuntList* l) {
+    virtual void Fill(StuntList* l) const {
         int i;
         for (i = 0; i < list.a.count; i++) {
             list.a.data[i]->Fill(l);
@@ -1906,7 +1906,7 @@ public:
             list.a.data[i]->Land(rc);
         }
     }
-    virtual s32 Total(void) {
+    virtual s32 Total(void) const {
         int i;
         for (i = 0; i < list.a.count; i++) {
             if (list.a.data[i]->Total()) {
@@ -2101,7 +2101,7 @@ int fn_80158618(const char* name) {
 
 }  // extern "C"
 
-int Tracker::NumRanks(void) { return ranks.a.count; }
+int Tracker::NumRanks(void) const { return ranks.a.count; }
 
 void TimedTracker::StopEffect(void) {
     if (f260 > minT) {
