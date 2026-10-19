@@ -478,7 +478,7 @@ public:
     virtual u32 HoverColor(void) { return 0xFFFFFFFF; }
     virtual u32 Color(void) { return 0xFF808080; }
     virtual void Click(void) {}
-    virtual const char* Label(void* target) { return 0; }
+    virtual const char* Label(void) { return 0; }
 };
 
 class LayoutCmd : public EditHandler {
@@ -488,7 +488,7 @@ public:
     virtual u32 HoverColor(void) { return 0xC0C0C0C0; }
     virtual u32 Color(void) { return 0x40000000; }
     virtual void Click(void);
-    virtual const char* Label(void* target) { return "Save"; }
+    virtual const char* Label(void) { return "Save"; }
     Layout* owner;  // offset 0x4
 };
 
@@ -501,7 +501,7 @@ public:
         e->y += d->y;
     }
     virtual u32 Color(void) { return 0xFF00FF00; }
-    virtual const char* Label(void* target) { return "Move"; }
+    virtual const char* Label(void) { return "Move"; }
 };
 
 class ResizeHandler : public EditHandler {
@@ -514,7 +514,7 @@ public:
         e->h -= d->y;
     }
     virtual u32 Color(void) { return 0xFF0000FF; }
-    virtual const char* Label(void* target) { return "Resize"; }
+    virtual const char* Label(void) { return "Resize"; }
 };
 
 class ScaleHandler : public EditHandler {
@@ -526,7 +526,7 @@ public:
         e->scale = s <= 0.05f ? 0.05f : s;
     }
     virtual u32 Color(void) { return 0xFFC0D9D9; }
-    virtual const char* Label(void* target) { return "Scale"; }
+    virtual const char* Label(void) { return "Scale"; }
 };
 
 template <typename T>
@@ -545,7 +545,7 @@ public:
         return colors[idx];
     }
     virtual void Click(void) { idx = (idx + 1) % 4; }
-    virtual const char* Label(void* target) {
+    virtual const char* Label(void) {
         const char* names[4] = {"Blue", "Green", "Red", "Alpha"};
         return names[idx];
     }
@@ -559,11 +559,67 @@ struct EditRect {
     void Set(int n) { fn_80145B50(&r, n); }
 };
 
+template <typename T, int N>
+struct FixedList {
+    FixedList(void) {
+        a.data = storage;
+        a.cap = N;
+        a.count = 0;
+    }
+    ~FixedList(void) {}
+    int CanAdd(void) { return a.count + 1 <= a.cap; }
+    void Push(T v) {
+        T* p = &a.data[a.count++];
+        *p = v;
+    }
+    int IndexOf(T v) {
+        int i;
+        for (i = 0; i < a.count; i++) {
+            if (a.data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    void RemoveAt(int i) {
+        if (i >= 0 && i < a.count) {
+            int last = a.count - 1;
+            if (i != last) {
+                a.data[i] = a.data[last];
+            }
+            a.count--;
+        }
+    }
+    ArrayRef<T> a;  // offset 0x0
+    T storage[N];   // offset 0xC
+};
+
 struct EditContext {
     EditContext(DynArray<EditRect>* r) {
         hover = 0;
         active = 0;
         rects = r;
+    }
+    EditRect* HitTest(const ValPoint& p) {
+        ElemBase none;
+        int i;
+        none.x = 0.0f;
+        none.y = 0.0f;
+        FixedList<EditRect*, 10> hits;
+        for (i = 0; i < rects->a.count; i++) {
+            EditRect* r = &rects->a.data[i];
+            if (r->handler) {
+                const ElemBase* o = r->target ? (const ElemBase*)r->target : &none;
+                if (p.x >= r->r.x + o->x && p.x < r->r.x + o->x + r->r.w && p.y >= r->r.y + o->y &&
+                    p.y < r->r.y + o->y + r->r.h) {
+                    hits.Push(r);
+                }
+            }
+        }
+        if (hits.a.count >= 1) {
+            return hits.a.data[0];
+        }
+        return 0;
     }
     EditRect* active;           // offset 0x0
     EditRect* hover;            // offset 0x4
@@ -574,46 +630,6 @@ struct EditContext {
 };
 
 extern "C" void fn_80146BD4(char* d, const char* s, int n, int pad);
-template <typename T, int N>
-struct FixedList {
-    FixedList(void) {
-        data = storage;
-        max = N;
-        count = 0;
-    }
-    ~FixedList(void) {
-        data = 0;
-        count = 0;
-        max = 0;
-    }
-    int CanAdd(void) { return count + 1 <= max; }
-    void Push(T v) {
-        T* p = &data[count++];
-        *p = v;
-    }
-    int IndexOf(T v) {
-        int i;
-        for (i = 0; i < count; i++) {
-            if (data[i] == v) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    void RemoveAt(int i) {
-        if (i >= 0 && i < count) {
-            int last = count - 1;
-            if (i != last) {
-                data[i] = data[last];
-            }
-            count--;
-        }
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 max;    // offset 0x8
-    T storage[N];
-};
 
 extern FixedList<Layout*, 40> lbl_8042FBC0;
 
@@ -840,6 +856,7 @@ public:
 // A list of text/gart/box draw commands against a layout, read from a .val node.
 class OverlayCmd : public IOverlayCmd {
 public:
+    OverlayCmd(ILayout* l, ValueNode* n);
     virtual ~OverlayCmd(void) {
         SafeDelete(boxes);
         SafeDelete(garts);
@@ -873,63 +890,69 @@ static inline int CountChildAt(ValueNode* n, const char* name) {
     return c;
 }
 
-extern "C" OverlayCmd* fn_80146C2C(ILayout* l, ValueNode* n) {
-    OverlayCmd* c = new ("OverlayLayoutCmd") OverlayCmd;
-    if (c) {
-        int i;
-        ValueNode* e;
-        DynArray<TextCmd>* t;
-        DynArray<GartCmd>* g;
-        DynArray<BoxCmd>* b;
-        c->ownsLayout = 0;
-        c->layout = l;
-        c->texts = 0;
-        c->garts = 0;
-        c->boxes = 0;
-        t = new ("overlaycmd_dsa") DynArray<TextCmd>(CountChildAt(n, "text_cmd"));
-        for (i = 0;; i++) {
-            e = n->GetChildAt(i);
-            if (!e) {
-                break;
-            }
-            if (!strcasecmp(e->GetName(), "text_cmd")) {
-                TextCmd* tc = t->Add();
-                tc->elem = e->GetValue("elem");
-                tc->text = e->GetValue("text");
-            }
+static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
+    int i;
+    int c;
+    ValueNode* e;
+    DynArray<TextCmd>* at;
+    DynArray<GartCmd>* ag;
+    DynArray<BoxCmd>* ab;
+    c = CountChildAt(n, "text_cmd");
+    at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
+    for (i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
         }
-        c->texts = t;
-        g = new ("overlaycmd_dsa") DynArray<GartCmd>(CountChildAt(n, "gart_cmd"));
-        for (i = 0;; i++) {
-            e = n->GetChildAt(i);
-            if (!e) {
-                break;
-            }
-            if (!strcasecmp(e->GetName(), "gart_cmd")) {
-                GartCmd* gc = g->Add();
-                gc->elem = e->GetValue("elem");
-                gc->art = e->GetValue("art");
-                gc->idx = e->GetIntValue("idx");
-            }
+        if (!strcasecmp(e->GetName(), "text_cmd")) {
+            TextCmd* tc = at->Add();
+            tc->elem = e->GetValue("elem");
+            tc->text = e->GetValue("text");
         }
-        c->garts = g;
-        b = new ("overlaycmd_dsa") DynArray<BoxCmd>(CountChildAt(n, "box_cmd"));
-        for (i = 0;; i++) {
-            e = n->GetChildAt(i);
-            if (!e) {
-                break;
-            }
-            if (!strcasecmp(e->GetName(), "box_cmd")) {
-                BoxCmd* bc = b->Add();
-                bc->elem = e->GetValue("elem");
-                bc->art = e->GetValue("art");
-                bc->color = fn_801454E8(e, "color");
-            }
-        }
-        c->boxes = b;
     }
-    return c;
+    o->texts = at;
+    c = CountChildAt(n, "gart_cmd");
+    ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
+    for (i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
+        }
+        if (!strcasecmp(e->GetName(), "gart_cmd")) {
+            GartCmd* gc = ag->Add();
+            gc->elem = e->GetValue("elem");
+            gc->art = e->GetValue("art");
+            gc->idx = e->GetIntValue("idx");
+        }
+    }
+    o->garts = ag;
+    c = CountChildAt(n, "box_cmd");
+    ab = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
+    for (i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
+        }
+        if (!strcasecmp(e->GetName(), "box_cmd")) {
+            BoxCmd* bc = ab->Add();
+            bc->elem = e->GetValue("elem");
+            bc->art = e->GetValue("art");
+            bc->color = fn_801454E8(e, "color");
+        }
+    }
+    o->boxes = ab;
 }
+
+inline OverlayCmd::OverlayCmd(ILayout* l, ValueNode* n) {
+    ownsLayout = 0;
+    layout = l;
+    texts = 0;
+    garts = 0;
+    boxes = 0;
+    ReadCmds(this, n);
+}
+
+extern "C" OverlayCmd* fn_80146C2C(ILayout* l, ValueNode* n) { return new ("OverlayLayoutCmd") OverlayCmd(l, n); }
 
 extern "C" {
 
@@ -1249,7 +1272,125 @@ void Layout::ToggleEdit(void) { editing = !editing; }
 
 u8 Layout::IsEditing(void) { return editing; }
 
-void Layout::Edit(void) {}
+extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+
+struct MouseEvent {
+    s32 type;   // offset 0x0
+    s32 x;      // offset 0x4
+    s32 y;      // offset 0x8
+    u32 flags;  // offset 0xC
+    s32 d;      // offset 0x10
+};
+
+void Layout::Edit(void) {
+    int i;
+    EditContext* c;
+    EditRect* r;
+    u32 col;
+    const char* label;
+    ArtElem* a;
+    GartElem* g;
+    int other;
+    if (editing) {
+        {
+            MouseEvent ev;
+            while (fn_80127A50(&ev)) {
+                c = ctx;
+                ValPoint t = fn_80145A24((IPoint*)&ev);
+                V2 d;
+                ValPoint p = t;
+                if (c->active) {
+                    if (ev.flags & 1) {
+                        d.x = p.x - c->lastX;
+                        d.y = p.y - c->lastY;
+                        if (!((f32)__fabs(d.x) <= lbl_80558DC4[0]) || !((f32)__fabs(d.y) <= lbl_80558DC4[0])) {
+                            c->moved = 1;
+                        }
+                        c->active->handler->Drag(&d, c->active->target);
+                    } else {
+                        if (!c->moved && ev.type == 1) {
+                            c->active->handler->Click();
+                        }
+                        c->active = 0;
+                    }
+                } else {
+                    EditRect* top = c->HitTest(p);
+                    c->hover = top;
+                    if (top && top->handler && ev.type == 0) {
+                        c->active = top;
+                        c->moved = 0;
+                    }
+                }
+                c->lastX = p.x;
+                c->lastY = p.y;
+            }
+        }
+        {
+            c = ctx;
+            for (i = 0; i < c->rects->a.count; i++) {
+                r = &c->rects->a.data[i];
+                if (r->target && c->active && r->target == c->active->target) {
+                    continue;
+                }
+                if (r == c->hover) {
+                    col = r->handler->HoverColor();
+                } else {
+                    col = r->handler->Color();
+                }
+                if (r->target) {
+                    fn_80010B80(fn_801451DC(((ElemBase*)r->target)->x + r->r.x, 4), fn_801452B4(((ElemBase*)r->target)->y + r->r.y), r->r.w, r->r.h, col);
+                } else {
+                    fn_80010B80(fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), r->r.w, r->r.h, col);
+                }
+                label = r->handler->Label();
+                if (label) {
+                    if (!r->target) {
+                        fn_8000FF88(-1, 9, "%s", 0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), label);
+                    } else if (r == c->hover) {
+                        fn_8000FF88(-1, 12, "%s", 0.6f, fn_801451DC(((ElemBase*)r->target)->x + r->r.x, 4),
+                                    fn_801452B4(r->r.y + ((ElemBase*)r->target)->y - 10.0f), label);
+                        fn_80010B80(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
+                        fn_8000FF88(-1, 9, "%s", 0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), ((ElemBase*)r->target)->name);
+                    }
+                }
+            }
+        }
+        for (i = 0; i < arts->a.count; i++) {
+            a = &arts->a.data[i];
+            c = ctx;
+            other = 1;
+            if (c->hover && a == c->hover->target) {
+                other = 0;
+            }
+            col = other ? 0x70FFFFFF : 0xC0FFFFFF;
+            fn_80010B80(fn_801451DC(a->x, 4), fn_801452B4(a->y), a->w, a->h, col);
+            if (c->active && a == c->active->target) {
+                fn_80010B80(fn_801451DC(a->x, 4), fn_801452B4(a->y - 15.0f), 100.0f, 15.0f, 0x40000000);
+                fn_8000FF88(-1, 9, "%.0f, %.0f (%.0f, %.0f)", 0.6f, fn_801451DC(a->x, 4), fn_801452B4(a->y - 15.0f), a->x,
+                            a->y, a->w, a->h);
+            }
+        }
+        for (i = 0; i < garts->a.count; i++) {
+            g = &garts->a.data[i];
+            c = ctx;
+            other = 1;
+            if (c->hover && g == c->hover->target) {
+                other = 0;
+            }
+            if (other) {
+                col = (g->color & 0xFFFFFF) | 0x70000000;
+            } else {
+                col = 0xC0FFFFFF;
+            }
+            fn_80010B80(fn_801451DC(g->x, 4), fn_801452B4(g->y), g->w, g->h, col);
+            if (c->active && g == c->active->target) {
+                fn_80010B80(fn_801451DC(g->x, 4), fn_801452B4(g->y - 15.0f), 100.0f, 15.0f, 0x40000000);
+                fn_8000FF88(-1, 9, "%.0f, %.0f (%.0f, %.0f)", 0.6f, fn_801451DC(g->x, 4), fn_801452B4(g->y - 15.0f), g->x,
+                            g->y, g->w, g->h);
+            }
+        }
+    }
+}
 
 void OverlayCmd::Draw(void) {
     int i;
