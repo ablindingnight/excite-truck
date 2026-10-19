@@ -2312,3 +2312,10 @@ game/gradesched.cpp:
 	.bss        start:0x8042FD60 end:0x8042FD78
 	.sdata      start:0x8055A0A8 end:0x8055A0B0
 	.sbss       start:0x8055E2B0 end:0x8055E2C0
+
+game/aiutil.cpp:
+	.text       start:0x80160B14 end:0x80160CE4
+	.ctors      start:0x802ED1DC end:0x802ED1E0
+	.bss        start:0x8042FD78 end:0x8042FDE0
+	.sbss       start:0x8055E2C0 end:0x8055E2D0
+	.sdata2     start:0x80561830 end:0x80561838
