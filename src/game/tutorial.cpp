@@ -1158,12 +1158,12 @@ int fn_80161ECC(void) {
 }
 
 void fn_80161F10(int n) {
-    int ev;
     Event* e;
+    u32 color;
+    int ev;
     s32 driver;
     s32 vehicle;
-    u32 color;
-    u8 buf[0xC8];
+    u8 buf[0xB8];
     fn_80161D14();
     ev = (int)fn_80161E40(n);
     e = GetEvent(ev);
