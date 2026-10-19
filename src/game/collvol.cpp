@@ -27,14 +27,14 @@ struct CMtx {
 class CollShape {
 public:
     CollShape(const CMtx* m) {
+        mtx = m;
         a4 = 0;
         a8 = 0;
-        mtx = m;
+        f18 = 0x424F5820;
         stiff = 50000.0f;
         skin = 0.2f;
-        f18 = 51.836f;
-        a1C = 0;
         a20 = 100;
+        a1C = 0;
     }
     virtual ~CollShape(void);
     virtual void vf0C(void);
@@ -55,17 +55,19 @@ public:
     const CMtx* mtx;  // offset 0xC
     f32 stiff;       // offset 0x10
     f32 skin;        // offset 0x14
-    f32 f18;         // offset 0x18
+    u32 f18;         // offset 0x18
     s32 a1C;         // offset 0x1C
     s32 a20;         // offset 0x20
 };
 
 class BoxShape : public CollShape {
 public:
-    BoxShape(const CMtx* m, const CVec3& h) : CollShape(m) {
-        half = h;
-        radius = skin + (f32)sqrt(h.x * h.x + h.y * h.y + h.z * h.z);
+    BoxShape(const CMtx* m, f32 x, f32 y, f32 z) : CollShape(m) {
+        half.x = x;
+        half.y = y;
+        half.z = z;
         a34 = 0;
+        radius = 0.2f + (f32)sqrt(x * x + y * y + z * z);
     }
     CVec3 half;  // offset 0x24
     f32 radius;  // offset 0x30
@@ -254,11 +256,15 @@ void BoxVolume::Init(CollDesc* d) {
     CollVolume::Init(d);
     mtx = d->mtx;
     Update();
-    if (d->shape == 0) {
-        BoxShape* s = new ("box-volume") BoxShape(&mtx, d->half);
+    switch (d->shape) {
+    case 0: {
+        BoxShape* s = new ("box-volume") BoxShape(&mtx, d->half.x, d->half.y, d->half.z);
         AddShape(s);
-    } else {
+        break;
+    }
+    default:
         fn_802E30C8("Collision volume:  Not supported");
+        break;
     }
 }
 
