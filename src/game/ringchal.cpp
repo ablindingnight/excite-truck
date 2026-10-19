@@ -50,6 +50,65 @@ s32 fn_80145E70(const char* name);
 void fn_802ADDD8(void* p, int a);
 }
 
+struct V2 {
+    f32 x;
+    f32 y;
+};
+
+struct TextElem {
+    TextElem(void) {}
+    const char* name;     // offset 0x0
+    V2 pos;               // offset 0x4
+    s32 elemJust;         // offset 0xC
+    f32 scale;            // offset 0x10
+    u32 just;             // offset 0x14
+    u32 color;            // offset 0x18
+    const char* defText;  // offset 0x1C
+};
+
+class ILayout {
+public:
+    virtual ~ILayout(void) {}
+    virtual TextElem* Find(const char* name) = 0;
+};
+
+struct RaceSetup {
+    u8 pad0[0x10];
+    f32 time;  // offset 0x10
+};
+
+struct Binding {
+    s32 type;          // offset 0x0
+    const char* name;  // offset 0x4
+    void* ptr;         // offset 0x8
+};
+
+static inline Binding Bind(s32 t, const char* n, void* p) {
+    Binding b;
+    b.type = t;
+    b.name = n;
+    b.ptr = p;
+    return b;
+}
+
+extern const Binding lbl_802FAA40;
+
+extern "C" {
+RaceSetup* fn_801E7E3C(void);
+void fn_8000FBE4(void);
+int fn_80161C38(void);
+void fn_8001DF08(int id, s32 score);
+int fn_801E866C(int view);
+const char* fn_80131234(const char* key);
+void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+f32 fn_80147204(TextElem* e, const char* text);
+s32 fn_80160998(s32 a);
+s32 fn_80160A74(void);
+void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
+void fn_80130978(char* buf, int size, f32 v);
+s32 fn_802ADF34(void* layout, const char* name, Binding* b);
+}
+
 struct GemRef {
     s32 a;
     s32 b;
@@ -423,7 +482,8 @@ public:
     char bB2[0x14];         // offset 0xB2
     char bC6[0x14];         // offset 0xC6
     char complete[0x14];    // offset 0xDA
-    u8 padEE[0xF4 - 0xEE];
+    u8 padEE[2];
+    s32 fF0;   // offset 0xF0
     s32 fF4;   // offset 0xF4
     s32 fF8;   // offset 0xF8
     s32 fFC;   // offset 0xFC
@@ -528,11 +588,13 @@ public:
     virtual ~RingChalMaster(void);
     virtual void vf10(void);
     virtual int vf20(int car);
+    virtual f32 vf38(void);
+    virtual int vf3C(int view);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
-    s32 f98;                  // offset 0x98
+    ILayout* layout;          // offset 0x98
     u8 b9C;                   // offset 0x9C
     u8 pad9D[3];
     f32 fA0;                  // offset 0xA0
@@ -646,7 +708,7 @@ inline RingChalMaster::RingChalMaster(Race* race) {
     }
     fn_8016A0B0();
     arena.Init();
-    f98 = 0;
+    layout = 0;
     b9C = 1;
     fA0 = -100.0f;
     sPreRace = fn_80207848("chal_prerace.sfx", 1);
@@ -1311,7 +1373,7 @@ void RingChalMaster::vfB8(ZoneResults* r) {
 }
 
 void RingChalMaster::vfF8(void) {
-    f98 = fn_80145E70("freestyle.val");
+    layout = (ILayout*)fn_80145E70("freestyle.val");
     results.layout = new ("ArtAnimManager") ArtAnimManager(1);
     results.Load();
     results.Reset();
@@ -1337,4 +1399,113 @@ void ResultsOverlay::Reset(void) {
     STOP(s24);
     STOP(s28);
     STOP(s2C);
+}
+
+static inline f32 Clamp01(f32 x) {
+    f32 r = 1.0f < x ? 1.0f : x;
+    return r > 0.0f ? r : 0.0f;
+}
+
+static inline f32 Ease(f32 t) {
+    if (t < -1.0f) {
+        return -1.0f;
+    } else if (t > 1.0f) {
+        return 1.0f;
+    } else if (t > 0.0f) {
+        return t * (-2.0f * t * t) + 3.0f * t * t;
+    } else {
+        return t * (-2.0f * t * t) - 3.0f * t * t;
+    }
+}
+
+static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { fn_801479A8(a, b, text, t); }
+
+static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
+
+int RingChalMaster::vf3C(int view) {
+    f32 t = fn_801E7E3C()->time;
+    f32 end0 = 6.75f;
+    f32 in0 = end0 - 0.8f;
+    f32 full0 = in0 - 0.3f;
+    f32 end1 = full0 - 0.15f;
+    f32 in1 = end1 - 0.8f;
+    f32 full1 = in1 - 0.3f;
+    TextElem* h0 = layout->Find("intro_head_0");
+    TextElem* h1 = layout->Find("intro_head_1");
+    if (t < full1) {
+        fn_8000FBE4();
+    }
+    if (!fn_80161C38()) {
+        if (t < end0) {
+            f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
+            TextElem* body = layout->Find("star_body_0");
+            TextElem* denom = layout->Find("star_body_1");
+            fn_8001DF08(fn_801E866C(view), 0);
+            if (h0 && h1 && body && denom) {
+                char buf[0x14];
+                Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
+                fn_801308F4(buf, sizeof(buf), fn_80160998(fn_80160A74()));
+                {
+                    TextElem e = *body;
+                    e.pos.x -= 0.5f * Width(&e, buf);
+                    Blend(&e, denom, buf, Ease(k));
+                }
+            }
+        }
+        if (t < end1) {
+            f32 k;
+            TextElem* body;
+            TextElem* timer;
+            fn_8014784C(layout, "stop_watch_art", "stop_watch_artset", 0);
+            k = Lerp(0.0f, 1.0f, Clamp01((t - in1) / (full1 - in1)));
+            body = layout->Find("time_body_0");
+            timer = layout->Find("timer");
+            if (h0 && h1 && body && timer) {
+                char buf[0x14];
+                Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k));
+                fn_80130978(buf, sizeof(buf), arena.timer.t);
+                {
+                    TextElem e = *body;
+                    e.pos.x -= 0.5f * Width(&e, buf);
+                    Blend(&e, timer, buf, Ease(k));
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+f32 RingChalMaster::vf38(void) { return 7.75f; }
+
+void ResultsOverlay::Load(void) {
+    Binding b[16] = {
+        Bind(3, "time_left", &fF8),
+        Bind(3, "time_bonus", &fFC),
+        Bind(3, "grade", &f100),
+        Bind(3, "final_score", &f104),
+        Bind(1, "ring_score", ringScore),
+        Bind(1, "time_bonus", timeLeft),
+        Bind(1, "time_bonus_title_caps", bonusTitle),
+        Bind(1, "final_score", finalScore),
+        Bind(1, "grade", grade),
+        Bind(1, "final_score_no_time_bonus", noBonusScore),
+        Bind(1, "time_left", timeBonus),
+        Bind(1, "challenge_complete_1", bB2),
+        Bind(1, "challenge_complete_2", bC6),
+        Bind(1, "out_of_time_message", complete),
+        Bind(2, "difficulty_level", &fF0),
+        lbl_802FAA40,
+    };
+    StrCopyN(noBonusScore, "100", 0x14);
+    StrCopyN(timeLeft, "50", 0x14);
+    StrCopyN(finalScore, "150", 0x14);
+    fn_80130980(timeBonus, 0x14, 2, 75.0f);
+    fF0 = fn_80204CF0() + 1;
+    fF4 = fn_802ADF34(layout, "a_ring_finish.val", b);
+    sBonus = fn_80207848("pr_ringchal1.sfx", 1);
+    sNoBonus = fn_80207848("pr_ringchal1_nobonus.sfx", 1);
+    s1C = fn_80207848("pr_ringchal2.sfx", 1);
+    s24 = fn_80207848("pr_transition.sfx", 1);
+    s28 = fn_80207848("levelup.sfx", 1);
+    s2C = fn_80207848("timeout.sfx", 1);
 }
