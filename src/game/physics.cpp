@@ -270,7 +270,10 @@ void fn_80176734(void) {
     fn_80177048();
 }
 
-void fn_8017677C(int mode, u32 flags) {}
+void fn_8017677C(int mode, u32 flags) {
+    const char* modes[] = {"Long Intro", "Player-drives", "Pack-off-track", "Immediate"};
+    const char* flagNames[] = {"", "Restart Weekend", "Interlude", "No Pause", "Fade From Black", "PRACTICE"};
+}
 
 void fn_80176780(u32 req, const u8* extra) {
     u32 flags;
@@ -409,7 +412,9 @@ StatePacket* fn_80176A70(void) {
     return pkt;
 }
 
-void fn_80176BA8(void) {}
+void fn_80176BA8(void) {
+    const char* fmts[] = {"%s%s%01d:%02d%c%02d", "%s%02d%c%02d", "%s%s%01d:%02d%c%01d", "%s%02d%c%01d"};
+}
 
 void fn_80176BAC(void) {
     f32 t = lbl_8055E3C8;
