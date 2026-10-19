@@ -183,7 +183,7 @@ void fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
     }
 }
 
-u8 fn_801450A0(int a, int b, f32 t) {
+u8 fn_801450A0(u32 a, u32 b, f32 t) {
     f32 f = (f32)a + t * ((f32)b - (f32)a);
     int v = Round(f);
     v = v > 0 ? v : 0;
@@ -372,10 +372,11 @@ ValPoint fn_80145A24(const IPoint* p) {
 }
 
 void fn_80145B50(Rect* r, int n) {
-    r->x = n * 10.0f;
+    f32 s = 10.0f;
+    r->x = s * n;
     r->y = 0.0f;
-    r->w = 10.0f;
-    r->h = 10.0f;
+    r->h = s;
+    r->w = s;
 }
 
 void fn_80145B94(const TextElem* e, const char* text) {
@@ -1174,12 +1175,12 @@ void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
 }
 
 void fn_80147EE0(ArtElem* e, f32 s) {
-    f32 w = e->w * s;
-    f32 h = e->h * s;
-    e->h = h;
-    e->w = w;
-    e->pos.x = e->pos.x + e->w / s * 0.5f - w * 0.5f;
-    e->pos.y = e->pos.y + e->h / s * 0.5f - h * 0.5f;
+    f32 cx = e->pos.x + e->w / 2.0f;
+    f32 cy = e->pos.y + e->h / 2.0f;
+    e->w *= s;
+    e->h *= s;
+    e->pos.x = cx - e->w / 2.0f;
+    e->pos.y = cy - e->h / 2.0f;
 }
 
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
