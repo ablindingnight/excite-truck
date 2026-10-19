@@ -2681,6 +2681,16 @@ game/loadscrn.cpp:
 	.sbss       start:0x8055F218 end:0x8055F228
 	.sdata2     start:0x805637F0 end:0x80563800
 
+game/mstats.cpp:
+	.text       start:0x80257284 end:0x80257C10
+	.ctors      start:0x802ED450 end:0x802ED454
+	.rodata     start:0x802FA5E0 end:0x802FA5F8
+	.data       start:0x80344CC8 end:0x80344D50
+	.bss        start:0x80498E38 end:0x80498E50
+	.sdata      start:0x8055C1D8 end:0x8055C200
+	.sbss       start:0x8055F348 end:0x8055F358
+	.sdata2     start:0x80563AA8 end:0x80563AC0
+
 game/tunemenu.cpp:
 	.text       start:0x80257C10 end:0x80257FB8
 	.ctors      start:0x802ED454 end:0x802ED458
