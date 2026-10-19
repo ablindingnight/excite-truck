@@ -43,6 +43,11 @@ const char* GetGradeDisplayName(int grade);
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 lbl_8055E3C8;  // race clock
 
+ModuleTag lbl_8055E228;
+UnkStaticFFFF lbl_8055E230;
+static UnkStatic123 lbl_8042FC70;
+UnkStatic7F lbl_8055E234;
+
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
 
@@ -206,12 +211,12 @@ public:
     virtual int vf84(void) { return 0; }
     virtual int vf88(void) { return 0; }
     virtual int vf8C(int p, int key);
-    virtual void vf90(void) {}
-    virtual void vf94(void) {}
+    virtual void vf90(struct RaceCarRec* a, struct RaceCarRec* b, void* p, const f32* hit) {}
+    virtual void vf94(struct RaceCarRec* rc) {}
     virtual void vf98(void);
-    virtual void vf9C(void) {}
+    virtual void vf9C(struct RaceCarRec* rc, int type) {}
     virtual int vfA0(void* cam);
-    virtual void vfA4(void) {}
+    virtual void vfA4(struct RaceCarRec* rc) {}
     virtual void vfA8(int car);
     virtual void vfAC(int car);
     virtual int vfB0(void) { return 0; }
@@ -360,7 +365,7 @@ struct RaceCarRec {
     u8 pad6E[0x118 - 0x6E];
     f32 vel[3];           // offset 0x118
     u8 pad124[0x1EC - 0x124];
-    s32 pickupFlags;      // offset 0x1EC
+    s32 index;            // offset 0x1EC
     s32 kind;             // offset 0x1F0
     u8 pad1F4[0x270 - 0x1F4];
     PlaceSource* places;  // offset 0x270
@@ -801,8 +806,8 @@ public:
     virtual f32 Rate(RaceCarRec* rc);                     // 0x14
     virtual void vf18(void);
     virtual void SetActive(int on);                       // 0x1C
-    virtual void vf20(void);
-    virtual void vf24(void);
+    virtual void Hit(f32 mag, int other);                 // 0x20
+    virtual void Bump(void);                              // 0x24
     virtual void Stop(void);                              // 0x28
     virtual void Award(RaceCarRec* rc, f32 v, int kind);  // 0x2C
     virtual void Start(RaceCarRec* rc);                   // 0x30
@@ -1089,6 +1094,7 @@ class BetaMaster : public GameMode, public IRaceListener, public IStuntListener,
 public:
     BetaMaster(void);
     virtual ~BetaMaster(void);
+    BetaCar* CarFor(RaceCarRec* rc) { return &cars[rc->index]; }
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car) {
@@ -1119,11 +1125,11 @@ public:
     virtual int vf68(void);
     virtual int vf88(void);
     virtual int vf8C(int p, int key);
-    virtual void vf90(void);
-    virtual void vf94(void);
-    virtual void vf9C(void);
+    virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
+    virtual void vf94(RaceCarRec* rc);
+    virtual void vf9C(RaceCarRec* rc, int type);
     virtual int vfA0(void* cam);
-    virtual void vfA4(void);
+    virtual void vfA4(RaceCarRec* rc);
     virtual void vfA8(int car);
     virtual void vfB8(void* r);
     virtual void vfC0(void);
@@ -1395,7 +1401,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             int got;
             if (e->kind == 3) {
                 u8* mine;
-                if ((f32)__fabs(e->respawn) <= lbl_80558DC4[0] && (mine = (u8*)e + rc->pickupFlags)[0xC4]) {
+                if ((f32)__fabs(e->respawn) <= lbl_80558DC4[0] && (mine = &e->hit[rc->index])[0]) {
                     if (e->big) {
                         ev.pos[0] = e->pos[0];
                         ev.pos[1] = e->pos[1];
@@ -1409,7 +1415,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                     }
                     e->respawn = fn_801D48F4(e->objs[e->which]);
                     got = 1;
-                    mine[0xC4] = 0;
+                    mine[0] = 0;
                 } else {
                     got = 0;
                 }
@@ -2638,5 +2644,142 @@ void BetaMaster::vf0C(void) {
     if (found) {
         f32 left = timer.limit - timer.now;
         fn_80167684(0.0f > left ? 0.0f : left);
+    }
+}
+
+extern "C" {
+f32 PSVECMag(const f32* v);
+int fn_801E85A4(void);
+int fn_801E86F8(int view);
+int fn_801E85B4(void);
+int fn_801E866C(int view);
+void fn_801E41D8(const V3* a, const V3* b, u32 color, f32 r);
+void fn_80167844(void);
+void fn_8016A438(void);
+}
+
+s32 fn_80151604(void) { return 0; }
+
+int BetaMaster::vf54(void) {
+    int f;
+    if (fn_80161C38()) {
+        return 0x5608;
+    }
+    f = fn_80179650() > 1 ? 0x160B : 0x564B;
+    f &= ~0x40;
+    return f;
+}
+
+void BetaMaster::vf9C(RaceCarRec* rc, int type) {
+    if (type == 1003) {
+        BetaCar* c = CarFor(rc);
+        if (c) {
+            c->meterObj->Bump();
+        }
+    }
+}
+
+void fn_80151688(void) {}
+
+void BetaMaster::vfA4(RaceCarRec* rc) {
+    BetaCar* c = CarFor(rc);
+    if (c) {
+        f32 add = 0.0f;
+        CarHud* h;
+        c->fullFlash = 0.0f;
+        c->meter = 0.5f * c->meter;
+        c->star = 0;
+        h = c->hud;
+        {
+            StuntIter it(&h->pending, 0);
+            for (; it.Valid(); it.Next()) {
+                if (it->running) {
+                    it.Remove();
+                    h->shown.PushBack(it.Get());
+                }
+            }
+        }
+        c->score += add;
+        c->meterObj->Reset();
+        if (c->boosts > 1) {
+            c->flash[0] = 1.5f;
+        }
+        c->boosts = c->boosts - 1 > 1 ? c->boosts - 1 : 1;
+        c->flash[4] = 0.0f;
+        c->flash[3] = 0.0f;
+        c->flash[2] = 0.0f;
+        c->flash[1] = 0.0f;
+    }
+}
+
+void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
+    f32 mag = PSVECMag(hit);
+    int fa = 1;
+    int fb = 1;
+    if (a->kind == 0x50 && b->kind == 0x50) {
+        fa = a->speed > b->speed;
+        fb = !fa;
+    }
+    if (fa) {
+        BetaCar* c = CarFor(a);
+        if (c) {
+            c->meterObj->Hit(mag, b->index);
+        }
+    }
+    if (fb) {
+        BetaCar* c = CarFor(b);
+        if (c) {
+            c->meterObj->Hit(mag, a->index);
+        }
+    }
+}
+
+void fn_80151914(void) {}
+
+void BetaMaster::vf94(RaceCarRec* rc) {
+    BetaCar* c = CarFor(rc);
+    if (c) {
+        c->Finish();
+    }
+    if (coins.enabled) {
+        coins.cars[rc->index].active = 0;
+    }
+}
+
+int BetaMaster::vf8C(int p, int key) {
+    if (key == 'X' && vf68()) {
+        int n = fn_801E85A4();
+        int i;
+        for (i = 0; i < n; i++) {
+            if (cars[fn_801E86F8(i)].result.dnf || n > 1) {
+                anims[i].state = 4;
+            } else if (anims[i].state == 2) {
+                anims[i].go = 1;
+            }
+        }
+    }
+    return 0;
+}
+
+void BetaMaster::vf48(void) {
+    BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
+    u32 col;
+    int i;
+    if (c && c->mode != 0) {
+        if (c->mode == 1) {
+        }
+    }
+    col = lbl_8055E230.value;
+    for (i = 0; i < puddles.a.count; i++) {
+        Puddle* p = puddles.a.data[i];
+        if (p->b10) {
+            V3 a;
+            V3 b;
+            a = *(V3*)&p->x;
+            a.y = a.y - 0.75f;
+            b = *(V3*)&p->x;
+            b.y = b.y + 0.75f;
+            fn_801E41D8(&a, &b, col, p->r);
+        }
     }
 }
