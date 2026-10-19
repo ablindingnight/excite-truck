@@ -314,24 +314,16 @@ void fn_801456E8(ElemList<TextElem>* l, void* f) {
     char just[0x40];
     const char* dt;
     int i;
-    fn_802E3AD0(f, "tabular text
-
-");
-    fn_802E3AD0(f, "	x y elem_just color scale just name default_text
-
-");
+    fn_802E3AD0(f, "tabular text\r\n");
+    fn_802E3AD0(f, "\tx y elem_just color scale just name default_text\r\n");
     for (i = 0; i < l->count; i++) {
         e = &l->data[i];
         dt = fn_8013126C(q, e->defText);
         js = fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
-        fn_802E3AD0(f, "	%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"
-
-", e->pos.x, e->pos.y, e->elemJust, e->color,
+        fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
                     e->scale, js, e->name, dt);
     }
-    fn_802E3AD0(f, "end
-
-");
+    fn_802E3AD0(f, "end\r\n");
 }
 
 void fn_801457D0(ElemList<ArtElem>* l, void* f) {
