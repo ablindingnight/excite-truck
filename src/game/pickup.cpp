@@ -301,18 +301,22 @@ extern s32 lbl_8055E3C4;  // frame
 extern f32 lbl_8055E460;
 
 inline PickupObjMan::PickupObjMan(void) {
-    int i;
     PickupType* t = lbl_80330020;
+    int i;
     for (i = 0; i < 5; i++) {
         t->handle = fn_802C6FC0(t->model, 0, 0);
         t->count = 0;
         if (t->handle != -1) {
             f32 box[6];
-            f32 d;
+            f32 m;
+            f32 w;
             fn_802C77F0(t->handle, box);
-            d = MAX(box[3] - box[2], box[5] - box[4]);
-            d = MAX(box[1] - box[0], d);
-            t->radius = 0.5f * d;
+            m = box[5] - box[4];
+            w = box[3] - box[2];
+            m = w > m ? w : m;
+            w = box[1] - box[0];
+            m = w > m ? w : m;
+            t->radius = 0.5f * m;
             t->yoff = -box[2];
         }
         t++;
@@ -395,7 +399,8 @@ void fn_801679F0(void) {
     if (vals->Has("coin_file")) {
         f32 params[3] = {4.0f, 30.0f, 10.0f};
         ValueTable* t;
-        if (vals->FindChild("coin_params") != 0) {
+        bool has = vals->FindChild("coin_params") != 0;
+        if (has) {
             ValueNode* p = vals->FindChild("coin_params");
             params[0] = p->GetFloat("box_step_size", params[0]);
             params[1] = p->GetFloat("strip_step_size", params[1]);
@@ -403,8 +408,8 @@ void fn_801679F0(void) {
         }
         t = fn_80131810(vals->GetValue("coin_file"));
         if (t) {
-            int i;
             ValueNode* n;
+            int i;
             for (i = 0; (n = t->GetChild(i)) != 0; i++) {
                 PickupMaker** m;
                 for (m = makers; *m; m++) {
@@ -478,18 +483,19 @@ void fn_80168104(void) {
                 V2 d;
                 d.z = c.z - g->cz;
                 d.x = c.x - g->cx;
-                if ((f32)sqrt(d.x * d.x + d.z * d.z) - g->radius >= 600.0f) {
+                if (!((f32)sqrt(d.x * d.x + d.z * d.z) - g->radius < 600.0f)) {
                     continue;
                 }
             }
             {
                 int j;
-                for (j = 0; j < g->count; j++) {
+                for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
                     Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
                     if (p->type && p->type->handle && !p->taken) {
                         u32 col = p->type ? p->type->color : 0xFFFFFFFF;
                         int o1 = fn_802C9994(col);
-                        u32 o2 = fn_802C9950((col >> 1) & 0x7F7F7F7F);
+                        u32 o2 = fn_802C9950(((col >> 1) & 0x7F000000) | ((col >> 1) & 0x7F0000) |
+                                             ((col >> 1) & 0x7F00) | ((col >> 1) & 0x7F));
                         SpinXform* x;
                         fn_802C9900((f32)(col >> 24) / 255.0f);
                         x = &lbl_8042FF60[((s32)p->type / 12) & 15];
