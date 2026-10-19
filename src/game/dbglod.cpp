@@ -58,15 +58,11 @@ bool lbl_8055EA8F;  // show log
 bool lbl_8055EA90;  // wireframe
 DbgLog lbl_804874F0;
 
-// Unused; only its message survives.
-inline void DmaTestReport(int i, int n, f32 lon, f32 lat) {
-    fn_802E30C8("test %d of %d from lon %8.1f / %.1f", i, n, lon, lat);
-}
-
 extern "C" {
 
 void fn_801E45CC(void) {
     char buf[80];
+    static const char* unused[] = {"test %d of %d from lon %8.1f / %.1f"};  // from a stripped DMA test
     fn_8023895C();
     fn_80238B44(10, 10, 230, 84, 0x80000000);
     sprintf(buf, "LOD Factor:  %4.1f", lbl_8055AEC4);
@@ -166,3 +162,5 @@ int fn_801E47BC(int key) {
 }
 
 }  // extern "C"
+
+// NonMatching: the sinit is one of the epilogue-scheduled kind.
