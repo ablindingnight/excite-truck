@@ -207,6 +207,11 @@ struct TCar {
 class Sound {
 public:
     virtual ~Sound(void);
+    void Play(void) {
+        play = 1;
+        b4B = 0;
+        b4A = 0;
+    }
     u8 pad4[0x49 - 0x4];
     u8 play;  // offset 0x49
     u8 b4A;   // offset 0x4A
@@ -1206,12 +1211,14 @@ struct Delta2 {
 inline void Challenge::Collect(void) {
     if (!IsDone()) {
         int i;
+        TCar* car;
+        Token* t;
+        int j;
         for (i = 0; i < fn_801B2F24(); i++) {
-            TCar* car = lbl_804348E8[i];
+            car = lbl_804348E8[i];
             if (car->model == 'PCAR') {
-                int j;
                 for (j = 0; j < tokens.count; j++) {
-                    Token* t = &tokens.data[j];
+                    t = &tokens.data[j];
                     if (t->active) {
                         if (t->path) {
                             if (fn_80139B5C(car, t->path)) {
@@ -1226,9 +1233,7 @@ inline void Challenge::Collect(void) {
                                         if (v.x * t->dir.x + v.z * t->dir.z > 0.1f) {
                                             got++;
                                             t->active = 0;
-                                            snd->play = 1;
-                                            snd->b4B = 0;
-                                            snd->b4A = 0;
+                                            snd->Play();
                                         }
                                     }
                                 }
@@ -1240,9 +1245,7 @@ inline void Challenge::Collect(void) {
                         } else if (PSVECSquareDistance(t, &car->pos) < radius * radius) {
                             got++;
                             t->active = 0;
-                            snd->play = 1;
-                            snd->b4B = 0;
-                            snd->b4A = 0;
+                            snd->Play();
                             break;
                         }
                     }
