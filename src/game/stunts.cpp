@@ -312,24 +312,7 @@ public:
     }
     virtual ~Tracker(void) {}
     virtual void Init(void) { ranks.Clear(); }
-    virtual void Dump(void) {
-        int count = 0;
-        int scored = 0;
-        f32 total = 0.0f;
-        int i;
-        fn_802E30C8("\n%s:", Label());
-        fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
-        fn_802E30C8("--------------------------------------------------");
-        for (i = 0; i < ranks.a.count; i++) {
-            struct Rank* r = &ranks.a.data[i];
-            fn_802E30C8("%d: %-12.12s %3d     %4d       %3d       %10.0f", i, r->adj, r->count, r->count - r->scored,
-                        r->natural, r->total);
-            total += r->total;
-            count += r->count;
-            scored += r->scored;
-        }
-        fn_802E30C8("Total count: %d (%d unscored) (%.0f points)", count, count - scored, total);
-    }
+    virtual void Dump(void);
     virtual void Start(const RaceCarRec* rc) {}
     virtual s32 Total(void) const { return 0; }
     virtual void Fill(StuntList* l) const {
@@ -2124,6 +2107,28 @@ int fn_80158618(const char* name) {
 }  // extern "C"
 
 int Tracker::NumRanks(void) const { return ranks.a.count; }
+
+void Tracker::Dump(void) {
+    int count;
+    int scored;
+    f32 total;
+    int i;
+    fn_802E30C8("\n%s:", Label());
+    fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
+    fn_802E30C8("--------------------------------------------------");
+    total = 0.0f;
+    scored = 0;
+    count = 0;
+    for (i = 0; i < ranks.a.count; i++) {
+        struct Rank* r = &ranks.a.data[i];
+        fn_802E30C8("%d: %-12.12s %3d     %4d       %3d       %10.0f", i, r->adj, r->count, r->count - r->scored,
+                    r->natural, r->total);
+        total += r->total;
+        count += r->count;
+        scored += r->scored;
+    }
+    fn_802E30C8("Total count: %d (%d unscored) (%.0f points)", count, count - scored, total);
+}
 
 void TimedTracker::StopEffect(void) {
     if (f260 > minT) {
