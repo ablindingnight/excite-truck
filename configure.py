@@ -1007,6 +1007,7 @@ config.libs.append(
             Object(NonMatching, "game/ilresmgr.cpp"),
             Object(NonMatching, "game/stunts.cpp"),
             Object(NonMatching, "game/aiobst.cpp"),
+            Object(Matching, "game/gradesched.cpp"),
         ],
     }
 )
