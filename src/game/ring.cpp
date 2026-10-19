@@ -65,6 +65,7 @@ struct ArrayRef {
         count = 0;
         cap = 0;
     }
+    int Count(void) const { return count; }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
@@ -97,8 +98,8 @@ struct MechaSimpleArray : ArrayRef<T> {
     }
     T* Add(void) { return &this->data[this->count++]; }
     void Remove(int k) {
-        if (k >= 0 && k < this->count) {
-            int last = this->count - 1;
+        if (k >= 0 && k < this->Count()) {
+            int last = this->Count() - 1;
             if (k != last) {
                 this->data[k] = this->data[last];
             }
@@ -118,6 +119,7 @@ struct RingType {
             loaded = 0;
         }
     }
+    void Make(int i);
     u8 loaded;      // offset 0x0
     char name[31];  // offset 0x1
     s32 model;      // offset 0x20
@@ -131,6 +133,7 @@ struct Ring {
     s32 radius;      // offset 0x4
     RingType* type;  // offset 0x8
     ValMatrix frame;  // offset 0xC
+    void Load(ValueNode* c);
     u8 active;       // offset 0x3C
     u8 passed;       // offset 0x3D
     f32 passTime;    // offset 0x40
@@ -140,11 +143,16 @@ struct Ring {
 struct RingSet {
     RingSet(void) { valid = 0; }
     ~RingSet(void) { valid = 0; }
+    void Load(ValueNode* n);
     u8 valid;       // offset 0x0
     char name[31];  // offset 0x1
     s32 first;      // offset 0x20
     s32 count;      // offset 0x24
     u8 enabled;     // offset 0x28
+};
+
+struct RingMaster {
+    static void CheckOrder(RingSet* s);
 };
 
 ModuleTag lbl_8055E358;
@@ -155,6 +163,16 @@ MechaSimpleArray<RingType> lbl_804302F0;
 MechaSimpleArray<Ring> lbl_80430318;
 MechaSimpleArray<RingSet> lbl_80430340;
 
+#define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
+
+static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+    f32 t = (x - a) / (b - a);
+    CLAMP01(t);
+    return t;
+}
+
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
 static inline void StrCopyN(char* dst, const char* src, int n) {
     while (--n > 0) {
         if ((*dst++ = *src++) == 0) {
@@ -162,6 +180,104 @@ static inline void StrCopyN(char* dst, const char* src, int n) {
         }
     }
     *dst = 0;
+}
+
+inline void RingType::Make(int i) {
+    if (lbl_8055E364) {
+        fn_801345D8(name, 30, "freestyle_ring_%d.mod", i);
+    } else {
+        fn_801345D8(name, 30, "stunt_ring_%d.mod", i);
+    }
+    if (fn_8012C33C(name)) {
+        model = fn_802C6FC0(name, 0, 0);
+        radius = i;
+        loaded = 1;
+        fn_802E30C8("RingType: created %d/%s", i, name);
+    }
+}
+
+inline void Ring::Load(ValueNode* c) {
+    if (c->Has("radius")) {
+        if (c->Has("frame64")) {
+            int k;
+            int idx;
+            radius = c->GetIntValue("radius");
+            frame = c->GetMatrix("frame64");
+            idx = -1;
+            for (k = 0; k < lbl_804302F0.count; k++) {
+                if (lbl_804302F0.data[k].radius == radius) {
+                    idx = k;
+                    break;
+                }
+            }
+            if (idx >= 0) {
+                type = &lbl_804302F0.data[idx];
+                active = 0;
+                fadeTime = -100.0f;
+                valid = 1;
+            } else {
+                fn_802E30C8("RingInfo: can't find a RingType with radius %d", radius);
+            }
+        } else {
+            fn_802E30C8("RingInfo: value 'frame64' not in table");
+        }
+    } else {
+        fn_802E30C8("RingInfo: value 'radius' not in table");
+    }
+}
+
+
+inline void RingSet::Load(ValueNode* n) {
+    if (n->Has("name")) {
+        int j;
+        ValueNode* c;
+        StrCopyN(name, n->GetValue("name"), 30);
+        first = lbl_80430318.count;
+        count = 0;
+        for (j = 0; (c = n->GetChildAt(j)) != 0; j++) {
+            if (strcmp(c->GetName(), "ring") == 0) {
+                Ring* r = lbl_80430318.Add();
+                r->valid = 0;
+                r->Load(c);
+                if (r->valid) {
+                    count++;
+                } else {
+                    lbl_80430318.Remove(lbl_80430318.Count() - 1);
+                }
+            }
+        }
+        RingMaster::CheckOrder(this);
+        enabled = 0;
+        valid = 1;
+    } else {
+        fn_802E30C8("RingSet: value 'name' not found in table");
+    }
+}
+
+inline void RingMaster::CheckOrder(RingSet* s) {
+    if (s->count > 2) {
+        V3 d0;
+        int k;
+        Ring* a = &lbl_80430318.data[s->first];
+        Ring* b = &lbl_80430318.data[s->first + 1];
+        d0.x = b->frame.origin.x - a->frame.origin.x;
+        d0.y = b->frame.origin.y - a->frame.origin.y;
+        d0.z = b->frame.origin.z - a->frame.origin.z;
+        for (k = s->first + 2; k < s->first + s->count; k++) {
+            V3 d;
+            Ring* p = &lbl_80430318.data[k - 1];
+            Ring* q = &lbl_80430318.data[k];
+            d.x = q->frame.origin.x - p->frame.origin.x;
+            d.y = q->frame.origin.y - p->frame.origin.y;
+            d.z = q->frame.origin.z - p->frame.origin.z;
+            if (PSVECDotProduct(&d, &d0) < 0.0f) {
+                fn_802E30C8("----------------------------------------------------");
+                fn_802E30C8("rings(%s): THESE RINGS ARE OUT OF ORDER", s->name);
+                fn_802E30C8("----------------------------------------------------");
+                break;
+            }
+        }
+    }
 }
 
 extern "C" {
@@ -270,12 +386,7 @@ void fn_8016A438(void) {
             Ring* r = &lbl_80430318.data[s->first + k];
             if (r->valid) {
                 f32 now = fn_801E7E18();
-                f32 a = (now - r->fadeTime - 0.0f) / 0.25f;
-                if (1.0f < a) {
-                    a = 1.0f;
-                }
-                a = a > 0.0f ? a : 0.0f;
-                a = 0.0f + a * 1.0f;
+                f32 a = Lerp(0.0f, 1.0f, Unlerp(0.0f, 0.25f, now - r->fadeTime));
                 if (!r->active) {
                     a = 1.0f - a;
                 }
@@ -373,19 +484,9 @@ void fn_8016A8F8(void) {
             fn_802C6CF8(t->model);
             t->loaded = 0;
         }
-        if (lbl_8055E364) {
-            fn_801345D8(t->name, 30, "freestyle_ring_%d.mod", i);
-        } else {
-            fn_801345D8(t->name, 30, "stunt_ring_%d.mod", i);
-        }
-        if (fn_8012C33C(t->name)) {
-            t->model = fn_802C6FC0(t->name, 0, 0);
-            t->radius = i;
-            t->loaded = 1;
-            fn_802E30C8("RingType: created %d/%s", i, t->name);
-        }
+        t->Make(i);
         if (!t->loaded) {
-            lbl_804302F0.Remove(lbl_804302F0.count - 1);
+            lbl_804302F0.Remove(lbl_804302F0.Count() - 1);
         }
     }
 }
@@ -406,80 +507,9 @@ void fn_8016AC90(void) {
                 if (strcmp(n->GetName(), "ring_set") == 0) {
                     RingSet* s = lbl_80430340.Add();
                     s->valid = 0;
-                    if (n->Has("name")) {
-                        int j;
-                        ValueNode* c;
-                        StrCopyN(s->name, n->GetValue("name"), 30);
-                        s->first = lbl_80430318.count;
-                        s->count = 0;
-                        for (j = 0; (c = n->GetChildAt(j)) != 0; j++) {
-                            if (strcmp(c->GetName(), "ring") == 0) {
-                                Ring* r = lbl_80430318.Add();
-                                r->valid = 0;
-                                if (c->Has("radius")) {
-                                    if (c->Has("frame64")) {
-                                        int k;
-                                        int idx;
-                                        r->radius = c->GetIntValue("radius");
-                                        r->frame = c->GetMatrix("frame64");
-                                        idx = -1;
-                                        for (k = 0; k < lbl_804302F0.count; k++) {
-                                            if (lbl_804302F0.data[k].radius == r->radius) {
-                                                idx = k;
-                                                break;
-                                            }
-                                        }
-                                        if (idx >= 0) {
-                                            r->type = &lbl_804302F0.data[idx];
-                                            r->active = 0;
-                                            r->fadeTime = -100.0f;
-                                            r->valid = 1;
-                                        } else {
-                                            fn_802E30C8("RingInfo: can't find a RingType with radius %d", r->radius);
-                                        }
-                                    } else {
-                                        fn_802E30C8("RingInfo: value 'frame64' not in table");
-                                    }
-                                } else {
-                                    fn_802E30C8("RingInfo: value 'radius' not in table");
-                                }
-                                if (r->valid) {
-                                    s->count++;
-                                } else {
-                                    lbl_80430318.Remove(lbl_80430318.count - 1);
-                                }
-                            }
-                        }
-                        if (s->count > 2) {
-                            V3 d0;
-                            int k;
-                            Ring* a = &lbl_80430318.data[s->first];
-                            Ring* b = &lbl_80430318.data[s->first + 1];
-                            d0.x = b->frame.origin.x - a->frame.origin.x;
-                            d0.y = b->frame.origin.y - a->frame.origin.y;
-                            d0.z = b->frame.origin.z - a->frame.origin.z;
-                            for (k = s->first + 2; k < s->first + s->count; k++) {
-                                V3 d;
-                                Ring* p = &lbl_80430318.data[k - 1];
-                                Ring* q = &lbl_80430318.data[k];
-                                d.x = q->frame.origin.x - p->frame.origin.x;
-                                d.y = q->frame.origin.y - p->frame.origin.y;
-                                d.z = q->frame.origin.z - p->frame.origin.z;
-                                if (PSVECDotProduct(&d, &d0) < 0.0f) {
-                                    fn_802E30C8("----------------------------------------------------");
-                                    fn_802E30C8("rings(%s): THESE RINGS ARE OUT OF ORDER", s->name);
-                                    fn_802E30C8("----------------------------------------------------");
-                                    break;
-                                }
-                            }
-                        }
-                        s->enabled = 0;
-                        s->valid = 1;
-                    } else {
-                        fn_802E30C8("RingSet: value 'name' not found in table");
-                    }
+                    s->Load(n);
                     if (!s->valid) {
-                        lbl_80430340.Remove(lbl_80430340.count - 1);
+                        lbl_80430340.Remove(lbl_80430340.Count() - 1);
                     }
                 }
             }
