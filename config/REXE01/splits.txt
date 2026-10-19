@@ -2440,3 +2440,9 @@ game/physdriver.cpp:
 	.sdata      start:0x8055A330 end:0x8055A3A0
 	.sbss       start:0x8055E4B0 end:0x8055E4C0
 	.sdata2     start:0x80561C48 end:0x80561CA0
+
+game/stub6.cpp:
+	.text       start:0x801AE59C end:0x801AE600
+	.ctors      start:0x802ED240 end:0x802ED244
+	.bss        start:0x80435728 end:0x80435740
+	.sbss       start:0x8055E608 end:0x8055E618
