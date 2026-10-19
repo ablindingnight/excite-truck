@@ -1299,9 +1299,10 @@ inline void Challenge::Collect(void) {
 }
 
 inline void Challenge::Init(void) {
-    model = fn_802C6FC0("growcoin.mod", 0, 0);
+    const char* name = "growcoin.mod";
+    model = fn_802C6FC0(name, 0, 0);
     if (model == -1) {
-        fn_802E30C8("Couldn't load challenge token model %s", "growcoin.mod");
+        fn_802E30C8("Couldn't load challenge token model %s", name);
     } else {
         f32 box[6];
         f32 m;
@@ -1323,7 +1324,7 @@ inline void Challenge::Init(void) {
     {
         ValueNode* n = node;
         tokens.count = 0;
-        if (n && n->FindChild("end") != 0) {
+        if (n && HasNode(n, "end")) {
             Token* t = &tokens.data[tokens.count++];
             TPath* p;
             int best = -1;
