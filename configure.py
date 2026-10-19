@@ -1052,6 +1052,8 @@ config.libs.append(
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/log.cpp"),
             Object(Matching, "game/memarena.cpp"),
+            Object(Matching, "game/vmem.cpp"),
+            Object(Matching, "game/callhook.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
             Object(NonMatching, "game/ball.cpp"),
         ],

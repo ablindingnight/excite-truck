@@ -2632,3 +2632,15 @@ game/memarena.cpp:
 	.ctors      start:0x802ED5F4 end:0x802ED5F8
 	.data       start:0x8034D020 end:0x8034D038
 	.sbss       start:0x8055FF28 end:0x8055FF30
+
+game/vmem.cpp:
+	.text       start:0x802E4C14 end:0x802E4D84
+	.ctors      start:0x802ED600 end:0x802ED604
+	.data       start:0x8034D1D0 end:0x8034D210
+	.sdata      start:0x8055D1C8 end:0x8055D1D0
+	.sbss       start:0x8055FF68 end:0x8055FF70
+
+game/callhook.cpp:
+	.text       start:0x802E7770 end:0x802E77B8
+	.ctors      start:0x802ED614 end:0x802ED618
+	.sbss       start:0x8055FFF8 end:0x80560000
