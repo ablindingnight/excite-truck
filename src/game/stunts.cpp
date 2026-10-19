@@ -1455,6 +1455,7 @@ public:
 f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
+    int n;
     if (rc->air > 0) {
         ground += 0.016683351f;
     } else {
@@ -1476,7 +1477,8 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
             }
         }
     }
-    if (ranks.a.count - 1 == Rank()) {
+    n = ranks.a.count;
+    if (Rank() == n - 1) {
         jumps = 1;
     }
     if (ground > 0.8f) {
