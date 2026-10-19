@@ -250,6 +250,8 @@ inline void PickupObjMan::Add(int type, f32 x, f32 z, f32 hover) {
     }
 }
 
+namespace {
+
 class PickupMaker {
 public:
     virtual ~PickupMaker(void) {}
@@ -284,6 +286,8 @@ public:
     virtual int Match(const char* name);
     virtual int Make(ValueNode* n, PickupObjMan* m, const f32* params);
 };
+
+}  // namespace
 
 ModuleTag lbl_8055E348;
 UnkStaticFFFF lbl_8055E350;
@@ -328,6 +332,35 @@ PickupType* fn_80167874(int type) {
     return lbl_80330020;
 }
 
+}  // extern "C"
+
+struct StripName {
+    const char* prefix;  // offset 0x0
+    const char* fmt;     // offset 0x4
+    s32 type;            // offset 0x8
+};
+
+struct StripTable {
+    StripName e[6];
+};
+
+const StripTable lbl_802F94B8 = {{
+    {"coin_strip_blue", "coin_strip_blue_%d_%d", 3},
+    {"coin_strip_red", "coin_strip_red_%d_%d", 2},
+    {"coin_strip_yellow", "coin_strip_yellow_%d_%d", 1},
+    {"coin_strip_star", "coin_strip_star_%d_%d", 4},
+    {"coin_strip", "coin_strip_%d_%d", 1},
+    {0, 0, 6},
+}};
+
+struct RainbowTable {
+    s32 t[5];
+};
+
+const RainbowTable lbl_802F9500 = {{1, 2, 3, 2, 1}};
+
+extern "C" {
+
 void fn_801678D8(void) {
     int i;
     SpinXform* m = lbl_8042FF60;
@@ -352,16 +385,11 @@ void fn_80168020(void);
 
 void fn_801679F0(void) {
     ValueNode* vals = GetEvent(fn_801769CC()->event)->vals;
-    PoopPickupMaker poop;
-    SinglesPickupMaker singles;
-    CoinBoxPickupMaker box;
     CoinStripPickupMaker strip;
-    PickupMaker* makers[5];
-    makers[0] = &poop;
-    makers[1] = &strip;
-    makers[2] = &box;
-    makers[3] = &singles;
-    makers[4] = 0;
+    CoinBoxPickupMaker box;
+    SinglesPickupMaker singles;
+    PoopPickupMaker poop;
+    PickupMaker* makers[] = {&poop, &strip, &box, &singles, 0};
     lbl_8055E354 = new ("PickupObjMan") PickupObjMan;
     if (vals->Has("coin_file")) {
         f32 params[3] = {4.0f, 30.0f, 10.0f};
@@ -582,30 +610,26 @@ void fn_801683F4(PickupCounts* out, int player) {
 }
 
 void fn_801688B4(int id) {
+    PickupObjMan* m = lbl_8055E354;
     int i;
-    for (i = 0; i < lbl_8055E354->groups.count; i++) {
-        if (id == lbl_8055E354->groups.data[i].id) {
-            lbl_8055E354->groups.data[i].enabled = 1;
+    for (i = 0; i < m->groups.count; i++) {
+        if (id == m->groups.data[i].id) {
+            m->groups.data[i].enabled = 1;
         }
     }
 }
 
 void fn_801688FC(int id) {
+    PickupObjMan* m = lbl_8055E354;
     int i;
-    for (i = 0; i < lbl_8055E354->groups.count; i++) {
-        if (id == lbl_8055E354->groups.data[i].id) {
-            lbl_8055E354->groups.data[i].enabled = 0;
+    for (i = 0; i < m->groups.count; i++) {
+        if (id == m->groups.data[i].id) {
+            m->groups.data[i].enabled = 0;
         }
     }
 }
 
 }  // extern "C"
-
-struct StripName {
-    const char* prefix;  // offset 0x0
-    const char* fmt;     // offset 0x4
-    s32 type;            // offset 0x8
-};
 
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
@@ -614,9 +638,12 @@ static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     return sqrt(d.x * d.x + d.z * d.z);
 }
 
-int CoinStripPickupMaker::Match(const char* name) { return strncasecmp(name, "coin_strip", strlen("coin_strip")) == 0; }
+inline int CoinStripPickupMaker::Match(const char* name) {
+    const char* p = "coin_strip";
+    return strncasecmp(name, p, strlen(p)) == 0;
+}
 
-int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
+inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     Bound* b;
     int rainbow;
     int count;
@@ -632,7 +659,7 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
     }
     b = fn_801399FC(n);
     if (b->n < 2) {
-        fn_802E30C8("StripPickupMaker: bound for table \"%s\" has less than two points", n->GetName());
+        fn_802E30C8("CoinStripPickupMaker: bound for table \"%s\" has less than two points", n->GetName());
         fn_80128658(b);
         return 0;
     }
@@ -643,16 +670,9 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
     if (rainbow) {
         count = 5;
     } else {
-        StripName names[6] = {
-            {"coin_strip_blue", "coin_strip_blue_%d_%d", 3},
-            {"coin_strip_red", "coin_strip_red_%d_%d", 2},
-            {"coin_strip_yellow", "coin_strip_yellow_%d_%d", 1},
-            {"coin_strip_star", "coin_strip_star_%d_%d", 4},
-            {"coin_strip", "coin_strip_%d_%d", 1},
-            {0, 0, 6},
-        };
+        StripTable names = lbl_802F94B8;
         StripName* s;
-        for (s = names; s->type != 6; s++) {
+        for (s = names.e; s->type != 6; s++) {
             if (strncasecmp(n->GetName(), s->prefix, strlen(s->prefix)) == 0) {
                 break;
             }
@@ -679,7 +699,7 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
     spacing = len / (f32)steps;
     m->BeginGroup(b, id);
     {
-        int rainbowTypes[5] = {1, 2, 3, 2, 1};
+        RainbowTable rainbowTypes = lbl_802F9500;
         f32 along = 0.0f;
         BoundPt* seg = b->pts;
         int si = 1;
@@ -692,7 +712,7 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
             V2 base;
             f32 inv;
             int c;
-            int* rt;
+            s32* rt;
             while (si < last && Dist(&seg[0], &seg[1]) < along) {
                 along -= Dist(&seg[0], &seg[1]);
                 seg++;
@@ -715,7 +735,7 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
             base.z = seg[0].z + dir.z * t;
             perp.x *= inv;
             perp.z *= inv;
-            rt = rainbowTypes;
+            rt = rainbowTypes.t;
             for (c = 0; c < count; c++) {
                 f32 off = params[2] * (0.5f + ((f32)c - 0.5f * (f32)count));
                 V2 p;
@@ -738,41 +758,54 @@ int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params)
     return 1;
 }
 
-int CoinBoxPickupMaker::Match(const char* name) { return strncasecmp(name, "coin_box", strlen("coin_box")) == 0; }
+inline int CoinBoxPickupMaker::Match(const char* name) {
+    const char* p = "coin_box";
+    return strncasecmp(name, p, strlen(p)) == 0;
+}
 
-extern "C" {
-
-int fn_801698B8(int j, int i, int ny, int nx) {
-    int a = MIN(j, ny - j);
-    int b = MIN(i, nx - i);
-    int lo = b < a ? b : a;
-    int hi = b > a ? b : a;
-    int v = hi + lo / 2;
+static inline int fn_801698B8(int j, int i, int ny, int nx) {
+    int lo;
+    int hi;
+    int v;
+    if (j > ny - j) {
+        j = ny - j;
+    }
+    if (i > nx - i) {
+        i = nx - i;
+    }
+    lo = i < j ? i : j;
+    hi = i > j ? i : j;
+    v = hi + lo / 2;
     if (v < 3) {
         return 3;
-    }
-    if (v >= 5) {
+    } else if (v >= 5) {
         return 1;
+    } else {
+        return 2;
     }
-    return 2;
 }
 
-int fn_80169928(int j, int i, int ny, int nx) {
-    int b = MIN(i, nx - i);
-    int a = MIN(j, ny - j);
-    int r = b < a ? b : a;
-    if (r > 2) {
+static inline int fn_80169928(int j, int i, int ny, int nx) {
+    if (i > nx - i) {
+        i = nx - i;
+    }
+    if (j > ny - j) {
+        j = ny - j;
+    }
+    if (i < j) {
+        j = i;
+    }
+    if (j > 2) {
         return 3;
-    }
-    if (r <= 1) {
+    } else if (j > 1) {
+        return 2;
+    } else {
         return 1;
     }
-    return 2;
 }
 
-}  // extern "C"
 
-int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
+inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     Bound* b;
     int np;
     f32 e[4];
@@ -869,7 +902,7 @@ int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     return 1;
 }
 
-int SinglesPickupMaker::Match(const char* name) {
+inline int SinglesPickupMaker::Match(const char* name) {
     int r = 0;
     if (strncasecmp(name, "star", 4) == 0 || strncasecmp(name, "coin", 4) == 0) {
         r = 1;
@@ -877,7 +910,7 @@ int SinglesPickupMaker::Match(const char* name) {
     return r;
 }
 
-int SinglesPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
+inline int SinglesPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     int type;
     int id;
     Bound* b;
@@ -910,9 +943,12 @@ int SinglesPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     return 1;
 }
 
-int PoopPickupMaker::Match(const char* name) { return strncasecmp(name, "poop", strlen("poop")) == 0; }
+inline int PoopPickupMaker::Match(const char* name) {
+    const char* p = "poop";
+    return strncasecmp(name, p, strlen(p)) == 0;
+}
 
-int PoopPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
+inline int PoopPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     int id = -1;
     int i;
     ValueNode* c;
