@@ -2446,3 +2446,33 @@ game/stub6.cpp:
 	.ctors      start:0x802ED240 end:0x802ED244
 	.bss        start:0x80435728 end:0x80435740
 	.sbss       start:0x8055E608 end:0x8055E618
+
+game/stub7.cpp:
+	.text       start:0x801B06C8 end:0x801B06D8
+	.ctors      start:0x802ED250 end:0x802ED254
+	.sbss       start:0x8055E658 end:0x8055E660
+
+game/stub10.cpp:
+	.text       start:0x8023B5E0 end:0x8023B5EC
+	.ctors      start:0x802ED3F8 end:0x802ED3FC
+	.sbss       start:0x8055F118 end:0x8055F120
+
+game/stub12.cpp:
+	.text       start:0x80296058 end:0x802960A0
+	.ctors      start:0x802ED4FC end:0x802ED500
+	.sbss       start:0x8055F770 end:0x8055F780
+
+game/stub13.cpp:
+	.text       start:0x802A7BD8 end:0x802A7BE8
+	.ctors      start:0x802ED52C end:0x802ED530
+	.sbss       start:0x8055F8A8 end:0x8055F8B0
+
+game/stub14.cpp:
+	.text       start:0x802BC328 end:0x802BC334
+	.ctors      start:0x802ED570 end:0x802ED574
+	.sbss       start:0x8055FA98 end:0x8055FAA0
+
+game/stub15.cpp:
+	.text       start:0x802DB2A0 end:0x802DB2D4
+	.ctors      start:0x802ED5D8 end:0x802ED5DC
+	.sbss       start:0x8055FE88 end:0x8055FE90
