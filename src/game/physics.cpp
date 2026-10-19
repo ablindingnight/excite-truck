@@ -39,8 +39,8 @@ s64 fn_802E2C9C(void);
 s32 fn_802D3EBC(void);
 void fn_802E2D74(int a);
 f32 fn_8017970C(void);
-void* fn_80179824(void);
-void fn_801C6AD0(void* p);
+struct StatePacket* fn_80179824(void);
+void fn_801C6AD0(s32* p);
 void fn_8017ED00(f32 dt);
 void fn_80179320(void);
 void fn_802E4C14(int a);
@@ -58,6 +58,11 @@ int fn_801CF050(void);
 int fn_802ECC10(void);
 f32 __cvt_sll_flt(s64 v);
 }
+
+struct StatePacket {
+    u8 pad0[0xDB0];
+    s32 fade;  // offset 0xDB0
+};
 
 struct LocString {
     LocString(const char* key);
@@ -166,7 +171,7 @@ void fn_80177048(void);
 void fn_801770C8(void);
 void fn_80177138(void);
 void fn_801771A8(void);
-u8 fn_801773E4(void);
+int fn_801773E4(void);
 void fn_80177790(void);
 void fn_8017779C(void);
 void fn_801777C0(void);
@@ -372,14 +377,18 @@ void fn_80176A34(s32 frame) {
 
 void fn_80176A6C(void) { fn_801771A8(); }
 
-void* fn_80176A70(void) {
+StatePacket* fn_80176A70(void) {
     s32 frame = lbl_8055E3C4;
     s32 t0 = fn_802E2C20();
     int n = 0;
     s64 start = fn_802E2C9C();
     s64 now = start;
-    void* pkt;
-    while (fn_80176610(), fn_80176A1C() != 2 && !lbl_8055E3BD && frame == lbl_8055E3C4 && !fn_802D3EBC()) {
+    StatePacket* pkt;
+    for (;;) {
+        fn_80176610();
+        if (fn_80176A1C() == 2 || lbl_8055E3BD || frame != lbl_8055E3C4 || fn_802D3EBC()) {
+            break;
+        }
         fn_802E2D74(0);
         if (fn_802E2C20() - t0 > 10000) {
             fn_802E30C8("PhysicsGetStatePacket(): detail: deviation %f seconds", fn_8017970C());
@@ -395,8 +404,8 @@ void* fn_80176A70(void) {
         lbl_8055E3D0 = dt + 0.95f * (lbl_8055E3D0 - dt);
     }
     pkt = fn_80179824();
-    *(u32*)((u8*)pkt + 0xDB0) = fn_801773E4();
-    fn_801C6AD0((u8*)pkt + 0xDB0);
+    pkt->fade = fn_801773E4();
+    fn_801C6AD0(&pkt->fade);
     return pkt;
 }
 
@@ -606,7 +615,7 @@ void fn_801771A8(void) {
     }
 }
 
-u8 fn_801773E4(void) {
+int fn_801773E4(void) {
     u8 a;
     FadeStep();
     if (lbl_80430558.state <= 1u) {
