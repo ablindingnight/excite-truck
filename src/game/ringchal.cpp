@@ -109,6 +109,30 @@ void fn_80130978(char* buf, int size, f32 v);
 s32 fn_802ADF34(void* layout, const char* name, Binding* b);
 }
 
+struct Phob {
+    u8 pad0[0x60];
+    ValVec3 pos;  // offset 0x60
+};
+
+struct Respawn {
+    ValVec3 basis[3];  // offset 0x0
+    ValVec3 pos;       // offset 0x24
+    ValVec3 vel;       // offset 0x30
+};
+
+extern "C" {
+double sqrt(double x);
+void fn_802C744C(s32 model, const ValMatrix* m);
+void fn_802C9900(f32 alpha);
+void fn_802C9904(void);
+void fn_8016A438(void);
+int fn_801B8514(void);
+void fn_802AE220(void* layout, int a);
+void fn_8001DFCC(void);
+void fn_802AE118(void* layout);
+void fn_801B0C78(int car);
+}
+
 struct GemRef {
     s32 a;
     s32 b;
@@ -116,6 +140,7 @@ struct GemRef {
 
 extern "C" GemRef fn_8016A6B0(const char* name, int n);
 extern "C" s32 fn_8001B308(GemRef* g, void* art, int a);
+extern "C" void fn_801B8060(struct Respawn* r, struct ObjTeleport* t);
 
 const char* GetGradeDisplayName(int grade);
 int IdentGetCurrentSlot(void);
@@ -309,6 +334,7 @@ struct ObjSet {
         }
     }
     u8 Load(ValueNode* set, ValueTable** dynos);
+    void CheckTeleport(struct Phob* car);
     IArray<ObjInfo>* infos;      // offset 0x0
     IArray<ObjTeleport>* teles;  // offset 0x4
     void Reset(void);
@@ -526,7 +552,7 @@ public:
     virtual int vf1C(int car);
     virtual int vf20(int car) = 0;
     virtual int vf24(void);
-    virtual void vf28(void);
+    virtual int vf28(void);
     virtual void vf2C(void);
     virtual int vf30(void);
     virtual int vf34(void);
@@ -560,7 +586,7 @@ public:
     virtual void vfA4(void);
     virtual void vfA8(int car);
     virtual void vfAC(int car);
-    virtual int vfB0(void);
+    virtual int vfB0(int car, struct Respawn* r);
     virtual void vfB4(void);
     virtual void vfB8(ZoneResults* r);
     virtual int vfBC(ZoneResults* r);
@@ -588,8 +614,21 @@ public:
     virtual ~RingChalMaster(void);
     virtual void vf10(void);
     virtual int vf20(int car);
+    virtual int vf24(void);
+    virtual int vf28(void);
     virtual f32 vf38(void);
     virtual int vf3C(int view);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual int vf5C(int p);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual int vf8C(int p, int key);
+    virtual void vfA8(int car);
+    virtual int vfB0(int car, struct Respawn* r);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
     PlayerList players;       // offset 0x4
@@ -1508,4 +1547,164 @@ void ResultsOverlay::Load(void) {
     s24 = fn_80207848("pr_transition.sfx", 1);
     s28 = fn_80207848("levelup.sfx", 1);
     s2C = fn_80207848("timeout.sfx", 1);
+}
+
+void RingChalMaster::vf40(void) {
+    int i;
+    for (i = 0; i < arena.nFiles; i++) {
+        ObjSet* s = &arena.sets->data[i];
+        if (s->active) {
+            int j;
+            for (j = 0; j < s->infos->count; j++) {
+                ObjInfo* o = &s->infos->data[j];
+                if (o->type == 1) {
+                    fn_802C744C(o->model, &o->mtx);
+                }
+            }
+        } else if (!s->active) {
+            f32 t = lbl_8055E3C8 - s->time;
+            if (t < 0.25f) {
+                f32 a = Lerp(1.0f, 0.0f, Unlerp(0.0f, 0.25f, t));
+                if (a > 0.01f) {
+                    int j;
+                    fn_802C9900(a);
+                    for (j = 0; j < s->infos->count; j++) {
+                        ObjInfo* o = &s->infos->data[j];
+                        if (o->type == 1) {
+                            fn_802C744C(o->model, &o->mtx);
+                        }
+                    }
+                    fn_802C9904();
+                }
+            }
+        }
+    }
+}
+
+void RingChalMaster::vf44(void) {
+    int any = 0;
+    int i;
+    for (i = 0; i < players.count; i++) {
+        if (players.data[i]->b8) {
+            any = 1;
+            break;
+        }
+    }
+    if (!any) {
+        fn_8016A438();
+    }
+}
+
+void RingChalMaster::vf50(int p) { vf4C(p); }
+
+int RingChalMaster::vf54(void) { return 0x1408; }
+
+inline void ObjSet::CheckTeleport(Phob* car) {
+    int next = f10 + 1;
+    if (next < teles->count) {
+        ObjTeleport* t = &teles->data[next];
+        V2 a;
+        V2 b;
+        V2 d;
+        a.x = t->mtx.origin.x;
+        a.y = t->mtx.origin.z;
+        b.x = car->pos.x;
+        b.y = car->pos.z;
+        d.x = a.x - b.x;
+        d.y = a.y - b.y;
+        if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
+            teles->data[f10].b30 = 0;
+            f10 = next;
+            teles->data[next].b30 = 1;
+        }
+    }
+}
+
+int RingChalMaster::vf24(void) {
+    int r = 0;
+    if (fn_801B8514() && arena.b49 && !b9C) {
+        r = 1;
+    }
+    return r;
+}
+
+int RingChalMaster::vf68(void) {
+    if (vf24()) {
+        return results.state == 2;
+    }
+    return 0;
+}
+
+int RingChalMaster::vf64(void) { return 1; }
+
+int RingChalMaster::vf5C(int p) {
+    if (lbl_8055E3C8 - fA0 < 2.25f) {
+        vf4C(p);
+    } else {
+        if (results.b8) {
+            vf4C(p);
+        }
+        if (results.layout) {
+            fn_802AE220(results.layout, 0);
+        }
+    }
+    if (vf68()) {
+        fn_8001DFCC();
+    }
+    return results.state != 4;
+}
+
+int RingChalMaster::vf8C(int p, int key) {
+    if (vf68() && key == 'X') {
+        if (results.state == 2) {
+            results.b9 = 1;
+        }
+        return 1;
+    }
+    if (results.state != 0) {
+        f32 now = lbl_8055E3C8;
+        if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
+            results.noBonus = 1;
+            if (results.layout) {
+                fn_802AE118(results.layout);
+            }
+            STOP(results.sBonus);
+            STOP(results.sNoBonus);
+            STOP(results.s28);
+            STOP(results.s2C);
+            results.b8 = 0;
+            results.start = lbl_8055E3C8 - 1.0f;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int RingChalMaster::vf28(void) { return !arena.b49; }
+
+void RingChalMaster::vfA8(int car) { fn_801B0C78(car); }
+
+int RingChalMaster::vfB0(int car, Respawn* r) {
+    PlayerData* p = players.data[car];
+    p->b8 = 0;
+    p->fC = 0.0f;
+    if (arena.curSet < arena.nFiles) {
+        ObjSet* s = &arena.sets->data[arena.curSet];
+        if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
+            ObjTeleport* t;
+            if (s->f10 + 1 < s->teles->count) {
+                t = &s->teles->data[s->f10 + 1];
+            } else {
+                t = &s->teles->data[s->f10];
+            }
+            fn_801B8060(r, t);
+            r->vel.x = t->mtx.basis[2].x * 26.666666f;
+            r->pos.y += 7.625f;
+            r->vel.y = t->mtx.basis[2].y * 26.666666f;
+            r->vel.z = t->mtx.basis[2].z * 26.666666f;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
 }
