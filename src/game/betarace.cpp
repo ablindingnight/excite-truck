@@ -1006,6 +1006,15 @@ extern s32 lbl_80559ED8;
 extern s32 lbl_80559EDC;
 extern s32 lbl_8055E254;
 
+// Trigger colours: five shades per palette.
+typedef u32 Color;  // r, g, b, a bytes
+
+struct Palette {
+    Color c[5];
+};
+
+inline void UseColor(const Color& c);
+
 // A star or coin lying on the track; the models are shared by all of them.
 struct Pickup {
     Pickup(ValueNode* n);
@@ -1023,6 +1032,9 @@ struct Pickup {
             lbl_8055E254 = -1;
         }
     }
+    void Draw(Color col);
+    Palette* GetPalette(void);
+
     f32 pos[3];            // offset 0x0
     void* objs[2];         // offset 0xC
     s32 which;             // offset 0x14
@@ -3581,6 +3593,194 @@ void BetaMaster::vf48(void) {
         }
     }
 }
+
+
+// ---------------------------------------------------------------------------------------------------
+// Drawing the morph triggers: a spinning question mark in a bubble, a turning bar, or the full morph
+// gadget. The small colour/palette helpers are defined after their users, so the users call their weak
+// copies.
+
+struct Mat3 {
+    void SetRotY(f32 a) {
+        f32 c = cos(a);
+        f32 s = sin(a);
+        m[0][0] = c;
+        m[0][1] = 0.0f;
+        m[0][2] = -s;
+        m[1][0] = 0.0f;
+        m[1][1] = 1.0f;
+        m[1][2] = 0.0f;
+        m[2][0] = s;
+        m[2][1] = 0.0f;
+        m[2][2] = c;
+    }
+    f32 m[3][3];
+};
+
+struct Xform {
+    Mat3 r;  // offset 0x0
+    V3 t;    // offset 0x24
+};
+
+struct VPos {
+    VPos(f32 x, f32 y, f32 z);
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+extern "C" {
+Color fn_802C9950(Color c);  // set the draw colour, returns the old one
+int fn_802C9994(int on);
+void fn_802C744C(s32 model, const Xform* m);
+void* fn_802C86DC(void);
+ViewOpts* fn_801E87A8(void);
+f32 fn_80149650(void);
+}
+
+inline Color LerpColor(Color a, Color b, f32 t);
+void DrawMorph(const VPos& pos, int a, int b);
+void DrawSpin(const VPos& pos, const Xform* m);
+
+static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
+    if (out == in) {
+        f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
+        f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
+        f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
+        out->y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
+        out->z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+    }
+}
+
+void BetaMaster::vf44(void) {
+    int on;
+    BetaCar* c;
+    Pickup* p;
+    int car = fn_801E866C(fn_801E85B4());
+    int i;
+    if (vf20(car)) {
+        c = &cars[car];
+        if (c) {
+            on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0];
+            for (i = 0; i < stars.a.count; i++) {
+                p = stars.a.data[i];
+                if (fn_80141F7C(p->respawn) && on && p->big) {
+                    p->Draw(LerpColor(p->GetPalette()->c[1], p->GetPalette()->c[0], fn_80149650()));
+                }
+            }
+        }
+    }
+    fn_80167844();
+    fn_8016A438();
+}
+
+void Pickup::Draw(Color col) {
+    if (kind == 3) {
+        Color tmp = col;
+        UseColor(tmp);
+        DrawSpin(VPos(pos[0], pos[1], pos[2]), (const Xform*)hB8);
+    } else if (kind == 4) {
+        Color oc = fn_802C9950(col);
+        int ot = fn_802C9994(0);
+        V3 p;
+        V3 at;
+        Xform m;
+        f32 ang;
+        p.z = pos[2];
+        p.x = pos[0];
+        p.y = 1.25f + pos[1];
+        at = p;
+        ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.875);
+        m.t = at;
+        m.r.SetRotY(ang);
+        fn_802C744C(lbl_80559ECC, &m);
+        fn_802C9994(ot);
+        fn_802C9950(oc);
+    } else {
+        Color oc = fn_802C9950(col);
+        int ot = fn_802C9994(0);
+        DrawMorph(VPos(pos[0], 1.25f + pos[1], pos[2]), 0, 0);
+        fn_802C9994(ot);
+        fn_802C9950(oc);
+    }
+}
+
+static inline V3 MakeV3(f32 x, f32 y, f32 z) {
+    V3 v;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+}
+
+static inline void ScaleRot(Mat3* m, f32 s) {
+    m->m[0][0] *= s;
+    m->m[0][1] *= s;
+    m->m[0][2] *= s;
+    m->m[1][0] *= s;
+    m->m[1][1] *= s;
+    m->m[1][2] *= s;
+    m->m[2][0] *= s;
+    m->m[2][1] *= s;
+    m->m[2][2] *= s;
+}
+
+void DrawSpin(const VPos& pos, const Xform* src) {
+    Xform a;
+    Xform b;
+    f32 box[6];
+    V3 c;
+    V3 n;
+    fn_802C86DC();
+    a = *src;
+    b = a;
+    fn_802C77F0(lbl_80559ED8, box);
+    c.z = box[4] + (box[5] - box[4]) * 0.5f;
+    n.z = c.z * -1.0f;
+    c.y = box[2] + (box[3] - box[2]) * 0.5f;
+    n.y = c.y * -1.0f;
+    c.x = box[0] + (box[1] - box[0]) * 0.5f;
+    n.x = c.x * -1.0f;
+    MulVec(&n, &n, &b.r);
+    b.t.y = b.t.y + n.y;
+    b.t.x = b.t.x + n.x;
+    b.t.z = b.t.z + n.z;
+    b.t.y = b.t.y + c.y;
+    b.t.x = b.t.x + c.x;
+    b.t.z = b.t.z + c.z;
+    b.t.y = b.t.y + 0.0f;
+    a.t.y = a.t.y + 0.0f;
+    ScaleRot(&b.r, 1.0f);
+    ScaleRot(&a.r, 1.0f);
+    if (fn_801E87A8()->flags & 2) {
+        a.r.m[0][0] = -a.r.m[0][0];
+        a.r.m[0][1] = -a.r.m[0][1];
+        a.r.m[0][2] = -a.r.m[0][2];
+        b.r.m[0][0] = -b.r.m[0][0];
+        b.r.m[0][1] = -b.r.m[0][1];
+        b.r.m[0][2] = -b.r.m[0][2];
+    }
+    fn_802C744C(lbl_80559ED8, &b);
+    fn_802C744C(lbl_80559ED4, &a);
+}
+
+inline void UseColor(const Color& c) {}
+
+inline Color LerpColor(Color a, Color b, f32 t) {
+    Color c;
+    ((u8*)&c)[0] = Lerp(((u8*)&a)[0], ((u8*)&b)[0], t);
+    ((u8*)&c)[1] = Lerp(((u8*)&a)[1], ((u8*)&b)[1], t);
+    ((u8*)&c)[2] = Lerp(((u8*)&a)[2], ((u8*)&b)[2], t);
+    ((u8*)&c)[3] = Lerp(((u8*)&a)[3], ((u8*)&b)[3], t);
+    return c;
+}
+
+inline Palette* Pickup::GetPalette(void) { return &((Palette*)colors)[kind + which]; }
 
 extern "C" {
 void fn_801CB7BC(int a);
