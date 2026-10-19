@@ -136,7 +136,7 @@ s32 lbl_8055E3F8;
 f32 lbl_8055E3FC;
 s32 lbl_8055E400;
 
-s32 lbl_8055A2F0 = 1;
+volatile s32 lbl_8055A2F0 = 1;
 f32 lbl_8055A2F4 = 3.0f;
 
 RaceMode lbl_804303C8;
@@ -149,6 +149,8 @@ PhysListener* lbl_80430570[8];
 
 extern f32 lbl_8055A3A0;
 extern f32 lbl_8055E460;
+
+static inline s32 SpeedMode(void) { return lbl_8055A2F0; }
 
 extern "C" {
 
@@ -322,8 +324,9 @@ void fn_8017691C(void) {
 }
 
 void fn_80176948(s32* data, s32* pos) {
-    *pos = lbl_8055E3CC;
-    fn_8012F458(lbl_8055E3E0, lbl_8055E3CC);
+    s32 p = lbl_8055E3CC;
+    *pos = p;
+    fn_8012F458(lbl_8055E3E0, p);
     fn_8012F4AC(lbl_8055E3E0, data, data[1]);
     lbl_8055E3CC += fn_80179658(data[0]);
 }
@@ -349,7 +352,7 @@ u8 fn_801769F8(void) { return lbl_8055E3BD; }
 
 void fn_80176A00(s32 m) {
     lbl_8055A2F0 = m;
-    if (lbl_8055A2F0 == 1) {
+    if (SpeedMode() == 1) {
         lbl_8055E460 = 1.0f;
     }
 }
@@ -414,9 +417,7 @@ s32* fn_80176C0C(s32* dst, const s32* src) {
 
 void fn_80176C4C(void) {
     if (lbl_804303D4.mode != 4) {
-        lbl_804303C8.mode = lbl_804303D4.mode;
-        lbl_804303C8.flags = lbl_804303D4.flags;
-        lbl_804303C8.extra[0] = lbl_804303D4.extra[0];
+        lbl_804303C8 = lbl_804303D4;
         lbl_804303D4.Clear();
     }
     fn_80179320();
@@ -512,12 +513,7 @@ void fn_80176F28(void) {
     FadeIn();
 }
 
-int fn_80176F9C(void) {
-    if (lbl_80430558.state == 0 || lbl_80430558.state == 3) {
-        return 0;
-    }
-    return 1;
-}
+int fn_80176F9C(void) { return lbl_80430558.state != 0 && lbl_80430558.state != 3; }
 
 static inline void FadeOut(void (*done)(void)) {
     lbl_80430558.done = done;
