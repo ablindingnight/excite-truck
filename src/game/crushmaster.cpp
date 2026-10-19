@@ -1,0 +1,1041 @@
+// Crush challenge master (0x80171D38-0x80176460): the "crushmaster" game mode. The player hunts AI trucks
+// in an arena before the clock runs out; kills are graded by distance and speed ("cr_kill_ok"/"cr_awesome"),
+// a radar points at the remaining trucks and crushed trucks respawn away from the forbidden zones
+// ("crush_nogo.val"). Tuning comes from the config's "crush_table". It shares the results overlay with the
+// ring challenge. Names are guesses apart from the strings.
+#include "game/common.h"
+
+class RSound;
+extern f32 lbl_8055E3C8;  // time
+
+extern "C" {
+void* memset(void* dst, int c, u32 n);
+u32 strlen(const char* s);
+double sqrt(double x);
+double cos(double x);
+double sin(double x);
+double fmod(double x, double y);
+f32 PSVECMag(const void* v);
+f32 PSVECDistance(const void* a, const void* b);
+void fn_802E30C8(const char* fmt, ...);  // debug print
+void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_801345D8(char* buf, int size, const char* fmt, ...);
+void fn_801308F4(char* buf, int size, int value);         // number with separators
+void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
+int fn_801609C4(int score);                                // grade for a score
+void fn_802ADFF4(void* layout, s32 a);
+void fn_802AE02C(void* layout, s32 a);
+void fn_802AE0B8(void* layout, s32 a);
+void fn_802AE168(void* layout);
+void fn_802AE0E0(void* layout);
+void fn_802ADE60(void* layout, int flag);
+void fn_802ADDD8(void* p, int a);
+s32 fn_80145E70(const char* name);
+s32 fn_80204CF0(void);
+s32 fn_80204EA0(const char* key);
+int fn_801EA994(void);  // number of cars
+f32 fn_80129DC4(int n, f32 lo, f32 hi);  // random float
+}
+
+struct JoyStatus {
+    f32 x;           // offset 0x0
+    f32 y;           // offset 0x4
+    u8 pad8[0x20 - 0x8];
+    u8 buttons[32];  // offset 0x20
+    u8 pad40[0x70 - 0x40];
+};
+
+extern "C" {
+int fn_801298E8(JoyStatus* out, int chan);
+s32* fn_801297F4(void);  // button mapping
+}
+
+struct V2 {
+    f32 x;
+    f32 y;
+};
+
+struct BoundSet;
+
+extern "C" {
+BoundSet* fn_80139D4C(const char* name);
+void fn_80139E18(BoundSet* s);
+int fn_80139EC4(BoundSet* s, f32 x, f32 y);
+int fn_802B04D4(const ValVec3* p);
+s32 fn_802CAC28(const char* name, int a);  // load texture
+void fn_802CAC54(s32 tex);
+}
+
+struct Binding {
+    s32 type;          // offset 0x0
+    const char* name;  // offset 0x4
+    void* ptr;         // offset 0x8
+};
+
+static inline Binding Bind(s32 t, const char* n, void* p) {
+    Binding b;
+    b.type = t;
+    b.name = n;
+    b.ptr = p;
+    return b;
+}
+
+extern const Binding lbl_802FAA40;
+
+extern "C" s32 fn_802ADF34(void* layout, const char* name, Binding* b);
+
+const char* GetGradeDisplayName(int grade);
+void* operator new(size_t size, const char* tag);
+
+struct ConfigRoot {
+    u8 pad0[0x20];
+    ValueNode* vals;  // offset 0x20
+};
+
+extern "C" ConfigRoot* fn_8000AC38(void);
+
+extern s32 lbl_8055E044;  // language
+
+class RSound {
+public:
+    virtual ~RSound(void);
+    u8 pad4[0x4];
+    f32 vol;  // offset 0x8
+    u8 padC[0x19 - 0xC];
+    u8 busy;  // offset 0x19
+    u8 pad1A[0x49 - 0x1A];
+    u8 playing;  // offset 0x49
+    u8 stop;     // offset 0x4A
+    u8 loop;     // offset 0x4B
+    u8 f4C;      // offset 0x4C
+    u8 dirty;    // offset 0x4D
+    void Play(void) {
+        playing = 1;
+        loop = 0;
+        stop = 0;
+    }
+    void Stop(void) {
+        stop = 1;
+        f4C = 0;
+    }
+};
+
+extern "C" RSound* fn_80207848(const char* name, int a);
+
+static inline void Play(RSound* s) {
+    if (s) {
+        s->Play();
+    }
+}
+
+static inline void PlayIdle(RSound* s) {
+    if (s && !s->busy) {
+        s->Play();
+    }
+}
+
+static inline void Stop(RSound* s) {
+    if (s) {
+        s->Stop();
+    }
+}
+
+static inline void StrCopyN(char* dst, const char* src, int len) {
+    char* d = dst;
+    int n = len;
+    const char* s = src;
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
+
+#define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
+
+static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+    f32 t = (x - a) / (b - a);
+    CLAMP01(t);
+    return t;
+}
+
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Remap(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) { return Lerp(y0, y1, Unlerp(x0, x1, x)); }
+
+class LocString {
+public:
+    LocString(const char* key);
+    void Refresh(void);  // fn_80131318
+    const char* Get(void) {
+        if (lang != lbl_8055E044) {
+            Refresh();
+        }
+        return text;
+    }
+    const char* key;   // offset 0x0
+    const char* text;  // offset 0x4
+    u32 lang;          // offset 0x8
+};
+
+extern "C" void fn_80131318(LocString* s);
+
+inline void LocString::Refresh(void) { fn_80131318(this); }
+
+template <class T>
+struct ArrayRef {
+    ArrayRef(T* d, int n) {
+        data = d;
+        cap = n;
+        count = 0;
+    }
+    ~ArrayRef(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
+};
+
+struct RaceCarRec {
+    u8 pad0[0x10];
+    u32 model;        // offset 0x10
+    u8 pad14[0x60 - 0x14];
+    ValVec3 pos;      // offset 0x60
+    u8 pad6C[0x118 - 0x6C];
+    ValVec3 center;   // offset 0x118
+    u8 pad124[0x25D4 - 0x124];
+    f32 speed;        // offset 0x25D4
+};
+
+extern "C" RaceCarRec* fn_8017960C(int id);
+
+struct Camera {
+    u8 pad0[0x24];
+    ValVec3 pos;  // offset 0x24
+};
+
+extern "C" {
+Camera* fn_802C86DC(void);
+void fn_8018F76C(RaceCarRec* car, int wheel);
+void fn_8001DAE0(struct Timer* t, f32 len);
+f32 fn_8001DAE8(void);  // time
+}
+
+struct Timer {
+    Timer(f32 len) { fn_8001DAE0(this, len); }
+    f32 len;    // offset 0x0
+    f32 start;  // offset 0x4
+};
+
+// Arrow/marker vertex.
+struct MarkVtx {
+    ValVec3 pos;  // offset 0x0
+    u32 color;    // offset 0xC
+    f32 u;        // offset 0x10
+    f32 v;        // offset 0x14
+};
+
+extern "C" {
+void fn_802C8BD0(s32 tex);
+void fn_802C8DB8(MarkVtx* v, int nv, const u16* idx, int ni);
+void fn_802C8D74(void);
+}
+
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+
+static inline void SetLen(ValVec3* v, f32 len) {
+    f32 m = PSVECMag(v);
+    if (!((f32)__fabs(m) <= lbl_80558DC4[0])) {
+        f32 k = len / m;
+        v->x *= k;
+        v->y *= k;
+        v->z *= k;
+    }
+}
+
+static inline void AddScaled(ValVec3* out, const ValVec3* a, const ValVec3* b, f32 k) {
+    out->x = a->x + b->x * k;
+    out->y = a->y + b->y * k;
+    out->z = a->z + b->z * k;
+}
+
+// "crush_table" settings.
+struct CrushTuning {
+    f32 speedA;         // offset 0x0
+    f32 speedB;         // offset 0x4
+    f32 speedATime;     // offset 0x8
+    f32 speedBTime;     // offset 0xC
+    u8 alwaysRadar;     // offset 0x10
+    u8 infTurbo;        // offset 0x11
+    u8 pad12[2];
+    s32 pointsPerKill;  // offset 0x14
+    u8 timeInSeconds;   // offset 0x18
+    u8 pad19[3];
+    f32 killOk;         // offset 0x1C
+    f32 awesome;        // offset 0x20
+    f32 killDist;       // offset 0x24
+    f32 killSpeed;      // offset 0x28
+};
+
+class ResultsOverlay {
+public:
+    ResultsOverlay(void) {
+        layout = 0;
+        sBonus = 0;
+        sNoBonus = 0;
+        s1C = 0;
+        s24 = 0;
+        s28 = 0;
+        s2C = 0;
+        memset(killScore, '0', 3);
+        killScore[3] = 0;
+        memset(timeLeft, '0', 3);
+        timeLeft[3] = 0;
+        memset(bonusTitle, '0', 3);
+        bonusTitle[3] = 0;
+        memset(finalScore, '0', 3);
+        finalScore[3] = 0;
+        memset(grade, '0', 3);
+        grade[3] = 0;
+        memset(noBonusScore, '0', 3);
+        noBonusScore[3] = 0;
+        memset(timeBonus, '0', 3);
+        timeBonus[3] = 0;
+        memset(bB2, '0', 3);
+        bB2[3] = 0;
+        memset(bC6, '0', 3);
+        bC6[3] = 0;
+        memset(complete, '0', 3);
+        complete[3] = 0;
+    }
+    ~ResultsOverlay(void) { Unload(); }
+    void Unload(void) {
+        if (layout) {
+            fn_802ADE60(layout, 1);
+            layout = 0;
+        }
+        if (sBonus) {
+            delete sBonus;
+            sBonus = 0;
+        }
+        if (sNoBonus) {
+            delete sNoBonus;
+            sNoBonus = 0;
+        }
+        if (s1C) {
+            delete s1C;
+            s1C = 0;
+        }
+        if (s24) {
+            delete s24;
+            s24 = 0;
+        }
+        if (s28) {
+            delete s28;
+            s28 = 0;
+        }
+        if (s2C) {
+            delete s2C;
+            s2C = 0;
+        }
+    }
+    void Update(int score, int kills, int bonus);
+    void Reset(void);
+    void Load(void);
+    s32 state;         // offset 0x0
+    f32 start;         // offset 0x4
+    u8 b8;             // offset 0x8
+    u8 b9;             // offset 0x9
+    u8 padA[2];
+    void* layout;      // offset 0xC
+    u8 noBonus;        // offset 0x10
+    u8 pad11[3];
+    RSound* sBonus;    // offset 0x14
+    RSound* sNoBonus;  // offset 0x18
+    RSound* s1C;       // offset 0x1C
+    u8 b20;            // offset 0x20
+    u8 pad21[3];
+    RSound* s24;       // offset 0x24
+    RSound* s28;       // offset 0x28
+    RSound* s2C;       // offset 0x2C
+    char killScore[0x14];   // offset 0x30
+    char timeLeft[0x14];    // offset 0x44
+    char bonusTitle[0x14];  // offset 0x58
+    char finalScore[0x14];  // offset 0x6C
+    char grade[0xA];        // offset 0x80
+    char noBonusScore[0x14];  // offset 0x8A
+    char timeBonus[0x14];   // offset 0x9E
+    char bB2[0x14];         // offset 0xB2
+    char bC6[0x14];         // offset 0xC6
+    char complete[0x14];    // offset 0xDA
+    u8 padEE[2];
+    s32 fF0;   // offset 0xF0
+    s32 fF4;   // offset 0xF4
+    s32 fF8;   // offset 0xF8
+    s32 fFC;   // offset 0xFC
+    s32 f100;  // offset 0x100
+    s32 f104;  // offset 0x104
+};
+
+class ILayout {
+public:
+    virtual ~ILayout(void) {}
+};
+
+// Owns the mode's HUD layout.
+struct LayoutRef {
+    void Free(void);
+    ILayout* p;  // offset 0x0
+};
+
+struct ArtAnimManager {
+    ArtAnimManager(int a);
+    u8 pad0[8];
+};
+
+extern "C" int fn_80171EC0(int id);
+
+struct ZoneResults;
+struct Respawn;
+
+class GameMode {
+public:
+    GameMode(void) {}
+    virtual ~GameMode(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual int vf1C(int car);
+    virtual int vf20(int car) = 0;
+    virtual int vf24(void);
+    virtual int vf28(void);
+    virtual void vf2C(void);
+    virtual int vf30(void);
+    virtual int vf34(void);
+    virtual f32 vf38(void);
+    virtual int vf3C(int p);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual void vf58(void);
+    virtual int vf5C(int p);
+    virtual void vf60(void);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual void vf6C(void);
+    virtual void vf70(void);
+    virtual void vf74(void);
+    virtual void vf78(void);
+    virtual int vf7C(void);
+    virtual int vf80(void);
+    virtual int vf84(void);
+    virtual int vf88(void);
+    virtual int vf8C(int p, int key);
+    virtual void vf90(void);
+    virtual void vf94(void);
+    virtual void vf98(void);
+    virtual void vf9C(void);
+    virtual int vfA0(Respawn* out, int idx);
+    virtual void vfA4(void);
+    virtual void vfA8(int car);
+    virtual void vfAC(int car);
+    virtual int vfB0(int car, Respawn* r);
+    virtual void vfB4(void);
+    virtual void vfB8(ZoneResults* r);
+    virtual int vfBC(ZoneResults* r);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual void vfC8(void);
+    virtual int vfCC(void);
+    virtual int vfD0(void);
+    virtual int vfD4(int car);
+    virtual int vfD8(void);
+    virtual int vfDC(void);
+    virtual int vfE0(int car, u8* out);
+    virtual int vfE4(void);
+    virtual void* vfE8(void);
+    virtual int vfEC(void);
+    virtual int vfF0(void);
+    virtual void vfF4(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+};
+
+class CSubTaskMgr {
+public:
+    virtual ~CSubTaskMgr(void) {}
+    virtual int vf0C(int a, int b, int c, int d, u32* flags);
+    virtual int vf10(int a, f32* out, int car);
+    virtual int vf14(void);
+    virtual void vf18(void);
+    virtual int vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual int vf28(void);
+};
+
+class CrushMaster;
+
+class CrushSubTaskMgr : public CSubTaskMgr {
+public:
+    CrushSubTaskMgr(CrushMaster* m) {
+        nCars = fn_801EA994();
+        master = m;
+    }
+    virtual ~CrushSubTaskMgr(void);
+    virtual int vf0C(int a, int b, int c, int d, u32* flags);
+    virtual int vf10(int a, f32* out, int car);
+    virtual int vf14(void);
+    virtual void vf18(void);
+    virtual int vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    u8 pad4[0x124 - 0x4];
+    s32 nCars;            // offset 0x124
+    CrushMaster* master;  // offset 0x128
+};
+
+// Per-car crush state.
+struct CrushCar {
+    u8 active;    // offset 0x0
+    u8 human;     // offset 0x1
+    u8 pad2[2];
+    s32 f4;       // offset 0x4
+    s32 f8;       // offset 0x8
+    s32 fC;       // offset 0xC
+    u8 f10[8];    // offset 0x10
+    f32 f18;      // offset 0x18
+};
+
+struct SpawnList : ArrayRef<V2> {
+    SpawnList(void) : ArrayRef<V2>(storage, 16) {}
+    V2 storage[16];  // offset 0xC
+};
+
+class CrushMaster : public GameMode {
+public:
+    CrushMaster(void) : t174(0.0f), t17C(2.0f), t184(1.5f), t18C(1.5f) {}
+    virtual ~CrushMaster(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual int vf20(int car);
+    virtual int vf24(void);
+    virtual int vf28(void);
+    virtual f32 vf38(void);
+    virtual int vf3C(int view);
+    virtual void vf44(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual int vf5C(int p);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual int vf8C(int p, int key);
+    virtual int vfA0(Respawn* out, int idx);
+    virtual void vfA8(int car);
+    virtual void vfB8(ZoneResults* r);
+    virtual void* vfE8(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+    SpawnList spawns;          // offset 0x4
+    CrushCar cars[8];          // offset 0x90
+    s32 nCars;                 // offset 0x170
+    Timer t174;                // offset 0x174
+    Timer t17C;                // offset 0x17C
+    Timer t184;                // offset 0x184
+    Timer t18C;                // offset 0x18C
+    u8 pad194[4];
+    s32 radarTex;              // offset 0x198
+    u8 pad19C[8];
+    f32 timeout;               // offset 0x1A4
+    LayoutRef layout;          // offset 0x1A8
+    ResultsOverlay results;    // offset 0x1AC
+    RSound* sPreRace;          // offset 0x2B4
+    u8 b2B8;                   // offset 0x2B8
+};
+
+// UnkStatic123 without its last word.
+class UnkStatic123s {
+public:
+    UnkStatic123s(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+};
+
+ModuleTag lbl_8055E390;
+static UnkStatic123s lbl_80430378;
+UnkStaticFFFF lbl_8055E398;
+UnkStaticFFFF lbl_8055E39C;
+UnkStatic7F lbl_8055E3A0;
+static CrushTuning lbl_8043038C;
+BoundSet* lbl_8055E3A4;
+s32 lbl_8055E3A8;
+
+extern "C" {
+
+static inline void Rotate(V2* v, f32 a) {
+    f32 cs;
+    f32 sn;
+    f32 tx = v->x;
+    cs = cos(a);
+    sn = sin(a);
+    v->x = v->x * cs - v->y * sn;
+    v->y = tx * sn + v->y * cs;
+}
+
+int fn_80171D38(int chan) {
+    JoyStatus s;
+    int r = 0;
+    if (fn_801298E8(&s, chan) && s.buttons[fn_801297F4()[12]]) {
+        r = 1;
+    }
+    return r;
+}
+
+void fn_80171D94(int id) {
+    RaceCarRec* car = fn_8017960C(id);
+    int i;
+    for (i = 0; i < 4; i++) {
+        fn_8018F76C(car, i);
+    }
+}
+
+int fn_80171DE4(const V2* p) {
+    int r = 0;
+    if (lbl_8055E3A4 && fn_80139EC4(lbl_8055E3A4, p->x, p->y)) {
+        r = 1;
+    }
+    return r;
+}
+
+int fn_80171E3C(const V2& p) {
+    ValVec3 v;
+    f32 x;
+    f32 z;
+    z = p.y;
+    x = p.x;
+    v.x = x;
+    v.y = 10.0f;
+    v.z = z;
+    if (fn_802B04D4(&v)) {
+        return 0;
+    }
+    if (lbl_8055E3A4 && fn_80139EC4(lbl_8055E3A4, p.x, p.y)) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline V2 LerpV(const V2* a, const V2* b, f32 t) {
+    V2 r;
+    f32 dy = b->y - a->y;
+    f32 dx = b->x - a->x;
+    r.y = a->y + t * dy;
+    r.x = a->x + t * dx;
+    return r;
+}
+
+static inline f32 DistV(const V2* a, const V2* b) {
+    V2 d;
+    d.y = a->y - b->y;
+    d.x = a->x - b->x;
+    return sqrt(d.x * d.x + d.y * d.y);
+}
+
+int fn_80171EF8(const V2* a, const V2* b) {
+    f32 len = DistV(a, b);
+    f32 step = 3.0f / len;
+    f32 t;
+    for (t = step; t < 1.0f - step; t += step) {
+        if (!fn_80171E3C(LerpV(a, b, t))) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+V2 fn_80171FF0(const V2* c, int tries, f32 r0, f32 dr) {
+    V2 p;
+    f32 r = r0;
+    while (tries-- > 0) {
+        V2 o;
+        o.x = r;
+        o.y = 0.0f;
+        Rotate(&o, fn_80129DC4(3, 0.0f, 6.2831855f));
+        p.x = c->x + o.x;
+        p.y = c->y + o.y;
+        if (fn_80171E3C(p)) {
+            break;
+        }
+        r += dr;
+    }
+    return p;
+}
+
+u32 fn_801720E0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
+
+void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
+    ValVec3 up;
+    ValVec3 fwd;
+    ValVec3 side;
+    MarkVtx v[5];
+    f32 w = 0.66f * size;
+    u32 dark;
+    int i;
+    up.x = 0.0f;
+    up.y = -1.0f;
+    up.z = 0.0f;
+    side.x = 1.0f;
+    side.y = 0.0f;
+    side.z = 0.0f;
+    fwd.x = 0.0f;
+    fwd.y = 0.0f;
+    fwd.z = 1.0f;
+    SetLen(&up, -size);
+    SetLen(&side, w * 0.5f);
+    SetLen(&fwd, w * 0.5f);
+    v[0].pos.x = 0.0f;
+    v[0].pos.y = 0.0f;
+    v[0].pos.z = 0.0f;
+    AddScaled(&v[1].pos, &up, &side, -1.0f);
+    AddScaled(&v[2].pos, &up, &side, 1.0f);
+    AddScaled(&v[3].pos, &up, &fwd, -1.0f);
+    AddScaled(&v[4].pos, &up, &fwd, 1.0f);
+    dark = fn_801720E0(color);
+    for (i = 0; i < 5; i++) {
+        v[i].color = color;
+        v[i].u = 0.1f * i;
+        v[i].v = 0.1f * i;
+        v[i].pos.x += at->x;
+        v[i].pos.y += at->y;
+        v[i].pos.z += at->z;
+    }
+    v[0].color = dark;
+    {
+        u16 idx[6] = {0, 1, 2, 0, 4, 3};
+        fn_802C8BD0(lbl_8055E3A8);
+        fn_802C8DB8(v, 5, idx, 6);
+        fn_802C8D74();
+        v[0].color &= 0x3FFFFFFF;
+        v[1].color &= 0x3FFFFFFF;
+        v[2].color &= 0x3FFFFFFF;
+        v[3].color &= 0x3FFFFFFF;
+        v[4].color &= 0x3FFFFFFF;
+        fn_802C8BD0(-1);
+        fn_802C8DB8(v, 5, idx, 6);
+        fn_802C8D74();
+    }
+}
+
+
+static inline f32 Parab(f32 t, f32 w) {
+    f32 x = t - w;
+    return 1.0f - x * x / (w * w);
+}
+
+static inline ValVec3* CamPos(void) { return &fn_802C86DC()->pos; }
+
+void fn_8017248C(int id) {
+    RaceCarRec* car = fn_8017960C(id);
+    f32 size = Remap(PSVECDistance(&car->pos, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
+    ValVec3 p;
+    p.x = car->pos.x;
+    p.y = car->pos.y;
+    p.z = car->pos.z;
+    {
+        f32 lo = 4.0f;
+        f32 h = 40.0f;
+        p.y += lo + h * Parab(fmod(3.742f * (2.0f * id) + lbl_8055E3C8, 2.0), 1.0f);
+    }
+    fn_801720FC(&p, 0xFFFFFF00, size);
+}
+
+f32 fn_801725C8(f32 t) {
+    return Remap(t, lbl_8043038C.speedATime, lbl_8043038C.speedBTime, lbl_8043038C.speedA, lbl_8043038C.speedB);
+}
+
+int fn_80172624(int killer, int victim) {
+    RaceCarRec* a = fn_8017960C(killer);
+    RaceCarRec* b = fn_8017960C(victim);
+    f32 d = PSVECDistance(&a->center, &b->center);
+    f32 sp = a->speed;
+    f32 f = lbl_8043038C.killDist * d + lbl_8043038C.killSpeed * sp;
+    int r = 0;
+    if (f >= lbl_8043038C.awesome) {
+        r = 2;
+    } else if (f >= lbl_8043038C.killOk) {
+        r = 1;
+    }
+    return r;
+}
+
+}  // extern "C"
+
+void* CrushMaster::vfE8(void) {
+    return new ("subtaskmgr") CrushSubTaskMgr(this);
+}
+
+#define STOP(s)          \
+    if (s) {             \
+        (s)->stop = 1;   \
+        (s)->f4C = 0;    \
+    }
+
+void ResultsOverlay::Update(int score, int kills, int bonus) {
+    if (layout) {
+        int shown;
+        int n;
+        fn_801308F4(killScore, 0x14, kills);
+        shown = bonus;
+        n = 0;
+        if (bonus && start > 0.0f) {
+            f32 t = Unlerp(0.0f, 1.0f, lbl_8055E3C8 - start);
+            n = Lerp(0.0f, 0.5f + bonus, t);
+            shown = bonus - n;
+        }
+        fn_801345D8(timeLeft, 0x14, "%d", n);
+        {
+            static LocString s("ResultsOverlay:TIME_BONUS_CAPS");
+            if (noBonus) {
+                StrCopyN(timeBonus, "", 0x14);
+                StrCopyN(bonusTitle, "", 0x14);
+            } else {
+                fn_80130980(timeBonus, 0x14, 2, shown);
+                StrCopyN(bonusTitle, s.Get(), 0x14);
+            }
+        }
+        fn_801308F4(finalScore, 0x14, score);
+        fn_801308F4(noBonusScore, 0x14, score - bonus);
+        {
+            int g = fn_801609C4(score);
+            if (g != -1) {
+                StrCopyN(grade, GetGradeDisplayName(g), 0xA);
+            } else {
+                StrCopyN(grade, "-", 0xA);
+            }
+        }
+        if (fF8) {
+            b8 = 0;
+        }
+        switch (state) {
+        case 0:
+            fn_802ADFF4(layout, fF4);
+            if (strlen(complete)) {
+                PlayIdle(s2C);
+            } else {
+                PlayIdle(s28);
+            }
+            if (bonus > 0) {
+                Play(sBonus);
+            } else {
+                Play(sNoBonus);
+            }
+            state = 1;
+            break;
+        case 1:
+            if (fFC && start < 0.0f) {
+                start = lbl_8055E3C8;
+            }
+            if (fFC == 2 && !b20) {
+                b20 = 1;
+                Play(s1C);
+            }
+            if (f100) {
+                fn_802AE02C(layout, fF4);
+                state = 2;
+            }
+            break;
+        case 2:
+            if (b9) {
+                fn_802AE0B8(layout, fF4);
+                Play(s24);
+                state = 3;
+            }
+            break;
+        case 3:
+            if (f104) {
+                fn_802AE02C(layout, fF4);
+                state = 4;
+            }
+            break;
+        }
+        fn_802AE168(layout);
+    }
+}
+
+extern "C" CrushMaster* fn_80172C28(void) {
+    CrushMaster* m = new ("crushmaster") CrushMaster;
+    if (m) {
+        lbl_8055E3A4 = fn_80139D4C("crush_nogo.val");
+        lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
+        m->radarTex = fn_802CAC28("ovradar.tex", 0);
+        if (lbl_8055E3A4) {
+            fn_802E30C8("crush: Loaded forbidden zones from %s", "crush_nogo.val");
+        }
+        m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
+        m->b2B8 = 0;
+    }
+    return m;
+}
+
+CrushSubTaskMgr::~CrushSubTaskMgr(void) {}
+
+CrushMaster::~CrushMaster(void) {
+    if (sPreRace) {
+        delete sPreRace;
+    }
+    if (lbl_8055E3A4) {
+        fn_80139E18(lbl_8055E3A4);
+        lbl_8055E3A4 = 0;
+    }
+    fn_802CAC54(lbl_8055E3A8);
+    fn_802CAC54(radarTex);
+}
+
+void CrushMaster::vfF8(void) {
+    int i;
+    ValueNode* t;
+    layout.p = (ILayout*)fn_80145E70("crushlyt.val");
+    nCars = fn_801EA994();
+    for (i = 0; i < nCars; i++) {
+        CrushCar* c = &cars[i];
+        c->human = fn_80171EC0(i);
+        c->active = 1;
+        c->f18 = -1.0f;
+        c->fC = 0;
+        c->f8 = 0;
+        c->f4 = 0;
+        memset(c->f10, 0, 8);
+    }
+    t = fn_8000AC38()->vals->FindChild((const char*)fn_80204EA0("crush_table"));
+    timeout = t->GetFloat("timeout", 180.0f);
+    lbl_8043038C.speedA = 0.44444445f * t->GetFloat("ai_speed_a", 160.0f);
+    lbl_8043038C.speedB = 0.44444445f * t->GetFloat("ai_speed_b", 100.0f);
+    lbl_8043038C.speedATime = t->GetFloat("ai_speed_a_time", 60.0f);
+    lbl_8043038C.speedBTime = t->GetFloat("ai_speed_b_time", 120.0f);
+    lbl_8043038C.alwaysRadar = t->GetBool("always_show_radar", 0);
+    lbl_8043038C.infTurbo = t->GetBool("infinite_turbo", 0);
+    lbl_8043038C.pointsPerKill = t->GetInt("points_per_kill", 10);
+    lbl_8043038C.timeInSeconds = t->GetBool("show_time_in_seconds", 0);
+    lbl_8043038C.killOk = t->GetFloat("cr_kill_ok", 10.0f);
+    lbl_8043038C.awesome = t->GetFloat("cr_awesome", 30.0f);
+    lbl_8043038C.killDist = t->GetFloat("killfactor_dist", 1.0f);
+    lbl_8043038C.killSpeed = t->GetFloat("killfactor_speed", 0.2f);
+    spawns.count = 0;
+    {
+        ValueNode* sp = fn_8000AC38()->vals->FindChild("spawns");
+        if (sp) {
+            int k;
+            for (k = 0;; k++) {
+                char name[0x20];
+                fn_801345D8(name, 0x20, "point%d", k);
+                if (!sp->Has(name) || spawns.count + 1 > spawns.cap) {
+                    break;
+                }
+                {
+                    ValPoint pt = sp->GetPoint(name);
+                    spawns.data[spawns.count++] = *(V2*)&pt;
+                }
+            }
+        }
+    }
+    results.layout = new ("ArtAnimManager") ArtAnimManager(1);
+    results.Load();
+    results.Reset();
+    fn_802E30C8("crush: timeout %.0f (%.0f->%.0f at (%.0f->%.0f)", timeout, lbl_8043038C.speedA / 0.44444445f,
+                lbl_8043038C.speedB / 0.44444445f, lbl_8043038C.speedATime, lbl_8043038C.speedBTime);
+}
+
+void ResultsOverlay::Reset(void) {
+    state = 0;
+    start = -1.0f;
+    b8 = 1;
+    b9 = 0;
+    noBonus = 0;
+    fF8 = 0;
+    fFC = 0;
+    f100 = 0;
+    f104 = 0;
+    if (layout) {
+        fn_802AE0E0(layout);
+    }
+    STOP(sBonus);
+    STOP(sNoBonus);
+    STOP(s1C);
+    b20 = 0;
+    STOP(s24);
+    STOP(s28);
+    STOP(s2C);
+}
+
+void ResultsOverlay::Load(void) {
+    Binding b[16] = {
+        Bind(3, "time_left", &fF8),
+        Bind(3, "time_bonus", &fFC),
+        Bind(3, "grade", &f100),
+        Bind(3, "final_score", &f104),
+        Bind(1, "kill_score", killScore),
+        Bind(1, "time_bonus", timeLeft),
+        Bind(1, "time_bonus_title_caps", bonusTitle),
+        Bind(1, "final_score", finalScore),
+        Bind(1, "grade", grade),
+        Bind(1, "final_score_no_time_bonus", noBonusScore),
+        Bind(1, "time_left", timeBonus),
+        Bind(1, "challenge_complete_1", bB2),
+        Bind(1, "challenge_complete_2", bC6),
+        Bind(1, "out_of_time_message", complete),
+        Bind(2, "difficulty_level", &fF0),
+        lbl_802FAA40,
+    };
+    StrCopyN(noBonusScore, "100", 0x14);
+    StrCopyN(timeLeft, "50", 0x14);
+    StrCopyN(finalScore, "150", 0x14);
+    fn_80130980(timeBonus, 0x14, 2, 75.0f);
+    fF0 = fn_80204CF0() + 1;
+    fF4 = fn_802ADF34(layout, "a_crush_finish.val", b);
+    sBonus = fn_80207848("pr_crushchal1.sfx", 1);
+    sNoBonus = fn_80207848("pr_crushchal1_nobonus.sfx", 1);
+    s1C = fn_80207848("pr_crushchal2.sfx", 1);
+    s24 = fn_80207848("pr_transition.sfx", 1);
+    s28 = fn_80207848("levelup.sfx", 1);
+    s2C = fn_80207848("timeout.sfx", 1);
+}
+
+void CrushMaster::vfFC(void) {
+    results.Unload();
+    layout.Free();
+}
+
+void LayoutRef::Free(void) {
+    if (p) {
+        delete p;
+        p = 0;
+    }
+}
+
+int CrushMaster::vf28(void) {
+    int n = 0;
+    int i;
+    for (i = 0; i < nCars; i++) {
+        if (!cars[i].human && cars[i].active) {
+            n++;
+        }
+    }
+    return n != 0;
+}

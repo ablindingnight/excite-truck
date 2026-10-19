@@ -2380,6 +2380,16 @@ game/techdemo.cpp:
 	.sbss       start:0x8055E380 end:0x8055E390
 	.sdata2     start:0x80561A30 end:0x80561A38
 
+game/crushmaster.cpp:
+	.text       start:0x80171D38 end:0x80176460
+	.ctors      start:0x802ED1FC end:0x802ED200
+	.rodata     start:0x802F9520 end:0x802F9530
+	.data       start:0x80330F48 end:0x803315A0
+	.bss        start:0x80430378 end:0x804303C8
+	.sdata      start:0x8055A2A0 end:0x8055A2F0
+	.sbss       start:0x8055E390 end:0x8055E3B0
+	.sdata2     start:0x80561A38 end:0x80561B18
+
 game/physics.cpp:
 	.text       start:0x80176460 end:0x80177814
 	.ctors      start:0x802ED200 end:0x802ED204
