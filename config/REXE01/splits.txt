@@ -2478,6 +2478,12 @@ game/csreplay.cpp:
 	.sdata      start:0x8055AB50 end:0x8055AB58
 	.sbss       start:0x8055E898 end:0x8055E8A8
 
+game/assoc.cpp:
+	.text       start:0x801D0BE4 end:0x801D0CF0
+	.ctors      start:0x802ED2AC end:0x802ED2B0
+	.bss        start:0x80438758 end:0x80438818
+	.sbss       start:0x8055E8D0 end:0x8055E8E0
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC

@@ -1027,6 +1027,7 @@ config.libs.append(
             Object(Matching, "game/pgfx.cpp"),
             Object(Matching, "game/alarm.cpp"),
             Object(Matching, "game/csreplay.cpp"),
+            Object(Matching, "game/assoc.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(Matching, "game/stub13.cpp"),
