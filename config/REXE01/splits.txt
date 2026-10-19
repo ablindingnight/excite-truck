@@ -2329,3 +2329,8 @@ game/tutorial.cpp:
 	.sdata      start:0x8055A0B0 end:0x8055A150
 	.sbss       start:0x8055E2D0 end:0x8055E310
 	.sdata2     start:0x80561838 end:0x80561890
+
+game/stub5.cpp:
+	.text       start:0x80167834 end:0x80167874
+	.ctors      start:0x802ED1E8 end:0x802ED1EC
+	.sbss       start:0x8055E338 end:0x8055E348
