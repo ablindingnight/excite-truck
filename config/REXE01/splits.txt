@@ -2688,6 +2688,14 @@ game/mmain.cpp:
 	.bss        start:0x80498758 end:0x80498770
 	.sbss       start:0x8055F120 end:0x8055F130
 
+game/gamedo.cpp:
+	.text       start:0x8023B764 end:0x8023C2B4
+	.ctors      start:0x802ED400 end:0x802ED404
+	.data       start:0x80341308 end:0x803413C0
+	.bss        start:0x80498770 end:0x80498788
+	.sdata      start:0x8055BB30 end:0x8055BB44
+	.sbss       start:0x8055F130 end:0x8055F138
+
 game/nameent.cpp:
 	.text       start:0x8023FA50 end:0x8023FE20
 	.ctors      start:0x802ED414 end:0x802ED418
