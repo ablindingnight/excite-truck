@@ -61,14 +61,23 @@ public:
         b4A = 0;
     }
 
+    void SetVolume(f32 v) {
+        if (v != vol) {
+            volDirty = 1;
+            vol = v;
+        }
+    }
+
     f32 pitch;  // offset 0x4
-    u8 pad8[0x19 - 0x8];
+    f32 vol;    // offset 0x8
+    u8 padC[0x19 - 0xC];
     u8 active;  // offset 0x19
     u8 pad1A[0x49 - 0x1A];
     u8 play;  // offset 0x49
     u8 b4A;   // offset 0x4A
     u8 b4B;   // offset 0x4B
     u8 b4C;   // offset 0x4C
+    u8 volDirty;  // offset 0x4D
 };
 
 static inline void StopSound(Sound* s) {
@@ -296,6 +305,11 @@ public:
 
 template <typename T>
 struct ArrayRef {
+    ArrayRef(T* d, int n) {
+        data = d;
+        cap = n;
+        count = 0;
+    }
     ~ArrayRef(void) {
         data = 0;
         count = 0;
@@ -309,11 +323,7 @@ struct ArrayRef {
 template <typename T, int N>
 struct FixedList {
     ~FixedList(void) {}
-    FixedList(void) {
-        a.data = storage;
-        a.cap = N;
-        a.count = 0;
-    }
+    FixedList(void) : a(storage, N) {}
     void Push(T v) {
         T* p = &a.data[a.count++];
         *p = v;
@@ -718,7 +728,7 @@ public:
         age = 1000.0f;
         t0C = 0.0f;
         start = 0.0f;
-        x118 = 0;
+        hud = 0;
         type = -1;
         ready = 0;
         b14 = 0;
@@ -758,14 +768,26 @@ public:
     f32 value;          // offset 0x104
     s32 points;         // offset 0x108
     s32 type;           // offset 0x10C
-    u8 pad110[0x118 - 0x110];
-    s32 x118;           // offset 0x118
+    s32 car;            // offset 0x110
+    u8 pad114[0x118 - 0x114];
+    class CarHud* hud;  // offset 0x118
     StuntEvent* next;   // offset 0x11C
     StuntEvent* prev;   // offset 0x120
 };
 
 
 struct StuntQueue {
+    void PushFront(StuntEvent* n) {
+        n->prev = 0;
+        n->next = head;
+        if (head) {
+            head->prev = n;
+        }
+        head = n;
+        if (!tail) {
+            tail = n;
+        }
+    }
     void Unlink(StuntEvent* n) {
         if (n->prev) {
             n->prev->next = n->next;
@@ -842,6 +864,7 @@ struct StuntIter {
 
 class CarHud {
 public:
+    CarHud(int car, int acar);
     virtual ~CarHud(void) {
         if (bigSnd) {
             delete bigSnd;
@@ -1115,6 +1138,8 @@ struct LocalCarDesc {
     s32 event;  // offset 0x0
     u8 pad4[0x8 - 0x4];
     s32 track;  // offset 0x8
+    u8 padC[0x10 - 0xC];
+    u32 flags;  // offset 0x10
 };
 
 struct Settings {
@@ -3332,5 +3357,116 @@ inline void BetaMaster::a2(void) {
     skipAt = GetEvent(fn_801769CC()->event)->vals->GetFloat("early_finish_t", -1.0f);
     for (i = 0; i < ARRAY_COUNT(anims); i++) {
         anims[i].Reset();
+    }
+}
+
+extern "C" {
+Sound* fn_802076A0(const char* name, int flags, int car, int pan);  // 3D sound
+void fn_801332D0(void* prefs, const char* key, const char** out);
+char* strncpy(char* d, const char* s, size_t n);
+Meter* fn_801572A4(CarHud* hud, int car, f32* hispeed);
+}
+
+static inline void InitCarHud(CarHud* h, int car, int acar) {
+    int i;
+    for (i = 0; i < 16; i++) {
+        StuntEvent* e = &h->pool[i];
+        e->hud = h;
+        e->car = car;
+        h->shown.PushFront(e);
+    }
+    h->current = 0;
+    h->played = 0;
+    h->racer = car;
+    if (acar) {
+        h->bonusSnd = 0;
+    } else {
+        h->bonusSnd = fn_802076A0("fcount.sfx", 1, car, 0);
+    }
+    if (h->bonusSnd) {
+        h->bonusSnd->SetVolume(1.0f);
+    }
+    if (acar) {
+        h->bigSnd = 0;
+    } else {
+        h->bigSnd = fn_802076A0("cheerhit.sfx", 1, car, 2);
+    }
+    if (h->bigSnd) {
+        h->bigSnd->SetVolume(1.0f);
+    }
+}
+
+inline CarHud::CarHud(int car, int acar) {
+    shown.tail = 0;
+    shown.head = 0;
+    pending.tail = 0;
+    pending.head = 0;
+    InitCarHud(this, car, acar);
+}
+
+void BetaMaster::a1(void) {
+    int i;
+    nCars = lbl_8055E4D0;
+    for (i = 0; i < nCars; i++) {
+        int acar = lbl_804348E8[i]->model == 'ACAR';
+        cars[i].hud = new ("stuntdash") CarHud(i, acar);
+        cars[i].stunts = new ("pr_stuntdash") StuntList;
+        cars[i].master = this;
+        cars[i].id = i;
+        cars[i].mode = !acar;
+        cars[i].tex[0] = fn_802CAC28("zonetex.tex", 0);
+        cars[i].tex[1] = fn_802CAC28("zonetex4.tex", 0);
+        {
+            TrackDesc* trk = GetTrack(GetEvent(fn_801769CC()->event)->track);
+            const char* set = 0;
+            char key[0x40];
+            fn_801345D8(key, sizeof(key), "icon_set");
+            fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, key, &set);
+            if (!set) {
+                cars[i].tex[2] = fn_802CAC28("betatex2.tex", 0);
+            } else {
+                char prefix[8];
+                char file[0x40];
+                memset(prefix, 0, sizeof(prefix));
+                strncpy(prefix, trk->name, 3);
+                fn_801345D8(file, sizeof(file), "%sstar1.tex", prefix, set);
+                if (fn_8012C33C(file)) {
+                    cars[i].tex[2] = fn_802CAC28(file, 0);
+                } else {
+                    fn_802E30C8("Couldn't find star icon texture %s!", file);
+                    cars[i].tex[2] = fn_802CAC28("betatex2.tex", 0);
+                }
+            }
+        }
+        cars[i].meterObj = fn_801572A4(cars[i].hud, cars[i].id, &lbl_8055E24C);
+        cars[i].fullSnd = 0;
+        cars[i].starSnd = 0;
+        if (!acar) {
+            cars[i].starSnd = fn_802076A0("boing.sfx", 1, cars[i].id, 2);
+            if (cars[i].starSnd) {
+                cars[i].starSnd->SetVolume(1.0f);
+            }
+            cars[i].fullSnd = fn_802076A0("counter.sfx", 7, cars[i].id, 0);
+        }
+    }
+    for (i = 0; i < bumps.a.count; i++) {
+        Token* t = bumps.a.data[i];
+        fn_801EA1E0(t->pos[0], t->pos[2], &t->pos[1], 1);
+    }
+    for (i = 0; i < bumps2.a.count; i++) {
+        Token* t = bumps2.a.data[i];
+        fn_801EA1E0(t->pos[0], t->pos[2], &t->pos[1], 1);
+    }
+    {
+        LocalCarDesc* d = fn_801769CC();
+        f32 lim = fn_8014E7DC(fn_801769CC()->event, d->track);
+        if (fn_801769CC()->flags & 1) {
+            lim = 3600.0f;
+        }
+        timer.limit = lim;
+        timer.limit0 = lim;
+    }
+    if (fn_80179650() > 1) {
+        timer.finishTimeout = 30.99f;
     }
 }
