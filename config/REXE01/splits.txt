@@ -2571,6 +2571,11 @@ game/gendrawlist.cpp:
 	.data       start:0x80339B70 end:0x80339BA0
 	.sbss       start:0x8055EAD8 end:0x8055EAE0
 
+game/stub17.cpp:
+	.text       start:0x801E78A0 end:0x801E78D8
+	.ctors      start:0x802ED318 end:0x802ED31C
+	.sbss       start:0x8055EAE0 end:0x8055EAF0
+
 game/ground.cpp:
 	.text       start:0x801E9C80 end:0x801EA1FC
 	.ctors      start:0x802ED320 end:0x802ED324
@@ -2694,6 +2699,12 @@ game/cscript.cpp:
 	.sdata      start:0x8055C660 end:0x8055C668
 	.sbss       start:0x8055F5A8 end:0x8055F5D0
 	.sdata2     start:0x805640A0 end:0x805640C0
+
+game/stub18.cpp:
+	.text       start:0x802789A8 end:0x80278A1C
+	.ctors      start:0x802ED4AC end:0x802ED4B0
+	.bss        start:0x804A16D0 end:0x804A16E8
+	.sbss       start:0x8055F5D0 end:0x8055F5E8
 
 game/lightset.cpp:
 	.text       start:0x80279370 end:0x80279464
