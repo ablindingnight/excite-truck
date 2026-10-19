@@ -171,7 +171,7 @@ u32 fn_80144F40(const char* s, const FlagName* tbl) {
     return r;
 }
 
-void fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
+char* fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
     buf[0] = 0;
     for (; tbl->name; tbl++) {
         if ((tbl->flag & flags) == tbl->flag) {
@@ -181,6 +181,7 @@ void fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
             StrCat(buf, n, tbl->name);
         }
     }
+    return buf;
 }
 
 u8 fn_801450A0(u32 a, u32 b, f32 t) {
@@ -307,19 +308,30 @@ void fn_80145670(GartSet* s, ValueNode* n) {
 }
 
 void fn_801456E8(ElemList<TextElem>* l, void* f) {
+    const char* js;
+    char q[0x130];
+    TextElem* e;
+    char just[0x40];
+    const char* dt;
     int i;
-    fn_802E3AD0(f, "tabular text\r\n");
-    fn_802E3AD0(f, "\tx y elem_just color scale just name default_text\r\n");
+    fn_802E3AD0(f, "tabular text
+
+");
+    fn_802E3AD0(f, "	x y elem_just color scale just name default_text
+
+");
     for (i = 0; i < l->count; i++) {
-        TextElem* e = &l->data[i];
-        char q[0x100];
-        char just[0x40];
-        const char* dt = fn_8013126C(q, e->defText);
-        fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
-        fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
-                    e->scale, just, e->name, dt);
+        e = &l->data[i];
+        dt = fn_8013126C(q, e->defText);
+        js = fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
+        fn_802E3AD0(f, "	%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"
+
+", e->pos.x, e->pos.y, e->elemJust, e->color,
+                    e->scale, js, e->name, dt);
     }
-    fn_802E3AD0(f, "end\r\n");
+    fn_802E3AD0(f, "end
+
+");
 }
 
 void fn_801457D0(ElemList<ArtElem>* l, void* f) {
@@ -364,10 +376,11 @@ f32 fn_80145A08(f32 a, f32 b, f32 c, f32 d, f32 x) {
 
 ValPoint fn_80145A24(const IPoint* p) {
     ValPoint r;
-    f32 top;
-    r.x = fn_80145A08(0.0f, fn_802C9C48(), 0.0f, 640.0f, p->x);
-    top = fn_802C9C38() / 2 - 0.75f * fn_802C9C48() * 0.5f;
-    r.y = fn_80145A08(top, top + 0.75f * fn_802C9C48(), 0.0f, 480.0f, p->y);
+    f32 x = fn_80145A08(0.0f, fn_802C9C48(), 0.0f, 640.0f, p->x);
+    f32 top = fn_802C9C38() / 2 - 0.75f * fn_802C9C48() / 2.0f;
+    f32 y = fn_80145A08(top, top + 0.75f * fn_802C9C48(), 0.0f, 480.0f, p->y);
+    r.x = x;
+    r.y = y;
     return r;
 }
 
