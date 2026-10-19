@@ -1003,6 +1003,7 @@ config.libs.append(
             Object(NonMatching, "game/modeinl.cpp"),
             Object(NonMatching, "game/records.cpp"),
             Object(NonMatching, "game/ovlayout.cpp"),
+            Object(NonMatching, "game/betarace.cpp"),
         ],
     }
 )

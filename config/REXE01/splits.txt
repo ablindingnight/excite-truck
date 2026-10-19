@@ -2267,3 +2267,13 @@ game/ovlayout.cpp:
 	.sdata      start:0x80559DA0 end:0x80559EB0
 	.sbss       start:0x8055E1F0 end:0x8055E228
 	.sdata2     start:0x805615D0 end:0x80561638
+
+game/betarace.cpp:
+	.text       start:0x80149588 end:0x801561E8
+	.ctors      start:0x802ED1C8 end:0x802ED1CC
+	.rodata     start:0x802F9410 end:0x802F9478
+	.data       start:0x8032D358 end:0x8032E238
+	.bss        start:0x8042FC70 end:0x8042FD08
+	.sdata      start:0x80559EB0 end:0x80559FC0
+	.sbss       start:0x8055E228 end:0x8055E270
+	.sdata2     start:0x80561638 end:0x80561738
