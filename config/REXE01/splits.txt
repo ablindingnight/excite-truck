@@ -2486,6 +2486,12 @@ game/surftype.cpp:
 	.sdata      start:0x8055AB58 end:0x8055ABD0
 	.sbss       start:0x8055E8B8 end:0x8055E8C8
 
+game/carlisten.cpp:
+	.text       start:0x801D0590 end:0x801D0BE4
+	.ctors      start:0x802ED2A8 end:0x802ED2AC
+	.bss        start:0x804386A8 end:0x80438758
+	.sbss       start:0x8055E8C8 end:0x8055E8D0
+
 game/assoc.cpp:
 	.text       start:0x801D0BE4 end:0x801D0CF0
 	.ctors      start:0x802ED2AC end:0x802ED2B0
