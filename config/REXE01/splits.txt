@@ -2586,6 +2586,13 @@ game/stub12.cpp:
 	.ctors      start:0x802ED4FC end:0x802ED500
 	.sbss       start:0x8055F770 end:0x8055F780
 
+game/drawline.cpp:
+	.text       start:0x8029EF70 end:0x8029F03C
+	.ctors      start:0x802ED514 end:0x802ED518
+	.data       start:0x803497D8 end:0x80349810
+	.sdata      start:0x8055CAE0 end:0x8055CAE8
+	.sbss       start:0x8055F800 end:0x8055F810
+
 game/stub13.cpp:
 	.text       start:0x802A7BD8 end:0x802A7BE8
 	.ctors      start:0x802ED52C end:0x802ED530
@@ -2595,6 +2602,12 @@ game/stub14.cpp:
 	.text       start:0x802BC328 end:0x802BC334
 	.ctors      start:0x802ED570 end:0x802ED574
 	.sbss       start:0x8055FA98 end:0x8055FAA0
+
+game/preload.cpp:
+	.text       start:0x802C2914 end:0x802C2A48
+	.ctors      start:0x802ED594 end:0x802ED598
+	.data       start:0x8034B008 end:0x8034B020
+	.sbss       start:0x8055FB78 end:0x8055FB88
 
 game/stub15.cpp:
 	.text       start:0x802DB2A0 end:0x802DB2D4
