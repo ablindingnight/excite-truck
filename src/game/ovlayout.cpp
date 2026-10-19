@@ -19,10 +19,10 @@ int fn_802C9A58(void);  // widescreen
 int fn_802C9A60(void);
 s32 fn_802C9C38(void);  // screen height
 s32 fn_802C9C48(void);  // screen width
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-void fn_802354A0(int art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+void fn_802354A0(f32 x, f32 y, f32 z, f32 w, f32 h, int art, int part, u32 color);
 }
 
 extern f32 lbl_8055D020;  // widescreen x stretch
@@ -45,11 +45,15 @@ void fn_80235380(int handle);
 }
 
 // Fields shared by every element type.
+struct V2 {
+    f32 x;
+    f32 y;
+};
+
 struct ElemBase {
     ElemBase(void) {}
     const char* name;  // offset 0x0
-    f32 x;             // offset 0x4
-    f32 y;             // offset 0x8
+    V2 pos;            // offset 0x4
     s32 elemJust;      // offset 0xC
 };
 
@@ -111,11 +115,6 @@ struct IPoint {
     s32 y;  // offset 0x8
 };
 
-struct V2 {
-    f32 x;
-    f32 y;
-};
-
 struct Rect {
     f32 x;  // offset 0x0
     f32 y;  // offset 0x4
@@ -136,9 +135,12 @@ f32 lbl_8055E204;  // y offset
 u8 lbl_8055E208;   // element positions are centred
 
 static inline void StrCopyN(char* d, int n, const char* s) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
+    char* p = d;
+    int k = n;
+    const char* q = s;
+    while ((*p++ = *q++) != 0) {
+        if (--k <= 0) {
+            p[-1] = 0;
             break;
         }
     }
@@ -159,10 +161,11 @@ static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 extern "C" {
 
 u32 fn_80144F40(const char* s, const FlagName* tbl) {
+    const FlagName* p = tbl;
     u32 r = 0;
-    for (; tbl->name; tbl++) {
-        if (strstr(s, tbl->name)) {
-            r |= tbl->flag;
+    for (; p->name; p++) {
+        if (strstr(s, p->name)) {
+            r |= p->flag;
         }
     }
     return r;
@@ -255,11 +258,11 @@ f32 fn_801452E0(ValueNode* n, const char* key) {
 
 void fn_80145368(ElemBase* e, ValueNode* n) {
     e->name = n->GetValue("name");
-    e->x = n->GetFloat("x");
-    e->y = n->GetFloat("y");
+    e->pos.x = n->GetFloat("x");
+    e->pos.y = n->GetFloat("y");
     if (lbl_8055E208) {
-        e->x = fn_801452C8(e->x);
-        e->y = fn_801452D4(e->y);
+        e->pos.x = fn_801452C8(e->pos.x);
+        e->pos.y = fn_801452D4(e->pos.y);
     }
     e->elemJust = n->GetInt("elem_just", 0);
 }
@@ -313,7 +316,7 @@ void fn_801456E8(ElemList<TextElem>* l, void* f) {
         char just[0x40];
         const char* dt = fn_8013126C(q, e->defText);
         fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
-        fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->x, e->y, e->elemJust, e->color,
+        fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
                     e->scale, just, e->name, dt);
     }
     fn_802E3AD0(f, "end\r\n");
@@ -325,7 +328,7 @@ void fn_801457D0(ElemList<ArtElem>* l, void* f) {
     fn_802E3AD0(f, "\tx y wid hit u0 v0 u1 v1 elem_just name\r\n");
     for (i = 0; i < l->count; i++) {
         ArtElem* e = &l->data[i];
-        fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f %f %f %f %f %d %s\r\n", e->x, e->y, e->w, e->h, e->u0, e->v0,
+        fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f %f %f %f %f %d %s\r\n", e->pos.x, e->pos.y, e->w, e->h, e->u0, e->v0,
                     e->u1, e->v1, e->elemJust, e->name);
     }
     fn_802E3AD0(f, "end\r\n");
@@ -337,8 +340,8 @@ void fn_8014589C(ElemList<GartElem>* l, void* f) {
     fn_802E3AD0(f, "\tx y wid hit color elem_just name\r\n");
     for (i = 0; i < l->count; i++) {
         GartElem* e = &l->data[i];
-        fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f #%8.8X %d %s\r\n", e->x, e->y, e->w, e->h, e->color, e->elemJust,
-                    e->name);
+        fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f #%8.8X %d %s\r\n", e->pos.x, e->pos.y, e->w, e->h, e->color,
+                    e->elemJust, e->name);
     }
     fn_802E3AD0(f, "end\r\n");
 }
@@ -376,24 +379,26 @@ void fn_80145B50(Rect* r, int n) {
 }
 
 void fn_80145B94(const TextElem* e, const char* text) {
-    f32 y = fn_801452B4(e->y);
-    fn_8000FF88(e->color, e->just, text, e->scale, fn_801451DC(e->x, e->elemJust), y);
+    f32 y = fn_801452B4(e->pos.y);
+    fn_8000FF88(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
 }
 
 void fn_80145C08(const TextElem* e, const char* text) {
-    f32 y = fn_801452B4(e->y);
-    fn_800104B0(e->color, e->just, text, e->scale, fn_801451DC(e->x, e->elemJust), y);
+    f32 y = fn_801452B4(e->pos.y);
+    fn_800104B0(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
 }
 
 void fn_80145C7C(const TextElem* e, const char* text) {
-    f32 y = fn_801452B4(e->y);
-    fn_8001027C(e->color, e->just, "%s", e->scale, fn_801451DC(e->x, e->elemJust), y, text);
+    f32 y = fn_801452B4(e->pos.y);
+    fn_8001027C(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, "%s", text);
 }
 
 void fn_80145CF4(const GartElem* e, int art, int part) {
-    f32 w = fn_801452A0(e->w, e->elemJust);
-    f32 y = fn_801452B4(e->y);
-    fn_802354A0(art, part, e->color, fn_801451DC(e->x, e->elemJust), y, 0.0f, w, e->h);
+    f32 y;
+    f32 w;
+    w = fn_801452A0(e->w, e->elemJust);
+    y = fn_801452B4(e->pos.y);
+    fn_802354A0(fn_801451DC(e->pos.x, e->elemJust), y, 0.0f, w, e->h, art, part, e->color);
 }
 
 }  // extern "C"
@@ -497,8 +502,8 @@ class MoveHandler : public EditHandler {
 public:
     virtual void Drag(const V2* d, void* target) {
         ElemBase* e = (ElemBase*)target;
-        e->x += d->x;
-        e->y += d->y;
+        e->pos.x += d->x;
+        e->pos.y += d->y;
     }
     virtual u32 Color(void) { return 0xFF00FF00; }
     virtual const char* Label(void) { return "Move"; }
@@ -508,9 +513,9 @@ class ResizeHandler : public EditHandler {
 public:
     virtual void Drag(const V2* d, void* target) {
         ArtElem* e = (ArtElem*)target;
-        e->x += d->x;
+        e->pos.x += d->x;
         e->w -= d->x;
-        e->y += d->y;
+        e->pos.y += d->y;
         e->h -= d->y;
     }
     virtual u32 Color(void) { return 0xFF0000FF; }
@@ -603,15 +608,15 @@ struct EditContext {
     EditRect* HitTest(const ValPoint& p) {
         ElemBase none;
         int i;
-        none.x = 0.0f;
-        none.y = 0.0f;
+        none.pos.x = 0.0f;
+        none.pos.y = 0.0f;
         FixedList<EditRect*, 10> hits;
         for (i = 0; i < rects->a.count; i++) {
             EditRect* r = &rects->a.data[i];
             if (r->handler) {
                 const ElemBase* o = r->target ? (const ElemBase*)r->target : &none;
-                if (p.x >= r->r.x + o->x && p.x < r->r.x + o->x + r->r.w && p.y >= r->r.y + o->y &&
-                    p.y < r->r.y + o->y + r->r.h) {
+                if (p.x >= r->r.x + o->pos.x && p.x < r->r.x + o->pos.x + r->r.w && p.y >= r->r.y + o->pos.y &&
+                    p.y < r->r.y + o->pos.y + r->r.h) {
                     hits.Push(r);
                 }
             }
@@ -1060,12 +1065,12 @@ void fn_801476D8(const ArtElem* e, u32 color, s32 tex) {
     if (e) {
         fn_802C8BD0(tex);
         if (fn_802C8DBC(4)) {
-            fn_802C8E00(color, 0, fn_801451DC(e->x, e->elemJust), fn_801452B4(e->y), 0.0f, e->u0, e->v0);
-            fn_802C8E00(color, 0, fn_801451DC(e->x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
-                        fn_801452B4(e->y), 0.0f, e->u1, e->v0);
-            fn_802C8E00(color, 1, fn_801451DC(e->x, e->elemJust), fn_801452B4(e->y + e->h), 0.0f, e->u0, e->v1);
-            fn_802C8E00(color, 1, fn_801451DC(e->x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
-                        fn_801452B4(e->y + e->h), 0.0f, e->u1, e->v1);
+            fn_802C8E00(color, 0, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), 0.0f, e->u0, e->v0);
+            fn_802C8E00(color, 0, fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
+                        fn_801452B4(e->pos.y), 0.0f, e->u1, e->v0);
+            fn_802C8E00(color, 1, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y + e->h), 0.0f, e->u0, e->v1);
+            fn_802C8E00(color, 1, fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
+                        fn_801452B4(e->pos.y + e->h), 0.0f, e->u1, e->v1);
             fn_802C8E48();
         }
         fn_802C8D74();
@@ -1092,6 +1097,13 @@ void fn_80147940(ILayout* l, GartElem* b, const char* set, int part) {
     if (b && art) {
         fn_80145CF4(b, art, part);
     }
+}
+
+static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
+    V2 r;
+    r.x = a.x + t * (b.x - a.x);
+    r.y = a.y + t * (b.y - a.y);
+    return r;
 }
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
@@ -1141,22 +1153,18 @@ u32 fn_80147C50(u32 a, u32 b, f32 t) {
 }
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
-    V2 p;
-    f32 s;
-    p.x = a->x + t * (b->x - a->x);
-    p.y = a->y + t * (b->y - a->y);
-    s = a->scale + t * (b->scale - a->scale);
+    V2 p = LerpV2(a->pos, b->pos, t);
+    f32 s = a->scale + t * (b->scale - a->scale);
     *out = *a;
-    out->x = p.x;
-    out->y = p.y;
+    out->pos = p;
     out->scale = s;
     out->color = fn_80147C50(a->color, b->color, t);
 }
 
 void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
+    V2 p = LerpV2(a->pos, b->pos, t);
     *out = *a;
-    out->x = a->x + t * (b->x - a->x);
-    out->y = a->y + t * (b->y - a->y);
+    out->pos = p;
     out->u0 = a->u0 + t * (b->u0 - a->u0);
     out->u1 = a->u1 + t * (b->u1 - a->u1);
     out->v0 = a->v0 + t * (b->v0 - a->v0);
@@ -1170,8 +1178,8 @@ void fn_80147EE0(ArtElem* e, f32 s) {
     f32 h = e->h * s;
     e->h = h;
     e->w = w;
-    e->x = e->x + e->w / s * 0.5f - w * 0.5f;
-    e->y = e->y + e->h / s * 0.5f - h * 0.5f;
+    e->pos.x = e->pos.x + e->w / s * 0.5f - w * 0.5f;
+    e->pos.y = e->pos.y + e->h / s * 0.5f - h * 0.5f;
 }
 
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
@@ -1181,16 +1189,16 @@ void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 s
 
 void fn_80147FF0(const GartElem* e, u32 color) {
     f32 w = fn_801452A0(e->w, e->elemJust);
-    fn_80011278(color, fn_801451DC(e->x, e->elemJust), fn_801452B4(e->y), w, e->h);
+    fn_80011278(color, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h);
 }
 
 void fn_80148070(const GartElem* e, u32 color, int art) {
     f32 w = fn_801452A0(e->w, e->elemJust);
-    fn_80011280(color, art, fn_801451DC(e->x, e->elemJust), fn_801452B4(e->y), w, e->h);
+    fn_80011280(color, art, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h);
 }
 
 void fn_80148100(const GartElem* e) {
-    fn_801470B0(e->x, e->y, e->w, e->h, e->color, -1, e->elemJust, 0.0f, 0.0f, 0.0f, 0.0f);
+    fn_801470B0(e->pos.x, e->pos.y, e->w, e->h, e->color, -1, e->elemJust, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void fn_80148134(f32* ox, f32* oy, int just, f32 x, f32 y) {
@@ -1338,19 +1346,21 @@ void Layout::Edit(void) {
                     col = r->handler->Color();
                 }
                 if (r->target) {
-                    fn_80010B80(fn_801451DC(((ElemBase*)r->target)->x + r->r.x, 4), fn_801452B4(((ElemBase*)r->target)->y + r->r.y), r->r.w, r->r.h, col);
+                    fn_80010B80(fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
+                                fn_801452B4(((ElemBase*)r->target)->pos.y + r->r.y), r->r.w, r->r.h, col);
                 } else {
                     fn_80010B80(fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), r->r.w, r->r.h, col);
                 }
                 label = r->handler->Label();
                 if (label) {
                     if (!r->target) {
-                        fn_8000FF88(-1, 9, "%s", 0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), label);
+                        fn_8000FF88(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, "%s", label);
                     } else if (r == c->hover) {
-                        fn_8000FF88(-1, 12, "%s", 0.6f, fn_801451DC(((ElemBase*)r->target)->x + r->r.x, 4),
-                                    fn_801452B4(r->r.y + ((ElemBase*)r->target)->y - 10.0f), label);
+                        fn_8000FF88(0.6f, fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
+                                    fn_801452B4(r->r.y + ((ElemBase*)r->target)->pos.y - 10.0f), -1, 12, "%s", label);
                         fn_80010B80(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
-                        fn_8000FF88(-1, 9, "%s", 0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), ((ElemBase*)r->target)->name);
+                        fn_8000FF88(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, "%s",
+                                    ((ElemBase*)r->target)->name);
                     }
                 }
             }
@@ -1363,11 +1373,11 @@ void Layout::Edit(void) {
                 other = 0;
             }
             col = other ? 0x70FFFFFF : 0xC0FFFFFF;
-            fn_80010B80(fn_801451DC(a->x, 4), fn_801452B4(a->y), a->w, a->h, col);
+            fn_80010B80(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
             if (c->active && a == c->active->target) {
-                fn_80010B80(fn_801451DC(a->x, 4), fn_801452B4(a->y - 15.0f), 100.0f, 15.0f, 0x40000000);
-                fn_8000FF88(-1, 9, "%.0f, %.0f (%.0f, %.0f)", 0.6f, fn_801451DC(a->x, 4), fn_801452B4(a->y - 15.0f), a->x,
-                            a->y, a->w, a->h);
+                fn_80010B80(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y - 15.0f), 100.0f, 15.0f, 0x40000000);
+                fn_8000FF88(0.6f, fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y - 15.0f), -1, 9, "%.0f, %.0f (%.0f,
+                            %.0f)", a->pos.x, a->pos.y, a->w, a->h);
             }
         }
         for (i = 0; i < garts->a.count; i++) {
@@ -1382,11 +1392,11 @@ void Layout::Edit(void) {
             } else {
                 col = 0xC0FFFFFF;
             }
-            fn_80010B80(fn_801451DC(g->x, 4), fn_801452B4(g->y), g->w, g->h, col);
+            fn_80010B80(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y), g->w, g->h, col);
             if (c->active && g == c->active->target) {
-                fn_80010B80(fn_801451DC(g->x, 4), fn_801452B4(g->y - 15.0f), 100.0f, 15.0f, 0x40000000);
-                fn_8000FF88(-1, 9, "%.0f, %.0f (%.0f, %.0f)", 0.6f, fn_801451DC(g->x, 4), fn_801452B4(g->y - 15.0f), g->x,
-                            g->y, g->w, g->h);
+                fn_80010B80(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y - 15.0f), 100.0f, 15.0f, 0x40000000);
+                fn_8000FF88(0.6f, fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y - 15.0f), -1, 9, "%.0f, %.0f (%.0f,
+                            %.0f)", g->pos.x, g->pos.y, g->w, g->h);
             }
         }
     }
