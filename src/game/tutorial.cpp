@@ -381,84 +381,27 @@ public:
 // The challenges' common part: help pages, the result and place targets.
 class ChallengeBase : public ChallengeIF {
 public:
+    void DoUpdate(void);
+    void DoStart(void);
     ChallengeBase(ValueNode* n) { node = n; }
     virtual ~ChallengeBase(void) {}
-    virtual void Init(void) {}
-    virtual void Shutdown(void) {}
-    virtual void Load(void) {
-        int n = 0;
-        ValueTable* cmds = fn_80131810("tutcmd.val");
-        char buf[0x10];
-        int i;
-        pages.count = 0;
-        do {
-            n++;
-            fn_801345D8(buf, sizeof(buf), "desc%d", n);
-        } while (node->Has(buf));
-        n--;
-        for (i = 0; i < n; i++) {
-            HelpPage* p = &pages.data[pages.count++];
-            fn_801345D8(buf, sizeof(buf), "desc%d", i + 1);
-            p->desc = node->GetValue(buf);
-            fn_801345D8(buf, sizeof(buf), "lyt%d", i + 1);
-            p->lyt = 0;
-            if (node->Has(buf)) {
-                const char* name = node->GetValue(buf);
-                if (cmds) {
-                    name = (const char*)cmds->FindChild(name);
-                    if (name) {
-                        p->lyt = fn_80146C2C(lbl_8055E2E4, name);
-                    }
-                }
-            }
-        }
-        if (cmds) {
-            fn_80131818(cmds);
-        }
-    }
-    virtual void Unload(void) {
-        int i;
-        for (i = 0; i < pages.count; i++) {
-            if (pages.data[i].lyt) {
-                delete pages.data[i].lyt;
-            }
-        }
-        pages.count = 0;
-    }
-    virtual void Update(void) {
-        if (!fn_801C5B60()) {
-            fn_801DF074(8, 0);
-        }
-    }
-    virtual void Start(void) {
-        int i;
-        result = 0;
-        resultSet = 0;
-        resultTime = -1000.0f;
-        for (i = 0; i < pages.count; i++) {
-            fn_801DF380(node->GetString("title", ""), pages.data[i].desc, fn_80161438, pages.data[i].lyt);
-        }
-    }
-    virtual int Key(int k) { return 0; }
-    virtual f32 Time(void) { return 5.0f; }
-    virtual int Get(f32* out, int i) {
-        *out = speed[i];
-        return 1;
-    }
+    virtual void Init(void);
+    virtual void Shutdown(void);
+    virtual void Load(void);
+    virtual void Unload(void);
+    virtual void Update(void);
+    virtual void Start(void);
+    virtual int Key(int k);
+    virtual f32 Time(void);
+    virtual int Get(f32* out, int i);
     virtual int Query(void* car, int i, int c);
-    virtual int Draw(int a) { return 0; }
-    virtual int DrawResults(int a) { return 0; }
-    virtual void Draw3D(void) {}
-    virtual int AllowPause(void) { return 1; }
-    virtual void Camera(void) {}
-    virtual const char* Title(void) { return node->GetString("title", ""); }
-    virtual void SetResult(int r) {
-        if (!resultSet) {
-            result = r;
-            resultSet = 1;
-            resultTime = lbl_8055E3C8;
-        }
-    }
+    virtual int Draw(int a);
+    virtual int DrawResults(int a);
+    virtual void Draw3D(void);
+    virtual int AllowPause(void);
+    virtual void Camera(void);
+    virtual const char* Title(void);
+    virtual void SetResult(int r);
 
     ValueNode* node;           // offset 0x4
     s32 result;                // offset 0x8
@@ -471,99 +414,27 @@ public:
 // A timed challenge: collect the tokens (and, in the subclasses, do the stunts) before the time runs out.
 class Challenge : public ChallengeBase {
 public:
+    void DoEvent(int a, int b, int c);
+    int DoDraw(int a);
+    void DoUpdate(void);
+    void DoStart(void);
     Challenge(ValueNode* n) : ChallengeBase(n) { SetupChallenge(this, n); }
     virtual ~Challenge(void) {}
     virtual void Init(void);
     virtual void Shutdown(void);
-    virtual void Update(void) {
-        ChallengeBase::Update();
-        Collect();
-    }
-    virtual void Start(void) {
-        int i;
-        ChallengeBase::Start();
-        got = 0;
-        time = 0.0f;
-        passed = 0;
-        endTime = 0.0f;
-        cont = 0;
-        crashed = 0;
-        ready = 1;
-        for (i = 0; i < tokens.count; i++) {
-            Token* t = &tokens.data[i];
-            int j;
-            fn_801EA140(t);
-            t->pos.y += t->bob;
-            if (t->path) {
-                for (j = 0; j < sizeof(t->ends) / sizeof(t->ends[0]); j++) {
-                    fn_801EA140(&t->ends[j]);
-                }
-            }
-            t->active = 1;
-            if (t->path) {
-                fn_802A95A8(&t->mid, &t->dir);
-                fn_802A95AC(1);
-            }
-        }
-    }
-    virtual int IsDone(void) const { return result != 0; }
-    virtual int IsPassed(void) const { return result == 1; }
-    virtual int State(void) {
-        int r = 0;
-        if (IsDone() && cont) {
-            r = 1;
-        }
-        return r;
-    }
-    virtual int Key(int k) {
-        if (endTime > 0.5f) {
-            if (k == 'X') {
-                if (cont) {
-                    lbl_8055E2DD = 1;
-                }
-                cont = 1;
-                return 1;
-            }
-            if (k == 0x1Bu) {
-                lbl_8055E2DD = 1;
-                return 1;
-            }
-        }
-        return 0;
-    }
-    virtual void Event(int a, int b, int c) {
-        if (!IsDone()) {
-            switch (a) {
-            case 0:
-                if (lbl_804348E8[b]->model == 'PCAR') {
-                    SetResult(2);
-                    crashed = 1;
-                }
-                break;
-            }
-        }
-    }
-    virtual int Draw(int a) {
-        f32 now = lbl_8055E3C8;
-        if (now > Time() && !IsPassed()) {
-            char buf[0x14];
-            fn_801476D8(lbl_8055E2E0->Art("timer_art"), -1, lbl_8055E2F8);
-            fn_801476C4(lbl_8055E2E0->Find("timer_title"));
-            fn_80130980(buf, sizeof(buf), 3, limit - time);
-            fn_801475D0(lbl_8055E2E0, "timer", "%s", buf);
-        }
-        return 0;
-    }
-    virtual int DrawResults(int a) {
-        if (endTime > 0.5f) {
-            fn_801476C4(lbl_8055E2E0->Find("continue"));
-        }
-        return 1;
-    }
+    virtual void Update(void);
+    virtual void Start(void);
+    virtual int IsDone(void) const;
+    virtual int IsPassed(void) const;
+    virtual int State(void);
+    virtual int Key(int k);
+    virtual void Event(int a, int b, int c);
+    virtual int Draw(int a);
+    virtual int DrawResults(int a);
     virtual void Draw3D(void);
-    virtual int AllowExit(void) { return endTime < 0.5f; }
+    virtual int AllowExit(void);
     virtual void Camera(void);
-    virtual int TimedOut(void) { return time > limit; }
+    virtual int TimedOut(void);
 
     void Collect(void);
 
@@ -591,83 +462,16 @@ class StuntChallenge : public Challenge, public StuntWatcher {
 public:
     StuntChallenge(ValueNode* n) : Challenge(n) { SetupStunt(this, n); }
     virtual ~StuntChallenge(void) { fn_8015857C(this); }
-    virtual void Update(void) {
-        int all = AllStunts();
-        if (all) {
-            ready = 1;
-            stuntTime += 0.016683351f;
-            if (onlyStunts && stunts.count > 0) {
-                SetResult(1);
-            }
-        } else {
-            ready = 0;
-        }
-        Challenge::Update();
-        if (!all && got >= needed) {
-            SetResult(4);
-        }
-    }
-    virtual void Start(void) {
-        int i;
-        Challenge::Start();
-        for (i = 0; i < stunts.count; i++) {
-            stunts.data[i].done = 0;
-        }
-        done = 0;
-        stuntTime = 0.0f;
-    }
-    virtual int IsDone(void) const {
-        f32 delay = finishDelay;
-        if (IsPassed()) {
-            return stuntTime > delay;
-        }
-        return result != 0;
-    }
-    virtual int IsPassed(void) const { return result == 1; }
-    virtual void Event(int a, int b, int c) {
-        if (!IsDone()) {
-            switch (a) {
-            case 2:
-                Notify(0x10, b, 5);
-                break;
-            case 1:
-                Notify(0x11, b, 5);
-                break;
-            case 3:
-                Notify(0x12, b, 5);
-                break;
-            case 4:
-                Notify(0x13, b, 5);
-                break;
-            }
-        }
-        Challenge::Event(a, b, c);
-    }
+    virtual void Update(void);
+    virtual void Start(void);
+    virtual int IsDone(void) const;
+    virtual int IsPassed(void) const;
+    virtual void Event(int a, int b, int c);
     virtual int Draw(int a);
     virtual int DrawResults(int a);
-    virtual void Notify(s32 type, int car, int rank) {
-        if (lbl_804348E8[car]->model == 'PCAR' && done < stunts.count && !IsDone()) {
-            int i;
-            for (i = 0; i < stunts.count; i++) {
-                StuntReq* r = &stunts.data[i];
-                if (!r->done && (r->type == type || (r->type == 4 && type == 5) || (r->type == 11 && type == 12)) &&
-                    r->rank <= rank) {
-                    r->done = 1;
-                    done++;
-                }
-            }
-        }
-    }
+    virtual void Notify(s32 type, int car, int rank);
 
-    int AllStunts(void) {
-        int i;
-        for (i = 0; i < stunts.count; i++) {
-            if (!stunts.data[i].done) {
-                return 0;
-            }
-        }
-        return 1;
-    }
+    int AllStunts(void);
 
     FixedArr<StuntReq, 4> stunts;  // offset 0x570
     s32 done;                   // offset 0x5AC
@@ -681,38 +485,13 @@ class FreestyleChallenge : public Challenge {
 public:
     FreestyleChallenge(ValueNode* n) : Challenge(n) { SetupFreestyle(this, n); }
     virtual ~FreestyleChallenge(void) {}
-    virtual void Update(void) {
-        if (time > limit) {
-            ended = 1;
-        }
-        Challenge::Update();
-    }
-    virtual void Start(void) {
-        Challenge::Start();
-        passedScore = 0;
-        ended = 0;
-        f574 = 0.0f;
-        if (lbl_8055E304 > 0) {
-            fn_8016D294(0, 0, lbl_8055E304 - 1);
-        }
-    }
-    virtual int IsDone(void) const { return ended; }
-    virtual int IsPassed(void) const { return passedScore; }
-    virtual int State(void) { return ended; }
-    virtual void Event(int a, int b, int c) {
-        if (a == 5 && !ended) {
-            if (c >= threshold) {
-                passedScore = 1;
-            }
-            ended = 1;
-        }
-    }
-    virtual int Draw(int a) {
-        if (!ended) {
-            return Challenge::Draw(a);
-        }
-        return 0;
-    }
+    virtual void Update(void);
+    virtual void Start(void);
+    virtual int IsDone(void) const;
+    virtual int IsPassed(void) const;
+    virtual int State(void);
+    virtual void Event(int a, int b, int c);
+    virtual int Draw(int a);
     virtual int DrawResults(int a);
 
     u8 passedScore;  // offset 0x56C
@@ -726,38 +505,26 @@ class ChalList : public Task {
 public:
     ChalList(void) {}
     virtual ~ChalList(void) {}
-    virtual void Init(void) {
-        pick = 0;
-        sel = 1;
-        done = 0;
-        exit = 0;
-        told = 0;
-    }
-    virtual void Shutdown(void) {}
-    virtual void Load(void) {}
-    virtual void Unload(void) {}
+    virtual void Init(void);
+    virtual void Shutdown(void);
+    virtual void Load(void);
+    virtual void Unload(void);
     virtual void Update(void);
     virtual void Start(void);
-    virtual int IsDone(void) const { return done; }
-    virtual int IsPassed(void) const { return done; }
-    virtual int State(void) { return done; }
+    virtual int IsDone(void) const;
+    virtual int IsPassed(void) const;
+    virtual int State(void);
     virtual int Key(int k);
-    virtual f32 Time(void) { return 0.0f; }
-    virtual int Query(void* car, int i, int c) { return 0; }
-    virtual void Event(int a, int b, int c) {}
+    virtual f32 Time(void);
+    virtual int Query(void* car, int i, int c);
+    virtual void Event(int a, int b, int c);
     virtual int Draw(int a);
-    virtual int DrawResults(int a) { return 1; }
-    virtual void Draw3D(void) {}
-    virtual int AllowPause(void) { return 0; }
-    virtual int AllowExit(void) { return 0; }
-    virtual void Camera(void) {
-        CamFrame cam;
-        f32 fov;
-        GetTipsCamera(&cam, &fov);
-        fn_8026A2CC(&cam, fov, 0);
-        fn_8000C630(0x15, -1);
-    }
-    virtual const char* Title(void) { return "Challenge List"; }
+    virtual int DrawResults(int a);
+    virtual void Draw3D(void);
+    virtual int AllowPause(void);
+    virtual int AllowExit(void);
+    virtual void Camera(void);
+    virtual const char* Title(void);
 
     u8 pick;  // offset 0x4
     u8 done;  // offset 0x5
@@ -784,22 +551,10 @@ extern "C" int fn_80161BB8(void);
 class ChalSubTaskMgr : public CSubTaskMgr {
 public:
     virtual ~ChalSubTaskMgr(void) {}
-    virtual int vf0C(int a, int b, int c, int d, u32* flags) {
-        if (fn_80161BB8()) {
-            *flags |= 0x1150;
-            return 1;
-        }
-        return 0;
-    }
-    virtual int vf10(int a, f32* out, int car) {
-        if (lbl_804348E8[car]) {
-            *out = 0.0f;
-            lbl_8042FDEC.data[lbl_8055E304]->Get(out, car);
-        }
-        return 0;
-    }
-    virtual int vf14(void) { return 1; }
-    virtual int vf1C(void) { return 0; }
+    virtual int vf0C(int a, int b, int c, int d, u32* flags);
+    virtual int vf10(int a, f32* out, int car);
+    virtual int vf14(void);
+    virtual int vf1C(void);
 };
 
 static inline void SetupChallenge(Challenge* c, ValueNode* n) {
@@ -1208,6 +963,109 @@ struct Delta2 {
     f32 z;
 };
 
+
+
+
+
+
+static inline void DrawBars(void) {
+    fn_801476D8(lbl_8055E2E0->Art("bar_top"), -1, lbl_8055E2E8);
+    fn_801476D8(lbl_8055E2E0->Art("bar_bot"), -1, lbl_8055E2EC);
+}
+
+
+
+
+
+
+struct CarState {
+    TVec3 basis[3];  // offset 0x0
+    TVec3 origin;    // offset 0x24
+};
+
+
+
+struct PathIter {
+    u8 pad[0x58];
+};
+
+struct LineNode {
+    f32 x;   // offset 0x0
+    f32 z;   // offset 0x4
+    f32 dx;  // offset 0x8
+    f32 dz;  // offset 0xC
+    u8 pad10[0x14 - 0x10];
+    LineNode* next;  // offset 0x14
+};
+
+struct LineHit {
+    LineNode* node;  // offset 0x0
+    f32 t;           // offset 0x4
+    s32 max;         // offset 0x8
+};
+
+class PathSet {
+public:
+    virtual void vf08(void);
+    virtual int GetLine(int i);  // 0x0C
+};
+
+extern "C" {
+void fn_801352B8(PathIter* it);
+int fn_80135D60(PathIter* it, int line);
+void fn_801355C0(PathIter* it, TVec2* pos, int a, LineHit* hit, int b);
+void fn_8013530C(PathIter* it, int unk);
+PathSet* fn_80156A40(void);
+}
+
+void ChallengeBase::Init(void) {
+
+}
+
+void ChallengeBase::Shutdown(void) {
+
+}
+
+inline void ChallengeBase::DoStart(void) {
+    int i;
+    result = 0;
+    resultSet = 0;
+    resultTime = -1000.0f;
+    for (i = 0; i < pages.count; i++) {
+        fn_801DF380(node->GetString("title", ""), pages.data[i].desc, fn_80161438, pages.data[i].lyt);
+    }
+}
+
+void ChallengeBase::Start(void) { DoStart(); }
+
+inline void ChallengeBase::DoUpdate(void) {
+    if (!fn_801C5B60()) {
+        fn_801DF074(8, 0);
+    }
+}
+
+void ChallengeBase::Update(void) { DoUpdate(); }
+
+int ChallengeBase::Draw(int a) {
+    return 0;
+}
+
+int ChallengeBase::DrawResults(int a) {
+    return 0;
+}
+
+void ChallengeBase::Draw3D(void) {
+
+}
+
+void ChallengeBase::Camera(void) {
+
+}
+
+int ChallengeBase::Key(int k) {
+    return 0;
+}
+
 inline void Challenge::Collect(void) {
     if (!IsDone()) {
         int i;
@@ -1285,7 +1143,294 @@ inline void Challenge::Collect(void) {
     }
 }
 
-inline void Challenge::Init(void) {
+inline void Challenge::DoUpdate(void) {
+    ChallengeBase::DoUpdate();
+    Collect();
+}
+
+void Challenge::Update(void) { DoUpdate(); }
+
+inline void Challenge::DoStart(void) {
+    int i;
+    ChallengeBase::DoStart();
+    got = 0;
+    time = 0.0f;
+    passed = 0;
+    endTime = 0.0f;
+    cont = 0;
+    crashed = 0;
+    ready = 1;
+    for (i = 0; i < tokens.count; i++) {
+        Token* t = &tokens.data[i];
+        int j;
+        fn_801EA140(t);
+        t->pos.y += t->bob;
+        if (t->path) {
+            for (j = 0; j < sizeof(t->ends) / sizeof(t->ends[0]); j++) {
+                fn_801EA140(&t->ends[j]);
+            }
+        }
+        t->active = 1;
+        if (t->path) {
+            fn_802A95A8(&t->mid, &t->dir);
+            fn_802A95AC(1);
+        }
+    }
+}
+
+void Challenge::Start(void) { DoStart(); }
+
+int Challenge::IsDone(void) const {
+    return result != 0;
+}
+
+int Challenge::IsPassed(void) const {
+    return result == 1;
+}
+
+inline void Challenge::DoEvent(int a, int b, int c) {
+    if (!IsDone()) {
+        switch (a) {
+        case 0:
+            if (lbl_804348E8[b]->model == 'PCAR') {
+                SetResult(2);
+                crashed = 1;
+            }
+            break;
+        }
+    }
+}
+
+void Challenge::Event(int a, int b, int c) { DoEvent(a, b, c); }
+
+inline int Challenge::DoDraw(int a) {
+    f32 now = lbl_8055E3C8;
+    if (now > Time() && !IsPassed()) {
+        char buf[0x14];
+        fn_801476D8(lbl_8055E2E0->Art("timer_art"), -1, lbl_8055E2F8);
+        fn_801476C4(lbl_8055E2E0->Find("timer_title"));
+        fn_80130980(buf, sizeof(buf), 3, limit - time);
+        fn_801475D0(lbl_8055E2E0, "timer", "%s", buf);
+    }
+    return 0;
+}
+
+int Challenge::Draw(int a) { return DoDraw(a); }
+
+int Challenge::DrawResults(int a) {
+    if (endTime > 0.5f) {
+        fn_801476C4(lbl_8055E2E0->Find("continue"));
+    }
+    return 1;
+}
+
+void StuntChallenge::Start(void) {
+    int i;
+    DoStart();
+    for (i = 0; i < stunts.count; i++) {
+        stunts.data[i].done = 0;
+    }
+    done = 0;
+    stuntTime = 0.0f;
+}
+
+inline int StuntChallenge::AllStunts(void) {
+    int i;
+    for (i = 0; i < stunts.count; i++) {
+        if (!stunts.data[i].done) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void StuntChallenge::Update(void) {
+    int all = AllStunts();
+    if (all) {
+        ready = 1;
+        stuntTime += 0.016683351f;
+        if (onlyStunts && stunts.count > 0) {
+            SetResult(1);
+        }
+    } else {
+        ready = 0;
+    }
+    DoUpdate();
+    if (!all && got >= needed) {
+        SetResult(4);
+    }
+}
+
+int StuntChallenge::IsDone(void) const {
+    f32 delay = finishDelay;
+    if (IsPassed()) {
+        return stuntTime > delay;
+    }
+    return result != 0;
+}
+
+int StuntChallenge::IsPassed(void) const {
+    return result == 1;
+}
+
+void StuntChallenge::Event(int a, int b, int c) {
+    if (!IsDone()) {
+        switch (a) {
+        case 2:
+            Notify(0x10, b, 5);
+            break;
+        case 1:
+            Notify(0x11, b, 5);
+            break;
+        case 3:
+            Notify(0x12, b, 5);
+            break;
+        case 4:
+            Notify(0x13, b, 5);
+            break;
+        }
+    }
+    DoEvent(a, b, c);
+}
+
+int StuntChallenge::Draw(int a) { return DoDraw(a); }
+
+int StuntChallenge::DrawResults(int a) {
+    const char* body;
+    TextBox* t;
+    TextBox* art;
+    DrawBars();
+    if (IsPassed()) {
+        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
+        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
+        body = fn_80131234("Tutorial:PASSED_BODY");
+    } else {
+        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
+        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
+        if (result == 4) {
+            body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
+        } else if (result == 2) {
+            body = fn_80131234("Tutorial:FAILED_BODY_CRASH");
+        } else {
+            body = fn_80131234("Tutorial:FAILED_BODY_TIME");
+        }
+    }
+    t = (TextBox*)lbl_8055E2E0->Find("results2");
+    art = (TextBox*)lbl_8055E2E0->Art("results_art");
+    if (t && art) {
+        f32 px;
+        f32 py;
+        fn_80148134(t->x, t->y, &py, &px, t->mode);
+        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
+    }
+    if (endTime > 0.5f) {
+        fn_801476C4(lbl_8055E2E0->Find("continue"));
+    }
+    return 1;
+}
+
+int Challenge::State(void) {
+    int r = 0;
+    if (IsDone() && cont) {
+        r = 1;
+    }
+    return r;
+}
+
+void StuntChallenge::Notify(s32 type, int car, int rank) {
+    if (lbl_804348E8[car]->model == 'PCAR' && done < stunts.count && !IsDone()) {
+        int i;
+        for (i = 0; i < stunts.count; i++) {
+            StuntReq* r = &stunts.data[i];
+            if (!r->done && (r->type == type || (r->type == 4 && type == 5) || (r->type == 11 && type == 12)) &&
+                r->rank <= rank) {
+                r->done = 1;
+                done++;
+            }
+        }
+    }
+}
+
+void FreestyleChallenge::Start(void) {
+    DoStart();
+    passedScore = 0;
+    ended = 0;
+    f574 = 0.0f;
+    if (lbl_8055E304 > 0) {
+        fn_8016D294(0, 0, lbl_8055E304 - 1);
+    }
+}
+
+int FreestyleChallenge::IsPassed(void) const {
+    return passedScore;
+}
+
+void FreestyleChallenge::Event(int a, int b, int c) {
+    if (a == 5 && !ended) {
+        if (c >= threshold) {
+            passedScore = 1;
+        }
+        ended = 1;
+    }
+}
+
+void FreestyleChallenge::Update(void) {
+    if (time > limit) {
+        ended = 1;
+    }
+    DoUpdate();
+}
+
+int FreestyleChallenge::Draw(int a) {
+    if (!ended) {
+        return DoDraw(a);
+    }
+    return 0;
+}
+
+int FreestyleChallenge::DrawResults(int a) {
+    const char* body;
+    TextBox* t;
+    TextBox* art;
+    DrawBars();
+    if (IsPassed()) {
+        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
+        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
+        body = fn_80131234("Tutorial:PASSED_BODY");
+    } else {
+        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
+        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
+        if (time > limit) {
+            body = fn_80131234("Tutorial:FAILED_BODY_TIME");
+        } else if (crashed) {
+            body = fn_80131234("Tutorial:FAILED_BODY_CRASH");
+        } else {
+            body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
+        }
+    }
+    t = (TextBox*)lbl_8055E2E0->Find("results2");
+    art = (TextBox*)lbl_8055E2E0->Art("results_art");
+    if (t && art) {
+        f32 px;
+        f32 py;
+        fn_80148134(t->x, t->y, &py, &px, t->mode);
+        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
+    }
+    if (endTime > 0.5f) {
+        fn_801476C4(lbl_8055E2E0->Find("continue"));
+    }
+    return 1;
+}
+
+int FreestyleChallenge::IsDone(void) const {
+    return ended;
+}
+
+int FreestyleChallenge::State(void) {
+    return ended;
+}
+
+void Challenge::Init(void) {
     model = fn_802C6FC0("growcoin.mod", 0, 0);
     if (model == -1) {
         fn_802E30C8("Couldn't load challenge token model %s", "growcoin.mod");
@@ -1379,7 +1524,7 @@ inline void Challenge::Init(void) {
     }
 }
 
-inline void Challenge::Shutdown(void) {
+void Challenge::Shutdown(void) {
     int i;
     for (i = 0; i < tokens.count; i++) {
         if (tokens.data[i].path) {
@@ -1391,7 +1536,11 @@ inline void Challenge::Shutdown(void) {
     fn_802C6CF8(model);
 }
 
-inline void Challenge::Camera(void) {
+int Challenge::AllowExit(void) {
+    return endTime < 0.5f;
+}
+
+void Challenge::Camera(void) {
     if (IsDone()) {
         if (lbl_8055E3C8 - resultTime > 4.0f) {
             CamFrame cam;
@@ -1405,7 +1554,7 @@ inline void Challenge::Camera(void) {
     }
 }
 
-inline void Challenge::Draw3D(void) {
+void Challenge::Draw3D(void) {
     s32 z = fn_802C9950(-0x100);
     s32 c = fn_802C9994(0);
     if (model != -1) {
@@ -1421,282 +1570,87 @@ inline void Challenge::Draw3D(void) {
     fn_802C9994(c);
 }
 
-static inline void DrawBars(void) {
-    fn_801476D8(lbl_8055E2E0->Art("bar_top"), -1, lbl_8055E2E8);
-    fn_801476D8(lbl_8055E2E0->Art("bar_bot"), -1, lbl_8055E2EC);
-}
-
-inline int StuntChallenge::Draw(int a) { return Challenge::Draw(a); }
-
-inline int StuntChallenge::DrawResults(int a) {
-    const char* body;
-    TextBox* t;
-    TextBox* art;
-    DrawBars();
-    if (IsPassed()) {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
-        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
-        body = fn_80131234("Tutorial:PASSED_BODY");
-    } else {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
-        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
-        if (result == 4) {
-            body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
-        } else if (result == 2) {
-            body = fn_80131234("Tutorial:FAILED_BODY_CRASH");
-        } else {
-            body = fn_80131234("Tutorial:FAILED_BODY_TIME");
-        }
-    }
-    t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->Art("results_art");
-    if (t && art) {
-        f32 px;
-        f32 py;
-        fn_80148134(t->x, t->y, &py, &px, t->mode);
-        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
-    }
+int Challenge::Key(int k) {
     if (endTime > 0.5f) {
-        fn_801476C4(lbl_8055E2E0->Find("continue"));
-    }
-    return 1;
-}
-
-inline int FreestyleChallenge::DrawResults(int a) {
-    const char* body;
-    TextBox* t;
-    TextBox* art;
-    DrawBars();
-    if (IsPassed()) {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
-        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
-        body = fn_80131234("Tutorial:PASSED_BODY");
-    } else {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
-        fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
-        if (time > limit) {
-            body = fn_80131234("Tutorial:FAILED_BODY_TIME");
-        } else if (crashed) {
-            body = fn_80131234("Tutorial:FAILED_BODY_CRASH");
-        } else {
-            body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
-        }
-    }
-    t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->Art("results_art");
-    if (t && art) {
-        f32 px;
-        f32 py;
-        fn_80148134(t->x, t->y, &py, &px, t->mode);
-        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
-    }
-    if (endTime > 0.5f) {
-        fn_801476C4(lbl_8055E2E0->Find("continue"));
-    }
-    return 1;
-}
-
-inline int ChalList::Key(int k) {
-    if (fn_801E7E34()->menu == 0) {
-        if (!exit) {
-            switch (k) {
-            case 0x126: {
-                int s = --sel;
-                if (s < 1) {
-                    sel = lbl_8042FDEC.count;
-                } else if (s > lbl_8042FDEC.count) {
-                    sel = 1;
-                } else if (s > fn_80160CE4() && s < lbl_8042FDEC.count) {
-                    sel = fn_80160CE4();
-                }
-                fn_80230E90(1);
-                return 1;
-            }
-            case 0x128: {
-                int s = ++sel;
-                if (s < 1) {
-                    sel = lbl_8042FDEC.count;
-                } else if (s > lbl_8042FDEC.count) {
-                    sel = 1;
-                } else if (s > fn_80160CE4() && s < lbl_8042FDEC.count) {
-                    sel = lbl_8042FDEC.count;
-                }
-                fn_80230E90(1);
-                return 1;
-            }
-            case 'X':
-                pick = 1;
-                return 1;
-            case 0x1B:
+        if (k == 'X') {
+            if (cont) {
                 lbl_8055E2DD = 1;
-                return 1;
             }
-        } else {
-            switch (k) {
-            case 'X':
-                sel = lbl_8042FDEC.count;
-                pick = 1;
-                return 1;
-            case 'S':
-                exit = 0;
-                return 1;
-            }
+            cont = 1;
+            return 1;
+        }
+        if (k == 0x1Bu) {
+            lbl_8055E2DD = 1;
+            return 1;
         }
     }
     return 0;
 }
 
-inline void ChalList::Start(void) {
-    TVec2 a;
-    TVec2 b;
-    fn_801796BC(1);
-    {
-        int n = fn_80160CE4();
-        if (lbl_8055E2DC && n <= lbl_8042FDEC.count) {
-            sel = n;
-        }
-    }
-    if (sel >= lbl_8042FDEC.count) {
-        sel = lbl_8042FDEC.count;
-    }
-    pick = 0;
-    exit = 0;
-    done = 0;
-    b.x = 9999.0f;
-    b.z = 9999.0f;
-    a.x = 1.0f;
-    a.z = 0.0f;
-    fn_802A95A8(&b, &a);
-    fn_80276CB0("challist", 0);
-    {
-        const char* body = fn_80131234("Tutorial:FINISHED_BODY");
-        fn_801DF380(fn_80131234("Tutorial:FINISHED_HEAD"), body, fn_80161438, 0);
-    }
+int Challenge::TimedOut(void) {
+    return time > limit;
 }
 
-struct CarState {
-    TVec3 basis[3];  // offset 0x0
-    TVec3 origin;    // offset 0x24
-};
-
-inline void ChalList::Update(void) {
+void ChallengeBase::Load(void) {
+    int n = 0;
+    ValueTable* cmds = fn_80131810("tutcmd.val");
+    char buf[0x10];
     int i;
-    if (lbl_8055A0B4 <= fn_80161D50() && lbl_8055A0B8 > fn_80161D50() && !told) {
-        fn_801DF074(8, 1);
-        told = 1;
-    }
-    for (i = 0; i < lbl_8055E4D0; i++) {
-        TCar* car = lbl_804348E8[i];
-        CarState m;
-        TVec3 v;
-        TVec3 w;
-        fn_8018ADBC(car, 1.0f);
-        fn_8018ADB4(car, 0.0f);
-        fn_8018ADA4(car, 0.0f);
-        m = *(CarState*)&car->fwd;
-        m.origin.x = 0.0f;
-        m.origin.y = 999.0f + 20.0f * (f32)i;
-        m.origin.z = 0.0f;
-        w.x = 0.0f;
-        w.y = 0.0f;
-        w.z = 0.0f;
-        v.x = 0.0f;
-        v.y = 0.0f;
-        v.z = 0.0f;
-        fn_8017CFFC(car, &m, &v, &w);
-    }
-    if (pick) {
-        fn_801796BC(0);
-        pick = 0;
-        done = 1;
-        lbl_8055E304 = sel;
-        if (sel < lbl_8042FDEC.count) {
-            fn_80176780(0x8002, 0);
-        } else {
-            fn_8017691C();
-        }
-    }
-}
-
-inline int ChalList::Draw(int a) {
-    if (exit) {
-        const char* body = fn_80131234("Tutorial:EXIT_BODY");
-        fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), body);
-    } else {
-        ::Event* e;
-        void* e1;
-        void* e2;
-        void* but;
-        void* star;
-        if (fn_801E8838() > 100) {
-            fn_80230E90(1);
-        }
-        DrawBars();
-        e = GetEvent(fn_801769CC()->event);
-        fn_801476C4(lbl_8055E2E0->Find("mode_title"));
-        fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->vals->GetString("friendly_name", GetEventDisplayName(e->id)));
-        fn_801476C4(lbl_8055E2E0->Find("continue"));
-        e1 = lbl_8055E2E0->Find("elem1");
-        e2 = lbl_8055E2E0->Find("elem2");
-        but = lbl_8055E2E0->Elem("sel_but");
-        star = lbl_8055E2E0->Elem("pass_star");
-        if (e1 && e2) {
-            int i;
-            for (i = 1; i <= lbl_8042FDEC.count; i++) {
-                char name[0xA];
-                void* el;
-                fn_801345D8(name, sizeof(name), "elem%d", i);
-                el = lbl_8055E2E0->Find(name);
-                if (el) {
-                    fn_80147230(el, "%s", i < lbl_8042FDEC.count ? lbl_8042FDEC.data[i]->Title()
-                                                                  : fn_80131234("Tutorial:EXIT_HEAD"));
-                } else {
-                    static u8 warned;
-                    if (!warned) {
-                        warned = 1;
-                        fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
-                    }
+    pages.count = 0;
+    do {
+        n++;
+        fn_801345D8(buf, sizeof(buf), "desc%d", n);
+    } while (node->Has(buf));
+    n--;
+    for (i = 0; i < n; i++) {
+        HelpPage* p = &pages.data[pages.count++];
+        fn_801345D8(buf, sizeof(buf), "desc%d", i + 1);
+        p->desc = node->GetValue(buf);
+        fn_801345D8(buf, sizeof(buf), "lyt%d", i + 1);
+        p->lyt = 0;
+        if (node->Has(buf)) {
+            const char* name = node->GetValue(buf);
+            if (cmds) {
+                name = (const char*)cmds->FindChild(name);
+                if (name) {
+                    p->lyt = fn_80146C2C(lbl_8055E2E4, name);
                 }
             }
         }
     }
+    if (cmds) {
+        fn_80131818(cmds);
+    }
+}
+
+void ChallengeBase::Unload(void) {
+    int i;
+    for (i = 0; i < pages.count; i++) {
+        if (pages.data[i].lyt) {
+            delete pages.data[i].lyt;
+        }
+    }
+    pages.count = 0;
+}
+
+int ChallengeBase::AllowPause(void) {
     return 1;
 }
 
-struct PathIter {
-    u8 pad[0x58];
-};
-
-struct LineNode {
-    f32 x;   // offset 0x0
-    f32 z;   // offset 0x4
-    f32 dx;  // offset 0x8
-    f32 dz;  // offset 0xC
-    u8 pad10[0x14 - 0x10];
-    LineNode* next;  // offset 0x14
-};
-
-struct LineHit {
-    LineNode* node;  // offset 0x0
-    f32 t;           // offset 0x4
-    s32 max;         // offset 0x8
-};
-
-class PathSet {
-public:
-    virtual void vf08(void);
-    virtual int GetLine(int i);  // 0x0C
-};
-
-extern "C" {
-void fn_801352B8(PathIter* it);
-int fn_80135D60(PathIter* it, int line);
-void fn_801355C0(PathIter* it, TVec2* pos, int a, LineHit* hit, int b);
-void fn_8013530C(PathIter* it, int unk);
-PathSet* fn_80156A40(void);
+void ChallengeBase::SetResult(int r) {
+    if (!resultSet) {
+        result = r;
+        resultSet = 1;
+        resultTime = lbl_8055E3C8;
+    }
 }
 
-inline int ChallengeBase::Query(void* carp, int idx, int c) {
+int ChallengeBase::Get(f32* out, int i) {
+    *out = speed[i];
+    return 1;
+}
+
+int ChallengeBase::Query(void* carp, int idx, int c) {
     TCar* car = (TCar*)carp;
     speed[idx] = 0.0f;
     if (node) {
@@ -1787,5 +1741,271 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             return 1;
         }
     }
+    return 0;
+}
+
+f32 ChallengeBase::Time(void) {
+    return 5.0f;
+}
+
+const char* ChallengeBase::Title(void) {
+    return node->GetString("title", "");
+}
+
+void ChalList::Init(void) {
+    pick = 0;
+    sel = 1;
+    done = 0;
+    exit = 0;
+    told = 0;
+}
+
+void ChalList::Shutdown(void) {
+
+}
+
+void ChalList::Load(void) {
+
+}
+
+void ChalList::Unload(void) {
+
+}
+
+void ChalList::Update(void) {
+    int i;
+    if (lbl_8055A0B4 <= fn_80161D50() && lbl_8055A0B8 > fn_80161D50() && !told) {
+        fn_801DF074(8, 1);
+        told = 1;
+    }
+    for (i = 0; i < lbl_8055E4D0; i++) {
+        TCar* car = lbl_804348E8[i];
+        CarState m;
+        TVec3 v;
+        TVec3 w;
+        fn_8018ADBC(car, 1.0f);
+        fn_8018ADB4(car, 0.0f);
+        fn_8018ADA4(car, 0.0f);
+        m = *(CarState*)&car->fwd;
+        m.origin.x = 0.0f;
+        m.origin.y = 999.0f + 20.0f * (f32)i;
+        m.origin.z = 0.0f;
+        w.x = 0.0f;
+        w.y = 0.0f;
+        w.z = 0.0f;
+        v.x = 0.0f;
+        v.y = 0.0f;
+        v.z = 0.0f;
+        fn_8017CFFC(car, &m, &v, &w);
+    }
+    if (pick) {
+        fn_801796BC(0);
+        pick = 0;
+        done = 1;
+        lbl_8055E304 = sel;
+        if (sel < lbl_8042FDEC.count) {
+            fn_80176780(0x8002, 0);
+        } else {
+            fn_8017691C();
+        }
+    }
+}
+
+void ChalList::Start(void) {
+    TVec2 b;
+    TVec2 a;
+    fn_801796BC(1);
+    {
+        int n = fn_80160CE4();
+        if (lbl_8055E2DC && n <= lbl_8042FDEC.count) {
+            sel = n;
+        }
+    }
+    if (sel >= lbl_8042FDEC.count) {
+        sel = lbl_8042FDEC.count;
+    }
+    pick = 0;
+    exit = 0;
+    done = 0;
+    b.x = 9999.0f;
+    b.z = 9999.0f;
+    a.x = 1.0f;
+    a.z = 0.0f;
+    fn_802A95A8(&b, &a);
+    fn_80276CB0("challist", 0);
+    {
+        const char* body = fn_80131234("Tutorial:FINISHED_BODY");
+        fn_801DF380(fn_80131234("Tutorial:FINISHED_HEAD"), body, fn_80161438, 0);
+    }
+}
+
+int ChalList::IsDone(void) const {
+    return done;
+}
+
+int ChalList::IsPassed(void) const {
+    return done;
+}
+
+int ChalList::State(void) {
+    return done;
+}
+
+int ChalList::Key(int k) {
+    if (fn_801E7E34()->menu == 0) {
+        if (!exit) {
+            switch (k) {
+            case 0x126: {
+                int s = --sel;
+                if (s < 1) {
+                    sel = lbl_8042FDEC.count;
+                } else if (s > lbl_8042FDEC.count) {
+                    sel = 1;
+                } else if (s > fn_80160CE4() && s < lbl_8042FDEC.count) {
+                    sel = fn_80160CE4();
+                }
+                fn_80230E90(1);
+                return 1;
+            }
+            case 0x128: {
+                int s = ++sel;
+                if (s < 1) {
+                    sel = lbl_8042FDEC.count;
+                } else if (s > lbl_8042FDEC.count) {
+                    sel = 1;
+                } else if (s > fn_80160CE4() && s < lbl_8042FDEC.count) {
+                    sel = lbl_8042FDEC.count;
+                }
+                fn_80230E90(1);
+                return 1;
+            }
+            case 'X':
+                pick = 1;
+                return 1;
+            case 0x1B:
+                lbl_8055E2DD = 1;
+                return 1;
+            }
+        } else {
+            switch (k) {
+            case 'X':
+                sel = lbl_8042FDEC.count;
+                pick = 1;
+                return 1;
+            case 'S':
+                exit = 0;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+f32 ChalList::Time(void) {
+    return 0.0f;
+}
+
+int ChalList::Query(void* car, int i, int c) {
+    return 0;
+}
+
+void ChalList::Event(int a, int b, int c) {
+
+}
+
+int ChalList::Draw(int a) {
+    if (exit) {
+        const char* body = fn_80131234("Tutorial:EXIT_BODY");
+        fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), body);
+    } else {
+        ::Event* e;
+        void* e1;
+        void* e2;
+        void* but;
+        void* star;
+        if (fn_801E8838() > 100) {
+            fn_80230E90(1);
+        }
+        DrawBars();
+        e = GetEvent(fn_801769CC()->event);
+        fn_801476C4(lbl_8055E2E0->Find("mode_title"));
+        fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->vals->GetString("friendly_name", GetEventDisplayName(e->id)));
+        fn_801476C4(lbl_8055E2E0->Find("continue"));
+        e1 = lbl_8055E2E0->Find("elem1");
+        e2 = lbl_8055E2E0->Find("elem2");
+        but = lbl_8055E2E0->Elem("sel_but");
+        star = lbl_8055E2E0->Elem("pass_star");
+        if (e1 && e2) {
+            int i;
+            for (i = 1; i <= lbl_8042FDEC.count; i++) {
+                char name[0xA];
+                void* el;
+                fn_801345D8(name, sizeof(name), "elem%d", i);
+                el = lbl_8055E2E0->Find(name);
+                if (el) {
+                    fn_80147230(el, "%s", i < lbl_8042FDEC.count ? lbl_8042FDEC.data[i]->Title()
+                                                                  : fn_80131234("Tutorial:EXIT_HEAD"));
+                } else {
+                    static u8 warned;
+                    if (!warned) {
+                        warned = 1;
+                        fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+int ChalList::DrawResults(int a) {
+    return 1;
+}
+
+void ChalList::Camera(void) {
+    CamFrame cam;
+    f32 fov;
+    GetTipsCamera(&cam, &fov);
+    fn_8026A2CC(&cam, fov, 0);
+    fn_8000C630(0x15, -1);
+}
+
+void ChalList::Draw3D(void) {
+
+}
+
+int ChalList::AllowPause(void) {
+    return 0;
+}
+
+int ChalList::AllowExit(void) {
+    return 0;
+}
+
+const char* ChalList::Title(void) {
+    return "Challenge List";
+}
+
+int ChalSubTaskMgr::vf0C(int a, int b, int c, int d, u32* flags) {
+    if (fn_80161BB8()) {
+        *flags |= 0x1150;
+        return 1;
+    }
+    return 0;
+}
+
+int ChalSubTaskMgr::vf10(int a, f32* out, int car) {
+    if (lbl_804348E8[car]) {
+        *out = 0.0f;
+        lbl_8042FDEC.data[lbl_8055E304]->Get(out, car);
+    }
+    return 0;
+}
+
+int ChalSubTaskMgr::vf14(void) {
+    return 1;
+}
+
+int ChalSubTaskMgr::vf1C(void) {
     return 0;
 }
