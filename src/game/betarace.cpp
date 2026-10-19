@@ -538,6 +538,20 @@ class FinishAnimation {
 public:
     FinishAnimation(void) : anim(0), bonusSnd(0), noBonusSnd(0), transitionSnd(0) {}
     ~FinishAnimation(void) { Release(); }
+    void Reset(void) {
+        if (anim) {
+            state = 0;
+            bonusStart = -1.0f;
+            signal[0] = 0;
+            signal[1] = 0;
+            signal[2] = 0;
+            go = 0;
+            fn_802AE0E0(anim);
+            StopSound(bonusSnd);
+            StopSound(noBonusSnd);
+            StopSound(transitionSnd);
+        }
+    }
     void Release(void) {
         if (anim) {
             fn_802ADE60(anim, 1);
@@ -1016,6 +1030,7 @@ public:
     int Results(FinishAnimation* a);
     void SetResultsView(FinishAnimation* a);
     void DrawWinner(ILayout* l) const;
+    void Reset(void);
     void Wipe(void) {
         f32 add = 0.0f;
         CarHud* h;
@@ -1066,7 +1081,8 @@ public:
     f32 flash[5];        // offset 0x40
     f32 countUp;         // offset 0x54
     f32 f58;             // offset 0x58
-    u8 pad5C[0x64 - 0x5C];
+    f32 f5C;             // offset 0x5C
+    f32 f60;             // offset 0x60
     f32 overtime;        // offset 0x64
     BetaMaster* master;  // offset 0x68
     CarResult result;    // offset 0x6C
@@ -1097,6 +1113,8 @@ struct EventInfo {
 
 struct LocalCarDesc {
     s32 event;  // offset 0x0
+    u8 pad4[0x8 - 0x4];
+    s32 track;  // offset 0x8
 };
 
 struct Settings {
@@ -2520,6 +2538,33 @@ public:
         body->SetActive(0);
         start = lbl_8055E3C8 + 10.0f;
     }
+    void Show(void) {
+        f32 m[12];
+        f32 vel[3];
+        f32 spin[3];
+        m[0] = 1.0f;
+        m[1] = 0.0f;
+        m[2] = 0.0f;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = 0.0f;
+        m[7] = 0.0f;
+        m[8] = 1.0f;
+        m[9] = 0.0f;
+        m[10] = 0.0f;
+        m[11] = 0.0f;
+        m[9] = pos[0];
+        m[10] = pos[1];
+        m[11] = pos[2];
+        spin[0] = 0.0f;
+        spin[1] = 0.0f;
+        spin[2] = 0.0f;
+        vel[0] = 0.0f;
+        vel[1] = 0.0f;
+        vel[2] = 0.0f;
+        body->SetState(m, vel, spin);
+    }
     virtual int Ready(void) { return 0; }  // vptr at 0x18
 };
 
@@ -3155,5 +3200,137 @@ void BetaMaster::c2(Body* b, int car) {
                 fn_80161A38(3, car, 0);
             }
         }
+    }
+}
+
+struct HighScore {
+    u8 pad0[0x4];
+    s32 score;  // offset 0x4
+};
+
+int IdentGetCurrentSlot(void);
+HighScore* StatsGetHighScore(int slot, long event, long track, int a);
+
+extern f32 lbl_80559EBC;  // starting meter of the ACAR
+
+inline void BetaCar::Reset(void) {
+    overtime = -1.0f;
+    result.score = 0;
+    result.place = 0;
+    result.table.index = -2;
+    result.bonus = 0;
+    result.timeLeft = 0;
+    result.total = 0;
+    result.grade = -1;
+    result.dnf = 0;
+    result.finishTime = -1.0f;
+    star = 0;
+    shown = 0.0f;
+    score = 0.0f;
+    moving = 0;
+    fade = 0.0f;
+    fullFlash = 0.0f;
+    flash[0] = 0.0f;
+    flash[1] = 0.0f;
+    flash[2] = 0.0f;
+    flash[3] = 0.0f;
+    flash[4] = 0.0f;
+    countUp = 0.0f;
+    f5C = 0.0f;
+    f60 = 0.0f;
+    {
+        LocalCarDesc* d = fn_801769CC();
+        LocalCarDesc* e = fn_801769CC();
+        HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), e->event, d->track, 0);
+        shownInt = hs ? hs->score : 0;
+    }
+    meterSmooth = 0.0f;
+    meter = 0.0f;
+    if (lbl_804348E8[id]->model == 'ACAR') {
+        meter = lbl_80559EBC;
+    }
+    fullTime = 0.0f;
+    boosts = 1;
+    f58 = 0.0f;
+    maxBoosts = 1;
+    meterObj->vf0C();
+    {
+        CarHud* h = hud;
+        int pan;
+        {
+            StuntIter it(&h->pending, 0);
+            for (; it.Valid(); it.Next()) {
+                it->age = 1000.0f;
+                it->t0C = 0.0f;
+                it.Remove();
+                h->shown.PushBack(it.Get());
+            }
+        }
+        if (h->current) {
+            h->shown.PushBack(h->current);
+            h->current = 0;
+        }
+        pan = fn_80009C84() ? 0 : 2;
+        if (h->bigSnd) {
+            fn_80206750(h->bigSnd, h->racer, pan);
+        }
+    }
+    bA8 = 0;
+    bA9 = 1;
+    bAA = 0;
+    {
+        int pan = fn_80009C84() ? 0 : 2;
+        if (starSnd) {
+            fn_80206750(starSnd, id, pan);
+        }
+    }
+}
+
+inline void BetaMaster::a2(void) {
+    int i;
+    for (i = 0; i < nCars; i++) {
+        cars[i].Reset();
+    }
+    for (i = 0; i < stars.a.count; i++) {
+        Pickup* t = stars.a.data[i];
+        t->respawn = 0.0f;
+        t->hit[0] = 0;
+        t->hit[1] = 0;
+        t->hit[2] = 0;
+        t->hit[3] = 0;
+        t->hit[4] = 0;
+        t->hit[5] = 0;
+        t->hit[6] = 0;
+        t->hit[7] = 0;
+        t->which = 0;
+        if (t->kind == 4) {
+            t->switchLeft = t->switchTime;
+        }
+    }
+    if (bumps.a.count > 0) {
+        for (i = 0; i < bumps.a.count; i++) {
+            Token* t = bumps.a.data[i];
+            t->active = 1;
+            t->start = -999.0f;
+            t->Show();
+        }
+    }
+    if (bumps2.a.count > 0) {
+        for (i = 0; i < bumps2.a.count; i++) {
+            Token* t = bumps2.a.data[i];
+            t->active = 1;
+            t->start = -999.0f;
+            t->Show();
+        }
+    }
+    timer.b10 = 0;
+    timer.now = 0.0f;
+    StopSound(timer.tick);
+    StopSound(timer.timeout);
+    timer.b1C = 0;
+    timer.limit = timer.limit0;
+    skipAt = GetEvent(fn_801769CC()->event)->vals->GetFloat("early_finish_t", -1.0f);
+    for (i = 0; i < ARRAY_COUNT(anims); i++) {
+        anims[i].Reset();
     }
 }
