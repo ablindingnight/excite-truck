@@ -224,6 +224,13 @@ u8 lbl_8055E4BA;
 
 PhysDriver* lbl_804348D8[4];
 
+f32 lbl_8055A330 = 0.15f;
+f32 lbl_8055A334 = 1.0f;
+f32 lbl_8055A338 = 0.3f;
+f32 lbl_8055A33C = 0.1f;
+f32 lbl_8055A340 = 0.3f;
+f32 lbl_8055A344 = 0.2f;
+
 struct Names4 {
     const char* n[4];
 };
@@ -231,7 +238,6 @@ struct Names4 {
 const Names4 lbl_802F9530 = {{"sel_up", "sel_down", "sel_left", "sel_right"}};
 const Names4 lbl_802F9540 = {{"POV Front", "POV Back", "POV Left", "POV Right"}};
 
-extern f32 lbl_8055A334;
 
 extern "C" {
 
@@ -323,8 +329,8 @@ inline void PhysDriver::Update(f32 dt) {
     }
     if (forced || fn_801A8EE4(&b6C) || fn_801A8EE4(&b7C)) {
         {
-            f32 rate = 2.5f * steerSpeed;
-            f32 ret = 1.9f * rate;
+            f32 rate;
+            f32 ret = 1.9f * (rate = 2.5f * steerSpeed);
             f32 tot = ret + rate;
             if (steer > 0.0f) {
                 steer = Max(steer - ret * dt, 0.0f);
@@ -367,8 +373,8 @@ inline void PhysDriver::Update(f32 dt) {
         }
     }
     {
-        f32 rate = 2.5f * steerSpeed;
-        f32 ret = 1.9f * rate;
+        f32 rate;
+        f32 ret = 1.9f * (rate = 2.5f * steerSpeed);
         f32 tot = ret + rate;
         if (steerAdd > 0.0f) {
             steerAdd = Max(steerAdd - ret * dt, 0.0f);
@@ -587,11 +593,6 @@ f32 fn_8017F70C(f32 x) {
 }  // extern "C"
 
 
-extern f32 lbl_8055A330;
-extern f32 lbl_8055A338;
-extern f32 lbl_8055A33C;
-extern f32 lbl_8055A340;
-extern f32 lbl_8055A344;
 
 inline void PhysDriver::Init(void) {
     int k;
