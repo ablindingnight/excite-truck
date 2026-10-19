@@ -1035,6 +1035,7 @@ config.libs.append(
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
             Object(Matching, "game/strlist.cpp"),
+            Object(Matching, "game/gtime.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),

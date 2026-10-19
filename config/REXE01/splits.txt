@@ -2531,6 +2531,15 @@ game/strlist.cpp:
 	.bss        start:0x80497DE0 end:0x80497DF8
 	.sbss       start:0x8055EFD0 end:0x8055EFD8
 
+game/gtime.cpp:
+	.text       start:0x80236550 end:0x80236728
+	.ctors      start:0x802ED3E0 end:0x802ED3E4
+	.data       start:0x803408D8 end:0x80340910
+	.bss        start:0x80498638 end:0x80498650
+	.sdata      start:0x8055BA00 end:0x8055BA08
+	.sbss       start:0x8055F088 end:0x8055F0A8
+	.sdata2     start:0x805636D0 end:0x805636E0
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
