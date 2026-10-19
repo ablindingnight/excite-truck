@@ -339,10 +339,17 @@ struct HelpPage {
 };
 
 // A token to collect: a point (coin) or a line to cross.
+struct EVec3 {
+    EVec3(void) {}
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
 struct Token {
     Token(void) {}
     TVec3 pos;      // offset 0x0
-    TVec3 ends[2];  // offset 0xC
+    EVec3 ends[2];  // offset 0xC
     TVec2 mid;      // offset 0x24
     TVec2 dir;      // offset 0x2C
     TPath* path;    // offset 0x34
