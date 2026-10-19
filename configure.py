@@ -1047,6 +1047,7 @@ config.libs.append(
             Object(Matching, "game/drawline.cpp"),
             Object(Matching, "game/stub13.cpp"),
             Object(Matching, "game/stub14.cpp"),
+            Object(NonMatching, "game/swlmap.cpp"),
             Object(Matching, "game/preload.cpp"),
             Object(NonMatching, "game/vidsetup.cpp"),
             Object(Matching, "game/image.cpp"),
