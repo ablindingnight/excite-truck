@@ -288,8 +288,8 @@ struct RankTable : FixedList<struct Rank, 10> {
 class Tracker : public Meter {
 public:
     Tracker(StuntHud* h, int c) {
-        car = c;
         ranks.a.count = 0;
+        car = c;
         hud = h;
         evt = 0;
     }
@@ -1933,8 +1933,10 @@ void fn_80157560(Tracker* t);
 }  // extern "C"
 
 RingTracker::RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
+    int ok;
     car2 = c;
-    if (!fn_80157278(c)) {
+    ok = !fn_80157278(c);
+    if (ok) {
         snd = fn_802076A0("ringhit.sfx", 1, c, 2);
     } else {
         snd = 0;
@@ -1983,9 +1985,10 @@ DriftTracker::DriftTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h,
 AirTracker::AirTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
 
 CountSound::CountSound(const char* a, const char* b, int car) {
+    int ok = !fn_80157278(car);
     s1 = 0;
     s0 = 0;
-    if (!fn_80157278(car)) {
+    if (ok) {
         s0 = fn_802076A0(a, 1, car, 0);
         if (s0) {
             s0->SetPitch(1.2f);
