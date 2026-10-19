@@ -134,6 +134,24 @@ struct Ring {
     RingType* type;  // offset 0x8
     ValMatrix frame;  // offset 0xC
     void Load(ValueNode* c);
+    void Start(void) {
+        passed = 0;
+        passTime = -1.0f;
+        active = 1;
+        fadeTime = lbl_8055E3C8;
+    }
+    void Stop(void) {
+        if (active) {
+            active = 0;
+            fadeTime = lbl_8055E3C8;
+        }
+    }
+    void Reset(void) {
+        active = 0;
+        passed = 0;
+        passTime = -1.0f;
+        fadeTime = -100.0f;
+    }
     u8 active;       // offset 0x3C
     u8 passed;       // offset 0x3D
     f32 passTime;    // offset 0x40
@@ -144,6 +162,8 @@ struct RingSet {
     RingSet(void) { valid = 0; }
     ~RingSet(void) { valid = 0; }
     void Load(ValueNode* n);
+    void Enable(void);
+    void Disable(void);
     u8 valid;       // offset 0x0
     char name[31];  // offset 0x1
     s32 first;      // offset 0x20
@@ -280,6 +300,22 @@ inline void RingMaster::CheckOrder(RingSet* s) {
     }
 }
 
+inline void RingSet::Enable(void) {
+    int k;
+    enabled = 1;
+    for (k = 0; k < count; k++) {
+        lbl_80430318.data[first + k].Start();
+    }
+}
+
+inline void RingSet::Disable(void) {
+    int k;
+    enabled = 0;
+    for (k = 0; k < count; k++) {
+        lbl_80430318.data[first + k].Stop();
+    }
+}
+
 extern "C" {
 
 void fn_8016A8F8(void);
@@ -298,11 +334,7 @@ void fn_8016A0D4(void) {
         lbl_80430340.data[i].enabled = 0;
     }
     for (i = 0; i < lbl_80430318.count; i++) {
-        Ring* r = &lbl_80430318.data[i];
-        r->active = 0;
-        r->passed = 0;
-        r->passTime = -1.0f;
-        r->fadeTime = -100.0f;
+        lbl_80430318.data[i].Reset();
     }
 }
 
@@ -311,16 +343,7 @@ int fn_8016A15C(const char* name) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
-            RingSet* s = &lbl_80430340.data[i];
-            int k;
-            s->enabled = 1;
-            for (k = 0; k < s->count; k++) {
-                Ring* r = &lbl_80430318.data[s->first + k];
-                r->passed = 0;
-                r->passTime = -1.0f;
-                r->active = 1;
-                r->fadeTime = lbl_8055E3C8;
-            }
+            lbl_80430340.data[i].Enable();
             found = 1;
         }
     }
@@ -331,16 +354,7 @@ void fn_8016A240(const char* name) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
-            RingSet* s = &lbl_80430340.data[i];
-            int k;
-            s->enabled = 0;
-            for (k = 0; k < s->count; k++) {
-                Ring* r = &lbl_80430318.data[s->first + k];
-                if (r->active) {
-                    r->active = 0;
-                    r->fadeTime = lbl_8055E3C8;
-                }
-            }
+            lbl_80430340.data[i].Disable();
         }
     }
 }
@@ -378,18 +392,20 @@ int fn_8016A30C(int player) {
 }
 
 void fn_8016A438(void) {
+    RingSet* s;
+    Ring* r;
+    int k;
     int i;
+    f32 now;
     for (i = 0; i < lbl_80430340.count; i++) {
-        RingSet* s = &lbl_80430340.data[i];
-        int k = s->count;
+        s = &lbl_80430340.data[i];
+        k = s->count;
         while (k-- > 0) {
-            Ring* r = &lbl_80430318.data[s->first + k];
+            r = &lbl_80430318.data[s->first + k];
             if (r->valid) {
-                f32 now = fn_801E7E18();
+                now = fn_801E7E18();
                 f32 a = Lerp(0.0f, 1.0f, Unlerp(0.0f, 0.25f, now - r->fadeTime));
-                if (!r->active) {
-                    a = 1.0f - a;
-                }
+                a = r->active ? a : 1.0f - a;
                 if (a > 0.01f) {
                     ValMatrix m;
                     fn_802C9900(a);
