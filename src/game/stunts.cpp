@@ -30,23 +30,26 @@ struct RaceCarRec {
     s32 id;     // offset 0x1EC
     s32 kind;   // offset 0x1F0
     u8 pad1F4[0x2410 - 0x1F4];
-    s32 w2410;  // offset 0x2410 (first of four 0x74-byte wheel records)
-    u8 pad2414[0x258C - 0x2414];
-    f32 f258C;  // offset 0x258C
-    u8 pad2590[0x259C - 0x2590];
-    u8 b259C;   // offset 0x259C
-    u8 pad259D[0x25BC - 0x259D];
-    f32 turbo;  // offset 0x25BC
-    u8 pad25C0[0x25D4 - 0x25C0];
-    f32 speed;  // offset 0x25D4
-    u8 pad25D8[0x2620 - 0x25D8];
+    union {
+        Wheel wheels[4];  // offset 0x2410 (the records overlap the fields below)
+        struct {
+            u8 pad2410[0x258C - 0x2410];
+            f32 f258C;  // offset 0x258C
+            u8 pad2590[0x259C - 0x2590];
+            u8 b259C;   // offset 0x259C
+            u8 pad259D[0x25BC - 0x259D];
+            f32 turbo;  // offset 0x25BC
+            u8 pad25C0[0x25D4 - 0x25C0];
+            f32 speed;  // offset 0x25D4
+            u8 pad25D8[0x2620 - 0x25D8];
+        };
+    };
     s32 air;    // offset 0x2620 (0 while airborne)
     u8 pad2624[0x2690 - 0x2624];
     f32 f2690;  // offset 0x2690
     f32 F2690(void) const;
     f32 Speed(void) const;
     s32 Air(void) const;
-    Wheel* Wheels(void) const { return (Wheel*)&w2410; }
 };
 
 struct LocalCarDesc {
@@ -957,7 +960,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     int n;
     int i;
     if (turbo) {
-        if (now - turboTime > 10.0f || !(rc->turbo > lbl_80558DC4[0])) {
+        if (now - turboTime > 10.0f || (rc->turbo > lbl_80558DC4[0]) == 0) {
             turbo = 0;
         }
     }
@@ -965,7 +968,10 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
         int boost;
         flags = 0;
         b2D0 = 1;
-        boost = rc->f258C > 0.001f || rc->b259C;
+        boost = 1;
+        if ((rc->f258C > 0.001f) == 0 && rc->b259C == 0) {
+            boost = 0;
+        }
         if (boost || rc->air == 0) {
             flags |= 2;
         } else {
@@ -973,7 +979,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
         }
     } else if (rc->air > 0) {
         for (i = 0; i < 4; i++) {
-            if (rc->Wheels()[i].contact == 0) {
+            if (rc->wheels[i].contact == 0) {
                 b2D0 = 0;
                 break;
             }
@@ -981,7 +987,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     }
     n = 0;
     any = 0;
-    for (i = 0; i < ARRAY_COUNT(slots); i++) {
+    for (i = 0; i < 8; i++) {
         CloseCallSlot* s = &slots[i];
         if (!s->done && now - s->time > 0.1f) {
             s->done = 1;
@@ -1004,7 +1010,10 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
         }
     }
     if (n > 0) {
-        int boost = rc->f258C > 0.001f || rc->b259C;
+        int boost = 1;
+        if ((rc->f258C > 0.001f) == 0 && rc->b259C == 0) {
+            boost = 0;
+        }
         if (!boost && rc->air > 0) {
             flags &= ~2;
         }
@@ -1031,7 +1040,8 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     } else if (count > 0) {
         Refresh();
     }
-    if (ranks.a.count - 1 == Rank()) {
+    n = ranks.a.count;
+    if (Rank() == n - 1) {
         flags = 0;
     }
     return r;
