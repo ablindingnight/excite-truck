@@ -2545,6 +2545,13 @@ game/stub10.cpp:
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
 	.sbss       start:0x8055F118 end:0x8055F120
 
+game/mmain.cpp:
+	.text       start:0x8023B5EC end:0x8023B764
+	.ctors      start:0x802ED3FC end:0x802ED400
+	.data       start:0x803412D8 end:0x80341308
+	.bss        start:0x80498758 end:0x80498770
+	.sbss       start:0x8055F120 end:0x8055F130
+
 game/stub16.cpp:
 	.text       start:0x80265D38 end:0x80265DCC
 	.ctors      start:0x802ED47C end:0x802ED480
