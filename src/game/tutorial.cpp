@@ -378,65 +378,65 @@ public:
     virtual void Init(void) {}
     virtual void Shutdown(void) {}
     virtual void Load(void) {
-    int n = 0;
-    ValueTable* cmds = fn_80131810("tutcmd.val");
-    char buf[0x10];
-    int i;
-    pages.count = 0;
-    do {
-    n++;
-    fn_801345D8(buf, sizeof(buf), "desc%d", n);
-    } while (node->Has(buf));
-    n--;
-    for (i = 0; i < n; i++) {
-    HelpPage* p = &pages.data[pages.count++];
-    fn_801345D8(buf, sizeof(buf), "desc%d", i + 1);
-    p->desc = node->GetValue(buf);
-    fn_801345D8(buf, sizeof(buf), "lyt%d", i + 1);
-    p->lyt = 0;
-    if (node->Has(buf)) {
-        const char* name = node->GetValue(buf);
-        if (cmds) {
-            name = (const char*)cmds->FindChild(name);
-            if (name) {
-                p->lyt = fn_80146C2C(lbl_8055E2E4, name);
+        int n = 0;
+        ValueTable* cmds = fn_80131810("tutcmd.val");
+        char buf[0x10];
+        int i;
+        pages.count = 0;
+        do {
+            n++;
+            fn_801345D8(buf, sizeof(buf), "desc%d", n);
+        } while (node->Has(buf));
+        n--;
+        for (i = 0; i < n; i++) {
+            HelpPage* p = &pages.data[pages.count++];
+            fn_801345D8(buf, sizeof(buf), "desc%d", i + 1);
+            p->desc = node->GetValue(buf);
+            fn_801345D8(buf, sizeof(buf), "lyt%d", i + 1);
+            p->lyt = 0;
+            if (node->Has(buf)) {
+                const char* name = node->GetValue(buf);
+                if (cmds) {
+                    name = (const char*)cmds->FindChild(name);
+                    if (name) {
+                        p->lyt = fn_80146C2C(lbl_8055E2E4, name);
+                    }
+                }
             }
         }
-    }
-    }
-    if (cmds) {
-    fn_80131818(cmds);
-    }
+        if (cmds) {
+            fn_80131818(cmds);
+        }
     }
     virtual void Unload(void) {
-    int i;
-    for (i = 0; i < pages.count; i++) {
-    if (pages.data[i].lyt) {
-        delete pages.data[i].lyt;
-    }
-    }
-    pages.count = 0;
+        int i;
+        for (i = 0; i < pages.count; i++) {
+            if (pages.data[i].lyt) {
+                delete pages.data[i].lyt;
+            }
+        }
+        pages.count = 0;
     }
     virtual void Update(void) {
-    if (!fn_801C5B60()) {
-    fn_801DF074(8, 0);
-    }
+        if (!fn_801C5B60()) {
+            fn_801DF074(8, 0);
+        }
     }
     virtual void Start(void) {
-    int i;
-    result = 0;
-    resultSet = 0;
-    resultTime = -1000.0f;
-    for (i = 0; i < pages.count; i++) {
-    HelpPage* p = &pages.data[i];
-    fn_801DF380(node->GetString("title", ""), p->desc, fn_80161438, p->lyt);
-    }
+        int i;
+        result = 0;
+        resultSet = 0;
+        resultTime = -1000.0f;
+        for (i = 0; i < pages.count; i++) {
+            HelpPage* p = &pages.data[i];
+            fn_801DF380(node->GetString("title", ""), p->desc, fn_80161438, p->lyt);
+        }
     }
     virtual int Key(int k) { return 0; }
     virtual f32 Time(void) { return 5.0f; }
     virtual int Get(f32* out, int i) {
-    *out = speed[i];
-    return 1;
+        *out = speed[i];
+        return 1;
     }
     virtual int Query(void* car, int i, int c);
     virtual int Draw(int a) { return 0; }
@@ -446,11 +446,11 @@ public:
     virtual void Camera(void) {}
     virtual const char* Title(void) { return node->GetString("title", ""); }
     virtual void SetResult(int r) {
-    if (!resultSet) {
-    result = r;
-    resultSet = 1;
-    resultTime = lbl_8055E3C8;
-    }
+        if (!resultSet) {
+            result = r;
+            resultSet = 1;
+            resultTime = lbl_8055E3C8;
+        }
     }
 
     ValueNode* node;           // offset 0x4
@@ -469,89 +469,89 @@ public:
     virtual void Init(void);
     virtual void Shutdown(void);
     virtual void Update(void) {
-    ChallengeBase::Update();
-    Collect();
+        ChallengeBase::Update();
+        Collect();
     }
     virtual void Start(void) {
-    int i;
-    ChallengeBase::Start();
-    got = 0;
-    time = 0.0f;
-    passed = 0;
-    endTime = 0.0f;
-    cont = 0;
-    crashed = 0;
-    ready = 1;
-    for (i = 0; i < tokens.count; i++) {
-    Token* t = &tokens.data[i];
-    int j;
-    fn_801EA140(t);
-    t->pos.y += t->bob;
-    if (t->path) {
-        for (j = 0; j < 2; j++) {
-            fn_801EA140(&t->a + j);
+        int i;
+        ChallengeBase::Start();
+        got = 0;
+        time = 0.0f;
+        passed = 0;
+        endTime = 0.0f;
+        cont = 0;
+        crashed = 0;
+        ready = 1;
+        for (i = 0; i < tokens.count; i++) {
+            Token* t = &tokens.data[i];
+            int j;
+            fn_801EA140(t);
+            t->pos.y += t->bob;
+            if (t->path) {
+                for (j = 0; j < 2; j++) {
+                    fn_801EA140(&t->a + j);
+                }
+            }
+            t->active = 1;
+            if (t->path) {
+                fn_802A95A8(&t->mid, &t->dir);
+                fn_802A95AC(1);
+            }
         }
-    }
-    t->active = 1;
-    if (t->path) {
-        fn_802A95A8(&t->mid, &t->dir);
-        fn_802A95AC(1);
-    }
-    }
     }
     virtual int IsDone(void) const { return result != 0; }
     virtual int IsPassed(void) const { return result == 1; }
     virtual int State(void) {
-    int r = 0;
-    if (IsDone() && cont) {
-    r = 1;
-    }
-    return r;
+        int r = 0;
+        if (IsDone() && cont) {
+            r = 1;
+        }
+        return r;
     }
     virtual int Key(int k) {
-    if (endTime > 0.5f) {
-    if (k == 'X') {
-        if (cont) {
-            lbl_8055E2DD = 1;
+        if (endTime > 0.5f) {
+            if (k == 'X') {
+                if (cont) {
+                    lbl_8055E2DD = 1;
+                }
+                cont = 1;
+                return 1;
+            }
+            if (k == 0x1Bu) {
+                lbl_8055E2DD = 1;
+                return 1;
+            }
         }
-        cont = 1;
-        return 1;
-    }
-    if (k == 0x1Bu) {
-        lbl_8055E2DD = 1;
-        return 1;
-    }
-    }
-    return 0;
+        return 0;
     }
     virtual void Event(int a, int b, int c) {
-    if (!IsDone()) {
-    switch (a) {
-    case 0:
-        if (lbl_804348E8[b]->model == 'PCAR') {
-            SetResult(2);
-            crashed = 1;
+        if (!IsDone()) {
+            switch (a) {
+            case 0:
+                if (lbl_804348E8[b]->model == 'PCAR') {
+                    SetResult(2);
+                    crashed = 1;
+                }
+                break;
+            }
         }
-        break;
-    }
-    }
     }
     virtual int Draw(int a) {
-    f32 now = lbl_8055E3C8;
-    if (now > Time() && !IsPassed()) {
-    char buf[0x14];
-    fn_801476D8(lbl_8055E2E0->Art("timer_art"), -1, lbl_8055E2F8);
-    fn_801476C4(lbl_8055E2E0->Find("timer_title"));
-    fn_80130980(buf, sizeof(buf), 3, limit - time);
-    fn_801475D0(lbl_8055E2E0, "timer", "%s", buf);
-    }
-    return 0;
+        f32 now = lbl_8055E3C8;
+        if (now > Time() && !IsPassed()) {
+            char buf[0x14];
+            fn_801476D8(lbl_8055E2E0->Art("timer_art"), -1, lbl_8055E2F8);
+            fn_801476C4(lbl_8055E2E0->Find("timer_title"));
+            fn_80130980(buf, sizeof(buf), 3, limit - time);
+            fn_801475D0(lbl_8055E2E0, "timer", "%s", buf);
+        }
+        return 0;
     }
     virtual int DrawResults(int a) {
-    if (endTime > 0.5f) {
-    fn_801476C4(lbl_8055E2E0->Find("continue"));
-    }
-    return 1;
+        if (endTime > 0.5f) {
+            fn_801476C4(lbl_8055E2E0->Find("continue"));
+        }
+        return 1;
     }
     virtual void Draw3D(void);
     virtual int AllowExit(void) { return endTime < 0.5f; }
@@ -585,81 +585,81 @@ public:
     StuntChallenge(ValueNode* n) : Challenge(n) { SetupStunt(this, n); }
     virtual ~StuntChallenge(void) { fn_8015857C(this); }
     virtual void Update(void) {
-    int all = AllStunts();
-    if (all) {
-    ready = 1;
-    stuntTime += 0.016683351f;
-    if (onlyStunts && stunts.count > 0) {
-        SetResult(1);
-    }
-    } else {
-    ready = 0;
-    }
-    Challenge::Update();
-    if (!all && got >= needed) {
-    SetResult(4);
-    }
+        int all = AllStunts();
+        if (all) {
+            ready = 1;
+            stuntTime += 0.016683351f;
+            if (onlyStunts && stunts.count > 0) {
+                SetResult(1);
+            }
+        } else {
+            ready = 0;
+        }
+        Challenge::Update();
+        if (!all && got >= needed) {
+            SetResult(4);
+        }
     }
     virtual void Start(void) {
-    int i;
-    Challenge::Start();
-    for (i = 0; i < stunts.count; i++) {
-    stunts.data[i].done = 0;
-    }
-    done = 0;
-    stuntTime = 0.0f;
+        int i;
+        Challenge::Start();
+        for (i = 0; i < stunts.count; i++) {
+            stunts.data[i].done = 0;
+        }
+        done = 0;
+        stuntTime = 0.0f;
     }
     virtual int IsDone(void) const {
-    f32 delay = finishDelay;
-    if (IsPassed()) {
-    return stuntTime > delay;
-    }
-    return result != 0;
+        f32 delay = finishDelay;
+        if (IsPassed()) {
+            return stuntTime > delay;
+        }
+        return result != 0;
     }
     virtual int IsPassed(void) const { return result == 1; }
     virtual void Event(int a, int b, int c) {
-    if (!IsDone()) {
-    switch (a) {
-    case 2:
-        Notify(0x10, b, 5);
-        break;
-    case 1:
-        Notify(0x11, b, 5);
-        break;
-    case 3:
-        Notify(0x12, b, 5);
-        break;
-    case 4:
-        Notify(0x13, b, 5);
-        break;
-    }
-    }
-    Challenge::Event(a, b, c);
+        if (!IsDone()) {
+            switch (a) {
+            case 2:
+                Notify(0x10, b, 5);
+                break;
+            case 1:
+                Notify(0x11, b, 5);
+                break;
+            case 3:
+                Notify(0x12, b, 5);
+                break;
+            case 4:
+                Notify(0x13, b, 5);
+                break;
+            }
+        }
+        Challenge::Event(a, b, c);
     }
     virtual int Draw(int a);
     virtual int DrawResults(int a);
     virtual void Notify(s32 type, int car, int rank) {
-    if (lbl_804348E8[car]->model == 'PCAR' && done < stunts.count && !IsDone()) {
-    int i;
-    for (i = 0; i < stunts.count; i++) {
-        StuntReq* r = &stunts.data[i];
-        if (!r->done && (r->type == type || (r->type == 4 && type == 5) || (r->type == 11 && type == 12)) &&
-            r->rank <= rank) {
-            r->done = 1;
-            done++;
+        if (lbl_804348E8[car]->model == 'PCAR' && done < stunts.count && !IsDone()) {
+            int i;
+            for (i = 0; i < stunts.count; i++) {
+                StuntReq* r = &stunts.data[i];
+                if (!r->done && (r->type == type || (r->type == 4 && type == 5) || (r->type == 11 && type == 12)) &&
+                    r->rank <= rank) {
+                    r->done = 1;
+                    done++;
+                }
+            }
         }
-    }
-    }
     }
 
     int AllStunts(void) {
-    int i;
-    for (i = 0; i < stunts.count; i++) {
-    if (!stunts.data[i].done) {
-        return 0;
-    }
-    }
-    return 1;
+        int i;
+        for (i = 0; i < stunts.count; i++) {
+            if (!stunts.data[i].done) {
+                return 0;
+            }
+        }
+        return 1;
     }
 
     FixedArr<StuntReq, 4> stunts;  // offset 0x570
@@ -675,36 +675,36 @@ public:
     FreestyleChallenge(ValueNode* n) : Challenge(n) { SetupFreestyle(this, n); }
     virtual ~FreestyleChallenge(void) {}
     virtual void Update(void) {
-    if (time > limit) {
-    ended = 1;
-    }
-    Challenge::Update();
+        if (time > limit) {
+            ended = 1;
+        }
+        Challenge::Update();
     }
     virtual void Start(void) {
-    Challenge::Start();
-    passedScore = 0;
-    ended = 0;
-    f574 = 0.0f;
-    if (lbl_8055E304 > 0) {
-    fn_8016D294(0, 0, lbl_8055E304 - 1);
-    }
+        Challenge::Start();
+        passedScore = 0;
+        ended = 0;
+        f574 = 0.0f;
+        if (lbl_8055E304 > 0) {
+            fn_8016D294(0, 0, lbl_8055E304 - 1);
+        }
     }
     virtual int IsDone(void) const { return ended; }
     virtual int IsPassed(void) const { return passedScore; }
     virtual int State(void) { return ended; }
     virtual void Event(int a, int b, int c) {
-    if (a == 5 && !ended) {
-    if (c >= threshold) {
-        passedScore = 1;
-    }
-    ended = 1;
-    }
+        if (a == 5 && !ended) {
+            if (c >= threshold) {
+                passedScore = 1;
+            }
+            ended = 1;
+        }
     }
     virtual int Draw(int a) {
-    if (!ended) {
-    return Challenge::Draw(a);
-    }
-    return 0;
+        if (!ended) {
+            return Challenge::Draw(a);
+        }
+        return 0;
     }
     virtual int DrawResults(int a);
 
@@ -720,11 +720,11 @@ public:
     ChalList(void) {}
     virtual ~ChalList(void) {}
     virtual void Init(void) {
-    pick = 0;
-    sel = 1;
-    done = 0;
-    exit = 0;
-    told = 0;
+        pick = 0;
+        sel = 1;
+        done = 0;
+        exit = 0;
+        told = 0;
     }
     virtual void Shutdown(void) {}
     virtual void Load(void) {}
@@ -744,11 +744,11 @@ public:
     virtual int AllowPause(void) { return 0; }
     virtual int AllowExit(void) { return 0; }
     virtual void Camera(void) {
-    CamFrame cam;
-    f32 fov;
-    GetTipsCamera(&cam, &fov);
-    fn_8026A2CC(&cam, fov, 0);
-    fn_8000C630(0x15, -1);
+        CamFrame cam;
+        f32 fov;
+        GetTipsCamera(&cam, &fov);
+        fn_8026A2CC(&cam, fov, 0);
+        fn_8000C630(0x15, -1);
     }
     virtual const char* Title(void) { return "Challenge List"; }
 
@@ -778,18 +778,18 @@ class ChalSubTaskMgr : public CSubTaskMgr {
 public:
     virtual ~ChalSubTaskMgr(void) {}
     virtual int vf0C(int a, int b, int c, int d, u32* flags) {
-    if (fn_80161BB8()) {
-    *flags |= 0x1150;
-    return 1;
-    }
-    return 0;
+        if (fn_80161BB8()) {
+            *flags |= 0x1150;
+            return 1;
+        }
+        return 0;
     }
     virtual int vf10(int a, f32* out, int car) {
-    if (lbl_804348E8[car]) {
-    *out = 0.0f;
-    lbl_8042FDEC.data[lbl_8055E304]->Get(out, car);
-    }
-    return 0;
+        if (lbl_804348E8[car]) {
+            *out = 0.0f;
+            lbl_8042FDEC.data[lbl_8055E304]->Get(out, car);
+        }
+        return 0;
     }
     virtual int vf14(void) { return 1; }
     virtual int vf1C(void) { return 0; }
@@ -802,41 +802,43 @@ static inline void SetupChallenge(Challenge* c, ValueNode* n) {
 }
 
 static inline void SetupStunt(StuntChallenge* c, ValueNode* n) {
-        int i;
-        ValueNode* s;
-        c->onlyStunts = n->GetBool("only_stunts", 0);
-        for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
-            if (strcasecmp(s->GetName(), "stunt") == 0) {
-                StuntReq* r = &c->stunts.data[c->stunts.count++];
-                const char* names[4] = {"nice_landing", "turbo_jump", "pow_item", "morph_trigger"};
-                const char* type = s->GetValue("type");
-                int k;
-                r->type = -1;
-                for (k = 0; k < 4; k++) {
-                    if (strcasecmp(type, names[k]) == 0) {
-                        r->type = k + 0x10;
-                    }
+    int i;
+    ValueNode* s;
+    c->onlyStunts = n->GetBool("only_stunts", 0);
+    for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
+        if (strcasecmp(s->GetName(), "stunt") == 0) {
+            StuntReq* r = &c->stunts.data[c->stunts.count++];
+            const char* names[4] = {"nice_landing", "turbo_jump", "pow_item", "morph_trigger"};
+            const char* type = s->GetValue("type");
+            int k;
+            r->type = -1;
+            for (k = 0; k < 4; k++) {
+                if (strcasecmp(type, names[k]) == 0) {
+                    r->type = k + 0x10;
                 }
-                if (r->type == -1) {
-                    r->type = fn_80158618(type);
-                }
-                r->rank = s->GetIntValue("rank");
             }
+            if (r->type == -1) {
+                r->type = fn_80158618(type);
+            }
+            r->rank = s->GetIntValue("rank");
         }
-        c->finishDelay = n->GetFloat("finish_delay", 1.0f);
-        fn_80158558(c ? (StuntWatcher*)c : 0);
     }
+    c->finishDelay = n->GetFloat("finish_delay", 1.0f);
+    fn_80158558(c ? (StuntWatcher*)c : 0);
+
+}
 
 static inline void SetupFreestyle(FreestyleChallenge* c, ValueNode* n) {
-        int i;
-        ValueNode* s;
-        c->threshold = 0;
-        for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
-            if (strcasecmp(s->GetName(), "stunt") == 0) {
-                c->threshold = s->GetIntValue("score_threshold");
-            }
+    int i;
+    ValueNode* s;
+    c->threshold = 0;
+    for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
+        if (strcasecmp(s->GetName(), "stunt") == 0) {
+            c->threshold = s->GetIntValue("score_threshold");
         }
     }
+
+}
 
 extern "C" {
 
