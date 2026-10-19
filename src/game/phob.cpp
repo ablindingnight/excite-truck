@@ -416,6 +416,12 @@ EventBufs lbl_80431874;
 HistEntry lbl_80433880[8];
 Phob* lbl_804340C0[0x200];
 
+static inline void Swap(char& a, char& b) {
+    char t = a;
+    a = b;
+    b = t;
+}
+
 extern "C" {
 
 void fn_80177814(s32* out) {
@@ -649,19 +655,9 @@ int fn_801781C0(s32 x) {
 }
 
 char* fn_801781F4(u32 v) {
-    char a;
-    char b;
-    char c;
-    char d;
     *(u32*)lbl_8055E46C = v;
-    a = lbl_8055E46C[0];
-    d = lbl_8055E46C[3];
-    b = lbl_8055E46C[1];
-    c = lbl_8055E46C[2];
-    lbl_8055E46C[0] = d;
-    lbl_8055E46C[3] = a;
-    lbl_8055E46C[1] = c;
-    lbl_8055E46C[2] = b;
+    Swap(lbl_8055E46C[0], lbl_8055E46C[3]);
+    Swap(lbl_8055E46C[1], lbl_8055E46C[2]);
     return lbl_8055E46C;
 }
 
@@ -785,8 +781,8 @@ void fn_801785A4(Phob* p) {
 }
 
 int fn_80178604(PhobMsg* m) {
-    u32 t = m->type;
     int car = 0;
+    u32 t = m->type;
     if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
         car = 1;
     }
