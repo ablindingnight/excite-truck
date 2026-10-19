@@ -2525,6 +2525,12 @@ game/trackgrf.cpp:
 	.sbss       start:0x8055EC80 end:0x8055EC88
 	.sdata2     start:0x80563028 end:0x80563030
 
+game/strlist.cpp:
+	.text       start:0x8022D0D8 end:0x8022D228
+	.ctors      start:0x802ED3C0 end:0x802ED3C4
+	.bss        start:0x80497DE0 end:0x80497DF8
+	.sbss       start:0x8055EFD0 end:0x8055EFD8
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
