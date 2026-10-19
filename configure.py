@@ -1045,6 +1045,7 @@ config.libs.append(
             Object(Matching, "game/trackgrf.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(Matching, "game/gtime.cpp"),
+            Object(Matching, "game/uitext.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/stub16.cpp"),
