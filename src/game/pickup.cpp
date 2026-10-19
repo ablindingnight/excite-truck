@@ -165,6 +165,16 @@ struct PickupGroup {
     s32 count;    // offset 0x18
     u8 hasBound;  // offset 0x1C
     u8 done;      // offset 0x1D
+    void On(int i) {
+        if (i == id) {
+            enabled = 1;
+        }
+    }
+    void Off(int i) {
+        if (i == id) {
+            enabled = 0;
+        }
+    }
 };
 
 // Car footprint test history: the position the car had last frame.
@@ -185,6 +195,12 @@ struct PickupObjMan {
     PickupObjMan(void);
     ~PickupObjMan(void);
     void BeginGroup(Bound* b, int id);
+    void EnableGroups(int id) {
+        int i;
+        for (i = 0; i < groups.count; i++) {
+            groups.data[i].On(id);
+        }
+    }
     void Add(int type, const V2& pos, f32 hover);
     FixedArr<Pickup, 5000> objs;       // offset 0x0
     FixedArr<PickupGroup, 100> groups;  // offset 0x1D4CC
@@ -608,23 +624,13 @@ void fn_801683F4(PickupCounts* out, int player) {
     *out = res;
 }
 
-void fn_801688B4(int id) {
-    PickupObjMan* m = lbl_8055E354;
-    int i;
-    for (i = 0; i < m->groups.count; i++) {
-        if (id == m->groups.data[i].id) {
-            m->groups.data[i].enabled = 1;
-        }
-    }
-}
+void fn_801688B4(int id) { lbl_8055E354->EnableGroups(id); }
 
 void fn_801688FC(int id) {
     PickupObjMan* m = lbl_8055E354;
     int i;
     for (i = 0; i < m->groups.count; i++) {
-        if (id == m->groups.data[i].id) {
-            m->groups.data[i].enabled = 0;
-        }
+        m->groups.data[i].Off(id);
     }
 }
 

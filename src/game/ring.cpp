@@ -91,19 +91,21 @@ struct MechaSimpleArray : ArrayRef<T> {
     void Reserve(int n) {
         Free();
         bufCount = n;
-        buf = new ("MechaSimpleArray_tab") T[n];
+        buf = new ("MechaSimpleArray_tab") T[bufCount];
         this->data = buf;
         this->cap = bufCount;
         this->count = 0;
     }
     T* Add(void) { return &this->data[this->count++]; }
     void Remove(int k) {
-        if (k >= 0 && k < this->Count()) {
-            int last = this->Count() - 1;
-            if (k != last) {
-                this->data[k] = this->data[last];
+        if (k >= 0) {
+            if (k < this->count) {
+                int last = this->count - 1;
+                if (k != last) {
+                    this->data[k] = this->data[last];
+                }
+                this->count--;
             }
-            this->count--;
         }
     }
     s32 pad;       // offset 0xC
@@ -121,7 +123,7 @@ struct RingType {
     }
     void Make(int i);
     u8 loaded;      // offset 0x0
-    char name[31];  // offset 0x1
+    char name[30];  // offset 0x1
     s32 model;      // offset 0x20
     s32 radius;     // offset 0x24
 };
@@ -167,7 +169,7 @@ struct RingSet {
     void Enable(void);
     void Disable(void);
     u8 valid;       // offset 0x0
-    char name[31];  // offset 0x1
+    char name[30];  // offset 0x1
     s32 first;      // offset 0x20
     s32 count;      // offset 0x24
     u8 enabled;     // offset 0x28
