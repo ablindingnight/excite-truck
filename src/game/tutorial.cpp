@@ -74,7 +74,7 @@ VehicleInfo* FindVehicle(long id);
 // A loaded overlay layout (tutovr.val / challist.val).
 class Layout {
 public:
-    virtual void vf08(void);
+    virtual ~Layout(void);
     virtual void* Find(const char* name);   // 0x0C
     virtual void* Art(const char* name);    // 0x10
     virtual void* Elem(const char* name);   // 0x14
@@ -730,7 +730,7 @@ public:
     }
     virtual int Draw(int a) {
         if (!ended) {
-            Challenge::Draw(a);
+            return Challenge::Draw(a);
         }
         return 0;
     }
@@ -878,8 +878,9 @@ void fn_80160CF4(void);
 
 void fn_80161618(void) {
     int i;
+    u8* slot = (u8*)IdentGetCurrentSlot();
     lbl_8055A0B8 = 1;
-    fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, lbl_8055A0B0, &lbl_8055A0B8);
+    fn_801332D0(slot + 0xC, lbl_8055A0B0, &lbl_8055A0B8);
     lbl_8055E2DC = 0;
     lbl_8055A0B4 = lbl_8055A0B8;
     lbl_8055E2DD = 0;
@@ -975,7 +976,7 @@ void fn_80161AEC(void) {
     }
 }
 
-int fn_80161B0C(int key) {
+int fn_80161B0C(int unused, int key) {
     if (lbl_8055E300 && lbl_8055E300->Key(key)) {
         if (!lbl_8055E2DD) {
             fn_800121A4();
@@ -1043,15 +1044,18 @@ static inline int HasNode(ValueNode* n, const char* name) { return n->FindChild(
 extern "C" {
 
 CSubTaskMgr* fn_80161C94(void) {
-    if (HasNode(GetEvent(fn_801769CC()->event)->vals, "challenge")) {
+    ValueNode* v = GetEvent(fn_801769CC()->event)->vals;
+    if (HasNode(v, "challenge")) {
         return new ("chalsubtaskmgr") ChalSubTaskMgr;
     }
     return 0;
 }
 
 s32 fn_80161D14(void) {
-    s32 v = 1;
-    fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, lbl_8055A0B0, &v);
+    s32 v;
+    u8* slot = (u8*)IdentGetCurrentSlot();
+    v = 1;
+    fn_801332D0(slot + 0xC, lbl_8055A0B0, &v);
     return v;
 }
 
