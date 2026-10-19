@@ -218,9 +218,9 @@ public:
 };
 
 ModuleTag lbl_8055E4B0;
-u8 lbl_8055E4B8;
-u8 lbl_8055E4B9;
-u8 lbl_8055E4BA;
+bool lbl_8055E4B8;
+bool lbl_8055E4B9;
+bool lbl_8055E4BA;
 
 PhysDriver* lbl_804348D8[4];
 
@@ -239,10 +239,15 @@ const Names4 lbl_802F9530 = {{"sel_up", "sel_down", "sel_left", "sel_right"}};
 const Names4 lbl_802F9540 = {{"POV Front", "POV Back", "POV Left", "POV Right"}};
 
 
+static inline f32 AbsD(f32 x) {
+    double d = __fabs(x);
+    return d;
+}
+
 extern "C" {
 
 f32 fn_8017EB80(f32 x, f32 dead, f32 over) {
-    f32 t = (1.0f + dead + over) * (f32)__fabs(x) - dead;
+    f32 t = (1.0f + dead + over) * AbsD(x) - dead;
     t = MIN(1.0f, t);
     t = MAX(t, 0.0f);
     if (x >= 0.0f) {
@@ -252,9 +257,9 @@ f32 fn_8017EB80(f32 x, f32 dead, f32 over) {
 }
 
 int fn_8017EBE0(void) {
-    lbl_8055E4B8 = 0;
-    lbl_8055E4BA = 1;
-    lbl_8055E4B9 = 0;
+    lbl_8055E4BA = true;
+    lbl_8055E4B8 = false;
+    lbl_8055E4B9 = false;
     lbl_804348D8[0] = 0;
     lbl_804348D8[1] = 0;
     lbl_804348D8[2] = 0;
@@ -272,7 +277,7 @@ void fn_8017EC30(void) {
             lbl_804348D8[i] = 0;
         }
     }
-    lbl_8055E4BA = 0;
+    lbl_8055E4BA = false;
 }
 
 }  // extern "C"
@@ -578,7 +583,8 @@ void fn_8017F628(PhysDriver* d) {
     f32 k = lbl_8055A334;
     if (!fn_801769F8() && !fn_801B526C() && !fn_801C5B60() && d->b5C && d->rumble) {
         fn_802E85AC(d->ch, d->rumA[2] + d->rumA[0] * k, d->rumA[1] * k);
-        fn_802E85A8(d->ch, d->rumB[0] * k, d->rumB[1], d->rumB[2] * k);
+        f32 b1 = d->rumB[1];
+        fn_802E85A8(d->ch, d->rumB[0] * k, b1, d->rumB[2] * k);
         fn_802E8528(d->ch, 0.4f * Abs(d->rumC[0] * k), Abs(d->rumC[1]));
     } else {
         fn_802E8518(d->ch);
@@ -795,6 +801,83 @@ extern "C" void fn_8017FF4C(f32 dt) {
 }
 
 
+extern "C" void fn_801808DC(void) {
+    PhysDriver* d;
+    int i;
+    fn_801333E8((void*)8, "smoothing", (u8*)&lbl_8055E4B9);
+    lbl_8055E4B8 = true;
+    for (i = 0; i < 4; i++) {
+        d = lbl_804348D8[i];
+        if (d) {
+            d->Init();
+        }
+    }
+}
+
+inline PhysDriver::PhysDriver(int i) {
+    car = i;
+    ch = fn_80137CFC(i);
+    rumble = 0;
+    if (fn_8027AA48()) {
+        f348 = 0x10;
+    } else {
+        f348 = i + 0xC;
+    }
+    f34C = ch + 8;
+    f33C = 0.0f;
+    b5B = 0;
+    b5C = 0;
+    b5E = 1;
+    nonlin = 1.0f;
+    steerDead = 0.0f;
+    steerSpeed = 1.0f;
+    steerOver = 0.1f;
+    thrDead = 0.1f;
+    thrSpeed = 1.0f;
+    thrOver = 0.1f;
+    brkDead = 0.1f;
+    brkSpeed = 1.0f;
+    brkOver = 0.1f;
+    maxGear = 0;
+    gear = 0;
+    steer = 0.0f;
+    steerAdd = 0.0f;
+    brake = 0.0f;
+    throttle = 0.0f;
+    brakeAdd = 0.0f;
+    throttleAdd = 0.0f;
+    grip = 0.0f;
+    f28 = 0.0f;
+    b58 = 0;
+    b5D = 0;
+    b68 = 0;
+    b59 = 0;
+    b5A = 0;
+    rumA[2] = 0.0f;
+    rumA[1] = 0.0f;
+    rumA[0] = 0.0f;
+    rumB[2] = 0.0f;
+    rumB[1] = 0.0f;
+    rumB[0] = 0.0f;
+    rumC[1] = 0.0f;
+    rumC[0] = 0.0f;
+    f32C = 0.0f;
+    b338 = 0;
+    forced = 0;
+    freeShift = 0;
+    b342 = 0;
+    b343 = 0;
+    b344 = 0;
+    Init();
+}
+
+extern "C" PhysDriver* fn_8018108C(int i) {
+    if (!lbl_804348D8[i]) {
+        lbl_804348D8[i] = new ("DriverInterface") PhysDriver(i);
+    }
+    return lbl_804348D8[i];
+}
+
 DButton::DButton(s32 c) {
     ch = c;
     bC = 0;
@@ -939,80 +1022,3 @@ int PhysDriver::vf64(void) {
 }
 
 u8 PhysDriver::vf68(void) { return b344; }
-
-extern "C" void fn_801808DC(void) {
-    PhysDriver* d;
-    int i;
-    fn_801333E8((void*)8, "smoothing", &lbl_8055E4B9);
-    lbl_8055E4B8 = 1;
-    for (i = 0; i < 4; i++) {
-        d = lbl_804348D8[i];
-        if (d) {
-            d->Init();
-        }
-    }
-}
-
-inline PhysDriver::PhysDriver(int i) {
-    car = i;
-    ch = fn_80137CFC(i);
-    rumble = 0;
-    if (fn_8027AA48()) {
-        f348 = 0x10;
-    } else {
-        f348 = i + 0xC;
-    }
-    f34C = ch + 8;
-    f33C = 0.0f;
-    b5B = 0;
-    b5C = 0;
-    b5E = 1;
-    nonlin = 1.0f;
-    steerDead = 0.0f;
-    steerSpeed = 1.0f;
-    steerOver = 0.1f;
-    thrDead = 0.1f;
-    thrSpeed = 1.0f;
-    thrOver = 0.1f;
-    brkDead = 0.1f;
-    brkSpeed = 1.0f;
-    brkOver = 0.1f;
-    maxGear = 0;
-    gear = 0;
-    steer = 0.0f;
-    steerAdd = 0.0f;
-    brake = 0.0f;
-    throttle = 0.0f;
-    brakeAdd = 0.0f;
-    throttleAdd = 0.0f;
-    grip = 0.0f;
-    f28 = 0.0f;
-    b58 = 0;
-    b5D = 0;
-    b68 = 0;
-    b59 = 0;
-    b5A = 0;
-    rumA[2] = 0.0f;
-    rumA[1] = 0.0f;
-    rumA[0] = 0.0f;
-    rumB[2] = 0.0f;
-    rumB[1] = 0.0f;
-    rumB[0] = 0.0f;
-    rumC[1] = 0.0f;
-    rumC[0] = 0.0f;
-    f32C = 0.0f;
-    b338 = 0;
-    forced = 0;
-    freeShift = 0;
-    b342 = 0;
-    b343 = 0;
-    b344 = 0;
-    Init();
-}
-
-extern "C" PhysDriver* fn_8018108C(int i) {
-    if (!lbl_804348D8[i]) {
-        lbl_804348D8[i] = new ("DriverInterface") PhysDriver(i);
-    }
-    return lbl_804348D8[i];
-}
