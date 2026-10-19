@@ -57,7 +57,7 @@ void fn_801777A8(void);
 void fn_80176A34(s32 frame);
 void fn_801279D0(void);
 void fn_80179D8C(void* p, s32 pos);
-int fn_801E2640(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, void* list, int count);
+int fn_801E2640(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, void* list, int count, s32 g);
 void fn_801B5318(void* p);
 s32 fn_8012F500(s32 s, s32* pos);
 s32 fn_8012F450(s32 s);
@@ -749,8 +749,8 @@ Phob* fn_801783A8(PhobMsg* m, s32 pos) {
     return p;
 }
 
-int fn_801784AC(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, s32 unused) {
-    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E468);
+int fn_801784AC(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, s32 g) {
+    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E468, g);
 }
 
 int fn_801784DC(const f32* pos, f32* outY, f32* outN, s32* outTri, s32 x) {
@@ -820,10 +820,10 @@ int fn_80178678(s32 s, Phob** out, int pass) {
 }
 
 void fn_8017873C(MsgBuf* b, u8 type, const void* data, u32 n) {
-    if (b->len + n + 1 < 0x1000) {
+    if (n + b->len + 1 < 0x1000) {
         b->data[b->len] = type;
-        memcpy(&b->data[b->len + 1], data, n);
-        b->len += n + 1;
+        memcpy(b->data + b->len + 1, data, n);
+        b->len = n + b->len + 1;
     }
 }
 
@@ -1313,8 +1313,8 @@ void fn_80179758(const char* fmt, ...) {}
 
 void fn_801797A8(const char* fmt, ...) {}
 
-void fn_801797F8(int i, u16 hi, u16 lo) {
-    lbl_804305A0[i].id = (hi << 16) | lo;
+void fn_801797F8(int i, u32 hi, u32 lo) {
+    lbl_804305A0[i].id = (hi << 16) | (u16)lo;
     lbl_804305A0[i].count++;
 }
 
