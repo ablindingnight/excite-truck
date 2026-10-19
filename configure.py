@@ -1019,6 +1019,7 @@ config.libs.append(
             Object(NonMatching, "game/phob.cpp"),
             Object(NonMatching, "game/collvol.cpp"),
             Object(NonMatching, "game/physdriver.cpp"),
+            Object(NonMatching, "game/ball.cpp"),
         ],
     }
 )

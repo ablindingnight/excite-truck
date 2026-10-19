@@ -2396,6 +2396,15 @@ game/collvol.cpp:
 	.sbss       start:0x8055E478 end:0x8055E480
 	.sdata2     start:0x80561B78 end:0x80561BA8
 
+game/ball.cpp:
+	.text       start:0x8017D378 end:0x8017EB80
+	.ctors      start:0x802ED210 end:0x802ED214
+	.data       start:0x80331D18 end:0x80331DD0
+	.bss        start:0x804348C0 end:0x804348D8
+	.sdata      start:0x8055A310 end:0x8055A330
+	.sbss       start:0x8055E498 end:0x8055E4B0
+	.sdata2     start:0x80561BE0 end:0x80561C48
+
 game/physdriver.cpp:
 	.text       start:0x8017EB80 end:0x8018185C
 	.ctors      start:0x802ED214 end:0x802ED218
