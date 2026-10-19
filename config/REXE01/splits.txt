@@ -2630,6 +2630,15 @@ game/trackgrf.cpp:
 	.sbss       start:0x8055EC80 end:0x8055EC88
 	.sdata2     start:0x80563028 end:0x80563030
 
+game/terchunk.cpp:
+	.text       start:0x80202218 end:0x80202BE4
+	.ctors      start:0x802ED360 end:0x802ED364
+	.data       start:0x8033B9F8 end:0x8033BA88
+	.bss        start:0x804888B8 end:0x80488970
+	.sdata      start:0x8055B410 end:0x8055B428
+	.sbss       start:0x8055ECB0 end:0x8055ECE8
+	.sdata2     start:0x805630A0 end:0x805630B8
+
 game/terrpick.cpp:
 	.text       start:0x80203FE0 end:0x80204330
 	.ctors      start:0x802ED368 end:0x802ED36C
