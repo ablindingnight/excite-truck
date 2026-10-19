@@ -189,6 +189,24 @@ struct FixedList {
     FixedList(void) : a(storage, N) {}
     s32 Count(void) const { return a.count; }
     T* At(int i) { return &a.data[i]; }
+    int Find(const T& v) {
+        int i;
+        for (i = 0; i < a.count; i++) {
+            if (a.data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    void Remove(int k) {
+        if (k >= 0 && k < a.count) {
+            int last = a.count - 1;
+            if (k != last) {
+                a.data[k] = a.data[last];
+            }
+            a.count--;
+        }
+    }
     T* Push(const T& v) {
         T* p = &a.data[a.count++];
         *p = v;
@@ -2073,25 +2091,11 @@ void fn_801584D4(s32 type, int car, int rank) {
 void fn_80158558(StuntWatcher* w) { lbl_8042FD34.a.data[lbl_8042FD34.a.count++] = w; }
 
 void fn_8015857C(StuntWatcher* w) {
-    int i;
-    int k;
-    for (i = 0; i < lbl_8042FD34.a.count; i++) {
-        if (lbl_8042FD34.a.data[i] == w) {
-            goto found;
-        }
-    }
-    i = -1;
-found:
-    k = i;
+    int k = lbl_8042FD34.Find(w);
     if (k == -1) {
         return;
     }
-    if (k >= 0 && k < lbl_8042FD34.a.count) {
-        if (k != lbl_8042FD34.a.count - 1) {
-            lbl_8042FD34.a.data[k] = lbl_8042FD34.a.data[lbl_8042FD34.a.count - 1];
-        }
-        lbl_8042FD34.a.count--;
-    }
+    lbl_8042FD34.Remove(k);
 }
 
 int fn_80158618(const char* name) {
