@@ -1094,6 +1094,7 @@ config.libs.append(
             Object(NonMatching, "game/umat.cpp"),
             Object(NonMatching, "game/lweight.cpp"),
             Object(Matching, "game/stub14.cpp"),
+            Object(NonMatching, "game/faninfo.cpp"),
             Object(NonMatching, "game/sky.cpp"),
             Object(NonMatching, "game/boats.cpp"),
             Object(NonMatching, "game/swlmap.cpp"),

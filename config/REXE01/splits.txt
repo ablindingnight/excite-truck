@@ -2971,6 +2971,14 @@ game/stub14.cpp:
 	.ctors      start:0x802ED570 end:0x802ED574
 	.sbss       start:0x8055FA98 end:0x8055FAA0
 
+game/faninfo.cpp:
+	.text       start:0x802BE30C end:0x802BECE4
+	.ctors      start:0x802ED578 end:0x802ED57C
+	.data       start:0x8034AC68 end:0x8034ACA0
+	.bss        start:0x804C06E0 end:0x804C07F0
+	.sbss       start:0x8055FAC0 end:0x8055FAD0
+	.sdata2     start:0x80564D50 end:0x80564D78
+
 game/sky.cpp:
 	.text       start:0x802C0D70 end:0x802C110C
 	.ctors      start:0x802ED580 end:0x802ED584
