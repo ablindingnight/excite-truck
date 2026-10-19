@@ -103,8 +103,8 @@ public:
     virtual void Unload(void) = 0;                        // 0x18
     virtual void Update(void) = 0;                        // 0x1C
     virtual void Start(void) = 0;                         // 0x20
-    virtual int IsDone(void) = 0;                         // 0x24
-    virtual int IsPassed(void) = 0;                       // 0x28
+    virtual int IsDone(void) const = 0;                         // 0x24
+    virtual int IsPassed(void) const = 0;                       // 0x28
     virtual int State(void) = 0;                          // 0x2C
     virtual int Key(int k) = 0;                           // 0x30
     virtual f32 Time(void) = 0;                           // 0x34
@@ -494,8 +494,8 @@ public:
             }
         }
     }
-    virtual int IsDone(void) { return result != 0; }
-    virtual int IsPassed(void) { return result == 1; }
+    virtual int IsDone(void) const { return result != 0; }
+    virtual int IsPassed(void) const { return result == 1; }
     virtual int State(void) {
         int r = 0;
         if (IsDone() && cont) {
@@ -628,14 +628,14 @@ public:
         done = 0;
         stuntTime = 0.0f;
     }
-    virtual int IsDone(void) {
+    virtual int IsDone(void) const {
         f32 delay = finishDelay;
         if (IsPassed()) {
             return stuntTime > delay;
         }
         return result != 0;
     }
-    virtual int IsPassed(void) { return result == 1; }
+    virtual int IsPassed(void) const { return result == 1; }
     virtual void Event(int a, int b, int c) {
         if (!IsDone()) {
             switch (a) {
@@ -717,8 +717,8 @@ public:
             fn_8016D294(0, 0, lbl_8055E304 - 1);
         }
     }
-    virtual int IsDone(void) { return ended; }
-    virtual int IsPassed(void) { return passedScore; }
+    virtual int IsDone(void) const { return ended; }
+    virtual int IsPassed(void) const { return passedScore; }
     virtual int State(void) { return ended; }
     virtual void Event(int a, int b, int c) {
         if (a == 5 && !ended) {
@@ -759,8 +759,8 @@ public:
     virtual void Unload(void) {}
     virtual void Update(void);
     virtual void Start(void);
-    virtual int IsDone(void) { return done; }
-    virtual int IsPassed(void) { return done; }
+    virtual int IsDone(void) const { return done; }
+    virtual int IsPassed(void) const { return done; }
     virtual int State(void) { return done; }
     virtual int Key(int k);
     virtual f32 Time(void) { return 0.0f; }
