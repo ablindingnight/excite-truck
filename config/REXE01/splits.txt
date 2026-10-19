@@ -2640,6 +2640,13 @@ game/vmem.cpp:
 	.sdata      start:0x8055D1C8 end:0x8055D1D0
 	.sbss       start:0x8055FF68 end:0x8055FF70
 
+game/strmfile.cpp:
+	.text       start:0x802E72B8 end:0x802E7578
+	.ctors      start:0x802ED60C end:0x802ED610
+	.data       start:0x8034D7D8 end:0x8034D808
+	.bss        start:0x804FC978 end:0x80505978
+	.sbss       start:0x8055FFD0 end:0x8055FFE8
+
 game/strmbank.cpp:
 	.text       start:0x802E7578 end:0x802E7770
 	.ctors      start:0x802ED610 end:0x802ED614
