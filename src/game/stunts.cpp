@@ -78,6 +78,16 @@ public:
         b4A = 1;
         b4C = 0;
     }
+    void Play(void) {
+        play = 1;
+        b4B = 0;
+        b4A = 0;
+    }
+    void Loop(void) {
+        b4A = 0;
+        b4B = 1;
+        play = 1;
+    }
     f32 pitch;  // offset 0x4
     f32 vol;    // offset 0x8
     u8 padC[0x19 - 0xC];
@@ -1776,17 +1786,12 @@ struct CountSound {
     void Update(void) {
         if (s0) {
             if (on == 0) {
-                s0->b4A = 0;
-                s0->b4B = 1;
-                s0->play = 1;
+                s0->Loop();
             } else {
                 if (s1 && wasOn == 0) {
-                    s1->play = 1;
-                    s1->b4B = 0;
-                    s1->b4A = 0;
+                    s1->Play();
                 }
-                s0->b4A = 1;
-                s0->b4C = 0;
+                s0->Stop();
             }
         }
         wasOn = on;
@@ -1812,13 +1817,9 @@ public:
     virtual ~TrackerArray(void) {
         int i;
         for (i = 0; i < list.a.count; i++) {
-            if (list.a.data[i]) {
-                delete list.a.data[i];
-            }
+            delete list.a.data[i];
         }
-        if (cnt) {
-            delete cnt;
-        }
+        delete cnt;
     }
     virtual void Init(void) {
         int i;
