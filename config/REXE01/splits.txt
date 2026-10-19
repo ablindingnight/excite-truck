@@ -2562,6 +2562,19 @@ game/sortwrap.cpp:
 	.ctors      start:0x802ED480 end:0x802ED484
 	.sbss       start:0x8055F468 end:0x8055F470
 
+game/lightset.cpp:
+	.text       start:0x80279370 end:0x80279464
+	.ctors      start:0x802ED4B4 end:0x802ED4B8
+	.bss        start:0x804A16E8 end:0x804A1968
+	.sbss       start:0x8055F5F8 end:0x8055F600
+	.sdata2     start:0x805640D8 end:0x805640E8
+
+game/cartype.cpp:
+	.text       start:0x80279464 end:0x8027953C
+	.ctors      start:0x802ED4B8 end:0x802ED4BC
+	.data       start:0x803477F0 end:0x80347818
+	.sbss       start:0x8055F600 end:0x8055F608
+
 game/stub12.cpp:
 	.text       start:0x80296058 end:0x802960A0
 	.ctors      start:0x802ED4FC end:0x802ED500

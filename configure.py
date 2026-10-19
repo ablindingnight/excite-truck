@@ -1040,6 +1040,8 @@ config.libs.append(
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),
+            Object(Matching, "game/lightset.cpp"),
+            Object(Matching, "game/cartype.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(Matching, "game/stub13.cpp"),
             Object(Matching, "game/stub14.cpp"),
