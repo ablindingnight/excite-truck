@@ -657,7 +657,7 @@ extern "C" int fn_80157278(int car);
 // Air time. Doubled when both wheels... (flags from the landing), zero in modes that need a boost.
 class AirTracker : public TimedTracker {
 public:
-    AirTracker(StuntHud* h, int c);
+    AirTracker(StuntHud* h, int c, struct CountSound* cs);
     virtual ~AirTracker(void);
     virtual void Init(void) {
         b273 = 0;
@@ -797,7 +797,7 @@ inline void LoopSound(Sound* s) {
 // Drift time; plays the skid sound while sliding fast enough sideways.
 class DriftTracker : public TimedTracker {
 public:
-    DriftTracker(StuntHud* h, int c);
+    DriftTracker(StuntHud* h, int c, struct CountSound* cs);
     virtual ~DriftTracker(void) {
         if (snd) {
             delete snd;
@@ -889,7 +889,7 @@ extern "C" f32 fn_801429D0(f32 a, f32 b);  // max
 // Near misses with other cars ("close call", "turbo close call" while boosting).
 class CloseCallTracker : public CountTracker {
 public:
-    CloseCallTracker(StuntHud* h, int c);
+    CloseCallTracker(StuntHud* h, int c, struct CountSound* cs);
     virtual ~CloseCallTracker(void) {
         if (snd) {
             delete snd;
@@ -1748,10 +1748,17 @@ struct CountSound {
     s32 wasOn;  // offset 0xC
 };
 
+extern "C" void fn_80157560(Tracker* t);
+void* operator new(size_t size, const char* tag);
+
+
 // All of a car's trackers behind one Meter.
 class TrackerArray : public Meter {
 public:
-    TrackerArray(void) {}
+    TrackerArray(f32* hispeed) { Unused2(&hispeed); }
+    void Add(Tracker* t) { list.Push(t); }
+    int Num(void) { return list.Count(); }
+    Tracker* Get(int i) { return *list.At(i); }
     virtual ~TrackerArray(void) {
         int i;
         for (i = 0; i < list.a.count; i++) {
@@ -1886,6 +1893,7 @@ public:
     s32 car;                       // offset 0x58
 };
 
+
 void* operator new(size_t size, const char* tag);
 
 extern "C" {
@@ -1894,33 +1902,6 @@ int fn_80157278(int car) { return lbl_804348E8[car]->model == 'ACAR'; }
 
 void fn_80157560(Tracker* t);
 
-#pragma dont_inline on
-Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
-    TrackerArray* m;
-    lbl_8042FD08[car] = 1.0f;
-    m = new ("arraytracker") TrackerArray;
-    if (m) {
-        int i;
-        Unused2(&hispeed);
-        m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
-        m->list.Push(new ("airtracker") AirTracker(hud, car));
-        m->list.Push(new ("drifttracker") DriftTracker(hud, car));
-        m->list.Push(new ("ccalltracker") CloseCallTracker(hud, car));
-        m->list.Push(new ("360tracker") SpinTracker(hud, car));
-        m->list.Push(new ("throwtracker") ThrowTracker(hud, car));
-        m->list.Push(new ("jmpcmbtracker") JumpComboTracker(hud, car));
-        m->list.Push(new ("carhittracker") CarHitTracker(hud, car));
-        m->list.Push(new ("crashtracker") CrashTracker(hud, car));
-        m->list.Push(new ("ringtracker") RingTracker(hud, car));
-        for (i = 0; i < m->list.Count(); i++) {
-            fn_80157560(*m->list.At(i));
-        }
-        m->active = 1;
-        m->car = car;
-    }
-    return m;
-}
-#pragma dont_inline reset
 
 }  // extern "C"
 
@@ -1959,12 +1940,12 @@ SpinTracker::SpinTracker(StuntHud* h, int c) : CountTracker(h, c, 999.0f, 0) {
     f27C = 0.0f;
 }
 
-CloseCallTracker::CloseCallTracker(StuntHud* h, int c) : CountTracker(h, c, 2.5f, 0x41206) {
+CloseCallTracker::CloseCallTracker(StuntHud* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
     snd = fn_802076A0("missflag.sfx", 1, car, 0);
     flags = 0;
 }
 
-DriftTracker::DriftTracker(StuntHud* h, int c) : TimedTracker(h, c, 15.0f, 0x40902) {
+DriftTracker::DriftTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
     snd = 0;
     if (snd) {
         snd->SetVolume(1.0f);
@@ -1972,7 +1953,7 @@ DriftTracker::DriftTracker(StuntHud* h, int c) : TimedTracker(h, c, 15.0f, 0x409
     blip = 0;
 }
 
-AirTracker::AirTracker(StuntHud* h, int c) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
+AirTracker::AirTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
 
 CountSound::CountSound(const char* a, const char* b, int car) {
     s1 = 0;
@@ -2135,4 +2116,33 @@ f32 CountTracker::Collect(RaceCarRec* rc) {
     count = 0;
     mult = 1.0f;
     return pts;
+}
+
+extern "C" {
+#pragma inline_depth(1)
+Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
+    TrackerArray* m;
+    lbl_8042FD08[car] = 1.0f;
+    m = new ("arraytracker") TrackerArray(hispeed);
+    if (m) {
+        int i;
+        m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
+        m->Add(new ("airtracker") AirTracker(hud, car, m->cnt));
+        m->Add(new ("drifttracker") DriftTracker(hud, car, m->cnt));
+        m->Add(new ("ccalltracker") CloseCallTracker(hud, car, m->cnt));
+        m->Add(new ("360tracker") SpinTracker(hud, car));
+        m->Add(new ("throwtracker") ThrowTracker(hud, car));
+        m->Add(new ("jmpcmbtracker") JumpComboTracker(hud, car));
+        m->Add(new ("carhittracker") CarHitTracker(hud, car));
+        m->Add(new ("crashtracker") CrashTracker(hud, car));
+        m->Add(new ("ringtracker") RingTracker(hud, car));
+        for (i = 0; i < m->Num(); i++) {
+            fn_80157560(m->Get(i));
+        }
+        m->active = 1;
+        m->car = car;
+    }
+    return m;
+}
+#pragma inline_depth(smart)
 }
