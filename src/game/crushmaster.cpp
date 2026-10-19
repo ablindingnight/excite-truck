@@ -4,6 +4,7 @@
 // ("crush_nogo.val"). Tuning comes from the config's "crush_table". It shares the results overlay with the
 // ring challenge. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <stdarg.h>
 
 class RSound;
 extern f32 lbl_8055E3C8;  // time
@@ -280,6 +281,7 @@ void fn_8001DAE0(struct Timer* t, f32 len);
 }
 
 extern "C" f32 fn_8001DAE8(struct Timer* t);  // time
+extern "C" f32 fn_8001DAF0(struct Timer* t);  // progress
 
 struct Timer {
     Timer(f32 len) { fn_8001DAE0(this, len); }
@@ -289,6 +291,7 @@ struct Timer {
     }
     void Start(void) { start = fn_8001DAE8(this); }
     void Clear(void) { start = -999.0f; }
+    f32 Progress(void) { return fn_8001DAF0(this); }
     f32 len;    // offset 0x0
     f32 start;  // offset 0x4
 };
@@ -443,9 +446,41 @@ public:
     s32 f104;  // offset 0x104
 };
 
+union ElemColor {
+    u32 all;
+    struct {
+        u32 a : 8;
+        u32 rgb : 24;
+    } ch;
+};
+
+struct TextElem {
+    TextElem(void) {}
+    const char* name;     // offset 0x0
+    V2 pos;               // offset 0x4
+    s32 elemJust;         // offset 0xC
+    f32 scale;            // offset 0x10
+    u32 just;             // offset 0x14
+    ElemColor color;      // offset 0x18
+    const char* defText;  // offset 0x1C
+};
+
+struct Box {
+    Box(void) {}
+    const char* name;  // offset 0x0
+    V2 pos;            // offset 0x4
+    s32 c;             // offset 0xC
+    f32 w;             // offset 0x10
+    f32 h;             // offset 0x14
+    ElemColor color;   // offset 0x18
+};
+
 class ILayout {
 public:
     virtual ~ILayout(void) {}
+    virtual TextElem* Find(const char* name) = 0;
+    virtual void* FindArt(const char* name) = 0;
+    virtual Box* FindBox(const char* name) = 0;
 };
 
 // Owns the mode's HUD layout.
@@ -1103,6 +1138,20 @@ int CrushMaster::vf28(void) { return AliveAI() != 0; }
 int IsLoadingActive(void);
 
 extern "C" {
+void fn_80139318(ILayout* l, s32 tex, int car, f32 size);  // radar
+void fn_80147940(ILayout* l, Box* b, const char* art, int part);
+void fn_80147230(TextElem* e, const char* fmt, ...);
+void fn_801476C4(TextElem* e);
+void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
+void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
+void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
+void fn_80130978(char* buf, int size, f32 v);
+f32 fn_801E7E18(void);
+void fn_8001DF08(int id, s32 score);
+int vsprintf(char* buf, const char* fmt, va_list args);
+}
+
+extern "C" {
 int fn_801E866C(int view);
 void fn_8018AF04(RaceCarRec* car);
 void fn_801E9DC4(s16* h);
@@ -1357,4 +1406,120 @@ int CrushMaster::vfA0(StartPos* out, int idx) {
         return 1;
     }
     return 0;
+}
+
+static inline f32 Ease(f32 t) {
+    if (t < -1.0f) {
+        return -1.0f;
+    } else if (t > 1.0f) {
+        return 1.0f;
+    } else if (t > 0.0f) {
+        return t * (-2.0f * t * t) + 3.0f * t * t;
+    } else {
+        return t * (-2.0f * t * t) - 3.0f * t * t;
+    }
+}
+
+extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
+
+void CrushMaster::vf4C(int view) {
+    int car = fn_801E866C(view);
+    int radar = 1;
+    if (!lbl_8043038C.alwaysRadar && !fn_80171D38(view)) {
+        radar = 0;
+    }
+    if (layout.p) {
+        CrushCar* cc;
+        int n;
+        Box* icon;
+        Box* hit;
+        TextElem* col;
+        int i;
+        if (radar && vf20(car)) {
+            fn_80139318(layout.p, radarTex, car, 140.0f);
+        }
+        cc = &cars[car];
+        n = nCars - 1;
+        icon = layout.p->FindBox("ring_set_icon");
+        hit = layout.p->FindBox("ring_set_hit");
+        if (!hit) {
+            hit = icon;
+        }
+        col = layout.p->Find("score_column");
+        for (i = 0; i < n; i++) {
+            Box b = *icon;
+            int killed = i < cc->f8;
+            int pts;
+            b.pos.y += i * hit->h;
+            if (!killed) {
+                b.color.all = 0x66FFFFFF;
+            }
+            fn_80147940(layout.p, &b, "star_art", 0);
+            if (cc->f10[i]) {
+                V2 save = b.pos;
+                b.pos.x += 5.0f;
+                b.pos.y += 4.0f;
+                fn_80147940(layout.p, &b, "star_art", 0);
+                b.pos = save;
+            }
+            pts = killed ? lbl_8043038C.pointsPerKill * (cc->f10[i] + 1) : 0;
+            if (pts) {
+                TextElem t = *col;
+                t.pos.x = b.pos.x + b.w * 0.5f;
+                t.pos.y = b.pos.y + b.h * 0.5f;
+                fn_80147230(&t, "%d", pts);
+            }
+        }
+        {
+            char buf[0x20];
+            if (lbl_8043038C.timeInSeconds) {
+                f32 left = endTime - fn_801E7E18();
+                fn_801345D8(buf, 0x20, "%.0f", 0.0f > left ? 0.0f : left);
+            } else {
+                f32 left = endTime - fn_801E7E18();
+                fn_80130978(buf, 0x20, 0.0f > left ? 0.0f : left);
+            }
+            if (AliveAI() > 0) {
+                fn_801475D0(layout.p, "timer", "%s", buf);
+                fn_8014784C(layout.p, "stop_watch_art", "stop_watch_artset", 0);
+            }
+        }
+        if (t184.Running()) {
+            fn_80175080(layout.p, "lame_kill_msg_0", "lame_kill_msg", Ease(t184.Progress()), 0);
+        }
+        if (t17C.Running()) {
+            fn_80175080(layout.p, "kill_msg_0", "kill_msg", Ease(t17C.Progress()), 0);
+        }
+        if (t18C.Running()) {
+            fn_80175080(layout.p, "awesome_kill_msg_0", "awesome_kill_msg", Ease(t18C.Progress()), 0);
+        }
+        if (t174.Running()) {
+            fn_80175080(layout.p, "player_wins_msg_0", "player_wins_msg", Ease(t174.Progress()), 0);
+        }
+    }
+    fn_8001DF08(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
+}
+
+extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
+    TextElem* a = l->Find(from);
+    TextElem* b = l->Find(to);
+    TextElem e;
+    if (a) {
+        fn_80147CEC(&e, a, b, t);
+    } else {
+        e = *b;
+    }
+    if (fmt) {
+        va_list args;
+        char buf[0x80];
+        va_start(args, fmt);
+        vsprintf(buf, fmt, args);
+        va_end(args);
+        if (strlen(buf) >= 0x80) {
+            fn_802E317C(" oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
+        }
+        fn_80147230(&e, "%s", buf);
+    } else {
+        fn_801476C4(&e);
+    }
 }
