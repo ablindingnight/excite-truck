@@ -558,33 +558,30 @@ static inline void FadeStep(void) {
     if (lbl_80430558.state - 1 <= 1u) {
         if (fn_802ECC10()) {
             if (lbl_80430558.state == 2) {
+                int a = lbl_80430558.alpha;
                 lbl_80430558.hold = 7;
-                lbl_80430558.alpha = MIN(lbl_80430558.alpha, 250);
+                lbl_80430558.alpha = MIN(a, 250);
             }
         } else if (!lbl_8055E3BD) {
             f32 speed = fn_80176A1C() == 2 ? fn_80176A2C() : 1.0f;
             int frames;
             int d;
             int a;
+            s32 now;
             speed = MAX(speed, 0.001f);
             frames = (int)(45.0f / speed);
-            d = lbl_8055E3C4 - lbl_80430558.frame;
-            if (d > 2) {
-                d = 2;
-            }
+            now = lbl_8055E3C4;
+            d = MIN(2, now - lbl_80430558.frame);
             a = lbl_80430558.alpha + (d * 255) / frames;
-            a = a & ~(a >> 31);
-            lbl_80430558.frame = lbl_8055E3C4;
-            lbl_80430558.alpha = MIN(a, 255);
+            a = a > 0 ? a : 0;
+            a = MIN(a, 255);
+            lbl_80430558.frame = now;
+            lbl_80430558.alpha = a;
         } else {
             s32 t = fn_802E2C20();
-            int d = t - lbl_80430558.time;
-            int a;
-            if (d > 33) {
-                d = 33;
-            }
-            a = lbl_80430558.alpha + (d * 255) / 750;
-            a = a & ~(a >> 31);
+            int d = MIN(33, t - lbl_80430558.time);
+            int a = lbl_80430558.alpha + (d * 255) / 750;
+            a = a > 0 ? a : 0;
             lbl_80430558.alpha = MIN(a, 255);
             lbl_80430558.time = t;
         }
@@ -597,7 +594,11 @@ void fn_801771A8(void) {
         lbl_80430558.hold--;
     }
     if (lbl_80430558.alpha == 255 && lbl_80430558.hold <= 0 && lbl_80430558.state - 1 <= 1u) {
-        lbl_80430558.state = lbl_80430558.state == 1 ? 0 : 3;
+        s32 ns = 3;
+        if (lbl_80430558.state == 1) {
+            ns = 0;
+        }
+        lbl_80430558.state = ns;
         if (lbl_80430558.done) {
             lbl_80430558.done();
             lbl_80430558.done = 0;
