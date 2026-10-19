@@ -43,9 +43,9 @@ struct RaceCarRec {
     s32 air;    // offset 0x2620 (0 while airborne)
     u8 pad2624[0x2690 - 0x2624];
     f32 f2690;  // offset 0x2690
-    f32 F2690(void) { return f2690; }
-    f32 Speed(void) { return speed; }
-    s32 Air(void) { return air; }
+    f32 F2690(void);
+    f32 Speed(void);
+    s32 Air(void);
     Wheel* Wheels(void) { return (Wheel*)&w2410; }
 };
 
@@ -254,6 +254,36 @@ extern "C" {
 void fn_801584D4(s32 type, int car, int rank);
 }
 
+struct RankTable : FixedList<struct Rank, 10> {
+    void Clear(void) {
+        int i;
+        for (i = 0; i < a.count; i++) {
+            a.data[i].count = 0;
+            a.data[i].scored = 0;
+            a.data[i].natural = 0;
+            a.data[i].total = 0.0f;
+        }
+    }
+    s32 First(void) {
+        int i;
+        for (i = 0; i < a.count; i++) {
+            if (a.data[i].thresh >= 0) {
+                return a.data[i].thresh;
+            }
+        }
+        return 0;
+    }
+    s32 Last(void) {
+        int i = a.count;
+        while (i-- > 0) {
+            if (a.data[i].thresh >= 0) {
+                return a.data[i].thresh;
+            }
+        }
+        return 0;
+    }
+};
+
 // A stunt kind with its rank table, its HUD pop-up and its share of the score.
 class Tracker : public Meter {
 public:
@@ -264,15 +294,7 @@ public:
         evt = 0;
     }
     virtual ~Tracker(void) {}
-    virtual void Init(void) {
-        int i;
-        for (i = 0; i < ranks.a.count; i++) {
-            ranks.a.data[i].count = 0;
-            ranks.a.data[i].scored = 0;
-            ranks.a.data[i].natural = 0;
-            ranks.a.data[i].total = 0.0f;
-        }
-    }
+    virtual void Init(void) { ranks.Clear(); }
     virtual void Dump(void) {
         int count = 0;
         int scored = 0;
@@ -323,20 +345,22 @@ public:
     }
     virtual int FirstRank(void) { return 1; }  // 0x4C
     virtual f32 Points(int rank) {             // 0x50
-        if (rank < FirstRank()) {
-            return 0.0f;
+        if (rank >= FirstRank()) {
+            return ranks.a.data[rank].pts;
         }
-        return ranks.a.data[rank].pts;
+        return 0.0f;
     }
     virtual int FindRank(s32 v) {  // 0x54
         int i;
         for (i = 0; i < ranks.a.count; i++) {
             s32 t = ranks.a.data[i].thresh;
             if (v < t || t < 0) {
-                return i;
+                goto done;
             }
         }
-        return 0;
+        i = 0;
+    done:
+        return i;
     }
     virtual s32 Value(void) = 0;                          // 0x58
     virtual int Rank(void) { return FindRank(Value()); }  // 0x5C
@@ -358,24 +382,8 @@ public:
     virtual const char* SuperLabel(void) { return fn_80131234(lbl_8032E7F8[Type()]); }  // 0x68
     virtual const char* StatsLabel(void) { return fn_80131234(lbl_8032E9E0[Type()]); }  // 0x6C
     virtual const char* Name(void) { return lbl_8032E540[Type()]; }                     // 0x70
-    virtual s32 MinThresh(void) {                                                       // 0x74
-        int i;
-        for (i = 0; i < ranks.a.count; i++) {
-            if (ranks.a.data[i].thresh >= 0) {
-                return ranks.a.data[i].thresh;
-            }
-        }
-        return 0;
-    }
-    virtual s32 MaxThresh(void) {  // 0x78
-        int i;
-        for (i = ranks.a.count; i > 0; i--) {
-            if (ranks.a.data[i].thresh >= 0) {
-                return ranks.a.data[i].thresh;
-            }
-        }
-        return 0;
-    }
+    virtual s32 MinThresh(void) { return ranks.First(); }  // 0x74
+    virtual s32 MaxThresh(void) { return ranks.Last(); }  // 0x78
     virtual s32 Type(void) = 0;  // 0x7C
     virtual void Show(void) {    // 0x80
         if (!evt) {
@@ -429,18 +437,17 @@ public:
     }
     virtual int InAir(void) { return 0; }  // 0x90
 
-    int NumRanks(void) { return ranks.a.count; }
+    int NumRanks(void);
 
     s32 car;                                 // offset 0x4
-    FixedList<struct Rank, 10> ranks;        // offset 0x8
+    RankTable ranks;                         // offset 0x8
     StuntHud* hud;                           // offset 0x244
     StuntText* evt;                          // offset 0x248
 };
 
-inline int IsZero(f32 x);
 
 struct Blip {
-    void Clear(void) { x8 = 0; }
+    void Clear(void);
     u8 pad0[0x8];
     s32 x8;  // offset 0x8
 };
@@ -468,7 +475,7 @@ public:
     virtual void Reset(void) {
         Hide();
         dur = 0.0f;
-        StopEffect();
+        StopFx();
         f264 = 0.0f;
         since = 0.016683351f;
     }
@@ -493,28 +500,28 @@ public:
             }
             r = 0.0f;
         } else if (NearZero(since)) {
-            r = Finish(rc);
+            r = End();
         } else {
             Hide();
             since += 0.016683351f;
-            StopEffect();
+            StopFx();
         }
-        if (NumRanks() - 1 == Rank()) {
-            r = Finish(rc);
+        if (ranks.a.count - 1 == Rank()) {
+            r = End();
         }
         return r;
     }
     virtual void Stop(RaceCarRec* rc) {
         if (dur > 0.0f) {
-            Finish(rc);
+            End();
         }
     }
-    virtual void Crash(RaceCarRec* rc) { Finish(rc); }
+    virtual void Crash(RaceCarRec* rc) { End(); }
     virtual s32 Value(void) { return dur; }
     virtual int Airborne(RaceCarRec* rc) = 0;  // 0x94
     virtual void Ended(f32 d) {}               // 0x98
 
-    void StopEffect(void) {
+    void StopFx(void) {
         if (f260 > minT) {
             if (effect) {
                 fn_801CB750(effect, car);
@@ -522,14 +529,14 @@ public:
             f260 = 0.0f;
         }
     }
-    f32 Finish(RaceCarRec* rc) {
+    f32 End(void) {
         f32 pts = 0.0f;
         if (dur > minT && Rank() > 0) {
             pts = Points(Rank()) * mult;
             Score(&pts);
             Hide();
         }
-        if (!IsZero(pts)) {
+        if (!fn_80141F7C(pts)) {
             Ended(dur);
         }
         since += 0.016683351f;
@@ -537,6 +544,8 @@ public:
         f264 = 0.0f;
         return pts;
     }
+    void StopEffect(void);
+    f32 Finish(RaceCarRec* rc);
 
     f32 minT;    // offset 0x24C
     f32 mult;    // offset 0x250
@@ -549,7 +558,6 @@ public:
     Blip* blip;  // offset 0x26C
 };
 
-inline int IsZero(f32 x) { return NearZero(x); }
 
 // A stunt that is counted: close calls, car hits, rings... Each one extends a short window; the count is
 // scored when the window runs out.
@@ -599,7 +607,7 @@ public:
         }
         if (NearZero(timer) || full) {
             if (count > 0) {
-                r = Collect(rc);
+                r = Take();
             }
             if (!full && playing > 0) {
                 if (effect) {
@@ -614,16 +622,16 @@ public:
     }
     virtual void Stop(RaceCarRec* rc) {
         if (count > 0) {
-            Collect(rc);
+            Take();
         }
     }
-    virtual void Crash(RaceCarRec* rc) { Collect(rc); }
+    virtual void Crash(RaceCarRec* rc) { Take(); }
     virtual s32 Value(void) { return count; }
     virtual int Grounded(void) { return 1; }  // 0x94
     virtual s32 Shown(void) { return count; }  // 0x98
     virtual int Capped(void) { return 1; }    // 0x9C
 
-    f32 Collect(RaceCarRec* rc) {
+    f32 Take(void) {
         f32 pts = Points(Rank()) * mult;
         Score(&pts);
         Hide();
@@ -631,14 +639,8 @@ public:
         mult = 1.0f;
         return pts;
     }
-    void StopEffect(void) {
-        if (playing > 0) {
-            if (effect) {
-                fn_801CB6E4(effect, car);
-            }
-            playing = 0;
-        }
-    }
+    f32 Collect(RaceCarRec* rc);
+    void StopEffect(void);
 
     u8 pad24C[0x250 - 0x24C];
     f32 window;   // offset 0x250
@@ -655,8 +657,8 @@ extern "C" int fn_80157278(int car);
 // Air time. Doubled when both wheels... (flags from the landing), zero in modes that need a boost.
 class AirTracker : public TimedTracker {
 public:
-    AirTracker(StuntHud* h, int c) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
-    virtual ~AirTracker(void) {}
+    AirTracker(StuntHud* h, int c);
+    virtual ~AirTracker(void);
     virtual void Init(void) {
         b273 = 0;
         b270 = 0;
@@ -711,14 +713,15 @@ public:
     s32 car2;  // offset 0x278
 };
 
-inline void Unused(RaceCarRec** p) {}
-inline void Unused2(f32** p) {}
+void Unused(RaceCarRec** p);
+void Unused2(f32** p);
 
-#pragma dont_inline on
+AirTracker::~AirTracker(void) {}
+
 f32 AirTracker::Rate(RaceCarRec* rc) {
     f32 r = 0.0f;
     b272 = 0;
-    if (IsZero(rc->F2690()) && Airborne(rc)) {
+    if (fn_80141F7C(rc->F2690()) && Airborne(rc)) {
         if (dur > minT) {
             Show();
         }
@@ -736,7 +739,7 @@ f32 AirTracker::Rate(RaceCarRec* rc) {
             }
         }
         r = 0.0f;
-    } else if (IsZero(since)) {
+    } else if (fn_80141F7C(since)) {
         r = Finish(rc);
     } else {
         Hide();
@@ -763,7 +766,6 @@ void AirTracker::Stop(RaceCarRec* rc) {
         AchievementsAdd(3, n);
     }
 }
-#pragma dont_inline reset
 
 struct RaceCarVec {
     f32 x;
@@ -795,13 +797,7 @@ inline void LoopSound(Sound* s) {
 // Drift time; plays the skid sound while sliding fast enough sideways.
 class DriftTracker : public TimedTracker {
 public:
-    DriftTracker(StuntHud* h, int c) : TimedTracker(h, c, 15.0f, 0x40902) {
-        snd = 0;
-        if (snd) {
-            snd->SetVolume(1.0f);
-        }
-        blip = 0;
-    }
+    DriftTracker(StuntHud* h, int c);
     virtual ~DriftTracker(void) {
         if (snd) {
             delete snd;
@@ -866,7 +862,6 @@ public:
     Sound* snd;  // offset 0x278
 };
 
-#pragma dont_inline on
 void DriftTracker::Stop(RaceCarRec* rc) {
     s32 n;
     Unused(&rc);
@@ -879,7 +874,6 @@ void DriftTracker::Stop(RaceCarRec* rc) {
     }
     StopSound(snd);
 }
-#pragma dont_inline reset
 
 struct CloseCallSlot {
     void* other;  // offset 0x0
@@ -895,10 +889,7 @@ extern "C" f32 fn_801429D0(f32 a, f32 b);  // max
 // Near misses with other cars ("close call", "turbo close call" while boosting).
 class CloseCallTracker : public CountTracker {
 public:
-    CloseCallTracker(StuntHud* h, int c) : CountTracker(h, c, 2.5f, 0x41206) {
-        snd = fn_802076A0("missflag.sfx", 1, car, 0);
-        flags = 0;
-    }
+    CloseCallTracker(StuntHud* h, int c);
     virtual ~CloseCallTracker(void) {
         if (snd) {
             delete snd;
@@ -937,7 +928,6 @@ public:
     Sound* snd;              // offset 0x2D8
 };
 
-#pragma dont_inline on
 f32 CloseCallTracker::Rate(RaceCarRec* rc) {
     f32 now = lbl_8055E3C8;
     f32 r;
@@ -985,7 +975,7 @@ f32 CloseCallTracker::Rate(RaceCarRec* rc) {
                 mult = 1.0f;
                 Show();
                 if (evt && blip) {
-                    blip->Clear();
+                    blip->x8 = 0;
                 }
             }
             any = 1;
@@ -1010,7 +1000,7 @@ f32 CloseCallTracker::Rate(RaceCarRec* rc) {
     if (Capped() && NumRanks() - 1 == Rank()) {
         full = 1;
     }
-    if (IsZero(timer) || full) {
+    if (fn_80141F7C(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1037,7 +1027,6 @@ void CloseCallTracker::Stop(RaceCarRec* rc) {
         AchievementsAdd(4, n);
     }
 }
-#pragma dont_inline reset
 
 void CloseCallTracker::Bump(RaceCarRec* rc, int kind, void* other) {
     if (rc->speed > 0.44444445f * lbl_8055A02C && kind == 1003 && !turbo) {
@@ -1139,17 +1128,7 @@ struct CarHit {
 // Being rammed by other cars into a wreck.
 class CarHitTracker : public Tracker {
 public:
-    CarHitTracker(StuntHud* h, int c) : Tracker(h, c) {
-        int i;
-        hits[0].timer = 0.0f;
-        car2 = c;
-        f290 = 0.0f;
-        f28C = 0.0f;
-        wrecked = 0;
-        for (i = 0; i < ARRAY_COUNT(hits); i++) {
-            hits[i].timer = 0.0f;
-        }
-    }
+    CarHitTracker(StuntHud* h, int c);
     virtual ~CarHitTracker(void) {}
     virtual void Init(void) {
         int i;
@@ -1251,7 +1230,7 @@ public:
 // Several jumps in a row.
 class JumpComboTracker : public CountTracker {
 public:
-    JumpComboTracker(StuntHud* h, int c) : CountTracker(h, c, 0.001f, 0) {}
+    JumpComboTracker(StuntHud* h, int c);
     virtual ~JumpComboTracker(void) {}
     virtual void Init(void) {
         CountTracker::Init();
@@ -1298,10 +1277,7 @@ struct ThrowTarget {
 // Throwing another car with a tree/object.
 class ThrowTracker : public CountTracker {
 public:
-    ThrowTracker(StuntHud* h, int c) : CountTracker(h, c, 0.5f, 0) {
-        handle = 0;
-        active = 0;
-    }
+    ThrowTracker(StuntHud* h, int c);
     virtual ~ThrowTracker(void) {}
     virtual void Init(void) {
         CountTracker::Init();
@@ -1337,10 +1313,7 @@ public:
 // Spins and rolls.
 class SpinTracker : public CountTracker {
 public:
-    SpinTracker(StuntHud* h, int c) : CountTracker(h, c, 999.0f, 0) {
-        car2 = c;
-        f27C = 0.0f;
-    }
+    SpinTracker(StuntHud* h, int c);
     virtual ~SpinTracker(void) {}
     virtual void Init(void) {
         CountTracker::Init();
@@ -1402,7 +1375,7 @@ public:
 // Crashing (into the scenery).
 class CrashTracker : public ValueTracker {
 public:
-    CrashTracker(StuntHud* h, int c) : ValueTracker(h, c) {}
+    CrashTracker(StuntHud* h, int c);
     virtual ~CrashTracker(void) {}
     virtual s32 Type(void) { return 13; }
     virtual void Refresh(void) {
@@ -1426,14 +1399,7 @@ static const f32 lbl_802F9478[6] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f, 0.
 // Flying through rings.
 class RingTracker : public CountTracker {
 public:
-    RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
-        car2 = c;
-        if (!fn_80157278(c)) {
-            snd = fn_802076A0("ringhit.sfx", 1, c, 2);
-        } else {
-            snd = 0;
-        }
-    }
+    RingTracker(StuntHud* h, int c);
     virtual ~RingTracker(void) {
         if (snd) {
             delete snd;
@@ -1465,7 +1431,6 @@ public:
     Sound* snd;   // offset 0x278
 };
 
-#pragma dont_inline on
 f32 JumpComboTracker::Rate(RaceCarRec* rc) {
     f32 r;
     int full;
@@ -1486,7 +1451,7 @@ f32 JumpComboTracker::Rate(RaceCarRec* rc) {
             mult = 1.0f;
             Show();
             if (evt && blip) {
-                blip->Clear();
+                blip->x8 = 0;
             }
         }
     }
@@ -1510,7 +1475,7 @@ f32 JumpComboTracker::Rate(RaceCarRec* rc) {
     if (Capped() && NumRanks() - 1 == Rank()) {
         full = 1;
     }
-    if (IsZero(timer) || full) {
+    if (fn_80141F7C(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1596,7 +1561,7 @@ f32 ThrowTracker::Rate(RaceCarRec* rc) {
                 mult = 1.0f;
                 Show();
                 if (evt && blip) {
-                    blip->Clear();
+                    blip->x8 = 0;
                 }
                 fn_80198EA0(i);
             }
@@ -1614,7 +1579,7 @@ f32 ThrowTracker::Rate(RaceCarRec* rc) {
     if (Capped() && NumRanks() - 1 == Rank()) {
         full = 1;
     }
-    if (IsZero(timer) || full) {
+    if (fn_80141F7C(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1639,7 +1604,7 @@ f32 SpinTracker::Rate(RaceCarRec* rc) {
             mult = 1.0f;
             Show();
             if (evt && blip) {
-                blip->Clear();
+                blip->x8 = 0;
             }
         }
     }
@@ -1652,7 +1617,7 @@ f32 SpinTracker::Rate(RaceCarRec* rc) {
     if (Capped() && NumRanks() - 1 == Rank()) {
         full = 1;
     }
-    if (IsZero(timer) || full) {
+    if (fn_80141F7C(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1722,7 +1687,7 @@ f32 RingTracker::Rate(RaceCarRec* rc) {
     if (Capped() && NumRanks() - 1 == Rank()) {
         full = 1;
     }
-    if (IsZero(timer) || full) {
+    if (fn_80141F7C(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1746,27 +1711,10 @@ void RingTracker::Stop(RaceCarRec* rc) {
         AchievementsAdd(6, n);
     }
 }
-#pragma dont_inline reset
 
 // The two count-up sounds of the score counter.
 struct CountSound {
-    CountSound(const char* a, const char* b, int car) {
-        s1 = 0;
-        s0 = 0;
-        if (!fn_80157278(car)) {
-            s0 = fn_802076A0(a, 1, car, 0);
-            if (s0) {
-                s0->SetPitch(1.2f);
-                s0->SetVolume(1.0f);
-            }
-            s1 = fn_802076A0(b, 1, car, 0);
-            if (s1) {
-                s1->SetPitch(1.2f);
-                s1->SetVolume(1.0f);
-            }
-        }
-        on = 1;
-    }
+    CountSound(const char* a, const char* b, int car);
     ~CountSound(void) {
         if (s1) {
             delete s1;
@@ -1974,6 +1922,78 @@ Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
 }
 #pragma dont_inline reset
 
+}  // extern "C"
+
+RingTracker::RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
+    car2 = c;
+    if (!fn_80157278(c)) {
+        snd = fn_802076A0("ringhit.sfx", 1, c, 2);
+    } else {
+        snd = 0;
+    }
+}
+
+CrashTracker::CrashTracker(StuntHud* h, int c) : ValueTracker(h, c) {}
+
+CarHitTracker::CarHitTracker(StuntHud* h, int c) : Tracker(h, c) {
+    int i;
+    hits[0].timer = 0.0f;
+    car2 = c;
+    f290 = 0.0f;
+    f28C = 0.0f;
+    wrecked = 0;
+    for (i = 0; i < ARRAY_COUNT(hits); i++) {
+        hits[i].timer = 0.0f;
+    }
+}
+
+JumpComboTracker::JumpComboTracker(StuntHud* h, int c) : CountTracker(h, c, 0.001f, 0) {}
+
+ThrowTracker::ThrowTracker(StuntHud* h, int c) : CountTracker(h, c, 0.5f, 0) {
+    handle = 0;
+    active = 0;
+}
+
+SpinTracker::SpinTracker(StuntHud* h, int c) : CountTracker(h, c, 999.0f, 0) {
+    car2 = c;
+    f27C = 0.0f;
+}
+
+CloseCallTracker::CloseCallTracker(StuntHud* h, int c) : CountTracker(h, c, 2.5f, 0x41206) {
+    snd = fn_802076A0("missflag.sfx", 1, car, 0);
+    flags = 0;
+}
+
+DriftTracker::DriftTracker(StuntHud* h, int c) : TimedTracker(h, c, 15.0f, 0x40902) {
+    snd = 0;
+    if (snd) {
+        snd->SetVolume(1.0f);
+    }
+    blip = 0;
+}
+
+AirTracker::AirTracker(StuntHud* h, int c) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
+
+CountSound::CountSound(const char* a, const char* b, int car) {
+    s1 = 0;
+    s0 = 0;
+    if (!fn_80157278(car)) {
+        s0 = fn_802076A0(a, 1, car, 0);
+        if (s0) {
+            s0->SetPitch(1.2f);
+            s0->SetVolume(1.0f);
+        }
+        s1 = fn_802076A0(b, 1, car, 0);
+        if (s1) {
+            s1->SetPitch(1.2f);
+            s1->SetVolume(1.0f);
+        }
+    }
+    on = 1;
+}
+
+extern "C" {
+
 void fn_80157560(Tracker* t) {
     ValueTable* vt = fn_80131810("stunts.val");
     ValueTable* def = fn_80131808("stuntdef.val");
@@ -2061,3 +2081,58 @@ int fn_80158618(const char* name) {
 }
 
 }  // extern "C"
+
+int Tracker::NumRanks(void) { return ranks.a.count; }
+
+void TimedTracker::StopEffect(void) {
+    if (f260 > minT) {
+        if (effect) {
+            fn_801CB750(effect, car);
+        }
+        f260 = 0.0f;
+    }
+}
+
+f32 TimedTracker::Finish(RaceCarRec* rc) {
+    f32 pts = 0.0f;
+    if (dur > minT && Rank() > 0) {
+        pts = Points(Rank()) * mult;
+        Score(&pts);
+        Hide();
+    }
+    if (!NearZero(pts)) {
+        Ended(dur);
+    }
+    since += 0.016683351f;
+    dur = 0.0f;
+    f264 = 0.0f;
+    return pts;
+}
+
+void Blip::Clear(void) { x8 = 0; }
+
+f32 RaceCarRec::Speed(void) { return speed; }
+
+s32 RaceCarRec::Air(void) { return air; }
+
+void Unused(RaceCarRec** p) {}
+
+void Unused2(f32** p) {}
+
+void CountTracker::StopEffect(void) {
+    if (playing > 0) {
+        if (effect) {
+            fn_801CB6E4(effect, car);
+        }
+        playing = 0;
+    }
+}
+
+f32 CountTracker::Collect(RaceCarRec* rc) {
+    f32 pts = Points(Rank()) * mult;
+    Score(&pts);
+    Hide();
+    count = 0;
+    mult = 1.0f;
+    return pts;
+}
