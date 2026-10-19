@@ -14,7 +14,7 @@ void fn_802E8528(int ch, f32 a, f32 b);
 void fn_802E85A8(int ch, f32 a, f32 b, f32 c);
 void fn_802E85AC(int ch, f32 a, f32 b);
 void fn_802E85F4(int ch);
-u8 fn_801769F8(void);
+int fn_801769F8(void);
 int fn_801B526C(void);
 int fn_801C5B60(void);
 int fn_801A8EE4(void* b);  // button held
@@ -231,6 +231,8 @@ void fn_8017EC30(void) {
 
 PhysDriver::~PhysDriver(void) {}
 
+static inline f32 Abs(f32 x) { return (f32)__fabs(x); }
+
 extern "C" {
 
 void fn_8017F628(PhysDriver* d) {
@@ -238,7 +240,7 @@ void fn_8017F628(PhysDriver* d) {
     if (!fn_801769F8() && !fn_801B526C() && !fn_801C5B60() && d->b5C && d->rumble) {
         fn_802E85AC(d->ch, d->rumA[2] + d->rumA[0] * k, d->rumA[1] * k);
         fn_802E85A8(d->ch, d->rumB[0] * k, d->rumB[1], d->rumB[2] * k);
-        fn_802E8528(d->ch, 0.4f * (f32)__fabs(d->rumC[0] * k), (f32)__fabs(d->rumC[1]));
+        fn_802E8528(d->ch, 0.4f * Abs(d->rumC[0] * k), Abs(d->rumC[1]));
     } else {
         fn_802E8518(d->ch);
     }
