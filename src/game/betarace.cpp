@@ -57,7 +57,9 @@ public:
     }
 
     f32 pitch;  // offset 0x4
-    u8 pad8[0x49 - 0x8];
+    u8 pad8[0x19 - 0x8];
+    u8 active;  // offset 0x19
+    u8 pad1A[0x49 - 0x1A];
     u8 play;  // offset 0x49
     u8 b4A;   // offset 0x4A
     u8 b4B;   // offset 0x4B
@@ -873,7 +875,7 @@ struct Pickup {
     f32 pos[3];            // offset 0x0
     void* objs[2];         // offset 0xC
     s32 which;             // offset 0x14
-    u8 pad18[0x1C - 0x18];
+    f32 switchLeft;        // offset 0x18
     f32 switchTime;        // offset 0x1C
     TexRef tex;            // offset 0x20
     f32 mid[3];            // offset 0x24
@@ -928,9 +930,7 @@ struct V3 {
     f32 x, y, z;
 };
 
-struct Bump {
-    f32 pos[3];
-};
+struct BumpObj;
 
 extern "C" {
 CoinFrame fn_801683F4(void);
@@ -1159,11 +1159,11 @@ public:
     virtual void c2(void);
     virtual void c3(void);
 
-    s32 x10;                         // offset 0x10
+    f32 skipAt;                      // offset 0x10
     FixedList<Pickup*, 0x80> stars;  // offset 0x14
     FixedList<Puddle*, 0x40> puddles;  // offset 0x220
-    FixedList<Bump*, 0x20> bumps;    // offset 0x32C
-    FixedList<Bump*, 0x20> bumps2;   // offset 0x3B8
+    FixedList<BumpObj*, 0x20> bumps;   // offset 0x32C
+    FixedList<BumpObj*, 0x20> bumps2;  // offset 0x3B8
     Sound* coinSnd;                  // offset 0x444
     Sound* starSnd;                  // offset 0x448
     Sound* preraceSnd;               // offset 0x44C
@@ -2329,5 +2329,314 @@ Pickup::Pickup(ValueNode* n) {
         vol->half[0] = hx;
         vol->half[1] = hy;
         vol->half[2] = hz;
+    }
+}
+
+extern "C" {
+void fn_8016783C(void);
+void fn_801688FC(int a);
+void fn_80168020(void);
+void fn_8016A0D4(void);
+}
+
+void BetaMaster::vf10(void) {
+    fn_8016783C();
+    if (coins.enabled) {
+        memset(coins.cars, 0, sizeof(coins.cars));
+        fn_801688FC(1);
+        fn_80168020();
+    }
+    fn_8016A0D4();
+    StopSound(preraceSnd);
+    b450 = 0;
+}
+
+// Physics body of a spin trigger.
+struct SpinBody {
+    f32 rot[9];  // offset 0x0
+    f32 pos[3];  // offset 0x24
+};
+
+class ReadyFlag {
+public:
+    virtual int Ready(void);  // 0x8
+};
+
+class Body {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
+};
+
+struct BumpObj {
+    Body* body;         // offset 0x0
+    u8 active;          // offset 0x4
+    f32 pos[3];         // offset 0x8
+    f32 start;          // offset 0x14
+    ReadyFlag* ready;   // offset 0x18
+};
+
+struct ViewOpts {
+    u8 pad0[0x10];
+    u32 flags;  // offset 0x10
+};
+
+extern "C" {
+int fn_801D48F8(void* seq);
+int fn_801D4904(void* seq);
+int fn_801D4900(void* seq);
+f32 fn_801B306C(void);
+int fn_80161C38(void);
+int fn_80009C84(void);
+void fn_80168328(void);
+int fn_801B2F2C(int id);
+void fn_801688B4(int a);
+void fn_80167840(RaceCarRec* rc);
+s32 fn_8016A30C(int id);
+int fn_80179630(int view);
+ViewOpts* fn_801E87A8(void);
+void fn_80167684(f32 left);
+double floor(double x);
+double cos(double x);
+}
+
+extern s32 lbl_8055E4D0;  // cars in the race
+extern f32 lbl_80559EC8;  // spin trigger wobble speed
+
+static inline void UpdateBumps(FixedList<BumpObj*, 0x20>* l) {
+    int i;
+    for (i = 0; i < l->a.count; i++) {
+        BumpObj* b = l->a.data[i];
+        if (b->active) {
+            f32 m[12];
+            f32 vel[3];
+            f32 spin[3];
+            f32 a;
+            f32 c;
+            f32 s;
+            m[0] = 1.0f;
+            m[1] = 0.0f;
+            m[2] = 0.0f;
+            m[3] = 0.0f;
+            m[4] = 1.0f;
+            m[5] = 0.0f;
+            m[6] = 0.0f;
+            m[7] = 0.0f;
+            m[8] = 1.0f;
+            m[9] = 0.0f;
+            m[10] = 0.0f;
+            m[11] = 0.0f;
+            m[9] = b->pos[0];
+            m[10] = b->pos[1];
+            m[11] = b->pos[2];
+            a = fmod(3.1415927f * lbl_8055E3C8, 2.3926990816987);
+            c = cos(a);
+            s = sin(a);
+            m[0] = c;
+            m[1] = 0.0f;
+            m[2] = -s;
+            m[3] = 0.0f;
+            m[4] = 1.0f;
+            m[5] = 0.0f;
+            m[6] = s;
+            m[7] = 0.0f;
+            m[8] = c;
+            if (fn_801E87A8()->flags & 2) {
+                m[0] = -m[0];
+                m[1] = -m[1];
+                m[2] = -m[2];
+            }
+            spin[0] = 0.0f;
+            spin[1] = 0.0f;
+            spin[2] = 0.0f;
+            vel[0] = 0.0f;
+            vel[1] = 0.0f;
+            vel[2] = 0.0f;
+            b->body->SetState(m, vel, spin);
+        } else if (b->ready->Ready() && lbl_8055E3C8 > b->start) {
+            f32 m[12];
+            f32 vel[3];
+            f32 spin[3];
+            b->active = 1;
+            m[0] = 1.0f;
+            m[1] = 0.0f;
+            m[2] = 0.0f;
+            m[3] = 0.0f;
+            m[4] = 1.0f;
+            m[5] = 0.0f;
+            m[6] = 0.0f;
+            m[7] = 0.0f;
+            m[8] = 1.0f;
+            m[9] = 0.0f;
+            m[10] = 0.0f;
+            m[11] = 0.0f;
+            m[9] = b->pos[0];
+            m[10] = b->pos[1];
+            m[11] = b->pos[2];
+            spin[0] = 0.0f;
+            spin[1] = 0.0f;
+            spin[2] = 0.0f;
+            vel[0] = 0.0f;
+            vel[1] = 0.0f;
+            vel[2] = 0.0f;
+            b->body->SetState(m, vel, spin);
+        }
+    }
+}
+
+void BetaMaster::vf0C(void) {
+    int i;
+    int found;
+    f32 lead;
+    for (i = 0; i < stars.a.count; i++) {
+        Pickup* t = stars.a.data[i];
+        SpinBody* body = (SpinBody*)t->hB8;
+        if (body) {
+            f32 ang = 0.5235988f * (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * lbl_8055E3C8, 1.875)) + t->angle;
+            f32 c;
+            f32 s;
+            body->pos[0] = t->pos[0];
+            body->pos[1] = t->pos[1];
+            body->pos[2] = t->pos[2];
+            body = (SpinBody*)t->hB8;
+            c = cos(ang);
+            s = sin(ang);
+            body->rot[0] = c;
+            body->rot[1] = 0.0f;
+            body->rot[2] = -s;
+            body->rot[3] = 0.0f;
+            body->rot[4] = 1.0f;
+            body->rot[5] = 0.0f;
+            body->rot[6] = s;
+            body->rot[7] = 0.0f;
+            body->rot[8] = c;
+        }
+        if (fn_801D48F8(t->objs[t->which]) || fn_801D4904(t->objs[t->which])) {
+            f32 r = t->respawn - 0.016683351f;
+            if (0.0f > r) {
+                r = 0.0f;
+            }
+            t->respawn = r;
+        }
+        if (!fn_801D4900(t->objs[t->which])) {
+            f32 r = t->respawn;
+            t->respawn = r > 0.016683351f ? r : 0.016683351f;
+        }
+        if (t->kind == 4) {
+            t->switchLeft -= 0.016683351f;
+            if (t->switchLeft < 0.0f) {
+                t->which = 1 - t->which;
+                t->switchLeft = t->switchTime;
+            }
+        }
+    }
+    found = 0;
+    lead = fn_801B306C();
+    if (!b450 && lead < 8.0f) {
+        b450 = 1;
+        if (preraceSnd && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
+            preraceSnd->Play();
+        }
+    }
+    if (!timer.b10 && lead <= 0.0f && !fn_80161C38()) {
+        timer.b10 = 1;
+        StopSound(timer.tick);
+    }
+    if (coins.enabled) {
+        fn_80168328();
+    }
+    for (i = 0; i < lbl_8055E4D0; i++) {
+        BetaCar* c = &cars[i];
+        c->Update((PickupList*)&stars.a, (PuddleList*)&puddles.a);
+        if (!fn_801B2F2C(i)) {
+            int over = timer.now > timer.limit;
+            if (over) {
+                if (!c->result.dnf) {
+                    c->Retire();
+                }
+            } else if (fn_8017960C(i)->kind == 0x50) {
+                s32 n;
+                found = 1;
+                if (fn_801609C4((s32)c->score) == 0 && coins.enabled) {
+                    fn_801688B4(1);
+                    coins.cars[i].active = 1;
+                }
+                if (GetNumPlayers() == 1) {
+                    fn_80167840(fn_8017960C(i));
+                }
+                n = fn_8016A30C(i);
+                if (n > 0) {
+                    fn_8014E61C(i, 5, n);
+                }
+            }
+        } else if (fn_8017960C(i)->kind == 0x50) {
+            int j;
+            for (j = 0; j < fn_80179650(); j++) {
+                if (i == fn_80179630(j)) {
+                    if (!c->result.dnf) {
+                        c->Results(&anims[j]);
+                    }
+                    if (anims[j].state == 2 && fn_80179650() > 1) {
+                        int ext;
+                        int soon = timer.limit - timer.now < timer.finishTimeout;
+                        if (!soon) {
+                            timer.limit = timer.now + timer.finishTimeout;
+                            ext = 1;
+                        } else {
+                            ext = 0;
+                        }
+                        if (ext) {
+                            if (c->result.finishTime < 0.0f) {
+                                c->result.finishTime = timer.now;
+                            }
+                        } else {
+                            f32 left = timer.limit - timer.now;
+                            f32 t;
+                            left = 0.0f > left ? 0.0f : left;
+                            t = timer.limit - ((f32)floor(left) - 0.1f);
+                            if (c->result.finishTime < 0.0f) {
+                                c->result.finishTime = t;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    UpdateBumps(&bumps);
+    UpdateBumps(&bumps2);
+    if (skipAt > 0.0f && lbl_8055E3C8 > skipAt) {
+        timer.b10 = 1;
+        skipAt = -1.0f;
+        timer.now = timer.limit - 30.0f;
+    }
+    if (!found) {
+        timer.b10 = 0;
+        StopSound(timer.tick);
+    }
+    if (timer.b10) {
+        timer.now += 0.016683351f;
+        if (timer.now > timer.limit) {
+            StopSound(timer.tick);
+            if (timer.timeout && !timer.b1C) {
+                timer.timeout->Play();
+                timer.b1C = 1;
+            }
+        } else if (timer.tick && timer.limit - timer.now < timer.finishTimeout && !timer.tick->active) {
+            timer.tick->b4A = 0;
+            timer.tick->b4B = 1;
+            timer.tick->play = 1;
+        }
+    }
+    if (found) {
+        f32 left = timer.limit - timer.now;
+        fn_80167684(0.0f > left ? 0.0f : left);
     }
 }
