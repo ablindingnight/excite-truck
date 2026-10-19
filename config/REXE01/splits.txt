@@ -2609,6 +2609,13 @@ game/preload.cpp:
 	.data       start:0x8034B008 end:0x8034B020
 	.sbss       start:0x8055FB78 end:0x8055FB88
 
+game/image.cpp:
+	.text       start:0x802C5130 end:0x802C5390
+	.ctors      start:0x802ED5A0 end:0x802ED5A4
+	.data       start:0x8034B178 end:0x8034B1B8
+	.sbss       start:0x8055FC08 end:0x8055FC18
+	.sdata2     start:0x80564EE8 end:0x80564EF0
+
 game/vidmode.cpp:
 	.text       start:0x802CE344 end:0x802CE3A4
 	.ctors      start:0x802ED5B4 end:0x802ED5B8
