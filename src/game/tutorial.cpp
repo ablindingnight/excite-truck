@@ -322,7 +322,7 @@ s32 fn_802C9994(s32 a);
 void fn_802A96E8(void* pts, int n, u32 color, s32 tex, int a);
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
-Layout* fn_80146C2C(Layout* l, const char* name);
+Layout* fn_80146C2C(Layout* l, ValueNode* desc);
 }
 
 struct CamFrame {
@@ -401,28 +401,30 @@ public:
     virtual void Init(void) {}
     virtual void Shutdown(void) {}
     virtual void Load(void) {
-        int n = 0;
-        ValueTable* cmds = fn_80131810("tutcmd.val");
         char buf[0x10];
         int i;
+        ValueTable* cmds;
+        int n;
         pages.count = 0;
+        cmds = fn_80131810("tutcmd.val");
+        n = 0;
         do {
             n++;
             fn_801345D8(buf, sizeof(buf), "desc%d", n);
         } while (node->Has(buf));
-        n--;
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n - 1; i++) {
             HelpPage* p = &pages.data[pages.count++];
-            fn_801345D8(buf, sizeof(buf), "desc%d", i + 1);
+            int k = i + 1;
+            fn_801345D8(buf, sizeof(buf), "desc%d", k);
             p->desc = node->GetValue(buf);
-            fn_801345D8(buf, sizeof(buf), "lyt%d", i + 1);
+            fn_801345D8(buf, sizeof(buf), "lyt%d", k);
             p->lyt = 0;
             if (node->Has(buf)) {
                 const char* name = node->GetValue(buf);
                 if (cmds) {
-                    name = (const char*)cmds->FindChild(name);
-                    if (name) {
-                        p->lyt = fn_80146C2C(lbl_8055E2E4, name);
+                    ValueNode* d = cmds->FindChild(name);
+                    if (d) {
+                        p->lyt = fn_80146C2C(lbl_8055E2E4, d);
                     }
                 }
             }
