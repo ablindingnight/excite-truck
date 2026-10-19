@@ -56,21 +56,43 @@ struct V2 {
     f32 y;
 };
 
+union ElemColor {
+    u32 all;
+    struct {
+        u32 a : 8;
+        u32 rgb : 24;
+    } ch;
+};
+
 struct TextElem {
     TextElem(void) {}
+    TextElem(const TextElem& o);  // fn_8014C920
     const char* name;     // offset 0x0
     V2 pos;               // offset 0x4
     s32 elemJust;         // offset 0xC
     f32 scale;            // offset 0x10
     u32 just;             // offset 0x14
-    u32 color;            // offset 0x18
+    ElemColor color;      // offset 0x18
     const char* defText;  // offset 0x1C
+};
+
+struct Box {
+    Box(void) {}
+    Box& operator=(const Box& o);
+    const char* name;  // offset 0x0
+    V2 pos;            // offset 0x4
+    s32 c;             // offset 0xC
+    f32 w;             // offset 0x10
+    f32 h;             // offset 0x14
+    ElemColor color;   // offset 0x18
 };
 
 class ILayout {
 public:
     virtual ~ILayout(void) {}
     virtual TextElem* Find(const char* name) = 0;
+    virtual void* FindArt(const char* name) = 0;
+    virtual Box* FindBox(const char* name) = 0;
 };
 
 struct RaceSetup {
@@ -108,6 +130,15 @@ s32 fn_80160A74(void);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
 s32 fn_802ADF34(void* layout, const char* name, Binding* b);
+f32 fn_8014C8B4(f32 lo, f32 hi, f32 a, f32 b, f32 x);
+f32 fn_80144C80(f32 a, f32 b, f32 t);
+f32 fn_80144BD8(f32 t);
+void fn_80147940(ILayout* l, Box* b, const char* art, int part);
+void fn_80147230(TextElem* e, const char* fmt, ...);
+void fn_801476C4(TextElem* e);
+int fn_802C9A58(void);
+void fn_8014C72C(ILayout* l, const char* name);
+void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 }
 
 struct Phob {
@@ -432,6 +463,7 @@ struct ArenaTimer {
     void Set(f32 t);
     void Reset(void);
     f32 Get(void);
+    void Draw(class ILayout* l);
     f32 t;      // offset 0x0
     f32 limit;  // offset 0x4
 };
@@ -1923,6 +1955,248 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
     return 0;
 }
 
+#define ALPHA(c, v) ((c).ch.a = (int)(255.0f * (v)))
+
+void RingChalMaster::vf4C(int view) {
+    ILayout* l;
+    TextElem* setScore;
+    Box* setIcon;
+    Box* arrowIcon;
+    Box* starScore;
+    int i;
+    {
+        PlayerData* p = players.data[fn_801E866C(view)];
+        if (p) {
+            fn_8001DF08(p->index, p->score);
+        }
+    }
+    l = layout;
+    arena.timer.Draw(l);
+    setScore = l->Find("ring_set_score");
+    setIcon = l->FindBox("ring_set_icon");
+    arrowIcon = l->FindBox("arrow_icon");
+    starScore = l->FindBox("star_score");
+    for (i = 0; i < arena.nSets; i++) {
+        Box icon;
+        TextElem txt = *setScore;
+        f32 dt;
+        icon = *setIcon;
+        dt = Time() - arena.stats->At(i)->time;
+        icon.pos.y += i * 40;
+        txt.pos.y += i * 40;
+        if (i > arena.curSet) {
+            icon.color.all = 0x66FFFFFF;
+        }
+        fn_80147940(l, &icon, "star_art", 0);
+        if (i < arena.curSet || arena.b48) {
+            int n = 0;
+            if (arena.stats->At(i)->done) {
+                f32 a;
+                f32 b;
+                n = dt / 0.05f;
+                if (n > arena.stats->At(i)->best) {
+                    n = arena.stats->At(i)->best;
+                }
+                a = 0.2f + 0.05f * arena.stats->At(i)->best;
+                b = 0.25f + 0.05f * arena.stats->At(i)->best;
+                if (dt < b + (0.3f + a)) {
+                    f32 sx = icon.pos.x;
+                    f32 sy = icon.pos.y;
+                    f32 x0 = starScore->pos.x - icon.w * (arena.stats->At(i)->best * 0.5f);
+                    f32 y0 = starScore->pos.y;
+                    f32 cx = l->Find("score_counter")->pos.x;
+                    f32 cy = l->Find("score_counter")->pos.y;
+                    int j;
+                    for (j = 0; j < arena.stats->At(i)->best; j++) {
+                        Box star;
+                        star = *starScore;
+                        if (dt < a) {
+                            f32 k = fn_8014C8B4(0.05f * j, 0.2f + 0.05f * j, 0.0f, 1.0f, dt);
+                            star.pos.x = fn_80144C80(sx, x0 + j * star.w, fn_80144BD8(k));
+                            star.pos.y = fn_80144C80(sy, y0, fn_80144BD8(k));
+                            ALPHA(star.color, k);
+                        } else if (dt > 0.3f + a + 0.05f * j && dt - (0.3f + a) < b) {
+                            f32 u = dt - a - 0.3f;
+                            if (u > 0.05f * j) {
+                                f32 k = fn_8014C8B4(0.0f, 0.25f, 0.0f, 1.0f, u - 0.05f * j);
+                                f32 k2 = fn_8014C8B4(0.0f, 0.2f, 0.0f, 1.0f, u - 0.05f * j);
+                                star.pos.x = fn_80144C80(x0 + j * star.w, cx, k);
+                                star.pos.y = fn_80144C80(y0, cy, k);
+                                ALPHA(star.color, 1.0f - k2);
+                            }
+                        } else {
+                            star.color.all = 0xFFFFFFFF;
+                            star.pos.y = y0;
+                            star.pos.x = x0 + j * star.w;
+                        }
+                        fn_80147940(l, &star, "star_art", 0);
+                    }
+                }
+                if (dt < 0.2f) {
+                    f32 k = fn_8014C8B4(0.0f, 0.2f, 0.0f, 1.0f, dt);
+                    txt.scale = fn_80144C80(4.0f, txt.scale, k);
+                    ALPHA(txt.color, k);
+                }
+            }
+            fn_80147230(&txt, "%i", n);
+        } else if (i == arena.curSet && !arena.b49) {
+            Box hl;
+            f32 k;
+            hl = icon;
+            k = fn_8014C8B4(0.0f, 0.75f, 0.0f, 1.0f, arena.f28);
+            hl.w = fn_80144C80(icon.w, 2.5f * icon.w, k);
+            hl.h = fn_80144C80(icon.h, 2.5f * icon.h, k);
+            hl.pos.x = fn_80144C80(icon.pos.x, icon.pos.x - (2.5f * icon.w - icon.w) * 0.5f, k);
+            hl.pos.y = fn_80144C80(icon.pos.y, icon.pos.y - (2.5f * icon.h - icon.h) * 0.5f, k);
+            ALPHA(hl.color, 1.0f - k);
+            fn_80147940(l, &hl, "star_art", 0);
+        }
+        if (dt < 3.4f) {
+            TextElem* nr = l->Find("next_ring");
+            TextElem* msg;
+            if (arena.stats->At(i)->done) {
+                msg = l->Find("ring_hit");
+            } else {
+                msg = l->Find("all_rings_missed");
+            }
+            if (msg) {
+                TextElem m = *msg;
+                if (dt < 0.1f) {
+                    f32 k;
+                    if (!fn_80141FA0(arena.sMissFlag)) {
+                        fn_80142B60(arena.sMissFlag);
+                    }
+                    k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, dt);
+                    m.scale = fn_80144C80(10.0f, m.scale, k);
+                    ALPHA(m.color, k);
+                } else if (dt > 1.6f) {
+                    f32 k = fn_8014C8B4(1.5f, 1.6f, 0.0f, 1.0f, dt);
+                    ALPHA(m.color, 1.0f - k);
+                }
+                fn_801476C4(&m);
+            }
+            if (dt > 1.7f && nr && !arena.b49) {
+                TextElem n = *nr;
+                f32 d2 = dt - 1.7f;
+                if (d2 < 0.1f) {
+                    f32 k;
+                    if (!fn_80141FA0(arena.sMissFlag)) {
+                        fn_80142B60(arena.sMissFlag);
+                    }
+                    k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, d2);
+                    n.scale = fn_80144C80(10.0f, n.scale, k);
+                    ALPHA(n.color, k);
+                } else if (d2 > 1.6f) {
+                    f32 k = fn_8014C8B4(1.6f, 1.7f, 0.0f, 1.0f, d2);
+                    n.scale = fn_80144C80(n.scale, 10.0f, k);
+                    ALPHA(n.color, 1.0f - k);
+                }
+                fn_801476C4(&n);
+            }
+        }
+    }
+    if (!arena.b49) {
+        Box arrow;
+        arrow = *arrowIcon;
+        if (arena.curSet > 0) {
+            f32 k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
+            int s = arena.curSet;
+            arrow.pos.y = fn_80144C80(arrowIcon->pos.y + (s - 1) * 40, arrowIcon->pos.y + s * 40, fn_80144BD8(k));
+        }
+        fn_80147940(l, &arrow, "arrow_art", 0);
+    }
+    {
+        Box* target;
+        Box* next;
+        Box tr;
+        int s;
+        if (fn_802C9A58()) {
+            target = l->FindBox("target_ring_ws");
+        } else {
+            target = l->FindBox("target_ring");
+        }
+        next = l->FindBox("next_ring");
+        tr = *target;
+        s = arena.curSet;
+        if (s > 0 && !arena.b49) {
+            f32 d = Time() - arena.stats->At(s - 1)->time - 1.9f;
+            if (Time() - arena.stats->At(s - 1)->time > 0.0f && d <= 2.2f) {
+                s = s - 1;
+            }
+            if (d >= 0.0f) {
+                Box nx;
+                nx = *next;
+                if (d <= 0.15f) {
+                    f32 k;
+                    if (arena.stats->At(arena.curSet - 1)->done) {
+                        if (!fn_80141FA0(arena.sLevelUp)) {
+                            fn_80142B60(arena.sLevelUp);
+                        }
+                    } else {
+                        if (!fn_80141FA0(arena.sFail)) {
+                            fn_80142B60(arena.sFail);
+                        }
+                    }
+                    k = fn_8014C8B4(0.0f, 0.15f, 0.0f, 1.0f, d);
+                    ALPHA(nx.color, k);
+                    nx.w = fn_80144C80(10.0f * next->w, next->w, k);
+                    nx.h = fn_80144C80(10.0f * next->h, next->h, k);
+                    nx.pos.x = fn_80144C80(next->pos.x - 10.0f * next->w * 0.5f, next->pos.x, k);
+                    nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h * 0.5f, next->pos.y, k);
+                }
+                if (d > 1.35f) {
+                    f32 k = fn_8014C8B4(1.35f, 1.9f, 0.0f, 1.0f, d);
+                    nx.pos.x = fn_80144C80(next->pos.x, target->pos.x, fn_80144BD8(k));
+                    nx.pos.y = fn_80144C80(next->pos.y, target->pos.y, fn_80144BD8(k));
+                    ALPHA(tr.color, 1.0f - fn_8014C8B4(1.5f, 1.65f, 0.0f, 1.0f, d));
+                }
+                switch (arena.stats->At(arena.curSet)->best) {
+                case 15:
+                    fn_80147940(l, &nx, "ring_15_art", 0);
+                    break;
+                case 10:
+                    fn_80147940(l, &nx, "ring_10_art", 0);
+                    break;
+                case 5:
+                    fn_80147940(l, &nx, "ring_5_art", 0);
+                    break;
+                }
+            }
+        }
+        if (!arena.b49) {
+            switch (arena.stats->At(s)->best) {
+            case 15:
+                fn_80147940(l, &tr, "ring_15_art", 0);
+                break;
+            case 10:
+                fn_80147940(l, &tr, "ring_10_art", 0);
+                break;
+            case 5:
+                fn_80147940(l, &tr, "ring_5_art", 0);
+                break;
+            }
+            fn_8014C72C(l, "ring_label");
+        }
+    }
+}
+
+inline Box& Box::operator=(const Box& o) {
+    name = o.name;
+    pos = o.pos;
+    c = o.c;
+    w = o.w;
+    h = o.h;
+    color = o.color;
+    return *this;
+}
+
+inline void ArenaTimer::Draw(ILayout* l) {
+    char buf[0x20];
+    fn_80130978(buf, 0x20, MAX(0.0f, t));
+    fn_8014784C(l, "stop_watch_art", "stop_watch_artset", 0);
+    fn_801475D0(l, "timer", "%s", buf);
+}
+
 void RingChalMaster::vf0C(void) {
     f32 rt = fn_801B306C();
     if (!bA8 && rt < 6.75f) {
@@ -2128,8 +2402,6 @@ inline void ObjSet::CheckTeleport(Phob* car) {
     }
 }
 
-static inline f32 Time(void) { return lbl_8055E3C8; }
-
 inline void* RaceCarRec::Rings(void) { return rings; }
 
 inline f32 ArenaTimer::Get(void) { return t; }
@@ -2156,3 +2428,5 @@ inline void Arena::SetName(char* buf, int n) {
 }
 
 
+
+static inline f32 Time(void) { return lbl_8055E3C8; }
