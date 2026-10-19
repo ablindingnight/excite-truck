@@ -266,16 +266,29 @@ public:
     virtual void a4(void) = 0;
 };
 
+// A stunt reported by the stunt system.
+class StuntEvt {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual int Type(void);  // 0x20
+    virtual s32 Id(void);    // 0x24
+};
+
 class IStuntListener {
 public:
     virtual void b0(void) = 0;
     virtual void b1(void) = 0;
-    virtual void b2(void) = 0;
+    virtual void b2(StuntEvt* e, int car) = 0;
 };
 
 class IPickupListener {
 public:
-    virtual void c0(void) = 0;
+    virtual void c0(class Body* b) = 0;
     virtual void c1(void) = 0;
     virtual void c2(void) = 0;
     virtual void c3(void) = 0;
@@ -508,6 +521,7 @@ struct CarResult {
 // One line of the stunt summary on the results screen.
 class StuntLine {
 public:
+    StuntLine(void) {}
     virtual ~StuntLine(void) {}
     char label[0xA0];  // offset 0x4
     char value[0x54];  // offset 0xA4
@@ -683,6 +697,20 @@ inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 class StuntEvent {
 public:
+    StuntEvent(void) {
+        prev = 0;
+        next = 0;
+        running = 0;
+        age = 1000.0f;
+        t0C = 0.0f;
+        start = 0.0f;
+        x118 = 0;
+        type = -1;
+        ready = 0;
+        b14 = 0;
+        b64 = 0;
+        bB4 = 0;
+    }
     virtual ~StuntEvent(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -707,11 +735,17 @@ public:
     f32 age;            // offset 0x8
     f32 t0C;            // offset 0xC
     f32 start;          // offset 0x10
-    u8 pad14[0x104 - 0x14];
+    u8 b14;             // offset 0x14
+    u8 pad15[0x64 - 0x15];
+    u8 b64;             // offset 0x64
+    u8 pad65[0xB4 - 0x65];
+    u8 bB4;             // offset 0xB4
+    u8 padB5[0x104 - 0xB5];
     f32 value;          // offset 0x104
     s32 points;         // offset 0x108
     s32 type;           // offset 0x10C
-    u8 pad110[0x11C - 0x110];
+    u8 pad110[0x118 - 0x110];
+    s32 x118;           // offset 0x118
     StuntEvent* next;   // offset 0x11C
     StuntEvent* prev;   // offset 0x120
 };
@@ -826,9 +860,9 @@ public:
     virtual void Stop(void);                              // 0x28
     virtual void Award(RaceCarRec* rc, f32 v, int kind);  // 0x2C
     virtual void Start(RaceCarRec* rc);                   // 0x30
-    virtual void vf34(void);
+    virtual void Land(RaceCarRec* rc);                    // 0x34
     virtual s32 Total(void);                              // 0x38
-    virtual void vf3C(void);
+    virtual void Crash(RaceCarRec* rc);                   // 0x3C
     virtual int Pending(f32* out);                        // 0x40
     virtual int Count(void);                              // 0x44
     virtual void Fill(StuntList* l);                      // 0x48
@@ -950,7 +984,8 @@ struct V3 {
     f32 x, y, z;
 };
 
-struct BumpObj;
+class Token;
+class Body;
 
 extern "C" {
 CoinFrame fn_801683F4(void);
@@ -981,6 +1016,33 @@ public:
     int Results(FinishAnimation* a);
     void SetResultsView(FinishAnimation* a);
     void DrawWinner(ILayout* l) const;
+    void Wipe(void) {
+        f32 add = 0.0f;
+        CarHud* h;
+        fullFlash = 0.0f;
+        meter = 0.5f * meter;
+        star = 0;
+        h = hud;
+        {
+            StuntIter it(&h->pending, 0);
+            for (; it.Valid(); it.Next()) {
+                if (it->running) {
+                    it.Remove();
+                    h->shown.PushBack(it.Get());
+                }
+            }
+        }
+        score += add;
+        meterObj->Reset();
+        if (boosts > 1) {
+            flash[0] = 1.5f;
+        }
+        boosts = boosts - 1 > 1 ? boosts - 1 : 1;
+        flash[4] = 0.0f;
+        flash[3] = 0.0f;
+        flash[2] = 0.0f;
+        flash[1] = 0.0f;
+    }
     void DrawBonusStar(ILayout* l, int n);
     void Retire(void);
     void Finish(void);
@@ -1194,8 +1256,8 @@ public:
     virtual void a3(void);
     virtual void b0(void);
     virtual void b1(void);
-    virtual void b2(void);
-    virtual void c0(void);
+    virtual void b2(StuntEvt* e, int car);
+    virtual void c0(Body* b);
     virtual void c1(void);
     virtual void c2(void);
     virtual void c3(void);
@@ -1203,8 +1265,8 @@ public:
     f32 skipAt;                      // offset 0x10
     FixedList<Pickup*, 0x80> stars;  // offset 0x14
     FixedList<Puddle*, 0x40> puddles;  // offset 0x220
-    FixedList<BumpObj*, 0x20> bumps;   // offset 0x32C
-    FixedList<BumpObj*, 0x20> bumps2;  // offset 0x3B8
+    FixedList<Token*, 0x20> bumps;   // offset 0x32C
+    FixedList<Token*, 0x20> bumps2;  // offset 0x3B8
     Sound* coinSnd;                  // offset 0x444
     Sound* starSnd;                  // offset 0x448
     Sound* preraceSnd;               // offset 0x44C
@@ -2405,9 +2467,9 @@ public:
 
 class Body {
 public:
-    virtual void vf08(void);
+    virtual ValueNode* Info(void);  // 0x8
     virtual void vf0C(void);
-    virtual void vf10(void);
+    virtual const f32* Pos(void);   // 0x10
     virtual void vf14(void);
     virtual void vf18(void);
     virtual void vf1C(void);
@@ -2416,12 +2478,33 @@ public:
     virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
 };
 
-struct BumpObj {
-    Body* body;         // offset 0x0
-    u8 active;          // offset 0x4
-    f32 pos[3];         // offset 0x8
-    f32 start;          // offset 0x14
-    ReadyFlag* ready;   // offset 0x18
+// A point or invincibility token placed by the pickup system; spins once it is live.
+class Token {
+public:
+    Token(Body* b) {
+        const f32* p;
+        body = b;
+        p = b->Pos();
+        pos[0] = p[0];
+        pos[1] = p[1];
+        pos[2] = p[2];
+    }
+    Body* body;      // offset 0x0
+    u8 active;       // offset 0x4
+    f32 pos[3];      // offset 0x8
+    f32 start;       // offset 0x14
+    virtual int Ready(void) { return 0; }  // vptr at 0x18
+};
+
+class PointToken : public Token {
+public:
+    PointToken(Body* b) : Token(b) {}
+};
+
+class InvToken : public Token {
+public:
+    InvToken(Body* b) : Token(b) {}
+    virtual int Ready(void) { return 1; }
 };
 
 struct ViewOpts {
@@ -2451,10 +2534,10 @@ double cos(double x);
 extern s32 lbl_8055E4D0;  // cars in the race
 extern f32 lbl_80559EC8;  // spin trigger wobble speed
 
-static inline void UpdateBumps(FixedList<BumpObj*, 0x20>* l) {
+static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
     int i;
     for (i = 0; i < l->a.count; i++) {
-        BumpObj* b = l->a.data[i];
+        Token* b = l->a.data[i];
         if (b->active) {
             f32 m[12];
             f32 vel[3];
@@ -2501,7 +2584,7 @@ static inline void UpdateBumps(FixedList<BumpObj*, 0x20>* l) {
             vel[1] = 0.0f;
             vel[2] = 0.0f;
             b->body->SetState(m, vel, spin);
-        } else if (b->ready->Ready() && lbl_8055E3C8 > b->start) {
+        } else if (b->Ready() && lbl_8055E3C8 > b->start) {
             f32 m[12];
             f32 vel[3];
             f32 spin[3];
@@ -2693,8 +2776,6 @@ void fn_80167844(void);
 void fn_8016A438(void);
 }
 
-s32 fn_80151604(void) { return 0; }
-
 int BetaMaster::vf54(void) {
     int f;
     if (fn_80161C38()) {
@@ -2719,31 +2800,7 @@ void fn_80151688(void) {}
 void BetaMaster::vfA4(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
     if (c) {
-        f32 add = 0.0f;
-        CarHud* h;
-        c->fullFlash = 0.0f;
-        c->meter = 0.5f * c->meter;
-        c->star = 0;
-        h = c->hud;
-        {
-            StuntIter it(&h->pending, 0);
-            for (; it.Valid(); it.Next()) {
-                if (it->running) {
-                    it.Remove();
-                    h->shown.PushBack(it.Get());
-                }
-            }
-        }
-        c->score += add;
-        c->meterObj->Reset();
-        if (c->boosts > 1) {
-            c->flash[0] = 1.5f;
-        }
-        c->boosts = c->boosts - 1 > 1 ? c->boosts - 1 : 1;
-        c->flash[4] = 0.0f;
-        c->flash[3] = 0.0f;
-        c->flash[2] = 0.0f;
-        c->flash[1] = 0.0f;
+        c->Wipe();
     }
 }
 
@@ -2961,3 +3018,51 @@ void BetaMaster::vfC4(void) {}
 void BetaMaster::a4(void) {}
 
 void BetaMaster::a3(void) {}
+
+extern "C" int fn_80161BB8(void);
+
+void BetaMaster::b2(StuntEvt* e, int car) {
+    BetaCar* c = &cars[car];
+    if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
+        int i;
+        for (i = 0; i < stars.a.count; i++) {
+            s32 h = stars.a.data[i]->hC0;
+            if (h == e->Id()) {
+                Pickup* t = stars.a.data[i];
+                if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
+                    (f32)__fabs(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
+                    t->hit[car] = 1;
+                }
+            }
+        }
+    }
+    if (e->Type() == 's') {
+        int turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
+        BetaCar* bc = &cars[car];
+        u8* f = &bc->bA8;
+        if (f[0]) {
+            bc->meterObj->Crash(lbl_804348E8[bc->id]);
+        }
+        if (f[1]) {
+            cars[car].Wipe();
+        }
+        if (turbo) {
+            if (lbl_80559EC0 == 1) {
+                f[2] = 1;
+            }
+            if (lbl_80559EC0 == 3) {
+                f[3] = 1;
+                f[1] = 1;
+            }
+        }
+        cars[car].meterObj->Land(lbl_804348E8[bc->id]);
+    }
+}
+
+void BetaMaster::c0(Body* b) {
+    if (b->Info()->Has("points")) {
+        bumps.Push(new ("pointtoken") PointToken(b));
+    } else if (b->Info()->Has("invincibility")) {
+        bumps2.Push(new ("inv_token") InvToken(b));
+    }
+}
