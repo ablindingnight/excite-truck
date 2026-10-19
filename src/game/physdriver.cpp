@@ -6,6 +6,8 @@
 
 struct DButton;
 
+void* operator new(size_t size, const char* tag);
+
 extern "C" {
 void fn_802E8518(int ch);
 void fn_802E30C8(const char* fmt, ...);
@@ -15,6 +17,7 @@ void fn_802E85A8(int ch, f32 a, f32 b, f32 c);
 void fn_802E85AC(int ch, f32 a, f32 b);
 void fn_802E85F4(int ch);
 int fn_801769F8(void);
+int fn_8027AA48(void);
 int fn_801B526C(void);
 int fn_801C5B60(void);
 int fn_801A8EE4(void* b);  // button held
@@ -35,9 +38,12 @@ int fn_801298E8(void* out);
 }
 
 struct DButton {
+    DButton(s32 c = 0);
     u8 pad0[0x4];
     s32 ch;  // offset 0x4
-    u8 pad8[0x8];
+    u8 pad8[0x4];
+    u8 bC;   // offset 0xC
+    u8 padD[3];
 };
 
 struct ValTable;
@@ -80,6 +86,8 @@ public:
 
 class PhysDriver : public DriverInterface {
 public:
+    PhysDriver(int i);
+    void Init(void);
     virtual void SetGear(int g);
     virtual f32 Steer(void);
     virtual f32 Throttle(void);
@@ -133,7 +141,7 @@ public:
     s32 maxGear;    // offset 0x50
     s32 gear;       // offset 0x54
     u8 b58;         // offset 0x58
-    u8 pad59;
+    u8 b59;         // offset 0x59
     u8 b5A;         // offset 0x5A
     u8 b5B;         // offset 0x5B
     u8 b5C;         // offset 0x5C
@@ -148,12 +156,35 @@ public:
     DButton b7C;    // offset 0x7C
     DButton b8C;    // offset 0x8C
     DButton b9C;    // offset 0x9C
-    u8 padAC[0x24C - 0xAC];
+    DButton bAC;    // offset 0xAC
+    DButton bBC;    // offset 0xBC
+    DButton bCC;    // offset 0xCC
+    DButton bDC;    // offset 0xDC
+    DButton bEC;    // offset 0xEC
+    DButton bFC;    // offset 0xFC
+    DButton b10C;   // offset 0x10C
+    DButton b11C;   // offset 0x11C
+    DButton b12C;   // offset 0x12C
+    DButton b13C;   // offset 0x13C
+    DButton b14C;   // offset 0x14C
+    DButton b15C;   // offset 0x15C
+    DButton b16C;   // offset 0x16C
+    DButton b17C;   // offset 0x17C
+    DButton b18C;   // offset 0x18C
+    DButton b19C;   // offset 0x19C
+    DButton b1AC;   // offset 0x1AC
+    DButton b1BC;   // offset 0x1BC
+    DButton b1CC;   // offset 0x1CC
+    DButton freeG[6];  // offset 0x1DC
+    DButton freeRev;   // offset 0x23C
     DButton b24C;   // offset 0x24C
     DButton b25C;   // offset 0x25C
     DButton b26C;   // offset 0x26C
     DButton b27C;   // offset 0x27C
-    u8 pad28C[0x2CC - 0x28C];
+    DButton b28C;   // offset 0x28C
+    DButton b29C;   // offset 0x29C
+    DButton b2AC;   // offset 0x2AC
+    DButton b2BC;   // offset 0x2BC
     DButton dpad[4];  // offset 0x2CC
     f32 rumA[3];    // offset 0x30C
     f32 rumB[3];    // offset 0x318
@@ -162,10 +193,12 @@ public:
     f32 f330;       // offset 0x330
     f32 f334;       // offset 0x334
     u8 b338;        // offset 0x338
-    u8 pad339[0x340 - 0x339];
+    u8 pad339[3];
+    f32 f33C;       // offset 0x33C
     u8 forced;      // offset 0x340
     u8 freeShift;   // offset 0x341
-    u8 pad342[2];
+    u8 b342;        // offset 0x342
+    u8 b343;        // offset 0x343
     u8 b344;        // offset 0x344
     u8 digThrottle;  // offset 0x345
     u8 digBraking;  // offset 0x346
@@ -250,6 +283,179 @@ f32 fn_8017F70C(f32 x) { return (f32)__fabs(x); }
 
 }  // extern "C"
 
+
+extern f32 lbl_8055A330;
+extern f32 lbl_8055A338;
+extern f32 lbl_8055A33C;
+extern f32 lbl_8055A340;
+extern f32 lbl_8055A344;
+
+inline f32 Clamp(f32 x, f32 lo, f32 hi) {
+    x = MIN(hi, x);
+    x = MAX(x, lo);
+    return x;
+}
+
+inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
+
+inline void PhysDriver::Init(void) {
+    int k;
+    u8 pedals;
+    u8 info[0x60];
+    char buf[0x40];
+    ch = fn_80137CFC(car);
+    steerDead = 0.05f;
+    thrDead = 0.05f;
+    brkDead = 0.15f;
+    steerSpeed = 1.0f;
+    thrSpeed = 0.9f;
+    brkSpeed = 2.0f;
+    steerOver = 0.1f;
+    thrOver = 0.5f;
+    brkOver = 0.1f;
+    forced = 0;
+    freeShift = 0;
+    fn_801331C4((void*)f34C, "steer_dead_spot", &steerDead);
+    fn_801331C4((void*)f34C, "throttle_dead_spot", &thrDead);
+    fn_801331C4((void*)f34C, "brake_dead_spot", &brkDead);
+    fn_801331C4((void*)f34C, "steer_overshoot", &steerOver);
+    fn_801331C4((void*)f34C, "throttle_overshoot", &thrOver);
+    fn_801331C4((void*)f34C, "brake_overshoot", &brkOver);
+    fn_801331C4((void*)f34C, "steer_speed", &steerSpeed);
+    fn_801331C4((void*)f34C, "throttle_speed", &thrSpeed);
+    fn_801331C4((void*)f34C, "brake_speed", &brkSpeed);
+    fn_801331C4((void*)f34C, "nonlinear_steering", &nonlin);
+    b5C = 1;
+    fn_801333E8((void*)f34C, "game_pad", &forced);
+    fn_801333E8((void*)f34C, "free_shift", &freeShift);
+    b5E = 1;
+    nonlin2 = Clamp(nonlin - 1.0f, 0.0f, 1.0f);
+    nonlin = Clamp(nonlin, 0.0f, 1.0f);
+    steerSpeed = Max(steerSpeed, 0.02f);
+    thrSpeed = Max(thrSpeed, 0.02f);
+    brkSpeed = Max(brkSpeed, 0.02f);
+    if (vf5C()) {
+        nonlin = 0.0f;
+    }
+    fn_802E8524(b5C, ch);
+    {
+        Names4 sel = lbl_802F9530;
+        Names4 pov = lbl_802F9540;
+        for (k = 0; k < 4; k++) {
+            fn_801A7DFC(sel.n[k], pov.n[k], (void*)f34C);
+            fn_801A7974(&dpad[k], sel.n[k], (void*)f34C);
+        }
+    }
+    fn_801A7974((&b6C), "steer_left", (void*)f34C);
+    fn_801A7974((&b7C), "steer_right", (void*)f34C);
+    fn_801A7974((&b18C), "steer2_left", (void*)f34C);
+    fn_801A7974((&b19C), "steer2_right", (void*)f34C);
+    fn_801A7974((&b8C), "throttle", (void*)f34C);
+    fn_801A7974((&b9C), "braking", (void*)f34C);
+    fn_801A7974((&bBC), "dig_throttle", (void*)f34C);
+    fn_801A7974((&bCC), "dig_braking", (void*)f34C);
+    fn_801A7974((&bDC), "throttle2", (void*)f34C);
+    fn_801A7974((&bEC), "braking2", (void*)f34C);
+    fn_801A7974((&b24C), "view", (void*)f34C);
+    fn_801A7974((&b25C), "race_info", (void*)f34C);
+    fn_801A7974((&b26C), "car_info", (void*)f34C);
+    fn_801A7974((&b27C), "mirror_control", (void*)f34C);
+    fn_801A7974((&bAC), "e_brake", (void*)f34C);
+    fn_801A7974((&bFC), "reverse", (void*)f34C);
+    fn_801A7974((&b10C), "alt_reverse", (void*)f34C);
+    fn_801A7974((&b15C), "clutch", (void*)f34C);
+    fn_801A7974((&b13C), "upshift", (void*)f34C);
+    fn_801A7974((&b14C), "downshift", (void*)f34C);
+    fn_801A7974((&b16C), "help", (void*)f34C);
+    fn_801A7974((&b17C), "airlift", (void*)f34C);
+    fn_801A7974((&b11C), "horn", (void*)f34C);
+    fn_801A7974((&b12C), "horn2", (void*)f34C);
+    fn_801A7974((&b1AC), "look_left", (void*)f34C);
+    fn_801A7974((&b1BC), "look_right", (void*)f34C);
+    fn_801A7974((&b1CC), "look_back", (void*)f34C);
+    fn_801A7974((&b28C), "pitch_up", (void*)f34C);
+    fn_801A7974((&b29C), "pitch_down", (void*)f34C);
+    fn_801A7974((&b2AC), "roll_left", (void*)f34C);
+    fn_801A7974((&b2BC), "roll_right", (void*)f34C);
+    fn_801331C4((void*)f34C, "ff_deadband_width", &lbl_8055A330);
+    fn_801331C4((void*)f34C, "ff_torque_gain", &lbl_8055A334);
+    fn_801331C4((void*)f34C, "ff_inband_damping", &lbl_8055A338);
+    fn_801331C4((void*)f34C, "ff_outband_damping", &lbl_8055A33C);
+    fn_801331C4((void*)f34C, "ff_inband_spring", &lbl_8055A340);
+    fn_801331C4((void*)f34C, "ff_outband_spring", &lbl_8055A344);
+    freeShift = 0;
+    fn_801333E8((void*)f34C, "free_shift", &freeShift);
+    digBraking = 0;
+    digThrottle = 1;
+    fn_801333E8((void*)f34C, "digital_braking", &digBraking);
+    fn_801333E8((void*)f34C, "digital_throttle", &digThrottle);
+    pedals = 0;
+    fn_801333E8((void*)f34C, "has_pedals", &pedals);
+    if (pedals) {
+        fn_802E30C8("has_pedals");
+        digBraking = 0;
+        digThrottle = 0;
+    }
+    fn_801A9110((&freeG[0]), "Button 6");
+    fn_801A9110((&freeG[1]), "Button 7");
+    fn_801A9110((&freeG[2]), "Button 1");
+    fn_801A9110((&freeG[3]), "Button 2");
+    fn_801A9110((&freeG[4]), "POV Front");
+    fn_801A9110((&freeG[5]), "POV Left");
+    fn_801A9110((&freeRev), "POV Right");
+    {
+        int j;
+        for (j = 0; j < 6; j++) {
+            sprintf(buf, "free_g%d", j + 1);
+            fn_801A7974((&freeG[j]), buf, (void*)f34C);
+        }
+    }
+    fn_801A7974((&freeRev), "free_reverse", (void*)f34C);
+    {
+        s32 c = ch;
+        b6C.ch = c;
+        b7C.ch = c;
+        b18C.ch = c;
+        b19C.ch = c;
+        b8C.ch = c;
+        b9C.ch = c;
+        bAC.ch = c;
+        bDC.ch = c;
+        bEC.ch = c;
+        bBC.ch = c;
+        bCC.ch = c;
+        bFC.ch = c;
+        b10C.ch = c;
+        b13C.ch = c;
+        b14C.ch = c;
+        b15C.ch = c;
+        b11C.ch = c;
+        b12C.ch = c;
+        b17C.ch = c;
+        b24C.ch = c;
+        b25C.ch = c;
+        b26C.ch = c;
+        b27C.ch = c;
+        b16C.ch = c;
+        b1AC.ch = c;
+        b1BC.ch = c;
+        b1CC.ch = c;
+        b28C.ch = c;
+        b29C.ch = c;
+        b2AC.ch = c;
+        b2BC.ch = c;
+        dpad[0].ch = c;
+        dpad[1].ch = c;
+        dpad[2].ch = c;
+        dpad[3].ch = c;
+    }
+    b344 = 0;
+    if (fn_801298E8(info) && (*(u32*)(info + 0x50) & 0x10)) {
+        b344 = 1;
+    }
+    b344 = 1;
+}
+
 int PhysDriver::vf5C(void) {
     int r = 0;
     if (forced || fn_801A8EE4(&b6C) || fn_801A8EE4(&b7C)) {
@@ -259,9 +465,9 @@ int PhysDriver::vf5C(void) {
 }
 
 
-extern "C" void fn_80181418(u8* p, s32 a) {
-    *(s32*)(p + 4) = a;
-    p[0xC] = 0;
+DButton::DButton(s32 c) {
+    ch = c;
+    bC = 0;
 }
 
 DriverInterface::DriverInterface(void) {}
@@ -404,14 +610,6 @@ int PhysDriver::vf64(void) {
 
 u8 PhysDriver::vf68(void) { return b344; }
 
-#define BTN(off) ((DButton*)((u8*)d + (off)))
-
-extern f32 lbl_8055A330;
-extern f32 lbl_8055A338;
-extern f32 lbl_8055A33C;
-extern f32 lbl_8055A340;
-extern f32 lbl_8055A344;
-
 extern "C" void fn_801808DC(void) {
     int i;
     fn_801333E8((void*)8, "smoothing", &lbl_8055E4B9);
@@ -419,158 +617,71 @@ extern "C" void fn_801808DC(void) {
     for (i = 0; i < 4; i++) {
         PhysDriver* d = lbl_804348D8[i];
         if (d) {
-            int k;
-            u8 pedals;
-            u8 info[0x60];
-            Names4 sel;
-            Names4 pov;
-            char buf[0x40];
-            d->ch = fn_80137CFC(d->car);
-            d->steerDead = 0.05f;
-            d->thrDead = 0.05f;
-            d->brkDead = 0.15f;
-            d->steerSpeed = 1.0f;
-            d->thrSpeed = 0.9f;
-            d->brkSpeed = 2.0f;
-            d->steerOver = 0.1f;
-            d->thrOver = 0.5f;
-            d->brkOver = 0.1f;
-            d->forced = 0;
-            d->freeShift = 0;
-            fn_801331C4((void*)d->f34C, "steer_dead_spot", &d->steerDead);
-            fn_801331C4((void*)d->f34C, "throttle_dead_spot", &d->thrDead);
-            fn_801331C4((void*)d->f34C, "brake_dead_spot", &d->brkDead);
-            fn_801331C4((void*)d->f34C, "steer_overshoot", &d->steerOver);
-            fn_801331C4((void*)d->f34C, "throttle_overshoot", &d->thrOver);
-            fn_801331C4((void*)d->f34C, "brake_overshoot", &d->brkOver);
-            fn_801331C4((void*)d->f34C, "steer_speed", &d->steerSpeed);
-            fn_801331C4((void*)d->f34C, "throttle_speed", &d->thrSpeed);
-            fn_801331C4((void*)d->f34C, "brake_speed", &d->brkSpeed);
-            fn_801331C4((void*)d->f34C, "nonlinear_steering", &d->nonlin);
-            d->b5C = 1;
-            fn_801333E8((void*)d->f34C, "game_pad", &d->forced);
-            fn_801333E8((void*)d->f34C, "free_shift", &d->freeShift);
-            d->b5E = 1;
-            d->nonlin2 = fn_8014C8F8(d->nonlin - 1.0f, 0.0f, 1.0f);
-            d->nonlin = fn_8014C8F8(d->nonlin, 0.0f, 1.0f);
-            d->steerSpeed = fn_801429D0(d->steerSpeed, 0.02f);
-            d->thrSpeed = fn_801429D0(d->thrSpeed, 0.02f);
-            d->brkSpeed = fn_801429D0(d->brkSpeed, 0.02f);
-            if (d->vf5C()) {
-                d->nonlin = 0.0f;
-            }
-            fn_802E8524(d->b5C, d->ch);
-            sel = lbl_802F9530;
-            pov = lbl_802F9540;
-            for (k = 0; k < 4; k++) {
-                fn_801A7DFC(sel.n[k], pov.n[k], (void*)d->f34C);
-                fn_801A7974(&d->dpad[k], sel.n[k], (void*)d->f34C);
-            }
-            fn_801A7974(BTN(0x6C), "steer_left", (void*)d->f34C);
-            fn_801A7974(BTN(0x7C), "steer_right", (void*)d->f34C);
-            fn_801A7974(BTN(0x18C), "steer2_left", (void*)d->f34C);
-            fn_801A7974(BTN(0x19C), "steer2_right", (void*)d->f34C);
-            fn_801A7974(BTN(0x8C), "throttle", (void*)d->f34C);
-            fn_801A7974(BTN(0x9C), "braking", (void*)d->f34C);
-            fn_801A7974(BTN(0xBC), "dig_throttle", (void*)d->f34C);
-            fn_801A7974(BTN(0xCC), "dig_braking", (void*)d->f34C);
-            fn_801A7974(BTN(0xDC), "throttle2", (void*)d->f34C);
-            fn_801A7974(BTN(0xEC), "braking2", (void*)d->f34C);
-            fn_801A7974(BTN(0x24C), "view", (void*)d->f34C);
-            fn_801A7974(BTN(0x25C), "race_info", (void*)d->f34C);
-            fn_801A7974(BTN(0x26C), "car_info", (void*)d->f34C);
-            fn_801A7974(BTN(0x27C), "mirror_control", (void*)d->f34C);
-            fn_801A7974(BTN(0xAC), "e_brake", (void*)d->f34C);
-            fn_801A7974(BTN(0xFC), "reverse", (void*)d->f34C);
-            fn_801A7974(BTN(0x10C), "alt_reverse", (void*)d->f34C);
-            fn_801A7974(BTN(0x15C), "clutch", (void*)d->f34C);
-            fn_801A7974(BTN(0x13C), "upshift", (void*)d->f34C);
-            fn_801A7974(BTN(0x14C), "downshift", (void*)d->f34C);
-            fn_801A7974(BTN(0x16C), "help", (void*)d->f34C);
-            fn_801A7974(BTN(0x17C), "airlift", (void*)d->f34C);
-            fn_801A7974(BTN(0x11C), "horn", (void*)d->f34C);
-            fn_801A7974(BTN(0x12C), "horn2", (void*)d->f34C);
-            fn_801A7974(BTN(0x1AC), "look_left", (void*)d->f34C);
-            fn_801A7974(BTN(0x1BC), "look_right", (void*)d->f34C);
-            fn_801A7974(BTN(0x1CC), "look_back", (void*)d->f34C);
-            fn_801A7974(BTN(0x28C), "pitch_up", (void*)d->f34C);
-            fn_801A7974(BTN(0x29C), "pitch_down", (void*)d->f34C);
-            fn_801A7974(BTN(0x2AC), "roll_left", (void*)d->f34C);
-            fn_801A7974(BTN(0x2BC), "roll_right", (void*)d->f34C);
-            fn_801331C4((void*)d->f34C, "ff_deadband_width", &lbl_8055A330);
-            fn_801331C4((void*)d->f34C, "ff_torque_gain", &lbl_8055A334);
-            fn_801331C4((void*)d->f34C, "ff_inband_damping", &lbl_8055A338);
-            fn_801331C4((void*)d->f34C, "ff_outband_damping", &lbl_8055A33C);
-            fn_801331C4((void*)d->f34C, "ff_inband_spring", &lbl_8055A340);
-            fn_801331C4((void*)d->f34C, "ff_outband_spring", &lbl_8055A344);
-            d->freeShift = 0;
-            fn_801333E8((void*)d->f34C, "free_shift", &d->freeShift);
-            d->digBraking = 0;
-            d->digThrottle = 1;
-            fn_801333E8((void*)d->f34C, "digital_braking", &d->digBraking);
-            fn_801333E8((void*)d->f34C, "digital_throttle", &d->digThrottle);
-            pedals = 0;
-            fn_801333E8((void*)d->f34C, "has_pedals", &pedals);
-            if (pedals) {
-                fn_802E30C8("has_pedals");
-                d->digBraking = 0;
-                d->digThrottle = 0;
-            }
-            fn_801A9110(BTN(0x1DC), "Button 6");
-            fn_801A9110(BTN(0x1EC), "Button 7");
-            fn_801A9110(BTN(0x1FC), "Button 1");
-            fn_801A9110(BTN(0x20C), "Button 2");
-            fn_801A9110(BTN(0x21C), "POV Front");
-            fn_801A9110(BTN(0x22C), "POV Left");
-            fn_801A9110(BTN(0x23C), "POV Right");
-            for (k = 0; k < 6; k++) {
-                sprintf(buf, "free_g%d", k + 1);
-                fn_801A7974(BTN(0x1DC + k * 0x10), buf, (void*)d->f34C);
-            }
-            fn_801A7974(BTN(0x23C), "free_reverse", (void*)d->f34C);
-            {
-                s32 ch = d->ch;
-                BTN(0x6C)->ch = ch;
-                BTN(0x7C)->ch = ch;
-                BTN(0x18C)->ch = ch;
-                BTN(0x19C)->ch = ch;
-                BTN(0x8C)->ch = ch;
-                BTN(0x9C)->ch = ch;
-                BTN(0xAC)->ch = ch;
-                BTN(0xDC)->ch = ch;
-                BTN(0xEC)->ch = ch;
-                BTN(0xBC)->ch = ch;
-                BTN(0xCC)->ch = ch;
-                BTN(0xFC)->ch = ch;
-                BTN(0x10C)->ch = ch;
-                BTN(0x13C)->ch = ch;
-                BTN(0x14C)->ch = ch;
-                BTN(0x15C)->ch = ch;
-                BTN(0x11C)->ch = ch;
-                BTN(0x12C)->ch = ch;
-                BTN(0x17C)->ch = ch;
-                BTN(0x24C)->ch = ch;
-                BTN(0x25C)->ch = ch;
-                BTN(0x26C)->ch = ch;
-                BTN(0x27C)->ch = ch;
-                BTN(0x16C)->ch = ch;
-                BTN(0x1AC)->ch = ch;
-                BTN(0x1BC)->ch = ch;
-                BTN(0x1CC)->ch = ch;
-                BTN(0x28C)->ch = ch;
-                BTN(0x29C)->ch = ch;
-                BTN(0x2AC)->ch = ch;
-                BTN(0x2BC)->ch = ch;
-                BTN(0x2CC)->ch = ch;
-                BTN(0x2DC)->ch = ch;
-                BTN(0x2EC)->ch = ch;
-                BTN(0x2FC)->ch = ch;
-            }
-            d->b344 = 0;
-            if (fn_801298E8(info) && (*(u32*)(info + 0x50) & 0x10)) {
-                d->b344 = 1;
-            }
-            d->b344 = 1;
+            d->Init();
         }
     }
+}
+
+inline PhysDriver::PhysDriver(int i) {
+    car = i;
+    ch = fn_80137CFC(i);
+    rumble = 0;
+    if (fn_8027AA48()) {
+        f348 = 0x10;
+    } else {
+        f348 = i + 0xC;
+    }
+    f34C = ch + 8;
+    f33C = 0.0f;
+    b5B = 0;
+    b5C = 0;
+    b5E = 1;
+    nonlin = 1.0f;
+    steerDead = 0.0f;
+    steerSpeed = 1.0f;
+    steerOver = 0.1f;
+    thrDead = 0.1f;
+    thrSpeed = 1.0f;
+    thrOver = 0.1f;
+    brkDead = 0.1f;
+    brkSpeed = 1.0f;
+    brkOver = 0.1f;
+    maxGear = 0;
+    gear = 0;
+    steer = 0.0f;
+    steerAdd = 0.0f;
+    brake = 0.0f;
+    throttle = 0.0f;
+    brakeAdd = 0.0f;
+    throttleAdd = 0.0f;
+    grip = 0.0f;
+    f28 = 0.0f;
+    b58 = 0;
+    b5D = 0;
+    b68 = 0;
+    b59 = 0;
+    b5A = 0;
+    rumA[2] = 0.0f;
+    rumA[1] = 0.0f;
+    rumA[0] = 0.0f;
+    rumB[2] = 0.0f;
+    rumB[1] = 0.0f;
+    rumB[0] = 0.0f;
+    rumC[1] = 0.0f;
+    rumC[0] = 0.0f;
+    f32C = 0.0f;
+    b338 = 0;
+    forced = 0;
+    freeShift = 0;
+    b342 = 0;
+    b343 = 0;
+    b344 = 0;
+    Init();
+}
+
+extern "C" PhysDriver* fn_8018108C(int i) {
+    if (!lbl_804348D8[i]) {
+        lbl_804348D8[i] = new ("DriverInterface") PhysDriver(i);
+    }
+    return lbl_804348D8[i];
 }
