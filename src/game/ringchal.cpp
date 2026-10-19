@@ -598,7 +598,7 @@ public:
     void Update(int score, int rings, int bonus);
     void Reset(void);
     void Load(void);
-    s32 state;         // offset 0x0
+    volatile s32 state;  // offset 0x0
     f32 start;         // offset 0x4
     u8 b8;             // offset 0x8
     u8 b9;             // offset 0x9
@@ -1752,8 +1752,8 @@ int RingChalMaster::vf8C(int p, int key) {
             Stop(results.sNoBonus);
             Stop(results.s28);
             Stop(results.s2C);
-            results.b8 = 0;
             results.start = lbl_8055E3C8 - 1.0f;
+            results.b8 = 0;
         }
         return 1;
     }

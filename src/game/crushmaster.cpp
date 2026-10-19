@@ -411,7 +411,7 @@ public:
     void Update(int score, int kills, int bonus);
     void Reset(void);
     void Load(void);
-    s32 state;         // offset 0x0
+    volatile s32 state;  // offset 0x0
     f32 start;         // offset 0x4
     u8 b8;             // offset 0x8
     u8 b9;             // offset 0x9
@@ -1138,6 +1138,9 @@ int CrushMaster::vf28(void) { return AliveAI() != 0; }
 int IsLoadingActive(void);
 
 extern "C" {
+void fn_802AE220(void* layout, int a);
+void fn_802AE118(void* layout);
+void fn_8001DFCC(void);
 void fn_80139318(ILayout* l, s32 tex, int car, f32 size);  // radar
 void fn_80147940(ILayout* l, Box* b, const char* art, int part);
 void fn_80147230(TextElem* e, const char* fmt, ...);
@@ -1522,4 +1525,56 @@ extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t,
     } else {
         fn_801476C4(&e);
     }
+}
+
+void CrushMaster::vf50(int p) { vf4C(p); }
+
+f32 CrushMaster::vf38(void) { return 7.75f; }
+
+int CrushMaster::vf64(void) { return 1; }
+
+int CrushMaster::vf5C(int p) {
+    fn_801E866C(p);
+    if (t17C.Running()) {
+        vf4C(p);
+    } else {
+        if (results.b8) {
+            vf4C(p);
+        }
+        if (results.layout) {
+            fn_802AE220(results.layout, 0);
+        }
+    }
+    if (vf68()) {
+        fn_8001DFCC();
+    }
+    return results.state != 4;
+}
+
+int CrushMaster::vf68(void) { return results.state == 2; }
+
+int CrushMaster::vf8C(int p, int key) {
+    int r = 0;
+    if (vf68() && key == 'X') {
+        if (results.state == 2) {
+            results.b9 = 1;
+        }
+        r = 1;
+    } else if (results.state != 0) {
+        f32 now = lbl_8055E3C8;
+        if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
+            results.noBonus = 1;
+            if (results.layout) {
+                fn_802AE118(results.layout);
+            }
+            Stop(results.sBonus);
+            Stop(results.sNoBonus);
+            Stop(results.s28);
+            Stop(results.s2C);
+            results.start = lbl_8055E3C8 - 1.0f;
+            results.b8 = 0;
+        }
+        r = 1;
+    }
+    return r;
 }
