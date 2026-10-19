@@ -1052,6 +1052,7 @@ config.libs.append(
             Object(Matching, "game/trkefx.cpp"),
             Object(Matching, "game/simpletga.cpp"),
             Object(Matching, "game/stub14.cpp"),
+            Object(NonMatching, "game/boats.cpp"),
             Object(NonMatching, "game/swlmap.cpp"),
             Object(Matching, "game/preload.cpp"),
             Object(NonMatching, "game/vidsetup.cpp"),
