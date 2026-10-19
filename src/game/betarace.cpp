@@ -218,7 +218,7 @@ public:
     virtual void vf9C(struct RaceCarRec* rc, int type) {}
     virtual int vfA0(void* cam);
     virtual void vfA4(struct RaceCarRec* rc) {}
-    virtual void vfA8(int car);
+    virtual void vfA8(int a, int b);
     virtual void vfAC(int car);
     virtual int vfB0(void) { return 0; }
     virtual void vfB4(void) {}
@@ -954,7 +954,7 @@ struct BumpObj;
 
 extern "C" {
 CoinFrame fn_801683F4(void);
-int fn_801B8514(RaceCarRec* rc);
+int fn_801B8514(void);
 Racer* fn_801B2EC0(int id);
 Racer* fn_801B2ED0(int id);
 void fn_801DF074(int a, int b);
@@ -1155,7 +1155,7 @@ public:
     virtual void vf9C(RaceCarRec* rc, int type);
     virtual int vfA0(void* cam);
     virtual void vfA4(RaceCarRec* rc);
-    virtual void vfA8(int car);
+    virtual void vfA8(int a, int b);
     virtual void vfB8(void* r) {
         RaceResults* res = (RaceResults*)r;
         int i;
@@ -1372,7 +1372,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     rc = fn_8017960C(id);
-    if (fn_801B8514(rc) && !master->vf20(id)) {
+    if (fn_801B8514() && !master->vf20(id)) {
         shown = score;
         result.Compute(this);
         return;
@@ -2908,3 +2908,56 @@ void BetaMaster::vf60(int view) {
 int BetaMaster::vf88(void) { return 1; }
 
 f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
+
+extern RaceCarRec* lbl_804348E8[];  // race cars
+
+extern "C" {
+int fn_801B2F24(void);
+void* fn_80161C94(void);
+void fn_801B0F70(int a, int b);
+void fn_80168104(void);
+}
+
+int BetaMaster::vf24(void) {
+    int any = 0;
+    int i;
+    int r;
+    for (i = 0; i < fn_801B2F24(); i++) {
+        if (lbl_804348E8[i]->kind == 0x50 && vf20(i)) {
+            any = 1;
+        }
+    }
+    r = 0;
+    if (!any && fn_801B8514()) {
+        r = 1;
+    }
+    return r;
+}
+
+void* BetaMaster::vfE8(void) {
+    void* p = fn_80161C94();
+    if (p) {
+        return p;
+    }
+    return GameMode::vfE8();
+}
+
+int BetaMaster::vfDC(void) { return 1; }
+
+void BetaMaster::vfA8(int a, int b) { fn_801B0F70(a, b); }
+
+void BetaMaster::vf40(void) {
+    if (coins.enabled) {
+        fn_80168104();
+    }
+}
+
+int BetaMaster::vfA0(void* cam) { return 0; }
+
+void BetaMaster::vfC0(void) {}
+
+void BetaMaster::vfC4(void) {}
+
+void BetaMaster::a4(void) {}
+
+void BetaMaster::a3(void) {}
