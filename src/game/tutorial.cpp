@@ -337,8 +337,7 @@ struct HelpPage {
 struct Token {
     Token(void) {}
     TVec3 pos;      // offset 0x0
-    TVec3 a;        // offset 0xC
-    TVec3 b;        // offset 0x18
+    TVec3 ends[2];  // offset 0xC
     TVec2 mid;      // offset 0x24
     TVec2 dir;      // offset 0x2C
     TPath* path;    // offset 0x34
@@ -432,8 +431,7 @@ public:
         resultSet = 0;
         resultTime = -1000.0f;
         for (i = 0; i < pages.count; i++) {
-            HelpPage* p = &pages.data[i];
-            fn_801DF380(node->GetString("title", ""), p->desc, fn_80161438, p->lyt);
+            fn_801DF380(node->GetString("title", ""), pages.data[i].desc, fn_80161438, pages.data[i].lyt);
         }
     }
     virtual int Key(int k) { return 0; }
@@ -492,8 +490,8 @@ public:
             fn_801EA140(t);
             t->pos.y += t->bob;
             if (t->path) {
-                for (j = 0; j < 2; j++) {
-                    fn_801EA140(&t->a + j);
+                for (j = 0; j < sizeof(t->ends) / sizeof(t->ends[0]); j++) {
+                    fn_801EA140(&t->ends[j]);
                 }
             }
             t->active = 1;
@@ -1334,12 +1332,12 @@ inline void Challenge::Init(void) {
                 TVec3 e1;
                 TVec3 e2;
                 TVec3 n3;
-                t->a.x = a->x;
-                t->a.y = 0.0f;
-                t->a.z = a->z;
-                t->b.x = b->x;
-                t->b.y = 0.0f;
-                t->b.z = b->z;
+                t->ends[0].x = a->x;
+                t->ends[0].y = 0.0f;
+                t->ends[0].z = a->z;
+                t->ends[1].x = b->x;
+                t->ends[1].y = 0.0f;
+                t->ends[1].z = b->z;
                 t->mid.x = (a->x + b->x) * 0.5f;
                 t->mid.z = (a->z + b->z) * 0.5f;
                 e1.x = c->x - b->x;
@@ -1412,7 +1410,7 @@ inline void Challenge::Draw3D(void) {
         for (i = 0; i < tokens.count; i++) {
             Token* t = &tokens.data[i];
             if (t->active && t->path && pillars) {
-                fn_802A96E8(&t->a, 2, color, tex, 0);
+                fn_802A96E8(t->ends, 2, color, tex, 0);
             }
         }
     }
