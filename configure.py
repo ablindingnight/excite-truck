@@ -1048,6 +1048,7 @@ config.libs.append(
             Object(Matching, "game/stub13.cpp"),
             Object(Matching, "game/stub14.cpp"),
             Object(Matching, "game/preload.cpp"),
+            Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/stub15.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
             Object(NonMatching, "game/ball.cpp"),
