@@ -254,7 +254,7 @@ extern "C" {
 void fn_80161438(const char* title, const char* msg);
 int fn_80160CE4(void);
 int fn_80161D50(void);
-void fn_8015857C(void* w);  // remove stunt watcher
+void fn_8015857C(class StuntWatcher* w);  // remove stunt watcher
 void fn_8016D294(int a, int b, int c);
 Arena* fn_801B83A0(void);
 struct MenuState* fn_801E7E34(void);
@@ -317,7 +317,7 @@ Layout* fn_80146C2C(Layout* l, const char* name);
 }
 
 struct CamFrame {
-    u8 pad[0x40];
+    u8 pad[0x30];
 };
 
 void GetTipsCamera(CamFrame* cam, f32* fov);
@@ -404,7 +404,9 @@ public:
     virtual void Unload(void) {
         int i;
         for (i = 0; i < pages.count; i++) {
-            delete pages.data[i].lyt;
+            if (pages.data[i].lyt) {
+                delete pages.data[i].lyt;
+            }
         }
         pages.count = 0;
     }
@@ -789,7 +791,7 @@ public:
 
 class CSubTaskMgr {
 public:
-    virtual ~CSubTaskMgr(void);
+    virtual ~CSubTaskMgr(void) {}
     virtual int vf0C(int a, int b, int c, int d, u32* flags);
     virtual int vf10(int a, f32* out, int car);
     virtual int vf14(void);
@@ -931,8 +933,12 @@ void fn_801618B4(void) {
     fn_802CAC54(lbl_8055E2F4);
     fn_802CAC54(lbl_8055E2F8);
     fn_80235380(lbl_8055E2FC);
-    delete lbl_8055E2E0;
-    delete lbl_8055E2E4;
+    if (lbl_8055E2E0) {
+        delete lbl_8055E2E0;
+    }
+    if (lbl_8055E2E4) {
+        delete lbl_8055E2E4;
+    }
     for (i = 0; i < lbl_8042FDEC.count; i++) {
         lbl_8042FDEC.data[i]->Unload();
     }
