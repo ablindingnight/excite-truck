@@ -71,6 +71,10 @@ public:
             vol = v;
         }
     }
+    void Stop(void) {
+        b4A = 1;
+        b4C = 0;
+    }
     f32 pitch;  // offset 0x4
     f32 vol;    // offset 0x8
     u8 padC[0x19 - 0xC];
@@ -827,7 +831,7 @@ public:
     virtual void Start(const RaceCarRec* rc) {
         if (snd) {
             if (!Sliding(rc, sliding, rc->speed)) {
-                StopSound(snd);
+                snd->Stop();
             }
         }
     }
@@ -852,19 +856,22 @@ public:
             amount = Clamp01(5.0f * (side / (spd * k) - 1.0f)) * fade;
         }
         if (snd) {
-            if (!NearZero(amount)) {
+            if (!((f32)__fabs(amount) <= lbl_80558DC4[0])) {
                 snd->SetVolume(0.4f * amount);
                 LoopSound(snd);
             } else {
-                StopSound(snd);
+                snd->Stop();
             }
         }
         return sliding;
     }
 
     int Sliding(const RaceCarRec* rc, u8 was, f32 spd) {
-        return NearZero(rc->f2690) && spd > 5.0f && ground < 0.5f &&
-               (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c)) > spd * (was ? 0.15f : 0.35f);
+        if ((f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && spd > 5.0f && ground < 0.5f) {
+            f32 side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            return side > spd * (was ? 0.15f : 0.35f);
+        }
+        return 0;
     }
 
     f32 ground;  // offset 0x270
