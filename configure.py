@@ -1054,6 +1054,7 @@ config.libs.append(
             Object(Matching, "game/memarena.cpp"),
             Object(Matching, "game/vmem.cpp"),
             Object(Matching, "game/callhook.cpp"),
+            Object(Matching, "game/sysconfig.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
             Object(NonMatching, "game/ball.cpp"),
         ],
