@@ -59,7 +59,7 @@ int fn_80129D90(int index, int lo, int hi) { return lo + fn_80129D18(index, hi -
 
 f32 fn_80129DC4(int index, f32 lo, f32 hi) {
     f32 range;
-    int r = fn_80129D18(index, 99998);
+    int r = fn_80129D18(index, 100000);
     range = hi - lo;
     return lo + range * (r / 99999.0f);
 }
