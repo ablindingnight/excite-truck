@@ -1113,6 +1113,7 @@ config.libs.append(
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/log.cpp"),
             Object(Matching, "game/memarena.cpp"),
+            Object(NonMatching, "game/filecd.cpp"),
             Object(Matching, "game/keybd.cpp"),
             Object(Matching, "game/vmem.cpp"),
             Object(Matching, "game/strmfile.cpp"),
