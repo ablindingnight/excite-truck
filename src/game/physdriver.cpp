@@ -577,7 +577,10 @@ void fn_8017F628(PhysDriver* d) {
     }
 }
 
-f32 fn_8017F70C(f32 x) { return (f32)__fabs(x); }
+f32 fn_8017F70C(f32 x) {
+    double r = __fabs(x);
+    return r;
+}
 
 }  // extern "C"
 
