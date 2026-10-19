@@ -131,10 +131,10 @@ u8 lbl_8055E3E4;
 s32 lbl_8055E3E8;
 u8 lbl_8055E3EC;
 s32 lbl_8055E3F0;
-s32 lbl_8055E3F4;  // state
+volatile s32 lbl_8055E3F4;  // state
 s32 lbl_8055E3F8;
 f32 lbl_8055E3FC;
-s32 lbl_8055E400;
+volatile s32 lbl_8055E400;
 
 volatile s32 lbl_8055A2F0 = 1;
 f32 lbl_8055A2F4 = 3.0f;
@@ -632,30 +632,32 @@ void fn_80177648(PhysListener* l) { l->End(); }
 
 void fn_80177658(void (*fn)(PhysListener*)) {
     int i;
-    PhysListener** l = lbl_80430570;
     for (i = 0; i < lbl_8055E400; i++) {
-        fn(*l);
-        l++;
+        fn(lbl_80430570[i]);
     }
 }
 
 void fn_801776C4(PhysListener* l) {
+    int n = lbl_8055E400;
     int i;
-    for (i = 0; i < lbl_8055E400; i++) {
+    for (i = 0; i < n; i++) {
         if (l == lbl_80430570[i]) {
             fn_802E317C("Physics: tried to register a state listener that was already registered!");
             return;
         }
     }
-    lbl_80430570[lbl_8055E400++] = l;
+    lbl_80430570[n] = l;
+    lbl_8055E400++;
 }
 
 void fn_80177720(PhysListener* l) {
+    int n = lbl_8055E400;
     int i;
-    for (i = 0; i < lbl_8055E400; i++) {
+    for (i = 0; i < n; i++) {
         if (l == lbl_80430570[i]) {
-            lbl_8055E400--;
-            memmove(&lbl_80430570[i], &lbl_80430570[i + 1], (lbl_8055E400 - i) * 4);
+            int c = lbl_8055E400 - 1;
+            lbl_8055E400 = c;
+            memmove(&lbl_80430570[i], &lbl_80430570[i] + 1, (c - i) * 4);
             return;
         }
     }
