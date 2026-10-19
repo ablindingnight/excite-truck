@@ -2600,6 +2600,13 @@ game/trackgrf.cpp:
 	.sbss       start:0x8055EC80 end:0x8055EC88
 	.sdata2     start:0x80563028 end:0x80563030
 
+game/terrpick.cpp:
+	.text       start:0x80203FE0 end:0x80204330
+	.ctors      start:0x802ED368 end:0x802ED36C
+	.data       start:0x8033BAD8 end:0x8033BB18
+	.sbss       start:0x8055ED20 end:0x8055ED30
+	.sdata2     start:0x80563140 end:0x80563168
+
 game/sounddash.cpp:
 	.text       start:0x8020BCE4 end:0x8020C140
 	.ctors      start:0x802ED394 end:0x802ED398

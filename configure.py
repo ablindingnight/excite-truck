@@ -1045,6 +1045,7 @@ config.libs.append(
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
+            Object(NonMatching, "game/terrpick.cpp"),
             Object(NonMatching, "game/sounddash.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(Matching, "game/gtime.cpp"),
