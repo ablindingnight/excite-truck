@@ -602,10 +602,13 @@ public:
         }
         r = 0.0f;
         full = 0;
-        if (Capped() && ranks.a.count - 1 == Rank()) {
-            full = 1;
+        if (Capped()) {
+            int n = ranks.a.count;
+            if (Rank() == n - 1) {
+                full = 1;
+            }
         }
-        if (NearZero(timer) || full) {
+        if ((f32)__fabs(timer) <= lbl_80558DC4[0] || full) {
             if (count > 0) {
                 r = Take();
             }
