@@ -1085,6 +1085,7 @@ config.libs.append(
             Object(Matching, "game/vidmode.cpp"),
             Object(NonMatching, "game/modelpool.cpp"),
             Object(NonMatching, "game/billboard.cpp"),
+            Object(NonMatching, "game/romfont.cpp"),
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/log.cpp"),
             Object(Matching, "game/memarena.cpp"),
