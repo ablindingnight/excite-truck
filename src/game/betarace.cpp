@@ -136,18 +136,19 @@ struct V2 {
 
 // Layout elements (see ovlayout.cpp).
 struct ElemBase {
-    ElemBase(void) {}
     const char* name;  // offset 0x0
     V2 pos;            // offset 0x4
     s32 elemJust;      // offset 0xC
 };
 
 struct BoxElem : ElemBase {
+    BoxElem(void) {}
     f32 w;  // offset 0x10
     f32 h;  // offset 0x14
 };
 
 struct TextElem : ElemBase {
+    TextElem(void) {}
     f32 scale;            // offset 0x10
     u32 just;             // offset 0x14
     u32 color;            // offset 0x18
@@ -385,8 +386,15 @@ f32 fn_80149650(void) { return fn_801495D4(64); }
 class BetaMaster;
 
 struct PlaceInfo {
-    u8 pad0[0x4];
+    u32 flags;  // offset 0x0
     s32 place;  // offset 0x4
+    u8 pad8[0x10 - 0x8];
+    s32 lap;    // offset 0x10
+};
+
+struct PlaceDist {
+    u8 pad0[0x48];
+    f32 f48;  // offset 0x48
 };
 
 class PlaceSource {
@@ -394,6 +402,8 @@ public:
     virtual void vf08(void);
     virtual void vf0C(void);
     virtual PlaceInfo* Get(void);
+    virtual void vf14(void);
+    virtual PlaceDist* Dist(void);
 };
 
 struct RaceCarRec {
@@ -802,6 +812,9 @@ public:
     void Age(void) { age += FrameDt(); }
     f32 GetAge(void) { return age; }
     s32 Points(void) { return points; }
+    f32 GetStart(void) { return start; }
+    char* GetText1(void) { return text1; }
+    char* GetText0(void) { return text0; }
 
     u8 running;         // offset 0x4
     u8 ready;           // offset 0x5
@@ -1241,6 +1254,8 @@ struct RaceTimer {
     Sound* tick;        // offset 0x14
     Sound* timeout;     // offset 0x18
     u8 b1C;             // offset 0x1C
+
+    int Finishing(void) { return limit - now < finishTimeout; }
 };
 
 static inline void InitTimer(RaceTimer* t) {
@@ -1680,10 +1695,557 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
 
 extern "C" {
 void fn_8001DFF0(void);
-void fn_801E7E18(void);
+f32 fn_801E7E18(void);
 void fn_802AE220(ArtAnimMan* anim, const f32* rect);
 }
 int GetNumPlayers(void);
+
+// ---------------------------------------------------------------------------------------------------
+// The stunt column, the stunt pop-up and the score stars of a car's HUD (shared by the race HUD and the
+// results screen). Compiled with an inline depth of one: helpers called from here are out of line.
+
+class LocString;
+extern "C" {
+extern u32 lbl_8055E044;  // localization version
+void fn_80131318(LocString* s);
+}
+
+// A localized string looked up by key and refreshed when the language changes.
+class LocString {
+public:
+    LocString(const char* key);
+    const char* Get(void) {
+        if (version != lbl_8055E044) {
+            fn_80131318(this);
+        }
+        return text;
+    }
+
+    const char* key;   // offset 0x0
+    const char* text;  // offset 0x4
+    u32 version;       // offset 0x8
+};
+
+struct StuntKind {
+    s32 type;          // offset 0x0
+    const char* name;  // offset 0x4
+    s32 x8;            // offset 0x8
+    int Is(s32 t) const { return type == t; }
+};
+
+extern const StuntKind lbl_802F9410[6];
+
+struct HiNames {
+    const char* a;     // offset 0x0
+    const char* b;     // offset 0x4
+    const char* text;  // offset 0x8
+};
+
+
+struct StuntCIter {
+    StuntCIter(StuntQueue* l, int rev) {
+        list = l;
+        if (!rev) {
+            cur = l->head;
+            if (cur) {
+                next = cur->next;
+                prev = cur->prev;
+            } else {
+                prev = 0;
+                next = 0;
+            }
+        } else {
+            cur = l->tail;
+            if (cur) {
+                next = cur->next;
+                prev = cur->prev;
+            } else {
+                prev = 0;
+                next = 0;
+            }
+        }
+    }
+    StuntEvent* operator->(void) { return cur; }
+    int Next(void) {
+        cur = next;
+        if (cur) {
+            next = cur->next;
+            prev = cur->prev;
+        } else {
+            prev = 0;
+            next = 0;
+        }
+        return cur != 0;
+    }
+    StuntEvent* Valid(void) { return cur; }
+
+    StuntQueue* list;  // offset 0x0
+    StuntEvent* cur;   // offset 0x4
+    StuntEvent* next;  // offset 0x8
+    StuntEvent* prev;  // offset 0xC
+};
+
+inline f32 Remap(f32 lo, f32 hi, f32 a, f32 b, f32 x) { return Lerp(a, b, Clamp01((x - lo) / (hi - lo))); }
+inline f32 Clamp(f32 x, f32 lo, f32 hi) {
+    f32 r = hi < x ? hi : x;
+    return r > lo ? r : lo;
+}
+inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
+inline u8 ColR(u32 c) { return c >> 24; }
+inline u8 ColA(u32 c) { return c; }
+inline u8 ColB(u32 c) { return c >> 8; }
+inline u8 ColG(u32 c) { return c >> 16; }
+inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
+    V2 r;
+    r.y = a.y + t * (b.y - a.y);
+    r.x = a.x + t * (b.x - a.x);
+    return r;
+}
+inline void SetV2(V2& d, const V2& s) {
+    d.x = s.x;
+    d.y = s.y;
+}
+
+extern "C" {
+int fn_8026B0C0(int view);
+void fn_80232928(u32 color);
+void fn_80232930(void);
+u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
+f32 fn_80144C80(f32 a, f32 b, f32 t);
+int fn_80144C90(f32 x);
+int fn_80141F7C(f32 x);
+void fn_80147EE0(ArtElem* e, f32 s);
+u32 fn_80147C50(u32 a, u32 b, f32 t);
+void fn_8001DF08(int id, s32 score);
+int sprintf(char* buf, const char* fmt, ...);
+}
+
+
+namespace {
+inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
+    s32 tx = c->tex[2];
+    CarHud* h = c->hud;
+    int pal;
+    StuntEvent* cur;
+    l->FindBox("stunt_column_info");
+    {
+        static LocString sAir("Stunt:AIR");
+        static LocString sOffroad("Stunt:OFFROAD");
+        static LocString sDrift("Stunt:DRIFT");
+        static LocString sTree("Stunt:TREE_RUN");
+        static LocString sTurboTree("Stunt:TURBO_TREE_RUN");
+        static LocString sRing("Stunt:RING");
+        static LocString s360("Stunt:360");
+    }
+    pal = fn_8026B0C0(view);
+    {
+        u8 done[6];
+        done[0] = 0;
+        done[1] = 0;
+        done[2] = 0;
+        done[3] = 0;
+        done[4] = 0;
+        done[5] = 0;
+        StuntCIter it(&h->pending, 0);
+        for (; it.Valid(); it.Next()) {
+            if (it->Value() > 0.5f) {
+                int i;
+                for (i = 0; i < ARRAY_COUNT(lbl_802F9410); i++) {
+                    char buf[0x20];
+                    ArtElem* a;
+                    fn_801345D8(buf, sizeof(buf), "%s_star", lbl_802F9410[i].name);
+                    a = l->FindArt(buf);
+                    if (a) {
+                        ArtElem e = *a;
+                        e.pos.x = e.pos.x - e.w * 0.5f - 4.0f * e.w * 0.5f;
+                        if (lbl_802F9410[i].Is(it->Type()) && !done[i]) {
+                            char name[0x20];
+                            TextElem* t;
+                            f32 j;
+                            fn_801345D8(name, sizeof(name), "stunt_%s", lbl_802F9410[i].name);
+                            t = l->Find(name);
+                            if (t) {
+                                TextElem te = *t;
+                                te.color = pal ? 0x70FFFF00 : 0xFFFFFF00;
+                                fn_801476C4(&te);
+                            }
+                            for (j = 0.0f; j <= it->Value(); j += 1.0f) {
+                                f32 f = Clamp(it->Value() - j, 0.0f, 1.0f);
+                                ArtElem s = e;
+                                fn_80147EE0(&s, Remap(0.0f, 1.0f, 3.0f, 1.0f, f));
+                                s.elemJust = 2;
+                                fn_80147C50(0x00FFFFFF, 0x7FFFFFFF, f);
+                                if (NearEq(f, 1.0f)) {
+                                    u32 col = l->Find("star_color_1")->color;
+                                    if (pal) {
+                                        col = (col & 0xFFFFFF) | 0x70000000;
+                                    }
+                                    fn_801476D8(&s, col, tx);
+                                    e.pos.x += e.w;
+                                }
+                            }
+                            done[i] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cur = h->current;
+    if (cur) {
+        f32 now = fn_801E7E18();
+        f32 spd = fn_80176A1C() == 2 ? fn_80176A2C() : 1.0f;
+        f32 age = (now - cur->GetStart()) * spd;
+        f32 fadeIn = Remap(0.5f, 1.1f, 0.0f, 1.0f, age);
+        f32 fadeOut = Remap(1.1f, 1.25f, 0.0f, 1.0f, age);
+        s32 n = fn_80144C90(cur->Value());
+        if (cur->Points() > 0) {
+            f32 a = Clamp(fadeIn, 0.0f, 1.0f);
+            f32 sc = Remap(0.0f, 1.0f, 1.0f, 1.5f, a);
+            const char* names[3] = {"hi_score_target", "big_hi_score_target", n >= 5 ? cur->GetText0() : cur->GetText1()};
+            ArtElem* stars;
+            if (n >= 5) {
+                f32 p = Remap(0.0f, 1.1f, 0.0f, 1.0f, age);
+                u32 c0 = fn_80144C68(0xFF, 0xC1, 0, 0);
+                fn_80232928(fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF));
+                if (p < 0.3f) {
+                    TextElem* t;
+                    p = Remap(0.0f, 0.3f, 0.0f, 1.0f, p);
+                    t = l->Find("hi_score_target");
+                    if (t) {
+                        TextElem te = *t;
+                        f32 al;
+                        te.scale = Remap(0.0f, 1.0f, 3.0f * te.scale, te.scale, p);
+                        al = fn_80144C80(0.0f, 1.0f, p);
+                        te.color = fn_80144C68(255.0f * al, ColG(c0), ColB(c0), ColA(c0));
+                        fn_80147230(&te, "%s", cur->GetText0());
+                    }
+                } else {
+                    TextElem* t1;
+                    TextElem* t2;
+                    p = Remap(0.8f, 1.0f, 0.0f, 1.0f, p);
+                    t1 = l->Find(names[0]);
+                    t2 = l->Find(names[1]);
+                    if (t1 && t2) {
+                        TextElem e1 = *t1;
+                        TextElem e2 = *t2;
+                        e1.color = fn_80144C68(ColR(e1.color), ColG(c0), ColB(c0), ColA(c0));
+                        e2.color = fn_80144C68(ColR(e2.color), ColG(c0), ColB(c0), ColA(c0));
+                        fn_801479A8(&e1, &e2, "%s", p, names[2]);
+                    }
+                }
+                fn_80232930();
+            } else {
+                TextElem* t1 = l->Find(names[0]);
+                TextElem* t2 = l->Find(names[1]);
+                if (t1 && t2) {
+                    fn_801479A8(t1, t2, "%s", a, names[2]);
+                }
+            }
+            stars = l->FindArt("hi_score_stars");
+            if (stars) {
+                ArtElem st;
+                if (fn_80141F7C(fadeOut)) {
+                    f32 p = Remap(0.0f, 0.2f, 0.0f, 1.0f, age);
+                    ArtElem* sa = 0;
+                    int i;
+                    for (i = 0; i < ARRAY_COUNT(lbl_802F9410); i++) {
+                        if (lbl_802F9410[i].Is(cur->Type())) {
+                            char buf[0x20];
+                            sprintf(buf, "%s_star", lbl_802F9410[i].name);
+                            sa = l->FindArt(buf);
+                            break;
+                        }
+                    }
+                    st = *stars;
+                    if (sa) {
+                        ArtElem s2 = *sa;
+                        s2.pos.x = s2.pos.x - s2.w * 0.5f - 4.0f * s2.w * 0.5f;
+                        st.w = sc * fn_80144C80(s2.w, st.w, p);
+                        st.h = sc * fn_80144C80(s2.h, st.h, p);
+                        st.pos.y = st.pos.y - 0.5f * st.h;
+                        st.pos.x = st.pos.x - 0.5f * st.w * n;
+                        SetV2(st.pos, LerpV2(s2.pos, st.pos, p));
+                    } else {
+                        st.w = st.w * sc;
+                        st.h = st.h * sc;
+                        st.pos.y = st.pos.y - 0.5f * st.h;
+                        st.pos.x = st.pos.x - 0.5f * st.w * n;
+                    }
+                } else {
+                    ArtElem* sa = l->FindArt("score_star_art");
+                    if (sa) {
+                        f32 sc2 = Remap(0.0f, 1.0f, 1.5f, 1.0f, fadeOut);
+                        ArtElem s3 = *stars;
+                        st = *sa;
+                        st.w = sc2 * fn_80144C80(s3.w, st.w, fadeOut);
+                        st.h = sc2 * fn_80144C80(s3.h, st.h, fadeOut);
+                        s3.pos.y = s3.pos.y - 0.5f * st.h;
+                        s3.pos.x = s3.pos.x - st.w * n * 0.5f;
+                        SetV2(st.pos, LerpV2(s3.pos, st.pos, fadeOut));
+                    }
+                }
+                {
+                    ArtElem base = st;
+                    u32 col = l->Find("star_color_1")->color;
+                    int i;
+                    for (i = 0; i < n; i++) {
+                        fn_801476D8(&base, col, tx);
+                        if (n >= 5) {
+                            f32 r = Remap(0.0f, 0.7f, 0.0f, 1.0f, fadeIn);
+                            ArtElem b2 = base;
+                            f32 red;
+                            u32 c2;
+                            fn_80147EE0(&b2, 1.0f + 6.0f * r);
+                            red = (1.0f - r) * ColR(col);
+                            c2 = fn_80144C68(red, ColG(col), ColB(col), ColA(col));
+                            b2.pos.x = b2.pos.x + 0.5f * ((i - 2) * (b2.w - base.w));
+                            fn_801476D8(&b2, c2, tx);
+                        }
+                        base.pos.x += base.w * (1.0f - fadeOut);
+                    }
+                }
+            }
+        }
+    }
+    fn_8014784C(l, "stunts_art", "excite_artset", 6);
+}
+}  // namespace
+
+
+struct StarSteps {
+    f32 t[4];
+};
+
+
+extern "C" {
+f32 fn_80144BD8(f32 x);  // ease in/out
+int fn_80160A74(void);   // places that get a high score entry
+int fn_801B2ED4(void);
+void fn_801DF93C(int view);
+void fn_8001DFA8(int id);
+int fn_801E85A4(void);
+int fn_80161C38(void);
+double fmod(double x, double y);
+void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
+f32 fn_8013672C(void);
+s32 fn_80204CF0(void);  // difficulty
+}
+extern ILayout* lbl_8055E238;
+extern ILayout* lbl_8055E23C;
+
+inline void DrawText(ILayout* l, const char* name) { fn_801476C4(l->Find(name)); }
+
+namespace {
+
+// Draws the "bonanza" coin counter and the three stars that fly into it.
+inline void DrawBonanza(Coins* co, int id) {
+    CoinCar* car;
+    if (co->enabled && co->obj && (car = &co->cars[id])->active) {
+        char buf[0x14];
+        GartElem* s0;
+        GartElem* s1;
+        GartElem* s2;
+        int k;
+        DrawText(co->obj, "bonanza_title");
+        fn_801308F4(buf, sizeof(buf), car->count);
+        fn_801473F8(co->obj, "bonanza_score", buf);
+        s0 = co->obj->FindBox("star_0");
+        s1 = co->obj->FindBox("star_1");
+        s2 = co->obj->FindBox("star_2");
+        for (k = 0; k < ARRAY_COUNT(car->flash); k++) {
+            if (car->flash[k] > -lbl_80558DC4[0]) {
+                f32 u = 1.0f - car->flash[k] / 0.6f;
+                f32 st[4] = {0.0f, 0.166f, 0.416f, 1.0f};
+                int seg;
+                f32 t;
+                f32 w;
+                int j;
+                for (seg = 0; seg < 3; seg++) {
+                    if (st[seg] - lbl_80558DC4[0] < u && st[seg + 1] > u) {
+                        break;
+                    }
+                }
+                t = Remap(st[seg], st[seg + 1], 0.0f, 1.0f, u);
+                GartElem g;
+                w = s0->w;
+                switch (seg) {
+                case 0:
+                    g = *s0;
+                    break;
+                case 1:
+                    g = *s0;
+                    g.pos.x = fn_80144C80(s0->pos.x, s1->pos.x, 2.0f * fn_80144BD8(0.5f + 0.5f * t) - 1.0f);
+                    g.pos.y = fn_80144C80(s0->pos.y, s1->pos.y, t);
+                    break;
+                case 2:
+                    g = *s2;
+                    g.pos.x = fn_80144C80(s1->pos.x, s2->pos.x, 2.0f * fn_80144BD8(0.5f * t));
+                    g.pos.y = fn_80144C80(s1->pos.y, s2->pos.y, t);
+                    w = fn_80144C80(w, 0.0f, t);
+                    break;
+                default:
+                    g = *s2;
+                    w = 0.0f;
+                    break;
+                }
+                g.pos.x += w * co->value;
+                for (j = 0; j < co->value; j++) {
+                    g.pos.x -= w;
+                    fn_80147940(co->obj, &g, "star_art", 0);
+                }
+            }
+        }
+    }
+}
+
+}  // namespace
+
+#pragma inline_depth(1)
+void BetaCar::DrawHud(ILayout* l, int view) {
+    RaceCarRec* rc = fn_8017960C(id);
+    PlaceInfo* info = rc->places->Get();
+    PlaceDist* dist = rc->places->Dist();
+    s32 pts = Round(shown);
+    int out = (info->flags >> 2) & 1;
+    int grade = fn_801609C4(pts);
+    int pal;
+    if (!fn_80161C38() && lbl_8055E4D0 > 1 && pts > shownInt && grade <= fn_80160A74() && grade >= 0) {
+        TextElem* t = l->Find("high_score_title");
+        if (t) {
+            TextElem e = *t;
+            e.color = fn_80147C50(0xFFFFFF00, 0xFF00FF00, 0.5f + 0.5f * (f32)sin(6.2831855f * countUp / 0.5f));
+            fn_801476C4(&e);
+        }
+    }
+    if (!fn_80161C38()) {
+        fn_8001DF08(id, pts);
+    }
+    {
+        f32 d = (info->lap - 1) * fn_8013672C() + dist->f48;
+        f32 y = d > 0.0f ? d : 0.0f;
+        f32 x = fn_801B2ED4();
+    }
+    if (!out || fn_8026B0C0(view)) {
+        DrawStunts(this, l, view);
+    }
+    pal = fn_8026B0C0(view);
+    if (pal) {
+        fn_801DF93C(view);
+    }
+    if (!pal || fn_80179650() > 1) {
+        if (master->timer.b10 && master->timer.Finishing()) {
+            TextElem* t;
+            fn_801476C4(l->Find("finish_timer_title"));
+            t = l->Find("finish_timer");
+            if (t) {
+                TextElem e = *t;
+                f32 left = 0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now;
+                f32 k = Lerp(0.0f, 1.0f, Clamp01(((f32)fmod(left, 1.875) - 1.0f) / -0.2f));
+                char buf[8];
+                e.scale *= 1.0f + 0.4f * k;
+                e.color = fn_80147C50(0xFFFFFFFF, 0xFFFF0000, k);
+                fn_80130980(buf, sizeof(buf), 2, left);
+                fn_801474EC(&e, "%s", buf);
+            }
+        }
+    }
+    if (pal) {
+        return;
+    }
+    DrawBonanza(&master->coins, id);
+    if (!out) {
+        TextElem* t = l->Find("nice_landing");
+        if (t) {
+            TextElem e = *t;
+            e.color &= 0xFFFFFF;
+            static LocString sThrown("Stunt:YOU_HAVE_BEEN_THROWN");
+            static LocString sTurbo("Stunt:TURBO_JUMP");
+            static LocString sNice("Stunt:NICE_LANDING");
+            static LocString sSpin("Stunt:AIR_SPINNING");
+            f32 a;
+            const char* s;
+            s = 0;
+            a = 0.0f;
+            if (!((f32)__fabs(flash[3]) <= lbl_80558DC4[0])) {
+                a = flash[3];
+                s = sThrown.Get();
+            } else if (!((f32)__fabs(flash[2]) <= lbl_80558DC4[0])) {
+                a = flash[2];
+                s = sTurbo.Get();
+            } else if (!((f32)__fabs(flash[1]) <= lbl_80558DC4[0])) {
+                a = flash[1];
+                s = sNice.Get();
+            } else if (!((f32)__fabs(flash[4]) <= lbl_80558DC4[0])) {
+                a = flash[4];
+                s = sSpin.Get();
+            }
+            if (s) {
+                e.color |= (int)(255.0f * Clamp01(a / 0.5f)) << 24;
+                fn_80147230(&e, s);
+            }
+        }
+    }
+    if (fn_80161C38()) {
+        return;
+    }
+    {
+        f32 lo = 0.6f + master->timer.finishTimeout;
+        f32 k = Lerp(0.0f, 1.0f, Clamp01(((0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now) - lo) / (master->timer.finishTimeout - lo)));
+        f32 limit = master->timer.limit;
+        f32 elapsed = limit - (0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now);
+        int art;
+        TextElem* tc;
+        TextElem* ft;
+        TextElem* tl;
+        int d = fn_80204CF0();
+        switch (d) {
+        case 0:
+            art = 1;
+            break;
+        case 1:
+            art = 3;
+            break;
+        case 2:
+            art = 5;
+            break;
+        default:
+            fn_802E30C8("betarace: Couldn't find time art idx for difficulty %d, returning 1", d);
+            art = 1;
+            break;
+        }
+        fn_8014784C(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, "time_limit_art", "excite_artset", art);
+        tl = l->Find("time_limit");
+        if (tl) {
+            fn_80149588(tl, limit);
+        }
+        fn_8014784C(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, "stop_watch_art", "stop_watch_artset", 0);
+        tc = l->Find("time_counter");
+        ft = l->Find("finish_timer");
+        if (tc && ft && !master->timer.Finishing()) {
+            TextElem e;
+            fn_80147CEC(&e, tc, ft, k);
+            fn_80149588(&e, elapsed);
+        }
+    }
+    fn_8001DFA8(id);
+}
+
+#pragma inline_depth(1)
+void BetaCar::DrawResults(ILayout* l, int view) {
+    s32 pts = Round(shown);
+    DrawStunts(this, l, view);
+    if (master->vf20(id)) {
+        fn_8001DF08(id, pts);
+    } else {
+        fn_8001DF08(id, result.total);
+    }
+}
+#pragma inline_depth(smart)
+
+const StuntKind lbl_802F9410[6] = {
+    {0, "air", 0}, {2, "off", 0}, {3, "drift", 0}, {4, "tree", 0}, {14, "ring", 0}, {7, "360", 0},
+};
 
 void BetaCar::StopBonus(void) {
     if (result.dnf) {
