@@ -2021,8 +2021,8 @@ extern "C" {
 void fn_80157560(Tracker* t) {
     ValueTable* vt = fn_80131810("stunts.val");
     ValueTable* def = fn_80131808("stuntdef.val");
-    const char* name;
     ValueNode* node;
+    const char* name;
     if (!vt) {
         vt = def;
     }
@@ -2035,9 +2035,9 @@ void fn_80157560(Tracker* t) {
         node = def->FindChild("default");
     }
     if (node) {
-        int i = 0;
         ValueNode* r;
-        for (r = node->GetChildAt(0); r; r = node->GetChildAt(++i)) {
+        int i;
+        for (r = node->GetChildAt(0), i = 0; r; r = node->GetChildAt(++i)) {
             s32 rank = r->GetIntValue("rank");
             const char* adj = r->GetString("adj", "");
             s32 thresh = r->GetInt("thresh", 0);
