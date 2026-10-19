@@ -485,7 +485,7 @@ public:
     }
     virtual f32 Rate(const RaceCarRec* rc) {
         f32 r;
-        if ((f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && Airborne(rc)) {
+        if (NearZero(rc->f2690) && Airborne(rc)) {
             if (dur > minT) {
                 Show();
             }
@@ -503,7 +503,7 @@ public:
                 }
             }
             r = 0.0f;
-        } else if ((f32)__fabs(since) <= lbl_80558DC4[0]) {
+        } else if (NearZero(since)) {
             r = End();
         } else {
             Hide();
@@ -614,7 +614,7 @@ public:
                 full = 1;
             }
         }
-        if ((f32)__fabs(timer) <= lbl_80558DC4[0] || full) {
+        if (NearZero(timer) || full) {
             if (count > 0) {
                 r = Take();
             }
@@ -856,7 +856,7 @@ public:
             amount = Clamp01(5.0f * (side / (spd * k) - 1.0f)) * fade;
         }
         if (snd) {
-            if (!((f32)__fabs(amount) <= lbl_80558DC4[0])) {
+            if (!NearZero(amount)) {
                 snd->SetVolume(0.4f * amount);
                 LoopSound(snd);
             } else {
@@ -867,7 +867,7 @@ public:
     }
 
     int Sliding(const RaceCarRec* rc, u8 was, f32 spd) {
-        if ((f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && spd > 5.0f && ground < 0.5f) {
+        if (NearZero(rc->f2690) && spd > 5.0f && ground < 0.5f) {
             f32 side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
             return side > spd * (was ? 0.15f : 0.35f);
         }
@@ -1061,7 +1061,7 @@ void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
         int i;
         for (i = 0; i < ARRAY_COUNT(slots); i++) {
             CloseCallSlot* s = &slots[i];
-            if ((f32)__fabs(s->time - now) <= lbl_80558DC4[0]) {
+            if (NearZero(s->time - now)) {
                 recent = 1;
             }
             if (s->other == other && now - s->time < 5.0f) {
@@ -1205,7 +1205,7 @@ public:
     virtual void Hit(f32 mag, int other) {
         if (!Wrecked(other)) {
             CarHit* h = &hits[other];
-            if ((f32)__fabs(h->timer) <= lbl_80558DC4[0]) {
+            if (NearZero(h->timer)) {
                 h->mag = mag;
             } else {
                 h->mag = mag > h->mag ? mag : h->mag;
@@ -1626,7 +1626,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
 f32 SpinTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
-    if (!((f32)__fabs(angle) <= lbl_80558DC4[0])) {
+    if (!NearZero(angle)) {
         spins += rolls;
         if (Round(angle) > 0) {
             int add = rolls ? 0 : Round(angle);
@@ -2119,7 +2119,7 @@ f32 TimedTracker::Finish(const RaceCarRec* rc) {
         Score(&pts);
         Hide();
     }
-    if (!((f32)__fabs(pts) <= lbl_80558DC4[0])) {
+    if (!NearZero(pts)) {
         Ended(dur);
     }
     dur = 0.0f;
