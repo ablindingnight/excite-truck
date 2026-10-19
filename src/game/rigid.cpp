@@ -14,6 +14,11 @@ void* fn_801B60F4(const void* pos, f32 r);                            // grid ce
 void fn_801B6428(void* cell, void* body);                             // cell remove
 void fn_801B63E0(void* cell, void* body);                             // cell add
 void fn_801AE158(void* contact);
+void fn_801ADB44(void* contact, void* body);
+void PSVECNormalize(const void* src, void* dst);
+f32 PSVECMag(const void* v);
+double sin(double x);
+double cos(double x);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -390,7 +395,191 @@ void RigidBody::VelAt2(RVec3* out, const RVec3* p) {
     out->z += accel.z;
 }
 
-void RigidBody::Update(void) {}
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
+static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
+    if (out == in) {
+        f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
+        f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
+        f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
+        out->y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
+        out->z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+    }
+}
+
+void RigidBody::Update(void) {
+    RVec3 g;
+    RVec3 dr;
+    Contact* c;
+    SetV(&g, 0.0f, 9.81f * -mass, 0.0f);
+    force.x += g.x;
+    force.y += g.y;
+    force.z += g.z;
+    for (c = contacts; c; c = c->next) {
+        fn_801ADB44(c, this);
+    }
+    if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
+        (nAdded > 0 ? sub[0] : 0)->Wake();
+    }
+    if (!((f32)__fabs(impW) <= lbl_80558DC4[0])) {
+        int i;
+        f32 inv = 1.0f / impW;
+        impF.x *= inv;
+        impF.y *= inv;
+        impF.z *= inv;
+        impT.x *= inv;
+        impT.y *= inv;
+        impT.z *= inv;
+        force.x += impF.x * 59.94f;
+        force.y += impF.y * 59.94f;
+        force.z += impF.z * 59.94f;
+        torque.x += impT.x * 59.94f;
+        torque.y += impT.y * 59.94f;
+        torque.z += impT.z * 59.94f;
+        for (i = 0; i < nImp; i++) {
+            ImpRec* p = imps[i];
+            if (p->by) {
+                int j;
+                for (j = i + 1; j < nImp; j++) {
+                    ImpRec* q = imps[j];
+                    if (p->by == q->by) {
+                        RVec3 mid;
+                        p->v.x += q->v.x;
+                        p->v.y += q->v.y;
+                        p->v.z += q->v.z;
+                        SetV(&mid, Lerp(p->at.x, q->at.x, 0.5f), Lerp(p->at.y, q->at.y, 0.5f), Lerp(p->at.z, q->at.z, 0.5f));
+                        p->at = mid;
+                        imps[j] = imps[--nImp];
+                    }
+                }
+            }
+        }
+        for (i = 0; i < nImp; i++) {
+            ImpRec* p = imps[i];
+            f32 k = 1.0f / impW;
+            p->v.x *= k;
+            p->v.y *= k;
+            p->v.z *= k;
+            if (p->obj) {
+                p->obj->Notify(&p->v, &p->at, p->kind, p->c, p->by);
+            } else {
+                OnImpulse(&p->v, &p->at, p->kind, p->c, p->by);
+            }
+        }
+        OnImpulses(&impF, &impT);
+        impF.x = 0.0f;
+        impF.y = 0.0f;
+        impF.z = 0.0f;
+        impT.x = 0.0f;
+        impT.y = 0.0f;
+        impT.z = 0.0f;
+    }
+    {
+        f32 k = 0.0166834f * invMass;
+        vel.x += force.x * k;
+        vel.y += force.y * k;
+        vel.z += force.z * k;
+        accel.x = force.x * invMass;
+        accel.y = force.y * invMass;
+        accel.z = force.z * invMass;
+    }
+    impW = 0.0f;
+    nImp = 0;
+    if (PSVECDotProduct(&vel, &vel) > 90000.0f) {
+        PSVECNormalize(&vel, &vel);
+        vel.x *= 300.0f;
+        vel.y *= 300.0f;
+        vel.z *= 300.0f;
+    }
+    mtx.pos.x += vel.x * 0.0166834f;
+    mtx.pos.y += vel.y * 0.0166834f;
+    mtx.pos.z += vel.z * 0.0166834f;
+    MulVec(&aaccel, &torque, &worldInvI);
+    avel.x += aaccel.x * 0.0166834f;
+    avel.y += aaccel.y * 0.0166834f;
+    avel.z += aaccel.z * 0.0166834f;
+    if (PSVECDotProduct(&avel, &avel) > 100.0f) {
+        PSVECNormalize(&avel, &avel);
+        avel.x *= 10.0f;
+        avel.y *= 10.0f;
+        avel.z *= 10.0f;
+    }
+    {
+        RMtx r;
+        f32 ang;
+        dr.x = avel.x * 0.0166834f;
+        dr.y = avel.y * 0.0166834f;
+        dr.z = avel.z * 0.0166834f;
+        ang = PSVECMag(&dr);
+        if (ang > 0.0001f) {
+            f32 inv = 1.0f / ang;
+            f32 ax = inv * dr.x;
+            f32 ay = inv * dr.y;
+            f32 az = inv * dr.z;
+            f32 s = sin(ang);
+            f32 co = cos(ang);
+            f32 t = 1.0f - co;
+            f32 tx = t * ax;
+            f32 ty = t * ay;
+            r.rot.m[0][0] = co + t * (ax * ax);
+            r.rot.m[0][1] = ay * tx + s * az;
+            r.rot.m[0][2] = az * tx - s * ay;
+            r.rot.m[1][0] = ay * tx - s * az;
+            r.rot.m[1][1] = co + t * (ay * ay);
+            r.rot.m[1][2] = az * ty + s * ax;
+            r.rot.m[2][0] = az * tx + s * ay;
+            r.rot.m[2][1] = az * ty - s * ax;
+            r.rot.m[2][2] = co + t * (az * az);
+        } else {
+            r.rot.m[0][0] = 1.0f;
+            r.rot.m[0][1] = 0.0f;
+            r.rot.m[0][2] = 0.0f;
+            r.rot.m[1][0] = 0.0f;
+            r.rot.m[1][1] = 1.0f;
+            r.rot.m[1][2] = 0.0f;
+            r.rot.m[2][0] = 0.0f;
+            r.rot.m[2][1] = 0.0f;
+            r.rot.m[2][2] = 1.0f;
+        }
+        {
+            RMat33* rr = &mtx.rot;
+            Mul(rr, rr, &r.rot);
+        }
+    }
+    {
+        RMat33 tmp;
+        RMat33 rt = mtx.rot;
+        rt.Transpose();
+        {
+            RMat33* ii = &invI;
+            Mul(&tmp, &rt, ii);
+        }
+        {
+            RMat33* wi = &worldInvI;
+            RMat33* rr = &mtx.rot;
+            Mul(wi, &tmp, rr);
+        }
+    }
+    force.x = 0.0f;
+    force.y = 0.0f;
+    force.z = 0.0f;
+    torque.x = 0.0f;
+    torque.y = 0.0f;
+    torque.z = 0.0f;
+    Xform2();
+    UpdateCell();
+}
 
 void RigidBody::OnImpulses(RVec3* f, RVec3* t) {}
 
@@ -489,14 +678,6 @@ extern "C" void fn_8017D140(u8* dst, const u8* src, int n) {
     while (--n >= 0) {
         *dst++ = *src++;
     }
-}
-
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-
-static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
 }
 
 void RigidBody::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb) {
