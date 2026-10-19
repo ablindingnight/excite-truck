@@ -1038,6 +1038,7 @@ config.libs.append(
             Object(Matching, "game/carmesh.cpp"),
             Object(NonMatching, "game/mgroup.cpp"),
             Object(NonMatching, "game/weather.cpp"),
+            Object(NonMatching, "game/joint.cpp"),
             Object(NonMatching, "game/dbglod.cpp"),
             Object(Matching, "game/fonttext.cpp"),
             Object(Matching, "game/ground.cpp"),
