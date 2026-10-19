@@ -259,7 +259,9 @@ public:
     u32 model;        // offset 0x10
     u8 pad14[0x3C - 0x14];
     ValMatrix mtx;    // offset 0x3C
-    u8 pad6C[0x118 - 0x6C];
+    u8 pad6C[0xD4 - 0x6C];
+    f32 fD4;          // offset 0xD4
+    u8 padD8[0x118 - 0xD8];
     ValVec3 center;   // offset 0x118
     u8 pad124[0x25A0 - 0x124];
     f32 turbo;        // offset 0x25A0
@@ -567,10 +569,10 @@ public:
 class CSubTaskMgr {
 public:
     virtual ~CSubTaskMgr(void) {}
-    virtual int vf0C(int a, int b, int c, int d, u32* flags);
-    virtual int vf10(int a, f32* out, int car);
+    virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
+    virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags);
     virtual int vf14(void);
-    virtual void vf18(void);
+    virtual void vf18(int a, int b);
     virtual int vf1C(void);
     virtual void vf20(void);
     virtual void vf24(void);
@@ -579,6 +581,17 @@ public:
 
 class CrushMaster;
 
+// Where an AI truck is headed.
+struct CrushTarget {
+    u8 b0;        // offset 0x0
+    u8 pad1[0xF];
+    s32 f10;      // offset 0x10
+    f32 x;        // offset 0x14
+    f32 y;        // offset 0x18
+    f32 speed;    // offset 0x1C
+    f32 until;    // offset 0x20
+};
+
 class CrushSubTaskMgr : public CSubTaskMgr {
 public:
     CrushSubTaskMgr(CrushMaster* m) {
@@ -586,16 +599,16 @@ public:
         master = m;
     }
     virtual ~CrushSubTaskMgr(void);
-    virtual int vf0C(int a, int b, int c, int d, u32* flags);
-    virtual int vf10(int a, f32* out, int car);
+    virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
+    virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags);
     virtual int vf14(void);
-    virtual void vf18(void);
+    virtual void vf18(int a, int b);
     virtual int vf1C(void);
     virtual void vf20(void);
     virtual void vf24(void);
-    u8 pad4[0x124 - 0x4];
-    s32 nCars;            // offset 0x124
-    CrushMaster* master;  // offset 0x128
+    CrushTarget targets[8];  // offset 0x4
+    s32 nCars;               // offset 0x124
+    CrushMaster* master;     // offset 0x128
 };
 
 // Per-car crush state.
@@ -1137,7 +1150,18 @@ int CrushMaster::vf28(void) { return AliveAI() != 0; }
 
 int IsLoadingActive(void);
 
+struct RaceSetup {
+    u8 pad0[0x10];
+    f32 time;  // offset 0x10
+};
+
 extern "C" {
+RaceSetup* fn_801E7E3C(void);
+void fn_8000FBE4(void);
+void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+f32 fn_80147204(TextElem* e, const char* text);
+s32 fn_80160998(s32 a);
+s32 fn_80160A74(void);
 void fn_802AE220(void* layout, int a);
 void fn_802AE118(void* layout);
 void fn_8001DFCC(void);
@@ -1477,10 +1501,12 @@ void CrushMaster::vf4C(int view) {
             char buf[0x20];
             if (lbl_8043038C.timeInSeconds) {
                 f32 left = endTime - fn_801E7E18();
-                fn_801345D8(buf, 0x20, "%.0f", 0.0f > left ? 0.0f : left);
+                left = 0.0f > left ? 0.0f : left;
+                fn_801345D8(buf, 0x20, "%.0f", left);
             } else {
                 f32 left = endTime - fn_801E7E18();
-                fn_80130978(buf, 0x20, 0.0f > left ? 0.0f : left);
+                left = 0.0f > left ? 0.0f : left;
+                fn_80130978(buf, 0x20, left);
             }
             if (AliveAI() > 0) {
                 fn_801475D0(layout.p, "timer", "%s", buf);
@@ -1577,4 +1603,295 @@ int CrushMaster::vf8C(int p, int key) {
         r = 1;
     }
     return r;
+}
+
+static inline f32 Clamp01(f32 x) {
+    f32 r = 1.0f < x ? 1.0f : x;
+    return r > 0.0f ? r : 0.0f;
+}
+
+static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { fn_801479A8(a, b, text, t); }
+
+static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
+
+int CrushMaster::vf3C(int view) {
+    f32 t = fn_801E7E3C()->time;
+    f32 end0 = 6.75f;
+    f32 in0 = end0 - 0.8f;
+    f32 full0 = in0 - 0.3f;
+    f32 end1 = full0 - 0.15f;
+    f32 in1 = end1 - 0.8f;
+    f32 full1 = in1 - 0.3f;
+    TextElem* h0 = layout.p->Find("intro_head_0");
+    TextElem* h1 = layout.p->Find("intro_head_1");
+    if (t < full1) {
+        fn_8000FBE4();
+    }
+    if (!fn_80161C38()) {
+        if (t < end0) {
+            f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
+            TextElem* body = layout.p->Find("star_body_0");
+            TextElem* denom = layout.p->Find("star_body_1");
+            fn_8001DF08(fn_801E866C(view), 0);
+            if (h0 && h1 && body && denom) {
+                char buf[0x14];
+                Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
+                fn_801308F4(buf, sizeof(buf), fn_80160998(fn_80160A74()));
+                {
+                    TextElem e = *body;
+                    e.pos.x -= 0.5f * Width(&e, buf);
+                    Blend(&e, denom, buf, Ease(k));
+                }
+            }
+        }
+        if (t < end1) {
+            f32 k;
+            TextElem* body;
+            TextElem* timer;
+            fn_8014784C(layout.p, "stop_watch_art", "stop_watch_artset", 0);
+            k = Lerp(0.0f, 1.0f, Clamp01((t - in1) / (full1 - in1)));
+            body = layout.p->Find("time_body_0");
+            timer = layout.p->Find("timer");
+            if (h0 && h1 && body && timer) {
+                char buf[0x14];
+                Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k));
+                {
+                    f32 left = endTime - fn_801E7E18();
+                    left = 0.0f > left ? 0.0f : left;
+                    fn_80130978(buf, sizeof(buf), left);
+                }
+                {
+                    TextElem e = *body;
+                    e.pos.x += 0.5f * Width(&e, buf);
+                    Blend(&e, timer, buf, Ease(k));
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+class CarBrain {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void Crushed(int by);  // 0x30
+};
+
+extern "C" {
+CarBrain* fn_801B2EC0(int car);
+u8 fn_801B3050(int car);
+void fn_8017B3A8(RaceCarRec* car, const ValVec3* imp, const ValVec3* at);
+void fn_8018F9B4(RaceCarRec* car);
+}
+
+static inline int Round(f32 v) { return v >= 0.0f ? 0.5f + v : v - 0.5f; }
+
+static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
+    f32 speed = fn_801725C8(lbl_8055E3C8);
+    f32 dur = 10.0f;
+    f32 dist = 220.0f;
+    V2 tgt;
+    int tries = 19;
+    do {
+        RaceCarRec* rec = fn_8017960C(car);
+        V2 pos;
+        V2 dir;
+        pos.x = rec->mtx.origin.x;
+        pos.y = rec->mtx.origin.z;
+        dir.x = rec->mtx.basis[2].x;
+        dir.y = rec->mtx.basis[2].z;
+        {
+            f32 len = sqrt(dir.x * dir.x + dir.y * dir.y);
+            if (!NearZero(len)) {
+                f32 k = dist / len;
+                dir.x *= k;
+                dir.y *= k;
+            }
+        }
+        Rotate(&dir, fn_80129DC4(3, 0.017453292f * a0, 0.017453292f * a1));
+        tgt.x = rec->mtx.origin.x + dir.x;
+        tgt.y = rec->mtx.origin.z + dir.y;
+        if (fn_80171EF8(&pos, &tgt)) {
+            break;
+        }
+        dur = 0.7f * dur;
+        a0 -= 10.0f;
+        a1 += 10.0f;
+        dur = MAX(dur, 2.0f);
+        speed = 0.7f * speed;
+        speed = MAX(speed, 17.777779f);
+        dist = 0.9f * dist;
+        dist = MAX(dist, 40.0f);
+    } while (tries-- > 0);
+    t->x = tgt.x;
+    t->y = tgt.y;
+    t->speed = speed;
+    t->until = dur + lbl_8055E3C8;
+}
+
+int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags) {
+    CrushTarget* t = &targets[car];
+    *flags = 0x21F;
+    pos->x = t->x;
+    pos->y = t->y;
+    *speed = t->speed;
+    return 1;
+}
+
+int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
+    RaceCarRec* rec = fn_8017960C(car);
+    ValVec3 p;
+    p.x = rec->mtx.origin.x + rec->mtx.basis[2].x * 50.0f;
+    p.y = rec->mtx.origin.y + rec->mtx.basis[2].y * 50.0f;
+    p.z = rec->mtx.origin.z + rec->mtx.basis[2].z * 50.0f;
+    pos->x = p.x;
+    pos->y = p.z;
+    *flags = 0x21F;
+    *speed = 9.777778f;
+    return 1;
+}
+
+void CrushSubTaskMgr::vf24(void) {
+    int i;
+    for (i = 0; i < nCars; i++) {
+        f32 a0;
+        f32 a1;
+        if (fn_801B3050(i) & 1) {
+            a0 = -20.0f;
+            a1 = 0.0f;
+        } else {
+            a0 = 0.0f;
+            a1 = 20.0f;
+        }
+        PickTarget(&targets[i], i, a0, a1);
+        targets[i].b0 = 0;
+        targets[i].f10 = -1;
+    }
+}
+
+void CrushSubTaskMgr::vf20(void) {
+    int i;
+    for (i = 0; i < nCars; i++) {
+        CrushTarget* t = &targets[i];
+        if (master->vf20(i)) {
+            RaceCarRec* rec = fn_8017960C(i);
+            V2 pos;
+            V2 d;
+            f32 r = 75.0f;
+            pos.x = rec->mtx.origin.x;
+            pos.y = rec->mtx.origin.z;
+            d.x = pos.x - t->x;
+            d.y = pos.y - t->y;
+            if (d.x * d.x + d.y * d.y < r * r || lbl_8055E3C8 > t->until) {
+                V2 here;
+                rec = fn_8017960C(i);
+                here.x = rec->mtx.origin.x;
+                here.y = rec->mtx.origin.z;
+                if (fn_80171E3C(here)) {
+                    PickTarget(t, i, -20.0f, 20.0f);
+                } else {
+                    V2 p = fn_80171FF0(&here, 10, 5.0f, 5.0f);
+                    t->x = p.x;
+                    t->y = p.y;
+                    t->speed = 17.777779f;
+                    t->until = 5.0f + lbl_8055E3C8;
+                }
+            }
+        }
+    }
+}
+
+int CrushSubTaskMgr::vf14(void) { return 0; }
+
+int CrushSubTaskMgr::vf1C(void) { return 0; }
+
+void CrushSubTaskMgr::vf18(int a, int b) {
+    if (master->vf20(a) && master->vf20(b)) {
+        int victim = -1;
+        if (fn_80171EC0(a)) {
+            victim = b;
+        } else if (fn_80171EC0(b)) {
+            victim = a;
+        }
+        if (victim != -1) {
+            int grade;
+            CrushMaster* m;
+            if (a == victim) {
+                a = b;
+            }
+            grade = fn_80172624(a, victim);
+            m = master;
+            m->t17C.Clear();
+            m->t18C.Clear();
+            if (grade >= 1) {
+                f32 now;
+                CrushCar* k;
+                m->t184.Clear();
+                fn_801B2EC0(victim)->Crushed(a);
+                fn_80171D94(victim);
+                now = lbl_8055E3C8;
+                m->cars[victim].active = 0;
+                m->cars[victim].f18 = now;
+                m->t17C.Start();
+                k = &m->cars[a];
+                k->f10[k->f8] = grade == 2;
+                k->f8++;
+                if (grade == 2) {
+                    k->fC++;
+                }
+                if (m->AliveAI() == 0) {
+                    f32 left = m->endTime - now;
+                    left = 0.0f > left ? 0.0f : left;
+                    k->bonus = Round(0.5f + left);
+                }
+                if (grade == 2) {
+                    ValVec3 tgt;
+                    ValVec3 imp;
+                    ValVec3 at;
+                    RaceCarRec* ka;
+                    RaceCarRec* v;
+                    f32 len;
+                    m->t18C.Start();
+                    ka = fn_8017960C(a);
+                    tgt.x = ka->mtx.origin.x + ka->mtx.basis[2].x * 50.0f;
+                    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * 50.0f;
+                    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * 50.0f;
+                    v = fn_8017960C(victim);
+                    imp.x = tgt.x - v->mtx.origin.x;
+                    imp.y = tgt.y - v->mtx.origin.y;
+                    imp.z = tgt.z - v->mtx.origin.z;
+                    len = PSVECMag(&imp);
+                    len = 0.01f > len ? 0.01f : len;
+                    {
+                        f32 inv = 1.0f / len;
+                        imp.x *= inv;
+                        imp.y *= inv;
+                        imp.z *= inv;
+                    }
+                    {
+                        f32 kk = 40.0f * v->fD4 / 0.0166833512f;
+                        imp.x *= kk;
+                        imp.y *= kk;
+                        imp.z *= kk;
+                    }
+                    imp.y = 17.777779f * v->fD4 / 0.0166833512f;
+                    at = v->mtx.origin;
+                    at.y += 0.5f;
+                    fn_8017B3A8(v, &imp, &at);
+                    fn_8018F9B4(v);
+                }
+            } else if (!m->t184.Running()) {
+                m->t184.Start();
+            }
+        }
+    }
 }
