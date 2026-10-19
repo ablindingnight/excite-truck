@@ -486,7 +486,7 @@ void RigidBody::Update(void) {
         impT.z = 0.0f;
     }
     {
-        f32 k = 0.0166834f * invMass;
+        f32 k = 0.0166833512f * invMass;
         vel.x += force.x * k;
         vel.y += force.y * k;
         vel.z += force.z * k;
@@ -502,13 +502,13 @@ void RigidBody::Update(void) {
         vel.y *= 300.0f;
         vel.z *= 300.0f;
     }
-    mtx.pos.x += vel.x * 0.0166834f;
-    mtx.pos.y += vel.y * 0.0166834f;
-    mtx.pos.z += vel.z * 0.0166834f;
+    mtx.pos.x += vel.x * 0.0166833512f;
+    mtx.pos.y += vel.y * 0.0166833512f;
+    mtx.pos.z += vel.z * 0.0166833512f;
     MulVec(&aaccel, &torque, &worldInvI);
-    avel.x += aaccel.x * 0.0166834f;
-    avel.y += aaccel.y * 0.0166834f;
-    avel.z += aaccel.z * 0.0166834f;
+    avel.x += aaccel.x * 0.0166833512f;
+    avel.y += aaccel.y * 0.0166833512f;
+    avel.z += aaccel.z * 0.0166833512f;
     if (PSVECDotProduct(&avel, &avel) > 100.0f) {
         PSVECNormalize(&avel, &avel);
         avel.x *= 10.0f;
@@ -518,9 +518,9 @@ void RigidBody::Update(void) {
     {
         RMtx r;
         f32 ang;
-        dr.x = avel.x * 0.0166834f;
-        dr.y = avel.y * 0.0166834f;
-        dr.z = avel.z * 0.0166834f;
+        dr.x = avel.x * 0.0166833512f;
+        dr.y = avel.y * 0.0166833512f;
+        dr.z = avel.z * 0.0166833512f;
         ang = PSVECMag(&dr);
         if (ang > 0.0001f) {
             f32 inv = 1.0f / ang;
@@ -691,9 +691,9 @@ void RigidBody::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb) {
     accel.x = vb.x - va.x;
     accel.y = vb.y - va.y;
     accel.z = vb.z - va.z;
-    accel.x *= 9.99f;
-    accel.y *= 9.99f;
-    accel.z *= 9.99f;
+    accel.x *= 9.98999882f;
+    accel.y *= 9.98999882f;
+    accel.z *= 9.98999882f;
     *nb = 0x20;
     *na = 0x20;
 }
