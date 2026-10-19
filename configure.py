@@ -1052,6 +1052,7 @@ config.libs.append(
             Object(NonMatching, "game/roadsnd.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(NonMatching, "game/autolyt.cpp"),
+            Object(Matching, "game/uictx.cpp"),
             Object(Matching, "game/gtime.cpp"),
             Object(Matching, "game/uitext.cpp"),
             Object(Matching, "game/stub10.cpp"),
