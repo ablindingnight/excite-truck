@@ -4,12 +4,14 @@
 // screen with its finish animation. Names are guesses apart from the allocation tags, keys and
 // messages.
 #include <math.h>
+#include <stdarg.h>
 #include "game/common.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
 extern "C" {
 void* memset(void* d, int c, size_t n);
+int vsprintf(char* buf, const char* fmt, va_list args);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);                      // debug print
 void fn_802E317C(const char* fmt, ...);                      // warning print
@@ -533,8 +535,33 @@ class StuntLine {
 public:
     StuntLine(void) {}
     virtual ~StuntLine(void) {}
-    char label[0xA0];  // offset 0x4
-    char value[0x54];  // offset 0xA4
+    virtual void Text0(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(label, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text1(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(mid, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text2(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(value, fmt, ap);
+        va_end(ap);
+    }
+    virtual void vf18(void) {}
+    virtual void SetF4(s32 v) { xF4 = v; }
+    virtual void vf20(void) {}
+    virtual void vf24(void) {}
+    virtual void vf28(void) {}
+    char label[0x50];  // offset 0x4
+    char mid[0x50];    // offset 0x54
+    char value[0x50];  // offset 0xA4
+    s32 xF4;           // offset 0xF4
 };
 
 class StuntList {
@@ -731,15 +758,37 @@ public:
         hud = 0;
         type = -1;
         ready = 0;
-        b14 = 0;
-        b64 = 0;
-        bB4 = 0;
+        text0[0] = 0;
+        text1[0] = 0;
+        text2[0] = 0;
     }
     virtual ~StuntEvent(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
+    virtual void Text0(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(text0, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text1(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(text1, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text2(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(text2, fmt, ap);
+        va_end(ap);
+    }
     virtual void SetValue(f32 v) { value = v; }
+    virtual void SetPoints(s32 p) {
+        points = p;
+        scored = 1;
+    }
+    virtual void SetType(s32 t) { type = t; }
+    virtual void Stop(void) { running = 0; }
+    virtual void SetReady(u8 r) { ready = r; }
     void Tick(void) {
         if (running) {
             t0C += FrameDt();
@@ -759,17 +808,14 @@ public:
     f32 age;            // offset 0x8
     f32 t0C;            // offset 0xC
     f32 start;          // offset 0x10
-    u8 b14;             // offset 0x14
-    u8 pad15[0x64 - 0x15];
-    u8 b64;             // offset 0x64
-    u8 pad65[0xB4 - 0x65];
-    u8 bB4;             // offset 0xB4
-    u8 padB5[0x104 - 0xB5];
+    char text0[0x50];   // offset 0x14
+    char text1[0x50];   // offset 0x64
+    char text2[0x50];   // offset 0xB4
     f32 value;          // offset 0x104
     s32 points;         // offset 0x108
     s32 type;           // offset 0x10C
     s32 car;            // offset 0x110
-    u8 pad114[0x118 - 0x114];
+    s32 scored;         // offset 0x114
     class CarHud* hud;  // offset 0x118
     StuntEvent* next;   // offset 0x11C
     StuntEvent* prev;   // offset 0x120
@@ -865,6 +911,7 @@ struct StuntIter {
 class CarHud {
 public:
     CarHud(int car, int acar);
+    virtual StuntEvent* Alloc(void);
     virtual ~CarHud(void) {
         if (bigSnd) {
             delete bigSnd;
@@ -874,7 +921,7 @@ public:
         }
     }
     StuntEvent pool[16];   // offset 0x4
-    StuntQueue shown;      // offset 0x1244
+    StuntQueue free;       // offset 0x1244
     StuntQueue pending;    // offset 0x124C
     StuntEvent* current;   // offset 0x1254
     Sound* bonusSnd;       // offset 0x1258
@@ -1066,7 +1113,7 @@ public:
             for (; it.Valid(); it.Next()) {
                 if (it->running) {
                     it.Remove();
-                    h->shown.PushBack(it.Get());
+                    h->free.PushBack(it.Get());
                 }
             }
         }
@@ -1413,7 +1460,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                     }
                 } else {
                     it.Remove();
-                    h->shown.PushBack(it.Get());
+                    h->free.PushBack(it.Get());
                 }
             }
             it.Next();
@@ -1429,7 +1476,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             }
             if (h->current->GetAge() > 1.25f) {
                 add = h->current->Points();
-                h->shown.PushBack(h->current);
+                h->free.PushBack(h->current);
                 h->current = 0;
             }
         }
@@ -1755,7 +1802,7 @@ void BetaCar::Finish(void) {
     add = 0.0f;
     if (h->current) {
         add += h->current->points;
-        h->shown.PushBack(h->current);
+        h->free.PushBack(h->current);
         h->current = 0;
     }
     {
@@ -1766,7 +1813,7 @@ void BetaCar::Finish(void) {
                     add += it->points;
                 }
                 it.Remove();
-                h->shown.PushBack(it.Get());
+                h->free.PushBack(it.Get());
             }
         }
     }
@@ -3288,11 +3335,11 @@ inline void BetaCar::Reset(void) {
                 it->age = 1000.0f;
                 it->t0C = 0.0f;
                 it.Remove();
-                h->shown.PushBack(it.Get());
+                h->free.PushBack(it.Get());
             }
         }
         if (h->current) {
-            h->shown.PushBack(h->current);
+            h->free.PushBack(h->current);
             h->current = 0;
         }
         pan = fn_80009C84() ? 0 : 2;
@@ -3373,7 +3420,7 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
         StuntEvent* e = &h->pool[i];
         e->hud = h;
         e->car = car;
-        h->shown.PushFront(e);
+        h->free.PushFront(e);
     }
     h->current = 0;
     h->played = 0;
@@ -3397,8 +3444,8 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
 }
 
 inline CarHud::CarHud(int car, int acar) {
-    shown.tail = 0;
-    shown.head = 0;
+    free.tail = 0;
+    free.head = 0;
     pending.tail = 0;
     pending.head = 0;
     InitCarHud(this, car, acar);
@@ -3469,4 +3516,26 @@ void BetaMaster::a1(void) {
     if (fn_80179650() > 1) {
         timer.finishTimeout = 30.99f;
     }
+}
+
+StuntEvent* CarHud::Alloc(void) {
+    StuntEvent* n = free.head;
+    if (n) {
+        free.Unlink(n);
+        pending.PushBack(n);
+        n->running = 1;
+        n->start = lbl_8055E3C8;
+        n->t0C = 0.0f;
+        n->age = 0.0f;
+        n->text0[0] = 0;
+        n->text1[0] = 0;
+        n->text2[0] = 0;
+        n->ready = 0;
+        n->type = -1;
+        n->value = 0.0f;
+        n->points = 0;
+        n->scored = 1;
+        return n;
+    }
+    return 0;
 }
