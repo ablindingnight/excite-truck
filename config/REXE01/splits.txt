@@ -2465,6 +2465,12 @@ game/pgfx.cpp:
 	.sbss       start:0x8055E718 end:0x8055E728
 	.sdata2     start:0x805626C0 end:0x805626C8
 
+game/alarm.cpp:
+	.text       start:0x801B8B84 end:0x801B8CC0
+	.ctors      start:0x802ED278 end:0x802ED27C
+	.data       start:0x80336990 end:0x803369A0
+	.sbss       start:0x8055E758 end:0x8055E768
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
