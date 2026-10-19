@@ -147,7 +147,7 @@ int fn_80161C4C(void);
 void AchievementsAdd(int category, s32 value);
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
-inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+#define NearZero(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
 inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     return r > 0.0f ? r : 0.0f;
