@@ -2285,3 +2285,13 @@ game/ilresmgr.cpp:
 	.sdata      start:0x80559FC0 end:0x80559FF8
 	.sbss       start:0x8055E270 end:0x8055E280
 	.sdata2     start:0x80561738 end:0x80561750
+
+game/stunts.cpp:
+	.text       start:0x80157278 end:0x8015EC50
+	.ctors      start:0x802ED1D0 end:0x802ED1D4
+	.rodata     start:0x802F9478 end:0x802F9490
+	.data       start:0x8032E4E0 end:0x8032F470
+	.bss        start:0x8042FD08 end:0x8042FD60
+	.sdata      start:0x80559FF8 end:0x8055A070
+	.sbss       start:0x8055E280 end:0x8055E290
+	.sdata2     start:0x80561750 end:0x805617D0
