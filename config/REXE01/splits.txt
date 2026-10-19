@@ -2473,6 +2473,15 @@ game/pgfx.cpp:
 	.sbss       start:0x8055E718 end:0x8055E728
 	.sdata2     start:0x805626C0 end:0x805626C8
 
+game/amaster.cpp:
+	.text       start:0x801B81E0 end:0x801B8B84
+	.ctors      start:0x802ED274 end:0x802ED278
+	.data       start:0x80336740 end:0x80336890
+	.bss        start:0x80436D08 end:0x80436D28
+	.sdata      start:0x8055A910 end:0x8055A918
+	.sbss       start:0x8055E738 end:0x8055E758
+	.sdata2     start:0x80562740 end:0x80562750
+
 game/alarm.cpp:
 	.text       start:0x801B8B84 end:0x801B8CC0
 	.ctors      start:0x802ED278 end:0x802ED27C
