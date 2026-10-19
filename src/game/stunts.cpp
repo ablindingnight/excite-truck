@@ -1526,37 +1526,40 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
         int i;
         int alive = fn_801D48FC(handle);
         active = alive;
-        for (i = 0; i < ARRAY_COUNT(targets); i++) {
-            ThrowTarget* t = &targets[i];
+        for (i = 0; i < 8; i++) {
             s32 h = handle;
             int hit;
-            t->prev = t->state;
-            if (t->state == 0) {
+            targets[i].prev = targets[i].state;
+            if (targets[i].state == 0) {
                 hit = 0;
             } else {
-                RaceCarRec* o = fn_8017960C(t->car);
+                RaceCarRec* o = fn_8017960C(targets[i].car);
                 if (!o) {
                     hit = 0;
                 } else {
                     int air = o->air > 0;
-                    switch (t->state) {
+                    switch (targets[i].state) {
                     case 1:
                         if (o) {
-                            t->state = air ? 3 : 2;
+                            int st = 2;
+                            if (air) {
+                                st = 3;
+                            }
+                            targets[i].state = st;
                         } else {
-                            t->state = 0;
+                            targets[i].state = 0;
                         }
                         break;
                     case 2:
                         if (air) {
-                            t->state = 3;
+                            targets[i].state = 3;
                         }
                         break;
                     case 3:
                         if (!air) {
                             u8 q[8];
-                            f32 at[3];
-                            t->state = 2;
+                            f32 at[7];
+                            targets[i].state = 2;
                             fn_801E9DC4(q);
                             {
                                 f32 g = fn_801DDC8C(q, o->pos[0], o->pos[2]);
@@ -1565,27 +1568,30 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
                                     fn_801E9DC4(q);
                                     n = fn_801DDA84(q, o->pos[0], o->pos[2], at, 1e-7f, 10);
                                     if (fn_801D4908(h, at, n)) {
-                                        t->state = 4;
-                                        t->timer = 1.0f;
+                                        targets[i].state = 4;
+                                        targets[i].timer = 1.0f;
                                     }
                                 }
                             }
                         }
                         break;
                     case 4:
-                        t->timer -= 0.016683351f;
-                        if (t->timer < 0.0f) {
-                            t->state = 5;
+                        targets[i].timer -= 0.016683351f;
+                        if (targets[i].timer < 0.0f) {
+                            targets[i].state = 5;
                         } else if (air) {
-                            t->state = 3;
+                            targets[i].state = 3;
                         }
                         break;
+                    case 5:
+                        break;
                     }
-                    hit = alive || t->state == 4;
+                    hit = alive || targets[i].state == 4;
                 }
             }
-            active = active | hit;
-            if (t->state == 5 && t->prev != 5) {
+            active = (active | hit) != 0;
+            int fire = targets[i].state == 5 && targets[i].prev != 5;
+            if (fire) {
                 count++;
                 playing++;
                 timer = window;
