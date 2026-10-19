@@ -489,10 +489,8 @@ public:
     void Init(void);
     int CountFiles(ValueNode* cfg);
     int CountRingSets(void);
-    void Reset(void);
     int PointValue(void);
     void SetName(char* buf, int n);
-    void SetNameA(char* buf, int n);
     void ShowSetGems(void);
     void ActivateRingSet(void);
     void ActivateObjSet(void);
@@ -648,7 +646,7 @@ struct ArtAnimManager {
 
 class GameMode {
 public:
-    GameMode(void) { fn_80144504(this); }
+    GameMode(void);
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -715,7 +713,6 @@ public:
 
 class RingChalMaster : public GameMode {
 public:
-    RingChalMaster(struct Race* race);
     virtual ~RingChalMaster(void);
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -846,24 +843,26 @@ void ResultsOverlay::Update(int score, int rings, int bonus) {
     }
 }
 
-inline RingChalMaster::RingChalMaster(Race* race) {
-    int i;
-    lbl_8055E378 = this;
-    players.Clear();
-    for (i = 0; i < race->nCars; i++) {
-        PlayerData* p = new ("playerdata") PlayerData(i);
-        players.Push(p);
+extern "C" RingChalMaster* fn_8016BE60(Race* race) {
+    RingChalMaster* m = new ("ringchalmaster") RingChalMaster;
+    if (m) {
+        int i;
+        lbl_8055E378 = m;
+        m->players.Clear();
+        for (i = 0; i < race->nCars; i++) {
+            PlayerData* p = new ("playerdata") PlayerData(i);
+            m->players.Push(p);
+        }
+        fn_8016A0B0();
+        m->arena.Init();
+        m->layout = 0;
+        m->b9C = 1;
+        m->fA0 = -100.0f;
+        m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
+        m->bA8 = 0;
     }
-    fn_8016A0B0();
-    arena.Init();
-    layout = 0;
-    b9C = 1;
-    fA0 = -100.0f;
-    sPreRace = fn_80207848("chal_prerace.sfx", 1);
-    bA8 = 0;
+    return m;
 }
-
-extern "C" RingChalMaster* fn_8016BE60(Race* race) { return new ("ringchalmaster") RingChalMaster(race); }
 
 
 inline Arena::~Arena(void) {
@@ -1197,22 +1196,22 @@ void Arena::Spawn(void) {
         (s)->f4C = 0;    \
     }
 
-inline void Arena::SetNameA(char* buf, int n) {
-    switch (difficulty) {
-    case 0:
-        fn_801345D8(buf, n, "set_%i_5", curSet);
-        break;
-    case 1:
-        fn_801345D8(buf, n, "set_%i_10", curSet);
-        break;
-    case 2:
-        fn_801345D8(buf, n, "set_%i_15", curSet);
-        break;
-    default:
-        fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
-        break;
+#define SET_NAME(a, buf, n)                                               \
+    switch ((a)->difficulty) {                                            \
+    case 0:                                                               \
+        fn_801345D8(buf, n, "set_%i_5", (a)->curSet);                     \
+        break;                                                            \
+    case 1:                                                               \
+        fn_801345D8(buf, n, "set_%i_10", (a)->curSet);                    \
+        break;                                                            \
+    case 2:                                                               \
+        fn_801345D8(buf, n, "set_%i_15", (a)->curSet);                    \
+        break;                                                            \
+    default:                                                              \
+        fn_802E317C("Unknown difficulty specification in Ring Challenge mode"); \
+        break;                                                            \
     }
-}
+
 
 
 
@@ -1238,7 +1237,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
             }
             {
                 char name[0x1E];
-                a->SetNameA(name, 0x1E);
+                SET_NAME(a, name, 0x1E);
                 fn_8016A15C(name);
             }
             {
@@ -1249,7 +1248,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
                         a->f24 = -1;
                     }
                 }
-                a->SetNameA(name, 0x1E);
+                SET_NAME(a, name, 0x1E);
                 switch (a->difficulty) {
                 case 0: {
                     GemRef g = fn_8016A6B0(name, 12);
@@ -1289,65 +1288,6 @@ RingChalMaster::~RingChalMaster(void) {
 
 
 
-inline void Arena::Reset(void) {
-    int i;
-    if (f40 == 0) {
-        difficulty = 0;
-    } else {
-        difficulty = 2;
-    }
-    curSet = 0;
-    f34 = 0;
-    f30 = 0;
-    b48 = 0;
-    b49 = 0;
-    b4A = 1;
-    f28 = 0.0f;
-    if (nFiles < nSets) {
-        fn_802E30C8("WARNING: There are less Freestyle object sets than Freestyle ring sets");
-    }
-    timer.Reset();
-    for (i = 0; i < nSets; i++) {
-        Deactivate(i);
-    }
-    for (i = 0; i < nFiles; i++) {
-        sets->At(i)->Reset();
-    }
-    ClearGems();
-    if (curSet >= 0 && curSet < nSets) {
-        ActivateObjSet();
-        ActivateRingSet();
-        ShowSetGems();
-    }
-    for (i = 0; i < stats->Count(); i++) {
-        stats->At(i)->done = 0;
-        stats->At(i)->best = -1;
-        stats->At(i)->time = -100.0f;
-        stats->At(i)->score = -100.0f;
-    }
-    stats->At(curSet)->best = PointValue();
-    if (sRingHit) {
-        fn_80144C54(sRingHit);
-    }
-    if (sLongCheer) {
-        fn_80144C54(sLongCheer);
-    }
-    if (sTally) {
-        fn_80144C54(sTally);
-    }
-    if (sCheerHit) {
-        fn_80144C54(sCheerHit);
-    }
-    if (sMissFlag) {
-        fn_80144C54(sMissFlag);
-    }
-    if (sLevelUp) {
-        fn_80144C54(sLevelUp);
-    }
-    if (sFail) {
-        fn_80144C54(sFail);
-    }
-}
 
 
 void RingChalMaster::vf10(void) {
@@ -1356,7 +1296,62 @@ void RingChalMaster::vf10(void) {
         players.data[i]->Reset();
     }
     fn_8016A0D4();
-    arena.Reset();
+    if (arena.f40 == 0) {
+        arena.difficulty = 0;
+    } else {
+        arena.difficulty = 2;
+    }
+    arena.curSet = 0;
+    arena.f34 = 0;
+    arena.f30 = 0;
+    arena.b48 = 0;
+    arena.b49 = 0;
+    arena.b4A = 1;
+    arena.f28 = 0.0f;
+    if (arena.nFiles < arena.nSets) {
+        fn_802E30C8("WARNING: There are less Freestyle object arena.sets than Freestyle ring arena.sets");
+    }
+    arena.timer.Reset();
+    for (i = 0; i < arena.nSets; i++) {
+        arena.Deactivate(i);
+    }
+    for (i = 0; i < arena.nFiles; i++) {
+        arena.sets->At(i)->Reset();
+    }
+    arena.ClearGems();
+    if (arena.curSet >= 0 && arena.curSet < arena.nSets) {
+        arena.ActivateObjSet();
+        arena.ActivateRingSet();
+        arena.ShowSetGems();
+    }
+    for (i = 0; i < arena.stats->Count(); i++) {
+        arena.stats->At(i)->done = 0;
+        arena.stats->At(i)->best = -1;
+        arena.stats->At(i)->time = -100.0f;
+        arena.stats->At(i)->score = -100.0f;
+    }
+    arena.stats->At(arena.curSet)->best = arena.PointValue();
+    if (arena.sRingHit) {
+        fn_80144C54(arena.sRingHit);
+    }
+    if (arena.sLongCheer) {
+        fn_80144C54(arena.sLongCheer);
+    }
+    if (arena.sTally) {
+        fn_80144C54(arena.sTally);
+    }
+    if (arena.sCheerHit) {
+        fn_80144C54(arena.sCheerHit);
+    }
+    if (arena.sMissFlag) {
+        fn_80144C54(arena.sMissFlag);
+    }
+    if (arena.sLevelUp) {
+        fn_80144C54(arena.sLevelUp);
+    }
+    if (arena.sFail) {
+        fn_80144C54(arena.sFail);
+    }
     b9C = 1;
     fA0 = -100.0f;
     results.state = 0;
@@ -1407,7 +1402,7 @@ void Arena::ShowSetGems(void) {
     if (f24 != -1) {
         ClearGems();
     }
-    SetNameA(name, 0x1E);
+    SET_NAME(this, name, 0x1E);
     switch (difficulty) {
     case 0: {
         GemRef g = fn_8016A6B0(name, 12);
@@ -1432,7 +1427,7 @@ void Arena::ShowSetGems(void) {
 
 void Arena::ActivateRingSet(void) {
     char name[0x1E];
-    SetNameA(name, 0x1E);
+    SET_NAME(this, name, 0x1E);
     fn_8016A15C(name);
 }
 
@@ -1470,7 +1465,7 @@ void ObjSet::Reset(void) {
 
 void Arena::Deactivate(int i) {
     char name[0x1E];
-    SetNameA(name, 0x1E);
+    SET_NAME(this, name, 0x1E);
     fn_8016A240(name);
     if (i < nFiles) {
         ObjSet* s = &sets->data[i];
@@ -2410,22 +2405,7 @@ inline RaceCarRec* PlayerData::Car(void) { return fn_8017960C(index); }
 
 inline u8 PlayerData::Stuck(void) { return b8; }
 
-inline void Arena::SetName(char* buf, int n) {
-    switch (difficulty) {
-    case 0:
-        fn_801345D8(buf, n, "set_%i_5", curSet);
-        break;
-    case 1:
-        fn_801345D8(buf, n, "set_%i_10", curSet);
-        break;
-    case 2:
-        fn_801345D8(buf, n, "set_%i_15", curSet);
-        break;
-    default:
-        fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
-        break;
-    }
-}
+void Arena::SetName(char* buf, int n) { SET_NAME(this, buf, n); }
 
 
 
