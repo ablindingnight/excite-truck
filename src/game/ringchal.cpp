@@ -237,41 +237,38 @@ extern "C" void fn_80131318(LocString* s);
 inline void LocString::Refresh(void) { fn_80131318(this); }
 
 template <class T>
-struct RArray {
-    RArray(int n, const char* tag);
-    ~RArray(void) {
-        delete[] buf;
+struct ArrayRef {
+    ArrayRef(T* d, int n) {
+        data = d;
+        cap = n;
+        count = 0;
+    }
+    ~ArrayRef(void) {
         data = 0;
         count = 0;
         cap = 0;
     }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
+};
+
+template <class T>
+struct RArray : ArrayRef<T> {
+    RArray(int n, const char* tag);
+    ~RArray(void) { delete[] buf; }
     T* Add(void);
     void Push(const T& v);
     int Count(void);
     T* At(int i);
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
     T* buf;     // offset 0xC
 };
 
 template <class T>
-struct IArray {
-    IArray(int n, const char* tag) {
-        data = buf = new (tag) T[n];
-        cap = n;
-        count = 0;
-    }
-    ~IArray(void) {
-        delete[] buf;
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Add(void) { return &data[count++]; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
+struct IArray : ArrayRef<T> {
+    IArray(int n, const char* tag) : ArrayRef<T>(buf = new (tag) T[n], n) {}
+    ~IArray(void) { delete[] buf; }
+    T* Add(void) { return &this->data[this->count++]; }
     T* buf;     // offset 0xC
 };
 
@@ -431,25 +428,18 @@ struct PlayerData {
     f32 fC;     // offset 0xC
 };
 
-struct PlayerList {
+struct PlayerList : ArrayRef<PlayerData*> {
     PlayerList(void);
-    ~PlayerList(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
     void Clear(void);
     void Push(PlayerData* const& p);
-    PlayerData** data;        // offset 0x0
-    s32 count;                // offset 0x4
-    s32 cap;                  // offset 0x8
     PlayerData* storage[8];   // offset 0xC
 };
 
 class ResultsOverlay {
 public:
     ResultsOverlay(void);
-    ~ResultsOverlay(void) {
+    ~ResultsOverlay(void) { Unload(); }
+    void Unload(void) {
         if (layout) {
             fn_802ADE60(layout, 1);
             layout = 0;
@@ -631,6 +621,7 @@ public:
     virtual int vfB0(int car, struct Respawn* r);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
+    virtual void vfFC(void);
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
     ILayout* layout;          // offset 0x98
@@ -789,25 +780,21 @@ inline Arena::~Arena(void) {
 }
 
 template <class T>
-RArray<T>::RArray(int n, const char* tag) {
-    data = buf = new (tag) T[n];
-    cap = n;
-    count = 0;
-}
+RArray<T>::RArray(int n, const char* tag) : ArrayRef<T>(buf = new (tag) T[n], n) {}
 
 template <class T>
 void RArray<T>::Push(const T& v) {
-    data[count++] = v;
+    this->data[this->count++] = v;
 }
 
 template <class T>
 int RArray<T>::Count(void) {
-    return count;
+    return this->count;
 }
 
 template <class T>
 T* RArray<T>::Add(void) {
-    return &data[count++];
+    return &this->data[this->count++];
 }
 
 void Arena::Init(void) {
@@ -1055,11 +1042,7 @@ Arena::Arena(void) {
     f40 = fn_80204CF0();
 }
 
-PlayerList::PlayerList(void) {
-    data = storage;
-    cap = 8;
-    count = 0;
-}
+PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
 int Arena::CountDynos(void) {
     int n = 0;
@@ -1180,10 +1163,7 @@ RingChalMaster::~RingChalMaster(void) {
         delete sPreRace;
     }
     for (i = 0; i < players.count; i++) {
-        PlayerData* p = players.data[i];
-        if (p) {
-            delete p;
-        }
+        delete players.data[i];
     }
     lbl_8055E378 = 0;
     fn_8016A68C();
@@ -1301,7 +1281,7 @@ int Arena::PointValue(void) {
 
 template <class T>
 T* RArray<T>::At(int i) {
-    return &data[i];
+    return &this->data[i];
 }
 
 void Arena::ShowSetGems(void) {
@@ -1707,4 +1687,9 @@ int RingChalMaster::vfB0(int car, Respawn* r) {
         return 0;
     }
     return 0;
+}
+
+void RingChalMaster::vfFC(void) {
+    results.Unload();
+    delete layout;
 }
