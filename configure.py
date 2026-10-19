@@ -1054,6 +1054,7 @@ config.libs.append(
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),
             Object(NonMatching, "game/jumpcam.cpp"),
+            Object(Matching, "game/cscript.cpp"),
             Object(Matching, "game/lightset.cpp"),
             Object(Matching, "game/cartype.cpp"),
             Object(Matching, "game/camdefs.cpp"),
