@@ -2619,3 +2619,16 @@ game/stub15.cpp:
 	.text       start:0x802DB2A0 end:0x802DB2D4
 	.ctors      start:0x802ED5D8 end:0x802ED5DC
 	.sbss       start:0x8055FE88 end:0x8055FE90
+
+game/log.cpp:
+	.text       start:0x802E3028 end:0x802E321C
+	.ctors      start:0x802ED5EC end:0x802ED5F0
+	.data       start:0x8034CEF8 end:0x8034CF40
+	.sdata      start:0x8055D178 end:0x8055D1A0
+	.sbss       start:0x8055FF08 end:0x8055FF10
+
+game/memarena.cpp:
+	.text       start:0x802E3DF8 end:0x802E3EB0
+	.ctors      start:0x802ED5F4 end:0x802ED5F8
+	.data       start:0x8034D020 end:0x8034D038
+	.sbss       start:0x8055FF28 end:0x8055FF30

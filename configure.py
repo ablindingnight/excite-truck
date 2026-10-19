@@ -1050,6 +1050,8 @@ config.libs.append(
             Object(Matching, "game/preload.cpp"),
             Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/stub15.cpp"),
+            Object(Matching, "game/log.cpp"),
+            Object(Matching, "game/memarena.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
             Object(NonMatching, "game/ball.cpp"),
         ],
