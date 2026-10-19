@@ -321,14 +321,14 @@ void fn_8015F1E4(Obst* o, const TrackObj* t) {
     Vec3 c;
     axis.x = t->mtx->basis[2].x;
     axis.z = t->mtx->basis[2].z;
-    o->rad = r + 0.5f * (3.05f * (f32)sqrt(axis.x * axis.x + axis.z * axis.z));
+    o->rad = r + 0.5f * (3.0500002f * (f32)sqrt(axis.x * axis.x + axis.z * axis.z));
     if (t->mtx->basis[2].y < 0.0f) {
-        f32 k = t->half - 1.525f;
+        f32 k = t->half - 1.5250001f;
         c.x = t->mtx->origin.x + t->mtx->basis[2].x * k;
         c.y = t->mtx->origin.y + t->mtx->basis[2].y * k;
         c.z = t->mtx->origin.z + t->mtx->basis[2].z * k;
     } else {
-        f32 k = -(t->half - 1.525f);
+        f32 k = -(t->half - 1.5250001f);
         c.x = t->mtx->origin.x + t->mtx->basis[2].x * k;
         c.y = t->mtx->origin.y + t->mtx->basis[2].y * k;
         c.z = t->mtx->origin.z + t->mtx->basis[2].z * k;
@@ -429,9 +429,6 @@ int fn_8015F7A0(int n, const Vec3* vel, const Vec3* right) {
 
 }  // extern "C"
 
-extern const f32 kWidth = 18.0f;  // the lane width the bins cover
-extern const f32 kBin = 0.015625f;
-extern const f32 kGap = 3.289f;  // the gap a car fits through
 
 struct Bin {
     f32 dist;  // offset 0x0
@@ -564,9 +561,10 @@ struct Opts {
 struct Bins {
     // Marks the bins an obstacle covers with its distance ahead.
     void Add(Obst* o, View* v, u8 side, f32 range) {
-        f32 d = v->Ahead(&o->pos, &v->at) - o->rad;
+        Vec2* p = &o->pos;
+        f32 d = v->Ahead(p, &v->at) - o->rad;
         if (d > 0.0f && d < range) {
-            f32 s = v->Side(&o->pos, &v->at);
+            f32 s = v->Side(p, &v->at);
             if (s + o->rad > -kWidth * 0.5f && s - o->rad < kWidth * 0.5f) {
                 int lo;
                 int hi;
@@ -632,24 +630,22 @@ extern "C" {
 int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
     if (lbl_8055E2A0) {
-        Track* trk = GetTrack(rc);
+        Track* trk = rc->pos->GetTrack();
         int seg = trk->seg - trk->path->segs;
         Frame f;
         f32 range;
         Opts opts;
         Obst* o;
         Bins bins;
+        const Vec3* vel;
         int i;
         int any;
         f32 nearest;
-        Vec2 target(0.0f, 0.0f);
-        Vec2 dir(0.0f, 0.0f);
-        int c;
-        int mid;
         fn_8015FB28(&f, &rc->mtx);
         range = MAX(20.0f, 0.6f * rc->speed);
         opts.side = side;
-        o = *lbl_8055E2A0->At(seg);
+        o = lbl_8055E2A0->a.data[seg];
+        vel = &rc->vel;
         opts.Init();
         for (i = 0; i < 64; i++) {
             bins.bins[i].dist = range;
@@ -667,69 +663,73 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
             for (i = 0; i < fn_80179650(); i++) {
                 const Vec3& p = fn_8017960C(fn_80179630(i))->Mtx()->origin;
                 Vec2 xz;
-                Obst car;
                 xz.SetXZ(p);
-                car.seg = 0;
-                car.type = 0;
-                car.pos.v.x = 0.0f;
-                car.pos.v.y = 0.0f;
-                car.rad = 0.0f;
-                car.pos = xz;
-                car.rad = 2.0f;
-                bins.Add(&car, &v, opts.side, range);
+                {
+                    Obst car = Obst();
+                    car.pos = xz;
+                    car.rad = 2.0f;
+                    bins.Add(&car, &v, opts.side, range);
+                }
             }
         }
         any = fn_8015F848(bins.bins, range);
         nearest = fn_8015F92C(bins.bins, range);
-        if (!any) {
-            return 0;
-        }
-        if (flatten) {
-            for (i = 0; i < 64; i++) {
-                bins.bins[i].dist = bins.bins[i].dist >= range ? nearest : range;
-            }
-        }
-        mid = fn_8015F7A0(64, &rc->vel, f.Right());
-        c = mid + 32;
-        if (bins.bins[c].dist < range) {
-            int r = fn_8015FA44(bins.bins, c, range);
-            int l = fn_8015FAB8(bins.bins, c, range);
-            if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
-                target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth * 0.5f), bins.bins[r - 1].dist);
-                dir.Set(1.875f, 0.0f);
-                found = 1;
-            } else if (l >= 0 && (r < 0 || Abs(r - c) > Abs(l - c))) {
-                target.Set(lbl_8055E2A4 * (f32)l - kWidth * 0.5f - 1.875f, bins.bins[l + 1].dist);
-                dir.Set(-1.875f, 0.0f);
-                found = 1;
-            }
-        } else {
-            int n = MinI(32 - Abs(mid), lbl_8055E2A8 / 2 + Abs(mid) + 1);
-            int k;
-            for (k = 1; k < n; k++) {
-                if (bins.bins[c + k].dist < range) {
-                    target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth * 0.5f - 1.875f, bins.bins[c + k].dist);
-                    dir.Set(-1.875f, 0.0f);
-                    found = 1;
-                    break;
-                }
-                if (bins.bins[c - k].dist < range) {
-                    target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth * 0.5f), bins.bins[c - k].dist);
-                    dir.Set(1.875f, 0.0f);
-                    found = 1;
-                    break;
+        if (any) {
+            int c;
+            int mid;
+            if (flatten) {
+                for (i = 0; i < 64; i++) {
+                    bins.bins[i].dist = bins.bins[i].dist >= range ? nearest : range;
                 }
             }
-        }
-        if (found) {
-            Vec2 w;
-            Spot spot;
-            fn_8019321C(&w, &target, &f);
-            if (steer) {
-                fn_8014C75C(steer, &w);
+            {
+                Vec2 target(0.0f, 0.0f);
+                Vec2 dir(0.0f, 0.0f);
+                mid = fn_8015F7A0(64, vel, f.Right());
+                c = mid + 32;
+                if (bins.bins[c].dist < range) {
+                    int r = fn_8015FA44(bins.bins, c, range);
+                    int l = fn_8015FAB8(bins.bins, c, range);
+                    if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
+                        target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth * 0.5f), bins.bins[r - 1].dist);
+                        dir.Set(1.875f, 0.0f);
+                        found = 1;
+                    } else if (l >= 0 && (r < 0 || Abs(r - c) > Abs(l - c))) {
+                        target.Set(lbl_8055E2A4 * (f32)l - kWidth * 0.5f - 1.875f, bins.bins[l + 1].dist);
+                        dir.Set(-1.875f, 0.0f);
+                        found = 1;
+                    }
+                } else {
+                    int n = MinI(32 - Abs(mid), lbl_8055E2A8 / 2 + Abs(mid) + 1);
+                    int k;
+                    for (k = 1; k < n; k++) {
+                        if (bins.bins[c + k].dist < range) {
+                            target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth * 0.5f - 1.875f,
+                                       bins.bins[c + k].dist);
+                            dir.Set(-1.875f, 0.0f);
+                            found = 1;
+                            break;
+                        }
+                        if (bins.bins[c - k].dist < range) {
+                            target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth * 0.5f),
+                                       bins.bins[c - k].dist);
+                            dir.Set(1.875f, 0.0f);
+                            found = 1;
+                            break;
+                        }
+                    }
+                }
+                if (found) {
+                    Vec2 w;
+                    Spot spot;
+                    fn_8019321C(&w, &target, &f);
+                    if (steer) {
+                        fn_8014C75C(steer, &w);
+                    }
+                    StatsUpdate__Fv(&spot.pos);
+                    spot.From(w);
+                }
             }
-            StatsUpdate__Fv(&spot.pos);
-            spot.From(w);
         }
     }
     return found;
@@ -737,3 +737,10 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
 
 
 }  // extern "C"
+
+// The target never folds these (binSize/gapBins are computed in the sinit, kWidth * 0.5f at run time), yet
+// they sit mid-.sdata2 (after fn_8015F7A0's literals). Defined here the code matches; the data order does
+// not yet. 3.05/1.525/3.289 are one ulp off the nearest float in the target, hence the odd literals.
+extern const f32 kWidth = 18.0f;  // the lane width the bins cover
+extern const f32 kBin = 0.015625f;
+extern const f32 kGap = 3.2889998f;  // the gap a car fits through
