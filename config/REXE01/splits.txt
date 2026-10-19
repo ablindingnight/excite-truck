@@ -2646,6 +2646,15 @@ game/terrpick.cpp:
 	.sbss       start:0x8055ED20 end:0x8055ED30
 	.sdata2     start:0x80563140 end:0x80563168
 
+game/tunedash.cpp:
+	.text       start:0x80204330 end:0x80204AA4
+	.ctors      start:0x802ED36C end:0x802ED370
+	.data       start:0x8033BB18 end:0x8033BB68
+	.bss        start:0x80488BB8 end:0x804891D0
+	.sdata      start:0x8055B428 end:0x8055B468
+	.sbss       start:0x8055ED30 end:0x8055ED50
+	.sdata2     start:0x80563168 end:0x80563190
+
 game/tiresnd.cpp:
 	.text       start:0x80209D4C end:0x80209FFC
 	.ctors      start:0x802ED388 end:0x802ED38C
