@@ -2343,3 +2343,13 @@ game/stub5.cpp:
 	.text       start:0x80167834 end:0x80167874
 	.ctors      start:0x802ED1E8 end:0x802ED1EC
 	.sbss       start:0x8055E338 end:0x8055E348
+
+game/pickup.cpp:
+	.text       start:0x80167874 end:0x8016A0B0
+	.ctors      start:0x802ED1EC end:0x802ED1F0
+	.rodata     start:0x802F94B8 end:0x802F9520
+	.data       start:0x80330000 end:0x80330460
+	.bss        start:0x8042FF60 end:0x804302E0
+	.sdata      start:0x8055A198 end:0x8055A1D0
+	.sbss       start:0x8055E348 end:0x8055E358
+	.sdata2     start:0x80561918 end:0x80561958
