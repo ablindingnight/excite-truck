@@ -2640,6 +2640,12 @@ game/vmem.cpp:
 	.sdata      start:0x8055D1C8 end:0x8055D1D0
 	.sbss       start:0x8055FF68 end:0x8055FF70
 
+game/strmbank.cpp:
+	.text       start:0x802E7578 end:0x802E7770
+	.ctors      start:0x802ED610 end:0x802ED614
+	.data       start:0x8034D808 end:0x8034D898
+	.sbss       start:0x8055FFE8 end:0x8055FFF8
+
 game/callhook.cpp:
 	.text       start:0x802E7770 end:0x802E77B8
 	.ctors      start:0x802ED614 end:0x802ED618
