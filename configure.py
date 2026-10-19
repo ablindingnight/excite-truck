@@ -1040,6 +1040,7 @@ config.libs.append(
             Object(Matching, "game/ground.cpp"),
             Object(Matching, "game/gendrawlist.cpp"),
             Object(Matching, "game/camproj.cpp"),
+            Object(Matching, "game/carinfo.cpp"),
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),

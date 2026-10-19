@@ -2571,6 +2571,12 @@ game/fwd1ea4b4.cpp:
 	.ctors      start:0x802ED328 end:0x802ED32C
 	.sbss       start:0x8055EB68 end:0x8055EB70
 
+game/carinfo.cpp:
+	.text       start:0x801EA4C4 end:0x801EAB2C
+	.ctors      start:0x802ED32C end:0x802ED330
+	.data       start:0x80339E08 end:0x80339E18
+	.sbss       start:0x8055EB70 end:0x8055EB80
+
 game/event.cpp:
 	.text       start:0x801EEFC8 end:0x801EF190
 	.ctors      start:0x802ED33C end:0x802ED340
