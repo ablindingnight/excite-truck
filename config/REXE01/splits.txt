@@ -2629,6 +2629,14 @@ game/sounddash.cpp:
 	.sbss       start:0x8055EE18 end:0x8055EE30
 	.sdata2     start:0x805632C8 end:0x805632D8
 
+game/roadsnd.cpp:
+	.text       start:0x8020CA30 end:0x8020CF68
+	.ctors      start:0x802ED39C end:0x802ED3A0
+	.data       start:0x8033C650 end:0x8033C690
+	.sdata      start:0x8055B5E0 end:0x8055B630
+	.sbss       start:0x8055EE60 end:0x8055EE68
+	.sdata2     start:0x80563300 end:0x80563318
+
 game/strlist.cpp:
 	.text       start:0x8022D0D8 end:0x8022D228
 	.ctors      start:0x802ED3C0 end:0x802ED3C4
@@ -2780,6 +2788,14 @@ game/stub12.cpp:
 	.text       start:0x80296058 end:0x802960A0
 	.ctors      start:0x802ED4FC end:0x802ED500
 	.sbss       start:0x8055F770 end:0x8055F780
+
+game/fxseq.cpp:
+	.text       start:0x802971B0 end:0x802978B8
+	.ctors      start:0x802ED504 end:0x802ED508
+	.data       start:0x80349368 end:0x803493D8
+	.sdata      start:0x8055CA30 end:0x8055CA60
+	.sbss       start:0x8055F790 end:0x8055F798
+	.sdata2     start:0x80564578 end:0x80564580
 
 game/shadowvol.cpp:
 	.text       start:0x802978B8 end:0x80297D5C
