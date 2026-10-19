@@ -45,6 +45,12 @@ struct BVec3 {
         y = b;
         z = c;
     }
+    BVec3& operator+=(const BVec3& v) {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
     f32 x;
     f32 y;
     f32 z;
@@ -101,10 +107,50 @@ struct BPathPt {
     f32 width;  // offset 0x28
 };
 
+struct BVec2 {
+    BVec2(void) {}
+    BVec2(f32 a, f32 b) {
+        x = a;
+        z = b;
+    }
+    f32 x;
+    f32 z;
+};
+
 struct BPathPos {
+    BPathPos(const BPathPos& o) {
+        pt = o.pt;
+        t = o.t;
+        f8 = o.f8;
+    }
     BPathPt* pt;  // offset 0x0
     f32 t;        // offset 0x4
     s32 f8;       // offset 0x8
+    void Advance(f32 d) {
+        while (d > pt->len) {
+            d -= pt->len;
+            pt = pt->next;
+        }
+    }
+    f32 Width(void) const { return pt->width + t * (pt->next->width - pt->width); }
+    void Place(f32* xz, f32 off) const {
+        BVec2 dir;
+        f32 inv;
+        xz[0] = pt->x + t * (pt->next->x - pt->x);
+        xz[1] = pt->z + t * (pt->next->z - pt->z);
+        dir.x = pt->dx + t * (pt->next->dx - pt->dx);
+        dir.z = pt->dz + t * (pt->next->dz - pt->dz);
+        inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
+        dir.x *= inv;
+        dir.z *= inv;
+        {
+            f32 t = dir.x;
+            dir.x = dir.z;
+            dir.z = -t;
+        }
+        xz[0] += dir.x * off;
+        xz[1] += dir.z * off;
+    }
 };
 
 struct BPath {
@@ -372,12 +418,15 @@ extern "C" f32 fn_8017D378(void) { return lbl_8055E3C8; }
 BVec3 Home(int car) {
     BTrack* t = fn_80178C9C();
     f32* p = t->start->xz;
-    BVec3 v(p[0], 0.0f, p[1]);
+    BVec3 v;
+    v.x = p[0];
+    v.y = 0.0f;
+    v.z = p[1];
     v.y = -1000.0f + (f32)(car * 2);
     return v;
 }
 
-extern "C" void fn_8017D404(const BVec3* c, RigidBody* self, int car, f32 r, f32 force) {
+extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
     BCarRec* by = fn_8017960C(car);
     struct Node {
         Phob* obj;
@@ -504,7 +553,7 @@ inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
             ev.pos = mtx.pos;
             ev.vel = vel;
             fn_801796EC(8, &ev, sizeof(ev));
-            fn_8017D404(&mtx.pos, other, car, 5.0f, 17500.0f);
+            fn_8017D404(5.0f, 17500.0f, &mtx.pos, other, car);
             if (sndRoll) {
                 sndRoll->Stop();
             }
@@ -529,7 +578,12 @@ inline void Ball::Update(void) {
         resetPending = 0;
     }
     if (state == 0 && timer < fn_8017D378()) {
-        state = fn_8017960C(car)->model == 0x41434152 ? 2 : 1;
+        u32 model = fn_8017960C(car)->model;
+        int st = 1;
+        if (model == 0x41434152) {
+            st = 2;
+        }
+        state = st;
     }
     if (!DbgFlag(0x88)) {
         mtx.pos = Home(car);
@@ -557,8 +611,10 @@ inline void Ball::Update(void) {
         }
     }
     {
-        BVec3 p = mtx.pos;
-        if (!fn_801E9E30(hint, &p.x)) {
+        struct P {
+            f32 v[3];
+        } p = *(P*)&mtx.pos;
+        if (!fn_801E9E30(hint, p.v)) {
             resetPending = 1;
         }
     }
@@ -591,10 +647,8 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     hint[0] = h;
     b1E9 = 1;
     Rotate(&p, &m, &launch);
-    m.pos.x += p.x;
-    m.pos.y += p.y;
-    m.pos.z += p.z;
-    p = m.pos;
+    p += m.pos;
+    m.pos = p;
     mtx = m;
     Xform();
     if (DbgFlag(0x80)) {
@@ -657,19 +711,14 @@ extern "C" void fn_8017E388(BMtx* m) {
 void Ball::PickDrop(f32* xz, s16* h) {
     if (*(u32*)((u8*)fn_801769CC() + 4) & 0x10000) {
         RigidBody* b = (RigidBody*)fn_8017960C(car);
-        f32 r;
-        f32 a;
-        f32 c;
         BVec3 p;
-        p.x = b->mtx.pos.x + b->vel.x * 2.0f;
-        p.y = b->mtx.pos.y + b->vel.y * 2.0f;
-        p.z = b->mtx.pos.z + b->vel.z * 2.0f;
+        f32 c;
+        f32 k = 2.0f;
+        p.x = b->mtx.pos.x + b->vel.x * k;
+        p.y = b->mtx.pos.y + b->vel.y * k;
+        p.z = b->mtx.pos.z + b->vel.z * k;
         c = 10.0f;
-        a = fn_80129DC4(4, -c, c);
-        r = fn_80129DC4(4, -c, c);
-        p.x += r;
-        p.y += 0.0f;
-        p.z += a;
+        p += BVec3(fn_80129DC4(4, -c, c), 0.0f, fn_80129DC4(4, -c, c));
         xz[0] = p.x;
         xz[1] = p.z;
         fn_801E9DC4(h);
@@ -679,49 +728,23 @@ void Ball::PickDrop(f32* xz, s16* h) {
         BPathPos pp = path->pos;
         f32 w;
         f32 off;
-        f32 dir[2];
-        f32 inv;
-        BVec3 p;
         while (d > pp.pt->len) {
             d -= pp.pt->len;
             pp.pt = pp.pt->next;
         }
         w = pp.pt->width + pp.t * (pp.pt->next->width - pp.pt->width);
         off = fn_80129DC4(4, -w * 0.5f, w * 0.5f);
-        xz[0] = pp.pt->x + pp.t * (pp.pt->next->x - pp.pt->x);
-        xz[1] = pp.pt->z + pp.t * (pp.pt->next->z - pp.pt->z);
-        dir[0] = pp.pt->dx + pp.t * (pp.pt->next->dx - pp.pt->dx);
-        dir[1] = pp.pt->dz + pp.t * (pp.pt->next->dz - pp.pt->dz);
-        inv = 1.0f / (f32)sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
-        dir[0] *= inv;
-        dir[1] *= inv;
+        pp.Place(xz, off);
         {
-            f32 t = dir[0];
-            dir[0] = dir[1];
-            dir[1] = -t;
-        }
-        xz[0] += dir[0] * off;
-        xz[1] += dir[1] * off;
-        p.x = xz[0];
-        p.y = 0.0f;
-        p.z = xz[1];
-        fn_801E9DC4(h);
-        if (!fn_801E9E30(h, &p.x)) {
-            xz[0] = pp.pt->x + pp.t * (pp.pt->next->x - pp.pt->x);
-            xz[1] = pp.pt->z + pp.t * (pp.pt->next->z - pp.pt->z);
-            dir[0] = pp.pt->dx + pp.t * (pp.pt->next->dx - pp.pt->dx);
-            dir[1] = pp.pt->dz + pp.t * (pp.pt->next->dz - pp.pt->dz);
-            inv = 1.0f / (f32)sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
-            dir[0] *= inv;
-            dir[1] *= inv;
-            {
-                f32 t = dir[0];
-                dir[0] = dir[1];
-                dir[1] = -t;
-            }
-            xz[0] += dir[0] * 0.0f;
-            xz[1] += dir[1] * 0.0f;
+            BVec3 p;
+            p.x = xz[0];
+            p.y = 0.0f;
+            p.z = xz[1];
             fn_801E9DC4(h);
+            if (!fn_801E9E30(h, &p.x)) {
+                pp.Place(xz, 0.0f);
+                fn_801E9DC4(h);
+            }
         }
     }
 }
