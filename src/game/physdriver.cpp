@@ -11,6 +11,7 @@ void* operator new(size_t size, const char* tag);
 extern "C" {
 void fn_802E8518(int ch);
 void fn_802E30C8(const char* fmt, ...);
+void fn_802E317C(const char* fmt, ...);
 void fn_802E8524(int a, int ch);
 void fn_802E8528(int ch, f32 a, f32 b);
 void fn_802E85A8(int ch, f32 a, f32 b, f32 c);
@@ -34,7 +35,14 @@ void fn_801A7DFC(const char* a, const char* b, void* t);
 void fn_801A7974(DButton* b, const char* name, void* t);
 void fn_801A9110(DButton* b, const char* name);
 int sprintf(char* buf, const char* fmt, ...);
-int fn_801298E8(void* out);
+int fn_801298E8(void* out, s32 ch);
+void fn_801A7844(int a);
+int fn_801A8E38(void* b);  // button down
+int fn_801A8F10(void* b);  // button bound
+f32 fn_801A7F98(void* b);  // button analog value
+f32 fn_80144C80(f32 a, f32 b, f32 t);
+int fn_802E85B0(s32 ch);
+int fn_80179300(void);
 }
 
 struct DButton {
@@ -264,6 +272,296 @@ void fn_8017EC30(void) {
 
 PhysDriver::~PhysDriver(void) {}
 
+inline f32 Clamp(f32 x, f32 lo, f32 hi) {
+    x = MIN(hi, x);
+    x = MAX(x, lo);
+    return x;
+}
+
+inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
+
+inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
+
+extern "C" {
+f32 fn_8017EB80(f32 x, f32 dead, f32 over);
+f32 fn_8017F70C(f32 x);
+void fn_8017F628(PhysDriver* d);
+}
+
+static inline void UpdateAll(f32 dt) {
+    PhysDriver* d;
+    int i;
+    fn_801A7844(1);
+    for (i = 0; i < 4; i++) {
+        d = lbl_804348D8[i];
+        if (d) {
+            u8 dthr;
+            u8 dbrk;
+            DButton* b;
+            DButton* bb;
+            if (fn_80137CFC(d->car) != d->ch) {
+                fn_802E30C8("driver: controller changed for player %d", d->car);
+                d->Init();
+            }
+            dthr = d->digThrottle;
+            dbrk = d->digBraking;
+            d->b342 = 0;
+            d->b343 = 0;
+            {
+                s32 c = d->b8C.ch;
+                u8 info[0x70];
+                if (fn_802E85B0(c) == 4) {
+                    d->b343 = 1;
+                    dthr = 0;
+                    dbrk = 0;
+                }
+                if (fn_801298E8(info, c)) {
+                    if (*(u32*)(info + 0x50) & 2) {
+                        d->b343 = 1;
+                        dthr = 0;
+                        dbrk = 0;
+                    }
+                    if (*(u32*)(info + 0x50) & 8) {
+                        d->b342 = 1;
+                        d->b343 = 1;
+                    }
+                }
+            }
+            if (d->forced || fn_801A8EE4(&d->b6C) || fn_801A8EE4(&d->b7C)) {
+                {
+                    f32 rate = 2.5f * d->steerSpeed;
+                    f32 ret = 1.9f * rate;
+                    f32 tot = ret + rate;
+                    if (d->steer > 0.0f) {
+                        d->steer = Max(d->steer - ret * dt, 0.0f);
+                    }
+                    if (d->steer < 0.0f) {
+                        d->steer = Min(d->steer + ret * dt, 0.0f);
+                    }
+                    if (fn_801A8E38(&d->b6C)) {
+                        d->steer -= tot * dt;
+                    }
+                    if (fn_801A8E38(&d->b7C)) {
+                        d->steer += tot * dt;
+                    }
+                    if (d->steer > 1.0f) {
+                        d->steer = 1.0f;
+                    }
+                    if (d->steer < -1.0f) {
+                        d->steer = -1.0f;
+                    }
+                }
+            } else {
+                f32 prev = d->steer;
+                f32 r = fn_801A7F98(&d->b7C);
+                f32 l = fn_801A7F98(&d->b6C);
+                f32 v = -l + r;
+                if (d->b344) {
+                    d->steer = fn_8017EB80(v, d->steerDead, d->steerOver);
+                } else if (!d->b343) {
+                    d->steer = fn_8017EB80(v, d->steerDead, d->steerOver);
+                    d->steer = d->steer * (1.0f + d->nonlin * fn_8017F70C(d->steer) - d->nonlin);
+                    d->steer = d->steer * (1.0f + d->nonlin2 * fn_8017F70C(d->steer) - d->nonlin2);
+                } else {
+                    d->steer = v;
+                    if (d->b342) {
+                        d->steer *= 1.5f;
+                    }
+                }
+                if (lbl_8055E4B9) {
+                    d->steer = fn_80144C80(d->steer, prev, 0.4f);
+                }
+            }
+            {
+                f32 rate = 2.5f * d->steerSpeed;
+                f32 ret = 1.9f * rate;
+                f32 tot = ret + rate;
+                if (d->steerAdd > 0.0f) {
+                    d->steerAdd = Max(d->steerAdd - ret * dt, 0.0f);
+                }
+                if (d->steerAdd < 0.0f) {
+                    d->steerAdd = Min(d->steerAdd + ret * dt, 0.0f);
+                }
+                if (fn_801A8E38(&d->b18C)) {
+                    d->steerAdd -= tot * dt;
+                }
+                if (fn_801A8E38(&d->b19C)) {
+                    d->steerAdd += tot * dt;
+                }
+                if (d->steerAdd > 1.0f) {
+                    d->steerAdd = 1.0f;
+                }
+                if (d->steerAdd < -1.0f) {
+                    d->steerAdd = -1.0f;
+                }
+            }
+            b = &d->b8C;
+            if (!fn_801A8F10(&d->b8C)) {
+                b = &d->bBC;
+            } else if (dthr && fn_801A8F10(&d->bBC)) {
+                b = &d->bBC;
+            }
+            if (d->forced || dthr || fn_801A8EE4(b)) {
+                {
+                    f32 up = 6.0f * d->thrSpeed;
+                    f32 down = 1.5f * up;
+                    if (fn_801A8E38(b)) {
+                        d->throttle = Min(d->throttle + up * dt, 1.0f);
+                    } else {
+                        d->throttle = Max(d->throttle - down * dt, 0.0f);
+                    }
+                }
+            } else {
+                d->throttle = fn_8017EB80(fn_801A7F98(b), d->thrDead, d->thrOver);
+            }
+            if (d->forced || fn_801A8EE4(&d->bDC)) {
+                {
+                    f32 up = 6.0f * d->thrSpeed;
+                    f32 down = 1.5f * up;
+                    if (fn_801A8E38(&d->bDC)) {
+                        d->throttleAdd = Min(d->throttleAdd + up * dt, 1.0f);
+                    } else {
+                        d->throttleAdd = Max(d->throttleAdd - down * dt, 0.0f);
+                    }
+                }
+            } else {
+                d->throttleAdd = fn_8017EB80(fn_801A7F98(&d->bDC), d->thrDead, d->thrOver);
+            }
+            bb = &d->b9C;
+            if (!fn_801A8F10(&d->b9C)) {
+                bb = &d->bCC;
+            } else if (dbrk && fn_801A8F10(&d->bCC)) {
+                bb = &d->bCC;
+            }
+            if (d->forced || dbrk || fn_801A8EE4(bb)) {
+                {
+                    f32 up = 12.0f * d->brkSpeed;
+                    f32 down = 6.0f * d->brkSpeed;
+                    if (d->brake > 0.0f) {
+                        d->brake = Max(d->brake - down * dt, 0.0f);
+                    }
+                    if (fn_801A8E38(bb)) {
+                        d->brake += up * dt;
+                    }
+                    if (d->brake > 1.0f) {
+                        d->brake = 1.0f;
+                    }
+                }
+            } else {
+                d->brake = fn_8017EB80(fn_801A7F98(bb), d->brkDead, d->brkOver);
+            }
+            if (d->forced || fn_801A8EE4(&d->bEC)) {
+                {
+                    f32 up = 12.0f * d->brkSpeed;
+                    f32 down = 6.0f * d->brkSpeed;
+                    if (d->brakeAdd > 0.0f) {
+                        d->brakeAdd = Max(d->brakeAdd - down * dt, 0.0f);
+                    }
+                    if (fn_801A8E38(&d->bEC)) {
+                        d->brakeAdd += up * dt;
+                    }
+                    if (d->brakeAdd > 1.0f) {
+                        d->brakeAdd = 1.0f;
+                    }
+                }
+            } else {
+                d->brakeAdd = fn_8017EB80(fn_801A7F98(&d->bEC), d->brkDead, d->brkOver);
+            }
+            d->f28 = fn_801A7F98(&d->bAC);
+            if (!d->freeShift) {
+                u8 rev = 0;
+                if (fn_801A8E38(&d->bFC) || fn_801A8E38(&d->b10C)) {
+                    rev = 1;
+                }
+                d->b5A = rev;
+            }
+            if (fn_801A8EE4(&d->b15C)) {
+                if (fn_801A8E38(&d->b15C)) {
+                    d->grip += 10.0f * dt;
+                } else if (d->grip > 0.0f) {
+                    d->grip = Max(d->grip - 5.0f * dt, 0.0f);
+                }
+                if (d->grip > 1.0f) {
+                    d->grip = 1.0f;
+                }
+            } else {
+                d->grip = fn_801A7F98(&d->b15C);
+            }
+            d->b5B = fn_801A8E38(&d->b16C);
+            {
+                u8 horn = 0;
+                if (fn_801A8E38(&d->b11C) || fn_801A8E38(&d->b12C)) {
+                    horn = 1;
+                }
+                d->b58 = horn;
+            }
+            d->b5D = fn_801A8E68(&d->b8C);
+            if (fn_80179300() < 40) {
+                d->b58 = 0;
+            }
+            d->b68 = fn_801A8E38(&d->b17C);
+            {
+                f32 l = fn_801A7F98(&d->b1AC);
+                f32 v = fn_8017EB80(-l + fn_801A7F98(&d->b1BC), 0.4f, 0.07f);
+                f32 k = 4.0f * dt;
+                d->f32C += Clamp(v - d->f32C, -k, k);
+            }
+            d->b338 = fn_801A8E38(&d->b1CC);
+            if (fn_801A8E38(&d->b27C)) {
+                d->b338 = 1;
+            }
+            {
+                f32 a = fn_801A7F98(&d->b28C);
+                d->f330 = fn_801A7F98(&d->b29C) - a;
+            }
+            {
+                f32 a = fn_801A7F98(&d->b2AC);
+                d->f334 = fn_801A7F98(&d->b2BC) - a;
+            }
+            if (!d->freeShift) {
+                if (fn_801A8E38(&d->b13C)) {
+                    if (!d->b59) {
+                        if (d->maxGear < d->gear) {
+                            d->maxGear++;
+                        }
+                        d->b59 = 1;
+                    }
+                } else if (fn_801A8E38(&d->b14C)) {
+                    if (!d->b59) {
+                        if (d->maxGear > -1) {
+                            d->maxGear--;
+                        }
+                        d->b59 = 1;
+                    }
+                } else {
+                    d->b59 = 0;
+                }
+            } else {
+                int k;
+                d->b59 = 0;
+                d->maxGear = 0;
+                for (k = 0; k < d->gear; k++) {
+                    if (fn_801A8E38(&d->freeG[k])) {
+                        d->maxGear = k + 1;
+                    }
+                }
+                if (fn_801A8E38(&d->freeRev)) {
+                    d->maxGear = -1;
+                }
+            }
+            fn_8017F628(d);
+        }
+    }
+}
+
+extern "C" void fn_8017ED00(f32 dt) {
+    if (!lbl_8055E4B8) {
+        fn_802E317C("I don't expect PhysDriverUpdate (fg) to be used");
+        UpdateAll(dt);
+    }
+}
+
+
 static inline f32 Abs(f32 x) { return (f32)__fabs(x); }
 
 extern "C" {
@@ -289,14 +587,6 @@ extern f32 lbl_8055A338;
 extern f32 lbl_8055A33C;
 extern f32 lbl_8055A340;
 extern f32 lbl_8055A344;
-
-inline f32 Clamp(f32 x, f32 lo, f32 hi) {
-    x = MIN(hi, x);
-    x = MAX(x, lo);
-    return x;
-}
-
-inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 
 inline void PhysDriver::Init(void) {
     int k;
@@ -450,7 +740,7 @@ inline void PhysDriver::Init(void) {
         dpad[3].ch = c;
     }
     b344 = 0;
-    if (fn_801298E8(info) && (*(u32*)(info + 0x50) & 0x10)) {
+    if (fn_801298E8(info, ch) && (*(u32*)(info + 0x50) & 0x10)) {
         b344 = 1;
     }
     b344 = 1;
@@ -462,6 +752,32 @@ int PhysDriver::vf5C(void) {
         r = 1;
     }
     return r;
+}
+
+extern "C" void fn_8017FF4C(f32 dt) {
+    if (lbl_8055E4B8) {
+        if (!fn_801769F8() && !fn_801B526C()) {
+            UpdateAll(dt);
+        } else {
+            int i;
+            for (i = 0; i < 4; i++) {
+                PhysDriver* d = lbl_804348D8[i];
+                if (d) {
+                    d->rumC[0] = 0.0f;
+                    d->rumC[1] = 0.0f;
+                    d->rumA[2] = 0.0f;
+                    d->rumA[1] = 0.0f;
+                    d->rumA[0] = 0.0f;
+                    d->rumB[2] = 0.0f;
+                    d->rumB[1] = 0.0f;
+                    d->rumB[0] = 0.0f;
+                    if (d->ch >= 0) {
+                        fn_802E8518(d->ch);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
