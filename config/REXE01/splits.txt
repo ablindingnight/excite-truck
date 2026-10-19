@@ -2491,6 +2491,13 @@ game/updlist.cpp:
 	.bss        start:0x80438818 end:0x80438858
 	.sbss       start:0x8055E8E0 end:0x8055E8F0
 
+game/drawlist.cpp:
+	.text       start:0x801D0FA4 end:0x801D1184
+	.ctors      start:0x802ED2B4 end:0x802ED2B8
+	.data       start:0x803381E0 end:0x80338208
+	.bss        start:0x80438858 end:0x80438898
+	.sbss       start:0x8055E8F0 end:0x8055E900
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
