@@ -481,7 +481,7 @@ public:
     }
     virtual f32 Rate(RaceCarRec* rc) {
         f32 r;
-        if (NearZero(rc->f2690) && Airborne(rc)) {
+        if ((f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && Airborne(rc)) {
             if (dur > minT) {
                 Show();
             }
@@ -495,18 +495,19 @@ public:
             if (dur > minT && Rank() > 0) {
                 since = 0.0f;
                 if (blip) {
-                    blip->Clear();
+                    blip->x8 = 0;
                 }
             }
             r = 0.0f;
-        } else if (NearZero(since)) {
+        } else if ((f32)__fabs(since) <= lbl_80558DC4[0]) {
             r = End();
         } else {
             Hide();
             since += 0.016683351f;
             StopFx();
         }
-        if (ranks.a.count - 1 == Rank()) {
+        int n = ranks.a.count;
+        if (Rank() == n - 1) {
             r = End();
         }
         return r;
@@ -539,9 +540,9 @@ public:
         if (!fn_80141F7C(pts)) {
             Ended(dur);
         }
-        since += 0.016683351f;
         dur = 0.0f;
         f264 = 0.0f;
+        since += 0.016683351f;
         return pts;
     }
     void StopEffect(void);
@@ -749,7 +750,7 @@ f32 AirTracker::Rate(RaceCarRec* rc) {
         since += 0.016683351f;
         StopEffect();
     }
-    if (NumRanks() - 1 == Rank()) {
+    if (Rank() == NumRanks() - 1) {
         r = Finish(rc);
     }
     b273 = b272 && b271;
@@ -914,7 +915,7 @@ public:
     virtual void Bump(RaceCarRec* rc, int kind, void* other);
     virtual void Stop(RaceCarRec* rc);
     virtual void Land(RaceCarRec* rc) {
-        if (!turbo && rc->turbo > lbl_80558DC4[0]) {
+        if (!turbo && (rc->turbo > lbl_80558DC4[0]) != 0) {
             turbo = 1;
             turboTime = lbl_8055E3C8;
         }
@@ -1000,7 +1001,7 @@ f32 CloseCallTracker::Rate(RaceCarRec* rc) {
     }
     r = 0.0f;
     full = 0;
-    if (Capped() && NumRanks() - 1 == Rank()) {
+    if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
     if (fn_80141F7C(timer) || full) {
@@ -1182,7 +1183,7 @@ public:
     virtual void Hit(f32 mag, int other) {
         if (!Wrecked(other)) {
             CarHit* h = &hits[other];
-            if (NearZero(h->timer)) {
+            if ((f32)__fabs(h->timer) <= lbl_80558DC4[0]) {
                 h->mag = mag;
             } else {
                 h->mag = mag > h->mag ? mag : h->mag;
@@ -1351,7 +1352,7 @@ public:
         if (car2 == rc->id && (kind == 7 || kind == 9)) {
             angle = v;
             if (kind == 7) {
-                rolls = Round(v);
+                rolls = Round(angle);
             }
         }
     }
@@ -1475,7 +1476,7 @@ f32 JumpComboTracker::Rate(RaceCarRec* rc) {
     }
     r = 0.0f;
     full = 0;
-    if (Capped() && NumRanks() - 1 == Rank()) {
+    if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
     if (fn_80141F7C(timer) || full) {
@@ -1579,7 +1580,7 @@ f32 ThrowTracker::Rate(RaceCarRec* rc) {
     }
     r = 0.0f;
     full = 0;
-    if (Capped() && NumRanks() - 1 == Rank()) {
+    if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
     if (fn_80141F7C(timer) || full) {
@@ -1617,7 +1618,7 @@ f32 SpinTracker::Rate(RaceCarRec* rc) {
     }
     r = 0.0f;
     full = 0;
-    if (Capped() && NumRanks() - 1 == Rank()) {
+    if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
     if (fn_80141F7C(timer) || full) {
@@ -1687,7 +1688,7 @@ f32 RingTracker::Rate(RaceCarRec* rc) {
     }
     r = 0.0f;
     full = 0;
-    if (Capped() && NumRanks() - 1 == Rank()) {
+    if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
     if (fn_80141F7C(timer) || full) {
