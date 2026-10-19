@@ -159,6 +159,40 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 #define NearZeroF(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
 
+struct PathPt {
+    f32 x;    // offset 0x0
+    f32 z;    // offset 0x4
+    f32 dx;   // offset 0x8
+    f32 dz;   // offset 0xC
+    u8 pad10[0x4];
+    PathPt* next;  // offset 0x14
+};
+
+struct PathPos {
+    PathPt* pt;  // offset 0x0
+    f32 t;       // offset 0x4
+    s32 f8;      // offset 0x8
+};
+
+struct PathIter {
+    PathIter(void);
+    ~PathIter(void);
+    int Set(void* path);
+    u8 pad0[0x38];
+};
+
+class PathSet {
+public:
+    virtual void vf08(void);
+    virtual void* Get(int index);  // 0xC
+};
+
+extern "C" {
+PathSet* fn_80156A40(void);
+void fn_801355C0(PathIter* it, V2* p, int a, PathPos* out, int b);
+void fn_801B7C8C(struct Respawn* r, V2* pos, V2* dir);
+}
+
 struct GemRef {
     s32 a;
     s32 b;
@@ -598,7 +632,7 @@ public:
     virtual void vf94(void);
     virtual void vf98(void);
     virtual void vf9C(void);
-    virtual int vfA0(void* cam);
+    virtual int vfA0(struct Respawn* out, int idx);
     virtual void vfA4(void);
     virtual void vfA8(int car);
     virtual void vfAC(int car);
@@ -643,6 +677,7 @@ public:
     virtual int vf64(void);
     virtual int vf68(void);
     virtual int vf8C(int p, int key);
+    virtual int vfA0(struct Respawn* out, int idx);
     virtual void vfA8(int car);
     virtual int vfB0(int car, struct Respawn* r);
     virtual int vfE0(int car, u8* out);
@@ -1793,4 +1828,93 @@ int RingChalMaster::vfE0(int car, u8* out) {
         }
     }
     return r;
+}
+
+static inline V2 Sub(const V2& a, const V2& b) {
+    V2 r;
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    return r;
+}
+
+static inline f32 LenSq(const V2& v) { return v.x * v.x + v.y * v.y; }
+
+int RingChalMaster::vfA0(Respawn* out, int idx) {
+    ValueNode* cfg = fn_8000AC38()->vals;
+    if (cfg) {
+        char name[0x10];
+        ValueNode* sp;
+        fn_801345D8(name, 0x10, "start_pos_%i", idx);
+        sp = cfg->FindChild(name);
+        if (sp) {
+            V2 pts[3];
+            V2 mid;
+            V2 dir;
+            int i;
+            int k;
+            f32 best;
+            mid.x = 0.0f;
+            mid.y = 0.0f;
+            dir.x = 0.0f;
+            dir.y = 0.0f;
+            for (i = 0; i < 3; i++) {
+                char b[0x10];
+                ValPoint p;
+                fn_801345D8(b, 0x10, "bound%d", i);
+                p = sp->GetPoint(b);
+                pts[i].x = p.x;
+                pts[i].y = p.y;
+            }
+            k = 2;
+            best = LenSq(Sub(pts[2], pts[0]));
+            if (LenSq(Sub(pts[0], pts[1])) > best) {
+                best = LenSq(Sub(pts[0], pts[1]));
+                k = 0;
+            }
+            if (LenSq(Sub(pts[1], pts[2])) > best) {
+                k = 1;
+            }
+            {
+                V2 m;
+                const V2& a = pts[k];
+                const V2& b = pts[(k + 1) % 3];
+                m.x = a.x + 0.5f * (b.x - a.x);
+                m.y = a.y + 0.5f * (b.y - a.y);
+                mid = m;
+            }
+            dir = Sub(pts[(k + 2) % 3], mid);
+            {
+                f32 inv = 1.0f / (f32)sqrt(LenSq(dir));
+                dir.x *= inv;
+                dir.y *= inv;
+            }
+            if (sp->GetBool("on_racingline", 1)) {
+                PathIter it;
+                PathPos pp;
+                it.Set(fn_80156A40()->Get(0));
+                pp.pt = 0;
+                pp.t = 0.0f;
+                pp.f8 = 10000;
+                fn_801355C0(&it, &mid, 0, &pp, 0);
+                mid.x = pp.pt->x + pp.t * (pp.pt->next->x - pp.pt->x);
+                mid.y = pp.pt->z + pp.t * (pp.pt->next->z - pp.pt->z);
+                dir.x = pp.pt->dx + pp.t * (pp.pt->next->dx - pp.pt->dx);
+                dir.y = pp.pt->dz + pp.t * (pp.pt->next->dz - pp.pt->dz);
+                {
+                    f32 inv = 1.0f / (f32)sqrt(LenSq(dir));
+                    dir.x *= inv;
+                    dir.y *= inv;
+                }
+            }
+            fn_801B7C8C(out, &mid, &dir);
+            {
+                f32 s = 0.444444f * sp->GetFloat("speed", 0.0f);
+                out->vel.x = out->basis[2].x * s;
+                out->vel.y = out->basis[2].y * s;
+                out->vel.z = out->basis[2].z * s;
+            }
+            return 1;
+        }
+    }
+    return 0;
 }
