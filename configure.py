@@ -1002,6 +1002,7 @@ config.libs.append(
             Object(NonMatching, "game/zone.cpp"),
             Object(NonMatching, "game/modeinl.cpp"),
             Object(NonMatching, "game/records.cpp"),
+            Object(NonMatching, "game/ovlayout.cpp"),
         ],
     }
 )
