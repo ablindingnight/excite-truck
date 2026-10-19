@@ -870,17 +870,26 @@ struct Pickup {
             lbl_8055E254 = -1;
         }
     }
-    f32 pos[3];     // offset 0x0
-    void* objs[2];  // offset 0xC
-    s32 which;      // offset 0x14
-    u8 pad18[0x20 - 0x18];
-    TexRef tex;     // offset 0x20
-    u8 pad24[0x34 - 0x24];
-    f32 respawn;    // offset 0x34
-    s32 kind;       // offset 0x38
-    u8 pad3C[0xCC - 0x3C];
-    u8 big;         // offset 0xCC
-    u8 padCD[0xD4 - 0xCD];
+    f32 pos[3];            // offset 0x0
+    void* objs[2];         // offset 0xC
+    s32 which;             // offset 0x14
+    u8 pad18[0x1C - 0x18];
+    f32 switchTime;        // offset 0x1C
+    TexRef tex;            // offset 0x20
+    f32 mid[3];            // offset 0x24
+    s16 track[2];          // offset 0x30
+    f32 respawn;           // offset 0x34
+    s32 kind;              // offset 0x38
+    u32 colors[15];        // offset 0x3C
+    u8 pad78[0x8C - 0x78];
+    u32 glow[10];          // offset 0x8C
+    class BoxVolume* vol;  // offset 0xB4
+    s32 hB8;               // offset 0xB8
+    f32 angle;             // offset 0xBC
+    s32 hC0;               // offset 0xC0
+    u8 hit[8];             // offset 0xC4
+    u8 big;                // offset 0xCC
+    const char* name;      // offset 0xD0
 };
 
 struct Puddle {
@@ -2047,5 +2056,278 @@ void BetaMaster::vfF4(void) {
             puddles.Push(new ("puddle") Puddle(pos, r, 1));
         }
         fn_80131818(t);
+    }
+}
+
+// A physics box around a spin trigger.
+class BoxVolume {
+public:
+    BoxVolume(f32 x, f32 y, f32 z) {
+        x4 = 0;
+        x8 = 0;
+        xC = 0;
+        x10 = 0.0f;
+        x14 = 0.0f;
+        type = 'BOX ';
+        x1C = 0;
+        x20 = 100;
+        half[0] = x;
+        half[1] = y;
+        half[2] = z;
+        x34 = 0;
+        radius = 0.2f + (f32)sqrt(x * x + (y * y + z * z));
+    }
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual void vf28(void);
+    virtual void vf2C(void);
+    virtual void vf30(void);
+    virtual void vf34(void);
+    virtual void vf38(void);
+    virtual void vf3C(void);
+    virtual void SetMass(int m);  // 0x40
+
+    s32 x4;       // offset 0x4
+    s32 x8;       // offset 0x8
+    s32 xC;       // offset 0xC
+    f32 x10;      // offset 0x10
+    f32 x14;      // offset 0x14
+    u32 type;     // offset 0x18
+    s32 x1C;      // offset 0x1C
+    s32 x20;      // offset 0x20
+    f32 half[3];  // offset 0x24
+    f32 radius;   // offset 0x30
+    s32 x34;      // offset 0x34
+};
+
+struct Model {
+    s32 nMats;  // offset 0x0
+    u8* mats;   // offset 0x4
+};
+
+struct TexOverride {
+    char mat[0x10];  // offset 0x0
+    s32 flag;        // offset 0x10
+    char tex[0x10];  // offset 0x14
+    u8 pad24[0x2C - 0x24];
+};
+
+struct Seg {
+    u8 pad0[0x8];
+    f32 x;      // offset 0x8
+    f32 z;      // offset 0xC
+    u8 pad10[0x14 - 0x10];
+    Seg* next;  // offset 0x14
+};
+
+struct TrackSample {
+    Seg* seg;  // offset 0x0
+    f32 t;     // offset 0x4
+};
+
+extern "C" {
+s32 fn_802CAC28(const char* name, int flags);  // load texture
+void* fn_801D4888(const char* name);
+Model* fn_802C6B44(const char* name);
+const char* fn_802C9C24(void* mat);
+void fn_802C7888(TexOverride* o, int on);
+void fn_802C6C20(Model* m);
+s32 fn_802C6FC0(const char* name, int a, int b);
+void fn_801EA140(Pickup* p);
+void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
+void fn_801E9DC4(s16* h);
+void fn_801E9E30(s16* h, const f32* pos);
+s32 fn_80178C9C(void);
+void fn_802C77F0(s32 model, f32* box);
+void fn_80136594(TrackSample* out, s32 track, const f32* xz);
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+double acos(double x);
+s32 fn_801FB1F4(int a);
+s32 fn_801FA8E0(BoxVolume* v, const f32* m, s32 h);
+}
+
+static inline void SatModel(const char* name) {
+    Model* m = fn_802C6B44(name);
+    TexOverride o;
+    int i;
+    memset(&o, 0, sizeof(o));
+    StrCopyN(o.tex, 0x10, "sat.tex");
+    o.flag = 1;
+    for (i = 0; i < m->nMats; i++) {
+        StrCopyN(o.mat, 0x10, fn_802C9C24(m->mats + i * 0x10));
+        fn_802C7888(&o, 1);
+    }
+    fn_802C6C20(m);
+}
+
+Pickup::Pickup(ValueNode* n) {
+    f32 c[2];
+    char buf[0x20];
+    int k;
+    s32 trk;
+    tex.h = fn_802CAC28("trigglow.tex", 0);
+    name = n->GetName();
+    objs[0] = fn_801D4888(n->GetName());
+    kind = n->Has("type") ? n->GetEnum("type", "bank\0jump\0misc\0spin\0multi") : 2;
+    big = n->GetBool("visible", 1);
+    kind = 3;
+    if (kind == 4) {
+        if (n->Has("second_actseq")) {
+            objs[1] = fn_801D4888(n->GetValue("second_actseq"));
+        } else {
+            fn_802E30C8("!! Warning: Morph trigger %s is marked as a 'multi' trigger, but has no \"second_actseq\" value.\n",
+                        n->GetName());
+            objs[1] = objs[0];
+        }
+        switchTime = n->GetFloat("switch_time", 2.0f);
+    }
+    if (lbl_8055E258++ == 0) {
+        const char* bar = "morphbar.mod";
+        const char* ring = "morphring1.mod";
+        const char* qst = "morphqst.mod";
+        SatModel(bar);
+        SatModel(ring);
+        SatModel(qst);
+        lbl_8055E254 = fn_802C6FC0(ring, 1, 0);
+        lbl_80559ED0 = fn_802C6FC0(bar, 0, 0);
+        lbl_80559ECC = fn_802C6FC0(qst, 0, 0);
+        lbl_80559ED4 = fn_802C6FC0("morph_bubble.mod", 0, 0);
+        lbl_80559ED8 = fn_802C6FC0("morph_qmark.mod", 0, 0);
+        lbl_80559EDC = fn_802CAC28("zdraw.tex", 0);
+    }
+    c[0] = 0.0f;
+    c[1] = 0.0f;
+    for (k = 0;;) {
+        sprintf(buf, "bound%d", k);
+        if (!n->Has(buf)) {
+            break;
+        }
+        k++;
+        {
+            ValPoint p = n->GetPoint(buf);
+            c[0] += p.x;
+            c[1] += p.y;
+        }
+    }
+    pos[1] = 0.0f;
+    c[0] *= 1.0f / k;
+    pos[0] = c[0];
+    c[1] *= 1.0f / k;
+    pos[2] = c[1];
+    fn_801EA140(this);
+    fn_801EA1E0(pos[0], pos[2], &pos[1], 1);
+    mid[0] = c[0];
+    mid[1] = 0.0f;
+    mid[2] = c[1];
+    fn_801E9DC4(track);
+    fn_801E9E30(track, mid);
+    angle = 0.0f;
+    colors[0] = 0xFF00FF00;
+    colors[1] = 0xFF64FF64;
+    colors[2] = 0x6000FF00;
+    colors[3] = 0x6064FF64;
+    colors[4] = 0xFF00D200;
+    colors[5] = 0xFFFF0000;
+    colors[6] = 0xFFFF6464;
+    colors[7] = 0x60FF0000;
+    colors[8] = 0x60FF6464;
+    colors[9] = 0xFFD20000;
+    colors[10] = 0xFF0000FF;
+    colors[11] = 0xFF6464FF;
+    colors[12] = 0x600000FF;
+    colors[13] = 0x606464FF;
+    colors[14] = 0xFF0000D2;
+    glow[0] = 0xFF4000C4;
+    glow[1] = 0xFF4064C4;
+    glow[2] = 0x604000C4;
+    glow[3] = 0xFF4064C4;
+    glow[4] = 0xFF4000C4;
+    glow[5] = 0xFF4000C4;
+    glow[6] = 0xFF4064C4;
+    glow[7] = 0x604000C4;
+    glow[8] = 0xFF4064C4;
+    glow[9] = 0xFF4000C4;
+    hB8 = 0;
+    hC0 = 0;
+    hit[0] = 0;
+    hit[1] = 0;
+    hit[2] = 0;
+    hit[3] = 0;
+    hit[4] = 0;
+    hit[5] = 0;
+    hit[6] = 0;
+    hit[7] = 0;
+    trk = fn_80178C9C();
+    if (kind == 3) {
+        f32 box[6];
+        f32 m[12];
+        f32 xz[2];
+        TrackSample ts;
+        f32 dir[2];
+        f32 fwd[2];
+        f32 a[3];
+        f32 b[3];
+        f32 cr[3];
+        f32 hx;
+        f32 hy;
+        f32 hz;
+        fn_802C77F0(lbl_80559ED4, box);
+        m[0] = 1.0f;
+        m[1] = 0.0f;
+        m[2] = 0.0f;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = 0.0f;
+        m[7] = 0.0f;
+        m[8] = 1.0f;
+        m[9] = 0.0f;
+        m[10] = 0.0f;
+        m[11] = 0.0f;
+        m[9] = pos[0];
+        m[10] = pos[1];
+        m[11] = pos[2];
+        xz[0] = pos[0];
+        xz[1] = pos[2];
+        fn_80136594(&ts, trk, xz);
+        {
+            Seg* s0 = ts.seg;
+            f32 len;
+            dir[0] = s0->x + ts.t * (s0->next->x - s0->x);
+            dir[1] = s0->z + ts.t * (s0->next->z - s0->z);
+            len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
+            fwd[0] = m[6];
+            fwd[1] = m[8];
+            dir[0] *= 1.0f / len;
+            dir[1] *= 1.0f / len;
+        }
+        a[0] = dir[0];
+        a[1] = 0.0f;
+        a[2] = dir[1];
+        b[0] = fwd[0];
+        b[1] = 0.0f;
+        b[2] = fwd[1];
+        PSVECCrossProduct(b, a, cr);
+        if (cr[1] > 0.0f) {
+            angle = acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
+        } else {
+            angle = -(f32)acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
+        }
+        hx = 1.0f + 1.5f * (box[1] - box[0]) * 0.5f;
+        hz = 1.0f + 1.5f * (box[5] - box[4]) * 0.5f;
+        hy = 1.0f + (box[3] - box[2]);
+        vol = new ("spinvol") BoxVolume(hx, hy, hx);
+        vol->SetMass(1000);
+        hC0 = fn_801FB1F4(1);
+        hB8 = fn_801FA8E0(vol, m, hC0);
+        vol->half[0] = hx;
+        vol->half[1] = hy;
+        vol->half[2] = hz;
     }
 }
