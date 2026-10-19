@@ -2700,6 +2700,15 @@ game/mixer.cpp:
 	.sbss       start:0x8055EDA0 end:0x8055EDB0
 	.sdata2     start:0x80563230 end:0x80563238
 
+game/engsnd.cpp:
+	.text       start:0x80209448 end:0x80209D4C
+	.ctors      start:0x802ED384 end:0x802ED388
+	.data       start:0x8033C1D0 end:0x8033C258
+	.bss        start:0x804892A8 end:0x804892C0
+	.sdata      start:0x8055B4F8 end:0x8055B548
+	.sbss       start:0x8055EDB0 end:0x8055EDC0
+	.sdata2     start:0x80563238 end:0x80563278
+
 game/tiresnd.cpp:
 	.text       start:0x80209D4C end:0x80209FFC
 	.ctors      start:0x802ED388 end:0x802ED38C
