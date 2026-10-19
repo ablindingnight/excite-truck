@@ -1014,6 +1014,7 @@ config.libs.append(
             Object(Matching, "game/stub5.cpp"),
             Object(NonMatching, "game/pickup.cpp"),
             Object(NonMatching, "game/ring.cpp"),
+            Object(NonMatching, "game/ringchal.cpp"),
             Object(NonMatching, "game/techdemo.cpp"),
             Object(NonMatching, "game/physics.cpp"),
             Object(NonMatching, "game/phob.cpp"),

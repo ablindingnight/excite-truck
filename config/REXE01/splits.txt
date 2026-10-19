@@ -2396,6 +2396,13 @@ game/collvol.cpp:
 	.sbss       start:0x8055E478 end:0x8055E480
 	.sdata2     start:0x80561B78 end:0x80561BA8
 
+game/rigid.cpp:
+	.text       start:0x8017B0B0 end:0x8017D378
+	.ctors      start:0x802ED20C end:0x802ED210
+	.data       start:0x80331CB8 end:0x80331D18
+	.sbss       start:0x8055E480 end:0x8055E498
+	.sdata2     start:0x80561BA8 end:0x80561BE0
+
 game/ball.cpp:
 	.text       start:0x8017D378 end:0x8017EB80
 	.ctors      start:0x802ED210 end:0x802ED214
@@ -2415,9 +2422,11 @@ game/physdriver.cpp:
 	.sbss       start:0x8055E4B0 end:0x8055E4C0
 	.sdata2     start:0x80561C48 end:0x80561CA0
 
-game/rigid.cpp:
-	.text       start:0x8017B0B0 end:0x8017D378
-	.ctors      start:0x802ED20C end:0x802ED210
-	.data       start:0x80331CB8 end:0x80331D18
-	.sbss       start:0x8055E480 end:0x8055E498
-	.sdata2     start:0x80561BA8 end:0x80561BE0
+game/ringchal.cpp:
+	.text       start:0x8016B964 end:0x80171698
+	.ctors      start:0x802ED1F4 end:0x802ED1F8
+	.data       start:0x803306D0 end:0x80330EC8
+	.bss        start:0x80430358 end:0x804303C8
+	.sdata      start:0x8055A208 end:0x8055A280
+	.sbss       start:0x8055E368 end:0x8055E380
+	.sdata2     start:0x80561980 end:0x80561A30
