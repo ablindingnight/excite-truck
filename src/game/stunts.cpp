@@ -932,7 +932,7 @@ public:
     virtual void Init(void) {
         int i;
         CountTracker::Init();
-        for (i = 0; i < ARRAY_COUNT(slots); i++) {
+        for (i = 0; i < 8; i++) {
             slots[i].other = 0;
             slots[i].time = -1000.0f;
             slots[i].done = 1;
@@ -1079,7 +1079,7 @@ void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
         int recent = 0;
         CloseCallSlot* oldest;
         int i;
-        for (i = 0; i < ARRAY_COUNT(slots); i++) {
+        for (i = 0; i < 8; i++) {
             CloseCallSlot* s = &slots[i];
             if (NearZero(s->time - now)) {
                 recent = 1;
@@ -1089,7 +1089,7 @@ void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
             }
         }
         oldest = 0;
-        for (i = 0; i < ARRAY_COUNT(slots); i++) {
+        for (i = 0; i < 8; i++) {
             CloseCallSlot* s = &slots[i];
             if (!oldest || s->time < oldest->time) {
                 oldest = s;
@@ -1183,7 +1183,7 @@ public:
         wrecked = 0;
         f290 = 0.0f;
         f28C = 0.0f;
-        for (i = 0; i < ARRAY_COUNT(hits); i++) {
+        for (i = 0; i < 8; i++) {
             hits[i].timer = 0.0f;
         }
     }
@@ -1338,7 +1338,7 @@ public:
             int i;
             active = 1;
             handle = *(s32*)&v;
-            for (i = 0; i < ARRAY_COUNT(targets); i++) {
+            for (i = 0; i < 8; i++) {
                 if (i == rc->id) {
                     targets[i].car = -1;
                     targets[i].state = 0;
@@ -1981,7 +1981,7 @@ CarHitTracker::CarHitTracker(StuntHud* h, int c) : Tracker(h, c) {
     f290 = 0.0f;
     f28C = 0.0f;
     wrecked = 0;
-    for (i = 0; i < ARRAY_COUNT(hits); i++) {
+    for (i = 0; i < 8; i++) {
         hits[i].timer = 0.0f;
     }
 }
