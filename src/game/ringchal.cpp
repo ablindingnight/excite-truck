@@ -291,6 +291,10 @@ public:
         loop = 0;
         stop = 0;
     }
+    void Stop(void) {
+        stop = 1;
+        f4C = 0;
+    }
 };
 
 extern "C" RSound* fn_802076A0(const char* name, int a, int b, int c);
@@ -299,6 +303,12 @@ extern "C" RSound* fn_80207848(const char* name, int a);
 static inline void Play(RSound* s) {
     if (s) {
         s->Play();
+    }
+}
+
+static inline void Stop(RSound* s) {
+    if (s) {
+        s->Stop();
     }
 }
 
@@ -1193,12 +1203,6 @@ void Arena::Spawn(void) {
     }
 }
 
-#define STOP(s)          \
-    if (s) {             \
-        (s)->stop = 1;   \
-        (s)->f4C = 0;    \
-    }
-
 #define SET_NAME(a, buf, n)                                               \
     switch ((a)->difficulty) {                                            \
     case 0:                                                               \
@@ -1369,14 +1373,14 @@ void RingChalMaster::vf10(void) {
     if (results.layout) {
         fn_802AE0E0(results.layout);
     }
-    STOP(results.sBonus);
-    STOP(results.sNoBonus);
-    STOP(results.s1C);
+    Stop(results.sBonus);
+    Stop(results.sNoBonus);
+    Stop(results.s1C);
     results.b20 = 0;
-    STOP(results.s24);
-    STOP(results.s28);
-    STOP(results.s2C);
-    STOP(sPreRace);
+    Stop(results.s24);
+    Stop(results.s28);
+    Stop(results.s2C);
+    Stop(sPreRace);
     bA8 = 0;
 }
 
@@ -1527,13 +1531,13 @@ void ResultsOverlay::Reset(void) {
     if (layout) {
         fn_802AE0E0(layout);
     }
-    STOP(sBonus);
-    STOP(sNoBonus);
-    STOP(s1C);
+    Stop(sBonus);
+    Stop(sNoBonus);
+    Stop(s1C);
     b20 = 0;
-    STOP(s24);
-    STOP(s28);
-    STOP(s2C);
+    Stop(s24);
+    Stop(s28);
+    Stop(s2C);
 }
 
 static inline f32 Clamp01(f32 x) {
@@ -1744,10 +1748,10 @@ int RingChalMaster::vf8C(int p, int key) {
             if (results.layout) {
                 fn_802AE118(results.layout);
             }
-            STOP(results.sBonus);
-            STOP(results.sNoBonus);
-            STOP(results.s28);
-            STOP(results.s2C);
+            Stop(results.sBonus);
+            Stop(results.sNoBonus);
+            Stop(results.s28);
+            Stop(results.s2C);
             results.b8 = 0;
             results.start = lbl_8055E3C8 - 1.0f;
         }

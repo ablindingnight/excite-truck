@@ -975,13 +975,13 @@ void ResultsOverlay::Reset(void) {
     if (layout) {
         fn_802AE0E0(layout);
     }
-    STOP(sBonus);
-    STOP(sNoBonus);
-    STOP(s1C);
+    Stop(sBonus);
+    Stop(sNoBonus);
+    Stop(s1C);
     b20 = 0;
-    STOP(s24);
-    STOP(s28);
-    STOP(s2C);
+    Stop(s24);
+    Stop(s28);
+    Stop(s2C);
 }
 
 void ResultsOverlay::Load(void) {
