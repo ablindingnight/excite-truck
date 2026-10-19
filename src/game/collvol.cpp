@@ -227,10 +227,12 @@ extern "C" void fn_8017A008(u8* dst, const u8* src, int n) {
     }
 }
 
+static inline f32 Frac(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
+
 static inline f32 Deq(u16 u) {
-    f32 t = MIN(1.0f, ((f32)u - 0.0f) / 65535.0f);
+    f32 t = MIN(1.0f, Frac(u, 0.0f, 65535.0f));
     t = MAX(t, 0.0f);
-    return -6.2831855f + t * (6.2831855f - -6.2831855f);
+    return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
 static inline void SetV(CVec3* v, f32 x, f32 y, f32 z) {
@@ -278,8 +280,8 @@ extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t);
 void CollVolume::vf30(f32 t, CollPacket* a, CollPacket* b, s32* na, s32* nb) {
     CMtx ma;
     CMtx mb;
-    CVec3 vb;
     CVec3 va;
+    CVec3 vb;
     fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
     fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
     SetV(&va, Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
