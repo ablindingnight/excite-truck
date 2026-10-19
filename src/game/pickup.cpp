@@ -535,11 +535,9 @@ void fn_80168328(void) {
 void fn_801683F4(PickupCounts* out, int player) {
     PickupCounts res;
     RaceCarRec* rec;
-    PickupTrack* tr;
     memset(&res, 0, sizeof(res));
     rec = fn_8017960C(player);
-    tr = &lbl_80430260[player];
-    if (lbl_8055E3C4 - 1 == tr->frame) {
+    if (lbl_8055E3C4 - 1 == lbl_80430260[player].frame) {
         int done = 0;
         f32 r = 0.0f;
         V2 pos;
@@ -556,9 +554,9 @@ void fn_801683F4(PickupCounts* out, int player) {
         car = rec->hasModel > 0 ? rec->model : 0;
         if (car) {
             f32 l[3];
-            f32 dx = tr->pos[0] - rec->pos[0];
-            f32 dy = tr->pos[1] - rec->pos[1];
-            f32 dz = tr->pos[2] - rec->pos[2];
+            f32 dx = lbl_80430260[player].pos[0] - rec->pos[0];
+            f32 dy = lbl_80430260[player].pos[1] - rec->pos[1];
+            f32 dz = lbl_80430260[player].pos[2] - rec->pos[2];
             CarDims* dims;
             l[0] = dx * rec->rot[0] + dy * rec->rot[1] + dz * rec->rot[2];
             l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];
@@ -580,7 +578,7 @@ void fn_801683F4(PickupCounts* out, int player) {
                     V2 d;
                     d.z = pos.z - g->cz;
                     d.x = pos.x - g->cx;
-                    if ((f32)sqrt(d.x * d.x + d.z * d.z) >= r + g->radius) {
+                    if (!((f32)sqrt(d.x * d.x + d.z * d.z) < r + g->radius)) {
                         continue;
                     }
                 }
@@ -607,10 +605,10 @@ void fn_801683F4(PickupCounts* out, int player) {
         }
         res.done = done;
     }
-    tr->pos[0] = rec->pos[0];
-    tr->pos[1] = rec->pos[1];
-    tr->pos[2] = rec->pos[2];
-    tr->frame = lbl_8055E3C4;
+    lbl_80430260[player].pos[0] = rec->pos[0];
+    lbl_80430260[player].pos[1] = rec->pos[1];
+    lbl_80430260[player].pos[2] = rec->pos[2];
+    lbl_80430260[player].frame = lbl_8055E3C4;
     *out = res;
 }
 
