@@ -911,28 +911,31 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     DynArray<TextCmd>* at;
     DynArray<GartCmd>* ag;
     DynArray<BoxCmd>* ab;
-    c = CountChildAt(n, "text_cmd");
+    const char* name;
+    name = "text_cmd";
+    c = CountChildAt(n, name);
     at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
     for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
         }
-        if (!strcasecmp(e->GetName(), "text_cmd")) {
+        if (!strcasecmp(e->GetName(), name)) {
             TextCmd* tc = at->Add();
             tc->elem = e->GetValue("elem");
             tc->text = e->GetValue("text");
         }
     }
     o->texts = at;
-    c = CountChildAt(n, "gart_cmd");
+    name = "gart_cmd";
+    c = CountChildAt(n, name);
     ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
     for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
         }
-        if (!strcasecmp(e->GetName(), "gart_cmd")) {
+        if (!strcasecmp(e->GetName(), name)) {
             GartCmd* gc = ag->Add();
             gc->elem = e->GetValue("elem");
             gc->art = e->GetValue("art");
@@ -940,14 +943,15 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
         }
     }
     o->garts = ag;
-    c = CountChildAt(n, "box_cmd");
+    name = "box_cmd";
+    c = CountChildAt(n, name);
     ab = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
     for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
         }
-        if (!strcasecmp(e->GetName(), "box_cmd")) {
+        if (!strcasecmp(e->GetName(), name)) {
             BoxCmd* bc = ab->Add();
             bc->elem = e->GetValue("elem");
             bc->art = e->GetValue("art");
