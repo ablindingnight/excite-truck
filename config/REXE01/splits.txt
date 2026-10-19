@@ -2330,6 +2330,15 @@ game/tutorial.cpp:
 	.sbss       start:0x8055E2D0 end:0x8055E310
 	.sdata2     start:0x80561838 end:0x80561890
 
+game/orbit.cpp:
+	.text       start:0x801659D0 end:0x80167834
+	.ctors      start:0x802ED1E4 end:0x802ED1E8
+	.data       start:0x8032FCC0 end:0x80330000
+	.bss        start:0x8042FE38 end:0x8042FF60
+	.sdata      start:0x8055A150 end:0x8055A198
+	.sbss       start:0x8055E310 end:0x8055E338
+	.sdata2     start:0x80561890 end:0x80561918
+
 game/stub5.cpp:
 	.text       start:0x80167834 end:0x80167874
 	.ctors      start:0x802ED1E8 end:0x802ED1EC

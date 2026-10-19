@@ -1010,6 +1010,7 @@ config.libs.append(
             Object(Matching, "game/gradesched.cpp"),
             Object(Matching, "game/aiutil.cpp"),
             Object(NonMatching, "game/tutorial.cpp"),
+            Object(NonMatching, "game/orbit.cpp"),
             Object(Matching, "game/stub5.cpp"),
         ],
     }
