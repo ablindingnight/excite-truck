@@ -1031,6 +1031,7 @@ config.libs.append(
             Object(Matching, "game/updlist.cpp"),
             Object(Matching, "game/drawlist.cpp"),
             Object(NonMatching, "game/carelem.cpp"),
+            Object(Matching, "game/gendrawlist.cpp"),
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
