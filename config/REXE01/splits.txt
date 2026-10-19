@@ -2752,6 +2752,15 @@ game/stub18.cpp:
 	.bss        start:0x804A16D0 end:0x804A16E8
 	.sbss       start:0x8055F5D0 end:0x8055F5E8
 
+game/carlayout.cpp:
+	.text       start:0x80278A1C end:0x80279370
+	.ctors      start:0x802ED4B0 end:0x802ED4B4
+	.rodata     start:0x802FA838 end:0x802FA848
+	.data       start:0x80347690 end:0x803477F0
+	.sdata      start:0x8055C668 end:0x8055C6E8
+	.sbss       start:0x8055F5E8 end:0x8055F5F8
+	.sdata2     start:0x805640C0 end:0x805640D8
+
 game/lightset.cpp:
 	.text       start:0x80279370 end:0x80279464
 	.ctors      start:0x802ED4B4 end:0x802ED4B8
