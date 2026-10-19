@@ -621,7 +621,7 @@ struct CrushCar {
     s32 bonus;    // offset 0x4
     s32 f8;       // offset 0x8
     s32 fC;       // offset 0xC
-    u8 f10[8];    // offset 0x10
+    bool f10[8];  // offset 0x10
     f32 f18;      // offset 0x18
 };
 
@@ -1693,7 +1693,7 @@ void fn_8017B3A8(RaceCarRec* car, const ValVec3* imp, const ValVec3* at);
 void fn_8018F9B4(RaceCarRec* car);
 }
 
-static inline int Round(f32 v) { return v >= 0.0f ? 0.5f + v : v - 0.5f; }
+static inline int Round(f32 v) { return v < 0.0f ? v - 0.5f : 0.5f + v; }
 
 static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
     f32 speed = fn_801725C8(lbl_8055E3C8);
@@ -1711,15 +1711,17 @@ static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
         dir.y = rec->mtx.basis[2].z;
         {
             f32 len = sqrt(dir.x * dir.x + dir.y * dir.y);
-            if (!NearZero(len)) {
+            if (!((f32)__fabs(len) <= lbl_80558DC4[0])) {
                 f32 k = dist / len;
                 dir.x *= k;
                 dir.y *= k;
             }
         }
         Rotate(&dir, fn_80129DC4(3, 0.017453292f * a0, 0.017453292f * a1));
-        tgt.x = rec->mtx.origin.x + dir.x;
-        tgt.y = rec->mtx.origin.z + dir.y;
+        tgt.x = rec->mtx.origin.x;
+        tgt.y = rec->mtx.origin.z;
+        tgt.x += dir.x;
+        tgt.y += dir.y;
         if (fn_80171EF8(&pos, &tgt)) {
             break;
         }
@@ -1834,7 +1836,6 @@ void CrushSubTaskMgr::vf18(int a, int b) {
             m->t18C.Clear();
             if (grade >= 1) {
                 f32 now;
-                CrushCar* k;
                 m->t184.Clear();
                 fn_801B2EC0(victim)->Crushed(a);
                 fn_80171D94(victim);
@@ -1842,21 +1843,19 @@ void CrushSubTaskMgr::vf18(int a, int b) {
                 m->cars[victim].active = 0;
                 m->cars[victim].f18 = now;
                 m->t17C.Start();
-                k = &m->cars[a];
-                k->f10[k->f8] = grade == 2;
-                k->f8++;
+                m->cars[a].f10[m->cars[a].f8++] = grade == 2;
                 if (grade == 2) {
-                    k->fC++;
+                    m->cars[a].fC++;
                 }
                 if (m->AliveAI() == 0) {
                     f32 left = m->endTime - now;
                     left = 0.0f > left ? 0.0f : left;
-                    k->bonus = Round(0.5f + left);
+                    m->cars[a].bonus = Round(0.5f + left);
                 }
                 if (grade == 2) {
-                    ValVec3 tgt;
-                    ValVec3 imp;
                     ValVec3 at;
+                    ValVec3 imp;
+                    ValVec3 tgt;
                     RaceCarRec* ka;
                     RaceCarRec* v;
                     f32 len;
