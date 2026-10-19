@@ -1455,11 +1455,16 @@ public:
     }
     virtual void Init(void) {
         int pan;
+        int mono;
         CountTracker::Init();
         pending = 0;
         queued = 0;
         StopSound(snd);
-        pan = fn_80009C84() ? 0 : 2;
+        mono = fn_80009C84();
+        pan = 2;
+        if (mono) {
+            pan = 0;
+        }
         if (snd) {
             fn_80206750(snd, car2, pan);
         }
