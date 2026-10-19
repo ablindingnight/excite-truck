@@ -1913,16 +1913,48 @@ void ChalList::Event(int a, int b, int c) {
 
 }
 
+struct ElemPos {
+    f32 x;
+    f32 y;
+};
+
+struct ElemHead {
+    ElemHead(void) {}
+    const char* name;  // offset 0x0
+    ElemPos pos;       // offset 0x4
+    s32 just;          // offset 0xC
+};
+
+struct TextElem : ElemHead {
+    f32 f10;     // offset 0x10
+    u32 w14;    // offset 0x14
+    u32 color;  // offset 0x18
+    u32 w1C;    // offset 0x1C
+};
+
+struct GartElem : ElemHead {
+    f32 w;        // offset 0x10
+    f32 h;      // offset 0x14
+    u32 color;  // offset 0x18
+};
+
+extern "C" {
+void fn_80147940(Layout* l, GartElem* e, const char* set, int part);
+void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
+}
+
+static u8 lbl_8055E308;  // warned about the elems
+
 int ChalList::Draw(int a) {
     if (exit) {
         const char* body = fn_80131234("Tutorial:EXIT_BODY");
         fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), body);
     } else {
         ::Event* e;
-        void* e1;
-        void* e2;
-        void* but;
-        void* star;
+        TextElem* e1;
+        TextElem* e2;
+        GartElem* but;
+        GartElem* star;
         if (fn_801E8838() > 100) {
             fn_80230E90(1);
         }
@@ -1931,26 +1963,73 @@ int ChalList::Draw(int a) {
         fn_801476C4(lbl_8055E2E0->Find("mode_title"));
         fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->vals->GetString("friendly_name", GetEventDisplayName(e->id)));
         fn_801476C4(lbl_8055E2E0->Find("continue"));
-        e1 = lbl_8055E2E0->Find("elem1");
-        e2 = lbl_8055E2E0->Find("elem2");
-        but = lbl_8055E2E0->Elem("sel_but");
-        star = lbl_8055E2E0->Elem("pass_star");
+        e1 = (TextElem*)lbl_8055E2E0->Find("elem1");
+        e2 = (TextElem*)lbl_8055E2E0->Find("elem2");
+        but = (GartElem*)lbl_8055E2E0->Elem("sel_but");
+        star = (GartElem*)lbl_8055E2E0->Elem("pass_star");
         if (e1 && e2) {
             int i;
             for (i = 1; i <= lbl_8042FDEC.count; i++) {
                 char name[0xA];
-                void* el;
+                TextElem* el;
                 fn_801345D8(name, sizeof(name), "elem%d", i);
-                el = lbl_8055E2E0->Find(name);
+                el = (TextElem*)lbl_8055E2E0->Find(name);
                 if (el) {
-                    fn_80147230(el, "%s", i < lbl_8042FDEC.count ? lbl_8042FDEC.data[i]->Title()
-                                                                  : fn_80131234("Tutorial:EXIT_HEAD"));
-                } else {
-                    static u8 warned;
-                    if (!warned) {
-                        warned = 1;
-                        fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
+                    GartElem b;
+                    TextElem te = *el;
+                    f32 dx = te.pos.x - e1->pos.x;
+                    f32 dy = te.pos.y - e1->pos.y;
+                    b = *but;
+                    int off = i != sel;
+                    u8 alpha;
+                    f32 pulse;
+                    if (i > fn_80160CE4() && i != lbl_8042FDEC.count) {
+                        b.color = 0x55FFFFFF;
                     }
+                    b.pos.y += dy;
+                    b.pos.x += dx;
+                    fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
+                    if (i > fn_80160CE4() && i < lbl_8042FDEC.count) {
+                        te.color = e2->color;
+                    } else {
+                        te.color = e1->color;
+                    }
+                    alpha = 0xFF;
+                    pulse = 0.0f;
+                    if (i == sel) {
+                        fn_80230F78(&alpha, &pulse, &te.color, 1);
+                        b.pos.x -= 0.5f * b.w * pulse;
+                        b.pos.y -= 0.5f * b.h * pulse;
+                        b.w *= 1.0f + pulse;
+                        b.h *= 1.0f + pulse;
+                        b.color = (alpha << 24) | (b.color & 0xFFFFFF);
+                        fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
+                    }
+                    if (i != lbl_8042FDEC.count) {
+                        if (i < fn_80160CE4()) {
+                            GartElem d = *star;
+                            d.pos.x += dx;
+                            d.pos.y += dy;
+                            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 2);
+                        } else {
+                            int done = i <= fn_80160CE4();
+                            GartElem d = *star;
+                            d.pos.x += dx;
+                            d.pos.y += dy;
+                            if (!done) {
+                                d.color = 0x55FFFFFF;
+                            }
+                            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 3);
+                        }
+                    }
+                    if (i < lbl_8042FDEC.count) {
+                        fn_80147230(&te, "%s", lbl_8042FDEC.data[i]->Title());
+                    } else {
+                        fn_80147230(&te, "%s", fn_80131234("Tutorial:EXIT_HEAD"));
+                    }
+                } else if (!lbl_8055E308) {
+                    lbl_8055E308 = 1;
+                    fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
                 }
             }
         }
