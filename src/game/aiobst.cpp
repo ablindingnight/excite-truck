@@ -182,7 +182,6 @@ struct DynArray {
 };
 
 struct Obst {
-    Obst(void) {}
     u16 seg;   // offset 0x0
     s16 type;  // offset 0x2 (0 circle, 1 left arrow, 2 right arrow)
     Vec2 pos;  // offset 0x4
@@ -665,7 +664,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 Vec2 xz;
                 xz.SetXZ(p);
                 {
-                    Obst car = Obst();
+                    Obst car = {0};
                     car.pos = xz;
                     car.rad = 2.0f;
                     bins.Add(&car, &v, opts.side, range);
@@ -683,8 +682,8 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 }
             }
             {
-                Vec2 target(0.0f, 0.0f);
                 Vec2 dir(0.0f, 0.0f);
+                Vec2 target(0.0f, 0.0f);
                 mid = fn_8015F7A0(64, vel, f.Right());
                 c = mid + 32;
                 if (bins.bins[c].dist < range) {
@@ -700,7 +699,8 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                         found = 1;
                     }
                 } else {
-                    int n = MinI(32 - Abs(mid), lbl_8055E2A8 / 2 + Abs(mid) + 1);
+                    int left = 32 - Abs(mid);
+                    int n = MinI(left, lbl_8055E2A8 / 2 + Abs(mid) + 1);
                     int k;
                     for (k = 1; k < n; k++) {
                         if (bins.bins[c + k].dist < range) {
