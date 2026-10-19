@@ -147,8 +147,11 @@ struct BoxElem : ElemBase {
     f32 h;  // offset 0x14
 };
 
-struct TextElem : ElemBase {
+struct TextElem {
     TextElem(void) {}
+    const char* name;     // offset 0x0
+    V2 pos;               // offset 0x4
+    s32 elemJust;         // offset 0xC
     f32 scale;            // offset 0x10
     u32 just;             // offset 0x14
     u32 color;            // offset 0x18
@@ -2046,6 +2049,28 @@ s32 fn_80204CF0(void);  // difficulty
 extern ILayout* lbl_8055E238;
 extern ILayout* lbl_8055E23C;
 
+// Which time-limit picture goes with the difficulty.
+static inline int TimeArtIndex(void) {
+    int art;
+    int d = fn_80204CF0();
+    switch (d) {
+    case 0:
+        art = 1;
+        break;
+    case 1:
+        art = 3;
+        break;
+    case 2:
+        art = 5;
+        break;
+    default:
+        fn_802E30C8("betarace: Couldn't find time art idx for difficulty %d, returning 1", d);
+        art = 1;
+        break;
+    }
+    return art;
+}
+
 inline void DrawText(ILayout* l, const char* name) { fn_801476C4(l->Find(name)); }
 
 namespace {
@@ -2210,22 +2235,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
         TextElem* tc;
         TextElem* ft;
         TextElem* tl;
-        int d = fn_80204CF0();
-        switch (d) {
-        case 0:
-            art = 1;
-            break;
-        case 1:
-            art = 3;
-            break;
-        case 2:
-            art = 5;
-            break;
-        default:
-            fn_802E30C8("betarace: Couldn't find time art idx for difficulty %d, returning 1", d);
-            art = 1;
-            break;
-        }
+        art = TimeArtIndex();
         fn_8014784C(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, "time_limit_art", "excite_artset", art);
         tl = l->Find("time_limit");
         if (tl) {
@@ -3997,6 +4007,118 @@ void BetaMaster::vf60(int view) {
 }
 
 int BetaMaster::vf88(void) { return 1; }
+
+struct RaceSetup {
+    u8 pad0[0x8];
+    s32 laps;  // offset 0x8
+    u8 padC[0x10 - 0xC];
+    f32 time;  // offset 0x10 (time since the intro started)
+};
+
+extern "C" {
+RaceSetup* fn_801E7E3C(void);
+void fn_8000FBE4(void);
+s32 fn_80160A90(void);  // stars needed
+TextElem* fn_80013DF0(int view);
+TextElem* fn_80013E1C(int view);
+void fn_80013EAC(int view, int a, s32 laps);
+void fn_80130FCC(char* buf, s32 size, s32 value);
+f32 fn_80147204(TextElem* e, const char* text);  // text width
+}
+
+
+static inline ILayout* Overlay(void) { return fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238; }
+
+static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t, ILayout* l) {
+    fn_801479A8(a, b, text, t);
+}
+static inline f32 Width(TextElem* e, const char* text, ILayout* l) { return fn_80147204(e, text); }
+
+static inline f32 Ease(f32 t) {
+    if (t < -1.0f) {
+        return -1.0f;
+    } else if (t > 1.0f) {
+        return 1.0f;
+    } else if (t > 0.0f) {
+        return t * (-2.0f * t * t) + 3.0f * t * t;
+    } else {
+        return t * (-2.0f * t * t) - 3.0f * t * t;
+    }
+}
+
+// The pre-race intro: "stars needed", the time limit and the lap count slide in one after the other.
+int BetaMaster::vf3C(int view) {
+    f32 t = fn_801E7E3C()->time;
+    f32 end0 = 8.0f;
+    f32 in0 = end0 - 0.8f;
+    f32 full0 = in0 - 0.3f;
+    f32 end1 = full0 - 0.15f;
+    f32 in1 = end1 - 0.8f;
+    f32 full1 = in1 - 0.3f;
+    f32 end2 = full1 - 0.15f;
+    f32 in2 = end2 - 0.8f;
+    f32 full2 = in2 - 0.3f;
+    TextElem* h0 = Overlay()->Find("intro_head_0");
+    TextElem* h1 = Overlay()->Find("intro_head_1");
+    if (t < full2) {
+        fn_8000FBE4();
+    }
+    if (!fn_80161C38()) {
+    if (t < end0) {
+        f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
+        TextElem* body = Overlay()->Find("star_body_0");
+        TextElem* denom = Overlay()->Find("score_denominator");
+        fn_8001DF08(fn_801E866C(view), 0);
+        if (h0 && h1 && body && denom) {
+            char buf[0x14];
+            Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k), Overlay());
+            fn_801308F4(buf, sizeof(buf), fn_80160A90());
+            {
+                TextElem e = *body;
+                e.pos.x -= 0.5f * Width(&e, buf, Overlay());
+                Blend(&e, denom, buf, Ease(k), Overlay());
+            }
+        }
+    }
+    if (t < end1) {
+        int art = TimeArtIndex();
+        f32 k;
+        TextElem* body;
+        TextElem* limit;
+        fn_8014784C(Overlay(), "time_limit_art", "excite_artset", art);
+        fn_8014784C(Overlay(), "stop_watch_art", "stop_watch_artset", 0);
+        k = Lerp(0.0f, 1.0f, Clamp01((t - in1) / (full1 - in1)));
+        body = Overlay()->Find("time_body_0");
+        limit = Overlay()->Find("time_limit");
+        if (h0 && h1 && body && limit) {
+            f32 left = 0.0f > timer.limit - timer.now ? 0.0f : timer.limit - timer.now;
+            TextElem e;
+            fn_80147CEC(&e, body, limit, Ease(k));
+            Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k), Overlay());
+            fn_80149588(&e, left);
+        }
+    }
+    if (t < end2) {
+        f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in2) / (full2 - in2)));
+        TextElem* body = fn_80013DF0(view);
+        TextElem* unit = fn_80013E1C(view);
+        if (h1 && h1 && body && unit) {
+            s32 laps;
+            char buf[0x14];
+            Blend(h0, h1, fn_80131234("PreRaceOverlay:NUMBER_OF_LAPS"), Ease(k), Overlay());
+            laps = fn_801E7E3C()->laps;
+            fn_80130FCC(buf, sizeof(buf), laps);
+            {
+                TextElem e = *body;
+                e.pos.x -= 0.5f * Width(&e, buf, Overlay());
+                Blend(&e, unit, buf, Ease(k), Overlay());
+            }
+            fn_80013EAC(view, 0, laps);
+        }
+    }
+    }
+    return 1;
+}
 
 f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
 
