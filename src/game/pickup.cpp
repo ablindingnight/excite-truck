@@ -159,8 +159,7 @@ struct Pickup {
 struct PickupGroup {
     s32 id;       // offset 0x0
     u8 enabled;   // offset 0x4
-    f32 cx;       // offset 0x8
-    f32 cz;       // offset 0xC
+    V2 c;         // offset 0x8
     f32 radius;   // offset 0x10
     s32 first;    // offset 0x14
     s32 count;    // offset 0x18
@@ -196,23 +195,20 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
     PickupGroup* g = &groups.data[groups.count++];
     if (b) {
         int i;
-        V2 c;
         g->hasBound = 1;
-        c = fn_80139C5C(b);
-        g->cx = c.x;
-        g->cz = c.z;
+        g->c = fn_80139C5C(b);
         g->radius = 0.0f;
         for (i = 0; i < b->n; i++) {
             V2 d;
-            d.z = g->cz - b->pts[i].z;
-            d.x = g->cx - b->pts[i].x;
+            d.z = g->c.z - b->pts[i].z;
+            d.x = g->c.x - b->pts[i].x;
             g->radius = MAX(g->radius, d.x * d.x + d.z * d.z);
         }
         g->radius = 1.1f * (f32)sqrt(g->radius);
     } else {
         g->hasBound = 0;
-        g->cx = 0.0f;
-        g->cz = 0.0f;
+        g->c.x = 0.0f;
+        g->c.z = 0.0f;
         g->radius = 0.0f;
     }
     g->first = objs.count;
@@ -481,8 +477,8 @@ void fn_80168104(void) {
         if (g->enabled) {
             if (g->hasBound) {
                 V2 d;
-                d.z = c.z - g->cz;
-                d.x = c.x - g->cx;
+                d.z = c.z - g->c.z;
+                d.x = c.x - g->c.x;
                 if (!((f32)sqrt(d.x * d.x + d.z * d.z) - g->radius < 600.0f)) {
                     continue;
                 }
@@ -576,8 +572,8 @@ void fn_801683F4(PickupCounts* out, int player) {
                 int j;
                 if (g->hasBound) {
                     V2 d;
-                    d.z = pos.z - g->cz;
-                    d.x = pos.x - g->cx;
+                    d.z = pos.z - g->c.z;
+                    d.x = pos.x - g->c.x;
                     if (!((f32)sqrt(d.x * d.x + d.z * d.z) < r + g->radius)) {
                         continue;
                     }
@@ -676,7 +672,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
         StripTable names = lbl_802F94B8;
         StripName* s;
         for (s = names.e; s->type != 6; s++) {
-            if (strncasecmp(n->GetName(), s->prefix, strlen(s->prefix)) == 0) {
+            const char* pre = s->prefix;
+            if (strncasecmp(n->GetName(), pre, strlen(pre)) == 0) {
                 break;
             }
         }
@@ -711,40 +708,44 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
             int last = b->n - 1;
             f32 t;
             V2 dir;
-            V2 perp;
+            f32 px;
+            f32 pz;
             V2 base;
             f32 inv;
             int c;
             s32* rt;
-            while (si < last && Dist(&seg[0], &seg[1]) < along) {
-                along -= Dist(&seg[0], &seg[1]);
+            f32 d;
+            while (si < last && (d = Dist(&seg[0], &seg[1])) < along) {
+                along -= d;
                 seg++;
                 si++;
             }
             t = along / Dist(&seg[0], &seg[1]);
-            if (t > 1.0f) {
+            if (1.0f < t) {
                 t = 1.0f;
             }
             dir.x = seg[1].x - seg[0].x;
             dir.z = seg[1].z - seg[0].z;
-            perp = dir;
             {
+                V2 perp = dir;
                 f32 x = perp.x;
                 perp.x = perp.z;
                 perp.z = -x;
+                inv = 1.0f / (f32)sqrt(perp.x * perp.x + perp.z * perp.z);
+                base.x = seg[0].x + dir.x * t;
+                base.z = seg[0].z + dir.z * t;
+                perp.x *= inv;
+                perp.z *= inv;
+                px = perp.x;
+                pz = perp.z;
             }
-            inv = 1.0f / (f32)sqrt(perp.x * perp.x + perp.z * perp.z);
-            base.x = seg[0].x + dir.x * t;
-            base.z = seg[0].z + dir.z * t;
-            perp.x *= inv;
-            perp.z *= inv;
             rt = rainbowTypes.t;
             for (c = 0; c < count; c++) {
                 f32 off = params[2] * (0.5f + ((f32)c - 0.5f * (f32)count));
                 V2 p;
                 int ty;
-                p.x = base.x + perp.x * off;
-                p.z = base.z + perp.z * off;
+                p.x = base.x + px * off;
+                p.z = base.z + pz * off;
                 if (rainbow) {
                     ty = *rt;
                 } else {
