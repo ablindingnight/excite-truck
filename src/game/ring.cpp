@@ -122,6 +122,7 @@ struct RingType {
         }
     }
     void Make(int i);
+    int Fits(const struct Ring* r);
     u8 loaded;      // offset 0x0
     char name[30];  // offset 0x1
     s32 model;      // offset 0x20
@@ -136,6 +137,7 @@ struct Ring {
     RingType* type;  // offset 0x8
     ValMatrix frame;  // offset 0xC
     void Load(ValueNode* c);
+    int FindType(void);
     void Start(void) {
         passed = 0;
         passTime = -1.0f;
@@ -197,13 +199,16 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline void StrCopyN(char* dst, const char* src, int n) {
-    while (--n > 0) {
-        if ((*dst++ = *src++) == 0) {
-            return;
+static inline void StrCopyN(char* d, const char* s) {
+    const char* src = s;
+    char* dst = d;
+    int n = 30;
+    while ((*dst++ = *src++) != 0) {
+        if (--n <= 0) {
+            dst[-1] = 0;
+            break;
         }
     }
-    *dst = 0;
 }
 
 inline void RingType::Make(int i) {
@@ -220,20 +225,25 @@ inline void RingType::Make(int i) {
     }
 }
 
+inline int RingType::Fits(const Ring* r) { return radius == r->radius; }
+
+inline int Ring::FindType(void) {
+    int k;
+    for (k = 0; k < lbl_804302F0.count; k++) {
+        if (lbl_804302F0.data[k].Fits(this)) {
+            return k;
+        }
+    }
+    return -1;
+}
+
 inline void Ring::Load(ValueNode* c) {
     if (c->Has("radius")) {
         if (c->Has("frame64")) {
-            int k;
             int idx;
             radius = c->GetIntValue("radius");
             frame = c->GetMatrix("frame64");
-            idx = -1;
-            for (k = 0; k < lbl_804302F0.count; k++) {
-                if (lbl_804302F0.data[k].radius == radius) {
-                    idx = k;
-                    break;
-                }
-            }
+            idx = FindType();
             if (idx >= 0) {
                 type = &lbl_804302F0.data[idx];
                 active = 0;
@@ -253,9 +263,9 @@ inline void Ring::Load(ValueNode* c) {
 
 inline void RingSet::Load(ValueNode* n) {
     if (n->Has("name")) {
-        int j;
         ValueNode* c;
-        StrCopyN(name, n->GetValue("name"), 30);
+        int j;
+        StrCopyN(name, n->GetValue("name"));
         first = lbl_80430318.count;
         count = 0;
         for (j = 0; (c = n->GetChildAt(j)) != 0; j++) {
@@ -520,8 +530,8 @@ void fn_8016AC90(void) {
     if (vals->Has(key)) {
         ValueTable* t = fn_80131810(vals->GetValue(key));
         if (t) {
-            int i;
             ValueNode* n;
+            int i;
             for (i = 0; (n = t->GetChild(i)) != 0; i++) {
                 if (strcmp(n->GetName(), "ring_set") == 0) {
                     RingSet* s = lbl_80430340.Add();
