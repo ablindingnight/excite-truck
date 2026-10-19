@@ -261,10 +261,15 @@ struct ArrayRef {
 
 template <typename T, int N>
 struct FixedList {
+    ~FixedList(void) {}
     FixedList(void) {
         a.data = storage;
         a.cap = N;
         a.count = 0;
+    }
+    void Push(T v) {
+        T* p = &a.data[a.count++];
+        *p = v;
     }
     ArrayRef<T> a;  // offset 0x0
     T storage[N];   // offset 0xC
@@ -277,13 +282,29 @@ struct CoinCar {
     u32 next;      // offset 0x18
 };
 
+class CoinObj {
+public:
+    virtual ~CoinObj(void);
+};
+
+extern "C" void fn_80167EEC(void);
+
 struct Coins {
     Coins(void);
+    ~Coins(void) {
+        if (enabled) {
+            if (obj) {
+                delete obj;
+            }
+            fn_80167EEC();
+            enabled = 0;
+        }
+    }
     s32 Count(int id) { return enabled ? cars[id].count : 0; }
 
     u8 enabled;       // offset 0x0
     CoinCar cars[8];  // offset 0x4
-    s32 xE4;          // offset 0xE4
+    CoinObj* obj;     // offset 0xE4
     s32 value;        // offset 0xE8
 };
 
@@ -458,8 +479,9 @@ struct StuntLine {
     char value[0x54];  // offset 0xA4
 };
 
-struct StuntList {
-    u8 pad0[0x4];
+class StuntList {
+public:
+    virtual ~StuntList(void);
     StuntLine* lines;  // offset 0x4
     s32 count;         // offset 0x8
 };
@@ -735,8 +757,10 @@ struct StuntIter {
     StuntEvent* prev;  // offset 0xC
 };
 
-struct CarHud {
-    u8 pad0[0x1244];
+class CarHud {
+public:
+    virtual ~CarHud(void);
+    u8 pad4[0x1244 - 0x4];
     StuntQueue shown;      // offset 0x1244
     StuntQueue pending;    // offset 0x124C
     StuntEvent* current;   // offset 0x1254
@@ -749,7 +773,7 @@ struct CarHud {
 
 class Meter {
 public:
-    virtual void vf08(void);
+    virtual ~Meter(void);
     virtual void vf0C(void);
     virtual void Reset(void);                             // 0x10
     virtual f32 Rate(RaceCarRec* rc);                     // 0x14
@@ -761,7 +785,7 @@ public:
     virtual void Award(RaceCarRec* rc, f32 v, int kind);  // 0x2C
     virtual void Start(RaceCarRec* rc);                   // 0x30
     virtual void vf34(void);
-    virtual void vf38(void);
+    virtual s32 Total(void);                              // 0x38
     virtual void vf3C(void);
     virtual int Pending(f32* out);                        // 0x40
     virtual int Count(void);                              // 0x44
@@ -791,12 +815,46 @@ struct CoinFrame {
     s32 c[4];
 };
 
-// A star or coin lying on the track.
+extern "C" {
+void fn_802CAC54(s32 tex);
+void fn_802C6CF8(s32 model);
+}
+
+struct TexRef {
+    ~TexRef(void) { fn_802CAC54(h); }
+    s32 h;
+};
+
+extern s32 lbl_8055E258;  // pickups alive
+extern s32 lbl_80559ECC;
+extern s32 lbl_80559ED0;
+extern s32 lbl_80559ED4;
+extern s32 lbl_80559ED8;
+extern s32 lbl_80559EDC;
+extern s32 lbl_8055E254;
+
+// A star or coin lying on the track; the models are shared by all of them.
 struct Pickup {
+    ~Pickup(void) {
+        if (--lbl_8055E258 == 0) {
+            fn_802CAC54(lbl_80559EDC);
+            lbl_80559EDC = -1;
+            fn_802C6CF8(lbl_80559ED4);
+            fn_802C6CF8(lbl_80559ED8);
+            fn_802C6CF8(lbl_80559ECC);
+            fn_802C6CF8(lbl_80559ED0);
+            fn_802C6CF8(lbl_8055E254);
+            lbl_80559ED0 = -1;
+            lbl_80559ECC = -1;
+            lbl_8055E254 = -1;
+        }
+    }
     f32 pos[3];     // offset 0x0
     void* objs[2];  // offset 0xC
     s32 which;      // offset 0x14
-    u8 pad18[0x34 - 0x18];
+    u8 pad18[0x20 - 0x18];
+    TexRef tex;     // offset 0x20
+    u8 pad24[0x34 - 0x24];
     f32 respawn;    // offset 0x34
     s32 kind;       // offset 0x38
     u8 pad3C[0xCC - 0x3C];
@@ -804,10 +862,18 @@ struct Pickup {
 };
 
 struct Puddle {
-    f32 x;  // offset 0x0
-    f32 y;  // offset 0x4
-    f32 z;  // offset 0x8
-    f32 r;  // offset 0xC
+    Puddle(const f32* p, f32 rad) {
+        x = p[0];
+        y = p[1];
+        z = p[2];
+        r = rad;
+        b10 = 0;
+    }
+    f32 x;   // offset 0x0
+    f32 y;   // offset 0x4
+    f32 z;   // offset 0x8
+    f32 r;   // offset 0xC
+    u8 b10;  // offset 0x10
 };
 
 struct PickupList {
@@ -829,6 +895,10 @@ struct PickupEvent {
 
 struct V3 {
     f32 x, y, z;
+};
+
+struct Bump {
+    f32 pos[3];
 };
 
 extern "C" {
@@ -893,13 +963,23 @@ public:
     u8 bAB;              // offset 0xAB
     Sound* starSnd;      // offset 0xAC
     Sound* fullSnd;      // offset 0xB0
-    u8 padB4[0xC0 - 0xB4];
+    s32 tex[3];          // offset 0xB4
 };
 
-struct EventDesc {
-    u8 pad0[0x20];
+struct TrackDesc {
+    u8 pad0[0x8];
+    char name[0x20];  // offset 0x8
+};
+
+struct EventInfo {
+    u8 pad0[0x4];
+    s32 track;        // offset 0x4
+    u8 pad8[0xC - 0x8];
+    s32 laps;         // offset 0xC
+    u8 pad10[0x20 - 0x10];
     ValueNode* vals;  // offset 0x20
 };
+
 
 struct LocalCarDesc {
     s32 event;  // offset 0x0
@@ -917,7 +997,8 @@ Sound* fn_80207848(const char* name, int flags);
 Settings* fn_8000AC38(void);
 void fn_801679F0(void);
 }
-void* GetEvent(int event);
+EventInfo* GetEvent(int event);
+TrackDesc* GetTrack(int track);
 
 static inline void InitCoins(Coins* c) {
     ValueNode* v;
@@ -925,7 +1006,7 @@ static inline void InitCoins(Coins* c) {
     v = fn_8000AC38()->vals;
     if (v->Has("coin_file")) {
         fn_801679F0();
-        c->xE4 = 0;
+        c->obj = 0;
         c->value = v->GetInt("coin_value", 3);
         c->enabled = 1;
     }
@@ -939,6 +1020,14 @@ static inline void InitTimer(RaceTimer* t);
 // The race clock: time limit from the event, the finish timeout and the warning sounds.
 struct RaceTimer {
     RaceTimer(void) { InitTimer(this); }
+    ~RaceTimer(void) {
+        if (tick) {
+            delete tick;
+        }
+        if (timeout) {
+            delete timeout;
+        }
+    }
 
     f32 now;            // offset 0x0
     f32 finishTimeout;  // offset 0x4
@@ -951,7 +1040,7 @@ struct RaceTimer {
 };
 
 static inline void InitTimer(RaceTimer* t) {
-    t->limit = ((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetFloat("time_limit", 300.0f);
+    t->limit = GetEvent(fn_801769CC()->event)->vals->GetFloat("time_limit", 300.0f);
     t->limit0 = t->limit;
     t->finishTimeout = fn_80204CFC("finish_timeout");
     t->tick = fn_80207848("clocktick.sfx", 1);
@@ -1029,8 +1118,8 @@ public:
     s32 x10;                         // offset 0x10
     FixedList<Pickup*, 0x80> stars;  // offset 0x14
     FixedList<Puddle*, 0x40> puddles;  // offset 0x220
-    FixedList<void*, 0x20> l32C;     // offset 0x32C
-    FixedList<void*, 0x20> l3B8;     // offset 0x3B8
+    FixedList<Bump*, 0x20> bumps;    // offset 0x32C
+    FixedList<Bump*, 0x20> bumps2;   // offset 0x3B8
     Sound* coinSnd;                  // offset 0x444
     Sound* starSnd;                  // offset 0x448
     Sound* preraceSnd;               // offset 0x44C
@@ -1550,3 +1639,173 @@ inline BetaMaster::BetaMaster(void) { InitBeta(this); }
 void* operator new(size_t size, const char* tag);
 
 extern "C" GameMode* fn_8014DE50(void) { return new ("betamaster") BetaMaster; }
+
+static inline void AwardCar(BetaCar* c, int id, int kind, f32 v) {
+    switch (kind) {
+    case 8:
+        c->flash[3] = 1.5f;
+        break;
+    case 1:
+        c->flash[1] = 1.5f;
+        if (fn_8017960C(id)->kind == 0x50) {
+            fn_801DF074(1, 1);
+        }
+        break;
+    case 6:
+        c->flash[2] = 1.5f;
+        break;
+    case 0:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 7:
+    case 9:
+        break;
+    }
+    c->meterObj->Award(fn_8017960C(id), v, kind);
+}
+
+extern "C" {
+
+void fn_8014E61C(int id, int kind, f32 v) {
+    BetaMaster* m = lbl_8055E268;
+    if (m) {
+        BetaCar* c = &m->cars[id];
+        if (c) {
+            AwardCar(c, id, kind, v);
+        }
+    }
+}
+
+void fn_8014E704(void) {}
+
+s32 fn_8014E708(int id) {
+    BetaMaster* m = lbl_8055E268;
+    if (m) {
+        return m->cars[id].meterObj->Total();
+    }
+    return 0;
+}
+
+s32 fn_8014E738(void) { return 0; }
+
+void fn_8014E740(const f32* pos, f32 r) {
+    BetaMaster* m = lbl_8055E268;
+    if (m) {
+        m->puddles.Push(new ("puddle") Puddle(pos, r));
+    }
+}
+
+void fn_8014E7D8(void) {}
+
+}  // extern "C"
+
+extern f32 lbl_80559EB0;
+
+extern "C" {
+void fn_8012E81C(const char* res);
+const char* fn_80205268(const char* key, int a, int event);
+int fn_8012C33C(const char* name);
+ValueTable* fn_80131810(const char* name);
+double ceil(double x);
+
+f32 fn_8014E7DC(int event, int a) {
+    char buf[0x104];
+    EventInfo* e;
+    TrackDesc* t;
+    const char* key;
+    fn_8012E81C("ghostcar.res");
+    e = GetEvent(event);
+    t = GetTrack(e->track);
+    key = fn_80205268("time_limit_override_key", a, event);
+    if (!e->vals->Has(key)) {
+        f32 lim = e->vals->GetFloat("time_limit", 300.0f);
+        const char* res = e->vals->GetString("resource", "xxx");
+        ValueTable* vt;
+        fn_8012E81C("ghostcar.res");
+        fn_801345D8(buf, sizeof(buf), "%sa_%s.val", res, t->name);
+        if (!fn_8012C33C(buf)) {
+            fn_801345D8(buf, sizeof(buf), "%s_%s.val", res, t->name);
+        }
+        vt = fn_80131810(buf);
+        if (vt) {
+            f32 lap = vt->FindChild("info")->GetFloat("lap_time");
+            fn_80131818(vt);
+            lim = 15.0f * (f32)ceil(lbl_80559EB0 * (lap * e->laps) / 15.0f);
+        } else {
+            fn_802E30C8("betarace: can't open %s", buf);
+        }
+        return lim;
+    }
+    return e->vals->GetFloat(key);
+}
+
+}  // extern "C"
+
+extern "C" {
+void fn_802328D4(s32 font);
+void fn_801D0824(IPickupListener* l);
+void fn_801D05B4(IStuntListener* l);
+void fn_801777D0(IRaceListener* l);
+void fn_80167838(void);
+void fn_8016A68C(void);
+}
+
+BetaMaster::~BetaMaster(void) {
+    int i;
+    fn_802328D4(lbl_8055E250);
+    lbl_8055E250 = 0;
+    delete lbl_8055E238;
+    lbl_8055E238 = 0;
+    delete lbl_8055E23C;
+    lbl_8055E23C = 0;
+    delete lbl_8055E240;
+    lbl_8055E240 = 0;
+    delete lbl_8055E244;
+    lbl_8055E244 = 0;
+    delete lbl_8055E248;
+    lbl_8055E248 = 0;
+    for (i = 0; i < nCars; i++) {
+        delete cars[i].meterObj;
+        if (cars[i].starSnd) {
+            delete cars[i].starSnd;
+        }
+        if (cars[i].fullSnd) {
+            delete cars[i].fullSnd;
+        }
+        fn_802CAC54(cars[i].tex[2]);
+        fn_802CAC54(cars[i].tex[1]);
+        fn_802CAC54(cars[i].tex[0]);
+        delete cars[i].stunts;
+        delete cars[i].hud;
+        cars[i].hud = 0;
+    }
+    for (i = 0; i < stars.a.count; i++) {
+        delete stars.a.data[i];
+    }
+    for (i = 0; i < puddles.a.count; i++) {
+        delete puddles.a.data[i];
+    }
+    for (i = 0; i < bumps.a.count; i++) {
+        delete bumps.a.data[i];
+    }
+    for (i = 0; i < bumps2.a.count; i++) {
+        delete bumps2.a.data[i];
+    }
+    if (preraceSnd) {
+        delete preraceSnd;
+    }
+    if (coinSnd) {
+        delete coinSnd;
+    }
+    if (starSnd) {
+        delete starSnd;
+    }
+    fn_801D0824(this);
+    fn_801D05B4(this);
+    fn_801777D0(this);
+    lbl_8055E268 = 0;
+    fn_80167838();
+    fn_8016A68C();
+}
