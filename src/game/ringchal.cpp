@@ -133,6 +133,32 @@ void fn_802AE118(void* layout);
 void fn_801B0C78(int car);
 }
 
+class CarCtl {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual u32 vf14(void);
+};
+
+struct RaceCarRec {
+    u8 pad0[0x10];
+    u32 model;        // offset 0x10
+    u8 pad14[0x54 - 0x14];
+    ValVec3 fwd;      // offset 0x54
+    ValVec3 pos;      // offset 0x60
+    u8 pad6C[0x2690 - 0x6C];
+    f32 speed;        // offset 0x2690
+    u8 pad2694[0x270C - 0x2694];
+    CarCtl* ctl;      // offset 0x270C
+};
+
+extern "C" RaceCarRec* fn_8017960C(int id);
+extern "C" f32 PSVECDotProduct(const void* a, const void* b);
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+
+#define NearZeroF(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+
 struct GemRef {
     s32 a;
     s32 b;
@@ -588,7 +614,7 @@ public:
     virtual int vfD4(int car);
     virtual int vfD8(void);
     virtual int vfDC(void);
-    virtual int vfE0(void);
+    virtual int vfE0(int car, u8* out);
     virtual int vfE4(void);
     virtual void* vfE8(void);
     virtual int vfEC(void);
@@ -619,6 +645,7 @@ public:
     virtual int vf8C(int p, int key);
     virtual void vfA8(int car);
     virtual int vfB0(int car, struct Respawn* r);
+    virtual int vfE0(int car, u8* out);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
     virtual void vfFC(void);
@@ -1692,4 +1719,78 @@ int RingChalMaster::vfB0(int car, Respawn* r) {
 void RingChalMaster::vfFC(void) {
     results.Unload();
     delete layout;
+}
+
+int RingChalMaster::vfE0(int car, u8* out) {
+    int r = 0;
+    f32 now = lbl_8055E3C8;
+    if (now > vf38() && !arena.b48) {
+        if (NearZeroF(fn_8017960C(players.data[car]->index)->speed)) {
+            PlayerData* p = players.data[car];
+            if (arena.curSet < arena.nFiles) {
+                ObjSet* s = &arena.sets->data[arena.curSet];
+                if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
+                    RaceCarRec* c = fn_8017960C(p->index);
+                    ObjTeleport* t = &s->teles->data[s->f10];
+                    V2 a;
+                    V2 b;
+                    V2 d;
+                    int inside;
+                    int behind;
+                    a.x = t->mtx.origin.x;
+                    a.y = t->mtx.origin.z;
+                    b.x = c->pos.x;
+                    b.y = c->pos.z;
+                    d.x = a.x - b.x;
+                    d.y = a.y - b.y;
+                    inside = (f32)sqrt(d.x * d.x + d.y * d.y) < t->radius;
+                    behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
+                    if (s->f10 == s->teles->count - 1 && inside) {
+                        s->teles->data[s->f10].b30 = 0;
+                        r = 0;
+                    } else {
+                        if (inside || behind) {
+                            if (!p->b8) {
+                                p->b8 = 1;
+                                p->fC = 0.0f;
+                            }
+                            if (p->fC > 2.0f) {
+                                *out = 1;
+                            } else {
+                                *out = 0;
+                            }
+                        } else {
+                            p->b8 = 0;
+                            p->fC = 0.0f;
+                            *out = 0;
+                        }
+                        r = 1;
+                    }
+                } else {
+                    r = 0;
+                }
+            } else {
+                r = 0;
+            }
+            if (!r) {
+                if (fn_8017960C(players.data[car]->index)->model == 'PCAR') {
+                    RaceCarRec* c = fn_8017960C(players.data[car]->index);
+                    if (c->ctl->vf14() & 0x10) {
+                        PlayerData* q = players.data[car];
+                        if (!q->b8) {
+                            q->b8 = 1;
+                            q->fC = 0.0f;
+                        }
+                    } else if (!(c->ctl->vf14() & 0x10)) {
+                        PlayerData* q = players.data[car];
+                        if (q->b8) {
+                            q->b8 = 0;
+                            q->fC = 0.0f;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return r;
 }
