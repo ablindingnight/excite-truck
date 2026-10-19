@@ -587,9 +587,12 @@ void FixupMyoEves(void) {
     int i;
     int j;
 
-    for (i = 0; i < lbl_8055D518; i++) {
-        lbl_803551E0[i].unk84 += lbl_803551E0[i].track.num_contests;
-        lbl_803551E0[i].track.num_contests = 0;
+    {
+        MyoTrack* t = lbl_803551E0;
+        for (i = 0; i < lbl_8055D518; i++, t++) {
+            t->unk84 += t->track.num_contests;
+            t->track.num_contests = 0;
+        }
     }
     for (i = 0; i < lbl_8055D508; i++) {
         for (j = 0; j < lbl_8055D518; j++) {
