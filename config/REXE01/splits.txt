@@ -2881,6 +2881,15 @@ game/umat.cpp:
 	.sdata      start:0x8055CE10 end:0x8055CE28
 	.sbss       start:0x8055F9E0 end:0x8055F9F0
 
+game/lweight.cpp:
+	.text       start:0x802BB87C end:0x802BC328
+	.ctors      start:0x802ED56C end:0x802ED570
+	.data       start:0x8034AAB8 end:0x8034AB38
+	.bss        start:0x804C0098 end:0x804C00C8
+	.sdata      start:0x8055CF18 end:0x8055CF38
+	.sbss       start:0x8055FA88 end:0x8055FA98
+	.sdata2     start:0x80564CF8 end:0x80564D10
+
 game/stub14.cpp:
 	.text       start:0x802BC328 end:0x802BC334
 	.ctors      start:0x802ED570 end:0x802ED574
