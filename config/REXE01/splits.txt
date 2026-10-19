@@ -3107,6 +3107,14 @@ game/log.cpp:
 	.sdata      start:0x8055D178 end:0x8055D1A0
 	.sbss       start:0x8055FF08 end:0x8055FF10
 
+game/file.cpp:
+	.text       start:0x802E321C end:0x802E3DF8
+	.ctors      start:0x802ED5F0 end:0x802ED5F4
+	.data       start:0x8034CF40 end:0x8034D020
+	.bss        start:0x804DB810 end:0x804DBAA0
+	.sdata      start:0x8055D1A0 end:0x8055D1B0
+	.sbss       start:0x8055FF10 end:0x8055FF28
+
 game/memarena.cpp:
 	.text       start:0x802E3DF8 end:0x802E3EB0
 	.ctors      start:0x802ED5F4 end:0x802ED5F8
