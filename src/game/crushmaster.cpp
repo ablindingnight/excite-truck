@@ -206,6 +206,32 @@ struct Respawn {
     s16 path;     // offset 0x40
 };
 
+// A race start slot: the spawn transform plus how the car starts.
+struct StartPos : Respawn {
+    s32 f44;  // offset 0x44
+    s32 f48;  // offset 0x48
+    s32 f4C;  // offset 0x4C
+};
+
+struct ZoneResults {
+    struct Entry {
+        s32 car;    // offset 0x0
+        s32 place;  // offset 0x4
+        s32 score;  // offset 0x8
+        u8 padC[0x10 - 0xC];
+        bool b10;   // offset 0x10
+        u8 pad11[3];
+    };
+    s32 nCars;    // offset 0x0
+    s32 nHumans;  // offset 0x4
+    u8 pad8[0x4];
+    u8 bC;    // offset 0xC
+    u8 done;  // offset 0xD
+    u8 bE;    // offset 0xE
+    u8 padF;
+    Entry entries[8];  // offset 0x10
+};
+
 class RaceCarRec {
 public:
     virtual void v08(void);
@@ -435,7 +461,6 @@ struct ArtAnimManager {
 
 extern "C" int fn_80171EC0(int id);
 
-struct ZoneResults;
 
 class GameMode {
 public:
@@ -478,7 +503,7 @@ public:
     virtual void vf94(void);
     virtual void vf98(void);
     virtual void vf9C(void);
-    virtual int vfA0(Respawn* out, int idx);
+    virtual int vfA0(StartPos* out, int idx);
     virtual void vfA4(void);
     virtual void vfA8(int car);
     virtual void vfAC(int car);
@@ -576,7 +601,7 @@ public:
     virtual int vf64(void);
     virtual int vf68(void);
     virtual int vf8C(int p, int key);
-    virtual int vfA0(Respawn* out, int idx);
+    virtual int vfA0(StartPos* out, int idx);
     virtual void vfA8(int car);
     virtual void vfB8(ZoneResults* r);
     virtual void* vfE8(void);
@@ -1075,7 +1100,10 @@ void LayoutRef::Free(void) {
 
 int CrushMaster::vf28(void) { return AliveAI() != 0; }
 
+int IsLoadingActive(void);
+
 extern "C" {
+int fn_801E866C(int view);
 void fn_8018AF04(RaceCarRec* car);
 void fn_801E9DC4(s16* h);
 f32 fn_801DCF48(int a, f32 x, f32 z);  // ground height
@@ -1286,4 +1314,47 @@ void CrushMaster::vfA8(int car) {
         }
         rec->Respawn(&r);
     }
+}
+
+void CrushMaster::vfB8(ZoneResults* r) {
+    ZoneResults::Entry* e;
+    int i;
+    r->nCars = nCars;
+    r->nHumans = 1;
+    r->done = vf24();
+    r->bC = 0;
+    for (i = 0, e = r->entries; i < r->nCars; e++, i++) {
+        e->b10 = fn_80171EC0(i) == 0;
+        e->place = i;
+        e->score = cars[i].Score();
+    }
+}
+
+void CrushMaster::vf44(void) {
+    if (fn_801B306C() < 0.0f && !IsLoadingActive()) {
+        int n = fn_801EA994();
+        int i;
+        for (i = 0; i < n; i++) {
+            if (i != fn_801E866C(-1) && vf20(i)) {
+                fn_8017248C(i);
+            }
+        }
+    }
+}
+
+int CrushMaster::vfA0(StartPos* out, int idx) {
+    if (idx < spawns.count) {
+        V2* p = &spawns.data[idx];
+        V2 d;
+        f32 k = -1.0f;
+        d.x = p->x * k;
+        d.y = p->y * k;
+        NormV2(&d);
+        fn_801B7C8C(out, p, &d);
+        out->f44 = 2;
+        out->f48 = 0;
+        out->f4C = 0;
+        return 1;
+    }
+    return 0;
 }
