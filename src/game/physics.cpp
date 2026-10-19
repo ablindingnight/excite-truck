@@ -86,7 +86,6 @@ struct EventSetup {
 struct EventDesc {
     EventSetup setup;  // offset 0x0
     u8 pad14[0x18 - 0x14];
-    char name[0x20];  // offset 0x18
 };
 
 struct PendingCall {
@@ -142,6 +141,7 @@ f32 lbl_8055A2F4 = 3.0f;
 RaceMode lbl_804303C8;
 RaceMode lbl_804303D4;
 EventDesc lbl_804303E0;
+char lbl_804303F8[0x20];
 PendingCall lbl_80430418;
 LocString lbl_80430448("High_Scores:DNF");
 Fader lbl_80430558;
@@ -179,7 +179,7 @@ void fn_80176460(const EventSetup* s, const char* name, const s32* seed) {
     lbl_8055E3BC = 1;
     lbl_8055E3F8 = *seed;
     lbl_804303E0.setup = *s;
-    strcpy(lbl_804303E0.name, name);
+    strcpy(lbl_804303F8, name);
     lbl_8055E3F4 = 0;
     lbl_8055E3BD = 1;
     lbl_8055E3C0 = 0;
