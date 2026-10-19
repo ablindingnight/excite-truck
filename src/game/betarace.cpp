@@ -278,6 +278,7 @@ struct CoinCar {
 };
 
 struct Coins {
+    Coins(void);
     s32 Count(int id) { return enabled ? cars[id].count : 0; }
 
     u8 enabled;       // offset 0x0
@@ -351,26 +352,104 @@ extern "C" RaceCarRec* fn_8017960C(int id);
 
 inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 
+extern "C" {
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+}
+void* operator new[](size_t size, const char* tag);
+
+// Points for each finishing place, read from place_bonus.val (multiplayer: base + rate per second).
+struct PlaceBonus;
+static inline void LoadPlaceBonus(PlaceBonus* p);
+
+struct PlaceBonus {
+    PlaceBonus(void) {
+        table = 0;
+        n = 0;
+        index = -1;
+        multiBase = 1;
+        multiRate = 1;
+        LoadPlaceBonus(this);
+    }
+    ~PlaceBonus(void) {
+        if (table) {
+            delete[] table;
+            table = 0;
+            n = 0;
+        }
+    }
+    s32 Get(void) const {
+        if (index >= 0 && index < n) {
+            return table[index];
+        }
+        return 0;
+    }
+
+    s32* table;     // offset 0x0
+    s32 n;          // offset 0x4
+    s32 index;      // offset 0x8
+    s32 multiBase;  // offset 0xC
+    s32 multiRate;  // offset 0x10
+};
+
+static inline void LoadPlaceBonus(PlaceBonus* p) {
+    ValueTable* t = fn_80131808("place_bonus.val");
+    if (t) {
+        int ok = 0;
+        ValueNode* nd = t->FindChild("place_bonus");
+        if (nd) {
+            int i;
+            char buf[100];
+            ok = 1;
+            p->n = 1;
+            for (;;) {
+                fn_801345D8(buf, sizeof(buf), "bonus_%d", p->n);
+                if (!nd->Has(buf)) {
+                    break;
+                }
+                p->n++;
+            }
+            p->table = new ("bonus_values") s32[p->n + 1];
+            for (i = 0; i < p->n - 1; i++) {
+                fn_801345D8(buf, sizeof(buf), "bonus_%d", i + 1);
+                p->table[i] = nd->GetIntValue(buf);
+            }
+            {
+                s32 last = p->n - 1;
+                p->table[last] = 0;
+            }
+            p->multiBase = nd->GetInt("multi_base", p->multiBase);
+            p->multiRate = nd->GetInt("multi_rate", p->multiRate);
+        }
+        if (ok) {
+            fn_802E30C8("betarace: loading place bonus from place_bonus.val");
+        }
+        fn_80131818(t);
+    }
+    if (!p->table) {
+        fn_802E30C8("betarace: place bonus not loaded");
+        p->table = new ("bonus_values") s32[1];
+        p->table[0] = 0;
+        p->n = 1;
+    }
+}
+
 // Final placing and score of one car, as shown on the results screen.
 struct CarResult {
     void Finish(const BetaCar* c);
     void Compute(const BetaCar* c);
     f32 SinceFinish(const BetaCar* c);
 
-    s32 score;        // offset 0x0
-    s32 place;        // offset 0x4
-    s32* bonusTable;  // offset 0x8
-    s32 nBonus;       // offset 0xC
-    s32 index;        // offset 0x10
-    s32 multiBase;    // offset 0x14
-    s32 multiRate;    // offset 0x18
-    s32 timeLeft;     // offset 0x1C
-    s32 bonus;        // offset 0x20
-    s32 total;        // offset 0x24
-    f32 clock;        // offset 0x28
-    f32 finishTime;   // offset 0x2C
-    s32 grade;        // offset 0x30
-    u8 dnf;           // offset 0x34
+    s32 score;         // offset 0x0
+    s32 place;         // offset 0x4
+    PlaceBonus table;  // offset 0x8
+    s32 timeLeft;      // offset 0x1C
+    s32 bonus;         // offset 0x20
+    s32 total;         // offset 0x24
+    f32 clock;         // offset 0x28
+    f32 finishTime;    // offset 0x2C
+    s32 grade;         // offset 0x30
+    u8 dnf;            // offset 0x34
 };
 
 struct StuntLine {
@@ -388,12 +467,7 @@ struct StuntList {
 // The results-screen animation of one player: place, bonus count-up, grade and stunt list.
 class FinishAnimation {
 public:
-    FinishAnimation(void) {
-        anim = 0;
-        bonusSnd = 0;
-        noBonusSnd = 0;
-        transitionSnd = 0;
-    }
+    FinishAnimation(void) : anim(0), bonusSnd(0), noBonusSnd(0), transitionSnd(0) {}
     ~FinishAnimation(void) {
         if (anim) {
             fn_802ADE60(anim, 1);
@@ -683,7 +757,7 @@ public:
     virtual void SetActive(int on);                       // 0x1C
     virtual void vf20(void);
     virtual void vf24(void);
-    virtual void vf28(void);
+    virtual void Stop(void);                              // 0x28
     virtual void Award(RaceCarRec* rc, f32 v, int kind);  // 0x2C
     virtual void Start(RaceCarRec* rc);                   // 0x30
     virtual void vf34(void);
@@ -785,6 +859,9 @@ public:
     int Results(FinishAnimation* a);
     void SetResultsView(FinishAnimation* a);
     void DrawWinner(ILayout* l) const;
+    void DrawBonusStar(ILayout* l, int n);
+    void Retire(void);
+    void Finish(void);
 
     s32 id;              // offset 0x0
     s32 mode;            // offset 0x4
@@ -819,9 +896,78 @@ public:
     u8 padB4[0xC0 - 0xB4];
 };
 
+struct EventDesc {
+    u8 pad0[0x20];
+    ValueNode* vals;  // offset 0x20
+};
+
+struct LocalCarDesc {
+    s32 event;  // offset 0x0
+};
+
+struct Settings {
+    u8 pad0[0x20];
+    ValueNode* vals;  // offset 0x20
+};
+
+extern "C" {
+LocalCarDesc* fn_801769CC(void);
+f32 fn_80204CFC(const char* name);  // tuning value
+Sound* fn_80207848(const char* name, int flags);
+Settings* fn_8000AC38(void);
+void fn_801679F0(void);
+}
+void* GetEvent(int event);
+
+static inline void InitCoins(Coins* c) {
+    ValueNode* v;
+    c->enabled = 0;
+    v = fn_8000AC38()->vals;
+    if (v->Has("coin_file")) {
+        fn_801679F0();
+        c->xE4 = 0;
+        c->value = v->GetInt("coin_value", 3);
+        c->enabled = 1;
+    }
+}
+
+inline Coins::Coins(void) { InitCoins(this); }
+
+struct RaceTimer;
+static inline void InitTimer(RaceTimer* t);
+
+// The race clock: time limit from the event, the finish timeout and the warning sounds.
+struct RaceTimer {
+    RaceTimer(void) { InitTimer(this); }
+
+    f32 now;            // offset 0x0
+    f32 finishTimeout;  // offset 0x4
+    f32 limit;          // offset 0x8
+    f32 limit0;         // offset 0xC
+    u8 b10;             // offset 0x10
+    Sound* tick;        // offset 0x14
+    Sound* timeout;     // offset 0x18
+    u8 b1C;             // offset 0x1C
+};
+
+static inline void InitTimer(RaceTimer* t) {
+    t->limit = ((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetFloat("time_limit", 300.0f);
+    t->limit0 = t->limit;
+    t->finishTimeout = fn_80204CFC("finish_timeout");
+    t->tick = fn_80207848("clocktick.sfx", 1);
+    t->timeout = fn_80207848("timeout.sfx", 1);
+    t->now = 0.0f;
+    t->b10 = 0;
+        StopSound(t->tick);
+        StopSound(t->timeout);
+    t->b1C = 0;
+    t->limit = t->limit0;
+}
+
 // The stunt race mode.
 class BetaMaster : public GameMode, public IRaceListener, public IStuntListener, public IPickupListener {
 public:
+    BetaMaster(void);
     virtual ~BetaMaster(void);
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -832,7 +978,7 @@ public:
         if (s->state != 3 && !s->out) {
             racing = 1;
         }
-        if (racing && !(clock > timeLimit)) {
+        if (racing && !(timer.now > timer.limit)) {
             r = 1;
         }
         return r;
@@ -890,14 +1036,7 @@ public:
     Sound* preraceSnd;               // offset 0x44C
     u8 b450;                         // offset 0x450
     FinishAnimation anims[2];        // offset 0x454
-    f32 clock;                       // offset 0x8D4
-    f32 finishTimeout;               // offset 0x8D8
-    f32 timeLimit;                   // offset 0x8DC
-    f32 timeLimit0;                  // offset 0x8E0
-    u8 b8E4;                         // offset 0x8E4
-    Sound* clockSnd;                 // offset 0x8E8
-    Sound* timeoutSnd;               // offset 0x8EC
-    u8 b8F0;                         // offset 0x8F0
+    RaceTimer timer;                 // offset 0x8D4
     Coins coins;                     // offset 0x8F4
     u8 b9E0;                         // offset 0x9E0
     BetaCar cars[8];                 // offset 0x9E4
@@ -906,10 +1045,10 @@ public:
 
 void CarResult::Finish(const BetaCar* c) {
     s32 p;
-    clock = c->master->clock;
+    clock = c->master->timer.now;
     p = fn_8017960C(c->id)->places->Get()->place;
     place = p;
-    index = p - 1;
+    table.index = p - 1;
     Compute(c);
 }
 
@@ -918,21 +1057,15 @@ void CarResult::Compute(const BetaCar* c) {
     score = dnf ? 0 : Round(c->score);
     if (fn_80179650() > 1) {
         f32 t = SinceFinish(c);
-        s32 b = index == 0 ? multiBase + (s32)(multiRate * t) : 0;
+        s32 b = table.index == 0 ? table.multiBase + (s32)(table.multiRate * t) : 0;
         if (b != bonus && c->hud && c->hud->bonusSnd) {
             c->hud->bonusSnd->Play();
         }
         bonus = b;
     } else {
-        s32 b;
-        if (index >= 0 && index < nBonus) {
-            b = bonusTable[index];
-        } else {
-            b = 0;
-        }
-        bonus = b;
+        bonus = table.Get();
     }
-    left = c->master->timeLimit - c->master->clock;
+    left = c->master->timer.limit - c->master->timer.now;
     left = 0.0f > left ? 0.0f : left;
     total = score + bonus;
     timeLeft = left;
@@ -944,7 +1077,7 @@ f32 CarResult::SinceFinish(const BetaCar* c) {
     if (finishTime < 0.0f) {
         return 0.0f;
     }
-    d = c->master->clock - finishTime;
+    d = c->master->timer.now - finishTime;
     if (0.0f > d) {
         return 0.0f;
     }
@@ -1070,7 +1203,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         result.Compute(this);
         return;
     }
-    over = master->clock > master->timeLimit;
+    over = master->timer.now > master->timer.limit;
     if (over && overtime < 0.0f) {
         overtime = lbl_8055E3C8;
     }
@@ -1283,3 +1416,137 @@ void BetaCar::DrawWinner(ILayout* l) const {
         fn_801476C4(l->Find("loser"));
     }
 }
+
+extern "C" {
+u32 fn_80147C50(u32 a, u32 b, f32 t);
+double fmod(double x, double y);
+void fn_801CB648(int id, f32 t, int done);
+void fn_801CB5DC(int id, s32 total, s32 grade);
+}
+
+void BetaCar::DrawBonusStar(ILayout* l, int n) {
+    f32 left = master->timer.limit - master->timer.now;
+    left = 0.0f > left ? 0.0f : left;
+    if (!(left < 1.0f)) {
+        char buf[100];
+        GartElem* a;
+        GartElem* b;
+        f32 t;
+        fn_801345D8(buf, sizeof(buf), "bonus_star_start_%d", n);
+        a = l->FindBox(buf);
+        fn_801345D8(buf, sizeof(buf), "bonus_star_end_%d", n);
+        b = l->FindBox(buf);
+        t = result.SinceFinish(this);
+        if (a && b) {
+            GartElem e;
+            f32 ph = fmod(t, 1.875);
+            if (ph < 0.5f) {
+                e = *a;
+                e.color = fn_80147C50(e.color & 0xFFFFFF, e.color, Lerp(0.0f, 1.0f, Ramp(ph, 0.0f, 0.25f)));
+            } else {
+                f32 f = 2.0f * ph - 1.0f;
+                f32 q = f * f;
+                f32 s = 1.0f - (1.0f - f) * (1.0f - f);
+                e = *a;
+                e.pos.x = a->pos.x + s * (b->pos.x - a->pos.x);
+                e.pos.y = a->pos.y + q * (b->pos.y - a->pos.y);
+                e.w = a->w + q * (b->w - a->w);
+                e.h = a->h + q * (b->h - a->h);
+                e.color = fn_80147C50(a->color, b->color, f);
+            }
+            fn_80147940(l, &e, "star_art", 0);
+        }
+    }
+}
+
+void BetaCar::Retire(void) {
+    f32 left;
+    result.dnf = 1;
+    result.Finish(this);
+    left = master->timer.limit - master->timer.now;
+    left = 0.0f > left ? 0.0f : left;
+    fn_801CB648(id, master->timer.limit - left, 0);
+}
+
+void BetaCar::Finish(void) {
+    f32 add;
+    CarHud* h;
+    meterObj->Stop();
+    h = hud;
+    add = 0.0f;
+    if (h->current) {
+        add += h->current->points;
+        h->shown.PushBack(h->current);
+        h->current = 0;
+    }
+    {
+        StuntIter it(&h->pending, 0);
+        for (; it.Valid(); it.Next()) {
+            if (!it->running) {
+                if (it->ready) {
+                    add += it->points;
+                }
+                it.Remove();
+                h->shown.PushBack(it.Get());
+            }
+        }
+    }
+    score += add;
+    overtime = lbl_8055E3C8;
+    result.Finish(this);
+    if (!result.dnf) {
+        s32 total = result.total;
+        s32 grade = result.grade;
+        f32 left;
+        fn_802E30C8("betarace: car %d finished at %d points", id, total);
+        fn_801CB5DC(id, total, grade);
+        left = master->timer.limit - master->timer.now;
+        left = 0.0f > left ? 0.0f : left;
+        fn_801CB648(id, master->timer.limit - left, 1);
+    }
+}
+
+extern "C" {
+int fn_802C9A58(void);  // widescreen
+void fn_801777CC(IRaceListener* l);
+void fn_801D0590(IStuntListener* l);
+void fn_801D0800(IPickupListener* l);
+s32 fn_80232578(const char* name);  // load font
+void fn_80167834(void);
+void fn_8016A0B0(void);
+}
+
+extern BetaMaster* lbl_8055E268;
+extern ILayout* lbl_8055E238;
+extern ILayout* lbl_8055E23C;
+extern ILayout* lbl_8055E240;
+extern ILayout* lbl_8055E244;
+extern ILayout* lbl_8055E248;
+extern s32 lbl_8055E250;
+
+static inline void InitBeta(BetaMaster* m) {
+    lbl_8055E268 = m;
+    lbl_8055E238 = fn_80145E70("betalyt.val");
+    lbl_8055E23C = fn_80145E70("betalyt_2.val");
+    lbl_8055E240 = fn_80145E70(fn_802C9A58() ? "beta_multi_fs_ws.val" : "beta_multi_fs.val");
+    lbl_8055E244 = fn_80145E70("betares.val");
+    lbl_8055E248 = fn_80145E70("betares_2.val");
+    m->b9E0 = 0;
+    m->nCars = 0;
+    fn_801777CC(m);
+    fn_801D0590(m);
+    fn_801D0800(m);
+    m->coinSnd = fn_80207848("pickup_coin.sfx", 1);
+    m->starSnd = fn_80207848("pickup_star.sfx", 1);
+    m->preraceSnd = fn_80207848("prerace.sfx", 1);
+    m->b450 = 0;
+    lbl_8055E250 = fn_80232578("digiface.gtx");
+    fn_80167834();
+    fn_8016A0B0();
+}
+
+inline BetaMaster::BetaMaster(void) { InitBeta(this); }
+
+void* operator new(size_t size, const char* tag);
+
+extern "C" GameMode* fn_8014DE50(void) { return new ("betamaster") BetaMaster; }
