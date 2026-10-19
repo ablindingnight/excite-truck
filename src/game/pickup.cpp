@@ -40,20 +40,17 @@ struct Event {
 extern "C" EventDesc* fn_801769CC(void);
 Event* GetEvent(int id);
 
-struct BoundPt {
+struct V2 {
     f32 x;
     f32 z;
 };
+
+typedef V2 BoundPt;
 
 struct Bound {
     s32 n;           // offset 0x0
     s32 cap;         // offset 0x4
     BoundPt pts[1];  // offset 0x8
-};
-
-struct V2 {
-    f32 x;
-    f32 z;
 };
 
 struct CarDims {
@@ -116,6 +113,8 @@ struct ArrayRef {
         count = 0;
         cap = 0;
     }
+    T& At(int i) { return data[i]; }
+    T& Back(void) { return At(count - 1); }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
@@ -185,8 +184,9 @@ extern "C" PickupType* fn_80167874(int type);
 
 struct PickupObjMan {
     PickupObjMan(void);
+    ~PickupObjMan(void);
     void BeginGroup(Bound* b, int id);
-    void Add(int type, f32 x, f32 z, f32 hover);
+    void Add(int type, const V2& pos, f32 hover);
     FixedArr<Pickup, 5000> objs;       // offset 0x0
     FixedArr<PickupGroup, 100> groups;  // offset 0x1D4CC
     u8 grouping;                        // offset 0x1E158
@@ -223,30 +223,31 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
     grouping = 1;
 }
 
-inline void PickupObjMan::Add(int type, f32 x, f32 z, f32 hover) {
+inline void PickupObjMan::Add(int type, const V2& pos, f32 hover) {
     Pickup* p = &objs.data[objs.count++];
     p->type = 0;
     p->type = fn_80167874(type);
-    p->pos[0] = x;
+    p->pos[0] = pos.x;
     p->pos[1] = 0.0f;
-    p->pos[2] = z;
+    p->pos[2] = pos.z;
     p->hover = hover;
     fn_801E9E30(0, p->pos);
-    p->pos[1] = p->pos[1] + p->type->yoff + p->hover;
+    p->pos[1] += p->type->yoff;
+    p->pos[1] += p->hover;
     p->taken = 0;
     fn_801EA1E0(p->pos[0], p->pos[2], &p->pos[1], 1);
     fn_80167874(type)->count++;
     if (grouping) {
-        groups.data[groups.count - 1].count++;
+        groups.Back().count++;
     } else {
-        if (groups.count == 0 || groups.data[groups.count - 1].hasBound) {
+        if (groups.count == 0 || groups.Back().hasBound) {
             PickupGroup* g = &groups.data[groups.count++];
             g->hasBound = 0;
             g->first = objs.count - 1;
             g->count = 0;
             g->done = 0;
         }
-        groups.data[groups.count - 1].count++;
+        groups.Back().count++;
     }
 }
 
@@ -362,12 +363,12 @@ const RainbowTable lbl_802F9500 = {{1, 2, 3, 2, 1}};
 extern "C" {
 
 void fn_801678D8(void) {
-    int i;
     SpinXform* m = lbl_8042FF60;
+    int i;
     f32 t = 0.016683351f * ((f32)lbl_8055E3C4 + lbl_8055E460);
     for (i = 0; i < 16; i++) {
-        f32 c = cos(6.2831855f * (t + (f32)i * 0.0625f));
-        f32 s = sin(6.2831855f * (t + (f32)i * 0.0625f));
+        f32 c = cos(6.2831855f * (t + (f32)i / 16.0f));
+        f32 s = sin(6.2831855f * (t + (f32)i / 16.0f));
         m->rot[0] = c;
         m->rot[1] = 0.0f;
         m->rot[2] = -s;
@@ -421,33 +422,31 @@ void fn_801679F0(void) {
 
 }  // extern "C"
 
-extern "C" {
-
-void fn_80167EEC(void) {
-    PickupObjMan* m = lbl_8055E354;
-    if (m) {
-        int i;
-        for (i = 0; i < 5; i++) {
-            lbl_80330020[i].count = 0;
+inline PickupObjMan::~PickupObjMan(void) {
+    int i;
+    for (i = 0; i < 5; i++) {
+        lbl_80330020[i].count = 0;
+    }
+    {
+        int n = objs.count;
+        while (n-- > 0) {
+            objs.data[n].type = 0;
         }
-        {
-            int n = m->objs.count;
-            while (n-- > 0) {
-                m->objs.data[n].type = 0;
-            }
+    }
+    objs.count = 0;
+    groups.count = 0;
+    grouping = 0;
+    for (i = 0; i < 5; i++) {
+        if (lbl_80330020[i].handle != -1) {
+            fn_802C6CF8(lbl_80330020[i].handle);
+            lbl_80330020[i].handle = -1;
         }
-        m->objs.count = 0;
-        m->groups.count = 0;
-        m->grouping = 0;
-        for (i = 0; i < 5; i++) {
-            if (lbl_80330020[i].handle != -1) {
-                fn_802C6CF8(lbl_80330020[i].handle);
-                lbl_80330020[i].handle = -1;
-            }
-        }
-        delete m;
     }
 }
+
+extern "C" {
+
+void fn_80167EEC(void) { delete lbl_8055E354; }
 
 void fn_80168020(void) {
     PickupObjMan* m = lbl_8055E354;
@@ -455,7 +454,7 @@ void fn_80168020(void) {
     for (i = 0; i < m->objs.count; i++) {
         Pickup* p = &m->objs.data[i];
         fn_801E9E30(0, p->pos);
-        p->pos[1] = p->pos[1] + p->type->yoff + p->hover;
+        p->pos[1] = p->hover + (p->pos[1] + p->type->yoff);
         p->taken = 0;
     }
     for (i = 0; i < m->groups.count; i++) {
@@ -747,7 +746,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 } else {
                     ty = type;
                 }
-                m->Add(ty, p.x, p.z, 0.0f);
+                m->Add(ty, p, 0.0f);
                 rt++;
             }
             along += spacing;
@@ -894,7 +893,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
             q.z = pa.z + s * (pb.z - pa.z);
             q.x = pa.x + s * (pb.x - pa.x);
             pt = q;
-            m->Add(pick(j, i, ny, nx), pt.x, pt.z, 0.0f);
+            m->Add(pick(j, i, ny, nx), pt, 0.0f);
         }
     }
     m->grouping = 0;
@@ -936,7 +935,7 @@ inline int SinglesPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     b = fn_801399FC(n);
     m->BeginGroup(0, id);
     for (i = 0; i < b->n; i++) {
-        m->Add(type, b->pts[i].x, b->pts[i].z, 0.0f);
+        m->Add(type, b->pts[i], 0.0f);
     }
     m->grouping = 0;
     fn_80128658(b);
@@ -957,7 +956,7 @@ inline int PoopPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* param
     for (i = 0; (c = n->GetChildAt(i)) != 0; i++) {
         f32 hit = c->GetFloat("hit");
         ValPoint loc = c->GetPoint("loc");
-        m->Add(1, loc.x, loc.y, hit);
+        m->Add(1, *(V2*)&loc, hit);
     }
     m->grouping = 0;
     return 1;
