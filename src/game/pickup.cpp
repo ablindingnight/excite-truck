@@ -630,6 +630,13 @@ void fn_801688FC(int id) {
 
 }  // extern "C"
 
+static inline V2 Lerp2(const V2& a, const V2& b, f32 t) {
+    V2 r;
+    r.x = a.x + t * (b.x - a.x);
+    r.z = a.z + t * (b.z - a.z);
+    return r;
+}
+
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
     d.z = b->z - a->z;
@@ -831,7 +838,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     }
     b = fn_801399FC(n);
     np = b->n;
-    if (np != 4) {
+    if (np < 4 || np > 4) {
         fn_802E30C8("CoinBoxPickupMaker: bound %s has %d points, should have 4", n->GetName(), np);
         fn_80128658(b);
         return 0;
@@ -863,26 +870,13 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     p3 = &b->pts[(a + 3) % 4];
     for (i = 0; i <= nx; i++) {
         f32 t = (0.5f * rest + (f32)i * params[0]) / w;
-        V2 ea;
-        V2 eb;
-        V2 pa;
-        V2 pb;
         f32 l;
         int ny;
         f32 off;
         int j;
-        ea.z = p0->z + t * (p1->z - p0->z);
-        ea.x = p0->x + t * (p1->x - p0->x);
-        eb.x = p3->x + t * (p2->x - p3->x);
-        eb.z = p3->z + t * (p2->z - p3->z);
-        pa = ea;
-        pb = eb;
-        {
-            V2 d;
-            d.z = pa.z - pb.z;
-            d.x = pa.x - pb.x;
-            l = sqrt(d.x * d.x + d.z * d.z);
-        }
+        V2 pa = Lerp2(*p0, *p1, t);
+        V2 pb = Lerp2(*p3, *p2, t);
+        l = Dist(&pb, &pa);
         ny = 1;
         {
             int s = (int)(l / params[0]);
@@ -893,11 +887,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         off = 0.5f * (l - (f32)ny * params[0]);
         for (j = 0; j <= ny; j++) {
             f32 s = (off + (f32)j * params[0]) / l;
-            V2 q;
-            V2 pt;
-            q.z = pa.z + s * (pb.z - pa.z);
-            q.x = pa.x + s * (pb.x - pa.x);
-            pt = q;
+            V2 pt = Lerp2(pa, pb, s);
             m->Add(pick(j, i, ny, nx), pt, 0.0f);
         }
     }
