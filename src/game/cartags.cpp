@@ -129,8 +129,8 @@ int fn_802A7E08(const void* pa, const void* pb) {
     return 1;
 }
 
-// NonMatching: the target computes (7056 - 100) and 3 * 7056 at run time from hoisted constants
-// (our build folds them) and numbers the FPRs differently.
+// NonMatching: register numbering only. The run-time (far - near) and 3 * far come from plain
+// (non-const) float locals, which MWCC does not fold.
 void fn_802A7EEC(void) {
     int order[8];
     int i;
@@ -142,7 +142,9 @@ void fn_802A7EEC(void) {
         *q = i;
     }
     qsort(order, fn_801EA994(), sizeof(int), fn_802A7E08);
-    for (i = 0, q = order; i < fn_801EA994(); i++, q++) {
+    f32 nearDist = 100.0f;
+    f32 farDist = 7056.0f;
+    for (i = 0, q = order; i < fn_801EA994(); q++, i++) {
         int car = *q;
         TagCar* c;
         TagObj* o;
@@ -166,7 +168,7 @@ void fn_802A7EEC(void) {
             d = PSVECSquareDistance(&p, &fn_802678C0(fn_801E85B4())->pos);
             if (fn_802C8FF4(&scr, 0.0f)) {
                 char buf[8];
-                f32 a = (d - 100.0f) / (7056.0f - 100.0f);
+                f32 a = (d - nearDist) / (farDist - nearDist);
                 u32 color;
                 a = MIN(1.0f, a);
                 a = MAX(a, 0.0f);
@@ -176,12 +178,13 @@ void fn_802A7EEC(void) {
             }
         }
         if (fn_8027AA48()) {
-            f32 b = (d - 7056.0f) / (3.0f * 7056.0f - 7056.0f);
-            s32 id = c->regId;
+            f32 b = (d - farDist) / (3.0f * farDist - farDist);
+            s32 id;
             s32 me;
             b = MIN(1.0f, b);
             b = MAX(b, 0.0f);
             b = 1.0f + b * -1.0f;
+            id = c->regId;
             me = fn_801EA9A0(fn_801E866C(-1))->regId;
             if (fn_8027AC50(fn_8027ABF8(me))) {
                 if (id == fn_8027AC64(fn_8027ABF8(me))) {
