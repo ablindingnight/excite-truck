@@ -2447,6 +2447,12 @@ game/stub6.cpp:
 	.bss        start:0x80435728 end:0x80435740
 	.sbss       start:0x8055E608 end:0x8055E618
 
+game/tirelist.cpp:
+	.text       start:0x801AFAC8 end:0x801AFC28
+	.ctors      start:0x802ED248 end:0x802ED24C
+	.data       start:0x803359E0 end:0x803359F0
+	.sbss       start:0x8055E638 end:0x8055E648
+
 game/stub7.cpp:
 	.text       start:0x801B06C8 end:0x801B06D8
 	.ctors      start:0x802ED250 end:0x802ED254
