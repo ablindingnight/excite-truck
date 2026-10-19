@@ -99,6 +99,194 @@ static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - 
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+struct V2 {
+    f32 x;
+    f32 y;
+};
+
+// Layout elements (see ovlayout.cpp).
+struct ElemBase {
+    ElemBase(void) {}
+    const char* name;  // offset 0x0
+    V2 pos;            // offset 0x4
+    s32 elemJust;      // offset 0xC
+};
+
+struct BoxElem : ElemBase {
+    f32 w;  // offset 0x10
+    f32 h;  // offset 0x14
+};
+
+struct TextElem : ElemBase {
+    f32 scale;            // offset 0x10
+    u32 just;             // offset 0x14
+    u32 color;            // offset 0x18
+    const char* defText;  // offset 0x1C
+};
+
+struct ArtElem : BoxElem {
+    f32 u0;  // offset 0x18
+    f32 v0;  // offset 0x1C
+    f32 u1;  // offset 0x20
+    f32 v1;  // offset 0x24
+};
+
+struct GartElem : BoxElem {
+    u32 color;  // offset 0x18
+};
+
+class ILayout {
+public:
+    virtual ~ILayout(void) {}
+    virtual TextElem* Find(const char* name) = 0;
+    virtual ArtElem* FindArt(const char* name) = 0;
+    virtual GartElem* FindBox(const char* name) = 0;
+    virtual int FindSet(const char* name) = 0;
+};
+
+extern "C" {
+void fn_801476C4(TextElem* e);
+void fn_801476D8(const ArtElem* e, u32 color, s32 tex);
+void fn_80147230(TextElem* e, const char* fmt, ...);
+void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
+void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
+void fn_80147940(ILayout* l, GartElem* b, const char* set, int part);
+void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+ILayout* fn_80145E70(const char* name);
+}
+
+// The base of every race mode; the defaults are shared weak copies.
+class GameMode {
+public:
+    virtual ~GameMode(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void) {}
+    virtual void vf18(void) {}
+    virtual int vf1C(int car) { return vf20(car); }
+    virtual int vf20(int car) = 0;
+    virtual int vf24(void);
+    virtual void vf28(void);
+    virtual void vf2C(void);
+    virtual int vf30(void) { return 0; }
+    virtual int vf34(void) { return 0; }
+    virtual f32 vf38(void);
+    virtual int vf3C(int p);
+    virtual void vf40(void) {}
+    virtual void vf44(void);
+    virtual void vf48(void) {}
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual void vf58(void);
+    virtual int vf5C(int p);
+    virtual void vf60(void);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual void vf6C(void) {}
+    virtual void vf70(void) {}
+    virtual void vf74(void) {}
+    virtual void vf78(void) {}
+    virtual int vf7C(void) { return 0; }
+    virtual int vf80(void) { return 0; }
+    virtual int vf84(void) { return 0; }
+    virtual int vf88(void) { return 0; }
+    virtual int vf8C(int p, int key);
+    virtual void vf90(void) {}
+    virtual void vf94(void) {}
+    virtual void vf98(void);
+    virtual void vf9C(void) {}
+    virtual int vfA0(void* cam);
+    virtual void vfA4(void) {}
+    virtual void vfA8(int car);
+    virtual void vfAC(int car);
+    virtual int vfB0(void) { return 0; }
+    virtual void vfB4(void) {}
+    virtual void vfB8(void* r) = 0;
+    virtual int vfBC(void) { return 0; }
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual void vfC8(void) {}
+    virtual int vfCC(void) { return 1; }
+    virtual int vfD0(void) { return 0; }
+    virtual int vfD4(int car);
+    virtual int vfD8(void) { return 0; }
+    virtual int vfDC(void) { return 1; }
+    virtual int vfE0(void) { return 0; }
+    virtual int vfE4(void) { return 0; }
+    virtual void* vfE8(void);
+    virtual int vfEC(void);
+    virtual int vfF0(void) { return 0; }
+    virtual void vfF4(void) {}
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+};
+
+// Race event listeners BetaMaster registers itself with.
+class IRaceListener {
+public:
+    virtual void a0(void) = 0;
+    virtual void a1(void) = 0;
+    virtual void a2(void) = 0;
+    virtual void a3(void) = 0;
+    virtual void a4(void) = 0;
+};
+
+class IStuntListener {
+public:
+    virtual void b0(void) = 0;
+    virtual void b1(void) = 0;
+    virtual void b2(void) = 0;
+};
+
+class IPickupListener {
+public:
+    virtual void c0(void) = 0;
+    virtual void c1(void) = 0;
+    virtual void c2(void) = 0;
+    virtual void c3(void) = 0;
+};
+
+template <typename T>
+struct ArrayRef {
+    ~ArrayRef(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
+};
+
+template <typename T, int N>
+struct FixedList {
+    FixedList(void) {
+        a.data = storage;
+        a.cap = N;
+        a.count = 0;
+    }
+    ArrayRef<T> a;  // offset 0x0
+    T storage[N];   // offset 0xC
+};
+
+struct CoinCar {
+    u8 active;     // offset 0x0
+    s32 count;     // offset 0x4
+    f32 flash[4];  // offset 0x8
+    u32 next;      // offset 0x18
+};
+
+struct Coins {
+    s32 Count(int id) { return enabled ? cars[id].count : 0; }
+
+    u8 enabled;       // offset 0x0
+    CoinCar cars[8];  // offset 0x4
+    s32 xE4;          // offset 0xE4
+    s32 value;        // offset 0xE8
+};
+
+
 extern "C" {
 
 void fn_80149588(TextElem* e, f32 secs) {
@@ -116,37 +304,7 @@ f32 fn_80149650(void) { return fn_801495D4(64); }
 
 }  // extern "C"
 
-struct CoinCar {
-    u8 active;     // offset 0x0
-    s32 count;     // offset 0x4
-    f32 flash[4];  // offset 0x8
-    u32 next;      // offset 0x18
-};
-
-struct Coins {
-    u8 enabled;       // offset 0x0
-    CoinCar cars[8];  // offset 0x4
-    s32 xE4;          // offset 0xE4
-    s32 value;        // offset 0xE8
-};
-
-class BetaMaster {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual int vf20(int car);
-
-    u8 pad4[0x8D4 - 0x4];
-    f32 clock;          // offset 0x8D4
-    f32 finishTimeout;  // offset 0x8D8
-    f32 timeLimit;      // offset 0x8DC
-    u8 pad8E0[0x8F4 - 0x8E0];
-    Coins coins;        // offset 0x8F4
-};
+class BetaMaster;
 
 struct PlaceInfo {
     u8 pad0[0x4];
@@ -245,7 +403,7 @@ public:
         SafeDelete(noBonusSnd);
         SafeDelete(transitionSnd);
     }
-    int Update(const CarResult* r, const StuntList* s);
+    int Update(const CarResult* r, const StuntList* s, s32 coins);
 
     s32 state;              // offset 0x0
     f32 bonusStart;         // offset 0x4
@@ -267,6 +425,7 @@ public:
     FixedStr<0x14> stuntValue[9];  // offset 0x149
     FixedStr<0x28> title;   // offset 0x1FD
     FixedStr<0x14> count;   // offset 0x225
+    s32 x23C;               // offset 0x23C
 };
 
 static inline void Log(const FinishAnimation* a, const char* msg) {
@@ -274,7 +433,7 @@ static inline void Log(const FinishAnimation* a, const char* msg) {
                 a->signal[2]);
 }
 
-int FinishAnimation::Update(const CarResult* r, const StuntList* s) {
+int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     int i;
     s32 b;
     s32 shown;
@@ -384,7 +543,8 @@ int fn_80176A1C(void);
 f32 fn_80176A2C(void);
 }
 
-static inline f32 FrameDt(void) { return (fn_80176A1C() == 2 ? fn_80176A2C() : 1.0f) * 0.016683351f; }
+static inline int SlowMotion(void) { return fn_80176A1C() == 2; }
+static inline f32 FrameDt(void) { return (SlowMotion() ? fn_80176A2C() : 1.0f) * 0.016683351f; }
 
 inline f32 Floor(f32 x) { return floor(x); }
 extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
@@ -398,12 +558,12 @@ public:
     virtual void vf14(void);
     virtual void SetShown(f32 v);
     void Tick(void) {
-        if (active) {
+        if (running) {
             t0C += FrameDt();
         }
     }
-    int IsDead(void) { return dead; }
-    int IsActive(void) { return active; }
+    int IsRunning(void) { return running; }
+    int IsReady(void) { return ready; }
     f32 Value(void) { return value; }
     void SetValue(f32 v) { value = v; }
     s32 Type(void) { return type; }
@@ -412,8 +572,8 @@ public:
     f32 GetAge(void) { return age; }
     s32 Points(void) { return points; }
 
-    u8 dead;            // offset 0x4
-    u8 active;          // offset 0x5
+    u8 running;         // offset 0x4
+    u8 ready;           // offset 0x5
     f32 age;            // offset 0x8
     f32 t0C;            // offset 0xC
     f32 start;          // offset 0x10
@@ -427,6 +587,20 @@ public:
 };
 
 struct StuntQueue {
+    void Unlink(StuntEvent* n) {
+        if (n->prev) {
+            n->prev->next = n->next;
+        } else {
+            head = n->next;
+        }
+        if (n->next) {
+            n->next->prev = n->prev;
+        } else {
+            tail = n->prev;
+        }
+        n->prev = 0;
+        n->next = 0;
+    }
     void PushBack(StuntEvent* n) {
         n->next = 0;
         n->prev = tail;
@@ -479,22 +653,7 @@ struct StuntIter {
     }
     StuntEvent* Get(void) { return cur; }
     StuntEvent* operator->(void) { return cur; }
-    void Remove(void) {
-        StuntEvent* n = cur;
-        StuntQueue* l = list;
-        if (n->prev) {
-            n->prev->next = n->next;
-        } else {
-            l->head = n->next;
-        }
-        if (n->next) {
-            n->next->prev = n->prev;
-        } else {
-            l->tail = n->prev;
-        }
-        n->prev = 0;
-        n->next = 0;
-    }
+    void Remove(void) { list->Unlink(cur); }
 
     StuntQueue* list;  // offset 0x0
     StuntEvent* cur;   // offset 0x4
@@ -532,6 +691,7 @@ public:
     virtual void vf3C(void);
     virtual int Pending(f32* out);                        // 0x40
     virtual int Count(void);                              // 0x44
+    virtual void Fill(StuntList* l);                      // 0x48
 };
 
 struct RacerState {
@@ -601,6 +761,7 @@ extern "C" {
 CoinFrame fn_801683F4(void);
 int fn_801B8514(RaceCarRec* rc);
 Racer* fn_801B2EC0(int id);
+Racer* fn_801B2ED0(int id);
 void fn_801DF074(int a, int b);
 void fn_801796EC(int type, void* data, int size);
 f32 fn_801D48F4(void* obj);
@@ -619,11 +780,16 @@ extern s32 lbl_80559EC0;
 class BetaCar {
 public:
     void Update(PickupList* stars, PuddleList* puddles);
+    void DrawHud(ILayout* l, void* view);
+    void StopBonus(void);
+    int Results(FinishAnimation* a);
+    void SetResultsView(FinishAnimation* a);
+    void DrawWinner(ILayout* l) const;
 
     s32 id;              // offset 0x0
     s32 mode;            // offset 0x4
     CarHud* hud;         // offset 0x8
-    u8 padC[0x10 - 0xC];
+    StuntList* stunts;   // offset 0xC
     Meter* meterObj;     // offset 0x10
     f32 score;           // offset 0x14
     f32 shown;           // offset 0x18
@@ -650,6 +816,92 @@ public:
     u8 bAB;              // offset 0xAB
     Sound* starSnd;      // offset 0xAC
     Sound* fullSnd;      // offset 0xB0
+    u8 padB4[0xC0 - 0xB4];
+};
+
+// The stunt race mode.
+class BetaMaster : public GameMode, public IRaceListener, public IStuntListener, public IPickupListener {
+public:
+    virtual ~BetaMaster(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual int vf20(int car) {
+        RacerState* s = fn_801B2ED0(car)->GetInfo();
+        int racing = 0;
+        int r = 0;
+        if (s->state != 3 && !s->out) {
+            racing = 1;
+        }
+        if (racing && !(clock > timeLimit)) {
+            r = 1;
+        }
+        return r;
+    }
+    virtual int vf24(void);
+    virtual f32 vf38(void);
+    virtual int vf3C(int p);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual void vf58(void);
+    virtual int vf5C(int p);
+    virtual void vf60(void);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual int vf88(void);
+    virtual int vf8C(int p, int key);
+    virtual void vf90(void);
+    virtual void vf94(void);
+    virtual void vf9C(void);
+    virtual int vfA0(void* cam);
+    virtual void vfA4(void);
+    virtual void vfA8(int car);
+    virtual void vfB8(void* r);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual int vfDC(void);
+    virtual void* vfE8(void);
+    virtual void vfF4(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+    virtual void a0(void);
+    virtual void a4(void);
+    virtual void a1(void);
+    virtual void a2(void);
+    virtual void a3(void);
+    virtual void b0(void);
+    virtual void b1(void);
+    virtual void b2(void);
+    virtual void c0(void);
+    virtual void c1(void);
+    virtual void c2(void);
+    virtual void c3(void);
+
+    s32 x10;                         // offset 0x10
+    FixedList<Pickup*, 0x80> stars;  // offset 0x14
+    FixedList<Puddle*, 0x40> puddles;  // offset 0x220
+    FixedList<void*, 0x20> l32C;     // offset 0x32C
+    FixedList<void*, 0x20> l3B8;     // offset 0x3B8
+    Sound* coinSnd;                  // offset 0x444
+    Sound* starSnd;                  // offset 0x448
+    Sound* preraceSnd;               // offset 0x44C
+    u8 b450;                         // offset 0x450
+    FinishAnimation anims[2];        // offset 0x454
+    f32 clock;                       // offset 0x8D4
+    f32 finishTimeout;               // offset 0x8D8
+    f32 timeLimit;                   // offset 0x8DC
+    f32 timeLimit0;                  // offset 0x8E0
+    u8 b8E4;                         // offset 0x8E4
+    Sound* clockSnd;                 // offset 0x8E8
+    Sound* timeoutSnd;               // offset 0x8EC
+    u8 b8F0;                         // offset 0x8F0
+    Coins coins;                     // offset 0x8F4
+    u8 b9E0;                         // offset 0x9E0
+    BetaCar cars[8];                 // offset 0x9E4
+    s32 nCars;                       // offset 0xFE4
 };
 
 void CarResult::Finish(const BetaCar* c) {
@@ -733,8 +985,8 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         StuntIter it(&h->pending, 0);
         while (it.Valid()) {
             it->Tick();
-            if (!it->IsDead()) {
-                if (it->IsActive()) {
+            if (!it->IsRunning()) {
+                if (it->IsReady()) {
                     it->SetShown(Floor(it->Value()));
                     if (!h->current) {
                         if (NearZero(fn_8017960C(h->racer)->F2690()) || it->Type() == 13) {
@@ -966,3 +1218,68 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     }
 }
 #pragma dont_inline reset
+
+extern "C" {
+void fn_8001DFF0(void);
+void fn_801E7E18(void);
+void fn_802AE220(s32 anim, const f32* rect);
+}
+int GetNumPlayers(void);
+
+void BetaCar::StopBonus(void) {
+    if (result.dnf) {
+        fn_8001DFF0();
+    }
+}
+
+int BetaCar::Results(FinishAnimation* a) {
+    stunts->count = 0;
+    meterObj->Fill(stunts);
+    return a->Update(&result, stunts, master->coins.Count(id));
+}
+
+void BetaCar::SetResultsView(FinishAnimation* a) {
+    fn_801E7E18();
+    if (!result.dnf) {
+        if (GetNumPlayers() == 2) {
+            s32 h = a->anim;
+            f32 r[4];
+            r[0] = 1.5f;
+            r[1] = 8.5f;
+            r[2] = 39.0f;
+            r[3] = 0.0f;
+            if (h) {
+                fn_802AE220(h, r);
+            }
+        } else if (a->anim) {
+            fn_802AE220(a->anim, 0);
+        }
+        if (overtime >= 0.0f) {
+            return;
+        }
+    }
+}
+
+void BetaCar::DrawWinner(ILayout* l) const {
+    int best = -1;
+    const BetaMaster* m = master;
+    int i;
+    for (i = 0; i < m->nCars; i++) {
+        const BetaCar* c = &m->cars[i];
+        if (best < 0) {
+            best = i;
+        } else {
+            const BetaCar* b = &m->cars[best];
+            if (b->result.total < c->result.total) {
+                best = i;
+            } else if (b->result.total == c->result.total && b->result.place > c->result.place) {
+                best = i;
+            }
+        }
+    }
+    if (id == best) {
+        fn_801476C4(l->Find("winner"));
+    } else {
+        fn_801476C4(l->Find("loser"));
+    }
+}
