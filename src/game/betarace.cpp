@@ -3601,6 +3601,30 @@ void BetaMaster::vf48(void) {
 // copies.
 
 struct Mat3 {
+    void SetRotX(f32 a) {
+        f32 c = cos(a);
+        f32 s = sin(a);
+        m[0][0] = 1.0f;
+        m[0][1] = 0.0f;
+        m[0][2] = 0.0f;
+        m[1][0] = 0.0f;
+        m[1][1] = c;
+        m[1][2] = s;
+        m[2][0] = 0.0f;
+        m[2][1] = -s;
+        m[2][2] = c;
+    }
+    void SetScale(f32 s) {
+        m[0][0] = s;
+        m[0][1] = 0.0f;
+        m[0][2] = 0.0f;
+        m[1][0] = 0.0f;
+        m[1][1] = s;
+        m[1][2] = 0.0f;
+        m[2][0] = 0.0f;
+        m[2][1] = 0.0f;
+        m[2][2] = s;
+    }
     void SetRotY(f32 a) {
         f32 c = cos(a);
         f32 s = sin(a);
@@ -3618,6 +3642,8 @@ struct Mat3 {
 };
 
 struct Xform {
+    void SetRotX(f32 a) { r.SetRotX(a); }
+    void SetRotY(f32 a) { r.SetRotY(a); }
     Mat3 r;  // offset 0x0
     V3 t;    // offset 0x24
 };
@@ -3631,6 +3657,8 @@ struct VPos {
 
 extern "C" {
 Color fn_802C9950(Color c);  // set the draw colour, returns the old one
+int fn_802E2C20(void);         // milliseconds
+void fn_802C74D8(s32 model, const Xform* m, s32 tex);
 int fn_802C9994(int on);
 void fn_802C744C(s32 model, const Xform* m);
 void* fn_802C86DC(void);
@@ -3710,6 +3738,104 @@ void Pickup::Draw(Color col) {
     }
 }
 
+inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+
+// d = a * b
+static inline void MtxMul(Mat3* pd, const Mat3* pa, const Mat3* pb) {
+    Mat3& d = *pd;
+    const Mat3& a = *pa;
+    const Mat3& b = *pb;
+    if (pd == pa || pd == pb) {
+        f32 t00 = Dot(b.m[0][0], a.m[0][0], b.m[1][0], a.m[0][1], b.m[2][0], a.m[0][2]);
+        f32 t10 = Dot(b.m[0][0], a.m[1][0], b.m[1][0], a.m[1][1], b.m[2][0], a.m[1][2]);
+        f32 t20 = Dot(b.m[0][0], a.m[2][0], b.m[1][0], a.m[2][1], b.m[2][0], a.m[2][2]);
+        f32 t01 = Dot(b.m[0][1], a.m[0][0], b.m[1][1], a.m[0][1], b.m[2][1], a.m[0][2]);
+        f32 t11 = Dot(b.m[0][1], a.m[1][0], b.m[1][1], a.m[1][1], b.m[2][1], a.m[1][2]);
+        f32 t21 = Dot(b.m[0][1], a.m[2][0], b.m[1][1], a.m[2][1], b.m[2][1], a.m[2][2]);
+        f32 t02 = Dot(b.m[0][2], a.m[0][0], b.m[1][2], a.m[0][1], b.m[2][2], a.m[0][2]);
+        f32 t12 = Dot(b.m[0][2], a.m[1][0], b.m[1][2], a.m[1][1], b.m[2][2], a.m[1][2]);
+        f32 t22 = Dot(b.m[0][2], a.m[2][0], b.m[1][2], a.m[2][1], b.m[2][2], a.m[2][2]);
+        d.m[0][0] = t00;
+        d.m[1][0] = t10;
+        d.m[2][0] = t20;
+        d.m[0][1] = t01;
+        d.m[1][1] = t11;
+        d.m[2][1] = t21;
+        d.m[0][2] = t02;
+        d.m[1][2] = t12;
+        d.m[2][2] = t22;
+    } else {
+        d.m[0][0] = Dot(b.m[0][0], a.m[0][0], b.m[1][0], a.m[0][1], b.m[2][0], a.m[0][2]);
+        d.m[1][0] = Dot(b.m[0][0], a.m[1][0], b.m[1][0], a.m[1][1], b.m[2][0], a.m[1][2]);
+        d.m[2][0] = Dot(b.m[0][0], a.m[2][0], b.m[1][0], a.m[2][1], b.m[2][0], a.m[2][2]);
+        d.m[0][1] = Dot(b.m[0][1], a.m[0][0], b.m[1][1], a.m[0][1], b.m[2][1], a.m[0][2]);
+        d.m[1][1] = Dot(b.m[0][1], a.m[1][0], b.m[1][1], a.m[1][1], b.m[2][1], a.m[1][2]);
+        d.m[2][1] = Dot(b.m[0][1], a.m[2][0], b.m[1][1], a.m[2][1], b.m[2][1], a.m[2][2]);
+        d.m[0][2] = Dot(b.m[0][2], a.m[0][0], b.m[1][2], a.m[0][1], b.m[2][2], a.m[0][2]);
+        d.m[1][2] = Dot(b.m[0][2], a.m[1][0], b.m[1][2], a.m[1][1], b.m[2][2], a.m[1][2]);
+        d.m[2][2] = Dot(b.m[0][2], a.m[2][0], b.m[1][2], a.m[2][1], b.m[2][2], a.m[2][2]);
+    }
+}
+
+static inline void DrawPart(int tex, const s32& model, const Xform* m) {
+    if (tex) {
+        fn_802C74D8(model, m, lbl_80559EDC);
+    } else {
+        fn_802C744C(model, m);
+    }
+}
+
+// The morph gadget: two rings turning against each other, each step 0.75 times smaller.
+void DrawMorph(const VPos& pos, int tex, int realClock) {
+    V3 p;
+    Mat3 sc;
+    Xform b;
+    Xform a;
+    Mat3 q;
+    f32 t;
+    f32 a1;
+    f32 a2;
+    f32 s;
+    s32* ring;
+    p.z = pos.z;
+    p.y = pos.y;
+    p.x = pos.x;
+    t = realClock ? 0.001f * fn_802E2C20() : fn_801E7E18();
+    a1 = 6.2831855f * (f32)fmod(1.5f * t, 1.875);
+    a2 = 6.2831855f * (f32)fmod(0.5f * t, 1.875);
+    ring = &lbl_8055E254;
+    s = 0.75f;
+    sc.SetScale(s);
+    b.t = p;
+    a.t = p;
+    b.SetRotY(a1);
+    a.SetRotY(a2);
+    DrawPart(tex, *ring, &a);
+    MtxMul(&b.r, &b.r, &sc);
+    DrawPart(tex, *ring, &b);
+    b.SetRotX(a1);
+    a.SetRotX(a2);
+    s *= 0.75f;
+    sc.SetScale(s);
+    MtxMul(&a.r, &a.r, &sc);
+    s *= 0.75f;
+    sc.SetScale(s);
+    MtxMul(&b.r, &b.r, &sc);
+    DrawPart(tex, *ring, &a);
+    DrawPart(tex, *ring, &b);
+    q.SetRotY(1.5707964f);
+    MtxMul(&b.r, &b.r, &q);
+    MtxMul(&a.r, &a.r, &q);
+    s *= 0.75f;
+    sc.SetScale(s);
+    MtxMul(&a.r, &a.r, &sc);
+    s *= 0.75f;
+    sc.SetScale(s);
+    MtxMul(&b.r, &b.r, &sc);
+    DrawPart(tex, *ring, &a);
+    DrawPart(tex, *ring, &b);
+}
+
 static inline V3 MakeV3(f32 x, f32 y, f32 z) {
     V3 v;
     v.x = x;
@@ -3779,6 +3905,8 @@ inline Color LerpColor(Color a, Color b, f32 t) {
     ((u8*)&c)[3] = Lerp(((u8*)&a)[3], ((u8*)&b)[3], t);
     return c;
 }
+
+inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
 inline Palette* Pickup::GetPalette(void) { return &((Palette*)colors)[kind + which]; }
 
