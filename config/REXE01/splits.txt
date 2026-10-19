@@ -2655,6 +2655,14 @@ game/tunedash.cpp:
 	.sbss       start:0x8055ED30 end:0x8055ED50
 	.sdata2     start:0x80563168 end:0x80563190
 
+game/difficulty.cpp:
+	.text       start:0x80204AA4 end:0x802057A8
+	.ctors      start:0x802ED370 end:0x802ED374
+	.rodata     start:0x802F9D68 end:0x802F9D90
+	.data       start:0x8033BB68 end:0x8033BC18
+	.sdata      start:0x8055B468 end:0x8055B4C0
+	.sbss       start:0x8055ED50 end:0x8055ED60
+
 game/tiresnd.cpp:
 	.text       start:0x80209D4C end:0x80209FFC
 	.ctors      start:0x802ED388 end:0x802ED38C
