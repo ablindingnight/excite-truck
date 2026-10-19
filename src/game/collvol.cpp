@@ -48,6 +48,7 @@ public:
     virtual void vf2C(void);
     virtual void vf30(void);
     virtual void vf34(void);
+    virtual void vf38(void);
     virtual f32 Radius(void);  // 0x3C
     s32 a4;          // offset 0x4
     s32 a8;          // offset 0x8
@@ -94,7 +95,7 @@ public:
     virtual s32 vf2C(void);            // 0x2C
     virtual void vf30(void);           // 0x30
     virtual void vf34(void* q);        // 0x34
-    virtual void vf38(int a, u8* out);  // 0x38
+    virtual void vf38(u8* out);  // 0x38
     virtual void vf3C(void);           // 0x3C
     virtual int vf40(void);            // 0x40
     virtual int vf44(void);            // 0x44
@@ -185,9 +186,13 @@ CollVolume::~CollVolume(void) {
 }
 
 void CollVolume::AddShape(CollShape* s) {
-    sub[nAdded] = s;
-    nSub = ++nAdded;
-    radius = MAX(radius, s->Radius());
+    int n = nAdded;
+    sub[n] = s;
+    nSub = nAdded = n + 1;
+    {
+        f32 r = s->Radius();
+        radius = radius > r ? radius : r;
+    }
 }
 
 void CollVolume::vf18(void) {}
@@ -296,4 +301,4 @@ void BoxVolume::vf28(void) {}
 
 s32 CollVolume::vf2C(void) { return 0x14; }
 
-void CollVolume::vf38(int a, u8* out) { *out = 0; }
+void CollVolume::vf38(u8* out) { *out = 0; }
