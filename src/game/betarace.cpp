@@ -283,6 +283,7 @@ struct FixedList {
         T* p = &a.data[a.count++];
         *p = v;
     }
+    T* Add(const T& v);
     ArrayRef<T> a;  // offset 0x0
     T storage[N];   // offset 0xC
 };
@@ -500,7 +501,8 @@ public:
 class FinishAnimation {
 public:
     FinishAnimation(void) : anim(0), bonusSnd(0), noBonusSnd(0), transitionSnd(0) {}
-    ~FinishAnimation(void) {
+    ~FinishAnimation(void) { Release(); }
+    void Release(void) {
         if (anim) {
             fn_802ADE60(anim, 1);
             anim = 0;
@@ -853,6 +855,7 @@ extern s32 lbl_8055E254;
 
 // A star or coin lying on the track; the models are shared by all of them.
 struct Pickup {
+    Pickup(ValueNode* n);
     ~Pickup(void) {
         if (--lbl_8055E258 == 0) {
             fn_802CAC54(lbl_80559EDC);
@@ -877,15 +880,16 @@ struct Pickup {
     s32 kind;       // offset 0x38
     u8 pad3C[0xCC - 0x3C];
     u8 big;         // offset 0xCC
+    u8 padCD[0xD4 - 0xCD];
 };
 
 struct Puddle {
-    Puddle(const f32* p, f32 rad) {
+    Puddle(const f32* p, f32 rad, u8 fromFile) {
         x = p[0];
         y = p[1];
         z = p[2];
         r = rad;
-        b10 = 0;
+        b10 = fromFile;
     }
     f32 x;   // offset 0x0
     f32 y;   // offset 0x4
@@ -1126,7 +1130,13 @@ public:
         }
         coins.obj = fn_80145E70("bonanza.val");
     }
-    virtual void vfFC(void);
+    virtual void vfFC(void) {
+        int i;
+        SafeDelete(coins.obj);
+        for (i = 1; i >= 0; i--) {
+            anims[i].Release();
+        }
+    }
     virtual void a0(void);
     virtual void a4(void);
     virtual void a1(void);
@@ -1717,7 +1727,7 @@ s32 fn_8014E738(void) { return 0; }
 void fn_8014E740(const f32* pos, f32 r) {
     BetaMaster* m = lbl_8055E268;
     if (m) {
-        m->puddles.Push(new ("puddle") Puddle(pos, r));
+        m->puddles.Push(new ("puddle") Puddle(pos, r, 0));
     }
 }
 
@@ -1922,4 +1932,120 @@ void FinishAnimation::Setup(void) {
     bonusSnd = fn_80207848("pr_score.sfx", 1);
     noBonusSnd = fn_80207848("pr_score_nobonus.sfx", 1);
     transitionSnd = fn_80207848("pr_transition.sfx", 1);
+}
+
+template <typename T, int N>
+T* FixedList<T, N>::Add(const T& v) {
+    T* p = &a.data[a.count++];
+    *p = v;
+    return p;
+}
+
+struct TuneRef {
+    ValueNode* node;  // offset 0x0
+    s32 x4;           // offset 0x4
+};
+
+class Trigger;
+
+extern f32 lbl_8055E24C;  // high-speed threshold
+extern f32 lbl_80559EB4;  // score factor
+
+extern "C" {
+void fn_8013A0B0(TuneRef* r, const char* table, const char* entry);
+void fn_8013A198(TuneRef* r, int flag);
+s32 fn_80204BB4(const char* s);
+f32 fn_801EA0E8(f32 x, f32 z);  // ground height
+double sqrt(double x);
+int sprintf(char* s, const char* fmt, ...);
+}
+
+void BetaMaster::vfF4(void) {
+    TuneRef ref;
+    ValueTable* t;
+    int loaded;
+    int i;
+    lbl_8055E24C = 57.77778f;
+    fn_8013A0B0(&ref, "betarace", "info");
+    {
+        ValueNode* n = ref.node;
+        if (n) {
+            lbl_8055E24C = 0.44444445f * n->GetFloat("hispeed_thresh", 130.0f);
+            lbl_80559EB4 = n->GetFloat("score_factor", 1.0f);
+            fn_802E30C8("betarace: score_factor = %1.2f", lbl_80559EB4);
+        }
+    }
+    fn_8013A198(&ref, -1);
+    t = fn_80131810(GetEvent(fn_801769CC()->event)->vals->GetString("trigger_file", "triggers.val"));
+    if (t) {
+        ValueNode* n;
+        for (i = 0; (n = t->GetChild(i)) != 0; i++) {
+            int d = fn_80204CF0();
+            int nd = n->Has("difficulty_level") ? fn_80204BB4(n->GetValue("difficulty_level")) : d;
+            if (nd == d) {
+                Pickup* p = new ("trigger") Pickup(n);
+                stars.Add(p);
+            }
+        }
+        fn_80131818(t);
+        loaded = 1;
+    } else {
+        loaded = 0;
+    }
+    if (!loaded) {
+        ValueNode* ev = GetEvent(fn_801769CC()->event)->vals;
+        ValueNode* n;
+        for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
+            if (n->Has("bound0")) {
+                Pickup* p = new ("trigger") Pickup(n);
+                stars.Add(p);
+            }
+        }
+    }
+    t = fn_80131810("puddles.val");
+    if (t) {
+        ValueNode* n;
+        for (i = 0; (n = t->GetChild(i)) != 0; i++) {
+            V2 pts[32];
+            char buf[0x20];
+            f32 pos[3];
+            V2 c;
+            V2 d;
+            int k;
+            int j;
+            f32 maxd;
+            f32 r;
+            f32 h;
+            c.x = 0.0f;
+            c.y = 0.0f;
+            for (k = 0;; k++) {
+                sprintf(buf, "bound%d", k);
+                if (!n->Has(buf)) {
+                    break;
+                }
+                ValPoint pt = n->GetPoint(buf);
+                pts[k].x = pt.x;
+                pts[k].y = pt.y;
+                c.x += pt.x;
+                c.y += pt.y;
+            }
+            c.x *= 1.0f / k;
+            c.y *= 1.0f / k;
+            maxd = 0.0f;
+            for (j = 0; j < k; j++) {
+                f32 dd;
+                d.x = pts[j].x - c.x;
+                d.y = pts[j].y - c.y;
+                dd = d.x * d.x + d.y * d.y;
+                maxd = maxd > dd ? maxd : dd;
+            }
+            r = sqrt(maxd);
+            h = fn_801EA0E8(c.x, c.y);
+            pos[0] = c.x;
+            pos[1] = h;
+            pos[2] = c.y;
+            puddles.Push(new ("puddle") Puddle(pos, r, 1));
+        }
+        fn_80131818(t);
+    }
 }
