@@ -290,7 +290,7 @@ class IPickupListener {
 public:
     virtual void c0(class Body* b) = 0;
     virtual void c1(void) = 0;
-    virtual void c2(void) = 0;
+    virtual void c2(class Body* b, int car) = 0;
     virtual void c3(void) = 0;
 };
 
@@ -1259,7 +1259,7 @@ public:
     virtual void b2(StuntEvt* e, int car);
     virtual void c0(Body* b);
     virtual void c1(void);
-    virtual void c2(void);
+    virtual void c2(Body* b, int car);
     virtual void c3(void);
 
     f32 skipAt;                      // offset 0x10
@@ -2473,7 +2473,7 @@ public:
     virtual void vf14(void);
     virtual void vf18(void);
     virtual void vf1C(void);
-    virtual void vf20(void);
+    virtual void SetActive(int on);  // 0x20
     virtual void vf24(void);
     virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
 };
@@ -2493,6 +2493,33 @@ public:
     u8 active;       // offset 0x4
     f32 pos[3];      // offset 0x8
     f32 start;       // offset 0x14
+    void Hide(void) {
+        f32 m[12];
+        f32 vel[3];
+        f32 spin[3];
+        m[0] = 1.0f;
+        m[1] = 0.0f;
+        m[2] = 0.0f;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = 0.0f;
+        m[7] = 0.0f;
+        m[8] = 1.0f;
+        m[9] = 0.0f;
+        m[10] = 0.0f;
+        m[11] = 0.0f;
+        m[10] = -9999.0f;
+        spin[0] = 0.0f;
+        spin[1] = 0.0f;
+        spin[2] = 0.0f;
+        vel[0] = 0.0f;
+        vel[1] = 0.0f;
+        vel[2] = 0.0f;
+        body->SetState(m, vel, spin);
+        body->SetActive(0);
+        start = lbl_8055E3C8 + 10.0f;
+    }
     virtual int Ready(void) { return 0; }  // vptr at 0x18
 };
 
@@ -3064,5 +3091,69 @@ void BetaMaster::c0(Body* b) {
         bumps.Push(new ("pointtoken") PointToken(b));
     } else if (b->Info()->Has("invincibility")) {
         bumps2.Push(new ("inv_token") InvToken(b));
+    }
+}
+
+extern "C" {
+void fn_80206750(Sound* s, int car, int pan);
+void fn_8018A120(RaceCarRec* rc);
+}
+
+void BetaMaster::c2(Body* b, int car) {
+    RaceCarRec* rc = fn_8017960C(car);
+    if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
+        BetaCar* c = &cars[car];
+        int i;
+        for (i = 0; i < bumps.a.count; i++) {
+            Token* t = bumps.a.data[i];
+            f32 pts;
+            if (b == t->body && t->active) {
+                t->active = 0;
+                t->Hide();
+                pts = t->body->Info()->GetFloat("points", 10.0f);
+            } else {
+                pts = 0.0f;
+            }
+            if (pts > 0.5f) {
+                if (coinSnd) {
+                    fn_80206750(coinSnd, car, 0);
+                    coinSnd->Play();
+                }
+                c->score += pts;
+            }
+        }
+        for (i = 0; i < bumps2.a.count; i++) {
+            Token* t = bumps2.a.data[i];
+            int got;
+            if (b == t->body && t->active) {
+                RaceCarRec* r2 = fn_8017960C(car);
+                if (r2) {
+                    PickupEvent ev;
+                    const f32* p = b->Pos();
+                    ev.pos[0] = p[0];
+                    ev.pos[1] = p[1];
+                    ev.pos[2] = p[2];
+                    ev.vel[0] = r2->vel[0];
+                    ev.vel[1] = r2->vel[1];
+                    ev.vel[2] = r2->vel[2];
+                    ev.heading = r2->heading;
+                    ev.sfx = 0x96;
+                    fn_801796EC(10, &ev, sizeof(ev));
+                }
+                t->active = 0;
+                t->Hide();
+                got = 1;
+            } else {
+                got = 0;
+            }
+            if (got) {
+                if (starSnd) {
+                    fn_80206750(starSnd, car, fn_80009C84() ? 0 : 2);
+                    starSnd->Play();
+                }
+                fn_8018A120(rc);
+                fn_80161A38(3, car, 0);
+            }
+        }
     }
 }
