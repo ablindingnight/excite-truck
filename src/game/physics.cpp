@@ -268,8 +268,10 @@ void fn_80176734(void) {
 void fn_8017677C(int mode, u32 flags) {}
 
 void fn_80176780(u32 req, const u8* extra) {
-    int mode = req & 0xFF;
-    u32 flags = req & ~(lbl_8055E3E4 ? 0x100 : 0) & 0x1FF00;
+    u32 flags;
+    int mode;
+    mode = req & 0xFF;
+    flags = (req & 0x1FF00) & ~(lbl_8055E3E4 ? 0x100 : 0);
     fn_8017677C(mode, flags);
     if (fn_80176F9C()) {
         fn_802E30C8("physics: hey, phys-fader was active! (new race mode)");
