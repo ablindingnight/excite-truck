@@ -532,9 +532,9 @@ class ScaleHandler : public EditHandler {
 public:
     virtual void Drag(const V2* d, void* target) {
         TextElem* e = (TextElem*)target;
-        f32 s = e->scale + d->x * 0.01f;
-        s = 5.0f >= s ? s : 5.0f;
-        e->scale = s <= 0.05f ? 0.05f : s;
+        f32 s = e->scale + 0.01f * d->x;
+        s = 5.0f < s ? 5.0f : s;
+        e->scale = s > 0.05f ? s : 0.05f;
     }
     virtual u32 Color(void) { return 0xFFC0D9D9; }
     virtual const char* Label(void) { return "Scale"; }
@@ -547,8 +547,8 @@ public:
     virtual void Drag(const V2* d, void* target) {
         u8* c = (u8*)&((T*)target)->color + idx;
         f32 v = *c + d->x;
-        v = 255.0f >= v ? v : 255.0f;
-        *c = v <= 0.0f ? 0.0f : v;
+        v = 255.0f < v ? 255.0f : v;
+        *c = v > 0.0f ? v : 0.0f;
     }
     virtual u32 HoverColor(void) { return Color() & 0xFF7F7F7F; }
     virtual u32 Color(void) {
@@ -782,9 +782,12 @@ ChannelHandler<TextElem> lbl_8055E218;
 ChannelHandler<GartElem> lbl_8055E220;
 
 void Layout::BuildEditRects(void) {
-    int i;
     EditRect* r;
-    rects = new ("edit_oprects") DynArray<EditRect>(arts->a.count * 2 + garts->a.count * 3 + texts->a.count * 3 + 1);
+    int i;
+    int na = arts->a.count * 2;
+    int nt = texts->a.count * 3;
+    int ng = garts->a.count * 3;
+    rects = new ("edit_oprects") DynArray<EditRect>(na + nt + ng + 1);
     ctx = new ("EditingContext") EditContext(rects);
     for (i = 0; i < arts->a.count; i++) {
         r = ctx->rects->Add();
