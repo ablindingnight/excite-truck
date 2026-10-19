@@ -5,6 +5,8 @@
 
 extern "C" {
 double sqrt(double x);
+double acos(double x);
+double sin(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801E9DC4(s16* h);
 void PSVECNormalize(const void* src, void* dst);
@@ -96,7 +98,7 @@ public:
     virtual void vf28(void);           // 0x28
     virtual s32 vf2C(void);            // 0x2C
     virtual void vf30(void);           // 0x30
-    virtual void vf34(void* q);        // 0x34
+    virtual s32 vf34(struct CollPacket* p);  // 0x34
     virtual void vf38(u8* out);  // 0x38
     virtual void vf3C(void);           // 0x3C
     virtual int vf40(void);            // 0x40
@@ -128,6 +130,24 @@ public:
 };
 
 ModuleTag lbl_8055E478;
+
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+
+struct CollPacket {
+    u16 rot[3];  // offset 0x0
+    u8 pad6[2];
+    CVec3 pos;   // offset 0x8
+};
+
+#define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
+
+static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+    f32 t = (x - a) / (b - a);
+    CLAMP01(t);
+    return t;
+}
+
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void Identity(CMtx* m) {
     m->rot[0].x = 1.0f;
@@ -242,6 +262,61 @@ void CollVolume::Update(void) {
 }
 
 extern "C" void fn_8017A800(void) {}
+
+s32 CollVolume::vf34(CollPacket* p) {
+    f32(*m)[3] = (f32(*)[3]) & mtx;
+    f32 v[3];
+    f32 q[4];
+    f32 tr;
+    f32 th;
+    f32 sn;
+    p->pos = mtx.pos;
+    tr = mtx.rot[0].x + mtx.rot[1].y + mtx.rot[2].z;
+    if (tr > 0.0f) {
+        f32 r = sqrt(1.0f + tr);
+        f32 inv = 0.5f / r;
+        q[3] = 0.5f * r;
+        q[0] = inv * (m[1][2] - m[2][1]);
+        q[1] = inv * (m[2][0] - m[0][2]);
+        q[2] = inv * (m[0][1] - m[1][0]);
+    } else {
+        int i = 0;
+        int j;
+        int k;
+        f32 r;
+        f32 inv;
+        if (m[1][1] > m[0][0]) {
+            i = 1;
+        }
+        if (m[2][2] > m[i][i]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        r = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
+        inv = 0.5f / r;
+        q[i] = 0.5f * r;
+        q[3] = inv * (m[j][k] - m[k][j]);
+        q[j] = inv * (m[i][j] + m[j][i]);
+        q[k] = inv * (m[i][k] + m[k][i]);
+    }
+    th = acos(q[3]);
+    sn = sin(th);
+    if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
+        f32 f = 2.0f * th / sn;
+        v[0] = q[0] * f;
+        v[1] = q[1] * f;
+        v[2] = q[2] * f;
+    } else {
+        v[0] = 0.0f;
+        v[1] = 0.0f;
+        v[2] = 0.0f;
+    }
+    p->rot[0] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[0]));
+    p->rot[1] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[1]));
+    p->rot[2] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[2]));
+    return 0x14;
+}
 
 void CollVolume::Xform(CVec3* out, const CVec3* in) {
     MulVec(&mtx, in, out);
