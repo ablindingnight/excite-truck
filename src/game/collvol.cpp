@@ -4,6 +4,8 @@
 #include "game/common.h"
 
 extern "C" {
+f32 PSVECMag(const void* v);
+double cos(double x);
 double sqrt(double x);
 double acos(double x);
 double sin(double x);
@@ -97,7 +99,7 @@ public:
     virtual void vf24(void);           // 0x24
     virtual void vf28(void);           // 0x28
     virtual s32 vf2C(void);            // 0x2C
-    virtual void vf30(void);           // 0x30
+    virtual void vf30(f32 t, struct CollPacket* a, struct CollPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(struct CollPacket* p);  // 0x34
     virtual void vf38(u8* out);  // 0x38
     virtual void vf3C(void);           // 0x3C
@@ -223,6 +225,71 @@ extern "C" void fn_8017A008(u8* dst, const u8* src, int n) {
     while (--n >= 0) {
         *dst++ = *src++;
     }
+}
+
+static inline f32 Deq(u16 u) {
+    f32 t = MIN(1.0f, ((f32)u - 0.0f) / 65535.0f);
+    t = MAX(t, 0.0f);
+    return -6.2831855f + t * (6.2831855f - -6.2831855f);
+}
+
+static inline void SetV(CVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
+static inline void AxisAngle(CVec3* m, const CVec3* v) {
+    f32 a = PSVECMag(v);
+    if (a > 0.0001f) {
+        f32 inv = 1.0f / a;
+        f32 x = inv * v->x;
+        f32 y = inv * v->y;
+        f32 z = inv * v->z;
+        f32 s = sin(a);
+        f32 c = cos(a);
+        f32 t = 1.0f - c;
+        f32 tx = t * x;
+        f32 ty = t * y;
+        m[0].x = c + t * (x * x);
+        m[0].y = y * tx + s * z;
+        m[0].z = z * tx - s * y;
+        m[1].x = y * tx - s * z;
+        m[1].y = c + t * (y * y);
+        m[1].z = z * ty + s * x;
+        m[2].x = z * tx + s * y;
+        m[2].y = z * ty - s * x;
+        m[2].z = c + t * (z * z);
+    } else {
+        m[0].y = 0.0f;
+        m[0].x = 1.0f;
+        m[0].z = 0.0f;
+        m[1].x = 0.0f;
+        m[1].y = 1.0f;
+        m[1].z = 0.0f;
+        m[2].x = 0.0f;
+        m[2].y = 0.0f;
+        m[2].z = 1.0f;
+    }
+}
+
+extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t);
+
+void CollVolume::vf30(f32 t, CollPacket* a, CollPacket* b, s32* na, s32* nb) {
+    CMtx ma;
+    CMtx mb;
+    CVec3 vb;
+    CVec3 va;
+    fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
+    fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
+    SetV(&va, Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
+    SetV(&vb, Deq(b->rot[0]), Deq(b->rot[1]), Deq(b->rot[2]));
+    AxisAngle(ma.rot, &va);
+    AxisAngle(mb.rot, &vb);
+    fn_8017AE94(&mtx, &ma, &mb, t);
+    Update();
+    *nb = 0x14;
+    *na = 0x14;
 }
 
 void CollVolume::vf1C(void) { Update(); }
