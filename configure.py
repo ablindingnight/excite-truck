@@ -1055,6 +1055,7 @@ config.libs.append(
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
+            Object(NonMatching, "game/loadscrn.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),
             Object(NonMatching, "game/jumpcam.cpp"),
