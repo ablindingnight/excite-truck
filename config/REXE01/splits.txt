@@ -2471,6 +2471,13 @@ game/alarm.cpp:
 	.data       start:0x80336990 end:0x803369A0
 	.sbss       start:0x8055E758 end:0x8055E768
 
+game/csreplay.cpp:
+	.text       start:0x801CEFAC end:0x801CF080
+	.ctors      start:0x802ED29C end:0x802ED2A0
+	.data       start:0x80338060 end:0x80338098
+	.sdata      start:0x8055AB50 end:0x8055AB58
+	.sbss       start:0x8055E898 end:0x8055E8A8
+
 game/stub10.cpp:
 	.text       start:0x8023B5E0 end:0x8023B5EC
 	.ctors      start:0x802ED3F8 end:0x802ED3FC
