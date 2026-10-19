@@ -2652,6 +2652,15 @@ game/sortwrap.cpp:
 	.ctors      start:0x802ED480 end:0x802ED484
 	.sbss       start:0x8055F468 end:0x8055F470
 
+game/jumpcam.cpp:
+	.text       start:0x8026B118 end:0x8026B844
+	.ctors      start:0x802ED48C end:0x802ED490
+	.data       start:0x80346988 end:0x80346A50
+	.bss        start:0x8049A010 end:0x8049A168
+	.sdata      start:0x8055C4F8 end:0x8055C518
+	.sbss       start:0x8055F4B8 end:0x8055F4D8
+	.sdata2     start:0x80563D68 end:0x80563D78
+
 game/lightset.cpp:
 	.text       start:0x80279370 end:0x80279464
 	.ctors      start:0x802ED4B4 end:0x802ED4B8
