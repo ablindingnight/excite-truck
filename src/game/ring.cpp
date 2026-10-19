@@ -115,7 +115,8 @@ struct MechaSimpleArray : ArrayRef<T> {
 
 struct RingType {
     RingType(void) { loaded = 0; }
-    ~RingType(void) {
+    ~RingType(void) { Unload(); }
+    void Unload(void) {
         if (loaded) {
             fn_802C6CF8(model);
             loaded = 0;
@@ -559,11 +560,7 @@ void fn_8016B598(void) {
 void fn_8016B634(void) {
     int i;
     for (i = 0; i < lbl_804302F0.count; i++) {
-        RingType* t = &lbl_804302F0.data[i];
-        if (t->loaded) {
-            fn_802C6CF8(t->model);
-            t->loaded = 0;
-        }
+        lbl_804302F0.data[i].Unload();
     }
     lbl_804302F0.Free();
 }
