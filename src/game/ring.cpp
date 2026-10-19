@@ -146,6 +146,8 @@ struct Ring {
             fadeTime = lbl_8055E3C8;
         }
     }
+    int Live(void) { return active && !passed; }
+    int Check(RaceCarRec* rec);
     void Reset(void) {
         active = 0;
         passed = 0;
@@ -316,6 +318,22 @@ inline void RingSet::Disable(void) {
     }
 }
 
+inline int Ring::Check(RaceCarRec* rec) {
+    int hit = 0;
+    if (Live()) {
+        f32 rad = (f32)radius;
+        if (lbl_8055E364) {
+            rad += 1.0f;
+        }
+        if (PSVECSquareDistance(rec->pos, &frame.origin) < rad * rad) {
+            passed = 1;
+            hit = 1;
+            passTime = lbl_8055E3C8;
+        }
+    }
+    return hit;
+}
+
 extern "C" {
 
 void fn_8016A8F8(void);
@@ -365,24 +383,7 @@ int fn_8016A30C(int player) {
         int n = 0;
         int i;
         for (i = 0; i < lbl_80430318.count; i++) {
-            Ring* r = &lbl_80430318.data[i];
-            int hit = 0;
-            int live = 0;
-            if (r->active && !r->passed) {
-                live = 1;
-            }
-            if (live) {
-                f32 rad = (f32)r->radius;
-                if (lbl_8055E364) {
-                    rad += 1.0f;
-                }
-                if (PSVECSquareDistance(rec->pos, &r->frame.origin) < rad * rad) {
-                    r->passed = 1;
-                    hit = 1;
-                    r->passTime = lbl_8055E3C8;
-                }
-            }
-            if (hit) {
+            if (lbl_80430318.data[i].Check(rec)) {
                 n++;
             }
         }
