@@ -5,6 +5,7 @@
 #include "game/common.h"
 
 class RSound;
+extern f32 lbl_8055E3C8;  // time
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
@@ -147,10 +148,13 @@ struct RaceCarRec {
     u8 pad14[0x54 - 0x14];
     ValVec3 fwd;      // offset 0x54
     ValVec3 pos;      // offset 0x60
-    u8 pad6C[0x2690 - 0x6C];
+    u8 pad6C[0x1EC - 0x6C];
+    void* rings;      // offset 0x1EC
+    u8 pad1F0[0x2690 - 0x1F0];
     f32 speed;        // offset 0x2690
     u8 pad2694[0x270C - 0x2694];
     CarCtl* ctl;      // offset 0x270C
+    void* Rings(void);
 };
 
 extern "C" RaceCarRec* fn_8017960C(int id);
@@ -192,6 +196,21 @@ PathSet* fn_80156A40(void);
 void fn_801355C0(PathIter* it, V2* p, int a, PathPos* out, int b);
 void fn_801B7C8C(struct Respawn* r, V2* pos, V2* dir);
 }
+
+extern "C" {
+f32 fn_801B306C(void);
+int fn_80009C84(void);
+s32 fn_8016A30C(void* rings);
+s32 fn_8016A780(const char* name, void* rings);
+s32 fn_8016A878(const char* name);
+s32 fn_8015A404(RaceCarRec* car);
+int fn_80141FA0(RSound* s);
+void fn_80142B60(RSound* s);
+void fn_801CB5DC(int car, s32 score, s32 grade);
+void fn_801CB648(int car, int a, f32 t);
+}
+
+static inline f32 Time(void);
 
 struct GemRef {
     s32 a;
@@ -412,6 +431,7 @@ struct SetStat {
 struct ArenaTimer {
     void Set(f32 t);
     void Reset(void);
+    f32 Get(void);
     f32 t;      // offset 0x0
     f32 limit;  // offset 0x4
 };
@@ -439,7 +459,8 @@ public:
     int CountRingSets(void);
     void Reset(void);
     int PointValue(void);
-    void SetName(char* buf);
+    void SetName(char* buf, int n);
+    void SetNameA(char* buf, int n);
     void ShowSetGems(void);
     void ActivateRingSet(void);
     void ActivateObjSet(void);
@@ -481,6 +502,8 @@ struct PlayerData {
         b8 = 0;
         fC = 0.0f;
     }
+    u8 Stuck(void);
+    struct RaceCarRec* Car(void);
     s32 score;  // offset 0x0
     s32 index;  // offset 0x4
     u8 b8;      // offset 0x8
@@ -662,6 +685,7 @@ class RingChalMaster : public GameMode {
 public:
     RingChalMaster(struct Race* race);
     virtual ~RingChalMaster(void);
+    virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car);
     virtual int vf24(void);
@@ -1141,16 +1165,16 @@ void Arena::Spawn(void) {
         (s)->f4C = 0;    \
     }
 
-inline void Arena::SetName(char* buf) {
+inline void Arena::SetNameA(char* buf, int n) {
     switch (difficulty) {
     case 0:
-        fn_801345D8(buf, 0x1E, "set_%i_5", curSet);
+        fn_801345D8(buf, n, "set_%i_5", curSet);
         break;
     case 1:
-        fn_801345D8(buf, 0x1E, "set_%i_10", curSet);
+        fn_801345D8(buf, n, "set_%i_10", curSet);
         break;
     case 2:
-        fn_801345D8(buf, 0x1E, "set_%i_15", curSet);
+        fn_801345D8(buf, n, "set_%i_15", curSet);
         break;
     default:
         fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
@@ -1182,7 +1206,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
             }
             {
                 char name[0x1E];
-                a->SetName(name);
+                a->SetNameA(name, 0x1E);
                 fn_8016A15C(name);
             }
             {
@@ -1193,7 +1217,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
                         a->f24 = -1;
                     }
                 }
-                a->SetName(name);
+                a->SetNameA(name, 0x1E);
                 switch (a->difficulty) {
                 case 0: {
                     GemRef g = fn_8016A6B0(name, 12);
@@ -1351,7 +1375,7 @@ void Arena::ShowSetGems(void) {
     if (f24 != -1) {
         ClearGems();
     }
-    SetName(name);
+    SetNameA(name, 0x1E);
     switch (difficulty) {
     case 0: {
         GemRef g = fn_8016A6B0(name, 12);
@@ -1376,7 +1400,7 @@ void Arena::ShowSetGems(void) {
 
 void Arena::ActivateRingSet(void) {
     char name[0x1E];
-    SetName(name);
+    SetNameA(name, 0x1E);
     fn_8016A15C(name);
 }
 
@@ -1414,7 +1438,7 @@ void ObjSet::Reset(void) {
 
 void Arena::Deactivate(int i) {
     char name[0x1E];
-    SetName(name);
+    SetNameA(name, 0x1E);
     fn_8016A240(name);
     if (i < nFiles) {
         ObjSet* s = &sets->data[i];
@@ -1641,26 +1665,6 @@ void RingChalMaster::vf50(int p) { vf4C(p); }
 
 int RingChalMaster::vf54(void) { return 0x1408; }
 
-inline void ObjSet::CheckTeleport(Phob* car) {
-    int next = f10 + 1;
-    if (next < teles->count) {
-        ObjTeleport* t = &teles->data[next];
-        V2 a;
-        V2 b;
-        V2 d;
-        a.x = t->mtx.origin.x;
-        a.y = t->mtx.origin.z;
-        b.x = car->pos.x;
-        b.y = car->pos.z;
-        d.x = a.x - b.x;
-        d.y = a.y - b.y;
-        if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
-            teles->data[f10].b30 = 0;
-            f10 = next;
-            teles->data[next].b30 = 1;
-        }
-    }
-}
 
 int RingChalMaster::vf24(void) {
     int r = 0;
@@ -1918,3 +1922,237 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
     }
     return 0;
 }
+
+void RingChalMaster::vf0C(void) {
+    f32 rt = fn_801B306C();
+    if (!bA8 && rt < 6.75f) {
+        bA8 = 1;
+        if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
+            sPreRace->Play();
+        }
+    }
+    if (lbl_8055E3C8 > vf38() && arena.nSets > 0) {
+        int i;
+        for (i = 0; i < players.count; i++) {
+            if (!vf24()) {
+                char name[0x1E];
+                PlayerData* pd;
+                if (players.data[i]->b8) {
+                    players.data[i]->fC += 0.0166833512f;
+                }
+                pd = players.data[i];
+                arena.SetName(name, 0x1E);
+                if (!pd->Stuck() && !arena.b49) {
+                    RaceCarRec* car = pd->Car();
+                    int hit;
+                    int left;
+                    arena.stats->At(arena.curSet)->score = arena.timer.Get();
+                    hit = fn_8016A30C(car->Rings());
+                    left = fn_8016A780(name, car->Rings());
+                    if (left == 0 && !arena.b4A) {
+                        arena.b4A = 1;
+                        arena.ActivateRingSet();
+                    }
+                    if (arena.b4A && arena.f24 == -1) {
+                        arena.ShowSetGems();
+                    }
+                    if ((hit > 0 || left == fn_8016A878(name) || (left > 0 && fn_8015A404(car) > 1)) && arena.b4A) {
+                        arena.stats->At(arena.curSet)->time = Time();
+                        arena.Deactivate(arena.curSet);
+                        if (hit > 0) {
+                            arena.stats->At(arena.curSet)->done = 1;
+                            arena.f34 = arena.f30;
+                            {
+                                int pts = arena.stats->At(arena.curSet)->best;
+                                arena.difficulty++;
+                                arena.f30 += pts;
+                            }
+                            if (arena.difficulty > 2) {
+                                arena.difficulty = 2;
+                            }
+                            if (arena.sRingHit) {
+                                if (fn_80141FA0(arena.sRingHit)) {
+                                    fn_80144C54(arena.sRingHit);
+                                }
+                                fn_80142B60(arena.sRingHit);
+                            }
+                            if (arena.sCheerHit) {
+                                if (fn_80141FA0(arena.sCheerHit)) {
+                                    fn_80144C54(arena.sCheerHit);
+                                }
+                                fn_80142B60(arena.sCheerHit);
+                            }
+                            if (arena.stats->At(arena.curSet)->best == 10 || arena.stats->At(arena.curSet)->best == 15) {
+                                if (arena.sLongCheer) {
+                                    fn_80142B60(arena.sLongCheer);
+                                }
+                            }
+                        } else {
+                            if (--arena.difficulty < 0) {
+                                arena.difficulty = 0;
+                            }
+                        }
+                        if (arena.curSet < arena.nSets - 1) {
+                            arena.b4A = 0;
+                            arena.curSet++;
+                            arena.stats->At(arena.curSet)->best = arena.PointValue();
+                            arena.ActivateObjSet();
+                        } else {
+                            arena.b48 = 1;
+                            arena.b49 = 1;
+                        }
+                    } else {
+                        arena.sets->At(arena.curSet)->CheckTeleport((Phob*)car);
+                    }
+                } else if (arena.f24 != -1) {
+                    arena.ClearGems();
+                }
+            }
+            if (players.data[i]->score != arena.f34) {
+                players.data[i]->score = arena.f34;
+            }
+            if (b9C && arena.b49) {
+                if (fA0 < 0.0f) {
+                    fA0 = lbl_8055E3C8;
+                }
+                if (arena.b48) {
+                    StrCopyN(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+                    StrCopyN(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+                    StrCopyN(results.complete, "", 0x14);
+                } else {
+                    StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+                    StrCopyN(results.bB2, "", 0x14);
+                    StrCopyN(results.bC6, "", 0x14);
+                }
+                {
+                    int total = arena.f30;
+                    int tb = (int)arena.timer.t;
+                    fn_801CB5DC(i, total + tb, fn_801609C4(total + (int)arena.timer.t));
+                }
+                fn_801CB648(i, 1, arena.timer.t);
+                b9C = 0;
+            }
+        }
+        if (!arena.b49) {
+            arena.f28 += 0.0166833512f;
+            if (arena.f28 > 1.75f) {
+                arena.f28 = 0.0f;
+            }
+            if (arena.timer.t <= 0.0f) {
+                arena.b49 = 1;
+            } else if (fn_801B306C() <= 0.0f) {
+                arena.timer.t -= 0.0166833512f;
+            }
+        }
+        if (arena.curSet > 0) {
+            int k = arena.curSet - 1;
+            if (arena.b48) {
+                k = arena.curSet;
+            }
+            if (arena.f34 < arena.f30 && arena.stats->data[k].done) {
+                SetStat* st = &arena.stats->data[k];
+                f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (arena.f30 - arena.f34));
+                int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, lbl_8055E3C8 - st->time));
+                if (n) {
+                    arena.f34 += n;
+                    if (arena.sTally && !arena.sTally->busy && arena.f34 != arena.f30) {
+                        arena.sTally->stop = 0;
+                        arena.sTally->loop = 1;
+                        arena.sTally->playing = 1;
+                    }
+                    if (arena.f34 == arena.f30 && arena.sTally && arena.sTally->busy) {
+                        arena.sTally->stop = 1;
+                        arena.sTally->f4C = 0;
+                    }
+                }
+            }
+            if (arena.sLongCheer && arena.stats->data[k].done) {
+                f32 a = 0.0f;
+                f32 b = 0.0f;
+                int lvl;
+                switch (arena.stats->data[k].best) {
+                case 5:
+                    lvl = 0;
+                    break;
+                case 10:
+                    lvl = 1;
+                    break;
+                case 15:
+                    lvl = 2;
+                    break;
+                default:
+                    fn_802E317C("Freestyle::get_ring_point_value_from_difficulty - Unknown point value mapping");
+                    lvl = 0;
+                    break;
+                }
+                switch (lvl) {
+                case 1:
+                    a = 0.8f;
+                    b = 1.0f;
+                    break;
+                case 2:
+                    a = 1.0f;
+                    b = 2.5f;
+                    break;
+                }
+                if (!NearZeroF(a)) {
+                    f32 t = Unlerp(0.0f, b, lbl_8055E3C8 - arena.stats->data[k].time);
+                    arena.sLongCheer->SetVol(Lerp(a, 0.0f, t));
+                }
+            }
+        }
+    }
+    if (vf24() && lbl_8055E3C8 - fA0 >= 2.25f) {
+        results.Update(arena.f30 + (int)arena.timer.t, arena.f30, (int)arena.timer.t);
+    }
+}
+
+inline void ObjSet::CheckTeleport(Phob* car) {
+    int next = f10 + 1;
+    if (next < teles->count) {
+        ObjTeleport* t = &teles->data[next];
+        V2 a;
+        V2 b;
+        V2 d;
+        a.x = t->mtx.origin.x;
+        a.y = t->mtx.origin.z;
+        b.x = car->pos.x;
+        b.y = car->pos.z;
+        d.x = a.x - b.x;
+        d.y = a.y - b.y;
+        if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
+            teles->data[f10].b30 = 0;
+            f10 = next;
+            teles->data[next].b30 = 1;
+        }
+    }
+}
+
+static inline f32 Time(void) { return lbl_8055E3C8; }
+
+inline void* RaceCarRec::Rings(void) { return rings; }
+
+inline f32 ArenaTimer::Get(void) { return t; }
+
+inline RaceCarRec* PlayerData::Car(void) { return fn_8017960C(index); }
+
+inline u8 PlayerData::Stuck(void) { return b8; }
+
+inline void Arena::SetName(char* buf, int n) {
+    switch (difficulty) {
+    case 0:
+        fn_801345D8(buf, n, "set_%i_5", curSet);
+        break;
+    case 1:
+        fn_801345D8(buf, n, "set_%i_10", curSet);
+        break;
+    case 2:
+        fn_801345D8(buf, n, "set_%i_15", curSet);
+        break;
+    default:
+        fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
+        break;
+    }
+}
+
+
