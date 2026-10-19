@@ -199,14 +199,44 @@ struct ArrayRef {
     s32 cap;    // offset 0x8
 };
 
-struct RaceCarRec {
-    u8 pad0[0x10];
+struct Respawn {
+    ValMatrix m;  // offset 0x0
+    ValVec3 vel;  // offset 0x30
+    s32 flag;     // offset 0x3C
+    s16 path;     // offset 0x40
+};
+
+class RaceCarRec {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void Respawn(struct Respawn* r);  // 0x54
+    u8 pad4[0x10 - 0x4];
     u32 model;        // offset 0x10
-    u8 pad14[0x60 - 0x14];
-    ValVec3 pos;      // offset 0x60
+    u8 pad14[0x3C - 0x14];
+    ValMatrix mtx;    // offset 0x3C
     u8 pad6C[0x118 - 0x6C];
     ValVec3 center;   // offset 0x118
-    u8 pad124[0x25D4 - 0x124];
+    u8 pad124[0x25A0 - 0x124];
+    f32 turbo;        // offset 0x25A0
+    u8 pad25A4[0x25D4 - 0x25A4];
     f32 speed;        // offset 0x25D4
 };
 
@@ -221,11 +251,18 @@ extern "C" {
 Camera* fn_802C86DC(void);
 void fn_8018F76C(RaceCarRec* car, int wheel);
 void fn_8001DAE0(struct Timer* t, f32 len);
-f32 fn_8001DAE8(void);  // time
 }
+
+extern "C" f32 fn_8001DAE8(struct Timer* t);  // time
 
 struct Timer {
     Timer(f32 len) { fn_8001DAE0(this, len); }
+    int Running(void) {
+        f32 t = fn_8001DAE8(this) - start;
+        return t >= 0.0f && t < len;
+    }
+    void Start(void) { start = fn_8001DAE8(this); }
+    void Clear(void) { start = -999.0f; }
     f32 len;    // offset 0x0
     f32 start;  // offset 0x4
 };
@@ -399,7 +436,6 @@ struct ArtAnimManager {
 extern "C" int fn_80171EC0(int id);
 
 struct ZoneResults;
-struct Respawn;
 
 class GameMode {
 public:
@@ -504,10 +540,12 @@ public:
 
 // Per-car crush state.
 struct CrushCar {
+    s32 Score(void);
+    void ClearHist(void) { memset(f10, 0, 8); }
     u8 active;    // offset 0x0
     u8 human;     // offset 0x1
     u8 pad2[2];
-    s32 f4;       // offset 0x4
+    s32 bonus;    // offset 0x4
     s32 f8;       // offset 0x8
     s32 fC;       // offset 0xC
     u8 f10[8];    // offset 0x10
@@ -544,6 +582,17 @@ public:
     virtual void* vfE8(void);
     virtual void vfF8(void);
     virtual void vfFC(void);
+    int AliveAI(void) {
+        int n = 0;
+        int i;
+        for (i = 0; i < nCars; i++) {
+            if (!cars[i].human && cars[i].active) {
+                n++;
+            }
+        }
+        return n;
+    }
+    void Finish(f32 now);
     SpawnList spawns;          // offset 0x4
     CrushCar cars[8];          // offset 0x90
     s32 nCars;                 // offset 0x170
@@ -551,9 +600,11 @@ public:
     Timer t17C;                // offset 0x17C
     Timer t184;                // offset 0x184
     Timer t18C;                // offset 0x18C
-    u8 pad194[4];
+    u8 b194;                   // offset 0x194
+    u8 pad195[3];
     s32 radarTex;              // offset 0x198
-    u8 pad19C[8];
+    f32 endTime;               // offset 0x19C
+    f32 finishTime;            // offset 0x1A0
     f32 timeout;               // offset 0x1A4
     LayoutRef layout;          // offset 0x1A8
     ResultsOverlay results;    // offset 0x1AC
@@ -753,11 +804,11 @@ static inline ValVec3* CamPos(void) { return &fn_802C86DC()->pos; }
 
 void fn_8017248C(int id) {
     RaceCarRec* car = fn_8017960C(id);
-    f32 size = Remap(PSVECDistance(&car->pos, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
+    f32 size = Remap(PSVECDistance(&car->mtx.origin, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
     ValVec3 p;
-    p.x = car->pos.x;
-    p.y = car->pos.y;
-    p.z = car->pos.z;
+    p.x = car->mtx.origin.x;
+    p.y = car->mtx.origin.y;
+    p.z = car->mtx.origin.z;
     {
         f32 lo = 4.0f;
         f32 h = 40.0f;
@@ -790,12 +841,6 @@ int fn_80172624(int killer, int victim) {
 void* CrushMaster::vfE8(void) {
     return new ("subtaskmgr") CrushSubTaskMgr(this);
 }
-
-#define STOP(s)          \
-    if (s) {             \
-        (s)->stop = 1;   \
-        (s)->f4C = 0;    \
-    }
 
 void ResultsOverlay::Update(int score, int kills, int bonus) {
     if (layout) {
@@ -914,14 +959,13 @@ void CrushMaster::vfF8(void) {
     layout.p = (ILayout*)fn_80145E70("crushlyt.val");
     nCars = fn_801EA994();
     for (i = 0; i < nCars; i++) {
-        CrushCar* c = &cars[i];
-        c->human = fn_80171EC0(i);
-        c->active = 1;
-        c->f18 = -1.0f;
-        c->fC = 0;
-        c->f8 = 0;
-        c->f4 = 0;
-        memset(c->f10, 0, 8);
+        cars[i].human = fn_80171EC0(i);
+        cars[i].active = 1;
+        cars[i].f18 = -1.0f;
+        cars[i].fC = 0;
+        cars[i].f8 = 0;
+        cars[i].bonus = 0;
+        cars[i].ClearHist();
     }
     t = fn_8000AC38()->vals->FindChild((const char*)fn_80204EA0("crush_table"));
     timeout = t->GetFloat("timeout", 180.0f);
@@ -962,7 +1006,7 @@ void CrushMaster::vfF8(void) {
                 lbl_8043038C.speedB / 0.44444445f, lbl_8043038C.speedATime, lbl_8043038C.speedBTime);
 }
 
-void ResultsOverlay::Reset(void) {
+inline void ResultsOverlay::Reset(void) {
     state = 0;
     start = -1.0f;
     b8 = 1;
@@ -1029,13 +1073,217 @@ void LayoutRef::Free(void) {
     }
 }
 
-int CrushMaster::vf28(void) {
-    int n = 0;
+int CrushMaster::vf28(void) { return AliveAI() != 0; }
+
+extern "C" {
+void fn_8018AF04(RaceCarRec* car);
+void fn_801E9DC4(s16* h);
+f32 fn_801DCF48(int a, f32 x, f32 z);  // ground height
+void fn_801B7C8C(Respawn* r, V2* pos, V2* dir);
+void PSVECNormalize(const void* src, void* dst);
+f32 fn_801B306C(void);  // race time
+int fn_80161C38(void);
+int fn_80179650(void);
+int fn_80009C84(void);
+void fn_801CB5DC(int id, s32 total, s32 grade);
+void fn_801CB648(int id, f32 t, int done);
+int fn_80179630(int view);
+const char* fn_80131234(const char* key);  // localize
+}
+
+inline s32 CrushCar::Score(void) { return bonus + lbl_8043038C.pointsPerKill * (fC + f8); }
+
+inline void CrushMaster::Finish(f32 now) {
     int i;
     for (i = 0; i < nCars; i++) {
-        if (!cars[i].human && cars[i].active) {
-            n++;
+        CrushCar* c = &cars[i];
+        if (c->active) {
+            c->active = 0;
+            c->f18 = now;
+        }
+        if (c->human) {
+            s32 g = fn_801609C4(c->Score());
+            fn_801CB5DC(i, c->Score(), g);
+            fn_801CB648(i, c->bonus, 1);
         }
     }
-    return n != 0;
+    finishTime = now;
+}
+
+void CrushMaster::vf0C(void) {
+    f32 now = lbl_8055E3C8;
+    int i;
+    if (!b2B8 && fn_801B306C() < 6.75f) {
+        b2B8 = 1;
+        if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
+            sPreRace->Play();
+        }
+    }
+    if (fn_801B306C() >= 0.0f) {
+        endTime = now + timeout;
+    }
+    for (i = 0; i < nCars; i++) {
+        if (cars[i].human && lbl_8043038C.infTurbo) {
+            fn_8017960C(i)->turbo = 0.0f;
+        }
+        if (!cars[i].human && !cars[i].active) {
+            fn_8017960C(i)->turbo = 0.9f;
+        }
+    }
+    if (!vf24()) {
+        if (AliveAI() == 0 && !t174.Running()) {
+            if (b194) {
+                Finish(now);
+            } else {
+                t174.Start();
+            }
+            b194 = 1;
+            StrCopyN(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+            StrCopyN(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+            StrCopyN(results.complete, "", 0x14);
+        }
+        {
+            f32 left = endTime - now;
+            left = 0.0f > left ? 0.0f : left;
+            if ((f32)__fabs(left) <= lbl_80558DC4[0] && AliveAI() > 0) {
+                StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+                StrCopyN(results.bB2, "", 0x14);
+                StrCopyN(results.bC6, "", 0x14);
+                Finish(now);
+            }
+        }
+    } else if (!t17C.Running()) {
+        CrushCar* c = &cars[fn_80179630(0)];
+        results.Update(c->Score(), lbl_8043038C.pointsPerKill * (c->f8 + c->fC), c->bonus);
+    }
+}
+
+void CrushMaster::vf10(void) {
+    int i;
+    b194 = 0;
+    endTime = timeout;
+    finishTime = -1.0f;
+    for (i = 0; i < nCars; i++) {
+        cars[i].active = 1;
+        cars[i].f18 = -1.0f;
+        cars[i].fC = 0;
+        cars[i].f8 = 0;
+        cars[i].bonus = 0;
+        cars[i].ClearHist();
+    }
+    t17C.Clear();
+    t184.Clear();
+    t18C.Clear();
+    t174.Clear();
+    results.Reset();
+    Stop(sPreRace);
+    b2B8 = 0;
+}
+
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline f32 Max0(f32 x) { return 0.0f > x ? 0.0f : x; }
+
+int CrushMaster::vf20(int car) {
+    CrushCar* c = &cars[car];
+    int r = c->active;
+    if (r) {
+        f32 now = lbl_8055E3C8;
+        r = !NearZero(Max0(endTime - now));
+    }
+    return r;
+}
+
+int CrushMaster::vf24(void) { return finishTime > 0.0f; }
+
+int CrushMaster::vf54(void) { return 8; }
+
+static inline V2 FindSpot(const ValVec3* p) {
+    V2 c;
+    c.x = p->x;
+    c.y = p->z;
+    return fn_80171FF0(&c, 99, 15.0f, 5.0f);
+}
+
+static inline void NormV2(V2* d) {
+    f32 len = sqrt(d->x * d->x + d->y * d->y);
+    len = 0.01f > len ? 0.01f : len;
+    d->x *= 1.0f / len;
+    d->y *= 1.0f / len;
+}
+
+void CrushMaster::vfA8(int car) {
+    if (cars[car].active) {
+        Respawn r;
+        ValVec3 dst;
+        ValVec3 v;
+        V2 at;
+        V2 to;
+        V2 d;
+        V2 fwd;
+        RaceCarRec* rec = fn_8017960C(car);
+        ValVec3* pos;
+        fn_8018AF04(rec);
+        r.path = -1;
+        fn_801E9DC4(&r.path);
+        r.flag = 0;
+        pos = &rec->mtx.origin;
+        r.m = rec->mtx;
+        r.vel.x = 0.0f;
+        r.vel.y = 0.0f;
+        r.vel.z = 0.0f;
+        at.x = rec->mtx.origin.x;
+        at.y = rec->mtx.origin.z;
+        if (fn_802B04D4(pos) || !fn_80171E3C(at)) {
+            int jump;
+            {
+                V2 np = FindSpot(pos);
+                dst.x = np.x;
+                dst.y = 0.0f;
+                dst.z = np.y;
+                dst.y = fn_801DCF48(0, np.x, np.y);
+            }
+            jump = 0;
+            if (fn_802B04D4(pos) && !fn_80171DE4(&at)) {
+                jump = 1;
+            }
+            if (jump) {
+                f32 t = 4.0f;
+                f32 k = 1.0f / t;
+                v.x = (dst.x - pos->x) * k;
+                v.y = (dst.y - pos->y) * k + 9.81f * t;
+                v.z = (dst.z - pos->z) * k;
+                r.m.origin.x = rec->mtx.origin.x;
+                r.m.origin.y = rec->mtx.origin.y;
+                r.m.origin.z = rec->mtx.origin.z;
+                r.m.basis[1].x = 0.0f;
+                r.m.basis[1].y = 1.0f;
+                r.m.basis[1].z = 0.0f;
+                r.m.basis[2].x = v.x;
+                r.m.basis[2].y = 0.0f;
+                r.m.basis[2].z = v.z;
+                PSVECNormalize(&r.m.basis[2], &r.m.basis[2]);
+                r.m.basis[0].x = r.m.basis[2].z;
+                r.m.basis[0].y = 0.0f;
+                r.m.basis[0].z = -r.m.basis[2].x;
+                r.vel = v;
+            } else {
+                to.x = dst.x;
+                to.y = dst.z;
+                d.x = dst.x - at.x;
+                d.y = dst.z - at.y;
+                NormV2(&d);
+                fn_801B7C8C(&r, &to, &d);
+                r.m.origin.y += 3.0f;
+                r.vel.x = r.m.basis[2].x * 8.888889f;
+                r.vel.y = r.m.basis[2].y * 8.888889f;
+                r.vel.z = r.m.basis[2].z * 8.888889f;
+            }
+        } else if (rec->mtx.basis[1].y < 0.2f) {
+            fwd.x = rec->mtx.basis[2].x;
+            fwd.y = rec->mtx.basis[2].z;
+            NormV2(&fwd);
+            fn_801B7C8C(&r, &at, &fwd);
+        }
+        rec->Respawn(&r);
+    }
 }
