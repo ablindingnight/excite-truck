@@ -145,6 +145,10 @@ struct FixedArr : ArrayRef<T> {
 
 struct TaskList : ArrayRef<Task*> {
     TaskList(void) : ArrayRef<Task*>(storage, 16) {}
+    void Push(Task* t) {
+        Task** p = &data[count++];
+        *p = t;
+    }
     Task* storage[16];
 };
 
@@ -805,9 +809,11 @@ static inline void SetupStunt(StuntChallenge* c, ValueNode* n) {
     int i;
     ValueNode* s;
     c->onlyStunts = n->GetBool("only_stunts", 0);
-    for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
+    i = 0;
+    for (s = n->GetChildAt(0); s; s = n->GetChildAt(++i)) {
         if (strcasecmp(s->GetName(), "stunt") == 0) {
-            StuntReq* r = &c->stunts.data[c->stunts.count++];
+            int k0 = c->stunts.count++;
+            StuntReq* r = &c->stunts.data[k0];
             const char* names[4] = {"nice_landing", "turbo_jump", "pow_item", "morph_trigger"};
             const char* type = s->GetValue("type");
             int k;
@@ -849,16 +855,14 @@ void fn_80160CF4(void) {
     int i = 1;
     ValueNode* n;
     lbl_8055E300 = 0;
-    lbl_8042FDEC.data[lbl_8042FDEC.count++] = new ("ChalList") ChalList;
+    lbl_8042FDEC.Push(new ("ChalList") ChalList);
     for (n = e->vals->GetChildAt(0); n; n = e->vals->GetChildAt(i++)) {
         if (strcasecmp(n->GetName(), "challenge") == 0) {
             const char* type = n->GetValue("type");
             if (strcasecmp(type, "stunt") == 0) {
-                StuntChallenge* c = new ("StuntChallenge") StuntChallenge(n);
-                lbl_8042FDEC.data[lbl_8042FDEC.count++] = c;
+                lbl_8042FDEC.Push(new ("StuntChallenge") StuntChallenge(n));
             } else if (strcasecmp(type, "freestyle") == 0) {
-                FreestyleChallenge* c = new ("FreestyleChallenge") FreestyleChallenge(n);
-                lbl_8042FDEC.data[lbl_8042FDEC.count++] = c;
+                lbl_8042FDEC.Push(new ("FreestyleChallenge") FreestyleChallenge(n));
             }
         }
     }
@@ -1658,6 +1662,39 @@ inline int ChalList::Draw(int a) {
     return 1;
 }
 
+struct PathIter {
+    u8 pad[0x58];
+};
+
+struct LineNode {
+    f32 x;   // offset 0x0
+    f32 z;   // offset 0x4
+    f32 dx;  // offset 0x8
+    f32 dz;  // offset 0xC
+    u8 pad10[0x14 - 0x10];
+    LineNode* next;  // offset 0x14
+};
+
+struct LineHit {
+    LineNode* node;  // offset 0x0
+    f32 t;           // offset 0x4
+    s32 max;         // offset 0x8
+};
+
+class PathSet {
+public:
+    virtual void vf08(void);
+    virtual int GetLine(int i);  // 0x0C
+};
+
+extern "C" {
+void fn_801352B8(PathIter* it);
+int fn_80135D60(PathIter* it, int line);
+void fn_801355C0(PathIter* it, TVec2* pos, int a, LineHit* hit, int b);
+void fn_8013530C(PathIter* it, int unk);
+PathSet* fn_80156A40(void);
+}
+
 inline int ChallengeBase::Query(void* carp, int idx, int c) {
     TCar* car = (TCar*)carp;
     speed[idx] = 0.0f;
@@ -1671,17 +1708,75 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             TVec2 pos;
             TVec2 dir;
             int k;
+            int best;
+            f32 max;
             f32 spd;
+            pos.x = 0.0f;
+            pos.z = 0.0f;
+            dir.x = 0.0f;
+            dir.z = 0.0f;
             for (k = 0; k < 3; k++) {
-                ValPoint p;
                 char key[0x10];
+                ValPoint p;
                 fn_801345D8(key, sizeof(key), "bound%d", k);
                 p = place->GetPoint(key);
                 pts[k].x = p.x;
                 pts[k].z = p.y;
             }
-            pos = pts[0];
-            dir = pts[1];
+            {
+                Delta2 d;
+                f32 len;
+                d.x = pts[2].x - pts[0].x;
+                d.z = pts[2].z - pts[0].z;
+                best = 2;
+                max = d.x * d.x + d.z * d.z;
+                d.x = pts[0].x - pts[1].x;
+                d.z = pts[0].z - pts[1].z;
+                len = d.x * d.x + d.z * d.z;
+                if (len > max) {
+                    max = len;
+                    best = 0;
+                }
+                d.x = pts[1].x - pts[2].x;
+                d.z = pts[1].z - pts[2].z;
+                if (d.x * d.x + d.z * d.z > max) {
+                    best = 1;
+                }
+            }
+            {
+                TVec2* a = &pts[best];
+                TVec2* b = &pts[(best + 1) % 3];
+                TVec2* f = &pts[(best + 2) % 3];
+                f32 inv;
+                pos.x = a->x + 0.5f * (b->x - a->x);
+                pos.z = a->z + 0.5f * (b->z - a->z);
+                dir.x = f->x - pos.x;
+                dir.z = f->z - pos.z;
+                inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
+                dir.x *= inv;
+                dir.z *= inv;
+            }
+            if (place->GetBool("on_racingline", 1)) {
+                PathIter it;
+                LineHit h;
+                LineNode* n;
+                f32 inv;
+                fn_801352B8(&it);
+                fn_80135D60(&it, fn_80156A40()->GetLine(0));
+                h.node = 0;
+                h.max = 10000;
+                h.t = 0.0f;
+                fn_801355C0(&it, &pos, 0, &h, 0);
+                n = h.node;
+                pos.x = n->x + h.t * (n->next->x - n->x);
+                pos.z = n->z + h.t * (n->next->z - n->z);
+                dir.x = n->dx + h.t * (n->next->dx - n->dx);
+                dir.z = n->dz + h.t * (n->next->dz - n->dz);
+                inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
+                dir.x *= inv;
+                dir.z *= inv;
+                fn_8013530C(&it, -1);
+            }
             fn_801B7C8C(car, &pos, &dir);
             spd = 0.44444445f * place->GetFloat("speed", 0.0f);
             car->vel.x = car->fwd.x * spd;
