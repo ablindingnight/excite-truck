@@ -2724,6 +2724,14 @@ game/simpletga.cpp:
 	.data       start:0x8034A4E0 end:0x8034A510
 	.sbss       start:0x8055F9D8 end:0x8055F9E0
 
+game/umat.cpp:
+	.text       start:0x802B539C end:0x802B5B18
+	.ctors      start:0x802ED560 end:0x802ED564
+	.data       start:0x8034A510 end:0x8034A598
+	.bss        start:0x804BE448 end:0x804BE7B8
+	.sdata      start:0x8055CE10 end:0x8055CE28
+	.sbss       start:0x8055F9E0 end:0x8055F9F0
+
 game/stub14.cpp:
 	.text       start:0x802BC328 end:0x802BC334
 	.ctors      start:0x802ED570 end:0x802ED574
