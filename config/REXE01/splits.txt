@@ -2867,6 +2867,12 @@ game/jumpcam.cpp:
 	.sbss       start:0x8055F4B8 end:0x8055F4D8
 	.sdata2     start:0x80563D68 end:0x80563D78
 
+game/camframe.cpp:
+	.text       start:0x8026E22C end:0x8026E870
+	.ctors      start:0x802ED494 end:0x802ED498
+	.sbss       start:0x8055F518 end:0x8055F520
+	.sdata2     start:0x80563E20 end:0x80563E30
+
 game/cscript.cpp:
 	.text       start:0x8027820C end:0x802789A8
 	.ctors      start:0x802ED4A8 end:0x802ED4AC
