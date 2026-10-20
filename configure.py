@@ -1135,6 +1135,7 @@ config.libs.append(
             Object(NonMatching, "game/modelpool.cpp"),
             Object(NonMatching, "game/billboard.cpp"),
             Object(Matching, "game/discerr.cpp"),
+            Object(NonMatching, "game/bonemgr.cpp"),
             Object(NonMatching, "game/romfont.cpp"),
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/log.cpp"),
