@@ -2633,6 +2633,13 @@ game/carinfo.cpp:
 	.data       start:0x80339E08 end:0x80339E18
 	.sbss       start:0x8055EB70 end:0x8055EB80
 
+game/animobj.cpp:
+	.text       start:0x801EAB2C end:0x801EAFCC
+	.ctors      start:0x802ED330 end:0x802ED334
+	.data       start:0x80339E18 end:0x80339E88
+	.sbss       start:0x8055EB80 end:0x8055EB88
+	.sdata2     start:0x80562E60 end:0x80562E68
+
 game/event.cpp:
 	.text       start:0x801EEFC8 end:0x801EF190
 	.ctors      start:0x802ED33C end:0x802ED340
