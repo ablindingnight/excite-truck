@@ -112,10 +112,12 @@ void CarElem::Compute(int car) {
     if (x > f2C) {
         t = x - f20;
         t = 0.0f > t ? 0.0f : t;
-        t = fC + (f8 * x + f4 * (x * x)) - f24 * t;
+        f32 sq = x * x;
+        t = fC + (f8 * x + f4 * sq) - f24 * t;
         t = f28 > t ? f28 : t;
     } else {
-        t = f18 + (f14 * x + f10 * (x * x));
+        f32 sq = x * x;
+        t = f18 + (f14 * x + f10 * sq);
     }
     f0 = k * t - x * f1C;
 }
@@ -146,3 +148,5 @@ void CarElemMgr::vf10(void) {
 void CarElemMgr::vf1C(s32 car) { lbl_8055E908[car].Update(car); }
 
 void CarElemMgr::vf0C(void) { lbl_8055E908 = new ("carelem") CarElem[lbl_8055E8F8]; }
+
+// NonMatching: Compute colors its float registers differently (18 diffs, same instructions).
