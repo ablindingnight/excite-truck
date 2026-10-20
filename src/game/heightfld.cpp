@@ -157,8 +157,11 @@ static inline int Sample(int x, int z, f32* out, s32* mat, int unused) {
         return 0;
     }
     f32 h = t->base + t->scale * t->h[lx][lz];
-    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-        h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
+    if (t->layer >= 0) {
+        GroundHeader* gg = lbl_8055E990;
+        for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
+            h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
+        }
     }
     u8* r = g->runs + t->rows[lz];
     int n = 0;
@@ -171,14 +174,14 @@ static inline int Sample(int x, int z, f32* out, s32* mat, int unused) {
         n += r[1];
         r += 2;
     }
-    if (m == 0xFF) {
-        return 0;
+    if (m != 0xFF) {
+        *out = h;
+        if (mat) {
+            *mat = m;
+        }
+        return 1;
     }
-    *out = h;
-    if (mat) {
-        *mat = m;
-    }
-    return 1;
+    return 0;
 }
 
 static inline f32 Spline(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3) {
@@ -226,8 +229,8 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
 f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     f32 t2 = fx * fx;
     f32 t3 = t2 * fx;
-    f32 dcol[4];
     f32 col[4];
+    f32 dcol[4];
     for (int i = 0; i < 4; i++) {
         col[i] = SplineD(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3, &dcol[i]);
     }
