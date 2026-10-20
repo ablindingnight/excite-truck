@@ -263,9 +263,9 @@ void fn_801E67B4(BVec* out, const BVec* in, const BFrame* m) {
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->r.xx + in->y * m->r.yx + in->z * m->r.zx;
-        out->y = in->x * m->r.xy + in->y * m->r.yy + in->z * m->r.zy;
-        out->z = in->x * m->r.xz + in->y * m->r.yz + in->z * m->r.zz;
+        out->x = m->r.yx * in->y + m->r.xx * in->x + m->r.zx * in->z;
+        out->y = m->r.yy * in->y + m->r.xy * in->x + m->r.zy * in->z;
+        out->z = m->r.yz * in->y + m->r.xz * in->x + m->r.zz * in->z;
     }
 }
 
