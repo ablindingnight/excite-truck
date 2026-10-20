@@ -1043,6 +1043,7 @@ config.libs.append(
             Object(NonMatching, "game/actseq.cpp"),
             Object(NonMatching, "game/mgroup.cpp"),
             Object(NonMatching, "game/path.cpp"),
+            Object(NonMatching, "game/pathman.cpp"),
             Object(NonMatching, "game/garagetweak.cpp"),
             Object(NonMatching, "game/popup.cpp"),
             Object(NonMatching, "game/crashmode.cpp"),
