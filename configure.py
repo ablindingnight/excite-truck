@@ -1046,6 +1046,7 @@ config.libs.append(
             Object(NonMatching, "game/cargear.cpp"),
             Object(Matching, "game/carmesh.cpp"),
             Object(NonMatching, "game/soevent.cpp"),
+            Object(NonMatching, "game/mutphob.cpp"),
             Object(NonMatching, "game/actseq.cpp"),
             Object(NonMatching, "game/mgroup.cpp"),
             Object(NonMatching, "game/path.cpp"),
