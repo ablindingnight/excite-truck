@@ -2809,6 +2809,15 @@ game/gamedo.cpp:
 	.sdata      start:0x8055BB30 end:0x8055BB44
 	.sbss       start:0x8055F130 end:0x8055F138
 
+game/setmenu.cpp:
+	.text       start:0x8023C2B4 end:0x8023C9C8
+	.ctors      start:0x802ED404 end:0x802ED408
+	.rodata     start:0x802FA068 end:0x802FA090
+	.data       start:0x803413C0 end:0x803414D0
+	.bss        start:0x80498788 end:0x804987A0
+	.sdata      start:0x8055BB48 end:0x8055BB68
+	.sbss       start:0x8055F138 end:0x8055F158
+
 game/nameent.cpp:
 	.text       start:0x8023FA50 end:0x8023FE20
 	.ctors      start:0x802ED414 end:0x802ED418
