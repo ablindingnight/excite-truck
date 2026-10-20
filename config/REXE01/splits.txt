@@ -3237,6 +3237,12 @@ game/sky.cpp:
 	.sbss       start:0x8055FB08 end:0x8055FB20
 	.sdata2     start:0x80564E30 end:0x80564E50
 
+game/roadopac.cpp:
+	.text       start:0x802C2074 end:0x802C2298
+	.ctors      start:0x802ED588 end:0x802ED58C
+	.data       start:0x8034AFB8 end:0x8034AFE8
+	.sbss       start:0x8055FB48 end:0x8055FB58
+
 game/boats.cpp:
 	.text       start:0x802C2298 end:0x802C26F0
 	.ctors      start:0x802ED58C end:0x802ED590
