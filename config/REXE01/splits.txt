@@ -3228,6 +3228,15 @@ game/stub14.cpp:
 	.ctors      start:0x802ED570 end:0x802ED574
 	.sbss       start:0x8055FA98 end:0x8055FAA0
 
+game/tree.cpp:
+	.text       start:0x802BC334 end:0x802BE30C
+	.ctors      start:0x802ED574 end:0x802ED578
+	.data       start:0x8034AB38 end:0x8034AC68
+	.bss        start:0x804C00C8 end:0x804C06E0
+	.sdata      start:0x8055CF38 end:0x8055CF68
+	.sbss       start:0x8055FAA0 end:0x8055FAC0
+	.sdata2     start:0x80564D10 end:0x80564D50
+
 game/faninfo.cpp:
 	.text       start:0x802BE30C end:0x802BECE4
 	.ctors      start:0x802ED578 end:0x802ED57C

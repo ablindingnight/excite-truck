@@ -1116,6 +1116,7 @@ config.libs.append(
             Object(NonMatching, "game/flipbook.cpp"),
             Object(NonMatching, "game/roadopac.cpp"),
             Object(NonMatching, "game/treehit.cpp"),
+            Object(NonMatching, "game/tree.cpp"),
             Object(NonMatching, "game/fxseq.cpp"),
             Object(NonMatching, "game/shadowvol.cpp"),
             Object(Matching, "game/drawline.cpp"),
