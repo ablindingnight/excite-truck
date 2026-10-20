@@ -621,18 +621,20 @@ inline void Ball::Update(void) {
     RigidBody::Update();
 }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 inline void Rotate(BVec3* out, const BMtx* m, const BVec3* v) {
     if (out == v) {
-        f32 x = v->x * m->rot[0].x + v->y * m->rot[1].x + v->z * m->rot[2].x;
-        f32 y = v->x * m->rot[0].y + v->y * m->rot[1].y + v->z * m->rot[2].y;
-        f32 z = v->x * m->rot[0].z + v->y * m->rot[1].z + v->z * m->rot[2].z;
+        f32 x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
+        f32 y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
+        f32 z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = v->x * m->rot[0].x + v->y * m->rot[1].x + v->z * m->rot[2].x;
-        out->y = v->x * m->rot[0].y + v->y * m->rot[1].y + v->z * m->rot[2].y;
-        out->z = v->x * m->rot[0].z + v->y * m->rot[1].z + v->z * m->rot[2].z;
+        out->x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
+        out->y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
+        out->z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
     }
 }
 

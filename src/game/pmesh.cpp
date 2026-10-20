@@ -51,18 +51,20 @@ void fn_801E41D8(const PVec3* a, const PVec3* b, u32 color, f32 width);
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void MulVec(PVec3* out, const PVec3* in, const PFrame* m) {
     if (out == in) {
-        f32 x = in->x * m->x.x + in->y * m->y.x + in->z * m->z.x;
-        f32 y = in->x * m->x.y + in->y * m->y.y + in->z * m->z.y;
-        f32 z = in->x * m->x.z + in->y * m->y.z + in->z * m->z.z;
+        f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        f32 z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->x.x + in->y * m->y.x + in->z * m->z.x;
-        out->y = in->x * m->x.y + in->y * m->y.y + in->z * m->z.y;
-        out->z = in->x * m->x.z + in->y * m->y.z + in->z * m->z.z;
+        out->x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        out->y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        out->z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
     }
 }
 
@@ -98,9 +100,9 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
         lp.x = pos->x - xf->pos.x;
         lp.y = pos->y - xf->pos.y;
         lp.z = pos->z - xf->pos.z;
-        f32 x = lp.x * xf->x.x + lp.y * xf->x.y + lp.z * xf->x.z;
-        f32 y = lp.x * xf->y.x + lp.y * xf->y.y + lp.z * xf->y.z;
-        f32 z = lp.x * xf->z.x + lp.y * xf->z.y + lp.z * xf->z.z;
+        f32 x = Dot3(lp.x, xf->x.x, lp.y, xf->x.y, lp.z, xf->x.z);
+        f32 y = Dot3(lp.x, xf->y.x, lp.y, xf->y.y, lp.z, xf->y.z);
+        f32 z = Dot3(lp.x, xf->z.x, lp.y, xf->z.y, lp.z, xf->z.z);
         lp.x = x;
         lp.y = y;
         lp.z = z;

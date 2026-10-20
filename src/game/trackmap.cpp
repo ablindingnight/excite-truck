@@ -419,33 +419,35 @@ void fn_8001A04C(TrackMap* map) {
 
 void fn_8001A1F0(void) {}
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void MulVec(Vec3* out, const Vec3* in, const Basis* m) {
     if (out == in) {
-        f32 x = in->x * m->right.x + in->y * m->fwd.x + in->z * m->up.x;
-        f32 y = in->x * m->right.y + in->y * m->fwd.y + in->z * m->up.y;
-        f32 z = in->x * m->right.z + in->y * m->fwd.z + in->z * m->up.z;
+        f32 x = Dot3(in->x, m->right.x, in->y, m->fwd.x, in->z, m->up.x);
+        f32 y = Dot3(in->x, m->right.y, in->y, m->fwd.y, in->z, m->up.y);
+        f32 z = Dot3(in->x, m->right.z, in->y, m->fwd.z, in->z, m->up.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->right.x + in->y * m->fwd.x + in->z * m->up.x;
-        out->y = in->x * m->right.y + in->y * m->fwd.y + in->z * m->up.y;
-        out->z = in->x * m->right.z + in->y * m->fwd.z + in->z * m->up.z;
+        out->x = Dot3(in->x, m->right.x, in->y, m->fwd.x, in->z, m->up.x);
+        out->y = Dot3(in->x, m->right.y, in->y, m->fwd.y, in->z, m->up.y);
+        out->z = Dot3(in->x, m->right.z, in->y, m->fwd.z, in->z, m->up.z);
     }
 }
 
 static inline void MulVecT(Vec3* out, const Vec3* in, const Basis* m) {
     if (out == in) {
-        f32 x = in->x * m->right.x + in->y * m->right.y + in->z * m->right.z;
-        f32 y = in->x * m->fwd.x + in->y * m->fwd.y + in->z * m->fwd.z;
-        f32 z = in->x * m->up.x + in->y * m->up.y + in->z * m->up.z;
+        f32 x = Dot3(in->x, m->right.x, in->y, m->right.y, in->z, m->right.z);
+        f32 y = Dot3(in->x, m->fwd.x, in->y, m->fwd.y, in->z, m->fwd.z);
+        f32 z = Dot3(in->x, m->up.x, in->y, m->up.y, in->z, m->up.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->right.x + in->y * m->right.y + in->z * m->right.z;
-        out->y = in->x * m->fwd.x + in->y * m->fwd.y + in->z * m->fwd.z;
-        out->z = in->x * m->up.x + in->y * m->up.y + in->z * m->up.z;
+        out->x = Dot3(in->x, m->right.x, in->y, m->right.y, in->z, m->right.z);
+        out->y = Dot3(in->x, m->fwd.x, in->y, m->fwd.y, in->z, m->fwd.z);
+        out->z = Dot3(in->x, m->up.x, in->y, m->up.y, in->z, m->up.z);
     }
 }
 

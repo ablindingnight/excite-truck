@@ -69,6 +69,8 @@ static UnkStatic123 lbl_8042F7A8;
 UnkStatic7F lbl_8055E124;
 UnkStaticFFFF lbl_8055E128;
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
@@ -123,16 +125,16 @@ int fn_801392F8(u8* car) {
 
 static inline void MulVec(const Frame& m, const V3& src, V3* dst) {
     if (dst == &src) {
-        f32 x = src.x * m.rows[0].x + src.y * m.rows[0].y + src.z * m.rows[0].z;
-        f32 y = src.x * m.rows[1].x + src.y * m.rows[1].y + src.z * m.rows[1].z;
-        f32 z = src.x * m.rows[2].x + src.y * m.rows[2].y + src.z * m.rows[2].z;
+        f32 x = Dot3(src.x, m.rows[0].x, src.y, m.rows[0].y, src.z, m.rows[0].z);
+        f32 y = Dot3(src.x, m.rows[1].x, src.y, m.rows[1].y, src.z, m.rows[1].z);
+        f32 z = Dot3(src.x, m.rows[2].x, src.y, m.rows[2].y, src.z, m.rows[2].z);
         dst->x = x;
         dst->y = y;
         dst->z = z;
     } else {
-        dst->x = src.x * m.rows[0].x + src.y * m.rows[0].y + src.z * m.rows[0].z;
-        dst->y = src.x * m.rows[1].x + src.y * m.rows[1].y + src.z * m.rows[1].z;
-        dst->z = src.x * m.rows[2].x + src.y * m.rows[2].y + src.z * m.rows[2].z;
+        dst->x = Dot3(src.x, m.rows[0].x, src.y, m.rows[0].y, src.z, m.rows[0].z);
+        dst->y = Dot3(src.x, m.rows[1].x, src.y, m.rows[1].y, src.z, m.rows[1].z);
+        dst->z = Dot3(src.x, m.rows[2].x, src.y, m.rows[2].y, src.z, m.rows[2].z);
     }
 }
 

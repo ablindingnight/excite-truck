@@ -91,18 +91,20 @@ static inline void MtxMul(BMtx33& d, const BMtx33& a, const BMtx33& b) {
     }
 }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void MulVec(BVec* out, const BVec* in, const BMtx33* m) {
     if (out == in) {
-        f32 x = in->x * m->xx + in->y * m->yx + in->z * m->zx;
-        f32 y = in->x * m->xy + in->y * m->yy + in->z * m->zy;
-        f32 z = in->x * m->xz + in->y * m->yz + in->z * m->zz;
+        f32 x = Dot3(in->x, m->xx, in->y, m->yx, in->z, m->zx);
+        f32 y = Dot3(in->x, m->xy, in->y, m->yy, in->z, m->zy);
+        f32 z = Dot3(in->x, m->xz, in->y, m->yz, in->z, m->zz);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->xx + in->y * m->yx + in->z * m->zx;
-        out->y = in->x * m->xy + in->y * m->yy + in->z * m->zy;
-        out->z = in->x * m->xz + in->y * m->yz + in->z * m->zz;
+        out->x = Dot3(in->x, m->xx, in->y, m->yx, in->z, m->zx);
+        out->y = Dot3(in->x, m->xy, in->y, m->yy, in->z, m->zy);
+        out->z = Dot3(in->x, m->xz, in->y, m->yz, in->z, m->zz);
     }
 }
 
@@ -256,16 +258,16 @@ s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
 
 void fn_801E67B4(BVec* out, const BVec* in, const BFrame* m) {
     if (out == in) {
-        f32 x = in->y * m->r.yx + in->x * m->r.xx + in->z * m->r.zx;
-        f32 y = in->y * m->r.yy + in->x * m->r.xy + in->z * m->r.zy;
-        f32 z = in->y * m->r.yz + in->x * m->r.xz + in->z * m->r.zz;
+        f32 x = Dot3(in->x, m->r.xx, in->y, m->r.yx, in->z, m->r.zx);
+        f32 y = Dot3(in->x, m->r.xy, in->y, m->r.yy, in->z, m->r.zy);
+        f32 z = Dot3(in->x, m->r.xz, in->y, m->r.yz, in->z, m->r.zz);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = m->r.yx * in->y + m->r.xx * in->x + m->r.zx * in->z;
-        out->y = m->r.yy * in->y + m->r.xy * in->x + m->r.zy * in->z;
-        out->z = m->r.yz * in->y + m->r.xz * in->x + m->r.zz * in->z;
+        out->x = Dot3(in->x, m->r.xx, in->y, m->r.yx, in->z, m->r.zx);
+        out->y = Dot3(in->x, m->r.xy, in->y, m->r.yy, in->z, m->r.zy);
+        out->z = Dot3(in->x, m->r.xz, in->y, m->r.yz, in->z, m->r.zz);
     }
 }
 

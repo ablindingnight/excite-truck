@@ -183,6 +183,8 @@ f32 lbl_8055D0A4 = 1000.0f;
 template <class T>
 inline void Relocate(T*& p, u32 base);
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void Swap16(void* p) {
     u8 t = ((u8*)p)[0];
     ((u8*)p)[0] = ((u8*)p)[1];
@@ -382,16 +384,16 @@ void fn_802CD33C(MList* m, int i, int on) {
 
 static inline void MulVecT(MVec3* out, const MVec3* in, const MMtx33* m) {
     if (out == in) {
-        f32 x = in->x * m->xx + in->y * m->xy + in->z * m->xz;
-        f32 y = in->x * m->yx + in->y * m->yy + in->z * m->yz;
-        f32 z = in->x * m->zx + in->y * m->zy + in->z * m->zz;
+        f32 x = Dot3(in->x, m->xx, in->y, m->xy, in->z, m->xz);
+        f32 y = Dot3(in->x, m->yx, in->y, m->yy, in->z, m->yz);
+        f32 z = Dot3(in->x, m->zx, in->y, m->zy, in->z, m->zz);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->xx + in->y * m->xy + in->z * m->xz;
-        out->y = in->x * m->yx + in->y * m->yy + in->z * m->yz;
-        out->z = in->x * m->zx + in->y * m->zy + in->z * m->zz;
+        out->x = Dot3(in->x, m->xx, in->y, m->xy, in->z, m->xz);
+        out->y = Dot3(in->x, m->yx, in->y, m->yy, in->z, m->yz);
+        out->z = Dot3(in->x, m->zx, in->y, m->zy, in->z, m->zz);
     }
 }
 

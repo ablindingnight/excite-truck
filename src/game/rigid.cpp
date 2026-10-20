@@ -52,6 +52,8 @@ struct RMtx {
     RVec3 pos;   // offset 0x24
 };
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void Mul(RMat33* out, const RMat33* l, const RMat33* r) {
     if (out == l || out == r) {
         f32 m00 = fn_80144514(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
@@ -405,16 +407,16 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     if (out == in) {
-        f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
-        f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
-        out->y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        out->z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
 

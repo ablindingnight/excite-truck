@@ -82,6 +82,8 @@ public:
     u8 volDirty;  // offset 0x4D
 };
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void StopSound(Sound* s) {
     if (s) {
         s->b4A = 1;
@@ -3698,16 +3700,16 @@ void DrawSpin(const VPos& pos, const Xform* m);
 
 static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     if (out == in) {
-        f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
-        f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
-        out->y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        out->z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
 

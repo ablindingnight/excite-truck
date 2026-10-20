@@ -50,6 +50,8 @@ DCam* fn_802C86DC(void);
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void SetLength(DVec3* v, f32 len) {
     f32 m = PSVECMag(v);
     if ((f32)__fabs(m) <= lbl_80558DC4[0]) {
@@ -63,16 +65,16 @@ static inline void SetLength(DVec3* v, f32 len) {
 
 static inline void MulVec(DVec3* out, const DVec3* in, const DFrame* m) {
     if (out == in) {
-        f32 x = in->x * m->x.x + in->y * m->y.x + in->z * m->z.x;
-        f32 y = in->x * m->x.y + in->y * m->y.y + in->z * m->z.y;
-        f32 z = in->x * m->x.z + in->y * m->y.z + in->z * m->z.z;
+        f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        f32 z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->x * m->x.x + in->y * m->y.x + in->z * m->z.x;
-        out->y = in->x * m->x.y + in->y * m->y.y + in->z * m->z.y;
-        out->z = in->x * m->x.z + in->y * m->y.z + in->z * m->z.z;
+        out->x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        out->y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        out->z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
     }
 }
 
