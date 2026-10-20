@@ -3387,6 +3387,15 @@ game/image.cpp:
 	.sbss       start:0x8055FC08 end:0x8055FC18
 	.sdata2     start:0x80564EE8 end:0x80564EF0
 
+game/model.cpp:
+	.text       start:0x802C5390 end:0x802C82C0
+	.ctors      start:0x802ED5A4 end:0x802ED5A8
+	.data       start:0x8034B1B8 end:0x8034B498
+	.bss        start:0x804C1338 end:0x804C13E0
+	.sdata      start:0x8055D008 end:0x8055D018
+	.sbss       start:0x8055FC18 end:0x8055FC28
+	.sdata2     start:0x80564EF0 end:0x80564EF8
+
 game/mrender.cpp:
 	.text       start:0x802C82C0 end:0x802CA0E4
 	.ctors      start:0x802ED5A8 end:0x802ED5AC
