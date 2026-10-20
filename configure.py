@@ -1044,6 +1044,7 @@ config.libs.append(
             Object(NonMatching, "game/mgroup.cpp"),
             Object(NonMatching, "game/garagetweak.cpp"),
             Object(NonMatching, "game/popup.cpp"),
+            Object(NonMatching, "game/crashmode.cpp"),
             Object(NonMatching, "game/boostman.cpp"),
             Object(NonMatching, "game/weather.cpp"),
             Object(NonMatching, "game/physcol.cpp"),
