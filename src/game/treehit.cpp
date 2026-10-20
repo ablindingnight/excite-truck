@@ -54,9 +54,11 @@ struct TRot {
 
 extern "C" {
 void fn_8022FF10(TRot* out, const TPos* axis);  // rotation from axis * angle
-void fn_80015B20(TMtx* out, const TMtx* a, const TRot* b);
 void fn_802BDFF4(TMtx* tree, int a);
 }
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 struct CarRec {
     u8 pad0[0x6C];
@@ -396,7 +398,7 @@ void fn_802C173C(f32 time) {
                 a.y = s->axis.y * k;
                 a.z = s->axis.z * k;
                 fn_8022FF10(&r, &a);
-                fn_80015B20(&m, &m, &r);
+                Mat3Mul((Mat3*)&m, (const Mat3*)&m, (const Mat3*)&r);
                 *s->tree = m;
             } else {
                 fn_802C1180(s);

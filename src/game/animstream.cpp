@@ -76,13 +76,15 @@ void fn_801E598C(void* skel);
 s32 fn_801E5990(void* skel);
 s32 fn_801E5E24(void* skel, const AQuat* pose, s32 n, ValMatrix* out);
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
-void fn_80015B20(ValMatrix* out, const ValMatrix* a, const ValMatrix* b);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void fn_802C6CF8(s32 model);
 void fn_802C70AC(s32 model, const ValMatrix* m, s32 a, int b);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 #define AMIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -362,7 +364,7 @@ void fn_801E75C8(AnimInst* a, const ValMatrix* m) {
     ValMatrix out;
     s32 r = fn_801E5E24(a->skel, a->pose, a->numBones, &mat);
     fn_801BFD34(&out.origin, &mat.origin, m);
-    fn_80015B20(&out, &mat, m);
+    Mat3Mul((Mat3*)&out, (const Mat3*)&mat, (const Mat3*)m);
     fn_802C70AC(a->model, &out, r, -1);
 }
 

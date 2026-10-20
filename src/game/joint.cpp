@@ -42,8 +42,10 @@ struct Mtx33 {
 
 extern "C" {
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
-void fn_80015B20(ValMatrix* out, const ValMatrix* a, const ValMatrix* b);
 }
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 // One joint record in a model's MRJT chunk: "name model" and the joint's transform.
 struct JointEntry {
@@ -221,10 +223,10 @@ void fn_801E3284(ValMatrix* out, const Joint* j, const ValMatrix* root) {
     }
     ValMatrix b;
     fn_801BFD34(&b.origin, &j->base.origin, &m);
-    fn_80015B20(&b, &j->base, &m);
+    Mat3Mul((Mat3*)&b, (const Mat3*)&j->base, (const Mat3*)&m);
     ValMatrix d;
     fn_801BFD34(&d.origin, &j->local.origin, &b);
-    fn_80015B20(&d, &j->local, &b);
+    Mat3Mul((Mat3*)&d, (const Mat3*)&j->local, (const Mat3*)&b);
     *out = d;
 }
 

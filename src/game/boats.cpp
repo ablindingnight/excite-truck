@@ -19,8 +19,10 @@ struct Mtx33 {
 
 extern "C" {
 void fn_80015A20(Mtx33* out, const ValVec3* angles);
-void fn_80015B20(ValMatrix* out, const Mtx33* a, const ValMatrix* b);
 }
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 template <typename T>
 struct ArrayRef {
@@ -124,7 +126,7 @@ void fn_802C2488(void) {
         ang.y = 0.0f;
         ang.z = roll;
         fn_80015A20(&rot, &ang);
-        fn_80015B20(&m, &rot, &m);
+        Mat3Mul((Mat3*)&m, (const Mat3*)&rot, (const Mat3*)&m);
         off.x = 0.0f;
         off.y = 0.5f + bobHeight * bob;
         off.z = 0.0f;

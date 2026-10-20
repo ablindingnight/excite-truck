@@ -48,12 +48,14 @@ ModelChunks* fn_802C6C34(s32 model);
 s32 fn_802C7A38(int a, const BFrame* m, s32 n);
 f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // a*b + c*d + e*f
 void fn_801BFD34(BVec* out, const BVec* v, const BFrame* m);
-void fn_80015B20(BFrame* out, const BFrame* a, const BFrame* b);
 void fn_801C7254(BMtx33* m);
 void fn_801BFE7C(BVec* out, const BVec* a, const BVec* b);
 void fn_801C0E60(BVec* out, const BVec* a, const BVec* b);
 void StatsUpdate__Fv(BVec* v);
 }
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return fn_80144514(a, b, c, d, e, f); }
 
@@ -212,9 +214,9 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
         v.y *= -1.0f;
         v.z *= -1.0f;
         fn_801BFD34(&a.t, &v, &local);
-        fn_80015B20(&a, (BFrame*)&t, &local);
+        Mat3Mul((Mat3*)&a, (const Mat3*)&t, (const Mat3*)&local);
         fn_801BFD34(&world[i].t, &a.t, &parent);
-        fn_80015B20(&world[i], &a, &parent);
+        Mat3Mul((Mat3*)&world[i], (const Mat3*)&a, (const Mat3*)&parent);
     }
     world[0].t.x = pose[0].x;
     world[0].t.y = pose[0].y;
@@ -244,7 +246,7 @@ s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
             BMtx33 l = b->rest.r;
             fn_801C7254(&l);
             BFrame* s = &skin[b->dest];
-            fn_80015B20(s, &w, (BFrame*)&l);
+            Mat3Mul((Mat3*)s, (const Mat3*)&w, (const Mat3*)&l);
             BVec tmp;
             StatsUpdate__Fv(&tmp);
             fn_801E67B4(&tmp, &b->rest.t, s);
