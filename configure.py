@@ -1077,6 +1077,7 @@ config.libs.append(
             Object(NonMatching, "game/menumus.cpp"),
             Object(NonMatching, "game/roadsnd.cpp"),
             Object(Matching, "game/strlist.cpp"),
+            Object(NonMatching, "game/uitable.cpp"),
             Object(NonMatching, "game/autolyt.cpp"),
             Object(Matching, "game/uictx.cpp"),
             Object(Matching, "game/gtime.cpp"),

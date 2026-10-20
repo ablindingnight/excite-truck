@@ -2862,6 +2862,15 @@ game/strlist.cpp:
 	.bss        start:0x80497DE0 end:0x80497DF8
 	.sbss       start:0x8055EFD0 end:0x8055EFD8
 
+game/uitable.cpp:
+	.text       start:0x8022D228 end:0x8022E0EC
+	.ctors      start:0x802ED3C4 end:0x802ED3C8
+	.data       start:0x80340108 end:0x803401F8
+	.bss        start:0x80497DF8 end:0x80497E10
+	.sdata      start:0x8055B958 end:0x8055B960
+	.sbss       start:0x8055EFD8 end:0x8055EFE0
+	.sdata2     start:0x805635C0 end:0x805635D8
+
 game/autolyt.cpp:
 	.text       start:0x8022E0EC end:0x8022E9E0
 	.ctors      start:0x802ED3C8 end:0x802ED3CC
