@@ -2554,7 +2554,7 @@ game/carelem.cpp:
 	.sdata2     start:0x80562A48 end:0x80562A50
 
 game/cargear.cpp:
-	.text       start:0x801D14EC end:0x801D1C60
+	.text       start:0x801D14EC end:0x801D1C68
 	.ctors      start:0x802ED2BC end:0x802ED2C0
 	.data       start:0x80338238 end:0x80338268
 	.sdata      start:0x8055ABD8 end:0x8055ABE0
@@ -2643,7 +2643,7 @@ game/carinfo.cpp:
 	.sbss       start:0x8055EB70 end:0x8055EB80
 
 game/animobj.cpp:
-	.text       start:0x801EAB2C end:0x801EAFCC
+	.text       start:0x801EAB2C end:0x801EAFD4
 	.ctors      start:0x802ED330 end:0x802ED334
 	.data       start:0x80339E18 end:0x80339E88
 	.sbss       start:0x8055EB80 end:0x8055EB88
@@ -2759,7 +2759,7 @@ game/sounddash.cpp:
 	.sdata2     start:0x805632C8 end:0x805632D8
 
 game/menumus.cpp:
-	.text       start:0x8020C140 end:0x8020CA28
+	.text       start:0x8020C140 end:0x8020CA30
 	.ctors      start:0x802ED398 end:0x802ED39C
 	.data       start:0x8033C5D8 end:0x8033C650
 	.bss        start:0x80489BE0 end:0x80489C70
@@ -2841,7 +2841,7 @@ game/gamedo.cpp:
 	.sbss       start:0x8055F130 end:0x8055F138
 
 game/setmenu.cpp:
-	.text       start:0x8023C2B4 end:0x8023C9C8
+	.text       start:0x8023C2B4 end:0x8023CA18
 	.ctors      start:0x802ED404 end:0x802ED408
 	.rodata     start:0x802FA068 end:0x802FA090
 	.data       start:0x803413C0 end:0x803414D0
@@ -2868,7 +2868,7 @@ game/loadscrn.cpp:
 	.sdata2     start:0x805637F0 end:0x80563800
 
 game/unlkmenu.cpp:
-	.text       start:0x8024497C end:0x80245030
+	.text       start:0x8024497C end:0x80245080
 	.ctors      start:0x802ED424 end:0x802ED428
 	.rodata     start:0x802FA338 end:0x802FA350
 	.data       start:0x80342E38 end:0x80342FC0
@@ -2905,6 +2905,15 @@ game/tutmenu.cpp:
 	.bss        start:0x80498E68 end:0x80498E80
 	.sdata      start:0x8055C238 end:0x8055C258
 	.sbss       start:0x8055F360 end:0x8055F378
+
+game/uiobjs.cpp:
+	.text       start:0x80258354 end:0x80259148
+	.ctors      start:0x802ED45C end:0x802ED460
+	.data       start:0x80344D88 end:0x80344DE0
+	.bss        start:0x80498E80 end:0x80498E98
+	.sdata      start:0x8055C258 end:0x8055C260
+	.sbss       start:0x8055F378 end:0x8055F388
+	.sdata2     start:0x80563AC8 end:0x80563AE0
 
 game/stub16.cpp:
 	.text       start:0x80265D38 end:0x80265DCC
@@ -3126,7 +3135,7 @@ game/image.cpp:
 	.sdata2     start:0x80564EE8 end:0x80564EF0
 
 game/mrender.cpp:
-	.text       start:0x802C82C0 end:0x802CA0A4
+	.text       start:0x802C82C0 end:0x802CA0E4
 	.ctors      start:0x802ED5A8 end:0x802ED5AC
 	.data       start:0x8034B498 end:0x8034B538
 	.bss        start:0x804C13E0 end:0x804C1480
