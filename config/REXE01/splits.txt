@@ -3404,6 +3404,15 @@ game/texture.cpp:
 	.sbss       start:0x8055FCA0 end:0x8055FCC8
 	.sdata2     start:0x80564F30 end:0x80564F58
 
+game/mlist.cpp:
+	.text       start:0x802CCBC0 end:0x802CE344
+	.ctors      start:0x802ED5B0 end:0x802ED5B4
+	.data       start:0x8034BBC0 end:0x8034BC00
+	.bss        start:0x804C1480 end:0x804C5650
+	.sdata      start:0x8055D0A0 end:0x8055D0A8
+	.sbss       start:0x8055FCC8 end:0x8055FCE8
+	.sdata2     start:0x80564F58 end:0x80564F70
+
 game/vidmode.cpp:
 	.text       start:0x802CE344 end:0x802CE3A4
 	.ctors      start:0x802ED5B4 end:0x802ED5B8
