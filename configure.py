@@ -1036,6 +1036,7 @@ config.libs.append(
             Object(Matching, "game/alarm.cpp"),
             Object(Matching, "game/dmginfo.cpp"),
             Object(Matching, "game/csreplay.cpp"),
+            Object(NonMatching, "game/pmesh.cpp"),
             Object(Matching, "game/surftype.cpp"),
             Object(Matching, "game/carlisten.cpp"),
             Object(Matching, "game/assoc.cpp"),
