@@ -1146,6 +1146,7 @@ config.libs.append(
             Object(NonMatching, "game/gxcanvas.cpp"),
             Object(Matching, "game/image.cpp"),
             Object(NonMatching, "game/mrender.cpp"),
+            Object(NonMatching, "game/texture.cpp"),
             Object(Matching, "game/vidmode.cpp"),
             Object(NonMatching, "game/modelpool.cpp"),
             Object(NonMatching, "game/billboard.cpp"),

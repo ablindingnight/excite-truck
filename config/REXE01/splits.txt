@@ -3396,6 +3396,14 @@ game/mrender.cpp:
 	.sbss       start:0x8055FC28 end:0x8055FCA0
 	.sdata2     start:0x80564EF8 end:0x80564F30
 
+game/texture.cpp:
+	.text       start:0x802CA0E4 end:0x802CCBC0
+	.ctors      start:0x802ED5AC end:0x802ED5B0
+	.data       start:0x8034B538 end:0x8034BBC0
+	.sdata      start:0x8055D038 end:0x8055D0A0
+	.sbss       start:0x8055FCA0 end:0x8055FCC8
+	.sdata2     start:0x80564F30 end:0x80564F58
+
 game/vidmode.cpp:
 	.text       start:0x802CE344 end:0x802CE3A4
 	.ctors      start:0x802ED5B4 end:0x802ED5B8
