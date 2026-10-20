@@ -1058,6 +1058,7 @@ config.libs.append(
             Object(NonMatching, "game/joint.cpp"),
             Object(NonMatching, "game/dbgdraw.cpp"),
             Object(NonMatching, "game/tristrip.cpp"),
+            Object(NonMatching, "game/boneset.cpp"),
             Object(NonMatching, "game/animstream.cpp"),
             Object(NonMatching, "game/dbglod.cpp"),
             Object(Matching, "game/fonttext.cpp"),
