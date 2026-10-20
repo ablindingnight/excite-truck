@@ -2758,6 +2758,15 @@ game/sounddash.cpp:
 	.sbss       start:0x8055EE18 end:0x8055EE30
 	.sdata2     start:0x805632C8 end:0x805632D8
 
+game/menumus.cpp:
+	.text       start:0x8020C140 end:0x8020CA28
+	.ctors      start:0x802ED398 end:0x802ED39C
+	.data       start:0x8033C5D8 end:0x8033C650
+	.bss        start:0x80489BE0 end:0x80489C70
+	.sdata      start:0x8055B5D0 end:0x8055B5E0
+	.sbss       start:0x8055EE30 end:0x8055EE60
+	.sdata2     start:0x805632D8 end:0x80563300
+
 game/roadsnd.cpp:
 	.text       start:0x8020CA30 end:0x8020CF68
 	.ctors      start:0x802ED39C end:0x802ED3A0
