@@ -2567,6 +2567,15 @@ game/carmesh.cpp:
 	.data       start:0x80338268 end:0x803382A8
 	.sbss       start:0x8055E920 end:0x8055E928
 
+game/actseq.cpp:
+	.text       start:0x801D4734 end:0x801D9120
+	.ctors      start:0x802ED2CC end:0x802ED2D0
+	.data       start:0x80338460 end:0x80339108
+	.bss        start:0x804422D8 end:0x804424B0
+	.sdata      start:0x8055AC80 end:0x8055AD60
+	.sbss       start:0x8055E948 end:0x8055E958
+	.sdata2     start:0x80562AD8 end:0x80562B28
+
 game/mgroup.cpp:
 	.text       start:0x801D9120 end:0x801D9CC4
 	.ctors      start:0x802ED2D0 end:0x802ED2D4
