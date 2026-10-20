@@ -2591,6 +2591,13 @@ game/mgroup.cpp:
 	.sbss       start:0x8055E958 end:0x8055E970
 	.sdata2     start:0x80562B28 end:0x80562B38
 
+game/boostman.cpp:
+	.text       start:0x801E0710 end:0x801E1874
+	.ctors      start:0x802ED2EC end:0x802ED2F0
+	.data       start:0x80339780 end:0x80339860
+	.sbss       start:0x8055EA08 end:0x8055EA18
+	.sdata2     start:0x80562C78 end:0x80562CA8
+
 game/weather.cpp:
 	.text       start:0x801E1874 end:0x801E1F8C
 	.ctors      start:0x802ED2F0 end:0x802ED2F4
