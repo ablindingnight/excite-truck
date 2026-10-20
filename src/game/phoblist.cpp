@@ -3,7 +3,7 @@
 // apart from the messages and allocation tags.
 #include "game/common.h"
 
-extern "C" void fn_802E317C(const char* fmt, ...);  // warning print
+extern "C" void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);

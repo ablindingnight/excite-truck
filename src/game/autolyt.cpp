@@ -8,7 +8,7 @@ int sprintf(char* buf, const char* fmt, ...);
 void* memset(void* dst, int c, size_t n);
 char* strcpy(char* dst, const char* src);
 int strcmp(const char* a, const char* b);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 const char* fn_80131234(const char* key);  // localize
 void* fn_8012C370(const char* name, u32 tag, u32* version, u32* size, int flags, u8* swapped);
 void fn_8012C4D8(void* res);

@@ -100,7 +100,7 @@ extern s32 lbl_8055CFF4;  // screen height
 int strcmp(const char* a, const char* b);
 double cos(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);

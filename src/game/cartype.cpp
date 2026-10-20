@@ -3,7 +3,7 @@
 #include "game/common.h"
 
 extern "C" {
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_80279370(void);
 void fn_802793AC(void);
 void fn_80279CE4(void);

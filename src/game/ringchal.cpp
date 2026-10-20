@@ -14,7 +14,7 @@ int strcasecmp(const char* a, const char* b);
 char* strstr(const char* s, const char* t);
 u32 strlen(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number

@@ -9,7 +9,7 @@ extern "C" {
 int strcasecmp(const char* a, const char* b);
 void* memmove(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);

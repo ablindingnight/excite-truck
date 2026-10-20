@@ -12,7 +12,7 @@ char* strncpy(char* dst, const char* src, size_t n);
 int sprintf(char* buf, const char* fmt, ...);
 void qsort(void* base, size_t num, size_t size, int (*cmp)(const void*, const void*));
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);

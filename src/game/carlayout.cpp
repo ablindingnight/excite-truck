@@ -9,7 +9,7 @@ void* memset(void* dst, int c, size_t n);
 char* strncpy(char* dst, const char* src, size_t n);
 int strcasecmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);

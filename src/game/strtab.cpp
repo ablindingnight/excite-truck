@@ -11,7 +11,7 @@ struct StringTable {
 };
 
 extern "C" {
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);
 }

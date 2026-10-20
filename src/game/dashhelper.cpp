@@ -125,7 +125,7 @@ double fmod(double x, double y);
 double ceil(double x);
 double sin(double x);
 double cos(double x);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 f32 fn_80235EF0(int art, int part);

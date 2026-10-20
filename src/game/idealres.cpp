@@ -7,7 +7,7 @@
 extern "C" {
 double sqrt(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* swap);
 int fn_8012C4D8(void* p);
 void* fn_8013BFE8(const char* name);

@@ -9,7 +9,7 @@ void* memset(void* dst, int c, u32 n);
 void* memcpy(void* dst, const void* src, u32 n);
 void* memmove(void* dst, const void* src, u32 n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801E1D20(void);
 void fn_801E1D2C(void);
 void fn_80178DD0(void);

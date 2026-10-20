@@ -9,7 +9,7 @@ extern "C" {
 void* memset(void* dst, int c, size_t n);
 void* memmove(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 s32 fn_802E2C20(void);                   // milliseconds
 s32 fn_802090B4(void);                   // sound quality
 int fn_8026A344(int a);                  // local player

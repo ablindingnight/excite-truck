@@ -13,7 +13,7 @@ void* memset(void* p, int c, size_t n);
 void* memcpy(void* d, const void* s, size_t n);
 int atoi(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);

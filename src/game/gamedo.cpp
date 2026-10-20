@@ -137,7 +137,7 @@ const char* GetEventTypeDisplayName(u32 type);
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_802054EC(const char* key, int track, int eve);
 int fn_802C9A58(void);
 void fn_802CED50(int x, int y, int w, int h);

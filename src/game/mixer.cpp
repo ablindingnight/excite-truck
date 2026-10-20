@@ -8,7 +8,7 @@ extern "C" {
 void* memset(void* dst, int c, size_t n);
 int strncmp(const char* a, const char* b, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 s32 fn_802E2C20(void);                   // milliseconds
 int fn_802E9A14(void);                   // sound mode
 void fn_801331C4(int owner, const char* key, f32* value);

@@ -5,7 +5,7 @@
 extern "C" {
 void* fn_801284E8(const char* name, u32 size);  // MemAlloc
 void fn_80128658(void* p);                      // MemFree
-void fn_802E317C(const char* fmt, ...);         // warning print
+void fn_802E317C(const char* fmt, ...);         // fatal: print, then exit() -> PPCHalt (never returns)
 }
 
 class Pool {

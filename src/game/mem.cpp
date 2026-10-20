@@ -11,7 +11,7 @@ void* memset(void* p, int c, size_t n);
 char* strcpy(char* dst, const char* src);
 int strcmp(const char* a, const char* b);
 int sprintf(char* buf, const char* fmt, ...);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E3DF8(int arena, void** base, u32* size);
 void fn_802E2D74(int unk);

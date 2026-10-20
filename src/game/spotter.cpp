@@ -5,7 +5,7 @@
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 }
 
 struct Phrase {

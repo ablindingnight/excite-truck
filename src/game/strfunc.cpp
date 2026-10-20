@@ -5,7 +5,7 @@
 
 extern "C" {
 int vsprintf(char* s, const char* fmt, va_list args);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 }
 
 ModuleTag lbl_8055E090;

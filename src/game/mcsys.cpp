@@ -7,7 +7,7 @@ extern "C" {
 void* memset(void* dst, int c, size_t n);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 u8* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
 u32 fn_80132E7C(const void* data, s32 len);  // checksum

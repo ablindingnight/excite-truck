@@ -5,7 +5,7 @@
 extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* swap);
 int fn_8012C4D8(void* p);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801D1C68(void* mesh, void* base);
 }
 

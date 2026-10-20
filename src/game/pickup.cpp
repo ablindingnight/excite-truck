@@ -15,7 +15,7 @@ double cos(double x);
 double sin(double x);
 void* memset(void* dst, int c, u32 n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 void fn_80128658(void* p);  // MemFree

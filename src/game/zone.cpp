@@ -9,7 +9,7 @@ extern "C" {
 int strcmp(const char* a, const char* b);
 int sprintf(char* s, const char* fmt, ...);
 void* memset(void* d, int c, size_t n);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);

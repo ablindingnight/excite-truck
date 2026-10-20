@@ -47,7 +47,7 @@ extern "C" {
 char* strrchr(const char* s, int c);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);                      // debug print
-void fn_802E317C(const char* fmt, ...);                      // warning print
+void fn_802E317C(const char* fmt, ...);                      // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_8012E81C(const char* res);
 Strength* fn_801E87A8(void);
 const char* fn_801E879C(void);  // track name

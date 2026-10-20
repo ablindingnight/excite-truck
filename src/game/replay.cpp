@@ -78,7 +78,7 @@ extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 void fn_80131318(LocString* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);

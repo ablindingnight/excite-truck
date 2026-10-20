@@ -14,7 +14,7 @@ void* memset(void* d, int c, size_t n);
 int vsprintf(char* buf, const char* fmt, va_list args);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);                      // debug print
-void fn_802E317C(const char* fmt, ...);                      // warning print
+void fn_802E317C(const char* fmt, ...);                      // fatal: print, then exit() -> PPCHalt (never returns)
 const char* fn_80131234(const char* key);                    // localize
 const char* fn_80130FE0(s32 value);                          // ordinal suffix
 void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time

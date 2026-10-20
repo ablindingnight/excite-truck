@@ -70,7 +70,7 @@ public:
 };
 
 extern "C" {
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_802E30C8(const char* fmt, ...);  // debug print
 u32 fn_802E2C20(void);
 }

@@ -6,7 +6,7 @@
 extern "C" {
 void* memset(void* dst, int c, size_t n);
 double ceil(double x);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_8012E96C(const char* name);
 void* fn_8012C370(const char* name, u32 tag, u32* version, u32* size, int flags, u8* swapped);
 void fn_8012C4D8(void* res);

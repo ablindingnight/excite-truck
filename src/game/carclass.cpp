@@ -4,7 +4,7 @@
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 }

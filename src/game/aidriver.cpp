@@ -8,7 +8,7 @@ int sprintf(char* s, const char* fmt, ...);
 char* strcpy(char* d, const char* s);
 double atof(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int* fn_801E87A8(void);
 void fn_8013B4E0(void* cars, void* race);
 f32 fn_8013672C(void);

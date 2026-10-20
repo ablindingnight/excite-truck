@@ -2,7 +2,7 @@
 // guesses apart from the message.
 #include "game/common.h"
 
-extern "C" void fn_802E317C(const char* fmt, ...);  // warning print
+extern "C" void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 
 struct VideoModeInfo {
     s32 width;   // offset 0x0

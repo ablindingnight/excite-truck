@@ -6,7 +6,7 @@ class AsyncResource;
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 AsyncResource* fn_8012C5B8(const char* name, u32 type, u32* info);  // ResourceGetStream
 void fn_8012C958(AsyncResource* r);                                 // ResourceStreamClose
 }

@@ -7,7 +7,7 @@ void* operator new(size_t size, const char* tag);
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 f32 fn_80144514(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);  // a0*b0 + a1*b1 + a2*b2
 }
 

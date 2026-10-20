@@ -8,7 +8,7 @@ int sprintf(char* s, const char* fmt, ...);
 char* strcpy(char* d, const char* s);
 int strcasecmp(const char* a, const char* b);
 void* memset(void* p, int c, size_t n);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 }

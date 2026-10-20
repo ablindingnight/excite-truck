@@ -12,7 +12,7 @@ char* strstr(const char* s, const char* sub);
 void* memset(void* p, int c, size_t n);
 void* memcpy(void* d, const void* s, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 u32 fn_80132E7C(const void* p, s32 n);   // crc
 int fn_802E36D8(const char* path);       // open
 s32 fn_802E37C4(int fd);                 // file size

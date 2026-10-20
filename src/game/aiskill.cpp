@@ -10,7 +10,7 @@ char* strcat(char* d, const char* s);
 int sscanf(const char* s, const char* fmt, ...);
 void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_80129D90(int seed, int lo, int hi);    // random int
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);    // random float
 int fn_8027AA48(void);

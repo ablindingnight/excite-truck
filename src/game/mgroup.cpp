@@ -6,7 +6,7 @@
 extern "C" {
 int strcmp(const char* a, const char* b);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* table);
 s32 fn_802C6FC0(const char* name, int a, int b);

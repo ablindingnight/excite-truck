@@ -8,7 +8,7 @@
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 const char* fn_80131234(const char* key);  // localize
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);

@@ -8,7 +8,7 @@ char* strchr(const char* s, int c);
 void* memset(void* dst, int c, size_t n);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
 s32 fn_802CAC28(const char* name, int flags);
 void fn_802CAC54(s32 handle);

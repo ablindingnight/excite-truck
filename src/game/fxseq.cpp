@@ -9,7 +9,7 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
 extern "C" {
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);

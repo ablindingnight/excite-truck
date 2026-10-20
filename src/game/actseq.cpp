@@ -835,7 +835,7 @@ void fn_8016A240(const char* name);  // switch a ring set off
 extern "C" Sound3D* fn_80207848(const char* name, int flags);  // 2D sound
 
 extern "C" {
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_801D9A54(const char* name);     // find morph group
 void fn_801D9AB8(void* group, f32 t);    // set morph group position
 int fn_801D9B28(void* group, int index);  // morph group contains index

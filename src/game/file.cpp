@@ -10,7 +10,7 @@ int strncmp(const char* a, const char* b, size_t n);
 char* strncpy(char* dst, const char* src, size_t n);
 void* memset(void* dst, int c, size_t n);
 int vsprintf(char* buf, const char* fmt, va_list args);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 }
 
 class File;

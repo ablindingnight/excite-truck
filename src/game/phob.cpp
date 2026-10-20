@@ -10,7 +10,7 @@ void* memset(void* dst, int c, u32 n);
 void* memcpy(void* dst, const void* src, u32 n);
 double sin(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 s32 fn_802E2C20(void);
 s64 fn_802E2C9C(void);
 void fn_802E2D74(int ms);

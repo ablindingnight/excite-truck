@@ -57,7 +57,7 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 int fn_80137C74(void);
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_8012DDA8(const char* name);
 void fn_8012E498(const char* name);
 void fn_8012E81C(const char* name);

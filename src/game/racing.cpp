@@ -168,7 +168,7 @@ double cos(double x);
 double sin(double x);
 double fmod(double x, double y);
 char* strcpy(char* dst, const char* src);
-void fn_802E317C(const char* fmt, ...);  // warning print
+void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801476C4(LayoutItem* item);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
 void fn_80147230(LayoutItem* item, const char* fmt, ...);
