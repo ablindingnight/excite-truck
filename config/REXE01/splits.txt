@@ -2458,6 +2458,14 @@ game/stub7.cpp:
 	.ctors      start:0x802ED250 end:0x802ED254
 	.sbss       start:0x8055E658 end:0x8055E660
 
+game/physreplay.cpp:
+	.text       start:0x801B45E0 end:0x801B53E4
+	.ctors      start:0x802ED25C end:0x802ED260
+	.data       start:0x80335DB8 end:0x80335E88
+	.bss        start:0x80435C70 end:0x80435EB8
+	.sbss       start:0x8055E6C8 end:0x8055E6E0
+	.sdata2     start:0x80562658 end:0x80562690
+
 game/phoblist.cpp:
 	.text       start:0x801B5F40 end:0x801B64B4
 	.ctors      start:0x802ED264 end:0x802ED268
