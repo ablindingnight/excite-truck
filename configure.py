@@ -1042,6 +1042,7 @@ config.libs.append(
             Object(NonMatching, "game/actseq.cpp"),
             Object(NonMatching, "game/mgroup.cpp"),
             Object(NonMatching, "game/weather.cpp"),
+            Object(NonMatching, "game/physcol.cpp"),
             Object(NonMatching, "game/joint.cpp"),
             Object(NonMatching, "game/dbglod.cpp"),
             Object(Matching, "game/fonttext.cpp"),

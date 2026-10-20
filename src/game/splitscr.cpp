@@ -95,11 +95,6 @@ f32 fn_8013672C(void);      // lap length
 RaceSetupHdr* fn_801E7E3C(void);
 }
 
-struct SplitColor {
-    SplitColor(void) { value = 0xFFFF0000; }
-    u32 value;
-};
-
 static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline f32 Clamp01(f32 x) { return Max(Min(x, 1.0f), 0.0f); }
@@ -108,7 +103,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 Unit(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
 
 ModuleTag lbl_8055ED60;
-SplitColor lbl_8055ED68;
+UnkStaticFFFF lbl_8055ED68;
 s32 lbl_8055ED6C;  // car icon texture
 
 extern "C" {
