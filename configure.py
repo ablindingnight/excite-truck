@@ -1113,6 +1113,7 @@ config.libs.append(
             Object(Matching, "game/preload.cpp"),
             Object(NonMatching, "game/vidsetup.cpp"),
             Object(Matching, "game/image.cpp"),
+            Object(NonMatching, "game/mrender.cpp"),
             Object(Matching, "game/vidmode.cpp"),
             Object(NonMatching, "game/modelpool.cpp"),
             Object(NonMatching, "game/billboard.cpp"),
