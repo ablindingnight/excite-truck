@@ -1134,6 +1134,7 @@ config.libs.append(
             Object(NonMatching, "game/swlmap.cpp"),
             Object(Matching, "game/preload.cpp"),
             Object(NonMatching, "game/vidsetup.cpp"),
+            Object(NonMatching, "game/gxcanvas.cpp"),
             Object(Matching, "game/image.cpp"),
             Object(NonMatching, "game/mrender.cpp"),
             Object(Matching, "game/vidmode.cpp"),
