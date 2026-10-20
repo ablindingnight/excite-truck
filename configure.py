@@ -1068,6 +1068,7 @@ config.libs.append(
             Object(Matching, "game/camproj.cpp"),
             Object(Matching, "game/carinfo.cpp"),
             Object(NonMatching, "game/animobj.cpp"),
+            Object(NonMatching, "game/graf.cpp"),
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
