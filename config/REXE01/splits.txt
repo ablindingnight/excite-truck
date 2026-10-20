@@ -3237,6 +3237,15 @@ game/sky.cpp:
 	.sbss       start:0x8055FB08 end:0x8055FB20
 	.sdata2     start:0x80564E30 end:0x80564E50
 
+game/treehit.cpp:
+	.text       start:0x802C110C end:0x802C2074
+	.ctors      start:0x802ED584 end:0x802ED588
+	.data       start:0x8034AED0 end:0x8034AFB8
+	.bss        start:0x804C0810 end:0x804C1090
+	.sdata      start:0x8055CFA0 end:0x8055CFD0
+	.sbss       start:0x8055FB20 end:0x8055FB48
+	.sdata2     start:0x80564E50 end:0x80564E90
+
 game/roadopac.cpp:
 	.text       start:0x802C2074 end:0x802C2298
 	.ctors      start:0x802ED588 end:0x802ED58C
