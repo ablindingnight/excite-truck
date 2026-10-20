@@ -2843,6 +2843,16 @@ game/loadscrn.cpp:
 	.sbss       start:0x8055F218 end:0x8055F228
 	.sdata2     start:0x805637F0 end:0x80563800
 
+game/unlkmenu.cpp:
+	.text       start:0x8024497C end:0x80245030
+	.ctors      start:0x802ED424 end:0x802ED428
+	.rodata     start:0x802FA338 end:0x802FA350
+	.data       start:0x80342E38 end:0x80342FC0
+	.bss        start:0x80498878 end:0x80498890
+	.sdata      start:0x8055BE20 end:0x8055BE50
+	.sbss       start:0x8055F228 end:0x8055F238
+	.sdata2     start:0x80563800 end:0x80563830
+
 game/mstats.cpp:
 	.text       start:0x80257284 end:0x80257C10
 	.ctors      start:0x802ED450 end:0x802ED454
