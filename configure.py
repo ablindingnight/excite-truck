@@ -1124,6 +1124,7 @@ config.libs.append(
             Object(NonMatching, "game/fxseq.cpp"),
             Object(NonMatching, "game/shadowvol.cpp"),
             Object(Matching, "game/drawline.cpp"),
+            Object(NonMatching, "game/partemit.cpp"),
             Object(NonMatching, "game/fence.cpp"),
             Object(Matching, "game/stub13.cpp"),
             Object(NonMatching, "game/cartags.cpp"),

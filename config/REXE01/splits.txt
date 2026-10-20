@@ -3203,6 +3203,15 @@ game/drawline.cpp:
 	.sdata      start:0x8055CAE0 end:0x8055CAE8
 	.sbss       start:0x8055F800 end:0x8055F810
 
+game/partemit.cpp:
+	.text       start:0x8029F03C end:0x802A0940
+	.ctors      start:0x802ED518 end:0x802ED51C
+	.data       start:0x80349810 end:0x803498E0
+	.bss        start:0x804B5070 end:0x804BCF88
+	.sdata      start:0x8055CAE8 end:0x8055CB68
+	.sbss       start:0x8055F810 end:0x8055F828
+	.sdata2     start:0x805646B0 end:0x805646D0
+
 game/fence.cpp:
 	.text       start:0x802A0940 end:0x802A0D60
 	.ctors      start:0x802ED51C end:0x802ED520
