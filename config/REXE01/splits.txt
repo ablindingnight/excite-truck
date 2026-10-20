@@ -2791,6 +2791,15 @@ game/terchunk.cpp:
 	.sbss       start:0x8055ECB0 end:0x8055ECE8
 	.sdata2     start:0x805630A0 end:0x805630B8
 
+game/cenvmap.cpp:
+	.text       start:0x80202BE4 end:0x80203FE0
+	.ctors      start:0x802ED364 end:0x802ED368
+	.rodata     start:0x802F9D48 end:0x802F9D68
+	.data       start:0x8033BA88 end:0x8033BAD8
+	.bss        start:0x80488970 end:0x80488BB8
+	.sbss       start:0x8055ECE8 end:0x8055ED20
+	.sdata2     start:0x805630B8 end:0x80563140
+
 game/terrpick.cpp:
 	.text       start:0x80203FE0 end:0x80204330
 	.ctors      start:0x802ED368 end:0x802ED36C

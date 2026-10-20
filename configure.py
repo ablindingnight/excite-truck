@@ -1069,6 +1069,7 @@ config.libs.append(
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
             Object(NonMatching, "game/terchunk.cpp"),
+            Object(NonMatching, "game/cenvmap.cpp"),
             Object(NonMatching, "game/terrpick.cpp"),
             Object(NonMatching, "game/tunedash.cpp"),
             Object(NonMatching, "game/difficulty.cpp"),
