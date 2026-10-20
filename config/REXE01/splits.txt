@@ -2999,6 +2999,15 @@ game/carstate.cpp:
 	.sbss       start:0x8055F610 end:0x8055F620
 	.sdata2     start:0x805640F0 end:0x80564108
 
+game/carsetup.cpp:
+	.text       start:0x80279CE4 end:0x8027AA08
+	.ctors      start:0x802ED4C4 end:0x802ED4C8
+	.data       start:0x80347848 end:0x80347A50
+	.bss        start:0x804A1968 end:0x804A21E8
+	.sdata      start:0x8055C6E8 end:0x8055C758
+	.sbss       start:0x8055F620 end:0x8055F628
+	.sdata2     start:0x80564108 end:0x805641F0
+
 game/carreg.cpp:
 	.text       start:0x8027ABF8 end:0x8027AD4C
 	.ctors      start:0x802ED4CC end:0x802ED4D0
