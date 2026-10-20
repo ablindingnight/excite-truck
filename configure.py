@@ -1058,6 +1058,7 @@ config.libs.append(
             Object(NonMatching, "game/terrpick.cpp"),
             Object(NonMatching, "game/tunedash.cpp"),
             Object(NonMatching, "game/difficulty.cpp"),
+            Object(NonMatching, "game/splitscr.cpp"),
             Object(NonMatching, "game/sound.cpp"),
             Object(NonMatching, "game/soundmgr.cpp"),
             Object(NonMatching, "game/mixer.cpp"),

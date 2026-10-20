@@ -2705,6 +2705,15 @@ game/difficulty.cpp:
 	.sdata      start:0x8055B468 end:0x8055B4C0
 	.sbss       start:0x8055ED50 end:0x8055ED60
 
+game/splitscr.cpp:
+	.text       start:0x802057A8 end:0x802062E8
+	.ctors      start:0x802ED374 end:0x802ED378
+	.rodata     start:0x802F9D90 end:0x802F9DA0
+	.data       start:0x8033BC18 end:0x8033BC50
+	.bss        start:0x804891D0 end:0x804891E8
+	.sbss       start:0x8055ED60 end:0x8055ED78
+	.sdata2     start:0x80563190 end:0x805631F8
+
 game/sound.cpp:
 	.text       start:0x802062E8 end:0x80207960
 	.ctors      start:0x802ED378 end:0x802ED37C
