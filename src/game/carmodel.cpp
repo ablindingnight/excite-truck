@@ -514,6 +514,14 @@ void fn_801EC714(const Slider* s, f32* y, f32* z) {
 
 }  // extern "C"
 
+extern "C" {
+void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir);
+void fn_801EE974(CarModel* m, Racer* r);
+void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir);
+void fn_801EEC68(CarModel* m);
+void fn_801ECCE0(CarModel* m, u32 pass);
+}
+
 CarModel::CarModel(Racer* r, CarDef* d) {
     car = 0;
     index = r->index;
@@ -532,9 +540,6 @@ CarModel::CarModel(Racer* r, CarDef* d) {
     s32 inst = d->driver >= 0 ? r->index : 0;
     char dir[64];
     fn_801345D8(dir, 64, "%s.car", d->name);
-    void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir);
-    void fn_801EE974(CarModel* m, Racer* r);
-    void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir);
     fn_801EE0E0(this, d->name, d->unk6C, inst, dir);
     fn_801EE974(this, r);
     fn_801EEA64(this, r, d->name, dir);
@@ -554,7 +559,6 @@ CarModel::CarModel(Racer* r, CarDef* d) {
 }
 
 CarModel::~CarModel(void) {
-    void fn_801EEC68(CarModel* m);
     fn_801EEC68(this);
     int i;
     for (i = 0; i < numLods; i++) {
@@ -814,12 +818,10 @@ void fn_801ED46C(CarModel* m) {
 }  // extern "C"
 
 void CarModel::Draw(void) {
-    void fn_801ECCE0(CarModel* m, u32 pass);
     fn_801ECCE0(this, 1);
 }
 
 void CarModel::vf24(void) {
-    void fn_801ECCE0(CarModel* m, u32 pass);
     fn_801ECCE0(this, 0);
 }
 
@@ -1064,8 +1066,9 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
             fn_802E317C("Lod table %s: bad value %s", name, use->GetValue(key));
         }
         int y = strchr(mode, 'y') != 0;
-        m->lods[m->numLods].dist = dist;
-        m->lods[m->numLods].noMirror = y;
+        LodEntry* e = &m->lods[m->numLods];
+        e->dist = dist;
+        e->noMirror = y;
         m->numLods++;
     }
     if (m->mirrorLod >= m->numLods) {
@@ -1132,8 +1135,9 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         fn_801345D8(bp, 256, "%s.car/bone.val", name);
     }
     m->numBoneSurfs = 0;
+    BoneSurf* bs;
     ValueTable* bt = fn_80131808(bp);
-    BoneSurf* bs = m->boneSurfs;
+    bs = m->boneSurfs;
     u32 all = 0;
     for (int i = 0;; i++) {
         char key[256];
