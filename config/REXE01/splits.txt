@@ -3131,6 +3131,15 @@ game/stub12.cpp:
 	.ctors      start:0x802ED4FC end:0x802ED500
 	.sbss       start:0x8055F770 end:0x8055F780
 
+game/flipbook.cpp:
+	.text       start:0x802960A0 end:0x802971B0
+	.ctors      start:0x802ED500 end:0x802ED504
+	.rodata     start:0x802FA9C0 end:0x802FA9F0
+	.data       start:0x80349348 end:0x80349368
+	.sdata      start:0x8055C9B8 end:0x8055CA30
+	.sbss       start:0x8055F780 end:0x8055F790
+	.sdata2     start:0x80564548 end:0x80564578
+
 game/fxseq.cpp:
 	.text       start:0x802971B0 end:0x802978B8
 	.ctors      start:0x802ED504 end:0x802ED508
