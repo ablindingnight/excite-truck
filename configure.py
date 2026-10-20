@@ -1069,6 +1069,7 @@ config.libs.append(
             Object(Matching, "game/uictx.cpp"),
             Object(Matching, "game/gtime.cpp"),
             Object(Matching, "game/uitext.cpp"),
+            Object(NonMatching, "game/stub19.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/gamedo.cpp"),
