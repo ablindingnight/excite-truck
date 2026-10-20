@@ -1025,6 +1025,7 @@ config.libs.append(
             Object(Matching, "game/tirelist.cpp"),
             Object(Matching, "game/stub7.cpp"),
             Object(NonMatching, "game/physreplay.cpp"),
+            Object(Matching, "game/sol.cpp"),
             Object(Matching, "game/phoblist.cpp"),
             Object(Matching, "game/pgfx.cpp"),
             Object(Matching, "game/spotter.cpp"),
