@@ -2697,6 +2697,14 @@ game/joint.cpp:
 	.sbss       start:0x8055EA48 end:0x8055EA58
 	.sdata2     start:0x80562CE8 end:0x80562CF0
 
+game/dbgdraw.cpp:
+	.text       start:0x801E3640 end:0x801E45CC
+	.ctors      start:0x802ED2FC end:0x802ED300
+	.rodata     start:0x802F99E8 end:0x802F99F8
+	.data       start:0x80339910 end:0x80339930
+	.sbss       start:0x8055EA58 end:0x8055EA70
+	.sdata2     start:0x80562CF0 end:0x80562D30
+
 game/dbglod.cpp:
 	.text       start:0x801E45CC end:0x801E4A2C
 	.ctors      start:0x802ED300 end:0x802ED304
