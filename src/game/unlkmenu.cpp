@@ -67,8 +67,39 @@ extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }
 
+// The menu state interface. Its all-pure vtable (24 zero words) is what follows each menu state's
+// vtable in the target's .data.
+class IMenuState {
+public:
+    IMenuState(void) {}
+    virtual ~IMenuState(void) = 0;
+    virtual void Enter(void) = 0;
+    virtual void Exit(void) = 0;
+    virtual void Unk14(void) = 0;
+    virtual void Unk18(void) = 0;
+    virtual void Update(void) = 0;
+    virtual void Unk20(void) = 0;
+    virtual void Unk24(void) = 0;
+    virtual void Draw(void) = 0;
+    virtual void Unk2C(void) = 0;
+    virtual void Unk30(void) = 0;
+    virtual void Unk34(void) = 0;
+    virtual void Unk38(void) = 0;
+    virtual void Unk3C(void) = 0;
+    virtual void Unk40(void) = 0;
+    virtual void Unk44(void) = 0;
+    virtual void Unk48(void) = 0;
+    virtual void Unk4C(void) = 0;
+    virtual void Unk50(void) = 0;
+    virtual void Unk54(void) = 0;
+    virtual int Key(int key) = 0;
+    virtual void Unk5C(void) = 0;
+};
+
+inline IMenuState::~IMenuState(void) {}
+
 // A menu state; most slots are empty defaults.
-class MenuState {
+class MenuState : public IMenuState {
 public:
     MenuState(void) { unk14 = 0; }
     virtual ~MenuState(void) {}
@@ -238,5 +269,4 @@ void UnlockList::Draw(void) {
 }
 
 // NonMatching: fn_802449A0 and Draw number their saved registers differently (65 and 17 diffs, same
-// instructions); MenuState's inline dtor is emitted here as a weak copy; the 0x60 zero bytes after the
-// vtable are not reproduced.
+// instructions); MenuState's and IMenuState's inline dtors are emitted here as weak copies.
