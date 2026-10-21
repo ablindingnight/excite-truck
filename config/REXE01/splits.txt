@@ -3051,6 +3051,15 @@ game/gback.cpp:
 	.sbss       start:0x8055F008 end:0x8055F018
 	.sdata2     start:0x805635E8 end:0x80563610
 
+game/uidraw.cpp:
+	.text       start:0x80230090 end:0x80231504
+	.ctors      start:0x802ED3D4 end:0x802ED3D8
+	.rodata     start:0x802F9FC0 end:0x802F9FF0
+	.bss        start:0x80497EF0 end:0x80497F08
+	.sdata      start:0x8055B998 end:0x8055B9A0
+	.sbss       start:0x8055F018 end:0x8055F038
+	.sdata2     start:0x80563610 end:0x80563680
+
 game/gart.cpp:
 	.text       start:0x80234D44 end:0x80236550
 	.ctors      start:0x802ED3DC end:0x802ED3E0
