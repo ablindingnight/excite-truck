@@ -3060,6 +3060,16 @@ game/uidraw.cpp:
 	.sbss       start:0x8055F018 end:0x8055F038
 	.sdata2     start:0x80563610 end:0x80563680
 
+game/gtext.cpp:
+	.text       start:0x80231504 end:0x80234D44
+	.ctors      start:0x802ED3D8 end:0x802ED3DC
+	.rodata     start:0x802F9FF0 end:0x802FA008
+	.data       start:0x80340440 end:0x80340670
+	.bss        start:0x80497F08 end:0x80498638
+	.sdata      start:0x8055B9A0 end:0x8055B9E0
+	.sbss       start:0x8055F038 end:0x8055F078
+	.sdata2     start:0x80563680 end:0x805636B0
+
 game/gart.cpp:
 	.text       start:0x80234D44 end:0x80236550
 	.ctors      start:0x802ED3DC end:0x802ED3E0
