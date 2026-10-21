@@ -1109,6 +1109,7 @@ config.libs.append(
             Object(Matching, "game/gamedo.cpp"),
             Object(NonMatching, "game/setmenu.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
+            Object(NonMatching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),
             Object(NonMatching, "game/unitmenu.cpp"),

@@ -13,9 +13,13 @@ void* operator new(size_t size, const char* tag);
 char* IdentGetDefaultName(int slot);
 void IdentSetDefaultName(const char* name, int slot);
 
+// The keyboard (keyboard.cpp).
 class NameChooser {
 public:
+    NameChooser(char* buf, int max);
     virtual ~NameChooser(void);
+    int IsDone(void);
+    u8 pad4[0x34];
 };
 
 // One menu widget binding: the layout element's name, its kind and kind-specific data.
@@ -47,8 +51,6 @@ struct MenuStrList {
 };
 
 extern "C" {
-NameChooser* fn_802439E8(void* p, const char* name, int maxLen);
-int fn_80244550(NameChooser* c);
 void fn_80214A9C(int sound);
 void fn_80214AF0(int sound);
 void fn_8024683C(void);
@@ -71,7 +73,7 @@ NameChooser* lbl_8055F1E0;
 extern "C" {
 
 int fn_8023FA50(int* result) {
-    if (fn_80244550(lbl_8055F1E0)) {
+    if (lbl_8055F1E0->IsDone()) {
         *result = -2;
         return 1;
     }
@@ -87,11 +89,7 @@ void fn_8023FA9C(void) {
 
 int fn_8023FAD4(char* name, int maxLen) {
     strcat(name, "_");
-    void* p = operator new(0x38, "name_chooser");
-    if (p) {
-        p = fn_802439E8(p, name, maxLen);
-    }
-    lbl_8055F1E0 = (NameChooser*)p;
+    lbl_8055F1E0 = new ("name_chooser") NameChooser(name, maxLen);
     MenuStrList list;
     fn_8022D228(&list, 10, 32);
     for (int i = 0; i < 10; i++) {
