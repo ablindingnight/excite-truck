@@ -3,6 +3,9 @@
 // models. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
 
+// Dot product taking the y term first (x*mx + y*my + z*mz).
+static inline f32 Dot3YX(f32 ay, f32 by, f32 ax, f32 bx, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
 double fmod(double x, double y);
@@ -119,9 +122,9 @@ static inline void Identity(ValMatrix* m) {
 }
 
 static inline void Rotate(ValVec3* out, const ViewCam* m, const ValVec3* d) {
-    out->x = d->x * m->m[0][0] + d->y * m->m[0][1] + d->z * m->m[0][2];
-    out->y = d->x * m->m[1][0] + d->y * m->m[1][1] + d->z * m->m[1][2];
-    out->z = d->x * m->m[2][0] + d->y * m->m[2][1] + d->z * m->m[2][2];
+    out->x = Dot3YX(d->y, m->m[0][1], d->x, m->m[0][0], d->z, m->m[0][2]);
+    out->y = Dot3YX(d->y, m->m[1][1], d->x, m->m[1][0], d->z, m->m[1][2]);
+    out->z = Dot3YX(d->y, m->m[2][1], d->x, m->m[2][0], d->z, m->m[2][2]);
 }
 
 extern "C" {
@@ -274,9 +277,9 @@ void fn_80202718(void) {
     f32 dy = next->pos.y - cam->pos.y;
     f32 dz = next->pos.z - cam->pos.z;
     ValVec3 v;
-    v.x = dx * cam->m[0][0] + dy * cam->m[0][1] + dz * cam->m[0][2];
-    v.z = dx * cam->m[2][0] + dy * cam->m[2][1] + dz * cam->m[2][2];
-    v.y = dx * cam->m[1][0] + dy * cam->m[1][1] + dz * cam->m[1][2];
+    v.x = Dot3YX(dy, cam->m[0][1], dx, cam->m[0][0], dz, cam->m[0][2]);
+    v.z = Dot3YX(dy, cam->m[2][1], dx, cam->m[2][0], dz, cam->m[2][2]);
+    v.y = Dot3YX(dy, cam->m[1][1], dx, cam->m[1][0], dz, cam->m[1][2]);
     int dir = 1;
     if (v.z < 0.0f) {
         dir = -1;
