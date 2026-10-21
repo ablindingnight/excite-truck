@@ -3041,6 +3041,16 @@ game/uictx.cpp:
 	.sbss       start:0x8055EFE8 end:0x8055F008
 	.sdata2     start:0x805635E0 end:0x805635E8
 
+game/gback.cpp:
+	.text       start:0x8022F248 end:0x80230090
+	.ctors      start:0x802ED3D0 end:0x802ED3D4
+	.rodata     start:0x802F9FB0 end:0x802F9FC0
+	.data       start:0x80340350 end:0x80340440
+	.bss        start:0x80497E28 end:0x80497EF0
+	.sdata      start:0x8055B988 end:0x8055B998
+	.sbss       start:0x8055F008 end:0x8055F018
+	.sdata2     start:0x805635E8 end:0x80563610
+
 game/gtime.cpp:
 	.text       start:0x80236550 end:0x80236728
 	.ctors      start:0x802ED3E0 end:0x802ED3E4
