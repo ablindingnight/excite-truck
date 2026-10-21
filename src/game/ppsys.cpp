@@ -187,6 +187,18 @@ static inline void Set(RVec3* out, const RVec3* v) {
     out->z = v->z;
 }
 
+static inline void AddScaled(RVec3* out, const RVec3* v, const RVec3* d, f32 k) {
+    out->x = v->x + d->x * k;
+    out->y = v->y + d->y * k;
+    out->z = v->z + d->z * k;
+}
+
+static inline void Sub(RVec3* out, const RVec3* a, const RVec3* b) {
+    out->x = a->x - b->x;
+    out->y = a->y - b->y;
+    out->z = a->z - b->z;
+}
+
 static inline void Scale(RVec3* out, const RVec3* v, f32 k) {
     out->x = v->x * k;
     out->y = v->y * k;
@@ -344,18 +356,12 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
 // Gives every particle the velocity of a body moving with 'vel' and spinning with 'avel' about 'at'.
 void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
     for (int i = 0; i < s->nPart; i++) {
-        RVec3 r;
         RVec3 v;
-        r.x = s->pos[i].x - at->x;
-        r.y = s->pos[i].y - at->y;
-        r.z = s->pos[i].z - at->z;
+        RVec3 r;
+        Sub(&r, &s->pos[i], at);
         PSVECCrossProduct(avel, &r, &v);
-        v.x += vel->x;
-        v.y += vel->y;
-        v.z += vel->z;
-        s->old[i].x = s->pos[i].x + v.x * -(1.0f / 60.0f);
-        s->old[i].y = s->pos[i].y + v.y * -(1.0f / 60.0f);
-        s->old[i].z = s->pos[i].z + v.z * -(1.0f / 60.0f);
+        AddTo(&v, vel);
+        AddScaled(&s->old[i], &s->pos[i], &v, -(1.0f / 60.0f));
     }
 }
 
