@@ -630,3 +630,11 @@ inline void Relocate(T*& p, u32 base) {
         p = (T*)((u8*)p + base);
     }
 }
+
+template void Relocate<MLSphere>(MLSphere*&, u32);
+template void Relocate<MLBox>(MLBox*&, u32);
+template void Relocate<MLPiece>(MLPiece*&, u32);
+template void Relocate<MLStrip>(MLStrip*&, u32);
+template void Relocate<MLPrim>(MLPrim*&, u32);
+template void Relocate<MLBatch>(MLBatch*&, u32);
+template void Relocate<MLObj*>(MLObj**&, u32);

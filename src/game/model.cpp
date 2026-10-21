@@ -430,7 +430,7 @@ void fn_802C595C(char* dst, int n, const char* name, s32 inst) {
 
 u16 fn_802C5A50(int a, int b) { return a << 8 | b; }
 
-TexNode* fn_802C5A60(s32 tex, u32 key, s16 prio) {
+TexNode* fn_802C5A60(s32 tex, u32 key, u16 prio) {
     TexNode* found = 0;
     TexNode* empty = 0;
     TexNode* t = lbl_804C13A8.data;

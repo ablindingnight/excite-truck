@@ -563,7 +563,7 @@ GXTex* fn_802D8E9C(GXTexDesc* d, const char* name) {
 }
 
 void fn_802D8FB4(GXTex* t) {
-    if (t->uses && lbl_8055FD2C - t->lastFrame < (u32)-0x100) {
+    if (t->uses && lbl_8055FD2C - t->lastFrame >= (u32)-0x100) {
         fn_802CFEEC();
     }
     if (t->lut) {
