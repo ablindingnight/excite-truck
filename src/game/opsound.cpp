@@ -10,7 +10,7 @@ char* strcpy(char* d, const char* s);
 class MenuState {
 public:
     MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void);
+    virtual ~MenuState(void) {}
     virtual void Enter(void);   // 0x0C
     virtual void Exit(void);    // 0x10
     virtual void Unk14(void);
@@ -39,8 +39,6 @@ public:
     s32 h;      // offset 0x10
     int unk14;  // offset 0x14
 };
-
-inline MenuState::~MenuState(void) {}
 
 class Sound {
 public:
@@ -86,6 +84,7 @@ struct MenuItem {
         arg0 = a0;
         arg1 = a1;
     }
+    MenuItem(const char* n, f32* v, const struct MenuRange& r);
     const char* name;
     int type;
     const void* data;
@@ -101,6 +100,13 @@ struct MenuRange {
     }
     f32 lo, hi;
 };
+
+inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
+    name = n;
+    type = 9;
+    data = v;
+    *(MenuRange*)&arg0 = r;
+}
 
 // A slider: the range is stored in the item's argument words.
 struct SliderItem {
@@ -291,11 +297,11 @@ void fn_8023CC84(const char* layout) {
                 MenuItem(lbl_8055BAC0, 8, (void*)fn_8023CA18, 0, 0),
                 MenuItem(0, 5, &opts, 0, 0),
                 MenuItem("default", 0, (void*)fn_8023CB54, 0, 0),
-                *(MenuItem*)&SliderItem("video_volume", &lbl_8055F174, MenuRange(0.0f, 1.0f)),
-                *(MenuItem*)&SliderItem("sfx_volume", &lbl_8055F16C, MenuRange(0.0f, 1.0f)),
-                *(MenuItem*)&SliderItem("announcer_volume", &lbl_8055F168, MenuRange(0.0f, 1.0f)),
-                *(MenuItem*)&SliderItem("music_volume", &lbl_8055F164, MenuRange(0.0f, 1.0f)),
-                *(MenuItem*)&SliderItem("tire_volume", &lbl_8055F170, MenuRange(0.0f, 1.0f)),
+                MenuItem("video_volume", &lbl_8055F174, MenuRange(0.0f, 1.0f)),
+                MenuItem("sfx_volume", &lbl_8055F16C, MenuRange(0.0f, 1.0f)),
+                MenuItem("announcer_volume", &lbl_8055F168, MenuRange(0.0f, 1.0f)),
+                MenuItem("music_volume", &lbl_8055F164, MenuRange(0.0f, 1.0f)),
+                MenuItem("tire_volume", &lbl_8055F170, MenuRange(0.0f, 1.0f)),
                 MenuItem("back", 0, 0, -1, 0),
                 MenuItem("quality", 7, &lbl_8055F17C, (int)"Low\0Medium\0High", 0),
                 MenuItem("race_music", 7, &lbl_8055F178, (int)"In-Game Music Off\0In-Game Music On", 0),
