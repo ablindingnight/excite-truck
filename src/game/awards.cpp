@@ -97,74 +97,84 @@ public:
     virtual ~ILayout(void);
 };
 
-template <class T> void SafeDelete(T*& p);
-
-// Owns one object.
-template <class T> struct AutoDel {
-    AutoDel(void) : p(0) {}
-    AutoDel(T* q) : p(q) {}
-    ~AutoDel(void) {
-        if (p) {
-            delete p;
-            p = 0;
-        }
+template <class T> void SafeDelete(T*& p) {
+    if (p) {
+        delete p;
+        p = 0;
     }
-    T* p;
-};
+}
 
 struct StatDesc {
     s32 event;
     s32 difficulty;
 };
 
-class StatHandler : public AutoDel<Statistic> {
+struct StatHolder {
+    Statistic* stat;  // offset 0x0
+};
+
+class StatHandler : public StatHolder {
 public:
-    StatHandler(Statistic* s) : AutoDel<Statistic>(s) {}
-    virtual ~StatHandler(void) {}
+    StatHandler(Statistic* s) { stat = s; }
+    virtual ~StatHandler(void) { SafeDelete(stat); }
     virtual int PushInt(long v);
     virtual int PushReal(f32 v);
 };
 
 class IntStatHandler : public StatHandler {
 public:
-    IntStatHandler(IntStatistic* s) : StatHandler(s) {}
-    virtual int PushInt(long v) {
-        IntStatistic* s = (IntStatistic*)p;
-        if (s->IsNewRecord(v)) {
-            s->SetValue(v);
-            if (best.p && !best.p->IsNewRecord(v)) {
-                return 0;
-            }
-            if (best2.p && !best2.p->IsNewRecord(v)) {
-                return 0;
-            }
-            return 1;
-        }
-        return 0;
+    IntStatHandler(IntStatistic* s) : StatHandler(s) {
+        best = 0;
+        best2 = 0;
     }
-    AutoDel<IntStatistic> best;   // offset 0x8
-    AutoDel<IntStatistic> best2;  // offset 0xC
+    virtual ~IntStatHandler(void) {
+        SafeDelete(best);
+        SafeDelete(best2);
+    }
+    virtual int PushInt(long v) {
+        IntStatistic* s = (IntStatistic*)stat;
+        if (!s->IsNewRecord(v)) {
+            return 0;
+        }
+        s->SetValue(v);
+        if (best && !best->IsNewRecord(v)) {
+            return 0;
+        }
+        if (best2 && !best2->IsNewRecord(v)) {
+            return 0;
+        }
+        return 1;
+    }
+    IntStatistic* best;   // offset 0x8
+    IntStatistic* best2;  // offset 0xC
 };
 
 class RealStatHandler : public StatHandler {
 public:
-    RealStatHandler(RealStatistic* s) : StatHandler(s) {}
-    virtual int PushReal(f32 v) {
-        RealStatistic* s = (RealStatistic*)p;
-        if (s->IsNewRecord(v)) {
-            s->SetValue(v);
-            if (best.p && !best.p->IsNewRecord(v)) {
-                return 0;
-            }
-            if (best2.p && !best2.p->IsNewRecord(v)) {
-                return 0;
-            }
-            return 1;
-        }
-        return 0;
+    RealStatHandler(RealStatistic* s) : StatHandler(s) {
+        best = 0;
+        best2 = 0;
     }
-    AutoDel<RealStatistic> best;   // offset 0x8
-    AutoDel<RealStatistic> best2;  // offset 0xC
+    virtual ~RealStatHandler(void) {
+        SafeDelete(best);
+        SafeDelete(best2);
+    }
+    virtual int PushReal(f32 v) {
+        RealStatistic* s = (RealStatistic*)stat;
+        if (!s->IsNewRecord(v)) {
+            return 0;
+        }
+        s->SetValue(v);
+        if (best && !best->IsNewRecord(v)) {
+            return 0;
+        }
+        if (best2 && !best2->IsNewRecord(v)) {
+            return 0;
+        }
+        return 1;
+    }
+    RealStatistic* best;   // offset 0x8
+    RealStatistic* best2;  // offset 0xC
 };
 
 // A queued "live update" pop-up.
@@ -440,7 +450,7 @@ int fn_801CB8FC(void) { return fn_801CE8CC(); }
 
 int fn_801CB900(StatHandler* h, u32 type) {
     int r = 0;
-    if (h && type == h->p->GetType()) {
+    if (h && type == h->stat->GetType()) {
         r = 1;
     }
     return r;
@@ -476,7 +486,7 @@ StatHandler* fn_801CB954(u32 type, const StatDesc* d) {
                 }
             }
             if (bestEv >= 0) {
-                h->best.p = new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
+                h->best = new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
             }
         }
         return h;
@@ -507,7 +517,7 @@ StatHandler* fn_801CB954(u32 type, const StatDesc* d) {
                 }
             }
             if (bestEv >= 0) {
-                h->best.p = new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
+                h->best = new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
             }
         }
         return h;
@@ -547,7 +557,7 @@ void fn_801CC470(void) {
         m->off[1] = 1;
         m->off[2] = 1;
         m->off[3] = 1;
-        for (u32 i = 1; i <= 7; i++) {
+        for (int i = 1; i <= 7; i++) {
             StatDesc* d = (StatDesc*)m;
             StatHandler* h = fn_801CB954(StatsGetTypeFromIndex(i), d);
             *fn_801CC784(&m->handlers) = h;
@@ -566,7 +576,7 @@ static inline void ResetAwards(AwardsMgr* m) {
     if (!m->paused) {
         for (int i = 0; i < m->handlers.n; i++) {
             if (m->handlers.data[i]) {
-                m->handlers.data[i]->p->Revert();
+                m->handlers.data[i]->stat->Revert();
             }
         }
         m->head = 0;
@@ -691,7 +701,7 @@ void fn_801CCBC4(void) {
     if (!m->paused) {
         for (int i = 0; i < m->handlers.n; i++) {
             if (m->handlers.data[i]) {
-                m->handlers.data[i]->p->Commit();
+                m->handlers.data[i]->stat->Commit();
             }
         }
         if (!fn_801CE898() && m->score != 0) {
@@ -1070,8 +1080,8 @@ int fn_801CE8CC(void) {
     if (h && h->grade >= 0 && h->grade <= need) {
         return 1;
     }
-    s32 score = 0;
     s32 grade = -1;
+    s32 score = 0;
     fn_801CD730(&score, &grade);
     if (grade >= 0 && grade <= need) {
         return 1;
