@@ -1072,6 +1072,7 @@ config.libs.append(
             Object(Matching, "game/ground.cpp"),
             Object(Matching, "game/gendrawlist.cpp"),
             Object(NonMatching, "game/stub17.cpp"),
+            Object(NonMatching, "game/world.cpp"),
             Object(Matching, "game/camproj.cpp"),
             Object(Matching, "game/carinfo.cpp"),
             Object(NonMatching, "game/animobj.cpp"),
