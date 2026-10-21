@@ -573,6 +573,12 @@ void fn_801D411C(MutPhob* p) {
 }
 
 // Sets up the chunk's collision shape.
+static inline f32 SumSquares(f32 a, f32 b) {
+    f32 aa = a * a;
+    f32 bb = b * b;
+    return aa + bb;
+}
+
 void fn_801D4294(MutPhob* p, const PhobConfig* c) {
     RVec3 center(0.0f, 0.0f, 0.0f);
     switch (c->kind) {
@@ -588,7 +594,7 @@ void fn_801D4294(MutPhob* p, const PhobConfig* c) {
         break;
     case MP_HINGED:
         p->shapeType = 'TUBE';
-        p->shapeRadius = sqrt(c->b * c->b + c->a * c->a);
+        p->shapeRadius = sqrt(SumSquares(c->a, c->b));
         new (p->shape) TubeShape(p, &p->mtx, c->spring, c->friction, c->a, c->b);
         break;
     case MP_CUBE: {
