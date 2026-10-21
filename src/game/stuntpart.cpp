@@ -629,7 +629,10 @@ void fn_802AB770(int idx) {
     car = fn_80287B24(idx);
     f32 dt = fn_801E7E24();
     if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
-        p->fogColor = FogColor();
+        u8 r = fn_80129D90(0, 140, 255);
+        u8 g = fn_80129D90(0, 250, 255);
+        u8 b = fn_80129D90(0, 240, 255);
+        p->fogColor = MakeFog(b, g, r);
     }
     f32 h = car->height;
     if (lbl_8055F92C) {
