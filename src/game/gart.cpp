@@ -460,6 +460,9 @@ int fn_80235FD8(gArtSet* s) {
     return n;
 }
 
+// Stripped from ET; only its string remains.
+const char* GArtStrippedUnknownId(void) { return "<unknown-id>"; }
+
 }  // extern "C"
 
 // A set of named textures, one of which is drawn at a time.
