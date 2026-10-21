@@ -1,4 +1,4 @@
-// Panel volumes (0x801BF210-0x801C109C): loose body panels ("panelvol"). A pool of rigid bodies, each a
+// Panel volumes (0x801BF214-0x801C109C): loose body panels ("panelvol"). A pool of rigid bodies, each a
 // quad that a car sheds (Attach): the quad is built from a box on the car, hangs off a cloth/strip
 // simulation (fn_801C1BA4 handle) and is re-fitted to the simulated corners every update. A body
 // is reused when free, else the oldest one is taken. Names are guesses apart from the strings.
@@ -336,8 +336,6 @@ inline PanelVol::PanelVol(void) {
 }
 
 extern "C" {
-
-void fn_801BF210(void) {}
 
 PanelVol* fn_801BF214(void) { return new ("panel") PanelVol; }
 

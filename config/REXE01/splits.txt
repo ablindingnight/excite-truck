@@ -2579,7 +2579,7 @@ game/trailer.cpp:
 	.sdata2     start:0x80562750 end:0x805627A8
 
 game/panelvol.cpp:
-	.text       start:0x801BF210 end:0x801C109C
+	.text       start:0x801BF214 end:0x801C109C
 	.ctors      start:0x802ED288 end:0x802ED28C
 	.rodata     start:0x802F98D0 end:0x802F9930
 	.data       start:0x80336A90 end:0x80336AF0
