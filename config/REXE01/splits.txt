@@ -3609,6 +3609,16 @@ game/faninfo.cpp:
 	.sbss       start:0x8055FAC0 end:0x8055FAD0
 	.sdata2     start:0x80564D50 end:0x80564D78
 
+game/water.cpp:
+	.text       start:0x802BECE4 end:0x802C0D70
+	.ctors      start:0x802ED57C end:0x802ED580
+	.rodata     start:0x802FABA0 end:0x802FAC60
+	.data       start:0x8034ACA0 end:0x8034AE98
+	.bss        start:0x804C07F0 end:0x804C0800
+	.sdata      start:0x8055CF68 end:0x8055CF90
+	.sbss       start:0x8055FAD0 end:0x8055FB08
+	.sdata2     start:0x80564D78 end:0x80564E30
+
 game/sky.cpp:
 	.text       start:0x802C0D70 end:0x802C110C
 	.ctors      start:0x802ED580 end:0x802ED584
