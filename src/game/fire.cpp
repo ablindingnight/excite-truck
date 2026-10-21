@@ -526,10 +526,10 @@ int fn_80297D90(s32* out, int n) {
 }
 
 void fn_80297DC8(FireDesc* e) {
-    e->kind = 1;
     e->max = 0xC0;
     e->size0 = 1.0f;
     e->size1 = 0.25f;
+    e->kind = 1;
     e->c0 = FColor(0.5f, 0.25f, 0.5f);
     e->c1 = FColor(1.0f, 1.0f, 1.0f);
     e->gravity = 0.0f;
@@ -884,10 +884,10 @@ void EngineFireMan::Emit(EngineEntry* e) {
 extern "C" void fn_802991BC(EngineFireMan* m) {
     FireDesc e;
     fn_8028E61C(&e);
-    e.kind = 1;
     e.max = 0x80;
     e.size0 = 0.4f;
     e.size1 = 0.5f;
+    e.kind = 1;
     e.frames = 2;
     e.c0 = FColor(0.4f, 0.4f, 0.4f);
     e.c1 = FColor(1.0f, 1.0f, 1.0f);
@@ -1056,10 +1056,10 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     FireDesc e;
     Mat3 rot;
     fn_8028E61C(&e);
-    e.kind = 1;
     e.max = 0xA0;
     e.size0 = 1.0f;
     e.size1 = 1.0f;
+    e.kind = 1;
     e.c0 = FColor(0.2f, 0.2f, 0.2f);
     e.c1 = FColor(1.0f, 1.0f, 1.0f);
     e.gravity = 0.0f;
@@ -1278,8 +1278,8 @@ void BoostFireMan::SetActive(int i) { entries[i].active = 1; }
 
 void BoostFireMan::Reset(void) {
     for (int i = 0; i < 8; i++) {
-        entries[i].active = 0;
         entries[i].t = -1.0f;
+        entries[i].active = 0;
     }
 }
 
@@ -1617,10 +1617,10 @@ void TorchFireMan::Add(const TorchFire* ev) {
 void TorchFireMan::InitEmitter(void) {
     FireDesc e;
     fn_8028E61C(&e);
-    e.kind = 1;
     e.max = 0xC0;
     e.size0 = 0.5f;
     e.size1 = 1.0f;
+    e.kind = 1;
     e.c0 = FColor(0.2f, 0.2f, 0.2f);
     e.c1 = FColor(1.0f, 1.0f, 1.0f);
     e.gravity = 0.0f;
