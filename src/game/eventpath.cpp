@@ -72,11 +72,13 @@ template <class T> struct FixedVec {
         return *this;
     }
     void RemoveAt(int k) {
-        if (k >= 0 && k < n) {
-            if (k != n - 1) {
-                data[k] = data[n - 1];
+        volatile s32& c = n;
+        int cnt;
+        if (k >= 0 && k < (cnt = c)) {
+            if (k != cnt - 1) {
+                data[k] = data[cnt - 1];
             }
-            n--;
+            c = c - 1;
         }
     }
     T* data;  // offset 0x0
@@ -200,7 +202,7 @@ struct PathEvent {
 struct PathEventList {
     int Find(int event) {
         for (int i = 0; i < n; i++) {
-            if (data[i].event == event) {
+            if (event == data[i].event) {
                 return i;
             }
         }
@@ -215,6 +217,19 @@ SlotPaths lbl_804A4380[4];
 u8 lbl_8055F650;
 Oracle* lbl_8055F654;
 s32 lbl_8055F658;
+
+static inline bool StrEq(const char* a, const char* b);
+
+static inline int FindContestIdx(Oracle* o, const char* name) {
+    for (int i = 0; i < o->contests.n; i++) {
+        if (StrEq(name, o->contests.data[i].name)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
 static inline bool StrEq(const char* a, const char* b) { return strcasecmp(a, b) == 0; }
 
@@ -254,11 +269,11 @@ extern "C" {
 
 s32 fn_8027D1F4(void);
 s32 fn_8027CFB4(const char* name);
-u8 fn_8027CEC4(const char* name);
-u8 fn_8027CE4C(const char* name);
-u8 fn_8027CF3C(const char* name);
-u8 fn_8027D0E0(const char* name);
-u8 fn_8027D068(const char* name);
+int fn_8027CEC4(const char* name);
+int fn_8027CE4C(const char* name);
+int fn_8027CF3C(const char* name);
+int fn_8027D0E0(const char* name);
+int fn_8027D068(const char* name);
 void fn_8027D158(const char* name, char* out, int n);
 int fn_8027BA24(Path* p);
 int fn_8027BAB8(Path* p);
@@ -277,9 +292,10 @@ int fn_8027AD4C(Contest* c, ValueNode* n) {
                     fn_802E30C8("EventPathEvent: found two contests named %s, using the first one", name);
                 } else {
                     found = 1;
-                    c->event = e->id;
-                    const char* table = fn_80205268("grade_table", c->difficulty, e->id);
-                    if (e->node->FindChild(table) != 0) {
+                    s32 id = e->id;
+                    c->event = id;
+                    const char* table = fn_80205268("grade_table", c->difficulty, id);
+                    if (HasChild(e->node, table)) {
                         c->grades.Load(e->node->FindChild(table));
                     } else {
                         fn_802E30C8("contest table %s has no table called \"%s\"", name, table);
@@ -399,10 +415,10 @@ void fn_8027CCB4(Path* p, int slot, int difficulty);
 void fn_8027CD80(Path* p, int slot, int difficulty);
 
 void fn_8027B690(void) {
+    u32 i;
     int mode = EnterCareerEves();
     for (int s = 0; s < 4; s++) {
         SlotPaths* sp = &lbl_804A4380[s];
-        u32 i;
         for (i = 0; i < 3; i++) {
             fn_8027CCB4(&sp->career[i], s, i);
         }
@@ -415,12 +431,12 @@ void fn_8027B690(void) {
 }
 
 void fn_8027B77C(void) {
+    u32 i;
     if (OptDirectToTrack() && !lbl_8055F650) {
         return;
     }
     for (u32 s = 0; s < 4; s++) {
         SlotPaths* sp = &lbl_804A4380[s];
-        u32 i;
         for (i = 0; i < 3; i++) {
             fn_8027B60C(&sp->career[i]);
         }
@@ -577,14 +593,7 @@ void fn_8027C0D0(BracketRef* r, s32 type, ValueNode* n) {
 }
 
 ContestRef* fn_8027C120(Oracle* o, const char* name) {
-    int idx;
-    for (idx = 0; idx < o->contests.n; idx++) {
-        if (StrEq(name, o->contests.data[idx].name)) {
-            goto found;
-        }
-    }
-    idx = -1;
-found:
+    int idx = FindContestIdx(o, name);
     if (idx < 0) {
         return 0;
     }
@@ -734,7 +743,8 @@ int fn_8027C788(BracketRef* b) {
 }
 
 int fn_8027C850(BracketRef* b) {
-    int i = fn_8027C1C8(lbl_8055F654, b->name);
+    const char* name = b->name;
+    int i = fn_8027C1C8(lbl_8055F654, name);
     if (i == 0) {
         return 1;
     }
@@ -831,7 +841,7 @@ void fn_8027CD80(Path* p, int slot, int difficulty) {
     LeaveEves(mode);
 }
 
-u8 fn_8027CE4C(const char* name) {
+int fn_8027CE4C(const char* name) {
     ContestRef* r = fn_8027C120(lbl_8055F654, name);
     switch (r->type) {
     case 0:
@@ -839,12 +849,12 @@ u8 fn_8027CE4C(const char* name) {
     case 1:
         return fn_8027CB20(r);
     default:
-        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, r->type);
         return 1;
     }
 }
 
-u8 fn_8027CEC4(const char* name) {
+int fn_8027CEC4(const char* name) {
     ContestRef* r = fn_8027C120(lbl_8055F654, name);
     switch (r->type) {
     case 0:
@@ -852,12 +862,12 @@ u8 fn_8027CEC4(const char* name) {
     case 1:
         return fn_8027CA1C(r);
     default:
-        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, r->type);
         return 1;
     }
 }
 
-u8 fn_8027CF3C(const char* name) {
+int fn_8027CF3C(const char* name) {
     ContestRef* r = fn_8027C120(lbl_8055F654, name);
     switch (r->type) {
     case 0:
@@ -865,7 +875,7 @@ u8 fn_8027CF3C(const char* name) {
     case 1:
         return fn_8027CAB4(r);
     default:
-        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, r->type);
         return 1;
     }
 }
@@ -883,7 +893,7 @@ s32 fn_8027CFB4(const char* name) {
     return 0;
 }
 
-u8 fn_8027D068(const char* name) {
+int fn_8027D068(const char* name) {
     BracketRef* b = fn_8027C26C(lbl_8055F654, name);
     switch (b->type) {
     case 0:
@@ -891,12 +901,12 @@ u8 fn_8027D068(const char* name) {
     case 1:
         return fn_8027CBF0(b);
     default:
-        fn_802E317C("eventpath: bracket %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: bracket %s has unknown event-path type %d", name, b->type);
         return 1;
     }
 }
 
-u8 fn_8027D0E0(const char* name) {
+int fn_8027D0E0(const char* name) {
     BracketRef* b = fn_8027C26C(lbl_8055F654, name);
     switch (b->type) {
     case 0:
@@ -904,7 +914,7 @@ u8 fn_8027D0E0(const char* name) {
     case 1:
         return fn_8027CB28(b);
     default:
-        fn_802E317C("eventpath: bracket %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: bracket %s has unknown event-path type %d", name, b->type);
         return 1;
     }
 }
@@ -919,7 +929,7 @@ void fn_8027D158(const char* name, char* out, int n) {
         fn_8027CBF8(b, out, n);
         break;
     default:
-        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name);
+        fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, b->type);
         break;
     }
 }
