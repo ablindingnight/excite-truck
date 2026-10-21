@@ -59,6 +59,13 @@ void operator delete(void* p);
 
 // A fixed-capacity array over storage the owner provides.
 template <class T> struct FixedVec {
+    ~FixedVec(void) {
+        if (this) {
+            data = 0;
+            n = 0;
+            cap = 0;
+        }
+    }
     FixedVec& operator=(const FixedVec& o) {
         if (&o != this) {
             int c = o.n;
@@ -416,14 +423,13 @@ void fn_8027CCB4(Path* p, int slot, int difficulty);
 void fn_8027CD80(Path* p, int slot, int difficulty);
 
 void fn_8027B690(void) {
-    u32 i;
     int mode = EnterCareerEves();
     for (int s = 0; s < 4; s++) {
         SlotPaths* sp = &lbl_804A4380[s];
-        for (i = 0; i < 3; i++) {
+        for (u32 i = 0; i < 3; i++) {
             fn_8027CCB4(&sp->career[i], s, i);
         }
-        for (i = 0; i < 2; i++) {
+        for (u32 i = 0; i < 2; i++) {
             fn_8027CD80(&sp->chal[i], s, i);
         }
     }
@@ -432,16 +438,15 @@ void fn_8027B690(void) {
 }
 
 void fn_8027B77C(void) {
-    u32 i;
     if (OptDirectToTrack() && !lbl_8055F650) {
         return;
     }
     for (u32 s = 0; s < 4; s++) {
         SlotPaths* sp = &lbl_804A4380[s];
-        for (i = 0; i < 3; i++) {
+        for (u32 i = 0; i < 3; i++) {
             fn_8027B60C(&sp->career[i]);
         }
-        for (i = 0; i < 2; i++) {
+        for (u32 i = 0; i < 2; i++) {
             fn_8027B60C(&sp->chal[i]);
         }
     }
@@ -601,16 +606,16 @@ ContestRef* fn_8027C120(Oracle* o, const char* name) {
     return &o->contests.data[idx];
 }
 
-int fn_8027C1C8(Oracle* o, const char* name) {
-    int i;
-    for (i = 0; i < o->brackets.n; i++) {
+static inline int FindBracketIdx(Oracle* o, const char* name) {
+    for (int i = 0; i < o->brackets.n; i++) {
         if (StrEq(name, o->brackets.data[i].name)) {
-            goto found;
+            return i;
         }
     }
-    i = -1;
-found:
-    return i;
+    return -1;
+}
+int fn_8027C1C8(Oracle* o, const char* name) {
+    return FindBracketIdx(o, name);
 }
 
 BracketRef* fn_8027C258(Oracle* o, int i) { return &o->brackets.data[i]; }
@@ -624,13 +629,15 @@ BracketRef* fn_8027C26C(Oracle* o, const char* name) {
 }
 
 void fn_8027C2B8(Oracle* o, s32 type, const char* file) {
+    BracketRef* br;
+    ValueNode* b;
     ValueTable* t = fn_80131808(file);
     if (t) {
-        o->tables.data[o->tables.n++] = t;
-        ValueNode* b;
+        ValueTable** slot = &o->tables.data[o->tables.n++];
+        *slot = t;
         for (int i = 0; (b = t->GetChild(i)) != 0; i++) {
             if (!strcasecmp(b->GetName(), "bracket")) {
-                BracketRef* br = &o->brackets.data[o->brackets.n++];
+                br = &o->brackets.data[o->brackets.n++];
                 fn_8027C0D0(br, type, b);
                 ValueNode* c;
                 for (int j = 0; (c = b->GetChildAt(j)) != 0; j++) {
@@ -667,24 +674,9 @@ Oracle* fn_8027C4B4(Oracle* o, short del) {
             fn_80131818(o->tables.data[i]);
         }
         o->tables.n = 0;
-        FixedVec<ValueTable*>* t = &o->tables;
-        if (t) {
-            t->data = 0;
-            t->n = 0;
-            t->cap = 0;
-        }
-        FixedVec<BracketRef>* b = &o->brackets;
-        if (b) {
-            b->data = 0;
-            b->n = 0;
-            b->cap = 0;
-        }
-        FixedVec<ContestRef>* c = &o->contests;
-        if (c) {
-            c->data = 0;
-            c->n = 0;
-            c->cap = 0;
-        }
+        o->tables.~FixedVec<ValueTable*>();
+        o->brackets.~FixedVec<BracketRef>();
+        o->contests.~FixedVec<ContestRef>();
         if (del > 0) {
             operator delete(o);
         }
