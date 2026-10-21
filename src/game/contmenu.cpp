@@ -11,7 +11,7 @@ void fn_8022BAD0(int style, int x, int y, int z, int w, int h, const char* text,
 class MenuState {
 public:
     MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
+    virtual ~MenuState(void);
     virtual void Enter(void);   // 0x0C
     virtual void Exit(void);    // 0x10
     virtual void Unk14(void);
@@ -49,6 +49,8 @@ public:
     s32 h;      // offset 0x10
     int unk14;  // offset 0x14
 };
+
+inline MenuState::~MenuState(void) {}
 
 class Sound {
 public:
