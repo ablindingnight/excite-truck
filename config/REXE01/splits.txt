@@ -3319,6 +3319,16 @@ game/minworld.cpp:
 	.sbss       start:0x8055F2F0 end:0x8055F318
 	.sdata2     start:0x805639C8 end:0x80563A00
 
+game/caruimod.cpp:
+	.text       start:0x80253258 end:0x80257284
+	.ctors      start:0x802ED44C end:0x802ED450
+	.rodata     start:0x802FA5A8 end:0x802FA5E0
+	.data       start:0x803447C0 end:0x80344CC8
+	.bss        start:0x80498DF0 end:0x80498E38
+	.sdata      start:0x8055C128 end:0x8055C1D8
+	.sbss       start:0x8055F318 end:0x8055F348
+	.sdata2     start:0x80563A00 end:0x80563AA8
+
 game/mstats.cpp:
 	.text       start:0x80257284 end:0x80257C10
 	.ctors      start:0x802ED450 end:0x802ED454
