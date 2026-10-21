@@ -316,13 +316,16 @@ void fn_80230AD8(const void* m) {
     fn_802C88BC(3);
     fn_802C8530();
     fn_802C8638(m);
-    fn_802C974C(1.0f, 1000.0f, 1.44f);
+    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
 }
 
 void fn_80230B38(void) {
     fn_802C855C();
     fn_802C2B48();
 }
+
+// Stripped from ET; only its constant remains.
+f32 UIDrawStrippedPeriod(void) { return 2.0f; }
 
 void fn_80230B5C(f32* m) {
     m[0] = 1.0f;
@@ -373,6 +376,9 @@ void fn_80230C9C(f32* a, f32* b, f32 lo, f32 hi, f32 range) {
     *a = x0;
     *b = x1;
 }
+
+// Stripped from ET; only its constant remains.
+f32 UIDrawStrippedRamp(void) { return 0.25f; }
 
 void fn_80230DA0(void) {}
 
