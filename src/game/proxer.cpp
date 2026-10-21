@@ -513,12 +513,14 @@ struct ProxQuery {
     s32 car;  // offset 0x18
 };
 
+static inline f32 Product(f32 a, f32 b) { return a * b; }
+
 f32 fn_80137850(ProxQuery* q) {
     CarRec* r = lbl_8055E0D0->Rec(q->car);
-    return r->pos.x + r->vel.x * q->when->t;
+    return r->pos.x + Product(r->vel.x, q->when->t);
 }
 
-void fn_80137884(s32 n) { lbl_8055E0D4 = lbl_8055E0D0 = new ("Proxer") Proxer(n); }
+void fn_80137884(s32 n) { lbl_8055E0D0 = lbl_8055E0D4 = new ("Proxer") Proxer(n); }
 
 void fn_801378D0(void) {
     delete lbl_8055E0D4;

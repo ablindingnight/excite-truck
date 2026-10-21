@@ -363,9 +363,7 @@ void fn_802CD254(MList* m) {
         e->tex = -2;
     }
     for (i = 0; i < m->numObjs; i++) {
-        if (m->objs[i]) {
-            delete m->objs[i];
-        }
+        delete m->objs[i];
         m->objs[i] = 0;
     }
     m->numObjs = 0;

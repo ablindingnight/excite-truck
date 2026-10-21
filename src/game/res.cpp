@@ -321,7 +321,7 @@ int fn_8012A470(ResourceSet* set, int idx, ResEntry* e, u8* base) {
     int ok;
     e->data = (ResData*)(base + e->offset - 8);
     fn_8012A46C(e->data->body, "toc fixup");
-    ok = fn_80132E7C(e->data->body, e->size) == e->crc;
+    ok = (e->crc - fn_80132E7C(e->data->body, e->size)) == 0;
     if (ok) {
         if (e->flags & 8) {
             fn_802E30C8("*************************************");
