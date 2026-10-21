@@ -3542,6 +3542,15 @@ game/shadowvol.cpp:
 	.sbss       start:0x8055F798 end:0x8055F7B8
 	.sdata2     start:0x80564580 end:0x80564590
 
+game/fire.cpp:
+	.text       start:0x80297D5C end:0x8029C1C4
+	.ctors      start:0x802ED50C end:0x802ED510
+	.rodata     start:0x802FA9F0 end:0x802FAA10
+	.data       start:0x80349408 end:0x80349560
+	.sdata      start:0x8055CA68 end:0x8055CAA8
+	.sbss       start:0x8055F7B8 end:0x8055F7E8
+	.sdata2     start:0x80564590 end:0x80564628
+
 game/waterpool.cpp:
 	.text       start:0x8029C1C4 end:0x8029EF70
 	.ctors      start:0x802ED510 end:0x802ED514
