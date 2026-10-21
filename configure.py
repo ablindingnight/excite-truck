@@ -1023,6 +1023,7 @@ config.libs.append(
             Object(Matching, "game/physdriver.cpp"),
             Object(NonMatching, "game/springcar.cpp"),
             Object(NonMatching, "game/netcar.cpp"),
+            Object(NonMatching, "game/inputbind.cpp"),
             Object(Matching, "game/stub6.cpp"),
             Object(NonMatching, "game/recordmgr.cpp"),
             Object(Matching, "game/tirelist.cpp"),
