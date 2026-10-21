@@ -273,8 +273,9 @@ void fn_8028D4FC(void) {
         }
     }
     for (int j = 0; j < lbl_8055F724; j++) {
-        lbl_8055F720[j].type = -1;
-        lbl_8055F720[j].time = 0.0f;
+        SkidSlot* sl = &lbl_8055F720[j];
+        sl->type = -1;
+        sl->time = 0.0f;
     }
 }
 
