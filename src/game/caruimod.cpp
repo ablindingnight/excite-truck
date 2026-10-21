@@ -15,6 +15,11 @@ struct Frame {
     Vec pos;  // offset 0x24
 };
 
+// A vector as three array elements (copied with word moves).
+struct Vec3a {
+    f32 v[3];
+};
+
 struct Mtx33 {
     f32 m[9];
 };
@@ -206,7 +211,6 @@ public:
     void Draw(void);
     void DrawShadow(void);
     void DrawEfx(void);
-    void* Wheels(int i) { return IsFront(i) ? fwheels : rwheels; }
 
     u8 loaded;         // offset 0x0
     f32 start;         // offset 0x4
@@ -299,7 +303,7 @@ void CarUIModel::Load(const char* carName) {
     fn_8027A714(&setup, carName);
     int i;
     for (i = 0; i < 4; i++) {
-        setup.wheels[i].radius = fn_801F159C(Wheels(i));
+        setup.wheels[i].radius = IsFront(i) ? fn_801F159C(fwheels) : fn_801F159C(rwheels);
     }
     offset = *(Vec*)&setup.modelOffset;
     f32 wheelbase = setup.wheelbase;
@@ -644,7 +648,8 @@ public:
 
 // A named async resource set shared between car views.
 struct ResourceLoader {
-    ResourceLoader(s32 size, const char* name) { set = fn_8012CAA0(size, name); }
+    ResourceLoader(const char* name) { set = fn_8012CAA0(0x16E360, name); }
+    int IsIdle(void) { return set->Status() == 0; }
     char name[0x20];        // offset 0x0
     AsyncResourceSet* set;  // offset 0x20
     s32 refs;               // offset 0x24
@@ -729,16 +734,15 @@ ResourceLoader* lbl_80498E08[4];
 Vec lbl_80498E18;  // camera target
 CarUIScreen* lbl_80498E28[4];
 
-static inline int LoaderIdle(int i) { return lbl_80498E08[i]->set->Status() == 0; }
-
 static inline void CreateLoader(void) {
-    ResourceLoader* l = new ("ResLoader") ResourceLoader(0x16E360, "caruimod");
-    lbl_80498E08[lbl_8055F33C++] = l;
+    ResourceLoader* l = new ("ResLoader") ResourceLoader("caruimod");
+    lbl_80498E08[lbl_8055F33C] = l;
+    lbl_8055F33C++;
 }
 
 static inline void DestroyLoader(void) {
     for (int i = 0; i < lbl_8055F33C; i++) {
-        if (LoaderIdle(i)) {
+        if (lbl_80498E08[i]->IsIdle()) {
             ResourceLoader* l = lbl_80498E08[i];
             ResourceLoader** p = &lbl_80498E08[i];
             if (l) {
@@ -770,7 +774,7 @@ static inline void ReleaseLoader(const char* name) {
 static inline int AcquireLoader(const char* name) {
     int idle = -1;
     for (int i = 0; i < lbl_8055F33C; i++) {
-        if (LoaderIdle(i)) {
+        if (lbl_80498E08[i]->IsIdle()) {
             idle = i;
         } else if (!strcasecmp(lbl_80498E08[i]->name, name)) {
             lbl_80498E08[i]->refs++;
@@ -837,10 +841,10 @@ static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
 
 extern "C" {
 
-void fn_80254568(ValVec3* out, s32 model, const char* name) {
+void fn_80254568(Vec3a* out, s32 model, const char* name) {
     const Frame* f = 0;
     fn_801E2CCC(model, name, &f);
-    *out = *(const ValVec3*)&f->pos;
+    *out = *(const Vec3a*)&f->pos;
 }
 
 void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
@@ -858,9 +862,9 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         Vec r;
         Vec l;
         Vec c;
-        fn_80254568((ValVec3*)&r, model, "front_r");
-        fn_80254568((ValVec3*)&l, model, "front_l");
-        fn_80254568((ValVec3*)&c, model, "rear_c");
+        fn_80254568((Vec3a*)&r, model, "front_r");
+        fn_80254568((Vec3a*)&l, model, "front_l");
+        fn_80254568((Vec3a*)&c, model, "rear_c");
         Vec mid;
         mid.x = l.x + 0.5f * (r.x - l.x);
         mid.y = l.y + 0.5f * (r.y - l.y);
