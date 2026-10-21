@@ -359,8 +359,25 @@ public:
     u8 armed;  // offset 0x20
 };
 
+// The menu item list terminator (0, 123, 0, 0, 0).
+class MenuEnd {
+public:
+    MenuEnd(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+};
+
 ModuleTag lbl_8055F100;
-static UnkStatic123 lbl_804986F8;
+static MenuEnd lbl_804986F8;
 static OptState lbl_8049870C;
 s32 lbl_8055BAC8 = -1;
 UnkStatic7F lbl_8055F108;
