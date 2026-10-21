@@ -349,6 +349,14 @@ static inline f32 Clamp01(f32 t) {
     return (t > 0.0f) ? t : 0.0f;
 }
 
+static inline void SetCroppedUV(f32& ul, f32& vt, f32& ur, f32& vb,
+                               f32 leftU, f32 topV, f32 rightU, f32 bottomV) {
+    ul = leftU;
+    vt = topV;
+    ur = rightU;
+    vb = bottomV;
+}
+
 void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 top, f32 right, f32 bottom,
                  int color) {
     if (idx >= 0) {
@@ -357,10 +365,11 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
             f32 sw, sh, vb, ur, vt, ul;
-            vb = Lerp(Clamp01(bottom), p->v0, p->v1);
-            ur = Lerp(Clamp01(right), p->u0, p->u1);
-            vt = Lerp(Clamp01(top), p->v0, p->v1);
-            ul = Lerp(Clamp01(left), p->u0, p->u1);
+            SetCroppedUV(ul, vt, ur, vb,
+                         Lerp(Clamp01(left), p->u0, p->u1),
+                         Lerp(Clamp01(top), p->v0, p->v1),
+                         Lerp(Clamp01(right), p->u0, p->u1),
+                         Lerp(Clamp01(bottom), p->v0, p->v1));
             s32 tex = s->tex;
             sh = h;
             sw = w;
@@ -472,6 +481,9 @@ int fn_80235FD8(gArtSet* s) {
 
 // Stripped from ET; only its string remains.
 const char* GArtStrippedUnknownId(void) { return "<unknown-id>"; }
+
+// Stripped from ET; only its int-to-float constant remains (it pools ahead of DynoTex::Draw's -10.0f).
+f32 GArtStrippedToFloat(int i) { return i; }
 
 }  // extern "C"
 
