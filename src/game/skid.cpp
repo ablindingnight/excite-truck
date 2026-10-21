@@ -174,7 +174,7 @@ void fn_8028CFB0(void) {
         f32 old = fn_802C9A4C(lbl_8055F710);
         fn_802C9648(1.1f);
         SkidType* t = lbl_804B3400;
-        for (int i = 0; i < lbl_8055F728; i++, t++) {
+        for (int i = 0; i < lbl_8055F728; t++, i++) {
             if (t->total > 1) {
                 fn_802C8BD0(t->tex);
                 if (fn_801E5370(t->total, 4, 0.075f * fn_801E88F0(-1))) {
@@ -237,16 +237,15 @@ void fn_8028D2B4(void) {
     lbl_8055F718 = new ("skid pt pool") SkidPt[nPts];
     lbl_8055F71C = new ("skid buffer pool") SkidStrip[nStrips];
     lbl_8055F720 = new ("skid wheel tab") SkidSlot[lbl_8055F724];
-    SkidStrip* s;
     SkidPt* p = lbl_8055F718;
-    s = lbl_8055F71C;
-    for (i = 0; i < lbl_8055F728; i++) {
-        lbl_804B3400[i].strips = s;
+    SkidStrip* s = lbl_8055F71C;
+    for (int j = 0; j < lbl_8055F728; j++) {
+        lbl_804B3400[j].strips = s;
         for (int k = 0; k < lbl_8055F724; k++) {
             s->pts = p;
-            s->len = lbl_804B3400[i].size;
+            s->len = lbl_804B3400[j].size;
             s++;
-            p += lbl_804B3400[i].size;
+            p += lbl_804B3400[j].size;
         }
     }
 }
@@ -273,9 +272,9 @@ void fn_8028D4FC(void) {
             lbl_804B3400[i].strips[k].n = 0;
         }
     }
-    for (i = 0; i < lbl_8055F724; i++) {
-        lbl_8055F720[i].type = -1;
-        lbl_8055F720[i].time = 0.0f;
+    for (int j = 0; j < lbl_8055F724; j++) {
+        lbl_8055F720[j].type = -1;
+        lbl_8055F720[j].time = 0.0f;
     }
 }
 
