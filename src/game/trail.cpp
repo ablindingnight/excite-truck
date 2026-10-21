@@ -23,9 +23,13 @@ struct TMtx33 {
     f32 zx, zy, zz;
 };
 
+struct TPos {
+    f32 x, y, z;
+};
+
 struct TWheel {
     TVec local;  // offset 0x0
-    TVec world;  // offset 0xC
+    TPos world;  // offset 0xC
     u8 pad18[0x24 - 0x18];
     f32 speed;  // offset 0x24
     f32 slip;   // offset 0x28
@@ -54,7 +58,7 @@ struct TRacer {
 };
 
 struct TrailEvent {
-    TVec pos;     // offset 0x0
+    TPos pos;     // offset 0x0
     TVec vel;     // offset 0xC
     TVec dir;     // offset 0x18
     f32 force;    // offset 0x24
@@ -122,7 +126,7 @@ struct Mark {
 };
 
 struct Paint {
-    Paint(PaintDesc* d, const char* tex);
+    Paint(const PaintDesc* d, const char* tex);
     ~Paint(void);
     void Reset(void);
     void Add(TVec* pos, TVec* vel, f32 alpha);
@@ -267,7 +271,55 @@ static inline void MulMtx(TMtx33* out, const TMtx33* a, const TMtx33* b) {
     }
 }
 
+struct TBasis {
+    TVec x, y, z;
+};
+
+// out = a * b
+static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
+    if (out == a || out == b) {
+        f32 xx = fn_80144514(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
+        f32 yx = fn_80144514(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
+        f32 zx = fn_80144514(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
+        f32 xy = fn_80144514(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
+        f32 yy = fn_80144514(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
+        f32 zy = fn_80144514(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
+        f32 xz = fn_80144514(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
+        f32 yz = fn_80144514(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
+        f32 zz = fn_80144514(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
+        out->x.x = xx;
+        out->x.y = xy;
+        out->x.z = xz;
+        out->y.x = yx;
+        out->y.y = yy;
+        out->y.z = yz;
+        out->z.x = zx;
+        out->z.y = zy;
+        out->z.z = zz;
+    } else {
+        out->x.x = fn_80144514(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
+        out->y.x = fn_80144514(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
+        out->z.x = fn_80144514(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
+        out->x.y = fn_80144514(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
+        out->y.y = fn_80144514(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
+        out->z.y = fn_80144514(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
+        out->x.z = fn_80144514(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
+        out->y.z = fn_80144514(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
+        out->z.z = fn_80144514(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
+    }
+}
+
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
+
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
+static inline f32 Mul(f32 a, f32 b) { return a * b; }
+
+static inline void Scale(TVec* o, const f32* v, f32 k) {
+    o->x = v[0] * k;
+    o->y = v[1] * k;
+    o->z = v[2] * k;
+}
 
 class TrailSys {
 public:
@@ -276,7 +328,7 @@ public:
     virtual void Reset(void);                            // 0x10
     virtual void Update(void);                           // 0x14
     virtual void Draw(void);                             // 0x18
-    virtual void Emit(TRacer* r, int wheel) = 0;         // 0x1C
+    virtual void Emit(const TRacer* r, int wheel) = 0;         // 0x1C
     virtual void Impact(const TrailEvent* e);            // 0x20
     virtual void Touch(const TrailEvent* e);             // 0x24
 };
@@ -289,7 +341,7 @@ public:
     virtual void Reset(void) { real->Reset(); }
     virtual void Update(void) { real->Update(); }
     virtual void Draw(void) { real->Draw(); }
-    virtual void Emit(TRacer* r, int wheel) { real->Emit(r, wheel); }
+    virtual void Emit(const TRacer* r, int wheel) { real->Emit(r, wheel); }
     virtual void Impact(const TrailEvent* e) { real->Impact(e); }
     virtual void Touch(const TrailEvent* e) { real->Touch(e); }
 
@@ -311,7 +363,7 @@ public:
     virtual void Reset(void);
     virtual void Update(void);
     virtual void Draw(void);
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     virtual void Impact(const TrailEvent* e);
     virtual void Touch(const TrailEvent* e);
     void InitSmall(const char* tex);
@@ -331,7 +383,7 @@ public:
     AsphaltTrail(ValueNode* cfg);
     virtual ~AsphaltTrail(void);
     virtual u32 GetType(void) { return 2; }
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     void InitSmall(const char* tex);
     void InitLarge(const char* tex);
 
@@ -344,7 +396,7 @@ public:
     GrassTrail(ValueNode* cfg);
     virtual ~GrassTrail(void);
     virtual u32 GetType(void) { return 3; }
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     void Init(const char* tex);
 
     s32 sys;  // offset 0x4
@@ -355,7 +407,7 @@ public:
     SandTrail(ValueNode* cfg);
     virtual ~SandTrail(void);
     virtual u32 GetType(void) { return 4; }
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     void Init(const char* tex);
 
     s32 sys;  // offset 0x4
@@ -366,7 +418,7 @@ public:
     WaterTrail(ValueNode* cfg);
     virtual ~WaterTrail(void);
     virtual u32 GetType(void) { return 5; }
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     void Init(const char* tex);
 
     s32 sys;  // offset 0x4
@@ -378,7 +430,7 @@ public:
     virtual ~MudTrail(void);
     virtual u32 GetType(void) { return 6; }
     virtual void Reset(void);
-    virtual void Emit(TRacer* r, int wheel);
+    virtual void Emit(const TRacer* r, int wheel);
     virtual void Touch(const TrailEvent* e);
     void Init(const char* tex);
 
@@ -395,38 +447,11 @@ ModuleTag lbl_8055F868;
 s32 lbl_8055F870;           // paint trail particles
 TrailSys* lbl_804BCF88[8];  // per terrain
 
-static inline void Spray(s32 sys, TRacer* r, int wheel) {
-    TWheel* wh = &r->body->wheels[wheel];
-    if (r->camDist > 2500.0f) {
-        return;
-    }
-    if (wh->speed * wh->speed < 100.0f) {
-        return;
-    }
-    {
-        f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
-        f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
-        TVec p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
-        TBody* b;
-        TVec v;
-        f32 k;
-        f32 up;
-        MulVec(&p, &p, &r->body->m);
-        p.x = p.x + r->body->pos.x;
-        p.y = p.y + r->body->pos.y;
-        p.z = p.z + r->body->pos.z;
-        b = r->body;
-        k = 0.2f + 0.05f * (side * b->speed);
-        v.x = b->vel.x + b->m.xx * k;
-        v.y = b->vel.y + b->m.xy * k;
-        v.z = b->vel.z + b->m.xz * k;
-        up = 0.2f + 0.09f * b->speed;
-        up = 2.5f >= up ? up : 2.5f;
-        v.x = v.x + b->m.yx * up;
-        v.y = v.y + b->m.yy * up;
-        v.z = v.z + b->m.yz * up;
-        fn_8028E590(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
-    }
+static inline void Xform(TVec* p, const TBody* b) {
+    MulVec(p, p, &b->m);
+    p->x = p->x + b->pos.x;
+    p->y = p->y + b->pos.y;
+    p->z = p->z + b->pos.z;
 }
 
 extern "C" {
@@ -662,10 +687,11 @@ void DustTrail::Update(void) {
         f32 slip;
         f32 r;
         if (fn_802BF4F0()) {
+            TWheel* wh = b->wheels;
             int n = 4;
             int w;
-            for (w = 0; w < 4; w++) {
-                if (b->wheels[w].world.y < fn_802BF590() || !b->wheels[w].contact) {
+            for (w = 0; w < 4; w++, wh++) {
+                if (wh->world.y < fn_802BF590() || !wh->contact) {
                     n--;
                 }
             }
@@ -673,8 +699,7 @@ void DustTrail::Update(void) {
                 continue;
             }
         }
-        slip = b->wheels[2].slip > b->wheels[3].slip ? b->wheels[2].slip : b->wheels[3].slip;
-        slip = 0.0005f * slip;
+        slip = 0.0005f * MaxF(b->wheels[2].slip, b->wheels[3].slip);
         r = b->speed * rate;
         r = r > slip ? r : slip;
         if (0.1f < r) {
@@ -690,14 +715,11 @@ void DustTrail::Update(void) {
 
 void DustTrail::Draw(void) { paint->Draw(); }
 
-void DustTrail::Emit(TRacer* r, int wheel) {
+void DustTrail::Emit(const TRacer* r, int wheel) {
     TWheel* wh = &r->body->wheels[wheel];
     int rear;
     f32 a;
-    if (r->camDist > 48400.0f) {
-        return;
-    }
-    if (wh->speed * wh->speed < 100.0f) {
+    if (r->camDist > 48400.0f || wh->speed * wh->speed < 100.0f) {
         return;
     }
     rear = 1;
@@ -705,19 +727,15 @@ void DustTrail::Emit(TRacer* r, int wheel) {
         rear = 0;
     }
     {
+        f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
         f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
         TVec p(wh->local.x, 0.2f + wh->local.y, wh->local.z - 0.4f * back);
-        f32 slip;
         f32 t;
-        MulVec(&p, &p, &r->body->m);
-        p.x = p.x + r->body->pos.x;
-        p.y = p.y + r->body->pos.y;
-        p.z = p.z + r->body->pos.z;
-        slip = r->body->wheels[2].slip > r->body->wheels[3].slip ? r->body->wheels[2].slip : r->body->wheels[3].slip;
-        t = Ramp(slip, 0.0f, 2.7f);
-        t = 1.0f >= t ? t : 1.0f;
+        Xform(&p, r->body);
+        t = Ramp(MaxF(r->body->wheels[2].slip, r->body->wheels[3].slip), 0.0f, 2.7f);
+        t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
-        a = 0.25f + t * 0.75f;
+        a = 0.25f + Mul(t, 0.75f);
         if (r->camDist < 2500.0f) {
             fn_8028E58C(small, &p, &r->body->vel, a);
             if (rear) {
@@ -741,66 +759,61 @@ void DustTrail::Impact(const TrailEvent* e) {
         n = k;
     }
     if (e->who >= 0 && n > 0 && st[e->who].lastHit + 0.01f < now) {
-        f32 h;
-        TVec dir;
-        TVec z;
-        TVec side;
-        TMtx33 rot;
-        TVec c;
+        TBasis m;
+        TBasis rot;
         TVec v;
+        f32 h;
+        f32 cs;
+        f32 sn;
         int i;
         fn_80287B24(e->who);
         h = 0.5f * (f32)__fabs(e->vel.y);
-        dir = e->dir;
-        z = TVec(0.0f, 0.0f, 1.0f);
-        {
-            TMtx33 m;
-            f32 cs;
-            f32 sn;
-            PSVECCrossProduct(&dir, &z, (TVec*)&m.xx);
-            PSVECCrossProduct((TVec*)&m.xx, &dir, (TVec*)&m.zx);
-            cs = cos(3.1415927f / n);
-            sn = sin(3.1415927f / n);
-            rot.xx = cs;
-            rot.xy = 0.0f;
-            rot.xz = -sn;
-            rot.yx = 0.0f;
-            rot.yy = 1.0f;
-            rot.yz = 0.0f;
-            rot.zx = sn;
-            rot.zy = 0.0f;
-            rot.zz = cs;
-            c = e->pos;
-            c.y = c.y + 0.35f;
-            v = TVec(0.5f * e->vel.x, 0.0f, 0.5f * e->vel.z);
-            for (i = 0; i < n; i++) {
-                TVec q;
-                TVec v1;
-                TVec v2;
-                v1.x = v.x + m.xx * h;
-                v1.y = v.y + m.xy * h;
-                v1.z = v.z + m.xz * h;
-                v2.x = v.x + m.xx * -h;
-                v2.y = v.y + m.xy * -h;
-                v2.z = v.z + m.xz * -h;
-                q.x = c.x + m.xx * 0.15f;
-                q.y = c.y + m.xy * 0.15f;
-                q.z = c.z + m.xz * 0.15f;
-                fn_8028E584(event, &q, &v1);
-                q.x = c.x + m.xx * 0.5f;
-                q.y = c.y + m.xy * 0.5f;
-                q.z = c.z + m.xz * 0.5f;
-                fn_8028E584(event, &q, &v1);
-                q.x = c.x + m.xx * -0.15f;
-                q.y = c.y + m.xy * -0.15f;
-                q.z = c.z + m.xz * -0.15f;
-                fn_8028E584(event, &q, &v2);
-                q.x = c.x + m.xx * -0.5f;
-                q.y = c.y + m.xy * -0.5f;
-                q.z = c.z + m.xz * -0.5f;
-                fn_8028E584(event, &q, &v2);
-                MulMtx(&m, &rot, &m);
-            }
+        m.y = e->dir;
+        PSVECCrossProduct(&m.y, &TVec(0.0f, 0.0f, 1.0f), &m.x);
+        PSVECCrossProduct(&m.x, &m.y, &m.z);
+        cs = cos(3.1415927f / n);
+        sn = sin(3.1415927f / n);
+        rot.x.x = cs;
+        rot.x.y = 0.0f;
+        rot.x.z = -sn;
+        rot.y.x = 0.0f;
+        rot.y.y = 1.0f;
+        rot.y.z = 0.0f;
+        rot.z.x = sn;
+        rot.z.y = 0.0f;
+        rot.z.z = cs;
+        TPos c = e->pos;
+        c.y += 0.35f;
+        v.x = 0.5f * e->vel.x;
+        v.y = 0.0f;
+        v.z = 0.5f * e->vel.z;
+        for (i = 0; i < n; i++) {
+            TVec v1;
+            TVec v2;
+            TVec q;
+            v1.x = v.x + m.x.x * h;
+            v1.y = v.y + m.x.y * h;
+            v1.z = v.z + m.x.z * h;
+            v2.x = v.x + m.x.x * -h;
+            v2.y = v.y + m.x.y * -h;
+            v2.z = v.z + m.x.z * -h;
+            q.x = c.x + m.x.x * 0.15f;
+            q.y = c.y + m.x.y * 0.15f;
+            q.z = c.z + m.x.z * 0.15f;
+            fn_8028E584(event, &q, &v1);
+            q.x = c.x + m.x.x * 0.5f;
+            q.y = c.y + m.x.y * 0.5f;
+            q.z = c.z + m.x.z * 0.5f;
+            fn_8028E584(event, &q, &v1);
+            q.x = c.x + m.x.x * -0.15f;
+            q.y = c.y + m.x.y * -0.15f;
+            q.z = c.z + m.x.z * -0.15f;
+            fn_8028E584(event, &q, &v2);
+            q.x = c.x + m.x.x * -0.5f;
+            q.y = c.y + m.x.y * -0.5f;
+            q.z = c.z + m.x.z * -0.5f;
+            fn_8028E584(event, &q, &v2);
+            MulBasis(&m, &rot, &m);
         }
         st[e->who].lastHit = now;
     }
@@ -808,7 +821,7 @@ void DustTrail::Impact(const TrailEvent* e) {
 
 void DustTrail::Touch(const TrailEvent* e) {
     if (Full(st[e->who].touch)) {
-        fn_8028E584(event, &e->pos, &e->vel);
+        fn_8028E584(event, (TVec*)&e->pos, &e->vel);
     }
     Wrap(st[e->who].touch, 0.1f);
 }
@@ -929,28 +942,23 @@ AsphaltTrail::~AsphaltTrail(void) {
     fn_8028E398(small);
 }
 
-void AsphaltTrail::Emit(TRacer* r, int wheel) {
-    TWheel* wh = &r->body->wheels[wheel];
-    if (r->camDist > 2500.0f) {
-        return;
-    }
-    if (wh->slip < 5.0f) {
+void AsphaltTrail::Emit(const TRacer* r, int wheel) {
+    TBody* b = r->body;
+    TWheel* wh = &b->wheels[wheel];
+    if (r->camDist > 2500.0f || wh->slip < 5.0f) {
         return;
     }
     {
-        int side = -1;
-        TVec p;
+        bool left = wh->local.x < 0.0f;
+        TVec* vel = &b->vel;
+        TPos p = wh->world;
         f32 s;
-        if (wh->local.x < 0.0f) {
-            side = 1;
-        }
-        p = wh->world;
-        p.y = p.y + 0.25f;
-        s = 0.02f * wh->speed * side;
+        p.y += 0.25f;
+        s = 0.02f * wh->speed * (left ? 1 : -1);
         if (wh->slip > 37.5f) {
-            fn_8028E590(large, &p, &r->body->vel, s);
+            fn_8028E590(large, (TVec*)&p, vel, s);
         } else {
-            fn_8028E590(small, &p, &r->body->vel, s);
+            fn_8028E590(small, (TVec*)&p, vel, s);
         }
     }
 }
@@ -1019,29 +1027,24 @@ GrassTrail::GrassTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
 
 GrassTrail::~GrassTrail(void) { fn_8028E398(sys); }
 
-void GrassTrail::Emit(TRacer* r, int wheel) {
+void GrassTrail::Emit(const TRacer* r, int wheel) {
     TBody* b = r->body;
     TWheel* wh = &b->wheels[wheel];
-    if (r->camDist > 2500.0f) {
-        return;
-    }
-    if (wh->slip < 5.0f) {
+    if (r->camDist > 2500.0f || wh->slip < 5.0f) {
         return;
     }
     {
-        TVec p = wh->world;
+        TPos p = wh->world;
         TVec v;
         f32 k;
-        v.x = b->m.yx * 5.5f;
-        v.y = b->m.yy * 5.5f;
-        v.z = b->m.yz * 5.5f;
-        v.x = v.x + b->vel.x * 0.8f;
-        v.y = v.y + b->vel.y * 0.8f;
-        v.z = v.z + b->vel.z * 0.8f;
+        Scale(&v, &b->m.yx, 5.5f);
+        v.x = v.x + Mul(b->vel.x, 0.8f);
+        v.y = v.y + Mul(b->vel.y, 0.8f);
+        v.z = v.z + Mul(b->vel.z, 0.8f);
         k = 0.1f * b->speed;
         v.x = v.x + fn_80129DC4(0, -k, k);
         v.z = v.z + fn_80129DC4(0, -k, k);
-        fn_8028E590(sys, &p, &v, 5.0f);
+        fn_8028E590(sys, (TVec*)&p, &v, 5.0f);
     }
 }
 
@@ -1076,27 +1079,21 @@ SandTrail::SandTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
 
 SandTrail::~SandTrail(void) { fn_8028E398(sys); }
 
-void SandTrail::Emit(TRacer* r, int wheel) {
-    TBody* b = r->body;
-    TWheel* wh = &b->wheels[wheel];
-    if (r->camDist > 2500.0f) {
-        return;
-    }
-    if (wh->slip < 5.0f && wh->speed < 10.0f) {
+void SandTrail::Emit(const TRacer* r, int wheel) {
+    TWheel* wh = &r->body->wheels[wheel];
+    if (r->camDist > 2500.0f || wh->slip < 5.0f && wh->speed < 10.0f) {
         return;
     }
     {
         f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
         TVec v;
         f32 k;
-        v.x = b->vel.x * 0.8f;
-        v.y = b->vel.y * 0.8f;
-        v.z = b->vel.z * 0.8f;
+        Scale(&v, &r->body->vel.x, 0.8f);
         k = 0.05f * (side * r->body->speed);
         v.x = v.x + r->body->m.xx * k;
         v.y = v.y + r->body->m.xy * k;
         v.z = v.z + r->body->m.xz * k;
-        fn_8028E590(sys, &wh->world, &v, 5.0f);
+        fn_8028E590(sys, (TVec*)&wh->world, &v, 5.0f);
     }
 }
 
@@ -1131,7 +1128,33 @@ WaterTrail::WaterTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
 
 WaterTrail::~WaterTrail(void) { fn_8028E398(sys); }
 
-void WaterTrail::Emit(TRacer* r, int wheel) { Spray(sys, r, wheel); }
+void WaterTrail::Emit(const TRacer* r, int wheel) {
+    TWheel* wh = &r->body->wheels[wheel];
+    if (r->camDist > 2500.0f || wh->speed * wh->speed < 100.0f) {
+        return;
+    }
+    {
+        f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
+        f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
+        TVec p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
+        TVec v;
+        TBody* b;
+        f32 k;
+        f32 up;
+        Xform(&p, r->body);
+        b = r->body;
+        k = 0.2f + 0.05f * (side * b->speed);
+        v.x = b->vel.x + b->m.xx * k;
+        v.y = b->vel.y + b->m.xy * k;
+        v.z = b->vel.z + b->m.xz * k;
+        up = 0.2f + 0.09f * b->speed;
+        up = 2.5f < up ? 2.5f : up;
+        v.x = v.x + b->m.yx * up;
+        v.y = v.y + b->m.yy * up;
+        v.z = v.z + b->m.yz * up;
+        fn_8028E590(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
+    }
+}
 
 void WaterTrail::Init(const char* tex) {
     PartDesc d;
@@ -1168,11 +1191,37 @@ void MudTrail::Reset(void) {
     }
 }
 
-void MudTrail::Emit(TRacer* r, int wheel) { Spray(sys, r, wheel); }
+void MudTrail::Emit(const TRacer* r, int wheel) {
+    TWheel* wh = &r->body->wheels[wheel];
+    if (r->camDist > 2500.0f || wh->speed * wh->speed < 100.0f) {
+        return;
+    }
+    {
+        f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
+        f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
+        TVec p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
+        TVec v;
+        TBody* b;
+        f32 k;
+        f32 up;
+        Xform(&p, r->body);
+        b = r->body;
+        k = 0.2f + 0.05f * (side * b->speed);
+        v.x = b->vel.x + b->m.xx * k;
+        v.y = b->vel.y + b->m.xy * k;
+        v.z = b->vel.z + b->m.xz * k;
+        up = 0.2f + 0.09f * b->speed;
+        up = 2.5f < up ? 2.5f : up;
+        v.x = v.x + b->m.yx * up;
+        v.y = v.y + b->m.yy * up;
+        v.z = v.z + b->m.yz * up;
+        fn_8028E590(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
+    }
+}
 
 void MudTrail::Touch(const TrailEvent* e) {
     if (Full(touch[e->who])) {
-        fn_8028E590(sys, &e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
+        fn_8028E590(sys, (TVec*)&e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
     }
     Wrap(touch[e->who], 0.1f);
 }
@@ -1201,10 +1250,9 @@ void MudTrail::Init(const char* tex) {
     sys = fn_8028E2F8(&d, "trail mud", tex);
 }
 
-Paint::Paint(PaintDesc* d, const char* name) {
-    s32 max = d->max;
-    marks = new ("bilinear partsys") Mark[max];
-    cap = max;
+Paint::Paint(const PaintDesc* d, const char* name) {
+    marks = new ("bilinear partsys") Mark[d->max];
+    cap = d->max;
     life = d->life;
     invLife = 1.0f / d->life;
     rate = d->rate;
@@ -1245,7 +1293,14 @@ void Paint::Reset(void) {
 void Paint::Add(TVec* pos, TVec* vel, f32 alpha) {
     if (n < cap && Full(accum)) {
         Mark* m = &marks[n];
-        m->pos = *pos;
+        {
+            f32 x = pos->x;
+            f32 y = pos->y;
+            f32 z = pos->z;
+            m->pos.x = x;
+            m->pos.y = y;
+            m->pos.z = z;
+        }
         m->vel.x = vel->x * velScale.x + fn_80287BC8(-jitter.x, jitter.x);
         m->vel.y = lift + (vel->y * velScale.y + fn_80287BC8(-jitter.y, jitter.y));
         m->vel.z = vel->z * velScale.z + fn_80287BC8(-jitter.z, jitter.z);
@@ -1267,8 +1322,9 @@ void Paint::Update(void) {
         if (m->born > cutoff) {
             TVec v;
             v.x = m->vel.x * k;
-            v.y = m->vel.y * k - g;
+            v.y = m->vel.y * k;
             v.z = m->vel.z * k;
+            v.y = v.y - g;
             out->pos.x = m->pos.x + v.x * dt;
             out->pos.y = m->pos.y + v.y * dt;
             out->pos.z = m->pos.z + v.z * dt;
