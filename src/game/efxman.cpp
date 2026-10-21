@@ -715,7 +715,8 @@ void fn_802885F0(void) {
         const Vec* pos = &c->m.pos;
         f32 s = fn_801E88F0(0);
         s *= s;
-        f32 best = s * PSVECSquareDistance(pos, &cams[0].pos);
+        f32 best = PSVECSquareDistance(pos, &cams[0].pos);
+        best *= s;
         int vis = 0;
         if (i != carOf[0] || fn_801E8954(0)) {
             vis = 1;
@@ -723,7 +724,8 @@ void fn_802885F0(void) {
         for (int v = 1; vis && v < n; v++) {
             s = fn_801E88F0(v);
             s *= s;
-            f32 d = s * PSVECSquareDistance(pos, &cams[v].pos);
+            f32 d = PSVECSquareDistance(pos, &cams[v].pos);
+            d *= s;
             best = MIN(best, d);
             vis = 0;
             if (i != carOf[v] || fn_801E8954(v)) {
