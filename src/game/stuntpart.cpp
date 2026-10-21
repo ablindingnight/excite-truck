@@ -93,8 +93,8 @@ void fn_8028E080(void);
 void fn_8028E240(int a);
 void* fn_8028E2F8(StuntDesc* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
-void fn_8028E584(void* e, const ValVec3* p, const ValVec3* v);
-void fn_8028E590(void* e, const ValVec3* p, const ValVec3* v, f32 spin);
+void fn_8028E584(void* e, ValVec3 p, ValVec3 v);
+void fn_8028E590(void* e, ValVec3 p, ValVec3 v, f32 spin);
 void fn_8028E61C(StuntDesc* desc);
 u8 fn_802C2C00(u8 a);
 void fn_802C2B78(f32 a, f32 b, f32 c);
@@ -153,9 +153,10 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
-static inline void Emit(void* e, ValVec3 p, ValVec3 v) { fn_8028E584(e, &p, &v); }
+static inline int IsZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
-static inline void EmitSpin(void* e, ValVec3 p, ValVec3 v, f32 spin) { fn_8028E590(e, &p, &v, spin); }
+static inline u32 TrailColor(int a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+
 
 // One car's stunt effects.
 struct StuntPart {
@@ -183,11 +184,11 @@ struct StuntPart {
 
 struct StuntEmitters {
     StuntEmitters(void) {
-        StuntDesc e;
         StuntDesc r;
+        StuntDesc e;
         fn_8028E61C(&e);
         f32 t = 0.3f;
-        f32 t2 = t * t;
+        f32 t2 = 0.3f * 0.3f;
         e.kind = 2;
         e.max = 300;
         e.size0 = t;
@@ -431,7 +432,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                     q.y = Lerp(a0->y, a1->y, r);
                     q.z = Lerp(a0->z, a1->z, r);
                     AddScaled(&q, &q, &car->axes[1], -1.0f);
-                    Emit(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
+                    fn_8028E584(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
                 }
             }
         } else {
@@ -464,7 +465,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
         AddScaled(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
         vel = car->vel;
         if (car->height >= 1.5f - lbl_80558DC4[0]) {
-            EmitSpin(lbl_8055F924->e0, *(ValVec3*)&pos, vel, 1.0f);
+            fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, vel, 1.0f);
         }
     }
 }
@@ -491,14 +492,17 @@ void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
         fn_802C8DBC(16);
         f32 phase = p->phase;
         for (int i = 0; i < 16; i++) {
-            Vec v = p->pts[i];
+            Vec v;
+            v.x = p->pts[i].x;
+            v.y = p->pts[i].y;
+            v.z = p->pts[i].z;
             int k = 0;
             if (i > 1) {
                 k = (16 - (i + 1)) / 2;
             }
-            f32 f = (f32)k * 0.125f;
-            int a = Round(lbl_8055CC6C * (f * (255.0f * (p->alpha * p->facing))));
-            u32 color = a << 24 | (u8)lbl_8055CC70 << 16 | (u8)lbl_8055CC78 << 8 | (u8)lbl_8055CC74;
+            f32 f = k / 8.0f;
+            u32 color = TrailColor(Round(lbl_8055CC6C * (f * (255.0f * (p->alpha * p->facing)))), lbl_8055CC70,
+                                   lbl_8055CC78, lbl_8055CC74);
             fn_802C8E00(color, 1, v.x, v.y, v.z, (i % 2) ? 0.0f : 1.0f, phase - f);
         }
         fn_802C8E48();
@@ -613,16 +617,16 @@ void fn_802AB6D4(void) {
     }
 }
 
+static inline u32 MakeFog(u8 b, u8 g, u8 r) { return 0xFF000000 | b << 16 | g << 8 | r; }
+
 static inline u32 FogColor(void) {
-    u8 r = fn_80129D90(0, 140, 255);
-    u8 g = fn_80129D90(0, 250, 255);
-    u8 b = fn_80129D90(0, 240, 255);
-    return 0xFF000000 | b << 16 | g << 8 | r;
+    return MakeFog(fn_80129D90(0, 240, 255), fn_80129D90(0, 250, 255), fn_80129D90(0, 140, 255));
 }
 
 void fn_802AB770(int idx) {
+    const StuntCar* car;
     StuntPart* p = &lbl_8055F928[idx];
-    const StuntCar* car = fn_80287B24(idx);
+    car = fn_80287B24(idx);
     f32 dt = fn_801E7E24();
     if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
         p->fogColor = FogColor();
@@ -637,10 +641,17 @@ void fn_802AB770(int idx) {
         p->fogT = p->fogT + 0.25f * dt;
     }
     f32 jump = 0.0f;
-    if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
+    if (!IsZero(dt)) {
         jump = 500.0f * (int)fn_80287BC8(0.0f, 1.0f);
     }
-    int on = !(h < 3.0f) || (f32)fmod(h, 0.5) > 0.25f;
+    int low = h < 3.0f;
+    int on = 1;
+    if (low) {
+        int up = (f32)fmod(h, 0.5) > 0.25f;
+        if (!up) {
+            on = 0;
+        }
+    }
     f32 z = 0.0f;
     if (on) {
         z = -1000.0f * p->fogT - jump;
@@ -677,13 +688,13 @@ void fn_802ABC2C(void) {
 
 void fn_802ABC80(const StuntMtx* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
     f32 ang = fn_80287BC8(-3.1415927f, 3.1415927f);
-    Vec x = *(const Vec*)&m->rot[0];
-    Vec z = *(const Vec*)&m->rot[2];
     Vec pos = *(const Vec*)&m->pos;
+    Vec z = *(const Vec*)&m->rot[2];
+    Vec x = *(const Vec*)&m->rot[0];
     AddScaled(&pos, &pos, &x, a * (f32)cos(ang));
     AddScaled(&pos, &pos, &z, b * (f32)sin(ang));
     AddScaled(&pos, &pos, (const Vec*)&m->rot[1], fn_80287BC8(0.0f, 2.0f * c));
-    EmitSpin(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
+    fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
 }
 
 void fn_802ABE50(void) { fn_8028E240(0); }
@@ -700,10 +711,17 @@ void fn_802ABE58(f32* t, f32* out, u32* color, f32 dt) {
         *t = *t + 0.25f * dt;
     }
     f32 jump = 0.0f;
-    if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
+    if (!IsZero(dt)) {
         jump = 500.0f * (int)fn_80287BC8(0.0f, 1.0f);
     }
-    int on = !(h < 3.0f) || (f32)fmod(h, 0.5) > 0.25f;
+    int low = h < 3.0f;
+    int on = 1;
+    if (low) {
+        int up = (f32)fmod(h, 0.5) > 0.25f;
+        if (!up) {
+            on = 0;
+        }
+    }
     f32 z = 0.0f;
     if (on) {
         z = -1000.0f * *t - jump;
