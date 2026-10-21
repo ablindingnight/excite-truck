@@ -1108,6 +1108,7 @@ config.libs.append(
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/gamedo.cpp"),
             Object(NonMatching, "game/setmenu.cpp"),
+            Object(NonMatching, "game/mcdialog.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
             Object(NonMatching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
