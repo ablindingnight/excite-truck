@@ -264,7 +264,17 @@ gArtSet* fn_8023512C(const char* name) {
     s->pictures = NULL;
     StrNCopy(s->name, path, 128);
     char info[128];
-    StrNCopy(info, path, 128);
+    {
+        const char* src = path;
+        int n = 128;
+        char* d = info;
+        while ((*d++ = *src++) != 0) {
+            if (--n <= 0) {
+                d[-1] = 0;
+                break;
+            }
+        }
+    }
     char* dot = strrchr(info, '.');
     if (dot) {
         *dot = 0;
