@@ -3196,6 +3196,16 @@ game/uiobjs.cpp:
 	.sbss       start:0x8055F378 end:0x8055F388
 	.sdata2     start:0x80563AC8 end:0x80563AE0
 
+game/contmenu.cpp:
+	.text       start:0x80263080 end:0x80263F30
+	.ctors      start:0x802ED474 end:0x802ED478
+	.rodata     start:0x802FA6E8 end:0x802FA700
+	.data       start:0x80345FD0 end:0x80346338
+	.bss        start:0x80498F40 end:0x80498F58
+	.sdata      start:0x8055C440 end:0x8055C450
+	.sbss       start:0x8055F428 end:0x8055F438
+	.sdata2     start:0x80563BD0 end:0x80563BF0
+
 game/stub16.cpp:
 	.text       start:0x80265D38 end:0x80265DCC
 	.ctors      start:0x802ED47C end:0x802ED480
