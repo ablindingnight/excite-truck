@@ -53,7 +53,7 @@ public:
     virtual void Unk4C(void);
     virtual void Unk50(void);
     virtual void Unk54(void);
-    virtual void Unk58(void);
+    virtual int Key(int key);   // 0x58
     virtual void Unk5C(void);
     void Finish(int result);
 
@@ -118,7 +118,7 @@ extern "C" void fn_802445FC(int track, int eve, int difficulty) {
         MenuItem(NULL, 5, &state, 0, 0),
         *(MenuItem*)&lbl_80498860,
     };
-    MenuDesc desc = {"loadsk_gc.lyt", items, NULL, 0, 0};
+    MenuDesc desc = {"loadksk_gc.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
 }
 
@@ -133,8 +133,13 @@ extern "C" void fn_80244738(void) {
     LoadingNop();
 }
 
+// Puts "race.res" after the vtable in the string pool, as in the original.
+struct LoadResources {
+    static void Unload(void) { fn_8012E81C("race.res"); }
+};
+
 void LoadScreenState::Enter(void) {
-    fn_8012E81C("race.res");
+    LoadResources::Unload();
     LoadingBegin(event, difficulty);
     start = fn_802E2C20();
 }
