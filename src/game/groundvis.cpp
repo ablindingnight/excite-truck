@@ -402,8 +402,8 @@ void fn_802AFF80(GroundBuf* b, u16 v) { b->Add(v); }
 
 u16 fn_802AFFA8(int x, int y) {
     Vec p;
-    p.x = lbl_80564AF0 * x;
-    p.z = lbl_80564AF0 * y;
+    p.x = x * lbl_80564AF0;
+    p.z = y * lbl_80564AF0;
     p.y = fn_801DCF48(0, p.x, p.z);
     return fn_802B127C(lbl_8055F974, &p);
 }

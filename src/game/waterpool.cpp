@@ -641,9 +641,10 @@ WaterPool::~WaterPool(void) {
 extern "C" {
 
 int fn_8029D4CC(WaterPool* p) {
-    f32 s = fn_801E88F0(-1);
-    s = s * s;
-    s = s * fn_802C88E8(&p->center);
+    f32 z = fn_801E88F0(-1);
+    z = z * z;
+    f32 s = fn_802C88E8(&p->center);
+    s *= z;
     f32 lim = (250.0f + p->radius) * (250.0f + p->radius);
     int vis = 0;
     if (s < lim &&

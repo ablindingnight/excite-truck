@@ -803,9 +803,10 @@ void fn_801ED46C(CarModel* m) {
         e->y = v.y;
         e->z = v.z;
         e = &m->car->effect[m->facingNeg];
-        e->x = v.x * -1.0f;
-        e->y = v.y * -1.0f;
-        e->z = v.z * -1.0f;
+        f32 neg = -1.0f;
+        e->x = v.x * neg;
+        e->y = v.y * neg;
+        e->z = v.z * neg;
         s32 h = fn_802C7A34(1, &m->car->effect[1], m->xrayBones);
         if (m->curLod <= 1 && !(m->car->flags6E & 0x20)) {
             fn_802C70AC(m->xray, &m->scaled, h, m->suspGroup);

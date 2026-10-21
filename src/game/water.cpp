@@ -416,10 +416,10 @@ void fn_802BF598(void* cam, f32 fov) {
 
 void EnvBase::Mirror(Frame* out, const Frame* in, const PVec* up) {
     *out = *in;
-    out->x.y = out->x.y * -1.0f;
-    out->y.y = out->y.y * -1.0f;
-    out->z.y = out->z.y * -1.0f;
-    out->pos.y = out->pos.y * -1.0f;
+    out->x.y *= -1.0f;
+    out->y.y *= -1.0f;
+    out->z.y *= -1.0f;
+    out->pos.y *= -1.0f;
     out->pos.y = out->pos.y + 2.0f * lbl_8055FAE0;
 }
 
