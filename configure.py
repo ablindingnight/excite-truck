@@ -1110,6 +1110,7 @@ config.libs.append(
             Object(NonMatching, "game/nameent.cpp"),
             Object(NonMatching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),
+            Object(NonMatching, "game/unitmenu.cpp"),
             Object(NonMatching, "game/mstats.cpp"),
             Object(NonMatching, "game/tunemenu.cpp"),
             Object(Matching, "game/tutmenu.cpp"),

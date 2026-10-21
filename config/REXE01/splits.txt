@@ -3138,6 +3138,16 @@ game/unlkmenu.cpp:
 	.sbss       start:0x8055F228 end:0x8055F238
 	.sdata2     start:0x80563800 end:0x80563830
 
+game/unitmenu.cpp:
+	.text       start:0x8024C070 end:0x8024C370
+	.ctors      start:0x802ED43C end:0x802ED440
+	.rodata     start:0x802FA520 end:0x802FA538
+	.data       start:0x80343EC0 end:0x80343F00
+	.bss        start:0x804989D0 end:0x804989E8
+	.sdata      start:0x8055C008 end:0x8055C018
+	.sbss       start:0x8055F2A8 end:0x8055F2B8
+	.sdata2     start:0x80563920 end:0x80563930
+
 game/mstats.cpp:
 	.text       start:0x80257284 end:0x80257C10
 	.ctors      start:0x802ED450 end:0x802ED454
