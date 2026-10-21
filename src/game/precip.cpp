@@ -1,8 +1,8 @@
-// Precipitation (0x802A4A50-0x802A7BD8, "weather" table users): rain and snow particle volumes that follow the camera (points
-// kept inside the view frustum, refilled as they fall out, pushed by wind and camera motion), rain
-// splashes spawned from "droplet" sources on track objects, "mist" point clouds read from the track
-// effect tables, a full-screen flash/tint and a lightning model. Names are guesses apart from the
-// strings.
+// Precipitation (0x802A4A50-0x802A7BD8, users of the "weather" table): rain and snow particle
+// volumes that follow the camera (points kept inside the view frustum, refilled as they fall out,
+// pushed by wind and camera motion), rain splashes spawned from "droplet" sources on track objects,
+// "mist" point clouds read from the track effect tables, a full-screen flash/tint and a lightning
+// model. Names are guesses apart from the strings.
 #include "game/common.h"
 
 void* operator new(size_t size, const char* tag);
