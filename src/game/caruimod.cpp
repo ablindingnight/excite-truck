@@ -5,9 +5,14 @@
 #include "macros.h"
 #include <revolution/MTX.h>
 
+struct Basis {
+    Vec v[3];
+};
+
 struct Frame {
-    Vec axes[3];  // offset 0x0
-    Vec pos;      // offset 0x24
+    Frame(void) {}
+    Basis b;  // offset 0x0
+    Vec pos;  // offset 0x24
 };
 
 struct Mtx33 {
@@ -123,16 +128,28 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->z = in->z * s;
 }
 
+static inline void MAdd(Vec* out, const Vec* a, const Vec* d, f32 s) {
+    out->x = a->x + d->x * s;
+    out->y = a->y + d->y * s;
+    out->z = a->z + d->z * s;
+}
+
+static inline void Lift(Vec* v, f32 y) {
+    v->x = 0.0f;
+    v->y = y;
+    v->z = 0.0f;
+}
+
 static inline void Identity(Frame* f) {
-    f->axes[0].x = 1.0f;
-    f->axes[0].y = 0.0f;
-    f->axes[0].z = 0.0f;
-    f->axes[1].x = 0.0f;
-    f->axes[1].y = 1.0f;
-    f->axes[1].z = 0.0f;
-    f->axes[2].x = 0.0f;
-    f->axes[2].y = 0.0f;
-    f->axes[2].z = 1.0f;
+    f->b.v[0].x = 1.0f;
+    f->b.v[0].y = 0.0f;
+    f->b.v[0].z = 0.0f;
+    f->b.v[1].x = 0.0f;
+    f->b.v[1].y = 1.0f;
+    f->b.v[1].z = 0.0f;
+    f->b.v[2].x = 0.0f;
+    f->b.v[2].y = 0.0f;
+    f->b.v[2].z = 1.0f;
     f->pos.x = 0.0f;
     f->pos.y = 0.0f;
     f->pos.z = 0.0f;
@@ -151,7 +168,17 @@ static inline void CopyName(char* dst, const char* src, int n) {
 }
 
 static inline int IsFront(int i) { return i == 0 || i == 1; }
-static inline int IsLeft(int i) { return i == 0 || i == 2; }
+static inline int IsLeft(int i) {
+    int left = 1;
+    if (i != 0 && i != 2) {
+        left = 0;
+    }
+    return left;
+}
+
+static inline f32 Sum(f32 a, f32 b) { return a + b; }
+static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
 static inline f32 Ease(f32 x) {
@@ -196,7 +223,7 @@ public:
     s32 facingNeg;     // offset 0x30
     s32 numBones;      // offset 0x34
     u32 groupMask;     // offset 0x38
-    Vec bones[80];     // offset 0x3C
+    ValVec3 bones[80]; // offset 0x3C
     s32* boneset;      // offset 0x3FC
     char name[0x20];   // offset 0x400
     Vec offset;        // offset 0x420
@@ -281,10 +308,12 @@ void CarUIModel::Load(const char* carName) {
     rideHeight = setup.wheels[3].rideHeight;
     fn_80131818(t);
     for (i = 0; i < 4; i++) {
+        int left = IsLeft(i);
+        int front = IsFront(i);
         Vec p;
-        p.x = 0.5f * (IsLeft(i) ? -1.0f : 1.0f) * (IsFront(i) ? ftrack : rtrack);
+        p.x = 0.5f * (left ? -1.0f : 1.0f) * (front ? ftrack : rtrack);
         p.y = setup.wheels[i].radius - setup.wheels[i].rideHeight;
-        p.z = wheelbase * (0.5f * (IsFront(i) ? 1.0f : -1.0f));
+        p.z = wheelbase * (0.5f * (front ? 1.0f : -1.0f));
         wheelPos[i] = p;
     }
     LoadEfx(path);
@@ -341,10 +370,10 @@ void CarUIModel::LoadEfx(const char* path) {
             for (int i = 0; i < numBones; i++) {
                 char key[0x20];
                 fn_801345D8(key, 0x20, "%d", i);
-                *(ValVec3*)&bones[i] = r->GetVec3Or(key, zero);
+                bones[i] = r->GetVec3Or(key, zero);
             }
         } else {
-            memset(bones, 0, sizeof(bones));
+            memset(bones, sizeof(bones), 0);
         }
         const char* susp[4] = {"lf", "rf", "lr", "rr"};
         if (t->HasChild("susp")) {
@@ -374,35 +403,39 @@ void CarUIModel::UnloadEfx(void) {
 }
 
 void CarUIModel::SetPose(const Frame* f, const f32* wy, const f32* steer) {
-    frame = *f;
+    Frame w;
+    Mtx33 r;
+    Mtx33 r2;
+    ValVec3 a;
+    ValVec3 b;
     Vec o;
-    MulVec(&o, &offset, frame.axes);
+    Vec t;
+    frame = *f;
+    MulVec(&o, &offset, frame.b.v);
     frame.pos.x = frame.pos.x + o.x;
     frame.pos.y = frame.pos.y + o.y;
     frame.pos.z = frame.pos.z + o.z;
     for (int i = 0; i < 4; i++) {
         wheelY[i] = wy[i];
         int left = IsLeft(i);
-        Frame w = *f;
-        Vec t;
-        MulVec(&t, &wheelPos[i], w.axes);
-        w.pos.x = w.pos.x + t.x + w.axes[1].x * wy[i];
-        w.pos.y = w.pos.y + t.y + w.axes[1].y * wy[i];
-        w.pos.z = w.pos.z + t.z + w.axes[1].z * wy[i];
+        w = *f;
+        MulVec(&t, &wheelPos[i], w.b.v);
+        w.pos.x = w.pos.x + t.x;
+        w.pos.y = w.pos.y + t.y;
+        w.pos.z = w.pos.z + t.z;
+        w.pos.x = w.pos.x + w.b.v[1].x * wy[i];
+        w.pos.y = w.pos.y + w.b.v[1].y * wy[i];
+        w.pos.z = w.pos.z + w.b.v[1].z * wy[i];
         if (!left) {
-            ValVec3 a;
             a.x = 0.0f;
             a.y = 3.1415927f;
             a.z = 0.0f;
-            Mtx33 r;
             fn_80015A20(&r, &a);
             Mat3Mul((Mat3*)&w, (const Mat3*)&r, (const Mat3*)&w);
         }
-        ValVec3 b;
         b.x = steer[i] * (left ? 1.0f : -1.0f);
         b.y = 0.0f;
         b.z = 0.0f;
-        Mtx33 r2;
         fn_80015A20(&r2, &b);
         Mat3Mul((Mat3*)&w, (const Mat3*)&r2, (const Mat3*)&w);
         wheels[i] = w;
@@ -412,17 +445,21 @@ void CarUIModel::SetPose(const Frame* f, const f32* wy, const f32* steer) {
 void CarUIModel::Draw(void) {
     Vec tmp[80];
     memset(tmp, 0, sizeof(tmp));
-    f32 t = (fn_8023659C() - start - 0.0f) / 0.25f;
+    f32 t = InvLerp(0.0f, 0.25f, fn_8023659C() - start);
     t = MIN(1.0f, t);
     t = MAX(t, 0.0f);
-    s32 frameNo = fn_80147C50(animSet, anim, Ease(0.0f + t * 1.0f));
+    s32 frameNo = fn_80147C50(animSet, anim, Ease(Lerp(0.0f, 1.0f, t)));
     s32 mat = fn_802C7A40(1, tmp, 0x50, 1, &frameNo, 1);
     u32 flags;
     fn_8018BF44(&flags);
     flags |= 0x10000000;
     fn_802C70AC(model, &frame, mat, flags);
     for (int i = 0; i < 4; i++) {
-        fn_801F1394(Wheels(i), &wheels[i]);
+        if (IsFront(i)) {
+            fn_801F1394(fwheels, &wheels[i]);
+        } else {
+            fn_801F1394(rwheels, &wheels[i]);
+        }
     }
     DrawEfx();
 }
@@ -439,28 +476,26 @@ void CarUIModel::DrawShadow(void) {
 }
 
 void CarUIModel::DrawEfx(void) {
+    const Frame* f = &frame;
     if (efx != -1) {
         const Frame* cam = fn_802C86DC();
-        Vec p = cam->axes[0];
-        bones[facingPos] = p;
-        bones[facingNeg].x = p.x * -1.0f;
-        bones[facingNeg].y = p.y * -1.0f;
-        bones[facingNeg].z = p.z * -1.0f;
-        if (boneset) {
-            bones[boneset[0x33]].x = 0.0f;
-            bones[boneset[0x33]].y = wheelY[0] - offset.y;
-            bones[boneset[0x33]].z = 0.0f;
-            bones[boneset[0x34]].x = 0.0f;
-            bones[boneset[0x34]].y = wheelY[1] - offset.y;
-            bones[boneset[0x34]].z = 0.0f;
-            bones[boneset[0x35]].x = 0.0f;
-            bones[boneset[0x35]].y = wheelY[2] - offset.y;
-            bones[boneset[0x35]].z = 0.0f;
-            bones[boneset[0x36]].x = 0.0f;
-            bones[boneset[0x36]].y = wheelY[3] - offset.y;
-            bones[boneset[0x36]].z = 0.0f;
+        Vec p = cam->b.v[0];
+        Vec* a = (Vec*)&bones[facingPos];
+        a->x = p.x;
+        a->y = p.y;
+        a->z = p.z;
+        Vec* b = (Vec*)&bones[facingNeg];
+        b->x = p.x * -1.0f;
+        b->y = p.y * -1.0f;
+        b->z = p.z * -1.0f;
+        s32* bs = boneset;
+        if (bs) {
+            Lift((Vec*)&bones[bs[0x33]], wheelY[0] - offset.y);
+            Lift((Vec*)&bones[bs[0x34]], wheelY[1] - offset.y);
+            Lift((Vec*)&bones[bs[0x35]], wheelY[2] - offset.y);
+            Lift((Vec*)&bones[bs[0x36]], wheelY[3] - offset.y);
         }
-        fn_802C70AC(efx, &frame, fn_802C7A34(1, &bones[1], numBones), groupMask);
+        fn_802C70AC(efx, f, fn_802C7A34(1, (Vec*)&bones[1], numBones), groupMask);
     }
 }
 
@@ -694,6 +729,8 @@ ResourceLoader* lbl_80498E08[4];
 Vec lbl_80498E18;  // camera target
 CarUIScreen* lbl_80498E28[4];
 
+static inline int LoaderIdle(int i) { return lbl_80498E08[i]->set->Status() == 0; }
+
 static inline void CreateLoader(void) {
     ResourceLoader* l = new ("ResLoader") ResourceLoader(0x16E360, "caruimod");
     lbl_80498E08[lbl_8055F33C++] = l;
@@ -701,7 +738,7 @@ static inline void CreateLoader(void) {
 
 static inline void DestroyLoader(void) {
     for (int i = 0; i < lbl_8055F33C; i++) {
-        if (!lbl_80498E08[i]->set->Status()) {
+        if (LoaderIdle(i)) {
             ResourceLoader* l = lbl_80498E08[i];
             ResourceLoader** p = &lbl_80498E08[i];
             if (l) {
@@ -733,7 +770,7 @@ static inline void ReleaseLoader(const char* name) {
 static inline int AcquireLoader(const char* name) {
     int idle = -1;
     for (int i = 0; i < lbl_8055F33C; i++) {
-        if (!lbl_80498E08[i]->set->Status()) {
+        if (LoaderIdle(i)) {
             idle = i;
         } else if (!strcasecmp(lbl_80498E08[i]->name, name)) {
             lbl_80498E08[i]->refs++;
@@ -828,34 +865,36 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         mid.x = l.x + 0.5f * (r.x - l.x);
         mid.y = l.y + 0.5f * (r.y - l.y);
         mid.z = l.z + 0.5f * (r.z - l.z);
-        p->frame.axes[2].x = mid.x - c.x;
-        p->frame.axes[2].y = mid.y - c.y;
-        p->frame.axes[2].z = mid.z - c.z;
-        p->frame.axes[0].x = r.x - l.x;
-        p->frame.axes[0].y = r.y - l.y;
-        p->frame.axes[0].z = r.z - l.z;
-        PSVECCrossProduct(&p->frame.axes[2], &p->frame.axes[0], &p->frame.axes[1]);
-        PSVECCrossProduct(&p->frame.axes[1], &p->frame.axes[2], &p->frame.axes[0]);
-        PSVECNormalize(&p->frame.axes[0], &p->frame.axes[0]);
-        PSVECNormalize(&p->frame.axes[1], &p->frame.axes[1]);
-        PSVECNormalize(&p->frame.axes[2], &p->frame.axes[2]);
-        lbl_80498E18.x = mid.x + p->frame.axes[2].x * -1.5566f;
-        lbl_80498E18.y = mid.y + p->frame.axes[2].y * -1.5566f;
-        lbl_80498E18.z = mid.z + p->frame.axes[2].z * -1.5566f;
-        lbl_80498E18.x = lbl_80498E18.x + p->frame.axes[1].x * 1.2283f;
-        lbl_80498E18.y = lbl_80498E18.y + p->frame.axes[1].y * 1.2283f;
-        lbl_80498E18.z = lbl_80498E18.z + p->frame.axes[1].z * 1.2283f;
+        p->frame.b.v[2].x = mid.x - c.x;
+        p->frame.b.v[2].y = mid.y - c.y;
+        p->frame.b.v[2].z = mid.z - c.z;
+        p->frame.b.v[0].x = r.x - l.x;
+        p->frame.b.v[0].y = r.y - l.y;
+        p->frame.b.v[0].z = r.z - l.z;
+        PSVECCrossProduct(&p->frame.b.v[2], &p->frame.b.v[0], &p->frame.b.v[1]);
+        PSVECCrossProduct(&p->frame.b.v[1], &p->frame.b.v[2], &p->frame.b.v[0]);
+        PSVECNormalize(&p->frame.b.v[0], &p->frame.b.v[0]);
+        PSVECNormalize(&p->frame.b.v[1], &p->frame.b.v[1]);
+        PSVECNormalize(&p->frame.b.v[2], &p->frame.b.v[2]);
+        f32 back = -1.5566f;
+        f32 up = 1.2283f;
+        lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
+        lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
+        lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;
+        lbl_80498E18.x = lbl_80498E18.x + p->frame.b.v[1].x * up;
+        lbl_80498E18.y = lbl_80498E18.y + p->frame.b.v[1].y * up;
+        lbl_80498E18.z = lbl_80498E18.z + p->frame.b.v[1].z * up;
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);
             f32 back = -(0.1524f + m->wheelPos[1].z);
             f32 h = -p->wheelY[1];
-            p->frame.pos.x = mid.x + p->frame.axes[2].x * back;
-            p->frame.pos.y = mid.y + p->frame.axes[2].y * back;
-            p->frame.pos.z = mid.z + p->frame.axes[2].z * back;
-            f32 up = 0.0f + (h + (-m->wheelPos[1].y + rad));
-            p->frame.pos.x = p->frame.pos.x + p->frame.axes[1].x * up;
-            p->frame.pos.y = p->frame.pos.y + p->frame.axes[1].y * up;
-            p->frame.pos.z = p->frame.pos.z + p->frame.axes[1].z * up;
+            p->frame.pos.x = mid.x + p->frame.b.v[2].x * back;
+            p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
+            p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
+            f32 lift = Sum(0.0f, h + (-m->wheelPos[1].y + rad));
+            p->frame.pos.x = p->frame.pos.x + p->frame.b.v[1].x * lift;
+            p->frame.pos.y = p->frame.pos.y + p->frame.b.v[1].y * lift;
+            p->frame.pos.z = p->frame.pos.z + p->frame.b.v[1].z * lift;
         } else {
             p->frame.pos = lbl_80498E18;
         }
@@ -868,13 +907,13 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
 
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {
-        f32 offX = 0.0f;
-        f32 d = dist;
         f32 offY = 0.0f;
-        int w2 = ceil(w / fn_802C9A50());
+        f32 d = dist;
+        f32 offX = offY;
+        int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hh = 0.5f * (f32)h;
-        x -= (w2 - w) / 2;
         f32 cy = (f32)y + hh;
+        x -= (w2 - w) / 2;
         f32 hw = 0.5f * (f32)w2;
         f32 cx = (f32)x + hw;
         f32 proj;
@@ -924,6 +963,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         f32 nx = -offX;
         f32 floor = 2.0f * aspect;
         f32 ny = -offY;
+        Mtx33* m = (Mtx33*)&cam;
         for (int i = 0; i < 400; i++) {
             f32 c = cos(pitch);
             f32 s = sin(pitch);
@@ -939,23 +979,21 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             rx.m[8] = c;
             f32 c2 = cos(yaw);
             f32 s2 = sin(yaw);
-            cam.axes[0].x = c2;
-            cam.axes[0].y = 0.0f;
-            cam.axes[1].x = 0.0f;
-            cam.axes[0].z = -s2;
-            cam.axes[1].y = 1.0f;
-            cam.axes[1].z = 0.0f;
-            cam.axes[2].x = s2;
-            cam.axes[2].y = 0.0f;
-            cam.axes[2].z = c2;
-            MulM((Mtx33*)&cam, &rx, (Mtx33*)&cam);
-            cam.pos.x = lbl_80498E18.x + cam.axes[2].x * nd;
-            cam.pos.y = lbl_80498E18.y + cam.axes[2].y * nd;
-            cam.pos.z = lbl_80498E18.z + cam.axes[2].z * nd;
-            cam.pos.x = cam.pos.x + cam.axes[0].x * nx + cam.axes[1].x * ny;
-            cam.pos.y = cam.pos.y + cam.axes[0].y * nx + cam.axes[1].y * ny;
-            cam.pos.z = cam.pos.z + cam.axes[0].z * nx + cam.axes[1].z * ny;
-            if (!lbl_8055F330 || fn_801DCF48(0) + floor < cam.pos.y) {
+            cam.b.v[0].x = c2;
+            cam.b.v[0].y = 0.0f;
+            cam.b.v[1].x = 0.0f;
+            cam.b.v[0].z = -s2;
+            cam.b.v[1].y = 1.0f;
+            cam.b.v[1].z = 0.0f;
+            cam.b.v[2].x = s2;
+            cam.b.v[2].y = 0.0f;
+            cam.b.v[2].z = c2;
+            MulM(m, &rx, m);
+            MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
+            cam.pos.x = cam.pos.x + cam.b.v[0].x * nx + cam.b.v[1].x * ny;
+            cam.pos.y = cam.pos.y + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
+            cam.pos.z = cam.pos.z + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
+            if (!lbl_8055F330 || floor + fn_801DCF48(0) < cam.pos.y) {
                 break;
             }
             pitch += 0.0019635f;
@@ -979,7 +1017,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         cam.pos.y = (cam.pos.y - model->rideHeight) + camOffset.y;
         cam.pos.z = (cam.pos.z - dist) + camOffset.z;
         cam.pos.x = cam.pos.x + camOffset.x;
-        MulVec(&cam.pos, &cam.pos, cam.axes);
+        MulVec(&cam.pos, &cam.pos, cam.b.v);
     }
 }
 
@@ -1192,9 +1230,11 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         }
         CopyName(loaded, loading, 0x20);
         loading[0] = 0;
+        CarUIModel* nm = model;
+        u32 a = anim;
         loadName[0] = 0;
-        model->anim = anim;
-        model->animSet = anim;
+        nm->anim = a;
+        nm->animSet = a;
         tint = nextTint;
     }
     if (!loading[0]) {
@@ -1203,10 +1243,10 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
             u32 want = anim;
             if (m->anim != want) {
                 if (m->anim != 0) {
-                    f32 t = (fn_8023659C() - m->start - 0.0f) / 0.25f;
+                    f32 t = InvLerp(0.0f, 0.25f, fn_8023659C() - m->start);
                     t = MIN(1.0f, t);
                     t = MAX(t, 0.0f);
-                    m->animSet = fn_80147C50(m->animSet, m->anim, Ease(0.0f + t * 1.0f));
+                    m->animSet = fn_80147C50(m->animSet, m->anim, Ease(Lerp(0.0f, 1.0f, t)));
                 } else {
                     m->animSet = want;
                 }
@@ -1223,19 +1263,18 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         }
         Camera(x, y, w, h, yaw, pitch);
     } else {
-        Vec box[2];
-        fn_802C77F0(model->model, box);
+        f32 box[6];
+        fn_802C77F0(model->model, (Vec*)box);
         fn_802C7808(model->model);
-        f32 dx = box[0].z - box[0].y;
-        f32 dy = box[1].x - box[0].x;
-        f32 dz = box[1].z - box[1].y;
+        f32 dx = box[1] - box[0];
+        f32 dy = box[3] - box[2];
+        f32 dz = box[5] - box[4];
         sqrt(dx * dx + dy * dy + dz * dz);
         sqrt(2.0);
         if (index == 0) {
             fn_802AB9E0(lbl_8055F338);
             for (int i = 0; i < lbl_8055F340; i++) {
-                CarUIScreen* v = lbl_80498E28[i];
-                if (v->shine) {
+                if (lbl_80498E28[i]->shine) {
                     Vec off;
                     off.x = 0.0f;
                     off.y = 0.0f;
@@ -1247,13 +1286,13 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                             fn_80253004(i, &p);
                         } else {
                             fn_802545C4(&p, bg, model);
-                            t.x = p.frame.axes[2].x * -13.333333f;
-                            t.y = p.frame.axes[2].y * -13.333333f;
-                            t.z = p.frame.axes[2].z * -13.333333f;
+                            t.x = p.frame.b.v[2].x * -13.333333f;
+                            t.y = p.frame.b.v[2].y * -13.333333f;
+                            t.z = p.frame.b.v[2].z * -13.333333f;
                         }
                         off = t;
                     }
-                    fn_802ABC80(&v->model->frame, &off, 1.0f, 2.5f, 1.0f);
+                    fn_802ABC80(&lbl_80498E28[i]->model->frame, &off, 1.0f, 2.5f, 1.0f);
                 }
             }
             fn_802AB9E4();
@@ -1314,30 +1353,30 @@ struct LightDirs {
 static const LightDirs lbl_802FA5B8 = {{{0.7f, -0.7f, 0.0f}, {0.0f, -0.7f, 0.7f}, {-0.7f, -0.7f, 0.0f}}};
 
 void CarUIScreen::DrawLights(void) {
-    LightDirs dirs = lbl_802FA5B8;
-    for (u32 i = 0; i < 4; i++) {
-        Frame f = *fn_802C86DC();
-        f.axes[1].y = 1.0f;
-        f.axes[0].y = 0.0f;
-        f.axes[2].y = 0.0f;
-        Vec x;
-        x.x = f.axes[0].x;
-        x.y = 0.0f;
-        x.z = f.axes[0].z;
-        Vec y;
-        Vec z;
-        z.x = f.axes[2].x;
-        z.y = 0.0f;
-        z.z = f.axes[2].z;
+    LightDirs dirs;
+    Frame f;
+    Vec l;
+    Vec up;
+    Vec z;
+    Vec y;
+    Vec x;
+    int i = 0;
+    dirs = lbl_802FA5B8;
+    for (; i < 4u; i++) {
+        f = *fn_802C86DC();
+        f.b.v[1].y = 1.0f;
+        f.b.v[0].y = 0.0f;
+        f.b.v[2].y = 0.0f;
+        SetVec(&x, f.b.v[0].x, 0.0f, f.b.v[0].z);
+        SetVec(&z, f.b.v[2].x, 0.0f, f.b.v[2].z);
         PSVECCrossProduct(&z, &x, &y);
         PSVECNormalize(&x, &x);
         PSVECNormalize(&y, &y);
         PSVECCrossProduct(&x, &y, &z);
-        f.axes[0] = x;
-        f.axes[1] = y;
-        f.axes[2] = z;
+        f.b.v[0] = x;
+        f.b.v[1] = y;
+        f.b.v[2] = z;
         const Vec* d;
-        Vec up;
         if (i > 0) {
             d = &dirs.d[i - 1];
         } else {
@@ -1346,8 +1385,7 @@ void CarUIScreen::DrawLights(void) {
             up.z = 0.0f;
             d = &up;
         }
-        Vec l;
-        MulVec(&l, d, f.axes);
+        MulVec(&l, d, f.b.v);
         fn_802C9A1C(&l);
         if (fn_802C9C8C(0x14000000)) {
             if (model->loaded) {
@@ -1365,11 +1403,9 @@ struct FloorVtx {
     f32 t;      // offset 0x14
 };
 
-static inline Frame CamFrame(void) { return *fn_802C86DC(); }
-
 void CarUIScreen::DrawFloor(u32 color, f32 a) {
     fn_802C942C(-1);
-    Frame saved = CamFrame();
+    Frame saved = *fn_802C86DC();
     Frame f = saved;
     f.pos.y = f.pos.y * -1.0f;
     CarUIModel* m = model;
@@ -1378,9 +1414,9 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
         f32 rad = fn_801F159C(m->fwheels);
         f.pos.y = f.pos.y + (m->wheels[0].pos.y + (m->frame.pos.y - ride) - rad - 0.03f);
     }
-    f.axes[0].y = f.axes[0].y * -1.0f;
-    f.axes[1].y = f.axes[1].y * -1.0f;
-    f.axes[2].y = f.axes[2].y * -1.0f;
+    f.b.v[0].y = f.b.v[0].y * -1.0f;
+    f.b.v[1].y = f.b.v[1].y * -1.0f;
+    f.b.v[2].y = f.b.v[2].y * -1.0f;
     fn_802C8638(&f);
     if (model->loaded) {
         if (shine) {
@@ -1401,34 +1437,38 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
     } else {
         y = 0.0f;
     }
-    u16 idx[150 * 9];
     FloorVtx v[301];
+    u16 idx[150 * 9];
     v[0].pos.y = y;
     v[0].pos.x = 0.0f;
     v[0].pos.z = 0.0f;
     v[0].s = 0.0f;
     v[0].t = 0.0f;
     v[0].color = 0x20FFFFFF;
+    f32 step = 0.041887902f;
     int i;
     for (i = 0; i < 150; i++) {
-        f32 ang = (f32)i * 0.041887902f;
-        f32 c = 1.333f * (f32)cos(ang);
-        f32 s = 1.333f * (f32)sin(ang);
-        FloorVtx* p = &v[1 + i * 2];
-        p[0].pos.x = 2.5f * c;
-        p[0].pos.y = y;
-        p[0].pos.z = 2.5f * s;
-        p[0].color = 0x20FFFFFF;
-        p[0].s = 1.333f * p[0].pos.x;
-        p[0].t = 1.333f * p[0].pos.z;
-        p[1].pos.x = 5.0f * c;
-        p[1].pos.y = y;
-        p[1].pos.z = 5.0f * s;
-        p[1].color = 0x00FFFFFF;
-        p[1].s = 1.333f * p[1].pos.x;
-        p[1].t = 1.333f * p[1].pos.z;
+        f32 fi = i;
+        f32 c = 1.333f * (f32)cos(fi * step);
+        f32 s = 1.333f * (f32)sin(fi * step);
+        f32 x0 = 2.5f * c;
+        f32 z0 = 2.5f * s;
+        f32 x1 = 5.0f * c;
+        f32 z1 = 5.0f * s;
+        v[1 + i * 2].pos.x = x0;
+        v[1 + i * 2].pos.y = y;
+        v[1 + i * 2].pos.z = z0;
+        v[1 + i * 2].color = 0x20FFFFFF;
+        v[1 + i * 2].s = 1.333f * x0;
+        v[1 + i * 2].t = 1.333f * z0;
+        v[2 + i * 2].pos.x = x1;
+        v[2 + i * 2].pos.y = y;
+        v[2 + i * 2].pos.z = z1;
+        v[2 + i * 2].color = 0x00FFFFFF;
+        v[2 + i * 2].s = 1.333f * x1;
+        v[2 + i * 2].t = 1.333f * z1;
     }
-    u16 n = 1;
+    int n = 1;
     for (i = 0; i < 150; i++, n += 2) {
         u16* q = &idx[i * 9];
         q[0] = 0;
