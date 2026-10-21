@@ -71,6 +71,32 @@ struct ThinkEvent {
     f32 z;              // offset 0x220
 };
 
+struct TeleportEvent {
+    f32 time;
+    s32 order;
+    s32 type;
+    u32 mask;           // offset 0xC
+    char who[0x100];    // offset 0x10
+    char except[0x100]; // offset 0x110
+    s32 where;          // offset 0x210
+    f32 speed;          // offset 0x214
+};
+
+struct DebugEvent {
+    f32 time;
+    s32 order;
+    s32 type;
+    char msg[0x100];  // offset 0xC
+};
+
+struct ShowEvent {
+    f32 time;
+    s32 order;
+    s32 type;
+    char title[0x100];  // offset 0xC
+    char text[0x200];   // offset 0x10C
+};
+
 struct CamEvent {
     f32 time;
     s32 order;
@@ -254,8 +280,15 @@ extern IVec3 lbl_80438498;
 extern char lbl_804384A8[0x100];  // think: who
 extern char lbl_804385A8[0x100];  // think: except
 extern u8 lbl_80337474[];         // debug key table
+extern "C" void IL_Use(int k, ...);  // placeholder sink: keeps the original strings in the pool
 
-static const char* const lbl_80562950 = "debug\0camera\0effect\0sound\0teleport\0think\0wait\0text";
+static const char* const lbl_80562950 = "debug\0camera\0effect\0sound\0teleport\0think\0wait\0text\0\0\0\0";
+static const char* const lbl_80562954 = "world_pt\0entry\0start";
+static const char* const lbl_80562958 = "park\0line\0target\0follow\0line_follow\0donut";
+static const char* const lbl_8056295C = "cross_pt";
+static const char* const lbl_80562960 = "speech\0music";
+static const char* const lbl_80562964 = "world\0start\0car\0\0\0\0";
+static const char* const lbl_80562968 = "linear\0hermite\0\0\0\0";
 
 extern "C" {
 
@@ -266,6 +299,8 @@ void fn_801C3D88(const char* name);
 void fn_801C855C(void);
 void fn_801C957C(int on);
 void fn_801C9920(const Event* e, int fd);
+const char* fn_801C98F4(const char* s, int n);
+void fn_801C94B8(int x, int y, const char* s, int color);
 void fn_801CA1C4(const Event* e, int x, int y, int h);
 
 f32 fn_801C2F58(int n, f32 x) {
@@ -291,8 +326,11 @@ f32 fn_801C34F4(f32 x) { return 180.0f * x / 3.1415927f; }
 
 int fn_801C3508(u32 mask, int i) { return (mask & (1 << i)) != 0; }
 
-// "who" name to car mask (placeholder).
-u32 fn_801C3524(const char* who) { return 0; }
+// "who" name to car mask (placeholder; the call keeps its strings in the pool).
+u32 fn_801C3524(const char* who) {
+    IL_Use(0, "eve_leader", "interlude: bad who %s", "interlude: can't find %s");
+    return 0;
+}
 
 u32 fn_801C3954(const char* list) {
     char buf[256];
@@ -400,8 +438,37 @@ Event* fn_801C3C80(void) {
 
 ValueNodeV* fn_801C3D5C(void) { return GetEvent(fn_801769CC()->event)->node; }
 
-// Interlude loader (placeholder).
-void fn_801C3D88(const char* name) {}
+// Interlude loader (placeholder; strings and switch keep the pool layout).
+void fn_801C3D88(const char* name) {
+    int k = (int)name;
+    IL_Use(0, "Interlude: Couldn't find interlude file %s!!!", "interlude_name", "Interlude: Couldn't find interlude %s in val file %s!!!", "duration", "intrlude: too many events!", "camera_type", "interp_type", "interp_time", "sound_type", "immediate", "interlude: unhandled teleport where type %d", "interlude: unhandled wait type %d", "interlude: unhandled event type %d", "intrlude: %d events");
+    switch (k) {
+    case 0:
+        IL_Use(0);
+        break;
+    case 1:
+        IL_Use(1);
+        break;
+    case 2:
+        IL_Use(2);
+        break;
+    case 3:
+        IL_Use(3);
+        break;
+    case 4:
+        IL_Use(4);
+        break;
+    case 5:
+        IL_Use(5);
+        break;
+    case 6:
+        IL_Use(6);
+        break;
+    case 7:
+        IL_Use(7);
+        break;
+    }
+}
 
 void fn_801C4AD0(void) {
     lbl_8055E7E9 = 0;
@@ -487,13 +554,43 @@ void fn_801C4BAC(void) {
 }
 
 // Event dispatch, player update and the per-event start (placeholders).
-void fn_801C4CE8(void) {}
+void fn_801C4CE8(int k) {
+    IL_Use(0, "====== INTERLUDE: DONE at %1.1f! =======", "interlude: reset completed", "intrlude: unhandled wait type %d", "debug_event: %s", "interlude: song %u (I:%d, O:%d)", "interlude: unhandled teleport where %d");
+    switch (k) {
+    case 0:
+        IL_Use(0);
+        break;
+    case 1:
+        IL_Use(1);
+        break;
+    case 2:
+        IL_Use(2);
+        break;
+    case 3:
+        IL_Use(3);
+        break;
+    case 4:
+        IL_Use(4);
+        break;
+    case 5:
+        IL_Use(5);
+        break;
+    case 6:
+        IL_Use(6);
+        break;
+    case 7:
+        IL_Use(7);
+        break;
+    }
+}
 
 void fn_801C56AC(void) {}
 
 u8 fn_801C5B60(void) { return lbl_8055E7E2; }
 
-void fn_801C5B68(void) {}
+void fn_801C5B68(void) {
+    IL_Use(0, "intrlude: unknown camtype %d");
+}
 
 void fn_801C6AD0(int* alpha) {
     if (lbl_8055E7E2) {
@@ -558,7 +655,9 @@ void fn_801C6D94(void) {
 }
 
 // Camera event start/update (placeholder).
-void fn_801C6E40(void) {}
+void fn_801C6E40(void) {
+    IL_Use(0, "Camera added at %.2f seconds");
+}
 
 void fn_801C7254(Mat3* m) {
     f32 s;
@@ -796,7 +895,9 @@ void fn_801C7BA0(void) {
 }
 
 // Add teleport (placeholder).
-void fn_801C7C04(void) {}
+void fn_801C7C04(void) {
+    IL_Use(0, "Interlude Editor: I'm not set up to handle where type %d", "Added teleport to (%.2f, %.2f) at %.2f");
+}
 
 void fn_801C7EF4(void) {
     lbl_8055E850 = 0;
@@ -939,12 +1040,14 @@ void fn_801C83D0(void) {
 
 void fn_801C8420(void) {
     char path[256];
-    if (fn_8013181C("intrlude.txt", "qintrlud.val", "qintrlud.qrs")) {
-        sprintf(path, "%s/%s", "qintrlud.qrs", "qintrlud.val");
+    const char* qrs = "qintrlud.qrs";
+    const char* val = "qintrlud.val";
+    if (fn_8013181C("intrlude.txt", val, qrs)) {
+        sprintf(path, "%s/%s", qrs, val);
         fn_80128684();
-        fn_8012BEF0("qintrlud.qrs");
+        fn_8012BEF0(qrs);
         fn_801C3D88(path);
-        fn_8012BF24("qintrlud.qrs");
+        fn_8012BF24(qrs);
         fn_80128678();
         sprintf(lbl_80437FC0, "Interlude Reloaded!!");
     } else {
@@ -964,8 +1067,16 @@ void fn_801C8500(void) {
     fn_801C7374();
 }
 
-// Editor draw and menu set-up (placeholder).
-void fn_801C855C(void) {}
+// Editor menu set-up (placeholder).
+void fn_801C855C(void) {
+    IL_Use(0, "INTERLUDE EDITOR", "Add text message...", "Set camera here...", "Add effect...", "Add sound...", "Teleport cars...", "Set AI thinking...", "Wait until...", "List events...", "Set duration", "Reload Interlude", "Global event time...", "GLOBAL EVENT TIME", "Turn Off", "SET GLOBAL TIME", "REALLY RELOAD?", "Yes, Reload", "SET DURATION", "Set Duration", "ENTER MSG TO DISPLAY", "Set Message", "Add Fadeout", "MOVE CAM TO DEST", "Ok-I'm at the destination", "TRANSITION TIME? (SECS)", "Set Camera", "TYPE OF SOUND", "Immediate", "Set Sample...", "Set Sound", "SET SAMPLE ID", "Set Sample", "TELEPORT TYPE", "Starting positions", "World point", "Continue", "TELEPORT WHO?", "EXCEPT WHO?", "TELEPORT WHERE?", "FACING WHERE?", "WHERE IS 2ND CAR?", "CAR SPEED?", "DO WHAT?", "Move to point", "Use Line", "Follow with Line", "TO WHERE?", "FOLLOW WHO?", "WAIT TYPE", "Cross Point", "WAIT FOR WHOM?", "EXCEPT FOR WHOM?", "WHAT POINT?", "Set wait point", "EVENT LIST", "Move down", "Change time", "Insert/Del time", "REALLY DELETE?", "SET TIME", "Set time", "Add time");
+}
+
+u8 lbl_80337474[0x38] = {
+    0xC8, 0xD0, 0x1C, 0x2E, 0x13, 0x26, 0x23, 0x17, 0x1A, 0x1B, 0xFF, 0x1E, 0x30, 0x2E, 0x20, 0x12, 0x21, 0x22, 0x23,
+    0x17, 0x24, 0x25, 0x26, 0x32, 0x31, 0x18, 0x19, 0x10, 0x13, 0x1F, 0x14, 0x16, 0x2F, 0x11, 0x2D, 0x15, 0x2C, 0x02,
+    0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0xD3, 0x0E, 0x92, 0x34, 0x39, 0x0C, 0x4A, 0xFF,
+};
 
 void fn_801C9444(void) {
     for (int i = 0; i < 0x21; i++) {
@@ -1093,7 +1204,36 @@ const char* fn_801C98F4(const char* s, int n) {
 }
 
 // Per-event export writer (placeholder).
-void fn_801C9920(const Event* e, int fd) {}
+void fn_801C9920(const Event* e, int fd) {
+    int k = e->type;
+    IL_Use(0, "\ttable action\r\n", "\t\tt\t%.2f\r\n", "\t\ttype\tdebug\r\n", "\t\tmsg\t%s\r\n", "\t\ttype\tcamera\r\n", "\t\tfov\t%.2f\r\n", "\t\torigin\t%.2f, %.2f, %.2f\r\n", "\t\tdir\t%.2f, %.2f, %.2f\r\n", "\t\tv\t%.2f, %.2f, %.2f\r\n", "\t\tav\t%.2f, %.2f, %.2f\r\n", "\t\tduration\t%.2f\r\n", "\t\taccel\t%s\r\n", "\t\ttype\teffect\r\n", "\t\ttype\tsound\r\n", "\t\tsound_type\t%s\r\n", "\t\toverlap\t%s\r\n", "\t\timmediate\t%s\r\n", "\t\tsample\t%u\r\n", "\t\ttype\tteleport\r\n", "\t\tspeed\t%.2f\r\n", "\t\twho\t%s\r\n", "\t\texcept\t%s\r\n", "\t\twhere\t%s\r\n", "\t\toffset\t%.2f\r\n", "\t\tspacing\t%.2f\r\n", "\t\tyaw\t%.2f\r\n", "\t\tpt\t%.2f, %.2f\r\n", "\t\toffset\t%.2f, %.2f\r\n", "interlude: unhandled teleport where type %d in export", "\t\ttype\tthink\r\n", "\t\thow\t%s\r\n", "\t\tlat\t%.2f\r\n", "\t\tlon\t%.2f\r\n", "\t\tparam\t%d\r\n", "\t\ttype\twait\r\n", "\t\twhat\t%s\r\n", "\t\tpt\t%.2f, %.2f, %.2f\r\n", "interlude: unhandled wait type %d in export", "\t\ttype\ttext\r\n", "\t\ttitle\t%s\r\n", "interlude: unhandled event type %d in export");
+    switch (k) {
+    case 0:
+        IL_Use(0);
+        break;
+    case 1:
+        IL_Use(1);
+        break;
+    case 2:
+        IL_Use(2);
+        break;
+    case 3:
+        IL_Use(3);
+        break;
+    case 4:
+        IL_Use(4);
+        break;
+    case 5:
+        IL_Use(5);
+        break;
+    case 6:
+        IL_Use(6);
+        break;
+    case 7:
+        IL_Use(7);
+        break;
+    }
+}
 
 void fn_801CA070(const char* name) {
     int fd = fn_802E367C(name);
@@ -1119,8 +1259,86 @@ void fn_801CA070(const char* name) {
     }
 }
 
-// Event detail lines (placeholder).
-void fn_801CA1C4(const Event* e, int x, int y, int h) {}
+void fn_801CA1C4(const Event* e, int x, int y, int h) {
+    char buf[256];
+    if (lbl_8055E7F0 == 0 || lbl_8055E828 >= lbl_8055E7F0) {
+        return;
+    }
+    switch (e->type) {
+    case 0:
+        sprintf(buf, "Msg: %s", ((const DebugEvent*)e)->msg);
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    case 1:
+        break;
+    case 2:
+        sprintf(buf, "Effect type: Fade");
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    case 3:
+        sprintf(buf, "Sound type: %s", fn_801C98F4(lbl_80562960, ((const SoundEvent*)e)->imm));
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    case 4: {
+        const TeleportEvent* t = (const TeleportEvent*)e;
+        sprintf(buf, "Teleport type: %s", fn_801C98F4(lbl_80562954, t->where));
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Who: %s", t->who);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Except: %s", t->except);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Speed: %.2f", t->speed / 0.44444445f);
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    }
+    case 5: {
+        const ThinkEvent* t = (const ThinkEvent*)e;
+        sprintf(buf, "Think type: %s", fn_801C98F4(lbl_80562958, t->kind));
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Who: %s", t->who);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Except: %s", t->except);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Speed: %.2f", t->speed / 0.44444445f);
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    }
+    case 6: {
+        const WaitEvent* w = (const WaitEvent*)e;
+        sprintf(buf, "Wait type: %s", fn_801C98F4(lbl_8056295C, w->kind));
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Who: %s", w->who);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        sprintf(buf, "Except: %s", w->except);
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    }
+    case 7: {
+        const ShowEvent* t = (const ShowEvent*)e;
+        char line[50] = {0};
+        strncpy(line, t->title, 0x31);
+        sprintf(buf, "Title: %s", line);
+        fn_801C94B8(x, y, buf, -1);
+        y += h;
+        strncpy(line, t->text, 0x31);
+        sprintf(buf, "Text: %s", line);
+        fn_801C94B8(x, y, buf, -1);
+        break;
+    }
+    default:
+        void fn_802E317C(const char* fmt, ...);
+        fn_802E317C("Unhandled event type %d in display_action()", e->type);
+        break;
+    }
+}
 
 void fn_801CA5A8(void) {
     char buf[256];
@@ -1137,7 +1355,9 @@ void fn_801CA5A8(void) {
 }
 
 // Editor overlay draw (placeholder).
-void fn_801CA67C(void) {}
+void fn_801CA67C(void) {
+    IL_Use(0, "HIDDEN ('H')", "INTERLUDE", "[ACTIVE]", "[INACTIVE]", "T: %1.1f (%1.1f)", "E: %d/%d", "C: %5.1f, %5.1f, %5.1f", "R: %5.2f, %5.2f, %5.2f", "F: %3.0f", "VALID ENTRIES", "(and combos of):", "## (Car index in lineup)", "%c - Un/Pause", "%c - Restart", "%c - Change Cam", "%c - +0.1 Secs", "%c - Save", "%c - Hide", "[ and ] Scroll", "%5.2f   %4d   %s", "InterludeSkipToEnd: interlude not active!");
+}
 
 int fn_801CB114(int key) {
     if (lbl_8055E838) {
