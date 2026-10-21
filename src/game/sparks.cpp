@@ -337,11 +337,11 @@ void fn_8028AD78(void);
 void fn_8028B3CC(void);
 void fn_8028B4CC(void);
 void fn_8028AB14(void);
-int fn_8028B93C(const SparkEv* ev);
-int fn_8028B500(const ImpactEv* ev);
-int fn_8028BA44(const SparkEv* ev);
-int fn_8028BA9C(const SparkEv* ev);
-int fn_8028BB14(const SparkEv* ev);
+int fn_8028B93C(const void* ev);
+int fn_8028B500(const void* ev);
+int fn_8028BA44(const void* ev);
+int fn_8028BA9C(const void* ev);
+int fn_8028BB14(const void* ev);
 
 void fn_8028A664(void) {
     lbl_8055F6F0 = new ("short sparks") SparkSys(0x80, 0.5f);
@@ -352,19 +352,19 @@ void fn_8028A664(void) {
     lbl_804B32B8.count = 0;
     fn_8028ABE8();
     fn_8028B3CC();
-    fn_801EEFDC((int (*)(const void*))fn_8028B93C, 0);
-    fn_801EEFDC((int (*)(const void*))fn_8028B500, 1);
-    fn_801EEFDC((int (*)(const void*))fn_8028BA44, 2);
-    fn_801EEFDC((int (*)(const void*))fn_8028BA9C, 7);
-    fn_801EEFDC((int (*)(const void*))fn_8028BB14, 8);
+    fn_801EEFDC(fn_8028B93C, 0);
+    fn_801EEFDC(fn_8028B500, 1);
+    fn_801EEFDC(fn_8028BA44, 2);
+    fn_801EEFDC(fn_8028BA9C, 7);
+    fn_801EEFDC(fn_8028BB14, 8);
 }
 
 void fn_8028A784(void) {
-    fn_801EF024((int (*)(const void*))fn_8028BB14);
-    fn_801EF024((int (*)(const void*))fn_8028BA9C);
-    fn_801EF024((int (*)(const void*))fn_8028BA44);
-    fn_801EF024((int (*)(const void*))fn_8028B500);
-    fn_801EF024((int (*)(const void*))fn_8028B93C);
+    fn_801EF024(fn_8028BB14);
+    fn_801EF024(fn_8028BA9C);
+    fn_801EF024(fn_8028BA44);
+    fn_801EF024(fn_8028B500);
+    fn_801EF024(fn_8028B93C);
     fn_8028B4CC();
     fn_8028AD78();
     if (lbl_8055F700) {
@@ -455,8 +455,8 @@ void fn_8028AB14(void) {
 void fn_8028ADF4(SparkEntry* e, int n);
 
 void fn_8028ABE8(void) {
-    int n = 0;
     TerChunk* tc = lbl_804B3238;
+    int n = 0;
     for (int i = 0; i < 8; i++, tc++) {
         char buf[32];
         fn_801345D8(buf, 32, "terrain_%d", i);
@@ -553,6 +553,7 @@ void fn_8028ADF4(SparkEntry* e, int n) {
 }
 
 void fn_8028B3CC(void) {
+    const char* tex = "splash.tex";
     int on = 0;
     if ((lbl_8055D430 & 1) && (lbl_8055D430 & 8)) {
         on = 1;
@@ -582,7 +583,7 @@ void fn_8028B3CC(void) {
         e.a6C = 1.0f;
         e.a64 = 1.0f;
         e.a74 = 0.0f;
-        lbl_8055F704 = fn_8028E2F8(&e, "paint splat", "splash.tex");
+        lbl_8055F704 = fn_8028E2F8(&e, "paint splat", tex);
     } else {
         lbl_8055F704 = 0;
     }
@@ -595,7 +596,8 @@ void fn_8028B4CC(void) {
     }
 }
 
-int fn_8028B500(const ImpactEv* ev) {
+int fn_8028B500(const void* evp) {
+    const ImpactEv* ev = (const ImpactEv*)evp;
     f32 mag = PSVECMag(&ev->v18);
     int n = MIN(MAX((int)(0.002f * mag), 0), 0x60);
     s16 hint = fn_80287B24(ev->car)->hint;
@@ -651,7 +653,8 @@ int fn_8028B500(const ImpactEv* ev) {
     return 0x38;
 }
 
-int fn_8028B93C(const SparkEv* ev) {
+int fn_8028B93C(const void* evp) {
+    const SparkEv* ev = (const SparkEv*)evp;
     Vec v;
     Vec p;
     Scale(&v, &ev->vel, 0.5f);
@@ -665,7 +668,8 @@ int fn_8028B93C(const SparkEv* ev) {
     return 0x20;
 }
 
-int fn_8028BA44(const SparkEv* ev) {
+int fn_8028BA44(const void* evp) {
+    const SparkEv* ev = (const SparkEv*)evp;
     Vec v;
     v.x = 0.0f;
     v.y = 0.0f;
@@ -675,14 +679,16 @@ int fn_8028BA44(const SparkEv* ev) {
     return 0x14;
 }
 
-int fn_8028BA9C(const SparkEv* ev) {
+int fn_8028BA9C(const void* evp) {
+    const SparkEv* ev = (const SparkEv*)evp;
     Vec v;
     Scale(&v, &ev->pos, 0.05f);
     lbl_8055F6F8->Emit(fn_80287B94(0x18, 0x30), &ev->vel, &v, 6.0f);
     return 0x1C;
 }
 
-int fn_8028BB14(const SparkEv* ev) {
+int fn_8028BB14(const void* evp) {
+    const SparkEv* ev = (const SparkEv*)evp;
     for (int i = 0; i < 20; i++) {
         fn_8028E584(lbl_8055F704, &ev->vel, &ev->pos);
     }
@@ -766,8 +772,9 @@ void SparkSys::Step(void) {
     f32 age = fn_801E7E18() - life;
     f32 dt = fn_801E7E24();
     f32 g = 9.81f * dt;
-    f32 drag = 1.0f - 0.5f * dt;
+    f32 h = 0.5f * dt;
     f32 down = 0.2f * g;
+    f32 drag = 1.0f - h;
     Spark* out = pts;
     for (int i = 0; i < count; i++) {
         Spark* s = &pts[i];
