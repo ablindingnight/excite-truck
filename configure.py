@@ -1170,6 +1170,7 @@ config.libs.append(
             Object(NonMatching, "game/sfline.cpp"),
             Object(NonMatching, "game/trail.cpp"),
             Object(NonMatching, "game/precip.cpp"),
+            Object(NonMatching, "game/stuntpart.cpp"),
             Object(Matching, "game/stub13.cpp"),
             Object(NonMatching, "game/cartags.cpp"),
             Object(Matching, "game/trkefx.cpp"),
