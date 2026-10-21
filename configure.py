@@ -1083,6 +1083,7 @@ config.libs.append(
             Object(NonMatching, "game/xraysusp.cpp"),
             Object(NonMatching, "game/wheelmod.cpp"),
             Object(NonMatching, "game/trackmod.cpp"),
+            Object(NonMatching, "game/fabric.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
             Object(NonMatching, "game/terchunk.cpp"),
             Object(NonMatching, "game/cenvmap.cpp"),
