@@ -141,6 +141,13 @@ struct CornerPool {
         head = 0;
         name = n;
     }
+    void FreeAll(void) {
+        while (head) {
+            CornerBlock* next = head->next;
+            delete head;
+            head = next;
+        }
+    }
     CornerBlock* head;  // offset 0x0
     const char* name;   // offset 0x4
 };
@@ -274,14 +281,9 @@ Corner* fn_801AE180(void) {
 void fn_801AE4C4(void) { lbl_8055E604 = new ("corner-alloc") CornerPool("corners"); }
 
 void fn_801AE50C(void) {
-    CornerBlock* next;
     CornerPool* pool = lbl_8055E604;
     if (pool) {
-        while (pool->head) {
-            next = pool->head->next;
-            delete pool->head;
-            pool->head = next;
-        }
+        pool->FreeAll();
         delete pool;
     }
     lbl_8055E604 = 0;
