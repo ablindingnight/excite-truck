@@ -50,6 +50,7 @@ struct MenuItem {
         arg0 = a0;
         arg1 = a1;
     }
+    MenuItem(const char* n, f32* v, const struct MenuRange& r);
     const char* name;
     int type;
     const void* data;
@@ -65,6 +66,13 @@ struct MenuRange {
     }
     f32 lo, hi;
 };
+
+inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
+    name = n;
+    type = 9;
+    data = v;
+    *(MenuRange*)&arg0 = r;
+}
 
 // A slider: the range is stored in the item's argument words.
 struct SliderItem {
@@ -722,9 +730,9 @@ extern "C" void fn_80239F74(void) {
                         MenuItem items[] = {
                             MenuItem(0, 5, &sound, 0, 0),
                             MenuItem("cvideo", 5, &aspect, 0, 0),
-                            *(MenuItem*)&SliderItem("music_volume", &st->cur.music, MenuRange(0.0f, 1.0f)),
+                            MenuItem("music_volume", &st->cur.music, MenuRange(0.0f, 1.0f)),
                             MenuItem("mvcustom", 5, &music, 0, 0),
-                            *(MenuItem*)&SliderItem("sfx_volume", &st->cur.sfx, MenuRange(0.0f, 1.0f)),
+                            MenuItem("sfx_volume", &st->cur.sfx, MenuRange(0.0f, 1.0f)),
                             MenuItem("sfxcustom", 5, &sfx, 0, 0),
                             MenuItem("audio", 16, 0, (int)&track, 0),
                             MenuItem("ascustom", 5, &trackCap, 0, 0),
