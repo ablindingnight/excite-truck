@@ -1411,16 +1411,16 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
     fn_802C942C(-1);
     Frame saved = *fn_802C86DC();
     Frame f = saved;
-    f.pos.y = f.pos.y * -1.0f;
+    f.pos.y *= -1.0f;
     CarUIModel* m = model;
     if (m->loaded) {
         f32 ride = m->rideHeight;
         f32 rad = fn_801F159C(m->fwheels);
         f.pos.y = f.pos.y + (m->wheels[0].pos.y + (m->frame.pos.y - ride) - rad - 0.03f);
     }
-    f.b.v[0].y = f.b.v[0].y * -1.0f;
-    f.b.v[1].y = f.b.v[1].y * -1.0f;
-    f.b.v[2].y = f.b.v[2].y * -1.0f;
+    f.b.v[0].y *= -1.0f;
+    f.b.v[1].y *= -1.0f;
+    f.b.v[2].y *= -1.0f;
     fn_802C8638(&f);
     if (model->loaded) {
         if (shine) {

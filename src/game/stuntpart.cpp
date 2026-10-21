@@ -522,7 +522,7 @@ void fn_802AAF04(void* cam, StuntPart* p, const StuntCar* car) {
                 f32 fj = j;
                 f32 ang = 1.5707964f + 1.75f * ((fj - 1.0f) / 5.0f) + (k ? 3.1415927f : 0.0f);
                 if (p->sparkFlip) {
-                    ang = ang * -1.0f;
+                    ang *= -1.0f;
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) * 0.5f;
                 f32 sz = p->sizeZ * (f32)sin(ang) * 0.5f;
@@ -530,7 +530,7 @@ void fn_802AAF04(void* cam, StuntPart* p, const StuntCar* car) {
                 base.x = m.pos.x + m.rot[0].x * cx + m.rot[2].x * sz;
                 base.y = m.pos.y + m.rot[0].y * cx + m.rot[2].y * sz;
                 base.z = m.pos.z + m.rot[0].z * cx + m.rot[2].z * sz;
-                fj = fj * 0.25f;
+                fj *= 0.25f;
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
                     v[i] = base;

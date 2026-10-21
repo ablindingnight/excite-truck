@@ -522,7 +522,7 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 p.y = p.y + d.y;
                 p.z = p.z + d.z;
                 Scale(&v, &car->vel, 0.87f);
-                v.y = v.y + 3.0f;
+                v.y += 3.0f;
                 AddScaled(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
                 f32 s = 0.033333335f * w->speed;
                 v.x = v.x + fn_80287BC8(-s, s);

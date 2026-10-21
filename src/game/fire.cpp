@@ -937,7 +937,7 @@ void RingSlots::Add(int id, const Vec* p, const Vec* e1, const Vec* e2, s16 hint
         fn_801E9DD4(lbl_8055CA70, lbl_8055CA7C);
         for (int i = 0; i < 4; i++) {
             fn_801E9E30(&hint, &c[i]);
-            c[i].y = c[i].y + 0.03f;
+            c[i].y += 0.03f;
             s->pts[i] = c[i];
         }
         fn_801E9DD8();
@@ -1126,9 +1126,9 @@ void BigRingMan::Tick(BigRing* r, f32 now) {
             fn_8028E584(r->emitter, &p, &v);
             fn_80288A58(&p, &v);
         }
-        r->t = r->t + -0.75f;
+        r->t += -0.75f;
     } else {
-        r->t = r->t + 0.25f;
+        r->t += 0.25f;
     }
 }
 
