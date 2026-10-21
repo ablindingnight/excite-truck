@@ -835,8 +835,8 @@ void SunIntensityTMH::Swap(TObj* o) {
 
 void SunIntensityTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
-    set = 1;
     value = (u8)*(u32*)d / 255.0f;
+    set = 1;
 }
 
 void SunIntensityTMH::Apply(void) {
@@ -1105,13 +1105,16 @@ static inline void Mat3MulD(TMat3* out, const TMat3* l, const TMat3* r) {
 }
 
 void RotList::Draw(void* ctx) {
-    int i;
-    for (i = 0; i < count; i++) {
+    int i = 0;
+    if (count > 0) {
+    for (; i < count; i++) {
         Rot* r = &rots[i];
         TMtx m;
+        f32 c;
+        f32 s;
         f32 a = r->speed * fn_801E7E18();
-        f32 c = cos(a);
-        f32 s = sin(a);
+        c = cos(a);
+        s = sin(a);
         m.r.m[0][0] = c;
         m.r.m[0][1] = 0.0f;
         m.r.m[0][2] = -s;
@@ -1127,8 +1130,8 @@ void RotList::Draw(void* ctx) {
         m.t[2] = r->pos[2];
         fn_802CDAB4(ctx, r->id, &m);
     }
+    }
 }
-
 void XFadeList::Draw(void* ctx) {}
 
 void XFadeList::Draw2(void* ctx) {
