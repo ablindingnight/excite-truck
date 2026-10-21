@@ -769,7 +769,7 @@ struct Race {
 
 ModuleTag lbl_8055E368;
 UnkStaticFFFF lbl_8055E370;
-static UnkStatic123 lbl_80430358;
+static UnkStatic123s lbl_80430358;
 RingChalMaster* lbl_8055E378;
 
 void ResultsOverlay::Update(int score, int rings, int bonus) {

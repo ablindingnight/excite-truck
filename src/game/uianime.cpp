@@ -259,7 +259,7 @@ inline UiSpecialList::UiSpecialList(ValueTable* t) {
     }
 }
 
-UnkStatic123 lbl_80498650;
+UnkStatic123s lbl_80498650;
 
 ModuleTag lbl_8055F0A8;
 UiAnimList* lbl_8055F0B0;     // pending present anims

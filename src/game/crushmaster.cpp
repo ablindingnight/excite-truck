@@ -685,23 +685,6 @@ public:
     u8 b2B8;                   // offset 0x2B8
 };
 
-// UnkStatic123 without its last word.
-class UnkStatic123s {
-public:
-    UnkStatic123s(void) {
-        unk4 = 123;
-        unk0 = 0;
-        unk8 = 0;
-        unkC = 0;
-        unk10 = 0;
-    }
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-};
-
 ModuleTag lbl_8055E390;
 static UnkStatic123s lbl_80430378;
 UnkStaticFFFF lbl_8055E398;

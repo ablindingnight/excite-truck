@@ -47,6 +47,23 @@ public:
     u32 unk14;
 };
 
+// The 20-byte form of the (0, 123, 0, 0, 0) static (no trailing word), e.g. menu item terminators.
+class UnkStatic123s {
+public:
+    UnkStatic123s(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+};
+
 class ValueNode;
 
 // A parsed .val file (root): its entries are ValueNodes. Slot names are guesses.

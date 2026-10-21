@@ -1044,23 +1044,6 @@ static inline void LoadSound(Sound*& s, const char* name) {
     }
 }
 
-// Static object built by an inline constructor storing (0, 123, 0, 0, 0); 0x14 bytes here.
-class UnkStatic123s {
-public:
-    UnkStatic123s(void) {
-        unk4 = 123;
-        unk0 = 0;
-        unk8 = 0;
-        unkC = 0;
-        unk10 = 0;
-    }
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-};
-
 class Color {
 public:
     Color(u32 c) { rgba = c; }
