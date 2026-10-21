@@ -3492,6 +3492,16 @@ game/efxman.cpp:
 	.sbss       start:0x8055F6A8 end:0x8055F6D0
 	.sdata2     start:0x80564250 end:0x80564270
 
+game/smoke.cpp:
+	.text       start:0x802888D8 end:0x8028A664
+	.ctors      start:0x802ED4E0 end:0x802ED4E4
+	.rodata     start:0x802FA978 end:0x802FA998
+	.data       start:0x80348A90 end:0x80348B98
+	.bss        start:0x804B3220 end:0x804B3238
+	.sdata      start:0x8055C880 end:0x8055C8A0
+	.sbss       start:0x8055F6D0 end:0x8055F6E8
+	.sdata2     start:0x80564270 end:0x80564328
+
 game/sunflare.cpp:
 	.text       start:0x80291784 end:0x802924E8
 	.ctors      start:0x802ED4F0 end:0x802ED4F4
