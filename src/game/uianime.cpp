@@ -58,8 +58,8 @@ struct UiAnimKey {
 
 struct UiAnimTrack {
     UiAnimTrack(void) {
-        n = 0;
         id = -1;
+        n = 0;
         keys = 0;
     }
     ~UiAnimTrack(void) {

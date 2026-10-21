@@ -482,9 +482,9 @@ void LightStack::Init(void* b, u32 s) {
 }
 
 void LightStack::Align(s32 align) {
+    u8* b;
     s32 old = used;
     u32 pad = align - (old & (align - 1));
-    u8* b;
     if (pad < 0x30) {
         pad += align;
     }
