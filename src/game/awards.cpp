@@ -133,17 +133,15 @@ public:
     }
     virtual int PushInt(long v) {
         IntStatistic* s = (IntStatistic*)stat;
-        if (!s->IsNewRecord(v)) {
-            return 0;
+        if (s->IsNewRecord(v)) {
+            s->SetValue(v);
+            if (!best || best->IsNewRecord(v)) {
+                if (!best2 || best2->IsNewRecord(v)) {
+                    return 1;
+                }
+            }
         }
-        s->SetValue(v);
-        if (best && !best->IsNewRecord(v)) {
-            return 0;
-        }
-        if (best2 && !best2->IsNewRecord(v)) {
-            return 0;
-        }
-        return 1;
+        return 0;
     }
     IntStatistic* best;   // offset 0x8
     IntStatistic* best2;  // offset 0xC
@@ -161,17 +159,15 @@ public:
     }
     virtual int PushReal(f32 v) {
         RealStatistic* s = (RealStatistic*)stat;
-        if (!s->IsNewRecord(v)) {
-            return 0;
+        if (s->IsNewRecord(v)) {
+            s->SetValue(v);
+            if (!best || best->IsNewRecord(v)) {
+                if (!best2 || best2->IsNewRecord(v)) {
+                    return 1;
+                }
+            }
         }
-        s->SetValue(v);
-        if (best && !best->IsNewRecord(v)) {
-            return 0;
-        }
-        if (best2 && !best2->IsNewRecord(v)) {
-            return 0;
-        }
-        return 1;
+        return 0;
     }
     RealStatistic* best;   // offset 0x8
     RealStatistic* best2;  // offset 0xC
@@ -252,11 +248,6 @@ ModuleTag lbl_8055E878;
 u8 lbl_8055E880;
 AwardsMgr* lbl_8055E884;
 
-static const char* const lbl_802F9930[] = {
-    "live_update_value_excite",
-    "live_update_value_super",
-    "live_update_value_mirror",
-};
 
 #define Disabled() (OptE3Demo() || fn_80161C38())
 
@@ -524,6 +515,16 @@ StatHandler* fn_801CB954(u32 type, const StatDesc* d) {
     }
     }
 }
+
+}  // extern "C"
+
+static const char* const lbl_802F9930[] = {
+    "live_update_value_excite",
+    "live_update_value_super",
+    "live_update_value_mirror",
+};
+
+extern "C" {
 
 extern "C" void IL_Use(int k, ...);
 
@@ -1059,11 +1060,17 @@ void fn_801CE7A0(void) {
         delete AW_ART(m);
         AW_ART(m) = 0;
     }
-    for (int i = 0; i < 3; i++) {
-        if (AW_VOBJ(m, i)) {
-            delete AW_VOBJ(m, i);
-            AW_VOBJ(m, i) = 0;
-        }
+    if (AW_VOBJ(m, 0)) {
+        delete AW_VOBJ(m, 0);
+        AW_VOBJ(m, 0) = 0;
+    }
+    if (AW_VOBJ(m, 1)) {
+        delete AW_VOBJ(m, 1);
+        AW_VOBJ(m, 1) = 0;
+    }
+    if (AW_VOBJ(m, 2)) {
+        delete AW_VOBJ(m, 2);
+        AW_VOBJ(m, 2) = 0;
     }
 }
 
