@@ -184,8 +184,9 @@ static inline void Swap16(void* p) {
 }
 
 static inline void Swap32(void* p) {
+    u8 t;
     u8* b = (u8*)p;
-    u8 t = b[0];
+    t = b[0];
     b[0] = b[3];
     b[3] = t;
     t = b[1];
@@ -198,6 +199,35 @@ public:
     UnkStaticFF00(void) { value = 0xFF000000; }
     u32 value;
 };
+
+static inline void SwapUV(Glyph* g) {
+    u8* b = (u8*)&g->u0;
+    u8 t;
+    t = b[0];
+    b[0] = b[3];
+    b[3] = t;
+    t = b[1];
+    b[1] = b[2];
+    b[2] = t;
+    t = b[4];
+    b[4] = b[7];
+    b[7] = t;
+    t = b[5];
+    b[5] = b[6];
+    b[6] = t;
+    t = b[8];
+    b[8] = b[11];
+    b[11] = t;
+    t = b[9];
+    b[9] = b[10];
+    b[10] = t;
+    t = b[12];
+    b[12] = b[15];
+    b[15] = t;
+    t = b[13];
+    b[13] = b[14];
+    b[14] = t;
+}
 
 ModuleTag lbl_8055F038;
 
@@ -518,13 +548,16 @@ void fn_802321D8(void) {
 }
 
 void fn_80232230(void) {
+    EscSeq* e;
+    ValueTable* t;
+    ValueNode* n;
+    int i;
     lbl_80497F14.count = 0;
-    ValueTable* t = fn_80131810("esc_seq.val");
+    t = fn_80131810("esc_seq.val");
     if (t) {
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != NULL; i++) {
+        for (i = 0; (n = t->GetChild(i)) != NULL; i++) {
             if (strcasecmp(n->GetName(), "esc_seq") == 0) {
-                EscSeq* e = &lbl_80497F14.data[lbl_80497F14.count++];
+                e = &lbl_80497F14.data[lbl_80497F14.count++];
                 e->name = n->GetValue("seq");
                 if (n->Has("art") && n->Has("art_idx")) {
                     e->art = fn_8023512C(n->GetValue("art"));
@@ -579,18 +612,19 @@ Font* fn_80232578(const char* name) {
     }
     u8 ok = 0;
     u8 swapped = 0;
-    u32 version;
     u32 size = 0;
+    u32 version;
     Font* f = (Font*)fn_8012C370(name, 'GTEX', &version, &size, &ok, &swapped);
-    if (f == NULL) {
+    if (f != NULL) {
+        if (version != 8) {
+            fn_802E317C("gText: Font \"%s\" has bad version %d", name, version);
+        }
+        if (!ok) {
+            fn_802E317C("Duplicate fonts allocated (%s).  Why? How? Arrrrrrggggg.", name);
+        }
+    } else {
         fn_802E30C8("gText: Null font %s!", name);
         return NULL;
-    }
-    if (version != 8) {
-        fn_802E317C("gText: Font \"%s\" has bad version %d", name, version);
-    }
-    if (!ok) {
-        fn_802E317C("Duplicate fonts allocated (%s).  Why? How? Arrrrrrggggg.", name);
     }
     if (swapped) {
         Swap16(&f->count);
@@ -600,16 +634,13 @@ Font* fn_80232578(const char* name) {
         f->glyphs = (Glyph*)((u8*)f->glyphs + (u32)f);
         f->texName = (char*)((u8*)f->texName + (u32)f);
         for (int i = 0; i < f->count; i++) {
-            Swap32(&f->glyphs[i].u0);
-            Swap32(&f->glyphs[i].v0);
-            Swap32(&f->glyphs[i].u1);
-            Swap32(&f->glyphs[i].v1);
+            SwapUV(&f->glyphs[i]);
             Swap32(&f->glyphs[i].pre);
             Swap32(&f->glyphs[i].post);
             Swap32(&f->glyphs[i].width);
         }
     }
-    char tex[32];
+    char tex[24];
     strncpy(tex, name, 11);
     tex[11] = 0;
     strcat(tex, ".tex");
