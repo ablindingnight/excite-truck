@@ -3472,6 +3472,15 @@ game/sunflare.cpp:
 	.sbss       start:0x8055F750 end:0x8055F760
 	.sdata2     start:0x80564480 end:0x805644D0
 
+game/chunks.cpp:
+	.text       start:0x802924E8 end:0x80294970
+	.ctors      start:0x802ED4F4 end:0x802ED4F8
+	.data       start:0x80349170 end:0x803492D0
+	.bss        start:0x804B4030 end:0x804B42F0
+	.sdata      start:0x8055C950 end:0x8055C990
+	.sbss       start:0x8055F760 end:0x8055F768
+	.sdata2     start:0x805644D0 end:0x80564518
+
 game/stub12.cpp:
 	.text       start:0x80296058 end:0x802960A0
 	.ctors      start:0x802ED4FC end:0x802ED500

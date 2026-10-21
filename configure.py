@@ -1150,6 +1150,7 @@ config.libs.append(
             Object(Matching, "game/carrival.cpp"),
             Object(Matching, "game/carreg.cpp"),
             Object(NonMatching, "game/sunflare.cpp"),
+            Object(NonMatching, "game/chunks.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(NonMatching, "game/flipbook.cpp"),
             Object(NonMatching, "game/roadopac.cpp"),
