@@ -361,6 +361,7 @@ public:
 
 class GroundFire {
 public:
+    ~GroundFire(void) {}
     void Reset(void);
     void Update(void);
     void Toggle(int idx, int on);
@@ -964,9 +965,9 @@ void RingSlots::Update(void) {
     for (int i = 0; i < 4; i++) {
         RingSlot* s = &slots[i];
         if (s->state == 1) {
-            s->alpha = Clamp01(s->alpha + dt * 0.25f);
+            s->alpha = Clamp01(s->alpha + dt / 4.0f);
         } else if (s->state == 2) {
-            s->alpha = Clamp01(s->alpha + -dt * 0.25f);
+            s->alpha = Clamp01(s->alpha + -dt / 4.0f);
             if ((int)(255.0f * s->alpha) < 1) {
                 s->state = 0;
             }
@@ -1381,9 +1382,10 @@ void ExhaustTorchMan::Draw(void) {
 }
 
 void ExhaustTorchMan::Set(int i, const TorchPart* part) {
+    const FireCar* c;
     TorchEntry* e = &entries[i];
     if (part) {
-        const FireCar* c = fn_80287B24(i);
+        c = fn_80287B24(i);
         fn_801BFD34(&e->pos, &part->pos, c);
         Mat3Mul((Mat3*)e->rot, &part->rot, (const Mat3*)c);
         e->len = 0.1625f * sizes[i] * (1.0f + fn_80287BC8(-0.35f, 0.35f));
@@ -1595,7 +1597,7 @@ void TorchFireMan::Update(void) {
     v.y = 0.0f;
     v.z = 0.0f;
     TorchFire* t = entries;
-    for (int i = 0; i < count; i++, t++) {
+    for (int i = 0; i < count; t++, i++) {
         if (t->on) {
             fn_80288A58((const Vec*)&t->pos, &v);
             fn_8028E584(emitter, (const Vec*)&t->pos, &v);
@@ -1665,7 +1667,7 @@ void fn_8029C084(FireCarEntry* e, int n) {
     if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
         return;
     }
-    for (int i = 0; i < n; i++, e++) {
+    for (int i = 0; i < n; e++, i++) {
         FireCar* car;
         s32 idx;
         u8 on;
