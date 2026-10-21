@@ -2923,6 +2923,16 @@ game/fabric.cpp:
 	.sbss       start:0x8055EC08 end:0x8055EC28
 	.sdata2     start:0x80562FB0 end:0x80562FF0
 
+game/trackobj.cpp:
+	.text       start:0x801F7A0C end:0x801FC8A8
+	.ctors      start:0x802ED350 end:0x802ED354
+	.rodata     start:0x802F9B30 end:0x802F9BC0
+	.data       start:0x8033AF80 end:0x8033B5C8
+	.bss        start:0x80488898 end:0x804888A8
+	.sdata      start:0x8055B1C8 end:0x8055B3C8
+	.sbss       start:0x8055EC28 end:0x8055EC80
+	.sdata2     start:0x80562FF0 end:0x80563028
+
 game/trackgrf.cpp:
 	.text       start:0x801FC8A8 end:0x801FC914
 	.ctors      start:0x802ED354 end:0x802ED358
