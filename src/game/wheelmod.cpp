@@ -151,14 +151,6 @@ struct Wheel {
     f32 spin;         // offset 0x48
 };
 
-static inline int IsLeft(int index) {
-    int r = 0;
-    if (index == 0 || index == 2) {
-        r = 1;
-    }
-    return r;
-}
-
 static inline void Identity(ValMatrix* m) {
     m->basis[0].x = 1.0f;
     m->basis[0].y = 0.0f;
@@ -433,10 +425,14 @@ void fn_801F0CC4(void) {
 
 Wheel* fn_801F0DC0(Wheel* w, const char* cls, s32 car, s32 index) {
     w->cls = fn_801F09FC(cls);
-    w->state = 0;
+    int left = 0;
+    w->state = left;
     w->car = car;
     w->index = index;
-    w->side = !IsLeft(index);
+    if (index == 0 || index == 2) {
+        left = 1;
+    }
+    w->side = !left;
     w->detached = 0;
     Identity(&w->mtx);
     fn_801F1878(w);

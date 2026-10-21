@@ -754,7 +754,7 @@ public:
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
-    virtual void vf14(void) {}
+    virtual void vf14(int p) {}
     virtual void vf18(void) {}
     virtual int vf1C(int car) { return vf20(car); }
     virtual int vf20(int car) = 0;
@@ -780,21 +780,21 @@ public:
     virtual void vf70(void) {}
     virtual void vf74(void) {}
     virtual void vf78(void) {}
-    virtual int vf7C(void) { return 0; }
+    virtual int vf7C(int p) { return 0; }
     virtual int vf80(void) { return 0; }
     virtual int vf84(void) { return 0; }
     virtual int vf88(void) { return 0; }
     virtual int vf8C(int p, int key);
-    virtual void vf90(void) {}
-    virtual void vf94(void) {}
+    virtual void vf90(int a, int b, int c, int d) {}
+    virtual void vf94(int p) {}
     virtual void vf98(void);
-    virtual void vf9C(void) {}
+    virtual void vf9C(int p, int type) {}
     virtual int vfA0(struct Cam* cam);
-    virtual void vfA4(void) {}
+    virtual void vfA4(int p) {}
     virtual void vfA8(int car);
     virtual void vfAC(int car);
-    virtual int vfB0(void) { return 0; }
-    virtual void vfB4(void) {}
+    virtual int vfB0(int a, int b, int c) { return 0; }
+    virtual void vfB4(int car, struct Damage* d) {}
     virtual void vfB8(struct ZoneResults* r) = 0;
     virtual int vfBC(void) { return 0; }
     virtual void vfC0(void);

@@ -2,6 +2,12 @@
 // here uses any more. Names are guesses.
 #include "game/common.h"
 
+// The game mode base (amaster.cpp); its empty vf44 lives here.
+class GameMode {
+public:
+    void vf44(void);
+};
+
 extern "C" {
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
@@ -82,6 +88,6 @@ int fn_80160C18(void) { return 0; }
 
 f32 fn_80160C20(void) { return 5.0f; }
 
-void fn_80160C28(void) {}
+void GameMode::vf44(void) {}
 
 }  // extern "C"

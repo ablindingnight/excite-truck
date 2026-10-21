@@ -3,6 +3,12 @@
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
 
+// The game mode base (amaster.cpp); its vfEC lives here.
+class GameMode {
+public:
+    int vfEC(void);
+};
+
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);
 char* strcpy(char* d, const char* s);
@@ -440,7 +446,7 @@ IDriver* fn_80134EC8(u32 type) {
     return d;
 }
 
-int fn_80134F40(void) { return 0; }
+int GameMode::vfEC(void) { return 0; }
 
 void* fn_80134F48(void) {
     LocalCarDesc* desc = fn_801769CC();

@@ -46,9 +46,10 @@ struct RaceSetup {
     u32 type;   // offset 0x3E8
 };
 
-class GameMode {
+// The game mode interface; GameMode inherits these slots from it.
+class GameUI {
 public:
-    virtual ~GameMode(void) {}
+    virtual ~GameUI(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(int p);
@@ -110,6 +111,65 @@ public:
     virtual void vfF4(void);
     virtual void vfF8(void);
     virtual void vfFC(void);
+};
+
+class GameMode : public GameUI {
+public:
+    virtual ~GameMode(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(int p);
+    virtual void vf18(void);
+    virtual int vf1C(int car);
+    virtual int vf20(int car);
+    virtual int vf24(void);
+    virtual int vf28(int car);
+    virtual int vf2C(int car);
+    virtual int vf30(void);
+    virtual int vf34(void);
+    virtual f32 vf38(void);
+    virtual int vf3C(int p);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(int p);
+    virtual void vf6C(void);
+    virtual void vf70(void);
+    virtual void vf74(void);
+    virtual void vf78(void);
+    virtual int vf7C(int p);
+    virtual int vf80(void);
+    virtual int vf84(void);
+    virtual int vf88(void);
+    virtual int vf8C(int p, int key);
+    virtual void vf90(int a, int b, int c, int d);
+    virtual void vf94(int p);
+    virtual void vf98(int a, int b);
+    virtual void vf9C(int p, int type);
+    virtual int vfA0(int a, int b, int c);
+    virtual void vfA4(int p);
+    virtual void vfA8(int a, int b);
+    virtual void vfAC(int car);
+    virtual int vfB0(int a, int b, int c);
+    virtual void vfB4(int car, Damage* d);
+    virtual void vfB8(int p);
+    virtual int vfBC(void);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual void vfC8(void);
+    virtual int vfCC(void);
+    virtual int vfD0(void);
+    virtual int vfD4(int car);
+    virtual int vfD8(void);
+    virtual int vfDC(void);
+    virtual int vfE0(void);
+    virtual int vfE4(void);
+    virtual void* vfE8(void);
+    virtual int vfEC(void);
+    virtual int vfF0(void);
+    virtual void vfF4(void);
 
     int Collide(int a, int b);
     int Started1C(int car);
@@ -217,7 +277,7 @@ void fn_801B841C(void) {
     lbl_8055E744->vf0C();
     fn_80161A18();
     if (lbl_8055E744->vf24()) {
-        lbl_8055E750 += 0.016683417f;
+        lbl_8055E750 += 0.016683351f;
     } else {
         lbl_8055E750 = 0.0f;
     }
@@ -290,7 +350,7 @@ int fn_801B87A0(int p, int key) {
     return lbl_8055E744->vf8C(p, key);
 }
 
-int fn_801B8804(void) { return 0; }
+int GameMode::vf8C(int p, int key) { return 0; }
 
 int fn_801B880C(void) { return lbl_8055E744->vf84(); }
 

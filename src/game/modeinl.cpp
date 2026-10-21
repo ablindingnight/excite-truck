@@ -132,6 +132,9 @@ extern "C" int fn_modeinl_Consts(f32 x) {
 
 class GameMode {
 public:
+    int vf3C(int p);
+    void vf50(int p);
+    void* vfE8(void);
     GameMode(void);
     virtual ~GameMode(void);
 };
@@ -216,11 +219,11 @@ void fn_80144DAC(Vec3* d, const Vec3* s) {
 
 void fn_80144DC8(void) {}
 
-int fn_80144DCC(void) { return 0; }
+int GameMode::vf3C(int p) { return 0; }
 
-void fn_80144DD4(void) {}
+void GameMode::vf50(int p) {}
 
-int fn_80144DD8(void) { return 0; }
+void* GameMode::vfE8(void) { return 0; }
 
 }  // extern "C"
 

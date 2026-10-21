@@ -233,7 +233,7 @@ public:
     virtual void vf94(struct RaceCarRec* rc) {}
     virtual void vf98(void);
     virtual void vf9C(struct RaceCarRec* rc, int type) {}
-    virtual int vfA0(void* cam);
+    virtual int vfA0(int a, int b, int c);
     virtual void vfA4(struct RaceCarRec* rc) {}
     virtual void vfA8(int a, int b);
     virtual void vfAC(int car);
@@ -1234,7 +1234,6 @@ public:
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
     virtual void vf94(RaceCarRec* rc);
     virtual void vf9C(RaceCarRec* rc, int type);
-    virtual int vfA0(void* cam);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vfA8(int a, int b);
     virtual void vfB8(void* r) {
@@ -4183,7 +4182,7 @@ void BetaMaster::vf40(void) {
     }
 }
 
-int BetaMaster::vfA0(void* cam) { return 0; }
+int GameMode::vfA0(int a, int b, int c) { return 0; }
 
 void BetaMaster::vfC0(void) {}
 
