@@ -136,7 +136,7 @@ s32 lbl_8055F93C;  // cached animation count
 s32 lbl_8055F940;  // debug selection
 u32 lbl_8055F944;  // debug start time
 u32 lbl_8055F948;  // debug pause offset
-u8 lbl_8055F94C;   // debug clock running
+bool lbl_8055F94C;  // debug clock running
 ArtAnim* lbl_804BD7C0[64];
 
 extern "C" {
@@ -317,8 +317,7 @@ int fn_802ADCF8(int key) {
     }
     case ']': {
         int last = lbl_8055F93C - 1;
-        int next = lbl_8055F940 + 1;
-        lbl_8055F940 = last < next ? last : next;
+        lbl_8055F940 = MIN(last, lbl_8055F940 + 1);
         return 1;
     }
     case '"':
@@ -326,7 +325,7 @@ int fn_802ADCF8(int key) {
         lbl_8055F948 = 0;
         return 1;
     case '\'':
-        lbl_8055F94C = lbl_8055F94C == 0;
+        lbl_8055F94C = !lbl_8055F94C;
         if (lbl_8055F94C) {
             lbl_8055F948 = fn_802E2C20() - lbl_8055F944;
         }
