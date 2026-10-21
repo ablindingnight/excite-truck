@@ -3502,6 +3502,15 @@ game/smoke.cpp:
 	.sbss       start:0x8055F6D0 end:0x8055F6E8
 	.sdata2     start:0x80564270 end:0x80564328
 
+game/sparks.cpp:
+	.text       start:0x8028A664 end:0x8028CED8
+	.ctors      start:0x802ED4E4 end:0x802ED4E8
+	.data       start:0x80348B98 end:0x80348C50
+	.bss        start:0x804B3238 end:0x804B3400
+	.sdata      start:0x8055C8A0 end:0x8055C8C8
+	.sbss       start:0x8055F6E8 end:0x8055F708
+	.sdata2     start:0x80564328 end:0x805643E8
+
 game/skid.cpp:
 	.text       start:0x8028CED8 end:0x8028DF58
 	.ctors      start:0x802ED4E8 end:0x802ED4EC
