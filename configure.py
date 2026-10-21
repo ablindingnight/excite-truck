@@ -1103,7 +1103,7 @@ config.libs.append(
             Object(NonMatching, "game/uianime.cpp"),
             Object(Matching, "game/uitext.cpp"),
             Object(NonMatching, "game/swfanim.cpp"),
-            Object(NonMatching, "game/stub19.cpp"),
+            Object(Matching, "game/stub19.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/gamedo.cpp"),
