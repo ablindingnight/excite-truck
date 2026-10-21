@@ -73,7 +73,18 @@ struct BackNode {
 };
 
 ModuleTag lbl_8055F008;
-static UnkStatic123 lbl_80497E28;
+class GBackStatic20 {
+public:
+    GBackStatic20(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    u32 unk0, unk4, unk8, unkC, unk10;
+};
+static GBackStatic20 lbl_80497E28;
 UnkStatic7F lbl_8055F010;
 BackNode* lbl_8055F014;     // the backgrounds
 Background lbl_80497E3C;    // the state of the last freed background
@@ -281,7 +292,9 @@ void fn_8022F8CC(Background* bg) {
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
     BMtx cm;
     BMtx m = bg->mtx;
-    fn_8022F868(&cm, &m);
+    const BMtx* in = &m;
+    BMtx* out = &cm;
+    fn_8022F868(out, in);
     fn_802C8B98(bg->tex, &cm);
     fn_802C8DB8(verts, 4, idx, 6);
     fn_802C8D74();
