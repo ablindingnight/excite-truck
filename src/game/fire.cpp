@@ -534,7 +534,6 @@ void fn_80297DC8(FireDesc* e) {
     e->c1 = FColor(1.0f, 1.0f, 1.0f);
     e->gravity = 0.0f;
     e->life = -0.05f;
-    e->frames = 2;
     e->grow = 1.0f;
     e->fade = 1.25f;
     e->spinMin = -3.0f;
@@ -548,6 +547,7 @@ void fn_80297DC8(FireDesc* e) {
     e->a80 = 1.0f;
     e->i84 = 0x40;
     e->b88 = 1;
+    e->frames = 2;
     e->b89 = 1;
 }
 
@@ -1064,7 +1064,6 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     e.c1 = FColor(1.0f, 1.0f, 1.0f);
     e.gravity = 0.0f;
     e.life = -0.05f;
-    e.frames = 2;
     e.grow = 0.75f;
     e.fade = 0.35f;
     e.spinMin = -3.0f;
@@ -1078,6 +1077,7 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     e.a80 = 1.0f;
     e.i84 = 0x40;
     e.b88 = 1;
+    e.frames = 2;
     e.b89 = 1;
     r->emitter = fn_8028E2F8(&e, "ring fire", lbl_8055CA80);
     int n = MIN((int)(4.0f * radius), 12);
@@ -1175,11 +1175,10 @@ void GroundFire::Toggle(int idx, int on) {
 }
 
 int GroundFire::Moved(const FireCar* c) {
+    f32 lim = 0.25f;
     int moved = 1;
-    if (PSVECSquareDistance(&m.pos, &c->pos) <= 0.25f) {
-        if (!(PSVECDotProduct(&m.rot[0], &c->axes[0]) < 0.9659258f)) {
-            moved = 0;
-        }
+    if (!(PSVECSquareDistance(&m.pos, &c->pos) > lim) && !(PSVECDotProduct(&m.rot[0], &c->axes[0]) < 0.9659258f)) {
+        moved = 0;
     }
     return moved;
 }
@@ -1217,7 +1216,6 @@ void GroundFire::Start(int idx) {
 }
 
 void GroundFire::Refresh(const FireCar* c) {
-    m = *(const FireMtx*)c;
     Vec p;
     Vec e1;
     Vec e2;
@@ -1230,6 +1228,7 @@ void GroundFire::Refresh(const FireCar* c) {
     e2.x = 0.0f;
     e2.y = 0.0f;
     e2.z = 0.0f;
+    m = *(const FireMtx*)c;
     Corners(&p, &e1, &e2);
     lbl_8055F7C0->Move(ring, &p, &e1, &e2, c->hint);
 }
@@ -1304,11 +1303,11 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
                 off.x = vel->x * f;
                 off.y = vel->y * f + -0.5f * (f * f);
                 off.z = vel->z * f;
-                for (int j = 0; j < 2; j++) {
+                for (u32 j = 0; j < 2; j++) {
                     Vec p;
-                    p.x = e->pts[j].x + off.x;
-                    p.y = e->pts[j].y + off.y;
-                    p.z = e->pts[j].z + off.z;
+                    p.x = off.x + e->pts[j].x;
+                    p.y = off.y + e->pts[j].y;
+                    p.z = off.z + e->pts[j].z;
                     fn_8028E584(emitter, &p, vel);
                 }
             }
@@ -1516,7 +1515,11 @@ BackfireMan::~BackfireMan(void) {
 
 void BackfireMan::Reset(void) {
     for (int i = 0; i < fn_80287B14(); i++) {
-        entries[i].state = fn_80288208(i)->nParts > 0 ? 1 : 0;
+        if (fn_80288208(i)->nParts > 0) {
+            entries[i].state = 1;
+        } else {
+            entries[i].state = 0;
+        }
         entries[i].d = 0;
     }
     torch->Reset();
@@ -1591,10 +1594,11 @@ void TorchFireMan::Update(void) {
     v.x = 0.0f;
     v.y = 0.0f;
     v.z = 0.0f;
-    for (int i = 0; i < count; i++) {
-        if (entries[i].on) {
-            fn_80288A58((const Vec*)&entries[i].pos, &v);
-            fn_8028E584(emitter, (const Vec*)&entries[i].pos, &v);
+    TorchFire* t = entries;
+    for (int i = 0; i < count; i++, t++) {
+        if (t->on) {
+            fn_80288A58((const Vec*)&t->pos, &v);
+            fn_8028E584(emitter, (const Vec*)&t->pos, &v);
         }
     }
 }
@@ -1621,7 +1625,6 @@ void TorchFireMan::InitEmitter(void) {
     e.c1 = FColor(1.0f, 1.0f, 1.0f);
     e.gravity = 0.0f;
     e.life = -0.05f;
-    e.frames = 2;
     e.grow = 0.5f;
     e.fade = 0.2f;
     e.spinMin = -3.0f;
@@ -1635,6 +1638,7 @@ void TorchFireMan::InitEmitter(void) {
     e.a80 = 1.0f;
     e.i84 = 0x40;
     e.b88 = 1;
+    e.frames = 2;
     e.b89 = 1;
     emitter = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
 }
@@ -1662,9 +1666,12 @@ void fn_8029C084(FireCarEntry* e, int n) {
         return;
     }
     for (int i = 0; i < n; i++, e++) {
-        u8 on = e->active;
-        s32 idx = e->index;
-        FireCar* car = e->car;
+        FireCar* car;
+        s32 idx;
+        u8 on;
+        on = e->active;
+        idx = e->index;
+        car = e->car;
         lbl_8055F7C8->Set(idx, on && car->state == 11);
         lbl_8055F7D8->Tick(idx, on);
         if (lbl_8055F7D0) {
