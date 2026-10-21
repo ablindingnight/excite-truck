@@ -134,7 +134,7 @@ PSys::PSys(int nPart, int nStick, int nAnchor, int nLink) {
     int ab = nAnchor * sizeof(PAnchor);
     maxAnchor = nAnchor;
     maxLink = nLink;
-    mem = new ("psys_mem") u8[sb + ab + (nLink * sizeof(PLink) + nPart * 0x30)];
+    mem = new ("psys_mem") u8[ab + sb + (nLink * sizeof(PLink) + nPart * 0x30)];
     u8* p = mem;
     pos = (RVec3*)p;
     p += nPart * sizeof(RVec3);

@@ -567,9 +567,9 @@ void PanelVol::Init(BodyDesc* d) {
     desc.size = sizeof(desc);
     desc.kind = d->kind;
     desc.mass = 45.45f;
-    desc.ix = 4.22799f;
-    desc.iy = 4.22799f;
-    desc.iz = 4.22799f;
+    desc.ix = 4.227986812591553f;
+    desc.iy = 4.227986812591553f;
+    desc.iz = 4.227986812591553f;
     RigidBody::Init(&desc);
     f1FC = 0.0f;
     f200 = 0.0f;
@@ -583,7 +583,8 @@ void PanelVol::Init(BodyDesc* d) {
     void* mem = operator new(0x34, "panelvol");
     CollShape* s = (CollShape*)mem;
     if (mem) {
-        s = fn_801A25F8(mem, &mtx, strip, this, 0.25f);
+        f32 scale = 0.25f;
+        s = fn_801A25F8(mem, &mtx, strip, this, scale);
     }
     AddShape(s);
     b1E8 = 0;
