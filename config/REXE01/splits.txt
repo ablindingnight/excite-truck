@@ -2906,6 +2906,15 @@ game/wheelmod.cpp:
 	.sbss       start:0x8055EBE0 end:0x8055EBF8
 	.sdata2     start:0x80562F10 end:0x80562F40
 
+game/trackmod.cpp:
+	.text       start:0x801F1C24 end:0x801F4CD8
+	.ctors      start:0x802ED348 end:0x802ED34C
+	.rodata     start:0x802F9B20 end:0x802F9B30
+	.data       start:0x8033A610 end:0x8033AC68
+	.sdata      start:0x8055B118 end:0x8055B160
+	.sbss       start:0x8055EBF8 end:0x8055EC08
+	.sdata2     start:0x80562F40 end:0x80562FB0
+
 game/trackgrf.cpp:
 	.text       start:0x801FC8A8 end:0x801FC914
 	.ctors      start:0x802ED354 end:0x802ED358
