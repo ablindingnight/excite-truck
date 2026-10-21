@@ -552,13 +552,17 @@ void fn_8028ADF4(SparkEntry* e, int n) {
     }
 }
 
-void fn_8028B3CC(void) {
-    const char* tex = "splash.tex";
+static inline int PaintOn(void) {
     int on = 0;
     if ((lbl_8055D430 & 1) && (lbl_8055D430 & 8)) {
         on = 1;
     }
-    if (on) {
+    return on;
+}
+
+void fn_8028B3CC(void) {
+    const char* tex = "splash.tex";
+    if (PaintOn()) {
         SparkDesc e;
         fn_8028E61C(&e);
         e.max = 0x80;
@@ -657,9 +661,11 @@ int fn_8028B93C(const void* evp) {
     const SparkEv* ev = (const SparkEv*)evp;
     Vec v;
     Vec p;
+    f32 s;
+    int i;
     Scale(&v, &ev->vel, 0.5f);
-    f32 s = 0.05f * PSVECMag(&v);
-    for (int i = 0; i < 2; i++) {
+    s = 0.05f * PSVECMag(&v);
+    for (i = 0; i < 2; i++) {
         SetVec(&p, ev->pos.x + fn_80287BC8(-0.15f, 0.15f), ev->pos.y + fn_80287BC8(-0.15f, 0.15f),
                ev->pos.z + fn_80287BC8(-0.15f, 0.15f));
         lbl_8055F6F0->Emit(1, &p, &v, s);
