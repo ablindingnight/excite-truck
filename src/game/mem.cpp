@@ -264,12 +264,12 @@ void operator delete[](void* p) { fn_80128584(p, 0); }
 extern "C" {
 
 // Stripped from ET; only their strings remain.
-void* malloc(size_t size) {
+void* MemStrippedMalloc(size_t size) {
     fn_802E317C("Do not use malloc()");
     return 0;
 }
 
-void free(void* p) { fn_802E317C("Do not use free()"); }
+void MemStrippedFree(void* p) { fn_802E317C("Do not use free()"); }
 
 void fn_80128678(void) { lbl_8055DF88 = 1; }
 
