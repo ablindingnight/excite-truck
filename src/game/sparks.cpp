@@ -233,6 +233,36 @@ struct Spark {
     f32 t;    // offset 0x18
 };
 
+struct XVec {
+    f32 v[3];
+};
+
+struct Explosion {
+    f32 t;            // offset 0x0
+    XVec pos;         // offset 0x4
+    FXSequence* seq;  // offset 0x10
+};
+
+struct ExplosionSet {
+    Explosion ex[16];  // offset 0x0
+    s32 count;         // offset 0x140
+};
+
+struct ImpactEv {
+    Vec vel;      // offset 0x0
+    Vec pos;      // offset 0xC
+    Vec v18;      // offset 0x18
+    Vec normal;   // offset 0x24
+    s32 car;      // offset 0x30
+    s32 terrain;  // offset 0x34
+};
+
+struct SparkEv {
+    Vec vel;  // offset 0x0
+    Vec pos;  // offset 0xC
+    u8 pad18[0x20 - 0x18];
+};
+
 class SparkSys {
 public:
     SparkSys(int n, f32 life);
@@ -290,32 +320,6 @@ struct TerChunk {
     s32 rnd;        // offset 0xC
 };
 
-struct Explosion {
-    f32 t;            // offset 0x0
-    ValVec3 pos;      // offset 0x4
-    FXSequence* seq;  // offset 0x10
-};
-
-struct ExplosionSet {
-    Explosion ex[16];  // offset 0x0
-    u32 count;         // offset 0x140
-};
-
-struct ImpactEv {
-    Vec vel;      // offset 0x0
-    Vec pos;      // offset 0xC
-    Vec v18;      // offset 0x18
-    Vec normal;   // offset 0x24
-    s32 car;      // offset 0x30
-    s32 terrain;  // offset 0x34
-};
-
-struct SparkEv {
-    Vec vel;  // offset 0x0
-    Vec pos;  // offset 0xC
-    u8 pad18[0x20 - 0x18];
-};
-
 ModuleTag lbl_8055F6E8;
 SparkSys* lbl_8055F6F0;    // short sparks
 SparkSys* lbl_8055F6F4;    // long sparks
@@ -333,11 +337,11 @@ void fn_8028AD78(void);
 void fn_8028B3CC(void);
 void fn_8028B4CC(void);
 void fn_8028AB14(void);
-int fn_8028B93C(const void* ev);
-int fn_8028B500(const void* ev);
-int fn_8028BA44(const void* ev);
-int fn_8028BA9C(const void* ev);
-int fn_8028BB14(const void* ev);
+int fn_8028B93C(const SparkEv* ev);
+int fn_8028B500(const ImpactEv* ev);
+int fn_8028BA44(const SparkEv* ev);
+int fn_8028BA9C(const SparkEv* ev);
+int fn_8028BB14(const SparkEv* ev);
 
 void fn_8028A664(void) {
     lbl_8055F6F0 = new ("short sparks") SparkSys(0x80, 0.5f);
@@ -348,28 +352,26 @@ void fn_8028A664(void) {
     lbl_804B32B8.count = 0;
     fn_8028ABE8();
     fn_8028B3CC();
-    fn_801EEFDC(fn_8028B93C, 0);
-    fn_801EEFDC(fn_8028B500, 1);
-    fn_801EEFDC(fn_8028BA44, 2);
-    fn_801EEFDC(fn_8028BA9C, 7);
-    fn_801EEFDC(fn_8028BB14, 8);
+    fn_801EEFDC((int (*)(const void*))fn_8028B93C, 0);
+    fn_801EEFDC((int (*)(const void*))fn_8028B500, 1);
+    fn_801EEFDC((int (*)(const void*))fn_8028BA44, 2);
+    fn_801EEFDC((int (*)(const void*))fn_8028BA9C, 7);
+    fn_801EEFDC((int (*)(const void*))fn_8028BB14, 8);
 }
 
 void fn_8028A784(void) {
-    fn_801EF024(fn_8028BB14);
-    fn_801EF024(fn_8028BA9C);
-    fn_801EF024(fn_8028BA44);
-    fn_801EF024(fn_8028B500);
-    fn_801EF024(fn_8028B93C);
+    fn_801EF024((int (*)(const void*))fn_8028BB14);
+    fn_801EF024((int (*)(const void*))fn_8028BA9C);
+    fn_801EF024((int (*)(const void*))fn_8028BA44);
+    fn_801EF024((int (*)(const void*))fn_8028B500);
+    fn_801EF024((int (*)(const void*))fn_8028B93C);
     fn_8028B4CC();
     fn_8028AD78();
     if (lbl_8055F700) {
         lbl_8055F700->Free();
     }
     lbl_8055F700 = 0;
-    if (lbl_8055F6FC) {
-        delete lbl_8055F6FC;
-    }
+    delete lbl_8055F6FC;
     lbl_8055F6FC = 0;
     delete lbl_8055F6F8;
     lbl_8055F6F8 = 0;
@@ -426,9 +428,9 @@ void fn_8028A9F4(void) {
 }
 
 void fn_8028AA6C(const Vec* pos, FXSequence* seq, f32 scale) {
-    if (seq && lbl_804B32B8.count < 16) {
+    if (seq && (u32)lbl_804B32B8.count < 16) {
         lbl_804B32B8.ex[lbl_804B32B8.count].t = fn_801E7E18();
-        lbl_804B32B8.ex[lbl_804B32B8.count].pos = *(const ValVec3*)pos;
+        *(ValVec3*)&lbl_804B32B8.ex[lbl_804B32B8.count].pos = *(const ValVec3*)pos;
         lbl_804B32B8.ex[lbl_804B32B8.count].seq = seq;
         lbl_804B32B8.count++;
     }
@@ -438,7 +440,7 @@ void fn_8028AB14(void) {
     f32 now = fn_801E7E18();
     Explosion* e = lbl_804B32B8.ex;
     for (int i = 0; i < lbl_804B32B8.count;) {
-        if (!e->seq->Play(now - e->t, &e->pos)) {
+        if (!e->seq->Play(now - e->t, (const ValVec3*)&e->pos)) {
             Explosion* last = &lbl_804B32B8.ex[--lbl_804B32B8.count];
             e->t = last->t;
             e->pos = last->pos;
@@ -593,8 +595,7 @@ void fn_8028B4CC(void) {
     }
 }
 
-int fn_8028B500(const void* evp) {
-    const ImpactEv* ev = (const ImpactEv*)evp;
+int fn_8028B500(const ImpactEv* ev) {
     f32 mag = PSVECMag(&ev->v18);
     int n = MIN(MAX((int)(0.002f * mag), 0), 0x60);
     s16 hint = fn_80287B24(ev->car)->hint;
@@ -650,8 +651,7 @@ int fn_8028B500(const void* evp) {
     return 0x38;
 }
 
-int fn_8028B93C(const void* evp) {
-    const SparkEv* ev = (const SparkEv*)evp;
+int fn_8028B93C(const SparkEv* ev) {
     Vec v;
     Vec p;
     Scale(&v, &ev->vel, 0.5f);
@@ -665,8 +665,7 @@ int fn_8028B93C(const void* evp) {
     return 0x20;
 }
 
-int fn_8028BA44(const void* evp) {
-    const SparkEv* ev = (const SparkEv*)evp;
+int fn_8028BA44(const SparkEv* ev) {
     Vec v;
     v.x = 0.0f;
     v.y = 0.0f;
@@ -676,16 +675,14 @@ int fn_8028BA44(const void* evp) {
     return 0x14;
 }
 
-int fn_8028BA9C(const void* evp) {
-    const SparkEv* ev = (const SparkEv*)evp;
+int fn_8028BA9C(const SparkEv* ev) {
     Vec v;
     Scale(&v, &ev->pos, 0.05f);
     lbl_8055F6F8->Emit(fn_80287B94(0x18, 0x30), &ev->vel, &v, 6.0f);
     return 0x1C;
 }
 
-int fn_8028BB14(const void* evp) {
-    const SparkEv* ev = (const SparkEv*)evp;
+int fn_8028BB14(const SparkEv* ev) {
     for (int i = 0; i < 20; i++) {
         fn_8028E584(lbl_8055F704, &ev->vel, &ev->pos);
     }
@@ -750,7 +747,9 @@ void SparkSys::Draw(void) {
 
 void SparkSys::Emit(int n, const Vec* pos, const Vec* vel, f32 spread) {
     f32 now = fn_801E7E18();
-    int k = MIN(MAX(n, 0), max - count);
+    int room = max - count;
+    int m = MAX(n, 0);
+    int k = MIN(m, room);
     for (int i = 0; i < k; i++) {
         Spark* s = &pts[count + i];
         s->pos.x = pos->x;
@@ -941,7 +940,9 @@ void ShardSys::Draw(void) {
 
 void ShardSys::Emit(int n, const Vec* pos, const Vec* vel, f32 spread) {
     f32 now = fn_801E7E18();
-    int k = MIN(MAX(n, 0), max - count);
+    int room = max - count;
+    int m = MAX(n, 0);
+    int k = MIN(m, room);
     for (int i = 0; i < k; i++) {
         Shard* s = &pts[count + i];
         s->pos.x = pos->x;
