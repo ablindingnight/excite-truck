@@ -60,11 +60,12 @@ void operator delete(void* p);
 // A fixed-capacity array over storage the owner provides.
 template <class T> struct FixedVec {
     FixedVec& operator=(const FixedVec& o) {
-        if (this != &o) {
-            n = o.n;
-            if (cap < n) {
-                n = cap;
+        if (&o != this) {
+            int c = o.n;
+            if (cap < c) {
+                c = cap;
             }
+            n = c;
             for (int i = 0; i < n; i++) {
                 data[i] = o.data[i];
             }
