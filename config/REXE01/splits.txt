@@ -2537,6 +2537,15 @@ game/alarm.cpp:
 	.data       start:0x80336990 end:0x803369A0
 	.sbss       start:0x8055E758 end:0x8055E768
 
+game/trailer.cpp:
+	.text       start:0x801B8CC0 end:0x801BA088
+	.ctors      start:0x802ED27C end:0x802ED280
+	.data       start:0x803369A0 end:0x80336A50
+	.bss        start:0x80436D28 end:0x80436D48
+	.sdata      start:0x8055A918 end:0x8055A920
+	.sbss       start:0x8055E768 end:0x8055E778
+	.sdata2     start:0x80562750 end:0x805627A8
+
 game/dmginfo.cpp:
 	.text       start:0x801CEC80 end:0x801CEFAC
 	.ctors      start:0x802ED298 end:0x802ED29C
