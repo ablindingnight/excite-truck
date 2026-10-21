@@ -1082,6 +1082,8 @@ void fn_801E89FC(void) {
     lbl_804881D8[3] = fn_80129DC4(0, 0.0f, 3.0f);
 }
 
+static inline f32 WindHalf(f32 half, f32 delta) { return delta * half; }
+
 static inline f32 Sign(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 
 void fn_801E8A84(void) {
@@ -1089,12 +1091,12 @@ void fn_801E8A84(void) {
     lbl_804881D8[1] += fn_80129DC4(0, -0.05f, 0.05f);
     lbl_804881D8[2] += fn_80129DC4(0, -0.05f, 0.05f);
     if (lbl_804881D8[1] > 0.33f) {
-        f32 e = 0.5f * (lbl_804881D8[1] - 0.33f);
+        f32 e = WindHalf(0.5f, (lbl_804881D8[1] - 0.33f));
         lbl_804881D8[0] += e * Sign(lbl_804881D8[0]);
         lbl_804881D8[1] = 0.33f;
         lbl_804881D8[2] += e * Sign(lbl_804881D8[2]);
     } else if (lbl_804881D8[1] < -0.33f) {
-        f32 e = 0.5f * (-0.33f - lbl_804881D8[1]);
+        f32 e = WindHalf(0.5f, (-0.33f - lbl_804881D8[1]));
         lbl_804881D8[0] += e * Sign(lbl_804881D8[0]);
         lbl_804881D8[1] = -0.33f;
         lbl_804881D8[2] += e * Sign(lbl_804881D8[2]);
