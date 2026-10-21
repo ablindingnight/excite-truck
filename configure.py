@@ -1172,6 +1172,7 @@ config.libs.append(
             Object(Matching, "game/stub13.cpp"),
             Object(NonMatching, "game/cartags.cpp"),
             Object(Matching, "game/trkefx.cpp"),
+            Object(NonMatching, "game/groundvis.cpp"),
             Object(Matching, "game/simpletga.cpp"),
             Object(NonMatching, "game/umat.cpp"),
             Object(NonMatching, "game/lweight.cpp"),
