@@ -35,7 +35,7 @@ class Window;
 
 class Window {
 public:
-    Window(int a, int b, int c, int d, int e, int f);
+    Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f);
     ~Window(void);
 
     u8 pad0[0x434];
@@ -337,7 +337,7 @@ void fn_80216710(void) {
 
 void fn_8021676C(void) {}
 
-Window* fn_80216770(int a, int b, int c, int d, int e, int f) {
+Window* fn_80216770(const char* a, s32 b, s32 c, s32 d, s32 e, s32 f) {
     Window* w = new ("WidgetWindow") Window(a, b, c, d, e, f);
     int i;
     for (i = 0; i < 16; i++) {
