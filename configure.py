@@ -1075,6 +1075,7 @@ config.libs.append(
             Object(NonMatching, "game/carmodel.cpp"),
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
+            Object(NonMatching, "game/xraysusp.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
             Object(NonMatching, "game/terchunk.cpp"),
             Object(NonMatching, "game/cenvmap.cpp"),
