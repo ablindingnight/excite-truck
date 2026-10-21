@@ -97,23 +97,28 @@ struct UIVert {
     f32 data[6];
 };
 
-template <class T, int N>
-class FixedArray {
+template <class T>
+class ArrayBase {
 public:
-    FixedArray(void) {
-        data = buf;
-        cap = N;
-        count = 0;
-    }
-    ~FixedArray(void) {
+    ~ArrayBase(void) {
         data = 0;
         count = 0;
         cap = 0;
     }
-    T* data;   // offset 0x0
+    T* data;    // offset 0x0
     int count;  // offset 0x4
     int cap;    // offset 0x8
-    T buf[N];   // offset 0xC
+};
+
+template <class T, int N>
+class FixedArray : public ArrayBase<T> {
+public:
+    FixedArray(void) {
+        this->data = buf;
+        this->cap = N;
+        this->count = 0;
+    }
+    T buf[N];  // offset 0xC
 };
 
 typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
