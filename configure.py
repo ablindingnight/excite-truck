@@ -1086,6 +1086,7 @@ config.libs.append(
             Object(NonMatching, "game/fabric.cpp"),
             Object(NonMatching, "game/trackobj.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
+            Object(NonMatching, "game/drone.cpp"),
             Object(NonMatching, "game/terchunk.cpp"),
             Object(NonMatching, "game/cenvmap.cpp"),
             Object(NonMatching, "game/terrpick.cpp"),

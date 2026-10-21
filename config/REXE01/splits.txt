@@ -2940,6 +2940,14 @@ game/trackgrf.cpp:
 	.sbss       start:0x8055EC80 end:0x8055EC88
 	.sdata2     start:0x80563028 end:0x80563030
 
+game/drone.cpp:
+	.text       start:0x801FC914 end:0x801FFB08
+	.ctors      start:0x802ED358 end:0x802ED35C
+	.data       start:0x8033B5D8 end:0x8033B938
+	.sdata      start:0x8055B3C8 end:0x8055B3E0
+	.sbss       start:0x8055EC88 end:0x8055ECA0
+	.sdata2     start:0x80563030 end:0x80563050
+
 game/terchunk.cpp:
 	.text       start:0x80202218 end:0x80202BE4
 	.ctors      start:0x802ED360 end:0x802ED364

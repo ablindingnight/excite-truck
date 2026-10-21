@@ -1869,8 +1869,8 @@ CollShape* fn_801FC12C(ObstacleDesc* d) {
 
 AnimDesc::~AnimDesc(void) {}
 
-void fn_801FC4D8(AnimInst** list, AnimInst* a);
-void fn_801FC644(EWSound** list, EWSound* s);
+extern "C" void fn_801FC4D8(AnimInst** list, AnimInst* a);
+extern "C" void fn_801FC644(EWSound** list, EWSound* s);
 
 void AnimDesc::Create(const PlacedObj* o) {
     place = o->frame;
@@ -1905,9 +1905,11 @@ void AnimDesc::Create(const PlacedObj* o) {
     fn_801FC4D8(&lbl_8055EC5C, a);
 }
 
+extern "C" {
 void fn_801FC4D8(AnimInst** list, AnimInst* a) {
     a->next = *list;
     *list = a;
+}
 }
 
 void SoundDesc::Create(const PlacedObj* o) {
@@ -1930,9 +1932,11 @@ void SoundDesc::Create(const PlacedObj* o) {
     fn_801FC644(&lbl_8055EC6C, s);
 }
 
+extern "C" {
 void fn_801FC644(EWSound** list, EWSound* s) {
     s->next = *list;
     *list = s;
+}
 }
 
 void SoundDesc::Props(void* p, PlacedObj* o) { fn_80204014(p, o->node, lbl_8055EC70); }
