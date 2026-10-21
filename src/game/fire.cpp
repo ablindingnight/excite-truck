@@ -775,7 +775,7 @@ void RingFireMan::Tick(FireRing* r, f32 dt) {
     v.z = 0.0f;
     AddScaled(&p, &r->p0, &r->e1, a);
     AddScaled(&p, &p, &r->e2, b);
-    p.y = p.y + 0.125f;
+    p.y += 0.125f;
     fn_8028E584(emitter, &p, &v);
     fn_80288A40(&p, &v);
 }
@@ -1324,12 +1324,12 @@ void BoostFireMan::Calc(int i, const FireCar* car) {
     e->pts[0].x = e->pts[0].x + car->pos.x;
     e->pts[0].y = e->pts[0].y + car->pos.y;
     e->pts[0].z = e->pts[0].z + car->pos.z;
-    e->pts[0].y = e->pts[0].y + 0.5f;
+    e->pts[0].y += 0.5f;
     MulVec(&e->pts[1], &car->wheels[3].pos, car->axes);
     e->pts[1].x = e->pts[1].x + car->pos.x;
     e->pts[1].y = e->pts[1].y + car->pos.y;
     e->pts[1].z = e->pts[1].z + car->pos.z;
-    e->pts[1].y = e->pts[1].y + 0.5f;
+    e->pts[1].y += 0.5f;
 }
 
 ExhaustTorchMan::ExhaustTorchMan(void) {
