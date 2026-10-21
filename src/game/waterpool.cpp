@@ -96,25 +96,21 @@ public:
     s32 tex;         // offset 0x40
 };
 
-class WaterIfaceBase {
-public:
-    virtual ~WaterIfaceBase(void) {}
-    virtual void Begin(void) {}
-    virtual void End(void) {}
-};
-
 // The water editing interface (only its destructor and accessors survive).
-class WaterIface : public WaterIfaceBase {
+class WaterIface {
 public:
     virtual ~WaterIface(void);
     virtual s32 Name(void) { return name; }
     virtual s32 Data(void) { return data; }
     virtual int Unk14(void) { return 0; }
-    virtual void Unk18(void) { WaterIfaceBase::Begin(); }
-    virtual void Unk1C(void) { WaterIfaceBase::End(); }
+    virtual void Unk18(void) { Begin(); }
+    virtual void Unk1C(void) { End(); }
     virtual void Show(void) { shown = 1; }
     virtual void Hide(void) { shown = 0; }
     virtual u8 Shown(void) { return shown; }
+    void Close(void);
+    void Begin(void);
+    void End(void);
 
     u8 pad4[0x10 - 0x4];
     s32 name;  // offset 0x10
@@ -191,6 +187,12 @@ static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
         out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
         out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
     }
+}
+
+static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
 }
 
 static inline int InRange(f32 v, f32 lo, f32 hi) {
@@ -298,9 +300,9 @@ void fn_8029C2D4(void) {
     if (best) {
         fn_8029D644(best);
     }
-    for (i = 0; i < lbl_8055F7F4; i++) {
-        if (fn_8029EAE8(lbl_804B5030[i])) {
-            fn_8029E8E0(lbl_804B5030[i]);
+    for (int k = 0; k < lbl_8055F7F4; k++) {
+        if (fn_8029EAE8(lbl_804B5030[k])) {
+            fn_8029E8E0(lbl_804B5030[k]);
         }
     }
 }
@@ -309,7 +311,7 @@ void fn_8029C2D4(void) {
 
 extern "C" void fn_8029C3EC(void) {}
 
-WaterIface::~WaterIface(void) {}
+WaterIface::~WaterIface(void) { Close(); }
 
 extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
     f32 far = 2500.0f;
@@ -336,12 +338,14 @@ extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
 extern "C" void fn_8029C570(void) {
     f32 period = 2.0f;
     f32 amplitude = 0.025f;
-    if (fn_8012C33C("flatwtr.mod")) {
-        lbl_8055CAA8 = fn_802C6FC0("flatwtr.mod", 0, 0);
+    const char* table = "flat_water";
+    const char* model = "flatwtr.mod";
+    if (fn_8012C33C(model)) {
+        lbl_8055CAA8 = fn_802C6FC0(model, 0, 0);
     } else {
         lbl_8055CAA8 = -1;
     }
-    ValueNode* n = fn_802AE414("flat_water");
+    ValueNode* n = fn_802AE414(table);
     if (n) {
         period = n->GetReal("period");
         amplitude = n->GetReal("amplitude");
@@ -357,13 +361,14 @@ extern "C" void fn_8029C650(void) {
 }
 
 extern "C" void fn_8029C664(void) {
+    WaterPool** q;
     WaterPool** p = lbl_804B5010;
-    for (int i = 0; i < lbl_8055F7F0; i++, p++) {
+    for (int i = 0; i < lbl_8055F7F0; p++, i++) {
         Vec c;
         f32 r;
         fn_8029D550(*p, &c, &r);
-        WaterPool** q = &lbl_804B5010[i + 1];
-        for (int j = i + 1; j < lbl_8055F7F0; j++, q++) {
+        q = &lbl_804B5010[i + 1];
+        for (int j = i + 1; j < lbl_8055F7F0; q++, j++) {
             Vec c2;
             f32 r2;
             fn_8029D550(*q, &c2, &r2);
@@ -389,11 +394,11 @@ extern "C" void fn_8029C73C(void) {
         d.color = -1;
         d.minAlpha = 0x20;
         d.maxAlpha = 0xE4;
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+        for (int i = 0; t->GetChild(i); i++) {
             if (lbl_8055F7F0 >= 8) {
                 fn_802E317C("water: exceeded pool limit (%d)", 8);
             }
+            ValueNode* n = t->GetChild(i);
             const char* tex = n->GetValue("texture_name");
             PoolGeom g;
             g.origin = n->GetVec3("origin");
@@ -417,11 +422,11 @@ extern "C" void fn_8029C998(void) {
     lbl_8055F7F4 = 0;
     ValueTable* t = fn_80131810("water2d.val");
     if (t) {
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+        for (int i = 0; t->GetChild(i); i++) {
             if (lbl_8055F7F4 >= 16) {
                 fn_802E317C("water: exceeded shallow limit (%d)", 16);
             }
+            ValueNode* n = t->GetChild(i);
             const char* tex = n->GetValue("texture_name");
             PoolGeom g;
             g.origin = n->GetVec3("origin");
@@ -480,7 +485,7 @@ struct EmitterDesc {
     f32 a74;          // offset 0x74
     u8 pad78[0x7C - 0x78];
     f32 a7C;          // offset 0x7C
-    u8 pad80[0x100 - 0x80];
+    u8 pad80[0x90 - 0x80];
 };
 
 extern "C" void fn_8029CBA0(void) {
@@ -528,19 +533,20 @@ extern "C" void fn_8029CD14(void) {
 
 extern "C" void fn_8029CD48(WaterCar* car) {
     for (int i = 0; i < 4; i++) {
+        const Vec* wp = &car->wheels[i].pos;
         if (car->wheels[i].flags & 8) {
             continue;
         }
         Vec p;
-        MulVec(&p, &car->wheels[i].pos, car->axes);
+        MulVec(&p, wp, car->axes);
         p.x = p.x + car->pos.x;
         p.y = p.y + car->pos.y;
         p.z = p.z + car->pos.z;
         if (p.y > fn_802BF590()) {
             continue;
         }
-        p.y = p.y + 0.5f;
-        f32 side = car->wheels[i].pos.x > 0.0f ? 1.0f : -1.0f;
+        p.y += 0.5f;
+        f32 side = wp->x > 0.0f ? 1.0f : -1.0f;
         f32 kick = 0.2f + 0.1f * (car->speed * side);
         f32 up = 0.2f + 0.1f * car->speed;
         Vec v;
@@ -567,7 +573,7 @@ extern "C" void fn_8029CD48(WaterCar* car) {
             w.x = w.x + fn_80287BC8(-a, a);
             w.y = 2.0f * fn_80287BC8(0.0f, a);
             w.z = w.z + fn_80287BC8(-a, a);
-            f32 dir = car->wheels[i].pos.x > 0.0f ? 1.0f : -1.0f;
+            f32 dir = wp->x > 0.0f ? 1.0f : -1.0f;
             fn_8028E590(lbl_8055F7F8, &q, &w, -dir * fn_80287BC8(0.0f, 3.1415927f));
         }
     }
@@ -637,8 +643,10 @@ extern "C" {
 int fn_8029D4CC(WaterPool* p) {
     f32 s = fn_801E88F0(-1);
     s = s * s;
+    s = s * fn_802C88E8(&p->center);
+    f32 lim = (250.0f + p->radius) * (250.0f + p->radius);
     int vis = 0;
-    if (fn_802C88E8(&p->center) * s < (250.0f + p->radius) * (250.0f + p->radius) &&
+    if (s < lim &&
         fn_802C9640(&p->center, p->radius)) {
         vis = 1;
     }
@@ -702,19 +710,18 @@ void fn_8029E49C(WaterPool* p, WaterCar* car, int w);
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r);
 
 void fn_8029D7D0(WaterPool* p, WaterCarEntry* e) {
-    WaterCar* car = e->car;
-    f32 dz = car->pos.z - p->center.z;
-    f32 dx = car->pos.x - p->center.x;
+    f32 dz = e->car->pos.z - p->center.z;
+    f32 dx = e->car->pos.x - p->center.x;
     if (dx * dx + dz * dz > p->radius * p->radius) {
         return;
     }
     for (int w = 0; w < 4; w++) {
         if (!(e->car->wheels[w].flags & 8)) {
-            fn_8029E49C(p, car, w);
+            fn_8029E49C(p, e->car, w);
         }
     }
     ModelInfo* m = fn_802C6C34(fn_801EE0C8(e->index < 8 ? lbl_80488648[e->index] : 0));
-    car = e->car;
+    WaterCar* car = e->car;
     Vec c;
     MulVec(&c, &m->center, car->axes);
     c.x = c.x + car->pos.x;
@@ -793,11 +800,16 @@ void fn_8029DF64(WaterPool* p, int x, int y, f32 amount) {
 
 int fn_8029DFE0(WaterPool* p, const Vec* at) {
     int in = 0;
-    f32 dx = at->x - p->origin.x;
-    f32 dz = at->z - p->origin.z;
-    f32 u = dx * p->dxx + dz * p->dxz;
-    f32 v = dx * p->dyx + dz * p->dyz;
+    ValPoint d;
+    d.y = at->z - p->origin.z;
+    d.x = at->x - p->origin.x;
+    f32 u = d.x * p->dxx + d.y * p->dxz;
+    f32 v = d.x * p->dyx + d.y * p->dyz;
+    int inside = 0;
     if (InRange(u, 0.5f, p->nx - 1.5f) && InRange(v, 0.5f, p->ny - 1.5f)) {
+        inside = 1;
+    }
+    if (inside) {
         if (at->y < p->origin.y - 0.1f) {
             in = 1;
         }
@@ -806,13 +818,18 @@ int fn_8029DFE0(WaterPool* p, const Vec* at) {
 }
 
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
+    Vec base;
+    Vec pos;
+    Vec w;
+    ValPoint d;
+    ValPoint v;
+    ValPoint q;
+    ValPoint dir;
     if (at->y - r > p->origin.y - 0.1f) {
         return;
     }
-    ValPoint v;
     v.x = vel->x;
     v.y = vel->z;
-    ValPoint d;
     d.x = at->x - p->origin.x;
     d.y = at->z - p->origin.z;
     f32 s2 = v.x * v.x + v.y * v.y;
@@ -823,7 +840,6 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     f32 depth = sqrt(r * r - dy * dy);
     f32 speed = sqrt(v.x * v.x + v.y * v.y);
     f32 inv = 1.0f / speed;
-    ValPoint q;
     q.x = d.x + v.x * (depth * inv);
     q.y = d.y + v.y * (depth * inv);
     f32 fu = q.x * p->dxx + q.y * p->dxz;
@@ -834,10 +850,8 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
         return;
     }
     p->cur[gx + gy * p->nx] = -32768;
-    ValPoint dir;
     dir.x = v.y * inv;
     dir.y = v.x * inv;
-    Vec base;
     base.x = p->origin.x + q.x;
     base.y = 0.25f + p->origin.y;
     base.z = p->origin.z + q.y;
@@ -846,14 +860,9 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     int n = (int)(0.25f * speed) < 10 ? (int)(0.25f * speed) : 10;
     f32 lift = 0.1f * speed;
     for (int k = 0; k < n; k++) {
-        Vec pos;
-        pos.z = base.z + dir.y * fn_80287BC8(-0.5f, 0.5f);
-        pos.y = base.y;
-        pos.x = base.x + dir.x * fn_80287BC8(-0.5f, 0.5f);
-        Vec w;
-        w.z = v.y + dir.y * (4.0f * fn_80287BC8(-a, a));
-        w.y = (3.0f < lift ? 3.0f : lift) + 2.0f * fn_80287BC8(0.0f, a);
-        w.x = v.x + dir.x * (4.0f * fn_80287BC8(-a, a));
+        SetVec(&pos, base.x + dir.x * fn_80287BC8(-0.5f, 0.5f), base.y, base.z + dir.y * fn_80287BC8(-0.5f, 0.5f));
+        SetVec(&w, v.x + dir.x * (4.0f * fn_80287BC8(-a, a)), (3.0f < lift ? 3.0f : lift) + 2.0f * fn_80287BC8(0.0f, a),
+               v.y + dir.y * (4.0f * fn_80287BC8(-a, a)));
         fn_8028E584(lbl_8055F7F8, &pos, &w);
     }
 }
@@ -866,7 +875,7 @@ void fn_8029E49C(WaterPool* p, WaterCar* car, int w) {
     at.y = at.y + car->pos.y;
     at.z = at.z + car->pos.z;
     if (fn_8029DFE0(p, &at)) {
-        at.y = at.y + 0.5f;
+        at.y += 0.5f;
         f32 kick = 0.2f + 0.1f * (car->speed * (wp->x > 0.0f ? 1.0f : -1.0f));
         Vec v;
         v.x = car->vel.x + car->axes[0].x * kick;
@@ -944,22 +953,22 @@ void fn_8029E8E0(WaterShallow* s) {
 void fn_8029EC64(WaterShallow* s, WaterCar* car, int w);
 
 void fn_8029EA34(WaterShallow* s, WaterCarEntry* e) {
-    WaterCar* car = e->car;
-    f32 dz = car->pos.z - s->center.z;
-    f32 dx = car->pos.x - s->center.x;
+    f32 dz = e->car->pos.z - s->center.z;
+    f32 dx = e->car->pos.x - s->center.x;
     if (dx * dx + dz * dz > s->radius * s->radius) {
         return;
     }
     for (int w = 0; w < 4; w++) {
         if (!(e->car->wheels[w].flags & 8)) {
-            fn_8029EC64(s, car, w);
+            fn_8029EC64(s, e->car, w);
         }
     }
 }
 
 int fn_8029EAE8(WaterShallow* s) {
+    f32 far = 22500.0f;
     int vis = 0;
-    if (fn_802C88E8(&s->center) < 22500.0f && fn_802C9640(&s->center, s->radius)) {
+    if (fn_802C88E8(&s->center) < far && fn_802C9640(&s->center, s->radius)) {
         vis = 1;
     }
     return vis;
@@ -967,8 +976,12 @@ int fn_8029EAE8(WaterShallow* s) {
 
 int fn_8029EB54(WaterShallow* s, const Vec* at) {
     int in = 0;
+    int inside = 0;
     if (InRange(at->x, MIN(s->corners[0].x, s->corners[3].x), MAX(s->corners[0].x, s->corners[3].x)) &&
         InRange(at->z, MIN(s->corners[0].z, s->corners[3].z), MAX(s->corners[0].z, s->corners[3].z))) {
+        inside = 1;
+    }
+    if (inside) {
         if (at->y < s->corners[0].y - 0.1f) {
             in = 1;
         }
@@ -984,7 +997,7 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
     at.y = at.y + car->pos.y;
     at.z = at.z + car->pos.z;
     if (fn_8029EB54(s, &at)) {
-        at.y = at.y + 0.5f;
+        at.y += 0.5f;
         f32 kick = 0.2f + 0.1f * (car->speed * (wp->x > 0.0f ? 1.0f : -1.0f));
         Vec v;
         v.x = car->vel.x + car->axes[0].x * kick;
@@ -1001,3 +1014,9 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
 }
 
 }  // extern "C"
+
+inline void WaterIface::Close(void) {}
+
+inline void WaterIface::Begin(void) {}
+
+inline void WaterIface::End(void) {}
