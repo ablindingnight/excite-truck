@@ -567,6 +567,9 @@ struct EWState {
 VehicleInfo* FindVehicle(s32 id);
 TableRef fn_8013A0B0(const char* what, const char* name);
 
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 f32 PSVECDotProduct(const void* a, const void* b);
@@ -579,7 +582,6 @@ void fn_802C6C20(void* model);
 void fn_802C70AC(void* model, const OFrame* f, int a, int mode);
 void fn_802C7AE0(void* model, const OFrame* f, int a, f32 alpha);
 void fn_801BFD34(void* out, const void* p, const PlacedObj* m);
-void Mat3Mul(void* out, const void* a, const void* b);
 s32 fn_801D04D0(const char* surface);
 void fn_802E317C(const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);
@@ -801,7 +803,7 @@ int fn_801F7EB0(OFrame* f, ValueNode* vn, const PlacedObj* parent) {
     }
     if (parent) {
         fn_801BFD34(&f->pos, &f->pos, parent);
-        Mat3Mul(f, f, parent);
+        Mat3Mul((Mat3*)f, (const Mat3*)f, (const Mat3*)parent);
     }
     return !lf && parent;
 }
@@ -1192,7 +1194,7 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         for (c = d; c; c = c->sibling) {
             PlacedObj p;
             fn_801BFD34(&p.frame.pos, &c->frame.pos, parent);
-            Mat3Mul(&p.frame, &c->frame, parent);
+            Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.flags = f;
             p.node = parent->node;
             c->Create(&p);

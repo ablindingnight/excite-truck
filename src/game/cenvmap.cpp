@@ -111,7 +111,7 @@ u32 lbl_8055ECF8 = EnvColor(0xFF, 0xFF, 0, 0);
 s32 lbl_8055ECFC;  // render target
 s32 lbl_8055ED00;  // cenvmap.tex / shwenv.tex
 s32 lbl_8055ED04;  // ambmap.tex
-u8 lbl_8055ED08;   // draw this frame
+bool lbl_8055ED08;  // draw this frame
 s32 lbl_8055ED0C;  // imap.tex (blend target)
 u8 lbl_8055ED10;
 s32 lbl_8055ED14;  // mode
