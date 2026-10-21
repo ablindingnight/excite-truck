@@ -9,6 +9,11 @@ void* operator new[](size_t size, const char* tag);
 
 struct TVec {
     TVec(void) {}
+    TVec(f32 ax, f32 ay, f32 az) {
+        x = ax;
+        y = ay;
+        z = az;
+    }
     f32 x, y, z;
 };
 
@@ -29,6 +34,16 @@ struct ZVec {
     f32 x, y, z;
 };
 
+struct PVec {
+    PVec(void) {}
+    f32 v[3];
+};
+
+struct PQuat {
+    PQuat(void) {}
+    f32 v[4];
+};
+
 #pragma pack(push, 1)
 // One position packet (0x4D, packed).
 struct Packet {
@@ -41,8 +56,8 @@ struct Packet {
     s32 gear;     // offset 0x15
     f32 f19;      // offset 0x19
     u8 b1D;       // offset 0x1D
-    TVec pos;     // offset 0x1E
-    TQuat rot;    // offset 0x2A
+    PVec pos;     // offset 0x1E
+    PQuat rot;    // offset 0x2A
     u8 pad3A[0x48 - 0x3A];
     u8 snap;      // offset 0x48
     s32 f49;      // offset 0x49
@@ -87,8 +102,8 @@ public:
 class CarBody {
 public:
     CarBody(void);
-    ~CarBody(void);
     virtual void Init(void* desc);   // 0x08
+    virtual ~CarBody(void);          // 0x0C
     virtual void Reset(void);        // 0x10
     virtual void vf14(void);
     virtual void vf18(void);
@@ -333,9 +348,9 @@ void NetCar::Extrapolate(Blend* b) {
     TVec p;
     TVec d;
     TVec r;
-    p.x = fn_801A6370(ptab[0].pos.x, v[0].x, acc.x, s);
-    p.y = fn_801A6370(ptab[0].pos.y, v[0].y, acc.y, s);
-    p.z = fn_801A6370(ptab[0].pos.z, v[0].z, acc.z, s);
+    p.x = fn_801A6370(ptab[0].pos.v[0], v[0].x, acc.x, s);
+    p.y = fn_801A6370(ptab[0].pos.v[1], v[0].y, acc.y, s);
+    p.z = fn_801A6370(ptab[0].pos.v[2], v[0].z, acc.z, s);
     {
         f32 t1 = fn_801A63C4(ptab[1].frame, ptab[2].frame);
         f32 t0 = fn_801A63C4(ptab[0].frame, ptab[2].frame);
@@ -343,9 +358,9 @@ void NetCar::Extrapolate(Blend* b) {
         double b1 = DL(tn, t1, 0.0, t0);
         double b2 = DL(tn, 0.0, t1, t0);
         double b0 = DL(tn, t0, 0.0, t1);
-        d.x = ptab[0].pos.x * b0 + (ptab[2].pos.x * b2 + ptab[1].pos.x * b1);
-        d.y = ptab[0].pos.y * b0 + (ptab[2].pos.y * b2 + ptab[1].pos.y * b1);
-        d.z = ptab[0].pos.z * b0 + (ptab[2].pos.z * b2 + ptab[1].pos.z * b1);
+        d.x = ptab[0].pos.v[0] * b0 + (ptab[2].pos.v[0] * b2 + ptab[1].pos.v[0] * b1);
+        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + ptab[1].pos.v[1] * b1);
+        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + ptab[1].pos.v[2] * b1);
     }
     fn_801A63F4(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;
@@ -355,23 +370,31 @@ void NetCar::Extrapolate(Blend* b) {
 }
 
 static inline void QuatToMtx(TMtx* m, const TQuat* q) {
-    f32 x2 = q->x + q->x;
-    f32 y2 = q->y + q->y;
-    f32 z2 = q->z + q->z;
-    f32 xx = q->x * x2;
-    f32 yy = q->y * y2;
-    f32 zz = q->z * z2;
-    f32 wx = q->w * x2;
-    f32 yz = q->y * z2;
-    f32 xz = q->x * z2;
-    f32 wy = q->w * y2;
-    f32 xy = q->x * y2;
-    f32 wz = q->w * z2;
+    f32 x = q->x;
+    f32 y = q->y;
+    f32 z = q->z;
+    f32 w = q->w;
+    f32 x2 = x + x;
+    f32 y2 = y + y;
+    f32 z2 = z + z;
+    f32 xx = x * x2;
+    f32 yy = y * y2;
+    f32 zz = z * z2;
+    f32 wx = w * x2;
+    f32 yz = y * z2;
+    f32 wy;
+    f32 xz;
+    f32 wz;
+    f32 xy;
     m->x.x = 1.0f - (yy + zz);
     m->y.y = 1.0f - (xx + zz);
     m->z.z = 1.0f - (xx + yy);
     m->z.y = yz - wx;
     m->y.z = yz + wx;
+    wy = w * y2;
+    xz = x * z2;
+    wz = w * z2;
+    xy = x * y2;
     m->z.x = xz + wy;
     m->x.z = xz - wy;
     m->y.x = xy - wz;
@@ -381,8 +404,10 @@ static inline void QuatToMtx(TMtx* m, const TQuat* q) {
 void NetCar::Snap(void) {
     BodyState s;
     s.hint = -1;
-    QuatToMtx(&s.mtx, &ptab[0].rot);
-    s.mtx.pos = ptab[0].pos;
+    QuatToMtx(&s.mtx, (const TQuat*)&ptab[0].rot);
+    s.mtx.pos.x = ptab[0].pos.v[0];
+    s.mtx.pos.y = ptab[0].pos.v[1];
+    s.mtx.pos.z = ptab[0].pos.v[2];
     s.vel.x = 0.0f;
     s.vel.y = 0.0f;
     s.vel.z = 0.0f;
@@ -392,10 +417,7 @@ void NetCar::Snap(void) {
     ptab[2] = ptab[0];
     ptab[1] = ptab[2];
     {
-        TVec z;
-        z.x = 0.0f;
-        z.y = 0.0f;
-        z.z = 0.0f;
+        TVec z(0.0f, 0.0f, 0.0f);
         ptab[1].frame--;
         ptab[2].frame -= 2;
         v[2].x = z.x;
@@ -413,7 +435,7 @@ void NetCar::Snap(void) {
 extern "C" f32 fn_801A70EC(TQuat* out, const Packet* a, const Packet* b, s32 frame) {
     f32 d = fn_801A63C4(b->frame, a->frame);
     f32 k = fn_801A63C4(frame, a->frame) / d;
-    fn_8012F57C(out, &a->rot, &b->rot, k);
+    fn_8012F57C(out, (const TQuat*)&a->rot, (const TQuat*)&b->rot, k);
     return k;
 }
 

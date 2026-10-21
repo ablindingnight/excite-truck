@@ -154,8 +154,8 @@ public:
 class CarBody {
 public:
     CarBody(void);
-    ~CarBody(void);
     virtual void Init(void* desc);   // 0x08
+    virtual ~CarBody(void);          // 0x0C
     virtual void Reset(void);        // 0x10
     virtual void vf14(void);         // 0x14
     virtual void vf18(void);
