@@ -3043,6 +3043,14 @@ game/roadsnd.cpp:
 	.sbss       start:0x8055EE60 end:0x8055EE68
 	.sdata2     start:0x80563300 end:0x80563318
 
+game/widgetwin.cpp:
+	.text       start:0x80216054 end:0x80216D14
+	.ctors      start:0x802ED3B0 end:0x802ED3B4
+	.data       start:0x8033D780 end:0x8033D808
+	.bss        start:0x804908B0 end:0x80490908
+	.sbss       start:0x8055EF60 end:0x8055EFA0
+	.sdata2     start:0x80563458 end:0x80563490
+
 game/strlist.cpp:
 	.text       start:0x8022D0D8 end:0x8022D228
 	.ctors      start:0x802ED3C0 end:0x802ED3C4
