@@ -86,10 +86,10 @@ struct ArtListBase {
 
 struct ArtList : public ArtListBase {
     ArtList(int n) {
-        buf = new ("dsa_buf") ArtItem[n];
-        items = buf;
+        items = new ("dsa_buf") ArtItem[n];
         max = n;
         count = 0;
+        buf = items;
     }
     ~ArtList(void) { delete[] buf; }
     ArtItem* buf;  // offset 0xC
@@ -273,11 +273,10 @@ void fn_802AD414(ArtAnim* a, f32 t) {
     for (int i = 0; i < a->nPaths; i++) {
         ArtPath* p = &a->paths[i];
         for (int k = 0; k < p->nKeys - 1; k++) {
-            ArtKey* key = &p->keys[k];
-            if (t >= key->t && t <= 0.001f + p->keys[k + 1].t) {
+            if (t >= p->keys[k].t && t <= 0.001f + p->keys[k + 1].t) {
                 s32* dst = a->elems[p->elem].dst;
                 if (dst) {
-                    *dst = key->value;
+                    *dst = p->keys[k].value;
                 }
                 break;
             }
@@ -316,15 +315,18 @@ int fn_802ADCF8(int key) {
         lbl_8055F940 = i < -1 ? -1 : i;
         return 1;
     }
-    case ']':
-        lbl_8055F940 = MIN(lbl_8055F93C - 1, lbl_8055F940 + 1);
+    case ']': {
+        int last = lbl_8055F93C - 1;
+        int next = lbl_8055F940 + 1;
+        lbl_8055F940 = last < next ? last : next;
         return 1;
+    }
     case '"':
         lbl_8055F944 = fn_802E2C20();
         lbl_8055F948 = 0;
         return 1;
     case '\'':
-        lbl_8055F94C = !lbl_8055F94C;
+        lbl_8055F94C = lbl_8055F94C == 0;
         if (lbl_8055F94C) {
             lbl_8055F948 = fn_802E2C20() - lbl_8055F944;
         }
@@ -411,9 +413,8 @@ void ArtPlayer::StopAll(void) {
 
 void ArtPlayer::Rewind(void) {
     for (int i = 0; i < list->count; i++) {
-        ArtItem* item = &list->items[i];
-        if (item->active) {
-            item->t0 = t - item->anim->length;
+        if (list->items[i].active) {
+            list->items[i].t0 = t - list->items[i].anim->length;
         }
     }
 }
