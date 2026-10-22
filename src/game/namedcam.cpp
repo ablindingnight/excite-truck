@@ -11,9 +11,25 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+// A named camera setup ("namedcam" entries in the camera file).
+struct NamedCam {
+    u32 unk0;       // offset 0x0
+    f32 pose[12];   // offset 0x4
+    f32 fov;        // offset 0x34
+    char name[16];  // offset 0x38
+};
+
+extern "C" {
+int strcasecmp(const char* a, const char* b);
+void* memcpy(void* d, const void* s, u32 n);
+void fn_8026A4A0(int i, f32* pose, f32* fov);
+}
+
 extern u8 lbl_8049FD58[];
 extern f32 lbl_8055E3C8;
-extern s32 lbl_8055F598;
+extern NamedCam* lbl_8055F598;
+extern NamedCam lbl_8049FE98;
+extern NamedCam lbl_8049FEE0[];
 extern s32 lbl_8055F59C;
 extern s32 lbl_8055F5A0;
 
@@ -31,11 +47,20 @@ int fn_80276068(int mode) {
     return 0;
 }
 
-void fn_80276098(u8* p) {}  // stub (309)
+void fn_80276098(f32* dst, f32* src, int a, int b, f32 from, f32 to, f32 t) {}  // stub (309)
 
 void fn_8027656C(u8* p) {}  // stub (310)
 
-void fn_80276A44(u8* p) {}  // stub (34)
+NamedCam* fn_80276A44(const char* name) {
+    NamedCam* c = lbl_8049FEE0;
+    for (int i = 0; i < lbl_8055F5A0; i++) {
+        if (!strcasecmp(c->name, name)) {
+            return &lbl_8049FEE0[i];
+        }
+        c++;
+    }
+    return 0;
+}
 
 void fn_80276ACC(u8* p) {}  // stub (48)
 
@@ -49,9 +74,31 @@ void fn_80276B8C(void) {
 
 void fn_80276BE4(u8* p) {}  // stub (51)
 
-void fn_80276CB0(u8* p) {}  // stub (35)
+void fn_80276CB0(const char* name, int blend) {
+    NamedCam* c = fn_80276A44(name);
+    if (!c) {
+        c = lbl_8055F598;
+    }
+    if (blend) {
+        fn_80276098(lbl_8049FE98.pose, c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
+    } else {
+        memcpy(&lbl_8049FE98, c, 0x48);
+        lbl_8049FD58[0] = 0;
+    }
+}
 
-void fn_80276D3C(u8* p) {}  // stub (35)
+void fn_80276D3C(const char* name, int mode) {
+    NamedCam* c = fn_80276A44(name);
+    if (mode == 1) {
+        f32 pose[12];
+        f32 fov;
+        fn_8026A4A0(0, pose, &fov);
+        fn_80276098(pose, c->pose, 0, 0x22, fov, c->fov, 2.0f);
+    } else {
+        memcpy(&lbl_8049FE98, c, 0x48);
+        lbl_8049FD58[0] = 0;
+    }
+}
 
 void fn_80276DC8(u8* p) {}  // stub (591)
 
