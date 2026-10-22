@@ -1,0 +1,170 @@
+// Achievements viewer (0x80259148-0x8025C028): the trophy cabinet ("trophy", "cnt1".."cnt3",
+// "MenuDoAchievementsViewer: bad return value %d ...") with its camera orbit and trophy spin helpers.
+// Written against raw field offsets; the large routines and the initialiser are still stubs. Names
+// are guesses apart from the strings.
+#include "game/common.h"
+#include <string.h>
+
+#define F32(p, o) (*(f32*)((u8*)(p) + (o)))
+#define S32(p, o) (*(s32*)((u8*)(p) + (o)))
+#define U32(p, o) (*(u32*)((u8*)(p) + (o)))
+#define U8(p, o) (*(u8*)((u8*)(p) + (o)))
+#define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
+
+class VD {
+public:
+    virtual ~VD(void);
+};
+
+class VA {
+public:
+    virtual void v08(void);
+    virtual void v0C(u8* q);
+};
+
+extern "C" {
+void fn_80236914(void);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+double sqrt(double x);
+double sin(double x);
+}
+
+struct Words9 {
+    u32 w[9];
+};
+
+extern VD* lbl_8055F394;
+extern bool lbl_8055F3A0;
+extern f32 lbl_8055F3A4;
+
+extern "C" {
+
+void fn_80259148(u8* p) {}  // stub (36)
+
+void fn_802591D8(void) {
+    delete lbl_8055F394;
+    lbl_8055F394 = 0;
+}
+
+u32 fn_8025921C(u8* p) { return 0; }
+
+void fn_80259224(u8* p) {}  // stub (279)
+
+void fn_80259680(u8* p) {}  // stub (32)
+
+u8* fn_80259700(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+void fn_80259740(int x, f32 v) {
+    fn_80236914();
+    lbl_8055F3A4 = v;
+    lbl_8055F3A0 = x == 2;
+}
+
+void fn_8025978C(u8* p) {}  // stub (654)
+
+u8* fn_8025A1C4(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+void fn_8025A204(u8* p) {}  // stub (178)
+
+u8* fn_8025A4CC(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+void fn_8025A50C(u8* p) {}  // stub (204)
+
+void fn_8025A83C(u8* p) {
+    F32(p, 0x88) = 0.0f;
+    F32(p, 0x84) = 1.0f;
+    F32(p, 0x8C) = 0.0f;
+    F32(p, 0x90) = 0.0f;
+    F32(p, 0x94) = 1.0f;
+    F32(p, 0x98) = 0.0f;
+    F32(p, 0x9C) = 0.0f;
+    F32(p, 0xA0) = 0.0f;
+    F32(p, 0xA4) = 1.0f;
+    ((VA*)p)->v0C(p + 4);
+}
+
+void fn_8025A87C(u8* p) {
+    F32(p, 0x88) = 0.0f;
+    F32(p, 0x84) = 1.0f;
+    F32(p, 0x8C) = 0.0f;
+    F32(p, 0x90) = 0.0f;
+    F32(p, 0x94) = 1.0f;
+    F32(p, 0x98) = 0.0f;
+    F32(p, 0x9C) = 0.0f;
+    F32(p, 0xA0) = 0.0f;
+    F32(p, 0xA4) = 1.0f;
+    U8(p, 0x4) = 0;
+    U8(p, 0x36) = 0;
+}
+
+void fn_8025A8B8(u8* p) {}  // stub (118)
+
+void fn_8025AA90(u8* p) {}  // stub (174)
+
+void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t) {
+    out[2] = a[2] + t * (b[2] - a[2]);
+    out[1] = a[1] + t * (b[1] - a[1]);
+    out[0] = a[0] + t * (b[0] - a[0]);
+}
+
+f32 fn_8025AD88(const f32* a, const f32* b) { return PSVECDotProduct(a, b); }
+
+void fn_8025AD8C(u8* self, f32* out, const f32* a, const f32* b, f32 t) {
+    f32 s = 4.1f * t;
+    f32 k = 1.0f >= s ? s : 1.0f;
+    out[0] = a[0] + k * (b[0] - a[0]);
+    out[1] = a[1] + k * (b[1] - a[1]);
+    out[2] = a[2] + k * (b[2] - a[2]);
+}
+
+f32 fn_8025ADF4(f32 x) { return (f32)sqrt(x); }
+
+void fn_8025AE18(u8* p) {}  // stub (165)
+
+f32 fn_8025B0A8(f32* r) {
+    f32 hi = r[1];
+    f32 lo = r[0];
+    return lo + (hi - lo) * 0.5f;
+}
+
+f32 fn_8025B0C4(f32 x) { return (f32)sin(x); }
+
+void fn_8025B0E8(Words9* d, const Words9* s) { *d = *s; }
+
+void fn_8025B134(u8* p) {}
+
+void fn_8025B138(u8* p) {}  // stub (61)
+
+void fn_8025B22C(u8* p) {}  // stub (36)
+
+void fn_8025B2BC(u8* p) {}  // stub (153)
+
+void fn_8025B520(u8* p) {}  // stub (153)
+
+void fn_8025B784(u8* p) {}
+
+void fn_8025B788(u8* p) {}  // stub (285)
+
+void fn_8025BBFC(u8* p) {}  // stub (132)
+
+void fn_8025BE0C(u8* p) {}  // stub (49)
+
+void fn_8025BED0(u8* p) {}  // stub (64)
+
+void fn_8025BFD0(u8* p) {}  // stub (22)
+}  // extern "C"

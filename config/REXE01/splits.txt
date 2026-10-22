@@ -3050,6 +3050,10 @@ game/drone.cpp:
 	.sbss       start:0x8055EC88 end:0x8055ECA0
 	.sdata2     start:0x80563030 end:0x80563050
 
+game/drivmod.cpp:
+	.text       start:0x801FFB08 end:0x80202218
+	.ctors      start:0x802ED35C end:0x802ED360
+
 game/terchunk.cpp:
 	.text       start:0x80202218 end:0x80202BE4
 	.ctors      start:0x802ED360 end:0x802ED364
@@ -3509,6 +3513,10 @@ game/uiobjs.cpp:
 	.sdata      start:0x8055C258 end:0x8055C260
 	.sbss       start:0x8055F378 end:0x8055F388
 	.sdata2     start:0x80563AC8 end:0x80563AE0
+
+game/achview.cpp:
+	.text       start:0x80259148 end:0x8025C028
+	.ctors      start:0x802ED460 end:0x802ED464
 
 game/recscreen.cpp:
 	.text       start:0x8025C028 end:0x8025CE78
