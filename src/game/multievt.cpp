@@ -28,7 +28,7 @@ public:
     virtual void s24(void);
     virtual void s28(void);
     virtual void s2C(void);
-    virtual void s30(void);
+    virtual void s30(u32 a, const char* b);
     virtual void s34(void);
     virtual void s38(s32* a, s32* b);
 };
@@ -49,9 +49,21 @@ struct NameEntry {
 };
 
 void* FindTrackEvent(int track, int eve);
+u8* GetEvent(int i);
+
+class VN {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual const char* v14(const char* key);
+};
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
+u32 strlen(const char* s);
+int strncmp(const char* a, const char* b, u32 n);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
 void fn_8023E52C(u32 a);
 s32 fn_80214D04(void);
 void fn_80214CB4(s32 a);
@@ -69,6 +81,7 @@ void fn_8024B6AC(u8* p);
 void operator delete(void* p);
 
 extern const NameEntry lbl_802FA4B0[3];
+extern char lbl_804989AC[];
 
 // Copies at most n characters, always terminating.
 static inline void CopyName(const char* s, int n, char* d) {
@@ -246,7 +259,15 @@ u8* fn_8024AFF8(u8* p, int del) {
 
 void fn_8024B070(u8* p) {}  // stub (66)
 
-void fn_8024B178(u8* p) {}  // stub (39)
+const char* fn_8024B178(int ev) {
+    const char* name = ((VN*)PTR(GetEvent(ev), 0x20))->v14("name");
+    const char* prefix = "career_";
+    if (!strncmp(name, prefix, strlen(prefix))) {
+        name += strlen(prefix);
+    }
+    fn_801345D8(lbl_804989AC, 0x21, "/%s.tex", name);
+    return lbl_804989AC;
+}
 
 int fn_8024B214(u8* a, u8* b) {
     u8 fa = U8(a, 0x4);
@@ -373,7 +394,11 @@ u32 fn_8024B9EC(u8* p) { return ((u32*)PTR(p, 0x10))[S32(p, 0x11C) * 2]; }
 
 void fn_8024BA00(u8* p) {}  // stub (40)
 
-void fn_8024BAA0(u8* p) {}  // stub (39)
+void fn_8024BAA0(u8* p) {
+    S32(p, 0x11C) = (S32(p, 0x11C) + 1) % S32(p, 0x14);
+    ((VC*)PTR(p, 0x124))->s30(U32(p, 0x120), ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name);
+    fn_801345D8((char*)(p + 0x128), 0x20, "%s/race.%s", ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name, "m2v");
+}
 
 void fn_8024BB3C(u8* p) {
     s32 v = S32(p, 0x10) - 1;

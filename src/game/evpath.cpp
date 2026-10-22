@@ -44,6 +44,7 @@ struct U32List {
 extern "C" {
 void fn_80236914(void);
 void fn_80216D28(void);
+void fn_802E30C8(const char* fmt, ...);
 void fn_8025C204(u8* p, s32 a);
 f32 fn_8023659C(void);
 void fn_80214A9C(int s);
@@ -57,6 +58,16 @@ void fn_80283938(u8* p);
 void operator delete(void* p);
 
 extern U32List lbl_804B30D8;
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
 
 ModuleTag lbl_8055F670;
 s32 lbl_8055F678;
@@ -101,7 +112,17 @@ void fn_8027EEE4(u8* p) {}  // stub (110)
 
 void fn_8027F09C(u8* p) {}  // stub (90)
 
-void fn_8027F204(u8* p) {}  // stub (33)
+void fn_8027F204(const char* name) {
+    u8* l = (u8*)lbl_8055F69C;
+    if (!l) {
+        return;
+    }
+    if (S32(l, 0x44) + 1 <= S32(l, 0x48)) {
+        CopyName(name, 30, (char*)(PTR(l, 0x40) + S32(l, 0x44)++ * 30));
+        return;
+    }
+    fn_802E30C8("add_anim_to_wait_for: can't add, there are %d already!", S32(l, 0x44));
+}
 
 void fn_8027F288(u8* p) {}  // stub (363)
 
