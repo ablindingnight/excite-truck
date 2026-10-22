@@ -28,6 +28,9 @@ public:
 
 extern "C" {
 void fn_80235380(u8* p);
+void fn_802E317C(const char* fmt, ...);
+u8* fn_8023512C(const char* name);
+u32 fn_802E4A10(void);
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
 int fn_802E8504(int ch);
@@ -37,14 +40,15 @@ u8* fn_80241098(u8* p);
 
 void operator delete(void* p);
 
-// The two players' joined slots.
-struct JoinSlots {
-    s32 first;     // offset 0x0
-    u8 pad4[0xC];  // offset 0x4
-    s32 second;    // offset 0x10
+// One player's joined slot ("get_player_info").
+struct JoinSlot {
+    s32 id;      // offset 0x0
+    u32 unk4;    // offset 0x4
+    u32 car;     // offset 0x8
+    u32 color;   // offset 0xC
 };
 
-extern JoinSlots lbl_80498828;
+extern JoinSlot lbl_80498828[2];
 extern void* lbl_803426B0[];
 extern void* lbl_80342734[];
 extern void* lbl_80342618[];
@@ -59,24 +63,45 @@ UnkStatic7F lbl_8055F1F0;
 extern "C" {
 
 void fn_8023FE20(void) {
-    JoinSlots* j = &lbl_80498828;
-    j->first = -1;
-    j->second = -1;
+    JoinSlot* j = lbl_80498828;
+    j[0].id = -1;
+    j[1].id = -1;
 }
 
 int fn_8023FE34(void) {
-    JoinSlots* j = &lbl_80498828;
+    JoinSlot* j = lbl_80498828;
     int n = 0;
-    if (j->first >= 0) {
+    if (j[0].id >= 0) {
         n = 1;
     }
-    if (j->second >= 0) {
+    if (j[1].id >= 0) {
         n++;
     }
     return n;
 }
 
-void fn_8023FE60(u8* p) {}  // stub (47)
+void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
+    JoinSlot* s = lbl_80498828;
+    int i;
+    for (i = 0; i < 2; i++) {
+        if (s->id >= 0) {
+            if (i == id) {
+                if (car) {
+                    *car = lbl_80498828[i].car;
+                }
+                if (color) {
+                    *color = lbl_80498828[i].color;
+                }
+                if (slot) {
+                    *slot = lbl_80498828[i].id;
+                }
+                return;
+            }
+        }
+        s++;
+    }
+    fn_802E317C("mroll.cpp: get_player_info got bad index %d (there are only %d players set up)", id, i);
+}
 
 void fn_8023FF1C(u8* p) {}  // stub (549)
 
@@ -181,7 +206,25 @@ u8* fn_80241098(u8* p) {
     return p;
 }
 
-void fn_802410F8(u8* p) {}  // stub (43)
+u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra) {
+    *(void**)(p + 0xC) = lbl_803426B0;
+    S32(p, 0x4) = -1;
+    U8(p, 0x0) = 0;
+    U8(p, 0x8) = 1;
+    U32(p, 0x24) = 0;
+    *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
+    U32(p, 0x28) = 0;
+    U32(p, 0x2C) = *sel;
+    PTR(p, 0x30) = (u8*)sel;
+    U32(p, 0x34) = owner;
+    U32(p, 0x38) = extra;
+    S32(p, 0x3C) = lbl_8055F1F4++;
+    PTR(p, 0x44) = fn_8023512C("caricona.art");
+    F32(p, 0x58) = 0.0f;
+    F32(p, 0x54) = 0.0f;
+    U8(p, 0x5C) = 0;
+    return p;
+}
 
 int fn_802411A4(u32* out) {
     if (lbl_8055F1FC) {
@@ -195,7 +238,7 @@ void fn_802411C8(void) { fn_8023FE20(); }
 
 int fn_802411CC(void) { return fn_8023FE34(); }
 
-void fn_802411D0(u8* p) { fn_8023FE60(p); }
+void fn_802411D0(int id, u32* car, u32* color, s32* slot) { fn_8023FE60(id, car, color, slot); }
 
 int fn_802411D4(void) {
     int r = 0;
@@ -228,7 +271,22 @@ void fn_80241DE8(u8* p) {
     }
 }
 
-void fn_80241E40(u8* p) {}  // stub (42)
+int fn_80241E40(u8* p) {
+    if (*(u32*)PTR(p, 0x34) == fn_802E4A10() && !U8(p, 0x38)) {
+        return 0;
+    }
+    for (int i = 0; i < S32(p, 0x2C); i++) {
+        u8 sel = 0;
+        u32 v = *(u32*)PTR(p, 0x34);
+        if (U8(p, 0x38) && i == S32(p, 0x30)) {
+            sel = 1;
+        }
+        u8* e = *(u8**)(p + 0x18 + i * 4);
+        U8(e, 0x0) = sel;
+        U32(e, 0x4) = v;
+    }
+    return 1;
+}
 
 u8* fn_80241EE8(u8* p) { return p + 0x4c; }
 
