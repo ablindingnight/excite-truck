@@ -73,6 +73,12 @@ extern const f32 lbl_80562138;
 #define kNegOne lbl_80562094
 #define k255 lbl_805620AC
 #define kTwo lbl_80562138
+extern const f32 lbl_80562084;
+extern const f32 lbl_805620A4;
+extern const f32 lbl_805620B8;
+#define kNegThree lbl_80562084
+#define kSix lbl_805620A4
+#define k65535 lbl_805620B8
 
 #define CMIN(a, b) ((a) < (b) ? (a) : (b))
 #define CMAX(a, b) ((a) > (b) ? (a) : (b))
@@ -99,10 +105,16 @@ void fn_802793B0(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
 void fn_801B6660(void);
+u8* fn_80178C90(void);
+s32 fn_801B2F54(u8* p);
+f32 fn_8018AE3C(u8* car);
+f32 fn_8018AE4C(u8* car);
+void fn_802E30C8(const char* fmt, ...);
 }
 
 void operator delete(void* p);
 void operator delete[](void* p);
+void* operator new[](unsigned long n, const char* tag);
 
 extern s32 lbl_8055E3C4;
 extern void* lbl_80332FC4[];
@@ -125,7 +137,13 @@ extern "C" {
 
 void fn_8018FB18(u8* p) {}  // stub (72)
 
-void fn_8018FC38(u8* p) {}  // stub (35)
+void fn_8018FC38(void) {
+    s32 n = fn_80137C74();
+    for (int i = 0; i < n; i++) {
+        lbl_804349B0[i] = (u8*)operator new[](0x46500, "replaypkt");
+    }
+    fn_802E30C8("playcar: allocating %dK for replay", (u32)(n * 0x8CA0) * 8 / 1024);
+}
 
 void fn_8018FCC4(void) {
     s32 n = fn_80137C74();
@@ -421,7 +439,11 @@ int fn_80192E20(u8* p) { return PF(PTR(p, 0x8))->b0 != 0; }
 
 void fn_80192E3C(u8* p) {}  // stub (37)
 
-void fn_80192ED0(u8* p) {}  // stub (34)
+f32 fn_80192ED0(u8* p) {
+    f32 t = CMIN(kOne, ((f32)*(u16*)PTR(p, 0x8) - kZero) / k65535);
+    t = CMAX(t, kZero);
+    return kNegThree + t * kSix;
+}
 
 void fn_80192F58(u8* p) { VP(PTR(p, 0x4))->v08(); }
 
@@ -429,7 +451,17 @@ u8 fn_80192F6C(u8* p) { return U8(p, 0x12); }
 
 void fn_80192F74(u8* p) { S32(p, 0xC) = lbl_8055E3C4; }
 
-void fn_80192F80(u8* p) {}  // stub (36)
+void fn_80192F80(u8* p) {
+    U32(fn_80178C90(), 0x0) = 0;
+    s32 v = fn_801B2F54(PTR(p, 0x3C));
+    S32(fn_80178C90(), 0x4) = v;
+    f32 a = F32(PTR(p, 0x34), 0x25CC);
+    F32(fn_80178C90(), 0x8) = a;
+    f32 b = fn_8018AE3C(PTR(p, 0x34));
+    F32(fn_80178C90(), 0xC) = b;
+    f32 c = fn_8018AE4C(PTR(p, 0x34));
+    F32(fn_80178C90(), 0x10) = c;
+}
 
 int fn_80193010(void) { return 0x20; }
 
