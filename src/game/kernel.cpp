@@ -315,7 +315,8 @@ void fn_802E1A9C(VidInfo* i, u32* offU, u32* offV, u32* offA, u32* frame, u32* r
     u32 sa = fn_802E1954(wa * h);
     u32 sc = fn_802E1954(wc * ch);
     u32 r2 = fn_802E1954(fn_802E1960(i->cwidth) << 3);
-    *ramps = fn_802E1954(fn_802E1960(i->width) << 3) + r2;
+    u32 r1 = fn_802E1954(fn_802E1960(i->width) << 3);
+    *ramps = r1 + r2;
     u32 ya = sy + sa;
     *offA = sy;
     *offU = ya;

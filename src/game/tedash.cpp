@@ -371,8 +371,8 @@ void fn_802B5F98(const char* name) {
         return;
     }
     fn_802E3AD0(fd, "surf\r\n");
-    fn_802E3AD0(fd, "tex worldmap.tex\r\n");
-    fn_802E3AD0(fd, "type normal\r\n");
+    fn_802E3AD0(fd, "\ttex worldmap.tex\r\n");
+    fn_802E3AD0(fd, "\ttype normal\r\n");
     int n = 0;
     for (int x = -0x200; x <= 0x200; x += 8) {
         for (int z = -0x200; z <= 0x200; z += 8) {
@@ -382,12 +382,12 @@ void fn_802B5F98(const char* name) {
             f32 h = fn_801DCF48(&nrm, fx, fz);
             f32 u = (f32)(x + 0x200) * 0.0009765625f;
             f32 v = (f32)(z + 0x200) * 0.0009765625f;
-            fn_802E3AD0(fd, "pt %.2f,%.2f,%.2f\r\n", fx, h, fz);
-            fn_802E3AD0(fd, "uv %.3f, %.3f\r\n", u, v);
-            fn_802E3AD0(fd, "n %.3f, %.3f, %.3f\r\n", nrm.x, nrm.y, nrm.z);
+            fn_802E3AD0(fd, "\tpt %.2f,%.2f,%.2f\r\n", fx, h, fz);
+            fn_802E3AD0(fd, "\tuv %.3f, %.3f\r\n", u, v);
+            fn_802E3AD0(fd, "\tn %.3f, %.3f, %.3f\r\n", nrm.x, nrm.y, nrm.z);
             if (x > -0x200 && z > -0x200) {
-                fn_802E3AD0(fd, "tri %d, %d, %d\r\n", n, n - 1, n - 0x81);
-                fn_802E3AD0(fd, "tri %d, %d, %d\r\n", n - 0x81, n - 1, n - 0x82);
+                fn_802E3AD0(fd, "\ttri %d, %d, %d\r\n", n, n - 1, n - 0x81);
+                fn_802E3AD0(fd, "\ttri %d, %d, %d\r\n", n - 0x81, n - 1, n - 0x82);
             }
             n++;
         }
@@ -818,9 +818,9 @@ void fn_802B7884(const char* label) {
 }
 
 void fn_802B7918(void) {
-    char nm[0x20];
     f32 row = lbl_8055FA48->FindBox("matmap_col")->h;
     TextElem t = *lbl_8055FA48->Find("brush_col");
+    char nm[0x20];
     fn_802B6568(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
     if (lbl_8055FA10.Waiting()) {
         fn_802B6AC0();
@@ -844,10 +844,10 @@ void fn_802B7918(void) {
 }
 
 void fn_802B7B08(void) {
-    char nm[0x20];
     f32 row = lbl_8055FA48->FindBox("matmap_col")->h;
     fn_802B6568(lbl_8055FA48->Find("layer_dropdown"), "Layers");
     TextElem t = *lbl_8055FA48->Find("layer_col");
+    char nm[0x20];
     if (lbl_8055FA08.Waiting()) {
         void* layers = fn_802B5B6C()->layers;
         if (fn_802B1C14(layers) > 0) {

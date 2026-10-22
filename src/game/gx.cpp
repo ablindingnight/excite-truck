@@ -1993,11 +1993,10 @@ void fn_802D2ED8(const RMtx* m, int slot) {
         lbl_8055FD70 = 1;
         lbl_8055FD8C = -1;
     }
-    Mat3 r;
-    V3 p;
-    fn_801BFD34(&p, &m->pos, &lbl_804CA2D8);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&r, &m->rot, &lbl_804CA2D8);
-    fn_802D0DD4(lbl_804C5650, (RMtx*)&r);
+    RMtx t;
+    fn_801BFD34(&t.pos, &m->pos, &lbl_804CA2D8);
+    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&t.rot, &m->rot, &lbl_804CA2D8);
+    fn_802D0DD4(lbl_804C5650, &t);
     GXLoadPosMtxImm(lbl_804C5650, slot * 3);
 }
 

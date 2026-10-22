@@ -286,7 +286,7 @@ void fn_802DB58C(void) {
 void fn_802DB620(void) {
     f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
     m[0][0] = lbl_8055D148;
-    m[1][1] = lbl_8055D148;
+    m[1][2] = lbl_8055D148;
     GXLoadTexMtxImm(m, 0x1E, 1);
 }
 

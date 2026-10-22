@@ -545,23 +545,67 @@ struct HeapBlock {
 };
 
 struct SimpleHeap {
+    void Dump(const char* who) {
+        fn_802E30C8("SimpleHeap dump: %s", who);
+        fn_802E30C8("Allocated:");
+        u32 total = 0;
+        for (HeapBlock* b = used; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            total += b->size;
+        }
+        fn_802E30C8("	%dK total", total >> 10);
+        u32 nfree = 0;
+        fn_802E30C8("Free:");
+        for (HeapBlock* b = free; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            nfree += b->size;
+        }
+        fn_802E30C8("	%dK total", nfree >> 10);
+    }
+    void* Alloc(u32 size) {
+        s32 n = (size + align) & ~align;
+        HeapBlock** best = 0;
+        s32 bestSize = 0x7FFFFFFF;
+        void* res = 0;
+        for (HeapBlock** l = &free; *l; l = &(*l)->next) {
+            HeapBlock* b = *l;
+            if (b->size >= n && bestSize > b->size) {
+                best = l;
+                bestSize = b->size;
+            }
+        }
+        if (best) {
+            HeapBlock* b = *best;
+            HeapBlock* split = 0;
+            HeapBlock* next = b->next;
+            s32 rest = b->size - n;
+            if (rest > ((align + 0x10) & ~align) + 0x20) {
+                HeapBlock* s = (HeapBlock*)((u8*)b + align + n + 1);
+                s->magic = 0xABCFEED0;
+                s->next = 0;
+                s->size = rest - ((align + 0x10) & ~align);
+                s->heap = this;
+                b->size = n;
+                split = s;
+            }
+            if (split) {
+                split->next = next;
+                *best = split;
+            } else {
+                *best = next;
+            }
+            b->next = used;
+            used = b;
+            res = (u8*)b + align + 1;
+        }
+        if (!res && active) {
+            fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
+        }
+        return res;
+    }
     ~SimpleHeap(void) {
         if (used) {
-            fn_802E30C8("SimpleHeap dump: %s", "~SimpleHeap");
-            fn_802E30C8("Allocated:");
-            u32 total = 0;
-            for (HeapBlock* b = used; b; b = b->next) {
-                fn_802E30C8("\tuser ptr %8.8p: %d", b + 1, b->size);
-                total += b->size;
-            }
-            fn_802E30C8("\t%dK total", total >> 10);
-            u32 nfree = 0;
-            fn_802E30C8("Free:");
-            for (HeapBlock* b = free; b; b = b->next) {
-                fn_802E30C8("\tuser ptr %8.8p: %d", b + 1, b->size);
-                nfree += b->size;
-            }
-            fn_802E30C8("\t%dK total", nfree >> 10);
+            Dump("~SimpleHeap");
             fn_802E317C("SimpleHeap Destroyed with pending allocations");
         }
     }
@@ -598,48 +642,7 @@ BinkMovie* fn_802E0BA8(void) {
 
 void fn_802E0BE0(BinkMovie* m) { operator delete(fn_802E0BA4(m)); }
 
-void* fn_802E0C04(u32 size) {
-    SimpleHeap* h = lbl_8055FEE8;
-    s32 n = (size + h->align) & ~h->align;
-    HeapBlock** best = 0;
-    s32 bestSize = 0x7FFFFFFF;
-    void* res = 0;
-    for (HeapBlock** l = &h->free; *l; l = &(*l)->next) {
-        HeapBlock* b = *l;
-        if (b->size >= n && bestSize > b->size) {
-            best = l;
-            bestSize = b->size;
-        }
-    }
-    if (best) {
-        HeapBlock* b = *best;
-        HeapBlock* split = 0;
-        HeapBlock* next = b->next;
-        s32 rest = b->size - n;
-        if (rest > ((h->align + 0x10) & ~h->align) + 0x20) {
-            HeapBlock* s = (HeapBlock*)((u8*)b + h->align + n + 1);
-            s->magic = 0xABCFEED0;
-            s->next = 0;
-            s->size = rest - ((h->align + 0x10) & ~h->align);
-            s->heap = h;
-            b->size = n;
-            split = s;
-        }
-        if (split) {
-            split->next = next;
-            *best = split;
-        } else {
-            *best = next;
-        }
-        b->next = h->used;
-        h->used = b;
-        res = (u8*)b + h->align + 1;
-    }
-    if (!res && h->active) {
-        fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
-    }
-    return res;
-}
+void* fn_802E0C04(u32 size) { return lbl_8055FEE8->Alloc(size); }
 
 void fn_802E0D44(void* p) {
     SimpleHeap* h = lbl_8055FEE8;
@@ -729,9 +732,7 @@ void fn_802E0F98(void) {
 }
 
 void fn_802E1058(void) {
-    if (lbl_8055FEE8) {
-        delete lbl_8055FEE8;
-    }
+    delete lbl_8055FEE8;
     lbl_8055FEE8 = 0;
     delete[] lbl_8055FEEC;
     lbl_8055FEEC = 0;
