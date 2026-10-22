@@ -1148,6 +1148,7 @@ config.libs.append(
             Object(NonMatching, "game/popwarn.cpp"),
             Object(NonMatching, "game/multievt.cpp"),
             Object(NonMatching, "game/unitmenu.cpp"),
+            Object(NonMatching, "game/garage.cpp"),
             Object(NonMatching, "game/minworld.cpp"),
             Object(NonMatching, "game/caruimod.cpp"),
             Object(NonMatching, "game/mstats.cpp"),

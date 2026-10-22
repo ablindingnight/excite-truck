@@ -3457,6 +3457,10 @@ game/unitmenu.cpp:
 	.sbss       start:0x8055F2A8 end:0x8055F2B8
 	.sdata2     start:0x80563920 end:0x80563930
 
+game/garage.cpp:
+	.text       start:0x8024DAD8 end:0x802526E0
+	.ctors      start:0x802ED444 end:0x802ED448
+
 game/minworld.cpp:
 	.text       start:0x802526E0 end:0x80253258
 	.ctors      start:0x802ED448 end:0x802ED44C
