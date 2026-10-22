@@ -1154,6 +1154,8 @@ config.libs.append(
             Object(Matching, "game/tutmenu.cpp"),
             Object(Matching, "game/uiobjs.cpp"),
             Object(NonMatching, "game/recscreen.cpp"),
+            Object(NonMatching, "game/frname.cpp"),
+            Object(NonMatching, "game/carpick.cpp"),
             Object(NonMatching, "game/chalpath.cpp"),
             Object(NonMatching, "game/contmenu.cpp"),
             Object(Matching, "game/stub16.cpp"),

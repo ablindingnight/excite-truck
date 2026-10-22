@@ -3514,6 +3514,14 @@ game/recscreen.cpp:
 	.text       start:0x8025C028 end:0x8025CE78
 	.ctors      start:0x802ED464 end:0x802ED468
 
+game/frname.cpp:
+	.text       start:0x8025CE78 end:0x8025E034
+	.ctors      start:0x802ED468 end:0x802ED46C
+
+game/carpick.cpp:
+	.text       start:0x8025E034 end:0x8025FE8C
+	.ctors      start:0x802ED46C end:0x802ED470
+
 game/chalpath.cpp:
 	.text       start:0x8025FE8C end:0x80262F8C
 	.ctors      start:0x802ED470 end:0x802ED474
