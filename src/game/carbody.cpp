@@ -28,6 +28,74 @@ public:
     virtual void v38(void);
 };
 
+// A large interface reached through slot 0xCC.
+class VBig {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual void s28(void);
+    virtual void s2C(void);
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void s38(void);
+    virtual void s3C(void);
+    virtual void s40(void);
+    virtual void s44(void);
+    virtual void s48(void);
+    virtual void s4C(void);
+    virtual void s50(void);
+    virtual void s54(void);
+    virtual void s58(void);
+    virtual void s5C(void);
+    virtual void s60(void);
+    virtual void s64(void);
+    virtual void s68(void);
+    virtual void s6C(void);
+    virtual void s70(void);
+    virtual void s74(void);
+    virtual void s78(void);
+    virtual void s7C(void);
+    virtual void s80(void);
+    virtual void s84(void);
+    virtual void s88(void);
+    virtual void s8C(void);
+    virtual void s90(void);
+    virtual void s94(void);
+    virtual void s98(void);
+    virtual void s9C(void);
+    virtual void sA0(void);
+    virtual void sA4(void);
+    virtual void sA8(void);
+    virtual void sAC(void);
+    virtual void sB0(void);
+    virtual void sB4(void);
+    virtual void sB8(void);
+    virtual void sBC(void);
+    virtual void sC0(void);
+    virtual void sC4(void);
+    virtual void sC8(void);
+    virtual int sCC(s32 id);
+};
+
+class VG {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual u8* v10(void);
+};
+
+// Two tuning values set together.
+struct F32Pair {
+    f32 a;  // offset 0x0
+    f32 b;  // offset 0x4
+};
+
 struct RVec3;
 
 class RigidBody {
@@ -70,6 +138,20 @@ void fn_801C2BF8(u8* p, f32* m);
 f32 fn_80181AEC(void);
 void fn_8018A8A8(u8* p);
 void fn_801D1184(void);
+f32 fn_80129DC4(int stream, f32 lo, f32 hi);
+f32 fn_802798E8(u8* p);
+void fn_802799EC(u8* p, f32 v);
+u8* fn_801769CC(void);
+int fn_801769C4(void);
+void fn_801BD694(int n);
+void fn_801AFC28(void);
+void fn_80181AFC(void);
+void fn_80204A1C(const char* name, u8* flag);
+void fn_8018C50C(void);
+void fn_8018F538(u8* p, u8* q);
+void fn_80279C00(u8* p, u8* q);
+void fn_80279B28(u8* p, u8* q);
+VBig* fn_801B83A0(void);
 void fn_801D14EC(void);
 void fn_801BD808(void);
 }
@@ -80,9 +162,17 @@ extern TuneBlock lbl_80434930;
 extern TuneBlock lbl_80434950;
 extern u8 lbl_8055E4F4;
 extern f32 lbl_8055E3C8;
-extern f32 lbl_8055E4E0;
+extern F32Pair lbl_8055E4E0;
 extern u8* lbl_8055E918;
 extern s32 lbl_8055E4D0;
+extern s32 lbl_8055E4D4;
+extern u8 lbl_8055E4F6;
+extern u8 lbl_8055A3AC;
+extern u8 lbl_8055A3B6;
+
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+
+static inline int Positive(f32 x) { return x > lbl_80558DC4[0]; }
 
 ModuleTag lbl_8055E4C0;
 CarHandle lbl_8055E4CC;
@@ -136,11 +226,34 @@ f32 fn_80181AC0(void) {
 
 f32 fn_80181AEC(void) { return lbl_80434930.v[3]; }
 
-void fn_80181AFC(u8* p) {}  // stub (236)
+void fn_80181AFC(void) {}  // stub (236)
 
-void fn_80181EAC(u8* p) {}  // stub (33)
+void fn_80181EAC(u8* p) {
+    f32 a = fn_80129DC4(4, 0.6f, 0.85f);
+    f32 b = fn_80129DC4(4, 0.05f, 0.25f);
+    f32 v = fn_802798E8(p);
+    if (v > a && v > b) {
+        fn_802799EC(p, v - b);
+    }
+}
 
-void fn_80181F30(u8* p) {}  // stub (37)
+void fn_80181F30(void) {
+    u32 flags = U32(fn_801769CC(), 0x4);
+    lbl_8055E4D0 = 0;
+    lbl_8055E4F4 = (flags >> 19) & 1;
+    fn_801BD694(8);
+    fn_801AFC28();
+    lbl_8055E4D4 = 1;
+    fn_80181AFC();
+    if (lbl_8055A3B6) {
+        lbl_8055E4E0.a = 10.0f;
+        lbl_8055E4E0.b = 2.0f;
+    }
+    lbl_8055A3B6 = 0;
+    fn_80204A1C("Enable Stalling", &lbl_8055A3AC);
+    lbl_8055E4F6 = 0;
+    fn_8018C50C();
+}
 
 void fn_80181FC4(void) {
     fn_8018C510();
@@ -186,7 +299,16 @@ void fn_8018381C(u8* p) {}  // stub (43)
 
 void fn_801838C8(u8* p) {}  // stub (332)
 
-void fn_80183DF8(u8* p) {}  // stub (33)
+void fn_80183DF8(u8* p) {
+    if (PTR(p, 0x328)) {
+        fn_8018F538(p, p + 0x1E44);
+        fn_80279C00(PTR(p, 0x328), p + 0x1E44);
+        if (fn_801769C4() == 2 && U32(p, 0x10) != 'PCAR' && !(U8(p, 0x260) & 4)) {
+            fn_80181EAC(PTR(p, 0x328));
+            fn_80279B28(PTR(p, 0x328), p + 0x1E44);
+        }
+    }
+}
 
 void fn_80183E7C(u8* p) {}  // stub (3032)
 
@@ -204,7 +326,15 @@ void fn_80188E2C(u8* p) {}  // stub (464)
 
 void fn_8018956C(u8* p) {}  // stub (412)
 
-void fn_80189BDC(u8* p) {}  // stub (34)
+int fn_80189BDC(u8* p) {
+    if (U32(p, 0x10) != 'TRLR') {
+        u8* o = ((VG*)PTR(p, 0x270))->v10();
+        if (o && (S32(o, 0x24) == 1 || S32(o, 0x24) == 3)) {
+            return 0;
+        }
+    }
+    return fn_801B83A0()->sCC(S32(p, 0x1EC));
+}
 
 void fn_80189C64(u8* p) {
     if (U8(p, 0x26AC)) {
@@ -230,7 +360,7 @@ int fn_8018A100(u8* p) { return F32(p, 0x2618) > lbl_80434930.v[1]; }
 
 void fn_8018A120(u8* p) {
     if (!fn_801B2F2C(PTR(p, 0x1EC))) {
-        F32(p, 0x25BC) = lbl_8055E4E0;
+        F32(p, 0x25BC) = lbl_8055E4E0.a;
         ((VR*)PTR(p, 0x2584))->v38();
     }
 }
@@ -297,7 +427,18 @@ f32 fn_8018AE54(void) { return 0.0f; }
 
 void fn_8018AE5C(u8* p) {}  // stub (8)
 
-void fn_8018AE7C(u8* p) {}  // stub (33)
+f32 fn_8018AE7C(u8* p) {
+    if (U32(fn_801769CC(), 0x4) == 0x180304) {
+        return 0.15f;
+    }
+    if (Positive(F32(p, 0x25BC))) {
+        return 0.15f;
+    }
+    if (F32(p, 0xD4) > 1363.5f) {
+        return 0.15f;
+    }
+    return 0.5f;
+}
 
 void fn_8018AF00(u8* p) {}
 
