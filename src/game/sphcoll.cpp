@@ -20,6 +20,22 @@ struct W3 {
     u32 a, b, c;
 };
 
+struct Phob;
+
+class RigidBody {
+public:
+    void Push(Phob* who, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
+};
+
+class VGroup {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(u8* a);
+};
+
+extern "C" void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b);
+
 class VEx {
 public:
     virtual void v08(void);
@@ -127,7 +143,7 @@ void fn_8019B4D8(u8* p) {}  // stub (541)
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
-void fn_8019BD54(u8* p) {}  // stub (704)
+void fn_8019BD54(u8* p, u8* q, int a, int b) {}  // stub (704)
 
 void fn_8019C854(u8* p) {}  // stub (286)
 
@@ -139,7 +155,7 @@ void fn_8019CE4C(u8* p) {}  // stub (69)
 
 void fn_8019CF60(u8* p) {}  // stub (67)
 
-void fn_8019D06C(u8* p) {}  // stub (76)
+void fn_8019D06C(u8* p, u8* q, int a, int b) {}  // stub (76)
 
 void fn_8019D19C(u8* p) {}  // stub (119)
 
@@ -174,9 +190,29 @@ u8* fn_8019E834(u8* p, int del) {
 
 void fn_8019E874(u8* p) {}  // stub (130)
 
-void fn_8019EA7C(u8* p) {}  // stub (38)
+void fn_8019EA7C(u8* p, u8* q) {}  // stub (38)
 
-void fn_8019EB14(u8* p) {}  // stub (43)
+void fn_8019EB14(u8* tree, int i) {
+    u8* n = tree + i * 8;
+    u8 t;
+    t = n[0];
+    n[0] = n[1];
+    n[1] = t;
+    t = n[2];
+    n[2] = n[3];
+    n[3] = t;
+    t = n[4];
+    n[4] = n[5];
+    n[5] = t;
+    t = n[6];
+    n[6] = n[7];
+    n[7] = t;
+    if (*(u16*)(n + 4)) {
+        for (int k = 0; k < 4; k++) {
+            fn_8019EB14(tree, *(u16*)(n + 4) + k);
+        }
+    }
+}
 
 void fn_8019EBC0(u8* p) {
     u8* o = PTR(p, 0x4);
@@ -185,7 +221,13 @@ void fn_8019EBC0(u8* p) {
     }
 }
 
-void fn_8019EBE0(u8* p) {}  // stub (41)
+void fn_8019EBE0(u8* p, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) {
+    if (PTR(p, 0x4)) {
+        ((RigidBody*)PTR(p, 0x4))->Push((Phob*)p, a, b, c, d, e, f, g);
+    } else if (PTR(p, 0x8)) {
+        fn_801A4A10(PTR(p, 0x8), c, f, b);
+    }
+}
 
 void fn_8019EC84(u8* p) {
     u8* o = PTR(p, 0x4);
@@ -403,7 +445,22 @@ void fn_801A1CA0(u8* p) {
 
 void fn_801A1CE4(u8* p) {}  // stub (60)
 
-void fn_801A1DD4(u8* p) {}  // stub (42)
+void fn_801A1DD4(u8* a, u8* obj) {
+    switch (S32(obj, 0x18)) {
+    case 'FLSR':
+        fn_8019D06C(obj, a, 0, 0);
+        break;
+    case 'SPHR':
+        fn_8019BD54(obj, a, 0, 0);
+        break;
+    case 'TUBE':
+        fn_8019EA7C(obj, a);
+        break;
+    case 'GRUP':
+        ((VGroup*)obj)->v10(a);
+        break;
+    }
+}
 
 void fn_801A1E7C(u8* p) {}  // stub (50)
 
@@ -606,7 +663,7 @@ void fn_801A49FC(u8* p) {
     }
 }
 
-void fn_801A4A10(u8* p) {}  // stub (31)
+void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {}  // stub (31)
 
 void fn_801A4A8C(u8* p) {}  // stub (52)
 
