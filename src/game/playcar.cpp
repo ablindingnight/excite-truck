@@ -63,6 +63,20 @@ public:
 
 #define VP(p) ((VPx*)(p))
 
+extern const f32 lbl_8056208C;
+extern const f32 lbl_80562090;
+extern const f32 lbl_80562094;
+extern const f32 lbl_805620AC;
+extern const f32 lbl_80562138;
+#define kZero lbl_8056208C
+#define kOne lbl_80562090
+#define kNegOne lbl_80562094
+#define k255 lbl_805620AC
+#define kTwo lbl_80562138
+
+#define CMIN(a, b) ((a) < (b) ? (a) : (b))
+#define CMAX(a, b) ((a) > (b) ? (a) : (b))
+
 static inline f32 Clamp01(f32 x) {
     x = 1.0f < x ? 1.0f : x;
     return x > 0.0f ? x : 0.0f;
@@ -207,9 +221,17 @@ void fn_80190388(u8* p) {}  // stub (502)
 
 int fn_80190B60(u8* p) { return PF(PTR(p, 0x8))->b4 != 0; }
 
-void fn_80190B7C(u8* p) {}  // stub (34)
+f32 fn_80190B7C(u8* p) {
+    f32 t = CMIN(kOne, ((f32)U8(PTR(p, 0x8), 0x2) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kZero + t * kOne;
+}
 
-void fn_80190C04(u8* p) {}  // stub (34)
+f32 fn_80190C04(u8* p) {
+    f32 t = CMIN(kOne, ((f32)U8(PTR(p, 0x8), 0x3) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kZero + t * kOne;
+}
 
 int fn_80190C8C(u8* p) { return PF(PTR(p, 0x8))->b3 != 0; }
 
@@ -383,9 +405,17 @@ int fn_80192C68(u8* p) { return PF(PTR(p, 0x8))->lvl - 1; }
 
 void fn_80192C7C(u8* p) {}  // stub (37)
 
-void fn_80192D10(u8* p) {}  // stub (34)
+f32 fn_80192D10(u8* p) {
+    f32 t = CMIN(kOne, ((f32)U8(PTR(p, 0x8), 0x5) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kNegOne + t * kTwo;
+}
 
-void fn_80192D98(u8* p) {}  // stub (34)
+f32 fn_80192D98(u8* p) {
+    f32 t = CMIN(kOne, ((f32)U8(PTR(p, 0x8), 0x4) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kNegOne + t * kTwo;
+}
 
 int fn_80192E20(u8* p) { return PF(PTR(p, 0x8))->b0 != 0; }
 
