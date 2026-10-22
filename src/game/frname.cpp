@@ -17,6 +17,17 @@ u8* fn_8023512C(const char* name);
 void operator delete(void* p);
 
 extern void* lbl_80345718[];
+extern char lbl_8055C3E0[1];
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
 extern s32 lbl_8055F3C4;
 
 ModuleTag lbl_8055F3B8;
@@ -45,7 +56,21 @@ u8* fn_8025D96C(u8* p, int del) {
     return p;
 }
 
-void fn_8025D9D0(u8* p) {}  // stub (46)
+u8* fn_8025D9D0(u8* p) {
+    U32(p, 0x420) = 0;
+    *(void**)(p + 0x40C) = lbl_80345718;
+    U32(p, 0x424) = 0;
+    U8(p, 0x42C) = 0;
+    PTR(p, 0x434) = fn_8023512C("caricona.art");
+    PTR(p, 0x0) = (u8*)lbl_8055C3E0;
+    CopyName(lbl_8055C3E0, 0x14, (char*)(p + 0x4));
+    U32(p, 0x408) = 0;
+    PTR(p, 0x1C) = (u8*)lbl_8055C3E0;
+    PTR(p, 0x18) = (u8*)lbl_8055C3E0;
+    U8(p, 0x20) = 0;
+    U8(p, 0x42C) = 0;
+    return p;
+}
 
 u8* fn_8025DA88(u8* p, int del) {
     if (p) {
