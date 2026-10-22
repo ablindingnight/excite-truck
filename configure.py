@@ -1184,6 +1184,7 @@ config.libs.append(
             Object(NonMatching, "game/artanim.cpp"),
             Object(Matching, "game/stub13.cpp"),
             Object(NonMatching, "game/cartags.cpp"),
+            Object(NonMatching, "game/birds.cpp"),
             Object(Matching, "game/trkefx.cpp"),
             Object(NonMatching, "game/groundvis.cpp"),
             Object(Matching, "game/simpletga.cpp"),
