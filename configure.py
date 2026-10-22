@@ -1224,6 +1224,7 @@ config.libs.append(
             Object(Matching, "game/strmfile.cpp"),
             Object(Matching, "game/strmbank.cpp"),
             Object(Matching, "game/callhook.cpp"),
+            Object(NonMatching, "game/rjoy.cpp"),
             Object(Matching, "game/sysconfig.cpp"),
             Object(Matching, "game/movieinfo.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
