@@ -3564,6 +3564,10 @@ game/contmenu.cpp:
 	.sbss       start:0x8055F428 end:0x8055F438
 	.sdata2     start:0x80563BD0 end:0x80563BF0
 
+game/credits.cpp:
+	.text       start:0x80263F30 end:0x80265D38
+	.ctors      start:0x802ED478 end:0x802ED47C
+
 game/stub16.cpp:
 	.text       start:0x80265D38 end:0x80265DCC
 	.ctors      start:0x802ED47C end:0x802ED480
