@@ -3554,6 +3554,10 @@ game/sortwrap.cpp:
 	.ctors      start:0x802ED480 end:0x802ED484
 	.sbss       start:0x8055F468 end:0x8055F470
 
+game/cammgr.cpp:
+	.text       start:0x80265DD8 end:0x8026A600
+	.ctors      start:0x802ED484 end:0x802ED488
+
 game/racerslot.cpp:
 	.text       start:0x8026A600 end:0x8026B118
 	.ctors      start:0x802ED488 end:0x802ED48C

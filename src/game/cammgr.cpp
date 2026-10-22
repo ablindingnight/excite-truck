@@ -1,0 +1,220 @@
+// Camera manager (0x80265DD8-0x8026A600): the per-player camera records, camera type dispatch
+// ("Unrecognized camera type (%d) (id=%d)", "Physcam: get_camera_frame: ..."), crash and cheer sound
+// cues ("crash_vol", "cheer3.sfx") and the per-slot shake levels. Written against raw field offsets;
+// the large routines and the initialiser are still stubs. Names are guesses apart from the strings.
+#include "game/common.h"
+#include <string.h>
+
+#define F32(p, o) (*(f32*)((u8*)(p) + (o)))
+#define S32(p, o) (*(s32*)((u8*)(p) + (o)))
+#define U32(p, o) (*(u32*)((u8*)(p) + (o)))
+#define U8(p, o) (*(u8*)((u8*)(p) + (o)))
+#define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
+
+class VD {
+public:
+    virtual ~VD(void);
+};
+
+struct Words12 {
+    u32 w[12];
+};
+
+extern "C" {
+void fn_801EF024(void* cb);
+void fn_80278288(void);
+void fn_802733F0(void);
+void fn_80209110(void* p);
+void fn_801E9DC4(void* p);
+void fn_802735F4(int i, u8 b);
+void fn_802734F0(u8* p);
+void fn_801EA994(u8* p);
+void fn_80265E08(u8* p);
+void fn_80266150(u8* p);
+u8* fn_80267EE4(int i);
+int fn_8026A554(s32* p);
+}
+
+extern f32 lbl_8055C4C0;
+extern VD* lbl_8055F490;
+extern u32 lbl_8055F494;
+extern s32 lbl_8055F4A0;
+extern s32 lbl_8055F4A4;
+extern u8 lbl_8055F4A8[8];
+extern u8 lbl_80499080[];
+extern s32 lbl_80499E50[];
+extern f32 lbl_80499980[];
+extern u8 lbl_8055F488;
+extern f32 lbl_8055F484;
+
+extern "C" {
+
+u8* fn_80265DD8(u8* p) {
+    fn_80265E08(p);
+    return p;
+}
+
+void fn_80265E08(u8* p) {
+    f32 z = 0.0f;
+    U32(p, 0x0) = 0;
+    F32(p, 0x14) = z;
+    F32(p, 0x10) = z;
+    F32(p, 0xC) = z;
+    U32(p, 0x4) = 0;
+    U32(p, 0x8) = 0;
+}
+
+void fn_80265E2C(u8* p) {}  // stub (38)
+
+void fn_80265EC4(u8* p) {}  // stub (107)
+
+void fn_80266070(u8* p) {}  // stub (44)
+
+u8* fn_80266120(u8* p) {
+    fn_80266150(p);
+    return p;
+}
+
+void fn_80266150(u8* p) {
+    U32(p, 0x4) = 0;
+    U32(p, 0x0) = 0;
+    F32(p, 0x8) = lbl_8055C4C0;
+    F32(p, 0xC) = 1.0f;
+}
+
+void fn_80266170(u8* p) {}  // stub (90)
+
+void fn_802662D8(u8* p) {}  // stub (44)
+
+void fn_80266388(u8* p) {}  // stub (417)
+
+void fn_80266A0C(u8* p) {}  // stub (421)
+
+void fn_802670A0(u8* p) {}  // stub (36)
+
+void fn_80267130(u8* p) {}  // stub (39)
+
+void fn_802671CC(u8* p) {}  // stub (149)
+
+void fn_80267420(u8* p) {}  // stub (152)
+
+void fn_80267680(u8* p) {}  // stub (119)
+
+void fn_8026785C(void) {
+    fn_801EF024((void*)fn_8026A554);
+    fn_80278288();
+    fn_802733F0();
+    if (lbl_8055F490) {
+        delete lbl_8055F490;
+        lbl_8055F490 = 0;
+    }
+    fn_80209110(&lbl_8055F494);
+}
+
+u8* fn_802678C0(int i) { return fn_80267EE4(i) + 0x58; }
+
+u8* fn_802678E4(int i) { return fn_80267EE4(i); }
+
+void fn_802678E8(u8* p) {}  // stub (342)
+
+void fn_80267E40(u8* p) {}  // stub (40)
+
+void fn_80267EE0(u8* p) { fn_802734F0(p); }
+
+u8* fn_80267EE4(int i) { return lbl_80499080 + i * 0x228; }
+
+void fn_80267EF8(u8* p) {}  // stub (238)
+
+void fn_802682B0(u8* p) {}  // stub (42)
+
+void fn_80268358(u8* p) {}  // stub (527)
+
+void fn_80268B94(s32 v) {
+    lbl_8055F4A0 = v;
+    lbl_8055F4A4 = v;
+    fn_801E9DC4(&lbl_8055F4A8);
+}
+
+int fn_80268BA4(int mode) {
+    switch (mode) {
+    case 4:
+    case 5:
+    case 6:
+    case 8:
+    case 9:
+    case 23:
+        return 1;
+    }
+    return 0;
+}
+
+void fn_80268BD4(u8* p) {}  // stub (112)
+
+void fn_80268D94(u8* p) {}  // stub (27)
+
+void fn_80268E00(u8* p) {}  // stub (37)
+
+void fn_80268E94(u8* p) {}  // stub (344)
+
+void fn_802693F4(u8* p) {}  // stub (495)
+
+void fn_80269BB0(u8* p) {}  // stub (400)
+
+void fn_8026A1F0(s32 a, int i, u8 b) {
+    S32(fn_80267EE4(i), 0x14) = a;
+    fn_802735F4(i, b);
+}
+
+void fn_8026A248(s32 a, int i) { S32(fn_80267EE4(i), 0x24) = a; }
+
+s32 fn_8026A27C(int i) {
+    s32 v = lbl_80499E50[i];
+    lbl_80499E50[i] = 0;
+    return v;
+}
+
+void fn_8026A298(int i) { lbl_80499E50[i] = -1; }
+
+void fn_8026A2B0(int i) { lbl_80499E50[i] = 1; }
+
+void fn_8026A2C8(u8* p) { fn_801EA994(p); }
+
+void fn_8026A2CC(const Words12* s, int i, f32 v) {
+    u8* e = lbl_80499080 + i * 0x228;
+    *(Words12*)(e + 0x1A4) = *s;
+    F32(e, 0x1D4) = v;
+}
+
+u32 fn_8026A344(int i) { return U32(fn_80267EE4(i), 0x20); }
+
+u32 fn_8026A368(int i) { return U32(fn_80267EE4(i), 0x10); }
+
+u8 fn_8026A38C(void) { return lbl_8055F488; }
+
+void fn_8026A394(u8* p) {}  // stub (66)
+
+void fn_8026A49C(u8* p) { fn_80269BB0(p); }
+
+void fn_8026A4A0(u8* p) {}  // stub (31)
+
+void fn_8026A51C(u8* p) { fn_802693F4(p); }
+
+f32 fn_8026A520(int i) {
+    if (i >= 0 && (u32)i < 8) {
+        return lbl_80499980[i];
+    }
+    return 0.0f;
+}
+
+void fn_8026A54C(f32 v) { lbl_8055F484 = v; }
+
+int fn_8026A554(s32* p) {
+    s32 i = *p;
+    if (i >= 0 && (u32)i < 8) {
+        lbl_80499980[i] = 0.5f;
+    }
+    return 4;
+}
+
+void fn_8026A584(u8* p) {}  // stub (31)
+}  // extern "C"

@@ -1162,6 +1162,7 @@ config.libs.append(
             Object(NonMatching, "game/contmenu.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),
+            Object(NonMatching, "game/cammgr.cpp"),
             Object(NonMatching, "game/racerslot.cpp"),
             Object(NonMatching, "game/jumpcam.cpp"),
             Object(NonMatching, "game/camframe.cpp"),
