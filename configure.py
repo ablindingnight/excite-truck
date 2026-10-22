@@ -1119,6 +1119,7 @@ config.libs.append(
             Object(NonMatching, "game/roadsnd.cpp"),
             Object(NonMatching, "game/widgetwin.cpp"),
             Object(NonMatching, "game/window.cpp"),
+            Object(NonMatching, "game/widgets.cpp"),
             Object(NonMatching, "game/uistyle.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(NonMatching, "game/uitable.cpp"),

@@ -3209,6 +3209,10 @@ game/window.cpp:
 	.sbss       start:0x8055EFA0 end:0x8055EFB0
 	.sdata2     start:0x80563490 end:0x805634A0
 
+game/widgets.cpp:
+	.text       start:0x80218E98 end:0x8022A5E4
+	.ctors      start:0x802ED3B8 end:0x802ED3BC
+
 game/uistyle.cpp:
 	.text       start:0x8022A5E4 end:0x8022D0D8
 	.ctors      start:0x802ED3BC end:0x802ED3C0
