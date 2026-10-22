@@ -22,6 +22,9 @@ struct Words12 {
 
 extern "C" {
 void fn_801EF024(void* cb);
+f32 fn_80129DC4(int stream, f32 lo, f32 hi);
+s32 fn_80129D90(int stream, s32 lo, s32 hi);
+int fn_80178CA4(void);
 void fn_80278288(void);
 void fn_802733F0(void);
 void fn_80209110(void* p);
@@ -35,7 +38,21 @@ u8* fn_80267EE4(int i);
 int fn_8026A554(s32* p);
 }
 
+// One random shake sample.
+struct ShakeEntry {
+    f32 x;  // offset 0x0
+    f32 y;  // offset 0x4
+    s32 n;  // offset 0x8
+};
+
 extern f32 lbl_8055C4C0;
+extern f32 lbl_8055C4E0;
+extern f32 lbl_8055C4E4;
+extern s32 lbl_8055C4E8;
+extern s32 lbl_8055C4EC;
+extern s32 lbl_8055CFF0;
+extern s32 lbl_8055CFF4;
+extern ShakeEntry lbl_804999A0[];
 extern VD* lbl_8055F490;
 extern u32 lbl_8055F494;
 extern s32 lbl_8055F4A0;
@@ -64,7 +81,15 @@ void fn_80265E08(u8* p) {
     U32(p, 0x8) = 0;
 }
 
-void fn_80265E2C(u8* p) {}  // stub (38)
+void fn_80265E2C(void) {
+    ShakeEntry* e = lbl_804999A0;
+    for (int i = 0; i < 100; i++) {
+        e->x = 0.017453292f * fn_80129DC4(6, -lbl_8055C4E0, lbl_8055C4E0);
+        e->y = 0.017453292f * fn_80129DC4(6, -lbl_8055C4E4, lbl_8055C4E4);
+        e->n = fn_80129D90(6, lbl_8055C4E8, lbl_8055C4EC);
+        e++;
+    }
+}
 
 void fn_80265EC4(u8* p) {}  // stub (107)
 
@@ -90,9 +115,25 @@ void fn_80266388(u8* p) {}  // stub (417)
 
 void fn_80266A0C(u8* p) {}  // stub (421)
 
-void fn_802670A0(u8* p) {}  // stub (36)
+void fn_802670A0(u8* p, int idx) {
+    int n = fn_80178CA4();
+    int cols = (n > 1) + 1;
+    int rows = (n + cols - 1) / cols;
+    int w = lbl_8055CFF0 / cols;
+    int h = lbl_8055CFF4 / rows;
+    S32(p, 0x40) = w;
+    S32(p, 0x44) = h;
+    S32(p, 0x38) = w * (idx / rows);
+    S32(p, 0x3C) = h * (idx % rows);
+}
 
-void fn_80267130(u8* p) {}  // stub (39)
+void fn_80267130(u8* p) {
+    f32 t = (F32(p, 0x30) - 0.39269909f) / 0.78539819f;
+    f32 c = (1.0f < t) ? 1.0f : t;
+    c = (c > 0.0f) ? c : 0.0f;
+    F32(p, 0x48) = 3.0f + -2.5f * c;
+    F32(p, 0x4C) = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
+}
 
 void fn_802671CC(u8* p) {}  // stub (149)
 
