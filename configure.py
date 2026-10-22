@@ -1240,6 +1240,7 @@ config.libs.append(
             Object(NonMatching, "game/rjoy.cpp"),
             Object(NonMatching, "game/rmemcard.cpp"),
             Object(Matching, "game/sysconfig.cpp"),
+            Object(NonMatching, "game/sdmp3.cpp"),
             Object(NonMatching, "game/homebtn.cpp"),
             Object(Matching, "game/movieinfo.cpp"),
             Object(NonMatching, "game/rigid.cpp"),

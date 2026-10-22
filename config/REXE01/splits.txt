@@ -4204,6 +4204,15 @@ game/sysconfig.cpp:
 	.sbss       start:0x80560038 end:0x80560058
 	.sdata2     start:0x805651A8 end:0x805651B8
 
+game/sdmp3.cpp:
+	.text       start:0x802E9A3C end:0x802EC4BC
+	.ctors      start:0x802ED624 end:0x802ED628
+	.data       start:0x8034E260 end:0x8034E9E0
+	.bss        start:0x80507600 end:0x80558860
+	.sdata      start:0x8055D258 end:0x8055D2F0
+	.sbss       start:0x80560058 end:0x805600D8
+	.sdata2     start:0x805651B8 end:0x805651E0
+
 game/homebtn.cpp:
 	.text       start:0x802EC4BC end:0x802ECCE4
 	.ctors      start:0x802ED628 end:0x802ED62C
