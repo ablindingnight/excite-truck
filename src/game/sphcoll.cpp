@@ -36,6 +36,29 @@ public:
 
 extern "C" void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b);
 
+// A rotation plus a translation.
+struct Mat3x3 {
+    f32 m[9];
+};
+
+struct Xform {
+    Mat3x3 rot;
+    RVec3 pos;
+};
+
+extern void* lbl_80333968[];
+
+static inline void Swap32(u8* b) {
+    u8 b0 = b[0];
+    u8 b1 = b[1];
+    u8 b2 = b[2];
+    u8 b3 = b[3];
+    b[0] = b3;
+    b[3] = b0;
+    b[1] = b2;
+    b[2] = b1;
+}
+
 class VEx {
 public:
     virtual void v08(void);
@@ -86,7 +109,7 @@ void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r);
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
 void fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r);
 void fn_8019ECC4(u8* p, u32 a, u32 b);
-void fn_801A1520(u8* p);
+u8* fn_801A1520(u8* p, u32 a, u32 swap);
 void fn_8019F1A4(u8* p);
 void fn_8019EBC0(u8* p);
 void fn_8019F03C(u8* p);
@@ -417,14 +440,25 @@ void fn_801A13F4(u8* p) {}  // stub (32)
 
 void fn_801A1474(u8* p) {}  // stub (43)
 
-void fn_801A1520(u8* p) {}  // stub (43)
+u8* fn_801A1520(u8* p, u32 a, u32 swap) {
+    fn_8019ECC4(p, a, swap);
+    *(void**)p = lbl_80333968;
+    if (swap) {
+        Swap32(p + 0x24);
+        Swap32(p + 0x28);
+        if (S32(p, 0x20) == 0x3EB) {
+            F32(p, 0x24) = F32(p, 0x24) + 3.35f;
+        }
+    }
+    return p;
+}
 
 void fn_801A15CC(u8* p) {}  // stub (123)
 
 void fn_801A17B8(u8* p) {}  // stub (56)
 
-u8* fn_801A1898(u8* p) {
-    fn_801A1520(p);
+u8* fn_801A1898(u8* p, u32 a, u32 swap) {
+    fn_801A1520(p, a, swap);
     *(void**)p = lbl_80333918;
     return p;
 }
@@ -471,7 +505,10 @@ void fn_801A1F44(RVec3* out, u8* q) {
 
 void fn_801A1F98(u8* p) {}  // stub (195)
 
-void fn_801A22A4(u8* p) {}  // stub (44)
+void fn_801A22A4(u8* p) {
+    Xform x = *(Xform*)((VEx*)p)->v50();
+    fn_801E44F4((u8*)&x, 0x50000000, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
+}
 
 void fn_801A2354(u8* p) {}  // stub (56)
 
