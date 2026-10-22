@@ -966,23 +966,15 @@ void fn_80223280(void) {}  // placeholder (820 bytes)
 void fn_802235B4(void) {}  // placeholder (144 bytes)
 void fn_80223644(void) {}  // placeholder (132 bytes)
 void fn_8022375C(void) {}  // placeholder (4 bytes)
-void fn_80223760(void) {}  // placeholder (112 bytes)
 void fn_80223800(void) {}  // placeholder (128 bytes)
 void fn_802238D0(void) {}  // placeholder (248 bytes)
-void fn_802239C8(void) {}  // placeholder (144 bytes)
 void fn_80223AB4(void) {}  // placeholder (224 bytes)
-void fn_80223B94(void) {}  // placeholder (140 bytes)
 void fn_80223C20(void) {}  // placeholder (164 bytes)
 void fn_80223CF0(void) {}  // placeholder (700 bytes)
-void fn_80223FAC(void) {}  // placeholder (124 bytes)
 void fn_80224028(void) {}  // placeholder (312 bytes)
 void fn_802241C8(void) {}  // placeholder (220 bytes)
-void fn_802242A4(void) {}  // placeholder (132 bytes)
 void fn_8022435C(void) {}  // placeholder (364 bytes)
-void fn_802244C8(void) {}  // placeholder (148 bytes)
-void fn_8022455C(void) {}  // placeholder (108 bytes)
 void fn_802245C8(void) {}  // placeholder (668 bytes)
-void fn_80224864(void) {}  // placeholder (152 bytes)
 void fn_802248FC(void) {}  // placeholder (316 bytes)
 void fn_80224A38(void) {}  // placeholder (212 bytes)
 void fn_80224B54(void) {}  // placeholder (492 bytes)
@@ -1341,4 +1333,19 @@ extern u32 lbl_8033F180[];void fn_8022EE98(void*);void fn_8022EEF8(void*,void*,c
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;self->vtable=lbl_8033F180;if(f->asset){fn_8022EE98(f->asset);f->asset=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021B944(WidgetFragment* self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;if(f->asset){char scope[64];const void* context=fn_8022EDC4();fn_8022EEF8(scope,f->asset,context);fn_8022ED00(scope);}fn_80219660(self);if(f->asset)fn_8022EDB8();}
 void fn_80223A58(WidgetFragment* self){if(*(unsigned char*)fn_80216708())fn_802237DC(self);else fn_802237D0(self);((void(*)(WidgetFragment*))fn_80223280)(self);}
+}
+
+struct TwoCleanupPrefix {char base[0x250];void* image;char gap254[12];void* asset;};
+struct ThreeCleanupPrefix {char base[0x280];void* image;void* assetFirst;void* assetSecond;};
+struct TimedFocusPrefix {char base[0x24c];float stamp;char gap250[4];int token;int* focus;char gap25c[4];unsigned char active,inactive;char gap262[6];float value,previous;};
+extern "C" {
+extern u32 lbl_8033E3D4[],lbl_8033E350[],lbl_8033E2CC[],lbl_8033E248[];void fn_802ECFF4(void*);
+int fn_80223760(WidgetFragment* self,int key){if(((SelectionPrefix*)self)->locked)return 0;switch(key){case 0x125:((void(*)(WidgetFragment*))fn_80223644)(self);return 1;case 0x127:((void(*)(WidgetFragment*))fn_802235B4)(self);return 1;}return 0;}
+int fn_802239C8(WidgetFragment* self,int key){if(*(unsigned char*)fn_80216708()){switch(key){case 0x127:((void(*)(WidgetFragment*))fn_802235B4)(self);return 1;case 0x125:((void(*)(WidgetFragment*))fn_80223644)(self);return 1;}}return ((int(*)(WidgetFragment*,int))fn_802192A4)(self,key);}
+WidgetFragment* fn_80223B94(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E3D4;TwoCleanupPrefix* f=(TwoCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->asset);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_80223FAC(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E350;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802ECFF4(f->resource);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_802242A4(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E2CC;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802C519C(f->resource);f->resource=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_802244C8(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E248;ThreeCleanupPrefix* f=(ThreeCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->assetSecond);fn_8022EE98(f->assetFirst);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+void fn_8022455C(WidgetFragment* self){TimedFocusPrefix* f=(TimedFocusPrefix*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,0,f->focus,4);((WidgetDispatch*)self)->Slot74(0,0);}
+void fn_80224864(WidgetFragment* self){TimedFocusPrefix* f=(TimedFocusPrefix*)self;if(!f->active&&f->token==*f->focus){f->inactive=0;f->active=1;}else if(f->active&&f->token!=*f->focus){f->active=0;f->inactive=1;}f->stamp=fn_8023659C();f->previous=f->value;}
 }
