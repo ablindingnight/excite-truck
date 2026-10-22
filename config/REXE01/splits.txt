@@ -3420,6 +3420,10 @@ game/menusel.cpp:
 	.text       start:0x80245080 end:0x802451DC
 	.ctors      start:0x802ED428 end:0x802ED42C
 
+game/mcstatus.cpp:
+	.text       start:0x802451DC end:0x80246938
+	.ctors      start:0x802ED42C end:0x802ED430
+
 game/popwarn.cpp:
 	.text       start:0x80246938 end:0x802494F8
 	.ctors      start:0x802ED430 end:0x802ED434
