@@ -25,6 +25,11 @@ extern u8 lbl_8049F9D8[];
 extern u8 lbl_8049A2C8[];
 extern void* lbl_80347364[];
 
+// A camera pose: three rows of four words.
+struct CamPose {
+    u32 w[12];
+};
+
 ModuleTag lbl_8055F570;
 
 extern "C" {
@@ -89,7 +94,10 @@ void fn_80275B9C(u8* p) {}  // stub (92)
 
 void fn_80275D0C(u8* p) {}  // stub (173)
 
-void fn_80275FC0(u8* p) {}  // stub (33)
+void fn_80275FC0(u8* p) {
+    *(CamPose*)(p + 0x58) = *(CamPose*)(p + 0x1A4);
+    F32(p, 0xBC) = F32(p, 0x1D4);
+}
 
 void fn_80276044(u8* p) { fn_80276BE4(p + 0x58, p + 0xBC); }
 

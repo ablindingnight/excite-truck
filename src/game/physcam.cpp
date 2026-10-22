@@ -19,6 +19,7 @@ struct PathPos {
 
 extern "C" {
 u8* fn_801E87A8(u8* p);
+int strcasecmp(const char* a, const char* b);
 u8* fn_80178C9C(void);
 void fn_80136468(PathPos* out, u8* src);
 void fn_80270EC4(u8* c, u32 id);
@@ -29,9 +30,19 @@ void fn_80271624(u8* p);
 void operator delete(void* p);
 
 extern u8 lbl_8049A258[];
+extern const char* lbl_80346B54[];
+
+// One camera region record.
+struct CamRegion {
+    s32 active;      // offset 0x0
+    u8 data[0x18];   // offset 0x4
+};
+
+extern CamRegion lbl_8049F9D8[];
 extern f32 lbl_8055F540;
 extern f32 lbl_8055F544;
 extern s32 lbl_8055F54C;
+extern s32 lbl_8055F554;
 extern u8 lbl_8055F558;
 
 extern "C" {
@@ -48,7 +59,12 @@ void fn_80270B00(const char* fmt, ...) {}
 
 u32 fn_80270B50(u8* p) { return U32(fn_801E87A8(p), 0x4); }
 
-void fn_80270B74(u8* p) {}  // stub (36)
+void fn_80270B74(void) {
+    for (int i = 0; i < 32; i++) {
+        lbl_8049F9D8[i].active = 0;
+    }
+    lbl_8055F554 = 0;
+}
 
 void fn_80270C04(u8* p) {}  // stub (70)
 
@@ -120,7 +136,14 @@ f32 fn_802715F0(u8* p) {
 
 void fn_80271624(u8* p) {}  // stub (610)
 
-void fn_80271FAC(u8* p) {}  // stub (31)
+int fn_80271FAC(const char* name) {
+    for (int i = 0; i < 18; i++) {
+        if (i != 11 && !strcasecmp(name, lbl_80346B54[i])) {
+            return i;
+        }
+    }
+    return 11;
+}
 
 void fn_80272028(u8* p) {}  // stub (203)
 
