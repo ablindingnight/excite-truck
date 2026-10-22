@@ -3416,6 +3416,10 @@ game/unlkmenu.cpp:
 	.sbss       start:0x8055F228 end:0x8055F238
 	.sdata2     start:0x80563800 end:0x80563830
 
+game/menusel.cpp:
+	.text       start:0x80245080 end:0x802451DC
+	.ctors      start:0x802ED428 end:0x802ED42C
+
 game/popwarn.cpp:
 	.text       start:0x80246938 end:0x802494F8
 	.ctors      start:0x802ED430 end:0x802ED434
