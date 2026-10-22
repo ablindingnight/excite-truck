@@ -948,15 +948,9 @@ void fn_8021C97C(void) {}  // placeholder (92 bytes)
 void fn_8021C9D8(void) {}  // placeholder (52 bytes)
 void fn_8021CB4C(void) {}  // placeholder (112 bytes)
 void fn_8021CBBC(void) {}  // placeholder (328 bytes)
-void fn_8021DB58(void) {}  // placeholder (1384 bytes)
 void fn_8021E620(void) {}  // placeholder (436 bytes)
 void fn_8021E8DC(void) {}  // placeholder (392 bytes)
-void fn_8021EA64(void) {}  // placeholder (312 bytes)
-void fn_8021EB9C(void) {}  // placeholder (128 bytes)
-void fn_8021EC1C(void) {}  // placeholder (392 bytes)
 void fn_8021EDA4(void) {}  // placeholder (572 bytes)
-void fn_8021EFE0(void) {}  // placeholder (100 bytes)
-void fn_8021F044(void) {}  // placeholder (40 bytes)
 void fn_8021F06C(void) {}  // placeholder (808 bytes)
 void fn_8021F394(void) {}  // placeholder (152 bytes)
 void fn_8021F42C(void) {}  // placeholder (76 bytes)
@@ -1081,69 +1075,200 @@ void fn_80227E84(void) {}  // placeholder (216 bytes)
 void fn_80227F5C(void) {}  // placeholder (180 bytes)
 void fn_80228010(void) {}  // placeholder (1032 bytes)
 void fn_802286E4(void) {}  // placeholder (328 bytes)
-void fn_8022882C(void) {}  // placeholder (64 bytes)
-void fn_8022886C(void) {}  // placeholder (116 bytes)
-void fn_802288E0(void) {}  // placeholder (156 bytes)
-void fn_8022897C(void) {}  // placeholder (20 bytes)
-void fn_80228990(void) {}  // placeholder (4 bytes)
-void fn_80228994(void) {}  // placeholder (164 bytes)
-void fn_80228A38(void) {}  // placeholder (52 bytes)
-void fn_80228A6C(void) {}  // placeholder (20 bytes)
-void fn_80228A80(void) {}  // placeholder (4 bytes)
-void fn_80228A84(void) {}  // placeholder (104 bytes)
-void fn_80228AEC(void) {}  // placeholder (676 bytes)
-void fn_80228D90(void) {}  // placeholder (20 bytes)
-void fn_80228DA4(void) {}  // placeholder (8 bytes)
-void fn_80228DAC(void) {}  // placeholder (20 bytes)
-void fn_80228DC0(void) {}  // placeholder (4 bytes)
-void fn_80228DC4(void) {}  // placeholder (188 bytes)
+void fn_80228AEC(WidgetFragment*,float) {}  // placeholder (676 bytes)
+void fn_80228DC4(void*,void*,int,int,int,int) {}  // placeholder (188 bytes)
 void fn_80228E80(void) {}  // placeholder (192 bytes)
-void fn_80229604(void) {}  // placeholder (12 bytes)
-void fn_802298F8(void) {}  // placeholder (4 bytes)
-void fn_802298FC(void) {}  // placeholder (4 bytes)
-void fn_80229900(void) {}  // placeholder (24 bytes)
-void fn_80229918(void) {}  // placeholder (64 bytes)
-void fn_80229958(void) {}  // placeholder (64 bytes)
-void fn_80229998(void) {}  // placeholder (24 bytes)
 void fn_802299B0(void) {}  // placeholder (76 bytes)
 void fn_802299FC(void) {}  // placeholder (152 bytes)
-void fn_80229A94(void) {}  // placeholder (48 bytes)
-void fn_80229AC4(void) {}  // placeholder (24 bytes)
-void fn_80229ADC(void) {}  // placeholder (8 bytes)
-void fn_80229AE4(void) {}  // placeholder (40 bytes)
 void fn_80229B0C(void) {}  // placeholder (92 bytes)
-void fn_80229B68(void) {}  // placeholder (8 bytes)
-void fn_80229B70(void) {}  // placeholder (8 bytes)
 void fn_80229B78(void) {}  // placeholder (112 bytes)
 void fn_80229BE8(void) {}  // placeholder (180 bytes)
-void fn_80229C9C(void) {}  // placeholder (8 bytes)
-void fn_80229CA4(void) {}  // placeholder (8 bytes)
-void fn_80229CAC(void) {}  // placeholder (8 bytes)
-void fn_80229CB4(void) {}  // placeholder (36 bytes)
-void fn_80229CD8(void) {}  // placeholder (32 bytes)
-void fn_80229CF8(void) {}  // placeholder (36 bytes)
-void fn_80229D1C(void) {}  // placeholder (32 bytes)
-void fn_80229D3C(void) {}  // placeholder (32 bytes)
-void fn_80229D5C(void) {}  // placeholder (8 bytes)
 void fn_80229D64(void) {}  // placeholder (92 bytes)
-void fn_80229DC0(void) {}  // placeholder (8 bytes)
-void fn_80229ED4(void) {}  // placeholder (32 bytes)
-void fn_80229EF4(void) {}  // placeholder (32 bytes)
-void fn_80229F14(void) {}  // placeholder (8 bytes)
-void fn_80229F1C(void) {}  // placeholder (28 bytes)
-void fn_80229F38(void) {}  // placeholder (32 bytes)
-void fn_80229F58(void) {}  // placeholder (8 bytes)
-void fn_80229F60(void) {}  // placeholder (24 bytes)
 void fn_80229F78(void) {}  // placeholder (120 bytes)
-void fn_80229FF0(void) {}  // placeholder (24 bytes)
-void fn_8022A008(void) {}  // placeholder (12 bytes)
-void fn_8022A014(void) {}  // placeholder (32 bytes)
-void fn_8022A034(void) {}  // placeholder (32 bytes)
 void fn_8022A054(void) {}  // placeholder (120 bytes)
 void fn_8022A0CC(void) {}  // placeholder (88 bytes)
 void fn_8022A124(void) {}  // placeholder (120 bytes)
 void fn_8022A19C(void) {}  // placeholder (116 bytes)
 void fn_8022A210(void) {}  // placeholder (868 bytes)
-void fn_8022A574(void) {}  // placeholder (32 bytes)
 void fn_8022A594(void) {}  // placeholder (80 bytes)
+}
+
+
+struct ProviderDrawMetrics {char unknown[0x70];float margin;};
+extern "C" {
+extern ProviderDrawMetrics* lbl_8055E050;extern const float lbl_80558DC4,lbl_80563508,lbl_8056350C,lbl_805634C8;
+void* fn_80211660(int);int fn_8022AB18(int,int,int);void fn_8022AAA8(int,const char*);u32 fn_8022AA84(int);
+float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);
+}
+static inline float ObservedProviderClamp(float value){float one=lbl_805634A4;float limited=one<value?one:value;float zero=lbl_805634A8;return limited>zero?limited:zero;}
+static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float duration=lbl_805634E8;float value=((duration+*stamp-now)-lbl_805634A8)/duration;return lbl_805634A8+ObservedProviderClamp(value)*lbl_805634C8;}
+static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float value=((now-*stamp)-lbl_805634A8)/lbl_80563504;int alpha=(int)(lbl_80563508+ObservedProviderClamp(value)*lbl_8056350C);return((u32)alpha<<24)|0x00ffffffu;}
+static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
+extern "C" {
+void fn_8021DB58(WidgetFragment* self){
+ ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;int selected;
+ if(fields->provider->Modal())selected=fields->provider->Selected();
+ else{selected=0;if(fields->focus&&fields->token==*fields->focus)selected=1;}
+ float x=lbl_805634A8,y=lbl_805634A8;fn_80230C30(&x,&y,self->left,self->top);
+ float available=(float)((WidgetDispatch*)self)->Slot78()+lbl_8055E050->margin;
+ float unusedHeight=(float)(self->bottom-self->top);
+ fn_80219660(self);
+ int previousFrame;if(selected){float now=fn_8023659C();if(lbl_805634E8+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
+ int nextFrame;if(selected){float now=fn_8023659C();if(lbl_805634E8+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
+ void* previousArrow=fn_80211660(0);void* nextArrow=fn_80211660(1);
+ float previousOffset=ObservedArrowOffset(&fields->previousTime),nextOffset=ObservedArrowOffset(&fields->nextTime);
+ float nextX=x+(float)fn_8022AB18(fields->height,0,3);
+ fn_8022AAA8(fields->height,fields->provider->Text());
+ y-=(float)fn_8022AB18(fields->height,1,3);
+ float previousX=nextX-fn_80235EF0(previousArrow,previousFrame)-previousOffset;
+ nextX+=nextOffset;
+ u32 align=fn_8022AA84(fields->height);
+ if(align&4){float half=available*lbl_805634C4;previousX-=half;nextX+=half;}
+ else{if(align&2)previousX-=available;else nextX+=available;}
+ u32 previousColor=0xffffffffu,nextColor=0xffffffffu;
+ if(!fields->provider||!fields->provider->HasPrevious())previousColor=ObservedArrowColor(&fields->previousTime);
+ if(!fields->provider||!fields->provider->HasNext())nextColor=ObservedArrowColor(&fields->nextTime);
+ if((fields->provider&&fields->provider->HasPrevious())||ObservedAbsDecision(previousOffset)>lbl_80558DC4){
+  if(previousArrow){float width=fn_80235EF0(previousArrow,previousFrame);float height=fn_80235F64(previousArrow,previousFrame);
+   fn_802354A0(previousArrow,previousFrame,previousColor,previousX,y+height*lbl_805634C4,lbl_805634A8,width,height);}
+ }
+ if((fields->provider&&fields->provider->HasNext())||ObservedAbsDecision(nextOffset)>lbl_80558DC4){
+  if(nextArrow){float width=fn_80235EF0(nextArrow,nextFrame);float height=fn_80235F64(nextArrow,nextFrame);
+   fn_802354A0(nextArrow,nextFrame,nextColor,nextX,y+height*lbl_805634C4,lbl_805634A8,width,height);}
+ }
+}
+}
+
+struct EditorDispatch {virtual ~EditorDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24();virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c();virtual void Slot40();virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual void Slot64(int);virtual void Slot68();virtual void Slot6c();virtual void Slot70();virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
+
+struct TextEntryPrefix {char base[0x244];int state,capacity,stride,cursor;char unknown254[0x800];char* buffer;int font;void* first;void* second;};
+typedef char TextEntryPrefixSize[(sizeof(TextEntryPrefix)==0xa64)?1:-1];
+extern "C" {
+extern u32 lbl_8033E988[];extern const char lbl_8033D96C[],lbl_8033D978[];
+void fn_802C2FC8(void*,int,int,int,int);void fn_80228DC4(void*,void*,int,int,int,int);
+void fn_8022B390(int,const char*,int,int*,int*);void fn_802C47B8(int,int,int,int,int);void fn_802C3014(void*);
+int fn_8022B2D4(int,const char*,int,int);extern int lbl_8055FBF8;
+WidgetFragment* fn_8021EA64(WidgetFragment* self,int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear){
+ fn_80218F34(self,x,y,x+width,y+height+3,0);self->vtable=lbl_8033E988;
+ if(clear)buffer[0]=0;TextEntryPrefix* fields=(TextEntryPrefix*)self;
+ fields->buffer=buffer;fields->font=font;fields->capacity=capacity<0?-capacity:capacity;fields->stride=stride;
+ if(stride==1&&capacity>0)fields->second=fn_802C5130(lbl_8033D96C);else fields->second=0;
+ fields->state=0;fields->first=fn_802C5130(lbl_8033D978);fields->cursor=strlen(buffer);
+ fn_80219440(self,0,buffer,fields->capacity*fields->stride);
+ if(fields->second){int height=fn_802C5220(fields->second);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}
+ return self;
+}
+WidgetFragment* fn_8021EB9C(WidgetFragment* self,int destroy){
+ if(self){self->vtable=lbl_8033E988;TextEntryPrefix* fields=(TextEntryPrefix*)self;
+  fn_802C519C(fields->first);if(fields->second)fn_802C519C(fields->second);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);
+ }return self;
+}
+void fn_8021EC1C(WidgetFragment* self,void* context){
+ fn_802C3034(context);TextEntryPrefix* fields=(TextEntryPrefix*)self;
+ int left=self->left,top=self->top;int width=((WidgetDispatch*)self)->Slot78();
+ fn_802C2FC8(context,left,top,left+width,self->bottom);fn_802192A0(self,context);
+ if(fields->second){int left,top;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4(context,fields->second,left,top,width,0);}
+ left=self->left;top=self->top;width=((WidgetDispatch*)self)->Slot78();
+ fn_802C2FC8(context,left,top,left+width,self->bottom);
+ fn_8022B91C(fields->font,self->left,self->top,fields->buffer,self->flag19!=0);
+ if(self->flag19){int x,y;fn_8022B390(fields->font,fields->buffer,fields->cursor,&x,&y);
+  int cursorY=y+self->top,cursorX=x+self->left;fn_802C47B8(cursorX,cursorY+2,cursorX,cursorY+12,lbl_8055FBF8);
+ }fn_802C3014(context);
+}
+void fn_8021EFE0(WidgetFragment* self,int x,int y){
+ TextEntryPrefix* fields=(TextEntryPrefix*)self;fields->cursor=fn_8022B2D4(fields->font,fields->buffer,x-self->left,y-self->top);WidgetMarkDirty(self);
+}
+void fn_8021F044(WidgetFragment* self){WidgetMarkDirty(self);((EditorDispatch*)self)->Slot64(0);}
+}
+
+struct PointerEventDispatch {virtual ~PointerEventDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24();virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c(int,int);virtual void Slot40();virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual void Slot64();virtual void Slot68();virtual void Slot6c();virtual void Slot70();virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
+
+struct LeafByte24c {char base[0x24c];unsigned char value;};
+struct LeafStoredValue {char base[0x254];int* destination;int value;};
+struct LeafActivity {char base[0x244];unsigned char active;char padding[3];float elapsed;};
+struct LeafChildDispatch {virtual ~LeafChildDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Paint(int,int,int,int);};
+struct LeafChildPrefix {char base[0x244];LeafChildDispatch* child;int first,second;};
+struct LeafResource250 {char base[0x250];void* resource;};
+extern "C" {
+void fn_802C5280(void*,int,int,int);void fn_802C744C(int,void*);
+void fn_80229604(WidgetFragment* self){((LeafByte24c*)self)->value=0;}
+void fn_802298F8(WidgetFragment*){}
+void fn_802298FC(WidgetFragment*){}
+void fn_80229900(WidgetFragment* self){((WidgetDispatch*)self)->Slot74(0,0);}
+void fn_80229918(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=1;}
+void fn_80229958(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=0;}
+void fn_80229998(WidgetFragment* self){LeafStoredValue* fields=(LeafStoredValue*)self;if(fields->destination)*fields->destination=fields->value;}
+void fn_80229A94(WidgetFragment* self){self->flag19=1;WidgetMarkDirty(self);((PointerEventDispatch*)self)->Slot3c(self->left,self->top);}
+void fn_80229AC4(WidgetFragment* self){LeafStoredValue* fields=(LeafStoredValue*)self;if(fields->destination)*fields->destination=fields->value;}
+int fn_80229ADC(WidgetFragment*){return 1;}
+void fn_80229AE4(WidgetFragment* self,int x,int y){LeafChildPrefix* fields=(LeafChildPrefix*)self;fields->child->Paint(fields->first,fields->second,x,y);}
+int fn_80229B68(WidgetFragment*){return 0;}
+void* fn_80229B70(WidgetFragment* self){return ((IntWatchPrefix*)self)->value;}
+void* fn_80229C9C(WidgetFragment* self){return(char*)self+0x264;}
+void* fn_80229CA4(WidgetFragment* self){return(char*)self+0x254;}
+void* fn_80229CAC(WidgetFragment* self){return(char*)self+0x254;}
+void fn_80229CB4(WidgetFragment* self){LeafActivity* fields=(LeafActivity*)self;fields->active=1;fields->elapsed=lbl_805634A8;WidgetMarkDirty(self);}
+void fn_80229CD8(WidgetFragment* self){((LeafActivity*)self)->active=0;WidgetMarkDirty(self);}
+void fn_80229CF8(WidgetFragment* self){self->flag18=1;((LeafActivity*)self)->elapsed=lbl_805634A8;WidgetMarkDirty(self);}
+void fn_80229D1C(WidgetFragment* self){self->flag18=0;WidgetMarkDirty(self);}
+void fn_80229D3C(WidgetFragment* self,int x,int y){fn_802C5280(((LeafResource250*)self)->resource,x-self->left,y-self->top,0);}
+void* fn_80229D5C(WidgetFragment* self){return(char*)self+0x264;}
+void* fn_80229DC0(WidgetFragment* self){return(char*)self+0x268;}
+void fn_80229ED4(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=1;}
+void fn_80229EF4(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=0;}
+void* fn_80229F14(WidgetFragment* self){return ((TextEntryPrefix*)self)->first;}
+void fn_80229F1C(WidgetFragment* self){self->flag18=1;WidgetMarkDirty(self);}
+void fn_80229F38(WidgetFragment* self){self->flag18=0;WidgetMarkDirty(self);}
+void* fn_80229F58(WidgetFragment* self){return(char*)self+0x254;}
+int fn_80229F60(WidgetFragment* self){int result=0;if(self->flag18)result=2;return result;}
+void fn_80229FF0(WidgetFragment* self){((LeafActivity*)self)->active=1;((WidgetDispatch*)self)->Slot4c();}
+void fn_8022A008(WidgetFragment* self){((LeafActivity*)self)->active=0;}
+void fn_8022A014(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=1;}
+void fn_8022A034(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=0;}
+void fn_8022A574(ResourcePrefix* self){if(self->resource!=-1)fn_802C744C(self->resource,(char*)self+8);}
+}
+
+
+struct AdapterTarget {virtual ~AdapterTarget();virtual void Name(const char*);virtual int Enter();virtual void Slot14();virtual int Leave();virtual void Draw();virtual int Flags();virtual int State();};
+struct AdapterPrefix {char base[0x244];const char* name;char lastName[32];AdapterTarget* target;unsigned char owned;char padding[3];int left,top,right,bottom;};
+typedef char AdapterPrefixSize[(sizeof(AdapterPrefix)==0x280)?1:-1];
+extern "C" {
+extern u32 lbl_8033DD20[];
+void* memset(void*,int,unsigned long);int strcasecmp(const char*,const char*);
+void fn_80228AEC(WidgetFragment*,float);
+void fn_802C86F0(ObservedClipRect*,int,int,int,int);void fn_802C88BC(int);void fn_802C8750(ObservedClipRect*,int);
+void* fn_8022882C(AdapterTarget* self,int destroy){if(self){if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_8022886C(WidgetFragment* self,const WidgetDesc* desc,AdapterTarget* target,const char* name){
+ fn_80218F80(self,desc);AdapterPrefix* fields=(AdapterPrefix*)self;fields->name=name;self->vtable=lbl_8033DD20;fields->target=target;fields->owned=0;
+ memset(fields->lastName,0,32);return self;
+}
+WidgetFragment* fn_802288E0(WidgetFragment* self,int destroy){
+ if(self){self->vtable=lbl_8033DD20;AdapterPrefix* fields=(AdapterPrefix*)self;
+  if(fields->owned){delete fields->target;fields->target=0;}
+  fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);
+ }return self;
+}
+int fn_8022897C(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Enter();}
+void fn_80228990(WidgetFragment*){}
+void fn_80228994(WidgetFragment* self){
+ AdapterPrefix* fields=(AdapterPrefix*)self;
+ if(fields->name&&strcasecmp(fields->lastName,fields->name)!=0){
+  const char* source=fields->name;int remaining=32;char* destination=fields->lastName;
+  while((*destination++=*source++)!=0){if(--remaining<=0){destination[-1]=0;break;}}
+  fields->target->Name(fields->lastName);
+ }
+ fn_80228AEC(self,fn_80214D48());
+}
+void fn_80228A38(WidgetFragment* self){fn_80228AEC(self,fn_80214D48());}
+int fn_80228A6C(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Leave();}
+void fn_80228A80(WidgetFragment*){}
+void fn_80228A84(WidgetFragment* self){
+ AdapterPrefix* fields=(AdapterPrefix*)self;ObservedClipRect saved;
+ fn_802C86F0(&saved,fields->left,fields->top,fields->right,fields->bottom);
+ fn_802C88BC(2);fields->target->Draw();fn_802C8750(&saved,-1);
+}
+int fn_80228D90(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Flags();}
+int fn_80228DA4(WidgetFragment*){return 0;}
+int fn_80228DAC(WidgetFragment* self){return ((AdapterPrefix*)self)->target->State();}
+void fn_80228DC0(WidgetFragment*){}
 }
