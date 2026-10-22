@@ -3473,6 +3473,10 @@ game/unitmenu.cpp:
 	.sbss       start:0x8055F2A8 end:0x8055F2B8
 	.sdata2     start:0x80563920 end:0x80563930
 
+game/profile.cpp:
+	.text       start:0x8024C370 end:0x8024DAD8
+	.ctors      start:0x802ED440 end:0x802ED444
+
 game/garage.cpp:
 	.text       start:0x8024DAD8 end:0x802526E0
 	.ctors      start:0x802ED444 end:0x802ED448
