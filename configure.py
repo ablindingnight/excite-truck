@@ -1139,6 +1139,7 @@ config.libs.append(
             Object(Matching, "game/gamedo.cpp"),
             Object(NonMatching, "game/setmenu.cpp"),
             Object(NonMatching, "game/opsound.cpp"),
+            Object(NonMatching, "game/controls.cpp"),
             Object(NonMatching, "game/mcdialog.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
             Object(NonMatching, "game/uicar.cpp"),
