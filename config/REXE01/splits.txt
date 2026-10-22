@@ -4043,6 +4043,16 @@ game/stub15.cpp:
 	.ctors      start:0x802ED5D8 end:0x802ED5DC
 	.sbss       start:0x8055FE88 end:0x8055FE90
 
+game/gndtex.cpp:
+	.text       start:0x802DB2D4 end:0x802DD4FC
+	.ctors      start:0x802ED5DC end:0x802ED5E0
+	.rodata     start:0x802FACD8 end:0x802FAD58
+	.data       start:0x8034CB00 end:0x8034CB50
+	.bss        start:0x804DB468 end:0x804DB6A0
+	.sdata      start:0x8055D148 end:0x8055D150
+	.sbss       start:0x8055FE90 end:0x8055FEC8
+	.sdata2     start:0x80565040 end:0x80565088
+
 game/kernel.cpp:
 	.text       start:0x802E1728 end:0x802E3028
 	.ctors      start:0x802ED5E8 end:0x802ED5EC
