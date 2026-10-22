@@ -3498,6 +3498,10 @@ game/uiobjs.cpp:
 	.sbss       start:0x8055F378 end:0x8055F388
 	.sdata2     start:0x80563AC8 end:0x80563AE0
 
+game/chalpath.cpp:
+	.text       start:0x8025FE8C end:0x80262F8C
+	.ctors      start:0x802ED470 end:0x802ED474
+
 game/contmenu.cpp:
 	.text       start:0x80263080 end:0x80263F30
 	.ctors      start:0x802ED474 end:0x802ED478
