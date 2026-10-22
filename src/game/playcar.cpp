@@ -32,7 +32,7 @@ public:
     virtual void v08(void);
     virtual void v0C(void);
     virtual void v10(u8* car);
-    virtual void v14(void);
+    virtual u32 v14(void);
     virtual int v18(int x);
     virtual void v1C(void);
     virtual int v20(int x);
@@ -42,7 +42,7 @@ public:
     virtual void v30(void);
     virtual void v34(void);
     virtual void v38(void);
-    virtual void v3C(void);
+    virtual void v3C(u32 a, u32 b, int c, u32 d);
     virtual void v40(void);
     virtual void v44(void);
     virtual void v48(void);
@@ -78,6 +78,12 @@ void fn_801B6664(u8* p);
 void fn_8018AE24(u8* car, int v);
 void fn_80191084(u8* p, int a);
 void fn_80191758(u8* p);
+int fn_801B526C(u8* p);
+int fn_801769F8(void);
+void fn_801B6650(u8* p);
+void fn_802793B0(u8* p);
+void fn_801797A8(u8* p, const char* fmt, ...);
+u32 fn_80191100(u8* p);
 }
 
 void operator delete(void* p);
@@ -94,7 +100,10 @@ UnkStaticFFFF lbl_8055E510;
 UnkStaticFFFF lbl_8055E514;
 s32 lbl_8055E518;
 s32 lbl_8055E51C;
-f32 lbl_8055E520;
+u8 lbl_8055E520;
+u8 lbl_8055E521;
+u8 lbl_8055E522;
+u8 lbl_8055E523;
 s32 lbl_8055E524;
 
 extern "C" {
@@ -141,11 +150,44 @@ void fn_80190184(u8* p, u8* car) {
     VP(PTR(p, 0xC))->v10(car);
 }
 
-void fn_801901F0(u8* p) {}  // stub (44)
+u32 fn_801901F0(u8* p) {
+    if (!fn_801B526C(p)) {
+        if (PTR(p, 0x4) && fn_801769F8()) {
+            VP(PTR(p, 0x4))->v78(0);
+        }
+        if (PTR(p, 0x10)) {
+            u32 f = VP(PTR(p, 0x10))->v14();
+            if (!U8(p, 0x34)) {
+                f |= 0x10;
+            }
+            if (lbl_8055E521) {
+                f |= 0x100;
+            }
+            return f;
+        }
+        return 4;
+    }
+    return 0;
+}
 
 void fn_801902A0(u8* p, int a) { VP(PTR(p, 0x4))->v78(a); }
 
-void fn_801902B4(u8* p) {}  // stub (43)
+void fn_801902B4(u8* p) {
+    fn_80191084(p, 0);
+    fn_801B6650(PTR(p, 0x20));
+    u32 cur = fn_80191100(p);
+    if (cur != U32(p, 0x8)) {
+        fn_80191084(p, U32(p, 0x8));
+    } else {
+        fn_80191084(p, U32(p, 0xC));
+    }
+    fn_80191084(p, cur);
+    if (U8(p, 0x38)) {
+        U8(p, 0x38) = 0;
+        fn_802793B0(PTR(p, 0x28));
+    }
+    VP(p)->v30();
+}
 
 void fn_80190360(u8* p) { fn_80191084(p, 0); }
 
@@ -206,7 +248,16 @@ void fn_80190F90(u8* p) { fn_80191758(p); }
 
 void fn_80190F94(u8* p) { VP(PTR(p, 0x10))->v38(); }
 
-void fn_80190FA8(u8* p) {}  // stub (46)
+void fn_80190FA8(u8* p, u32 a, u32 b, int c, u32 d) {
+    if (!PTR(p, 0x10)) {
+        return;
+    }
+    if (PTR(p, 0x10) == PTR(p, 0xC) && lbl_8055E523 && !lbl_8055E520 && c != 1) {
+        lbl_8055E520 = 1;
+        fn_801797A8(PTR(p, 0x28), "Hit object!");
+    }
+    VP(PTR(p, 0x10))->v3C(a, b, c, d);
+}
 
 void fn_80191060(u8* p) { fn_801B6664(p); }
 
