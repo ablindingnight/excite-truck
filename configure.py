@@ -1160,6 +1160,7 @@ config.libs.append(
             Object(Matching, "game/carrival.cpp"),
             Object(Matching, "game/carreg.cpp"),
             Object(NonMatching, "game/eventpath.cpp"),
+            Object(NonMatching, "game/pathcareer.cpp"),
             Object(NonMatching, "game/efxman.cpp"),
             Object(NonMatching, "game/smoke.cpp"),
             Object(NonMatching, "game/sparks.cpp"),
