@@ -25,6 +25,9 @@ void fn_80214AF0(int s);
 void fn_80214B44(int i);
 void fn_80214A9C(int s);
 void fn_80235380(u8* p);
+s32 fn_80129AF4(void);
+int fn_801298E8(void* info, s32 ch);
+void fn_80214FD8(const char* title, const char* msg);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
 }
@@ -33,6 +36,13 @@ void operator delete(void* p);
 
 extern void* lbl_803430E8[];
 extern u8* lbl_8055F244;
+
+// A remote's status block.
+struct WpadInfo {
+    u8 pad0[0x50];  // offset 0x0
+    u32 flags;      // offset 0x50
+    u8 pad54[0x10]; // offset 0x54
+};
 
 ModuleTag lbl_8055F248;
 UnkStatic123s lbl_804988D8;
@@ -139,6 +149,25 @@ void fn_802464B4(u8* p) {}  // stub (60)
 
 void fn_802465A4(u8* p) {}  // stub (166)
 
-void fn_8024683C(u8* p) {}  // stub (45)
+void fn_8024683C(void) {
+    WpadInfo all;
+    WpadInfo one;
+    s32 ch = fn_80129AF4();
+    int warn = 0;
+    if (ch == -1) {
+        for (int i = 0; i < 4; i++) {
+            if (fn_801298E8(&all, i) && (all.flags & 1)) {
+                warn = 1;
+            }
+        }
+    } else {
+        if (fn_801298E8(&one, ch) && (one.flags & 1)) {
+            warn = 1;
+        }
+    }
+    if (warn) {
+        fn_80214FD8("Wireless Warning", "Any information you enter might be picked up by another wireless receiver");
+    }
+}
 
 }  // extern "C"

@@ -11,6 +11,18 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+class VPage {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual u8* v20(void);
+    virtual s32 v24(void);
+};
+
 struct Words3 {
     u32 w[3];
 };
@@ -23,6 +35,7 @@ extern "C" {
 void fn_80236914(void);
 void fn_80214A9C(int s);
 void fn_80230E90(int a);
+void fn_8025C204(u8* p, s32 a);
 void fn_80235380(u8* p);
 void fn_802328D4(u8* p);
 void fn_80214AF0(int s);
@@ -144,7 +157,18 @@ void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
 
 void fn_80260E30(u8* p) {}  // stub (166)
 
-void fn_802610C8(u8* p) {}  // stub (44)
+int fn_802610C8(void) {
+    if (lbl_8055F3EB) {
+        lbl_8055F3EA = 1;
+        fn_80214A9C(0x1E);
+        s32 a = (*(VPage**)(lbl_8055F420 + S32(lbl_8055F420, 0x0) * 4 + 0x60))->v24();
+        fn_8025C204((*(VPage**)(lbl_8055F420 + S32(lbl_8055F420, 0x0) * 4 + 0x60))->v20(), a);
+        fn_80214AF0(0x1E);
+        fn_80230E90(0);
+        lbl_8055F3EA = 0;
+    }
+    return 0;
+}
 
 void fn_80261178(u8* p) {}  // stub (154)
 

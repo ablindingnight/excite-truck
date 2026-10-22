@@ -83,6 +83,14 @@ void operator delete(void* p);
 extern const NameEntry lbl_802FA4B0[3];
 extern char lbl_804989AC[];
 
+struct NameList3 {
+    const char* n[3];
+};
+
+extern const NameList3 lbl_802FA4C8;
+extern char* lbl_8055F294;
+extern u8 lbl_8055F290;
+
 // Copies at most n characters, always terminating.
 static inline void CopyName(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
@@ -124,7 +132,16 @@ void fn_8024958C(u8* p) {}  // stub (53)
 
 int fn_80249660(u8* p) { return 1; }
 
-void fn_80249668(u8* p) {}  // stub (46)
+int fn_80249668(s32* out) {
+    NameList3 names = lbl_802FA4C8;
+    const char* src = names.n[fn_80214D04()];
+    CopyName(src, 0x100, lbl_8055F294);
+    if (lbl_8055F290 && !fn_802411D4()) {
+        *out = -1;
+        return 1;
+    }
+    return 0;
+}
 
 void fn_80249720(void) { lbl_8055BF34 = fn_80214D04(); }
 

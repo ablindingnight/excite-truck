@@ -47,6 +47,7 @@ void fn_8020C918(int a);
 s32 fn_80221EA8(u8* p);
 u8 fn_802E8690(u8* p);
 f32 fn_80214D48(void);
+void fn_80214D50(int s);
 int fn_802C9A58(void);
 void fn_802168BC(int a);
 }
@@ -329,7 +330,27 @@ int fn_80249154(u8* p) {
 
 void fn_802491A8(u8* p) {}  // stub (99)
 
-void fn_80249334(u8* p) {}  // stub (45)
+int fn_80249334(u8* p, int key) {
+    switch (key) {
+    case 0x125:
+        if (S32(p, 0x28) > 0) {
+            fn_80214D50(0);
+            S32(p, 0x28)--;
+        } else {
+            fn_80214D50(1);
+        }
+        break;
+    case 0x127:
+        if (S32(p, 0x28) + 1 < S32(p, 0x24)) {
+            fn_80214D50(0);
+            S32(p, 0x28)++;
+        } else {
+            fn_80214D50(1);
+        }
+        break;
+    }
+    return 0;
+}
 
 void fn_802493E8(u8* p) {
     for (int i = 0; i < S32(p, 0x1C); i++) {
