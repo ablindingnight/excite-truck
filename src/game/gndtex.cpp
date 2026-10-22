@@ -212,6 +212,8 @@ f32 lbl_8055D148 = 1.0f;
 GXTex* lbl_804DB468[3];
 Batch lbl_804DB480;
 
+extern "C" {
+
 void fn_802DB2D4(void) {
     lbl_8055FEB0 = 0;
     GXTex* t = lbl_804DB468[0];
@@ -778,3 +780,5 @@ void fn_802DD27C(u8* verts, int n, const u16* idx, int count) {
 }
 
 void* fn_802DD42C(u32 size) { return fn_802CFF64(size); }
+
+}  // extern "C"
