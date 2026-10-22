@@ -1188,6 +1188,7 @@ config.libs.append(
             Object(NonMatching, "game/cartags.cpp"),
             Object(NonMatching, "game/birds.cpp"),
             Object(NonMatching, "game/zonelite.cpp"),
+            Object(NonMatching, "game/lightwall.cpp"),
             Object(Matching, "game/trkefx.cpp"),
             Object(NonMatching, "game/groundvis.cpp"),
             Object(Matching, "game/simpletga.cpp"),
