@@ -3510,6 +3510,10 @@ game/uiobjs.cpp:
 	.sbss       start:0x8055F378 end:0x8055F388
 	.sdata2     start:0x80563AC8 end:0x80563AE0
 
+game/recscreen.cpp:
+	.text       start:0x8025C028 end:0x8025CE78
+	.ctors      start:0x802ED464 end:0x802ED468
+
 game/chalpath.cpp:
 	.text       start:0x8025FE8C end:0x80262F8C
 	.ctors      start:0x802ED470 end:0x802ED474
