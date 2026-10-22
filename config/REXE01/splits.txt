@@ -3565,9 +3565,21 @@ game/camframe.cpp:
 	.sbss       start:0x8055F518 end:0x8055F520
 	.sdata2     start:0x80563E20 end:0x80563E30
 
+game/camfov.cpp:
+	.text       start:0x8026E870 end:0x80270AE8
+	.ctors      start:0x802ED498 end:0x802ED49C
+
 game/physcam.cpp:
 	.text       start:0x80270AE8 end:0x80273A88
 	.ctors      start:0x802ED49C end:0x802ED4A0
+
+game/camstate.cpp:
+	.text       start:0x80273A88 end:0x80276068
+	.ctors      start:0x802ED4A0 end:0x802ED4A4
+
+game/namedcam.cpp:
+	.text       start:0x80276068 end:0x8027820C
+	.ctors      start:0x802ED4A4 end:0x802ED4A8
 
 game/cscript.cpp:
 	.text       start:0x8027820C end:0x802789A8
