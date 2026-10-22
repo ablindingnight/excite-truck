@@ -1191,6 +1191,7 @@ config.libs.append(
             Object(NonMatching, "game/lightwall.cpp"),
             Object(Matching, "game/trkefx.cpp"),
             Object(NonMatching, "game/groundvis.cpp"),
+            Object(NonMatching, "game/skagbag.cpp"),
             Object(Matching, "game/simpletga.cpp"),
             Object(NonMatching, "game/umat.cpp"),
             Object(NonMatching, "game/lweight.cpp"),
