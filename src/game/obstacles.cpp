@@ -18,6 +18,18 @@ public:
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(const char* a, const char* b);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(const f32* push, const f32* at, int force, int flags);
 };
 
 // A handle whose constructor marks it unused.
@@ -37,13 +49,22 @@ void fn_801A9AB0(u8* p, u8* q);
 void fn_801ABFF8(u8* p, void** f);
 void fn_801ACF94(u8* p);
 void fn_801AD8C8(u8* p);
-void fn_801AD99C(u8* p);
+void fn_801AD99C(u8* p, f32* v, f32* off);
+void fn_801D09A8(u8* p, s32 id);
 }
 
 void operator delete(void* p);
 void* operator new(unsigned long n, const char* tag);
 
 extern void* lbl_8033585C[];
+extern void* lbl_80335808[];
+extern u8* lbl_80435628[];
+
+// Cars, player cars, AI cars and network cars all carry a car tag.
+static inline int IsCar(u8* o) {
+    u32 t = U32(o, 0x10);
+    return t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR';
+}
 extern void* lbl_80335744[];
 extern void* lbl_80335940[];
 extern f32 lbl_8055E3C8;
@@ -89,7 +110,7 @@ void fn_801ABFF4(u8* p) { vf20__10CollVolumeFv(p); }
 
 void fn_801ABFF8(u8* p, void** f) {}  // stub (42)
 
-void fn_801AC0A0(u8* p) {}  // stub (57)
+void fn_801AC0A0(u8* p, int a, int b, int c, u8* car) {}  // stub (57)
 
 void fn_801AC184(u8* p) {}  // stub (47)
 
@@ -129,7 +150,17 @@ u8* fn_801AC2C8(u8* p, int del) {
     return p;
 }
 
-void fn_801AC330(u8* p) {}  // stub (31)
+u8* fn_801AC330(u8* p) {
+    fn_801A9700(p);
+    *(void**)p = lbl_80335808;
+    if (!lbl_8055E5EC) {
+        lbl_8055E5F0 = 0;
+    }
+    S32(p, 0x250) = lbl_8055E5EC++;
+    lbl_80435628[S32(p, 0x250)] = p;
+    S32(p, 0x254) = -1;
+    return p;
+}
 
 void fn_801AC3AC(u8* p) {}  // stub (42)
 
@@ -201,7 +232,16 @@ void fn_801AD7A4(u8* p, int a, int b, int c) {
     }
 }
 
-void fn_801AD7C4(u8* p) {}  // stub (39)
+void fn_801AD7C4(u8* p, int a, int b, int c, u8* car) {
+    fn_801AC0A0(p, a, b, c, car);
+    if (car && IsCar(car)) {
+        s32 id = S32(car, 0x1EC);
+        if (p) {
+            p += 0x23C;
+        }
+        fn_801D09A8(p, id);
+    }
+}
 
 u8 fn_801AD860(u8* p) { return U8(p, 0x220); }
 
@@ -221,7 +261,18 @@ void fn_801AD888(u8* p) {
 
 void fn_801AD8C8(u8* p) {}  // stub (53)
 
-void fn_801AD99C(u8* p) {}  // stub (39)
+void fn_801AD99C(u8* p, f32* v, f32* off) {
+    f32 push[3];
+    f32 at[3];
+    f32 s = F32(p, 0xD4) / 0.01668335f;
+    push[0] = v[0] * s;
+    push[1] = v[1] * s;
+    push[2] = v[2] * s;
+    at[0] = F32(p, 0x60) + off[0];
+    at[1] = F32(p, 0x64) + off[1];
+    at[2] = F32(p, 0x68) + off[2];
+    ((VO*)p)->v48(push, at, 100, 0);
+}
 
 void fn_801ADA38(u8* p, int on) {
     if (on) {
@@ -252,7 +303,7 @@ void fn_801ADAF4(u8* p) { fn_801AD888(p - 0x23C); }
 
 void fn_801ADAFC(u8* p) { fn_801AD8C8(p - 0x23C); }
 
-void fn_801ADB04(u8* p) { fn_801AD99C(p - 0x23C); }
+void fn_801ADB04(u8* p, f32* v, f32* off) { fn_801AD99C(p - 0x23C, v, off); }
 
 void fn_801ADB0C(u8* p, int on) { fn_801ADA38(p - 0x23C, on); }
 
