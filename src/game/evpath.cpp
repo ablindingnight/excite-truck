@@ -18,17 +18,17 @@ public:
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
-    virtual void v18(void);
+    virtual int v18(void);
     virtual u8* v1C(s32 x);
-    virtual void v20(void);
-    virtual void v24(void);
+    virtual u8* v20(void);
+    virtual int v24(void);
     virtual int v28(void);
     virtual void v2C(void);
     virtual void v30(int a);
     virtual void v34(void);
     virtual void v38(const char* s);
     virtual int v3C(void);
-    virtual void v40(void);
+    virtual int v40(void);
     virtual void v44(void);
     virtual void v48(void);
     virtual int v4C(void);
@@ -44,6 +44,7 @@ struct U32List {
 extern "C" {
 void fn_80236914(void);
 void fn_80216D28(void);
+void fn_8025C204(u8* p, s32 a);
 f32 fn_8023659C(void);
 void fn_80214A9C(int s);
 void fn_80214AF0(int s);
@@ -141,7 +142,15 @@ void fn_80283814(u8* p) {}  // stub (73)
 
 void fn_80283938(u8* p) {}  // stub (38)
 
-void fn_802839D0(u8* p) {}  // stub (32)
+int fn_802839D0(void) {
+    if (lbl_8055F684 && lbl_8055F698) {
+        s32 a = VR(PTR((u8*)lbl_8055F698, 0x60))->v24();
+        fn_8025C204(VR(PTR((u8*)lbl_8055F698, 0x60))->v20(), a);
+    } else {
+        fn_80216D28();
+    }
+    return 0;
+}
 
 int fn_80283A50(void) {
     int i;
@@ -162,7 +171,24 @@ found:
     return 0;
 }
 
-void fn_80283AC8(u8* p) {}  // stub (36)
+int fn_80283AC8(void) {
+    int i;
+    u32 key = lbl_8055F698;
+    u32* d = lbl_804B30D8.data;
+    for (i = 0; i < lbl_804B30D8.count; i++) {
+        if (*d == key) {
+            goto found;
+        }
+        d++;
+    }
+    i = -1;
+found:
+    if (i >= 0 && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        return 1;
+    }
+    fn_80216D28();
+    return 0;
+}
 
 void fn_80283B58(u8* p) {}  // stub (180)
 
@@ -200,7 +226,15 @@ void fn_80286788(u8* p) { VR(PTR(p, 0x1C))->v20(); }
 
 void fn_8028679C(u8* p) { VR(PTR(p, 0x1C))->v24(); }
 
-void fn_802867B0(u8* p) {}  // stub (33)
+s32 fn_802867B0(u8* p) {
+    u8* o = PTR(p, 0x20);
+    if (o) {
+        s32 v = (s32)((f32)S32(o, 0x0) + F32(o, 0x10));
+        s32 m = S32(o, 0x4);
+        return v < m ? v : m;
+    }
+    return VR(PTR(p, 0x1C))->v28();
+}
 
 void fn_80286834(u8* p) { VR(p)->v30(VR(p)->v28()); }
 
@@ -261,7 +295,14 @@ u8* fn_8028732C(u8* p, s32 x) {
 
 void fn_80287360(u8* p) {}
 
-void fn_80287364(u8* p) {}  // stub (37)
+int fn_80287364(u8* p) {
+    for (int i = 0; i < VR(p)->v18(); i++) {
+        if (!VR(VR(p)->v1C(i))->v40()) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void fn_802873F8(u8* p) { VR(PTR(p, 0x4))->v24(); }
 
