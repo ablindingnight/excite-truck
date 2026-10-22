@@ -2493,6 +2493,15 @@ game/inputbind.cpp:
 	.sbss       start:0x8055E5C0 end:0x8055E5D8
 	.sdata2     start:0x80562450 end:0x80562478
 
+game/obstacles.cpp:
+	.text       start:0x801A9660 end:0x801ADB44
+	.ctors      start:0x802ED238 end:0x802ED23C
+	.data       start:0x80335528 end:0x80335950
+	.bss        start:0x80435628 end:0x80435728
+	.sdata      start:0x8055A858 end:0x8055A8B8
+	.sbss       start:0x8055E5D8 end:0x8055E5F8
+	.sdata2     start:0x80562478 end:0x80562520
+
 game/corners.cpp:
 	.text       start:0x801ADB44 end:0x801AE59C
 	.ctors      start:0x802ED23C end:0x802ED240
