@@ -38,6 +38,11 @@ public:
     void Show(s32 event);
 };
 
+struct NamedValue {
+    const char* name;
+    s32 value;
+};
+
 struct NameEntry {
     s32 id;
     const char* name;
@@ -55,12 +60,25 @@ void __dt__7UITableFv(void* p, int del);
 void __dt__7DynoTexFv(void* p, int del);
 void fn_8024974C(u32 a, u32 b, u32 c, int d);
 void fn_8024B260(u8* p);
+void fn_80214AF0(int s);
+void fn_80214A9C(int s);
+void fn_80214B44(int i);
 void fn_8024B6AC(u8* p);
 }
 
 void operator delete(void* p);
 
 extern const NameEntry lbl_802FA4B0[3];
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
 
 ModuleTag lbl_8055F280;
 UnkStatic123s lbl_80498998;
@@ -245,7 +263,16 @@ void fn_8024B260(u8* p) {}  // stub (98)
 
 void fn_8024B3E8(u8* p) {}  // stub (87)
 
-void fn_8024B544(u8* p) {}  // stub (36)
+void fn_8024B544(u8* p, const char* name) {
+    S32(p, 0x280) = 0;
+    if (name) {
+        for (int i = 0; i < S32(p, 0x1C); i++) {
+            if (!strcasecmp(((const NamedValue*)PTR(p, 0x18))[i].name, name)) {
+                S32(p, 0x280) = i;
+            }
+        }
+    }
+}
 
 const char* fn_8024B5D4(u8* p, int i) {
     if (i < S32(p, 0x1C)) {
@@ -260,11 +287,26 @@ u8* fn_8024B608(u8* p, int i) { return p + i * 0x68 + 0x78; }
 
 u8* fn_8024B618(u8* p, int i) { return p + i * 0x68 + 0xDC; }
 
-void fn_8024B628(u8* p) {}  // stub (32)
+void fn_8024B628(u8* p) {
+    fn_80214CB4(S32(p, 0x280));
+    for (int i = S32(p, 0x1C); i < S32(p, 0x20); i++) {
+        fn_80214A9C(i + 1);
+    }
+    if (!U8(p, 0x284)) {
+        fn_80214A9C(10);
+    } else {
+        fn_80214AF0(10);
+    }
+    fn_8024B260(p);
+}
 
 void fn_8024B6A8(u8* p) { fn_8024B260(p); }
 
-void fn_8024B6AC(u8* p) {}  // stub (36)
+void fn_8024B6AC(u8* p) {
+    S32(p, 0x9C) = fn_80214D04();
+    CopyName((const char*)PTR(((u8**)PTR(p, 0x18))[S32(p, 0x9C)], 0x10), 50, (char*)(p + 0x64));
+    U32(p, 0x98) = U32(((u8**)PTR(p, 0x18))[S32(p, 0x9C)], 0x0);
+}
 
 void fn_8024B73C(u8* p) {}  // stub (61)
 
@@ -297,7 +339,18 @@ u8* fn_8024B8CC(u8* p) { return p + 0x4c; }
 
 u8* fn_8024B8D4(u8* p) { return p + 0x98; }
 
-void fn_8024B8DC(u8* p) {}  // stub (37)
+void fn_8024B8DC(u8* p) {
+    fn_80214CB4(S32(p, 0x9C));
+    for (int i = 0; i < S32(p, 0x20); i++) {
+        if (i < S32(p, 0x1C)) {
+            if (!U8(((u8**)PTR(p, 0x18))[i], 0x14)) {
+                fn_80214B44(i + 1);
+            }
+        } else {
+            fn_80214A9C(i + 1);
+        }
+    }
+}
 
 void fn_8024B970(u8* p) { fn_8024B6AC(p); }
 
