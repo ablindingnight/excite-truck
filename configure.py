@@ -1140,6 +1140,7 @@ config.libs.append(
             Object(NonMatching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),
+            Object(NonMatching, "game/multievt.cpp"),
             Object(NonMatching, "game/unitmenu.cpp"),
             Object(NonMatching, "game/minworld.cpp"),
             Object(NonMatching, "game/caruimod.cpp"),

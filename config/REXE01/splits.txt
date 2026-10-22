@@ -3403,6 +3403,15 @@ game/unlkmenu.cpp:
 	.sbss       start:0x8055F228 end:0x8055F238
 	.sdata2     start:0x80563800 end:0x80563830
 
+game/multievt.cpp:
+	.text       start:0x802494F8 end:0x8024BDDC
+	.ctors      start:0x802ED434 end:0x802ED438
+	.rodata     start:0x802FA4B0 end:0x802FA510
+	.data       start:0x80343998 end:0x80343E90
+	.bss        start:0x80498998 end:0x804989D0
+	.sdata      start:0x8055BF10 end:0x8055C008
+	.sbss       start:0x8055F280 end:0x8055F2A0
+
 game/unitmenu.cpp:
 	.text       start:0x8024C070 end:0x8024C370
 	.ctors      start:0x802ED43C end:0x802ED440
