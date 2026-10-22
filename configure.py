@@ -1216,6 +1216,7 @@ config.libs.append(
             Object(Matching, "game/vidmode.cpp"),
             Object(NonMatching, "game/modelpool.cpp"),
             Object(NonMatching, "game/billboard.cpp"),
+            Object(NonMatching, "game/drsurf.cpp"),
             Object(NonMatching, "game/drtex.cpp"),
             Object(Matching, "game/discerr.cpp"),
             Object(NonMatching, "game/bonemgr.cpp"),
