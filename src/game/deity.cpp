@@ -128,6 +128,67 @@ public:
     virtual int v28(void* a, int b, int c, int d);
 };
 
+class DMaster {
+public:
+    virtual void m08(void);
+    virtual void m0C(void);
+    virtual void m10(void);
+    virtual void m14(void);
+    virtual void m18(void);
+    virtual void m1C(void);
+    virtual void m20(void);
+    virtual void m24(void);
+    virtual void m28(void);
+    virtual void m2C(void);
+    virtual void m30(void);
+    virtual void m34(void);
+    virtual void m38(void);
+    virtual void m3C(void);
+    virtual void m40(void);
+    virtual void m44(void);
+    virtual void m48(void);
+    virtual void m4C(void);
+    virtual void m50(void);
+    virtual void m54(void);
+    virtual void m58(void);
+    virtual void m5C(void);
+    virtual void m60(void);
+    virtual void m64(void);
+    virtual void m68(void);
+    virtual void m6C(void);
+    virtual void m70(void);
+    virtual void m74(void);
+    virtual void m78(void);
+    virtual void m7C(void);
+    virtual void m80(void);
+    virtual void m84(void);
+    virtual void m88(void);
+    virtual void m8C(void);
+    virtual void m90(void);
+    virtual void Finished(DCar* car, s32 place);  // 0x94
+    virtual void m98(void);
+    virtual void m9C(void);
+    virtual void mA0(void);
+    virtual void mA4(void);
+    virtual void mA8(void);
+    virtual void mAC(void);
+    virtual void mB0(void);
+    virtual void mB4(void);
+    virtual void mB8(void);
+    virtual void mBC(void);
+    virtual void mC0(void);
+    virtual void mC4(void);
+    virtual void mC8(void);
+    virtual void mCC(void);
+    virtual void mD0(void);
+    virtual void mD4(void);
+    virtual void mD8(void);
+    virtual void mDC(void);
+    virtual void mE0(void);
+    virtual void mE4(void);
+    virtual DAI* GetAI(void);  // 0xE8
+};
+
 // Per-car race state (the vtable 0x10 accessor returns it).
 struct DState {
     u32 flags;   // offset 0x4
@@ -155,8 +216,8 @@ public:
     virtual LineFollower* Line(void);     // 0x1C
     virtual DCar* Car(void);              // 0x20
     virtual void v24(void);               // 0x24
-    virtual void v28(void* a, void* b, void* c, s32* out);  // 0x28
-    virtual void v2C(void* a, void* b, void* c, s32* out);  // 0x2C
+    virtual void v28(void* a, void* b, s32* out);  // 0x28
+    virtual void v2C(void* a, void* b, s32* out);  // 0x2C
     virtual void Hold(void);              // 0x30
     virtual void Release(void);           // 0x34
     virtual u8 Held(void);                // 0x38
@@ -246,9 +307,9 @@ void fn_8018B0D0(DCar* car, int mode);
 RaceInfo* fn_801769CC(void);
 RaceSetup* fn_801769D8(void);
 int fn_801769F8(void);
-int fn_80179630(int i);
+int fn_80179630(void);
 int fn_800081F0(RaceInfo* r);
-void* fn_801B83A0(void);
+DMaster* fn_801B83A0(void);
 DAI* fn_8013C9F4(int a);
 void fn_80204A1C(const char* key, u8* out);
 PathSet* fn_80156A40(void);
@@ -479,7 +540,7 @@ int fn_801B0E40(int i, s32* place) {
     return 1;
 }
 
-LineFollower* fn_801B0F18(void) { return lbl_8055E684[fn_80179630(0)].line; }
+IdealPoint* fn_801B0F18(void) { return lbl_8055E684[fn_80179630()].racing.seg; }
 
 int fn_801B0F48(u32 a, u32 b) {
     u32 d = b - a;
@@ -512,7 +573,7 @@ void fn_801B0F70(int i, s32 place) {
     if (!isPlayer) {
         if (fn_801B0E40(i, &place)) {
             int near = 0;
-            u32 il = fn_801B0F18()->il.seg->ilpos;
+            u32 il = fn_801B0F18()->ilpos;
             IdealPoint* s = p.seg;
             while (!fn_801B06D8(&s->pos, &s->dir)) {
                 if (fn_801B0F48(s->ilpos, il)) {
@@ -682,8 +743,7 @@ void fn_801B15A8(DeityCar* c, f32 t) {
                 c->finished = 1;
                 *(s32*)((u8*)c + 0x28) = 3;
                 fn_8018B0D0(c->car, 3);
-                DAI* ai = (DAI*)fn_801B83A0();
-                ((void (*)(DAI*, DCar*, s32))(*(void***)ai)[0x94 / 4])(ai, c->car, *(s32*)((u8*)c + 0x8));
+                fn_801B83A0()->Finished(c->car, *(s32*)((u8*)c + 0x8));
                 fn_801CB55C(c->index, *(s32*)((u8*)c + 0x8));
                 fn_801CB360(c->index);
                 if (c->car->type == 'PCAR') {
@@ -772,14 +832,14 @@ void fn_801B1A5C(DeityCar* c) {
 // Per-car update (placeholder).
 void DeityCar::Update(void) {}
 
-void DeityCar::v28(void* a, void* b, void* c, s32* out) {
+void DeityCar::v28(void* a, void* b, s32* out) {
     *out = 0;
     if (lbl_8055E68C) {
         lbl_8055E68C->v0C(a, b, index, &ai, out);
     }
 }
 
-void DeityCar::v2C(void* a, void* b, void* c, s32* out) {
+void DeityCar::v2C(void* a, void* b, s32* out) {
     *out = 0;
     if (lbl_8055E68C) {
         lbl_8055E68C->v10(a, b, index, &ai, out);
@@ -803,9 +863,8 @@ void fn_801B2024(RaceInfo* r) {
     lbl_8055E67C = 0;
     lbl_8055E684 = new ("proxy_list") DeityCar[n];
     lbl_8055E680 = fn_800081F0(fn_801769CC());
-    DAI* ai = ((DAI * (*)(void*))(*(void***)fn_801B83A0())[0xE8 / 4])(fn_801B83A0());
-    lbl_8055E68C = ai;
-    if (!ai) {
+    lbl_8055E68C = fn_801B83A0()->GetAI();
+    if (!lbl_8055E68C) {
         lbl_8055E68C = fn_8013C9F4(0);
     }
     lbl_8055E674 = 0;
@@ -814,12 +873,8 @@ void fn_801B2024(RaceInfo* r) {
 }  // extern "C"
 
 DeityCar::~DeityCar(void) {
-    if (follower) {
-        delete follower;
-    }
-    if (line) {
-        delete line;
-    }
+    delete follower;
+    delete line;
 }
 
 DeityCar::DeityCar(void) {
@@ -868,7 +923,7 @@ void fn_801B2320(void) {
         CenterLine* line;
     };
     T* t = (T*)((void* (*)(void))fn_80178C9C)();
-    lbl_8055E688 = (s32)t->line->points;
+    lbl_8055E688 = t->line->total;
 }
 
 void fn_801B234C(f32 t) {
@@ -1096,7 +1151,10 @@ s32 fn_801B3050(int i) { return lbl_8055E684[i].start; }
 
 f32 fn_801B3064(void) { return lbl_8055E6A4; }
 
-f32 fn_801B306C(void) { return lbl_8055E6AC - lbl_8055E3C8; }
+f32 fn_801B306C(void) {
+    f32 t = lbl_8055E3C8;
+    return lbl_8055E6AC - t;
+}
 
 s32 fn_801B307C(void) { return lbl_8055E694; }
 
