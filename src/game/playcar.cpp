@@ -34,7 +34,7 @@ public:
     virtual void v10(u8* car);
     virtual u32 v14(void);
     virtual int v18(int x);
-    virtual void v1C(void);
+    virtual void v1C(s32 x, s32 y, s32* dx, s32* dy, f32 t);
     virtual int v20(int x);
     virtual void v24(int a);
     virtual void v28(void);
@@ -84,6 +84,7 @@ void fn_801B6650(u8* p);
 void fn_802793B0(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
+void fn_801B6660(void);
 }
 
 void operator delete(void* p);
@@ -277,7 +278,18 @@ int fn_80191108(u8* p, int x) {
     return a + VP(PTR(p, 0x8))->v18(x + a);
 }
 
-void fn_80191178(u8* p) {}  // stub (50)
+void fn_80191178(u8* p, s32 x, s32 y, s32* outx, s32* outy, f32 t) {
+    s32 ax;
+    s32 ay;
+    s32 bx;
+    s32 by;
+    VP(PTR(p, 0xC))->v1C(x, y, &ax, &ay, t);
+    VP(PTR(p, 0x8))->v1C(x + ax, y + ay, &bx, &by, t);
+    *outx = ax + bx;
+    *outy = ay + by;
+    fn_801B6660();
+    U8(PTR(p, 0x20), 0x260C) = 0;
+}
 
 int fn_80191240(u8* p, int x) {
     int a = x + VP(PTR(p, 0xC))->v20(x);
