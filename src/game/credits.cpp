@@ -1,5 +1,6 @@
 // Track B1 partial draft. Offsets are observed fields, not asserted class names.
 #include "game/common.h"
+void* operator new[](unsigned long,const char*);
 extern "C" {
 extern const char lbl_80346338[12];
 extern const char lbl_80346344[14];
@@ -27,6 +28,7 @@ struct CreditMethodTableFields {const void* slots[24];};
 typedef char CreditTableSize[sizeof(CreditMethodTableFields)==96?1:-1];
 extern "C" {
 struct CreditItemFields {
+CreditItemFields(void);
     CreditItemFields(const void* n,int k,void* c,int m,int e) {kind=k;token=n;callback=c;mode=m;extra=e;}
     CreditItemFields(const CreditItemFields& other) {token=other.token;kind=other.kind;callback=other.callback;mode=other.mode;extra=other.extra;}
     const void* token; int kind; void* callback; int mode; int extra;
@@ -582,13 +584,7 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
 
 extern "C" void fn_80264098(CreditItemFields* self, int kind) { self->kind = kind; }
 
-extern "C" void fn_802640A0(CreditItemFields* self) {
-    self->callback = 0;
-    self->kind = 123;
-    self->token = &lbl_8055C458;
-    self->mode = 0;
-    self->extra = 0;
-}
+CreditItemFields::CreditItemFields(void){callback=0;kind=123;token=&lbl_8055C458;mode=0;extra=0;}
 
 extern "C" void fn_802640C4(CreditItemFields* self,ValueNode* node) {
     const char* type=node->GetValue(lbl_8055C45C);
@@ -810,19 +806,17 @@ extern "C" int fn_802656C8(ValueNode* node) {
         if(!strcasecmp(child->GetName(),lbl_8055C498))count++;
         index++;
     }
-    int allocated=count+5;
-    void* storage=__nwa__FUlPCc(allocated*sizeof(CreditItemFields)+16,lbl_803464B4);
-    CreditItemFields* items=(CreditItemFields*)__construct_new_array(storage,(void*)fn_802640A0,0,sizeof(CreditItemFields),allocated);
-    int used=0;
+int allocated=count+5;CreditItemFields* items=new(lbl_803464B4) CreditItemFields[allocated];
     index=0;
-    while((child=node->GetChildAt(index))!=0) {
-        if(!strcasecmp(child->GetName(),lbl_8055C498))fn_802640C4(&items[used++],child);
-        index++;
+    int secondIndex=0;
+    while((child=node->GetChildAt(secondIndex))!=0) {
+        if(!strcasecmp(child->GetName(),lbl_8055C498))fn_802640C4(&items[index++],child);
+        secondIndex++;
     }
-    fn_802643B8(&items[used++]);
-    fn_80264404(&items[used++]);
-    fn_80264444(&items[used++]);
-    fn_80264484(&items[used]);
+    fn_802643B8(&items[index++]);
+    fn_80264404(&items[index++]);
+    fn_80264444(&items[index++]);
+    fn_80264484(&items[index]);
     CreditMenuDescFields desc={0,0,0,0,0};
     desc.layout=node->GetValue(lbl_8055C4A0);
     desc.items=items;
