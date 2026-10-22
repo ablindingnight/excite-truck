@@ -20,6 +20,11 @@ public:
     void UnloadModel(void);
 };
 
+class VDel {
+public:
+    virtual ~VDel(void);
+};
+
 class MenuState {
 public:
     void Finish(int r);
@@ -34,6 +39,7 @@ struct GarageFlags {
 
 extern "C" {
 void fn_8024739C(u8* p);
+void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void fn_802CAC54(u8* p);
 void fn_80214A9C(int s);
@@ -41,9 +47,13 @@ void fn_80214A9C(int s);
 
 void operator delete(void* p);
 void operator delete[](void* p);
+void* operator new(unsigned long n, const char* tag);
+void* operator new[](unsigned long n, const char* tag);
 
 extern GarageFlags lbl_80498C48;
 extern void* lbl_8034453C[];
+extern void* lbl_803443B0[];
+extern void* lbl_80344384[];
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
@@ -104,9 +114,33 @@ u8* fn_8024FB64(u8* p, int del) {
 
 void fn_8024FBD8(u8* p) {}  // stub (264)
 
-void fn_8024FFF8(u8* p) {}  // stub (33)
+u8* fn_8024FFF8(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_803443B0;
+        VDel* c = (VDel*)PTR(p, 0x188);
+        if (c) {
+            delete c;
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
-void fn_8025007C(u8* p) {}  // stub (35)
+u8* fn_8025007C(int n) {
+    u8* o = (u8*)operator new(0x20, "ChassisList");
+    if (o) {
+        *(void**)o = lbl_80344384;
+        u8* buf = (u8*)operator new[](n * 0x48, "dsa_buf");
+        PTR(o, 0x4) = buf;
+        S32(o, 0xC) = n;
+        U32(o, 0x8) = 0;
+        PTR(o, 0x10) = buf;
+        __ct__9LocStringFPCc(o + 0x14, "EventPath:CONGRATULATIONS");
+    }
+    return o;
+}
 
 void fn_80250108(u8* p) {}  // stub (63)
 
