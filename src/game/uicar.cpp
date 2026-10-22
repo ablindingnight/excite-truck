@@ -11,6 +11,11 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+class VDel {
+public:
+    virtual ~VDel(void);
+};
+
 class VU {
 public:
     virtual void v08(void);
@@ -23,6 +28,7 @@ public:
 
 extern "C" {
 void fn_80235380(u8* p);
+void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
 int fn_802E8504(int ch);
 void __construct_array(void* p, void* ctor, void* dtor, u32 size, u32 n);
@@ -41,6 +47,7 @@ struct JoinSlots {
 extern JoinSlots lbl_80498828;
 extern void* lbl_803426B0[];
 extern void* lbl_80342734[];
+extern void* lbl_80342618[];
 extern s32 lbl_8055F1F4;
 extern u8 lbl_8055F1FC;
 extern u32 lbl_8055F200;
@@ -87,7 +94,16 @@ u8* fn_802407F0(u8* p, int del) {
     return p;
 }
 
-void fn_80240830(u8* p) {}  // stub (32)
+u8* fn_80240830(u8* p, int del) {
+    if (p) {
+        *(void**)(p + 0xC) = lbl_80342618;
+        delete (VDel*)PTR(p, 0x24);
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_802408B0(u8* p, int del) {
     if (p) {
@@ -102,7 +118,19 @@ u8* fn_802408B0(u8* p, int del) {
     return p;
 }
 
-void fn_80240928(u8* p) {}  // stub (31)
+u8* fn_80240928(u8* p, int del) {
+    if (p) {
+        U32(p, 0x24) = 0;
+        *(void**)p = lbl_80342734;
+        U32(p, 0x20) = 0;
+        fn_802328D4(PTR(p, 0x18));
+        U32(p, 0x18) = 0;
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 

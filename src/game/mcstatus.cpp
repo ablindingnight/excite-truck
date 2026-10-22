@@ -22,6 +22,8 @@ u8 fn_8012C33C(const char* lyt);
 void fn_80214D50(int s);
 void fn_80214CB4(int a);
 void fn_80235380(u8* p);
+void fn_802C519C(u8* p);
+void fn_802328D4(u8* p);
 }
 
 void operator delete(void* p);
@@ -53,7 +55,20 @@ u8* fn_8024521C(u8* p, int del) {
 
 void fn_80245264(u8* p) {}  // stub (32)
 
-void fn_802452E4(u8* p) {}  // stub (31)
+void fn_802452E4(u8* p) {
+    if (PTR(p, 0x4)) {
+        fn_802C519C(PTR(p, 0x4));
+    }
+    U32(p, 0x4) = 0;
+    if (PTR(p, 0x8)) {
+        fn_802C519C(PTR(p, 0x8));
+    }
+    U32(p, 0x8) = 0;
+    fn_802328D4(PTR(p, 0xC));
+    fn_802328D4(PTR(p, 0x10));
+    U32(p, 0xC) = 0;
+    U32(p, 0x10) = 0;
+}
 
 void fn_80245360(u8* p) {}  // stub (363)
 
