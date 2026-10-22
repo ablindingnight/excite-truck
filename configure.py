@@ -1197,6 +1197,7 @@ config.libs.append(
             Object(NonMatching, "game/skagbag.cpp"),
             Object(Matching, "game/simpletga.cpp"),
             Object(NonMatching, "game/umat.cpp"),
+            Object(NonMatching, "game/xlobj.cpp"),
             Object(NonMatching, "game/lweight.cpp"),
             Object(Matching, "game/stub14.cpp"),
             Object(NonMatching, "game/faninfo.cpp"),
