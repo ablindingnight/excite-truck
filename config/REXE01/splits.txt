@@ -3792,6 +3792,15 @@ game/groundvis.cpp:
 	.sbss       start:0x8055F960 end:0x8055F990
 	.sdata2     start:0x80564AF0 end:0x80564BB8
 
+game/objplace.cpp:
+	.text       start:0x802B1D38 end:0x802B3FC4
+	.ctors      start:0x802ED554 end:0x802ED558
+	.data       start:0x8034A288 end:0x8034A408
+	.bss        start:0x804BE1F0 end:0x804BE248
+	.sdata      start:0x8055CDB8 end:0x8055CDF8
+	.sbss       start:0x8055F9A8 end:0x8055F9C0
+	.sdata2     start:0x80564C00 end:0x80564C30
+
 game/skagbag.cpp:
 	.text       start:0x802B3FC4 end:0x802B4FB0
 	.ctors      start:0x802ED558 end:0x802ED55C
