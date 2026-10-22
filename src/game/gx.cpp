@@ -325,11 +325,11 @@ struct Light {
 struct GXLightSet {
     GXLightSet(void);
     RMtx view;      // offset 0x0
-    u8 amb[4];      // offset 0x30
-    u8 col[4];      // offset 0x34
+    GXColor amb;    // offset 0x30
+    GXColor col;    // offset 0x34
     u8 alpha;       // offset 0x38
     u8 pad39[3];
-    f32 dir[3];     // offset 0x3C
+    V3 dir;         // offset 0x3C
     f32 scale;      // offset 0x48
 };
 
@@ -391,6 +391,23 @@ PointLight lbl_804CA088[7];
 GXLightObj lbl_804CA118[7];
 RMtx lbl_804CA2D8;
 
+struct GPMetric {
+    s32 id;
+    const char* name;
+    s32 metric;
+    const char* unit;
+    s32 kind;
+};
+
+GPMetric lbl_8034BD40[6] = {
+    {0x22, "Clocks", 0x10, "Vertex", 1},     {2, "Clip Clocks", 0x15, "Clock", 1},
+    {3, "XF Wait In", 0x15, "Clock", 1},     {4, "XF Wait Out", 0x15, "Clock", 1},
+    {5, "XF XFrm", 0x15, "Clock", 1},        {6, "XF Lit", 0x15, "Clock", 1},
+};
+
+extern s32 lbl_80558DC4[];  // FLT_EPSILON
+#define FEPS (*(f32*)lbl_80558DC4)
+
 ModuleTag lbl_8055FD00;
 static inline u16 BlendKey(int v) { return v; }
 u16 lbl_8055FD08 = BlendKey(0x100);
@@ -442,7 +459,7 @@ s32 lbl_8055FDA8;
 s32 lbl_8055FDAC;   // light sets
 GXLightSet* lbl_8055FDB0;
 u8 lbl_8055FDB4;    // shadow alpha pass
-s32 lbl_8055FDB8;   // hang count
+u32 lbl_8055FDB8;   // hang count
 u32 lbl_8055FDBC;
 s32 lbl_8055FDC0;
 s32 lbl_8055FDC4;   // screenshot start
@@ -516,12 +533,12 @@ void fn_802CEA34(void) {
 void fn_802CEAC4(void) {
     switch (VIGetTvFormat()) {
     case 0:
-        if (fn_802E9A1C() && VIGetDTVStatus()) {
-            fn_802E30C8("gx: NTSC 480p");
-            lbl_8055FD64 = &GXNtsc480Prog;
-        } else {
+        if (!fn_802E9A1C() || !VIGetDTVStatus()) {
             fn_802E30C8("gx: NTSC 480i");
             lbl_8055FD64 = &GXNtsc480IntDf;
+        } else {
+            fn_802E30C8("gx: NTSC 480p");
+            lbl_8055FD64 = &GXNtsc480Prog;
         }
         break;
     case 1:
@@ -622,8 +639,8 @@ void fn_802CED78(void) {
 }
 
 void fn_802CEF90(void) {
-    u8 dummy;
     u8 overhi;
+    u8 dummy;
     if (lbl_8055FD34) {
         lbl_8055FD38++;
     }
@@ -981,7 +998,7 @@ void fn_802CFCA0(void) {
     GXInvalidateVtxCache();
     GXSetDrawSync(1);
     lbl_8055FD30++;
-    if (!lbl_804C97B0.range && !((f32)__fabs(lbl_804C97B0.depth) <= 1.1920929e-07f)) {
+    if (!lbl_804C97B0.range && !((f32)__fabs(lbl_804C97B0.depth) <= FEPS)) {
         lbl_804C97B0.range = 1;
         lbl_804C97B0.dirty = 1;
     }
@@ -1048,7 +1065,7 @@ void fn_802CFF50(void) { lbl_8055FD20 = -1; }
 void fn_802CFF5C(u32 flags) { lbl_8055FD1C = flags; }
 
 void* fn_802CFF64(u32 size) {
-    u32 n = (size + 0x1F) & ~0x1F;
+    s32 n = (size + 0x1F) & ~0x1F;
     s32 used = lbl_8055FD94;
     if (used + n > 0x177000) {
         lbl_8055FD94 = n;
@@ -1074,12 +1091,12 @@ void fn_802CFFAC(u8 r, u8 g, u8 b) {
 
 void fn_802D0014(f32 start, f32 end, f32 depth) {
     lbl_804C97B0.start = start;
-    if ((f32)__fabs(depth) <= 1.1920929e-07f) {
-        lbl_804C97B0.end = end;
-        lbl_804C97B0.range = 0;
-    } else {
+    if (!((f32)__fabs(depth) <= FEPS)) {
         lbl_804C97B0.range = 1;
         lbl_804C97B0.end = start + (end - start) / depth;
+    } else {
+        lbl_804C97B0.end = end;
+        lbl_804C97B0.range = 0;
     }
     lbl_804C97B0.depth = depth;
     lbl_804C97B0.dirty = 1;
@@ -1191,18 +1208,10 @@ s32 fn_802D0514(const RMtx* view) {
     GXLightSet* s = &lbl_8055FDB0[n];
     lbl_8055FDAC = n + 1;
     s->view = *view;
-    s->amb[0] = lbl_804C97D0.amb.r;
-    s->amb[1] = lbl_804C97D0.amb.g;
-    s->amb[2] = lbl_804C97D0.amb.b;
-    s->amb[3] = lbl_804C97D0.amb.a;
-    s->col[0] = lbl_804C97D0.color.r;
-    s->col[1] = lbl_804C97D0.color.g;
-    s->col[2] = lbl_804C97D0.color.b;
-    s->col[3] = lbl_804C97D0.color.a;
+    s->amb = lbl_804C97D0.amb;
+    s->col = lbl_804C97D0.color;
     s->alpha = lbl_804C97D0.alpha;
-    s->dir[0] = lbl_804C97D0.dir.x;
-    s->dir[1] = lbl_804C97D0.dir.y;
-    s->dir[2] = lbl_804C97D0.dir.z;
+    s->dir = lbl_804C97D0.dir;
     s->scale = lbl_804C97D0.scale;
     return n + 1;
 }
@@ -1215,18 +1224,10 @@ void fn_802D0610(s32 set) {
         GXLightSet* s = &lbl_8055FDB0[set - 1];
         lbl_804C5690 = s->view;
         lbl_8055FD70 = 1;
-        lbl_804C97D0.amb.r = s->amb[0];
-        lbl_804C97D0.amb.g = s->amb[1];
-        lbl_804C97D0.amb.b = s->amb[2];
-        lbl_804C97D0.amb.a = s->amb[3];
-        lbl_804C97D0.color.r = s->col[0];
-        lbl_804C97D0.color.g = s->col[1];
-        lbl_804C97D0.color.b = s->col[2];
-        lbl_804C97D0.color.a = s->col[3];
+        lbl_804C97D0.amb = s->amb;
+        lbl_804C97D0.color = s->col;
         lbl_804C97D0.alpha = s->alpha;
-        lbl_804C97D0.dir.x = s->dir[0];
-        lbl_804C97D0.dir.y = s->dir[1];
-        lbl_804C97D0.dir.z = s->dir[2];
+        lbl_804C97D0.dir = s->dir;
         lbl_804C97D0.scale = s->scale;
         lbl_804C97D0.dirty = 1;
     } else {
@@ -1452,8 +1453,9 @@ static inline void ApplyBlend(void) {
     if (lbl_8055FD86 == lbl_8055FD08) {
         GXSetBlendMode(0, 0, 0, 5);
     } else {
+        int hi = lbl_8055FD86 >> 8;
         int d = fn_802D0EC8(lbl_8055FD86 & 0xFF);
-        GXSetBlendMode(1, fn_802D0EC8(lbl_8055FD86 >> 8), d, 5);
+        GXSetBlendMode(1, fn_802D0EC8(hi), d, 5);
     }
 }
 
@@ -1991,9 +1993,9 @@ void fn_802D2ED8(const RMtx* m, int slot) {
         lbl_8055FD70 = 1;
         lbl_8055FD8C = -1;
     }
+    Mat3 r;
     V3 p;
     fn_801BFD34(&p, &m->pos, &lbl_804CA2D8);
-    Mat3 r;
     Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&r, &m->rot, &lbl_804CA2D8);
     fn_802D0DD4(lbl_804C5650, (RMtx*)&r);
     GXLoadPosMtxImm(lbl_804C5650, slot * 3);
