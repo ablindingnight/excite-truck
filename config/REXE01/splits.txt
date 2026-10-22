@@ -3384,6 +3384,10 @@ game/nameent.cpp:
 	.sdata      start:0x8055BD38 end:0x8055BD60
 	.sbss       start:0x8055F1D0 end:0x8055F1E8
 
+game/uicar.cpp:
+	.text       start:0x8023FE20 end:0x80243460
+	.ctors      start:0x802ED418 end:0x802ED41C
+
 game/keyboard.cpp:
 	.text       start:0x80243478 end:0x802445FC
 	.ctors      start:0x802ED41C end:0x802ED420
