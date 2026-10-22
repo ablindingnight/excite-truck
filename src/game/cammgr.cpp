@@ -46,6 +46,7 @@ struct ShakeEntry {
 };
 
 extern f32 lbl_8055C4C0;
+extern f32 lbl_8055E3C8;
 extern f32 lbl_8055C4E0;
 extern f32 lbl_8055C4E4;
 extern s32 lbl_8055C4E8;
@@ -158,7 +159,17 @@ u8* fn_802678E4(int i) { return fn_80267EE4(i); }
 
 void fn_802678E8(u8* p) {}  // stub (342)
 
-void fn_80267E40(u8* p) {}  // stub (40)
+void fn_80267E40(u32 id, f32 strength) {
+    f32 now = lbl_8055E3C8;
+    for (int i = 0; i < 4; i++) {
+        u8* c = fn_80267EE4(i);
+        if (U32(c, 0x140) == id && strength > F32(c, 0x154) * (1.0f - (now - F32(c, 0x158)) / 0.5f)) {
+            F32(c, 0x158) = now;
+            F32(c, 0x154) = strength;
+            return;
+        }
+    }
+}
 
 void fn_80267EE0(u8* p) { fn_802734F0(p); }
 

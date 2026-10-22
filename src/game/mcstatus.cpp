@@ -21,6 +21,9 @@ extern "C" {
 u8 fn_8012C33C(const char* lyt);
 void fn_80214D50(int s);
 void fn_80214CB4(int a);
+void fn_80214AF0(int s);
+void fn_80214B44(int i);
+void fn_80214A9C(int s);
 void fn_80235380(u8* p);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
@@ -100,7 +103,18 @@ u8* fn_802461D0(u8* p, int del) {
     return p;
 }
 
-void fn_80246210(u8* p) {}  // stub (36)
+void fn_80246210(void) {
+    U8(lbl_8055F244, 0x1E) = 0;
+    s32 n = S32(PTR(lbl_8055F244, 0x20), 0x14);
+    for (int i = 0; i < n; i++) {
+        fn_80214AF0(i);
+    }
+    for (; n < 4; n++) {
+        fn_80214B44(n);
+        fn_80214A9C(n);
+    }
+    fn_80214CB4(S32(PTR(lbl_8055F244, 0x20), 0x10));
+}
 
 void fn_802462A0(u8* p) {}  // stub (98)
 
