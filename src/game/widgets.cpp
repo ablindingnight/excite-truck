@@ -916,8 +916,6 @@ void fn_80219F14(void) {}  // placeholder (204 bytes)
 void fn_80219FE0(void) {}  // placeholder (1496 bytes)
 void fn_8021AA18(void) {}  // placeholder (368 bytes)
 void fn_8021B460(void) {}  // placeholder (1100 bytes)
-void fn_8021B8AC(void) {}  // placeholder (152 bytes)
-void fn_8021B944(void) {}  // placeholder (104 bytes)
 void fn_8021B9AC(void) {}  // placeholder (184 bytes)
 void fn_8021BA64(void) {}  // placeholder (316 bytes)
 void fn_8021BC20(void) {}  // placeholder (296 bytes)
@@ -933,7 +931,6 @@ void fn_8021CBBC(void) {}  // placeholder (328 bytes)
 void fn_8021E620(void) {}  // placeholder (436 bytes)
 void fn_8021E8DC(void) {}  // placeholder (392 bytes)
 void fn_8021EDA4(void) {}  // placeholder (572 bytes)
-void fn_8021F06C(void) {}  // placeholder (808 bytes)
 void fn_8021F478(void) {}  // placeholder (120 bytes)
 void fn_8021F4F0(void) {}  // placeholder (392 bytes)
 void fn_8021F678(void) {}  // placeholder (372 bytes)
@@ -973,7 +970,6 @@ void fn_80223760(void) {}  // placeholder (112 bytes)
 void fn_80223800(void) {}  // placeholder (128 bytes)
 void fn_802238D0(void) {}  // placeholder (248 bytes)
 void fn_802239C8(void) {}  // placeholder (144 bytes)
-void fn_80223A58(void) {}  // placeholder (84 bytes)
 void fn_80223AB4(void) {}  // placeholder (224 bytes)
 void fn_80223B94(void) {}  // placeholder (140 bytes)
 void fn_80223C20(void) {}  // placeholder (164 bytes)
@@ -1314,4 +1310,35 @@ WidgetFragment* fn_8021BBA0(WidgetFragment* self,int destroy){if(self){self->vta
 WidgetFragment* fn_8021F394(WidgetFragment* self,int x,int y,int parameter,int* value,int height){fn_80219568(self,x,y,0,height,0,0);BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->parameter=parameter;self->vtable=lbl_8033E8FC;f->value=value;fn_801A7E54(f->buffer,24,(int)value);fn_80219440(self,0,value,16);fn_80219718(self);return self;}
 int fn_8021FBC4(WidgetFragment* self,int x,int y){HitAreaPrefix* f=(HitAreaPrefix*)self;int result=0,insideY=0,insideX=0;if(x>=f->x-20&&x<f->x+f->width+20)insideX=1;if(insideX&&y>=f->y-20)insideY=1;if(insideY&&y<f->y+f->height+20)result=1;return result;}
 WidgetFragment* fn_8022003C(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E7F4;fn_802C519C((void*)self->label);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+}
+
+extern "C" {
+int fn_802E4A1C(int);
+int fn_8021F06C(WidgetFragment* self,int key){
+ TextEntryPrefix* f=(TextEntryPrefix*)self;char* text=f->buffer;
+ if(f->cursor>(int)strlen(text))f->cursor=strlen(text);
+ int capacity=f->capacity*f->stride;
+ if(!self->flag19)return 0;
+ WidgetMarkDirty(self);
+ if((unsigned int)key>=0x160&&(unsigned int)key<=0x169)key=(unsigned short)(key+0xfed0);
+ switch(key){
+ case 0x124:f->cursor=0;WidgetMarkDirty(self);break;
+ case 0x123:f->cursor=strlen(f->buffer);WidgetMarkDirty(self);break;
+ case 0x125:if(f->cursor>0){f->cursor--;WidgetMarkDirty(self);}break;
+ case 0x127:if((unsigned int)f->cursor<strlen(f->buffer)){f->cursor++;WidgetMarkDirty(self);}break;
+ case 0x12e:{text=f->buffer;if(strlen(text)!=0){register int index=f->cursor;if((unsigned int)index<strlen(text)){while(f->buffer[index]){f->buffer[index]=f->buffer[index+1];index++;}}}WidgetMarkDirty(self);break;}
+ case 8:if(strlen(f->buffer)!=0&&f->cursor>0){int i=--f->cursor;while(f->buffer[i]){f->buffer[i]=f->buffer[i+1];i++;}}WidgetMarkDirty(self);break;
+ case 9:if(!fn_802E4A1C(0xfd))fn_802194F4(self);else fn_80219508(self);break;
+ default:if(!(key&0x100)&&(unsigned int)key>31){text=f->buffer;if(strlen(text)<(unsigned int)(capacity-1)){int i=strlen(text)+1;while(i>f->cursor){f->buffer[i]=f->buffer[i-1];i--;}f->buffer[f->cursor++]=(char)key;}WidgetMarkDirty(self);}else return ((int(*)(WidgetFragment*,int))fn_802192A4)(self,key);break;
+ }
+ return 1;
+}
+}
+
+struct ScopedAssetPrefix {char base[0x368];int resource;char gap36c[4];void* asset;};
+extern "C" {
+extern u32 lbl_8033F180[];void fn_8022EE98(void*);void fn_8022EEF8(void*,void*,const void*);void fn_8022ED00(void*);void fn_8022EDB8();
+WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;self->vtable=lbl_8033F180;if(f->asset){fn_8022EE98(f->asset);f->asset=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+void fn_8021B944(WidgetFragment* self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;if(f->asset){char scope[64];const void* context=fn_8022EDC4();fn_8022EEF8(scope,f->asset,context);fn_8022ED00(scope);}fn_80219660(self);if(f->asset)fn_8022EDB8();}
+void fn_80223A58(WidgetFragment* self){if(*(unsigned char*)fn_80216708())fn_802237DC(self);else fn_802237D0(self);((void(*)(WidgetFragment*))fn_80223280)(self);}
 }
