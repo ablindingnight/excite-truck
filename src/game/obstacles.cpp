@@ -32,6 +32,21 @@ public:
     virtual void v48(const f32* push, const f32* at, int force, int flags);
 };
 
+// A 12-word body pose.
+struct Pose12 {
+    u32 w[12];
+};
+
+class CollVolume {
+public:
+    void Update(void);
+};
+
+class RigidBody {
+public:
+    void Reset(void);
+};
+
 // A handle whose constructor marks it unused.
 struct ObHandle {
     s32 v;
@@ -46,6 +61,10 @@ s32 fn_801C1BA4(s32 a, s32 b);
 void fn_801D08C0(u8* p);
 void fn_801D0A24(u8* p, int a);
 void fn_801A9AB0(u8* p, u8* q);
+void fn_801C1C7C(u8* p);
+void fn_802E30C8(const char* fmt, ...);
+f32 PSVECSquareDistance(const u8* a, const u8* b);
+void fn_801AC240(u8* p);
 void fn_801ABFF8(u8* p, void** f);
 void fn_801ACF94(u8* p);
 void fn_801AD8C8(u8* p);
@@ -112,7 +131,14 @@ void fn_801ABFF8(u8* p, void** f) {}  // stub (42)
 
 void fn_801AC0A0(u8* p, int a, int b, int c, u8* car) {}  // stub (57)
 
-void fn_801AC184(u8* p) {}  // stub (47)
+void fn_801AC184(u8* p) {
+    fn_801AC240(p);
+    *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
+    ((CollVolume*)p)->Update();
+    ((RigidBody*)p)->Reset();
+    U8(p, 0x223) = 1;
+    U8(p, 0x234) = U8(p, 0x235);
+}
 
 void fn_801AC240(u8* p) {
     U8(p, 0x220) = 1;
@@ -162,9 +188,45 @@ u8* fn_801AC330(u8* p) {
     return p;
 }
 
-void fn_801AC3AC(u8* p) {}  // stub (42)
+u8* fn_801AC3AC(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80335808;
+        if (--lbl_8055E5EC == 0 && lbl_8055E5F0) {
+            fn_801C1C7C((u8*)lbl_8055E5F0);
+            lbl_8055E5F0 = 0;
+        }
+        if (p) {
+            lbl_8055E5E4 = 0;
+            if (p) {
+                if (p) {
+                    __dt__10CollVolumeFv(p, 0);
+                }
+            }
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
-void fn_801AC454(u8* p) {}  // stub (45)
+void fn_801AC454(u8* p, u8* q) {
+    U32(p, 0x23C) = 0;
+    U32(p, 0x240) = 0;
+    fn_801A9AB0(p, q);
+    s32 idx = S32(p, 0x250);
+    F32(p, 0x248) = F32(q, 0x5C);
+    F32(p, 0x244) = 0.0f;
+    F32(p, 0x24C) = 0.0f;
+    U32(p, 0x23C) = 0;
+    if (idx > 0) {
+        u8* prev = lbl_80435628[idx - 1];
+        if (PSVECSquareDistance(prev + 0x60, p + 0x60) < 16.0f) {
+            PTR(p, 0x23C) = prev;
+            fn_802E30C8("fencepole: binding to %p", prev);
+        }
+    }
+}
 
 void fn_801AC508(void) {
     s32 n = lbl_8055E5EC;
