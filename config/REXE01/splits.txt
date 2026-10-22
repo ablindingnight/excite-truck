@@ -3602,6 +3602,16 @@ game/pathcareer.cpp:
 	.sdata      start:0x8055C774 end:0x8055C798
 	.sbss       start:0x8055F660 end:0x8055F670
 
+game/evpath.cpp:
+	.text       start:0x8027E908 end:0x8028777C
+	.ctors      start:0x802ED4D8 end:0x802ED4DC
+	.rodata     start:0x802FA848 end:0x802FA978
+	.data       start:0x80347E50 end:0x80348A20
+	.bss        start:0x804B2FF8 end:0x804B3150
+	.sdata      start:0x8055C798 end:0x8055C880
+	.sbss       start:0x8055F670 end:0x8055F6A8
+	.sdata2     start:0x805641F8 end:0x80564250
+
 game/efxman.cpp:
 	.text       start:0x8028777C end:0x802888D8
 	.ctors      start:0x802ED4DC end:0x802ED4E0
