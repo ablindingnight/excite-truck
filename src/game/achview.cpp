@@ -24,6 +24,10 @@ public:
 
 extern "C" {
 void fn_80236914(void);
+void fn_802C6CF8(s32 h);
+void fn_802CAC54(u8* p);
+void fn_80214AF0(int s);
+void fn_80214A9C(int s);
 f32 PSVECDotProduct(const f32* a, const f32* b);
 double sqrt(double x);
 double sin(double x);
@@ -34,6 +38,7 @@ struct Words9 {
 };
 
 extern VD* lbl_8055F394;
+extern void* lbl_80345158[];
 extern bool lbl_8055F3A0;
 extern f32 lbl_8055F3A4;
 
@@ -50,7 +55,20 @@ u32 fn_8025921C(u8* p) { return 0; }
 
 void fn_80259224(u8* p) {}  // stub (279)
 
-void fn_80259680(u8* p) {}  // stub (32)
+u8* fn_80259680(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80345158;
+        if (S32(p, 0x50) != -1) {
+            fn_802C6CF8(S32(p, 0x50));
+            S32(p, 0x50) = -1;
+        }
+        fn_802CAC54(PTR(p, 0xA8));
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_80259700(u8* p, int del) {
     if (p && del > 0) {
@@ -150,7 +168,22 @@ void fn_8025B134(u8* p) {}
 
 void fn_8025B138(u8* p) {}  // stub (61)
 
-void fn_8025B22C(u8* p) {}  // stub (36)
+void fn_8025B22C(u8* p) {
+    for (int i = 1; i <= 5; i++) {
+        if (S32(p, 0x74) == i) {
+            fn_80214AF0(i + 5);
+        } else {
+            fn_80214A9C(i + 5);
+        }
+        if (i <= S32(p, 0x1C)) {
+            fn_80214AF0(i);
+            fn_80214A9C(i + 10);
+        } else {
+            fn_80214AF0(i + 10);
+            fn_80214A9C(i);
+        }
+    }
+}
 
 void fn_8025B2BC(u8* p) {}  // stub (153)
 
