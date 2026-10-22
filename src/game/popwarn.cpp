@@ -16,6 +16,14 @@ public:
     void Finish(int r);
 };
 
+// A popup that waits for the card, then counts down before closing.
+struct WaitPopup {
+    u8 pad0[0x18];  // offset 0x0
+    u8* card;       // offset 0x18
+    u8 done;        // offset 0x1C
+    f32 timer;      // offset 0x20
+};
+
 struct ModeEntry {
     s32 a;      // offset 0x0
     s32 b;      // offset 0x4
@@ -38,6 +46,7 @@ int fn_802E499C(u16* keys);
 void fn_8020C918(int a);
 s32 fn_80221EA8(u8* p);
 u8 fn_802E8690(u8* p);
+f32 fn_80214D48(void);
 int fn_802C9A58(void);
 void fn_802168BC(int a);
 }
@@ -50,6 +59,7 @@ extern u8 lbl_803432FC[];
 extern u8 lbl_8034330C[];
 extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
@@ -247,7 +257,16 @@ void fn_802487B4(u8* p) {}  // stub (173)
 
 void fn_80248A68(u8* p) { F32(p, 0x1C) = 0.0f; }
 
-void fn_80248A74(u8* p) {}  // stub (31)
+void fn_80248A74(u8* p) {
+    s32 rate;
+    if (F32(p, 0x1C) > 370.0f) {
+        rate = 200;
+    } else {
+        rate = 50;
+    }
+    f32 dt = fn_80214D48();
+    F32(p, 0x1C) = F32(p, 0x1C) + (f32)rate * dt;
+}
 
 void fn_80248AF0(u8* p) {}  // stub (56)
 
@@ -256,7 +275,20 @@ void fn_80248BD0(u8* p) {
     U8(p, 0x1C) = fn_802E8690(PTR(p, 0x18));
 }
 
-void fn_80248C0C(u8* p) {}  // stub (34)
+void fn_80248C0C(u8* p) {
+    WaitPopup* w = (WaitPopup*)p;
+    w->done = fn_802E8690(w->card);
+    if (w->done) {
+        w->timer = 2.0f;
+        fn_80214A9C(0x1E);
+    } else {
+        w->timer -= fn_80214D48();
+        fn_80214AF0(0x1E);
+    }
+    if (w->timer < lbl_80558DC4[0]) {
+        ((MenuState*)p)->Finish(0);
+    }
+}
 
 int fn_80248C94(u8* p, int key) {
     if (!U8(p, 0x1C) && key == 0xD) {
@@ -299,7 +331,16 @@ void fn_802491A8(u8* p) {}  // stub (99)
 
 void fn_80249334(u8* p) {}  // stub (45)
 
-void fn_802493E8(u8* p) {}  // stub (32)
+void fn_802493E8(u8* p) {
+    for (int i = 0; i < S32(p, 0x1C); i++) {
+        u8* e = PTR(p, 0x18) + i * 8;
+        if (U8(e, 0x4)) {
+            fn_80214AF0(S32(e, 0x0));
+        } else {
+            fn_80214A9C(S32(e, 0x0));
+        }
+    }
+}
 
 
 }  // extern "C"
