@@ -66,7 +66,7 @@ public:
     s32 fC;         // offset 0xC
     s32 bottom;     // offset 0x10
     u8 pad14[0x1A - 0x14];
-    u8 hidden;      // offset 0x1A
+    u8 shown;       // offset 0x1A
     u8 enabled;     // offset 0x1B
     f32 fadeIn;     // offset 0x1C
     f32 fadeOut;    // offset 0x20
@@ -161,7 +161,7 @@ static UnkStatic123 lbl_80490908;
 UnkStatic7F lbl_8055EFA8;
 u8 lbl_8055EFAC;  // keys muted
 
-static inline BOOL Visible(const Widget* w) { return !w->hidden && w->fadeOut >= 0.0f; }
+static inline BOOL Visible(const Widget* w) { return w->shown || w->fadeOut >= 0.0f; }
 
 static inline s32 StyleOf(const Widget* w) { return w->stylePtr ? *w->stylePtr : w->style; }
 
@@ -172,7 +172,7 @@ static inline f32 Alpha(const Widget* w) {
     if (w->fadeIn >= 0.0f) {
         return w->fadeIn;
     }
-    if (w->hidden) {
+    if (w->shown) {
         return 1.0f;
     }
     return 0.0f;
@@ -797,7 +797,7 @@ void fn_80218A34(Window* win, int g) {
             wd = win->widgets[i];
             if (!(win->disabledGroups & wd->mask)) {
                 wd->enabled = 1;
-                if (wd->hidden) {
+                if (wd->shown) {
                     wd->dirty = 1;
                 }
             }
@@ -814,7 +814,7 @@ void fn_80218ADC(Window* win, int g) {
             wd = win->widgets[i];
             if (win->disabledGroups & wd->mask) {
                 wd->enabled = 0;
-                if (wd->hidden) {
+                if (wd->shown) {
                     wd->dirty = 1;
                 }
             }
