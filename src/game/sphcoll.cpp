@@ -626,12 +626,15 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     CFrame* f = (CFrame*)PTR(q, 0xC);
     RVec3 l;
-    f32 dx = c[0] - f->t.x;
-    f32 dy = c[1] - f->t.y;
-    f32 dz = c[2] - f->t.z;
-    l.x = Dot3(dx, f->m[0], dy, f->m[1], dz, f->m[2]);
-    l.y = Dot3(dx, f->m[3], dy, f->m[4], dz, f->m[5]);
-    l.z = Dot3(dx, f->m[6], dy, f->m[7], dz, f->m[8]);
+    l.x = c[0] - f->t.x;
+    l.y = c[1] - f->t.y;
+    l.z = c[2] - f->t.z;
+    f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
+    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
+    f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
+    l.x = x;
+    l.y = y;
+    l.z = z;
     f32 len = F32(q, 0x28);
     if (l.z < len && l.z > -len) {
         f32 dist = (f32)sqrt(l.x * l.x + l.y * l.y);
