@@ -255,6 +255,7 @@ extern const CamPreset lbl_802FA788;
 extern const CamPreset lbl_802FA7A4;
 extern const CamPreset lbl_802FA7C0;
 extern const CamPreset lbl_802FA7DC;
+extern const CamPreset lbl_802FA7F8;
 extern const f32 lbl_80564024;  // degrees to radians
 extern const f32 lbl_80564028;
 extern const f32 lbl_8056402C;
@@ -426,7 +427,32 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     F32(p, 0xBC) = lbl_80564040;
 }
 
-void fn_80275D0C(u8* p) {}  // stub (173)
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+
+// As fn_802751AC, but relative to a level frame at the target: forward = the car's forward axis,
+// up = world y made perpendicular.
+void fn_80275D0C(u8* p) {
+    CamPreset c = lbl_802FA7F8;
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    CFrame f;
+    f.t.x = F32(p, 0xE4);
+    f.t.y = F32(p, 0xE8);
+    f.t.z = F32(p, 0xEC);
+    f.m[6] = F32(p, 0xD8);
+    f.m[7] = F32(p, 0xDC);
+    f.m[8] = F32(p, 0xE0);
+    f.m[3] = lbl_80563FB0;
+    f.m[4] = lbl_80563FAC;
+    f.m[5] = lbl_80563FB0;
+    PSVECCrossProduct(&f.m[3], &f.m[6], &f.m[0]);
+    PSVECCrossProduct(&f.m[6], &f.m[0], &f.m[3]);
+    CamVec off(c.off.x, c.off.y, c.off.z);
+    Mat3 rot;
+    RotFromVec(&rot, c.rot * lbl_80564024);
+    fn_801BFD34(p + 0x7C, &off, (u8*)&f);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)&f);
+    F32(p, 0xBC) = lbl_80564024 * c.fov;
+}
 
 void fn_80275FC0(u8* p) {
     *(CamPose*)(p + 0x58) = *(CamPose*)(p + 0x1A4);
