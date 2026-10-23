@@ -109,7 +109,49 @@ u8* fn_80246AA8(u8* p, int del) {
     return p;
 }
 
-void fn_80246AE8(u8* p) {}  // stub (88)
+}  // extern "C"
+
+extern "C" u8* fn_8023512C(const char* art);
+
+// A menu art widget that owns its image ("extruck.art"); dtor is fn_80246C48.
+struct MenuArt {
+    MenuArt(const char* art) {
+        vt = lbl_80343780;
+        f14 = 0;
+        image = fn_8023512C(art);
+    }
+    ~MenuArt(void) {
+        vt = lbl_80343780;
+        fn_80235380(image);
+    }
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    u8* image;       // offset 0x18
+    u8 pad1C[0x4];
+};
+
+extern char lbl_80498908[0x40];  // version text buffer
+
+extern "C" {
+int fn_8024762C(void);
+
+// Kiosk title screen: logo art and version text.
+int fn_80246AE8(void) {
+    lbl_8055F25C = fn_802E2C20();
+    MenuArt logo("extruck.art");
+    lbl_80498908[0] = 0;
+    MenuItem items[] = {
+        MenuItem("excite_truck", 5, &logo, 0, 0),
+        MenuItem("version", lbl_80498908, CaptionContext(0x40)),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80246938, -2, 13),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"kiosk.lyt", 0, (int (*)(int*))fn_8024762C, 0, 0};
+    desc.items = items;
+    fn_802146BC(&desc, -999, -999, 1);
+    return 1;
+}
 
 u8* fn_80246C48(u8* p, int del) {
     if (p) {
