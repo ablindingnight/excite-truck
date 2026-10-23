@@ -92,7 +92,7 @@ void fn_802E30C8(const char* fmt, ...);
 f32 PSVECSquareDistance(const u8* a, const u8* b);
 void fn_801AC240(u8* p);
 void fn_801ABFF8(u8* p, VVisit* f);
-void fn_801ACF94(u8* p);
+void fn_801ACF94(void);
 void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi);
 void fn_801AD99C(u8* p, f32* v, f32* off);
 void fn_801D09A8(u8* p, s32 id);
@@ -388,7 +388,64 @@ void fn_801ACA48(u8* p) {
 
 void fn_801ACB30(u8* p) {}  // stub (281)
 
-void fn_801ACF94(u8* p) {}  // stub (83)
+// Fence span update sent to the renderer: the posts between two linked fence posts.
+struct FenceMsg {
+    s32 kind;         // offset 0x0
+    s32 post;         // offset 0x4
+    s32 count;        // offset 0x8
+    f32 pts[6][3];    // offset 0xC
+};
+
+void fn_801C2694(s32 rope, f32 (*out)[3], s32* n, f32* d, f32* c, f32* b, f32* a);
+void fn_801796CC(int kind, void* msg, int size);
+extern const f32 lbl_8056247C;  // 0.0
+extern const f32 lbl_805624AC;  // 1.0
+extern const f32 lbl_80562510;  // -10000.0
+
+// Samples the fence rope and sends each linked post pair its span of points.
+void fn_801ACF94(void) {
+    if (lbl_8055E5F0) {
+        f32 out[0x13C][3];
+        FenceMsg m;
+        f32 d[3];
+        f32 c[3];
+        f32 b[3];
+        f32 a[3];
+        s32 n = 0x13C;
+        a[0] = lbl_8056247C;
+        a[1] = lbl_8056247C;
+        a[2] = lbl_8056247C;
+        b[0] = lbl_8056247C;
+        b[1] = lbl_8056247C;
+        b[2] = lbl_8056247C;
+        c[0] = lbl_8056247C;
+        c[1] = lbl_805624AC;
+        c[2] = lbl_8056247C;
+        d[0] = lbl_8056247C;
+        d[1] = lbl_80562510;
+        d[2] = lbl_8056247C;
+        fn_801C2694(lbl_8055E5F0, out, &n, d, c, b, a);
+        for (int i = 0; i < lbl_8055E5EC; i++) {
+            u8* next;
+            u8* post;
+            post = lbl_80435628[i];
+            next = PTR(post, 0x23C);
+            if (next) {
+                int first = S32(next, 0x254);
+                int last = S32(post, 0x254);
+                m.kind = 0;
+                m.post = i;
+                m.count = last - first + 1;
+                for (int k = 0; k < m.count; k++) {
+                    m.pts[k][0] = out[first + k][0];
+                    m.pts[k][1] = out[first + k][1];
+                    m.pts[k][2] = out[first + k][2];
+                }
+                fn_801796CC(6, &m, 0x54);
+            }
+        }
+    }
+}
 
 void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
     f32 t = 0.02f * x;
@@ -457,7 +514,7 @@ void fn_801AD394(u8* p) {}  // stub (150)
 
 void fn_801AD5EC(void) { fn_801AC508(); }
 
-void fn_801AD5F0(u8* p) { fn_801ACF94(p); }
+void fn_801AD5F0(u8* p) { fn_801ACF94(); }
 
 }  // extern "C"
 
