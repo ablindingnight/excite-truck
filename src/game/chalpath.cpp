@@ -226,7 +226,98 @@ u8* fn_80260DC4(u8* p, int del) {
 
 void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
 
-void fn_80260E30(u8* p) {}  // stub (166)
+}  // extern "C"
+
+// A node on the challenge map (event or difficulty marker).
+class PathNode {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual void s28(void);
+    virtual void s2C(void);
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void s38(void);
+    virtual void s3C(void);
+    virtual void s40(void);
+    virtual void s44(void);
+    virtual void s48(void);
+    virtual void s4C(void);
+    virtual void s50(void);
+    virtual void s54(void);
+    virtual void s58(void);
+    virtual void s5C(void);
+    virtual void Dim(void);      // 0x60
+    virtual void Open(void);     // 0x64
+    virtual void Select(void);   // 0x68
+    virtual void Refresh(void);  // 0x6C
+    virtual void Focus(void);    // 0x70
+};
+
+// The challenge map screen (lbl_8055F420).
+struct PathScreen {
+    s32 event;           // offset 0x0: selected event node
+    s32 level;           // offset 0x4: selected difficulty
+    s32 numEvents;       // offset 0x8
+    s32 numLevels;       // offset 0xC
+    u8 pad10[0x8];       // offset 0x10
+    PathNode** events;   // offset 0x18
+    u8 pad1C[0x20];      // offset 0x1C
+    PathNode** levels;   // offset 0x3C
+};
+
+#define SCREEN ((PathScreen*)lbl_8055F420)
+
+extern "C" {
+
+// Redraws every node after a selection change (lbl_8055F3EB set); returns 1 when nothing changed.
+int fn_80260E30(void) {
+    if (lbl_8055F3EB) {
+        lbl_8055F3EB = 0;
+        int i;
+        for (i = 0; i < SCREEN->numLevels; i++) {
+            SCREEN->levels[i]->Refresh();
+        }
+        for (i = 0; i < SCREEN->numEvents; i++) {
+            if (!lbl_8055F3EB) {
+                SCREEN->events[i]->Dim();
+                SCREEN->events[i]->Refresh();
+            } else if (i == SCREEN->event) {
+                SCREEN->events[i]->Select();
+            } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
+                SCREEN->events[i]->Open();
+                SCREEN->events[i]->Refresh();
+            } else {
+                SCREEN->events[i]->Refresh();
+            }
+        }
+        for (i = 0; i < SCREEN->numLevels; i++) {
+            if (!lbl_8055F3EB) {
+                if (i == SCREEN->level) {
+                    SCREEN->levels[i]->Select();
+                } else {
+                    SCREEN->levels[i]->Open();
+                    SCREEN->levels[i]->Refresh();
+                }
+            } else if (i == SCREEN->level) {
+                SCREEN->levels[i]->Select();
+                SCREEN->levels[SCREEN->level]->Focus();
+            } else {
+                SCREEN->levels[i]->Dim();
+                SCREEN->levels[i]->Refresh();
+            }
+        }
+    } else {
+        return 1;
+    }
+    return 0;
+}
 
 int fn_802610C8(void) {
     if (lbl_8055F3EB) {
