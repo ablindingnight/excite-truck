@@ -173,7 +173,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
     }
 }
 
-static inline ResToc* GetToc(const char* name) {
+inline ResToc* GetToc(const char* name) {
     u32 i;
     char buf[0x80];
     bool swap;
