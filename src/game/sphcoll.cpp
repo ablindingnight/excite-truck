@@ -386,11 +386,14 @@ int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {
     f32 rs = r + s;
     const f32* cv = (const f32*)c;
     const f32* dv = (const f32*)d;
-    dd.v[0] = cv[0] - dv[0];
-    dd.v[2] = cv[2] - dv[2];
-    dd.v[1] = cv[1] - dv[1];
+    f32 dx = cv[0] - dv[0];
+    f32 dz = cv[2] - dv[2];
+    f32 dy = cv[1] - dv[1];
+    dd.v[0] = dx;
+    dd.v[2] = dz;
+    dd.v[1] = dy;
     int hit = 0;
-    if ((f32)__fabs(dd.v[0]) < rs && (f32)__fabs(dd.v[2]) < rs && (f32)__fabs(dd.v[1]) < rs) {
+    if ((f32)__fabs(dx) < rs && (f32)__fabs(dz) < rs && (f32)__fabs(dy) < rs) {
         f32 dist = PSVECMag(dd.v);
         if (!((f32)__fabs(dist) <= lbl_80558DC4[0])) {
             f32 pen = s + (-dist + r);
