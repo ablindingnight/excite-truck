@@ -407,7 +407,29 @@ void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
     F32(p, 0x20) = 0.1f * t;
 }
 
-void fn_801AD148(u8* p) {}  // stub (81)
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// Links this joint between a point on our volume and the same point in `body`'s local frame.
+void fn_801AD148(u8* p, const CVec3* a, u8* body, f32 x, f32 y) {
+    CVec3 w;
+    CVec3 l;
+    ((CollVolume*)PTR(p, 0x34))->Xform(&w, a);
+    if (body) {
+        l.x = w.x - F32(body, 0x60);
+        l.y = w.y - F32(body, 0x64);
+        l.z = w.z - F32(body, 0x68);
+        f32* m = (f32*)(body + 0x3C);
+        f32 lx = Dot3(l.x, m[0], l.y, m[1], l.z, m[2]);
+        f32 ly = Dot3(l.x, m[3], l.y, m[4], l.z, m[5]);
+        f32 lz = Dot3(l.x, m[6], l.y, m[7], l.z, m[8]);
+        l.x = lx;
+        l.y = ly;
+        l.z = lz;
+    } else {
+        l = w;
+    }
+    fn_801AD0E0(p, (const f32*)&l, (s32)body, (const f32*)a, x, y);
+}
 
 f32 PSVECMag(const CVec3* v);
 
