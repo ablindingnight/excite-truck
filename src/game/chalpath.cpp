@@ -246,8 +246,32 @@ void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 
 }  // extern "C"
 
-extern u8 lbl_80498F20[];          // unlock animation widget
-extern UnkStatic123 lbl_80498F00;  // this unit's end-of-menu tag
+extern const f32 lbl_80563B90;  // 0.0
+
+// Animated widget base (vtable lbl_8033D618).
+class AnimWidget {
+public:
+    AnimWidget(void) {
+        f18 = lbl_80563B90;
+        f14 = 0;
+    }
+    virtual ~AnimWidget(void) {}
+    u8 pad4[0x10];  // offset 0x4
+    s32 f14;        // offset 0x14
+    f32 f18;        // offset 0x18
+};
+
+// The unlock animation shown in the challenge unlock box (vtable lbl_80345F70, dtor fn_80262F8C).
+class UnlockAnim : public AnimWidget {
+public:
+    UnlockAnim(void) {}
+    virtual ~UnlockAnim(void) {}
+};
+
+ModuleTag lbl_8055F3D8;
+static UnkStatic123s lbl_80498F00;  // end-of-menu tag
+UnkStatic7F lbl_8055F3E0;
+static UnlockAnim sUnlockAnim;  // lbl_80498F20
 extern "C" const char* fn_80131234(const char* key);
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 
@@ -258,7 +282,7 @@ void fn_80261AF0(u8* p, int difficulty) {
     char buf[100];
     fn_801345D8(buf, 100, "EventPath:CHALLENGE_DIFFICULTY_%d_UNLOCKED", difficulty);
     MenuItem items[] = {
-        MenuItem(0, 5, lbl_80498F20, 0, 0),
+        MenuItem(0, 5, &sUnlockAnim, 0, 0),
         MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
         MenuItem("message", fn_80131234(buf)),
         MenuItem((const char*)lbl_8055B860, 6, 0, -2, 13),
@@ -319,5 +343,6 @@ void fn_80262584(u8* p) {
 
 void fn_802625D4(u8* p) {}  // stub (585)
 
-void fn_80262EF8(u8* p) {}  // stub (37)
 }  // extern "C"
+
+
