@@ -1,5 +1,5 @@
-// Camera states (0x80273A88-0x80276068): the physics camera's per-mode state objects and their
-// update routines, plus the array destructors registered by the camera definitions' initialiser.
+// Camera states (0x80273B4C-0x80276068): the physics camera's per-mode state objects and their
+// update routines.
 // Written against raw field offsets; the large routines are still stubs. Names are guesses.
 #include "game/common.h"
 #include "game/camframe.h"
@@ -34,19 +34,9 @@ void Mat3FromEuler(Mat3* out, const Vec3* euler);  // Y, then X, then Z (racing.
 
 extern "C" {
 f32 PSVECMag(const f32* v);
-void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
-u8* fn_80273978(u8* p, int del);
-u8* fn_80273B08(u8* p, int del);
-void fn_80272354(u8* p);
 void fn_80276BE4(u8* a, u8* b);
 void fn_802704D4(int a, u8* p);
 }
-
-void operator delete(void* p);
-
-extern u8 lbl_8049F9D8[];
-extern u8 lbl_8049A2C8[];
-extern void* lbl_80347364[];
 
 // A camera pose: three rows of four words.
 struct CamPose {
@@ -56,30 +46,6 @@ struct CamPose {
 ModuleTag lbl_8055F570;
 
 extern "C" {
-
-void fn_80273A88(void) { __destroy_arr(lbl_8049F9D8, (void*)fn_80273978, 0x1C, 0x20); }
-
-u8* fn_80273AA4(u8* p) {
-    *(void**)(p + 0x18) = lbl_80347364;
-    U32(p, 0x0) = 0;
-    return p;
-}
-
-u8* fn_80273ABC(u8* p) {
-    fn_80272354(p);
-    return p;
-}
-
-void fn_80273AEC(void) { __destroy_arr(lbl_8049A2C8, (void*)fn_80273B08, 0x60, 0xC8); }
-
-u8* fn_80273B08(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-void fn_80273B48(u8* p) {}
 
 void fn_80273B4C(u8* p) {
     u8* car = PTR(p, 0x140);

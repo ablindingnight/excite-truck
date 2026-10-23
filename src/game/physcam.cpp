@@ -1,4 +1,4 @@
-// Physics camera (0x80270AE8-0x80273A88): the camera definitions file ("camera3.val") with its
+// Physics camera (0x80270AE8-0x80273B4C): the camera definitions file ("camera3.val") with its
 // cam/radius/group/event/fov/shakey/rumble fields, camera region lookup ("find_best_region"), pit-mode
 // checks and the angle/range helpers. Written against raw field offsets; the large routines and the
 // static-array initialiser are still stubs. Names are guesses apart from the strings.
@@ -29,23 +29,40 @@ void fn_80271624(u8* p);
 
 void operator delete(void* p);
 
-extern u8 lbl_8049A258[];
 extern const char* lbl_80346B54[];
 
-// One camera region record.
-struct CamRegion {
+// One camera region record (its vptr follows the data).
+class CamRegion {
+public:
     u8* cam;         // offset 0x0, null when unused
     f32 lo1;         // offset 0x4, first heading window
     f32 hi1;         // offset 0x8
     f32 lo2;         // offset 0xC, second heading window
     f32 hi2;         // offset 0x10
     u8 dual;         // offset 0x14, second window in use
-    u8 pad15[0x7];
+    u8 pad15[0x3];
+
+    CamRegion(void) { cam = 0; }
+    virtual ~CamRegion(void);  // vptr at 0x18
+    virtual int Weight(u8* car, f32* weight, int type);
+    virtual void Prepare(u8* car);
 };
 
-extern CamRegion lbl_8049F9D8[];
-extern f32 lbl_8055F540;
-extern f32 lbl_8055F544;
+// A camera definition record (0x60), filled from "camera3.val".
+class CamRecord {
+public:
+    CamRecord(void) { Reset(); }
+    void Reset(void);
+    u8 data[0x60];
+};
+
+// A camera path key (0x60).
+class CamKey {
+public:
+    CamKey(void) {}
+    ~CamKey(void) {}
+    u8 data[0x60];
+};
 extern s32 lbl_8055F54C;
 extern s32 lbl_8055F554;
 extern u8 lbl_8055F558;
@@ -58,6 +75,19 @@ struct CamCycle {
     s32 cur;        // offset 0xC
     u8 pad10[0x4];  // offset 0x10
 };
+
+extern const f32 lbl_80563F9C;
+extern const f32 lbl_80563FA0;
+extern const f32 lbl_80563FA4;
+
+ModuleTag lbl_8055F538;
+f32 lbl_8055F540 = lbl_80563FA0;
+f32 lbl_8055F544 = lbl_80563FA4;
+static CamCycle lbl_8049A258[5];
+static CamKey lbl_8049A2C8[200];
+static CamRecord lbl_8049EDC8[32];
+static CamRegion lbl_8049F9D8[32];
+f32 lbl_8055F560 = lbl_80563F9C;
 
 extern "C" int fn_80273494(int x);
 
@@ -85,8 +115,6 @@ void fn_80270B74(void) {
 extern char lbl_80346B00[];  // this unit's string pool ("TV Set 1", ...)
 extern s32 lbl_8055F550;
 extern u8 lbl_8055F564;
-extern u8 lbl_8049EDC8[];  // camera records, 0x60 each
-void fn_80272738(CamRegion* r, u8* car);
 
 // Collects the camera regions usable for this event; falls back to region 0.
 void fn_80270C04(u8* car, u32 flags) {
@@ -97,23 +125,23 @@ void fn_80270C04(u8* car, u32 flags) {
         u8 check = (flags >> 8) & 1;
         lbl_8055F564 = check;
         fn_80270B00(pool + 0x1E0, lbl_8055F550);  // "Preparing regions (%d)"
-        cam = lbl_8049EDC8;
+        cam = (u8*)lbl_8049EDC8;
         for (int i = 0; i < lbl_8055F550; i++) {
             fn_80270B00(pool + 0x1F8, i);  // "  Region %d:"
             fn_80270B00(pool + 0x208);     // "  ...is ok for event type"
             CamRegion* r = &lbl_8049F9D8[lbl_8055F554];
             r->cam = cam;
             if (check) {
-                fn_80272738(r, car);
+                r->CamRegion::Prepare(car);
             }
             lbl_8055F554++;
             cam += 0x60;
         }
         if (!lbl_8055F554) {
             fn_80270B00(pool + 0x224);  // "Found no regions!  Using only region 0"
-            lbl_8049F9D8[0].cam = lbl_8049EDC8;
+            lbl_8049F9D8[0].cam = (u8*)lbl_8049EDC8;
             if (check) {
-                fn_80272738(&lbl_8049F9D8[0], car);
+                lbl_8049F9D8[0].Prepare(car);
             }
             lbl_8055F554 = 1;
         }
@@ -228,7 +256,9 @@ int fn_80271FAC(const char* name) {
 
 void fn_80272028(u8* p) {}  // stub (203)
 
-void fn_80272354(u8* p) {
+}  // extern "C"
+void CamRecord::Reset(void) {
+    u8* p = data;
     F32(p, 0x0) = 0.0f;
     F32(p, 0x4) = 0.0f;
     F32(p, 0x8) = 0.0f;
@@ -237,6 +267,7 @@ void fn_80272354(u8* p) {
     S32(p, 0x58) = 0;
     S32(p, 0x5C) = 2;
 }
+extern "C" {
 
 void fn_802723B4(u8* src, f32* out) {
     PathPos pos;
@@ -270,7 +301,9 @@ int fn_802726EC(f32 x, f32 a, f32 b) {
     return r;
 }
 
-void fn_80272738(CamRegion* r, u8* car) {}  // stub (315)
+}  // extern "C"
+void CamRegion::Prepare(u8* car) {}  // stub (315)
+extern "C" {
 
 int fn_80272C24(f32 x, f32 a, f32 b, f32 m) {
     if (a == b) {
@@ -301,7 +334,9 @@ extern const f32 lbl_80563F48;  // 0.0
 extern const f32 lbl_80563F50;  // 1.0
 
 // How strongly `r` applies to `car` (0..1 into *weight); returns whether the region is usable.
-int fn_80272C74(CamRegion* r, u8* car, f32* weight, int type) {
+}  // extern "C"
+int CamRegion::Weight(u8* car, f32* weight, int type) {
+    CamRegion* r = this;
     *weight = lbl_80563F48;
     if (!S32(r->cam, 0x58)) {
         return 0;
@@ -327,6 +362,7 @@ int fn_80272C74(CamRegion* r, u8* car, f32* weight, int type) {
     }
     return ok;
 }
+extern "C" {
 
 void fn_80272DCC(u8* p) {}  // stub (354)
 
@@ -442,12 +478,8 @@ void fn_802735F4(int a, u8 b) {
 
 void fn_80273604(u8* p) {}  // stub (221)
 
-u8* fn_80273978(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
+}  // extern "C"
+CamRegion::~CamRegion(void) {}
+extern "C" {
 
-void fn_802739B8(u8* p) {}  // stub (52)
 }  // extern "C"

@@ -3618,11 +3618,11 @@ game/camfov.cpp:
 	.ctors      start:0x802ED498 end:0x802ED49C
 
 game/physcam.cpp:
-	.text       start:0x80270AE8 end:0x80273A88
+	.text       start:0x80270AE8 end:0x80273B4C
 	.ctors      start:0x802ED49C end:0x802ED4A0
 
 game/camstate.cpp:
-	.text       start:0x80273A88 end:0x80276068
+	.text       start:0x80273B4C end:0x80276068
 	.ctors      start:0x802ED4A0 end:0x802ED4A4
 
 game/namedcam.cpp:
