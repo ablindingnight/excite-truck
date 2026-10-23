@@ -2,6 +2,7 @@
 // update routines, plus the array destructors registered by the camera definitions' initialiser.
 // Written against raw field offsets; the large routines are still stubs. Names are guesses.
 #include "game/common.h"
+#include "game/camframe.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -148,39 +149,6 @@ int fn_801EA098(const s16* hint, f32* pos, f32* normal, int* flags, f32 x, f32 z
 double cos(double x);
 extern const double lbl_80563FB8;  // ground tilt limit (radians)
 extern const f32 lbl_80563FDC;
-
-struct CsVec {
-    CsVec(void) {}
-    CsVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    void Set(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x, y, z;
-};
-
-// Rebuilds the camera rows (0x58) as an orthonormal basis that keeps the view axis (row 2).
-static inline void Orthonormalize(u8* p) {
-    CsVec x;
-    CsVec y;
-    CsVec z;
-    x.Set(F32(p, 0x58), F32(p, 0x5C), F32(p, 0x60));
-    z.Set(F32(p, 0x70), F32(p, 0x74), F32(p, 0x78));
-    PSVECCrossProduct(&z.x, &x.x, &y.x);
-    PSVECNormalize(&x.x, &x.x);
-    PSVECNormalize(&y.x, &y.x);
-    PSVECCrossProduct(&x.x, &y.x, &z.x);
-    F32(p, 0x58) = x.x;
-    F32(p, 0x5C) = x.y;
-    F32(p, 0x60) = x.z;
-    F32(p, 0x64) = y.x;
-    F32(p, 0x68) = y.y;
-    F32(p, 0x6C) = y.z;
-    F32(p, 0x70) = z.x;
-    F32(p, 0x74) = z.y;
-    F32(p, 0x78) = z.z;
-}
 
 f32 fn_8018AE3C(u8* car);
 f32 fn_8018AE44(u8* car);

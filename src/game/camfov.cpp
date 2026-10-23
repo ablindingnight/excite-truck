@@ -3,6 +3,7 @@
 // field offsets; the large routines and the initialiser are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/camframe.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -30,7 +31,33 @@ extern CamRect lbl_8049A218[4];
 
 extern "C" {
 
-void fn_8026E870(u8* p) {}  // stub (105)
+f32 PSVECDotProduct(const f32* a, const f32* b);
+extern const f32 lbl_80563E30;  // minimum squared distance
+extern const f32 lbl_80563E34;  // minimum horizontal offset
+
+// Places the camera at `pos` looking at `target` with `up` as the up hint; nothing changes the frame
+// when the target is too close or straight above/below.
+void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
+    F32(cam, 0x7C) = pos[0];
+    F32(cam, 0x80) = pos[1];
+    F32(cam, 0x84) = pos[2];
+    CsVec d;
+    d.x = target[0] - F32(cam, 0x7C);
+    d.y = target[1] - F32(cam, 0x80);
+    d.z = target[2] - F32(cam, 0x84);
+    if (PSVECDotProduct(&d.x, &d.x) < lbl_80563E30) {
+        return;
+    }
+    if (AbsF(d.x) < lbl_80563E34 && AbsF(d.z) < lbl_80563E34) {
+        return;
+    }
+    F32(cam, 0x70) = d.x;
+    F32(cam, 0x74) = d.y;
+    F32(cam, 0x78) = d.z;
+    PSVECCrossProduct(up, (f32*)(cam + 0x70), (f32*)(cam + 0x58));
+    PSVECCrossProduct((f32*)(cam + 0x70), (f32*)(cam + 0x58), (f32*)(cam + 0x64));
+    Orthonormalize(cam);
+}
 
 int fn_8026EA14(int mode) {
     switch (mode) {
