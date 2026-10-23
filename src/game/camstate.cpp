@@ -192,7 +192,52 @@ void fn_802756A4(u8* p) {}  // stub (165)
 
 void fn_80275938(u8* p) {}  // stub (153)
 
-void fn_80275B9C(u8* p) {}  // stub (92)
+double fmod(double x, double y);
+double sin(double x);
+double cos(double x);
+int fn_801E9E30(u8* ground, f32* pos);
+extern f32 lbl_8055E3C8;         // game time
+extern f32 lbl_8055F588;         // last ground height
+extern const double lbl_80564038;  // 2 pi
+extern const f32 lbl_80563FD8;
+extern const f32 lbl_80563FC4;
+extern const f32 lbl_80564040;
+
+struct CsVec {
+    CsVec(void) {}
+    CsVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    f32 x, y, z;
+};
+
+// Orbits the camera around its target at `radius`, keeping it above the ground.
+void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
+    F32(p, 0x15C) = fmod(speed * lbl_8055E3C8, lbl_80564038);
+    f32 s = radius * (f32)sin(F32(p, 0x15C));
+    f32 c = radius * (f32)cos(F32(p, 0x15C));
+    CsVec pos;
+    CsVec off;
+    off.x = c;
+    off.y = lbl_80563FB0;
+    off.z = s;
+    pos.x = F32(p, 0xE4) + off.x;
+    pos.y = F32(p, 0xE8) + off.y;
+    pos.z = F32(p, 0xEC) + off.z;
+    if (!fn_801E9E30(p + 0x1EC, &pos.x)) {
+        pos.y = lbl_80563FD8 + lbl_8055F588;
+        CsVec t(pos.x + lbl_80563FC4 * (F32(p, 0xE4) - pos.x), pos.y + lbl_80563FC4 * (F32(p, 0xE8) - pos.y),
+                pos.z + lbl_80563FC4 * (F32(p, 0xEC) - pos.z));
+        pos = t;
+    } else {
+        lbl_8055F588 = pos.y;
+    }
+    pos.y += height;
+    f32 up[3];
+    up[0] = lbl_80563FB0;
+    up[1] = lbl_80563FAC;
+    up[2] = lbl_80563FB0;
+    fn_8026E850(&pos.x, (f32*)(p + 0xE4), p, up);
+    F32(p, 0xBC) = lbl_80564040;
+}
 
 void fn_80275D0C(u8* p) {}  // stub (173)
 
