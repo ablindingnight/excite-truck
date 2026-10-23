@@ -275,9 +275,53 @@ struct NodeVec {
     s32 cap;          // offset 0x8
 };
 
+// A challenge difficulty: its events.
+class ChalLevel {
+public:
+    virtual ~ChalLevel(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual int NumEvents(void);       // 0x18
+    virtual void* GetEvent(int i);     // 0x1C
+};
+
+// The challenge path (lbl_8055F3E4): up to three difficulties.
+class ChalPath {
+public:
+    virtual ~ChalPath(void);
+    virtual int NumLevels(void);       // 0x0C
+    virtual ChalLevel* GetLevel(int i);  // 0x10
+};
+
+class Sound {
+public:
+    virtual ~Sound(void);
+    void SetVolume(f32 v) {
+        if (v != vol) {
+            volDirty = 1;
+            vol = v;
+        }
+    }
+
+    f32 pitch;  // offset 0x4
+    f32 vol;    // offset 0x8
+    u8 padC[0x4D - 0xC];
+    u8 volDirty;  // offset 0x4D
+};
+
+struct PathScreenBuf;
+extern "C" void fn_80261C68(PathScreenBuf* s);
+
 // Node lists with inline storage for 6 events / 3 difficulties.
 struct NodeVec6 {
     inline NodeVec6(void);
+    void Push(PathNode* p) {
+        PathNode** d = data;
+        int k = count;
+        count = k + 1;
+        d[k] = p;
+    }
     PathNode** data;  // offset 0x0
     s32 count;        // offset 0x4
     s32 cap;          // offset 0x8
@@ -286,6 +330,12 @@ struct NodeVec6 {
 
 struct NodeVec3 {
     inline NodeVec3(void);
+    void Push(PathNode* p) {
+        PathNode** d = data;
+        int k = count;
+        count = k + 1;
+        d[k] = p;
+    }
     PathNode** data;  // offset 0x0
     s32 count;        // offset 0x4
     s32 cap;          // offset 0x8
@@ -299,13 +349,13 @@ struct PathScreenBuf {
         arg = a;
         level = 0;
         event = 0;
-        popup = 0;
+        sound = 0;
     }
     ~PathScreenBuf(void) {
         lbl_8055F420 = 0;
-        if (popup) {
-            delete popup;
-            popup = 0;
+        if (sound) {
+            delete sound;
+            sound = 0;
         }
         lbl_8055F3EC = 0;
         int i;
@@ -327,10 +377,11 @@ struct PathScreenBuf {
     s32 numEvents;       // offset 0x8
     s32 numLevels;       // offset 0xC
     s32 arg;             // offset 0x10
-    PathNode* popup;     // offset 0x14
+    Sound* sound;        // offset 0x14: "a_levelup.sfx"
     NodeVec6 events;     // offset 0x18
     NodeVec3 levels;     // offset 0x3C
-    u8 pad54[0x24];      // offset 0x54
+    ChalLevel* lvObjs[3];  // offset 0x54
+    void* evObjs[6];       // offset 0x60
 };
 
 // A raw menu record, filled by the out-of-line item initialisers below.
@@ -339,8 +390,7 @@ struct PathItem {
 };
 
 extern "C" {
-int fn_8027B878(int a);
-void fn_80261C68(u8* p);
+ChalPath* fn_8027B878(int a);
 void fn_8026003C(void);
 void fn_80261AF0(u8* p, int difficulty);
 void fn_80261AE8(u8* p, u32 v);
@@ -363,7 +413,7 @@ int fn_802616A8(void);
 u8* fn_80260DC4(u8* p, int del);
 void fn_80260E04(Words5* d, const Words5* s);
 extern u8 lbl_8055F3E8;
-extern s32 lbl_8055F3E4;
+extern ChalPath* lbl_8055F3E4;
 
 // The challenge map screen: unlock popups, then the map menu until backed out.
 void fn_80260954(int arg) {
@@ -381,7 +431,7 @@ void fn_80260954(int arg) {
     PathScreenBuf scr(arg);
     MenuDesc desc;
     s32 diff;
-    fn_80261C68((u8*)&scr);
+    fn_80261C68(&scr);
     int r;
     goto start;
     do {
@@ -686,7 +736,74 @@ void fn_80261AF0(u8* p, int difficulty) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-void fn_80261C68(u8* p) {}  // stub (302)
+}  // extern "C"
+
+void* operator new(size_t size, const char* tag);
+extern void* lbl_80345E28[];
+extern const f32 lbl_80563B88;  // 1.0f
+static inline int MinI(int a, int b) { return a >= b ? b : a; }
+
+extern "C" {
+void* memset(void* d, int c, u32 n);
+u8* fn_8023512C(const char* art);
+u8* fn_80232578(const char* name);
+Sound* fn_80207848(const char* name, int flags);
+
+// Builds the map: a "pathcontrol" node per difficulty (at most 3) and an "eventcontrol" node per event
+// (at most 6 each), and the level-up sound.
+void fn_80261C68(PathScreenBuf* s) {
+    char* pool = lbl_80345B40;
+    int i;
+    int j;
+    s->numEvents = 0;
+    s->numLevels = lbl_8055F3E4->NumLevels();
+    memset(s->evObjs, 0, sizeof(s->evObjs));
+    memset(s->lvObjs, 0, sizeof(s->lvObjs));
+    s->events.count = 0;
+    s->levels.count = 0;
+    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
+        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
+        u8* n = (u8*)operator new(0x2C, pool + 0x144);  // "pathcontrol"
+        if (n) {
+            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
+            S32(n, 0x14) = 0;
+            *(void**)n = lbl_80345E28;
+            S32(n, 0x20) = i;
+            PTR(n, 0x18) = (u8*)lv;
+            U8(n, 0x1C) = 0;
+            U8(n, 0x1D) = 1;
+            U8(n, 0x1E) = 0;
+            U8(n, 0x1F) = 0;
+            PTR(n, 0x24) = fn_8023512C(pool + 0x150);  // "bar7.art"
+            PTR(n, 0x28) = fn_80232578(pool + 0x15C);  // "uifnt_o.gtx"
+        }
+        s->levels.Push((PathNode*)n);
+        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
+            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
+            u8* e = (u8*)operator new(0x28, pool + 0x168);  // "eventcontrol"
+            if (e) {
+                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
+                S32(e, 0x14) = 0;
+                *(void**)e = lbl_80345EA0;
+                PTR(e, 0x18) = (u8*)ev;
+                U8(e, 0x1E) = 0;
+                U8(e, 0x1C) = 0;
+                U8(e, 0x1D) = 1;
+                PTR(e, 0x20) = fn_8023512C(pool + 0x150);
+                PTR(e, 0x24) = fn_80232578(pool + 0x15C);
+            }
+            s->events.Push((PathNode*)e);
+            s->numEvents++;
+        }
+    }
+    s->sound = fn_80207848(pool + 0x178, 0);  // "a_levelup.sfx"
+    if (s->sound) {
+        s->sound->SetVolume(lbl_80563B88);
+    } else {
+        fn_802E317C(pool + 0x188);  // "Error creating unlock sound in MCHALLENGEMODE!"
+    }
+    RedrawNodes();
+}
 
 }  // extern "C"
 
