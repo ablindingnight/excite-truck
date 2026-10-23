@@ -2047,7 +2047,7 @@ void fn_801A44D4(u8* l) {
 void fn_801A4538(void* a) { fn_8012C4E4(a, (void*)fn_801A44D4, 0); }
 
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* swapped);  // res.cpp
-void fn_801A4B5C(u8* o, bool swap, u8* q);
+u8* fn_801A4B5C(u8* o, bool swap, u8* vol);
 void fn_801A4768(s32* p, s32 base);
 void fn_801A4780(s32* p, s32 base);
 void fn_801A4798(s32* p, s32 base);
@@ -2209,7 +2209,61 @@ u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
     return p;
 }
 
-void fn_801A4B5C(u8* o, bool swap, u8* q) {}  // stub (179)
+// Static object from file data (byte-swapped when `swap`); its collision volume is built in place at
+// vol according to the volume's tag.
+u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
+    *(void**)o = lbl_803336F8;
+    if (swap) {
+        Swap32(o + 0x34);
+        Swap32(o + 0x38);
+        f32* w = (f32*)(o + 0x4);
+        for (int i = 0; i < 12; i++) {
+            Swap32((u8*)&w[i]);
+        }
+    }
+    U32(o, 0x48) = 0;
+    s32 tag = S32(vol, 0x18);
+    if (swap) {
+        Swap32((u8*)&tag);
+    }
+    switch (tag) {
+    case 'BOX ':
+        if (vol) {
+            vol = fn_801A1CE4(vol, (u32)o, swap);
+        }
+        PTR(o, 0x3C) = vol;
+        break;
+    case 'SPHR':
+        if (vol) {
+            vol = fn_8019EDB8(vol, (u32)o, swap);
+        }
+        PTR(o, 0x3C) = vol;
+        break;
+    case 'TUBE':
+        if (vol) {
+            vol = fn_801A1898(vol, (u32)o, swap);
+        }
+        PTR(o, 0x3C) = vol;
+        break;
+    case 'RING':
+        if (vol) {
+            vol = fn_801A2CC0(vol, (u32)o, swap);
+        }
+        PTR(o, 0x3C) = vol;
+        break;
+    case 'PMSH':
+        if (vol) {
+            vol = fn_801A3F5C(vol, (u32)o, swap);
+        }
+        PTR(o, 0x3C) = vol;
+        break;
+    default:
+        PTR(o, 0x3C) = 0;
+        break;
+    }
+    fn_801A48E4(o);
+    return o;
+}
 
 void fn_801A4E28(void) { lbl_8055E5A0 = fn_801CFEAC("track.msh"); }
 
