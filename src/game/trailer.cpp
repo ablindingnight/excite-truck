@@ -400,15 +400,15 @@ void Trailer::Update(void) {
         fn_8018ADA4(this, detached ? 0.25f : 0.0f);
     } else {
         CarBody* c = car;
-        RVec3 dv;
-        dv.x = vel.x - c->vel.x;
-        dv.y = vel.y - c->vel.y;
-        dv.z = vel.z - c->vel.z;
         RVec3 l;
+        RVec3 dv;
         l.x = c->mtx.pos.x - mtx.pos.x;
         l.y = c->mtx.pos.y - mtx.pos.y;
         l.z = c->mtx.pos.z - mtx.pos.z;
         MulVecTSelf(&l, mtx.rot);
+        dv.x = vel.x - c->vel.x;
+        dv.y = vel.y - c->vel.y;
+        dv.z = vel.z - c->vel.z;
         f32 a = 0.15f * PSVECDotProduct(&dv, &mtx.rot[2]);
         a = (0.25f < a) ? 0.25f : a;
         a = (a > -0.25f) ? a : -0.25f;
