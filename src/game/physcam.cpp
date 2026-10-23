@@ -35,7 +35,12 @@ extern const char* lbl_80346B54[];
 // One camera region record.
 struct CamRegion {
     u8* cam;         // offset 0x0, null when unused
-    u8 data[0x18];   // offset 0x4
+    f32 lo1;         // offset 0x4, first heading window
+    f32 hi1;         // offset 0x8
+    f32 lo2;         // offset 0xC, second heading window
+    f32 hi2;         // offset 0x10
+    u8 dual;         // offset 0x14, second window in use
+    u8 pad15[0x7];
 };
 
 extern CamRegion lbl_8049F9D8[];
@@ -281,7 +286,47 @@ int fn_80272C24(f32 x, f32 a, f32 b, f32 m) {
     return x >= a && x <= b;
 }
 
-void fn_80272C74(u8* p) {}  // stub (86)
+class CarCtl {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual u8* Track(void);  // 0x18
+};
+
+f32 PSVECDistance(const u8* a, const u8* b);
+extern f32 lbl_8055F568;        // car heading
+extern const f32 lbl_80563F48;  // 0.0
+extern const f32 lbl_80563F50;  // 1.0
+
+// How strongly `r` applies to `car` (0..1 into *weight); returns whether the region is usable.
+int fn_80272C74(CamRegion* r, u8* car, f32* weight, int type) {
+    *weight = lbl_80563F48;
+    if (!S32(r->cam, 0x58)) {
+        return 0;
+    }
+    if (type != -1 && type != S32(r->cam, 0x5C)) {
+        return 0;
+    }
+    int ok = 1;
+    if (lbl_8055F564) {
+        f32 wrap = F32(PTR(((CarCtl*)PTR(car, 0x270))->Track(), 0x2C), 0x8);
+        if (fn_80272C24(lbl_8055F568, r->lo1, r->hi1, wrap) ||
+            (r->dual && fn_80272C24(lbl_8055F568, r->lo2, r->hi2, wrap))) {
+            *weight = lbl_80563F50;
+            return 1;
+        }
+        ok = 0;
+    }
+    f32 d = PSVECDistance(car + 0x60, r->cam) - F32(r->cam, 0xC);
+    if (d <= lbl_80563F48) {
+        *weight = lbl_80563F50;
+    } else {
+        *weight = lbl_80563F50 / (lbl_80563F50 + d);
+    }
+    return ok;
+}
 
 void fn_80272DCC(u8* p) {}  // stub (354)
 
