@@ -1029,12 +1029,12 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         return 0;
     }
     f32 k = -1.0f / dist;
-    at.x = (pa.x + pb.x) / 2.0f;
-    at.y = (pa.y + pb.y) / 2.0f;
     nrm.x = diff.x * k;
-    at.z = (pa.z + pb.z) / 2.0f;
     nrm.y = diff.y * k;
     nrm.z = diff.z * k;
+    at.x = (pa.x + pb.x) / 2.0f;
+    at.y = (pa.y + pb.y) / 2.0f;
+    at.z = (pa.z + pb.z) / 2.0f;
     fn_8019A788(who ? who : p, q, (u32)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
     return 1;
 }
