@@ -26,8 +26,8 @@ struct WaitPopup {
 };
 
 struct ModeEntry {
-    s32 a;      // offset 0x0
-    s32 b;      // offset 0x4
+    s32 a;            // offset 0x0
+    const char* lyt;  // offset 0x4
     s32 count;  // offset 0x8
 };
 
@@ -86,6 +86,8 @@ s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEBC;
 extern s32 lbl_8055BEB8;
+extern s32 lbl_8055BEC0;
+extern void* lbl_803435A0[];
 extern void* lbl_80343600[];
 extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
 extern char lbl_8055B860[8];
@@ -523,6 +525,8 @@ extern "C" {
 void fn_80129AEC(int a);
 void fn_8020A600(void);
 int fn_80247C18(void);
+int fn_802478A4(void);
+int fn_80247AD0(void);
 void fn_8024CF60(void);
 void fn_8024CFB4(void);
 void fn_8027DDCC(int a);
@@ -706,7 +710,7 @@ void fn_8024778C(void) {
 void fn_80247880(void) { lbl_8055BEB0 = fn_80214D04(); }
 
 // Career difficulty menu.
-void fn_802478A4(void) {
+int fn_802478A4(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_8024778C, 0, 0),
         MenuItem(lbl_8055BABC, 8, (const void*)fn_80247880, 1, 0),
@@ -719,7 +723,7 @@ void fn_802478A4(void) {
     };
     MenuDesc desc = {"excite_diff.lyt", 0, 0, 0, 0};
     desc.items = items;
-    fn_802146BC(&desc, -999, -999, 1);
+    return fn_802146BC(&desc, -999, -999, 1);
 }
 
 void fn_80247A0C(void) {
@@ -750,7 +754,7 @@ void fn_80247A0C(void) {
 void fn_80247AAC(void) { lbl_8055BEB4 = fn_80214D04(); }
 
 // Challenge difficulty menu.
-void fn_80247AD0(void) {
+int fn_80247AD0(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80247A0C, 0, 0),
         MenuItem(lbl_8055BABC, 8, (const void*)fn_80247AAC, 1, 0),
@@ -761,10 +765,136 @@ void fn_80247AD0(void) {
     };
     MenuDesc desc = {"chaldiff.lyt", 0, 0, 0, 0};
     desc.items = items;
-    fn_802146BC(&desc, -999, -999, 1);
+    return fn_802146BC(&desc, -999, -999, 1);
 }
 
-int fn_80247C18(void) { return 0; }  // stub (330)
+}  // extern "C"
+
+// The demo menu's mode buttons list (vtable lbl_803435A0): up to 10 {id, locked} entries.
+struct ModeList {
+    struct Entry {
+        s32 id;  // offset 0x0
+        u8 on;   // offset 0x4
+    };
+    ModeList(void) {
+        f14 = 0;
+        count = 0;
+        vt = lbl_803435A0;
+        items = buf;
+        cap = 10;
+    }
+    ~ModeList(void) {
+        items = 0;
+        count = 0;
+        cap = 0;
+    }
+    void Add(s32 id, u8 on) {
+        Entry& e = items[count++];
+        e.id = id;
+        e.on = on;
+    }
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    Entry* items;    // offset 0x18
+    s32 count;       // offset 0x1C
+    s32 cap;         // offset 0x20
+    Entry buf[10];   // offset 0x24
+};
+
+int IsUnlockAll(void);
+
+extern "C" {
+int fn_80161D50(void);
+int fn_80161D14(void);
+int fn_8027DE68(int a);
+
+// The demo main menu: works out which modes are open, then runs the menu (career and challenge go
+// through their difficulty popups). Returns the chosen entry.
+int fn_80247C18(void) {
+    lbl_8055F26C = 0;
+    int n = fn_80161D50();
+    bool ok = fn_80161D14() > n;
+    if (ok) {
+        lbl_8055F26C = 1;
+        if (fn_8027DE68(0)) {
+            lbl_8055F26C = 2;
+            if (fn_8027DE68(1)) {
+                lbl_8055F26C = 3;
+            }
+        }
+    }
+    lbl_8055BEA8 = 4;
+    if (fn_8027B9EC(0)) {
+        lbl_8055BEA8 = 5;
+    }
+    if (IsUnlockAll()) {
+        lbl_8055F26C = 3;
+        lbl_8055BEA8 = 5;
+    }
+    const ModeEntry* mode = &lbl_802FA3B4[lbl_8055F26C];
+    ModeList list;
+    int x = fn_8027DE68(2);
+    list.Add(11, !x && lbl_8055F26C >= 2);
+    list.Add(12, !x && lbl_8055F26C >= 3);
+    list.Add(13, x);
+    int y = fn_8027B9EC(1);
+    list.Add(14, !y && lbl_8055BEA8 >= 5);
+    list.Add(15, y);
+    list.Add(16, 0);
+    int slot = IdentGetCurrentSlot();
+    if (lbl_8055BEC0 < 0 || lbl_8055BEC0 != slot) {
+        lbl_8055BEAC = mode->a;
+    }
+    lbl_8055BEC0 = slot;
+    MenuItem items[] = {
+        MenuItem(0, 5, &list, 0, 0),
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_8024768C, 0, 0),
+        MenuItem(lbl_8055BABC, 8, (const void*)fn_80247768, 1, 0),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem("new_game", 0, 0, 1, 0),
+        MenuItem("load", 0, 0, 2, 0),
+        MenuItem("career_0", 0, 0, 3, 0),
+        MenuItem("challenge", 0, 0, 6, 0),
+        MenuItem("multi", 0, 0, 8, 0),
+        MenuItem("tutorial", 0, 0, 12, 0),
+        MenuItem("options", 0, 0, 9, 0),
+        MenuItem("save", 0, 0, 10, 0),
+        MenuItem("action", 0, 0, 11, 0),
+        MenuItem("records", 0, 0, 16, 0),
+        MenuItem(lbl_804988F0),
+    };
+    for (;;) {
+        int r;
+        if (lbl_8055F270) {
+            r = 3;
+        } else if (lbl_8055F271) {
+            r = 6;
+        } else {
+            MenuDesc desc = {0, 0, (int (*)(int*))fn_802476FC, 0, 0};
+            desc.layout = mode->lyt;
+            desc.items = items;
+            r = fn_802146BC(&desc, -999, -999, 1);
+        }
+        if (r == 3) {
+            int d = fn_802478A4();
+            if (d != -1) {
+                lbl_8055F270 = 1;
+                return d;
+            }
+            lbl_8055F270 = 0;
+        } else if (r == 6) {
+            int d = fn_80247AD0();
+            if (d != -1) {
+                lbl_8055F271 = 1;
+                return d;
+            }
+            lbl_8055F271 = 0;
+        } else {
+            return r;
+        }
+    }
+}
 
 u8* fn_80248140(u8* p, int del) {
     if (p) {
