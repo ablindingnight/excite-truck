@@ -125,7 +125,7 @@ int fn_801B89E0(void);
 void fn_801B665C(void);
 void fn_801B6664(u8* p);
 void fn_8018AE24(u8* car, int v);
-void fn_80191084(u8* p, int a);
+void fn_80191084(u8* p, u32 a);
 void fn_80191758(u8* p);
 int fn_801B526C(u8* p);
 int fn_801769F8(void);
@@ -516,7 +516,33 @@ void fn_80191064(u8* p) {
     }
 }
 
-void fn_80191084(u8* p, int a) {}
+// The camera/view slots seen as switchable modes: 0x24 enters, 0x28 leaves.
+class VSwitch {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void Enter(void);  // 0x24
+    virtual void Leave(void);  // 0x28
+};
+
+// Makes `next` the active view (offset 0x10): the old one leaves, the new one enters.
+void fn_80191084(u8* p, u32 next) {
+    VSwitch* cur = (VSwitch*)PTR(p, 0x10);
+    if ((VSwitch*)next != cur) {
+        if (cur) {
+            cur->Leave();
+        }
+        PTR(p, 0x10) = (u8*)next;
+        if (next) {
+            ((VSwitch*)next)->Enter();
+        }
+    }
+}
 
 u32 fn_80191100(u8* p) { return U32(p, 0xc); }
 
