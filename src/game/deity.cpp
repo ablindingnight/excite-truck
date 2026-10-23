@@ -189,7 +189,8 @@ public:
     virtual DAI* GetAI(void);  // 0xE8
 };
 
-// Per-car race state (the vtable 0x10 accessor returns it).
+// Per-car race state (the vtable 0x10 accessor returns it). NOTE: the offset comments are relative
+// to the owning DeityCar (State() returns car + 4); subtract 4 for offsets within DState.
 struct DState {
     u32 flags;   // offset 0x4
     s32 place;   // offset 0x8
