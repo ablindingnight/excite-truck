@@ -576,14 +576,14 @@ ValueNodeV* fn_80287E80(EfxInfo* e, const char* key) {
     return e->node->Find(buf);
 }
 
-ValVec3 fn_80287ED0(EfxInfo* e, const char* node, const char* key) {
+ValVec3 fn_80287ED0(const EfxInfo* e, const char* node, const char* key) {
     if (!e->node || !e->node->Find(node)) {
         fn_802E317C("efx: this model doesn't support '%s'", node);
     }
     return e->node->Find(node)->GetVec3(key);
 }
 
-ValVec3 fn_80287F90(EfxInfo* e, const char* node, const char* key, ValVec3 def) {
+ValVec3 fn_80287F90(const EfxInfo* e, const char* node, const char* key, ValVec3 def) {
     if (!e->node || !e->node->Find(node)) {
         fn_802E317C("efx: this model doesn't support '%s'", node);
     }

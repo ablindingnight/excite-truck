@@ -736,7 +736,7 @@ int fn_8027C788(BracketRef* b) {
     return 1;
 }
 
-int fn_8027C850(BracketRef* b) {
+int fn_8027C850(const BracketRef* b) {
     const char* name = b->name;
     int i = fn_8027C1C8(lbl_8055F654, name);
     if (i == 0) {

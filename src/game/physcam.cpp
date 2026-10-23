@@ -131,7 +131,7 @@ int fn_80270D1C(int x) {
     }
 }
 
-s32 fn_80270D4C(u8* a, u8* b) {
+s32 fn_80270D4C(u8* a, const u8* b) {
     f32* pb;
     f32* pa;
     if (U8(b, 0x4)) {

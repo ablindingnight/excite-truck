@@ -137,7 +137,7 @@ void SafeDelete(T*& p) {
     }
 }
 
-extern "C" SkagBag* fn_802B475C(SkagVec<SkagBag*>* v);
+extern "C" SkagBag* fn_802B475C(const SkagVec<SkagBag*>* v);
 
 struct SkagGrid {
     // The root grid: a random root bag in every cell.
@@ -292,7 +292,7 @@ void fn_802B40F8(void) {
     lbl_8055F9C8 = -1;
 }
 
-SkagBag* fn_802B475C(SkagVec<SkagBag*>* v) { return v->data[fn_80129D90(0, 0, v->count)]; }
+SkagBag* fn_802B475C(const SkagVec<SkagBag*>* v) { return v->data[fn_80129D90(0, 0, v->count)]; }
 
 }  // extern "C"
 

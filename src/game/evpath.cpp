@@ -504,7 +504,7 @@ void fn_80286788(u8* p) { VR(PTR(p, 0x1C))->v20(); }
 
 void fn_8028679C(u8* p) { VR(PTR(p, 0x1C))->v24(); }
 
-s32 fn_802867B0(u8* p) {
+s32 fn_802867B0(const u8* p) {
     u8* o = PTR(p, 0x20);
     if (o) {
         s32 v = (s32)((f32)S32(o, 0x0) + F32(o, 0x10));
