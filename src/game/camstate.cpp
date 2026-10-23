@@ -96,7 +96,58 @@ void fn_80273B4C(u8* p) {
 
 void fn_80273BD0(u8* p) {}  // stub (422)
 
-void fn_80274268(u8* p) {}  // stub (125)
+struct CVec3 {
+    f32 x, y, z;
+};
+
+// Rotation + translation (camera frame).
+struct CFrame {
+    f32 m[9];  // offset 0x0, rows
+    CVec3 t;   // offset 0x24
+};
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVec(CVec3* out, const CVec3* in, const CFrame* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+    }
+}
+
+void fn_80274460(u8* p);
+extern const f32 lbl_80563FE4;
+extern const f32 lbl_80563FE8;
+extern const f32 lbl_80563FEC;
+
+// Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
+// flag 0x260C on the car takes fn_80274460 instead.
+void fn_80274268(u8* p) {
+    u8* car = PTR(p, 0x140);
+    if (U8(car, 0x260C)) {
+        fn_80274460(p);
+        return;
+    }
+    CVec3 v;
+    CVec3 w;
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    v.x = lbl_80563FB0;
+    v.y = lbl_80563FE8;
+    v.z = lbl_80563FEC + (F32(car, 0x2458) - lbl_80563FE4);
+    MulVec(&w, &v, (CFrame*)(p + 0x58));
+    F32(p, 0x7C) = F32(p, 0x7C) + w.x;
+    F32(p, 0x80) = F32(p, 0x80) + w.y;
+    F32(p, 0x84) = F32(p, 0x84) + w.z;
+    fn_80273B4C(p);
+}
 
 void fn_8027445C(u8* p) { fn_80274268(p); }
 
