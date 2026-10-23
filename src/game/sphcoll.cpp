@@ -52,6 +52,35 @@ extern void* lbl_803337C8[];
 
 class VEx;
 
+class VDel {
+public:
+    virtual ~VDel(void);
+};
+
+struct SphGroupDel {
+    u8 pad0[0x24];    // offset 0x0
+    VDel* vols[20];   // offset 0x24
+};
+
+// A bounding plane: unit normal plus distance.
+struct PolyPlane {
+    W3 n;   // offset 0x0
+    f32 d;  // offset 0xC
+};
+
+struct PolyVol {
+    u8 pad0[0x3C];         // offset 0x0
+    PolyPlane planes[8];   // offset 0x3C
+};
+
+extern void* lbl_80333778[];
+
+// The per-volume cached values cleared on reset.
+struct SphCache {
+    u8 pad0[0x64];  // offset 0x0
+    f32 v[24];      // offset 0x64
+};
+
 // The volume interface viewed through its two setters.
 class VSet {
 public:
@@ -237,7 +266,7 @@ void fn_8019DF88(u8* p) {}  // stub (155)
 
 void fn_8019E1F4(u8* p) {}  // stub (55)
 
-void fn_8019E2D0(u8* p) {}  // stub (140)
+int fn_8019E2D0(u8* a, u8* b, u8* c, u8* m, f32 x, f32 y, f32 z) { return 0; }  // stub (140)
 
 void fn_8019E500(u8* p) {}  // stub (205)
 
@@ -374,7 +403,12 @@ void fn_8019F560(u8* p) { fn_8019F1A4(p); }
 
 void fn_8019F564(u8* p) {}  // stub (99)
 
-void fn_8019F6F0(u8* p) {}  // stub (36)
+void fn_8019F6F0(u8* p) {
+    fn_8019F03C(p);
+    for (int i = 0; i < 24; i++) {
+        ((SphCache*)p)->v[i] = 0.0f;
+    }
+}
 
 void fn_8019F780(u8* p) {}  // stub (514)
 
@@ -409,7 +443,19 @@ u8* fn_8019FFD8(u8* p, u32 a, u32 b) {
     return p;
 }
 
-void fn_801A0040(u8* p) {}  // stub (51)
+u8* fn_801A0040(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_803339B8;
+        for (int i = 0; i < S32(p, 0x174); i++) {
+            delete ((SphGroupDel*)p)->vols[i];
+        }
+        delete *(VDel**)(p + 0x17C);
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_801A010C(u8* p, int del) {
     if (p && del > 0) {
@@ -557,7 +603,18 @@ void fn_801A1DD4(u8* a, u8* obj) {
     }
 }
 
-void fn_801A1E7C(u8* p) {}  // stub (50)
+int fn_801A1E7C(u8* p, u8* a, u8* b, u8* c, RVec3* out) {
+    f32 z = F32(p, 0x2C);
+    f32 y = F32(p, 0x28);
+    f32 x = F32(p, 0x24);
+    if (fn_8019E2D0(a, b, c, ((VEx*)p)->v50(), x, y, z)) {
+        out->x = 0.0f;
+        out->y = 1.0f;
+        out->z = 0.0f;
+        return 1;
+    }
+    return 0;
+}
 
 void fn_801A1F44(RVec3* out, u8* q) {
     u8* o = VE(q)->v50();
@@ -647,7 +704,30 @@ void fn_801A2ECC(u8* p) {}  // stub (170)
 
 void fn_801A3174(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, lbl_8055E598.value, F32(p, 0x24) + F32(p, 0x28)); }
 
-void fn_801A3190(u8* p) {}  // stub (47)
+u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) {
+    U32(p, 0xC) = a;
+    U32(p, 0x4) = 0;
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'POLY';
+    F32(p, 0x10) = f1;
+    F32(p, 0x14) = f2;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_80333778;
+    U32(p, 0xDC) = 0;
+    S32(p, 0xBC) = n;
+    for (int i = 0; i < S32(p, 0xBC); i++) {
+        ((PolyVol*)p)->planes[i].n = planes[i].n;
+        ((PolyVol*)p)->planes[i].d = planes[i].d;
+    }
+    F32(p, 0x24) = lo->x;
+    F32(p, 0x28) = lo->y;
+    F32(p, 0x2C) = lo->z;
+    F32(p, 0x30) = hi->x;
+    F32(p, 0x34) = hi->y;
+    F32(p, 0x38) = hi->z;
+    return p;
+}
 
 void fn_801A324C(u8* p) {}  // stub (161)
 
