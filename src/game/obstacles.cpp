@@ -39,6 +39,12 @@ struct Pose12 {
 
 extern s32 lbl_8055E3C4;
 
+extern "C" {
+f32 PSVECDotProduct(const f32* a, const f32* b);
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+void fn_801ABC28(u8* p);
+}
+
 struct ObVec3 {
     f32 x, y, z;
 };
@@ -133,7 +139,23 @@ void fn_801A9798(u8* p) {}  // stub (198)
 
 void fn_801A9AB0(u8* p, u8* q) {}  // stub (2089)
 
-void fn_801ABB54(u8* p) {}  // stub (53)
+void fn_801ABB54(u8* p) {
+    f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
+    f32 lim = F32(p, 0x238);
+    f32 imp = 0.0f;
+    f32 ad = (f32)__fabs(d);
+    if (ad > lim) {
+        if (!(lim < ad)) {
+            lim = ad;
+        }
+        imp = -(d > 0.0f ? 1.0f : -1.0f) * lim;
+    } else if (ad > 0.01f) {
+        imp = -d * 0.5f;
+    }
+    F32(p, 0x128) = F32(p, 0x128) + F32(p, 0x58) * imp;
+    F32(p, 0x124) = F32(p, 0x124) + F32(p, 0x54) * imp;
+    F32(p, 0x12C) = F32(p, 0x12C) + F32(p, 0x5C) * imp;
+}
 
 void fn_801ABC28(u8* p) {}  // stub (243)
 
@@ -261,7 +283,29 @@ void fn_801AC508(void) {
 
 void fn_801AC544(u8* p) {}  // stub (321)
 
-void fn_801ACA48(u8* p) {}  // stub (58)
+void fn_801ACA48(u8* p) {
+    fn_801ABC28(p);
+    if (U8(p, 0x220)) {
+        f32 a = 0.9f * F32(p, 0x124);
+        f32 b = 0.9f * F32(p, 0x128);
+        F32(p, 0x118) = 0.0f;
+        F32(p, 0x11C) = 0.0f;
+        F32(p, 0x120) = 0.0f;
+        F32(p, 0x124) = a;
+        F32(p, 0x128) = b;
+        F32(p, 0x12C) = 0.9f * F32(p, 0x12C);
+        ObVec3 c;
+        PSVECCrossProduct((f32*)(p + 0x48), (f32*)(p + 0x1F8), &c.x);
+        if (F32(p, 0x4C) < 0.92f) {
+            F32(p, 0x124) = F32(p, 0x124) + 0.1f * c.x;
+            F32(p, 0x128) = F32(p, 0x128) + 0.1f * c.y;
+            F32(p, 0x12C) = F32(p, 0x12C) + 0.1f * c.z;
+        }
+        F32(p, 0x60) = F32(p, 0x210);
+        F32(p, 0x64) = F32(p, 0x214);
+        F32(p, 0x68) = F32(p, 0x218);
+    }
+}
 
 void fn_801ACB30(u8* p) {}  // stub (281)
 
