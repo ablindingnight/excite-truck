@@ -247,7 +247,42 @@ void fn_80266150(u8* p) {
     F32(p, 0xC) = 1.0f;
 }
 
-void fn_80266170(u8* p) {}  // stub (90)
+extern f32 lbl_8055C4BC;  // funky fov scale
+extern s32 lbl_8055C4B4;  // funky fov ease start time
+extern s32 lbl_8055C4B8;  // funky fov ease end time
+
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 ClampF(f32 x) {
+    x = lbl_80563C2C < x ? lbl_80563C2C : x;
+    return x > lbl_80563C20 ? x : lbl_80563C20;
+}
+
+// "funky_fov": on a camera cut, aim the view angle at a scaled (capped) fov, then ease toward it.
+struct FunkyFov {
+    s32 last;    // offset 0x0
+    s32 acc;     // offset 0x4
+    f32 target;  // offset 0x8
+    f32 t;       // offset 0xC
+};
+
+void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
+    if (fresh) {
+        f->last = now;
+        f->acc = 0;
+        f->target = MinF(lbl_8055C4BC * fov, lbl_8055C4C0);
+    }
+    if (paused) {
+        f->last = now;
+        return;
+    }
+    f->acc += now - f->last;
+    f->last = now;
+    f32 a = f->acc;
+    f32 e = lbl_8055C4B8;
+    f32 st = lbl_8055C4B4;
+    f32 x = (a - st) / (e - st);
+    f->t = ShakeEase(lbl_80563C20 + ClampF(x) * lbl_80563C2C);
+}
 
 f32 PSVECDistance(const f32* a, const f32* b);
 extern f32 lbl_8055C4C4;
