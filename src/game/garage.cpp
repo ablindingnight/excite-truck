@@ -32,11 +32,31 @@ public:
     void Finish(int r);
 };
 
-// Garage-wide flags.
+// Two (0, 2) value pairs built by the constructor.
+struct GaragePair {
+    GaragePair(void) {
+        c = 0;
+        a = 0;
+        d = 2;
+        b = 2;
+    }
+    s32 a;  // offset 0x0
+    s32 b;  // offset 0x4
+    s32 c;  // offset 0x8
+    s32 d;  // offset 0xC
+};
+
+// Garage-wide state.
 struct GarageFlags {
-    u32 unk0;  // offset 0x0
-    u8 alt;    // offset 0x4
-    u8 pad5[0xB];
+    GarageFlags(void) {
+        unk0 = -1;
+        alt = 0;
+    }
+    u32 unk0;              // offset 0x0, profile slot
+    u8 alt;                // offset 0x4
+    u8 pad5[0x3];
+    GaragePair pairs[4];   // offset 0x8
+    u8 pad48[0x70];        // offset 0x48
 };
 
 extern "C" {
@@ -58,7 +78,10 @@ void operator delete[](void* p);
 void* operator new(unsigned long n, const char* tag);
 void* operator new[](unsigned long n, const char* tag);
 
-extern GarageFlags lbl_80498C48;
+ModuleTag lbl_8055F2D8;
+static UnkStatic123 lbl_80498C30;
+UnkStatic7F lbl_8055F2E0;
+static GarageFlags lbl_80498C48;
 extern u8* lbl_8055F2EC;
 
 class VList {
@@ -498,5 +521,4 @@ u8 fn_802524A8(u8* p, int i) { return U8(PTR(p, 0x4) + i * 0x48, 0x41); }
 
 s32 fn_802524BC(u8* p, int i) { return S32(PTR(p, 0x4) + i * 0x48, 0x44); }
 
-void fn_802524D0(u8* p) {}  // stub (132)
 }  // extern "C"
