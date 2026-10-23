@@ -4,6 +4,7 @@
 // against raw field offsets; the large screen routines are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -96,53 +97,10 @@ VR* fn_8027ED70(void) { return lbl_8055F680; }
 
 }  // extern "C"
 
-struct CaptionContext {
-    int value;
-    CaptionContext(int v = 0) : value(v) {}
-};
-
-// Five-word menu records, as in controls.cpp; a 0x7B type ends the list.
-struct MenuItem {
-    // A text item (type 3).
-    MenuItem(const char* n, const char* t, CaptionContext context = CaptionContext()) {
-        type = 3;
-        name = n;
-        data = t;
-        arg0 = (int)context.value;
-        arg1 = 0;
-    }
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    MenuItem(const UnkStatic123& end) {
-        name = (const char*)end.unk0;
-        type = end.unk4;
-        data = (const void*)end.unk8;
-        arg0 = end.unkC;
-        arg1 = end.unk10;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0, arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int*);
-    int unkC, unk10;
-};
-
 extern UnkStatic123 lbl_804B2FF8;  // this unit's end-of-menu tag
 extern char lbl_8055B860[8];
 
 extern "C" {
-int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
 
 // Shows the "event unlocked" message box.
 void fn_8027ED78(const char* title, const char* message) {

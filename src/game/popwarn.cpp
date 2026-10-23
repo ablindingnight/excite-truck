@@ -3,6 +3,7 @@
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -340,7 +341,50 @@ int fn_802485FC(void) {
     return 0;
 }
 
-void fn_80248668(u8* p) {}  // stub (66)
+}  // extern "C"
+
+extern void* lbl_803436C0[];
+
+// Kiosk idle timer driven by the kiosk menu (30 s timeout).
+struct KioskTimer {
+    KioskTimer(void) {
+        f14 = 0;
+        vt = lbl_803436C0;
+        timeout = 30000;
+        f24 = 1;
+        f28 = 0;
+        start = fn_802E2C20();
+        armed = 1;
+    }
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    s32 armed;       // offset 0x18
+    s32 start;       // offset 0x1C
+    s32 timeout;     // offset 0x20
+    s32 f24;         // offset 0x24
+    s32 f28;         // offset 0x28
+    u8 pad2C[0x10];  // offset 0x2C
+};
+extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
+
+extern "C" {
+int fn_8020A640(void);
+void fn_8020A600(void);
+
+void fn_80248668(void) {
+    if (!fn_8020A640()) {
+        fn_8020A600();
+    }
+    KioskTimer t;
+    MenuItem items[] = {
+        MenuItem(0, 5, &t, 0, 0),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"kiosk.lyt", 0, (int (*)(int*))fn_802485FC, 0, 0};
+    desc.items = items;
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 void fn_80248770(u8* p) {
     U8(p, 0x18) = 1;
