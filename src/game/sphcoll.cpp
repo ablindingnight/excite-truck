@@ -693,7 +693,8 @@ void fn_801A22A4(u8* p) {
     Xform x;
     x.rot = src->rot;
     x.pos = src->pos;
-    fn_801E44F4((u8*)&x, 0x50000000, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
+    RVec3* c = (RVec3*)(p + 0x24);
+    fn_801E44F4((u8*)&x, 0x50000000, c->x, c->y, c->z);
 }
 
 void fn_801A2354(u8* p) {}  // stub (56)

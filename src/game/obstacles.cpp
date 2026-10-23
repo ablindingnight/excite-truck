@@ -37,6 +37,18 @@ struct Pose12 {
     u32 w[12];
 };
 
+extern s32 lbl_8055E3C4;
+
+struct ObVec3 {
+    f32 x, y, z;
+};
+
+// A visitor called for each obstacle in a linked chain.
+class VVisit {
+public:
+    virtual void Visit(u8* o);
+};
+
 class CollVolume {
 public:
     void Update(void);
@@ -65,9 +77,9 @@ void fn_801C1C7C(u8* p);
 void fn_802E30C8(const char* fmt, ...);
 f32 PSVECSquareDistance(const u8* a, const u8* b);
 void fn_801AC240(u8* p);
-void fn_801ABFF8(u8* p, void** f);
+void fn_801ABFF8(u8* p, VVisit* f);
 void fn_801ACF94(u8* p);
-void fn_801AD8C8(u8* p);
+void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi);
 void fn_801AD99C(u8* p, f32* v, f32* off);
 void fn_801D09A8(u8* p, s32 id);
 }
@@ -127,7 +139,18 @@ void fn_801ABC28(u8* p) {}  // stub (243)
 
 void fn_801ABFF4(u8* p) { vf20__10CollVolumeFv(p); }
 
-void fn_801ABFF8(u8* p, void** f) {}  // stub (42)
+void fn_801ABFF8(u8* p, VVisit* f) {
+    u8* o = PTR(p, 0x224);
+    if (o && U8(p, 0x223) && lbl_8055E3C4 > 1) {
+        while (o != p) {
+            U8(o, 0x223) = 0;
+            f->Visit(o);
+            o = PTR(o, 0x224);
+        }
+        U8(p, 0x223) = 0;
+    }
+    fn_801AC240(p);
+}
 
 void fn_801AC0A0(u8* p, int a, int b, int c, u8* car) {}  // stub (57)
 
@@ -321,7 +344,17 @@ void fn_801AD888(u8* p) {
     fn_801AC254(p);
 }
 
-void fn_801AD8C8(u8* p) {}  // stub (53)
+void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) {
+    *(Pose12*)(p + 0x3C) = *pose;
+    ((CollVolume*)p)->Update();
+    F32(p, 0x118) = lo->x;
+    F32(p, 0x11C) = lo->y;
+    F32(p, 0x120) = lo->z;
+    F32(p, 0x124) = hi->x;
+    F32(p, 0x128) = hi->y;
+    F32(p, 0x12C) = hi->z;
+    fn_801AC240(p);
+}
 
 void fn_801AD99C(u8* p, f32* v, f32* off) {
     f32 push[3];
@@ -339,7 +372,7 @@ void fn_801AD99C(u8* p, f32* v, f32* off) {
 void fn_801ADA38(u8* p, int on) {
     if (on) {
         void* f = lbl_80335940;
-        fn_801ABFF8(p, &f);
+        fn_801ABFF8(p, (VVisit*)&f);
     } else {
         U8(p, 0x220) = 0;
     }
@@ -363,7 +396,7 @@ void fn_801ADAC0(u8* self, u8* p) { fn_801AC240(p); }
 
 void fn_801ADAF4(u8* p) { fn_801AD888(p - 0x23C); }
 
-void fn_801ADAFC(u8* p) { fn_801AD8C8(p - 0x23C); }
+void fn_801ADAFC(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) { fn_801AD8C8(p - 0x23C, pose, lo, hi); }
 
 void fn_801ADB04(u8* p, f32* v, f32* off) { fn_801AD99C(p - 0x23C, v, off); }
 
