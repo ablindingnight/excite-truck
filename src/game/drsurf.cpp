@@ -771,9 +771,9 @@ void fn_802D5DE8(u32 fmt) {
     GXSetVtxDescv(list);
 }
 
-void fn_802D5F88(Surf* s) {
+void fn_802D5F88(const Surf* s) {
     u32 key = s->vfmt & ~0x300000;
-    u8 b = s->b9;
+    u32 b = s->b9;
     if (key != lbl_8055FDE8) {
         GXCallDisplayList(s->fmtDL, s->dlBlocks << 5);
         lbl_8055FDE8 = key;
