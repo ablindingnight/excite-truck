@@ -114,7 +114,29 @@ void fn_8024DAE0(u8* p) {}  // stub (769)
 
 void fn_8024E6E4(u8* p) {}  // stub (77)
 
-void fn_8024E818(u8* p) {}  // stub (66)
+u8* fn_8024E818(u8* p, int del) {
+    if (p) {
+        lbl_8055F2EC = 0;
+        if (p) {
+            *(void**)p = lbl_803444D8;
+            delete[] PTR(p, 0xCC);
+            if (--lbl_8055F2E8 == 0) {
+                FreeIconPool(lbl_8055F2E4);
+                lbl_8055F2E4 = 0;
+            }
+            if (p) {
+                *(void**)p = lbl_8034453C;
+                delete[] PTR(p, 0x18);
+                fn_80235380(PTR(p, 0x24));
+                fn_802CAC54(PTR(p, 0x20));
+            }
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_8024E920(u8* p, int del) {
     if (p) {
