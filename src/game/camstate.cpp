@@ -17,6 +17,7 @@ struct Mat3 {
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 extern const f32 lbl_80563FA8;
+extern const f32 lbl_80563FB4;  // pi/4
 extern const f32 lbl_80563FAC;
 extern const f32 lbl_80563FB0;
 extern const f32 lbl_80563FF0;
@@ -29,7 +30,7 @@ extern const f32 lbl_8056401C;
 
 extern "C" {
 f32 PSVECMag(const f32* v);
-void fn_80015A20(Mat3* out, const f32* axis, f32 a, f32 b);
+void fn_80015A20(Mat3* out, const f32* euler);  // Y, then X, then Z
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 u8* fn_80273978(u8* p, int del);
 u8* fn_80273B08(u8* p, int del);
@@ -77,7 +78,21 @@ u8* fn_80273B08(u8* p, int del) {
 
 void fn_80273B48(u8* p) {}
 
-void fn_80273B4C(u8* p) {}  // stub (33)
+void fn_80273B4C(u8* p) {
+    u8* car = PTR(p, 0x140);
+    if (car) {
+        f32 euler[3];
+        f32 side = U8(car, 0x260C) ? lbl_80563FA8 : lbl_80563FAC;
+        f32 zero = lbl_80563FB0;
+        f32 ang = zero * lbl_80563FB4;
+        euler[0] = zero;
+        euler[1] = ang * side;
+        euler[2] = zero;
+        Mat3 rot;
+        fn_80015A20(&rot, euler);
+        Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
+    }
+}
 
 void fn_80273BD0(u8* p) {}  // stub (422)
 
@@ -88,24 +103,26 @@ void fn_8027445C(u8* p) { fn_80274268(p); }
 void fn_80274460(u8* p) {}  // stub (128)
 
 void fn_80274660(u8* unused, u8* p) {
-    F32(p, 0x5C) = lbl_80563FB0;
-    F32(p, 0x58) = lbl_80563FAC;
-    F32(p, 0x60) = lbl_80563FB0;
-    F32(p, 0x64) = lbl_80563FB0;
-    F32(p, 0x68) = lbl_80563FAC;
-    F32(p, 0x6C) = lbl_80563FB0;
-    F32(p, 0x70) = lbl_80563FB0;
-    F32(p, 0x74) = lbl_80563FB0;
-    F32(p, 0x78) = lbl_80563FAC;
-    F32(p, 0x7C) = lbl_80563FB0;
-    F32(p, 0x80) = lbl_80563FB0;
-    F32(p, 0x84) = lbl_80563FB0;
+    f32 zero = lbl_80563FB0;
+    f32 one = lbl_80563FAC;
+    F32(p, 0x5C) = zero;
+    F32(p, 0x58) = one;
+    F32(p, 0x60) = zero;
+    F32(p, 0x64) = zero;
+    F32(p, 0x68) = one;
+    F32(p, 0x6C) = zero;
+    F32(p, 0x70) = zero;
+    F32(p, 0x74) = zero;
+    F32(p, 0x78) = one;
+    F32(p, 0x7C) = zero;
+    F32(p, 0x80) = zero;
+    F32(p, 0x84) = zero;
     f32 axis[3];
     axis[0] = lbl_80563FF0;
-    axis[1] = lbl_80563FB0;
-    axis[2] = lbl_80563FB0;
+    axis[1] = zero;
+    axis[2] = zero;
     Mat3 rot;
-    fn_80015A20(&rot, axis, lbl_80563FB0, lbl_80563FAC);
+    fn_80015A20(&rot, axis);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0xE4);
     F32(p, 0x80) = F32(p, 0xE8);
@@ -116,8 +133,8 @@ void fn_80274660(u8* unused, u8* p) {
     } else {
         h = lbl_80563FF8;
     }
-    F32(p, 0x124) = lbl_80563FB0;
     F32(p, 0x80) += h;
+    F32(p, 0x124) = lbl_80563FB0;
 }
 
 void fn_80274730(u8* p, f32 a, f32 b, f32 c, f32 d) {}  // stub (179)
