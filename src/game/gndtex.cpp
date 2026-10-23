@@ -577,7 +577,7 @@ void fn_802DC71C(GModel* model, s32 tex) {
     lbl_8055FEB4 = 0;
     fn_802CADD0(tex, 1);
     fn_802D2D1C();
-    GXTex* t = lbl_804DB468[1];
+    const GXTex* t = lbl_804DB468[1];
     u8 hasAlpha = t->hasAlpha;
     lbl_8055FEBB = fn_802DC628(model)->type == 0x1D ? 1 : 0;
     lbl_8055FEB9 = GXGetTexObjWidth(&lbl_804DB468[0]->obj) == 0x200 ? 1 : 0;
