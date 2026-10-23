@@ -251,8 +251,7 @@ void fn_8025BED0(u8* p) {
     if (U8(o, 0xC5) && !U8(o, 0x58)) {
         s32 level = S32(o, 0xC8);
         S32(p, 0x24) = level;
-        s32 cat = S32(o, 0x18);
-        S32(p, 0x20) = cat;
+        s32 cat = S32(p, 0x20) = S32(o, 0x18);
         SetTrophy(p, cat, level);
         U8(PTR(p, 0x18), 0x4A) = 1;
     }

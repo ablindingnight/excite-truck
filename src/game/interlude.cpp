@@ -1170,7 +1170,8 @@ int fn_801C9708(int key) {
             size_t n = strlen(lbl_804380F0);
             if (n < 0xFF) {
                 lbl_804380F0[n] = key;
-                lbl_804380F0[n + 1] = 0;
+                int end = n + 1;
+                lbl_804380F0[end] = 0;
             }
         }
         break;
