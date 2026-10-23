@@ -55,9 +55,14 @@ public:
     virtual void Visit(u8* o);
 };
 
+struct CVec3 {
+    f32 x, y, z;
+};
+
 class CollVolume {
 public:
     void Update(void);
+    void Xform(CVec3* out, const CVec3* in);
 };
 
 struct RVec3;
@@ -404,7 +409,27 @@ void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
 
 void fn_801AD148(u8* p) {}  // stub (81)
 
-void fn_801AD28C(u8* p) {}  // stub (66)
+f32 PSVECMag(const CVec3* v);
+
+// Links this joint between a point on our volume and one on `other` (or a world point).
+void fn_801AD28C(u8* p, const CVec3* a, CollVolume* other, const CVec3* b, f32 x, f32 y) {
+    CVec3 wa;
+    CVec3 wb;
+    CVec3 d;
+    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, a);
+    if (other) {
+        other->Xform(&wb, b);
+    } else {
+        wb = *b;
+    }
+    d.x = wb.x - wa.x;
+    d.y = wb.y - wa.y;
+    d.z = wb.z - wa.z;
+    F32(p, 0x28) = PSVECMag(&d);
+    f32 len = F32(p, 0x28);
+    fn_801AD0E0(p, (const f32*)b, (s32)other, (const f32*)a, x, y);
+    F32(p, 0x28) = len;
+}
 
 void fn_801AD394(u8* p) {}  // stub (150)
 
