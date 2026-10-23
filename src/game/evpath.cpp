@@ -156,7 +156,31 @@ int fn_8027EE88(void) {
 
 void fn_8027EEE4(u8* p) {}  // stub (110)
 
-void fn_8027F09C(u8* p) {}  // stub (90)
+}  // extern "C"
+
+extern char lbl_80347E50[];  // this unit's string pool
+extern u8 lbl_804B3018[];    // unlock animation widget
+extern "C" const char* fn_80131234(const char* key);
+extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
+
+extern "C" {
+
+// "Career difficulty N unlocked" message box.
+void fn_8027F09C(int difficulty) {
+    char buf[100];
+    fn_801345D8(buf, 100, lbl_80347E50 + 0x3D8, difficulty);  // "EventPath:CAREER_DIFFICULTY_%d_UNLOCK_INSTRUCTIONS"
+    MenuItem items[] = {
+        MenuItem(0, 5, lbl_804B3018, 0, 0),
+        MenuItem("title", fn_80131234(lbl_80347E50 + 0x40C)),  // "EventPath:CHALLENGE"
+        MenuItem("message", fn_80131234(buf)),
+        MenuItem(lbl_8055B860, 6, 0, -2, 13),
+        MenuItem(lbl_804B2FF8),
+    };
+    MenuDesc desc = {"unlock_crr_chal.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    fn_8027ED70()->v38(lbl_80347E50 + 0x214);  // "passed_career"
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 void fn_8027F204(const char* name) {
     u8* l = (u8*)lbl_8055F69C;
