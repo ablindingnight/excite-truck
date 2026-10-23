@@ -508,6 +508,11 @@ double cos(double x);
 struct CamVec {
     CamVec(void) {}
     CamVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    void Set(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
     f32 x, y, z;
 };
 
@@ -534,15 +539,14 @@ extern const f32 lbl_80563FDC;
 void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
-static inline void RotFromVec(Mat3* r, const CamVec& v) {
-    const CamVec* w = &v;
-    f32 a = PSVECMag(&w->x);
+static inline void RotFromVec(Mat3* r, const CamVec& w) {
+    f32 a = PSVECMag(&w.x);
     if (a > lbl_80564020) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563FAC / a;
-        x = inv * w->x;
-        y = inv * w->y;
-        z = inv * w->z;
+        x = inv * w.x;
+        y = inv * w.y;
+        z = inv * w.z;
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = lbl_80563FAC - c;
@@ -710,8 +714,8 @@ void fn_80275D0C(u8* p) {
     f.m[5] = lbl_80563FB0;
     PSVECCrossProduct(&f.m[3], &f.m[6], &f.m[0]);
     PSVECCrossProduct(&f.m[6], &f.m[0], &f.m[3]);
-    CamVec off(c.off.x, c.off.y, c.off.z);
     Mat3 rot;
+    CamVec off(c.off.x, c.off.y, c.off.z);
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, (u8*)&f);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)&f);
