@@ -739,22 +739,31 @@ int fn_8019C854(u8* p, u8* q) {
 
 // Capsule (q: frame at 0xC with axis at 0x18 and centre at 0x24, half length 0x28, radius 0x24):
 // the cylinder test, then a sphere test at each end.
+// A float field read through a pointer (a getter in the original; found by the permuter).
+static inline f32 LoadF(const f32* f) { return *f; }
+
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
+    u8* m;
+    f32 h;
+    PVec3 a;
+    PVec3 b;
+    PVec3 axis;
+    PVec3 org;
+    f32 rad;
+    int hit;
     if (fn_8019B08C(p, (f32*)c, q, r)) {
         return 1;
     }
-    u8* m = PTR(q, 0xC);
-    f32 h = F32(q, 0x28);
-    PVec3 a;
-    PVec3 b;
-    PVec3 axis = *(PVec3*)(m + 0x18);
-    PVec3 org = *(PVec3*)(m + 0x24);
-    f32 rad = F32(q, 0x24);
+    m = PTR(q, 0xC);
+    h = LoadF((f32*)(q + 0x28));
+    axis = *(PVec3*)(m + 0x18);
+    org = *(PVec3*)(m + 0x24);
+    rad = LoadF((f32*)(q + 0x24));
     MulAdd(a.v, org.v, axis.v, h);
     MulAdd(b.v, org.v, axis.v, -h);
-    bool hit = false;
-    hit |= fn_8019AA34(p, c, q, (u8*)a.v, 0, 0, r, rad);
-    hit |= fn_8019AA34(p, c, q, (u8*)b.v, 0, 0, r, rad);
+    hit = 0;
+    hit = (hit | fn_8019AA34(p, c, q, (u8*)a.v, 0, 0, r, rad)) != 0;
+    hit = (hit | fn_8019AA34(p, c, q, (u8*)b.v, 0, 0, r, rad)) != 0;
     return hit;
 }
 
