@@ -162,7 +162,7 @@ f32 fn_8026EB4C(u8* p) {
 }
 
 double cos(double x);
-extern const f32 lbl_80563E68;    // degrees to radians
+extern const f32 lbl_80563E68;    // 0.25
 
 // Returns the view angle; scales *scale so that wider views keep the reference framing.
 f32 fn_8026ECE4(u8* p, f32* scale) {
@@ -216,7 +216,98 @@ void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     pos[2] = target[2] + d.z * s;
 }
 
-void fn_8026EF48(u8* p) {}  // stub (304)
+extern const f32 lbl_80563E4C;
+extern const f32 lbl_80563E84;  // ground sample spacing
+extern const f32 lbl_80563E88;
+extern const f32 lbl_80563E8C;
+extern const f32 lbl_80563E90;
+extern const f32 lbl_80563E94;
+extern const f32 lbl_80563E98;
+extern const f32 lbl_80563E9C;
+extern const f32 lbl_80563EA0;
+extern const f32 lbl_80563EA8;
+f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);
+int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
+f32 fn_8026A520(int i);
+int fn_8026F408(int n);
+
+// A plain (copyable) vector.
+struct CVec3 {
+    f32 x, y, z;
+};
+
+// Raises a ground height to any obstacle top found at (x, z).
+static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
+    CsVec q(x, y, z);
+    f32 top;
+    if (fn_801784DC(&q.x, &top, 0, 0, fn_8026F408)) {
+        h = h > top ? h : top;
+    }
+    return h;
+}
+
+// Per-frame camera height tracking: averages the ground around the car into the player's rect
+// (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
+void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
+    CamRect* r = &lbl_8049A218[*cam];
+    u8* car = PTR(cam, 0x140);
+    if (!fn_801769F8()) {
+        CVec3 c = *(CVec3*)(car + 0x60);
+        const s16* hint = (const s16*)(car + 0x6C);
+        bool onGround = S32(car, 0x2620) > 0;
+        f32 y = c.y;
+        f32 z = c.z;
+        f32 h0 = fn_801E9FDC(hint, lbl_80563E84 + c.x, lbl_80563E84 + z);
+        h0 = OverObstacle(h0, lbl_80563E84 + c.x, y, lbl_80563E84 + z);
+        f32 h1 = fn_801E9FDC(hint, c.x - lbl_80563E84, lbl_80563E84 + z);
+        h1 = OverObstacle(h1, c.x - lbl_80563E84, y, lbl_80563E84 + z);
+        f32 h2 = fn_801E9FDC(hint, c.x - lbl_80563E84, z - lbl_80563E84);
+        h2 = OverObstacle(h2, c.x - lbl_80563E84, y, z - lbl_80563E84);
+        f32 h3 = fn_801E9FDC(hint, lbl_80563E84 + c.x, z - lbl_80563E84);
+        h3 = OverObstacle(h3, lbl_80563E84 + c.x, y, z - lbl_80563E84);
+        f32 avg = lbl_80563E68 * (h0 + (h1 + (h2 + h3)));
+        if (onGround) {
+            r->v[0] = avg - c.y;
+            r->v[2] = lbl_80563E78;
+        } else {
+            r->v[2] = r->v[2] + lbl_80563E88;
+        }
+        f32 t = (r->v[2] - lbl_80563E78) / lbl_80563E30;
+        f32 h = r->v[0] + (c.y - avg);
+        t = lbl_80563E30 < t ? lbl_80563E30 : t;
+        t = t > lbl_80563E78 ? t : lbl_80563E78;
+        f32 up = lbl_80563E88 * (lbl_80563E8C + t * lbl_80563E90);
+        f32 down = onGround ? lbl_80563E94 : lbl_80563E98;
+        if (h < r->v[1]) {
+            f32 lo = r->v[1] - down;
+            h = h > lo ? h : lo;
+            r->v[1] = h;
+        } else {
+            f32 hi = r->v[1] + up;
+            h = h < hi ? h : hi;
+            r->v[1] = h;
+        }
+        f32 zoom = fn_8026A520(S32(car, 0x1EC)) > lbl_80563E78;
+        if (zoom != lbl_80563E78) {
+            f32 v = lbl_80563E9C + r->v[3];
+            r->v[3] = v < lbl_80563E30 ? v : lbl_80563E30;
+        } else {
+            f32 v = r->v[3] - lbl_80563EA0;
+            r->v[3] = v > lbl_80563E78 ? v : lbl_80563E78;
+        }
+    }
+    f32 lift = lbl_80563E78 > r->v[1] ? lbl_80563E78 : r->v[1];
+    f32 top = lbl_8049A208[3];
+    f32 m = lbl_80563EA8 + lbl_8049A208[2];
+    top = top > m ? top : m;
+    f32 k = (lift - lbl_8049A208[2]) / (top - lbl_8049A208[2]);
+    k = lbl_80563E30 < k ? lbl_80563E30 : k;
+    k = k > lbl_80563E78 ? k : lbl_80563E78;
+    k = lbl_80563E78 + k * lbl_80563E30;
+    pos[1] = pos[1] + lbl_8049A208[0] * k;
+    target[1] = target[1] + lbl_8049A208[1] * k;
+    fn_8026ED64(cam, lbl_80563E30 < lbl_80563E4C ? lbl_80563E30 : lbl_80563E4C, pos, target);
+}
 
 int fn_8026F408(int n) { return n <= 8; }
 
