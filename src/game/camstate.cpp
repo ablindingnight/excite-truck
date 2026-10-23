@@ -211,7 +211,97 @@ void fn_80274660(u8* unused, u8* p) {
     F32(p, 0x124) = lbl_80563FB0;
 }
 
-void fn_80274730(u8* p, f32 a, f32 b, f32 c, f32 d) {}  // stub (179)
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+void PSVECNormalize(const f32* in, f32* out);
+f32 PSVECDistance(const f32* a, const f32* b);
+double tan(double x);
+double atan(double x);
+extern f32 lbl_80558DC4[];  // epsilon
+extern const f32 lbl_80563FC4;
+extern const f32 lbl_80563FD8;
+extern const f32 lbl_80563FFC;  // fov limits
+extern const f32 lbl_80564000;
+extern const f32 lbl_80564004;
+extern const f32 lbl_80564008;
+extern const f32 lbl_8056400C;
+
+struct CsVec {
+    CsVec(void) {}
+    CsVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    void Set(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+    f32 x, y, z;
+};
+
+// Aims the camera frame (0x58) from its position (0x7C) at the look point (0x4C), with world y as up
+// (the car's forward axis when looking straight down). A positive `dist` pulls the camera toward that
+// distance by `stiff`; the fov follows from `width` / `zoom` and the remaining distance unless `fov` is
+// given.
+void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
+    f32 dx = F32(p, 0x4C) - F32(p, 0x7C);
+    f32 dy = F32(p, 0x50) - F32(p, 0x80);
+    f32 dz = F32(p, 0x54) - F32(p, 0x84);
+    F32(p, 0x70) = dx;
+    F32(p, 0x74) = dy;
+    F32(p, 0x78) = dz;
+    f32 eps = lbl_80558DC4[0];
+    if ((f32)__fabs(dx) <= eps && (f32)__fabs(dz) <= eps) {
+        F32(p, 0x70) = F32(p, 0xD8);
+        F32(p, 0x78) = F32(p, 0xE0);
+    }
+    CsVec up(lbl_80563FB0, lbl_80563FAC, lbl_80563FB0);
+    PSVECCrossProduct(&up.x, (f32*)(p + 0x70), (f32*)(p + 0x58));
+    PSVECCrossProduct((f32*)(p + 0x70), (f32*)(p + 0x58), (f32*)(p + 0x64));
+    CsVec z;
+    CsVec y;
+    CsVec x;
+    x.Set(F32(p, 0x58), F32(p, 0x5C), F32(p, 0x60));
+    z.Set(F32(p, 0x70), F32(p, 0x74), F32(p, 0x78));
+    PSVECCrossProduct(&z.x, &x.x, &y.x);
+    PSVECNormalize(&x.x, &x.x);
+    PSVECNormalize(&y.x, &y.x);
+    PSVECCrossProduct(&x.x, &y.x, &z.x);
+    F32(p, 0x58) = x.x;
+    F32(p, 0x5C) = x.y;
+    F32(p, 0x60) = x.z;
+    F32(p, 0x64) = y.x;
+    F32(p, 0x68) = y.y;
+    F32(p, 0x6C) = y.z;
+    F32(p, 0x70) = z.x;
+    F32(p, 0x74) = z.y;
+    F32(p, 0x78) = z.z;
+    f32 d = PSVECDistance((f32*)(p + 0x7C), (f32*)(p + 0x4C));
+    if (dist > lbl_80563FB0) {
+        f32 k = (lbl_80563FAC - stiff) * (d - dist);
+        F32(p, 0x7C) = F32(p, 0x7C) + F32(p, 0x70) * k;
+        F32(p, 0x80) = F32(p, 0x80) + F32(p, 0x74) * k;
+        F32(p, 0x84) = F32(p, 0x84) + F32(p, 0x78) * k;
+    }
+    d = PSVECDistance((f32*)(p + 0x7C), (f32*)(p + 0x4C));
+    f32 lo = lbl_80563FFC;
+    f32 v = lbl_80564000;
+    f32 half = lbl_80564004;
+    f32 inv = zoom > lbl_80564008 ? lbl_80563FAC / zoom : lbl_80563FAC;
+    f32 w = lbl_8056400C * inv;
+    f32 a = lbl_80563FD8 * (f32)atan(w / d * (f32)tan(half * lbl_80563FC4));
+    v = v < a ? v : a;
+    v = v > lo ? v : lo;
+    if (fov > lbl_80563FB0) {
+        F32(p, 0xBC) = fov;
+        F32(p, 0x194) = fov;
+    } else {
+        f32 prev = F32(p, 0x194);
+        f32 f = prev + lbl_80563FAC * (v - prev);
+        F32(p, 0xBC) = f;
+        F32(p, 0x194) = f;
+    }
+    F32(p, 0x120) = lbl_80563FB0;
+    F32(p, 0x124) = lbl_80563FB0;
+    F32(p, 0x128) = lbl_80563FB0;
+}
 
 void fn_802749FC(u8* p) {}  // stub (294)
 
@@ -391,11 +481,6 @@ extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FC4;
 extern const f32 lbl_80564040;
 
-struct CsVec {
-    CsVec(void) {}
-    CsVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    f32 x, y, z;
-};
 
 // Orbits the camera around its target at `radius`, keeping it above the ground.
 void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
