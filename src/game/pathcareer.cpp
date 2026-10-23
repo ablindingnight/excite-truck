@@ -127,11 +127,11 @@ void AchievementsCommitSession(void);
 class IContest {
 public:
     virtual ~IContest(void) {}
-    virtual const char* TrackName(void) = 0;      // 0xC
-    virtual const char* Name(void) = 0;           // 0x10
-    virtual const char* TypeName(void) = 0;       // 0x14
-    virtual const char* TypeDisplayName(void) = 0;  // 0x18
-    virtual const char* FriendlyName(void) = 0;   // 0x1C
+    virtual const char* TrackName(void) const = 0;      // 0xC
+    virtual const char* Name(void) const = 0;           // 0x10
+    virtual const char* TypeName(void) const = 0;       // 0x14
+    virtual const char* TypeDisplayName(void) const = 0;  // 0x18
+    virtual const char* FriendlyName(void) const = 0;   // 0x1C
     virtual int EventId(void) = 0;                // 0x20
     virtual int Difficulty(void) = 0;             // 0x24
     virtual int Best(void) = 0;                   // 0x28
@@ -197,11 +197,11 @@ public:
         grades.Reset();
     }
     ~Contest(void);
-    const char* TrackName(void);
-    const char* Name(void);
-    const char* TypeName(void);
-    const char* TypeDisplayName(void);
-    const char* FriendlyName(void);
+    const char* TrackName(void) const;
+    const char* Name(void) const;
+    const char* TypeName(void) const;
+    const char* TypeDisplayName(void) const;
+    const char* FriendlyName(void) const;
     int EventId(void);
     int Difficulty(void);
     int Best(void);
@@ -317,7 +317,7 @@ Contest::~Contest(void) { fn_8027AF94(this); }
 
 SlotPaths::SlotPaths(void) {}
 
-const char* Contest::TrackName(void) {
+const char* Contest::TrackName(void) const {
     EventInfo* e = GetEvent(event);
     if (e->node->Has("track")) {
         return GetTrackFriendlyName(e->node->GetValue("track"));
@@ -325,13 +325,13 @@ const char* Contest::TrackName(void) {
     return GetTrackFriendlyName(GetTrack(e->track)->name);
 }
 
-const char* Contest::Name(void) { return GetEvent(event)->node->GetValue("name"); }
+const char* Contest::Name(void) const { return GetEvent(event)->node->GetValue("name"); }
 
-const char* Contest::TypeName(void) { return GetEventTypeName(GetEvent(event)->type); }
+const char* Contest::TypeName(void) const { return GetEventTypeName(GetEvent(event)->type); }
 
-const char* Contest::TypeDisplayName(void) { return GetEventTypeDisplayName(GetEvent(event)->type); }
+const char* Contest::TypeDisplayName(void) const { return GetEventTypeDisplayName(GetEvent(event)->type); }
 
-const char* Contest::FriendlyName(void) { return GetEvent(event)->node->GetValue("friendly_name"); }
+const char* Contest::FriendlyName(void) const { return GetEvent(event)->node->GetValue("friendly_name"); }
 
 int Contest::Best(void) { return best; }
 
