@@ -35,7 +35,7 @@ extern "C" {
 int fn_802E2C20(void);
 void fn_80235380(u8* p);
 void fn_8020A5F8(f32 v);
-void fn_80246CB8(const void* desc);
+void fn_80246CB8(const char* lyt);
 void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 void fn_80214CB4(s32 a);
@@ -60,6 +60,12 @@ f32 fn_80214D48(void);
 void fn_80214D50(int s);
 int fn_802C9A58(void);
 void fn_802168BC(int a);
+void fn_802ECEC0(void);
+void fn_802ECEC4(void);
+void fn_802483E0(void);
+u8* fn_80232578(const char* name);
+u8* fn_802C5130(const char* name);
+u8* fn_8023512C(const char* art);
 }
 
 void operator delete(void* p);
@@ -71,6 +77,8 @@ extern u8 lbl_8034330C[];
 extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern const f32 lbl_80563898;  // 1.0f
+extern f32 lbl_8056389C;  // 0.7f
 
 s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
@@ -151,7 +159,6 @@ u8* fn_80246AA8(u8* p, int del) {
 
 }  // extern "C"
 
-extern "C" u8* fn_8023512C(const char* art);
 
 // A menu art widget that owns its image ("extruck.art"); dtor is fn_80246C48.
 struct MenuArt {
@@ -206,7 +213,43 @@ u8* fn_80246C48(u8* p, int del) {
 
 void fn_80246CAC(f32 v) { fn_8020A5F8(v * lbl_8055F264); }
 
-void fn_80246CB8(const void* desc) {}
+extern void* lbl_803436C0[];
+
+// Timed menu widget (vtable lbl_803436C0): closes the menu after dur ms.
+struct MenuTimer {
+    MenuTimer(s32 ms, s32 m) {
+        f14 = 0;
+        vt = lbl_803436C0;
+        dur = ms;
+        mode = m;
+        f28 = 0;
+        start = fn_802E2C20();
+        f18 = 1;
+    }
+    void* vt;       // offset 0x0
+    u8 pad4[0x10];  // offset 0x4
+    s32 f14;        // offset 0x14
+    s32 f18;        // offset 0x18
+    s32 start;      // offset 0x1C
+    s32 dur;        // offset 0x20
+    s32 mode;       // offset 0x24
+    s32 f28;        // offset 0x28
+};
+
+void fn_80216CA8(void);
+
+// Shows one boot logo layout for 2.5 s.
+void fn_80246CB8(const char* lyt) {
+    MenuTimer t(2500, 1);
+    MenuItem items[] = {
+        MenuItem(0, 5, &t, 0, 0),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {lyt, 0, 0, 0, 0};
+    desc.items = items;
+    fn_80216CA8();
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 u8* fn_80246DA8(u8* p, int del) {
     if (p && del > 0) {
@@ -215,11 +258,11 @@ u8* fn_80246DA8(u8* p, int del) {
     return p;
 }
 
-void fn_80246DE8(void) { fn_80246CB8(lbl_803432EC); }
+void fn_80246DE8(void) { fn_80246CB8((const char*)lbl_803432EC); }
 
-void fn_80246DF4(void) { fn_80246CB8(lbl_803432FC); }
+void fn_80246DF4(void) { fn_80246CB8((const char*)lbl_803432FC); }
 
-void fn_80246E00(void) { fn_80246CB8(lbl_8034330C); }
+void fn_80246E00(void) { fn_80246CB8((const char*)lbl_8034330C); }
 
 u8* fn_80246E0C(u8* p, int del) {
     if (p && del > 0) {
@@ -228,7 +271,96 @@ u8* fn_80246E0C(u8* p, int del) {
     return p;
 }
 
-void fn_80246E4C(u8* p) {}  // stub (162)
+}  // extern "C"
+
+void* operator new(size_t size, const char* tag);
+
+// Track-name text style (0x14, tagged "font").
+struct CupText {
+    CupText(const char* name) {
+        font = 0;
+        color = -1;
+        flags = 9;
+        scale = lbl_80563898;
+        f10 = lbl_80563898;
+        font = fn_80232578(name);
+    }
+    ~CupText(void) {
+        fn_802328D4(font);
+        font = 0;
+    }
+    u8* font;    // offset 0x0
+    s32 color;   // offset 0x4
+    u32 flags;   // offset 0x8
+    f32 scale;   // offset 0xC
+    f32 f10;     // offset 0x10
+};
+
+// The E3 track picker: cup tiles, track images and their names (vtable lbl_80343600, dtor fn_802470D4).
+struct CupSelect {
+    CupSelect(int s) {
+        f14 = 0;
+        vt = lbl_80343600;
+        tileSel = fn_8023512C("tile_cup_s.art");
+        tile = fn_8023512C("tile_cup.art");
+        tracks = fn_802C5130("e3_trks.img");
+        text = new ("font") CupText("uifnt_o.gtx");
+        text->scale = lbl_8056389C;
+        text->flags = (text->flags & ~7) | 4;
+        text->flags = (text->flags & ~0x58) | 0x10;
+        count = 2;
+        sel = s;
+        pos = (f32)sel;
+    }
+    ~CupSelect(void) {
+        vt = lbl_80343600;
+        fn_80235380(tileSel);
+        fn_80235380(tile);
+        fn_802C519C(tracks);
+        delete text;
+    }
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    u8* tileSel;     // offset 0x18
+    u8* tile;        // offset 0x1C
+    u8* tracks;      // offset 0x20
+    s32 count;       // offset 0x24
+    s32 sel;         // offset 0x28
+    f32 pos;         // offset 0x2C
+    CupText* text;   // offset 0x30
+};
+
+extern "C" {
+
+// E3 demo track select; returns the chosen track or -1.
+int fn_80246E4C(void) {
+    int r;
+    fn_802ECEC4();
+    {
+        MenuTimer t(60000, 3);
+        t.f28 = 3;
+        CupSelect w(0);
+        MenuItem items[] = {
+            MenuItem(0, 5, &t, 0, 0),
+            MenuItem(0, 5, &w, 0, 0),
+            MenuItem(lbl_804988F0),
+        };
+        MenuDesc desc = {"e3_track.lyt", 0, 0, 0, 0};
+        desc.items = items;
+        int ret = fn_802146BC(&desc, -999, -999, 1);
+        if (ret == -2) {
+            r = w.sel;
+        } else if (ret == -234) {
+            fn_802483E0();
+            r = -1;
+        } else {
+            r = -1;
+        }
+        fn_802ECEC0();
+    }
+    return r;
+}
 
 u8* fn_802470D4(u8* p, int del) {
     if (p) {
@@ -429,7 +561,7 @@ void fn_80248398(void) {
     U8(lbl_8055F278, 0x44) = 0;
 }
 
-void fn_802483E0(u8* p) {}  // stub (111)
+void fn_802483E0(void) {}  // stub (111)
 
 u8* fn_8024859C(u8* p, int del) {
     if (p) {
