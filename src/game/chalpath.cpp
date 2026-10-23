@@ -44,8 +44,6 @@ void fn_80214AF0(int s);
 
 void operator delete(void* p);
 
-extern const Words3 lbl_802FA6A8;
-extern const Words3 lbl_802FA6B4;
 extern u8 lbl_8055B860[8];
 extern u8 lbl_8055BAB8[4];
 extern u8 lbl_8055BAC0[8];
@@ -394,9 +392,9 @@ int fn_802616A8(void) {
     return 0;
 }
 
-u32 fn_80261948(s32* p) {
-    Words3 t = lbl_802FA6A8;
-    return t.w[*p];
+const char* fn_80261948(s32* p) {
+    const char* t[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
+    return t[*p];
 }
 
 void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
@@ -407,9 +405,9 @@ void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
     S32(p, 0x10) = 0;
 }
 
-u32 fn_802619A0(s32* p) {
-    Words3 t = lbl_802FA6B4;
-    return t.w[*p];
+const char* fn_802619A0(s32* p) {
+    const char* t[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
+    return t[*p];
 }
 
 u8* fn_802619D8(u8* p, int i) { return PTR(p, 0x0) + i * 4; }
