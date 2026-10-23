@@ -406,7 +406,31 @@ void fn_8019ECBC(u8* p, u32 v) { U32(p, 0xc) = v; }
 
 void fn_8019ECC4(u8* p, u32 a, u32 b) {}
 
-void fn_8019EDB8(u8* p) {}  // stub (69)
+extern void* lbl_80333B48[];
+
+// Sphere volume constructor from file data (byte-swapped when `swap`).
+u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
+    fn_8019ECC4(p, a, swap);
+    *(void**)p = lbl_80333B48;
+    if (swap) {
+        Swap32(p + 0x24);
+        Swap32(p + 0x28);
+        Swap32(p + 0x2C);
+        Swap32(p + 0x30);
+        if (S32(p, 0x20) == 0x3EB) {
+            F32(p, 0x24) += 3.35f;
+        }
+    }
+    U8(p, 0x4C) = 0;
+    F32(p, 0x34) = 0.0f;
+    F32(p, 0x38) = 0.0f;
+    F32(p, 0x3C) = 0.0f;
+    F32(p, 0x40) = 0.0f;
+    F32(p, 0x44) = 0.0f;
+    F32(p, 0x48) = 0.0f;
+    F32(p, 0x50) = 0.0f;
+    return p;
+}
 
 void fn_8019EECC(u8* p, RVec3* v) {
     v->x += F32(p, 0x30);
