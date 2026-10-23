@@ -467,7 +467,29 @@ u8* fn_8019F3D4(u8* p, int del) {
     return p;
 }
 
-void fn_8019F414(u8* p) {}  // stub (48)
+struct PVec3 {
+    f32 v[3];
+};
+
+extern const f32 lbl_8056237C;
+
+// Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
+void fn_8019F414(u8* p) {
+    u8* m = PTR(p, 0x54);
+    u8* o = PTR(p, 0x4);
+    PVec3 t = *(PVec3*)(m + 0x30);
+    f32 lift = lbl_8056237C + F32(p, 0x24) + F32(m, 0xC);
+    t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
+    t.v[1] = t.v[1] - F32(o, 0x34) + lift;
+    t.v[2] = t.v[2] - F32(o, 0x38);
+    F32(p, 0x28) = t.v[0];
+    F32(p, 0x2C) = t.v[1];
+    F32(p, 0x30) = t.v[2];
+    if (o) {
+        fn_8019EECC(o, (RVec3*)(p + 0x28));
+    }
+    fn_8019EF00(p);
+}
 
 void fn_8019F4D4(u8* p) {}  // stub (35)
 
@@ -781,10 +803,6 @@ void fn_801A1ABC(u8* p, u8* o) {
         break;
     }
 }
-
-struct PVec3 {
-    f32 v[3];
-};
 
 // Collides the tube's two end caps as spheres.
 void fn_801A1B9C(u8* p) {
