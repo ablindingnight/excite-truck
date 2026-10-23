@@ -348,9 +348,9 @@ struct CrushTuning {
     f32 killSpeed;      // offset 0x28
 };
 
-class ResultsOverlay {
+class CrushResults {
 public:
-    ResultsOverlay(void) {
+    CrushResults(void) {
         layout = 0;
         sBonus = 0;
         sNoBonus = 0;
@@ -379,7 +379,7 @@ public:
         memset(complete, '0', 3);
         complete[3] = 0;
     }
-    ~ResultsOverlay(void) { Unload(); }
+    ~CrushResults(void) { Unload(); }
     void Unload(void) {
         if (layout) {
             fn_802ADE60(layout, 1);
@@ -680,7 +680,7 @@ public:
     f32 finishTime;            // offset 0x1A0
     f32 timeout;               // offset 0x1A4
     LayoutRef layout;          // offset 0x1A8
-    ResultsOverlay results;    // offset 0x1AC
+    CrushResults results;    // offset 0x1AC
     RSound* sPreRace;          // offset 0x2B4
     u8 b2B8;                   // offset 0x2B8
 };
@@ -898,7 +898,7 @@ void* CrushMaster::vfE8(void) {
     return new ("subtaskmgr") CrushSubTaskMgr(this);
 }
 
-void ResultsOverlay::Update(int score, int kills, int bonus) {
+void CrushResults::Update(int score, int kills, int bonus) {
     if (layout) {
         int shown;
         int n;
@@ -1062,7 +1062,7 @@ void CrushMaster::vfF8(void) {
                 lbl_8043038C.speedB / 0.44444445f, lbl_8043038C.speedATime, lbl_8043038C.speedBTime);
 }
 
-inline void ResultsOverlay::Reset(void) {
+inline void CrushResults::Reset(void) {
     state = 0;
     start = -1.0f;
     b8 = 1;
@@ -1084,7 +1084,7 @@ inline void ResultsOverlay::Reset(void) {
     Stop(s2C);
 }
 
-void ResultsOverlay::Load(void) {
+void CrushResults::Load(void) {
     Binding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
