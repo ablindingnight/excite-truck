@@ -315,7 +315,28 @@ int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r) { return 0; }  // stub
 
 void fn_8019DF88(u8* p) {}  // stub (155)
 
-void fn_8019E1F4(u8* p) {}  // stub (55)
+extern f32 lbl_80558DC4[];       // FLT_EPSILON
+extern const f32 lbl_805622D0;  // 0.0
+
+// Clips the ray parameter range [*tmin, *tmax] against the slab |o + t*d| <= r.
+int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
+    if ((f32)__fabs(d) <= lbl_80558DC4[0]) {
+        if (o < -r || o > r) {
+            return 0;
+        }
+        return 1;
+    }
+    f32 t2 = (-r - o) / d;
+    f32 t1 = (r - o) / d;
+    f32 lo = t2 < t1 ? t2 : t1;
+    *tmin = *tmin > lo ? *tmin : lo;
+    f32 hi = t2 > t1 ? t2 : t1;
+    *tmax = *tmax < hi ? *tmax : hi;
+    if (*tmin > *tmax) {
+        return 0;
+    }
+    return !(*tmax < lbl_805622D0);
+}
 
 int fn_8019E2D0(u8* a, u8* b, u8* c, u8* m, f32 x, f32 y, f32 z) { return 0; }  // stub (140)
 
