@@ -476,7 +476,166 @@ void fn_80247210(void) {
 
 u32 fn_8024739C(u8* p) { return 0; }
 
-void fn_802473A4(u8* p) {}  // stub (160)
+}  // extern "C"
+
+class LocString;
+extern "C" {
+extern u32 lbl_8055E044;  // localization version
+void fn_80131318(LocString* s);
+}
+
+// A localized string looked up by key and refreshed when the language changes.
+class LocString {
+public:
+    LocString(const char* key);
+    void Update(void) {
+        if (version != lbl_8055E044) {
+            fn_80131318(this);
+        }
+    }
+
+    const char* key;   // offset 0x0
+    const char* text;  // offset 0x4
+    u32 version;       // offset 0x8
+};
+
+extern u32 lbl_8055D430;
+
+// Sets debug flag bit 0 for its scope.
+class FlagGuard {
+public:
+    FlagGuard(void) {
+        saved = lbl_8055D430 & 1;
+        lbl_8055D430 |= 1;
+    }
+    ~FlagGuard(void) { lbl_8055D430 = (lbl_8055D430 & ~1) | saved; }
+    u32 saved;
+};
+
+void ClearUnlockAll(void);
+void UnlockAll(void);
+int IdentGetCurrentSlot(void);
+BOOL IdentIsSlotEmpty(int slot);
+char* IdentGetDefaultName(int slot);
+void SetPlayerName(const char* name, int slot);
+
+extern "C" {
+void fn_80129AEC(int a);
+void fn_8020A600(void);
+int fn_80247C18(void);
+void fn_8024CF60(void);
+void fn_8024CFB4(void);
+void fn_8027DDCC(int a);
+void fn_80260954(int a);
+void fn_8023BEA8(void);
+void fn_80214FD8(const char* title, const char* text);
+void fn_80239F74(void);
+void fn_802E6FBC(void);
+void fn_80137C78(int n);
+void fn_80137C84(int pad, int slot);
+void fn_8023BCEC(void);
+void fn_8025812C(void);
+void fn_8025C054(void);
+void fn_80161DE4(void);
+void fn_8027DE6C(void);
+void fn_80263F30(int a, int b, int c);
+int fn_8024CF54(void);
+
+// Demo main menu loop: dispatches the demo menu's choices until the title screen is left.
+void fn_802473A4(void) {
+    lbl_8055F260 = 1;
+    fn_8020A600();
+    fn_802ECEC4();
+    while (fn_80246AE8()) {
+        while (fn_8024CF54()) {
+            ClearUnlockAll();
+            int stay = 1;
+            do {
+                fn_80129AEC(0);
+                switch (fn_80247C18()) {
+                case 1:
+                    fn_8024CF60();
+                    break;
+                case 2:
+                    fn_8024CFB4();
+                    break;
+                case 3:
+                    fn_8027DDCC(0);
+                    break;
+                case 4:
+                    fn_8027DDCC(1);
+                    break;
+                case 5:
+                    fn_8027DDCC(2);
+                    break;
+                case 6:
+                    fn_80260954(0);
+                    break;
+                case 7:
+                    fn_80260954(1);
+                    break;
+                case 8: {
+                    FlagGuard guard;
+                    fn_8023BEA8();
+                    if (!fn_802411D4()) {
+                        static LocString sTitle("UIMain:VERSUS_MISSING_CONTROLLER_TITLE");
+                        static LocString sText("UIMain:VERSUS_MISSING_CONTROLLER_TEXT");
+                        sTitle.Update();
+                        sText.Update();
+                        fn_80214FD8(sTitle.text, sText.text);
+                    }
+                    break;
+                }
+                case 9:
+                    fn_80239F74();
+                    if (IdentIsSlotEmpty(IdentGetCurrentSlot())) {
+                        fn_802E6FBC();
+                        stay = 0;
+                    }
+                    break;
+                case 10:
+                    fn_802E6FBC();
+                    break;
+                case 11: {
+                    FlagGuard guard;
+                    SetPlayerName(IdentGetDefaultName(0), 0);
+                    fn_80137C78(1);
+                    int slot = IdentGetCurrentSlot();
+                    fn_80137C84(fn_802E4A10(), slot);
+                    fn_80129AEC(fn_802E4A10());
+                    fn_8023BCEC();
+                    break;
+                }
+                case 12:
+                    fn_8025812C();
+                    break;
+                case 16:
+                    fn_8025C054();
+                    break;
+                case 13:
+                    UnlockAll();
+                    break;
+                case 14:
+                    fn_80161DE4();
+                    fn_8027DE6C();
+                    break;
+                case 17:
+                    fn_80263F30(1, 1, 1);
+                    break;
+                case 15:
+                    break;
+                case -1:
+                    stay = 0;
+                    break;
+                default:
+                    fn_802E317C("MenuDoDemo: bad return value %s from demo menu!");
+                    break;
+                }
+            } while (stay);
+        }
+    }
+    lbl_8055F260 = 0;
+}
 
 u8 fn_80247624(void) { return lbl_8055F260; }
 
@@ -605,7 +764,7 @@ void fn_80247AD0(void) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-void fn_80247C18(u8* p) {}  // stub (330)
+int fn_80247C18(void) { return 0; }  // stub (330)
 
 u8* fn_80248140(u8* p, int del) {
     if (p) {
