@@ -965,7 +965,32 @@ void fn_801A4868(u8* p, u32 v) {
 
 void fn_801A48C8(u8* p) { VE(PTR(p, 0x48))->v18("dyno", "unknown"); }
 
-void fn_801A48E4(u8* p) {}  // stub (65)
+void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
+extern const f32 lbl_805622D0;  // 0.0
+extern const f32 lbl_805622DC;  // -1.0
+extern const f32 lbl_805622E0;  // 1.0
+
+// Refreshes the attached volume and drops it (and the anchor) onto the ground.
+void fn_801A48E4(u8* p) {
+    U8(p, 0x40) = 1;
+    ((VMesh*)PTR(p, 0x3C))->v0C();
+    u8* o = PTR(p, 0x3C);
+    s32 type = S32(o, 0x18);
+    if (type == 'SPHR') {
+        fn_801EA1E0(F32(o, 0x34), F32(o, 0x3C), (f32*)(o + 0x38), 0);
+        fn_801EA1E0(F32(p, 0x28), F32(p, 0x30), (f32*)(p + 0x2C), 0);
+    }
+    if (type == 'TUBE') {
+        f32 dir = F32(p, 0x20) > lbl_805622D0 ? lbl_805622DC : lbl_805622E0;
+        f32 len = F32(PTR(p, 0x3C), 0x28);
+        f32 r = dir * len;
+        f32 end[3];
+        end[0] = F32(p, 0x28) + F32(p, 0x1C) * r;
+        end[1] = F32(p, 0x2C) + F32(p, 0x20) * r;
+        end[2] = F32(p, 0x30) + F32(p, 0x24) * r;
+        fn_801EA1E0(end[0], end[2], (f32*)(p + 0x2C), 0);
+    }
+}
 
 void fn_801A49E8(u8* p) {
     if (PTR(p, 0x48)) {
