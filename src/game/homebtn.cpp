@@ -193,7 +193,7 @@ void fn_802EC614(void) {
     lbl_80558860.soundCallback = 0;
     lbl_80558860.backFlag = 0;
     lbl_80558860.cursor = 0;
-    lbl_80558860.adjustX = 1.368421f;
+    lbl_80558860.adjustX = 1.3684211f;
     lbl_80558860.adjustY = 1.0f;
     lbl_80558860.frameDelta = 2.0f;
     fn_801282EC(0x20);
