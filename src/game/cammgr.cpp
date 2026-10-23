@@ -78,7 +78,7 @@ extern "C" {
 void fn_80134E34(IdealFollower* f, f32 dist);
 void fn_80136468(PathPos* out, IdealFollower* f);
 void fn_8013530C(IdealFollower* f, int del);
-void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k);
+void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 k);
 }
 
 extern u8 lbl_80499950[];
@@ -410,7 +410,55 @@ int fn_80268BA4(int mode) {
     return r;
 }
 
-void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k) {}  // stub (112)
+double sqrt(double x);
+double sin(double x);
+double cos(double x);
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+void fn_801EA140(f32* pos);  // drop onto the ground
+extern const f32 lbl_80563C8C;
+extern const f32 lbl_80563C90;
+extern const f32 lbl_80563C94;  // height above the ground
+
+struct CamPt {
+    f32 x, y;
+};
+
+// Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
+// (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
+void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
+    const u8* next = PTR(seg, 0x14);
+    CamPt pos;
+    CamPt d;
+    CamPt pt;
+    d.x = F32(seg, 0x8) + t * (F32(next, 0x8) - F32(seg, 0x8));
+    d.y = F32(seg, 0xC) + t * (F32(next, 0xC) - F32(seg, 0xC));
+    pos.x = F32(seg, 0x0) + t * (F32(next, 0x0) - F32(seg, 0x0));
+    pos.y = F32(seg, 0x4) + t * (F32(next, 0x4) - F32(seg, 0x4));
+    f32 inv = lbl_80563C2C / (f32)sqrt(d.x * d.x + d.y * d.y);
+    F32(rec, 0x28) = lbl_80563C20;
+    f32 nx = d.x * inv;
+    d.x = d.y * inv;
+    d.y = -nx;
+    f32 off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
+    pt.x = pos.x + d.x * off;
+    pt.y = pos.y + d.y * off;
+    F32(rec, 0x24) = pt.x;
+    F32(rec, 0x2C) = pt.y;
+    fn_801EA140((f32*)(rec + 0x24));
+    f32 px = d.x;
+    F32(rec, 0x28) = F32(rec, 0x28) + lbl_80563C94;
+    f32 c = (f32)cos(angle);
+    f32 sn = (f32)sin(angle);
+    F32(rec, 0xC) = lbl_80563C20;
+    F32(rec, 0x10) = lbl_80563C2C;
+    F32(rec, 0x14) = lbl_80563C20;
+    d.x = px * c - d.y * sn;
+    d.y = px * sn + d.y * c;
+    F32(rec, 0x18) = d.x;
+    F32(rec, 0x1C) = lbl_80563C20;
+    F32(rec, 0x20) = d.y;
+    PSVECCrossProduct((f32*)(rec + 0xC), (f32*)(rec + 0x18), (f32*)rec);
+}
 
 void fn_80268D94(void) {
     IdealFollower f;
