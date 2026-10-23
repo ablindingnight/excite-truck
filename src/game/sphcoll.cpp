@@ -75,6 +75,26 @@ struct PolyVol {
 
 extern void* lbl_80333778[];
 
+class VSet;
+
+// A sphere group's full layout as far as it is used here.
+struct SphGroupAll {
+    u8 pad0[0x20];      // offset 0x0
+    u32 setA;           // offset 0x20
+    VSet* vols[16];     // offset 0x24
+    f32 sph[16][4];     // offset 0x64
+    u8 pad164[0xC];     // offset 0x164
+    f32 radius;         // offset 0x170
+    s32 count;          // offset 0x174
+    f32 radius2;        // offset 0x178
+};
+
+extern "C" {
+void fn_801D2414(u8* p);
+void fn_801D0738(u8* p, const RVec3* c, void* f, const RVec3* b);
+f32 PSVECMag(const f32* v);
+}
+
 // The per-volume cached values cleared on reset.
 struct SphCache {
     u8 pad0[0x64];  // offset 0x0
@@ -496,7 +516,23 @@ void fn_801A01E0(u8* p, RVec3* lo, RVec3* hi) {
 
 void fn_801A0258(u8* p) {}  // stub (72)
 
-void fn_801A0378(u8* p) {}  // stub (51)
+void fn_801A0378(u8* p, u8* s) {
+    SphGroupAll* g = (SphGroupAll*)p;
+    g->vols[g->count] = (VSet*)s;
+    f32* e = g->sph[g->count];
+    e[0] = F32(s, 0x28);
+    e[1] = F32(s, 0x2C);
+    e[2] = F32(s, 0x30);
+    e[3] = F32(s, 0x24);
+    g->vols[g->count]->SetA(g->setA);
+    f32 m = PSVECMag((f32*)(s + 0x28));
+    f32 r = 0.5f + (m + F32(s, 0x24));
+    if (r > g->radius2) {
+        g->radius2 = r;
+        g->radius = r;
+    }
+    g->count++;
+}
 
 void fn_801A0444(u8* p, u8* q) {
     PTR(p, 0x17C) = q;
@@ -862,7 +898,14 @@ void fn_801A49FC(u8* p) {
     }
 }
 
-void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {}  // stub (31)
+void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
+    if (U8(p, 0x40)) {
+        fn_801D2414(p);
+        if (PTR(p, 0x48)) {
+            fn_801D0738(p, c, f, b);
+        }
+    }
+}
 
 void fn_801A4A8C(u8* p) {}  // stub (52)
 
