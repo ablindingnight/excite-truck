@@ -563,15 +563,13 @@ int fn_802399DC(int unused) {
     int a = fn_80214A38(0x1E);
     int b = fn_80214A38(0x1D);
     int r;
-    const char* body;
     if (a) {
         fn_80214A9C(0x1E);
     }
     if (b) {
         fn_80214A9C(0x1D);
     }
-    body = fn_80131234("UIOptions:CONFIRM_ERASE_BODY");
-    r = fn_8021521C(IdentGetSlotName(IdentGetCurrentSlot()), body, 0);
+    r = fn_8021521C(IdentGetSlotName(IdentGetCurrentSlot()), fn_80131234("UIOptions:CONFIRM_ERASE_BODY"), 0);
     if (b) {
         fn_80214AF0(0x1D);
     }
