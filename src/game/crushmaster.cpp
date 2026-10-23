@@ -1307,8 +1307,8 @@ void CrushMaster::vfA8(int car) {
         V2 to;
         V2 d;
         V2 fwd;
-        RaceCarRec* rec = fn_8017960C(car);
         ValVec3* pos;
+        RaceCarRec* rec = fn_8017960C(car);
         fn_8018AF04(rec);
         r.path = -1;
         fn_801E9DC4(&r.path);

@@ -558,8 +558,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f32 k = depth * F32(p, 0x10);
         f32 vn = -PSVECDotProduct(&v, &nrm);
         imp.x = nrm.x * k;
-        imp.y = nrm.y * k;
         imp.z = nrm.z * k;
+        imp.y = nrm.y * k;
         vt.x = v.x + nrm.x * vn;
         vt.y = v.y + nrm.y * vn;
         vt.z = v.z + nrm.z * vn;
@@ -652,8 +652,8 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 s.y = l.y;
                 s.z = 0.0f;
                 f32 k = (F32(q, 0x24) - r) / dist;
-                s.z = l.z;
                 s.x *= k;
+                s.z = l.z;
                 s.y *= k;
                 CFrame* m = (CFrame*)PTR(q, 0xC);
                 MulVec(&w, &s, m);

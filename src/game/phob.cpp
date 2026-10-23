@@ -894,8 +894,8 @@ int fn_801787B4(PhysClock* c) {
     if (!fixed) {
         if (c->resync) {
             c->frame = lbl_8055E3C4;
-            c->resync = 0;
             c->base = (fn_802E2C9C() + 0x2000) & ~(s64)0x3FFF;
+            c->resync = 0;
         } else {
             n = ((s32)fn_80178BBC(c) + 8341) / 16683;
             if (fn_801B526C()) {

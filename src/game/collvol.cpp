@@ -350,8 +350,8 @@ s32 CollVolume::vf34(CollPacket* p) {
         q[2] = inv * (m[0][1] - m[1][0]);
     } else {
         int i = 0;
-        int j;
         int k;
+        int j;
         f32 r;
         f32 inv;
         if (m[1][1] > m[0][0]) {

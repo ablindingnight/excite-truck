@@ -474,8 +474,8 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     at.x += b->mtx.rot[2].x * rnd;
                     at.y += b->mtx.rot[2].y * rnd;
                     at.z += b->mtx.rot[2].z * rnd;
-                    d.y -= 0.15f;
                     k = -fall * force;
+                    d.y -= 0.15f;
                     imp.x = d.x * k;
                     imp.y = d.y * k;
                     imp.z = d.z * k;
@@ -494,8 +494,8 @@ inline void Ball::Init(BallDesc* d) {
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 kk = d->stiffK;
     f32 skin = d->skin;
-    BVec3 c(0.0f, 0.0f, 0.0f);
     f32 radius = 0.0254f * d->radius;
+    BVec3 c(0.0f, 0.0f, 0.0f);
     car = d->car;
     f32 stiff = k * (kk * kk);
     mtx.pos = Home(car);
@@ -662,8 +662,8 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
         f32 s;
         d.x = m.rot[2].x * 0.707f + m.rot[1].x * 0.4949f;
         d.y = m.rot[2].y * 0.707f + m.rot[1].y * 0.4949f;
-        d.z = m.rot[2].z * 0.707f + m.rot[1].z * 0.4949f;
         s = 35.5556f * k;
+        d.z = m.rot[2].z * 0.707f + m.rot[1].z * 0.4949f;
         vel.x = d.x * s;
         vel.y = d.y * s;
         vel.z = d.z * s;

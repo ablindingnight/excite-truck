@@ -1681,8 +1681,8 @@ void ZoneMaster::vf44(void) {
                     break;
                 }
                 {
-                    Vec3* p = &g->a;
                     int k;
+                    Vec3* p = &g->a;
                     for (k = 0; k < 2; k++) {
                         fn_801E9E30(&g->h, p);
                         p->y += 0.5f;
@@ -2193,8 +2193,8 @@ public:
 
 int ZoneHud::Update(CarState* c) {
     int tb;
-    int left;
     int shown;
+    int left;
     int final;
     int total;
     if (!anim) {
