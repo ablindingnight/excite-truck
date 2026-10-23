@@ -51,7 +51,7 @@ public:
     virtual ~Sound(void) {}
     virtual void vf0C(void);
     virtual int vf10(void) = 0;
-    virtual void vf14(void);
+    virtual int vf14(void);
     virtual void Play(void) = 0;
     virtual void Start(void) = 0;
     virtual void Stop(void) = 0;

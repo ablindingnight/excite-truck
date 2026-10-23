@@ -21,6 +21,36 @@ typedef char ManagerSize[(sizeof(Manager)==0x5c0)?1:-1];
 struct SoundInfo { const char* name; int pool; float gain; };
 struct SoundTuple { const char* name; float gain; };
 struct KeyInfo { int pool,first,second; };
+// The sound interface (declared like mixer.cpp). Only its shared `return 0` slot 0x14 is defined in
+// this unit, at its original place below.
+class Sound {
+public:
+    Sound(void);
+    virtual ~Sound(void);
+    virtual void vf0C(void);
+    virtual int vf10(void) = 0;
+    virtual int vf14(void);
+    virtual void Play(void) = 0;
+    virtual void Start(void) = 0;
+    virtual void Stop(void) = 0;
+    virtual int State(void) = 0;
+    virtual void Pause(void) = 0;
+    virtual void Resume(void) = 0;
+    virtual void vf30(void) = 0;
+    virtual void vf34(void) = 0;
+    virtual int vf38(void) = 0;
+    virtual void vf3C(void) = 0;
+    virtual void vf40(void) = 0;
+    virtual void vf44(float v);
+    virtual void vf48(float v);
+    virtual void vf4C(float v);
+    virtual void vf50(u32 mask);
+    virtual void vf54(void) = 0;
+    virtual void vf58(void) = 0;
+    virtual void vf5C(void) = 0;
+    virtual float vf60(void);
+};
+
 extern "C" {
 extern const SoundInfo lbl_802F9630[13];
 extern const KeyInfo lbl_802F96CC[43];
@@ -94,7 +124,9 @@ void fn_801B3B28(){fn_801B537C((void*)fn_801B3390);fn_801B537C((void*)fn_801B339
 Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)fn_801B3C64,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
 Entry* fn_801B3C64(Entry* self){self->vtable=lbl_80335DAC;self->a=lbl_80562624;self->b=lbl_80562624;self->c=lbl_80562624;self->d=lbl_80562624;self->e=lbl_80562624;self->f=lbl_80562624;self->sound=0;return self;}
 void fn_801B3DBC(Manager* self){fn_801B435C(self);}
-int fn_801B3FD0(){return 0;}
+}  // extern "C"
+int Sound::vf14(void) { return 0; }
+extern "C" {
 int fn_801B4428(const Node* a,const Node* b){if(a->key<b->key)return -1;if(a->key>b->key)return 1;fn_802E317C(lbl_80335D80);return 0;}
 Node* fn_801B447C(Manager* self,Node* nodes,int count){if(count==1)return nodes;int middle=count/2;if(middle>0)nodes[middle].left=fn_801B447C(self,nodes,middle);int remaining=count-middle-1;if(remaining>0)nodes[middle].right=fn_801B447C(self,nodes+middle+1,remaining);return nodes+middle;}
 Node* fn_801B4528(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return fn_801B4528(self,node->left,key);return 0;}if(key>node->key){if(node->right)return fn_801B4528(self,node->right,key);return 0;}return node;}
@@ -272,3 +304,4 @@ __declspec(section ".sdata2") extern const float lbl_80562648=0.699999988079071f
 __declspec(section ".sdata2") extern const float lbl_8056264C=1.0f;
 __declspec(section ".sdata2") extern const float lbl_80562650=-5.0f;
 }
+
