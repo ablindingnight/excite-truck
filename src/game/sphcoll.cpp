@@ -724,7 +724,43 @@ void fn_801A13F4(u8* p) {
     }
 }
 
-void fn_801A1474(u8* p) {}  // stub (43)
+// Sphere group layout (partial).
+struct SphPart {
+    f32 x, y, z;  // offset 0x0, local centre
+    f32 r;        // offset 0xC
+};
+
+struct SphGroupData {
+    u8 pad0[0x24];
+    u8* vols[16];       // offset 0x24
+    SphPart parts[16];  // offset 0x64
+    f32 c[3];           // offset 0x164
+    f32 rad;            // offset 0x170
+    s32 count;          // offset 0x174
+    f32 srad;           // offset 0x178
+    u8* bound;          // offset 0x17C
+};
+
+// Scales the group and its members by s.
+void fn_801A1474(SphGroupData* g, f32 s) {
+    g->srad = g->rad * s;
+    for (int i = 0; i < g->count; i++) {
+        SphPart* e = &g->parts[i];
+        RVec3 t;
+        t.x = e->x * s;
+        t.y = e->y * s;
+        t.z = e->z * s;
+        *(RVec3*)(g->vols[i] + 0x28) = t;
+        F32(g->vols[i], 0x24) = e->r * s;
+    }
+    f32 x = g->c[0] * s;
+    f32 y = g->c[1] * s;
+    f32 z = g->c[2] * s;
+    u8* b = g->bound;
+    F32(b, 0x24) = x;
+    F32(b, 0x28) = y;
+    F32(b, 0x2C) = z;
+}
 
 u8* fn_801A1520(u8* p, u32 a, u32 swap) {
     fn_8019ECC4(p, a, swap);
