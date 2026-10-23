@@ -48,8 +48,35 @@ struct Xform {
 
 extern void* lbl_80333968[];
 extern void* lbl_80333818[];
+extern void* lbl_803337C8[];
 
 class VEx;
+
+// The volume interface viewed through its two setters.
+class VSet {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual void s28(void);
+    virtual void s2C(void);
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void s38(void);
+    virtual void s3C(void);
+    virtual void SetA(u32 v);
+    virtual void SetB(u32 v);
+};
+
+struct SphGroupSet {
+    u8 pad0[0x24];    // offset 0x0
+    VSet* vols[20];   // offset 0x24
+};
 
 // A sphere group: its member volumes start at +0x24.
 struct SphGroup {
@@ -60,14 +87,13 @@ extern s32 lbl_8055E3C4;
 extern "C" void fn_801A2674(u8* p, f32 r, u32 a, u32 b);
 
 static inline void Swap32(u8* b) {
-    u8 b0 = b[0];
-    u8 b1 = b[1];
-    u8 b2 = b[2];
-    u8 b3 = b[3];
-    b[0] = b3;
-    b[3] = b0;
-    b[1] = b2;
-    b[2] = b1;
+    u8 t;
+    t = b[0];
+    b[0] = b[3];
+    b[3] = t;
+    t = b[1];
+    b[1] = b[2];
+    b[2] = t;
 }
 
 class VEx {
@@ -448,11 +474,23 @@ void fn_801A1250(u8* p) {
     S32(p, 0x180) = -1;
 }
 
-void fn_801A12C4(u8* p) {}  // stub (37)
+void fn_801A12C4(u8* p, u32 v) {
+    U32(p, 0x1C) = v;
+    ((VSet*)PTR(p, 0x17C))->SetB(v);
+    for (int i = 0; i < S32(p, 0x174); i++) {
+        ((SphGroupSet*)p)->vols[i]->SetB(v);
+    }
+}
 
 void fn_801A1358(u8* p, u32 v) { U32(p, 0x1c) = v; }
 
-void fn_801A1360(u8* p) {}  // stub (37)
+void fn_801A1360(u8* p, u32 v) {
+    U32(p, 0x20) = v;
+    ((VSet*)PTR(p, 0x17C))->SetA(v);
+    for (int i = 0; i < S32(p, 0x174); i++) {
+        ((SphGroupSet*)p)->vols[i]->SetA(v);
+    }
+}
 
 void fn_801A13F4(u8* p) {
     ((VEx*)PTR(p, 0x17C))->v4C();
@@ -470,7 +508,7 @@ u8* fn_801A1520(u8* p, u32 a, u32 swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
         if (S32(p, 0x20) == 0x3EB) {
-            F32(p, 0x24) = F32(p, 0x24) + 3.35f;
+            F32(p, 0x24) += 3.35f;
         }
     }
     return p;
@@ -591,7 +629,15 @@ f32 fn_801A2CA4(u8* p) { return F32(p, 0x178); }
 
 void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, lbl_8055E598.value, F32(p, 0x24)); }
 
-void fn_801A2CC0(u8* p) {}  // stub (36)
+u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
+    fn_8019ECC4(p, a, swap);
+    *(void**)p = lbl_803337C8;
+    if (swap) {
+        Swap32(p + 0x24);
+        Swap32(p + 0x28);
+    }
+    return p;
+}
 
 void fn_801A2D50(u8* p) {}  // stub (94)
 
