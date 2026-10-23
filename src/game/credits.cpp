@@ -728,30 +728,31 @@ extern "C" void fn_80265268(CreditScrollFields* self,void* font,const char* text
     self->length=strlen(self->text);self->offset=offset;
 }
 
+struct CreditTextBoundsNew {f32 left,top,right,bottom;};
 extern "C" void fn_802652E8(CreditScrollFields* self) {
     f32 elapsed=fn_80264588();
-    if(elapsed>=self->offset) {
+    if(elapsed<self->offset)return; {
         f32 progress=lbl_80563C18*(elapsed-self->offset);
-        f32 left,top,right,bottom;
-        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&left,&top,&right,&bottom);
+        CreditTextBoundsNew full;
+        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&full.left,&full.top,&full.right,&full.bottom);
         int cutoff=(int)progress;
         bool complete=cutoff>self->length;
         if(complete)cutoff=self->length;
         else fn_802645EC();
-        char saved=self->text[cutoff];self->text[cutoff]=0;
-        f32 partialLeft,partialTop,partialRight,partialBottom;
-        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&partialLeft,&partialTop,&partialRight,&partialBottom);
-        f32 delta=(right-left)-(partialRight-partialLeft);
+        char savedByte=self->text[cutoff];self->text[cutoff]=0;int saved=savedByte;
+        CreditTextBoundsNew partial;
+        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&partial.left,&partial.top,&partial.right,&partial.bottom);
+        f32 delta=(full.right-full.left)-(partial.right-partial.left);
         f32 x=(f32)self->x;
         u32 flags=fn_8022AA84(self->font);
         if(flags&2)x-=delta;
         else if(flags&4)x-=(0.5f)*delta;
-        fn_8022BD40(self->font,self->text,0,0,x,(f32)self->y,(0.0f),right-left,bottom-top,(1.0f));
+        fn_8022BD40(self->font,self->text,0,0,x,(f32)self->y,(0.0f),full.right-full.left,full.bottom-full.top,(1.0f));
         self->text[cutoff]=saved;
         if(!complete) {
             f32 fraction=progress-(f32)cutoff;
-            f32 caret=(f32)(int)(lbl_80563C1C*fraction)+(left+partialRight-partialLeft);
-            fn_80264A5C(caret,(bottom+top)*(0.5f));
+            f32 caret=(f32)(int)(lbl_80563C1C*fraction)+(full.left+partial.right-partial.left);
+            fn_80264A5C(caret,(full.bottom+full.top)/2.0f);
         }
     }
 }

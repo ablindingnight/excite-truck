@@ -28,7 +28,7 @@ struct WidgetFragment {
 typedef char WidgetPrefixSizeCheck[(sizeof(WidgetFragment)==0x268)?1:-1];
 extern "C" {
 void fn_80227880(float,float,float,float);
-void fn_802235B4(void);void fn_80223644(void);
+void fn_802235B4(WidgetFragment*);void fn_80223644(WidgetFragment*);
 extern u32 lbl_8033FA28[],lbl_8033F20C[],lbl_8033FB38[];
 extern const float lbl_805634A0,lbl_805634A4,lbl_805634A8,lbl_805634AC,lbl_805634B0,lbl_805634B4;
 float fn_80214D48();
@@ -728,13 +728,21 @@ struct ChoiceProviderDispatch :ChoiceProviderData {
  virtual int Modal();virtual int Selected();virtual int AcceptsKeys();virtual void Slot14();virtual void Slot18();virtual const char* Text();
  virtual void Previous();virtual void Next();virtual int HasPrevious();virtual int HasNext();
 };
-struct ProviderChoicePrefix {char base[0x254];ChoiceProviderDispatch* provider;int* focus;int token;float previousTime,nextTime;int height;};
+// Console layout witness: pointer fields are typed; prefix ownership and a 64-bit layout remain open.
+struct ProviderChoicePrefix {
+ char base[0x254]; // 0x000..0x253: observed prefix, not a recovered base class
+ ChoiceProviderDispatch* provider; // 0x254
+ int* focus; // 0x258
+ int token; // 0x25C
+ float previousTime,nextTime; // 0x260, 0x264
+ int fontResource; // 0x268: passed to font measurement/text APIs, not a pixel height
+};
 extern "C" {
 extern u32 lbl_8033EC2C[];float fn_8023659C();void fn_80216D28();void fn_80230E90(int);
 WidgetFragment* fn_8021D7C8(WidgetFragment* self,int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider){
  fn_80219568(self,x,y,0,height,dx,dy);self->vtable=lbl_8033EC2C;
  ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;float time=fn_8023659C()-lbl_805634E8;
- fields->provider=provider;fields->height=height;fields->nextTime=time;fields->previousTime=time;fields->focus=0;
+ fields->provider=provider;fields->fontResource=height;fields->nextTime=time;fields->previousTime=time;fields->focus=0;
  fields->token=fn_80228F40(x,y);return self;
 }
 const char* fn_8021D864(WidgetFragment* self){return ((ProviderChoicePrefix*)self)->provider->Text();}
@@ -980,8 +988,8 @@ void* fn_80211660(int);int fn_8022AB18(int,int,int);void fn_8022AAA8(int,const c
 float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);
 }
 static inline float ObservedProviderClamp(float value){float one=lbl_805634A4;float limited=one<value?one:value;float zero=lbl_805634A8;return limited>zero?limited:zero;}
-static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float duration=lbl_805634E8;float value=((duration+*stamp-now)-lbl_805634A8)/duration;return lbl_805634A8+ObservedProviderClamp(value)*lbl_805634C8;}
-static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float value=((now-*stamp)-lbl_805634A8)/lbl_80563504;int alpha=(int)(lbl_80563508+ObservedProviderClamp(value)*lbl_8056350C);return((u32)alpha<<24)|0x00ffffffu;}
+static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float duration=lbl_805634E8;float value=((duration+*stamp-now)-lbl_805634A8)/duration;float result=ObservedProviderClamp(value);result*=lbl_805634C8;return lbl_805634A8+result;}
+static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float value=((now-*stamp)-lbl_805634A8)/lbl_80563504;float result=ObservedProviderClamp(value);result*=lbl_8056350C;int alpha=(int)(lbl_80563508+result);return((u32)alpha<<24)|0x00ffffffu;}
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
 void fn_8021DB58(WidgetFragment* self){
@@ -990,28 +998,29 @@ void fn_8021DB58(WidgetFragment* self){
  else{selected=0;if(fields->focus&&fields->token==*fields->focus)selected=1;}
  float x=lbl_805634A8,y=lbl_805634A8;fn_80230C30(&x,&y,self->left,self->top);
  float available=(float)((WidgetDispatch*)self)->Slot78()+lbl_8055E050->margin;
+ // MWCC retains conversion work even when the float result is unused; see UNUSED-FLOAT-CONVERSION-COMPILER-PROBE.json.
  float unusedHeight=(float)(self->bottom-self->top);
  fn_80219660(self);
  int previousFrame;if(selected){float now=fn_8023659C();if(lbl_805634E8+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
  int nextFrame;if(selected){float now=fn_8023659C();if(lbl_805634E8+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
  void* previousArrow=fn_80211660(0);void* nextArrow=fn_80211660(1);
  float previousOffset=ObservedArrowOffset(&fields->previousTime),nextOffset=ObservedArrowOffset(&fields->nextTime);
- float nextX=x+(float)fn_8022AB18(fields->height,0,3);
- fn_8022AAA8(fields->height,fields->provider->Text());
- y-=(float)fn_8022AB18(fields->height,1,3);
- float previousX=nextX-fn_80235EF0(previousArrow,previousFrame)-previousOffset;
+ float baseX=x+(float)fn_8022AB18(fields->fontResource,0,3);
+ fn_8022AAA8(fields->fontResource,fields->provider->Text());
+ y-=(float)fn_8022AB18(fields->fontResource,1,3);
+ float previousX=baseX-fn_80235EF0(previousArrow,previousFrame)-previousOffset;float nextX=baseX;
  nextX+=nextOffset;
- u32 align=fn_8022AA84(fields->height);
+ u32 align=fn_8022AA84(fields->fontResource);
  if(align&4){float half=available*lbl_805634C4;previousX-=half;nextX+=half;}
- else{if(align&2)previousX-=available;else nextX+=available;}
+ else{if(align&2)previousX-=available;if(!(align&2))nextX+=available;}
  u32 previousColor=0xffffffffu,nextColor=0xffffffffu;
  if(!fields->provider||!fields->provider->HasPrevious())previousColor=ObservedArrowColor(&fields->previousTime);
  if(!fields->provider||!fields->provider->HasNext())nextColor=ObservedArrowColor(&fields->nextTime);
- if((fields->provider&&fields->provider->HasPrevious())||ObservedAbsDecision(previousOffset)>lbl_80558DC4[0]){
+ if((!fields->provider||fields->provider->HasPrevious())||ObservedAbsDecision(previousOffset)>lbl_80558DC4[0]){
   if(previousArrow){float width=fn_80235EF0(previousArrow,previousFrame);float height=fn_80235F64(previousArrow,previousFrame);
    fn_802354A0(previousArrow,previousFrame,previousColor,previousX,y+height*lbl_805634C4,lbl_805634A8,width,height);}
  }
- if((fields->provider&&fields->provider->HasNext())||ObservedAbsDecision(nextOffset)>lbl_80558DC4[0]){
+ if((!fields->provider||fields->provider->HasNext())||ObservedAbsDecision(nextOffset)>lbl_80558DC4[0]){
   if(nextArrow){float width=fn_80235EF0(nextArrow,nextFrame);float height=fn_80235F64(nextArrow,nextFrame);
    fn_802354A0(nextArrow,nextFrame,nextColor,nextX,y+height*lbl_805634C4,lbl_805634A8,width,height);}
  }
@@ -1356,8 +1365,8 @@ struct SelectionActionPrefix {char base[0x244];SelectionActionDispatch* child;ch
 extern "C" {
 extern u32 lbl_8033E458[],lbl_8033E140[];
 void Finish__9MenuStateFi(void*,void* context){fn_802168BC(context);}
-void fn_802235B4(void) {}
-void fn_80223644(void) {}
+void fn_802235B4(WidgetFragment*) {}
+void fn_80223644(WidgetFragment*) {}
 WidgetFragment* fn_80223800(WidgetFragment* self,int x,int y,void* model,int* watched){((void(*)(WidgetFragment*,int,int,void*))fn_802230A4)(self,x,y,model);((SelectWatchedPrefix*)self)->watched=watched;self->vtable=lbl_8033E458;if(watched)fn_80219440(self,0,watched,4);fn_80219440(self,1,fn_80216708(),1);return self;}
 void fn_80223C20(WidgetFragment* self){ImageAlphaPrefix* f=(ImageAlphaPrefix*)self;f->asset->alpha=lbl_805634A4-f->blend;float zero=lbl_805634A8;if(f->asset->alpha>zero&&f->image){char scope[64];const void* context=fn_8022EDC4();fn_8022EEF8(scope,f->asset,context);fn_8022ED00(scope);fn_802C5320(f->image,0,f->x,f->y,zero,f->width,f->height);fn_8022EDB8();}}
 WidgetFragment* fn_80225828(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E140;RollingRowsPrefix* f=(RollingRowsPrefix*)self;if(f->rows)__dla__FPv(f->rows);f->rows=0;if(self->y)fn_802328D4(self->y);self->y=0;self->x=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
@@ -1372,7 +1381,7 @@ struct AssetFormatPrefix {char base[0x244];int first,resource;char gap24c[13];ch
 extern "C" {
 extern const float lbl_805634F8;extern const char lbl_8033DA2C[],lbl_8055B88C[4];extern u32 lbl_8033E1C4[],lbl_8033F7F4[];
 RotationMatrix* fn_8022EE9C();void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);void fn_802E317C(const char*,...);
-void fn_80224DDC(WidgetFragment*,float,float,float) {}
+void fn_80224DDC(WidgetFragment*,float,float,float);
 void fn_80227044(WidgetFragment*,float,float,float);
 WidgetFragment* fn_80224D40(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E1C4;AssetFormatPrefix* f=(AssetFormatPrefix*)self;if(f->owned)fn_8022EE98(f->asset);fn_802328D4(f->resource);f->resource=0;f->first=0;strcpy(f->text,lbl_8055B88C);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80226630(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*)){fn_802224B4(self,context,x,y,dx,dy,child,callback,1,0);self->vtable=lbl_8033F7F4;Bound264* f=(Bound264*)self;f->token=fn_80228F40(x,y);f->focus=0;return self;}
@@ -1382,15 +1391,22 @@ void fn_802238D0(WidgetFragment* self,int mode){SelectWatchedPrefix* f=(SelectWa
 }
 
 struct SourceResourcePrefix {char base[0x244];int kind;void* resource;char gap24c[12];const char* name;char cached[32];};
-struct FullDrawStatePrefix {RotationMatrix matrix;RotationVec light;float alpha,first,second;};
-struct FocusPaintPrefix {char base[0x244];DelegatePaintDispatch* child;int first,second,third;int* focus;int token;};
+struct DrawStateWordsNew {u32 words[3];};
+struct FullDrawStatePrefix {RotationMatrix matrix;DrawStateWordsNew light;float alpha,first,second;};
+struct FocusPaintPrefix {
+ char base[0x244]; // 0x000..0x243: observed widget prefix
+ DelegatePaintDispatch* child; // 0x244
+ int first,second,third; // 0x248, 0x24C, 0x250: forwarded paint parameters
+ int* focus; // 0x254
+ int token; // 0x258
+};
 struct FullFormatDispatch {virtual ~FullFormatDispatch();virtual void Bind(void**,int*);virtual void Format(char*,int);virtual int Increase();virtual int Decrease();virtual int CanNext();virtual int CanPrevious();virtual float Value();};
 struct ExtendedFormatPrefix {char base[0x254];char text[80];FullFormatDispatch* target;int* focus;int token,left,right,lineY;};
 extern "C" {
 extern u32 lbl_8033F434[],lbl_8033EEDC[];int strncasecmp(const char*,const char*,unsigned long);void fn_802C5310(void*,int,float,float,float);
 WidgetFragment* fn_80219E44(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F434;SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(f->resource)fn_80235380(f->resource);break;case 2:case 4:case 5:if(f->resource)fn_802328D4((int)f->resource);break;}f->resource=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80219F14(WidgetFragment* self){fn_802192AC(self);SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(strncasecmp(f->cached,f->name,31)!=0){if(f->resource)fn_80235380(f->resource);f->resource=fn_8023512C(f->name);const char* source=f->name;int remaining=32;char* destination=f->cached;while((*destination++=*source++)!=0){if(--remaining<=0){destination[-1]=0;break;}}}break;}}
-void fn_8021AA18(void) {}
+
 WidgetFragment* fn_8021BEC0(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY){fn_80219568(self,x,y,0,height,0,0);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EEDC;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
 void fn_8021BFEC(WidgetFragment* self){fn_80219660(self);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=lbl_805634A8;float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
 }
@@ -1408,7 +1424,7 @@ extern "C" {
 void fn_802180BC(void*);void fn_802180B0(void*);void fn_802180C8(void*);void fn_802180D4(void*);extern const float lbl_80563500;
 int fn_8021C730(WidgetFragment* self,int key){ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=lbl_80558DC4[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180BC(self->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=lbl_80558DC4[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180B0(self->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180C8(self->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180D4(self->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
 void fn_8021CB4C(WidgetFragment* self,void* context){fn_802C3034(context);GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
-void fn_8021CBBC(void) {}
+void fn_8021CBBC(WidgetFragment*);
 }
 
 struct SelectResourcePrefix {char base[0x3fc];int resource;};
@@ -1449,12 +1465,20 @@ extern u32 lbl_8033E770[],lbl_8033DF30[];
 }
 
 struct PageTextList {char base[8];int count;char gapc[4];int pageSize;char gap14[12];int page;int version;};
-struct PageTextPrefix {char base[0x244];int font;char gap248[8];int rowHeight;PageTextList* list;void* image;int column,iconOffset;};
+struct PageTextPrefix {
+ char base[0x244]; // 0x000..0x243: observed widget prefix
+ int font; // 0x244: resource handle
+ char gap248[8]; // 0x248..0x24F: unknown fields, no fill or ownership claim
+ int rowHeight; // 0x250
+ PageTextList* list; // 0x254
+ void* image; // 0x258: observed zero initialization; complete resource type open
+ int column,iconOffset; // 0x25C, 0x260
+};
 struct DropdownRowPrefix {RowListPrefix list;int width,height;};
 struct FloatSliderPrefix {char base[0x244];bool dragging;char gap245[3];float minimum,maximum;float* value;int rate;bool negative;char gap259[3];void* background;void* marker;int oldX,oldY,oldWidth,oldHeight;int* focus;int token;};
 extern "C" {
 const char* fn_8022D850(PageTextList*,int,int,int*);void fn_8022D924(PageTextList*,int);void fn_802C4F58(int,int,const char*,int);extern const char lbl_8055B878[4],lbl_8055B884[7];extern const float lbl_805634FC;extern u32 lbl_8033E878[];
-void fn_8021BA64(WidgetFragment*,int,int,void*,void*,const char*,int,int,int,int,int,int,int) {}
+void fn_8021BA64(WidgetFragment*,int,int,PageTextList*,int,const char*,int,int,int,int,int,int,int);
 void fn_8021BC20(WidgetFragment* self){PageTextPrefix* f=(PageTextPrefix*)self;int end;int x=self->left;int start=f->list->page*f->list->pageSize;int y=self->top;end=start+f->list->pageSize;if(f->list->count<end)end=f->list->count;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=fn_8022D850(f->list,i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,lbl_805634A8,lbl_805634FC,lbl_805634FC);}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,lbl_805634A4);y+=f->rowHeight;}}
 void fn_8021E8DC(WidgetFragment* self,void* context){DropdownRowPrefix* f=(DropdownRowPrefix*)self;if(f->list.active){((WidgetDispatch*)self)->Slot1c(self->left,self->bottom+3);int height=self->bottom-self->top;int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,f->width,f->height);fn_8021E3BC(self,context);fn_80219284(self,width,height);((WidgetDispatch*)self)->Slot1c(self->left,self->top*2-3-self->bottom);}fn_802C3034(context);fn_802192A0(self,context);int y,x;x=self->left;y=self->top;int width=((WidgetDispatch*)self)->Slot78();fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBDC);const char* label=fn_8022D3F8(f->list.list,*f->list.selected,0);char buffer[80];sprintf(buffer,lbl_8055B884,f->list.columns,label?label:lbl_8055B88C);fn_802C4F58(self->left+1,self->top+1,buffer,lbl_8055FBC0);}
 static inline int InlineWidgetAbsolute(int value){return value<0?-value:value;}
@@ -1512,7 +1536,7 @@ struct FormattedChoiceDescriptor {int unknown0,font,x,y,kind,width,height;float 
 extern "C" {
 extern const char lbl_8033DAD8[];int fn_80129D90(int,int,int);int fn_80131234(const char*);extern u32 lbl_8033DF30[],lbl_8033E7F4[];
 WidgetFragment* fn_80224B54(WidgetFragment* self,int context,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E1C4;ResourceTextPrefix* f=(ResourceTextPrefix*)self;strcpy(f->text,lbl_8055B88C);f->localized=0;switch(desc->fielda0){case 0:f->localized=1;strcpy(f->text,lbl_8055B88C);break;case 1:{int second=fn_80129D90(1,1,8);int first=fn_80129D90(1,0x42,0x45);sprintf(f->text,lbl_8033DAD8,first,second);break;}}if(context)f->context=context;else f->context=fn_80131234((const char*)desc+0x20);f->resource=fn_80232578((const char*)desc+0x40);f->style=desc->style90;f->flags=desc->flags;f->scale=desc->scale/(float)fn_80232B70(f->resource);f->owned=0;f->asset=0;float x,y,z;memcpy(&x,(const char*)desc+0xa4,4);memcpy(&y,(const char*)desc+0xa8,4);memcpy(&z,(const char*)desc+0xac,4);if(!(ObservedAbsDecision(x)<=lbl_80558DC4[0]&&ObservedAbsDecision(y)<=lbl_80558DC4[0]&&ObservedAbsDecision(z)<=lbl_80558DC4[0]))fn_80224DDC(self,x,y,z);return self;}
-WidgetFragment* fn_8021B9AC(WidgetFragment* self,FormattedChoiceDescriptor* desc,void* provider,void* context){fn_80218F80(self,(WidgetDesc*)desc);self->vtable=lbl_8033F0FC;fn_8021BA64(self,desc->width,desc->height,provider,context,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);return self;}
+WidgetFragment* fn_8021B9AC(WidgetFragment* self,FormattedChoiceDescriptor* desc,PageTextList* provider,int column){fn_80218F80(self,(WidgetDesc*)desc);self->vtable=lbl_8033F0FC;fn_8021BA64(self,desc->width,desc->height,provider,column,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);return self;}
 WidgetFragment* fn_80227E84(WidgetFragment* self,void* first,WidgetDesc* desc,void* second){const char* strings=lbl_8033D878;fn_80218F80(self,desc);ThreeResourcePrefix* f=(ThreeResourcePrefix*)self;f->first=first;self->vtable=lbl_8033DF30;f->second=second;f->flag=*(const int*)((const char*)desc+0xb0)==1;f->resource=fn_80232578(strings+0x20c);if(!f->resource)fn_802E30C8(strings+0x408);f->image=fn_8023512C(strings+0x42c);if(!f->image)fn_802E30C8(strings+0x438);f->overlay=fn_8023512C(strings+0x3d4);if(!f->overlay)fn_802E30C8(strings+0x3e0);return self;}
 WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,int divisions,float minimum,float maximum){fn_80218F34(self,desc->x,desc->y,desc->x+desc->dx,desc->y+desc->dy,0);self->vtable=lbl_8033E7F4;SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;f->value=value;f->minimum=minimum;f->maximum=maximum;f->step=(maximum-minimum)/(float)divisions;f->image=fn_802C5130(lbl_8033D9BC);f->focus=0;f->token=fn_80228F40(desc->x,desc->y);f->nextTime=fn_8023659C()-lbl_805634E8;f->previousTime=f->nextTime;return self;}
 }
@@ -1671,4 +1695,30 @@ void fn_80226B6C(WidgetFragment* self){char scope[64];CenteredImagePrefix* f=(Ce
 extern "C" {
 static inline float RotationScale360(float a,float b){return a*b;}
 void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=fn_8022EE9C();RotationVec rotation={RotationScale360(lbl_805634F8,x),RotationScale360(lbl_805634F8,y),RotationScale360(lbl_805634F8,z)};RotationMatrix matrix;RotationMatrix* target=f->matrix;fn_80015A20(&matrix,(RotationVec*)&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
+}
+
+extern "C" {
+void fn_80224DDC(WidgetFragment* self,float x,float y,float z){ResourceTextPrefix* f=(ResourceTextPrefix*)self;f->owned=1;f->asset=fn_8022EE9C();RotationVec rotation={RotationScale360(lbl_805634F8,x),RotationScale360(lbl_805634F8,y),RotationScale360(lbl_805634F8,z)};RotationMatrix matrix;RotationMatrix* target=(RotationMatrix*)f->asset;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
+}
+
+extern "C" {
+static inline float CenteredGaugeY349(int height,int top){return (float)(height/2-top);}
+void fn_8021CBBC(WidgetFragment* self){GaugeValuePrefix* f=(GaugeValuePrefix*)self;float x=(float)(self->left-lbl_8055FB9C/2);float y=CenteredGaugeY349(lbl_8055FBA0,self->top);fn_802C5310(f->background,0,x,y-lbl_80563500,lbl_805634A8);float value=f->target->Value();int width=((WidgetDispatch*)self)->Slot78();int pixel=(int)(value*(float)(width-f->inset));pixel+=self->left;fn_80230C30(&x,&y,pixel,self->top+3);fn_802C5310(f->marker,0,x,y,lbl_805634A8);}
+}
+
+extern "C" {extern const float lbl_805634E8;
+
+}
+
+extern "C" {
+
+}
+
+struct FocusTemporaryNew {int selected;const char* label;};
+extern "C" {
+void fn_8021AA18(FocusPaintPrefix* self){FocusTemporaryNew temporary;FullDrawStatePrefix state;const FullDrawStatePrefix* live=(const FullDrawStatePrefix*)fn_8022EDC4();state.matrix=live->matrix;state.light=live->light;state.alpha=live->alpha;state.first=live->first;state.second=live->second;temporary.selected=0;if(self->focus&&*self->focus==self->token)temporary.selected=1;if(!*(unsigned char*)fn_80216708()&&!temporary.selected)state.alpha*=lbl_805634E8;fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;temporary.label=((WidgetDispatch*)self)->Slot88();int width=((WidgetDispatch*)self)->Slot78();self->child->Paint(self->first,self->second,self->third,width,height,temporary.label);fn_8022EDB8();}
+}
+
+extern "C" {
+void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;ChoiceResourceSpec spec={};spec.words[0]=(u32)font;spec.words[2]=flags;spec.words[3]=value;spec.words[4]=second;spec.words[5]=third;spec.words[6]=horizontal;spec.words[7]=vertical;spec.words[10]=first;spec.words[11]=second;spec.words[12]=third;spec.words[13]=horizontal;spec.words[14]=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
 }

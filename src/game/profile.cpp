@@ -248,14 +248,14 @@ int fn_8024C578(int slot) {
 
 void fn_8024C628(void) {
     int current = IdentGetCurrentSlot();
-    int item = 0;
-    for (int slot = 0; slot < 4; slot++, item += 2) {
-        int valid = 1;
+    
+    for (int slot = 0; slot < 4; slot++) {
+        unsigned int valid=1;
         for (int j = 0; j < 3; j++) if (!fn_8027B8E4(j, slot)) valid = 0;
         for (int j = 0; j < 2; j++) if (!fn_8027B984(j, slot)) valid = 0;
         if (valid) fn_80214A9C(slot + 1);
         else fn_80214A9C(slot + 11);
-        if (slot == current) fn_80214CB4(item + valid);
+        if (slot == current) fn_80214CB4((slot << 1) + valid);
     }
 }
 
@@ -399,29 +399,22 @@ void* memset(void*, int, unsigned long);
 void fn_801308F4(char*, int, u32);
 // Achievement result is retained as an opaque register-sized word: both this
 // build's producer and consumer are four-byte stubs, so no pointee type is inferred.
+static inline void ProfileCopyLabelNew(const char* src,int n,char* dst){while((*dst++=*src++)!=0){if(--n<=0){dst[-1]=0;break;}}}
 void fn_8024CAAC(int emptyAvailable) {
     char* name = &lbl_80498A58[0][0];
     char* description = &lbl_80498AA0[0][0];
-    u8* available = lbl_8055F2D0;
-    for (int slot = 0; slot < 4; slot++, name += 18, description += 100, available++) {
+    u8* available;int slot=0;available=lbl_8055F2D0;
+    for (; slot < 4; slot++, name += 18, description += 100, available++) {
         if (IdentIsSlotEmpty(slot)) {
             const char* src = fn_80131234("PlayerName:EMPTY");
-            char* dst = name;
-            int n = 18;
-            while ((*dst++ = *src++) != 0) {
-                if (--n <= 0) { dst[-1] = 0; break; }
-            }
+            ProfileCopyLabelNew(src,18,name);
             memset(description, 0, 100);
             *available = emptyAvailable;
         } else {
             char key[100];
             fn_801345D8(key, 100, "PlayerName:%d", slot + 1);
             const char* src = fn_80131234(key);
-            char* dst = name;
-            int n = 18;
-            while ((*dst++ = *src++) != 0) {
-                if (--n <= 0) { dst[-1] = 0; break; }
-            }
+            ProfileCopyLabelNew(src,18,name);
             fn_801308F4(description, 100, AchievementsGetForSlot(0, slot));
             *available = 1;
         }
