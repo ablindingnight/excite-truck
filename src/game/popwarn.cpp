@@ -79,6 +79,10 @@ extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEBC;
 extern s32 lbl_8055BEB8;
 extern void* lbl_80343600[];
+extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
+extern char lbl_8055B860[8];
+extern char lbl_8055BAC0[4];  // ""
+extern char lbl_8055BABC[4];  // ""
 
 ModuleTag lbl_8055F250;
 s32 lbl_8055F258;
@@ -276,7 +280,20 @@ void fn_80247A0C(void) {
 
 void fn_80247AAC(void) { lbl_8055BEB4 = fn_80214D04(); }
 
-void fn_80247AD0(u8* p) {}  // stub (82)
+// Challenge difficulty menu.
+void fn_80247AD0(void) {
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80247A0C, 0, 0),
+        MenuItem(lbl_8055BABC, 8, (const void*)fn_80247AAC, 1, 0),
+        MenuItem("challenge_0", 0, 0, 6, 0),
+        MenuItem("challenge_1", 0, 0, 7, 0),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"chaldiff.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 void fn_80247C18(u8* p) {}  // stub (330)
 
@@ -366,7 +383,6 @@ struct KioskTimer {
     s32 f28;         // offset 0x28
     u8 pad2C[0x10];  // offset 0x2C
 };
-extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
 
 extern "C" {
 int fn_8020A640(void);
