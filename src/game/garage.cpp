@@ -46,6 +46,8 @@ void fn_80214D50(int s);
 void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void fn_802CAC54(u8* p);
+void fn_802354A0(u8* o, int kind, s32 v, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_80216CB4(void);
 void fn_80214A9C(int s);
 }
 
@@ -67,6 +69,35 @@ public:
     virtual int v1C(u32 id);
 };
 extern void* lbl_8034453C[];
+extern void* lbl_803444D8[];
+
+// Shared car icon textures, released with the last list.
+struct IconEntry {
+    u8 pad0[0x20];  // offset 0x0
+    u8* tex;        // offset 0x20
+    u8* texE;       // offset 0x24
+    u8 pad28[0x10]; // offset 0x28
+};
+
+struct IconPool {
+    IconEntry* entries;  // offset 0x0
+    s32 count;           // offset 0x4
+};
+
+extern IconPool* lbl_8055F2E4;
+
+static inline void FreeIconPool(IconPool* pool) {
+    if (pool) {
+        for (int i = 0; i < pool->count; i++) {
+            IconEntry* e = &pool->entries[i];
+            fn_802CAC54(e->tex);
+            fn_802CAC54(e->texE);
+        }
+        delete[] pool->entries;
+        operator delete(pool);
+    }
+}
+extern s32 lbl_8055F2E8;
 extern void* lbl_803443B0[];
 extern void* lbl_80344384[];
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
@@ -85,7 +116,26 @@ void fn_8024E6E4(u8* p) {}  // stub (77)
 
 void fn_8024E818(u8* p) {}  // stub (66)
 
-void fn_8024E920(u8* p) {}  // stub (63)
+u8* fn_8024E920(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_803444D8;
+        delete[] PTR(p, 0xCC);
+        if (--lbl_8055F2E8 == 0) {
+            FreeIconPool(lbl_8055F2E4);
+            lbl_8055F2E4 = 0;
+        }
+        if (p) {
+            *(void**)p = lbl_8034453C;
+            delete[] PTR(p, 0x18);
+            fn_80235380(PTR(p, 0x24));
+            fn_802CAC54(PTR(p, 0x20));
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 void fn_8024EA1C(u8* p) {}  // stub (94)
 
@@ -177,7 +227,13 @@ void fn_80250204(u8* p) {}  // stub (925)
 
 void fn_80251078(u8* p) {}  // stub (271)
 
-void fn_802514B4(u8* p) {}  // stub (50)
+void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
+    s32 v = S32(PTR(p, 0xCC) + i * 0x14, 0x10);
+    fn_802354A0(PTR(p, 0x24), 0, -1, x, y, 0.0f, w, h);
+    fn_80216CB4();
+    fn_802354A0(PTR(p, 0x24), 3, v, x, y, 0.0f, w, h);
+    fn_802354A0(PTR(p, 0x24), 6, -1, x, y, 0.0f, w, h);
+}
 
 void fn_8025157C(u8* p) {}  // stub (238)
 
