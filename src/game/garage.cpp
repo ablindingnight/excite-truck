@@ -19,6 +19,7 @@ const char* GetSpecialChassis(const char* name);
 class CarUIScreen {
 public:
     void UnloadModel(void);
+    void SetAnim(u32 anim);
 };
 
 class VDel {
@@ -146,6 +147,25 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
+// Garage car-select screen (partial).
+struct GarageSel {
+    u8 pad0[0x2C];
+    s32 sel;  // offset 0x2C
+};
+
+// Selected paint index of the current vehicle.
+static inline u32 GetSelColor(u8* p) {
+    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    if (lbl_80498C48.alt) {
+        return GetVehicleColor(v, 0)[0];
+    }
+    return GetVehicleColor(v, 0)[1];
+}
+
+extern char lbl_8034287C[];
+extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
+extern "C" const char* fn_80131234(u8* s);
+
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 extern "C" {
@@ -228,7 +248,22 @@ u8* fn_8024E920(u8* p, int del) {
     return p;
 }
 
-void fn_8024EA1C(u8* p) {}  // stub (94)
+void fn_8024EA1C(u8* p) {
+    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    if (lbl_80498C48.alt) {
+        GetVehicleColor(v, 0)[0] = S32(p, 0x2C);
+    } else {
+        GetVehicleColor(v, 0)[1] = S32(p, 0x2C);
+    }
+    *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
+    VehicleInfo* v2 = FindVehicleNamed((const char*)(p + 0x60), 0);
+    u32 col = GetSelColor(p);
+    u32 anim = *(u32*)(PTR(p, 0xCC) + ((GarageSel*)p)->sel * 0x14 + 0x10);
+    ((CarUIScreen*)PTR(p, 0x4C))->SetAnim(anim ? anim : ((u32*)((u8*)v2 + 0x64))[col]);
+    fn_801345D8((char*)(p + 0xE0), 0x100, lbl_8034287C, ((GarageSel*)p)->sel + 1);
+    const char* str = fn_80131234(p + 0xE0);
+    CopyName(str, 0x100, (char*)(p + 0xE0));
+}
 
 u32 fn_8024EB94(u8* p) { return U32(p, 0x1c); }
 
@@ -241,13 +276,7 @@ void fn_8024EBAC(u8* p, s32 v, int set) {
     }
 }
 
-u32 fn_8024EBE4(u8* p) {
-    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
-    if (lbl_80498C48.alt) {
-        return GetVehicleColor(v, 0)[0];
-    }
-    return GetVehicleColor(v, 0)[1];
-}
+u32 fn_8024EBE4(u8* p) { return GetSelColor(p); }
 
 int fn_8024EC3C(void) {
     int ok = 0;
