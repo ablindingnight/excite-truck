@@ -364,20 +364,15 @@ void fn_802E7FD0(void) {
     Remote* r = lbl_80505978;
     s32* type = lbl_80507278;
     s8* last = lbl_8055D230;
+    Remote* q;
     for (int chan = 0; chan < 4; chan++, r++, type++, last++) {
         memset(r->kpad, 0, sizeof(r->kpad));
         int busy = 0;
-        if (lbl_80505978[0].infoBusy) {
-            busy = 1;
-        }
-        if (lbl_80505978[1].infoBusy) {
-            busy = 1;
-        }
-        if (lbl_80505978[2].infoBusy) {
-            busy = 1;
-        }
-        if (lbl_80505978[3].infoBusy) {
-            busy = 1;
+        q = lbl_80505978;
+        for (int k = 0; k < 4; k++, q++) {
+            if (q->infoBusy) {
+                busy = 1;
+            }
         }
         if (!busy && now - r->lastInfo > 10000) {
             r->lastInfo = now;
