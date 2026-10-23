@@ -253,7 +253,50 @@ int fn_802464B4(u8* p, int key) {
 
 }  // extern "C"
 
-void MemBar::Draw(void) {}  // stub (166)
+extern "C" {
+void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
+f32 fn_80235EF0(u8* art, int part);
+f32 fn_80235F64(u8* art, int part);
+void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
+void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_80235758(u8* art, int part, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
+void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
+}
+
+// Left cap, stretched middle and right cap, the filled part drawn over them; a plain bar without art.
+void MemBar::Draw(void) {
+    f32 sx;
+    f32 sy;
+    fn_80230C30(&sx, &sy, x, y);
+    f32 fw = (f32)w;
+    f32 fh = (f32)h;
+    if (art) {
+        f32 lw = fn_80235EF0(art, 0);
+        f32 rw = fn_80235EF0(art, 2);
+        f32 mid = fw - lw - rw;
+        f32 total = rw + (lw + mid);
+        f32 ah = fn_80235F64(art, 0);
+        sx = (sx + 0.5f * fw) - 0.5f * total;
+        sy = (sy + 0.5f * fh) - 0.5f * ah;
+        f32 fill = total * frac;
+        if (fill < lw) {
+            fn_80235758(art, 3, sx, sy, fill, ah, 0.0f, 0.0f, fill / lw, 1.0f, -1);
+        } else if (fill < lw + mid) {
+            fn_802353F4(art, 3, sx, sy, 0.0f);
+            fn_80235758(art, 4, sx + lw, sy, fill - lw, ah, 0.0f, 0.0f, (fill - lw) / mid, 1.0f, -1);
+        } else {
+            fn_802353F4(art, 3, sx, sy, 0.0f);
+            fn_802354A0(art, 4, sx + lw, sy, 0.0f, mid, ah, -1);
+            fn_80235758(art, 5, mid + (sx + lw), sy, (fill - lw) - mid, ah, 0.0f, 0.0f, ((fill - lw) - mid) / rw, 1.0f,
+                        -1);
+        }
+        fn_802353F4(art, 0, sx, sy, 0.0f);
+        fn_802354A0(art, 1, sx + lw, sy, 0.0f, mid, ah, -1);
+        fn_802353F4(art, 2, mid + (sx + lw), sy, 0.0f);
+    } else {
+        fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, 0.0f);
+    }
+}
 
 extern "C" {
 
