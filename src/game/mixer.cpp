@@ -115,7 +115,7 @@ public:
     virtual ~Mixer(void) {}
     virtual const char* Name(void) = 0;
     virtual void* Data(void) = 0;
-    virtual int vf14(void) { return 0; }
+    virtual int vf14(void);
     virtual int Usable(void) = 0;
     virtual Sound* CreateSound(void) = 0;
     virtual void vf20(void) = 0;
@@ -132,6 +132,7 @@ public:
     u32 data[3];  // offset 0x4
 };
 
+ModuleTag lbl_8055EDA0;
 LocString lbl_8048929C("Sound:NoSound");
 
 // The mixer used when there is no sound device.
@@ -164,7 +165,6 @@ struct MixerList {
     s32 current;     // offset 0x1C
 };
 
-ModuleTag lbl_8055EDA0;
 f32 lbl_8055B4D0 = 1.0f;  // effects volume setting
 f32 lbl_8055B4D4 = 1.0f;  // effective effects volume
 s32 lbl_8055B4D8 = 1;     // sound mode
@@ -359,5 +359,8 @@ f32 fn_802091CC(void) { return fn_80208A18(1.0f); }
 
 }  // extern "C"
 
-// NonMatching: the vtables point at Mixer and Sound base methods in neighbouring unnamed units, and our
-// compiler does not emit the base vtables or Mixer::vf14 (0x80209214).
+int Mixer::vf14(void) { return 0; }
+
+// NonMatching (link): NullSound's vtable slot 0x14 is the shared `return 0` fn_801B3FD0 (defined in
+// collisionsound.cpp); our Sound::vf14 has no symbol to bind to. Code is 100%.
+
