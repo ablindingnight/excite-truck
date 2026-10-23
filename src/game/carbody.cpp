@@ -98,9 +98,26 @@ struct F32Pair {
 
 struct RVec3;
 
+// A 12-word body pose.
+struct CbPose {
+    u32 w[12];
+};
+
+class CollVolume {
+public:
+    void Update(void);
+};
+
+extern "C" {
+void fn_801838C8(u8* p);
+void fn_801A1474(u8* p, f32 s);
+void fn_8018A180(u8* p);
+}
+
 class RigidBody {
 public:
     RigidBody(void);
+    void Reset(void);
     void OnHit(const RVec3* a, const RVec3* b, int c, void* d);
 };
 
@@ -295,7 +312,12 @@ u8* fn_801837DC(u8* p, int del) {
     return p;
 }
 
-void fn_8018381C(u8* p) {}  // stub (43)
+void fn_8018381C(u8* p) {
+    *(CbPose*)(p + 0x3C) = *(CbPose*)(p + 0x274);
+    ((CollVolume*)p)->Update();
+    ((RigidBody*)p)->Reset();
+    fn_801838C8(p);
+}
 
 void fn_801838C8(u8* p) {}  // stub (332)
 
@@ -480,7 +502,27 @@ void fn_8018BDEC(u8* p) {
     }
 }
 
-void fn_8018BE54(u8* p) {}  // stub (60)
+void fn_8018BE54(u8* p, f32 s) {
+    if ((f32)__fabs(F32(p, 0x5E4) - s) <= lbl_80558DC4[0]) {
+        return;
+    }
+    F32(p, 0x5E4) = s;
+    fn_801A1474(PTR(p, 0x268), F32(p, 0x5E4));
+    f32 k = F32(p, 0x5E4);
+    f32 k2 = k * k;
+    F32(p, 0x330) = F32(p, 0x468) * k2;
+    F32(p, 0x334) = F32(p, 0x46C) * k2;
+    F32(p, 0x338) = F32(p, 0x470) * k2;
+    F32(p, 0x344) = F32(p, 0x47C) * k;
+    F32(p, 0x33C) = F32(p, 0x474) * k;
+    F32(p, 0x340) = F32(p, 0x478) * k;
+    F32(p, 0x34C) = F32(p, 0x484) * k;
+    F32(p, 0x3AC) = k * F32(p, 0x4E4);
+    F32(p, 0x3D0) = k * F32(p, 0x508);
+    F32(p, 0x3F4) = k * F32(p, 0x52C);
+    F32(p, 0x418) = k * F32(p, 0x550);
+    fn_8018A180(p);
+}
 
 void fn_8018BF44(u32* p) { *p = 0x0FF807FF; }
 
