@@ -158,7 +158,45 @@ void fn_80274EA8(u8* p) {
     fn_80274730(p, lbl_80563FA8, lbl_80564014, lbl_80564018, lbl_8056401C);
 }
 
-void fn_80274F74(u8* p) {}  // stub (84)
+extern const f32 lbl_80564020;  // small angle
+double sin(double x);
+double cos(double x);
+
+// Rotation (0x58, 3x3) from the rotation vector w (axis * angle), Rodrigues' formula; identity for a
+// tiny angle. t goes to 0xBC.
+void fn_80274F74(u8* p, const f32* w, f32 t) {
+    f32 a = PSVECMag(w);
+    if (a > lbl_80564020) {
+        f32 x, s, y, z, c, k;
+        f32 inv = lbl_80563FAC / a;
+        x = inv * w[0];
+        y = inv * w[1];
+        z = inv * w[2];
+        s = (f32)sin(a);
+        c = (f32)cos(a);
+        k = lbl_80563FAC - c;
+        F32(p, 0x58) = c + k * (x * x);
+        F32(p, 0x5C) = y * (k * x) + s * z;
+        F32(p, 0x60) = z * (k * x) - s * y;
+        F32(p, 0x64) = y * (k * x) - s * z;
+        F32(p, 0x68) = c + k * (y * y);
+        F32(p, 0x6C) = z * (k * y) + s * x;
+        F32(p, 0x70) = z * (k * x) + s * y;
+        F32(p, 0x74) = z * (k * y) - s * x;
+        F32(p, 0x78) = c + k * (z * z);
+    } else {
+        F32(p, 0x5C) = lbl_80563FB0;
+        F32(p, 0x58) = lbl_80563FAC;
+        F32(p, 0x60) = lbl_80563FB0;
+        F32(p, 0x64) = lbl_80563FB0;
+        F32(p, 0x68) = lbl_80563FAC;
+        F32(p, 0x6C) = lbl_80563FB0;
+        F32(p, 0x70) = lbl_80563FB0;
+        F32(p, 0x74) = lbl_80563FB0;
+        F32(p, 0x78) = lbl_80563FAC;
+    }
+    F32(p, 0xBC) = t;
+}
 
 void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
 f32 PSVECDotProduct(const f32* a, const f32* b);
