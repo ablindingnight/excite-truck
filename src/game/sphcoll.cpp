@@ -241,6 +241,15 @@ static inline void Swap32(u8* b) {
     b[2] = t;
 }
 
+static inline void SwapN(u8* p, int n) {
+    int i;
+    for (i = 0; i < n / 2; i++) {
+        u8 t = p[i];
+        p[i] = p[n - 1 - i];
+        p[n - 1 - i] = t;
+    }
+}
+
 class VEx {
 public:
     virtual void v08(void);
@@ -1273,9 +1282,10 @@ u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
     *(void**)p = lbl_80333B48;
     if (swap) {
         Swap32(p + 0x24);
-        Swap32(p + 0x28);
-        Swap32(p + 0x2C);
-        Swap32(p + 0x30);
+        f32* w = (f32*)(p + 0x28);
+        for (int i = 0; i < 3; i++) {
+            Swap32((u8*)&w[i]);
+        }
         if (S32(p, 0x20) == 0x3EB) {
             F32(p, 0x24) += 3.35f;
         }
