@@ -4,6 +4,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -453,7 +454,62 @@ u8* fn_8024AC54(u8* p, int del) {
     return p;
 }
 
-int fn_8024ACB4(s32* key, const char* sel, u8* list) { return 0; }  // stub (209)
+struct EvList;
+u8* fn_8024B73C(u8* p, const char* name, EvList* list);
+void fn_8024B830(u8* p, s32 id);
+u8* fn_8024B874(u8* p);
+const char* fn_8024B87C(u8* p, int i);
+s32 fn_8024B8A4(u8* p, int i);
+u8* fn_8024B8CC(u8* p);
+u8* fn_8024B8D4(u8* p);
+void __dt__7DynoTexFv(void* p, int del);
+extern char lbl_8055B860[8];
+
+// Tears down the course list built by fn_8024B73C.
+static inline void CourseListFree(u8* m) {
+    __dt__7DynoTexFv(m + 0x4C, -1);
+    U32(m, 0x18) = 0;
+    U32(m, 0x1C) = 0;
+    U32(m, 0x20) = 0;
+}
+
+// Course menu of location sel; on a choice stores the event in *key and returns 1.
+int fn_8024ACB4(s32* key, const char* sel, u8* list) {
+    if (!fn_802411D4()) {
+        return 0;
+    }
+    u32 buf[0x28];
+    fn_8024B73C((u8*)buf, sel, (EvList*)list);
+    fn_8024B830((u8*)buf, *key);
+    MenuItem items[] = {
+        MenuItem("__first", 5, (u8*)buf, 0, 0),
+        MenuItem("#course_1", fn_8024B87C((u8*)buf, 0)),
+        MenuItem("#course_1", 0, 0, fn_8024B8A4((u8*)buf, 0), 0),
+        MenuItem("#course_2", fn_8024B87C((u8*)buf, 1)),
+        MenuItem("#course_2", 0, 0, fn_8024B8A4((u8*)buf, 1), 0),
+        MenuItem("#course_3", fn_8024B87C((u8*)buf, 2)),
+        MenuItem("#course_3", 0, 0, fn_8024B8A4((u8*)buf, 2), 0),
+        MenuItem("#course_4", fn_8024B87C((u8*)buf, 3)),
+        MenuItem("#course_4", 0, 0, fn_8024B8A4((u8*)buf, 3), 0),
+        MenuItem("#course_5", fn_8024B87C((u8*)buf, 4)),
+        MenuItem("#course_5", 0, 0, fn_8024B8A4((u8*)buf, 4), 0),
+        MenuItem("#trackmap", 0x12, fn_8024B8CC((u8*)buf), 0, 0),
+        MenuItem("#trackmap", 2, fn_8024B8D4((u8*)buf), 0, 0),
+        MenuItem("#course_name", (const char*)fn_8024B874((u8*)buf)),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_80498998),
+    };
+    MenuDesc desc = {"multi_course.lyt", 0, (int (*)(int*))fn_8024A6A4, 0, 0};
+    desc.items = items;
+    int r = fn_802146BC(&desc, -999, -999, 1);
+    if (r != -1) {
+        *key = r;
+        CourseListFree((u8*)buf);
+        return 1;
+    }
+    CourseListFree((u8*)buf);
+    return 0;
+}
 
 u8* fn_8024AFF8(u8* p, int del) {
     if (p) {
