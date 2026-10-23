@@ -210,7 +210,8 @@ struct PathEvent {
 struct PathEventList {
     int Find(int event) {
         for (int i = 0; i < n; i++) {
-            if (event == data[i].event) {
+            PathEvent* e = &data[i];
+            if (e->event == event) {
                 return i;
             }
         }
