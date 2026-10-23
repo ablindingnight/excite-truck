@@ -493,7 +493,7 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 
 int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) { return 0; }  // stub (275)
 
-void fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 a, f32 r) {}  // stub (541)
+int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 a, f32 r) { return 0; }  // stub (541)
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
@@ -896,7 +896,7 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     return 0;
 }
 
-void fn_8019E500(u8* p, u8* q) {}  // stub (205)
+int fn_8019E500(u8* p, u8* q) { return 0; }  // stub (205)
 
 u8* fn_8019E834(u8* p, int del) {
     if (p && del > 0) {
@@ -907,10 +907,9 @@ u8* fn_8019E834(u8* p, int del) {
 
 // Capsule p against q: the point of p's axis nearest q's centre (clamped to +-half length 0x28) is
 // tested as a sphere of p's radius; types 0x73 / 0x74 take fn_8019E500 instead.
-void fn_8019E874(u8* p, u8* q) {
+int fn_8019E874(u8* p, u8* q) {
     if ((u32)S32(p, 0x20) == 0x73 || (u32)S32(p, 0x20) == 0x74) {
-        fn_8019E500(p, q);
-        return;
+        return fn_8019E500(p, q);
     }
     CFrame oq;
     CFrame fp;
@@ -931,10 +930,21 @@ void fn_8019E874(u8* p, u8* q) {
     c.x = c.x + fp.m[6] * v;
     c.y = c.y + fp.m[7] * v;
     c.z = c.z + fp.m[8] * v;
-    fn_8019B4D8(p, q, &c, 0, F32(p, 0x24));
+    return fn_8019B4D8(p, q, &c, 0, F32(p, 0x24));
 }
 
-void fn_8019EA7C(u8* p, u8* q) {}  // stub (38)
+// Capsule p against q, with the centre offset kept for a debug view that is compiled out.
+int fn_8019EA7C(u8* p, u8* q) {
+    CFrame* fq = (CFrame*)VE(q)->v50();
+    CFrame* fp = (CFrame*)PTR(p, 0xC);
+    f32 x = fp->t.x - fq->t.x;
+    f32 y = fp->t.y - fq->t.y;
+    f32 z = fp->t.z - fq->t.z;
+    BoxCorner d(x, y, z);
+    bool hit = false;
+    hit |= fn_8019E874(p, q);
+    return hit;
+}
 
 void fn_8019EB14(u8* tree, int i) {
     u8* n = tree + i * 8;
@@ -987,7 +997,22 @@ void fn_8019ECA4(u8* p, u8* q) {
 
 void fn_8019ECBC(u8* p, u32 v) { U32(p, 0xc) = v; }
 
-void fn_8019ECC4(u8* p, u32 a, u32 b) {}
+extern void* lbl_80333B98[];
+
+// Collision volume base constructor from file data (byte-swapped when `swap`).
+void fn_8019ECC4(u8* p, u32 a, u32 swap) {
+    *(void**)p = lbl_80333B98;
+    if (swap) {
+        Swap32(p + 0x18);
+        Swap32(p + 0x10);
+        Swap32(p + 0x14);
+        Swap32(p + 0x20);
+        Swap32(p + 0x1C);
+    }
+    U32(p, 0x8) = a;
+    U32(p, 0x4) = 0;
+    U32(p, 0xC) = a + 4;
+}
 
 extern void* lbl_80333B48[];
 
@@ -1178,7 +1203,16 @@ void fn_8019F414(u8* p) {
     fn_8019EF00((CVolume*)p);
 }
 
-void fn_8019F4D4(u8* p) {}  // stub (35)
+// Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
+void fn_8019F4D4(u8* p, const RVec3* v) {
+    fn_8019EC84(p);
+    f32 d = -PSVECDotProduct(&((CFrame*)PTR(p, 0xC))->m[3], v);
+    CFrame* f = (CFrame*)PTR(p, 0xC);
+    f32 x = v->x + f->m[3] * d;
+    f32 y = v->y + f->m[4] * d;
+    f32 z = v->z + f->m[5] * d;
+    BoxCorner c(x, y, z);
+}
 
 void fn_8019F560(u8* p) { fn_8019F1A4(p); }
 
