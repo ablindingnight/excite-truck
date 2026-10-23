@@ -374,6 +374,7 @@ fail:
 }
 
 void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha) {
+    int hasAlpha;
     int a;
     if (alpha >= 0.99f) {
         a = 0xFF;
@@ -382,11 +383,9 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     } else {
         a = (int)(0.5f + 255.0f * alpha);
     }
-    int hasAlpha;
+    hasAlpha = 0;
     if (v->info.frames[0].a.buf) {
         hasAlpha = 1;
-    } else {
-        hasAlpha = 0;
     }
     v->busy[v->info.cur] = 1;
     GXSetVtxAttrFmt(0, 9, 1, 3, 0);
@@ -472,10 +471,14 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     GXSetTevKColor(2, k2);
     GXSetTevSwapModeTable(0, 0, 1, 2, 3);
     GXSetIndTexMtx(1, (const f32(*)[3])lbl_802FAE40, 4);
-    lbl_804DB740[0][0] = (f32)(v->info.width >> 3) / (f32)v->rampW[0];
-    lbl_804DB740[1][1] = (f32)v->info.height / (f32)v->rampW[1];
-    lbl_804DB760[0][0] = (f32)(v->info.cwidth >> 3) / (f32)v->rampW2[0];
-    lbl_804DB760[1][1] = (f32)v->info.cheight / (f32)v->rampW2[1];
+    f32 ys = (f32)(v->info.width >> 3) / (f32)v->rampW[0];
+    f32 yt = (f32)v->info.height / (f32)v->rampW[1];
+    f32 cs = (f32)(v->info.cwidth >> 3) / (f32)v->rampW2[0];
+    f32 ct = (f32)v->info.cheight / (f32)v->rampW2[1];
+    lbl_804DB740[0][0] = ys;
+    lbl_804DB740[1][1] = yt;
+    lbl_804DB760[0][0] = cs;
+    lbl_804DB760[1][1] = ct;
     GXSetTexCoordGen2(0, 1, 4, 0x1E, 0, 0x7D);
     GXSetTexCoordGen2(1, 1, 4, 0x21, 0, 0x7D);
     GXSetTexCoordGen2(2, 1, 4, 0x24, 0, 0x7D);
@@ -485,9 +488,12 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     GXLoadTexMtxImm(lbl_804DB760, 0x24, 1);
     GXLoadTexMtxImm(lbl_802FAE60, 0x27, 1);
     GXBegin(0x80, 0, 4);
-    s16 x0 = (int)x;
-    s16 y0 = (int)y;
-    s16 x1 = x0 + (int)((f32)w * sx);
+    int x1;
+    int x0;
+    int y0;
+    x0 = (int)x;
+    y0 = (int)y;
+    x1 = x0 + (int)((f32)w * sx);
     s16 y1 = y0 + (int)((f32)h * sy);
     GXPosition3s16(x0, y0, 0);
     GXColor4u8(a, a, a, a);
