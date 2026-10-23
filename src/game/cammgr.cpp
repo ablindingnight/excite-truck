@@ -20,6 +20,35 @@ struct Words12 {
     u32 w[12];
 };
 
+class CenterLine;
+
+// Walks the ideal racing line for camera placement.
+struct IdealFollower {
+    u8 pad0[0x2C];   // offset 0x0
+    u8* line;        // offset 0x2C
+    u8 pad30[0x20];  // offset 0x30
+    u8* buf;         // offset 0x50
+    u8 pad54[0x14];  // offset 0x54
+};
+
+// A position on the ideal line: the segment and how far along it.
+struct PathPos {
+    u8* seg;       // offset 0x0
+    f32 t;         // offset 0x4
+    u8 pad8[0x8];  // offset 0x8
+};
+
+extern "C" {
+void fn_80134E34(IdealFollower* f, f32 dist);
+void fn_80136468(PathPos* out, IdealFollower* f);
+void fn_8013530C(IdealFollower* f, int del);
+void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k);
+}
+
+extern u8 lbl_80499950[];
+
+extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
+
 extern "C" {
 void fn_801EF024(void* cb);
 void fn_801BFD34(u8* a, f32* b, u8* c);
@@ -230,11 +259,25 @@ int fn_80268BA4(int mode) {
     return 0;
 }
 
-void fn_80268BD4(u8* p) {}  // stub (112)
+void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k) {}  // stub (112)
 
 void fn_80268D94(u8* p) {}  // stub (27)
 
-void fn_80268E00(u8* p) {}  // stub (37)
+void fn_80268E00(void) {
+    IdealFollower f;
+    PathPos pos;
+    fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), -1.0f);
+    fn_80136468(&pos, &f);
+    if (!pos.seg) {
+        pos.seg = PTR(f.line, 0x1C);
+    }
+    fn_80268BD4(lbl_80499950, pos.seg, pos.t, 4.176f);
+    if (f.buf) {
+        delete[] f.buf;
+    }
+    f.buf = 0;
+    fn_8013530C(&f, 0);
+}
 
 void fn_80268E94(u8* p) {}  // stub (344)
 
