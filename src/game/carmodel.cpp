@@ -269,7 +269,7 @@ int fn_801E89A4(s32 a);
 int fn_801E89C8(s32 a);
 int fn_801E9E78(void* a, Vec* p, Vec* n, s32* c);
 void fn_801EA59C(s32 index, int a, CarDef* d);
-void fn_801EAB10(s32 index);
+void fn_801EAB10(int idx, s32 x8);  // carinfo.cpp
 void* fn_801EF1F0(void* p, const char* name);
 void fn_801EF428(void* p, int del);
 void fn_801EFC90(void* p, CarState* c, void** wheels);
@@ -1214,7 +1214,7 @@ void fn_801EEC68(CarModel* m) {
 
 void fn_801EECAC(CarModel* m, u8* data) {
     m->car = (CarState*)(data + m->offset);
-    fn_801EAB10(m->index);
+    fn_801EAB10(m->index, (s32)m->car);
     ValueNode* ch = m->res->values->FindChild("Chassis");
     fn_801EC214(&m->volts, ch, m->chassis, "volt_gauge", 1.0f, 0.0f, &lbl_8055B088);
     fn_801EC214(&m->speedometer, ch, m->chassis, "speedometer", 0.44444445f, 0.0f, &m->car->speed);

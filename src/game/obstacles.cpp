@@ -83,7 +83,7 @@ extern "C" {
 u8* __ct__9RigidBodyFv(u8* p);
 void __dt__10CollVolumeFv(void* p, int del);
 void vf20__10CollVolumeFv(u8* p);
-s32 fn_801C1BA4(s32 a, s32 b);
+s32 fn_801C1BA4(int nPart, int nStick, int nAnchor);  // ppsys.cpp: new PSysObj
 void fn_801D08C0(u8* p);
 void fn_801D0A24(u8* p, int a);
 void fn_801A9AB0(u8* p, u8* q);
@@ -356,7 +356,7 @@ void fn_801AC508(void) {
     s32 n = lbl_8055E5EC;
     if (n > 0) {
         s32 t = n * 5;
-        lbl_8055E5F0 = fn_801C1BA4(t, t - 1);
+        lbl_8055E5F0 = fn_801C1BA4(t, t - 1, n);
     }
 }
 
