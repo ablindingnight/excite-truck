@@ -4,6 +4,7 @@
 // event, and the loop that plays career contests and reports what a run unlocked. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/pathstatics.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -381,22 +382,6 @@ int Path::Count(void) { return brackets.n; }
 IBracket* Path::Get(int i) { return &brackets.data[i]; }
 
 int Path::IsCareer(void) { return career; }
-
-struct PathInfo {
-    PathInfo(void) {
-        a0 = 0;
-        a4 = 0x7B;
-        a8 = 0;
-        aC = 0;
-        a10 = 0;
-    }
-    s32 a0, a4, a8, aC, a10;
-};
-
-struct PathLimit {
-    PathLimit(void) { v = 0x7F000000; }
-    s32 v;
-};
 
 static inline int PMax(int a, int b) { return a > b ? a : b; }
 static inline int PMin(int a, int b) { return a < b ? a : b; }

@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large routines and the initialiser are still stubs. Names
 // are guesses apart from the strings.
 #include "game/common.h"
+#include "game/pathstatics.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -248,5 +249,10 @@ void fn_8025BED0(u8* p) {
     }
 }
 
-void fn_8025BFD0(u8* p) {}  // stub (22)
 }  // extern "C"
+
+ModuleTag lbl_8055F388;
+PathInfo lbl_80498E98;
+PathLimit lbl_8055F390;
+extern const f32 lbl_80563B38;
+f32 lbl_8055F39C = lbl_80563B38;
