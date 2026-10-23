@@ -146,7 +146,7 @@ Sound* fn_802076A0(const char* name, int flags, int car, int pan);
 f32 fn_80204CFC(const char* name);  // tuning value
 char* fn_8023139C(char* buf, int size, u32 value);  // format a score
 void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
-void fn_801CB750(s32 effect, int car);
+void fn_801CB750(u32 type, int car, f32 v);  // awards.cpp
 int fn_80141F7C(f32 x);  // near zero
 LocalCarDesc* fn_801769CC(void);
 int fn_80179650(void);
@@ -543,7 +543,7 @@ public:
     void StopFx(void) {
         if (f260 > minT) {
             if (effect) {
-                fn_801CB750(effect, car);
+                fn_801CB750(effect, car, f260);
             }
             f260 = 0.0f;
         }
@@ -2137,7 +2137,7 @@ void Tracker::Dump(void) {
 void TimedTracker::StopEffect(void) {
     if (f260 > minT) {
         if (effect) {
-            fn_801CB750(effect, car);
+            fn_801CB750(effect, car, f260);
         }
         f260 = 0.0f;
     }

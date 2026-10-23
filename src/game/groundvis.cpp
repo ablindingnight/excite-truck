@@ -124,7 +124,7 @@ void fn_802BAE50(void);
 void fn_802BB674(u32 a, int i);
 void fn_802BBBC8(void);
 void fn_802BBCC4(void);
-u32 fn_802BBD38(s16 x, s16 y);
+u32 fn_802BBD38(short x, short z, int layer);  // layer weight (lweight.cpp; defined there returning u8)
 void fn_802BDBA8(void);
 void fn_802BDC3C(void);
 void fn_802BDC60(void);
@@ -521,7 +521,7 @@ int fn_802B04D4(const Vec* p) {
         if (InWorld(p)) {
             int x = p->x / lbl_80564AF0;
             int z = p->z / lbl_80564AF0;
-            return fn_802BBD38(x, z) > (u8)lbl_8055F97C;
+            return fn_802BBD38(x, z, lbl_8055CD78) > (u8)lbl_8055F97C;
         }
         return 1;
     }
