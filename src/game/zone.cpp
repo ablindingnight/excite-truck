@@ -217,8 +217,8 @@ static inline int ClampI(int x, int lo, int hi) {
     }
     return hi;
 }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+f32 Max(f32 a, f32 b) { return a > b ? a : b; }
+f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 Floor(f32 x) { return floor(x); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
@@ -2385,7 +2385,7 @@ void ZoneMaster::vf0C(void) {
                         switch (fn_8013CBC0(c, i)) {
                         case 1:
                             c->Miss();
-                            c->clock = MaxF(MinF(c->clock, 1.25f), c->clock - lbl_8042FB3C.gatePenalty);
+                            c->clock = Max(Min(c->clock, 1.25f), c->clock - lbl_8042FB3C.gatePenalty);
                             c->gate = NextGate(c->gate);
                             c->hits[0]++;
                             if (!c->tA8.Active()) {
@@ -2442,7 +2442,7 @@ void ZoneMaster::vf0C(void) {
                         }
                         }
                     }
-                    c->clock = MaxF(Boosting(fn_8017960C(i)) ? 0.5f : 0.0f, c->clock - 0.016683351f);
+                    c->clock = Max(Boosting(fn_8017960C(i)) ? 0.5f : 0.0f, c->clock - 0.016683351f);
                     if (!c->AddTime(-0.016683351f) && !missflag->Active()) {
                         missflag->Play();
                     }
