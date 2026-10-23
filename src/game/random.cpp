@@ -68,8 +68,8 @@ f32 fn_80129DC4(int index, f32 lo, f32 hi) {
 f32 RandomZero(void) { return 0.0f; }
 
 void fn_80129E34(Ranmar* r, int ij, int kl) {
-    f32 s;
     f32 t;
+    f32 s;
     int i = (int)(f32)fmod(ij / 177.0f, 177.0) + 2;
     int j = (int)(f32)fmod((f32)ij, 177.0) + 2;
     int k = (int)(f32)fmod(kl / 169.0f, 178.0) + 1;

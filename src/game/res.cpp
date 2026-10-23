@@ -469,8 +469,8 @@ int fn_8012AC98(const char* name) { return fn_8012AC28(name, 0); }
 
 int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     ResToc* toc;
-    ResEntry* e;
     int ok;
+    ResEntry* e;
     u32 i;
     if (!lbl_8055DFFC) {
         fn_802E317C("res(%s): TOC library unavailable, can't load.", set);

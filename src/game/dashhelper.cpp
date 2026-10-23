@@ -448,8 +448,8 @@ void fn_8000E3B4(int player) {
         f32 h = fn_80235F64(lbl_80350F88.art, part);
         f32 x = Lerp(-5.0f, right + w, row->slide) - w;
         f32 x5;
-        f32 x10;
         f32 xr;
+        f32 x10;
         f32 ty;
         fn_80235EF0(lbl_80350F88.art, part2);
         x5 = 5.0f + x;
@@ -618,8 +618,8 @@ void fn_8000E874(int player) {
         y -= h - 1.0f;
     }
     {
-        int part = fn_8000DFA8(0);
         int part2 = fn_8000DFC0(0);
+        int part = fn_8000DFA8(0);
         fn_80235EF0(lbl_80351214.art, part);
         fn_80235EF0(lbl_80351214.art, part2);
         fn_80235F64(lbl_80351214.art, part);
@@ -1457,8 +1457,8 @@ void fn_80011A5C(int n) {
     rows = ((lbl_8055D4A0 > 1) + 1) * 2;
     cols = ((lbl_8055D4A0 > 2) + 1) * 2;
     for (i = 0; i < lbl_8055D4A0; i++) {
-        lbl_80350ED8[i] = views[i];
         lbl_80350F28[i].top = 480.0f / rows - views[i].top;
+        lbl_80350ED8[i] = views[i];
         lbl_80350F28[i].bottom = -480.0f / rows + views[i].bottom;
         lbl_80350F28[i].left = -640.0f / cols + views[i].left;
         lbl_80350F28[i].right = 640.0f / cols - views[i].right;
