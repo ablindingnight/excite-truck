@@ -337,7 +337,36 @@ void fn_80280A38(void) {
     }
 }
 
-void fn_80280C00(u8* p) {}  // stub (114)
+// While the current event is not done, picks the first done event as the one to show.
+int fn_80280C00(void) {
+    u8* cur = (u8*)lbl_8055F688;
+    if (cur && PTR(cur, 0x60) && !((EvCond*)PTR(cur, 0x60))->Done()) {
+        lbl_8055F68C = lbl_8055F688;
+        if (!lbl_8055F690) {
+            for (int i = 0; i < lbl_804B3048.count; i++) {
+                u8* e = (u8*)lbl_804B3048.data[i];
+                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done()) {
+                    lbl_8055F690 = (s32)e;
+                    break;
+                }
+            }
+        }
+        if (lbl_8055F690) {
+            int i = lbl_804B3048.Find((u8*)lbl_8055F690);
+            lbl_804B3068[0] = 0;
+            if (i >= 0 && i < lbl_804B3048.count) {
+                u8* e = (u8*)lbl_804B3048.data[i];
+                lbl_8055F688 = (s32)e;
+                if (e && PTR(e, 0x60)) {
+                    CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+                }
+            } else {
+                lbl_8055F688 = 0;
+            }
+        }
+    }
+    return 0;
+}
 
 void fn_80280DC8(u8* p) {}  // stub (109)
 
