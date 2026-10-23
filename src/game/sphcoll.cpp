@@ -90,6 +90,7 @@ class RigidBody {
 public:
     void Push(Phob* who, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
     void VelAt(RVec3* out, const RVec3* at);
+    void AddTorque(const RVec3* t);
 };
 
 class VGroup {
@@ -297,7 +298,7 @@ void fn_801D06C4(u8* p);
 int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r);
 int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
-void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
+void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
 void fn_8019ECC4(u8* p, u32 a, u32 b);
 u8* fn_801A1520(u8* p, u32 a, u32 swap);
@@ -496,7 +497,109 @@ int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {
     return hit;
 }
 
-void fn_8019AC44(u8* p, u8* c, u8* d, f32 r) {}
+extern const f32 lbl_8056231C;
+extern const f32 lbl_80562320;
+extern const f32 lbl_80562324;
+extern const f32 lbl_80562328;
+extern const f32 lbl_80562330;
+extern const f32 lbl_805622D4;
+extern const f32 lbl_8056232C;
+extern const f32 lbl_805622D0;
+extern "C" int fn_801E9F08(u8* hint, const f32* at, RVec3* pos, RVec3* n, u32* surf, f32 maxDist);
+
+// Sphere (centre c, radius r) on the ground: every track-mesh hit pushes via fn_8019A820; then the
+// ground contact gives a spring impulse, a clamped friction force (with d, the slip accumulator, nudged
+// by the tangential velocity), a spin damping torque and the bounce/sound events. Off the ground d is cleared.
+void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
+    RVec3 hits[64];
+    RVec3 pt;
+    RVec3 nrm;
+    RVec3 dv;
+    RVec3 v;
+    RVec3 imp;
+    RVec3 vt;
+    RVec3 f;
+    RVec3 t;
+    RVec3 fr;
+    int n;
+    u32 surf;
+    RigidBody* o = (RigidBody*)PTR(p, 0x4);
+    if (lbl_8055E5A0) {
+        n = 64;
+        fn_801CF080(lbl_8055E5A0, (const RVec3*)c, hits, &n, 0, r);
+        for (int i = 0; i < n; i++) {
+            fn_8019A820(p, c, &hits[i], 0x6E, 0, r);
+        }
+    }
+    if (fn_801E9F08((u8*)o + 0x6C, c, &pt, &nrm, &surf, r)) {
+        f32 dx = c[0] - pt.x;
+        f32 dy = c[1] - pt.y;
+        f32 dz = c[2] - pt.z;
+        dv.x = dx;
+        dv.y = dy;
+        dv.z = dz;
+        f32 depth = r - PSVECDotProduct(&nrm, &dv);
+        o->VelAt(&v, &pt);
+        f32 k = depth * F32(p, 0x10);
+        f32 vn = -PSVECDotProduct(&v, &nrm);
+        imp.x = nrm.x * k;
+        imp.y = nrm.y * k;
+        imp.z = nrm.z * k;
+        vt.x = v.x + nrm.x * vn;
+        vt.y = v.y + nrm.y * vn;
+        vt.z = v.z + nrm.z * vn;
+        d[0] = d[0] + vt.x * lbl_8056231C;
+        d[1] = d[1] + vt.y * lbl_8056231C;
+        d[2] = d[2] + vt.z * lbl_8056231C;
+        f32 dm = PSVECMag(d);
+        if (dm > lbl_80562320) {
+            f32 s = lbl_80562320 / dm;
+            d[0] *= s;
+            d[1] *= s;
+            d[2] *= s;
+        }
+        f.x = vt.x * lbl_80562324;
+        f.y = vt.y * lbl_80562324;
+        f.z = vt.z * lbl_80562324;
+        f32 m = lbl_80562328 * F32(o, 0xD4);
+        f.x = f.x + d[0] * m;
+        f.y = f.y + d[1] * m;
+        f.z = f.z + d[2] * m;
+        f32 fm = PSVECMag(&f.x);
+        f32 lim = k * F32(p, 0x14);
+        lim = lim > lbl_80562320 ? lim : lbl_80562320;
+        if (fm > lim) {
+            f32 s = lim / fm;
+            f.x *= s;
+            f.y *= s;
+            f.z *= s;
+        }
+        imp.x += f.x;
+        imp.y += f.y;
+        imp.z += f.z;
+        f32 w = -PSVECDotProduct((u8*)o + 0x124, &nrm);
+        w = lbl_8056232C * (w * k);
+        t.x = nrm.x * w;
+        t.y = nrm.y * w;
+        t.z = nrm.z * w;
+        o->AddTorque(&t);
+        VE(p)->v1C(&imp, &pt, surf, 0);
+        f32 e = lbl_80562330 * fn_8019DF88((u8*)o + 0x60, &v, (u8*)o + 0x148, &pt, &nrm.x, F32(o, 0xD4), lbl_805622D0);
+        if (e > lbl_805622D0) {
+            fr.x = nrm.x * e;
+            fr.y = nrm.y * e;
+            fr.z = nrm.z * e;
+            f32 lo = lbl_805622D4;
+            f32 ww = lo > depth ? lo : depth;
+            VE(p)->v20(0, &fr, &pt, surf, 0, 0, ww);
+            fn_801B34DC(p, 0, &pt, &fr, &nrm.x, surf);
+        }
+    } else {
+        d[0] = lbl_805622D0;
+        d[1] = lbl_805622D0;
+        d[2] = lbl_805622D0;
+    }
+}
 
 int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
     f32 s = F32(q, 0x24);
@@ -1372,7 +1475,7 @@ void fn_8019F064(u8* p, u8* o) {
     }
 }
 
-void fn_8019F1A4(u8* p) { fn_8019AC44(p, p + 0x34, p + 0x40, F32(p, 0x24)); }
+void fn_8019F1A4(u8* p) { fn_8019AC44(p, (f32*)(p + 0x34), (f32*)(p + 0x40), F32(p, 0x24)); }
 
 void fn_8019F1B4(u8* p, u32 a, u32 b, u32 c, u32 d) { fn_8019DDFC((f32*)a, (f32*)b, (f32*)c, (f32*)d, (f32*)(p + 0x34), F32(p, 0x24)); }
 
@@ -2024,8 +2127,8 @@ void fn_801A1B9C(u8* p) {
     zero.v[0] = lbl_805622D0;
     zero.v[1] = lbl_805622D0;
     zero.v[2] = lbl_805622D0;
-    fn_8019AC44(p, (u8*)&a, (u8*)&zero, r);
-    fn_8019AC44(p, (u8*)&b, (u8*)&zero, r);
+    fn_8019AC44(p, (f32*)&a, (f32*)&zero, r);
+    fn_8019AC44(p, (f32*)&b, (f32*)&zero, r);
 }
 
 void fn_801A1CA0(const u8* p) {
@@ -2119,7 +2222,7 @@ void fn_801A22A4(u8* p) {
     Xform x;
     x.rot = src->rot;
     x.pos = src->pos;
-    RVec3* c = (RVec3*)(p + 0x24);
+    const RVec3* c = (const RVec3*)(p + 0x24);
     fn_801E44F4((u8*)&x, 0x50000000, c->x, c->y, c->z);
 }
 
