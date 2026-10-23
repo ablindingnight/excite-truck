@@ -344,7 +344,87 @@ int fn_8024A4B8(const char** a, const char** b) { return strcasecmp(*a, *b); }
 
 void fn_8024A4C4(u32 a, u32 b, u32 c) { fn_8024974C(a, b, c, 0); }
 
-void fn_8024A4CC(u8* p) {}  // stub (118)
+}  // extern "C"
+
+int GetNumTracks(void);
+
+struct EvEntryBuf {
+    s32 id;         // offset 0x0
+    u8 pad4[0x14];  // offset 0x4
+};
+
+// An event list with room for 0x80 entries on the stack.
+struct EvListBuf {
+    EvListBuf(void) {
+        count = 0;
+        items = buf;
+        cap = 0x80;
+    }
+    ~EvListBuf(void) {
+        items = 0;
+        count = 0;
+        cap = 0;
+    }
+    int Find(s32 id) {
+        for (int i = 0; i < count; i++) {
+            EvEntryBuf& e = items[i];
+            if (e.id == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    EvEntryBuf* items;      // offset 0x0
+    s32 count;              // offset 0x4
+    s32 cap;                // offset 0x8
+    EvEntryBuf buf[0x80];   // offset 0xC
+};
+
+const char* lbl_8055BF10 = "last_mp_event_count";
+const char* lbl_8055BF14 = "last_mp_eve";
+
+extern "C" {
+void fn_801332D0(int slot, const char* name, s32* value);
+void fn_80133348(int slot, const char* name, s32 value);
+void fn_8027BCD0(EvListBuf* list);
+int fn_8024B070(s32* key, u8* list);
+
+// Multiplayer event choice: starts from the remembered track/event, runs the pickers and remembers the
+// result. Returns 0 when backed out.
+int fn_8024A4CC(s32* track, s32* eve, s32* extra) {
+    *track = -1;
+    *eve = 0;
+    *extra = 0;
+    fn_801332D0(0, lbl_8055BF14, track);
+    fn_801332D0(0, lbl_8055BF10, eve);
+    EvListBuf list;
+    fn_8027BCD0(&list);
+    s32 key = -1;
+    if (*track >= 0 && *track < GetNumTracks()) {
+        MpTrack* t = GetTrack(*track);
+        if (*eve >= 0 && *eve < t->numEves) {
+            s32 id = S32(FindTrackEvent(*track, *eve), 0x0);
+            if (list.Find(id) >= 0) {
+                key = id;
+            }
+        }
+    }
+    if (fn_8024B070(&key, (u8*)&list)) {
+        *track = S32(GetEvent(key), 0x4);
+        *eve = -1;
+        int k = GetTrack(*track)->numEves;
+        while (k-- > 0) {
+            if (key == S32(FindTrackEvent(*track, k), 0x0)) {
+                *eve = k;
+                break;
+            }
+        }
+        fn_80133348(0, lbl_8055BF14, *track);
+        fn_80133348(0, lbl_8055BF10, *eve);
+        return 1;
+    }
+    return 0;
+}
 
 int fn_8024A6A4(s32* p) {
     if (fn_802411D4() == 0) {
@@ -414,14 +494,15 @@ struct EvList {
 
 static inline int FindById(EvList* list, s32* key) {
     for (int i = 0; i < list->count; i++) {
-        if (list->items[i].id == *key) {
+        EvEntry& e = list->items[i];
+        if (e.id == *key) {
             return i;
         }
     }
     return -1;
 }
 
-u8 fn_8024B070(s32* key, u8* list) {
+int fn_8024B070(s32* key, u8* list) {
     int i = FindById((EvList*)list, key);
     const char* sel = i >= 0 ? ((EvList*)list)->items[i].group : 0;
     if (fn_80215228()) {
