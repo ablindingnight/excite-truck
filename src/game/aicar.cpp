@@ -384,7 +384,7 @@ void fn_801935EC(u8* d) {
     F32(d, 0x22C) = lbl_8055E3C8;
 }
 
-void fn_80193604(u8* d, RVec3* dir, RVec3* b, int kind, u8* other) {
+void fn_80193604(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
     if (other) {
         if (U32(other, 0x10) == 'PCAR') {
             RVec3 rel;

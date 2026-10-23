@@ -623,7 +623,7 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 
 // Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
 // the axis, a contact at the tube surface with the radial normal.
-int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) {
+int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     CFrame* f = (CFrame*)PTR(q, 0xC);
     RVec3 l;
     f32 dx = c[0] - f->t.x;
@@ -2418,7 +2418,7 @@ void fn_801A2D50(u8* p, u8* o) {
 void fn_801A2EC8(u8* p) {}
 
 // Axis-aligned bounds: the 8 corners of the local box (+-(r + h), +-(r + h), +-h) through the frame.
-void fn_801A2ECC(u8* p, RVec3* lo, RVec3* hi) {
+void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
     CFrame* f = (CFrame*)PTR(p, 0xC);
     f32 h = F32(p, 0x28);
     f32 a = F32(p, 0x24) + h;
