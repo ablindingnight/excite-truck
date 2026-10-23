@@ -154,14 +154,38 @@ int fn_8027EE88(void) {
     return 0;
 }
 
-void fn_8027EEE4(u8* p) {}  // stub (110)
+}  // extern "C"
+
+extern char lbl_8055BAB8[4];  // ""
+extern u8 lbl_804B3018[];    // unlock animation widget
+extern "C" const char* fn_80131234(const char* key);
+extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
+
+extern "C" {
+
+// "Career difficulty N unlocked" box; the layout depends on the new difficulty.
+void fn_8027EEE4(int level) {
+    char buf[100];
+    fn_801345D8(buf, 100, "EventPath:CAREER_DIFFICULTY_%d_UNLOCKED", level);
+    MenuItem items[] = {
+        MenuItem(0, 5, lbl_804B3018, 0, 0),
+        MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
+        MenuItem("message", fn_80131234(buf)),
+        MenuItem(lbl_8055B860, 6, 0, -2, 13),
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
+        MenuItem(lbl_804B2FF8),
+    };
+    const char* layouts[3] = {"newmode1.lyt", "newmode2.lyt", "newmode3.lyt"};
+    MenuDesc desc = {layouts[level - 1], 0, (int (*)(int*))fn_8027EE88, 0, 0};
+    desc.items = items;
+    lbl_8055F684 = 0;
+    lbl_8055F685 = 0;
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 }  // extern "C"
 
 extern char lbl_80347E50[];  // this unit's string pool
-extern u8 lbl_804B3018[];    // unlock animation widget
-extern "C" const char* fn_80131234(const char* key);
-extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 
 extern "C" {
 
