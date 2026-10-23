@@ -623,7 +623,161 @@ int fn_802726EC(f32 x, f32 a, f32 b) {
 }
 
 }  // extern "C"
-void CamRegion::Prepare(u8* car) {}  // stub (315)
+struct V2 {
+    f32 x, y;
+};
+
+// A position on an ideal line (idealline.cpp).
+struct ILPos {
+    ILPos(void) {
+        seg = 0;
+        mode = 10000;
+        t = lbl_80563F48;
+    }
+    u8* seg;   // offset 0x0
+    f32 t;     // offset 0x4
+    s32 mode;  // offset 0x8
+};
+
+class LineFollower {
+public:
+    void Locate(V2* pos, V2* dir, ILPos* out, int unused);
+};
+
+extern "C" {
+double sqrt(double x);
+int fn_802726EC(f32 x, f32 a, f32 b);
+void fn_802723B4(u8* src, f32* out, f32 at);
+void fn_8027264C(const char* name, u8* src, f32 x);
+void* memmove(void* d, const void* s, u32 n);
+extern f32 lbl_80558DC4[];  // epsilon
+}
+extern const f32 lbl_80563F50;  // 1.0
+extern const f32 lbl_80563F8C;  // 2.0
+extern const f32 lbl_80563F90;  // 4.0
+
+// Works out this region's heading windows on `line`: where the sphere's circle crosses the line
+// (two crossings = one window, four = two), falling back to the nearest line point +- radius.
+void CamRegion::Prepare(u8* line) {
+    V2 center;
+    V2 s;
+    V2 e;
+    V2 dir;
+    V2 rel;
+    f32 sol[2];
+    V2 pt;
+    V2 d1;
+    V2 d2;
+    center.x = F32(cam, 0x0);
+    center.y = F32(cam, 0x8);
+    f32 rad = F32(cam, 0xC);
+    f32 wrap = *(f32*)(PTR(line, 0x2C) + 8);
+    f32 r2 = rad * rad;
+    S32(line, 0xC) = fn_80270D1C(S32(cam, 0x5C));
+    int k = 0;
+    int done = 0;
+    u8* first = PTR(PTR(line, 0x2C), 0x1C);
+    u8* seg = first;
+    do {
+        int n = 0;
+        s.x = F32(seg, 0x0) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
+        s.y = F32(seg, 0x4) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
+        e.x = F32(seg, 0x0) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
+        e.y = F32(seg, 0x4) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
+        dir.x = e.x - s.x;
+        dir.y = e.y - s.y;
+        rel.x = s.x - center.x;
+        rel.y = s.y - center.y;
+        f32 a = dir.x * dir.x + dir.y * dir.y;
+        f32 b = lbl_80563F8C * (rel.x * dir.x + rel.y * dir.y);
+        f32 c = rel.x * rel.x + rel.y * rel.y - r2;
+        f32 disc = b * b - lbl_80563F90 * a * c;
+        if (!((f32)__fabs(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
+            f32 q = (f32)sqrt(disc);
+            n = 2;
+            sol[0] = (-b - q) / (lbl_80563F8C * a);
+            sol[1] = (-b + q) / (lbl_80563F8C * a);
+        }
+        for (int j = 0; j < n; j++) {
+            if (fn_802726EC(sol[j], lbl_80563F48, lbl_80563F50)) {
+                f32 v = F32(seg, 0x1C) + F32(seg, 0x18) * sol[j];
+                if (k < 4) {
+                    (&lo1)[k] = v;
+                    fn_80270B00("  solution: %.3f", (&lo1)[k++]);
+                } else {
+                    fn_80270B00("    too many solutions, discarding %.3f", v);
+                }
+            }
+        }
+        u8* next = PTR(seg, 0x14);
+        u32 idx = U32(seg, 0x10);
+        seg = next;
+        if (next == first || k >= 4 || U32(next, 0x10) == 0) {
+            done = 1;
+        } else if (U32(next, 0x10) < idx) {
+            fn_80270B00("** PhysCam: lon_idx < old_lon_idx, but lon_idx != 0");
+            done = 1;
+        }
+    } while (!done);
+    if (k == 0) {
+        fn_80270B00("failed to find intersection, using lame method");
+        ILPos pos;
+        ((LineFollower*)line)->Locate(&center, 0, &pos, 0);
+        f32 mid = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+        f32 lo = mid - rad;
+        if (rad > mid) {
+            lo += wrap;
+        }
+        f32 hi = mid + rad;
+        if (rad > wrap - mid) {
+            hi -= wrap;
+        }
+        (&lo1)[0] = fn_80272428(line, &center.x, lo, mid, r2);
+        (&lo1)[1] = fn_80272428(line, &center.x, mid, hi, r2);
+        k = 2;
+    } else if (k == 1) {
+        (&lo1)[1] = (&lo1)[0];
+        k++;
+    } else if (k == 3) {
+        (&lo1)[3] = (&lo1)[2];
+        k++;
+    }
+    if (k > 2) {
+        fn_80270B00("  region is in the x!");
+        dual = 1;
+    } else {
+        dual = 0;
+    }
+    fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[0] + (&lo1)[1]));
+    d1.x = pt.x - center.x;
+    d1.y = pt.y - center.y;
+    if (d1.x * d1.x + d1.y * d1.y > r2) {
+        if (dual) {
+            fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[1] + (&lo1)[2]));
+            d2.x = pt.x - center.x;
+            d2.y = pt.y - center.y;
+            if (d2.x * d2.x + d2.y * d2.y > r2) {
+                dual = 0;
+            } else {
+                f32 first0 = (&lo1)[0];
+                memmove(&(&lo1)[0], &(&lo1)[1], 12);
+                (&lo1)[3] = first0;
+            }
+        }
+        if (!dual) {
+            f32 t0 = (&lo1)[0];
+            (&lo1)[0] = (&lo1)[1];
+            (&lo1)[1] = t0;
+        }
+    }
+    fn_80270B00("  finding line points for (%.3f, %.3f)", center.x, center.y);
+    fn_8027264C("start_long", line, (&lo1)[0]);
+    fn_8027264C("end_long", line, (&lo1)[1]);
+    if (dual) {
+        fn_8027264C("start_long_2", line, (&lo1)[2]);
+        fn_8027264C("end_long_2", line, (&lo1)[3]);
+    }
+}
 extern "C" {
 
 int fn_80272C24(f32 x, f32 a, f32 b, f32 m) {
