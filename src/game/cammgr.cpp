@@ -170,7 +170,52 @@ void fn_80265E2C(void) {
     }
 }
 
-void fn_80265EC4(u8* p) {}  // stub (107)
+extern const f32 lbl_80563C20;  // 0.0
+extern const f32 lbl_80563C28;  // -1.0
+extern const f32 lbl_80563C2C;  // 1.0
+extern const f32 lbl_80563C30;  // -2.0
+extern const f32 lbl_80563C34;  // 3.0
+
+// Camera shake: walks the random shake table (lbl_804999A0), easing between consecutive entries.
+struct CamShake {
+    s32 idx;   // offset 0x0, current table entry
+    s32 acc;   // offset 0x4, time into it
+    s32 last;  // offset 0x8, last clock
+    f32 t;     // offset 0xC, eased fraction
+    f32 x;     // offset 0x10
+    f32 y;     // offset 0x14
+};
+
+static inline f32 ShakeEase(f32 x) {
+    if (x < lbl_80563C28) {
+        return lbl_80563C28;
+    }
+    if (x > lbl_80563C2C) {
+        return lbl_80563C2C;
+    }
+    if (x > lbl_80563C20) {
+        return lbl_80563C30 * x * x * x + lbl_80563C34 * x * x;
+    }
+    return lbl_80563C30 * x * x * x - lbl_80563C34 * x * x;
+}
+
+void fn_80265EC4(CamShake* s, s32 now, int paused) {
+    if (paused) {
+        s->last = now;
+        return;
+    }
+    s->acc += now - s->last;
+    s->last = now;
+    while (s->acc > lbl_804999A0[s->idx].n) {
+        s->acc -= lbl_804999A0[s->idx].n;
+        s->idx = (s->idx + 1) % 100;
+    }
+    s->t = ShakeEase((f32)s->acc / (f32)lbl_804999A0[s->idx].n);
+    ShakeEntry* a = &lbl_804999A0[s->idx];
+    ShakeEntry* b = &lbl_804999A0[(s->idx + 1) % 100];
+    s->x = a->x + s->t * (b->x - a->x);
+    s->y = a->y + s->t * (b->y - a->y);
+}
 
 f32 PSVECMag(const f32* v);
 
