@@ -562,8 +562,8 @@ int fn_802399AC(void) { return fn_8027B9EC(1) != 0; }
 int fn_802399DC(int unused) {
     int a = fn_80214A38(0x1E);
     int b = fn_80214A38(0x1D);
-    const char* body;
     int r;
+    const char* body;
     if (a) {
         fn_80214A9C(0x1E);
     }
