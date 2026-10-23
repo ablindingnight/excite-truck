@@ -175,7 +175,46 @@ f32 fn_8026ECE4(u8* p, f32* scale) {
     return fov;
 }
 
-void fn_8026ED64(u8* p) {}  // stub (121)
+extern const f32 lbl_80563E6C;
+extern const f32 lbl_80563E70;
+extern const f32 lbl_80563E74;
+extern const f32 lbl_80563E78;
+extern const f32 lbl_80563E7C;
+extern const f32 lbl_80563E80;
+
+// Cubic ease of a 0..1 screen fraction (mirrored below the midpoint).
+static inline f32 Ease(f32 x) {
+    if (x < lbl_80563E6C) {
+        return lbl_80563E6C;
+    }
+    if (x > lbl_80563E30) {
+        return lbl_80563E30;
+    }
+    if (x > lbl_80563E78) {
+        return lbl_80563E70 * x * x * x + lbl_80563E74 * x * x;
+    }
+    return lbl_80563E70 * x * x * x - lbl_80563E74 * x * x;
+}
+
+// Adjusts the camera position for the player's split-screen viewport: lifts it by `lift` scaled with
+// the viewport's height, then pulls it toward the target by its vertical placement.
+void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
+    CamRect* r = &lbl_8049A218[*cam];
+    f32 e = Ease(r->v[3]);
+    f32 t = (r->v[1] - lbl_80563E78) / lbl_80563E7C;
+    t = lbl_80563E30 < t ? lbl_80563E30 : t;
+    t = t > lbl_80563E78 ? t : lbl_80563E78;
+    f32 k = lbl_80563E78 + t * lbl_80563E30;
+    pos[1] = pos[1] + lift * (lbl_80563E80 * (k * e));
+    CsVec d;
+    d.x = target[0] - pos[0];
+    d.y = target[1] - pos[1];
+    d.z = target[2] - pos[2];
+    f32 s = lbl_80563E6C - lbl_80563E50 * Ease(r->v[3]);
+    pos[0] = target[0] + d.x * s;
+    pos[1] = target[1] + d.y * s;
+    pos[2] = target[2] + d.z * s;
+}
 
 void fn_8026EF48(u8* p) {}  // stub (304)
 
