@@ -15,13 +15,14 @@
 struct PathPos {
     u8* seg;  // offset 0x0
     f32 t;    // offset 0x4
+    u32 w8;   // offset 0x8
 };
 
 extern "C" {
 u8* fn_801E87A8(u8* p);
 int strcasecmp(const char* a, const char* b);
 u8* fn_80178C9C(void);
-void fn_80136468(PathPos* out, u8* src);
+void fn_80136468(PathPos* out, u8* src, f32 t);
 void fn_80270EC4(u8* c, u32 id);
 void fn_802712F8(const char* path);
 void fn_80271624(u8* p);
@@ -532,20 +533,77 @@ void RegionSphere::Reset(void) {
 }
 extern "C" {
 
-void fn_802723B4(u8* src, f32* out) {
+void fn_802723B4(u8* src, f32* out, f32 at) {
     PathPos pos;
-    fn_80136468(&pos, src);
+    fn_80136468(&pos, src, at);
     f32 t = pos.t;
     u8* q = pos.seg;
     out[0] = F32(q, 0x0) + t * (F32(PTR(q, 0x14), 0x0) - F32(q, 0x0));
     out[1] = F32(q, 0x4) + t * (F32(PTR(q, 0x14), 0x4) - F32(q, 0x4));
 }
 
-void fn_80272428(u8* p) {}  // stub (137)
+// A 2D point on the track plane.
+struct TrackPt {
+    f32 x, y;
+};
+
+// Finds where the looping path `track` crosses the circle of squared radius `r2` around `c`, between
+// path positions a and b (b may have wrapped past the loop end), by bisection.
+f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
+    PathPos pa;
+    PathPos pb;
+    TrackPt qa;
+    TrackPt qb;
+    TrackPt da;
+    TrackPt db;
+    f32 wrap = *(f32*)(PTR(track, 0x2C) + 8);
+    if (a > b) {
+        f32 span = b - (a - wrap);
+        if (span * span < lbl_8055F560) {
+            return a;
+        }
+    } else {
+        f32 span = b - a;
+        if (span * span < lbl_8055F560) {
+            return a;
+        }
+    }
+    fn_80136468(&pa, track, a);
+    qa.x = F32(pa.seg, 0x0) + pa.t * (F32(PTR(pa.seg, 0x14), 0x0) - F32(pa.seg, 0x0));
+    qa.y = F32(pa.seg, 0x4) + pa.t * (F32(PTR(pa.seg, 0x14), 0x4) - F32(pa.seg, 0x4));
+    da.x = qa.x - c[0];
+    da.y = qa.y - c[1];
+    f32 ea = (f32)__fabs(r2 - (da.x * da.x + da.y * da.y));
+    if (ea < lbl_8055F560) {
+        return a;
+    }
+    fn_80136468(&pb, track, b);
+    qb.x = F32(pb.seg, 0x0) + pb.t * (F32(PTR(pb.seg, 0x14), 0x0) - F32(pb.seg, 0x0));
+    qb.y = F32(pb.seg, 0x4) + pb.t * (F32(PTR(pb.seg, 0x14), 0x4) - F32(pb.seg, 0x4));
+    db.x = qb.x - c[0];
+    db.y = qb.y - c[1];
+    f32 eb = (f32)__fabs(r2 - (db.x * db.x + db.y * db.y));
+    if (eb < lbl_8055F560) {
+        return b;
+    }
+    f32 mid;
+    if (a > b) {
+        mid = (b + (a - wrap)) * lbl_80563F40;
+        if (mid < lbl_80563F48) {
+            mid += wrap;
+        }
+    } else {
+        mid = (a + b) * lbl_80563F40;
+    }
+    if (ea < eb) {
+        return fn_80272428(track, c, a, mid, r2);
+    }
+    return fn_80272428(track, c, mid, b, r2);
+}
 
 void fn_8027264C(const char* name, u8* src, f32 x) {
     f32 v[2];
-    fn_802723B4(src, v);
+    fn_802723B4(src, v, x);
     fn_80270B00("  %s: %.3f  (%.3f, %.3f)", name, x, v[0], v[1]);
 }
 
