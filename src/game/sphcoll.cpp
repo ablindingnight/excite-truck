@@ -698,7 +698,30 @@ u8* fn_801A1520(u8* p, u32 a, u32 swap) {
 
 void fn_801A15CC(u8* p) {}  // stub (123)
 
-void fn_801A17B8(u8* p) {}  // stub (56)
+// Axis + centre of a tube volume (plain data, copied as words).
+struct TubeSeg {
+    f32 dir[3];  // offset 0x0
+    f32 mid[3];  // offset 0xC
+};
+
+void fn_801E41D8(f32* a, f32* b, u32 color, f32 r);
+
+// o = c + d * k
+static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
+    o[0] = c[0] + d[0] * k;
+    o[1] = c[1] + d[1] * k;
+    o[2] = c[2] + d[2] * k;
+}
+
+// Debug-draws the tube as a capsule.
+void fn_801A17B8(u8* p) {
+    TubeSeg s = *(TubeSeg*)(PTR(p, 0xC) + 0x18);
+    f32 a[3];
+    f32 b[3];
+    MulAdd(a, s.mid, s.dir, F32(p, 0x28));
+    MulAdd(b, s.mid, s.dir, -F32(p, 0x28));
+    fn_801E41D8(a, b, 0x40FFFF00, lbl_8056234C * F32(p, 0x24));
+}
 
 u8* fn_801A1898(u8* p, u32 a, u32 swap) {
     fn_801A1520(p, a, swap);
