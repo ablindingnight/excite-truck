@@ -112,6 +112,9 @@ extern "C" {
 void fn_801838C8(u8* p);
 void fn_801A1474(u8* p, f32 s);
 void fn_8018A180(u8* p);
+u8* fn_801D2008(u8* name);
+s32 fn_801C1C1C(void);
+s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
 
 class RigidBody {
@@ -395,7 +398,27 @@ void fn_8018A2BC(u8* p) {}
 
 void fn_8018A2C0(u8* p) {}  // stub (229)
 
-void fn_8018A654(u8* p) {}  // stub (40)
+void fn_8018A654(u8* p, u8* cfg) {
+    if (*(s8*)(cfg + 0xEC)) {
+        u8* m = fn_801D2008(cfg + 0xEC);
+        PTR(p, 0x26C0) = m;
+        if (S32(m, 0x10) > 0) {
+            S32(p, 0x26C4) = fn_801C1C1C();
+        } else {
+            S32(p, 0x26C4) = 0;
+        }
+        s32 n = S32(PTR(p, 0x26C0), 0xC8);
+        if (n > 0) {
+            S32(p, 0x26C8) = fn_801C1BA4(n * 2, n, n);
+        } else {
+            S32(p, 0x26C8) = 0;
+        }
+    } else {
+        PTR(p, 0x26C0) = 0;
+        S32(p, 0x26C4) = 0;
+        S32(p, 0x26C8) = 0;
+    }
+}
 
 void fn_8018A6F4(u8* p) {
     if (PTR(p, 0x26C8)) {
