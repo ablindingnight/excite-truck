@@ -65,8 +65,9 @@ u8* fn_8025D9D0(u8* p) {
     PTR(p, 0x0) = (u8*)lbl_8055C3E0;
     CopyName(lbl_8055C3E0, 0x14, (char*)(p + 0x4));
     U32(p, 0x408) = 0;
-    PTR(p, 0x1C) = (u8*)lbl_8055C3E0;
-    PTR(p, 0x18) = (u8*)lbl_8055C3E0;
+    char* empty;
+    PTR(p, 0x1C) = (u8*)(empty = lbl_8055C3E0);
+    PTR(p, 0x18) = (u8*)empty;
     U8(p, 0x20) = 0;
     U8(p, 0x42C) = 0;
     return p;
