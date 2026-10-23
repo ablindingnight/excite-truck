@@ -203,28 +203,33 @@ struct PathPt {
     PathPt* next;  // offset 0x14
 };
 
-struct PathPos {
+// A position on a centre line (idealline): segment start and fraction.
+struct ILPos {
     PathPt* pt;  // offset 0x0
     f32 t;       // offset 0x4
     s32 f8;      // offset 0x8
 };
 
-struct PathIter {
-    PathIter(void);
-    ~PathIter(void);
-    int Set(void* path);
+struct CenterLine;
+
+// Follows a centre line (idealline.cpp).
+class LineFollower {
+public:
+    LineFollower(void);
+    ~LineFollower(void);
+    void SetLine(CenterLine* line);
+    int Locate(V2* p, V2* dir, ILPos* out, int n);
     u8 pad0[0x38];
 };
 
 class PathSet {
 public:
     virtual void vf08(void);
-    virtual void* Get(int index);  // 0xC
+    virtual CenterLine* Get(int index);  // 0xC
 };
 
 extern "C" {
 PathSet* fn_80156A40(void);
-void fn_801355C0(PathIter* it, V2* p, int a, PathPos* out, int b);
 void fn_801B7C8C(struct Respawn* r, V2* pos, V2* dir);
 }
 
@@ -1871,14 +1876,25 @@ int RingChalMaster::vfE0(int car, u8* out) {
     return r;
 }
 
-static inline V2 Sub(const V2& a, const V2& b) {
-    V2 r;
+static inline void Sub(V2& r, const V2& a, const V2& b) {
     r.x = a.x - b.x;
     r.y = a.y - b.y;
-    return r;
 }
 
 static inline f32 LenSq(const V2& v) { return v.x * v.x + v.y * v.y; }
+
+static inline V2 MidPoint(const V2& a, const V2& b) {
+    V2 m;
+    m.y = a.y + 0.5f * (b.y - a.y);
+    m.x = a.x + 0.5f * (b.x - a.x);
+    return m;
+}
+
+static inline void Normalize(V2& v) {
+    f32 inv = 1.0f / (f32)sqrt(LenSq(v));
+    v.x *= inv;
+    v.y *= inv;
+}
 
 int RingChalMaster::vfA0(Respawn* out, int idx) {
     ValueNode* cfg = fn_8000AC38()->vals;
@@ -1894,58 +1910,53 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
             int i;
             int k;
             f32 best;
+            f32 l;
             mid.x = 0.0f;
             mid.y = 0.0f;
             dir.x = 0.0f;
             dir.y = 0.0f;
             for (i = 0; i < 3; i++) {
                 char b[0x10];
-                ValPoint p;
                 fn_801345D8(b, 0x10, "bound%d", i);
-                p = sp->GetPoint(b);
+                ValPoint p = sp->GetPoint(b);
                 pts[i].x = p.x;
                 pts[i].y = p.y;
             }
             k = 2;
-            best = LenSq(Sub(pts[2], pts[0]));
-            if (LenSq(Sub(pts[0], pts[1])) > best) {
-                best = LenSq(Sub(pts[0], pts[1]));
-                k = 0;
-            }
-            if (LenSq(Sub(pts[1], pts[2])) > best) {
-                k = 1;
+            {
+                V2 d;
+                Sub(d, pts[2], pts[0]);
+                best = LenSq(d);
             }
             {
-                V2 m;
-                const V2& a = pts[k];
-                const V2& b = pts[(k + 1) % 3];
-                m.x = a.x + 0.5f * (b.x - a.x);
-                m.y = a.y + 0.5f * (b.y - a.y);
-                mid = m;
-            }
-            dir = Sub(pts[(k + 2) % 3], mid);
-            {
-                f32 inv = 1.0f / (f32)sqrt(LenSq(dir));
-                dir.x *= inv;
-                dir.y *= inv;
-            }
-            if (sp->GetBool("on_racingline", 1)) {
-                PathIter it;
-                PathPos pp;
-                it.Set(fn_80156A40()->Get(0));
-                pp.pt = 0;
-                pp.t = 0.0f;
-                pp.f8 = 10000;
-                fn_801355C0(&it, &mid, 0, &pp, 0);
-                mid.x = pp.pt->x + pp.t * (pp.pt->next->x - pp.pt->x);
-                mid.y = pp.pt->z + pp.t * (pp.pt->next->z - pp.pt->z);
-                dir.x = pp.pt->dx + pp.t * (pp.pt->next->dx - pp.pt->dx);
-                dir.y = pp.pt->dz + pp.t * (pp.pt->next->dz - pp.pt->dz);
-                {
-                    f32 inv = 1.0f / (f32)sqrt(LenSq(dir));
-                    dir.x *= inv;
-                    dir.y *= inv;
+                V2 e;
+                Sub(e, pts[0], pts[1]);
+                l = LenSq(e);
+                if (l > best) {
+                    best = l;
+                    k = 0;
                 }
+                Sub(e, pts[1], pts[2]);
+                if (LenSq(e) > best) {
+                    k = 1;
+                }
+            }
+            mid = MidPoint(pts[k], pts[(k + 1) % 3]);
+            Sub(dir, pts[(k + 2) % 3], mid);
+            Normalize(dir);
+            if (sp->GetBool("on_racingline", 1)) {
+                LineFollower lf;
+                lf.SetLine(fn_80156A40()->Get(0));
+                ILPos pos;
+                pos.pt = 0;
+                pos.t = 0.0f;
+                pos.f8 = 10000;
+                lf.Locate(&mid, 0, &pos, 0);
+                mid.x = pos.pt->x + pos.t * (pos.pt->next->x - pos.pt->x);
+                mid.y = pos.pt->z + pos.t * (pos.pt->next->z - pos.pt->z);
+                dir.x = pos.pt->dx + pos.t * (pos.pt->next->dx - pos.pt->dx);
+                dir.y = pos.pt->dz + pos.t * (pos.pt->next->dz - pos.pt->dz);
+                Normalize(dir);
             }
             fn_801B7C8C(out, &mid, &dir);
             {
