@@ -54,7 +54,12 @@ public:
     RegionSphere(void) { Reset(); }
     void Reset(void);
     int Load(ValueNode* t);
-    u8 data[0x60];
+    f32 pos[3];       // offset 0x0, location_x/y/z
+    f32 radius;       // offset 0xC
+    u32 events[2];    // offset 0x10, event types the region applies to (bit per type)
+    s32 cameras[16];  // offset 0x18, TV camera indices
+    s32 cameraCount;  // offset 0x58
+    s32 group;        // offset 0x5C
 };
 
 // A TV camera: one "cam" table from the camera file (0x60).
@@ -438,12 +443,72 @@ int fn_80271FAC(const char* name) {
 }
 
 }  // extern "C"
-int RegionSphere::Load(ValueNode* t) { return 0; }  // stub (203)
+u32 FindEventType(const char* name);
+extern "C" {
+int sprintf(char* buf, const char* fmt, ...);
+int strncmp(const char* a, const char* b, u32 n);
+}
+
+#define REGION_MISSING "can't load region sphere - value '%s' is missing"
+
+int RegionSphere::Load(ValueNode* t) {
+    int j;
+    int i;
+    Reset();
+    if (!t->Has("location_x")) {
+        fn_80270B00(REGION_MISSING, "location_x");
+        return 0;
+    }
+    pos[0] = t->GetFloat("location_x");
+    if (!t->Has("location_y")) {
+        fn_80270B00(REGION_MISSING, "location_y");
+        return 0;
+    }
+    pos[1] = t->GetFloat("location_y");
+    if (!t->Has("location_z")) {
+        fn_80270B00(REGION_MISSING, "location_z");
+        return 0;
+    }
+    pos[2] = t->GetFloat("location_z");
+    if (!t->Has("radius")) {
+        fn_80270B00(REGION_MISSING, "radius");
+        return 0;
+    }
+    radius = t->GetFloat("radius");
+    group = t->GetInt("group", 2);
+    const char* key;
+    const char* value;
+    for (i = 0; t->GetPair(i, &key, &value); i++) {
+        if (!strncmp(key, "event", 5) && key[5] != '_') {
+            int type = (u8)FindEventType(value);
+            if (type < 32) {
+                events[0] |= 1 << type;
+            } else {
+                events[1] |= 1 << (type - 32);
+            }
+        }
+    }
+    if (!t->Has("camera_count")) {
+        fn_80270B00(REGION_MISSING, "camera_count");
+        return 0;
+    }
+    cameraCount = t->GetIntValue("camera_count");
+    for (j = 0; j < cameraCount; j++) {
+        char name[16];
+        sprintf(name, "camera%d", j);
+        if (!t->Has(name)) {
+            fn_80270B00(REGION_MISSING, name);
+            return 0;
+        }
+        cameras[j] = t->GetIntValue(name);
+    }
+    return 1;
+}
 extern "C" {
 
 }  // extern "C"
 void RegionSphere::Reset(void) {
-    u8* p = data;
+    u8* p = (u8*)this;
     F32(p, 0x0) = 0.0f;
     F32(p, 0x4) = 0.0f;
     F32(p, 0x8) = 0.0f;
