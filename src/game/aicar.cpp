@@ -1321,6 +1321,21 @@ void fn_801965AC(u8* d) {
     }
 }
 
+void fn_80198530(u8* d);
+void fn_80196AA0(u8* d);
+
+void fn_801967A4(u8* d) {
+    switch (S32(d, 0x210)) {
+    case 0:
+        fn_80198530(d);
+        fn_801965AC(d);
+        break;
+    case 1:
+        fn_80196AA0(d);
+        break;
+    }
+}
+
 void fn_801967FC(u8* d) {
     S32(d, 0x300) = 0;
     if (U8(d, 0x250)) {
