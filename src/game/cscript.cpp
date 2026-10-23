@@ -1,4 +1,4 @@
-// Camera script recording and playback (0x8027820C-0x802789A8): records camera frames per tick,
+// Camera script recording and playback (0x80278214-0x802789A8): records camera frames per tick,
 // replays them by interpolation, and drives screenshot "movie" capture over a tick range. Names
 // are guesses apart from the messages and allocation tag.
 #include "game/common.h"
@@ -76,10 +76,6 @@ static inline ScriptNode* NodeAt(int i) { return &lbl_8055F5B0[i]; }
 static inline ScriptNode* NodeAt(int i);
 
 extern "C" {
-
-void fn_8027820C(void) {}
-
-void fn_80278210(void) {}
 
 void fn_80278214(void) {
     lbl_8055F5B4 = 0;

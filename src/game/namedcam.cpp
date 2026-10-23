@@ -1,4 +1,4 @@
-// Named cameras (0x80276068-0x8027820C): the named camera sets ("namedcam", "rddefault", "raceday",
+// Named cameras (0x80276068-0x80278214): the named camera sets ("namedcam", "rddefault", "raceday",
 // "house") and the timed camera transitions ("physcam: Clock looped during camera transition!!").
 // Written against raw field offsets; the large routines and the initialiser are still stubs. Names
 // are guesses apart from the strings.
@@ -27,6 +27,7 @@ struct CamPose {
 };
 
 struct NamedCam {
+    NamedCam(void) {}
     u8 valid;       // offset 0x0
     u8 pad1[0x3];
     CamPose pose;   // offset 0x4
@@ -54,11 +55,33 @@ void* memcpy(void* d, const void* s, u32 n);
 void fn_8026A4A0(int i, f32* pose, f32* fov);
 }
 
-extern u8 lbl_8049FD58[];
+// A timed camera transition slot (0x50).
+struct CamShot {
+    CamShot(void) {}
+    u8 data[0x50];
+};
+
+// A camera record (racerslot.cpp holds its constructor).
+struct CamRec {
+    CamRec(void);
+    u8 data[0x228];
+};
+
+// A 3x4 frame; its empty constructor lives in modeinl.cpp (fn_80144DC8).
+struct CamFrame34 {
+    CamFrame34(void);
+    f32 m[12];
+};
+
+ModuleTag lbl_8055F590;
+static CamShot lbl_8049FD58[4];
+static NamedCam lbl_8049FE98;
+static NamedCam lbl_8049FEE0[48];
+static CamRec lbl_804A0C60[4];
+static CamFrame34 lbl_804A1500[4];
+
 extern f32 lbl_8055E3C8;
 extern NamedCam* lbl_8055F598;
-extern NamedCam lbl_8049FE98;
-extern NamedCam lbl_8049FEE0[];
 extern NamedCam* lbl_8055F59C;
 extern s32 lbl_8055F5A0;
 
@@ -108,7 +131,7 @@ void fn_80276ACC(CamReader* r, const char* def) {
 }
 
 void fn_80276B8C(void) {
-    u8* e = lbl_8049FD58;
+    u8* e = ((u8*)lbl_8049FD58);
     for (int i = 0; i < 4; i++) {
         memset(e, 0, 0x50);
         e += 0x50;
@@ -116,7 +139,7 @@ void fn_80276B8C(void) {
 }
 
 void fn_80276BE4(CamPose* out, f32* fov) {
-    if (lbl_8049FD58[0]) {
+    if (((u8*)lbl_8049FD58)[0]) {
         fn_8027656C(&lbl_8049FE98.pose, &lbl_8049FE98.fov, 0);
     }
     out->rot = lbl_8049FE98.pose.rot;
@@ -133,7 +156,7 @@ void fn_80276CB0(const char* name, int blend) {
         fn_80276098((f32*)&lbl_8049FE98.pose, (f32*)&c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
-        lbl_8049FD58[0] = 0;
+        ((u8*)lbl_8049FD58)[0] = 0;
     }
 }
 
@@ -146,18 +169,20 @@ void fn_80276D3C(const char* name, int mode) {
         fn_80276098(pose, (f32*)&c->pose, 0, 0x22, fov, c->fov, 2.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
-        lbl_8049FD58[0] = 0;
+        ((u8*)lbl_8049FD58)[0] = 0;
     }
 }
 
 void fn_80276DC8(u8* p) {}  // stub (591)
 
+extern const f32 lbl_80564054;  // -1.0
+
 f32 fn_80277704(int i) {
-    u8* e = lbl_8049FD58 + i * 0x50;
-    if (e[0]) {
+    if (lbl_8049FD58[i].data[0]) {
+        u8* e = lbl_8049FD58[i].data;
         return (lbl_8055E3C8 - F32(e, 0x48)) / F32(e, 0x44);
     }
-    return -1.0f;
+    return lbl_80564054;
 }
 
 void fn_80277740(void) {
@@ -265,5 +290,4 @@ void fn_80277F84(NamedCam* c, CamReader* r, int n) {
     c->valid = 1;
 }
 
-void fn_80278168(u8* p) {}  // stub (41)
 }  // extern "C"
