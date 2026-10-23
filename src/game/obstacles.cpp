@@ -340,7 +340,33 @@ void fn_801AD5F0(u8* p) { fn_801ACF94(p); }
 
 void fn_801AD5F4(u8* p) {}  // stub (47)
 
-void fn_801AD6B0(u8* p) {}  // stub (40)
+void fn_801D0934(u8* p);
+
+// DynamicObstacle destructor; the secondary base at 0x23C is torn down first.
+u8* fn_801AD6B0(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80335744;
+        *(void**)(p + 0x23C) = (u8*)lbl_80335744 + 0x54;
+        u8* sec = p;
+        if (p) {
+            sec = p + 0x23C;
+        }
+        fn_801D0934(sec);
+        S32(p, 0x240) = 0;
+        if (p) {
+            lbl_8055E5E4 = 0;
+            if (p) {
+                if (p) {
+                    __dt__10CollVolumeFv(p, 0);
+                }
+            }
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 void fn_801AD750(u8* p, u8* q) {
     fn_801A9AB0(p, q);
