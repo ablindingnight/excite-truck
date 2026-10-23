@@ -34,7 +34,7 @@ extern const char* lbl_80346B54[];
 
 // One camera region record.
 struct CamRegion {
-    s32 active;      // offset 0x0
+    u8* cam;         // offset 0x0, null when unused
     u8 data[0x18];   // offset 0x4
 };
 
@@ -72,12 +72,48 @@ u32 fn_80270B50(u8* p) { return U32(fn_801E87A8(p), 0x4); }
 
 void fn_80270B74(void) {
     for (int i = 0; i < 32; i++) {
-        lbl_8049F9D8[i].active = 0;
+        lbl_8049F9D8[i].cam = 0;
     }
     lbl_8055F554 = 0;
 }
 
-void fn_80270C04(u8* p) {}  // stub (70)
+extern char lbl_80346B00[];  // this unit's string pool ("TV Set 1", ...)
+extern s32 lbl_8055F550;
+extern u8 lbl_8055F564;
+extern u8 lbl_8049EDC8[];  // camera records, 0x60 each
+void fn_80272738(CamRegion* r, u8* car);
+
+// Collects the camera regions usable for this event; falls back to region 0.
+void fn_80270C04(u8* car, u32 flags) {
+    char* pool = lbl_80346B00;
+    fn_80270B74();
+    if (lbl_8055F550) {
+        u8* cam;
+        u8 check = (flags >> 8) & 1;
+        lbl_8055F564 = check;
+        fn_80270B00(pool + 0x1E0, lbl_8055F550);  // "Preparing regions (%d)"
+        cam = lbl_8049EDC8;
+        for (int i = 0; i < lbl_8055F550; i++) {
+            fn_80270B00(pool + 0x1F8, i);  // "  Region %d:"
+            fn_80270B00(pool + 0x208);     // "  ...is ok for event type"
+            CamRegion* r = &lbl_8049F9D8[lbl_8055F554];
+            r->cam = cam;
+            if (check) {
+                fn_80272738(r, car);
+            }
+            lbl_8055F554++;
+            cam += 0x60;
+        }
+        if (!lbl_8055F554) {
+            fn_80270B00(pool + 0x224);  // "Found no regions!  Using only region 0"
+            lbl_8049F9D8[0].cam = lbl_8049EDC8;
+            if (check) {
+                fn_80272738(&lbl_8049F9D8[0], car);
+            }
+            lbl_8055F554 = 1;
+        }
+    }
+}
 
 int fn_80270D1C(int x) {
     switch (x) {
@@ -229,7 +265,7 @@ int fn_802726EC(f32 x, f32 a, f32 b) {
     return r;
 }
 
-void fn_80272738(u8* p) {}  // stub (315)
+void fn_80272738(CamRegion* r, u8* car) {}  // stub (315)
 
 int fn_80272C24(f32 x, f32 a, f32 b, f32 m) {
     if (a == b) {
