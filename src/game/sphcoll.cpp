@@ -881,17 +881,6 @@ static inline void InitVolume(u8* s, u32 id, u32 owner) {
     U32(s, 0x4) = owner;
 }
 
-static inline f32 Max3(f32 a, f32 b, f32 c) {
-    f32 m = c;
-    if (b > m) {
-        m = b;
-    }
-    if (a > m) {
-        m = a;
-    }
-    return m;
-}
-
 extern void* lbl_80333A58[];
 
 // Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
