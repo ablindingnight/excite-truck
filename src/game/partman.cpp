@@ -830,12 +830,12 @@ static inline u8 Byte(f32 x) {
 void PartSys::DrawSprites(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
     f32 t0 = lbl_8055F738;
-    V3 d2;
     V3 d1;
+    V3 d2;
     d1.x = cam->up.x - cam->right.x;
-    d2.x = cam->up.x + cam->right.x;
     d1.y = cam->up.y - cam->right.y;
     d1.z = cam->up.z - cam->right.z;
+    d2.x = cam->up.x + cam->right.x;
     d2.y = cam->up.y + cam->right.y;
     d2.z = cam->up.z + cam->right.z;
     QuadBatch batch;
@@ -884,12 +884,12 @@ void PartSys::DrawSprites(Particle* p, int n) {
 void PartSys::DrawAnimated(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
     f32 t0 = lbl_8055F738;
-    V3 d2;
     V3 d1;
+    V3 d2;
     d1.x = cam->up.x - cam->right.x;
-    d2.x = cam->up.x + cam->right.x;
     d1.y = cam->up.y - cam->right.y;
     d1.z = cam->up.z - cam->right.z;
+    d2.x = cam->up.x + cam->right.x;
     d2.y = cam->up.y + cam->right.y;
     d2.z = cam->up.z + cam->right.z;
     QuadBatch batch;
