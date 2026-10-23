@@ -94,6 +94,7 @@ class RigidBody {
 public:
     void AddImpulse(f32 s, const RVec3* a, const RVec3* b);
     void AddTorque(const RVec3* t);
+    void AddForceAt(const RVec3* f, const RVec3* at);
 };
 
 class Proxer {
@@ -1350,7 +1351,72 @@ void fn_8019684C(u8* d) {}
 
 void fn_80196A9C(u8* d) { fn_8019684C(d); }
 
-void fn_80196AA0(u8* d) {}
+extern const f32 lbl_80562250[2];  // phase ends: 0.1 s, 1 s
+extern const f32 lbl_80562258;     // -44500
+extern const f32 lbl_8056225C;     // -31150
+extern const f32 lbl_80562160;     // 4.444
+void fn_8018ADD4(void* car, int v);
+void fn_8018ADC4(void* car, f32 v);
+
+// Start-line launch: a first push, then hold the line until the other car is ready.
+void fn_80196AA0(u8* d) {
+    f32 t = F32(d, 0x26C) - F32(d, 0x218);
+    int phase;
+    for (phase = 0; phase < 2; phase++) {
+        if (t < lbl_80562250[phase]) {
+            break;
+        }
+    }
+    u8* o = PTR(d, 0x298);
+    if (!U8(o, 0x17C) || !U8(o, 0x108)) {
+        phase = -1;
+    }
+    switch (phase) {
+    case 0: {
+        u8* car = CAR(d);
+        RVec3 f;
+        f.x = F32(car, 0x88) * lbl_80562258;
+        f.y = F32(car, 0x8C) * lbl_80562258;
+        f.z = F32(car, 0x90) * lbl_80562258;
+        (*(RigidBody**)(d + 0x294))->AddForceAt(&f, (RVec3*)(CAR(d) + 0x94));
+    }
+    case 1: {
+        V2 v;
+        v.x = 0.0f;
+        v.y = 1.0f;
+        f32 ax;
+        f32 ay;
+        ay = F32(d, 0x44);
+        ax = F32(d, 0x40);
+        f32 s = -(v.y * ax + -v.x * ay);
+        s = MIN(1.0f, s);
+        s = MAX(s, -1.0f);
+        fn_8018ADAC(CAR(d), s);
+        fn_8018ADD4(CAR(d), -1);
+        fn_8018ADBC(CAR(d), 0.0f);
+        fn_8018ADC4(CAR(d), 1.0f);
+        if ((f32)__fabs(F32(d, 0x270)) < lbl_80562160) {
+            fn_8018ADB4(CAR(d), 1.0f);
+        }
+        if (F32(d, 0x270) < lbl_80562160) {
+            fn_8018ADC4(CAR(d), 0.0f);
+            u8* car = CAR(d);
+            RVec3 g;
+            g.x = F32(car, 0x88) * lbl_8056225C;
+            g.y = F32(car, 0x8C) * lbl_8056225C;
+            g.z = F32(car, 0x90) * lbl_8056225C;
+            (*(RigidBody**)(d + 0x294))->AddForceAt(&g, (RVec3*)(CAR(d) + 0x94));
+        }
+        break;
+    }
+    case -1:
+        break;
+    default:
+        S32(d, 0x210) = S32(d, 0x214);
+        S32(d, 0x214) = 2;
+        break;
+    }
+}
 
 extern "C" int __fpclassifyf(f32 x);
 
