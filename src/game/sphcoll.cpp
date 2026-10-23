@@ -1920,7 +1920,46 @@ u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, c
     return p;
 }
 
-void fn_801A324C(u8* p) {}  // stub (161)
+ValueTable* fn_80131808(const char* name);  // open a .val table
+void fn_80131818(ValueTable* table);        // release it
+
+// Polyhedron volume ('POLY') from the named table: extents, then its "plane" (n, k) and
+// "curve" (center, axis, radius) entries.
+u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
+    int i;
+    ValueNode* n;
+    ValueTable* t;
+    ValueNode* ext;
+    U32(p, 0xC) = id;
+    F32(p, 0x10) = s0;
+    U32(p, 0x4) = 0;
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'POLY';
+    F32(p, 0x14) = s1;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_80333778;
+    t = fn_80131808(name);
+    S32(p, 0xBC) = 0;
+    S32(p, 0xDC) = 0;
+    ext = t->FindChild("extents");
+    *(ValVec3*)(p + 0x24) = ext->GetVec3("min");
+    *(ValVec3*)(p + 0x30) = ext->GetVec3("max");
+    for (i = 0; (n = (ValueNode*)t->GetChild(i)) != 0; i++) {
+        if (strcmp(n->GetName(), "plane") == 0) {
+            u8* pl = p + S32(p, 0xBC)++ * 0x10;
+            *(ValVec3*)(pl + 0x3C) = n->GetVec3("n");
+            F32(pl, 0x48) = n->GetFloat("k");
+        } else if (strcmp(n->GetName(), "curve") == 0) {
+            u8* c = p + S32(p, 0xDC)++ * 0x1C;
+            *(ValVec3*)(c + 0xC0) = n->GetVec3("center");
+            *(ValVec3*)(c + 0xCC) = n->GetVec3("axis");
+            F32(c, 0xD8) = n->GetFloat("radius");
+        }
+    }
+    fn_80131818(t);
+    return p;
+}
 
 void fn_801A34D0(u8* p) {}  // stub (236)
 
