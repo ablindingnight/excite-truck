@@ -49,9 +49,9 @@ class Sound {
 public:
     Sound(void) {}
     virtual ~Sound(void) {}
-    virtual void vf0C(void);
+    virtual void vf0C(void) { delete this; }
     virtual int vf10(void) = 0;
-    virtual int vf14(void);
+    virtual int vf14(void) { return 0; }
     virtual void Play(void) = 0;
     virtual void Start(void) = 0;
     virtual void Stop(void) = 0;
@@ -63,14 +63,14 @@ public:
     virtual int vf38(void) = 0;
     virtual void vf3C(void) = 0;
     virtual void vf40(void) = 0;
-    virtual void vf44(f32 v);
-    virtual void vf48(f32 v);
-    virtual void vf4C(f32 v);
-    virtual void vf50(u32 mask);
+    virtual void vf44(f32 v) {}
+    virtual void vf48(f32 v) {}
+    virtual void vf4C(f32 v) {}
+    virtual void vf50(u32 mask) {}
     virtual void vf54(void) = 0;
     virtual void vf58(void) = 0;
     virtual void vf5C(void) = 0;
-    virtual f32 vf60(void);
+    virtual f32 vf60(void) { return 0.0f; }
 };
 
 // A sound that only keeps its state.
@@ -133,13 +133,13 @@ public:
 };
 
 ModuleTag lbl_8055EDA0;
-LocString lbl_8048929C("Sound:NoSound");
+extern LocString lbl_8048929C;
 
 // The mixer used when there is no sound device.
 class NullMixer : public Mixer {
 public:
     NullMixer(void) { memset(data, 0, sizeof(data)); }
-    virtual ~NullMixer(void) {}
+    virtual ~NullMixer(void);
     virtual const char* Name(void) { return lbl_8048929C.Get(); }
     virtual void* Data(void) { return data; }
     virtual int vf14(void) { return 1; }
@@ -172,6 +172,7 @@ int lbl_8055B4DC = -1;    // settings callback handle
 s32 lbl_8055EDA8;         // quality
 MixerList lbl_80489238;
 VolumeHandles lbl_80489258;
+LocString lbl_8048929C("Sound:NoSound");
 
 extern "C" {
 
@@ -300,6 +301,29 @@ void fn_80208E90(Mixer* m, int dontCare) {
     }
 }
 
+// Dead-stripped in the game; kept so their strings land in the pool in the original order.
+const char* MixerLocationName(int loc) {
+    switch (loc) {
+    case 0:
+        return "LOC_HARDWARE3D";
+    case 1:
+        return "LOC_HARDWARE";
+    case 2:
+        return "LOC_SOFTWARE";
+    }
+    return "LOC_DONTCARE";
+}
+
+const char* MixerQualityName(int q) {
+    if (q == 0) {
+        return "Sound:Quality:Great";
+    }
+    if (q == 1) {
+        return "Sound:Quality:Awesome";
+    }
+    return "Sound:Quality:Incredible";
+}
+
 f32 fn_80209028(void) { return lbl_8055B4D4; }
 
 void fn_80209030(f32 v) {
@@ -320,6 +344,9 @@ void fn_80209090(s32 q) {
 s32 fn_802090B4(void) { return lbl_8055EDA8; }
 
 void fn_802090BC(void) { fn_802E30C8("mixer: MixerSetSoundMode is a NOOP"); }
+
+// Dead-stripped in the game (sound mode name).
+const char* MixerSoundModeName(void) { return "Surround"; }
 
 s32 fn_802090CC(void) { return lbl_8055B4D8; }
 
@@ -358,6 +385,8 @@ void fn_80209190(VolumeHandle* h, f32 v) {
 f32 fn_802091CC(void) { return fn_80208A18(1.0f); }
 
 }  // extern "C"
+
+NullMixer::~NullMixer(void) {}
 
 int Mixer::vf14(void) { return 0; }
 

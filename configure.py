@@ -1111,7 +1111,7 @@ config.libs.append(
             Object(NonMatching, "game/splitscr.cpp"),
             Object(NonMatching, "game/sound.cpp"),
             Object(NonMatching, "game/soundmgr.cpp"),
-            Object(NonMatching, "game/mixer.cpp"),
+            Object(Matching, "game/mixer.cpp"),
             Object(NonMatching, "game/engsnd.cpp"),
             Object(Matching, "game/tiresnd.cpp"),
             Object(NonMatching, "game/musicplr.cpp"),
