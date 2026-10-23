@@ -910,7 +910,7 @@ inline Arena::~Arena(void) {
 }
 
 template <class T>
-RArray<T>::RArray(int n, const char* tag) : ArrayRef<T>(buf = new (tag) T[n], n) {}
+RArray<T>::RArray(int n, const char* tag) : ArrayRef<T>(new (tag) T[n], n) { buf = this->data; }
 
 template <class T>
 void RArray<T>::Push(const T& v) {

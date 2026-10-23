@@ -626,7 +626,8 @@ public:
         full = 0;
         if (Capped()) {
             int n = ranks.a.count;
-            if (Rank() == n - 1) {
+            int k = Rank();
+            if (k == n - 1) {
                 full = 1;
             }
         }
