@@ -3,6 +3,7 @@
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "macros.h"
 #include "game/menu.h"
 #include <string.h>
 
@@ -913,7 +914,52 @@ u8* fn_80248140(u8* p, int del) {
     return p;
 }
 
-void fn_802481A0(u8* p) {}  // stub (126)
+double sin(double x);
+
+}  // extern "C"
+
+struct BobPoint {
+    f32 x;  // offset 0x0
+    f32 y;  // offset 0x4
+};
+
+extern "C" {
+
+}  // extern "C"
+
+// y of the drift curve at x, scaled by the remaining ease u.
+static inline f32 BobCurve(f32 x, f32 y, f32 u) {
+    BobPoint pts[9] = {
+        {-200.0f, -66.0f}, {-170.0f, -46.0f}, {-26.0f, -57.0f}, {27.0f, -32.0f}, {67.0f, -35.0f},
+        {96.0f, -30.0f},   {116.0f, -20.0f},  {158.0f, -18.0f}, {200.0f, -6.0f},
+    };
+    int i;
+    for (i = 1; i < 8; i++) {
+        if (x < pts[i].x) {
+            break;
+        }
+    }
+    f32 y1 = pts[i].y;
+    f32 y0 = pts[i - 1].y;
+    f32 x1 = pts[i].x;
+    f32 x0 = pts[i - 1].x;
+    f32 f = (x - x0) / (x1 - x0);
+    f = MIN(1.0f, f);
+    f = MAX(f, 0.0f);
+    return y + u * (y0 + f * (y1 - y0));
+}
+
+extern "C" {
+
+// Attract-mode cursor drift: x eases in with a sway 1.5 s after lbl_8055F274; y follows a fixed curve over x.
+void fn_802481A0(f32* outX, f32* outY, f32 x, f32 y) {
+    int ms = fn_802E2C20() - lbl_8055F274 - 1500;
+    f32 t = MIN(1.0f, (f32)ms / 1000.0f);
+    t = MAX(t, 0.0f);
+    f32 u = 1.0f - t;
+    *outX = x + 3.0f * (f32)sin(956.0f * u);
+    *outY = BobCurve(x, y, u);
+}
 
 void fn_80248398(void) {
     u8* o = lbl_8055F278;
