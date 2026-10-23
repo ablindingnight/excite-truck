@@ -856,7 +856,45 @@ int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
     return !(*tmax < lbl_805622D0);
 }
 
-int fn_8019E2D0(u8* a, u8* b, u8* c, u8* m, f32 x, f32 y, f32 z) { return 0; }  // stub (140)
+// out = rotation^T * in (into the frame's space).
+static inline void MulVecT(RVec3* out, const RVec3* in, const CFrame* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
+        f32 y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
+        f32 z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
+        out->y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
+        out->z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+    }
+}
+
+// Ray from + t*dir against the box (frame m, half sizes hx, hy, hz): slab test in box space; the entry
+// distance replaces *t when nearer.
+int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f32 hx, f32 hy, f32 hz) {
+    RVec3 lp;
+    RVec3 ld;
+    f32 tmin;
+    f32 tmax;
+    f32 dx = from->x - m->t.x;
+    f32 dy = from->y - m->t.y;
+    f32 dz = from->z - m->t.z;
+    lp.x = Dot3(dx, m->m[0], dy, m->m[1], dz, m->m[2]);
+    lp.y = Dot3(dx, m->m[3], dy, m->m[4], dz, m->m[5]);
+    lp.z = Dot3(dx, m->m[6], dy, m->m[7], dz, m->m[8]);
+    MulVecT(&ld, dir, m);
+    tmin = -1e8f;
+    tmax = 1e8f;
+    if (fn_8019E1F4(&tmin, &tmax, lp.x, ld.x, hx) && fn_8019E1F4(&tmin, &tmax, lp.y, ld.y, hy) &&
+        fn_8019E1F4(&tmin, &tmax, lp.z, ld.z, hz) && tmin < *t) {
+        *t = tmin;
+        return 1;
+    }
+    return 0;
+}
 
 void fn_8019E500(u8* p, u8* q) {}  // stub (205)
 
@@ -1686,7 +1724,7 @@ int fn_801A1E7C(u8* p, u8* a, u8* b, u8* c, RVec3* out) {
     f32 z = F32(p, 0x2C);
     f32 y = F32(p, 0x28);
     f32 x = F32(p, 0x24);
-    if (fn_8019E2D0(a, b, c, ((VEx*)p)->v50(), x, y, z)) {
+    if (fn_8019E2D0((RVec3*)a, (RVec3*)b, (f32*)c, (CFrame*)((VEx*)p)->v50(), x, y, z)) {
         out->x = 0.0f;
         out->y = 1.0f;
         out->z = 0.0f;
