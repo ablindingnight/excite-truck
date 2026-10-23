@@ -99,15 +99,13 @@ struct PVtx {
 
 struct QuadBatch {
     QuadBatch(void) {
-        u16 b = 0;
         for (int i = 0; i < 8; i++) {
-            idx[i * 6 + 0] = b;
-            idx[i * 6 + 1] = b + 1;
-            idx[i * 6 + 2] = b + 2;
-            idx[i * 6 + 3] = b;
-            idx[i * 6 + 4] = b + 2;
-            idx[i * 6 + 5] = b + 3;
-            b += 4;
+            idx[i * 6 + 0] = i * 4;
+            idx[i * 6 + 1] = i * 4 + 1;
+            idx[i * 6 + 2] = i * 4 + 2;
+            idx[i * 6 + 3] = i * 4;
+            idx[i * 6 + 4] = i * 4 + 2;
+            idx[i * 6 + 5] = i * 4 + 3;
         }
         n = 0;
     }
