@@ -68,7 +68,20 @@ public:
     TvCamera(void) {}
     ~TvCamera(void) {}
     int Load(ValueNode* t);
-    u8 data[0x60];
+    f32 pos[3];      // offset 0x0, x/y/z
+    f32 ex[3];       // offset 0xC, ex_1..ex_3
+    f32 fov;         // offset 0x18
+    u8 moves;        // offset 0x1C, has an "_a" end pose
+    u8 flags;        // offset 0x1D, 1 funky_fov, 2 shakey, 4 rumble, 8 focus_blur
+    u8 pad1E[2];
+    f32 from[3];     // offset 0x20
+    f32 to[3];       // offset 0x2C, x_a/y_a/z_a
+    f32 exFrom[3];   // offset 0x38
+    f32 exTo[3];     // offset 0x44, ex_1_a..ex_3_a
+    f32 fovFrom;     // offset 0x50
+    f32 fovTo;       // offset 0x54, new_fov_a / fov_a
+    s32 type;        // offset 0x58
+    u8 pad5C[4];
 };
 extern s32 lbl_8055F54C;
 extern s32 lbl_8055F554;
@@ -615,7 +628,77 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
 extern "C" {
 
 }  // extern "C"
-int TvCamera::Load(ValueNode* t) { return 0; }  // stub (354)
+extern const f32 lbl_80563F94;  // 0.75: old "fov" values to new_fov units
+extern const f32 lbl_80563F98;  // 20.0
+
+// One "cam" table: position, extras, field of view ("new_fov", or old-style "fov" * 0.75), type and
+// flags, plus an optional end pose ("x_a"...) the camera moves to.
+int TvCamera::Load(ValueNode* t) {
+    if (t->Has("x") && t->Has("y") && t->Has("z") && (t->Has("fov") || t->Has("new_fov")) && t->Has("type")) {
+        pos[0] = t->GetFloat("x");
+        pos[1] = t->GetFloat("y");
+        pos[2] = t->GetFloat("z");
+        if (t->Has("new_fov")) {
+            fov = t->GetFloat("new_fov");
+        } else {
+            fov = lbl_80563F94 * t->GetFloat("fov");
+        }
+        type = fn_80271FAC(t->GetValue("type"));
+        ex[0] = t->GetFloat("ex_1", lbl_80563F48);
+        ex[1] = t->GetFloat("ex_2", lbl_80563F48);
+        ex[2] = t->GetFloat("ex_3", lbl_80563F50);
+        int funky = t->GetBool("funky_fov", 0);
+        int shakey = t->GetBool("shakey", 0);
+        int rumble = t->GetBool("rumble", 0);
+        int blur = t->GetBool("focus_blur", 0);
+        flags = funky | (rumble ? 4 : 0) | (shakey ? 2 : 0) | (blur ? 8 : 0);
+        switch (type) {
+        case 13:
+            flags |= 2;
+            type = 1;
+            break;
+        case 14:
+            flags |= 2;
+            type = 2;
+            break;
+        case 15:
+            flags |= 2;
+            type = 3;
+            break;
+        case 12:
+            flags |= 4;
+            type = 0;
+            break;
+        }
+        if (t->Has("x_a") && t->Has("y_a") && t->Has("z_a")) {
+            moves = 1;
+            from[0] = pos[0];
+            from[1] = pos[1];
+            from[2] = pos[2];
+            exFrom[0] = ex[0];
+            exFrom[1] = ex[1];
+            exFrom[2] = ex[2];
+            fovFrom = fov;
+            to[0] = t->GetFloat("x_a", pos[0]);
+            to[1] = t->GetFloat("y_a", lbl_80563F98 + pos[1]);
+            to[2] = t->GetFloat("z_a", pos[2]);
+            if (t->Has("new_fov_a")) {
+                fovTo = t->GetFloat("new_fov_a");
+            } else if (t->Has("fov_a")) {
+                fovTo = lbl_80563F94 * t->GetFloat("fov_a");
+            } else {
+                fovTo = fovFrom;
+            }
+            exTo[0] = t->GetFloat("ex_1_a", exFrom[0]);
+            exTo[1] = t->GetFloat("ex_2_a", exFrom[1]);
+            exTo[2] = t->GetFloat("ex_3_a", exFrom[2]);
+        } else {
+            moves = 0;
+        }
+        return 1;
+    }
+    return 0;
+}
 extern "C" {
 
 void fn_80273354(void) {
