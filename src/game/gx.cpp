@@ -1301,7 +1301,7 @@ void fn_802D08CC(int mode) {
 
 void fn_802D0910(void) {}
 
-void fn_802D0914(s32 fd, u16 w, u16 h) {
+void fn_802D0914(s32 fd, int w, int h) {
     u8 hdr[0x12];
     memset(hdr, 0, sizeof(hdr));
     *(u16*)(hdr + 8) = 0;
