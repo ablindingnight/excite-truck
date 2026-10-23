@@ -295,7 +295,26 @@ void fn_80280DC8(u8* p) {}  // stub (109)
 
 void fn_80280F7C(u8* p) {}  // stub (111)
 
-void fn_80281138(u8* p) {}  // stub (95)
+int fn_802368EC(void);
+
+// Menu slot of an event: the bonus slot (5) or its place in the registry.
+static inline int EventSlot(u8* e) { return U8(e, 0x64) ? 5 : lbl_804B3048.Find(e); }
+
+// Plays the "back to slot" animation, then the unlock animation for the newly opened event.
+void fn_80281138(void) {
+    if (lbl_804B3048.Find((u8*)lbl_8055F688) >= 0 && fn_802368EC()) {
+        char buf[0x1E];
+        fn_801345D8(buf, 0x1E, "back_select_%d", EventSlot((u8*)lbl_8055F688) + 1);
+        fn_80236954(buf);
+    }
+    u8* next = (u8*)lbl_8055F694;
+    if (next) {
+        lbl_8055F688 = 0;
+        char buf[0x1E];
+        fn_801345D8(buf, 0x1E, "unlock_%d", EventSlot(next) + 1);
+        fn_80236954(buf);
+    }
+}
 
 void fn_802812B4(u8* p) {}  // stub (2376)
 
