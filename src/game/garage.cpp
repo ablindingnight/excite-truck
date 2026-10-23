@@ -326,11 +326,13 @@ extern const f32 lbl_80563968;
 extern const f32 lbl_8056396C;
 extern const f32 lbl_80563970;
 
-void fn_80250108(u8* p) {
-    SlotAnim* e;  // near miss: i/e register swap
-    f32 dt = fn_80214D48();
+static inline void UpdateSlotAnims(u8* p) {
+    int i;
+    SlotAnim* e;
+    f32 dt;
+    dt = fn_80214D48();
     F32(p, 0x28) = F32(p, 0x28) + lbl_80563968 * ((f32)S32(p, 0x2C) - F32(p, 0x28));
-    for (int i = 0; i < S32(p, 0x1C); i++) {
+    for (i = 0; i < S32(p, 0x1C); i++) {
         e = &((SlotAnim*)PTR(p, 0x18))[i];
         if (e->sel != e->shown) {
             e->t = e->t + lbl_8056396C * dt;
@@ -348,6 +350,8 @@ void fn_80250108(u8* p) {
     }
 }
 
+void fn_80250108(u8* p) { UpdateSlotAnims(p); }
+
 void fn_80250204(u8* p) {}  // stub (925)
 
 void fn_80251078(u8* p) {}  // stub (271)
@@ -362,7 +366,33 @@ void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
 
 void fn_8025157C(u8* p) {}  // stub (238)
 
-void fn_80251934(u8* p) {}  // stub (116)
+void fn_80214AF0(int s);
+
+void fn_80251934(u8* p) {
+    int on;
+    SlotAnim* e;
+    int i;
+    u8* c;
+    S32(p, 0xC0) = U8(PTR(p, 0x4C), 0xDC) == 0;
+    for (i = 0; i < S32(p, 0x1C); i++) {
+        on = 0;
+        c = PTR(p, 0xCC) + i * 0x14;
+        if (((u8*)GetVehicleColor(*(VehicleInfo**)(c + 8), 0))[8] && c[0xC]) {
+            on = 1;
+        }
+        e = &((SlotAnim*)PTR(p, 0x18))[i];
+        if (on != e->sel) {
+            e->sel = on;
+            e->t = (f32)__fabs(e->t);
+        }
+    }
+    UpdateSlotAnims(p);
+    if (((VList*)PTR(p, 0xD0))->v1C(S32(p, 0x2C)) == 0) {
+        fn_80214A9C(2);
+    } else {
+        fn_80214AF0(2);
+    }
+}
 
 void fn_80251B04(u8* p) {}  // stub (130)
 
