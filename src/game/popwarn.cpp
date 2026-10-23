@@ -89,6 +89,7 @@ f32 fn_80214D48(void);
 void fn_80214D50(int s);
 int fn_802C9A58(void);
 void fn_802168BC(int a);
+void fn_80214BE4(int i, int dx, int dy);
 void fn_802C942C(u32 color);
 int fn_8020A640(void);
 void fn_802ECEC0(void);
@@ -1018,46 +1019,56 @@ void fn_80248398(void) {
 
 }  // extern "C"
 
-extern void* lbl_803437E0[];
 extern f32 lbl_8055BEF4;  // 0.7f
 
-// The thank-you screen's moving logo (vtable lbl_803437E0, 0x60 bytes); lbl_8055F278 while shown.
-struct LogoMover {
-    LogoMover(void) {
-        f14 = 0;
-        vt = lbl_803437E0;
+// The logo's motion state (from 0x18): eases from (fromX, fromY) to (toX, toY).
+struct LogoMotion {
+    LogoMotion(void) {
         rate = 1.0f / lbl_8055BEF4;
-        f40 = 2;
-        f3C = 1.0f;
+        ease = 2;
+        t = 1.0f;
         Reset(2);
     }
-    ~LogoMover(void) { Reset(1); }
+    ~LogoMotion(void) { Reset(1); }
+    bool Done(void) const { return t >= 1.0f; }
     void Reset(s32 n) {
-        f18 = 0;
+        active = 0;
+        jumpOn = 0;
         moveOn = 0;
-        fadeOn = 0;
-        f24 = n;
-        f20 = 0;
+        lastVis = n;
+        vis = 0;
         f44 = 0;
     }
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
-    u8 f18;          // offset 0x18
-    s32 f1C;         // offset 0x1C
-    s32 f20;         // offset 0x20
-    s32 f24;         // offset 0x24
-    u8 pad28[0x10];  // offset 0x28
-    f32 rate;        // offset 0x38
-    f32 f3C;         // offset 0x3C
-    s32 f40;         // offset 0x40
-    u8 f44;          // offset 0x44
-    s32 moveStart;   // offset 0x48
-    s32 moveDur;     // offset 0x4C
-    u8 moveOn;       // offset 0x50
-    s32 fadeStart;   // offset 0x54
-    s32 fadeDur;     // offset 0x58
-    u8 fadeOn;       // offset 0x5C
+
+    u8 active;     // offset 0x18
+    s32 idx;       // offset 0x1C: this item's index in the menu
+    s32 vis;       // offset 0x20
+    s32 lastVis;   // offset 0x24
+    s32 fromX;     // offset 0x28
+    s32 fromY;     // offset 0x2C
+    s32 toX;       // offset 0x30
+    s32 toY;       // offset 0x34
+    f32 rate;      // offset 0x38
+    f32 t;         // offset 0x3C
+    s32 ease;      // offset 0x40: 1 = quadratic, 2 = smooth, else linear
+    u8 f44;        // offset 0x44: show when the move ends
+    s32 jumpX;     // offset 0x48
+    s32 jumpY;     // offset 0x4C
+    u8 jumpOn;     // offset 0x50
+    s32 moveX;     // offset 0x54
+    s32 moveY;     // offset 0x58
+    u8 moveOn;     // offset 0x5C
+};
+
+// The thank-you screen's moving logo (0x60 bytes); lbl_8055F278 while shown.
+class LogoMover : public MenuState {
+public:
+    virtual ~LogoMover(void) {}
+    virtual void Enter(void);
+    virtual void Exit(void);
+    virtual void Update(void);
+
+    LogoMotion m;  // offset 0x18
 };
 
 typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
@@ -1086,20 +1097,6 @@ void fn_802483E0(void) {
     lbl_8055F278 = 0;
 }
 
-u8* fn_8024859C(u8* p, int del) {
-    if (p) {
-        U8(p, 0x18) = 0;
-        U8(p, 0x50) = 0;
-        U8(p, 0x5C) = 0;
-        S32(p, 0x24) = 1;
-        S32(p, 0x20) = 0;
-        U8(p, 0x44) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 int fn_802485FC(void) {
     u16 keys[5] = {0x126, 0x128, 0x125, 0x127, 0};
@@ -1132,14 +1129,88 @@ int fn_80248668(void) {
     return fn_802146BC(&desc, -999, -999, 1);
 }
 
-void fn_80248770(u8* p) {
-    U8(p, 0x18) = 1;
-    S32(p, 0x1C) = fn_80221EA8(p);
+}  // extern "C"
+
+void LogoMover::Enter(void) {
+    m.active = 1;
+    m.idx = fn_80221EA8((u8*)this);
 }
 
-void fn_802487A8(u8* p) { U8(p, 0x18) = 0; }
+void LogoMover::Exit(void) { m.active = 0; }
 
-void fn_802487B4(u8* p) {}  // stub (173)
+// Odd smoothstep: -1 below -1, 1 above 1.
+static inline f32 SmoothSign(f32 v) {
+    if (v < -1.0f) {
+        return -1.0f;
+    }
+    if (v > 1.0f) {
+        return 1.0f;
+    }
+    if (v > 0.0f) {
+        return v * (-2.0f * v * v) + 3.0f * v * v;
+    }
+    return v * (-2.0f * v * v) - 3.0f * v * v;
+}
+
+static inline f32 LerpF(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
+void LogoMover::Update(void) {
+    if (m.vis != m.lastVis) {
+        if (m.vis == 0) {
+            fn_80214AF0(m.idx);
+        } else {
+            fn_80214A9C(m.idx);
+        }
+        m.lastVis = m.vis;
+    }
+    if (m.jumpOn) {
+        s32 jy;
+        s32 jx;
+        jx = m.jumpX;
+        jy = m.jumpY;
+        m.toX = jx;
+        m.fromX = jx;
+        m.toY = jy;
+        m.fromY = jy;
+        fn_80214BE4(m.idx, jx - x, jy - y);
+        m.jumpOn = 0;
+        m.t = 1.1f;
+    }
+    if (m.moveOn) {
+        m.fromX = x;
+        m.fromY = y;
+        m.toX = m.moveX;
+        m.toY = m.moveY;
+        m.t = 0.0f;
+        m.moveOn = 0;
+    }
+    m.t += m.rate * fn_80214D48();
+    f32 k;
+    switch (m.ease) {
+    case 1: {
+        f32 v = MIN(m.t, 1.0f);
+        k = v * v;
+        break;
+    }
+    case 2: {
+        f32 v = MIN(m.t, 1.0f);
+        k = SmoothSign(v);
+        break;
+    }
+    default:
+        k = MIN(m.t, 1.0f);
+        break;
+    }
+    int nx = (int)LerpF((f32)m.fromX, (f32)m.toX, k);
+    int ny = (int)LerpF((f32)m.fromY, (f32)m.toY, k);
+    fn_80214BE4(m.idx, nx - x, ny - y);
+    if (m.f44 && m.Done()) {
+        m.f44 = 0;
+        m.vis = 1;
+    }
+}
+
+extern "C" {
 
 void fn_80248A68(u8* p) { F32(p, 0x1C) = 0.0f; }
 
