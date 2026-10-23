@@ -64,7 +64,7 @@ public:
     Statistic(int slot, u32 type, long event, int difficulty);
     u32 GetType(void);
     int HasValue(void);
-    int IsBetterThan(Statistic* o);
+    int IsBetterThan(const Statistic* o) const;
     void Revert(void);
     void Commit(void);
     void Format(char* buf, int n);

@@ -213,7 +213,7 @@ public:
     BOOL HasDefault(void);
     char* Format(char* buf, int size);
     VehicleChoice GetChoice(void);
-    BOOL IsBetterThan(Statistic* other);
+    BOOL IsBetterThan(const Statistic* other) const;
     void Commit(void);
     void Revert(void);
 
@@ -388,7 +388,7 @@ VehicleChoice Statistic::GetChoice(void) {
     return StatsUnpackChoice(entry->values[slot].choice);
 }
 
-BOOL Statistic::IsBetterThan(Statistic* other) {
+BOOL Statistic::IsBetterThan(const Statistic* other) const {
     return CompareStatValues(entry, slot, other->entry, other->slot) < 0;
 }
 
