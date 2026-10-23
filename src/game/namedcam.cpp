@@ -27,7 +27,8 @@ struct CamPose {
 };
 
 struct NamedCam {
-    u32 unk0;       // offset 0x0
+    u8 valid;       // offset 0x0
+    u8 pad1[0x3];
     CamPose pose;   // offset 0x4
     f32 fov;        // offset 0x34
     char name[16];  // offset 0x38
@@ -41,6 +42,9 @@ public:
     virtual void v10(void);
     virtual void v14(void);
     virtual const char* GetString(const char* key, const char* def);  // 0x18
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual f32 GetFloat(const char* key);  // 0x24
 };
 
 extern "C" {
@@ -191,7 +195,26 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 
 void fn_80277A14(u8* p) {}  // stub (348)
 
-void fn_80277F84(NamedCam* c, CamReader* r, int n) {}  // stub (121)
+extern char lbl_80347378[];  // this unit's string pool ("rddefault", ...)
+#define POOL(o) (lbl_80347378 + (o))
+
+void fn_80277F84(NamedCam* c, CamReader* r, int n) {
+    c->pose.pos.v[0] = r->GetFloat(POOL(0x178));   // "location_x"
+    c->pose.pos.v[1] = r->GetFloat(POOL(0x184));   // "location_y"
+    c->pose.pos.v[2] = r->GetFloat(POOL(0x190));   // "location_z"
+    c->pose.rot.m[0] = r->GetFloat(POOL(0x19C));   // "basis_x_x"
+    c->pose.rot.m[1] = r->GetFloat(POOL(0x1A8));   // "basis_x_y"
+    c->pose.rot.m[2] = r->GetFloat(POOL(0x1B4));   // "basis_x_z"
+    c->pose.rot.m[3] = r->GetFloat(POOL(0x1C0));   // "basis_y_x"
+    c->pose.rot.m[4] = r->GetFloat(POOL(0x1CC));   // "basis_y_y"
+    c->pose.rot.m[5] = r->GetFloat(POOL(0x1D8));   // "basis_y_z"
+    c->pose.rot.m[6] = r->GetFloat(POOL(0x1E4));   // "basis_z_x"
+    c->pose.rot.m[7] = r->GetFloat(POOL(0x1F0));   // "basis_z_y"
+    c->pose.rot.m[8] = r->GetFloat(POOL(0x1FC));   // "basis_z_z"
+    c->fov = r->GetFloat("fov");
+    strncpy(c->name, r->GetString("name", ""), 0x10);
+    c->valid = 1;
+}
 
 void fn_80278168(u8* p) {}  // stub (41)
 }  // extern "C"
