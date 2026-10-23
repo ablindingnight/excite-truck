@@ -171,7 +171,115 @@ s32 lbl_8055E524;
 
 extern "C" {
 
-void fn_8018FB18(u8* p) {}  // stub (72)
+}  // extern "C"
+
+class PcGameMode {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void v60(void);
+    virtual void v64(void);
+    virtual void v68(void);
+    virtual void v6C(void);
+    virtual void v70(void);
+    virtual void v74(void);
+    virtual void v78(void);
+    virtual void v7C(void);
+    virtual void v80(void);
+    virtual void v84(void);
+    virtual void v88(void);
+    virtual void v8C(void);
+    virtual void v90(void);
+    virtual void v94(void);
+    virtual void v98(void);
+    virtual void v9C(void);
+    virtual void vA0(void);
+    virtual void vA4(void);
+    virtual void vA8(void);
+    virtual void vAC(void);
+    virtual void vB0(void);
+    virtual void vB4(void);
+    virtual void vB8(void);
+    virtual void vBC(void);
+    virtual void vC0(void);
+    virtual void vC4(void);
+    virtual void vC8(void);
+    virtual void vCC(void);
+    virtual void vD0(void);
+    virtual void vD4(void);
+    virtual void vD8(void);
+    virtual void vDC(void);
+    virtual void vE0(void);
+    virtual void vE4(void);
+    virtual void vE8(void);
+    virtual u32 PlayerController(void);  // 0xEC
+};
+
+class Controller;
+class SpringCar {
+public:
+    SpringCar(Controller* c);
+    u8 data[0x2844];
+};
+
+void* operator new(unsigned long n, const char* tag);
+
+extern "C" {
+u8* fn_801769CC(void);
+PcGameMode* fn_801B83A0(void);
+u32 fn_80134E90(void);
+u32 fn_80134EC8(void);
+u32 fn_80135078(void);
+u8* fn_801912B4(u8* p);
+u8* fn_8018FD88(u8* p, u32 a, u32 b);
+
+// Builds the local player's car: driver, hybrid controller and the car itself.
+SpringCar* fn_8018FB18(void) {
+    u8* prof = fn_801769CC();
+    u32 ctl = fn_801B83A0()->PlayerController();
+    lbl_8055E522 = (U32(prof, 0x4) >> 8) & 1;
+    if (U32(prof, 0x4) == 0x180304) {
+        lbl_8055E522 = 0;
+    }
+    if (!ctl) {
+        if (U32(prof, 0x4) & 0x100) {
+            ctl = fn_80134E90();
+        } else if (U32(prof, 0x4) == 0x180201) {
+            ctl = fn_80134EC8();
+        } else {
+            ctl = fn_80135078();
+        }
+    }
+    u8* drv = (u8*)operator new(0x44, "PlayerDriver");
+    if (drv) {
+        drv = fn_801912B4(drv);
+    }
+    u8* hyb = (u8*)operator new(0x3C, "Hybrid");
+    if (hyb) {
+        hyb = fn_8018FD88(hyb, ctl, (u32)drv);
+    }
+    return new ("LocalCar (player)") SpringCar((Controller*)hyb);
+}
 
 void fn_8018FC38(void) {
     s32 n = fn_80137C74();
