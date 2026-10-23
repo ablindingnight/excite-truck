@@ -767,13 +767,9 @@ public:
         }
     }
     virtual void Rearm(void) { Stop(); }
+    virtual void Added(Body* b);
+    virtual void Removed(Body* b);
     virtual void Changed(void) {}
-    virtual void Removed(Body* b) { bodies.Remove(b); }
-    virtual void Added(Body* b) {
-        if (Matches(b)) {
-            bodies.Push(b);
-        }
-    }
     virtual int Begin(int reverse);
     virtual void Update(void);
     virtual void Hit(Body* b, const Vec* pos);
@@ -798,6 +794,14 @@ public:
     s32 startFrame;                        // offset 0x6C
     FixedArr<Body*, 64> bodies;            // offset 0x70
 };
+
+inline void Obstacle_ASE::Removed(Body* b) { bodies.Remove(b); }
+
+inline void Obstacle_ASE::Added(Body* b) {
+    if (Matches(b)) {
+        bodies.Push(b);
+    }
+}
 
 }  // namespace
 
@@ -1381,25 +1385,9 @@ public:
             entries.data[i].obj->SetMode(-1);
         }
     }
+    virtual void Added(SurfBody* b);
+    virtual void Removed(SurfBody* b);
     virtual void Changed(void) {}
-    virtual void Removed(SurfBody* b) {
-        for (int i = 0; i < entries.Count(); i++) {
-            if (entries.data[i].obj == b) {
-                entries.RemoveAt(i);
-            }
-        }
-    }
-    virtual void Added(SurfBody* b) {
-        ValueNode* d = b->Desc();
-        if (d && groupId == d->GetInt("group_id", -1)) {
-            SurfEntry e;
-            e.surf = b->Surface();
-            e.mode = b->Mode();
-            e.obj = b;
-            entries.Push(e);
-            b->SetMode(-1);
-        }
-    }
 
     s32 groupId;                      // offset 0x8
     f32 delay;                        // offset 0xC
@@ -1410,6 +1398,25 @@ public:
     s32 phase;                        // offset 0x20
     FixedArr<SurfEntry, 32> entries;  // offset 0x24
 };
+
+inline void SurfaceChange_ASE::Removed(SurfBody* b) {
+    for (int i = 0; i < entries.Count(); i++) {
+        if (entries.data[i].obj == b) {
+            entries.RemoveAt(i);
+        }
+    }
+}
+inline void SurfaceChange_ASE::Added(SurfBody* b) {
+    ValueNode* d = b->Desc();
+    if (d && groupId == d->GetInt("group_id", -1)) {
+        SurfEntry e;
+        e.surf = b->Surface();
+        e.mode = b->Mode();
+        e.obj = b;
+        entries.Push(e);
+        b->SetMode(-1);
+    }
+}
 
 }  // namespace
 
