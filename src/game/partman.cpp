@@ -896,8 +896,8 @@ void PartSys::DrawAnimated(Particle* p, int n) {
     for (int i = 0; i < n; i++, p++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
-        int frame = (p->frame + (int)(t * ((f32)frames * animRamp))) % frames;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
+        int frame = (p->frame + (int)(t * ((f32)frames * animRamp))) % frames;
         V3 pos;
         Integrate(&pos, p, age);
         CamMtx m = *fn_802C86DC();
