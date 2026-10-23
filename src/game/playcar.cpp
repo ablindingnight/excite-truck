@@ -530,7 +530,20 @@ int fn_80192C4C(u8* p) { return PF(PTR(p, 0x8))->b2 != 0; }
 
 int fn_80192C68(u8* p) { return PF(PTR(p, 0x8))->lvl - 1; }
 
-void fn_80192C7C(u8* p) {}  // stub (37)
+// A 4-bit field widened to 8 bits (0xN -> 0xNN).
+struct Nibbles {
+    u8 hi : 4;
+    u8 lo : 4;
+};
+
+static inline u8 HiNibble8(u8* p) { return (*p & 0xF0) | ((Nibbles*)p)->hi; }
+static inline u8 LoNibble8(u8* p) { return ((*p << 4) & 0xF0) | ((Nibbles*)p)->lo; }
+
+f32 fn_80192C7C(u8* p) {
+    f32 t = CMIN(kOne, ((f32)HiNibble8(PTR(p, 0x8) + 0x6) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kZero + t * kOne;
+}
 
 f32 fn_80192D10(u8* p) {
     f32 t = CMIN(kOne, ((f32)U8(PTR(p, 0x8), 0x5) - kZero) / k255);
@@ -546,7 +559,11 @@ f32 fn_80192D98(u8* p) {
 
 int fn_80192E20(u8* p) { return PF(PTR(p, 0x8))->b0 != 0; }
 
-void fn_80192E3C(u8* p) {}  // stub (37)
+f32 fn_80192E3C(u8* p) {
+    f32 t = CMIN(kOne, ((f32)LoNibble8(PTR(p, 0x8) + 0x6) - kZero) / k255);
+    t = CMAX(t, kZero);
+    return kZero + t * kOne;
+}
 
 f32 fn_80192ED0(u8* p) {
     f32 t = CMIN(kOne, ((f32)*(u16*)PTR(p, 0x8) - kZero) / k65535);
