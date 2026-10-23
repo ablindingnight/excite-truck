@@ -990,8 +990,10 @@ void fn_801B24B8(void) {
 }
 
 int fn_801B25B0(const s32* pa, const s32* pb) {
-    f32 a = lbl_8055E684[*pa].State()->last;
-    f32 b = lbl_8055E684[*pb].State()->last;
+    DeityCar* ca = &lbl_8055E684[*pa];
+    DeityCar* cb = &lbl_8055E684[*pb];
+    f32 a = ca->State()->qual;
+    f32 b = cb->State()->qual;
     if (a < 1.0f) {
         a = 100000.0f;
     }
