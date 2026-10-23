@@ -569,9 +569,12 @@ void fn_802BD0F4(TreeType* t) {
 }
 
 TListEntry* fn_802BD194(TListFile* f, const char* name) {
-    u32 n = f->n;
-    for (u32 i = 0; i < n; i++) {
-        TListEntry* es = f->entries;
+    u32 n;
+    TListEntry* es;
+    u32 i;
+    n = f->n;
+    for (i = 0; i < n; i++) {
+        es = f->entries;
         if (strcmp(es[i].name, name) == 0) {
             return &es[i];
         }
