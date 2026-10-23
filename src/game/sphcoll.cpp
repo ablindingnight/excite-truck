@@ -47,6 +47,17 @@ struct Xform {
 };
 
 extern void* lbl_80333968[];
+extern void* lbl_80333818[];
+
+class VEx;
+
+// A sphere group: its member volumes start at +0x24.
+struct SphGroup {
+    u8 pad0[0x24];   // offset 0x0
+    VEx* vols[20];   // offset 0x24
+};
+extern s32 lbl_8055E3C4;
+extern "C" void fn_801A2674(u8* p, f32 r, u32 a, u32 b);
 
 static inline void Swap32(u8* b) {
     u8 b0 = b[0];
@@ -383,7 +394,14 @@ u8* fn_801A010C(u8* p, int del) {
 
 void fn_801A014C(u8* p) { VE(PTR(p, 0x17C))->v0C(); }
 
-void fn_801A0160(u8* p) {}  // stub (32)
+void fn_801A0160(u8* p) {
+    if (lbl_8055E3C4 != S32(p, 0x180)) {
+        S32(p, 0x180) = lbl_8055E3C4;
+        for (int i = 0; i < S32(p, 0x174); i++) {
+            ((SphGroup*)p)->vols[i]->v0C();
+        }
+    }
+}
 
 void fn_801A01E0(u8* p, RVec3* lo, RVec3* hi) {
     f32 r = F32(p, 0x178);
@@ -436,7 +454,12 @@ void fn_801A1358(u8* p, u32 v) { U32(p, 0x1c) = v; }
 
 void fn_801A1360(u8* p) {}  // stub (37)
 
-void fn_801A13F4(u8* p) {}  // stub (32)
+void fn_801A13F4(u8* p) {
+    ((VEx*)PTR(p, 0x17C))->v4C();
+    for (int i = 0; i < S32(p, 0x174); i++) {
+        ((SphGroup*)p)->vols[i]->v4C();
+    }
+}
 
 void fn_801A1474(u8* p) {}  // stub (43)
 
@@ -521,7 +544,20 @@ u8* fn_801A2434(u8* p, int del) {
 
 void fn_801A2474(u8* p) {}  // stub (97)
 
-void fn_801A25F8(u8* p) {}  // stub (31)
+u8* fn_801A25F8(u8* p, u32 a, u32 b, u32 c, f32 r) {
+    U32(p, 0xC) = a;
+    U32(p, 0x30) = b;
+    U32(p, 0x4) = c;
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'RAGD';
+    F32(p, 0x10) = 1.0f;
+    F32(p, 0x14) = 1.0f;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_80333818;
+    fn_801A2674(p, r, 0, -1);
+    return p;
+}
 
 void fn_801A2674(u8* p, f32 r, u32 a, u32 b) {
     F32(p, 0x24) = r;
