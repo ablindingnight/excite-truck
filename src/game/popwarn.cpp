@@ -961,20 +961,36 @@ void fn_802481A0(f32* outX, f32* outY, f32 x, f32 y) {
     *outY = BobCurve(x, y, u);
 }
 
+}  // extern "C"
+
+// Starts a {start, dur, on} ramp.
+static inline void SetRamp(u8* r, s32 start, s32 dur) {
+    U8(r, 0x8) = 1;
+    S32(r, 0x0) = start;
+    S32(r, 0x4) = dur;
+}
+
+extern "C" {
+
+}  // extern "C"
+
+static inline void RestartRamps(u8* o) {
+    s32 b;
+    s32 a;
+    a = S32(o, 0x4);
+    b = S32(o, 0x8);
+    SetRamp(o + 0x48, lbl_8055BEF0 + a, b);
+    u8* q = lbl_8055F278;
+    SetRamp(q + 0x54, a, b);
+    U8(q, 0x44) = 0;
+}
+
+extern "C" {
+
 void fn_80248398(void) {
-    u8* o = lbl_8055F278;
-    if (!o) {
-        return;
+    if (lbl_8055F278) {
+        RestartRamps(lbl_8055F278);
     }
-    s32 a = S32(o, 0x4);
-    s32 b = S32(o, 0x8);
-    U8(o, 0x50) = 1;
-    S32(o, 0x48) = lbl_8055BEF0 + a;
-    S32(o, 0x4C) = b;
-    U8(lbl_8055F278, 0x5C) = 1;
-    S32(lbl_8055F278, 0x54) = a;
-    S32(lbl_8055F278, 0x58) = b;
-    U8(lbl_8055F278, 0x44) = 0;
 }
 
 void fn_802483E0(void) {}  // stub (111)
