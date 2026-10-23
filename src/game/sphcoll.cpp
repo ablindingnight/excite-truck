@@ -414,7 +414,45 @@ void fn_8019EECC(u8* p, RVec3* v) {
     v->z += F32(p, 0x38);
 }
 
-void fn_8019EF00(u8* p) {}  // stub (79)
+// Rotation + translation of a collision frame.
+struct CFrame {
+    f32 m[9];   // offset 0x0, rows
+    RVec3 t;    // offset 0x24
+};
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+    }
+}
+
+struct CVolume {
+    u8 pad0[0xC];
+    CFrame* frame;  // offset 0xC
+    u8 pad10[0x18];
+    RVec3 local;    // offset 0x28
+    RVec3 world;    // offset 0x34
+};
+
+// World centre = frame * local centre.
+void fn_8019EF00(CVolume* v) {
+    CFrame* f = v->frame;
+    MulVec(&v->world, &v->local, f);
+    v->world.x = v->world.x + f->t.x;
+    v->world.y = v->world.y + f->t.y;
+    v->world.z = v->world.z + f->t.z;
+}
 
 void fn_8019F03C(u8* p) {
     U8(p, 0x4C) = 0;
@@ -488,7 +526,7 @@ void fn_8019F414(u8* p) {
     if (o) {
         fn_8019EECC(o, (RVec3*)(p + 0x28));
     }
-    fn_8019EF00(p);
+    fn_8019EF00((CVolume*)p);
 }
 
 void fn_8019F4D4(u8* p) {}  // stub (35)
