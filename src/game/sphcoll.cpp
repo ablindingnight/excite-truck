@@ -16,6 +16,17 @@ struct RVec3 {
     f32 x, y, z;
 };
 
+struct PVec3 {
+    f32 v[3];
+};
+
+// o = c + d * k
+static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
+    o[0] = c[0] + d[0] * k;
+    o[1] = c[1] + d[1] * k;
+    o[2] = c[2] + d[2] * k;
+}
+
 struct W3 {
     u32 a, b, c;
 };
@@ -290,7 +301,7 @@ void fn_8019AC44(u8* p, u8* c, u8* d, f32 r) {}
 
 void fn_8019B068(u8* p, u8* q, u32 a, u32 b) { fn_8019AA34(p, p + 0x34, q, q + 0x34, a, b, F32(p, 0x24), F32(q, 0x24)); }
 
-void fn_8019B08C(u8* p) {}  // stub (275)
+int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) { return 0; }  // stub (275)
 
 void fn_8019B4D8(u8* p) {}  // stub (541)
 
@@ -444,9 +455,26 @@ void fn_8019D378(u8* p, u8* q) {
 
 void fn_8019D484(u8* p) {}  // stub (101)
 
-void fn_8019D618(u8* p) {}  // stub (294)
+int fn_8019D618(u8* p, u8* q, int a, int b) { return 0; }  // stub (294)
 
-void fn_8019DAB0(u8* p) {}  // stub (85)
+// Tube p vs q: the cylinder first, then both end caps as spheres.
+int fn_8019DAB0(u8* p, u8* q) {
+    bool hit = fn_8019D618(p, q, 0, 0);
+    if (hit) {
+        return 1;
+    }
+    PVec3 a;
+    PVec3 b;
+    PVec3 dir = *(PVec3*)(PTR(p, 0xC) + 0x18);
+    PVec3 mid = *(PVec3*)(PTR(p, 0xC) + 0x24);
+    f32 h = F32(p, 0x28);
+    MulAdd(a.v, mid.v, dir.v, h);
+    MulAdd(b.v, mid.v, dir.v, -h);
+    f32 r = F32(p, 0x24);
+    hit |= fn_8019B08C(p, a.v, q, r);
+    hit |= fn_8019B08C(p, b.v, q, r);
+    return hit;
+}
 
 void fn_8019DC04(u8* p, u8* q) {}  // stub (122)
 
@@ -737,10 +765,6 @@ u8* fn_8019F3D4(u8* p, int del) {
     }
     return p;
 }
-
-struct PVec3 {
-    f32 v[3];
-};
 
 extern const f32 lbl_8056237C;
 
@@ -1056,12 +1080,6 @@ struct TubeSeg {
 
 void fn_801E41D8(f32* a, f32* b, u32 color, f32 r);
 
-// o = c + d * k
-static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
-    o[0] = c[0] + d[0] * k;
-    o[1] = c[1] + d[1] * k;
-    o[2] = c[2] + d[2] * k;
-}
 
 // Debug-draws the tube as a capsule.
 void fn_801A17B8(u8* p) {
