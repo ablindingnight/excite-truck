@@ -30,7 +30,7 @@ public:
     virtual int v3C(void);
     virtual int v40(void);
     virtual void v44(void);
-    virtual void v48(void);
+    virtual int v48(void);
     virtual int v4C(void);
 };
 
@@ -52,12 +52,13 @@ void fn_80214AF0(int s);
 void fn_8027E908(u8* p);
 void fn_80286A34(u8* p);
 void fn_80287238(u8* p);
-void fn_80283938(u8* p);
+u8* fn_80283938(u8* p, int del);
 }
 
 void operator delete(void* p);
 
 extern U32List lbl_804B30D8;
+extern void* lbl_80348678[];
 
 // Copies at most n characters, always terminating.
 static inline void CopyName(const char* s, int n, char* d) {
@@ -161,7 +162,28 @@ u8* fn_802837D4(u8* p, int del) {
 
 void fn_80283814(u8* p) {}  // stub (73)
 
-void fn_80283938(u8* p) {}  // stub (38)
+u8* fn_80283938(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80348678;
+        *(void**)(p + 0x4) = (u8*)lbl_80348678 + 0x50;
+        lbl_8055F69C = 0;
+        if (PTR(p, 0x20)) {
+            operator delete(PTR(p, 0x20));
+        }
+        u8* m = p + 0x40;
+        if (m) {
+            if (m) {
+                U32(p, 0x40) = 0;
+                U32(p, 0x44) = 0;
+                U32(p, 0x48) = 0;
+            }
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 int fn_802839D0(void) {
     if (lbl_8055F684 && lbl_8055F698) {
@@ -297,7 +319,22 @@ int fn_802869CC(u8* p, int key) {
 
 void fn_80286A34(u8* p) {}  // stub (513)
 
-void fn_80287238(u8* p) {}  // stub (41)
+void fn_80287238(u8* p) {
+    u8* o = PTR(p, 0x20);
+    if (o) {
+        F32(o, 0x10) = 0.0f;
+        U8(p, 0x29) = 0;
+        U8(p, 0x2A) = 0;
+        U8(p, 0x28) = VR(p)->v40();
+        fn_8027ED70()->v38("scoreup_tally");
+        fn_80214A9C(0x1F);
+        F32(p, 0x178) = 1.0f;
+    } else {
+        U8(p, 0x29) = 1;
+        U8(p, 0x2A) = 0;
+        F32(p, 0x178) = 0.0f;
+    }
+}
 
 void fn_802872DC(u8* p) { VR(PTR(p, 0x4))->v0C(); }
 
@@ -327,7 +364,14 @@ int fn_80287364(u8* p) {
 
 void fn_802873F8(u8* p) { VR(PTR(p, 0x4))->v24(); }
 
-void fn_8028740C(u8* p) {}  // stub (37)
+int fn_8028740C(u8* p) {
+    for (int i = 0; i < VR(p)->v18(); i++) {
+        if (!VR(VR(p)->v1C(i))->v48()) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void fn_802874A0(u8* p) { VR(PTR(p, 0x4))->v2C(); }
 
@@ -393,6 +437,6 @@ void fn_80287764(u8* p) { fn_80286A34(p - 4); }
 
 void fn_8028776C(u8* p) { fn_80287238(p - 4); }
 
-void fn_80287774(u8* p) { fn_80283938(p - 4); }
+u8* fn_80287774(u8* p, int del) { return fn_80283938(p - 4, del); }
 
 }  // extern "C"
