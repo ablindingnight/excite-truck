@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "macros.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -15,6 +16,11 @@
 
 struct RVec3 {
     f32 x, y, z;
+};
+
+// A vector copied as words (array member).
+struct PVec3 {
+    f32 v[3];
 };
 
 struct V2 {
@@ -1276,20 +1282,42 @@ void fn_801964D0(u8* d) {
     }
 }
 
-void fn_801965AC(u8* d) {}
+void fn_801EA18C(RVec3* pos, const RVec3* dir, int a);
+extern const f32 lbl_80562140;  // 1.0f
+extern const f32 lbl_80562144;  // 0.0f
+extern const f32 lbl_80562248;  // -1.1f
+void fn_8018AE2C(u8* car, f32 pitch);
+void fn_8018AE34(u8* car, f32 roll);
 
-void fn_80198530(u8* d);
-void fn_80196AA0(u8* d);
-
-void fn_801967A4(u8* d) {
-    switch (S32(d, 0x210)) {
-    case 0:
-        fn_80198530(d);
-        fn_801965AC(d);
-        break;
-    case 1:
-        fn_80196AA0(d);
-        break;
+// Steers the truck's attitude: in the air level it against up; on the ground pitch from height and speed.
+void fn_801965AC(u8* d) {
+    if (S32(CAR(d), 0x2620) != 0) {
+        return;
+    }
+    RVec3 up;
+    up.x = 0.0f;
+    up.y = 1.0f;
+    up.z = 0.0f;
+    PVec3 pos = *(PVec3*)(CAR(d) + 0x60);
+    fn_801EA18C((RVec3*)&pos, &up, 0);
+    f32 h = MAX(0.0f, F32(CAR(d), 0x64) - pos.v[1]);
+    f32 vy = MIN(F32(CAR(d), 0x11C), -0.01f);
+    bool air = -h / vy < lbl_80562140;
+    f32 gain = 5.0f;
+    if (air) {
+        f32 a = gain * PSVECDotProduct(&up, CAR(d) + 0x54);
+        a = MIN(1.0f, a);
+        fn_8018AE2C(CAR(d), MAX(a, -1.0f));
+        a = gain * PSVECDotProduct(&up, CAR(d) + 0x3C);
+        a = MIN(1.0f, a);
+        fn_8018AE34(CAR(d), MAX(a, -1.0f));
+    } else {
+        f32 k = MIN(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / lbl_80562140);
+        k = MAX(k, 0.0f);
+        f32 a = gain * (F32(CAR(d), 0x58) - (0.7f + k * lbl_80562248));
+        a = MIN(1.0f, a);
+        fn_8018AE2C(CAR(d), MAX(a, -1.0f));
+        fn_8018AE34(CAR(d), 0.0f);
     }
 }
 
