@@ -19,13 +19,13 @@ struct PathPos {
 };
 
 extern "C" {
-u8* fn_801E87A8(u8* p);
+u8* fn_801E87A8(void);
 int strcasecmp(const char* a, const char* b);
 u8* fn_80178C9C(void);
 void fn_80136468(PathPos* out, u8* src, f32 t);
 void fn_80270EC4(u8* c, u32 id);
 void fn_802712F8(const char* path);
-void fn_80271624(u8* p);
+void fn_80271624(int mode, u8* p);
 }
 
 void operator delete(void* p);
@@ -124,7 +124,7 @@ void fn_80270AE8(f32* p) {
 
 void fn_80270B00(const char* fmt, ...) {}
 
-u32 fn_80270B50(u8* p) { return U32(fn_801E87A8(p), 0x4); }
+u32 fn_80270B50(void) { return U32(fn_801E87A8(), 0x4); }
 
 void fn_80270B74(void) {
     for (int i = 0; i < 32; i++) {
@@ -420,7 +420,7 @@ void fn_80271578(void) {
     u32 keep;
     u8* c = fn_80178C9C();
     keep = U32(c, 0xC);
-    fn_80270EC4(c, fn_80270B50(c));
+    fn_80270EC4(c, fn_80270B50());
     U32(c, 0xC) = keep;
 }
 
@@ -451,7 +451,316 @@ f32 fn_802715F0(u8* p) {
     return lbl_8055F540;
 }
 
-void fn_80271624(u8* p) {}  // stub (610)
+}  // extern "C"
+struct Mat3 {
+    f32 m[9];
+};
+
+// A camera frame copied as 12 words (rotation rows + position).
+struct Words12 {
+    u32 w[12];
+};
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+extern "C" {
+void fn_802704D4(int to, u8* cam);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+void fn_801BFD34(u8* out, const f32* v, const u8* frame);
+extern s32 lbl_8055F548;
+extern u8 lbl_8055F480;
+extern f32 lbl_8055C598;  // focus distance override (< 0: use the target)
+extern const f32 lbl_80563F44;  // -1.0
+extern const f32 lbl_80563F50;  // 1.0
+extern const f32 lbl_80563F54;  // -2.0
+extern const f32 lbl_80563F58;  // 3.0
+extern const f32 lbl_80563F5C;
+extern const f32 lbl_80563F60;
+extern const f32 lbl_80563F64;
+extern const f32 lbl_80563F68;  // minimum focus distance
+extern const f32 lbl_80563F6C;  // overhead camera height
+extern const f32 lbl_80563F70;  // fallback grid size
+extern const f32 lbl_80563F74;
+extern const f32 lbl_80563F78;  // fallback height above ground
+extern f32 lbl_80499050[12];    // last camera frame
+extern char lbl_80346E9C[];     // "PhysCam warning: car pit mode is invalid"
+extern char lbl_80346EC8[];     // "Unknown camera %d"
+int fn_80129D90(int seed, int lo, int hi);  // random int
+int fn_801769F8(void);
+u32 fn_802E2C20(void);
+void fn_802E317C(const char* fmt, ...);  // fatal
+void fn_801E9DC4(u8* h);
+int fn_801E9E30(u8* h, f32* pos);
+f32 fn_801E9DDC(u8* h, f32 x, f32 z);
+void fn_80265EC4(u8* shake, u32 t, int a);
+void fn_80266070(u8* shake, f32* a, f32* b, f32* c);
+void fn_80266170(u8* funky, u32 t, int a, int fresh, f32 fov);
+void fn_802662D8(u8* funky, f32* a, f32* b, f32* c, f32* d);
+void fn_80266388(u8* rumble, int a, f32* frame, u8* tv, u8* car);
+void fn_80266A0C(u8* p, f32* w, u8* tv, f32 fov);
+void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff);
+void fn_802749FC(u8* p, f32* move);
+void fn_80274E94(u8* p);
+void fn_80274EA8(u8* p);
+void fn_80274F74(u8* p, const f32* w, f32 t);
+void fn_802750C4(u8* p, f32 k, f32 dist);
+void fn_802751AC(u8* p);
+void fn_80275410(u8* p);
+void fn_802756A4(u8* p);
+void fn_80275938(u8* p);
+void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed);
+void fn_80275D0C(u8* p);
+
+// The track's pit/route mode (3 = none).
+static inline int PitMode(u8* track) {
+    u8* r = PTR(track, 0x4);
+    return r ? U8(r, 0x34) : 3;
+}
+
+// Smoothstep-style ease of a -1..1 fraction.
+static inline f32 CamEase(f32 x) {
+    if (x < lbl_80563F44) {
+        return lbl_80563F44;
+    }
+    if (x > lbl_80563F50) {
+        return lbl_80563F50;
+    }
+    if (x > lbl_80563F48) {
+        return lbl_80563F54 * x * x * x + lbl_80563F58 * x * x;
+    }
+    return lbl_80563F54 * x * x * x - lbl_80563F58 * x * x;
+}
+
+// Per-frame TV (replay) camera: picks the best region's camera on a region change, eases moving cameras
+// along the car's progress through the region, applies shake/funky fov/rumble/focus, then runs the
+// camera's type. Without TV cameras it uses a grid-snapped default; with no region, an overhead view.
+void fn_80271624(int mode, u8* p) {
+    u8* track = ((CamCarCtl*)PTR(PTR(p, 0x140), 0x270))->Track();
+    int group;
+    switch (PitMode(track)) {
+    case 1:
+        group = 0;
+        break;
+    case 2:
+        group = 1;
+        break;
+    default:
+        static bool warnedPit;
+        if (!warnedPit) {
+            warnedPit = true;
+            fn_802E30C8("%s", lbl_80346E9C);
+        }
+    case 0:
+        group = lbl_8049A258[0].cur + 2;
+        break;
+    }
+    fn_80270B50();
+    if (lbl_8055F548 > 1) {
+        int fresh = 0;
+        int idx;
+        if (mode == 11) {
+            idx = fn_802710A0(PTR(p, 0x140), group);
+            if (idx >= 0) {
+                S32(p, 0x14C) = idx;
+                if (idx != S32(p, 0x150)) {
+                    S32(p, 0x150) = idx;
+                    RegionSphere* rs = &lbl_8049EDC8[idx];
+                    fresh = 1;
+                    S32(p, 0x148) = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
+                }
+            }
+        } else {
+            idx = -1;
+        }
+        if (idx >= 0) {
+            TvCamera* tv = &lbl_8049A2C8[S32(p, 0x148)];
+            if (tv->moves) {
+                if (lbl_8055F564) {
+                    CamRegion* r = &lbl_8049F9D8[idx];
+                    f32 f = lbl_80563F48;
+                    f32 h = lbl_8055F568;
+                    f32 lo = r->lo1;
+                    f32 hi = r->hi1;
+                    if (lo >= hi) {
+                        if (h >= lo) {
+                            hi += *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
+                        } else {
+                            lo -= *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
+                        }
+                    }
+                    if (lo <= h && h <= hi) {
+                        f = (h - lo) / (hi - lo);
+                    } else {
+                        lo = r->lo2;
+                        hi = r->hi2;
+                        if (lo >= hi) {
+                            if (h >= lo) {
+                                hi += *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
+                            } else {
+                                lo -= *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
+                            }
+                        }
+                        if (lo <= h && h <= hi) {
+                            f = (h - lo) / (hi - lo);
+                        }
+                    }
+                    f32 e = CamEase(f);
+                    f32 v[3];
+                    v[0] = tv->from[0] + e * (tv->to[0] - tv->from[0]);
+                    v[1] = tv->from[1] + e * (tv->to[1] - tv->from[1]);
+                    v[2] = tv->from[2] + e * (tv->to[2] - tv->from[2]);
+                    tv->pos[0] = v[0];
+                    tv->pos[1] = v[1];
+                    tv->pos[2] = v[2];
+                    f32 x[3];
+                    x[0] = tv->exFrom[0] + e * (tv->exTo[0] - tv->exFrom[0]);
+                    x[1] = tv->exFrom[1] + e * (tv->exTo[1] - tv->exFrom[1]);
+                    x[2] = tv->exFrom[2] + e * (tv->exTo[2] - tv->exFrom[2]);
+                    tv->ex[0] = x[0];
+                    tv->ex[1] = x[1];
+                    tv->ex[2] = x[2];
+                    tv->fov = tv->fovFrom + e * (tv->fovTo - tv->fovFrom);
+                } else {
+                    tv->pos[0] = tv->from[0];
+                    tv->pos[1] = tv->from[1];
+                    tv->pos[2] = tv->from[2];
+                    tv->ex[0] = tv->exFrom[0];
+                    tv->ex[1] = tv->exFrom[1];
+                    tv->ex[2] = tv->exFrom[2];
+                    tv->fov = tv->fovFrom;
+                }
+            }
+            F32(p, 0x7C) = tv->pos[0];
+            F32(p, 0x80) = tv->pos[1];
+            F32(p, 0x84) = tv->pos[2];
+            F32(p, 0x120) = lbl_80563F48;
+            F32(p, 0x124) = lbl_80563F48;
+            F32(p, 0x128) = lbl_80563F48;
+            if (lbl_8055F54C != tv->type) {
+                fn_801E9DC4(p + 0x1EC);
+            }
+            if (tv->flags & 2) {
+                int a = fn_801769F8();
+                fn_80265EC4(p + 0x160, fn_802E2C20(), a);
+                fn_80266070(p + 0x160, (f32*)(p + 0x4C), (f32*)(p + 0xE4), (f32*)(p + 0x12C));
+            } else {
+                F32(p, 0x4C) = F32(p, 0xE4);
+                F32(p, 0x50) = F32(p, 0xE8);
+                F32(p, 0x54) = F32(p, 0xEC);
+            }
+            if (tv->flags & 1) {
+                int a = fn_801769F8();
+                fn_80266170(p + 0x178, fn_802E2C20(), a, fresh, F32(p, 0xBC));
+                f32 fov = F32(p, 0x180) + F32(p, 0x184) * (F32(p, 0xBC) - F32(p, 0x180));
+                F32(p, 0x194) = fov;
+                F32(p, 0xBC) = fov;
+            }
+            switch (tv->type) {
+            case 0: {
+                f32 fov = fn_802715F0((u8*)tv);
+                f32 w[3];
+                fn_802715C4(w, (u8*)tv);
+                fn_80274F74(p, w, fov);
+                break;
+            }
+            case 1:
+                fn_80274730(p, lbl_80563F4C * tv->fov, lbl_80563F44, lbl_80563F44, lbl_80563F48);
+                break;
+            case 2:
+                fn_80274E94(p);
+                break;
+            case 3:
+                fn_80274EA8(p);
+                break;
+            case 4:
+                fn_802704D4(4, p);
+                break;
+            case 5: {
+                f32 move[3];
+                move[0] = lbl_80563F5C;
+                move[1] = lbl_80563F50;
+                move[2] = lbl_80563F48;
+                lbl_8055F480 = 1;
+                fn_802749FC(p, move);
+                break;
+            }
+            case 6:
+                fn_80275B9C(p, lbl_80563F60, lbl_80563F64, lbl_80563F50);
+                break;
+            case 7:
+                fn_80275410(p);
+                break;
+            case 8:
+                fn_802756A4(p);
+                break;
+            case 9:
+                fn_80275938(p);
+                break;
+            case 10:
+                fn_80275D0C(p);
+                break;
+            case 12: {
+                f32 fov = fn_802715F0((u8*)tv);
+                f32 w[3];
+                fn_802715C4(w, (u8*)tv);
+                fn_80266A0C(p, w, (u8*)tv, fov);
+                break;
+            }
+            case 16:
+                fn_802751AC(p);
+                break;
+            case 17:
+                fn_802750C4(p, tv->ex[0], tv->ex[1]);
+                break;
+            default:
+                fn_802E317C(lbl_80346EC8, tv->type);
+                break;
+            }
+            lbl_8055F54C = tv->type;
+            if (tv->flags & 1) {
+                fn_802662D8(p + 0x178, (f32*)(p + 0x7C), (f32*)(p + 0x7C), (f32*)(p + 0x70), (f32*)(p + 0x4C));
+            }
+            if (tv->flags & 4) {
+                fn_80266388(p + 0x188, fn_801769F8(), (f32*)(p + 0x58), (u8*)tv, PTR(p, 0x140));
+            }
+            if (tv->flags & 8) {
+                f32 d[3];
+                d[0] = F32(p, 0xE4) - F32(p, 0x7C);
+                d[1] = F32(p, 0xE8) - F32(p, 0x80);
+                d[2] = F32(p, 0xEC) - F32(p, 0x84);
+                f32 focus = PSVECDotProduct(d, (f32*)(p + 0x70));
+                focus = lbl_8055C598 >= lbl_80563F48 ? lbl_8055C598 : focus;
+                F32(p, 0x1A0) = focus > lbl_80563F68 ? focus : lbl_80563F68;
+            }
+        } else if (idx != -10) {
+            f32 off[3];
+            off[0] = lbl_80563F48;
+            off[1] = lbl_80563F6C;
+            off[2] = lbl_80563F48;
+            Mat3 down;
+            down.m[0] = lbl_80563F50;
+            down.m[1] = lbl_80563F48;
+            down.m[2] = lbl_80563F48;
+            down.m[3] = lbl_80563F48;
+            down.m[4] = lbl_80563F48;
+            down.m[5] = lbl_80563F50;
+            down.m[6] = lbl_80563F48;
+            down.m[7] = lbl_80563F44;
+            down.m[8] = lbl_80563F48;
+            fn_801BFD34(p + 0x7C, off, p + 0xC0);
+            Mat3Mul((Mat3*)(p + 0x58), &down, (Mat3*)(p + 0xC0));
+            *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
+        }
+    } else {
+        F32(p, 0x7C) = lbl_80563F70 * ((f32)(int)(lbl_80563F40 + (lbl_80563F74 + F32(p, 0xE4) / lbl_80563F70)) - lbl_80563F74);
+        F32(p, 0x84) = lbl_80563F70 * ((f32)(int)(lbl_80563F40 + (lbl_80563F74 + F32(p, 0xEC) / lbl_80563F70)) - lbl_80563F74);
+        fn_801E9DC4(p + 0x1EC);
+        if (!fn_801E9E30(p + 0x1EC, (f32*)(p + 0x7C))) {
+            F32(p, 0x80) = fn_801E9DDC(p + 0x1EC, F32(p, 0xE4), F32(p, 0xEC));
+        }
+        F32(p, 0x80) = F32(p, 0x80) + lbl_80563F78;
+        fn_80274E94(p);
+        *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
+    }
+}
 
 int fn_80271FAC(const char* name) {
     for (int i = 0; i < 18; i++) {
@@ -955,7 +1264,7 @@ void fn_802733F4(u8* p) {
     lbl_8055F558 = 0;
 }
 
-void fn_80273490(u8* p) { fn_80271624(p); }
+void fn_80273490(int mode, u8* p) { fn_80271624(mode, p); }
 
 int fn_80273494(int x) {
     switch (x) {
@@ -1032,17 +1341,6 @@ void fn_802735F4(int a, u8 b) {
     }
 }
 
-}  // extern "C"
-struct Mat3 {
-    f32 m[9];
-};
-
-// A camera frame copied as 12 words (rotation rows + position).
-struct Words12 {
-    u32 w[12];
-};
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-extern "C" {
 f32 PSVECMag(const f32* v);
 double sin(double x);
 double cos(double x);
