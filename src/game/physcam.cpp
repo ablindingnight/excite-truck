@@ -45,6 +45,16 @@ extern s32 lbl_8055F54C;
 extern s32 lbl_8055F554;
 extern u8 lbl_8055F558;
 
+// A camera cycle: how many views it has and which one is current.
+struct CamCycle {
+    u8 pad0[0x8];   // offset 0x0
+    s32 count;      // offset 0x8
+    s32 cur;        // offset 0xC
+    u8 pad10[0x4];  // offset 0x10
+};
+
+extern "C" int fn_80273494(int x);
+
 extern "C" {
 
 void fn_80270AE8(f32* p) {
@@ -229,7 +239,21 @@ void fn_802733C8(void) {
 
 void fn_802733F0(u8* p) {}
 
-void fn_802733F4(u8* p) {}  // stub (39)
+void fn_802733F4(u8* p) {
+    if (!U8(p, 0x138) && lbl_8055F558) {
+        int t = fn_80273494(S32(p, 0x10));
+        if (t != 6) {
+            CamCycle* c = &((CamCycle*)lbl_8049A258)[t];
+            if (++c->cur >= c->count) {
+                c->cur = 0;
+            }
+            if (c->count > 1) {
+                U8(p, 0x138) = 1;
+                lbl_8055F558 = 0;
+            }
+        }
+    }
+}
 
 void fn_80273490(u8* p) { fn_80271624(p); }
 

@@ -39,6 +39,10 @@ struct GarageFlags {
 
 extern "C" {
 void fn_8024739C(u8* p);
+u32 fn_802E4A10(void);
+int fn_80129800(u32 ch, int feature);
+void fn_80216D28(void);
+void fn_80214D50(int s);
 void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void fn_802CAC54(u8* p);
@@ -51,6 +55,17 @@ void* operator new(unsigned long n, const char* tag);
 void* operator new[](unsigned long n, const char* tag);
 
 extern GarageFlags lbl_80498C48;
+extern u8* lbl_8055F2EC;
+
+class VList {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual int v1C(u32 id);
+};
 extern void* lbl_8034453C[];
 extern void* lbl_803443B0[];
 extern void* lbl_80344384[];
@@ -93,7 +108,21 @@ u32 fn_8024EBE4(u8* p) {
     return GetVehicleColor(v, 0)[1];
 }
 
-void fn_8024EC3C(u8* p) {}  // stub (38)
+int fn_8024EC3C(void) {
+    int ok = 0;
+    if (fn_80129800(fn_802E4A10(), 5) && fn_80129800(fn_802E4A10(), 6)) {
+        ok = 1;
+    }
+    if (!ok) {
+        if (((VList*)PTR(lbl_8055F2EC, 0xD0))->v1C(U32(lbl_8055F2EC, 0x2C))) {
+            return 1;
+        }
+    } else {
+        fn_80216D28();
+    }
+    fn_80214D50(1);
+    return 0;
+}
 
 void fn_8024ECD4(u8* p) {}  // stub (298)
 
