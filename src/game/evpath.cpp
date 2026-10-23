@@ -230,7 +230,38 @@ int fn_80280898(void) {
     return 1;
 }
 
-void fn_802808D0(u8* p) {}  // stub (90)
+}  // extern "C"
+
+int IsUnlockAll(void);
+
+extern "C" {
+void fn_80236954(const char* name);
+void fn_80214D50(int s);
+
+// Moves the cursor to the current event's slot; returns whether it is selectable.
+int fn_802808D0(void) {
+    int i = lbl_804B3048.Find((u8*)lbl_8055F688);
+    if (i >= 0) {
+        int ok;
+        u8* e = (u8*)lbl_804B3048.data[i];
+        ok = 0;
+        if (PTR(e, 0x60) && (IsUnlockAll() || ((VR*)PTR(e, 0x60))->v24())) {
+            ok = 1;
+        }
+        if (ok) {
+            int idx = U8((u8*)lbl_8055F688, 0x64) ? 5 : lbl_804B3048.Find((u8*)lbl_8055F688);
+            char buf[0x1E];
+            fn_801345D8(buf, 0x1E, "select_%d", idx + 1);
+            fn_80236954(buf);
+            return 1;
+        }
+        fn_80216D28();
+        fn_80214D50(1);
+        return 0;
+    }
+    fn_80216D28();
+    return 0;
+}
 
 void fn_80280A38(u8* p) {}  // stub (114)
 
