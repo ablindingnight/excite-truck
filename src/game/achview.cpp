@@ -145,8 +145,8 @@ u8* fn_8025A4CC(u8* p, int del) {
 void fn_8025A50C(u8* p) {}  // stub (204)
 
 void fn_8025A83C(u8* p) {
-    F32(p, 0x88) = 0.0f;
     F32(p, 0x84) = 1.0f;
+    F32(p, 0x88) = 0.0f;
     F32(p, 0x8C) = 0.0f;
     F32(p, 0x90) = 0.0f;
     F32(p, 0x94) = 1.0f;
@@ -158,8 +158,8 @@ void fn_8025A83C(u8* p) {
 }
 
 void fn_8025A87C(u8* p) {
-    F32(p, 0x88) = 0.0f;
     F32(p, 0x84) = 1.0f;
+    F32(p, 0x88) = 0.0f;
     F32(p, 0x8C) = 0.0f;
     F32(p, 0x90) = 0.0f;
     F32(p, 0x94) = 1.0f;
@@ -171,7 +171,55 @@ void fn_8025A87C(u8* p) {
     U8(p, 0x36) = 0;
 }
 
-void fn_8025A8B8(u8* p) {}  // stub (118)
+}  // extern "C"
+
+// Appends s to d (n bytes in all), always terminating.
+static inline void CatName(const char* s, int n, char* d) {
+    while (*d) {
+        n--;
+        d++;
+    }
+    if (n > 0) {
+        CopyName(s, n, d);
+    }
+}
+
+extern char lbl_80345208[];  // "*uiaction.res/"
+
+extern "C" {
+char* strrchr(const char* s, int c);
+int fn_8012C33C(const char* name);
+s32 fn_802C6FC0(const char* name, int a, int b);
+
+// Loads the trophy model "*uiaction.res/<name>.mo0" (replacing the old one) and resets its rotation.
+void fn_8025A8B8(u8* p, const char* name) {
+    if (S32(p, 0x50) != -1) {
+        fn_802C6CF8(S32(p, 0x50));
+        S32(p, 0x50) = -1;
+    }
+    if (*name && strlen(name)) {
+        char buf[64];
+        CopyName(lbl_80345208, 64, buf);
+        CatName(name, 64, buf);
+        if (strrchr(buf, '.')) {
+            char* dot = strrchr(buf, '.');
+            *dot = 0;
+        }
+        CatName(".mo0", 64, buf);
+        if (fn_8012C33C(buf)) {
+            S32(p, 0x50) = fn_802C6FC0(buf, 0, 0);
+        }
+    }
+    F32(p, 0x84) = 1.0f;
+    F32(p, 0x88) = 0.0f;
+    F32(p, 0x8C) = 0.0f;
+    F32(p, 0x90) = 0.0f;
+    F32(p, 0x94) = 1.0f;
+    F32(p, 0x98) = 0.0f;
+    F32(p, 0x9C) = 0.0f;
+    F32(p, 0xA0) = 0.0f;
+    F32(p, 0xA4) = 1.0f;
+}
 
 void fn_8025AA90(u8* p) {}  // stub (174)
 
