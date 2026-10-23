@@ -1635,7 +1635,28 @@ f32 fn_801A3880(u8* p) {
 
 void fn_801A38E4(u8* p) {}  // stub (191)
 
-void fn_801A3BE0(u8* p) {}  // stub (115)
+
+// Debug draw: a line from the frame origin along each of the volume's rays (direction * length, frame space).
+void fn_801A3BE0(u8* p) {
+    PVec3 o;
+    RVec3 v;
+    RVec3 w;
+    const f32* d = (const f32*)(p + 0x3C);
+    u32 color = lbl_8055E598.value;
+    o = *(PVec3*)&((CFrame*)PTR(p, 0xC))->t;
+    for (int i = 0; i < S32(p, 0xBC); d += 4, i++) {
+        f32 len = d[3];
+        v.x = d[0] * len;
+        v.y = d[1] * len;
+        v.z = d[2] * len;
+        CFrame* f = (CFrame*)PTR(p, 0xC);
+        MulVec(&w, &v, f);
+        w.x = w.x + f->t.x;
+        w.y = w.y + f->t.y;
+        w.z = w.z + f->t.z;
+        fn_801E41D8(o.v, &w.x, color, 0.3f);
+    }
+}
 
 // Mesh resource (fn_801CFEAC): its vertices.
 struct MeshRes {
