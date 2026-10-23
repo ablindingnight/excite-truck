@@ -206,7 +206,52 @@ void fn_80270DB0(AngleRef* a, AngleRef* b, f32 wrap) {
     *AngleLo(b) = v;
 }
 
-void fn_80270EC4(u8* c, u32 id) {}  // stub (119)
+void qsort(void* base, u32 n, u32 size, s32 (*cmp)(u8*, const u8*));
+
+// Collects the usable regions for `car`, then (when id bit 8 is set) makes each camera group's
+// heading windows tile the full circle: sorted by start, neighbours meet halfway.
+void fn_80270EC4(u8* car, u32 id) {
+    AngleRef refs[64];
+    char* pool = lbl_80346B00;
+    fn_80270C04(car, id);
+    if (id & 0x100) {
+        for (int g = 0; g < 3; g++) {
+            CamRegion* r = lbl_8049F9D8;
+            int n = 0;
+            for (int i = 0; i < lbl_8055F554; i++) {
+                if (g == fn_80270D1C(S32(r->cam, 0x5C))) {
+                    refs[n].track = (u8*)r;
+                    refs[n].alt = 0;
+                    if (r->dual) {
+                        n++;
+                        refs[n].track = refs[n - 1].track;
+                        refs[n].alt = 1;
+                    }
+                    n++;
+                }
+                r++;
+            }
+            if (n > 0) {
+                qsort(refs, n, sizeof(AngleRef), fn_80270D4C);
+                f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
+                int last = n - 1;
+                for (int i = 0; i < last; i++) {
+                    fn_80270DB0(&refs[i], &refs[i + 1], wrap);
+                }
+                fn_80270DB0(&refs[last], &refs[0], wrap);
+            }
+        }
+        fn_80270B00(pool + 0x250, lbl_8055F554);  // "Region longitudes: (%d)"
+        CamRegion* r = lbl_8049F9D8;
+        for (int i = 0; i < lbl_8055F554; i++) {
+            fn_80270B00(pool + 0x268, i, r->lo1, r->hi1);  // "  %2d: %.3f  %.3f"
+            if (r->dual) {
+                fn_80270B00(pool + 0x27C, i, r->lo2, r->hi2);  // " +%2d: %.3f  %.3f"
+            }
+            r++;
+        }
+    }
+}
 
 void fn_802710A0(u8* p) {}  // stub (150)
 
