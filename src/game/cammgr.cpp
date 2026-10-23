@@ -42,7 +42,19 @@ struct CamRec {
     CamPose pose;      // offset 0x58
     u8 pad88[0x34];    // offset 0x88
     f32 fov;           // offset 0xBC
-    u8 padC0[0x168];   // offset 0xC0
+    u8 padC0[0x78];    // offset 0xC0
+    u8 b138;           // offset 0x138
+    u8 b139;           // offset 0x139
+    u8 pad13A[0x2];
+    f32 f13C;          // offset 0x13C
+    u8* car;           // offset 0x140
+    u8 pad144[0x10];   // offset 0x144
+    f32 f154;          // offset 0x154
+    f32 f158;          // offset 0x158
+    u8 pad15C[0x94];   // offset 0x15C
+    f32 f1F0;          // offset 0x1F0
+    f32 prevFov;       // offset 0x1F4
+    CamPose prevPose;  // offset 0x1F8
 };
 
 // Walks the ideal racing line for camera placement.
@@ -380,7 +392,30 @@ u32 fn_8026A368(int i) { return U32(fn_80267EE4(i), 0x10); }
 
 u8 fn_8026A38C(void) { return lbl_8055F488; }
 
-void fn_8026A394(u8* p) {}  // stub (66)
+extern const f32 lbl_80563CBC;
+extern const f32 lbl_80563C2C;
+extern f32 lbl_8055E3C8;
+
+// Starts a camera transition for the camera following `car`.
+void fn_8026A394(u8* car) {
+    for (int i = 0; i < 4; i++) {
+        CamRec* c = (CamRec*)fn_80267EE4(i);
+        if (c->car == car) {
+            c->b139 = 1;
+            c->b138 = 1;
+            f32 speed = F32(c->car, 0x25D4);
+            f32 v = lbl_80563CBC * speed;
+            f32 m = lbl_80563C2C;
+            c->f13C = m < v ? m : v;
+            c->f154 = lbl_80563C20;
+            c->f158 = lbl_80563C20;
+            c->prevPose = c->pose;
+            c->prevFov = c->fov;
+            c->f1F0 = lbl_8055E3C8;
+            return;
+        }
+    }
+}
 
 void fn_8026A49C(u8* p) { fn_80269BB0(p); }
 
