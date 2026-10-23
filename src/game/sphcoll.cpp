@@ -261,11 +261,24 @@ void fn_80199870(u8* p, void* w) {
     }
 }
 
-void fn_80199894(u8* p) {}  // stub (955)
+void fn_80199894(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {}  // stub (955)
 
 u32 fn_8019A780(u8* p) { return U32(p, 0x8); }
 
-void fn_8019A788(u8* p) {}  // stub (38)
+extern const f32 lbl_805622DC;  // -1.0
+
+// Contact between p and q along n; volumes without an owner hand the test to q with the normal flipped.
+void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
+    if (U32(p, 0x4) || a) {
+        fn_80199894(p, q, x, n, a, b, s, u, v);
+    } else {
+        RVec3 m;
+        m.x = n->x * lbl_805622DC;
+        m.y = n->y * lbl_805622DC;
+        m.z = n->z * lbl_805622DC;
+        fn_80199894(q, p, x, &m, b, a, s, v, u);
+    }
+}
 
 void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r) {}
 
