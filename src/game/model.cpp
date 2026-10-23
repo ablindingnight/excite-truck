@@ -468,7 +468,7 @@ void fn_802C5BA0(TexNode* t) {
     }
 }
 
-u16 fn_802C5BEC(u16 a, u16 b) { return fn_802C5A50(5, 100) + a * 2 + b; }
+u16 fn_802C5BEC(u32 a, u32 b) { return fn_802C5A50(5, 100) + (u16)(a * 2) + (u16)b; }
 
 void fn_802C5C40(MSurf* s, s32 inst, MSurf* base) {
     u32 type = s->type;
@@ -490,7 +490,7 @@ void fn_802C5CC4(MSurf* s, s32 inst, int sorted, const char* prefix) {
     s32 tex = fn_802CAC44(name, type);
     u16 prio;
     if (sorted) {
-        prio = fn_802C5BEC(fn_802CAF8C(tex), type);
+        prio = fn_802C5BEC(type, fn_802CAF8C(tex));
     } else {
         prio = fn_802C5A50(fn_802CAFC8(tex), fn_802CAFF0(tex));
     }
