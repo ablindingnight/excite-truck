@@ -1148,8 +1148,8 @@ void fn_80010C74(f32 x, f32 y, f32 w) {
 void fn_80010D88(f32 x, f32 y, f32 h) {
     if (lbl_8055D4A8 < 255) {
         QueuedRect a = {x, y, 1.0f, h, lbl_8055D484.value, lbl_8055D484.value};
-        QueuedRect b = {1.0f + x, y - 1.0f, 1.0f, h, lbl_8055D488.value, lbl_8055D488.value};
         lbl_8034F6B0[lbl_8055D4A8++] = a;
+        QueuedRect b = {1.0f + x, y - 1.0f, 1.0f, h, lbl_8055D488.value, lbl_8055D488.value};
         lbl_8034F6B0[lbl_8055D4A8++] = b;
     }
 }
