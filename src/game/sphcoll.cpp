@@ -1419,7 +1419,8 @@ void fn_801A401C(u8* p, u8* o) {
         RVec3 hits[64];
         int n = 64;
         u8* sph = o;
-        fn_801CF080(PTR(p, 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(p, 0xC), lbl_8056234C * F32(sph, 0x24));
+        f32 r = F32(sph, 0x24);
+        fn_801CF080(PTR(p, 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(p, 0xC), lbl_8056234C * r);
         for (int i = 0; i < n; i++) {
             fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)p);
         }

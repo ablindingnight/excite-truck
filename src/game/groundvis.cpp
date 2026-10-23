@@ -478,7 +478,7 @@ void fn_802B0288(GroundSet* g) {
 }
 
 static inline int InWorld(const Vec* p) {
-    f32 half = 1024.0f * lbl_80564AF0 * 0.5f;
+    f32 half = 1024.0f * lbl_80564AF0 / 2.0f;
     int in = 0;
     if (p->x > -half && p->x < half && p->z > -half && p->z < half) {
         in = 1;

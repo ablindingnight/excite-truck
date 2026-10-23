@@ -1165,7 +1165,8 @@ void fn_8019639C(u8* d) { fn_80194844(d); }
 
 void fn_801963A0(u8* d) {
     fn_801961F8(d, 0);
-    lbl_8055E57C += 0.033366702f * F32(CAR(d), 0x25D4);
+    f32 v = F32(CAR(d), 0x25D4);
+    lbl_8055E57C += 0.033366702f * v;
     lbl_8055E0D0->SetActive(CARID(d), 1);
     fn_801958C4(d);
     fn_801959AC(d);
@@ -1206,7 +1207,8 @@ void fn_801964D0(u8* d) {
             fn_8018A174(CAR(d));
             f32 s = fn_80129D18(3, 2) ? -1.0f : 1.0f;
             u8* car = CAR(d);
-            f32 k = 59.94f * (1000.0f * F32(car, 0xD4)) * s;
+            f32 v = F32(car, 0xD4);
+            f32 k = 59.94f * (1000.0f * v) * s;
             RVec3 t;
             t.x = F32(car, 0x3C) * k;
             t.y = F32(car, 0x40) * k;
