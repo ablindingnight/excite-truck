@@ -141,7 +141,7 @@ LytFile* fn_8022E0EC(const char* name) {
 void fn_8022E4BC(LytFile* f) { fn_8012C4D8(f); }
 
 // Builds a plain column of labels and widgets for a menu that has no layout file.
-LytFile* fn_8022E4C0(MenuDesc* desc) {
+LytFile* fn_8022E4C0(const MenuDesc* desc) {
     // From layout functions the linker stripped.
     static const char* unused[] = {"Can't write %s", "Corrupt layout %s"};
     LytFile* f = new ("autolyt") LytFile;
@@ -293,4 +293,3 @@ void fn_8022E960(LytFile* f) {
 
 }  // extern "C"
 
-// NonMatching: fn_8022E4C0 schedules the desc->items load later than the target (8 diffs).

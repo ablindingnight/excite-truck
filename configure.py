@@ -1124,7 +1124,7 @@ config.libs.append(
             Object(NonMatching, "game/uistyle.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(NonMatching, "game/uitable.cpp"),
-            Object(NonMatching, "game/autolyt.cpp"),
+            Object(Matching, "game/autolyt.cpp"),
             Object(Matching, "game/uictx.cpp"),
             Object(Matching, "game/gback.cpp"),
             Object(NonMatching, "game/uidraw.cpp"),
