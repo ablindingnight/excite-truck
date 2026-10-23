@@ -110,6 +110,23 @@ struct CFrame {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
+// The per-mode camera state (partial; the remaining routines still use raw offsets).
+struct CamState {
+    u8 pad0[0x28];
+    CVec3 up;         // offset 0x28, smoothed up vector
+    CVec3 upVel;      // offset 0x34
+    u8 pad40[0xC];
+    CVec3 look;       // offset 0x4C, look-at point
+    CFrame frame;     // offset 0x58, camera rows + position
+    u8 pad88[0x34];
+    f32 fov;          // offset 0xBC
+    CFrame carFrame;  // offset 0xC0, the followed car's frame
+    u8 padF0[0x48];
+    u8 snap;          // offset 0x138, jump instead of smoothing
+    u8 pad139[7];
+    u8* car;          // offset 0x140
+};
+
 static inline void MulVec(CVec3* out, const CVec3* in, const CFrame* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
@@ -236,6 +253,28 @@ struct CsVec {
     f32 x, y, z;
 };
 
+// Rebuilds the camera rows (0x58) as an orthonormal basis that keeps the view axis (row 2).
+static inline void Orthonormalize(u8* p) {
+    CsVec x;
+    CsVec y;
+    CsVec z;
+    x.Set(F32(p, 0x58), F32(p, 0x5C), F32(p, 0x60));
+    z.Set(F32(p, 0x70), F32(p, 0x74), F32(p, 0x78));
+    PSVECCrossProduct(&z.x, &x.x, &y.x);
+    PSVECNormalize(&x.x, &x.x);
+    PSVECNormalize(&y.x, &y.x);
+    PSVECCrossProduct(&x.x, &y.x, &z.x);
+    F32(p, 0x58) = x.x;
+    F32(p, 0x5C) = x.y;
+    F32(p, 0x60) = x.z;
+    F32(p, 0x64) = y.x;
+    F32(p, 0x68) = y.y;
+    F32(p, 0x6C) = y.z;
+    F32(p, 0x70) = z.x;
+    F32(p, 0x74) = z.y;
+    F32(p, 0x78) = z.z;
+}
+
 // Aims the camera frame (0x58) from its position (0x7C) at the look point (0x4C), with world y as up
 // (the car's forward axis when looking straight down). A positive `dist` pulls the camera toward that
 // distance by `stiff`; the fov follows from `width` / `zoom` and the remaining distance unless `fov` is
@@ -255,24 +294,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     CsVec up(lbl_80563FB0, lbl_80563FAC, lbl_80563FB0);
     PSVECCrossProduct(&up.x, (f32*)(p + 0x70), (f32*)(p + 0x58));
     PSVECCrossProduct((f32*)(p + 0x70), (f32*)(p + 0x58), (f32*)(p + 0x64));
-    CsVec z;
-    CsVec y;
-    CsVec x;
-    x.Set(F32(p, 0x58), F32(p, 0x5C), F32(p, 0x60));
-    z.Set(F32(p, 0x70), F32(p, 0x74), F32(p, 0x78));
-    PSVECCrossProduct(&z.x, &x.x, &y.x);
-    PSVECNormalize(&x.x, &x.x);
-    PSVECNormalize(&y.x, &y.x);
-    PSVECCrossProduct(&x.x, &y.x, &z.x);
-    F32(p, 0x58) = x.x;
-    F32(p, 0x5C) = x.y;
-    F32(p, 0x60) = x.z;
-    F32(p, 0x64) = y.x;
-    F32(p, 0x68) = y.y;
-    F32(p, 0x6C) = y.z;
-    F32(p, 0x70) = z.x;
-    F32(p, 0x74) = z.y;
-    F32(p, 0x78) = z.z;
+    Orthonormalize(p);
     f32 d = PSVECDistance((f32*)(p + 0x7C), (f32*)(p + 0x4C));
     if (dist > lbl_80563FB0) {
         f32 k = (lbl_80563FAC - stiff) * (d - dist);
@@ -303,7 +325,66 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     F32(p, 0x128) = lbl_80563FB0;
 }
 
-void fn_802749FC(u8* p) {}  // stub (294)
+}  // extern "C"
+int fn_801EA098(const s16* hint, f32* pos, f32* normal, int* flags, f32 x, f32 z);
+extern "C" {
+f32 PSVECDotProduct(const f32* a, const f32* b);
+double cos(double x);
+extern const double lbl_80563FB8;  // ground tilt limit (radians)
+extern const f32 lbl_80563FDC;
+
+// Moves the camera by `move` in the car frame, then levels its up vector (0x28) toward the ground
+// normal below the target (or the car's up axis), and rebuilds the frame around it.
+void fn_802749FC(u8* p, const CVec3* move) {
+    CamState* c = (CamState*)p;
+    if (c->snap) {
+        c->up.x = lbl_80563FB0;
+        c->up.y = lbl_80563FAC;
+        c->up.z = lbl_80563FB0;
+        c->upVel.x = lbl_80563FB0;
+        c->upVel.y = lbl_80563FB0;
+        c->upVel.z = lbl_80563FB0;
+    }
+    CVec3 n;
+    CVec3 pos;
+    CVec3 w;
+    c->frame = c->carFrame;
+    MulVec(&w, move, &c->frame);
+    c->frame.t.x = c->frame.t.x + w.x;
+    c->frame.t.y = c->frame.t.y + w.y;
+    c->frame.t.z = c->frame.t.z + w.z;
+    int flags = 0;
+    static f32 cosLimit = (f32)cos(lbl_80563FB8);
+    if (!fn_801EA098((s16*)(c->car + 0x6C), &pos.x, &n.x, &flags, c->carFrame.t.x, c->carFrame.t.z)) {
+        n.x = c->carFrame.m[3];
+        n.y = c->carFrame.m[4];
+        n.z = c->carFrame.m[5];
+    } else {
+        f32 t = (PSVECDotProduct(&n.x, &c->carFrame.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
+        t = lbl_80563FB0 > t ? lbl_80563FB0 : t;
+        n.x = n.x * t;
+        n.y = n.y * t;
+        n.z = n.z * t;
+        f32 u = lbl_80563FAC - t;
+        n.x = n.x + c->carFrame.m[3] * u;
+        n.y = n.y + c->carFrame.m[4] * u;
+        n.z = n.z + c->carFrame.m[5] * u;
+    }
+    f32 k = c->snap ? lbl_80563FB0 : lbl_80563FDC;
+    c->up.x = c->up.x * k;
+    c->up.y = c->up.y * k;
+    c->up.z = c->up.z * k;
+    f32 j = lbl_80563FAC - k;
+    c->up.x = c->up.x + n.x * j;
+    c->up.y = c->up.y + n.y * j;
+    c->up.z = c->up.z + n.z * j;
+    c->frame.m[3] = c->up.x * lbl_80563FC4 + c->carFrame.m[3] * lbl_80563FC4;
+    c->frame.m[4] = c->up.y * lbl_80563FC4 + c->carFrame.m[4] * lbl_80563FC4;
+    c->frame.m[5] = c->up.z * lbl_80563FC4 + c->carFrame.m[5] * lbl_80563FC4;
+    PSVECCrossProduct(&c->frame.m[3], &c->frame.m[6], &c->frame.m[0]);
+    PSVECCrossProduct(&c->frame.m[0], &c->frame.m[3], &c->frame.m[6]);
+    Orthonormalize(p);
+}
 
 void fn_80274E94(u8* p) { fn_80274730(p, -1.0f, -1.0f, -1.0f, 0.0f); }
 
