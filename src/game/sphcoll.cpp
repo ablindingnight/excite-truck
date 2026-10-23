@@ -293,7 +293,7 @@ void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, a, F32(p, 0x24)); }
 
 void fn_8019CE4C(u8* p) {}  // stub (69)
 
-void fn_8019CF60(u8* p) {}  // stub (67)
+void fn_8019CF60(u8* p, u8* q) {}  // stub (67)
 
 void fn_8019D06C(u8* p, u8* q, int a, int b) {}  // stub (76)
 
@@ -307,7 +307,7 @@ void fn_8019D618(u8* p) {}  // stub (294)
 
 void fn_8019DAB0(u8* p) {}  // stub (85)
 
-void fn_8019DC04(u8* p) {}  // stub (122)
+void fn_8019DC04(u8* p, u8* q) {}  // stub (122)
 
 f32 fn_8019DDEC(u8* p) { return F32(p, 0x24) + F32(p, 0x28); }
 
@@ -708,7 +708,35 @@ u8* fn_801A1898(u8* p, u32 a, u32 swap) {
 
 void fn_801A18D4(u8* p) {}  // stub (122)
 
-void fn_801A1ABC(u8* p) {}  // stub (56)
+void fn_802E30C8(const char* fmt, ...);
+
+// Collides `p` against volume `o` by its type tag.
+void fn_801A1ABC(u8* p, u8* o) {
+    switch (S32(o, 0x18)) {
+    case 'RAGD':
+    case 'POLY':
+    case 'RING':
+        break;
+    case 'FLSR':
+        fn_8019CF60(p, o);
+        break;
+    case 'SPHR':
+        fn_8019CE3C(o, (u32)p);
+        break;
+    case 'BOX ':
+        fn_8019EA7C(p, o);
+        break;
+    case 'TUBE':
+        fn_8019DC04(p, o);
+        break;
+    case 'GRUP':
+        fn_8019EA7C(p, PTR(o, 0x17C));
+        break;
+    default:
+        fn_802E30C8("Unsupported collision type: Tube-%x", S32(o, 0x18));
+        break;
+    }
+}
 
 void fn_801A1B9C(u8* p) {}  // stub (65)
 
