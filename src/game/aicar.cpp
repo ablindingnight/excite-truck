@@ -1128,7 +1128,8 @@ void fn_80195CA8(u8* d) {
 
 // Where the car is on the race line (copied whole into the AI state each frame).
 struct LinePos {
-    u32 w[9];  // offset 0x0
+    f32 pos[3];  // offset 0x0
+    u32 w[6];    // offset 0xC
     u8 flag;   // offset 0x24
     u8* seg;   // offset 0x28
     u32 w2C;   // offset 0x2C
