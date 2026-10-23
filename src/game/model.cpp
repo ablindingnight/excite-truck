@@ -315,13 +315,14 @@ int fn_802C544C(const void* pa, const void* pb) {
 
 Bin* fn_802C54B4(int pri) { return &lbl_804C1348[pri - 1]; }
 
-u8 fn_802C54CC(s16 prio) { return prio >> 8; }
+int fn_802C54CC(s16 prio) { return (u8)(prio >> 8); }
 
 void fn_802C54D4(void) {
     if (lbl_8055FC21) {
+        TexNode* t;
         lbl_804C1390.count = 0;
         for (int i = 0; i < lbl_804C13A8.count; i++) {
-            TexNode* t = &lbl_804C13A8.data[i];
+            t = &lbl_804C13A8.data[i];
             if (t->refs) {
                 TexNode** p = lbl_804C1390.Alloc();
                 if (p) {
