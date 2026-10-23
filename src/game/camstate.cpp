@@ -228,23 +228,21 @@ void fn_80273BD0(u8* p) {
         n.z = c->carFrame.m[5];
     } else {
         f32 t = (PSVECDotProduct(&n.x, &c->carFrame.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
-        t = lbl_80563FB0 > t ? lbl_80563FB0 : t;
-        n.x = n.x * t;
-        n.y = n.y * t;
-        n.z = n.z * t;
-        f32 u = lbl_80563FAC - t;
-        n.x = n.x + c->carFrame.m[3] * u;
-        n.y = n.y + c->carFrame.m[4] * u;
-        n.z = n.z + c->carFrame.m[5] * u;
+        f32 s = lbl_80563FB0 > t ? lbl_80563FB0 : t;
+        n.x = n.x * s;
+        n.y = n.y * s;
+        n.z = n.z * s;
+        n.x = n.x + c->carFrame.m[3] * (lbl_80563FAC - s);
+        n.y = n.y + c->carFrame.m[4] * (lbl_80563FAC - s);
+        n.z = n.z + c->carFrame.m[5] * (lbl_80563FAC - s);
     }
     f32 k = c->snap ? lbl_80563FB0 : lbl_80563FC0;
     c->up.x = c->up.x * k;
     c->up.y = c->up.y * k;
     c->up.z = c->up.z * k;
-    f32 j = lbl_80563FAC - k;
-    c->up.x = c->up.x + n.x * j;
-    c->up.y = c->up.y + n.y * j;
-    c->up.z = c->up.z + n.z * j;
+    c->up.x = c->up.x + n.x * (lbl_80563FAC - k);
+    c->up.y = c->up.y + n.y * (lbl_80563FAC - k);
+    c->up.z = c->up.z + n.z * (lbl_80563FAC - k);
     c->frame.m[3] = c->up.x * lbl_80563FC4 + c->carFrame.m[3] * lbl_80563FC4;
     c->frame.m[4] = c->up.y * lbl_80563FC4 + c->carFrame.m[4] * lbl_80563FC4;
     c->frame.m[5] = c->up.z * lbl_80563FC4 + c->carFrame.m[5] * lbl_80563FC4;
@@ -463,23 +461,21 @@ void fn_802749FC(u8* p, const CVec3* move) {
         n.z = c->carFrame.m[5];
     } else {
         f32 t = (PSVECDotProduct(&n.x, &c->carFrame.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
-        t = lbl_80563FB0 > t ? lbl_80563FB0 : t;
-        n.x = n.x * t;
-        n.y = n.y * t;
-        n.z = n.z * t;
-        f32 u = lbl_80563FAC - t;
-        n.x = n.x + c->carFrame.m[3] * u;
-        n.y = n.y + c->carFrame.m[4] * u;
-        n.z = n.z + c->carFrame.m[5] * u;
+        f32 s = lbl_80563FB0 > t ? lbl_80563FB0 : t;
+        n.x = n.x * s;
+        n.y = n.y * s;
+        n.z = n.z * s;
+        n.x = n.x + c->carFrame.m[3] * (lbl_80563FAC - s);
+        n.y = n.y + c->carFrame.m[4] * (lbl_80563FAC - s);
+        n.z = n.z + c->carFrame.m[5] * (lbl_80563FAC - s);
     }
     f32 k = c->snap ? lbl_80563FB0 : lbl_80563FDC;
     c->up.x = c->up.x * k;
     c->up.y = c->up.y * k;
     c->up.z = c->up.z * k;
-    f32 j = lbl_80563FAC - k;
-    c->up.x = c->up.x + n.x * j;
-    c->up.y = c->up.y + n.y * j;
-    c->up.z = c->up.z + n.z * j;
+    c->up.x = c->up.x + n.x * (lbl_80563FAC - k);
+    c->up.y = c->up.y + n.y * (lbl_80563FAC - k);
+    c->up.z = c->up.z + n.z * (lbl_80563FAC - k);
     c->frame.m[3] = c->up.x * lbl_80563FC4 + c->carFrame.m[3] * lbl_80563FC4;
     c->frame.m[4] = c->up.y * lbl_80563FC4 + c->carFrame.m[4] * lbl_80563FC4;
     c->frame.m[5] = c->up.z * lbl_80563FC4 + c->carFrame.m[5] * lbl_80563FC4;
