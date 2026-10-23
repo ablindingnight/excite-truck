@@ -3,6 +3,7 @@
 // popup, the "%s/%s" progress counters and the list descriptors behind it. Written against raw field
 // offsets; the large screen routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -243,7 +244,31 @@ void fn_80261AA0(void) {
 
 void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 
-void fn_80261AF0(u8* p) {}  // stub (94)
+}  // extern "C"
+
+extern u8 lbl_80498F20[];          // unlock animation widget
+extern UnkStatic123 lbl_80498F00;  // this unit's end-of-menu tag
+extern "C" const char* fn_80131234(const char* key);
+extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
+
+extern "C" {
+
+// "Challenge difficulty N unlocked" message box.
+void fn_80261AF0(u8* p, int difficulty) {
+    char buf[100];
+    fn_801345D8(buf, 100, "EventPath:CHALLENGE_DIFFICULTY_%d_UNLOCKED", difficulty);
+    MenuItem items[] = {
+        MenuItem(0, 5, lbl_80498F20, 0, 0),
+        MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
+        MenuItem("message", fn_80131234(buf)),
+        MenuItem((const char*)lbl_8055B860, 6, 0, -2, 13),
+        MenuItem((const char*)lbl_8055BAB8, 8, (const void*)fn_80261A40, 2, 0),
+        MenuItem(lbl_80498F00),
+    };
+    MenuDesc desc = {"newmode1.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 void fn_80261C68(u8* p) {}  // stub (302)
 
