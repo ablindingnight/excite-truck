@@ -117,7 +117,7 @@ public:
             dirty = 1;
         }
     }
-    u8 Active(void) { return active; }
+    int Active(void) { return active; }
 
     f32 pitch;  // offset 0x4
     u8 pad8[0x19 - 0x8];
