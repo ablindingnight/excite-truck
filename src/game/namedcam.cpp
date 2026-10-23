@@ -180,7 +180,56 @@ int fn_80277754(CamReader* r) {
     return 1;
 }
 
-void fn_80277828(u8* p) {}  // stub (78)
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" char* strcpy(char* d, const char* s);
+extern const f32 lbl_80564048;  // 0.0
+extern const f32 lbl_8056404C;  // 1.0
+extern const f32 lbl_80564070;  // default fov, pi/2
+extern const f32 lbl_80564074;  // house fov, 85 degrees
+
+// Identity pose at the origin with the default fov.
+static inline void ResetCam(NamedCam* c) {
+    c->pose.rot.m[0] = lbl_8056404C;
+    c->pose.rot.m[1] = lbl_80564048;
+    c->pose.rot.m[2] = lbl_80564048;
+    c->pose.rot.m[3] = lbl_80564048;
+    c->pose.rot.m[4] = lbl_8056404C;
+    c->pose.rot.m[5] = lbl_80564048;
+    c->pose.rot.m[6] = lbl_80564048;
+    c->pose.rot.m[7] = lbl_80564048;
+    c->pose.rot.m[8] = lbl_8056404C;
+    c->pose.pos.v[0] = lbl_80564048;
+    c->pose.pos.v[1] = lbl_80564048;
+    c->pose.pos.v[2] = lbl_80564048;
+    c->fov = lbl_80564070;
+    c->name[0] = 0;
+}
+
+// Makes sure the default and "house" cameras exist.
+void fn_80277828(void) {
+    NamedCam* c;
+    ResetCam(&lbl_8049FE98);
+    lbl_8049FE98.valid = 1;
+    if (!lbl_8055F598) {
+        int n = lbl_8055F5A0;
+        c = &lbl_8049FEE0[n];
+        ResetCam(c);
+        lbl_8055F5A0 = n + 1;
+        lbl_8055F598 = c;
+        c->valid = 1;
+        sprintf(c->name, lbl_8055C638, c, n);
+    }
+    c = lbl_8055F59C;
+    if (!c) {
+        int n = lbl_8055F5A0;
+        c = &lbl_8049FEE0[n];
+        lbl_8055F59C = c;
+        lbl_8055F5A0 = n + 1;
+        c->valid = 1;
+    }
+    c->fov = lbl_80564074;
+    strcpy(lbl_8055F59C->name, "house");
+}
 
 int fn_80277960(const char* name, CamPose* out, f32* fov) {
     NamedCam* c = fn_80276A44(name);
