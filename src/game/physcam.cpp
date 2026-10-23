@@ -817,7 +817,10 @@ int fn_80273494(int x) {
 // One selectable camera view.
 struct CamView {
     s32 type;       // offset 0x0
-    u8 pad4[0x20];  // offset 0x4
+    u8 pad4[0x4];
+    f32 off[3];     // offset 0x8, mount offset in the car frame
+    f32 rot[3];     // offset 0x14, rotation vector (degrees)
+    f32 fov;        // offset 0x20 (degrees)
     u8 b24;         // offset 0x24
     u8 b25;         // offset 0x25
     u8 pad26[0x2];
@@ -869,7 +872,108 @@ void fn_802735F4(int a, u8 b) {
     }
 }
 
-void fn_80273604(u8* p) {}  // stub (221)
+}  // extern "C"
+struct Mat3 {
+    f32 m[9];
+};
+
+// A camera frame copied as 12 words (rotation rows + position).
+struct Words12 {
+    u32 w[12];
+};
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+extern "C" {
+f32 PSVECMag(const f32* v);
+double sin(double x);
+double cos(double x);
+void fn_801BFD34(u8* out, const f32* v, const u8* frame);
+void fn_80273BD0(u8* p);
+void fn_80274268(u8* p);
+void fn_802704D0(int to, int from, u8* cam);
+void fn_802704D4(int to, u8* cam);
+extern char lbl_80347310[];  // "camera_car: unexpected camera type %d"
+extern const f32 lbl_80563F4C;  // degrees to radians
+
+// Rotation from the rotation vector w (axis * angle), Rodrigues' formula (as camstate's).
+static inline void CamRotFromVec(Mat3* r, const f32* w) {
+    f32 a = PSVECMag(w);
+    if (a > lbl_80563F9C) {
+        f32 x, s, y, z, c, k;
+        f32 inv = lbl_80563F50 / a;
+        x = inv * w[0];
+        y = inv * w[1];
+        z = inv * w[2];
+        s = (f32)sin(a);
+        c = (f32)cos(a);
+        k = lbl_80563F50 - c;
+        r->m[0] = c + k * (x * x);
+        r->m[1] = y * (k * x) + s * z;
+        r->m[2] = z * (k * x) - s * y;
+        r->m[3] = y * (k * x) - s * z;
+        r->m[4] = c + k * (y * y);
+        r->m[5] = z * (k * y) + s * x;
+        r->m[6] = z * (k * x) + s * y;
+        r->m[7] = z * (k * y) - s * x;
+        r->m[8] = c + k * (z * z);
+    } else {
+        r->m[1] = lbl_80563F48;
+        r->m[0] = lbl_80563F50;
+        r->m[2] = lbl_80563F48;
+        r->m[3] = lbl_80563F48;
+        r->m[4] = lbl_80563F50;
+        r->m[5] = lbl_80563F48;
+        r->m[6] = lbl_80563F48;
+        r->m[7] = lbl_80563F48;
+        r->m[8] = lbl_80563F50;
+    }
+}
+
+// Applies the current view of camera cycle `ci` to camera `p`.
+void fn_80273604(u8* p, int ci) {
+    CamCycle* cyc = &lbl_8049A258[ci];
+    CamView* v = &lbl_80346BA0[cyc->first + cyc->cur];
+    switch (v->type) {
+    case 34: {
+        *(Words12*)(p + 0x58) = *(Words12*)(p + 0xC0);
+        f32 w[3];
+        w[0] = lbl_80563F4C * v->rot[0];
+        w[1] = lbl_80563F4C * v->rot[1];
+        w[2] = lbl_80563F4C * v->rot[2];
+        f32 off[3];
+        off[0] = v->off[0];
+        off[1] = v->off[1];
+        off[2] = v->off[2];
+        Mat3 rot;
+        CamRotFromVec(&rot, w);
+        fn_801BFD34(p + 0x7C, off, p + 0xC0);
+        Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+        F32(p, 0xBC) = lbl_80563F4C * v->fov;
+        break;
+    }
+    case 0:
+        fn_80273BD0(p);
+        break;
+    case 2:
+        fn_80274268(p);
+        break;
+    case 4:
+    case 5:
+    case 7: {
+        int t = fn_80273494(S32(p, 0x4));
+        if (t == 6 || t == 0 || t == ci) {
+            fn_802704D0(v->type, lbl_80346BA0[cyc->first + (cyc->count + cyc->cur - 1) % cyc->count].type, p);
+        } else {
+            CamCycle* o = &lbl_8049A258[t];
+            fn_802704D0(v->type, lbl_80346BA0[o->first + o->cur].type, p);
+        }
+        break;
+    }
+    default:
+        fn_802E30C8(lbl_80347310, v->type);
+        fn_802704D4(4, p);
+        break;
+    }
+}
 
 }  // extern "C"
 CamRegion::~CamRegion(void) {}
