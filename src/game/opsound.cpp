@@ -277,6 +277,8 @@ void fn_8023CBA4(void) {
 }
 
 void fn_8023CC84(const char* layout) {
+    static char qualities[] = "Low\0Medium\0High\0";
+    static char raceMusic[] = "In-Game Music Off\0In-Game Music On\0\0";
     fn_8023CA54();
     if (!lbl_8055F160) {
         lbl_8055F164 = 0.0f;
@@ -303,8 +305,8 @@ void fn_8023CC84(const char* layout) {
                 MenuItem("music_volume", &lbl_8055F164, MenuRange(0.0f, 1.0f)),
                 MenuItem("tire_volume", &lbl_8055F170, MenuRange(0.0f, 1.0f)),
                 MenuItem("back", 0, 0, -1, 0),
-                MenuItem("quality", 7, &lbl_8055F17C, (int)"Low\0Medium\0High", 0),
-                MenuItem("race_music", 7, &lbl_8055F178, (int)"In-Game Music Off\0In-Game Music On", 0),
+                MenuItem("quality", 7, &lbl_8055F17C, (int)qualities, 0),
+                MenuItem("race_music", 7, &lbl_8055F178, (int)raceMusic, 0),
                 MenuItem("mixer", 2, &mixer, 0, 0),
                 MenuItem("mixer_name", 3, mixerName, 0x100, 0),
                 MenuItem("circle_list", 10, &list, 0, 0),
