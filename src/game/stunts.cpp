@@ -498,13 +498,14 @@ public:
         since = 0.016683351f;
     }
     virtual f32 Rate(const RaceCarRec* rc) {
-        f32 r;
+        f32 r = 0.0f;
         if (NearZero(rc->f2690) && Airborne(rc)) {
             if (dur > minT) {
                 Show();
             }
             {
-                f32 d = 0.016683351f * rc->speed;
+                f32 s = rc->speed;
+                f32 d = 0.016683351f * s;
                 dur += d;
                 f260 += d;
                 f264 += d;
@@ -525,7 +526,8 @@ public:
             StopFx();
         }
         int n = ranks.a.count;
-        if (Rank() == n - 1) {
+        int k = Rank();
+        if (k == n - 1) {
             r = End();
         }
         return r;
