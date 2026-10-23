@@ -235,7 +235,7 @@ void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r);
 int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
-int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r);
+int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
 void fn_8019ECC4(u8* p, u32 a, u32 b);
 u8* fn_801A1520(u8* p, u32 a, u32 swap);
 void fn_8019F1A4(u8* p);
@@ -538,7 +538,35 @@ void fn_8019DC04(u8* p, u8* q) {}  // stub (122)
 
 f32 fn_8019DDEC(u8* p) { return F32(p, 0x24) + F32(p, 0x28); }
 
-int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r) { return 0; }  // stub
+extern const f32 lbl_805622D0;  // 0.0
+
+// Ray from + t*dir against the sphere (c, r): the nearer hit if it lies in [0, *t), with its normal.
+int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r) {
+    PVec3 m;
+    m.v[0] = from[0] - c[0];
+    m.v[1] = from[1] - c[1];
+    m.v[2] = from[2] - c[2];
+    f32 b = lbl_8056234C * PSVECDotProduct(m.v, dir);
+    f32 mm = PSVECDotProduct(m.v, m.v);
+    f32 disc = b * b - 4.0f * (mm - r * r);
+    if (disc > 1e-5f) {
+        f32 t0 = 0.5f * (-b - (f32)sqrt(disc));
+        if (t0 >= lbl_805622D0 && t0 < *t) {
+            *t = t0;
+            n[0] = m.v[0] + dir[0] * t0;
+            n[1] = m.v[1] + dir[1] * t0;
+            n[2] = m.v[2] + dir[2] * t0;
+            f32 len = PSVECMag(n);
+            f32 k = 0.0001f;
+            f32 inv = 1.0f / (k > len ? k : len);
+            n[0] *= inv;
+            n[1] *= inv;
+            n[2] *= inv;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void fn_8019DF88(u8* p) {}  // stub (155)
 
@@ -754,7 +782,7 @@ void fn_8019F064(u8* p, u8* o) {
 
 void fn_8019F1A4(u8* p) { fn_8019AC44(p, p + 0x34, p + 0x40, F32(p, 0x24)); }
 
-void fn_8019F1B4(u8* p, u32 a, u32 b, u32 c, u32 d) { fn_8019DDFC(a, b, c, d, p + 0x34, F32(p, 0x24)); }
+void fn_8019F1B4(u8* p, u32 a, u32 b, u32 c, u32 d) { fn_8019DDFC((f32*)a, (f32*)b, (f32*)c, (f32*)d, (f32*)(p + 0x34), F32(p, 0x24)); }
 
 void fn_8019F1D4(u8* p, RVec3* lo, RVec3* hi) {
     f32 r = F32(p, 0x24);
@@ -1034,7 +1062,7 @@ int fn_801A1148(u8* p, u32 from, u32 dir, u32 t, u32 out) {
         int hit = 0;
         for (int i = 0; i < S32(p, 0x174); i++) {
             u8* s = (u8*)((SphGroupDel*)p)->vols[i];
-            if (fn_8019DDFC(from, dir, t, out, s + 0x34, F32(s, 0x24))) {
+            if (fn_8019DDFC((f32*)from, (f32*)dir, (f32*)t, (f32*)out, (f32*)(s + 0x34), F32(s, 0x24))) {
                 hit = 1;
             }
         }
