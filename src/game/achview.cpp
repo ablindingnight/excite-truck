@@ -104,7 +104,7 @@ void fn_802591D8(void) {
     lbl_8055F394 = 0;
 }
 
-u32 fn_8025921C(u8* p) { return 0; }
+u32 fn_8025921C(void) { return 0; }
 
 void fn_80259224(u8* p) {}  // stub (279)
 
@@ -377,7 +377,66 @@ void fn_8025B784(u8* p) {}
 
 void fn_8025B788(u8* p) {}  // stub (285)
 
-void fn_8025BBFC(u8* p) {}  // stub (132)
+}  // extern "C"
+
+// True while the tally animation (f_cc) still runs.
+static inline bool Tallying(u8* p) { return F32(p, 0xCC) < 1.5f && U8(p, 0xC5); }
+
+extern "C" {
+void fn_80216CA8(void);
+
+int fn_8025BBFC(u8* p, int key) {
+    if (U8(p, 0x58) || Tallying(p)) {
+        fn_80216D28();
+    }
+    switch (key) {
+    case 0xD:
+        if (U8(p, 0xC4)) {
+            if (U8(p, 0x58)) {
+                F32(p, 0x28) = (f32)S32(p, 0x20);
+            } else if (!Tallying(p)) {
+                U8(p, 0x59) = 1;
+                S32(p, 0x5C) = -2;
+            }
+        } else if ((S32(p, 0xC8) > 1 || fn_8025921C()) && !Tallying(p)) {
+            S32(p, 0x5C) = 3;
+            U8(p, 0x59) = 1;
+        } else {
+            fn_80214D50(1);
+            return 0;
+        }
+        break;
+    case 0x1B:
+        if (!U8(p, 0xC4)) {
+            U8(p, 0x59) = 1;
+            S32(p, 0x5C) = -1;
+        } else {
+            return 0;
+        }
+        break;
+    case 0x126:
+        if (!U8(p, 0xC4)) {
+            U8(p, 0x59) = 1;
+            S32(p, 0x5C) = 1;
+            fn_80216CA8();
+        } else {
+            return 0;
+        }
+        break;
+    case 0x128:
+        if (!U8(p, 0xC4)) {
+            U8(p, 0x59) = 1;
+            S32(p, 0x5C) = 2;
+            fn_80216CA8();
+        } else {
+            return 0;
+        }
+        break;
+    default:
+        return 0;
+    }
+    return 1;
+}
 
 void fn_8025BE0C(u8* p) {
     s32 level = S32(p, 0x24);
