@@ -33,8 +33,19 @@ struct NamedCam {
     char name[16];  // offset 0x38
 };
 
+// Camera definition reader (only the slot used here is named).
+class CamReader {
+public:
+    virtual const char* Tag(void);  // 0x08
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual const char* GetString(const char* key, const char* def);  // 0x18
+};
+
 extern "C" {
 int strcasecmp(const char* a, const char* b);
+char* strncpy(char* d, const char* s, u32 n);
 void* memcpy(void* d, const void* s, u32 n);
 void fn_8026A4A0(int i, f32* pose, f32* fov);
 }
@@ -44,7 +55,7 @@ extern f32 lbl_8055E3C8;
 extern NamedCam* lbl_8055F598;
 extern NamedCam lbl_8049FE98;
 extern NamedCam lbl_8049FEE0[];
-extern s32 lbl_8055F59C;
+extern NamedCam* lbl_8055F59C;
 extern s32 lbl_8055F5A0;
 
 extern "C" {
@@ -76,7 +87,21 @@ NamedCam* fn_80276A44(const char* name) {
     return 0;
 }
 
-void fn_80276ACC(u8* p) {}  // stub (48)
+void fn_80277F84(NamedCam* c, CamReader* r, int n);
+extern const char* lbl_8055C638;
+
+// Reads one named camera and remembers the special "house" and default ones.
+void fn_80276ACC(CamReader* r, const char* def) {
+    const char* name = r->GetString("name", def);
+    NamedCam* c = &lbl_8049FEE0[lbl_8055F5A0++];
+    fn_80277F84(c, r, lbl_8055F5A0);
+    strncpy(c->name, name, 0x10);
+    if (!strcasecmp(name, "house")) {
+        lbl_8055F59C = c;
+    } else if (!strcasecmp(name, lbl_8055C638)) {
+        lbl_8055F598 = c;
+    }
+}
 
 void fn_80276B8C(void) {
     u8* e = lbl_8049FD58;
@@ -137,7 +162,19 @@ void fn_80277740(void) {
     lbl_8055F59C = 0;
 }
 
-void fn_80277754(u8* p) {}  // stub (53)
+// Handles one camera-file block; returns whether the tag was recognised.
+int fn_80277754(CamReader* r) {
+    if (!strcasecmp(r->Tag(), "raceday")) {
+        fn_80276ACC(r, lbl_8055C638);
+    } else if (!strcasecmp(r->Tag(), "house")) {
+        fn_80276ACC(r, "house");
+    } else if (!strcasecmp(r->Tag(), "namedcam")) {
+        fn_80276ACC(r, "def_name");
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 void fn_80277828(u8* p) {}  // stub (78)
 
@@ -154,7 +191,7 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 
 void fn_80277A14(u8* p) {}  // stub (348)
 
-void fn_80277F84(u8* p) {}  // stub (121)
+void fn_80277F84(NamedCam* c, CamReader* r, int n) {}  // stub (121)
 
 void fn_80278168(u8* p) {}  // stub (41)
 }  // extern "C"
