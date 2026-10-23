@@ -669,7 +669,7 @@ void fn_802D93E8(GXTex* t) {
 void fn_802D9418(void) {
     fn_802D2614();
     GXTexObj* o = &lbl_8055FE24->obj;
-    u16 w = GXGetTexObjWidth(o);
+    int w = GXGetTexObjWidth(o);
     u16 h = GXGetTexObjHeight(o);
     GXSetTexCopySrc(0, 0, w, h);
     GXSetTexCopyDst(w, h, GXGetTexObjFmt(o), 0);
@@ -683,7 +683,7 @@ void fn_802D9418(void) {
 GXTex* fn_802D94DC(void) { return lbl_8055FE18; }
 
 void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
-    u16 w = GXGetTexObjWidth(&dst->obj);
+    int w = GXGetTexObjWidth(&dst->obj);
     int n = GXGetTexObjHeight(&dst->obj) * w * 16 / 32;
     u32* pd = (u32*)((u8*)GXGetTexObjData(&dst->obj) - 0x40000000);
     u32* pa = (u32*)((u8*)GXGetTexObjData(&a->obj) - 0x40000000);
@@ -701,25 +701,27 @@ void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
     }
 }
 
-void fn_802D9628(GXTex* t, int x, int y, u8 v) {
+void fn_802D9628(GXTex* t, int x, int y, u32 color) {
+    int w;
     int fmt = GXGetTexObjFmt(&t->obj);
-    u16 w = GXGetTexObjWidth(&t->obj);
+    w = GXGetTexObjWidth(&t->obj);
     GXGetTexObjHeight(&t->obj);
     u8* data = (u8*)GXGetTexObjData(&t->obj) - 0x40000000;
     if (fmt == 0) {
         u8* blk = data + (x / 8 + (y / 8) * (w / 8)) * 32;
-        int off = ((y % 8) * 8 + x % 8) * 4 / 8;
+        int off = (x % 8 + (y % 8) * 8) * 4 / 8;
+        u8 v = color;
         if (x & 1) {
-            blk[off] = (blk[off] & 0xF0) | (v >> 4);
+            blk[off] = (v >> 4) | (blk[off] & 0xF0);
         } else {
-            blk[off] = (v & 0xF0) | (blk[off] & 0xF);
+            blk[off] = (blk[off] & 0xF) | (v & 0xF0);
         }
     }
 }
 
 u32 fn_802D972C(GXTex* t, int x, int y) {
     int fmt = GXGetTexObjFmt(&t->obj);
-    u16 w = GXGetTexObjWidth(&t->obj);
+    int w = GXGetTexObjWidth(&t->obj);
     GXGetTexObjHeight(&t->obj);
     u8* data = (u8*)GXGetTexObjData(&t->obj) - 0x40000000;
     if (fmt == 0) {
