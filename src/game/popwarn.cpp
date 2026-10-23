@@ -36,6 +36,9 @@ public:
     virtual void Unk48(void);
     virtual void Unk4C(void);
     virtual void Unk50(void);
+    virtual void Unk54(void);
+    virtual int Key(int key);   // 0x58
+    virtual void Unk5C(void);
 
     void Finish(int r);
 
@@ -120,7 +123,6 @@ extern s32 lbl_8055BEBC;
 extern s32 lbl_8055BEB8;
 extern s32 lbl_8055BEC0;
 extern void* lbl_803435A0[];
-extern void* lbl_80343600[];
 extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""
@@ -323,11 +325,10 @@ struct CupText {
     f32 f10;     // offset 0x10
 };
 
-// The E3 track picker: cup tiles, track images and their names (vtable lbl_80343600, dtor fn_802470D4).
-struct CupSelect {
+// The E3 track picker: cup tiles, track images and their names.
+class CupSelect : public MenuState {
+public:
     CupSelect(int s) {
-        f14 = 0;
-        vt = lbl_80343600;
         tileSel = fn_8023512C("tile_cup_s.art");
         tile = fn_8023512C("tile_cup.art");
         tracks = fn_802C5130("e3_trks.img");
@@ -339,22 +340,21 @@ struct CupSelect {
         sel = s;
         pos = (f32)sel;
     }
-    ~CupSelect(void) {
-        vt = lbl_80343600;
+    virtual ~CupSelect(void) {
         fn_80235380(tileSel);
         fn_80235380(tile);
         fn_802C519C(tracks);
         delete text;
     }
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
+    virtual void Draw(void);
+    virtual int Key(int key);
+
     u8* tileSel;     // offset 0x18
     u8* tile;        // offset 0x1C
     u8* tracks;      // offset 0x20
     s32 count;       // offset 0x24
     s32 sel;         // offset 0x28
-    f32 pos;         // offset 0x2C
+    f32 pos;         // offset 0x2C: eases toward sel
     CupText* text;   // offset 0x30
 };
 
@@ -389,24 +389,6 @@ int fn_80246E4C(void) {
     return r;
 }
 
-u8* fn_802470D4(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80343600;
-        fn_80235380(PTR(p, 0x18));
-        fn_80235380(PTR(p, 0x1C));
-        fn_802C519C(PTR(p, 0x20));
-        u8* h = PTR(p, 0x30);
-        if (h) {
-            fn_802328D4(PTR(h, 0x0));
-            PTR(h, 0x0) = 0;
-            operator delete(h);
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 void fn_80247174(void) {
     for (int i = 0; i < 50; i++) {
@@ -1389,22 +1371,43 @@ int fn_80249154(u8* p) {
     return 1;
 }
 
-void fn_802491A8(u8* p) {}  // stub (99)
+f32 fn_80235EF0(u8* art, int part);
+void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
+void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_80234AFC(CupText* st, f32 x, f32 y, const char* fmt, ...);
 
-int fn_80249334(u8* p, int key) {
+}  // extern "C"
+
+// Two cup tiles side by side, the selected one lit; the row slides toward the selection.
+void CupSelect::Draw(void) {
+    for (int i = 0; i < count; i++) {
+        f32 off = 300.0f * ((f32)i - pos) - 100.0f;
+        bool cur = i == sel;
+        u8* art = cur ? tileSel : tile;
+        fn_802353F4(art, 0, 200.0f + off - fn_80235EF0(art, 0), 100.0f, 0.0f);
+        fn_802354A0(tracks, i, 30.0f + off, 70.0f, 0.0f, 140.0f, 140.0f, cur ? 0xFFFFFF00 : 0xC0202020);
+        CupText* tx = text;
+        tx->color = cur ? 0xFFFFFF00 : 0xC0202020;
+        fn_80234AFC(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? "MEXICO" : "FIJI");
+    }
+    f32 p = pos;
+    pos = p + 0.05f * ((f32)sel - p);
+}
+
+int CupSelect::Key(int key) {
     switch (key) {
     case 0x125:
-        if (S32(p, 0x28) > 0) {
+        if (sel > 0) {
             fn_80214D50(0);
-            S32(p, 0x28)--;
+            sel--;
         } else {
             fn_80214D50(1);
         }
         break;
     case 0x127:
-        if (S32(p, 0x28) + 1 < S32(p, 0x24)) {
+        if (sel + 1 < count) {
             fn_80214D50(0);
-            S32(p, 0x28)++;
+            sel++;
         } else {
             fn_80214D50(1);
         }
@@ -1412,6 +1415,9 @@ int fn_80249334(u8* p, int key) {
     }
     return 0;
 }
+
+extern "C" {
+
 
 void fn_802493E8(u8* p) {
     for (int i = 0; i < S32(p, 0x1C); i++) {
