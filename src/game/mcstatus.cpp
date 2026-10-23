@@ -32,12 +32,17 @@ int fn_801298E8(void* info, s32 ch);
 void fn_80214FD8(const char* title, const char* msg);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
+u8* fn_802C5130(const char* name);
+void fn_802E30C8(const char* fmt, ...);
+u8* fn_80232578(const char* name);
 }
 
 void operator delete(void* p);
 
 extern void* lbl_803430E8[];
 extern u8* lbl_8055F244;
+extern char lbl_80342FC0[];  // string pool
+extern const f32 lbl_80563830;
 
 // A remote's status block.
 struct WpadInfo {
@@ -68,7 +73,16 @@ u8* fn_8024521C(u8* p, int del) {
     return p;
 }
 
-void fn_80245264(u8* p) {}  // stub (32)
+void fn_80245264(u8* p) {
+    const char* str = lbl_80342FC0;
+    if ((PTR(p, 0x4) = fn_802C5130(str + 0x60)) == 0) {
+        fn_802E30C8(str + 0x78);
+    }
+    S32(p, 0x8) = 0;
+    PTR(p, 0x10) = fn_80232578(str + 0xB4);
+    PTR(p, 0xC) = fn_80232578(str + 0xB4);
+    F32(p, 0x14) = lbl_80563830;
+}
 
 void fn_802452E4(u8* p) {
     if (PTR(p, 0x4)) {

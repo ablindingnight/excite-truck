@@ -11,9 +11,13 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-class VD {
+// Interface of UIObjectsImpl (uiobjs.cpp).
+class UIObjects {
 public:
-    virtual ~VD(void);
+    virtual ~UIObjects(void);
+    virtual void AddImage(const char* name, const char* file, int frame);
+    virtual void AddFont(const char* name, const char* file);
+    virtual void AddSound(const char* name, const char* file, u8 loop);
 };
 
 class VA {
@@ -68,14 +72,20 @@ struct Words9 {
     u32 w[9];
 };
 
-extern VD* lbl_8055F394;
+extern UIObjects* lbl_8055F394;
+extern "C" UIObjects* fn_80258354(void);
 extern void* lbl_80345158[];
 extern bool lbl_8055F3A0;
 extern f32 lbl_8055F3A4;
 
 extern "C" {
 
-void fn_80259148(u8* p) {}  // stub (36)
+void fn_80259148(void) {
+    lbl_8055F394 = fn_80258354();
+    lbl_8055F394->AddSound("achieve_enter", "a_achieve.sfx", 0);
+    lbl_8055F394->AddSound("achieve_trophy", "a_trophy1.sfx", 0);
+    lbl_8055F394->AddSound("achieve_tally", "a_tally.sfx", 1);
+}
 
 void fn_802591D8(void) {
     delete lbl_8055F394;
