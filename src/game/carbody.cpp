@@ -510,7 +510,41 @@ void fn_8018A6F4(u8* p) {
 
 void fn_8018A750(u8* p) {}  // stub (86)
 
-void fn_8018A8A8(u8* p) {}  // stub (82)
+}  // extern "C"
+
+struct BVec {
+    BVec(void) {}
+    BVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    f32 x, y, z;
+};
+
+static inline void Scale(BVec* o, const BVec* a, f32 k) {
+    o->x = a->x * k;
+    o->y = a->y * k;
+    o->z = a->z * k;
+}
+
+extern "C" {
+double fmod(double x, double y);
+void fn_801C27D8(u8* sim, BVec* gravity, BVec* up, BVec* force, BVec* torque);
+
+// Feeds the flapping parts (flags/aerials at 0x26C4/0x26C8) their wind and motion input.
+void fn_8018A8A8(u8* p) {
+    BVec gravity(0.0f, -10000.0f, 0.0f);
+    BVec up(0.0f, 1.0f, 0.0f);
+    BVec zero(0.0f, 0.0f, 0.0f);
+    if (PTR(p, 0x26C4)) {
+        f32 t = lbl_8055E3C8;
+        BVec wind(1681.65f * ((f32)fmod(t, 0.16f) - 0.08f), 1954.35f * ((f32)fmod(t, 0.14f) - 0.07f),
+                  1363.5f * ((f32)fmod(t, 0.2f) - 0.1f));
+        fn_801C27D8(PTR(p, 0x26C4), &gravity, &up, &wind, &zero);
+    }
+    if (PTR(p, 0x26C8)) {
+        BVec v;
+        Scale(&v, (BVec*)(p + 0x118), -227.25f);
+        fn_801C27D8(PTR(p, 0x26C8), &gravity, &up, &v, &zero);
+    }
+}
 
 void fn_8018A9F0(u8* p) {}  // stub (237)
 
