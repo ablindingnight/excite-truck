@@ -261,7 +261,7 @@ ModuleTag lbl_8055F990;
 s32 lbl_8055F998;  // gmat triangles
 s32 lbl_8055F99C;  // world map triangles
 GAllocator* lbl_8055F9A0;
-extern u8 lbl_8055FA59;  // draw debug
+extern bool lbl_8055FA59;  // draw debug
 InlineVec<GMat*, 32> lbl_804BE104;
 static GVec lbl_804BE190[8];  // ocean corners
 extern const f32 kWorldScale;

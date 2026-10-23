@@ -223,7 +223,7 @@ u8 lbl_8055D36C;
 u8 lbl_8055D36D;  // replay running
 s32 lbl_8055D370;
 Layout* lbl_8055D374;
-u8 lbl_8055D378[2];  // restart / replay requested
+bool lbl_8055D378[2];  // restart / replay requested
 u8 lbl_8055D37A;     // results menu up
 ReplayClock lbl_8055D380;
 f32 lbl_8055D394;
@@ -231,7 +231,7 @@ s32 lbl_8055D398;
 u8 lbl_8055D39C;
 u8 lbl_8055D39D;
 
-u8 lbl_805589B0 = 1;  // advanced overlay
+bool lbl_805589B0 = 1;  // advanced overlay
 s32 lbl_805589EC = 4;  // camera mode
 
 void fn_80008390(void) {

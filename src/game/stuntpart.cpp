@@ -273,7 +273,7 @@ ModuleTag lbl_8055F918;
 UnkStaticFFFF lbl_8055F920;
 StuntEmitters* lbl_8055F924;
 StuntPart* lbl_8055F928;
-u8 lbl_8055F92C;
+bool lbl_8055F92C;
 u8 lbl_8055F92D;
 SavedFog lbl_804BD7B0;
 

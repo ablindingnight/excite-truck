@@ -202,7 +202,7 @@ f32 lbl_8055E564;
 f32 lbl_8055E568;
 f32 lbl_8055E56C;
 f32 lbl_8055E570;
-u8 lbl_8055E574;
+bool lbl_8055E574;
 s32 lbl_8055E578;
 f32 lbl_8055E57C;
 u8 lbl_8055E580;

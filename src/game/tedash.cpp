@@ -248,7 +248,7 @@ s32 lbl_8055FA28;  // current layer
 s32 lbl_8055FA2C;  // current brush
 u8 lbl_8055FA30;   // show peaks
 u8 lbl_8055FA31;
-u8 lbl_8055FA32;   // show world map
+bool lbl_8055FA32;   // show world map
 s32 lbl_8055FA34;
 s32 lbl_8055FA38;  // mode
 s32 lbl_8055FA3C;  // world
@@ -257,7 +257,7 @@ s32 lbl_8055FA44;  // selected object
 ILayout* lbl_8055FA48;
 s16 lbl_8055FA50[4];  // dirty rect
 u8 lbl_8055FA58;
-u8 lbl_8055FA59;
+bool lbl_8055FA59;
 
 InlineVec<Brush, 16> lbl_804BE7D8;
 InlineVec<Stat, 32> lbl_804BFA70;
