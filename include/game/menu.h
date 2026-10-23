@@ -33,6 +33,13 @@ struct MenuItem {
         arg0 = end.unkC;
         arg1 = end.unk10;
     }
+    MenuItem(const UnkStatic123s& end) {
+        name = (const char*)end.unk0;
+        type = end.unk4;
+        data = (const void*)end.unk8;
+        arg0 = end.unkC;
+        arg1 = end.unk10;
+    }
     const char* name;  // offset 0x0
     int type;          // offset 0x4
     const void* data;  // offset 0x8
