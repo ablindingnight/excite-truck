@@ -547,6 +547,7 @@ void fn_8000E874(int player) {
         char buf[20];
         int part = fn_8000DFA8(row->type);
         int part2 = fn_8000DFC0(row->type);
+        f32 w = fn_80235EF0(lbl_80351214.art, part) + pad;
         f32 h = fn_80235F64(lbl_80351214.art, part);
         f32 x = Lerp(5.0f + lbl_8055CFF0, right, row->slide);
         f32 x5;
@@ -556,7 +557,7 @@ void fn_8000E874(int player) {
         fn_80235EF0(lbl_80351214.art, part2);
         x9 = 9.0f + x;
         x5 = 5.0f + x;
-        xr = x + (fn_80235EF0(lbl_80351214.art, part) + pad);
+        xr = x + w;
         ty = 1.0f + (y - h * 0.5f);
         switch (row->type) {
         case 1:
