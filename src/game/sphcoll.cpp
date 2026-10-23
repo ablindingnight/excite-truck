@@ -53,6 +53,8 @@ struct Xform {
 extern void* lbl_80333968[];
 extern void* lbl_80333818[];
 extern void* lbl_803337C8[];
+extern void* lbl_803338C0[];
+extern void* lbl_80333868[];
 
 class VEx;
 
@@ -649,7 +651,18 @@ void fn_801A1CA0(u8* p) {
     }
 }
 
-void fn_801A1CE4(u8* p) {}  // stub (60)
+u8* fn_801A1CE4(u8* p, u32 a, u32 swap) {
+    fn_8019ECC4(p, a, swap);
+    *(void**)p = lbl_803338C0;
+    if (swap) {
+        Swap32(p + 0x24);
+        Swap32(p + 0x28);
+        Swap32(p + 0x2C);
+        Swap32(p + 0x30);
+        Swap32(p + 0x34);
+    }
+    return p;
+}
 
 void fn_801A1DD4(u8* a, u8* obj) {
     switch (S32(obj, 0x18)) {
@@ -697,7 +710,30 @@ void fn_801A22A4(u8* p) {
     fn_801E44F4((u8*)&x, 0x50000000, c->x, c->y, c->z);
 }
 
-void fn_801A2354(u8* p) {}  // stub (56)
+u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz) {
+    f32 y = hy - 0.2f;
+    f32 x = hx - 0.2f;
+    f32 z = hz - 0.2f;
+    F32(p, 0x10) = s0;
+    U32(p, 0xC) = a;
+    U32(p, 0x4) = b;
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'BOX ';
+    F32(p, 0x14) = s1;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_803338C0;
+    F32(p, 0x24) = x;
+    F32(p, 0x28) = y;
+    F32(p, 0x2C) = z;
+    U32(p, 0x34) = 0;
+    F32(p, 0x30) = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
+    F32(p, 0x38) = c->x;
+    *(void**)p = lbl_80333868;
+    F32(p, 0x3C) = c->y;
+    F32(p, 0x40) = c->z;
+    return p;
+}
 
 u8* fn_801A2434(u8* p, int del) {
     if (p && del > 0) {
