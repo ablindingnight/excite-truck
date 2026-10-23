@@ -391,7 +391,88 @@ void fn_80247174(void) {
     fn_80246CAC(1.0f);
 }
 
-void fn_80247210(u8* p) {}  // stub (99)
+}  // extern "C"
+
+// A track record as GetTrack returns it; only its value node is used here.
+struct KioskTrack {
+    u8 pad0[0x80];      // offset 0x0
+    ValueNode* vals;    // offset 0x80
+};
+
+int GetNumTracks(void);
+KioskTrack* GetTrack(int track);
+
+extern "C" {
+f32 fn_8020A5F0(void);
+void fn_8023D704(int a);
+void fn_80129AFC(void);
+void fn_802E47E8(void);
+void fn_8023D7CC(void);
+int fn_80248668(void);
+int fn_80278A1C(const char* movie);
+void fn_802E317C(const char* fmt, ...);
+void fn_8020C91C(int song);
+void fn_8023BFBC(int track, int eve);
+
+}  // extern "C"
+
+inline void KioskLoadLog(void) { fn_802E317C("MenuShowKioskLoadIntoGame!"); }
+
+extern "C" {
+
+// Kiosk attract loop: logos, idle menu (or the attract movie), then the E3 track picker; loads the
+// chosen demo track with its song.
+void fn_80247210(void) {
+    if (!lbl_8055F268) {
+        lbl_8055F264 = fn_8020A5F0();
+        lbl_8055F268 = 1;
+    }
+    lbl_8055F260 = 1;
+    fn_8023D704(0);
+    fn_80129AFC();
+    fn_802E47E8();
+    fn_8023D7CC();
+    int skip = 0;
+    for (;;) {
+        if (skip) {
+            skip = 0;
+        } else {
+            fn_80246DE8();
+            fn_80246DF4();
+            fn_80246E00();
+        }
+        if (fn_80248668() == -234) {
+            if (!fn_80278A1C("attract.avi")) {
+                skip = 1;
+            }
+            if (!skip) {
+                fn_80247174();
+            }
+            continue;
+        }
+        skip = fn_80246E4C();
+        if (skip >= 0) {
+            break;
+        }
+        skip = 1;
+    }
+    KioskLoadLog();
+    int track = -1;
+    int song = -1;
+    for (int i = 0; i < GetNumTracks(); i++) {
+        if (skip == GetTrack(i)->vals->GetInt("demo_idx", -1)) {
+            track = i;
+            song = GetTrack(i)->vals->GetInt("song_id", -1);
+            break;
+        }
+    }
+    fn_8020C91C(song);
+    fn_8020A634();
+    fn_8023BFBC(track, 0);
+    fn_802483E0();
+    fn_8020C91C(-1);
+    lbl_8055F260 = 0;
+}
 
 u32 fn_8024739C(u8* p) { return 0; }
 
@@ -617,7 +698,7 @@ extern "C" {
 int fn_8020A640(void);
 void fn_8020A600(void);
 
-void fn_80248668(void) {
+int fn_80248668(void) {
     if (!fn_8020A640()) {
         fn_8020A600();
     }
@@ -628,7 +709,7 @@ void fn_80248668(void) {
     };
     MenuDesc desc = {"kiosk.lyt", 0, (int (*)(int*))fn_802485FC, 0, 0};
     desc.items = items;
-    fn_802146BC(&desc, -999, -999, 1);
+    return fn_802146BC(&desc, -999, -999, 1);
 }
 
 void fn_80248770(u8* p) {
