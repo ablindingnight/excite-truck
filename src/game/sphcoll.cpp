@@ -36,6 +36,7 @@ struct Phob;
 class RigidBody {
 public:
     void Push(Phob* who, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
+    void VelAt(RVec3* out, const RVec3* at);
 };
 
 class VGroup {
@@ -263,7 +264,58 @@ extern "C" {
 
 void fn_80198F64(u8* p) {}  // stub (470)
 
-void fn_801996BC(u8* p) {}  // stub (109)
+// Friction impulse at contact point pt (normal n) between volumes a and b: the opposing tangential
+// relative velocity, scaled by -1000 and clamped to half of mu * (a's + b's friction).
+void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 mu) {
+    RVec3 dn;
+    RVec3 rel;
+    RVec3 va;
+    RVec3 vb;
+    RVec3 f;
+    RigidBody* ra = (RigidBody*)PTR(a, 0x4);
+    RigidBody* rb = (RigidBody*)PTR(b, 0x4);
+    if (ra) {
+        ra->VelAt(&va, pt);
+    } else {
+        va.x = 0.0f;
+        va.y = 0.0f;
+        va.z = 0.0f;
+    }
+    if (rb) {
+        rb->VelAt(&vb, pt);
+    } else {
+        vb.x = 0.0f;
+        vb.y = 0.0f;
+        vb.z = 0.0f;
+    }
+    rel.x = va.x - vb.x;
+    rel.y = va.y - vb.y;
+    rel.z = va.z - vb.z;
+    f32 d = PSVECDotProduct(n, &rel);
+    dn.x = n->x * d;
+    dn.y = n->y * d;
+    dn.z = n->z * d;
+    rel.x = rel.x - dn.x;
+    rel.y = rel.y - dn.y;
+    rel.z = rel.z - dn.z;
+    f.x = rel.x;
+    f.y = rel.y;
+    f.z = rel.z;
+    f.x *= -1000.0f;
+    f.y *= -1000.0f;
+    f.z *= -1000.0f;
+    f32 mag = PSVECMag(&f.x);
+    f32 fb = F32(b, 0x14);
+    f32 fa = F32(a, 0x14);
+    f32 lim = 0.5f * mu * (fa + fb);
+    if (mag > lim) {
+        f32 k = lim / mag;
+        f.x *= k;
+        f.y *= k;
+        f.z *= k;
+    }
+    *out = f;
+}
 
 void fn_80199870(u8* p, void* w) {
     u32 t = U32(p, 0x10);
