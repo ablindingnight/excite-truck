@@ -224,7 +224,7 @@ void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r);
 void fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
 void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r);
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
-void fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r);
+int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r);
 void fn_8019ECC4(u8* p, u32 a, u32 b);
 u8* fn_801A1520(u8* p, u32 a, u32 swap);
 void fn_8019F1A4(u8* p);
@@ -311,7 +311,7 @@ void fn_8019DC04(u8* p) {}  // stub (122)
 
 f32 fn_8019DDEC(u8* p) { return F32(p, 0x24) + F32(p, 0x28); }
 
-void fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r) {}
+int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r) { return 0; }  // stub
 
 void fn_8019DF88(u8* p) {}  // stub (155)
 
@@ -576,7 +576,35 @@ void fn_801A0464(u8* p) {}  // stub (683)
 
 void fn_801A0F10(u8* p) {}  // stub (142)
 
-void fn_801A1148(u8* p) {}  // stub (66)
+// Sweeps a ray against the group: a cheap slab test on the bounding sphere, then each member.
+int fn_801A1148(u8* p, u32 from, u32 dir, u32 t, u32 out) {
+    const f32* c = (const f32*)(PTR(p, 0xC) + 0x24);
+    const f32* f = (const f32*)from;
+    f32 fy;
+    f32 fx;
+    f32 fz;
+    fx = f[0];
+    fy = f[1];
+    fz = f[2];
+    f32 d[3];
+    d[0] = c[0] - fx;
+    d[1] = c[1] - fy;
+    d[2] = c[2] - fz;
+    f32 proj = PSVECDotProduct(d, (void*)dir);
+    f32 rad = F32(p, 0x178);
+    if (proj >= -rad && proj < *(f32*)t + rad) {
+        fn_801A0160(p);
+        int hit = 0;
+        for (int i = 0; i < S32(p, 0x174); i++) {
+            u8* s = (u8*)((SphGroupDel*)p)->vols[i];
+            if (fn_8019DDFC(from, dir, t, out, s + 0x34, F32(s, 0x24))) {
+                hit = 1;
+            }
+        }
+        return hit;
+    }
+    return 0;
+}
 
 void fn_801A1250(u8* p) {
     u8* q = p;
