@@ -329,7 +329,7 @@ void fn_80130568(char* s) {
     }
 }
 
-void fn_801305C4(char* buf, s32 size, Unit* u, int mode, f32 value) {
+void fn_801305C4(char* buf, s32 size, const Unit* u, int mode, f32 value) {
     if (u->precis == 0) {
         fn_801345D8(buf, size, "%c%d", 1, (int)(value * u->conv));
     } else {
