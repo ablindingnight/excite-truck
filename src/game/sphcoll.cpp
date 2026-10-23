@@ -80,6 +80,21 @@ static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
     }
 }
 
+static inline void MulVecT(RVec3* out, const RVec3* in, const CFrame* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
+        f32 y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
+        f32 z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
+        out->y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
+        out->z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+    }
+}
+
 struct W3 {
     u32 a, b, c;
 };
@@ -662,7 +677,62 @@ u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
 void fn_8019BD54(u8* p, u8* q, int a, int b) {}  // stub (704)
 
-void fn_8019C854(u8* p, u8* q) {}  // stub (286)
+// Sphere p against ring q (major radius 0x24, tube radius 0x28): in ring space, within the slab, the
+// nearest point of the ring's centre circle gives the contact.
+int fn_8019C854(u8* p, u8* q) {
+    RVec3 l;
+    RVec3 a;
+    RVec3 n;
+    RVec3 w;
+    RVec3 nw;
+    CFrame* f = (CFrame*)PTR(q, 0xC);
+    l.x = F32(p, 0x34) - f->t.x;
+    l.y = F32(p, 0x38) - f->t.y;
+    l.z = F32(p, 0x3C) - f->t.z;
+    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
+    f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
+    f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
+    l.x = x;
+    l.y = y;
+    l.z = z;
+    f32 rs = F32(p, 0x24);
+    f32 R = F32(q, 0x24);
+    f32 tr = F32(q, 0x28);
+    if (l.z < rs + tr && l.z > -(rs + tr)) {
+        f32 dist = (f32)sqrt(l.x * l.x + l.y * l.y);
+        f32 pen = (rs + tr) - (f32)__fabs(dist - R);
+        if (pen > 0.0f) {
+            if (dist > R + tr) {
+                f32 k = (dist - rs) / dist;
+                a.x = l.x * k;
+                a.y = l.y * k;
+                a.z = l.z * k;
+            } else if (dist < R - tr) {
+                f32 k = (dist + rs) / dist;
+                a.x = l.x * k;
+                a.y = l.y * k;
+                a.z = l.z * k;
+            } else {
+                a = l;
+            }
+            a.z = 0.0f;
+            n.x = l.x - a.x;
+            n.y = l.y - a.y;
+            n.z = l.z - a.z;
+            PSVECNormalize(&n.x, &n.x);
+            a.z = l.z;
+            CFrame* m = (CFrame*)PTR(q, 0xC);
+            MulVec(&w, &a, m);
+            w.x += m->t.x;
+            w.y += m->t.y;
+            w.z += m->t.z;
+            MulVec(&nw, &n, (CFrame*)PTR(q, 0xC));
+            fn_8019A788(p, q, (u32)&w, &nw, 0, 0, pen, 0.0f, 0.0f);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 // Capsule (q: frame at 0xC with axis at 0x18 and centre at 0x24, half length 0x28, radius 0x24):
 // the cylinder test, then a sphere test at each end.
@@ -1124,20 +1194,6 @@ int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
 }
 
 // out = rotation^T * in (into the frame's space).
-static inline void MulVecT(RVec3* out, const RVec3* in, const CFrame* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
-        f32 y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
-        f32 z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
-        out->y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
-        out->z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
-    }
-}
 
 // Ray from + t*dir against the box (frame m, half sizes hx, hy, hz): slab test in box space; the entry
 // distance replaces *t when nearer.
