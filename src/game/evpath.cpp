@@ -337,6 +337,25 @@ void fn_80280A38(void) {
     }
 }
 
+}  // extern "C"
+
+// Makes event i current (none when out of range) and copies its caption.
+static inline void SelectEvent(int i) {
+    lbl_804B3068[0] = 0;
+    if (i >= 0 && i < lbl_804B3048.count) {
+        u8* e = (u8*)lbl_804B3048.data[i];
+        lbl_8055F688 = (s32)e;
+        if (e && PTR(e, 0x60)) {
+            CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+        }
+    } else {
+        lbl_8055F688 = 0;
+    }
+}
+
+extern "C" {
+void fn_80216D28(void);
+
 // While the current event is not done, picks the first done event as the one to show.
 int fn_80280C00(void) {
     u8* cur = (u8*)lbl_8055F688;
@@ -368,9 +387,53 @@ int fn_80280C00(void) {
     return 0;
 }
 
-void fn_80280DC8(u8* p) {}  // stub (109)
+// Next event in the same state (done/not done) as the current one.
+int fn_80280DC8(void) {
+    if (lbl_8055F688) {
+        int i = lbl_804B3048.Find((u8*)lbl_8055F688);
+        u8* cur = (u8*)lbl_804B3048.data[i];
+        if (PTR(cur, 0x60)) {
+            bool done = ((EvCond*)PTR(cur, 0x60))->Done();
+            int k;
+            for (k = i + 1; k < lbl_804B3048.count; k++) {
+                u8* e = (u8*)lbl_804B3048.data[k];
+                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                    break;
+                }
+            }
+            if (k < lbl_804B3048.count) {
+                SelectEvent(k);
+            }
+        }
+    } else {
+        fn_80216D28();
+    }
+    return 0;
+}
 
-void fn_80280F7C(u8* p) {}  // stub (111)
+// Previous event in the same state as the current one.
+int fn_80280F7C(void) {
+    if (lbl_8055F688) {
+        int i = lbl_804B3048.Find((u8*)lbl_8055F688);
+        u8* cur = (u8*)lbl_804B3048.data[i];
+        if (PTR(cur, 0x60)) {
+            bool done = ((EvCond*)PTR(cur, 0x60))->Done();
+            int k;
+            for (k = i - 1; k >= 0; k--) {
+                u8* e = (u8*)lbl_804B3048.data[k];
+                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                    break;
+                }
+            }
+            if (k >= 0) {
+                SelectEvent(k);
+            }
+        }
+    } else {
+        fn_80216D28();
+    }
+    return 0;
+}
 
 int fn_802368EC(void);
 
