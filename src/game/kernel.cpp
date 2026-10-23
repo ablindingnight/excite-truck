@@ -332,35 +332,33 @@ int fn_802E1BB4(Video* v) {
     void* mem = fn_8011FFC4(ramps + frame * v->info.count + 0x7F);
     if (mem) {
         v->mem = mem;
-        VidFrame* f = v->info.frames;
-        VidTexSet* t = v->tex;
         u8* p = (u8*)(((u32)mem + 0x7F) & ~0x7F);
-        for (int k = 0; k < v->info.count; k++, f++, t++) {
-            if (f->y.on) {
-                f->y.buf = p;
-                f->y.width = lumaW;
-                if (!fn_802E18D4(lumaW, v->info.height, 1, 0, &t->y, p)) {
+        for (int k = 0; k < v->info.count; k++) {
+            if (v->info.frames[k].y.on) {
+                v->info.frames[k].y.buf = p;
+                v->info.frames[k].y.width = lumaW;
+                if (!fn_802E18D4(lumaW, v->info.height, 1, 0, &v->tex[k].y, p)) {
                     goto fail;
                 }
             }
-            if (f->u.on) {
-                f->u.buf = p + offU;
-                f->u.width = chromaW;
-                if (!fn_802E18D4(chromaW, v->info.cheight, 1, 0, &t->u, p + offU)) {
+            if (v->info.frames[k].u.on) {
+                v->info.frames[k].u.buf = p + offU;
+                v->info.frames[k].u.width = chromaW;
+                if (!fn_802E18D4(chromaW, v->info.cheight, 1, 0, &v->tex[k].u, p + offU)) {
                     goto fail;
                 }
             }
-            if (f->v.on) {
-                f->v.buf = p + offV;
-                f->v.width = chromaW;
-                if (!fn_802E18D4(chromaW, v->info.cheight, 1, 0, &t->v, p + offV)) {
+            if (v->info.frames[k].v.on) {
+                v->info.frames[k].v.buf = p + offV;
+                v->info.frames[k].v.width = chromaW;
+                if (!fn_802E18D4(chromaW, v->info.cheight, 1, 0, &v->tex[k].v, p + offV)) {
                     goto fail;
                 }
             }
-            if (f->a.on) {
-                f->a.buf = p + offA;
-                f->a.width = lumaW;
-                if (!fn_802E18D4(lumaW, v->info.height, 1, 0, &t->a, p + offA)) {
+            if (v->info.frames[k].a.on) {
+                v->info.frames[k].a.buf = p + offA;
+                v->info.frames[k].a.width = lumaW;
+                if (!fn_802E18D4(lumaW, v->info.height, 1, 0, &v->tex[k].a, p + offA)) {
                     goto fail;
                 }
             }
