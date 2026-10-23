@@ -161,9 +161,8 @@ void fn_802059C0(void) {
             u32 dark = color & 0xFF7F7F7F;
             f32 side = (i == 0) ? -1.0f : 1.0f;
             f32 iconScale = 3.0f;
-            f32 iconH = 0.01f * iconScale;
             f32 iconX = side * iconScale;
-            f32 margin = 2.0f * iconH;
+            f32 margin = 2.0f * (0.01f * iconScale);
             f32 y = Lerp(margin, 1.0f, Ramp(p, 0.0f, 1.0f));
             if ((u8)a) {
                 fn_802C8CBC(-1);
