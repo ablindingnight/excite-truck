@@ -8,8 +8,9 @@ void* operator new(size_t size, const char* tag);
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-f32 fn_80144514(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);  // a0*b0 + a1*b1 + a2*b2
 }
+
+f32 Dot(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);  // a0*b0 + a1*b1 + a2*b2 (modeinl.cpp)
 
 // A fixed-size block pool.
 // Fixed-size block pool (pool.cpp).
@@ -215,15 +216,15 @@ void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
     out->unk34 = l->unk34 * r->unk34;
     out->unk38 = l->unk38 * r->unk38;
     if (out == l || out == r) {
-        f32 m00 = fn_80144514(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
-        f32 m10 = fn_80144514(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
-        f32 m20 = fn_80144514(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
-        f32 m01 = fn_80144514(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
-        f32 m11 = fn_80144514(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
-        f32 m21 = fn_80144514(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
-        f32 m02 = fn_80144514(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
-        f32 m12 = fn_80144514(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
-        f32 m22 = fn_80144514(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
+        f32 m00 = Dot(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
+        f32 m10 = Dot(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
+        f32 m20 = Dot(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
+        f32 m01 = Dot(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
+        f32 m11 = Dot(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
+        f32 m21 = Dot(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
+        f32 m02 = Dot(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
+        f32 m12 = Dot(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
+        f32 m22 = Dot(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
         out->xf.m[0][0] = m00;
         out->xf.m[1][0] = m10;
         out->xf.m[2][0] = m20;
@@ -234,15 +235,15 @@ void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
         out->xf.m[1][2] = m12;
         out->xf.m[2][2] = m22;
     } else {
-        out->xf.m[0][0] = fn_80144514(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
-        out->xf.m[1][0] = fn_80144514(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
-        out->xf.m[2][0] = fn_80144514(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
-        out->xf.m[0][1] = fn_80144514(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
-        out->xf.m[1][1] = fn_80144514(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
-        out->xf.m[2][1] = fn_80144514(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
-        out->xf.m[0][2] = fn_80144514(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
-        out->xf.m[1][2] = fn_80144514(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
-        out->xf.m[2][2] = fn_80144514(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
+        out->xf.m[0][0] = Dot(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
+        out->xf.m[1][0] = Dot(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
+        out->xf.m[2][0] = Dot(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
+        out->xf.m[0][1] = Dot(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
+        out->xf.m[1][1] = Dot(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
+        out->xf.m[2][1] = Dot(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
+        out->xf.m[0][2] = Dot(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
+        out->xf.m[1][2] = Dot(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
+        out->xf.m[2][2] = Dot(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
     }
     out->xf.t[0] = l->xf.t[0] + r->xf.t[0];
     out->xf.t[1] = l->xf.t[1] + r->xf.t[1];
