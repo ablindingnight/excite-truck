@@ -140,7 +140,7 @@ int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
     return r;
 }
 
-void fn_8026003C(u8* p) {}  // stub (482)
+void fn_8026003C(void) {}  // stub (482)
 
 void fn_802607C4(u8* p) {
     U8(p, 0x1D) = 1;
@@ -213,23 +213,12 @@ u8* fn_802608D4(u8* p, int del) {
     return p;
 }
 
-void fn_80260954(u8* p) {}  // stub (284)
-
-u8* fn_80260DC4(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
-
 }  // extern "C"
 
 // A node on the challenge map (event or difficulty marker).
 class PathNode {
 public:
-    virtual void s08(void);
+    virtual ~PathNode(void);
     virtual void s0C(void);
     virtual void s10(void);
     virtual void s14(void);
@@ -271,6 +260,202 @@ struct PathScreen {
 };
 
 #define SCREEN ((PathScreen*)lbl_8055F420)
+
+extern UnkStatic123s lbl_80498F00;  // end-of-menu tag
+extern const MenuDesc lbl_802FA6C0;
+
+int GetEveMode(void);
+void UnloadEves(void);
+void LoadModeEves(int mode);
+
+// A node pointer list with inline storage (initialised by fn_8026213C / fn_80262120).
+struct NodeVec {
+    PathNode** data;  // offset 0x0
+    s32 count;        // offset 0x4
+    s32 cap;          // offset 0x8
+};
+
+// Node lists with inline storage for 6 events / 3 difficulties.
+struct NodeVec6 {
+    inline NodeVec6(void);
+    PathNode** data;  // offset 0x0
+    s32 count;        // offset 0x4
+    s32 cap;          // offset 0x8
+    PathNode* buf[6]; // offset 0xC
+};
+
+struct NodeVec3 {
+    inline NodeVec3(void);
+    PathNode** data;  // offset 0x0
+    s32 count;        // offset 0x4
+    s32 cap;          // offset 0x8
+    PathNode* buf[3]; // offset 0xC
+};
+
+// The whole screen as it sits on fn_80260954's stack (PathScreen is its head).
+struct PathScreenBuf {
+    PathScreenBuf(int a) {
+        lbl_8055F420 = (u8*)this;
+        arg = a;
+        level = 0;
+        event = 0;
+        popup = 0;
+    }
+    ~PathScreenBuf(void) {
+        lbl_8055F420 = 0;
+        if (popup) {
+            delete popup;
+            popup = 0;
+        }
+        lbl_8055F3EC = 0;
+        int i;
+        for (i = 0; i < numEvents; i++) {
+            delete events.data[i];
+        }
+        for (i = 0; i < numLevels; i++) {
+            delete levels.data[i];
+        }
+        levels.data = 0;
+        levels.count = 0;
+        levels.cap = 0;
+        events.data = 0;
+        events.count = 0;
+        events.cap = 0;
+    }
+    s32 event;           // offset 0x0
+    s32 level;           // offset 0x4
+    s32 numEvents;       // offset 0x8
+    s32 numLevels;       // offset 0xC
+    s32 arg;             // offset 0x10
+    PathNode* popup;     // offset 0x14
+    NodeVec6 events;     // offset 0x18
+    NodeVec3 levels;     // offset 0x3C
+    u8 pad54[0x24];      // offset 0x54
+};
+
+// A raw menu record, filled by the out-of-line item initialisers below.
+struct PathItem {
+    u32 w[5];
+};
+
+extern "C" {
+int fn_8027B878(int a);
+void fn_80261C68(u8* p);
+void fn_8026003C(void);
+void fn_80261AF0(u8* p, int difficulty);
+void fn_80261AE8(u8* p, u32 v);
+void fn_80261A7C(u8* p, s32 a);
+void fn_80261A18(u8* p, s32 a);
+u8* fn_80261A08(u8* p, int i);
+u8* fn_802619D8(u8* p, int i);
+void fn_802619E8(u8* p, s32 a, s32 b);
+void fn_80261980(u8* p, s32 a, s32 b, s32 c);
+const char* fn_80261948(s32* p);
+const char* fn_802619A0(s32* p);
+void fn_80261688(u8* p, s32 a, s32 b, s32 c);
+void fn_80261AA0(void);
+void fn_80261A40(int x);
+int fn_802610C8(void);
+int fn_80260E30(void);
+int fn_80261178(void);
+int fn_802613E0(void);
+int fn_802616A8(void);
+u8* fn_80260DC4(u8* p, int del);
+void fn_80260E04(Words5* d, const Words5* s);
+extern u8 lbl_8055F3E8;
+extern s32 lbl_8055F3E4;
+
+// The challenge map screen: unlock popups, then the map menu until backed out.
+void fn_80260954(int arg) {
+    PathItem items[19];
+    char* pool = lbl_80345B40;
+    int mode = GetEveMode();
+    if (mode != 0x130) {
+        if (mode != 0x134) {
+            UnloadEves();
+        }
+        LoadModeEves(0x130);
+    }
+    lbl_8055F3E4 = fn_8027B878(arg);
+    {
+    PathScreenBuf scr(arg);
+    MenuDesc desc;
+    s32 diff;
+    fn_80261C68((u8*)&scr);
+    int r;
+    goto start;
+    do {
+        fn_8026003C();
+    start:
+        if (lbl_8055F3E8) {
+            fn_80261AF0((u8*)&scr, scr.arg + 1);
+            lbl_8055F3E8 = 0;
+            if (scr.arg == 0) {
+                lbl_8055F3EB = 0;
+                r = -1;
+                continue;
+            }
+        }
+        fn_80261AE8((u8*)&diff, scr.arg);
+        fn_80261A7C((u8*)&items[0], (s32)fn_80261AA0);
+        fn_80261A18((u8*)&items[1], (s32)fn_80261A40);
+        fn_802619E8((u8*)&items[2], (s32)(pool + 0x1B8), *(s32*)fn_80261A08((u8*)&scr.levels, 0));
+        fn_802619E8((u8*)&items[3], (s32)(pool + 0x1C8), *(s32*)fn_80261A08((u8*)&scr.levels, 1));
+        fn_802619E8((u8*)&items[4], (s32)(pool + 0x1D8), *(s32*)fn_80261A08((u8*)&scr.levels, 2));
+        fn_802619E8((u8*)&items[5], (s32)(pool + 0x1E8), *(s32*)fn_802619D8((u8*)&scr.events, 0));
+        fn_802619E8((u8*)&items[6], (s32)(pool + 0x1F8), *(s32*)fn_802619D8((u8*)&scr.events, 1));
+        fn_802619E8((u8*)&items[7], (s32)(pool + 0x208), *(s32*)fn_802619D8((u8*)&scr.events, 2));
+        fn_802619E8((u8*)&items[8], (s32)(pool + 0x218), *(s32*)fn_802619D8((u8*)&scr.events, 3));
+        fn_802619E8((u8*)&items[9], (s32)(pool + 0x228), *(s32*)fn_802619D8((u8*)&scr.events, 4));
+        fn_802619E8((u8*)&items[10], (s32)(pool + 0x238), *(s32*)fn_802619D8((u8*)&scr.events, 5));
+        fn_80261980((u8*)&items[11], (s32)(pool + 0x248), (s32)fn_802619A0(&diff), 0);
+        fn_80261980((u8*)&items[12], (s32)(pool + 0x258), (s32)fn_80261948(&diff), 0);
+        fn_80261688((u8*)&items[13], 0x126, 0, (s32)fn_802616A8);
+        fn_80261688((u8*)&items[14], 0x128, 0, (s32)fn_802613E0);
+        fn_80261688((u8*)&items[15], 0xD, -2, (s32)fn_80261178);
+        fn_80261688((u8*)&items[16], 0x121, 0, (s32)fn_802610C8);
+        fn_80261688((u8*)&items[17], 0x1B, -1, (s32)fn_80260E30);
+        fn_80260E04((Words5*)&items[18], (const Words5*)&lbl_80498F00);
+        desc = *(const MenuDesc*)&lbl_802FA6C0;
+        desc.items = (MenuItem*)items;
+        for (;;) {
+            r = fn_802146BC(&desc, -999, -999, 1);
+            if (r == -1) {
+                fn_80260DC4((u8*)&diff, -1);
+                r = -1;
+                break;
+            }
+            if (r == -2) {
+                fn_80260DC4((u8*)&diff, -1);
+                r = -2;
+                break;
+            }
+            fn_802E317C(pool + 0x268);  // "MenuDoChallengeMode: invalid return value from dialog!"
+        }
+    } while (r != -1);
+    }
+    int now = GetEveMode();
+    if (mode != now) {
+        if (now != 0x134) {
+            UnloadEves();
+        }
+        if (mode != 0x134) {
+            LoadModeEves(mode);
+        }
+    }
+}
+
+u8* fn_80260DC4(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
+
+}  // extern "C"
+
 
 extern "C" {
 
@@ -476,7 +661,7 @@ public:
 };
 
 ModuleTag lbl_8055F3D8;
-static UnkStatic123s lbl_80498F00;  // end-of-menu tag
+UnkStatic123s lbl_80498F00;
 UnkStatic7F lbl_8055F3E0;
 static UnlockAnim sUnlockAnim;  // lbl_80498F20
 extern "C" const char* fn_80131234(const char* key);
@@ -503,17 +688,21 @@ void fn_80261AF0(u8* p, int difficulty) {
 
 void fn_80261C68(u8* p) {}  // stub (302)
 
-void fn_80262120(u8* p) {
-    PTR(p, 0x0) = p + 0xC;
-    S32(p, 0x8) = 3;
-    S32(p, 0x4) = 0;
+}  // extern "C"
+
+inline NodeVec3::NodeVec3(void) {
+    data = buf;
+    cap = 3;
+    count = 0;
 }
 
-void fn_8026213C(u8* p) {
-    PTR(p, 0x0) = p + 0xC;
-    S32(p, 0x8) = 6;
-    S32(p, 0x4) = 0;
+inline NodeVec6::NodeVec6(void) {
+    data = buf;
+    cap = 6;
+    count = 0;
 }
+
+extern "C" {
 
 void fn_80262158(u8* p) {}
 
