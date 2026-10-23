@@ -55,7 +55,7 @@ int fn_802411D4(void);
 int fn_802E499C(u16* keys);
 void fn_8020C918(int a);
 s32 fn_80221EA8(u8* p);
-u8 fn_802E8690(u8* p);
+int fn_802E8690(u8* p);
 f32 fn_80214D48(void);
 void fn_80214D50(int s);
 int fn_802C9A58(void);
@@ -100,7 +100,47 @@ u8* lbl_8055F278;
 
 extern "C" {
 
-void fn_80246938(u8* p) {}  // stub (92)
+}  // extern "C"
+
+// Waits on a controller channel while the warning is shown (vtable lbl_80343720).
+struct PadWait {
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    s32 chan;        // offset 0x18
+    u8 pad1C[0x8];
+};
+
+extern void* lbl_80343720[];
+
+extern "C" {
+int fn_802E4A10(void);
+const char* fn_80131234(const char* key);
+
+// "Wrong controller type" warning, repeated while the bad controller stays connected.
+int fn_80246938(void) {
+    int chan = fn_802E4A10();
+    if (chan >= 0 && chan < 4) {
+        fn_80214A9C(0x1F);
+        while (fn_802E8690((u8*)chan)) {
+            PadWait w;
+            w.f14 = 0;
+            w.vt = lbl_80343720;
+            w.chan = chan;
+            MenuItem items[] = {
+                MenuItem(0, 5, &w, 0, 0),
+                MenuItem("title", fn_80131234("WARN:CAUTION_TITLE")),
+                MenuItem("message", fn_80131234("WARN:BAD_CONTROLLER_TYPE_MSG")),
+                MenuItem(lbl_804988F0),
+            };
+            MenuDesc desc = {"pop_warn.lyt", 0, 0, 0, 0};
+            desc.items = items;
+            fn_802146BC(&desc, -999, -999, 1);
+        }
+        fn_80214AF0(0x1F);
+    }
+    return 1;
+}
 
 u8* fn_80246AA8(u8* p, int del) {
     if (p && del > 0) {
