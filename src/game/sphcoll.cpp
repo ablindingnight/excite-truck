@@ -345,7 +345,33 @@ void fn_8019CF60(u8* p, u8* q) {
     fn_8019CE3C(q, (u32)p);
 }
 
-void fn_8019D06C(u8* p, u8* q, int a, int b) {}  // stub (76)
+void fn_801A1F44(RVec3* out, u8* q);
+
+// Sets flat sphere p's radius from how edge-on it is to box q, then collides them.
+void fn_8019D06C(u8* p, u8* q, int a, int b) {
+    RVec3 c;
+    fn_801A1F44(&c, q);
+    f32 d[3];
+    d[0] = c.x - F32(p, 0x34);
+    d[1] = c.y - F32(p, 0x38);
+    d[2] = c.z - F32(p, 0x3C);
+    f32 sq = PSVECSquareDistance(&c, p + 0x34);
+    f32 r;
+    if (sq > lbl_8056232C) {
+        f32 inv = 1.0f / (f32)sqrt(sq);
+        d[0] *= inv;
+        d[1] *= inv;
+        d[2] *= inv;
+        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(p, 0xC) + 0xC));
+        r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
+    } else {
+        f32 hi = F32(p, 0x58);
+        f32 lo = F32(p, 0x54);
+        r = lo > hi ? lo : hi;
+    }
+    F32(p, 0x24) = r;
+    fn_8019BD54(p, q, a, b);
+}
 
 void fn_8019D19C(u8* p, u8* q) {}  // stub (119)
 
