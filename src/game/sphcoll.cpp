@@ -60,6 +60,9 @@ struct CFrame {
     RVec3 t;    // offset 0x24
 };
 
+extern "C" const f32 lbl_805622DC;  // -1.0
+extern "C" const f32 lbl_805622E0;  // 1.0
+
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
@@ -1363,22 +1366,18 @@ void fn_8019F1A4(u8* p) { fn_8019AC44(p, p + 0x34, p + 0x40, F32(p, 0x24)); }
 
 void fn_8019F1B4(u8* p, u32 a, u32 b, u32 c, u32 d) { fn_8019DDFC((f32*)a, (f32*)b, (f32*)c, (f32*)d, (f32*)(p + 0x34), F32(p, 0x24)); }
 
-void fn_8019F1D4(u8* p, RVec3* lo, RVec3* hi) {
-    f32 r = F32(p, 0x24);
+void fn_8019F1D4(const u8* p, RVec3* lo, RVec3* hi) {
+    RVec3 c;
     RVec3 e;
+    f32 r = F32(p, 0x24);
     e.x = r;
     e.y = r;
     e.z = r;
-    RVec3 c;
     c.x = F32(p, 0x34);
     c.y = F32(p, 0x38);
     c.z = F32(p, 0x3C);
-    lo->x = c.x + r * -1.0f;
-    lo->y = c.y + r * -1.0f;
-    lo->z = c.z + r * -1.0f;
-    hi->x = c.x + r * 1.0f;
-    hi->y = c.y + r * 1.0f;
-    hi->z = c.z + r * 1.0f;
+    MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
+    MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
 
 void fn_8019F248(u8* p) {
@@ -1605,23 +1604,19 @@ void fn_801A0160(u8* p) {
     }
 }
 
-void fn_801A01E0(u8* p, RVec3* lo, RVec3* hi) {
+void fn_801A01E0(const u8* p, RVec3* lo, RVec3* hi) {
+    RVec3 c;
+    RVec3 e;
     f32 r = F32(p, 0x178);
     u8* o = PTR(p, 0xC);
-    RVec3 e;
     e.x = r;
     e.y = r;
     e.z = r;
-    RVec3 c;
     c.x = F32(o, 0x24);
     c.y = F32(o, 0x28);
     c.z = F32(o, 0x2C);
-    lo->x = c.x + r * -1.0f;
-    lo->y = c.y + r * -1.0f;
-    lo->z = c.z + r * -1.0f;
-    hi->x = c.x + r * 1.0f;
-    hi->y = c.y + r * 1.0f;
-    hi->z = c.z + r * 1.0f;
+    MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
+    MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
 
 extern void* lbl_80333B48[];
@@ -2566,9 +2561,9 @@ int fn_801A40F8(u8* p, const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     return 0;
 }
 
-void fn_801A442C(u8* p, RVec3* a, RVec3* b) {
-    *a = *(RVec3*)(p + 0x28);
-    *b = *(RVec3*)(p + 0x34);
+void fn_801A442C(const u8* p, RVec3* a, RVec3* b) {
+    *a = *(const RVec3*)(p + 0x28);
+    *b = *(const RVec3*)(p + 0x34);
 }
 
 f32 fn_801A4460(u8* p) {
