@@ -48,19 +48,21 @@ public:
     virtual void Prepare(u8* car);
 };
 
-// A camera definition record (0x60), filled from "camera3.val".
-class CamRecord {
+// A "region_sphere" table from the camera file (0x60); camera regions point at these.
+class RegionSphere {
 public:
-    CamRecord(void) { Reset(); }
+    RegionSphere(void) { Reset(); }
     void Reset(void);
+    int Load(ValueNode* t);
     u8 data[0x60];
 };
 
-// A camera path key (0x60).
-class CamKey {
+// A TV camera: one "cam" table from the camera file (0x60).
+class TvCamera {
 public:
-    CamKey(void) {}
-    ~CamKey(void) {}
+    TvCamera(void) {}
+    ~TvCamera(void) {}
+    int Load(ValueNode* t);
     u8 data[0x60];
 };
 extern s32 lbl_8055F54C;
@@ -84,8 +86,8 @@ ModuleTag lbl_8055F538;
 f32 lbl_8055F540 = lbl_80563FA0;
 f32 lbl_8055F544 = lbl_80563FA4;
 static CamCycle lbl_8049A258[5];
-static CamKey lbl_8049A2C8[200];
-static CamRecord lbl_8049EDC8[32];
+static TvCamera lbl_8049A2C8[200];
+static RegionSphere lbl_8049EDC8[32];
 static CamRegion lbl_8049F9D8[32];
 f32 lbl_8055F560 = lbl_80563F9C;
 
@@ -334,10 +336,64 @@ int fn_802710A0(u8* car, int type) {
         }
         return -1;
     }
-    return (u32)(lbl_8049F9D8[bestIdx].cam - (u8*)lbl_8049EDC8) / sizeof(CamRecord);
+    return (u32)(lbl_8049F9D8[bestIdx].cam - (u8*)lbl_8049EDC8) / sizeof(RegionSphere);
 }
 
-void fn_802712F8(const char* path) {}  // stub (157)
+extern s32 lbl_8055F548;  // TV camera count
+int fn_8012C33C(const char* name);  // file exists
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+void fn_80277740(void);
+int fn_80277754(ValueNode* t);  // named camera table (namedcam.cpp)
+void fn_80277828(void);
+
+// Loads the camera file: TV cameras ("cam"), region spheres ("region_sphere") and named cameras.
+// Without it, falls back to the old camera2.val (TV cameras only).
+void fn_802712F8(const char* path) {
+    lbl_8055F550 = 0;
+    lbl_8055F548 = 0;
+    fn_80277740();
+    if (fn_8012C33C(path)) {
+        ValueTable* t = fn_80131808(path);
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (!strcasecmp(n->GetName(), "cam")) {
+                if (lbl_8049A2C8[lbl_8055F548].Load(n)) {
+                    lbl_8055F548++;
+                }
+            } else if (!strcasecmp(n->GetName(), "region_sphere")) {
+                if (lbl_8049EDC8[lbl_8055F550].Load(n)) {
+                    lbl_8055F550++;
+                }
+            } else if (!fn_80277754(n)) {
+                fn_802E30C8("unrecognized table '%s' in camera file", n->GetName());
+            }
+        }
+        fn_80131818(t);
+    } else if (fn_8012C33C("camera2.val")) {
+        ValueTable* t = fn_80131808("camera2.val");
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (!strcasecmp(n->GetName(), "cam")) {
+                if (lbl_8055F548 < 200) {
+                    if (lbl_8049A2C8[lbl_8055F548].Load(n)) {
+                        lbl_8055F548++;
+                    } else {
+                        fn_802E30C8("physcam: failed to load tv camera (index %d)", i);
+                    }
+                } else {
+                    static bool warnedTooMany;
+                    if (!warnedTooMany) {
+                        warnedTooMany = true;
+                        fn_802E30C8("%s", "physcam: too many TV cameras!");
+                    }
+                }
+            }
+        }
+        fn_80131818(t);
+    }
+    fn_80277828();
+}
 
 void fn_8027156C(void) { fn_802712F8("camera3.val"); }
 
@@ -381,10 +437,12 @@ int fn_80271FAC(const char* name) {
     return 11;
 }
 
-void fn_80272028(u8* p) {}  // stub (203)
+}  // extern "C"
+int RegionSphere::Load(ValueNode* t) { return 0; }  // stub (203)
+extern "C" {
 
 }  // extern "C"
-void CamRecord::Reset(void) {
+void RegionSphere::Reset(void) {
     u8* p = data;
     F32(p, 0x0) = 0.0f;
     F32(p, 0x4) = 0.0f;
@@ -491,7 +549,9 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
 }
 extern "C" {
 
-void fn_80272DCC(u8* p) {}  // stub (354)
+}  // extern "C"
+int TvCamera::Load(ValueNode* t) { return 0; }  // stub (354)
+extern "C" {
 
 void fn_80273354(void) {
     memset(lbl_8049A258, 0, 100);
