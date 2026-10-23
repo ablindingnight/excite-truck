@@ -364,7 +364,25 @@ void fn_80248A74(u8* p) {
     F32(p, 0x1C) = F32(p, 0x1C) + (f32)rate * dt;
 }
 
-void fn_80248AF0(u8* p) {}  // stub (56)
+void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+f32 fn_80235F64(u8* text, int flag, f32 v);
+void fn_802353F4(u8* text, int flag, f32 x, f32 y, f32 z);
+extern const f32 lbl_805638C8;  // 370.0
+extern const f32 lbl_805638B0;  // 0.0
+
+// Draws the scrolling warning text, wrapping the scroll offset at the box width.
+void fn_80248AF0(u8* p) {
+    f32 x, y;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    f32 w = S32(p, 0xC);
+    f32 h = S32(p, 0x10);
+    if (F32(p, 0x1C) > w) {
+        F32(p, 0x1C) -= w;
+    }
+    int wide = F32(p, 0x1C) > lbl_805638C8;
+    fn_802353F4(PTR(p, 0x18), wide, x + F32(p, 0x1C), (y - h) + fn_80235F64(PTR(p, 0x18), wide, F32(p, 0x1C)),
+                lbl_805638B0);
+}
 
 void fn_80248BD0(u8* p) {
     F32(p, 0x20) = 2.0f;
