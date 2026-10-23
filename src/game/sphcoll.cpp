@@ -41,9 +41,13 @@ struct Mat3x3 {
     f32 m[9];
 };
 
+struct XVec3 {
+    f32 v[3];
+};
+
 struct Xform {
-    Mat3x3 rot;
-    RVec3 pos;
+    Mat3x3 rot;  // offset 0x0
+    XVec3 pos;   // offset 0x24
 };
 
 extern void* lbl_80333968[];
@@ -685,7 +689,10 @@ void fn_801A1F44(RVec3* out, u8* q) {
 void fn_801A1F98(u8* p) {}  // stub (195)
 
 void fn_801A22A4(u8* p) {
-    Xform x = *(Xform*)((VEx*)p)->v50();
+    Xform* src = (Xform*)((VEx*)p)->v50();
+    Xform x;
+    x.rot = src->rot;
+    x.pos = src->pos;
     fn_801E44F4((u8*)&x, 0x50000000, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
 }
 

@@ -22,6 +22,29 @@ struct Words12 {
 
 class CenterLine;
 
+// A camera pose: rotation then position.
+struct CamMat3 {
+    f32 m[9];
+};
+
+struct CamVec3 {
+    f32 v[3];
+};
+
+struct CamPose {
+    CamMat3 rot;  // offset 0x0
+    CamVec3 pos;  // offset 0x24
+};
+
+// One player's camera record.
+struct CamRec {
+    u8 pad0[0x58];     // offset 0x0
+    CamPose pose;      // offset 0x58
+    u8 pad88[0x34];    // offset 0x88
+    f32 fov;           // offset 0xBC
+    u8 padC0[0x168];   // offset 0xC0
+};
+
 // Walks the ideal racing line for camera placement.
 struct IdealFollower {
     u8 pad0[0x2C];   // offset 0x0
@@ -320,7 +343,12 @@ void fn_8026A394(u8* p) {}  // stub (66)
 
 void fn_8026A49C(u8* p) { fn_80269BB0(p); }
 
-void fn_8026A4A0(u8* p) {}  // stub (31)
+void fn_8026A4A0(int i, CamPose* out, f32* fov) {
+    CamRec* e = &((CamRec*)lbl_80499080)[i];
+    out->rot = e->pose.rot;
+    out->pos = e->pose.pos;
+    *fov = e->fov;
+}
 
 void fn_8026A51C(u8* p) { fn_802693F4(p); }
 
