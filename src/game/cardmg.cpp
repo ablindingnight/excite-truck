@@ -158,7 +158,58 @@ void fn_8018F6F8(u8* p) {
 
 void fn_8018F76C(u8* p) {}  // stub (146)
 
-void fn_8018F9B4(u8* p) {}  // stub (70)
+struct DVec {
+    f32 x, y, z;
+};
+
+// Live state of one damageable part (17 of them at car + 0x152C).
+struct PartState {
+    u32 attached;    // offset 0x0
+    s32 hp;          // offset 0x4
+    u8 pad8[0x70];   // offset 0x8
+    u8 flag78;       // offset 0x78
+    u8 pad79[0x3];
+    s32 state;       // offset 0x7C
+};
+
+struct BoneBox {
+    DVec lo;  // offset 0x0
+    DVec hi;  // offset 0xC
+};
+
+// Car model (partial).
+struct CarModel {
+    u8 pad0[0x2138];
+    BoneBox boxes[1];  // offset 0x2138, one per bone
+};
+
+void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
+extern const f32 lbl_80561FE4;  // -0.5
+
+// Breaks off every part that is detached (or flagged to break) at its bone box centre.
+void fn_8018F9B4(u8* p) {
+    PartState* w = (PartState*)(p + 0x152C);
+    DamagePart* t = lbl_80332840;
+    for (int i = 0; i < 17; i++) {
+        if ((w->attached && w->hp > 0 && !w->state) || w->state == 2) {
+            s32 bone = *(s32*)((u8*)t + 0x8);
+            DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[bone].lo;
+            DVec* hi = lo + 1;
+            DVec c;
+            c.x = lo->x + hi->x;
+            c.y = lo->y + hi->y;
+            c.z = lo->z + hi->z;
+            c.x *= lbl_80561FE4;
+            c.y *= lbl_80561FE4;
+            c.z *= lbl_80561FE4;
+            fn_801BF2A4(p, 1 << bone, &c, lo, hi, *(s32*)((u8*)t + 0x34), (u8*)t + 0x38);
+            w->state = 3;
+            w->flag78 = 0;
+        }
+        w++;
+        t++;
+    }
+}
 
 void fn_8018FACC(u8* p) {}  // stub (19)
 }  // extern "C"
