@@ -312,7 +312,7 @@ u8* lbl_8055E5A0;  // track collision mesh
 
 extern "C" {
 
-void fn_80198F64(u8* p) {}  // stub (470)
+int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32* vel, f32 r) { return 0; }  // stub (470)
 
 // Friction impulse at contact point pt (normal n) between volumes a and b: the opposing tangential
 // relative velocity, scaled by -1000 and clamped to half of mu * (a's + b's friction).
@@ -1995,7 +1995,64 @@ f32 fn_801A3880(u8* p) {
     return (f32)sqrt(b > a ? b : a);
 }
 
-void fn_801A38E4(u8* p) {}  // stub (191)
+// Sphere (and flat sphere 'FLSR') against the world: each point attached to the owner body
+// (lifted 0.25), then the sphere itself; contacts go to fn_8019A788.
+// The owner body as seen here: its frame at 0x3C and its attached points.
+struct OwnerBody {
+    u8 pad0[0x3C];
+    CFrame frame;  // offset 0x3C
+};
+
+void fn_801A38E4(u32 world, u8* p) {
+    RVec3 pt;
+    PVec3 n1;
+    PVec3 hit1;
+    PVec3 n2;
+    PVec3 hit2;
+    PVec3 vel1;
+    PVec3 vel2;
+    PVec3 down;
+    f32 depth1;
+    f32 depth2;
+    switch (S32(p, 0x18)) {
+    case 'FLSR': {
+        down.v[0] = 0.0f;
+        down.v[1] = -1.0f;
+        down.v[2] = 0.0f;
+        f32 k = (f32)__fabs(PSVECDotProduct(down.v, PTR(p, 0xC) + 0xC));
+        F32(p, 0x24) = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
+    }
+    case 'SPHR': {
+        OwnerBody* owner = (OwnerBody*)PTR(p, 0x4);
+        if (owner) {
+            u8* e = PTR(owner, 0xD0);
+            if (e) {
+                for (; e; e = PTR(e, 0x0)) {
+                    RVec3* lp = (RVec3*)(e + 0x4);
+                    MulVec(&pt, lp, &owner->frame);
+                    pt.x = pt.x + owner->frame.t.x;
+                    pt.y = pt.y + owner->frame.t.y;
+                    pt.z = pt.z + owner->frame.t.z;
+                    pt.y += 0.25f;
+                    vel1.v[0] = 0.0f;
+                    vel1.v[1] = 0.0f;
+                    vel1.v[2] = 0.0f;
+                    if (fn_80198F64(&pt.x, world, hit1.v, &depth1, n1.v, vel1.v, 0.25f)) {
+                        fn_8019A788(p, (u8*)world, (u32)hit1.v, (RVec3*)n1.v, 0, 0, depth1, 0.0f, 0.0f);
+                    }
+                }
+            }
+        }
+        vel2.v[0] = 0.0f;
+        vel2.v[1] = 0.0f;
+        vel2.v[2] = 0.0f;
+        if (fn_80198F64((f32*)(p + 0x34), world, hit2.v, &depth2, n2.v, vel2.v, F32(p, 0x24))) {
+            fn_8019A788(p, (u8*)world, (u32)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
+        }
+        break;
+    }
+    }
+}
 
 
 // Debug draw: a line from the frame origin along each of the volume's rays (direction * length, frame space).
