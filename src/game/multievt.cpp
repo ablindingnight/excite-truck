@@ -83,6 +83,31 @@ void operator delete(void* p);
 extern const NameEntry lbl_802FA4B0[3];
 extern char lbl_804989AC[];
 
+// Per-car multiplayer unlock flags.
+struct UnlockEntry {
+    s32 id;          // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    u8 unlocked;     // offset 0x14
+    u8 pad15[0x3];   // offset 0x15
+};
+
+struct UnlockList {
+    UnlockEntry* entries;  // offset 0x0
+    s32 count;             // offset 0x4
+};
+
+extern UnlockList* lbl_8055F28C;
+
+static inline int FindUnlock(u8* car) {
+    UnlockList* l = lbl_8055F28C;
+    for (int i = 0; i < l->count; i++) {
+        if (S32(car, 0x0) == l->entries[i].id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 struct NameList3 {
     const char* n[3];
 };
@@ -128,7 +153,16 @@ void fn_80249584(u8* p) {}
 
 void fn_80249588(u8* p) {}
 
-void fn_8024958C(u8* p) {}  // stub (53)
+int fn_8024958C(u8* car) {
+    u32 ok = S32(car, 0x8) == 0x180302;
+    if (ok) {
+        ok = FindUnlock(car) != -1;
+    }
+    if (ok) {
+        ok = lbl_8055F28C->entries[FindUnlock(car)].unlocked;
+    }
+    return ok;
+}
 
 int fn_80249660(u8* p) { return 1; }
 
@@ -440,9 +474,37 @@ void fn_8024BB98(u8* p) {
     ((StatsTable*)p)->Show(*(s32*)FindTrackEvent(a, b));
 }
 
-void fn_8024BBF4(u8* p) {}  // stub (51)
+void fn_8024BBF4(u8* p) {
+    VC* c = (VC*)PTR(p, 0x30);
+    if (c) {
+        s32 eve;
+        s32 track;
+        c->s38(&track, &eve);
+        u8* ev = (u8*)FindTrackEvent(track, eve);
+        S32(p, 0x34) = S32(ev, 0x0);
+        const char* name = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
+        CopyName(name, 100, (char*)(p + 0x38));
+    } else {
+        S32(p, 0x34) = -1;
+        U8(p, 0x38) = 0;
+    }
+}
 
-void fn_8024BCC0(u8* p) {}  // stub (51)
+void fn_8024BCC0(u8* p) {
+    VC* c = (VC*)PTR(p, 0x30);
+    if (c) {
+        s32 eve;
+        s32 track;
+        c->s38(&track, &eve);
+        u8* ev = (u8*)FindTrackEvent(track, eve);
+        S32(p, 0x34) = S32(ev, 0x0);
+        const char* name = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
+        CopyName(name, 100, (char*)(p + 0x38));
+    } else {
+        S32(p, 0x34) = -1;
+        U8(p, 0x38) = 0;
+    }
+}
 
 
 
