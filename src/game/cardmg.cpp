@@ -8,6 +8,7 @@
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
+#define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 // One entry of the damageable part table.
 struct DamagePart {
@@ -25,7 +26,22 @@ void fn_8018C50C(u8* p) {}
 
 void fn_8018C510(u8* p) {}
 
-void fn_8018C514(u8* p) {}  // stub (35)
+f32 PSVECDistance(const f32* a, const f32* b);
+extern const f32 lbl_80561F70;  // large distance
+
+// Index of the damage point nearest to pos (entry 0 is skipped).
+int fn_8018C514(u8* p, const f32* pos) {
+    f32 best = lbl_80561F70;
+    int idx = 0;
+    for (int i = 1; i < *(s32*)PTR(p, 0x26C); i++) {
+        f32 d = PSVECDistance(pos, (f32*)(PTR(p, 0x26C) + i * 0x34 + 0x20));
+        if (d < best) {
+            best = d;
+            idx = i;
+        }
+    }
+    return idx;
+}
 
 void fn_8018C5A0(u8* p) {}  // stub (359)
 
