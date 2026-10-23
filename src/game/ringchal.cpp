@@ -1407,7 +1407,10 @@ T* RArray<T>::At(int i) {
 void Arena::ShowSetGems(void) {
     char name[0x1E];
     if (f24 != -1) {
-        ClearGems();
+        if (f24 != -1) {
+            fn_8001B450(f24);
+            f24 = -1;
+        }
     }
     SET_NAME(this, name, 0x1E);
     switch (difficulty) {
