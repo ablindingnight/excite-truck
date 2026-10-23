@@ -331,8 +331,8 @@ void fn_801CFA48(PMesh* m) {
 }
 
 PMesh* fn_801CFEAC(const char* name) {
-    u8 swapped = 0;
     u32 ver = 1;
+    u8 swapped = 0;
     PMesh* m = (PMesh*)fn_8012C370(name, 'PMsh', &ver, 0, 0, &swapped);
     if (swapped) {
         fn_801CFA48(m);

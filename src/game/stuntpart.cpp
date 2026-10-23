@@ -512,7 +512,7 @@ void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
 
 void fn_802AAF00(void* cam, StuntPart* p, const StuntCar* car) {}
 
-void fn_802AAF04(void* cam, StuntPart* p, const StuntCar* car) {
+void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
     StuntMtx m = *(const StuntMtx*)car;
     if (p->sparkAmt > 0.001f) {
         fn_802C8BD0(lbl_8055CC64);
