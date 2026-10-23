@@ -450,7 +450,7 @@ int fn_8028EDA8(SysList* l, PartSys* s) {
             return 1;
         }
     }
-    fn_802E317C("particle: could not find system %x in bucket");
+    fn_802E317C("particle: could not find system %x in bucket", s);
     return 0;
 }
 
@@ -484,7 +484,7 @@ int TypeTable::Release(PartSys* s) {
             return --e[i].refs == 0;
         }
     }
-    fn_802E317C("particle: could not find system %x in bucket");
+    fn_802E317C("particle: could not find system %x in bucket", s);
     return 0;
 }
 
@@ -792,7 +792,7 @@ void PartSys::Add(const V3* pos, const V3* vel, f32 angVel, f32 size) {
         p.angVel = angVel;
         break;
     default:
-        fn_802E317C("particle: invalid type %d");
+        fn_802E317C("particle: invalid type %d", type);
         break;
     }
     if (head < 0) {

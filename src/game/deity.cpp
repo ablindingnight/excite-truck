@@ -739,7 +739,7 @@ void fn_801B15A8(DeityCar* c, f32 t) {
             s32 nl = *(s32*)((u8*)c + 0x14);
             c->finishLap = nl;
             if (nl == lbl_8055E680 + 1) {
-                fn_802E30C8("deity: car %d finishes at %1.2f on lap %d", c->index, t);
+                fn_802E30C8("deity: car %d finishes at %1.2f on lap %d", c->index, t, nl);
                 c->finished = 1;
                 *(s32*)((u8*)c + 0x28) = 3;
                 fn_8018B0D0(c->car, 3);

@@ -450,7 +450,7 @@ int fn_801CB900(StatHandler* h, u32 type) {
 StatHandler* fn_801CB954(u32 type, const StatDesc* d) {
     switch (type & 0x300) {
     default:
-        fn_802E317C("StatHandler::Create: stat type %x has invalid data type flag %x", type);
+        fn_802E317C("StatHandler::Create: stat type %x has invalid data type flag %x", type, type & 0x300);
     case 0x200: {
         IntStatHandler* h =
             new ("award_int") IntStatHandler(new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty));

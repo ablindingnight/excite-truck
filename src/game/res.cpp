@@ -1190,7 +1190,7 @@ int AsyncResourceSet::Restart(const char* name) {
         fn_8012A80C(&set.hdr);
         set.mem = 0;
         if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)");
+            fn_802E317C("res: resident size exceeded buf! (%d > %d)", set.hdr.baseOffset + set.hdr.loadSize, bufSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
@@ -1238,7 +1238,7 @@ void AsyncResourceSet::Update(void) {
         fn_8012A80C(&set.hdr);
         set.mem = 0;
         if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)");
+            fn_802E317C("res: resident size exceeded buf! (%d > %d)", set.hdr.baseOffset + set.hdr.loadSize, bufSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;

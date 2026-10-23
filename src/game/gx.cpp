@@ -1362,7 +1362,7 @@ void fn_802D09E8(void) {
     if (tile < lbl_8055D0BC * lbl_8055D0C0) {
         int ty = tile / lbl_8055D0BC;
         int tx = tile - ty * lbl_8055D0BC;
-        fn_802E30C8(" tile %d / %d", tile + 1);
+        fn_802E30C8(" tile %d / %d", tile + 1, lbl_8055D0BC * lbl_8055D0C0);
         fn_802D0910();
         lbl_8055D0B8++;
     }

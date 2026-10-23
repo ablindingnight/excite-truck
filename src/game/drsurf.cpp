@@ -854,7 +854,7 @@ void fn_802D5FE4(Surf* s) {
         fn_802D422C(s);
         break;
     default:
-        fn_802E317C("drDrawSurface (DL): unhandled vertex fmt %d");
+        fn_802E317C("drDrawSurface (DL): unhandled vertex fmt %d", s->fmt);
         break;
     }
 }

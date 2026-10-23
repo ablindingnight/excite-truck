@@ -422,7 +422,7 @@ int Bucket::Release(Chunks* sys) {
             return --entries[i].refs == 0;
         }
     }
-    fn_802E317C("chunk: could not find system %x in bucket");
+    fn_802E317C("chunk: could not find system %x in bucket", sys);
     return 0;
 }
 
