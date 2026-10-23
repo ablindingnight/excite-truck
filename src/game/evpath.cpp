@@ -38,8 +38,33 @@ public:
 #define VR(p) ((VR*)(p))
 
 struct U32List {
+    int Count(void) const { return count; }
+    template <typename V>
+    int Find(V* v) {
+        for (int i = 0; i < Count(); i++) {
+            if ((V*)data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    template <typename V>
+    void Remove(V* v) {
+        int i = Find(v);
+        if (i == -1) {
+            return;
+        }
+        if (i >= 0 && i < count) {
+            int last = count - 1;
+            if (i != last) {
+                data[i] = data[last];
+            }
+            count--;
+        }
+    }
     u32* data;  // offset 0x0
     s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
 };
 
 extern "C" {
@@ -59,6 +84,7 @@ u8* fn_80283938(u8* p, int del);
 void operator delete(void* p);
 
 extern U32List lbl_804B30D8;
+extern U32List lbl_804B3048;
 extern void* lbl_80348678[];
 
 // Copies at most n characters, always terminating.
@@ -146,7 +172,29 @@ void fn_8027F204(const char* name) {
 
 void fn_8027F288(u8* p) {}  // stub (363)
 
-void fn_8027F834(u8* p) {}  // stub (73)
+extern void* lbl_80348798[];
+
+u8* fn_8027F834(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80348798;
+        if ((u32)lbl_8055F688 == (u32)p) {
+            lbl_8055F688 = 0;
+        }
+        lbl_804B3048.Remove(p);
+        if (p) {
+            U8(p, 0x18) = 0;
+            U8(p, 0x50) = 0;
+            U8(p, 0x5C) = 0;
+            S32(p, 0x24) = 1;
+            S32(p, 0x20) = 0;
+            U8(p, 0x44) = 0;
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 void fn_8027F958(u8* p) {}  // stub (976)
 
@@ -179,7 +227,29 @@ u8* fn_802837D4(u8* p, int del) {
     return p;
 }
 
-void fn_80283814(u8* p) {}  // stub (73)
+extern void* lbl_80348738[];
+
+u8* fn_80283814(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80348738;
+        if ((u32)lbl_8055F698 == (u32)p) {
+            lbl_8055F698 = 0;
+        }
+        lbl_804B30D8.Remove(p);
+        if (p) {
+            U8(p, 0x18) = 0;
+            U8(p, 0x50) = 0;
+            U8(p, 0x5C) = 0;
+            S32(p, 0x24) = 1;
+            S32(p, 0x20) = 0;
+            U8(p, 0x44) = 0;
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_80283938(u8* p, int del) {
     if (p) {
