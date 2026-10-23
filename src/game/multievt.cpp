@@ -269,7 +269,7 @@ int fn_8024A6A4(s32* p) {
     return 0;
 }
 
-int fn_8024A6EC(s32* sel, u8* list) { return 0; }  // stub (346)
+int fn_8024A6EC(const char** sel, u8* list) { return 0; }  // stub (346)
 
 u8* fn_8024AC54(u8* p, int del) {
     if (p) {
@@ -288,7 +288,7 @@ u8* fn_8024AC54(u8* p, int del) {
     return p;
 }
 
-int fn_8024ACB4(s32* key, s32 sel, u8* list) { return 0; }  // stub (209)
+int fn_8024ACB4(s32* key, const char* sel, u8* list) { return 0; }  // stub (209)
 
 u8* fn_8024AFF8(u8* p, int del) {
     if (p) {
@@ -312,10 +312,14 @@ int fn_80215228(void);
 extern u8 lbl_8055F298;
 
 struct EvEntry {
-    s32 id;          // offset 0x0
-    u8 pad4[0x8];
-    s32 sel;         // offset 0xC
-    u8 pad10[0x8];
+    s32 id;             // offset 0x0
+    const char* name;   // offset 0x4
+    s32 slot;           // offset 0x8
+    const char* group;  // offset 0xC, country/location key
+    const char* name2;  // offset 0x10
+    u8 unlocked;        // offset 0x14
+    u8 flag;            // offset 0x15
+    u8 pad16[0x2];
 };
 
 struct EvList {
@@ -334,7 +338,7 @@ static inline int FindById(EvList* list, s32* key) {
 
 u8 fn_8024B070(s32* key, u8* list) {
     int i = FindById((EvList*)list, key);
-    s32 sel = i >= 0 ? ((EvList*)list)->items[i].sel : 0;
+    const char* sel = i >= 0 ? ((EvList*)list)->items[i].group : 0;
     if (fn_80215228()) {
         lbl_8055F298 = 0;
     }
@@ -369,7 +373,42 @@ int fn_8024B214(u8* a, u8* b) {
     return strcasecmp(*(const char**)a, *(const char**)b);
 }
 
-void fn_8024B260(u8* p) {}  // stub (98)
+// One course row on the course list.
+struct CourseSlot {
+    char name[50];   // offset 0x0
+    char name2[50];  // offset 0x32
+    s32 open;        // offset 0x64
+};
+
+const char* fn_80131234(const char* key);
+
+void fn_8024B260(u8* p) {
+    EvEntry* e;
+    const char* group;
+    int i;
+    int k;
+    S32(p, 0x280) = fn_80214D04();
+    group = ((const char**)PTR(p, 0x18))[S32(p, 0x280) * 2];
+    memset(p + 0x78, 0, 5 * sizeof(CourseSlot));
+    for (k = 0; k < 5; k++) {
+        ((CourseSlot*)(p + 0x78))[k].open = 1;
+    }
+    for (i = 0; i < ((EvList*)PTR(p, 0x74))->count; i++) {
+        e = &((EvList*)PTR(p, 0x74))->items[i];
+        if (!strcasecmp(group, e->group)) {
+            CourseSlot* c = &((CourseSlot*)(p + 0x78))[e->slot];
+            CopyName(e->name, 50, c->name);
+            if (e->unlocked) {
+                CopyName(e->name2, 50, c->name2);
+                c->open = 1;
+            } else {
+                const char* locked = fn_80131234("UIMulti:LOCKED_COURSE_NAME");
+                CopyName(locked, 50, c->name2);
+                c->open = 0;
+            }
+        }
+    }
+}
 
 void fn_8024B3E8(u8* p) {}  // stub (87)
 
@@ -447,7 +486,7 @@ u8* fn_8024B73C(u8* p, const char* name, EvList* list) {
     __ct__7DynoTexFiUc(p + 0x4C, 10, 0);
     for (i = 0; i < list->count; i++) {
         e = &list->items[i];
-        if (!strcasecmp(name, (const char*)e->sel)) {
+        if (!strcasecmp(name, e->group)) {
             ((PtrVec*)(p + 0x18))->Push(e);
             Add__7DynoTexFiPCc(p + 0x4C, e->id, fn_8024B178(e->id));
         }
