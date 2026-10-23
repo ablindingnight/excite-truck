@@ -253,7 +253,89 @@ void fn_80270EC4(u8* car, u32 id) {
     }
 }
 
-void fn_802710A0(u8* p) {}  // stub (150)
+void fn_802E30C8(const char* fmt, ...);  // debug print
+int fn_801B526C(void);
+void fn_80136414(PathPos* out, u8* track, s32 node);
+s32 fn_801363A0(u8* track, u8* cur);
+extern f32 lbl_8055F568;  // car heading
+extern const f32 lbl_80563F44;
+extern const f32 lbl_80563F48;  // 0.0
+
+// The car's track controller (slot 0x18 returns its track).
+class CamCarCtl {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual u8* Track(void);
+};
+
+// find_best_region: the camera record (index into lbl_8049EDC8) whose region suits `car` best for
+// camera group `type` (-1 = any); regions that do not apply still win over nothing if their camera
+// is enabled.
+int fn_802710A0(u8* car, int type) {
+    f32 best = lbl_80563F44;
+    f32 altBest = best;
+    CamRegion* r;
+    int found = 0;
+    int foundAlt = 0;
+    int bestIdx = -1;
+    int altIdx = -1;
+    int i;
+    if (lbl_8055F564) {
+        u8* track = ((CamCarCtl*)PTR(car, 0x270))->Track();
+        f32* heading = &lbl_8055F568;
+        if (fn_801B526C()) {
+            PathPos pos;
+            fn_80136414(&pos, track, S32(car, 0x2678));
+            *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+        } else {
+            PathPos pos;
+            fn_80136414(&pos, track, fn_801363A0(track, track + 4));
+            *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+        }
+    }
+    r = lbl_8049F9D8;
+    for (i = 0; i < lbl_8055F554; i++) {
+        f32 w = lbl_80563F48;
+        if (r->CamRegion::Weight(car, &w, type)) {
+            if (!found || best < w) {
+                best = w;
+                bestIdx = i;
+                found = 1;
+            }
+        } else if (!found) {
+            if ((!foundAlt || altBest < w) && S32(r->cam, 0x58)) {
+                altBest = w;
+                altIdx = i;
+                foundAlt = 1;
+            }
+        }
+        r++;
+    }
+    if (!found) {
+        found = foundAlt;
+        bestIdx = altIdx;
+    }
+    if (!found) {
+        if (type != -1) {
+            static bool warnedGroups;
+            if (!warnedGroups) {
+                warnedGroups = true;
+                fn_802E30C8("%s", "find_best_region: didn't find any, trying all groups...");
+            }
+            return fn_802710A0(car, -1);
+        }
+        static bool warnedAny;
+        if (!warnedAny) {
+            warnedAny = true;
+            fn_802E30C8("%s", "find_best_region: didn't find any with CG_ANY?!?");
+        }
+        return -1;
+    }
+    return (u32)(lbl_8049F9D8[bestIdx].cam - (u8*)lbl_8049EDC8) / sizeof(CamRecord);
+}
 
 void fn_802712F8(const char* path) {}  // stub (157)
 
