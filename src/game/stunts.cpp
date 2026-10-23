@@ -2008,7 +2008,7 @@ CloseCallTracker::CloseCallTracker(StuntHud* h, int c, CountSound* cs) : CountTr
 DriftTracker::DriftTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
     snd = 0;
     if (snd) {
-        snd->SetVolume(1.0f);
+        snd->SetVolume(f254);
     }
     blip = 0;
 }
