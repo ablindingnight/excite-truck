@@ -911,15 +911,13 @@ void CrushResults::Update(int score, int kills, int bonus) {
             shown = bonus - n;
         }
         fn_801345D8(timeLeft, 0x14, "%d", n);
-        {
+        if (noBonus) {
+            StrCopyN(timeBonus, "", 0x14);
+            StrCopyN(bonusTitle, "", 0x14);
+        } else {
             static LocString s("ResultsOverlay:TIME_BONUS_CAPS");
-            if (noBonus) {
-                StrCopyN(timeBonus, "", 0x14);
-                StrCopyN(bonusTitle, "", 0x14);
-            } else {
-                fn_80130980(timeBonus, 0x14, 2, shown);
-                StrCopyN(bonusTitle, s.Get(), 0x14);
-            }
+            fn_80130980(timeBonus, 0x14, 2, shown);
+            StrCopyN(bonusTitle, s.Get(), 0x14);
         }
         fn_801308F4(finalScore, 0x14, score);
         fn_801308F4(noBonusScore, 0x14, score - bonus);
@@ -974,6 +972,8 @@ void CrushResults::Update(int score, int kills, int bonus) {
                 fn_802AE02C(layout, fF4);
                 state = 4;
             }
+            break;
+        case 4:
             break;
         }
         fn_802AE168(layout);
