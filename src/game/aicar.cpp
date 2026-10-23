@@ -868,11 +868,15 @@ void fn_80194844(u8* d) {
 
 void fn_801948B0(u8* d) {}
 
-void fn_80194AF4(u8* d, RVec3* out, const RVec3* a, const RVec3* b, f32 t) {
-    V2 xy;
-    xy.y = a->y + t * (b->y - a->y);
-    xy.x = a->x + t * (b->x - a->x);
-    V2 c = xy;
+static inline V2 LerpXY(const RVec3* a, const RVec3* b, f32 t) {
+    V2 r;
+    r.y = a->y + t * (b->y - a->y);
+    r.x = a->x + t * (b->x - a->x);
+    return r;
+}
+
+void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
+    V2 c = LerpXY(a, b, t);
     out->x = c.x;
     out->y = c.y;
     out->z = a->z + t * (b->z - a->z);
