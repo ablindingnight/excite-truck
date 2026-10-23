@@ -1395,7 +1395,17 @@ u8* fn_801A2434(u8* p, int del) {
     return p;
 }
 
-void fn_801A2474(u8* p) {}  // stub (97)
+// Takes the frame's rotation (0x44), then the world centre (0x68) = frame * local centre (0x38).
+void fn_801A2474(u8* p) {
+    CFrame* f = (CFrame*)PTR(p, 0xC);
+    ((PVec3*)(p + 0x44))[0] = ((PVec3*)f->m)[0];
+    ((PVec3*)(p + 0x44))[1] = ((PVec3*)f->m)[1];
+    ((PVec3*)(p + 0x44))[2] = ((PVec3*)f->m)[2];
+    MulVec((RVec3*)(p + 0x68), (RVec3*)(p + 0x38), f);
+    F32(p, 0x68) = F32(p, 0x68) + f->t.x;
+    F32(p, 0x6C) = F32(p, 0x6C) + f->t.y;
+    F32(p, 0x70) = F32(p, 0x70) + f->t.z;
+}
 
 u8* fn_801A25F8(u8* p, u32 a, u32 b, u32 c, f32 r) {
     U32(p, 0xC) = a;
