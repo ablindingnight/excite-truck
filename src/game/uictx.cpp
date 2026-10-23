@@ -12,16 +12,15 @@ f32 fn_80144514(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);  // a0*b0 + a1*
 }
 
 // A fixed-size block pool.
-class MemPool {
+// Fixed-size block pool (pool.cpp).
+class Pool {
 public:
-    virtual ~MemPool(void);
+    Pool(const char* name, s32 count, s32 size);
+    virtual ~Pool(void);
+    void* Alloc(void);
+    void Free(void* p);
+    u8 pad4[0x20 - 0x4];
 };
-
-extern "C" {
-MemPool* fn_8012A13C(void* p, const char* name, int count, int size);
-void* fn_8012A2D8(MemPool* pool);
-void fn_8012A364(MemPool* pool, void* p);
-}
 
 struct UIXform {
     f32 m[3][3];  // offset 0x0
@@ -56,20 +55,16 @@ struct UIContextTracker {
 ModuleTag lbl_8055EFE8;
 UnkStatic7F lbl_8055EFF0;
 int lbl_8055EFF4;             // cnode pool users
-MemPool* lbl_8055EFF8;        // cnode pool
+Pool* lbl_8055EFF8;        // cnode pool
 int lbl_8055EFFC;             // UIContext pool users
-MemPool* lbl_8055F000;        // UIContext pool
+Pool* lbl_8055F000;        // UIContext pool
 UIContextTracker* lbl_8055F004;
 
 void* cnode::operator new(size_t size, const char* tag) {
     if (lbl_8055EFF4 == 0) {
-        void* p = ::operator new(0x20, "cnode::pool");
-        if (p) {
-            p = fn_8012A13C(p, "cnode::pool", 0x20, 8);
-        }
-        lbl_8055EFF8 = (MemPool*)p;
+        lbl_8055EFF8 = new ("cnode::pool") Pool("cnode::pool", 0x20, 8);
     }
-    void* node = fn_8012A2D8(lbl_8055EFF8);
+    void* node = lbl_8055EFF8->Alloc();
     if (node) {
         lbl_8055EFF4++;
     }
@@ -77,7 +72,7 @@ void* cnode::operator new(size_t size, const char* tag) {
 }
 
 void cnode::operator delete(void* p) {
-    fn_8012A364(lbl_8055EFF8, p);
+    lbl_8055EFF8->Free(p);
     if (--lbl_8055EFF4 == 0) {
         delete lbl_8055EFF8;
         lbl_8055EFF8 = NULL;
@@ -86,13 +81,9 @@ void cnode::operator delete(void* p) {
 
 void* UIContext::operator new(size_t size, const char* tag) {
     if (lbl_8055EFFC == 0) {
-        void* p = ::operator new(0x20, "UIContext::pool");
-        if (p) {
-            p = fn_8012A13C(p, "UIContext::pool", 0x20, 0x3C);
-        }
-        lbl_8055F000 = (MemPool*)p;
+        lbl_8055F000 = new ("UIContext::pool") Pool("UIContext::pool", 0x20, 0x3C);
     }
-    void* ctx = fn_8012A2D8(lbl_8055F000);
+    void* ctx = lbl_8055F000->Alloc();
     if (ctx) {
         lbl_8055EFFC++;
     }
@@ -100,7 +91,7 @@ void* UIContext::operator new(size_t size, const char* tag) {
 }
 
 void UIContext::operator delete(void* p) {
-    fn_8012A364(lbl_8055F000, p);
+    lbl_8055F000->Free(p);
     if (--lbl_8055EFFC == 0) {
         delete lbl_8055F000;
         lbl_8055F000 = NULL;
