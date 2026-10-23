@@ -106,7 +106,36 @@ s32 fn_80270D4C(u8* a, u8* b) {
     return (s32)(*pa - *pb);
 }
 
-void fn_80270DB0(u8* p) {}  // stub (69)
+// A view into a camera track's angle window; `alt` selects the second window.
+struct AngleRef {
+    u8* track;  // offset 0x0
+    u8 alt;     // offset 0x4
+};
+
+static inline f32* AngleLo(AngleRef* r) { return (f32*)(r->alt ? r->track + 0xC : r->track + 0x4); }
+static inline f32* AngleHi(AngleRef* r) { return (f32*)(r->alt ? r->track + 0x10 : r->track + 0x8); }
+
+extern const f32 lbl_80563F40;  // 0.5
+
+// Meets two adjacent windows halfway: a's end and b's start become their midpoint (mod wrap).
+void fn_80270DB0(AngleRef* a, AngleRef* b, f32 wrap) {
+    f32 hi = *AngleHi(a);
+    f32 lo = *AngleLo(b);
+    if (hi < *AngleLo(a)) {
+        hi += wrap;
+    }
+    if (lo < *AngleLo(a)) {
+        lo += wrap;
+    }
+    f32 v = *AngleLo(a);
+    f32 mid = lbl_80563F40 * (hi + lo);
+    v = v > mid ? v : mid;
+    if (v >= wrap) {
+        v -= wrap;
+    }
+    *AngleHi(a) = v;
+    *AngleLo(b) = v;
+}
 
 void fn_80270EC4(u8* c, u32 id) {}  // stub (119)
 
