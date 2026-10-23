@@ -27,6 +27,33 @@ static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
     o[2] = c[2] + d[2] * k;
 }
 
+// A box corner built component-wise (its constructor arguments are evaluated z, y, x).
+struct BoxCorner {
+    f32 x, y, z;
+    BoxCorner(f32 ax, f32 ay, f32 az) {
+        x = ax;
+        y = ay;
+        z = az;
+    }
+};
+
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
+static inline BoxCorner VMin(const RVec3& a, const RVec3& b) {
+    return BoxCorner(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
+}
+
+static inline BoxCorner VMax(const RVec3& a, const RVec3& b) {
+    return BoxCorner(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
+}
+
+static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 struct W3 {
     u32 a, b, c;
 };
@@ -1335,7 +1362,45 @@ u8* fn_801A1898(u8* p, u32 a, u32 swap) {
     return p;
 }
 
-void fn_801A18D4(u8* p) {}  // stub (122)
+// Axis-aligned bounds of the volume: both axis end points (org +- axis * k), widened by k.
+void fn_801A18D4(u8* p, RVec3* lo, RVec3* hi) {
+    PVec3 org;
+    PVec3 axis;
+    RVec3 a;
+    RVec3 b;
+    u8* m = PTR(p, 0xC);
+    f32 k = F32(p, 0x24);
+    axis = *(PVec3*)(m + 0x18);
+    org = *(PVec3*)(m + 0x24);
+    MulAdd(&b.x, org.v, axis.v, -k);
+    MulAdd(&a.x, org.v, axis.v, k);
+    {
+        RVec3 mn;
+        RVec3 la;
+        RVec3 lb;
+        lb.x = b.x - k;
+        lb.y = b.y - k;
+        lb.z = b.z - k;
+        la.x = a.x - k;
+        la.y = a.y - k;
+        la.z = a.z - k;
+        SetV(&mn, MinF(la.x, lb.x), MinF(la.y, lb.y), MinF(la.z, lb.z));
+        *lo = mn;
+    }
+    {
+        RVec3 mx;
+        RVec3 ha;
+        RVec3 hb;
+        hb.x = b.x + k;
+        hb.y = b.y + k;
+        hb.z = b.z + k;
+        ha.x = a.x + k;
+        ha.y = a.y + k;
+        ha.z = a.z + k;
+        SetV(&mx, MaxF(ha.x, hb.x), MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
+        *hi = mx;
+    }
+}
 
 void fn_802E30C8(const char* fmt, ...);
 
@@ -1664,27 +1729,6 @@ struct MeshRes {
     RVec3* verts;  // offset 0x8
     s32 count;     // offset 0xC
 };
-
-// A box corner built component-wise (its constructor arguments are evaluated z, y, x).
-struct BoxCorner {
-    f32 x, y, z;
-    BoxCorner(f32 ax, f32 ay, f32 az) {
-        x = ax;
-        y = ay;
-        z = az;
-    }
-};
-
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
-
-static inline BoxCorner VMin(const RVec3& a, const RVec3& b) {
-    return BoxCorner(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
-}
-
-static inline BoxCorner VMax(const RVec3& a, const RVec3& b) {
-    return BoxCorner(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
-}
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
 u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
