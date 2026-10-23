@@ -184,9 +184,9 @@ void fn_801A9AB0(u8* p, u8* q) {}  // stub (2089)
 
 void fn_801ABB54(u8* p) {
     f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
-    f32 lim = F32(p, 0x238);
     f32 imp = 0.0f;
     f32 ad = (f32)__fabs(d);
+    f32 lim = F32(p, 0x238);
     if (ad > lim) {
         if (!(lim < ad)) {
             lim = ad;

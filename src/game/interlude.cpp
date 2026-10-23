@@ -706,9 +706,9 @@ void fn_801C7394(void) {
 }
 
 void fn_801C73DC(void) {
-    int n = lbl_8055E7F0;
     int sel = lbl_8055E828;
     int other = sel - 1;
+    int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
         if (fn_801C34CC(lbl_8055E7F8[sel].time, lbl_8055E7F8[other].time)) {
             Event* a = &lbl_8055E7F8[sel];
@@ -722,9 +722,9 @@ void fn_801C73DC(void) {
 }
 
 void fn_801C7480(void) {
-    int n = lbl_8055E7F0;
     int sel = lbl_8055E828;
     int other = sel + 1;
+    int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
         if (fn_801C34CC(lbl_8055E7F8[sel].time, lbl_8055E7F8[other].time)) {
             Event* a = &lbl_8055E7F8[sel];

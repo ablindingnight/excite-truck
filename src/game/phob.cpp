@@ -960,11 +960,11 @@ s32 fn_80178CA4(void) { return lbl_8055E444; }
 
 void fn_80178CAC(int a, int b) {
     int i;
-    RaceCarRec* ra;
     RaceCarRec* rb;
     s32 ka;
     s32 kb;
     s32 ma;
+    RaceCarRec* ra;
     s32 mb;
     s32 xa;
     s32 xb;

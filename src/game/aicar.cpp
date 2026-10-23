@@ -441,9 +441,9 @@ void fn_8019386C(u8* d) { fn_80193CE0(d); }
 void fn_80193870(u8* d) { fn_801945F8(d, "console"); }
 
 void fn_80193878(u8* d) {
-    RVec3 pos;
     RVec3 at;
     RVec3 imp;
+    RVec3 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
     pos.z = 13349.999f;

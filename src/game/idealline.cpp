@@ -620,9 +620,9 @@ ILPos fn_80136414(const LineFollower* f, u32 x) {
 
 ILPos fn_80136468(LineFollower* f, f32 m) {
     CenterLine* l = f->line;
-    s32 mode;
     IdealPoint* s;
     IdealPoint* n;
+    s32 mode;
     int i;
     f32 t;
     if (!l) {
