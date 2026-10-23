@@ -2419,7 +2419,6 @@ void fn_801A2EC8(u8* p) {}
 
 // Axis-aligned bounds: the 8 corners of the local box (+-(r + h), +-(r + h), +-h) through the frame.
 void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
-    CFrame* f = (CFrame*)PTR(p, 0xC);
     f32 h = F32(p, 0x28);
     f32 a = F32(p, 0x24) + h;
     RVec3 c[8] = {
@@ -2427,21 +2426,20 @@ void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
         {a, -a, -h},  {a, -a, h},  {a, a, -h},  {a, a, h},
     };
     RVec3 w;
-    *lo = f->t;
-    *hi = f->t;
-    RVec3* cp = c;
-    for (int i = 0; i < 8; i++, cp++) {
+    *lo = ((CFrame*)PTR(p, 0xC))->t;
+    *hi = ((CFrame*)PTR(p, 0xC))->t;
+    for (int i = 0; i < 8; i++) {
         CFrame* m = (CFrame*)PTR(p, 0xC);
-        MulVec(&w, cp, m);
+        MulVec(&w, &c[i], m);
         w.x = w.x + m->t.x;
         w.y = w.y + m->t.y;
         w.z = w.z + m->t.z;
         lo->x = lo->x < w.x ? lo->x : w.x;
         lo->y = lo->y < w.y ? lo->y : w.y;
         lo->z = lo->z < w.z ? lo->z : w.z;
-        hi->x = hi->x > w.x ? hi->x : w.x;
-        hi->y = hi->y > w.y ? hi->y : w.y;
-        hi->z = hi->z > w.z ? hi->z : w.z;
+        hi->x = MaxF(hi->x, w.x);
+        hi->y = MaxF(hi->y, w.y);
+        hi->z = MaxF(hi->z, w.z);
     }
 }
 
