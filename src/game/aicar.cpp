@@ -1347,9 +1347,71 @@ void fn_801967FC(u8* d) {
     F32(d, 0x254) = 1.0f < v ? 1.0f : v;
 }
 
-void fn_8019684C(u8* d) {}
+}  // extern "C"
 
-void fn_80196A9C(u8* d) { fn_8019684C(d); }
+// AI drivers gathered for one update pass.
+struct CarList {
+    s32 count;   // offset 0x0
+    u8* cars[8]; // offset 0x4
+    void Add(u8* d) { cars[count++] = d; }
+};
+
+extern "C" {
+int fn_801796B4(void);
+int fn_80134A44(int car);
+
+// Updates every active AI driver: paused/scripted ones only get the base update and path step, the rest
+// run the full pipeline; then each listed driver's v48.
+void fn_8019684C(void) {
+    CarList full;
+    CarList hold;
+    int paused;
+    int k;
+    int i;
+    u8* d;
+    full.count = 0;
+    hold.count = 0;
+    paused = fn_801796B4();
+    for (i = 0; i < 8; i++) {
+        d = lbl_804349C0[i];
+        if (d && fn_80134A44(i) && U8(d, 0x2A4)) {
+            if (paused || U8(d, 0x2A5)) {
+                hold.Add(d);
+            } else {
+                full.Add(d);
+            }
+        }
+    }
+    for (k = 0; k < hold.count; k++) {
+        fn_8019639C(hold.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_8019639C(full.cars[k]);
+    }
+    for (k = 0; k < hold.count; k++) {
+        fn_80196328(hold.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_801963A0(full.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_80196414(full.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_80196418(full.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_801967A4(full.cars[k]);
+    }
+    for (k = 0; k < full.count; k++) {
+        fn_801967FC(full.cars[k]);
+    }
+    for (k = 0; k < lbl_804349E0.count; k++) {
+        VI(lbl_804349E0.items[k])->v48();
+    }
+}
+
+void fn_80196A9C(u8* d) { fn_8019684C(); }
 
 extern const f32 lbl_80562250[2];  // phase ends: 0.1 s, 1 s
 extern const f32 lbl_80562258;     // -44500
