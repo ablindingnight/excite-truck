@@ -285,13 +285,13 @@ u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
 void fn_8019BD54(u8* p, u8* q, int a, int b) {}  // stub (704)
 
-void fn_8019C854(u8* p) {}  // stub (286)
+void fn_8019C854(u8* p, u8* q) {}  // stub (286)
 
 void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r) {}
 
 void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, a, F32(p, 0x24)); }
 
-void fn_8019CE4C(u8* p) {}  // stub (69)
+void fn_8019CE4C(u8* p, u8* q) {}  // stub (69)
 
 void fn_8019CF60(u8* p, u8* q) {}  // stub (67)
 
@@ -464,7 +464,42 @@ void fn_8019F03C(u8* p) {
     F32(p, 0x3C) = 0.0f;
 }
 
-void fn_8019F064(u8* p) {}  // stub (80)
+void fn_802E317C(const char* fmt, ...);
+
+// Collides sphere `p` against volume `o` by its type tag.
+void fn_8019F064(u8* p, u8* o) {
+    switch (S32(o, 0x18)) {
+    case 'RAGD':
+        break;
+    case 'FLSR':
+        fn_8019CE4C(p, o);
+        break;
+    case 'SPHR':
+        fn_8019B068(p, o, 0, 0);
+        break;
+    case 'TUBE':
+        fn_8019CE3C(p, (u32)o);
+        break;
+    case 'BOX ':
+        fn_8019BD54(p, o, 0, 0);
+        break;
+    case 'GRUP':
+        ((VGroup*)o)->v10(p);
+        break;
+    case 'RING':
+        fn_8019C854(p, o);
+        break;
+    case 'POLY':
+        ((VGroup*)o)->v10(p);
+        break;
+    case 'PMSH':
+        ((VGroup*)o)->v10(p);
+        break;
+    default:
+        fn_802E317C("Unsupported collision type: Sphere-%x", S32(o, 0x18));
+        break;
+    }
+}
 
 void fn_8019F1A4(u8* p) { fn_8019AC44(p, p + 0x34, p + 0x40, F32(p, 0x24)); }
 
