@@ -159,7 +159,23 @@ void fn_80265E2C(void) {
 
 void fn_80265EC4(u8* p) {}  // stub (107)
 
-void fn_80266070(u8* p) {}  // stub (44)
+f32 PSVECMag(const f32* v);
+
+// out = from + dir * scale (0x10), lifted by |dir| * rise (0x14).
+void fn_80266070(u8* p, f32* out, const f32* from, const f32* dir) {
+    f32 v[3];
+    f32 k = F32(p, 0x10);
+    v[0] = dir[0] * k;
+    v[1] = dir[1] * k;
+    v[2] = dir[2] * k;
+    v[1] += F32(p, 0x14) * PSVECMag(dir);
+    f32 x = from[0] + v[0];
+    f32 y = from[1] + v[1];
+    f32 z = from[2] + v[2];
+    out[0] = x;
+    out[1] = y;
+    out[2] = z;
+}
 
 u8* fn_80266120(u8* p) {
     fn_80266150(p);
@@ -175,7 +191,22 @@ void fn_80266150(u8* p) {
 
 void fn_80266170(u8* p) {}  // stub (90)
 
-void fn_802662D8(u8* p) {}  // stub (44)
+f32 PSVECDistance(const f32* a, const f32* b);
+extern f32 lbl_8055C4C4;
+extern const f32 lbl_80563C20;
+
+// out = from + dir * (distance to `to`, eased by the blend at 0xC).
+void fn_802662D8(u8* p, f32* out, const f32* from, const f32* dir, const f32* to) {
+    f32 d = PSVECDistance(from, to) - lbl_8055C4C4;
+    f32 k = F32(p, 0xC);
+    f32 t = lbl_80563C20 + k * (d - lbl_80563C20);
+    f32 x = from[0] + dir[0] * t;
+    f32 y = from[1] + dir[1] * t;
+    f32 z = from[2] + dir[2] * t;
+    out[0] = x;
+    out[1] = y;
+    out[2] = z;
+}
 
 void fn_80266388(u8* p) {}  // stub (417)
 
