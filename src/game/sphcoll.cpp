@@ -700,7 +700,111 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
     return 0;
 }
 
-int fn_8019D618(u8* p, u8* q, int a, u8* b) { return 0; }  // stub (294)
+extern const f32 lbl_805622E8;  // 0.5
+
+// Tube p against tube q: closest points of the two axes (parameters clamped to the half lengths when
+// `clamp`, else out-of-range is a miss); overlapping radii report one contact at the midpoint.
+int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
+    f32 m[3][3];
+    RVec3 ca;
+    RVec3 cb;
+    RVec3 pa;
+    RVec3 pb;
+    RVec3 da;
+    RVec3 db;
+    RVec3 d;
+    RVec3 n;
+    RVec3 mid;
+    RVec3 w;
+    RVec3 diff;
+    RVec3 at;
+    RVec3 nrm;
+    f32 s;
+    f32 t;
+    ca = *(RVec3*)(PTR(p, 0xC) + 0x24);
+    cb = *(RVec3*)(PTR(q, 0xC) + 0x24);
+    da = *(RVec3*)(PTR(p, 0xC) + 0x18);
+    db = *(RVec3*)(PTR(q, 0xC) + 0x18);
+    d.x = cb.x - ca.x;
+    d.y = cb.y - ca.y;
+    d.z = cb.z - ca.z;
+    PSVECCrossProduct(&da.x, &db.x, &n.x);
+    f32 nn = PSVECDotProduct(&n.x, &n.x);
+    f32 la = F32(p, 0x28);
+    f32 lb = F32(q, 0x28);
+    if (nn < lbl_8056232C) {
+        mid.x = (ca.x + cb.x) / 2.0f;
+        mid.y = (ca.y + cb.y) / 2.0f;
+        mid.z = (ca.z + cb.z) / 2.0f;
+        w.x = mid.x - ca.x;
+        w.y = mid.y - ca.y;
+        w.z = mid.z - ca.z;
+        s = PSVECDotProduct(&da.x, &w.x);
+        w.x = mid.x - cb.x;
+        w.y = mid.y - cb.y;
+        w.z = mid.z - cb.z;
+        t = PSVECDotProduct(&db.x, &w.x);
+    } else {
+        if (!((f32)__fabs(nn) <= lbl_80558DC4[0])) {
+        m[0][0] = d.x;
+        m[0][1] = db.x;
+        m[0][2] = n.x;
+        m[1][0] = d.y;
+        m[1][1] = db.y;
+        m[1][2] = n.y;
+        m[2][0] = d.z;
+        m[2][1] = db.z;
+        m[2][2] = n.z;
+        s = Det33(m) / nn;
+        m[0][1] = da.x;
+        m[1][1] = da.y;
+        m[2][1] = da.z;
+        t = Det33(m) / nn;
+        } else {
+            return 0;
+        }
+    }
+    if (!clamp) {
+        if (s < -la || s > la || t < -lb || t > lb) {
+            return 0;
+        }
+    } else {
+        if (s < -la) {
+            s = -la;
+        }
+        if (s > la) {
+            s = la;
+        }
+        if (t < -lb) {
+            t = -lb;
+        }
+        if (t > lb) {
+            t = lb;
+        }
+    }
+    MulAdd(&pa.x, &ca.x, &da.x, s);
+    MulAdd(&pb.x, &cb.x, &db.x, t);
+    diff.x = pb.x - pa.x;
+    diff.y = pb.y - pa.y;
+    diff.z = pb.z - pa.z;
+    f32 dist = PSVECMag(&diff.x);
+    if ((f32)__fabs(dist) <= lbl_80558DC4[0]) {
+        return 0;
+    }
+    f32 pen = (F32(p, 0x24) + F32(q, 0x24)) - dist;
+    if (pen < 0.0f) {
+        return 0;
+    }
+    f32 k = -1.0f / dist;
+    nrm.x = diff.x * k;
+    nrm.y = diff.y * k;
+    nrm.z = diff.z * k;
+    at.x = (pa.x + pb.x) / 2.0f;
+    at.y = (pa.y + pb.y) / 2.0f;
+    at.z = (pa.z + pb.z) / 2.0f;
+    fn_8019A788(who ? who : p, q, (u32)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
+    return 1;
+}
 
 // Tube p vs q: the cylinder first, then both end caps as spheres.
 int fn_8019DAB0(u8* p, u8* q) {
