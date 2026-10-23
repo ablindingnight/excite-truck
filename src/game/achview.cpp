@@ -33,6 +33,37 @@ double sqrt(double x);
 double sin(double x);
 }
 
+const char* AchievementsGetLevelModel(int cat, int level);
+
+extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
+
+// Shows one trophy: its model name and its level caption.
+static inline void SetTrophy(u8* self, s32 cat, s32 level) {
+    u8* m = PTR(self, 0x18);
+    S32(m, 0x4C) = level;
+    const char* name = AchievementsGetLevelModel(cat, level);
+    if (name) {
+        CopyName(name, 50, (char*)(m + 0x4));
+    } else {
+        U8(m, 0x4) = 0;
+    }
+    if (level > 0) {
+        fn_801345D8((char*)(m + 0x36), 0x14, "Level %d", level);
+    } else {
+        U8(m, 0x36) = 0;
+    }
+}
+
 struct Words9 {
     u32 w[9];
 };
@@ -166,7 +197,12 @@ void fn_8025B0E8(Words9* d, const Words9* s) { *d = *s; }
 
 void fn_8025B134(u8* p) {}
 
-void fn_8025B138(u8* p) {}  // stub (61)
+void fn_8025B138(u8* p) {
+    s32 level = S32(p, 0x1C);
+    S32(p, 0x74) = level;
+    SetTrophy(p, S32(p, 0x70), level);
+    fn_801345D8((char*)(p + 0x20), 0x50, "%s", AchievementsGetLevelModel(S32(p, 0x70), S32(p, 0x74)));
+}
 
 void fn_8025B22C(u8* p) {
     for (int i = 1; i <= 5; i++) {
@@ -195,9 +231,22 @@ void fn_8025B788(u8* p) {}  // stub (285)
 
 void fn_8025BBFC(u8* p) {}  // stub (132)
 
-void fn_8025BE0C(u8* p) {}  // stub (49)
+void fn_8025BE0C(u8* p) {
+    s32 level = S32(p, 0x24);
+    SetTrophy(p, S32(p, 0x20), level);
+}
 
-void fn_8025BED0(u8* p) {}  // stub (64)
+void fn_8025BED0(u8* p) {
+    u8* o = PTR(p, 0x1C);
+    if (U8(o, 0xC5) && !U8(o, 0x58)) {
+        s32 level = S32(o, 0xC8);
+        S32(p, 0x24) = level;
+        s32 cat = S32(o, 0x18);
+        S32(p, 0x20) = cat;
+        SetTrophy(p, cat, level);
+        U8(PTR(p, 0x18), 0x4A) = 1;
+    }
+}
 
 void fn_8025BFD0(u8* p) {}  // stub (22)
 }  // extern "C"
