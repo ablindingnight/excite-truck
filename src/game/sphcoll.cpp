@@ -493,7 +493,7 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 
 int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) { return 0; }  // stub (275)
 
-void fn_8019B4D8(u8* p) {}  // stub (541)
+void fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 a, f32 r) {}  // stub (541)
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
@@ -858,7 +858,7 @@ int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
 
 int fn_8019E2D0(u8* a, u8* b, u8* c, u8* m, f32 x, f32 y, f32 z) { return 0; }  // stub (140)
 
-void fn_8019E500(u8* p) {}  // stub (205)
+void fn_8019E500(u8* p, u8* q) {}  // stub (205)
 
 u8* fn_8019E834(u8* p, int del) {
     if (p && del > 0) {
@@ -867,7 +867,34 @@ u8* fn_8019E834(u8* p, int del) {
     return p;
 }
 
-void fn_8019E874(u8* p) {}  // stub (130)
+// Capsule p against q: the point of p's axis nearest q's centre (clamped to +-half length 0x28) is
+// tested as a sphere of p's radius; types 0x73 / 0x74 take fn_8019E500 instead.
+void fn_8019E874(u8* p, u8* q) {
+    if ((u32)S32(p, 0x20) == 0x73 || (u32)S32(p, 0x20) == 0x74) {
+        fn_8019E500(p, q);
+        return;
+    }
+    CFrame oq;
+    CFrame fp;
+    RVec3 c;
+    RVec3 d;
+    oq = *(CFrame*)VE(q)->v50();
+    fp = *(CFrame*)PTR(p, 0xC);
+    c = fp.t;
+    d.x = c.x - oq.t.x;
+    d.y = c.y - oq.t.y;
+    d.z = c.z - oq.t.z;
+    f32 nh;
+    f32 h = F32(p, 0x28);
+    nh = -h;
+    f32 s = -PSVECDotProduct(&fp.m[6], &d);
+    f32 v = h < s ? h : s;
+    v = v > nh ? v : nh;
+    c.x = c.x + fp.m[6] * v;
+    c.y = c.y + fp.m[7] * v;
+    c.z = c.z + fp.m[8] * v;
+    fn_8019B4D8(p, q, &c, 0, F32(p, 0x24));
+}
 
 void fn_8019EA7C(u8* p, u8* q) {}  // stub (38)
 
