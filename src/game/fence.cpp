@@ -92,7 +92,6 @@ void fn_802A0B54(void) {
             FenceVtx v[12];
             f32 v0 = 0.25f * f->type;
             f32 len = 1.0f + (f->type * 6);
-            f32 v1 = 0.25f + v0;
             int j;
             for (j = 0; j < f->count; j++) {
                 FenceVtx* p = &v[j * 2];
@@ -104,7 +103,7 @@ void fn_802A0B54(void) {
                 p[0].color = 0xFFFFFFFF;
                 p[1] = p[0];
                 p[1].pos.y += 0.15f;
-                p[1].v = v1;
+                p[1].v = (0.25f + v0);
                 if (j > 0) {
                     u16* q = &idx[(j - 1) * 6];
                     u16 b = (j - 1) * 2;

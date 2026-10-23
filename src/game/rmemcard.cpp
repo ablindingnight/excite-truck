@@ -556,10 +556,9 @@ inline void fn_802E95CC(s32 result, void* block) {
 
 int fn_802E95E0(const char* what, void (*poll)(void)) {
     s32 start = fn_802E2C20();
-    s32 end = start + 4000;
     while (lbl_80507288.state >= 2) {
         s32 now = fn_802E2C20();
-        if (now < start || now > end) {
+        if (now < start || now > (start + 4000)) {
             fn_802E30C8("rmemcard: (%s) timeout while blocking (%d ms)", what, now - start);
             return 0;
         }

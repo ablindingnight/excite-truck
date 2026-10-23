@@ -318,9 +318,8 @@ extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
         return;
     }
-    f32 minSpeed = 2.5f;
     for (int i = 0; i < n; i++, e++) {
-        if (e->dist < far && e->car->speed > minSpeed && e->active) {
+        if (e->dist < far && e->car->speed > 2.5f && e->active) {
             int j;
             for (j = 0; j < lbl_8055F7F0; j++) {
                 fn_8029D7D0(lbl_804B5010[j], e);

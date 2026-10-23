@@ -157,8 +157,7 @@ void fn_802D7564(void) {
     for (int i = 0; i < 450; i++) {
         GXTex* t = &lbl_8055FE28[i];
         if (t->used) {
-            u16 h = GXGetTexObjHeight(&t->obj);
-            fn_802E30C8("%3d: %-32s (%d x %d)", i, t, GXGetTexObjWidth(&t->obj), h);
+            fn_802E30C8("%3d: %-32s (%d x %d)", i, t, GXGetTexObjWidth(&t->obj), GXGetTexObjHeight(&t->obj));
         }
     }
 }
