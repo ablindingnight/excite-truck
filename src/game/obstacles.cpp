@@ -115,7 +115,42 @@ s32 lbl_8055E5F0;
 
 extern "C" {
 
-void fn_801A9660(u8* p) {}  // stub (40)
+u8* fn_801792F8(void);
+void fn_802E317C(const char* fmt, ...);
+u8* fn_801A9700(u8* p);
+u8* fn_801AC26C(void);
+u8* fn_801AC330(u8* p);
+
+// Creates the obstacle object for the current track's obstacle type.
+u8* fn_801A9660(void) {
+    u8* o;
+    switch (S32(fn_801792F8(), 0x50)) {
+    case 12:
+        o = (u8*)operator new(0x258, "fencepst");
+        if (o) {
+            o = fn_801AC330(o);
+        }
+        return o;
+    case 17:
+    case 18:
+    case 21:
+        return fn_801AC26C();
+    case 6:
+    case 9:
+    case 14:
+    case 15:
+    case 19:
+    case 22:
+        fn_802E317C("obstacle: tried to create an Obstacle intended only for the SOL");
+        return 0;
+    default:
+        o = (u8*)operator new(0x23C, "obst");
+        if (o) {
+            o = fn_801A9700(o);
+        }
+        return o;
+    }
+}
 
 u8* fn_801A9700(u8* p) {
     __ct__9RigidBodyFv(p);
