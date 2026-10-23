@@ -21,6 +21,8 @@ extern "C" {
 u8 fn_8012C33C(const char* lyt);
 void fn_80214D50(int s);
 void fn_80214CB4(int a);
+void fn_80216D28(void);
+void fn_80230E90(int a);
 void fn_80214AF0(int s);
 void fn_80214B44(int i);
 void fn_80214A9C(int s);
@@ -145,7 +147,45 @@ void fn_80246498(u8* p) { fn_80214CB4(U8(p, 0x18) == 0); }
 
 void fn_802464A8(u8* p) { U8(p, 0x19) = 0; }
 
-void fn_802464B4(u8* p) {}  // stub (60)
+int fn_802464B4(u8* p, int key) {
+    switch (key) {
+    case 0x125:
+        if (!U8(p, 0x19)) {
+            fn_80214CB4(0);
+            fn_80230E90(0);
+        } else {
+            fn_80216D28();
+        }
+        break;
+    case 0x127:
+        if (!U8(p, 0x19)) {
+            fn_80214CB4(1);
+            fn_80230E90(0);
+        } else {
+            fn_80216D28();
+        }
+        break;
+    case 0x126:
+        if (U8(p, 0x19)) {
+            fn_80214CB4(0);
+            fn_80230E90(0);
+        } else {
+            fn_80216D28();
+        }
+        break;
+    case 0x128:
+        if (U8(p, 0x19)) {
+            fn_80214CB4(1);
+            fn_80230E90(0);
+        } else {
+            fn_80216D28();
+        }
+        break;
+    default:
+        return 0;
+    }
+    return 1;
+}
 
 void fn_802465A4(u8* p) {}  // stub (166)
 
