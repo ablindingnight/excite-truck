@@ -85,8 +85,9 @@ extern char lbl_804989AC[];
 
 // Per-car multiplayer unlock flags.
 struct UnlockEntry {
-    s32 id;          // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
+    s32 id;            // offset 0x0
+    const char* name;  // offset 0x4
+    u8 pad8[0xC];      // offset 0x8
     u8 unlocked;     // offset 0x14
     u8 pad15[0x3];   // offset 0x15
 };
@@ -253,7 +254,91 @@ void fn_8024A2BC(u8* p, s32 a, s32 b) {
     }
 }
 
-void fn_8024A304(u8* p) {}  // stub (109)
+}  // extern "C"
+
+// A track record as GetTrack returns it.
+struct MpTrack {
+    u8 pad0[0x70];  // offset 0x0
+    s32 numEves;    // offset 0x70
+};
+
+MpTrack* GetTrack(int track);
+const char* GetTrackEnviron(const char* track);
+const char* GetEventDisplayName(int ev);
+
+struct EvPair {
+    const char* track;  // offset 0x0
+    u8* ev;             // offset 0x4
+};
+
+struct EvPairs {
+    EvPair* items;  // offset 0x0
+    s32 count;      // offset 0x4
+};
+
+// One course row of the picker.
+struct EvPick {
+    s32 track;         // offset 0x0
+    s32 eve;           // offset 0x4
+    const char* name;  // offset 0x8
+};
+
+struct EvPicker {
+    u8 pad0[0x10];     // offset 0x0
+    s32 cur;           // offset 0x10
+    s32 count;         // offset 0x14
+    u8 pad18[0x4];     // offset 0x18
+    const char* env;   // offset 0x1C
+    EvPick ents[1];    // offset 0x20
+};
+
+// The unlock-table row for event ev, or -1.
+static inline int FindUnlockEv(u8* ev) {
+    UnlockList* l = lbl_8055F28C;
+    for (int i = 0; i < l->count; i++) {
+        if (l->entries[i].id == S32(ev, 0x0)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// The event's index within its track, or -1.
+static inline int EveIndex(u8* ev) {
+    int n = GetTrack(S32(ev, 0x4))->numEves;
+    for (int k = 0; k < n; k++) {
+        if (ev == FindTrackEvent(S32(ev, 0x4), k)) {
+            return k;
+        }
+    }
+    return -1;
+}
+
+extern "C" {
+
+// Fills the course list with the events at tracks in environment env.
+void fn_8024A304(EvPicker* p, EvPairs** pairs, const char* env) {
+    u8* ev;
+    int i;
+    int j;
+    p->env = env;
+    p->cur = 0;
+    p->count = 0;
+    for (i = 0; i < (*pairs)->count; i++) {
+        if (!strcasecmp(GetTrackEnviron((*pairs)->items[i].track), p->env)) {
+            ev = (*pairs)->items[i].ev;
+            p->ents[p->count].track = S32(ev, 0x4);
+            p->ents[p->count].eve = EveIndex(ev);
+            j = FindUnlockEv(ev);
+            if (lbl_8055F290 && j >= 0) {
+                p->ents[p->count].name = lbl_8055F28C->entries[j].name;
+            } else {
+                p->ents[p->count].name = ((ValueNode*)PTR(ev, 0x20))->GetString("friendly_name", GetEventDisplayName(S32(ev, 0x0)));
+            }
+            p->count++;
+        }
+    }
+}
 
 int fn_8024A4B8(const char** a, const char** b) { return strcasecmp(*a, *b); }
 
