@@ -18,7 +18,15 @@ double atan(double x);
 }
 
 extern f32 lbl_8049A208[];
-extern f32 lbl_8049A218[];
+
+// A screen rectangle; its out-of-line constructor (fn_80270AE8, in physcam.cpp) zeroes it.
+class CamRect {
+public:
+    CamRect(void);
+    f32 v[4];
+};
+
+extern CamRect lbl_8049A218[4];
 
 extern "C" {
 
@@ -78,7 +86,7 @@ f32 fn_8026EAEC(f32 fov) {
 f32 fn_8026EB4C(u8* p) { return 0.0f; }  // stub (102)
 
 double cos(double x);
-extern f32 lbl_8055F52C;          // reference field of view
+extern f32 lbl_8055F52C;
 extern const f32 lbl_80563E68;    // degrees to radians
 
 // Returns the view angle; scales *scale so that wider views keep the reference framing.
@@ -116,7 +124,7 @@ void fn_8027045C(void) {
 
 void fn_80270484(void) {
     f32 z = 0.0f;
-    f32* q = lbl_8049A218;
+    f32* q = (f32*)lbl_8049A218;
     for (int i = 0; i < 4; i++) {
         q[0] = z;
         q[1] = z;
@@ -134,5 +142,16 @@ f32 fn_802704E0(int mode, f32 t) { return fn_8026EA8C(mode, t); }
 
 void fn_802704E4(u8* p) {}  // stub (360)
 
-void fn_80270A84(u8* p) {}  // stub (25)
 }  // extern "C"
+
+extern const f32 lbl_80563F2C;
+extern const f32 lbl_80563F30;
+extern const f32 lbl_80563F34;
+extern const f32 lbl_80563F38;
+
+ModuleTag lbl_8055F520;
+f32 lbl_8055F528 = lbl_80563F2C;
+f32 lbl_8055F52C = lbl_80563F30;  // reference field of view
+f32 lbl_8055F530 = lbl_80563F34;
+f32 lbl_8055F534 = lbl_80563F38;
+CamRect lbl_8049A218[4];
