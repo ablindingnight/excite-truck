@@ -291,10 +291,34 @@ void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r) {}
 
 void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, a, F32(p, 0x24)); }
 
-void fn_8019CE4C(u8* p, u8* q) {}  // stub (69)
-
 extern const f32 lbl_8056232C;  // small distance
 f32 PSVECSquareDistance(const void* a, const void* b);
+
+// Sets flat sphere q's radius from how edge-on it is to sphere p, then collides them.
+void fn_8019CE4C(u8* p, u8* q) {
+    f32* c = (f32*)(p + 0x34);
+    f32 d[3];
+    d[0] = c[0] - F32(q, 0x34);
+    d[1] = c[1] - F32(q, 0x38);
+    d[2] = c[2] - F32(q, 0x3C);
+    f32 sq = PSVECSquareDistance(c, q + 0x34);
+    f32 r;
+    if (sq > lbl_8056232C) {
+        f32 inv = 1.0f / (f32)sqrt(sq);
+        d[0] *= inv;
+        d[1] *= inv;
+        d[2] *= inv;
+        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(q, 0xC) + 0xC));
+        r = F32(q, 0x54) + k * (F32(q, 0x58) - F32(q, 0x54));
+    } else {
+        f32 b = F32(q, 0x58);
+        f32 a = F32(q, 0x54);
+        r = a > b ? a : b;
+    }
+    F32(q, 0x24) = r;
+    fn_8019B068(p, q, 0, 0);
+}
+
 
 // Sets flat sphere q's radius from how edge-on it is to p, then collides them.
 void fn_8019CF60(u8* p, u8* q) {
@@ -325,7 +349,30 @@ void fn_8019D06C(u8* p, u8* q, int a, int b) {}  // stub (76)
 
 void fn_8019D19C(u8* p, u8* q) {}  // stub (119)
 
-void fn_8019D378(u8* p, u8* q) {}  // stub (67)
+// Sets flat sphere p's radius from how edge-on it is to ring q, then collides them.
+void fn_8019D378(u8* p, u8* q) {
+    f32* c = (f32*)(PTR(q, 0xC) + 0x24);
+    f32 d[3];
+    d[0] = c[0] - F32(p, 0x34);
+    d[1] = c[1] - F32(p, 0x38);
+    d[2] = c[2] - F32(p, 0x3C);
+    f32 sq = PSVECSquareDistance(c, p + 0x34);
+    f32 r;
+    if (sq > lbl_8056232C) {
+        f32 inv = 1.0f / (f32)sqrt(sq);
+        d[0] *= inv;
+        d[1] *= inv;
+        d[2] *= inv;
+        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(p, 0xC) + 0xC));
+        r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
+    } else {
+        f32 b = F32(p, 0x58);
+        f32 a = F32(p, 0x54);
+        r = a > b ? a : b;
+    }
+    F32(p, 0x24) = r;
+    fn_8019C854(p, q);
+}
 
 void fn_8019D484(u8* p) {}  // stub (101)
 
