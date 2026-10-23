@@ -561,10 +561,10 @@ struct PlayerList : ArrayRef<PlayerData*> {
     PlayerData* storage[8];   // offset 0xC
 };
 
-class ResultsOverlay {
+class RingResults {
 public:
-    ResultsOverlay(void);
-    ~ResultsOverlay(void) { Unload(); }
+    RingResults(void);
+    ~RingResults(void) { Unload(); }
     void Unload(void) {
         if (layout) {
             fn_802ADE60(layout, 1);
@@ -759,7 +759,7 @@ public:
     RSound* sPreRace;         // offset 0xA4
     u8 bA8;                   // offset 0xA8
     u8 padA9[3];
-    ResultsOverlay results;   // offset 0xAC
+    RingResults results;   // offset 0xAC
 };
 
 struct Race {
@@ -772,7 +772,7 @@ UnkStaticFFFF lbl_8055E370;
 static UnkStatic123s lbl_80430358;
 RingChalMaster* lbl_8055E378;
 
-void ResultsOverlay::Update(int score, int rings, int bonus) {
+void RingResults::Update(int score, int rings, int bonus) {
     if (layout) {
         int shown;
         int n;
@@ -1101,7 +1101,7 @@ PlayerData::PlayerData(int i) {
 
 void PlayerList::Clear(void) { count = 0; }
 
-ResultsOverlay::ResultsOverlay(void) {
+RingResults::RingResults(void) {
     layout = 0;
     sBonus = 0;
     sNoBonus = 0;
@@ -1521,7 +1521,7 @@ void RingChalMaster::vfF8(void) {
     results.Reset();
 }
 
-void ResultsOverlay::Reset(void) {
+void RingResults::Reset(void) {
     state = 0;
     start = -1.0f;
     b8 = 1;
@@ -1619,7 +1619,7 @@ int RingChalMaster::vf3C(int view) {
 
 f32 RingChalMaster::vf38(void) { return 7.75f; }
 
-void ResultsOverlay::Load(void) {
+void RingResults::Load(void) {
     Binding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
