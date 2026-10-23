@@ -410,7 +410,52 @@ void fn_8024B260(u8* p) {
     }
 }
 
-void fn_8024B3E8(u8* p) {}  // stub (87)
+// One location on the location list.
+struct GroupEntry {
+    const char* name;  // offset 0x0
+    u8 flag;           // offset 0x4
+    u8 pad5[0x3];
+};
+
+struct GroupVec {
+    GroupEntry* data;  // offset 0x0
+    s32 count;         // offset 0x4
+    s32 cap;           // offset 0x8
+};
+
+extern void* lbl_80343BD0[];
+void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
+
+u8* fn_8024B3E8(u8* p, EvList* list) {
+    PTR(p, 0x74) = (u8*)list;
+    S32(p, 0x14) = 0;
+    *(void**)p = lbl_80343BD0;
+    PTR(p, 0x18) = p + 0x24;
+    S32(p, 0x20) = 10;
+    S32(p, 0x1C) = 0;
+    U8(p, 0x284) = 0;
+    for (int i = 0; i < list->count; i++) {
+        EvEntry* e = &list->items[i];
+        int isNew = 1;
+        for (int j = 0; j < S32(p, 0x1C); j++) {
+            if (!e->unlocked || !strcasecmp(((GroupEntry*)PTR(p, 0x18))[j].name, e->group)) {
+                isNew = 0;
+            }
+        }
+        if (isNew) {
+            GroupEntry* g = &((GroupVec*)(p + 0x18))->data[((GroupVec*)(p + 0x18))->count++];
+            g->name = e->group;
+            g->flag = e->flag;
+        }
+        if (e->unlocked && e->flag) {
+            U8(p, 0x284) = 1;
+        }
+    }
+    fn_80265DCC(PTR(p, 0x18), S32(p, 0x1C), 8, fn_8024B214);
+    memset(p + 0x78, 0, 0x208);
+    S32(p, 0x280) = -1;
+    return p;
+}
 
 void fn_8024B544(u8* p, const char* name) {
     S32(p, 0x280) = 0;
