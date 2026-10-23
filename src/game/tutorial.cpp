@@ -1590,8 +1590,7 @@ inline void ChalList::Start(void) {
     fn_802A95A8(&b, &a);
     fn_80276CB0("challist", 0);
     {
-        const char* body = fn_80131234("Tutorial:FINISHED_BODY");
-        fn_801DF380(fn_80131234("Tutorial:FINISHED_HEAD"), body, fn_80161438, 0);
+        fn_801DF380(fn_80131234("Tutorial:FINISHED_HEAD"), (fn_80131234("Tutorial:FINISHED_BODY")), fn_80161438, 0);
     }
 }
 

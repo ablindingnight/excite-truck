@@ -959,10 +959,10 @@ CenterLine* fn_80178C9C(void) { return lbl_8055E414; }
 s32 fn_80178CA4(void) { return lbl_8055E444; }
 
 void fn_80178CAC(int a, int b) {
-    int i;
     RaceCarRec* rb;
     s32 ka;
     s32 kb;
+    int i;
     s32 ma;
     RaceCarRec* ra;
     s32 mb;
