@@ -491,7 +491,55 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
     return fn_8019AA34(p, p + 0x34, q, q + 0x34, a, b, F32(p, 0x24), s);
 }
 
-int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) { return 0; }  // stub (275)
+// Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
+// the axis, a contact at the tube surface with the radial normal.
+int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) {
+    CFrame* f = (CFrame*)PTR(q, 0xC);
+    RVec3 l;
+    f32 dx = c[0] - f->t.x;
+    f32 dy = c[1] - f->t.y;
+    f32 dz = c[2] - f->t.z;
+    l.x = Dot3(dx, f->m[0], dy, f->m[1], dz, f->m[2]);
+    l.y = Dot3(dx, f->m[3], dy, f->m[4], dz, f->m[5]);
+    l.z = Dot3(dx, f->m[6], dy, f->m[7], dz, f->m[8]);
+    f32 len = F32(q, 0x28);
+    if (l.z < len && l.z > -len) {
+        f32 dist = (f32)sqrt(l.x * l.x + l.y * l.y);
+        if (!((f32)__fabs(dist) <= lbl_80558DC4[0])) {
+            r += -dist + F32(q, 0x24);
+            if (r > 0.0f) {
+                BoxCorner ct(f->t.x, f->t.y, f->t.z);
+                BoxCorner cc(c[0], c[1], c[2]);
+                RVec3 s;
+                RVec3 w;
+                RVec3 nw;
+                RVec3 n;
+                RVec3 nn;
+                s.x = l.x;
+                s.y = l.y;
+                s.z = 0.0f;
+                f32 k = (F32(q, 0x24) - r) / dist;
+                s.z = l.z;
+                s.x *= k;
+                s.y *= k;
+                CFrame* m = (CFrame*)PTR(q, 0xC);
+                MulVec(&w, &s, m);
+                w.x += m->t.x;
+                w.y += m->t.y;
+                w.z += m->t.z;
+                n.x = l.x;
+                n.y = l.y;
+                n.z = 0.0f;
+                PSVECNormalize(&n.x, &n.x);
+                MulVec(&nw, &n, (CFrame*)PTR(q, 0xC));
+                nn = nw;
+                fn_8019A788(p, q, (u32)&w, &nn, 0, 0, r, 0.0f, 0.0f);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 a, f32 r) { return 0; }  // stub (541)
 
