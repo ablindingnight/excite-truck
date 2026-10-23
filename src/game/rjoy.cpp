@@ -12,7 +12,7 @@ s32 fn_802E2C20(void);  // milliseconds
 void fn_802D9BF0(void);
 u8 fn_802E9A24(void);
 void fn_802E2E0C(int (*cb)(int, int), const char* name);
-u8 fn_802ECC10(void);
+int fn_802ECC10(void);
 void fn_802ECBF8(void);
 void fn_802E2E38(int a);
 void fn_802EC884(void);
@@ -350,7 +350,7 @@ void fn_802E7FD0(void) {
     }
     lbl_80560010 = now;
     lbl_80560014++;
-    u8 paused = fn_802ECC10();
+    u32 paused = fn_802ECC10();
     if (paused != lbl_80560009) {
         lbl_80560009 = paused;
         for (int i = 0; i < 4; i++) {
@@ -392,7 +392,7 @@ void fn_802E7FD0(void) {
         }
         s32 probe = WPADProbe(chan, type);
         if (fn_80047C0C(chan, r->kpad, 1) >= 1 && probe == 0 && r->present) {
-            s8 err = r->kpad[0].err;
+            int err = r->kpad[0].err;
             if (err != *last) {
                 fn_802E30C8("rjoy: #%d: %s -> %s", chan, fn_802E77C0(*last), fn_802E77C0(err));
                 *last = err;
