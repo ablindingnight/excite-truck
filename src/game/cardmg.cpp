@@ -196,13 +196,13 @@ void fn_8018F9B4(u8* p) {
             DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[bone].lo;
             DVec* hi = lo + 1;
             DVec c;
-            c.x = lo->x + hi->x;
+            c.x = lo->x + (lo + 1)->x;
             c.y = lo->y + hi->y;
-            c.z = lo->z + hi->z;
+            c.z = lo->z + (lo + 1)->z;
             c.x *= lbl_80561FE4;
             c.y *= lbl_80561FE4;
             c.z *= lbl_80561FE4;
-            fn_801BF2A4(p, 1 << bone, &c, lo, hi, *(s32*)((u8*)t + 0x34), (u8*)t + 0x38);
+            fn_801BF2A4(p, 1 << bone, &c, lo, lo + 1, *(s32*)((u8*)t + 0x34), (u8*)t + 0x38);
             w->state = 3;
             w->flag78 = 0;
         }

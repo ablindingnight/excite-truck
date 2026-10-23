@@ -402,7 +402,31 @@ static inline void UpdateSlotAnims(u8* p) {
     }
 }
 
-void fn_80250108(u8* p) { UpdateSlotAnims(p); }
+// Same body as UpdateSlotAnims; the declaration order here (found by decomp-permuter) gives the target's registers.
+void fn_80250108(u8* p) {
+    SlotAnim* e;
+    f32 dt = fn_80214D48();
+    int i;
+    SlotAnim* slot;
+    F32(p, 0x28) = F32(p, 0x28) + lbl_80563968 * ((f32)S32(p, 0x2C) - F32(p, 0x28));
+    for (i = 0; i < S32(p, 0x1C); i++) {
+        slot = &((SlotAnim*)PTR(p, 0x18))[i];
+        e = slot;
+        if (e->sel != e->shown) {
+            e->t = e->t + lbl_8056396C * dt;
+            if (e->t >= lbl_80563964) {
+                e->shown = e->sel;
+                e->t = e->t - lbl_80563970;
+            }
+        } else {
+            f32 t = e->t + lbl_8056396C * dt;
+            if (lbl_80563960 < t) {
+                t = lbl_80563960;
+            }
+            e->t = t;
+        }
+    }
+}
 
 void fn_80250204(u8* p) {}  // stub (925)
 
@@ -432,7 +456,8 @@ void fn_80251934(u8* p) {
         if (((u8*)GetVehicleColor(*(VehicleInfo**)(c + 8), 0))[8] && c[0xC]) {
             on = 1;
         }
-        e = &((SlotAnim*)PTR(p, 0x18))[i];
+        SlotAnim* slot = &((SlotAnim*)PTR(p, 0x18))[i];
+        e = slot;
         if (on != e->sel) {
             e->sel = on;
             e->t = (f32)__fabs(e->t);
