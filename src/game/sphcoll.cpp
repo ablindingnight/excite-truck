@@ -74,6 +74,31 @@ struct PolyVol {
 };
 
 extern void* lbl_80333778[];
+extern void* lbl_803336F8[];
+extern const f32 lbl_8056234C;  // 2.0f
+
+struct Pose12s {
+    u32 w[12];
+};
+
+class VMesh {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(u8* vol);
+};
+
+extern "C" {
+void fn_801CF080(u8* mesh, const RVec3* c, RVec3* hits, int* n, u32 mask, f32 r);
+void fn_801A48E4(u8* p);
+}
 
 class VSet;
 
@@ -802,7 +827,19 @@ u8* fn_801A3FB8(u8* p, int del) {
     return p;
 }
 
-void fn_801A401C(u8* p) {}  // stub (55)
+void fn_801A401C(u8* p, u8* o) {
+    if (S32(o, 0x18) == 'GRUP') {
+        ((VGroup*)o)->v10(p);
+    } else if (S32(o, 0x18) == 'SPHR') {
+        RVec3 hits[64];
+        int n = 64;
+        u8* sph = o;
+        fn_801CF080(PTR(p, 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(p, 0xC), lbl_8056234C * F32(sph, 0x24));
+        for (int i = 0; i < n; i++) {
+            fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)p);
+        }
+    }
+}
 
 void fn_801A40F8(u8* p) {}  // stub (205)
 
@@ -907,7 +944,17 @@ void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
     }
 }
 
-void fn_801A4A8C(u8* p) {}  // stub (52)
+u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
+    U32(p, 0x38) = a;
+    *(void**)p = lbl_803336F8;
+    U32(p, 0x48) = c;
+    U32(p, 0x34) = b;
+    PTR(p, 0x3C) = mesh;
+    *(Pose12s*)(p + 0x4) = *pose;
+    ((VMesh*)mesh)->v2C(p);
+    fn_801A48E4(p);
+    return p;
+}
 
 void fn_801A4B5C(u8* p) {}  // stub (179)
 
