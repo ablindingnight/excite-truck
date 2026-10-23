@@ -373,7 +373,48 @@ void fn_801AD5EC(void) { fn_801AC508(); }
 
 void fn_801AD5F0(u8* p) { fn_801ACF94(p); }
 
-void fn_801AD5F4(u8* p) {}  // stub (47)
+}  // extern "C"
+
+class ObstacleSink {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void Hit(const f32* push, const f32* at, u32 a, u32 b);  // 0x48
+};
+
+extern "C" {
+extern const f32 lbl_805624F4;  // 5.0
+extern const f32 lbl_8056249C;  // 0.8
+
+void fn_801AD5F4(u8* p, ObstacleSink* q) {
+    f32 push[3];
+    push[0] = F32(p, 0x4) * lbl_805624F4;
+    push[1] = F32(p, 0x8) * lbl_805624F4;
+    push[2] = F32(p, 0xC) * lbl_805624F4;
+    f32 at[3];
+    f32 c2 = F32(p, 0x18) + lbl_8056249C * (F32((u8*)q, 0x68) - F32(p, 0x18));
+    f32 c1 = F32(p, 0x14) + lbl_8056249C * (F32((u8*)q, 0x64) - F32(p, 0x14));
+    f32 c0 = F32(p, 0x10) + lbl_8056249C * (F32((u8*)q, 0x60) - F32(p, 0x10));
+    at[0] = c0;
+    at[1] = c1;
+    at[2] = c2;
+
+    q->Hit(push, at, U32(p, 0x1C), U32(p, 0x20));
+}
 
 void fn_801D0934(u8* p);
 
