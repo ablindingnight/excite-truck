@@ -63,9 +63,11 @@ struct UiAnimTrack {
         keys = 0;
     }
     ~UiAnimTrack(void) {
-        delete[] keys;
-        n = 0;
+        if (keys) {
+            delete[] keys;
+        }
         id = -1;
+        n = 0;
         keys = 0;
     }
     s32 id;     // offset 0x0
@@ -319,7 +321,9 @@ static inline void* EvalTrack(const UiAnimTrack* tr, f32 time) {
 }
 
 UiAnimList::~UiAnimList(void) {
-    delete[] tracks;
+    if (tracks) {
+        delete[] tracks;
+    }
     tracks = 0;
     n = 0;
     len = 0.0f;
