@@ -1738,7 +1738,35 @@ void fn_801A1F44(RVec3* out, u8* q) {
     *(W3*)out = *(W3*)(o + 0x24);
 }
 
-void fn_801A1F98(u8* p) {}  // stub (195)
+// Axis-aligned bounds of the box: its 8 corners (+-hx, +-hy, +-hz) through the volume's frame.
+void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
+    f32 hx = F32(p, 0x24);
+    f32 hy = F32(p, 0x28);
+    f32 hz = F32(p, 0x2C);
+    f32 nx = -hx;
+    f32 ny = -hy;
+    f32 nz = -hz;
+    RVec3 c[8] = {
+        {hx, hy, hz},   {nx, hy, hz},   {hx, ny, hz},   {nx, ny, hz},
+        {hx, hy, nz},   {nx, hy, nz},   {hx, ny, nz},   {nx, ny, nz},
+    };
+    RVec3 w;
+    *lo = ((CFrame*)VE(p)->v50())->t;
+    *hi = ((CFrame*)VE(p)->v50())->t;
+    for (int i = 0; i < 8; i++) {
+        CFrame* m = (CFrame*)VE(p)->v50();
+        MulVec(&w, &c[i], m);
+        w.x = w.x + m->t.x;
+        w.y = w.y + m->t.y;
+        w.z = w.z + m->t.z;
+        lo->x = lo->x < w.x ? lo->x : w.x;
+        lo->y = lo->y < w.y ? lo->y : w.y;
+        lo->z = lo->z < w.z ? lo->z : w.z;
+        hi->x = hi->x > w.x ? hi->x : w.x;
+        hi->y = hi->y > w.y ? hi->y : w.y;
+        hi->z = hi->z > w.z ? hi->z : w.z;
+    }
+}
 
 void fn_801A22A4(u8* p) {
     Xform* src = (Xform*)((VEx*)p)->v50();
