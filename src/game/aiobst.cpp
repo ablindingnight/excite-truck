@@ -197,7 +197,7 @@ extern const f32 kWidth;
 extern const f32 kBin;
 extern const f32 kGap;
 f32 lbl_8055E2A4 = kWidth * kBin;               // bin width
-s32 lbl_8055E2A8 = 64.0f * (kGap / kWidth) + 1;  // bins a car needs
+s32 lbl_8055E2A8 = (s32)(64.0f * (kGap / kWidth)) + 1;  // bins a car needs
 
 static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
 
@@ -744,3 +744,5 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
 extern const f32 kWidth = 18.0f;  // the lane width the bins cover
 extern const f32 kBin = 0.015625f;
 extern const f32 kGap = 3.2889998f;  // the gap a car fits through
+
+#pragma dont_inline reset
