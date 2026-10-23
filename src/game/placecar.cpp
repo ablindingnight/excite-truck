@@ -110,7 +110,7 @@ LocalCarDesc* fn_801769CC(void);
 int fn_801769B8(void);
 u32 fn_801769A8(void);
 int fn_801796B4(void);
-ILPos fn_80135B24(LineFollower* f, f32 m);
+ILPos fn_80135B24(const LineFollower* f, f32 m);
 ILPos fn_80136468(LineFollower* f, f32 m);
 League* fn_80137C54(s32 i);
 f32 fn_80139048(void);

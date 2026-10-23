@@ -391,7 +391,7 @@ int LineFollower::Step(V2* p) {
 
 extern "C" {
 
-ILPos fn_80135B24(LineFollower* f, f32 m) {
+ILPos fn_80135B24(const LineFollower* f, f32 m) {
     ILPos r;
     r.seg = f->line->start;
     if (r.seg) {
@@ -603,7 +603,7 @@ int IdealFollower::Track(V2* p, f32* progress) {
 
 extern "C" {
 
-u32 fn_801363A0(LineFollower* f, ILPos* p) {
+u32 fn_801363A0(LineFollower* f, const ILPos* p) {
     u32 a = p->seg->ilpos;
     u32 b = p->seg->next->ilpos;
     if (b == 0) {
@@ -612,7 +612,7 @@ u32 fn_801363A0(LineFollower* f, ILPos* p) {
     return a + (u32)(p->t * (s32)(b - a));
 }
 
-ILPos fn_80136414(LineFollower* f, u32 x) {
+ILPos fn_80136414(const LineFollower* f, u32 x) {
     IdealPoint* s = &f->line->points[x >> 16];
     f32 t = (x & 0xFFFF) / 65535.0f;
     return ILPos(s, t, 0);

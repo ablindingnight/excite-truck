@@ -199,7 +199,7 @@ void fn_8013AB08(V2* out, Strength* s) {
     }
 }
 
-f32 fn_8013AC2C(Strength* s) {
+f32 fn_8013AC2C(const Strength* s) {
     u8* ev = (u8*)GetEvent(s->event);
     u8* trk = (u8*)GetTrack(*(s32*)(ev + 4));
     return (*(ValueNode**)(trk + 0x80))->GetFloat("rtt_speed_factor", 1.0f);
