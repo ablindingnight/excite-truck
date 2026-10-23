@@ -876,7 +876,85 @@ void fn_8019F4D4(u8* p) {}  // stub (35)
 
 void fn_8019F560(u8* p) { fn_8019F1A4(p); }
 
-void fn_8019F564(u8* p) {}  // stub (99)
+static inline void InitVolume(u8* s, u32 id, u32 owner) {
+    U32(s, 0xC) = id;
+    U32(s, 0x4) = owner;
+}
+
+static inline f32 Max3(f32 a, f32 b, f32 c) {
+    f32 m = c;
+    if (b > m) {
+        m = b;
+    }
+    if (a > m) {
+        m = a;
+    }
+    return m;
+}
+
+extern void* lbl_80333A58[];
+
+// Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
+u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz) {
+    f32 cx = c->x;
+    f32 cy = c->y;
+    f32 cz = c->z;
+    f32 big = hy > hz ? hy : hz;
+    big = hx > big ? hx : big;
+    InitVolume(p, frame, owner);
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'SPHR';
+    F32(p, 0x10) = k;
+    F32(p, 0x14) = skin;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_80333B48;
+    F32(p, 0x24) = 0.5f * big;
+    F32(p, 0x34) = 0.0f;
+    F32(p, 0x38) = 0.0f;
+    F32(p, 0x3C) = 0.0f;
+    F32(p, 0x40) = 0.0f;
+    F32(p, 0x44) = 0.0f;
+    F32(p, 0x48) = 0.0f;
+    U8(p, 0x4C) = 0;
+    F32(p, 0x50) = 0.0f;
+    F32(p, 0x28) = cx;
+    F32(p, 0x2C) = cy;
+    F32(p, 0x30) = cz;
+    if (owner) {
+        fn_8019EECC((u8*)owner, (RVec3*)(p + 0x28));
+    }
+    *(void**)p = lbl_80333A58;
+    F32(p, 0x54) = a;
+    F32(p, 0x58) = 0.5f * hx;
+    F32(p, 0x5C) = 0.5f * hy;
+    F32(p, 0x60) = 0.5f * hz;
+    F32(p, 0x64) = 0.0f;
+    F32(p, 0x68) = 0.0f;
+    F32(p, 0x6C) = 0.0f;
+    F32(p, 0x70) = 0.0f;
+    F32(p, 0x74) = 0.0f;
+    F32(p, 0x78) = 0.0f;
+    F32(p, 0x7C) = 0.0f;
+    F32(p, 0x80) = 0.0f;
+    F32(p, 0x84) = 0.0f;
+    F32(p, 0x88) = 0.0f;
+    F32(p, 0x8C) = 0.0f;
+    F32(p, 0x90) = 0.0f;
+    F32(p, 0x94) = 0.0f;
+    F32(p, 0x98) = 0.0f;
+    F32(p, 0x9C) = 0.0f;
+    F32(p, 0xA0) = 0.0f;
+    F32(p, 0xA4) = 0.0f;
+    F32(p, 0xA8) = 0.0f;
+    F32(p, 0xAC) = 0.0f;
+    F32(p, 0xB0) = 0.0f;
+    F32(p, 0xB4) = 0.0f;
+    F32(p, 0xB8) = 0.0f;
+    F32(p, 0xBC) = 0.0f;
+    F32(p, 0xC0) = 0.0f;
+    return p;
+}
 
 void fn_8019F6F0(u8* p) {
     fn_8019F03C(p);
@@ -971,10 +1049,6 @@ void fn_801A01E0(u8* p, RVec3* lo, RVec3* hi) {
 
 extern void* lbl_80333B48[];
 
-static inline void InitVolume(u8* s, u32 id, u32 owner) {
-    U32(s, 0xC) = id;
-    U32(s, 0x4) = owner;
-}
 void fn_801A0378(u8* p, u8* s);
 extern const f32 lbl_805622D0;  // 0.0
 
