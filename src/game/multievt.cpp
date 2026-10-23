@@ -435,7 +435,72 @@ int fn_8024A6A4(s32* p) {
     return 0;
 }
 
-int fn_8024A6EC(const char** sel, u8* list) { return 0; }  // stub (346)
+struct EvList;
+u8* fn_8024B3E8(u8* p, EvList* list);
+void fn_8024B544(u8* p, const char* name);
+const char* fn_8024B5D4(u8* p, int i);
+u8* fn_8024B5F8(u8* p, int i);
+u8* fn_8024B608(u8* p, int i);
+u8* fn_8024B618(u8* p, int i);
+extern char lbl_8055B860[8];
+
+// Location menu: on a choice stores the location name in *sel and returns 1.
+int fn_8024A6EC(const char** sel, u8* list) {
+    if (!fn_802411D4()) {
+        return 0;
+    }
+    u32 buf[0xA2];
+    fn_8024B3E8((u8*)buf, (EvList*)list);
+    fn_8024B544((u8*)buf, *sel);
+    MenuItem items[] = {
+        MenuItem("__first", 5, (u8*)buf, 0, 0),
+        MenuItem("#country_1", fn_8024B5D4((u8*)buf, 0)),
+        MenuItem("#country_1", 0, 0, 1, 0),
+        MenuItem("#country_2", fn_8024B5D4((u8*)buf, 1)),
+        MenuItem("#country_2", 0, 0, 2, 0),
+        MenuItem("#country_3", fn_8024B5D4((u8*)buf, 2)),
+        MenuItem("#country_3", 0, 0, 3, 0),
+        MenuItem("#country_4", fn_8024B5D4((u8*)buf, 3)),
+        MenuItem("#country_4", 0, 0, 4, 0),
+        MenuItem("#country_5", fn_8024B5D4((u8*)buf, 4)),
+        MenuItem("#country_5", 0, 0, 5, 0),
+        MenuItem("#country_6", fn_8024B5D4((u8*)buf, 5)),
+        MenuItem("#country_6", 0, 0, 6, 0),
+        MenuItem("#country_7", fn_8024B5D4((u8*)buf, 6)),
+        MenuItem("#country_7", 0, 0, 7, 0),
+        MenuItem("#cup_1", (const char*)fn_8024B608((u8*)buf, 0)),
+        MenuItem("#course_1", (const char*)fn_8024B5F8((u8*)buf, 0)),
+        MenuItem("#lock_1", 2, fn_8024B618((u8*)buf, 0), 0, 0),
+        MenuItem("#cup_2", (const char*)fn_8024B608((u8*)buf, 1)),
+        MenuItem("#course_2", (const char*)fn_8024B5F8((u8*)buf, 1)),
+        MenuItem("#lock_2", 2, fn_8024B618((u8*)buf, 1), 0, 0),
+        MenuItem("#cup_3", (const char*)fn_8024B608((u8*)buf, 2)),
+        MenuItem("#course_3", (const char*)fn_8024B5F8((u8*)buf, 2)),
+        MenuItem("#lock_3", 2, fn_8024B618((u8*)buf, 2), 0, 0),
+        MenuItem("#cup_4", (const char*)fn_8024B608((u8*)buf, 3)),
+        MenuItem("#course_4", (const char*)fn_8024B5F8((u8*)buf, 3)),
+        MenuItem("#lock_4", 2, fn_8024B618((u8*)buf, 3), 0, 0),
+        MenuItem("#cup_5", (const char*)fn_8024B608((u8*)buf, 4)),
+        MenuItem("#course_5", (const char*)fn_8024B5F8((u8*)buf, 4)),
+        MenuItem("#lock_5", 2, fn_8024B618((u8*)buf, 4), 0, 0),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_80498998),
+    };
+    MenuDesc desc = {"multi_country.lyt", 0, (int (*)(int*))fn_8024A6A4, 0, 0};
+    desc.items = items;
+    int r = fn_802146BC(&desc, -999, -999, 1);
+    if (r != -1) {
+        *sel = fn_8024B5D4((u8*)buf, r - 1);
+        U32(buf, 0x18) = 0;
+        U32(buf, 0x1C) = 0;
+        U32(buf, 0x20) = 0;
+        return 1;
+    }
+    U32(buf, 0x18) = 0;
+    U32(buf, 0x1C) = 0;
+    U32(buf, 0x20) = 0;
+    return 0;
+}
 
 u8* fn_8024AC54(u8* p, int del) {
     if (p) {
