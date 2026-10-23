@@ -196,22 +196,17 @@ u8* fn_80246AA8(u8* p, int del) {
 }  // extern "C"
 
 
-// A menu art widget that owns its image ("extruck.art"); dtor is fn_80246C48.
-struct MenuArt {
-    MenuArt(const char* art) {
-        vt = lbl_80343780;
-        f14 = 0;
-        image = fn_8023512C(art);
-    }
-    ~MenuArt(void) {
-        vt = lbl_80343780;
-        fn_80235380(image);
-    }
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
-    u8* image;       // offset 0x18
-    u8 pad1C[0x4];
+// A scrolling menu art widget that owns its image ("extruck.art").
+class MenuArt : public MenuState {
+public:
+    MenuArt(const char* art) { image = fn_8023512C(art); }
+    virtual ~MenuArt(void) { fn_80235380(image); }
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+
+    u8* image;  // offset 0x18
+    f32 scroll; // offset 0x1C
 };
 
 extern char lbl_80498908[0x40];  // version text buffer
@@ -236,16 +231,6 @@ int fn_80246AE8(void) {
     return 1;
 }
 
-u8* fn_80246C48(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80343780;
-        fn_80235380(PTR(p, 0x18));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 void fn_80246CAC(f32 v) { fn_8020A5F8(v * lbl_8055F264); }
 
@@ -1194,17 +1179,19 @@ void LogoMover::Update(void) {
 
 extern "C" {
 
-void fn_80248A68(u8* p) { F32(p, 0x1C) = 0.0f; }
+}  // extern "C"
 
-void fn_80248A74(u8* p) {
+void MenuArt::Enter(void) { scroll = 0.0f; }
+
+void MenuArt::Update(void) {
     s32 rate;
-    if (F32(p, 0x1C) > 370.0f) {
+    if (scroll > 370.0f) {
         rate = 200;
     } else {
         rate = 50;
     }
     f32 dt = fn_80214D48();
-    F32(p, 0x1C) = F32(p, 0x1C) + (f32)rate * dt;
+    scroll = scroll + (f32)rate * dt;
 }
 
 void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
@@ -1214,18 +1201,19 @@ extern const f32 lbl_805638C8;  // 370.0
 extern const f32 lbl_805638B0;  // 0.0
 
 // Draws the scrolling warning text, wrapping the scroll offset at the box width.
-void fn_80248AF0(u8* p) {
-    f32 x, y;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
-    f32 w = S32(p, 0xC);
-    f32 h = S32(p, 0x10);
-    if (F32(p, 0x1C) > w) {
-        F32(p, 0x1C) -= w;
+void MenuArt::Draw(void) {
+    f32 sx, sy;
+    fn_80230C30(&sx, &sy, x, y);
+    f32 fw = w;
+    f32 fh = h;
+    if (scroll > fw) {
+        scroll -= fw;
     }
-    int wide = F32(p, 0x1C) > lbl_805638C8;
-    fn_802353F4(PTR(p, 0x18), wide, x + F32(p, 0x1C), (y - h) + fn_80235F64(PTR(p, 0x18), wide, F32(p, 0x1C)),
-                lbl_805638B0);
+    int wide = scroll > lbl_805638C8;
+    fn_802353F4(image, wide, sx + scroll, (sy - fh) + fn_80235F64(image, wide, scroll), lbl_805638B0);
 }
+extern "C" {
+
 
 void fn_80248BD0(u8* p) {
     F32(p, 0x20) = 2.0f;
