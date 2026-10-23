@@ -47,7 +47,8 @@ extern u8 lbl_8055F558;
 
 // A camera cycle: how many views it has and which one is current.
 struct CamCycle {
-    u8 pad0[0x8];   // offset 0x0
+    u8 pad0[0x4];   // offset 0x0
+    s32 first;      // offset 0x4, index of the first view in lbl_80346BA0
     s32 count;      // offset 0x8
     s32 cur;        // offset 0xC
     u8 pad10[0x4];  // offset 0x10
@@ -274,7 +275,54 @@ int fn_80273494(int x) {
     }
 }
 
-void fn_802734F0(u8* p) {}  // stub (65)
+// One selectable camera view.
+struct CamView {
+    s32 type;       // offset 0x0
+    u8 pad4[0x20];  // offset 0x4
+    u8 b24;         // offset 0x24
+    u8 b25;         // offset 0x25
+    u8 pad26[0x2];
+};
+
+extern CamView lbl_80346BA0[];
+extern u8 lbl_8055F480;
+
+// HUD/feature flags for the camera used in `mode`.
+u32 fn_802734F0(int mode) {
+    int t = fn_80273494(mode);
+    u32 f = 0;
+    if (lbl_8055F480) {
+        f |= 8;
+    } else if (t != 6 && t != 0) {
+        CamCycle* c = &((CamCycle*)lbl_8049A258)[t];
+        CamView* v = &lbl_80346BA0[c->cur + c->first];
+        if (!v->b24) {
+            f |= 1;
+        } else if (v->type == 2) {
+            f |= 2;
+        } else if (v->type == 0) {
+            f |= 8;
+        }
+        if (!v->b25) {
+            f |= 4;
+        }
+    } else {
+        switch (mode) {
+        case 1:
+            break;
+        case 2:
+            f |= 6;
+            break;
+        case 0:
+            f |= 8;
+            break;
+        default:
+            f |= 5;
+            break;
+        }
+    }
+    return f;
+}
 
 void fn_802735F4(int a, u8 b) {
     if (a == 0) {
