@@ -106,9 +106,6 @@ u8* fn_8023512C(const char* art);
 void operator delete(void* p);
 
 extern void* lbl_80343780[];
-extern u8 lbl_803432EC[];
-extern u8 lbl_803432FC[];
-extern u8 lbl_8034330C[];
 extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
@@ -197,7 +194,7 @@ u8* fn_80246AA8(u8* p, int del) {
 // A scrolling menu art widget that owns its image ("extruck.art").
 class MenuArt : public MenuState {
 public:
-    MenuArt(const char* art) { image = fn_8023512C(art); }
+    MenuArt(void) { image = fn_8023512C("extruck.art"); }
     virtual ~MenuArt(void) { fn_80235380(image); }
     virtual void Enter(void);
     virtual void Update(void);
@@ -215,7 +212,7 @@ int fn_8024762C(void);
 // Kiosk title screen: logo art and version text.
 int fn_80246AE8(void) {
     lbl_8055F25C = fn_802E2C20();
-    MenuArt logo("extruck.art");
+    MenuArt logo;
     lbl_80498908[0] = 0;
     MenuItem items[] = {
         MenuItem("excite_truck", 5, &logo, 0, 0),
@@ -270,11 +267,19 @@ void fn_80246CB8(const char* lyt) {
 }
 
 
-void fn_80246DE8(void) { fn_80246CB8((const char*)lbl_803432EC); }
+// Not in the DOL (dead-stripped); kept for their strings' places in the pool.
+void ShowLegal(void) { fn_80246CB8("dd_legal.lyt"); }
 
-void fn_80246DF4(void) { fn_80246CB8((const char*)lbl_803432FC); }
+void ShowDemoControls(void) { fn_80246CB8("democtl.lyt"); }
 
-void fn_80246E00(void) { fn_80246CB8((const char*)lbl_8034330C); }
+void fn_80246DE8(void) { fn_80246CB8("LogoNint.lyt"); }
+
+void fn_80246DF4(void) { fn_80246CB8("LogoMnst.lyt"); }
+
+void fn_80246E00(void) { fn_80246CB8("LogoDlby.lyt"); }
+
+// Not in the DOL (dead-stripped).
+void ShowWiiStrap(void) { fn_80246CB8("WiiStrap.lyt"); }
 
 u8* fn_80246E0C(u8* p, int del) {
     if (p && del > 0) {
@@ -466,6 +471,23 @@ void fn_80247210(void) {
     lbl_8055F260 = 0;
 }
 
+// Not in the DOL (dead-stripped): the controller-setup screen for the attached controller type.
+void ShowWiiConfig(int type) {
+    const char* lyt;
+    switch (type) {
+    case 2:
+        lyt = "wiiconf_c.lyt";
+        break;
+    case 1:
+        lyt = "wiiconf_b.lyt";
+        break;
+    default:
+        lyt = "wiiconf_a.lyt";
+        break;
+    }
+    fn_80246CB8(lyt);
+}
+
 u32 fn_8024739C(u8* p) { return 0; }
 
 }  // extern "C"
@@ -629,6 +651,38 @@ void fn_802473A4(void) {
         }
     }
     lbl_8055F260 = 0;
+}
+
+// Not in the DOL (dead-stripped): other demo menu entries.
+void ShowUnavailable(void) { fn_80214FD8("Unavailable", "This option is not available in this demo."); }
+
+int ShowTechDemo(void) {
+    MenuItem items[] = {
+        MenuItem("invalid1", 0, 0, 1, 0),
+        MenuItem("invalid2", 0, 0, 2, 0),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"techdemo.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    return fn_802146BC(&desc, -999, -999, 1);
+}
+
+void ShowHome(void) { fn_80246CB8("home.lyt"); }
+
+void ShowNeedControllers(void) { fn_80214FD8(lbl_8055BAC0, "Please plug in more controllers for Multi-Player"); }
+
+int ShowMultiMenu(void) {
+    if (!fn_802411D4()) {
+        ShowNeedControllers();
+        return -1;
+    }
+    MenuItem items[] = {
+        MenuItem("multi", 0, 0, 8, 0),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"main_2.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    return fn_802146BC(&desc, -999, -999, 1);
 }
 
 u8 fn_80247624(void) { return lbl_8055F260; }
