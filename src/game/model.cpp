@@ -682,10 +682,10 @@ void fn_802C61BC(ModelInfo* m, const char* name) {
 }
 
 ModelInfo* fn_802C6B44(const char* name) {
-    u32 ver;
-    u32 size;
-    u8 first;
     u8 swapped;
+    u8 first;
+    u32 size;
+    u32 ver;
     ModelInfo* m = (ModelInfo*)fn_8012C370(name, 'MODL', &ver, &size, &first, &swapped);
     if (m) {
         if (swapped) {

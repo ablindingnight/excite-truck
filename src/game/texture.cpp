@@ -442,7 +442,7 @@ void fn_802CA57C(TTHeader* h, const char* name, u32 data, s32 kind) {
         Swap16(&h->w);
         Swap16(&h->h);
         Swap16(&h->zhint);
-        h->data += (u32)h;
+        h->data = (u32)((u8*)h + h->data);  // offset -> pointer
         fn_802CA3F4(&d, h, 0, data, kind);
         fn_802D8DCC(&d, name);
         h->flags |= 0x80;
