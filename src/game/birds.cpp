@@ -69,12 +69,26 @@ struct BirdFrame {
 };
 
 struct ModelVec {
+    ~ModelVec(void) {
+        if (this) {
+            data = 0;
+            n = 0;
+            cap = 0;
+        }
+    }
     void** data;  // offset 0x0
     s32 n;        // offset 0x4
     s32 cap;      // offset 0x8
 };
 
 struct BoidVec {
+    ~BoidVec(void) {
+        if (this) {
+            data = 0;
+            n = 0;
+            cap = 0;
+        }
+    }
     Boid* data;  // offset 0x0
     s32 n;       // offset 0x4
     s32 cap;     // offset 0x8
@@ -212,18 +226,8 @@ void fn_802A85C8(void) {
             }
             f->models.n = 0;
             f->birds.n = 0;
-            BoidVec* bv = &f->birds;
-            if (bv) {
-                bv->data = 0;
-                bv->n = 0;
-                bv->cap = 0;
-            }
-            ModelVec* mv = &f->models;
-            if (mv) {
-                mv->data = 0;
-                mv->n = 0;
-                mv->cap = 0;
-            }
+            f->birds.~BoidVec();
+            f->models.~ModelVec();
             operator delete(f);
         }
     }

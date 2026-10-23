@@ -554,9 +554,15 @@ AnimState* fn_80237C40(void) {
 }
 
 void fn_80237D00(AnimState* s) {
-    delete s->present;
-    delete s->unpresent;
-    delete s->special;
+    if (s->present) {
+        delete s->present;
+    }
+    if (s->unpresent) {
+        delete s->unpresent;
+    }
+    if (s->special) {
+        delete s->special;
+    }
     delete s;
 }
 
