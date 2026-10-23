@@ -506,7 +506,32 @@ void fn_801916F4(u8* p) {
 
 void fn_80191758(u8* p) {}  // stub (66)
 
-void fn_80191860(u8* p) {}  // stub (50)
+}  // extern "C"
+
+// One saved option: where it lives, its size and its key.
+struct SaveField {
+    void* data;        // offset 0x0
+    s32 size;          // offset 0x4
+    const char* name;  // offset 0x8
+};
+
+class FieldSaver {
+public:
+    virtual void Save(SaveField* fields);  // 0x08
+};
+
+extern "C" {
+int fn_8018B06C(u8* body);
+
+void fn_80191860(u8* p, FieldSaver* s) {
+    SaveField f[3] = {
+        {p + 4, 1, "auto_shifting"},
+        {p + 5, 1, "auto_clutch"},
+        {0, 0, 0},
+    };
+    VP(PTR(p, 0x38))->v24(fn_8018B06C(PTR(p, 0x34)));
+    s->Save(f);
+}
 
 void fn_80191928(u8* p) {}  // stub (92)
 
