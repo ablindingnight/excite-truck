@@ -54,6 +54,29 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
+// Rotation + translation of a collision frame.
+struct CFrame {
+    f32 m[9];   // offset 0x0, rows
+    RVec3 t;    // offset 0x24
+};
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+    }
+}
+
 struct W3 {
     u32 a, b, c;
 };
@@ -370,7 +393,7 @@ void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u
     }
 }
 
-f32 fn_8019DF88(u8* m, const RVec3* v, u8* w, const RVec3* at, const f32* n, f32 k, f32 e);
+f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, const f32* n, f32 mass, f32 e);
 void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
 
 // Sphere (c, r) of p against the point at: a spring push along the normal, then friction from the body.
@@ -769,7 +792,46 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
     return 0;
 }
 
-f32 fn_8019DF88(u8* m, const RVec3* v, u8* w, const RVec3* at, const f32* n, f32 k, f32 e) { return 0.0f; }  // stub (155)
+// Impulse magnitude for a contact at `at` with normal n on a body (centre of mass com, inverse inertia
+// iinv, mass, restitution e) moving at v: -(1 + e) v.n / (1/mass + n.((iinv (r x n)) x r)), capped.
+f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, const f32* n, f32 mass, f32 e) {
+    RVec3 vel;
+    PVec3 r;
+    PVec3 nn;
+    PVec3 un;
+    RVec3 rn;
+    RVec3 t;
+    PVec3 u;
+    f32 rx = at->x - F32(com, 0x0);
+    f32 ry = at->y - F32(com, 0x4);
+    f32 rz = at->z - F32(com, 0x8);
+    f32 vx, vy, vz;
+    vz = v->z;
+    vy = v->y;
+    vx = v->x;
+    vel.x = vx;
+    vel.y = vy;
+    vel.z = vz;
+    r.v[0] = rx;
+    r.v[1] = ry;
+    r.v[2] = rz;
+    nn = *(const PVec3*)n;
+    if (PSVECDotProduct(&vel, n) < 0.0f) {
+        un = nn;
+        PSVECNormalize(un.v, un.v);
+        PSVECCrossProduct(r.v, un.v, &rn);
+        MulVec(&t, &rn, (const CFrame*)iinv);
+        PSVECCrossProduct(&t, r.v, u.v);
+        f32 denom = 1.0f / mass + PSVECDotProduct(un.v, u.v);
+        if ((f32)__fabs(denom) > 1e-7f) {
+            f32 j = (-(1.0f + e) * PSVECDotProduct(&vel, un.v)) / denom;
+            f32 cap = 100000.0f;
+            cap = cap < j ? cap : j;
+            return cap;
+        }
+    }
+    return 0.0f;
+}
 
 extern f32 lbl_80558DC4[];       // FLT_EPSILON
 extern const f32 lbl_805622D0;  // 0.0
@@ -894,28 +956,6 @@ void fn_8019EECC(u8* p, RVec3* v) {
     v->z += F32(p, 0x38);
 }
 
-// Rotation + translation of a collision frame.
-struct CFrame {
-    f32 m[9];   // offset 0x0, rows
-    RVec3 t;    // offset 0x24
-};
-
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-
-static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
-    }
-}
 
 struct CVolume {
     u8 pad0[0xC];
