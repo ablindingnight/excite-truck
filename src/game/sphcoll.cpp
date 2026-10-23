@@ -1637,7 +1637,58 @@ void fn_801A38E4(u8* p) {}  // stub (191)
 
 void fn_801A3BE0(u8* p) {}  // stub (115)
 
-void fn_801A3DAC(u8* p) {}  // stub (108)
+// Mesh resource (fn_801CFEAC): its vertices.
+struct MeshRes {
+    u8 pad0[0x8];
+    RVec3* verts;  // offset 0x8
+    s32 count;     // offset 0xC
+};
+
+// A box corner built component-wise (its constructor arguments are evaluated z, y, x).
+struct BoxCorner {
+    f32 x, y, z;
+    BoxCorner(f32 ax, f32 ay, f32 az) {
+        x = ax;
+        y = ay;
+        z = az;
+    }
+};
+
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
+static inline BoxCorner VMin(const RVec3& a, const RVec3& b) {
+    return BoxCorner(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
+}
+
+static inline BoxCorner VMax(const RVec3& a, const RVec3& b) {
+    return BoxCorner(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
+}
+
+// Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
+u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
+    InitVolume(p, id, owner);
+    U32(p, 0x8) = 0;
+    S32(p, 0x18) = 'PMSH';
+    F32(p, 0x10) = 1.0f;
+    F32(p, 0x14) = 1.0f;
+    S32(p, 0x20) = 100;
+    U32(p, 0x1C) = 0;
+    *(void**)p = lbl_80333728;
+    MeshRes* m = (MeshRes*)fn_801CFEAC(name);
+    PTR(p, 0x24) = (u8*)m;
+    RVec3* mn = (RVec3*)(p + 0x28);
+    RVec3* mx = (RVec3*)(p + 0x34);
+    *mx = m->verts[0];
+    *mn = *mx;
+    for (int i = 1; i < ((MeshRes*)PTR(p, 0x24))->count; i++) {
+        BoxCorner lo = VMin(*mn, ((MeshRes*)PTR(p, 0x24))->verts[i]);
+        *mn = *(RVec3*)&lo;
+        BoxCorner hi = VMax(*mx, ((MeshRes*)PTR(p, 0x24))->verts[i]);
+        *mx = *(RVec3*)&hi;
+    }
+    return p;
+}
 
 u8* fn_801A3F5C(u8* p, u32 a, u32 b) {
     fn_8019ECC4(p, a, b);
