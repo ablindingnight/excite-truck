@@ -60,9 +60,12 @@ public:
     void Update(void);
 };
 
+struct RVec3;
+
 class RigidBody {
 public:
     void Reset(void);
+    void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);
 };
 
 // A handle whose constructor marks it unused.
@@ -209,7 +212,43 @@ void fn_801ABFF8(u8* p, VVisit* f) {
     fn_801AC240(p);
 }
 
-void fn_801AC0A0(u8* p, int a, int b, int c, u8* car) {}  // stub (57)
+}  // extern "C"
+
+// Visitor handed to the linked obstacles when this one is hit hard.
+struct HitVisit {
+    void* vt;     // offset 0x0
+    f32 v[3];     // offset 0x4
+    f32 at[3];    // offset 0x10
+    s32 force;    // offset 0x1C
+    u8* extra;    // offset 0x20
+};
+
+extern void* lbl_803357F0[];
+extern const f32 lbl_805624E8;  // 16/9
+
+extern "C" {
+
+void fn_801AC0A0(u8* p, const f32* v, const f32* at, int force, u8* extra) {
+    if (force >= 100 && !U8(p, 0x220)) {
+        f32 r = F32(p, 0xD4);
+        f32 k = lbl_805624E8 * r;
+        f32 k2 = k * k;
+        if (PSVECDotProduct(v, v) > k2) {
+            HitVisit h;
+            h.vt = lbl_803357F0;
+            h.v[0] = v[0];
+            h.v[1] = v[1];
+            h.v[2] = v[2];
+            h.at[0] = at[0];
+            h.at[1] = at[1];
+            h.at[2] = at[2];
+            h.force = force;
+            h.extra = extra;
+            fn_801ABFF8(p, (VVisit*)&h);
+        }
+    }
+    ((RigidBody*)p)->OnHit((const RVec3*)v, (const RVec3*)at, force, 0);
+}
 
 void fn_801AC184(u8* p) {
     fn_801AC240(p);
@@ -463,8 +502,8 @@ void fn_801AD7A4(u8* p, int a, int b, int c) {
     }
 }
 
-void fn_801AD7C4(u8* p, int a, int b, int c, u8* car) {
-    fn_801AC0A0(p, a, b, c, car);
+void fn_801AD7C4(u8* p, const f32* v, const f32* at, int force, u8* car) {
+    fn_801AC0A0(p, v, at, force, car);
     if (car && IsCar(car)) {
         s32 id = S32(car, 0x1EC);
         if (p) {
