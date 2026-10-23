@@ -373,7 +373,36 @@ void fn_8019D06C(u8* p, u8* q, int a, int b) {
     fn_8019BD54(p, q, a, b);
 }
 
-void fn_8019D19C(u8* p, u8* q) {}  // stub (119)
+// Flat sphere s takes a radius between its min (0x54) and max (0x58) by how edge-on it is to c.
+static inline void FlatRadius(u8* s, const f32* cp) {
+    const f32* c = cp;
+    f32 d[3];
+    f32 r;
+    d[0] = c[0] - F32(s, 0x34);
+    d[1] = c[1] - F32(s, 0x38);
+    d[2] = c[2] - F32(s, 0x3C);
+    f32 sq = PSVECSquareDistance(c, s + 0x34);
+    if (sq > lbl_8056232C) {
+        f32 inv = 1.0f / (f32)sqrt(sq);
+        d[0] *= inv;
+        d[1] *= inv;
+        d[2] *= inv;
+        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(s, 0xC) + 0xC));
+        r = F32(s, 0x54) + k * (F32(s, 0x58) - F32(s, 0x54));
+    } else {
+        f32 hi = F32(s, 0x58);
+        f32 lo = F32(s, 0x54);
+        r = lo > hi ? lo : hi;
+    }
+    F32(s, 0x24) = r;
+}
+
+// Sets both flat spheres' radii from how edge-on they are to each other, then collides them.
+void fn_8019D19C(u8* p, u8* q) {
+    FlatRadius(p, (f32*)(q + 0x34));
+    FlatRadius(q, (f32*)(p + 0x34));
+    fn_8019B068(p, q, 0, 0);
+}
 
 // Sets flat sphere p's radius from how edge-on it is to ring q, then collides them.
 void fn_8019D378(u8* p, u8* q) {
