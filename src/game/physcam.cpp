@@ -424,15 +424,21 @@ void fn_80271578(void) {
     U32(c, 0xC) = keep;
 }
 
+extern const f32 lbl_80563F4C;  // degrees to radians
+
 void fn_802715C4(f32* out, u8* p) {
-    f32 k = 0.017453292f;
-    out[2] = k * F32(p, 0x14);
-    out[0] = k * F32(p, 0xC);
-    out[1] = k * F32(p, 0x10);
+    f32 z = F32(p, 0x14);
+    f32 k = lbl_80563F4C;
+    f32 y = F32(p, 0x10);
+    f32 x = F32(p, 0xC);
+    out[2] = k * z;
+    out[0] = k * x;
+    out[1] = k * y;
 }
 
 f32 fn_802715F0(u8* p) {
-    f32 v = 0.017453292f * F32(p, 0x18);
+    f32 a = F32(p, 0x18);
+    f32 v = lbl_80563F4C * a;
     f32 x;
     if (lbl_8055F544 < v) {
         x = lbl_8055F544;
