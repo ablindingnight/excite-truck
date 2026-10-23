@@ -318,17 +318,16 @@ void fn_80268B94(s32 v) {
     fn_801E9DC4(&lbl_8055F4A8);
 }
 
+// Mode set as a bit mask over modes 4..23 (the original tests a mask, not a switch).
+#define CAM_MODE_BIT(m) (1 << ((m) - 4))
+
 int fn_80268BA4(int mode) {
-    switch (mode) {
-    case 4:
-    case 5:
-    case 6:
-    case 8:
-    case 9:
-    case 23:
-        return 1;
+    int r = 0;
+    u32 i = mode - 4;
+    if (i <= 19 && ((1 << i) & (CAM_MODE_BIT(4) | CAM_MODE_BIT(5) | CAM_MODE_BIT(6) | CAM_MODE_BIT(8) | CAM_MODE_BIT(9) | CAM_MODE_BIT(23)))) {
+        r = 1;
     }
-    return 0;
+    return r;
 }
 
 void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k) {}  // stub (112)

@@ -64,16 +64,16 @@ extern s32 lbl_8055F5A0;
 
 extern "C" {
 
+// Mode set as a bit mask over modes 4..23 (the original tests a mask, not a switch).
+#define CAM_MODE_BIT(m) (1 << ((m) - 4))
+
 int fn_80276068(int mode) {
-    switch (mode) {
-    case 4:
-    case 5:
-    case 6:
-    case 9:
-    case 23:
-        return 1;
+    int r = 0;
+    u32 i = mode - 4;
+    if (i <= 19 && ((1 << i) & (CAM_MODE_BIT(4) | CAM_MODE_BIT(5) | CAM_MODE_BIT(6) | CAM_MODE_BIT(9) | CAM_MODE_BIT(23)))) {
+        r = 1;
     }
-    return 0;
+    return r;
 }
 
 void fn_80276098(f32* dst, f32* src, int a, int b, f32 from, f32 to, f32 t) {}  // stub (309)
