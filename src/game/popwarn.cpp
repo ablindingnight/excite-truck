@@ -39,6 +39,13 @@ void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 void fn_80214CB4(s32 a);
 void fn_80214B44(int i);
+void fn_80235380(u8* p);
+void fn_802C519C(u8* p);
+void fn_802328D4(u8* p);
+void fn_80127464(void);
+void fn_802E2D74(int ms);
+void fn_8020A634(void);
+int fn_8027B9EC(int i);
 void fn_80214B94(int i);
 s32 fn_80214D04(void);
 int fn_802411D4(void);
@@ -65,6 +72,9 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
+extern s32 lbl_8055BEA8;
+extern s32 lbl_8055BEBC;
+extern void* lbl_80343600[];
 
 ModuleTag lbl_8055F250;
 s32 lbl_8055F258;
@@ -130,9 +140,34 @@ u8* fn_80246E0C(u8* p, int del) {
 
 void fn_80246E4C(u8* p) {}  // stub (162)
 
-void fn_802470D4(u8* p) {}  // stub (40)
+u8* fn_802470D4(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80343600;
+        fn_80235380(PTR(p, 0x18));
+        fn_80235380(PTR(p, 0x1C));
+        fn_802C519C(PTR(p, 0x20));
+        u8* h = PTR(p, 0x30);
+        if (h) {
+            fn_802328D4(PTR(h, 0x0));
+            PTR(h, 0x0) = 0;
+            operator delete(h);
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
-void fn_80247174(u8* p) {}  // stub (39)
+void fn_80247174(void) {
+    for (int i = 0; i < 50; i++) {
+        fn_80246CAC(1.0f - (f32)i / 49.0f);
+        fn_80127464();
+        fn_802E2D74(16);
+    }
+    fn_8020A634();
+    fn_80246CAC(1.0f);
+}
 
 void fn_80247210(u8* p) {}  // stub (99)
 
@@ -176,7 +211,30 @@ void fn_80247880(void) { lbl_8055BEB0 = fn_80214D04(); }
 
 void fn_802478A4(u8* p) {}  // stub (90)
 
-void fn_80247A0C(u8* p) {}  // stub (40)
+void fn_80247A0C(void) {
+    if (lbl_8055BEBC != lbl_8055BEA8) {
+        lbl_8055BEBC = lbl_8055BEA8;
+        switch (lbl_8055BEA8) {
+        case 5:
+            lbl_8055BEB4 = 1;
+            break;
+        default:
+            lbl_8055BEB4 = 0;
+            break;
+        }
+    }
+    fn_80214CB4(lbl_8055BEB4);
+    switch (lbl_8055BEBC) {
+    case 4:
+        fn_80214B44(2);
+        break;
+    }
+    for (int i = 0; i < 2; i++) {
+        if (!fn_8027B9EC(i)) {
+            fn_80214A9C(i + 11);
+        }
+    }
+}
 
 void fn_80247AAC(void) { lbl_8055BEB4 = fn_80214D04(); }
 

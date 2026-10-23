@@ -409,7 +409,11 @@ void fn_8024B9CC(u8* p, s32* a, s32* b) {
 
 u32 fn_8024B9EC(u8* p) { return ((u32*)PTR(p, 0x10))[S32(p, 0x11C) * 2]; }
 
-void fn_8024BA00(u8* p) {}  // stub (40)
+void fn_8024BA00(u8* p) {
+    S32(p, 0x11C) = (S32(p, 0x14) + S32(p, 0x11C) - 1) % S32(p, 0x14);
+    ((VC*)PTR(p, 0x124))->s30(U32(p, 0x120), ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name);
+    fn_801345D8((char*)(p + 0x128), 0x20, "%s/race.%s", ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name, "m2v");
+}
 
 void fn_8024BAA0(u8* p) {
     S32(p, 0x11C) = (S32(p, 0x11C) + 1) % S32(p, 0x14);
