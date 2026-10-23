@@ -236,39 +236,72 @@ extern const f32 lbl_80564020;  // small angle
 double sin(double x);
 double cos(double x);
 
-// Rotation (0x58, 3x3) from the rotation vector w (axis * angle), Rodrigues' formula; identity for a
-// tiny angle. t goes to 0xBC.
-void fn_80274F74(u8* p, const f32* w, f32 t) {
-    f32 a = PSVECMag(w);
+struct CamVec {
+    CamVec(void) {}
+    CamVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    f32 x, y, z;
+};
+
+static inline CamVec operator*(const CVec3& v, f32 k) { return CamVec(k * v.x, k * v.y, k * v.z); }
+static inline CamVec operator+(CVec3 a, const CamVec& b) { return CamVec(a.x + b.x, a.y + b.y, a.z + b.z); }
+
+struct CamPreset {
+    CVec3 off;
+    CVec3 rot;
+    f32 fov;
+};
+
+extern const CamPreset lbl_802FA788;
+extern const CamPreset lbl_802FA7A4;
+extern const CamPreset lbl_802FA7C0;
+extern const CamPreset lbl_802FA7DC;
+extern const f32 lbl_80564024;  // degrees to radians
+extern const f32 lbl_80564028;
+extern const f32 lbl_8056402C;
+extern const f32 lbl_80564030;
+extern const f32 lbl_80563FD8;
+extern const f32 lbl_80563FDC;
+void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
+
+// Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
+static inline void RotFromVec(Mat3* r, const CamVec& v) {
+    const CamVec* w = &v;
+    f32 a = PSVECMag(&w->x);
     if (a > lbl_80564020) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563FAC / a;
-        x = inv * w[0];
-        y = inv * w[1];
-        z = inv * w[2];
+        x = inv * w->x;
+        y = inv * w->y;
+        z = inv * w->z;
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = lbl_80563FAC - c;
-        F32(p, 0x58) = c + k * (x * x);
-        F32(p, 0x5C) = y * (k * x) + s * z;
-        F32(p, 0x60) = z * (k * x) - s * y;
-        F32(p, 0x64) = y * (k * x) - s * z;
-        F32(p, 0x68) = c + k * (y * y);
-        F32(p, 0x6C) = z * (k * y) + s * x;
-        F32(p, 0x70) = z * (k * x) + s * y;
-        F32(p, 0x74) = z * (k * y) - s * x;
-        F32(p, 0x78) = c + k * (z * z);
+        r->m[0] = c + k * (x * x);
+        r->m[1] = y * (k * x) + s * z;
+        r->m[2] = z * (k * x) - s * y;
+        r->m[3] = y * (k * x) - s * z;
+        r->m[4] = c + k * (y * y);
+        r->m[5] = z * (k * y) + s * x;
+        r->m[6] = z * (k * x) + s * y;
+        r->m[7] = z * (k * y) - s * x;
+        r->m[8] = c + k * (z * z);
     } else {
-        F32(p, 0x5C) = lbl_80563FB0;
-        F32(p, 0x58) = lbl_80563FAC;
-        F32(p, 0x60) = lbl_80563FB0;
-        F32(p, 0x64) = lbl_80563FB0;
-        F32(p, 0x68) = lbl_80563FAC;
-        F32(p, 0x6C) = lbl_80563FB0;
-        F32(p, 0x70) = lbl_80563FB0;
-        F32(p, 0x74) = lbl_80563FB0;
-        F32(p, 0x78) = lbl_80563FAC;
+        r->m[1] = lbl_80563FB0;
+        r->m[0] = lbl_80563FAC;
+        r->m[2] = lbl_80563FB0;
+        r->m[3] = lbl_80563FB0;
+        r->m[4] = lbl_80563FAC;
+        r->m[5] = lbl_80563FB0;
+        r->m[6] = lbl_80563FB0;
+        r->m[7] = lbl_80563FB0;
+        r->m[8] = lbl_80563FAC;
     }
+}
+
+// Rotation (0x58, 3x3) from the rotation vector w (axis * angle), Rodrigues' formula; identity for a
+// tiny angle. t goes to 0xBC.
+void fn_80274F74(u8* p, const f32* w, f32 t) {
+    RotFromVec((Mat3*)(p + 0x58), *(const CamVec*)w);
     F32(p, 0xBC) = t;
 }
 
@@ -296,13 +329,55 @@ void fn_802750C4(u8* p, f32 k, f32 dist) {
     F32(p, 0x84) = z;
 }
 
-void fn_802751AC(u8* p) {}  // stub (153)
+// A fixed camera placement: offset from the car frame, rotation vector in degrees, field of view.
+// Camera frame = the car frame (0xC0) turned by the preset rotation and moved to its offset.
+void fn_802751AC(u8* p) {
+    CamPreset c = lbl_802FA788;
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    Mat3 rot;
+    CamVec off(c.off.x, c.off.y, c.off.z);
+    RotFromVec(&rot, c.rot * lbl_80564024);
+    fn_801BFD34(p + 0x7C, &off, p + 0xC0);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+    F32(p, 0xBC) = lbl_80564024 * c.fov;
+}
 
-void fn_80275410(u8* p) {}  // stub (165)
+// As fn_802751AC, but the offset follows the car's first point (0x2450) instead of the preset's.
+void fn_80275410(u8* p) {
+    u8* car = PTR(p, 0x140);
+    CamPreset c = lbl_802FA7A4;
+    CamVec off = *(CVec3*)(car + 0x2450) + CamVec(lbl_80563FE8, lbl_80564028, lbl_8056402C);
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    Mat3 rot;
+    RotFromVec(&rot, c.rot * lbl_80564024);
+    fn_801BFD34(p + 0x7C, &off, p + 0xC0);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+    F32(p, 0xBC) = lbl_80564024 * c.fov;
+}
 
-void fn_802756A4(u8* p) {}  // stub (165)
+// As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
+void fn_802756A4(u8* p) {
+    u8* car = PTR(p, 0x140);
+    CamPreset c = lbl_802FA7C0;
+    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(lbl_80564030, lbl_80563FDC, lbl_80563FD8);
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    Mat3 rot;
+    RotFromVec(&rot, c.rot * lbl_80564024);
+    fn_801BFD34(p + 0x7C, &off, p + 0xC0);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+    F32(p, 0xBC) = lbl_80564024 * c.fov;
+}
 
-void fn_80275938(u8* p) {}  // stub (153)
+void fn_80275938(u8* p) {
+    CamPreset c = lbl_802FA7DC;
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    Mat3 rot;
+    CamVec off(c.off.x, c.off.y, c.off.z);
+    RotFromVec(&rot, c.rot * lbl_80564024);
+    fn_801BFD34(p + 0x7C, &off, p + 0xC0);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+    F32(p, 0xBC) = lbl_80564024 * c.fov;
+}
 
 double fmod(double x, double y);
 double sin(double x);
