@@ -111,10 +111,57 @@ f32 fn_8026EAEC(f32 fov) {
     return fov;
 }
 
-f32 fn_8026EB4C(u8* p) { return 0.0f; }  // stub (102)
+// The AI driver of a car (aicar.cpp); slot 0x10 returns its current behaviour.
+class CamDriver {
+public:
+    virtual void v08(void);
+    virtual void v0C(int a);
+    virtual u8* v10(void);
+};
+
+}  // extern "C"
+int IsLoadingActive(void);
+extern "C" {
+CamDriver* fn_801B2ED0(int id);
+int fn_801769F8(void);
+extern f32 lbl_8055F528;  // fov range by speed
+extern f32 lbl_8055F52C;
+extern f32 lbl_8055F530;  // boost fov
+extern f32 lbl_8055F534;  // normal fov
+extern const f32 lbl_80563E50;
+extern const f32 lbl_80563E5C;
+extern const f32 lbl_80563E60;
+extern const f32 lbl_80563E64;
+
+static inline int Boosting(u8* car) { return F32(car, 0x258C) > lbl_80563E5C; }
+static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+static inline int Above(f32 v, f32 k) { return v > k; }
+
+// The view angle for the camera: blended from the last one (0x194) toward the speed-based angle, or
+// toward the boost angle while boosting (not while an AI driver is in mode 1).
+f32 fn_8026EB4C(u8* p) {
+    f32 fov;
+    f32 r = fn_8026EAEC(!Boosting(PTR(p, 0x140)) ? lbl_8055F534 : lbl_8055F530);
+    fov = fn_8026EAEC(LerpF(F32(p, 0x13C), lbl_8055F528, lbl_8055F52C));
+    u8* car = PTR(p, 0x140);
+    int boost = 0;
+    int on = Boosting(car) || car[0x259C];
+    if (on && Above(F32(car, 0x25E0), lbl_80563E50)) {
+        boost = 1;
+    }
+    if (S32(p, 0x4) != S32(p, 0x10)) {
+        r = boost ? r : fov;
+    } else if (fn_801769F8() || IsLoadingActive() || S32(PTR(p, 0x140), 0x2620) < 1) {
+        r = F32(p, 0x194);
+    } else if (boost && *(s32*)(fn_801B2ED0(S32(PTR(p, 0x140), 0x1EC))->v10() + 0x24) != 1) {
+        r = F32(p, 0x194) + lbl_80563E60 * (r - F32(p, 0x194));
+    } else {
+        r = F32(p, 0x194) + lbl_80563E64 * (fov - F32(p, 0x194));
+    }
+    return r;
+}
 
 double cos(double x);
-extern f32 lbl_8055F52C;
 extern const f32 lbl_80563E68;    // degrees to radians
 
 // Returns the view angle; scales *scale so that wider views keep the reference framing.
