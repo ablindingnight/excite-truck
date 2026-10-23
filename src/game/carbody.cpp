@@ -200,9 +200,21 @@ UnkStatic7F lbl_8055E4C8;
 
 extern "C" {
 
-void fn_8018185C(u8* p) {}  // stub (81)
+void fn_8018185C(u8* p, f32* v) {}  // stub (81)
 
-void fn_801819A0(u8* p) {}  // stub (29)
+extern const f32 lbl_80561CC4;
+extern const f32 lbl_80561CC8;
+
+void fn_801819A0(u8* p, u8* cfg, f32 a, f32 b, f32 c) {
+    f32 v[6];
+    v[0] = F32(cfg, 0x54) * a / lbl_80561CC4;
+    v[1] = F32(cfg, 0x5C) * c;
+    v[2] = F32(cfg, 0x50) * a / lbl_80561CC8;
+    v[3] = F32(cfg, 0x58) * b;
+    v[4] = F32(cfg, 0x68);
+    v[5] = F32(cfg, 0x60);
+    fn_8018185C(p, v);
+}
 
 f32 fn_80181A14(u8* p) {
     f32 k;

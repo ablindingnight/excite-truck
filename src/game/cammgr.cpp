@@ -69,6 +69,7 @@ void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k);
 }
 
 extern u8 lbl_80499950[];
+extern u8 lbl_80499920[];
 
 extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
 
@@ -284,7 +285,16 @@ int fn_80268BA4(int mode) {
 
 void fn_80268BD4(u8* rec, u8* seg, f32 t, f32 k) {}  // stub (112)
 
-void fn_80268D94(u8* p) {}  // stub (27)
+void fn_80268D94(void) {
+    IdealFollower f;
+    __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
+    fn_80268BD4(lbl_80499920, PTR(f.line, 0x1C), 0.0f, 2.088f);
+    if (f.buf) {
+        delete[] f.buf;
+    }
+    f.buf = 0;
+    fn_8013530C(&f, 0);
+}
 
 void fn_80268E00(void) {
     IdealFollower f;
