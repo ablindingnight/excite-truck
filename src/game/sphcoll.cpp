@@ -761,7 +761,27 @@ void fn_801A1ABC(u8* p, u8* o) {
     }
 }
 
-void fn_801A1B9C(u8* p) {}  // stub (65)
+struct PVec3 {
+    f32 v[3];
+};
+
+// Collides the tube's two end caps as spheres.
+void fn_801A1B9C(u8* p) {
+    PVec3 a;
+    PVec3 b;
+    PVec3 zero;
+    PVec3 dir = *(PVec3*)(PTR(p, 0xC) + 0x18);
+    PVec3 mid = *(PVec3*)(PTR(p, 0xC) + 0x24);
+    f32 h = F32(p, 0x28);
+    MulAdd(a.v, mid.v, dir.v, h);
+    MulAdd(b.v, mid.v, dir.v, -h);
+    f32 r = F32(p, 0x24);
+    zero.v[0] = lbl_805622D0;
+    zero.v[1] = lbl_805622D0;
+    zero.v[2] = lbl_805622D0;
+    fn_8019AC44(p, (u8*)&a, (u8*)&zero, r);
+    fn_8019AC44(p, (u8*)&b, (u8*)&zero, r);
+}
 
 void fn_801A1CA0(u8* p) {
     if (S32(p, 0x20) < 1000) {
