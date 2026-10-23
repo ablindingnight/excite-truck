@@ -508,8 +508,10 @@ void AchAddModelStat(int category, const char* model, s32 value) {
         }
     }
     if (found < 0) {
-        int n = sizeof(s_race.models[empty].name);
-        char* dst = s_race.models[empty].name;
+        char* dst;
+        int n;
+        dst = s_race.models[empty].name;
+        n = sizeof(s_race.models[empty].name);
 
         while ((*dst++ = *name++) != '\0') {
             if (--n <= 0) {

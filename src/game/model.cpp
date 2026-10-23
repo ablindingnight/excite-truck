@@ -366,8 +366,8 @@ void fn_802C5690(TexNode* t) {
 }
 
 void fn_802C5720(int pri) {
-    TexNode** first;
     s32 n;
+    TexNode** first;
     fn_802C54D4();
     if (pri > 0) {
         Bin* b = fn_802C54B4(pri);
@@ -477,8 +477,8 @@ void fn_802C5C40(MSurf* s, s32 inst, MSurf* base) {
 }
 
 void fn_802C5CC4(MSurf* s, s32 inst, int sorted, const char* prefix) {
-    char path[0x100];
     char name[0x100];
+    char path[0x100];
     fn_802C595C(name, 0x100, s->name, inst);
     if (prefix) {
         fn_801345D8(path, 0x100, "%s/%s", prefix, name);

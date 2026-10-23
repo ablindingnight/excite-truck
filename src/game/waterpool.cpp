@@ -361,8 +361,8 @@ extern "C" void fn_8029C650(void) {
 }
 
 extern "C" void fn_8029C664(void) {
-    WaterPool** q;
     WaterPool** p = lbl_804B5010;
+    WaterPool** q;
     for (int i = 0; i < lbl_8055F7F0; p++, i++) {
         Vec c;
         f32 r;

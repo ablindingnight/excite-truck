@@ -291,8 +291,8 @@ void fn_802DB620(void) {
 }
 
 int fn_802DB69C(GXTex** layers, int mode) {
-    int stage = 0;
     int map = 0;
+    int stage = 0;
     for (int i = 0; i < lbl_8055FEA4; i++) {
         GXTex* t = *layers;
         int base = map;

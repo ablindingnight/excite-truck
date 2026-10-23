@@ -910,8 +910,8 @@ Surf* fn_802D62E4(Surf* s) {
 
 void fn_802D62FC(Surf* s, void** dl, u32* size) {
     u32 key = s->vfmt;
-    u8 b = s->b9;
     DLEntry* e = lbl_804CA438;
+    u8 b = s->b9;
     for (int i = lbl_8055FDF0; i > 0; i--) {
         if (e->key == key && e->b == b) {
             *dl = e->dl;
