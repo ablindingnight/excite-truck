@@ -286,8 +286,11 @@ u8* fn_80267EE4(int i) { return lbl_80499080 + i * 0x228; }
 void fn_80267EF8(u8* p) {}  // stub (238)
 
 void fn_802682B0(u8* p) {
+    int row;
+    int* rowp = &row;
     if (U8(p, 0x138)) {
-        lbl_80499050.m[0][0] = 1.0f;
+        // An index the compiler cannot fold (found by decomp-permuter) gives the target's stfsu.
+        lbl_80499050.m[row = 0][*rowp] = 1.0f;
         lbl_80499050.m[0][1] = 0.0f;
         lbl_80499050.m[0][2] = 0.0f;
         lbl_80499050.m[0][3] = 0.0f;
