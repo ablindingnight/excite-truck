@@ -545,7 +545,48 @@ void fn_801A01E0(u8* p, RVec3* lo, RVec3* hi) {
     hi->z = c.z + r * 1.0f;
 }
 
-void fn_801A0258(u8* p) {}  // stub (72)
+extern void* lbl_80333B48[];
+
+static inline void InitVolume(u8* s, u32 id, u32 owner) {
+    U32(s, 0xC) = id;
+    U32(s, 0x4) = owner;
+}
+void fn_801A0378(u8* p, u8* s);
+extern const f32 lbl_805622D0;  // 0.0
+
+// Adds a sphere part (radius r) at c to the group.
+void fn_801A0258(u8* grp, const RVec3* c, f32 r, f32 s0, f32 s1) {
+    u8* s = (u8*)operator new(0x54, "SphereGroupPart");
+    if (s) {
+        f32 cz = c->z;
+        f32 cy = c->y;
+        f32 cx = c->x;
+        InitVolume(s, U32(grp, 0xC), U32(grp, 0x4));
+        U32(s, 0x8) = 0;
+        S32(s, 0x18) = 'SPHR';
+        F32(s, 0x10) = s0;
+        F32(s, 0x14) = s1;
+        S32(s, 0x20) = 100;
+        U32(s, 0x1C) = 0;
+        *(void**)s = lbl_80333B48;
+        F32(s, 0x24) = r;
+        F32(s, 0x34) = lbl_805622D0;
+        F32(s, 0x38) = lbl_805622D0;
+        F32(s, 0x3C) = lbl_805622D0;
+        F32(s, 0x40) = lbl_805622D0;
+        F32(s, 0x44) = lbl_805622D0;
+        F32(s, 0x48) = lbl_805622D0;
+        U8(s, 0x4C) = 0;
+        F32(s, 0x50) = lbl_805622D0;
+        F32(s, 0x28) = cx;
+        F32(s, 0x2C) = cy;
+        F32(s, 0x30) = cz;
+        if (U32(s, 0x4)) {
+            fn_8019EECC((u8*)U32(s, 0x4), (RVec3*)(s + 0x28));
+        }
+    }
+    fn_801A0378(grp, s);
+}
 
 void fn_801A0378(u8* p, u8* s) {
     SphGroupAll* g = (SphGroupAll*)p;
@@ -994,7 +1035,6 @@ void fn_801A4868(u8* p, u32 v) {
 void fn_801A48C8(u8* p) { VE(PTR(p, 0x48))->v18("dyno", "unknown"); }
 
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
-extern const f32 lbl_805622D0;  // 0.0
 extern const f32 lbl_805622DC;  // -1.0
 extern const f32 lbl_805622E0;  // 1.0
 
