@@ -303,8 +303,8 @@ void fn_802B5CB4(int d) { lbl_8055FA3C += d; }
 void fn_802B5CC4(const char* name) { fn_802B5CB4(1); }
 
 void fn_802B5CCC(const char* name) {
-    u8* clump;
-    fn_802B321C(0, &clump, fn_802B5B6C()->objs, lbl_8055FA40);
+    bool* clump;
+    fn_802B321C(0, (u8**)&clump, fn_802B5B6C()->objs, lbl_8055FA40);
     *clump = !*clump;
     fn_802B32E0(fn_802B5B6C()->objs);
     fn_802B4E44(fn_802B5B6C()->objs);
@@ -1052,10 +1052,9 @@ void fn_802B869C(void) {
 }
 
 void fn_802B86F8(void) {
-    Cursor* c = &lbl_804BFF80;
-    c->hover[0] = 0;
-    if (c->clicked[0] && !(c->s.flags & 1)) {
-        c->clicked[0] = 0;
+    lbl_804BFF80.hover[0] = 0;
+    if (lbl_804BFF80.clicked[0] && !(lbl_804BFF80.s.flags & 1)) {
+        lbl_804BFF80.clicked[0] = 0;
     }
 }
 
