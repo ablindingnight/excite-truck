@@ -46,6 +46,8 @@ void fn_80127464(void);
 void fn_802E2D74(int ms);
 void fn_8020A634(void);
 int fn_8027B9EC(int i);
+int fn_8027B8C0(int a);
+int fn_8027B94C(int i);
 void fn_80214B94(int i);
 s32 fn_80214D04(void);
 int fn_802411D4(void);
@@ -74,6 +76,7 @@ s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEBC;
+extern s32 lbl_8055BEB8;
 extern void* lbl_80343600[];
 
 ModuleTag lbl_8055F250;
@@ -205,7 +208,41 @@ int fn_802476FC(void) {
 
 void fn_80247768(void) { lbl_8055BEAC = fn_80214D04(); }
 
-void fn_8024778C(u8* p) {}  // stub (61)
+void fn_8024778C(void) {
+    if (lbl_8055BEB8 != lbl_8055F26C) {
+        lbl_8055BEB8 = lbl_8055F26C;
+        switch (lbl_8055F26C) {
+        case 2:
+            lbl_8055BEB0 = 1;
+            break;
+        case 3:
+            lbl_8055BEB0 = 2;
+            break;
+        default:
+            lbl_8055BEB0 = 0;
+            break;
+        }
+    }
+    fn_80214CB4(lbl_8055BEB0);
+    switch (lbl_8055F26C) {
+    case 1:
+        fn_80214B44(2);
+        fn_80214A9C(3);
+        break;
+    case 2:
+        if (fn_8027B8C0(1)) {
+            fn_80214B44(3);
+        } else {
+            fn_80214A9C(3);
+        }
+        break;
+    }
+    for (int i = 0; i < 3; i++) {
+        if (!fn_8027B94C(i)) {
+            fn_80214A9C(i + 11);
+        }
+    }
+}
 
 void fn_80247880(void) { lbl_8055BEB0 = fn_80214D04(); }
 
@@ -361,7 +398,38 @@ void fn_80248CD8(u8* p) {}  // stub (86)
 
 void fn_80248E30(u8* p) {}  // stub (96)
 
-void fn_80248FB0(u8* p) {}  // stub (63)
+int fn_80248FB0(u8* p, int key) {
+    s32 now = fn_802E2C20();
+    s32 t0 = S32(p, 0x1C);
+    if (now < t0 + 750) {
+        return 0;
+    }
+    s32 d = S32(p, 0x20);
+    if (d && now - t0 > d - 500) {
+        return 0;
+    }
+    if (S32(p, 0x18) != 1) {
+        return 0;
+    }
+    switch (key) {
+    case 27:
+        if (U32(p, 0x24) & 2) {
+            S32(p, 0x18) = 4;
+            break;
+        }
+        return 0;
+    case 13:
+        if (U32(p, 0x24) & 1) {
+            S32(p, 0x18) = 2;
+            break;
+        }
+        return 0;
+    default:
+        return 0;
+    }
+    S32(p, 0x1C) = now - S32(p, 0x20) + 500;
+    return 1;
+}
 
 void fn_802490AC(u8* p) {
     U8(p, 0x1C) = 0;
