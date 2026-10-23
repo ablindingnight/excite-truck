@@ -2018,7 +2018,7 @@ void fn_801A1B9C(u8* p) {
     fn_8019AC44(p, (u8*)&b, (u8*)&zero, r);
 }
 
-void fn_801A1CA0(u8* p) {
+void fn_801A1CA0(const u8* p) {
     if (S32(p, 0x20) < 1000) {
         fn_801E44F4(PTR(p, 0xC), 0x40FFFF00, F32(p, 0x24), F32(p, 0x24), F32(p, 0x28));
     } else {
@@ -2071,7 +2071,7 @@ int fn_801A1E7C(u8* p, u8* a, u8* b, u8* c, RVec3* out) {
 
 void fn_801A1F44(RVec3* out, u8* q) {
     u8* o = VE(q)->v50();
-    *(W3*)out = *(W3*)(o + 0x24);
+    *(PVec3*)out = *(PVec3*)(o + 0x24);
 }
 
 // Axis-aligned bounds of the box: its 8 corners (+-hx, +-hy, +-hz) through the volume's frame.
@@ -2163,8 +2163,8 @@ u8* fn_801A25F8(u8* p, u32 a, u32 b, u32 c, f32 r) {
     U32(p, 0x4) = c;
     U32(p, 0x8) = 0;
     S32(p, 0x18) = 'RAGD';
-    F32(p, 0x10) = 1.0f;
-    F32(p, 0x14) = 1.0f;
+    F32(p, 0x10) = lbl_805622E0;
+    F32(p, 0x14) = lbl_805622E0;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
     *(void**)p = lbl_80333818;
@@ -2178,22 +2178,15 @@ void fn_801A2674(u8* p, f32 r, u32 a, u32 b) {
     U32(p, 0x2C) = b;
 }
 
-void fn_801A2684(u8* p, RVec3* lo, RVec3* hi) {
+void fn_801A2684(const u8* p, RVec3* lo, RVec3* hi) {
     f32 r = F32(p, 0x24);
     u8* o = PTR(p, 0xC);
-    f32 k = 1.0f;
     RVec3 e;
-    e.x = k;
-    e.y = k;
-    e.z = k;
-    f32 a = k * -r;
-    f32 b = k * r;
-    lo->x = F32(o, 0x24) + a;
-    lo->y = F32(o, 0x28) + a;
-    lo->z = F32(o, 0x2C) + a;
-    hi->x = F32(o, 0x24) + b;
-    hi->y = F32(o, 0x28) + b;
-    hi->z = F32(o, 0x2C) + b;
+    e.x = lbl_805622E0;
+    e.y = lbl_805622E0;
+    e.z = lbl_805622E0;
+    MulAdd(&lo->x, (f32*)(o + 0x24), &e.x, -r);
+    MulAdd(&hi->x, (f32*)(o + 0x24), &e.x, r);
 }
 
 void fn_801A26FC(u8* p) {}  // stub (360)
