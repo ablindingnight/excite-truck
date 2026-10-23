@@ -700,7 +700,7 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
     return 0;
 }
 
-int fn_8019D618(u8* p, u8* q, int a, int b) { return 0; }  // stub (294)
+int fn_8019D618(u8* p, u8* q, int a, u8* b) { return 0; }  // stub (294)
 
 // Tube p vs q: the cylinder first, then both end caps as spheres.
 int fn_8019DAB0(u8* p, u8* q) {
@@ -896,7 +896,103 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     return 0;
 }
 
-int fn_8019E500(u8* p, u8* q) { return 0; }  // stub (205)
+// One box half-axis: direction and extent.
+struct BoxAxis {
+    PVec3 dir;
+    f32 ext;
+};
+
+// Frame of one box edge: the two cross axes, the edge axis and the edge centre.
+struct EdgeFrame {
+    RVec3 a;
+    RVec3 b;
+    RVec3 axis;
+    RVec3 pos;
+};
+
+u8 lbl_80435020[0x30];  // scratch tube volume for box edges
+
+// Placement-constructs a tube volume (radius r, half length len) on frame f.
+// A tube volume built on the fly (same layout as the file tubes).
+struct TubeVol {
+    void* vt;           // offset 0x0
+    u32 owner;          // offset 0x4
+    u32 f8;             // offset 0x8
+    EdgeFrame* frame;   // offset 0xC
+    f32 f10;            // offset 0x10
+    f32 f14;            // offset 0x14
+    s32 type;           // offset 0x18
+    u32 f1C;            // offset 0x1C
+    s32 f20;            // offset 0x20
+    f32 r;              // offset 0x24
+    f32 len;            // offset 0x28
+
+    void Init(EdgeFrame* f, u32 o, f32 a, f32 b, f32 rr, f32 l) {
+        frame = f;
+        owner = o;
+        f8 = 0;
+        type = 'TUBE';
+        f10 = a;
+        f14 = b;
+        f20 = 100;
+        f1C = 0;
+        r = rr;
+        len = l;
+        vt = lbl_80333918;
+    }
+};
+
+// p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
+// radius 0.75 inset by that radius.
+int fn_8019E500(u8* p, u8* q) {
+    CFrame fr = *(CFrame*)VE(q)->v50();
+    BoxAxis ax[3] = {0};
+    ax[0].dir = *(PVec3*)&fr.m[0];
+    ax[0].ext = F32(q, 0x24);
+    ax[1].dir = *(PVec3*)&fr.m[3];
+    ax[1].ext = F32(q, 0x28);
+    ax[2].dir = *(PVec3*)&fr.m[6];
+    ax[2].ext = F32(q, 0x2C);
+    bool hit = false;
+    f32 r = 0.75f;
+    for (int i = 0; i < 3; i++) {
+        if (i == 1) {
+            continue;
+        }
+        EdgeFrame e;
+        BoxAxis* aa = &ax[(i + 1) % 3];
+        BoxAxis* ab = &ax[(i + 2) % 3];
+        BoxAxis* ai = &ax[i];
+        e.axis.x = ai->dir.v[0];
+        e.axis.y = ai->dir.v[1];
+        e.axis.z = ai->dir.v[2];
+        f32 ea = aa->ext - r;
+        f32 eb = ab->ext - r;
+        e.b.x = ab->dir.v[0];
+        e.b.y = ab->dir.v[1];
+        e.b.z = ab->dir.v[2];
+        e.a.x = aa->dir.v[0];
+        e.a.y = aa->dir.v[1];
+        e.a.z = aa->dir.v[2];
+        for (int j = 0; j < 4; j++) {
+            e.pos = fr.t;
+            f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
+            e.pos.x += aa->dir.v[0] * k;
+            e.pos.y += aa->dir.v[1] * k;
+            e.pos.z += aa->dir.v[2] * k;
+            k = eb * ((j & 2) ? -1.0f : 1.0f);
+            e.pos.x += ab->dir.v[0] * k;
+            e.pos.y += ab->dir.v[1] * k;
+            e.pos.z += ab->dir.v[2] * k;
+            TubeVol* t = (TubeVol*)lbl_80435020;
+            if (t) {
+                t->Init(&e, U32(q, 0x4), F32(q, 0x10), F32(q, 0x14), r, ai->ext);
+            }
+            hit |= fn_8019D618((u8*)t, p, 1, q);
+        }
+    }
+    return hit;
+}
 
 u8* fn_8019E834(u8* p, int del) {
     if (p && del > 0) {
