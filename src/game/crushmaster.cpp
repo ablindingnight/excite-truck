@@ -93,7 +93,7 @@ struct ConfigRoot {
     ValueNode* vals;  // offset 0x20
 };
 
-extern "C" ConfigRoot* fn_8000AC38(void);
+ConfigRoot* fn_8000AC38(void);
 
 extern s32 lbl_8055E044;  // language
 
