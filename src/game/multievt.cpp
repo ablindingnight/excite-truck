@@ -269,7 +269,7 @@ int fn_8024A6A4(s32* p) {
     return 0;
 }
 
-void fn_8024A6EC(u8* p) {}  // stub (346)
+int fn_8024A6EC(s32* sel, u8* list) { return 0; }  // stub (346)
 
 u8* fn_8024AC54(u8* p, int del) {
     if (p) {
@@ -288,7 +288,7 @@ u8* fn_8024AC54(u8* p, int del) {
     return p;
 }
 
-void fn_8024ACB4(u8* p) {}  // stub (209)
+int fn_8024ACB4(s32* key, s32 sel, u8* list) { return 0; }  // stub (209)
 
 u8* fn_8024AFF8(u8* p, int del) {
     if (p) {
@@ -308,7 +308,45 @@ u8* fn_8024AFF8(u8* p, int del) {
     return p;
 }
 
-void fn_8024B070(u8* p) {}  // stub (66)
+int fn_80215228(void);
+extern u8 lbl_8055F298;
+
+struct EvEntry {
+    s32 id;          // offset 0x0
+    u8 pad4[0x8];
+    s32 sel;         // offset 0xC
+    u8 pad10[0x8];
+};
+
+struct EvList {
+    EvEntry* items;  // offset 0x0
+    s32 count;       // offset 0x4
+};
+
+static inline int FindById(EvList* list, s32* key) {
+    for (int i = 0; i < list->count; i++) {
+        if (list->items[i].id == *key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+u8 fn_8024B070(s32* key, u8* list) {
+    int i = FindById((EvList*)list, key);
+    s32 sel = i >= 0 ? ((EvList*)list)->items[i].sel : 0;
+    if (fn_80215228()) {
+        lbl_8055F298 = 0;
+    }
+    while (lbl_8055F298 || fn_8024A6EC(&sel, list)) {
+        lbl_8055F298 = 0;
+        if (fn_8024ACB4(key, sel, list)) {
+            lbl_8055F298 = 1;
+            break;
+        }
+    }
+    return lbl_8055F298;
+}
 
 const char* fn_8024B178(int ev) {
     const char* name = ((VN*)PTR(GetEvent(ev), 0x20))->v14("name");
