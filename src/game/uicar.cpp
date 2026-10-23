@@ -159,23 +159,88 @@ u8* fn_80240928(u8* p, int del) {
 
 void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 
-void fn_802409AC(u8* p, u32 item) {
-    s32 n = S32(p, 0x2C);
-    *(u32*)(p + 0x18 + n * 4) = item;
-    S32(p, 0x2C) = n + 1;
-    for (int i = 0; i < S32(p, 0x2C); i++) {
-        u8 sel = 0;
-        u32 v = *(u32*)PTR(p, 0x34);
-        if (U8(p, 0x38) && i == S32(p, 0x30)) {
-            sel = 1;
+}  // extern "C"
+
+// One row of a player's car choice list.
+struct CarSelItem {
+    u8 sel;        // offset 0x0
+    u8 pad1[0x3];
+    u32 value;     // offset 0x4
+};
+
+// A player's car choice list (vtable lbl_80342650).
+struct CarSel {
+    void* vt;               // offset 0x0
+    u8 pad4[0x10];          // offset 0x4
+    s32 f14;                // offset 0x14
+    CarSelItem* items[4];   // offset 0x18
+    u8* car;                // offset 0x28
+    s32 count;              // offset 0x2C
+    s32 cur;                // offset 0x30
+    s32* slot;              // offset 0x34
+    u8 active;              // offset 0x38
+    char name[0x20];        // offset 0x39
+
+    void Refresh(void) {
+        u8 sel;
+        int i;
+        CarSelItem* e;
+        u32 v;
+        for (i = 0; i < count; i++) {
+            sel = 0;
+            v = *slot;
+            if (active && i == cur) {
+                sel = 1;
+            }
+            e = items[i];
+            e->sel = sel;
+            e->value = v;
         }
-        u8* e = *(u8**)(p + 0x18 + i * 4);
-        U8(e, 0x0) = sel;
-        U32(e, 0x4) = v;
+    }
+};
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
     }
 }
 
-void fn_80240A1C(u8* p) {}  // stub (98)
+extern void* lbl_80342650[];
+extern char lbl_8055BD60[8];  // ""
+
+extern "C" {
+const char* fn_802E85B8(s32 slot);
+
+void fn_802409AC(CarSel* p, CarSelItem* item) {
+    int n = p->count;
+    p->items[n] = item;
+    p->count = n + 1;
+    p->Refresh();
+}
+
+CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
+    p->car = car;
+    p->vt = lbl_80342650;
+    p->f14 = 0;
+    p->count = 0;
+    p->cur = 0;
+    p->slot = slot;
+    p->active = 1;
+    CopyName(lbl_8055BD60, 0x20, p->name);
+    S32(p->car, 0xD8) = *p->slot;
+    if (*p->slot < 0) {
+        CopyName(lbl_8055BD60, 0x20, p->name);
+    } else {
+        const char* nm = fn_802E85B8(*p->slot);
+        CopyName(nm, 0x20, p->name);
+    }
+    p->Refresh();
+    return p;
+}
 
 void fn_80240BA4(u8* p) {}  // stub (283)
 
