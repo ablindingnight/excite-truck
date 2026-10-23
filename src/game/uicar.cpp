@@ -252,7 +252,38 @@ void fn_80241224(u8* p) {}
 
 void fn_80241228(u8* p) {}
 
-void fn_8024122C(u8* p) {}  // stub (74)
+void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+const char* fn_80131234(const char* key);
+void fn_80232BA4(const char* text, u8* font, s32 color, int align, f32 x, f32 y, f32 size, f32 a, f32 b);
+extern const s32 lbl_802FA300[3];  // stat level thresholds: 0, 4, 7
+extern const f32 lbl_80563758;     // 0.0
+extern const f32 lbl_8056375C;     // 0.43
+extern const f32 lbl_80563760;     // 0.37
+extern const f32 lbl_80563764;     // 1.0
+
+// Draws the text for one car stat at its level ("UICar:STAT_%i_TEXT_%i").
+void fn_8024122C(u8* p) {
+    f32 x, y;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    if (S32(p, 0x1C) >= 0) {
+        int lvl = 0;
+        for (int i = 0; i < 3; i++) {
+            if (*(s32*)PTR(p, 0x24) && *(s32*)PTR(p, 0x24) >= lbl_802FA300[i]) {
+                lvl = i + 1;
+            }
+        }
+        char buf[0x1E];
+        fn_801345D8(buf, 0x1E, "UICar:STAT_%i_TEXT_%i", S32(p, 0x1C), lvl);
+        int align = 10;
+        f32 size = lbl_8056375C;
+        if (*PTR(p, 0x20)) {
+            size = lbl_80563760;
+            align = 9;
+        }
+        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), -0x100, align, x, y, size, lbl_80563758, lbl_80563764);
+    }
+}
 
 void fn_80241354(u8* p) {}  // stub (307)
 
