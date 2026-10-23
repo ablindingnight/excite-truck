@@ -2046,7 +2046,54 @@ void fn_801A44D4(u8* l) {
 
 void fn_801A4538(void* a) { fn_8012C4E4(a, (void*)fn_801A44D4, 0); }
 
-void fn_801A4548(u8* p) {}  // stub (136)
+void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* swapped);  // res.cpp
+void fn_801A4B5C(u8* o, bool swap, u8* q);
+void fn_801A4768(s32* p, s32 base);
+void fn_801A4780(s32* p, s32 base);
+void fn_801A4798(s32* p, s32 base);
+void fn_801A47B0(s32* p, s32 base);
+
+static inline void Swap16(u8* b) {
+    u8 t = b[0];
+    b[0] = b[1];
+    b[1] = t;
+}
+
+// Loads the static-object list resource ('SOBL'): on first load byte-swaps it, turns its offsets into
+// pointers and sets up each object.
+u8* fn_801A4548(const char* name) {
+    u32 info;
+    bool swapped = 0;
+    u8* l = (u8*)fn_8012C370(name, 'SOBL', &info, 0, 0, &swapped);
+    if (l && swapped) {
+        Swap32(l + 0x0);
+        Swap32(l + 0x8);
+        Swap32(l + 0x4);
+        Swap32(l + 0xC);
+        Swap32(l + 0x10);
+        fn_801A4768((s32*)(l + 0x4), (s32)l);
+        fn_801A4780((s32*)(l + 0x10), (s32)l);
+        fn_801A4798((s32*)(l + 0xC), (s32)l);
+        int i;
+        for (i = 0; i < S32(l, 0x0); i++) {
+            Swap32(PTR(l, 0x4) + i * 4);
+            fn_801A47B0((s32*)(PTR(l, 0x4) + i * 4), (s32)l);
+        }
+        for (i = 0; i < S32(l, 0x8); i++) {
+            Swap16(PTR(l, 0xC) + i * 2);
+        }
+        fn_8019EB14(PTR(l, 0x10), 0);
+        for (i = 0; i < S32(l, 0x0); i++) {
+            u8* o = ((u8**)PTR(l, 0x4))[i];
+            bool sw = swapped;
+            if (o) {
+                fn_801A4B5C(o, sw, o + 0x4C);
+            }
+        }
+        PTR(l, 0x14) = (u8*)fn_801A4538;
+    }
+    return l;
+}
 
 void fn_801A4768(s32* p, s32 base) {
     if (*p) {
@@ -2162,7 +2209,7 @@ u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
     return p;
 }
 
-void fn_801A4B5C(u8* p) {}  // stub (179)
+void fn_801A4B5C(u8* o, bool swap, u8* q) {}  // stub (179)
 
 void fn_801A4E28(void) { lbl_8055E5A0 = fn_801CFEAC("track.msh"); }
 
