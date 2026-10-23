@@ -3,6 +3,8 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -35,11 +37,11 @@ void fn_802328D4(u8* p);
 u8* fn_802C5130(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 u8* fn_80232578(const char* name);
+u8* fn_8023512C(const char* art);
 }
 
 void operator delete(void* p);
 
-extern void* lbl_803430E8[];
 extern u8* lbl_8055F244;
 extern char lbl_80342FC0[];  // string pool
 extern const f32 lbl_80563830;
@@ -142,20 +144,68 @@ void fn_80246210(void) {
     fn_80214CB4(S32(PTR(lbl_8055F244, 0x20), 0x10));
 }
 
-void fn_802462A0(u8* p) {}  // stub (98)
+}  // extern "C"
 
-u8* fn_80246428(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_803430E8;
-        if (PTR(p, 0x1C)) {
-            fn_80235380(PTR(p, 0x1C));
-        }
-        if (del > 0) {
-            operator delete(p);
+// The save progress bar ("mem_bar.art"; vtable lbl_803430E8, dtor fn_80246428).
+class MemBar : public MenuState {
+public:
+    MemBar(f32 f) {
+        frac = f;
+        art = fn_8023512C("mem_bar.art");
+    }
+    virtual ~MemBar(void) {
+        if (art) {
+            fn_80235380(art);
         }
     }
-    return p;
+    virtual void Draw(void);
+
+    f32 frac;  // offset 0x18
+    u8* art;   // offset 0x1C
+};
+
+// A memory card message: title, text and progress.
+struct McMsg {
+    const char* title;  // offset 0x0
+    const char* text;   // offset 0x4
+    f32 frac;           // offset 0x8
+};
+
+class VSub {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void Show(void);  // 0x14
+};
+
+extern const MenuDesc lbl_802FA350;  // "mc_dialog.lyt"
+extern UnkStatic123 lbl_80498890;  // menu end tag
+
+extern "C" {
+void fn_80216CA8(void);
+int fn_802450D4(void);
+
+// Shows a memory card message with its progress bar (or just refreshes the status when hidden).
+void fn_802462A0(u8* p, const McMsg* m) {
+    if (!U8(p, 0x1D)) {
+        ((VSub*)(p + 0x4))->Show();
+        return;
+    }
+    MemBar bar(m->frac);
+    MenuItem items[] = {
+        MenuItem("#title", m->title, CaptionContext(strlen(m->title))),
+        MenuItem("#msg", m->text, CaptionContext(strlen(m->text))),
+        MenuItem("progress", 5, &bar, 0, 0),
+        MenuItem(lbl_80498890),
+    };
+    S32(p, 0x24) = 0;
+    MenuDesc desc = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
+    desc.items = items;
+    fn_80216CA8();
+    fn_802146BC(&desc, -999, -999, 1);
 }
+
 
 void fn_80246498(u8* p) { fn_80214CB4(U8(p, 0x18) == 0); }
 
@@ -201,7 +251,11 @@ int fn_802464B4(u8* p, int key) {
     return 1;
 }
 
-void fn_802465A4(u8* p) {}  // stub (166)
+}  // extern "C"
+
+void MemBar::Draw(void) {}  // stub (166)
+
+extern "C" {
 
 void fn_8024683C(void) {
     WpadInfo all;
