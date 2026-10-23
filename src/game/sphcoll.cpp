@@ -203,7 +203,7 @@ public:
     virtual void v30(void);
     virtual void v34(u8* q);
     virtual void v38(void);
-    virtual void v3C(void);
+    virtual f32 v3C(void);  // bounding radius
     virtual void v40(void);
     virtual void v44(void);
     virtual void v48(void);
@@ -586,7 +586,44 @@ int fn_8019DAB0(u8* p, u8* q) {
     return hit;
 }
 
-void fn_8019DC04(u8* p, u8* q) {}  // stub (122)
+// Capsule p against capsule q: bounding spheres, then the axis segments, then p's end spheres.
+int fn_8019DC04(u8* p, u8* q) {
+    PVec3 d;
+    PVec3 a;
+    PVec3 b;
+    PVec3 axis;
+    PVec3 org;
+    u8* fq = PTR(q, 0xC);
+    u8* fp = PTR(p, 0xC);
+    d.v[0] = F32(fp, 0x24) - F32(fq, 0x24);
+    d.v[1] = F32(fp, 0x28) - F32(fq, 0x28);
+    d.v[2] = F32(fp, 0x2C) - F32(fq, 0x2C);
+    f32 rq = VE(q)->v3C();
+    f32 rp = VE(p)->v3C();
+    f32 r = rp + rq;
+    f32 r2 = r * r;
+    if (PSVECDotProduct(d.v, d.v) < r2) {
+        bool hit = false;
+        hit |= fn_8019DAB0(p, q);
+        if (hit) {
+            return 1;
+        }
+        u8* m = PTR(p, 0xC);
+        f32 h = F32(p, 0x28);
+        axis = *(PVec3*)(m + 0x18);
+        org = *(PVec3*)(m + 0x24);
+        f32 rad = F32(p, 0x24);
+        MulAdd(a.v, org.v, axis.v, h);
+        MulAdd(b.v, org.v, axis.v, -h);
+        hit |= fn_8019CCCC(p, (u8*)a.v, q, rad);
+        if (hit) {
+            return 1;
+        }
+        hit |= fn_8019CCCC(p, (u8*)b.v, q, rad);
+        return hit;
+    }
+    return 0;
+}
 
 f32 fn_8019DDEC(u8* p) { return F32(p, 0x24) + F32(p, 0x28); }
 
