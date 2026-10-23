@@ -22,6 +22,7 @@ struct Words12 {
 
 extern "C" {
 void fn_801EF024(void* cb);
+void fn_801BFD34(u8* a, f32* b, u8* c);
 f32 fn_80129DC4(int stream, f32 lo, f32 hi);
 s32 fn_80129D90(int stream, s32 lo, s32 hi);
 int fn_80178CA4(void);
@@ -46,6 +47,17 @@ struct ShakeEntry {
 };
 
 extern f32 lbl_8055C4C0;
+extern f32 lbl_8055F47C;
+
+struct Mat3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
+// A scratch 3x4 matrix.
+struct Mtx34 {
+    f32 m[3][4];
+};
+
+extern Mtx34 lbl_80499050;
 extern f32 lbl_8055E3C8;
 extern f32 lbl_8055C4E0;
 extern f32 lbl_8055C4E4;
@@ -177,7 +189,25 @@ u8* fn_80267EE4(int i) { return lbl_80499080 + i * 0x228; }
 
 void fn_80267EF8(u8* p) {}  // stub (238)
 
-void fn_802682B0(u8* p) {}  // stub (42)
+void fn_802682B0(u8* p) {
+    if (U8(p, 0x138)) {
+        lbl_80499050.m[0][0] = 1.0f;
+        lbl_80499050.m[0][1] = 0.0f;
+        lbl_80499050.m[0][2] = 0.0f;
+        lbl_80499050.m[0][3] = 0.0f;
+        lbl_80499050.m[1][0] = 1.0f;
+        lbl_80499050.m[1][1] = 0.0f;
+        lbl_80499050.m[1][2] = 0.0f;
+        lbl_80499050.m[1][3] = 0.0f;
+        lbl_80499050.m[2][0] = 1.0f;
+        lbl_80499050.m[2][1] = 0.0f;
+        lbl_80499050.m[2][2] = 0.0f;
+        lbl_80499050.m[2][3] = 0.0f;
+    }
+    fn_801BFD34(p + 0x7C, &lbl_80499050.m[2][1], p + 0xC0);
+    Mat3Mul((Mat3*)(p + 0x58), (Mat3*)&lbl_80499050, (Mat3*)(p + 0xC0));
+    F32(p, 0xBC) = lbl_8055F47C;
+}
 
 void fn_80268358(u8* p) {}  // stub (527)
 
