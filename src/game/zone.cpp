@@ -1455,8 +1455,8 @@ void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
         V2 pa;
         V2 pb;
         V2 d;
-        V2 pp;
         V2 r;
+        V2 pp;
         f32 len;
         f32 inv;
         f32 t;

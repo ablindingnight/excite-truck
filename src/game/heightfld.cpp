@@ -400,11 +400,10 @@ GroundHeader* fn_801DCA60(void) {
             }
             f32 h = 0.0f;
             f32 a = 15.0f;
-            f32 b = 0.6f * k;
             for (int n = lbl_80446F08.w / 2; n > 16; n /= 2) {
                 h = h + a * (1.0f + (f32)sin(6.2831855f * ((f32)(z * 2) / n)));
                 h = h + a * (1.0f + (f32)cos(6.2831855f * ((f32)(x * 2) / n)));
-                a = a * b;
+                a = a * (0.6f * k);
             }
             lbl_80446F08.data[x * lbl_80446F08.w + z] = h;
         }

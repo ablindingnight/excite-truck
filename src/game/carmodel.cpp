@@ -431,7 +431,6 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
         fn_802E317C("%s: bad format", name);
     }
     g->bone = fn_801E3004(model, name, -1);
-    f32 range = scale - offset;
     g->count = 0;
     for (; g->count < 8; g->count++) {
         char key[32];
@@ -446,7 +445,7 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
             fn_802E317C("gauge %s: bad format", key);
         }
         p->angle = atan2(x - cx, -(y - cy));
-        p->val = p->val * range + offset;
+        p->val = p->val * (scale - offset) + offset;
     }
     if (g->count < 2) {
         fn_802E317C("gauge %s: pair_count < 2", name);
