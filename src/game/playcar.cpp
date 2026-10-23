@@ -504,7 +504,36 @@ void fn_801916F4(u8* p) {
     F32(p, 0x40) = 0.0f;
 }
 
-void fn_80191758(u8* p) {}  // stub (66)
+// Per-player body-part transforms (lbl_804A16E8).
+struct PartXf {
+    f32 pos[3];  // offset 0x0
+    f32 scl[3];  // offset 0xC
+    f32 a;       // offset 0x18
+    f32 b;       // offset 0x1C
+};
+
+struct PlayerRec {
+    char name[0x20];   // offset 0x0
+    PartXf parts[4];   // offset 0x20
+};
+
+extern PlayerRec lbl_804A16E8[];
+char* strcpy(char* d, const char* s);
+
+static inline void ResetPart(PartXf* x) {
+    x->pos[0] = x->pos[1] = x->pos[2] = kZero;
+    x->scl[0] = x->scl[1] = x->scl[2] = kOne;
+    x->a = kOne;
+    x->b = kOne;
+}
+
+void fn_80191758(u8* p) {
+    strcpy(lbl_804A16E8[S32(p, 0x28)].name, (const char*)(PTR(p, 0x20) + 0x234));
+    ResetPart(&lbl_804A16E8[S32(p, 0x28)].parts[0]);
+    ResetPart(&lbl_804A16E8[S32(p, 0x28)].parts[1]);
+    ResetPart(&lbl_804A16E8[S32(p, 0x28)].parts[2]);
+    ResetPart(&lbl_804A16E8[S32(p, 0x28)].parts[3]);
+}
 
 }  // extern "C"
 
