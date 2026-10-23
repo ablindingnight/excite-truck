@@ -51,7 +51,89 @@ void fn_8018DA5C(u8* p) {}  // stub (270)
 
 void fn_8018DE94(u8* p) {}  // stub (295)
 
-void fn_8018E330(u8* p) {}  // stub (47)
+}  // extern "C"
+
+// The running game mode (only the slot used here is named).
+class GameMode {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void v60(void);
+    virtual void v64(void);
+    virtual void v68(void);
+    virtual void v6C(void);
+    virtual void v70(void);
+    virtual void v74(void);
+    virtual void v78(void);
+    virtual void v7C(void);
+    virtual void v80(void);
+    virtual void v84(void);
+    virtual void v88(void);
+    virtual void v8C(void);
+    virtual void v90(void);
+    virtual void v94(void);
+    virtual void v98(void);
+    virtual void v9C(void);
+    virtual void vA0(void);
+    virtual void ResetCar(u8* car);  // 0xA4
+};
+
+class DmgModel {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual u8* Current(void);  // 0x10
+};
+
+extern "C" {
+GameMode* fn_801B83A0(void);
+void fn_80161A38(int a, u8* car, int b);
+void fn_801DFF1C(u8* car);
+extern const f32 lbl_80561F74;
+extern const f32 lbl_80561F8C;
+extern f32 lbl_8055E3C8;
+
+void fn_8018E330(u8* p) {
+    fn_801B83A0()->ResetCar(p);
+    fn_80161A38(0, PTR(p, 0x1EC), 0);
+    fn_801DFF1C(PTR(p, 0x1EC));
+    f32 zero = lbl_80561F74;
+    f32 k = lbl_80561F8C;
+    F32(p, 0x258C) = zero;
+    F32(p, 0x2690) = k;
+    F32(p, 0x25BC) = zero;
+    F32(p, 0x26A0) = lbl_8055E3C8;
+    S32(p, 0x26A4) = S32(((DmgModel*)PTR(p, 0x270))->Current(), 0x4);
+    F32(p, 0x2588) = lbl_80561F74;
+    F32(p, 0x25A0) = lbl_80561F74;
+    U8(p, 0x259D) = 0;
+    U8(p, 0x259C) = 0;
+    S32(p, 0x2638) = 0;
+    S32(p, 0x2644) = 0;
+    F32(p, 0x2630) = lbl_80561F74;
+    F32(p, 0x262C) = lbl_80561F74;
+    F32(p, 0x2628) = lbl_80561F74;
+}
 
 void fn_8018E3EC(u8* p) {}  // stub (949)
 
