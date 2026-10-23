@@ -12,9 +12,23 @@
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 // A named camera setup ("namedcam" entries in the camera file).
+// A camera pose: rotation then position.
+struct CamMat3 {
+    f32 m[9];
+};
+
+struct CamVec3 {
+    f32 v[3];
+};
+
+struct CamPose {
+    CamMat3 rot;  // offset 0x0
+    CamVec3 pos;  // offset 0x24
+};
+
 struct NamedCam {
     u32 unk0;       // offset 0x0
-    f32 pose[12];   // offset 0x4
+    CamPose pose;   // offset 0x4
     f32 fov;        // offset 0x34
     char name[16];  // offset 0x38
 };
@@ -49,7 +63,7 @@ int fn_80276068(int mode) {
 
 void fn_80276098(f32* dst, f32* src, int a, int b, f32 from, f32 to, f32 t) {}  // stub (309)
 
-void fn_8027656C(u8* p) {}  // stub (310)
+void fn_8027656C(CamPose* pose, f32* fov, int a) {}  // stub (310)
 
 NamedCam* fn_80276A44(const char* name) {
     NamedCam* c = lbl_8049FEE0;
@@ -72,7 +86,14 @@ void fn_80276B8C(void) {
     }
 }
 
-void fn_80276BE4(u8* p) {}  // stub (51)
+void fn_80276BE4(CamPose* out, f32* fov) {
+    if (lbl_8049FD58[0]) {
+        fn_8027656C(&lbl_8049FE98.pose, &lbl_8049FE98.fov, 0);
+    }
+    out->rot = lbl_8049FE98.pose.rot;
+    out->pos = lbl_8049FE98.pose.pos;
+    *fov = lbl_8049FE98.fov;
+}
 
 void fn_80276CB0(const char* name, int blend) {
     NamedCam* c = fn_80276A44(name);
@@ -80,7 +101,7 @@ void fn_80276CB0(const char* name, int blend) {
         c = lbl_8055F598;
     }
     if (blend) {
-        fn_80276098(lbl_8049FE98.pose, c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
+        fn_80276098((f32*)&lbl_8049FE98.pose, (f32*)&c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
         lbl_8049FD58[0] = 0;
@@ -93,7 +114,7 @@ void fn_80276D3C(const char* name, int mode) {
         f32 pose[12];
         f32 fov;
         fn_8026A4A0(0, pose, &fov);
-        fn_80276098(pose, c->pose, 0, 0x22, fov, c->fov, 2.0f);
+        fn_80276098(pose, (f32*)&c->pose, 0, 0x22, fov, c->fov, 2.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
         lbl_8049FD58[0] = 0;
@@ -120,7 +141,16 @@ void fn_80277754(u8* p) {}  // stub (53)
 
 void fn_80277828(u8* p) {}  // stub (78)
 
-void fn_80277960(u8* p) {}  // stub (45)
+int fn_80277960(const char* name, CamPose* out, f32* fov) {
+    NamedCam* c = fn_80276A44(name);
+    if (c) {
+        out->rot = c->pose.rot;
+        out->pos = c->pose.pos;
+        *fov = c->fov;
+        return 1;
+    }
+    return 0;
+}
 
 void fn_80277A14(u8* p) {}  // stub (348)
 
