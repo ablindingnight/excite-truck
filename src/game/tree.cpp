@@ -388,9 +388,14 @@ s32 fn_802BC4E0(const TModel* m) {
 }
 
 f32 fn_802BC540(const TVec* v, f32 k) {
-    f32 x = v->x;
+    f32 x;
     f32 z = v->z;
-    return k * (f32)sqrt(x * x + z * z);
+    f32 xx;
+    f32 zz;
+    x = v->x;
+    xx = x * x;
+    zz = z * z;
+    return k * (f32)sqrt(xx + zz);
 }
 
 }  // extern "C"
