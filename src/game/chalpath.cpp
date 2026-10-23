@@ -70,7 +70,77 @@ int fn_8025FE8C(void) {
     return 0;
 }
 
-void fn_8025FECC(u8* p) {}  // stub (92)
+}  // extern "C"
+
+void SetNumPlayers(int n);
+u8* GetTrack(int i);
+
+class TrackTable {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual u32 GetString(const char* key, int def);  // 0x18
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual TrackTable* GetTable(const char* key);   // 0x5C
+    bool HasTable(const char* key) { return GetTable(key) != 0; }
+};
+
+class ChassisList {
+public:
+    virtual ~ChassisList(void);                               // 0x08
+    virtual void Add(u32 chassis, int a, int b);              // 0x0C
+};
+
+extern char lbl_80345B40[];  // this unit's string pool
+extern s32 lbl_8055C400;
+
+extern "C" {
+void fn_802E317C(const char* fmt, ...);
+ChassisList* fn_8025007C(int n);
+int fn_8024DAE0(u8* a, u8* b, int c, ChassisList* list, u32 d);
+
+// Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
+int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
+    char* pool = lbl_80345B40;
+    if (lbl_8055C400 >= 0) {
+        return 1;
+    }
+    SetNumPlayers(1);
+    u8* t = GetTrack(track);
+    u32 chassis = 0;
+    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable(pool + 0x90)) {  // "vehicle_map"
+        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable(pool + 0x90)->GetString(pool + 0xA0, 0);  // "default_vehicle"
+    } else {
+        fn_802E317C(pool + 0xB0);  // "...Expecting vehicle_map table and found none!"
+    }
+    ChassisList* list = 0;
+    if (chassis) {
+        list = fn_8025007C(1);
+        list->Add(chassis, 1, 0);
+    } else {
+        fn_802E317C(pool + 0x104);  // "...Default chassis is NULL!"
+    }
+    int r = fn_8024DAE0(a, b, 0, list, d);
+    delete list;
+    return r;
+}
 
 void fn_8026003C(u8* p) {}  // stub (482)
 
