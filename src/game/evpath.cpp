@@ -287,7 +287,55 @@ int fn_802808D0(void) {
     return 0;
 }
 
-void fn_80280A38(u8* p) {}  // stub (114)
+}  // extern "C"
+
+// An event's unlock condition (object at event + 0x60).
+class EvCond {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual int Done(void);          // 0x2C
+    virtual const char* Name(void);  // 0x30
+};
+
+extern char lbl_804B3068[100];  // name of the next event to unlock
+
+extern "C" {
+
+// When the current event is done, picks the first not-yet-done event as the next unlock.
+void fn_80280A38(void) {
+    u8* cur = (u8*)lbl_8055F688;
+    if (cur && PTR(cur, 0x60) && ((EvCond*)PTR(cur, 0x60))->Done()) {
+        lbl_8055F690 = lbl_8055F688;
+        if (!lbl_8055F68C) {
+            for (int i = 0; i < lbl_804B3048.count; i++) {
+                u8* e = (u8*)lbl_804B3048.data[i];
+                if (PTR(e, 0x60) && !((EvCond*)PTR(e, 0x60))->Done()) {
+                    lbl_8055F68C = (s32)e;
+                    break;
+                }
+            }
+        }
+        if (lbl_8055F68C) {
+            int i = lbl_804B3048.Find((u8*)lbl_8055F68C);
+            lbl_804B3068[0] = 0;
+            if (i >= 0 && i < lbl_804B3048.count) {
+                u8* e = (u8*)lbl_804B3048.data[i];
+                lbl_8055F688 = (s32)e;
+                if (e && PTR(e, 0x60)) {
+                    CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+                }
+            }
+        }
+    }
+}
 
 void fn_80280C00(u8* p) {}  // stub (114)
 
