@@ -2173,7 +2173,31 @@ void fn_801A401C(u8* p, u8* o) {
     }
 }
 
-void fn_801A40F8(u8* p) {}  // stub (205)
+// Ray from + t*dir against the mesh volume, tested in the volume's frame; the hit normal is turned
+// back into world space.
+int fn_801A40F8(u8* p, const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
+    RVec3 lf;
+    RVec3 ld;
+    RVec3 ln;
+    CFrame* f = (CFrame*)PTR(p, 0xC);
+    lf.x = from->x - f->t.x;
+    lf.y = from->y - f->t.y;
+    lf.z = from->z - f->t.z;
+    {
+        f32 x = Dot3(lf.x, f->m[0], lf.y, f->m[1], lf.z, f->m[2]);
+        f32 y = Dot3(lf.x, f->m[3], lf.y, f->m[4], lf.z, f->m[5]);
+        f32 z = Dot3(lf.x, f->m[6], lf.y, f->m[7], lf.z, f->m[8]);
+        lf.x = x;
+        lf.y = y;
+        lf.z = z;
+    }
+    MulVecT(&ld, dir, (CFrame*)PTR(p, 0xC));
+    if (fn_801CF828(PTR(p, 0x24), (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
+        MulVec(n, &ln, (CFrame*)PTR(p, 0xC));
+        return 1;
+    }
+    return 0;
+}
 
 void fn_801A442C(u8* p, RVec3* a, RVec3* b) {
     *a = *(RVec3*)(p + 0x28);
