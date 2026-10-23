@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large routines and the initialiser are still stubs. Names
 // are guesses apart from the strings.
 #include "game/common.h"
+#include "macros.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -279,7 +280,41 @@ void fn_8025B22C(u8* p) {
     }
 }
 
-void fn_8025B2BC(u8* p) {}  // stub (153)
+}  // extern "C"
+
+extern "C" void fn_80216D28(void);
+extern "C" void fn_80214D50(int s);
+
+static inline int MaxI(int a, int b) { return a > b ? a : b; }
+static inline int MinI(int a, int b) { return a < b ? a : b; }
+
+// Moves the shown level by d within [1, unlocked]; a bump sound when it can't move.
+static inline void StepLevel(u8* p, int d) {
+    int old = S32(p, 0x74);
+    S32(p, 0x74) = old + d;
+    S32(p, 0x74) = MinI(MaxI(S32(p, 0x74), 1), S32(p, 0x1C));
+    if (old != S32(p, 0x74)) {
+        SetTrophy(p, S32(p, 0x70), S32(p, 0x74));
+        fn_801345D8((char*)(p + 0x20), 0x50, "%s", AchievementsGetLevelModel(S32(p, 0x70), S32(p, 0x74)));
+    } else {
+        fn_80216D28();
+        fn_80214D50(1);
+    }
+}
+
+extern "C" {
+
+int fn_8025B2BC(u8* p, int key) {
+    switch (key) {
+    case 0x128:
+        StepLevel(p, -1);
+        return 1;
+    case 0x126:
+        StepLevel(p, 1);
+        return 1;
+    }
+    return 0;
+}
 
 void fn_8025B520(u8* p) {}  // stub (153)
 
