@@ -778,9 +778,8 @@ void SparkSys::Step(void) {
     f32 age = fn_801E7E18() - life;
     f32 dt = fn_801E7E24();
     f32 g = 9.81f * dt;
-    f32 h = 0.5f * dt;
     f32 down = 0.2f * g;
-    f32 drag = 1.0f - h;
+    f32 drag = 1.0f - (0.5f * dt);
     Spark* out = pts;
     for (int i = 0; i < count; i++) {
         Spark* s = &pts[i];

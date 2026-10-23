@@ -959,7 +959,6 @@ void CarModel::Set(const AnimSlot* s) {
         f32 yz = frame.axes[1].z * k;
         f32 zx = frame.axes[2].x * k;
         f32 zy = frame.axes[2].y * k;
-        f32 zz = frame.axes[2].z * k;
         scaled.pos = frame.pos;
         scaled.axes[0].x = xx;
         scaled.axes[0].y = xy;
@@ -969,7 +968,7 @@ void CarModel::Set(const AnimSlot* s) {
         scaled.axes[1].z = yz;
         scaled.axes[2].x = zx;
         scaled.axes[2].y = zy;
-        scaled.axes[2].z = zz;
+        scaled.axes[2].z = (frame.axes[2].z * k);
     }
     for (int i = 0; i < 4; i++) {
         fn_801F0F78(wheels[i], &car->wheels[i], &frame, scale);
@@ -1007,9 +1006,8 @@ void CarModel::vf1C(void) {
     f32 k;
     if (fn_801E9E78(&q, &p, &up, &q.hit)) {
         f32 d = -PSVECDotProduct(&up, fn_802C9A40());
-        f32 m = 0.1f > d ? 0.1f : d;
         h = frame.pos.y - p.y;
-        k = 1.0f / m;
+        k = 1.0f / (0.1f > d ? 0.1f : d);
     } else {
         h = 0.0f;
         k = 1.5f;

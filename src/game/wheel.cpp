@@ -390,8 +390,7 @@ void Wheel::vf1C(void) {
             t.y *= k;
             t.z *= k;
             AddTorque(&t);
-            f32 roll = PSVECDotProduct(&mtx.rot[0], &vel) / spin;
-            RVec3 t2(0.0f, 100.0f * roll, 0.0f);
+            RVec3 t2(0.0f, 100.0f * (PSVECDotProduct(&mtx.rot[0], &vel) / spin), 0.0f);
             AddTorque(&t2);
             *(GMtx3*)&pos = *(const GMtx3*)&mtx.pos;
             if (fn_801E9E30(hint, &pos)) {

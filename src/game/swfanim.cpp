@@ -139,7 +139,7 @@ void SwfAnim::DrawItem(const Sw2Item* it) {
     SwfPt pts[4];
     SwfVtx v[4] __attribute__((aligned(16)));
     Sw2Shape* sh = &data->shapes[it->shape];
-    Sw2Cxform* cx = &data->cxforms[it->cxform];
+    const Sw2Cxform* cx = &data->cxforms[it->cxform];
     for (int i = 0; i < sh->numPts; i++) {
         f32 x = sh->pts[i][0];
         f32 y = sh->pts[i][1];
