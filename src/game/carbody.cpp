@@ -470,7 +470,16 @@ f32 fn_8018AE4C(void) { return 0.0f; }
 
 f32 fn_8018AE54(void) { return 0.0f; }
 
-void fn_8018AE5C(u8* p) {}  // stub (8)
+// Shared body-tuning block (lbl_80434990), built on first use.
+struct BodyTune {
+    BodyTune(void) {}
+    u8 data[0x10];
+};
+
+BodyTune* fn_8018AE5C(void) {
+    static BodyTune s;
+    return &s;
+}
 
 f32 fn_8018AE7C(u8* p) {
     if (U32(fn_801769CC(), 0x4) == 0x180304) {
