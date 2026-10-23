@@ -1335,7 +1335,49 @@ u8* fn_801A1520(u8* p, u32 a, u32 swap) {
     return p;
 }
 
-void fn_801A15CC(u8* p) {}  // stub (123)
+// Ray from + t*dir against the capsule's side (axis clamped to +-half length 0x28, radius 0x24):
+// the hit if it lies in (0, *t), with its normal.
+int fn_801A15CC(u8* p, const f32* from, const f32* dir, f32* t, f32* n) {
+    PVec3 hit;
+    PVec3 on;
+    f32 tr = 0.0f;
+    f32 s = 0.0f;
+    u8* m = PTR(p, 0xC);
+    f32* axis = (f32*)(m + 0x18);
+    f32* org = (f32*)(m + 0x24);
+    if (fn_8019D484(from, dir, org, axis, &tr, &s)) {
+        f32 h = F32(p, 0x28);
+        f32 nh = -h;
+        f32 v = h;
+        if (!(h < s)) {
+            v = s;
+        }
+        if (!(v > nh)) {
+            v = nh;
+        }
+        s = v;
+        if (tr > 0.0f && tr < *t) {
+            MulAdd(hit.v, from, dir, tr);
+            MulAdd(on.v, org, axis, s);
+            f32 d2 = PSVECSquareDistance(hit.v, on.v);
+            f32 r = F32(p, 0x24);
+            if (d2 < r * r) {
+                n[0] = hit.v[0] - on.v[0];
+                n[1] = hit.v[1] - on.v[1];
+                n[2] = hit.v[2] - on.v[2];
+                f32 len = PSVECMag(n);
+                f32 k = 0.001f;
+                f32 inv = 1.0f / (k > len ? k : len);
+                n[0] *= inv;
+                n[1] *= inv;
+                n[2] *= inv;
+                *t = tr;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 // Axis + centre of a tube volume (plain data, copied as words).
 struct TubeSeg {
