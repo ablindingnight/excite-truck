@@ -1408,7 +1408,66 @@ void fn_801A0444(u8* p, u8* q) {
 
 void fn_801A0464(u8* p) {}  // stub (683)
 
-void fn_801A0F10(u8* p) {}  // stub (142)
+extern const f32 lbl_805622E0;  // 1.0
+void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
+void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
+
+static inline int IsCarObj(const u8* o) {
+    if (o) {
+        switch (S32(o, 0x10)) {
+        case 'ACAR':
+        case 'CAR ':
+        case 'NCAR':
+        case 'PCAR':
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Per-frame update of the sphere group; with a track mesh loaded and a car owner, each of its 4 wheels
+// (moved by the car's velocity) is tested against the mesh and every hit reported to the car.
+void fn_801A0F10(u8* p) {
+    RVec3* h;
+    RVec3 hits[64];
+    PVec3 wp;
+    PVec3 c;
+    PVec3 d;
+    int n;
+    fn_801A0160(p);
+    for (int i = 0; i < S32(p, 0x174); i++) {
+        ((SphGroup*)p)->vols[i]->v14();
+    }
+    if (lbl_8055E5A0) {
+        u8* car = PTR(p, 0x4);
+        if (IsCarObj(car)) {
+            int id = S32(car, 0x1EC);
+            for (int w = 0; w < 4; w++) {
+                fn_801BEAEC(id, w, &wp);
+                c = wp;
+                c.v[0] = c.v[0] + F32(car, 0x48) * lbl_805622E0;
+                c.v[1] = c.v[1] + F32(car, 0x4C) * lbl_805622E0;
+                c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805622E0;
+                n = 64;
+                fn_801CF080(lbl_8055E5A0, (RVec3*)c.v, hits, &n, 0, lbl_8056234C);
+                h = hits;
+                for (int k = 0; k < n; h++, k++) {
+                    d.v[0] = c.v[0] - h->x;
+                    d.v[1] = c.v[1] - h->y;
+                    d.v[2] = c.v[2] - h->z;
+                    f32 len = PSVECMag(d.v);
+                    if (len > 0.001f) {
+                        f32 inv = lbl_805622E0 / len;
+                        d.v[0] *= inv;
+                        d.v[1] *= inv;
+                        d.v[2] *= inv;
+                        fn_801BEB44(id, w, h, &d);
+                    }
+                }
+            }
+        }
+    }
+}
 
 // Sweeps a ray against the group: a cheap slab test on the bounding sphere, then each member.
 int fn_801A1148(u8* p, u32 from, u32 dir, u32 t, u32 out) {
