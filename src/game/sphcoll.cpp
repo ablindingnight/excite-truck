@@ -475,7 +475,43 @@ void fn_8019D378(u8* p, u8* q) {
     fn_8019C854(p, q);
 }
 
-void fn_8019D484(u8* p) {}  // stub (101)
+void PSVECCrossProduct(const void* a, const void* b, void* out);
+extern const f32 lbl_80562348;  // parallel-line threshold
+
+static inline f32 Det33(f32 m[3][3]) {
+    return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) + m[0][1] * (m[1][2] * m[2][0] - m[1][0] * m[2][2]) +
+           m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+}
+
+// Closest approach of the lines p0 + t*d0 and p1 + s*d1; 0 when they are parallel.
+int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32* t, f32* s) {
+    f32 m[3][3];
+    PVec3 w;
+    PVec3 n;
+    w.v[0] = p1[0] - p0[0];
+    w.v[1] = p1[1] - p0[1];
+    w.v[2] = p1[2] - p0[2];
+    PSVECCrossProduct(d0, d1, n.v);
+    f32 nn = PSVECDotProduct(n.v, n.v);
+    if (nn > lbl_80562348) {
+        m[0][0] = w.v[0];
+        m[0][1] = d1[0];
+        m[0][2] = n.v[0];
+        m[1][0] = w.v[1];
+        m[1][1] = d1[1];
+        m[1][2] = n.v[1];
+        m[2][0] = w.v[2];
+        m[2][1] = d1[2];
+        m[2][2] = n.v[2];
+        *t = Det33(m) / nn;
+        m[0][1] = d0[0];
+        m[1][1] = d0[1];
+        m[2][1] = d0[2];
+        *s = Det33(m) / nn;
+        return 1;
+    }
+    return 0;
+}
 
 int fn_8019D618(u8* p, u8* q, int a, int b) { return 0; }  // stub (294)
 
