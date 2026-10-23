@@ -10,7 +10,26 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+struct Mat3 {
+    f32 m[9];
+};
+
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
+extern const f32 lbl_80563FA8;
+extern const f32 lbl_80563FAC;
+extern const f32 lbl_80563FB0;
+extern const f32 lbl_80563FF0;
+extern const f32 lbl_80563FF4;
+extern const f32 lbl_80563FF8;
+extern const f32 lbl_80564010;
+extern const f32 lbl_80564014;
+extern const f32 lbl_80564018;
+extern const f32 lbl_8056401C;
+
 extern "C" {
+f32 PSVECMag(const f32* v);
+void fn_80015A20(Mat3* out, const f32* axis, f32 a, f32 b);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 u8* fn_80273978(u8* p, int del);
 u8* fn_80273B08(u8* p, int del);
@@ -68,7 +87,38 @@ void fn_8027445C(u8* p) { fn_80274268(p); }
 
 void fn_80274460(u8* p) {}  // stub (128)
 
-void fn_80274660(u8* p) {}  // stub (52)
+void fn_80274660(u8* unused, u8* p) {
+    F32(p, 0x5C) = lbl_80563FB0;
+    F32(p, 0x58) = lbl_80563FAC;
+    F32(p, 0x60) = lbl_80563FB0;
+    F32(p, 0x64) = lbl_80563FB0;
+    F32(p, 0x68) = lbl_80563FAC;
+    F32(p, 0x6C) = lbl_80563FB0;
+    F32(p, 0x70) = lbl_80563FB0;
+    F32(p, 0x74) = lbl_80563FB0;
+    F32(p, 0x78) = lbl_80563FAC;
+    F32(p, 0x7C) = lbl_80563FB0;
+    F32(p, 0x80) = lbl_80563FB0;
+    F32(p, 0x84) = lbl_80563FB0;
+    f32 axis[3];
+    axis[0] = lbl_80563FF0;
+    axis[1] = lbl_80563FB0;
+    axis[2] = lbl_80563FB0;
+    Mat3 rot;
+    fn_80015A20(&rot, axis, lbl_80563FB0, lbl_80563FAC);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
+    F32(p, 0x7C) = F32(p, 0xE4);
+    F32(p, 0x80) = F32(p, 0xE8);
+    F32(p, 0x84) = F32(p, 0xEC);
+    f32 h;
+    if (S32(p, 0x10) == 10) {
+        h = lbl_80563FF4;
+    } else {
+        h = lbl_80563FF8;
+    }
+    F32(p, 0x124) = lbl_80563FB0;
+    F32(p, 0x80) += h;
+}
 
 void fn_80274730(u8* p, f32 a, f32 b, f32 c, f32 d) {}  // stub (179)
 
@@ -76,7 +126,20 @@ void fn_802749FC(u8* p) {}  // stub (294)
 
 void fn_80274E94(u8* p) { fn_80274730(p, -1.0f, -1.0f, -1.0f, 0.0f); }
 
-void fn_80274EA8(u8* p) {}  // stub (51)
+void fn_80274EA8(u8* p) {
+    f32 d[3];
+    d[0] = F32(p, 0x7C) - F32(p, 0xE4);
+    d[1] = F32(p, 0x80) - F32(p, 0xE8);
+    d[2] = F32(p, 0x84) - F32(p, 0xEC);
+    f32 m = PSVECMag(d);
+    if (m > lbl_80564010) {
+        f32 s = -(m - lbl_80564010) / m;
+        F32(p, 0x7C) = F32(p, 0x7C) + d[0] * s;
+        F32(p, 0x80) = F32(p, 0x80) + d[1] * s;
+        F32(p, 0x84) = F32(p, 0x84) + d[2] * s;
+    }
+    fn_80274730(p, lbl_80563FA8, lbl_80564014, lbl_80564018, lbl_8056401C);
+}
 
 void fn_80274F74(u8* p) {}  // stub (84)
 
