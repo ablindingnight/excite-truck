@@ -4,7 +4,6 @@
 // event, and the loop that plays career contests and reports what a run unlocked. Names are guesses apart
 // from the strings.
 #include "game/common.h"
-#include "game/pathstatics.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -387,9 +386,9 @@ static inline int PMax(int a, int b) { return a > b ? a : b; }
 static inline int PMin(int a, int b) { return a < b ? a : b; }
 
 ModuleTag lbl_8055F660;
-PathInfo lbl_804B2FC0;
+UnkStatic123s lbl_804B2FC0;
 static CareerSave lbl_804B2FD8[4];
-PathLimit lbl_8055F668;
+UnkStatic7F lbl_8055F668;
 u8 lbl_8055F66C;  // running
 s32 lbl_8055C790 = -1;
 
