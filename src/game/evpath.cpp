@@ -101,7 +101,7 @@ ModuleTag lbl_8055F670;
 s32 lbl_8055F678;
 u8 lbl_8055F67C;
 VR* lbl_8055F680;
-u8 lbl_8055F684;
+bool lbl_8055F684;
 u8 lbl_8055F685;
 s32 lbl_8055F688;
 s32 lbl_8055F68C;
@@ -580,8 +580,9 @@ void fn_80287304(u8* p) { VR(PTR(p, 0x4))->v14(); }
 void fn_80287318(u8* p) { VR(PTR(p, 0x4))->v18(); }
 
 u8* fn_8028732C(u8* p, s32 x) {
-    if (PTR(p, 0x8) && x == S32(p, 0xC)) {
-        return PTR(p, 0x8);
+    u8* r = PTR(p, 0x8);
+    if (r && x == S32(p, 0xC)) {
+        return r;
     }
     return VR(PTR(p, 0x4))->v1C(x);
 }
