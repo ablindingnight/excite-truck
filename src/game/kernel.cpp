@@ -668,7 +668,7 @@ int main(void) {
 
 s32 fn_802E2C20(void) {
     s64 t = OSGetTime();
-    if (lbl_8055FEF8 == 0) {
+    if (!lbl_8055FEF8) {
         lbl_8055FEF8 = t;
     }
     return (t - lbl_8055FEF8) / ((OS_BUS_CLOCK / 4) / 1000);
