@@ -122,6 +122,7 @@ public:
     RigidBody(void);
     void Reset(void);
     void OnHit(const RVec3* a, const RVec3* b, int c, void* d);
+    void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
 };
 
 class CarBody : public RigidBody {
@@ -404,7 +405,70 @@ void fn_8018A120(u8* p) {
 
 void fn_8018A174(u8* p) { F32(p, 0x2650) = 4.0f; }
 
-void fn_8018A180(u8* p) {}  // stub (79)
+}  // extern "C"
+
+class CarElem {
+public:
+    void Fetch(int id);
+};
+
+class CarGear {
+public:
+    void Fetch(int id);
+};
+
+class CarHost {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void Unimpair(void);   // 0x34
+    virtual int IsImpaired(void);  // 0x38
+};
+
+extern u8* lbl_8055E908;
+
+extern "C" {
+void fn_8018F2C0(u8* p, u8* q);
+void fn_8018AF04(u8* p);
+void fn_802E30C8(const char* fmt, ...);
+void vf20__10CollVolumeFv(u8* p);
+void fn_801BDA74(s32 id, u8* mass);
+extern const f32 lbl_80561D54;
+extern const f32 lbl_80561D58;
+extern const f32 lbl_80561CD0;
+
+// Re-applies the tuned body setup (mass, inertia, elements, gearing) after a change.
+void fn_8018A180(u8* p) {
+    if (PTR(p, 0x328)) {
+        fn_80279B28(PTR(p, 0x328), p + 0x1E44);
+        fn_8018F2C0(p, p + 0x1E44);
+        if (S32(p, 0x20DC) < 9 && ((CarHost*)PTR(p, 0x270))->IsImpaired()) {
+            fn_802E30C8("car: unimpairing car %d", S32(p, 0x1EC));
+            ((CarHost*)PTR(p, 0x270))->Unimpair();
+            fn_8018AF04(p);
+        }
+    }
+    F32(p, 0x30) = F32(p, 0x458);
+    F32(p, 0x34) = F32(p, 0x45C);
+    F32(p, 0x38) = F32(p, 0x460);
+    vf20__10CollVolumeFv(p);
+    ((RigidBody*)p)->SetMass(F32(p, 0x32C) / lbl_80561D54, F32(p, 0x330) / lbl_80561D58, F32(p, 0x334) / lbl_80561D58,
+                             F32(p, 0x338) / lbl_80561D58);
+    F32(p, 0xD4) = F32(p, 0x32C);
+    F32(p, 0xE4) = lbl_80561CD0 / F32(p, 0x32C);
+    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
+    ((CarElem*)(lbl_8055E908 + S32(p, 0x1EC) * 0x34))->Fetch(S32(p, 0x1EC));
+    ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Fetch(S32(p, 0x1EC));
+}
 
 void fn_8018A2BC(u8* p) {}
 
