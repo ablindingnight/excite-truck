@@ -119,8 +119,6 @@ s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
-extern s32 lbl_8055BEBC;
-extern s32 lbl_8055BEB8;
 extern s32 lbl_8055BEC0;
 extern void* lbl_803435A0[];
 extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
@@ -664,8 +662,9 @@ int fn_802476FC(void) {
 void fn_80247768(void) { lbl_8055BEAC = fn_80214D04(); }
 
 void fn_8024778C(void) {
-    if (lbl_8055BEB8 != lbl_8055F26C) {
-        lbl_8055BEB8 = lbl_8055F26C;
+    static s32 sLastMode = 6;
+    if (sLastMode != lbl_8055F26C) {
+        sLastMode = lbl_8055F26C;
         switch (lbl_8055F26C) {
         case 2:
             lbl_8055BEB0 = 1;
@@ -719,8 +718,9 @@ int fn_802478A4(void) {
 }
 
 void fn_80247A0C(void) {
-    if (lbl_8055BEBC != lbl_8055BEA8) {
-        lbl_8055BEBC = lbl_8055BEA8;
+    static s32 sLastMode = 4;
+    if (sLastMode != lbl_8055BEA8) {
+        sLastMode = lbl_8055BEA8;
         switch (lbl_8055BEA8) {
         case 5:
             lbl_8055BEB4 = 1;
@@ -731,7 +731,7 @@ void fn_80247A0C(void) {
         }
     }
     fn_80214CB4(lbl_8055BEB4);
-    switch (lbl_8055BEBC) {
+    switch (sLastMode) {
     case 4:
         fn_80214B44(2);
         break;
