@@ -222,8 +222,8 @@ public:
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(const char* a, const char* b);
-    virtual void v1C(void);
-    virtual void v20(void);
+    virtual void v1C(const RVec3* imp, const RVec3* at, u32 a, u32 b);  // push
+    virtual void v20(u32 who, const RVec3* f, const RVec3* at, u32 a, u32 b, u32 c, f32 w);  // friction
     virtual void v24(void);
     virtual void v28(void);
     virtual void v2C(void);
@@ -259,7 +259,7 @@ void fn_8012C4E4(void* a, void* fn, int b);
 void fn_801796EC(int kind, void* msg, int size);
 void fn_801D0650(u8* p);
 void fn_801D06C4(u8* p);
-void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r);
+int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r);
 int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
@@ -370,9 +370,50 @@ void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u
     }
 }
 
-void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r) {}
+f32 fn_8019DF88(u8* m, const RVec3* v, u8* w, const RVec3* at, const f32* n, f32 k, f32 e);
+void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
 
-void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, p + 0x34, a, b, c, F32(p, 0x24)); }
+// Sphere (c, r) of p against the point at: a spring push along the normal, then friction from the body.
+int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
+    PVec3 d;
+    PVec3 n;
+    RVec3 vel;
+    RVec3 imp;
+    RVec3 fr;
+    d.v[0] = c[0] - at->x;
+    d.v[1] = c[1] - at->y;
+    d.v[2] = c[2] - at->z;
+    f32 len = PSVECMag(d.v);
+    RigidBody* rb = (RigidBody*)PTR(p, 0x4);
+    if (len > 0.001f && len < r) {
+        f32 pen = r - len;
+        f32 inv = 1.0f / len;
+        n.v[0] = d.v[0] * inv;
+        n.v[1] = d.v[1] * inv;
+        n.v[2] = d.v[2] * inv;
+        rb->VelAt(&vel, at);
+        f32 k = pen * F32(p, 0x10);
+        PSVECDotProduct(&vel, n.v);
+        imp.x = n.v[0] * k;
+        imp.y = n.v[1] * k;
+        imp.z = n.v[2] * k;
+        VE(p)->v1C(&imp, at, a, 0);
+        f32 f = fn_8019DF88((u8*)rb + 0x60, &vel, (u8*)rb + 0x148, at, n.v, F32(rb, 0xD4), 0.3f);
+        if (f > 0.0f) {
+            fr.x = n.v[0] * f;
+            fr.y = n.v[1] * f;
+            fr.z = n.v[2] * f;
+            f32 lo = 0.001f;
+            f32 w = lo > pen ? lo : pen;
+            VE(p)->v20(b, &fr, at, a, 0, 0, w);
+            fn_801B34DC(p, 0, at, &fr, n.v, a);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, (f32*)(p + 0x34), (RVec3*)a, b, c, F32(p, 0x24)); }
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 void PSVECNormalize(const void* in, void* out);
@@ -728,7 +769,7 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
     return 0;
 }
 
-void fn_8019DF88(u8* p) {}  // stub (155)
+f32 fn_8019DF88(u8* m, const RVec3* v, u8* w, const RVec3* at, const f32* n, f32 k, f32 e) { return 0.0f; }  // stub (155)
 
 extern f32 lbl_80558DC4[];       // FLT_EPSILON
 extern const f32 lbl_805622D0;  // 0.0
