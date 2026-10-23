@@ -1037,6 +1037,7 @@ config.libs.append(
             Object(NonMatching, "game/wheel.cpp"),
             Object(Matching, "game/stub7.cpp"),
             Object(NonMatching, "game/deity.cpp"),
+            Object(NonMatching, "game/collisionsound.cpp"),
             Object(NonMatching, "game/physreplay.cpp"),
             Object(Matching, "game/sol.cpp"),
             Object(Matching, "game/phoblist.cpp"),
