@@ -232,8 +232,8 @@ void fn_801796EC(int kind, void* msg, int size);
 void fn_801D0650(u8* p);
 void fn_801D06C4(u8* p);
 void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r);
-void fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
-void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r);
+int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
+int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r);
 int fn_8019DDFC(u32 a, u32 b, u32 c, u32 d, u8* e, f32 r);
 void fn_8019ECC4(u8* p, u32 a, u32 b);
@@ -295,11 +295,14 @@ void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r) {}
 
 void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, p + 0x34, a, b, c, F32(p, 0x24)); }
 
-void fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {}
+int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) { return 0; }  // stub (528)
 
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r) {}
 
-void fn_8019B068(u8* p, u8* q, u32 a, u32 b) { fn_8019AA34(p, p + 0x34, q, q + 0x34, a, b, F32(p, 0x24), F32(q, 0x24)); }
+int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
+    f32 s = F32(q, 0x24);
+    return fn_8019AA34(p, p + 0x34, q, q + 0x34, a, b, F32(p, 0x24), s);
+}
 
 int fn_8019B08C(u8* p, f32* c, u8* q, f32 r) { return 0; }  // stub (275)
 
@@ -311,9 +314,28 @@ void fn_8019BD54(u8* p, u8* q, int a, int b) {}  // stub (704)
 
 void fn_8019C854(u8* p, u8* q) {}  // stub (286)
 
-void fn_8019CCCC(u8* p, u8* c, u32 a, f32 r) {}
+// Capsule (q: frame at 0xC with axis at 0x18 and centre at 0x24, half length 0x28, radius 0x24):
+// the cylinder test, then a sphere test at each end.
+int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
+    if (fn_8019B08C(p, (f32*)c, q, r)) {
+        return 1;
+    }
+    u8* m = PTR(q, 0xC);
+    f32 h = F32(q, 0x28);
+    PVec3 a;
+    PVec3 b;
+    PVec3 axis = *(PVec3*)(m + 0x18);
+    PVec3 org = *(PVec3*)(m + 0x24);
+    f32 rad = F32(q, 0x24);
+    MulAdd(a.v, org.v, axis.v, h);
+    MulAdd(b.v, org.v, axis.v, -h);
+    bool hit = false;
+    hit |= fn_8019AA34(p, c, q, (u8*)a.v, 0, 0, r, rad);
+    hit |= fn_8019AA34(p, c, q, (u8*)b.v, 0, 0, r, rad);
+    return hit;
+}
 
-void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, a, F32(p, 0x24)); }
+void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, (u8*)a, F32(p, 0x24)); }
 
 extern const f32 lbl_8056232C;  // small distance
 f32 PSVECSquareDistance(const void* a, const void* b);
