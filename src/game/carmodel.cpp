@@ -983,7 +983,7 @@ struct ShadowQuery {
 void CarModel::vf1C(void) {
     f32 s = fn_801E88F0(-1);
     s = s * s;
-    s = fn_802C88E8(&frame.pos) * s;
+    s = s * fn_802C88E8(&frame.pos);
     int i = numShadows - 1;
     while (i >= 0 && s < shadows[i].dist * shadows[i].dist) {
         i--;
@@ -1002,8 +1002,8 @@ void CarModel::vf1C(void) {
     up.y = 1.0f;
     up.z = 0.0f;
     q.hit = 0;
-    f32 h;
     f32 k;
+    f32 h;
     if (fn_801E9E78(&q, &p, &up, &q.hit)) {
         f32 d = -PSVECDotProduct(&up, fn_802C9A40());
         h = frame.pos.y - p.y;
