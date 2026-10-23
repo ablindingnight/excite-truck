@@ -418,7 +418,45 @@ void fn_8024B6AC(u8* p) {
     U32(p, 0x98) = U32(((u8**)PTR(p, 0x18))[S32(p, 0x9C)], 0x0);
 }
 
-void fn_8024B73C(u8* p) {}  // stub (61)
+extern void* lbl_80343B70[];
+
+// Fixed-capacity pointer list with inline storage.
+struct PtrVec {
+    EvEntry** data;  // offset 0x0
+    s32 count;       // offset 0x4
+    s32 cap;         // offset 0x8
+
+    void Push(EvEntry* e) {
+        EvEntry** d = data;
+        int n = count;
+        count = n + 1;
+        d[n] = e;
+    }
+};
+void __ct__7DynoTexFiUc(void* p, int n, u8 f);
+void Add__7DynoTexFiPCc(void* p, int id, const char* name);
+
+u8* fn_8024B73C(u8* p, const char* name, EvList* list) {
+    EvEntry* e;
+    int i;
+    S32(p, 0x14) = 0;
+    *(void**)p = lbl_80343B70;
+    PTR(p, 0x18) = p + 0x24;
+    S32(p, 0x20) = 10;
+    S32(p, 0x1C) = 0;
+    __ct__7DynoTexFiUc(p + 0x4C, 10, 0);
+    for (i = 0; i < list->count; i++) {
+        e = &list->items[i];
+        if (!strcasecmp(name, (const char*)e->sel)) {
+            ((PtrVec*)(p + 0x18))->Push(e);
+            Add__7DynoTexFiPCc(p + 0x4C, e->id, fn_8024B178(e->id));
+        }
+    }
+    U8(p, 0x64) = 0;
+    S32(p, 0x98) = -1;
+    S32(p, 0x9C) = -1;
+    return p;
+}
 
 void fn_8024B830(u8* p, s32 id) {
     S32(p, 0x9C) = -1;
