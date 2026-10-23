@@ -156,7 +156,32 @@ void fn_8024DADC(u8* p) { fn_8024739C(p); }
 
 void fn_8024DAE0(u8* p) {}  // stub (769)
 
-void fn_8024E6E4(u8* p) {}  // stub (77)
+extern void* lbl_80344410[];
+
+u8* fn_8024E6E4(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80344410;
+        delete (VDel*)PTR(p, 0xD4);
+        if (p) {
+            *(void**)p = lbl_803444D8;
+            delete[] PTR(p, 0xCC);
+            if (--lbl_8055F2E8 == 0) {
+                FreeIconPool(lbl_8055F2E4);
+                lbl_8055F2E4 = 0;
+            }
+            if (p) {
+                *(void**)p = lbl_8034453C;
+                delete[] PTR(p, 0x18);
+                fn_80235380(PTR(p, 0x24));
+                fn_802CAC54(PTR(p, 0x20));
+            }
+        }
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
 
 u8* fn_8024E818(u8* p, int del) {
     if (p) {
@@ -287,7 +312,41 @@ u8* fn_8025007C(int n) {
     return o;
 }
 
-void fn_80250108(u8* p) {}  // stub (63)
+// Animated slot: shown value chases the selected one.
+struct SlotAnim {
+    s32 shown;  // offset 0x0
+    s32 sel;    // offset 0x4
+    f32 t;      // offset 0x8
+};
+
+f32 fn_80214D48(void);
+extern const f32 lbl_80563960;
+extern const f32 lbl_80563964;
+extern const f32 lbl_80563968;
+extern const f32 lbl_8056396C;
+extern const f32 lbl_80563970;
+
+void fn_80250108(u8* p) {
+    SlotAnim* e;  // near miss: i/e register swap
+    f32 dt = fn_80214D48();
+    F32(p, 0x28) = F32(p, 0x28) + lbl_80563968 * ((f32)S32(p, 0x2C) - F32(p, 0x28));
+    for (int i = 0; i < S32(p, 0x1C); i++) {
+        e = &((SlotAnim*)PTR(p, 0x18))[i];
+        if (e->sel != e->shown) {
+            e->t = e->t + lbl_8056396C * dt;
+            if (e->t >= lbl_80563964) {
+                e->shown = e->sel;
+                e->t = e->t - lbl_80563970;
+            }
+        } else {
+            f32 t = e->t + lbl_8056396C * dt;
+            if (lbl_80563960 < t) {
+                t = lbl_80563960;
+            }
+            e->t = t;
+        }
+    }
+}
 
 void fn_80250204(u8* p) {}  // stub (925)
 
