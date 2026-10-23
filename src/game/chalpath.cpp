@@ -276,43 +276,52 @@ struct PathScreen {
 
 extern "C" {
 
-// Redraws every node after a selection change (lbl_8055F3EB set); returns 1 when nothing changed.
+}  // extern "C"
+
+// Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).
+static inline void RedrawNodes(void) {
+    int i;
+    for (i = 0; i < SCREEN->numEvents; i++) {
+        if (!lbl_8055F3EB) {
+            SCREEN->events[i]->Dim();
+            SCREEN->events[i]->Refresh();
+        } else if (i == SCREEN->event) {
+            SCREEN->events[i]->Select();
+        } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
+            SCREEN->events[i]->Open();
+            SCREEN->events[i]->Refresh();
+        } else {
+            SCREEN->events[i]->Refresh();
+        }
+    }
+    for (i = 0; i < SCREEN->numLevels; i++) {
+        if (!lbl_8055F3EB) {
+            if (i == SCREEN->level) {
+                SCREEN->levels[i]->Select();
+            } else {
+                SCREEN->levels[i]->Open();
+                SCREEN->levels[i]->Refresh();
+            }
+        } else if (i == SCREEN->level) {
+            SCREEN->levels[i]->Select();
+            SCREEN->levels[SCREEN->level]->Focus();
+        } else {
+            SCREEN->levels[i]->Dim();
+            SCREEN->levels[i]->Refresh();
+        }
+    }
+}
+
+extern "C" {
+
+// Back from event picking to difficulty picking (lbl_8055F3EB set); returns 1 when nothing changed.
 int fn_80260E30(void) {
     if (lbl_8055F3EB) {
         lbl_8055F3EB = 0;
-        int i;
-        for (i = 0; i < SCREEN->numLevels; i++) {
+        for (int i = 0; i < SCREEN->numLevels; i++) {
             SCREEN->levels[i]->Refresh();
         }
-        for (i = 0; i < SCREEN->numEvents; i++) {
-            if (!lbl_8055F3EB) {
-                SCREEN->events[i]->Dim();
-                SCREEN->events[i]->Refresh();
-            } else if (i == SCREEN->event) {
-                SCREEN->events[i]->Select();
-            } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
-                SCREEN->events[i]->Open();
-                SCREEN->events[i]->Refresh();
-            } else {
-                SCREEN->events[i]->Refresh();
-            }
-        }
-        for (i = 0; i < SCREEN->numLevels; i++) {
-            if (!lbl_8055F3EB) {
-                if (i == SCREEN->level) {
-                    SCREEN->levels[i]->Select();
-                } else {
-                    SCREEN->levels[i]->Open();
-                    SCREEN->levels[i]->Refresh();
-                }
-            } else if (i == SCREEN->level) {
-                SCREEN->levels[i]->Select();
-                SCREEN->levels[SCREEN->level]->Focus();
-            } else {
-                SCREEN->levels[i]->Dim();
-                SCREEN->levels[i]->Refresh();
-            }
-        }
+        RedrawNodes();
     } else {
         return 1;
     }
@@ -332,9 +341,33 @@ int fn_802610C8(void) {
     return 0;
 }
 
-void fn_80261178(u8* p) {}  // stub (154)
+// Difficulty chosen: moves to its first event node.
+int fn_80261178(void) {
+    if (lbl_8055F3EB) {
+        return 1;
+    }
+    lbl_8055F3EB = 1;
+    SCREEN->event = SCREEN->level * 2;
+    RedrawNodes();
+    return 0;
+}
 
-void fn_802613E0(u8* p) {}  // stub (170)
+// Next difficulty, or next event of the chosen difficulty.
+int fn_802613E0(void) {
+    if (!lbl_8055F3EB) {
+        SCREEN->level++;
+        if (SCREEN->level >= SCREEN->numLevels) {
+            SCREEN->level = SCREEN->numLevels - 1;
+        }
+    } else {
+        SCREEN->event++;
+        if (SCREEN->event > SCREEN->level * 2 + 1) {
+            SCREEN->event = SCREEN->level * 2 + 1;
+        }
+    }
+    RedrawNodes();
+    return 0;
+}
 
 void fn_80261688(u8* p, s32 a, s32 b, s32 c) {
     S32(p, 0x8) = c;
@@ -344,7 +377,22 @@ void fn_80261688(u8* p, s32 a, s32 b, s32 c) {
     S32(p, 0x10) = a;
 }
 
-void fn_802616A8(u8* p) {}  // stub (168)
+// Previous difficulty, or previous event of the chosen difficulty.
+int fn_802616A8(void) {
+    if (!lbl_8055F3EB) {
+        SCREEN->level--;
+        if (SCREEN->level < 0) {
+            SCREEN->level = 0;
+        }
+    } else {
+        SCREEN->event--;
+        if (SCREEN->event < SCREEN->level * 2) {
+            SCREEN->event = SCREEN->level * 2;
+        }
+    }
+    RedrawNodes();
+    return 0;
+}
 
 u32 fn_80261948(s32* p) {
     Words3 t = lbl_802FA6A8;
