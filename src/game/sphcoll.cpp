@@ -374,7 +374,48 @@ void fn_8019A820(u8* p, u8* c, u32 a, u32 b, u32 d, f32 r) {}
 
 void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, p + 0x34, a, b, c, F32(p, 0x24)); }
 
-int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) { return 0; }  // stub (528)
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+void PSVECNormalize(const void* in, void* out);
+
+// Sphere (c, r) of p against sphere (d, s) of q: reports the contact (normal flattened in y) to the
+// volume that has an owner.
+int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {
+    PVec3 dd;
+    PVec3 n;
+    PVec3 at;
+    f32 rs = r + s;
+    const f32* cv = (const f32*)c;
+    const f32* dv = (const f32*)d;
+    dd.v[0] = cv[0] - dv[0];
+    dd.v[2] = cv[2] - dv[2];
+    dd.v[1] = cv[1] - dv[1];
+    int hit = 0;
+    if ((f32)__fabs(dd.v[0]) < rs && (f32)__fabs(dd.v[2]) < rs && (f32)__fabs(dd.v[1]) < rs) {
+        f32 dist = PSVECMag(dd.v);
+        if (!((f32)__fabs(dist) <= lbl_80558DC4[0])) {
+            f32 pen = s + (-dist + r);
+            if (pen > 0.0f) {
+                f32 inv = 1.0f / dist;
+                n.v[0] = dd.v[0] * inv;
+                n.v[1] = dd.v[1] * inv * 0.2f;
+                n.v[2] = dd.v[2] * inv;
+                PSVECNormalize(n.v, n.v);
+                f32 k = -0.5f * ((r + dist) - s);
+                MulAdd(at.v, cv, n.v, k);
+                if (U32(p, 0x4)) {
+                    fn_8019A788(p, q, (u32)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
+                } else {
+                    n.v[0] *= -1.0f;
+                    n.v[1] *= -1.0f;
+                    n.v[2] *= -1.0f;
+                    fn_8019A788(q, p, (u32)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
+                }
+                hit = 1;
+            }
+        }
+    }
+    return hit;
+}
 
 void fn_8019AC44(u8* p, u8* c, u8* d, f32 r) {}
 
