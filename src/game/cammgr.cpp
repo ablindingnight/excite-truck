@@ -38,6 +38,7 @@ struct CamPose {
 
 // One player's camera record.
 struct CamRec {
+    CamRec(void);  // fn_8026A600 (out of line, after this unit)
     u8 pad0[0x58];     // offset 0x0
     CamPose pose;      // offset 0x58
     u8 pad88[0x34];    // offset 0x88
@@ -136,7 +137,7 @@ extern u32 lbl_8055F494;
 extern s32 lbl_8055F4A0;
 extern s32 lbl_8055F4A4;
 extern u8 lbl_8055F4A8[8];
-extern u8 lbl_80499080[];
+extern CamRec lbl_80499080[4];
 extern s32 lbl_80499E50[];
 extern f32 lbl_80499980[];
 extern u8 lbl_8055F488;
@@ -282,7 +283,7 @@ void fn_80267E40(u32 id, f32 strength) {
 
 void fn_80267EE0(u8* p) { fn_802734F0(p); }
 
-u8* fn_80267EE4(int i) { return lbl_80499080 + i * 0x228; }
+u8* fn_80267EE4(int i) { return (u8*)lbl_80499080 + i * 0x228; }
 
 void fn_80267EF8(u8* p) {}  // stub (238)
 
@@ -385,7 +386,7 @@ void fn_8026A2B0(int i) { lbl_80499E50[i] = 1; }
 void fn_8026A2C8(u8* p) { fn_801EA994(p); }
 
 void fn_8026A2CC(const Words12* s, int i, f32 v) {
-    u8* e = lbl_80499080 + i * 0x228;
+    u8* e = (u8*)lbl_80499080 + i * 0x228;
     *(Words12*)(e + 0x1A4) = *s;
     F32(e, 0x1D4) = v;
 }
@@ -424,7 +425,7 @@ void fn_8026A394(u8* car) {
 void fn_8026A49C(u8* p) { fn_80269BB0(p); }
 
 void fn_8026A4A0(int i, CamPose* out, f32* fov) {
-    CamRec* e = &((CamRec*)lbl_80499080)[i];
+    CamRec* e = &lbl_80499080[i];
     out->rot = e->pose.rot;
     out->pos = e->pose.pos;
     *fov = e->fov;
@@ -449,5 +450,30 @@ int fn_8026A554(s32* p) {
     return 4;
 }
 
-void fn_8026A584(u8* p) {}  // stub (31)
 }  // extern "C"
+
+// Folded degree/radian constants (the initialisers are dynamic in the original, so they load these).
+extern const f32 lbl_80563CF4;  // 82.5 deg
+extern const f32 lbl_80563CF8;  // 30 * 30
+extern const f32 lbl_80563CFC;  // 42.5 deg
+extern const f32 lbl_80563D00;  // 55 deg
+extern const f32 lbl_80563D04;  // 60 deg
+
+// A fixed camera mount: offset and look point in the car frame, field of view, enabled.
+struct CamMount {
+    f32 off[3];  // offset 0x0
+    f32 look[3]; // offset 0xC
+    f32 fov;     // offset 0x18
+    u8 on;       // offset 0x1C
+};
+
+ModuleTag lbl_8055F470;
+UnkStaticFFFF lbl_8055F478;
+f32 lbl_8055F47C = lbl_80563CF4;  // default field of view
+CamRec lbl_80499080[4];
+f32 lbl_8055F49C = lbl_80563CF8;
+CamMount lbl_803467E8[3] = {
+    {{0.0f, 0.7f, 0.0f}, {0.0f, 0.8f, 9.0f}, lbl_80563CFC, 1},
+    {{0.0f, -0.5f, -30.5f}, {0.0f, 2.1f, 1.0f}, lbl_80563D00, 1},
+    {{0.1f, 1.1f, -0.2f}, {-9.5f, 2.5f, 4.2f}, lbl_80563D04, 0},
+};

@@ -16,16 +16,21 @@ struct RacerSlot {
     RacerSlot(void);
 };
 
+// A camera record (cammgr.cpp builds four); its constructor is the first function of this unit.
+struct CamRec {
+    CamRec(void);
+    u8 data[0x228];
+};
+
+CamRec::CamRec(void) {
+    fn_80265DD8(data + 0x160);
+    fn_80266120(data + 0x178);
+}
+
 ModuleTag lbl_8055F4B0;
 RacerSlot lbl_80499E60[4];
 
 extern "C" {
-
-u8* fn_8026A600(u8* p) {
-    fn_80265DD8(p + 0x160);
-    fn_80266120(p + 0x178);
-    return p;
-}
 
 f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
     f32 d[3];
