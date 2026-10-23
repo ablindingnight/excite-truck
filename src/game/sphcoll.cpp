@@ -297,9 +297,9 @@ void fn_8019CF60(u8* p, u8* q) {}  // stub (67)
 
 void fn_8019D06C(u8* p, u8* q, int a, int b) {}  // stub (76)
 
-void fn_8019D19C(u8* p) {}  // stub (119)
+void fn_8019D19C(u8* p, u8* q) {}  // stub (119)
 
-void fn_8019D378(u8* p) {}  // stub (67)
+void fn_8019D378(u8* p, u8* q) {}  // stub (67)
 
 void fn_8019D484(u8* p) {}  // stub (101)
 
@@ -529,7 +529,40 @@ void fn_8019F248(u8* p) {
     fn_801E3FC8(p + 0x34, lbl_8055E598.value, r);
 }
 
-void fn_8019F26C(u8* p) {}  // stub (89)
+void fn_802E30C8(const char* fmt, ...);
+
+// Collides flat sphere `p` against volume `o` by its type tag.
+void fn_8019F26C(u8* p, u8* o) {
+    switch (S32(o, 0x18)) {
+    case 'RAGD':
+        break;
+    case 'FLSR':
+        fn_8019D19C(p, o);
+        break;
+    case 'SPHR':
+        fn_8019CE4C(o, p);
+        break;
+    case 'TUBE':
+        fn_8019CF60(o, p);
+        break;
+    case 'BOX ':
+        fn_8019D06C(p, o, 0, 0);
+        break;
+    case 'GRUP':
+    case 'POLY':
+        ((VGroup*)o)->v10(p);
+        break;
+    case 'RING':
+        fn_8019D378(p, o);
+        break;
+    default: {
+        char tag[5] = "fooo";
+        *(s32*)tag = S32(o, 0x18);
+        fn_802E30C8("flatsphere: Can't collide with type %s", tag);
+        break;
+    }
+    }
+}
 
 void fn_8019F3D0(u8* p) {}
 
