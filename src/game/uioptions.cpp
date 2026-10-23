@@ -194,6 +194,12 @@ public:
     virtual void Base0C(void);
     virtual void Base10(void);
     virtual void Base14(void);
+    virtual ~ChoiceBase(void) {}
+    virtual const char* Get(void) = 0;
+    virtual void Prev(void) = 0;
+    virtual void Next(void) = 0;
+    virtual int HasPrev(void) = 0;
+    virtual int HasNext(void) = 0;
 };
 
 // A choice list drawn with its own font (the aspect ratio).
