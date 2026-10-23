@@ -652,16 +652,16 @@ void fn_8027C2B8(Oracle* o, s32 type, const char* file) {
 }
 
 Oracle* fn_8027C41C(Oracle* o, s32 difficulty) {
-    o->contests.data = o->contestBuf;
-    o->contests.n = 0;
-    o->contests.cap = 0x8C0;
-    o->brackets.data = o->bracketBuf;
-    o->brackets.n = 0;
-    o->brackets.cap = 0x14;
-    o->tables.data = o->tableBuf;
-    o->tables.n = 0;
-    o->tables.cap = 2;
     o->difficulty = difficulty;
+    o->contests.data = o->contestBuf;
+    o->contests.cap = 0x8C0;
+    o->contests.n = 0;
+    o->brackets.data = o->bracketBuf;
+    o->brackets.cap = 0x14;
+    o->brackets.n = 0;
+    o->tables.data = o->tableBuf;
+    o->tables.cap = 2;
+    o->tables.n = 0;
     fn_8027C2B8(o, 0, "ep_career.val");
     fn_8027C2B8(o, 1, "ep_chal.val");
     return o;
