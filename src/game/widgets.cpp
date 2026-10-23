@@ -1,3 +1,8 @@
+static inline float MapMinBranchNew(float a,float b){if(a<b)return a;return b;}
+static inline float MapMaxBranchNew(float a,float b){if(a>b)return a;return b;}
+extern "C" {extern const float lbl_805634A4,lbl_805634A8;}
+static inline float MapScopeNew(float screen,float value,float span){float pos=(value-lbl_805634A8)/span;pos=MapMinBranchNew(lbl_805634A4,pos);pos=MapMaxBranchNew(pos,lbl_805634A8);return lbl_805634A8+pos*(screen-lbl_805634A8);}
+static inline int MapIntegerMinNew(int a,int b){if(a<b)return a;return b;}
 // Anonymous widget-class fragment; no recovered TU or data ownership claim.
 typedef unsigned int u32;
 struct WidgetDispatch {virtual ~WidgetDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24();virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c();virtual void Slot40();virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual void Slot64();virtual void Slot68();virtual void Slot6c();virtual void Slot70();virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
@@ -373,7 +378,7 @@ void fn_80219510(WidgetFragment* self,int x,int y){
 void fn_8021952C(WidgetFragment* self,int x,int y){
  WidgetWindowOffsetPrefix* fields=(WidgetWindowOffsetPrefix*)self;
  WindowOffsetPrefix* window=(WindowOffsetPrefix*)self->window;
- if(fields->enabled){int dx=fields->x+x;int dy=fields->y+y;int wx=window->x;int wy=window->y;window->x=wx+dx;window->y=wy+dy;}
+ if(fields->enabled){int dx=(int)((unsigned int)fields->x+(unsigned int)x);int dy=(int)((unsigned int)fields->y+(unsigned int)y);int wx=window->x;int wy=window->y;window->x=(int)((unsigned int)dx+(unsigned int)wx);window->y=(int)((unsigned int)wy+(unsigned int)dy);}
 }
 }
 
@@ -534,10 +539,8 @@ void fn_802285B8(WidgetFragment* self){
 struct ObservedClipRect {int left,top,right,bottom;};
 struct ObservedClipPrefix {char prefix[0x14];ObservedClipRect bounds;};
 extern "C" {
-void fn_80218E98(ObservedClipPrefix* self,ObservedClipRect* out){
- int left=self->bounds.left,top=self->bounds.top,right=self->bounds.right,bottom=self->bounds.bottom;
- out->left=left;out->top=top;out->right=right;out->bottom=bottom;
-}
+void fn_80218E98(ObservedClipPrefix* self,ObservedClipRect* out){// Read the complete signed rectangle before writing potentially overlapping output.
+ int snapshot[4]={0,0,0,0};snapshot[0]=self->bounds.left;snapshot[1]=self->bounds.top;snapshot[2]=self->bounds.right;snapshot[3]=self->bounds.bottom;out->left=snapshot[0];out->top=snapshot[1];out->right=snapshot[2];out->bottom=snapshot[3];}
 void fn_80218EBC(ObservedClipPrefix* self,const ObservedClipRect* in){self->bounds=*in;
 }
 void fn_80218EE0(ObservedClipPrefix* self,int left,int top,int right,int bottom){
@@ -695,21 +698,44 @@ struct ChoiceDrawStatePrefix {char unknown[0x34];float scale;};
 extern "C" {
 void* fn_8021165C(int,int);const ChoiceDrawStatePrefix* fn_8022EDC4();
 void fn_80219660(WidgetFragment*);
-void fn_8021D378(WidgetFragment* self){
- fn_80219660(self);ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
- if(fields->first!=fields->second){
-  int selected=0;if(fields->focus&&fields->token==*fields->focus)selected=1;
-  void* first=fn_8021165C(0,2);void* second=fn_8021165C(1,2);
-  float scale=fn_8022EDC4()->scale;
-  float zero=lbl_805634A8;float x=zero,y=zero;
-  fn_80230C30(&x,&y,fields->first,fields->style);
-  float width,height;height=scale*(float)fn_802C5220(first);width=(float)fn_802C51C0(first);
-  fn_802C5320(first,selected,x,y-((float)fn_802C5220(first)-height),zero,width,height);
-  fn_80230C30(&x,&y,fields->second,fields->style);
-  height=scale*(float)fn_802C5220(second);width=(float)fn_802C51C0(second);
-  fn_802C5320(second,selected,x,y-((float)fn_802C5220(second)-height),zero,width,height);
- }
+void fn_8021D378(WidgetFragment *self) {
+    float x;
+    float y;
+    int *focus;
+    int selected;
+    void *firstImage;
+    void *secondImage;
+    float zero;
+    float firstWidth;
+    float secondWidth;
+    float scale;
+    float firstHeight;
+    float secondHeight;
+
+    fn_80219660(self);ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
+    if ((int) fields->first != (int) fields->second) {
+        focus = fields->focus;
+        selected = 0;
+        if ((focus != 0) && ((int) fields->token == (int) *focus)) {
+            selected = 1;
+        }
+        firstImage = fn_8021165C(0, 2);
+        secondImage = fn_8021165C(1, 2);
+        scale = fn_8022EDC4()->scale;
+        zero = lbl_805634A8;
+        x = zero;
+        y = zero;
+        fn_80230C30(&x, &y, (int) fields->first, (int) fields->style);
+        firstHeight = scale * (float) fn_802C5220(firstImage);
+        firstWidth = (float) fn_802C51C0(firstImage);
+        fn_802C5320(firstImage, selected, x, y - ((float) fn_802C5220(firstImage) - firstHeight), zero, firstWidth, firstHeight);
+        fn_80230C30(&x, &y, (int) fields->second, (int) fields->style);
+        secondHeight = scale * (float) fn_802C5220(secondImage);
+        secondWidth = (float) fn_802C51C0(secondImage);
+        fn_802C5320(secondImage, selected, x, y - ((float) fn_802C5220(secondImage) - secondHeight), zero, secondWidth, secondHeight);
+    }
 }
+
 extern int lbl_8055FBC0;
 void fn_802C3424(int,int,int,int,int);
 void fn_8021D568(WidgetFragment* self,void* context){
@@ -806,26 +832,91 @@ extern u32 lbl_8033EA90[];extern const char lbl_8055B880[2];
 extern const float lbl_80563504,lbl_80563510;
 int fn_8022B620(int,const char*);void fn_8021E7D4(WidgetFragment*);
 void fn_802192AC(WidgetFragment*);
-WidgetFragment* fn_8021E0C0(WidgetFragment* self,int x,int y,int width,int height,ObservedStringList* list,int* selected,ObservedListViewport* view){
- fn_80218F34(self,x,y,x+width,y+height,0);self->vtable=lbl_8033EA90;
- RowListPrefix* fields=(RowListPrefix*)self;fields->active=0;fields->direction=0;fields->elapsed=lbl_805634A8;
- int rowHeight=fn_8022B620(7,lbl_8055B880)+2;
- fields->list=list;fields->rowHeight=rowHeight;fields->selected=selected;fields->view=view;fields->rows=height/rowHeight;fields->columns=width/8;
- if(view){view->total=list->count;view->page=fields->rows;fn_80219440(self,0,view,12);}
- fn_8021E7D4(self);fn_80219440(self,0,selected,4);fn_80219440(self,0,&list->version,4);return self;
+WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, ObservedStringList *list, int *selected, ObservedListViewport *view)
+{
+  fn_80218F34(self, x, y, x + width, y + height, 0);
+  self->vtable = lbl_8033EA90;
+  RowListPrefix *fields = (RowListPrefix *) self;
+  fields->active = 0;
+  fields->direction = 0;
+  fields->elapsed = lbl_805634A8;
+  int rowHeight = fn_8022B620(7, lbl_8055B880) + 2;
+  fields->columns = width / 8;
+  fields->list = list;
+  fields->rowHeight = rowHeight;
+  fields->selected = selected;
+  fields->view = view;
+  fields->rows = height / rowHeight;
+  if (view)
+  {
+    view->total = list->count;
+    view->page = fields->rows;
+    fn_80219440(self, 0, view, 12);
+    fn_8021E7D4(self);
+  }
+  fn_80219440(self, 0, selected, 4);
+  fn_80219440(self, 0, &list->version, 4);
+  return self;
 }
-void fn_8021E1C8(WidgetFragment* self,int x,int y){
- RowListPrefix* fields=(RowListPrefix*)self;fields->direction=0;if(!fields->active)return;
- WidgetMarkDirty(self);int start=0;if(fields->view)start=fields->view->start;
- int row=start+(y-self->top-2)/fields->rowHeight;
- if(row<0)row=0;if(row>=fields->list->count)row=fields->list->count-1;
- if(fields->view){
-  if(row<fields->view->start){fields->direction=-1;row=fields->view->start;}
-  int end=fields->view->start+fields->view->page;
-  if(row>=end){fields->direction=1;row=end-1;}
- }
- if(row>=0&&row<fields->list->count)*fields->selected=row;
+typedef struct RowInputListNew {int unknown0,unknown4,count,version;} RowInputListNew;
+typedef struct RowInputViewNew {int total,page,start;} RowInputViewNew;
+typedef struct RowInputReceiverNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x218];unsigned char dirty;char gap235[15];RowInputListNew* list;RowInputViewNew* view;int unknown24c,columns,rows,rowHeight;int* selected;int direction;float elapsed;unsigned char active;} RowInputReceiverNew;
+typedef char RowInputAddressWordSizeCheckNew[(sizeof(void*)==sizeof(int))?1:-1];
+typedef char RowInputReceiverPrefixSizeCheckNew[(sizeof(RowInputReceiverNew)==0x26c)?1:-1];
+void fn_8021E1C8(WidgetFragment *source, int unusedX, int y) {RowInputReceiverNew* fields=(RowInputReceiverNew*)source;
+    RowInputViewNew *initialView;
+    int page;
+    int scratch;
+    int row;
+    int start;
+
+    fields->direction = 0;
+    if ((int) fields->active != 0) {
+        if ((int) fields->shown != 0) {
+            fields->dirty = 1;
+        }
+        initialView = fields->view;
+        start = 0;
+        if (initialView != 0) {
+            start = initialView->start;
+        }
+        scratch = fields->top;
+        scratch = y - scratch;
+        scratch -= 2;
+        row = start + (scratch / (int) fields->rowHeight);
+        if (row < 0) {
+            row = 0;
+        }
+        scratch = fields->list->count;
+        if (row >= scratch) {
+            row = scratch - 1;
+        }
+        if (initialView != 0) {
+            scratch = initialView->start;
+            if (row < scratch) {
+                fields->direction = -1;
+                row = scratch;
+            }
+            // Preserve the original 32-bit address/integer register lifetime.
+            // The typed pointer alternative is retained in the research review for a movable PC build.
+            scratch = (int) fields->view;
+            page = ((RowInputViewNew*)scratch)->page;
+            scratch = ((RowInputViewNew*)scratch)->start;
+            scratch += page;
+            if (row >= scratch) {
+                fields->direction = 1;
+                row = scratch - 1;
+            }
+        }
+        if (row >= 0) {
+            RowInputListNew* currentList=fields->list;
+            if (row < currentList->count) {
+                *fields->selected = row;
+            }
+        }
+    }
 }
+
 void fn_8021E2A0(WidgetFragment* self){
  fn_802192AC(self);RowListPrefix* fields=(RowListPrefix*)self;
  if(fields->view&&fields->direction){
@@ -868,11 +959,11 @@ void fn_8021E3BC(WidgetFragment* self,void* context){
  }
 }
 void fn_8021E51C(WidgetFragment* self){
- RowListPrefix* fields=(RowListPrefix*)self;int start=0;if(fields->view)start=fields->view->start;
- int flags=0;
- int index;for(int row=0;row<fields->rows&&(index=row+start,fn_8022D3F8(fields->list,index,&flags)!=0);++row){
-  int selected=*fields->selected==index;int y=self->top,x=self->left;
-  fn_8022BAD0(7,x+2,y+row*fields->rowHeight+2,0,0,0,fn_8022D3F8(fields->list,index,0),(selected!=0)|((flags!=0)?2:0),0,lbl_805634A4);
+ int y;int x;RowListPrefix* f=(RowListPrefix*)self;int start=0;if(f->view)start=f->view->start;int flags=0;int index;
+ for(int row=0;row<f->rows&&(index=row+start,fn_8022D3F8(f->list,index,&flags)!=0);++row){
+ int disabled;bool selected;y=self->top;x=self->left;selected=*f->selected==index;disabled=flags!=0?2:0;selected=selected!=0;
+ const char* label=fn_8022D3F8(f->list,index,0);
+ fn_8022BAD0(7,x+2,y+row*f->rowHeight+2,0,0,0,label,selected|disabled,0,lbl_805634A4);
  }
 }
 }
@@ -924,7 +1015,7 @@ WidgetFragment* fn_802295AC(WidgetFragment* self,int destroy){if(self){fn_802191
 // Placeholders for the original functions not yet implemented above (generated by Claude for
 // the provisional code-only widgets unit). Empty bodies; they are not decompilations.
 void fn_80219AB4(WidgetFragment*,int,const char*,int,int,int,bool);  // placeholder (912 bytes)
-void fn_80219FE0(void) {}  // placeholder (1496 bytes)
+void fn_80219FE0(WidgetFragment*);
 void fn_8021B460(void) {}  // placeholder (1100 bytes)
 int fn_8021E620(WidgetFragment* self,int key){
  RowListPrefix* f=(RowListPrefix*)self;
@@ -944,7 +1035,7 @@ int fn_8021E620(WidgetFragment* self,int key){
 void fn_8021F4F0(void) {}  // placeholder (392 bytes)
 void fn_802200AC(void) {}  // placeholder (1280 bytes)
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
-void fn_802213A4(void) {}  // placeholder (404 bytes)
+
 void fn_80221544(void) {}  // placeholder (1068 bytes)
 void fn_80221970(void) {}  // placeholder (1292 bytes)
 void fn_80221F9C(void) {}  // placeholder (388 bytes)
@@ -975,9 +1066,13 @@ void fn_80226B6C(WidgetFragment*);  // placeholder (336 bytes)
 void fn_802272D4(void) {}  // placeholder (1452 bytes)
 void fn_802278F0(void*,float,float,float,float);
 void fn_80228010(void) {}  // placeholder (1032 bytes)
-void fn_80228AEC(WidgetFragment*,float) {}  // placeholder (676 bytes)
+void fn_80228AEC(WidgetFragment*,float);
 void fn_8022A210(void) {}  // placeholder (868 bytes)
-void fn_8022A594(void) {}  // placeholder (80 bytes)
+// Observed five-word initialized prefix only; complete object size and data ownership remain unresolved.
+typedef struct StartupSharedPrefixNew {unsigned long first,kind,third,fourth,fifth;} StartupSharedPrefixNew;
+typedef char StartupSharedPrefixSizeCheckNew[(sizeof(StartupSharedPrefixNew)==20)?1:-1];
+extern StartupSharedPrefixNew lbl_80490920;extern unsigned long lbl_8055EFB0[2],lbl_8055EFB8;void RegisterModuleTag__FP9ModuleTag(void*);
+void fn_8022A594(){RegisterModuleTag__FP9ModuleTag(lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
 }
 
 
@@ -1051,17 +1146,42 @@ WidgetFragment* fn_8021EB9C(WidgetFragment* self,int destroy){
   fn_802C519C(fields->first);if(fields->second)fn_802C519C(fields->second);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);
  }return self;
 }
-void fn_8021EC1C(WidgetFragment* self,void* context){
- fn_802C3034(context);TextEntryPrefix* fields=(TextEntryPrefix*)self;
- int left=self->left,top=self->top;int width=((WidgetDispatch*)self)->Slot78();
- fn_802C2FC8(context,left,top,left+width,self->bottom);fn_802192A0(self,context);
- if(fields->second){int left,top;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,fields->second,left,top,width,0);}
- left=self->left;top=self->top;width=((WidgetDispatch*)self)->Slot78();
- fn_802C2FC8(context,left,top,left+width,self->bottom);
- fn_8022B91C(fields->font,self->left,self->top,fields->buffer,self->flag19!=0);
- if(self->flag19){int x,y;fn_8022B390(fields->font,fields->buffer,fields->cursor,&x,&y);
-  int cursorY=y+self->top,cursorX=x+self->left;fn_802C47B8(cursorX,cursorY+2,cursorX,cursorY+12,lbl_8055FBF8);
- }fn_802C3014(context);
+// Observed text-entry prefix only; no complete allocation or buffer-storage ownership claim.
+typedef struct TextPaintReceiverNew TextPaintReceiverNew;
+struct TextPaintReceiverNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];int state,capacity,stride,cursor;char unknown254[0x800];char* buffer;int font;void* first;void* second;};
+void fn_8021EC1C(WidgetFragment *self, void *context) {TextPaintReceiverNew* fields=(TextPaintReceiverNew*)self;
+    int cursorX;
+    int cursorY;
+    int caretY;
+    int caretX;
+    int initialTop;
+    int imageTop;
+    int finalTop;
+    int initialLeft;
+    int imageLeft;
+    int finalLeft;
+
+    fn_802C3034(context);
+    initialLeft = fields->left;
+    initialTop = fields->top;
+    fn_802C2FC8(context, initialLeft, initialTop, initialLeft + ((WidgetDispatch*)self)->Slot78(), fields->bottom);
+    fn_802192A0(self, context);
+    if ((void *) fields->second != 0) {
+        imageTop = fields->top;
+        imageLeft = fields->left;
+        fn_80228DC4((ObservedClipPrefix*)context, fields->second, imageLeft, imageTop, ((WidgetDispatch*)self)->Slot78(), 0);
+    }
+    finalLeft = fields->left;
+    finalTop = fields->top;
+    fn_802C2FC8(context, finalLeft, finalTop, finalLeft + ((WidgetDispatch*)self)->Slot78(), fields->bottom);
+    fn_8022B91C(fields->font, fields->left, fields->top, fields->buffer, fields->flag19 != 0);
+    if ((int) fields->flag19 != 0) {
+        fn_8022B390(fields->font, fields->buffer, fields->cursor, &cursorX, &cursorY);
+        caretY = cursorY + fields->top;
+        caretX = cursorX + fields->left;
+        fn_802C47B8(caretX, caretY + 2, caretX, caretY + 0xC, lbl_8055FBF8);
+    }
+    fn_802C3014(context);
 }
 void fn_8021EFE0(WidgetFragment* self,int x,int y){
  TextEntryPrefix* fields=(TextEntryPrefix*)self;fields->cursor=fn_8022B2D4(fields->font,fields->buffer,x-self->left,y-self->top);WidgetMarkDirty(self);
@@ -1365,8 +1485,16 @@ struct SelectionActionPrefix {char base[0x244];SelectionActionDispatch* child;ch
 extern "C" {
 extern u32 lbl_8033E458[],lbl_8033E140[];
 void Finish__9MenuStateFi(void*,void* context){fn_802168BC(context);}
-void fn_802235B4(WidgetFragment*) {}
-void fn_80223644(WidgetFragment*) {}
+struct SelectBooleanNavigationRelativeNew {char base[0x2c8];int count;int* selected;bool available[33];};
+// Observed 33-slot navigation prefix. The local bounds array keeps the original position/count lifetimes.
+// The forward byte sum preserves PPC32 operand order; pointer-preserving alternative is retained for port work.
+typedef char NavigationNextAddressWordCheckNew[(sizeof(void*)==sizeof(unsigned int))?1:-1];
+void fn_802235B4(WidgetFragment* self){SelectBooleanNavigationRelativeNew* f=(SelectBooleanNavigationRelativeNew*)self;int* value=f->selected;int selected=*value;int bounds[2]={selected+1,f->count};int step=1;for(;bounds[0]<bounds[1];bounds[0]++,step++){if(((SelectBooleanNavigationRelativeNew*)((unsigned int)f+((unsigned int)selected+(unsigned int)step)))->available[0]){*value+=step;return ((void(*)(WidgetFragment*))fn_8022375C)(self);}}for(int step=selected;step>0;step--){if(((SelectBooleanNavigationRelativeNew*)((char*)f+(unsigned int)(selected-step)))->available[0]){*value-=step;return ((void(*)(WidgetFragment*))fn_8022375C)(self);}}}
+struct NavigationPreviousNew {char prefix[0x2c8];int count;int* selected;unsigned char available[33];};
+// Observed navigation prefix only; the forward-wrap byte-address sum retains the original 32-bit operand order.
+// A pointer-preserving counterpart differs by one commuted add and is saved for the later PC port.
+typedef char NavigationPreviousAddressWordCheckNew[(sizeof(void*)==sizeof(u32))?1:-1];
+void fn_80223644(WidgetFragment* self){NavigationPreviousNew* f=(NavigationPreviousNew*)self;int* value=f->selected;int selected=*value;for(int step=1;selected-step>=0;step++){if(((NavigationPreviousNew*)((char*)f+((unsigned int)selected-(unsigned int)step)))->available[0]){*value-=step;((void(*)(WidgetFragment*))fn_8022375C)(self);return;}}for(int step=f->count-selected-1;step>0;step--){if(((NavigationPreviousNew*)(((unsigned int)f+(unsigned int)selected)+(unsigned int)step))->available[0]){*value+=step;((void(*)(WidgetFragment*))fn_8022375C)(self);return;}}}
 WidgetFragment* fn_80223800(WidgetFragment* self,int x,int y,void* model,int* watched){((void(*)(WidgetFragment*,int,int,void*))fn_802230A4)(self,x,y,model);((SelectWatchedPrefix*)self)->watched=watched;self->vtable=lbl_8033E458;if(watched)fn_80219440(self,0,watched,4);fn_80219440(self,1,fn_80216708(),1);return self;}
 void fn_80223C20(WidgetFragment* self){ImageAlphaPrefix* f=(ImageAlphaPrefix*)self;f->asset->alpha=lbl_805634A4-f->blend;float zero=lbl_805634A8;if(f->asset->alpha>zero&&f->image){char scope[64];const void* context=fn_8022EDC4();fn_8022EEF8(scope,f->asset,context);fn_8022ED00(scope);fn_802C5320(f->image,0,f->x,f->y,zero,f->width,f->height);fn_8022EDB8();}}
 WidgetFragment* fn_80225828(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E140;RollingRowsPrefix* f=(RollingRowsPrefix*)self;if(f->rows)__dla__FPv(f->rows);f->rows=0;if(self->y)fn_802328D4(self->y);self->y=0;self->x=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
@@ -1386,7 +1514,7 @@ void fn_80227044(WidgetFragment*,float,float,float);
 WidgetFragment* fn_80224D40(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E1C4;AssetFormatPrefix* f=(AssetFormatPrefix*)self;if(f->owned)fn_8022EE98(f->asset);fn_802328D4(f->resource);f->resource=0;f->first=0;strcpy(f->text,lbl_8055B88C);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80226630(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*)){fn_802224B4(self,context,x,y,dx,dy,child,callback,1,0);self->vtable=lbl_8033F7F4;Bound264* f=(Bound264*)self;f->token=fn_80228F40(x,y);f->focus=0;return self;}
 void fn_80227880(float x,float y,float width,float height){fn_80230924(0x40ffffffu,x,y,x+width,y-height,lbl_805634A8);fn_80230924(0x99000000u,x,y,x+width,y-height,lbl_805634A8);}
-void fn_80221EA8(void) {}
+
 void fn_802238D0(WidgetFragment* self,int mode){SelectWatchedPrefix* f=(SelectWatchedPrefix*)self;void* window;for(int i=0;i<(int)fn_802237E8(self);i++){if(i==*f->watched){float duration=mode==2?lbl_805634A8:lbl_805634E8;window=self->window;int item=(int)fn_802237F0(self,i);fn_80218968(window,item,duration);}else{float duration=mode==2?lbl_805634A8:lbl_805634E8;window=self->window;int item=(int)fn_802237F0(self,i);fn_8021889C(window,item,duration);}}WidgetMarkDirty(self);}
 }
 
@@ -1500,7 +1628,7 @@ struct CenteredImageState {char base[0x24];float x,y;};
 struct CenteredImagePrefix {char base[0x244];void* image;CenteredImageState* asset;float x,y,height,width;int value;};
 extern "C" {
 void fn_8022DBFC(void*);void fn_8022DC20(void*);void* fn_8022DBE8(void*);extern u32 lbl_8033E0BC[];extern const char lbl_8033DAF8[];
-void fn_80222234(void) {}
+
 int fn_802263CC(WidgetFragment* self,int key){RollingActionPrefix* f=(RollingActionPrefix*)self;if(f->focus&&f->token!=*f->focus)return 0;switch(key){case 0x127:if(f->list->vertical){fn_80217C4C(self->window);return 1;}break;case 0x125:if(f->list->vertical){fn_80217D84(self->window);return 1;}break;case 0x128:fn_8022DBFC(f->list);fn_80226570(self,-1);f->direction=2;f->stamp=fn_8023659C();return 1;case 0x126:fn_8022DC20(f->list);fn_80226570(self,1);f->direction=1;f->stamp=fn_8023659C();return 1;case 13:{void* context;int(*callback)(void*)=f->list->callback;context=fn_8022DBE8(f->list);if(!callback||callback(context))fn_802168BC(context);return 1;}}return 0;}
 WidgetFragment* fn_802269A8(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E0BC;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=fn_802C5130(desc->name);if(!f->image)fn_802E30C8(lbl_8033DAF8,desc->name);f->asset=(CenteredImageState*)fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->x=f->x+f->width*lbl_805634C4;f->asset->y=f->y-f->height*lbl_805634C4;f->value=desc->field9c;return self;}
 
@@ -1544,7 +1672,10 @@ WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,i
 struct UnsignedAssetPrefix {char base[0x244];void* context;int resource,mode;float scale,elapsed;};
 extern "C" {
 extern const float lbl_8056351C;extern const char lbl_8033DA60[];extern u32 lbl_8033E560[];
+#pragma section sconst_type ".sdata2$20" data_mode=sda_rel
 WidgetFragment* fn_80222BDC(WidgetFragment* self,WidgetDesc* desc,void* context){fn_80218F80(self,desc);UnsignedAssetPrefix* f=(UnsignedAssetPrefix*)self;f->context=context;self->vtable=lbl_8033E560;f->resource=fn_80232578(desc->name);if(!f->resource)fn_802E317C(lbl_8033DA60,desc->name);f->mode=desc->fielda0;f->scale=(float)(u32)desc->field9c;f->elapsed=lbl_8056351C;return self;}
+#pragma section sconst_type ".sdata2" data_mode=sda_rel
+
 }
 
 
@@ -1578,11 +1709,12 @@ WidgetFragment* fn_802286E4(WidgetFragment* self,WidgetDesc* desc,void* context)
 }
 }
 
-struct TimedImage349 {char base[0x244];float x,y,width,height;int resource;float rate,stamp;void* asset;bool owned;char pad265[3];float first,second;bool toggle;};
+// Observed timed-image prefix: byte 0x264 is the fade direction, and 0x270 reverses angular motion.
+struct TimedImage349 {char base[0x244];float x,y,width,height;int resource;float rate,stamp;void* asset;bool increasing;char pad265[3];float first,second;bool reverse;};
 extern "C" {
 extern u32 lbl_8033DFB4[];extern const char lbl_8033DC20[];extern const float lbl_805634C8;
 int fn_802CAC28(const char*,int);
-WidgetFragment* fn_802270DC(WidgetFragment* self,WidgetDesc* desc){return self;}
+
 }
 
 struct EffectImage351 {char base[0x244];void* image;float x,y,height,width;int mode;RotationMatrix* matrix;bool owned;};
@@ -1721,4 +1853,277 @@ void fn_8021AA18(FocusPaintPrefix* self){FocusTemporaryNew temporary;FullDrawSta
 
 extern "C" {
 void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;ChoiceResourceSpec spec={};spec.words[0]=(u32)font;spec.words[2]=flags;spec.words[3]=value;spec.words[4]=second;spec.words[5]=third;spec.words[6]=horizontal;spec.words[7]=vertical;spec.words[10]=first;spec.words[11]=second;spec.words[12]=third;spec.words[13]=horizontal;spec.words[14]=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
+}
+
+extern "C" {
+WidgetFragment* fn_802270DC(WidgetFragment* self,WidgetDesc* desc){
+ fn_80218F80(self,desc);self->vtable=lbl_8033DFB4;TimedImage349* f=(TimedImage349*)self;
+ fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();
+ const char* name=(const char*)desc+0x40;f->resource=-1;if(name)f->resource=fn_802CAC28(name,0);
+ if(f->resource==-2)goto failure; if(f->resource!=-1)goto loaded; failure:fn_802E30C8(lbl_8033DC20);loaded:;
+ f->rate=(float)(u32)desc->field9c/lbl_805634C8;f->stamp=fn_8023659C();f->asset=fn_8022EE9C();f->increasing=1;f->first=lbl_805634A8;f->second=lbl_805634A8;
+ if(*(int*)((char*)desc+0xb0))f->reverse=1;else f->reverse=0;return self;
+}
+}
+
+extern "C" {
+void fn_802213A4(WidgetFragment* self,int x,int y){
+ DragViewportPrefix* f=(DragViewportPrefix*)self;
+ if(f->dragging){
+ if(f->direction==0){
+ ObservedListViewport* state=f->state;
+ int value=(int)(((float)state->total/(float)(self->bottom-self->top))*(float)(y+f->grabY));
+ state->start=value;if(value>state->total-state->page)state->start=state->total-state->page;if(state->start<0)state->start=0;
+ }else{
+ int total=f->state->total;float ratio=(float)total/(float)((WidgetDispatch*)self)->Slot78();ObservedListViewport* state=f->state;int value=(int)(ratio*(float)(x+f->grabX));
+ state->start=value;if(value>state->total-state->page)state->start=state->total-state->page;if(state->start<0)state->start=0;
+ }
+ }
+}
+}
+
+extern "C" {
+typedef unsigned int GroupSearchWordNew;
+typedef struct GroupSearchContextNew {char base[0x238];GroupSearchWordNew group;} GroupSearchContextNew;
+typedef struct GroupSearchProxyNew {char base[0x14];GroupSearchContextNew* context;} GroupSearchProxyNew;
+extern const char lbl_8033DA2C[];void fn_802E317C(const char*,...);
+int fn_80221EA8(GroupSearchProxyNew* self){GroupSearchWordNew one=1;GroupSearchWordNew group=self->context->group;for(int index=0;index<32;index++){if(group==(one<<index))return index;}fn_802E317C(lbl_8033DA2C,group);return 0;}
+
+}
+
+// Observed menu prefixes only; no complete object or table-storage ownership claim.
+typedef struct MenuHitListNew {int unknown0,unknown4,count,version;} MenuHitListNew;
+typedef struct MenuHitEntryNew {MenuHitListNew* list;char label[32];} MenuHitEntryNew;
+typedef struct MenuHitTableNew {MenuHitEntryNew entries[8];int count;} MenuHitTableNew;
+typedef struct MenuHitWidgetNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap_1c[0x228];MenuHitTableNew* table;unsigned char active;char gap249[3];int row,column;} MenuHitWidgetNew;
+
+extern "C" {
+typedef char MenuHitTablePrefixSizeCheckNew[(sizeof(MenuHitTableNew)==292)?1:-1];
+typedef char MenuHitWidgetPrefixSizeCheckNew[(sizeof(MenuHitWidgetNew)==0x254)?1:-1];
+static inline int MenuBoundAddNew(int a,int b){return a+b;}
+void fn_80222234(MenuHitWidgetNew *self, int x, int y) {
+    int left;
+    int row;
+    int top;
+    int column;
+    int headerRow;
+
+    if ((int) self->active != 0) {
+        if ((int) self->row >= (int) self->table->count) {
+            self->row = -1;
+        }
+        top = self->top;
+        if (y < (int) (top + 0xA)) {
+            headerRow = (x - self->left) / 50;
+            if ((headerRow >= 0) && ((int) headerRow < (int) self->table->count)) {
+                self->row = (int) headerRow;
+                self->column = -1;
+            }
+        } else {
+            row = self->row;
+            if (row >= 0) {
+                left = self->left;
+                if ((x >= MenuBoundAddNew(row*50,left)) && (x <= MenuBoundAddNew((row+1)*50,left))) {
+                    MenuHitTableNew* table=self->table;MenuHitListNew* list=table->entries[row].list;column = ((y - top) - 0xA) / 10;
+                    if ((column >= 0) && ((int) column < (int) list->count)) {
+                        self->column = (int) column;
+                        return;
+                    }
+                    self->column = -1;
+                    return;
+                }
+                self->column = -1;
+            }
+        }
+    }
+}
+
+}
+
+typedef struct MapViewportReceiverNew MapViewportReceiverNew;typedef struct MapRendererNew MapRendererNew;
+typedef struct MapReceiverTableNew {void* prefix[30];int(*Width)(MapViewportReceiverNew*);} MapReceiverTableNew;
+typedef struct MapRendererTableNew {void* prefix[5];void(*Draw)(MapRendererNew*,int,int,int,int,float);} MapRendererTableNew;
+struct MapRendererNew {MapRendererTableNew* vtable;};
+struct MapViewportReceiverNew {MapReceiverTableNew* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x24c];MapRendererNew* renderer;unsigned char owned;char gap26d[3];int x,y,width,height;};
+struct MapRendererDispatchCppNew {virtual ~MapRendererDispatchCppNew();virtual void Slot0c();virtual void Slot10();virtual void Draw(int,int,int,int,float);};
+
+extern "C" {extern const float lbl_8056357C,lbl_80563580;
+void fn_80228AEC(WidgetFragment *source, float opacity) {MapViewportReceiverNew* viewport=(MapViewportReceiverNew*)source;
+    MapRendererNew *renderer;
+    float scaledWidth;
+    float scaledHeight;
+    float roundedWidth;
+    float roundedHeight;
+    int height;
+    int displayWidth;
+    int clippedHeight;
+
+    int mapped_x=(int)MapScopeNew((float)lbl_8055CFF0,(float)viewport->left,lbl_8056357C);viewport->x=MapIntegerMinNew(mapped_x,lbl_8055CFF0-2);
+    int mapped_y=(int)MapScopeNew((float)lbl_8055CFF4,(float)viewport->top,lbl_80563580);viewport->y=MapIntegerMinNew(mapped_y,lbl_8055CFF4-2);
+    displayWidth = lbl_8055CFF0;
+    scaledWidth = ((float) displayWidth * (float) ((WidgetDispatch*)source)->Slot78()) / lbl_8056357C;
+    if (scaledWidth < lbl_805634A8) {
+        roundedWidth = scaledWidth - lbl_805634C4;
+    } else {
+        roundedWidth = lbl_805634C4 + scaledWidth;
+    }
+int boundWidth=displayWidth-viewport->x;int resultWidth=(int)roundedWidth;if(resultWidth<boundWidth)boundWidth=resultWidth;viewport->width=boundWidth;
+    scaledHeight = ((float) lbl_8055CFF4 * (float) (viewport->bottom - viewport->top)) / lbl_80563580;
+    if (scaledHeight < lbl_805634A8) {
+        roundedHeight = scaledHeight - lbl_805634C4;
+    } else {
+        roundedHeight = lbl_805634C4 + scaledHeight;
+    }
+    clippedHeight = lbl_8055CFF4 - viewport->y;
+    height = (int) roundedHeight;
+    if (height < clippedHeight) {
+        clippedHeight = height;
+    }
+    viewport->height = clippedHeight;
+    renderer = viewport->renderer;
+    ((MapRendererDispatchCppNew*)renderer)->Draw( viewport->x, viewport->y, viewport->width, clippedHeight, opacity);
+}
+}
+
+typedef struct ImageFillPaintNew ImageFillPaintNew;typedef struct ImageFillPaintTableNew {void* prefix[30];int(*Width)(ImageFillPaintNew*);} ImageFillPaintTableNew;
+struct ImageFillPaintNew {ImageFillPaintTableNew* vtable;int left,top,right,bottom,kind;char gap18[0x22c];int mode;void* image;int* watched;int index;unsigned int color;int style;char gap25c[0x20];float scale;unsigned char nativeSize;};
+typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlobalNew;
+
+extern "C" {
+extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
+float fn_8023659C(void);void fn_80230C30(float*,float*,int,int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);int fn_80235FD8(void*);double fmod(double,double);double sin(double);
+void fn_80230150(float,unsigned int,int,float,float,float,float,float,float,float);void fn_802304EC(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_80230650(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_802307AC(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_80230924(unsigned int,float,float,float,float,float);void fn_802354A0(void*,int,unsigned int,float,float,float,float,float);
+// Graphics declarations preserve the observed independent GPR/FPR argument orders.
+// Their interleaving is a matching compiler form, not a claim about original headers.
+void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPaintNew*)source;
+    float x;
+    float y;
+    int mode;
+    void *shaderImage;
+    void *stretchImage;
+    void *gradientImage;
+    int frameCount;
+    int solidFlags;
+    int pulseFrame;
+    int imageFrame;
+    int *pulseWatch;
+    unsigned int frameSign;
+    int *imageWatch;
+    int solidHeight;
+    void *borderImage;
+    void *pulseImage;
+    void *image;
+    float time;
+    float borderWidth;
+    float nativeHeight;
+    float zero;
+    float borderHeight;
+    float pulseSpan;
+    float extra;
+    float borderX;
+    float leftCapWidth;
+
+    time = fn_8023659C();
+    zero = lbl_805634A8;
+    x = zero;
+    y = zero;
+    fn_80230C30(&x, &y, fields->left, fields->top);
+    mode = fields->mode;
+    {
+        switch (mode) {
+        case 0:
+        case 1:
+            solidFlags = 2;
+            if (mode == 0) {
+                solidFlags = 1;
+            }
+            solidHeight = fields->bottom - fields->top;
+            fn_80230150( x,fields->color, solidFlags | 8, y - (float) solidHeight, zero, (float) ((WidgetDispatch*)source)->Slot78(), (float) solidHeight, (float) fields->index, time, lbl_805634C0);
+            return;
+        case 9:
+            borderImage = fields->image;
+            if (borderImage != 0) {
+                borderWidth = ((ImageFillGlobalNew*)lbl_8055E050)->padding + (float) ((WidgetDispatch*)source)->Slot78();
+                borderX = x - (borderWidth * lbl_805634C4);
+                x = borderX;
+                borderHeight = (float) (fields->bottom - fields->top);
+                fn_802354A0(borderImage, 0, -1U, borderX, y, zero, borderWidth, borderHeight);
+                frameCount = fn_80235FD8(borderImage);
+                if (frameCount >= 2) {
+                    leftCapWidth = fn_80235EF0(borderImage, 1);
+                    fn_802354A0(borderImage, 1, -1U, x - leftCapWidth, y, zero, leftCapWidth, borderHeight);
+                }
+                if (frameCount >= 3) {
+                    fn_802354A0(borderImage, 2, -1U, x + borderWidth, y, zero, fn_80235EF0(borderImage, 2), borderHeight);
+                    return;
+                }
+            }
+            break;
+        case 8:
+            pulseImage = fields->image;
+            if (pulseImage != 0) {
+                pulseWatch = fields->watched;
+                if (pulseWatch != 0) {
+                    pulseFrame = *pulseWatch;
+                } else {
+                    pulseFrame = fields->index;
+                }
+                frameSign = (unsigned int) pulseFrame >> 0x1FU;
+                if ((((pulseFrame & 1) ^ frameSign) - frameSign) == 0) {
+                    pulseSpan = lbl_805634C8;
+                    extra = (pulseSpan * (lbl_805634C4 + (lbl_805634C4 * (float) sin((double) (lbl_805634D8 * (float) fmod(fn_8023659C(), lbl_805634D0)))))) - (pulseSpan * lbl_805634C4);
+
+                    fn_802354A0(pulseImage, pulseFrame, -1U, x - lbl_805634C4*extra, y + lbl_805634C4*extra, lbl_805634A8, extra + (float) ((WidgetDispatch*)source)->Slot78(), extra + (float) (fields->bottom - fields->top));
+                    return;
+                }
+                fn_802354A0(pulseImage, pulseFrame, -1U, x, y, lbl_805634A8, (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top));
+                return;
+            }
+            break;
+        case 3:
+        case 6:
+            image = fields->image;
+            if (image != 0) {
+                imageWatch = fields->watched;
+                if (imageWatch != 0) {
+                    imageFrame = *imageWatch;
+                } else {
+                    imageFrame = fields->index;
+                }
+                if ((int) fields->nativeSize != 0) {
+                    nativeHeight = fn_80235F64(image, imageFrame);
+                    fn_802354A0(image, imageFrame, -1U, x, y, lbl_805634A8, fn_80235EF0(image, imageFrame), nativeHeight);
+                    return;
+                }
+                fn_802354A0(image, imageFrame, -1U, x, y, lbl_805634A8, (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top));
+                return;
+            }
+            break;
+        case 2:
+            shaderImage = fields->image;
+            if (shaderImage != 0) {
+                fn_802304EC(fields->style, shaderImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, lbl_805634C0);
+                return;
+            }
+            break;
+        case 4:
+            stretchImage = fields->image;
+            if (stretchImage != 0) {
+                fn_80230650(fields->style, stretchImage, x, y, zero, fields->scale, fields->color, 0x41, (float) fields->index, time, lbl_805634DC);
+                return;
+            }
+            break;
+        case 5:
+            gradientImage = fields->image;
+            if (gradientImage != 0) {
+                fn_802307AC(fields->style, gradientImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, lbl_805634E0);
+                return;
+            }
+            break;
+        case 7:
+            fn_80230924(fields->color, x, y, x + (float) ((WidgetDispatch*)source)->Slot78(), y - (float) (fields->bottom - fields->top), zero);
+            break;
+        }
+    }
+}
 }
