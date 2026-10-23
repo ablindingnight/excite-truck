@@ -1124,7 +1124,61 @@ void fn_80195CA8(u8* d) {
     S32(d, 0x4)++;
 }
 
-void fn_80195D80(u8* d, f32 t) {}
+}  // extern "C"
+
+// Where the car is on the race line (copied whole into the AI state each frame).
+struct LinePos {
+    u32 w[9];  // offset 0x0
+    u8 flag;   // offset 0x24
+    u8* seg;   // offset 0x28
+    u32 w2C;   // offset 0x2C
+};
+
+class VPosSrc {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual u8* Pos(void);  // 0x1C
+};
+
+class LineFollower {
+public:
+    void Update(V2* p);
+};
+
+extern f32 lbl_805621C0;  // 1.5f
+
+extern "C" {
+u32 fn_801388F4(u32 a);
+
+// Tracks the car's race-line position; re-aims the line follower at most every 1.5 s.
+void fn_80195D80(u8* d, f32 t) {
+    u8* pos = ((VPosSrc*)PTR(d, 0x28C))->Pos();
+    F32(d, 0x2CC) = F32(PTR(pos, 0x2C), 0x14);
+    U32(d, 0x2C8) = U32(PTR(pos, 0x2C), 0x28);
+    U32(d, 0x18) = fn_801388F4(U32(pos, 0x4));
+    u8* car = CAR(d);
+    bool changed = PTR(d, 0x1C8) && PTR(d, 0x1C8) != PTR(pos, 0x2C);
+    if (changed) {
+        *(LinePos*)(d + 0x16C) = *(LinePos*)(d + 0x1A0);
+        F32(d, 0x1D0) = lbl_8055E3C8;
+    }
+    *(LinePos*)(d + 0x1A0) = *(LinePos*)(pos + 0x4);
+    if (t - F32(d, 0x1D0) < lbl_805621C0) {
+        f32 s = F32(car, 0x5BC);
+        RVec3 p;
+        p.x = F32(car, 0x94) + F32(car, 0x54) * s;
+        p.y = F32(car, 0x98) + F32(car, 0x58) * s;
+        p.z = F32(car, 0x9C) + F32(car, 0x5C) * s;
+        V2 q;
+        q.x = p.x;
+        q.y = p.z;
+        ((LineFollower*)(d + 0x168))->Update(&q);
+    }
+}
 
 void fn_80195F6C(u8* d) {}
 
