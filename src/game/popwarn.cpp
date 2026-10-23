@@ -13,9 +13,37 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+// A menu widget; the menu runner calls its virtuals.
 class MenuState {
 public:
+    MenuState(void) { unk14 = 0; }
+    virtual ~MenuState(void) {}
+    virtual void Enter(void);   // 0x0C
+    virtual void Exit(void);    // 0x10
+    virtual void Unk14(void);
+    virtual void Unk18(void);
+    virtual void Update(void);  // 0x1C
+    virtual void Unk20(void);
+    virtual void Unk24(void);
+    virtual void Draw(void);    // 0x28
+    virtual void Unk2C(void);
+    virtual void Unk30(void);
+    virtual void Unk34(void);
+    virtual void Unk38(void);
+    virtual void Unk3C(void);
+    virtual void Unk40(void);
+    virtual void Unk44(void);
+    virtual void Unk48(void);
+    virtual void Unk4C(void);
+    virtual void Unk50(void);
+
     void Finish(int r);
+
+    s32 x;      // offset 0x4
+    s32 y;      // offset 0x8
+    s32 w;      // offset 0xC
+    s32 h;      // offset 0x10
+    int unk14;  // offset 0x14
 };
 
 // A popup that waits for the card, then counts down before closing.
@@ -61,6 +89,8 @@ f32 fn_80214D48(void);
 void fn_80214D50(int s);
 int fn_802C9A58(void);
 void fn_802168BC(int a);
+void fn_802C942C(u32 color);
+int fn_8020A640(void);
 void fn_802ECEC0(void);
 void fn_802ECEC4(void);
 void fn_802483E0(void);
@@ -216,27 +246,26 @@ u8* fn_80246C48(u8* p, int del) {
 
 void fn_80246CAC(f32 v) { fn_8020A5F8(v * lbl_8055F264); }
 
-extern void* lbl_803436C0[];
 
 // Timed menu widget (vtable lbl_803436C0): closes the menu after dur ms.
-struct MenuTimer {
+class MenuTimer : public MenuState {
+public:
     MenuTimer(s32 ms, s32 m) {
-        f14 = 0;
-        vt = lbl_803436C0;
         dur = ms;
         mode = m;
-        f28 = 0;
+        fade = 0;
         start = fn_802E2C20();
-        f18 = 1;
+        kind = 1;
     }
-    void* vt;       // offset 0x0
-    u8 pad4[0x10];  // offset 0x4
-    s32 f14;        // offset 0x14
-    s32 f18;        // offset 0x18
-    s32 start;      // offset 0x1C
-    s32 dur;        // offset 0x20
-    s32 mode;       // offset 0x24
-    s32 f28;        // offset 0x28
+    virtual ~MenuTimer(void) {}
+    virtual void Update(void);
+    virtual void Draw(void);
+
+    s32 kind;   // offset 0x18: how it ends (1 = timeout)
+    s32 start;  // offset 0x1C
+    s32 dur;    // offset 0x20
+    s32 mode;   // offset 0x24
+    s32 fade;   // offset 0x28: kinds that also fade the screen
 };
 
 void fn_80216CA8(void);
@@ -254,12 +283,6 @@ void fn_80246CB8(const char* lyt) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-u8* fn_80246DA8(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
 
 void fn_80246DE8(void) { fn_80246CB8((const char*)lbl_803432EC); }
 
@@ -342,7 +365,7 @@ int fn_80246E4C(void) {
     fn_802ECEC4();
     {
         MenuTimer t(60000, 3);
-        t.f28 = 3;
+        t.fade = 3;
         CupSelect w(0);
         MenuItem items[] = {
             MenuItem(0, 5, &t, 0, 0),
@@ -952,7 +975,7 @@ static inline f32 BobCurve(f32 x, f32 y, f32 u) {
 extern "C" {
 
 // Attract-mode cursor drift: x eases in with a sway 1.5 s after lbl_8055F274; y follows a fixed curve over x.
-void fn_802481A0(f32* outX, f32* outY, f32 x, f32 y) {
+void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY) {
     int ms = fn_802E2C20() - lbl_8055F274 - 1500;
     f32 t = MIN(1.0f, (f32)ms / 1000.0f);
     t = MAX(t, 0.0f);
@@ -993,7 +1016,75 @@ void fn_80248398(void) {
     }
 }
 
-void fn_802483E0(void) {}  // stub (111)
+}  // extern "C"
+
+extern void* lbl_803437E0[];
+extern f32 lbl_8055BEF4;  // 0.7f
+
+// The thank-you screen's moving logo (vtable lbl_803437E0, 0x60 bytes); lbl_8055F278 while shown.
+struct LogoMover {
+    LogoMover(void) {
+        f14 = 0;
+        vt = lbl_803437E0;
+        rate = 1.0f / lbl_8055BEF4;
+        f40 = 2;
+        f3C = 1.0f;
+        Reset(2);
+    }
+    ~LogoMover(void) { Reset(1); }
+    void Reset(s32 n) {
+        f18 = 0;
+        moveOn = 0;
+        fadeOn = 0;
+        f24 = n;
+        f20 = 0;
+        f44 = 0;
+    }
+    void* vt;        // offset 0x0
+    u8 pad4[0x10];   // offset 0x4
+    s32 f14;         // offset 0x14
+    u8 f18;          // offset 0x18
+    s32 f1C;         // offset 0x1C
+    s32 f20;         // offset 0x20
+    s32 f24;         // offset 0x24
+    u8 pad28[0x10];  // offset 0x28
+    f32 rate;        // offset 0x38
+    f32 f3C;         // offset 0x3C
+    s32 f40;         // offset 0x40
+    u8 f44;          // offset 0x44
+    s32 moveStart;   // offset 0x48
+    s32 moveDur;     // offset 0x4C
+    u8 moveOn;       // offset 0x50
+    s32 fadeStart;   // offset 0x54
+    s32 fadeDur;     // offset 0x58
+    u8 fadeOn;       // offset 0x5C
+};
+
+typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
+
+extern "C" {
+void fn_80232B80(XformFn fn);
+void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY);
+
+// "Thank you" screen at the end of the demo: the logo drifts in, closes after 5 s.
+void fn_802483E0(void) {
+    MenuTimer t(5000, 0);
+    LogoMover logo;
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80248398, 0, 0),
+        MenuItem("logo_mover", 5, &logo, 0, 0),
+        MenuItem(0, 5, &t, 0, 0),
+        MenuItem(lbl_804988F0),
+    };
+    lbl_8055F274 = fn_802E2C20();
+    lbl_8055F278 = (u8*)&logo;
+    MenuDesc desc = {"thankyou.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    fn_80232B80(fn_802481A0);
+    fn_802146BC(&desc, -999, -999, 1);
+    fn_80232B80(0);
+    lbl_8055F278 = 0;
+}
 
 u8* fn_8024859C(u8* p, int del) {
     if (p) {
@@ -1021,29 +1112,7 @@ int fn_802485FC(void) {
 
 }  // extern "C"
 
-extern void* lbl_803436C0[];
 
-// Kiosk idle timer driven by the kiosk menu (30 s timeout).
-struct KioskTimer {
-    KioskTimer(void) {
-        f14 = 0;
-        vt = lbl_803436C0;
-        timeout = 30000;
-        f24 = 1;
-        f28 = 0;
-        start = fn_802E2C20();
-        armed = 1;
-    }
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
-    s32 armed;       // offset 0x18
-    s32 start;       // offset 0x1C
-    s32 timeout;     // offset 0x20
-    s32 f24;         // offset 0x24
-    s32 f28;         // offset 0x28
-    u8 pad2C[0x10];  // offset 0x2C
-};
 
 extern "C" {
 int fn_8020A640(void);
@@ -1053,7 +1122,7 @@ int fn_80248668(void) {
     if (!fn_8020A640()) {
         fn_8020A600();
     }
-    KioskTimer t;
+    MenuTimer t(30000, 1);
     MenuItem items[] = {
         MenuItem(0, 5, &t, 0, 0),
         MenuItem(lbl_804988F0),
@@ -1133,9 +1202,65 @@ int fn_80248C94(u8* p, int key) {
     return 0;
 }
 
-void fn_80248CD8(u8* p) {}  // stub (86)
+}  // extern "C"
 
-void fn_80248E30(u8* p) {}  // stub (96)
+// Black overlay fading out over the first and in over the last 500 ms.
+void MenuTimer::Draw(void) {
+    int t = fn_802E2C20() - start;
+    f32 a = 0.0f;
+    if (t < 500) {
+        a = MAX(0.0f, 1.0f - (f32)t / 500.0f);
+    }
+    if (dur != 0 || kind != 1) {
+        if (t > dur - 500) {
+            f32 b = 1.0f - (f32)(dur - t) / 500.0f;
+            a = MAX(a, b);
+        }
+    }
+    f32 v = 255.0f * a;
+    int c = (int)(v < 0.0f ? v - 0.5f : 0.5f + v);
+    c = MAX(c, 0);
+    c = MIN(c, 255);
+    fn_802C942C((c << 24) | 0xFFFFFF);
+}
+
+void MenuTimer::Update(void) {
+    if (dur == 0 && kind == 1) {
+        return;
+    }
+    int now = fn_802E2C20();
+    if ((fade & kind) && fn_8020A640()) {
+        int t = now - start;
+        if (t > dur - 400) {
+            f32 f = (f32)(dur - t) / 400.0f;
+            f = MIN(1.0f, f);
+            f = MAX(f, 0.0f);
+            fn_80246CAC(f);
+        }
+    }
+    if (now > start + dur) {
+        switch (kind) {
+        case 1:
+            Finish(-234);
+            break;
+        case 4:
+            Finish(-1);
+            break;
+        case 2:
+            Finish(-2);
+            break;
+        default:
+            fn_802E317C("mdemo: unhandled ending type %d", kind);
+            break;
+        }
+        if ((fade & kind) && fn_8020A640()) {
+            fn_8020A634();
+            fn_80246CAC(1.0f);
+        }
+    }
+}
+
+extern "C" {
 
 int fn_80248FB0(u8* p, int key) {
     s32 now = fn_802E2C20();
