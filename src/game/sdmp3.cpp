@@ -24,8 +24,8 @@ s32 OSResumeThread(void* t);
 s32 VFInit(u32 config);
 s32 VFSetMediaCallback(s32 drive, void (*ins)(int), void (*rem)(int));
 s32 VFAttachDrive(s32 a, s32 b, s32 c, void* drive);
-s32 VFUnmountDrive(s32 drive, s32 mode);
-s32 VFDetachDrive(s32 drive);
+s32 VFUnmountDrive(char drive, s32 mode);
+s32 VFDetachDrive(char drive);
 void* VFOpenFile(const char* path, const char* mode);
 s32 VFCloseFile(void* fp);
 s32 VFGetFileInfo(void* fp, void* info);
@@ -97,7 +97,7 @@ struct DriveCache {
 struct Drive {
     u8 pad0[4];
     DriveCache* cache;  // offset 0x4
-    s8 letter;          // offset 0x8
+    char letter;         // offset 0x8
     u8 flags;           // offset 0x9
     u8 padA[2];
 };

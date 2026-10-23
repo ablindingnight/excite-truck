@@ -145,7 +145,7 @@ const char* fn_80131234(const char* key);  // localize
 Sound* fn_802076A0(const char* name, int flags, int car, int pan);
 f32 fn_80204CFC(const char* name);  // tuning value
 char* fn_8023139C(char* buf, int size, u32 value);  // format a score
-void fn_801CB6E4(s32 effect, int car);  // stop a rumble effect
+void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
 void fn_801CB750(s32 effect, int car);
 int fn_80141F7C(f32 x);  // near zero
 LocalCarDesc* fn_801769CC(void);
@@ -602,7 +602,7 @@ public:
         count = 0;
         if (p > 0) {
             if (effect) {
-                fn_801CB6E4(effect, car);
+                fn_801CB6E4(effect, car, p);
             }
             playing = 0;
         }
@@ -634,7 +634,7 @@ public:
             }
             if (!full && playing > 0) {
                 if (effect) {
-                    fn_801CB6E4(effect, car);
+                    fn_801CB6E4(effect, car, playing);
                 }
                 playing = 0;
             }
@@ -1294,7 +1294,7 @@ public:
         ground = 0.0f;
         jumps = 0;
         if (effects > 0) {
-            fn_801CB6E4(0x50204, car);
+            fn_801CB6E4(0x50204, car, effects);
             effects = 0;
         }
     }
@@ -1375,7 +1375,7 @@ public:
     virtual void Reset(void) {
         CountTracker::Reset();
         if (spins > 0) {
-            fn_801CB6E4(0x48203, car);
+            fn_801CB6E4(0x48203, car, spins);
             spins = 0;
         }
         rolls = 0;
@@ -1388,7 +1388,7 @@ public:
         Crash(rc);
         if (spins > 0) {
             if (spins > 0) {
-                fn_801CB6E4(0x48203, car);
+                fn_801CB6E4(0x48203, car, spins);
                 spins = 0;
             }
             angle = 0.0f;
@@ -1518,7 +1518,7 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     if (ground > 0.8f) {
         jumps = 0;
         if (effects > 0) {
-            fn_801CB6E4(0x50204, car);
+            fn_801CB6E4(0x50204, car, effects);
             effects = 0;
         }
     }
@@ -1697,7 +1697,7 @@ f32 SpinTracker::Rate(const RaceCarRec* rc) {
         f27C += fn_801E7E24();
         if (rolls > 0 || f27C > 0.75f) {
             if (spins > 0) {
-                fn_801CB6E4(0x48203, car);
+                fn_801CB6E4(0x48203, car, spins);
                 spins = 0;
             }
             angle = 0.0f;
@@ -2172,7 +2172,7 @@ void Unused2(f32** p) {}
 void CountTracker::StopEffect(void) {
     if (playing > 0) {
         if (effect) {
-            fn_801CB6E4(effect, car);
+            fn_801CB6E4(effect, car, playing);
         }
         playing = 0;
     }
