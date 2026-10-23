@@ -28,9 +28,11 @@ extern const f32 lbl_80564014;
 extern const f32 lbl_80564018;
 extern const f32 lbl_8056401C;
 
+struct Vec3;
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // Y, then X, then Z (racing.cpp)
+
 extern "C" {
 f32 PSVECMag(const f32* v);
-void fn_80015A20(Mat3* out, const f32* euler);  // Y, then X, then Z
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 u8* fn_80273978(u8* p, int del);
 u8* fn_80273B08(u8* p, int del);
@@ -89,7 +91,7 @@ void fn_80273B4C(u8* p) {
         euler[1] = ang * side;
         euler[2] = zero;
         Mat3 rot;
-        fn_80015A20(&rot, euler);
+        Mat3FromEuler(&rot, (const Vec3*)euler);
         Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
     }
 }
@@ -151,7 +153,28 @@ void fn_80274268(u8* p) {
 
 void fn_8027445C(u8* p) { fn_80274268(p); }
 
-void fn_80274460(u8* p) {}  // stub (128)
+extern const f32 lbl_80563FE0;
+
+// Camera frame (0x58) = the car-relative frame (0xC0) turned about y by lbl_80563FE0 and lifted.
+void fn_80274460(u8* p) {
+    Mat3 rot;
+    f32 euler[3];
+    CVec3 v;
+    CVec3 w;
+    *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
+    euler[0] = lbl_80563FB0;
+    euler[1] = lbl_80563FE0;
+    euler[2] = lbl_80563FB0;
+    Mat3FromEuler(&rot, (const Vec3*)euler);
+    Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
+    v.x = lbl_80563FB0;
+    v.y = lbl_80563FE8;
+    v.z = lbl_80563FB0;
+    MulVec(&w, &v, (CFrame*)(p + 0x58));
+    F32(p, 0x7C) = F32(p, 0x7C) + w.x;
+    F32(p, 0x80) = F32(p, 0x80) + w.y;
+    F32(p, 0x84) = F32(p, 0x84) + w.z;
+}
 
 void fn_80274660(u8* unused, u8* p) {
     f32 zero = lbl_80563FB0;
@@ -173,7 +196,7 @@ void fn_80274660(u8* unused, u8* p) {
     axis[1] = zero;
     axis[2] = zero;
     Mat3 rot;
-    fn_80015A20(&rot, axis);
+    Mat3FromEuler(&rot, (const Vec3*)axis);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0xE4);
     F32(p, 0x80) = F32(p, 0xE8);
