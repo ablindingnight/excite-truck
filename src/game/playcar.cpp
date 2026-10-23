@@ -55,13 +55,32 @@ public:
     virtual void v64(void);
     virtual void v68(void);
     virtual void v6C(void);
-    virtual void v70(void);
+    virtual u8* v70(void);
     virtual void v74(void);
     virtual void v78(int a);
     virtual void v7C(void);
 };
 
 #define VP(p) ((VPx*)(p))
+
+static inline void SetMode(u8* p, int on) {
+    U8(p, 0x25) = on;
+    U8(p, 0x26) = on == 0;
+    U8(p, 0x24) = 1;
+}
+
+// The same interface viewed with an argument-less slot 0x24.
+class VPa {
+public:
+    virtual void s08(void);
+    virtual void s0C(void);
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void v24(void);
+};
 
 extern const f32 lbl_8056208C;
 extern const f32 lbl_80562090;
@@ -105,6 +124,9 @@ void fn_802793B0(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
 void fn_801B6660(void);
+int fn_801CF050(u8* p, int a);
+void fn_801B6658(void);
+void fn_801331C4(u8* ctx, const char* name, u8* value);
 u8* fn_80178C90(void);
 s32 fn_801B2F54(u8* p);
 f32 fn_8018AE3C(u8* car);
@@ -283,7 +305,26 @@ void fn_80190E70(u8* p) {
     }
 }
 
-void fn_80190EAC(u8* p) {}  // stub (57)
+void fn_80190EAC(u8* p) {
+    int z = 0;
+    SetMode(p, z);
+    lbl_8055E520 = z;
+    u8* o = PTR(p, 0x4);
+    if (fn_801CF050(p, 1)) {
+        U32(o, 0xC) = z;
+        lbl_8055E524 = z;
+    }
+    S32(o, 0x8) = S32(o, 0x18);
+    VP(PTR(p, 0x8))->v30();
+    VP(PTR(p, 0xC))->v30();
+    fn_80191084(p, 0);
+    fn_80191084(p, fn_80191100(p));
+    fn_801B6658();
+    U8(p, 0x34) = 0;
+    F32(p, 0x30) = 0.0f;
+    U8(p, 0x34) = 1;
+    F32(p, 0x2C) = 10.0f;
+}
 
 void fn_80190F90(u8* p) { fn_80191758(p); }
 
@@ -367,7 +408,17 @@ void fn_80191584(u8* p) {
     S32(p, 0x8) = -1;
 }
 
-void fn_801915FC(u8* p) {}  // stub (35)
+void fn_801915FC(u8* p, u8* car) {
+    PTR(p, 0x34) = car;
+    S32(p, 0x3C) = S32(car, 0x1EC);
+    ((VPa*)p)->v24();
+    F32(p, 0x10) = 0.0f;
+    F32(p, 0x14) = 0.0f;
+    F32(p, 0x18) = 0.0f;
+    memset(p + 0x20, 0, 0x10);
+    F32(p, 0x1C) = 1.0f;
+    fn_801331C4(VP(PTR(p, 0x38))->v70(), "ff_jolt", p + 0x1C);
+}
 
 void fn_80191688(u8* p) { VP(PTR(p, 0x4))->v70(); }
 
