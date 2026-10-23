@@ -839,7 +839,88 @@ void fn_80262168(u8* p) {
     }
 }
 
-void fn_802621F0(u8* p) {}  // stub (225)
+}  // extern "C"
+
+// A challenge event as the map shows it.
+class ChalEvent {
+public:
+    virtual ~ChalEvent(void);
+    virtual const char* Name(void);  // 0x0C
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual s32 Score(void);         // 0x28
+    virtual s32 Grade(void);         // 0x2C
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void s38(void);
+    virtual s32 Target(void);        // 0x3C
+};
+
+const char* GetGradeDisplayName(int grade);
+
+extern "C" {
+void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
+void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
+void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_80232BA4(const char* text, u8* font, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs);
+void fn_801308F4(char* buf, s32 size, s32 value);
+extern const f32 lbl_80563B90;  // 0.0f
+
+#define EV ((ChalEvent*)PTR(p, 0x18))
+
+// Event node: its tile (pulsing while selected), name, grade and "score/target".
+void fn_802621F0(u8* p) {
+    static f32 sTextY = 0.5f * -(f32)S32(p, 0x10);
+    char line[30];
+    char target[30];
+    f32 x;
+    f32 y;
+    u32 color;
+    f32 grow;
+    u8 alpha;
+    u32 gradeColor;
+    u32 tile;
+    int part;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    color = 0xFFFFFFFF;
+    part = 0;
+    gradeColor = 0xFFFFFFFF;
+    tile = 0xFFFFFFFF;
+    if (U8(p, 0x1C)) {
+        color = 0xFFFFFFFF;
+        part = 1;
+        gradeColor = 0xFFFFFFFF;
+        tile = 0xFFFFFFFF;
+    } else if (U8(p, 0x1D)) {
+        color = 0xFFFFFFFF;
+        gradeColor = 0xFFFFFFFF;
+        tile = 0xFFFFFFFF;
+    }
+    fn_802354A0(PTR(p, 0x20), part, x, y, lbl_80563B90, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
+    if (U8(p, 0x1C) && !lbl_8055F3EA) {
+        fn_80230F78(&alpha, &grow, &color, 0);
+        u32 c = (alpha << 24) | (tile & 0xFFFFFF);
+        f32 hw = 0.5f * (f32)S32(p, 0xC);
+        f32 hh = 0.5f * (f32)S32(p, 0x10);
+        fn_802354A0(PTR(p, 0x20), part, x - grow * hw, y + grow * hh, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),
+                    (1.0f + grow) * (f32)S32(p, 0x10), c);
+    }
+    fn_80232BA4(EV->Name(), PTR(p, 0x24), color, 0x11, 15.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+    const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
+    fn_80232BA4(grade, PTR(p, 0x24), gradeColor, 0x14, 205.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+    fn_801308F4(target, 30, EV->Target());
+    if (EV->Score() <= 0) {
+        fn_801345D8(line, 30, "0/%s", target + 1);
+    } else {
+        fn_801308F4(line, 30, EV->Score());
+        fn_801345D8(line, 30, "%s/%s", line, target + 1);
+    }
+    fn_80232BA4(line, PTR(p, 0x24), color, 0x12, 350.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+}
 
 void fn_80262574(u8* p) {}
 
