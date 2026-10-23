@@ -2015,7 +2015,33 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     return p;
 }
 
-void fn_801A34D0(u8* p) {}  // stub (236)
+// Axis-aligned bounds of the extents (0x24 min, 0x30 max) through the frame, padded by 1.5 in x and z.
+void fn_801A34D0(u8* p, RVec3* lo, RVec3* hi) {
+    RVec3 b;
+    RVec3 a;
+    CFrame* f = (CFrame*)PTR(p, 0xC);
+    MulVec(&a, (RVec3*)(p + 0x24), f);
+    a.x = a.x + f->t.x;
+    a.y = a.y + f->t.y;
+    a.z = a.z + f->t.z;
+    CFrame* g = (CFrame*)PTR(p, 0xC);
+    MulVec(&b, (RVec3*)(p + 0x30), g);
+    b.x = b.x + g->t.x;
+    b.y = b.y + g->t.y;
+    b.z = b.z + g->t.z;
+    *hi = a;
+    *lo = *hi;
+    lo->x = lo->x < b.x ? lo->x : b.x;
+    lo->y = lo->y < b.y ? lo->y : b.y;
+    lo->z = lo->z < b.z ? lo->z : b.z;
+    hi->x = hi->x > b.x ? hi->x : b.x;
+    hi->y = hi->y > b.y ? hi->y : b.y;
+    hi->z = hi->z > b.z ? hi->z : b.z;
+    hi->x += 1.5f;
+    hi->z += 1.5f;
+    lo->x -= 1.5f;
+    lo->z -= 1.5f;
+}
 
 f32 fn_801A3880(u8* p) {
     f32 a = PSVECDotProduct(p + 0x30, p + 0x30);
