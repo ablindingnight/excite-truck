@@ -250,7 +250,7 @@ void fn_801E3488(ValVec3* out, const Joint* j) {
     fn_801E3440(out, j, &root);
 }
 
-void fn_801E34E4(Joint* j, const ValMatrix* root) {
+void fn_801E34E4(const Joint* j, const ValMatrix* root) {
     if (j->inst != -1) {
         ValMatrix w;
         fn_801E3284(&w, j, root);

@@ -24,7 +24,7 @@ Joint* fn_801E3004(int model, const char* name, int flags);
 Joint* fn_801E31D8(Joint* parent, const char* name, int flags);
 void fn_801E323C(Joint* j);
 void fn_801E3440(ValVec3* out, const Joint* j, const ValMatrix* root);
-void fn_801E34E4(Joint* j, const ValMatrix* root);
+void fn_801E34E4(const Joint* j, const ValMatrix* root);
 int fn_801E3534(const Joint* j);
 void fn_801E353C(Joint* j, f32 angle);
 void fn_801E35D4(Joint* j, const Mat3* r);
