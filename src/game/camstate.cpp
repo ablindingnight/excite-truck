@@ -160,7 +160,29 @@ void fn_80274EA8(u8* p) {
 
 void fn_80274F74(u8* p) {}  // stub (84)
 
-void fn_802750C4(u8* p) {}  // stub (58)
+void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+
+// Re-aims the camera, then slides it along its view axis toward `dist` from the target.
+void fn_802750C4(u8* p, f32 k, f32 dist) {
+    f32 d[3];
+    f32 up[3];
+    up[0] = lbl_80563FB0;
+    up[1] = lbl_80563FAC;
+    up[2] = lbl_80563FB0;
+    fn_8026E850((f32*)(p + 0x7C), (f32*)(p + 0xE4), p, up);
+    d[0] = F32(p, 0xE4) - F32(p, 0x7C);
+    d[1] = F32(p, 0xE8) - F32(p, 0x80);
+    d[2] = F32(p, 0xEC) - F32(p, 0x84);
+    f32 e = PSVECDotProduct((f32*)(p + 0x70), d) - dist;
+    f32 t = e * k;
+    f32 x = F32(p, 0x7C) + F32(p, 0x70) * t;
+    f32 y = F32(p, 0x80) + F32(p, 0x74) * t;
+    f32 z = F32(p, 0x84) + F32(p, 0x78) * t;
+    F32(p, 0x7C) = x;
+    F32(p, 0x80) = y;
+    F32(p, 0x84) = z;
+}
 
 void fn_802751AC(u8* p) {}  // stub (153)
 
