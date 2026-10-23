@@ -251,7 +251,22 @@ void fn_8024778C(void) {
 
 void fn_80247880(void) { lbl_8055BEB0 = fn_80214D04(); }
 
-void fn_802478A4(u8* p) {}  // stub (90)
+// Career difficulty menu.
+void fn_802478A4(void) {
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_8024778C, 0, 0),
+        MenuItem(lbl_8055BABC, 8, (const void*)fn_80247880, 1, 0),
+        // Literal-pool offsets differ (0x10.. vs 0x2A0..) until the unit's earlier strings are literals too.
+        MenuItem("career_0", 0, 0, 3, 0),
+        MenuItem("career_1", 0, 0, 4, 0),
+        MenuItem("career_2", 0, 0, 5, 0),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc = {"excite_diff.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    fn_802146BC(&desc, -999, -999, 1);
+}
 
 void fn_80247A0C(void) {
     if (lbl_8055BEBC != lbl_8055BEA8) {
