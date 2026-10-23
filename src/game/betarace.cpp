@@ -3540,7 +3540,7 @@ void BetaMaster::vf9C(RaceCarRec* rc, int type) {
     }
 }
 
-void fn_80151688(void) {}
+extern "C" void fn_80151688(void) {}
 
 void BetaMaster::vfA4(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
@@ -3571,7 +3571,7 @@ void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
     }
 }
 
-void fn_80151914(void) {}
+extern "C" void fn_80151914(void) {}
 
 void BetaMaster::vf94(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);

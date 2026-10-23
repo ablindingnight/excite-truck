@@ -147,15 +147,11 @@ void fn_8020A634(void);
 void fn_8027B77C(void);
 void fn_80211F4C(void);
 void fn_800126B4(RaceSetup* rs, DAVMap* dav, int a, int b);
-void fn_8000AB48(RaceSetup* rs, DAVMap* dav);
-void fn_8000ABE0(RaceSetup* rs);
 void fn_800126C0(RaceSetup* rs, DAVMap* dav);
 void fn_80244738(void);
 void fn_80211F44(void);
 void fn_8027B690(void);
 void fn_8020A600(void);
-void fn_8000BF20(RaceSetup* rs, GameListener* listener);
-void fn_8000C0E8(RaceSetup* rs);
 int fn_802ECEEC(void);
 void fn_802ECEC0(void);
 void fn_802ECEC4(void);
@@ -183,6 +179,12 @@ void fn_8023B5E0(void);
 void fn_8000824C(s32* event, s32 index);
 extern u8 lbl_8055F291;
 }
+
+// gameloop.cpp / raceload.cpp (C++ linkage)
+void fn_8000AB48(RaceSetup* rs, DAVMap* dav);
+void fn_8000ABE0(RaceSetup* rs);
+void fn_8000BF20(RaceSetup* rs, GameListener* listener);
+void fn_8000C0E8(RaceSetup* rs);
 
 static inline int Abs(int v) {
     int m = v >> 31;

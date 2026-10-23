@@ -283,7 +283,7 @@ void fn_8013A074(void) {
 
 }  // extern "C"
 
-TableRef fn_8013A0B0(const char* what, const char* name) {
+extern "C" TableRef fn_8013A0B0(const char* what, const char* name) {
     TableRef r;
     if (lbl_8055E138 && *name) {
         if (lbl_8055E138->HasChild(name)) {
