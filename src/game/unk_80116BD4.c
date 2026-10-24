@@ -4554,10 +4554,45 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 blockMap[idx >> 1] = 1;
                 c1 |= c1 << 8;
                 c1 |= c1 << 16;
-                for (i = 0; i < 8; i++) {
+                {
                     u32 p = *pattern.cur++;
-                    ((u32 *)(dst + i * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
-                    ((u32 *)(dst + i * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                    ((u32 *)(dst + 0 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 0 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 1 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 1 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 2 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 2 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 3 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 3 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 4 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 4 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 5 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 5 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 6 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 6 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + 7 * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + 7 * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
                 }
                 break;
             }
