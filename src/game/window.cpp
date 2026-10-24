@@ -319,8 +319,8 @@ void fn_80217590(Window* win, s32 x, s32 y) {
     y -= win->y;
     if (wd) {
         wd->ReleaseA(x, y);
-        win->pressed = 0;
     }
+    win->pressed = 0;
 }
 
 void fn_802175F0(Window* win, s32 x, s32 y) {
@@ -348,8 +348,8 @@ void fn_802176D4(Window* win, s32 x, s32 y) {
     y -= win->y;
     if (wd) {
         wd->ReleaseB(x, y);
-        win->pressed = 0;
     }
+    win->pressed = 0;
 }
 
 void fn_80217734(Window* win, s32 x, s32 y) {
