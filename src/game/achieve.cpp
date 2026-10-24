@@ -43,8 +43,8 @@ public:
     ~AchSchedule(void) {
         if (levels != NULL) {
             delete[] levels;
-            levels = NULL;
         }
+        levels = NULL;
         count = 0;
     }
 
@@ -241,16 +241,15 @@ void AchLoad(void) {
 }
 
 void AchFree(void) {
-    AchCategory* cat;
     u32 i;
 
     if (lbl_8055D610 == NULL) {
         return;
     }
-    for (i = 0, cat = lbl_802FDF30; i < NUM_CATEGORIES; i++, cat++) {
-        if (cat->schedule != NULL) {
-            delete cat->schedule;
-            cat->schedule = NULL;
+    for (i = 0; i < NUM_CATEGORIES; i++) {
+        if (lbl_802FDF30[i].schedule != NULL) {
+            delete lbl_802FDF30[i].schedule;
+            lbl_802FDF30[i].schedule = NULL;
         }
     }
     fn_80131818(lbl_8055D610);
