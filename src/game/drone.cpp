@@ -369,36 +369,36 @@ HermitePools* lbl_8055EC98;
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return fn_80144514(a, b, c, d, e, f); }
 
 // d = a * b
-static inline void MtxMul(BMtx33& d, const BMtx33& a, const BMtx33& b) {
-    if (&d == &a || &d == &b) {
-        f32 t00 = Dot(b.xx, a.xx, b.yx, a.xy, b.zx, a.xz);
-        f32 t10 = Dot(b.xx, a.yx, b.yx, a.yy, b.zx, a.yz);
-        f32 t20 = Dot(b.xx, a.zx, b.yx, a.zy, b.zx, a.zz);
-        f32 t01 = Dot(b.xy, a.xx, b.yy, a.xy, b.zy, a.xz);
-        f32 t11 = Dot(b.xy, a.yx, b.yy, a.yy, b.zy, a.yz);
-        f32 t21 = Dot(b.xy, a.zx, b.yy, a.zy, b.zy, a.zz);
-        f32 t02 = Dot(b.xz, a.xx, b.yz, a.xy, b.zz, a.xz);
-        f32 t12 = Dot(b.xz, a.yx, b.yz, a.yy, b.zz, a.yz);
-        f32 t22 = Dot(b.xz, a.zx, b.yz, a.zy, b.zz, a.zz);
-        d.xx = t00;
-        d.yx = t10;
-        d.zx = t20;
-        d.xy = t01;
-        d.yy = t11;
-        d.zy = t21;
-        d.xz = t02;
-        d.yz = t12;
-        d.zz = t22;
+static inline void MtxMul(BMtx33* d, const BMtx33* a, const BMtx33* b) {
+    if (d == a || d == b) {
+        f32 t00 = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        f32 t10 = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        f32 t20 = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        f32 t01 = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        f32 t11 = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        f32 t21 = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        f32 t02 = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        f32 t12 = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        f32 t22 = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
+        d->xx = t00;
+        d->yx = t10;
+        d->zx = t20;
+        d->xy = t01;
+        d->yy = t11;
+        d->zy = t21;
+        d->xz = t02;
+        d->yz = t12;
+        d->zz = t22;
     } else {
-        d.xx = Dot(b.xx, a.xx, b.yx, a.xy, b.zx, a.xz);
-        d.yx = Dot(b.xx, a.yx, b.yx, a.yy, b.zx, a.yz);
-        d.zx = Dot(b.xx, a.zx, b.yx, a.zy, b.zx, a.zz);
-        d.xy = Dot(b.xy, a.xx, b.yy, a.xy, b.zy, a.xz);
-        d.yy = Dot(b.xy, a.yx, b.yy, a.yy, b.zy, a.yz);
-        d.zy = Dot(b.xy, a.zx, b.yy, a.zy, b.zy, a.zz);
-        d.xz = Dot(b.xz, a.xx, b.yz, a.xy, b.zz, a.xz);
-        d.yz = Dot(b.xz, a.yx, b.yz, a.yy, b.zz, a.yz);
-        d.zz = Dot(b.xz, a.zx, b.yz, a.zy, b.zz, a.zz);
+        d->xx = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        d->yx = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        d->zx = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        d->xy = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        d->yy = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        d->zy = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        d->xz = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        d->yz = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        d->zz = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
     }
 }
 
@@ -772,7 +772,7 @@ void HermiteDrone::UpdateReverse(f32 dt) {
             r.zx = s;
             r.zy = 0.0f;
             r.zz = c;
-            MtxMul(m, r, m);
+            MtxMul(&m, &r, &m);
             MtxToQuat(&m, &q1);
         }
     }
