@@ -193,7 +193,8 @@ extern "C" StringList* fn_8022D2BC(StringList* sl, int flags) {
 extern "C" void fn_8022D350(StringList* sl, const char* s, char flag) {
     if (sl->used < sl->count) {
         strncpy(sl->items[sl->used], s, sl->len);
-        sl->items[sl->used][sl->len - 1] = 0;
+        int last = sl->len - 1;
+        sl->items[sl->used][last] = 0;
         sl->items[sl->used][sl->len] = flag;
         sl->used++;
         sl->added++;
