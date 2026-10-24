@@ -421,8 +421,8 @@ void fn_8029FD04(void) {
     lbl_804B9B7C.n = 0;
     ValueTable* t = fn_80131810("partemit.val");
     if (t) {
-        int i = 1;
-        ValueNode* n = t->GetChild(0);
+        int i = 0;
+        ValueNode* n = t->GetChild(i++);
         while (n) {
             if (strcasecmp(n->GetName(), "emitter") == 0) {
                 fn_8029FB00(n);
