@@ -164,8 +164,8 @@ void fn_802A81F0(void) {
     lbl_804BD6C4.n = 0;
     ValueTable* t = fn_80131810("birds.val");
     if (t) {
-        int next = 1;
-        ValueNode* n = t->GetChild(0);
+        int next = 0;
+        ValueNode* n = t->GetChild(next++);
         int count = 0;
         while (n) {
             if (!strcasecmp(n->GetName(), "flock")) {
