@@ -3171,6 +3171,9 @@ game/musicplr.cpp:
 	.sbss       start:0x8055EDC8 end:0x8055EDF0
 	.sdata2     start:0x80563290 end:0x805632B0
 
+game/unk_8020A6AC.c:
+	.text       start:0x8020A6AC end:0x8020BCB8
+
 game/sounddash.cpp:
 	.text       start:0x8020BCE4 end:0x8020C140
 	.ctors      start:0x802ED394 end:0x802ED398

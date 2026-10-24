@@ -17,6 +17,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | fn_801B3E24 (collision sound play) | src/game/collisionsound.cpp | volatile zero vector forces stack stores | Codex (tagged in COLLISIONSOUND-23) |
 | UI API unit (9 sites: dont_inline/scheduling pragmas, 1 register) | src/game/uiapi.cpp | imported raw from upstream; whole file needs a typed rewrite | upstream orangedude27/excite-truck |
 | whole unit (3 tagged sites) | src/game/unk_802E4D84.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
+| whole unit (8 tagged sites) | src/game/unk_8020A6AC.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 
 ## Existing sites (inventory 2026-10-23, before tagging)
 
