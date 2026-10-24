@@ -146,7 +146,7 @@ int fn_801B3DC0(Manager* self,u32 first,u32 second){
  }
  return found;
 }
-void fn_801B3FD8(Manager* self){int at=0;for(int pool=0;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){((SoundTuple*)self->pools[pool].items)[i].name=lbl_802F9630[first+i].name;((SoundTuple*)self->pools[pool].items)[i].gain=lbl_802F9630[first+i].gain;}}}
+void fn_801B3FD8(Manager* self){int pool=0;unsigned int at=0;for(;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){SoundTuple* item=(SoundTuple*)self->pools[pool].items+i;item->name=lbl_802F9630[first+i].name;item->gain=lbl_802F9630[first+i].gain;}}}
 inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 inline u32 NodeKeyFromInfoNew(const KeyInfo* row){int second=row->second;int first=row->first;if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))fn_801B4428);self->root=fn_801B447C(self,self->nodes,43);}
