@@ -174,6 +174,8 @@ void* memset(void* dst, int c, size_t n);
 char* strcpy(char* dst, const char* src);
 char* strncpy(char* dst, const char* src, size_t n);
 size_t strlen(const char* s);
+int strcmp(const char* a, const char* b);
+void fn_802E30C8(const char* fmt, ...);
 int sprintf(char* dst, const char* fmt, ...);
 double atof(const char* s);
 int atoi(const char* s);
@@ -412,9 +414,49 @@ f32 fn_801C34F4(f32 x) { return 180.0f * x / 3.1415927f; }
 
 int fn_801C3508(u32 mask, int i) { return (mask & (1 << i)) != 0; }
 
-// "who" name to car mask (placeholder; the call keeps its strings in the pool).
+// A "who" name to a car mask: nobody, all, last, first, player, the eve leader, even or odd lineup
+// slots, or a lineup index (counted from the end when negative).
 u32 fn_801C3524(const char* who) {
-    IL_Use(0, "eve_leader", "interlude: bad who %s", "interlude: can't find %s");
+    if (strcmp(who, "nobody") == 0) {
+        return 0;
+    }
+    if (strcmp(who, "all") == 0) {
+        return 0xFFFFFFFF;
+    }
+    if (strcmp(who, "last") == 0) {
+        return 1 << (lbl_8055E804 - 1);
+    }
+    if (strcmp(who, "0") == 0 || strcmp(who, "first") == 0) {
+        return 1;
+    }
+    if (strcmp(who, "player") == 0) {
+        return 1 << fn_80179630(0);
+    }
+    if (strcmp(who, "eve_leader") == 0) {
+        return 1 << lbl_8055E808;
+    }
+    if (strcmp(who, "even") == 0) {
+        u32 mask = 0;
+        for (int i = 0; i < lbl_8055E804; i += 2) {
+            mask |= 1 << i;
+        }
+        return mask;
+    }
+    if (strcmp(who, "odd") == 0) {
+        u32 mask = 0;
+        for (int i = 1; i < lbl_8055E804; i += 2) {
+            mask |= 1 << i;
+        }
+        return mask;
+    }
+    int n = atoi(who);
+    if (n > 0) {
+        return 1 << n;
+    }
+    if (n < 0) {
+        return 1 << (lbl_8055E804 - n);
+    }
+    fn_802E30C8("interlude: bad who %s", who);
     return 0;
 }
 
@@ -527,7 +569,7 @@ ValueNodeV* fn_801C3D5C(void) { return GetEvent(fn_801769CC()->event)->node; }
 // Interlude loader (placeholder; strings and switch keep the pool layout).
 void fn_801C3D88(const char* name) {
     int k = (int)name;
-    IL_Use(0, "Interlude: Couldn't find interlude file %s!!!", "interlude_name", "Interlude: Couldn't find interlude %s in val file %s!!!", "duration", "intrlude: too many events!", "camera_type", "interp_type", "interp_time", "sound_type", "immediate", "interlude: unhandled teleport where type %d", "interlude: unhandled wait type %d", "interlude: unhandled event type %d", "intrlude: %d events");
+    IL_Use(0, "interlude: can't find %s", "Interlude: Couldn't find interlude file %s!!!", "interlude_name", "Interlude: Couldn't find interlude %s in val file %s!!!", "duration", "intrlude: too many events!", "camera_type", "interp_type", "interp_time", "sound_type", "immediate", "interlude: unhandled teleport where type %d", "interlude: unhandled wait type %d", "interlude: unhandled event type %d", "intrlude: %d events");
     switch (k) {
     case 0:
         IL_Use(0);
