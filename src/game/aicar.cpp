@@ -390,6 +390,11 @@ void fn_801935EC(u8* d) {
     F32(d, 0x22C) = lbl_8055E3C8;
 }
 
+extern const f32 lbl_80562168;  // 0.1
+extern const f32 lbl_80562174;  // 2.0
+extern const f32 lbl_8056216C;  // 22.2 (80 km/h)
+extern const f32 lbl_80562170;  // 2.2 (8 km/h)
+
 void fn_80193604(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
     if (other) {
         if (U32(other, 0x10) == 'PCAR') {
@@ -402,14 +407,14 @@ void fn_80193604(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
                 f32 s = PSVECDotProduct(other + 0x118, other + 0x54);
                 if (s > 4.4444447f) {
                     if ((f32)__fabs(PSVECDotProduct(other + 0x118, other + 0x3C) / s) > 0.176f) {
-                        F32(d, 0x2A8) = F32(d, 0x2A8) + 0.1f;
+                        F32(d, 0x2A8) += lbl_80562168;
                     }
                 }
             }
         }
         u32 t = U32(other, 0x10);
-        if (t == 'ACAR' || (t == 'PCAR' && fn_80193524(CAR(d), other))) {
-            F32(d, 0x2A8) = F32(d, 0x2A8) + 0.1f;
+        if ((t == 'ACAR' || t == 'PCAR') && fn_80193524(CAR(d), other)) {
+            F32(d, 0x2A8) += lbl_80562168;
         }
     }
     if (kind < 1000 && PSVECDotProduct(dir, CAR(d) + 0x88) < 0.0f) {
@@ -422,20 +427,22 @@ void fn_80193604(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
         n.z *= inv;
         if ((f32)__fabs(PSVECDotProduct(&n, CAR(d) + 0x88)) > 0.5f) {
             f32 v = F32(d, 0x270);
-            if (v < 22.222223f) {
-                if (kind != 0x6D || v < 2.2222223f) {
+            if (v < lbl_8056216C) {
+                if (kind != 0x6D || v < lbl_80562170) {
                     if (S32(d, 0x268) != 1 || kind != 0x6D) {
-                        F32(d, 0x2A0) = F32(d, 0x2A0) + 2.0f;
+                        F32(d, 0x2A0) += lbl_80562174;
                     }
                 }
             }
         }
     }
     if (kind == 0x3EA) {
-        F32(d, 0x2A0) = F32(d, 0x2A0) + 2.0f;
+        F32(d, 0x2A0) += lbl_80562174;
     }
-    if (kind == 0x6D) {
+    switch (kind) {
+    case 0x6D:
         U8(d, 0x2FE) = 0;
+        break;
     }
 }
 
