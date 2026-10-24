@@ -2532,6 +2532,109 @@ if(bits < -22) memset(*(u8**)((u8*)arg0+0x2c), **(u8**)((u8*)arg0+0x2c), -bits-2
 *(u32*)((u8*)arg1+4)=(u32)src;*(u32*)arg1=bits;*(u32*)((u8*)arg1+8)=remain;
 }
 
+// A decoder bundle: a buffer of values read from the bitstream on demand.
+typedef struct Bundle8011 {
+    u8 *cur;           // 0x00 next value to use
+    u8 *end;           // 0x04
+    u8 pad8[0x10 - 0x8];
+    u8 symbols[16];    // 0x10 Huffman symbol map
+    u32 maxBits;       // 0x20 Huffman code length limit
+    u8 *lookup;        // 0x24 code -> (length << 4 | symbol index)
+    u32 countBits;     // 0x28 width of the value count
+    u8 *data;          // 0x2C
+} Bundle8011;
+
+// Refills an exhausted bundle of unsigned bytes: reads the count, then either that many Huffman-coded values or one
+// 4-bit value repeated.
+void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
+    u32 *next;
+    u32 value;
+    u32 count;
+    u32 len, bit, mask, fill, e;
+    u8 *dst, *lookup, *symbols;
+    u32 width;
+
+    if (b->cur != b->end) return;
+    count = bits->count;
+    width = b->countBits;
+    next = bits->next;
+    value = bits->value;
+    if (count < width) {
+        u32 word = *next;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
+        value = word >> (width - count);
+        count = count + 32 - width;
+        next++;
+    } else {
+        len = value & (0xFFFFFFFFU >> (32 - width));
+        value >>= width;
+        count -= width;
+    }
+    if (len != 0) {
+        b->cur = b->data;
+        b->end = b->data + len;
+        if (count == 0) {
+            bit = *next;
+            value = bit >> 1;
+            count = 31;
+            next++;
+        } else {
+            bit = value;
+            value >>= 1;
+            count--;
+        }
+        if (!(bit & 1)) {
+            width = b->maxBits;
+            mask = 0xFFFFFFFFU >> (32 - width);
+            dst = b->data;
+            lookup = b->lookup;
+            symbols = b->symbols;
+            do {
+                len--;
+                if (count >= width) {
+                    e = lookup[value & mask];
+                    *dst++ = symbols[e & 15];
+                    e >>= 4;
+                    value >>= e;
+                    count -= e;
+                } else {
+                    u32 word = *next;
+                    e = lookup[(value | (word << count)) & mask];
+                    *dst++ = symbols[e & 15];
+                    e >>= 4;
+                    if (count >= e) {
+                        value >>= e;
+                        count -= e;
+                    } else {
+                        value = word >> (e - count);
+                        next++;
+                        count = count + 32 - e;
+                    }
+                }
+            } while (len != 0);
+        } else {
+            if (count < 4) {
+                u32 word = *next;
+                next++;
+                fill = (value | (word << count)) & 15;
+                value = word >> (4 - count);
+                count += 28;
+            } else {
+                fill = value & 15;
+                value >>= 4;
+                count -= 4;
+            }
+            memset(b->data, fill, len);
+        }
+    } else {
+        b->end = b->data;
+        b->cur = b->data + 4;
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = count;
+}
+
 void fn_8011D9E4(void *arg0, void *arg1) {
     u32 *bits;
     u32 value, bitCount, available, mask, count, i, code, len;
