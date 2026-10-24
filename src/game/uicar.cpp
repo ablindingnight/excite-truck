@@ -80,12 +80,14 @@ int fn_8023FE34(void) {
     return n;
 }
 
+// Car, colour and slot of the id-th joined player (slots with id < 0 are empty).
 void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
     JoinSlot* s = lbl_80498828;
+    int n = 0;
     int i;
     for (i = 0; i < 2; i++) {
         if (s->id >= 0) {
-            if (i == id) {
+            if (n == id) {
                 if (car) {
                     *car = lbl_80498828[i].car;
                 }
@@ -97,10 +99,11 @@ void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
                 }
                 return;
             }
+            n++;
         }
         s++;
     }
-    fn_802E317C("mroll.cpp: get_player_info got bad index %d (there are only %d players set up)", id, i);
+    fn_802E317C("mroll.cpp: get_player_info got bad index %d (there are only %d players set up)", id, n);
 }
 
 void fn_8023FF1C(u8* p) {}  // stub (549)
