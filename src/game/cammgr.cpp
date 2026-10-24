@@ -39,11 +39,21 @@ struct CamPose {
 // One player's camera record.
 struct CamRec {
     CamRec(void);  // fn_8026A600 (out of line, after this unit)
-    u8 pad0[0x58];     // offset 0x0
-    CamPose pose;      // offset 0x58
-    u8 pad88[0x34];    // offset 0x88
-    f32 fov;           // offset 0xBC
-    u8 padC0[0x78];    // offset 0xC0
+    u8 pad0[0x10];      // offset 0x0
+    s32 mode;           // offset 0x10
+    s32 nextMode;       // offset 0x14
+    u8 pad18[0x4];      // offset 0x18
+    s32 w1C;            // offset 0x1C
+    s32 target;         // offset 0x20
+    s32 nextTarget;     // offset 0x24
+    u8 pad28[0x30];     // offset 0x28
+    CamPose pose;       // offset 0x58
+    CamPose lastPose;   // offset 0x88
+    s32 lastFrame;      // offset 0xB8
+    f32 fov;            // offset 0xBC
+    CamPose carFrame;   // offset 0xC0
+    u8 padF0[0x30];     // offset 0xF0
+    u8 listener[0x18];  // offset 0x120
     u8 b138;           // offset 0x138
     u8 b139;           // offset 0x139
     u8 pad13A[0x2];
@@ -52,7 +62,11 @@ struct CamRec {
     u8 pad144[0x10];   // offset 0x144
     f32 f154;          // offset 0x154
     f32 f158;          // offset 0x158
-    u8 pad15C[0x94];   // offset 0x15C
+    u8 pad15C[0x44];   // offset 0x15C
+    f32 f1A0;          // offset 0x1A0
+    u8 pad1A4[0x48];   // offset 0x1A4
+    s16 h1EC;          // offset 0x1EC
+    u8 pad1EE[0x2];    // offset 0x1EE
     f32 f1F0;          // offset 0x1F0
     f32 prevFov;       // offset 0x1F4
     CamPose prevPose;  // offset 0x1F8
@@ -97,7 +111,8 @@ void fn_802733F0(void);
 void fn_80209110(void* p);
 void fn_801E9DC4(void* p);
 void fn_802735F4(int i, u8 b);
-void fn_802734F0(u8* p);
+int fn_802734F0(int mode);
+int fn_80267EE0(int mode);
 void fn_801EA994(u8* p);
 void fn_80265E08(u8* p);
 void fn_80266150(u8* p);
@@ -603,7 +618,142 @@ u8* fn_802678C0(int i) { return fn_80267EE4(i) + 0x58; }
 
 u8* fn_802678E4(int i) { return fn_80267EE4(i); }
 
-void fn_802678E8(u8* p) {}  // stub (342)
+// What the sound listener follows: the target car and this camera's pose.
+struct ListenerRef {
+    s32 id;     // offset 0x0
+    void* mtx;  // offset 0x4
+    void* vel;  // offset 0x8
+};
+
+void fn_8020655C(const ListenerRef& l, int i);
+int fn_801C5B68(u8* view, int idx);
+void fn_8026B768(int target, int idx);
+int fn_8026B734(int target, f32* out);
+u8* fn_8017960C(int car);
+int fn_801769F8(void);
+f32 fn_801B8950(int car);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+double tan(double x);
+double fabs(double x);
+void fn_802693F4(CamRec* c, u8* own, int idx);
+void fn_80268E94(CamRec* c, int idx);
+extern s32 lbl_8055E3C4;  // frame counter
+extern f32 lbl_8055E460;  // tick alpha
+extern u8 lbl_8055F480;
+extern const f32 lbl_80563C68;  // default fov
+extern const f32 lbl_80563C6C;  // half
+extern const f32 lbl_80563C70;
+extern const f32 lbl_80563C74;
+extern const f32 lbl_80563C78;
+extern const f32 lbl_80563C7C;  // shake decay per frame
+
+// Per-frame camera update for player idx: run the current camera type, blend from last frame's pose by the
+// tick alpha, and fill the view (pose, fov, rumble, flags). The shake levels decay unless paused.
+void fn_802678E8(u8* view, int idx) {
+    fn_802670A0(view, idx);
+    if (fn_801C5B68(view, idx)) {
+        fn_80267130(view);
+        return;
+    }
+    CamRec* c = (CamRec*)fn_80267EE4(idx);
+    c->f1A0 = lbl_80563C28;
+    fn_8026B768(c->target, idx);
+    if (lbl_8055E3C4 != c->lastFrame) {
+        c->lastPose = c->pose;
+        c->lastFrame = lbl_8055E3C4;
+    }
+    if (c->nextMode < 0 || c->nextMode >= 0x22) {
+        c->nextMode = 4;
+    }
+    S32(view, 0x5C) = c->w1C;
+    lbl_8055F480 = 0;
+    c->target = c->nextTarget;
+    c->mode = c->nextMode;
+    c->fov = lbl_80563C68;
+    c->car = fn_8017960C(c->target);
+    f32 pos[3];
+    pos[0] = c->pose.pos.v[0];
+    pos[1] = c->pose.pos.v[1];
+    pos[2] = c->pose.pos.v[2];
+    u8 own = 0;
+    int flags;
+    if (c->car) {
+        fn_802693F4(c, &own, idx);
+        flags = fn_80267EE0(c->mode);
+        if (U8(c->car, 0x260C)) {
+            flags |= 0x20;
+        }
+    } else {
+        flags = fn_80267EE0(c->mode);
+    }
+    fn_80268E94(c, idx);
+    ListenerRef l = {c->target, &c->pose, c->listener};
+    fn_8020655C(l, idx);
+    if (c->mode != 0x11) {
+        CamPose blend;
+        f32 k = lbl_8055E460;
+        const f32* a = (const f32*)&c->lastPose;
+        const f32* b = (const f32*)&c->pose;
+        f32* d = (f32*)&blend;
+        for (int i = 0; i < 12; i++) {
+            f32 y = b[i];
+            f32 x = a[i];
+            d[i] = x + k * (y - x);
+        }
+        *(CamPose*)view = blend;
+    } else {
+        *(CamPose*)view = c->pose;
+    }
+    F32(view, 0x30) = c->fov;
+    F32(view, 0x34) = tan(lbl_80563C6C * c->fov);
+    f32 rumble;
+    f32 r;
+    if (!fn_801769F8()) {
+        if (fn_8026B734(c->target, &r)) {
+            rumble = r;
+            goto done;
+        } else {
+            bool chase = false;
+            int m = c->mode;
+            if ((m >= 0 && m < 10) || m == 0xE) {
+                chase = true;
+            }
+            if (chase) {
+                r = fn_801B8950(c->target);
+                f32 k = ((f32)__fabs(PSVECDotProduct(&c->pose.rot.m[6], &c->carFrame.rot.m[6])) - lbl_80563C70) / lbl_80563C74;
+                k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
+                k = (k > lbl_80563C20) ? k : lbl_80563C20;
+                rumble = r * (lbl_80563C2C + k * lbl_80563C78);
+                goto done;
+            }
+        }
+    }
+    rumble = lbl_80563C20;
+done:
+    F32(view, 0x50) = rumble;
+    F32(view, 0x54) = c->f1A0;
+    if (c->b138) {
+        flags |= 0x10;
+    }
+    c->b138 = 0;
+    c->b139 = 0;
+    S32(view, 0x58) = c->mode;
+    S32(view, 0x60) = c->target;
+    S32(view, 0x68) = flags;
+    if (own) {
+        *(s16*)(view + 0x64) = c->h1EC;
+    } else {
+        *(s16*)(view + 0x64) = *(s16*)(c->car + 0x6C);
+    }
+    if (!fn_801769F8()) {
+        for (int i = 0; i < 8; i++) {
+            f32 v = lbl_80499980[i] - lbl_80563C7C;
+            lbl_80499980[i] = (lbl_80563C20 > v) ? lbl_80563C20 : v;
+        }
+    }
+    fn_80267130(view);
+    fn_802671CC(view);
+}
 
 void fn_80267E40(u32 id, f32 strength) {
     f32 now = lbl_8055E3C8;
@@ -617,7 +767,7 @@ void fn_80267E40(u32 id, f32 strength) {
     }
 }
 
-void fn_80267EE0(u8* p) { fn_802734F0(p); }
+int fn_80267EE0(int mode) { return fn_802734F0(mode); }
 
 u8* fn_80267EE4(int i) { return (u8*)lbl_80499080 + i * 0x228; }
 
@@ -808,9 +958,9 @@ void fn_80268E00(void) {
     fn_8013530C(&f, 0);
 }
 
-void fn_80268E94(u8* p) {}  // stub (344)
+void fn_80268E94(CamRec* c, int idx) {}  // stub (344)
 
-void fn_802693F4(u8* p) {}  // stub (495)
+void fn_802693F4(CamRec* c, u8* own, int idx) {}  // stub (495)
 
 void fn_80269BB0(u8* p) {}  // stub (400)
 
@@ -879,7 +1029,7 @@ void fn_8026A4A0(int i, CamPose* out, f32* fov) {
     *fov = e->fov;
 }
 
-void fn_8026A51C(u8* p) { fn_802693F4(p); }
+void fn_8026A51C(CamRec* c, u8* own, int idx) { fn_802693F4(c, own, idx); }
 
 f32 fn_8026A520(int i) {
     if (i >= 0 && (u32)i < 8) {
