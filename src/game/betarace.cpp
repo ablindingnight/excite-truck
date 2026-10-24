@@ -3555,7 +3555,9 @@ void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
     int fa = 1;
     int fb = 1;
     if (a->kind == 0x50 && b->kind == 0x50) {
-        fa = a->speed > b->speed;
+        f32 sb = b->speed;
+        f32 sa = a->speed;
+        fa = sa > sb;
         fb = !fa;
     }
     if (fa) {
