@@ -1241,29 +1241,35 @@ f32 fn_8011AE18(s32 arg0) {
     return temp;
 }
 
+// Scales float samples by `gain` into clamped 16-bit PCM.
 void fn_8011AE68(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    s32 *out = (s32 *)arg0;
-    f32 *in = arg1;
+    s16 *out = (s16 *)arg0;
     u32 i;
+    s32 v;
     for (i = 0; i < arg2; i++) {
-        f32 v = *in * farg0;
-        *(s16 *)((u8 *)out + 2) = (s16)(v * 32767.0f + 0.5f);
-        in++;
-        out++;
+        v = (s32)(*arg1++ * farg0);
+        if (v < -32768) v = -32768;
+        if (v > 32767) v = 32767;
+        *out++ = v;
     }
 }
 
+// Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 void fn_8011AED8(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    s32 *out = (s32 *)arg0;
-    f32 *in = arg1;
+    s16 *out = (s16 *)arg0;
+    f32 *right = arg1 + arg2;
     u32 i;
+    s32 l;
+    s32 r;
     for (i = 0; i < arg2; i++) {
-        f32 v1 = in[0] * farg0;
-        f32 v2 = in[1] * farg0;
-        *(s16 *)((u8 *)out + 2) = (s16)(v1 * 32767.0f + 0.5f);
-        *(s16 *)((u8 *)out + 4) = (s16)(v2 * 32767.0f + 0.5f);
-        in += 2;
-        out += 2;
+        l = (s32)(*arg1++ * farg0);
+        r = (s32)(farg0 * *right++);
+        if (l < -32768) l = -32768;
+        if (l > 32767) l = 32767;
+        if (r < -32768) r = -32768;
+        if (r > 32767) r = 32767;
+        *out++ = l;
+        *out++ = r;
     }
 }
 
@@ -4069,8 +4075,8 @@ void fn_80124CE8(f32 *a, f32 *w) {
         y6i, y7r, y7i;
 
     wn4r = w[1];
-    wk1r = w[2];
-    wk1i = w[3];
+    wk1r = w[4];
+    wk1i = w[5];
     y0r = a[0] - a[9];
     y0i = a[1] + a[8];
     y1r = a[0] + a[9];
