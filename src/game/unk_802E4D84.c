@@ -916,7 +916,6 @@ void fn_802E6264(void) {
                     continue;
                 }
                 if (v->start && v->play) {
-                    AXPBSRC src;
                     v->start = 0;
                     wasPlaying = 0;
                     s = v->sample;
@@ -1019,12 +1018,15 @@ void fn_802E6264(void) {
                     } else {
                         fn_802E317C(msg + 0x3F8);
                     }
-                    memset(&src, 0, sizeof(src));
-                    src.ratioHi = 1;
-                    src.ratioLo = 0;
-                    src.currentAddressFrac = 0;
-                    AXSetVoiceSrcType(v->vpb, 1);
-                    AXSetVoiceSrc(v->vpb, &src);
+                    {
+                        AXPBSRC src;
+                        memset(&src, 0, sizeof(src));
+                        src.ratioHi = 1;
+                        src.ratioLo = 0;
+                        src.currentAddressFrac = 0;
+                        AXSetVoiceSrcType(v->vpb, 1);
+                        AXSetVoiceSrc(v->vpb, &src);
+                    }
                 }
                 if (v->play) {
                     AXPBVE ve;
@@ -1038,7 +1040,7 @@ void fn_802E6264(void) {
                     AXSetVoiceSrcRatio(v->vpb, muted ? 0.0f : v->sample->rate * ((22050.0f / 32000.0f) * v->pitch));
                     memset(&ve, 0, sizeof(ve));
                     vol = v->volume;
-                    if (vol > 1.0f) {
+                    if (1.0f < vol) {
                         vol = 1.0f;
                     }
                     ve.currentVolume = 0.75f * (32767.0f * vol);
@@ -1070,10 +1072,10 @@ void fn_802E6264(void) {
                     }
                     memset(&rmt, 0, sizeof(rmt));
                     if (remotes & 1) {
-                        rmt.vMain0 = rmt.vAux0 = fn_802E5168(lbl_804FC680[0] * v->volume);
+                        rmt.vAux0 = rmt.vMain0 = fn_802E5168(lbl_804FC680[0] * v->volume);
                     }
                     if (remotes & 2) {
-                        rmt.vMain1 = rmt.vAux1 = fn_802E5168(lbl_804FC680[1] * v->volume);
+                        rmt.vAux1 = rmt.vMain1 = fn_802E5168(lbl_804FC680[1] * v->volume);
                     }
                     AXSetVoiceRmtMix(v->vpb, &rmt);
                 }
