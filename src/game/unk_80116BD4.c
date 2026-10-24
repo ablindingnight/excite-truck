@@ -24,6 +24,46 @@ typedef struct {
     u32 *start;
 } BitReader8011;
 
+// A decoder bundle: a buffer of values read from the bitstream on demand.
+typedef struct Bundle8011 {
+    u8 *cur;           // 0x00 next value to use
+    u8 *end;           // 0x04
+    u8 pad8[0x10 - 0x8];
+    u8 symbols[16];    // 0x10 Huffman symbol map
+    u32 maxBits;       // 0x20 Huffman code length limit
+    u8 *lookup;        // 0x24 code -> (length << 4 | symbol index)
+    u32 countBits;     // 0x28 width of the value count
+    u8 *data;          // 0x2C
+} Bundle8011;
+
+// Reads one bit from the reader state held in value/avail/next.
+#define BINK_GETBIT(bit)        \
+    if (avail == 0) {           \
+        bit = *next;            \
+        avail = 31;             \
+        next++;                 \
+        value = bit >> 1;       \
+    } else {                    \
+        bit = value;            \
+        value >>= 1;            \
+        avail--;                \
+    }
+
+// Reads `width` bits into v from the reader state held in value/avail/next.
+#define BINK_GETBITS(v, width)                                    \
+    if (avail < (width)) {                                        \
+        u32 word = *next;                                         \
+        next++;                                                   \
+        v = (value | (word << avail)) & (0xFFFFFFFFU >> (32 - (width))); \
+        value = word >> ((width) - avail);                        \
+        avail = avail + 32 - (width);                             \
+    } else {                                                      \
+        v = value & (0xFFFFFFFFU >> (32 - (width)));              \
+        value >>= (width);                                        \
+        avail -= (width);                                         \
+    }
+
+
 #include <revolution/ARC/arc.h>
 #include <revolution/OS/OSAlarm.h>
 #include <revolution/OS/OSContext.h>
@@ -2831,24 +2871,154 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
     return var_r9;
 }
 
-extern void fn_8011C4A0(s32, s32, s32, s32);
-void fn_8011CD78(s32 arg0, s32 arg1) {
-    fn_8011C4A0(arg1, arg0 + 0x24, arg0 + 0x20, arg0 + 0x10);
+// Peeks `width` bits into v without consuming them.
+#define BINK_PEEK(v, width)                                               \
+    if (avail < (width)) {                                                \
+        v = (value | (*next << avail)) & (0xFFFFFFFFU >> (32 - (width))); \
+    } else {                                                              \
+        v = value & (0xFFFFFFFFU >> (32 - (width)));                      \
+    }
+
+// Consumes n bits.
+#define BINK_SKIP(n)                         \
+    if (avail < (n)) {                       \
+        u32 word = *next;                    \
+        next++;                              \
+        value = word >> ((n) - avail);       \
+        avail = avail + 32 - (n);            \
+    } else {                                 \
+        value >>= (n);                       \
+        avail -= (n);                        \
+    }
+
+// One merge pass step: merges runs a and b of `size` symbols into dst, steered by up to `width` peeked bits.
+#define BINK_MERGE(dst, a, b, size, width)            \
+    {                                                 \
+        u32 v;                                        \
+        BINK_PEEK(v, width);                          \
+        v = fn_8011C400(v, dst, a, b, size);          \
+        BINK_SKIP(v);                                 \
+    }
+
+extern u8 *lbl_80329DA8[16];  // Bink Huffman lookup tables
+extern u8 lbl_802F6990[16];   // their maximum code lengths
+
+// Reads a Huffman tree: picks one of the 16 fixed code tables and reads the symbol order, either explicitly or as
+// a series of merge passes over the identity order.
+void fn_8011C4A0(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
+    u32 *next;
+    u32 value;
+    u32 avail;
+    u32 table;
+    u32 passes;
+    u32 bit;
+    u32 i;
+    u8 tmp[16];
+    u8 tmp2[16];
+
+    avail = bits->count;
+    next = bits->next;
+    value = bits->value;
+    BINK_GETBITS(table, 4);
+    *lookup = lbl_80329DA8[table];
+    *maxBits = lbl_802F6990[table];
+    if (table == 0) {
+        for (i = 0; i < 16; i++) {
+            syms[i] = i;
+        }
+    } else {
+        BINK_GETBIT(bit);
+        if (!(bit & 1)) {
+            BINK_GETBITS(passes, 2);
+            if (passes == 0) {
+                for (i = 0; i < 16; i += 2) {
+                    BINK_GETBIT(bit);
+                    if (bit & 1) {
+                        syms[i] = i + 1;
+                        syms[i + 1] = i;
+                    } else {
+                        syms[i] = i;
+                        syms[i + 1] = i + 1;
+                    }
+                }
+            } else {
+                for (i = 0; i < 16; i += 2) {
+                    BINK_GETBIT(bit);
+                    if (bit & 1) {
+                        tmp[i] = i + 1;
+                        tmp[i + 1] = i;
+                    } else {
+                        tmp[i] = i;
+                        tmp[i + 1] = i + 1;
+                    }
+                }
+                if (passes == 1) {
+                    BINK_MERGE(syms, &tmp[0], &tmp[2], 2, 3);
+                    BINK_MERGE(syms + 4, &tmp[4], &tmp[6], 2, 3);
+                    BINK_MERGE(syms + 8, &tmp[8], &tmp[10], 2, 3);
+                    BINK_MERGE(syms + 12, &tmp[12], &tmp[14], 2, 3);
+                } else {
+                    BINK_MERGE(&tmp2[0], &tmp[0], &tmp[2], 2, 3);
+                    BINK_MERGE(&tmp2[4], &tmp[4], &tmp[6], 2, 3);
+                    BINK_MERGE(&tmp2[8], &tmp[8], &tmp[10], 2, 3);
+                    BINK_MERGE(&tmp2[12], &tmp[12], &tmp[14], 2, 3);
+                    if (passes == 2) {
+                        BINK_MERGE(syms, &tmp2[0], &tmp2[4], 4, 7);
+                        BINK_MERGE(syms + 8, &tmp2[8], &tmp2[12], 4, 7);
+                    } else {
+                        BINK_MERGE(&tmp[0], &tmp2[0], &tmp2[4], 4, 7);
+                        BINK_MERGE(&tmp[8], &tmp2[8], &tmp2[12], 4, 7);
+                        BINK_MERGE(syms, &tmp[0], &tmp[8], 8, 15);
+                    }
+                }
+            }
+        } else {
+            u32 count;
+            u32 unused = 0xFFFF;
+            u8 *p = syms;
+            BINK_GETBITS(count, 3);
+            for (i = 0; i < count + 1; i++) {
+                u32 s;
+                BINK_GETBITS(s, 4);
+                *p++ = s;
+                unused &= ~(1 << s);
+            }
+            p = syms + count;
+            i = 0;
+            do {
+                if (unused & 1) {
+                    *++p = i;
+                }
+                i++;
+            } while (unused >>= 1);
+        }
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = avail;
 }
 
-void fn_8011CD90(s32 arg0, s32 arg1, s32 arg2) {
-    s32 a = arg2;
-    s32 b = arg2 + 0x100;
-    s32 c = arg2 + 0x140;
+// Reads a bundle's Huffman tree.
+void fn_8011CD78(Bundle8011 *b, BitReader8011 *bits) {
+    fn_8011C4A0(bits, &b->lookup, &b->maxBits, b->symbols);
+}
+
+// The 16 context trees used for colors (selected by the previous high nibble).
+typedef struct BinkColorTrees8011 {
+    u8 symbols[16][16];  // 0x000
+    u32 maxBits[16];     // 0x100
+    u8 *lookup[16];      // 0x140
+    s32 last;            // 0x180 previous high nibble
+} BinkColorTrees8011;
+
+// Reads the 16 color context trees, then the bundle's own tree.
+void fn_8011CD90(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 i;
-    for (i = 0; i < 0x10; i++) {
-        fn_8011C4A0(arg1, c, b, a);
-        a += 0x10;
-        b += 4;
-        c += 4;
+    for (i = 0; i < 16; i++) {
+        fn_8011C4A0(bits, &trees->lookup[i], &trees->maxBits[i], trees->symbols[i]);
     }
-    fn_8011C4A0(arg1, arg0 + 0x24, arg0 + 0x20, arg0 + 0x10);
-    *(s32 *)(arg2 + 0x180) = 0;
+    fn_8011C4A0(bits, &b->lookup, &b->maxBits, b->symbols);
+    trees->last = 0;
 }
 
 extern u8 lbl_80561208[];
@@ -2987,17 +3157,6 @@ if(bits < -22) memset(*(u8**)((u8*)arg0+0x2c), **(u8**)((u8*)arg0+0x2c), -bits-2
 *(u32*)((u8*)arg1+4)=(u32)src;*(u32*)arg1=bits;*(u32*)((u8*)arg1+8)=remain;
 }
 
-// A decoder bundle: a buffer of values read from the bitstream on demand.
-typedef struct Bundle8011 {
-    u8 *cur;           // 0x00 next value to use
-    u8 *end;           // 0x04
-    u8 pad8[0x10 - 0x8];
-    u8 symbols[16];    // 0x10 Huffman symbol map
-    u32 maxBits;       // 0x20 Huffman code length limit
-    u8 *lookup;        // 0x24 code -> (length << 4 | symbol index)
-    u32 countBits;     // 0x28 width of the value count
-    u8 *data;          // 0x2C
-} Bundle8011;
 
 // Refills an exhausted bundle of unsigned bytes: reads the count, then either that many Huffman-coded values or one
 // 4-bit value repeated.
@@ -5942,33 +6101,6 @@ void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg
         var_r3 += arg1;
     }
 }
-
-// Reads one bit from the reader state held in value/avail/next.
-#define BINK_GETBIT(bit)        \
-    if (avail == 0) {           \
-        bit = *next;            \
-        avail = 31;             \
-        next++;                 \
-        value = bit >> 1;       \
-    } else {                    \
-        bit = value;            \
-        value >>= 1;            \
-        avail--;                \
-    }
-
-// Reads `width` bits into v from the reader state held in value/avail/next.
-#define BINK_GETBITS(v, width)                                    \
-    if (avail < (width)) {                                        \
-        u32 word = *next;                                         \
-        next++;                                                   \
-        v = (value | (word << avail)) & (0xFFFFFFFFU >> (32 - (width))); \
-        value = word >> ((width) - avail);                        \
-        avail = avail + 32 - (width);                             \
-    } else {                                                      \
-        v = value & (0xFFFFFFFFU >> (32 - (width)));              \
-        value >>= (width);                                        \
-        avail -= (width);                                         \
-    }
 
 // Reads the AC coefficients of an 8x8 DCT block (block[0], the DC, is set by the caller) bit plane by bit plane,
 // using the same coefficient list scheme as the residue reader, then stores them in natural order.
