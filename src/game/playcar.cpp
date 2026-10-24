@@ -467,8 +467,8 @@ void fn_80190E70(u8* p) {
     u8* o = PTR(p, 0x10);
     if (o) {
         VP(o)->v2C();
-        fn_801B665C();
     }
+    fn_801B665C();
 }
 
 void fn_80190EAC(u8* p) {

@@ -192,6 +192,8 @@ int fn_802D76DC(u32 fmt) {
     case 0x43:
     case 0x46:
     case 0x47:
+    case 0x4A:
+    case 0x4B:
         return 1;
     case 0x2:
     case 0x42:
