@@ -5723,6 +5723,167 @@ void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg
     }
 }
 
+// Reads one bit from the reader state held in value/avail/next.
+#define BINK_GETBIT(bit)        \
+    if (avail == 0) {           \
+        bit = *next;            \
+        avail = 31;             \
+        next++;                 \
+        value = bit >> 1;       \
+    } else {                    \
+        bit = value;            \
+        value >>= 1;            \
+        avail--;                \
+    }
+
+// Reads the residue of an 8x8 block into `block` (signed bytes), bit plane by bit plane, stopping after
+// `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
+// split, 2 = group of 4, 3 = single coefficient.
+void fn_80126A10(s8 *block, BitReader8011 *bits, u32 limit) {
+    u32 value;
+    u32 *next;
+    u32 avail;
+    u32 n = 0;
+    u32 bit;
+    u32 coef;
+    s32 mask;
+    s32 planes;
+    s32 nzCount;
+    s32 i;
+    u32 e;
+    u8 *nz_p;
+    u8 *p;
+    u8 *start;
+    u8 *end;
+    u8 nz[64];
+    u8 list[128];
+
+    avail = bits->count;
+    next = bits->next;
+    value = bits->value;
+    if (avail < 3) {
+        u32 word = *next;
+        next++;
+        planes = (value | (word << avail)) & 7;
+        value = word >> (3 - avail);
+        avail += 29;
+    } else {
+        planes = value & 7;
+        value >>= 3;
+        avail -= 3;
+    }
+    start = &list[64];
+    start[0] = 4 << 2;
+    start[1] = 24 << 2;
+    start[2] = 44 << 2;
+    start[3] = 0 << 2 | 2;
+    end = start + 4;
+    mask = 1 << planes;
+    nzCount = 0;
+    for (planes++; planes != 0; planes--) {
+        nz_p = nz;
+        for (i = 0; i < nzCount; i++) {
+            BINK_GETBIT(bit);
+            if (bit & 1) {
+                block[*nz_p] += block[*nz_p] < 0 ? -mask : mask;
+                if (n++ == limit) {
+                    goto done;
+                }
+            }
+            nz_p++;
+        }
+        p = start;
+        while (p < end) {
+            e = *p;
+            if (e != 0) {
+                BINK_GETBIT(bit);
+                if (bit & 1) {
+                    switch (e & 3) {
+                    case 0:
+                        coef = e >> 2;
+                        *p = ((coef + 4) << 2) + 1;
+                        goto group4;
+                    case 1:
+                        coef = e >> 2;
+                        *p = (coef << 2) + 2;
+                        end[0] = ((coef + 4) << 2) + 2;
+                        end[1] = ((coef + 8) << 2) + 2;
+                        end[2] = ((coef + 12) << 2) + 2;
+                        end += 3;
+                        continue;
+                    case 2:
+                        *p = 0;
+                        coef = e >> 2;
+                        p++;
+                    group4:
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = coef;
+                            BINK_GETBIT(bit);
+                            block[coef] = (bit & 1) ? -mask : mask;
+                            if (n++ == limit) {
+                                goto done;
+                            }
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 1) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = coef + 1;
+                            BINK_GETBIT(bit);
+                            block[coef + 1] = (bit & 1) ? -mask : mask;
+                            if (n++ == limit) {
+                                goto done;
+                            }
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 2) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = coef + 2;
+                            BINK_GETBIT(bit);
+                            block[coef + 2] = (bit & 1) ? -mask : mask;
+                            if (n++ == limit) {
+                                goto done;
+                            }
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 3) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = coef + 3;
+                            BINK_GETBIT(bit);
+                            block[coef + 3] = (bit & 1) ? -mask : mask;
+                            if (n++ == limit) {
+                                goto done;
+                            }
+                        }
+                        continue;
+                    case 3:
+                        coef = e >> 2;
+                        nz[nzCount++] = coef;
+                        BINK_GETBIT(bit);
+                        block[coef] = (bit & 1) ? -mask : mask;
+                        if (n++ == limit) {
+                            goto done;
+                        }
+                        *p = 0;
+                        break;
+                    }
+                }
+            }
+            p++;
+        }
+        mask >>= 1;
+    }
+done:
+    bits->next = next;
+    bits->value = value;
+    bits->count = avail;
+}
+
 extern char lbl_8055DF08;
 // Calls every callback registered in list `arg0` (-1..3).
 void fn_80127398(s32 arg0) {
