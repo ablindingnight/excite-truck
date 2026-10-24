@@ -3227,6 +3227,9 @@ game/unk_8020F3B4.c:
 game/uiapi.cpp:
 	.text       start:0x802115AC end:0x80215CF4
 
+game/unk_80215E68.c:
+	.text       start:0x80215E68 end:0x80216054
+
 game/widgetwin.cpp:
 	.text       start:0x80216054 end:0x80216D14
 	.ctors      start:0x802ED3B0 end:0x802ED3B4

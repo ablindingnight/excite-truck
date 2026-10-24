@@ -1127,6 +1127,7 @@ config.libs.append(
             Object(NonMatching, "game/unk_8020F3AC.c"),
             Object(NonMatching, "game/unk_8020F3B4.c"),
             Object(NonMatching, "game/uiapi.cpp"),
+            Object(NonMatching, "game/unk_80215E68.c"),
             Object(NonMatching, "game/widgetwin.cpp"),
             Object(NonMatching, "game/window.cpp"),
             Object(NonMatching, "game/widgets.cpp"),
