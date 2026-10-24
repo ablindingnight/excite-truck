@@ -228,8 +228,11 @@ void* GameMode::vfE8(void) { return 0; }
 }  // extern "C"
 
 // d = a * b
-static inline void MtxMul(Mtx33& d, const Mtx33& a, const Mtx33& b) {
-    if (&d == &a || &d == &b) {
+static inline void MtxMul(Mtx33* dp, const Mtx33* ap, const Mtx33* bp) {
+    Mtx33& d = *dp;
+    const Mtx33& a = *ap;
+    const Mtx33& b = *bp;
+    if (dp == ap || dp == bp) {
         f32 t00 = Dot(b.xx, a.xx, b.yx, a.xy, b.zx, a.xz);
         f32 t10 = Dot(b.xx, a.yx, b.yx, a.yy, b.zx, a.yz);
         f32 t20 = Dot(b.xx, a.zx, b.yx, a.zy, b.zx, a.zz);
@@ -264,10 +267,11 @@ static inline void MtxMul(Mtx33& d, const Mtx33& a, const Mtx33& b) {
 void Mtx33::SetEuler(f32 y, f32 x, f32 z) {
     Mtx33 t;
     SetRotY(y);
-    t.SetRotX(x);
-    MtxMul(*this, t, *this);
-    t.SetRotZ(z);
-    MtxMul(*this, t, *this);
+    Mtx33* r = &t;
+    r->SetRotX(x);
+    MtxMul(this, r, this);
+    r->SetRotZ(z);
+    MtxMul(this, r, this);
 }
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
