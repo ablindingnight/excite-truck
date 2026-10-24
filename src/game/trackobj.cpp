@@ -805,7 +805,7 @@ int fn_801F7EB0(OFrame* f, ValueNode* vn, const PlacedObj* parent) {
         fn_801BFD34(&f->pos, &f->pos, parent);
         Mat3Mul((Mat3*)f, (const Mat3*)f, (const Mat3*)parent);
     }
-    return !lf && parent;
+    return lf || parent;
 }
 
 void fn_801F7FA0(ShadowDesc* s, ValueNode* vn) {
