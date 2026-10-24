@@ -630,6 +630,15 @@ CollShape* fn_801A324C(void* p, void* o, f32 k, f32 s, const char* file);
 Sound3D* fn_802077A4(const char* name, int cls, const PVec* vel, const PVec* pos);
 }
 
+// A new solid object, tagged for the allocator.
+inline SolObj* NewSolObj(s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
+    SolObj* o = (SolObj*)operator new(sizeof(SolObj), "StaticObject");
+    if (o) {
+        o = fn_801A4A8C(o, id, event, s, f, node);
+    }
+    return o;
+}
+
 extern f32 lbl_80558DC4[];
 
 ModuleTag lbl_8055EC28;
@@ -1564,10 +1573,7 @@ OFrame* fn_801FA8E0(CollShape* s, const OFrame* f, s32 event) {
     s32 id = lbl_8055EC78++;
     ValueNode* node = fn_8013184C();
     SolBuilder* b = lbl_8055EC74;
-    SolObj* o = (SolObj*)operator new(sizeof(SolObj), "StaticObject");
-    if (o) {
-        o = fn_801A4A8C(o, id, event, s, f, node);
-    }
+    SolObj* o = NewSolObj(id, event, s, f, node);
     o->next = b->head;
     b->head = o;
     return &o->frame;
@@ -1832,10 +1838,7 @@ static int FacingX(const OFrame* f) { return FacingMode(f, &f->x); }
 extern "C" {
 
 OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
-    SolObj* o = (SolObj*)operator new(sizeof(SolObj), "StaticObject");
-    if (o) {
-        o = fn_801A4A8C(o, id, event, s, f, node);
-    }
+    SolObj* o = NewSolObj(id, event, s, f, node);
     o->next = b->head;
     b->head = o;
     return &o->frame;
