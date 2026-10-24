@@ -6,7 +6,6 @@
 #include <revolution/AX/AXPB.h>
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern f64 lbl_80561228;
 extern f32 lbl_80329BC8[];
 
 
@@ -321,7 +320,6 @@ void fn_801254E4(int n, f32 *a, int nc, f32 *c);             // dctsub
 extern void* fn_802ECC74(void*);
 extern void *fn_8011FFC4(s32);
 extern f32 lbl_80329D48[];
-extern f64 lbl_805611D8;
 extern void fn_8011A330(void *);
 void fn_8011FFB8();
 extern void *lbl_8055DEF8;
@@ -1674,7 +1672,6 @@ void fn_801195A0(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
 
-extern f64 lbl_805611A8;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
@@ -1858,7 +1855,6 @@ void fn_80119B38(void *arg0, s32 arg1) {
     fn_80119288(arg0);
 }
 
-extern f64 lbl_805611A8;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
@@ -2456,7 +2452,6 @@ void fn_8011AC10(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 extern f32 lbl_80329D48[];
-extern f64 lbl_805611D8;
 extern void fn_8011A330(void *);
 void fn_8011AC84(void *arg0) {
     fn_8011A330(arg0);
@@ -5016,7 +5011,6 @@ void fn_80120834(int n, int *info, f32 *table) {
 
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern f64 lbl_80561228;
 void fn_80120B6C(int arg0, int *arg1, f32 *arg2) {
     s32 i;
     s32 half;
@@ -7640,7 +7634,6 @@ void fn_8012748C(s32 arg0) {
     fn_80127398(arg0);
     fn_802E300C(arg0);
 }
-extern f64 lbl_805611A8;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
