@@ -1186,6 +1186,7 @@ config.libs.append(
             Object(NonMatching, "game/cammgr.cpp"),
             Object(NonMatching, "game/racerslot.cpp"),
             Object(NonMatching, "game/jumpcam.cpp"),
+            Object(NonMatching, "game/unk_8026B844.c"),
             Object(NonMatching, "game/unk_8026E224.c"),
             Object(NonMatching, "game/camframe.cpp"),
             Object(NonMatching, "game/camfov.cpp"),

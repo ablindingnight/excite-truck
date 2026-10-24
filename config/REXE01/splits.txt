@@ -3647,6 +3647,9 @@ game/jumpcam.cpp:
 	.sbss       start:0x8055F4B8 end:0x8055F4D8
 	.sdata2     start:0x80563D68 end:0x80563D78
 
+game/unk_8026B844.c:
+	.text       start:0x8026B844 end:0x8026E224
+
 game/unk_8026E224.c:
 	.text       start:0x8026E224 end:0x8026E22C
 	.ctors      start:0x802ED490 end:0x802ED494
