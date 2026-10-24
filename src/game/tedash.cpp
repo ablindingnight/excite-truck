@@ -1152,43 +1152,44 @@ void fn_802B8848(void) {
     fn_80011A2C();
 }
 
-int fn_802B8998(int key) {
+// Debug-dash key handler (keys arrive as unsigned codes).
+int fn_802B8998(u32 key) {
     ILayout* l = lbl_8055FA48;
-    if (!l) {
-        return 0;
-    }
-    switch (key) {
-    case 0x125:
-    case 0x127:
-        if (lbl_8055FA38 == 0) {
-            fn_802B5C24(key == 0x125 ? -1 : 1);
+    if (l) {
+        switch (key) {
+        case 0x125:
+        case 0x127:
+            if (lbl_8055FA38 == 0) {
+                fn_802B5C24(key == 0x125 ? -1 : 1);
+            }
+            lbl_804BFF80.s.op = 8;
+            lbl_804BFF80.hover[0] = 0;
+            lbl_8055FA44 = -1;
+            lbl_804BFF80.clicked[0] = 0;
+            break;
+        case 5:
+            l->Toggle();
+            break;
+        case 'e':
+            fn_802B8510(6);
+            break;
+        case 's':
+            l->Save();
+            break;
+        case 'n':
+            lbl_8055FA59 = !lbl_8055FA59;
+            break;
+        case 'w':
+            lbl_8055FA32 = !lbl_8055FA32;
+            break;
+        case 'm':
+            break;
+        default:
+            return 0;
         }
-        lbl_804BFF80.s.op = 8;
-        lbl_8055FA44 = -1;
-        lbl_804BFF80.hover[0] = 0;
-        lbl_804BFF80.clicked[0] = 0;
-        break;
-    case 5:
-        l->Toggle();
-        break;
-    case 'e':
-        fn_802B8510(6);
-        break;
-    case 's':
-        l->Save();
-        break;
-    case 'n':
-        lbl_8055FA59 = !lbl_8055FA59;
-        break;
-    case 'w':
-        lbl_8055FA32 = !lbl_8055FA32;
-        break;
-    case 'm':
-        break;
-    default:
-        return 0;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 void fn_802B8AE0(const char* name, u32* value) {
