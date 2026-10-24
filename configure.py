@@ -961,6 +961,7 @@ config.libs.append(
             Object(NonMatching, "game/racing.cpp"),
             Object(NonMatching, "game/dashhelper.cpp"),
             Object(NonMatching, "game/trackmap.cpp"),
+            Object(NonMatching, "game/unk_80116BD4.c"),
             Object(NonMatching, "game/unk_801274C0.c"),
             Object(NonMatching, "game/prof.cpp"),
             Object(Matching, "game/eventq.cpp"),
