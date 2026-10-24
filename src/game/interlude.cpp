@@ -13,17 +13,17 @@ struct IVec3 {
 };
 
 // A ground-plane (x, z) vector.
-struct IVec2 {
-    IVec2(void) {}
-    IVec2(f32 x_, f32 y_) : x(x_), y(y_) {}
-    IVec2(const IVec2& o) : x(o.x), y(o.y) {}
+struct V2 {
+    V2(void) {}
+    V2(f32 x_, f32 y_) : x(x_), y(y_) {}
+    V2(const V2& o) : x(o.x), y(o.y) {}
     f32 x;
     f32 y;
 };
 
-static inline IVec2 XZ(const IVec3& v) { return IVec2(v.x, v.z); }
+static inline V2 XZ(const IVec3& v) { return V2(v.x, v.z); }
 
-static inline IVec2 operator-(const IVec2& a, const IVec2& b) { return IVec2(a.x - b.x, a.y - b.y); }
+static inline V2 operator-(const V2& a, const V2& b) { return V2(a.x - b.x, a.y - b.y); }
 
 struct IMtx {
     u32 w[12];
@@ -93,9 +93,9 @@ struct TeleportEvent {
     char except[0x100]; // offset 0x110
     s32 where;          // offset 0x210
     f32 speed;          // offset 0x214
-    IVec2 pt;           // offset 0x218: world point (x, z)
+    V2 pt;           // offset 0x218: world point (x, z)
     f32 yaw;            // offset 0x220
-    IVec2 offset;       // offset 0x224: second car, from pt
+    V2 offset;       // offset 0x224: second car, from pt
 };
 
 struct DebugEvent {
@@ -988,9 +988,9 @@ struct IMotion {
     f32 p2, v2, a2;
 };
 
-class ILineFollower {
+class LineFollower {
 public:
-    void Update(IVec2* p);
+    void Update(V2* p);
 };
 
 class IRacer {
@@ -999,7 +999,7 @@ public:
     virtual void v04(void);
     virtual void v08(void);
     virtual void v0C(void);
-    virtual ILineFollower* Follower(void);  // 0x18
+    virtual LineFollower* Follower(void);  // 0x18
 };
 
 extern AIOrder lbl_80437E30[20];
@@ -1012,7 +1012,7 @@ void fn_8018ADBC(ICar* car, f32 v);  // brake
 void fn_8018ADC4(ICar* car, f32 v);
 void fn_8018ADCC(ICar* car, f32 v);
 void fn_8018ADEC(ICar* car);
-void fn_80135B9C(ILineFollower* f, f32 d, IVec2* outPos, IVec2* outDir, f32* outSpeed, void* outIl);
+void fn_80135B9C(LineFollower* f, f32 d, V2* outPos, V2* outDir, f32* outSpeed, void* outIl);
 f32 fn_80139030(IMotion* m);
 f32 PSVECDotProduct(const IVec3* a, const IVec3* b);
 }
@@ -1037,14 +1037,14 @@ void fn_801C56AC(void) {
             fn_8018ADC4(car, 1.0f);
             fn_8018ADEC(car);
             fn_8018ADAC(car, 0.0f);
-            ILineFollower* line = fn_801B2ED0(i)->Follower();
-            IVec2 pos;
+            LineFollower* line = fn_801B2ED0(i)->Follower();
+            V2 pos;
             pos.x = car->pos.x;
             pos.y = car->pos.z;
             line->Update(&pos);
             if (o->kind != 5 && o->kind != 0) {
                 int ahead = 1;
-                IVec2 tgt(0.0f, 0.0f);
+                V2 tgt(0.0f, 0.0f);
                 if (o->param > 1) {
                     ahead = o->param;
                 }
@@ -1057,7 +1057,7 @@ void fn_801C56AC(void) {
                     if (5.0f > d) {
                         d = 5.0f;
                     }
-                    IVec2 dir;
+                    V2 dir;
                     fn_80135B9C(line, d, &tgt, &dir, 0, 0);
                     f32 k = o->x;
                     tgt.x += dir.x * k;
@@ -1065,7 +1065,7 @@ void fn_801C56AC(void) {
                 } else {
                     tgt.x = lead->pos.x;
                     tgt.y = lead->pos.z;
-                    IVec2 side(car->side.x, car->side.z);
+                    V2 side(car->side.x, car->side.z);
                     f32 k = o->x;
                     tgt.x += side.x * k;
                     tgt.y += side.y * k;
@@ -1491,9 +1491,9 @@ void fn_801C7BA0(void) {
 }
 
 // The signed angle from a to b (both normalised first unless already unit length).
-static inline f32 Angle(const IVec2& a, const IVec2& b) {
-    const IVec2* pa = &a;
-    IVec2 na;
+static inline f32 Angle(const V2& a, const V2& b) {
+    const V2* pa = &a;
+    V2 na;
     f32 la = a.x * a.x + a.y * a.y;
     if (!((f32)__fabs(la - 1.0f) <= lbl_80558DC4[0])) {
         na = a;
@@ -1502,8 +1502,8 @@ static inline f32 Angle(const IVec2& a, const IVec2& b) {
         na.y *= inv;
         pa = &na;
     }
-    const IVec2* pb = &b;
-    IVec2 nb;
+    const V2* pb = &b;
+    V2 nb;
     f32 lb = b.x * b.x + b.y * b.y;
     if (!((f32)__fabs(lb - 1.0f) <= lbl_80558DC4[0])) {
         nb = b;
@@ -1536,7 +1536,7 @@ void fn_801C7C04(void) {
     case 0:
         e->pt = XZ(*(IVec3*)(s + 0x6F8));
         e->offset = XZ(*(IVec3*)(s + 0x710)) - e->pt;
-        e->yaw = Angle(XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)), IVec2(0.0f, 1.0f));
+        e->yaw = Angle(XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)), V2(0.0f, 1.0f));
         break;
     case 1:
     default:
