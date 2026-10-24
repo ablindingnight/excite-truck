@@ -136,6 +136,22 @@ struct CamPose {
     IVec3 pos;  // offset 0x24
 };
 
+// The camera move being played (the player state starts with it).
+struct CamPlay {
+    f32 start;       // offset 0x0
+    f32 end;         // offset 0x4
+    IVec3 origin;    // offset 0x8
+    Mat3 rot;        // offset 0x14
+    IVec3 v;         // offset 0x38
+    IVec3 av;        // offset 0x44
+    f32 fov;         // offset 0x50
+    u8 accel;        // offset 0x54
+    s32 target;      // offset 0x58
+    s32 camType;     // offset 0x5C
+    s32 interpType;  // offset 0x60
+    f32 interpTime;  // offset 0x64
+};
+
 // The on-screen message an event shows.
 struct Message {
     const char* title;  // offset 0x0
@@ -272,6 +288,7 @@ extern u8 lbl_8055E7E2;     // active
 extern u8 lbl_8055E7E3;
 extern f32 lbl_8055E7E4;    // start offset
 extern u8 lbl_8055E7E8;
+extern s32 lbl_8055E7EC;  // fade frame
 extern u8 lbl_8055E7E9;
 extern s32 lbl_8055E7F0;    // events
 extern s32 lbl_8055E7F4;
@@ -928,36 +945,34 @@ void fn_801C4BAC(void) {
     }
 }
 
-// Event dispatch, player update and the per-event start (placeholders).
-void fn_801C4CE8(int k) {
-    IL_Use(0, "====== INTERLUDE: DONE at %1.1f! =======", "interlude: reset completed", "intrlude: unhandled wait type %d", "debug_event: %s", "interlude: song %u (I:%d, O:%d)", "interlude: unhandled teleport where %d");
-    switch (k) {
-    case 0:
-        IL_Use(0);
-        break;
-    case 1:
-        IL_Use(1);
-        break;
-    case 2:
-        IL_Use(2);
-        break;
-    case 3:
-        IL_Use(3);
-        break;
-    case 4:
-        IL_Use(4);
-        break;
-    case 5:
-        IL_Use(5);
-        break;
-    case 6:
-        IL_Use(6);
-        break;
-    case 7:
-        IL_Use(7);
-        break;
+// Where a teleported car is put: its frame, velocity and line node (-1 = find one).
+struct CarPlace {
+    CarPlace(void) : node(-1) {
+        frame.rot.m[0] = 1.0f;
+        frame.rot.m[1] = 0.0f;
+        frame.rot.m[2] = 0.0f;
+        frame.rot.m[3] = 0.0f;
+        frame.rot.m[4] = 1.0f;
+        frame.rot.m[5] = 0.0f;
+        frame.rot.m[6] = 0.0f;
+        frame.rot.m[7] = 0.0f;
+        frame.rot.m[8] = 1.0f;
+        frame.pos.x = 0.0f;
+        frame.pos.y = 0.0f;
+        frame.pos.z = 0.0f;
     }
-}
+    CamPose frame;  // offset 0x0
+    IVec3 vel;      // offset 0x30
+    f32 unk3C;
+    s16 node;       // offset 0x40
+};
+
+// A car's start pose (the place plus more).
+struct CarPose {
+    CarPlace place;
+    u8 pad44[0xC];
+};
+
 
 // The parts of a car body the AI orders read.
 struct ICar {
@@ -966,9 +981,17 @@ struct ICar {
     u8 pad48[0xC];
     IVec3 fwd;   // offset 0x54
     IVec3 pos;   // offset 0x60
-    u8 pad6C[0x128 - 0x6C];
+    u8 pad6C[0x94 - 0x6C];
+    IVec3 front;  // offset 0x94
+    u8 padA0[0x118 - 0xA0];
+    IVec3 heading;  // offset 0x118
+    u8 pad124[0x128 - 0x124];
     f32 yawRate;  // offset 0x128
-    u8 pad12C[0x25D4 - 0x12C];
+    u8 pad12C[0x1F0 - 0x12C];
+    s32 player;   // offset 0x1F0
+    u8 pad1F4[0x274 - 0x1F4];
+    CarPose pose;  // offset 0x274
+    u8 pad2C4[0x25D4 - 0x2C4];
     f32 speed;  // offset 0x25D4
 };
 
@@ -1022,6 +1045,287 @@ static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return Max(Min(hi, v), lo); }
 static inline f32 ClampSigned(f32 v) { return Clamp(v, -1.0f, 1.0f); }
 static inline f32 Clamp01(f32 v) { return Clamp(v, 0.0f, 1.0f); }
+
+// The car object behind fn_8017960C, for its virtual placement.
+class CarObj {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void Place(const CarPlace* p);  // 0x54
+};
+
+struct RaceLen {
+    u8 pad0[4];
+    f32 len;  // offset 0x4
+};
+
+extern "C" {
+void fn_80176A00(int on);
+int fn_801E8838(void);
+int fn_80202B00(void);
+void fn_80179758(const char* fmt, ...);
+s32 fn_80179318(void);
+void fn_80176858(void);
+void fn_80129360(u32 sample, int a);
+void fn_8020C8F4(u32 sample);
+int fn_802794AC(s32 player, int a);
+void fn_801B8100(CarPose* pose, int car, s32 player);
+f32 fn_80139048(void);
+RaceLen* fn_80137C54(int i);
+void fn_801B8048(CarPlace* p, LineFollower* line, f32 lat, f32 along);
+void fn_801B8E28(int car);
+}
+
+// The interlude player, once per frame: runs every event whose time has come, in order. A wait (cars to
+// cross a point) or a fade still running holds the queue and pauses the clock.
+void fn_801C4CE8(void) {
+    if (lbl_8055E7E1) {
+        fn_801769E0();
+        lbl_8055E7E1 = 0;
+    }
+    if (!lbl_8055E7E2) {
+        lbl_8055E7E3 = 0;
+        return;
+    }
+    f32 t = fn_801C3B6C();
+    if (t > lbl_8055A958) {
+        if (!lbl_8055E7E3) {
+            lbl_8055E7E3 = 1;
+            fn_802E30C8("====== INTERLUDE: DONE at %1.1f! =======", t);
+            fn_80176780(0x8102, 0);
+        }
+        return;
+    }
+    lbl_8055E7E3 = 0;
+    fn_80176A00(1);
+    if (lbl_8055E7E8) {
+        lbl_8055E7E8 = fn_801E8838() != 0;
+    }
+    int blocked = 0;
+    if (lbl_8055E7FC && lbl_8055E800 > 4 && !fn_80202B00()) {
+        fn_802E30C8("interlude: reset completed");
+        lbl_8055E7FC = 0;
+    }
+    if (lbl_8055E7FC) {
+        lbl_8055E7E4 = -lbl_8055E3C8;
+    }
+    u8* s = lbl_80437D88;
+    Message* msg = (Message*)(s + 0x9C);
+    while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
+        Event* e = &lbl_8055E7F8[lbl_8055E7F4];
+        if (!(t >= e->time)) {
+            break;
+        }
+        lbl_8055E7F4++;
+        switch (e->type) {
+        case 6: {
+            WaitEvent* w = (WaitEvent*)e;
+            switch (w->kind) {
+            case 0:
+                blocked = 1;
+                for (int i = 0; i < lbl_8055E804; i++) {
+                    if (fn_801C3508(w->mask, i)) {
+                        ICar* car = (ICar*)fn_8017960C(i);
+                        if (car) {
+                            IVec3 d;
+                            d.x = car->front.x - w->pt.x;
+                            d.y = car->front.y - w->pt.y;
+                            d.z = car->front.z - w->pt.z;
+                            if (PSVECDotProduct(&d, &car->heading) > 0.1f) {
+                                blocked = 0;
+                            }
+                        }
+                    }
+                }
+                break;
+            default:
+                fn_802E317C("intrlude: unhandled wait type %d", w->kind);
+                break;
+            }
+            break;
+        }
+        case 0:
+            fn_802E30C8("debug_event: %s", ((DebugEvent*)e)->msg);
+            fn_80179758("%s", ((DebugEvent*)e)->msg);
+            break;
+        case 1: {
+            CamEvent* c = (CamEvent*)e;
+            CamPlay* p = (CamPlay*)s;
+            p->start = c->time;
+            p->end = c->end;
+            p->origin.x = c->origin.x;
+            p->origin.y = c->origin.y;
+            p->origin.z = c->origin.z;
+            p->rot = c->rot;
+            p->v.x = c->v.x;
+            p->v.y = c->v.y;
+            p->v.z = c->v.z;
+            p->av.x = c->av.x;
+            p->av.y = c->av.y;
+            p->av.z = c->av.z;
+            p->fov = c->fov;
+            p->accel = c->accel;
+            p->target = c->target;
+            p->camType = c->camType;
+            p->interpType = c->interpType;
+            p->interpTime = c->interpTime;
+            break;
+        }
+        case 2:
+            blocked = 1;
+            if (!lbl_8055E7E8) {
+                lbl_8055E7E8 = 1;
+                lbl_8055E7EC = fn_80179318();
+                fn_80176858();
+            } else if (lbl_8055E7EC != fn_80179318()) {
+                blocked = 0;
+            }
+            break;
+        case 3: {
+            SoundEvent* snd = (SoundEvent*)e;
+            switch (snd->soundType) {
+            case 0:
+                fn_80129360(snd->sample, 0);
+                break;
+            case 1:
+                fn_802E30C8("interlude: song %u (I:%d, O:%d)", snd->sample, snd->imm, snd->overlap);
+                if (snd->imm) {
+                    fn_8020C8FC();
+                }
+                if (snd->sample == 0xFFFFFFFF) {
+                    fn_8020C8F8();
+                } else {
+                    fn_8020C8F4(snd->sample);
+                }
+                if (!snd->overlap) {
+                    lbl_8055E7E9 = 1;
+                } else {
+                    lbl_8055E7E9 = 0;
+                }
+                break;
+            }
+            break;
+        }
+        case 4: {
+            TeleportEvent* tp = (TeleportEvent*)e;
+            int k = 0;
+            for (int i = 0; i < lbl_8055E804; i++) {
+                if (!fn_801C3508(tp->mask, i) || !fn_802794AC(((ICar*)fn_8017960C(i))->player, 0)) {
+                    continue;
+                }
+                ICar* car = (ICar*)fn_8017960C(i);
+                if (!car) {
+                    break;
+                }
+                CarPlace place;
+                switch (tp->where) {
+                case 1:
+                    fn_801C3A3C(&place.frame.rot, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
+                    break;
+                case 0: {
+                    V2 pt;
+                    pt.x = tp->pt.x + tp->offset.x * (f32)k;
+                    pt.y = tp->pt.y + tp->offset.y * (f32)k;
+                    fn_801C3AF8(&place, &pt, tp->yaw);
+                    break;
+                }
+                case 2: {
+                    V2 off = tp->pt;
+                    if (fn_801769CC()->type & 0x100) {
+                        CarPose pose = car->pose;
+                        fn_801B8100(&pose, i, car->player);
+                        place = pose.place;
+                    } else if (fn_801769CC()->type & 0x100) {
+                        f32 w = fn_80139048();
+                        f32 spacing = 0.61f + (fn_80137C54(-1)->len + w);
+                        fn_801B8048(&place, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
+                    } else {
+                        CamPose f = car->pose.place.frame;
+                        IVec3 euler;
+                        euler.x = 0.0f;
+                        euler.y = tp->yaw;
+                        euler.z = 0.0f;
+                        Mat3 r;
+                        fn_80015A20(&r, &euler);
+                        Mat3Mul(&f.rot, &r, &f.rot);
+                        f.pos.x += f.rot.m[0] * off.x;
+                        f.pos.y += f.rot.m[1] * off.x;
+                        f.pos.z += f.rot.m[2] * off.x;
+                        f.pos.x += f.rot.m[6] * off.y;
+                        f.pos.y += f.rot.m[7] * off.y;
+                        f.pos.z += f.rot.m[8] * off.y;
+                        f32 yaw = atan2(f.rot.m[6], f.rot.m[8]);
+                        V2 pt;
+                        pt.x = f.pos.x;
+                        pt.y = f.pos.z;
+                        fn_801C3AF8(&place, &pt, yaw);
+                    }
+                    break;
+                }
+                default:
+                    fn_802E317C("interlude: unhandled teleport where %d", tp->where);
+                    break;
+                }
+                place.vel.x = place.frame.rot.m[6] * tp->speed;
+                place.vel.y = place.frame.rot.m[7] * tp->speed;
+                place.vel.z = place.frame.rot.m[8] * tp->speed;
+                ((CarObj*)car)->Place(&place);
+                if (fn_802794AC(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
+                    fn_801B8E28(i);
+                }
+                k++;
+            }
+            break;
+        }
+        case 5: {
+            ThinkEvent* th = (ThinkEvent*)e;
+            AIOrder* o = lbl_80437E30;
+            for (int i = 0; i < lbl_8055E804; i++, o++) {
+                if (fn_801C3508(th->mask, i)) {
+                    o->kind = th->kind;
+                    o->param = th->param;
+                    o->speed = th->speed;
+                    o->x = th->x;
+                    o->z = th->z;
+                }
+            }
+            break;
+        }
+        case 7: {
+            TextEvent* tx = (TextEvent*)e;
+            msg->title = tx->text;
+            msg->text = tx->title;
+            msg->time = lbl_8055E3C8;
+            break;
+        }
+        default:
+            fn_802E30C8("interlude: unhandled event type %d", e->type);
+            break;
+        }
+        if (blocked) {
+            lbl_8055E7F4--;
+            lbl_8055E7E4 -= t - e->time;
+            return;
+        }
+    }
+}
 
 // Drives the AI cars by their standing orders while an interlude runs.
 void fn_801C56AC(void) {
