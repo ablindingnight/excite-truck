@@ -1155,9 +1155,12 @@ int fn_80161D50(void) {
 }
 
 void fn_80161DE4(void) {
-    int n = fn_801615B4(fn_80161ECC() - 1);
-    n += fn_8016208C((int)fn_80161E40(fn_80161ECC() - 1));
-    fn_80133348((u8*)IdentGetCurrentSlot() + 0xC, lbl_8055A0B0, n + 1);
+    int n;
+    int bonus;
+    n = fn_801615B4(fn_80161ECC() - 1);
+    bonus = fn_8016208C((int)fn_80161E40(fn_80161ECC() - 1));
+    bonus += n;
+    fn_80133348((u8*)IdentGetCurrentSlot() + 0xC, lbl_8055A0B0, bonus + 1);
 }
 
 Event* fn_80161E40(int n) {
