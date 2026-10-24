@@ -255,22 +255,60 @@ static inline void CreditUpdateGroup(CreditFontGroupFields* self,f32 delta) {
         }
     }
 }
-static inline void CreditDrawGroup(CreditFontGroupFields* self) {
-    for(int index=0;index<self->glyphs.count;index++) {
-        CreditGlyphFields* glyph=&((CreditGlyphFields*)self->glyphs.items)[index];
-        f32 fade=self->glyphs.inverseZ*(self->desc.lifetime-glyph->remaining);
-        if((1.0f)<fade)fade=(1.0f);
-        fade=fade>(0.0f)?fade:(0.0f);
-        int opacity=(int)(fade*(glyph->remaining*self->glyphs.inverseY));
-        opacity=opacity>0?opacity:0;
-        opacity=opacity<255?opacity:255;
-        f32 scale=self->desc.size+self->desc.sizeDelta*((1.0f)-glyph->remaining*self->glyphs.inverseX);
-        u32 code=glyph->glyph;
-        f32 yScale=scale*fn_80235F64(self->resource,code);
-        f32 xScale=scale*fn_80235EF0(self->resource,glyph->glyph);
-        fn_80235AFC(self->resource,code,((u32)opacity<<24)|0xFFFFFF,
-          glyph->position.x,glyph->position.y,(0.0f),xScale,yScale,glyph->angle);
+static inline f32 CreditDrawScaleObservedNew(const CreditFontGroupFields* self,const CreditGlyphFields* glyph){return self->desc.size+self->desc.sizeDelta*((1.0f)-glyph->remaining*self->glyphs.inverseX);}
+static inline void CreditDrawGroup(CreditFontGroupFields* self,int index=0) {f32 lowerFadeBound;
+
+  
+  while (index < self->glyphs.count)
+  {
+    CreditGlyphFields *glyph = &((CreditGlyphFields *) self->glyphs.items)[index];
+
+    f32 fade = self->glyphs.inverseZ * (self->desc.lifetime - glyph->remaining);
+    f32 upperFadeBound = 1.0f;
+    if (upperFadeBound < fade)
+    {
+      fade = 1.0f;
     }
+    lowerFadeBound=0.0f;fade = (fade > lowerFadeBound) ? fade : 0.0f;
+    int opacity = (int) (fade * (glyph->remaining * self->glyphs.inverseY));
+    opacity = (opacity > 0) ? (opacity) : (0);
+    opacity = (opacity < 255) ? (opacity) : (255);
+    f32 scale = CreditDrawScaleObservedNew(self, glyph);
+    u32 code = glyph->glyph;
+
+    f32 yScale = scale * fn_80235F64(self->resource, glyph->glyph);
+    f32 xScale = scale * fn_80235EF0(self->resource, glyph->glyph);
+    fn_80235AFC(self->resource, code, (((u32) opacity) << 24) | 0xFFFFFF, glyph->position.x, glyph->position.y, 0.0f, xScale, yScale, glyph->angle);
+    ++index;
+  }
+
+}
+static inline void CreditDrawFireGroupObservedNew(CreditFontGroupFields* self) {f32 yScale;
+
+  int index = 0;
+  while (index < self->glyphs.count)
+  {
+    CreditGlyphFields *glyph = &((CreditGlyphFields *) self->glyphs.items)[index];
+
+    f32 fade = self->glyphs.inverseZ * (self->desc.lifetime - glyph->remaining);
+    f32 upperFadeBound = 1.0f;
+    if (upperFadeBound < fade)
+    {
+      fade = 1.0f;
+    }
+    fade = (fade > 0.0f) ? (fade) : (0.0f);
+    int opacity = (int) (fade * (glyph->remaining * self->glyphs.inverseY));
+    opacity = (opacity > 0) ? (opacity) : (0);
+    opacity = (opacity < 255) ? (opacity) : (255);
+    f32 scale = CreditDrawScaleObservedNew(self, glyph);
+    u32 code = glyph->glyph;
+
+    yScale = scale * fn_80235F64(self->resource, glyph->glyph);
+    f32 xScale = scale * fn_80235EF0(self->resource, glyph->glyph);
+    fn_80235AFC(self->resource, code, (((u32) opacity) << 24) | 0xFFFFFF, glyph->position.x, glyph->position.y, 0.0f, xScale, yScale, glyph->angle);
+    ++index;
+  }
+
 }
 extern "C" {
 CreditBackgroundFields* __dt__22CreditBackgroundFieldsFv(CreditBackgroundFields* self,int deleteFlag);
@@ -699,7 +737,7 @@ extern "C" void fn_80264FD4(CreditStateFields* self) {
 }
 
 extern "C" void fn_80264FE4(CreditBackgroundFields* self) {
-    CreditDrawGroup(&self->smoke);CreditDrawGroup(&self->fire);
+    CreditDrawGroup(&self->smoke);CreditDrawFireGroupObservedNew(&self->fire);
 }
 
 extern "C" CreditScrollFields* fn_8026523C(CreditScrollFields* self) {
