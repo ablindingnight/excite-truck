@@ -968,18 +968,24 @@ void fn_802D6594(u8* s) {
     }
 }
 
+// Vertex format 0x1A: colour-facing surfaces (0x13 ones are converted to it below).
+enum SurfFmt { SURF_FMT_FACING = 0x1A };
+
 void fn_802D65F8(Surf* s, u32 base, const char* name) {
     fn_802D63FC(s, base);
     Swap32((u8*)s + 0x2C);
     Swap32((u8*)s + 0x30);
     fn_802D657C((u32*)&s->dl, base);
-    if (s->fmt == 0x1A) {
+    if ((SurfFmt)s->fmt == SURF_FMT_FACING) {
         fn_802D6594((u8*)s);
     }
     if (s->fmt == 0x13) {
         u8* v = (u8*)s->verts;
         for (int i = s->nverts; i > 0; i--) {
-            if ((v[0xC] != 0x4C && v[0xC] != 0x4D) || v[0xD] != 0) {
+            if (v[0xC] != 0x4C && v[0xC] != 0x4D) {
+                return;
+            }
+            if (v[0xD] != 0) {
                 return;
             }
             v += 0x10;
@@ -1000,7 +1006,10 @@ void fn_802D65F8(Surf* s, u32 base, const char* name) {
     if (s->fmt == 0x19) {
         u8* v = (u8*)s->verts;
         for (int i = s->nverts; i > 0; i--) {
-            if ((v[0xC] != 0x4C && v[0xC] != 0x4D) || v[0xD] != 0) {
+            if (v[0xC] != 0x4C && v[0xC] != 0x4D) {
+                return;
+            }
+            if (v[0xD] != 0) {
                 return;
             }
             v += 0x18;
