@@ -308,10 +308,7 @@ void fn_8029222C(void) {
 }
 
 void fn_8029227C(void) {
-    if (!lbl_8055F75C) {
-        return;
-    }
-    if (!lbl_8055C920) {
+    if (!lbl_8055F75C || !lbl_8055C920) {
         return;
     }
     {
