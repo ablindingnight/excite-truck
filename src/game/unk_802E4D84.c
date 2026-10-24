@@ -30,12 +30,13 @@ extern unsigned char lbl_804FC558[];
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
 extern int *lbl_8055FF9C;
-extern int fn_802E5AE8(void);
+extern int fn_802E5AE8(char *name);
 extern void fn_8012BEF0(unsigned char *);
 extern void fn_8012C41C(void (*)(void), int, unsigned char *);
-extern void fn_802E589C(void);
-extern int fn_802E582C(void);
-extern char lbl_8055D1E4[];
+extern void fn_802E589C(char *name);
+extern int fn_802E582C(char *name);
+__declspec(section ".sdata") extern char lbl_8055D1E4[];
+extern int sprintf(char *, const char *, ...);
 extern char lbl_8034D490[];
 extern char lbl_8034D4A0[];
 extern char lbl_8034D5B0[];
@@ -44,7 +45,8 @@ extern int lbl_8055FF98;
 extern char lbl_8034D584[];
 extern char lbl_8034D528[];
 extern void fn_80128670(int);
-extern void fn_8012C4D8(void);
+extern void fn_8012C4D8(void *res);
+void fn_802E5D5C(void *arg0);
 extern void fn_8012BF24(void *);
 void fn_802E4D84(void *dst, void *src, int size) {
     void *saved_dst = dst;
@@ -143,20 +145,34 @@ void fn_802E5824(void) {
 void fn_802E5828(void) {
 }
 
-void fn_802E589C(void) {
-    fn_802E582C();
+// Loads sample `name` into the next cache slot (256 at most); returns whether it loaded.
+int fn_802E582C(char *name) {
+    if (lbl_8055FFA0 < 0x100) {
+        lbl_8055FF9C[lbl_8055FFA0] = fn_802E5AE8(name);
+        if (lbl_8055FF9C[lbl_8055FFA0] == 0) {
+            return 0;
+        }
+        lbl_8055FFA0++;
+        return 1;
+    }
+    return 0;
+}
+
+// Resource callback: cache the sample named `name`.
+void fn_802E589C(char *name) {
+    fn_802E582C(name);
 }
 
 extern unsigned char lbl_804FC558[];
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
 extern int *lbl_8055FF9C;
-extern int fn_802E5AE8(void);
+extern int fn_802E5AE8(char *name);
 extern void fn_8012BEF0(unsigned char *);
 extern void fn_8012C41C(void (*)(void), int, unsigned char *);
-extern int fn_802E582C(void);
+extern int fn_802E582C(char *name);
 int fn_802E58A0(void *arg0, int arg1) {
-    if (arg1 == 0x53465830) return fn_802E582C();
+    if (arg1 == 0x53465830) return fn_802E582C((char *)arg0);
     return 1;
 }
 
@@ -174,7 +190,17 @@ void fn_802E58B8(unsigned char *arg0) {
         *dst++ = *src++;
     }
     fn_8012BEF0(arg0);
-    fn_8012C41C(fn_802E589C, 0, arg0);
+    fn_8012C41C((void (*)(void))fn_802E589C, 0, arg0);
+}
+
+// Caches the sample named by format `lbl_8055D1E4` with (arg0, arg1).
+void fn_802E5950(int arg0, int arg1) {
+    char name[0x100];
+    sprintf(name, lbl_8055D1E4, arg0, arg1);
+    ((void (*)(char *, ...))fn_802E30C8)(lbl_8034D490, name);
+    if (fn_802E582C(name) == 0) {
+        ((void (*)(char *, ...))fn_802E30C8)(lbl_8034D4A0, name);
+    }
 }
 
 void fn_802E59BC(unsigned char *arg0) {
@@ -198,7 +224,7 @@ void fn_802E5A54(void) {
     unsigned char *ptr;
     int i;
     for (i = 0; i < lbl_8055FFA0; i++) {
-        fn_802E5D5C(lbl_8055FF9C[i]);
+        fn_802E5D5C((void *)lbl_8055FF9C[i]);
     }
     lbl_8055FFA0 = 0;
     for (ptr = lbl_804FC558, i = 0; i < lbl_8055FF78; i++, ptr += 0x20) {
@@ -218,6 +244,17 @@ extern "C" void fn_802E5FE4(void *arg0) {
     *(int *)((char *)arg0 + 0x94) = 0;
 }
 #pragma cplusplus reset
+
+// Drops a reference to a cached sample, freeing its data with the last one.
+void fn_802E5D5C(void *arg0) {
+    if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
+        ((void (*)(char *, ...))fn_802E317C)(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
+    }
+    if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
+        fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
+        *(void **)((char *)arg0 + 0xAC) = 0;
+    }
+}
 
 float fn_802E6040(void *arg0) {
     if (arg0 != 0) return *(float *)((char *)arg0 + 0xA4);
