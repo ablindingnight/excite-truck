@@ -51,29 +51,37 @@ void* fn_8020A76C(void) {
 
 void *fn_8020A774(int arg0) { return lbl_804892D0 + arg0 * 0x24; }
 
-void fn_8020A788(void) {
-    if (lbl_8055EE0C == 0) {
-        if (fn_801284F8(0x20, lbl_8033C368) != 0)
-            lbl_8055EE10 = fn_8012A13C(lbl_8033C368, 0x200, 0x54);
-    }
-    if (fn_8012A2D8(lbl_8055EE10) != 0) {
-        int count;
-        count = lbl_8055EE0C;
-        lbl_8055EE0C = count + 1;
-    }
-}
-
 #pragma push
 #pragma cplusplus on
-extern "C" void fn_8020A800(void *arg0) {
-    class Obj {
-    public:
-        virtual void f(int);
-    };
-    fn_8012A364(lbl_8055EE10, arg0);
+void* operator new(unsigned long size, const char* tag);
+
+// A fixed-size block pool (joint.cpp declares it too).
+class Pool {
+public:
+    Pool(const char* name, long count, long size);
+    virtual ~Pool(void);
+    void* Alloc(void);
+    void Free(void* p);
+
+    unsigned char pad4[0x1C];
+};
+
+// Blocks of 0x54 bytes from a shared pool, created on first use and deleted with its last block.
+extern "C" void* fn_8020A788(void) {
+    if (lbl_8055EE0C == 0) {
+        lbl_8055EE10 = new (lbl_8033C368) Pool(lbl_8033C368, 0x200, 0x54);
+    }
+    void* p = ((Pool*)lbl_8055EE10)->Alloc();
+    if (p) {
+        lbl_8055EE0C++;
+    }
+    return p;
+}
+
+extern "C" void fn_8020A800(void* p) {
+    ((Pool*)lbl_8055EE10)->Free(p);
     if (--lbl_8055EE0C == 0) {
-        if (lbl_8055EE10 != 0)
-            ((Obj *)lbl_8055EE10)->f(1);
+        delete (Pool*)lbl_8055EE10;
         lbl_8055EE10 = 0;
     }
 }
