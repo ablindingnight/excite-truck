@@ -423,10 +423,7 @@ s32 fn_802168F0(Window* w) {
     fn_80211F64();
     t = 1.0f;
     rate = t / FadeMax(fade.in, 0.01f);
-    if ((f32)__fabs(fade.in) <= lbl_80558DC4[0]) {
-    } else {
-        t = 0.0f;
-    }
+    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? t : 0.0f;
     one = 1.0f;
     started = 0;
     lbl_8055EF94 = t;
