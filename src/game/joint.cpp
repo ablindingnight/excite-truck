@@ -123,9 +123,11 @@ int fn_801E2C1C(int model, int index, JointEntry** entry, ValMatrix** mtx) {
 }
 
 int fn_801E2CCC(int model, const char* name, ValMatrix** out) {
-    int full;
-    ValMatrix* mtx = NULL;
-    JointEntry* entry = NULL;
+    bool full;
+    ValMatrix* mtx;
+    JointEntry* entry;
+    mtx = NULL;
+    entry = NULL;
     full = strchr(name, ' ') != NULL;
     for (int i = 0; fn_801E2C1C(model, i, &entry, &mtx); i++) {
         char jointName[0x40] = {0};
