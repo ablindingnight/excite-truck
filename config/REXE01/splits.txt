@@ -4372,6 +4372,10 @@ game/vmem.cpp:
 game/unk_802E4D84.c:
 	.text       start:0x802E4D84 end:0x802E6B48
 
+game/unk_802E6B48.c:
+	.text       start:0x802E6B48 end:0x802E6B50
+	.ctors      start:0x802ED604 end:0x802ED608
+
 game/mcsys.cpp:
 	.text       start:0x802E6B50 end:0x802E72B8
 	.ctors      start:0x802ED608 end:0x802ED60C
