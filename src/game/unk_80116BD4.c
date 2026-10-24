@@ -3471,38 +3471,126 @@ void fn_8011CE18(void *arg0, void *arg1) {
     *(u32 *)arg1 = value; *(u32 *)((u8 *)arg1 + 8) = bitCount;
 }
 
-void fn_8011D0E8(void *arg0, void *arg1, void *arg2) {
- u32 *p=(u32*)M2C_FIELD(arg1,u32*,4), bits=M2C_FIELD(arg1,u32*,0), n=M2C_FIELD(arg1,u32*,8), width=M2C_FIELD(arg0,u32*,0x28), out;
- s32 left, tree=M2C_FIELD(arg2,s32*,0x180);
- u32 code, mask, value;
- u8 *dst;
- if(M2C_FIELD(arg0,u8**,0)!=M2C_FIELD(arg0,u8**,4)) return;
- if(n<width){u32 x=*p++; out=(-1U>>(32-width))&(bits|(x<<n)); bits=x>>(width-n); n=n+32-width;} else {out=bits&(-1U>>(32-width)); bits>>=width; n-=width;}
- if(out){
-  dst=M2C_FIELD(arg0,u8**,0x2C); M2C_FIELD(arg0,u8**,0)=dst; M2C_FIELD(arg0,u8**,4)=dst+out;
-  if(n==0){bits=*p++>>1;n=31;} else {bits>>=1;n--;}
-  if(bits&1) out=-20-out;
-  mask=-1U>>(32-M2C_FIELD(arg0,u32*,0x20));
-  do {
-   s32 rem;
-   out--;
-   {u8 *tab=(u8*)M2C_FIELD(arg2,u32*,tree*4+0x140); u32 w=M2C_FIELD(arg2,u32*,tree*4+0x100);
-    if(n>=w){code=tab[bits&(-1U>>(32-w))];}
-    else {u32 x=*p, idx=(bits|(x<<n))&(-1U>>(32-w)); code=tab[idx];}
-    tree=*(u8*)((u8*)arg2+tree*16+(code&15)); rem=code>>4;
-    if(n<rem){u32 x=*p++; bits=x>>(rem-n); n=n+32-rem;} else {bits>>=rem;n-=rem;}
-   }
-   {u8 *table=(u8*)M2C_FIELD(arg0,u8**,0x24); u32 ix;
-    if(n>=M2C_FIELD(arg0,u32*,0x20)){u8 c=table[bits&mask]; value=*(u8*)((u8*)arg0+0x10+(c&15)); rem=c>>4;}
-    else {u32 x=*p, ix2=(bits|(x<<n))&mask; u8 c=table[ix2]; value=*(u8*)((u8*)arg0+0x10+(c&15)); rem=c>>4;}
-    if(n<rem){u32 x=*p++;bits=x>>(rem-n);n=n+32-rem;}else{bits>>=rem;n-=rem;}
-   }
-   {u32 c=value|(tree<<4); u32 v=c&127; if(c&128)v=(u8)(-v); *dst++=v+128;}
-  } while(out>0);
-  if(out < -22) memset(M2C_FIELD(arg0,u8**,0x2C),*(u8*)M2C_FIELD(arg0,u8**,0x2C),-(out+21));
-  M2C_FIELD(arg2,s32*,0x180)=tree;
- } else {dst=M2C_FIELD(arg0,u8**,0x2C);M2C_FIELD(arg0,u8**,4)=dst;M2C_FIELD(arg0,u8**,0)=dst+4;}
- M2C_FIELD(arg1,u32**,4)=p;M2C_FIELD(arg1,u32*,0)=bits;M2C_FIELD(arg1,u32*,8)=n;
+// Refills the colors bundle (newer format): each color is a high nibble from the context tree picked by the
+// previous high nibble and a low nibble from the bundle's tree, stored sign-magnitude around 128. A set first bit
+// means one color followed by a run of copies.
+void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
+    u32 *next;
+    u32 value;
+    u32 count;
+    s32 len;
+    u32 width;
+    u32 mask;
+    u32 e;
+    u32 bit;
+    u32 last;
+    u32 lo;
+    u8 *dst;
+    u8 *lookup;
+    u8 *symbols;
+
+    if (b->cur != b->end) return;
+    count = bits->count;
+    width = b->countBits;
+    next = bits->next;
+    value = bits->value;
+    if (count < width) {
+        u32 word = *next;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
+        value = word >> (width - count);
+        count = count + 32 - width;
+        next++;
+    } else {
+        len = value & (0xFFFFFFFFU >> (32 - width));
+        value >>= width;
+        count -= width;
+    }
+    if (len != 0) {
+        dst = b->data;
+        width = b->maxBits;
+        symbols = b->symbols;
+        b->cur = dst;
+        lookup = b->lookup;
+        b->end = dst + len;
+        last = trees->last;
+        if (count == 0) {
+            bit = *next;
+            value = bit >> 1;
+            count = 31;
+            next++;
+        } else {
+            bit = value;
+            value >>= 1;
+            count--;
+        }
+        if (bit & 1) {
+            len = -20 - len;
+        }
+        mask = 0xFFFFFFFFU >> (32 - width);
+        do {
+            u32 w;
+            u32 c;
+            u32 v;
+            len--;
+            w = trees->maxBits[last];
+            if (count >= w) {
+                e = trees->lookup[last][value & (0xFFFFFFFFU >> (32 - w))];
+                last = trees->symbols[last][e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = trees->lookup[last][(value | (word << count)) & (0xFFFFFFFFU >> (32 - w))];
+                last = trees->symbols[last][e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            if (count >= width) {
+                e = lookup[value & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = lookup[(value | (word << count)) & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            c = lo | (last << 4);
+            v = c & 0x7F;
+            if (c & 0x80) {
+                v = (u8)-v;
+            }
+            *dst++ = v + 128;
+        } while (len > 0);
+        if (len < -22) {
+            memset(b->data, b->data[0], -(len + 21));
+        }
+        trees->last = last;
+    } else {
+        b->end = b->data;
+        b->cur = b->data + 4;
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = count;
 }
 
 void fn_8011D378(void *arg0, void *arg1, void *arg2) {
@@ -3974,9 +4062,9 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     bits.count = 0;
     bits.value = 0;
     if (flags & 0x8000) {
-        readColors = fn_8011D0E8;
+        readColors = (void (*)(void *, void *, void *))fn_8011D0E8;
     } else {
-        readColors = fn_8011D378;
+        readColors = (void (*)(void *, void *, void *))fn_8011D378;
     }
     fn_8011C3A8((s32)bufs[0], &types, 0x200, width, 4, 1, 0);
     fn_8011C3A8((s32)bufs[1], &subTypes, 0x200, width >> 1, 4, 1, 0);
