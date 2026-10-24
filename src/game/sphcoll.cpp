@@ -1338,8 +1338,11 @@ u8* fn_8019E834(u8* p, int del) {
 
 // Capsule p against q: the point of p's axis nearest q's centre (clamped to +-half length 0x28) is
 // tested as a sphere of p's radius; types 0x73 / 0x74 take fn_8019E500 instead.
+// Body type ids (0x20 of a body); the two values here take the edge-tube test.
+enum SphBodyType { SPH_TYPE_73 = 0x73, SPH_TYPE_74 = 0x74 };
+
 int fn_8019E874(u8* p, u8* q) {
-    if ((u32)S32(p, 0x20) == 0x73 || (u32)S32(p, 0x20) == 0x74) {
+    if ((SphBodyType)S32(p, 0x20) == SPH_TYPE_73 || (SphBodyType)S32(p, 0x20) == SPH_TYPE_74) {
         return fn_8019E500(p, q);
     }
     CFrame oq;
