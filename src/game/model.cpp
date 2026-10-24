@@ -469,7 +469,9 @@ void fn_802C5BA0(TexNode* t) {
     }
 }
 
-u16 fn_802C5BEC(u32 a, u32 b) { return fn_802C5A50(5, 100) + (u16)(a * 2) + (u16)b; }
+static inline u32 Twice(u32 x) { return x * 2; }
+
+u16 fn_802C5BEC(u32 a, u32 b) { return fn_802C5A50(5, 100) + (u16)Twice(a) + (u16)b; }
 
 void fn_802C5C40(MSurf* s, s32 inst, MSurf* base) {
     u32 type = s->type;

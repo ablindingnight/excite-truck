@@ -490,8 +490,8 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     f32* d = (f32*)out;
     const f32* x = (const f32*)a;
     const f32* y = (const f32*)b;
-    for (int i = 0; i < 12; i++) {
-        d[i] = Lerp(x[i], y[i], t);
+    for (int i = 0; i < 12; i++, d++, x++, y++) {
+        *d = Lerp(*x, *y, t);
     }
 }
 

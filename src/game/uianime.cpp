@@ -415,8 +415,10 @@ void fn_80236780(void) {
 void fn_80236848(void) {
     AnimState* cur = lbl_8055F0C0;
     AnimState* p = lbl_8055F0BC;
+    // MATCHING-AID: taking cur's address (found by the NucBox permuter) fixes the load order; revisit.
+    AnimState** last = &cur;
     if (p == cur) {
-        fn_80237D00(cur);
+        fn_80237D00(*last);
         lbl_8055F0BC = 0;
         lbl_8055F0C0 = 0;
     } else {
