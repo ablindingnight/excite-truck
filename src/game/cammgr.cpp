@@ -621,7 +621,72 @@ void fn_80267EE0(u8* p) { fn_802734F0(p); }
 
 u8* fn_80267EE4(int i) { return (u8*)lbl_80499080 + i * 0x228; }
 
-void fn_80267EF8(u8* p) {}  // stub (238)
+}  // extern "C"
+int fn_8000D75C(void);
+extern "C" {
+u32 fn_802E2C20(void);
+void fn_801769EC(void);
+void fn_8022FF10(CamMat3* out, const f32* euler);
+extern const f32 lbl_80563C24;  // degrees to radians
+extern const f32 lbl_80563C64;  // "no crash" time
+extern const f32 lbl_80563C6C;  // fade time
+extern const f32 lbl_80563C80;  // ms to s
+extern const f32 lbl_80563C84;  // fade back in after
+extern const f32 lbl_80563C88;  // 360
+extern f32 lbl_8055F48C;        // crash start time
+
+// Crash camera: for three seconds after a crash, fade the crash volume out and back in (the cheer the
+// other way) and swing the camera once round a pivot ahead of it; then restore the volume and resume.
+void fn_80267EF8(u8* p) {
+    f32 t = lbl_80563C80 * (f32)(s32)fn_802E2C20() - lbl_8055F48C;
+    if (t > lbl_80563C34) {
+        lbl_8055F488 = 0;
+        lbl_8055F48C = lbl_80563C64;
+        fn_80209190(lbl_8055F494, lbl_80563C2C);
+        if (!fn_8000D75C()) {
+            fn_801769EC();
+        }
+        return;
+    }
+    f32 vol;
+    f32 u = t / lbl_80563C34;
+    vol = lbl_80563C20;
+    if (t < lbl_80563C6C) {
+        vol = lbl_80563C2C + (t / lbl_80563C6C) * lbl_80563C28;
+    } else if (t > lbl_80563C84) {
+        vol = vol + ((t - lbl_80563C84) / lbl_80563C6C) * lbl_80563C2C;
+    }
+    fn_80209190(lbl_8055F494, vol);
+    u8* cheer = (u8*)lbl_8055F490;
+    f32 cv = lbl_80563C2C - vol;
+    if (cv != F32(cheer, 0x8)) {
+        U8(cheer, 0x4D) = 1;
+        F32(cheer, 0x8) = cv;
+    }
+    f32 ang = lbl_80563C24 * (lbl_80563C20 + ShakeEase(u) * lbl_80563C88);
+    CamPose cam;
+    CamPose car;
+    cam = *(CamPose*)(p + 0x58);
+    car = *(CamPose*)(p + 0xC0);
+    f32 dist = PSVECDistance(car.pos.v, cam.pos.v);
+    CamPose f;
+    f = cam;
+    f.pos.v[0] += f.rot.m[6] * dist;
+    f.pos.v[1] += f.rot.m[7] * dist;
+    f.pos.v[2] += f.rot.m[8] * dist;
+    f32 euler[3];
+    euler[0] = lbl_80563C20;
+    euler[1] = ang;
+    euler[2] = lbl_80563C20;
+    CamMat3 rot;
+    fn_8022FF10(&rot, euler);
+    Mat3Mul((Mat3*)&f.rot, (Mat3*)&f.rot, (Mat3*)&rot);
+    f32 back = -dist;
+    f.pos.v[0] += f.rot.m[6] * back;
+    f.pos.v[1] += f.rot.m[7] * back;
+    f.pos.v[2] += f.rot.m[8] * back;
+    *(CamPose*)(p + 0x58) = f;
+}
 
 void fn_802682B0(u8* p) {
     int row;
