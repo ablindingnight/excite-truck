@@ -5736,6 +5736,253 @@ void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg
         avail--;                \
     }
 
+// Reads `width` bits into v from the reader state held in value/avail/next.
+#define BINK_GETBITS(v, width)                                    \
+    if (avail < (width)) {                                        \
+        u32 word = *next;                                         \
+        next++;                                                   \
+        v = (value | (word << avail)) & (0xFFFFFFFFU >> (32 - (width))); \
+        value = word >> ((width) - avail);                        \
+        avail = avail + 32 - (width);                             \
+    } else {                                                      \
+        v = value & (0xFFFFFFFFU >> (32 - (width)));              \
+        value >>= (width);                                        \
+        avail -= (width);                                         \
+    }
+
+// Reads the AC coefficients of an 8x8 DCT block (block[0], the DC, is set by the caller) bit plane by bit plane,
+// using the same coefficient list scheme as the residue reader, then stores them in natural order.
+void fn_80126018(s16 *block, BitReader8011 *bits) {
+    u32 value;
+    u32 *next;
+    u32 avail;
+    u32 bit;
+    u32 v;
+    u32 coef;
+    u32 e;
+    u32 width;
+    u32 planes;
+    s32 mask;
+    s32 sign;
+    s32 val;
+    s32 i;
+    u8 *p;
+    u8 *start;
+    u8 *end;
+    u8 list[128];
+    s16 tmp[64];
+
+    {
+        u32 *z = (u32 *)tmp;
+        for (i = 0; i < 16; i++) {
+            z[0] = 0;
+            z[1] = 0;
+            z += 2;
+        }
+    }
+    avail = bits->count;
+    next = bits->next;
+    value = bits->value;
+    BINK_GETBITS(planes, 4);
+    start = &list[68];
+    start[0] = (4 << 2) + 0;
+    start[1] = (24 << 2) + 0;
+    start[2] = (44 << 2) + 0;
+    start[3] = (1 << 2) + 3;
+    start[4] = (2 << 2) + 3;
+    start[5] = (3 << 2) + 3;
+    end = start + 6;
+    mask = 1 << (planes - 1);
+    for (width = planes; width > 1; width--) {
+        sign = 1 << (width - 1);
+        p = start;
+        while (p < end) {
+            e = *p;
+            if (e != 0) {
+                BINK_GETBIT(bit);
+                if (bit & 1) {
+                    switch (e & 3) {
+                    case 0:
+                        coef = e >> 2;
+                        *p = ((coef + 4) << 2) + 1;
+                        goto group4;
+                    case 1:
+                        coef = e >> 2;
+                        *p = (coef << 2) + 2;
+                        end[0] = ((coef + 4) << 2) + 2;
+                        end[1] = ((coef + 8) << 2) + 2;
+                        end[2] = ((coef + 12) << 2) + 2;
+                        end += 3;
+                        continue;
+                    case 2:
+                        *p = 0;
+                        coef = e >> 2;
+                        p++;
+                    group4:
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef) << 2) + 3;
+                        } else {
+                            BINK_GETBITS(v, width);
+                            val = mask | (v & (sign - 1));
+                            if (v & sign) {
+                                val = -val;
+                            }
+                            tmp[coef] = val;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 1) << 2) + 3;
+                        } else {
+                            BINK_GETBITS(v, width);
+                            val = mask | (v & (sign - 1));
+                            if (v & sign) {
+                                val = -val;
+                            }
+                            tmp[coef + 1] = val;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 2) << 2) + 3;
+                        } else {
+                            BINK_GETBITS(v, width);
+                            val = mask | (v & (sign - 1));
+                            if (v & sign) {
+                                val = -val;
+                            }
+                            tmp[coef + 2] = val;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 3) << 2) + 3;
+                        } else {
+                            BINK_GETBITS(v, width);
+                            val = mask | (v & (sign - 1));
+                            if (v & sign) {
+                                val = -val;
+                            }
+                            tmp[coef + 3] = val;
+                        }
+                        continue;
+                    case 3:
+                        BINK_GETBITS(v, width);
+                        val = mask | (v & (sign - 1));
+                        if (v & sign) {
+                            val = -val;
+                        }
+                        *p = 0;
+                        tmp[e >> 2] = val;
+                        break;
+                    }
+                }
+            }
+            p++;
+        }
+        mask >>= 1;
+    }
+    if (planes != 0) {
+        p = start;
+        while (p < end) {
+            e = *p;
+            if (e != 0) {
+                BINK_GETBIT(bit);
+                if (bit & 1) {
+                    switch (e & 3) {
+                    case 0:
+                        coef = e >> 2;
+                        *p = ((coef + 4) << 2) + 1;
+                        goto group4s;
+                    case 1:
+                        coef = e >> 2;
+                        *p = (coef << 2) + 2;
+                        end[0] = ((coef + 4) << 2) + 2;
+                        end[1] = ((coef + 8) << 2) + 2;
+                        end[2] = ((coef + 12) << 2) + 2;
+                        end += 3;
+                        continue;
+                    case 2:
+                        *p = 0;
+                        coef = e >> 2;
+                        p++;
+                    group4s:
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef) << 2) + 3;
+                        } else {
+                            BINK_GETBIT(bit);
+                            tmp[coef] = -(bit & 1) | 1;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 1) << 2) + 3;
+                        } else {
+                            BINK_GETBIT(bit);
+                            tmp[coef + 1] = -(bit & 1) | 1;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 2) << 2) + 3;
+                        } else {
+                            BINK_GETBIT(bit);
+                            tmp[coef + 2] = -(bit & 1) | 1;
+                        }
+                        BINK_GETBIT(bit);
+                        if (bit & 1) {
+                            *--start = ((coef + 3) << 2) + 3;
+                        } else {
+                            BINK_GETBIT(bit);
+                            tmp[coef + 3] = -(bit & 1) | 1;
+                        }
+                        continue;
+                    case 3:
+                        BINK_GETBIT(bit);
+                        *p = 0;
+                        tmp[e >> 2] = -(bit & 1) | 1;
+                        break;
+                    }
+                }
+            }
+            p++;
+        }
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = avail;
+
+    block[1] = tmp[1];
+    ((u32 *)block)[1] = ((u32 *)tmp)[2];
+    ((u32 *)block)[2] = ((u32 *)tmp)[4];
+    ((u32 *)block)[3] = ((u32 *)tmp)[6];
+    ((u32 *)block)[4] = ((u32 *)tmp)[1];
+    ((u32 *)block)[5] = ((u32 *)tmp)[3];
+    ((u32 *)block)[6] = ((u32 *)tmp)[5];
+    ((u32 *)block)[7] = ((u32 *)tmp)[7];
+    ((u32 *)block)[8] = ((u32 *)tmp)[12];
+    ((u32 *)block)[9] = ((u32 *)tmp)[22];
+    ((u32 *)block)[10] = ((u32 *)tmp)[8];
+    ((u32 *)block)[11] = ((u32 *)tmp)[10];
+    ((u32 *)block)[12] = ((u32 *)tmp)[13];
+    ((u32 *)block)[13] = ((u32 *)tmp)[23];
+    ((u32 *)block)[14] = ((u32 *)tmp)[9];
+    ((u32 *)block)[15] = ((u32 *)tmp)[11];
+    ((u32 *)block)[16] = ((u32 *)tmp)[14];
+    ((u32 *)block)[17] = ((u32 *)tmp)[16];
+    ((u32 *)block)[18] = ((u32 *)tmp)[24];
+    ((u32 *)block)[19] = ((u32 *)tmp)[26];
+    ((u32 *)block)[20] = ((u32 *)tmp)[15];
+    ((u32 *)block)[21] = ((u32 *)tmp)[17];
+    ((u32 *)block)[22] = ((u32 *)tmp)[25];
+    ((u32 *)block)[23] = ((u32 *)tmp)[27];
+    ((u32 *)block)[24] = ((u32 *)tmp)[18];
+    ((u32 *)block)[25] = ((u32 *)tmp)[20];
+    ((u32 *)block)[26] = ((u32 *)tmp)[28];
+    ((u32 *)block)[27] = ((u32 *)tmp)[30];
+    ((u32 *)block)[28] = ((u32 *)tmp)[19];
+    ((u32 *)block)[29] = ((u32 *)tmp)[21];
+    ((u32 *)block)[30] = ((u32 *)tmp)[29];
+    ((u32 *)block)[31] = ((u32 *)tmp)[31];
+}
+
 // Reads the residue of an 8x8 block into `block` (signed bytes), bit plane by bit plane, stopping after
 // `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
 // split, 2 = group of 4, 3 = single coefficient.
@@ -5772,7 +6019,7 @@ void fn_80126A10(s8 *block, BitReader8011 *bits, u32 limit) {
         value >>= 3;
         avail -= 3;
     }
-    start = &list[64];
+    start = &list[68];
     start[0] = 4 << 2;
     start[1] = 24 << 2;
     start[2] = 44 << 2;
