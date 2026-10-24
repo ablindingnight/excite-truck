@@ -3446,6 +3446,9 @@ game/uicar.cpp:
 	.text       start:0x8023FE20 end:0x80243460
 	.ctors      start:0x802ED418 end:0x802ED41C
 
+game/unk_80243460.c:
+	.text       start:0x80243460 end:0x80243478
+
 game/keyboard.cpp:
 	.text       start:0x80243478 end:0x802445FC
 	.ctors      start:0x802ED41C end:0x802ED420
