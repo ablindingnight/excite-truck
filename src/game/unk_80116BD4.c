@@ -152,7 +152,7 @@ typedef struct StreamPlayer {
     u8 pad2C[0xB4 - 0x2C];
     s32 unkB4;                          // 0xB4
     void *video;                        // 0xB8  video decoder (0 = audio only)
-    void *frameBuffer;                  // 0xBC
+    u8 *frameBuffer;                    // 0xBC
     u32 blocksWide;                     // 0xC0  width in 16-pixel blocks
     u32 frameBufferSize;                // 0xC4
     u32 largestFrame;                   // 0xC8
@@ -984,7 +984,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     if (local.histSize == 0) {
         local.histSize = 1;
     }
-    fn_8011FE20(&local.frameBuffer, local.frameBufferSize + 16);
+    fn_8011FE20((void **)&local.frameBuffer, local.frameBufferSize + 16);
     fn_8011FE20((void **)&local.histFrameStart, local.histSize * 4);
     fn_8011FE20((void **)&local.histIdle, local.histSize * 4);
     fn_8011FE20((void **)&local.histDecode, local.histSize * 4);
@@ -1123,7 +1123,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
             p->readerStart(&p->readerRead, p->readBuffer, p->readBufSize, p->fileSize + 8, startArg);
         }
     }
-    ((u8 *)p->frameBuffer)[p->frameBufferSize] = 0;
+    p->frameBuffer[p->frameBufferSize] = 0;
     p->curSet = -1;
     if (p->fpsNum != 0) {
         p->unk270 = fn_80116BD4(2000, p->fpsDen, p->fpsNum);
