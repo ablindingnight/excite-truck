@@ -1317,10 +1317,8 @@ u32 fn_802734F0(int mode) {
         if (!v->b25) {
             f |= 4;
         }
-    } else {
+    } else if (mode != 1) {
         switch (mode) {
-        case 1:
-            break;
         case 2:
             f |= 6;
             break;
