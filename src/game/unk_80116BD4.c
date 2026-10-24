@@ -487,52 +487,18 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
     return (q1 << 16) | q0;
 }
 
-void fn_80116CC4(s32* arg0, u16 arg1, u32 arg2) {
-    s32* r3;
-    u32 r6;
-    s32 r7;
-    s32 val;
-    s32* p;
-    u32 count;
-    
-    r3 = arg0;
-    r6 = arg2 >> 1;
-    r7 = arg1;
-    
-    val = (s32)(arg1 & 0xFFFF);
-    val = val | (val << 16);
-    
-    if (r6 != 0) {
-        count = r6 >> 3;
-        if (count != 0) {
-            p = r3;
-            do {
-                p[0] = val;
-                p[1] = val;
-                p[2] = val;
-                p[3] = val;
-                p[4] = val;
-                p[5] = val;
-                p[6] = val;
-                p[7] = val;
-                p += 8;
-                count--;
-            } while (count != 0);
-            r6 &= 7;
-        }
-        if (r6 != 0) {
-            do {
-                *r3 = val;
-                r3++;
-                r6--;
-            } while (r6 != 0);
-        }
+#pragma opt_unroll_loops on
+void fn_80116CC4(u32 *dst, u16 v, u32 size) {
+    u32 n = size >> 1;
+    u32 val = v | (v << 16);
+    while (n--) {
+        *dst++ = val;
     }
-    
-    if (arg2 & 1) {
-        *(s16*)r3 = arg1;
+    if (size & 1) {
+        *(u16 *)dst = v;
     }
 }
+#pragma opt_unroll_loops reset
 
 extern s64 OSGetTime(void);
 extern s32 lbl_8055DEC0;
@@ -1703,27 +1669,9 @@ void *fn_8011A168(StreamAllocator *allocator) {
 #pragma unroll on
 void fn_8011A1A0(u32 *data, u32 size) {
     u32 count = (size + 3) >> 2;
-    u32 groups;
-    if (count) {
-        groups = count >> 3;
-        if (groups) {
-            do {
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-                *data = __lwbrx(data, 0); data++;
-            } while (--groups);
-            count &= 7;
-        }
-        if (count) {
-            do {
-                *data = __lwbrx(data, 0); data++;
-            } while (--count);
-        }
+    while (count--) {
+        *data = __lwbrx(data, 0);
+        data++;
     }
 }
 
@@ -3509,7 +3457,7 @@ void fn_8011DC5C(void *arg0, void *arg1) {
                     dst++;
                 }
             } else {
-                fn_80116CC4((s32 *)dst, (u16)val, (n + n));
+                fn_80116CC4((u32 *)dst, (u16)val, (n + n));
                 dst = (s16 *)((u8 *)dst + (n << 1));
             }
             count -= n;
