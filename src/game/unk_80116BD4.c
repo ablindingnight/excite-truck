@@ -807,15 +807,15 @@ void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
 // packets into its ring (dropping the oldest data on overflow), then decodes the video. Returns 1 when playback is
 // done, otherwise 0.
 s32 fn_801186B8(StreamPlayer *p) {
-    s32 locked = 0;
     s32 i;
-    s32 j;
     s32 old;
+    u8 *data;
+    s32 locked = 0;
     u32 size;
     u32 remaining;
+    s32 j;
     u32 room;
     u32 over;
-    u8 *data;
     u8 *src;
     s16 *out;
     u32 len;
@@ -941,7 +941,10 @@ s32 fn_801186B8(StreamPlayer *p) {
             memset(p->frameBuffer, 0, p->frameBufferSize);
         }
         if (p->memoryData == 0 && p->unk114 == 0) {
-            u32 n = p->maxFrameSize < p->readerCapacity ? p->maxFrameSize : p->readerCapacity;
+            u32 n = p->maxFrameSize;
+            if (n >= p->readerCapacity) {
+                n = p->readerCapacity;
+            }
             if (p->readerFilled < (n * 4 - n) >> 2) {
                 p->readerFill(p->reader);
             }
