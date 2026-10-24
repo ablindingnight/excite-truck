@@ -622,7 +622,7 @@ void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
 }
 
 extern void AXSetVoiceState(s32);
-s32 fn_8011943C(void *arg0, s32 arg1) {
+void fn_8011943C(void *arg0, s32 arg1) {
     s32 temp_r0;
     s32 temp_r3;
     temp_r0 = *(s32 *)arg0;
@@ -676,7 +676,7 @@ extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
-extern s32 fn_8011943C(void *, s32);
+extern void fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 
 s32 fn_80119994(void) { return 0; }
@@ -757,7 +757,7 @@ extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
-extern s32 fn_8011943C(void *, s32);
+extern void fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 s32 fn_80119C0C(void *arg0, s32 arg1) {
     s32 state = *(s32 *)((u8 *)arg0 + 0x64);
@@ -2261,7 +2261,7 @@ void *fn_8011FFC4(s32 arg0) {
     u8 offset;
     u32 mode;
     s32 result;
-    if (arg0 == 0 || (u32)(arg0 + 0x10000) == 0xFFFFFFFF) return 0;
+    if (arg0 == 0 || (u32)arg0 == 0xFFFFFFFF) return 0;
     if (lbl_8055DEF8 != 0) {
         result = ((s32 (*)(s32))lbl_8055DEF8)(arg0 + 0x40);
         if (result != 0) {
@@ -4678,5 +4678,5 @@ extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
-extern s32 fn_8011943C(void *, s32);
+extern void fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
