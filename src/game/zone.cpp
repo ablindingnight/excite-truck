@@ -1543,9 +1543,15 @@ void Gate::Scale(f32 f) {
 #undef s
 }
 
+// MATCHING-AID: the target copies both end points as one 24-byte block (six lwz, six stw), which means
+// a and b were probably one segment struct in the original. GateSeg stands in for that type.
+struct GateSeg {
+    Vec3 a;
+    Vec3 b;
+};
+
 Gate& Gate::operator=(const Gate& o) {
-    a = o.a;
-    b = o.b;
+    *(GateSeg*)&a = *(const GateSeg*)&o.a;
     t = o.t;
     h = o.h;
     ring = o.ring;

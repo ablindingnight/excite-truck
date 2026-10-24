@@ -15,6 +15,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | fn_80198488 (pick waiting car) | src/game/aicar.cpp | volatile reads of the two counts | upstream orangedude27/excite-truck |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
 | Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
+| Gate::operator= (__as__4GateFRC4Gate) | src/game/zone.cpp | end points copied as one GateSeg block; the original likely grouped a/b in a segment struct | Claude 2026-10-24 |
 | fn_801B3E24 (collision sound play) | src/game/collisionsound.cpp | volatile zero vector forces stack stores | Codex (tagged in COLLISIONSOUND-23) |
 | UI API unit (9 sites: dont_inline/scheduling pragmas, 1 register) | src/game/uiapi.cpp | imported raw from upstream; whole file needs a typed rewrite | upstream orangedude27/excite-truck |
 | Spu sound layer (6 tagged sites) | src/game/unk_802E4D84.c | 3 upstream pragmas; 3 `msg` base pointers into the message pool (fn_802E5478, fn_802E5AE8, fn_802E6264) standing in for pooled string literals. The pool also holds strings of linker-stripped functions, so literals can't reproduce its offsets until the unit owns its .data | upstream orangedude27/excite-truck; Claude 2026-10-24 |
