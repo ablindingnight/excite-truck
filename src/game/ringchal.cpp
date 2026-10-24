@@ -883,22 +883,20 @@ void RingResults::Update(int score, int rings, int bonus) {
 
 extern "C" RingChalMaster* fn_8016BE60(Race* race) {
     RingChalMaster* m = new ("ringchalmaster") RingChalMaster;
-    if (m) {
-        int i;
-        lbl_8055E378 = m;
-        m->players.Clear();
-        for (i = 0; i < race->nCars; i++) {
-            PlayerData* p = new ("playerdata") PlayerData(i);
-            m->players.Push(p);
-        }
-        fn_8016A0B0();
-        m->arena.Init();
-        m->layout = 0;
-        m->b9C = 1;
-        m->fA0 = -100.0f;
-        m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
-        m->bA8 = 0;
+    int i;
+    lbl_8055E378 = m;
+    m->players.Clear();
+    for (i = 0; i < race->nCars; i++) {
+        PlayerData* p = new ("playerdata") PlayerData(i);
+        m->players.Push(p);
     }
+    fn_8016A0B0();
+    m->arena.Init();
+    m->layout = 0;
+    m->b9C = 1;
+    m->fA0 = -100.0f;
+    m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
+    m->bA8 = 0;
     return m;
 }
 
