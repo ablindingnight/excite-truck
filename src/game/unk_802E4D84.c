@@ -349,38 +349,40 @@ extern int WPADCanSendStreamData(int);
 extern unsigned char fn_802E86B4(int);
 extern int AXRmtGetSamples(int, short *, int);
 extern void WENCGetEncodeData(void *, int, short *, int, void *);
-extern void fn_80062278(int, void *, int);
+extern int WPADSendStreamData(int chan, void *data, int len);
 extern void AXRmtAdvancePtr(int);
 extern unsigned char lbl_804FC6C0[];
 extern int lbl_8055FFA8;
+// Wii Remote speaker alarm: for each remote that can take data, pulls 40 samples from AX and, if the remote is ready
+// and any of its voices played recently, encodes them (restarting the encoder after a gap) and sends the packet.
 void fn_802E52EC(void) {
-    unsigned char *entry = lbl_804FC800;
+    SpuRemote *r = SPU_REMOTES;
     short *samples = (short *)lbl_804FC6C0;
+    int i;
     int any = 0;
-    int i = 0;
-    int zero = 0;
-    int one = 1;
-    do {
-        int state = OSDisableInterrupts();
-        if (WPADCanSendStreamData(i) && fn_802E86B4(i) > 0x55 &&
-            AXRmtGetSamples(i, samples, 0x28) == 0x28) {
+    for (i = 0; i < 4; i++) {
+        unsigned char data[0x14];
+        int level = OSDisableInterrupts();
+        if (WPADCanSendStreamData(i) && fn_802E86B4(i) > 0x55 && AXRmtGetSamples(i, samples, 0x28) == 0x28) {
             any = 1;
-            if (entry[0] && (lbl_8055FFA8 & (one << i))) {
-                int active = *(int *)(entry + 0x24);
-                int encode = active == 0;
-                if (active) *(int *)(entry + 0x24) = zero;
-                WENCGetEncodeData(entry + 1, encode, samples, 0x28, &zero);
-                fn_80062278(i, &zero, 0x14);
+            if (r->ready && (lbl_8055FFA8 & (1 << i))) {
+                int flag = r->restart == 0;
+                if (r->restart) {
+                    r->restart = 0;
+                }
+                WENCGetEncodeData(r->wenc, flag, samples, 0x28, data);
+                WPADSendStreamData(i, data, 0x14);
             } else {
-                *(int *)(entry + 0x24) = one;
+                r->restart = 1;
             }
         }
-        OSRestoreInterrupts(state);
-        i++;
-        entry += 0x2C;
+        OSRestoreInterrupts(level);
+        r++;
         samples += 0x28;
-    } while (i < 4);
-    if (any) AXRmtAdvancePtr(0x28);
+    }
+    if (any) {
+        AXRmtAdvancePtr(0x28);
+    }
 }
 
 int fn_802E540C(int arg0) {
