@@ -1477,25 +1477,23 @@ void fn_8011BC48(void) {
     fn_80120084();
 }
 
-s32 fn_8011BC4C(void *arg0, void *arg1) {
-    void *var_r5;
-    void *temp_r0;
-    if (arg0 == NULL) return 0;
-    var_r5 = *(void **)((u8 *)arg0 + 0x30);
-    if (var_r5 == arg1) {
-        *(void **)((u8 *)arg0 + 0x30) = *(void **)var_r5;
+// Unlink node from the singly linked list at +0x30 of owner (next pointer at +0). Returns 1 if it was there.
+s32 fn_8011BC4C(void *owner, void *node) {
+    void *p;
+    if (owner == NULL) return 0;
+    p = *(void **)((u8 *)owner + 0x30);
+    if (p == node) {
+        *(void **)((u8 *)owner + 0x30) = *(void **)p;
         return 1;
     }
-    temp_r0 = *(void **)var_r5;
-loop:
-    if (temp_r0 == arg1) {
-        *(void **)var_r5 = *(void **)arg1;
-        return 1;
+    while (*(void **)p != NULL) {
+        if (*(void **)p == node) {
+            *(void **)p = *(void **)node;
+            return 1;
+        }
+        p = *(void **)p;
     }
-    var_r5 = temp_r0;
-    temp_r0 = *(void **)var_r5;
-    if (temp_r0 == NULL) return 0;
-    goto loop;
+    return 0;
 }
 
 void fn_8011BCAC(void **head, void *node) {
