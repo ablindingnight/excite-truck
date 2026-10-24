@@ -20,6 +20,7 @@ struct Spawn {
 };
 
 struct SpawnEvent {
+    SpawnEvent(void) {}
     s32 w[6];  // offset 0x0
     s16 slot;  // offset 0x18
     s32 id;    // offset 0x1C
@@ -588,18 +589,17 @@ int fn_802A0620(const void* ev) {
     const SpawnEvent* e = (const SpawnEvent*)ev;
     EmitterDef* d = fn_8029FE1C(e->id);
     SpawnEvent se = *e;
-    Spawn& s = *(Spawn*)&se;
     if (d) {
         for (int i = 0; i < d->repeat; i++) {
             if (d->part.enabled) {
-                fn_802A01C8(d, &s);
+                fn_802A01C8(d, (Spawn*)&se);
             }
             if (d->chunk.enabled) {
-                fn_802A02F4(d, &s);
+                fn_802A02F4(d, (Spawn*)&se);
             }
-            s.pos.x = s.pos.x + d->dpos.x;
-            s.pos.y = s.pos.y + d->dpos.y;
-            s.pos.z = s.pos.z + d->dpos.z;
+            ((Spawn*)&se)->pos.x = ((Spawn*)&se)->pos.x + d->dpos.x;
+            ((Spawn*)&se)->pos.y = ((Spawn*)&se)->pos.y + d->dpos.y;
+            ((Spawn*)&se)->pos.z = ((Spawn*)&se)->pos.z + d->dpos.z;
         }
     }
     return 0x20;
