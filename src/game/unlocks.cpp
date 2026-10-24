@@ -17,25 +17,33 @@ s32 fn_8001EFC0(int kind, const char* chassis);
 int fn_8027DE68(int);
 }
 
-template <class T, int N>
-class FixedArray {
+// A counted array over storage it does not own; clearing it on destruction.
+template <class T>
+class ArrayRef {
 public:
-    FixedArray(void) {
-        data = storage;
-        capacity = N;
-        count = 0;
-    }
-    s32 Size(void) const { return count; }
-    T* Add(void) { return &data[count++]; }
-    ~FixedArray(void) {
+    ~ArrayRef(void) {
         data = NULL;
         count = 0;
         capacity = 0;
     }
+    s32 Size(void) const { return count; }
+    T* Add(void) { return &data[count++]; }
 
     T* data;       // offset 0x0
     s32 count;     // offset 0x4
     s32 capacity;  // offset 0x8
+};
+
+template <class T, int N>
+class FixedArray : public ArrayRef<T> {
+public:
+    FixedArray(void) {
+        this->data = storage;
+        this->capacity = N;
+        this->count = 0;
+    }
+    ~FixedArray(void) {}
+
     T storage[N];  // offset 0xC
 };
 
