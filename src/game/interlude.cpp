@@ -147,13 +147,13 @@ struct MenuItem {
     const char* label;     // offset 0x0
     void (*fn)(void);      // offset 0x4
     s32 next;              // offset 0x8: menu to open, 0x22 = back
-    s32 pad;
+    u8* check;             // offset 0xC: shown as a check box when set
 };
 
 struct Menu {
-    MenuItem* items;  // offset 0x0
-    s32 pad4;
-    s32 count;        // offset 0x8
+    MenuItem* items;    // offset 0x0
+    const char* title;  // offset 0x4
+    s32 count;          // offset 0x8
     s32 padC;
 };
 
@@ -216,6 +216,12 @@ void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void
 double cos(double x);
 double sin(double x);
 double acos(double x);
+void* fn_801E8718(int view);
+void fn_802C8638(void* cam);
+void fn_801EA478(int cam);
+void fn_801E9DC4(s16* hint);
+f32 fn_801E9DDC(s16* hint, f32 x, f32 z);
+void fn_801E3FC8(const IVec3* p, f32 size, u32 color);
 double cos(double x);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);
@@ -248,7 +254,7 @@ void fn_8023895C(void);
 void fn_802389E4(void);
 int fn_80238A20(void);
 void fn_80238A74(int x, int y, const char* s, int color);
-void fn_80238B44(int x, int y, const char* s, int color);
+void fn_80238B44(int x0, int y0, int x1, int y1, u32 color);  // filled box
 int fn_802E367C(const char* name);
 void fn_802E3734(int* fd);
 void fn_802E3AD0(int fd, const char* fmt, ...);
@@ -259,6 +265,7 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern f32 lbl_8055F47C;
 extern IMtx lbl_80499050;   // current camera
 
+extern UnkStatic7F lbl_8055E7DC;  // box colour
 extern bool lbl_8055E7E0;     // hidden
 extern u8 lbl_8055E7E1;
 extern u8 lbl_8055E7E2;     // active
@@ -1732,7 +1739,7 @@ void fn_801C9444(void) {
 
 void fn_801C94B8(int x, int y, const char* s, int color) { fn_80238A74(x, y, s, color); }
 
-void fn_801C94BC(int x, int y, const char* s, int color) { fn_80238B44(x, y, s, color); }
+void fn_801C94BC(int x0, int y0, int x1, int y1, u32 color) { fn_80238B44(x0, y0, x1, y1, color); }
 
 void fn_801C94C0(int x, int y) {
     fn_8023895C();
@@ -2073,9 +2080,181 @@ void fn_801CA5A8(void) {
     }
 }
 
-// Editor overlay draw (placeholder).
+// Editor overlay draw: the status box (time, events, camera position/rotation/fov, a time line of the
+// events), the current menu, the input line or the key help, the event list, and markers in the world for
+// the selected event.
 void fn_801CA67C(void) {
-    IL_Use(0, "HIDDEN ('H')", "INTERLUDE", "[ACTIVE]", "[INACTIVE]", "T: %1.1f (%1.1f)", "E: %d/%d", "C: %5.1f, %5.1f, %5.1f", "R: %5.2f, %5.2f, %5.2f", "F: %3.0f", "VALID ENTRIES", "(and combos of):", "## (Car index in lineup)", "%c - Un/Pause", "%c - Restart", "%c - Change Cam", "%c - +0.1 Secs", "%c - Save", "%c - Hide", "[ and ] Scroll", "%5.2f   %4d   %s", "InterludeSkipToEnd: interlude not active!");
+    int h = fn_80238A20();
+    int bottom = (434 / h) * h;
+    int lineH = h + 6;
+    IVec3 rot;
+    RotToAxisAngle((const Mat3*)&lbl_80499050, &rot);
+    fn_8023895C();
+    if (lbl_8055E7E0) {
+        fn_80238B44(5, 5, 135, h + 15, lbl_8055E7DC.value);
+        fn_80238A74(10, 10, "HIDDEN ('H')", -1);
+        fn_802389E4();
+        return;
+    }
+    u32 bg = lbl_8055E7DC.value;
+    fn_80238B44(5, 5, 265, 110, bg);
+    fn_80238A74(10, 10, "INTERLUDE", 0xFFFFFF00);
+    fn_80238A74(110, 10, fn_801C5B60() ? "[ACTIVE]" : "[INACTIVE]", -1);
+    f32 t = fn_801C3B6C();
+    char buf[0x100];
+    sprintf(buf, "T: %1.1f (%1.1f)", t, lbl_8055E7E4);
+    fn_80238A74(10, 25, buf, -1);
+    sprintf(buf, "E: %d/%d", lbl_8055E7F4, lbl_8055E7F0);
+    fn_80238A74(110, 25, buf, -1);
+    const CamPose* cam = (const CamPose*)&lbl_80499050;
+    sprintf(buf, "C: %5.1f, %5.1f, %5.1f", cam->pos.x, cam->pos.y, cam->pos.z);
+    fn_80238A74(10, 50, buf, -1);
+    sprintf(buf, "R: %5.2f, %5.2f, %5.2f", rot.x, rot.y, rot.z);
+    fn_80238A74(10, 65, buf, 0xFFC0C0C0);
+    sprintf(buf, "F: %3.0f", lbl_8055F47C / 0.017453292f);
+    fn_80238A74(200, 65, buf, 0xFFFFFF00);
+    if (lbl_8055E7F0) {
+        fn_80238B44(10, 90, 260, 105, 0x40000000);
+        f32 dur = lbl_8055A958 > 0.01f ? lbl_8055A958 : 0.01f;
+        f32 scale = 250.0f / dur;
+        for (int i = 0; i < lbl_8055E7F0; i++) {
+            int color = fn_801C34CC(lbl_8055E7F8[i].time, lbl_8055E7F8[lbl_8055E828].time) ? -1 : 0xFF000000;
+            int x = (int)(0.5f + lbl_8055E7F8[i].time * scale) + 10;
+            x = x <= 260 ? x : 260;
+            fn_80238B44(x, 90, x + 1, 105, color);
+        }
+        int x = (int)(0.5f + t * scale) + 10;
+        x = x > 260 ? 260 : x;
+        fn_80238B44(x, 90, x + 1, 105, 0xFFFFFF00);
+    }
+    Menu* m = &lbl_8055E86C[lbl_8055E81C];
+    fn_801C94BC(398, 8, 600, lineH * (m->count + 1) + 10, bg);
+    fn_801C94BC(398, 8, 600, h + 10, 0x32000000);
+    fn_801C94B8(400, 10, m->title, -1);
+    int y = lineH + 10;
+    for (int i = 0; i < m->count; i++) {
+        MenuItem* it = &m->items[i];
+        char line[0x100];
+        if (it->check) {
+            sprintf(line, "[%s] %s", *it->check ? "X" : "  ", it->label);
+        } else {
+            strcpy(line, it->label);
+        }
+        fn_801C94B8(400, y, line, lbl_8055E820 == i ? 0xFFFFFF00 : -1);
+        y += lineH;
+    }
+    if (lbl_8055E838) {
+        fn_801C94BC(200, 200, 400, h + 212, bg);
+        sprintf(buf, "%s_", lbl_804380F0);
+        fn_801C94B8(206, 206, buf, -1);
+        if (lbl_8055E83C) {
+            fn_801C94B8(270, 5, "VALID ENTRIES", -1);
+            int yy = h + 5;
+            fn_801C94B8(270, yy, "(and combos of):", -1);
+            yy += h;
+            fn_801C94B8(270, yy, "all", -1);
+            yy += h;
+            fn_801C94B8(270, yy, "even", -1);
+            yy += h;
+            fn_801C94B8(270, yy, "odd", -1);
+            yy += h;
+            fn_801C94B8(270, yy, "first", -1);
+            yy += h;
+            fn_801C94B8(270, yy, "last", -1);
+            fn_801C94B8(270, yy + h, "## (Car index in lineup)", -1);
+        }
+    } else {
+        sprintf(buf, "%c - Un/Pause", 'p');
+        fn_801C94B8(270, 5, buf, -1);
+        int yy = h + 5;
+        sprintf(buf, "%c - Restart", 'r');
+        fn_801C94B8(270, yy, buf, -1);
+        yy += h;
+        sprintf(buf, "%c - Change Cam", 'c');
+        fn_801C94B8(270, yy, buf, -1);
+        yy += h;
+        sprintf(buf, "%c - +0.1 Secs", 'i');
+        fn_801C94B8(270, yy, buf, -1);
+        yy += h;
+        sprintf(buf, "%c - Save", 'l');
+        fn_801C94B8(270, yy, buf, -1);
+        sprintf(buf, "%c - Hide", 'h');
+        fn_801C94B8(270, yy + h, buf, -1);
+    }
+    if (lbl_8055E839) {
+        fn_801C94BC(10, 125, 260, h * 14 + 125, bg);
+        fn_801C94B8(10, 125, "[ and ] Scroll", 0xE6969696);
+        int yy = h * 2 + 125;
+        int first = lbl_8055E82C * 10;
+        for (int i = 0; i < 10; i++) {
+            int k = first + i;
+            if (k >= lbl_8055E7F0) {
+                break;
+            }
+            Event* e = &lbl_8055E7F8[k];
+            sprintf(buf, "%5.2f   %4d   %s", e->time, e->order, fn_801C98F4(lbl_80562950, e->type));
+            fn_801C94B8(10, yy, buf, k == lbl_8055E828 ? 0xFFFFFF00 : -1);
+            yy += h;
+        }
+        if (first < lbl_8055E7F0 - 10) {
+            fn_801C94B8(10, yy, "  v", -1);
+            fn_801C94B8(10, yy + h - 10, "  v", -1);
+        }
+        fn_801CA5A8();
+    }
+    fn_802389E4();
+    if (lbl_8055E83A) {
+        fn_801C9830();
+    }
+    if (lbl_8055E7F0 > 0 && lbl_8055E828 < lbl_8055E7F0) {
+        fn_802C8638(fn_801E8718(0));
+        fn_801EA478(0);
+        Event ev = lbl_8055E7F8[lbl_8055E828];
+        switch (ev.type) {
+        case 6:
+            fn_801E3FC8(&((WaitEvent*)&ev)->pt, 2.0f, 0xFFFFFF00);
+            break;
+        case 4: {
+            TeleportEvent* tp = (TeleportEvent*)&ev;
+            if (tp->where == 0) {
+                s16 hint;
+                fn_801E9DC4(&hint);
+                IVec3 p;
+                p.x = tp->pt.x;
+                p.y = 0.0f;
+                p.z = tp->pt.y;
+                p.y = fn_801E9DDC(&hint, tp->pt.x, tp->pt.y);
+                fn_801E3FC8(&p, 2.0f, 0xFF0000FF);
+            }
+            break;
+        }
+        case 5: {
+            ThinkEvent* th = (ThinkEvent*)&ev;
+            if (th->kind == 2) {
+                s16 hint;
+                fn_801E9DC4(&hint);
+                IVec3 p;
+                p.x = th->x;
+                p.y = 0.0f;
+                p.z = th->z;
+                p.y = fn_801E9DDC(&hint, th->x, th->z);
+                fn_801E3FC8(&p, 2.0f, 0xFF00FF00);
+            }
+            break;
+        }
+        }
+    }
+    fn_801C94C0(10, bottom);
+}
+
+// Dead-stripped from the game: only its message is left in the string pool (after the overlay's).
+// The body is reconstructed from the message.
+void InterludeSkipToEnd(void) {
+    if (!lbl_8055E7E2) {
+        fn_802E30C8("InterludeSkipToEnd: interlude not active!");
+        return;
+    }
+    lbl_8055E7E4 = lbl_8055A958;
 }
 
 int fn_801CB114(int key) {
