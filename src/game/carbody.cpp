@@ -272,8 +272,8 @@ void fn_80181EAC(u8* p) {
 
 void fn_80181F30(void) {
     u32 flags = U32(fn_801769CC(), 0x4);
-    lbl_8055E4D0 = 0;
     lbl_8055E4F4 = (flags >> 19) & 1;
+    lbl_8055E4D0 = 0;
     fn_801BD694(8);
     fn_801AFC28();
     lbl_8055E4D4 = 1;
