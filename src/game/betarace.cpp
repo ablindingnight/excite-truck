@@ -1392,7 +1392,8 @@ struct StuntCIter {
 inline f32 Remap(f32 lo, f32 hi, f32 a, f32 b, f32 x) { return Lerp(a, b, Clamp01((x - lo) / (hi - lo))); }
 inline f32 Clamp(f32 x, f32 lo, f32 hi) {
     f32 r = hi < x ? hi : x;
-    return r > lo ? r : lo;
+    r = r > lo ? r : lo;
+    return r;
 }
 inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
 inline u8 ColR(u32 c) { return c >> 24; }
