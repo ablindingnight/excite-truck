@@ -181,10 +181,11 @@ struct CreditTextDescFields {
     f32 accelerationX,accelerationY,spinMin,spinMax;int capacity;f32 emissionRate;
     f32 lifetime,fadeTime,size,sizeDelta;
 };
-struct CreditGlyphBatchFields {void* items;int count,capacity;void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
-struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
+struct CreditGlyphStorageObservedNew {~CreditGlyphStorageObservedNew(){items=0;count=0;capacity=0;}void* items;int count,capacity;};
+struct CreditGlyphBatchFields:CreditGlyphStorageObservedNew {~CreditGlyphBatchFields(){__dla__FPv(allocation);}void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
+struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);~CreditFontGroupFields();void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
 struct CreditBackgroundHeader {CreditBackgroundHeader(const void* t){state=0;methods=t;}const void* methods;u8 reserved4[0x10];int state;};
-struct CreditBackgroundFields:CreditBackgroundHeader {CreditBackgroundFields();CreditFontGroupFields fire,smoke;};
+struct CreditBackgroundFields:CreditBackgroundHeader {CreditBackgroundFields();~CreditBackgroundFields();CreditFontGroupFields fire,smoke;};
 typedef char CreditDescriptorSize[sizeof(CreditTextDescFields)==0x3C?1:-1];
 typedef char CreditGroupSize[sizeof(CreditFontGroupFields)==0x60?1:-1];
 typedef char CreditBackgroundSize[sizeof(CreditBackgroundFields)==0xD8?1:-1];
@@ -217,7 +218,7 @@ void fn_80131818(ValueTable*);
 int fn_802ECF00(int);
 int fn_802ECF04(void);
 extern int lbl_8055C450;
-CreditBackgroundFields* fn_80264968(CreditBackgroundFields*,int);
+CreditBackgroundFields* __dt__22CreditBackgroundFieldsFv(CreditBackgroundFields*,int);
 void fn_80263F30(int before,u8 allowSkip,int after);
 
 void fn_80235380(int);
@@ -225,21 +226,12 @@ f32 fn_80235F64(int,u32);
 f32 fn_80235EF0(int,u32);
 void fn_80235AFC(int,u32,u32,f32,f32,f32,f32,f32,f32);
 }
-// Borrowed cleanup views mirror observed nested member destruction. They do
-// not change the raw background view's automatic lifetime in the entry draft.
-struct CreditGlyphCleanup : public CreditListHeader {
-    ~CreditGlyphCleanup(void) {__dla__FPv(allocation);}
-    void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;
-};
-struct CreditGroupCleanup {
-    ~CreditGroupCleanup(void) {if(resource){fn_80235380(resource);resource=0;}}
-    CreditTextDescFields desc;int resource;CreditGlyphCleanup glyphs;
-};
 struct CreditGlyphFields {
     ValPoint position,velocity;f32 angle,angularVelocity,remaining;u32 glyph;
 };
 typedef char CreditGlyphSize[sizeof(CreditGlyphFields)==32?1:-1];
-typedef char CreditCleanupSize[sizeof(CreditGroupCleanup)==0x60?1:-1];
+typedef char CreditGlyphStorageSize[sizeof(CreditGlyphStorageObservedNew)==12?1:-1];
+typedef char CreditGlyphBatchSize[sizeof(CreditGlyphBatchFields)==32?1:-1];
 static inline void CreditRemoveGlyph(CreditGlyphBatchFields* batch,int index) {
     if(index<0 || index>=batch->count)return;
     CreditGlyphFields* glyphs=(CreditGlyphFields*)batch->items;
@@ -280,7 +272,7 @@ static inline void CreditDrawGroup(CreditFontGroupFields* self) {
     }
 }
 extern "C" {
-CreditBackgroundFields* fn_80264968(CreditBackgroundFields* self,int deleteFlag);
+CreditBackgroundFields* __dt__22CreditBackgroundFieldsFv(CreditBackgroundFields* self,int deleteFlag);
 void fn_80264D5C(CreditBackgroundFields* self);
 void fn_80264FE4(CreditBackgroundFields* self);
 
@@ -486,7 +478,7 @@ __declspec(section ".data") const CreditMethodTableFields lbl_80346618 = {{
 __declspec(section ".data") const CreditMethodTableFields lbl_80346678 = {{
     0,
     0,
-    (const void*)fn_80264968,
+    (const void*)__dt__22CreditBackgroundFieldsFv,
     (const void*)fn_802153A0,
     (const void*)fn_80215CA0,
     (const void*)fn_80215CA4,
@@ -576,7 +568,7 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
         fn_8020A648(-1);fn_80265A74();
         if(!fn_802ECF04())fn_802E317C(lbl_803463F8);
         fn_80131818(table);
-        fn_80264538(&fade,-1);fn_80264968(&background,-1);
+        fn_80264538(&fade,-1);
     }
     if(after)fn_80265940();
     fn_8020A648(previous);
@@ -680,15 +672,8 @@ extern "C" void fn_80264618(CreditFadeFields* self) {
 
 CreditBackgroundFields::CreditBackgroundFields():CreditBackgroundHeader(&lbl_80346678),fire(lbl_802FA700),smoke(lbl_80346364){lbl_8055F448=this;}
 
-extern "C" CreditBackgroundFields* fn_80264968(CreditBackgroundFields* self,int deleteFlag) {
-    if(self) {
-        lbl_8055F448=0;
-        ((CreditGroupCleanup*)&self->smoke)->~CreditGroupCleanup();
-        ((CreditGroupCleanup*)&self->fire)->~CreditGroupCleanup();
-        if(deleteFlag>0)__dl__FPv(self);
-    }
-    return self;
-}
+inline CreditFontGroupFields::~CreditFontGroupFields(){if(resource){fn_80235380(resource);resource=0;}}
+CreditBackgroundFields::~CreditBackgroundFields(){lbl_8055F448=0;}
 
 extern "C" void* fn_80264A54(void) { return lbl_8055F448; }
 
