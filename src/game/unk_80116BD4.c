@@ -282,7 +282,7 @@ s32 fn_80116D30(void) {
 }
 
 extern void* fn_8011FF24(void);
-extern void fn_8011FF2C(s32);
+extern void *fn_8011FF2C(s32);
 void fn_80116DDC(void* arg0, s32 arg1) {
     void* result = fn_8011FF24();
     s32* ptr = (s32*)arg0;
@@ -1688,10 +1688,14 @@ void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3) {
 void fn_8011C364(s32 arg0);
 s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
     s32 result = 0;
+    void *owner;
+    void *node;
     s32 level;
+    owner = (void *)arg0;
+    node = (void *)arg1;
     if (arg0 != 0 && arg1 != 0 && *(s32 *)(arg1 + 0x18) != 0 && *(s32 *)(arg1 + 0x14) != 0) {
         level = OSDisableInterrupts();
-        if (fn_8011BC4C((void *)arg0, (void *)arg1) != 0) {
+        if (fn_8011BC4C(owner, node) != 0) {
             *(s32 *)(arg0 + 0x38) -= 1;
             if ((arg2 & 1) && *(s32 *)(arg0 + 0x30) == 0) {
                 fn_8011C364(arg0);
@@ -2233,20 +2237,22 @@ void* fn_8011FF24(void) {
 }
 
 extern u32 lbl_8055DEF4;
-// Allocates one block for all the pending buffers and hands each its slice.
-void fn_8011FF2C(s32 arg0) {
+// Allocates one block for all the pending buffers, hands each its slice and returns the block.
+void *fn_8011FF2C(s32 arg0) {
     s32 size = (arg0 + 0x1F) & ~0x1F;
-    u8 *p = fn_8011FFC4((s32)lbl_8055DEF0 + size);
     u32 i;
+    u8 *block = fn_8011FFC4((s32)lbl_8055DEF0 + size);
+    u8 *p;
     lbl_8055DEF0 = 0;
-    if (p != 0) {
-        p += size;
+    if (block != 0) {
+        p = block + size;
         for (i = 0; i < lbl_8055DEF4; i++) {
             *lbl_80559948[i] = p;
             p += lbl_8055994C[i];
         }
     }
     lbl_8055DEF4 = 0;
+    return block;
 }
 
 void fn_8011FFB8(void *arg0, void *arg1) {
