@@ -502,6 +502,7 @@ struct ArenaTimer {
     void Reset(void);
     f32 Get(void);
     void Draw(class ILayout* l);
+    int Expired(void) { return t <= 0.0f; }
     f32 t;      // offset 0x0
     f32 limit;  // offset 0x4
 };
@@ -2346,7 +2347,7 @@ void RingChalMaster::vf0C(void) {
             if (arena.f28 > 1.75f) {
                 arena.f28 = 0.0f;
             }
-            if (arena.timer.t <= 0.0f) {
+            if (arena.timer.Expired()) {
                 arena.b49 = 1;
             } else if (fn_801B306C() <= 0.0f) {
                 arena.timer.t -= 0.0166833512f;
