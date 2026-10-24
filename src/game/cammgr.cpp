@@ -254,9 +254,9 @@ static inline f32 ShakeEase(f32 x) {
         return lbl_80563C2C;
     }
     if (x > lbl_80563C20) {
-        return lbl_80563C30 * x * x * x + lbl_80563C34 * x * x;
+        return -2.0f * x * x * x + 3.0f * x * x;
     }
-    return lbl_80563C30 * x * x * x - lbl_80563C34 * x * x;
+    return -2.0f * x * x * x - 3.0f * x * x;
 }
 
 void fn_80265EC4(CamShake* s, s32 now, int paused) {
