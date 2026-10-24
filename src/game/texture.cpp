@@ -990,21 +990,24 @@ void fn_802CBD7C(MipDiscard** list, MipDiscard* d) {
 }
 
 // Starts loading the best candidate mip0, evicting resident ones that score worse if needed.
+// Slot a scores lower than b (so a can be evicted for b).
+static inline int Below(MipSlot* a, MipSlot* b) { return a->score < b->score; }
+
 void fn_802CBDD0(TexCache* c) {
     if (c->best && c->freeLoads) {
-        MipSlot** pp;
         MipSlot* s;
+        MipSlot** pp;
         for (pp = &c->resident; (s = *pp) != 0; pp = &s->next) {
-            if (s->score < c->best->score) {
+            if (Below(s, c->best)) {
                 c->cut = s;
                 *pp = 0;
                 break;
             }
         }
-        MipLoad* l = c->freeLoads;
+        s32 id = c->best->tex;
         int started = 0;
         MipSlot* victim = c->resident;
-        s32 id = c->best->tex;
+        MipLoad* l = c->freeLoads;
         if (l) {
             if (fn_802D9068()) {
                 TexEntry* t = &lbl_8055FCB0[id];
@@ -1018,8 +1021,8 @@ void fn_802CBDD0(TexCache* c) {
                         break;
                     }
                     victim->state = 0;
-                    l->wait++;
                     victim = victim->next;
+                    l->wait++;
                 }
                 if (l->mem) {
                     fn_802CC03C(c, l, id);
