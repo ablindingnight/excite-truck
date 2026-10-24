@@ -132,8 +132,7 @@ BOOL ARCChangeDir(ARCHandle* handle, const char* path) {
 }
 
 BOOL ARCOpenDir(ARCHandle* handle, const char* path, ARCDir* dir) {
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 entrynum = ARCConvertPathToEntrynum(handle, path);
+    s32 entrynum = ARCConvertPathToEntrynum(handle, path);
     void* fst = handle->FSTStart;
     
     if (entrynum < 0 || !(*(u32*)((u8*)fst + entrynum * 0xC) & 0xFF000000)) {
@@ -921,26 +920,20 @@ extern u32 fn_8011A240(void *, u32, s32, u32);
 extern void fn_8011A45C(void *, s32, s32);
 extern void fn_8011A1A0(u32 *, u32);
 u32 fn_8011A8FC(void *arg0, s32 arg1, s32 arg2, void *arg3, u32 arg4) {
-// MATCHING-AID: register pinning from upstream; revisit.
-              register s32 var_r29 = arg2;
-// MATCHING-AID: register pinning from upstream; revisit.
-              register u32 var_r26 = arg4;
+              s32 var_r29 = arg2;
+              u32 var_r26 = arg4;
               s32 var_r25 = (s32)arg3;
-// MATCHING-AID: register pinning from upstream; revisit.
-              register u32 var_r28 = 0;
+              u32 var_r28 = 0;
               s32 temp_r27 = var_r25;
-// MATCHING-AID: register pinning from upstream; revisit.
-                register s32 var_r31;
-// MATCHING-AID: register pinning from upstream; revisit.
+                s32 var_r31;
 // MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-              register volatile u32 *var_r30;
+              volatile u32 *var_r30;
               u32 temp_r0;
        u32 temp_r3;
         u32 temp_r6;
               u32 temp_r4;
               u32 temp_r5;
-// MATCHING-AID: register pinning from upstream; revisit.
-              register u32 temp_r23;
+              u32 temp_r23;
           
               if (*(s32 *)((u8 *)arg0 + 0x20) != 0)
                   return 0;
@@ -1687,8 +1680,7 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
 extern void fn_8011C4A0(s32, s32, s32, s32);
 void fn_8011CD90(s32 arg0, s32 arg1, s32 arg2) {
     s32 a = arg2;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 b = arg2 + 0x100;
+    s32 b = arg2 + 0x100;
     s32 c = arg2 + 0x140;
     u32 i;
     for (i = 0; i < 0x10; i++) {
@@ -2141,10 +2133,8 @@ void fn_80120084(void *arg0) {
 }
 
 void fn_80120834(s32 n, s32 *info, f32 *table) {
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 i;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 stage;
+    s32 i;
+    s32 stage;
     s32 half;
     s32 j;
     f32 endpoint;
@@ -2254,10 +2244,8 @@ extern void fn_80124AD8(void *, void *);
 extern void fn_80121BB0(void *);
 extern void fn_80124F90(void *);
 extern void fn_80125098(void *);
-// MATCHING-AID: register pinning from upstream; revisit.
-void fn_80120CA4(register s32 count, register void *dst, register s32 mode, register s32 srcIndex, register void *src) {
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 n;
+void fn_80120CA4(s32 count, void *dst, s32 mode, s32 srcIndex, void *src) {
+    s32 n;
     if (count > 0x20) {
         n = count >> 2;
         fn_80121C68(count, dst, (u8 *)src + (srcIndex - n) * 4);
@@ -3639,40 +3627,30 @@ done:
 
 void fn_80125960(void *arg0, s32 arg1, void *arg2, void *arg3) {
     s32 sp8[64];
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 *var_r12;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 *var_r4;
+    s32 *var_r12;
+    s32 *var_r4;
     s16 temp_r0, temp_r10, temp_r25, temp_r4, temp_r4_2, temp_r7, temp_r8, temp_r9;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s16 temp_r23;
+    s16 temp_r23;
     s32 temp_r0_2, temp_r0_3, temp_r0_4, temp_r0_5, temp_r0_6, temp_r0_7;
     s32 temp_r10_2, temp_r10_3, temp_r10_4, temp_r10_5, temp_r10_6;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 temp_r11;
+    s32 temp_r11;
     s32 temp_r11_2, temp_r11_3, temp_r11_4, temp_r11_5;
     s32 temp_r12, temp_r12_2, temp_r12_3, temp_r12_4, temp_r12_5;
     s32 temp_r23_2, temp_r23_3, temp_r23_4, temp_r23_5, temp_r23_6, temp_r23_7, temp_r23_8, temp_r23_9, temp_r23_10, temp_r23_11;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 temp_r24;
+    s32 temp_r24;
     s32 temp_r24_2, temp_r24_3, temp_r24_4, temp_r24_5, temp_r24_6, temp_r24_7, temp_r24_8;
     s32 temp_r25_2, temp_r25_3, temp_r25_4, temp_r25_5, temp_r25_6;
-// MATCHING-AID: register pinning from upstream; revisit.
-    s32 temp_r26, temp_r26_2, temp_r26_3, temp_r27, temp_r28, temp_r29; register s32 temp_r30;
+    s32 temp_r26, temp_r26_2, temp_r26_3, temp_r27, temp_r28, temp_r29; s32 temp_r30;
     s32 temp_r4_3, temp_r4_4, temp_r5, temp_r5_2, temp_r6;
     s32 temp_r7_2, temp_r7_3, temp_r7_4, temp_r7_5;
     s32 temp_r8_2, temp_r8_3, temp_r8_4, temp_r8_5;
     s32 temp_r9_2, temp_r9_3, temp_r9_4, temp_r9_5, temp_r9_6, temp_r9_7, temp_r9_8;
     s32 var_ctr, var_ctr_2;
     u32 temp_r11_6;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r31;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r3;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s16 *var_r5;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 *var_r6;
+    u8 *var_r31;
+    u8 *var_r3;
+    s16 *var_r5;
+    s32 *var_r6;
     var_r3 = (u8 *)arg0;
     var_r5 = (s16 *)arg2;
     var_r6 = (s32 *)arg3;
@@ -3823,10 +3801,8 @@ void fn_80125CB4(void *arg0, void *arg1, void *arg2, s32 arg3) {
 extern u8 lbl_802F7A40[];
 void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg5) {
     s32 sp8[64];
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r6;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r6_2;
+    u8 *var_r6;
+    u8 *var_r6_2;
     s16 temp_r0;
     s16 temp_r10;
     s16 temp_r10_2;
@@ -3902,14 +3878,10 @@ void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg
     s32 var_ctr;
     s32 var_ctr_2;
     u8 temp_r5_3;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r3;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r5;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r7;
-// MATCHING-AID: register pinning from upstream; revisit.
-    register u8 *var_r9;
+    u8 *var_r3;
+    u8 *var_r5;
+    u8 *var_r7;
+    u8 *var_r9;
 
     var_r3 = arg0;
     var_r5 = arg2;
