@@ -1296,10 +1296,11 @@ void Paint::Add(TVec* pos, TVec* vel, f32 alpha) {
     if (n < cap && Full(accum)) {
         Mark* m = &marks[n];
         {
+            // MATCHING-AID: copy through temporaries in this order (plain m->pos = *pos schedules differently).
             f32 x = pos->x;
             f32 y = pos->y;
-            f32 z = pos->z;
             m->pos.x = x;
+            f32 z = pos->z;
             m->pos.y = y;
             m->pos.z = z;
         }

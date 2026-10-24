@@ -449,9 +449,9 @@ void fn_802B11BC(GMat* g) {
     for (int i = 0; i < 65; i++) {
         g->lists[i] = GList();
     }
+    bool merged = false;
     g->pending = 0;
     g->strips.count = 0;
-    bool merged = false;
     if (g->worldmap == -2 || fn_802B05E4() || fn_802B05EC()) {
         merged = true;
     }
