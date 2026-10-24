@@ -4370,19 +4370,13 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 src = prev + *(s8 *)yOff.cur++ * pitch;
                 src += *(s8 *)xOff.cur++;
                 if ((((u32)dst | (u32)src) & 7) == 0) {
-                    u8 *d = dst;
                     for (i = 0; i < 8; i++) {
-                        *(f64 *)d = *(f64 *)src;
-                        d += pitch;
-                        src += pitch;
+                        *(f64 *)(dst + i * pitch) = *(f64 *)(src + i * pitch);
                     }
                 } else if ((((u32)dst | (u32)src) & 3) == 0) {
-                    u8 *d = dst;
                     for (i = 0; i < 8; i++) {
-                        ((u32 *)d)[0] = ((u32 *)src)[0];
-                        ((u32 *)d)[1] = ((u32 *)src)[1];
-                        d += pitch;
-                        src += pitch;
+                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)(src + i * pitch))[0];
+                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)(src + i * pitch))[1];
                     }
                 } else {
                     u8 *d = dst;
