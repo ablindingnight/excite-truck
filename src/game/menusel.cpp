@@ -1,25 +1,24 @@
-// Menu selection hook (0x80245080-0x802451DC): the selection callback check, the retry counter and
-// the menu sound-bank selection. The static initialiser is still a stub. Names are guesses.
+// Menu selection hook (0x80245080-0x802451DC): the memory card dialog's selection check and retry
+// counter, installing/removing it as the active dialog and the dialog manager instance. Names are guesses.
 #include "game/common.h"
-
-#define S32(p, o) (*(s32*)((u8*)(p) + (o)))
-#define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
-typedef int (*SelectCheck)(u8* p);
+#include "game/mcdialog.h"
 
 extern "C" {
 void fn_80236900(void);
-void fn_802E8D7C(u8* bank);
+void fn_802E8D7C(MemCardDialogMgr* dialog);  // sets the active memory card dialog
 }
 
-extern u8* lbl_8055F244;
-extern u8 lbl_804988B0[];
+ModuleTag lbl_8055F238;
+UnkStatic123s lbl_80498890;  // menu end tag
+UnkStatic7F lbl_8055F240;
+MemCardDialogMgr* lbl_8055F244;
+static MemCardDialogMgr lbl_804988B0;
 
 extern "C" {
 
 int fn_80245080(u8* p) {
     int r = 0;
-    SelectCheck check = *(SelectCheck*)(PTR(lbl_8055F244, 0x20) + 0xC);
+    int (*check)(u8* p) = lbl_8055F244->cfg->check;
     if (check && check(p) == 1) {
         r = 1;
     }
@@ -28,18 +27,16 @@ int fn_80245080(u8* p) {
 
 int fn_802450D4(void) {
     fn_80236900();
-    u8* m = lbl_8055F244;
-    if (S32(m, 0x24) > 7) {
+    MemCardDialogMgr* m = lbl_8055F244;
+    if (m->retries > 7) {
         return 1;
     }
-    S32(m, 0x24)++;
+    m->retries++;
     return 0;
 }
 
-void fn_80245118(void) { fn_802E8D7C(lbl_804988B0); }
+void fn_80245118(void) { fn_802E8D7C(&lbl_804988B0); }
 
 void fn_80245124(void) { fn_802E8D7C(0); }
-
-void fn_8024512C(void) {}  // stub (44)
 
 }  // extern "C"

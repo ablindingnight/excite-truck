@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/mcdialog.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 #include <string.h>
@@ -12,12 +13,6 @@
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
-class VM {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-};
 
 extern "C" {
 u8 fn_8012C33C(const char* lyt);
@@ -42,7 +37,6 @@ u8* fn_8023512C(const char* art);
 
 void operator delete(void* p);
 
-extern u8* lbl_8055F244;
 extern char lbl_80342FC0[];  // string pool
 extern const f32 lbl_80563830;
 
@@ -58,71 +52,60 @@ UnkStatic123s lbl_804988D8;
 
 extern "C" {
 
-u8* fn_802451DC(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
+}  // extern "C"
 
-u8* fn_8024521C(u8* p, int del) {
-    if (p) {
-        lbl_8055F244 = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
+MemCardDialogMgr::~MemCardDialogMgr(void) { lbl_8055F244 = 0; }
 
-void fn_80245264(u8* p) {
+void MemCardDialogBg::Load(void) {
     const char* str = lbl_80342FC0;
-    if ((PTR(p, 0x4) = fn_802C5130(str + 0x60)) == 0) {
+    if ((image = fn_802C5130(str + 0x60)) == 0) {
         fn_802E30C8(str + 0x78);
     }
-    S32(p, 0x8) = 0;
-    PTR(p, 0x10) = fn_80232578(str + 0xB4);
-    PTR(p, 0xC) = fn_80232578(str + 0xB4);
-    F32(p, 0x14) = lbl_80563830;
+    image2 = 0;
+    font2 = fn_80232578(str + 0xB4);
+    font = fn_80232578(str + 0xB4);
+    fade = lbl_80563830;
 }
 
-void fn_802452E4(u8* p) {
-    if (PTR(p, 0x4)) {
-        fn_802C519C(PTR(p, 0x4));
+void MemCardDialogBg::Unload(void) {
+    if (image) {
+        fn_802C519C(image);
     }
-    U32(p, 0x4) = 0;
-    if (PTR(p, 0x8)) {
-        fn_802C519C(PTR(p, 0x8));
+    image = 0;
+    if (image2) {
+        fn_802C519C(image2);
     }
-    U32(p, 0x8) = 0;
-    fn_802328D4(PTR(p, 0xC));
-    fn_802328D4(PTR(p, 0x10));
-    U32(p, 0xC) = 0;
-    U32(p, 0x10) = 0;
+    image2 = 0;
+    fn_802328D4(font);
+    fn_802328D4(font2);
+    font = 0;
+    font2 = 0;
 }
 
-void fn_80245360(u8* p) {}  // stub (363)
+void MemCardDialogBg::Setup(McDialogCfg* cfg) {}  // stub (363)
 
-void fn_8024590C(u8* p) {}  // stub (239)
+void MemCardDialogBg::Show(const McMsg* m) {}  // stub (239)
 
-void fn_80245CC8(u8* p) {
-    U8(p, 0x1C) = 1;
-    U8(p, 0x1D) = fn_8012C33C("mc_dialog.lyt");
-    if (!U8(p, 0x1D)) {
-        ((VM*)(p + 4))->v08();
-        U8(p, 0x1E) = 1;
+void MemCardDialogMgr::Open(void) {
+    open = 1;
+    layout = fn_8012C33C("mc_dialog.lyt");
+    if (!layout) {
+        bg.Load();
     }
+    bgShown = 1;
 }
 
-void fn_80245D2C(u8* p) {
-    U8(p, 0x1C) = 0;
-    if (!U8(p, 0x1D)) {
-        ((VM*)(p + 4))->v0C();
+void MemCardDialogMgr::Close(void) {
+    open = 0;
+    if (!layout) {
+        bg.Unload();
     }
     fn_80214D50(4);
 }
 
-void fn_80245D74(u8* p) {}  // stub (279)
+void MemCardDialogMgr::Setup(McDialogCfg* cfg) {}  // stub (279)
+
+extern "C" {
 
 u8* fn_802461D0(u8* p, int del) {
     if (p && del > 0) {
@@ -132,8 +115,8 @@ u8* fn_802461D0(u8* p, int del) {
 }
 
 void fn_80246210(void) {
-    U8(lbl_8055F244, 0x1E) = 0;
-    s32 n = S32(PTR(lbl_8055F244, 0x20), 0x14);
+    lbl_8055F244->bgShown = 0;
+    s32 n = lbl_8055F244->cfg->count;
     for (int i = 0; i < n; i++) {
         fn_80214AF0(i);
     }
@@ -141,7 +124,7 @@ void fn_80246210(void) {
         fn_80214B44(n);
         fn_80214A9C(n);
     }
-    fn_80214CB4(S32(PTR(lbl_8055F244, 0x20), 0x10));
+    fn_80214CB4(lbl_8055F244->cfg->select);
 }
 
 }  // extern "C"
@@ -164,32 +147,18 @@ public:
     u8* art;   // offset 0x1C
 };
 
-// A memory card message: title, text and progress.
-struct McMsg {
-    const char* title;  // offset 0x0
-    const char* text;   // offset 0x4
-    f32 frac;           // offset 0x8
-};
-
-class VSub {
-public:
-    virtual void s08(void);
-    virtual void s0C(void);
-    virtual void s10(void);
-    virtual void Show(void);  // 0x14
-};
-
 extern const MenuDesc lbl_802FA350;  // "mc_dialog.lyt"
-extern UnkStatic123 lbl_80498890;  // menu end tag
+extern UnkStatic123s lbl_80498890;  // menu end tag (menusel.cpp)
 
 extern "C" {
 void fn_80216CA8(void);
 int fn_802450D4(void);
+}
 
-// Shows a memory card message with its progress bar (or just refreshes the status when hidden).
-void fn_802462A0(u8* p, const McMsg* m) {
-    if (!U8(p, 0x1D)) {
-        ((VSub*)(p + 0x4))->Show();
+// Shows a memory card message with its progress bar (on the plain background without the layout).
+void MemCardDialogMgr::ShowMsg(const McMsg* m) {
+    if (!layout) {
+        bg.Show(m);
         return;
     }
     MemBar bar(m->frac);
@@ -199,12 +168,14 @@ void fn_802462A0(u8* p, const McMsg* m) {
         MenuItem("progress", 5, &bar, 0, 0),
         MenuItem(lbl_80498890),
     };
-    S32(p, 0x24) = 0;
+    retries = 0;
     MenuDesc desc = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
     desc.items = items;
     fn_80216CA8();
     fn_802146BC(&desc, -999, -999, 1);
 }
+
+extern "C" {
 
 
 void fn_80246498(u8* p) { fn_80214CB4(U8(p, 0x18) == 0); }
