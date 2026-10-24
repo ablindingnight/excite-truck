@@ -2047,6 +2047,11 @@ u8* fn_801A1520(u8* p, u32 a, u32 swap) {
 
 // Ray from + t*dir against the capsule's side (axis clamped to +-half length 0x28, radius 0x24):
 // the hit if it lies in (0, *t), with its normal.
+static inline f32 ClampF(f32 v, f32 lo, f32 hi) {
+    v = hi < v ? hi : v;
+    return v > lo ? v : lo;
+}
+
 int fn_801A15CC(u8* p, const f32* from, const f32* dir, f32* t, f32* n) {
     PVec3 hit;
     PVec3 on;
@@ -2056,16 +2061,7 @@ int fn_801A15CC(u8* p, const f32* from, const f32* dir, f32* t, f32* n) {
     f32* axis = (f32*)(m + 0x18);
     f32* org = (f32*)(m + 0x24);
     if (fn_8019D484(from, dir, org, axis, &tr, &s)) {
-        f32 h = F32(p, 0x28);
-        f32 nh = -h;
-        f32 v = h;
-        if (!(h < s)) {
-            v = s;
-        }
-        if (!(v > nh)) {
-            v = nh;
-        }
-        s = v;
+        s = ClampF(s, -F32(p, 0x28), F32(p, 0x28));
         if (tr > 0.0f && tr < *t) {
             MulAdd(hit.v, from, dir, tr);
             MulAdd(on.v, org, axis, s);
@@ -2076,7 +2072,7 @@ int fn_801A15CC(u8* p, const f32* from, const f32* dir, f32* t, f32* n) {
                 n[1] = hit.v[1] - on.v[1];
                 n[2] = hit.v[2] - on.v[2];
                 f32 len = PSVECMag(n);
-                f32 k = 0.001f;
+                f32 k = lbl_805622D4;
                 f32 inv = 1.0f / (k > len ? k : len);
                 n[0] *= inv;
                 n[1] *= inv;
