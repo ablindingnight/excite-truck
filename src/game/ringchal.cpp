@@ -4,6 +4,23 @@
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
 
+// Art animation player (artanim.cpp).
+class ArtPlayer {
+public:
+    ArtPlayer(int n);
+    ~ArtPlayer(void);
+    int Add(const char* name, int bindings);
+    void Start(int i);
+    void Pause(int i);
+    void Resume(int i);
+    void StopAll(void);
+    void Update(void);
+    void Draw(int flags);
+
+    void* list;  // offset 0x0
+    f32 t;       // offset 0x4
+};
+
 class RSound;
 extern f32 lbl_8055E3C8;  // time
 
@@ -19,10 +36,6 @@ void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
 int fn_801609C4(int score);                                // grade for a score
-void fn_802ADFF4(void* layout, s32 a);
-void fn_802AE02C(void* layout, s32 a);
-void fn_802AE0B8(void* layout, s32 a);
-void fn_802AE168(void* layout);
 ValueTable* fn_80131808(const char* name);  // open .val table
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);  // close .val table
@@ -45,7 +58,6 @@ void fn_8016A68C(void);
 void fn_8001B450(s32 h);
 s32 fn_802BAF98(void* obj, int on);
 void fn_80144C54(RSound* s);
-void fn_802AE0E0(void* layout);
 s32 fn_80179650(void);
 s32 fn_80145E70(const char* name);
 void fn_802ADDD8(void* p, int a);
@@ -129,7 +141,6 @@ s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
-s32 fn_802ADF34(void* layout, const char* name, Binding* b);
 f32 fn_8014C8B4(f32 lo, f32 hi, f32 a, f32 b, f32 x);
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 f32 fn_80144BD8(f32 t);
@@ -159,7 +170,6 @@ void fn_802C9900(f32 alpha);
 void fn_802C9904(void);
 void fn_8016A438(void);
 int fn_801B8514(void);
-void fn_802AE220(void* layout, int a);
 void fn_8001DFCC(void);
 void fn_802AE118(void* layout);
 void fn_801B0C78(int car);
@@ -815,7 +825,7 @@ void RingResults::Update(int score, int rings, int bonus) {
         }
         switch (state) {
         case 0:
-            fn_802ADFF4(layout, fF4);
+            ((ArtPlayer*)(layout))->Start(fF4);
             if (strlen(complete)) {
                 PlayIdle(s2C);
             } else {
@@ -837,27 +847,27 @@ void RingResults::Update(int score, int rings, int bonus) {
                 Play(s1C);
             }
             if (f100) {
-                fn_802AE02C(layout, fF4);
+                ((ArtPlayer*)(layout))->Pause(fF4);
                 state = 2;
             }
             break;
         case 2:
             if (b9) {
-                fn_802AE0B8(layout, fF4);
+                ((ArtPlayer*)(layout))->Resume(fF4);
                 Play(s24);
                 state = 3;
             }
             break;
         case 3:
             if (f104) {
-                fn_802AE02C(layout, fF4);
+                ((ArtPlayer*)(layout))->Pause(fF4);
                 state = 4;
             }
             break;
         case 4:
             break;
         }
-        fn_802AE168(layout);
+        ((ArtPlayer*)(layout))->Update();
     }
 }
 
@@ -1376,7 +1386,7 @@ void RingChalMaster::vf10(void) {
     results.f100 = 0;
     results.f104 = 0;
     if (results.layout) {
-        fn_802AE0E0(results.layout);
+        ((ArtPlayer*)(results.layout))->StopAll();
     }
     Stop(results.sBonus);
     Stop(results.sNoBonus);
@@ -1537,7 +1547,7 @@ void RingResults::Reset(void) {
     f100 = 0;
     f104 = 0;
     if (layout) {
-        fn_802AE0E0(layout);
+        ((ArtPlayer*)(layout))->StopAll();
     }
     Stop(sBonus);
     Stop(sNoBonus);
@@ -1648,7 +1658,7 @@ void RingResults::Load(void) {
     StrCopyN(finalScore, "150", 0x14);
     fn_80130980(timeBonus, 0x14, 2, 75.0f);
     fF0 = fn_80204CF0() + 1;
-    fF4 = fn_802ADF34(layout, "a_ring_finish.val", b);
+    fF4 = ((ArtPlayer*)(layout))->Add("a_ring_finish.val", (int)(b));
     sBonus = fn_80207848("pr_ringchal1.sfx", 1);
     sNoBonus = fn_80207848("pr_ringchal1_nobonus.sfx", 1);
     s1C = fn_80207848("pr_ringchal2.sfx", 1);
@@ -1733,7 +1743,7 @@ int RingChalMaster::vf5C(int p) {
             vf4C(p);
         }
         if (results.layout) {
-            fn_802AE220(results.layout, 0);
+            ((ArtPlayer*)(results.layout))->Draw(0);
         }
     }
     if (vf68()) {

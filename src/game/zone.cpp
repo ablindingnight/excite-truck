@@ -52,7 +52,6 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 extern "C" f32 fn_8013CB3C(void);
 extern u8 lbl_8055E1BC;  // timed-out-of-zone mode
-extern "C" int fn_802ADF34(void* anim, const char* file, void* bindings);
 void* GetEvent(int event);
 
 extern f32 lbl_8055E3C8;     // current race time
@@ -524,6 +523,13 @@ class ArtPlayer {
 public:
     ArtPlayer(int n);
     ~ArtPlayer(void);
+    int Add(const char* name, int bindings);
+    void Start(int i);
+    void Pause(int i);
+    void Resume(int i);
+    void StopAll(void);
+    void Update(void);
+    void Draw(int flags);
 
     void* list;  // offset 0x0
     f32 t;       // offset 0x4
@@ -542,7 +548,6 @@ public:
 };
 
 extern "C" const char* fn_80131234(const char* key);
-extern "C" void fn_802AE0E0(ArtPlayer* a);
 
 static inline void StrCopyN(char* d, int n, const char* s) {
     while ((*d++ = *s++) != 0) {
@@ -647,7 +652,7 @@ struct ZoneHud {
         i114 = 0;
         i118 = 0;
         if (anim) {
-            fn_802AE0E0(anim);
+            ((ArtPlayer*)(anim))->StopAll();
         }
         StopSound(timeBonusAnim);
         StopSound(noTimeBonusAnim);
@@ -1609,7 +1614,6 @@ void fn_802A9BFC(Vec3* a, Vec3* b, s32 tex, int d, int e, int f, int g, f32 t);
 void fn_801E9E30(s16* h, Vec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(Vec3* p);
-void fn_802AE220(ArtPlayer* a, int b);
 void fn_8001DFCC(void);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
                  f32 u1, f32 v1);
@@ -1735,7 +1739,7 @@ int ZoneMaster::vf5C(int p) {
             vf4C(p);
         }
         if (hud.anim) {
-            fn_802AE220(hud.anim, 0);
+            ((ArtPlayer*)(hud.anim))->Draw(0);
         }
     } else {
         vf4C(p);
@@ -2167,10 +2171,6 @@ void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
 
 extern "C" {
 size_t strlen(const char* s);
-void fn_802ADFF4(ArtPlayer* a, int id);
-void fn_802AE02C(ArtPlayer* a, int id);
-void fn_802AE0B8(ArtPlayer* a, int id);
-void fn_802AE168(ArtPlayer* a);
 char* fn_801308F4(char* buf, s32 size, s32 value);
 int fn_801609C4(int score);
 }
@@ -2241,7 +2241,7 @@ int ZoneHud::Update(CarState* c) {
     }
     switch (state) {
     case 0:
-        fn_802ADFF4(anim, animId);
+        ((ArtPlayer*)(anim))->Start(animId);
         if (strlen(failText)) {
             Show(complete2);
         } else {
@@ -2263,25 +2263,25 @@ int ZoneHud::Update(CarState* c) {
             Play(ringAnim);
         }
         if (i114) {
-            fn_802AE02C(anim, animId);
+            ((ArtPlayer*)(anim))->Pause(animId);
             state = 2;
         }
         break;
     case 2:
         if (b9) {
-            fn_802AE0B8(anim, animId);
+            ((ArtPlayer*)(anim))->Resume(animId);
             Play(outro);
             state = 3;
         }
         break;
     case 3:
         if (i118) {
-            fn_802AE02C(anim, animId);
+            ((ArtPlayer*)(anim))->Pause(animId);
             state = 4;
         }
         break;
     }
-    fn_802AE168(anim);
+    ((ArtPlayer*)(anim))->Update();
     return state != 4;
 }
 
@@ -2797,7 +2797,7 @@ void ZoneHud::Init(void) {
     StrCopyN(totalText, 0x14, "150");
     fn_80130980(timeLeft, 0x14, 2, 15.0f);
     level = fn_80204CF0() + 1;
-    animId = fn_802ADF34(anim, "a_zone_finish.val", b);
+    animId = ((ArtPlayer*)(anim))->Add("a_zone_finish.val", (int)(b));
     timeBonusAnim = fn_80207848("pr_gatechal1.sfx", 1);
     noTimeBonusAnim = fn_80207848("pr_gatechal1_nobonus.sfx", 1);
     ringAnim = fn_80207848("pr_gatechal2.sfx", 1);

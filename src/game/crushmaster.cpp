@@ -6,6 +6,23 @@
 #include "game/common.h"
 #include <stdarg.h>
 
+// Art animation player (artanim.cpp).
+class ArtPlayer {
+public:
+    ArtPlayer(int n);
+    ~ArtPlayer(void);
+    int Add(const char* name, int bindings);
+    void Start(int i);
+    void Pause(int i);
+    void Resume(int i);
+    void StopAll(void);
+    void Update(void);
+    void Draw(int flags);
+
+    void* list;  // offset 0x0
+    f32 t;       // offset 0x4
+};
+
 class RSound;
 extern f32 lbl_8055E3C8;  // time
 
@@ -24,11 +41,6 @@ void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
 int fn_801609C4(int score);                                // grade for a score
-void fn_802ADFF4(void* layout, s32 a);
-void fn_802AE02C(void* layout, s32 a);
-void fn_802AE0B8(void* layout, s32 a);
-void fn_802AE168(void* layout);
-void fn_802AE0E0(void* layout);
 void fn_802ADE60(void* layout, int flag);
 void fn_802ADDD8(void* p, int a);
 s32 fn_80145E70(const char* name);
@@ -83,7 +95,6 @@ static inline Binding Bind(s32 t, const char* n, void* p) {
 
 extern const Binding lbl_802FAA40;
 
-extern "C" s32 fn_802ADF34(void* layout, const char* name, Binding* b);
 
 const char* GetGradeDisplayName(int grade);
 void* operator new(size_t size, const char* tag);
@@ -934,7 +945,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
         }
         switch (state) {
         case 0:
-            fn_802ADFF4(layout, fF4);
+            ((ArtPlayer*)(layout))->Start(fF4);
             if (strlen(complete)) {
                 PlayIdle(s2C);
             } else {
@@ -956,27 +967,27 @@ void CrushResults::Update(int score, int kills, int bonus) {
                 Play(s1C);
             }
             if (f100) {
-                fn_802AE02C(layout, fF4);
+                ((ArtPlayer*)(layout))->Pause(fF4);
                 state = 2;
             }
             break;
         case 2:
             if (b9) {
-                fn_802AE0B8(layout, fF4);
+                ((ArtPlayer*)(layout))->Resume(fF4);
                 Play(s24);
                 state = 3;
             }
             break;
         case 3:
             if (f104) {
-                fn_802AE02C(layout, fF4);
+                ((ArtPlayer*)(layout))->Pause(fF4);
                 state = 4;
             }
             break;
         case 4:
             break;
         }
-        fn_802AE168(layout);
+        ((ArtPlayer*)(layout))->Update();
     }
 }
 
@@ -1073,7 +1084,7 @@ inline void CrushResults::Reset(void) {
     f100 = 0;
     f104 = 0;
     if (layout) {
-        fn_802AE0E0(layout);
+        ((ArtPlayer*)(layout))->StopAll();
     }
     Stop(sBonus);
     Stop(sNoBonus);
@@ -1108,7 +1119,7 @@ void CrushResults::Load(void) {
     StrCopyN(finalScore, "150", 0x14);
     fn_80130980(timeBonus, 0x14, 2, 75.0f);
     fF0 = fn_80204CF0() + 1;
-    fF4 = fn_802ADF34(layout, "a_crush_finish.val", b);
+    fF4 = ((ArtPlayer*)(layout))->Add("a_crush_finish.val", (int)(b));
     sBonus = fn_80207848("pr_crushchal1.sfx", 1);
     sNoBonus = fn_80207848("pr_crushchal1_nobonus.sfx", 1);
     s1C = fn_80207848("pr_crushchal2.sfx", 1);
@@ -1145,7 +1156,6 @@ void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
 f32 fn_80147204(TextElem* e, const char* text);
 s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
-void fn_802AE220(void* layout, int a);
 void fn_802AE118(void* layout);
 void fn_8001DFCC(void);
 void fn_80139318(ILayout* l, s32 tex, int car, f32 size);  // radar
@@ -1551,7 +1561,7 @@ int CrushMaster::vf5C(int p) {
             vf4C(p);
         }
         if (results.layout) {
-            fn_802AE220(results.layout, 0);
+            ((ArtPlayer*)(results.layout))->Draw(0);
         }
     }
     if (vf68()) {
