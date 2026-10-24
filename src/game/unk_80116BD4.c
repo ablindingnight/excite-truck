@@ -873,7 +873,6 @@ s32 fn_80118F78(StreamPlayer *p, s32 arg1) {
 }
 
 // Stops (arg1 == 0) or restarts every track; when a stop empties the tracks their rings are reset.
-// Stops (arg1 == 0) or restarts every track; when a stop empties the tracks their rings are reset.
 s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
     s32 any = 0;
     s32 locked;
@@ -887,7 +886,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
                     locked = 1;
                     fn_8011C274(lbl_8055DED4, p->queue);
                 }
-                r = p->tracks[i].Run(&p->tracks[i], arg1 != 0);
+                r = p->tracks[i].Run(&p->tracks[i], arg1 ? 1 : 0);
                 if (r != 0) {
                     any = 1;
                 }
@@ -1290,14 +1289,18 @@ void fn_80119D40(void *arg0) {
     }
 }
 
-void *fn_8011A168(void *arg0) {
-    s32 *src = (s32 *)arg0;
-    if (arg0 == NULL) {
+typedef struct StreamAllocator {
+    void *(*alloc)(u32 size);
+    void (*free)(void *p);
+} StreamAllocator;
+
+// Installs the sample buffer allocator (0 clears it); returns the stream decode callback.
+void *fn_8011A168(StreamAllocator *allocator) {
+    if (allocator == NULL) {
         lbl_8055DEE0[0] = 0;
         lbl_8055DEE0[1] = 0;
     } else {
-        lbl_8055DEE0[0] = src[0];
-        lbl_8055DEE4 = src[1];
+        *(StreamAllocator *)lbl_8055DEE0 = *allocator;
     }
     return &fn_80119DD0;
 }
