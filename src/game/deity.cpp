@@ -308,7 +308,7 @@ void fn_8018B0D0(DCar* car, int mode);
 RaceInfo* fn_801769CC(void);
 RaceSetup* fn_801769D8(void);
 int fn_801769F8(void);
-int fn_80179630(void);
+int fn_80179630(int view);  // car of a local player
 int fn_800081F0(RaceInfo* r);
 DMaster* fn_801B83A0(void);
 DAI* fn_8013C9F4(int a);
@@ -543,7 +543,7 @@ int fn_801B0E40(int i, s32* place) {
     return 1;
 }
 
-IdealPoint* fn_801B0F18(void) { return lbl_8055E684[fn_80179630()].racing.seg; }
+IdealPoint* fn_801B0F18(int view) { return lbl_8055E684[fn_80179630(view)].racing.seg; }
 
 int fn_801B0F48(u32 a, u32 b) {
     u32 d = b - a;
@@ -576,9 +576,9 @@ void fn_801B0F70(int i, s32 place) {
     if (!isPlayer) {
         if (fn_801B0E40(i, &place)) {
             int near = 0;
-            u32 il = fn_801B0F18()->ilpos;
+            u32 il = fn_801B0F18(0)->ilpos;
             IdealPoint* s = p.seg;
-            while (!fn_801B06D8(&s->pos, &s->dir)) {
+            while (fn_801B06D8(&s->pos, &s->dir)) {
                 if (fn_801B0F48(s->ilpos, il)) {
                     near = 1;
                     break;
