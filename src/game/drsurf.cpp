@@ -968,7 +968,7 @@ void fn_802D6594(u8* s) {
     }
 }
 
-void fn_802D65F8(Surf* s, u32 base) {
+void fn_802D65F8(Surf* s, u32 base, const char* name) {
     fn_802D63FC(s, base);
     Swap32((u8*)s + 0x2C);
     Swap32((u8*)s + 0x30);
@@ -1086,8 +1086,9 @@ void fn_802D6B7C(Surf* s) { fn_802D6170(s); }
 
 void fn_802D6B80(Surf* s, u32 base, const char* name) {
     Swap32((u8*)s);
-    if (fn_802D62E4(s)) {
-        fn_802D65F8(s, base);
+    Surf* t = fn_802D62E4(s);
+    if (t) {
+        fn_802D65F8(t, base, name);
     } else {
         char type[5];
         *(u32*)type = s->magic;
