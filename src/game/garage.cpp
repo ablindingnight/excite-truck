@@ -306,13 +306,10 @@ int fn_8024EC3C(void) {
     if (fn_80129800(fn_802E4A10(), 5) && fn_80129800(fn_802E4A10(), 6)) {
         ok = 1;
     }
-    if (!ok) {
-        if (((VList*)PTR(lbl_8055F2EC, 0xD0))->v1C(U32(lbl_8055F2EC, 0x2C))) {
-            return 1;
-        }
-    } else {
-        fn_80216D28();
+    if (ok || ((VList*)PTR(lbl_8055F2EC, 0xD0))->v1C(U32(lbl_8055F2EC, 0x2C))) {
+        return 1;
     }
+    fn_80216D28();
     fn_80214D50(1);
     return 0;
 }
