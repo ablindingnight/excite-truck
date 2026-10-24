@@ -21,6 +21,10 @@ struct IVec2 {
     f32 y;
 };
 
+static inline IVec2 XZ(const IVec3& v) { return IVec2(v.x, v.z); }
+
+static inline IVec2 operator-(const IVec2& a, const IVec2& b) { return IVec2(a.x - b.x, a.y - b.y); }
+
 struct IMtx {
     u32 w[12];
 };
@@ -726,7 +730,169 @@ void fn_801C4CE8(int k) {
     }
 }
 
-void fn_801C56AC(void) {}
+// The parts of a car body the AI orders read.
+struct ICar {
+    u8 pad0[0x3C];
+    IVec3 side;  // offset 0x3C
+    u8 pad48[0xC];
+    IVec3 fwd;   // offset 0x54
+    IVec3 pos;   // offset 0x60
+    u8 pad6C[0x128 - 0x6C];
+    f32 yawRate;  // offset 0x128
+    u8 pad12C[0x25D4 - 0x12C];
+    f32 speed;  // offset 0x25D4
+};
+
+// One car's standing AI order, set by think events: 0 = none, 1 = follow the line, 2 = drive to a point,
+// 3 = follow a car, 4 = follow a car along the line, 5 = drive a donut.
+struct AIOrder {
+    s32 kind;   // offset 0x0
+    s32 param;  // offset 0x4: cars ahead to follow
+    f32 speed;  // offset 0x8
+    f32 x;      // offset 0xC
+    f32 z;      // offset 0x10
+};
+
+// Motion targets for the gas/brake controller (catchup).
+struct IMotion {
+    f32 p1, v1, a1;
+    f32 p2, v2, a2;
+};
+
+class ILineFollower {
+public:
+    void Update(IVec2* p);
+};
+
+class IRacer {
+public:
+    virtual void v00(void);
+    virtual void v04(void);
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual ILineFollower* Follower(void);  // 0x18
+};
+
+extern AIOrder lbl_80437E30[20];
+
+extern "C" {
+IRacer* fn_801B2ED0(int i);
+void fn_8018ADAC(ICar* car, f32 v);  // steer
+void fn_8018ADB4(ICar* car, f32 v);  // gas
+void fn_8018ADBC(ICar* car, f32 v);  // brake
+void fn_8018ADC4(ICar* car, f32 v);
+void fn_8018ADCC(ICar* car, f32 v);
+void fn_8018ADEC(ICar* car);
+void fn_80135B9C(ILineFollower* f, f32 d, IVec2* outPos, IVec2* outDir, f32* outSpeed, void* outIl);
+f32 fn_80139030(IMotion* m);
+f32 PSVECDotProduct(const IVec3* a, const IVec3* b);
+}
+
+static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return Max(Min(hi, v), lo); }
+static inline f32 ClampSigned(f32 v) { return Clamp(v, -1.0f, 1.0f); }
+static inline f32 Clamp01(f32 v) { return Clamp(v, 0.0f, 1.0f); }
+
+// Drives the AI cars by their standing orders while an interlude runs.
+void fn_801C56AC(void) {
+    if (lbl_8055E7E2) {
+        AIOrder* o = lbl_80437E30;
+        for (int i = 0; i < 8; i++, o++) {
+            ICar* car = (ICar*)fn_8017960C(i);
+            if (!car) {
+                return;
+            }
+            f32 speed = o->speed;
+            fn_8018ADCC(car, 0.0f);
+            fn_8018ADC4(car, 1.0f);
+            fn_8018ADEC(car);
+            fn_8018ADAC(car, 0.0f);
+            ILineFollower* line = fn_801B2ED0(i)->Follower();
+            IVec2 pos;
+            pos.x = car->pos.x;
+            pos.y = car->pos.z;
+            line->Update(&pos);
+            if (o->kind != 5 && o->kind != 0) {
+                int ahead = 1;
+                IVec2 tgt(0.0f, 0.0f);
+                if (o->param > 1) {
+                    ahead = o->param;
+                }
+                ICar* lead = (ICar*)fn_8017960C((i + lbl_8055E804 - ahead) % lbl_8055E804);
+                if (o->kind == 2) {
+                    tgt.x = o->x;
+                    tgt.y = o->z;
+                } else if (o->kind == 1 || o->kind == 4) {
+                    f32 d = o->z;
+                    if (5.0f > d) {
+                        d = 5.0f;
+                    }
+                    IVec2 dir;
+                    fn_80135B9C(line, d, &tgt, &dir, 0, 0);
+                    f32 k = o->x;
+                    tgt.x += dir.x * k;
+                    tgt.y += dir.y * k;
+                } else {
+                    tgt.x = lead->pos.x;
+                    tgt.y = lead->pos.z;
+                    IVec2 side(car->side.x, car->side.z);
+                    f32 k = o->x;
+                    tgt.x += side.x * k;
+                    tgt.y += side.y * k;
+                }
+                tgt.x -= pos.x;
+                tgt.y -= pos.y;
+                IVec3 to;
+                to.x = tgt.x;
+                to.y = 0.0f;
+                to.z = tgt.y;
+                fn_8018ADAC(car, ClampSigned(0.1f * PSVECDotProduct(&to, &car->side) + 0.9f * -car->yawRate));
+                if (o->kind == 3 || o->kind == 4) {
+                    IVec3 rel;
+                    rel.x = lead->pos.x - car->pos.x;
+                    rel.y = lead->pos.y - car->pos.y;
+                    rel.z = lead->pos.z - car->pos.z;
+                    f32 gap = PSVECDotProduct(&rel, &car->fwd) - o->z;
+                    f32 a = 0.5f + (o->speed - car->speed);
+                    IMotion m;
+                    m.p2 = 0.0f;
+                    m.v2 = lead->speed;
+                    m.a2 = 0.0f;
+                    m.p1 = -gap;
+                    m.v1 = car->speed;
+                    m.a1 = a;
+                    f32 r = fn_80139030(&m);
+                    fn_8018ADB4(car, Clamp01(10.0f * r));
+                    fn_8018ADBC(car, Clamp01(-r));
+                    f32 base = lead->speed + 0.5f * (o->speed - lead->speed);
+                    if (gap > 0.0f) {
+                        speed = base + 0.5f * (gap * o->speed);
+                    } else {
+                        speed = base + 2.0f * (gap * o->speed);
+                    }
+                }
+            }
+            if (o->kind == 5) {
+                fn_8018ADB4(car, 1.0f);
+                fn_8018ADBC(car, 0.0f);
+                fn_8018ADAC(car, ClampSigned(o->x));
+            } else if (o->kind != 3 && o->kind != 4) {
+                f32 cur = car->speed;
+                if (!((f32)__fabs(speed) <= lbl_80558DC4[0])) {
+                    fn_8018ADB4(car, Clamp01(0.5f * (speed - cur)));
+                    fn_8018ADBC(car, Clamp01(0.5f * (cur - speed)));
+                } else {
+                    fn_8018ADB4(car, 0.0f);
+                    fn_8018ADBC(car, 1.0f);
+                }
+            }
+            fn_8018ADCC(car, 0.0f);
+            fn_8018ADC4(car, 1.0f);
+            fn_8018ADEC(car);
+        }
+    }
+}
 
 u8 fn_801C5B60(void) { return lbl_8055E7E2; }
 
@@ -1035,10 +1201,6 @@ void fn_801C7BA0(void) {
     strcpy(lbl_80438380, "");
     fn_801C957C(0);
 }
-
-static inline IVec2 XZ(const IVec3& v) { return IVec2(v.x, v.z); }
-
-static inline IVec2 operator-(const IVec2& a, const IVec2& b) { return IVec2(a.x - b.x, a.y - b.y); }
 
 // The signed angle from a to b (both normalised first unless already unit length).
 static inline f32 Angle(const IVec2& a, const IVec2& b) {
