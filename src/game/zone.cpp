@@ -519,10 +519,14 @@ struct GateHit {
     f32 dist;
 };
 
-class ArtAnimManager {
+// Plays a list of art animations (artanim.cpp); allocated with the "ArtAnimManager" tag.
+class ArtPlayer {
 public:
-    ArtAnimManager(int n);
-    ~ArtAnimManager(void);
+    ArtPlayer(int n);
+    ~ArtPlayer(void);
+
+    void* list;  // offset 0x0
+    f32 t;       // offset 0x4
 };
 
 // Result panel animation item.
@@ -538,7 +542,7 @@ public:
 };
 
 extern "C" const char* fn_80131234(const char* key);
-extern "C" void fn_802AE0E0(ArtAnimManager* a);
+extern "C" void fn_802AE0E0(ArtPlayer* a);
 
 static inline void StrCopyN(char* d, int n, const char* s) {
     while ((*d++ = *s++) != 0) {
@@ -661,7 +665,7 @@ struct ZoneHud {
     u8 b8;      // offset 0x8
     u8 b9;      // offset 0x9
     u8 padA[0x2];
-    ArtAnimManager* anim;  // offset 0xC (0x140)
+    ArtPlayer* anim;  // offset 0xC (0x140)
     u8 noBonus;            // offset 0x10
     u8 pad11[0x3];
     Sound* timeBonusAnim;    // offset 0x14
@@ -1605,7 +1609,7 @@ void fn_802A9BFC(Vec3* a, Vec3* b, s32 tex, int d, int e, int f, int g, f32 t);
 void fn_801E9E30(s16* h, Vec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(Vec3* p);
-void fn_802AE220(ArtAnimManager* a, int b);
+void fn_802AE220(ArtPlayer* a, int b);
 void fn_8001DFCC(void);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
                  f32 u1, f32 v1);
@@ -2163,10 +2167,10 @@ void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
 
 extern "C" {
 size_t strlen(const char* s);
-void fn_802ADFF4(ArtAnimManager* a, int id);
-void fn_802AE02C(ArtAnimManager* a, int id);
-void fn_802AE0B8(ArtAnimManager* a, int id);
-void fn_802AE168(ArtAnimManager* a);
+void fn_802ADFF4(ArtPlayer* a, int id);
+void fn_802AE02C(ArtPlayer* a, int id);
+void fn_802AE0B8(ArtPlayer* a, int id);
+void fn_802AE168(ArtPlayer* a);
 char* fn_801308F4(char* buf, s32 size, s32 value);
 int fn_801609C4(int score);
 }
@@ -2289,7 +2293,7 @@ void fn_801CB5DC(int car, int score, int grade);
 void fn_801CB648(int car, int a, f32 t);
 void* fn_80178C9C(void);
 void* fn_802C6C34(int id);
-void fn_802AE118(ArtAnimManager* a);
+void fn_802AE118(ArtPlayer* a);
 int fn_80204CF0(void);
 void* fn_80156A40(void);
 void fn_801352B8(void* it);
@@ -2753,7 +2757,7 @@ f32 ZoneMaster::vf38(void) { return 7.75f; }
 int ZoneMaster::vf64(void) { return 1; }
 
 void ZoneMaster::vfF8(void) {
-    hud.anim = new ("ArtAnimManager") ArtAnimManager(1);
+    hud.anim = new ("ArtAnimManager") ArtPlayer(1);
     hud.Init();
     hud.Reset();
 }
