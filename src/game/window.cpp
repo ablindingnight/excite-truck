@@ -737,14 +737,23 @@ void fn_80218574(Window* win) {
             style = s;
             fn_8022ED00(&win->styles[s]);
         }
+        f32 al = Alpha(wd);
         pushed = 0;
-        if (Alpha(wd) < 0.9f && win->fadeStyle) {
+        if (al < 0.9f && win->fadeStyle) {
             Style tmp;
             f32 a;
             pushed = 1;
             tmp = *fn_8022EDC4();
             a = Alpha(wd);
-            win->fadeStyle(&tmp, wd->mask, wd->x, wd->y, wd->Height(), wd->bottom - wd->y, 0, a);
+            {
+                s32 x;
+                u32 mask;
+                s32 y;
+                y = wd->y;
+                x = wd->x;
+                mask = wd->mask;
+                win->fadeStyle(&tmp, mask, x, y, wd->Height(), wd->bottom - y, 0, a);
+            }
             fn_8022ED00(&tmp);
         }
         wd->Draw();
