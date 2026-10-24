@@ -196,32 +196,31 @@ void fn_802E8920(s32 size) {
     u32 answer = 0;
     s32 r = NANDCheck((size + 0x3FFF) / 0x4000 + 4, 2, &answer);
     if (r == 0) {
-        for (;;) {
-            if (answer & 1) {
-                fn_802E30C8("rmemcard: exceeded maximum file size in home dir");
+    retry:
+        if (answer & 1) {
+            fn_802E30C8("rmemcard: exceeded maximum file size in home dir");
+        }
+        if (answer & 2) {
+            fn_802E30C8("rmemcard: exceeded maximum files/directories in home dir");
+        }
+        if (answer & 0xF) {
+            int which = 3;
+            if (answer & 5) {
+                which = 2;
             }
-            if (answer & 2) {
-                fn_802E30C8("rmemcard: exceeded maximum files/directories in home dir");
+            if (fn_802E888C(which)) {
+                fn_802E8918();
+                return;
             }
-            if (answer & 0xF) {
-                int which = 3;
-                if (answer & 5) {
-                    which = 2;
-                }
-                if (fn_802E888C(which)) {
-                    fn_802E8918();
-                    return;
-                }
-                if (fn_802E88D8()) {
-                    return;
-                }
-            } else {
-                if (fn_802E888C(7)) {
-                    return;
-                }
-                if (fn_802E88D8()) {
-                    return;
-                }
+            if (!fn_802E88D8()) {
+                goto retry;
+            }
+        } else {
+            if (fn_802E888C(7)) {
+                return;
+            }
+            if (!fn_802E88D8()) {
+                goto retry;
             }
         }
     } else {
