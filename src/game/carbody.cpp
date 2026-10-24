@@ -493,8 +493,8 @@ extern f32 lbl_80561CAC, lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC,
     lbl_80561F0C, lbl_80561F10, lbl_80561F14, lbl_80561F18;
 
 // Registers the body's tunables (mass, moments, power, geometry, springs, damping, tires) with a tuning
-// menu. Matched by the upstream project (orangedude27/excite-truck) with register pinning and these
-// scheduling pragmas (a matching aid, not original source).
+// menu. Matched by the upstream project (orangedude27/excite-truck).
+// MATCHING-AID: register pinning + scheduling/opt_propagation pragmas, not original source. Revisit.
 #pragma push
 #pragma scheduling invalid_target
 #pragma opt_propagation off
