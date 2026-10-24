@@ -20,6 +20,16 @@ the original author.
   branch rebuilds the game and verifies the DOL's SHA-1 against the original before it is accepted.
 - Contact: Discord `ablindingnight`.
 
+### Progress
+
+Exact matches only (objdiff `report.json`), as of 2026-10-24:
+
+| | Exactly matched code | Functions |
+| :--- | :--- | :--- |
+| **Whole game** | 59.5% (1,814,128 / 3,050,236 bytes) | 11,908 / 13,779 (86.4%) |
+| Excite Truck's own code | 44.0% (893,664 / 2,030,956 bytes) | 8,388 / 10,141 |
+| Nintendo SDK libraries | 95.8% (920,464 / 961,052 bytes) | 3,520 / 3,560 |
+
 ### Goals
 
 - A 100% matching decompilation: every function compiles back to the original bytes.
