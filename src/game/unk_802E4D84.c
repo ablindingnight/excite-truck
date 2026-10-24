@@ -1,3 +1,5 @@
+#include <revolution/AX/AXPB.h>
+
 // Code 0x802E4D84-0x802E6B48, imported verbatim from the upstream project (github.com/orangedude27/excite-truck,
 // CC0; file src/auto/text_802E4D84_.c), where its functions match exactly. Unit name is provisional.
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
@@ -36,8 +38,8 @@ typedef struct DSPADPCMHeader {
 typedef struct SpuSample {
     char name[0x20];
     int locked;           // 0x20
-    unsigned char adpcm;  // 0x24
-    unsigned char loop;   // 0x25
+    bool adpcm;           // 0x24
+    bool loop;            // 0x25
     DSPADPCMHeader adpcmInfo; // 0x28
     int (*fill)(void *dst, int size, int arg); // 0x88 streaming samples: refills the buffer
     int fillArg;          // 0x8C
@@ -94,7 +96,7 @@ typedef struct SpuVoice {
 #define SPU_VOICE_TABLE ((SpuVoice *)SPU_VOICES)
 
 extern char lbl_8055FFB5;
-extern void *lbl_8055FF8C;
+extern int lbl_8055FF8C;  // output mode: 0/1 stereo, 2 surround
 extern float lbl_80565128;
 extern float lbl_8056512C;
 extern float lbl_80565130;
@@ -109,7 +111,7 @@ extern void fn_802E2E0C(void *arg0, void *arg1);
 extern int TRKReadBuffer_ui32(void);
 extern float fn_802E9A2C(void);
 extern void fn_80060CC0(int, int, void (*)());
-extern void fn_802E30C8(char *, int, char *, ...);
+extern void fn_802E30C8(const char *fmt, ...);  // Spu report
 extern void fn_802E5248(int, int);
 extern void fn_802E51D0();
 __declspec(section ".sdata") extern char lbl_8055D1D8[];
@@ -130,7 +132,7 @@ extern int sprintf(char *, const char *, ...);
 extern char lbl_8034D490[];
 extern char lbl_8034D4A0[];
 extern char lbl_8034D5B0[];
-extern void fn_802E317C(char *, int, void *, ...);
+extern void fn_802E317C(const char *fmt, ...);  // Spu warning
 extern int lbl_8055FF98;
 extern char lbl_8034D584[];
 extern char lbl_8034D528[];
@@ -141,6 +143,15 @@ extern void fn_8012BF24(void *);
 extern void *memcpy(void *, const void *, unsigned int);
 extern void DCFlushRange(void *, unsigned int);
 extern void DCInvalidateRange(void *, unsigned int);
+extern void __dla__FPv(void *);
+extern char lbl_804FC690[];  // the Spu alarm
+extern void *lbl_8055FFB0;
+extern unsigned int lbl_8055FF84;  // ARAM buffer size
+extern char lbl_8034D210[];  // the Spu's message strings
+extern void fn_801282EC(int align);
+extern void fn_801282F4(void);
+extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator new[](size, tag)
+extern float lbl_80565138;
 extern int OSDisableInterrupts(void);
 // Copies `size` bytes to "ARAM" (main memory here) and flushes them.
 void fn_802E4D84(void *dst, void *src, int size, int dir) {
@@ -190,7 +201,7 @@ SpuSampleRes *fn_802E4DC8(char *name) {
     res = (SpuSampleRes *)fn_8012C370(name, 'SFX0', &version, 0, &first, &swapped);
     if (res != 0) {
         if (version != 3) {
-            ((void (*)(char *, ...))fn_802E317C)(lbl_8034D280, name, version, 3);
+            fn_802E317C(lbl_8034D280, name, version, 3);
         }
         if (swapped) {
             Swap32(&res->size);
@@ -222,9 +233,9 @@ typedef struct SpuAdpcmLoop {
     unsigned short yn2;
 } SpuAdpcmLoop;
 
-extern char lbl_8055FFA4;
+extern unsigned char lbl_8055FFA4;
 extern unsigned char lbl_8055FFA6;
-extern char lbl_8055FFB4;
+extern unsigned char lbl_8055FFB4;
 extern int fn_802D9BF0(void);
 extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
 
@@ -370,17 +381,90 @@ void fn_802E5438(void) {
     }
 }
 
-extern char lbl_804FC690[];  // the Spu alarm
+extern void *lbl_8055FF7C;
+extern void *lbl_8055FF80;
+extern int lbl_8055FF88;  // ARAM address of the zero area
+__declspec(section ".sdata") extern char lbl_8055D1E0[];
+extern void *fn_801284E8(const char *tag, unsigned int size);
+extern void DCInvalidateRange(void *, unsigned int);
+extern void AIInit(void *);
+extern void AXInit(void);
+extern void AXSetMode(int);
+extern void *AXAcquireVoice(int priority, void *callback, int context);
+extern void AXSetVoiceState(void *vpb, int state);
+extern void AXSetVoiceType(void *vpb, int type);
+extern void AXRegisterCallback(void (*)(void));
+extern void fn_802E6B04(void);
+extern void OSCreateAlarm(void *);
+extern long long OSGetTime(void);
+extern void OSSetPeriodicAlarm(void *alarm, long long start, long long period, void (*handler)());
+extern void fn_802E4F98(void);
+extern void fn_802E52EC(void);
+
+#define OS_BUS_CLOCK (*(unsigned int *)0x800000F8)
+#define OS_TIMER_CLOCK (OS_BUS_CLOCK / 4)
+#define OSNanosecondsToTicks(nsec) (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
+
+// Starts the Spu: takes an ARAM buffer, starts AI/AX, allocates the sample, voice and cache tables, acquires the
+// 32 voices, clears the zero area at the end of ARAM, and starts the refill callback and the 150 Hz alarm.
+void fn_802E5478(void) {
+    char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
+    int i;
+    void *vpb;
+    void *zero;
+
+    fn_802E30C8(msg + 0x1BC);
+    lbl_8055FF8C = 1;
+    lbl_8055FF84 = 0x20000;
+    fn_801282F4();
+    lbl_8055FFB0 = lbl_8055FF7C = lbl_8055FF80 = fn_801284E8(msg + 0x1C8, lbl_8055FF84);
+    DCInvalidateRange(lbl_8055FF80, lbl_8055FF84);
+    fn_802E30C8(msg + 0x1D4, lbl_8055FF80, lbl_8055FF84, lbl_8055FF84 >> 10);
+    AIInit(0);
+    AXInit();
+    AXSetMode(0);
+    lbl_8055FF90 = (unsigned char *)__nwa__FUlPCc(0x100 * 0xB0, msg + 0x1F4);
+    SPU_VOICES = (unsigned char *)__nwa__FUlPCc(0x20 * 0x2C, msg + 0x200);
+    lbl_8055FF9C = (SpuSample **)__nwa__FUlPCc(0x100 * 4, msg + 0x20C);
+    lbl_8055FFA0 = 0;
+    memset(lbl_8055FF90, 0, 0x100 * 0xB0);
+    memset(SPU_VOICES, 0, 0x20 * 0x2C);
+    for (i = 0; i < 0x20; i++) {
+        vpb = AXAcquireVoice(0x1F, 0, 0);
+        if (vpb == 0) {
+            fn_802E317C(msg + 0x218, i);
+        }
+        AXSetVoiceState(vpb, 0);
+        AXSetVoiceType(vpb, 0);
+        SPU_VOICE_TABLE[i].unk0 = i;
+        SPU_VOICE_TABLE[i].vpb = vpb;
+    }
+    lbl_8055FF88 = (int)lbl_8055FF7C + (lbl_8055FF84 - 0x20000);
+    fn_801282EC(0x20);
+    zero = __nwa__FUlPCc(0x20000, msg + 0x234);
+    memset(zero, 0, 0x20000);
+    fn_802E4D84((void *)lbl_8055FF88, zero, 0x20000, 1);
+    __dla__FPv(zero);
+    AXRegisterCallback(fn_802E4F98);
+    fn_802E6B04();
+    OSCreateAlarm(lbl_804FC690);
+    OSSetPeriodicAlarm(lbl_804FC690, OSGetTime(), OSNanosecondsToTicks(6666667), fn_802E52EC);
+    lbl_804FC680[0] = lbl_80565128;
+    lbl_804FC680[1] = lbl_80565128;
+    lbl_804FC680[2] = lbl_80565128;
+    lbl_804FC680[3] = lbl_80565128;
+    fn_802E2E0C(fn_802E540C, lbl_8055D1E0);
+    lbl_8055FFA5 = 1;
+    fn_802E5438();
+}
+
 extern unsigned char lbl_8055FFA5;
-extern int lbl_8055FF84;
-extern void *lbl_8055FFB0;
 extern char lbl_8034D450[];
 extern char lbl_8034D470[];
 extern void OSCancelAlarm(void *);
 extern void AXFreeVoice(void *);
 extern void AXQuit(void);
 extern void AIReset(void);
-extern void __dla__FPv(void *);
 extern void fn_802E6B34(void);
 extern void fn_80128658(void *);
 // Shuts the Spu down: stops its alarm, frees the 32 voices (reporting any still playing), reports samples still
@@ -393,14 +477,14 @@ void fn_802E56F0(void) {
     fn_802E6B34();
     for (i = 0; i < 0x20; i++) {
         if (SPU_VOICES[i * 0x2C + 0x20] != 0) {
-            ((void (*)(char *, ...))fn_802E317C)(lbl_8034D450, *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
+            fn_802E317C(lbl_8034D450, *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
         }
         AXFreeVoice(*(void **)(SPU_VOICES + i * 0x2C + 4));
         *(void **)(SPU_VOICES + i * 0x2C + 4) = 0;
     }
     for (j = 0; j < 0x100; j++) {
         if (*(int *)(lbl_8055FF90 + j * 0xB0 + 0x94) > 0) {
-            ((void (*)(char *, ...))fn_802E317C)(lbl_8034D470, lbl_8055FF90 + j * 0xB0);
+            fn_802E317C(lbl_8034D470, lbl_8055FF90 + j * 0xB0);
         }
     }
     __dla__FPv(SPU_VOICES);
@@ -476,9 +560,9 @@ void fn_802E58B8(unsigned char *arg0) {
 void fn_802E5950(int arg0, int arg1) {
     char name[0x100];
     sprintf(name, lbl_8055D1E4, arg0, arg1);
-    ((void (*)(char *, ...))fn_802E30C8)(lbl_8034D490, name);
+    fn_802E30C8(lbl_8034D490, name);
     if (fn_802E582C(name) == 0) {
-        ((void (*)(char *, ...))fn_802E30C8)(lbl_8034D4A0, name);
+        fn_802E30C8(lbl_8034D4A0, name);
     }
 }
 
@@ -535,7 +619,6 @@ SpuSample *fn_802E5AE8(char *name) {
     float rate;
     unsigned int addr;
     unsigned int size;
-    int adpcm;
     unsigned short magic;
 
     slash = strrchr(name, '/');
@@ -556,14 +639,14 @@ SpuSample *fn_802E5AE8(char *name) {
         }
     }
     if (free < 0) {
-        ((void (*)(char *, ...))fn_802E317C)(msg + 0x2A8, name);
+        fn_802E317C(msg + 0x2A8, name);
     }
     res = fn_802E4DC8(name);
     if (res == 0) {
         return 0;
     }
     if ((magic = res->magic = 0xCFFE) != 0xCFFE) {
-        ((void (*)(char *, ...))fn_802E317C)(msg + 0x2C4, name, magic, 0xCFFE);
+        fn_802E317C(msg + 0x2C4, name, magic, 0xCFFE);
     }
     size = res->size;
     length = (float)(size >> 1) / lbl_80565138;
@@ -576,15 +659,14 @@ SpuSample *fn_802E5AE8(char *name) {
     memset(s, 0, sizeof(SpuSample));
     addr = (unsigned int)res->data;
     if (addr & 0x1F) {
-        ((void (*)(char *, ...))fn_802E317C)(msg + 0x2FC, base, addr);
+        fn_802E317C(msg + 0x2FC, base, addr);
     }
     s->size = size;
     s->refs = 1;
     s->locked = 0;
-    adpcm = res->format == 1;
-    s->adpcm = adpcm;
-    s->loop = res->loop != 0;
-    if (adpcm) {
+    s->adpcm = res->format == 1;
+    s->loop = res->loop;
+    if (s->adpcm) {
         memcpy(&s->adpcmInfo, &res->adpcmInfo, sizeof(s->adpcmInfo));
     } else {
         memset(&s->adpcmInfo, 0, sizeof(s->adpcmInfo));
@@ -627,7 +709,7 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
         }
     }
     if (free < 0) {
-        ((void (*)(char *, ...))fn_802E317C)(lbl_8034D554, name);
+        fn_802E317C(lbl_8034D554, name);
     }
     s = &SPU_SAMPLES[free];
     memset(s, 0, sizeof(SpuSample));
@@ -653,7 +735,7 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
 // Free a stream's buffer (warns if channels still use it; the stream's name is at its start).
 void fn_802E5FE4(void *arg0) {
     if (*(int *)((char *)arg0 + 0x98) > 0) {
-        ((void (*)(char *, ...))fn_802E317C)(lbl_8034D584, arg0, *(int *)((char *)arg0 + 0x98));
+        fn_802E317C(lbl_8034D584, arg0, *(int *)((char *)arg0 + 0x98));
     }
     delete[] *(unsigned char **)((char *)arg0 + 0x90);
     *(int *)((char *)arg0 + 0x90) = 0;
@@ -663,7 +745,7 @@ void fn_802E5FE4(void *arg0) {
 // Drops a reference to a cached sample, freeing its data with the last one.
 void fn_802E5D5C(void *arg0) {
     if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
-        ((void (*)(char *, ...))fn_802E317C)(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
+        fn_802E317C(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
     }
     if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
         fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
@@ -750,7 +832,7 @@ void fn_802E61EC(void *arg0, float farg0) {
 }
 
 void fn_802E620C(void *arg0, float farg0) {
-    if ((int)lbl_8055FF8C == 2) {
+    if (lbl_8055FF8C == 2) {
         *(float *)((char *)arg0 + 0x14) = farg0;
         return;
     }
@@ -773,8 +855,250 @@ void fn_802E6248(int arg0, float arg1) {
     lbl_804FC680[arg0] = arg1;
 }
 
-void fn_802E625C(void* hi) {
-    lbl_8055FF8C = hi;
+void fn_802E625C(int mode) {
+    lbl_8055FF8C = mode;
+}
+
+extern int lbl_8055D1D0;  // output mode last applied
+extern int lbl_8055FFAC;
+extern unsigned int lbl_804FC658[10];  // remotes used in each of the last 10 updates
+extern float lbl_8056514C;
+extern float lbl_80565150;
+extern float lbl_80565154;
+extern float lbl_80565158;
+extern int fn_802ECC10(void);
+extern void AXSetVoiceVe(void *vpb, AXPBVE *ve);
+extern void AXSetVoiceAddr(void *vpb, AXPBADDR *addr);
+extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
+extern void AXSetVoiceSrcType(void *vpb, int type);
+extern void AXSetVoiceSrc(void *vpb, AXPBSRC *src);
+extern void AXSetVoiceSrcRatio(void *vpb, float ratio);
+extern void AXSetVoiceMix(void *vpb, AXPBMIX *mix);
+extern void AXSetVoiceRmtOn(void *vpb, int on);
+extern void AXSetVoiceRmtMix(void *vpb, AXPBRMTMIX *mix);
+
+// Per-frame voice update (from the AX callback): applies output-mode changes, stops and starts voices (setting up
+// their addresses for in-memory or streaming PCM16/ADPCM samples), and sets pitch, volume, pan and remote-speaker
+// mixes for playing voices; records which remotes were used over the last 10 frames.
+void fn_802E6264(void) {
+    char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
+    int muted;
+    int level;
+    int i;
+    SpuVoice *v;
+    SpuSample *s;
+    int wasPlaying;
+    unsigned int remotes;
+    unsigned int used;
+    int start;
+    float vol;
+    float left;
+    float right;
+    float front;
+    float back;
+    AXPBVE ve;
+    AXPBSRC src;
+    AXPBADDR addr;
+    AXPBMIX mix;
+    AXPBRMTMIX rmt;
+    AXPBADPCM adpcm;
+    DSPADPCMHeader hdr;
+
+    if (lbl_8055FFA4) {
+        lbl_8055FFA4 = 0;
+        lbl_8055FFA6 = 1;
+        used = 0;
+        if (lbl_8055FF8C != lbl_8055D1D0) {
+            lbl_8055D1D0 = lbl_8055FF8C;
+            fn_802E30C8(msg + 0x3C4);
+            switch (lbl_8055FF8C) {
+            case 0:
+            case 1:
+                AXSetMode(0);
+                break;
+            case 2:
+                AXSetMode(2);
+                break;
+            default:
+                fn_802E317C(msg + 0x3E0);
+                break;
+            }
+        }
+        muted = 1;
+        if (!fn_802ECC10() && !fn_802D9BF0()) {
+            muted = 0;
+        }
+        level = OSDisableInterrupts();
+        for (i = 0; i < 0x20; i++) {
+            v = &SPU_VOICE_TABLE[i];
+            wasPlaying = v->wasPlaying;
+            v->wasPlaying = v->play;
+            if ((wasPlaying && !v->play) || (v->start && !v->startAck)) {
+                AXSetVoiceState(v->vpb, 0);
+                wasPlaying = 0;
+                memset(&ve, 0, sizeof(ve));
+                AXSetVoiceVe(v->vpb, &ve);
+            }
+            if (v->active) {
+                if (v->start && !v->startAck) {
+                    v->startAck = 1;
+                    continue;
+                }
+                if (v->start && v->play) {
+                    v->start = 0;
+                    wasPlaying = 0;
+                    s = v->sample;
+                    if (s->locked == 0 && !s->adpcm) {
+                        AXSetVoiceType(v->vpb, 0);
+                        start = (int)s->addr / 2;
+                        memset(&addr, 0, sizeof(addr));
+                        addr.loopFlag = v->loop;
+                        addr.format = 10;
+                        if (v->loop) {
+                            addr.loopAddressHi = start >> 16;
+                            addr.loopAddressLo = start;
+                        } else {
+                            addr.loopAddressHi = ((int)lbl_8055FF88 / 2) >> 16;
+                            addr.loopAddressLo = (int)lbl_8055FF88 / 2;
+                        }
+                        addr.endAddressHi = (start + (int)s->size / 2 - 1) >> 16;
+                        addr.endAddressLo = start + (int)s->size / 2 - 1;
+                        addr.currentAddressHi = start >> 16;
+                        addr.currentAddressLo = start;
+                        AXSetVoiceAddr(v->vpb, &addr);
+                    } else if (s->locked == 0 && s->adpcm) {
+                        AXSetVoiceType(v->vpb, 0);
+                        start = s->addr * 2 + 2;
+                        memset(&addr, 0, sizeof(addr));
+                        addr.loopFlag = v->loop;
+                        addr.format = 0;
+                        if (v->loop) {
+                            addr.loopAddressHi = (start + s->adpcmInfo.loopStart) >> 16;
+                            addr.loopAddressLo = start + s->adpcmInfo.loopStart;
+                        } else {
+                            addr.loopAddressHi = ((unsigned int)lbl_8055FF88 * 2 + 2) >> 16;
+                            addr.loopAddressLo = (unsigned int)lbl_8055FF88 * 2 + 2;
+                        }
+                        addr.endAddressHi = (start + s->adpcmInfo.loopEnd - 2) >> 16;
+                        addr.endAddressLo = start + s->adpcmInfo.loopEnd - 2;
+                        addr.currentAddressHi = start >> 16;
+                        addr.currentAddressLo = start;
+                        memset(&adpcm, 0, sizeof(adpcm));
+                        memcpy(adpcm.a, s->adpcmInfo.coef, sizeof(adpcm.a));
+                        adpcm.gain = s->adpcmInfo.gain;
+                        adpcm.pred_scale = s->adpcmInfo.predScale;
+                        adpcm.yn1 = s->adpcmInfo.yn1;
+                        adpcm.yn2 = s->adpcmInfo.yn2;
+                        AXSetVoiceAddr(v->vpb, &addr);
+                        AXSetVoiceAdpcm(v->vpb, &adpcm);
+                    } else if (s->locked == 1 && !s->adpcm) {
+                        AXSetVoiceType(v->vpb, 0);
+                        start = (int)s->addr / 2;
+                        memset(&addr, 0, sizeof(addr));
+                        addr.loopFlag = 1;
+                        addr.format = 10;
+                        addr.loopAddressHi = start >> 16;
+                        addr.loopAddressLo = start;
+                        addr.endAddressHi = (start + (s->size >> 1) - 1) >> 16;
+                        addr.endAddressLo = start + (s->size >> 1) - 1;
+                        addr.currentAddressHi = start >> 16;
+                        addr.currentAddressLo = start;
+                        AXSetVoiceAddr(v->vpb, &addr);
+                        s->rate = lbl_8056514C;
+                    } else if (s->locked == 1) {
+                        AXSetVoiceType(v->vpb, 1);
+                        start = s->addr * 2 + 2;
+                        memset(&addr, 0, sizeof(addr));
+                        addr.loopFlag = 1;
+                        addr.format = 0;
+                        addr.loopAddressHi = start >> 16;
+                        addr.loopAddressLo = start;
+                        addr.endAddressHi = (start + s->size * 2 - 3) >> 16;
+                        addr.endAddressLo = start + s->size * 2 - 3;
+                        addr.currentAddressHi = start >> 16;
+                        addr.currentAddressLo = start;
+                        memset(&hdr, 0, sizeof(hdr));
+                        s->fill(&hdr, sizeof(hdr), s->fillArg);
+                        s->rate = (float)hdr.sampleRate / lbl_80565138;
+                        s->fill(s->data, s->size, s->fillArg);
+                        DCFlushRange(s->data, s->size);
+                        AXSetVoiceAddr(v->vpb, &addr);
+                        memset(&adpcm, 0, sizeof(adpcm));
+                        memcpy(adpcm.a, hdr.coef, sizeof(adpcm.a));
+                        adpcm.gain = hdr.gain;
+                        adpcm.pred_scale = hdr.predScale;
+                        adpcm.yn1 = hdr.yn1;
+                        adpcm.yn2 = hdr.yn2;
+                        AXSetVoiceAdpcm(v->vpb, &adpcm);
+                    } else {
+                        fn_802E317C(msg + 0x3F8);
+                    }
+                    memset(&src, 0, sizeof(src));
+                    src.ratioHi = 1;
+                    src.ratioLo = 0;
+                    src.currentAddressFrac = 0;
+                    AXSetVoiceSrcType(v->vpb, 1);
+                    AXSetVoiceSrc(v->vpb, &src);
+                }
+                if (v->play) {
+                    AXSetVoiceSrcRatio(v->vpb, muted ? lbl_8056512C : v->sample->rate * (lbl_80565150 * v->pitch));
+                    memset(&ve, 0, sizeof(ve));
+                    vol = v->volume;
+                    if (vol > lbl_80565128) {
+                        vol = lbl_80565128;
+                    }
+                    ve.currentVolume = lbl_80565154 * (lbl_80565158 * vol);
+                    ve.currentDelta = 0;
+                    if (muted) {
+                        ve.currentVolume = 0;
+                    }
+                    AXSetVoiceVe(v->vpb, &ve);
+                    memset(&mix, 0, sizeof(mix));
+                    left = lbl_80565128 - v->pan;
+                    left = left < lbl_80565128 ? left : lbl_80565128;
+                    right = lbl_80565128 + v->pan;
+                    right = right < lbl_80565128 ? right : lbl_80565128;
+                    front = lbl_80565128 + v->depth;
+                    front = front < lbl_80565128 ? front : lbl_80565128;
+                    back = lbl_80565128 - v->depth;
+                    back = back < lbl_80565128 ? back : lbl_80565128;
+                    mix.vL = lbl_80565158 * (left * front);
+                    mix.vR = lbl_80565158 * (right * front);
+                    mix.vS = lbl_80565158 * (left * back);
+                    mix.vAuxCL = lbl_80565158 * (right * back);
+                    AXSetVoiceMix(v->vpb, &mix);
+                    remotes = v->remotes;
+                    used |= remotes;
+                    if (remotes) {
+                        AXSetVoiceRmtOn(v->vpb, 1);
+                    } else {
+                        AXSetVoiceRmtOn(v->vpb, 0);
+                    }
+                    memset(&rmt, 0, sizeof(rmt));
+                    if (remotes & 1) {
+                        rmt.vMain0 = rmt.vAux0 = fn_802E5168(lbl_804FC680[0] * v->volume);
+                    }
+                    if (remotes & 2) {
+                        rmt.vMain1 = rmt.vAux1 = fn_802E5168(lbl_804FC680[1] * v->volume);
+                    }
+                    AXSetVoiceRmtMix(v->vpb, &rmt);
+                }
+                if (v->play && !wasPlaying) {
+                    AXSetVoiceState(v->vpb, 1);
+                }
+            }
+        }
+        OSRestoreInterrupts(level);
+        lbl_804FC658[lbl_8055FFAC++] = used;
+        if (lbl_8055FFAC >= 10) {
+            lbl_8055FFAC = 0;
+        }
+        for (i = 0; i < 10; i++) {
+            used |= lbl_804FC658[i];
+        }
+        lbl_8055FFA8 = used;
+        lbl_8055FFA6 = 0;
+    }
 }
 
 int* fn_802E6ABC(void) {
