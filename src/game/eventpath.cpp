@@ -501,7 +501,7 @@ int fn_8027BAB8(Path* p) {
 void fn_8027BB4C(int difficulty, s32* total, s32* max, int clamp) {
     s32 sum = 0;
     s32 most = 0;
-    Path* p = fn_8027B834(0);
+    Path* p = fn_8027B834(difficulty);
     for (int i = 0; i < p->Count(); i++) {
         Bracket* b = p->Get(i);
         for (int j = 0; j < b->Count(); j++) {
