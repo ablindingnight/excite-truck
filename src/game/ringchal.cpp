@@ -1819,19 +1819,21 @@ void RingChalMaster::vfFC(void) {
     delete layout;
 }
 
+static inline int Stopped(f32 speed) { return NearZeroF(speed); }
+
 int RingChalMaster::vfE0(int car, u8* out) {
     int r = 0;
     f32 now = lbl_8055E3C8;
     if (now > vf38() && !arena.b48) {
-        if (NearZeroF(fn_8017960C(players.data[car]->index)->speed)) {
+        if (Stopped(fn_8017960C(players.data[car]->index)->speed)) {
             PlayerData* p = players.data[car];
             if (arena.curSet < arena.nFiles) {
                 ObjSet* s = &arena.sets->data[arena.curSet];
                 if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
                     RaceCarRec* c = fn_8017960C(p->index);
                     ObjTeleport* t = &s->teles->data[s->f10];
-                    V2 a;
                     V2 b;
+                    V2 a;
                     V2 d;
                     int inside;
                     int behind;
@@ -1873,18 +1875,13 @@ int RingChalMaster::vfE0(int car, u8* out) {
             if (!r) {
                 if (fn_8017960C(players.data[car]->index)->model == 'PCAR') {
                     RaceCarRec* c = fn_8017960C(players.data[car]->index);
-                    if (c->ctl->vf14() & 0x10) {
-                        PlayerData* q = players.data[car];
-                        if (!q->b8) {
-                            q->b8 = 1;
-                            q->fC = 0.0f;
-                        }
-                    } else if (!(c->ctl->vf14() & 0x10)) {
-                        PlayerData* q = players.data[car];
-                        if (q->b8) {
-                            q->b8 = 0;
-                            q->fC = 0.0f;
-                        }
+                    PlayerData* q;
+                    if ((c->ctl->vf14() & 0x10) && !(q = players.data[car])->b8) {
+                        q->b8 = 1;
+                        q->fC = 0.0f;
+                    } else if (!(c->ctl->vf14() & 0x10) && (q = players.data[car])->b8) {
+                        q->b8 = 0;
+                        q->fC = 0.0f;
                     }
                 }
             }
