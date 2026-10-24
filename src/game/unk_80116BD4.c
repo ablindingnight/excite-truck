@@ -2900,8 +2900,8 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
         BINK_SKIP(v);                                 \
     }
 
-extern u8 *lbl_80329DA8[16];  // Bink Huffman lookup tables
-extern u8 lbl_802F6990[16];   // their maximum code lengths
+extern u8 *const lbl_80329DA8[16];  // Bink Huffman lookup tables
+extern const u8 lbl_802F6990[16];   // their maximum code lengths
 
 // Reads a Huffman tree: picks one of the 16 fixed code tables and reads the symbol order, either explicitly or as
 // a series of merge passes over the identity order.
