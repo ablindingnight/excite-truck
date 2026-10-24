@@ -255,6 +255,8 @@ u8* fn_8018FD88(u8* p, u32 a, u32 b);
 
 // Builds the local player's car: driver, hybrid controller and the car itself.
 SpringCar* fn_8018FB18(void) {
+    u8* drv;
+    u8* hyb;
     u8* prof = fn_801769CC();
     u32 ctl = fn_801B83A0()->PlayerController();
     lbl_8055E522 = (U32(prof, 0x4) >> 8) & 1;
@@ -270,11 +272,11 @@ SpringCar* fn_8018FB18(void) {
             ctl = fn_80135078();
         }
     }
-    u8* drv = (u8*)operator new(0x44, "PlayerDriver");
+    drv = (u8*)operator new(0x44, "PlayerDriver");
     if (drv) {
         drv = fn_801912B4(drv);
     }
-    u8* hyb = (u8*)operator new(0x3C, "Hybrid");
+    hyb = (u8*)operator new(0x3C, "Hybrid");
     if (hyb) {
         hyb = fn_8018FD88(hyb, ctl, (u32)drv);
     }
