@@ -958,7 +958,137 @@ void fn_80268E00(void) {
     fn_8013530C(&f, 0);
 }
 
-void fn_80268E94(CamRec* c, int idx) {}  // stub (344)
+}  // extern "C"
+
+struct ShakeMat {
+    f32 m[3][3];
+};
+
+inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+
+// d = a * b
+static inline void ShakeMul(ShakeMat* pd, const ShakeMat* pa, const ShakeMat* pb) {
+    ShakeMat& d = *pd;
+    const ShakeMat& a = *pa;
+    const ShakeMat& b = *pb;
+    if (pd == pa || pd == pb) {
+        f32 t00 = Dot(b.m[0][0], a.m[0][0], b.m[1][0], a.m[0][1], b.m[2][0], a.m[0][2]);
+        f32 t10 = Dot(b.m[0][0], a.m[1][0], b.m[1][0], a.m[1][1], b.m[2][0], a.m[1][2]);
+        f32 t20 = Dot(b.m[0][0], a.m[2][0], b.m[1][0], a.m[2][1], b.m[2][0], a.m[2][2]);
+        f32 t01 = Dot(b.m[0][1], a.m[0][0], b.m[1][1], a.m[0][1], b.m[2][1], a.m[0][2]);
+        f32 t11 = Dot(b.m[0][1], a.m[1][0], b.m[1][1], a.m[1][1], b.m[2][1], a.m[1][2]);
+        f32 t21 = Dot(b.m[0][1], a.m[2][0], b.m[1][1], a.m[2][1], b.m[2][1], a.m[2][2]);
+        f32 t02 = Dot(b.m[0][2], a.m[0][0], b.m[1][2], a.m[0][1], b.m[2][2], a.m[0][2]);
+        f32 t12 = Dot(b.m[0][2], a.m[1][0], b.m[1][2], a.m[1][1], b.m[2][2], a.m[1][2]);
+        f32 t22 = Dot(b.m[0][2], a.m[2][0], b.m[1][2], a.m[2][1], b.m[2][2], a.m[2][2]);
+        d.m[0][0] = t00;
+        d.m[1][0] = t10;
+        d.m[2][0] = t20;
+        d.m[0][1] = t01;
+        d.m[1][1] = t11;
+        d.m[2][1] = t21;
+        d.m[0][2] = t02;
+        d.m[1][2] = t12;
+        d.m[2][2] = t22;
+    } else {
+        d.m[0][0] = Dot(b.m[0][0], a.m[0][0], b.m[1][0], a.m[0][1], b.m[2][0], a.m[0][2]);
+        d.m[1][0] = Dot(b.m[0][0], a.m[1][0], b.m[1][0], a.m[1][1], b.m[2][0], a.m[1][2]);
+        d.m[2][0] = Dot(b.m[0][0], a.m[2][0], b.m[1][0], a.m[2][1], b.m[2][0], a.m[2][2]);
+        d.m[0][1] = Dot(b.m[0][1], a.m[0][0], b.m[1][1], a.m[0][1], b.m[2][1], a.m[0][2]);
+        d.m[1][1] = Dot(b.m[0][1], a.m[1][0], b.m[1][1], a.m[1][1], b.m[2][1], a.m[1][2]);
+        d.m[2][1] = Dot(b.m[0][1], a.m[2][0], b.m[1][1], a.m[2][1], b.m[2][1], a.m[2][2]);
+        d.m[0][2] = Dot(b.m[0][2], a.m[0][0], b.m[1][2], a.m[0][1], b.m[2][2], a.m[0][2]);
+        d.m[1][2] = Dot(b.m[0][2], a.m[1][0], b.m[1][2], a.m[1][1], b.m[2][2], a.m[1][2]);
+        d.m[2][2] = Dot(b.m[0][2], a.m[2][0], b.m[1][2], a.m[2][1], b.m[2][2], a.m[2][2]);
+    }
+}
+
+struct ShakeVec {
+    f32 x, y, z;
+    ShakeVec(f32 ax, f32 ay, f32 az) : x(ax), y(ay), z(az) {}
+};
+
+extern "C" {
+int fn_8026B0C0(int view);
+double sin(double x);
+double cos(double x);
+extern f32 lbl_8055E3C8;        // race time
+extern const f32 lbl_80563C40;  // smallest rotation
+extern const f32 lbl_80563C50;
+extern const f32 lbl_80563CA0;  // smallest shake
+extern const f32 lbl_80563CA4;  // 2 pi
+extern const f32 lbl_80563CA8;
+extern const f32 lbl_80563CAC;  // base frequency
+extern const f32 lbl_80563CB0;  // jitter range
+extern const f32 lbl_80563CB4;
+extern const f32 lbl_80563CB8;  // wave weight
+
+// Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
+static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
+    f32 a = PSVECMag(&w.x);
+    if (a > lbl_80563C40) {
+        f32 x, s, y, z, c, k;
+        f32 inv = lbl_80563C2C / a;
+        x = inv * w.x;
+        y = inv * w.y;
+        z = inv * w.z;
+        s = (f32)sin(a);
+        c = (f32)cos(a);
+        k = lbl_80563C2C - c;
+        r->m[0][0] = c + k * (x * x);
+        r->m[0][1] = y * (k * x) + s * z;
+        r->m[0][2] = z * (k * x) - s * y;
+        r->m[1][0] = y * (k * x) - s * z;
+        r->m[1][1] = c + k * (y * y);
+        r->m[1][2] = z * (k * y) + s * x;
+        r->m[2][0] = z * (k * x) + s * y;
+        r->m[2][1] = z * (k * y) - s * x;
+        r->m[2][2] = c + k * (z * z);
+    } else {
+        r->m[0][1] = lbl_80563C20;
+        r->m[0][0] = lbl_80563C2C;
+        r->m[0][2] = lbl_80563C20;
+        r->m[1][0] = lbl_80563C20;
+        r->m[1][1] = lbl_80563C2C;
+        r->m[1][2] = lbl_80563C20;
+        r->m[2][0] = lbl_80563C20;
+        r->m[2][1] = lbl_80563C20;
+        r->m[2][2] = lbl_80563C2C;
+    }
+}
+
+// One axis of the hit shake: a sine wave of the given phase plus jitter, scaled by the amplitude.
+static inline f32 ShakeAxis(f32 amp, f32 phase, f32 twoPi) {
+    f32 s = (f32)sin(phase * twoPi);
+    return amp * (fn_80129DC4(0, lbl_80563CB0, lbl_80563CB4) + s * lbl_80563CB8);
+}
+
+// Hit shake for chase cameras: for half a second after a bump the camera wobbles about all three axes
+// (a sine wave per axis plus jitter), easing out with the time since the hit.
+void fn_80268E94(CamRec* c, int idx) {
+    f32 amp, twoPi, t;
+    if (!fn_8026B0C0(idx) && !fn_801769F8()) {
+        bool chase = false;
+        int m = c->mode;
+        if ((m >= 0 && m < 10) || m == 0xE) {
+            chase = true;
+        }
+        if (chase) {
+            t = lbl_8055E3C8 - c->f158;
+            if (t < lbl_80563C6C) {
+                amp = c->f154 * ShakeEase((lbl_80563C6C - t) / lbl_80563C6C);
+                if (amp > lbl_80563CA0) {
+                    twoPi = lbl_80563CA4;
+                    ShakeVec w(ShakeAxis(amp, lbl_80563CAC * t, twoPi), ShakeAxis(amp, lbl_80563C50 * (lbl_80563CAC * t), twoPi),
+                               ShakeAxis(amp, lbl_80563CA8 * (lbl_80563CAC * t), twoPi));
+                    ShakeMat rot;
+                    ShakeRot(&rot, w);
+                    ShakeMul((ShakeMat*)&c->pose.rot, (ShakeMat*)&c->pose.rot, &rot);
+                }
+            }
+        }
+    }
+}
 
 void fn_802693F4(CamRec* c, u8* own, int idx) {}  // stub (495)
 
@@ -1075,3 +1205,5 @@ CamMount lbl_803467E8[3] = {
     {{0.0f, -0.5f, -30.5f}, {0.0f, 2.1f, 1.0f}, lbl_80563D00, 1},
     {{0.1f, 1.1f, -0.2f}, {-9.5f, 2.5f, 4.2f}, lbl_80563D04, 0},
 };
+
+inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
