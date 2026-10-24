@@ -338,8 +338,8 @@ u32 fn_801C3954(const char* list) {
     char* start = buf;
     char* p = start;
     u32 mask = 0;
-    int done = 0;
     for (;;) {
+        int done = 0;
         while (*p != ' ' && *p != '\0') {
             p++;
         }
