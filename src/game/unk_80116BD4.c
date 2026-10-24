@@ -50,7 +50,19 @@ typedef struct StreamTrack {
     u32 minimum;     // 0x54
     s32 blockMask;   // 0x58
     s32 dirty;       // 0x5C
-    u8 pad60[0x17C - 0x60];
+    u8 pad60[0x78 - 0x60];
+    s32 mono;        // 0x78  1 = one voice; otherwise left/right voices fed from interleaved data
+    void *voices[2]; // 0x7C  AX voices (left, right)
+    s16 *bufL;       // 0x84  voice buffers (bufL is also the allocation freed for both)
+    s16 *bufR;       // 0x88
+    u8 pad8C[0x94 - 0x8C];
+    u32 bufSize;     // 0x94  bytes of interleaved data the voice buffers hold
+    u8 pad98[0xB0 - 0x98];
+    s32 ending;      // 0xB0
+    s32 stopping;    // 0xB4
+    u32 writePos;    // 0xB8  interleaved byte position in the voice buffers
+    u32 pending;     // 0xBC  bytes the voices still need
+    u8 padC0[0x17C - 0xC0];
 } StreamTrack;
 #define STREAM_TRACKS(p) (*(StreamTrack **)((u8 *)(p) + 0x2F0))
 
@@ -955,6 +967,63 @@ extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 
+// Moves buffered data from a track's ring into its voice buffers, splitting interleaved stereo into the left and
+// right voices.
+void fn_801195D8(StreamTrack *t) {
+    u16 *src;
+    u32 n;
+    u16 *l;
+    u16 *r;
+    u16 *l0;
+    u16 *r0;
+    u32 i;
+    u16 *dst;
+    s32 level;
+    if (t->available > t->minimum) {
+        n = t->pending;
+        if (n > t->available) {
+            n = t->available;
+        }
+        if (n + t->writePos > t->bufSize) {
+            n = t->bufSize - t->writePos;
+        }
+        src = (u16 *)t->readPtr;
+        if ((u32)src + n > (u32)t->ringEnd) {
+            n = (u32)t->ringEnd - (u32)src;
+        }
+        if (t->mono != 1) {
+            l = l0 = (u16 *)((u8 *)t->bufL + (t->writePos >> 1));
+            r = r0 = (u16 *)((u8 *)t->bufR + (t->writePos >> 1));
+            for (i = n >> 2; i != 0; i--) {
+                *l++ = *src++;
+                *r++ = *src++;
+            }
+            DCFlushRange(l0, (l - l0) * sizeof(u16));
+            DCFlushRange(r0, (r - r0) * sizeof(u16));
+        } else {
+            dst = (u16 *)((u8 *)t->bufL + t->writePos);
+            memcpy(dst, src, n);
+            DCFlushRange(dst, n);
+            src += n / 2;
+        }
+        level = OSDisableInterrupts();
+        t->available -= n;
+        OSRestoreInterrupts(level);
+        if ((u32)src >= (u32)t->ringEnd) {
+            src = (u16 *)t->ringStart;
+        }
+        t->readPtr = (u8 *)src;
+        t->writePos += n;
+        if (t->writePos >= t->bufSize) {
+            t->writePos -= t->bufSize;
+        }
+        t->pending -= n;
+        if (t->ending == 0 && t->pending == 0 && t->stopping == 0) {
+            fn_80119558(t->voices);
+        }
+    }
+}
+
 s32 fn_80119994(void) { return 0; }
 
 s32 fn_8011999C(void) { return 0; }
@@ -1084,14 +1153,7 @@ extern void TRKGetFreeBuffer(void *);
 extern s32 lbl_8055DEE0[2];  // the sample buffer allocator: alloc, free
 extern s32 lbl_8055DEE8;
 extern void AXFreeVoice(void *);
-// The part of a stream channel this file touches by name.
-typedef struct StreamChannel {
-    u8 pad0[0x7C];
-    void *voices[2];  // 0x7C  AX voices (left, right)
-    void *buffer;     // 0x84  sample buffer
-    u8 pad88[0xB4 - 0x88];
-    s32 stopping;     // 0xB4
-} StreamChannel;
+typedef StreamTrack StreamChannel;  // the voice side of a track
 
 // Stops and releases the voices of a channel, then frees its sample buffer.
 void fn_80119D40(void *arg0) {
@@ -1105,7 +1167,7 @@ void fn_80119D40(void *arg0) {
         if (ch->voices[1] != 0) {
             AXFreeVoice(ch->voices[1]);
         }
-        ((void (*)(void *))lbl_8055DEE0[1])(ch->buffer);
+        ((void (*)(void *))lbl_8055DEE0[1])(ch->bufL);
         lbl_8055DEE8--;
         ch->voices[0] = 0;
     }
