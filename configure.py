@@ -1119,6 +1119,7 @@ config.libs.append(
             Object(NonMatching, "game/sounddash.cpp"),
             Object(NonMatching, "game/menumus.cpp"),
             Object(NonMatching, "game/roadsnd.cpp"),
+            Object(NonMatching, "game/unk_8020DE74.c"),
             Object(NonMatching, "game/uiapi.cpp"),
             Object(NonMatching, "game/widgetwin.cpp"),
             Object(NonMatching, "game/window.cpp"),
