@@ -3199,6 +3199,9 @@ game/roadsnd.cpp:
 	.sbss       start:0x8055EE60 end:0x8055EE68
 	.sdata2     start:0x80563300 end:0x80563318
 
+game/unk_8020CF68.c:
+	.text       start:0x8020CF68 end:0x8020DE24
+
 game/unk_8020DE74.c:
 	.text       start:0x8020DE74 end:0x8020F3AC
 
