@@ -28,6 +28,33 @@ typedef struct {
 #include <revolution/OS/OSContext.h>
 #include <revolution/DVD/dvd.h>
 
+// One decoded stream feeding a voice: callbacks plus a ring buffer of decoded samples (0x17C bytes).
+typedef struct StreamTrack {
+    s32 (*IsActive)(struct StreamTrack *t);                    // 0x00
+    s32 (*GetBuffer)(struct StreamTrack *t, u8 **dst, u32 *len); // 0x04
+    void (*Commit)(struct StreamTrack *t, u32 len);            // 0x08
+    u8 pad0C[0x2C - 0x0C];
+    u8 *ringStart;   // 0x2C
+    u8 *ringEnd;     // 0x30
+    u8 pad34[0x38 - 0x34];
+    u8 *readPtr;     // 0x38
+    u8 pad3C[0x40 - 0x3C];
+    u32 available;   // 0x40
+    s32 eightBit;    // 0x44  (16-bit data delivered as 8-bit)
+    s32 deadline;    // 0x48
+    u8 pad4C[0x54 - 0x4C];
+    u32 minimum;     // 0x54
+    s32 blockMask;   // 0x58
+    u8 pad5C[0x17C - 0x5C];
+} StreamTrack;
+#define STREAM_TRACKS(p) (*(StreamTrack **)((u8 *)(p) + 0x2F0))
+
+extern s32 lbl_8055DED4;
+u32 fn_8011C1E0(s32 arg0, void *arg1);
+void fn_8011C2EC(s32 arg0, void *arg1);
+s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes);
+void fn_80117074(void *arg0);
+
 // Takuya Ooura's general purpose FFT package (fftsg.c), built with float data.
 void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w);  // rdft
 void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w);  // ddct
@@ -333,47 +360,13 @@ s32 fn_80116E54(s32 (*arg0)(s32), s32 arg1) {
     return lbl_8055DECC != 0;
 }
 
-void fn_80116EE4(s8 *arg0, s16 *arg1, u32 arg2) {
-    s16 *var_r4 = arg1;
-    s8 *var_r3 = arg0;
-    u32 var_r5 = arg2 >> 1U;
-    u32 temp_r0;
-    u32 var_ctr;
-    u32 var_ctr_2;
-    s16 temp_r0_2;
-    s16 temp_r0_3;
-    if (var_r5 != 0) {
-        temp_r0 = var_r5 >> 3U;
-        var_ctr = temp_r0;
-        if (temp_r0 != 0) {
-            do {
-                var_r3[0] = (s8)(var_r4[0] >> 8);
-                var_r3[1] = (s8)(var_r4[1] >> 8);
-                var_r3[2] = (s8)(var_r4[2] >> 8);
-                var_r3[3] = (s8)(var_r4[3] >> 8);
-                var_r3[4] = (s8)(var_r4[4] >> 8);
-                var_r3[5] = (s8)(var_r4[5] >> 8);
-                var_r3[6] = (s8)(var_r4[6] >> 8);
-                temp_r0_2 = var_r4[7];
-                var_r4 += 8;
-                var_r3[7] = (s8)(temp_r0_2 >> 8);
-                var_r3 += 8;
-                var_ctr -= 1;
-            } while (var_ctr != 0);
-            var_r5 &= 7;
-            if (var_r5 != 0) goto tail;
-        } else {
-tail:
-            var_ctr_2 = var_r5;
-            do {
-                temp_r0_3 = *var_r4;
-                var_r4 += 1;
-                *var_r3 = (s8)(temp_r0_3 >> 8);
-                var_r3 += 1;
-                var_ctr_2 -= 1;
-            } while (var_ctr_2 != 0);
-        }
+// Converts `bytes` of 16-bit samples to 8-bit ones (high byte), returning the end of the output.
+s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes) {
+    u32 n;
+    for (n = bytes >> 1; n != 0; n--) {
+        *dst++ = *src++ >> 8;
     }
+    return dst;
 }
 
 #pragma push
@@ -410,8 +403,69 @@ u32 fn_80116F8C(void *arg0) {
     return 0;
 }
 #pragma pop
-extern s32 fn_80117074(void*);
 extern s32 fn_80116D30(void);
+// Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
+// copies the next block out of its ring buffer into the buffer it hands out.
+void fn_80117074(void *arg0) {
+    u32 i;
+    u8 *dst;
+    u32 len;
+    u32 first;
+
+    if (STREAM_TRACKS(arg0)[*(int *)((u8 *)arg0 + 0x2E8) - 1].IsActive != 0 &&
+        fn_8011C1E0(lbl_8055DED4, (u8 *)arg0 + 0x340) != 0) {
+        for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
+            while (STREAM_TRACKS(arg0)[i].IsActive(&STREAM_TRACKS(arg0)[i]) &&
+                   (STREAM_TRACKS(arg0)[i].available > STREAM_TRACKS(arg0)[i].minimum ||
+                    (*(s32 *)((u8 *)arg0 + 0xC) > STREAM_TRACKS(arg0)[i].deadline &&
+                     STREAM_TRACKS(arg0)[i].available != 0))) {
+                if (STREAM_TRACKS(arg0)[i].GetBuffer(&STREAM_TRACKS(arg0)[i], &dst, &len) == 0) {
+                    break;
+                }
+                if (STREAM_TRACKS(arg0)[i].eightBit) {
+                    len *= 2;
+                }
+                if (len > STREAM_TRACKS(arg0)[i].available) {
+                    len = STREAM_TRACKS(arg0)[i].available;
+                }
+                if (*(s32 *)((u8 *)arg0 + 0xC) <= STREAM_TRACKS(arg0)[i].deadline) {
+                    len &= STREAM_TRACKS(arg0)[i].blockMask << STREAM_TRACKS(arg0)[i].eightBit;
+                }
+                STREAM_TRACKS(arg0)[i].available -= len;
+                first = STREAM_TRACKS(arg0)[i].ringEnd - STREAM_TRACKS(arg0)[i].readPtr;
+                if (first < len) {
+                    if (first != 0) {
+                        if (STREAM_TRACKS(arg0)[i].eightBit) {
+                            dst = (u8 *)fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].readPtr, first);
+                        } else {
+                            memcpy(dst, STREAM_TRACKS(arg0)[i].readPtr, first);
+                            dst += first;
+                        }
+                    }
+                    if (STREAM_TRACKS(arg0)[i].eightBit) {
+                        fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].ringStart, len - first);
+                    } else {
+                        memcpy(dst, STREAM_TRACKS(arg0)[i].ringStart, len - first);
+                    }
+                    STREAM_TRACKS(arg0)[i].readPtr = STREAM_TRACKS(arg0)[i].ringStart + (len - first);
+                } else {
+                    if (STREAM_TRACKS(arg0)[i].eightBit) {
+                        fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].readPtr, len);
+                    } else {
+                        memcpy(dst, STREAM_TRACKS(arg0)[i].readPtr, len);
+                    }
+                    STREAM_TRACKS(arg0)[i].readPtr += len;
+                }
+                if (STREAM_TRACKS(arg0)[i].eightBit) {
+                    len >>= 1;
+                }
+                STREAM_TRACKS(arg0)[i].Commit(&STREAM_TRACKS(arg0)[i], len);
+            }
+        }
+        fn_8011C2EC(lbl_8055DED4, (void *)((u32)arg0 + 0x340));
+    }
+}
+
 void fn_80117330(void* arg0) {
  if(*(s32*)((u8*)arg0+0x268)==0) {
   s32 value=fn_80116D30();
