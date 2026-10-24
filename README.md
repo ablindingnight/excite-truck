@@ -14,6 +14,10 @@ the original author.
   his first commits up to June 2025) and was developed separately from there. Its history is **not** based
   on the original repository's current `main`, which has continued independently since; nothing here
   replaces or rewrites his work, and his commits keep their original authorship.
+- Timeline: when this work began on 2026-10-15, the newest commit in our copy of the original repository was
+  from 2025-06-10, so the project appeared inactive and this branch was started from that state. On
+  2026-10-23 we noticed the original repository had resumed active development (its newer commits are dated
+  from August 2026 on) and have credited everything taken from it since.
 - Some units and symbol names were later imported from the original repository's newer `main` (CC0). Those
   commits say "imported from upstream (orangedude27/excite-truck, CC0)" or "via upstream" / "with upstream".
 - Progress is measured with objdiff (`build/REXE01/report.json`, exact matches only). Every commit on this
