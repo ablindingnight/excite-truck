@@ -1147,8 +1147,8 @@ void fn_801F94CC(const char* fmt, ...) {
 }
 
 ValueNode* fn_801F95C4(int (*pred)(ValueNode*), const char* name) {
-    FileEntry* e = lbl_8055EC44;
     ValueNode* n = 0;
+    FileEntry* e = lbl_8055EC44;
     while (!n && e) {
         int i = 0;
         while ((n = e->table->GetChild(i)) != 0) {
