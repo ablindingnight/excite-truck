@@ -618,8 +618,7 @@ u32 fn_80116F8C(StreamTrack *t) {
     if (t->available < t->fillTarget) {
         need = t->fillTarget - t->available;
         ms = need * 1000 / ((t->channels * (t->rate * t->bits)) >> 3);
-        start = t->readPtr - need;
-        t->readPtr = start;
+        start = t->readPtr -= need;
         ring = t->ringStart;
         if (start < ring) {
             wrap = ring - start;
