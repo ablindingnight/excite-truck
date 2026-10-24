@@ -866,21 +866,12 @@ void fn_802E6264(void) {
     SpuVoice *v;
     SpuSample *s;
     int wasPlaying;
-    unsigned int remotes;
+    int starting;
     unsigned int used;
-    int start;
-    float vol;
-    float left;
-    float right;
-    float front;
-    float back;
-    AXPBVE ve;
-    AXPBSRC src;
-    AXPBADDR addr;
-    AXPBMIX mix;
-    AXPBRMTMIX rmt;
-    AXPBADPCM adpcm;
-    DSPADPCMHeader hdr;
+    unsigned int remotes;
+    unsigned int start;
+    unsigned int loop;
+    unsigned int end;
 
     if (lbl_8055FFA4) {
         lbl_8055FFA4 = 0;
@@ -910,8 +901,10 @@ void fn_802E6264(void) {
         for (i = 0; i < 0x20; i++) {
             v = &SPU_VOICE_TABLE[i];
             wasPlaying = v->wasPlaying;
+            starting = v->start;
             v->wasPlaying = v->play;
-            if ((wasPlaying && !v->play) || (v->start && !v->startAck)) {
+            if ((wasPlaying && !v->play) || (starting && !v->startAck)) {
+                AXPBVE ve;
                 AXSetVoiceState(v->vpb, 0);
                 wasPlaying = 0;
                 memset(&ve, 0, sizeof(ve));
@@ -923,10 +916,12 @@ void fn_802E6264(void) {
                     continue;
                 }
                 if (v->start && v->play) {
+                    AXPBSRC src;
                     v->start = 0;
                     wasPlaying = 0;
                     s = v->sample;
                     if (s->locked == 0 && !s->adpcm) {
+                        AXPBADDR addr;
                         AXSetVoiceType(v->vpb, 0);
                         start = (int)s->addr / 2;
                         memset(&addr, 0, sizeof(addr));
@@ -936,29 +931,36 @@ void fn_802E6264(void) {
                             addr.loopAddressHi = start >> 16;
                             addr.loopAddressLo = start;
                         } else {
-                            addr.loopAddressHi = ((int)lbl_8055FF88 / 2) >> 16;
-                            addr.loopAddressLo = (int)lbl_8055FF88 / 2;
+                            loop = lbl_8055FF88 / 2;
+                            addr.loopAddressHi = loop >> 16;
+                            addr.loopAddressLo = loop;
                         }
-                        addr.endAddressHi = (start + (int)s->size / 2 - 1) >> 16;
-                        addr.endAddressLo = start + (int)s->size / 2 - 1;
+                        end = start + (int)s->size / 2 - 1;
+                        addr.endAddressHi = end >> 16;
+                        addr.endAddressLo = end;
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         AXSetVoiceAddr(v->vpb, &addr);
                     } else if (s->locked == 0 && s->adpcm) {
+                        AXPBADDR addr;
+                        AXPBADPCM adpcm;
                         AXSetVoiceType(v->vpb, 0);
                         start = s->addr * 2 + 2;
                         memset(&addr, 0, sizeof(addr));
                         addr.loopFlag = v->loop;
                         addr.format = 0;
                         if (v->loop) {
-                            addr.loopAddressHi = (start + s->adpcmInfo.loopStart) >> 16;
-                            addr.loopAddressLo = start + s->adpcmInfo.loopStart;
+                            loop = start + s->adpcmInfo.loopStart;
+                            addr.loopAddressHi = loop >> 16;
+                            addr.loopAddressLo = loop;
                         } else {
-                            addr.loopAddressHi = ((unsigned int)lbl_8055FF88 * 2 + 2) >> 16;
-                            addr.loopAddressLo = (unsigned int)lbl_8055FF88 * 2 + 2;
+                            loop = lbl_8055FF88 * 2 + 2;
+                            addr.loopAddressHi = loop >> 16;
+                            addr.loopAddressLo = loop;
                         }
-                        addr.endAddressHi = (start + s->adpcmInfo.loopEnd - 2) >> 16;
-                        addr.endAddressLo = start + s->adpcmInfo.loopEnd - 2;
+                        end = start + s->adpcmInfo.loopEnd - 2;
+                        addr.endAddressHi = end >> 16;
+                        addr.endAddressLo = end;
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         memset(&adpcm, 0, sizeof(adpcm));
@@ -970,6 +972,7 @@ void fn_802E6264(void) {
                         AXSetVoiceAddr(v->vpb, &addr);
                         AXSetVoiceAdpcm(v->vpb, &adpcm);
                     } else if (s->locked == 1 && !s->adpcm) {
+                        AXPBADDR addr;
                         AXSetVoiceType(v->vpb, 0);
                         start = (int)s->addr / 2;
                         memset(&addr, 0, sizeof(addr));
@@ -977,13 +980,17 @@ void fn_802E6264(void) {
                         addr.format = 10;
                         addr.loopAddressHi = start >> 16;
                         addr.loopAddressLo = start;
-                        addr.endAddressHi = (start + (s->size >> 1) - 1) >> 16;
-                        addr.endAddressLo = start + (s->size >> 1) - 1;
+                        end = start + (s->size >> 1) - 1;
+                        addr.endAddressHi = end >> 16;
+                        addr.endAddressLo = end;
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         AXSetVoiceAddr(v->vpb, &addr);
                         s->rate = 2.0f;
                     } else if (s->locked == 1) {
+                        AXPBADDR addr;
+                        DSPADPCMHeader hdr;
+                        AXPBADPCM adpcm;
                         AXSetVoiceType(v->vpb, 1);
                         start = s->addr * 2 + 2;
                         memset(&addr, 0, sizeof(addr));
@@ -991,8 +998,9 @@ void fn_802E6264(void) {
                         addr.format = 0;
                         addr.loopAddressHi = start >> 16;
                         addr.loopAddressLo = start;
-                        addr.endAddressHi = (start + s->size * 2 - 3) >> 16;
-                        addr.endAddressLo = start + s->size * 2 - 3;
+                        end = start + s->size * 2 - 3;
+                        addr.endAddressHi = end >> 16;
+                        addr.endAddressLo = end;
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         memset(&hdr, 0, sizeof(hdr));
@@ -1019,6 +1027,14 @@ void fn_802E6264(void) {
                     AXSetVoiceSrc(v->vpb, &src);
                 }
                 if (v->play) {
+                    AXPBVE ve;
+                    AXPBMIX mix;
+                    AXPBRMTMIX rmt;
+                    float vol;
+                    float left;
+                    float right;
+                    float front;
+                    float back;
                     AXSetVoiceSrcRatio(v->vpb, muted ? 0.0f : v->sample->rate * ((22050.0f / 32000.0f) * v->pitch));
                     memset(&ve, 0, sizeof(ve));
                     vol = v->volume;
