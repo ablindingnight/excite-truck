@@ -156,12 +156,20 @@ inline void Swap(T& a, T& b) {
 
 template <class T>
 void Shuffle(T* a, int n) {
-    int last = n - 1;
-    for (int i = 0; i < last; i++) {
+    // MATCHING-AID: byte-offset counter divided back to an index (found by upstream); revisit.
+    int last;
+    int off;
+    int i;
+    i = 0;
+    last = n - 1;
+    off = 0;
+    while (i < last) {
         int j = fn_80129D90(0, i + 1, n);
-        T t = a[i];
-        a[i] = a[j];
+        T t = a[off / (int)sizeof(T)];
+        a[off / (int)sizeof(T)] = a[j];
         a[j] = t;
+        i++;
+        off += sizeof(T);
     }
 }
 
