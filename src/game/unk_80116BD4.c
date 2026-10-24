@@ -54,15 +54,61 @@ typedef struct StreamTrack {
 } StreamTrack;
 #define STREAM_TRACKS(p) (*(StreamTrack **)((u8 *)(p) + 0x2F0))
 
+// A streamed music/voice player (0x388 bytes). Only the fields named here are understood.
+typedef struct StreamPlayer {
+    u8 pad0[0x8];
+    u32 numSets;                        // 0x08
+    s32 curSet;                         // 0x0C
+    u8 pad10[0x20 - 0x10];
+    u32 flags;                          // 0x20
+    u8 pad24[0xDC - 0x24];
+    s32 paused;                         // 0xDC
+    u8 padE0[0xE8 - 0xE0];
+    void *memoryData;                   // 0xE8  set when playing from memory
+    u8 padEC[0xF0 - 0xEC];
+    u8 reader[0x10];                    // 0xF0  file reader state
+    s32 (*readerFill)(void *reader);    // 0x100
+    void (*readerClose)(void *reader);  // 0x104
+    u8 pad108[0x11C - 0x108];
+    volatile s32 busy;                  // 0x11C  also read by the decode callbacks
+    u8 pad120[0x138 - 0x120];
+    u32 readerCapacity;                 // 0x138
+    u32 readerFilled;                   // 0x13C
+    u8 pad140[0x1F4 - 0x140];
+    u8 request[0x234 - 0x1F4];          // 0x1F4
+    void *readBuffer;                   // 0x234
+    u8 pad238[0x258 - 0x238];
+    s32 unk258;                         // 0x258
+    u8 pad25C[0x268 - 0x25C];
+    s32 startTime;                      // 0x268
+    u8 pad26C[0x288 - 0x26C];
+    s32 running;                        // 0x288
+    u8 pad28C[0x2D4 - 0x28C];
+    u32 unk2D4;                         // 0x2D4
+    u8 pad2D8[0x2E8 - 0x2D8];
+    int numTracks;                      // 0x2E8
+    s32 resyncs;                        // 0x2EC
+    StreamTrack *tracks;                // 0x2F0
+    u8 pad2F4[0x2F8 - 0x2F4];
+    s32 unk2F8;                         // 0x2F8
+    u8 pad2FC[0x328 - 0x2FC];
+    s32 unk328;                         // 0x328
+    u8 pad32C[0x330 - 0x32C];
+    s32 pauseTime;                      // 0x330
+    u8 pad334[0x340 - 0x334];
+    u8 queue[0x384 - 0x340];            // 0x340  request queue entry
+    void *extra;                        // 0x384
+} StreamPlayer;
+
 extern s32 lbl_8055DED4;
 u32 fn_8011C1E0(s32 arg0, void *arg1);
 void fn_8011C2EC(s32 arg0, void *arg1);
 s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes);
-void fn_80117074(void *arg0);
-void fn_80118C44(void *arg0);
-void fn_80118DC0(void *arg0);
-s32 fn_80118F78(void *arg0, s32 arg1);
-s32 fn_801190B0(void *arg0, s32 arg1);
+void fn_80117074(StreamPlayer *p);
+void fn_80118C44(StreamPlayer *p);
+void fn_80118DC0(StreamPlayer *p);
+s32 fn_80118F78(StreamPlayer *p, s32 arg1);
+s32 fn_801190B0(StreamPlayer *p, s32 arg1);
 void fn_80118C1C(void *arg0, s32 arg1);
 void fn_80118F1C(void *arg0, s32 arg1);
 void fn_80117380(void *arg0, s32 arg1);
@@ -424,63 +470,63 @@ u32 fn_80116F8C(void *arg0) {
 extern s32 fn_80116D30(void);
 // Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
 // copies the next block out of its ring buffer into the buffer it hands out.
-void fn_80117074(void *arg0) {
+// Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
+// copies the next block out of its ring buffer into the buffer it hands out.
+void fn_80117074(StreamPlayer *p) {
     u32 i;
     u8 *dst;
     u32 len;
     u32 first;
 
-    if (STREAM_TRACKS(arg0)[*(int *)((u8 *)arg0 + 0x2E8) - 1].IsActive != 0 &&
-        fn_8011C1E0(lbl_8055DED4, (u8 *)arg0 + 0x340) != 0) {
-        for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
-            while (STREAM_TRACKS(arg0)[i].IsActive(&STREAM_TRACKS(arg0)[i]) &&
-                   (STREAM_TRACKS(arg0)[i].available > STREAM_TRACKS(arg0)[i].minimum ||
-                    (*(s32 *)((u8 *)arg0 + 0xC) > STREAM_TRACKS(arg0)[i].deadline &&
-                     STREAM_TRACKS(arg0)[i].available != 0))) {
-                if (STREAM_TRACKS(arg0)[i].GetBuffer(&STREAM_TRACKS(arg0)[i], &dst, &len) == 0) {
+    if (p->tracks[p->numTracks - 1].IsActive != 0 && fn_8011C1E0(lbl_8055DED4, p->queue) != 0) {
+        for (i = 0; i < p->numTracks; i++) {
+            while (p->tracks[i].IsActive(&p->tracks[i]) &&
+                   (p->tracks[i].available > p->tracks[i].minimum ||
+                    (p->curSet > p->tracks[i].deadline && p->tracks[i].available != 0))) {
+                if (p->tracks[i].GetBuffer(&p->tracks[i], &dst, &len) == 0) {
                     break;
                 }
-                if (STREAM_TRACKS(arg0)[i].eightBit) {
+                if (p->tracks[i].eightBit) {
                     len *= 2;
                 }
-                if (len > STREAM_TRACKS(arg0)[i].available) {
-                    len = STREAM_TRACKS(arg0)[i].available;
+                if (len > p->tracks[i].available) {
+                    len = p->tracks[i].available;
                 }
-                if (*(s32 *)((u8 *)arg0 + 0xC) <= STREAM_TRACKS(arg0)[i].deadline) {
-                    len &= STREAM_TRACKS(arg0)[i].blockMask << STREAM_TRACKS(arg0)[i].eightBit;
+                if (p->curSet <= p->tracks[i].deadline) {
+                    len &= p->tracks[i].blockMask << p->tracks[i].eightBit;
                 }
-                STREAM_TRACKS(arg0)[i].available -= len;
-                first = STREAM_TRACKS(arg0)[i].ringEnd - STREAM_TRACKS(arg0)[i].readPtr;
+                p->tracks[i].available -= len;
+                first = p->tracks[i].ringEnd - p->tracks[i].readPtr;
                 if (first < len) {
                     if (first != 0) {
-                        if (STREAM_TRACKS(arg0)[i].eightBit) {
-                            dst = (u8 *)fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].readPtr, first);
+                        if (p->tracks[i].eightBit) {
+                            dst = (u8 *)fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].readPtr, first);
                         } else {
-                            memcpy(dst, STREAM_TRACKS(arg0)[i].readPtr, first);
+                            memcpy(dst, p->tracks[i].readPtr, first);
                             dst += first;
                         }
                     }
-                    if (STREAM_TRACKS(arg0)[i].eightBit) {
-                        fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].ringStart, len - first);
+                    if (p->tracks[i].eightBit) {
+                        fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].ringStart, len - first);
                     } else {
-                        memcpy(dst, STREAM_TRACKS(arg0)[i].ringStart, len - first);
+                        memcpy(dst, p->tracks[i].ringStart, len - first);
                     }
-                    STREAM_TRACKS(arg0)[i].readPtr = STREAM_TRACKS(arg0)[i].ringStart + (len - first);
+                    p->tracks[i].readPtr = p->tracks[i].ringStart + (len - first);
                 } else {
-                    if (STREAM_TRACKS(arg0)[i].eightBit) {
-                        fn_80116EE4((s8 *)dst, (s16 *)STREAM_TRACKS(arg0)[i].readPtr, len);
+                    if (p->tracks[i].eightBit) {
+                        fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].readPtr, len);
                     } else {
-                        memcpy(dst, STREAM_TRACKS(arg0)[i].readPtr, len);
+                        memcpy(dst, p->tracks[i].readPtr, len);
                     }
-                    STREAM_TRACKS(arg0)[i].readPtr += len;
+                    p->tracks[i].readPtr += len;
                 }
-                if (STREAM_TRACKS(arg0)[i].eightBit) {
+                if (p->tracks[i].eightBit) {
                     len >>= 1;
                 }
-                STREAM_TRACKS(arg0)[i].Commit(&STREAM_TRACKS(arg0)[i], len);
+                p->tracks[i].Commit(&p->tracks[i], len);
             }
         }
-        fn_8011C2EC(lbl_8055DED4, (void *)((u32)arg0 + 0x340));
+        fn_8011C2EC(lbl_8055DED4, p->queue);
     }
 }
 
@@ -567,7 +613,7 @@ s32 fn_80117598(s32 arg0,s32 arg1){
 void fn_801175C4(s32 arg0,s32 arg1){
  s32 off=((arg0+0x340)-arg0);
  s32* p=(s32*)(arg0-off);
- if(p[0x2e8/4]) fn_80117074(p);
+ if(p[0x2e8/4]) fn_80117074((StreamPlayer *)p);
  p[0x33c/4]=arg1;
 }
 
@@ -617,77 +663,77 @@ void fn_80118C1C(void *arg0, s32 arg1) {
 
 // Per-frame update of a stream player: catches up tracks whose dirty flag is set, refills buffers and steps the
 // playback state.
-void fn_80118C44(void *arg0) {
+// Per-frame update of a stream player: catches up tracks whose dirty flag is set, refills buffers and steps the
+// playback state.
+void fn_80118C44(StreamPlayer *p) {
     s32 resync = 0;
     u32 i;
-    if (arg0 != 0) {
-        *(s32 *)((u8 *)arg0 + 0x11C) = 1;
-        *(s32 *)((u8 *)arg0 + 0x2F8) = 0;
-        *(s32 *)((u8 *)arg0 + 0x11C) = 0;
-        for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
-            if (STREAM_TRACKS(arg0)[i].dirty != 0) {
-                STREAM_TRACKS(arg0)[i].dirty = 0;
-                if (*(u32 *)((u8 *)arg0 + 0xC) > 1 &&
-                    *(s32 *)((u8 *)arg0 + 0xC) <= STREAM_TRACKS(arg0)[i].deadline) {
+    if (p != 0) {
+        p->busy = 1;
+        p->unk2F8 = 0;
+        p->busy = 0;
+        for (i = 0; i < p->numTracks; i++) {
+            if (p->tracks[i].dirty != 0) {
+                p->tracks[i].dirty = 0;
+                if (p->curSet > 1U && p->curSet <= p->tracks[i].deadline) {
                     resync = 1;
                 }
             }
         }
         if (resync) {
-            (*(s32 *)((u8 *)arg0 + 0x2EC))++;
-            fn_8011C274(lbl_8055DED4, (u8 *)arg0 + 0x340);
-            fn_801190B0(arg0, 0);
-            while (*(u32 *)((u8 *)arg0 + 0x13C) < (*(u32 *)((u8 *)arg0 + 0x138) * 29) >> 5 &&
-                   (*(s32 (**)(void *))((u8 *)arg0 + 0x100))((u8 *)arg0 + 0xF0) != 0) {
+            p->resyncs++;
+            fn_8011C274(lbl_8055DED4, p->queue);
+            fn_801190B0(p, 0);
+            while ((p->readerCapacity * 29) >> 5 > p->readerFilled && p->readerFill(p->reader) != 0) {
             }
-            *(s32 *)((u8 *)arg0 + 0x268) = 0;
-            *(s32 *)((u8 *)arg0 + 0x328) = 0;
-            *(s32 *)((u8 *)arg0 + 0x330) = 0;
-            fn_801190B0(arg0, 1);
-            fn_8011C2EC(lbl_8055DED4, (u8 *)arg0 + 0x340);
+            p->startTime = 0;
+            p->unk328 = 0;
+            p->pauseTime = 0;
+            fn_801190B0(p, 1);
+            fn_8011C2EC(lbl_8055DED4, p->queue);
         }
-        *(s32 *)((u8 *)arg0 + 0x11C) = 1;
-        if (*(s32 *)((u8 *)arg0 + 0x2E8) != 0) {
-            fn_80117074(arg0);
+        p->busy = 1;
+        if (p->numTracks != 0) {
+            fn_80117074(p);
         }
-        fn_80118C1C(arg0, fn_80116D30());
-        fn_80117380(arg0, *(u32 *)((u8 *)arg0 + 0xC) < *(u32 *)((u8 *)arg0 + 0x8) ? *(u32 *)((u8 *)arg0 + 0xC) + 1 : 1);
-        *(s32 *)((u8 *)arg0 + 0x11C) = 0;
+        fn_80118C1C(p, fn_80116D30());
+        fn_80117380(p, p->curSet < p->numSets ? p->curSet + 1 : 1);
+        p->busy = 0;
     }
 }
 
 // Destroys a stream player: closes its tracks, releases its file and buffers, and frees it.
-void fn_80118DC0(void *arg0) {
+// Destroys a stream player: closes its tracks, releases its file and buffers, and frees it.
+void fn_80118DC0(StreamPlayer *p) {
     u32 i;
-    if (arg0 != 0) {
-        fn_80118F78(arg0, 1);
-        switch (fn_8011BFFC(0, (s32)((u8 *)arg0 + 0x1F4), *(s32 *)((u8 *)arg0 + 0x2E8) != 0 ? lbl_8055DED4 : 0,
-                            (s32)((u8 *)arg0 + 0x340), 1)) {
+    if (p != 0) {
+        fn_80118F78(p, 1);
+        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? lbl_8055DED4 : 0, (s32)p->queue, 1)) {
         case 2:
             lbl_8055DED4 = 0;
         case 3:
             lbl_8055DED4 = 0;
         }
-        for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
-            STREAM_TRACKS(arg0)[i].Close(&STREAM_TRACKS(arg0)[i]);
-            fn_8011BC48(STREAM_TRACKS(arg0)[i].handle);
-            if (STREAM_TRACKS(arg0)[i].ringStart != 0) {
-                fn_80120084(STREAM_TRACKS(arg0)[i].ringStart);
+        for (i = 0; i < p->numTracks; i++) {
+            p->tracks[i].Close(&p->tracks[i]);
+            fn_8011BC48(p->tracks[i].handle);
+            if (p->tracks[i].ringStart != 0) {
+                fn_80120084(p->tracks[i].ringStart);
             }
         }
-        if (*(s32 *)((u8 *)arg0 + 0xE8) != 0) {
-            if (!(*(u32 *)((u8 *)arg0 + 0x20) & 0x04000000)) {
-                fn_80120084(*(void **)((u8 *)arg0 + 0xE8));
+        if (p->memoryData != 0) {
+            if (!(p->flags & 0x04000000)) {
+                fn_80120084(p->memoryData);
             }
         } else {
-            (*(void (**)(void *))((u8 *)arg0 + 0x104))((u8 *)arg0 + 0xF0);
-            fn_80120084(*(void **)((u8 *)arg0 + 0x234));
+            p->readerClose(p->reader);
+            fn_80120084(p->readBuffer);
         }
-        if (*(s32 *)((u8 *)arg0 + 0x384) != 0) {
-            fn_80120084(*(void **)((u8 *)arg0 + 0x384));
+        if (p->extra != 0) {
+            fn_80120084(p->extra);
         }
-        memset(arg0, 0, 0x388);
-        fn_80120084(arg0);
+        memset(p, 0, sizeof(StreamPlayer));
+        fn_80120084(p);
     }
 }
 
@@ -710,78 +756,80 @@ void fn_80118F1C(void *arg0, s32 arg1) {
 }
 
 // Pauses (arg1 != 0) or resumes a stream player and all its tracks; returns the new paused state.
-s32 fn_80118F78(void *arg0, s32 arg1) {
-    s32 resumed = 0;
+// Pauses (arg1 != 0) or resumes a stream player and all its tracks; returns the new paused state.
+s32 fn_80118F78(StreamPlayer *p, s32 arg1) {
     s32 now;
     u32 i;
-    if (arg0 == 0) {
+    s32 resumed = 0;
+    if (p == 0) {
         return 0;
     }
     now = fn_80116D30();
-    fn_80118C1C(arg0, now);
-    fn_80118F1C(arg0, now);
+    fn_80118C1C(p, now);
+    fn_80118F1C(p, now);
     if (arg1 == 0) {
-        if (*(s32 *)((u8 *)arg0 + 0xDC) != 0) {
+        if (p->paused != 0) {
             resumed = 1;
         }
-    } else if (*(s32 *)((u8 *)arg0 + 0xDC) == 0) {
-        if (*(s32 *)((u8 *)arg0 + 0x268) != 0) {
-            *(s32 *)((u8 *)arg0 + 0x330) = now - *(s32 *)((u8 *)arg0 + 0x268);
+    } else if (p->paused == 0) {
+        if (p->startTime != 0) {
+            p->pauseTime = now - p->startTime;
         } else {
-            *(s32 *)((u8 *)arg0 + 0x330) = 0;
+            p->pauseTime = 0;
         }
     }
-    *(s32 *)((u8 *)arg0 + 0xDC) = arg1;
-    fn_8011C274(lbl_8055DED4, (u8 *)arg0 + 0x340);
-    for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
-        STREAM_TRACKS(arg0)[i].SetPaused(&STREAM_TRACKS(arg0)[i], arg1);
+    p->paused = arg1;
+    fn_8011C274(lbl_8055DED4, p->queue);
+    for (i = 0; i < p->numTracks; i++) {
+        p->tracks[i].SetPaused(&p->tracks[i], arg1);
     }
-    fn_8011C2EC(lbl_8055DED4, (u8 *)arg0 + 0x340);
-    if (*(s32 *)((u8 *)arg0 + 0x258) != 0 && *(s32 *)((u8 *)arg0 + 0x2E8) != 0) {
-        fn_80117074(arg0);
+    fn_8011C2EC(lbl_8055DED4, p->queue);
+    if (p->unk258 != 0 && p->numTracks != 0) {
+        fn_80117074(p);
     }
     if (resumed) {
-        *(s32 *)((u8 *)arg0 + 0x268) = fn_80116D30() - *(s32 *)((u8 *)arg0 + 0x330);
+        p->startTime = fn_80116D30() - p->pauseTime;
     }
-    return *(s32 *)((u8 *)arg0 + 0xDC);
+    return p->paused;
 }
 
 // Stops (arg1 == 0) or restarts every track; when a stop empties the tracks their rings are reset.
-s32 fn_801190B0(void *arg0, s32 arg1) {
+// Stops (arg1 == 0) or restarts every track; when a stop empties the tracks their rings are reset.
+s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
     s32 any = 0;
     s32 locked;
     u32 i;
     s32 r;
-    if (arg0 != 0) {
+    if (p != 0) {
         locked = 0;
-        for (i = 0; i < *(u32 *)((u8 *)arg0 + 0x2E8); i++) {
-            if (STREAM_TRACKS(arg0)[i].Run != 0) {
+        for (i = 0; i < p->numTracks; i++) {
+            if (p->tracks[i].Run != 0) {
                 if (!locked) {
                     locked = 1;
-                    fn_8011C274(lbl_8055DED4, (u8 *)arg0 + 0x340);
+                    fn_8011C274(lbl_8055DED4, p->queue);
                 }
-                r = STREAM_TRACKS(arg0)[i].Run(&STREAM_TRACKS(arg0)[i], arg1 != 0);
+                r = p->tracks[i].Run(&p->tracks[i], arg1 != 0);
                 if (r != 0) {
                     any = 1;
                 }
-                if (r == 0 && *(s32 *)((u8 *)arg0 + 0x288) != 0) {
-                    STREAM_TRACKS(arg0)[i].writePtr = STREAM_TRACKS(arg0)[i].ringStart;
-                    STREAM_TRACKS(arg0)[i].readPtr = STREAM_TRACKS(arg0)[i].ringStart;
-                    STREAM_TRACKS(arg0)[i].available = 0;
-                    if (*(u32 *)((u8 *)arg0 + 0xC) != 1 || *(u32 *)((u8 *)arg0 + 0x2D4) == *(u32 *)((u8 *)arg0 + 0xC)) {
-                        fn_80116F8C(&STREAM_TRACKS(arg0)[i]);
+                if (r == 0 && p->running != 0) {
+                    p->tracks[i].writePtr = p->tracks[i].ringStart;
+                    p->tracks[i].readPtr = p->tracks[i].ringStart;
+                    p->tracks[i].available = 0;
+                    if (p->curSet != 1U || p->unk2D4 == p->curSet) {
+                        fn_80116F8C(&p->tracks[i]);
                     }
-                    *(s32 *)((u8 *)arg0 + 0x288) = 0;
-                } else if (r != 0 && *(s32 *)((u8 *)arg0 + 0x288) == 0) {
-                    *(s32 *)((u8 *)arg0 + 0x288) = 1;
-                    *(s32 *)((u8 *)arg0 + 0x268) = 0;
-                    *(s32 *)((u8 *)arg0 + 0x328) = 0;
-                    *(s32 *)((u8 *)arg0 + 0x330) = 0;
+                    p->running = 0;
+                } else if (r != 0 && p->running == 0) {
+                    p->running = 1;
+                    p->startTime = 0;
+                    p->unk328 = 0;
+                    p->pauseTime = 0;
                 }
             }
         }
         if (locked) {
-            fn_8011C2EC(lbl_8055DED4, (u8 *)arg0 + 0x340);
+            fn_8011C2EC(lbl_8055DED4, p->queue);
         }
     }
     return any;
