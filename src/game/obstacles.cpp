@@ -178,7 +178,53 @@ u8* fn_801A973C(u8* p, int del) {
     return p;
 }
 
-void fn_801A9798(u8* p) {}  // stub (198)
+}  // extern "C"
+
+extern const f32 lbl_8056247C;  // 0.0
+extern const f32 lbl_80562478;  // 0.5
+
+// A contact corner (corners.cpp), kept in a body's list at 0xD0.
+struct BodyCorner {
+    BodyCorner* next;  // offset 0x0
+    ObVec3 pos;        // offset 0x4
+    f32 spring;        // offset 0x10
+    f32 friction;      // offset 0x14
+    f32 damping;       // offset 0x18
+    ObVec3 vel;        // offset 0x1C
+};
+
+extern "C" BodyCorner* fn_801AE180(void);  // new corner
+
+static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
+    ObVec3 pos;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    BodyCorner* c = fn_801AE180();
+    c->pos = pos;
+    c->spring = spring;
+    c->friction = lbl_80562478;
+    c->vel.x = lbl_8056247C;
+    c->vel.y = lbl_8056247C;
+    c->vel.z = lbl_8056247C;
+    c->damping = lbl_8056247C;
+    c->next = *(BodyCorner**)(body + 0xD0);
+    *(BodyCorner**)(body + 0xD0) = c;
+}
+
+extern "C" {
+
+// Puts a contact corner at each of the eight corners of a box with half extents (x, y, z).
+void fn_801A9798(u8* p, f32 x, f32 y, f32 z, f32 spring) {
+    AddCorner(p, -x, y, -z, spring);
+    AddCorner(p, x, y, -z, spring);
+    AddCorner(p, -x, y, z, spring);
+    AddCorner(p, x, y, z, spring);
+    AddCorner(p, -x, -y, -z, spring);
+    AddCorner(p, x, -y, -z, spring);
+    AddCorner(p, -x, -y, z, spring);
+    AddCorner(p, x, -y, z, spring);
+}
 
 void fn_801A9AB0(u8* p, u8* q) {}  // stub (2089)
 
