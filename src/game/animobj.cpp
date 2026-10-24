@@ -92,7 +92,6 @@ public:
 
 AnimObj::AnimObj(void) {
     frame.axes[0].x = 1.0f;
-    flags = lbl_80562E28;
     frame.axes[0].x = 1.0f;
     frame.axes[0].y = 0.0f;
     frame.axes[0].z = 0.0f;
@@ -105,6 +104,7 @@ AnimObj::AnimObj(void) {
     frame.pos.x = 0.0f;
     frame.pos.y = 0.0f;
     frame.pos.z = 0.0f;
+    flags = lbl_80562E28;
 }
 
 void AnimObj::Bind(const char* name) { fn_80176948(name, &offset); }
