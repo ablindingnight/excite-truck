@@ -181,6 +181,27 @@ typedef struct StreamPlayer {
     void *extra;                        // 0x384
 } StreamPlayer;
 
+// The Bink audio decoder's state.
+typedef struct BinkAudio8011 {
+    u32 frameSize;     // 0x00 samples per transform
+    f32 scale;         // 0x04 2 / sqrt(frameSize)
+    u32 frameBytes;    // 0x08 output bytes per frame
+    u32 overlapBytes;  // 0x0C
+    u32 channels;      // 0x10
+    s16 *output;       // 0x14
+    s32 first;         // 0x18 no previous frame to overlap yet
+    u32 numBands;      // 0x1C
+    u32 *bands;        // 0x20 band edges in coefficients
+    s32 *quant;        // 0x24
+    void *transform;   // 0x28 DCT or RDFT work area
+    s16 *previous;     // 0x2C overlap from the last frame
+    u32 flags;         // 0x30 bit 0: DCT (per channel) instead of RDFT (interleaved)
+} BinkAudio8011;
+void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next);
+u32 fn_8011FC2C(void *arg0, s32 arg1, s32 arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void fn_80117330(void *arg0);
+void fn_80117074(StreamPlayer *p);
+
 extern s32 lbl_8055DED4;
 u32 fn_8011C1E0(s32 arg0, void *arg1);
 void fn_8011C2EC(s32 arg0, void *arg1);
@@ -782,6 +803,167 @@ void fn_80117618(void *arg0, void *arg1) {
 
 void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
 
+// Decodes the current frame of a stream player: updates the timing history, copies each audio track's decoded
+// packets into its ring (dropping the oldest data on overflow), then decodes the video. Returns 1 when playback is
+// done, otherwise 0.
+s32 fn_801186B8(StreamPlayer *p) {
+    s32 locked = 0;
+    s32 i;
+    s32 j;
+    s32 old;
+    u32 size;
+    u32 remaining;
+    u32 room;
+    u32 over;
+    u8 *data;
+    u8 *src;
+    s16 *out;
+    u32 len;
+    s32 now;
+    s32 level;
+    StreamTrack *t;
+
+    if (p == 0) {
+        return 0;
+    }
+    if (p->unk2D4 == p->curSet) {
+        return 0;
+    }
+    if (p->stalled) {
+        p->stalled = 0;
+        if (p->running) {
+            fn_801190B0(p, 0);
+            fn_801190B0(p, 1);
+        }
+        p->startTime = 0;
+        p->pauseTime = 0;
+        p->unk328 = 0;
+    }
+    if (p->paused) {
+        p->startTime = 0;
+        p->pauseTime = 0;
+        p->unk328 = 0;
+    }
+    p->unk2F8 = 0;
+    p->busy = 1;
+    p->frameStart = fn_80116D30();
+    old = p->histPos;
+    if (--p->histPos < 0) {
+        p->histPos = p->histSize - 1;
+    }
+    p->histFrameStart[p->histPos] = p->frameStart;
+    p->histDecode[p->histPos] = p->decodeTime;
+    p->histIdle[p->histPos] = p->idleTime;
+    p->hist29C[p->histPos] = p->unk29C;
+    p->histRead[p->histPos] = p->readTime;
+    p->hist128[p->histPos] = p->unk128;
+    p->hist12C[p->histPos] = p->unk12C;
+    if (p->unk25C == 0) {
+        p->histFrameStart[old] = p->frameStart - fn_80116BD4(1000, p->rateDen, p->rateNum);
+        p->unk12C = 0;
+        p->unk25C = p->frameStart;
+        p->unk128 = 0;
+    } else if (p->numTracks != 0) {
+        fn_80117074(p);
+    }
+    data = (u8 *)p->setData;
+    p->unk274 = p->frameStart;
+    if (p->unk110) {
+        p->done = 1;
+    }
+    if (p->done) {
+        return 1;
+    }
+    for (i = 0; i < p->numAudio; i++) {
+        size = *(u32 *)data;
+        data += 4;
+        for (j = 0; j < p->numTracks; j++) {
+            if (i == p->trackIds[j]) {
+                goto found;
+            }
+        }
+        j = -1;
+    found:
+        if (j != -1 && size != 0) {
+            src = data;
+            remaining = *(u32 *)src;
+            src += 4;
+            if (!locked) {
+                locked = 1;
+                fn_8011C274(lbl_8055DED4, p->queue);
+            }
+            while (remaining != 0) {
+                t = &p->tracks[j];
+                room = t->ringSize - t->available;
+                fn_8011B94C((BinkAudio8011 *)t->handle, &out, &len, src, &src);
+                if (len > remaining) {
+                    len = remaining;
+                }
+                remaining -= len;
+                if (len > room) {
+                    over = len - room;
+                    p->tracks[j].readPtr += over;
+                    level = OSDisableInterrupts();
+                    p->tracks[j].available -= over;
+                    OSRestoreInterrupts(level);
+                    t = &p->tracks[j];
+                    if (t->readPtr >= t->ringEnd) {
+                        t->readPtr -= t->ringSize;
+                    }
+                }
+                level = OSDisableInterrupts();
+                p->tracks[j].available += len;
+                OSRestoreInterrupts(level);
+                t = &p->tracks[j];
+                room = t->ringEnd - t->writePtr;
+                if (room < len) {
+                    if (room != 0) {
+                        memcpy(t->writePtr, out, room);
+                        len -= room;
+                        out = (s16 *)((u8 *)out + room);
+                    }
+                    memcpy(p->tracks[j].ringStart, out, len);
+                    p->tracks[j].writePtr = p->tracks[j].ringStart + len;
+                } else {
+                    memcpy(t->writePtr, out, len);
+                    p->tracks[j].writePtr += len;
+                }
+            }
+        }
+        data += size;
+    }
+    if (locked) {
+        fn_8011C2EC(lbl_8055DED4, p->queue);
+    }
+    now = fn_80116D30();
+    if (p->unk28C && p->video) {
+        if (p->unk2F4 == 0) {
+            memset(p->frameBuffer, 0, p->frameBufferSize);
+        }
+        if (p->memoryData == 0 && p->unk114 == 0) {
+            u32 n = p->maxFrameSize < p->readerCapacity ? p->maxFrameSize : p->readerCapacity;
+            if (p->readerFilled < (n * 4 - n) >> 2) {
+                p->readerFill(p->reader);
+            }
+        }
+        p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->frameBuffer2, (s32 *)data,
+                                     p->setIndex[p->curSet - 1] & 1, (s32)p->videoState, p->flags, p->videoFlags);
+    }
+    if (p->numTracks != 0) {
+        fn_80117074(p);
+    }
+    p->unkB4 = -1;
+    p->unk258++;
+    fn_80117330(p);
+    p->frameEnd = fn_80116D30();
+    p->idleTime += now - p->frameStart;
+    p->decodeTime += p->frameEnd - now;
+    p->unk2D4 = p->curSet;
+    p->prevSet = p->curSet;
+    p->busy = 0;
+    return 0;
+}
+
 void fn_80118C1C(void *arg0, s32 arg1) {
     s32 temp_r0 = *(s32 *)((u8 *)arg0 + 0x264);
     if (temp_r0 != 0) {
@@ -791,8 +973,6 @@ void fn_80118C1C(void *arg0, s32 arg1) {
     }
 }
 
-// Per-frame update of a stream player: catches up tracks whose dirty flag is set, refills buffers and steps the
-// playback state.
 // Per-frame update of a stream player: catches up tracks whose dirty flag is set, refills buffers and steps the
 // playback state.
 void fn_80118C44(StreamPlayer *p) {
@@ -2252,22 +2432,6 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
     return ((u32)bits.next - (u32)bits.start) & 0x1fffffff;
 }
 
-// The Bink audio decoder's state.
-typedef struct BinkAudio8011 {
-    u32 frameSize;     // 0x00 samples per transform
-    f32 scale;         // 0x04 2 / sqrt(frameSize)
-    u32 frameBytes;    // 0x08 output bytes per frame
-    u32 overlapBytes;  // 0x0C
-    u32 channels;      // 0x10
-    s16 *output;       // 0x14
-    s32 first;         // 0x18 no previous frame to overlap yet
-    u32 numBands;      // 0x1C
-    u32 *bands;        // 0x20 band edges in coefficients
-    s32 *quant;        // 0x24
-    void *transform;   // 0x28 DCT or RDFT work area
-    s16 *previous;     // 0x2C overlap from the last frame
-    u32 flags;         // 0x30 bit 0: DCT (per channel) instead of RDFT (interleaved)
-} BinkAudio8011;
 
 void fn_8011FE20(void **slot, s32 size);
 extern u32 lbl_80329B60[25];  // critical band frequencies (Hz)
