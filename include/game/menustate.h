@@ -28,9 +28,9 @@ public:
     virtual void Unk48(void);
     virtual void Unk4C(void);
     virtual void Unk50(void);
-    virtual void Unk54(void);
+    virtual int Unk54(void);
     virtual int Key(int key);   // 0x58
-    virtual void Unk5C(void);
+    virtual int Unk5C(void);
 
     void Finish(int r);
 

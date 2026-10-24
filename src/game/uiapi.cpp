@@ -5,6 +5,7 @@
 // (Window, Widget, MenuState) before the PC port. Tricks are tagged MATCHING-AID.
 
 #include <types.h>
+#include "game/menustate.h"
 
 extern "C" s32 fn_80218C14(s32, s32);
 extern "C" s32 fn_802E317C(const char *);
@@ -559,12 +560,12 @@ extern "C" s32 __dt__Q36nw4hbm3snd18MemorySoundArchiveFv_80215348(void *arg0, s3
     return (s32)arg0;
 }
 
-extern "C" void fn_802153A0(void) {
+void MenuState::Enter(void) {
 }
 
 extern "C" s32 fn_802168BC(s32);
 extern "C" void fn_8021915C(void *, unsigned int);
-extern "C" s32 fn_802153A4(void) {
+int MenuState::Key(int key) {
     return 0;
 }
 
@@ -982,79 +983,79 @@ done:
     return 1;
 }
 
-extern "C" void fn_80215CA0(void) {
+void MenuState::Exit(void) {
 
 }
 
-extern "C" void fn_80215CA4(void) {
+void MenuState::Unk14(void) {
 
 }
 
-extern "C" void fn_80215CA8(void) {
+void MenuState::Unk18(void) {
 	fn_80221E7C();
 }
 
-extern "C" void fn_80215CAC(void) {
+void MenuState::Update(void) {
 
 }
 
-extern "C" void fn_80215CB0(void) {
+void MenuState::Unk20(void) {
 
 }
 
-extern "C" void fn_80215CB4(void) {
+void MenuState::Unk24(void) {
 
 }
 
-extern "C" void fn_80215CB8(void) {
+void MenuState::Draw(void) {
 
 }
 
-extern "C" void fn_80215CBC(void) {
+void MenuState::Unk2C(void) {
 
 }
 
-extern "C" void fn_80215CC0(void) {
+void MenuState::Unk30(void) {
 
 }
 
-extern "C" void fn_80215CC8(void) {
+void MenuState::Unk38(void) {
 
 }
 
-extern "C" void fn_80215CCC(void) {
+void MenuState::Unk3C(void) {
 
 }
 
-extern "C" void fn_80215CD0(void) {
+void MenuState::Unk40(void) {
 
 }
 
-extern "C" void fn_80215CD4(void) {
+void MenuState::Unk44(void) {
 
 }
 
-extern "C" void fn_80215CD8(void) {
+void MenuState::Unk48(void) {
 
 }
 
-extern "C" void fn_80215CDC(void) {
+void MenuState::Unk4C(void) {
 
 }
 
-extern "C" void fn_80215CE0(void) {
+void MenuState::Unk50(void) {
 
 }
 
-extern "C" s32 fn_80215CE4(void) {
+int MenuState::Unk54(void) {
     return 0;
 }
 
-extern "C" s32 fn_80215CEC(void) {
+int MenuState::Unk5C(void) {
     return 0;
 }
 
-extern "C" void fn_80215CC4(void) {
+void MenuState::Unk34(void) {
 
 }
 
