@@ -6,12 +6,6 @@
 #include <revolution/AX/AXPB.h>
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern f32 lbl_80561210;
-extern f32 lbl_80561214;
-extern f32 lbl_80561218;
-extern f32 lbl_8056121C;
-extern f32 lbl_80561220;
-extern f32 lbl_80561224;
 extern f64 lbl_80561228;
 extern f32 lbl_80329BC8[];
 
@@ -1680,9 +1674,7 @@ void fn_801195A0(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
 
-extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
-extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
@@ -1846,15 +1838,11 @@ void fn_80119AB0(void *arg0, s32 arg1) {
     f32 temp;
     if (value < 0) value = 0;
     if (value > 0x7fff) value = 0x7fff;
-    temp = (f32) fn_8002EFBC((f32)value, lbl_80561198);
-    *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(lbl_805611A0 * temp);
+    temp = (f32) fn_8002EFBC((f32)value, 1.6666666f);
+    *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(0.000976582407f * temp);
     fn_80119288(arg0);
 }
 
-extern f32 lbl_805611B0;
-extern f32 lbl_805611B4;
-extern f64 lbl_805611B8;
-extern f32 lbl_805611C0;
 void fn_80119B38(void *arg0, s32 arg1) {
     s32 value = arg1;
     f32 temp_f31;
@@ -1862,17 +1850,15 @@ void fn_80119B38(void *arg0, s32 arg1) {
     f32 temp_f1;
     if (value < 0) value = 0;
     if (value > 0x10000) value = 0x10000;
-    temp_f31 = (f32)value / lbl_805611B0;
-    temp_f3 = (f32)fn_8002EFBC(lbl_805611B4 - temp_f31, lbl_805611B8);
-    *(s32*)((u8*)arg0 + 0xa8) = (s32)(lbl_805611C0 * temp_f3);
-    temp_f1 = (f32)fn_8002EFBC(temp_f31, lbl_805611B8);
-    *(s32*)((u8*)arg0 + 0xac) = (s32)(lbl_805611C0 * temp_f1);
+    temp_f31 = (f32)value / 65536.0f;
+    temp_f3 = (f32)fn_8002EFBC(1.0f - temp_f31, 0.3f);
+    *(s32*)((u8*)arg0 + 0xa8) = (s32)(32768.0f * temp_f3);
+    temp_f1 = (f32)fn_8002EFBC(temp_f31, 0.3f);
+    *(s32*)((u8*)arg0 + 0xac) = (s32)(32768.0f * temp_f1);
     fn_80119288(arg0);
 }
 
-extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
-extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
@@ -2563,7 +2549,6 @@ void fn_8011AED8(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
 }
 
 extern u8 lbl_80329B50[];
-extern f32 lbl_805611E0;
 void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 var_r29;
     s32 var_r28;
@@ -2601,7 +2586,7 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 var_r3;
     u32 var_r4_3;
 
-    var_f28 = lbl_805611E0;
+    var_f28 = 0.0f;
     var_f29 = var_f28;
     var_r26 = ((BitReader8011 *)arg2)->next;
     var_r25 = ((BitReader8011 *)arg2)->value;
@@ -2620,7 +2605,7 @@ init_test:
     var_r0 = (u32)*var_r5 << 1;
     if (var_r0 < 2U) goto init_body;
 
-    temp_f31 = lbl_805611E0;
+    temp_f31 = 0.0f;
     var_r27 = (f32 *)((u8 *)arg0 + 8);
     var_r3 = 2U;
     goto outer_test;
@@ -4972,19 +4957,19 @@ void fn_80120834(int n, int *info, f32 *table) {
         return;
 
     half = n >> 1;
-    angle = lbl_80561214 / (f32)half;
+    angle = 0.785398185f / (f32)half;
     endpoint = (f32)cos((f64)(angle * (f32)half));
-    table[0] = lbl_80561218;
+    table[0] = 1.0f;
     table[1] = endpoint;
 
     if (half >= 4) {
-        f32 first = (f32)cos((f64)(lbl_8056121C * angle));
-        f32 second_angle = lbl_80561220 * angle;
-        table[2] = lbl_80561210 / first;
-        table[3] = lbl_80561210 / (f32)cos((f64)second_angle);
+        f32 first = (f32)cos((f64)(2.0f * angle));
+        f32 second_angle = 6.0f * angle;
+        table[2] = 0.5f / first;
+        table[3] = 0.5f / (f32)cos((f64)second_angle);
     }
 
-    angle2 = lbl_80561224 * angle;
+    angle2 = 3.0f * angle;
     for (i = 4; i < half; i += 4) {
         table[i + 0] = (f32)cos((f64)(angle * (f32)i));
         table[i + 1] = (f32)sin((f64)(angle * (f32)i));
@@ -4992,8 +4977,8 @@ void fn_80120834(int n, int *info, f32 *table) {
         table[i + 3] = (f32)sin((f64)(angle2 * (f32)i));
     }
 
-    stage_scale = lbl_80561210;
-    stage_zero = lbl_80561218;
+    stage_scale = 0.5f;
+    stage_zero = 1.0f;
     i = 0;
     while (half > 2) {
         f32 *stagep;
@@ -5031,8 +5016,6 @@ void fn_80120834(int n, int *info, f32 *table) {
 
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern f32 lbl_80561210;
-extern f32 lbl_80561214;
 extern f64 lbl_80561228;
 void fn_80120B6C(int arg0, int *arg1, f32 *arg2) {
     s32 i;
@@ -5044,9 +5027,9 @@ void fn_80120B6C(int arg0, int *arg1, f32 *arg2) {
     arg1[1] = arg0;
     if (arg0 <= 1) return;
     half = arg0 >> 1;
-    angle = lbl_80561214 / (f32)half;
+    angle = 0.785398185f / (f32)half;
     result = (f32)cos((f64)(angle * (f32)half));
-    scale = lbl_80561210;
+    scale = 0.5f;
     arg2[0] = result;
     arg2[half] = scale * result;
     for (i = 1; i < half; i++) {
@@ -5486,7 +5469,6 @@ void fn_80121BF4(f32 *arg0) {
     *(f32 *)((u8 *)arg0 + 0x3c) = temp_24;
 }
 
-extern f32 lbl_80561218;
 extern f32 lbl_80561230;
 void fn_80121C68(int n, f32 *a, f32 *w) {
     int j, j0, j1, j2, j3, k, m, mh;
@@ -7658,9 +7640,7 @@ void fn_8012748C(s32 arg0) {
     fn_80127398(arg0);
     fn_802E300C(arg0);
 }
-extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
-extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
