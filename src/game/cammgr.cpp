@@ -32,44 +32,78 @@ struct CamVec3 {
 };
 
 struct CamPose {
+    CamPose(void) {}
     CamMat3 rot;  // offset 0x0
     CamVec3 pos;  // offset 0x24
 };
 
 // One player's camera record.
+// Per-camera state that a record copy must not duplicate (its copy constructor copies nothing).
+struct CamLink {
+    CamLink(void) {}
+    CamLink(const CamLink&) {}
+    u32 w;
+};
+
 struct CamRec {
     CamRec(void);  // fn_8026A600 (out of line, after this unit)
-    u8 pad0[0x10];      // offset 0x0
+    s32 w0;             // offset 0x0
+    s32 w4;             // offset 0x4
+    f32 f8;             // offset 0x8
+    f32 fC;             // offset 0xC
     s32 mode;           // offset 0x10
     s32 nextMode;       // offset 0x14
-    u8 pad18[0x4];      // offset 0x18
+    s32 w18;            // offset 0x18
     s32 w1C;            // offset 0x1C
     s32 target;         // offset 0x20
     s32 nextTarget;     // offset 0x24
-    u8 pad28[0x30];     // offset 0x28
+    u32 w28[6];         // offset 0x28
+    CamVec3 eye;        // offset 0x40
+    u32 w4C[3];         // offset 0x4C
     CamPose pose;       // offset 0x58
     CamPose lastPose;   // offset 0x88
     s32 lastFrame;      // offset 0xB8
     f32 fov;            // offset 0xBC
     CamPose carFrame;   // offset 0xC0
-    u8 padF0[0x30];     // offset 0xF0
-    u8 listener[0x18];  // offset 0x120
-    u8 b138;           // offset 0x138
-    u8 b139;           // offset 0x139
-    u8 pad13A[0x2];
-    f32 f13C;          // offset 0x13C
-    u8* car;           // offset 0x140
-    u8 pad144[0x10];   // offset 0x144
-    f32 f154;          // offset 0x154
-    f32 f158;          // offset 0x158
-    u8 pad15C[0x44];   // offset 0x15C
-    f32 f1A0;          // offset 0x1A0
-    u8 pad1A4[0x48];   // offset 0x1A4
-    s16 h1EC;          // offset 0x1EC
-    u8 pad1EE[0x2];    // offset 0x1EE
-    f32 f1F0;          // offset 0x1F0
-    f32 prevFov;       // offset 0x1F4
-    CamPose prevPose;  // offset 0x1F8
+    u32 wF0[6];
+    u32 w108;
+    u32 w10C;
+    u32 w110;
+    u32 w114;
+    u32 w118;
+    u32 w11C;
+    CamVec3 vel;        // offset 0x120
+    CamVec3 carVel;     // offset 0x12C
+    u8 b138;            // offset 0x138
+    u8 b139;            // offset 0x139
+    f32 f13C;           // offset 0x13C
+    u8* car;            // offset 0x140
+    u8* lastCar;        // offset 0x144
+    u32 w148[3];        // offset 0x148
+    f32 f154;           // offset 0x154
+    f32 f158;           // offset 0x158
+    f32 f15C;           // offset 0x15C
+    u32 w160[3];        // offset 0x160
+    f32 f16C;           // offset 0x16C
+    f32 f170;           // offset 0x170
+    f32 f174;           // offset 0x174
+    u32 w178[2];        // offset 0x178
+    f32 f180;           // offset 0x180
+    f32 f184;           // offset 0x184
+    CamLink link;       // offset 0x188
+    f32 f18C;           // offset 0x18C
+    f32 f190;           // offset 0x190
+    f32 f194;           // offset 0x194
+    f32 f198;           // offset 0x198
+    f32 f19C;           // offset 0x19C
+    f32 f1A0;           // offset 0x1A0
+    u32 w1A4[12];       // offset 0x1A4
+    f32 f1D4;           // offset 0x1D4
+    u32 w1D8[5];        // offset 0x1D8
+    s16 h1EC;           // offset 0x1EC
+    f32 f1F0;           // offset 0x1F0
+    f32 prevFov;        // offset 0x1F4
+    CamPose prevPose;   // offset 0x1F8
 };
 
 // Walks the ideal racing line for camera placement.
@@ -95,8 +129,8 @@ void fn_8013530C(IdealFollower* f, int del);
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 k);
 }
 
-extern u8 lbl_80499950[];
-extern u8 lbl_80499920[];
+extern CamPose lbl_80499950;  // trackside camera frames
+extern CamPose lbl_80499920;
 
 extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
 
@@ -687,7 +721,7 @@ void fn_802678E8(u8* view, int idx) {
         flags = fn_80267EE0(c->mode);
     }
     fn_80268E94(c, idx);
-    ListenerRef l = {c->target, &c->pose, c->listener};
+    ListenerRef l = {c->target, &c->pose, &c->vel};
     fn_8020655C(l, idx);
     if (c->mode != 0x11) {
         CamPose blend;
@@ -934,7 +968,7 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
 void fn_80268D94(void) {
     IdealFollower f;
     __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
-    fn_80268BD4(lbl_80499920, PTR(f.line, 0x1C), 0.0f, 2.088f);
+    fn_80268BD4((u8*)&lbl_80499920, PTR(f.line, 0x1C), 0.0f, 2.088f);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -950,7 +984,7 @@ void fn_80268E00(void) {
     if (!pos.seg) {
         pos.seg = PTR(f.line, 0x1C);
     }
-    fn_80268BD4(lbl_80499950, pos.seg, pos.t, 4.176f);
+    fn_80268BD4((u8*)&lbl_80499950, pos.seg, pos.t, 4.176f);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -1090,9 +1124,259 @@ void fn_80268E94(CamRec* c, int idx) {
     }
 }
 
-void fn_802693F4(CamRec* c, u8* own, int idx) {}  // stub (495)
+void fn_802733F4(CamRec* c);
+void fn_80273BD0(CamRec* c);
+void fn_8027445C(CamRec* c);
+void fn_80274268(CamRec* c);
+void fn_802704D4(int type, CamRec* c);
+int fn_8026A698(CamRec* c, int idx);
+void fn_80274460(CamRec* c);
+void fn_8027847C(CamRec* c);
+void fn_802704E4(CamRec* c);
+void fn_80274660(int type, CamRec* c);
+void fn_8026DAA8(CamRec* c);
+void fn_80275FC0(CamRec* c);
+void fn_80276044(CamRec* c);
+void fn_80276054(CamRec* c);
+u32 fn_801769A8(void);
+void fn_80273490(int type, CamRec* c);
+void fn_80273604(CamRec* c, int which);
+void fn_80275B9C(f32 a, f32 b, f32 c, CamRec* rec);
+void fn_80277A14(CamRec* c, int idx);
+void fn_80278360(CamRec* c);
+void fn_802E317C(const char* fmt, ...);
+int fn_80268BA4(int mode);
+void fn_802682B0(u8* p);
+void fn_80268358(u8* p);
+extern f32 lbl_8055C4B0;
+extern const f32 lbl_80563CBC;  // rumble per speed
+extern const f32 lbl_80563CC0;
+extern const f32 lbl_80563CC4;
+extern const f32 lbl_80563CC8;
+extern const f32 lbl_80563CCC;
+extern const f32 lbl_80563CD0;
+extern const f32 lbl_80563CD4;
+extern const f32 lbl_80563CD8;
+extern const f32 lbl_80563CDC;
+extern const f32 lbl_80563CE0;
+extern const f32 lbl_80563CE4;
+extern const f32 lbl_80563CE8;
+extern const f32 lbl_80563CEC;
+extern const f32 lbl_80563CF0;  // smallest bump
 
-void fn_80269BB0(u8* p) {}  // stub (400)
+// Runs camera type c->mode for one frame: follows the car's frame, flags cuts (a mode change other than
+// between 4 and 25, or a new car), smooths the rumble, dispatches on the type and finally arms the hit
+// shake from the car's impact speed. Sets *own for types that fill the sound pose themselves.
+void fn_802693F4(CamRec* c, u8* own, int idx) {
+    u8* car = c->car;
+    const KVec3* off = (const KVec3*)(car + 0x30);
+    c->carFrame = *(CamPose*)(car + 0x3C);
+    c->carVel.v[0] = F32(car, 0x118);
+    c->carVel.v[1] = F32(car, 0x11C);
+    c->carVel.v[2] = F32(car, 0x120);
+    c->vel.v[0] = c->carVel.v[0];
+    c->vel.v[1] = c->carVel.v[1];
+    c->vel.v[2] = c->carVel.v[2];
+    KVec3 d;
+    KMulVec(&d, off, (const KFrame*)&c->carFrame);
+    c->carFrame.pos.v[0] += d.x;
+    c->carFrame.pos.v[1] += d.y;
+    c->carFrame.pos.v[2] += d.z;
+    if (c->mode != c->w4 && !(c->mode == 4 && c->w4 == 0x19) && !(c->w4 == 4 && c->mode == 0x19)) {
+        c->b138 = 1;
+    }
+    fn_802733F4(c);
+    if (c->lastCar != c->car) {
+        c->lastCar = c->car;
+        c->b139 = 1;
+        c->b138 = 1;
+    }
+    if (c->b138) {
+        fn_801E9DC4(&c->h1EC);
+    }
+    c->eye.v[0] = c->carFrame.pos.v[0];
+    c->eye.v[1] = c->carFrame.pos.v[1];
+    c->eye.v[2] = c->carFrame.pos.v[2];
+    if (!fn_801769F8()) {
+        f32 r = F32(c->car, 0x25D4) * lbl_80563CBC;
+        r = (lbl_80563C2C < r) ? lbl_80563C2C : r;
+        if (!c->b138 && !c->b139) {
+            c->f13C = c->f13C + lbl_80563CA0 * (r - c->f13C);
+        } else {
+            c->f13C = r;
+        }
+    }
+    if (!fn_8026A698(c, idx)) {
+        switch (c->mode) {
+        case 0:
+            fn_80273BD0(c);
+            break;
+        case 1:
+            fn_8027445C(c);
+            break;
+        case 2:
+            fn_80274268(c);
+            break;
+        case 3:
+            fn_80274460(c);
+            break;
+        case 0x19:
+            fn_8027847C(c);
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 0x17:
+            fn_802704D4(c->mode, c);
+            if (lbl_8055F488) {
+                fn_80267EF8((u8*)c);
+            }
+            break;
+        case 9:
+            fn_802704E4(c);
+            break;
+        case 0xA:
+        case 0x10:
+            fn_80274660(c->mode, c);
+            break;
+        case 0x11:
+            fn_8026DAA8(c);
+            *own = 1;
+            break;
+        case 0x12:
+            fn_802682B0((u8*)c);
+            *own = 1;
+            break;
+        case 0x15:
+            fn_80275FC0(c);
+            f32 zero = lbl_80563C20;
+            c->vel.v[0] = zero;
+            c->vel.v[1] = zero;
+            c->vel.v[2] = zero;
+            *own = 1;
+            break;
+        case 0x21:
+            fn_80276044(c);
+            *own = 1;
+            break;
+        case 0x16:
+            fn_80276054(c);
+            break;
+        case 0x18:
+            if ((fn_801769A8() >> 8) & 1) {
+                fn_80268358((u8*)c);
+            } else {
+                fn_8027445C(c);
+            }
+            break;
+        case 0xB:
+            fn_80273490(c->mode, c);
+            *own = 1;
+            break;
+        case 0xC:
+            fn_80273604(c, 1);
+            break;
+        case 0xD:
+            fn_80273604(c, 2);
+            break;
+        case 0xE:
+            fn_80273604(c, 3);
+            break;
+        case 0xF:
+            fn_80273604(c, 4);
+            break;
+        case 0x13:
+            c->pose = lbl_80499920;
+            break;
+        case 0x14:
+            c->pose = lbl_80499950;
+            break;
+        case 0x1A:
+            fn_80275B9C(lbl_80563CC0, lbl_80563CC4, lbl_80563CC8, c);
+            break;
+        case 0x1E:
+            fn_80275B9C(lbl_80563CDC + lbl_80563C20 * lbl_80563CE0, lbl_80563CD4 + lbl_80563C20 * lbl_80563CD8,
+                        lbl_80563CCC + lbl_80563C20 * lbl_80563CD0, c);
+            break;
+        case 0x1B:
+            fn_802704D4(7, c);
+            break;
+        case 0x1C:
+            fn_80275B9C(lbl_80563CA4, lbl_80563CE4, lbl_80563CC8, c);
+            break;
+        case 0x1D:
+            fn_802704D4(7, c);
+            break;
+        case 0x20:
+            fn_80277A14(c, idx);
+            break;
+        default:
+            fn_802E317C("Unrecognized camera type (%d) (id=%d)", c->mode, idx);
+            break;
+        }
+    }
+    fn_80278360(c);
+    c->w4 = c->mode;
+    c->f194 = c->fov;
+    if (fn_80268BA4(c->mode) && !c->b138 && !c->b139) {
+        f32 w;
+        f32 now = lbl_8055E3C8;
+        f32 scale = lbl_80563CE8 * lbl_8055C4B0;
+        f32 k = (c->f1F0 - now) / ((now - lbl_80563CEC) - now);
+        k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
+        k = (k > lbl_80563C20) ? k : lbl_80563C20;
+        w = lbl_80563C20 + k * lbl_80563C2C;
+        f32 s = PSVECMag((const f32*)(c->car + 0x26B4)) * scale;
+        s = (lbl_80563CEC < s) ? lbl_80563CEC : s;
+        f32 bump = w * s;
+        f32 e = ShakeEase((lbl_80563C6C - (now - c->f158)) / lbl_80563C6C);
+        if (bump > lbl_80563CF0 && bump > c->f154 * e) {
+            c->f158 = now;
+            c->f154 = bump;
+        }
+    } else {
+        c->f158 = lbl_80563C20;
+        c->f154 = lbl_80563C20;
+    }
+}
+
+void fn_80273BD0(CamRec* c);
+void fn_8027445C(CamRec* c);
+void fn_80274268(CamRec* c);
+void fn_802704D4(int type, CamRec* c);
+void fn_802E30C8(const char* fmt, ...);
+
+// Where camera type `type` would put player idx's camera right now: runs it on a copy of the record and
+// returns the pose and fov, leaving the live camera alone.
+void fn_80269BB0(int idx, int type, CamPose* pose, f32* fov) {
+    CamRec c = lbl_80499080[idx];
+    c.w4 = 0x15;
+    c.mode = type;
+    c.b138 = 1;
+    switch (type) {
+    case 1:
+        fn_8027445C(&c);
+        break;
+    case 0:
+        fn_80273BD0(&c);
+        break;
+    case 4:
+    case 5:
+        fn_802704D4(type, &c);
+        break;
+    case 2:
+        fn_80274268(&c);
+        break;
+    case 0xB:
+    case 0x11:
+        fn_802E30C8("Physcam: get_camera_frame: Unsupported camera to live transition to %d", type);
+        break;
+    }
+    *pose = c.pose;
+    *fov = c.fov;
+}
 
 void fn_8026A1F0(s32 a, int i, u8 b) {
     S32(fn_80267EE4(i), 0x14) = a;
@@ -1150,7 +1434,7 @@ void fn_8026A394(u8* car) {
     }
 }
 
-void fn_8026A49C(u8* p) { fn_80269BB0(p); }
+void fn_8026A49C(int idx, int type, CamPose* pose, f32* fov) { fn_80269BB0(idx, type, pose, fov); }
 
 void fn_8026A4A0(int i, CamPose* out, f32* fov) {
     CamRec* e = &lbl_80499080[i];
