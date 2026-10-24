@@ -1328,7 +1328,7 @@ void fn_801965AC(u8* d) {
     fn_801EA18C((RVec3*)&pos, &up, 0);
     f32 h = MAX(0.0f, F32(CAR(d), 0x64) - pos.v[1]);
     f32 vy = MIN(F32(CAR(d), 0x11C), -0.01f);
-    bool air = -h / vy < lbl_80562140;
+    bool air = -h / vy < 1.0f;
     f32 gain = 5.0f;
     if (air) {
         f32 a = gain * PSVECDotProduct(&up, CAR(d) + 0x54);
@@ -1338,7 +1338,7 @@ void fn_801965AC(u8* d) {
         a = MIN(1.0f, a);
         fn_8018AE34(CAR(d), MAX(a, -1.0f));
     } else {
-        f32 k = MIN(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / lbl_80562140);
+        f32 k = MIN(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / 1.0f);
         k = MAX(k, 0.0f);
         f32 a = gain * (F32(CAR(d), 0x58) - (0.7f + k * lbl_80562248));
         a = MIN(1.0f, a);

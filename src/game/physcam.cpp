@@ -527,9 +527,9 @@ static inline f32 CamEase(f32 x) {
         return lbl_80563F50;
     }
     if (x > lbl_80563F48) {
-        return lbl_80563F54 * x * x * x + lbl_80563F58 * x * x;
+        return -2.0f * x * x * x + 3.0f * x * x;
     }
-    return lbl_80563F54 * x * x * x - lbl_80563F58 * x * x;
+    return -2.0f * x * x * x - 3.0f * x * x;
 }
 
 // Per-frame TV (replay) camera: picks the best region's camera on a region change, eases moving cameras
