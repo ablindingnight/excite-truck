@@ -1110,9 +1110,7 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         m->lodModels[i] = fn_802C6FC0(p, inst, dir);
         m->drawModels[i] = m->lodModels[i];
         int r = 0;
-        if (fn_801E320C(m->lodModels[i], "neck") || fn_801E320C(m->lodModels[i], "butt")) {
-            r = 1;
-        }
+        r = fn_801E320C(m->lodModels[i], "neck") || fn_801E320C(m->lodModels[i], "butt") ? 1 : r;
         m->lods[i].rider = r;
         m->lods[i].wheels = fn_801E320C(m->lodModels[i], "wheel");
     }
