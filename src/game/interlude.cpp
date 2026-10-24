@@ -290,6 +290,79 @@ static const char* const lbl_80562960 = "speech\0music";
 static const char* const lbl_80562964 = "world\0start\0car\0\0\0\0";
 static const char* const lbl_80562968 = "linear\0hermite\0\0\0\0";
 
+// A camera frame: axes (rows) and position, as in camframe.
+struct IFrame {
+    IVec3 axes[3];  // offset 0x0
+    IVec3 pos;      // offset 0x24
+};
+
+struct IQuat {
+    f32 x, y, z, w;
+};
+
+extern "C" double sqrt(double x);
+extern "C" void fn_8012F57C(IQuat* out, IQuat* a, IQuat* b, f32 t);  // slerp
+
+static inline void FrameToQuatAxis(f32 (*m)[3], IQuat* q) {
+    f32* v = &q->x;
+    int i = 0;
+    if (m[1][1] > m[0][0]) {
+        i = 1;
+    }
+    if (m[2][2] > m[i][i]) {
+        i = 2;
+    }
+    int j = (i + 1) % 3;
+    int k = (j + 1) % 3;
+    f32 s = sqrt(m[i][i] - (m[j][j] + m[k][k]) + 1.0f);
+    v[i] = 0.5f * s;
+    s = 0.5f / s;
+    q->w = (m[j][k] - m[k][j]) * s;
+    v[j] = (m[i][j] + m[j][i]) * s;
+    v[k] = (m[i][k] + m[k][i]) * s;
+}
+
+static inline void FrameToQuat(const IFrame* f, IQuat* q) {
+    const f32(*m)[3] = (const f32(*)[3])f;
+    f32 tr = f->axes[0].x + f->axes[1].y + f->axes[2].z;
+    if (tr > 0.0f) {
+        f32 s = sqrt(tr + 1.0f);
+        q->w = 0.5f * s;
+        s = 0.5f / s;
+        q->x = (m[1][2] - m[2][1]) * s;
+        q->y = (m[2][0] - m[0][2]) * s;
+        q->z = (m[0][1] - m[1][0]) * s;
+    } else {
+        FrameToQuatAxis((f32(*)[3])f, q);
+    }
+}
+
+// The rotation of a unit quaternion.
+static inline void QuatToFrame(IFrame* f, const IQuat* q) {
+    f32(*m)[3] = (f32(*)[3])f;
+    f32 x2 = q->x + q->x;
+    f32 y2 = q->y + q->y;
+    f32 z2 = q->z + q->z;
+    f32 xx = q->x * x2;
+    f32 xy = q->x * y2;
+    f32 xz = q->x * z2;
+    f32 yy = q->y * y2;
+    f32 yz = q->y * z2;
+    f32 zz = q->z * z2;
+    f32 wx = q->w * x2;
+    f32 wy = q->w * y2;
+    f32 wz = q->w * z2;
+    m[0][0] = 1.0f - (yy + zz);
+    m[1][0] = xy - wz;
+    m[2][0] = xz + wy;
+    m[0][1] = xy + wz;
+    m[1][1] = 1.0f - (xx + zz);
+    m[2][1] = yz - wx;
+    m[0][2] = xz - wy;
+    m[1][2] = yz + wx;
+    m[2][2] = 1.0f - (xx + yy);
+}
+
 extern "C" {
 
 int fn_801C3B7C(const void* a, const void* b);
@@ -311,8 +384,21 @@ f32 fn_801C2F58(int n, f32 x) {
     return r;
 }
 
-// Event loader body (placeholder).
-void fn_801C2FF4(void) {}
+// Blends two camera frames: orientation through quaternion slerp, position linearly.
+void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
+    IQuat qa;
+    IQuat qb;
+    IQuat q;
+    IVec3 pos;
+    FrameToQuat(a, &qa);
+    FrameToQuat(b, &qb);
+    fn_8012F57C(&q, &qa, &qb, t);
+    QuatToFrame(out, &q);
+    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
+    pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
+    pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
+    out->pos = pos;
+}
 
 // Rounds to hundredths.
 f32 fn_801C3450(f32 t) {
