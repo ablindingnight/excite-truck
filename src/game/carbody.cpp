@@ -374,12 +374,14 @@ int fn_80189BDC(u8* p) {
     return fn_801B83A0()->sCC(S32(p, 0x1EC));
 }
 
+extern f32 lbl_80561CAC;  // 0.0
+
 void fn_80189C64(u8* p) {
     if (U8(p, 0x26AC)) {
         U8(p, 0x26AC) = 0;
         fn_801BF1B8(PTR(p, 0x1EC), 0);
-        F32(p, 0x26A8) = 0.0f;
     }
+    F32(p, 0x26A8) = lbl_80561CAC;
 }
 
 void fn_80189CB4(u8* p) {}  // stub (245)
