@@ -182,7 +182,7 @@ struct CreditTextDescFields {
     f32 lifetime,fadeTime,size,sizeDelta;
 };
 struct CreditGlyphBatchFields {void* items;int count,capacity;void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
-struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
+struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
 struct CreditBackgroundHeader {CreditBackgroundHeader(const void* t){state=0;methods=t;}const void* methods;u8 reserved4[0x10];int state;};
 struct CreditBackgroundFields:CreditBackgroundHeader {CreditBackgroundFields();CreditFontGroupFields fire,smoke;};
 typedef char CreditDescriptorSize[sizeof(CreditTextDescFields)==0x3C?1:-1];
@@ -298,12 +298,12 @@ int fn_80235FD8(int);
 f64 cos(f64);f64 sin(f64);
 
 }
-static inline void CreditSpawnGlyph(CreditFontGroupFields* self,f32 x,f32 y) {
+inline void CreditFontGroupFields::Spawn(const ValPoint& position) {CreditFontGroupFields* self=this;
     self->glyphs.elapsed+=self->desc.emissionRate;
     if(self->glyphs.elapsed>(1.0f) && self->glyphs.count+1<=self->glyphs.capacity) {
         self->glyphs.elapsed-=(1.0f);
         CreditGlyphFields* glyph=&((CreditGlyphFields*)self->glyphs.items)[self->glyphs.count++];
-        glyph->position.x=x;glyph->position.y=y;
+        glyph->position.x=position.x;glyph->position.y=position.y;
         f32 angle=fn_80129DC4(6,self->desc.angleMin,self->desc.angleMax);
         f32 speed=fn_80129DC4(6,self->desc.speedMin,self->desc.speedMax);
         glyph->velocity.x=speed*(f32)cos((f64)angle);
@@ -698,9 +698,9 @@ extern "C" void fn_80264A5C(f32 x,f32 y) {
     fn_80230C30(&screenX,&screenY,(int)x,(int)y);
     screenX+=x-(f32)(int)x;screenY-=y-(f32)(int)y;
     CreditBackgroundFields* self=(CreditBackgroundFields*)lbl_8055F448;
-    CreditSpawnGlyph(&self->fire,screenX,screenY);
+    ValPoint firePosition={screenX,screenY};self->fire.Spawn(firePosition);
     self=(CreditBackgroundFields*)lbl_8055F448;
-    CreditSpawnGlyph(&self->smoke,screenX,(5.0f)+screenY);
+    ValPoint smokePosition={screenX,(5.0f)+screenY};self->smoke.Spawn(smokePosition);
 }
 
 extern "C" void fn_80264D5C(CreditBackgroundFields* self) {
