@@ -744,8 +744,8 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
     u32 maxDiff = 0;
     s32 maxIndex = 0;
     s32 allOdd = 1;
-    u32 *ahead = values + offset;
     for (i = 0; i < count - offset; i++) {
+        u32 *ahead = values + offset;
         u32 diff = ahead[i] - values[i];
         if (diff > maxDiff) {
             maxDiff = diff;
@@ -4674,10 +4674,10 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
 // of skipped blocks in the luma plane (in block pairs).
 u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyframe, s32 bufs, s32 flags,
                 s32 videoFlags) {
+    s32 cur;
     BinkFrameBuffers8011 *v = video;
     u32 result;
     s32 old = v->unk14;
-    s32 cur;
     u32 *end;
     if (v->frames[old ^ 1].y.buffer != 0) {
         v->unk14 = old ^ 1;
