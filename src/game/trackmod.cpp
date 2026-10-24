@@ -465,21 +465,23 @@ void fn_801F3198(TVec* v);
 void fn_801F3E60(void);
 void fn_801F3E64(void);
 
+extern const f32 lbl_80562F48;  // -1.0
+
 // Billboard frame facing the camera, upright.
 void fn_801F1C24(TFrame* f) {
     TCam* cam = fn_802C86DC();
     f->y.x = 0.0f;
     f->y.y = 1.0f;
     f->y.z = 0.0f;
-    f->z.x = -1.0f * cam->dir[0];
-    f->z.y = -1.0f * cam->dir[1];
-    f->z.z = -1.0f * cam->dir[2];
+    f->z.x = cam->dir[0] * lbl_80562F48;
+    f->z.y = cam->dir[1] * lbl_80562F48;
+    f->z.z = cam->dir[2] * lbl_80562F48;
     PSVECCrossProduct(&f->y, &f->z, &f->x);
     if (PSVECDotProduct(&f->x, &f->x) > 0.0001f) {
         PSVECNormalize(&f->x, &f->x);
     } else {
-        f->x.y = 0.0f;
         f->x.x = 1.0f;
+        f->x.y = 0.0f;
         f->x.z = 0.0f;
     }
     PSVECCrossProduct(&f->z, &f->x, &f->y);
