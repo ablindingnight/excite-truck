@@ -90,7 +90,9 @@ void fn_80147230(LayoutItem* item, const char* fmt, ...);
 void fn_801476C4(LayoutItem* item);
 void fn_80011A2C(void);
 void fn_802C9904(void);
-int fn_800075A0(int player);
+}  // extern "C"
+int fn_800075A0(int);
+extern "C" {
 int fn_80137CFC(int player);
 int fn_802E8504(int pad);
 int fn_80137C74(void);

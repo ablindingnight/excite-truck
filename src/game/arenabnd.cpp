@@ -16,7 +16,9 @@ void fn_80128658(void* p);                     // MemFree
 void fn_801286A0(void* p, s32 shrink);         // MemShrink
 ValueTable* fn_80131810(const char* name);     // load value file, quiet
 void fn_80131818(ValueTable* t);
+}  // extern "C"
 const char* fn_8000AC2C(void);
+extern "C" {
 }
 
 const char* GetEventTypeName(u32 type);

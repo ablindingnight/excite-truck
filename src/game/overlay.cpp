@@ -245,7 +245,9 @@ extern s32 lbl_8055CFF4;
 void fn_801E88B4(int* x, int* y, int* w, int* h, int player);
 void fn_802C86F0(Viewport* vp, int x, int y, int w, int h);
 int fn_801E89EC(void);
+}  // extern "C"
 void fn_8000D75C(void);
+extern "C" {
 void fn_8001123C(int player);
 void fn_80011A2C(void);
 void fn_802C8750(Viewport* vp, int unk);
@@ -281,7 +283,9 @@ void fn_8014784C(Layout* layout, const char* name, const char* set, int index);
 void fn_80230F78(u8* alpha, f32* scale, u32* color, int unk);
 void fn_80147940(Layout* layout, LayoutArtItem* item, const char* set, int index);
 void fn_801476C4(LayoutItem* item);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 f32 fn_80011E34(void);
 f32 fn_80011E54(void);
 ResultRacer* fn_801EA9B0(int index);
@@ -297,14 +301,20 @@ void fn_80011F64(void);
 int fn_80137C74(void);
 void* fn_802090D4(const char* name);
 void fn_801331C4(int unk, const char* name, f32* value);
-void fn_8001DB54(void);
-void fn_8001DD6C(void);
+}  // extern "C"
+void InitOverlays(void);
+extern "C" {
+}  // extern "C"
+void ShutdownOverlays(void);
+extern "C" {
 void fn_80209110(void** p);
 void fn_8000FB44(void);
 void fn_800120BC(void);
 void fn_8000F158(void);
 void fn_80209190(void* p, f32 value);
-void fn_8001DEA8(void);
+}  // extern "C"
+void ResetOverlays(void);
+extern "C" {
 void fn_80011A50(void);
 void* fn_801E7E3C(void);
 f32 fn_801E7E18(void);
@@ -320,7 +330,9 @@ int fn_801DF238(int key);
 int fn_802E4A10(void);
 int fn_80137C98(int unk);
 void fn_80276DC8(int player);
-void fn_8000C630(int a, int b);
+}  // extern "C"
+void fn_8000C630(long, int);
+extern "C" {
 f32 fn_80011E44(void);
 f32 fn_80011E60(void);
 void fn_8000FBE8(f32 x, f32 y, f32 scale);
@@ -1034,7 +1046,7 @@ void ResultsOverlay::DrawMenu(void) {
             }
             fn_801476C4(&text);
         }
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
 }
 
@@ -1100,7 +1112,7 @@ void fn_80006D9C(void) {
     fn_80005464();
     fn_80005C88();
     fn_80011A5C(lbl_8055D350->numPlayers);
-    fn_8001DB54();
+    InitOverlays();
     fn_801B83A0()->vfF8();
     fn_800070DC();
 }
@@ -1108,7 +1120,7 @@ void fn_80006D9C(void) {
 void fn_80006E54(void) {
     int i;
     fn_801B83A0()->vfFC();
-    fn_8001DD6C();
+    ShutdownOverlays();
     for (i = 0; i < lbl_8055D350->numPlayers; i++) {
         delete lbl_8034EEB8.players[i].racing;
     }
@@ -1166,7 +1178,7 @@ void fn_800070DC(void) {
         lbl_8034EEB8.players[i].racing->Reset();
         lbl_8034EEB8.players[i].next = 0;
     }
-    fn_8001DEA8();
+    ResetOverlays();
     fn_80011A50();
     fn_80005464();
 }

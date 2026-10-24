@@ -188,7 +188,9 @@ TrackMap* fn_80019C68(int player);
 void fn_8001A04C(TrackMap* map);
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h);
 Layout* fn_80145E70(const char* name);
-void fn_8000C630(s32 cam, int player);
+}  // extern "C"
+void fn_8000C630(long, int);
+extern "C" {
 int fn_8026B0C0(int player);
 GameUI* fn_801B83A0(void);
 void fn_801DF93C(int player);
@@ -196,8 +198,12 @@ void fn_8000FBE4(void);
 int fn_801E866C(int player);
 int fn_801E89C8(int player);
 EventInfo* fn_801E87A8(void);
+}  // extern "C"
 int fn_8000D75C(void);
-void fn_8001DF84(int view);
+extern "C" {
+}  // extern "C"
+void UpdateOverheatOverlay(int);
+extern "C" {
 int fn_8027AA48(void);
 void fn_800111A4(const char* text, int a, int b, int c, int flags, f32 scale);
 void fn_80010F38(const char* text, int a, int b, int flags, f32 scale);
@@ -738,7 +744,7 @@ void RacingOverlay::Update(void) {
             }
             if (lbl_8055D350->event->type & 0x80000) {
                 DrawHeat();
-                fn_8001DF84(lbl_8055D350->view);
+                UpdateOverheatOverlay(lbl_8055D350->view);
             }
         }
     }

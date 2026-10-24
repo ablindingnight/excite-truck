@@ -1114,7 +1114,9 @@ void fn_801E9DC4(void* q);
 f32 fn_801DDC8C(void* q, f32 x, f32 z);
 int fn_801DDA84(void* q, f32 x, f32 z, f32* out, f32 eps, int n);
 f32 fn_801E7E24(void);
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 void fn_80206750(Sound* s, int car, int pan);
 }
 

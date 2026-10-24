@@ -51,7 +51,9 @@ struct SFConfig {
 struct DrawList;
 
 extern "C" {
+}  // extern "C"
 SFConfig* fn_8000AC38(void);
+extern "C" {
 int fn_80161C38(void);
 SFPathSet* fn_80156A40(void);
 void fn_801352B8(SFIter* it);

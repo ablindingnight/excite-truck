@@ -47,7 +47,9 @@ struct V3 {
 };
 
 extern "C" {
+}  // extern "C"
 Event* fn_8000AC38(void);
+extern "C" {
 RaceCarRec* fn_8017960C(int id);
 }
 

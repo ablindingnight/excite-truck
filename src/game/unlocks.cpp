@@ -12,8 +12,12 @@ void fn_80131818(ValueTable* table);
 void fn_80131234(const char* event_path);
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));
 s32 fn_8027DEAC(void);
-s32 fn_8001EF60(int);
-s32 fn_8001EFC0(int kind, const char* chassis);
+}  // extern "C"
+s32 AchievementsGet(int);
+extern "C" {
+}  // extern "C"
+s32 AchievementsGetModelStat(int, const char*);
+extern "C" {
 int fn_8027DE68(int);
 }
 
@@ -87,7 +91,7 @@ s32 GetExcitePoints(void) {
 }
 
 s32 GetCarPoints(void) {
-    return fn_8001EF60(0);
+    return AchievementsGet(0);
 }
 
 int CompareUnlockables(const void* a, const void* b) {
@@ -258,8 +262,8 @@ BOOL IsSpecialChassisUnlocked(const char* name) {
         if (lbl_8055D588) {
             return TRUE;
         }
-        races = fn_8001EFC0(0, name) >= req->races_run;
-        grades = fn_8001EFC0(1, name) >= req->aaas;
+        races = AchievementsGetModelStat(0, name) >= req->races_run;
+        grades = AchievementsGetModelStat(1, name) >= req->aaas;
         if (races || grades) {
             return TRUE;
         }
@@ -284,8 +288,8 @@ void ShowUnlockReason(const char* name) {
     BOOL races;
 
     if (req != NULL) {
-        races = fn_8001EFC0(0, name) >= req->races_run;
-        if (fn_8001EFC0(1, name) >= req->aaas) {
+        races = AchievementsGetModelStat(0, name) >= req->races_run;
+        if (AchievementsGetModelStat(1, name) >= req->aaas) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_S_GRADES");
         } else if (races) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_RACES_RUN");

@@ -21,9 +21,15 @@ const char* fn_80204EA0(const char* name);  // tuning string
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 f32 fn_8013672C(void);                      // center line length
 s32 fn_800081F0(const void* race);                // laps
-f32 fn_801429D0(f32 a, f32 b);              // max
-f32 fn_8014C8B4(f32 x0, f32 x1, f32 y0, f32 y1, f32 x);  // remap
-f32 fn_8014C8F8(f32 x, f32 lo, f32 hi);     // clamp
+}  // extern "C"
+f32 Max(float, float);
+extern "C" {
+}  // extern "C"
+f32 Remap(float, float, float, float, float);
+extern "C" {
+}  // extern "C"
+f32 Clamp(float, float, float);
+extern "C" {
 int fn_80179630(int view);
 int fn_801B8570(int id);
 void fn_80139E18(void* b);
@@ -551,12 +557,12 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
         diff = d - target;
         if (fn_80166F78(&s->setTime)) {
             f32 f;
-            fn_80166F3C(&s->setTime, fn_801429D0(0.0f, lbl_8042FE38.setFreq - 0.5f),
+            fn_80166F3C(&s->setTime, Max(0.0f, lbl_8042FE38.setFreq - 0.5f),
                         lbl_8042FE38.setFreq + 0.5f);
-            f = fn_8014C8B4(lbl_8042FE38.minLon, lbl_8042FE38.maxLon, lbl_8042FE38.maxSf, lbl_8042FE38.minSf,
+            f = Remap(lbl_8042FE38.minLon, lbl_8042FE38.maxLon, lbl_8042FE38.maxSf, lbl_8042FE38.minSf,
                             diff);
             if (s->close = d > lbl_8042FE38.minCloseLon && d < lbl_8042FE38.maxCloseLon) {
-                f = fn_8014C8F8(f, lbl_8042FE38.minCloseSf, lbl_8042FE38.maxCloseSf);
+                f = Clamp(f, lbl_8042FE38.minCloseSf, lbl_8042FE38.maxCloseSf);
             }
             fn_80166E68(&s->sf, lbl_8042FE38.speedAdjust + f * lbl_8055E31C);
         }

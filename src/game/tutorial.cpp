@@ -316,7 +316,9 @@ void PSVECCrossProduct(const void* a, const void* b, void* c);
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
 void fn_802C6CF8(s32 model);
-void fn_8000C630(int a, int b);
+}  // extern "C"
+void fn_8000C630(long, int);
+extern "C" {
 s32 fn_802C9950(s32 a);
 s32 fn_802C9994(s32 a);
 void fn_802A96E8(void* pts, int n, u32 color, s32 tex, int a);

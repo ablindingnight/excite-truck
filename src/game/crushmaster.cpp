@@ -1185,7 +1185,9 @@ void PSVECNormalize(const void* src, void* dst);
 f32 fn_801B306C(void);  // race time
 int fn_80161C38(void);
 int fn_80179650(void);
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 void fn_801CB5DC(int id, s32 total, s32 grade);
 void fn_801CB648(int id, f32 t, int done);
 int fn_80179630(int view);

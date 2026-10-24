@@ -323,7 +323,9 @@ void fn_801F4CD8(void);
 void fn_801EA31C(s32* ev);
 void fn_801EA394(void);
 void fn_801FFB6C(void);
+}  // extern "C"
 void fn_8000A868(void);
+extern "C" {
 void fn_801B826C(RaceSetup* s);
 void fn_80136764(void);
 void fn_8013477C(RaceSetup* s);

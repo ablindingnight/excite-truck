@@ -15,8 +15,12 @@ void fn_802103BC(void);
 void fn_80210444(void);
 u8 fn_802104B8(void);
 void fn_80210688(int a);
-u8 fn_8000D75C(void);    // paused
+}  // extern "C"
+u8 fn_8000D75C(void);
+extern "C" {
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 int fn_801B85CC(void);   // race over
 int fn_801E8838(void);
 int fn_8012E938(const char* name);  // resource ready

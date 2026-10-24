@@ -132,7 +132,9 @@ extern "C" {
 RaceSetup* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 int fn_80161C38(void);
-void fn_8001DF08(int id, s32 score);
+}  // extern "C"
+void UpdateScoreOverlays(int, int);
+extern "C" {
 int fn_801E866C(int view);
 const char* fn_80131234(const char* key);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
@@ -141,14 +143,18 @@ s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
-f32 fn_8014C8B4(f32 lo, f32 hi, f32 a, f32 b, f32 x);
+}  // extern "C"
+f32 Remap(float, float, float, float, float);
+extern "C" {
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 f32 fn_80144BD8(f32 t);
 void fn_80147940(ILayout* l, Box* b, const char* art, int part);
 void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801476C4(TextElem* e);
 int fn_802C9A58(void);
-void fn_8014C72C(ILayout* l, const char* name);
+}  // extern "C"
+void DrawText(ILayout*, const char*);
+extern "C" {
 void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 }
 
@@ -170,7 +176,9 @@ void fn_802C9900(f32 alpha);
 void fn_802C9904(void);
 void fn_8016A438(void);
 int fn_801B8514(void);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 void fn_802AE118(void* layout);
 void fn_801B0C78(int car);
 }
@@ -245,7 +253,9 @@ void fn_801B7C8C(struct Respawn* r, V2* pos, V2* dir);
 
 extern "C" {
 f32 fn_801B306C(void);
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 s32 fn_8016A30C(void* rings);
 s32 fn_8016A780(const char* name, void* rings);
 s32 fn_8016A878(const char* name);
@@ -1597,7 +1607,7 @@ int RingChalMaster::vf3C(int view) {
             f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
             TextElem* body = layout->Find("star_body_0");
             TextElem* denom = layout->Find("star_body_1");
-            fn_8001DF08(fn_801E866C(view), 0);
+            UpdateScoreOverlays(fn_801E866C(view), 0);
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
@@ -1747,7 +1757,7 @@ int RingChalMaster::vf5C(int p) {
         }
     }
     if (vf68()) {
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
     return results.state != 4;
 }
@@ -1993,7 +2003,7 @@ void RingChalMaster::vf4C(int view) {
     {
         PlayerData* p = players.data[fn_801E866C(view)];
         if (p) {
-            fn_8001DF08(p->index, p->score);
+            UpdateScoreOverlays(p->index, p->score);
         }
     }
     l = layout;
@@ -2037,15 +2047,15 @@ void RingChalMaster::vf4C(int view) {
                         Box star;
                         star = *starScore;
                         if (dt < a) {
-                            f32 k = fn_8014C8B4(0.05f * j, 0.2f + 0.05f * j, 0.0f, 1.0f, dt);
+                            f32 k = Remap(0.05f * j, 0.2f + 0.05f * j, 0.0f, 1.0f, dt);
                             star.pos.x = fn_80144C80(sx, x0 + j * star.w, fn_80144BD8(k));
                             star.pos.y = fn_80144C80(sy, y0, fn_80144BD8(k));
                             ALPHA(star.color, k);
                         } else if (dt > 0.3f + a + 0.05f * j && dt - (0.3f + a) < b) {
                             f32 u = dt - a - 0.3f;
                             if (u > 0.05f * j) {
-                                f32 k = fn_8014C8B4(0.0f, 0.25f, 0.0f, 1.0f, u - 0.05f * j);
-                                f32 k2 = fn_8014C8B4(0.0f, 0.2f, 0.0f, 1.0f, u - 0.05f * j);
+                                f32 k = Remap(0.0f, 0.25f, 0.0f, 1.0f, u - 0.05f * j);
+                                f32 k2 = Remap(0.0f, 0.2f, 0.0f, 1.0f, u - 0.05f * j);
                                 star.pos.x = fn_80144C80(x0 + j * star.w, cx, k);
                                 star.pos.y = fn_80144C80(y0, cy, k);
                                 ALPHA(star.color, 1.0f - k2);
@@ -2059,7 +2069,7 @@ void RingChalMaster::vf4C(int view) {
                     }
                 }
                 if (dt < 0.2f) {
-                    f32 k = fn_8014C8B4(0.0f, 0.2f, 0.0f, 1.0f, dt);
+                    f32 k = Remap(0.0f, 0.2f, 0.0f, 1.0f, dt);
                     txt.scale = fn_80144C80(4.0f, txt.scale, k);
                     ALPHA(txt.color, k);
                 }
@@ -2069,7 +2079,7 @@ void RingChalMaster::vf4C(int view) {
             Box hl;
             f32 k;
             hl = icon;
-            k = fn_8014C8B4(0.0f, 0.75f, 0.0f, 1.0f, arena.f28);
+            k = Remap(0.0f, 0.75f, 0.0f, 1.0f, arena.f28);
             hl.w = fn_80144C80(icon.w, 2.5f * icon.w, k);
             hl.h = fn_80144C80(icon.h, 2.5f * icon.h, k);
             hl.pos.x = fn_80144C80(icon.pos.x, icon.pos.x - (2.5f * icon.w - icon.w) * 0.5f, k);
@@ -2092,11 +2102,11 @@ void RingChalMaster::vf4C(int view) {
                     if (!fn_80141FA0(arena.sMissFlag)) {
                         fn_80142B60(arena.sMissFlag);
                     }
-                    k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, dt);
+                    k = Remap(0.0f, 0.1f, 0.0f, 1.0f, dt);
                     m.scale = fn_80144C80(10.0f, m.scale, k);
                     ALPHA(m.color, k);
                 } else if (dt > 1.6f) {
-                    f32 k = fn_8014C8B4(1.5f, 1.6f, 0.0f, 1.0f, dt);
+                    f32 k = Remap(1.5f, 1.6f, 0.0f, 1.0f, dt);
                     ALPHA(m.color, 1.0f - k);
                 }
                 fn_801476C4(&m);
@@ -2109,11 +2119,11 @@ void RingChalMaster::vf4C(int view) {
                     if (!fn_80141FA0(arena.sMissFlag)) {
                         fn_80142B60(arena.sMissFlag);
                     }
-                    k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, d2);
+                    k = Remap(0.0f, 0.1f, 0.0f, 1.0f, d2);
                     n.scale = fn_80144C80(10.0f, n.scale, k);
                     ALPHA(n.color, k);
                 } else if (d2 > 1.6f) {
-                    f32 k = fn_8014C8B4(1.6f, 1.7f, 0.0f, 1.0f, d2);
+                    f32 k = Remap(1.6f, 1.7f, 0.0f, 1.0f, d2);
                     n.scale = fn_80144C80(n.scale, 10.0f, k);
                     ALPHA(n.color, 1.0f - k);
                 }
@@ -2125,7 +2135,7 @@ void RingChalMaster::vf4C(int view) {
         Box arrow;
         arrow = *arrowIcon;
         if (arena.curSet > 0) {
-            f32 k = fn_8014C8B4(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
+            f32 k = Remap(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
             int s = arena.curSet;
             arrow.pos.y = fn_80144C80(arrowIcon->pos.y + (s - 1) * 40, arrowIcon->pos.y + s * 40, fn_80144BD8(k));
         }
@@ -2163,7 +2173,7 @@ void RingChalMaster::vf4C(int view) {
                             fn_80142B60(arena.sFail);
                         }
                     }
-                    k = fn_8014C8B4(0.0f, 0.15f, 0.0f, 1.0f, d);
+                    k = Remap(0.0f, 0.15f, 0.0f, 1.0f, d);
                     ALPHA(nx.color, k);
                     nx.w = fn_80144C80(10.0f * next->w, next->w, k);
                     nx.h = fn_80144C80(10.0f * next->h, next->h, k);
@@ -2171,10 +2181,10 @@ void RingChalMaster::vf4C(int view) {
                     nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h * 0.5f, next->pos.y, k);
                 }
                 if (d > 1.35f) {
-                    f32 k = fn_8014C8B4(1.35f, 1.9f, 0.0f, 1.0f, d);
+                    f32 k = Remap(1.35f, 1.9f, 0.0f, 1.0f, d);
                     nx.pos.x = fn_80144C80(next->pos.x, target->pos.x, fn_80144BD8(k));
                     nx.pos.y = fn_80144C80(next->pos.y, target->pos.y, fn_80144BD8(k));
-                    ALPHA(tr.color, 1.0f - fn_8014C8B4(1.5f, 1.65f, 0.0f, 1.0f, d));
+                    ALPHA(tr.color, 1.0f - Remap(1.5f, 1.65f, 0.0f, 1.0f, d));
                 }
                 switch (arena.stats->At(arena.curSet)->best) {
                 case 15:
@@ -2201,7 +2211,7 @@ void RingChalMaster::vf4C(int view) {
                 fn_80147940(l, &tr, "ring_5_art", 0);
                 break;
             }
-            fn_8014C72C(l, "ring_label");
+            DrawText(l, "ring_label");
         }
     }
 }

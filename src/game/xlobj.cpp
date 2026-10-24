@@ -33,7 +33,9 @@ void StatsUpdate__Fv(struct Vec3* v);
 void fn_80144D64(struct Vec3* d, const struct Vec3* s);
 const struct Vec3* fn_802C9A40(void);
 f32 fn_801DCF48(struct Vec3* n, f32 x, f32 z);  // ground height
-f32 fn_8014C8B4(f32 x0, f32 x1, f32 y0, f32 y1, f32 x);  // remap
+}  // extern "C"
+f32 Remap(float, float, float, float, float);
+extern "C" {
 void fn_801286A0(void* p, s32 shrink);         // MemShrink
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));  // qsort
 void* fn_801352B8(void* it);
@@ -749,7 +751,7 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
         Vec2 n2;
         fn_801602B0(&n2);
         n2.SetXZ(nrm);
-        f32 k = fn_8014C8B4(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
+        f32 k = Remap(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
         fn_80160BA0(&along, &along, k);
     }
     fn_802BA848(s, &side, &along, &org);

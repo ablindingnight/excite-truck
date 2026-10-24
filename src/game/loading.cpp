@@ -129,8 +129,12 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t);
 void fn_802A1120(f32* center, f32* dir);
 f32 fn_801EA0E8(f32 x, f32 z);
 void fn_8026A2CC(CamFrame* cam, int unk, f32 fov);
-void fn_8000C630(int unk, int unk2);
-void fn_8000B3DC(int unk);
+}  // extern "C"
+void fn_8000C630(long, int);
+extern "C" {
+}  // extern "C"
+void fn_8000B3DC(unsigned char);
+extern "C" {
 int fn_801E8838(void);
 int fn_802E4A10(void);
 int fn_802C9A58(void);

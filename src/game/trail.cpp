@@ -168,7 +168,9 @@ double cos(double x);
 double fn_8002F208(double x);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);                    // random float
-f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);     // a*b + c*d + e*f
+}  // extern "C"
+f32 Dot(float, float, float, float, float, float);
+extern "C" {
 f32 fn_801E7E18(void);                                        // time
 f32 fn_801E7E24(void);                                        // frame time
 void fn_801EEFDC(EventHandler h, u8 type);
@@ -240,15 +242,15 @@ static inline void MulVec(TVec* out, const TVec* in, const TMtx33* m) {
 // out = a * b
 static inline void MulMtx(TMtx33* out, const TMtx33* a, const TMtx33* b) {
     if (out == a || out == b) {
-        f32 xx = fn_80144514(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
-        f32 yx = fn_80144514(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
-        f32 zx = fn_80144514(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
-        f32 xy = fn_80144514(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
-        f32 yy = fn_80144514(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
-        f32 zy = fn_80144514(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
-        f32 xz = fn_80144514(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
-        f32 yz = fn_80144514(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
-        f32 zz = fn_80144514(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
+        f32 xx = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        f32 yx = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        f32 zx = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        f32 xy = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        f32 yy = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        f32 zy = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        f32 xz = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        f32 yz = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        f32 zz = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
         out->xx = xx;
         out->xy = xy;
         out->xz = xz;
@@ -259,15 +261,15 @@ static inline void MulMtx(TMtx33* out, const TMtx33* a, const TMtx33* b) {
         out->zy = zy;
         out->zz = zz;
     } else {
-        out->xx = fn_80144514(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
-        out->yx = fn_80144514(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
-        out->zx = fn_80144514(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
-        out->xy = fn_80144514(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
-        out->yy = fn_80144514(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
-        out->zy = fn_80144514(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
-        out->xz = fn_80144514(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
-        out->yz = fn_80144514(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
-        out->zz = fn_80144514(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
+        out->xx = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        out->yx = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        out->zx = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        out->xy = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        out->yy = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        out->zy = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        out->xz = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        out->yz = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        out->zz = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
     }
 }
 
@@ -278,15 +280,15 @@ struct TBasis {
 // out = a * b
 static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
     if (out == a || out == b) {
-        f32 xx = fn_80144514(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
-        f32 yx = fn_80144514(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
-        f32 zx = fn_80144514(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
-        f32 xy = fn_80144514(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
-        f32 yy = fn_80144514(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
-        f32 zy = fn_80144514(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
-        f32 xz = fn_80144514(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
-        f32 yz = fn_80144514(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
-        f32 zz = fn_80144514(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
+        f32 xx = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
+        f32 yx = Dot(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
+        f32 zx = Dot(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
+        f32 xy = Dot(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
+        f32 yy = Dot(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
+        f32 zy = Dot(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
+        f32 xz = Dot(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
+        f32 yz = Dot(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
+        f32 zz = Dot(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
         out->x.x = xx;
         out->x.y = xy;
         out->x.z = xz;
@@ -297,15 +299,15 @@ static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
         out->z.y = zy;
         out->z.z = zz;
     } else {
-        out->x.x = fn_80144514(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
-        out->y.x = fn_80144514(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
-        out->z.x = fn_80144514(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
-        out->x.y = fn_80144514(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
-        out->y.y = fn_80144514(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
-        out->z.y = fn_80144514(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
-        out->x.z = fn_80144514(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
-        out->y.z = fn_80144514(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
-        out->z.z = fn_80144514(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
+        out->x.x = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
+        out->y.x = Dot(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
+        out->z.x = Dot(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
+        out->x.y = Dot(b->x.y, a->x.x, b->y.y, a->x.y, b->z.y, a->x.z);
+        out->y.y = Dot(b->x.y, a->y.x, b->y.y, a->y.y, b->z.y, a->y.z);
+        out->z.y = Dot(b->x.y, a->z.x, b->y.y, a->z.y, b->z.y, a->z.z);
+        out->x.z = Dot(b->x.z, a->x.x, b->y.z, a->x.y, b->z.z, a->x.z);
+        out->y.z = Dot(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
+        out->z.z = Dot(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
     }
 }
 

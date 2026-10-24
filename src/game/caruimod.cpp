@@ -529,7 +529,9 @@ VehicleInfo* FindVehicleNamed(const char* chassis, int n);
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 void* memmove(void* dst, const void* src, size_t n);
-f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // dot product
+}  // extern "C"
+f32 Dot(float, float, float, float, float, float);
+extern "C" {
 double atan(double x);
 double ceil(double x);
 double cos(double x);
@@ -808,15 +810,15 @@ static inline int LoaderReady(const char* name) {
 
 static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
     if (out == a || out == b) {
-        f32 m0 = fn_80144514(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        f32 m3 = fn_80144514(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        f32 m6 = fn_80144514(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        f32 m1 = fn_80144514(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        f32 m4 = fn_80144514(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        f32 m7 = fn_80144514(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        f32 m2 = fn_80144514(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        f32 m5 = fn_80144514(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        f32 m8 = fn_80144514(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
+        f32 m0 = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
+        f32 m3 = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
+        f32 m6 = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
+        f32 m1 = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
+        f32 m4 = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
+        f32 m7 = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
+        f32 m2 = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
+        f32 m5 = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
+        f32 m8 = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
         out->m[0] = m0;
         out->m[3] = m3;
         out->m[6] = m6;
@@ -827,15 +829,15 @@ static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
         out->m[5] = m5;
         out->m[8] = m8;
     } else {
-        out->m[0] = fn_80144514(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        out->m[3] = fn_80144514(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        out->m[6] = fn_80144514(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        out->m[1] = fn_80144514(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        out->m[4] = fn_80144514(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        out->m[7] = fn_80144514(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        out->m[2] = fn_80144514(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        out->m[5] = fn_80144514(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        out->m[8] = fn_80144514(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
+        out->m[0] = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
+        out->m[3] = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
+        out->m[6] = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
+        out->m[1] = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
+        out->m[4] = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
+        out->m[7] = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
+        out->m[2] = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
+        out->m[5] = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
+        out->m[8] = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
     }
 }
 

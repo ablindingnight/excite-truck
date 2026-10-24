@@ -1134,7 +1134,9 @@ extern "C" {
 LocalCarDesc* fn_801769CC(void);
 f32 fn_80204CFC(const char* name);  // tuning value
 Sound* fn_80207848(const char* name, int flags);
+}  // extern "C"
 Settings* fn_8000AC38(void);
+extern "C" {
 void fn_801679F0(void);
 }
 EventInfo* GetEvent(int event);
@@ -2037,7 +2039,9 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
 #pragma dont_inline reset
 
 extern "C" {
-void fn_8001DFF0(void);
+}  // extern "C"
+void UpdateOutOfTimeOverlay(void);
+extern "C" {
 f32 fn_801E7E18(void);
 void fn_802AE220(ArtAnimMan* anim, const f32* rect);
 }
@@ -2055,7 +2059,9 @@ f32 fn_80144BD8(f32 x);  // ease in/out
 int fn_80160A74(void);   // places that get a high score entry
 int fn_801B2ED4(void);
 void fn_801DF93C(int view);
-void fn_8001DFA8(int id);
+}  // extern "C"
+void UpdateLapTitleOverlay(int);
+extern "C" {
 int fn_801E85A4(void);
 int fn_80161C38(void);
 double fmod(double x, double y);
@@ -2267,7 +2273,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
             fn_80149588(&e, elapsed);
         }
     }
-    fn_8001DFA8(id);
+    UpdateLapTitleOverlay(id);
 }
 
 #pragma inline_depth(1)
@@ -2288,7 +2294,7 @@ const StuntKind lbl_802F9410[6] = {
 
 void BetaCar::StopBonus(void) {
     if (result.dnf) {
-        fn_8001DFF0();
+        UpdateOutOfTimeOverlay();
     }
 }
 
@@ -3271,7 +3277,9 @@ int fn_801D4904(void* seq);
 int fn_801D4900(void* seq);
 f32 fn_801B306C(void);
 int fn_80161C38(void);
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 void fn_80168328(void);
 int fn_801B2F2C(int id);
 void fn_801688B4(int a);
@@ -4048,9 +4056,15 @@ extern "C" {
 RaceSetup* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 s32 fn_80160A90(void);  // stars needed
-TextElem* fn_80013DF0(int view);
-TextElem* fn_80013E1C(int view);
-void fn_80013EAC(int view, int a, s32 laps);
+}  // extern "C"
+TextElem* GetLapBody(int);
+extern "C" {
+}  // extern "C"
+TextElem* GetLapBody1(int);
+extern "C" {
+}  // extern "C"
+void DrawPlayerLapCounter(int, int, int);
+extern "C" {
 void fn_80130FCC(char* buf, s32 size, s32 value);
 f32 fn_80147204(TextElem* e, const char* text);  // text width
 }
@@ -4129,8 +4143,8 @@ int BetaMaster::vf3C(int view) {
     }
     if (t < end2) {
         f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in2) / (full2 - in2)));
-        TextElem* body = fn_80013DF0(view);
-        TextElem* unit = fn_80013E1C(view);
+        TextElem* body = GetLapBody(view);
+        TextElem* unit = GetLapBody1(view);
         if (h1 && h1 && body && unit) {
             s32 laps;
             char buf[0x14];
@@ -4142,7 +4156,7 @@ int BetaMaster::vf3C(int view) {
                 e.pos.x -= 0.5f * Width(&e, buf, Overlay());
                 Blend(&e, unit, buf, Ease(k), Overlay());
             }
-            fn_80013EAC(view, 0, laps);
+            DrawPlayerLapCounter(view, 0, laps);
         }
     }
     }

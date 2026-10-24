@@ -13,7 +13,9 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
+}  // extern "C"
 const char* fn_8000AC2C(void);
+extern "C" {
 f32 fn_80204CFC(const char* name);  // tuning value
 void fn_802049DC(const char* name, f32* v, f32 lo, f32 hi, f32 step);  // debug tweak
 void fn_801331C4(int type, const char* name, f32* out);
@@ -1614,7 +1616,9 @@ void fn_802A9BFC(Vec3* a, Vec3* b, s32 tex, int d, int e, int f, int g, f32 t);
 void fn_801E9E30(s16* h, Vec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(Vec3* p);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
                  f32 u1, f32 v1);
 void fn_80147EE0(LayoutArt* a, f32 s);
@@ -1745,7 +1749,7 @@ int ZoneMaster::vf5C(int p) {
         vf4C(p);
     }
     if (vf68()) {
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
     return hud.state != 4;
 }
@@ -1943,7 +1947,9 @@ void fn_80130980(char* buf, int size, int digits, f32 t);
 void fn_8014784C(Layout* l, const char* name, const char* set, int index);
 void fn_80147CEC(LayoutItem* out, LayoutItem* a, LayoutItem* b, f32 t);
 void fn_801474EC(LayoutItem* item, const char* fmt, ...);
-void fn_8001DF08(int player, int score);
+}  // extern "C"
+void UpdateScoreOverlays(int, int);
+extern "C" {
 void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
 void PSVECNormalize(const Vec3* a, Vec3* b);
 void PSVECCrossProduct(const Vec3* a, const Vec3* b, Vec3* c);
@@ -2052,7 +2058,7 @@ void ZoneMaster::DrawScore(int p, CarState* c) {
         f32 f = 1.0f - c->t98.Frac();
         score = c->score - (int)(c->bonus * f);
     }
-    fn_8001DF08(fn_801E866C(p), score);
+    UpdateScoreOverlays(fn_801E866C(p), score);
 }
 
 void ZoneMaster::DrawMissedFlag(int p, CarState* c) {
@@ -2287,7 +2293,9 @@ int ZoneHud::Update(CarState* c) {
 
 extern "C" {
 f32 fn_801B306C(void);
+}  // extern "C"
 int fn_80009C84(void);
+extern "C" {
 int fn_80179630(int i);
 void fn_801CB5DC(int car, int score, int grade);
 void fn_801CB648(int car, int a, f32 t);
@@ -2719,7 +2727,7 @@ int ZoneMaster::vf3C(int p) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t1, t2, t)));
             LayoutItem* b0 = mainLyt->Find("star_body_0");
             LayoutItem* b1 = mainLyt->Find("star_body_1");
-            fn_8001DF08(fn_801E866C(p), 0);
+            UpdateScoreOverlays(fn_801E866C(p), 0);
             if (h0 && h1 && b0 && b1) {
                 char buf[0x14];
                 LayoutItem it;
