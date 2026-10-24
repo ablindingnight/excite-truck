@@ -3911,43 +3911,478 @@ void fn_8011DFAC(void* arg0, u32 arg1) {
     out[8] = fn_8011DF68(0x200, arg1, 4, 0x30);
 }
 
-extern s32* fn_8011E0B4(s32, s32, s32, s32, s32, s32*, s32, s32);
-u32 fn_8011FC2C(void* arg0, s32 arg1, s32 arg2, s32* arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    u32 result = 0;
-    s32* ptr = arg3;
-    s32 old = *(s32*)((u8*)arg0 + 0x14);
-    s32 next = old ^ 1;
-    s32 cur;
-    s32 flag;
-    s32* ret;
-    s32 tmp;
-    if (*(s32*)((u8*)arg0 + next * 0x30 + 0x1C))
-        *(s32*)((u8*)arg0 + 0x14) = next;
-    cur = *(s32*)((u8*)arg0 + 0x14);
-    if ((arg7 & 0x100000) && (arg6 & 0x100000)) {
-        tmp = 1;
-        fn_8011E0B4(*(s32*)((u8*)arg0 + cur * 0x30 + 0x40), *(s32*)((u8*)arg0 + old * 0x30 + 0x40),
-            *(s32*)((u8*)arg0 + 4), *(s32*)((u8*)arg0 + 8), *(s32*)((u8*)arg0 + old * 0x30 + 0x44),
-            ptr + 1, arg4, arg1);
-        ptr = (s32*)((u8*)ptr + *ptr);
+#pragma opt_unroll_loops on
+extern u32 lbl_802F65C0[];  // Bink pixel masks (pattern blocks use the tables at +0x3E0..+0x47F)
+extern u8 lbl_802F8A40[16][64];  // run block scan orders
+#define BINK_PAT_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x3E0))         // 4-pixel masks, 1 bit per pixel
+#define BINK_PAT_C0 ((u32 *)((u8 *)lbl_802F65C0 + 0x420))
+#define BINK_PAT2_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x460))        // doubled 2-pixel masks
+#define BINK_PAT2_C0 ((u32 *)((u8 *)lbl_802F65C0 + 0x470))
+
+void fn_80126018(s16 *block, BitReader8011 *bits);
+void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride);
+void fn_80125CA0(void *dst, void *stride, void *block, s32 quant);
+void fn_80125CB4(void *dst, void *stride, void *block, s32 quant);
+void fn_80125CC8(void *dst, s32 stride, void *block, s32 quant, void *src, s32 srcStride);
+
+// Reads `width` bits from reader *br into v.
+#define BINK_BR_GETBITS(br, v, width)                                               \
+    if ((br)->count < (width)) {                                                    \
+        u32 word = *(br)->next;                                                     \
+        v = ((br)->value | (word << (br)->count)) & (0xFFFFFFFFU >> (32 - (width))); \
+        (br)->value = word >> ((width) - (br)->count);                              \
+        (br)->count = (br)->count + 32 - (width);                                   \
+        (br)->next++;                                                               \
+    } else {                                                                        \
+        v = (br)->value & (0xFFFFFFFFU >> (32 - (width)));                          \
+        (br)->value >>= (width);                                                    \
+        (br)->count -= (width);                                                     \
     }
-    flag = arg6 & 0x8000;
+
+// Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
+// `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
+// chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
+// plane's data.
+u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
+                 s32 blocksWide, s32 step, void **bufs, u32 flags, u32 *skipped) {
+    BinkColorTrees8011 trees;
+    s16 block[64];
+    Bundle8011 types;
+    Bundle8011 subTypes;
+    Bundle8011 colors;
+    Bundle8011 pattern;
+    Bundle8011 xOff;
+    Bundle8011 yOff;
+    Bundle8011 intraDC;
+    Bundle8011 interDC;
+    Bundle8011 runs;
+    u8 tmp[64];
+    BitReader8011 bits;
+    void (*readColors)(void *b, void *bits, void *trees);
+    s32 rowSkip;
+    u32 skipCount;
+    u32 idx;
+    u32 y;
+    u32 x;
+    u8 *src;
+    s32 i;
+
+    rowSkip = pitch * 8 - width;
+    idx = 0;
+    skipCount = 0;
+    bits.start = data;
+    bits.next = data;
+    bits.count = 0;
+    bits.value = 0;
+    if (flags & 0x8000) {
+        readColors = fn_8011D0E8;
+    } else {
+        readColors = fn_8011D378;
+    }
+    fn_8011C3A8((s32)bufs[0], &types, 0x200, width, 4, 1, 0);
+    fn_8011C3A8((s32)bufs[1], &subTypes, 0x200, width >> 1, 4, 1, 0);
+    fn_8011C3A8((s32)bufs[2], &colors, 0x200, width, 8, 64, 0);
+    fn_8011C3A8((s32)bufs[3], &pattern, 0x200, width, 8, 8, 0);
+    fn_8011C3A8((s32)bufs[4], &xOff, 0x200, width, 5, 1, 1);
+    fn_8011C3A8((s32)bufs[5], &yOff, 0x200, width, 5, 1, 1);
+    fn_8011C3A8((s32)bufs[6], &intraDC, 0x200, width, 11, 1, 0);
+    fn_8011C3A8((s32)bufs[7], &interDC, 0x200, width, 11, 1, 1);
+    fn_8011C3A8((s32)bufs[8], &runs, 0x200, width, 4, 48, 0);
+    fn_8011CD78(&types, &bits);
+    fn_8011CD78(&subTypes, &bits);
+    fn_8011CD90(&colors, &bits, &trees);
+    fn_8011CD78(&pattern, &bits);
+    fn_8011CD78(&xOff, &bits);
+    fn_8011CD78(&yOff, &bits);
+    fn_8011CD78(&runs, &bits);
+    for (y = 0; y < height; y += 8) {
+        fn_8011CE18(&types, &bits);
+        fn_8011CE18(&subTypes, &bits);
+        readColors(&colors, &bits, &trees);
+        fn_8011D7F8(&pattern, &bits);
+        fn_8011D9E4(&xOff, &bits);
+        fn_8011D9E4(&yOff, &bits);
+        fn_8011DC5C(&intraDC, &bits);
+        fn_8011DC5C(&interDC, &bits);
+        fn_8011D5F0(&runs, &bits);
+        for (x = width; x != 0; x -= 8, dst += 8, prev += 8, idx += step) {
+            switch (*types.cur++) {
+            case 0:  // skip: keep the previous frame's block
+                for (i = 0; i < 8; i++) {
+                    *(f64 *)(dst + i * pitch) = *(f64 *)(prev + i * pitch);
+                }
+                if (blockMap[idx >> 1] == 0) {
+                    skipCount++;
+                }
+                break;
+            case 1:  // scaled: one 8x8 block drawn as 16x16
+                if (!(y & 8)) {
+                    switch (*subTypes.cur++) {
+                    case 3: {
+                        u32 value = bits.value;
+                        u32 *next = bits.next;
+                        u32 avail = bits.count;
+                        u8 *scan;
+                        u32 v;
+                        u32 bit;
+                        BINK_GETBITS(v, 4);
+                        scan = lbl_802F8A40[v];
+                        i = 0;
+                        do {
+                            u32 run;
+                            BINK_GETBIT(bit);
+                            if (bit & 1) {
+                                u8 c = *colors.cur++;
+                                for (run = *runs.cur++ + 1; run != 0; run--) {
+                                    tmp[scan[i++]] = c;
+                                }
+                            } else {
+                                for (run = *runs.cur++ + 1; run != 0; run--) {
+                                    tmp[scan[i++]] = *colors.cur++;
+                                }
+                            }
+                        } while (i < 63);
+                        if (i == 63) {
+                            tmp[scan[63]] = *colors.cur++;
+                        }
+                        {
+                            u8 *d0 = dst;
+                            u8 *d1 = dst + pitch;
+                            u16 *s = (u16 *)tmp;
+                            for (i = 0; i < 8; i++) {
+                                u32 w;
+                                w = s[0];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[0] = w;
+                                ((u32 *)d1)[0] = w;
+                                w = s[1];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[1] = w;
+                                ((u32 *)d1)[1] = w;
+                                w = s[2];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[2] = w;
+                                ((u32 *)d1)[2] = w;
+                                w = s[3];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[3] = w;
+                                ((u32 *)d1)[3] = w;
+                                s += 4;
+                                d0 = d1 + pitch;
+                                d1 = d0 + pitch;
+                            }
+                        }
+                        bits.next = next;
+                        bits.value = value;
+                        bits.count = avail;
+                        break;
+                    }
+                    case 5: {
+                        s32 quant;
+                        block[0] = *(s16 *)intraDC.cur;
+                        intraDC.cur += 2;
+                        fn_80126018(block, &bits);
+                        BINK_BR_GETBITS(&bits, quant, 4);
+                        fn_80125CB4(dst, (void *)pitch, block, quant);
+                        break;
+                    }
+                    case 6: {
+                        u32 c = *colors.cur++;
+                        u8 *d = dst;
+                        c |= c << 8;
+                        c |= c << 16;
+                        for (i = 0; i < 16; i++) {
+                            ((u32 *)d)[0] = c;
+                            ((u32 *)d)[1] = c;
+                            ((u32 *)d)[2] = c;
+                            ((u32 *)d)[3] = c;
+                            d += pitch;
+                        }
+                        break;
+                    }
+                    case 8: {
+                        u32 c0 = *colors.cur++;
+                        u32 c1 = *colors.cur++;
+                        u8 *d0 = dst;
+                        u8 *d1 = dst + pitch;
+                        c0 |= c0 << 8;
+                        c0 |= c0 << 16;
+                        c1 |= c1 << 8;
+                        c1 |= c1 << 16;
+                        for (i = 0; i < 8; i++) {
+                            u32 p = *pattern.cur++;
+                            u32 w;
+                            w = (c0 & BINK_PAT2_C0[p & 3]) | (c1 & BINK_PAT2_C1[p & 3]);
+                            ((u32 *)d0)[0] = w;
+                            ((u32 *)d1)[0] = w;
+                            w = (c0 & BINK_PAT2_C0[(p >> 2) & 3]) | (c1 & BINK_PAT2_C1[(p >> 2) & 3]);
+                            ((u32 *)d0)[1] = w;
+                            ((u32 *)d1)[1] = w;
+                            w = (c0 & BINK_PAT2_C0[(p >> 4) & 3]) | (c1 & BINK_PAT2_C1[(p >> 4) & 3]);
+                            ((u32 *)d0)[2] = w;
+                            ((u32 *)d1)[2] = w;
+                            w = (c0 & BINK_PAT2_C0[p >> 6]) | (c1 & BINK_PAT2_C1[p >> 6]);
+                            ((u32 *)d0)[3] = w;
+                            ((u32 *)d1)[3] = w;
+                            d0 = d1 + pitch;
+                            d1 = d0 + pitch;
+                        }
+                        break;
+                    }
+                    case 9: {
+                        u8 *d0 = dst;
+                        u8 *d1 = dst + pitch;
+                        if ((u32)colors.cur & 3) {
+                            for (i = 0; i < 8; i++) {
+                                u32 w;
+                                w = (colors.cur[0] << 24) | (colors.cur[0] << 16) | (colors.cur[1] << 8) | colors.cur[1];
+                                ((u32 *)d0)[0] = w;
+                                ((u32 *)d1)[0] = w;
+                                w = (colors.cur[2] << 24) | (colors.cur[2] << 16) | (colors.cur[3] << 8) | colors.cur[3];
+                                ((u32 *)d0)[1] = w;
+                                ((u32 *)d1)[1] = w;
+                                w = (colors.cur[4] << 24) | (colors.cur[4] << 16) | (colors.cur[5] << 8) | colors.cur[5];
+                                ((u32 *)d0)[2] = w;
+                                ((u32 *)d1)[2] = w;
+                                w = (colors.cur[6] << 24) | (colors.cur[6] << 16) | (colors.cur[7] << 8) | colors.cur[7];
+                                ((u32 *)d0)[3] = w;
+                                ((u32 *)d1)[3] = w;
+                                d0 += pitch * 2;
+                                d1 += pitch * 2;
+                                colors.cur += 8;
+                            }
+                        } else {
+                            for (i = 0; i < 8; i++) {
+                                u32 w;
+                                w = ((u16 *)colors.cur)[0];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[0] = w;
+                                ((u32 *)d1)[0] = w;
+                                w = ((u16 *)colors.cur)[1];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[1] = w;
+                                ((u32 *)d1)[1] = w;
+                                w = ((u16 *)colors.cur)[2];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[2] = w;
+                                ((u32 *)d1)[2] = w;
+                                w = ((u16 *)colors.cur)[3];
+                                w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
+                                ((u32 *)d0)[3] = w;
+                                ((u32 *)d1)[3] = w;
+                                d0 += pitch * 2;
+                                d1 += pitch * 2;
+                                colors.cur += 8;
+                            }
+                        }
+                        break;
+                    }
+                    }
+                }
+                blockMap[idx >> 1] = 1;
+                idx += step;
+                blockMap[idx >> 1] = 1;
+                x -= 8;
+                dst += 8;
+                prev += 8;
+                break;
+            case 2:  // motion: copy a block of the previous frame
+                blockMap[idx >> 1] = 1;
+                src = prev + *(s8 *)yOff.cur++ * pitch;
+                src += *(s8 *)xOff.cur++;
+                if ((((u32)dst | (u32)src) & 7) == 0) {
+                    for (i = 0; i < 8; i++) {
+                        *(f64 *)(dst + i * pitch) = *(f64 *)(src + i * pitch);
+                    }
+                } else if ((((u32)dst | (u32)src) & 3) == 0) {
+                    for (i = 0; i < 8; i++) {
+                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)(src + i * pitch))[0];
+                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)(src + i * pitch))[1];
+                    }
+                } else {
+                    for (i = 0; i < 8; i++) {
+                        s32 j;
+                        for (j = 0; j < 8; j++) {
+                            dst[i * pitch + j] = src[i * pitch + j];
+                        }
+                    }
+                }
+                break;
+            case 3: {  // run: runs of one color or of literal colors along a scan order
+                u32 value = bits.value;
+                u32 *next = bits.next;
+                u32 avail = bits.count;
+                u8 *scan;
+                u32 v;
+                u32 bit;
+                BINK_GETBITS(v, 4);
+                blockMap[idx >> 1] = 1;
+                scan = lbl_802F8A40[v];
+                i = 0;
+                do {
+                    u32 run;
+                    BINK_GETBIT(bit);
+                    if (bit & 1) {
+                        u8 c = *colors.cur++;
+                        for (run = *runs.cur++ + 1; run != 0; run--) {
+                            tmp[scan[i++]] = c;
+                        }
+                    } else {
+                        for (run = *runs.cur++ + 1; run != 0; run--) {
+                            tmp[scan[i++]] = *colors.cur++;
+                        }
+                    }
+                } while (i < 63);
+                if (i == 63) {
+                    tmp[scan[63]] = *colors.cur++;
+                }
+                for (i = 0; i < 8; i++) {
+                    *(f64 *)(dst + i * pitch) = ((f64 *)tmp)[i];
+                }
+                bits.next = next;
+                bits.value = value;
+                bits.count = avail;
+                break;
+            }
+            case 4: {  // residue on top of a motion copy
+                u32 n;
+                blockMap[idx >> 1] = 1;
+                src = prev + *(s8 *)yOff.cur++ * pitch;
+                src += *(s8 *)xOff.cur++;
+                BINK_BR_GETBITS(&bits, n, 7);
+                fn_80126EF0(dst, pitch, &bits, n, src, pitch);
+                break;
+            }
+            case 5: {  // intra DCT block
+                s32 quant;
+                blockMap[idx >> 1] = 1;
+                block[0] = *(s16 *)intraDC.cur;
+                intraDC.cur += 2;
+                fn_80126018(block, &bits);
+                BINK_BR_GETBITS(&bits, quant, 4);
+                fn_80125CA0(dst, (void *)pitch, block, quant);
+                break;
+            }
+            case 6: {  // fill with one color
+                u32 c = *colors.cur++;
+                blockMap[idx >> 1] = 1;
+                c |= c << 8;
+                c |= c << 16;
+                for (i = 0; i < 8; i++) {
+                    ((u32 *)(dst + i * pitch))[0] = c;
+                    ((u32 *)(dst + i * pitch))[1] = c;
+                }
+                break;
+            }
+            case 7: {  // inter DCT block on top of a motion copy
+                s32 quant;
+                blockMap[idx >> 1] = 1;
+                src = prev + *(s8 *)yOff.cur++ * pitch;
+                src += *(s8 *)xOff.cur++;
+                block[0] = *(s16 *)interDC.cur;
+                interDC.cur += 2;
+                fn_80126018(block, &bits);
+                BINK_BR_GETBITS(&bits, quant, 4);
+                fn_80125CC8(dst, pitch, block, quant, src, pitch);
+                break;
+            }
+            case 8: {  // two-color pattern
+                u32 c0 = colors.cur[0];
+                u32 c1;
+                colors.cur++;
+                c1 = *colors.cur++;
+                c0 |= c0 << 8;
+                c0 |= c0 << 16;
+                blockMap[idx >> 1] = 1;
+                c1 |= c1 << 8;
+                c1 |= c1 << 16;
+                for (i = 0; i < 8; i++) {
+                    u32 p = *pattern.cur++;
+                    ((u32 *)(dst + i * pitch))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);
+                    ((u32 *)(dst + i * pitch))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4]);
+                }
+                break;
+            }
+            case 9:  // raw pixels
+                blockMap[idx >> 1] = 1;
+                if ((((u32)dst | (u32)colors.cur) & 7) == 0) {
+                    for (i = 0; i < 8; i++) {
+                        *(f64 *)(dst + i * pitch) = ((f64 *)colors.cur)[i];
+                    }
+                } else if ((((u32)dst | (u32)colors.cur) & 3) == 0) {
+                    for (i = 0; i < 8; i++) {
+                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)colors.cur)[i * 2];
+                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)colors.cur)[i * 2 + 1];
+                    }
+                } else {
+                    for (i = 0; i < 8; i++) {
+                        s32 j;
+                        for (j = 0; j < 8; j++) {
+                            dst[i * pitch + j] = colors.cur[i * 8 + j];
+                        }
+                    }
+                }
+                colors.cur += 64;
+                break;
+            }
+        }
+        if (step == 1) {
+            if (y & 8) {
+                blockMap += blocksWide;
+            }
+        } else {
+            blockMap += blocksWide;
+        }
+        idx = 0;
+        dst += rowSkip;
+        prev += rowSkip;
+    }
+    *skipped = skipCount;
+    bits.count = 0;
+    return bits.next;
+}
+#pragma opt_unroll_loops reset
+
+// Decodes a video frame into the next frame buffer (alpha, luma, then the two chroma planes); returns the number
+// of skipped blocks in the luma plane (in block pairs).
+u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyframe, s32 bufs, s32 flags,
+                s32 videoFlags) {
+    BinkFrameBuffers8011 *v = video;
+    u32 result;
+    s32 old = v->unk14;
+    s32 cur;
+    u32 *end;
+    if (v->frames[old ^ 1].y.buffer != 0) {
+        v->unk14 = old ^ 1;
+    }
+    cur = v->unk14;
     result = 0;
-    if (flag == 0) ptr++;
-    ret = fn_8011E0B4(*(s32*)((u8*)arg0 + cur * 0x30 + 0x1C), *(s32*)((u8*)arg0 + old * 0x30 + 0x1C),
-        *(s32*)((u8*)arg0 + 4), *(s32*)((u8*)arg0 + 8), *(s32*)((u8*)arg0 + old * 0x30 + 0x20),
-        ptr, arg4, arg1);
-    if (flag == 0) ret = (s32*)((u8*)ptr + *(s32*)((u8*)ptr - 4) - 4);
+    if (videoFlags & 0x100000) {
+        if (flags & 0x100000) {
+            fn_8011E0B4(v->frames[cur].a.buffer, v->frames[old].a.buffer, v->width, v->height,
+                        v->frames[old].a.pitch, (u32 *)(data + 1), keyframe, (u8 *)blockMap, blocksWide, 1,
+                        (void **)bufs, flags, &result);
+        }
+        data = (s32 *)((u8 *)data + *data);
+    }
+    result = 0;
+    if (!(flags & 0x8000)) {
+        data++;
+    }
+    end = fn_8011E0B4(v->frames[cur].y.buffer, v->frames[old].y.buffer, v->width, v->height, v->frames[old].y.pitch,
+                      (u32 *)data, keyframe, (u8 *)blockMap, blocksWide, 1, (void **)bufs, flags, &result);
+    if (!(flags & 0x8000)) {
+        end = (u32 *)((u8 *)data + data[-1] - 4);
+    }
     result >>= 2;
-    if (!(arg6 & 0x20000)) {
-        tmp = 2;
-        ret = fn_8011E0B4(*(s32*)((u8*)arg0 + cur * 0x30 + 0x28), *(s32*)((u8*)arg0 + old * 0x30 + 0x28),
-            *(s32*)((u8*)arg0 + 0xC), *(s32*)((u8*)arg0 + 0x10), *(s32*)((u8*)arg0 + old * 0x30 + 0x2C),
-            ret, arg4, arg1);
+    if (!(flags & 0x20000)) {
+        end = fn_8011E0B4(v->frames[cur].cr.buffer, v->frames[old].cr.buffer, v->cWidth, v->cHeight,
+                          v->frames[old].cr.pitch, end, keyframe, (u8 *)blockMap, blocksWide, 2, (void **)bufs,
+                          flags, &result);
         result = 0;
-        fn_8011E0B4(*(s32*)((u8*)arg0 + cur * 0x30 + 0x34), *(s32*)((u8*)arg0 + old * 0x30 + 0x34),
-            *(s32*)((u8*)arg0 + 0xC), *(s32*)((u8*)arg0 + 0x10), *(s32*)((u8*)arg0 + old * 0x30 + 0x38),
-            ret, arg4, arg1);
+        fn_8011E0B4(v->frames[cur].cb.buffer, v->frames[old].cb.buffer, v->cWidth, v->cHeight,
+                    v->frames[old].cb.pitch, end, keyframe, (u8 *)blockMap, blocksWide, 2, (void **)bufs, flags,
+                    &result);
     }
     return result;
 }
