@@ -101,7 +101,7 @@ public:
     virtual void vf24(void);
     virtual void vf28(void);
 };
-Layout* fn_80145E70(const char* name);
+extern "C" Layout* fn_80145E70(const char* name);
 
 // A loaded sound effect; playback flags are polled by the sound system.
 class Sound {
@@ -138,7 +138,7 @@ static inline void StopSound(Sound* s) {
         s->b4C = 0;
     }
 }
-Sound* fn_80207848(const char* name, int flags);
+extern "C" Sound* fn_80207848(const char* name, int flags);
 
 class TruckPath {
 public:

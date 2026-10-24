@@ -133,7 +133,7 @@ struct GXf {
 extern BVec lbl_804DB068[81];
 extern u8 lbl_8055FD24;
 extern u32 lbl_8055FD30;
-GXTex* fn_802D94DC(void);
+extern "C" GXTex* fn_802D94DC(void);
 
 template <class T>
 struct VecBase {

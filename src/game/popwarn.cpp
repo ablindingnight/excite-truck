@@ -1248,9 +1248,9 @@ void MenuArt::Update(void) {
     scroll = scroll + (f32)rate * dt;
 }
 
-void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
-f32 fn_80235F64(u8* text, int flag, f32 v);
-void fn_802353F4(u8* text, int flag, f32 x, f32 y, f32 z);
+extern "C" void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+extern "C" f32 fn_80235F64(u8* text, int flag, f32 v);
+extern "C" void fn_802353F4(u8* text, int flag, f32 x, f32 y, f32 z);
 extern const f32 lbl_805638C8;  // 370.0
 extern const f32 lbl_805638B0;  // 0.0
 
