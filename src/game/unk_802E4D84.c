@@ -198,14 +198,17 @@ void fn_802E5A54(void) {
     lbl_8055FF78 = 0;
 }
 
-void fn_802E5FE4(void *arg0) {
+#pragma cplusplus on
+// Free a stream's buffer (warns if channels still use it; the stream's name is at its start).
+extern "C" void fn_802E5FE4(void *arg0) {
     if (*(int *)((char *)arg0 + 0x98) > 0) {
-        ((void (*)(char *, void *, ...))fn_802E317C)(lbl_8034D584, arg0);
+        ((void (*)(char *, ...))fn_802E317C)(lbl_8034D584, arg0, *(int *)((char *)arg0 + 0x98));
     }
-    fn_80128670(*(int *)((char *)arg0 + 0x90));
+    delete[] *(unsigned char **)((char *)arg0 + 0x90);
     *(int *)((char *)arg0 + 0x90) = 0;
     *(int *)((char *)arg0 + 0x94) = 0;
 }
+#pragma cplusplus reset
 
 float fn_802E6040(void *arg0) {
     if (arg0 != 0) return *(float *)((char *)arg0 + 0xA4);
