@@ -130,7 +130,7 @@ FlagName lbl_8032CED8[] = {
 };
 ModuleTag lbl_8055E1F0;
 UnkStaticFFFF lbl_8055E1F8;
-static UnkStatic123 lbl_8042FBA0;
+static UnkStatic123s lbl_8042FBA0;
 UnkStatic7F lbl_8055E1FC;
 f32 lbl_8055E200;  // x offset
 f32 lbl_8055E204;  // y offset
@@ -878,7 +878,6 @@ static inline void LoadLayout(Layout* l) {
     l->BuildEditRects();
 }
 
-FixedList<Layout*, 40> lbl_8042FBC0;
 
 extern "C" {
 
@@ -941,6 +940,7 @@ ResizeHandler lbl_8055E210;
 ScaleHandler lbl_8055E214;
 ChannelHandler<TextElem> lbl_8055E218;
 ChannelHandler<GartElem> lbl_8055E220;
+FixedList<Layout*, 40> lbl_8042FBC0;
 
 void Layout::BuildEditRects(void) {
     EditRect* r;
