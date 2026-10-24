@@ -330,7 +330,99 @@ void fn_802671CC(u8* p) {}  // stub (149)
 
 void fn_80267420(u8* p) {}  // stub (152)
 
-void fn_80267680(u8* p) {}  // stub (119)
+void fn_802733C8(void);
+int fn_801796B4(void);
+void fn_80276BE4(u8* pose, u8* fov);
+void fn_80209190(u32 handle, f32 vol);
+void fn_80270484(void);
+void fn_80268B94(s32 v);
+extern f32 lbl_8055F48C;
+extern const f32 lbl_80563C54;  // default view angle
+extern const f32 lbl_80563C58;
+extern const double lbl_80563C38;  // int -> float conversion
+extern const f32 lbl_80563C5C;
+extern const f32 lbl_80563C60;
+extern const f32 lbl_80563C64;
+
+// Re-reads the saved pose (the identity passed in is not used).
+static inline void ResetSavedPose(u8* c, const CamPose& pose) { fn_80276BE4(c + 0x1A4, c + 0x1D4); }
+
+// Resets the four players' camera records, the shake table, the split-screen rects and the shake levels.
+void fn_80267680(void) {
+    fn_802733C8();
+    u8* c = (u8*)lbl_80499080;
+    for (int i = 0; i < 4; i++) {
+        F32(c, 0x8) = lbl_80563C20;
+        F32(c, 0xC) = lbl_80563C20;
+        S32(c, 0x144) = 0;
+        S32(c, 0xB8) = -1;
+        U8(c, 0x138) = 1;
+        U8(c, 0x139) = 1;
+        F32(c, 0x13C) = lbl_80563C20;
+        F32(c, 0x40) = lbl_80563C20;
+        F32(c, 0x44) = lbl_80563C20;
+        F32(c, 0x48) = lbl_80563C20;
+        F32(c, 0x28) = lbl_80563C20;
+        F32(c, 0x2C) = lbl_80563C2C;
+        F32(c, 0x30) = lbl_80563C20;
+        S32(c, 0x148) = 0;
+        F32(c, 0x194) = lbl_80563C54;
+        fn_80265E08(c + 0x160);
+        fn_80266150(c + 0x178);
+        F32(c, 0x158) = lbl_80563C58;
+        F32(c, 0x15C) = i;
+        F32(c, 0x198) = lbl_80563C20;
+        F32(c, 0x19C) = lbl_80563C20;
+        S32(c, 0x14C) = -1;
+        S32(c, 0x150) = -1;
+        if (!fn_801796B4()) {
+            volatile f32 id[12];  // identity pose (unused; volatile keeps its stack layout)
+            id[0] = lbl_80563C2C;
+            id[1] = lbl_80563C20;
+            id[2] = lbl_80563C20;
+            id[3] = lbl_80563C20;
+            id[4] = lbl_80563C2C;
+            id[5] = lbl_80563C20;
+            id[6] = lbl_80563C20;
+            id[7] = lbl_80563C20;
+            id[8] = lbl_80563C2C;
+            id[9] = lbl_80563C20;
+            id[10] = lbl_80563C20;
+            id[11] = lbl_80563C20;
+            fn_80276BE4(c + 0x1A4, c + 0x1D4);
+        }
+        fn_801E9DC4(c + 0x1EC);
+        F32(c, 0x1F8) = lbl_80563C2C;
+        F32(c, 0x1FC) = lbl_80563C20;
+        F32(c, 0x200) = lbl_80563C20;
+        F32(c, 0x204) = lbl_80563C20;
+        F32(c, 0x208) = lbl_80563C2C;
+        F32(c, 0x20C) = lbl_80563C20;
+        F32(c, 0x210) = lbl_80563C20;
+        F32(c, 0x214) = lbl_80563C20;
+        F32(c, 0x218) = lbl_80563C2C;
+        F32(c, 0x21C) = lbl_80563C20;
+        F32(c, 0x220) = lbl_80563C20;
+        F32(c, 0x224) = lbl_80563C20;
+        F32(c, 0x1F4) = lbl_80563C5C;
+        F32(c, 0x1F0) = lbl_80563C60;
+        c += 0x228;
+    }
+    lbl_8055F488 = 0;
+    lbl_8055F48C = lbl_80563C64;
+    fn_80209190(lbl_8055F494, lbl_80563C2C);
+    fn_80265E2C();
+    fn_80268B94(0);
+    fn_80270484();
+    lbl_80499980[0] = lbl_80563C20;
+    lbl_80499980[1] = lbl_80563C20;
+    lbl_80499980[2] = lbl_80563C20;
+    lbl_80499980[3] = lbl_80563C20;
+    lbl_80499980[4] = lbl_80563C20;
+    lbl_80499980[5] = lbl_80563C20;
+    lbl_80499980[6] = lbl_80563C20;
+    lbl_80499980[7] = lbl_80563C20;
+}
 
 void fn_8026785C(void) {
     fn_801EF024((void*)fn_8026A554);
