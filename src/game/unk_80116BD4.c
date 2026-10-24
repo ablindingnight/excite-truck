@@ -529,7 +529,7 @@ void fn_80119214(void) {
 }
 
 extern void memset(void *, int, unsigned int);
-void fn_80119218(void *arg0, s16 arg1, s16 arg2, s16 arg3) {
+void fn_80119218(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     void *temp_r31 = (u8*)arg0 + 0x14C;
     memset(temp_r31, 0, 0x30);
     *(s16*)temp_r31 = arg2;
@@ -538,6 +538,50 @@ void fn_80119218(void *arg0, s16 arg1, s16 arg2, s16 arg3) {
     *(s16*)((u8*)arg0 + 0x1AE) = 0;
     *(s32*)((u8*)arg0 + 0x144) = 3;
     *(s32*)((u8*)arg0 + 0x1C) |= 0x212;
+}
+
+void fn_80119288(void *arg0) {
+    if (*(void **)((u8 *)arg0 + 0x7C) != 0) {
+        fn_80119218(*(void **)((u8 *)arg0 + 0x7C), *(s32 *)((u8 *)arg0 + 0xA4), *(s32 *)((u8 *)arg0 + 0xA8),
+                    *(s32 *)((u8 *)arg0 + 0x78) == 1 ? *(s32 *)((u8 *)arg0 + 0xAC) : 0);
+    }
+    if (*(void **)((u8 *)arg0 + 0x80) != 0) {
+        fn_80119218(*(void **)((u8 *)arg0 + 0x80), *(s32 *)((u8 *)arg0 + 0xA4), 0, *(s32 *)((u8 *)arg0 + 0xAC));
+    }
+}
+
+extern void DCFlushRange(void *, u32);
+void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
+    u32 n;
+    u32 len;
+    u32 off;
+    len = arg2;
+    if (arg2 + arg1 > *(u32 *)((u8 *)arg0 + 0x18)) {
+        len = *(u32 *)((u8 *)arg0 + 0x18) - arg1;
+    }
+    if (*(s32 *)((u8 *)arg0 + 4) != 0) {
+        off = arg1 >> 1;
+        n = len >> 1;
+        memset(*(u8 **)((u8 *)arg0 + 8) + off, 0, n);
+        DCFlushRange(*(u8 **)((u8 *)arg0 + 8) + off, n);
+        memset(*(u8 **)((u8 *)arg0 + 0xC) + off, 0, n);
+        DCFlushRange(*(u8 **)((u8 *)arg0 + 0xC) + off, n);
+        if (len < arg2) {
+            n = (arg2 - len) >> 1;
+            memset(*(u8 **)((u8 *)arg0 + 8), 0, n);
+            DCFlushRange(*(u8 **)((u8 *)arg0 + 8), n);
+            memset(*(u8 **)((u8 *)arg0 + 0xC), 0, n);
+            DCFlushRange(*(u8 **)((u8 *)arg0 + 0xC), n);
+        }
+    } else {
+        memset(*(u8 **)((u8 *)arg0 + 8) + arg1, 0, len);
+        DCFlushRange(*(u8 **)((u8 *)arg0 + 8) + arg1, len);
+        if (len < arg2) {
+            n = arg2 - len;
+            memset(*(u8 **)((u8 *)arg0 + 8), 0, n);
+            DCFlushRange(*(u8 **)((u8 *)arg0 + 8), n);
+        }
+    }
 }
 
 extern void AXSetVoiceState(s32);
@@ -593,8 +637,8 @@ extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
 extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
-extern void fn_80119288(void *, f32);
-extern s32 fn_80119300(void *, s32, s32);
+extern void fn_80119288(void *);
+extern void fn_80119300(void *, u32, u32);
 extern s32 fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 
@@ -648,7 +692,7 @@ void fn_80119AB0(void *arg0, s32 arg1) {
     if (value > 0x7fff) value = 0x7fff;
     temp = (f32) fn_8002EFBC((f32)value, lbl_80561198);
     *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(lbl_805611A0 * temp);
-    fn_80119288(arg0, temp);
+    fn_80119288(arg0);
 }
 
 extern f32 lbl_805611B0;
@@ -667,15 +711,15 @@ void fn_80119B38(void *arg0, s32 arg1) {
     *(s32*)((u8*)arg0 + 0xa8) = (s32)(lbl_805611C0 * temp_f3);
     temp_f1 = (f32)fn_8002EFBC(temp_f31, lbl_805611B8);
     *(s32*)((u8*)arg0 + 0xac) = (s32)(lbl_805611C0 * temp_f1);
-    fn_80119288(arg0, temp_f1);
+    fn_80119288(arg0);
 }
 
 extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
 extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
-extern void fn_80119288(void *, f32);
-extern s32 fn_80119300(void *, s32, s32);
+extern void fn_80119288(void *);
+extern void fn_80119300(void *, u32, u32);
 extern s32 fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 s32 fn_80119C0C(void *arg0, s32 arg1) {
@@ -4041,7 +4085,7 @@ extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
 extern f32 lbl_805611A0;
 extern f64 fn_8002EFBC(f32, f64);
-extern void fn_80119288(void *, f32);
-extern s32 fn_80119300(void *, s32, s32);
+extern void fn_80119288(void *);
+extern void fn_80119300(void *, u32, u32);
 extern s32 fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
