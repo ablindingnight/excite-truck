@@ -826,7 +826,6 @@ struct StuntIter {
 class CarHud {
 public:
     CarHud(int car, int acar);
-    virtual StuntEvent* Alloc(void);
     virtual ~CarHud(void) {
         if (bigSnd) {
             delete bigSnd;
@@ -835,6 +834,7 @@ public:
             delete bonusSnd;
         }
     }
+    virtual StuntEvent* Alloc(void);
     StuntEvent pool[16];   // offset 0x4
     StuntQueue free;       // offset 0x1244
     StuntQueue pending;    // offset 0x124C
