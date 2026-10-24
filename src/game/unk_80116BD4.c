@@ -29,28 +29,28 @@ typedef struct {
 #include <revolution/DVD/dvd.h>
 
 // Takuya Ooura's general purpose FFT package (fftsg.c), built with float data.
-void fn_801200BC(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w);  // rdft
-void fn_8012023C(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w);  // ddct
-void fn_80120834(s32 nw, s32 *ip, f32 *w);                   // makewt
-void fn_80120B6C(s32 nc, s32 *ip, f32 *c);                   // makect
-void fn_80120CA4(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w);    // cftfsub
-void fn_80120E14(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w);    // cftbsub
-void fn_80120F84(s32 n, s32 *ip, f32 *a);                    // bitrv2
-void fn_80121400(s32 n, s32 *ip, f32 *a);                    // bitrv2conj
+void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w);  // rdft
+void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w);  // ddct
+void fn_80120834(int nw, int *ip, f32 *w);                     // makewt
+void fn_80120B6C(int nc, int *ip, f32 *c);                     // makect
+void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w);    // cftfsub
+void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w);    // cftbsub
+void fn_80120F84(int n, int *ip, f32 *a);                    // bitrv2
+void fn_80121400(int n, int *ip, f32 *a);                    // bitrv2conj
 void fn_80121848(f32 *a);                                    // bitrv216
 void fn_801219B4(f32 *a);                                    // bitrv216neg
 void fn_80121BB0(f32 *a);                                    // bitrv208
 void fn_80121BF4(f32 *a);                                    // bitrv208neg
-void fn_80121C68(s32 n, f32 *a, f32 *w);                     // cftf1st
-void fn_80122518(s32 n, f32 *a, f32 *w);                     // cftb1st
-void fn_80122E08(s32 n, f32 *a, s32 nw, f32 *w);             // cftrec1
-void fn_80122ED8(s32 n, f32 *a, s32 nw, f32 *w);             // cftrec2
-void fn_80122FA4(s32 n, f32 *a, s32 nw, f32 *w);             // cftexp1
-void fn_801231B8(s32 n, f32 *a, s32 nw, f32 *w);             // cftexp2
-void fn_801233F8(s32 n, f32 *a, f32 *w);                     // cftmdl1
-void fn_801237C4(s32 n, f32 *a, f32 *w);                     // cftmdl2
-void fn_80123CEC(s32 n, f32 *a, s32 nw, f32 *w);             // cftfx41
-void fn_80123DC0(s32 n, f32 *a, s32 nw, f32 *w);             // cftfx42
+void fn_80121C68(int n, f32 *a, f32 *w);                     // cftf1st
+void fn_80122518(int n, f32 *a, f32 *w);                     // cftb1st
+void fn_80122E08(int n, f32 *a, int nw, f32 *w);             // cftrec1
+void fn_80122ED8(int n, f32 *a, int nw, f32 *w);             // cftrec2
+void fn_80122FA4(int n, f32 *a, int nw, f32 *w);             // cftexp1
+void fn_801231B8(int n, f32 *a, int nw, f32 *w);             // cftexp2
+void fn_801233F8(int n, f32 *a, f32 *w);                     // cftmdl1
+void fn_801237C4(int n, f32 *a, f32 *w);                     // cftmdl2
+void fn_80123CEC(int n, f32 *a, int nw, f32 *w);             // cftfx41
+void fn_80123DC0(int n, f32 *a, int nw, f32 *w);             // cftfx42
 void fn_80123E98(f32 *a, f32 *w);                            // cftf161
 void fn_8012440C(f32 *a, f32 *w);                            // cftf162
 void fn_80124AD8(f32 *a, f32 *w);                            // cftf081
@@ -58,9 +58,9 @@ void fn_80124CE8(f32 *a, f32 *w);                            // cftf082
 void fn_80124F90(f32 *a);                                    // cftf040
 void fn_80125014(f32 *a);                                    // cftb040
 void fn_80125098(f32 *a);                                    // cftx020
-void fn_801250CC(s32 n, f32 *a, s32 nc, f32 *c);             // rftfsub
-void fn_801252D8(s32 n, f32 *a, s32 nc, f32 *c);             // rftbsub
-void fn_801254E4(s32 n, f32 *a, s32 nc, f32 *c);             // dctsub
+void fn_801250CC(int n, f32 *a, int nc, f32 *c);             // rftfsub
+void fn_801252D8(int n, f32 *a, int nc, f32 *c);             // rftbsub
+void fn_801254E4(int n, f32 *a, int nc, f32 *c);             // dctsub
 
 #define M2C_FIELD(base, type, offset) (*(type)((u8 *)(base) + (offset)))
 
@@ -1531,8 +1531,8 @@ s32 fn_8011B2AC(s32 size, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 outpu
             *q++ = lbl_80329BC8[index];
         }
         fn_8011AF94(p, size, &bits, factors, arg8);
-        if (mode) fn_8012023C(size, 1, p, (s32 *)arg3, (f32 *)arg4);
-        else fn_801200BC(size, -1, p, (s32 *)arg3, (f32 *)arg4);
+        if (mode) fn_8012023C(size, 1, p, (int *)arg3, (f32 *)arg4);
+        else fn_801200BC(size, -1, p, (int *)arg3, (f32 *)arg4);
         p += size;
     }
     if (channels == 1) fn_8011AE68(output, buffer, size, gain);
@@ -2292,8 +2292,8 @@ void fn_80120084(void *arg0) {
     else free(base);
 }
 
-void fn_801200BC(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
-    s32 nw, nc;
+void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w) {
+    int nw, nc;
     f32 xi;
 
     nw = ip[0];
@@ -2328,8 +2328,8 @@ void fn_801200BC(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
     }
 }
 
-void fn_8012023C(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
-    s32 j, nw, nc;
+void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w) {
+    int j, nw, nc;
     f32 xr;
 
     nw = ip[0];
@@ -2375,7 +2375,7 @@ void fn_8012023C(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
     }
 }
 
-void fn_80120834(s32 n, s32 *info, f32 *table) {
+void fn_80120834(int n, int *info, f32 *table) {
     s32 i;
     s32 stage;
     s32 half;
@@ -2454,7 +2454,7 @@ extern f64 sin(f64);
 extern f32 lbl_80561210;
 extern f32 lbl_80561214;
 extern f64 lbl_80561228;
-void fn_80120B6C(s32 arg0, s32 *arg1, f32 *arg2) {
+void fn_80120B6C(int arg0, int *arg1, f32 *arg2) {
     s32 i;
     s32 half;
     f32 scale;
@@ -2475,8 +2475,8 @@ void fn_80120B6C(s32 arg0, s32 *arg1, f32 *arg2) {
     }
 }
 
-void fn_80120CA4(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
-    s32 m;
+void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w) {
+    int m;
 
     if (n > 32) {
         m = n >> 2;
@@ -2507,8 +2507,8 @@ void fn_80120CA4(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
     }
 }
 
-void fn_80120E14(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
-    s32 m;
+void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w) {
+    int m;
 
     if (n > 32) {
         m = n >> 2;
@@ -2539,8 +2539,8 @@ void fn_80120E14(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
     }
 }
 
-void fn_80120F84(s32 n, s32 *ip, f32 *a) {
-    s32 j, j1, k, k1, l, m, m2;
+void fn_80120F84(int n, int *ip, f32 *a) {
+    int j, j1, k, k1, l, m, m2;
     f32 xr, xi, yr, yi;
 
     ip[0] = 0;
@@ -2637,8 +2637,8 @@ void fn_80120F84(s32 n, s32 *ip, f32 *a) {
     }
 }
 
-void fn_80121400(s32 n, s32 *ip, f32 *a) {
-    s32 j, j1, k, k1, l, m, m2;
+void fn_80121400(int n, int *ip, f32 *a) {
+    int j, j1, k, k1, l, m, m2;
     f32 xr, xi, yr, yi;
 
     ip[0] = 0;
@@ -2908,8 +2908,8 @@ void fn_80121BF4(f32 *arg0) {
 
 extern f32 lbl_80561218;
 extern f32 lbl_80561230;
-void fn_80121C68(s32 n, f32 *a, f32 *w) {
-    s32 j, j0, j1, j2, j3, k, m, mh;
+void fn_80121C68(int n, f32 *a, f32 *w) {
+    int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
 
@@ -3110,8 +3110,8 @@ void fn_80121C68(s32 n, f32 *a, f32 *w) {
     a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void fn_80122518(s32 n, f32 *a, f32 *w) {
-    s32 j, j0, j1, j2, j3, k, m, mh;
+void fn_80122518(int n, f32 *a, f32 *w) {
+    int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
 
@@ -3312,8 +3312,8 @@ void fn_80122518(s32 n, f32 *a, f32 *w) {
     a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void fn_80122E08(s32 n, f32 *a, s32 nw, f32 *w) {
-    s32 m;
+void fn_80122E08(int n, f32 *a, int nw, f32 *w) {
+    int m;
 
     m = n >> 2;
     fn_801233F8(n, a, &w[nw - 2 * m]);
@@ -3327,8 +3327,8 @@ void fn_80122E08(s32 n, f32 *a, s32 nw, f32 *w) {
     }
 }
 
-void fn_80122ED8(s32 n, f32 *a, s32 nw, f32 *w) {
-    s32 m;
+void fn_80122ED8(int n, f32 *a, int nw, f32 *w) {
+    int m;
 
     m = n >> 2;
     fn_801237C4(n, a, &w[nw - n]);
@@ -3342,8 +3342,8 @@ void fn_80122ED8(s32 n, f32 *a, s32 nw, f32 *w) {
     }
 }
 
-void fn_80122FA4(s32 n, f32 *a, s32 nw, f32 *w) {
-    s32 j, k, l;
+void fn_80122FA4(int n, f32 *a, int nw, f32 *w) {
+    int j, k, l;
 
     l = n >> 2;
     while (l > 128) {
@@ -3371,8 +3371,8 @@ void fn_80122FA4(s32 n, f32 *a, s32 nw, f32 *w) {
     fn_80123CEC(l, &a[n - l], nw, w);
 }
 
-void fn_801231B8(s32 n, f32 *a, s32 nw, f32 *w) {
-    s32 j, k, l, m;
+void fn_801231B8(int n, f32 *a, int nw, f32 *w) {
+    int j, k, l, m;
 
     m = n >> 1;
     l = n >> 2;
@@ -3405,8 +3405,8 @@ void fn_801231B8(s32 n, f32 *a, s32 nw, f32 *w) {
     }
 }
 
-void fn_801233F8(s32 n, f32 *a, f32 *w) {
-    s32 j, j0, j1, j2, j3, k, m, mh;
+void fn_801233F8(int n, f32 *a, f32 *w) {
+    int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, wk1r, wk1i, wk3r, wk3i;
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
@@ -3513,8 +3513,8 @@ void fn_801233F8(s32 n, f32 *a, f32 *w) {
     a[j3 + 1] = -wn4r * (x0i - x0r);
 }
 
-void fn_801237C4(s32 n, f32 *a, f32 *w) {
-    s32 j, j0, j1, j2, j3, k, kr, m, mh;
+void fn_801237C4(int n, f32 *a, f32 *w) {
+    int j, j0, j1, j2, j3, k, kr, m, mh;
     f32 wn4r, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y2r, y2i;
 
@@ -3645,7 +3645,7 @@ void fn_801237C4(s32 n, f32 *a, f32 *w) {
     a[j3 + 1] = y0i + y2i;
 }
 
-void fn_80123CEC(s32 n, f32 *a, s32 nw, f32 *w) {
+void fn_80123CEC(int n, f32 *a, int nw, f32 *w) {
     if (n == 128) {
         fn_80123E98(a, &w[nw - 8]);
         fn_8012440C(&a[32], &w[nw - 32]);
@@ -3659,7 +3659,7 @@ void fn_80123CEC(s32 n, f32 *a, s32 nw, f32 *w) {
     }
 }
 
-void fn_80123DC0(s32 n, f32 *a, s32 nw, f32 *w) {
+void fn_80123DC0(int n, f32 *a, int nw, f32 *w) {
     if (n == 128) {
         fn_80123E98(a, &w[nw - 8]);
         fn_8012440C(&a[32], &w[nw - 32]);
@@ -4186,8 +4186,8 @@ void fn_80125098(f32 *a) {
     a[3] = x0i;
 }
 
-void fn_801250CC(s32 n, f32 *a, s32 nc, f32 *c) {
-    s32 j, k, kk, ks, m;
+void fn_801250CC(int n, f32 *a, int nc, f32 *c) {
+    int j, k, kk, ks, m;
     f32 wkr, wki, xr, xi, yr, yi;
 
     m = n >> 1;
@@ -4209,8 +4209,8 @@ void fn_801250CC(s32 n, f32 *a, s32 nc, f32 *c) {
     }
 }
 
-void fn_801252D8(s32 n, f32 *a, s32 nc, f32 *c) {
-    s32 j, k, kk, ks, m;
+void fn_801252D8(int n, f32 *a, int nc, f32 *c) {
+    int j, k, kk, ks, m;
     f32 wkr, wki, xr, xi, yr, yi;
 
     m = n >> 1;
@@ -4232,8 +4232,8 @@ void fn_801252D8(s32 n, f32 *a, s32 nc, f32 *c) {
     }
 }
 
-void fn_801254E4(s32 n, f32 *a, s32 nc, f32 *c) {
-    s32 j, k, kk, ks, m;
+void fn_801254E4(int n, f32 *a, int nc, f32 *c) {
+    int j, k, kk, ks, m;
     f32 wkr, wki, xr;
 
     m = n >> 1;
