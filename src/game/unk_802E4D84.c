@@ -741,32 +741,31 @@ float fn_802E6040(void *arg0) {
 extern unsigned char lbl_8055FF94[];
 extern int OSDisableInterrupts(void);
 __declspec(section ".sdata") extern unsigned char lbl_8055FF94[];
-void *fn_802E6058(void *arg0) {
-    unsigned char *entry;
+// Starts a voice for sample `s` on the first free voice (stopped, centered, full volume); returns it, or 0 when
+// all 32 are busy.
+SpuVoice *fn_802E6058(SpuSample *s) {
     int i;
-    i = 0;
-    for (;;) {
-        entry = lbl_8055FF94 + ((((i << 27) - (i >> 31)) << 5) + (i >> 31)) * 0x2C;
-        if (entry[0x20] == 0) {
+    for (i = 0; i < 0x20; i++) {
+        SpuVoice *v = &SPU_VOICE_TABLE[i % 0x20];
+        if (!v->active) {
             OSDisableInterrupts();
-            entry[0x20] = 1;
-            *(void **)(entry + 0x1C) = arg0;
-            *(float *)(entry + 8) = 1.0f;
-            *(float *)(entry + 0xC) = 0.0f;
-            *(float *)(entry + 0x14) = 1.0f;
-            *(int *)(entry + 0x18) = 0;
-            *(float *)(entry + 0x10) = *(float *)((char *)arg0 + 0xA8);
-            entry[0x23] = 0;
-            entry[0x25] = 0;
-            *(int *)((char *)arg0 + 0x98) += 1;
-            entry[0x21] = 1;
-            entry[0x22] = 0;
-            *(int *)(entry + 0x28) = 0;
+            v->active = 1;
+            v->sample = s;
+            v->volume = 1.0f;
+            v->pan = 0.0f;
+            v->depth = 1.0f;
+            v->remotes = 0;
+            v->pitch = s->rate;
+            v->play = 0;
+            v->loop = 0;
+            s->users++;
+            v->start = 1;
+            v->startAck = 0;
+            v->lastPos = 0;
             OSEnableInterrupts();
-            ++lbl_8055FF98;
-            return entry;
+            lbl_8055FF98++;
+            return v;
         }
-        if (++i == 0x20) break;
     }
     return 0;
 }
