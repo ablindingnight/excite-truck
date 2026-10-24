@@ -326,7 +326,62 @@ void fn_80267130(u8* p) {
     F32(p, 0x4C) = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
 }
 
-void fn_802671CC(u8* p) {}  // stub (149)
+struct KVec3 {
+    f32 x, y, z;
+};
+
+// Rotation + translation (camera frame).
+struct KFrame {
+    f32 m[9];  // offset 0x0, rows
+    KVec3 t;   // offset 0x24
+};
+
+static inline f32 KDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void KMulVec(KVec3* out, const KVec3* in, const KFrame* m) {
+    if (out == in) {
+        f32 x = KDot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        f32 y = KDot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        f32 z = KDot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = KDot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        out->y = KDot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        out->z = KDot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+    }
+}
+
+f32 fn_801EA0E8(f32 x, f32 z);  // ground height
+extern f32 lbl_8055D020;        // aspect
+
+// Keeps the camera's near plane above the ground: lifts it by the deepest corner (not in modes 17/21).
+void fn_802671CC(u8* p) {
+    KVec3 v;
+    KVec3 w;
+    f32 nearZ = F32(p, 0x48);
+    f32 s = nearZ * F32(p, 0x34);
+    f32 hx = s / lbl_8055D020;
+    f32 hy = ((f32)S32(p, 0x44) * s) / (f32)S32(p, 0x40);
+    f32 lift = lbl_80563C20;
+    for (int i = 0; i < 4; i++) {
+        f32 cx = (i & 1) ? hx : -hx;
+        f32 cy = (i & 2) ? hy : -hy;
+        v.x = cx;
+        v.y = cy;
+        v.z = nearZ;
+        KMulVec(&w, &v, (KFrame*)p);
+        w.x += F32(p, 0x24);
+        w.y += F32(p, 0x28);
+        w.z += F32(p, 0x2C);
+        f32 d = fn_801EA0E8(w.x, w.z) - w.y;
+        lift = lift > d ? lift : d;
+    }
+    if (S32(p, 0x58) != 0x11 && S32(p, 0x58) != 0x15) {
+        F32(p, 0x28) = F32(p, 0x28) + lift;
+    }
+}
 
 void fn_80267420(u8* p) {}  // stub (152)
 
