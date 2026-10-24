@@ -375,10 +375,11 @@ void AchAddValue(int category, s32 value) {
             s32 total = AchGetValue(category, IdentGetCurrentSlot());
             s32 limited = value;
 
-            if (lbl_8055D618 - total < value) {
-                limited = lbl_8055D618 - total;
-                fn_802E30C8("Achievements: limiting value %d to %d due to scoring limiter", value, limited);
+            s32 room = lbl_8055D618 - total;
+            if (room < value) {
+                limited = room;
             }
+            fn_802E30C8("Achievements: limiting value %d to %d due to scoring limiter", value, limited);
             value = limited;
         }
         s_race.totals[category] += value;
