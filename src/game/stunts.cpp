@@ -332,7 +332,7 @@ public:
     virtual void Init(void) { ranks.Clear(); }
     virtual void Dump(void);
     virtual void Start(const RaceCarRec* rc) {}
-    virtual s32 Total(void) const { return 0; }
+    virtual s32 Total(void) const { return 1; }
     virtual void Fill(StuntList* l) const {
         int n = 0;
         int i;
