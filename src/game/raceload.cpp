@@ -99,8 +99,8 @@ public:
 };
 
 ModuleTag lbl_8055D3A0;
-UnkStaticFFFF lbl_8055D3A8;
 static RaceLoadStatic lbl_8034F4C8;
+UnkStaticFFFF lbl_8055D3A8;
 UnkStatic7F lbl_8055D3AC;
 
 static char lbl_8034F4E0[64];  // track

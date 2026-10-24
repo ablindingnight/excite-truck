@@ -1910,3 +1910,6 @@ void CrushSubTaskMgr::vf18(int a, int b) {
         }
     }
 }
+
+// Empty in the shipped game.
+extern "C" void fn_80176400(void) {}

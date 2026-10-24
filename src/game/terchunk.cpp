@@ -88,8 +88,8 @@ struct VisibleList {
 };
 
 ModuleTag lbl_8055ECB0;
-UnkStaticFFFF lbl_8055ECB8;
 static UnkStatic123 lbl_804888B8;
+UnkStaticFFFF lbl_8055ECB8;
 UnkStatic7F lbl_8055ECBC;
 int lbl_8055B410 = 7;              // chunk window
 int lbl_8055B414 = -1;             // forced chunk

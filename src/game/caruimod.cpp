@@ -720,8 +720,8 @@ ModuleTag lbl_8055F318;
 u16 lbl_8055F320 = 0x100;
 u16 lbl_8055F322 = 0x405;
 u16 lbl_8055F324 = 0x401;
-UnkStatic123 lbl_80498DF0;
 UnkStaticFFFF lbl_8055F328;
+UnkStatic123 lbl_80498DF0;
 UnkStatic7F lbl_8055F32C;
 u8 lbl_8055F330;   // track scene mode
 f32 lbl_8055F334;  // frame time

@@ -236,8 +236,8 @@ static inline void StrCopy(char* d, const char* s, int n) {
 }
 
 ModuleTag lbl_8055F9F0;
-UnkStatic123s lbl_804BE7B8;
 UnkStaticFFFF lbl_8055F9F8;
+UnkStatic123s lbl_804BE7B8;
 UnkStatic7F lbl_8055F9FC;
 s32 lbl_8055FA00;
 Timer lbl_8055FA08(2.0f);  // layer list

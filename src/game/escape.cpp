@@ -123,8 +123,8 @@ static const char* lbl_802FC098[] = {
 };
 
 ModuleTag lbl_8055D3F0;
-UnkStaticFFFF lbl_8055D3F8;
 static UnkStatic123 lbl_8034F610;
+UnkStaticFFFF lbl_8055D3F8;
 UnkStatic7F lbl_8055D3FC;
 
 s32 lbl_8055D400;                  // selected item

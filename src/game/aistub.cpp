@@ -3,8 +3,8 @@
 #include "game/common.h"
 
 ModuleTag lbl_8055E140;
-UnkStaticFFFF lbl_8055E148;
 static UnkStatic123 lbl_8042F840;
+UnkStaticFFFF lbl_8055E148;
 UnkStatic7F lbl_8055E14C;
 
 extern "C" {
