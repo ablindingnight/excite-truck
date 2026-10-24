@@ -426,15 +426,18 @@ void fn_80271578(void) {
 
 extern const f32 lbl_80563F4C;  // degrees to radians
 
-void fn_802715C4(f32* out, u8* p) {
-    f32 z = F32(p, 0x14);
-    f32 k = lbl_80563F4C;
-    f32 y = F32(p, 0x10);
-    f32 x = F32(p, 0xC);
-    out[2] = k * z;
-    out[0] = k * x;
-    out[1] = k * y;
+static inline f32 DegToRad(f32 d) { return lbl_80563F4C * d; }
+
+static inline void VecToRad(f32* o, const f32* v) {
+    f32 z = v[2];
+    f32 y = v[1];
+    f32 x = v[0];
+    o[2] = DegToRad(z);
+    o[0] = DegToRad(x);
+    o[1] = DegToRad(y);
 }
+
+void fn_802715C4(f32* out, u8* p) { VecToRad(out, (const f32*)(p + 0xC)); }
 
 f32 fn_802715F0(u8* p) {
     f32 a = F32(p, 0x18);
