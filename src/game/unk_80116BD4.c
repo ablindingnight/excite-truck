@@ -503,32 +503,20 @@ void fn_80116CC4(u32 *dst, u16 v, u32 size) {
 #pragma opt_unroll_loops reset
 
 extern s64 OSGetTime(void);
-extern s32 lbl_8055DEC0;
-extern u32 lbl_8055DEC4;
+extern s64 lbl_8055DEC0;  // time of the first call
+// Milliseconds since the first call (60750 timer ticks per ms), divided without a 64-bit division.
 s32 fn_80116D30(void) {
-    s64 time = OSGetTime();
-    u32 time_high;
-    s32 time_low;
-    s32 saved_low;
-    u32 saved_high;
-    s64 delta;
-    
-    time_high = (u32)(time >> 32);
-    time_low = (s32)time;
-    
-    saved_low = lbl_8055DEC0;
-    saved_high = lbl_8055DEC4;
-    
-    if (saved_low == 0 && saved_high == 0) {
-        lbl_8055DEC4 = time_high;
-        lbl_8055DEC0 = time_low;
-        saved_high = time_high;
-        saved_low = time_low;
+    s64 now = OSGetTime();
+    u64 delta;
+    u64 ms;
+    if (!lbl_8055DEC0) {
+        lbl_8055DEC0 = now;
     }
-    
-    delta = time - ((s32)saved_high << 32 | saved_low);
-    
-    return (s32)(delta * 70811LL / 2317483787LL);
+    delta = now - lbl_8055DEC0;
+    ms = (u32)(delta >> 32) * 70699;
+    delta -= ms * 60750;
+    delta = (delta * 0x8A15866B) >> 47;
+    return delta + ms;
 }
 
 extern void* fn_8011FF24(void);
