@@ -161,7 +161,13 @@ static UnkStatic123 lbl_80490908;
 UnkStatic7F lbl_8055EFA8;
 u8 lbl_8055EFAC;  // keys muted
 
-static inline BOOL Visible(const Widget* w) { return w->shown || w->fadeOut >= 0.0f; }
+static inline BOOL Visible(const Widget* w) {
+    BOOL r = FALSE;
+    if (w->shown || w->fadeOut >= 0.0f) {
+        r = TRUE;
+    }
+    return r;
+}
 
 static inline s32 StyleOf(const Widget* w) { return w->stylePtr ? *w->stylePtr : w->style; }
 
