@@ -50,7 +50,7 @@ extern const u32 lbl_8055C458;
 extern f32 lbl_8055C454;
 
 // Unsized address view reproduces original absolute access to the known 4-byte object.
-extern const f32 lbl_80558DC4[];
+extern f32 lbl_80558DC4[];
 extern const CreditMethodTableFields lbl_803466D8, lbl_803465B8, lbl_80346558;
 extern const char lbl_8055C4A8[8], lbl_803464EC[];
 extern CreditFadeFields* lbl_8055F444;
