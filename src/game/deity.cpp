@@ -329,7 +329,9 @@ void fn_801CB6B4(int car, int a, int b);
 void fn_80178C9C(void);
 int fn_801E89EC(void);
 void fn_801E89F4(int a);
+}  // extern "C"
 int IsLoadingActive(void);
+extern "C" {
 void fn_801B84F8(void);
 f32 fn_801365C4(IdealFollower* a, IdealFollower* b);
 
@@ -934,6 +936,14 @@ void fn_801B234C(f32 t) {
 
 void fn_801B235C(void) { fn_801E89F4(3); }
 
+// Hand a car back to the AI and its HUD slot.
+static inline void ReleaseCar(DeityCar* c) {
+    fn_8018B0D0(c->car, 2);
+    fn_801CB3AC(c->index);
+}
+
+extern const f32 lbl_805625DC;  // 1 / 59.94 (one frame)
+
 void fn_801B2364(void) {
     fn_801B146C();
     if (fn_801769F8()) {
@@ -941,19 +951,20 @@ void fn_801B2364(void) {
     }
     int r = fn_801E89EC();
     f32 now = lbl_8055E3C8;
-    if (!lbl_8055E6A0 || !(now >= lbl_8055E6A4)) {
+    if (!lbl_8055E6A0) {
+        return;
+    }
+    if (!(now >= lbl_8055E6A4)) {
         return;
     }
     if (!r) {
         fn_801E89F4(1);
         for (int i = 0; i < lbl_8055E678; i++) {
-            DeityCar* c = &lbl_8055E684[i];
-            fn_8018B0D0(c->car, 2);
-            fn_801CB3AC(c->index);
+            ReleaseCar(&lbl_8055E684[i]);
         }
     }
     if (lbl_8055E6A8 == 1 && IsLoadingActive()) {
-        lbl_8055E6AC += 1.0f / 59.94f;
+        lbl_8055E6AC += lbl_805625DC;
     }
     if (lbl_8055E6A8 == 1 && now > lbl_8055E6AC) {
         fn_802E30C8("deity: green flag!");
