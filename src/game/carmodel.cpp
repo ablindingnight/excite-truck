@@ -1109,9 +1109,7 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         fn_801345D8(p, 64, "%s%d.mod", mdl, i);
         m->lodModels[i] = fn_802C6FC0(p, inst, dir);
         m->drawModels[i] = m->lodModels[i];
-        int r = 0;
-        r = fn_801E320C(m->lodModels[i], "neck") || fn_801E320C(m->lodModels[i], "butt") ? 1 : r;
-        m->lods[i].rider = r;
+        m->lods[i].rider = fn_801E320C(m->lodModels[i], "neck") || fn_801E320C(m->lodModels[i], "butt");
         m->lods[i].wheels = fn_801E320C(m->lodModels[i], "wheel");
     }
     s32 m1 = m->lodModels[1];
