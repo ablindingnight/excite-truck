@@ -1993,21 +1993,22 @@ s32 fn_8011B2AC(s32 size, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 outpu
         q = factors;
         for (j = 0; j < bands; j++) {
             {
-            u32 value;
-            if (bits.count < 8) {
-                u32 word = *bits.next;
-                value = bits.value | (word << bits.count);
-                bits.value = word >> (8 - bits.count);
-                index = value & 0xff;
-                bits.count += 24;
-                bits.next++;
-            } else {
-                bits.count -= 8;
-                value = bits.value;
-                index = value & 0xff;
-                bits.value >>= 8;
+                u32 value;
+                u32 have = bits.count;
+                if (have < 8) {
+                    u32 word = *bits.next;
+                    value = bits.value | (word << have);
+                    bits.value = word >> (8 - have);
+                    index = value & 0xff;
+                    bits.count += 24;
+                    bits.next++;
+                } else {
+                    bits.count -= 8;
+                    value = bits.value;
+                    index = value & 0xff;
+                    bits.value >>= 8;
+                }
             }
-        }
             if (index > 95) index = 95;
             *q++ = lbl_80329BC8[index];
         }
