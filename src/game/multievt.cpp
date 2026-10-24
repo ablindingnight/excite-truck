@@ -234,8 +234,8 @@ u8* fn_8024A204(u8* p, int del) {
 
 u8* fn_8024A268(u8* p, int del) {
     if (p) {
-        U32(p, 0x10) = 0;
         S32(p, 0x18) = -1;
+        U32(p, 0x10) = 0;
         U32(p, 0x1C) = 0;
         if (del > 0) {
             operator delete(p);
