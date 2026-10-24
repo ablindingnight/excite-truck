@@ -1239,15 +1239,15 @@ void fn_801C9920(const Event* e, int fd) {
 void fn_801CA070(const char* name) {
     int fd = fn_802E367C(name);
     if (fd != -1) {
-        if (lbl_8055E814 == 0) {
-            const char* table;
-            if (fn_801C3D5C()->Has("interlude_name")) {
-                table = fn_801C3D5C()->GetValue("interlude_name");
-            } else {
-                table = GetEventTypeName(fn_801769CC()->type);
-            }
-            fn_802E3AD0(fd, "table %s\r\n", table);
+        const char* table;
+        if (lbl_8055E814) {
+            table = (const char*)lbl_8055E814;  // name override
+        } else if (fn_801C3D5C()->Has("interlude_name")) {
+            table = fn_801C3D5C()->GetValue("interlude_name");
+        } else {
+            table = GetEventTypeName(fn_801769CC()->type);
         }
+        fn_802E3AD0(fd, "table %s\r\n", table);
         fn_802E3AD0(fd, "\tduration\t%.2f\r\n", lbl_8055A958);
         for (int i = 0; i < lbl_8055E7F0; i++) {
             fn_801C9920(&lbl_8055E7F8[i], fd);
