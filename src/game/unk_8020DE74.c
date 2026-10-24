@@ -19,54 +19,54 @@ extern float lbl_805633FC;
 extern void *lbl_8033C8C4[];
 extern "C" void fn_80128668(void *);
 extern "C" void *fn_8020E288(void *arg0, s32 arg1) {
-    struct Dummy { virtual void release(s32); virtual void v1(); virtual void v2(); };
+    struct Dummy { virtual ~Dummy(); };
     void *child;
     u8 *p;
     u32 i;
     if (arg0 != 0) {
         child = *(void **)((u8 *)arg0 + 8);
         *(void **)arg0 = lbl_8033C8C4;
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         p = (u8 *)arg0;
         i = 0;
         do {
             child = *(void **)(p + 0x10);
-            if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+            if (child != 0) delete (Dummy *)child;
             p += 4;
             i++;
         } while (i < 2);
         child = *(void **)((u8 *)arg0 + 0x18);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x28);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x30);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x1C);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x20);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x24);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x2C);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x48);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x4C);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x50);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x44);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x34);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x38);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x3C);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x40);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x54);
-        if (child != 0) { if (child != 0) ((Dummy *)child)->release(1); }
+        if (child != 0) delete (Dummy *)child;
         if (arg1 > 0) fn_80128668(arg0);
     }
     return arg0;
