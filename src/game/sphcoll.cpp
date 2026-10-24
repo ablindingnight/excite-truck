@@ -2291,7 +2291,10 @@ void fn_801A22A4(u8* p) {
     x.rot = src->rot;
     x.pos = src->pos;
     const RVec3* c = (const RVec3*)(p + 0x24);
-    fn_801E44F4((u8*)&x, 0x50000000, c->x, c->y, c->z);
+    f32 cz = c->z;
+    f32 cy = c->y;
+    f32 cx = c->x;
+    fn_801E44F4((u8*)&x, 0x50000000, cx, cy, cz);
 }
 
 u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz) {
