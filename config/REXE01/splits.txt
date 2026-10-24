@@ -368,6 +368,9 @@ MSL/math_sun.c:
 	extabindex  start:0x8000494C end:0x80004958
 	.text       start:0x8002B060 end:0x8002B0A0
 
+game/unk_8002B0A0.c:
+	.text       start:0x8002B0A0 end:0x8002B0B0
+
 MSL/extras.c:
 	.text       start:0x8002B130 end:0x8002B1DC
 
