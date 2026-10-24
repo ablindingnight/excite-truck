@@ -1616,7 +1616,25 @@ WidgetFragment* fn_8021F678(WidgetFragment* self,int x,int y,int width,int heigh
 struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,step;void* image;int* focus;int token;float previousTime,nextTime;};
 extern "C" {
 extern const float lbl_80563518;extern u32 lbl_8033E7F4[];void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
-void fn_8021FA98(void) {}
+void fn_8021FA98(WidgetFragment *self, int x, int y)
+{
+  FloatSliderPrefix *f = (FloatSliderPrefix *) self;
+  if (f->dragging && fn_8021FBC4(self, x, y))
+  {
+    float raw = f->minimum + ((((float) (x - f->oldX)) * (f->maximum - f->minimum)) / ((float) (f->oldWidth - (f->oldWidth / f->rate))));
+    int steps = f->rate - 1;
+float snapped=(float)(int)(lbl_80563518+(float)steps*(raw-f->minimum)/(f->maximum-f->minimum));float value=f->minimum+snapped*(f->maximum-f->minimum)/(float)steps;
+    if (value < f->minimum)
+    {
+      value = f->minimum;
+    }
+    if (value > f->maximum)
+    {
+      value = f->maximum;
+    }
+    *f->value = value;
+  }
+}
 void fn_8021FC40(WidgetFragment* self,void* context){fn_802C3034(context);fn_802192A0(self,context);FloatSliderPrefix* f=(FloatSliderPrefix*)self;int top,left;int span=((WidgetDispatch*)self)->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
 void fn_8021FD68(WidgetFragment* self){FloatSliderPrefix* f=(FloatSliderPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;float width=(float)((WidgetDispatch*)self)->Slot78();float height=(float)(self->bottom-self->top);float x=(float)(self->left-lbl_8055FB9C/2),y=(float)(lbl_8055FBA0/2-self->top);fn_802C5320(f->background,selected,x,y,lbl_805634A8,width,height);fn_802C5334(f->marker,selected,x,y,lbl_805634A8,(float)fill,height,lbl_805634A8,lbl_805634A8,(float)fill/width,lbl_805634A4);}
 }
@@ -1649,7 +1667,7 @@ void fn_802245C8(WidgetFragment* self){ToggleImagePrefix* f=(ToggleImagePrefix*)
 struct ScrollbarPrefix {char base[0x244];void* view;void* track;void* marker;bool dragging;char gap251[3];int vertical;};
 extern "C" {
 extern u32 lbl_8033E7F4[],lbl_8033E770[];
-void fn_80220A50(void) {}
+
 WidgetFragment* fn_80220E48(WidgetFragment* self,int x,int y,int width,int height,void* view,int vertical){const char* strings=lbl_8033D878;fn_80218F34(self,x,y,x+width,y+height,0);self->vtable=lbl_8033E770;ScrollbarPrefix* f=(ScrollbarPrefix*)self;if(!vertical){f->track=fn_802C5130(strings+0x150);f->marker=fn_802C5130(strings+0x15c);}else{f->track=fn_802C5130(strings+0x168);f->marker=fn_802C5130(strings+0x174);}((WidgetDispatch*)self)->Slot1c(self->left,self->top);if(!vertical){int width=fn_802C51C0(f->track);fn_80219284(self,width,self->bottom-self->top);}else{int height=fn_802C5220(f->track);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}f->view=view;f->vertical=vertical;fn_80219440(self,0,view,12);f->dragging=0;return self;}
 }
 
@@ -2126,4 +2144,10 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
         }
     }
 }
+}
+
+enum SliderDenominatorWordNew { SliderDenominatorMinNew=(-2147483647-1),SliderDenominatorMaxNew=2147483647 };
+static inline int ClampIntegerSliderNew(int limit,int value){return value>=limit?limit:value;}
+extern "C" {
+void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(SliderFullPrefix*)self;f->dragging=1;int left=self->left;int minimum=f->minimum;int width=((WidgetDispatch*)self)->Slot78();int value=(f->maximum-minimum)*(x-left-5);SliderDenominatorWordNew denominator=(SliderDenominatorWordNew)(width-10);width=value/(int)denominator;value=minimum+width;if(value<minimum)value=minimum;value=ClampIntegerSliderNew(*(volatile int*)&f->maximum-1,value);*f->value=value;}
 }

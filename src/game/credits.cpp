@@ -27,7 +27,17 @@ extern const char lbl_803464EC[9];
 struct CreditMethodTableFields {const void* slots[24];};
 typedef char CreditTableSize[sizeof(CreditMethodTableFields)==96?1:-1];
 extern "C" {
+// Reconstructed typed input view; original type and helper boundaries are unknown.
+struct CreditTokenInputObservedNew {
+    const void* value;
+    inline CreditTokenInputObservedNew(const void* v) { value=v; }
+};
+typedef char CreditTokenInputSize4[sizeof(CreditTokenInputObservedNew)==4?1:-1];
 struct CreditItemFields {
+    inline const void* InitializeTokenInputHeaderObservedNew(CreditTokenInputObservedNew name,int k) {
+        kind=k;
+        return name.value;
+    }
 CreditItemFields(void);
     CreditItemFields(const void* n,int k,void* c,int m,int e) {kind=k;token=n;callback=c;mode=m;extra=e;}
     CreditItemFields(const CreditItemFields& other) {token=other.token;kind=other.kind;callback=other.callback;mode=other.mode;extra=other.extra;}
@@ -615,7 +625,12 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
 
 extern "C" void fn_80264098(CreditItemFields* self, int kind) { self->kind = kind; }
 
-CreditItemFields::CreditItemFields(void){callback=0;kind=123;token=&lbl_8055C458;mode=0;extra=0;}
+CreditItemFields::CreditItemFields(void) {
+    token=InitializeTokenInputHeaderObservedNew(CreditTokenInputObservedNew(&lbl_8055C458),123);
+    callback=0;
+    mode=0;
+    extra=0;
+}
 
 extern "C" void fn_802640C4(CreditItemFields* self,ValueNode* node) {
     const char* type=node->GetValue(lbl_8055C45C);
