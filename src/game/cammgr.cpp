@@ -38,6 +38,12 @@ struct CamPose {
 };
 
 // One player's camera record.
+// Mount camera timing (plain data; copied word by word).
+struct CamMountTime {
+    u32 w[4];   // offset 0x0
+    f32 start;  // offset 0x10, when the mount last changed
+};
+
 // Per-camera state that a record copy must not duplicate (its copy constructor copies nothing).
 struct CamLink {
     CamLink(void) {}
@@ -99,7 +105,7 @@ struct CamRec {
     f32 f1A0;           // offset 0x1A0
     u32 w1A4[12];       // offset 0x1A4
     f32 f1D4;           // offset 0x1D4
-    u32 w1D8[5];        // offset 0x1D8
+    CamMountTime mount; // offset 0x1D8
     s16 h1EC;           // offset 0x1EC
     f32 f1F0;           // offset 0x1F0
     f32 prevFov;        // offset 0x1F4
@@ -108,7 +114,12 @@ struct CamRec {
 
 // Walks the ideal racing line for camera placement.
 struct IdealFollower {
-    u8 pad0[0x2C];   // offset 0x0
+    u8 pad0[0x4];    // offset 0x0
+    u8* seg;         // offset 0x4, current line segment
+    f32 t;           // offset 0x8, how far along it
+    u8 padC[0x4];    // offset 0xC
+    f32 dir[2];      // offset 0x10, heading (x, z)
+    u8 pad18[0x14];  // offset 0x18
     u8* line;        // offset 0x2C
     u8 pad30[0x20];  // offset 0x30
     u8* buf;         // offset 0x50
@@ -1166,7 +1177,148 @@ void fn_802682B0(u8* p) {
     F32(p, 0xBC) = lbl_8055F47C;
 }
 
-void fn_80268358(u8* p) {}  // stub (527)
+void PSVECNormalize(const f32* in, f32* out);
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
+int fn_801E9E78(void* ground, KVec3* p, KVec3* n, s32* hit);
+extern f32 lbl_8055C4F0;  // mount blend time (aim, up, fov)
+extern f32 lbl_8055C4F4;  // mount blend time (position)
+
+}  // extern "C"
+
+// A fixed camera mount: offset and look point in the car frame, field of view, enabled.
+struct CamMount {
+    f32 off[3];  // offset 0x0
+    f32 look[3]; // offset 0xC
+    f32 fov;     // offset 0x18
+    u8 on;       // offset 0x1C
+};
+
+extern CamMount lbl_803467E8[3];
+
+extern "C" {
+// Mount camera points averaged over the ideal-line frames: two points in the frame, and its up vector.
+struct MountView {
+    KVec3 a;   // offset 0x0
+    KVec3 b;   // offset 0xC
+    KVec3 up;  // offset 0x18
+};
+
+// Fixed mount camera on the ideal line: for the current and the next mount, place both mount points in
+// the line's frame (an average of two samples), then blend from one mount to the other over time.
+void fn_80268358(CamRec* c) {
+    f32 m[2][6] = {
+        {lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2],
+         lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]},
+        {lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2],
+         lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2]},
+    };
+    MountView out[2];
+    f32 zero = lbl_80563C20;
+    f32 half = lbl_80563C6C;
+    for (int i = 0; i < 2; i++) {
+        MountView* o = &out[i];
+        o->a.x = zero;
+        o->a.y = zero;
+        o->a.z = zero;
+        o->b.x = zero;
+        o->b.y = zero;
+        o->b.z = zero;
+        o->up.x = zero;
+        o->up.y = zero;
+        o->up.z = zero;
+        KFrame fr[2];
+        for (int j = 0; j < 2; j++) {
+            IdealFollower f;
+            __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
+            f32* p0 = (f32*)f.seg;
+            f32* p1 = *(f32**)(f.seg + 0x14);
+            s32 hit = 0;
+            f32 x = p0[0] + f.t * (p1[0] - p0[0]);
+            f32 z = p0[1] + f.t * (p1[1] - p0[1]);
+            CamXZ xz(x, z);
+            KVec3 v;
+            v.x = xz.x;
+            v.y = lbl_80563C20;
+            v.z = xz.z;
+            KVec3 n;
+            fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
+            KFrame* r = &fr[j];
+            r->m[6] = f.dir[0];
+            r->m[7] = lbl_80563C20;
+            r->m[8] = f.dir[1];
+            PSVECNormalize(&r->m[6], &r->m[6]);
+            PSVECCrossProduct(&n.x, &r->m[6], &r->m[0]);
+            PSVECNormalize(&r->m[0], &r->m[0]);
+            PSVECCrossProduct(&r->m[6], &r->m[0], &r->m[3]);
+            PSVECNormalize(&r->m[3], &r->m[3]);
+            r->t.x = v.x;
+            r->t.y = v.y;
+            r->t.z = v.z;
+            if (f.buf) {
+                delete[] f.buf;
+            }
+            f.buf = 0;
+            fn_8013530C(&f, 0);
+        }
+        KVec3 in = *(KVec3*)&m[i][0];
+        for (int k = 0; k < 2; k++) {
+            KVec3 res;
+            KMulVec(&res, &in, &fr[k]);
+            res.x += fr[k].t.x;
+            res.y += fr[k].t.y;
+            res.z += fr[k].t.z;
+            o->a.x += res.x * half;
+            o->a.y += res.y * half;
+            o->a.z += res.z * half;
+        }
+        KVec3 in2 = *(KVec3*)&m[i][3];
+        for (int k = 0; k < 2; k++) {
+            KVec3 res2;
+            KMulVec(&res2, &in2, &fr[k]);
+            res2.x += fr[k].t.x;
+            res2.y += fr[k].t.y;
+            res2.z += fr[k].t.z;
+            o->b.x += res2.x * half;
+            o->b.y += res2.y * half;
+            o->b.z += res2.z * half;
+        }
+        o->up.x += fr[0].m[3] * half;
+        o->up.y += fr[0].m[4] * half;
+        o->up.z += fr[0].m[5] * half;
+        o->up.x += fr[1].m[3] * half;
+        o->up.y += fr[1].m[4] * half;
+        o->up.z += fr[1].m[5] * half;
+    }
+    f32 t = lbl_8055E3C8 - c->mount.start;
+    f32 ka;
+    if (lbl_803467E8[lbl_8055F4A0].on) {
+        ka = ShakeEase(t / lbl_8055C4F0);
+    } else {
+        ka = t / lbl_8055C4F0;
+    }
+    f32 kb;
+    if (lbl_803467E8[lbl_8055F4A0].on) {
+        kb = ShakeEase(t / lbl_8055C4F4);
+    } else {
+        kb = t / lbl_8055C4F4;
+    }
+    KVec3 bl;
+    bl.x = out[0].b.x + ka * (out[1].b.x - out[0].b.x);
+    bl.y = out[0].b.y + ka * (out[1].b.y - out[0].b.y);
+    bl.z = out[0].b.z + ka * (out[1].b.z - out[0].b.z);
+    KVec3 al;
+    al.x = out[0].a.x + kb * (out[1].a.x - out[0].a.x);
+    al.y = out[0].a.y + kb * (out[1].a.y - out[0].a.y);
+    al.z = out[0].a.z + kb * (out[1].a.z - out[0].a.z);
+    KVec3 up;
+    up.x = out[0].up.x + ka * (out[1].up.x - out[0].up.x);
+    up.y = out[0].up.y + ka * (out[1].up.y - out[0].up.y);
+    up.z = out[0].up.z + ka * (out[1].up.z - out[0].up.z);
+    PSVECNormalize(&up.x, &up.x);
+    c->fov = lbl_803467E8[lbl_8055F4A0].fov + ka * (lbl_803467E8[lbl_8055F4A4].fov - lbl_803467E8[lbl_8055F4A0].fov);
+    fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
+}
 
 void fn_80268B94(s32 v) {
     lbl_8055F4A0 = v;
@@ -1320,7 +1472,7 @@ void fn_80278360(CamRec* c);
 void fn_802E317C(const char* fmt, ...);
 int fn_80268BA4(int mode);
 void fn_802682B0(u8* p);
-void fn_80268358(u8* p);
+void fn_80268358(CamRec* c);
 extern f32 lbl_8055C4B0;
 extern const f32 lbl_80563CBC;  // rumble per speed
 extern const f32 lbl_80563CC0;
@@ -1439,7 +1591,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             break;
         case 0x18:
             if ((fn_801769A8() >> 8) & 1) {
-                fn_80268358((u8*)c);
+                fn_80268358(c);
             } else {
                 fn_8027445C(c);
             }
@@ -1643,14 +1795,6 @@ extern const f32 lbl_80563CF8;  // 30 * 30
 extern const f32 lbl_80563CFC;  // 42.5 deg
 extern const f32 lbl_80563D00;  // 55 deg
 extern const f32 lbl_80563D04;  // 60 deg
-
-// A fixed camera mount: offset and look point in the car frame, field of view, enabled.
-struct CamMount {
-    f32 off[3];  // offset 0x0
-    f32 look[3]; // offset 0xC
-    f32 fov;     // offset 0x18
-    u8 on;       // offset 0x1C
-};
 
 ModuleTag lbl_8055F470;
 UnkStaticFFFF lbl_8055F478;
