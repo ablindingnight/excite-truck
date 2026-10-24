@@ -3593,22 +3593,117 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     bits->count = count;
 }
 
-void fn_8011D378(void *arg0, void *arg1, void *arg2) {
-u32 *src; u32 bits, index, remain, node, tmp; u8 *out; u32 endbits, mask;
-if (*(u32*)arg0 != *(u32*)((u8*)arg0+4)) return;
-remain=*(u32*)((u8*)arg1+8); index=*(u32*)((u8*)arg0+0x28); src=*(u32**)((u8*)arg1+4); bits=*(u32*)arg1;
-if(remain<index){tmp=*src++; bits=(bits|(tmp<<remain))&(0xFFFFFFFFU>>(32-index)); remain=remain+32-index; bits=tmp>>(index-*(u32*)((u8*)arg1+8));}else{remain-=index;bits&=0xFFFFFFFFU>>(32-index);bits>>= index;}
-if(bits){out=*(u8**)((u8*)arg0+0x2c);endbits=*(u32*)((u8*)arg0+0x20);*(u8**)arg0=out;*(u8**)((u8*)arg0+4)=out+bits;node=*(u32*)((u8*)arg2+0x180);
-if(remain==0){tmp=*src++;remain=31;bits=tmp>>1;}else{tmp=bits;bits>>=1;remain--;}
-if(tmp&1)bits=-20-bits; mask=0xFFFFFFFFU>>(32-endbits);
-do{bits--;{u32 n=*(u32*)((u8*)arg2+node*4+0x100);u8 v;if(remain>=n){v=*(*(u8**)((u8*)arg2+node*4+0x140)+(bits&(0xFFFFFFFFU>>(32-n))));node=*((u8*)arg2+node*16+(v&15));tmp=v>>4;bits>>=tmp;remain-=tmp;}else{u32 w=*src;v=*(*(u8**)((u8*)arg2+node*4+0x140)+((bits|(w<<remain))&(0xFFFFFFFFU>>(32-n))));node=*((u8*)arg2+node*16+(v&15));tmp=v>>4;if(remain>=tmp){bits>>=tmp;remain-=tmp;}else{bits=w>>(tmp-remain);src++;remain=remain+32-tmp;}}}
-{u8 v;if(remain>=endbits){v=*((u8*)arg0+0x24+(bits&mask));tmp=*(u8*)((u8*)arg0+0x10+(v&15));bits>>=v>>4;remain-=v>>4;}else{u32 w=*src;v=*((u8*)arg0+0x24+((bits|(w<<remain))&mask));tmp=*(u8*)((u8*)arg0+0x10+(v&15));if(remain>=v>>4){bits>>=v>>4;remain-=v>>4;}else{bits=w>>((v>>4)-remain);src++;remain=remain+32-(v>>4);}}}
-*out++=(u8)(tmp|(node<<4));
-}while(bits>0);
-if(bits < -22) memset(*(u8**)((u8*)arg0+0x2c), **(u8**)((u8*)arg0+0x2c), -bits-21);
-*(u32*)((u8*)arg2+0x180)=node;
-}else{out=*(u8**)((u8*)arg0+0x2c);*(u8**)((u8*)arg0+4)=out;*(u8**)arg0=out+4;}
-*(u32*)((u8*)arg1+4)=(u32)src;*(u32*)arg1=bits;*(u32*)((u8*)arg1+8)=remain;
+// Refills the colors bundle (older format): like fn_8011D0E8, with colors stored as plain bytes.
+void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
+    u32 *next;
+    u32 value;
+    u32 count;
+    s32 len;
+    u32 width;
+    u32 mask;
+    u32 e;
+    u32 bit;
+    u32 last;
+    u32 lo;
+    u8 *dst;
+    u8 *lookup;
+    u8 *symbols;
+
+    if (b->cur != b->end) return;
+    count = bits->count;
+    width = b->countBits;
+    next = bits->next;
+    value = bits->value;
+    if (count < width) {
+        u32 word = *next;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
+        value = word >> (width - count);
+        count = count + 32 - width;
+        next++;
+    } else {
+        len = value & (0xFFFFFFFFU >> (32 - width));
+        value >>= width;
+        count -= width;
+    }
+    if (len != 0) {
+        dst = b->data;
+        width = b->maxBits;
+        symbols = b->symbols;
+        b->cur = dst;
+        lookup = b->lookup;
+        b->end = dst + len;
+        last = trees->last;
+        if (count == 0) {
+            bit = *next;
+            value = bit >> 1;
+            count = 31;
+            next++;
+        } else {
+            bit = value;
+            value >>= 1;
+            count--;
+        }
+        if (bit & 1) {
+            len = -20 - len;
+        }
+        mask = 0xFFFFFFFFU >> (32 - width);
+        do {
+            u32 w;
+            len--;
+            w = trees->maxBits[last];
+            if (count >= w) {
+                e = trees->lookup[last][value & (0xFFFFFFFFU >> (32 - w))];
+                last = trees->symbols[last][e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = trees->lookup[last][(value | (word << count)) & (0xFFFFFFFFU >> (32 - w))];
+                last = trees->symbols[last][e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            if (count >= width) {
+                e = lookup[value & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = lookup[(value | (word << count)) & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            *dst++ = lo | (last << 4);
+        } while (len > 0);
+        if (len < -22) {
+            memset(b->data, b->data[0], -(len + 21));
+        }
+        trees->last = last;
+    } else {
+        b->end = b->data;
+        b->cur = b->data + 4;
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = count;
 }
 
 
