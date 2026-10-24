@@ -1313,7 +1313,6 @@ extern void AXSetVoiceSrcType(void *vpb, u32 type);
 extern void AXSetVoiceSrc(void *vpb, AXPBSRC *src);
 extern void AXSetVoiceSrcRatio(void *vpb, f32 ratio);
 extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
-extern f64 lbl_805611C8;  // 32000.0, the AX output rate
 s32 fn_80119824(StreamTrack *t);
 s32 fn_80119994(void);
 s32 fn_8011999C(void);
@@ -1324,7 +1323,7 @@ s32 fn_80119C0C(void *arg0, s32 arg1);
 
 // Bink sound open for AX: sets up a track of `chans` 16-bit voices at `freq` Hz with a 600 ms buffer, prefilled with
 // up to the whole movie's sound, and installs the track callbacks. Returns 0 without an allocator or voices.
-s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, u32 chans, u32 flags, BinkInfo8011 *bink) {
+s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
     u32 bps;
     u32 total;
     u32 i;
@@ -1392,7 +1391,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, u32 chans, u32 flags, BinkIn
         src.last_samples[3] = 0;
         AXSetVoiceSrcType(t->voices[i], 1);
         AXSetVoiceSrc(t->voices[i], &src);
-        AXSetVoiceSrcRatio(t->voices[i], t->rate / lbl_805611C8);
+        AXSetVoiceSrcRatio(t->voices[i], t->rate / 32000.0);
         AXSetVoiceAdpcm(t->voices[i], &adpcm);
     }
     fn_80119300(t->voices, 0, t->bufSize);
