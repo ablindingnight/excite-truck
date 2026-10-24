@@ -268,6 +268,11 @@ MSL/ansi_fp.c:
 MSL/arith.c:
 	.text       start:0x800241CC end:0x800241DC
 
+game/unk_800241DC.c:
+	extab       start:0x800045A0 end:0x800045A8
+	extabindex  start:0x800047C0 end:0x800047CC
+	.text       start:0x800241DC end:0x800242CC
+
 MSL/buffer_io.c:
 	extab       start:0x800045A8 end:0x800045B0
 	extabindex  start:0x800047CC end:0x800047D8
