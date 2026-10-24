@@ -859,9 +859,9 @@ void fn_801C7698(void) {
                 lbl_8055E7F8[i].time = fn_801C3450(d + lbl_8055E7F8[i].time);
             }
             qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
-            fn_801C957C(0);
         }
     }
+    fn_801C957C(0);
 }
 
 void fn_801C7770(void) { lbl_8055E83E = !lbl_8055E83E; }
