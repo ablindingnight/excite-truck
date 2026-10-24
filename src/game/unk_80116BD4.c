@@ -5884,6 +5884,92 @@ done:
     bits->count = avail;
 }
 
+// Adds a residue read from the bitstream to an 8x8 block: dst = src + residue (the residue is stored in Bink's
+// coefficient order, 2x2 groups within 4x4 quadrants).
+void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride) {
+    s8 block[64] = {0};
+
+    fn_80126A10(block, bits, limit);
+    dst[0] = block[0] + src[0];
+    dst[1] = block[1] + src[1];
+    dst[2] = block[4] + src[2];
+    dst[3] = block[5] + src[3];
+    dst[4] = block[8] + src[4];
+    dst[5] = block[9] + src[5];
+    dst[6] = block[12] + src[6];
+    dst[7] = block[13] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[2] + src[0];
+    dst[1] = block[3] + src[1];
+    dst[2] = block[6] + src[2];
+    dst[3] = block[7] + src[3];
+    dst[4] = block[10] + src[4];
+    dst[5] = block[11] + src[5];
+    dst[6] = block[14] + src[6];
+    dst[7] = block[15] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[24] + src[0];
+    dst[1] = block[25] + src[1];
+    dst[2] = block[44] + src[2];
+    dst[3] = block[45] + src[3];
+    dst[4] = block[16] + src[4];
+    dst[5] = block[17] + src[5];
+    dst[6] = block[20] + src[6];
+    dst[7] = block[21] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[26] + src[0];
+    dst[1] = block[27] + src[1];
+    dst[2] = block[46] + src[2];
+    dst[3] = block[47] + src[3];
+    dst[4] = block[18] + src[4];
+    dst[5] = block[19] + src[5];
+    dst[6] = block[22] + src[6];
+    dst[7] = block[23] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[28] + src[0];
+    dst[1] = block[29] + src[1];
+    dst[2] = block[32] + src[2];
+    dst[3] = block[33] + src[3];
+    dst[4] = block[48] + src[4];
+    dst[5] = block[49] + src[5];
+    dst[6] = block[52] + src[6];
+    dst[7] = block[53] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[30] + src[0];
+    dst[1] = block[31] + src[1];
+    dst[2] = block[34] + src[2];
+    dst[3] = block[35] + src[3];
+    dst[4] = block[50] + src[4];
+    dst[5] = block[51] + src[5];
+    dst[6] = block[54] + src[6];
+    dst[7] = block[55] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[36] + src[0];
+    dst[1] = block[37] + src[1];
+    dst[2] = block[40] + src[2];
+    dst[3] = block[41] + src[3];
+    dst[4] = block[56] + src[4];
+    dst[5] = block[57] + src[5];
+    dst[6] = block[60] + src[6];
+    dst[7] = block[61] + src[7];
+    dst += dstStride;
+    src += srcStride;
+    dst[0] = block[38] + src[0];
+    dst[1] = block[39] + src[1];
+    dst[2] = block[42] + src[2];
+    dst[3] = block[43] + src[3];
+    dst[4] = block[58] + src[4];
+    dst[5] = block[59] + src[5];
+    dst[6] = block[62] + src[6];
+    dst[7] = block[63] + src[7];
+}
+
 extern char lbl_8055DF08;
 // Calls every callback registered in list `arg0` (-1..3).
 void fn_80127398(s32 arg0) {
