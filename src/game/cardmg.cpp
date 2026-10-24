@@ -211,5 +211,26 @@ void fn_8018F9B4(u8* p) {
     }
 }
 
-void fn_8018FACC(u8* p) {}  // stub (19)
+}  // extern "C"
+
+class ModuleTag;
+void RegisterModuleTag(ModuleTag* tag);
+extern ModuleTag lbl_8055E500;  // this unit's module tag
+
+extern "C" {
+
+extern const f32 lbl_80562058;
+extern const f32 lbl_8056205C;
+extern const f32 lbl_80562060;
+extern const f32 lbl_80562064;
+
+// Unit start-up: register the module tag and fill the damage table's computed entries.
+void fn_8018FACC(void) {
+    RegisterModuleTag(&lbl_8055E500);
+    *(f32*)(lbl_80332840[0].data + 0x8) = lbl_80562058;
+    *(f32*)(lbl_80332840[1].data + 0x8) = lbl_8056205C;
+    *(f32*)(lbl_80332840[8].data + 0xC) = lbl_80562060;
+    *(f32*)(lbl_80332840[9].data + 0xC) = lbl_80562064;
+}
+
 }  // extern "C"
