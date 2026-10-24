@@ -218,8 +218,6 @@ void fn_80116CC4(s32* arg0, u16 arg1, u32 arg2) {
 extern s64 OSGetTime(void);
 extern s32 lbl_8055DEC0;
 extern u32 lbl_8055DEC4;
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 s32 fn_80116D30(void) {
     s64 time = OSGetTime();
     u32 time_high;
@@ -895,8 +893,6 @@ s32 fn_8011A7CC(DVDFileInfo *info) {
     return p[0x24 / 4];
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 // 0x50 is a state flag the DVD callbacks also change: every access is volatile.
 s32 fn_8011A870(void *arg0, s32 arg1) {
     if (arg1 & 1) {
@@ -1065,7 +1061,6 @@ u32 fn_8011A8FC(void *arg0, s32 arg1, s32 arg2, void *arg3, u32 arg4) {
               return var_r28;
          }
 
-#pragma dont_inline reset
 s32 fn_8011AC04(s32 arg0, s32 arg1) {
     return (arg1 + 0x7FFF) & 0xFFFF8000;
 }
@@ -1584,8 +1579,6 @@ u32 fn_8011C06C(void *arg0) {
     return 1;
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 u32 fn_8011C1E0(s32 arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
@@ -1599,7 +1592,6 @@ u32 fn_8011C1E0(s32 arg0, void *arg1) {
     }
     return 1;
 }
-#pragma dont_inline reset
 
 // Waits (yielding) until fn_8011C1E0 reports the request finished.
 void fn_8011C274(s32 arg0, void *arg1) {
