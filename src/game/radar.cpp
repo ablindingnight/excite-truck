@@ -78,9 +78,7 @@ static inline f32 Clamp01(f32 t) {
     if (1.0f < t) {
         t = 1.0f;
     }
-    if (!(t > 0.0f)) {
-        t = 0.0f;
-    }
+    t = t <= 0.0f ? 0.0f : t;
     return t;
 }
 
