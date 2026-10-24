@@ -16,8 +16,6 @@ extern f32 lbl_80329BC8[];
 
 
 extern void fn_8011AF94(f32 *, s32, void *, f32 *, s32);
-extern void fn_801200BC(s32, s32, f32 *, s32, s32);
-extern void fn_8012023C(s32, s32, f32 *, s32, s32);
 typedef struct {
     u32 value;
     u32 *next;
@@ -29,6 +27,41 @@ typedef struct {
 #include <revolution/OS/OSAlarm.h>
 #include <revolution/OS/OSContext.h>
 #include <revolution/DVD/dvd.h>
+
+// Takuya Ooura's general purpose FFT package (fftsg.c), built with float data.
+void fn_801200BC(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w);  // rdft
+void fn_8012023C(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w);  // ddct
+void fn_80120834(s32 nw, s32 *ip, f32 *w);                   // makewt
+void fn_80120B6C(s32 nc, s32 *ip, f32 *c);                   // makect
+void fn_80120CA4(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w);    // cftfsub
+void fn_80120E14(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w);    // cftbsub
+void fn_80120F84(s32 n, s32 *ip, f32 *a);                    // bitrv2
+void fn_80121400(s32 n, s32 *ip, f32 *a);                    // bitrv2conj
+void fn_80121848(f32 *a);                                    // bitrv216
+void fn_801219B4(f32 *a);                                    // bitrv216neg
+void fn_80121BB0(f32 *a);                                    // bitrv208
+void fn_80121BF4(f32 *a);                                    // bitrv208neg
+void fn_80121C68(s32 n, f32 *a, f32 *w);                     // cftf1st
+void fn_80122518(s32 n, f32 *a, f32 *w);                     // cftb1st
+void fn_80122E08(s32 n, f32 *a, s32 nw, f32 *w);             // cftrec1
+void fn_80122ED8(s32 n, f32 *a, s32 nw, f32 *w);             // cftrec2
+void fn_80122FA4(s32 n, f32 *a, s32 nw, f32 *w);             // cftexp1
+void fn_801231B8(s32 n, f32 *a, s32 nw, f32 *w);             // cftexp2
+void fn_801233F8(s32 n, f32 *a, f32 *w);                     // cftmdl1
+void fn_801237C4(s32 n, f32 *a, f32 *w);                     // cftmdl2
+void fn_80123CEC(s32 n, f32 *a, s32 nw, f32 *w);             // cftfx41
+void fn_80123DC0(s32 n, f32 *a, s32 nw, f32 *w);             // cftfx42
+void fn_80123E98(f32 *a, f32 *w);                            // cftf161
+void fn_8012440C(f32 *a, f32 *w);                            // cftf162
+void fn_80124AD8(f32 *a, f32 *w);                            // cftf081
+void fn_80124CE8(f32 *a, f32 *w);                            // cftf082
+void fn_80124F90(f32 *a);                                    // cftf040
+void fn_80125014(f32 *a);                                    // cftb040
+void fn_80125098(f32 *a);                                    // cftx020
+void fn_801250CC(s32 n, f32 *a, s32 nc, f32 *c);             // rftfsub
+void fn_801252D8(s32 n, f32 *a, s32 nc, f32 *c);             // rftbsub
+void fn_801254E4(s32 n, f32 *a, s32 nc, f32 *c);             // dctsub
+
 #define M2C_FIELD(base, type, offset) (*(type)((u8 *)(base) + (offset)))
 
 extern void* fn_802ECC74(void*);
@@ -1498,8 +1531,8 @@ s32 fn_8011B2AC(s32 size, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 outpu
             *q++ = lbl_80329BC8[index];
         }
         fn_8011AF94(p, size, &bits, factors, arg8);
-        if (mode) fn_8012023C(size, 1, p, arg3, arg4);
-        else fn_801200BC(size, -1, p, arg3, arg4);
+        if (mode) fn_8012023C(size, 1, p, (s32 *)arg3, (f32 *)arg4);
+        else fn_801200BC(size, -1, p, (s32 *)arg3, (f32 *)arg4);
         p += size;
     }
     if (channels == 1) fn_8011AE68(output, buffer, size, gain);
@@ -2259,6 +2292,89 @@ void fn_80120084(void *arg0) {
     else free(base);
 }
 
+void fn_801200BC(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
+    s32 nw, nc;
+    f32 xi;
+
+    nw = ip[0];
+    if (n > (nw << 2)) {
+        nw = n >> 2;
+        fn_80120834(nw, ip, w);
+    }
+    nc = ip[1];
+    if (n > (nc << 2)) {
+        nc = n >> 2;
+        fn_80120B6C(nc, ip, w + nw);
+    }
+    if (isgn >= 0) {
+        if (n > 4) {
+            fn_80120CA4(n, a, ip + 2, nw, w);
+            fn_801250CC(n, a, nc, w + nw);
+        } else if (n == 4) {
+            fn_80120CA4(n, a, ip + 2, nw, w);
+        }
+        xi = a[0] - a[1];
+        a[0] += a[1];
+        a[1] = xi;
+    } else {
+        a[1] = 0.5f * (a[0] - a[1]);
+        a[0] -= a[1];
+        if (n > 4) {
+            fn_801252D8(n, a, nc, w + nw);
+            fn_80120E14(n, a, ip + 2, nw, w);
+        } else if (n == 4) {
+            fn_80120E14(n, a, ip + 2, nw, w);
+        }
+    }
+}
+
+void fn_8012023C(s32 n, s32 isgn, f32 *a, s32 *ip, f32 *w) {
+    s32 j, nw, nc;
+    f32 xr;
+
+    nw = ip[0];
+    if (n > (nw << 2)) {
+        nw = n >> 2;
+        fn_80120834(nw, ip, w);
+    }
+    nc = ip[1];
+    if (n > nc) {
+        nc = n;
+        fn_80120B6C(nc, ip, w + nw);
+    }
+    if (isgn < 0) {
+        xr = a[n - 1];
+        for (j = n - 2; j >= 2; j -= 2) {
+            a[j + 1] = a[j] - a[j - 1];
+            a[j] += a[j - 1];
+        }
+        a[1] = a[0] - xr;
+        a[0] += xr;
+        if (n > 4) {
+            fn_801252D8(n, a, nc, w + nw);
+            fn_80120E14(n, a, ip + 2, nw, w);
+        } else if (n == 4) {
+            fn_80120E14(n, a, ip + 2, nw, w);
+        }
+    }
+    fn_801254E4(n, a, nc, w + nw);
+    if (isgn >= 0) {
+        if (n > 4) {
+            fn_80120CA4(n, a, ip + 2, nw, w);
+            fn_801250CC(n, a, nc, w + nw);
+        } else if (n == 4) {
+            fn_80120CA4(n, a, ip + 2, nw, w);
+        }
+        xr = a[0] - a[1];
+        a[0] += a[1];
+        for (j = 2; j < n; j += 2) {
+            a[j - 1] = a[j] - a[j + 1];
+            a[j] += a[j + 1];
+        }
+        a[n - 1] = xr;
+    }
+}
+
 void fn_80120834(s32 n, s32 *info, f32 *table) {
     s32 i;
     s32 stage;
@@ -2359,84 +2475,276 @@ void fn_80120B6C(s32 arg0, s32 *arg1, f32 *arg2) {
     }
 }
 
-extern void fn_80121C68(s32, void *, void *);
-extern void fn_80122E08(s32, void *, s32, void *);
-extern void fn_80122ED8(s32, void *, s32, void *);
-extern void fn_80122FA4(s32, void *, s32, void *);
-extern void fn_80123CEC(s32, void *, s32, void *);
-extern void fn_80120F84(s32, s32, void *);
-extern void fn_80123E98(void *, void *);
-extern void fn_80121848(void *);
-extern void fn_80124AD8(void *, void *);
-extern void fn_80121BB0(void *);
-extern void fn_80124F90(void *);
-extern void fn_80125098(void *);
-void fn_80120CA4(s32 count, void *dst, s32 mode, s32 srcIndex, void *src) {
-    s32 n;
-    if (count > 0x20) {
-        n = count >> 2;
-        fn_80121C68(count, dst, (u8 *)src + (srcIndex - n) * 4);
-        if (count > 0x200) {
-            fn_80122E08(n, dst, srcIndex, src);
-            fn_80122ED8(n, (u8 *)dst + n * 4, srcIndex, src);
-            fn_80122E08(n, (u8 *)dst + n * 8, srcIndex, src);
-            fn_80122E08(n, (u8 *)dst + ((n * 3) << 2), srcIndex, src);
-        } else if (n > 0x20) {
-            fn_80122FA4(count, dst, srcIndex, src);
+void fn_80120CA4(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
+    s32 m;
+
+    if (n > 32) {
+        m = n >> 2;
+        fn_80121C68(n, a, &w[nw - m]);
+        if (n > 512) {
+            fn_80122E08(m, a, nw, w);
+            fn_80122ED8(m, &a[m], nw, w);
+            fn_80122E08(m, &a[2 * m], nw, w);
+            fn_80122E08(m, &a[3 * m], nw, w);
+        } else if (m > 32) {
+            fn_80122FA4(n, a, nw, w);
         } else {
-            fn_80123CEC(count, dst, srcIndex, src);
+            fn_80123CEC(n, a, nw, w);
         }
-        fn_80120F84(count, mode, dst);
-    } else if (count > 8) {
-        if (count == 8) {
-            fn_80123E98(dst, (u8 *)src + (srcIndex - 8) * 4);
-            fn_80121848(dst);
+        fn_80120F84(n, ip, a);
+    } else if (n > 8) {
+        if (n == 32) {
+            fn_80123E98(a, &w[nw - 8]);
+            fn_80121848(a);
         } else {
-            fn_80124AD8(dst, src);
-            fn_80121BB0(dst);
+            fn_80124AD8(a, w);
+            fn_80121BB0(a);
+        }
+    } else if (n == 8) {
+        fn_80124F90(a);
+    } else if (n == 4) {
+        fn_80125098(a);
+    }
+}
+
+void fn_80120E14(s32 n, f32 *a, s32 *ip, s32 nw, f32 *w) {
+    s32 m;
+
+    if (n > 32) {
+        m = n >> 2;
+        fn_80122518(n, a, &w[nw - m]);
+        if (n > 512) {
+            fn_80122E08(m, a, nw, w);
+            fn_80122ED8(m, &a[m], nw, w);
+            fn_80122E08(m, &a[2 * m], nw, w);
+            fn_80122E08(m, &a[3 * m], nw, w);
+        } else if (m > 32) {
+            fn_80122FA4(n, a, nw, w);
+        } else {
+            fn_80123CEC(n, a, nw, w);
+        }
+        fn_80121400(n, ip, a);
+    } else if (n > 8) {
+        if (n == 32) {
+            fn_80123E98(a, &w[nw - 8]);
+            fn_801219B4(a);
+        } else {
+            fn_80124AD8(a, w);
+            fn_80121BF4(a);
+        }
+    } else if (n == 8) {
+        fn_80125014(a);
+    } else if (n == 4) {
+        fn_80125098(a);
+    }
+}
+
+void fn_80120F84(s32 n, s32 *ip, f32 *a) {
+    s32 j, j1, k, k1, l, m, m2;
+    f32 xr, xi, yr, yi;
+
+    ip[0] = 0;
+    l = n;
+    m = 1;
+    while ((m << 3) < l) {
+        l >>= 1;
+        for (j = 0; j < m; j++) {
+            ip[m + j] = ip[j] + l;
+        }
+        m <<= 1;
+    }
+    m2 = 2 * m;
+    if ((m << 3) == l) {
+        for (k = 0; k < m; k++) {
+            for (j = 0; j < k; j++) {
+                j1 = 2 * j + ip[k];
+                k1 = 2 * k + ip[j];
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += 2 * m2;
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 -= m2;
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += 2 * m2;
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+            }
+            j1 = 2 * k + m2 + ip[k];
+            k1 = j1 + m2;
+            xr = a[j1];
+            xi = a[j1 + 1];
+            yr = a[k1];
+            yi = a[k1 + 1];
+            a[j1] = yr;
+            a[j1 + 1] = yi;
+            a[k1] = xr;
+            a[k1 + 1] = xi;
         }
     } else {
-        fn_80124F90(dst);
-        if (count == 4) fn_80125098(dst);
-    }
-}
-
-void fn_80121400(s32 n, s32 *map, f32 *data, s32 unused) {
-    s32 size = 1;
-    s32 i, j, k, half, span;
-    *map = 0;
-    while ((size << 3) < n) {
-        n >>= 1;
-        for (i = 0; i < size; i++) map[size + i] = n + map[i];
-        size <<= 1;
-    }
-    half = size;
-    if ((size << 3) == n) {
-        for (i = 0; i < size; i++) {
-            for (j = 0; j < i; j++) {
-                s32 a = map[i] + j * 2;
-                s32 b = map[j] + i * 2;
-                f32 t0=data[b*2], t1=data[b*2+1];
-                data[b*2]=data[a*2]; data[b*2+1]=-data[a*2+1];
-                data[a*2]=t0; data[a*2+1]=-t1;
+        for (k = 1; k < m; k++) {
+            for (j = 0; j < k; j++) {
+                j1 = 2 * j + ip[k];
+                k1 = 2 * k + ip[j];
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += m2;
+                xr = a[j1];
+                xi = a[j1 + 1];
+                yr = a[k1];
+                yi = a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
             }
-            data[(map[i]+i*2)*2+1] = -data[(map[i]+i*2)*2+1];
-        }
-        return;
-    }
-    data[1] = -data[1];
-    data[(half*2+1)*2] = -data[(half*2+1)*2];
-    for (i=1; i<size; i++) {
-        for (j=0; j<i; j++) {
-            s32 a=2+map[j]+i*2, b=map[i+1]+j*2;
-            f32 t0=data[b*2], t1=data[b*2+1];
-            data[b*2]=data[a*2]; data[b*2+1]=-data[a*2+1];
-            data[a*2]=t0; data[a*2+1]=-t1;
         }
     }
 }
 
-void fn_80121848(void *arg0) {
+void fn_80121400(s32 n, s32 *ip, f32 *a) {
+    s32 j, j1, k, k1, l, m, m2;
+    f32 xr, xi, yr, yi;
+
+    ip[0] = 0;
+    l = n;
+    m = 1;
+    while ((m << 3) < l) {
+        l >>= 1;
+        for (j = 0; j < m; j++) {
+            ip[m + j] = ip[j] + l;
+        }
+        m <<= 1;
+    }
+    m2 = 2 * m;
+    if ((m << 3) == l) {
+        for (k = 0; k < m; k++) {
+            for (j = 0; j < k; j++) {
+                j1 = 2 * j + ip[k];
+                k1 = 2 * k + ip[j];
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += 2 * m2;
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 -= m2;
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += 2 * m2;
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+            }
+            k1 = 2 * k + ip[k];
+            a[k1 + 1] = -a[k1 + 1];
+            j1 = k1 + m2;
+            k1 = j1 + m2;
+            xr = a[j1];
+            xi = -a[j1 + 1];
+            yr = a[k1];
+            yi = -a[k1 + 1];
+            a[j1] = yr;
+            a[j1 + 1] = yi;
+            a[k1] = xr;
+            a[k1 + 1] = xi;
+            k1 += m2;
+            a[k1 + 1] = -a[k1 + 1];
+        }
+    } else {
+        a[1] = -a[1];
+        a[m2 + 1] = -a[m2 + 1];
+        for (k = 1; k < m; k++) {
+            for (j = 0; j < k; j++) {
+                j1 = 2 * j + ip[k];
+                k1 = 2 * k + ip[j];
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+                j1 += m2;
+                k1 += m2;
+                xr = a[j1];
+                xi = -a[j1 + 1];
+                yr = a[k1];
+                yi = -a[k1 + 1];
+                a[j1] = yr;
+                a[j1 + 1] = yi;
+                a[k1] = xr;
+                a[k1 + 1] = xi;
+            }
+            k1 = 2 * k + ip[k];
+            a[k1 + 1] = -a[k1 + 1];
+            a[k1 + m2 + 1] = -a[k1 + m2 + 1];
+        }
+    }
+}
+
+void fn_80121848(f32 *arg0) {
     f32 temp_f0;
     f32 temp_f10;
     f32 temp_f11;
@@ -2487,46 +2795,73 @@ void fn_80121848(void *arg0) {
     *(f32 *)((s8 *)arg0 + 0x74) = temp_f11;
 }
 
-void fn_801219B4(void *arg0) {
-    f32 a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t;
-    a=*(f32*)((char*)arg0+8);
-    b=*(f32*)((char*)arg0+0x40);
-    c=*(f32*)((char*)arg0+0x78);
-    d=*(f32*)((char*)arg0+0xC);
-    e=*(f32*)((char*)arg0+0x44);
-    f=*(f32*)((char*)arg0+0x7C);
-    g=*(f32*)((char*)arg0+0x10);
-    h=*(f32*)((char*)arg0+0x38);
-    i=*(f32*)((char*)arg0+0x48);
-    j=*(f32*)((char*)arg0+0x60);
-    k=*(f32*)((char*)arg0+0x68);
-    l=*(f32*)((char*)arg0+0x28);
-    m=*(f32*)((char*)arg0+0x30);
-    n=*(f32*)((char*)arg0+0x50);
-    o=*(f32*)((char*)arg0+0x58);
-    p=*(f32*)((char*)arg0+0x18);
-    q=*(f32*)((char*)arg0+0x20);
-    r=*(f32*)((char*)arg0+0x70);
-    s=*(f32*)((char*)arg0+0x14);
-    t=*(f32*)((char*)arg0+0x3C);
-    *(f32*)((char*)arg0+8)=c; *(f32*)((char*)arg0+0xC)=f;
-    *(f32*)((char*)arg0+0x10)=h; *(f32*)((char*)arg0+0x14)=t;
-    *(f32*)((char*)arg0+0x18)=o; *(f32*)((char*)arg0+0x1C)=*(f32*)((char*)arg0+0x5C);
-    *(f32*)((char*)arg0+0x20)=p; *(f32*)((char*)arg0+0x24)=*(f32*)((char*)arg0+0x1C);
-    *(f32*)((char*)arg0+0x28)=*(f32*)((char*)arg0+0x68); *(f32*)((char*)arg0+0x2C)=*(f32*)((char*)arg0+0x6C);
-    *(f32*)((char*)arg0+0x30)=l; *(f32*)((char*)arg0+0x34)=*(f32*)((char*)arg0+0x2C);
-    *(f32*)((char*)arg0+0x38)=i; *(f32*)((char*)arg0+0x3C)=*(f32*)((char*)arg0+0x4C);
-    *(f32*)((char*)arg0+0x40)=a; *(f32*)((char*)arg0+0x44)=d;
-    *(f32*)((char*)arg0+0x48)=r; *(f32*)((char*)arg0+0x4C)=*(f32*)((char*)arg0+0x74);
-    *(f32*)((char*)arg0+0x50)=m; *(f32*)((char*)arg0+0x54)=*(f32*)((char*)arg0+0x34);
-    *(f32*)((char*)arg0+0x58)=n; *(f32*)((char*)arg0+0x5C)=*(f32*)((char*)arg0+0x54);
-    *(f32*)((char*)arg0+0x60)=g; *(f32*)((char*)arg0+0x64)=s;
-    *(f32*)((char*)arg0+0x68)=j; *(f32*)((char*)arg0+0x6C)=*(f32*)((char*)arg0+0x64);
-    *(f32*)((char*)arg0+0x70)=q; *(f32*)((char*)arg0+0x74)=*(f32*)((char*)arg0+0x24);
-    *(f32*)((char*)arg0+0x78)=b; *(f32*)((char*)arg0+0x7C)=e;
+void fn_801219B4(f32 *a) {
+    f32 x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i, x5r, x5i, x6r, x6i, x7r, x7i, x8r, x8i, x9r, x9i, x10r, x10i,
+        x11r, x11i, x12r, x12i, x13r, x13i, x14r, x14i, x15r, x15i;
+
+    x1r = a[2];
+    x1i = a[3];
+    x2r = a[4];
+    x2i = a[5];
+    x3r = a[6];
+    x3i = a[7];
+    x4r = a[8];
+    x4i = a[9];
+    x5r = a[10];
+    x5i = a[11];
+    x6r = a[12];
+    x6i = a[13];
+    x7r = a[14];
+    x7i = a[15];
+    x8r = a[16];
+    x8i = a[17];
+    x9r = a[18];
+    x9i = a[19];
+    x10r = a[20];
+    x10i = a[21];
+    x11r = a[22];
+    x11i = a[23];
+    x12r = a[24];
+    x12i = a[25];
+    x13r = a[26];
+    x13i = a[27];
+    x14r = a[28];
+    x14i = a[29];
+    x15r = a[30];
+    x15i = a[31];
+    a[2] = x15r;
+    a[3] = x15i;
+    a[4] = x7r;
+    a[5] = x7i;
+    a[6] = x11r;
+    a[7] = x11i;
+    a[8] = x3r;
+    a[9] = x3i;
+    a[10] = x13r;
+    a[11] = x13i;
+    a[12] = x5r;
+    a[13] = x5i;
+    a[14] = x9r;
+    a[15] = x9i;
+    a[16] = x1r;
+    a[17] = x1i;
+    a[18] = x14r;
+    a[19] = x14i;
+    a[20] = x6r;
+    a[21] = x6i;
+    a[22] = x10r;
+    a[23] = x10i;
+    a[24] = x2r;
+    a[25] = x2i;
+    a[26] = x12r;
+    a[27] = x12i;
+    a[28] = x4r;
+    a[29] = x4i;
+    a[30] = x8r;
+    a[31] = x8i;
 }
 
-void fn_80121BB0(void *arg0) {
+void fn_80121BB0(f32 *arg0) {
     f32 *p = (f32 *)arg0;
     f32 a, c, e, g, b, d, f, h;
     a = p[2]; c = p[3]; e = p[6]; g = p[7];
@@ -2535,7 +2870,7 @@ void fn_80121BB0(void *arg0) {
     p[8] = a; p[9] = c; p[12] = e; p[13] = g;
 }
 
-void fn_80121BF4(void *arg0) {
+void fn_80121BF4(f32 *arg0) {
     f32 temp_8, temp_C, temp_10, temp_14, temp_18, temp_1C;
     f32 temp_20, temp_24, temp_28, temp_2C, temp_30, temp_34;
     f32 temp_38, temp_3C;
@@ -2573,1183 +2908,1347 @@ void fn_80121BF4(void *arg0) {
 
 extern f32 lbl_80561218;
 extern f32 lbl_80561230;
-void fn_80122518(s32 arg0, u8 *arg1, void *arg2) {
-    f64 sp38;
-    f64 sp30;
-    f64 sp28;
-    f64 sp20;
-    f64 sp18;
-    f32 sp14;
-    f32 sp10;
-    f32 spC;
-    f32 sp8;
-    f32 temp_f0;
-    f32 temp_f0_2;
-    f32 temp_f0_3;
-    f32 temp_f0_4;
-    f32 temp_f0_5;
-    f32 temp_f0_6;
-    f32 temp_f0_7;
-    f32 temp_f0_8;
-    f32 temp_f0_9;
-    f32 temp_f10;
-    f32 temp_f10_10;
-    f32 temp_f10_2;
-    f32 temp_f10_3;
-    f32 temp_f10_4;
-    f32 temp_f10_5;
-    f32 temp_f10_6;
-    f32 temp_f10_7;
-    f32 temp_f10_8;
-    f32 temp_f10_9;
-    f32 temp_f11;
-    f32 temp_f11_10;
-    f32 temp_f11_11;
-    f32 temp_f11_12;
-    f32 temp_f11_2;
-    f32 temp_f11_3;
-    f32 temp_f11_4;
-    f32 temp_f11_5;
-    f32 temp_f11_6;
-    f32 temp_f11_7;
-    f32 temp_f11_8;
-    f32 temp_f11_9;
-    f32 temp_f12;
-    f32 temp_f12_2;
-    f32 temp_f12_3;
-    f32 temp_f12_4;
-    f32 temp_f12_5;
-    f32 temp_f12_6;
-    f32 temp_f12_7;
-    f32 temp_f12_8;
-    f32 temp_f13;
-    f32 temp_f13_2;
-    f32 temp_f13_3;
-    f32 temp_f13_4;
-    f32 temp_f13_5;
-    f32 temp_f13_6;
-    f32 temp_f13_7;
-    f32 temp_f14;
-    f32 temp_f14_2;
-    f32 temp_f14_3;
-    f32 temp_f15;
-    f32 temp_f15_2;
-    f32 temp_f15_3;
-    f32 temp_f16;
-    f32 temp_f16_2;
-    f32 temp_f16_3;
-    f32 temp_f16_4;
-    f32 temp_f17;
-    f32 temp_f17_2;
-    f32 temp_f17_3;
-    f32 temp_f18;
-    f32 temp_f18_2;
-    f32 temp_f19;
-    f32 temp_f19_2;
-    f32 temp_f19_3;
-    f32 temp_f19_4;
-    f32 temp_f1;
-    f32 temp_f1_2;
-    f32 temp_f1_3;
-    f32 temp_f1_4;
-    f32 temp_f1_5;
-    f32 temp_f1_6;
-    f32 temp_f1_7;
-    f32 temp_f1_8;
-    f32 temp_f20;
-    f32 temp_f20_2;
-    f32 temp_f21;
-    f32 temp_f21_2;
-    f32 temp_f21_3;
-    f32 temp_f22;
-    f32 temp_f23;
-    f32 temp_f23_2;
-    f32 temp_f23_3;
-    f32 temp_f24;
-    f32 temp_f25;
-    f32 temp_f25_2;
-    f32 temp_f26;
-    f32 temp_f26_2;
-    f32 temp_f26_3;
-    f32 temp_f27;
-    f32 temp_f27_2;
-    f32 temp_f28;
-    f32 temp_f28_2;
-    f32 temp_f29;
-    f32 temp_f29_2;
-    f32 temp_f2;
-    f32 temp_f2_2;
-    f32 temp_f2_3;
-    f32 temp_f2_4;
-    f32 temp_f2_5;
-    f32 temp_f2_6;
-    f32 temp_f2_7;
-    f32 temp_f30;
-    f32 temp_f30_2;
-    f32 temp_f31;
-    f32 temp_f31_2;
-    f32 temp_f3;
-    f32 temp_f3_2;
-    f32 temp_f3_3;
-    f32 temp_f3_4;
-    f32 temp_f3_5;
-    f32 temp_f3_6;
-    f32 temp_f3_7;
-    f32 temp_f3_8;
-    f32 temp_f3_9;
-    f32 temp_f4;
-    f32 temp_f4_2;
-    f32 temp_f4_3;
-    f32 temp_f4_4;
-    f32 temp_f4_5;
-    f32 temp_f5;
-    f32 temp_f5_10;
-    f32 temp_f5_2;
-    f32 temp_f5_3;
-    f32 temp_f5_4;
-    f32 temp_f5_5;
-    f32 temp_f5_6;
-    f32 temp_f5_7;
-    f32 temp_f5_8;
-    f32 temp_f5_9;
-    f32 temp_f6;
-    f32 temp_f6_10;
-    f32 temp_f6_11;
-    f32 temp_f6_2;
-    f32 temp_f6_3;
-    f32 temp_f6_4;
-    f32 temp_f6_5;
-    f32 temp_f6_6;
-    f32 temp_f6_7;
-    f32 temp_f6_8;
-    f32 temp_f6_9;
-    f32 temp_f7;
-    f32 temp_f7_10;
-    f32 temp_f7_11;
-    f32 temp_f7_12;
-    f32 temp_f7_2;
-    f32 temp_f7_3;
-    f32 temp_f7_4;
-    f32 temp_f7_5;
-    f32 temp_f7_6;
-    f32 temp_f7_7;
-    f32 temp_f7_8;
-    f32 temp_f7_9;
-    f32 temp_f8;
-    f32 temp_f8_10;
-    f32 temp_f8_11;
-    f32 temp_f8_2;
-    f32 temp_f8_3;
-    f32 temp_f8_4;
-    f32 temp_f8_5;
-    f32 temp_f8_6;
-    f32 temp_f8_7;
-    f32 temp_f8_8;
-    f32 temp_f8_9;
-    f32 temp_f9;
-    f32 temp_f9_10;
-    f32 temp_f9_11;
-    f32 temp_f9_12;
-    f32 temp_f9_13;
-    f32 temp_f9_2;
-    f32 temp_f9_3;
-    f32 temp_f9_4;
-    f32 temp_f9_5;
-    f32 temp_f9_6;
-    f32 temp_f9_7;
-    f32 temp_f9_8;
-    f32 temp_f9_9;
-    f32 var_f24;
-    s32 temp_r0;
-    s32 temp_r0_2;
-    s32 temp_r0_3;
-    s32 temp_r0_4;
-    s32 temp_r0_5;
-    s32 temp_r10;
-    s32 temp_r10_3;
-    s32 temp_r10_4;
-    s32 temp_r10_5;
-    s32 temp_r11;
-    s32 temp_r11_2;
-    s32 temp_r11_4;
-    s32 temp_r11_5;
-    s32 temp_r11_6;
-    s32 temp_r12;
-    s32 temp_r12_3;
-    s32 temp_r12_4;
-    s32 temp_r26;
-    s32 temp_r26_3;
-    s32 temp_r27;
-    s32 temp_r28;
-    s32 temp_r28_3;
-    s32 temp_r29;
-    s32 temp_r29_2;
-    s32 temp_r30;
-    s32 temp_r30_2;
-    s32 temp_r31;
-    s32 temp_r31_2;
-    s32 temp_r3;
-    s32 temp_r3_2;
-    s32 temp_r3_3;
-    s32 temp_r5;
-    s32 temp_r6;
-    s32 temp_r6_2;
-    s32 temp_r6_3;
-    s32 temp_r7;
-    s32 temp_r8;
-    s32 temp_r8_2;
-    s32 temp_r9;
-    s32 temp_r9_2;
-    s32 temp_r9_3;
-    s32 temp_r9_5;
-    s32 temp_r9_7;
-    s32 temp_r9_8;
-    s32 temp_r9_9;
-    s32 var_r3;
-    u32 var_ctr;
-    void *temp_r10_2;
-    void *temp_r11_3;
-    void *temp_r12_2;
-    void *temp_r26_2;
-    void *temp_r28_2;
-    void *temp_r9_4;
-    void *temp_r9_6;
-    u8 *var_r27;
-    u8 *var_r5;
+void fn_80121C68(s32 n, f32 *a, f32 *w) {
+    s32 j, j0, j1, j2, j3, k, m, mh;
+    f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
 
-    var_r5 = arg2;
-    temp_r7 = arg0 >> 3;
-    temp_r6 = temp_r7 * 2;
-    temp_r10 = arg0 & 0xFFFFFFF8;
-    temp_r26 = (arg0 * 2) & 0xFFFFFFF0;
-    temp_r9 = temp_r7 * 6;
-    temp_f6 = -M2C_FIELD(arg1, f32 *, 4);
-    temp_r12 = ((temp_r7 * 4) + 1) * 4;
-    temp_r11 = temp_r9 * 4;
-    temp_r3 = (temp_r6 + 1) * 4;
-    temp_r9_2 = (temp_r9 + 1) * 4;
-    temp_f5 = *(arg1 + temp_r12);
-    temp_r8 = temp_r7 - 2;
-    temp_f7 = M2C_FIELD(arg1, f32 *, 0);
-    temp_f0 = *(arg1 + temp_r26);
-    temp_f9 = temp_f6 - temp_f5;
-    temp_f4 = *(arg1 + temp_r10);
-    temp_f3 = *(arg1 + temp_r11);
-    temp_f8 = temp_f7 + temp_f0;
-    temp_f7_2 = temp_f7 - temp_f0;
-    temp_f10 = temp_f4 + temp_f3;
-    temp_f2 = *(arg1 + temp_r3);
-    temp_f3_2 = temp_f4 - temp_f3;
-    temp_f1 = *(arg1 + temp_r9_2);
-    sp10 = lbl_80561218;
-    temp_f11 = temp_f2 + temp_f1;
-    temp_f12 = temp_f2 - temp_f1;
-    var_r27 = arg1 + 8;
-    spC = lbl_80561230;
-    M2C_FIELD(arg1, f32 *, 0) = (f32) (temp_f8 + temp_f10);
-    var_f24 = spC;
-    M2C_FIELD(arg1, f32 *, 4) = (f32) (temp_f9 - temp_f11);
-    temp_f2_2 = temp_f6 + temp_f5;
-    *(arg1 + temp_r10) = temp_f8 - temp_f10;
-    *(arg1 + temp_r3) = temp_f9 + temp_f11;
-    var_r3 = 2;
-    *(arg1 + temp_r26) = temp_f7_2 + temp_f12;
-    *(arg1 + temp_r12) = temp_f2_2 + temp_f3_2;
-    *(arg1 + temp_r11) = temp_f7_2 - temp_f12;
-    *(arg1 + temp_r9_2) = temp_f2_2 - temp_f3_2;
-    sp8 = lbl_80561218;
-    temp_f15 = M2C_FIELD(var_r5, f32 *, 8);
-    sp14 = M2C_FIELD(var_r5, f32 *, 4);
-    temp_f14 = M2C_FIELD(var_r5, f32 *, 0xC);
-    var_ctr = (u32) (temp_r8 + 1) >> 2U;
-    if (temp_r8 > 2) {
-        do {
-            temp_r0 = var_r3 + temp_r6;
-            temp_r9_3 = temp_r0 + temp_r6;
-            temp_f27 = -M2C_FIELD(var_r27, f32 *, 4);
-            temp_r12_2 = arg1 + (temp_r9_3 * 4);
-            temp_f25 = M2C_FIELD(var_r27, f32 *, 0);
-            temp_r9_4 = arg1 + (temp_r0 * 4);
-            temp_r0_2 = (temp_r9_3 + temp_r6) * 4;
-            temp_r26_2 = arg1 + temp_r0_2;
-            temp_f26 = M2C_FIELD(temp_r12_2, f32 *, 0);
-            temp_f31 = -M2C_FIELD(var_r27, f32 *, 0xC);
-            temp_f28 = M2C_FIELD(temp_r12_2, f32 *, 4);
-            temp_f12_2 = M2C_FIELD(temp_r9_4, f32 *, 0);
-            temp_f2_3 = temp_f25 + temp_f26;
-            temp_f11_2 = *(arg1 + temp_r0_2);
-            temp_f17 = temp_f27 - temp_f28;
-            temp_f23 = M2C_FIELD(var_r5, f32 *, 0x1C);
-            temp_f3_3 = temp_f12_2 + temp_f11_2;
-            temp_f13 = M2C_FIELD(temp_r12_2, f32 *, 0xC);
-            temp_f18 = M2C_FIELD(var_r5, f32 *, 0x10);
-            temp_f24 = var_f24 - temp_f23;
-            temp_f1_2 = temp_f31 - temp_f13;
-            temp_f19 = sp10 + temp_f18;
-            temp_f20 = M2C_FIELD(var_r5, f32 *, 0x14);
-            temp_f22 = M2C_FIELD(var_r5, f32 *, 0x18);
-            temp_f13_2 = temp_f31 + temp_f13;
-            temp_f21 = spC + temp_f20;
-            temp_f10_2 = M2C_FIELD(temp_r9_4, f32 *, 4);
-            temp_f9_2 = M2C_FIELD(temp_r26_2, f32 *, 4);
-            temp_f11_3 = temp_f12_2 - temp_f11_2;
-            temp_f16 = temp_f10_2 + temp_f9_2;
-            temp_f29 = M2C_FIELD(var_r27, f32 *, 8);
-            temp_f3_4 = sp8 + temp_f22;
-            temp_f30 = M2C_FIELD(temp_r12_2, f32 *, 8);
-            sp30 = (f64) (temp_f2_3 - temp_f3_3);
-            temp_f9_3 = temp_f10_2 - temp_f9_2;
-            temp_f8_2 = M2C_FIELD(temp_r9_4, f32 *, 8);
-            temp_f0_2 = temp_f29 + temp_f30;
-            temp_f7_3 = M2C_FIELD(temp_r26_2, f32 *, 8);
-            var_r5 += 0x10;
-            temp_f6_2 = M2C_FIELD(temp_r9_4, f32 *, 0xC);
-            temp_f5_2 = M2C_FIELD(temp_r26_2, f32 *, 0xC);
-            temp_f2_4 = temp_f8_2 + temp_f7_3;
-            sp18 = (f64) temp_f3_4;
-            temp_f3_5 = temp_f6_2 + temp_f5_2;
-            M2C_FIELD(var_r27, f32 *, 0) = (f32) (temp_f2_3 + temp_f3_3);
-            temp_f4_2 = temp_f17 - temp_f16;
-            sp10 = temp_f18;
-            sp38 = (f64) temp_f4_2;
-            spC = temp_f20;
-            sp20 = (f64) (temp_f0_2 + temp_f2_4);
-            sp28 = (f64) (temp_f1_2 - temp_f3_5);
-            sp8 = temp_f22;
-            M2C_FIELD(var_r27, f32 *, 4) = temp_f4_2;
-            M2C_FIELD(var_r27, f32 *, 8) = (f32) sp20;
-            temp_f17_2 = temp_f14 * (f32) sp18;
-            M2C_FIELD(var_r27, f32 *, 0xC) = (f32) sp28;
-            temp_f2_5 = temp_f15 * temp_f19;
-            temp_f19_2 = temp_f25 - temp_f26;
-            M2C_FIELD(temp_r9_4, f32 *, 0) = (f32) sp30;
-            temp_f16_2 = temp_f15 * temp_f21;
-            temp_f21_2 = temp_f29 - temp_f30;
-            M2C_FIELD(temp_r9_4, f32 *, 4) = (f32) (temp_f17 + temp_f16);
-            temp_f4_3 = temp_f14 * temp_f24;
-            var_f24 = -temp_f23;
-            M2C_FIELD(temp_r9_4, f32 *, 8) = (f32) (temp_f0_2 - temp_f2_4);
-            temp_f0_3 = temp_f27 + temp_f28;
-            temp_f23_2 = temp_f8_2 - temp_f7_3;
-            temp_f25_2 = temp_f6_2 - temp_f5_2;
-            temp_f6_3 = temp_f19_2 + temp_f9_3;
-            temp_r0_3 = temp_r6 - var_r3;
-            temp_f7_4 = temp_f0_3 + temp_f11_3;
-            temp_r28 = temp_r0_3 + temp_r6;
-            temp_r11_2 = temp_r28 + temp_r6;
-            M2C_FIELD(temp_r9_4, f32 *, 0xC) = (f32) (temp_f1_2 + temp_f3_5);
-            temp_f8_3 = temp_f21_2 + temp_f25_2;
-            temp_r9_5 = (temp_r11_2 + temp_r6) * 4;
-            temp_f12_3 = temp_f13_2 + temp_f23_2;
-            temp_r0_4 = temp_r28 * 4;
-            temp_f11_4 = temp_f0_3 - temp_f11_3;
-            temp_r28_2 = arg1 + (temp_r0_3 * 4);
-            M2C_FIELD(temp_r12_2, f32 *, 0) = (f32) ((temp_f2_5 * temp_f6_3) - (temp_f16_2 * temp_f7_4));
-            temp_f10_3 = temp_f19_2 - temp_f9_3;
-            temp_r10_2 = arg1 + (temp_r11_2 * 4);
-            temp_r11_3 = arg1 + temp_r0_4;
-            M2C_FIELD(temp_r12_2, f32 *, 4) = (f32) ((temp_f2_5 * temp_f7_4) + (temp_f16_2 * temp_f6_3));
-            M2C_FIELD(temp_r12_2, f32 *, 8) = (f32) ((temp_f18 * temp_f8_3) - (temp_f20 * temp_f12_3));
-            temp_f0_4 = temp_f21_2 - temp_f25_2;
-            temp_f1_3 = temp_f13_2 - temp_f23_2;
-            M2C_FIELD(temp_r12_2, f32 *, 0xC) = (f32) ((temp_f18 * temp_f12_3) + (temp_f20 * temp_f8_3));
-            M2C_FIELD(temp_r26_2, f32 *, 0) = (f32) ((temp_f17_2 * temp_f10_3) + (temp_f4_3 * temp_f11_4));
-            M2C_FIELD(temp_r26_2, f32 *, 4) = (f32) ((temp_f17_2 * temp_f11_4) - (temp_f4_3 * temp_f10_3));
-            M2C_FIELD(temp_r26_2, f32 *, 8) = (f32) ((temp_f22 * temp_f0_4) + (var_f24 * temp_f1_3));
-            M2C_FIELD(temp_r26_2, f32 *, 0xC) = (f32) ((temp_f22 * temp_f1_3) - (var_f24 * temp_f0_4));
-            temp_f9_4 = -M2C_FIELD(temp_r28_2, f32 *, 4);
-            temp_f5_3 = M2C_FIELD(temp_r10_2, f32 *, 4);
-            temp_f12_4 = -M2C_FIELD(temp_r28_2, f32 *, -4);
-            temp_f6_4 = M2C_FIELD(temp_r10_2, f32 *, -4);
-            temp_f1_4 = M2C_FIELD(temp_r28_2, f32 *, 0);
-            temp_f0_5 = M2C_FIELD(temp_r10_2, f32 *, 0);
-            temp_f30_2 = temp_f9_4 - temp_f5_3;
-            temp_f7_5 = *(temp_r9_5 + arg1);
-            temp_r9_6 = temp_r9_5 + arg1;
-            temp_f8_4 = *(arg1 + temp_r0_4);
-            temp_f10_4 = temp_f12_4 - temp_f6_4;
-            temp_f13_3 = M2C_FIELD(temp_r28_2, f32 *, -8);
-            temp_f23_3 = temp_f1_4 + temp_f0_5;
-            temp_f3_6 = temp_f1_4 - temp_f0_5;
-            temp_f11_5 = M2C_FIELD(temp_r10_2, f32 *, -8);
-            temp_f5_4 = temp_f9_4 + temp_f5_3;
-            temp_f1_5 = M2C_FIELD(temp_r11_3, f32 *, 4);
-            temp_f9_5 = temp_f13_3 + temp_f11_5;
-            temp_f0_6 = M2C_FIELD(temp_r9_6, f32 *, 4);
-            temp_f12_5 = temp_f12_4 + temp_f6_4;
-            temp_f31_2 = temp_f8_4 + temp_f7_5;
-            temp_f7_6 = temp_f8_4 - temp_f7_5;
-            temp_f11_6 = temp_f13_3 - temp_f11_5;
-            temp_f6_5 = temp_f1_5 + temp_f0_6;
-            temp_f8_5 = temp_f1_5 - temp_f0_6;
-            temp_f29_2 = M2C_FIELD(temp_r11_3, f32 *, -8);
-            temp_f28_2 = M2C_FIELD(temp_r9_6, f32 *, -8);
-            temp_f0_7 = temp_f3_6 + temp_f8_5;
-            temp_f27_2 = M2C_FIELD(temp_r11_3, f32 *, -4);
-            temp_f1_6 = temp_f5_4 + temp_f7_6;
-            temp_f26_2 = M2C_FIELD(temp_r9_6, f32 *, -4);
-            temp_f13_4 = temp_f29_2 + temp_f28_2;
-            var_r27 += 0x10;
-            temp_f19_3 = temp_f27_2 + temp_f26_2;
-            M2C_FIELD(temp_r28_2, f32 *, 0) = (f32) (temp_f23_3 + temp_f31_2);
-            var_r3 += 4;
-            M2C_FIELD(temp_r28_2, f32 *, 4) = (f32) (temp_f30_2 - temp_f6_5);
-            M2C_FIELD(temp_r28_2, f32 *, -8) = (f32) (temp_f9_5 + temp_f13_4);
-            temp_f6_6 = temp_f29_2 - temp_f28_2;
-            M2C_FIELD(temp_r28_2, f32 *, -4) = (f32) (temp_f10_4 - temp_f19_3);
-            temp_f26_3 = temp_f27_2 - temp_f26_2;
-            M2C_FIELD(temp_r11_3, f32 *, 0) = (f32) (temp_f23_3 - temp_f31_2);
-            temp_f3_7 = temp_f3_6 - temp_f8_5;
-            M2C_FIELD(temp_r11_3, f32 *, 4) = (f32) (temp_f30_2 + temp_f6_5);
-            temp_f7_7 = temp_f5_4 - temp_f7_6;
-            M2C_FIELD(temp_r11_3, f32 *, -8) = (f32) (temp_f9_5 - temp_f13_4);
-            M2C_FIELD(temp_r11_3, f32 *, -4) = (f32) (temp_f10_4 + temp_f19_3);
-            temp_f9_6 = temp_f11_6 + temp_f26_3;
-            temp_f1_7 = temp_f11_6 - temp_f26_3;
-            M2C_FIELD(temp_r10_2, f32 *, 0) = (f32) ((temp_f16_2 * temp_f0_7) - (temp_f2_5 * temp_f1_6));
-            temp_f13_5 = temp_f12_5 + temp_f6_6;
-            temp_f5_5 = temp_f12_5 - temp_f6_6;
-            M2C_FIELD(temp_r10_2, f32 *, 4) = (f32) ((temp_f16_2 * temp_f1_6) + (temp_f2_5 * temp_f0_7));
-            M2C_FIELD(temp_r10_2, f32 *, -8) = (f32) ((temp_f20 * temp_f9_6) - (temp_f18 * temp_f13_5));
-            M2C_FIELD(temp_r10_2, f32 *, -4) = (f32) ((temp_f20 * temp_f13_5) + (temp_f18 * temp_f9_6));
-            M2C_FIELD(temp_r9_6, f32 *, 0) = (f32) ((temp_f4_3 * temp_f3_7) + (temp_f17_2 * temp_f7_7));
-            M2C_FIELD(temp_r9_6, f32 *, 4) = (f32) ((temp_f4_3 * temp_f7_7) - (temp_f17_2 * temp_f3_7));
-            M2C_FIELD(temp_r9_6, f32 *, -8) = (f32) ((var_f24 * temp_f1_7) + (temp_f22 * temp_f5_5));
-            M2C_FIELD(temp_r9_6, f32 *, -4) = (f32) ((var_f24 * temp_f5_5) - (temp_f22 * temp_f1_7));
-            var_ctr -= 1;
-        } while (var_ctr != 0);
+    mh = n >> 3;
+    m = 2 * mh;
+    j1 = m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[0] + a[j2];
+    x0i = a[1] + a[j2 + 1];
+    x1r = a[0] - a[j2];
+    x1i = a[1] - a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[0] = x0r + x2r;
+    a[1] = x0i + x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i - x2i;
+    a[j2] = x1r - x3i;
+    a[j2 + 1] = x1i + x3r;
+    a[j3] = x1r + x3i;
+    a[j3 + 1] = x1i - x3r;
+    wn4r = w[1];
+    csc1 = w[2];
+    csc3 = w[3];
+    wd1r = 1;
+    wd1i = 0;
+    wd3r = 1;
+    wd3i = 0;
+    k = 0;
+    for (j = 2; j < mh - 2; j += 4) {
+        k += 4;
+        wk1r = csc1 * (wd1r + w[k]);
+        wk1i = csc1 * (wd1i + w[k + 1]);
+        wk3r = csc3 * (wd3r + w[k + 2]);
+        wk3i = csc3 * (wd3i + w[k + 3]);
+        wd1r = w[k];
+        wd1i = w[k + 1];
+        wd3r = w[k + 2];
+        wd3i = w[k + 3];
+        j1 = j + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j] + a[j2];
+        x0i = a[j + 1] + a[j2 + 1];
+        x1r = a[j] - a[j2];
+        x1i = a[j + 1] - a[j2 + 1];
+        y0r = a[j + 2] + a[j2 + 2];
+        y0i = a[j + 3] + a[j2 + 3];
+        y1r = a[j + 2] - a[j2 + 2];
+        y1i = a[j + 3] - a[j2 + 3];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        y2r = a[j1 + 2] + a[j3 + 2];
+        y2i = a[j1 + 3] + a[j3 + 3];
+        y3r = a[j1 + 2] - a[j3 + 2];
+        y3i = a[j1 + 3] - a[j3 + 3];
+        a[j] = x0r + x2r;
+        a[j + 1] = x0i + x2i;
+        a[j + 2] = y0r + y2r;
+        a[j + 3] = y0i + y2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i - x2i;
+        a[j1 + 2] = y0r - y2r;
+        a[j1 + 3] = y0i - y2i;
+        x0r = x1r - x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1r * x0r - wk1i * x0i;
+        a[j2 + 1] = wk1r * x0i + wk1i * x0r;
+        x0r = y1r - y3i;
+        x0i = y1i + y3r;
+        a[j2 + 2] = wd1r * x0r - wd1i * x0i;
+        a[j2 + 3] = wd1r * x0i + wd1i * x0r;
+        x0r = x1r + x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3r * x0r + wk3i * x0i;
+        a[j3 + 1] = wk3r * x0i - wk3i * x0r;
+        x0r = y1r + y3i;
+        x0i = y1i - y3r;
+        a[j3 + 2] = wd3r * x0r + wd3i * x0i;
+        a[j3 + 3] = wd3r * x0i - wd3i * x0r;
+        j0 = m - j;
+        j1 = j0 + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j0] + a[j2];
+        x0i = a[j0 + 1] + a[j2 + 1];
+        x1r = a[j0] - a[j2];
+        x1i = a[j0 + 1] - a[j2 + 1];
+        y0r = a[j0 - 2] + a[j2 - 2];
+        y0i = a[j0 - 1] + a[j2 - 1];
+        y1r = a[j0 - 2] - a[j2 - 2];
+        y1i = a[j0 - 1] - a[j2 - 1];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        y2r = a[j1 - 2] + a[j3 - 2];
+        y2i = a[j1 - 1] + a[j3 - 1];
+        y3r = a[j1 - 2] - a[j3 - 2];
+        y3i = a[j1 - 1] - a[j3 - 1];
+        a[j0] = x0r + x2r;
+        a[j0 + 1] = x0i + x2i;
+        a[j0 - 2] = y0r + y2r;
+        a[j0 - 1] = y0i + y2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i - x2i;
+        a[j1 - 2] = y0r - y2r;
+        a[j1 - 1] = y0i - y2i;
+        x0r = x1r - x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1i * x0r - wk1r * x0i;
+        a[j2 + 1] = wk1i * x0i + wk1r * x0r;
+        x0r = y1r - y3i;
+        x0i = y1i + y3r;
+        a[j2 - 2] = wd1i * x0r - wd1r * x0i;
+        a[j2 - 1] = wd1i * x0i + wd1r * x0r;
+        x0r = x1r + x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3i * x0r + wk3r * x0i;
+        a[j3 + 1] = wk3i * x0i - wk3r * x0r;
+        x0r = y1r + y3i;
+        x0i = y1i - y3r;
+        a[j3 - 2] = wd3i * x0r + wd3r * x0i;
+        a[j3 - 1] = wd3i * x0i - wd3r * x0r;
     }
-    temp_r3_2 = temp_r7 * 3;
-    temp_r5 = temp_r7 * 5;
-    temp_r11_4 = temp_r8 * 4;
-    temp_r6_2 = temp_r7 * 7;
-    temp_r10_3 = (temp_r7 - 1) * 4;
-    temp_r26_3 = (temp_r5 - 2) * 4;
-    temp_r29 = (temp_r3_2 - 2) * 4;
-    temp_r30 = (temp_r6_2 - 2) * 4;
-    temp_r31 = (temp_r5 - 1) * 4;
-    temp_r12_3 = (temp_r6_2 - 1) * 4;
-    temp_r9_7 = (temp_r3_2 - 1) * 4;
-    temp_f7_8 = -*(arg1 + temp_r10_3);
-    temp_f6_7 = *(arg1 + temp_r31);
-    temp_f9_7 = *(arg1 + temp_r11_4);
-    temp_f8_6 = *(arg1 + temp_r26_3);
-    temp_f5_6 = *(arg1 + temp_r29);
-    temp_f17_3 = temp_f7_8 - temp_f6_7;
-    temp_f4_4 = *(arg1 + temp_r30);
-    temp_f16_3 = temp_f9_7 + temp_f8_6;
-    temp_f3_8 = *(arg1 + temp_r9_7);
-    temp_f2_6 = *(arg1 + temp_r12_3);
-    temp_f19_4 = temp_f5_6 + temp_f4_4;
-    temp_f20_2 = temp_f5_6 - temp_f4_4;
-    temp_f0_8 = temp_f3_8 + temp_f2_6;
-    temp_r27 = temp_r7 * 0x14;
-    temp_f21_3 = temp_f3_8 - temp_f2_6;
-    temp_f8_7 = temp_f9_7 - temp_f8_6;
-    temp_f18_2 = temp_f7_8 + temp_f6_7;
-    temp_r28_3 = (temp_r5 + 1) * 4;
-    *(arg1 + temp_r11_4) = temp_f16_3 + temp_f19_4;
-    temp_f2_7 = temp_f15 * (spC + sp14);
-    temp_r11_5 = temp_r7 * 4;
-    temp_f12_6 = temp_f18_2 + temp_f20_2;
-    *(arg1 + temp_r10_3) = temp_f17_3 - temp_f0_8;
-    temp_f3_9 = temp_f14 * (sp8 - sp14);
-    temp_f4_5 = temp_f14 * (var_f24 - sp14);
-    temp_r10_4 = (temp_r7 + 1) * 4;
-    temp_f1_8 = temp_f15 * (sp10 + sp14);
-    *(arg1 + temp_r29) = temp_f16_3 - temp_f19_4;
-    temp_f9_8 = temp_f8_7 + temp_f21_3;
-    temp_f11_7 = temp_f8_7 - temp_f21_3;
-    *(arg1 + temp_r9_7) = temp_f17_3 + temp_f0_8;
-    temp_f10_5 = temp_f18_2 - temp_f20_2;
-    *(arg1 + temp_r26_3) = (temp_f1_8 * temp_f9_8) - (temp_f2_7 * temp_f12_6);
-    *(arg1 + temp_r31) = (temp_f1_8 * temp_f12_6) + (temp_f2_7 * temp_f9_8);
-    *(arg1 + temp_r30) = (temp_f3_9 * temp_f11_7) + (temp_f4_5 * temp_f10_5);
-    *(arg1 + temp_r12_3) = (temp_f3_9 * temp_f10_5) - (temp_f4_5 * temp_f11_7);
-    temp_f11_8 = *(arg1 + temp_r11_5);
-    temp_f5_7 = *(arg1 + temp_r27);
-    temp_f12_7 = temp_f11_8 + temp_f5_7;
-    temp_r29_2 = temp_r7 * 0x1C;
-    temp_r30_2 = temp_r7 * 0xC;
-    temp_f8_8 = *(arg1 + temp_r30_2);
-    temp_f7_9 = *(arg1 + temp_r29_2);
-    temp_r9_8 = (temp_r3_2 + 1) * 4;
-    temp_r31_2 = (temp_r6_2 + 1) * 4;
-    temp_f13_6 = temp_f11_8 - temp_f5_7;
-    temp_f10_6 = -*(arg1 + temp_r10_4);
-    temp_f9_9 = *(arg1 + temp_r28_3);
-    temp_f14_2 = temp_f8_8 + temp_f7_9;
-    temp_f6_8 = *(arg1 + temp_r9_8);
-    temp_f5_8 = *(arg1 + temp_r31_2);
-    temp_f11_9 = temp_f10_6 - temp_f9_9;
-    temp_f16_4 = temp_f6_8 - temp_f5_8;
-    temp_f5_9 = temp_f6_8 + temp_f5_8;
-    *(arg1 + temp_r11_5) = temp_f12_7 + temp_f14_2;
-    temp_f10_7 = temp_f10_6 + temp_f9_9;
-    temp_f15_2 = temp_f8_8 - temp_f7_9;
-    temp_f8_9 = temp_f10_7 + temp_f15_2;
-    temp_r12_4 = (temp_r5 + 2) * 4;
-    *(arg1 + temp_r10_4) = temp_f11_9 - temp_f5_9;
-    temp_f7_10 = temp_f13_6 + temp_f16_4;
-    *(arg1 + temp_r30_2) = temp_f12_7 - temp_f14_2;
-    temp_f9_10 = temp_f13_6 - temp_f16_4;
-    temp_r11_6 = (temp_r7 + 2) * 4;
-    *(arg1 + temp_r9_8) = temp_f11_9 + temp_f5_9;
-    temp_f10_8 = temp_f10_7 - temp_f15_2;
-    temp_r9_9 = (temp_r7 + 3) * 4;
-    temp_f6_9 = -sp14;
-    temp_r10_5 = (temp_r5 + 3) * 4;
-    temp_r8_2 = (temp_r6_2 + 2) * 4;
-    *(arg1 + temp_r27) = sp14 * (temp_f7_10 - temp_f8_9);
-    temp_r6_3 = (temp_r3_2 + 2) * 4;
-    *(arg1 + temp_r28_3) = sp14 * (temp_f8_9 + temp_f7_10);
-    temp_r3_3 = (temp_r6_2 + 3) * 4;
-    temp_r0_5 = (temp_r3_2 + 3) * 4;
-    *(arg1 + temp_r29_2) = temp_f6_9 * (temp_f9_10 + temp_f10_8);
-    *(arg1 + temp_r31_2) = temp_f6_9 * (temp_f10_8 - temp_f9_10);
-    temp_f11_10 = *(arg1 + temp_r11_6);
-    temp_f9_11 = -*(arg1 + temp_r9_9);
-    temp_f10_9 = *(arg1 + temp_r12_4);
-    temp_f8_10 = *(arg1 + temp_r10_5);
-    temp_f12_8 = temp_f11_10 + temp_f10_9;
-    temp_f7_11 = *(arg1 + temp_r6_3);
-    temp_f13_7 = temp_f9_11 - temp_f8_10;
-    temp_f6_10 = *(arg1 + temp_r8_2);
-    temp_f8_11 = temp_f9_11 + temp_f8_10;
-    temp_f5_10 = *(arg1 + temp_r0_5);
-    temp_f0_9 = *(arg1 + temp_r3_3);
-    temp_f11_11 = temp_f11_10 - temp_f10_9;
-    temp_f9_12 = temp_f7_11 + temp_f6_10;
-    temp_f14_3 = temp_f5_10 + temp_f0_9;
-    temp_f15_3 = temp_f5_10 - temp_f0_9;
-    temp_f7_12 = temp_f7_11 - temp_f6_10;
-    temp_f10_10 = temp_f11_11 + temp_f15_3;
-    temp_f6_11 = temp_f8_11 + temp_f7_12;
-    *(arg1 + temp_r11_6) = temp_f12_8 + temp_f9_12;
-    temp_f9_13 = temp_f11_11 - temp_f15_3;
-    temp_f11_12 = temp_f8_11 - temp_f7_12;
-    *(arg1 + temp_r9_9) = temp_f13_7 - temp_f14_3;
-    *(arg1 + temp_r6_3) = temp_f12_8 - temp_f9_12;
-    *(arg1 + temp_r0_5) = temp_f13_7 + temp_f14_3;
-    *(arg1 + temp_r12_4) = (temp_f2_7 * temp_f10_10) - (temp_f1_8 * temp_f6_11);
-    *(arg1 + temp_r10_5) = (temp_f2_7 * temp_f6_11) + (temp_f1_8 * temp_f10_10);
-    *(arg1 + temp_r8_2) = (temp_f4_5 * temp_f9_13) + (temp_f3_9 * temp_f11_12);
-    *(arg1 + temp_r3_3) = (temp_f4_5 * temp_f11_12) - (temp_f3_9 * temp_f9_13);
+    wk1r = csc1 * (wd1r + wn4r);
+    wk1i = csc1 * (wd1i + wn4r);
+    wk3r = csc3 * (wd3r - wn4r);
+    wk3i = csc3 * (wd3i - wn4r);
+    j0 = mh;
+    j1 = j0 + m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[j0 - 2] + a[j2 - 2];
+    x0i = a[j0 - 1] + a[j2 - 1];
+    x1r = a[j0 - 2] - a[j2 - 2];
+    x1i = a[j0 - 1] - a[j2 - 1];
+    x2r = a[j1 - 2] + a[j3 - 2];
+    x2i = a[j1 - 1] + a[j3 - 1];
+    x3r = a[j1 - 2] - a[j3 - 2];
+    x3i = a[j1 - 1] - a[j3 - 1];
+    a[j0 - 2] = x0r + x2r;
+    a[j0 - 1] = x0i + x2i;
+    a[j1 - 2] = x0r - x2r;
+    a[j1 - 1] = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    a[j2 - 2] = wk1r * x0r - wk1i * x0i;
+    a[j2 - 1] = wk1r * x0i + wk1i * x0r;
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    a[j3 - 2] = wk3r * x0r + wk3i * x0i;
+    a[j3 - 1] = wk3r * x0i - wk3i * x0r;
+    x0r = a[j0] + a[j2];
+    x0i = a[j0 + 1] + a[j2 + 1];
+    x1r = a[j0] - a[j2];
+    x1i = a[j0 + 1] - a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[j0] = x0r + x2r;
+    a[j0 + 1] = x0i + x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    a[j2] = wn4r * (x0r - x0i);
+    a[j2 + 1] = wn4r * (x0i + x0r);
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    a[j3] = -wn4r * (x0r + x0i);
+    a[j3 + 1] = -wn4r * (x0i - x0r);
+    x0r = a[j0 + 2] + a[j2 + 2];
+    x0i = a[j0 + 3] + a[j2 + 3];
+    x1r = a[j0 + 2] - a[j2 + 2];
+    x1i = a[j0 + 3] - a[j2 + 3];
+    x2r = a[j1 + 2] + a[j3 + 2];
+    x2i = a[j1 + 3] + a[j3 + 3];
+    x3r = a[j1 + 2] - a[j3 + 2];
+    x3i = a[j1 + 3] - a[j3 + 3];
+    a[j0 + 2] = x0r + x2r;
+    a[j0 + 3] = x0i + x2i;
+    a[j1 + 2] = x0r - x2r;
+    a[j1 + 3] = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    a[j2 + 2] = wk1i * x0r - wk1r * x0i;
+    a[j2 + 3] = wk1i * x0i + wk1r * x0r;
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    a[j3 + 2] = wk3i * x0r + wk3r * x0i;
+    a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void fn_80122ED8(s32 arg0, void *arg1, s32 arg2, void *arg3) {
-    s32 n = arg0 >> 2;
-    fn_801237C4((u8 *)arg3 + (arg2 - arg0) * 4);
-    if (arg0 > 0x200) {
-        fn_80122E08(n, arg1, arg2, arg3);
-        fn_80122ED8(n, (u8 *)arg1 + n * 4, arg2, arg3);
-        fn_80122E08(n, (u8 *)arg1 + n * 8, arg2, arg3);
-        fn_80122ED8(n, (u8 *)arg1 + (n - n * 4) * 4, arg2, arg3);
-        return;
+void fn_80122518(s32 n, f32 *a, f32 *w) {
+    s32 j, j0, j1, j2, j3, k, m, mh;
+    f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
+
+    mh = n >> 3;
+    m = 2 * mh;
+    j1 = m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[0] + a[j2];
+    x0i = -a[1] - a[j2 + 1];
+    x1r = a[0] - a[j2];
+    x1i = -a[1] + a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[0] = x0r + x2r;
+    a[1] = x0i - x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i + x2i;
+    a[j2] = x1r + x3i;
+    a[j2 + 1] = x1i + x3r;
+    a[j3] = x1r - x3i;
+    a[j3 + 1] = x1i - x3r;
+    wn4r = w[1];
+    csc1 = w[2];
+    csc3 = w[3];
+    wd1r = 1;
+    wd1i = 0;
+    wd3r = 1;
+    wd3i = 0;
+    k = 0;
+    for (j = 2; j < mh - 2; j += 4) {
+        k += 4;
+        wk1r = csc1 * (wd1r + w[k]);
+        wk1i = csc1 * (wd1i + w[k + 1]);
+        wk3r = csc3 * (wd3r + w[k + 2]);
+        wk3i = csc3 * (wd3i + w[k + 3]);
+        wd1r = w[k];
+        wd1i = w[k + 1];
+        wd3r = w[k + 2];
+        wd3i = w[k + 3];
+        j1 = j + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j] + a[j2];
+        x0i = -a[j + 1] - a[j2 + 1];
+        x1r = a[j] - a[j2];
+        x1i = -a[j + 1] + a[j2 + 1];
+        y0r = a[j + 2] + a[j2 + 2];
+        y0i = -a[j + 3] - a[j2 + 3];
+        y1r = a[j + 2] - a[j2 + 2];
+        y1i = -a[j + 3] + a[j2 + 3];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        y2r = a[j1 + 2] + a[j3 + 2];
+        y2i = a[j1 + 3] + a[j3 + 3];
+        y3r = a[j1 + 2] - a[j3 + 2];
+        y3i = a[j1 + 3] - a[j3 + 3];
+        a[j] = x0r + x2r;
+        a[j + 1] = x0i - x2i;
+        a[j + 2] = y0r + y2r;
+        a[j + 3] = y0i - y2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i + x2i;
+        a[j1 + 2] = y0r - y2r;
+        a[j1 + 3] = y0i + y2i;
+        x0r = x1r + x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1r * x0r - wk1i * x0i;
+        a[j2 + 1] = wk1r * x0i + wk1i * x0r;
+        x0r = y1r + y3i;
+        x0i = y1i + y3r;
+        a[j2 + 2] = wd1r * x0r - wd1i * x0i;
+        a[j2 + 3] = wd1r * x0i + wd1i * x0r;
+        x0r = x1r - x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3r * x0r + wk3i * x0i;
+        a[j3 + 1] = wk3r * x0i - wk3i * x0r;
+        x0r = y1r - y3i;
+        x0i = y1i - y3r;
+        a[j3 + 2] = wd3r * x0r + wd3i * x0i;
+        a[j3 + 3] = wd3r * x0i - wd3i * x0r;
+        j0 = m - j;
+        j1 = j0 + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j0] + a[j2];
+        x0i = -a[j0 + 1] - a[j2 + 1];
+        x1r = a[j0] - a[j2];
+        x1i = -a[j0 + 1] + a[j2 + 1];
+        y0r = a[j0 - 2] + a[j2 - 2];
+        y0i = -a[j0 - 1] - a[j2 - 1];
+        y1r = a[j0 - 2] - a[j2 - 2];
+        y1i = -a[j0 - 1] + a[j2 - 1];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        y2r = a[j1 - 2] + a[j3 - 2];
+        y2i = a[j1 - 1] + a[j3 - 1];
+        y3r = a[j1 - 2] - a[j3 - 2];
+        y3i = a[j1 - 1] - a[j3 - 1];
+        a[j0] = x0r + x2r;
+        a[j0 + 1] = x0i - x2i;
+        a[j0 - 2] = y0r + y2r;
+        a[j0 - 1] = y0i - y2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i + x2i;
+        a[j1 - 2] = y0r - y2r;
+        a[j1 - 1] = y0i + y2i;
+        x0r = x1r + x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1i * x0r - wk1r * x0i;
+        a[j2 + 1] = wk1i * x0i + wk1r * x0r;
+        x0r = y1r + y3i;
+        x0i = y1i + y3r;
+        a[j2 - 2] = wd1i * x0r - wd1r * x0i;
+        a[j2 - 1] = wd1i * x0i + wd1r * x0r;
+        x0r = x1r - x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3i * x0r + wk3r * x0i;
+        a[j3 + 1] = wk3i * x0i - wk3r * x0r;
+        x0r = y1r - y3i;
+        x0i = y1i - y3r;
+        a[j3 - 2] = wd3i * x0r + wd3r * x0i;
+        a[j3 - 1] = wd3i * x0i - wd3r * x0r;
     }
-    fn_801231B8(arg0, arg1, arg2, arg3);
+    wk1r = csc1 * (wd1r + wn4r);
+    wk1i = csc1 * (wd1i + wn4r);
+    wk3r = csc3 * (wd3r - wn4r);
+    wk3i = csc3 * (wd3i - wn4r);
+    j0 = mh;
+    j1 = j0 + m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[j0 - 2] + a[j2 - 2];
+    x0i = -a[j0 - 1] - a[j2 - 1];
+    x1r = a[j0 - 2] - a[j2 - 2];
+    x1i = -a[j0 - 1] + a[j2 - 1];
+    x2r = a[j1 - 2] + a[j3 - 2];
+    x2i = a[j1 - 1] + a[j3 - 1];
+    x3r = a[j1 - 2] - a[j3 - 2];
+    x3i = a[j1 - 1] - a[j3 - 1];
+    a[j0 - 2] = x0r + x2r;
+    a[j0 - 1] = x0i - x2i;
+    a[j1 - 2] = x0r - x2r;
+    a[j1 - 1] = x0i + x2i;
+    x0r = x1r + x3i;
+    x0i = x1i + x3r;
+    a[j2 - 2] = wk1r * x0r - wk1i * x0i;
+    a[j2 - 1] = wk1r * x0i + wk1i * x0r;
+    x0r = x1r - x3i;
+    x0i = x1i - x3r;
+    a[j3 - 2] = wk3r * x0r + wk3i * x0i;
+    a[j3 - 1] = wk3r * x0i - wk3i * x0r;
+    x0r = a[j0] + a[j2];
+    x0i = -a[j0 + 1] - a[j2 + 1];
+    x1r = a[j0] - a[j2];
+    x1i = -a[j0 + 1] + a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[j0] = x0r + x2r;
+    a[j0 + 1] = x0i - x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i + x2i;
+    x0r = x1r + x3i;
+    x0i = x1i + x3r;
+    a[j2] = wn4r * (x0r - x0i);
+    a[j2 + 1] = wn4r * (x0i + x0r);
+    x0r = x1r - x3i;
+    x0i = x1i - x3r;
+    a[j3] = -wn4r * (x0r + x0i);
+    a[j3 + 1] = -wn4r * (x0i - x0r);
+    x0r = a[j0 + 2] + a[j2 + 2];
+    x0i = -a[j0 + 3] - a[j2 + 3];
+    x1r = a[j0 + 2] - a[j2 + 2];
+    x1i = -a[j0 + 3] + a[j2 + 3];
+    x2r = a[j1 + 2] + a[j3 + 2];
+    x2i = a[j1 + 3] + a[j3 + 3];
+    x3r = a[j1 + 2] - a[j3 + 2];
+    x3i = a[j1 + 3] - a[j3 + 3];
+    a[j0 + 2] = x0r + x2r;
+    a[j0 + 3] = x0i - x2i;
+    a[j1 + 2] = x0r - x2r;
+    a[j1 + 3] = x0i + x2i;
+    x0r = x1r + x3i;
+    x0i = x1i + x3r;
+    a[j2 + 2] = wk1i * x0r - wk1r * x0i;
+    a[j2 + 3] = wk1i * x0i + wk1r * x0r;
+    x0r = x1r - x3i;
+    x0i = x1i - x3r;
+    a[j3 + 2] = wk3i * x0r + wk3r * x0i;
+    a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-extern void fn_8012440C(void *, void *);
-extern void fn_80124CE8(void *, void *);
-void fn_80123DC0(s32 count, void *dst, s32 srcIndex, void *src) {
-    void *srcBase = src;
-    void *temp_r31;
-    void *temp_r30;
-    if (count == 0x80) {
-        temp_r31 = (u8 *)srcBase + ((srcIndex - 8) * 4);
-        fn_80123E98(dst, temp_r31);
-        temp_r30 = (u8 *)srcBase + ((srcIndex - 0x20) * 4);
-        fn_8012440C((u8 *)dst + 0x80, temp_r30);
-        fn_80123E98((u8 *)dst + 0x100, temp_r31);
-        fn_8012440C((u8 *)dst + 0x180, temp_r30);
-        return;
+void fn_80122E08(s32 n, f32 *a, s32 nw, f32 *w) {
+    s32 m;
+
+    m = n >> 2;
+    fn_801233F8(n, a, &w[nw - 2 * m]);
+    if (n > 512) {
+        fn_80122E08(m, a, nw, w);
+        fn_80122ED8(m, &a[m], nw, w);
+        fn_80122E08(m, &a[2 * m], nw, w);
+        fn_80122E08(m, &a[3 * m], nw, w);
     } else {
-        void *tempElse = (u8 *)srcBase + ((srcIndex - 0x10) * 4);
-        fn_80124AD8(dst, tempElse);
-        fn_80124CE8((u8 *)dst + 0x40, tempElse);
-        fn_80124AD8((u8 *)dst + 0x80, tempElse);
-        fn_80124CE8((u8 *)dst + 0xC0, tempElse);
+        fn_80122FA4(n, a, nw, w);
     }
 }
 
-void fn_80123E98(void *arg0, void *arg1) {
-    f32 sp58;
-    f64 sp50;
-    f64 sp48;
-    f64 sp40;
-    f64 sp38;
-    f64 sp30;
-    f64 sp28;
-    f64 sp20;
-    f64 sp18;
-    f32 sp14;
-    f32 sp10;
-    f32 spC;
-    f32 sp8;
-    f32 temp_f0;
-    f32 temp_f0_2;
-    f32 temp_f0_3;
-    f32 temp_f0_4;
-    f32 temp_f0_5;
-    f32 temp_f10;
-    f32 temp_f10_2;
-    f32 temp_f10_3;
-    f32 temp_f10_4;
-    f32 temp_f10_5;
-    f32 temp_f10_6;
-    f32 temp_f11;
-    f32 temp_f11_2;
-    f32 temp_f11_3;
-    f32 temp_f11_4;
-    f32 temp_f12;
-    f32 temp_f12_2;
-    f32 temp_f12_3;
-    f32 temp_f12_4;
-    f32 temp_f13;
-    f32 temp_f13_2;
-    f32 temp_f13_3;
-    f32 temp_f13_4;
-    f32 temp_f13_5;
-    f32 temp_f13_6;
-    f32 temp_f13_7;
-    f32 temp_f13_8;
-    f32 temp_f14;
-    f32 temp_f14_2;
-    f32 temp_f14_3;
-    f32 temp_f15;
-    f32 temp_f15_2;
-    f32 temp_f15_3;
-    f32 temp_f16;
-    f32 temp_f16_2;
-    f32 temp_f16_3;
-    f32 temp_f16_4;
-    f32 temp_f17;
-    f32 temp_f17_2;
-    f32 temp_f17_3;
-    f32 temp_f17_4;
-    f32 temp_f17_5;
-    f32 temp_f17_6;
-    f32 temp_f18;
-    f32 temp_f19;
-    f32 temp_f19_2;
-    f32 temp_f19_3;
-    f32 temp_f19_4;
-    f32 temp_f1;
-    f32 temp_f1_2;
-    f32 temp_f1_3;
-    f32 temp_f1_4;
-    f32 temp_f1_5;
-    f32 temp_f20;
-    f32 temp_f20_2;
-    f32 temp_f20_3;
-    f32 temp_f21;
-    f32 temp_f21_2;
-    f32 temp_f21_3;
-    f32 temp_f21_4;
-    f32 temp_f21_5;
-    f32 temp_f22;
-    f32 temp_f22_2;
-    f32 temp_f23;
-    f32 temp_f23_2;
-    f32 temp_f23_3;
-    f32 temp_f23_4;
-    f32 temp_f24;
-    f32 temp_f24_2;
-    f32 temp_f24_3;
-    f32 temp_f25;
-    f32 temp_f25_2;
-    f32 temp_f25_3;
-    f32 temp_f25_4;
-    f32 temp_f26;
-    f32 temp_f26_2;
-    f32 temp_f26_3;
-    f32 temp_f26_4;
-    f32 temp_f27;
-    f32 temp_f27_2;
-    f32 temp_f28;
-    f32 temp_f28_2;
-    f32 temp_f28_3;
-    f32 temp_f28_4;
-    f32 temp_f29;
-    f32 temp_f29_2;
-    f32 temp_f29_3;
-    f32 temp_f29_4;
-    f32 temp_f2;
-    f32 temp_f2_2;
-    f32 temp_f2_3;
-    f32 temp_f30;
-    f32 temp_f30_2;
-    f32 temp_f30_3;
-    f32 temp_f31;
-    f32 temp_f31_2;
-    f32 temp_f31_3;
-    f32 temp_f3;
-    f32 temp_f3_2;
-    f32 temp_f3_3;
-    f32 temp_f3_4;
-    f32 temp_f4;
-    f32 temp_f4_2;
-    f32 temp_f4_3;
-    f32 temp_f4_4;
-    f32 temp_f5;
-    f32 temp_f5_2;
-    f32 temp_f5_3;
-    f32 temp_f5_4;
-    f32 temp_f5_5;
-    f32 temp_f6;
-    f32 temp_f6_2;
-    f32 temp_f6_3;
-    f32 temp_f6_4;
-    f32 temp_f6_5;
-    f32 temp_f6_6;
-    f32 temp_f6_7;
-    f32 temp_f7;
-    f32 temp_f7_2;
-    f32 temp_f7_3;
-    f32 temp_f7_4;
-    f32 temp_f8;
-    f32 temp_f8_10;
-    f32 temp_f8_2;
-    f32 temp_f8_3;
-    f32 temp_f8_4;
-    f32 temp_f8_5;
-    f32 temp_f8_6;
-    f32 temp_f8_7;
-    f32 temp_f8_8;
-    f32 temp_f8_9;
-    f32 temp_f9;
-    f32 temp_f9_2;
-    f32 temp_f9_3;
-    f32 temp_f9_4;
-    f32 temp_f9_5;
-    f32 temp_f9_6;
-    f32 temp_f9_7;
-    f32 temp_f9_8;
+void fn_80122ED8(s32 n, f32 *a, s32 nw, f32 *w) {
+    s32 m;
 
-    temp_f18 = (*(f32 *)((s8 *)arg1 + 4));
-    temp_f1 = (*(f32 *)((s8 *)arg1 + 8));
-    temp_f3 = (*(f32 *)((s8 *)arg0 + 8));
-    temp_f16 = temp_f18 * temp_f1;
-    temp_f0 = (*(f32 *)((s8 *)arg0 + 0x48));
-    temp_f21 = (*(f32 *)((s8 *)arg0 + 0xC));
-    temp_f10 = (*(f32 *)((s8 *)arg0 + 0x4C));
-    temp_f4 = temp_f3 - temp_f0;
-    temp_f17 = temp_f16 + temp_f1;
-    temp_f5 = temp_f21 - temp_f10;
-    temp_f2 = (*(f32 *)((s8 *)arg0 + 0x28));
-    temp_f1_2 = (*(f32 *)((s8 *)arg0 + 0x68));
-    temp_f22 = temp_f3 + temp_f0;
-    temp_f19 = (*(f32 *)((s8 *)arg0 + 0x2C));
-    temp_f6 = temp_f2 - temp_f1_2;
-    temp_f9 = (*(f32 *)((s8 *)arg0 + 0x6C));
-    temp_f21_2 = temp_f21 + temp_f10;
-    temp_f14 = (*(f32 *)((s8 *)arg0 + 0));
-    temp_f20 = temp_f2 + temp_f1_2;
-    temp_f0_2 = temp_f19 - temp_f9;
-    temp_f8 = temp_f5 + temp_f6;
-    temp_f13 = (*(f32 *)((s8 *)arg0 + 0x40));
-    temp_f29 = temp_f5 - temp_f6;
-    temp_f23 = (*(f32 *)((s8 *)arg0 + 4));
-    temp_f7 = temp_f4 - temp_f0_2;
-    temp_f0_3 = temp_f4 + temp_f0_2;
-    temp_f15 = (*(f32 *)((s8 *)arg0 + 0x44));
-    temp_f1_3 = temp_f14 + temp_f13;
-    temp_f14_2 = temp_f14 - temp_f13;
-    temp_f12 = (*(f32 *)((s8 *)arg0 + 0x20));
-    temp_f11 = (*(f32 *)((s8 *)arg0 + 0x60));
-    temp_f19_2 = temp_f19 + temp_f9;
-    temp_f6_2 = (*(f32 *)((s8 *)arg0 + 0x24));
-    temp_f5_2 = (*(f32 *)((s8 *)arg0 + 0x64));
-    temp_f31 = (*(f32 *)((s8 *)arg0 + 0x10));
-    temp_f2_2 = temp_f6_2 + temp_f5_2;
-    temp_f5_3 = temp_f6_2 - temp_f5_2;
-    temp_f13_2 = (*(f32 *)((s8 *)arg0 + 0x50));
-    temp_f3_2 = temp_f23 + temp_f15;
-    temp_f6_3 = temp_f23 - temp_f15;
-    temp_f10_2 = (*(f32 *)((s8 *)arg0 + 0x30));
-    temp_f4_2 = temp_f12 + temp_f11;
-    temp_f15_2 = temp_f12 - temp_f11;
-    temp_f12_2 = (*(f32 *)((s8 *)arg0 + 0x14));
-    temp_f11_2 = (*(f32 *)((s8 *)arg0 + 0x54));
-    temp_f9_2 = (*(f32 *)((s8 *)arg0 + 0x70));
-    temp_f8_2 = (*(f32 *)((s8 *)arg0 + 0x34));
-    temp_f1_4 = temp_f1_3 - temp_f4_2;
-    temp_f7_2 = (*(f32 *)((s8 *)arg0 + 0x74));
-    temp_f4_3 = temp_f6_3 + temp_f15_2;
-    temp_f6_4 = temp_f6_3 - temp_f15_2;
-    sp8 = temp_f1_3 + temp_f4_2;
-    temp_f15_3 = temp_f22 + temp_f20;
-    temp_f20_2 = temp_f22 - temp_f20;
-    temp_f22_2 = (temp_f17 * temp_f8) + (temp_f16 * temp_f7);
-    temp_f0_4 = temp_f3_2 + temp_f2_2;
-    temp_f2_3 = temp_f3_2 - temp_f2_2;
-    sp10 = temp_f31 + temp_f13_2;
-    temp_f3_3 = temp_f14_2 - temp_f5_3;
-    temp_f5_4 = temp_f14_2 + temp_f5_3;
-    temp_f14_3 = temp_f21_2 + temp_f19_2;
-    spC = temp_f12_2 + temp_f11_2;
-    temp_f25 = temp_f12_2 - temp_f11_2;
-    temp_f19_3 = temp_f21_2 - temp_f19_2;
-    temp_f21_3 = (temp_f17 * temp_f7) - (temp_f16 * temp_f8);
-    temp_f23_2 = (temp_f16 * temp_f0_3) - (temp_f17 * temp_f29);
-    temp_f13_3 = temp_f31 - temp_f13_2;
-    temp_f24 = (temp_f16 * temp_f29) + (temp_f17 * temp_f0_3);
-    temp_f11_3 = temp_f10_2 + temp_f9_2;
-    temp_f12_3 = temp_f8_2 + temp_f7_2;
-    temp_f30 = temp_f8_2 - temp_f7_2;
-    temp_f8_3 = (*(f32 *)((s8 *)arg0 + 0x5C));
-    temp_f9_3 = temp_f10_2 - temp_f9_2;
-    temp_f26 = (*(f32 *)((s8 *)arg0 + 0x18));
-    sp20 = (f64) (*(f32 *)((s8 *)arg0 + 0x58));
-    sp30 = (f64) temp_f8_3;
-    sp28 = (f64) (*(f32 *)((s8 *)arg0 + 0x1C));
-    sp38 = (f64) (*(f32 *)((s8 *)arg0 + 0x38));
-    temp_f7_3 = sp10 + temp_f11_3;
-    sp18 = (f64) temp_f26;
-    temp_f26_2 = temp_f26 - (f32) sp20;
-    temp_f8_4 = (*(f32 *)((s8 *)arg0 + 0x78));
-    sp40 = (f64) temp_f8_4;
-    temp_f28 = (f32) sp28 - temp_f8_3;
-    sp48 = (f64) (*(f32 *)((s8 *)arg0 + 0x3C));
-    temp_f13_4 = temp_f13_3 + temp_f30;
-    temp_f30_2 = temp_f25 - temp_f9_3;
-    sp58 = temp_f13_3 - temp_f30;
-    temp_f8_5 = (*(f32 *)((s8 *)arg0 + 0x7C));
-    sp50 = (f64) temp_f8_5;
-    temp_f29_2 = (f32) sp38 - temp_f8_4;
-    temp_f31_2 = (f32) sp48 - temp_f8_5;
-    temp_f8_6 = temp_f25 + temp_f9_3;
-    temp_f10_3 = temp_f28 + temp_f29_2;
-    temp_f28_2 = temp_f28 - temp_f29_2;
-    sp14 = temp_f26_2 - temp_f31_2;
-    temp_f27 = temp_f26_2 + temp_f31_2;
-    temp_f25_2 = temp_f18 * (temp_f13_4 + temp_f30_2);
-    temp_f8_7 = temp_f18 * (sp58 - temp_f8_6);
-    temp_f9_4 = temp_f18 * (temp_f8_6 + sp58);
-    temp_f26_3 = temp_f18 * (temp_f30_2 - temp_f13_4);
-    temp_f10_4 = (temp_f16 * sp14) - (temp_f17 * temp_f10_3);
-    temp_f13_5 = (temp_f16 * temp_f10_3) + (temp_f17 * sp14);
-    temp_f16_2 = temp_f5_4 - temp_f25_2;
-    temp_f30_3 = (temp_f17 * temp_f27) - (temp_f16 * temp_f28_2);
-    temp_f31_3 = (temp_f17 * temp_f28_2) + (temp_f16 * temp_f27);
-    temp_f28_3 = temp_f6_4 - temp_f26_3;
-    temp_f17_2 = temp_f23_2 - temp_f30_3;
-    temp_f29_3 = temp_f24 - temp_f31_3;
-    temp_f25_3 = temp_f5_4 + temp_f25_2;
-    temp_f24_2 = temp_f24 + temp_f31_3;
-    (*(f32 *)((s8 *)arg0 + 0x60)) = (f32) (temp_f16_2 + temp_f17_2);
-    (*(f32 *)((s8 *)arg0 + 0x64)) = (f32) (temp_f28_3 + temp_f29_3);
-    temp_f17_3 = temp_f6_4 + temp_f26_3;
-    (*(f32 *)((s8 *)arg0 + 0x68)) = (f32) (temp_f16_2 - temp_f17_2);
-    temp_f23_3 = temp_f23_2 + temp_f30_3;
-    (*(f32 *)((s8 *)arg0 + 0x6C)) = (f32) (temp_f28_3 - temp_f29_3);
-    temp_f25_4 = temp_f22_2 + temp_f13_5;
-    (*(f32 *)((s8 *)arg0 + 0x70)) = (f32) (temp_f25_3 - temp_f24_2);
-    temp_f5_5 = temp_f3_3 + temp_f8_7;
-    (*(f32 *)((s8 *)arg0 + 0x78)) = (f32) (temp_f25_3 + temp_f24_2);
-    temp_f23_4 = temp_f21_3 + temp_f10_4;
-    (*(f32 *)((s8 *)arg0 + 0x74)) = (f32) (temp_f17_3 + temp_f23_3);
-    temp_f16_3 = temp_f4_3 + temp_f9_4;
-    (*(f32 *)((s8 *)arg0 + 0x7C)) = (f32) (temp_f17_3 - temp_f23_3);
-    temp_f6_5 = (f32) sp18 + (f32) sp20;
-    temp_f24_3 = (f32) sp38 + (f32) sp40;
-    (*(f32 *)((s8 *)arg0 + 0x40)) = (f32) (temp_f5_5 + temp_f23_4);
-    temp_f3_4 = temp_f3_3 - temp_f8_7;
-    (*(f32 *)((s8 *)arg0 + 0x44)) = (f32) (temp_f16_3 + temp_f25_4);
-    temp_f17_4 = (f32) sp28 + (f32) sp30;
-    temp_f4_4 = temp_f4_3 - temp_f9_4;
-    temp_f26_4 = (f32) sp48 + (f32) sp50;
-    temp_f28_4 = sp10 - temp_f11_3;
-    temp_f27_2 = spC + temp_f12_3;
-    temp_f29_4 = spC - temp_f12_3;
-    temp_f11_4 = temp_f6_5 + temp_f24_3;
-    temp_f12_4 = temp_f17_4 + temp_f26_4;
-    temp_f6_6 = temp_f6_5 - temp_f24_3;
-    temp_f17_5 = temp_f17_4 - temp_f26_4;
-    temp_f8_8 = temp_f21_3 - temp_f10_4;
-    temp_f9_5 = temp_f22_2 - temp_f13_5;
-    temp_f21_4 = temp_f19_3 + temp_f6_6;
-    temp_f13_6 = temp_f20_2 - temp_f17_5;
-    temp_f10_5 = temp_f20_2 + temp_f17_5;
-    temp_f19_4 = temp_f19_3 - temp_f6_6;
-    temp_f21_5 = temp_f18 * (temp_f13_6 - temp_f21_4);
-    (*(f32 *)((s8 *)arg0 + 0x4C)) = (f32) (temp_f16_3 - temp_f25_4);
-    (*(f32 *)((s8 *)arg0 + 0x48)) = (f32) (temp_f5_5 - temp_f23_4);
-    temp_f20_3 = temp_f1_4 - temp_f29_4;
-    (*(f32 *)((s8 *)arg0 + 0x50)) = (f32) (temp_f3_4 - temp_f9_5);
-    temp_f17_6 = temp_f18 * (temp_f21_4 + temp_f13_6);
-    (*(f32 *)((s8 *)arg0 + 0x54)) = (f32) (temp_f4_4 + temp_f8_8);
-    temp_f9_6 = temp_f2_3 + temp_f28_4;
-    temp_f16_4 = temp_f18 * (temp_f10_5 - temp_f19_4);
-    temp_f13_7 = temp_f2_3 - temp_f28_4;
-    (*(f32 *)((s8 *)arg0 + 0x58)) = (f32) (temp_f3_4 + temp_f9_5);
-    (*(f32 *)((s8 *)arg0 + 0x5C)) = (f32) (temp_f4_4 - temp_f8_8);
-    (*(f32 *)((s8 *)arg0 + 0x20)) = (f32) (temp_f20_3 + temp_f21_5);
-    temp_f13_8 = temp_f18 * (temp_f19_4 + temp_f10_5);
-    (*(f32 *)((s8 *)arg0 + 0x24)) = (f32) (temp_f9_6 + temp_f17_6);
-    temp_f9_7 = temp_f1_4 + temp_f29_4;
-    temp_f10_6 = temp_f15_3 + temp_f11_4;
-    temp_f8_9 = sp8 + temp_f7_3;
-    (*(f32 *)((s8 *)arg0 + 0x2C)) = (f32) (temp_f9_6 - temp_f17_6);
-    (*(f32 *)((s8 *)arg0 + 0x28)) = (f32) (temp_f20_3 - temp_f21_5);
-    (*(f32 *)((s8 *)arg0 + 0x30)) = (f32) (temp_f9_7 - temp_f13_8);
-    temp_f8_10 = temp_f0_4 + temp_f27_2;
-    (*(f32 *)((s8 *)arg0 + 0)) = (f32) (temp_f8_9 + temp_f10_6);
-    temp_f1_5 = sp8 - temp_f7_3;
-    temp_f9_8 = temp_f14_3 + temp_f12_4;
-    (*(f32 *)((s8 *)arg0 + 0x34)) = (f32) (temp_f13_7 + temp_f16_4);
-    temp_f7_4 = temp_f14_3 - temp_f12_4;
-    (*(f32 *)((s8 *)arg0 + 0x38)) = (f32) (temp_f9_7 + temp_f13_8);
-    temp_f0_5 = temp_f0_4 - temp_f27_2;
-    (*(f32 *)((s8 *)arg0 + 0x3C)) = (f32) (temp_f13_7 - temp_f16_4);
-    (*(f32 *)((s8 *)arg0 + 8)) = (f32) (temp_f8_9 - temp_f10_6);
-    temp_f6_7 = temp_f15_3 - temp_f11_4;
-    (*(f32 *)((s8 *)arg0 + 4)) = (f32) (temp_f8_10 + temp_f9_8);
-    (*(f32 *)((s8 *)arg0 + 0xC)) = (f32) (temp_f8_10 - temp_f9_8);
-    (*(f32 *)((s8 *)arg0 + 0x10)) = (f32) (temp_f1_5 - temp_f7_4);
-    (*(f32 *)((s8 *)arg0 + 0x14)) = (f32) (temp_f0_5 + temp_f6_7);
-    (*(f32 *)((s8 *)arg0 + 0x18)) = (f32) (temp_f1_5 + temp_f7_4);
-    (*(f32 *)((s8 *)arg0 + 0x1C)) = (f32) (temp_f0_5 - temp_f6_7);
+    m = n >> 2;
+    fn_801237C4(n, a, &w[nw - n]);
+    if (n > 512) {
+        fn_80122E08(m, a, nw, w);
+        fn_80122ED8(m, &a[m], nw, w);
+        fn_80122E08(m, &a[2 * m], nw, w);
+        fn_80122ED8(m, &a[3 * m], nw, w);
+    } else {
+        fn_801231B8(n, a, nw, w);
+    }
 }
 
-void fn_80124F90(void *arg0) {
-    f32 r4_f1, r4_f0, r4_f5, r4_f4, r4_f6, r4_f8;
-    f32 r4_f3, r4_f2, r4_f7, r4_f1b, r4_f0b;
-    f32 r4_f9, r4_f10, r4_f11, r4_f12;
+void fn_80122FA4(s32 n, f32 *a, s32 nw, f32 *w) {
+    s32 j, k, l;
 
-    r4_f1 = *(f32 *)((u8 *)arg0 + 0);
-    r4_f0 = *(f32 *)((u8 *)arg0 + 0x10);
-    r4_f5 = *(f32 *)((u8 *)arg0 + 4);
-    r4_f4 = *(f32 *)((u8 *)arg0 + 0x14);
-    r4_f6 = r4_f1 + r4_f0;
-    r4_f8 = r4_f1 - r4_f0;
-    r4_f3 = *(f32 *)((u8 *)arg0 + 8);
-    r4_f2 = *(f32 *)((u8 *)arg0 + 0x18);
-    r4_f7 = r4_f5 + r4_f4;
-    r4_f1b = *(f32 *)((u8 *)arg0 + 0xC);
-    r4_f0b = *(f32 *)((u8 *)arg0 + 0x1C);
-    r4_f9 = r4_f5 - r4_f4;
-    r4_f10 = r4_f3 + r4_f2;
-    r4_f11 = r4_f3 - r4_f2;
-    r4_f12 = r4_f1b - r4_f0b;
-    r4_f4 = r4_f1b + r4_f0b;
-    *(f32 *)((u8 *)arg0 + 0) = r4_f6 + r4_f10;
-    *(f32 *)((u8 *)arg0 + 4) = r4_f7 + r4_f4;
-    *(f32 *)((u8 *)arg0 + 0x10) = r4_f6 - r4_f10;
-    *(f32 *)((u8 *)arg0 + 0x14) = r4_f7 - r4_f4;
-    *(f32 *)((u8 *)arg0 + 8) = r4_f8 - r4_f12;
-    *(f32 *)((u8 *)arg0 + 0xC) = r4_f9 + r4_f11;
-    *(f32 *)((u8 *)arg0 + 0x18) = r4_f8 + r4_f12;
-    *(f32 *)((u8 *)arg0 + 0x1C) = r4_f9 - r4_f11;
-}
-
-void fn_80125014(void *arg0) {
-    f32 temp_f0;
-    f32 temp_f1;
-    f32 temp_f2;
-    f32 temp_f3;
-    f32 temp_f4;
-    f32 temp_f5;
-    f32 temp_f6;
-    f32 temp_f7;
-    f32 temp_f8;
-    f32 temp_f9;
-    f32 temp_f10;
-    f32 temp_f11;
-    f32 temp_f12;
-
-    temp_f1 = *(f32 *)((u8 *)arg0 + 0);
-    temp_f0 = *(f32 *)((u8 *)arg0 + 0x10);
-    temp_f5 = *(f32 *)((u8 *)arg0 + 4);
-    temp_f4 = *(f32 *)((u8 *)arg0 + 0x14);
-    temp_f6 = temp_f1 + temp_f0;
-    temp_f8 = temp_f1 - temp_f0;
-    temp_f3 = *(f32 *)((u8 *)arg0 + 8);
-    temp_f2 = *(f32 *)((u8 *)arg0 + 0x18);
-    temp_f7 = temp_f5 + temp_f4;
-    temp_f1 = *(f32 *)((u8 *)arg0 + 0xC);
-    temp_f0 = *(f32 *)((u8 *)arg0 + 0x1C);
-    temp_f9 = temp_f5 - temp_f4;
-    temp_f10 = temp_f3 + temp_f2;
-    temp_f11 = temp_f3 - temp_f2;
-    temp_f12 = temp_f1 - temp_f0;
-    temp_f4 = temp_f1 + temp_f0;
-    *(f32 *)((u8 *)arg0 + 0) = temp_f6 + temp_f10;
-    *(f32 *)((u8 *)arg0 + 4) = temp_f7 + temp_f4;
-    *(f32 *)((u8 *)arg0 + 0x10) = temp_f6 - temp_f10;
-    *(f32 *)((u8 *)arg0 + 0x14) = temp_f7 - temp_f4;
-    *(f32 *)((u8 *)arg0 + 8) = temp_f8 + temp_f12;
-    *(f32 *)((u8 *)arg0 + 0xC) = temp_f9 - temp_f11;
-    *(f32 *)((u8 *)arg0 + 0x18) = temp_f8 - temp_f12;
-    *(f32 *)((u8 *)arg0 + 0x1C) = temp_f9 + temp_f11;
-}
-
-void fn_80125098(void *arg0) {
-    f32 f0, f1, f2, f3;
-    f3 = *(f32 *)((u8 *)arg0 + 0);
-    f1 = *(f32 *)((u8 *)arg0 + 8);
-    f2 = *(f32 *)((u8 *)arg0 + 4);
-    f0 = *(f32 *)((u8 *)arg0 + 12);
-    *(f32 *)((u8 *)arg0 + 8) = f3 - f1;
-    *(f32 *)((u8 *)arg0 + 0) = f3 + f1;
-    *(f32 *)((u8 *)arg0 + 4) = f2 - f0;
-    *(f32 *)((u8 *)arg0 + 12) = f2 + f0;
-}
-
-void fn_801250CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    f32 *a = (f32 *)arg1;
-    f32 *w = (f32 *)arg3;
-    s32 half = arg0 >> 1;
-    s32 step = (arg2 * 2) / half;
-    s32 stride = step * 4;
-    s32 i = 0;
-    s32 j = 2;
-    f32 *p = a + 2;
-    f32 *q = w;
-    s32 n = (half - 1) >> 1;
-    if (half > 2) {
-        s32 k = n >> 1;
-        while (k != 0) {
-            i += step;
-            {
-                f32 x = p[0], y = w[arg2 - i], u = a[arg0 - j], v = p[1] + a[arg0 - j + 1];
-                f32 z = lbl_80561210 - y;
-                f32 t = x - u;
-                f32 c = *q;
-                f32 re = z * t - c * v;
-                f32 im = z * v + c * t;
-                p[0] = x - re; p[1] -= im;
-                a[arg0-j] += re; a[arg0-j+1] -= im;
-                i += step; j += 2;
+    l = n >> 2;
+    while (l > 128) {
+        for (k = l; k < n; k <<= 2) {
+            for (j = k - l; j < n; j += 4 * k) {
+                fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
+                fn_801237C4(l, &a[k + j], &w[nw - l]);
+                fn_801233F8(l, &a[2 * k + j], &w[nw - (l >> 1)]);
             }
-            {
-                f32 x = p[2], y = w[arg2 - i], u = a[arg0 - j], v = p[3] + a[arg0-j+1];
-                f32 z = lbl_80561210 - y;
-                f32 t = x-u;
-                f32 c = q[stride/4];
-                f32 re = z*t-c*v;
-                f32 im = z*v+c*t;
-                p[2] = x-re; p[3] -= im;
-                a[arg0-j] += re; a[arg0-j+1] -= im;
+        }
+        fn_801233F8(l, &a[n - l], &w[nw - (l >> 1)]);
+        l >>= 2;
+    }
+    for (k = l; k < n; k <<= 2) {
+        for (j = k - l; j < n; j += 4 * k) {
+            fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
+            fn_80123CEC(l, &a[j], nw, w);
+            fn_801237C4(l, &a[k + j], &w[nw - l]);
+            fn_80123DC0(l, &a[k + j], nw, w);
+            fn_801233F8(l, &a[2 * k + j], &w[nw - (l >> 1)]);
+            fn_80123CEC(l, &a[2 * k + j], nw, w);
+        }
+    }
+    fn_801233F8(l, &a[n - l], &w[nw - (l >> 1)]);
+    fn_80123CEC(l, &a[n - l], nw, w);
+}
+
+void fn_801231B8(s32 n, f32 *a, s32 nw, f32 *w) {
+    s32 j, k, l, m;
+
+    m = n >> 1;
+    l = n >> 2;
+    while (l > 128) {
+        for (k = l; k < m; k <<= 2) {
+            for (j = k - l; j < m; j += 2 * k) {
+                fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
+                fn_801233F8(l, &a[m + j], &w[nw - (l >> 1)]);
             }
-            j += 2; p += 4; q += stride/4; k--;
+            for (j = 2 * k - l; j < m; j += 4 * k) {
+                fn_801237C4(l, &a[j], &w[nw - l]);
+                fn_801237C4(l, &a[m + j], &w[nw - l]);
+            }
         }
-        n &= 1;
-        if (n) {
-            do {
-                i += step;
-                {
-                    f32 x=p[0], y=w[arg2-i], u=a[arg0-j], v=p[1]+a[arg0-j+1];
-                    f32 z=lbl_80561210-y, t=x-u, c=*q;
-                    f32 re=z*t-c*v, im=z*v+c*t;
-                    p[0]=x-re; p[1]-=im; a[arg0-j]+=re; a[arg0-j+1]-=im;
-                }
-                j+=2; p+=2; q+=stride/4;
-            } while (--n);
+        l >>= 2;
+    }
+    for (k = l; k < m; k <<= 2) {
+        for (j = k - l; j < m; j += 2 * k) {
+            fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
+            fn_80123CEC(l, &a[j], nw, w);
+            fn_801233F8(l, &a[m + j], &w[nw - (l >> 1)]);
+            fn_80123CEC(l, &a[m + j], nw, w);
+        }
+        for (j = 2 * k - l; j < m; j += 4 * k) {
+            fn_801237C4(l, &a[j], &w[nw - l]);
+            fn_80123DC0(l, &a[j], nw, w);
+            fn_801237C4(l, &a[m + j], &w[nw - l]);
+            fn_80123DC0(l, &a[m + j], nw, w);
         }
     }
 }
 
-void fn_801252D8(s32 n, f32 *a, s32 m, f32 *w) {
-    s32 half, step, i, j, count, k, x, off;
-    f32 *p, *q, *r;
-    f32 t, u, c, d, e, z, h, l, v, y, re, im;
-    half = n >> 1; step = (m * 2) / half; i = 0; j = 2;
-    p = a + 2; q = w; count = (half - 1) >> 1;
-    if (half <= 2) return;
-    if ((count >> 1) != 0) {
-        k = count >> 1;
-        do {
-            x = i + step; t = *p; u = w[m - x]; r = a + n - j;
-            i = x + step; c = lbl_80561210 - u; d = t - r[0]; j += 2;
-            e = p[1] + r[1]; z = *q; q += step; h = c * d; l = z * d;
-            v = z * e; off = (n - j) * 4; y = c * e; j += 2;
-            re = h + v; im = y - l; p[0] = t - re; p[1] -= im;
-            r[0] += re; r[1] -= im; r = (f32 *)((u8 *)a + off);
-            t = p[2]; c = lbl_80561210 - w[m - i]; d = t - r[0]; z = *q;
-            q += step; e = p[3] + r[1]; h = c * d; v = z * e; l = z * d;
-            y = c * e; re = h + v; im = y - l; p[2] = t - re; p[3] -= im;
-            p += 4; r[0] += re; r[1] -= im;
-        } while (--k != 0);
-        count &= 1;
+void fn_801233F8(s32 n, f32 *a, f32 *w) {
+    s32 j, j0, j1, j2, j3, k, m, mh;
+    f32 wn4r, wk1r, wk1i, wk3r, wk3i;
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+
+    mh = n >> 3;
+    m = 2 * mh;
+    j1 = m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[0] + a[j2];
+    x0i = a[1] + a[j2 + 1];
+    x1r = a[0] - a[j2];
+    x1i = a[1] - a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[0] = x0r + x2r;
+    a[1] = x0i + x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i - x2i;
+    a[j2] = x1r - x3i;
+    a[j2 + 1] = x1i + x3r;
+    a[j3] = x1r + x3i;
+    a[j3 + 1] = x1i - x3r;
+    wn4r = w[1];
+    k = 0;
+    for (j = 2; j < mh; j += 2) {
+        k += 4;
+        wk1r = w[k];
+        wk1i = w[k + 1];
+        wk3r = w[k + 2];
+        wk3i = w[k + 3];
+        j1 = j + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j] + a[j2];
+        x0i = a[j + 1] + a[j2 + 1];
+        x1r = a[j] - a[j2];
+        x1i = a[j + 1] - a[j2 + 1];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        a[j] = x0r + x2r;
+        a[j + 1] = x0i + x2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i - x2i;
+        x0r = x1r - x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1r * x0r - wk1i * x0i;
+        a[j2 + 1] = wk1r * x0i + wk1i * x0r;
+        x0r = x1r + x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3r * x0r + wk3i * x0i;
+        a[j3 + 1] = wk3r * x0i - wk3i * x0r;
+        j0 = m - j;
+        j1 = j0 + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j0] + a[j2];
+        x0i = a[j0 + 1] + a[j2 + 1];
+        x1r = a[j0] - a[j2];
+        x1i = a[j0 + 1] - a[j2 + 1];
+        x2r = a[j1] + a[j3];
+        x2i = a[j1 + 1] + a[j3 + 1];
+        x3r = a[j1] - a[j3];
+        x3i = a[j1 + 1] - a[j3 + 1];
+        a[j0] = x0r + x2r;
+        a[j0 + 1] = x0i + x2i;
+        a[j1] = x0r - x2r;
+        a[j1 + 1] = x0i - x2i;
+        x0r = x1r - x3i;
+        x0i = x1i + x3r;
+        a[j2] = wk1i * x0r - wk1r * x0i;
+        a[j2 + 1] = wk1i * x0i + wk1r * x0r;
+        x0r = x1r + x3i;
+        x0i = x1i - x3r;
+        a[j3] = wk3i * x0r + wk3r * x0i;
+        a[j3 + 1] = wk3i * x0i - wk3r * x0r;
     }
-    if (count != 0) {
-        do {
-            i += step; t = *p; off = (n - j) * 4; r = (f32 *)((u8 *)a + off);
-            d = t - r[0]; j += 2; c = lbl_80561210 - w[m - i]; z = *q;
-            q += step; e = p[1] + r[1]; h = c * d; l = z * d; v = z * e;
-            y = c * e; re = h + v; im = y - l; p[0] = t - re; p[1] -= im;
-            p += 2; r[0] += re; r[1] -= im;
-        } while (--count != 0);
+    j0 = mh;
+    j1 = j0 + m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[j0] + a[j2];
+    x0i = a[j0 + 1] + a[j2 + 1];
+    x1r = a[j0] - a[j2];
+    x1i = a[j0 + 1] - a[j2 + 1];
+    x2r = a[j1] + a[j3];
+    x2i = a[j1 + 1] + a[j3 + 1];
+    x3r = a[j1] - a[j3];
+    x3i = a[j1 + 1] - a[j3 + 1];
+    a[j0] = x0r + x2r;
+    a[j0 + 1] = x0i + x2i;
+    a[j1] = x0r - x2r;
+    a[j1 + 1] = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    a[j2] = wn4r * (x0r - x0i);
+    a[j2 + 1] = wn4r * (x0i + x0r);
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    a[j3] = -wn4r * (x0r + x0i);
+    a[j3 + 1] = -wn4r * (x0i - x0r);
+}
+
+void fn_801237C4(s32 n, f32 *a, f32 *w) {
+    s32 j, j0, j1, j2, j3, k, kr, m, mh;
+    f32 wn4r, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y2r, y2i;
+
+    mh = n >> 3;
+    m = 2 * mh;
+    wn4r = w[1];
+    j1 = m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[0] - a[j2 + 1];
+    x0i = a[1] + a[j2];
+    x1r = a[0] + a[j2 + 1];
+    x1i = a[1] - a[j2];
+    x2r = a[j1] - a[j3 + 1];
+    x2i = a[j1 + 1] + a[j3];
+    x3r = a[j1] + a[j3 + 1];
+    x3i = a[j1 + 1] - a[j3];
+    y0r = wn4r * (x2r - x2i);
+    y0i = wn4r * (x2i + x2r);
+    a[0] = x0r + y0r;
+    a[1] = x0i + y0i;
+    a[j1] = x0r - y0r;
+    a[j1 + 1] = x0i - y0i;
+    y0r = wn4r * (x3r - x3i);
+    y0i = wn4r * (x3i + x3r);
+    a[j2] = x1r - y0i;
+    a[j2 + 1] = x1i + y0r;
+    a[j3] = x1r + y0i;
+    a[j3 + 1] = x1i - y0r;
+    k = 0;
+    kr = 2 * m;
+    for (j = 2; j < mh; j += 2) {
+        k += 4;
+        wk1r = w[k];
+        wk1i = w[k + 1];
+        wk3r = w[k + 2];
+        wk3i = w[k + 3];
+        kr -= 4;
+        wd1i = w[kr];
+        wd1r = w[kr + 1];
+        wd3i = w[kr + 2];
+        wd3r = w[kr + 3];
+        j1 = j + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j] - a[j2 + 1];
+        x0i = a[j + 1] + a[j2];
+        x1r = a[j] + a[j2 + 1];
+        x1i = a[j + 1] - a[j2];
+        x2r = a[j1] - a[j3 + 1];
+        x2i = a[j1 + 1] + a[j3];
+        x3r = a[j1] + a[j3 + 1];
+        x3i = a[j1 + 1] - a[j3];
+        y0r = wk1r * x0r - wk1i * x0i;
+        y0i = wk1r * x0i + wk1i * x0r;
+        y2r = wd1r * x2r - wd1i * x2i;
+        y2i = wd1r * x2i + wd1i * x2r;
+        a[j] = y0r + y2r;
+        a[j + 1] = y0i + y2i;
+        a[j1] = y0r - y2r;
+        a[j1 + 1] = y0i - y2i;
+        y0r = wk3r * x1r + wk3i * x1i;
+        y0i = wk3r * x1i - wk3i * x1r;
+        y2r = wd3r * x3r + wd3i * x3i;
+        y2i = wd3r * x3i - wd3i * x3r;
+        a[j2] = y0r + y2r;
+        a[j2 + 1] = y0i + y2i;
+        a[j3] = y0r - y2r;
+        a[j3 + 1] = y0i - y2i;
+        j0 = m - j;
+        j1 = j0 + m;
+        j2 = j1 + m;
+        j3 = j2 + m;
+        x0r = a[j0] - a[j2 + 1];
+        x0i = a[j0 + 1] + a[j2];
+        x1r = a[j0] + a[j2 + 1];
+        x1i = a[j0 + 1] - a[j2];
+        x2r = a[j1] - a[j3 + 1];
+        x2i = a[j1 + 1] + a[j3];
+        x3r = a[j1] + a[j3 + 1];
+        x3i = a[j1 + 1] - a[j3];
+        y0r = wd1i * x0r - wd1r * x0i;
+        y0i = wd1i * x0i + wd1r * x0r;
+        y2r = wk1i * x2r - wk1r * x2i;
+        y2i = wk1i * x2i + wk1r * x2r;
+        a[j0] = y0r + y2r;
+        a[j0 + 1] = y0i + y2i;
+        a[j1] = y0r - y2r;
+        a[j1 + 1] = y0i - y2i;
+        y0r = wd3i * x1r + wd3r * x1i;
+        y0i = wd3i * x1i - wd3r * x1r;
+        y2r = wk3i * x3r + wk3r * x3i;
+        y2i = wk3i * x3i - wk3r * x3r;
+        a[j2] = y0r + y2r;
+        a[j2 + 1] = y0i + y2i;
+        a[j3] = y0r - y2r;
+        a[j3 + 1] = y0i - y2i;
+    }
+    wk1r = w[m];
+    wk1i = w[m + 1];
+    j0 = mh;
+    j1 = j0 + m;
+    j2 = j1 + m;
+    j3 = j2 + m;
+    x0r = a[j0] - a[j2 + 1];
+    x0i = a[j0 + 1] + a[j2];
+    x1r = a[j0] + a[j2 + 1];
+    x1i = a[j0 + 1] - a[j2];
+    x2r = a[j1] - a[j3 + 1];
+    x2i = a[j1 + 1] + a[j3];
+    x3r = a[j1] + a[j3 + 1];
+    x3i = a[j1 + 1] - a[j3];
+    y0r = wk1r * x0r - wk1i * x0i;
+    y0i = wk1r * x0i + wk1i * x0r;
+    y2r = wk1i * x2r - wk1r * x2i;
+    y2i = wk1i * x2i + wk1r * x2r;
+    a[j0] = y0r + y2r;
+    a[j0 + 1] = y0i + y2i;
+    a[j1] = y0r - y2r;
+    a[j1 + 1] = y0i - y2i;
+    y0r = wk1i * x1r - wk1r * x1i;
+    y0i = wk1i * x1i + wk1r * x1r;
+    y2r = wk1r * x3r - wk1i * x3i;
+    y2i = wk1r * x3i + wk1i * x3r;
+    a[j2] = y0r - y2r;
+    a[j2 + 1] = y0i - y2i;
+    a[j3] = y0r + y2r;
+    a[j3 + 1] = y0i + y2i;
+}
+
+void fn_80123CEC(s32 n, f32 *a, s32 nw, f32 *w) {
+    if (n == 128) {
+        fn_80123E98(a, &w[nw - 8]);
+        fn_8012440C(&a[32], &w[nw - 32]);
+        fn_80123E98(&a[64], &w[nw - 8]);
+        fn_80123E98(&a[96], &w[nw - 8]);
+    } else {
+        fn_80124AD8(a, &w[nw - 16]);
+        fn_80124CE8(&a[16], &w[nw - 16]);
+        fn_80124AD8(&a[32], &w[nw - 16]);
+        fn_80124AD8(&a[48], &w[nw - 16]);
     }
 }
 
-void fn_801254E4(s32 arg0, f32 *arg1, s32 arg2, f32 *arg3) {
-    s32 i;
-    s32 j;
-    s32 step;
-    s32 half;
-    s32 k;
-    f32 *tw;
-    f32 *out;
-    f32 a, b, c, d, e, f;
-
-    tw = arg3;
-    out = arg1 + 1;
-    i = 1;
-    j = 0;
-    step = arg2 / arg0;
-    half = arg0 >> 1;
-    k = half - 1;
-    if (half > 1) {
-        k = (u32)k >> 1;
-        if (k != 0) {
-            do {
-                j += step;
-                a = *(tw += step);
-                b = arg3[arg2 - j];
-                j += step;
-                c = out[0];
-                d = arg1[arg0 - i];
-                i++;
-                e = a - b;
-                f = a + b;
-                out[0] = e * c + f * d;
-                arg1[arg0 - i + 1] = f * c - e * d;
-                i++;
-                a = *(tw += step);
-                b = arg3[arg2 - j];
-                c = out[1];
-                d = arg1[arg0 - i];
-                e = a - b;
-                f = a + b;
-                out[1] = e * c + f * d;
-                arg1[arg0 - i] = f * c - e * d;
-                out += 2;
-                k--;
-            } while (k != 0);
-            k = (half - 1) & 1;
-            if (k == 0) goto done;
-        } else {
-            k = half - 1;
-        }
-        do {
-            j += step;
-            a = *(tw += step);
-            b = arg3[arg2 - j];
-            c = *out;
-            d = arg1[arg0 - i];
-            i++;
-            e = a - b;
-            f = a + b;
-            *out++ = e * c + f * d;
-            arg1[arg0 - i + 1] = f * c - e * d;
-            k--;
-        } while (k != 0);
+void fn_80123DC0(s32 n, f32 *a, s32 nw, f32 *w) {
+    if (n == 128) {
+        fn_80123E98(a, &w[nw - 8]);
+        fn_8012440C(&a[32], &w[nw - 32]);
+        fn_80123E98(&a[64], &w[nw - 8]);
+        fn_8012440C(&a[96], &w[nw - 32]);
+    } else {
+        fn_80124AD8(a, &w[nw - 16]);
+        fn_80124CE8(&a[16], &w[nw - 16]);
+        fn_80124AD8(&a[32], &w[nw - 16]);
+        fn_80124CE8(&a[48], &w[nw - 16]);
     }
-done:
-    arg1[half] *= *arg3;
+}
+
+void fn_80123E98(f32 *a, f32 *w) {
+    f32 wn4r, wk1r, wk1i, x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i, y4r, y4i,
+        y5r, y5i, y6r, y6i, y7r, y7i, y8r, y8i, y9r, y9i, y10r, y10i, y11r, y11i, y12r, y12i, y13r, y13i, y14r,
+        y14i, y15r, y15i;
+
+    wn4r = w[1];
+    wk1r = w[2];
+    wk1i = w[3];
+    x0r = a[0] + a[16];
+    x0i = a[1] + a[17];
+    x1r = a[0] - a[16];
+    x1i = a[1] - a[17];
+    x2r = a[8] + a[24];
+    x2i = a[9] + a[25];
+    x3r = a[8] - a[24];
+    x3i = a[9] - a[25];
+    y0r = x0r + x2r;
+    y0i = x0i + x2i;
+    y4r = x0r - x2r;
+    y4i = x0i - x2i;
+    y8r = x1r - x3i;
+    y8i = x1i + x3r;
+    y12r = x1r + x3i;
+    y12i = x1i - x3r;
+    x0r = a[2] + a[18];
+    x0i = a[3] + a[19];
+    x1r = a[2] - a[18];
+    x1i = a[3] - a[19];
+    x2r = a[10] + a[26];
+    x2i = a[11] + a[27];
+    x3r = a[10] - a[26];
+    x3i = a[11] - a[27];
+    y1r = x0r + x2r;
+    y1i = x0i + x2i;
+    y5r = x0r - x2r;
+    y5i = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    y9r = wk1r * x0r - wk1i * x0i;
+    y9i = wk1r * x0i + wk1i * x0r;
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    y13r = wk1i * x0r - wk1r * x0i;
+    y13i = wk1i * x0i + wk1r * x0r;
+    x0r = a[4] + a[20];
+    x0i = a[5] + a[21];
+    x1r = a[4] - a[20];
+    x1i = a[5] - a[21];
+    x2r = a[12] + a[28];
+    x2i = a[13] + a[29];
+    x3r = a[12] - a[28];
+    x3i = a[13] - a[29];
+    y2r = x0r + x2r;
+    y2i = x0i + x2i;
+    y6r = x0r - x2r;
+    y6i = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    y10r = wn4r * (x0r - x0i);
+    y10i = wn4r * (x0i + x0r);
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    y14r = wn4r * (x0r + x0i);
+    y14i = wn4r * (x0i - x0r);
+    x0r = a[6] + a[22];
+    x0i = a[7] + a[23];
+    x1r = a[6] - a[22];
+    x1i = a[7] - a[23];
+    x2r = a[14] + a[30];
+    x2i = a[15] + a[31];
+    x3r = a[14] - a[30];
+    x3i = a[15] - a[31];
+    y3r = x0r + x2r;
+    y3i = x0i + x2i;
+    y7r = x0r - x2r;
+    y7i = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    y11r = wk1i * x0r - wk1r * x0i;
+    y11i = wk1i * x0i + wk1r * x0r;
+    x0r = x1r + x3i;
+    x0i = x1i - x3r;
+    y15r = wk1r * x0r - wk1i * x0i;
+    y15i = wk1r * x0i + wk1i * x0r;
+    x0r = y12r - y14r;
+    x0i = y12i - y14i;
+    x1r = y12r + y14r;
+    x1i = y12i + y14i;
+    x2r = y13r - y15r;
+    x2i = y13i - y15i;
+    x3r = y13r + y15r;
+    x3i = y13i + y15i;
+    a[24] = x0r + x2r;
+    a[25] = x0i + x2i;
+    a[26] = x0r - x2r;
+    a[27] = x0i - x2i;
+    a[28] = x1r - x3i;
+    a[29] = x1i + x3r;
+    a[30] = x1r + x3i;
+    a[31] = x1i - x3r;
+    x0r = y8r + y10r;
+    x0i = y8i + y10i;
+    x1r = y8r - y10r;
+    x1i = y8i - y10i;
+    x2r = y9r + y11r;
+    x2i = y9i + y11i;
+    x3r = y9r - y11r;
+    x3i = y9i - y11i;
+    a[16] = x0r + x2r;
+    a[17] = x0i + x2i;
+    a[18] = x0r - x2r;
+    a[19] = x0i - x2i;
+    a[20] = x1r - x3i;
+    a[21] = x1i + x3r;
+    a[22] = x1r + x3i;
+    a[23] = x1i - x3r;
+    x0r = y5r - y7i;
+    x0i = y5i + y7r;
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    x0r = y5r + y7i;
+    x0i = y5i - y7r;
+    x3r = wn4r * (x0r - x0i);
+    x3i = wn4r * (x0i + x0r);
+    x0r = y4r - y6i;
+    x0i = y4i + y6r;
+    x1r = y4r + y6i;
+    x1i = y4i - y6r;
+    a[8] = x0r + x2r;
+    a[9] = x0i + x2i;
+    a[10] = x0r - x2r;
+    a[11] = x0i - x2i;
+    a[12] = x1r - x3i;
+    a[13] = x1i + x3r;
+    a[14] = x1r + x3i;
+    a[15] = x1i - x3r;
+    x0r = y0r + y2r;
+    x0i = y0i + y2i;
+    x1r = y0r - y2r;
+    x1i = y0i - y2i;
+    x2r = y1r + y3r;
+    x2i = y1i + y3i;
+    x3r = y1r - y3r;
+    x3i = y1i - y3i;
+    a[0] = x0r + x2r;
+    a[1] = x0i + x2i;
+    a[2] = x0r - x2r;
+    a[3] = x0i - x2i;
+    a[4] = x1r - x3i;
+    a[5] = x1i + x3r;
+    a[6] = x1r + x3i;
+    a[7] = x1i - x3r;
+}
+
+void fn_8012440C(f32 *a, f32 *w) {
+    f32 wn4r, wk1r, wk1i, wk2r, wk2i, wk3r, wk3i, x0r, x0i, x1r, x1i, x2r, x2i, y0r, y0i, y1r, y1i, y2r, y2i,
+        y3r, y3i, y4r, y4i, y5r, y5i, y6r, y6i, y7r, y7i, y8r, y8i, y9r, y9i, y10r, y10i, y11r, y11i, y12r, y12i,
+        y13r, y13i, y14r, y14i, y15r, y15i;
+
+    wn4r = w[1];
+    wk1r = w[4];
+    wk1i = w[5];
+    wk3r = w[6];
+    wk3i = -w[7];
+    wk2r = w[8];
+    wk2i = w[9];
+    x1r = a[0] - a[17];
+    x1i = a[1] + a[16];
+    x0r = a[8] - a[25];
+    x0i = a[9] + a[24];
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    y0r = x1r + x2r;
+    y0i = x1i + x2i;
+    y4r = x1r - x2r;
+    y4i = x1i - x2i;
+    x1r = a[0] + a[17];
+    x1i = a[1] - a[16];
+    x0r = a[8] + a[25];
+    x0i = a[9] - a[24];
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    y8r = x1r - x2i;
+    y8i = x1i + x2r;
+    y12r = x1r + x2i;
+    y12i = x1i - x2r;
+    x0r = a[2] - a[19];
+    x0i = a[3] + a[18];
+    x1r = wk1r * x0r - wk1i * x0i;
+    x1i = wk1r * x0i + wk1i * x0r;
+    x0r = a[10] - a[27];
+    x0i = a[11] + a[26];
+    x2r = wk3i * x0r - wk3r * x0i;
+    x2i = wk3i * x0i + wk3r * x0r;
+    y1r = x1r + x2r;
+    y1i = x1i + x2i;
+    y5r = x1r - x2r;
+    y5i = x1i - x2i;
+    x0r = a[2] + a[19];
+    x0i = a[3] - a[18];
+    x1r = wk3r * x0r - wk3i * x0i;
+    x1i = wk3r * x0i + wk3i * x0r;
+    x0r = a[10] + a[27];
+    x0i = a[11] - a[26];
+    x2r = wk1r * x0r + wk1i * x0i;
+    x2i = wk1r * x0i - wk1i * x0r;
+    y9r = x1r - x2r;
+    y9i = x1i - x2i;
+    y13r = x1r + x2r;
+    y13i = x1i + x2i;
+    x0r = a[4] - a[21];
+    x0i = a[5] + a[20];
+    x1r = wk2r * x0r - wk2i * x0i;
+    x1i = wk2r * x0i + wk2i * x0r;
+    x0r = a[12] - a[29];
+    x0i = a[13] + a[28];
+    x2r = wk2i * x0r - wk2r * x0i;
+    x2i = wk2i * x0i + wk2r * x0r;
+    y2r = x1r + x2r;
+    y2i = x1i + x2i;
+    y6r = x1r - x2r;
+    y6i = x1i - x2i;
+    x0r = a[4] + a[21];
+    x0i = a[5] - a[20];
+    x1r = wk2i * x0r - wk2r * x0i;
+    x1i = wk2i * x0i + wk2r * x0r;
+    x0r = a[12] + a[29];
+    x0i = a[13] - a[28];
+    x2r = wk2r * x0r - wk2i * x0i;
+    x2i = wk2r * x0i + wk2i * x0r;
+    y10r = x1r - x2r;
+    y10i = x1i - x2i;
+    y14r = x1r + x2r;
+    y14i = x1i + x2i;
+    x0r = a[6] - a[23];
+    x0i = a[7] + a[22];
+    x1r = wk3r * x0r - wk3i * x0i;
+    x1i = wk3r * x0i + wk3i * x0r;
+    x0r = a[14] - a[31];
+    x0i = a[15] + a[30];
+    x2r = wk1i * x0r - wk1r * x0i;
+    x2i = wk1i * x0i + wk1r * x0r;
+    y3r = x1r + x2r;
+    y3i = x1i + x2i;
+    y7r = x1r - x2r;
+    y7i = x1i - x2i;
+    x0r = a[6] + a[23];
+    x0i = a[7] - a[22];
+    x1r = wk1i * x0r + wk1r * x0i;
+    x1i = wk1i * x0i - wk1r * x0r;
+    x0r = a[14] + a[31];
+    x0i = a[15] - a[30];
+    x2r = wk3i * x0r - wk3r * x0i;
+    x2i = wk3i * x0i + wk3r * x0r;
+    y11r = x1r + x2r;
+    y11i = x1i + x2i;
+    y15r = x1r - x2r;
+    y15i = x1i - x2i;
+    x1r = y0r + y2r;
+    x1i = y0i + y2i;
+    x2r = y1r + y3r;
+    x2i = y1i + y3i;
+    a[0] = x1r + x2r;
+    a[1] = x1i + x2i;
+    a[2] = x1r - x2r;
+    a[3] = x1i - x2i;
+    x1r = y0r - y2r;
+    x1i = y0i - y2i;
+    x2r = y1r - y3r;
+    x2i = y1i - y3i;
+    a[4] = x1r - x2i;
+    a[5] = x1i + x2r;
+    a[6] = x1r + x2i;
+    a[7] = x1i - x2r;
+    x1r = y4r - y6i;
+    x1i = y4i + y6r;
+    x0r = y5r - y7i;
+    x0i = y5i + y7r;
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    a[8] = x1r + x2r;
+    a[9] = x1i + x2i;
+    a[10] = x1r - x2r;
+    a[11] = x1i - x2i;
+    x1r = y4r + y6i;
+    x1i = y4i - y6r;
+    x0r = y5r + y7i;
+    x0i = y5i - y7r;
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    a[12] = x1r - x2i;
+    a[13] = x1i + x2r;
+    a[14] = x1r + x2i;
+    a[15] = x1i - x2r;
+    x1r = y8r + y10r;
+    x1i = y8i + y10i;
+    x2r = y9r - y11r;
+    x2i = y9i - y11i;
+    a[16] = x1r + x2r;
+    a[17] = x1i + x2i;
+    a[18] = x1r - x2r;
+    a[19] = x1i - x2i;
+    x1r = y8r - y10r;
+    x1i = y8i - y10i;
+    x2r = y9r + y11r;
+    x2i = y9i + y11i;
+    a[20] = x1r - x2i;
+    a[21] = x1i + x2r;
+    a[22] = x1r + x2i;
+    a[23] = x1i - x2r;
+    x1r = y12r - y14i;
+    x1i = y12i + y14r;
+    x0r = y13r + y15i;
+    x0i = y13i - y15r;
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    a[24] = x1r + x2r;
+    a[25] = x1i + x2i;
+    a[26] = x1r - x2r;
+    a[27] = x1i - x2i;
+    x1r = y12r + y14i;
+    x1i = y12i - y14r;
+    x0r = y13r - y15i;
+    x0i = y13i + y15r;
+    x2r = wn4r * (x0r - x0i);
+    x2i = wn4r * (x0i + x0r);
+    a[28] = x1r - x2i;
+    a[29] = x1i + x2r;
+    a[30] = x1r + x2i;
+    a[31] = x1i - x2r;
+}
+
+void fn_80124AD8(f32 *a, f32 *w) {
+    f32 wn4r, x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i, y4r, y4i, y5r, y5i,
+        y6r, y6i, y7r, y7i;
+
+    wn4r = w[1];
+    x0r = a[0] + a[8];
+    x0i = a[1] + a[9];
+    x1r = a[0] - a[8];
+    x1i = a[1] - a[9];
+    x2r = a[4] + a[12];
+    x2i = a[5] + a[13];
+    x3r = a[4] - a[12];
+    x3i = a[5] - a[13];
+    y0r = x0r + x2r;
+    y0i = x0i + x2i;
+    y2r = x0r - x2r;
+    y2i = x0i - x2i;
+    y1r = x1r - x3i;
+    y1i = x1i + x3r;
+    y3r = x1r + x3i;
+    y3i = x1i - x3r;
+    x0r = a[2] + a[10];
+    x0i = a[3] + a[11];
+    x1r = a[2] - a[10];
+    x1i = a[3] - a[11];
+    x2r = a[6] + a[14];
+    x2i = a[7] + a[15];
+    x3r = a[6] - a[14];
+    x3i = a[7] - a[15];
+    y4r = x0r + x2r;
+    y4i = x0i + x2i;
+    y6r = x0r - x2r;
+    y6i = x0i - x2i;
+    x0r = x1r - x3i;
+    x0i = x1i + x3r;
+    x2r = x1r + x3i;
+    x2i = x1i - x3r;
+    y5r = wn4r * (x0r - x0i);
+    y5i = wn4r * (x0r + x0i);
+    y7r = wn4r * (x2r - x2i);
+    y7i = wn4r * (x2r + x2i);
+    a[8] = y1r + y5r;
+    a[9] = y1i + y5i;
+    a[10] = y1r - y5r;
+    a[11] = y1i - y5i;
+    a[12] = y3r - y7i;
+    a[13] = y3i + y7r;
+    a[14] = y3r + y7i;
+    a[15] = y3i - y7r;
+    a[0] = y0r + y4r;
+    a[1] = y0i + y4i;
+    a[2] = y0r - y4r;
+    a[3] = y0i - y4i;
+    a[4] = y2r - y6i;
+    a[5] = y2i + y6r;
+    a[6] = y2r + y6i;
+    a[7] = y2i - y6r;
+}
+
+void fn_80124CE8(f32 *a, f32 *w) {
+    f32 wn4r, wk1r, wk1i, x0r, x0i, x1r, x1i, y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i, y4r, y4i, y5r, y5i, y6r,
+        y6i, y7r, y7i;
+
+    wn4r = w[1];
+    wk1r = w[2];
+    wk1i = w[3];
+    y0r = a[0] - a[9];
+    y0i = a[1] + a[8];
+    y1r = a[0] + a[9];
+    y1i = a[1] - a[8];
+    x0r = a[4] - a[13];
+    x0i = a[5] + a[12];
+    y2r = wn4r * (x0r - x0i);
+    y2i = wn4r * (x0i + x0r);
+    x0r = a[4] + a[13];
+    x0i = a[5] - a[12];
+    y3r = wn4r * (x0r - x0i);
+    y3i = wn4r * (x0i + x0r);
+    x0r = a[2] - a[11];
+    x0i = a[3] + a[10];
+    y4r = wk1r * x0r - wk1i * x0i;
+    y4i = wk1r * x0i + wk1i * x0r;
+    x0r = a[2] + a[11];
+    x0i = a[3] - a[10];
+    y5r = wk1i * x0r - wk1r * x0i;
+    y5i = wk1i * x0i + wk1r * x0r;
+    x0r = a[6] - a[15];
+    x0i = a[7] + a[14];
+    y6r = wk1i * x0r - wk1r * x0i;
+    y6i = wk1i * x0i + wk1r * x0r;
+    x0r = a[6] + a[15];
+    x0i = a[7] - a[14];
+    y7r = wk1r * x0r - wk1i * x0i;
+    y7i = wk1r * x0i + wk1i * x0r;
+    x0r = y0r + y2r;
+    x0i = y0i + y2i;
+    x1r = y4r + y6r;
+    x1i = y4i + y6i;
+    a[0] = x0r + x1r;
+    a[1] = x0i + x1i;
+    a[2] = x0r - x1r;
+    a[3] = x0i - x1i;
+    x0r = y0r - y2r;
+    x0i = y0i - y2i;
+    x1r = y4r - y6r;
+    x1i = y4i - y6i;
+    a[4] = x0r - x1i;
+    a[5] = x0i + x1r;
+    a[6] = x0r + x1i;
+    a[7] = x0i - x1r;
+    x0r = y1r - y3i;
+    x0i = y1i + y3r;
+    x1r = y5r - y7r;
+    x1i = y5i - y7i;
+    a[8] = x0r + x1r;
+    a[9] = x0i + x1i;
+    a[10] = x0r - x1r;
+    a[11] = x0i - x1i;
+    x0r = y1r + y3i;
+    x0i = y1i - y3r;
+    x1r = y5r + y7r;
+    x1i = y5i + y7i;
+    a[12] = x0r - x1i;
+    a[13] = x0i + x1r;
+    a[14] = x0r + x1i;
+    a[15] = x0i - x1r;
+}
+
+void fn_80124F90(f32 *a) {
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+
+    x0r = a[0] + a[4];
+    x0i = a[1] + a[5];
+    x1r = a[0] - a[4];
+    x1i = a[1] - a[5];
+    x2r = a[2] + a[6];
+    x2i = a[3] + a[7];
+    x3r = a[2] - a[6];
+    x3i = a[3] - a[7];
+    a[0] = x0r + x2r;
+    a[1] = x0i + x2i;
+    a[4] = x0r - x2r;
+    a[5] = x0i - x2i;
+    a[2] = x1r - x3i;
+    a[3] = x1i + x3r;
+    a[6] = x1r + x3i;
+    a[7] = x1i - x3r;
+}
+
+void fn_80125014(f32 *a) {
+    f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+
+    x0r = a[0] + a[4];
+    x0i = a[1] + a[5];
+    x1r = a[0] - a[4];
+    x1i = a[1] - a[5];
+    x2r = a[2] + a[6];
+    x2i = a[3] + a[7];
+    x3r = a[2] - a[6];
+    x3i = a[3] - a[7];
+    a[0] = x0r + x2r;
+    a[1] = x0i + x2i;
+    a[4] = x0r - x2r;
+    a[5] = x0i - x2i;
+    a[2] = x1r + x3i;
+    a[3] = x1i - x3r;
+    a[6] = x1r - x3i;
+    a[7] = x1i + x3r;
+}
+
+void fn_80125098(f32 *a) {
+    f32 x0r, x0i;
+
+    x0r = a[0] - a[2];
+    x0i = a[1] - a[3];
+    a[0] += a[2];
+    a[1] += a[3];
+    a[2] = x0r;
+    a[3] = x0i;
+}
+
+void fn_801250CC(s32 n, f32 *a, s32 nc, f32 *c) {
+    s32 j, k, kk, ks, m;
+    f32 wkr, wki, xr, xi, yr, yi;
+
+    m = n >> 1;
+    ks = 2 * nc / m;
+    kk = 0;
+    for (j = 2; j < m; j += 2) {
+        k = n - j;
+        kk += ks;
+        wkr = 0.5f - c[nc - kk];
+        wki = c[kk];
+        xr = a[j] - a[k];
+        xi = a[j + 1] + a[k + 1];
+        yr = wkr * xr - wki * xi;
+        yi = wkr * xi + wki * xr;
+        a[j] -= yr;
+        a[j + 1] -= yi;
+        a[k] += yr;
+        a[k + 1] -= yi;
+    }
+}
+
+void fn_801252D8(s32 n, f32 *a, s32 nc, f32 *c) {
+    s32 j, k, kk, ks, m;
+    f32 wkr, wki, xr, xi, yr, yi;
+
+    m = n >> 1;
+    ks = 2 * nc / m;
+    kk = 0;
+    for (j = 2; j < m; j += 2) {
+        k = n - j;
+        kk += ks;
+        wkr = 0.5f - c[nc - kk];
+        wki = c[kk];
+        xr = a[j] - a[k];
+        xi = a[j + 1] + a[k + 1];
+        yr = wkr * xr + wki * xi;
+        yi = wkr * xi - wki * xr;
+        a[j] -= yr;
+        a[j + 1] -= yi;
+        a[k] += yr;
+        a[k + 1] -= yi;
+    }
+}
+
+void fn_801254E4(s32 n, f32 *a, s32 nc, f32 *c) {
+    s32 j, k, kk, ks, m;
+    f32 wkr, wki, xr;
+
+    m = n >> 1;
+    ks = nc / n;
+    kk = 0;
+    for (j = 1; j < m; j++) {
+        k = n - j;
+        kk += ks;
+        wkr = c[kk] - c[nc - kk];
+        wki = c[kk] + c[nc - kk];
+        xr = wki * a[j] - wkr * a[k];
+        a[j] = wkr * a[j] + wki * a[k];
+        a[k] = xr;
+    }
+    a[m] *= c[0];
 }
 
 void fn_80125960(void *arg0, s32 arg1, void *arg2, void *arg3) {
