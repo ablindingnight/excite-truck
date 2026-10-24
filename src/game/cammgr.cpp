@@ -383,7 +383,116 @@ void fn_802671CC(u8* p) {
     }
 }
 
-void fn_80267420(u8* p) {}  // stub (152)
+void fn_801769CC(void);
+void fn_80276B8C(void);
+void fn_80268D94(void);
+void fn_80268E00(void);
+void fn_80278214(void);
+void fn_80267680(void);
+void fn_80273354(void);
+void fn_8027045C(void);
+u32 fn_802090D4(const char* name);  // mixer volume handle
+VD* fn_80207848(const char* file, int flags);  // load a sound
+void fn_801EEFDC(void* handler, int type);
+int fn_8026A554(s32* p);
+extern const f32 lbl_80563C54;  // default view angle
+extern char lbl_803467D0[];  // "crash_vol"
+extern char lbl_803467DC[];  // "cheer3.sfx"
+
+// Camera manager start-up: initialises the four camera records, the named/fixed cameras, the crash
+// volume handle and the cheer sound, then resets.
+void fn_80267420(void) {
+    fn_801769CC();
+    u8* c = (u8*)lbl_80499080;
+    for (int i = 0; i < 4;) {
+        memset(c, 0, 0x228);
+        S32(c, 0x0) = i++;
+        F32(c, 0x8) = lbl_80563C20;
+        F32(c, 0xC) = lbl_80563C20;
+        S32(c, 0x24) = 0;
+        S32(c, 0x20) = 0;
+        S32(c, 0x14) = 10;
+        S32(c, 0x10) = 10;
+        F32(c, 0x28) = lbl_80563C20;
+        F32(c, 0x2C) = lbl_80563C2C;
+        F32(c, 0x30) = lbl_80563C20;
+        F32(c, 0x34) = lbl_80563C20;
+        F32(c, 0x38) = lbl_80563C20;
+        F32(c, 0x3C) = lbl_80563C20;
+        U8(c, 0x138) = 1;
+        F32(c, 0x58) = lbl_80563C2C;
+        F32(c, 0x5C) = lbl_80563C20;
+        F32(c, 0x60) = lbl_80563C20;
+        F32(c, 0x64) = lbl_80563C20;
+        F32(c, 0x68) = lbl_80563C2C;
+        F32(c, 0x6C) = lbl_80563C20;
+        F32(c, 0x70) = lbl_80563C20;
+        F32(c, 0x74) = lbl_80563C20;
+        F32(c, 0x78) = lbl_80563C2C;
+        F32(c, 0x7C) = lbl_80563C20;
+        F32(c, 0x80) = lbl_80563C20;
+        F32(c, 0x84) = lbl_80563C20;
+        *(CamPose*)(c + 0x88) = *(CamPose*)(c + 0x58);
+        F32(c, 0x120) = lbl_80563C20;
+        F32(c, 0x124) = lbl_80563C20;
+        F32(c, 0x128) = lbl_80563C20;
+        F32(c, 0x12C) = lbl_80563C20;
+        F32(c, 0x130) = lbl_80563C20;
+        F32(c, 0x134) = lbl_80563C20;
+        F32(c, 0xF0) = lbl_80563C2C;
+        F32(c, 0xF4) = lbl_80563C20;
+        F32(c, 0xF8) = lbl_80563C20;
+        F32(c, 0xFC) = lbl_80563C20;
+        F32(c, 0x100) = lbl_80563C2C;
+        F32(c, 0x104) = lbl_80563C20;
+        F32(c, 0x108) = lbl_80563C20;
+        F32(c, 0x10C) = lbl_80563C20;
+        F32(c, 0x110) = lbl_80563C2C;
+        F32(c, 0x114) = lbl_80563C20;
+        F32(c, 0x118) = lbl_80563C20;
+        F32(c, 0x11C) = lbl_80563C20;
+        F32(c, 0xC0) = lbl_80563C2C;
+        F32(c, 0xC4) = lbl_80563C20;
+        F32(c, 0xC8) = lbl_80563C20;
+        F32(c, 0xCC) = lbl_80563C20;
+        F32(c, 0xD0) = lbl_80563C2C;
+        F32(c, 0xD4) = lbl_80563C20;
+        F32(c, 0xD8) = lbl_80563C20;
+        F32(c, 0xDC) = lbl_80563C20;
+        F32(c, 0xE0) = lbl_80563C2C;
+        F32(c, 0xE4) = lbl_80563C20;
+        F32(c, 0xE8) = lbl_80563C20;
+        F32(c, 0xEC) = lbl_80563C20;
+        S32(c, 0x140) = 0;
+        S32(c, 0x144) = 0;
+        S32(c, 0x4) = 10;
+        S32(c, 0x1C) = 10;
+        F32(c, 0x1A4) = lbl_80563C2C;
+        F32(c, 0x1A8) = lbl_80563C20;
+        F32(c, 0x1AC) = lbl_80563C20;
+        F32(c, 0x1B0) = lbl_80563C20;
+        F32(c, 0x1B4) = lbl_80563C2C;
+        F32(c, 0x1B8) = lbl_80563C20;
+        F32(c, 0x1BC) = lbl_80563C20;
+        F32(c, 0x1C0) = lbl_80563C20;
+        F32(c, 0x1C4) = lbl_80563C2C;
+        F32(c, 0x1C8) = lbl_80563C20;
+        F32(c, 0x1CC) = lbl_80563C20;
+        F32(c, 0x1D0) = lbl_80563C20;
+        F32(c, 0x1D4) = lbl_80563C54;
+        c += 0x228;
+    }
+    fn_80276B8C();
+    fn_80268D94();
+    fn_80268E00();
+    fn_80278214();
+    fn_80273354();
+    fn_8027045C();
+    lbl_8055F494 = fn_802090D4(lbl_803467D0);
+    lbl_8055F490 = fn_80207848(lbl_803467DC, 0);
+    fn_801EEFDC((void*)fn_8026A554, 13);
+    fn_80267680();
+}
 
 void fn_802733C8(void);
 int fn_801796B4(void);
