@@ -1128,6 +1128,7 @@ config.libs.append(
             Object(NonMatching, "game/unk_8020F3AC.c"),
             Object(NonMatching, "game/unk_8020F3B4.c"),
             Object(NonMatching, "game/unk_800241DC.c", cflags=cflags_runtime, mw_version="GC/3.0a5.2"),
+            Object(NonMatching, "game/unk_80116644.c", cflags=cflags_runtime, mw_version="GC/3.0a5.2"),
             Object(NonMatching, "game/uiapi.cpp"),
             Object(NonMatching, "game/unk_80215E68.c"),
             Object(NonMatching, "game/widgetwin.cpp"),

@@ -33,6 +33,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | whole unit (1 tagged sites) | src/game/unk_8026B844.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (43 tagged sites) | src/game/unk_80116BD4.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 tagged sites) | src/game/unk_800241DC.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
+| whole unit (1 tagged sites) | src/game/unk_80116644.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 
 ## Existing sites (inventory 2026-10-23, before tagging)
 

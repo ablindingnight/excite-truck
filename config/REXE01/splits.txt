@@ -1953,6 +1953,10 @@ RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp:
 	.text       start:0x80108FFC end:0x8010C7DC
 	.data       start:0x80329140 end:0x80329458
 
+game/unk_80116644.c:
+	.text       start:0x80116644 end:0x801166C8
+	.ctors      start:0x802ED118 end:0x802ED11C
+
 RVL_SDK/arc/arc.c:
 	.text       start:0x801166C8 end:0x80116BD4
 	.data       start:0x80329B28 end:0x80329B50
