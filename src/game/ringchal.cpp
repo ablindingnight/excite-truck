@@ -1249,57 +1249,56 @@ void Arena::Spawn(void) {
 
 extern "C" void fn_8016D294(int a, int b, int set) {
     RingChalMaster* m = lbl_8055E378;
-    if (m) {
-        if (b == 0) {
-            Arena* a = &m->arena;
-            a->curSet = set;
-            if (a->curSet < a->nFiles) {
-                ObjSet* os = &a->sets->data[a->curSet];
-                int i;
-                os->active = 1;
-                os->time = lbl_8055E3C8;
-                os->f10 = 0;
-                for (i = 0; i < os->infos->count; i++) {
-                    if (os->infos->data[i].obj) {
-                        fn_802BAF98(os->infos->data[i].obj, 1);
-                    }
-                }
+    if (!m || b != 0) {
+        return;
+    }
+    Arena* ar = &m->arena;
+    ar->curSet = set;
+    if (ar->curSet < ar->nFiles) {
+        ObjSet* os = &ar->sets->data[ar->curSet];
+        int i;
+        os->active = 1;
+        os->time = lbl_8055E3C8;
+        os->f10 = 0;
+        for (i = 0; i < os->infos->count; i++) {
+            if (os->infos->data[i].obj) {
+                fn_802BAF98(os->infos->data[i].obj, 1);
             }
-            {
-                char name[0x1E];
-                SET_NAME(a, name, 0x1E);
-                fn_8016A15C(name);
+        }
+    }
+    {
+        char name[0x1E];
+        SET_NAME(ar, name, 0x1E);
+        fn_8016A15C(name);
+    }
+    {
+        char name[0x1E];
+        if (ar->f24 != -1) {
+            if (ar->f24 != -1) {
+                fn_8001B450(ar->f24);
+                ar->f24 = -1;
             }
-            {
-                char name[0x1E];
-                if (a->f24 != -1) {
-                    if (a->f24 != -1) {
-                        fn_8001B450(a->f24);
-                        a->f24 = -1;
-                    }
-                }
-                SET_NAME(a, name, 0x1E);
-                switch (a->difficulty) {
-                case 0: {
-                    GemRef g = fn_8016A6B0(name, 12);
-                    a->f24 = fn_8001B308(&g, a->art, 2);
-                    break;
-                }
-                case 1: {
-                    GemRef g = fn_8016A6B0(name, 9);
-                    a->f24 = fn_8001B308(&g, a->art, 2);
-                    break;
-                }
-                case 2: {
-                    GemRef g = fn_8016A6B0(name, 6);
-                    a->f24 = fn_8001B308(&g, a->art, 2);
-                    break;
-                }
-                default:
-                    fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
-                    break;
-                }
-            }
+        }
+        SET_NAME(ar, name, 0x1E);
+        switch (ar->difficulty) {
+        case 0: {
+            GemRef g = fn_8016A6B0(name, 12);
+            ar->f24 = fn_8001B308(&g, ar->art, 2);
+            break;
+        }
+        case 1: {
+            GemRef g = fn_8016A6B0(name, 9);
+            ar->f24 = fn_8001B308(&g, ar->art, 2);
+            break;
+        }
+        case 2: {
+            GemRef g = fn_8016A6B0(name, 6);
+            ar->f24 = fn_8001B308(&g, ar->art, 2);
+            break;
+        }
+        default:
+            fn_802E317C("Unknown difficulty specification in Ring Challenge mode");
+            break;
         }
     }
 }
