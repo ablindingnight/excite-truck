@@ -220,7 +220,7 @@ static inline int ClampI(int x, int lo, int hi) {
 }
 f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 f32 Min(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 Floor(f32 x) { return floor(x); }
+inline f32 Floor(f32 x) { return floor(x); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 static inline f32 Clamp01(f32 x) {
