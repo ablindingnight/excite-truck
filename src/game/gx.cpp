@@ -1067,12 +1067,12 @@ void fn_802CFF5C(u32 flags) { lbl_8055FD1C = flags; }
 void* fn_802CFF64(u32 size) {
     s32 n = (size + 0x1F) & ~0x1F;
     s32 used = lbl_8055FD94;
-    if (used + n > 0x177000) {
-        lbl_8055FD94 = n;
-        return lbl_8055FDA0;
+    if (used + n <= 0x177000) {
+        lbl_8055FD94 = used + n;
+        return lbl_8055FDA0 + used;
     }
-    lbl_8055FD94 = used + n;
-    return lbl_8055FDA0 + used;
+    lbl_8055FD94 = n;
+    return lbl_8055FDA0;
 }
 
 void* fn_802CFFA0(u32 size) { return fn_802CFF64(size); }
