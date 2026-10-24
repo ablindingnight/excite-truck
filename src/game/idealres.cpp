@@ -174,13 +174,26 @@ void fn_80137FF0(ResExt* e) {
 }
 
 void fn_801380DC(ResExt* e) {
-    u32* p;
+    u8* n = (u8*)&e->data[0];
+    u8 a = n[0];
+    u8* p = (u8*)&e->data[1];
+    u8 b = n[1];
     int i;
-    Swap4(&e->data[0]);
-    p = &e->data[1];
+    u8 c;
+    n[0] = n[3];
+    n[3] = a;
+    n[1] = n[2];
+    n[2] = b;
     for (i = 0; i < (s32)(e->data[0] * e->data[0]); i++) {
-        Swap4(p);
-        p++;
+        a = p[0];
+        c = p[3];
+        p[0] = c;
+        p[3] = a;
+        a = p[1];
+        c = p[2];
+        p[1] = c;
+        p[2] = a;
+        p += 4;
     }
 }
 

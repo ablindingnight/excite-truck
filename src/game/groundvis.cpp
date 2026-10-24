@@ -443,7 +443,12 @@ void fn_802B016C(void) {
 
 void fn_802B01A8(void) {
     fn_802DBE4C();
-    int old = fn_802C9C58(fn_801E87A8()->hires ? 2 : 1);
+    ViewFlags* v = fn_801E87A8();
+    int mode = 1;
+    if (v->hires) {
+        mode = 2;
+    }
+    int old = fn_802C9C58(mode);
     fn_802B14B4(lbl_8055F974);
     fn_802C9C58(old);
     fn_802DBECC();

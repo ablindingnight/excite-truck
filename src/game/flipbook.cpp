@@ -280,7 +280,9 @@ u32 fn_80296A10(u32 c0, u32 c1, f32 t) {
     int g = fn_802969B4(c0 >> 8, c1 >> 8, t);
     int b = fn_802969B4(c0 >> 16, c1 >> 16, t);
     int a = fn_802969B4(c0 >> 24, c1 >> 24, t);
-    return ((r & 0xFF) | ((g & 0xFF) << 8)) | (((b & 0xFF) << 16) | (a << 24));
+    int lo = (r & 0xFF) | ((g & 0xFF) << 8);
+    int hi = ((a & 0xFF) << 24) | ((b & 0xFF) << 16);
+    return lo | hi;
 }
 
 void fn_80296AAC(FlipFrame* f) {

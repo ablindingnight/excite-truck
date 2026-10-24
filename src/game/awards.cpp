@@ -62,7 +62,7 @@ CarInfo* fn_801EA9A0(int car);
 class Statistic {
 public:
     Statistic(int slot, u32 type, long event, int difficulty);
-    u32 GetType(void);
+    int GetType(void);
     int HasValue(void);
     int IsBetterThan(const Statistic* o) const;
     void Revert(void);
@@ -439,7 +439,7 @@ void fn_801CB8C0(void) {
 
 int fn_801CB8FC(void) { return fn_801CE8CC(); }
 
-int fn_801CB900(StatHandler* h, u32 type) {
+int fn_801CB900(StatHandler* h, int type) {
     int r = 0;
     if (h && type == h->stat->GetType()) {
         r = 1;
