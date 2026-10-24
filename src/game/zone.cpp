@@ -486,7 +486,7 @@ struct RacerInfo {
 
 class ISubTaskMgr {
 public:
-    virtual ~ISubTaskMgr(void) {}
+    virtual ~ISubTaskMgr(void) = 0;
     virtual int vf0C(void) = 0;
     virtual int vf10(void) = 0;
     virtual int vf14(int car) = 0;
@@ -496,6 +496,8 @@ public:
     virtual void vf24(void) = 0;
     virtual int vf28(void) = 0;
 };
+
+inline ISubTaskMgr::~ISubTaskMgr(void) {}
 
 class CSubTaskMgr : public ISubTaskMgr {
 public:

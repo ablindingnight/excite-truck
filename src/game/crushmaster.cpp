@@ -577,7 +577,23 @@ public:
     virtual void vfFC(void);
 };
 
-class CSubTaskMgr {
+// The race's per-mode hooks (0x2C vtable, all pure).
+class ISubTaskMgr {
+public:
+    virtual ~ISubTaskMgr(void) = 0;
+    virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags) = 0;
+    virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags) = 0;
+    virtual int vf14(void) = 0;
+    virtual void vf18(int a, int b) = 0;
+    virtual int vf1C(void) = 0;
+    virtual void vf20(void) = 0;
+    virtual void vf24(void) = 0;
+    virtual int vf28(void) = 0;
+};
+
+inline ISubTaskMgr::~ISubTaskMgr(void) {}
+
+class CSubTaskMgr : public ISubTaskMgr {
 public:
     virtual ~CSubTaskMgr(void) {}
     virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
@@ -609,7 +625,7 @@ public:
         nCars = fn_801EA994();
         master = m;
     }
-    virtual ~CrushSubTaskMgr(void);
+    virtual ~CrushSubTaskMgr(void) {}
     virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
     virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags);
     virtual int vf14(void);
@@ -759,6 +775,9 @@ int fn_80171E3C(const V2& p) {
     }
     return 1;
 }
+
+// Whether the car is a player's ('PCAR') rather than the AI's.
+int fn_80171EC0(int id) { return fn_8017960C(id)->model == 'PCAR'; }
 
 static inline V2 LerpV(const V2* a, const V2* b, f32 t) {
     V2 r;
@@ -993,20 +1012,17 @@ void CrushResults::Update(int score, int kills, int bonus) {
 
 extern "C" CrushMaster* fn_80172C28(void) {
     CrushMaster* m = new ("crushmaster") CrushMaster;
-    if (m) {
-        lbl_8055E3A4 = fn_80139D4C("crush_nogo.val");
-        lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
-        m->radarTex = fn_802CAC28("ovradar.tex", 0);
-        if (lbl_8055E3A4) {
-            fn_802E30C8("crush: Loaded forbidden zones from %s", "crush_nogo.val");
-        }
-        m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
-        m->b2B8 = 0;
+    const char* nogo = "crush_nogo.val";
+    lbl_8055E3A4 = fn_80139D4C(nogo);
+    lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
+    m->radarTex = fn_802CAC28("ovradar.tex", 0);
+    if (lbl_8055E3A4) {
+        fn_802E30C8("crush: Loaded forbidden zones from %s", nogo);
     }
+    m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
+    m->b2B8 = 0;
     return m;
 }
-
-CrushSubTaskMgr::~CrushSubTaskMgr(void) {}
 
 CrushMaster::~CrushMaster(void) {
     if (sPreRace) {
