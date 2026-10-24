@@ -708,11 +708,12 @@ public:
     FreestyleChallenge(ValueNode* n) : Challenge(n) { SetupFreestyle(this, n); }
     virtual ~FreestyleChallenge(void) {}
     virtual void Update(void) {
-        if (time > limit) {
+        if (OutOfTime()) {
             ended = 1;
         }
         Challenge::Update();
     }
+    int OutOfTime(void) { return time > limit; }
     virtual void Start(void) {
         Challenge::Start();
         passedScore = 0;
@@ -1497,7 +1498,7 @@ inline int FreestyleChallenge::DrawResults(int a) {
     } else {
         fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
         fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
-        if (time > limit) {
+        if (OutOfTime()) {
             body = fn_80131234("Tutorial:FAILED_BODY_TIME");
         } else if (crashed) {
             body = fn_80131234("Tutorial:FAILED_BODY_CRASH");
