@@ -46,17 +46,17 @@ struct SoundEvent {
     s32 order;
     s32 type;
     s32 sample;   // offset 0xC: -1 = random
-    s32 imm;      // offset 0x10
-    u8 overlap;   // offset 0x14
-    u8 b15;       // offset 0x15
+    s32 soundType;  // offset 0x10: speech, music
+    u8 overlap;     // offset 0x14
+    u8 imm;         // offset 0x15: immediate
 };
 
 struct TextEvent {
     f32 time;
     s32 order;
     s32 type;
-    u8 pad0C[0x10C - 0xC];
-    char text[0x200];  // offset 0x10C
+    char title[0x100];  // offset 0xC
+    char text[0x200];   // offset 0x10C
 };
 
 struct WaitEvent {
@@ -978,6 +978,24 @@ void fn_801C6D94(void) {
     fn_801C957C(1);
 }
 
+// A rotation as axis * angle.
+static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
+    IQuat q;
+    RotToQuat((const f32(*)[3])m, &q);
+    f32 ang = acos(q.w);
+    f32 sn = sin(ang);
+    if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
+        f32 k = 2.0f * ang / sn;
+        out->x = q.x * k;
+        out->y = q.y * k;
+        out->z = q.z * k;
+    } else {
+        out->x = 0.0f;
+        out->y = 0.0f;
+        out->z = 0.0f;
+    }
+}
+
 // Add camera: a move from the current editor camera to the destination one over the transition time,
 // stored as linear and angular velocities in the current camera's frame.
 void fn_801C6E40(void) {
@@ -997,25 +1015,12 @@ void fn_801C6E40(void) {
         IVec3 dp;
         Mat3 d;
         Mat3 inv;
-        IQuat q;
         CamPose* dst = (CamPose*)(s + 0x498);
         inv = cur->rot;
         fn_801C7254(&inv);
         Mat3Mul(&d, &dst->rot, &inv);
         fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
-        RotToQuat((const f32(*)[3])&d, &q);
-        f32 ang = acos(q.w);
-        f32 sn = sin(ang);
-        if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
-            f32 k = 2.0f * ang / sn;
-            e->av.x = q.x * k;
-            e->av.y = q.y * k;
-            e->av.z = q.z * k;
-        } else {
-            e->av.x = 0.0f;
-            e->av.y = 0.0f;
-            e->av.z = 0.0f;
-        }
+        RotToAxisAngle(&d, &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;
         e->av.y *= inv1;
@@ -1174,9 +1179,9 @@ void fn_801C77FC(void) {
     char buf[16];
     SoundEvent* e = (SoundEvent*)fn_801C3C80();
     e->type = 3;
-    e->b15 = lbl_8055E83F;
+    e->imm = lbl_8055E83F;
     e->overlap = lbl_8055E83E;
-    e->imm = lbl_8055E840 != 0;
+    e->soundType = lbl_8055E840 != 0;
     if (lbl_8055E841) {
         e->sample = -1;
     } else {
@@ -1636,36 +1641,111 @@ const char* fn_801C98F4(const char* s, int n) {
     return s;
 }
 
-// Per-event export writer (placeholder).
+// Writes one event as an "action" table of the interlude .val file.
 void fn_801C9920(const Event* e, int fd) {
-    int k = e->type;
-    IL_Use(0, "\ttable action\r\n", "\t\tt\t%.2f\r\n", "\t\ttype\tdebug\r\n", "\t\tmsg\t%s\r\n", "\t\ttype\tcamera\r\n", "\t\tfov\t%.2f\r\n", "\t\torigin\t%.2f, %.2f, %.2f\r\n", "\t\tdir\t%.2f, %.2f, %.2f\r\n", "\t\tv\t%.2f, %.2f, %.2f\r\n", "\t\tav\t%.2f, %.2f, %.2f\r\n", "\t\tduration\t%.2f\r\n", "\t\taccel\t%s\r\n", "\t\ttype\teffect\r\n", "\t\ttype\tsound\r\n", "\t\tsound_type\t%s\r\n", "\t\toverlap\t%s\r\n", "\t\timmediate\t%s\r\n", "\t\tsample\t%u\r\n", "\t\ttype\tteleport\r\n", "\t\tspeed\t%.2f\r\n", "\t\twho\t%s\r\n", "\t\texcept\t%s\r\n", "\t\twhere\t%s\r\n", "\t\toffset\t%.2f\r\n", "\t\tspacing\t%.2f\r\n", "\t\tyaw\t%.2f\r\n", "\t\tpt\t%.2f, %.2f\r\n", "\t\toffset\t%.2f, %.2f\r\n", "interlude: unhandled teleport where type %d in export", "\t\ttype\tthink\r\n", "\t\thow\t%s\r\n", "\t\tlat\t%.2f\r\n", "\t\tlon\t%.2f\r\n", "\t\tparam\t%d\r\n", "\t\ttype\twait\r\n", "\t\twhat\t%s\r\n", "\t\tpt\t%.2f, %.2f, %.2f\r\n", "interlude: unhandled wait type %d in export", "\t\ttype\ttext\r\n", "\t\ttitle\t%s\r\n", "interlude: unhandled event type %d in export");
-    switch (k) {
-    case 0:
-        IL_Use(0);
-        break;
-    case 1:
-        IL_Use(1);
-        break;
-    case 2:
-        IL_Use(2);
-        break;
-    case 3:
-        IL_Use(3);
-        break;
-    case 4:
-        IL_Use(4);
-        break;
-    case 5:
-        IL_Use(5);
-        break;
-    case 6:
-        IL_Use(6);
-        break;
-    case 7:
-        IL_Use(7);
+    fn_802E3AD0(fd, "\ttable action\r\n");
+    fn_802E3AD0(fd, "\t\tt\t%.2f\r\n", e->time);
+    switch (e->type) {
+    case 0: {
+        const DebugEvent* d = (const DebugEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\tdebug\r\n");
+        fn_802E3AD0(fd, "\t\tmsg\t%s\r\n", d->msg);
         break;
     }
+    case 1: {
+        const CamEvent* c = (const CamEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\tcamera\r\n");
+        fn_802E3AD0(fd, "\t\tfov\t%.2f\r\n", fn_801C34F4(c->fov));
+        fn_802E3AD0(fd, "\t\torigin\t%.2f, %.2f, %.2f\r\n", c->origin.x, c->origin.y, c->origin.z);
+        IVec3 dir;
+        RotToAxisAngle(&c->rot, &dir);
+        fn_802E3AD0(fd, "\t\tdir\t%.2f, %.2f, %.2f\r\n", dir.x, dir.y, dir.z);
+        fn_802E3AD0(fd, "\t\tv\t%.2f, %.2f, %.2f\r\n", c->v.x, c->v.y, c->v.z);
+        fn_802E3AD0(fd, "\t\tav\t%.2f, %.2f, %.2f\r\n", c->av.x, c->av.y, c->av.z);
+        fn_802E3AD0(fd, "\t\tduration\t%.2f\r\n", c->end - c->time);
+        fn_802E3AD0(fd, "\t\taccel\t%s\r\n", c->accel ? "yes" : "no");
+        break;
+    }
+    case 2:
+        fn_802E3AD0(fd, "\t\ttype\teffect\r\n");
+        break;
+    case 3: {
+        const SoundEvent* s = (const SoundEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\tsound\r\n");
+        fn_802E3AD0(fd, "\t\tsound_type\t%s\r\n", fn_801C98F4(lbl_80562960, s->soundType));
+        fn_802E3AD0(fd, "\t\toverlap\t%s\r\n", s->overlap ? "yes" : "no");
+        fn_802E3AD0(fd, "\t\timmediate\t%s\r\n", s->imm ? "yes" : "no");
+        fn_802E3AD0(fd, "\t\tsample\t%u\r\n", s->sample);
+        break;
+    }
+    case 4: {
+        const TeleportEvent* t = (const TeleportEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\tteleport\r\n");
+        fn_802E3AD0(fd, "\t\tspeed\t%.2f\r\n", t->speed);
+        fn_802E3AD0(fd, "\t\twho\t%s\r\n", t->who);
+        fn_802E3AD0(fd, "\t\texcept\t%s\r\n", t->except);
+        fn_802E3AD0(fd, "\t\twhere\t%s\r\n", fn_801C98F4(lbl_80562954, t->where));
+        switch (t->where) {
+        case 1:
+            fn_802E3AD0(fd, "\t\toffset\t%.2f\r\n", t->pt.x);
+            fn_802E3AD0(fd, "\t\tspacing\t%.2f\r\n", t->pt.y);
+            fn_802E3AD0(fd, "\t\tyaw\t%.2f\r\n", t->yaw);
+            break;
+        case 0:
+            fn_802E3AD0(fd, "\t\tpt\t%.2f, %.2f\r\n", t->pt.x, t->pt.y);
+            fn_802E3AD0(fd, "\t\tyaw\t%.2f\r\n", t->yaw);
+            fn_802E3AD0(fd, "\t\toffset\t%.2f, %.2f\r\n", t->offset.x, t->offset.y);
+            break;
+        case 2:
+            fn_802E3AD0(fd, "\t\tyaw\t%.2f\r\n", t->yaw);
+            fn_802E3AD0(fd, "\t\toffset\t%.2f, %.2f\r\n", t->pt.x, t->pt.y);
+            break;
+        default:
+            fn_802E317C("interlude: unhandled teleport where type %d in export", t->where);
+            break;
+        }
+        break;
+    }
+    case 5: {
+        const ThinkEvent* t = (const ThinkEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\tthink\r\n");
+        fn_802E3AD0(fd, "\t\twho\t%s\r\n", t->who);
+        fn_802E3AD0(fd, "\t\texcept\t%s\r\n", t->except);
+        fn_802E3AD0(fd, "\t\thow\t%s\r\n", fn_801C98F4(lbl_80562958, t->kind));
+        fn_802E3AD0(fd, "\t\tspeed\t%.2f\r\n", t->speed);
+        fn_802E3AD0(fd, "\t\tlat\t%.2f\r\n", t->x);
+        fn_802E3AD0(fd, "\t\tlon\t%.2f\r\n", t->z);
+        fn_802E3AD0(fd, "\t\tparam\t%d\r\n", t->param);
+        if (t->kind == 2) {
+            fn_802E3AD0(fd, "\t\tpt\t%.2f, %.2f\r\n", t->x, t->z);
+        }
+        break;
+    }
+    case 6: {
+        const WaitEvent* w = (const WaitEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\twait\r\n");
+        fn_802E3AD0(fd, "\t\twhat\t%s\r\n", fn_801C98F4(lbl_8056295C, w->kind));
+        fn_802E3AD0(fd, "\t\twho\t%s\r\n", w->who);
+        fn_802E3AD0(fd, "\t\texcept\t%s\r\n", w->except);
+        if (w->kind == 0) {
+            fn_802E3AD0(fd, "\t\tpt\t%.2f, %.2f, %.2f\r\n", w->pt.x, w->pt.y, w->pt.z);
+        } else {
+            fn_802E317C("interlude: unhandled wait type %d in export", w->kind);
+        }
+        break;
+    }
+    case 7: {
+        const TextEvent* t = (const TextEvent*)e;
+        fn_802E3AD0(fd, "\t\ttype\ttext\r\n");
+        fn_802E3AD0(fd, "\t\tmsg\t%s\r\n", t->text);
+        fn_802E3AD0(fd, "\t\ttitle\t%s\r\n", t->title);
+        break;
+    }
+    default:
+        fn_802E317C("interlude: unhandled event type %d in export", e->type);
+        break;
+    }
+    fn_802E3AD0(fd, "\tend\r\n");
 }
 
 void fn_801CA070(const char* name) {
@@ -1709,7 +1789,7 @@ void fn_801CA1C4(const Event* e, int x, int y, int h) {
         fn_801C94B8(x, y, buf, -1);
         break;
     case 3:
-        sprintf(buf, "Sound type: %s", fn_801C98F4(lbl_80562960, ((const SoundEvent*)e)->imm));
+        sprintf(buf, "Sound type: %s", fn_801C98F4(lbl_80562960, ((const SoundEvent*)e)->soundType));
         fn_801C94B8(x, y, buf, -1);
         break;
     case 4: {
