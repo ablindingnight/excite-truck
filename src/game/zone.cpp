@@ -2384,6 +2384,8 @@ void ZoneMaster::vf0C(void) {
                     }
                     if (c->gate->ring) {
                         switch (fn_8013CBC0(c, i)) {
+                        case 0:
+                            break;
                         case 1:
                             c->gate = NextGate(c->gate);
                             break;
@@ -2402,6 +2404,8 @@ void ZoneMaster::vf0C(void) {
                         }
                     } else {
                         switch (fn_8013CBC0(c, i)) {
+                        case 0:
+                            break;
                         case 1:
                             c->Miss();
                             c->clock = Max(Min(c->clock, 1.25f), c->clock - lbl_8042FB3C.gatePenalty);
