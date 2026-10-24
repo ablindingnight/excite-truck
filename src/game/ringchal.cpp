@@ -582,7 +582,7 @@ struct PlayerData {
 struct PlayerList : ArrayRef<PlayerData*> {
     PlayerList(void);
     void Clear(void);
-    void Push(PlayerData* const& p);
+    PlayerData** Push(PlayerData* const& p);
     PlayerData* storage[8];   // offset 0xC
 };
 
@@ -1114,7 +1114,11 @@ int Arena::CountFiles(ValueNode* cfg) {
 
 void ArenaTimer::Set(f32 t) { limit = t; }
 
-void PlayerList::Push(PlayerData* const& p) { data[count++] = p; }
+PlayerData** PlayerList::Push(PlayerData* const& p) {
+    PlayerData** s = &data[count++];
+    *s = p;
+    return s;
+}
 
 PlayerData::PlayerData(int i) {
     index = i;
