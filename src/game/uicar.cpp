@@ -371,18 +371,20 @@ void fn_80241DE8(u8* p) {
 }
 
 int fn_80241E40(u8* p) {
-    if (*(u32*)PTR(p, 0x34) == fn_802E4A10() && !U8(p, 0x38)) {
+    if (*(s32*)PTR(p, 0x34) != (s32)fn_802E4A10() || !U8(p, 0x38)) {
         return 0;
     }
+    u8* q = p;
     for (int i = 0; i < S32(p, 0x2C); i++) {
         u8 sel = 0;
-        u32 v = *(u32*)PTR(p, 0x34);
+        s32 v = *(s32*)PTR(p, 0x34);
         if (U8(p, 0x38) && i == S32(p, 0x30)) {
             sel = 1;
         }
-        u8* e = *(u8**)(p + 0x18 + i * 4);
+        u8* e = PTR(q, 0x18);
         U8(e, 0x0) = sel;
-        U32(e, 0x4) = v;
+        S32(e, 0x4) = v;
+        q += 4;
     }
     return 1;
 }
