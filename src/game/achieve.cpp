@@ -411,11 +411,12 @@ int AchGetLevel(int category, s32 value) {
     if (category >= 0 && (u32)category < NUM_CATEGORIES) {
         sched = lbl_802FDF30[category].schedule;
         if (sched != NULL) {
-            if (sched->levels == NULL) {
+            AchLevel* levels = sched->levels;
+            if (levels == NULL) {
                 return 0;
             }
             for (i = 0; i < sched->count; i++) {
-                if (sched->levels[i].threshold > value) {
+                if (levels[i].threshold > value) {
                     return i;
                 }
             }
