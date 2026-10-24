@@ -1118,6 +1118,7 @@ config.libs.append(
             Object(Matching, "game/tiresnd.cpp"),
             Object(NonMatching, "game/musicplr.cpp"),
             Object(NonMatching, "game/unk_8020A6AC.c"),
+            Object(NonMatching, "game/unk_8020BCB8.c"),
             Object(NonMatching, "game/sounddash.cpp"),
             Object(NonMatching, "game/menumus.cpp"),
             Object(NonMatching, "game/roadsnd.cpp"),

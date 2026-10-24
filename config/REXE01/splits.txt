@@ -3182,6 +3182,10 @@ game/musicplr.cpp:
 game/unk_8020A6AC.c:
 	.text       start:0x8020A6AC end:0x8020BCB8
 
+game/unk_8020BCB8.c:
+	.text       start:0x8020BCB8 end:0x8020BCE4
+	.ctors      start:0x802ED390 end:0x802ED394
+
 game/sounddash.cpp:
 	.text       start:0x8020BCE4 end:0x8020C140
 	.ctors      start:0x802ED394 end:0x802ED398
