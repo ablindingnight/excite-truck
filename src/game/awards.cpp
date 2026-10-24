@@ -201,22 +201,61 @@ public:
     virtual ~VObj(void);
 };
 
+// The handler list; its storage follows it in AwardsMgr (handlerBuf).
 struct HandlerVec {
+    HandlerVec(void);
     StatHandler** data;  // offset 0x0
     s32 n;               // offset 0x4
     s32 cap;             // offset 0x8
 };
 
+// Three-letter initials, "zzz" when empty.
+struct Initials {
+    char s[4];
+};
+
+// One high-score row: initials then score data.
+struct ScoreRow {
+    Initials name;  // offset 0x0
+    u8 pad4[0x10];
+};
+
+// The results screen's state (0x2C0 in AwardsMgr).
 struct Results {
-    s32 state;  // offset 0x0
-    u8 pad4[0x2B8];
+    Results(void);
+    s32 state;          // offset 0x0
+    s32 f4;             // offset 0x4
+    s32 f8;             // offset 0x8
+    s32 fC;             // offset 0xC
+    s32 f10;            // offset 0x10
+    s32 f14;            // offset 0x14
+    u8 pad18[8];
+    ScoreRow rows[15];  // offset 0x20
+    ScoreRow best[5];   // offset 0x14C
+    u8 pad1B0[0x50];
+    Initials i200;      // offset 0x200
+    u8 pad204[0x60];
+    Initials i264;      // offset 0x264
+    u8 pad268[0xE];
+    Initials i276;      // offset 0x276
+    u8 pad27A[0x42];
+};
+
+// The popup queue: head and the link to append at.
+struct PopupQueue {
+    PopupQueue(void);
+    Popup* head;   // offset 0x0
+    Popup** tail;  // offset 0x4
 };
 
 struct Vec4 {
     f32 x, y, z, w;
 };
 
+namespace {
+
 struct AwardsMgr {
+    AwardsMgr(void);
     s32 event;                // offset 0x0
     s32 difficulty;           // offset 0x4
     LayoutObj* sfx;           // offset 0x8
@@ -227,8 +266,7 @@ struct AwardsMgr {
     StatHandler* handlerBuf[7];  // offset 0x24
     ILayout* layout;          // offset 0x40
     Popup popups[30];         // offset 0x44
-    Popup* head;              // offset 0x29C
-    Popup** tail;             // offset 0x2A0
+    PopupQueue q;             // offset 0x29C
     ILayout* recLayout;       // offset 0x2A4
     s32 place;                // offset 0x2A8
     s32 score;                // offset 0x2AC
@@ -237,7 +275,10 @@ struct AwardsMgr {
     f32 time;                 // offset 0x2B8
     u8 hasTime;               // offset 0x2BC
     Results results;          // offset 0x2C0 (state), 0x2C4 f32 ...
+    u8 pad57C[0x9C];
 };
+
+}  // namespace
 
 #define AW_OFF(o) (*(f32*)((u8*)(o) + 0x2C4))
 #define AW_ART(o) (*(ArtPlayer**)((u8*)(o) + 0x2C8))
@@ -540,39 +581,33 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
 void fn_801CC594(AwardsMgr* m);
 void fn_801CC768(LayoutObj* l, f32 speed);
 StatHandler** fn_801CC784(HandlerVec* v);
-void* fn_801CC7A0(Results* r);
-void fn_801CC8EC(Popup** q);
-void fn_801CC8FC(HandlerVec* v);
+
+inline AwardsMgr::AwardsMgr(void) {
+    layout = (ILayout*)fn_80145E70("awards_lyt.val");
+    recLayout = (ILayout*)fn_80145E70("awards_pr.val");
+    paused = 0;
+    RaceSlot* s = fn_801769CC();
+    event = s->event;
+    difficulty = s->difficulty;
+    off[0] = 1;
+    off[1] = 1;
+    off[2] = 1;
+    off[3] = 1;
+    for (int i = 1; i <= 7; i++) {
+        StatDesc* d = (StatDesc*)this;
+        StatHandler* h = fn_801CB954(StatsGetTypeFromIndex(i), d);
+        *fn_801CC784(&handlers) = h;
+    }
+    sfx = (LayoutObj*)fn_80207848("levelup.sfx", 1);
+    if (sfx) {
+        fn_801CC768(sfx, 0.5f);
+    }
+    art = fn_8023512C("awardsart.art");
+    fn_801CC594(this);
+}
 
 void fn_801CC470(void) {
-    AwardsMgr* m = (AwardsMgr*)operator new(0x618, "StatsModule");
-    if (m) {
-        fn_801CC8FC(&m->handlers);
-        fn_801CC8EC(&m->head);
-        fn_801CC7A0(&m->results);
-        m->layout = (ILayout*)fn_80145E70("awards_lyt.val");
-        m->recLayout = (ILayout*)fn_80145E70("awards_pr.val");
-        m->paused = 0;
-        RaceSlot* s = fn_801769CC();
-        m->event = s->event;
-        m->difficulty = s->difficulty;
-        m->off[0] = 1;
-        m->off[1] = 1;
-        m->off[2] = 1;
-        m->off[3] = 1;
-        for (int i = 1; i <= 7; i++) {
-            StatDesc* d = (StatDesc*)m;
-            StatHandler* h = fn_801CB954(StatsGetTypeFromIndex(i), d);
-            *fn_801CC784(&m->handlers) = h;
-        }
-        m->sfx = (LayoutObj*)fn_80207848("levelup.sfx", 1);
-        if (m->sfx) {
-            fn_801CC768(m->sfx, 0.5f);
-        }
-        m->art = fn_8023512C("awardsart.art");
-        fn_801CC594(m);
-    }
-    lbl_8055E884 = m;
+    lbl_8055E884 = new ("StatsModule") AwardsMgr;
 }
 
 static inline void ResetAwards(AwardsMgr* m) {
@@ -582,8 +617,8 @@ static inline void ResetAwards(AwardsMgr* m) {
                 m->handlers.data[i]->stat->Revert();
             }
         }
-        m->head = 0;
-        m->tail = &m->head;
+        m->q.head = 0;
+        m->q.tail = &m->q.head;
         memset(m->popups, 0, sizeof(m->popups));
         m->place = 0;
         m->score = 0;
@@ -625,53 +660,42 @@ void fn_801CC768(LayoutObj* l, f32 speed) {
 
 StatHandler** fn_801CC784(HandlerVec* v) { return &v->data[v->n++]; }
 
-struct Initials {
-    Initials(void) {
-        memset(s, 'z', 3);
-        s[3] = 0;
+Results::Results(void) {
+    f8 = 0;
+    fC = 0;
+    f10 = 0;
+    f14 = 0;
+    for (ScoreRow* p = rows; p < rows + 15; p++) {
+        memset(p->name.s, 'z', 3);
+        p->name.s[3] = 0;
     }
-    char s[4];
-    u8 pad[0x10];
-};
-
-void* fn_801CC7A0(Results* r) {
-    u8* b = (u8*)r;
-    *(s32*)(b + 0x8) = 0;
-    *(s32*)(b + 0xC) = 0;
-    *(s32*)(b + 0x10) = 0;
-    *(s32*)(b + 0x14) = 0;
-    for (char* p = (char*)(b + 0x20); p < (char*)(b + 0x14C); p += 0x14) {
-        memset(p, 'z', 3);
-        p[3] = 0;
-    }
-    memset(b + 0x14C, 'z', 3);
-    b[0x14F] = 0;
-    memset(b + 0x160, 'z', 3);
-    b[0x163] = 0;
-    memset(b + 0x174, 'z', 3);
-    b[0x177] = 0;
-    memset(b + 0x188, 'z', 3);
-    b[0x18B] = 0;
-    memset(b + 0x19C, 'z', 3);
-    b[0x19F] = 0;
-    memset(b + 0x200, 'z', 3);
-    b[0x203] = 0;
-    memset(b + 0x264, 'z', 3);
-    b[0x267] = 0;
-    memset(b + 0x276, 'z', 3);
-    b[0x279] = 0;
-    return r;
+    memset(best[0].name.s, 'z', 3);
+    best[0].name.s[3] = 0;
+    memset(best[1].name.s, 'z', 3);
+    best[1].name.s[3] = 0;
+    memset(best[2].name.s, 'z', 3);
+    best[2].name.s[3] = 0;
+    memset(best[3].name.s, 'z', 3);
+    best[3].name.s[3] = 0;
+    memset(best[4].name.s, 'z', 3);
+    best[4].name.s[3] = 0;
+    memset(i200.s, 'z', 3);
+    i200.s[3] = 0;
+    memset(i264.s, 'z', 3);
+    i264.s[3] = 0;
+    memset(i276.s, 'z', 3);
+    i276.s[3] = 0;
 }
 
-void fn_801CC8EC(Popup** q) {
-    q[1] = (Popup*)q;
-    q[0] = 0;
+PopupQueue::PopupQueue(void) {
+    tail = &head;
+    head = 0;
 }
 
-void fn_801CC8FC(HandlerVec* v) {
-    v->data = (StatHandler**)(v + 1);
-    v->cap = 7;
-    v->n = 0;
+HandlerVec::HandlerVec(void) {
+    data = (StatHandler**)(this + 1);
+    cap = 7;
+    n = 0;
 }
 
 void fn_801CC918(void) {
@@ -765,11 +789,11 @@ found:
 }
 
 static inline Popup* PopQueue(AwardsMgr* m) {
-    Popup* p = m->head;
+    Popup* p = m->q.head;
     if (p) {
-        m->head = p->next;
-        if (!m->head) {
-            m->tail = &m->head;
+        m->q.head = p->next;
+        if (!m->q.head) {
+            m->q.tail = &m->q.head;
         }
         p->next = 0;
     }
@@ -806,8 +830,8 @@ static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
             m->sfx->b4B = 0;
             m->sfx->b4A = 0;
         }
-        *m->tail = free;
-        m->tail = &free->next;
+        *m->q.tail = free;
+        m->q.tail = &free->next;
         free->next = 0;
     }
 }
