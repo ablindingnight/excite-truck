@@ -560,10 +560,7 @@ void fn_802A5384(WeatherCfg* c) {
 }
 
 void fn_802A53B0(DropHit* hits, int n) {
-    if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0]) {
-        return;
-    }
-    if (!lbl_8055F894) {
+    if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0] || !lbl_8055F894) {
         return;
     }
     RainSystem* r = lbl_8055F88C;
