@@ -40,8 +40,8 @@ void fn_8011FFB8();
 void fn_80120084();
 extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
-extern void *lbl_80559948[];
-extern u32 lbl_8055994C[];
+extern void ***lbl_80559948;
+extern u32 *lbl_8055994C;
 extern void fn_80127F70(void*);
 extern void fn_80127F94(void*);
 extern s32 fn_8011A7CC(DVDFileInfo *);
@@ -49,7 +49,11 @@ extern s32 OSDisableInterrupts(void);
 void fn_80127440(void*);
 extern void fn_80127398(s32);
 extern void fn_802E300C(s32);
-extern void* lbl_8041D728[];
+typedef struct CallbackList {
+    s32 count;
+    void (*fns[4])(void);
+} CallbackList;
+extern CallbackList lbl_8041D728[];
 extern u8 lbl_802F6A40[];
 extern u8 lbl_8041D508[];
 extern u32 lbl_80559950;
@@ -805,6 +809,17 @@ void fn_8011A1A0(u32 *data, u32 size) {
             } while (--count);
         }
     }
+}
+
+void fn_8011A330(void *arg0) {
+    s32 status;
+    *(s32 *)((u8 *)arg0 + 0xC4) = 1;
+    DVDCancel((DVDCommandBlock *)((u8 *)arg0 + 0x54));
+    do {
+        status = DVDGetDriveStatus();
+    } while (status == 2 || status == 1);
+    *(s32 *)((u8 *)arg0 + 0xC4) = 0;
+    *(s32 *)((u8 *)arg0 + 0x24) = 0;
 }
 
 u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
@@ -1605,6 +1620,24 @@ void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3) {
     OSRestoreInterrupts(old);
 }
 
+void fn_8011C364(s32 arg0);
+s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
+    s32 result = 0;
+    s32 level;
+    if (arg0 != 0 && arg1 != 0 && *(s32 *)(arg1 + 0x18) != 0 && *(s32 *)(arg1 + 0x14) != 0) {
+        level = OSDisableInterrupts();
+        if (fn_8011BC4C((void *)arg0, (void *)arg1) != 0) {
+            *(s32 *)(arg0 + 0x38) -= 1;
+            if ((arg2 & 1) && *(s32 *)(arg0 + 0x30) == 0) {
+                fn_8011C364(arg0);
+                result = 1;
+            }
+        }
+        OSRestoreInterrupts(level);
+    }
+    return result;
+}
+
 s32 fn_8011BFFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 temp = fn_8011BF4C(arg2, arg3, arg4) << 1;
     s32 result = fn_8011BF4C(arg0, arg1, arg4);
@@ -2134,6 +2167,23 @@ void* fn_8011FF24(void) {
     return lbl_8055DEF0;
 }
 
+extern u32 lbl_8055DEF4;
+// Allocates one block for all the pending buffers and hands each its slice.
+void fn_8011FF2C(s32 arg0) {
+    s32 size = (arg0 + 0x1F) & ~0x1F;
+    u8 *p = fn_8011FFC4((s32)lbl_8055DEF0 + size);
+    u32 i;
+    lbl_8055DEF0 = 0;
+    if (p != 0) {
+        p += size;
+        for (i = 0; i < lbl_8055DEF4; i++) {
+            *lbl_80559948[i] = p;
+            p += lbl_8055994C[i];
+        }
+    }
+    lbl_8055DEF4 = 0;
+}
+
 void fn_8011FFB8(void *arg0, void *arg1) {
     lbl_8055DEF8 = arg0;
     lbl_8055DEFC = arg1;
@@ -2142,8 +2192,8 @@ void fn_8011FFB8(void *arg0, void *arg1) {
 extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
 extern u32 lbl_8055DEF4;
-extern void *lbl_80559948[];
-extern u32 lbl_8055994C[];
+extern void ***lbl_80559948;
+extern u32 *lbl_8055994C;
 extern void *malloc(u32);
 extern void free(void *);
 extern void *fn_8011FFC4(s32);
@@ -4056,6 +4106,22 @@ void fn_80125CC8(void *arg0, s32 arg1, void *arg2, s32 arg3, void *arg4, s32 arg
 }
 
 extern char lbl_8055DF08;
+// Calls every callback registered in list `arg0` (-1..3).
+void fn_80127398(s32 arg0) {
+    CallbackList *list;
+    s32 i;
+    if (arg0 >= -1 && arg0 < 4) {
+        list = &(lbl_8041D728 + 1)[arg0];
+    } else {
+        list = 0;
+    }
+    if (list != 0) {
+        for (i = 0; i < list->count; i++) {
+            list->fns[i]();
+        }
+    }
+}
+
 char fn_8012742C(void) {
     return lbl_8055DF08;
 }
