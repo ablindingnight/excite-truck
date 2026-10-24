@@ -117,8 +117,19 @@ struct CamEvent {
     f32 time;
     s32 order;
     s32 type;
-    u8 pad0C[0x58 - 0xC];
-    f32 end;  // offset 0x58
+    IVec3 origin;  // offset 0xC
+    Mat3 rot;      // offset 0x18
+    IVec3 v;       // offset 0x3C: per second, in the start frame
+    IVec3 av;      // offset 0x48: per second (axis * angle)
+    f32 fov;       // offset 0x54
+    f32 end;       // offset 0x58
+    u8 accel;      // offset 0x5C
+};
+
+// An editor camera: rotation rows, then position.
+struct CamPose {
+    Mat3 rot;   // offset 0x0
+    IVec3 pos;  // offset 0x24
 };
 
 // The on-screen message an event shows.
@@ -200,6 +211,8 @@ int atoi(const char* s);
 void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));
 double cos(double x);
 double sin(double x);
+double acos(double x);
+void fn_80144CD0(IVec3* out, const IVec3* p, const f32* m);
 f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_8000FC8C(const char* s);
 void fn_8000FDF0(const char* s);
@@ -260,6 +273,7 @@ extern s32 lbl_8055E820;    // current item
 extern s32 lbl_8055E824;    // editor key slot
 extern s32 lbl_8055E828;    // selected event
 extern s32 lbl_8055E82C;    // first listed event
+extern f32 lbl_8055E830;  // editor camera transition time
 extern f32 lbl_8055E834;
 extern u8 lbl_8055E838;     // editing
 extern u8 lbl_8055E839;     // listing
@@ -342,9 +356,8 @@ static inline void FrameToQuatAxis(f32 (*m)[3], IQuat* q) {
     v[k] = (m[i][k] + m[k][i]) * s;
 }
 
-static inline void FrameToQuat(const IFrame* f, IQuat* q) {
-    const f32(*m)[3] = (const f32(*)[3])f;
-    f32 tr = f->axes[0].x + f->axes[1].y + f->axes[2].z;
+static inline void RotToQuat(const f32 (*m)[3], IQuat* q) {
+    f32 tr = m[0][0] + m[1][1] + m[2][2];
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
         q->w = 0.5f * s;
@@ -353,9 +366,11 @@ static inline void FrameToQuat(const IFrame* f, IQuat* q) {
         q->y = (m[2][0] - m[0][2]) * s;
         q->z = (m[0][1] - m[1][0]) * s;
     } else {
-        FrameToQuatAxis((f32(*)[3])f, q);
+        FrameToQuatAxis((f32(*)[3])m, q);
     }
 }
+
+static inline void FrameToQuat(const IFrame* f, IQuat* q) { RotToQuat((const f32(*)[3])f, q); }
 
 // The rotation of a unit quaternion.
 static inline void QuatToFrame(IFrame* f, const IQuat* q) {
@@ -389,6 +404,7 @@ int fn_801C3B7C(const void* a, const void* b);
 f32 fn_801C3450(f32 t);
 u32 fn_801C3524(const char* who);
 void fn_801C3D88(const char* name);
+void fn_801C7254(Mat3* m);
 void fn_801C855C(void);
 void fn_801C957C(int on);
 void fn_801C9920(const Event* e, int fd);
@@ -962,9 +978,63 @@ void fn_801C6D94(void) {
     fn_801C957C(1);
 }
 
-// Camera event start/update (placeholder).
+// Add camera: a move from the current editor camera to the destination one over the transition time,
+// stored as linear and angular velocities in the current camera's frame.
 void fn_801C6E40(void) {
-    IL_Use(0, "Camera added at %.2f seconds");
+    u8* s = lbl_80437D88;
+    lbl_8055E830 = atof((char*)(s + 0x368));
+    CamEvent* e = (CamEvent*)fn_801C3C80();
+    e->type = 1;
+    CamPose* cur = (CamPose*)(s + 0x468);
+    e->fov = lbl_8055E834;
+    e->origin.x = cur->pos.x;
+    e->origin.y = cur->pos.y;
+    e->origin.z = cur->pos.z;
+    e->rot = cur->rot;
+    e->end = e->time + lbl_8055E830;
+    e->accel = 1;
+    if (lbl_8055E830 > 0.01f) {
+        IVec3 dp;
+        Mat3 d;
+        Mat3 inv;
+        IQuat q;
+        CamPose* dst = (CamPose*)(s + 0x498);
+        inv = cur->rot;
+        fn_801C7254(&inv);
+        Mat3Mul(&d, &dst->rot, &inv);
+        fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
+        RotToQuat((const f32(*)[3])&d, &q);
+        f32 ang = acos(q.w);
+        f32 sn = sin(ang);
+        if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
+            f32 k = 2.0f * ang / sn;
+            e->av.x = q.x * k;
+            e->av.y = q.y * k;
+            e->av.z = q.z * k;
+        } else {
+            e->av.x = 0.0f;
+            e->av.y = 0.0f;
+            e->av.z = 0.0f;
+        }
+        f32 inv1 = 1.0f / lbl_8055E830;
+        e->av.x *= inv1;
+        e->av.y *= inv1;
+        e->av.z *= inv1;
+        f32 inv2 = 1.0f / lbl_8055E830;
+        e->v.x = dp.x * inv2;
+        e->v.y = dp.y * inv2;
+        e->v.z = dp.z * inv2;
+    } else {
+        e->av.x = 0.0f;
+        e->av.y = 0.0f;
+        e->av.z = 0.0f;
+        e->v.x = 0.0f;
+        e->v.y = 0.0f;
+        e->v.z = 0.0f;
+    }
+    sprintf((char*)(s + 0x238), "Camera added at %.2f seconds", e->time);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    fn_801C957C(0);
 }
 
 void fn_801C7254(Mat3* m) {
