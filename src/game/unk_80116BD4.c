@@ -2379,6 +2379,33 @@ u32 fn_8011FC2C(void* arg0, s32 arg1, s32 arg2, s32* arg3, s32 arg4, s32 arg5, s
 }
 
 extern void *lbl_8055DEF0;
+extern void *lbl_8055DEF0;
+extern u32 lbl_8055DEF4;
+// Registers *slot for the next batched allocation (fn_8011FF2C). Sizes are rounded to 32 bytes and padded so
+// consecutive buffers start in different cache sets; the registration arrays double when full.
+void fn_8011FE20(void **slot, s32 size) {
+    void ***slots;
+    u32 *sizes;
+    u32 padded;
+    if (lbl_80559950 == lbl_8055DEF4) {
+        slots = fn_8011FFC4(lbl_80559950 * 16);
+        sizes = (u32 *)((u8 *)slots + lbl_80559950 * 8);
+        memcpy(slots, lbl_80559948, lbl_80559950 * 4);
+        memcpy(sizes, lbl_8055994C, lbl_80559950 * 4);
+        lbl_80559950 *= 2;
+        if (lbl_80559950 != 64) {
+            fn_80120084(lbl_80559948);
+        }
+        lbl_80559948 = slots;
+        lbl_8055994C = sizes;
+    }
+    padded = ((size + 31) & ~31) +
+             (((((u32)lbl_8055DEF0 >> 5) & 31) + 33 - (((u32)(size + 31) >> 5) & 31)) << 5 & 0x3E0);
+    lbl_8055DEF0 = (u8 *)lbl_8055DEF0 + padded;
+    lbl_8055994C[lbl_8055DEF4] = padded;
+    lbl_80559948[lbl_8055DEF4++] = slot;
+}
+
 void* fn_8011FF24(void) {
     return lbl_8055DEF0;
 }
