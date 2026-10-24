@@ -1611,10 +1611,15 @@ void fn_801971AC(u8* d, V2* io) {
 
 f32 fn_801973FC(const V2* n, const V2* a, const V2* b);
 
+extern const f32 lbl_8056226C;  // 4 / 59.94 (four frames)
+extern const f32 lbl_80562268;  // 0.9
+extern const f32 lbl_8056222C;  // 40.0
+
 void fn_8019724C(u8* d, V2* io) {
     if (F32(d, 0x270) > 4.4444447f) {
         s32 o = fn_801671AC(CARID(d));
         u8* car = CAR(d);
+        V2 hit;
         V2 dir;
         dir.x = F32(car, 0x70);
         dir.y = F32(car, 0x78);
@@ -1623,25 +1628,24 @@ void fn_8019724C(u8* d, V2* io) {
         f32 inv = 1.0f / l;
         dir.x *= inv;
         dir.y *= inv;
-        V2 hit;
         if (fn_8015FBCC(CAR(d), &hit, 0, o)) {
             f32 t = F32(d, 0x26C);
-            f32 hi = 0.066733405f + F32(d, 0x1F8);
-            f32 lo = t - 0.9f;
+            f32 hi = lbl_8056226C + F32(d, 0x1F8);
+            f32 lo = t - lbl_80562268;
             t = t < hi ? t : hi;
             t = t > lo ? t : lo;
             F32(d, 0x1F8) = t;
             F32(d, 0x20C) = fn_801973FC(&dir, &hit, io);
             io->x = hit.x;
             io->y = hit.y;
-            if (F32(d, 0x270) > 40.0f) {
+            if (F32(d, 0x270) > lbl_8056222C) {
                 S32(d, 0x2D0) |= 0x40;
-                S32(d, 0x2D0) |= 0x800;
             }
+            S32(d, 0x2D0) |= 0x800;
         } else {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1F8);
-            if (dt < 0.9f) {
-                f32 k = F32(d, 0x20C) * (1.0f - dt / 0.9f);
+            if (dt < lbl_80562268) {
+                f32 k = F32(d, 0x20C) * (1.0f - dt / lbl_80562268);
                 io->x = io->x + dir.x * k;
                 io->y = io->y + dir.y * k;
             }
