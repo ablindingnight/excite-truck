@@ -1594,52 +1594,41 @@ u32 fn_8011C06C(void *arg0) {
 // MATCHING-AID: compiler pragma from upstream; revisit.
 #pragma dont_inline on
 u32 fn_8011C1E0(s32 arg0, void *arg1) {
-// MATCHING-AID: register pinning from upstream; revisit.
-    register s32 temp_r4;
-    s32 temp_r4_2;
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
-        OSDisableInterrupts();
+        s32 level = OSDisableInterrupts();
         if (*(s32 *)((u8 *)arg1 + 0xC) == 1)
             *(s32 *)((u8 *)arg1 + 0xC) = 2;
-        temp_r4 = *(s32 *)((u8 *)arg1 + 0x10);
-        *(s32 *)((u8 *)arg1 + 0x10) = temp_r4 + 1;
-        OSRestoreInterrupts(temp_r4);
-        temp_r4_2 = *(s32 *)((u8 *)arg1 + 0xC);
-        return (u32)((1 - temp_r4_2) | (temp_r4_2 - 1)) >> 31;
+        *(s32 *)((u8 *)arg1 + 0x10) += 1;
+        OSRestoreInterrupts(level);
+        return *(s32 *)((u8 *)arg1 + 0xC) != 1;
     }
     return 1;
 }
 #pragma dont_inline reset
 
+// Waits (yielding) until fn_8011C1E0 reports the request finished.
 void fn_8011C274(s32 arg0, void *arg1) {
-    if (arg0 == 0) goto done;
-    if (arg1 == 0) goto done;
-    if (*(s32 *)((u8 *)arg1 + 0x18) == 0) goto done;
-    if (*(s32 *)((u8 *)arg1 + 0x14) == 0) goto done;
-    goto retry;
-retry:
-    OSYieldThread();
-    if (fn_8011C1E0(arg0, arg1) == 0) goto retry;
-done:
-    return;
+    if (arg0 != 0 && arg1 != 0 &&
+        *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
+        *(s32 *)((u8 *)arg1 + 0x14) != 0) {
+        do {
+            OSYieldThread();
+        } while (fn_8011C1E0(arg0, arg1) == 0);
+    }
 }
 
 void fn_8011C2EC(s32 arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
-        s32 value;
-        OSDisableInterrupts();
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-        value = *(volatile s32 *)((u8 *)arg1 + 0x10);
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-        *(volatile s32 *)((u8 *)arg1 + 0x10) = value - 1;
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
+        s32 level = OSDisableInterrupts();
+        // pending-request count, shared with interrupt-time code
+        *(volatile s32 *)((u8 *)arg1 + 0x10) -= 1;
         if (*(volatile s32 *)((u8 *)arg1 + 0x10) == 0)
             *(s32 *)((u8 *)arg1 + 0xC) = 1;
-        OSRestoreInterrupts();
+        OSRestoreInterrupts(level);
     }
 }
 
