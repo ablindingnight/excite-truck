@@ -2635,6 +2635,93 @@ void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
     bits->count = count;
 }
 
+// Refills an exhausted bundle of nibble pairs: reads the count, then that many bytes, each two Huffman-coded
+// nibbles (low first).
+void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
+    u32 *next;
+    u32 value;
+    u32 count;
+    u32 len, mask, e, lo, hi;
+    u8 *dst, *lookup, *symbols;
+    u32 width;
+
+    if (b->cur != b->end) return;
+    count = bits->count;
+    width = b->countBits;
+    next = bits->next;
+    value = bits->value;
+    if (count < width) {
+        u32 word = *next;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
+        value = word >> (width - count);
+        count = count + 32 - width;
+        next++;
+    } else {
+        len = value & (0xFFFFFFFFU >> (32 - width));
+        value >>= width;
+        count -= width;
+    }
+    if (len != 0) {
+        dst = b->data;
+        b->cur = dst;
+        b->end = dst + len;
+        width = b->maxBits;
+        mask = 0xFFFFFFFFU >> (32 - width);
+        lookup = b->lookup;
+        symbols = b->symbols;
+        do {
+            len--;
+            if (count >= width) {
+                e = lookup[value & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = lookup[(value | (word << count)) & mask];
+                lo = symbols[e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            if (count >= width) {
+                e = lookup[value & mask];
+                hi = symbols[e & 15];
+                e >>= 4;
+                value >>= e;
+                count -= e;
+            } else {
+                u32 word = *next;
+                e = lookup[(value | (word << count)) & mask];
+                hi = symbols[e & 15];
+                e >>= 4;
+                if (count >= e) {
+                    value >>= e;
+                    count -= e;
+                } else {
+                    value = word >> (e - count);
+                    next++;
+                    count = count + 32 - e;
+                }
+            }
+            *dst++ = lo | (hi << 4);
+        } while (len != 0);
+    } else {
+        b->end = b->data;
+        b->cur = b->data + 4;
+    }
+    bits->next = next;
+    bits->value = value;
+    bits->count = count;
+}
+
 void fn_8011D9E4(void *arg0, void *arg1) {
     u32 *bits;
     u32 value, bitCount, available, mask, count, i, code, len;
