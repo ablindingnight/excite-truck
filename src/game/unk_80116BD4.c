@@ -2116,7 +2116,7 @@ outer_test:
     ((BitReader8011 *)arg2)->count = var_r24;
 }
 
-s32 fn_8011B2AC(s32 size, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 output, u32 *input, u32 bands, f32 gain, s32 arg8) {
+s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 output, u32 *input, u32 bands, s32 arg8) {
     f32 buffer[4096];
     f32 factors[26];
     BitReader8011 bits;
@@ -2315,21 +2315,30 @@ BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags) {
     return a;
 }
 
-void fn_8011B94C(void *arg0, s32 *arg1, s32 *arg2, s32 arg3, s32 *arg4, s32 arg5, u32 *arg6, u32 arg7, f32 arg8, s32 arg9) {
-    u8 *p = (u8 *)arg0;
-    u32 count = *(u32 *)(p + 0xC) >> 1;
-    u32 i;
-    s32 result = fn_8011B2AC(*(s32 *)p, *(u32 *)(p + 0x10), *(s32 *)(p + 0x30), *(s32 *)(p + 0x24), *(s32 *)(p + 0x28), *(s32 *)(p + 0x14), arg6, *(u32 *)(p + 0x1C), *(f32 *)(p + 4), *(u32 *)(p + 0x20));
-    if (*(s32 *)(p + 0x18)) *(s32 *)(p + 0x18) = 0;
-    else for (i = 0; i < count; i++) {
-        s16 *a = *(s16 **)(p + 0x14);
-        s16 *b = *(s16 **)(p + 0x2C);
-        a[i] = (s16)(((u32)i * a[i] + (u32)(count - i) * b[i]) / count);
+// Decodes one Bink audio frame from `src`: returns the output samples (cross-faded with the previous frame's tail)
+// and their size, saves the new tail, and sets *next past the frame's data.
+void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next) {
+    s32 used = fn_8011B2AC(a->frameSize, a->scale, a->channels, a->flags, (s32)a->quant, (s32)a->transform,
+                           (s32)a->output, (u32 *)src, a->numBands, (s32)a->bands);
+    if (a->first) {
+        a->first = 0;
+    } else {
+        u32 i;
+        u32 count = a->overlapBytes >> 1;
+        for (i = 0; i < count; i++) {
+            a->output[i] = (i * a->output[i] + (count - i) * a->previous[i]) / count;
+        }
     }
-    memcpy(*(void **)(p + 0x2C), (u8 *)*(void **)(p + 0x14) + (*(u32 *)(p + 8) - *(u32 *)(p + 0xC)), *(u32 *)(p + 0xC));
-    if (arg2) *arg2 = *(u32 *)(p + 8) - *(u32 *)(p + 0xC);
-    if (arg1) *arg1 = (s32)*(void **)(p + 0x14);
-    if (arg4) *arg4 = arg6[0] + result;
+    memcpy(a->previous, (u8 *)a->output + (a->frameBytes - a->overlapBytes), a->overlapBytes);
+    if (outLen) {
+        *outLen = a->frameBytes - a->overlapBytes;
+    }
+    if (out) {
+        *out = a->output;
+    }
+    if (next) {
+        *next = src + used;
+    }
 }
 
 void fn_8011BC48(s32 arg0) {
