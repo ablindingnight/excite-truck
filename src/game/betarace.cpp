@@ -1419,7 +1419,9 @@ int fn_80144C90(f32 x);
 int fn_80141F7C(f32 x);
 void fn_80147EE0(ArtElem* e, f32 s);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
-void fn_8001DF08(int id, s32 score);
+}  // extern "C"
+void UpdateScoreOverlays(int id, int score);
+extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
 }
 
@@ -2171,7 +2173,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
         }
     }
     if (!fn_80161C38()) {
-        fn_8001DF08(id, pts);
+        UpdateScoreOverlays(id, pts);
     }
     {
         f32 d = (info->lap - 1) * fn_8013672C() + dist->f48;
@@ -2273,9 +2275,9 @@ void BetaCar::DrawResults(ILayout* l, int view) {
     s32 pts = Round(shown);
     DrawStunts(this, l, view);
     if (master->vf20(id)) {
-        fn_8001DF08(id, pts);
+        UpdateScoreOverlays(id, pts);
     } else {
-        fn_8001DF08(id, result.total);
+        UpdateScoreOverlays(id, result.total);
     }
 }
 #pragma inline_depth(smart)
@@ -3947,7 +3949,9 @@ inline Palette* Pickup::GetPalette(void) { return &((Palette*)colors)[kind + whi
 
 extern "C" {
 void fn_801CB7BC(int a);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 }
 
 void BetaMaster::vf4C(int view) {
@@ -4012,7 +4016,7 @@ int BetaMaster::vf5C(int view) {
         }
     }
     if (vf68() && view == 0) {
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
     return !AllDone(n);
 }
@@ -4093,7 +4097,7 @@ int BetaMaster::vf3C(int view) {
         f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
         TextElem* body = Overlay()->Find("star_body_0");
         TextElem* denom = Overlay()->Find("score_denominator");
-        fn_8001DF08(fn_801E866C(view), 0);
+        UpdateScoreOverlays(fn_801E866C(view), 0);
         if (h0 && h1 && body && denom) {
             char buf[0x14];
             Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k), Overlay());

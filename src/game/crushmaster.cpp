@@ -1157,7 +1157,9 @@ f32 fn_80147204(TextElem* e, const char* text);
 s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
 void fn_802AE118(void* layout);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 void fn_80139318(ILayout* l, s32 tex, int car, f32 size);  // radar
 void fn_80147940(ILayout* l, Box* b, const char* art, int part);
 void fn_80147230(TextElem* e, const char* fmt, ...);
@@ -1167,7 +1169,9 @@ void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
 f32 fn_801E7E18(void);
-void fn_8001DF08(int id, s32 score);
+}  // extern "C"
+void UpdateScoreOverlays(int id, int score);
+extern "C" {
 int vsprintf(char* buf, const char* fmt, va_list args);
 }
 
@@ -1519,7 +1523,7 @@ void CrushMaster::vf4C(int view) {
             fn_80175080(layout.p, "player_wins_msg_0", "player_wins_msg", Ease(t174.Progress()), 0);
         }
     }
-    fn_8001DF08(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
+    UpdateScoreOverlays(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
 }
 
 extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
@@ -1565,7 +1569,7 @@ int CrushMaster::vf5C(int p) {
         }
     }
     if (vf68()) {
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
     return results.state != 4;
 }
@@ -1625,7 +1629,7 @@ int CrushMaster::vf3C(int view) {
             f32 k = Lerp(0.0f, 1.0f, Clamp01((t - in0) / (full0 - in0)));
             TextElem* body = layout.p->Find("star_body_0");
             TextElem* denom = layout.p->Find("star_body_1");
-            fn_8001DF08(fn_801E866C(view), 0);
+            UpdateScoreOverlays(fn_801E866C(view), 0);
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));

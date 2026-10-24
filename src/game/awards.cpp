@@ -8,7 +8,9 @@
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
-void fn_8001DFCC(void);
+}  // extern "C"
+void UpdateContinueOverlay(void);
+extern "C" {
 void* fn_80145E70(const char* name);  // layout
 int fn_801345D8(char* dst, int n, const char* fmt, ...);
 int fn_80160AB4(void);
@@ -1040,7 +1042,7 @@ void fn_801CE6F8(void) {
         AW_ART(m)->Draw((int)((u8*)m + 0x608));
     }
     if (m->results.state == 3) {
-        fn_8001DFCC();
+        UpdateContinueOverlay();
     }
 }
 
