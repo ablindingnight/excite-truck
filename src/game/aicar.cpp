@@ -820,22 +820,22 @@ void fn_801944C0(u8* d) {
     if (w) {
         if (F32(d, 0x1EC) < 0.0f) {
             F32(d, 0x1EC) = F32(d, 0x26C);
-            switch (lbl_8055E540) {
-            case 0:
-                fn_80193CD4(d);
-                break;
-            case 1:
-                if (!(S32(d, 0x2D0) & 0x200)) {
-                    fn_801945F8(d, "disabled");
-                }
-                break;
-            case 2:
-                fn_8018AF04(CAR(d));
-                break;
-            }
-            u8* p = PTR(d, 0x28C);
-            VI(p)->v30(-1);
         }
+        switch (lbl_8055E540) {
+        case 2:
+            fn_8018AF04(CAR(d));
+            break;
+        case 1:
+            if (!(S32(d, 0x2D0) & 0x200)) {
+                fn_801945F8(d, "disabled");
+            }
+            break;
+        case 0:
+            fn_80193CD4(d);
+            break;
+        }
+        u8* p = PTR(d, 0x28C);
+        VI(p)->v30(-1);
     } else {
         F32(d, 0x1EC) = -1.0f;
     }
