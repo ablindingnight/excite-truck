@@ -696,7 +696,8 @@ int fn_802CAF8C(s32 id) {
     if (id == -1) {
         return 0;
     }
-    return lbl_8055FCB0[id].res->zhint != lbl_8055FCA8;
+    u16* z = &lbl_8055FCB0[id].res->zhint;
+    return *z != lbl_8055FCA8;
 }
 
 u8 fn_802CAFC8(s32 id) {
