@@ -903,8 +903,9 @@ s32 fn_8011A870(void *arg0, s32 arg1) {
         if (*(s32 *)((char *)arg0 + 0x50) == 0)
             *(s32 *)((char *)arg0 + 0x50) = 1;
         if (arg1 & 0x80000000) {
-            do {
-            } while (*(s32 *)((char *)arg0 + 0x24) != 0);
+            // busy-wait until the flag is cleared elsewhere (volatile: re-read every pass)
+            while (*(volatile s32 *)((char *)arg0 + 0x24) != 0) {
+            }
         }
     } else if (arg1 & 2) {
         if ((u32)*(s32 *)((char *)arg0 + 0x50) == 1U)
