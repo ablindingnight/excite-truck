@@ -4564,14 +4564,47 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
             case 9:  // raw pixels
                 blockMap[idx >> 1] = 1;
                 if ((((u32)dst | (u32)colors.cur) & 7) == 0) {
-                    for (i = 0; i < 8; i++) {
-                        *(f64 *)(dst + i * pitch) = ((f64 *)colors.cur)[i];
-                    }
+                    u8 *d = dst;
+                    *(f64 *)d = ((f64 *)colors.cur)[0];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[1];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[2];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[3];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[4];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[5];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[6];
+                    d += pitch;
+                    *(f64 *)d = ((f64 *)colors.cur)[7];
                 } else if ((((u32)dst | (u32)colors.cur) & 3) == 0) {
-                    for (i = 0; i < 8; i++) {
-                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)colors.cur)[i * 2];
-                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)colors.cur)[i * 2 + 1];
-                    }
+                    u8 *d = dst;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[0];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[1];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[2];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[3];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[4];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[5];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[6];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[7];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[8];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[9];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[10];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[11];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[12];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[13];
+                    d += pitch;
+                    ((u32 *)d)[0] = ((u32 *)colors.cur)[14];
+                    ((u32 *)d)[1] = ((u32 *)colors.cur)[15];
                 } else {
                     u8 *d = dst;
                     d[0] = colors.cur[0];
