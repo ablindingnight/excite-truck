@@ -1742,12 +1742,13 @@ int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags) {
     return 1;
 }
 
+extern const f32 lbl_80561AF0;  // 50.0f
 int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
     RaceCarRec* rec = fn_8017960C(car);
     ValVec3 p;
-    p.x = rec->mtx.origin.x + rec->mtx.basis[2].x * 50.0f;
-    p.y = rec->mtx.origin.y + rec->mtx.basis[2].y * 50.0f;
-    p.z = rec->mtx.origin.z + rec->mtx.basis[2].z * 50.0f;
+    p.x = rec->mtx.origin.x + rec->mtx.basis[2].x * lbl_80561AF0;
+    p.y = rec->mtx.origin.y + rec->mtx.basis[2].y * lbl_80561AF0;
+    p.z = rec->mtx.origin.z + rec->mtx.basis[2].z * lbl_80561AF0;
     pos->x = p.x;
     pos->y = p.z;
     *flags = 0x21F;

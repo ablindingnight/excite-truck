@@ -510,11 +510,12 @@ int fn_8015FAB8(Bin* bins, int i, f32 range) {
 }
 
 // The car's frame pushed 3.1 forward.
+extern const f32 lbl_80561810;  // 3.1f
 void fn_8015FB28(Frame* f, const Frame* m) {
     *f = *m;
-    f->origin.x += f->basis[2].x * 3.1f;
-    f->origin.y += f->basis[2].y * 3.1f;
-    f->origin.z += f->basis[2].z * 3.1f;
+    f->origin.x += f->basis[2].x * lbl_80561810;
+    f->origin.y += f->basis[2].y * lbl_80561810;
+    f->origin.z += f->basis[2].z * lbl_80561810;
 }
 
 }  // extern "C"
