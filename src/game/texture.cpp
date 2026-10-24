@@ -1221,7 +1221,7 @@ u8 fn_802CC744(void) { return lbl_8055D07D; }
 
 int fn_802CC74C(void) {
     TexCache* c = lbl_8055FCBC;
-    int full = c && !c->freeLoads;
+    bool full = c && !c->freeLoads;
     if (full) {
         return 0;
     }
