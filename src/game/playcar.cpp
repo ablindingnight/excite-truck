@@ -412,13 +412,13 @@ void fn_801902B4(u8* p) {
 
 void fn_80190360(u8* p) { fn_80191084(p, 0); }
 
+// Modes 0 and 1 (meaning not known yet) are compared as an enum.
+enum PlayMode { PLAY_MODE_0, PLAY_MODE_1 };
+
 int fn_80190368(int x) {
     int r = 0;
-    switch (x) {
-    case 1:
-    case 0:
+    if ((PlayMode)x == PLAY_MODE_1 || (PlayMode)x == PLAY_MODE_0) {
         r = 1;
-        break;
     }
     return r;
 }
