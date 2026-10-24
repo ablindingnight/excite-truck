@@ -981,7 +981,7 @@ void ResultsOverlay::DrawMenu(void) {
     MenuItem* item;
     u32 i;
     f32 elapsed;
-    int selected;
+    bool selected;
     int frame;
     LayoutItem text;
     LayoutArtItem button;
@@ -1017,7 +1017,7 @@ void ResultsOverlay::DrawMenu(void) {
             }
             text = *layout->Find(item->text);
             text.pos.x += item->x;
-            selected = item->index == selection;
+            selected = selection == item->index;
             alpha = 0xFF;
             pulse = 0.0f;
             if (selected) {
