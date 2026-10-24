@@ -2684,7 +2684,7 @@ int ZoneMaster::vf8C(int p, int key) {
         tan.y = t->dirZ;
         half = PSVECDistance(&levels->levels->gates->a, &levels->levels->gates->b) * 0.5f;
         len = sqrt(tan.x * tan.x + tan.y * tan.y);
-        if (!NearZero(len)) {
+        if (!((f32)__fabs(len) <= lbl_80558DC4[0])) {
             tan.x *= half / len;
             tan.y *= half / len;
         }
