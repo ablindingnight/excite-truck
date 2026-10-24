@@ -876,6 +876,15 @@ struct RacerState {
     s32 state;  // offset 0x24
     u8 out;     // offset 0x28
 };
+// Still in the race: not finished (state 3) and not knocked out.
+static inline bool StillRacing(RacerState* s) {
+    bool racing = false;
+    if (s->state != 3 && !s->out) {
+        racing = true;
+    }
+    return racing;
+}
+
 
 class Racer {
 public:
@@ -1205,12 +1214,8 @@ public:
     virtual void vf10(void);
     virtual int vf20(int car) {
         RacerState* s = fn_801B2ED0(car)->GetInfo();
-        int racing = 0;
         int r = 0;
-        if (s->state != 3 && !s->out) {
-            racing = 1;
-        }
-        if (racing && !(timer.now > timer.limit)) {
+        if (StillRacing(s) && !(timer.now > timer.limit)) {
             r = 1;
         }
         return r;
