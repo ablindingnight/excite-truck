@@ -2208,6 +2208,113 @@ s32 fn_8011B2AC(s32 size, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 outpu
     return ((u32)bits.next - (u32)bits.start) & 0x1fffffff;
 }
 
+// The Bink audio decoder's state.
+typedef struct BinkAudio8011 {
+    u32 frameSize;     // 0x00 samples per transform
+    f32 scale;         // 0x04 2 / sqrt(frameSize)
+    u32 frameBytes;    // 0x08 output bytes per frame
+    u32 overlapBytes;  // 0x0C
+    u32 channels;      // 0x10
+    s16 *output;       // 0x14
+    s32 first;         // 0x18 no previous frame to overlap yet
+    u32 numBands;      // 0x1C
+    u32 *bands;        // 0x20 band edges in coefficients
+    s32 *quant;        // 0x24
+    void *transform;   // 0x28 DCT or RDFT work area
+    s16 *previous;     // 0x2C overlap from the last frame
+    u32 flags;         // 0x30 bit 0: DCT (per channel) instead of RDFT (interleaved)
+} BinkAudio8011;
+
+void fn_8011FE20(void **slot, s32 size);
+extern u32 lbl_80329B60[25];  // critical band frequencies (Hz)
+
+// MSL's inline sqrtf: three Newton steps from the frsqrte estimate.
+static inline f32 Sqrtf8011(f32 x) {
+    if (x > 0.0f) {
+        f64 guess = __frsqrte((f64)x);
+        guess = 0.5 * guess * (3.0 - guess * guess * x);
+        guess = 0.5 * guess * (3.0 - guess * guess * x);
+        guess = 0.5 * guess * (3.0 - guess * guess * x);
+        return (f32)(guess * x);
+    }
+    return x;
+}
+
+// Opens a Bink audio decoder for `channels` channels at `rate` Hz; returns 0 when out of memory.
+BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags) {
+    u32 *bands;
+    s32 *quant;
+    void *transform;
+    s16 *previous;
+    s16 *output;
+    u32 numBands;
+    u32 frameSize;
+    u32 half;
+    u32 frameBytes;
+    u32 nyquist;
+    s32 dct;
+    u32 i;
+    BinkAudio8011 *a;
+
+    if (rate >= 44100) {
+        frameSize = 2048;
+    } else if (rate >= 22050) {
+        frameSize = 1024;
+    } else {
+        frameSize = 512;
+    }
+    frameBytes = frameSize * channels * 2;
+    dct = flags & 1;
+    if (!dct) {
+        rate *= channels;
+        frameSize *= channels;
+        channels = 1;
+    }
+    half = frameSize >> 1;
+    nyquist = (rate + 1) >> 1;
+    for (numBands = 0; numBands < 25; numBands++) {
+        if (lbl_80329B60[numBands] >= nyquist) {
+            break;
+        }
+    }
+    fn_8011FE20((void **)&bands, (numBands + 1) * 4);
+    fn_8011FE20((void **)&quant, ((s32)Sqrtf8011(half) + 2) * 4);
+    if (dct) {
+        fn_8011FE20(&transform, frameSize * 20 / 4);
+    } else {
+        fn_8011FE20(&transform, half * 4 - 1);
+    }
+    fn_8011FE20((void **)&previous, frameBytes / 2);
+    fn_8011FE20((void **)&output, frameBytes);
+    a = fn_8011FF2C(sizeof(BinkAudio8011));
+    if (a == 0) {
+        return 0;
+    }
+    memset(a, 0, sizeof(BinkAudio8011));
+    a->bands = bands;
+    a->quant = quant;
+    a->transform = transform;
+    a->previous = previous;
+    a->output = output;
+    a->flags = flags;
+    a->channels = channels;
+    a->numBands = numBands;
+    a->frameSize = frameSize;
+    a->frameBytes = frameBytes;
+    a->overlapBytes = frameBytes / 16;
+    a->scale = 2.0f / Sqrtf8011(frameSize);
+    for (i = 0; i < numBands; i++) {
+        a->bands[i] = half * lbl_80329B60[i] / nyquist;
+        if (a->bands[i] == 0) {
+            a->bands[i] = 1;
+        }
+    }
+    a->bands[i] = half;
+    a->quant[0] = 0;
+    a->first = 1;
+    return a;
+}
+
 void fn_8011B94C(void *arg0, s32 *arg1, s32 *arg2, s32 arg3, s32 *arg4, s32 arg5, u32 *arg6, u32 arg7, f32 arg8, s32 arg9) {
     u8 *p = (u8 *)arg0;
     u32 count = *(u32 *)(p + 0xC) >> 1;
