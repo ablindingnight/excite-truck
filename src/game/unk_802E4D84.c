@@ -124,13 +124,13 @@ typedef struct SpuRemote {
 } SpuRemote;
 #define SPU_REMOTES ((SpuRemote *)lbl_804FC800)
 extern char lbl_8034D384[];
-extern unsigned char lbl_804FC558[];
+extern char lbl_804FC558[][0x20];  // names of the loaded sound packages
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
 extern struct SpuSample **lbl_8055FF9C;
 struct SpuSample *fn_802E5AE8(char *name);
-extern void fn_8012BEF0(unsigned char *);
-extern void fn_8012C41C(void (*)(void), int, unsigned char *);
+extern void fn_8012BEF0(const char *name);
+extern void fn_8012C41C(void (*)(void), int, const char *name);
 extern void fn_802E589C(char *name);
 extern int fn_802E582C(char *name);
 __declspec(section ".sdata") extern char lbl_8055D1E4[];
@@ -170,6 +170,17 @@ extern int OSRestoreInterrupts(int);
 extern void *memset(void *, int, unsigned int);
 extern char lbl_8034D554[];
 extern char lbl_8034D578[];
+
+// Copies at most n - 1 characters of src to dst and terminates it.
+static inline void StrCopy(char *d, const char *s, int n) {
+    char *p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
 
 // Byte swaps for resources saved with the other endianness.
 static inline void Swap32(void *p) {
@@ -530,34 +541,23 @@ void fn_802E589C(char *name) {
     fn_802E582C(name);
 }
 
-extern unsigned char lbl_804FC558[];
+extern char lbl_804FC558[][0x20];  // names of the loaded sound packages
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
 extern struct SpuSample **lbl_8055FF9C;
 struct SpuSample *fn_802E5AE8(char *name);
-extern void fn_8012BEF0(unsigned char *);
-extern void fn_8012C41C(void (*)(void), int, unsigned char *);
+extern void fn_8012BEF0(const char *name);
+extern void fn_8012C41C(void (*)(void), int, const char *name);
 extern int fn_802E582C(char *name);
 int fn_802E58A0(void *arg0, int arg1) {
     if (arg1 == 0x53465830) return fn_802E582C((char *)arg0);
     return 1;
 }
 
-void fn_802E58B8(unsigned char *arg0) {
-    int index = lbl_8055FF78;
-    unsigned char *dst = lbl_804FC558 + (index << 5);
-    unsigned char *src = arg0;
-    int count = 0x20;
-    lbl_8055FF78 = index + 1;
-    do {
-        count--;
-    } while (count != 0);
-    *--dst = 0;
-    while ((signed char)*src != 0) {
-        *dst++ = *src++;
-    }
-    fn_8012BEF0(arg0);
-    fn_8012C41C((void (*)(void))fn_802E589C, 0, arg0);
+void fn_802E58B8(char *name) {
+    StrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
+    fn_8012BEF0(name);
+    fn_8012C41C((void (*)())fn_802E589C, 0, name);
 }
 
 // Caches the sample named by format `lbl_8055D1E4` with (arg0, arg1).
@@ -570,32 +570,21 @@ void fn_802E5950(int arg0, int arg1) {
     }
 }
 
-void fn_802E59BC(unsigned char *arg0) {
-    int index = lbl_8055FF78;
-    unsigned char *dst = lbl_804FC558 + (index << 5);
-    unsigned char *src = arg0;
-    int count = 0x20;
-    lbl_8055FF78 = index + 1;
-    while (count > 0) {
-        count--;
-    }
-    *--dst = 0;
-    while ((signed char)*src != 0) {
-        *dst++ = *src++;
-    }
-    fn_8012BEF0(arg0);
-    fn_8012C41C((void (*)())fn_802E58A0, 0, arg0);
+void fn_802E59BC(char *name) {
+    StrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
+    fn_8012BEF0(name);
+    fn_8012C41C((void (*)())fn_802E58A0, 0, name);
 }
 
+// Releases every cached sample and unloads the sound packages.
 void fn_802E5A54(void) {
-    unsigned char *ptr;
     int i;
     for (i = 0; i < lbl_8055FFA0; i++) {
-        fn_802E5D5C((void *)lbl_8055FF9C[i]);
+        fn_802E5D5C(lbl_8055FF9C[i]);
     }
     lbl_8055FFA0 = 0;
-    for (ptr = lbl_804FC558, i = 0; i < lbl_8055FF78; i++, ptr += 0x20) {
-        fn_8012BF24(ptr);
+    for (i = 0; i < lbl_8055FF78; i++) {
+        fn_8012BF24(lbl_804FC558[i]);
     }
     lbl_8055FF78 = 0;
 }
@@ -682,16 +671,6 @@ SpuSample *fn_802E5AE8(char *name) {
     return s;
 }
 
-// Copies at most n - 1 characters of src to dst and terminates it.
-static inline void StrCopy(char *d, const char *s, int n) {
-    char *p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 extern void fn_801282EC(int align);
 extern void fn_801282F4(void);
