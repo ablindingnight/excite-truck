@@ -2453,22 +2453,20 @@ s32 fn_8011AC04(s32 arg0, s32 arg1) {
 }
 
 void fn_8011AC10(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 temp_r4;
     s32* p = (s32*)arg0;
-    OSDisableInterrupts();
+    s32 level = OSDisableInterrupts();
     arg2 &= 0xFFFF8000;
-    temp_r4 = arg1 + arg2;
     p[0xA0/4] = arg2;
     p[0x40/4] = arg2;
     p[0xA4/4] = arg1;
     p[0x9C/4] = arg1;
     p[0xAC/4] = arg1;
-    p[0xA8/4] = temp_r4;
+    p[0xA8/4] = arg1 + arg2;
     p[0x4C/4] = 0;
     p[0xB8/4] = arg3;
     p[0xBC/4] = arg4;
     p[0xD0/4] = (s32)arg0;
-    OSRestoreInterrupts(temp_r4);
+    OSRestoreInterrupts(level);
 }
 
 extern f32 lbl_80329D48[];
@@ -3043,23 +3041,22 @@ void fn_8011BDF0(s32 arg0) {
     }
 }
 
-void *fn_8011BE48(s32 arg0) {
-    void *ptr;
-    s32 sign;
-    s32 value;
-    ptr = fn_8011FFC4(0x40);
-    if (ptr != NULL) {
-        memset(ptr, 0, 0x40);
-        sign = arg0 >> 31;
-        *(s32 *)((u8 *)ptr + 0x00) = 0;
-        value = (sign ^ arg0) - sign;
-        *(s32 *)((u8 *)ptr + 0x04) = 1;
-        *(s32 *)((u8 *)ptr + 0x30) = 0;
-        *(s32 *)((u8 *)ptr + 0x34) = 1;
-        *(s32 *)((u8 *)ptr + 0x38) = 0;
-        *(s32 *)((u8 *)ptr + 0x3C) = value;
+// Creates a sound request queue for `count` entries (negative counts are taken as positive).
+void *fn_8011BE48(s32 count) {
+    void *q = fn_8011FFC4(0x40);
+    if (q != NULL) {
+        memset(q, 0, 0x40);
+        *(s32 *)((u8 *)q + 0x00) = 0;
+        *(s32 *)((u8 *)q + 0x04) = 1;
+        *(s32 *)((u8 *)q + 0x30) = 0;
+        *(s32 *)((u8 *)q + 0x34) = 1;
+        *(s32 *)((u8 *)q + 0x38) = 0;
+        if (count < 0) {
+            count = -count;
+        }
+        *(s32 *)((u8 *)q + 0x3C) = count;
     }
-    return ptr;
+    return q;
 }
 
 // Queues request `arg1` (callbacks arg2/arg3) on `arg0` with interrupts disabled.
