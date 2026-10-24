@@ -757,11 +757,13 @@ s32 fn_802C6DC4(const char* name, ModelInfo* m, s32 inst, const char* prefix) {
     ModelNode* empty = 0;
     ModelNode* s = lbl_804C139C.data;
     for (int i = 0; i < lbl_804C139C.count; i++, s++) {
-        if (s->refs <= 0) {
+        if (s->refs > 0) {
+            if (s->inst == inst && s->info == m) {
+                found = s;
+                break;
+            }
+        } else {
             empty = s;
-        } else if (s->inst == inst && s->info == m) {
-            found = s;
-            break;
         }
     }
     if (!found) {
