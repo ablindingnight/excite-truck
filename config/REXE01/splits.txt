@@ -3217,6 +3217,10 @@ game/unk_8020CF68.c:
 game/unk_8020DE74.c:
 	.text       start:0x8020DE74 end:0x8020F3AC
 
+game/unk_8020F3AC.c:
+	.text       start:0x8020F3AC end:0x8020F3B4
+	.ctors      start:0x802ED3A4 end:0x802ED3A8
+
 game/unk_8020F3B4.c:
 	.text       start:0x8020F3B4 end:0x802114F4
 
