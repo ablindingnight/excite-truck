@@ -2913,8 +2913,8 @@ void fn_8011C4A0(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
     u32 passes;
     u32 bit;
     u32 i;
-    u8 tmp[16];
     u8 tmp2[16];
+    u8 tmp[16];
 
     avail = bits->count;
     next = bits->next;
@@ -2973,23 +2973,25 @@ void fn_8011C4A0(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
                 }
             }
         } else {
+            u32 unused;
             u32 count;
-            u32 unused = 0xFFFF;
-            u8 *p = syms;
+            u8 *p;
+            u32 sym;
             BINK_GETBITS(count, 3);
-            for (i = 0; i < count + 1; i++) {
+            unused = 0xFFFF;
+            for (i = 0; i <= count; i++) {
                 u32 s;
                 BINK_GETBITS(s, 4);
-                *p++ = s;
+                syms[i] = s;
                 unused &= ~(1 << s);
             }
             p = syms + count;
-            i = 0;
+            sym = 0;
             do {
                 if (unused & 1) {
-                    *++p = i;
+                    *++p = sym;
                 }
-                i++;
+                sym++;
             } while (unused >>= 1);
         }
     }
