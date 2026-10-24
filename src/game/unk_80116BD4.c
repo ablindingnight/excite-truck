@@ -877,6 +877,8 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     u32 i;
     u32 n;
     s32 any;
+    s32 f;
+    void *buf;
 
     open = (s32 (*)(void *, void *, u32))fn_8011ACC4;
     if (!(flags & 0x4000)) {
@@ -895,7 +897,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         }
         lbl_8055DED8 = 0;
         if (!open(&local.readerRead, name, flags)) {
-            if (lbl_8041D508[0] == 0) {
+            if ((s8)lbl_8041D508[0] == 0) {
                 fn_80116E2C((u8 *)lbl_802F6528);
             }
             return 0;
@@ -905,7 +907,11 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     if ((hdr.magic != 'fKIB' && hdr.magic != 'gKIB' && hdr.magic != 'hKIB' && hdr.magic != 'iKIB') ||
         local.unk110 != 0) {
         fn_80116E2C((u8 *)lbl_802F6528 + 0x14);
-        goto close;
+    close:
+        if (!fromMemory) {
+            local.readerClose(&local.readerRead);
+        }
+        return 0;
     }
     if (hdr.frames == 0) {
         fn_80116E2C((u8 *)lbl_802F6528 + 0x25);
@@ -979,9 +985,15 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     fn_8011FE20((void **)&local.tracks, (lbl_80559944 != 0 ? lbl_80559944 : 1) * sizeof(StreamTrack));
     fn_8011FE20((void **)&local.trackIds, lbl_80559944 * 4);
     fn_8011DFAC(local.planeSizes, (local.width + 15) & ~15);
-    for (i = 0; i < 9; i++) {
-        fn_8011FE20((void **)&local.planeSizes[i], local.planeSizes[i]);
-    }
+    fn_8011FE20((void **)&local.planeSizes[0], local.planeSizes[0]);
+    fn_8011FE20((void **)&local.planeSizes[1], local.planeSizes[1]);
+    fn_8011FE20((void **)&local.planeSizes[2], local.planeSizes[2]);
+    fn_8011FE20((void **)&local.planeSizes[3], local.planeSizes[3]);
+    fn_8011FE20((void **)&local.planeSizes[4], local.planeSizes[4]);
+    fn_8011FE20((void **)&local.planeSizes[5], local.planeSizes[5]);
+    fn_8011FE20((void **)&local.planeSizes[6], local.planeSizes[6]);
+    fn_8011FE20((void **)&local.planeSizes[7], local.planeSizes[7]);
+    fn_8011FE20((void **)&local.planeSizes[8], local.planeSizes[8]);
     if (!fromMemory) {
         fn_8011FE20((void **)&local.setIndex, (local.numIndex + 1) * 4);
         fn_8011FE20((void **)&local.audioMaxSize, local.numAudio * 4);
@@ -1021,43 +1033,43 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     if (!(flags & 0x400)) {
         fn_80117618(p, &fb);
         any = 0;
-        for (i = 0; i < fb.count; i++) {
+        for (f = 0; f < fb.count; f++) {
             u32 cPitch = (fb.cWidth + 15) & ~15;
-            if (fb.frames[i].y.wanted) {
-                fn_8011FE20(&fb.frames[i].y.buffer, fb.width * fb.height);
+            if (fb.frames[f].y.wanted) {
+                fn_8011FE20(&fb.frames[f].y.buffer, fb.width * fb.height);
                 any = 1;
-                fb.frames[i].y.pitch = fb.width;
+                fb.frames[f].y.pitch = fb.width;
             }
-            if (fb.frames[i].cr.wanted) {
-                fn_8011FE20(&fb.frames[i].cr.buffer, cPitch * fb.cHeight);
-                fb.frames[i].cr.pitch = cPitch;
-                any = 1;
-            }
-            if (fb.frames[i].cb.wanted) {
-                fn_8011FE20(&fb.frames[i].cb.buffer, cPitch * fb.cHeight);
-                fb.frames[i].cb.pitch = cPitch;
+            if (fb.frames[f].cr.wanted) {
+                fn_8011FE20(&fb.frames[f].cr.buffer, cPitch * fb.cHeight);
+                fb.frames[f].cr.pitch = cPitch;
                 any = 1;
             }
-            if (fb.frames[i].a.wanted) {
-                fn_8011FE20(&fb.frames[i].a.buffer, fb.width * fb.height);
+            if (fb.frames[f].cb.wanted) {
+                fn_8011FE20(&fb.frames[f].cb.buffer, cPitch * fb.cHeight);
+                fb.frames[f].cb.pitch = cPitch;
                 any = 1;
-                fb.frames[i].a.pitch = fb.width;
+            }
+            if (fb.frames[f].a.wanted) {
+                fn_8011FE20(&fb.frames[f].a.buffer, fb.width * fb.height);
+                any = 1;
+                fb.frames[f].a.pitch = fb.width;
             }
         }
-        for (; i < 2; i++) {
-            fb.frames[i].cr.buffer = 0;
-            fb.frames[i].cb.buffer = 0;
-            fb.frames[i].y.buffer = 0;
+        for (; f < 2; f++) {
+            fb.frames[f].cr.buffer = 0;
+            fb.frames[f].cb.buffer = 0;
+            fb.frames[f].y.buffer = 0;
         }
         if (any) {
-            p->extra = fn_80116DDC(p, sizeof(fb));
-            if (p->extra == 0) {
+            p->extra = buf = fn_80116DDC(p, sizeof(fb));
+            if (buf == 0) {
             freeplayer:
                 fn_80120084(p);
                 goto nomem;
             }
-            p->video = p->extra;
-            memcpy(p->extra, &fb, sizeof(fb));
+            p->video = buf;
+            memcpy(buf, &fb, sizeof(fb));
         }
     }
     if ((flags & 0x01000000) && lbl_8055993C != -1) {
@@ -1204,12 +1216,6 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         }
     }
     return p;
-
-close:
-    if (!fromMemory) {
-        local.readerClose(&local.readerRead);
-    }
-    return 0;
 }
 
 // Decodes the current frame of a stream player: updates the timing history, copies each audio track's decoded
