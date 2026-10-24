@@ -93,6 +93,29 @@ struct TextBox {
     s32 a;     // offset 0x18
 };
 
+// Something told about every awarded stunt. These interfaces come before Task because the
+// compiler emits vtables in reverse declaration order (target .data: Task, ISubTaskMgr, StuntWatcher).
+class StuntWatcher {
+public:
+    virtual void Notify(s32 type, int car, int rank) = 0;  // 0x08
+};
+
+// The race's per-mode hooks (0x2C vtable, all pure).
+class ISubTaskMgr {
+public:
+    virtual ~ISubTaskMgr(void) = 0;
+    virtual int vf0C(int a, int b, int c, int d, u32* flags) = 0;
+    virtual int vf10(int a, f32* out, int car) = 0;
+    virtual int vf14(void) = 0;
+    virtual void vf18(void) = 0;
+    virtual int vf1C(void) = 0;
+    virtual void vf20(void) = 0;
+    virtual void vf24(void) = 0;
+    virtual int vf28(void) = 0;
+};
+
+inline ISubTaskMgr::~ISubTaskMgr(void) {}
+
 // One challenge (and the list screen): the interface the tutorial drives.
 class Task {
 public:
@@ -367,12 +390,7 @@ struct StuntReq {
     u8 done;   // offset 0x8
 };
 
-class StuntWatcher {
-public:
-    virtual void Notify(s32 type, int car, int rank);  // 0x08
-};
-
-class CSubTaskMgr {
+class CSubTaskMgr : public ISubTaskMgr {
 public:
     virtual ~CSubTaskMgr(void) {}
     virtual int vf0C(int a, int b, int c, int d, u32* flags);
@@ -394,16 +412,8 @@ static inline void SetupChallenge(Challenge* c, ValueNode* n);
 static inline void SetupStunt(StuntChallenge* c, ValueNode* n);
 static inline void SetupFreestyle(FreestyleChallenge* c, ValueNode* n);
 
-// A challenge's own slots.
-class ChallengeIF : public Task {
-public:
-    virtual ~ChallengeIF(void) {}
-    virtual void SetResult(int r) = 0;  // 0x60
-    virtual int TimedOut(void) = 0;     // 0x64
-};
-
 // The challenges' common part: help pages, the result and place targets.
-class ChallengeBase : public ChallengeIF {
+class ChallengeBase : public Task {
 public:
     ChallengeBase(ValueNode* n) { node = n; }
     virtual ~ChallengeBase(void) {}
@@ -478,13 +488,14 @@ public:
     virtual int AllowPause(void) { return 1; }
     virtual void Camera(void) {}
     virtual const char* Title(void) { return node->GetString("title", ""); }
-    virtual void SetResult(int r) {
+    virtual void SetResult(int r) {  // 0x60
         if (!resultSet) {
             result = r;
             resultSet = 1;
             resultTime = lbl_8055E3C8;
         }
     }
+    virtual int TimedOut(void) = 0;  // 0x64
 
     ValueNode* node;           // offset 0x4
     s32 result;                // offset 0x8
@@ -1675,8 +1686,7 @@ static u8 lbl_8055E308;  // warned about the elems
 
 inline int ChalList::Draw(int a) {
     if (exit) {
-        const char* body = fn_80131234("Tutorial:EXIT_BODY");
-        fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), body);
+        fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), fn_80131234("Tutorial:EXIT_BODY"));
     } else {
         ::Event* e;
         TextElem* e1;
