@@ -31,9 +31,7 @@ extern void fn_80209110(void *);
 #pragma cplusplus on
 class Dummy_8020D1C8 {
 public:
-    virtual void d0();
-    virtual void d1();
-    virtual void d2(int);
+    virtual ~Dummy_8020D1C8();
 };
 #pragma cplusplus off
 
@@ -106,9 +104,7 @@ void fn_8020D178(void) {
 extern "C" void fn_8020D1C8(void) {
     Dummy_8020D1C8 *obj = (Dummy_8020D1C8 *)lbl_8055EEA0;
     if (obj != 0) {
-        if (obj != 0) {
-            obj->d2(1);
-        }
+        delete obj;
         lbl_8055EEA0 = 0;
     }
     fn_80209110(&lbl_8055EE74);
