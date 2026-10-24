@@ -80,14 +80,18 @@ typedef struct StreamPlayer {
     u8 pad0[0x8];
     u32 numSets;                        // 0x08
     s32 curSet;                         // 0x0C
-    u8 pad10[0x20 - 0x10];
+    s32 prevSet;                        // 0x10
+    u8 pad14[0x20 - 0x14];
     u32 flags;                          // 0x20
     u8 pad24[0xDC - 0x24];
     s32 paused;                         // 0xDC
-    u8 padE0[0xE8 - 0xE0];
+    u8 padE0[0xE4 - 0xE0];
+    s32 setData;                        // 0xE4  start of the current set's data
     void *memoryData;                   // 0xE8  set when playing from memory
-    u8 padEC[0xF0 - 0xEC];
-    u8 reader[0x10];                    // 0xF0  file reader state
+    s32 *setIndex;                      // 0xEC  file offset of each set (low bit is a flag)
+    u8 reader[4];                       // 0xF0  file reader state
+    s32 (*readerSeek)(void *reader, s32 set, s32 offset, s32 dst, s32 size);  // 0xF4
+    u8 readerF8[0x100 - 0xF8];
     s32 (*readerFill)(void *reader);    // 0x100
     void (*readerClose)(void *reader);  // 0x104
     u8 pad108[0x11C - 0x108];
@@ -106,7 +110,9 @@ typedef struct StreamPlayer {
     s32 running;                        // 0x288
     u8 pad28C[0x2D4 - 0x28C];
     u32 unk2D4;                         // 0x2D4
-    u8 pad2D8[0x2E8 - 0x2D8];
+    s32 firstTime;                      // 0x2D8  time the first set last started
+    s32 stalled;                        // 0x2DC
+    u8 pad2E0[0x2E8 - 0x2E0];
     int numTracks;                      // 0x2E8
     s32 resyncs;                        // 0x2EC
     StreamTrack *tracks;                // 0x2F0
@@ -133,7 +139,7 @@ s32 fn_80118F78(StreamPlayer *p, s32 arg1);
 s32 fn_801190B0(StreamPlayer *p, s32 arg1);
 void fn_80118C1C(void *arg0, s32 arg1);
 void fn_80118F1C(void *arg0, s32 arg1);
-void fn_80117380(void *arg0, s32 arg1);
+void fn_80117380(struct StreamPlayer *p, s32 next);
 u32 fn_80116F8C(void *arg0);
 s32 fn_80116D30(void);
 void fn_8011BC48(s32 arg0);
@@ -562,36 +568,35 @@ void fn_80117330(void* arg0) {
  }
 }
 
-void fn_80117380(void *arg0, s32 arg1) {
-    s32 var_r31;
-    s32 temp_r3;
-    s32 temp_r5;
-    var_r31 = arg1;
-    if (arg1 != 0) var_r31 = arg1 - 1;
-    *(s32 *)((u8 *)arg0 + 0x2F8) = 0;
-    if (*(s32 *)((u8 *)arg0 + 0x2E8) != 0) fn_80117074(arg0);
-    *(s32 *)((u8 *)arg0 + 0x10) = *(s32 *)((u8 *)arg0 + 0xC);
-    if (var_r31 == 0) {
-        temp_r3 = fn_80116D30();
-        if (*(s32 *)((u8 *)arg0 + 0x2D8) == 0) *(s32 *)((u8 *)arg0 + 0x2D8) = temp_r3;
-        if ((u32)(temp_r3 - *(u32 *)((u8 *)arg0 + 0x2D8)) > 0x493E0U) {
-            *(s32 *)((u8 *)arg0 + 0x2D8) = temp_r3;
-            *(s32 *)((u8 *)arg0 + 0x2DC) = 1;
+// Moves a stream player to set `next` (1-based; 0 restarts the first): feeds the tracks, notes when the first set
+// starts (flagging a stall after 300000 ticks), and points the data at the set, in memory or through the reader.
+void fn_80117380(StreamPlayer *p, s32 next) {
+    int set;
+    s32 now;
+    s32 base;
+    set = next;
+    if (next != 0) set = next - 1;
+    p->unk2F8 = 0;
+    if (p->numTracks != 0) fn_80117074(p);
+    p->prevSet = p->curSet;
+    if (set == 0) {
+        now = fn_80116D30();
+        if (p->firstTime == 0) p->firstTime = now;
+        if ((u32)(now - p->firstTime) > 300000) {
+            p->firstTime = now;
+            p->stalled = 1;
         }
     }
-    temp_r5 = *(s32 *)((u8 *)arg0 + 0xE8);
-    if (temp_r5 != 0) {
-        s32 *p = *(s32 **)((u8 *)arg0 + 0xEC);
-        *(s32 *)((u8 *)arg0 + 0xE4) = temp_r5 + ((p[var_r31] & ~1) - (p[0] & ~1));
+    base = (s32)p->memoryData;
+    if (base != 0) {
+        p->setData = base + ((p->setIndex[set] & ~1) - (p->setIndex[0] & ~1));
     } else {
-        s32 *p = *(s32 **)((u8 *)arg0 + 0xEC);
-        s32 a = p[var_r31] & ~1;
-        s32 b = p[var_r31 + 1] & ~1;
-        s32 (*fn)(void *, s32, s32, s32, s32) = *(s32 (**)(void *, s32, s32, s32, s32))((u8 *)arg0 + 0xF4);
-        fn((u8 *)arg0 + 0xF0, var_r31, a, *(s32 *)((u8 *)arg0 + 0xE4), b - a);
+        s32 a = p->setIndex[set] & ~1;
+        s32 b = p->setIndex[set + 1] & ~1;
+        p->readerSeek(p->reader, set, a, p->setData, b - a);
     }
-    if (*(s32 *)((u8 *)arg0 + 0x2E8) != 0) fn_80117074(arg0);
-    *(s32 *)((u8 *)arg0 + 0xC) = var_r31 + 1;
+    if (p->numTracks != 0) fn_80117074(p);
+    p->curSet = set + 1;
 }
 
 u32 fn_80116BD4(s32, s32, s32);
