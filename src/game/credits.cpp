@@ -181,8 +181,8 @@ struct CreditTextDescFields {
     f32 accelerationX,accelerationY,spinMin,spinMax;int capacity;f32 emissionRate;
     f32 lifetime,fadeTime,size,sizeDelta;
 };
-struct CreditGlyphStorageObservedNew {~CreditGlyphStorageObservedNew(){items=0;count=0;capacity=0;}void* items;int count,capacity;};
-struct CreditGlyphBatchFields:CreditGlyphStorageObservedNew {~CreditGlyphBatchFields(){__dla__FPv(allocation);}void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
+struct CreditGlyphStorageObservedNew {CreditGlyphStorageObservedNew(int);~CreditGlyphStorageObservedNew(){items=0;count=0;capacity=0;}void* items;int count,capacity;};
+struct CreditGlyphBatchFields:CreditGlyphStorageObservedNew {CreditGlyphBatchFields(int);~CreditGlyphBatchFields(){__dla__FPv(allocation);}void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
 struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);~CreditFontGroupFields();void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
 struct CreditBackgroundHeader {CreditBackgroundHeader(const void* t){state=0;methods=t;}const void* methods;u8 reserved4[0x10];int state;};
 struct CreditBackgroundFields:CreditBackgroundHeader {CreditBackgroundFields();~CreditBackgroundFields();CreditFontGroupFields fire,smoke;};
@@ -197,16 +197,17 @@ extern const char lbl_8055C490[8];
 int fn_8023512C(const void*);
 }
 static inline f32 CreditObservedMax(f32 a,f32 b){return a>b?a:b;}
+inline CreditGlyphStorageObservedNew::CreditGlyphStorageObservedNew(int n){void* buffer=__nwa__FUlPCc(n*32,lbl_8055C490);items=buffer;capacity=n;count=0;}
+inline CreditGlyphBatchFields::CreditGlyphBatchFields(int n):CreditGlyphStorageObservedNew(n),allocation(items){}
 static inline void CreditGroupInit(CreditFontGroupFields* self,int capacity) {
-    void* buffer=__nwa__FUlPCc(capacity*32,lbl_8055C490);
-    self->glyphs.items=buffer;self->glyphs.capacity=capacity;self->glyphs.count=0;self->glyphs.allocation=buffer;
+
     self->glyphs.inverseX=(1.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.lifetime);
     self->glyphs.inverseY=(255.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.lifetime);
     self->glyphs.inverseZ=(1.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.fadeTime);
     self->glyphs.count=0;self->glyphs.elapsed=(0.0f);
 }
 
-inline CreditFontGroupFields::CreditFontGroupFields(const CreditTextDescFields& d):desc(d),resource(fn_8023512C(desc.resource)){CreditGroupInit(this,d.capacity);}
+inline CreditFontGroupFields::CreditFontGroupFields(const CreditTextDescFields& d):desc(d),resource(fn_8023512C(desc.resource)),glyphs(d.capacity){CreditGroupInit(this,d.capacity);}
 extern "C" {
 CreditBackgroundFields* fn_802646D0(CreditBackgroundFields* self);
 
