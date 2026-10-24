@@ -487,7 +487,7 @@ void fn_80251D7C(u8* p) {}  // stub (303)
 
 int fn_80252238(u8* p, int key) {
     if (key == 0xD) {
-        if (NearZero(F32(p, 0x194)) || NearZero(F32(p, 0x198))) {
+        if ((f32)__fabs(F32(p, 0x194)) <= lbl_80558DC4[0] || (f32)__fabs(F32(p, 0x198)) <= lbl_80558DC4[0]) {
             ((MenuState*)p)->Finish(0);
             return 1;
         }
