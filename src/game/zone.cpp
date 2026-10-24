@@ -632,7 +632,7 @@ struct ZoneHud {
         StrCopyN(textC6, 0x14, "");
         StrCopyN(textDA, 0x14, "");
     }
-    void Reset(void) {
+    void ResetState(void) {
         state = 0;
         t = -1.0f;
         b8 = 1;
@@ -653,6 +653,7 @@ struct ZoneHud {
         StopSound(complete1);
         StopSound(complete2);
     }
+    void Reset(void);
     void Init(void);
 
     s32 state;  // offset 0x0 (0x134)
@@ -2583,7 +2584,7 @@ void ZoneMaster::vf10(void) {
     }
     events.a.tail = 0;
     events.a.head = 0;
-    hud.Reset();
+    hud.ResetState();
     f250 = 1.5f;
     StopSound(prerace);
     b258 = 0;
@@ -2756,6 +2757,8 @@ void ZoneMaster::vfF8(void) {
     hud.Init();
     hud.Reset();
 }
+
+void ZoneHud::Reset(void) { ResetState(); }
 
 struct HudBinding {
     HudBinding(s32 type, const char* name, void* ptr) : type(type), name(name), ptr(ptr) {}
