@@ -155,9 +155,11 @@ typedef struct StreamPlayer {
     s32 setData;                        // 0xE4  start of the current set's data
     void *memoryData;                   // 0xE8  set when playing from memory
     s32 *setIndex;                      // 0xEC  file offset of each set (low bit is a flag)
-    u8 reader[4];                       // 0xF0  file reader state
+    // 0xF0: the file reader (fn_8011ACC4 for DVD files); its state follows its functions.
+    s32 (*readerRead)(void *reader, s32 pos, void *dst, u32 size);             // 0xF0
     s32 (*readerSeek)(void *reader, s32 set, s32 offset, s32 dst, s32 size);  // 0xF4
-    u8 readerF8[0x100 - 0xF8];
+    u32 (*readerBufSize)(void *reader, u32 size);                              // 0xF8
+    void (*readerStart)(void *reader, void *buf, u32 bufSize, u32 total, s32 arg);  // 0xFC
     s32 (*readerFill)(void *reader);    // 0x100
     void (*readerClose)(void *reader);  // 0x104
     u8 pad108[0x10C - 0x108];
@@ -722,7 +724,7 @@ void fn_80117380(StreamPlayer *p, s32 next) {
     } else {
         s32 a = p->setIndex[set] & ~1;
         s32 b = p->setIndex[set + 1] & ~1;
-        p->readerSeek(p->reader, set, a, p->setData, b - a);
+        p->readerSeek(&p->readerRead, set, a, p->setData, b - a);
     }
     if (p->numTracks != 0) fn_80117074(p);
     p->curSet = set + 1;
@@ -949,7 +951,7 @@ s32 fn_801186B8(StreamPlayer *p) {
                 n = p->readerCapacity;
             }
             if (p->readerFilled < (n * 4 - n) >> 2) {
-                p->readerFill(p->reader);
+                p->readerFill(&p->readerRead);
             }
         }
         p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
@@ -1000,7 +1002,7 @@ void fn_80118C44(StreamPlayer *p) {
             p->resyncs++;
             fn_8011C274(lbl_8055DED4, p->queue);
             fn_801190B0(p, 0);
-            while ((p->readerCapacity * 29) >> 5 > p->readerFilled && p->readerFill(p->reader) != 0) {
+            while ((p->readerCapacity * 29) >> 5 > p->readerFilled && p->readerFill(&p->readerRead) != 0) {
             }
             p->startTime = 0;
             p->unk328 = 0;
@@ -1044,7 +1046,7 @@ void fn_80118DC0(StreamPlayer *p) {
                 fn_80120084(p->memoryData);
             }
         } else {
-            p->readerClose(p->reader);
+            p->readerClose(&p->readerRead);
             fn_80120084(p->readBuffer);
         }
         if (p->extra != 0) {
