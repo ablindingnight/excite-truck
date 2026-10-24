@@ -367,11 +367,11 @@ void fn_8000D19C(void) {
 void fn_8000D1DC(void) {
     u8 alpha;
     Camera cam;
-    int i;
+    const char** text;
     char name[32];
     f32 pulse;
-    const char** text;
-    int selected;
+    int i;
+    bool selected;
     char label[32];
     LayoutItem item;
     LayoutArtItem button;
