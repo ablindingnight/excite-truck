@@ -1091,7 +1091,6 @@ void fn_802B8744(void) {
 void fn_802B87A0(void) {
     fn_8026E214((void*)lbl_8055FA00);
     SafeDelete(lbl_8055FA48);
-    fn_80148F4C();
     if (lbl_8055FA34 != -1) {
         fn_802C6CF8(lbl_8055FA34);
         lbl_8055FA34 = -1;

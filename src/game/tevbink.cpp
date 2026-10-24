@@ -185,6 +185,7 @@ void fn_802DF1B4(void) {
     GXSetTevSwapModeTable(1, 0, 0, 0, 3);
     GXSetTevSwapMode(0, 0, 0);
     GXSetTevSwapMode(1, 0, 0);
+    fn_802D3144();
     GXSetNumIndStages(0);
     GXSetTevDirect(1);
 }
