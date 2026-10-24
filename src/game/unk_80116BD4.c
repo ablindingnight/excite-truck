@@ -115,7 +115,7 @@ void fn_80117380(void *arg0, s32 arg1);
 u32 fn_80116F8C(void *arg0);
 s32 fn_80116D30(void);
 void fn_8011BC48(s32 arg0);
-s32 fn_8011BFFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
 void fn_8011C274(s32 arg0, void *arg1);
 void fn_80120084(void *arg0);
 extern void memset(void *, int, unsigned int);
@@ -708,11 +708,13 @@ void fn_80118DC0(StreamPlayer *p) {
     u32 i;
     if (p != 0) {
         fn_80118F78(p, 1);
-        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? lbl_8055DED4 : 0, (s32)p->queue, 1)) {
+        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? (void *)lbl_8055DED4 : (void *)0, (s32)p->queue, 1)) {
         case 2:
             lbl_8055DED4 = 0;
+            break;
         case 3:
             lbl_8055DED4 = 0;
+            break;
         }
         for (i = 0; i < p->numTracks; i++) {
             p->tracks[i].Close(&p->tracks[i]);
@@ -2055,8 +2057,8 @@ s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
     return result;
 }
 
-s32 fn_8011BFFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 temp = fn_8011BF4C(arg2, arg3, arg4) << 1;
+s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
+    s32 temp = fn_8011BF4C((s32)arg2, arg3, arg4) << 1;
     s32 result = fn_8011BF4C(arg0, arg1, arg4);
     return result | temp;
 }
