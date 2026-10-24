@@ -424,8 +424,8 @@ u32 lbl_8055FD28;   // tev color 2
 s32 lbl_8055FD2C;   // last finished frame
 s32 lbl_8055FD30;   // frame
 u8 lbl_8055FD34;    // waiting for draw done
-s32 lbl_8055FD38;   // retraces waited
-u8 lbl_8055FD3C;    // draw done
+volatile s32 lbl_8055FD38;  // retraces waited (counted in the retrace callback)
+volatile u8 lbl_8055FD3C;   // draw done (set by the draw-done callback)
 s32 lbl_8055FD40;
 s32 lbl_8055FD44;   // retraces
 s32 lbl_8055FD48;   // black frames
