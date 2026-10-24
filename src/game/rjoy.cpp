@@ -140,9 +140,7 @@ f32 fn_802E7824(f32 x, f32 dead) {
     if (x >= 0.0f) {
         f32 v = k * (x - dead);
         f32 r = 1.5f;
-        if (r >= v) {
-            r = v;
-        }
+        r = r >= v ? v : r;
         if (r > 0.0f) {
             return r;
         }
@@ -150,9 +148,7 @@ f32 fn_802E7824(f32 x, f32 dead) {
     }
     f32 v = k * (x + dead);
     f32 r = 0.0f;
-    if (r >= v) {
-        r = v;
-    }
+    r = r >= v ? v : r;
     if (r <= -1.5f) {
         r = -1.5f;
     }
@@ -292,12 +288,8 @@ void fn_802E7D0C(void) {
 
 static inline f32 Clamp1(f32 x) {
     f32 r = 1.0f;
-    if (r >= x) {
-        r = x;
-    }
-    if (r <= -1.0f) {
-        r = -1.0f;
-    }
+    r = r >= x ? x : r;
+    r = r <= -1.0f ? -1.0f : r;
     return r;
 }
 
@@ -488,12 +480,8 @@ const char* fn_802E85B8(s32 chan) {
 void fn_802E85F4(s32 chan) {
     Remote* r = &lbl_80505978[chan];
     f32 a = 0.2617994f;
-    if (a >= r->angle) {
-        a = r->angle;
-    }
-    if (a <= -0.5235988f) {
-        a = -0.5235988f;
-    }
+    a = a >= r->angle ? r->angle : a;
+    a = a <= -0.5235988f ? -0.5235988f : a;
     r->hist[r->histPos] = a;
     r->histPos = (r->histPos + 1) % 16;
 }
