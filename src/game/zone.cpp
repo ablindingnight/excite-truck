@@ -1718,7 +1718,7 @@ void ZoneMaster::vf44(void) {
         }
     }
     if (hits.count > 0) {
-        if (!NearZero(fn_801E7E24())) {
+        if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
             int i;
             for (i = 0; i < hits.count; i++) {
                 Gate* gg = hits.data[i].gate;
