@@ -487,6 +487,8 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
     return (q1 << 16) | q0;
 }
 
+// Bink was built with loop unrolling (a library build setting, applied here per function until the unit's
+// hand-unrolled loops are rewritten). Fills `size` bytes at dst with the 16-bit value v.
 #pragma opt_unroll_loops on
 void fn_80116CC4(u32 *dst, u16 v, u32 size) {
     u32 n = size >> 1;
