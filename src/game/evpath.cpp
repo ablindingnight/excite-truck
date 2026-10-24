@@ -523,18 +523,7 @@ int fn_802839D0(void) {
 }
 
 int fn_80283A50(void) {
-    int i;
-    u32 key = lbl_8055F698;
-    u32* d = lbl_804B30D8.data;
-    for (i = 0; i < lbl_804B30D8.count; i++) {
-        if (*d == key) {
-            goto found;
-        }
-        d++;
-    }
-    i = -1;
-found:
-    if (i >= 0) {
+    if (lbl_804B30D8.Find((u8*)lbl_8055F698) >= 0) {
         return 1;
     }
     fn_80216D28();
@@ -542,17 +531,7 @@ found:
 }
 
 int fn_80283AC8(void) {
-    int i;
-    u32 key = lbl_8055F698;
-    u32* d = lbl_804B30D8.data;
-    for (i = 0; i < lbl_804B30D8.count; i++) {
-        if (*d == key) {
-            goto found;
-        }
-        d++;
-    }
-    i = -1;
-found:
+    int i = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (i >= 0 && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
         return 1;
     }
