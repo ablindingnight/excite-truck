@@ -49,7 +49,6 @@ void fn_802C6CF8(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void* fn_802BAA68(void* xlo, const ValMatrix* m);
 void fn_8016A0B0(void);
-void fn_80144504(void* p);
 void fn_802ADE60(void* layout, int flag);
 void fn_8016A15C(const char* name);  // activate ring set
 void fn_8016A240(const char* name);  // deactivate ring set
