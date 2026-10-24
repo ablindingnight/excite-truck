@@ -796,7 +796,7 @@ void fn_802B7518(s16 x, s16 z, int v) {
     }
 }
 
-int fn_802B7694(void) {
+int fn_802B7694(const V3* hit) {
     int r = 0;
     if (!lbl_8055FA20.Waiting()) {
         lbl_8055FA20.Reset();
@@ -806,23 +806,21 @@ int fn_802B7694(void) {
 }
 
 void fn_802B773C(void) {
+    Cursor* c = &lbl_804BFF80;
     u8 was = lbl_8055FA58;
     lbl_8055FA58 = 0;
-    Cursor* c = &lbl_804BFF80;
     if (c->hover[0] == 0 && lbl_8055FA2C >= 0 && lbl_8055FA2C < lbl_804BE7D8.count) {
         V3 hit;
         if (fn_80204054(&hit, 0, 0, fn_802C86DC(), c->s.x, c->s.y)) {
-            if (c->s.flags & 1) {
-                if (lbl_804BFF80.s.op == 0 || was) {
-                    lbl_8055FA58 = 1;
-                    if (fn_802B7694()) {
-                        lbl_8055FA50[0] = 0x400;
-                        lbl_8055FA50[2] = 0x400;
-                        lbl_8055FA50[3] = -0x400;
-                        lbl_8055FA50[1] = -0x400;
-                        fn_802B6F34(&hit, &lbl_804BE7D8.data[lbl_8055FA2C], fn_802B7518);
-                        fn_802B7434();
-                    }
+            if ((c->s.flags & 1) && (lbl_804BFF80.s.op == 0 || was)) {
+                lbl_8055FA58 = 1;
+                if (fn_802B7694(&hit)) {
+                    lbl_8055FA50[0] = 0x400;
+                    lbl_8055FA50[2] = 0x400;
+                    lbl_8055FA50[3] = -0x400;
+                    lbl_8055FA50[1] = -0x400;
+                    fn_802B6F34(&hit, &lbl_804BE7D8.data[lbl_8055FA2C], fn_802B7518);
+                    fn_802B7434();
                 }
             } else if (!(c->s.flags & 2)) {
                 fn_802B6F34(&hit, &lbl_804BE7D8.data[lbl_8055FA2C], fn_802B7420);
