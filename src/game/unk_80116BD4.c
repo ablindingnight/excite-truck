@@ -898,22 +898,23 @@ s32 fn_8011A7CC(DVDFileInfo *info) {
 
 // MATCHING-AID: compiler pragma from upstream; revisit.
 #pragma dont_inline on
+// 0x50 is a state flag the DVD callbacks also change: every access is volatile.
 s32 fn_8011A870(void *arg0, s32 arg1) {
     if (arg1 & 1) {
-        if (*(s32 *)((char *)arg0 + 0x50) == 0)
-            *(s32 *)((char *)arg0 + 0x50) = 1;
+        if (*(volatile s32 *)((char *)arg0 + 0x50) == 0)
+            *(volatile s32 *)((char *)arg0 + 0x50) = 1;
         if (arg1 & 0x80000000) {
             // busy-wait until the flag is cleared elsewhere (volatile: re-read every pass)
             while (*(volatile s32 *)((char *)arg0 + 0x24) != 0) {
             }
         }
     } else if (arg1 & 2) {
-        if ((u32)*(s32 *)((char *)arg0 + 0x50) == 1U)
-            *(s32 *)((char *)arg0 + 0x50) = 0;
+        if ((u32)*(volatile s32 *)((char *)arg0 + 0x50) == 1U)
+            *(volatile s32 *)((char *)arg0 + 0x50) = 0;
         if (arg1 & 0x80000000)
             fn_8011A7CC(arg0);
     }
-    return *(s32 *)((char *)arg0 + 0x50);
+    return *(volatile s32 *)((char *)arg0 + 0x50);
 }
 
 extern u32 fn_8011A240(void *, u32, s32, u32);
