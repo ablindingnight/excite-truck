@@ -1575,13 +1575,39 @@ void fn_8011BCAC(void **head, void *node) {
     *(void **)((u8 *)cur + 4) = node;
 }
 
+// Ticks every active request of the queue; finished ones are collected and then told so.
+void fn_8011BD20(void *arg0) {
+    void *done;
+    void *n;
+    *(s32 *)((u8 *)arg0 + 0x34) += 1;
+    if (*(s32 *)arg0 == 1) {
+        n = *(void **)((u8 *)arg0 + 0x30);
+        done = 0;
+        while (n != 0) {
+            if (*(s32 *)arg0 != 1) {
+                return;
+            }
+            if (*(s32 *)((u8 *)n + 0xC) == 1) {
+                *(s32 *)((u8 *)n + 8) = (*(s32 (**)(void *, s32))((u8 *)n + 0x14))(n, *(s32 *)((u8 *)arg0 + 0x34));
+                if (*(s32 *)((u8 *)n + 8) != 0) {
+                    fn_8011BCAC(&done, n);
+                }
+            }
+            n = *(void **)n;
+        }
+        for (n = done; n != 0; n = *(void **)((u8 *)n + 4)) {
+            (*(void (**)(void *, s32))((u8 *)n + 0x18))(n, *(s32 *)((u8 *)arg0 + 0x34));
+        }
+    }
+}
+
 void fn_8011BDF0(s32 arg0) {
     s32 temp;
     s32 old;
     temp = arg0 - 8;
     if (temp != 0 && *(s32 *)(temp + 0x30) != 0) {
         old = OSEnableInterrupts();
-        fn_8011BD20(temp);
+        fn_8011BD20((void *)temp);
         OSRestoreInterrupts(old);
     }
 }
