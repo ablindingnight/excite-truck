@@ -241,6 +241,7 @@ public:
     Gate(void);
     void Init(ValueNode* node, f32 w);
     void Scale(f32 f);
+    Gate& operator=(const Gate& o);
     Vec3 Center(void) const { return Vec3(a.x + 0.5f * (b.x - a.x), a.y + 0.5f * (b.y - a.y), a.z + 0.5f * (b.z - a.z)); }
 
     Vec3 a;     // offset 0x0
@@ -1540,6 +1541,16 @@ void Gate::Scale(f32 f) {
         b = Vec3(mid.x + s * (b.x - mid.x), mid.y + s * (b.y - mid.y), mid.z + s * (b.z - mid.z));
     }
 #undef s
+}
+
+Gate& Gate::operator=(const Gate& o) {
+    a = o.a;
+    b = o.b;
+    t = o.t;
+    h = o.h;
+    ring = o.ring;
+    ringY = o.ringY;
+    return *this;
 }
 
 static inline f32 Len2D(f32 x, f32 y) { return sqrt(x * x + y * y); }
