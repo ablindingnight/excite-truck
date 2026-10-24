@@ -4146,8 +4146,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 w = (colors.cur[6] << 24) | (colors.cur[6] << 16) | (colors.cur[7] << 8) | colors.cur[7];
                                 ((u32 *)d0)[3] = w;
                                 ((u32 *)d1)[3] = w;
-                                d0 += pitch * 2;
-                                d1 += pitch * 2;
+                                d0 = d1 + pitch;
+                                d1 = d0 + pitch;
                                 colors.cur += 8;
                             }
                         } else {
@@ -4169,8 +4169,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
                                 ((u32 *)d0)[3] = w;
                                 ((u32 *)d1)[3] = w;
-                                d0 += pitch * 2;
-                                d1 += pitch * 2;
+                                d0 = d1 + pitch;
+                                d1 = d0 + pitch;
                                 colors.cur += 8;
                             }
                         }
@@ -4190,21 +4190,100 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 src = prev + *(s8 *)yOff.cur++ * pitch;
                 src += *(s8 *)xOff.cur++;
                 if ((((u32)dst | (u32)src) & 7) == 0) {
+                    u8 *d = dst;
                     for (i = 0; i < 8; i++) {
-                        *(f64 *)(dst + i * pitch) = *(f64 *)(src + i * pitch);
+                        *(f64 *)d = *(f64 *)src;
+                        d += pitch;
+                        src += pitch;
                     }
                 } else if ((((u32)dst | (u32)src) & 3) == 0) {
+                    u8 *d = dst;
                     for (i = 0; i < 8; i++) {
-                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)(src + i * pitch))[0];
-                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)(src + i * pitch))[1];
+                        ((u32 *)d)[0] = ((u32 *)src)[0];
+                        ((u32 *)d)[1] = ((u32 *)src)[1];
+                        d += pitch;
+                        src += pitch;
                     }
                 } else {
-                    for (i = 0; i < 8; i++) {
-                        s32 j;
-                        for (j = 0; j < 8; j++) {
-                            dst[i * pitch + j] = src[i * pitch + j];
-                        }
-                    }
+                    u8 *d = dst;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
+                    d += pitch;
+                    src += pitch;
+                    d[0] = src[0];
+                    d[1] = src[1];
+                    d[2] = src[2];
+                    d[3] = src[3];
+                    d[4] = src[4];
+                    d[5] = src[5];
+                    d[6] = src[6];
+                    d[7] = src[7];
                 }
                 break;
             case 3: {  // run: runs of one color or of literal colors along a scan order
@@ -4314,12 +4393,78 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         ((u32 *)(dst + i * pitch))[1] = ((u32 *)colors.cur)[i * 2 + 1];
                     }
                 } else {
-                    for (i = 0; i < 8; i++) {
-                        s32 j;
-                        for (j = 0; j < 8; j++) {
-                            dst[i * pitch + j] = colors.cur[i * 8 + j];
-                        }
-                    }
+                    u8 *d = dst;
+                    d[0] = colors.cur[0];
+                    d[1] = colors.cur[1];
+                    d[2] = colors.cur[2];
+                    d[3] = colors.cur[3];
+                    d[4] = colors.cur[4];
+                    d[5] = colors.cur[5];
+                    d[6] = colors.cur[6];
+                    d[7] = colors.cur[7];
+                    d += pitch;
+                    d[0] = colors.cur[8];
+                    d[1] = colors.cur[9];
+                    d[2] = colors.cur[10];
+                    d[3] = colors.cur[11];
+                    d[4] = colors.cur[12];
+                    d[5] = colors.cur[13];
+                    d[6] = colors.cur[14];
+                    d[7] = colors.cur[15];
+                    d += pitch;
+                    d[0] = colors.cur[16];
+                    d[1] = colors.cur[17];
+                    d[2] = colors.cur[18];
+                    d[3] = colors.cur[19];
+                    d[4] = colors.cur[20];
+                    d[5] = colors.cur[21];
+                    d[6] = colors.cur[22];
+                    d[7] = colors.cur[23];
+                    d += pitch;
+                    d[0] = colors.cur[24];
+                    d[1] = colors.cur[25];
+                    d[2] = colors.cur[26];
+                    d[3] = colors.cur[27];
+                    d[4] = colors.cur[28];
+                    d[5] = colors.cur[29];
+                    d[6] = colors.cur[30];
+                    d[7] = colors.cur[31];
+                    d += pitch;
+                    d[0] = colors.cur[32];
+                    d[1] = colors.cur[33];
+                    d[2] = colors.cur[34];
+                    d[3] = colors.cur[35];
+                    d[4] = colors.cur[36];
+                    d[5] = colors.cur[37];
+                    d[6] = colors.cur[38];
+                    d[7] = colors.cur[39];
+                    d += pitch;
+                    d[0] = colors.cur[40];
+                    d[1] = colors.cur[41];
+                    d[2] = colors.cur[42];
+                    d[3] = colors.cur[43];
+                    d[4] = colors.cur[44];
+                    d[5] = colors.cur[45];
+                    d[6] = colors.cur[46];
+                    d[7] = colors.cur[47];
+                    d += pitch;
+                    d[0] = colors.cur[48];
+                    d[1] = colors.cur[49];
+                    d[2] = colors.cur[50];
+                    d[3] = colors.cur[51];
+                    d[4] = colors.cur[52];
+                    d[5] = colors.cur[53];
+                    d[6] = colors.cur[54];
+                    d[7] = colors.cur[55];
+                    d += pitch;
+                    d[0] = colors.cur[56];
+                    d[1] = colors.cur[57];
+                    d[2] = colors.cur[58];
+                    d[3] = colors.cur[59];
+                    d[4] = colors.cur[60];
+                    d[5] = colors.cur[61];
+                    d[6] = colors.cur[62];
+                    d[7] = colors.cur[63];
                 }
                 colors.cur += 64;
                 break;
