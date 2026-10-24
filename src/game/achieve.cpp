@@ -430,11 +430,12 @@ s32 AchGetLevelThreshold(int category, int level) {
 
     if (category >= 0 && (u32)category < NUM_CATEGORIES) {
         sched = lbl_802FDF30[category].schedule;
-        if (sched != NULL && sched->levels != NULL && level <= sched->count) {
-            if (level <= 0) {
+        if (sched != NULL) {
+            AchLevel* levels = sched->levels;
+            if (levels == NULL || sched->count < level || level <= 0) {
                 return -1;
             }
-            return sched->levels[level - 1].threshold;
+            return levels[level - 1].threshold;
         }
     }
     return 0;
