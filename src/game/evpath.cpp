@@ -13,6 +13,24 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+// The screen's image/font/sound set (shared UIObjects implementation, see uiobjs.cpp).
+class UIObjects {
+public:
+    virtual ~UIObjects(void);
+    virtual void AddImage(const char* name, const char* file, int frame);
+    virtual void AddFont(const char* name, const char* file);
+    virtual void AddSound(const char* name, const char* file, u8 loop);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual void s28(void);
+    virtual void s2C(void);
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void PlaySound(const char* name);  // 0x38
+};
+
 class VR {
 public:
     virtual ~VR(void);
@@ -67,6 +85,8 @@ struct U32List {
     s32 cap;    // offset 0x8
 };
 
+const char* GetEventTypeName(u32 type);
+
 extern "C" {
 void fn_80236914(void);
 void fn_80216D28(void);
@@ -75,7 +95,8 @@ void fn_8025C204(u8* p, s32 a);
 f32 fn_8023659C(void);
 void fn_80214A9C(int s);
 void fn_80214AF0(int s);
-void fn_8027E908(u8* p);
+void fn_8027E908(void);
+UIObjects* fn_80258354(void);
 void fn_80286A34(u8* p);
 void fn_80287238(u8* p);
 u8* fn_80283938(u8* p, int del);
@@ -100,7 +121,7 @@ static inline void CopyName(const char* s, int n, char* d) {
 ModuleTag lbl_8055F670;
 s32 lbl_8055F678;
 u8 lbl_8055F67C;
-VR* lbl_8055F680;
+UIObjects* lbl_8055F680;
 bool lbl_8055F684;
 u8 lbl_8055F685;
 s32 lbl_8055F688;
@@ -112,14 +133,48 @@ s32 lbl_8055F69C;
 
 extern "C" {
 
-void fn_8027E908(u8* p) {}  // stub (265)
+// Loads the screen's images, fonts and sounds.
+void fn_8027E908(void) {
+    lbl_8055F680 = fn_80258354();
+    lbl_8055F680->AddImage("meter_unlockable", "ep_ticker.art", 4);
+    lbl_8055F680->AddImage("meter_minor", "ep_ticker.art", 3);
+    lbl_8055F680->AddImage("meter_major", "ep_ticker.art", 1);
+    lbl_8055F680->AddImage("meter_tick", "ep_ticker.art", 2);
+    lbl_8055F680->AddImage("meter_finger", "ep_ticker.art", 4);
+    lbl_8055F680->AddImage(GetEventTypeName(0x180201), "event_icons.art", 1);
+    lbl_8055F680->AddImage(GetEventTypeName(0x180302), "event_icons.art", 2);
+    lbl_8055F680->AddImage("Time Attack", "event_icons.art", 1);
+    lbl_8055F680->AddImage("bronze", "ep_cupicon1.art", 0);
+    lbl_8055F680->AddImage("silver", "ep_cupicon1.art", 1);
+    lbl_8055F680->AddImage("gold", "ep_cupicon1.art", 2);
+    lbl_8055F680->AddImage("platinum", "ep_cupicon1.art", 3);
+    lbl_8055F680->AddImage("diamond", "ep_cupicon1.art", 4);
+    lbl_8055F680->AddImage("cup_star", "ep_cupicon1.art", 5);
+    lbl_8055F680->AddImage("star_small_empty", "star_ab.art", 1);
+    lbl_8055F680->AddImage("star_small_full", "star_ab.art", 0);
+    lbl_8055F680->AddImage("silver_unlock", "cup_unlk1.art", 0);
+    lbl_8055F680->AddImage("gold_unlock", "cup_unlk1.art", 1);
+    lbl_8055F680->AddImage("platinum_unlock", "cup_unlk2.art", 0);
+    lbl_8055F680->AddImage("diamond_unlock", "cup_unlk2.art", 1);
+    lbl_8055F680->AddImage("nocup_unlock", "bar5.art", 6);
+    lbl_8055F680->AddFont("normal", "uifnt.gtx");
+    lbl_8055F680->AddFont("outline", "uifnt_o.gtx");
+    lbl_8055F680->AddSound("scoreup_tally", "a_tally.sfx", 1);
+    lbl_8055F680->AddSound("scoreup_gradeup", "a_grade1.sfx", 0);
+    lbl_8055F680->AddSound("scoreup_AAA", "a_grade2.sfx", 0);
+    lbl_8055F680->AddSound("scoreup_passevent", "a_starfill.sfx", 0);
+    lbl_8055F680->AddSound("scoreup_perfectevent", "a_starfill.sfx", 0);
+    lbl_8055F680->AddSound("passed_cup", "a_cheerhit.sfx", 0);
+    lbl_8055F680->AddSound("passed_career", "a_grade1.sfx", 0);
+    lbl_8055F680->AddSound("unlocked_career", "a_levelup.sfx", 0);
+}
 
 void fn_8027ED2C(void) {
     delete lbl_8055F680;
     lbl_8055F680 = 0;
 }
 
-VR* fn_8027ED70(void) { return lbl_8055F680; }
+UIObjects* fn_8027ED70(void) { return lbl_8055F680; }
 
 }  // extern "C"
 
@@ -149,7 +204,7 @@ void fn_8027EE74(int x) {
 int fn_8027EE88(void) {
     if (!lbl_8055F685 && lbl_8055F684) {
         lbl_8055F685 = 1;
-        fn_8027ED70()->v38("unlocked_career");
+        fn_8027ED70()->PlaySound("unlocked_career");
     }
     return 0;
 }
@@ -202,7 +257,7 @@ void fn_8027F09C(int difficulty) {
     };
     MenuDesc desc = {"unlock_crr_chal.lyt", 0, 0, 0, 0};
     desc.items = items;
-    fn_8027ED70()->v38(lbl_80347E50 + 0x214);  // "passed_career"
+    fn_8027ED70()->PlaySound(lbl_80347E50 + 0x214);  // "passed_career"
     fn_802146BC(&desc, -999, -999, 1);
 }
 
@@ -543,7 +598,7 @@ void fn_80283B58(u8* p) {}  // stub (180)
 
 void fn_80283E28(u8* p) {}  // stub (179)
 
-void fn_802840F4(u8* p) { fn_8027E908(p); }
+void fn_802840F4(u8* p) { fn_8027E908(); }
 
 void fn_802840F8(void) { fn_8027ED2C(); }
 
@@ -632,7 +687,7 @@ void fn_80287238(u8* p) {
         U8(p, 0x29) = 0;
         U8(p, 0x2A) = 0;
         U8(p, 0x28) = VR(p)->v40();
-        fn_8027ED70()->v38("scoreup_tally");
+        fn_8027ED70()->PlaySound("scoreup_tally");
         fn_80214A9C(0x1F);
         F32(p, 0x178) = 1.0f;
     } else {
