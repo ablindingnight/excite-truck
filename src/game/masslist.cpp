@@ -13,6 +13,17 @@ struct MVec3 {
 
 struct MVec4 {
     MVec4(void) {}
+    MVec4(f32 x_, f32 y_, f32 z_) {  // w left unset
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+    MVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
+        x = x_;
+        y = y_;
+        z = z_;
+        w = w_;
+    }
     f32 x;
     f32 y;
     f32 z;
@@ -21,7 +32,13 @@ struct MVec4 {
 
 struct MassSet {
     MassSet(void);
-    u8 data[0xB0];
+    MVec4 pos;      // offset 0x0
+    MVec4 rot[3];   // offset 0x10 (rows)
+    MVec4 quat;     // offset 0x40
+    MVec4 vel;      // offset 0x50
+    MVec4 v60;      // offset 0x60
+    u8 pad70[0x30];
+    MVec4 vA0;      // offset 0xA0
 };
 
 struct ContactPt {
@@ -31,8 +48,12 @@ struct ContactPt {
 
 struct ContactSet {
     ContactSet(void);
-    u8 pad0[0x40];
-    ContactPt pts[0x1B];  // offset 0x40
+    u8 pad0[0x30];
+    MVec4 v30;            // offset 0x30
+    ContactPt pts[0x15];  // offset 0x40
+    MVec4 v190;           // offset 0x190
+    MVec4 v1A0;           // offset 0x1A0
+    u8 pad1B0[0x40];
 };
 
 struct CrossSet {
@@ -56,7 +77,18 @@ CxEntry* lbl_8055E7A4;      // per car
 u8 lbl_8055E7A8;
 MVec4 lbl_80436D48[0x100];
 
+struct ContactOut {
+    ContactOut(void) {}
+    u8 data[0x158];
+};
+
 extern "C" {
+void* memset(void* p, int c, size_t n);
+double cos(double x);
+double sin(double x);
+void fn_801E9DC4(CxEntry* e);
+void fn_801BDA70(void);
+void fn_801BDA74(int car, ContactOut* out);
 int fn_801E9E78(s16* h, MVec3* p, MVec3* n);
 void fn_80279D40(void);
 }
@@ -119,13 +151,39 @@ void fn_801BD790(void) {
     lbl_8055E790 = 0;
 }
 
-// Mass update (placeholder).
-void fn_801BD808(void) {}
+// Adds a car: clears its records and starts it at rest, upright, 2 units up.
+void fn_801BD808(void) {
+    ContactOut out;
+    int car = lbl_8055E78C++;
+    MassSet* m = &lbl_8055E794[car];
+    ContactSet* c = &lbl_8055E798[car];
+    CrossSet* x = &lbl_8055E79C[car];
+    CxEntry* e = &lbl_8055E7A4[car];
+    memset(m, 0, sizeof(MassSet));
+    memset(c, 0, sizeof(ContactSet));
+    memset(x, 0, sizeof(CrossSet));
+    memset(e, 0, sizeof(CxEntry));
+    fn_801E9DC4(e);
+    m->pos = MVec4(0.0f, 2.0f, 0.0f);
+    m->vel = MVec4(0.0f, 0.0f, 0.0f);
+    m->v60 = MVec4(0.0f, 0.0f, 0.0001f);
+    m->vA0 = MVec4(0.0f, 0.0f, 0.0f);
+    f32 angle = 0.0f;
+    m->quat = MVec4(0.0f, 0.0f, sin(0.5f * angle), cos(0.5f * angle));
+    m->rot[0] = MVec4(1.0f, 0.0f, 0.0f);
+    m->rot[1] = MVec4(0.0f, 1.0f, 0.0f);
+    m->rot[2] = MVec4(0.0f, 0.0f, 1.0f);
+    c->v30 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    fn_801BDA70();
+    fn_801BDA74(car, &out);
+}
 
 void fn_801BDA70(void) { fn_80279D40(); }
 
 // Contact gathering (placeholders).
-void fn_801BDA74(void) {}
+void fn_801BDA74(int car, ContactOut* out) {}
 
 void fn_801BE168(void) {}
 
