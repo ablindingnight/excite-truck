@@ -12,6 +12,15 @@ struct IVec3 {
     f32 z;
 };
 
+// A ground-plane (x, z) vector.
+struct IVec2 {
+    IVec2(void) {}
+    IVec2(f32 x_, f32 y_) : x(x_), y(y_) {}
+    IVec2(const IVec2& o) : x(o.x), y(o.y) {}
+    f32 x;
+    f32 y;
+};
+
 struct IMtx {
     u32 w[12];
 };
@@ -80,6 +89,9 @@ struct TeleportEvent {
     char except[0x100]; // offset 0x110
     s32 where;          // offset 0x210
     f32 speed;          // offset 0x214
+    IVec2 pt;           // offset 0x218: world point (x, z)
+    f32 yaw;            // offset 0x220
+    IVec2 offset;       // offset 0x224: second car, from pt
 };
 
 struct DebugEvent {
@@ -176,6 +188,8 @@ char* strncpy(char* dst, const char* src, size_t n);
 size_t strlen(const char* s);
 int strcmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);
+void fn_802E317C(const char* fmt, ...);
+double atan2(double y, double x);
 int sprintf(char* dst, const char* fmt, ...);
 double atof(const char* s);
 int atoi(const char* s);
@@ -1022,9 +1036,67 @@ void fn_801C7BA0(void) {
     fn_801C957C(0);
 }
 
-// Add teleport (placeholder).
+static inline IVec2 XZ(const IVec3& v) { return IVec2(v.x, v.z); }
+
+static inline IVec2 operator-(const IVec2& a, const IVec2& b) { return IVec2(a.x - b.x, a.y - b.y); }
+
+// The signed angle from a to b (both normalised first unless already unit length).
+static inline f32 Angle(const IVec2& a, const IVec2& b) {
+    const IVec2* pa = &a;
+    IVec2 na;
+    f32 la = a.x * a.x + a.y * a.y;
+    if (!((f32)__fabs(la - 1.0f) <= lbl_80558DC4[0])) {
+        na = a;
+        f32 inv = 1.0f / (f32)sqrt(la);
+        na.x *= inv;
+        na.y *= inv;
+        pa = &na;
+    }
+    const IVec2* pb = &b;
+    IVec2 nb;
+    f32 lb = b.x * b.x + b.y * b.y;
+    if (!((f32)__fabs(lb - 1.0f) <= lbl_80558DC4[0])) {
+        nb = b;
+        f32 inv = 1.0f / (f32)sqrt(lb);
+        nb.x *= inv;
+        nb.y *= inv;
+        pb = &nb;
+    }
+    return atan2(pa->x * pb->y - pb->x * pa->y, pa->x * pb->x + pa->y * pb->y);
+}
+
+// Add teleport: who/except, where (0 = world point facing a direction, 2 = starting positions) and speed.
 void fn_801C7C04(void) {
-    IL_Use(0, "Interlude Editor: I'm not set up to handle where type %d", "Added teleport to (%.2f, %.2f) at %.2f");
+    u8* s = lbl_80437D88;
+    lbl_8055E84C = 0.44444445f * (f32)atof((char*)(s + 0x368));
+    fn_801C957C(0);
+    TeleportEvent* e = (TeleportEvent*)fn_801C3C80();
+    e->type = 4;
+    e->where = lbl_8055E848;
+    strcpy(e->who, (char*)(s + 0x4F8));
+    strcpy(e->except, (char*)(s + 0x5F8));
+    e->mask = fn_801C3954(e->who);
+    e->mask &= ~fn_801C3954(e->except);
+    e->speed = lbl_8055E84C;
+    switch (e->where) {
+    case 2:
+        e->yaw = 0.0f;
+        e->pt = XZ(*(IVec3*)(s + 0x710));
+        break;
+    case 0:
+        e->pt = XZ(*(IVec3*)(s + 0x6F8));
+        e->offset = XZ(*(IVec3*)(s + 0x710)) - e->pt;
+        e->yaw = Angle(XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)), IVec2(0.0f, 1.0f));
+        break;
+    case 1:
+    default:
+        fn_802E317C("Interlude Editor: I'm not set up to handle where type %d", e->where);
+        break;
+    }
+    IVec3* p = (IVec3*)(s + 0x6F8);
+    sprintf((char*)(s + 0x238), "Added teleport to (%.2f, %.2f) at %.2f", p->x, p->z, e->time);
+    fn_801C7BA0();
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
 }
 
 void fn_801C7EF4(void) {
