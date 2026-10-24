@@ -54,6 +54,7 @@ struct SkagVec {
         }
     }
     void Push(T v) { data[count++] = v; }
+    int Size(void) const { return count; }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
@@ -345,7 +346,7 @@ void fn_802B4BDC(void) {
     for (u32 i = 0; i < 128; i++, g++) {
         SafeDelete(*g);
     }
-    for (int i = 0; i < lbl_8055F9D0->count; i++) {
+    for (int i = 0; i < lbl_8055F9D0->Size(); i++) {
         delete lbl_8055F9D0->data[i];
     }
     SafeDelete(lbl_8055F9D0);
