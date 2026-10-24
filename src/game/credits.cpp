@@ -148,8 +148,8 @@ void fn_80265A74(void);
 
 // The actual startup stores identify a 20-byte sentinel, rather than 24.
 static ModuleTag creditsModuleTag;
-UnkStatic123s creditsStatic123;
 static UnkStatic7F creditsStatic7F;
+UnkStatic123s creditsStatic123;
 CreditStateListFields lbl_80498F78;
 CreditFadeFields* lbl_8055F444;
 void* lbl_8055F448;
