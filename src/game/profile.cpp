@@ -1,5 +1,5 @@
-// Track B3: all 26 function bodies drafted. Initialized data and method-table
-// recovery remain incomplete. Not registered, linked into the game, or executed.
+// Isolated profile research: 26 owning functions; initialized-data ownership
+// and full-source placement remain incomplete. Native component proofs are separate.
 #include "game/common.h"
 
 class MenuState {
@@ -41,7 +41,7 @@ extern "C" void fn_802328D4(int);
 class ProfileFontState {
 public:
     ~ProfileFontState(void) { fn_802328D4(font); font=0; }
-    int font; u32 color; int alignment; f32 scale,widthScale;
+    int font; u32 color; int alignment; f32 scale,widthScale;inline void DrawCoordinatesNew(const void* text,f32 x,f32 y)const;
 };
 class ProfileTextState : public MenuState {
 public:
@@ -308,19 +308,20 @@ struct ProfileKeyboardFitFields {
 };
 }
 
+extern "C" {extern const f32 lbl_80563944,lbl_80563948,lbl_8056394C;}
+extern "C" const f32 lbl_80563944;
+extern "C" const f32 lbl_80563948;
+extern "C" const f32 lbl_8056394C;
 void ProfileKeyboardState::Enter(void) {
     ProfileKeyboardFitFields* self=(ProfileKeyboardFitFields*)this;
-    f32 cellWidth = (f32)self->width / 10.0f;
-    f32 cellHeight = (f32)self->height * 0.25f;
+    f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height*lbl_80563944;cellWidth=width/lbl_80563948;
     f32 textWidth = fn_8023293C(self->font, "BS", self->widthScale);
-    f32 fitWidth = (cellWidth - 5.5f) / (self->scale * textWidth);
-    f32 fitHeight = (cellHeight - 5.5f) / (f32)fn_80232B70(self->font);
+    textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-lbl_8056394C)/textWidth;
+    int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-lbl_8056394C;f32 fitHeight=heightGap/(f32)fontHeight;
     self->scale = fitHeight < fitWidth ? fitHeight : fitWidth;
-    self->upper = !0;
+    self->upper=0;self->upper=!self->upper;
     const char* key = self->upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
-    const char* src = fn_80131234(key);
-    char* dst = self->shiftLabel;
-    int n = 10;
+const char* src;int n;char* dst;src=fn_80131234(key);dst=self->shiftLabel;n=10;
     while ((*dst++ = *src++) != 0) {
         if (--n <= 0) { dst[-1] = 0; break; }
     }
@@ -344,6 +345,8 @@ struct ProfileTextDrawFields {
 };
 }
 
+extern "C" {extern const f32 lbl_80563930,lbl_80563940;extern const char lbl_8055C08C[6];}
+inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text,font,color,alignment,x,y,scale,lbl_80563930,widthScale);}
 void ProfileTextState::Draw(void) {
     ProfileTextDrawFields* self=(ProfileTextDrawFields*)this;
     f32 x, y;
@@ -353,18 +356,19 @@ void ProfileTextState::Draw(void) {
         self->color = 0xFF000000;
         int height = self->height;
         f32 width = fn_8023293C(self->font, self->text, self->widthScale);
-        fn_80230924(0xFFFFFFFF, x, y, x + self->scale * width, y - (f32)height, 0.0f);
+        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, lbl_80563940);
     }
-    fn_80232BA4(self->stringObject, self->font, self->color, self->alignment,
-               x, y, self->scale, 1.0f, self->widthScale);
+    // Use the observed font payload through a typed inline call.
+    // The original method name and inline boundary remain unknown.
+    f32 callY=y;f32 callX=x;this->font.DrawCoordinatesNew(self->stringObject,callX,callY);
     // Original prefix starts at sp+0x10; capacity 18 is inferred from slot names,
     // not independently recoverable from the non-bounds-checked sprintf call.
     char prefix[18];
-    sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
+    sprintf(prefix, lbl_8055C08C, self->cursor, self->cursor, self->text);
     f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
     f32 cursorX = x + width;
-    fn_80230924(0xFFFFD03F, cursorX - 1.0f, y, 1.0f + cursorX,
-               y - (f32)self->height, 0.0f);
+    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930, y, lbl_80563930 + cursorX,
+               y - (f32)self->height, lbl_80563940);
 }
 
 extern "C" {
