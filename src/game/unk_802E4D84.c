@@ -139,6 +139,57 @@ void fn_802E5438(void) {
     }
 }
 
+__declspec(section ".sdata") extern unsigned char lbl_8055FF94[];  // holds the voice table pointer
+#define SPU_VOICES (*(unsigned char **)lbl_8055FF94)
+extern unsigned char *lbl_8055FF90;                                  // sample table (256 x 0xB0)
+extern char lbl_804FC690[];  // the Spu alarm
+extern char lbl_8055FFA5;
+extern int lbl_8055FF84;
+extern void *lbl_8055FFB0;
+extern char lbl_8034D450[];
+extern char lbl_8034D470[];
+extern void OSCancelAlarm(void *);
+extern void AXFreeVoice(void *);
+extern void AXQuit(void);
+extern void AIReset(void);
+extern void __dla__FPv(void *);
+extern void fn_802E6B34(void);
+extern void fn_80128658(void *);
+// Shuts the Spu down: stops its alarm, frees the 32 voices (reporting any still playing), reports samples still
+// referenced, frees the tables and quits AX.
+void fn_802E56F0(void) {
+    int i;
+    int j;
+    OSCancelAlarm(lbl_804FC690);
+    lbl_8055FFA5 = 0;
+    fn_802E6B34();
+    for (i = 0; i < 0x20; i++) {
+        if (SPU_VOICES[i * 0x2C + 0x20] != 0) {
+            ((void (*)(char *, ...))fn_802E317C)(lbl_8034D450, *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
+        }
+        AXFreeVoice(*(void **)(SPU_VOICES + i * 0x2C + 4));
+        *(void **)(SPU_VOICES + i * 0x2C + 4) = 0;
+    }
+    for (j = 0; j < 0x100; j++) {
+        if (*(int *)(lbl_8055FF90 + j * 0xB0 + 0x94) > 0) {
+            ((void (*)(char *, ...))fn_802E317C)(lbl_8034D470, lbl_8055FF90 + j * 0xB0);
+        }
+    }
+    __dla__FPv(SPU_VOICES);
+    SPU_VOICES = 0;
+    __dla__FPv(lbl_8055FF90);
+    lbl_8055FF90 = 0;
+    __dla__FPv(lbl_8055FF9C);
+    lbl_8055FF9C = 0;
+    AXQuit();
+    AIReset();
+    lbl_8055FF84 = 0;
+    if (lbl_8055FFB0 != 0) {
+        fn_80128658(lbl_8055FFB0);
+        lbl_8055FFB0 = 0;
+    }
+}
+
 void fn_802E5824(void) {
 }
 
