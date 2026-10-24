@@ -561,7 +561,69 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     }
 }
 
-void fn_80266A0C(u8* p) {}  // stub (421)
+void fn_80274F74(u8* p, const f32* w, f32 fov);
+int fn_801769F8(void);
+
+// Trackside camera aimed by a rotation vector, with the same pass-by rumble as fn_80266388.
+void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
+    fn_80274F74((u8*)c, w, fov);
+    if (fn_801769F8()) {
+        return;
+    }
+    const f32* rp;
+    CamTrack* trk = (*(CamTrackOwner**)(c->car + 0x270))->GetTrack();
+    CamXZ xz(c->pose.pos.v[0], c->pose.pos.v[2]);
+    CamTrackPos at;
+    fn_80136594(&at, trk, &xz);
+    f32 camDist = lbl_8055C4CC + (F32(at.seg, 0x1C) + F32(at.seg, 0x18) * at.t);
+    int n = fn_8026A2C8();
+    f32 best = lbl_8055F49C;
+    u8* near = 0;
+    for (int i = 0; i < n; i++) {
+        u8* r = fn_801B2EC0(i)->GetCar();
+        rp = (const f32*)(r + 0x60);
+        CamXZ rxz(rp[0], rp[2]);
+        CamTrackPos rat;
+        fn_80136594(&rat, trk, &rxz);
+        f32 d = (F32(rat.seg, 0x1C) + F32(rat.seg, 0x18) * rat.t) - camDist;
+        if (d < lbl_80563C20) {
+            u32 lap = trk->seg ? U8(trk->seg, 0x34) : 3;
+            d += *(f32*)(trk->path + lap * 4 + 8);
+        }
+        if (d * d < lbl_8055F49C) {
+            f32 sq = PSVECSquareDistance(eye, rp);
+            if (sq < best) {
+                best = sq;
+                near = r;
+            }
+        }
+    }
+    if (near) {
+        f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
+        a = (lbl_80563C2C < a) ? lbl_80563C2C : a;
+        a = (a > lbl_80563C20) ? a : lbl_80563C20;
+        f32 ka = lbl_80563C20 + a * lbl_80563C2C;
+        f32 b = (best - lbl_8055F49C) / (lbl_80563C20 - lbl_8055F49C);
+        b = (lbl_80563C2C < b) ? lbl_80563C2C : b;
+        b = (b > lbl_80563C20) ? b : lbl_80563C20;
+        f32 k = ka * (lbl_80563C20 + b * lbl_80563C2C);
+        f32 move = lbl_8055C4D8 * k;
+        f32 turn = lbl_8055C4DC * k;
+        if (lbl_8055F498) {
+            ShakeVec j(fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move));
+            c->pose.pos.v[0] += j.x;
+            c->pose.pos.v[1] += j.y;
+            c->pose.pos.v[2] += j.z;
+        }
+        if (lbl_8055C4C8) {
+            ShakeVec w(fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn));
+            ShakeMat rot;
+            ShakeRot(&rot, w);
+            ShakeMul((ShakeMat*)&c->pose.rot, (ShakeMat*)&c->pose.rot, &rot);
+        }
+    }
+}
+
 
 void fn_802670A0(u8* p, int idx) {
     int n = fn_80178CA4();
