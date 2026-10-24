@@ -1726,14 +1726,21 @@ void fn_802D1C04(void) {
     switch (lbl_804C5700.mode) {
     case 2:
     case 3: {
+        // Projected texture: express the model frame in the projector's look-at frame.
         f32 m[3][4];
-        f32 a[3][4];
         f32 b[3][4];
         f32 s[3][4];
         f32 t[3][4];
         f32 st[3][4];
-        fn_802C8588(a, &lbl_804C56C0.pos, &lbl_804C5690.pos);
-        fn_802D0DD4(m, &lbl_804C5690);
+        RMtx look;
+        fn_802C8588(&look, &lbl_804C56C0.pos, &lbl_804C5690.pos);
+        RMtx li;
+        Invert(&li, &look);
+        V3 lp;
+        fn_801BFD34(&lp, &lbl_804C5690.pos, &li);
+        Mat3 lr;
+        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lr, &lbl_804C5690.rot, &li);
+        fn_802D0DD4(m, (RMtx*)&lr);
         PSMTXInvXpose(m, b);
         PSMTXScale(s, 0.5f, -0.5f, 0.0f);
         PSMTXTrans(t, 0.5f, 0.5f, 1.0f);
