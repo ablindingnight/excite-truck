@@ -859,6 +859,36 @@ extern s32 lbl_8055DEE8;
 extern void fn_80119DD0(void);
 extern void fn_8011A6A0(void *);
 extern void TRKGetFreeBuffer(void *);
+extern s32 lbl_8055DEE0[2];  // the sample buffer allocator: alloc, free
+extern s32 lbl_8055DEE8;
+extern void AXFreeVoice(void *);
+// The part of a stream channel this file touches by name.
+typedef struct StreamChannel {
+    u8 pad0[0x7C];
+    void *voices[2];  // 0x7C  AX voices (left, right)
+    void *buffer;     // 0x84  sample buffer
+    u8 pad88[0xB4 - 0x88];
+    s32 stopping;     // 0xB4
+} StreamChannel;
+
+// Stops and releases the voices of a channel, then frees its sample buffer.
+void fn_80119D40(void *arg0) {
+    StreamChannel *ch = arg0;
+    if (ch->voices[0] != 0) {
+        ch->stopping = 1;
+        fn_8011943C(ch->voices, 0);
+        if (ch->voices[0] != 0) {
+            AXFreeVoice(ch->voices[0]);
+        }
+        if (ch->voices[1] != 0) {
+            AXFreeVoice(ch->voices[1]);
+        }
+        ((void (*)(void *))lbl_8055DEE0[1])(ch->buffer);
+        lbl_8055DEE8--;
+        ch->voices[0] = 0;
+    }
+}
+
 void *fn_8011A168(void *arg0) {
     s32 *src = (s32 *)arg0;
     if (arg0 == NULL) {
@@ -1831,6 +1861,25 @@ u32 fn_8011C06C(void *arg0) {
 void fn_8011C0E0(void *arg0) {
     while (fn_8011C06C(arg0) == 0) {
         OSYieldThread();
+    }
+}
+
+// Releases one hold on the queue; the last release starts its periodic tick (`rate` per second).
+void fn_8011C120(void *arg0) {
+    s32 level;
+    if (arg0 != 0) {
+        level = OSDisableInterrupts();
+        // hold count, shared with the alarm handler
+        *(volatile s32 *)((u8 *)arg0 + 4) -= 1;
+        if (*(volatile s32 *)((u8 *)arg0 + 4) == 0) {
+            if (*(s32 *)arg0 == 0) {
+                OSSetPeriodicAlarm((OSAlarm *)((u8 *)arg0 + 8), OSGetTime(),
+                                   (1000 / *(u32 *)((u8 *)arg0 + 0x3C)) * (*(u32 *)0x800000F8 / 4 / 1000),
+                                   (OSAlarmHandler)fn_8011BDF0);
+            }
+            *(s32 *)arg0 = 1;
+        }
+        OSRestoreInterrupts(level);
     }
 }
 
