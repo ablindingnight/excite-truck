@@ -39,7 +39,8 @@ typedef struct StreamTrack {
     void (*SetPaused)(struct StreamTrack *t, s32 paused);      // 0x14
     s32 (*Run)(struct StreamTrack *t, s32 run);                // 0x18
     void (*Close)(struct StreamTrack *t);                      // 0x1C
-    u8 pad20[0x2C - 0x20];
+    u8 pad20[0x28 - 0x20];
+    u32 ringSize;    // 0x28
     u8 *ringStart;   // 0x2C
     u8 *ringEnd;     // 0x30
     u8 *writePtr;    // 0x34
@@ -90,9 +91,20 @@ typedef struct StreamPlayer {
     u32 numSets;                        // 0x08
     s32 curSet;                         // 0x0C
     s32 prevSet;                        // 0x10
-    u8 pad14[0x20 - 0x14];
+    u8 pad14[0x1C - 0x14];
+    s32 done;                           // 0x1C
     u32 flags;                          // 0x20
-    u8 pad24[0xDC - 0x24];
+    s32 videoFlags;                     // 0x24
+    u8 pad28[0xB4 - 0x28];
+    s32 unkB4;                          // 0xB4
+    void *video;                        // 0xB8  video decoder (0 = audio only)
+    void *frameBuffer;                  // 0xBC
+    void *frameBuffer2;                 // 0xC0
+    u32 frameBufferSize;                // 0xC4
+    u8 padC8[0xD0 - 0xC8];
+    int numAudio;                       // 0xD0  audio tracks in the file
+    u32 maxFrameSize;                   // 0xD4
+    u8 padD8[0xDC - 0xD8];
     s32 paused;                         // 0xDC
     u8 padE0[0xE4 - 0xE0];
     s32 setData;                        // 0xE4  start of the current set's data
@@ -103,31 +115,63 @@ typedef struct StreamPlayer {
     u8 readerF8[0x100 - 0xF8];
     s32 (*readerFill)(void *reader);    // 0x100
     void (*readerClose)(void *reader);  // 0x104
-    u8 pad108[0x11C - 0x108];
+    u8 pad108[0x110 - 0x108];
+    s32 unk110;                         // 0x110
+    s32 unk114;                         // 0x114
+    u8 pad118[0x11C - 0x118];
     volatile s32 busy;                  // 0x11C  also read by the decode callbacks
-    u8 pad120[0x138 - 0x120];
+    u8 pad120[0x124 - 0x120];
+    s32 readTime;                       // 0x124
+    s32 unk128;                         // 0x128
+    s32 unk12C;                         // 0x12C
+    u8 pad130[0x138 - 0x130];
     u32 readerCapacity;                 // 0x138
     u32 readerFilled;                   // 0x13C
     u8 pad140[0x1F4 - 0x140];
     u8 request[0x234 - 0x1F4];          // 0x1F4
     void *readBuffer;                   // 0x234
-    u8 pad238[0x258 - 0x238];
-    s32 unk258;                         // 0x258
-    u8 pad25C[0x268 - 0x25C];
+    u8 pad238[0x244 - 0x238];
+    s32 *trackIds;                      // 0x244  audio track number of each track
+    u8 pad248[0x258 - 0x248];
+    s32 unk258;                         // 0x258  frames decoded
+    s32 unk25C;                         // 0x25C
+    s32 frameStart;                     // 0x260
+    s32 frameEnd;                       // 0x264
     s32 startTime;                      // 0x268
-    u8 pad26C[0x288 - 0x26C];
+    u8 pad26C[0x274 - 0x26C];
+    s32 unk274;                         // 0x274
+    u8 pad278[0x288 - 0x278];
     s32 running;                        // 0x288
-    u8 pad28C[0x2D4 - 0x28C];
+    s32 unk28C;                         // 0x28C
+    u8 pad290[0x294 - 0x290];
+    s32 decodeTime;                     // 0x294
+    s32 idleTime;                       // 0x298
+    s32 unk29C;                         // 0x29C
+    u8 pad2A0[0x2A4 - 0x2A0];
+    u32 rateNum;                        // 0x2A4
+    u32 rateDen;                        // 0x2A8
+    s32 histSize;                       // 0x2AC
+    s32 histPos;                        // 0x2B0
+    s32 *histFrameStart;                // 0x2B4
+    s32 *histIdle;                      // 0x2B8
+    s32 *histDecode;                    // 0x2BC
+    s32 *hist29C;                       // 0x2C0
+    s32 *histRead;                      // 0x2C4
+    s32 *hist128;                       // 0x2C8
+    s32 *hist12C;                       // 0x2CC
+    u8 pad2D0[0x2D4 - 0x2D0];
     u32 unk2D4;                         // 0x2D4
     s32 firstTime;                      // 0x2D8  time the first set last started
     s32 stalled;                        // 0x2DC
-    u8 pad2E0[0x2E8 - 0x2E0];
+    u32 videoResult;                    // 0x2E0
+    u8 pad2E4[0x2E8 - 0x2E4];
     int numTracks;                      // 0x2E8
     s32 resyncs;                        // 0x2EC
     StreamTrack *tracks;                // 0x2F0
-    u8 pad2F4[0x2F8 - 0x2F4];
+    s32 unk2F4;                         // 0x2F4
     s32 unk2F8;                         // 0x2F8
-    u8 pad2FC[0x328 - 0x2FC];
+    u8 pad2FC[0x300 - 0x2FC];
+    u8 videoState[0x328 - 0x300];       // 0x300
     s32 unk328;                         // 0x328
     u8 pad32C[0x330 - 0x32C];
     s32 pauseTime;                      // 0x330
