@@ -94,10 +94,10 @@ typedef struct StreamTrack {
     u32 minimum;     // 0x54
     s32 blockMask;   // 0x58
     s32 dirty;       // 0x5C  set when the voices ran dry (silence was written)
-    u8 pad60[0x64 - 0x60];
+    s32 unk60;       // 0x60
     s32 playing;     // 0x64
     s32 unk68;       // 0x68
-    u8 pad6C[0x70 - 0x6C];
+    s32 gain;        // 0x6C  0x10000 = unity
     u32 rate;        // 0x70  Hz
     s32 bits;        // 0x74
     s32 channels;    // 0x78  1 = one voice; otherwise left/right voices fed from interleaved data
@@ -128,24 +128,28 @@ typedef struct StreamTrack {
 
 // A streamed music/voice player (0x388 bytes). Only the fields named here are understood.
 typedef struct StreamPlayer {
-    u8 pad0[0x8];
+    u32 width;                          // 0x00
+    u32 height;                         // 0x04
     u32 numSets;                        // 0x08
     s32 curSet;                         // 0x0C
     s32 prevSet;                        // 0x10
-    u8 pad14[0x1C - 0x14];
+    u32 fpsNum;                         // 0x14
+    u32 fpsDen;                         // 0x18
     s32 done;                           // 0x1C
     u32 flags;                          // 0x20
     s32 videoFlags;                     // 0x24
-    u8 pad28[0xB4 - 0x28];
+    u32 fileSize;                       // 0x28
+    u8 pad2C[0xB4 - 0x2C];
     s32 unkB4;                          // 0xB4
     void *video;                        // 0xB8  video decoder (0 = audio only)
     void *frameBuffer;                  // 0xBC
-    void *frameBuffer2;                 // 0xC0
+    u32 blocksWide;                     // 0xC0  width in 16-pixel blocks
     u32 frameBufferSize;                // 0xC4
-    u8 padC8[0xD0 - 0xC8];
+    u32 largestFrame;                   // 0xC8
+    u32 numIndex;                       // 0xCC  frame index entries - 1
     int numAudio;                       // 0xD0  audio tracks in the file
     u32 maxFrameSize;                   // 0xD4
-    u8 padD8[0xDC - 0xD8];
+    u32 unkD8;                          // 0xD8
     s32 paused;                         // 0xDC
     u8 padE0[0xE4 - 0xE0];
     s32 setData;                        // 0xE4  start of the current set's data
@@ -156,7 +160,8 @@ typedef struct StreamPlayer {
     u8 readerF8[0x100 - 0xF8];
     s32 (*readerFill)(void *reader);    // 0x100
     void (*readerClose)(void *reader);  // 0x104
-    u8 pad108[0x110 - 0x108];
+    u8 pad108[0x10C - 0x108];
+    struct StreamPlayer *self;          // 0x10C
     s32 unk110;                         // 0x110
     s32 unk114;                         // 0x114
     u8 pad118[0x11C - 0x118];
@@ -171,24 +176,30 @@ typedef struct StreamPlayer {
     u8 pad140[0x1F4 - 0x140];
     u8 request[0x234 - 0x1F4];          // 0x1F4
     void *readBuffer;                   // 0x234
-    u8 pad238[0x244 - 0x238];
+    u32 readBufSize;                    // 0x238
+    u32 width2;                         // 0x23C
+    u32 height2;                        // 0x240
     s32 *trackIds;                      // 0x244  audio track number of each track
-    u8 pad248[0x258 - 0x248];
+    u32 *audioMaxSize;                  // 0x248  per audio track
+    u32 *audioFlags;                    // 0x24C
+    s32 *audioIds;                      // 0x250
+    u8 pad254[0x258 - 0x254];
     s32 unk258;                         // 0x258  frames decoded
     s32 unk25C;                         // 0x25C
     s32 frameStart;                     // 0x260
     s32 frameEnd;                       // 0x264
     s32 startTime;                      // 0x268
-    u8 pad26C[0x274 - 0x26C];
+    u8 pad26C[0x270 - 0x26C];
+    s32 unk270;                         // 0x270
     s32 unk274;                         // 0x274
     u8 pad278[0x288 - 0x278];
     s32 running;                        // 0x288
     s32 unk28C;                         // 0x28C
-    u8 pad290[0x294 - 0x290];
+    u32 memUsed;                        // 0x290
     s32 decodeTime;                     // 0x294
     s32 idleTime;                       // 0x298
     s32 unk29C;                         // 0x29C
-    u8 pad2A0[0x2A4 - 0x2A0];
+    s32 openTime;                       // 0x2A0
     u32 rateNum;                        // 0x2A4
     u32 rateDen;                        // 0x2A8
     s32 histSize;                       // 0x2AC
@@ -205,20 +216,22 @@ typedef struct StreamPlayer {
     s32 firstTime;                      // 0x2D8  time the first set last started
     s32 stalled;                        // 0x2DC
     u32 videoResult;                    // 0x2E0
-    u8 pad2E4[0x2E8 - 0x2E4];
+    u32 frameWords;                     // 0x2E4
     int numTracks;                      // 0x2E8
     s32 resyncs;                        // 0x2EC
     StreamTrack *tracks;                // 0x2F0
     s32 unk2F4;                         // 0x2F4
     s32 unk2F8;                         // 0x2F8
     u8 pad2FC[0x300 - 0x2FC];
-    u8 videoState[0x328 - 0x300];       // 0x300
+    u32 planeSizes[9];                  // 0x300  video plane buffer sizes
+    u8 pad324[0x328 - 0x324];
     s32 unk328;                         // 0x328
     u8 pad32C[0x330 - 0x32C];
     s32 pauseTime;                      // 0x330
     u8 pad334[0x33C - 0x334];
     s32 tick;                           // 0x33C
-    u8 queue[0x384 - 0x340];            // 0x340  request queue entry
+    u8 queue[0x380 - 0x340];            // 0x340  request queue entry
+    s32 unk380;                         // 0x380
     void *extra;                        // 0x384
 } StreamPlayer;
 
@@ -939,8 +952,8 @@ s32 fn_801186B8(StreamPlayer *p) {
                 p->readerFill(p->reader);
             }
         }
-        p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->frameBuffer2, (s32 *)data,
-                                     p->setIndex[p->curSet - 1] & 1, (s32)p->videoState, p->flags, p->videoFlags);
+        p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
+                                     p->setIndex[p->curSet - 1] & 1, (s32)p->planeSizes, p->flags, p->videoFlags);
     }
     if (p->numTracks != 0) {
         fn_80117074(p);
