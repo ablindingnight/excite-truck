@@ -226,7 +226,9 @@ void fn_802AE690(const GroundFrame* cam) {
 f32 fn_802AE6E0(const Vec* a, const Vec* b) {
     f32 dz = a->z - b->z;
     f32 dx = a->x - b->x;
-    return sqrt(dx * dx + dz * dz);
+    f32 z2 = dz * dz;
+    f32 x2 = dx * dx;
+    return sqrt(x2 + z2);
 }
 
 void fn_802AE728(void) {
