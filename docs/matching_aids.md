@@ -12,6 +12,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | Function | File | Aid | Source |
 |---|---|---|---|
 | fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas | upstream orangedude27/excite-truck |
+| fn_80198488 (pick waiting car) | src/game/aicar.cpp | volatile reads of the two counts | upstream orangedude27/excite-truck |
 
 ## Existing sites (inventory 2026-10-23, before tagging)
 

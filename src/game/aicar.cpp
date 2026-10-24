@@ -162,7 +162,6 @@ extern f32 lbl_8055E3C8;
 extern f32 lbl_80558DC4[];
 extern void* lbl_80333348[];  // AIDriver vtable
 extern void* lbl_80333390[];  // IDriver vtable
-extern u8 lbl_80333158[];     // message table and tunables
 
 struct AIVecBase {
     ~AIVecBase(void) { data = 0; }
@@ -464,6 +463,23 @@ void fn_80193878(u8* d) {
     ((RigidBody*)CAR(d))->AddImpulse(1.0f, &pos, &at);
 }
 
+// AI debug console commands: name and handler (stored as a pointer to member: this delta, vtable slot).
+struct AICommand {
+    const char* name;
+    s32 thisDelta;
+    s32 vtblSlot;
+    void (*fn)(u8* d);
+};
+
+void fn_80193CD4(u8* d);
+
+AICommand lbl_80333158[4] = {
+    {"wake", 0, -1, fn_8019386C},
+    {"sleep", 0, -1, fn_80193CD4},
+    {"pit", 0, -1, fn_80193870},
+    {"wreck", 0, -1, fn_80193878},
+};
+
 
 u8* fn_801938F4(u8* d) {
     S32(d, 0x68) = 0;
@@ -745,11 +761,11 @@ void fn_801942B8(u8* d, f32 v) {
 }
 
 void fn_801942F0(u8* d, int on) {
-    if (!(S32(d, 0x2D0) & 0x20) && on) {
+    if ((S32(d, 0x2D0) & 0x20) || on) {
         S32(CAR(d), 0x267C) = 1;
-        return;
+    } else {
+        S32(CAR(d), 0x267C) = 0;
     }
-    S32(CAR(d), 0x267C) = 0;
 }
 
 void fn_80194324(u8* d) {
@@ -1750,15 +1766,19 @@ void fn_8019813C(u8* d, u8* p, f32 a, f32 b) {
 
 void fn_801981A0(u8* d, u8* out) {}
 
+// MATCHING-AID: volatile forces the second read of each count (found by upstream); the original
+// probably re-read it through some accessor. Revisit.
 void fn_80198488(u8* d) {
-    u8 b = U8(d, 0x9C);
-    u8 a = U8(d, 0x74);
+    volatile u8* pa = d + 0x74;
+    volatile u8* pb = d + 0x9C;
+    u8 b = *pb;
+    u8 a = *pa;
     if (a + b + 1 > (int)F32(d, 0x2F4)) {
         int z = S32(d, 0x18) == 0;
         if (z && a) {
-            fn_80193138(d, U8(d, 0x74) ? S32(d, 0x90) : -1);
+            fn_80193138(d, *pa ? S32(d, 0x90) : -1);
         } else if (!z && b) {
-            fn_80193138(d, U8(d, 0x9C) ? S32(d, 0xB8) : -1);
+            fn_80193138(d, *pb ? S32(d, 0xB8) : -1);
         }
     }
 }
