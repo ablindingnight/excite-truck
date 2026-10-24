@@ -243,7 +243,7 @@ int fn_8020DB0C(int arg0) {
 #pragma dont_inline reset
 extern void *lbl_8055EE7C;
 extern void *lbl_8055EE80;
-void AXFXSetHooks_8020DE10(void *arg0, void *arg1) {
+void fn_8020DE10(void *arg0, void *arg1) {
     lbl_8055EE7C = arg0;
     lbl_8055EE80 = arg1;
 }

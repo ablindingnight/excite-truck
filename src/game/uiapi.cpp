@@ -542,7 +542,7 @@ extern "C" s32 fn_802152CC(void) {
     fn_802152C8();
     return 0;
 }
-extern "C" void *__dt__Q36nw4hbm3snd18MemorySoundArchiveFv_802152F0(void *arg0, int arg1) {
+extern "C" void *fn_802152F0(void *arg0, int arg1) {
     if (arg0 != 0) {
         fn_8021915C(arg0, 0);
         if (arg1 > 0) ((s32 (*)(void *))fn_80128668)(arg0);
@@ -550,7 +550,7 @@ extern "C" void *__dt__Q36nw4hbm3snd18MemorySoundArchiveFv_802152F0(void *arg0, 
     return arg0;
 }
 
-extern "C" s32 __dt__Q36nw4hbm3snd18MemorySoundArchiveFv_80215348(void *arg0, s32 arg1) {
+extern "C" s32 fn_80215348(void *arg0, s32 arg1) {
     if (arg0 != 0) {
         fn_8021915C(arg0, 0);
         if (arg1 > 0) {
@@ -684,7 +684,7 @@ extern "C" s32 fn_802155AC(void) {
 
 extern "C" void fn_802C4C80(void*);
 extern "C" int lbl_8033D528[];
-extern "C" void* __dt__14CollisionSpaceFv_802155B4(void* arg0, s32 arg1) {
+extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
     if (arg0 != 0) {
         *(void**)arg0 = &lbl_8033D528;
         fn_802C4C80(((void**)arg0)[1]);

@@ -320,7 +320,7 @@ extern "C" void fn_80210904(void) {
 #pragma cplusplus off
 extern void *lbl_8055EED8;
 extern void *lbl_8055EEDC;
-void AXFXSetHooks_80210950(void *arg0, void *arg1) {
+void fn_80210950(void *arg0, void *arg1) {
     lbl_8055EED8 = arg0;
     lbl_8055EEDC = arg1;
 }

@@ -36,7 +36,7 @@ extern void *fn_8011FFC4(s32);
 extern f32 lbl_80329D48[];
 extern f64 lbl_805611D8;
 extern void fn_8011A330(void *);
-void AXFXSetHooks_8011FFB8();
+void fn_8011FFB8();
 void fn_80120084();
 extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
@@ -529,7 +529,7 @@ void fn_80118F1C(void *arg0, s32 arg1) {
 }
 
 void fn_80119214(void) {
-    AXFXSetHooks_8011FFB8();
+    fn_8011FFB8();
 }
 
 extern void memset(void *, int, unsigned int);
@@ -2102,7 +2102,7 @@ void* fn_8011FF24(void) {
     return lbl_8055DEF0;
 }
 
-void AXFXSetHooks_8011FFB8(void *arg0, void *arg1) {
+void fn_8011FFB8(void *arg0, void *arg1) {
     lbl_8055DEF8 = arg0;
     lbl_8055DEFC = arg1;
 }
