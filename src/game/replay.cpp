@@ -406,12 +406,10 @@ int fn_80008C5C(void) {
         if (!any && lbl_8055D394 > 1.0f && lbl_805589EC != 4) {
             lbl_805589EC = 4;
         }
-        if (lbl_805589EC != prev) {
-            if (lbl_8055D394 > 1.0f || prev == 4) {
-                lbl_8055D394 = 0.0f;
-            } else {
-                lbl_805589EC = prev;
-            }
+        if (lbl_805589EC != prev && (lbl_8055D394 > 1.0f || prev == 4)) {
+            lbl_8055D394 = 0.0f;
+        } else {
+            lbl_805589EC = prev;
         }
         lbl_8055D394 += 0.016683351f;
     }
