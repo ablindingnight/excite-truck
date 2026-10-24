@@ -109,11 +109,21 @@ extern float fn_802E9A2C(void);
 extern void fn_80060CC0(int, int, void (*)());
 extern void fn_802E30C8(const char *fmt, ...);  // Spu report
 extern void fn_802E5248(int, int);
-extern void fn_802E51D0();
+void fn_802E51D0(int chan, int result);
 __declspec(section ".sdata") extern char lbl_8055D1D8[];
 extern char lbl_8034D39C[];
 extern char lbl_8034D3C0[];
 extern unsigned char lbl_804FC800[];
+// Per-remote speaker state (4 remotes).
+typedef struct SpuRemote {
+    unsigned char ready;
+    unsigned char wenc[0x20];  // 0x01 WENC encoder state
+    char pad21[3];
+    int restart;               // 0x24 restart the encoder with the next block
+    int unk28;
+} SpuRemote;
+#define SPU_REMOTES ((SpuRemote *)lbl_804FC800)
+extern char lbl_8034D384[];
 extern unsigned char lbl_804FC558[];
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
@@ -300,7 +310,16 @@ unsigned short fn_802E5168(float volume) {
     return result < 0x8000 ? result : 0x8000;
 }
 
-void fn_802E51D0(void) {
+// Wii Remote speaker setup, last step: the speaker is playing, so mark the remote ready and reset its encoder.
+void fn_802E51D0(int chan, int result) {
+    if (result == 0) {
+        SpuRemote *r = &SPU_REMOTES[chan];
+        r->ready = 1;
+        r->restart = 1;
+        r->unk28 = 0;
+        memset(r->wenc, 0, sizeof(r->wenc));
+        fn_802E30C8(lbl_8034D384, chan);
+    }
 }
 
 void fn_802E5248(int arg0, int arg1) {
@@ -860,12 +879,12 @@ extern void AXSetVoiceRmtMix(void *vpb, AXPBRMTMIX *mix);
 // mixes for playing voices; records which remotes were used over the last 10 frames.
 void fn_802E6264(void) {
     char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
-    int muted;
+    int muted;  // silence all voices this update
     int level;
     int i;
     SpuVoice *v;
-    SpuSample *s;
     int wasPlaying;
+    SpuSample *s;
     int starting;
     unsigned int used;
     unsigned int remotes;
