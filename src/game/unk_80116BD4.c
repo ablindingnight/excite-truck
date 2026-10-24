@@ -898,6 +898,50 @@ void fn_8011A1A0(u32 *data, u32 size) {
     }
 }
 
+// Reads `len` bytes at `offset` into `dst` through an aligned stack buffer, waiting for each chunk.
+// Returns the bytes read, or 0 when the drive reports an error.
+u32 fn_8011A240(void *arg0, u32 arg1, s32 arg2, u32 arg3) {
+    u8 buf[0x400 + 31];
+    u8 *aligned = (u8 *)(((u32)buf + 31) & ~31);
+    u32 cap = ((u32)(buf + sizeof(buf)) - (u32)aligned) & ~31;
+    u32 total = 0;
+    u32 chunk;
+    while (arg3 != 0) {
+        chunk = (arg3 + 31) & ~31;
+        if (arg3 >= cap) {
+            chunk = cap;
+        }
+        DVDReadAsyncPrio((DVDFileInfo *)arg0, aligned, chunk, arg1, 0, 0);
+        while (1) {
+            switch (DVDGetDriveStatus()) {
+            case 0:
+                goto done;
+            case -1:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+                return 0;
+            }
+        }
+    done:
+        if (chunk > arg3) {
+            chunk = arg3;
+        }
+        memcpy((void *)arg2, aligned, chunk);
+        arg2 += chunk;
+        total += chunk;
+        arg3 -= chunk;
+        arg1 += chunk;
+    }
+    return total;
+}
+
 void fn_8011A330(void *arg0) {
     s32 status;
     *(s32 *)((u8 *)arg0 + 0xC4) = 1;
