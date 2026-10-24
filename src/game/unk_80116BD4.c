@@ -116,7 +116,8 @@ typedef struct StreamPlayer {
     s32 unk328;                         // 0x328
     u8 pad32C[0x330 - 0x32C];
     s32 pauseTime;                      // 0x330
-    u8 pad334[0x340 - 0x334];
+    u8 pad334[0x33C - 0x334];
+    s32 tick;                           // 0x33C
     u8 queue[0x384 - 0x340];            // 0x340  request queue entry
     void *extra;                        // 0x384
 } StreamPlayer;
@@ -631,11 +632,12 @@ s32 fn_80117598(s32 arg0,s32 arg1){
  return (~v) & ((v-arg1 | arg1-v)>>31);
 }
 
-void fn_801175C4(s32 arg0,s32 arg1){
- s32 off=((arg0+0x340)-arg0);
- s32* p=(s32*)(arg0-off);
- if(p[0x2e8/4]) fn_80117074((StreamPlayer *)p);
- p[0x33c/4]=arg1;
+// Queue callback: `arg0` is the player's queue entry; feeds the player's tracks and stores the tick.
+void fn_801175C4(s32 arg0, s32 arg1) {
+    // container-of: the player that owns this queue entry
+    StreamPlayer *p = (StreamPlayer *)((u8 *)arg0 - ((u8 *)((StreamPlayer *)arg0)->queue - (u8 *)arg0));
+    if (p->numTracks) fn_80117074(p);
+    p->tick = arg1;
 }
 
 void fn_80117618(void *arg0, void *arg1) {
@@ -2812,13 +2814,12 @@ got_memory:
     return (void *)result;
 }
 
+// Frees a block from fn_8011FFC4: the bytes before it hold the alignment offset and which allocator made it.
 void fn_80120084(void *arg0) {
     u8 *ptr = arg0;
-    u8 *base;
     if (ptr == 0) return;
-    base = ptr - ptr[-1];
-    if (ptr[-2] == 3) ((void (*)(void *))*(void **)(ptr - 8))(base);
-    else free(base);
+    if (ptr[-2] == 3) ((void (*)(void *))*(void **)(ptr - 8))(ptr - ptr[-1]);
+    else free(ptr - ptr[-1]);
 }
 
 void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w) {
