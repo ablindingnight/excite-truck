@@ -463,8 +463,7 @@ void fn_801175C4(s32 arg0,s32 arg1){
 }
 
 void fn_80117618(void *arg0, void *arg1) {
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    volatile s32 *out = (volatile s32 *)arg1;
+    s32 *out = (s32 *)arg1;
     s32 temp_r5;
     u32 half;
 
