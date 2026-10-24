@@ -267,7 +267,6 @@ void fn_801C6B70(void);
 void fn_80011A5C(int numPlayers);
 void fn_801B84A4(int player);
 int fn_801B87A0(int player, u16 key);
-int fn_80009C84(void);
 void fn_801CB844(void);
 int fn_801B8874(void);
 void fn_800121A4(void);
@@ -345,6 +344,7 @@ extern s32 lbl_8055D348;
 
 static inline int IsFreeRun(void) { return fn_801769B8() == 0; }
 
+int fn_80009C84(void);
 static inline int GetTime(void) { return fn_80009C84() ? lbl_8055D348 : fn_802E2C20(); }
 
 // The closure screen's base: adds the "done" query and the continue prompt. Neither is defined
@@ -899,10 +899,7 @@ int ArenaOverlay::HandleKey(int player, u32 type, int key) {
 }
 
 void ResultsOverlay::Update(void) {
-    if (state != shown) {
-        shown = state;
-        start = GetTime();
-    }
+    SetState(state);
     fn_80011A2C();
     switch (state) {
     case 3:
