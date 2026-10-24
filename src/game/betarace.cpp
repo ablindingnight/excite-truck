@@ -1749,15 +1749,16 @@ void CarResult::Compute(const BetaCar* c) {
 }
 
 f32 CarResult::SinceFinish(const BetaCar* c) {
-    f32 d;
-    if (finishTime < 0.0f) {
+    f32 t = finishTime;
+    if (t < 0.0f) {
         return 0.0f;
     }
-    d = c->master->timer.now - finishTime;
-    if (0.0f > d) {
+    f32 now = c->master->timer.now;
+    t = now - t;
+    if (0.0f > t) {
         return 0.0f;
     }
-    return d;
+    return t;
 }
 
 #pragma dont_inline on
