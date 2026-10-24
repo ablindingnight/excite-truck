@@ -1348,8 +1348,8 @@ void fn_801CA5A8(void) {
         Event* e = &lbl_8055E7F8[lbl_8055E828];
         sprintf(buf, "type: %s", fn_801C98F4(lbl_80562950, e->type));
         fn_801C94B8(400, 180, buf, -1);
-        sprintf(buf, "t: %.2f", e->time);
         int y = 180 + h;
+        sprintf(buf, "t: %.2f", e->time);
         fn_801C94B8(400, y, buf, -1);
         fn_801CA1C4(&lbl_8055E7F8[lbl_8055E828], 400, y + h, h);
     }
