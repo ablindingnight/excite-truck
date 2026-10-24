@@ -712,7 +712,7 @@ extern "C" s32 fn_80215730(void *arg0) {
 
   void fn_802C2FC4(int);
   s32 fn_80128668(void *);
-void fn_802C40E8(int, int, int);
+extern "C" void fn_802C40E8(int, int, int);
 void fn_802C4F2C(int, int *, int *);
 int fn_802C4EE4(int);
 int fn_802C4EFC(int);
@@ -732,7 +732,7 @@ extern "C" void *fn_80215738(void *arg0, s32 arg1) {
 void fn_802157A8(int arg0, int arg1, int arg2, unsigned int arg3) {
     unsigned int r7 = *(unsigned int *)(arg0 + 0xC);
     int r8 = *(int *)(arg0 + 4);
-    unsigned int rem = arg3 - (arg3 / r7) * r7;
+    unsigned int rem = arg3 % r7;
     if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - *(int *)(arg0 + 8) * rem);
 }
 
