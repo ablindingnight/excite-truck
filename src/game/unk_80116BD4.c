@@ -2020,19 +2020,17 @@ void *fn_8011BE48(s32 arg0) {
     return ptr;
 }
 
+// Queues request `arg1` (callbacks arg2/arg3) on `arg0` with interrupts disabled.
 void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3) {
-    s32 one = 1;
-    s32 old;
-    OSDisableInterrupts();
-    *(s32 *)((u8 *)arg1 + 0xC) = one;
+    s32 level = OSDisableInterrupts();
+    *(s32 *)((u8 *)arg1 + 0xC) = 1;
     *(s32 *)((u8 *)arg1 + 0x14) = arg2;
     *(s32 *)((u8 *)arg1 + 0x18) = arg3;
     *(s32 *)((u8 *)arg1 + 0x10) = 0;
     *(void **)arg1 = *(void **)((u8 *)arg0 + 0x30);
-    old = *(s32 *)((u8 *)arg0 + 0x38);
     *(void **)((u8 *)arg0 + 0x30) = arg1;
-    *(s32 *)((u8 *)arg0 + 0x38) = old + 1;
-    OSRestoreInterrupts(old);
+    *(s32 *)((u8 *)arg0 + 0x38) += 1;
+    OSRestoreInterrupts(level);
 }
 
 void fn_8011C364(s32 arg0);
