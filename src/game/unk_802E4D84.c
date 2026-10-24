@@ -97,10 +97,6 @@ typedef struct SpuVoice {
 
 extern char lbl_8055FFB5;
 extern int lbl_8055FF8C;  // output mode: 0/1 stereo, 2 surround
-extern float lbl_80565128;
-extern float lbl_8056512C;
-extern float lbl_80565130;
-extern float lbl_80565134;
 extern void fn_802E5264(int, int);
 extern float lbl_804FC680[];
 extern int lbl_8055D1EC;
@@ -151,7 +147,6 @@ extern char lbl_8034D210[];  // the Spu's message strings
 extern void fn_801282EC(int align);
 extern void fn_801282F4(void);
 extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator new[](size, tag)
-extern float lbl_80565138;
 extern int OSDisableInterrupts(void);
 // Copies `size` bytes to "ARAM" (main memory here) and flushes them.
 void fn_802E4D84(void *dst, void *src, int size, int dir) {
@@ -297,21 +292,12 @@ void fn_802E4F98(void) {
     }
 }
 
-extern float lbl_80565130;
-extern float lbl_80565134;
-unsigned short fn_802E5168(float arg0) {
-    float value = lbl_80565130 * arg0;
-    int converted;
-    int result;
-    if (value < lbl_8056512C) {
-        value -= lbl_80565134;
-    } else {
-        value += lbl_80565134;
-    }
-    converted = (int)value;
-    result = converted & ((-converted & ~converted) >> 31);
-    if (result >= 0x8000) result = 0x8000;
-    return (unsigned short)result;
+// Converts a 0..1 volume to a remote-speaker mix level (0..0x8000), rounding to nearest.
+unsigned short fn_802E5168(float volume) {
+    float value = 32768.0f * volume;
+    int converted = (int)(value < 0.0f ? value - 0.5f : value + 0.5f);
+    int result = converted & ((-converted & ~converted) >> 31);  // negative -> 0
+    return result < 0x8000 ? result : 0x8000;
 }
 
 void fn_802E51D0(void) {
@@ -417,7 +403,7 @@ void fn_802E5478(void) {
     lbl_8055FF8C = 1;
     lbl_8055FF84 = 0x20000;
     fn_801282F4();
-    lbl_8055FFB0 = lbl_8055FF7C = lbl_8055FF80 = fn_801284E8(msg + 0x1C8, lbl_8055FF84);
+    lbl_8055FF80 = lbl_8055FF7C = lbl_8055FFB0 = fn_801284E8(msg + 0x1C8, lbl_8055FF84);
     DCInvalidateRange(lbl_8055FF80, lbl_8055FF84);
     fn_802E30C8(msg + 0x1D4, lbl_8055FF80, lbl_8055FF84, lbl_8055FF84 >> 10);
     AIInit(0);
@@ -449,10 +435,9 @@ void fn_802E5478(void) {
     fn_802E6B04();
     OSCreateAlarm(lbl_804FC690);
     OSSetPeriodicAlarm(lbl_804FC690, OSGetTime(), OSNanosecondsToTicks(6666667), fn_802E52EC);
-    lbl_804FC680[0] = lbl_80565128;
-    lbl_804FC680[1] = lbl_80565128;
-    lbl_804FC680[2] = lbl_80565128;
-    lbl_804FC680[3] = lbl_80565128;
+    for (i = 0; i < 4; i++) {
+        lbl_804FC680[i] = 1.0f;
+    }
     fn_802E2E0C(fn_802E540C, lbl_8055D1E0);
     lbl_8055FFA5 = 1;
     fn_802E5438();
@@ -597,8 +582,6 @@ void fn_802E5A54(void) {
 }
 
 extern char lbl_8034D210[];  // the Spu's message strings
-extern float lbl_80565138;
-extern float lbl_8056513C;
 extern char *strrchr(const char *, int);
 extern int strcasecmp(const char *, const char *);
 extern char *strcpy(char *, const char *);
@@ -649,12 +632,12 @@ SpuSample *fn_802E5AE8(char *name) {
         fn_802E317C(msg + 0x2C4, name, magic, 0xCFFE);
     }
     size = res->size;
-    length = (float)(size >> 1) / lbl_80565138;
+    length = (float)(size >> 1) / 22050.0f;
     size = (size + 0x3F) & ~0x3F;
     if (res->format == 1) {
-        length *= lbl_8056513C;
+        length *= 3.488817f;
     }
-    rate = (float)res->rate / lbl_80565138;
+    rate = (float)res->rate / 22050.0f;
     s = &SPU_SAMPLES[free];
     memset(s, 0, sizeof(SpuSample));
     addr = (unsigned int)res->data;
@@ -692,7 +675,6 @@ static inline void StrCopy(char *d, const char *s, int n) {
 }
 
 extern void fn_801282EC(int align);
-extern float lbl_80565148;
 extern void fn_801282F4(void);
 extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator new[](size, tag)
 
@@ -726,8 +708,8 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
     s->fill = fill;
     s->fillArg = arg;
     s->users = 0;
-    s->rate = lbl_80565128;
-    s->length = lbl_80565148;
+    s->rate = 1.0f;
+    s->length = 1000.0f;
     StrCopy(s->name, name, 0x20);
     return s;
 }
@@ -755,7 +737,7 @@ void fn_802E5D5C(void *arg0) {
 
 float fn_802E6040(void *arg0) {
     if (arg0 != 0) return *(float *)((char *)arg0 + 0xA4);
-    return lbl_8056512C;
+    return 0.0f;
 }
 
 extern unsigned char lbl_8055FF94[];
@@ -771,9 +753,9 @@ void *fn_802E6058(void *arg0) {
             OSDisableInterrupts();
             entry[0x20] = 1;
             *(void **)(entry + 0x1C) = arg0;
-            *(float *)(entry + 8) = lbl_80565128;
-            *(float *)(entry + 0xC) = lbl_8056512C;
-            *(float *)(entry + 0x14) = lbl_80565128;
+            *(float *)(entry + 8) = 1.0f;
+            *(float *)(entry + 0xC) = 0.0f;
+            *(float *)(entry + 0x14) = 1.0f;
             *(int *)(entry + 0x18) = 0;
             *(float *)(entry + 0x10) = *(float *)((char *)arg0 + 0xA8);
             entry[0x23] = 0;
@@ -828,7 +810,7 @@ void fn_802E61EC(void *arg0, float farg0) {
         *(float *)((char *)arg0 + 0xC) = farg0;
         return;
     }
-    *(float *)((char *)arg0 + 0xC) = lbl_8056512C;
+    *(float *)((char *)arg0 + 0xC) = 0.0f;
 }
 
 void fn_802E620C(void *arg0, float farg0) {
@@ -836,7 +818,7 @@ void fn_802E620C(void *arg0, float farg0) {
         *(float *)((char *)arg0 + 0x14) = farg0;
         return;
     }
-    *(float *)((char *)arg0 + 0x14) = lbl_80565128;
+    *(float *)((char *)arg0 + 0x14) = 1.0f;
 }
 
 void fn_802E622C(void *arg0, float farg0) { *(float *)((char *)arg0 + 0x10) = farg0; }
@@ -862,10 +844,6 @@ void fn_802E625C(int mode) {
 extern int lbl_8055D1D0;  // output mode last applied
 extern int lbl_8055FFAC;
 extern unsigned int lbl_804FC658[10];  // remotes used in each of the last 10 updates
-extern float lbl_8056514C;
-extern float lbl_80565150;
-extern float lbl_80565154;
-extern float lbl_80565158;
 extern int fn_802ECC10(void);
 extern void AXSetVoiceVe(void *vpb, AXPBVE *ve);
 extern void AXSetVoiceAddr(void *vpb, AXPBADDR *addr);
@@ -1004,7 +982,7 @@ void fn_802E6264(void) {
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         AXSetVoiceAddr(v->vpb, &addr);
-                        s->rate = lbl_8056514C;
+                        s->rate = 2.0f;
                     } else if (s->locked == 1) {
                         AXSetVoiceType(v->vpb, 1);
                         start = s->addr * 2 + 2;
@@ -1019,7 +997,7 @@ void fn_802E6264(void) {
                         addr.currentAddressLo = start;
                         memset(&hdr, 0, sizeof(hdr));
                         s->fill(&hdr, sizeof(hdr), s->fillArg);
-                        s->rate = (float)hdr.sampleRate / lbl_80565138;
+                        s->rate = (float)hdr.sampleRate / 22050.0f;
                         s->fill(s->data, s->size, s->fillArg);
                         DCFlushRange(s->data, s->size);
                         AXSetVoiceAddr(v->vpb, &addr);
@@ -1041,31 +1019,31 @@ void fn_802E6264(void) {
                     AXSetVoiceSrc(v->vpb, &src);
                 }
                 if (v->play) {
-                    AXSetVoiceSrcRatio(v->vpb, muted ? lbl_8056512C : v->sample->rate * (lbl_80565150 * v->pitch));
+                    AXSetVoiceSrcRatio(v->vpb, muted ? 0.0f : v->sample->rate * ((22050.0f / 32000.0f) * v->pitch));
                     memset(&ve, 0, sizeof(ve));
                     vol = v->volume;
-                    if (vol > lbl_80565128) {
-                        vol = lbl_80565128;
+                    if (vol > 1.0f) {
+                        vol = 1.0f;
                     }
-                    ve.currentVolume = lbl_80565154 * (lbl_80565158 * vol);
+                    ve.currentVolume = 0.75f * (32767.0f * vol);
                     ve.currentDelta = 0;
                     if (muted) {
                         ve.currentVolume = 0;
                     }
                     AXSetVoiceVe(v->vpb, &ve);
                     memset(&mix, 0, sizeof(mix));
-                    left = lbl_80565128 - v->pan;
-                    left = left < lbl_80565128 ? left : lbl_80565128;
-                    right = lbl_80565128 + v->pan;
-                    right = right < lbl_80565128 ? right : lbl_80565128;
-                    front = lbl_80565128 + v->depth;
-                    front = front < lbl_80565128 ? front : lbl_80565128;
-                    back = lbl_80565128 - v->depth;
-                    back = back < lbl_80565128 ? back : lbl_80565128;
-                    mix.vL = lbl_80565158 * (left * front);
-                    mix.vR = lbl_80565158 * (right * front);
-                    mix.vS = lbl_80565158 * (left * back);
-                    mix.vAuxCL = lbl_80565158 * (right * back);
+                    left = 1.0f - v->pan;
+                    left = left < 1.0f ? left : 1.0f;
+                    right = 1.0f + v->pan;
+                    right = right < 1.0f ? right : 1.0f;
+                    front = 1.0f + v->depth;
+                    front = front < 1.0f ? front : 1.0f;
+                    back = 1.0f - v->depth;
+                    back = back < 1.0f ? back : 1.0f;
+                    mix.vL = 32767.0f * (left * front);
+                    mix.vR = 32767.0f * (right * front);
+                    mix.vS = 32767.0f * (left * back);
+                    mix.vAuxCL = 32767.0f * (right * back);
                     AXSetVoiceMix(v->vpb, &mix);
                     remotes = v->remotes;
                     used |= remotes;

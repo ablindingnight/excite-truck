@@ -4407,6 +4407,7 @@ game/vmem.cpp:
 
 game/unk_802E4D84.c:
 	.text       start:0x802E4D84 end:0x802E6B48
+	.sdata2     start:0x80565128 end:0x80565160
 
 game/unk_802E6B48.c:
 	.text       start:0x802E6B48 end:0x802E6B50
