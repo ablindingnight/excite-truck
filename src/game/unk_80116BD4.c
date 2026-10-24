@@ -324,6 +324,55 @@ u32 fn_80116BCC(void) {
     return 1;
 }
 
+// Returns a * b / d with a 64-bit intermediate (the quotient must fit in 32 bits): shifts for a power-of-two d,
+// divides directly when the product fits, else uses two-digit long division (Hacker's Delight divlu).
+u32 fn_80116BD4(u32 a, u32 b, u32 d) {
+    u32 hi = __mulhwu(a, b);
+    u32 lo = a * b;
+    u32 s;
+    u32 vn1, vn0, un32, un10, un1, un0, un21, q1, q0, r, p;
+
+    if ((d & (d - 1)) == 0) {
+        s = __cntlzw(d);
+        return (hi << (s + 1)) | (lo >> (31 - s));
+    }
+    if (hi == 0) {
+        return lo / d;
+    }
+    s = __cntlzw(d);
+    d <<= s;
+    un32 = (hi << s) + (lo >> (32 - s));
+    un10 = lo << s;
+    vn1 = d >> 16;
+    vn0 = d & 0xFFFF;
+    un1 = un10 >> 16;
+
+    q1 = un32 / vn1;
+    r = ((un32 - q1 * vn1) << 16) | un1;
+    p = q1 * vn0;
+    if (r < p) {
+        r += d;
+        q1--;
+        if (r >= d && r < p) {
+            r += d;
+            q1--;
+        }
+    }
+    un21 = r - p;
+
+    q0 = un21 / vn1;
+    r = ((un21 - q0 * vn1) << 16) | (un10 & 0xFFFF);
+    p = q0 * vn0;
+    if (r < p) {
+        r += d;
+        q0--;
+        if (r >= d && r < p) {
+            q0--;
+        }
+    }
+    return (q1 << 16) | q0;
+}
+
 void fn_80116CC4(s32* arg0, u16 arg1, u32 arg2) {
     s32* r3;
     u32 r6;
@@ -599,7 +648,7 @@ void fn_80117380(StreamPlayer *p, s32 next) {
     p->curSet = set + 1;
 }
 
-u32 fn_80116BD4(s32, s32, s32);
+u32 fn_80116BD4(u32 a, u32 b, u32 d);
 u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag) {
     s32 i;
     u32 maxDiff;
