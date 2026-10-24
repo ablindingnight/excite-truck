@@ -586,9 +586,8 @@ void fn_802D8FB4(GXTex* t) {
 }
 
 int fn_802D9068(void) {
-    GXTex* t = lbl_8055FE28;
-    for (int i = 0; i < 450; i++, t++) {
-        if (!t->used) {
+    for (int i = 0; i < 450; i++) {
+        if (!lbl_8055FE28[i].used) {
             return 1;
         }
     }
