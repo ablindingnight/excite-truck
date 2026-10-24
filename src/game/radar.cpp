@@ -166,7 +166,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     corner.y = origin.y + size.y;
     fn_801392F8(fn_8017960C(self));
     cam = fn_801E8718();
-    if (NearZero(cam->dir.x) && NearZero(cam->dir.z)) {
+    if ((f32)__fabs(cam->dir.x) <= lbl_80558DC4[0] && (f32)__fabs(cam->dir.z) <= lbl_80558DC4[0]) {
         return;
     }
     h.x = cam->dir.x;
@@ -215,7 +215,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
             alpha = LerpF(1.0f, 0.3f, Clamp01((dist - 2.0f * range) / (6.0f * range - 2.0f * range)));
             if (dist > range) {
                 f32 mag = PSVECMag(&p);
-                if (!NearZero(mag)) {
+                if (!((f32)__fabs(mag) <= lbl_80558DC4[0])) {
                     f32 k = range / mag;
                     p.x *= k;
                     p.y *= k;
