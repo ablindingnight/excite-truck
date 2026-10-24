@@ -584,6 +584,11 @@ void fn_80119558(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x50) = fn_80116D30();
 }
 
+void fn_801195A0(void *arg0) {
+    fn_8011943C(arg0, 0);
+    *(s32 *)((u8 *)arg0 + 0x38) = 1;
+}
+
 extern f64 lbl_80561198;
 extern f64 lbl_805611A8;
 extern f32 lbl_805611A0;
@@ -1578,6 +1583,13 @@ u32 fn_8011C06C(void *arg0) {
     return 1;
 }
 
+// Waits (yielding) until fn_8011C06C reports the request finished.
+void fn_8011C0E0(void *arg0) {
+    while (fn_8011C06C(arg0) == 0) {
+        OSYieldThread();
+    }
+}
+
 u32 fn_8011C1E0(s32 arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
@@ -1618,7 +1630,7 @@ void fn_8011C2EC(s32 arg0, void *arg1) {
 
 void fn_8011C364(s32 arg0) {
     if (arg0 != 0) {
-        fn_8011C0E0();
+        fn_8011C0E0((void *)arg0);
         OSCancelAlarm((OSAlarm *)(arg0 + 8));
         fn_80120084(arg0);
     }
@@ -1669,6 +1681,10 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
 }
 
 extern void fn_8011C4A0(s32, s32, s32, s32);
+void fn_8011CD78(s32 arg0, s32 arg1) {
+    fn_8011C4A0(arg1, arg0 + 0x24, arg0 + 0x20, arg0 + 0x10);
+}
+
 void fn_8011CD90(s32 arg0, s32 arg1, s32 arg2) {
     s32 a = arg2;
     s32 b = arg2 + 0x100;
