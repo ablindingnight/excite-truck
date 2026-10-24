@@ -389,8 +389,9 @@ static inline void FrameToQuatAxis(f32 (*m)[3], IQuat* q) {
     v[k] = (m[i][k] + m[k][i]) * s;
 }
 
-static inline void RotToQuat(const f32 (*m)[3], IQuat* q) {
-    f32 tr = m[0][0] + m[1][1] + m[2][2];
+static inline void RotToQuat(const Mat3* r, IQuat* q) {
+    const f32(*m)[3] = (const f32(*)[3])r;
+    f32 tr = r->m[0] + r->m[4] + r->m[8];
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
         q->w = 0.5f * s;
@@ -403,7 +404,7 @@ static inline void RotToQuat(const f32 (*m)[3], IQuat* q) {
     }
 }
 
-static inline void FrameToQuat(const IFrame* f, IQuat* q) { RotToQuat((const f32(*)[3])f, q); }
+static inline void FrameToQuat(const IFrame* f, IQuat* q) { RotToQuat((const Mat3*)f, q); }
 
 // The rotation of a unit quaternion.
 static inline void QuatToFrame(IFrame* f, const IQuat* q) {
@@ -1738,7 +1739,7 @@ void fn_801C6D94(void) {
 // A rotation as axis * angle.
 static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
     IQuat q;
-    RotToQuat((const f32(*)[3])m, &q);
+    RotToQuat(m, &q);
     f32 ang = acos(q.w);
     f32 sn = sin(ang);
     if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
