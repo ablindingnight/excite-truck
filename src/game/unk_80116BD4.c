@@ -49,20 +49,29 @@ typedef struct StreamTrack {
     u8 pad4C[0x54 - 0x4C];
     u32 minimum;     // 0x54
     s32 blockMask;   // 0x58
-    s32 dirty;       // 0x5C
-    u8 pad60[0x78 - 0x60];
+    s32 dirty;       // 0x5C  set when the voices ran dry (silence was written)
+    u8 pad60[0x64 - 0x60];
+    s32 playing;     // 0x64
+    u8 pad68[0x78 - 0x68];
     s32 mono;        // 0x78  1 = one voice; otherwise left/right voices fed from interleaved data
     void *voices[2]; // 0x7C  AX voices (left, right)
     s16 *bufL;       // 0x84  voice buffers (bufL is also the allocation freed for both)
     s16 *bufR;       // 0x88
     u8 pad8C[0x94 - 0x8C];
     u32 bufSize;     // 0x94  bytes of interleaved data the voice buffers hold
-    u8 pad98[0xB0 - 0x98];
+    u8 pad98[0x9C - 0x98];
+    u32 chunk;       // 0x9C
+    u8 padA0[0xB0 - 0xA0];
     s32 ending;      // 0xB0
     s32 stopping;    // 0xB4
     u32 writePos;    // 0xB8  interleaved byte position in the voice buffers
     u32 pending;     // 0xBC  bytes the voices still need
-    u8 padC0[0x17C - 0xC0];
+    u8 padC0[0xC4 - 0xC0];
+    u32 lastPos;     // 0xC4  last voice play position
+    u32 threshold;   // 0xC8
+    u32 lastTime;    // 0xCC
+    u32 interval;    // 0xD0
+    u8 padD4[0x17C - 0xD4];
 } StreamTrack;
 #define STREAM_TRACKS(p) (*(StreamTrack **)((u8 *)(p) + 0x2F0))
 
@@ -1022,6 +1031,58 @@ void fn_801195D8(StreamTrack *t) {
             fn_80119558(t->voices);
         }
     }
+}
+
+// Keeps a track's voices fed: tops them up from the ring, or writes silence while the voices outrun the data.
+s32 fn_80119824(StreamTrack *t) {
+    u32 pos;
+    u32 now;
+    u32 space;
+    if (t->stopping != 0 || t->playing == 0) {
+        return 0;
+    }
+    if (t->ending == 0) {
+        fn_801195D8(t);
+        return 0;
+    }
+    pos = t->lastPos;
+    if (fn_80116D30() - t->lastTime <= 12) {
+        goto compute;
+    }
+    for (;;) {
+        pos = fn_801194E4(t->voices);
+        now = fn_80116D30();
+        t->lastPos = pos;
+        if (now - t->lastTime >= t->interval) {
+            t->lastTime = now;
+            goto silence;
+        }
+        t->lastTime = now;
+    compute:
+        if (pos < t->writePos) {
+            space = pos + t->bufSize - t->writePos;
+        } else {
+            space = pos - t->writePos;
+        }
+        space = space < 1024 ? 0 : (space - 1024) & ~3;
+        if (space < t->chunk && (t->pending == 0 || space == 0)) {
+            goto done;
+        }
+        if (space < t->threshold) {
+            break;
+        }
+    silence:
+        t->dirty = 1;
+        fn_80119300(t->voices, t->writePos, t->chunk * 2);
+        t->writePos += t->chunk * 2;
+        if (t->writePos >= t->bufSize) {
+            t->writePos -= t->bufSize;
+        }
+    }
+    t->pending = space;
+    fn_801195D8(t);
+done:
+    return 0;
 }
 
 s32 fn_80119994(void) { return 0; }
