@@ -537,13 +537,12 @@ s32 fn_80116D30(void) {
 
 extern void* fn_8011FF24(void);
 extern void *fn_8011FF2C(s32);
-void fn_80116DDC(void* arg0, s32 arg1) {
-    void* result = fn_8011FF24();
-    s32* ptr = (s32*)arg0;
-    s32 current = ptr[0x290 / 4];
-    s32 new_val = arg1 + (s32)result + current;
-    ptr[0x290 / 4] = new_val;
-    fn_8011FF2C(arg1);
+// Allocates `size` bytes for player p, counting them (plus allocator overhead) in its memory total.
+void *fn_80116DDC(void *p, s32 size) {
+    void *overhead = fn_8011FF24();
+    s32 *fields = (s32 *)p;
+    fields[0x290 / 4] += size + (s32)overhead;
+    return fn_8011FF2C(size);
 }
 
 void fn_80116E2C(const u8 *arg0) {
@@ -807,6 +806,411 @@ void fn_80117618(void *arg0, void *arg1) {
 }
 
 void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
+
+s32 fn_8011ACC4(void *reader, void *name, s32 flags);
+BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags);
+void fn_8011FE20(void **slot, s32 size);
+void fn_8011DFAC(void *arg0, u32 arg1);
+void *fn_8011BE48(s32 arg0);
+void fn_8011C120(void *arg0);
+void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3);
+void fn_80120084(void *p);
+
+// Bink file header.
+typedef struct BinkHeader8011 {
+    u32 magic;         // 'BIKf'..'BIKi' (stored little-endian)
+    u32 fileSize;      // 0x04 bytes after the first 8
+    u32 frames;        // 0x08
+    u32 largestFrame;  // 0x0C
+    u32 numIndex;      // 0x10
+    u32 width;         // 0x14
+    u32 height;        // 0x18
+    u32 fpsNum;        // 0x1C
+    u32 fpsDen;        // 0x20
+    u32 flags;         // 0x24
+    u32 numAudio;      // 0x28
+} BinkHeader8011;
+
+// One video plane buffer request.
+typedef struct BinkPlane8011 {
+    s32 wanted;
+    void *buffer;
+    u32 pitch;
+} BinkPlane8011;
+
+// Frame buffer layout filled in by fn_80117618.
+typedef struct BinkFrameBuffers8011 {
+    s32 count;      // frames (1 or 2)
+    u32 width;      // 0x04 luma width/height
+    u32 height;     // 0x08
+    u32 cWidth;     // 0x0C chroma width/height
+    u32 cHeight;    // 0x10
+    u32 unk14;
+    struct {
+        BinkPlane8011 y;
+        BinkPlane8011 cr;
+        BinkPlane8011 cb;
+        BinkPlane8011 a;
+    } frames[2];    // 0x18
+} BinkFrameBuffers8011;
+
+extern char lbl_802F6528[];  // BinkOpen error messages
+extern s32 lbl_80559938;     // frame rate override (-1 = none)
+extern s32 lbl_8055DEDC;
+extern s32 lbl_8055993C;     // read buffer size override (-1 = none)
+extern s32 lbl_80559940;     // reader start argument override (-1 = none)
+extern u32 lbl_80559944;     // number of requested sound tracks
+extern s32 lbl_8041D608[];   // requested sound track ids
+extern s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);  // one-shot reader override
+typedef s32 (*BinkSoundOpen8011)(StreamTrack *t, u32 rate, s32 bits, s32 chans, u32 flags, struct StreamPlayer *p);
+
+// BinkOpen: opens `name` (or a file image in memory with flag 0x04000000) and sets up the player, its frame
+// buffers, frame index, read buffer and sound tracks. Returns 0 on failure (the reason is in lbl_8041D508).
+StreamPlayer *fn_8011770C(void *name, u32 flags) {
+    BinkHeader8011 hdr;
+    BinkFrameBuffers8011 fb;
+    StreamPlayer local;
+    StreamPlayer *p;
+    s32 (*open)(void *reader, void *name, u32 flags);
+    s32 fromMemory;
+    s32 startArg;
+    u32 i;
+    u32 n;
+    s32 any;
+
+    open = (s32 (*)(void *, void *, u32))fn_8011ACC4;
+    if (!(flags & 0x4000)) {
+        lbl_80559944 = 1;
+        lbl_8041D608[0] = 0;
+    }
+    memset(&local, 0, sizeof(local));
+    local.openTime = fn_80116D30();
+    lbl_8041D508[0] = 0;
+    fromMemory = flags & 0x04000000;
+    if (fromMemory) {
+        memcpy(&hdr, name, sizeof(hdr));
+    } else {
+        if ((flags & 0x02000000) && lbl_8055DED8 != 0) {
+            open = lbl_8055DED8;
+        }
+        lbl_8055DED8 = 0;
+        if (!open(&local.readerRead, name, flags)) {
+            if (lbl_8041D508[0] == 0) {
+                fn_80116E2C((u8 *)lbl_802F6528);
+            }
+            return 0;
+        }
+        local.readerRead(&local.readerRead, 0, &hdr, sizeof(hdr));
+    }
+    if ((hdr.magic != 'fKIB' && hdr.magic != 'gKIB' && hdr.magic != 'hKIB' && hdr.magic != 'iKIB') ||
+        local.unk110 != 0) {
+        fn_80116E2C((u8 *)lbl_802F6528 + 0x14);
+        goto close;
+    }
+    if (hdr.frames == 0) {
+        fn_80116E2C((u8 *)lbl_802F6528 + 0x25);
+        goto close;
+    }
+    local.width = hdr.width;
+    local.height = hdr.height;
+    local.width2 = hdr.width;
+    local.height2 = hdr.height;
+    local.videoFlags = hdr.flags;
+    local.blocksWide = (hdr.width + 15) >> 4;
+    local.flags = (flags & ~0x70000000) | (hdr.flags & 0x20000);
+    if (!(hdr.flags & 0x100000)) {
+        local.flags &= ~0x100000;
+    }
+    if ((flags & 0x70000000) != 0x70000000) {
+        if (flags & 0x70000000) {
+            local.flags |= flags & 0x70000000;
+        } else {
+            local.flags |= hdr.flags & 0x70000000;
+        }
+        switch (local.flags & 0x70000000) {
+        case 0x10000000:
+        case 0x20000000:
+            local.height *= 2;
+            break;
+        case 0x30000000:
+            local.width *= 2;
+            break;
+        case 0x40000000:
+        case 0x50000000:
+            local.width *= 2;
+            local.height *= 2;
+            break;
+        }
+    }
+    if (hdr.magic == 'fKIB' || hdr.magic == 'gKIB') {
+        local.flags |= 0x18000;
+    } else if (hdr.magic == 'hKIB') {
+        local.flags |= 0x8000;
+    }
+    local.numSets = hdr.frames;
+    local.numIndex = hdr.numIndex;
+    if ((flags & 0x1000) && lbl_80559938 != -1) {
+        local.fpsNum = lbl_80559938;
+        local.fpsDen = lbl_8055DEDC;
+        lbl_80559938 = -1;
+    } else {
+        local.fpsNum = hdr.fpsNum;
+        local.fpsDen = hdr.fpsDen;
+    }
+    local.rateNum = hdr.fpsNum;
+    local.rateDen = hdr.fpsDen;
+    local.fileSize = hdr.fileSize;
+    local.numAudio = hdr.numAudio;
+    local.largestFrame = hdr.largestFrame;
+    local.frameBufferSize = local.blocksWide * ((local.height + 15) >> 4);
+    local.frameWords = local.frameBufferSize >> 2;
+    local.histSize = (hdr.fpsNum + (hdr.fpsDen >> 1)) / hdr.fpsDen;
+    if (local.histSize == 0) {
+        local.histSize = 1;
+    }
+    fn_8011FE20(&local.frameBuffer, local.frameBufferSize + 16);
+    fn_8011FE20((void **)&local.histFrameStart, local.histSize * 4);
+    fn_8011FE20((void **)&local.histIdle, local.histSize * 4);
+    fn_8011FE20((void **)&local.histDecode, local.histSize * 4);
+    fn_8011FE20((void **)&local.hist29C, local.histSize * 4);
+    fn_8011FE20((void **)&local.histRead, local.histSize * 4);
+    fn_8011FE20((void **)&local.hist128, local.histSize * 4);
+    fn_8011FE20((void **)&local.hist12C, local.histSize * 4);
+    fn_8011FE20((void **)&local.tracks, (lbl_80559944 != 0 ? lbl_80559944 : 1) * sizeof(StreamTrack));
+    fn_8011FE20((void **)&local.trackIds, lbl_80559944 * 4);
+    fn_8011DFAC(local.planeSizes, (local.width + 15) & ~15);
+    for (i = 0; i < 9; i++) {
+        fn_8011FE20((void **)&local.planeSizes[i], local.planeSizes[i]);
+    }
+    if (!fromMemory) {
+        fn_8011FE20((void **)&local.setIndex, (local.numIndex + 1) * 4);
+        fn_8011FE20((void **)&local.audioMaxSize, local.numAudio * 4);
+        fn_8011FE20((void **)&local.audioFlags, local.numAudio * 4);
+        fn_8011FE20((void **)&local.audioIds, local.numAudio * 4);
+    }
+    p = fn_80116DDC(&local, sizeof(StreamPlayer));
+    if (p == 0) {
+    nomem:
+        fn_80116E2C((u8 *)lbl_802F6528 + 0x59);
+        goto close;
+    }
+    memcpy(p, &local, sizeof(StreamPlayer));
+    p->self = p;
+    *p->histIdle = 0;
+    *p->histDecode = 0;
+    *p->hist29C = 0;
+    *p->histRead = 0;
+    *p->hist128 = 0;
+    *p->hist12C = 0;
+    if (fromMemory) {
+        p->audioMaxSize = (u32 *)((u8 *)name + 0x2C);
+        p->audioFlags = (u32 *)((u8 *)name + p->numAudio * 4 + 0x2C);
+        p->audioIds = (s32 *)((u8 *)name + p->numAudio * 8 + 0x2C);
+        p->setIndex = (s32 *)((u8 *)name + p->numAudio * 12 + 0x2C);
+    } else {
+        p->readerRead(&p->readerRead, -1, p->audioMaxSize, p->numAudio * 4);
+        p->readerRead(&p->readerRead, -1, p->audioFlags, p->numAudio * 4);
+        p->readerRead(&p->readerRead, -1, p->audioIds, p->numAudio * 4);
+        p->readerRead(&p->readerRead, -1, p->setIndex, (p->numIndex + 1) * 4);
+        if (p->unk110) {
+            fn_80116E2C((u8 *)lbl_802F6528 + 0x68);
+            goto close;
+        }
+    }
+    p->maxFrameSize = fn_801174B0(p->numSets, (u32 *)p->setIndex, p->histSize, (s32 *)&p->unkD8, &p->unk380);
+    if (!(flags & 0x400)) {
+        fn_80117618(p, &fb);
+        any = 0;
+        for (i = 0; i < fb.count; i++) {
+            u32 cPitch = (fb.cWidth + 15) & ~15;
+            if (fb.frames[i].y.wanted) {
+                fn_8011FE20(&fb.frames[i].y.buffer, fb.width * fb.height);
+                any = 1;
+                fb.frames[i].y.pitch = fb.width;
+            }
+            if (fb.frames[i].cr.wanted) {
+                fn_8011FE20(&fb.frames[i].cr.buffer, cPitch * fb.cHeight);
+                fb.frames[i].cr.pitch = cPitch;
+                any = 1;
+            }
+            if (fb.frames[i].cb.wanted) {
+                fn_8011FE20(&fb.frames[i].cb.buffer, cPitch * fb.cHeight);
+                fb.frames[i].cb.pitch = cPitch;
+                any = 1;
+            }
+            if (fb.frames[i].a.wanted) {
+                fn_8011FE20(&fb.frames[i].a.buffer, fb.width * fb.height);
+                any = 1;
+                fb.frames[i].a.pitch = fb.width;
+            }
+        }
+        for (; i < 2; i++) {
+            fb.frames[i].cr.buffer = 0;
+            fb.frames[i].cb.buffer = 0;
+            fb.frames[i].y.buffer = 0;
+        }
+        if (any) {
+            p->extra = fn_80116DDC(p, sizeof(fb));
+            if (p->extra == 0) {
+            freeplayer:
+                fn_80120084(p);
+                goto nomem;
+            }
+            p->video = p->extra;
+            memcpy(p->extra, &fb, sizeof(fb));
+        }
+    }
+    if ((flags & 0x01000000) && lbl_8055993C != -1) {
+        p->readBufSize = lbl_8055993C;
+        lbl_8055993C = -1;
+    } else {
+        p->readBufSize = p->maxFrameSize;
+    }
+    if ((flags & 0x00400000) && (startArg = lbl_80559940) != -1) {
+        lbl_80559940 = -1;
+    } else {
+        startArg = 0;
+    }
+    if (fromMemory) {
+        p->memoryData = (u8 *)name + (p->setIndex[0] & ~1);
+    } else {
+        p->readBufSize = p->readerBufSize(&p->readerRead, p->readBufSize);
+        if (p->readBufSize >= p->fileSize * 9 / 10) {
+            flags |= 0x2000;
+            p->flags |= 0x2000;
+        }
+        if (flags & 0x2000) {
+            n = p->fileSize + 8 - (p->setIndex[0] & ~1);
+            p->memoryData = fn_80116DDC(p, n);
+            if (p->memoryData == 0) {
+                if (p->extra != 0) {
+                    fn_80120084(p->extra);
+                }
+                goto freeplayer;
+            }
+            p->readerStart(&p->readerRead, 0, 0, p->fileSize + 8, startArg);
+            p->readerSeek(&p->readerRead, 0, p->setIndex[0] & ~1, (s32)p->memoryData, n);
+            p->readerClose(&p->readerRead);
+            p->readTime = 0;
+        } else {
+            fn_8011FE20((void **)&p->setData, p->largestFrame);
+            p->readBuffer = fn_80116DDC(p, p->readBufSize);
+            if (p->readBuffer == 0) {
+                p->readBufSize = 0;
+            }
+            p->readerStart(&p->readerRead, p->readBuffer, p->readBufSize, p->fileSize + 8, startArg);
+        }
+    }
+    ((u8 *)p->frameBuffer)[p->frameBufferSize] = 0;
+    p->curSet = -1;
+    if (p->fpsNum != 0) {
+        p->unk270 = fn_80116BD4(2000, p->fpsDen, p->fpsNum);
+    } else {
+        p->unk270 = 2000;
+    }
+    p->unk28C = 1;
+    fn_80117380(p, 1);
+    p->openTime = fn_80116D30() - p->openTime;
+    p->tracks->gain = 0x10000;
+    p->numTracks = 0;
+    if (p->numAudio != 0 && lbl_80559944 != 0) {
+        for (i = 0; i < lbl_80559944; i++) {
+            u32 j;
+            for (j = 0; j < p->numAudio; j++) {
+                if (p->audioIds[j] == lbl_8041D608[i]) {
+                    p->trackIds[p->numTracks++] = j;
+                    break;
+                }
+            }
+        }
+    }
+    lbl_80559944 = 1;
+    lbl_8041D608[0] = 0;
+    for (i = 0; i < p->numTracks;) {
+        StreamTrack *t;
+        u32 af;
+        p->tracks[i].ringStart = 0;
+        af = p->audioFlags[p->trackIds[i]];
+        if (((af & 0x80000000) || (af & 0x10000000)) && lbl_8055DECC != 0) {
+            u32 rate = af & 0xFFFF;
+            if (local.fpsNum != 0 && local.fpsDen != 0) {
+                rate = (s32)((f64)(s32)local.rateDen * ((f64)(s32)rate * (f64)(s32)local.fpsNum) /
+                             ((f64)(s32)local.fpsDen * (f64)(s32)local.rateNum));
+            }
+            if (((BinkSoundOpen8011)lbl_8055DECC)(&p->tracks[i], rate, ((af >> 27) & 8) + 8, ((af >> 29) & 1) + 1, p->flags, p)) {
+                s32 latency;
+                if (p->tracks[i].blockMask == 0) {
+                    p->tracks[i].blockMask = -1;
+                }
+                p->tracks[i].ringSize = (p->audioMaxSize[p->trackIds[i]] + 0xFF) & ~0xFF;
+                p->tracks[i].ringStart = fn_80116DDC(p, p->tracks[i].ringSize);
+                t = &p->tracks[i];
+                if (t->ringStart == 0) {
+                    t->Close(t);
+                } else {
+                    latency = 750 - t->unk68;
+                    if (latency < 0) {
+                        latency = 0;
+                    }
+                    af = p->audioFlags[p->trackIds[i]];
+                    t->eightBit = ((af >> 27) & 8) == 0;
+                    p->tracks[i].ringEnd = p->tracks[i].ringStart + p->tracks[i].ringSize;
+                    p->tracks[i].writePtr = p->tracks[i].ringStart;
+                    p->tracks[i].readPtr = p->tracks[i].ringStart;
+                    af = p->audioFlags[p->trackIds[i]];
+                    p->tracks[i].fillTarget = fn_80116BD4(rate * (((af >> 29) & 1) + 1) * 2, latency, 1000) & ~3;
+                    if (p->tracks[i].fillTarget > p->tracks[i].ringSize) {
+                        p->tracks[i].fillTarget = p->tracks[i].ringSize;
+                    }
+                    af = p->audioFlags[p->trackIds[i]];
+                    p->tracks[i].handle = (s32)fn_8011B584(af & 0xFFFF, ((af >> 29) & 1) + 1,
+                                                           !(af & 0x80000000) && (af & 0x10000000));
+                    if (p->tracks[i].handle == 0) {
+                        p->tracks[i].Close(&p->tracks[i]);
+                        p->tracks[i].ringStart = 0;
+                    }
+                    lbl_8055DED0++;
+                    p->tracks[i].deadline = p->numSets - (p->rateNum * 3) / (p->rateDen * 4);
+                    p->tracks[i].available = 0;
+                }
+            }
+        }
+        if (p->tracks[i].gain == 0) {
+            p->tracks[i].gain = 0x10000;
+        }
+        if (p->tracks[i].ringStart == 0) {
+            p->numTracks--;
+            memcpy(&p->trackIds[i], &p->trackIds[i + 1], (p->numTracks - i) * 4);
+        } else {
+            i++;
+        }
+    }
+    if (p->numTracks != 0) {
+        p->running = 1;
+        if (p->tracks[0].unk60 == 0) {
+            if (lbl_8055DED4 == 0) {
+                lbl_8055DED4 = (s32)fn_8011BE48(-13);
+                if (lbl_8055DED4 != 0) {
+                    fn_8011C120((void *)lbl_8055DED4);
+                }
+            }
+            if (lbl_8055DED4 != 0) {
+                fn_8011BEC8((void *)lbl_8055DED4, p->queue, (s32)fn_80117598, (s32)fn_801175C4);
+            }
+        }
+    }
+    if (p->memoryData == 0 && !(flags & 0x200000)) {
+        while (p->readerFill(&p->readerRead)) {
+        }
+    }
+    return p;
+
+close:
+    if (!fromMemory) {
+        local.readerClose(&local.readerRead);
+    }
+    return 0;
+}
 
 // Decodes the current frame of a stream player: updates the timing history, copies each audio track's decoded
 // packets into its ring (dropping the oldest data on overflow), then decodes the video. Returns 1 when playback is
