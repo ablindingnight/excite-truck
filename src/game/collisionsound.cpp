@@ -134,7 +134,18 @@ void* fn_801B4570(Manager* self,u32 key){Pool* pool=(Pool*)self;Node* node=fn_80
 
 
 Manager* fn_801B3D24(Manager* self,int destroy){if(self){for(int i=0;i<6;i++)__dla__FPv(self->pools[i].items);__destroy_arr(self->entries,(void*)fn_801B3BD4,0x2c,16);if(destroy>0)__dl__FPv(self);}return self;}
-int fn_801B3DC0(Manager* self,u32 first,u32 second){float cutoff=lbl_8055E3C8-lbl_80562630;int result=0;Entry* entry=self->entries;int i=0;while(!result&&i<16){result=0;if(entry->key1==first&&entry->key2==second&&entry->time>cutoff)result=1;entry++;i++;}return result;}
+int fn_801B3DC0(Manager* self,u32 first,u32 second){
+ Entry* entry=self->entries;
+ int found=0;
+ int i=0;
+ while(found==0&&i<16){
+  found=0;
+  if(entry->key1==first&&entry->key2==second&&entry->time>lbl_8055E3C8-lbl_80562630)found=1;
+  entry++;
+  i++;
+ }
+ return found;
+}
 void fn_801B3FD8(Manager* self){int at=0;for(int pool=0;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){((SoundTuple*)self->pools[pool].items)[i].name=lbl_802F9630[first+i].name;((SoundTuple*)self->pools[pool].items)[i].gain=lbl_802F9630[first+i].gain;}}}
 inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=PairKey(lbl_802F96CC[i].first,lbl_802F96CC[i].second);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))fn_801B4428);self->root=fn_801B447C(self,self->nodes,43);}
@@ -157,7 +168,9 @@ void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* seco
   float gain=CollisionMin(lbl_8056264C,amplitude*choice->gain);
   entry->d=lbl_80562624;entry->e=lbl_80562624;entry->f=lbl_80562624;
   entry->a=position->x;entry->b=position->y;entry->c=position->z;
-  SoundHandle* sound=(SoundHandle*)entry->sound;volatile V3 zero={lbl_80562624,lbl_80562624,lbl_80562624};
+  SoundHandle* sound=(SoundHandle*)entry->sound;
+  // MATCHING-AID: retained volatile zero vector forces the observed stack stores; natural-source replacement remains open.
+  volatile V3 zero={lbl_80562624,lbl_80562624,lbl_80562624};
   if(sound){if(gain!=sound->gain){sound->dirty=1;sound->gain=gain;}sound=(SoundHandle*)entry->sound;sound->playing=1;sound->stopped=0;sound->paused=0;}
   self->next=(self->next+1)%16;
  }
