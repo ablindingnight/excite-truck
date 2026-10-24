@@ -89,7 +89,8 @@ typedef struct StreamTrack {
     u32 available;   // 0x40
     s32 eightBit;    // 0x44  (16-bit data delivered as 8-bit)
     s32 deadline;    // 0x48
-    u8 pad4C[0x54 - 0x4C];
+    u32 fillTarget;  // 0x4C  bytes to keep buffered
+    u8 pad50[0x54 - 0x50];
     u32 minimum;     // 0x54
     s32 blockMask;   // 0x58
     s32 dirty;       // 0x5C  set when the voices ran dry (silence was written)
@@ -254,7 +255,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1);
 void fn_80118C1C(void *arg0, s32 arg1);
 void fn_80118F1C(void *arg0, s32 arg1);
 void fn_80117380(struct StreamPlayer *p, s32 next);
-u32 fn_80116F8C(void *arg0);
+u32 fn_80116F8C(struct StreamTrack *t);
 s32 fn_80116D30(void);
 void fn_8011BC48(s32 arg0);
 s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
@@ -582,34 +583,30 @@ s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes) {
 
 #pragma push
 #pragma use_lmw_stmw off
-u32 fn_80116F8C(void *arg0) {
-    s32 temp_r28;
-    s32 temp_r30;
-    u32 temp_r0;
-    u32 temp_r29;
-    u32 temp_r4;
-    u32 temp_r6;
-    u32 temp_r9;
-    u32 *data = (u32 *)arg0;
-
-    temp_r4 = data[0x4C / 4];
-    temp_r0 = data[0x40 / 4];
-    if (temp_r0 < temp_r4) {
-        temp_r30 = temp_r4 - temp_r0;
-        temp_r6 = data[0x38 / 4] - temp_r30;
-        temp_r9 = data[0x2C / 4];
-        data[0x38 / 4] = temp_r6;
-        temp_r29 = (temp_r30 * 0x3E8) / ((data[0x78 / 4] * (data[0x70 / 4] * data[0x74 / 4])) >> 3);
-        if (temp_r6 < temp_r9) {
-            temp_r28 = temp_r9 - temp_r6;
-            data[0x38 / 4] = temp_r6 + data[0x28 / 4];
-            __memclr((void *)temp_r9, temp_r30 - temp_r28);
-            __memclr((void *)data[0x38 / 4], temp_r28);
+// Tops a track's buffered data up to its fill target by inserting silence before the read position; returns the
+// milliseconds of silence added.
+u32 fn_80116F8C(StreamTrack *t) {
+    u32 need;
+    u32 ms;
+    u32 wrap;
+    u8 *start;
+    u8 *ring;
+    if (t->available < t->fillTarget) {
+        need = t->fillTarget - t->available;
+        ms = need * 1000 / ((t->channels * (t->rate * t->bits)) >> 3);
+        start = t->readPtr - need;
+        t->readPtr = start;
+        ring = t->ringStart;
+        if (start < ring) {
+            wrap = ring - start;
+            t->readPtr = start + t->ringSize;
+            memset(ring, 0, need - wrap);
+            memset(t->readPtr, 0, wrap);
         } else {
-            __memclr((void *)temp_r6, temp_r30);
+            memset(start, 0, need);
         }
-        data[0x40 / 4] += temp_r30;
-        return temp_r29;
+        t->available += need;
+        return ms;
     }
     return 0;
 }
