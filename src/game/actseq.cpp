@@ -776,8 +776,11 @@ public:
 
     int Matches(Body* b) {
         ValueNode* d = b->Desc();
-        if (groupId >= 0 && d && groupId == d->GetInt("group_id", -1)) {
-            return 1;
+        if (groupId >= 0 && d) {
+            int g = d->GetInt("group_id", -1);
+            if (g == groupId) {
+                return 1;
+            }
         }
         return 0;
     }
