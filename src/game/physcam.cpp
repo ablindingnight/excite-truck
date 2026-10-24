@@ -931,7 +931,7 @@ int fn_802726AC(f32 x, f32 a, f32 b) {
 
 int fn_802726EC(f32 x, f32 a, f32 b) {
     int r = 0;
-    if (x != a && x != b && fn_802726AC(x, a, b)) {
+    if (x == a || x == b || fn_802726AC(x, a, b)) {
         r = 1;
     }
     return r;

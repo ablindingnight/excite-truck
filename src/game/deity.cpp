@@ -219,7 +219,7 @@ public:
     virtual void v24(void);               // 0x24
     virtual void v28(void* a, void* b, s32* out);  // 0x28
     virtual void v2C(void* a, void* b, s32* out);  // 0x2C
-    virtual void Hold(void);              // 0x30
+    virtual void Hold(int who);           // 0x30
     virtual void Release(void);           // 0x34
     virtual u8 Held(void);                // 0x38
     virtual ~DeityCar(void);              // 0x3C
@@ -702,11 +702,11 @@ void fn_801B14E4(DeityCar* c) {
 
 }  // extern "C"
 
-void DeityCar::Hold(void) {
+void DeityCar::Hold(int who) {
     *(u8*)((u8*)this + 0x2C) = 1;
     *(f32*)((u8*)this + 0x30) = lbl_8055E3C8;
     if (lbl_8055E690) {
-        fn_801CB6B4(index, 0, 2);
+        fn_801CB6B4(index, who, 2);
     }
 }
 

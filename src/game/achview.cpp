@@ -255,10 +255,13 @@ f32 fn_8025ADF4(f32 x) { return (f32)sqrt(x); }
 
 void fn_8025AE18(u8* p) {}  // stub (165)
 
+extern const f32 lbl_80563B1C;  // 0.5
+
 f32 fn_8025B0A8(f32* r) {
-    f32 hi = r[1];
-    f32 lo = r[0];
-    return lo + (hi - lo) * 0.5f;
+    f32 d = r[1] - r[0];
+    f32 out = r[0];
+    out += d * lbl_80563B1C;
+    return out;
 }
 
 f32 fn_8025B0C4(f32 x) { return (f32)sin(x); }
