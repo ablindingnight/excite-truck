@@ -6785,7 +6785,14 @@ void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        if ((block[8] | block[16] | block[24] | block[32] | block[40] | block[48] | block[56]) == 0) {
+        s32 s1 = block[8];
+        s32 s2 = block[16];
+        s32 s3 = block[24];
+        s32 s4 = block[32];
+        s32 s5 = block[40];
+        s32 s6 = block[48];
+        s32 s7 = block[56];
+        if ((s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -6799,14 +6806,26 @@ void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             t[56] = dc;
             t++;
         } else {
-            s32 a0 = ((block[0] * quant[0]) >> 11) + ((block[32] * quant[32]) >> 11);
-            s32 a1 = ((block[0] * quant[0]) >> 11) - ((block[32] * quant[32]) >> 11);
-            s32 a2 = ((block[16] * quant[16]) >> 11) + ((block[48] * quant[48]) >> 11);
-            s32 a3 = BINK_MUL(BINK_A1, ((block[16] * quant[16]) >> 11) - ((block[48] * quant[48]) >> 11)) - a2;
-            s32 a4 = ((block[40] * quant[40]) >> 11) + ((block[24] * quant[24]) >> 11);
-            s32 a5 = ((block[40] * quant[40]) >> 11) - ((block[24] * quant[24]) >> 11);
-            s32 a6 = ((block[8] * quant[8]) >> 11) + ((block[56] * quant[56]) >> 11);
-            s32 a7 = ((block[8] * quant[8]) >> 11) - ((block[56] * quant[56]) >> 11);
+            s32 d0 = (block[0] * quant[0]) >> 11;
+            s32 d2 = (s2 * quant[16]) >> 11;
+            s32 d4 = (s4 * quant[32]) >> 11;
+            s32 d6 = (s6 * quant[48]) >> 11;
+            s32 a0 = d0 + d4;
+            s32 a1 = d0 - d4;
+            s32 a2 = d2 + d6;
+            s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
+            s32 e0 = a0 + a2;
+            s32 e3 = a0 - a2;
+            s32 e1 = a1 + a3;
+            s32 e2 = a1 - a3;
+            s32 d1 = (s1 * quant[8]) >> 11;
+            s32 d3 = (s3 * quant[24]) >> 11;
+            s32 d5 = (s5 * quant[40]) >> 11;
+            s32 d7 = (s7 * quant[56]) >> 11;
+            s32 a4 = d5 + d3;
+            s32 a5 = d5 - d3;
+            s32 a6 = d1 + d7;
+            s32 a7 = d1 - d7;
             s32 b0 = a4 + a6;
             s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
             s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
@@ -6814,14 +6833,14 @@ void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
             block++;
             quant++;
-            t[0] = a0 + a2 + b0;
-            t[56] = a0 + a2 - b0;
-            t[8] = a1 + a3 + b2;
-            t[48] = a1 + a3 - b2;
-            t[16] = a1 - a3 + b3;
-            t[40] = a1 - a3 - b3;
-            t[32] = a0 - a2 + b4;
-            t[24] = a0 - a2 - b4;
+            t[0] = e0 + b0;
+            t[56] = e0 - b0;
+            t[8] = e1 + b2;
+            t[48] = e1 - b2;
+            t[16] = e2 + b3;
+            t[40] = e2 - b3;
+            t[32] = e3 + b4;
+            t[24] = e3 - b4;
             t++;
         }
     }
