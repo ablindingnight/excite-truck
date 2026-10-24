@@ -567,6 +567,50 @@ static const char* const lbl_802F9930[] = {
     "live_update_value_mirror",
 };
 
+// Layout elements as the awards layouts return them (see betarace's TextElem/GartElem).
+struct AwPos {
+    f32 x, y;
+};
+
+struct AwText {
+    const char* name;     // offset 0x0
+    AwPos pos;            // offset 0x4
+    s32 elemJust;         // offset 0xC
+    f32 scale;            // offset 0x10
+    u32 just;             // offset 0x14
+    u32 color;            // offset 0x18
+    const char* defText;  // offset 0x1C
+};
+
+struct AwBox {
+    const char* name;  // offset 0x0
+    AwPos pos;         // offset 0x4
+    s32 elemJust;      // offset 0xC
+    f32 w;             // offset 0x10
+    f32 h;             // offset 0x14
+    u32 color;         // offset 0x18
+};
+
+class AwLayout {
+public:
+    virtual ~AwLayout(void);
+    virtual AwText* Find(const char* name);     // 0xC
+    virtual void* FindArt(const char* name);    // 0x10
+    virtual AwBox* FindBox(const char* name);   // 0x14
+};
+
+const char* StatsGetLabel(u32 type);
+
+extern "C" {
+f32 fn_801E7E24(void);
+int fn_8026B0C0(int player);
+int fn_80204CF0(void);
+void fn_80148070(AwBox* box, u32 color, void* art);
+void fn_80147230(AwText* e, const char* fmt, ...);
+void fn_801476C4(AwText* e);
+}
+
+
 extern "C" {
 
 extern "C" void IL_Use(int k, ...);
@@ -998,8 +1042,86 @@ void fn_801CD7BC(int car, int valid, f32 t) {
     }
 }
 
-// Pop-up draw (placeholder; keeps its strings in the pool).
-void fn_801CD970(int car) { IL_Use(0, "live_update_box", "live_update_message", "live_update_title"); }
+// Live-update pop-up draw: the head of the queue slides in from the right for its first quarter second and
+// out for its last, showing the stat's label, its value (the art for the difficulty) and the title.
+void fn_801CD970(int car) {
+    if (fn_801CE898()) {
+        return;
+    }
+    AwardsMgr* m = lbl_8055E884;
+    if (!m->layout || !m->q.head) {
+        return;
+    }
+    f32 dt = fn_801E7E24();
+    Popup* p;
+    for (;;) {
+        p = m->q.head;
+        if (!p) {
+            p = 0;
+            break;
+        }
+        if (fn_8026B0C0(car)) {
+            if (p->shown) {
+                if (p->time < 0.25f) {
+                    PopQueue(m);
+                    p->time = -1.0f;
+                    p->used = 0;
+                } else {
+                    p->time = 2.75f;
+                }
+            }
+            p = 0;
+            break;
+        }
+        p->shown = 1;
+        p->time -= dt;
+        if (!(p->time < 0.0f)) {
+            break;
+        }
+        PopQueue(m);
+        p->used = 0;
+    }
+    if (!p) {
+        return;
+    }
+    AwLayout* l = (AwLayout*)m->layout;
+    AwBox* box = l->FindBox("live_update_box");
+    if (!box) {
+        return;
+    }
+    f32 t = p->time < 0.25f ? p->time : 3.0f - p->time;
+    f32 out = box->w + (640.0f - (box->pos.x + box->w));
+    f32 k = (t - 0.0f) / 0.25f;
+    k = k > 1.0f ? 1.0f : k;
+    k = k > 0.0f ? k : 0.0f;
+    f32 slide = out + k * (0.0f - out);
+    if (box) {
+        AwBox b = *box;
+        b.pos.x += slide;
+        fn_80148070(&b, -1, m->art);
+    }
+    AwText* msg = l->Find("live_update_message");
+    AwText* val = l->Find(lbl_802F9930[fn_80204CF0()]);
+    AwText* title = l->Find("live_update_title");
+    if (msg && val && title) {
+        char num[0x14];
+        char label[0x40];
+        char value[0x10];
+        AwText e = *msg;
+        e.pos.x += slide;
+        Statistic* s = p->h->stat;
+        s->Format(num, sizeof(num));
+        fn_801345D8(label, sizeof(label), "%s", StatsGetLabel(s->GetType()));
+        fn_801345D8(value, sizeof(value), "%s", num);
+        fn_80147230(&e, "%s", label);
+        e = *val;
+        e.pos.x += slide;
+        fn_80147230(&e, "%s", value);
+        e = *title;
+        e.pos.x += slide;
+        fn_801476C4(&e);
+    }
+}
 
 void fn_801CDDCC(void) {
     if (fn_801CE898()) {
