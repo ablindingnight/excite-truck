@@ -127,6 +127,16 @@ typedef struct StreamTrack {
 #define STREAM_TRACKS(p) (*(StreamTrack **)((u8 *)(p) + 0x2F0))
 
 // A streamed music/voice player (0x388 bytes). Only the fields named here are understood.
+// Per-track audio description in the Bink header.
+typedef struct BinkAudioFlags8011 {
+    u32 valid : 1;
+    u32 is16 : 1;
+    u32 stereo : 1;
+    u32 dct : 1;   // DCT codec (else RDFT)
+    u32 pad : 12;
+    u32 rate : 16;
+} BinkAudioFlags8011;
+
 typedef struct StreamPlayer {
     u32 width;                          // 0x00
     u32 height;                         // 0x04
@@ -183,7 +193,7 @@ typedef struct StreamPlayer {
     u32 height2;                        // 0x240
     s32 *trackIds;                      // 0x244  audio track number of each track
     u32 *audioMaxSize;                  // 0x248  per audio track
-    u32 *audioFlags;                    // 0x24C
+    struct BinkAudioFlags8011 *audioFlags;  // 0x24C
     s32 *audioIds;                      // 0x250
     u8 pad254[0x258 - 0x254];
     s32 unk258;                         // 0x258  frames decoded
@@ -859,7 +869,7 @@ extern s32 lbl_80559938;     // frame rate override (-1 = none)
 extern s32 lbl_8055DEDC;
 extern s32 lbl_8055993C;     // read buffer size override (-1 = none)
 extern s32 lbl_80559940;     // reader start argument override (-1 = none)
-extern u32 lbl_80559944;     // number of requested sound tracks
+extern s32 lbl_80559944;     // number of requested sound tracks
 extern s32 lbl_8041D608[];   // requested sound track ids
 extern s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);  // one-shot reader override
 typedef s32 (*BinkSoundOpen8011)(StreamTrack *t, u32 rate, s32 bits, s32 chans, u32 flags, struct StreamPlayer *p);
@@ -870,9 +880,9 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     BinkHeader8011 hdr;
     BinkFrameBuffers8011 fb;
     StreamPlayer local;
+    s32 fromMemory;
     StreamPlayer *p;
     s32 (*open)(void *reader, void *name, u32 flags);
-    s32 fromMemory;
     s32 startArg;
     u32 i;
     u32 n;
@@ -908,7 +918,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         local.unk110 != 0) {
         fn_80116E2C((u8 *)lbl_802F6528 + 0x14);
     close:
-        if (!fromMemory) {
+        if (!(flags & 0x04000000)) {
             local.readerClose(&local.readerRead);
         }
         return 0;
@@ -1016,7 +1026,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     *p->hist12C = 0;
     if (fromMemory) {
         p->audioMaxSize = (u32 *)((u8 *)name + 0x2C);
-        p->audioFlags = (u32 *)((u8 *)name + p->numAudio * 4 + 0x2C);
+        p->audioFlags = (BinkAudioFlags8011 *)((u8 *)name + p->numAudio * 4 + 0x2C);
         p->audioIds = (s32 *)((u8 *)name + p->numAudio * 8 + 0x2C);
         p->setIndex = (s32 *)((u8 *)name + p->numAudio * 12 + 0x2C);
     } else {
@@ -1095,8 +1105,8 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
             n = p->fileSize + 8 - (p->setIndex[0] & ~1);
             p->memoryData = fn_80116DDC(p, n);
             if (p->memoryData == 0) {
-                if (p->extra != 0) {
-                    fn_80120084(p->extra);
+                if (p->video != 0) {
+                    fn_80120084(p->video);
                 }
                 goto freeplayer;
             }
@@ -1127,7 +1137,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     p->numTracks = 0;
     if (p->numAudio != 0 && lbl_80559944 != 0) {
         for (i = 0; i < lbl_80559944; i++) {
-            u32 j;
+            s32 j;
             for (j = 0; j < p->numAudio; j++) {
                 if (p->audioIds[j] == lbl_8041D608[i]) {
                     p->trackIds[p->numTracks++] = j;
@@ -1140,16 +1150,17 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     lbl_8041D608[0] = 0;
     for (i = 0; i < p->numTracks;) {
         StreamTrack *t;
-        u32 af;
+        BinkAudioFlags8011 af;
         p->tracks[i].ringStart = 0;
-        af = p->audioFlags[p->trackIds[i]];
-        if (((af & 0x80000000) || (af & 0x10000000)) && lbl_8055DECC != 0) {
-            u32 rate = af & 0xFFFF;
+#define AF (p->audioFlags[p->trackIds[i]])
+        af = AF;
+        if ((af.valid || af.dct) && lbl_8055DECC != 0) {
+            u32 rate = af.rate;
             if (local.fpsNum != 0 && local.fpsDen != 0) {
                 rate = (s32)((f64)(s32)local.rateDen * ((f64)(s32)rate * (f64)(s32)local.fpsNum) /
                              ((f64)(s32)local.fpsDen * (f64)(s32)local.rateNum));
             }
-            if (((BinkSoundOpen8011)lbl_8055DECC)(&p->tracks[i], rate, ((af >> 27) & 8) + 8, ((af >> 29) & 1) + 1, p->flags, p)) {
+            if (((BinkSoundOpen8011)lbl_8055DECC)(&p->tracks[i], rate, af.is16 * 8 + 8, af.stereo + 1, p->flags, p)) {
                 s32 latency;
                 if (p->tracks[i].blockMask == 0) {
                     p->tracks[i].blockMask = -1;
@@ -1164,19 +1175,15 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                     if (latency < 0) {
                         latency = 0;
                     }
-                    af = p->audioFlags[p->trackIds[i]];
-                    t->eightBit = ((af >> 27) & 8) == 0;
+                    t->eightBit = AF.is16 * 8 + 8 == 8;
                     p->tracks[i].ringEnd = p->tracks[i].ringStart + p->tracks[i].ringSize;
                     p->tracks[i].writePtr = p->tracks[i].ringStart;
                     p->tracks[i].readPtr = p->tracks[i].ringStart;
-                    af = p->audioFlags[p->trackIds[i]];
-                    p->tracks[i].fillTarget = fn_80116BD4(rate * (((af >> 29) & 1) + 1) * 2, latency, 1000) & ~3;
+                    p->tracks[i].fillTarget = fn_80116BD4(rate * (AF.stereo + 1) * 2, latency, 1000) & ~3;
                     if (p->tracks[i].fillTarget > p->tracks[i].ringSize) {
                         p->tracks[i].fillTarget = p->tracks[i].ringSize;
                     }
-                    af = p->audioFlags[p->trackIds[i]];
-                    p->tracks[i].handle = (s32)fn_8011B584(af & 0xFFFF, ((af >> 29) & 1) + 1,
-                                                           !(af & 0x80000000) && (af & 0x10000000));
+                    p->tracks[i].handle = (s32)fn_8011B584(AF.rate, AF.stereo + 1, !AF.valid && AF.dct);
                     if (p->tracks[i].handle == 0) {
                         p->tracks[i].Close(&p->tracks[i]);
                         p->tracks[i].ringStart = 0;
@@ -1187,6 +1194,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                 }
             }
         }
+#undef AF
         if (p->tracks[i].gain == 0) {
             p->tracks[i].gain = 0x10000;
         }
