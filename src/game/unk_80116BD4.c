@@ -3,6 +3,7 @@
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
 #include <types.h>
+#include <revolution/AX/AXPB.h>
 extern f64 cos(f64);
 extern f64 sin(f64);
 extern f32 lbl_80561210;
@@ -33,7 +34,8 @@ typedef struct StreamTrack {
     s32 (*IsActive)(struct StreamTrack *t);                    // 0x00
     s32 (*GetBuffer)(struct StreamTrack *t, u8 **dst, u32 *len); // 0x04
     void (*Commit)(struct StreamTrack *t, u32 len);            // 0x08
-    u8 pad0C[0x14 - 0x0C];
+    void (*SetVolume)(struct StreamTrack *t, s32 volume);     // 0x0C
+    void (*SetPan)(struct StreamTrack *t, s32 pan);           // 0x10
     void (*SetPaused)(struct StreamTrack *t, s32 paused);      // 0x14
     s32 (*Run)(struct StreamTrack *t, s32 run);                // 0x18
     void (*Close)(struct StreamTrack *t);                      // 0x1C
@@ -52,21 +54,28 @@ typedef struct StreamTrack {
     s32 dirty;       // 0x5C  set when the voices ran dry (silence was written)
     u8 pad60[0x64 - 0x60];
     s32 playing;     // 0x64
-    u8 pad68[0x78 - 0x68];
-    s32 mono;        // 0x78  1 = one voice; otherwise left/right voices fed from interleaved data
+    s32 unk68;       // 0x68
+    u8 pad6C[0x70 - 0x6C];
+    u32 rate;        // 0x70  Hz
+    s32 bits;        // 0x74
+    s32 channels;    // 0x78  1 = one voice; otherwise left/right voices fed from interleaved data
     void *voices[2]; // 0x7C  AX voices (left, right)
     s16 *bufL;       // 0x84  voice buffers (bufL is also the allocation freed for both)
     s16 *bufR;       // 0x88
-    u8 pad8C[0x94 - 0x8C];
+    u32 physL;       // 0x8C  physical addresses of the voice buffers
+    u32 physR;       // 0x90
     u32 bufSize;     // 0x94  bytes of interleaved data the voice buffers hold
-    u8 pad98[0x9C - 0x98];
+    u32 voiceSize;   // 0x98  bytes per voice buffer
     u32 chunk;       // 0x9C
-    u8 padA0[0xB0 - 0xA0];
+    u32 curRate;     // 0xA0
+    s32 volume;      // 0xA4
+    s32 panL;        // 0xA8
+    s32 panR;        // 0xAC
     s32 ending;      // 0xB0
     s32 stopping;    // 0xB4
     u32 writePos;    // 0xB8  interleaved byte position in the voice buffers
     u32 pending;     // 0xBC  bytes the voices still need
-    u8 padC0[0xC4 - 0xC0];
+    u32 prefill;     // 0xC0
     u32 lastPos;     // 0xC4  last voice play position
     u32 threshold;   // 0xC8
     u32 lastTime;    // 0xCC
@@ -1055,7 +1064,7 @@ void fn_801195D8(StreamTrack *t) {
         if ((u32)src + n > (u32)t->ringEnd) {
             n = (u32)t->ringEnd - (u32)src;
         }
-        if (t->mono != 1) {
+        if (t->channels != 1) {
             l = l0 = (u16 *)((u8 *)t->bufL + (t->writePos >> 1));
             r = r0 = (u16 *)((u8 *)t->bufR + (t->writePos >> 1));
             for (i = n >> 2; i != 0; i--) {
@@ -1263,7 +1272,6 @@ s32 fn_80119CB0(void *arg0, s32 arg1) {
 extern s32 lbl_8055DEE0[];
 extern s32 lbl_8055DEE4;
 extern s32 lbl_8055DEE8;
-extern void fn_80119DD0(void);
 extern void fn_8011A6A0(void *);
 extern void TRKGetFreeBuffer(void *);
 extern s32 lbl_8055DEE0[2];  // the sample buffer allocator: alloc, free
@@ -1289,6 +1297,127 @@ void fn_80119D40(void *arg0) {
     }
 }
 
+// Bink movie header fields used for the sound length.
+typedef struct BinkInfo8011 {
+    u32 width;
+    u32 height;
+    u32 frames;        // 0x08
+    u32 frameNum;
+    u32 lastFrameNum;
+    u32 frameRate;     // 0x14
+    u32 frameRateDiv;  // 0x18
+} BinkInfo8011;
+
+extern void *AXAcquireVoice(u32 prio, void *callback, u32 context);
+extern void AXSetVoiceSrcType(void *vpb, u32 type);
+extern void AXSetVoiceSrc(void *vpb, AXPBSRC *src);
+extern void AXSetVoiceSrcRatio(void *vpb, f32 ratio);
+extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
+extern f64 lbl_805611C8;  // 32000.0, the AX output rate
+s32 fn_80119824(StreamTrack *t);
+s32 fn_80119994(void);
+s32 fn_8011999C(void);
+void fn_80119AB0(void *arg0, s32 arg1);
+void fn_80119B38(void *arg0, s32 arg1);
+s32 fn_80119CB0(void *arg0, s32 arg1);
+s32 fn_80119C0C(void *arg0, s32 arg1);
+
+// Bink sound open for AX: sets up a track of `chans` 16-bit voices at `freq` Hz with a 600 ms buffer, prefilled with
+// up to the whole movie's sound, and installs the track callbacks. Returns 0 without an allocator or voices.
+s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, u32 chans, u32 flags, BinkInfo8011 *bink) {
+    u32 bps;
+    u32 total;
+    u32 i;
+    u32 n;
+    u8 *buf;
+
+    if (lbl_8055DEE0[0] == 0) {
+        return 0;
+    }
+    memset(t, 0, sizeof(StreamTrack));
+    t->dirty = 0;
+    t->rate = freq;
+    t->bits = 16;
+    t->channels = chans;
+    t->voices[0] = AXAcquireVoice(31, 0, 0);
+    if (t->voices[0] == 0) {
+        return 0;
+    }
+    if (t->channels != 1) {
+        t->voices[1] = AXAcquireVoice(31, 0, 0);
+        if (t->voices[1] == 0) {
+            AXFreeVoice(t->voices[0]);
+            return 0;
+        }
+    }
+    bps = t->channels * (t->rate * 2);
+    t->interval = 0x21C;
+    t->curRate = freq;
+    t->unk68 = 0;
+    t->bufSize = (bps * 600 / 1000 + 0x3FF) & ~0x3FF;
+    t->chunk = (bps * 50 / 1000 + 0xFF) & ~0xFF;
+    t->threshold = t->bufSize * 90 / 100;
+    if (bink->frameRate != 0 && bink->frameRateDiv != 0) {
+        total = (u64)bps * bink->frameRateDiv * bink->frames / bink->frameRate;
+    } else {
+        total = t->chunk;
+    }
+    if (chans != 1) {
+        t->voiceSize = t->bufSize >> 1;
+    } else {
+        t->voiceSize = t->bufSize;
+    }
+    buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
+    t->bufL = (s16 *)buf;
+    t->bufR = (s16 *)(buf + t->voiceSize);
+    t->physL = (u32)buf - 0x80000000;
+    t->physR = (u32)buf - 0x80000000 + t->voiceSize;
+    t->minimum = t->chunk;
+    t->volume = 0x7FFF;
+    t->panL = 0x67F8;
+    t->panR = 0x67F8;
+    fn_80119288(t);
+    fn_801199A4(t->voices, 1);
+    for (i = 0; i < t->channels; i++) {
+        AXPBADPCM adpcm;
+        AXPBSRC src;
+        memset(&adpcm, 0, sizeof(adpcm));
+        adpcm.gain = 0x800;
+        src.ratioHi = 1;
+        src.ratioLo = 0;
+        src.currentAddressFrac = 0;
+        src.last_samples[0] = 0;
+        src.last_samples[1] = 0;
+        src.last_samples[2] = 0;
+        src.last_samples[3] = 0;
+        AXSetVoiceSrcType(t->voices[i], 1);
+        AXSetVoiceSrc(t->voices[i], &src);
+        AXSetVoiceSrcRatio(t->voices[i], t->rate / lbl_805611C8);
+        AXSetVoiceAdpcm(t->voices[i], &adpcm);
+    }
+    fn_80119300(t->voices, 0, t->bufSize);
+    n = t->bufSize;
+    t->writePos = 0;
+    t->ending = 0;
+    if (total < n) {
+        n = total;
+    }
+    t->prefill = n;
+    t->pending = n;
+    t->stopping = 0;
+    t->playing = 1;
+    t->IsActive = fn_80119824;
+    t->GetBuffer = (s32 (*)(StreamTrack *, u8 **, u32 *))fn_80119994;
+    t->Commit = (void (*)(StreamTrack *, u32))fn_8011999C;
+    t->SetVolume = (void (*)(StreamTrack *, s32))fn_80119AB0;
+    t->SetPan = (void (*)(StreamTrack *, s32))fn_80119B38;
+    t->SetPaused = (void (*)(StreamTrack *, s32))fn_80119CB0;
+    t->Run = (s32 (*)(StreamTrack *, s32))fn_80119C0C;
+    t->Close = (void (*)(StreamTrack *))fn_80119D40;
+    lbl_8055DEE8++;
+    return 1;
+}
+
 typedef struct StreamAllocator {
     void *(*alloc)(u32 size);
     void (*free)(void *p);
@@ -1302,7 +1431,7 @@ void *fn_8011A168(StreamAllocator *allocator) {
     } else {
         *(StreamAllocator *)lbl_8055DEE0 = *allocator;
     }
-    return &fn_80119DD0;
+    return (void *)fn_80119DD0;
 }
 
 #pragma unroll on
