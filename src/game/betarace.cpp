@@ -4149,13 +4149,14 @@ void fn_80168104(void);
 }
 
 int BetaMaster::vf24(void) {
-    int any = 0;
-    int i;
+    RaceCarRec** it = lbl_804348E8;
     int r;
-    for (i = 0; i < fn_801B2F24(); i++) {
-        if (lbl_804348E8[i]->kind == 0x50 && vf20(i)) {
+    int any = 0;
+    for (int i = 0; i < fn_801B2F24(); i++) {
+        if ((*it)->kind == 0x50 && vf20(i)) {
             any = 1;
         }
+        it++;
     }
     r = 0;
     if (!any && fn_801B8514()) {
