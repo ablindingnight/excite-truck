@@ -584,9 +584,9 @@ static const s16 lbl_802FAB60[32] = {1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1
                                      1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1, 32};
 
 inline s16 LowBit(s16 v) {
-    s16 a = v + 0x200;
-    s16 i = a % 32;
-    return lbl_802FAB60[i];
+    v += 0x200;
+    v %= 32;
+    return lbl_802FAB60[v];
 }
 
 inline s16 Obj::X(void) { return x; }
