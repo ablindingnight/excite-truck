@@ -718,14 +718,12 @@ void fn_80117380(StreamPlayer *p, s32 next) {
 u32 fn_80116BD4(u32 a, u32 b, u32 d);
 u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag) {
     s32 i;
-    u32 maxDiff;
-    s32 maxIndex;
-    s32 allOdd;
-
-    maxDiff = 0;
-    maxIndex = 0;
+    u32 maxDiff = 0;
+    s32 maxIndex = 0;
+    s32 allOdd = 1;
+    u32 *ahead = values + offset;
     for (i = 0; i < count - offset; i++) {
-        u32 diff = values[offset + i] - values[i];
+        u32 diff = ahead[i] - values[i];
         if (diff > maxDiff) {
             maxDiff = diff;
             maxIndex = i;
@@ -734,7 +732,6 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
     if (maxDiff == 0) {
         maxDiff = fn_80116BD4(values[count] - values[0], offset, count);
     }
-    allOdd = 1;
     for (i = 0; i < count; i++) {
         if ((values[i] & 1) == 0) {
             allOdd = 0;
