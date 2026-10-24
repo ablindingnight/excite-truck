@@ -124,6 +124,10 @@ struct CamEvent {
     f32 fov;       // offset 0x54
     f32 end;       // offset 0x58
     u8 accel;      // offset 0x5C
+    s32 target;    // offset 0x60: car the camera follows, -1 = none
+    s32 camType;   // offset 0x64: world, start, car
+    s32 interpType;  // offset 0x68: linear, hermite
+    f32 interpTime;  // offset 0x6C
 };
 
 // An editor camera: rotation rows, then position.
@@ -212,6 +216,11 @@ void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void
 double cos(double x);
 double sin(double x);
 double acos(double x);
+double cos(double x);
+int fn_8012C33C(const char* name);
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+f32 PSVECMag(const ValVec3* v);
 void fn_80144CD0(IVec3* out, const IVec3* p, const f32* m);
 f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_8000FC8C(const char* s);
@@ -600,36 +609,233 @@ Event* fn_801C3C80(void) {
 
 ValueNodeV* fn_801C3D5C(void) { return GetEvent(fn_801769CC()->event)->node; }
 
-// Interlude loader (placeholder; strings and switch keep the pool layout).
-void fn_801C3D88(const char* name) {
-    int k = (int)name;
-    IL_Use(0, "interlude: can't find %s", "Interlude: Couldn't find interlude file %s!!!", "interlude_name", "Interlude: Couldn't find interlude %s in val file %s!!!", "duration", "intrlude: too many events!", "camera_type", "interp_type", "interp_time", "sound_type", "immediate", "interlude: unhandled teleport where type %d", "interlude: unhandled wait type %d", "interlude: unhandled event type %d", "intrlude: %d events");
-    switch (k) {
-    case 0:
-        IL_Use(0);
-        break;
-    case 1:
-        IL_Use(1);
-        break;
-    case 2:
-        IL_Use(2);
-        break;
-    case 3:
-        IL_Use(3);
-        break;
-    case 4:
-        IL_Use(4);
-        break;
-    case 5:
-        IL_Use(5);
-        break;
-    case 6:
-        IL_Use(6);
-        break;
-    case 7:
-        IL_Use(7);
-        break;
+// An enum key, or def when the node does not have it.
+static inline int GetEnumOr(ValueNode* n, const char* key, const char* names, int def) {
+    return n->Has(key) ? n->GetEnum(key, names) : def;
+}
+
+static inline ValVec3 ZeroVec3(void) {
+    ValVec3 v;
+    v.x = 0.0f;
+    v.y = 0.0f;
+    v.z = 0.0f;
+    return v;
+}
+
+static inline ValPoint ZeroPoint(void) {
+    ValPoint p;
+    p.x = 0.0f;
+    p.y = 0.0f;
+    return p;
+}
+
+// The rotation of angle |v| about v.
+static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
+    f32 ang = PSVECMag(&v);
+    if (ang > 0.0001f) {
+        f32 inv = 1.0f / ang;
+        f32 x = inv * v.x;
+        f32 y = inv * v.y;
+        f32 z = inv * v.z;
+        f32 s = sin(ang);
+        f32 c = cos(ang);
+        f32 t = 1.0f - c;
+        m->m[0] = c + t * (x * x);
+        m->m[1] = y * (t * x) + s * z;
+        m->m[2] = z * (t * x) - s * y;
+        m->m[3] = y * (t * x) - s * z;
+        m->m[4] = c + t * (y * y);
+        m->m[5] = z * (t * y) + s * x;
+        m->m[6] = z * (t * x) + s * y;
+        m->m[7] = z * (t * y) - s * x;
+        m->m[8] = c + t * (z * z);
+    } else {
+        m->m[0] = 1.0f;
+        m->m[1] = 0.0f;
+        m->m[2] = 0.0f;
+        m->m[3] = 0.0f;
+        m->m[4] = 1.0f;
+        m->m[5] = 0.0f;
+        m->m[6] = 0.0f;
+        m->m[7] = 0.0f;
+        m->m[8] = 1.0f;
     }
+}
+
+// Loads the interlude for this event (or the override name) from the .val file: its duration and its
+// "action" tables.
+void fn_801C3D88(const char* name) {
+    memset(lbl_8055E7F8, 0, 64 * sizeof(Event));
+    for (int i = 0; i < 64; i++) {
+        lbl_8055E7F8[i].time = -999.0f;
+    }
+    f32 last = 0.0f;
+    lbl_8055E808 = 0;
+    lbl_8055E7F0 = 0;
+    if (!fn_8012C33C(name)) {
+        fn_802E30C8("interlude: can't find %s", name);
+        fn_802E317C("Interlude: Couldn't find interlude file %s!!!", name);
+        return;
+    }
+    ValueTable* vt = fn_80131808(name);
+    const char* table = lbl_8055E814 ? (const char*)lbl_8055E814
+                        : fn_801C3D5C()->Has("interlude_name") ? fn_801C3D5C()->GetValue("interlude_name")
+                                                               : GetEventTypeName(fn_801769CC()->type);
+    if (!vt->HasChild(table)) {
+        fn_802E30C8("interlude: can't find %s", table);
+        table = "default";
+    }
+    if (!vt->HasChild(table)) {
+        fn_802E30C8("interlude: can't find %s", table);
+        fn_80131818(vt);
+        fn_802E317C("Interlude: Couldn't find interlude %s in val file %s!!!", table, name);
+        return;
+    }
+    ValueNode* root = vt->FindChild(table);
+    lbl_8055A958 = root->GetFloat("duration");
+    int order = 0;
+    for (int i = 0;; i++) {
+        ValueNode* n = root->GetChildAt(i);
+        if (!n) {
+            break;
+        }
+        if (strcmp(n->GetName(), "action") != 0) {
+            continue;
+        }
+        if (lbl_8055E7F0 >= 64) {
+            fn_802E317C("intrlude: too many events!");
+        }
+        Event* e = &lbl_8055E7F8[lbl_8055E7F0++];
+        int type = n->GetEnum("type", lbl_80562950);
+        e->type = type;
+        e->time = fn_801C3450(n->GetFloat("t", last));
+        e->time = fn_801C3450(e->time + n->GetFloat("dt", 0.0f));
+        if (!fn_801C34CC(e->time, last)) {
+            order = 0;
+        }
+        order = e->order = n->GetInt("order", order + 1);
+        last = e->time;
+        switch (type) {
+        case 0:
+            strncpy(((DebugEvent*)e)->msg, n->GetValue("msg"), 0x17);
+            break;
+        case 1: {
+            CamEvent* c = (CamEvent*)e;
+            c->fov = 0.017453292f * n->GetFloat("fov", 90.0f);
+            const ValVec3& o = n->GetVec3("origin");
+            c->origin.x = o.x;
+            c->origin.y = o.y;
+            c->origin.z = o.z;
+            AxisAngleToRot(&c->rot, n->GetVec3("dir"));
+            const ValVec3& v = n->GetVec3Or("v", ZeroVec3());
+            c->v.x = v.x;
+            c->v.y = v.y;
+            c->v.z = v.z;
+            const ValVec3& av = n->GetVec3Or("av", ZeroVec3());
+            c->av.x = av.x;
+            c->av.y = av.y;
+            c->av.z = av.z;
+            c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
+            c->accel = n->GetBool("accel", 1);
+            c->target = fn_801C3A00(fn_801C3954(n->GetString("who", "nobody")));
+            c->camType = GetEnumOr(n, "camera_type", lbl_80562964, 0);
+            c->interpType = GetEnumOr(n, "interp_type", lbl_80562968, 1);
+            c->interpTime = n->GetFloat("interp_time", 0.0f);
+            break;
+        }
+        case 3: {
+            SoundEvent* s = (SoundEvent*)e;
+            s->sample = n->GetInt("sample", -1);
+            s->soundType = GetEnumOr(n, "sound_type", lbl_80562960, 0);
+            s->overlap = n->GetBool("overlap", 1);
+            s->imm = n->GetBool("immediate", 0);
+            break;
+        }
+        case 4: {
+            TeleportEvent* t = (TeleportEvent*)e;
+            t->speed = n->GetFloat("speed", 0.0f);
+            strcpy(t->who, n->GetString("who", "all"));
+            t->mask = fn_801C3954(t->who);
+            strcpy(t->except, n->GetString("except", "nobody"));
+            t->mask &= ~fn_801C3954(t->except);
+            t->where = n->GetEnum("where", lbl_80562954);
+            switch (t->where) {
+            case 1:
+                t->pt.x = n->GetFloat("offset", 0.0f);
+                t->pt.y = n->GetFloat("spacing", 0.0f);
+                t->yaw = n->GetFloat("yaw", 0.0f);
+                break;
+            case 0: {
+                const ValPoint& p = n->GetPoint("pt");
+                t->pt.x = p.x;
+                t->pt.y = p.y;
+                t->yaw = n->GetFloat("yaw");
+                const ValPoint& d = n->GetPointOr("offset", ZeroPoint());
+                t->offset.x = d.x;
+                t->offset.y = d.y;
+                break;
+            }
+            case 2: {
+                t->yaw = n->GetFloat("yaw", 0.0f);
+                const ValPoint& d = n->GetPointOr("offset", ZeroPoint());
+                t->pt.x = d.x;
+                t->pt.y = d.y;
+                break;
+            }
+            default:
+                fn_802E317C("interlude: unhandled teleport where type %d", t->where);
+                break;
+            }
+            break;
+        }
+        case 5: {
+            ThinkEvent* t = (ThinkEvent*)e;
+            strcpy(t->who, n->GetString("who", "all"));
+            t->mask = fn_801C3954(t->who);
+            strcpy(t->except, n->GetString("except", "nobody"));
+            t->mask &= ~fn_801C3954(t->except);
+            t->kind = n->GetEnum("how", lbl_80562958);
+            t->speed = n->GetFloat("speed", 0.0f);
+            t->x = n->GetFloat("lat", 0.0f);
+            t->z = n->GetFloat("lon", 0.0f);
+            t->param = n->GetInt("param", 0);
+            if (t->kind == 2) {
+                const ValPoint& p = n->GetPoint("pt");
+                t->x = p.x;
+                t->z = p.y;
+            }
+            break;
+        }
+        case 6: {
+            WaitEvent* w = (WaitEvent*)e;
+            w->kind = n->GetEnum("what", lbl_8056295C);
+            strcpy(w->who, n->GetString("who", "all"));
+            w->mask = fn_801C3954(w->who);
+            strcpy(w->except, n->GetString("except", "nobody"));
+            w->mask &= ~fn_801C3954(w->except);
+            if (w->kind != 0) {
+                fn_802E317C("interlude: unhandled wait type %d", w->kind);
+            } else {
+                const ValVec3& p = n->GetVec3("pt");
+                w->pt.x = p.x;
+                w->pt.y = p.y;
+                w->pt.z = p.z;
+            }
+            break;
+        }
+        case 7: {
+            TextEvent* t = (TextEvent*)e;
+            strncpy(t->text, n->GetValue("msg"), 0x1FF);
+            strncpy(t->title, n->GetString("title", ""), 0xFF);
+            break;
+        }
+        default:
+            fn_802E317C("interlude: unhandled event type %d", type);
+            break;
+        }
+    }
+    fn_802E30C8("intrlude: %d events", lbl_8055E7F0);
+    fn_80131818(vt);
 }
 
 void fn_801C4AD0(void) {
