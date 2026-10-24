@@ -182,21 +182,25 @@ void fn_801A9798(u8* p) {}  // stub (198)
 
 void fn_801A9AB0(u8* p, u8* q) {}  // stub (2089)
 
+extern const f32 lbl_8056247C;  // 0.0
+extern const f32 lbl_805624AC;  // 1.0
+extern const f32 lbl_805624A4;  // -1.0
+extern const f32 lbl_805624D8;  // 0.01
+extern const f32 lbl_80562478;  // 0.5
+
 void fn_801ABB54(u8* p) {
     f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
-    f32 imp = 0.0f;
+    f32 imp = lbl_8056247C;
     f32 ad = (f32)__fabs(d);
     f32 lim = F32(p, 0x238);
     if (ad > lim) {
-        if (!(lim < ad)) {
-            lim = ad;
-        }
-        imp = -(d > 0.0f ? 1.0f : -1.0f) * lim;
-    } else if (ad > 0.01f) {
-        imp = -d * 0.5f;
+        lim = lim < ad ? lim : ad;
+        imp = -(d > lbl_8056247C ? lbl_805624AC : lbl_805624A4) * lim;
+    } else if (ad > lbl_805624D8) {
+        imp = -d * lbl_80562478;
     }
-    F32(p, 0x128) = F32(p, 0x128) + F32(p, 0x58) * imp;
     F32(p, 0x124) = F32(p, 0x124) + F32(p, 0x54) * imp;
+    F32(p, 0x128) = F32(p, 0x128) + F32(p, 0x58) * imp;
     F32(p, 0x12C) = F32(p, 0x12C) + F32(p, 0x5C) * imp;
 }
 
