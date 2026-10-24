@@ -1,0 +1,14 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "Excite Truck",
+  "system": "Wii",
+  "type": "decomp",
+  "original": { "region": "USA", "serial": "REXE01", "sha1": "e51685814152f377e5c76a50067d8132e25f672b" },
+  "project": "Excite Truck decompilation (runtime-decomp fork)",
+  "status": "in-progress",
+  "toolchain": "Decomp-toolkit",
+  "approach": "Matching decompilation (MWCC GC/3.0a5); every commit rebuilds a byte-identical DOL",
+  "maintainers": [{ "name": "ablindingnight", "link": "https://github.com/ablindingnight" }],
+  "links": [{ "label": "Original project", "url": "https://github.com/orangedude27/excite-truck" }],
+  "notes": "Independent fork of orangedude27/excite-truck. 59.5% of code matched exactly (objdiff, Oct 2026): SDK 95.8%, game code 44%. Goal: 100% matching with natural source and no matching tricks. Contact: Discord ablindingnight."
+}
