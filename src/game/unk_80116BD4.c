@@ -2326,7 +2326,7 @@ void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next) {
         u32 i;
         u32 count = a->overlapBytes >> 1;
         for (i = 0; i < count; i++) {
-            a->output[i] = (i * a->output[i] + (count - i) * a->previous[i]) / count;
+            a->output[i] = (i * a->output[i] + a->previous[i] * (count - i)) / count;
         }
     }
     memcpy(a->previous, (u8 *)a->output + (a->frameBytes - a->overlapBytes), a->overlapBytes);
