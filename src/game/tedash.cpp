@@ -513,12 +513,32 @@ void fn_802B6568(TextElem* e, const char* fmt, ...) {
             e->color = 0xFFFFFFFF;
         }
     } else if (fn_802B640C(e, buf)) {
-        StrCopy(c->hover, e->name, 0x20);
+        {
+            const char* src = e->name;
+            int left = 0x20;
+            char* dst = c->hover;
+            while ((*dst++ = *src++) != 0) {
+                if (--left <= 0) {
+                    dst[-1] = 0;
+                    break;
+                }
+            }
+        }
         e->color = 0xFFFFFFFF;
         fn_802B62A4(e);
         if (lbl_804BFF80.s.op == 0) {
             fn_802B6358(e);
-            StrCopy(lbl_804BFF80.clicked, e->name, 0x20);
+            {
+                const char* src = e->name;
+                int left = 0x20;
+                char* dst = lbl_804BFF80.clicked;
+                while ((*dst++ = *src++) != 0) {
+                    if (--left <= 0) {
+                        dst[-1] = 0;
+                        break;
+                    }
+                }
+            }
             lbl_804BFF80.prev = lbl_804BFF80.s;
         }
     }

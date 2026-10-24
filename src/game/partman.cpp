@@ -220,8 +220,8 @@ void fn_8028DFB0(void) {
     if (lbl_804B34B0.count > 0) {
         fn_8028F2EC(&lbl_804B34B0);
         lbl_8055F740 = lbl_804B34B0.items[0];
-        lbl_8055F744 = 0;
     }
+    lbl_8055F744 = 0;
 }
 
 void fn_8028DFFC(void) {
@@ -233,8 +233,8 @@ void fn_8028E024(void) {
     if (lbl_804B34B0.count > 0) {
         fn_8028F2EC(&lbl_804B34B0);
         lbl_8055F740 = lbl_804B34B0.items[0];
-        lbl_8055F744 = 0;
     }
+    lbl_8055F744 = 0;
 }
 
 void fn_8028E070(f32 t) {
@@ -669,44 +669,38 @@ void PartSys::Update(f32 t) {
     if (accum >= 1.0f - lbl_80558DC4[0]) {
         accum -= 1.0f;
     }
-    accum += spewRate;
     int i = head;
+    accum += spewRate;
     if (i < 0) {
         return;
     }
     f32 cutoff = t - maxLife;
     if (i < tail) {
-        for (; i < tail; i++) {
-            if (!(parts[i].birth < cutoff)) {
-                break;
-            }
+        while (i < tail && parts[i].birth < cutoff) {
+            i++;
         }
-        if (i == tail) {
-            head = -1;
-            tail = 0;
+        if (i != tail) {
+            head = i;
             return;
         }
-        head = i;
+        head = -1;
+        tail = 0;
         return;
     }
-    for (; i < cap; i++) {
-        if (!(parts[i].birth < cutoff)) {
-            break;
-        }
+    while (i < cap && parts[i].birth < cutoff) {
+        i++;
     }
     if (i == cap) {
         int j = 0;
-        for (; j < tail; j++) {
-            if (!(parts[j].birth < cutoff)) {
-                break;
-            }
+        while (j < tail && parts[j].birth < cutoff) {
+            j++;
         }
-        if (j == tail) {
-            head = -1;
-            tail = 0;
+        if (j != tail) {
+            head = j;
             return;
         }
-        head = j;
+        head = -1;
+        tail = 0;
         return;
     }
     head = i;
