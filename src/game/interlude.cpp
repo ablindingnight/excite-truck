@@ -1,9 +1,8 @@
 // Interludes (0x801C2F58-0x801CB2D8): scripted race intros/outros from "intrlude.val" ("action_list"
 // of timed events: camera moves, fades, sounds, car teleports, AI think orders, waits and text), plus the
 // in-game interlude editor (menus driven by the debug keyboard, an input line, an event list that can be
-// re-timed and reordered, and export to "intrlude.txt"). The loader, the per-frame player, the event
-// dispatcher, the editor's draw/menu set-up and the exporter's per-event writer are placeholders.
-// Names are guesses apart from the strings.
+// re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
+// lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
 
 struct IVec3 {
@@ -349,7 +348,6 @@ extern IVec3 lbl_80438498;
 extern char lbl_804384A8[0x100];  // think: who
 extern char lbl_804385A8[0x100];  // think: except
 extern u8 lbl_80337474[];         // debug key table
-extern "C" void IL_Use(int k, ...);  // placeholder sink: keeps the original strings in the pool
 
 static const char* const lbl_80562950 = "debug\0camera\0effect\0sound\0teleport\0think\0wait\0text\0\0\0\0";
 static const char* const lbl_80562954 = "world_pt\0entry\0start";
