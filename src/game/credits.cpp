@@ -227,16 +227,16 @@ f32 fn_80235F64(int,u32);
 f32 fn_80235EF0(int,u32);
 void fn_80235AFC(int,u32,u32,f32,f32,f32,f32,f32,f32);
 }
+struct CreditVelocityArrayObservedNew {f32 values[2];};typedef char CreditVelocityArraySizeNew[sizeof(CreditVelocityArrayObservedNew)==8?1:-1];
 struct CreditGlyphFields {
-    ValPoint position,velocity;f32 angle,angularVelocity,remaining;u32 glyph;
+    ValPoint position;CreditVelocityArrayObservedNew velocity;f32 angle,angularVelocity,remaining;u32 glyph;
 };
 typedef char CreditGlyphSize[sizeof(CreditGlyphFields)==32?1:-1];
 typedef char CreditGlyphStorageSize[sizeof(CreditGlyphStorageObservedNew)==12?1:-1];
 typedef char CreditGlyphBatchSize[sizeof(CreditGlyphBatchFields)==32?1:-1];
 static inline void CreditRemoveGlyph(CreditGlyphBatchFields* batch,int index) {
     if(index<0 || index>=batch->count)return;
-    CreditGlyphFields* glyphs=(CreditGlyphFields*)batch->items;
-    if(index!=batch->count-1)glyphs[index]=glyphs[batch->count-1];
+    if(index!=batch->count-1){CreditGlyphFields* glyphs=(CreditGlyphFields*)batch->items;glyphs[index]=glyphs[batch->count-1];}
     batch->count--;
 }
 static inline void CreditUpdateGroup(CreditFontGroupFields* self,f32 delta) {
@@ -245,11 +245,11 @@ static inline void CreditUpdateGroup(CreditFontGroupFields* self,f32 delta) {
         CreditGlyphFields* glyph=&((CreditGlyphFields*)self->glyphs.items)[index];
         glyph->remaining-=delta;
         if(glyph->remaining<lbl_80558DC4[0])CreditRemoveGlyph(&self->glyphs,index);
-        else {
-            glyph->velocity.x+=self->desc.accelerationX*delta;
-            glyph->velocity.y+=self->desc.accelerationY*delta;
-            glyph->position.x+=glyph->velocity.x*delta;
-            glyph->position.y+=glyph->velocity.y*delta;
+        else {f32& vx=glyph->velocity.values[0];f32& vy=glyph->velocity.values[1];
+            f32 accelerationX=self->desc.accelerationX;vx+=accelerationX*delta;
+            vy+=self->desc.accelerationY*delta;
+            glyph->position.x+=vx*delta;
+            glyph->position.y+=vy*delta;
             glyph->angle+=glyph->angularVelocity*delta;
             index++;
         }
@@ -299,8 +299,8 @@ inline void CreditFontGroupFields::Spawn(const ValPoint& position) {CreditFontGr
         glyph->position.x=position.x;glyph->position.y=position.y;
         f32 angle=fn_80129DC4(6,self->desc.angleMin,self->desc.angleMax);
         f32 speed=fn_80129DC4(6,self->desc.speedMin,self->desc.speedMax);
-        glyph->velocity.x=speed*(f32)cos((f64)angle);
-        glyph->velocity.y=speed*(f32)sin((f64)angle);
+        glyph->velocity.values[0]=speed*(f32)cos((f64)angle);
+        glyph->velocity.values[1]=speed*(f32)sin((f64)angle);
         glyph->angle=fn_80129DC4(6,(0.0f),(6.2831854820251465f));
         glyph->angularVelocity=fn_80129DC4(6,self->desc.spinMin,self->desc.spinMax);
         glyph->remaining=self->desc.lifetime;
