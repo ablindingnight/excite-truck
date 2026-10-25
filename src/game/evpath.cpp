@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -55,7 +56,15 @@ public:
 
 #define VR(p) ((VR*)(p))
 
-struct U32List {
+// A list with an inline buffer; the base destructor clears the header.
+template <typename T>
+class ArrayBase {
+public:
+    ~ArrayBase(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
     int Count(void) const { return count; }
     template <typename V>
     int Find(V* v) {
@@ -80,9 +89,20 @@ struct U32List {
             count--;
         }
     }
-    u32* data;  // offset 0x0
+    T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
+};
+
+template <typename T, int N>
+class FixedArray : public ArrayBase<T> {
+public:
+    FixedArray(void) {
+        this->data = buf;
+        this->cap = N;
+        this->count = 0;
+    }
+    T buf[N];  // offset 0xC
 };
 
 const char* GetEventTypeName(u32 type);
@@ -104,8 +124,6 @@ u8* fn_80283938(u8* p, int del);
 
 void operator delete(void* p);
 
-extern U32List lbl_804B30D8;
-extern U32List lbl_804B3048;
 extern void* lbl_80348678[];
 
 // Copies at most n characters, always terminating.
@@ -130,6 +148,26 @@ s32 lbl_8055F690;
 s32 lbl_8055F694;
 u32 lbl_8055F698;
 s32 lbl_8055F69C;
+
+// The "cup unlocked" flash shown in the unlock message box (menu item type 5).
+class EventUnlockFx : public MenuState {
+public:
+    EventUnlockFx(void) { start = 0.0f; }
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual int Key(int key);
+    f32 start;  // offset 0x18
+    u8 done;    // offset 0x1C
+};
+
+static UnkStatic123s lbl_804B2FF8;            // this unit's end-of-menu tag
+static EventUnlockFx lbl_804B3018;            // unlock flash widget
+static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
+static char lbl_804B3068[100];                // name of the next event to unlock
+static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
+static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
+static char sBrowseDesc[32];                  // lbl_804B30D8 + 0x40
+static char sBrowseBest[20];                  // lbl_804B30D8 + 0x60
 
 extern "C" {
 
@@ -178,7 +216,6 @@ UIObjects* fn_8027ED70(void) { return lbl_8055F680; }
 
 }  // extern "C"
 
-extern UnkStatic123 lbl_804B2FF8;  // this unit's end-of-menu tag
 extern char lbl_8055B860[8];
 
 extern "C" {
@@ -212,7 +249,6 @@ int fn_8027EE88(void) {
 }  // extern "C"
 
 extern char lbl_8055BAB8[4];  // ""
-extern u8 lbl_804B3018[];    // unlock animation widget
 extern "C" const char* fn_80131234(const char* key);
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 
@@ -223,7 +259,7 @@ void fn_8027EEE4(int level) {
     char buf[100];
     fn_801345D8(buf, 100, "EventPath:CAREER_DIFFICULTY_%d_UNLOCKED", level);
     MenuItem items[] = {
-        MenuItem(0, 5, lbl_804B3018, 0, 0),
+        MenuItem(0, 5, &lbl_804B3018, 0, 0),
         MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
         MenuItem("message", fn_80131234(buf)),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
@@ -249,7 +285,7 @@ void fn_8027F09C(int difficulty) {
     char buf[100];
     fn_801345D8(buf, 100, lbl_80347E50 + 0x3D8, difficulty);  // "EventPath:CAREER_DIFFICULTY_%d_UNLOCK_INSTRUCTIONS"
     MenuItem items[] = {
-        MenuItem(0, 5, lbl_804B3018, 0, 0),
+        MenuItem(0, 5, &lbl_804B3018, 0, 0),
         MenuItem("title", fn_80131234(lbl_80347E50 + 0x40C)),  // "EventPath:CHALLENGE"
         MenuItem("message", fn_80131234(buf)),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
@@ -348,19 +384,18 @@ int fn_802808D0(void) {
 class EvCond {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual const char* Title(void);  // 0x0C
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
+    virtual const char* Desc(void);   // 0x1C
+    virtual s32 EventId(void);        // 0x20
+    virtual int Difficulty(void);     // 0x24
     virtual void v28(void);
     virtual int Done(void);          // 0x2C
     virtual const char* Name(void);  // 0x30
 };
 
-extern char lbl_804B3068[100];  // name of the next event to unlock
 
 extern "C" {
 
@@ -594,7 +629,70 @@ int fn_80283AC8(void) {
     return 0;
 }
 
-void fn_80283B58(u8* p) {}  // stub (180)
+}  // extern "C"
+
+class Statistic {
+public:
+    int HasValue(void);
+    u8 pad[0x24];
+};
+
+class RealStatistic : public Statistic {
+public:
+    RealStatistic(int slot, u32 type, long event, int difficulty);
+    f32 GetValue(void);
+};
+
+int IdentGetCurrentSlot(void);
+extern s32 lbl_8055C7E0;
+
+extern "C" {
+void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
+
+// Selects the next event that has an unlock condition and shows its title, description and best time.
+int fn_80283B58(void) {
+    int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
+    if (cur >= 0) {
+        int i = cur;
+        do {
+            if (++i >= lbl_804B30D8.Count()) {
+                i = 0;
+            }
+        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
+        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+            lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+        } else {
+            lbl_8055F698 = 0;
+        }
+        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+            u8* e = (u8*)lbl_804B30D8.data[i];
+            if (e) {
+                CopyName(((EvCond*)PTR(e, 0x60))->Title(), 32, sBrowseTitle);
+                CopyName(((EvCond*)PTR(e, 0x60))->Desc(), 32, sBrowseDesc);
+                int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
+                s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
+                RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+                if (best.HasValue()) {
+                    fn_80130980(sBrowseBest, 20, 3, best.GetValue());
+                } else {
+                    CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, sBrowseBest);
+                }
+                lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
+            } else {
+                sBrowseDesc[0] = 0;
+                sBrowseTitle[0] = 0;
+                lbl_8055C7E0 = -1;
+            }
+        } else {
+            sBrowseDesc[0] = 0;
+            sBrowseTitle[0] = 0;
+            lbl_8055C7E0 = -1;
+        }
+    } else {
+        fn_80216D28();
+    }
+    return 0;
+}
 
 void fn_80283E28(u8* p) {}  // stub (179)
 
@@ -853,58 +951,27 @@ void fn_802874A0(u8* p) { VR(PTR(p, 0x4))->v2C(); }
 void fn_802874B4(u8* p, int a) { VR(PTR(p, 0x4))->v30(a); }
 
 
-u8* fn_802875B8(u8* p, int del) {
-    if (p) {
-        if (p) {
-            U32(p, 0x0) = 0;
-            U32(p, 0x4) = 0;
-            U32(p, 0x8) = 0;
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
+}  // extern "C"
 
-u8* fn_80287610(u8* p, int del) {
-    if (p) {
-        if (p) {
-            U32(p, 0x0) = 0;
-            U32(p, 0x4) = 0;
-            U32(p, 0x8) = 0;
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_80287668(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-void fn_802876A8(u8* p) {
-    F32(p, 0x18) = fn_8023659C();
-    U8(p, 0x1C) = 0;
+void EventUnlockFx::Enter(void) {
+    start = fn_8023659C();
+    done = 0;
     fn_80214A9C(0x1D);
 }
 
-void fn_802876E8(u8* p) {
+void EventUnlockFx::Update(void) {
     f32 t = fn_8023659C();
-    if (t < F32(p, 0x18) || t - F32(p, 0x18) > 1.5f) {
-        U8(p, 0x1C) = 1;
+    if (t < start || t - start > 1.5f) {
+        done = 1;
     }
-    if (U8(p, 0x1C)) {
+    if (done) {
         fn_80214AF0(0x1D);
     }
 }
 
-int fn_8028774C(u8* p) { return U8(p, 0x1C) == 0; }
+int EventUnlockFx::Key(int key) { return done == 0; }
+
+extern "C" {
 
 int fn_8028775C(u8* p, int k) { return fn_802869CC(p - 4, k); }
 
