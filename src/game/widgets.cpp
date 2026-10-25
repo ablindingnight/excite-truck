@@ -1,3 +1,4 @@
+struct RotatingChoiceDescriptorNew;
 static inline float MapMinBranchNew(float a,float b){if(a<b)return a;return b;}
 static inline float MapMaxBranchNew(float a,float b){if(a>b)return a;return b;}
 extern "C" {extern const float lbl_805634A4,lbl_805634A8;}
@@ -1015,7 +1016,31 @@ WidgetFragment* fn_802295AC(WidgetFragment* self,int destroy){if(self){fn_802191
 // the provisional code-only widgets unit). Empty bodies; they are not decompilations.
 void fn_80219AB4(WidgetFragment*,int,const char*,int,int,int,bool);  // placeholder (912 bytes)
 void fn_80219FE0(WidgetFragment*);
-void fn_8021B460(void) {}  // placeholder (1100 bytes)
+}
+struct RotationVec {float x,y,z;};struct RotationMatrix {float m[9];};
+extern "C" {void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);}
+struct ChoicePoseNew {RotationMatrix basis;RotationVec translation;};
+struct RotatingChoiceFieldsNew {char base[0x368];int resource;unsigned char mode;char pad36d[3];void* pose;};
+struct RotatingChoiceDescriptorNew {u32 first;int flags,x,y,width,height,kind;float scale;char name[0x64];u32 option84,gap88,gap8c,option90,option94,gap98,gap9c,gapa0;float rx,ry,rz;};
+extern "C" {extern u32 lbl_8033F180[];extern const float lbl_805634F0,lbl_805634F4,lbl_805634F8;void* fn_8022EDE4(float,const void*);}
+static inline float ChoiceDotContractNew(float x,float y,float z,float a,float b,float c){return z*c+(x*a+y*b);}
+static inline void ChoiceTransformVectorNew(const RotationMatrix* matrix,const RotationVec* input,RotationVec* out){const float* m=matrix->m;if(out==input){float first,second,third;first=ChoiceDotContractNew(input->x,input->y,input->z,m[0],m[3],m[6]);second=ChoiceDotContractNew(input->x,input->y,input->z,m[1],m[4],m[7]);third=ChoiceDotContractNew(input->x,input->y,input->z,m[2],m[5],m[8]);out->x=first;out->y=second;out->z=third;}else{out->x=ChoiceDotContractNew(input->x,input->y,input->z,m[0],m[3],m[6]);out->y=ChoiceDotContractNew(input->x,input->y,input->z,m[1],m[4],m[7]);out->z=ChoiceDotContractNew(input->x,input->y,input->z,m[2],m[5],m[8]);}}
+
+extern "C" {
+static inline void ChoiceApplyOffsetNew(ChoicePoseNew* pose,const RotationVec* input){RotationVec translated;ChoiceTransformVectorNew(&pose->basis,input,&translated);pose->translation.x+=translated.x;pose->translation.y+=translated.y;pose->translation.z+=translated.z;}
+WidgetFragment* fn_8021B460(WidgetFragment* self,RotatingChoiceDescriptorNew* desc,const char* label,int* value){
+fn_8021B2B0(self,desc->x,desc->y,label,8,value,desc->width);self->vtable=lbl_8033F180;RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;f->mode=(u32)desc->flags>>31;
+ChoiceResourceSpec spec={};spec.words[0]=(u32)desc->name;*((float*)&spec.words[1])=desc->scale;spec.words[2]=desc->flags;spec.words[3]=desc->option90;spec.words[4]=desc->option90;spec.words[7]=desc->option84;spec.words[10]=desc->option94;spec.words[11]=desc->option94;spec.words[14]=desc->option84;
+int resource=fn_8022A86C(&spec);f->resource=resource;self->height=resource;fn_80219718(self);
+ChoicePoseNew pose;pose.basis.m[0]=lbl_805634A4;pose.basis.m[1]=lbl_805634A8;pose.basis.m[2]=lbl_805634A8;pose.basis.m[3]=lbl_805634A8;pose.basis.m[4]=lbl_805634A4;pose.basis.m[5]=lbl_805634A8;pose.basis.m[6]=lbl_805634A8;pose.basis.m[7]=lbl_805634A8;pose.basis.m[8]=lbl_805634A4;pose.translation.x=lbl_805634A8;pose.translation.y=lbl_805634A8;pose.translation.z=lbl_805634A8;
+RotationVec input={(float)desc->x-lbl_805634F0,lbl_805634F4-(float)desc->y,0.0f};ChoiceApplyOffsetNew(&pose,&input);
+float x,y,z;memcpy(&x,&desc->rx,4);memcpy(&y,&desc->ry,4);memcpy(&z,&desc->rz,4);
+if(lbl_805634A8==x&&lbl_805634A8==y&&lbl_805634A8==z)f->pose=0;else{RotationVec rotation={lbl_805634F8*x,lbl_805634F8*y,lbl_805634F8*z};RotationMatrix matrix;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&pose.basis,&matrix,&pose.basis);input.x=-input.x;input.y=-input.y;ChoiceApplyOffsetNew(&pose,&input);f->pose=fn_8022EDE4(lbl_805634A4,&pose);}return self;
+}
+}
+
+extern "C" {
+
 int fn_8021E620(WidgetFragment* self,int key){
  RowListPrefix* f=(RowListPrefix*)self;
  switch(key){
@@ -1654,7 +1679,7 @@ void fn_80226570(WidgetFragment* self,int delta){RollingRowsPrefix* f=(RollingRo
 int fn_802268E8(WidgetFragment* self){SelectionActionPrefix* f=(SelectionActionPrefix*)self;if(!f->focus)return 0;int selected=f->token==*f->focus;unsigned int state;if(self->flag18)state=(selected!=0)+2;else state=selected!=0;if(f->child->State()==3&&state==3)state=1;if(!self->enabled)state=4;return state;}
 }
 
-struct RotationVec {float x,y,z;};struct RotationMatrix {float m[9];};
+
 struct RotationPrefix {char base[0x299];unsigned char owned;char gap29a[2];RotationMatrix* matrix;};
 struct AssetRotationPrefix {char base[0x25c];RotationMatrix* matrix;unsigned char owned;};
 struct AssetFormatPrefix {char base[0x244];int first,resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];void* asset;};
@@ -2307,3 +2332,4 @@ void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(Sli
 extern "C" {extern int lbl_8055FBE0,lbl_8055FBFC;
 
 }
+
