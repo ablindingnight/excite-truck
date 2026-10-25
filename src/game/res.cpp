@@ -1771,11 +1771,11 @@ extern "C" void fn_8012ED20(StreamBuf* b) {
 }
 
 extern "C" int fn_8012EDA8(StreamBuf* b, const char* name, u32 type, u32* info) {
-    int i;
-    int j;
+    StreamSlot* s;
     StreamSlot* slots = b->slots;
-    StreamSlot* s = slots;
-    for (i = 0; i < 2; i++, s++) {
+    int j;
+    int i;
+    for (s = slots, i = 0; i < 2; i++, s++) {
         if (s->res) {
             s->res->Cancel();
             fn_8012C958(s->res);
