@@ -139,7 +139,51 @@ void fn_8018E3EC(u8* p) {}  // stub (949)
 
 void fn_8018F2C0(u8* p) {}  // stub (158)
 
-void fn_8018F538(u8* p) {}  // stub (112)
+}  // extern "C"
+
+extern const f32 lbl_80562038;  // 255
+static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
+static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
+
+// A dent offset (-0.508..0.508) packed into a byte.
+static inline u8 PackDent(f32 v) {
+    f32 t = FMax(FMin((v - -0.508f) / 1.016f, 1.0f), lbl_80561F74);
+    return lbl_80561F74 + t * lbl_80562038 + 0.5f;
+}
+
+extern "C" {
+
+// Saves the damage state (dents packed to bytes, part states) into a snapshot.
+void fn_8018F538(u8* p, u8* q) {
+    F32(q, 0x290) = F32(p, 0x2690);
+    F32(q, 0x294) = F32(p, 0x2698);
+    S32(q, 0x298) = S32(p, 0x268C);
+    u8* d = p;
+    u8* o = q;
+    for (int i = 0; i < S32(p, 0x5F8); d += 0xC, i++, o += 4) {
+        o[0] = PackDent(F32(d, 0x5FC));
+        o[1] = PackDent(F32(d, 0x600));
+        o[2] = PackDent(F32(d, 0x604));
+    }
+    U8(q, 0x2A0) = S32(p, 0x15A8);
+    U8(q, 0x2A1) = S32(p, 0x1628);
+    U8(q, 0x2A2) = S32(p, 0x16A8);
+    U8(q, 0x2A3) = S32(p, 0x1728);
+    U8(q, 0x2A4) = S32(p, 0x17A8);
+    U8(q, 0x2A5) = S32(p, 0x1828);
+    U8(q, 0x2A6) = S32(p, 0x18A8);
+    U8(q, 0x2A7) = S32(p, 0x1928);
+    U8(q, 0x2A8) = S32(p, 0x19A8);
+    U8(q, 0x2A9) = S32(p, 0x1A28);
+    U8(q, 0x2AA) = S32(p, 0x1AA8);
+    U8(q, 0x2AB) = S32(p, 0x1B28);
+    U8(q, 0x2AC) = S32(p, 0x1BA8);
+    U8(q, 0x2AD) = S32(p, 0x1C28);
+    U8(q, 0x2AE) = S32(p, 0x1CA8);
+    U8(q, 0x2AF) = S32(p, 0x1D28);
+    U8(q, 0x2B0) = S32(p, 0x1DA8);
+    S32(q, 0x29C) = S32(p, 0x1E3C);
+}
 
 void fn_8018F6F8(u8* p) {
     DamagePart* t = lbl_80332840;
