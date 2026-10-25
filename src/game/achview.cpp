@@ -4,6 +4,7 @@
 // are guesses apart from the strings.
 #include "game/common.h"
 #include "macros.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -106,7 +107,7 @@ void fn_802591D8(void) {
 
 u32 fn_8025921C(void) { return 0; }
 
-void fn_80259224(u8* p) {}  // stub (279)
+int fn_80259224(u8* p) { return 0; }  // stub (279)
 
 u8* fn_80259680(u8* p, int del) {
     if (p) {
@@ -136,7 +137,7 @@ void fn_80259740(int x, f32 v) {
     lbl_8055F3A0 = x == 2;
 }
 
-void fn_8025978C(u8* p) {}  // stub (654)
+int fn_8025978C(u8* p) { return 0; }  // stub (654)
 
 u8* fn_8025A1C4(u8* p, int del) {
     if (p && del > 0) {
@@ -145,7 +146,117 @@ u8* fn_8025A1C4(u8* p, int del) {
     return p;
 }
 
-void fn_8025A204(u8* p) {}  // stub (178)
+}  // extern "C"
+
+struct AchQuery {
+    s32 category;  // offset 0x0
+    s32 value;     // offset 0x4
+    s32 best;      // offset 0x8
+};
+
+void AchievementsQuery(AchQuery* q);
+int AchievementsGetLevel(int category, s32 value);
+s32 AchievementsGetLevelThreshold(int category, int level);
+extern "C" void fn_80130FCC(char* buf, s32 size, s32 value);
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern u8 lbl_8055F67C;     // demo: show every category one step ahead
+extern f32 lbl_8055F398;     // trophy spin angle
+extern f32 lbl_80498EAC[3];  // smoothed view direction
+
+// One achievement category shown in the viewer (vtable lbl_80345098).
+class AchView : public MenuState {
+public:
+    AchView(int idx, int cat, f32 rate) {
+        index = idx;
+        q.category = cat;
+        tallyRate = rate;
+        tally = 0.0f;
+        AchievementsQuery(&q);
+        if (lbl_8055F67C) {
+            q.best = q.value + 50;
+        }
+        int bestLevel = AchievementsGetLevel(q.category, q.best);
+        levelUp = AchievementsGetLevel(q.category, q.value) != bestLevel;
+        Refresh();
+    }
+    virtual ~AchView(void) {}
+    virtual void Enter(void);
+    virtual void Exit(void);
+    virtual void Update(void);
+
+    void Refresh(void) {
+        s32 v;
+        int show;
+        shown = (f32)q.value;
+        v = (s32)(shown + lbl_80558DC4[0]);
+        fn_80130FCC(valueText, 0x14, v);
+        show = 1;
+        if (counting && (started || !levelUp)) {
+            show = 0;
+        }
+        level = AchievementsGetLevel(q.category, v);
+        s32 next = AchievementsGetLevelThreshold(q.category, level + 1);
+        if (next >= 0) {
+            fn_80130FCC(nextText, 0x14, next);
+        } else {
+            CopyName("", 0x14, nextText);
+        }
+        const char* model = AchievementsGetLevelModel(q.category, level);
+        if (model && show) {
+            CopyName(model, 50, modelName);
+        } else {
+            CopyName("", 50, modelName);
+        }
+    }
+
+    AchQuery q;          // offset 0x18
+    s32 index;           // offset 0x24
+    f32 shown;           // offset 0x28
+    char valueText[20];  // offset 0x2C
+    char nextText[20];   // offset 0x40
+    f32 tallyRate;       // offset 0x54
+    u8 started;          // offset 0x58
+    u8 pad59[0x7];
+    char modelName[50];  // offset 0x60
+    u8 pad92[0x32];
+    u8 counting;         // offset 0xC4
+    u8 levelUp;          // offset 0xC5
+    u8 padC6[0x2];
+    s32 level;           // offset 0xC8
+    f32 tally;           // offset 0xCC
+};
+
+// Achievement categories in viewer order.
+struct AchCategoryRef {
+    s32 category;
+    const char* name;
+};
+extern AchCategoryRef lbl_80344EA0[7];
+
+extern "C" {
+void fn_80259148(void);
+void fn_802591D8(void);
+int fn_8025978C(u8* p);
+int fn_80259224(u8* p);
+void fn_802E317C(const char* fmt, ...);
+
+// Tally run: every category that changed since the last visit counts up in turn.
+void fn_8025A204(void) {
+    fn_80259148();
+    lbl_80498EAC[0] = 0.0f;
+    lbl_80498EAC[1] = -1.0f;
+    lbl_80498EAC[2] = 0.0f;
+    lbl_8055F398 = 0.31415927f;
+    for (int i = 0; i < 7; i++) {
+        AchView v(i, lbl_80344EA0[i].category, lbl_80344EA0[i].category == 0 ? 500.0f : 12.0f);
+        v.counting = 1;
+        if (v.q.best != v.q.value) {
+            lbl_8055F394->PlaySound("achieve_enter");
+            fn_8025978C((u8*)&v);
+        }
+    }
+    fn_802591D8();
+}
 
 u8* fn_8025A4CC(u8* p, int del) {
     if (p && del > 0) {
@@ -154,7 +265,40 @@ u8* fn_8025A4CC(u8* p, int del) {
     return p;
 }
 
-void fn_8025A50C(u8* p) {}  // stub (204)
+// Browse run: left/right page through the categories until the player backs out.
+void fn_8025A50C(void) {
+    fn_80259148();
+    lbl_80498EAC[0] = 0.0f;
+    lbl_80498EAC[1] = -1.0f;
+    lbl_80498EAC[2] = 0.0f;
+    lbl_8055F398 = 0.31415927f;
+    int i = 0;
+    int run = 1;
+    while (run) {
+        AchView v(i, lbl_80344EA0[i].category, 0.0f);
+        v.counting = 0;
+        int r = fn_8025978C((u8*)&v);
+        switch (r) {
+        case 1:
+            i = (i + 6) % 7;
+            break;
+        case 2:
+            i = (i + 1) % 7;
+            break;
+        case 3:
+            while (fn_80259224((u8*)&v) != -1) {
+            }
+            break;
+        case -1:
+            run = 0;
+            break;
+        default:
+            fn_802E317C("MenuDoAchievementsViewer: bad return value %d from do_accumulate", r);
+            break;
+        }
+    }
+    fn_802591D8();
+}
 
 void fn_8025A83C(u8* p) {
     F32(p, 0x84) = 1.0f;
