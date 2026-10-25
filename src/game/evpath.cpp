@@ -694,7 +694,50 @@ int fn_80283B58(void) {
     return 0;
 }
 
-void fn_80283E28(u8* p) {}  // stub (179)
+// Selects the previous event that has an unlock condition and shows its title, description and best time.
+int fn_80283E28(void) {
+    int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
+    if (cur >= 0) {
+        int i = cur;
+        do {
+            if (--i < 0) {
+                i += lbl_804B30D8.Count();
+            }
+        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
+        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+            lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+        } else {
+            lbl_8055F698 = 0;
+        }
+        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+            u8* e = (u8*)lbl_804B30D8.data[i];
+            if (e) {
+                CopyName(((EvCond*)PTR(e, 0x60))->Title(), 32, sBrowseTitle);
+                CopyName(((EvCond*)PTR(e, 0x60))->Desc(), 32, sBrowseDesc);
+                int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
+                s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
+                RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+                if (best.HasValue()) {
+                    fn_80130980(sBrowseBest, 20, 3, best.GetValue());
+                } else {
+                    CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, sBrowseBest);
+                }
+                lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
+            } else {
+                sBrowseDesc[0] = 0;
+                sBrowseTitle[0] = 0;
+                lbl_8055C7E0 = -1;
+            }
+        } else {
+            sBrowseDesc[0] = 0;
+            sBrowseTitle[0] = 0;
+            lbl_8055C7E0 = -1;
+        }
+    } else {
+        fn_80216D28();
+    }
+    return 0;
+}
 
 void fn_802840F4(u8* p) { fn_8027E908(); }
 
