@@ -1491,8 +1491,8 @@ inline int StuntChallenge::DrawResults(int a) {
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(t->x, t->y, &py, &px, t->mode);
-        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
+        fn_80148134(t->x, t->y, &px, &py, t->mode);
+        fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
@@ -1525,8 +1525,8 @@ inline int FreestyleChallenge::DrawResults(int a) {
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(t->x, t->y, &py, &px, t->mode);
-        fn_800103B8(t->w, t->a, t->b, py, px, art->w - 100.0f, "%s", body);
+        fn_80148134(t->x, t->y, &px, &py, t->mode);
+        fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
