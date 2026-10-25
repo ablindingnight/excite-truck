@@ -837,7 +837,6 @@ void fn_801E83D4(void) {
 }
 
 void fn_801E8410(void) {
-    int i;
     fn_801E837C();
     if (!fn_801B89F8() || lbl_8055AF0C == 0) {
         ViewState* s = &lbl_80487D00[lbl_8055AF0C];
@@ -860,6 +859,7 @@ void fn_801E8410(void) {
         fn_801FA618();
         {
             PlayerObj** pp = lbl_80488648;
+            int i;
             for (i = 0; i < 8; i++, pp++) {
                 PlayerObj* p = (u32)i < 8 ? *pp : 0;
                 if (p) {
@@ -875,7 +875,7 @@ void fn_801E8410(void) {
         fn_80203EC4();
         fn_80287A6C(0);
         fn_801E95DC();
-        for (i = 0; i < lbl_8055EB34; i++) {
+        for (int i = 0; i < lbl_8055EB34; i++) {
             lbl_8055EB3C[i]->PostDraw();
         }
     }
