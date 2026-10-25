@@ -693,11 +693,23 @@ void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
     for (int i = 0; i < n; i++) {
         u32 ca = *pa++;
         u32 cb = *pb++;
-        u32 r0 = (ca & 0xFF) * ka + (cb & 0xFF) * kb;
-        u32 r1 = (ca >> 8 & 0xFF) * ka + (cb >> 8 & 0xFF) * kb;
-        u32 r2 = (ca >> 16 & 0xFF) * ka + (cb >> 16 & 0xFF) * kb;
-        u32 r3 = (ca >> 24) * ka + (cb >> 24) * kb;
-        *pd++ = r0 >> 8 | (r1 & 0xFFFFFF00) | (r2 << 8 & 0xFF0000) | (r3 << 16 & 0xFF000000);
+        u32 a0 = ca & 0xFF;
+        u32 b0 = cb & 0xFF;
+        ca >>= 8;
+        u32 a1 = ca & 0xFF;
+        ca >>= 8;
+        cb >>= 8;
+        u32 b1 = cb & 0xFF;
+        cb >>= 8;
+        u32 a2 = ca & 0xFF;
+        u32 a3 = ca >> 8 & 0xFF;
+        u32 b2 = cb & 0xFF;
+        u32 b3 = cb >> 8 & 0xFF;
+        u32 r0 = a0 * ka + b0 * kb;
+        u32 r1 = a1 * ka + b1 * kb;
+        u32 r2 = a2 * ka + b2 * kb;
+        u32 r3 = a3 * ka + b3 * kb;
+        *pd++ = r0 >> 8 | (r1 >> 8) << 8 | (r2 >> 8) << 16 | (r3 >> 8) << 24;
     }
 }
 
