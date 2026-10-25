@@ -480,15 +480,19 @@ void fn_802A4E08(void) {
     }
 }
 
-int fn_802A4FA8(Droplet* d, ValueNode* vn) {
+static inline f32 Area(const ValVec3* a, const ValVec3* b) {
     PVec c;
+    PSVECCrossProduct(a, b, &c);
+    return PSVECMag(&c);
+}
+
+int fn_802A4FA8(Droplet* d, ValueNode* vn) {
     if (vn) {
         d->n = vn->GetVec3("n");
         d->origin = vn->GetVec3("origin");
         d->sv = vn->GetVec3("sv");
         d->tv = vn->GetVec3("tv");
-        PSVECCrossProduct(&d->sv, &d->tv, &c);
-        if (2.5f * PSVECMag(&c) < 2.0f) {
+        if (2.5f * Area(&d->sv, &d->tv) < 2.0f) {
             fn_802E317C("weather: droplet source is too small");
         }
         return 1;
