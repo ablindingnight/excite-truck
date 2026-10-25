@@ -883,6 +883,9 @@ revolution/OS/OSStateFlags.c:
 	.data       start:0x80311568 end:0x80311590
 	.bss        start:0x8038F060 end:0x8038F080
 
+RVL_SDK/os/__start.c:
+	.init       start:0x80004134 end:0x80004414
+
 revolution/OS/__ppc_eabi_init.c:
 	.init       start:0x80004414 end:0x8000446C
 	.text       start:0x800560B0 end:0x80056164
