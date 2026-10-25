@@ -10,6 +10,7 @@
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
+#define B8(p, o) (*(bool*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 struct RVec3 {
@@ -74,8 +75,8 @@ extern f32 lbl_8055A468;
 extern f32 lbl_8055A46C;
 
 static inline void SetMode(u8* p, int on) {
-    U8(p, 0x25) = on;
-    U8(p, 0x26) = on == 0;
+    B8(p, 0x25) = on;
+    B8(p, 0x26) = !B8(p, 0x25);
     U8(p, 0x24) = 1;
 }
 
@@ -134,7 +135,7 @@ void fn_802793B0(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
 void fn_801B6660(void);
-int fn_801CF050(u8* p, int a);
+int fn_801CF050(void);
 void fn_801B6658(void);
 int fn_801B6668(void);
 void fn_801B6654(void);
@@ -364,7 +365,108 @@ u8* fn_8018FF84(u8* p, int del) {
     return p;
 }
 
-void fn_8018FFC4(u8* p) {}  // stub (112)
+}  // extern "C"
+
+extern void* lbl_80332F40[];  // replay recorder vtable
+extern u8 lbl_8055E528;
+int OptProfile(void);
+
+// Replay data source of a car (fn_8018108C); slots 0x5C-0x68 report its setup.
+class ReplaySrc {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual u8 v5C(void);
+    virtual u8 v60(void);
+    virtual u8 v64(void);
+    virtual u8 v68(void);
+};
+
+// Car controller interface (driver/hybrid at +0x8/+0xC, controller at +0x14).
+class CarCtl {
+public:
+    virtual void v08(void);
+    virtual void Attach(u8* car, u8* q);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual s32 v18(void);
+};
+
+extern "C" {
+ReplaySrc* fn_8018108C(s32 id);
+CarCtl* fn_801B2EC0(s32 id);
+}
+
+// The car's replay recorder (0x24): writes packets into the car's replay buffer.
+struct Recorder {
+    void* vtbl;
+    ReplaySrc* src;
+    u8* buf;
+    s32 pos;
+    u8 pad10;
+    u8 cfg[4];
+    u8 pad15[3];
+    u8* start;
+    s32 cap;
+    s32 id;
+
+    Recorder(s32 n) {
+        vtbl = lbl_80332F40;
+        id = n;
+        fn_80137C74();
+        cap = 36000;
+        buf = start = lbl_804349B0[n];
+        src = fn_8018108C(n);
+        pos = 0;
+        lbl_8055E524 = 0;
+        if (fn_801CF050()) {
+            cfg[0] = src->v5C();
+            cfg[1] = src->v64();
+            cfg[2] = src->v60();
+            cfg[3] = src->v68();
+        }
+    }
+};
+
+extern "C" {
+
+void fn_8018FFC4(u8* p, u8* car, u8* q) {
+    S32(p, 0x28) = U8(car, 0x260) & 3;
+    Recorder* r = new ("repl_di") Recorder(S32(p, 0x28));
+    PTR(p, 0x4) = (u8*)r;
+    PTR(PTR(p, 0xC), 0x38) = (u8*)r;
+    B8(p, 0x25) = S32(q, 0x5C) == 0;
+    B8(p, 0x26) = S32(q, 0x5C) != 0;
+    PTR(p, 0x20) = car;
+    S32(p, 0x1C) = S32(car, 0x1EC);
+    CarCtl* c = fn_801B2EC0(S32(p, 0x1C));
+    PTR(p, 0x14) = (u8*)c;
+    S32(p, 0x18) = c->v18();
+    ((CarCtl*)PTR(p, 0x8))->Attach(car, q);
+    ((CarCtl*)PTR(p, 0xC))->Attach(car, q);
+    if (OptProfile()) {
+        lbl_8055E528 = 1;
+    }
+}
 
 void fn_80190184(u8* p, u8* car) {
     PTR(p, 0x20) = car;
@@ -478,7 +580,7 @@ void fn_80190EAC(u8* p) {
     SetMode(p, z);
     lbl_8055E520 = z;
     u8* o = PTR(p, 0x4);
-    if (fn_801CF050(p, 1)) {
+    if (fn_801CF050()) {
         U32(o, 0xC) = z;
         lbl_8055E524 = z;
     }
