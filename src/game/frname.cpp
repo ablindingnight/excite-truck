@@ -38,23 +38,35 @@ extern "C" {
 
 void fn_8025CE78(u8* p) {}  // stub (701)
 
-u8* fn_8025D96C(u8* p, int del) {
-    if (p) {
-        u8* m = p + 0x18;
-        lbl_8055F3C4 = 0;
-        if (m) {
-            if (m) {
-                U32(m, 0x0) = 0;
-                U32(m, 0x4) = 0;
-                U32(m, 0x8) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
+}  // extern "C"
+
+template <class T>
+class ArrayBase {
+public:
+    ~ArrayBase(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
     }
-    return p;
-}
+    T* data;    // offset 0x0
+    int count;  // offset 0x4
+    int cap;    // offset 0x8
+};
+
+template <class T>
+class SimpleArray : public ArrayBase<T> {};
+
+// The friendly-name list (one per screen; lbl_8055F3C4 is cleared when it goes away).
+class FriendlyNames {
+public:
+    ~FriendlyNames(void);
+    u8 pad0[0x18];
+    SimpleArray<u32> names;  // offset 0x18
+};
+
+FriendlyNames::~FriendlyNames(void) { lbl_8055F3C4 = 0; }
+
+extern "C" {
 
 u8* fn_8025D9D0(u8* p) {
     U32(p, 0x420) = 0;
