@@ -947,15 +947,14 @@ extern "C" {
 extern int lbl_8055FBDC;
 const char* fn_8022D3F8(ObservedStringList*,int,int*);
 void fn_8021E3BC(WidgetFragment* self,void* context){
- RowListPrefix* fields=(RowListPrefix*)self;int start=0;if(fields->view)start=fields->view->start;
- fn_802192A0(self,context);fn_802C3034(context);int flags=0;int color=lbl_8055FBDC;
- int index;for(int row=0;row<fields->rows&&(index=row+start,fn_8022D3F8(fields->list,index,&flags)!=0);++row){
-  int selected=*fields->selected==index;
-  if(selected){int x=self->left,y=self->top;int width=((WidgetDispatch*)self)->Slot78();
-   fn_802C3424(x+2,y+row*fields->rowHeight+2,x+width-2,y+(row+1)*fields->rowHeight+2,color);
+ int drawY;int drawX;int color,index;RowListPrefix* fields=(RowListPrefix*)self;int start=0;if(fields->view)start=fields->view->start;
+ fn_802192A0(self,context);fn_802C3034(context);int flags=0;color=lbl_8055FBDC;
+ for(int row=0;row<fields->rows&&(index=row+start,fn_8022D3F8(fields->list,index,&flags)!=0);++row){
+  int x,y;bool selected=*fields->selected==index;
+  if(selected){x=self->left;y=self->top;int width=x+((WidgetDispatch*)self)->Slot78();
+   {int h=fields->rowHeight;int bottom=(row+1)*h;int top=row*h;fn_802C3424(x+2,y+top+2,width-2,y+bottom+2,color);}
   }
-  int y=self->top,x=self->left;
-  fn_8022B91C(7,x+2,y+row*fields->rowHeight+2,fn_8022D3F8(fields->list,index,0),(selected!=0)|((flags!=0)?2:0));
+  int disabled=flags!=0?2:0;selected=selected!=0;drawY=self->top;drawX=self->left;const char* label=fn_8022D3F8(fields->list,index,0);fn_8022B91C(7,drawX+2,drawY+row*fields->rowHeight+2,label,selected|disabled);
  }
 }
 void fn_8021E51C(WidgetFragment* self){
@@ -1033,10 +1032,166 @@ int fn_8021E620(WidgetFragment* self,int key){
  }return 0;
 }  // placeholder (436 bytes)
 void fn_8021F4F0(void) {}  // placeholder (392 bytes)
-void fn_802200AC(void) {}  // placeholder (1280 bytes)
+}
+struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,step;void* image;int* focus;int token;float previousTime,nextTime;};
+typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
+extern "C" {
+extern float lbl_80558DC4[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
+void* fn_80211660(int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
+}
+static inline float ObservedProviderClamp(float value){float one=lbl_805634A4;float limited=one<value?one:value;float zero=lbl_805634A8;return limited>zero?limited:zero;}
+static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float duration=lbl_805634E8;float value=((duration+*stamp-now)-lbl_805634A8)/duration;float result=ObservedProviderClamp(value);result*=lbl_805634C8;return lbl_805634A8+result;}
+static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float value=((now-*stamp)-lbl_805634A8)/lbl_80563504;float result=ObservedProviderClamp(value);result*=lbl_8056350C;int alpha=(int)(lbl_80563508+result);return((u32)alpha<<24)|0x00ffffffu;}
+// Read-only half-coefficient accessor; original helper boundary is unproved.
+static inline const float& GaugeHalfReferenceObservedNew(){return lbl_805634C4;}
+extern "C" {
+void fn_802200AC(WidgetFragment* self){int previousFrame;
+ int nextFrame;
+ void* previousArrow;
+ void* nextArrow;
+ float nextX;
+ float fraction;
+ float height;
+ float filledWidth;
+ SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;
+ if(f->value)fraction=(*f->value-f->minimum)/(f->maximum-f->minimum);
+ else fraction=lbl_805634A4;
+ float coordinates[2];
+ coordinates[1]=lbl_805634A8;
+ coordinates[0]=lbl_805634A8;
+ fn_80230C30(&coordinates[1],&coordinates[0],self->left,self->top);
+ float width=(float)((WidgetDispatch*)self)->Slot78();
+ height=(float)(self->bottom-self->top);
+ filledWidth=fraction*(float)fn_802C51C0(f->image);
+ float imageHeight=(float)fn_802C5220(f->image);
+ previousFrame=0;
+ if(f->focus&&*f->focus==f->token)previousFrame=1;
+ ((void(*)(void*,int,float,float,float,float,float,float,float,float,float))fn_802C5334)(f->image,previousFrame,coordinates[1]+(GaugeHalfReferenceObservedNew())*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)*GaugeHalfReferenceObservedNew(),lbl_805634A8,filledWidth,imageHeight,lbl_805634A8,lbl_805634A8,fraction,lbl_805634A4);
+ 
+previousArrow=fn_80211660(0);
+ nextArrow=fn_80211660(1);
+ {bool previousSelected;
+ {int* focus=f->focus;
+ previousSelected=false;
+ if(focus){if(*focus==f->token)previousSelected=true;
+ }}if(previousSelected){float now=fn_8023659C();
+ if(lbl_805634E8+f->previousTime>now)previousFrame=2;
+ else previousFrame=1;
+ }else previousFrame=0;
+ }bool nextSelected=false;
+ if(f->focus&&*f->focus==f->token)nextSelected=true;
+ if(nextSelected){float now=fn_8023659C();
+ if(lbl_805634E8+f->nextTime>now)nextFrame=2;
+ else nextFrame=1;
+ }else nextFrame=0;
+ 
+float previousOffset=ObservedArrowOffset(&f->previousTime),nextOffset=ObservedArrowOffset(&f->nextTime);
+ previousOffset=(coordinates[1]-fn_80235EF0(previousArrow,previousFrame))-previousOffset;
+ nextX=coordinates[1]+width;
+ nextX=nextOffset+nextX;
+ u32 previousColor=0xffffffffu,nextColor=0xffffffffu;
+ if(fraction<=lbl_80558DC4[0])previousColor=ObservedArrowColor(&f->previousTime);
+ if(fraction>=lbl_805634A4-lbl_80558DC4[0])nextColor=ObservedArrowColor(&f->nextTime);
+ 
+if(previousArrow){float arrowWidth=fn_80235EF0(previousArrow,previousFrame);
+ float arrowHeight=fn_80235F64(previousArrow,previousFrame);
+ fn_802354A0(previousArrow,previousFrame,previousColor,previousOffset,coordinates[0]+(arrowHeight-height)*(GaugeHalfReferenceObservedNew()),lbl_805634A8,arrowWidth,arrowHeight);
+ }if(nextArrow){float arrowWidth=fn_80235EF0(nextArrow,nextFrame);
+ float arrowHeight=fn_80235F64(nextArrow,nextFrame);
+ fn_802354A0(nextArrow,nextFrame,nextColor,nextX,coordinates[0]+(arrowHeight-height)*(GaugeHalfReferenceObservedNew()),lbl_805634A8,arrowWidth,arrowHeight);
+ }}
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
 
-void fn_80221544(void) {}  // placeholder (1068 bytes)
+struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
+struct ScrollLocalWordObservedNew {int value;inline ScrollLocalWordObservedNew(){}inline ScrollLocalWordObservedNew(int v):value(v){}};typedef char ScrollLocalWordObservedSize4[sizeof(ScrollLocalWordObservedNew)==4?1:-1];
+struct ScrollEdgeWordObservedNew {int value;inline ScrollEdgeWordObservedNew(int v):value(v){}};typedef char ScrollEdgeWordObservedSize4[sizeof(ScrollEdgeWordObservedNew)==4?1:-1];
+extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
+void fn_80221544(WidgetFragment *self, void *context)
+{
+  int imageExtent;
+
+  int trackWidth;
+
+  DragViewportPrefix *f = (DragViewportPrefix *) self;
+
+  fn_802C3034(context);
+
+  if (f->direction == 0)
+  {
+    ((void (*)(ObservedClipPrefix *, void *, int, int, int, int)) fn_80228E80)((ObservedClipPrefix *) context, f->first, self->left, self->top, self->bottom - self->top, 0);
+
+  }
+  else
+  {
+    ScrollLocalWordObservedNew y(self->top);
+
+    ScrollLocalWordObservedNew x(self->left);
+
+    int width = ((WidgetDispatch*)self)->Slot78();
+
+    fn_80228DC4((ObservedClipPrefix *) context, f->first, x.value, y.value, width, 0);
+
+  }
+  ScrollLocalWordObservedNew total(f->state->total);
+
+  if (f->state->page < total.value)
+  {
+  if (f->direction == 0) { int left;
+ int right;
+ int top;
+ int bottom;
+ ScrollLocalWordObservedNew x(self->left);
+ left = x.value + 1;
+ float ratio = ((float) (self->bottom - self->top)) / ((float) total.value);
+ trackWidth = ((WidgetDispatch*)self)->Slot78();
+ int rightEdge = x.value + trackWidth;
+ right = rightEdge - 1;
+ const int& start=f->state->start;
+ top=(self->top + ((int) (ratio * ((float) start))))+5;
+bottom=(self->top + ((int) (ratio * ((float) (start + f->state->page)))))-5;
+ if (((bottom - 1) > (top + 1)) && ((right - 1) > (left + 1))) { if (f->second) { void *image = f->second;
+ imageExtent = fn_802C51C0(f->first);
+ int tw = fn_802C51C0(image);
+ ((void (*)(ObservedClipPrefix *, void *, int, int, int, int)) fn_80228E80)((ObservedClipPrefix *) context, f->second, left + ((imageExtent - tw) / 2), top, bottom - top, 0);
+ }
+else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
+ int dark = lbl_8055FBE0;
+ fn_802C3424(left, bottom - 1, right, bottom, dark);
+ fn_802C3424(right - 1, top, right, bottom, dark);
+ int light = lbl_8055FBFC;
+ fn_802C3424(left, top, right, top + 1, light);
+ fn_802C3424(left, top, left + 1, bottom, light);
+ } } }
+else { int left;
+ int right;
+ int top;
+ int bottom;
+ int width = ((WidgetDispatch*)self)->Slot78();
+ float ratio = ((float) width) / ((float) total.value);
+ int start = f->state->start;
+ int edge = self->bottom;
+ ScrollLocalWordObservedNew y(self->top);
+ top = y.value + 1;
+ bottom = edge - 1;
+ int low = self->left + ((int) (ratio * ((float) start)));
+ ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
+ left = low + 5;
+ right = high.value - 5;
+ if (((right - 1) > (left + 1)) && ((bottom - 1) > (top + 1))) { if (f->second) { void *image = f->second;
+ imageExtent = fn_802C5220(f->first);
+ int th = fn_802C5220(image);
+ fn_80228DC4((ObservedClipPrefix *) context, f->second, left, top + ((imageExtent - th) / 2), right - left, 0);
+ }
+else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
+ int dark = lbl_8055FBE0;
+ fn_802C3424(left, bottom - 1, right, bottom, dark);
+ fn_802C3424(right - 1, top, right, bottom, dark);
+ int light = lbl_8055FBFC;
+ fn_802C3424(left, top, right, top + 1, light);
+ fn_802C3424(left, top, left + 1, bottom, light);
+ } } } 
+  }
+}
 void fn_80221970(void) {}  // placeholder (1292 bytes)
 void fn_80221F9C(void) {}  // placeholder (388 bytes)
 void fn_80222CFC(void) {}  // placeholder (936 bytes)
@@ -1082,9 +1237,6 @@ extern ProviderDrawMetrics* lbl_8055E050;extern float lbl_80558DC4[];extern cons
 void* fn_80211660(int);int fn_8022AB18(int,int,int);void fn_8022AAA8(int,const char*);u32 fn_8022AA84(int);
 float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);
 }
-static inline float ObservedProviderClamp(float value){float one=lbl_805634A4;float limited=one<value?one:value;float zero=lbl_805634A8;return limited>zero?limited:zero;}
-static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float duration=lbl_805634E8;float value=((duration+*stamp-now)-lbl_805634A8)/duration;float result=ObservedProviderClamp(value);result*=lbl_805634C8;return lbl_805634A8+result;}
-static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float value=((now-*stamp)-lbl_805634A8)/lbl_80563504;float result=ObservedProviderClamp(value);result*=lbl_8056350C;int alpha=(int)(lbl_80563508+result);return((u32)alpha<<24)|0x00ffffffu;}
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
 void fn_8021DB58(WidgetFragment* self){
@@ -1613,7 +1765,6 @@ static inline int InlineWidgetAbsolute(int value){return value<0?-value:value;}
 WidgetFragment* fn_8021F678(WidgetFragment* self,int x,int y,int width,int height,float minimum,float maximum,float* value,int rate){fn_80218F34(self,x,y,x+width,y+height,0);FloatSliderPrefix* f=(FloatSliderPrefix*)self;self->vtable=lbl_8033E878;f->value=value;f->minimum=minimum;f->maximum=maximum;f->dragging=0;f->rate=InlineWidgetAbsolute(rate);f->negative=rate<0;f->background=fn_802C5130(lbl_8033D9B0);f->marker=fn_802C5130(lbl_8033D9BC);f->oldX=self->left;f->oldY=self->top;f->oldWidth=((WidgetDispatch*)self)->Slot78();f->oldHeight=self->bottom-self->top;int newHeight=fn_802C5220(f->background);if(self->bottom-self->top>newHeight)newHeight=self->bottom-self->top;fn_80219284(self,((WidgetDispatch*)self)->Slot78()-1,newHeight);fn_80219440(self,0,value,4);f->focus=0;f->token=fn_80228F40(x,y);return self;}
 }
 
-struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,step;void* image;int* focus;int token;float previousTime,nextTime;};
 extern "C" {
 extern const float lbl_80563518;extern u32 lbl_8033E7F4[];void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
 void fn_8021FA98(WidgetFragment *self, int x, int y)
@@ -1810,7 +1961,6 @@ void fn_80219AB4(WidgetFragment* self,int kind,const char* name,int style,int ar
 }
 }
 
-struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
 extern "C" {
 }
 
@@ -2150,4 +2300,10 @@ enum SliderDenominatorWordNew { SliderDenominatorMinNew=(-2147483647-1),SliderDe
 static inline int ClampIntegerSliderNew(int limit,int value){return value>=limit?limit:value;}
 extern "C" {
 void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(SliderFullPrefix*)self;f->dragging=1;int left=self->left;int minimum=f->minimum;int width=((WidgetDispatch*)self)->Slot78();int value=(f->maximum-minimum)*(x-left-5);SliderDenominatorWordNew denominator=(SliderDenominatorWordNew)(width-10);width=value/(int)denominator;value=minimum+width;if(value<minimum)value=minimum;value=ClampIntegerSliderNew(*(volatile int*)&f->maximum-1,value);*f->value=value;}
+}
+
+
+
+extern "C" {extern int lbl_8055FBE0,lbl_8055FBFC;
+
 }
