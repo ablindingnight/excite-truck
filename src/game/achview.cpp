@@ -233,7 +233,101 @@ void fn_8025A8B8(u8* p, const char* name) {
     F32(p, 0xA4) = 1.0f;
 }
 
-void fn_8025AA90(u8* p) {}  // stub (174)
+}  // extern "C"
+
+// Pad state as read by fn_801298E8 (partial).
+struct ViewPad {
+    f32 x;            // offset 0x0
+    f32 y;            // offset 0x4
+    u8 pad8[0x38];
+    u32 hold;         // offset 0x40
+    u8 pad44[0xC];
+    u32 flags;        // offset 0x50, 0x20: pointer direction valid
+    f32 dir[3];       // offset 0x54
+    u8 pad60[0x4];
+};
+
+struct Mat3 {
+    f32 m[9];
+};
+
+f32 Max(f32 a, f32 b);
+f32 Remap(f32 lo, f32 hi, f32 a, f32 b, f32 x);
+void Mat3RotY(Mat3* m, f32 a);
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
+extern f32 lbl_8055F398;     // trophy spin angle
+extern f32 lbl_80498EAC[3];  // smoothed view direction
+
+extern "C" {
+int fn_801298E8(ViewPad* pad, int chan);
+void StatsUpdate__Fv(f32* v);  // vector default constructor (empty, out of line)
+void fn_80144DAC(f32* dst, const f32* src);
+f32 fn_80144CC8(f32 x);
+void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
+void fn_801F3198(f32* v);
+void fn_80144B44(f32* v, f32 x, f32 y, f32 z);
+f32 fn_8017F70C(f32 x);
+void fn_801C0E4C(f32* out, const f32* a, const f32* b);
+Mat3* fn_802C86DC(void);
+void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t);
+f32 fn_8025AD88(const f32* a, const f32* b);
+void fn_8025AD8C(u8* self, f32* out, const f32* a, const f32* b, f32 t);
+f32 fn_8025ADF4(f32 x);
+
+// Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
+// (right, up, forward) is rebuilt around the tilted up vector.
+void fn_8025AA90(u8* p, f32 dt) {
+    ViewPad pad;
+    Mat3 rot;
+    f32 r[3];
+    f32 c[3];
+    f32 b[3];
+    f32 a[3];
+    f32 fwd[3];
+    f32 side[3];
+    f32 v[3];
+    if (S32(p, 0x50) == -1 || !U8(p, 0x4A)) {
+        return;
+    }
+    if (fn_801298E8(&pad, 0)) {
+        f32 plus = (pad.hold & 2) ? 1.0f : 0.0f;
+        f32 minus = (pad.hold & 8) ? -1.0f : 0.0f;
+        lbl_8055F398 += dt * (3.1415927f * (minus + plus));
+        StatsUpdate__Fv(v);
+        if (pad.flags & 0x20) {
+            fn_80144DAC(v, pad.dir);
+        } else {
+            fn_801BFEBC(v, pad.x, -fn_8025ADF4(Max(0.0f, 1.0f - fn_80144CC8(pad.x) + fn_80144CC8(pad.y))), pad.y);
+        }
+        fn_8025AD8C(p + 0x84, lbl_80498EAC, lbl_80498EAC, v, dt);
+        fn_801BFEBC((f32*)(p + 0x90), lbl_80498EAC[0], -lbl_80498EAC[1], lbl_80498EAC[2]);
+        fn_801F3198((f32*)(p + 0x90));
+    }
+    fn_80144B44(side, 1.0f, 0.0f, 0.0f);
+    fn_80144B44(fwd, 0.0f, 0.0f, 1.0f);
+    f32 tilt = fn_8017F70C(fn_8025AD88(side, (f32*)(p + 0x90)));
+    fn_8017F70C(fn_8025AD88((f32*)(p + 0x90), fwd));
+    if (tilt > 0.707f) {
+        StatsUpdate__Fv(a);
+        StatsUpdate__Fv(b);
+        StatsUpdate__Fv(c);
+        fn_801C0E4C(c, side, (f32*)(p + 0x90));
+        fn_801C0E4C(a, (f32*)(p + 0x90), c);
+        fn_801C0E4C(b, (f32*)(p + 0x90), fwd);
+        fn_8025AD3C(r, a, b, Remap(0.707f, 0.996f, 0.0f, 1.0f, tilt));
+        fn_801C0E4C((f32*)(p + 0x9C), r, (f32*)(p + 0x90));
+        fn_801F3198((f32*)(p + 0x9C));
+        fn_801C0E4C((f32*)(p + 0x84), (f32*)(p + 0x90), (f32*)(p + 0x9C));
+    } else {
+        fn_801C0E4C((f32*)(p + 0x9C), side, (f32*)(p + 0x90));
+        fn_801F3198((f32*)(p + 0x9C));
+        fn_801C0E4C((f32*)(p + 0x84), (f32*)(p + 0x90), (f32*)(p + 0x9C));
+    }
+    Mat3RotY(&rot, lbl_8055F398);
+    Mat3Mul((Mat3*)(p + 0x84), &rot, (Mat3*)(p + 0x84));
+    Mat3Mul((Mat3*)(p + 0x84), (Mat3*)(p + 0x84), fn_802C86DC());
+}
 
 void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t) {
     out[2] = a[2] + t * (b[2] - a[2]);
