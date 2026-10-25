@@ -198,8 +198,8 @@ template <class T, int N>
 struct TFixed {
     TFixed(void) {
         data = items;
-        n = 0;
         cap = N;
+        n = 0;
     }
     ~TFixed(void) {}
     T* data;     // offset 0x0
