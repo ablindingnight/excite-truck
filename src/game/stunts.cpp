@@ -1083,8 +1083,7 @@ void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
         f32 now = lbl_8055E3C8;
         int recent = 0;
         CloseCallSlot* oldest;
-        int i;
-        for (i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             CloseCallSlot* s = &slots[i];
             if (NearZero(s->time - now)) {
                 recent = 1;
@@ -1094,7 +1093,7 @@ void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
             }
         }
         oldest = 0;
-        for (i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             CloseCallSlot* s = &slots[i];
             if (!oldest || s->time < oldest->time) {
                 oldest = s;

@@ -944,13 +944,12 @@ FixedList<Layout*, 40> lbl_8042FBC0;
 
 void Layout::BuildEditRects(void) {
     EditRect* r;
-    int i;
     int na = arts->a.count * 2;
     int nt = texts->a.count * 3;
     int ng = garts->a.count * 3;
     rects = new ("edit_oprects") DynArray<EditRect>(na + nt + ng + 1);
     ctx = new ("EditingContext") EditContext(rects);
-    for (i = 0; i < arts->a.count; i++) {
+    for (int i = 0; i < arts->a.count; i++) {
         r = ctx->rects->Add();
         r->Set(0);
         r->target = &arts->a.data[i];
@@ -960,7 +959,7 @@ void Layout::BuildEditRects(void) {
         r->target = &arts->a.data[i];
         r->handler = &lbl_8055E210;
     }
-    for (i = 0; i < texts->a.count; i++) {
+    for (int i = 0; i < texts->a.count; i++) {
         r = ctx->rects->Add();
         r->Set(0);
         r->target = &texts->a.data[i];
@@ -974,7 +973,7 @@ void Layout::BuildEditRects(void) {
         r->target = &texts->a.data[i];
         r->handler = &lbl_8055E218;
     }
-    for (i = 0; i < garts->a.count; i++) {
+    for (int i = 0; i < garts->a.count; i++) {
         r = ctx->rects->Add();
         r->Set(0);
         r->target = &garts->a.data[i];

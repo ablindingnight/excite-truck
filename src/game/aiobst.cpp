@@ -239,9 +239,8 @@ int fn_8015ED90(ValueNode* list) {
 
 void fn_8015EE14(ValueNode* list, Track* trk) {
     if (list) {
-        int i;
         ValueNode* n;
-        for (i = 0; (n = list->GetChildAt(i)) != 0; i++) {
+        for (int i = 0; (n = list->GetChildAt(i)) != 0; i++) {
             if (fn_8015ED18(n)) {
                 Obst* o = lbl_8055E29C->Add();
                 const char* type;
