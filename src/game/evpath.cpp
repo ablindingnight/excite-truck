@@ -24,8 +24,8 @@ public:
     virtual void s1C(void);
     virtual void s20(void);
     virtual void s24(void);
-    virtual void s28(void);
-    virtual void s2C(void);
+    virtual const char* GetString(u32 id);  // 0x28
+    virtual s32 GetInt(u32 id);             // 0x2C
     virtual void s30(void);
     virtual void s34(void);
     virtual void PlaySound(const char* name);  // 0x38
@@ -35,7 +35,7 @@ class VR {
 public:
     virtual ~VR(void);
     virtual void v0C(void);
-    virtual void v10(void);
+    virtual u32 v10(void);
     virtual void v14(void);
     virtual int v18(void);
     virtual u8* v1C(s32 x);
@@ -663,7 +663,63 @@ void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg) {
     delete list;
 }
 
-void fn_80284760(u8* p) {}  // stub (162)
+extern char lbl_80348940[];  // "cup_perfected" (string pool)
+s32 fn_80221EA8(void);
+int fn_8023695C(const char* name);
+
+// Event screen setup: progress text ("%d/%d" of the cup's parts) and the event's title.
+void fn_80284760(u8* p) {
+    if (!U8(p, 0x64)) {
+        U8(p, 0x18) = 1;
+        S32(p, 0x1C) = fn_80221EA8();
+    }
+    if (PTR(p, 0x60)) {
+        S32(p, 0x20) = 0;
+        U8(p, 0x50) = 1;
+        s32 y;
+        s32 x = S32(p, 0x4);
+        y = S32(p, 0x8);
+        S32(p, 0x48) = x;
+        S32(p, 0x4C) = y;
+        S32(p, 0x6C) = x;
+        F32(p, 0x68) = 0.0f;
+        if (PTR(p, 0x60)) {
+            if (VR(PTR(p, 0x60))->v28() && !U8(p, 0xCC)) {
+                fn_80236954(lbl_80348940);
+                fn_8027F204(lbl_80348940);
+            }
+            int show = 0;
+            S32(p, 0x70) = p == (u8*)lbl_8055F688 ? 6 : 7;
+            if (VR(PTR(p, 0x60))->v24()) {
+                if (!VR(PTR(p, 0x60))->v28() || fn_8023695C(lbl_80348940)) {
+                    show = 1;
+                }
+            }
+            U8(p, 0xCD) = show;
+            if (show) {
+                int i;
+                int done;
+                int n = VR(PTR(p, 0x60))->v18();
+                done = 0;
+                for (i = 0; i < n; i++) {
+                    if (VR(VR(PTR(p, 0x60))->v1C(i))->v40()) {
+                        done++;
+                    }
+                }
+                fn_801345D8((char*)p + 0x74, 10, "%d/%d", done, n);
+            } else {
+                U8(p, 0x74) = 0;
+            }
+        }
+        const char* title = fn_8027ED70()->GetString(VR(PTR(p, 0x60))->v10());
+        if (title) {
+            CopyName(title, 50, (char*)p + 0x7E);
+        }
+        S32(p, 0xB0) = fn_8027ED70()->GetInt(VR(PTR(p, 0x60))->v10());
+    } else {
+        S32(p, 0x20) = 1;
+    }
+}
 
 void fn_802849E8(u8* p) {}  // stub (702)
 
