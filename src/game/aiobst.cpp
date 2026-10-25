@@ -539,13 +539,17 @@ struct View {
         Delta d;
         d.x = p->v.x - o->x;
         d.z = p->v.y - o->y;
-        return fwd.x * d.x + fwd.y * d.z;
+        f32 fx = fwd.x;
+        f32 fy = fwd.y;
+        return fx * d.x + fy * d.z;
     }
     f32 Side(const Vec2* p, const Pt* o) const {
         Delta d;
         d.x = p->v.x - o->x;
         d.z = p->v.y - o->y;
-        return fwd.y * d.x + -fwd.x * d.z;
+        f32 sx = fwd.y;
+        f32 sz = -fwd.x;
+        return sx * d.x + sz * d.z;
     }
     Pt fwd;    // offset 0x0
     Pt right;  // offset 0x8
