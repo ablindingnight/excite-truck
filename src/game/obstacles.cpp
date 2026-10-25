@@ -70,6 +70,8 @@ struct RVec3;
 class RigidBody {
 public:
     void Reset(void);
+    void VelAt(RVec3* out, const RVec3* at);
+    void AddForceAt(const RVec3* f, const RVec3* at);
     void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);
 };
 
@@ -559,7 +561,72 @@ void fn_801AD28C(u8* p, const CVec3* a, CollVolume* other, const CVec3* b, f32 x
     F32(p, 0x28) = len;
 }
 
-void fn_801AD394(u8* p) {}  // stub (150)
+extern const f32 lbl_80562518;  // 0.001
+double sqrt(double x);
+
+// Applies the joint's spring (beyond the rest length) and damping between the two attachment points.
+void fn_801AD394(u8* p) {
+    CVec3 wa;
+    CVec3 wb;
+    CVec3 d;
+    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, (const CVec3*)(p + 0x10));
+    if (PTR(p, 0xC)) {
+        ((CollVolume*)PTR(p, 0xC))->Xform(&wb, (const CVec3*)p);
+    } else {
+        wb = *(const CVec3*)p;
+    }
+    d.x = wb.x - wa.x;
+    d.y = wb.y - wa.y;
+    d.z = wb.z - wa.z;
+    f32 len = PSVECMag(&d);
+    f32 dx = d.x;
+    f32 dz = d.z;
+    F32(p, 0x30) = (f32)sqrt(dx * dx + dz * dz);
+    f32 stretch = len - F32(p, 0x28);
+    F32(p, 0x2C) = stretch;
+    if (len > lbl_80562518 && len < F32(p, 0x28) + F32(p, 0x24)) {
+        CVec3 dir;
+        CVec3 force;
+        CVec3 va;
+        CVec3 vb;
+        CVec3 dv;
+        f32 inv = lbl_805624AC / len;
+        force.x = lbl_8056247C;
+        force.y = lbl_8056247C;
+        force.z = lbl_8056247C;
+        dir.x = d.x * inv;
+        dir.y = d.y * inv;
+        dir.z = d.z * inv;
+        ((RigidBody*)PTR(p, 0x34))->VelAt((RVec3*)&va, (const RVec3*)&wa);
+        if (PTR(p, 0xC)) {
+            ((RigidBody*)PTR(p, 0xC))->VelAt((RVec3*)&vb, (const RVec3*)&wb);
+        } else {
+            vb.x = lbl_8056247C;
+            vb.y = lbl_8056247C;
+            vb.z = lbl_8056247C;
+        }
+        dv.x = vb.x - va.x;
+        dv.y = vb.y - va.y;
+        dv.z = vb.z - va.z;
+        f32 c = F32(p, 0x20);
+        force.x = dv.x * c;
+        force.y = dv.y * c;
+        force.z = dv.z * c;
+        if (len > F32(p, 0x28)) {
+            f32 k = F32(p, 0x1C) * (len - F32(p, 0x28));
+            force.x = force.x + dir.x * k;
+            force.y = force.y + dir.y * k;
+            force.z = force.z + dir.z * k;
+        }
+        ((RigidBody*)PTR(p, 0x34))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
+        if (PTR(p, 0xC)) {
+            force.x = force.x * lbl_805624A4;
+            force.y = force.y * lbl_805624A4;
+            force.z = force.z * lbl_805624A4;
+            ((RigidBody*)PTR(p, 0xC))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
+        }
+    }
+}
 
 void fn_801AD5EC(void) { fn_801AC508(); }
 
