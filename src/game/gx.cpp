@@ -118,10 +118,10 @@ void fn_802E3A64(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const RMtx* m);
 void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(Mat3* out, const Mat3* a, const RMtx* b);
 void fn_802C8588(void* out, const V3* a, const V3* b);
-void fn_8004229C(GXLightObj* l, f32 x, f32 y, f32 z);
-void fn_800421CC(GXLightObj* l, f32 a, f32 b, int f);
-void fn_800422AC(GXLightObj* l, f32 x, f32 y, f32 z);
-void fn_800421B0(GXLightObj* l, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+void GXInitLightPos(GXLightObj* l, f32 x, f32 y, f32 z);
+void GXInitLightDistAttn(GXLightObj* l, f32 a, f32 b, int f);
+void GXInitSpecularDirHA(GXLightObj* l, f32 nx, f32 ny, f32 nz, f32 hx, f32 hy, f32 hz);
+void GXInitLightAttn(GXLightObj* l, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 void PSVECCrossProduct(const V3* a, const V3* b, V3* out);
 f32 PSVECMag(const V3* v);
 void PSMTXInvXpose(const void* src, void* dst);
@@ -1527,14 +1527,14 @@ void fn_802D0EEC(void) {
         u32 w = fn_802CE9FC(0xFF, 0xFF, 0xFF, 0xFF);
         u32 k = fn_802CE9FC(0, 0, 0, 0xFF);
         f32 s = -1048576.0f;
-        fn_8004229C(&lbl_804C97D0.obj, lbl_804C97D0.dir.x * s, lbl_804C97D0.dir.y * s, -(lbl_804C97D0.dir.z * s));
+        GXInitLightPos(&lbl_804C97D0.obj, lbl_804C97D0.dir.x * s, lbl_804C97D0.dir.y * s, -(lbl_804C97D0.dir.z * s));
         GXColor c;
         c.r = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.r);
         c.g = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.g);
         c.b = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.b);
         c.a = lbl_804C97D0.amb.a;
         GXInitLightColor(&lbl_804C97D0.obj, c);
-        fn_800421CC(&lbl_804C97D0.obj, 1.0f, 1.0f, 0);
+        GXInitLightDistAttn(&lbl_804C97D0.obj, 1.0f, 1.0f, 0);
         GXLoadLightObjImm(&lbl_804C97D0.obj, 1);
         GXSetChanMatColor(0, *(GXColor*)&w);
         u32 a = fn_802CE9FC(0, 0, 0, lbl_804C97D0.alpha);
@@ -1614,8 +1614,8 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, const u8* color, f
     d.x *= inv;
     d.y *= inv;
     d.z *= inv;
-    fn_800422AC(l, cam->x, cam->y, -cam->z);
-    fn_800421B0(l, 0.0f, 0.0f, 1.0f - 0.5f * radius, 0.0f, 0.0f, 0.0f);
+    GXInitSpecularDirHA(l, cam->x, cam->y, -cam->z, d.x, d.y, -d.z);
+    GXInitLightAttn(l, 0.0f, 0.0f, 1.0f - 0.5f * radius, 0.0f, 0.0f, 0.0f);
 }
 
 void fn_802D18E8(void) {

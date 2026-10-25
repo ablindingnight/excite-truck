@@ -681,7 +681,8 @@ revolution/gx/GXFrameBuf.c:
 	.sdata2     start:0x80560B40 end:0x80560B50
 
 RVL_SDK/gx/GXLight.c:
-	.text       start:0x800422D8 end:0x800425D8
+	.text       start:0x800421B0 end:0x800425D8
+	.sdata2     start:0x80560B50 end:0x80560B60
 
 revolution/gx/GXTexture.c:
 	.text       start:0x800425D8 end:0x800434D4

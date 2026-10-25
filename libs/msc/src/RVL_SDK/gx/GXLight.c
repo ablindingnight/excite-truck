@@ -192,6 +192,18 @@ void GXInitSpecularDir(GXLightObj* light, f32 x, f32 y, f32 z) {
     impl->posZ = -999999999999999999.0f * z;
 }
 
+void GXInitSpecularDirHA(GXLightObj* light, f32 nx, f32 ny, f32 nz, f32 hx, f32 hy, f32 hz) {
+    GXLightObjImpl* impl = (GXLightObjImpl*)light;
+
+    impl->dirX = hx;
+    impl->dirY = hy;
+    impl->dirZ = hz;
+
+    impl->posX = -999999999999999999.0f * nx;
+    impl->posY = -999999999999999999.0f * ny;
+    impl->posZ = -999999999999999999.0f * nz;
+}
+
 void GXInitLightColor(GXLightObj* light, GXColor color) {
     GXLightObjImpl* impl = (GXLightObjImpl*)light;
     *(u32*)&impl->color = *(u32*)&color;
