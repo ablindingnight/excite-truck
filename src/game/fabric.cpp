@@ -635,8 +635,8 @@ void fn_801F65D0(Fabric* f) {
         TVec* b = &f->cur[s->b];
         PVec d;
         f32 k;
-        f32 ka;
         f32 kb;
+        f32 ka;
         d.x = b->x - a->x;
         d.y = b->y - a->y;
         d.z = b->z - a->z;

@@ -689,8 +689,8 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 int nowCareer = IsCareerComplete();
                 int d = newBest - oldBest;
                 res.delta = d;
-                res.event = sel;
                 res.improved = d > 0;
+                res.event = sel;
                 res.newly[0] = !wasUnlocked && nowUnlocked;
                 res.newly[1] = !wasOpen && nowOpen;
                 res.newly[2] = !bracketUnlocked && nowBracketUnlocked;

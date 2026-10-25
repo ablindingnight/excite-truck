@@ -1043,8 +1043,8 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 k = -1.0f / dist;
     nrm.x = diff.x * k;
     nrm.y = diff.y * k;
-    nrm.z = diff.z * k;
     at.x = (pa.x + pb.x) / 2.0f;
+    nrm.z = diff.z * k;
     at.y = (pa.y + pb.y) / 2.0f;
     at.z = (pa.z + pb.z) / 2.0f;
     fn_8019A788(who ? who : p, q, (u32)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
@@ -1661,8 +1661,8 @@ u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f3
     f32 cz = c->z;
     f32 big = hy > hz ? hy : hz;
     big = hx > big ? hx : big;
-    InitVolume(p, frame, owner);
     U32(p, 0x8) = 0;
+    InitVolume(p, frame, owner);
     S32(p, 0x18) = 'SPHR';
     F32(p, 0x10) = k;
     F32(p, 0x14) = skin;

@@ -1309,8 +1309,8 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
                 f32 f = -k * step;
                 Vec off;
                 off.x = vel->x * f;
-                off.y = vel->y * f + -0.5f * (f * f);
                 off.z = vel->z * f;
+                off.y = vel->y * f + -0.5f * (f * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;
                     p.x = off.x + e->pts[j].x;

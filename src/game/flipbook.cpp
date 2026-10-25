@@ -422,8 +422,8 @@ int fn_80296D2C(FlipBook* b, f32 t, const ValVec3* pos) {
     p.z = d.z + pos->z;
     if (flags & 4) {
         u32 rgb;
-        u8 a0;
         u32 alpha = color >> 24;
+        u8 a0;
         a0 = fn_802969B4(alpha, 0, k);
         rgb = color & 0xFFFFFF;
         fn_802960A0(&p, (a0 << 24) | rgb, fr[0]->tex, size, u1, u2, v1, v2);

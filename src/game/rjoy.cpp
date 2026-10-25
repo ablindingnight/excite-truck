@@ -295,8 +295,8 @@ static inline f32 Clamp1(f32 x) {
 
 void fn_802E7DDC(Remote* r, const KStatus* k) {
     u32 hold = k->hold;
-    r->a48 = 0x800F;
     r->isExt = *(s32*)(r->info + 0xC) != 0;
+    r->a48 = 0x800F;
     r->a4C = 0xFF;
     r->flags |= 0x10;
     u32 d = 0;

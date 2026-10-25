@@ -578,8 +578,8 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
 void fn_8028F2EC(SysList* all) {
     SysList buckets[9];
     fn_8028EFC4(buckets, all);
-    s32 prev = -2;
     int off = 0;
+    s32 prev = -2;
     SysList* b = buckets;
     for (int i = 0; i < 9; i++) {
         s32 next = fn_8028F0C0(buckets, i, prev);

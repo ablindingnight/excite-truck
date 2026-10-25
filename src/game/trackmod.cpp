@@ -707,8 +707,8 @@ void SkyTMH::Draw(TObj* list) {
             f32* c = cone;
             f32 half;
             u32 i;
-            mask = 1;
             half = 0.5f * (1.25f * fn_801E8738(-1));
+            mask = 1;
             for (i = 0; i < 32; i++, cone += 4, c += 4) {
                 f32 d = PSVECDotProduct(cam->dir, cone);
                 if (d > (f32)cos(half + c[3])) {

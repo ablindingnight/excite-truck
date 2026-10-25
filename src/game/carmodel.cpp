@@ -425,8 +425,8 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
         g->bone = 0;
         return;
     }
-    f32 cy = 0.0f;
     f32 cx = 0.0f;
+    f32 cy = 0.0f;
     if (sscanf(n->GetValue(name), "%f, %f", &cx, &cy) != 2) {
         fn_802E317C("%s: bad format", name);
     }
@@ -1057,8 +1057,8 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         if (!use->Has(key)) {
             break;
         }
-        char mode[32] = "n";
         f32 dist = 0.0f;
+        char mode[32] = "n";
         if (sscanf(use->GetValue(key), "%f %s", &dist, mode) != 2) {
             fn_802E317C("Lod table %s: bad value %s", name, use->GetValue(key));
         }

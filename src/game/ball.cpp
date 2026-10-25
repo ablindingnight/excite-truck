@@ -491,8 +491,8 @@ extern "C" Ball* fn_8017D688(void) { return new ("Ball") Ball; }
 inline void Ball::Init(BallDesc* d) {
     BSphere* s;
     RigidBody::Init(d);
-    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 kk = d->stiffK;
+    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 skin = d->skin;
     f32 radius = 0.0254f * d->radius;
     BVec3 c(0.0f, 0.0f, 0.0f);

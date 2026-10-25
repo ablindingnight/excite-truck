@@ -1514,8 +1514,8 @@ void Gate::Init(ValueNode* node, f32 w) {
     Perp(&n);
     b.y = 0.0f;
     a.y = 0.0f;
-    q.x = c.x + n.x * w;
     q.y = c.y + n.y * w;
+    q.x = c.x + n.x * w;
     b.x = q.x;
     b.z = q.y;
     q.x = c.x + n.x * -w;

@@ -212,8 +212,8 @@ SoundManager::SoundManager(Mixer* mixer) {
     fn_80207960();
     all.first = new ("SoundManager::snd_tab") GameSound*[0xF0];
     all.count = 0;
-    this->mixer = mixer;
     memset(listeners, 0, sizeof(listeners));
+    this->mixer = mixer;
     primaryOnly = 0;
     Ident(&lbl_804891F8);
     Zero(&lbl_80489228);

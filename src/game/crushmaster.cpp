@@ -1011,8 +1011,8 @@ void CrushResults::Update(int score, int kills, int bonus) {
 }
 
 extern "C" CrushMaster* fn_80172C28(void) {
-    CrushMaster* m = new ("crushmaster") CrushMaster;
     const char* nogo = "crush_nogo.val";
+    CrushMaster* m = new ("crushmaster") CrushMaster;
     lbl_8055E3A4 = fn_80139D4C(nogo);
     lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
     m->radarTex = fn_802CAC28("ovradar.tex", 0);

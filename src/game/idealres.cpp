@@ -408,8 +408,8 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
             q->dir.x *= inv;
             q->dir.y *= inv;
             q->dist = acc;
-            d.x = q->pos.x - q->next->pos.x;
             d.y = q->pos.y - q->next->pos.y;
+            d.x = q->pos.x - q->next->pos.x;
             q->len = sqrt(d.x * d.x + d.y * d.y);
             if (q->len < 0.5f) {
                 fail = 1;

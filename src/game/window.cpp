@@ -462,8 +462,8 @@ s32* fn_80217BD8(Window* win, s32 id, Widget* wd) {
 void fn_80217C4C(Window* win) {
     int n = win->menuCount;
     int cur;
-    int vis;
     int i;
+    int vis;
     int next;
     if (n < 1) {
         return;
@@ -539,8 +539,8 @@ void fn_80217D84(Window* win) {
 }
 
 void fn_80217EC0(Window* win, int horizontal, int negative) {
-    int n = win->menuCount;
     int cur;
+    int n = win->menuCount;
     int best;
     int bestScore;
     int i;

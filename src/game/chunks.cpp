@@ -540,8 +540,8 @@ void CarChunks::Step(void) {
         PVec p = in->pos;
         s16 slot = in->slot;
         if (state == 2) {
-            p.x = p.x + v.x * dt;
             p.y = p.y + v.y * dt;
+            p.x = p.x + v.x * dt;
             p.z = p.z + v.z * dt;
             PVec hit;
             PVec nrm;
@@ -687,8 +687,8 @@ void TerrainChunks::Step(void) {
         PVec p = in->pos;
         s16 slot = in->slot;
         if (state == 2) {
-            p.x = p.x + v.x * dt;
             p.y = p.y + v.y * dt;
+            p.x = p.x + v.x * dt;
             p.z = p.z + v.z * dt;
             PVec hit;
             PVec nrm;
@@ -817,8 +817,8 @@ void WoodChunks::Step(void) {
         }
         PVec v;
         v.x = in->vel.x * drag;
-        v.y = in->vel.y * drag - 9.81f * dt * grav;
         v.z = in->vel.z * drag;
+        v.y = in->vel.y * drag - 9.81f * dt * grav;
         out->pos.x = in->pos.x + v.x * dt;
         out->pos.y = in->pos.y + v.y * dt;
         out->pos.z = in->pos.z + v.z * dt;

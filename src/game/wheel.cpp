@@ -277,8 +277,8 @@ void Wheel::Init(BodyDesc* bd) {
     RVec3 c(0.0f, 0.0f, 0.0f);
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 r = 0.0254f * d->radius;
-    f32 skin = d->skin;
     f32 stiff = k * (kk * kk);
+    f32 skin = d->skin;
     mtx.pos = RVec3(0.0f, -200.0f, 0.0f);
     CollVolume::Update();
     s = new ("wheel-volume") SphereShape(this, &mtx, stiff, skin, r, c);

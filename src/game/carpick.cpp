@@ -268,8 +268,8 @@ void fn_8025FC8C(u8* p) {
     fh = (f32)S32(p, 0x10);
     fn_802354A0(PTR(p, 0x2C), U8(p, 0x24), sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
     e = &((IconEntry*)*(u8**)PTR(p, 0x18))[S32(p, 0x1C)];
-    x = sx;
     y = sy;
+    x = sx;
     u0 = e->u0;
     v0 = e->v0;
     u1 = e->u1;

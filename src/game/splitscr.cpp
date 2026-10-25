@@ -203,8 +203,8 @@ void fn_80205D5C(void) {
     fn_802C8DBC(0x10);
     f32 ys[4] = {0.0f, 0.08f, 0.92f, 1.0f};
     f32 w = 0.5f * (0.01f * (f32)lbl_8055CFF0);
-    f32 cx = (f32)lbl_8055CFF0 * 0.5f;
     f32 ws[4] = {1.5f * w, w, w, 1.5f * w};
+    f32 cx = (f32)lbl_8055CFF0 * 0.5f;
     for (int i = 0; i < 4; i++) {
         DividerVertex(0x00404040, i > 0, cx + ws[i], (f32)lbl_8055CFF4 * ys[i]);
         DividerVertex(0xFF404040, i > 0, cx, (f32)lbl_8055CFF4 * ys[i]);

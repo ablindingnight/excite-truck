@@ -736,8 +736,8 @@ void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
         n->z = 0.0f;
         return;
     }
-    s16* h = p->cur;
     int i = x + y * p->nx;
+    s16* h = p->cur;
     f32 gx = 1.5258789e-05f * (0.5f * (h[i - 1] - h[i + 1]));
     f32 gy = 1.5258789e-05f * (0.5f * (h[x + (y - 1) * p->nx] - h[x + (y + 1) * p->nx]));
     n->x = gx * p->dxx + gy * p->dyx;

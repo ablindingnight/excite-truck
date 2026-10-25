@@ -417,8 +417,8 @@ void StackHeap::Free(void* p, int type) {
 void StackHeap::Dump(int flags) {
     if (flags & 1) {
         s32 wasted;
-        s32 off;
         s32 count;
+        s32 off;
         fn_802E30C8("==================== Alloc Dump =======================");
         off = 0;
         wasted = 0;

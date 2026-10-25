@@ -1627,8 +1627,8 @@ void fn_802D18E8(void) {
     mag = mag > 0.001f ? mag : 0.001f;
     f32 inv = 1.0f / mag;
     lbl_8055FDCC = 0;
-    d.x *= inv;
     d.y *= inv;
+    d.x *= inv;
     d.z *= inv;
     if (lbl_8055FDC8 > 0) {
         PointLight* p = lbl_804CA088;
@@ -2250,8 +2250,8 @@ int fn_802D3A5C(VisTest* t, const V3* p) {
     if (x >= 0 && x < 0x280 && y >= 0 && y < 0x1C0) {
         t->x = x;
         t->y = y;
-        f32 n = lbl_804C9778.nearZ;
         f32 f = lbl_804C9778.farZ;
+        f32 n = lbl_804C9778.nearZ;
         f32 z = -p->z;
         t->z = __cvt_fp2unsigned(16777215.0f + 16777215.0f * ((z * (-n / (f - n)) - f * n / (f - n)) / -z));
         if (lbl_804C9984.count < 0x40) {

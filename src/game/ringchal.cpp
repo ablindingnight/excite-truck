@@ -1003,8 +1003,8 @@ int Arena::CountRingSets(void) {
             do {
                 char prefix[0x1E];
                 int i;
-                fn_801345D8(prefix, 0x1E, "set_%i_", n);
                 found = 0;
+                fn_801345D8(prefix, 0x1E, "set_%i_", n);
                 for (i = 0; t->GetChild(i) != 0; i++) {
                     if (!strcmp(t->GetChild(i)->GetName(), "ring_set") &&
                         strstr(t->GetChild(i)->GetValue("name"), prefix)) {

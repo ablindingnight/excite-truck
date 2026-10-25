@@ -359,8 +359,8 @@ int fn_8015F3EC(const void* a, const void* b) { return ((const Obst*)a)->seg - (
 void fn_8015F3FC(Track* trk) {
     if (lbl_8055E29C->a.count > 0) {
         int nseg;
-        int j;
         int s;
+        int j;
         fn_80265DCC(lbl_8055E29C->a.data, lbl_8055E29C->a.count, sizeof(Obst), fn_8015F3EC);
         nseg = trk->path->count;
         lbl_8055E2A0 = new ("ai-obsindex") DynArray<Obst*>(nseg);

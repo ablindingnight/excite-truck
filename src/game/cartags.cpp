@@ -133,8 +133,8 @@ int fn_802A7E08(const void* pa, const void* pb) {
 // (non-const) float locals, which MWCC does not fold.
 void fn_802A7EEC(void) {
     int order[8];
-    int i;
     int* q;
+    int i;
     if (fn_801CF064()) {
         return;
     }
