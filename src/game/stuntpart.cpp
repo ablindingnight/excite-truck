@@ -501,8 +501,10 @@ void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
                 k = (16 - (i + 1)) / 2;
             }
             f32 f = k / 8.0f;
-            u32 color = TrailColor(Round(lbl_8055CC6C * (f * (255.0f * (p->alpha * p->facing)))), lbl_8055CC70,
-                                   lbl_8055CC78, lbl_8055CC74);
+            u8 r = lbl_8055CC70;
+            u8 g = lbl_8055CC78;
+            u8 b = lbl_8055CC74;
+            u32 color = TrailColor(Round(lbl_8055CC6C * (f * (255.0f * (p->alpha * p->facing)))), r, g, b);
             fn_802C8E00(color, 1, v.x, v.y, v.z, (i % 2) ? 0.0f : 1.0f, phase - f);
         }
         fn_802C8E48();
