@@ -2017,7 +2017,60 @@ void fn_8019813C(u8* d, u8* p, f32 a, f32 b) {
     }
 }
 
-void fn_801981A0(u8* d, u8* out) {}
+extern "C" const f32 lbl_8056217C;  // 10.0
+
+// Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
+// car is) and, when the pass slows down, nudges the lateral offset away from the other car.
+void fn_801981A0(u8* d, u8* t) {
+    if (S32(d, 0x140) > 0) {
+        S32(d, 0x140)--;
+    }
+    if (U8(d, 0x11C)) {
+        if (S32(d, 0x138) != S32(d, 0x13C)) {
+            F32(d, 0x14C) = fn_80129DC4(3, lbl_8055E55C, lbl_8055E560);
+            S32(d, 0x13C) = S32(d, 0x138);
+        }
+        f32 lo = lbl_8055A48C;
+        f32 hi = lo + 0.8f * F32(d, 0x2EC) * lo;
+        int ok = 1;
+        if (U8(d, 0xFC) && S32(d, 0x114) == S32(d, 0x138)) {
+            ok = 0;
+        }
+        if (S32(d, 0x138) != S32(d, 0x2C4) && ok && (f32)__fabs(F32(d, 0x12C)) < lbl_8055E570 * lbl_8055A488) {
+            f32 x = F32(t, 0x8);
+            f32 a = F32(d, 0x130);
+            F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+            f32 b = F32(d, 0x134);
+            f32 y = F32(t, 0xC);
+            F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+            if (U8(d, 0x9C)) {
+                S32(d, 0x140) = 30;
+            }
+            if (S32(d, 0x140) == 0 && S32(d, 0x268) != 3) {
+                f32 span = lbl_8056217C - lbl_80562140;
+                f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
+                f32 lim = 4.0f * lbl_8055A488 * lbl_8055E564;
+                r = span < r ? span : r;
+                r = r > 0.0f ? r : 0.0f;
+                r = 1.0f + r;
+                int go = 0;
+                if (F32(d, 0x150) < 0.0f || F32(d, 0x26C) > F32(d, 0x150)) {
+                    go = 1;
+                }
+                if (go) {
+                    F32(d, 0x150) = -1.0f;
+                    f32 side = S32(d, 0x18) == 1 ? -1.0f : 1.0f;
+                    f32 sgn = F32(d, 0x12C) - 0.305f * (2.0f * side) > 0.0f ? 1.0f : -1.0f;
+                    f32 p = F32(d, 0x144) + 0.08f * r * -sgn;
+                    p = lim < p ? lim : p;
+                    p = p > -lim ? p : -lim;
+                    F32(d, 0x144) = p;
+                }
+            }
+        }
+    }
+    U8(d, 0x154) = 0;
+}
 
 // MATCHING-AID: volatile forces the second read of each count (found by upstream); the original
 // probably re-read it through some accessor. Revisit.
