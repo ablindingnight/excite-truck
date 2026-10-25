@@ -1619,7 +1619,7 @@ void fn_801FA9AC(void) {
 
 void fn_801FAAC4(ObstacleDesc* d, ValueNode* vn) { ReadShape(d, vn); }
 
-void fn_801FB1F4(s32 n) { lbl_8055B1C8 -= n; }
+s32 fn_801FB1F4(s32 n) { return lbl_8055B1C8 -= n; }
 }
 
 SoundDesc::~SoundDesc(void) {}

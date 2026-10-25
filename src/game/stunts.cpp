@@ -2041,6 +2041,8 @@ CountSound::CountSound(const char* a, const char* b, int car) {
 
 extern "C" {
 
+void fn_801584A4(void) {}
+
 void fn_80157560(Tracker* t) {
     ValueTable* vt = fn_80131810("stunts.val");
     ValueTable* def = fn_80131808("stuntdef.val");
