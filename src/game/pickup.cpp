@@ -379,11 +379,12 @@ const RainbowTable lbl_802F9500 = {{1, 2, 3, 2, 1}};
 extern "C" {
 
 void fn_801678D8(void) {
+    f32 c;
     SpinXform* m = lbl_8042FF60;
     int i;
     f32 t = 0.016683351f * ((f32)lbl_8055E3C4 + lbl_8055E460);
     for (i = 0; i < 16; i++) {
-        f32 c = cos(6.2831855f * (t + (f32)i / 16.0f));
+        c = cos(6.2831855f * (t + (f32)i / 16.0f));
         f32 s = sin(6.2831855f * (t + (f32)i / 16.0f));
         m->rot[0] = c;
         m->rot[1] = 0.0f;
