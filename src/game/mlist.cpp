@@ -237,10 +237,10 @@ extern "C" {
 void fn_802CCBC0(const MMtx33* r, F4 a, F4 b, F4 c) {}
 
 u8 fn_802CCBC4(const MLBox* e, MVec4 eye, f32 a, f32 b) {
-    MVec4 v = *(MVec4*)&e->ext;
     MVec4 w;
-    memcpy(&w, &v, sizeof(w));
     MVec3 d;
+    MVec4 v = *(MVec4*)&e->ext;
+    memcpy(&w, &v, sizeof(w));
     d.x = eye.x - e->c.x;
     d.y = eye.y - e->c.y;
     d.z = eye.z - e->c.z;
