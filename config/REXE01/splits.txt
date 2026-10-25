@@ -883,6 +883,9 @@ revolution/OS/OSStateFlags.c:
 	.data       start:0x80311568 end:0x80311590
 	.bss        start:0x8038F060 end:0x8038F080
 
+Runtime.PPCEABI.H/__mem.c:
+	.init       start:0x80004000 end:0x80004134
+
 RVL_SDK/os/__start.c:
 	.init       start:0x80004134 end:0x80004414
 
