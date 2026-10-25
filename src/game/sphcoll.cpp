@@ -1895,12 +1895,13 @@ void fn_801A0F10(u8* p) {
     PVec3 c;
     PVec3 d;
     int n;
+    u8* car;
     fn_801A0160(p);
     for (int i = 0; i < S32(p, 0x174); i++) {
         ((SphGroup*)p)->vols[i]->v14();
     }
     if (lbl_8055E5A0) {
-        u8* car = PTR(p, 0x4);
+        car = PTR(p, 0x4);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
