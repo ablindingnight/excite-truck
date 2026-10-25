@@ -70,6 +70,8 @@ struct RVec3;
 class RigidBody {
 public:
     void Reset(void);
+    void Update(void);
+    void Flush(RVec3* a, RVec3* b);
     void VelAt(RVec3* out, const RVec3* at);
     void AddForceAt(const RVec3* f, const RVec3* at);
     void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);
@@ -252,7 +254,111 @@ void fn_801ABB54(u8* p) {
     F32(p, 0x12C) = F32(p, 0x12C) + F32(p, 0x5C) * imp;
 }
 
-void fn_801ABC28(u8* p) {}  // stub (243)
+}  // extern "C"
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// out = m * v (m: 3x3 rows at 0, 3, 6), safe when out aliases v.
+static inline void ObRotate(ObVec3* out, const f32* m, const ObVec3* v) {
+    if (out == v) {
+        f32 x = Dot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        f32 y = Dot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        f32 z = Dot3(v->x, m[2], v->y, m[5], v->z, m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        out->y = Dot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        out->z = Dot3(v->x, m[2], v->y, m[5], v->z, m[8]);
+    }
+}
+
+// Message sent when a solid obstacle wants its hit point reported.
+struct ObHitMsg {
+    ObVec3 pos;  // offset 0x0
+    u8* obj;     // offset 0xC
+    u8 flag;     // offset 0x10
+};
+
+// One frame of a sleeping/settled rigid obstacle (Frame copy at 0x1EC, rest timer at 0x21C).
+class ObSolid {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void Fell(void);  // 0x10
+};
+
+extern "C" {
+void fn_801AC254(u8* p);
+void fn_801796CC(int kind, void* msg, int size);
+
+void fn_801ABC28(u8* p) {
+    if (U8(p, 0x222)) {
+        ObVec3 lin;
+        ObVec3 ang;
+        U8(p, 0x1E9) = 0;
+        ((RigidBody*)p)->Flush((RVec3*)&lin, (RVec3*)&ang);
+        return;
+    }
+    if (PSVECDotProduct((f32*)(p + 0x118), (f32*)(p + 0x118)) > 0.01f ||
+        PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x124)) > 0.01f) {
+        if (F32(p, 0x64) > -500.0f) {
+            fn_801AC240(p);
+        }
+    }
+    if (U8(p, 0x220)) {
+        if (lbl_8055E3C4 == 1 || lbl_8055E3C8 > lbl_805624AC + F32(p, 0x21C)) {
+            fn_801AC254(p);
+            F32(p, 0x124) = lbl_8056247C;
+            F32(p, 0x128) = lbl_8056247C;
+            F32(p, 0x12C) = lbl_8056247C;
+            F32(p, 0x118) = lbl_8056247C;
+            F32(p, 0x11C) = lbl_8056247C;
+            F32(p, 0x120) = lbl_8056247C;
+        } else if (!U8(p, 0x221)) {
+            ((RigidBody*)p)->Update();
+            F32(p, 0x118) *= 0.99983317f;
+            F32(p, 0x11C) *= 0.99983317f;
+            F32(p, 0x120) *= 0.99983317f;
+            F32(p, 0x124) *= 0.99983317f;
+            F32(p, 0x128) *= 0.99983317f;
+            F32(p, 0x12C) *= 0.99983317f;
+            if (F32(p, 0x238) > lbl_8056247C) {
+                fn_801ABB54(p);
+            }
+            int up = 0;
+            if (U8(p, 0x234) && F32(p, 0x4C) > lbl_80562478) {
+                up = 1;
+            }
+            U8(p, 0x234) = up;
+        } else {
+            ((RigidBody*)p)->Update();
+            F32(p, 0x124) = lbl_8056247C;
+            F32(p, 0x128) = lbl_8056247C;
+            F32(p, 0x12C) = lbl_8056247C;
+            F32(p, 0x118) = lbl_8056247C;
+            F32(p, 0x11C) = lbl_8056247C;
+            F32(p, 0x120) = lbl_8056247C;
+            *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
+            ((CollVolume*)p)->Update();
+        }
+        if (F32(p, 0x64) < -500.0f) {
+            ((ObSolid*)p)->Fell();
+        }
+    }
+    if (U8(p, 0x235)) {
+        ObHitMsg m;
+        ObRotate(&m.pos, (f32*)(p + 0x70), (ObVec3*)(p + 0x228));
+        m.pos.x += F32(p, 0x94);
+        m.pos.y += F32(p, 0x98);
+        m.pos.z += F32(p, 0x9C);
+        m.obj = p;
+        m.flag = U8(p, 0x234);
+        fn_801796CC(9, &m, sizeof(ObHitMsg));
+    }
+    S32(p, 0x1E4) = 0;
+}
 
 void fn_801ABFF4(u8* p) { vf20__10CollVolumeFv(p); }
 
@@ -514,8 +620,6 @@ void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
     F32(p, 0x24) = y;
     F32(p, 0x20) = 0.1f * t;
 }
-
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // Links this joint between a point on our volume and the same point in `body`'s local frame.
 void fn_801AD148(u8* p, const CVec3* a, u8* body, f32 x, f32 y) {
