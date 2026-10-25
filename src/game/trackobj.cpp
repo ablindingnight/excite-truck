@@ -388,8 +388,8 @@ public:
         center.x = c.x;
         center.y = c.y;
         center.z = c.z;
-        if (o) {
-            fn_8019EECC(o, &center);
+        if (owner) {
+            fn_8019EECC(owner, &center);
         }
     }
     virtual ~SphereVol(void);
