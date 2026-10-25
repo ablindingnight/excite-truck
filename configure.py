@@ -873,6 +873,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/gx/GXTransform.c"),
             Object(Matching, "RVL_SDK/mem/mem_unitHeap.c"),
             Object(NonMatching, "RVL_SDK/os/__start.c"),
+            Object(Matching, "RVL_SDK/wenc/wenc.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/os/OSExec.c"),
             Object(Matching, "RVL_SDK/os/OSReboot.c"),
             Object(Matching, "RVL_SDK/vi/vi.c"),
