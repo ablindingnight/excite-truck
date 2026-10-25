@@ -604,7 +604,64 @@ void fn_802840F8(void) { fn_8027ED2C(); }
 
 void fn_802840FC(u8* p) {}  // stub (289)
 
-void fn_80284580(u8* p) {}  // stub (120)
+}  // extern "C"
+
+struct Unlockable {
+    const char* type;  // offset 0x0
+    const char* name;  // offset 0x4
+    s32 points;        // offset 0x8
+};
+
+int GetUnlockableCount(void);
+Unlockable* GetUnlockable(int i);
+
+class VehicleList {
+public:
+    virtual ~VehicleList(void);                                    // 0x8
+    virtual void Add(const char* name, int unlocked, int special);  // 0xC
+    virtual void SetReason(int i, const char* reason);             // 0x10
+    virtual int Count(void);                                       // 0x14
+};
+
+// Extra vehicles an event offers on top of the unlockables.
+class ExtraVehicles {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual int Count(void);            // 0x14
+    virtual const char* Name(int i);    // 0x18
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual const char* Reason(int i);  // 0x28
+};
+
+extern "C" {
+int strcasecmp(const char* a, const char* b);
+VehicleList* fn_8025007C(int n);
+void fn_8024FBD8(VehicleList* list, u32 arg);
+
+// Shows the cars unlocked between two point totals (plus the event's extra vehicles).
+void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg) {
+    VehicleList* list = fn_8025007C(GetUnlockableCount() + (extra ? extra->Count() : 0));
+    if (extra) {
+        for (int i = 0; i < extra->Count(); i++) {
+            list->Add(extra->Name(i), 1, 0);
+            list->SetReason(list->Count() - 1, extra->Reason(i));
+        }
+    }
+    for (int i = 0; i < GetUnlockableCount(); i++) {
+        Unlockable* u = GetUnlockable(i);
+        if (!strcasecmp(u->type, "CAR") && lo < u->points && hi >= u->points) {
+            list->Add(u->name, 1, 0);
+        }
+    }
+    if (list->Count() > 0) {
+        fn_8024FBD8(list, arg);
+    }
+    delete list;
+}
 
 void fn_80284760(u8* p) {}  // stub (162)
 
