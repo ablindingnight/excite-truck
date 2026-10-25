@@ -128,12 +128,14 @@ void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* b, f32 size, f32 alpha, i
     }
 }
 
-// NonMatching: the target allocates the frame after the loads and stores d last.
+// Projects (a - b) onto dir.
 f32 fn_802A0F7C(const SFVec2* dir, const SFVec2* a, const SFVec2* b) {
     SFVec2 d;
     d.x = a->x - b->x;
     d.y = a->y - b->y;
-    return dir->x * d.x + dir->y * d.y;
+    f32 dx = dir->x;
+    f32 dy = dir->y;
+    return dx * d.x + dy * d.y;
 }
 
 int fn_802A0FBC(void) {
