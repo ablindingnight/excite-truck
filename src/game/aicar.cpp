@@ -1003,7 +1003,103 @@ f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
     return a + s * (b - a);
 }
 
-void fn_80194C4C(u8* d, u8* out, f32 t) {}
+// Another racer, as seen through its controller (fn_801B2EC0).
+class AIRacer {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual u8* State(void);  // 0x10
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual u8* Car(void);    // 0x20
+};
+
+// The car's control sink (d + 0x28C): takes the steering target, speed and flags.
+class AISink {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void Drive(u8* steer, u8* speed, u8* flags);  // 0x2C
+};
+
+extern "C" {
+AIRacer* fn_801B2EC0(int car);
+f32 fn_80134C1C(void);
+f32 fn_801B3064(void);
+f32 fn_80139048(void);
+f32 PSVECDistance(const u8* a, const u8* b);
+void fn_80194FD0(u8* d, u8* out, f32 t);
+f32 fn_80194F70(const RVec3* n, const RVec3* a, const RVec3* b);
+}
+
+// Fills the drive targets: steering point, then the target speed (start ramp, following the leader of the
+// group or drafting the first free car), a per-car wobble, and finally hands it all to the control sink.
+// The drive targets passed to the control sink.
+struct AITarget {
+    f32 x;      // offset 0x0
+    f32 y;      // offset 0x4
+    f32 speed;  // offset 0x8
+    f32 k;      // offset 0xC
+};
+
+extern "C" const f32 lbl_80562144;  // 0.0f
+
+void fn_80194C4C(u8* d, u8* out, f32 t) {
+    AITarget* o = (AITarget*)out;
+    fn_80194FD0(d, out, t);
+    u8* g = PTR(d, 0x288);
+    f32 w = F32(g, 0x34);
+    F32(out, 0x0) = F32(out, 0x0) + F32(d, 0x58) * w;
+    F32(out, 0x4) = F32(out, 0x4) + F32(d, 0x5C) * w;
+    f32 speed = fn_80134C1C();
+    if (fn_801769A8() & 0x400) {
+        f32 now = lbl_8055E3C8;
+        f32 k = Clamp01(((now - fn_801B3064()) - lbl_80562144) / 7.0f);
+        speed = lbl_80562144 + k * (speed - lbl_80562144);
+    }
+    if (S32(g, 0x30) == 0) {
+        o->speed = speed;
+        for (int i = 0; i < fn_801B2F24(); i++) {
+            AIRacer* r = fn_801B2EC0(i);
+            if (i == CARID(d)) {
+                continue;
+            }
+            if (S32(r->State(), 0x30) == 0) {
+                o->speed = o->speed + fn_80194F70((RVec3*)(CAR(d) + 0x54), (RVec3*)(r->Car() + 0x60),
+                                                  (RVec3*)(CAR(d) + 0x60));
+                break;
+            }
+        }
+    } else {
+        f32 gap = 0.61f + (lbl_8055A48C + fn_80139048());
+        f32 dist = PSVECDistance(PTR(g, 0x30) + 0x60, CAR(d) + 0x60);
+        if (dist > gap) {
+            f32 k = Clamp01((dist - gap) / (2.0f * gap - gap));
+            o->speed = speed + k * ((4.4444447f + speed) - speed);
+        } else {
+            f32 lo = speed - 4.4444447f;
+            lo = 0.0f > lo ? 0.0f : lo;
+            f32 k = Clamp01((dist - (0.61f + lbl_8055A48C)) / (gap - (0.61f + lbl_8055A48C)));
+            o->speed = lo + k * (speed - lo);
+        }
+    }
+    o->speed = o->speed + fn_80194B60(-0.8888889f, 0.8888889f, 5.0f, F32(d, 0x26C) + 1.72f * CARID(d));
+    o->k = 0.7f;
+    if (S32(CAR(d), 0x2610) == 0) {
+        o->speed = 0.0f;
+        S32(d, 0x2D0) |= 0x10;
+    }
+    ((AISink*)PTR(d, 0x28C))->Drive(out, (u8*)&o->speed, d + 0x2D0);
+    S32(d, 0x2D0) |= 0x826;
+}
 
 f32 fn_80194F70(const RVec3* n, const RVec3* a, const RVec3* b) {
     RVec3 v;
