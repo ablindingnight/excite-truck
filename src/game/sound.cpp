@@ -327,10 +327,7 @@ extern "C" void fn_80206750(GameSound* s, s32 player, int on) {
 
 extern "C" void fn_802067C8(GameSound* s, Listener* l, int n) {
     int music = s->cls == 0;
-    int on = 0;
-    if (s->playing && (s->volume > 0.05f || music)) {
-        on = 1;
-    }
+    int on = s->playing && (s->volume > 0.05f || music);
     s->active = on;
     if (on) {
         s->PreUpdate(l, n);
@@ -355,10 +352,7 @@ extern "C" void fn_80206824(GameSound* s, Listener* l, int n) {
         break;
     case 3:
         if (s->start) {
-            int muted = 0;
-            if ((lbl_8055D430 & 1) && (lbl_8055D430 & 0x200)) {
-                muted = 1;
-            }
+            int muted = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x200);
             if (!muted || s->cls == 0) {
                 s->start = 0;
                 if (s->loop) {
@@ -656,5 +650,5 @@ void fn_80207938(const char* name) { fn_802E30C8("sound: %08d: grab failed (%s)"
 }  // extern "C"
 
 // NonMatching: SoundDash::PreUpdate keeps "heard" in a register across the unrolled copies in the
-// target, fn_802067C8/fn_80206824 swap two volatile registers, and the Sound3D updates schedule their
+// target, and the Sound3D updates schedule their
 // float loads differently.
