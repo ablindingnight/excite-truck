@@ -41,7 +41,86 @@ void fn_8025E678(u8* p) {}  // stub (401)
 
 void fn_8025ECBC(u8* p) {}  // stub (366)
 
-void fn_8025F274(u8* p) {}  // stub (126)
+}  // extern "C"
+
+// A car choice in one of the pick lists.
+class CarChoice {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual int Unlocked(void);  // 0x24
+    virtual void v28(void);
+    virtual int Hidden(void);    // 0x2C
+};
+
+class CarChoiceList {
+public:
+    virtual void v08(void);
+    virtual int Count(void);            // 0x0C
+    virtual CarChoice* Get(int i);      // 0x10
+};
+
+struct CarPickScreen {
+    CarChoiceList* all;       // offset 0x0
+    CarChoiceList* lists[3];  // offset 0x4
+    u8 pad10[0x144 - 0x10];
+    s32 sel;                  // offset 0x144, then every 0x58 bytes per column
+};
+
+extern CarPickScreen* lbl_8055F3D4;
+
+static inline int AnyShown(int i) {
+    for (int j = 0; j < 3; j++) {
+        if (i < lbl_8055F3D4->lists[j]->Count()) {
+            CarChoice* c = lbl_8055F3D4->lists[j]->Get(i);
+            if (c->Unlocked() || !c->Hidden()) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+static inline int AnyUnlocked(int i) {
+    for (int j = 0; j < 3; j++) {
+        if (i < lbl_8055F3D4->lists[j]->Count()) {
+            if (lbl_8055F3D4->lists[j]->Get(i)->Unlocked()) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+extern "C" {
+void fn_80214AF0(s32 s);
+
+// Greys out the grid buttons of cars nobody can pick and highlights each column's selection.
+void fn_8025F274(u8* p) {
+    for (int i = 0; i < lbl_8055F3D4->all->Count(); i++) {
+        if (!AnyShown(i)) {
+            fn_80214A9C(i + 0x10);
+        }
+        if (!AnyUnlocked(i)) {
+            fn_80214A9C(i + 0x1A);
+        }
+    }
+    CarPickScreen* s = lbl_8055F3D4;
+    for (int k = 0; k < 5; k++) {
+        for (int j = 0; j < 3; j++) {
+            if (j == S32(s, 0x144 + k * 0x58)) {
+                fn_80214AF0(k + 1 + j * 10);
+            } else {
+                fn_80214A9C(k + 1 + j * 10);
+            }
+        }
+    }
+}
 
 void fn_8025F46C(u8* p) {}  // stub (339)
 
