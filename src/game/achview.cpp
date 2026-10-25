@@ -476,22 +476,19 @@ void fn_8025AA90(u8* p, f32 dt) {
 }
 
 void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t) {
-    f32 dz = b[2] - a[2];
-    f32 dy = b[1] - a[1];
-    f32 dx = b[0] - a[0];
-    out[2] = a[2] + t * dz;
-    out[1] = a[1] + t * dy;
-    out[0] = a[0] + t * dx;
+    out[2] = LerpF(a[2], b[2], t);
+    out[1] = LerpF(a[1], b[1], t);
+    out[0] = LerpF(a[0], b[0], t);
 }
 
 f32 fn_8025AD88(const f32* a, const f32* b) { return PSVECDotProduct(a, b); }
 
 void fn_8025AD8C(u8* self, f32* out, const f32* a, const f32* b, f32 t) {
     f32 s = 4.1f * t;
-    f32 k = 1.0f >= s ? s : 1.0f;
-    out[0] = a[0] + k * (b[0] - a[0]);
-    out[1] = a[1] + k * (b[1] - a[1]);
-    out[2] = a[2] + k * (b[2] - a[2]);
+    f32 k = 1.0f < s ? 1.0f : s;
+    out[0] = LerpF(a[0], b[0], k);
+    out[1] = LerpF(a[1], b[1], k);
+    out[2] = LerpF(a[2], b[2], k);
 }
 
 f32 fn_8025ADF4(f32 x) { return (f32)sqrt(x); }
