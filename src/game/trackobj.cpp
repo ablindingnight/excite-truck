@@ -1459,6 +1459,7 @@ void fn_801FA298(void) {
 static inline int IsLive(AnimInst* a, int near) { return a->live && near; }
 
 void fn_801FA2C4(void) {
+    Sound3D* snd;
     f32 dt = fn_801E7E24();
     AnimInst* a;
     EWSound* s;
@@ -1493,7 +1494,7 @@ void fn_801FA2C4(void) {
         }
     }
     for (s = lbl_8055EC6C; s; s = s->next) {
-        Sound3D* snd = s->snd;
+        snd = s->snd;
         if (snd) {
             if (s->tag == lbl_8055EC40.view) {
                 snd->f4A = 0;
