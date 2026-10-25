@@ -120,7 +120,7 @@ void fn_80232BA4(const char* text, void* font, u32 color, int align, f32 x, f32 
 void fn_8023293C(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
-void fn_80231220(s32 tex, u32 color, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1);
+void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 void fn_802354A0(void* image, int unk, u32 color, f32 x, f32 y, f32 z);
 void fn_80011280(u32 color, void* image, f32 x, f32 y, f32 width);
 void fn_80148134(f32 x, f32 y, f32* out_x, f32* out_y, int mode);
@@ -530,10 +530,10 @@ void DrawLoadingScreen(int alpha, f32 t) {
     if (lbl_8055D646) {
         bar_color = 0;
     }
-    fn_80231220(lbl_80558D80, bar_color, x0, y0, x1 - x0, y0 - y1, 0.0f, 0.0f, 1.0f, 1.0f);
-    fn_80231220(lbl_80558D84, bar_color, x0, y1, x1 - x0, y1 - y2, 0.0f, 0.0f, 1.0f, 1.0f);
-    fn_80231220(lbl_80558D78, color, x0, y0, x1 - x0, y0 - y1, 0.0f, 0.0f, 1.0f, 1.0f);
-    fn_80231220(lbl_80558D7C, color, x0, y1, x1 - x0, y1 - y2, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80231220(x0, y0, x1 - x0, y0 - y1, lbl_80558D80, bar_color, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80231220(x0, y1, x1 - x0, y1 - y2, lbl_80558D84, bar_color, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80231220(x0, y0, x1 - x0, y0 - y1, lbl_80558D78, color, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80231220(x0, y1, x1 - x0, y1 - y2, lbl_80558D7C, color, 0.0f, 0.0f, 1.0f, 1.0f);
     fn_80148134(65.0f, 40.0f, &title_x, &title_y, 2);
     fn_80148134(65.0f, 84.0f, &sub_x, &sub_y, 2);
     fn_80232BA4(lbl_8055D660, lbl_8055D64C, color, 9, title_x, title_y, 1.1733334f, 0.0f, 1.0f);

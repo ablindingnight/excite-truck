@@ -502,13 +502,13 @@ extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
 extern "C" {
-void fn_80231220(u8* tex, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
+void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
 void fn_80251B04(u8* p) {
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
     f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
-    fn_80231220(PTR(p, 0x20), -0.5f * w, 225.0f, w, 66.0f, 0.0f, 0.0f, 10.0f, 1.0f, -1);
+    fn_80231220(-0.5f * w, 225.0f, w, 66.0f, PTR(p, 0x20), -1, 0.0f, 0.0f, 10.0f, 1.0f);
     f32 fade = fn_80216CB4();
     for (int i = 0; i < S32(p, 0x1C); i++) {
         SlotAnim* e = &((SlotAnim*)PTR(p, 0x18))[i];

@@ -264,7 +264,7 @@ static inline u32 DimColor(u32 c) {
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-void fn_80231220(u8* tex, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
+void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
 void fn_8025FC8C(u8* p) {
@@ -295,8 +295,8 @@ void fn_8025FC8C(u8* p) {
     u1 = e->u1;
     v1 = e->v1;
     c = U32(p, 0x28);
-    fn_80231220(e->tex, x, y, fw, fh, u0, v0, u1, v1, -1);
-    fn_80231220(e->overlay, x, y, fw, fh, u0, v0, u1, v1, DimColor(c));
+    fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
+    fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
 }
 
 

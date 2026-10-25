@@ -472,7 +472,7 @@ void fn_80231094(int* top, int* bottom, int* left, int* right) {
     }
 }
 
-void fn_80231220(s32 tex, u32 color, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1) {
+void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1) {
     fn_802C8B98(tex, fn_8022EDC4());
     u32 c = fn_80230B9C(color);
     f32 z = 0.0f;
