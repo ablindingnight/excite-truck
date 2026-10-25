@@ -97,10 +97,40 @@ public:
     void AddForceAt(const RVec3* f, const RVec3* at);
 };
 
+// A pair of cars tracked by the proximity sorter (proxer.cpp).
+struct Pair {
+    u8 close;    // offset 0x0
+    f32 time;    // offset 0x4
+    u8 aFlag;    // offset 0x8
+    s32 a;       // offset 0xC
+    u8 bFlag;    // offset 0x10
+    s32 b;       // offset 0x14
+    f32 dist2;   // offset 0x18
+    V2 dpos;     // offset 0x1C
+    V2 dvel;     // offset 0x24
+};
+
+struct CarRec {
+    V2 pos;          // offset 0x0
+    V2 vel;          // offset 0x8
+    f32 accel;       // offset 0x10
+    u8 flipped;      // offset 0x14
+    u8 active;       // offset 0x15
+    u8 sec;          // offset 0x16
+    Pair* table[1];  // offset 0x18 ([3][count])
+};
+
 class Proxer {
 public:
     void SortCar(int car);
     void SetActive(int car, u8 on);
+    CarRec* Rec(int i) { return (CarRec*)(recs + i * stride); }
+
+    s32 count;    // offset 0x0
+    s32 key;      // offset 0x4
+    Pair* pairs;  // offset 0x8
+    s32 stride;   // offset 0xC
+    u8* recs;     // offset 0x10
 };
 
 class AIExceptions {
@@ -1657,7 +1687,93 @@ void fn_80196C90(u8* d) {
     F32(d, 0x148) = F32(d, 0x144);
 }
 
-void fn_80196DC4(u8* d) {}
+void fn_80137788(Pair* p, int car, V2* out);
+void fn_801377EC(Pair* p, int car, V2* out);
+int fn_8019799C(u8* d, u8* p);
+int fn_8019703C(u8* d, u8* p);
+int fn_80197FE4(u8* d, u8* p);
+
+// Another car near this one, seen from `car`.
+struct NearCar {
+    NearCar(Pair* p, int car) {
+        pair = p;
+        if (p) {
+            fn_80137788(p, car, &rel);
+            fn_801377EC(p, car, &vel);
+            flag = car == p->a ? p->aFlag : p->bFlag;
+            other = car == p->a ? p->b : p->a;
+        } else {
+            rel.x = 0.0f;
+            rel.y = 0.0f;
+            vel.x = 0.0f;
+            vel.y = 0.0f;
+            flag = 0;
+            other = 0;
+        }
+    }
+    Pair* pair;  // offset 0x0
+    V2 rel;      // offset 0x4
+    V2 vel;      // offset 0xC
+    u8 flag;     // offset 0x14
+    s32 other;   // offset 0x18
+};
+
+// How many nearby cars each check may react to per frame.
+struct NearBudget {
+    s32 avoid;
+    s32 block;
+    s32 draft;
+};
+
+static const NearBudget kNearBudget = {4, 0, 8};
+
+// Resets the avoidance state and runs the nearby cars (closest first) through the avoid / block / draft
+// checks, each with its own budget.
+void fn_80196DC4(u8* d) {
+    fn_80196C90(d);
+    f32 half = F32(d, 0x274);
+    U8(d, 0x74) = 0;
+    U8(d, 0x9C) = 0;
+    U8(d, 0xFC) = 0;
+    S32(d, 0x100) = 0;
+    S32(d, 0x98) = 0;
+    F32(d, 0x94) = -1000.0f;
+    S32(d, 0xC0) = 0;
+    F32(d, 0xBC) = 1000.0f;
+    U8(d, 0x9C) = 0;
+    U8(d, 0x74) = 0;
+    f32 lo = -half;
+    F32(d, 0xC4) = lo;
+    F32(d, 0xD0) = lo;
+    F32(d, 0xC8) = half;
+    F32(d, 0xD4) = half;
+    U8(d, 0x11C) = 0;
+    F32(d, 0x120) = 0.0f;
+    lbl_8055E0D0->SortCar(CARID(d));
+    NearBudget budget = kNearBudget;
+    int me;
+    int n = lbl_8055E0D0->count - 1;
+    for (int i = 0; i < n; i++) {
+        me = CARID(d);
+        Pair* p = lbl_8055E0D0->Rec(me)->table[lbl_8055E0D0->count * 2 + i];
+        if (!p || !(me == p->a ? p->aFlag : p->bFlag)) {
+            break;
+        }
+        NearCar nc(p, me);
+        if (nc.pair->close) {
+            if (budget.avoid > 0 && fn_8019703C(d, (u8*)&nc)) {
+                budget.avoid--;
+            }
+        } else {
+            if (budget.draft > 0 && fn_80197FE4(d, (u8*)&nc)) {
+                budget.draft--;
+            }
+            if (budget.block > 0 && fn_8019799C(d, (u8*)&nc)) {
+                budget.block--;
+            }
+        }
+    }
+}
 
 int fn_8019700C(int car) {
     u8* o = lbl_804349C0[car];
