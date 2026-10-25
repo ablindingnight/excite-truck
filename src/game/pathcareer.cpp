@@ -684,10 +684,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 int nowPrev = 1;
                 for (int i = 0; i < path->Count(); i++) {
                     int p = nowPrev;
-                    nowPrev = 0;
-                    if (p && path->Get(i)->Unlocked()) {
-                        nowPrev = 1;
-                    }
+                    nowPrev = p && path->Get(i)->Unlocked();
                 }
                 int nowCareer = IsCareerComplete();
                 int d = newBest - oldBest;

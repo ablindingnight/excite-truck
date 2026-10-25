@@ -869,10 +869,7 @@ int fn_801787B4(PhysClock* c) {
     }
     lbl_8055E460 = 1.0f;
     {
-        int skip = 0;
-        if ((lbl_8055D430 & 1) && (lbl_8055D430 & 0x600)) {
-            skip = 1;
-        }
+        int skip = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x600);
         if (skip) {
             c->resync = 1;
             return 3;
