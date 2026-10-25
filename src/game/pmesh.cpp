@@ -348,8 +348,8 @@ void fn_801CFF18(PMesh* m, const PFrame* xf) {
     if (xf) {
         f = *xf;
     } else {
-        f.x.y = 0.0f;
         f.x.x = 1.0f;
+        f.x.y = 0.0f;
         f.x.z = 0.0f;
         f.y.x = 0.0f;
         f.y.y = 1.0f;

@@ -234,8 +234,8 @@ void UnlockList::Draw(void) {
     f32 w = width;
     f32 lockX = px + w - fn_802C51C0(image);
     f32 left = px;
-    f32 textX = left + w / 2.8f;
     f32 ptsX = lockX - 15.0f;
+    f32 textX = left + w / 2.8f;
     f32 nameScale = 22.0f / fn_80232B70(font);
     f32 ptsScale = 20.0f / fn_80232B70(font);
     int rating = fn_80019888();

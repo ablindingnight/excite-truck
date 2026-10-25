@@ -474,8 +474,8 @@ void SpringWall::Set(WallObj* w, SpringCar* car, const TVec* other) {
         k = 17.777779f < k ? 17.777779f : k;
         k = k > 0.8888889f ? k : 0.8888889f;
         ramp = 0.2f;
-        time = 0.0f;
         depth = 0.2f * k;
+        time = 0.0f;
         owner = w;
     } else if (owner == w) {
         time = 0.0f;
