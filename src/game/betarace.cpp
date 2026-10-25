@@ -1606,7 +1606,7 @@ inline const char* CleanRaceName(int i) {
 }  // namespace
 
 int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
-    const StuntLine*l;
+    const StuntLine* l;
     int i;
     s32 b;
     s32 shown;
