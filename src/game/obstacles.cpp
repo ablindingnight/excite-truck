@@ -733,9 +733,11 @@ void fn_801AD394(u8* p) {
     d.y = wb.y - wa.y;
     d.z = wb.z - wa.z;
     f32 len = PSVECMag(&d);
-    f32 dx = d.x;
+    const f32& dx = d.x;
     f32 dz = d.z;
-    F32(p, 0x30) = (f32)sqrt(dx * dx + dz * dz);
+    f32 hxx = dx * dx;
+    f32 hzz = dz * dz;
+    F32(p, 0x30) = (f32)sqrt(hxx + hzz);
     f32 stretch = len - F32(p, 0x28);
     F32(p, 0x2C) = stretch;
     if (len > lbl_80562518 && len < F32(p, 0x28) + F32(p, 0x24)) {
@@ -745,9 +747,10 @@ void fn_801AD394(u8* p) {
         CVec3 vb;
         CVec3 dv;
         f32 inv = lbl_805624AC / len;
-        force.x = lbl_8056247C;
-        force.y = lbl_8056247C;
-        force.z = lbl_8056247C;
+        f32 zero = lbl_8056247C;
+        force.x = zero;
+        force.y = zero;
+        force.z = zero;
         dir.x = d.x * inv;
         dir.y = d.y * inv;
         dir.z = d.z * inv;

@@ -972,9 +972,12 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
     int any;
+    CloseCallSlot* s;
     int n;
     if (turbo) {
-        if (now - turboTime > 10.0f || (rc->turbo > lbl_80558DC4[0]) == 0) {
+        // MATCHING-AID: a const reference to the literal sets the compare operand registers.
+        const f32& turboLimit = 10.0f;
+        if ((now - turboTime) > turboLimit || (rc->turbo > lbl_80558DC4[0]) == 0) {
             turbo = 0;
         }
     }
@@ -1001,8 +1004,8 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     }
     n = 0;
     any = 0;
-    for (int i = 0; i < 8; i++) {
-        CloseCallSlot* s = &slots[i];
+    s = slots;
+    for (int i = 0; i < 8; i++, s++) {
         if (!s->done && now - s->time > 0.1f) {
             s->done = 1;
             if (!any) {
@@ -1055,7 +1058,8 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
         Refresh();
     }
     n = ranks.a.count;
-    if (Rank() == n - 1) {
+    int rankValue = Rank();
+    if (rankValue == n - 1) {
         flags = 0;
     }
     return r;

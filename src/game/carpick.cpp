@@ -138,8 +138,28 @@ u8* fn_8025F9C0(u8* p) {
 }  // extern "C"
 
 // One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
+// Fixed-capacity name buffer (original class name unknown).
+// Append is a bounded concatenation that always terminates.
+template<int N> struct IconName {
+    char text[N];
+    operator char*() { return text; }
+    operator const char*() const { return text; }
+    static void CopyTail(const char* s, int n, char* d) {
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+    void Append(const char* s) {
+        char* d = text;
+        int n = N;
+        while (*d) { n--; d++; }
+        if (n > 0) { CopyTail(s, n, d); }
+    }
+};
+typedef char CarIconNameSize32[(sizeof(IconName<32>) == 32) ? 1 : -1];
+
 struct CarIcon {
-    char name[32];  // offset 0x0
+    IconName<32> name;  // offset 0x0
     u8* tex;        // offset 0x20
     u8* overlay;    // offset 0x24
     f32 u1;         // offset 0x28
@@ -190,7 +210,7 @@ struct CarIconSet {
                 CarIcon* c = &icons[count++];
                 CopyName(c->name, 32, n->GetValue("chassis"));
                 if (k) {
-                    AppendName("_e", 32, c->name);
+                    c->name.Append("_e");
                 }
                 c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
                 c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);

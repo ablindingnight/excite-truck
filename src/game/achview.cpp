@@ -164,6 +164,23 @@ extern f32 lbl_8055F398;     // trophy spin angle
 extern f32 lbl_80498EAC[3];  // smoothed view direction
 
 // One achievement category shown in the viewer (vtable lbl_80345098).
+// Fixed-capacity name buffer (original class name unknown).
+// CopyFrom is a bounded copy that always terminates.
+template<int N> struct NameBuffer {
+    char text[N];
+    operator char*() { return text; }
+    operator const char*() const { return text; }
+    void CopyFrom(const char* s) {
+        char* d = text;
+        int n = N;
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+};
+typedef char AchievementNameSize20[(sizeof(NameBuffer<20>) == 20) ? 1 : -1];
+typedef char AchievementNameSize50[(sizeof(NameBuffer<50>) == 50) ? 1 : -1];
+
 class AchView : public MenuState {
 public:
     AchView(int idx, int cat, f32 rate) {
@@ -176,7 +193,8 @@ public:
             q.best = q.value + 50;
         }
         int bestLevel = AchievementsGetLevel(q.category, q.best);
-        levelUp = AchievementsGetLevel(q.category, q.value) != bestLevel;
+        int currentLevel = AchievementsGetLevel(q.category, q.value);
+        levelUp = currentLevel != bestLevel;
         Refresh();
     }
     virtual ~AchView(void) {}
@@ -199,13 +217,13 @@ public:
         if (next >= 0) {
             fn_80130FCC(nextText, 0x14, next);
         } else {
-            CopyName("", 0x14, nextText);
+            nextText.CopyFrom("");
         }
         const char* model = AchievementsGetLevelModel(q.category, level);
         if (model && show) {
-            CopyName(model, 50, modelName);
+            modelName.CopyFrom(model);
         } else {
-            CopyName("", 50, modelName);
+            modelName.CopyFrom("");
         }
     }
 
@@ -213,12 +231,12 @@ public:
     s32 index;           // offset 0x24
     f32 shown;           // offset 0x28
     char valueText[20];  // offset 0x2C
-    char nextText[20];   // offset 0x40
+    NameBuffer<20> nextText;   // offset 0x40
     f32 tallyRate;       // offset 0x54
     u8 started;          // offset 0x58
     u8 pad59[0x7];
-    char modelName[50];  // offset 0x60
-    u8 pad92[0x32];
+    NameBuffer<50> modelName;  // offset 0x60
+    NameBuffer<50> previousModelName;
     u8 counting;         // offset 0xC4
     u8 levelUp;          // offset 0xC5
     u8 padC6[0x2];
@@ -293,7 +311,7 @@ void fn_8025A50C(void) {
             run = 0;
             break;
         default:
-            fn_802E317C("MenuDoAchievementsViewer: bad return value %d from do_accumulate", r);
+            fn_802E317C("MenuDoAchievementsViewer: bad return value %d from do_accumulate_single_achievement", r);
             break;
         }
     }
@@ -541,6 +559,16 @@ static const TrophySizes kTrophySizes = {0.75f, 0.8f, 0.85f, 0.95f, 1.0f};
 
 // Draws the trophy model: scaled to the view, placed in front of the camera so its size class
 // fills the screen, lit from a fixed direction.
+// Moves the model so its bounding-box centre sits at the view point.
+static inline void TrophyCenterOffset(u8* p, f32* bounds, u8* cam) {
+    f32 c[3];
+    StatsUpdate__Fv(c);
+    fn_801BFEBC(c, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
+    fn_801E67B4(c, c, p + 0x54);
+    fn_801C0E60((f32*)(p + 0x78), (f32*)(p + 0x78), c);
+    fn_801BFE7C((f32*)(p + 0x78), (f32*)(p + 0x78), (f32*)(cam + 0x24));
+}
+
 void fn_8025AE18(u8* p) {
     Mat3 scale;
     TrophySizes sizes;
@@ -564,12 +592,7 @@ void fn_8025AE18(u8* p) {
         f32 nearD = 0.1f + r;
         u8* m = (u8*)fn_802C86DC();
         fn_801C2B9C((f32*)(p + 0x78), (f32*)(m + 0x24), (f32*)(m + 0x18), Max(d, nearD));
-        f32 c[3];
-        StatsUpdate__Fv(c);
-        fn_801BFEBC(c, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
-        fn_801E67B4(c, c, p + 0x54);
-        fn_801C0E60((f32*)(p + 0x78), (f32*)(p + 0x78), c);
-        fn_801BFE7C((f32*)(p + 0x78), (f32*)(p + 0x78), (f32*)(cam + 0x24));
+        TrophyCenterOffset(p, bounds, cam);
     }
     dir.x = 0.2f;
     dir.y = -0.7f;
@@ -687,7 +710,7 @@ void fn_8025B520(u8* p) {
     }
     fn_80214A9C(0x10);
     fn_80214A9C(0xD);
-    CopyName((const char*)(p + 0x60), 50, (char*)(p + 0x92));
+    ((AchView*)p)->previousModelName.CopyFrom((const char*)(p + 0x60));
 }
 
 void fn_8025B784(u8* p) {}

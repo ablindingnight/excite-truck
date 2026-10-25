@@ -131,9 +131,11 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
 }
 
 u32 MP3_HuffLookup(s32 bits, s32 n, HuffTable* t) {
+    u32 mask;
+    s32 shift;
     s32 node = 0;
-    u32 mask = 0xF;
-    s32 shift = 28;
+    mask = 0xF;
+    shift = 28;
 
     while (n-- > 0) {
         u16 e = t->nodes[node][(bits >> shift) & mask];
@@ -142,7 +144,8 @@ u32 MP3_HuffLookup(s32 bits, s32 n, HuffTable* t) {
         }
         mask = lbl_8031C2B8[e & 0xF];
         node = (e >> 8) & 0xFF;
-        shift -= e & 0xF;
+        e &= 0xF;
+        shift -= e;
     }
     return 0;
 }
