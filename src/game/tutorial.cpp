@@ -921,8 +921,8 @@ void fn_80161438(const char* title, const char* msg) {
     if (lbl_8055E2E0) {
         void* box = lbl_8055E2E0->Elem("popup_box");
         TextBox* t;
-        f32 y;
         f32 x;
+        f32 y;
         if (box) {
             fn_80148070(box, 0x96FFFFFF, lbl_8055E2E0->Image("popup_box_art"));
         }
@@ -931,8 +931,8 @@ void fn_80161438(const char* title, const char* msg) {
             fn_80148070(t, -1, lbl_8055E2E0->Image("popup_box_art"));
         }
         t = (TextBox*)lbl_8055E2E0->Find("popup_msg");
-        fn_80148134(t->x, t->y, &y, &x, t->mode);
-        fn_800103B8(t->w, t->a, t->b, y, x, ((TextBox*)box)->w - 34.0f, "%s", msg);
+        fn_80148134(t->x, t->y, &x, &y, t->mode);
+        fn_800103B8(t->w, t->a, t->b, x, y, ((TextBox*)box)->w - 34.0f, "%s", msg);
         fn_801473F8(lbl_8055E2E0, "popup_title_elem", "%s", title);
         fn_801476C4(lbl_8055E2E0->Find("continue"));
     }
