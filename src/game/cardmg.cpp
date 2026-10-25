@@ -269,7 +269,84 @@ void fn_8018F6F8(u8* p) {
     }
 }
 
-void fn_8018F76C(u8* p) {}  // stub (146)
+}  // extern "C"
+
+struct CVec4 {
+    CVec4(void) {}
+    CVec4(const CVec4& o) {
+        x = o.x;
+        y = o.y;
+        z = o.z;
+        w = o.w;
+    }
+    f32 x, y, z, w;
+};
+
+struct WVec3 {
+    WVec3(void) {}
+    WVec3(const WVec3& o) {
+        x = o.x;
+        y = o.y;
+        z = o.z;
+    }
+    f32 x, y, z;
+};
+
+struct PVec3 {
+    f32 x, y, z;
+};
+
+struct PFrame {
+    PVec3 basis[3];
+};
+
+struct PColor {
+    f32 r, g, b, a;
+};
+
+struct WFrame {
+    PVec3 basis[3];
+};
+
+struct RVec3;
+class RigidBody {
+public:
+    void VelAt(RVec3* out, const RVec3* at);
+};
+
+extern "C" {
+void fn_802E30C8(const char* fmt, ...);
+void fn_801BEB30(s32 car, u8** out);
+void fn_801AFC44(s32 car, int wheel, WFrame* m, WVec3* vel, WVec3* imp);
+
+// Knocks wheel i off the car: dims its channel in the car's cross-link colour, then launches it from
+// the hub with the car's velocity plus its own spin.
+void fn_8018F76C(u8* p, int i) {
+    u8* w = p + i * 0x74;
+    if (U32(w, 0x241C) & 8) {
+        fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, S32(p, 0x1EC));
+    }
+    u8* x;
+    fn_801BEB30(S32(p, 0x1EC), &x);
+    PColor pc = *(PColor*)(x + 0x70);
+    CVec4 c = *(CVec4*)&pc;
+    (&c.x)[i] *= 0.15f;
+    *(CVec4*)(x + 0x70) = c;
+    WFrame m = *(WFrame*)(p + 0x3C);
+    WVec3 hub = *(WVec3*)(w + 0x23D0);
+    hub.x += m.basis[1].x * 0.3f;
+    hub.y += m.basis[1].y * 0.3f;
+    hub.z += m.basis[1].z * 0.3f;
+    WVec3 vel;
+    ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&hub);
+    f32 spin = F32(w, 0x23AC);
+    WVec3 imp;
+    imp.x = m.basis[0].x * spin + F32(p, 0x124);
+    imp.y = m.basis[0].y * spin + F32(p, 0x128);
+    imp.z = m.basis[0].z * spin + F32(p, 0x12C);
+    fn_801AFC44(S32(p, 0x1EC), i, &m, &vel, &imp);
+    U32(w, 0x241C) |= 8;
+}
 
 struct DVec {
     f32 x, y, z;
