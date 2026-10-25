@@ -738,7 +738,7 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
     s32 allOdd = 1;
     for (i = 0; i < count - offset; i++) {
         u32 *ahead = values + offset;
-        u32 diff = ahead[i] - values[i];
+        u32 diff = ahead[(u32)i] - values[i];
         if (diff > maxDiff) {
             maxDiff = diff;
             maxIndex = i;
