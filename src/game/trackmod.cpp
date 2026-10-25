@@ -1001,7 +1001,7 @@ void FlareSourceTMH::Swap(TObj* o) {
     Swap32(p + 16);
 }
 
-void FlareSourceTMH::Init(TObj* o) { fn_802E317C("trackmod: local flare sources not supported"); }
+void FlareSourceTMH::Init(TObj* o) { fn_802E317C("trackmod: local flare sources not support"); }
 
 void FlareSourceTMH::Draw(TObj* list) {}
 

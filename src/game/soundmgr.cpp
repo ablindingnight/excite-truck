@@ -490,7 +490,7 @@ Sound* SoundManager::Create(void* desc, int cls) {
         }
         d = mixer->CreateSound(desc, mode, loop);
         if (mode == 0 && d == NULL) {
-            fn_802E30C8("Creating 3d sound failed.  Supposed to be impossible!");
+            fn_802E30C8("Creating 3d sound failed.  Supposed to be impossible.");
             d = mixer->CreateSound(desc, 1, loop);
         }
     } else {

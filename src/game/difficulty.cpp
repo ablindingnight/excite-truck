@@ -140,7 +140,7 @@ int fn_80204B2C(const char* name) {
             return i;
         }
     }
-    fn_802E317C("Difficulty: can't find a difficulty level named %s", name);
+    fn_802E317C("Difficulty: can't find a difficulty level named '%s'", name);
     return 0;
 }
 

@@ -1342,7 +1342,7 @@ void RingChalMaster::vf10(void) {
     arena.b4A = 1;
     arena.f28 = 0.0f;
     if (arena.nFiles < arena.nSets) {
-        fn_802E30C8("WARNING: There are less Freestyle object arena.sets than Freestyle ring arena.sets");
+        fn_802E30C8("WARNING: There are less Freestyle object sets than Freestyle ring sets");
     }
     arena.timer.Reset();
     for (i = 0; i < arena.nSets; i++) {

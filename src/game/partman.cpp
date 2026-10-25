@@ -765,7 +765,7 @@ void PartSys::SetParams(const PartParams* p) {
 void PartSys::Add(const V3* pos, const V3* vel, f32 angVel, f32 size) {
     if (!lbl_8055F73C && !lbl_8055F74C) {
         lbl_8055F74C = 1;
-        fn_802E30C8("%s", "particle: added particle outside of ParticlePreUpdate/ParticlePostUpdate");
+        fn_802E30C8("%s", "particle: added particle outside of ParticlePreUpdate() and ParticlePostUpdate()");
     }
     Particle p;
     p.pos = *pos;
