@@ -43,7 +43,7 @@ public:
     virtual void v2C(void);
     virtual void v30(void);
     virtual void v34(void);
-    virtual void v38(void);
+    virtual int v38(void);
     virtual void v3C(u32 a, u32 b, int c, u32 d);
     virtual void v40(void);
     virtual void v44(void);
@@ -231,7 +231,7 @@ public:
     virtual void vD4(void);
     virtual void vD8(void);
     virtual void vDC(void);
-    virtual void vE0(void);
+    virtual int vE0(s32 car, bool* out);
     virtual void vE4(void);
     virtual void vE8(void);
     virtual u32 PlayerController(void);  // 0xEC
@@ -376,22 +376,22 @@ int OptProfile(void);
 class ReplaySrc {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
+    virtual f32 Throttle(f32 speed);
+    virtual f32 v10(void);
+    virtual f32 v14(void);
+    virtual f32 v18(void);
+    virtual f32 v1C(void);
+    virtual int Gear(void);
     virtual void v24(void);
     virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
+    virtual BOOL v2C(void);
+    virtual BOOL v30(void);
+    virtual BOOL v34(void);
+    virtual BOOL v38(void);
+    virtual BOOL v3C(void);
     virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
+    virtual f32 v44(void);
+    virtual f32 v48(void);
     virtual void v4C(void);
     virtual void v50(void);
     virtual void v54(void);
@@ -407,7 +407,7 @@ class CarCtl {
 public:
     virtual void v08(void);
     virtual void Attach(u8* car, u8* q);
-    virtual void v10(void);
+    virtual u8* Info(void);
     virtual void v14(void);
     virtual s32 v18(void);
 };
@@ -528,7 +528,205 @@ int fn_80190368(int x) {
     return r;
 }
 
-void fn_80190388(u8* p) {}  // stub (502)
+}  // extern "C"
+
+// One recorded replay frame (8 bytes).
+struct ReplayPkt {
+    u16 throttle;
+    u8 v10;
+    u8 v14;
+    u8 v44;
+    u8 v48;
+    u8 v18 : 4;
+    u8 v1C : 4;
+    u8 gear : 3;
+    u8 v34 : 1;
+    u8 v38 : 1;
+    u8 v3C : 1;
+    u8 v2C : 1;
+    u8 v30 : 1;
+};
+
+extern "C" u32 fn_80190E00(u8* p);
+
+static inline ReplayPkt* CurPkt(Recorder* r) { return (ReplayPkt*)fn_80190E00((u8*)r); }
+static inline void SetThrottle(Recorder* r, int v) { CurPkt(r)->throttle = v; }
+static inline void SetV10(Recorder* r, int v) { CurPkt(r)->v10 = v; }
+static inline void SetV14(Recorder* r, int v) { CurPkt(r)->v14 = v; }
+static inline void SetV18(Recorder* r, int v) { CurPkt(r)->v18 = v; }
+static inline void SetV1C(Recorder* r, int v) { CurPkt(r)->v1C = v; }
+static inline void SetGear(Recorder* r, u8 v) { CurPkt(r)->gear = v; }
+static inline void SetV34(Recorder* r, u8 v) { CurPkt(r)->v34 = v; }
+static inline void SetV38(Recorder* r, u8 v) { CurPkt(r)->v38 = v; }
+static inline void SetV3C(Recorder* r, u8 v) { CurPkt(r)->v3C = v; }
+static inline void SetV2C(Recorder* r, u8 v) { CurPkt(r)->v2C = v; }
+static inline void SetV30(Recorder* r, u8 v) { CurPkt(r)->v30 = v; }
+static inline void SetV44(Recorder* r, int v) { CurPkt(r)->v44 = v; }
+static inline void SetV48(Recorder* r, int v) { CurPkt(r)->v48 = v; }
+
+class RaceCarRec {
+public:
+    f32 Speed(void) const;
+};
+
+// Track position tracker of a car (car + 0x270).
+class CarTrackPos {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual u32* Flags(void);
+    virtual void v14(void);
+    virtual u8* Segment(void);
+};
+
+extern f32 lbl_8055E3C8;  // race time
+extern u8 lbl_8055E529;
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+BOOL OptPaTest(void);
+
+extern "C" {
+u32 fn_80190E00(u8* p);
+int fn_80190D9C(f32 x, f32 lo, f32 hi);
+int fn_80190D38(f32 x, f32 lo, f32 hi);
+int fn_80190CD0(f32 x, f32 lo, f32 hi);
+int fn_801CF064(void);
+void fn_801769E0(void);
+void fn_80176A34(s32 frame);
+int fn_801B851C(s32 car);
+int fn_8026B7B4(s32 car);
+int fn_802B02C8(u8* p);
+int fn_801796C4(void);
+void fn_801B86A4(s32 car);
+
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+
+void fn_80190388(u8* p) {
+    u8* info = ((CarCtl*)PTR(p, 0x14))->Info();
+    f32 now = lbl_8055E3C8;
+    Recorder* rec = (Recorder*)PTR(p, 0x4);
+    f32 speed = ((RaceCarRec*)PTR(p, 0x20))->Speed();
+    s32 frame = lbl_8055E3C4;
+    if (frame >= rec->cap) {
+        frame = rec->cap - 1;
+    }
+    rec->buf = rec->start + frame * 8;
+    if (fn_801CF050()) {
+        if (frame >= rec->pos) {
+            lbl_8055E524 = rec->pos = frame + 1;
+        }
+        SetThrottle(rec, fn_80190D9C(rec->src->Throttle(speed), kNegThree, 3.0f));
+        SetV14(rec, fn_80190D38(rec->src->v14(), kZero, kOne));
+        SetV10(rec, fn_80190D38(rec->src->v10(), kZero, kOne));
+        SetV18(rec, fn_80190CD0(rec->src->v18(), kZero, kOne));
+        SetV1C(rec, fn_80190CD0(rec->src->v1C(), kZero, kOne));
+        SetGear(rec, rec->src->Gear() + 1);
+        SetV34(rec, rec->src->v34());
+        SetV38(rec, rec->src->v38());
+        SetV3C(rec, rec->src->v3C());
+        SetV2C(rec, rec->src->v2C());
+        SetV30(rec, rec->src->v30());
+        SetV44(rec, fn_80190D38(rec->src->v44(), kNegOne, kOne));
+        SetV48(rec, fn_80190D38(rec->src->v48(), kNegOne, kOne));
+    }
+    if (fn_801CF064() && frame >= rec->pos - 1) {
+        fn_801769E0();
+        fn_80176A34(lbl_8055E3C4);
+    }
+    VP(PTR(p, 0x4))->v74();
+    if (S32(PTR(p, 0x20), 0x2620)) {
+        VP(PTR(p, 0x4))->v7C();
+    }
+    if (!lbl_8055E529) {
+        bool late = lbl_8055E3C8 - F32(PTR(p, 0x20), 0x26D8) < 0.4f;
+        if (S32(info, 0x24) == 3 || lbl_8055E528 || OptPaTest() || late) {
+            fn_80191084(p, U32(p, 0x8));
+        } else if (U8(p, 0x25)) {
+            if (!U8(p, 0x26)) {
+                fn_80191084(p, U32(p, 0xC));
+            } else {
+                fn_80191084(p, U32(p, 0x8));
+            }
+        } else if (S32(info, 0x24) == 1) {
+            fn_80191084(p, U32(p, 0x8));
+        } else if (!fn_801B851C(S32(p, 0x1C)) || fn_8026B7B4(S32(p, 0x1C))) {
+            fn_80191084(p, U32(p, 0x8));
+        } else {
+            fn_80191084(p, U32(p, 0xC));
+        }
+    } else {
+        fn_80191084(p, U32(p, 0xC));
+    }
+    if (PTR(p, 0x10) == PTR(p, 0xC)) {
+        VP(PTR(p, 0xC))->v48();
+    } else {
+        VP(PTR(p, 0x4))->v78(0);
+    }
+    int landed = 0;
+    if (VP(PTR(p, 0x4))->v38()) {
+        if (!U8(p, 0x24)) {
+            landed = 1;
+        }
+        U8(p, 0x24) = 1;
+    } else {
+        U8(p, 0x24) = 0;
+    }
+    bool off = false;
+    if (fn_801B83A0()->vE0(S32(p, 0x1C), &off)) {
+        if ((B8(p, 0x34) = !off)) {
+            F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
+        }
+    } else {
+        u8* car = PTR(p, 0x20);
+        f32 dist = F32(((CarTrackPos*)PTR(car, 0x270))->Segment(), 0x48);
+        f32 moved = dist - F32(p, 0x30);
+        int stopped;
+        int lap = (*((CarTrackPos*)PTR(PTR(p, 0x20), 0x270))->Flags() >> 2) & 1;
+        car = PTR(p, 0x20);
+        stopped = NearZero(F32(car, 0x2690));
+        if (stopped) {
+            stopped = now - F32(car, 0x26D8) >= 5.0f;
+        }
+        if (lap && stopped) {
+            U8(p, 0x34) = 0;
+        } else if (moved > 106.66667f || moved < -500.0f || !stopped || !fn_802B02C8(car + 0x60)) {
+            F32(p, 0x30) = dist;
+            F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
+            U8(p, 0x34) = 1;
+        } else if (now - F32(p, 0x2C) > kSix) {
+            U8(p, 0x34) = 0;
+            F32(p, 0x2C) = kOne + (now - kSix);
+            F32(p, 0x30) = 17.777779f + (dist - 106.66667f);
+        }
+    }
+    if (fn_801796C4() || !lbl_8055E522) {
+        F32(p, 0x2C) = now;
+        U8(p, 0x34) = 1;
+    }
+    if (!U8(p, 0x34) && landed) {
+        U8(p, 0x34) = 1;
+        F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
+        fn_801B86A4(S32(p, 0x1C));
+    }
+    if (!U8(p, 0x26)) {
+        u8* other = PTR(PTR(p, 0x18), 0x4);
+        if ((other ? U8(other, 0x34) : 3) == 0) {
+            U8(p, 0x26) = 1;
+            S32(PTR(p, 0x18), 0xC) = 0;
+        }
+    }
+    if (PTR(p, 0x10) == PTR(p, 0xC) && lbl_8055E523 && !lbl_8055E520) {
+        int off = 0;
+        for (int i = 0; i < 4; i++) {
+            if (!fn_80190368(S32(PTR(p, 0x20) + i * 0x74, 0x2410))) {
+                off = 1;
+            }
+        }
+        if (off) {
+            lbl_8055E520 = 1;
+            fn_801797A8(PTR(p, 0x28), "\x01" "Don't leave the road!");
+        }
+    }
+}
 
 int fn_80190B60(u8* p) { return PF(PTR(p, 0x8))->b4 != 0; }
 
