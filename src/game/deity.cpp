@@ -77,6 +77,8 @@ public:
     virtual CenterLine* Center(int i);  // 0x10
     virtual CenterLine* Racing(int i);  // 0x14
     virtual void Locate(int il, void* pos);  // 0x18
+    virtual void v1C(void);
+    virtual void Reset(void);                // 0x20
 };
 
 // The car a DeityCar oversees (offsets only).
@@ -1018,8 +1020,63 @@ int fn_801B25B0(const s32* pa, const s32* pb) {
     return a > b;
 }
 
-// Lap-crossing scan and the qualify grid (placeholders; the second keeps its string in the pool).
-void fn_801B265C(void) { fn_802E30C8("deity: using 'test mode' quick intro duration"); }
+}  // extern "C"
+
+int OptDirectToTrack(void);
+
+extern "C" {
+f32 fn_801B88BC(void);
+f32 fn_8013B650(s32 car);  // AI qualifying time
+int fn_801B25B0(const s32* pa, const s32* pb);
+
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+
+// Race start: the intro timer (short in test mode), cleared race counters, every car on its line, and the
+// starting order from the qualifying times.
+void fn_801B265C(void) {
+    static u8 warned;
+    s32 order[8];
+    lbl_8055E6A8 = 1;
+    if ((((u32*)fn_801769CC())[4] & 1) || OptDirectToTrack()) {
+        if (!warned) {
+            warned = 1;
+            fn_802E30C8("%s", "deity: using 'test mode' quick intro duration");
+        }
+        lbl_8055E6AC = lbl_8055E3C8 + 0.5f;
+    } else {
+        f32 now = lbl_8055E3C8;
+        lbl_8055E6AC = now + fn_801B88BC();
+    }
+    lbl_8055E698 = 0;
+    lbl_8055E694 = 0;
+    lbl_8055E6A4 = 0.0f;
+    lbl_8055E69C = 0;
+    lbl_8055E6A0 = 0;
+    memset(lbl_80435C30, -1, sizeof(lbl_80435C30));
+    fn_80156A40()->Reset();
+    for (int i = 0; i < lbl_8055E678; i++) {
+        fn_801B1A5C(&lbl_8055E684[i]);
+    }
+    for (int i = 0; i < lbl_8055E678; i++) {
+        f32 v = -1.0f;
+        DeityCar* c = &lbl_8055E684[i];
+        if (*(s32*)((u8*)c->car + 0x1F0) == 0x51) {
+            v = fn_8013B650(c->index);
+        }
+        f32 q = *(f32*)((u8*)c->car + 0x254);
+        if (!NearZero(q)) {
+            v = q;
+        }
+        DS((u8*)c + 0x4)->qual = v;
+    }
+    for (int i = 0; i < lbl_8055E678; i++) {
+        order[i] = i;
+    }
+    qsort(order, lbl_8055E678, 4, (int (*)(const void*, const void*))fn_801B25B0);
+    for (int i = 0; i < lbl_8055E678; i++) {
+        lbl_8055E684[order[i]].start = i;
+    }
+}
 
 void fn_801B2910(void) {}
 
