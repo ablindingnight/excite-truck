@@ -552,7 +552,9 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     vmin = FMin(q->c[0].v, FMin(q->c[1].v, FMin(q->c[2].v, q->c[3].v)));
     vmax = FMax(q->c[0].v, FMax(q->c[1].v, FMax(q->c[2].v, q->c[3].v)));
     f->tex = fn_802CAC28(tex, 0);
-    span = FMax((f32)fabs(umax - umin), (f32)fabs(vmax - vmin));
+    f32 du = (f32)__fabs(umax - umin);
+    f32 dv = (f32)__fabs(vmax - vmin);
+    span = FMax(du, dv);
     f->lod = fn_8002F208(span / FMax(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
