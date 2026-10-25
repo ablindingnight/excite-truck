@@ -607,7 +607,71 @@ void fn_8018A6F4(u8* p) {
     }
 }
 
-void fn_8018A750(u8* p) {}  // stub (86)
+}  // extern "C"
+
+// The spring system descriptors (ppsys.cpp).
+struct SprPos {
+    f32 v[3];
+};
+
+struct SprVert {
+    SprPos pos;  // offset 0x0
+    f32 w34;     // offset 0xC
+    f32 w30;     // offset 0x10
+};
+
+struct SprEdge {
+    s32 a;      // offset 0x0
+    s32 b;      // offset 0x4
+    f32 extra;  // offset 0x8
+    f32 stiff;  // offset 0xC
+};
+
+struct SprPin {
+    s32 idx;          // offset 0x0
+    const u8* mtx;    // offset 0x4
+    const f32* at;    // offset 0x8
+};
+
+extern "C" {
+void fn_801C1CBC(u8* sys, int nv, const SprVert* v, int ne, const SprEdge* e, int np, const SprPin* pins);
+void fn_801C2170(u8* sys, u8* desc, void* owner);
+}
+
+
+extern "C" {
+
+// Builds the body's spring system: per attachment point a pinned particle and a free one, joined by an edge.
+void fn_8018A750(u8* p) {
+    if (PTR(p, 0x26C4)) {
+        fn_801C2170(PTR(p, 0x26C4), PTR(p, 0x26C0), p + 0x70);
+    }
+    if (PTR(p, 0x26C8)) {
+        SprVert verts[8];
+        SprEdge edges[4];
+        SprPin pins[4];
+        int n = S32(PTR(p, 0x26C0), 0xC8);
+        for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+            SprVert* v = &verts[i * 2];
+            v->pos.v[0] = F32(p, 0x94);
+            v->pos.v[1] = F32(p, 0x98);
+            v->pos.v[2] = F32(p, 0x9C);
+            v->w34 = lbl_80561CD0;
+            v->w30 = lbl_80561CDC;
+            v[1].pos = v[0].pos;
+            v[1].w34 = v[0].w34;
+            v[1].w30 = v[0].w30;
+            edges[i].a = i * 2;
+            edges[i].b = i * 2 + 1;
+            edges[i].extra = lbl_80561CAC;
+            edges[i].stiff = lbl_80561CD0 - F32(PTR(p, 0x26C0) + i * 8, 0xA8);
+            pins[i].idx = i * 2;
+            pins[i].mtx = p + 0x70;
+            pins[i].at = 0;
+        }
+        fn_801C1CBC(PTR(p, 0x26C8), n * 2, verts, n, edges, n, pins);
+    }
+}
 
 }  // extern "C"
 
