@@ -201,7 +201,46 @@ UnkStatic7F lbl_8055E4C8;
 
 extern "C" {
 
-void fn_8018185C(u8* p, f32* v) {}  // stub (81)
+}  // extern "C"
+
+extern const f32 lbl_80561CA0;  // torque unit scale
+extern const f32 lbl_80561CA4;  // 1e-5
+extern const f32 lbl_80561CA8;  // 5252 (hp = torque * rpm / 5252)
+extern f32 lbl_80561CAC;        // 0.0
+extern const f32 lbl_80561CB0;  // -2.0
+extern const f32 lbl_80561CB4;  // 8000
+extern const f32 lbl_80561CB8;  // 0.3
+extern const f32 lbl_80561CBC;  // 1e-4
+
+static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
+
+extern "C" {
+
+// Builds the engine torque curve from v = {hp, hp rpm, peak torque, torque rpm, redline rpm, idle torque}: a
+// parabola through the torque peak and the hp point below it, another from the peak down to 30% at redline.
+void fn_8018185C(u8* p, f32* v) {
+    F32(p, 0x1C) = v[1];
+    F32(p, 0x28) = v[3];
+    F32(p, 0x18) = lbl_80561CA0 * v[5];
+    f32 hp = lbl_80561CA0 * (lbl_80561CA8 * v[0] / FMax(v[1], lbl_80561CA4));
+    F32(p, 0x24) = lbl_80561CAC;
+    f32 peak = lbl_80561CA0 * v[2];
+    f32 d = F32(p, 0x1C) - v[3];
+    f32 a = (hp - peak) / FMax(d * d, lbl_80561CA4);
+    f32 top = F32(p, 0x28);
+    f32 red = v[4];
+    f32 low = lbl_80561CA0 * (lbl_80561CB8 * v[2]);
+    f32 peak2 = lbl_80561CA0 * v[2];
+    F32(p, 0x20) = hp / lbl_80561CB4;
+    F32(p, 0x0) = a;
+    F32(p, 0x4) = F32(p, 0x18) + lbl_80561CB0 * a * v[3];
+    F32(p, 0x8) = peak + a * (v[3] * v[3]);
+    d = red - top;
+    f32 b = (low - peak2) / FMax(d * d, lbl_80561CBC);
+    F32(p, 0xC) = b;
+    F32(p, 0x14) = peak2 + b * (top * top);
+    F32(p, 0x10) = F32(p, 0x18) + lbl_80561CB0 * b * top;
+}
 
 extern const f32 lbl_80561CC4;
 extern const f32 lbl_80561CC8;
