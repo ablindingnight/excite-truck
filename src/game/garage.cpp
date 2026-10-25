@@ -69,7 +69,7 @@ void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void fn_802CAC54(u8* p);
 void fn_802354A0(u8* o, int kind, s32 v, f32 x, f32 y, f32 z, f32 w, f32 h);
-void fn_80216CB4(void);
+f32 fn_80216CB4(void);  // menu fade-in (0..1)
 void fn_80214A9C(int s);
 }
 
@@ -468,7 +468,65 @@ void fn_80251934(u8* p) {
     }
 }
 
-void fn_80251B04(u8* p) {}  // stub (130)
+}  // extern "C"
+
+// The garage screen's per-slot draw hook (vtable slot 0x60).
+class GarageSlotView {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void DrawSlot(int i, s32 value, f32 x, f32 y, f32 w, f32 h, f32 alpha);  // 0x60
+};
+
+extern s32 lbl_8055CFF0;  // screen width
+extern s32 lbl_8055CFF4;  // screen height
+
+extern "C" {
+void fn_80231220(u8* tex, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
+
+// Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
+void fn_80251B04(u8* p) {
+    f32 top = lbl_8055CFF4 / 2 - 24.0f;
+    f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
+    fn_80231220(PTR(p, 0x20), -0.5f * w, 225.0f, w, 66.0f, 0.0f, 0.0f, 10.0f, 1.0f, -1);
+    f32 fade = fn_80216CB4();
+    for (int i = 0; i < S32(p, 0x1C); i++) {
+        SlotAnim* e = &((SlotAnim*)PTR(p, 0x18))[i];
+        f32 s = 1.0f - (f32)__fabs(e->t);
+        s = s < fade ? s : fade;
+        f32 h = 48.0f * s;
+        f32 d = (f32)__fabs(F32(p, 0x28) - i);
+        f32 y = top - 0.5f * (48.0f * (1.0f - s));
+        f32 x = 82.5f * (i - F32(p, 0x28)) - 41.25f;
+        if (1.0f < d) {
+            d = 1.0f;
+        }
+        d = d > 0.0f ? d : 0.0f;
+        f32 alpha = 1.0f - d;
+        ((GarageSlotView*)p)->DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
+    }
+    fn_802354A0(PTR(p, 0x24), 2, -1, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f);
+}
 
 void fn_80251D0C(u8* p) {
     ((CarUIScreen*)PTR(p, 0x20))->UnloadModel();
