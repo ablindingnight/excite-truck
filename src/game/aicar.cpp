@@ -219,6 +219,9 @@ AIVec lbl_80434A10;
 #define CAR(d) PTR(d, 0x294)
 #define CARID(d) S32(d, 0x290)
 
+static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 static inline f32 Clamp01(f32 x) {
     x = 1.0f < x ? 1.0f : x;
     return x > 0.0f ? x : 0.0f;
@@ -898,7 +901,44 @@ void fn_80194844(u8* d) {
 }
 
 
-void fn_801948B0(u8* d) {}
+f32 fn_801673A4(int i, f32* wander);
+
+// Target lateral offset: the lane blend (plus the wander), scaled by the throttle response, pushed back when
+// the car is over the lane edge and finally clamped to the track width.
+f32 fn_801948B0(u8* d, f32 t, int steer) {
+    f32 wander;
+    f32 out = 0.0f;
+    F32(d, 0x220) = LerpT(Clamp01((F32(d, 0x26C) - F32(d, 0x22C)) / F32(d, 0x230)), F32(d, 0x228), F32(d, 0x224));
+    f32 k = fn_801673A4(CARID(d), &wander);
+    F32(d, 0x220) = F32(d, 0x220) + k * (wander - F32(d, 0x220));
+    f32 slow = lbl_8055E544 * (5.0f * lbl_8055A488 * F32(d, 0x2E4));
+    f32 fast = 1.5f * lbl_8055A488 * lbl_8055E568;
+    f32 resp = fn_801931EC(t, F32(d, 0x2CC));
+    int calm = S32(d, 0x268) == 0 || S32(d, 0x268) == 3;
+    f32 gain = calm ? resp * slow : resp * fast;
+    f32 push = 0.0f;
+    if (steer && U8(d, 0x14)) {
+        f32 x = F32(d, 0x8);
+        f32 over = gain * 0.5f + (f32)__fabs(x) - F32(d, 0x274);
+        over = over > 0.0f ? over : 0.0f;
+        push = -(x > 0.0f ? 1.0f : -1.0f) * over;
+    }
+    f32 lim[2] = {0};
+    out += push + F32(d, 0x220) * gain;
+    out += F32(d, 0x144) * F32(d, 0x2E8);
+    if (steer) {
+        if ((f32)__fabs(F32(d, 0x278)) < 2.0f + F32(d, 0x284)) {
+            lim[1] = F32(d, 0x274) - F32(d, 0x8);
+            lim[0] = -F32(d, 0x274) - F32(d, 0x8);
+            f32 r = lim[1] < out ? lim[1] : out;
+            out = r > lim[0] ? r : lim[0];
+        } else {
+            out = 0.0f;
+        }
+    }
+    F32(d, 0x238) = out;
+    return out;
+}
 
 static inline V2 LerpXY(const RVec3* a, const RVec3* b, f32 t) {
     V2 r;
