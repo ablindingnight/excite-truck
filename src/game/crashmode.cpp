@@ -329,6 +329,7 @@ extern "C" {
 void fn_801DF6FC(void) { new ("crashmode") CrashMode(); }
 
 int fn_801DF93C(int view) {
+    ArtElem* up;
     int car;
     CrashMode* m;
     CrashState* s;
@@ -393,7 +394,7 @@ int fn_801DF93C(int view) {
                 DrawArt(m->layout, "button_up", m->tapTex);
             }
             k = fn_80144BD8(k);
-            ArtElem* up = m->layout->FindArt("arrow_up");
+            up = m->layout->FindArt("arrow_up");
             ArtElem* dn = m->layout->FindArt("arrow_dn");
             if (up && dn) {
                 ArtElem e(*up);

@@ -146,11 +146,12 @@ int fn_801E2CCC(int model, const char* name, ValMatrix** out) {
 }
 
 JointEntry* fn_801E2DEC(int model, const char* name, char* modelName) {
+    JointEntry* e;
     ModelData* md = fn_802C6C34(model);
     for (int i = 0; i < md->numChunks; i++) {
         JointChunk* c = md->chunks[i];
         if (c->tag == 'MRJT') {
-            JointEntry* e = c->entries;
+            e = c->entries;
             for (int k = 0; k < c->count; e++, k++) {
                 char jointName[0x20];
                 char other[0x20] = {0};
