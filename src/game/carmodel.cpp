@@ -630,8 +630,7 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
         return;
     }
     CarModel** p = lbl_80488648;
-    int i;
-    for (i = 0; *p && i < 8; i++, p++) {
+    for (int i = 0; *p && i < 8; p++, i++) {
         if (pass != fn_801ECC8C(*p)) {
             fn_801ECB80(*p);
         }
@@ -639,9 +638,9 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
     CarModel* mine = CarAt(fn_801E866C(-1));
     CarModel* list[8];
     int n = 0;
-    CarModel** q = list;
     p = lbl_80488648;
-    for (i = 0; *p && i < 8; i++, p++) {
+    CarModel** q = list;
+    for (int i = 0; *p && i < 8; p++, i++) {
         if (*p != mine) {
             *q++ = *p;
             n++;
@@ -650,7 +649,7 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
     lbl_80488668.alpha = fn_802C99E8(1.0f);
     u32 c0 = fn_802C9950(lbl_80488668.c0);
     u32 c1 = fn_802C9994(lbl_80488668.c1);
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         CarModel* c = list[i];
         u32 t = fn_801ECC8C(c);
         if (t != pass) {
@@ -663,7 +662,7 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
             }
         }
     }
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         CarModel* c = list[i];
         u32 t = fn_801ECC8C(c);
         if (t != pass) {
@@ -676,7 +675,7 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
             }
         }
     }
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         CarModel* c = list[i];
         u32 t = fn_801ECC8C(c);
         if (t != pass) {
