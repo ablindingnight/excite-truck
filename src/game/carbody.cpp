@@ -9,6 +9,7 @@
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
+#define U16(p, o) (*(u16*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 class VR {
@@ -123,6 +124,7 @@ public:
     void Reset(void);
     void OnHit(const RVec3* a, const RVec3* b, int c, void* d);
     void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
+    int vf34(struct RPacket* pk);
 };
 
 class CarBody : public RigidBody {
@@ -842,7 +844,66 @@ void fn_8018B0D0(u8* p, u32 v) { U32(p, 0x2610) = v; }
 
 void fn_8018B0D8(u8* p) {}  // stub (607)
 
-void fn_8018BA54(u8* p) {}  // stub (230)
+}  // extern "C"
+
+static inline f32 PackClamp01(f32 x) {
+    x = 1.0f < x ? 1.0f : x;
+    return x > 0.0f ? x : 0.0f;
+}
+
+static inline f32 PackLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+// The car's track position tracker (car + 0x270).
+class CarTrackPos {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual u8* Segment(void);  // 0x18
+};
+
+// Quantises x from [lo, hi] to 0..range (rounded).
+static inline int Pack(f32 x, f32 lo, f32 hi, f32 range) {
+    return (int)(0.5f + PackLerp(0.0f, range, PackClamp01((x - lo) / (hi - lo))));
+}
+
+extern "C" {
+s32 fn_801363A0(u8* seg, u8* pos);
+
+// Writes the car's state into a network/replay packet: engine and control values, then per wheel
+// (steer angle, suspension, spin, slip) and its contact flags.
+int fn_8018BA54(u8* p, u8* pk) {
+    ((RigidBody*)p)->vf34((RPacket*)pk);
+    U16(pk, 0x20) = Pack(F32(p, 0x25D0), -2000.0f, 12000.0f, 65535.0f);
+    U8(pk, 0x22) = Pack(F32(p, 0x25F0), -1.2f, 1.2f, 255.0f);
+    U8(pk, 0x23) = Pack(F32(p, 0x25F4), 0.0f, 1.0f, 255.0f);
+    U8(pk, 0x24) = Pack(F32(p, 0x25E4), 0.0f, 1.0f, 255.0f);
+    U8(pk, 0x3C) = (int)(0.5f + PackLerp(0.0f, 255.0f, lbl_80561CD0));
+    u8* seg = ((CarTrackPos*)PTR(p, 0x270))->Segment();
+    S32(pk, 0x40) = fn_801363A0(seg, seg + 4);
+    if (U8(pk, 0x3C) == 0) {
+        U8(pk, 0x3C) = 1;
+    }
+    U16(pk, 0x3A) = S32(p, 0x4);
+    U8(pk, 0x25) = S32(lbl_8055E918 + S32(p, 0x1EC) * 0x9C, 0x14);
+    u8* w = p + 0x23AC;
+    u8* out = pk + 0x26;
+    for (int i = 0; i < 4; i++) {
+        u32 flags = U32(w, 0x70);
+        if (U8(w, 0x20)) {
+            flags |= 1;
+        }
+        out[2] = Pack(F32(w, 0xC), 0.0f, 2.0f, 255.0f);
+        out[0] = Pack(F32(w, 0x8), -6.2831855f, 6.2831855f, 255.0f);
+        out[1] = Pack(F32(w, 0x0), -100.0f, 100.0f, 255.0f);
+        out[3] = Pack(F32(w, 0x68), 0.0f, 10.0f, 255.0f);
+        out[4] = flags;
+        w += 0x74;
+        out += 5;
+    }
+    return 0x44;
+}
 
 void fn_8018BDEC(u8* p) {
     f32 m[12];
