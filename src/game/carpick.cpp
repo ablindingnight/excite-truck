@@ -135,7 +135,90 @@ u8* fn_8025F9C0(u8* p) {
     return p;
 }
 
-void fn_8025FA18(u8* p) {}  // stub (157)
+}  // extern "C"
+
+// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
+struct CarIcon {
+    char name[32];  // offset 0x0
+    u8* tex;        // offset 0x20
+    u8* overlay;    // offset 0x24
+    f32 u1;         // offset 0x28
+    f32 v1;         // offset 0x2C
+    f32 u2;         // offset 0x30
+    f32 v2;         // offset 0x34
+};
+
+static inline void CopyName(char* d, int n, const char* s) {
+    char* p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
+
+static inline void AppendName(const char* s, int n, char* d) {
+    while (*d) {
+        n--;
+        d++;
+    }
+    if (n > 0) {
+        CopyName(d, n, s);
+    }
+}
+
+void* operator new(size_t n, const char* tag);
+void* operator new[](size_t n, const char* tag);
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+extern "C" u8* fn_802CAC28(const char* name, int flags);
+extern "C" int strcmp(const char* a, const char* b);
+
+// The car icon table (caricons.val): two icons per Car entry, plain and "_e".
+struct CarIconSet {
+    CarIconSet(void) {
+        ValueTable* t = fn_80131808("caricons.val");
+        count = 0;
+        icons = new ("cicon") CarIcon[50];
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (strcmp(n->GetName(), "Car")) {
+                continue;
+            }
+            for (int k = 0; k < 2; k++) {
+                CarIcon* c = &icons[count++];
+                CopyName(c->name, 32, n->GetValue("chassis"));
+                if (k) {
+                    AppendName("_e", 32, c->name);
+                }
+                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                c->u1 = n->GetFloat("u1");
+                c->v1 = n->GetFloat("v1");
+                c->u2 = n->GetFloat("u2");
+                c->v2 = n->GetFloat("v2");
+            }
+        }
+        fn_80131818(t);
+    }
+    CarIcon* icons;  // offset 0x0
+    s32 count;       // offset 0x4
+};
+
+extern CarIconSet* lbl_8055F2E4;
+extern s32 lbl_8055F2E8;
+
+extern "C" {
+
+// Loads the car icon table on first use; reference counted.
+CarIconSet* fn_8025FA18(void) {
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") CarIconSet;
+    }
+    lbl_8055F2E8++;
+    return lbl_8055F2E4;
+}
 
 }  // extern "C"
 
