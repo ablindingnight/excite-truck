@@ -207,9 +207,9 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
         v[i].color = color;
         v[i].u = 0.1f * (f32)i;
         v[i].v = 0.1f * (f32)i;
-        v[i].x = v[i].x + pos->x;
+        v[i].x += pos->x;
         v[i].y = v[i].y + pos->y;
-        v[i].z = v[i].z + pos->z;
+        v[i].z += pos->z;
     }
     v[0].color = dark;
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
