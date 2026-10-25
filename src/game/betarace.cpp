@@ -1243,37 +1243,14 @@ public:
     virtual void vf9C(RaceCarRec* rc, int type);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vfA8(int a, int b);
-    virtual void vfB8(void* r) {
-        RaceResults* res = (RaceResults*)r;
-        int i;
-        GameMode::FillResults(r);
-        fn_802E30C8("BetaRace: FillResults");
-        for (i = 0; i < lbl_8055E4D0; i++) {
-            s32 t = cars[i].result.total;
-            res->e[i].score = t;
-            fn_802E30C8("  car %d scored %d", i, t);
-        }
-    }
+    virtual void vfB8(void* r);
     virtual void vfC0(void);
     virtual void vfC4(void);
     virtual int vfDC(void);
     virtual void* vfE8(void);
     virtual void vfF4(void);
-    virtual void vfF8(void) {
-        int i;
-        for (i = 0; i < ARRAY_COUNT(anims); i++) {
-            anims[i].anim = new ("artanim_man") ArtAnimMan(2);
-            anims[i].Setup();
-        }
-        coins.obj = fn_80145E70("bonanza.val");
-    }
-    virtual void vfFC(void) {
-        int i;
-        SafeDelete(coins.obj);
-        for (i = 1; i >= 0; i--) {
-            anims[i].Release();
-        }
-    }
+    virtual void vfF8(void);
+    virtual void vfFC(void);
     virtual void a0(void);
     virtual void a4(void);
     virtual void a1(void);
@@ -2687,6 +2664,15 @@ s32 fn_80204CF0(void);  // difficulty
 s32 fn_802ADF34(ArtAnimMan* anim, const char* file, const AnimBinding* table);
 }
 
+void BetaMaster::vfF8(void) {
+    int i;
+    for (i = 0; i < ARRAY_COUNT(anims); i++) {
+        anims[i].anim = new ("artanim_man") ArtAnimMan(2);
+        anims[i].Setup();
+    }
+    coins.obj = fn_80145E70("bonanza.val");
+}
+
 void FinishAnimation::Setup(void) {
     int multi = fn_80179650() > 1;
     int ws = fn_802C9A58();
@@ -2776,6 +2762,14 @@ s32 fn_80204BB4(const char* s);
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 double sqrt(double x);
 int sprintf(char* s, const char* fmt, ...);
+}
+
+void BetaMaster::vfFC(void) {
+    int i;
+    SafeDelete(coins.obj);
+    for (i = 1; i >= 0; i--) {
+        anims[i].Release();
+    }
 }
 
 void BetaMaster::vfF4(void) {
@@ -2990,7 +2984,7 @@ Pickup::Pickup(ValueNode* n) {
         if (n->Has("second_actseq")) {
             objs[1] = fn_801D4888(n->GetValue("second_actseq"));
         } else {
-            fn_802E30C8("!! Warning: Morph trigger %s is marked as a 'multi' trigger, but has no \"second_actseq\" value.\n",
+            fn_802E30C8("!! Warning: Morph trigger %s is marked as a 'multi' trigger, but has no \"second_actseq\" value!",
                         n->GetName());
             objs[1] = objs[0];
         }
@@ -4166,6 +4160,18 @@ int BetaMaster::vf3C(int view) {
 
 f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
 
+void BetaMaster::vfB8(void* r) {
+    RaceResults* res = (RaceResults*)r;
+    int i;
+    GameMode::FillResults(r);
+    fn_802E30C8("BetaRace: FillResults");
+    for (i = 0; i < lbl_8055E4D0; i++) {
+        s32 t = cars[i].result.total;
+        res->e[i].score = t;
+        fn_802E30C8("  car %d scored %d", i, t);
+    }
+}
+
 extern RaceCarRec* lbl_804348E8[];  // race cars
 
 extern "C" {
@@ -4222,115 +4228,13 @@ void BetaMaster::a3(void) {}
 
 extern "C" int fn_80161BB8(void);
 
-void BetaMaster::b2(StuntEvt* e, int car) {
-    BetaCar* c = &cars[car];
-    if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
-        int i;
-        for (i = 0; i < stars.a.count; i++) {
-            s32 h = stars.a.data[i]->hC0;
-            if (h == e->Id()) {
-                Pickup* t = stars.a.data[i];
-                if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
-                    (f32)__fabs(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
-                    t->hit[car] = 1;
-                }
-            }
-        }
-    }
-    if (e->Type() == 's') {
-        int turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
-        BetaCar* bc = &cars[car];
-        u8* f = &bc->bA8;
-        if (f[0]) {
-            bc->meterObj->Crash(lbl_804348E8[bc->id]);
-        }
-        if (f[1]) {
-            cars[car].Wipe();
-        }
-        if (turbo) {
-            if (lbl_80559EC0 == 1) {
-                f[2] = 1;
-            }
-            if (lbl_80559EC0 == 3) {
-                f[3] = 1;
-                f[1] = 1;
-            }
-        }
-        cars[car].meterObj->Land(lbl_804348E8[bc->id]);
-    }
-}
 
-void BetaMaster::c0(Body* b) {
-    if (b->Info()->Has("points")) {
-        bumps.Push(new ("pointtoken") PointToken(b));
-    } else if (b->Info()->Has("invincibility")) {
-        bumps2.Push(new ("inv_token") InvToken(b));
-    }
-}
 
 extern "C" {
 void fn_80206750(Sound* s, int car, int pan);
 void fn_8018A120(RaceCarRec* rc);
 }
 
-void BetaMaster::c2(Body* b, int car) {
-    RaceCarRec* rc = fn_8017960C(car);
-    if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
-        BetaCar* c = &cars[car];
-        int i;
-        for (i = 0; i < bumps.a.count; i++) {
-            Token* t = bumps.a.data[i];
-            f32 pts;
-            if (b == t->body && t->active) {
-                t->active = 0;
-                t->Hide();
-                pts = t->body->Info()->GetFloat("points", 10.0f);
-            } else {
-                pts = 0.0f;
-            }
-            if (pts > 0.5f) {
-                if (coinSnd) {
-                    fn_80206750(coinSnd, car, 0);
-                    coinSnd->Play();
-                }
-                c->score += pts;
-            }
-        }
-        for (i = 0; i < bumps2.a.count; i++) {
-            Token* t = bumps2.a.data[i];
-            int got;
-            if (b == t->body && t->active) {
-                RaceCarRec* r2 = fn_8017960C(car);
-                if (r2) {
-                    PickupEvent ev;
-                    const f32* p = b->Pos();
-                    ev.pos[0] = p[0];
-                    ev.pos[1] = p[1];
-                    ev.pos[2] = p[2];
-                    ev.vel[0] = r2->vel[0];
-                    ev.vel[1] = r2->vel[1];
-                    ev.vel[2] = r2->vel[2];
-                    ev.heading = r2->heading;
-                    ev.sfx = 0x96;
-                    fn_801796EC(10, &ev, sizeof(ev));
-                }
-                t->active = 0;
-                t->Hide();
-                got = 1;
-            } else {
-                got = 0;
-            }
-            if (got) {
-                if (starSnd) {
-                    fn_80206750(starSnd, car, fn_80009C84() ? 0 : 2);
-                    starSnd->Play();
-                }
-                fn_8018A120(rc);
-                fn_80161A38(3, car, 0);
-            }
-        }
-    }
-}
 
 struct HighScore {
     u8 pad0[0x4];
@@ -4572,6 +4476,111 @@ void BetaMaster::a1(void) {
     }
     if (fn_80179650() > 1) {
         timer.finishTimeout = 30.99f;
+    }
+}
+
+void BetaMaster::b2(StuntEvt* e, int car) {
+    BetaCar* c = &cars[car];
+    if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
+        int i;
+        for (i = 0; i < stars.a.count; i++) {
+            s32 h = stars.a.data[i]->hC0;
+            if (h == e->Id()) {
+                Pickup* t = stars.a.data[i];
+                if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
+                    (f32)__fabs(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
+                    t->hit[car] = 1;
+                }
+            }
+        }
+    }
+    if (e->Type() == 's') {
+        int turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
+        BetaCar* bc = &cars[car];
+        u8* f = &bc->bA8;
+        if (f[0]) {
+            bc->meterObj->Crash(lbl_804348E8[bc->id]);
+        }
+        if (f[1]) {
+            cars[car].Wipe();
+        }
+        if (turbo) {
+            if (lbl_80559EC0 == 1) {
+                f[2] = 1;
+            }
+            if (lbl_80559EC0 == 3) {
+                f[3] = 1;
+                f[1] = 1;
+            }
+        }
+        cars[car].meterObj->Land(lbl_804348E8[bc->id]);
+    }
+}
+
+void BetaMaster::c2(Body* b, int car) {
+    RaceCarRec* rc = fn_8017960C(car);
+    if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
+        BetaCar* c = &cars[car];
+        int i;
+        for (i = 0; i < bumps.a.count; i++) {
+            Token* t = bumps.a.data[i];
+            f32 pts;
+            if (b == t->body && t->active) {
+                t->active = 0;
+                t->Hide();
+                pts = t->body->Info()->GetFloat("points", 10.0f);
+            } else {
+                pts = 0.0f;
+            }
+            if (pts > 0.5f) {
+                if (coinSnd) {
+                    fn_80206750(coinSnd, car, 0);
+                    coinSnd->Play();
+                }
+                c->score += pts;
+            }
+        }
+        for (i = 0; i < bumps2.a.count; i++) {
+            Token* t = bumps2.a.data[i];
+            int got;
+            if (b == t->body && t->active) {
+                RaceCarRec* r2 = fn_8017960C(car);
+                if (r2) {
+                    PickupEvent ev;
+                    const f32* p = b->Pos();
+                    ev.pos[0] = p[0];
+                    ev.pos[1] = p[1];
+                    ev.pos[2] = p[2];
+                    ev.vel[0] = r2->vel[0];
+                    ev.vel[1] = r2->vel[1];
+                    ev.vel[2] = r2->vel[2];
+                    ev.heading = r2->heading;
+                    ev.sfx = 0x96;
+                    fn_801796EC(10, &ev, sizeof(ev));
+                }
+                t->active = 0;
+                t->Hide();
+                got = 1;
+            } else {
+                got = 0;
+            }
+            if (got) {
+                if (starSnd) {
+                    fn_80206750(starSnd, car, fn_80009C84() ? 0 : 2);
+                    starSnd->Play();
+                }
+                fn_8018A120(rc);
+                fn_80161A38(3, car, 0);
+            }
+        }
+    }
+}
+
+void BetaMaster::c0(Body* b) {
+    if (b->Info()->Has("points")) {
+        bumps.Push(new ("pointtoken") PointToken(b));
+    } else if (b->Info()->Has("invincibility")) {
+        bumps2.Push(new ("inv_token") InvToken(b));
     }
 }
 
