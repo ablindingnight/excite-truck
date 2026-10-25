@@ -275,6 +275,8 @@ f32 fn_8025AD88(const f32* a, const f32* b);
 void fn_8025AD8C(u8* self, f32* out, const f32* a, const f32* b, f32 t);
 f32 fn_8025ADF4(f32 x);
 
+static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
 // Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
 // (right, up, forward) is rebuilt around the tilted up vector.
 void fn_8025AA90(u8* p, f32 dt) {
@@ -330,9 +332,12 @@ void fn_8025AA90(u8* p, f32 dt) {
 }
 
 void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t) {
-    out[2] = a[2] + t * (b[2] - a[2]);
-    out[1] = a[1] + t * (b[1] - a[1]);
-    out[0] = a[0] + t * (b[0] - a[0]);
+    f32 dz = b[2] - a[2];
+    f32 dy = b[1] - a[1];
+    f32 dx = b[0] - a[0];
+    out[2] = a[2] + t * dz;
+    out[1] = a[1] + t * dy;
+    out[0] = a[0] + t * dx;
 }
 
 f32 fn_8025AD88(const f32* a, const f32* b) { return PSVECDotProduct(a, b); }
