@@ -322,6 +322,7 @@ int fn_80137140(int i, int j) {
 }  // extern "C"
 
 void Proxer::Process(void) {
+    f32 d;
     f32 gap = fn_80137C54(-1)->gap;
     int k;
     int n;
@@ -358,7 +359,7 @@ void Proxer::Process(void) {
                         q->bFlag = 0;
                         rel = sgn * q->dvel.y;
                         if (rel < -0.8888889f) {
-                            f32 d = sgn * q->dpos.y;
+                            d = sgn * q->dpos.y;
                             f32 tt = -((d - gap) / rel);
                             if (tt < 8.0f || d <= reach) {
                                 q->aFlag = 1;
