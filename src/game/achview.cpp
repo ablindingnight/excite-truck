@@ -680,29 +680,7 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 // An achievement row: its value, level, next threshold and trophy model name.
 void fn_8025B520(u8* p) {
-    int show;
-    s32 value;
-    F32(p, 0x28) = (f32)S32(p, 0x1C);
-    value = (s32)(F32(p, 0x28) + lbl_80558DC4[0]);
-    fn_80130FCC((char*)(p + 0x2C), 0x14, value);
-    show = 1;
-    if (U8(p, 0xC4) && (U8(p, 0x58) || !U8(p, 0xC5))) {
-        show = 0;
-    }
-    int level = AchievementsGetLevel(S32(p, 0x18), value);
-    S32(p, 0xC8) = level;
-    s32 next = AchievementsGetLevelThreshold(S32(p, 0x18), level + 1);
-    if (next >= 0) {
-        fn_80130FCC((char*)(p + 0x40), 0x14, next);
-    } else {
-        CopyName("", 0x14, (char*)(p + 0x40));
-    }
-    const char* model = AchievementsGetLevelModel(S32(p, 0x18), S32(p, 0xC8));
-    if (model && show) {
-        CopyName(model, 50, (char*)(p + 0x60));
-    } else {
-        CopyName("", 50, (char*)(p + 0x60));
-    }
+    ((AchView*)p)->Refresh();
     U8(p, 0x58) = 1;
     U8(p, 0x59) = 0;
     S32(p, 0x5C) = -1000;
