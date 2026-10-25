@@ -88,8 +88,8 @@ struct ScreenFx {
     f32 flash;      // offset 0xDC
 };
 
-struct ParticleDesc {
-    ParticleDesc(void);
+struct PartParams {
+    PartParams(void);
     s32 a28;     // offset 0x0
     s32 a2C;     // offset 0x4
     f32 a30;     // offset 0x8
@@ -111,7 +111,7 @@ struct ParticleDesc {
     f32 a94;     // offset 0x6C
     u8 pad98[4];
     f32 a9C;     // offset 0x74
-    u8 padA0[0x1C];
+    u8 padA0[0x14];
 };
 
 class SnowSystem {
@@ -228,8 +228,8 @@ void fn_802C9900(f32 a);
 void fn_802C744C(s32 model, const WFrame* f);
 void fn_802C9904(void);
 void fn_802E317C(const char* fmt, ...);
-void fn_8028E61C(ParticleDesc* d);
-s32 fn_8028E2F8(ParticleDesc* d, const char* name, const char* tex);
+void fn_8028E61C(PartParams* d);
+s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
 ValueNode* fn_80288208(int i);
 int fn_80287B14(void);
 int fn_80287E20(ValueNode* vn, const char* key);
@@ -497,10 +497,10 @@ int fn_802A4FA8(Droplet* d, ValueNode* vn) {
 }
 
 void fn_802A50F8(void) {
-    ParticleDesc pd;
+    PartParams pd;
     char key[32];
-    pd.a2C = 0x100;
     pd.a28 = 0;
+    pd.a2C = 0x100;
     pd.a30 = 0.35f;
     pd.a34 = 1.0f;
     pd.a38[0] = 1.65f;
