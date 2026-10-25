@@ -1997,6 +1997,7 @@ static inline f32 Ease(f32 x) {
 }
 
 void ZoneMaster::DrawTimer(int p, CarState* c) {
+    f32 age;
     if (lbl_8055E1BC) {
         fn_802C8BD0(tex[0]);
         if (fn_802C8DBC(0x10)) {
@@ -2050,7 +2051,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
         }
         now = fn_8013CB3C();
         for (i = 0; events.a.Get(i); i++) {
-            f32 age = (now - events.a.Get(i)->time) / 1.0f;
+            age = (now - events.a.Get(i)->time) / 1.0f;
             LayoutArt* s0 = mainLyt->FindArt("ring_bonus_star_0");
             LayoutArt* s1 = mainLyt->FindArt("ring_bonus_star_1");
             LayoutArt* s2 = mainLyt->FindArt("score_star_art");

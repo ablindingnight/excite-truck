@@ -1606,6 +1606,7 @@ inline const char* CleanRaceName(int i) {
 }  // namespace
 
 int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
+    const StuntLine*l;
     int i;
     s32 b;
     s32 shown;
@@ -1650,7 +1651,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         grade2.Set("");
     }
     for (i = 0; i < s->lines.a.count; i++) {
-        const StuntLine* l = &s->lines.a.data[i];
+        l = &s->lines.a.data[i];
         stuntLabel[i].Set(l->label);
         stuntValue[i].Set(l->value);
     }

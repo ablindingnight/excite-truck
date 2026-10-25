@@ -161,10 +161,7 @@ const char* fn_80204EA0(const char* key) { return lbl_8055ED5C->Get(key); }
 
 int fn_8020503C(const char* key) {
     const char* v = lbl_8055ED5C->Get(key);
-    int b = 0;
-    if (strcasecmp(v, "yes") == 0 || strcasecmp(v, "true") == 0) {
-        b = 1;
-    }
+    int b = strcasecmp(v, "yes") == 0 || strcasecmp(v, "true") == 0;
     return b;
 }
 
