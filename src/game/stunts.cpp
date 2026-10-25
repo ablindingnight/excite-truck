@@ -973,7 +973,6 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     int full;
     int any;
     int n;
-    int i;
     if (turbo) {
         if (now - turboTime > 10.0f || (rc->turbo > lbl_80558DC4[0]) == 0) {
             turbo = 0;
@@ -993,7 +992,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
             flags &= ~2;
         }
     } else if (rc->air > 0) {
-        for (i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             if (rc->wheels[i].contact == 0) {
                 b2D0 = 0;
                 break;
@@ -1002,7 +1001,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     }
     n = 0;
     any = 0;
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         CloseCallSlot* s = &slots[i];
         if (!s->done && now - s->time > 0.1f) {
             s->done = 1;
