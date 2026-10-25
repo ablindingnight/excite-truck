@@ -233,8 +233,8 @@ void fn_80274268(u8* p) {
     CVec3 w;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     v.x = lbl_80563FB0;
-    v.y = lbl_80563FE8;
     v.z = lbl_80563FEC + (F32(car, 0x2458) - lbl_80563FE4);
+    v.y = lbl_80563FE8;
     MulVec(&w, &v, (CFrame*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0x7C) + w.x;
     F32(p, 0x80) = F32(p, 0x80) + w.y;

@@ -594,8 +594,8 @@ void Lift::Step(SpringCar* car, f32 rate) {
                     t = lbl_8055E3C8;
                     m = 1.0f < m ? 1.0f : m;
                     m = m > 0.0f ? m : 0.0f;
-                    state = 0;
                     f = 9.81f * (m * car->mass);
+                    state = 0;
                     while (--count) {
                         Apply(car);
                     }

@@ -818,8 +818,8 @@ void fn_802B773C(void) {
                     lbl_8055FA50[0] = 0x400;
                     lbl_8055FA50[2] = 0x400;
                     lbl_8055FA50[3] = -0x400;
-                    lbl_8055FA50[1] = -0x400;
                     fn_802B6F34(&hit, &lbl_804BE7D8.data[lbl_8055FA2C], fn_802B7518);
+                    lbl_8055FA50[1] = -0x400;
                     fn_802B7434();
                 }
             } else if (!(c->s.flags & 2)) {
