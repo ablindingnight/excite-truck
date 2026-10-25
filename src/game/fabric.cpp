@@ -726,19 +726,21 @@ UniformFabricMan::~UniformFabricMan(void) {
 static inline BOOL Paused(void) { return (f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]; }
 
 void UniformFabricMan::Update(void* ctx) {
+    f32 gravity;
     BOOL run = !Paused();
     Fabric* f = fabrics;
     int i;
     for (i = 0; i < count; f++, i++) {
         if (run) {
             f32 wind = f->wind;
-            f32 gravity = f->gravity;
-            PVec w;
+            gravity = f->gravity;
             PVec force;
+            PVec w;
             fn_801E8C84(&w);
             force.x = w.x * wind;
+            force.y = w.y * wind;
             force.z = w.z * wind;
-            force.y = w.y * wind - gravity;
+            force.y -= gravity;
             fn_801F63F0(f, &force, f->drag);
             fn_801F65D0(f);
             fn_801F6728(f);
@@ -849,17 +851,19 @@ ManualFabricMan::~ManualFabricMan(void) {
 }
 
 void ManualFabricMan::Update(void) {
+    f32 gravity;
     Fabric* f = fabrics;
     int i;
     for (i = 0; i < count; f++, i++) {
         f32 wind = f->wind;
-        f32 gravity = f->gravity;
-        PVec w;
+        gravity = f->gravity;
         PVec force;
+        PVec w;
         fn_801E8C84(&w);
         force.x = w.x * wind;
+        force.y = w.y * wind;
         force.z = w.z * wind;
-        force.y = w.y * wind - gravity;
+        force.y -= gravity;
         fn_801F63F0(f, &force, f->drag);
         fn_801F65D0(f);
         fn_801F6728(f);
