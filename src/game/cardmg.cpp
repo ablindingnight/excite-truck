@@ -137,11 +137,13 @@ void fn_8018E330(u8* p) {
 
 void fn_8018E3EC(u8* p) {}  // stub (949)
 
-void fn_8018F2C0(u8* p) {}  // stub (158)
 
 }  // extern "C"
 
 extern const f32 lbl_80562038;  // 255
+extern const f32 lbl_80561F88;  // 1.0
+extern const f32 lbl_8056203C;  // -0.508
+extern const f32 lbl_80562040;  // 1.016
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -150,6 +152,73 @@ static inline u8 PackDent(f32 v) {
     f32 t = FMax(FMin((v - -0.508f) / 1.016f, 1.0f), lbl_80561F74);
     return lbl_80561F74 + t * lbl_80562038 + 0.5f;
 }
+
+#define DMG_MIN(a, b) ((a) < (b) ? (a) : (b))
+
+// A packed dent byte back to its offset.
+static inline f32 UnpackDent(u8 b) {
+    f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
+    t = FMax(t, lbl_80561F74);
+    return lbl_8056203C + t * lbl_80562040;
+}
+
+extern "C" {
+
+// Restores the damage state saved by fn_8018F538.
+void fn_8018F2C0(u8* p, u8* q) {
+    f32 h = F32(q, 0x290);
+    F32(p, 0x2690) = h;
+    F32(p, 0x2694) = h;
+    F32(p, 0x2698) = F32(q, 0x294);
+    S32(p, 0x268C) = S32(q, 0x298);
+    u8* o = q;
+    u8* d = p;
+    for (int i = 0; i < S32(p, 0x5F8); o += 4, i++, d += 0xC) {
+        F32(d, 0x5FC) = UnpackDent(o[0]);
+        F32(d, 0x600) = UnpackDent(o[1]);
+        F32(d, 0x604) = UnpackDent(o[2]);
+        F32(d, 0xD94) = F32(d, 0x5FC);
+        F32(d, 0xD98) = F32(d, 0x600);
+        F32(d, 0xD9C) = F32(d, 0x604);
+    }
+    S32(p, 0x15A8) = U8(q, 0x2A0);
+    U8(p, 0x15A4) = 0;
+    S32(p, 0x1628) = U8(q, 0x2A1);
+    U8(p, 0x1624) = 0;
+    S32(p, 0x16A8) = U8(q, 0x2A2);
+    U8(p, 0x16A4) = 0;
+    S32(p, 0x1728) = U8(q, 0x2A3);
+    U8(p, 0x1724) = 0;
+    S32(p, 0x17A8) = U8(q, 0x2A4);
+    U8(p, 0x17A4) = 0;
+    S32(p, 0x1828) = U8(q, 0x2A5);
+    U8(p, 0x1824) = 0;
+    S32(p, 0x18A8) = U8(q, 0x2A6);
+    U8(p, 0x18A4) = 0;
+    S32(p, 0x1928) = U8(q, 0x2A7);
+    U8(p, 0x1924) = 0;
+    S32(p, 0x19A8) = U8(q, 0x2A8);
+    U8(p, 0x19A4) = 0;
+    S32(p, 0x1A28) = U8(q, 0x2A9);
+    U8(p, 0x1A24) = 0;
+    S32(p, 0x1AA8) = U8(q, 0x2AA);
+    U8(p, 0x1AA4) = 0;
+    S32(p, 0x1B28) = U8(q, 0x2AB);
+    U8(p, 0x1B24) = 0;
+    S32(p, 0x1BA8) = U8(q, 0x2AC);
+    U8(p, 0x1BA4) = 0;
+    S32(p, 0x1C28) = U8(q, 0x2AD);
+    U8(p, 0x1C24) = 0;
+    S32(p, 0x1CA8) = U8(q, 0x2AE);
+    U8(p, 0x1CA4) = 0;
+    S32(p, 0x1D28) = U8(q, 0x2AF);
+    U8(p, 0x1D24) = 0;
+    S32(p, 0x1DA8) = U8(q, 0x2B0);
+    U8(p, 0x1DA4) = 0;
+    S32(p, 0x1E3C) = S32(q, 0x29C);
+}
+
+}  // extern "C"
 
 extern "C" {
 
