@@ -4225,6 +4225,16 @@ void BetaMaster::vfC4(void) {}
 
 void BetaMaster::a4(void) {}
 
+void BetaMaster::a0(void) {}
+
+void BetaMaster::b0(void) {}
+
+void BetaMaster::b1(void) {}
+
+void BetaMaster::c1(void) {}
+
+void BetaMaster::c3(void) {}
+
 void BetaMaster::a3(void) {}
 
 extern "C" int fn_80161BB8(void);
