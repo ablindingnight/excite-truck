@@ -448,8 +448,8 @@ void fn_80251934(u8* p) {
     u8* c;
     S32(p, 0xC0) = U8(PTR(p, 0x4C), 0xDC) == 0;
     for (i = 0; i < S32(p, 0x1C); i++) {
-        on = 0;
         c = PTR(p, 0xCC) + i * 0x14;
+        on = 0;
         if (((u8*)GetVehicleColor(*(VehicleInfo**)(c + 8), 0))[8] && c[0xC]) {
             on = 1;
         }

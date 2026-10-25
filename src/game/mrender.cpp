@@ -848,8 +848,8 @@ void Flare::Draw(int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) {
             f32 grow = 0.5f * (dist - radius);
             pos.x += d.x * grow;
             pos.y += d.y * grow;
-            radius = 0.5f * (radius + dist);
             pos.z += d.z * grow;
+            radius = 0.5f * (radius + dist);
         }
     }
     fn_801E7890(fx, a, b, x, y, z, s, t);
