@@ -21,8 +21,8 @@ public:
     virtual void AddImage(const char* name, const char* file, int frame);
     virtual void AddFont(const char* name, const char* file);
     virtual void AddSound(const char* name, const char* file, u8 loop);
-    virtual void s18(void);
-    virtual void s1C(void);
+    virtual void DrawImage(const char* name, f32 x, f32 y, int z, int frame);                // 0x18
+    virtual void DrawImageFade(const char* name, f32 x, f32 y, f32 a, int z, int frame);     // 0x1C
     virtual void s20(void);
     virtual void s24(void);
     virtual const char* GetString(u32 id);  // 0x28
@@ -864,7 +864,50 @@ void fn_80284760(u8* p) {
 
 void fn_802849E8(u8* p) {}  // stub (702)
 
-void fn_802854E0(u8* p) {}  // stub (178)
+}  // extern "C"
+
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern "C" double cos(double x);
+extern "C" double sin(double x);
+
+extern "C" {
+void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
+
+// The fill level of each of an event icon's stars.
+struct EvIconStars {
+    u8 pad[0xB4];
+    f32 fill[8];  // offset 0xB4
+};
+
+// Draws the event's stars on an arc under its icon: full, empty, or empty with the fill fading in.
+void fn_802854E0(u8* p) {
+    if (!PTR(p, 0x60) || !U8(p, 0xCD)) {
+        return;
+    }
+    f32 x;
+    f32 y;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    f32 cx = x + 0.5f * S32(p, 0xC);
+    f32 cy = y - 0.5f * S32(p, 0x10);
+    f32 radius = 0.3f * S32(p, 0xC);
+    f32 step = VR(PTR(p, 0x60))->v18() == 4 ? 0.6981317f : 0.61086524f;
+    f32 start = 4.712389f;  // 3pi/2: straight down
+    for (int i = 0; i < VR(PTR(p, 0x60))->v18(); i++) {
+        f32 a = start + step * (i - 0.5f * (VR(PTR(p, 0x60))->v18() - 1));
+        x = cx + radius * (f32)cos(a);
+        y = cy + radius * (f32)sin(a);
+        if (VR(VR(PTR(p, 0x60))->v1C(i))->v40()) {
+            if (!((f32)__fabs(((EvIconStars*)p)->fill[i] - 1.0f) <= lbl_80558DC4[0])) {
+                fn_8027ED70()->DrawImage("star_small_empty", x, y, 20, -1);
+                fn_8027ED70()->DrawImageFade("star_small_full", x, y, 2.0f - ((EvIconStars*)p)->fill[i], 20, -1);
+            } else {
+                fn_8027ED70()->DrawImage("star_small_full", x, y, 20, -1);
+            }
+        } else {
+            fn_8027ED70()->DrawImage("star_small_empty", x, y, 20, -1);
+        }
+    }
+}
 
 void fn_802857A8(u8* p) {}  // stub (324)
 
