@@ -306,16 +306,17 @@ public:
         }
     }
     virtual void Switch(int car) {
-        CarLine* c = cars + car;
+        IdealLineRes* l;
+        IdealLineRes* cur;
         f32 now = lbl_8055E3C8;
-        IdealLineRes* cur = c->line;
+        cur = cars[car].line;
         int k = fn_80129D90(4, 0, lines.a.count);
-        IdealLineRes* l = lines.a.data[k].line;
+        l = lines.a.data[k].line;
         if (l == cur) {
             l = lines.a.data[(k + 1) % lines.a.count].line;
         }
         cars[car].next = now + fn_80129DC4(4, minT, maxT);
-        c->line = l;
+        cars[car].line = l;
     }
     virtual void Assign(void) {
         int n = fn_801B2F24();
