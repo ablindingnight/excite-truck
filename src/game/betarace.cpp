@@ -4481,11 +4481,12 @@ void BetaMaster::a1(void) {
 }
 
 void BetaMaster::b2(StuntEvt* e, int car) {
+    s32 h;
     BetaCar* c = &cars[car];
     if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
         int i;
         for (i = 0; i < stars.a.count; i++) {
-            s32 h = stars.a.data[i]->hC0;
+            h = stars.a.data[i]->hC0;
             if (h == e->Id()) {
                 Pickup* t = stars.a.data[i];
                 if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
