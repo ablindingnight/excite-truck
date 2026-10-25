@@ -5,6 +5,7 @@
 // strings.
 #include "game/common.h"
 #include <string.h>
+#include <revolution/MTX/vec.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -800,7 +801,54 @@ void fn_80191860(u8* p, FieldSaver* s) {
     s->Save(f);
 }
 
-void fn_80191928(u8* p) {}  // stub (92)
+// Transmission interface at +0x38 of the shifter.
+class Gearbox {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual f32 Speed(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual int Busy(void);
+};
+
+void fn_80191928(u8* p) {
+    if (S32(p, 0x30) == 0) {
+        return;
+    }
+    u8* body = PTR(p, 0x34);
+    if (F32(body, 0x2618) > kOne) {
+        S32(p, 0x30) = 4;
+        return;
+    }
+    f32 speed = ((Gearbox*)PTR(p, 0x38))->Speed();
+    int busy = ((Gearbox*)PTR(p, 0x38))->Busy();
+    bool moving = speed > 0.1f;
+    body = PTR(p, 0x34);
+    f32 d = PSVECDotProduct((Vec*)(body + 0x54), (Vec*)(body + 0x118));
+    int steady;
+    if (S32(p, 0x30) == 4) {
+        steady = moving && d < 0.8888889f;
+    } else {
+        steady = moving && d < 2.6666667f;
+    }
+    if (!steady || busy) {
+        S32(p, 0x30) = 4;
+    } else if (S32(p, 0x30) == 4) {
+        S32(p, 0x30) = 5;
+    } else if (S32(p, 0x30) >= 5) {
+        if (++S32(p, 0x30) - 5 == 29) {
+            S32(p, 0x30) = 3;
+        }
+        if (d < -1.3333334f) {
+            S32(p, 0x30) = 3;
+        }
+    }
+}
 
 int fn_80191A98(u8* p) { return PF(PTR(p, 0x8))->b1 != 0; }
 
