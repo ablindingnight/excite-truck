@@ -781,7 +781,7 @@ int sprintf(char* buf, const char* fmt, ...);
 int strncmp(const char* a, const char* b, u32 n);
 }
 
-#define REGION_MISSING "can't load region sphere - value '%s' is missing"
+#define REGION_MISSING "can't load region sphere - value '%s' is missing!"
 
 int RegionSphere::Load(ValueNode* t) {
     int j;
