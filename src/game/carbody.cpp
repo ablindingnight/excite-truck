@@ -779,10 +779,16 @@ struct CVec4 {
         z = z_;
         w = w_;
     }
+    CVec4(const CVec4& o) {
+        x = o.x;
+        y = o.y;
+        z = o.z;
+        w = o.w;
+    }
     f32 x, y, z, w;
 };
 
-static inline void SetVec4(u8* d, const CVec4& v) {
+static inline void SetVec4(u8* d, CVec4 v) {
     CVec4* o = (CVec4*)d;
     o->x = v.x;
     o->y = v.y;
@@ -799,7 +805,7 @@ void fn_8018F6F8(u8* p);
 // Puts the car back in one piece: restores the saved damage state (the alternate copy when fn_801CF064 says so),
 // clears the wheels' detached flags and resets the matching cross-link state.
 void fn_8018AF04(u8* p) {
-    fn_8018F2C0(p, fn_801CF064() ? p + 0x20F8 : p + 0x1E44);
+    fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
     CVec4 load;
     u8* w = p + 0x241C;
     for (int i = 0; i < 4; i++, w += 0x74) {
@@ -809,8 +815,8 @@ void fn_8018AF04(u8* p) {
     u8* x;
     fn_801BEB30(S32(p, 0x1EC), &x);
     SetVec4(x + 0x70, load);
-    SetVec4(x + 0x130, CVec4(lbl_80561CAC, lbl_80561CAC, lbl_80561CAC, lbl_80561CAC));
-    SetVec4(x + 0x140, CVec4(lbl_80561CAC, lbl_80561CAC, lbl_80561CAC, lbl_80561CAC));
+    SetVec4(x + 0x130, CVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    SetVec4(x + 0x140, CVec4(0.0f, 0.0f, 0.0f, 0.0f));
     if (S32(p, 0x26B0) >= 0) {
         S32(p, 0x26B0) = -1;
     }
