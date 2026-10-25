@@ -1253,7 +1253,91 @@ void fn_80195D80(u8* d, f32 t) {
     }
 }
 
-void fn_80195F6C(u8* d) {}
+// A point of the ideal line (idealline.cpp).
+struct IdealPoint {
+    V2 pos;            // offset 0x0
+    V2 dir;            // offset 0x8
+    u32 ilpos;         // offset 0x10
+    IdealPoint* next;  // offset 0x14
+    u8 pad18[0x10];
+    f32 width;         // offset 0x28
+    u8 pad2C[8];
+    u8 type;           // offset 0x34
+    u8 section;        // offset 0x35
+    u8 pad36[6];
+};
+
+// A position on the ideal line (idealline.cpp).
+struct ILPos {
+    ILPos(void) {
+        seg = 0;
+        mode = 10000;
+        t = 0.0f;
+    }
+    IdealPoint* seg;  // offset 0x0
+    f32 t;            // offset 0x4
+    s32 mode;         // offset 0x8
+};
+
+extern f32 lbl_8055A48C;  // -100000
+void fn_80135B9C(LineFollower* f, f32 dist, V2* outPos, V2* outDir, f32* outSpeed, ILPos* outIl);
+
+// Re-anchors the AI on the ideal line: lane half-width and margin, track limits, the look-ahead point and
+// the line direction there.
+void fn_80195F6C(u8* d) {
+    if (U8(d, 0x2A5)) {
+        return;
+    }
+    ILPos prev = *(ILPos*)(PTR(d, 0x164) + 0x4);
+    fn_80195D80(d, F32(d, 0x26C));
+    S32(PTR(d, 0x164), 0xC) = 0;
+    f32 w = (*(ILPos*)(PTR(d, 0x164) + 0x4)).seg->width;
+    if (!(prev.seg->section & 1)) {
+        w *= 100.0f;
+    }
+    F32(d, 0x284) = 0.5f * w;
+    F32(d, 0x274) = 0.5f * (w - lbl_8055A488) - 0.305f;
+    int calm = S32(d, 0x268) == 0 || S32(d, 0x268) == 3;
+    if (!calm) {
+        F32(d, 0x274) = F32(d, 0x274) - 0.61f;
+    }
+    if (F32(d, 0x274) <= 0.0f) {
+        fn_802E30C8("%.1f == (%.1f-%.1f)/2-%.1f", F32(d, 0x274), w, lbl_8055A488, 0.305);
+    }
+    F32(d, 0x278) = F32(PTR(d, 0x164), 0x40);
+    F32(d, 0x280) = F32(PTR(d, 0x164), 0x48);
+    F32(d, 0x27C) = F32(PTR(d, 0x164), 0x44);
+    U8(d, 0x2FE) = 0;
+    f32 ahead = 0.3f * F32(d, 0x270);
+    f32 speedScale = 0.5f;
+    ahead = lbl_8055A48C > ahead ? lbl_8055A48C : ahead;
+    ILPos il;
+    fn_80135B9C((LineFollower*)PTR(d, 0x164), ahead, 0, 0, (f32*)(d + 0x50), &il);
+    F32(d, 0x54) = speedScale;
+    *(ILPos*)(d + 0x68) = il;
+    if (il.seg->type == 3) {
+        F32(d, 0x50) = 40.0f;
+    }
+    if (il.seg) {
+        V2 pos;
+        V2 dir;
+        IdealPoint* s = il.seg;
+        f32 t = il.t;
+        dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
+        dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
+        pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
+        pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
+        f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
+        F32(d, 0x48) = pos.x;
+        F32(d, 0x4C) = pos.y;
+        dir.x *= inv;
+        dir.y *= inv;
+        F32(d, 0x58) = dir.y;
+        F32(d, 0x5C) = -dir.x;
+        F32(d, 0x60) = dir.x;
+        F32(d, 0x64) = dir.y;
+    }
+}
 
 void fn_801961F8(u8* d, const char* why) {}
 
