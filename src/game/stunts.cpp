@@ -614,6 +614,7 @@ public:
     }
     virtual f32 Rate(const RaceCarRec* rc) {
         f32 r;
+        int n;
         int full;
         {
             f32 t = timer - 0.016683351f;
@@ -625,7 +626,7 @@ public:
         r = 0.0f;
         full = 0;
         if (Capped()) {
-            int n = ranks.a.count;
+            n = ranks.a.count;
             int k = Rank();
             if (k == n - 1) {
                 full = 1;
