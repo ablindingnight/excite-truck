@@ -1465,9 +1465,10 @@ void fn_801FA2C4(void) {
     EWSound* s;
     for (a = lbl_8055EC5C; a; a = a->next) {
         int near = PSVECSquareDistance(&fn_801E8718(0)->pos, &a->frame.pos) < a->liveRad2;
+        int act;
         int state = a->state;
         if (state != 2) {
-            int act = 0;
+            act = 0;
             if (IsLive(a, near) && a->tag == lbl_8055EC40.view) {
                 act = 1;
             }
