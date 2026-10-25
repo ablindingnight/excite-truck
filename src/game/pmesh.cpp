@@ -368,9 +368,9 @@ void fn_801CFF18(PMesh* m, const PFrame* xf) {
         PVec3 v[3];
         for (int k = 0; k < 3; k++) {
             MulVec(&v[k], &m->verts[t->v[k]], &f);
-            v[k].x = v[k].x + f.pos.x;
-            v[k].y = v[k].y + f.pos.y;
-            v[k].z = v[k].z + f.pos.z;
+            v[k].x += f.pos.x;
+            v[k].y += f.pos.y;
+            v[k].z += f.pos.z;
         }
         PVec3 e1;
         PVec3 e2;
