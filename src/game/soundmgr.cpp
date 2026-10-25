@@ -313,12 +313,11 @@ void SoundManager::Allocate(void) {
     int avail = lbl_802F9DC8[q].total;
     int want[9];
     int got[9];
-    int c;
     int done;
     int k;
     memset(want, 0, sizeof(want));
     if (avail > 0) {
-        for (c = 0; c < 9; c++) {
+        for (int c = 0; c < 9; c++) {
             want[c] = 0;
             if (!primaryOnly || c == 0) {
                 int n = classes[c].count;
@@ -333,7 +332,7 @@ void SoundManager::Allocate(void) {
     memset(got, 0, sizeof(got));
     do {
         done = 1;
-        for (c = 0; avail > 0 && c < 9; c++) {
+        for (int c = 0; avail > 0 && c < 9; c++) {
             if (want[c]) {
                 int lim = (lbl_802F9DC8[q].cls[c] < avail) ? lbl_802F9DC8[q].cls[c] : avail;
                 if (want[c] > lim) {
@@ -350,7 +349,7 @@ void SoundManager::Allocate(void) {
         }
     } while (!done && avail > 0);
     SoundList* l = classes;
-    for (c = 0; c < 9; c++, l++) {
+    for (int c = 0; c < 9; c++, l++) {
         int n = l->count;
         for (k = 0; k < n; k++) {
             GameSound* s = l->first[k];
