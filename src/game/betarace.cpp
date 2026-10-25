@@ -582,6 +582,7 @@ public:
 class StuntList {
 public:
     virtual ~StuntList(void) {}
+    virtual StuntLine* Alloc(void);
     FixedList<StuntLine, 16> lines;  // offset 0x4
 };
 
@@ -4595,6 +4596,8 @@ void BetaMaster::c0(Body* b) {
         bumps2.Push(new ("inv_token") InvToken(b));
     }
 }
+
+StuntLine* StuntList::Alloc(void) { return &lines.a.data[lines.a.count++]; }
 
 StuntEvent* CarHud::Alloc(void) {
     StuntEvent* n = free.head;
