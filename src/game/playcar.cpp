@@ -683,7 +683,85 @@ u8* fn_801912B4(u8* p) {
     return p;
 }
 
-void fn_801912D8(u8* p) {}  // stub (136)
+// Transmission interface at +0x38 of the shifter.
+class Gearbox {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual f32 Speed(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void SetGear(int g);
+    virtual void SetRatio(f32 r);
+    virtual int Busy(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void v60(void);
+    virtual void v64(void);
+    virtual u8 Kind(void);
+    virtual int ParamSection(void);
+};
+
+extern u32 lbl_8055D430;
+int fn_801333E8(int section, const char* name, bool* v);
+int fn_8018B06C(u8* body);
+
+static inline BOOL OptHardcore(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 & 4); }
+
+void fn_801912D8(u8* p) {
+    Gearbox* gb = (Gearbox*)PTR(p, 0x38);
+    U8(PTR(p, 0x34), 0x2680) = gb->Kind();
+    S32(PTR(p, 0x34), 0x267C) = 0;
+    F32(PTR(p, 0x34), 0x5F0) = kOne;
+    bool autoShift = true;
+    B8(p, 0x4) = autoShift;
+    fn_801333E8(((Gearbox*)PTR(p, 0x38))->ParamSection(), "auto_shifting", (bool*)(p + 0x4));
+    B8(p, 0x5) = true;
+    fn_801333E8(((Gearbox*)PTR(p, 0x38))->ParamSection(), "auto_clutch", (bool*)(p + 0x5));
+    if (B8(p, 0x4)) {
+        B8(p, 0x5) = true;
+    }
+    if (!B8(p, 0x4)) {
+        autoShift = false;
+    }
+    int mode = 0;
+    if (autoShift) {
+        mode = 4;
+    }
+    S32(p, 0x30) = mode;
+    bool stability = true;
+    bool braking = true;
+    bool hardcore = false;
+    fn_801333E8(((Gearbox*)PTR(p, 0x38))->ParamSection(), "arc_stability_help", &stability);
+    fn_801333E8(((Gearbox*)PTR(p, 0x38))->ParamSection(), "arcade_braking_help", &braking);
+    fn_801333E8(((Gearbox*)PTR(p, 0x38))->ParamSection(), "hardcore_mode", &hardcore);
+    if (OptHardcore()) {
+        hardcore = true;
+    }
+    if (hardcore) {
+        stability = false;
+        braking = false;
+    }
+    ((Gearbox*)PTR(p, 0x38))->SetGear(fn_8018B06C(PTR(p, 0x34)));
+    ((Gearbox*)PTR(p, 0x38))->SetRatio(F32(PTR(p, 0x34), 0x25F4));
+    S32(p, 0x8) = S32(PTR(p, 0x38), 0x20);
+    F32(p, 0x10) = 0.0f;
+    F32(p, 0x14) = 0.0f;
+    F32(p, 0x18) = 0.0f;
+    memset(p + 0x20, 0, 0x10);
+}
 
 void fn_801914F8(u8* p) { VP(PTR(p, 0x4))->v28(); }
 
@@ -800,21 +878,6 @@ void fn_80191860(u8* p, FieldSaver* s) {
     VP(PTR(p, 0x38))->v24(fn_8018B06C(PTR(p, 0x34)));
     s->Save(f);
 }
-
-// Transmission interface at +0x38 of the shifter.
-class Gearbox {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual f32 Speed(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual int Busy(void);
-};
 
 void fn_80191928(u8* p) {
     if (S32(p, 0x30) == 0) {
