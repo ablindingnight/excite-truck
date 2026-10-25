@@ -530,6 +530,8 @@ void fn_802C3D74(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     }
 }
 
+static inline u32 gxReadPixel32(const u32* pixel) { return *pixel; }
+
 void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
@@ -544,7 +546,7 @@ void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         do {
             int n = w;
             do {
-                u32 p = *s++;
+                u32 p = gxReadPixel32(s++);
                 int r = (p >> 16) & 0xFF;
                 int g = (p >> 8) & 0xFF;
                 int b = p & 0xFF;
@@ -557,7 +559,7 @@ void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         do {
             int n = w;
             do {
-                u32 p = *s++;
+                u32 p = gxReadPixel32(s++);
                 *d++ = gxPack565((p >> 16) & 0xFF, (p >> 8) & 0xFF, p & 0xFF);
             } while (--n > 0);
             s += sskip;

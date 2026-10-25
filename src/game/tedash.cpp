@@ -941,8 +941,9 @@ int fn_802B8110(int d, const char* s) {
     World* w = fn_802B5B6C();
     InlineVec<ObjItem, 16> list;
     fn_802B321C(&list, 0, w->objs, lbl_8055FA40);
+    int v;
     s32* dp = list.data[idx].density;
-    int v = *dp + d / 2;
+    v = *dp + d / 2;
     int c = v > 0 ? v : 0;
     if (*dp != (c < 0x80 ? c : 0x80)) {
         c = v > 0 ? v : 0;
