@@ -22,7 +22,7 @@ void fn_801282F4(void);
 void* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
 void fn_80128684(void);
-void fn_800485AC(s32 chan);
+void KPADEnableDPD(s32 chan);
 void fn_800484E4(s32 chan);
 s32 fn_80047C0C(s32 chan, void* status, u32 n);  // KPADRead
 
@@ -347,7 +347,7 @@ void fn_802E7FD0(void) {
         lbl_80560009 = paused;
         for (int i = 0; i < 4; i++) {
             if (paused) {
-                fn_800485AC(i);
+                KPADEnableDPD(i);
             } else {
                 fn_800484E4(i);
             }
