@@ -79,6 +79,7 @@ public:
     virtual void Locate(int il, void* pos);  // 0x18
     virtual void v1C(void);
     virtual void Reset(void);                // 0x20
+    virtual void Begin(void);                // 0x24
 };
 
 // The car a DeityCar oversees (offsets only).
@@ -205,7 +206,8 @@ struct DState {
     s32 mode;    // offset 0x28
     u8 hold;     // offset 0x2C
     f32 holdTime;  // offset 0x30
-    u8 pad34[0x3C - 0x34];
+    DCar* ahead;   // offset 0x34, the car in front in the same grid column
+    f32 lane;      // offset 0x38, grid column offset
 };
 
 class DeityCar {
@@ -1078,7 +1080,44 @@ void fn_801B265C(void) {
     }
 }
 
-void fn_801B2910(void) {}
+void fn_801B234C(f32 t);
+
+// Puts the cars on the grid: reset, place order from the start positions, then two columns (one if racing
+// alone), each car following the one ahead in its column.
+void fn_801B2910(void) {
+    lbl_8055E6A0 = 0;
+    fn_801E89F4(0);
+    lbl_80435BE8.n = 0;
+    for (int i = 0; i < lbl_8055E678; i++) {
+        lbl_8055E684[i].Reset();
+    }
+    for (int i = 0; i < lbl_8055E678; i++) {
+        lbl_80435C30[(u32)(DS((u8*)&lbl_8055E684[i] + 0x4)->place - 1)] = i;
+    }
+    if (lbl_8055E68C) {
+        lbl_8055E68C->v24();
+    }
+    fn_801B234C(0.033366702f + lbl_8055E3C8);
+    int solo = lbl_8055E678 == 1;
+    f32 left = solo ? 0.0f : -5.0f;
+    f32 right = solo ? 0.0f : 5.0f;
+    DCar* lastRight = 0;
+    DCar* lastLeft = 0;
+    for (int i = 0; i < lbl_8055E678; i++) {
+        DeityCar* c = &lbl_8055E684[lbl_80435C30[i]];
+        DState* st = DS((u8*)c + 0x4);
+        if ((i & 1) || solo) {
+            st->ahead = lastRight;
+            st->lane = right;
+            lastRight = c->Car();
+        } else {
+            st->ahead = lastLeft;
+            st->lane = left;
+            lastLeft = c->Car();
+        }
+    }
+    fn_80156A40()->Begin();
+}
 
 }  // extern "C"
 
