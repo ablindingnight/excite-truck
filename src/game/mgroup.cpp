@@ -336,14 +336,13 @@ void fn_801D9B58(void) {
         if (l->dirty) {
             f32 w[2];
             f32 out[4];
-            int i;
-            for (i = 0; i < l->groups.count; i++) {
+            for (int i = 0; i < l->groups.count; i++) {
                 w[i] = l->groups.data[i]->t;
             }
             fn_801D9120(out, w, l->groups.count, 1.0f);
             fn_802C9900((0.003921569f > out[0]) ? 0.003921569f : out[0]);
             fn_802C7040(l->models.data[0]);
-            for (i = 1; i < l->models.count; i++) {
+            for (int i = 1; i < l->models.count; i++) {
                 fn_802C9900(out[i]);
                 fn_802C7040(l->models.data[i]);
             }
