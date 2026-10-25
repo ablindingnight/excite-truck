@@ -303,7 +303,6 @@ int fn_802710A0(u8* car, int type) {
     int foundAlt = 0;
     int bestIdx = -1;
     int altIdx = -1;
-    int i;
     if (lbl_8055F564) {
         u8* track = ((CamCarCtl*)PTR(car, 0x270))->Track();
         f32* heading = &lbl_8055F568;
@@ -318,7 +317,7 @@ int fn_802710A0(u8* car, int type) {
         }
     }
     r = lbl_8049F9D8;
-    for (i = 0; i < lbl_8055F554; i++) {
+    for (int i = 0; i < lbl_8055F554; i++) {
         f32 w = lbl_80563F48;
         if (r->CamRegion::Weight(car, &w, type)) {
             if (!found || best < w) {
