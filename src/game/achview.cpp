@@ -347,7 +347,103 @@ void fn_8025AD8C(u8* self, f32* out, const f32* a, const f32* b, f32 t) {
 
 f32 fn_8025ADF4(f32 x) { return (f32)sqrt(x); }
 
-void fn_8025AE18(u8* p) {}  // stub (165)
+}  // extern "C"
+
+struct Perspective {
+    Perspective(f32 near, f32 far, f32 fov);
+    ~Perspective(void);
+    f32 near;  // offset 0x0
+    f32 far;   // offset 0x4
+    f32 fov;   // offset 0x8
+};
+
+struct LightDir {
+    f32 x, y, z;
+};
+
+extern f32 lbl_8055F39C;  // trophy view field of view
+
+extern "C" {
+u8* fn_8025B134(u8* p);
+void fn_8025B0E8(Words9* d, const Words9* s);
+f32 fn_8025B0A8(f32* r);
+f32 fn_8025B0C4(f32 x);
+u8* fn_8022EDC4(void);
+void fn_80144D80(Mat3* m, f32 x, f32 y, f32 z);
+void fn_802C77F0(s32 model, f32* bounds);
+void fn_801C2B9C(f32* out, const f32* pos, const f32* dir, f32 d);
+void fn_801E67B4(f32* out, const f32* v, const u8* m);
+void fn_801C0E60(f32* out, const f32* a, const f32* b);
+void fn_801BFE7C(f32* out, const f32* a, const f32* b);
+void fn_802E30C8(const char* fmt, ...);
+u32 fn_802C9950(u32 c);
+u32 fn_802C9994(u32 c);
+f32 fn_802C99E8(f32 v);
+LightDir* fn_802C9A40(void);
+void fn_802C9A1C(const LightDir* d);
+void fn_802D7554(int on);
+void fn_802CA294(s32 tex);
+void fn_802D9230(void);
+void fn_802C744C(s32 model, u8* m);
+
+// Trophy size per level.
+struct TrophySizes {
+    f32 s[5];
+};
+
+static const TrophySizes kTrophySizes = {0.75f, 0.8f, 0.85f, 0.95f, 1.0f};
+
+// Draws the trophy model: scaled to the view, placed in front of the camera so its size class
+// fills the screen, lit from a fixed direction.
+void fn_8025AE18(u8* p) {
+    Mat3 scale;
+    TrophySizes sizes;
+    f32 bounds[6];
+    LightDir dir;
+    if (S32(p, 0x50) == -1 || !U8(p, 0x4A)) {
+        return;
+    }
+    fn_8025B0E8((Words9*)(p + 0x54), (Words9*)fn_8025B134(p + 0x84));
+    u8* cam = fn_8022EDC4();
+    fn_80144D80(&scale, F32(cam, 0x38), F32(cam, 0x38), F32(cam, 0x38));
+    Mat3Mul((Mat3*)(p + 0x54), (Mat3*)(p + 0x54), &scale);
+    fn_802C77F0(S32(p, 0x50), bounds);
+    sizes = kTrophySizes;
+    int level = S32(p, 0x4C);
+    if (level <= 0) {
+        fn_802E30C8("AchievementTrophyModel: bad level value %d", level);
+    } else {
+        f32 r = 4.3f * sizes.s[level - 1] / 2.0f;
+        f32 d = r / fn_8025B0C4(0.5f * lbl_8055F39C);
+        f32 nearD = 0.1f + r;
+        u8* m = (u8*)fn_802C86DC();
+        fn_801C2B9C((f32*)(p + 0x78), (f32*)(m + 0x24), (f32*)(m + 0x18), Max(d, nearD));
+        f32 c[3];
+        StatsUpdate__Fv(c);
+        fn_801BFEBC(c, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
+        fn_801E67B4(c, c, p + 0x54);
+        fn_801C0E60((f32*)(p + 0x78), (f32*)(p + 0x78), c);
+        fn_801BFE7C((f32*)(p + 0x78), (f32*)(p + 0x78), (f32*)(cam + 0x24));
+    }
+    dir.x = 0.2f;
+    dir.y = -0.7f;
+    dir.z = 0.7f;
+    u32 oldAmb = fn_802C9950(0xFF646464);
+    u32 oldDiff = fn_802C9994(0xFFB4B4B4);
+    f32 oldSpec = fn_802C99E8(1.0f);
+    LightDir saved = *fn_802C9A40();
+    fn_802C9A1C(&dir);
+    fn_802D7554(1);
+    fn_802CA294(S32(p, 0xA8));
+    fn_802D9230();
+    Perspective persp(0.1f, 100.0f, lbl_8055F39C);
+    fn_802C744C(S32(p, 0x50), p + 0x54);
+    fn_802D7554(0);
+    fn_802C9A1C(&saved);
+    fn_802C99E8(oldSpec);
+    fn_802C9994(oldDiff);
+    fn_802C9950(oldAmb);
+}
 
 extern const f32 lbl_80563B1C;  // 0.5
 
@@ -362,7 +458,7 @@ f32 fn_8025B0C4(f32 x) { return (f32)sin(x); }
 
 void fn_8025B0E8(Words9* d, const Words9* s) { *d = *s; }
 
-void fn_8025B134(u8* p) {}
+u8* fn_8025B134(u8* p) { return p; }
 
 void fn_8025B138(u8* p) {
     s32 level = S32(p, 0x1C);
