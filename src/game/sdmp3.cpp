@@ -466,9 +466,10 @@ void fn_802EA7E0(void) {
 }
 
 Mp3Reader* fn_802EA834(int idx, s32* size) {
+    int k;
     Mp3Reader* r = 0;
     if (idx <= -2) {
-        int k = -2 - idx;
+        k = -2 - idx;
         if (k >= 0 && k < 3 && lbl_805076A0[k].data) {
             r = fn_802E9A3C((u8*)lbl_805076A0[k].data, lbl_805076A0[k].size);
             if (r) {

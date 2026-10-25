@@ -943,6 +943,7 @@ void fn_802CBBE8(MipLoad** list, MipLoad* l) {
 }
 
 void fn_802CBC3C(TexCache* c, s32 frame) {
+    MipLoad* l;
     MipDiscard* d = c->discards;
     while (d) {
         if (d->frame <= frame) {
@@ -950,7 +951,7 @@ void fn_802CBC3C(TexCache* c, s32 frame) {
             fn_802CB3F4(d->gx);
             d->gx = 0;
             fn_802CBD30(&c->freeDiscards, &c->discards, d);
-            MipLoad* l = d->load;
+            l = d->load;
             if (l) {
                 if (--l->wait == 0) {
                     l->wait = -1;

@@ -90,6 +90,7 @@ int fn_802E721C(u32 cookie, u32 version, s32 size);
 int fn_802E6FBC(void);
 
 int fn_802E6CA8(void) {
+    u8* p;
     MemCardHeader* h;
     int ok;
     int failed;
@@ -123,7 +124,7 @@ int fn_802E6CA8(void) {
             fn_802E30C8("Memcard: bad checksum (%x != %x)", sum, h->checksum);
         } else {
             ChunkHeader* ch = h->chunks;
-            u8* p = h->data;
+            p = h->data;
             ok = 1;
             ChunkHeader* c = ch;
             for (i = 0; i < h->count; i++, c++) {
