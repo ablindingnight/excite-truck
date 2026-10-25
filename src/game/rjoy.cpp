@@ -409,10 +409,7 @@ void fn_802E7FD0(void) {
         } else {
             r->home = 0;
         }
-        int hold = 0;
-        if (fn_802E77B8(chan) && r->b2B && r->b29 && r->b27) {
-            hold = 1;
-        }
+        int hold = fn_802E77B8(chan) && r->b2B && r->b29 && r->b27;
         s32 t = fn_802E2C20();
         if (!hold) {
             r->lastHome = t;
