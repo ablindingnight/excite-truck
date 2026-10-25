@@ -50,7 +50,9 @@ struct ContactSet {
     ContactSet(void);
     u8 pad0[0x30];
     MVec4 v30;            // offset 0x30
-    ContactPt pts[0x15];  // offset 0x40
+    ContactPt pts[13];    // offset 0x40
+    ContactPt nrm[4];     // offset 0x110, per-wheel contact plane normal
+    ContactPt ref[4];     // offset 0x150, per-wheel contact plane anchor
     MVec4 v190;           // offset 0x190
     MVec4 v1A0;           // offset 0x1A0
     u8 pad1B0[0x40];
@@ -199,7 +201,60 @@ void fn_801BEB1C(int car, ContactSet** out) { *out = &lbl_8055E798[car]; }
 void fn_801BEB30(int car, CrossSet** out) { *out = &lbl_8055E79C[car]; }
 
 // Post-update passes (placeholders).
-void fn_801BEB44(void) {}
+// A vector with a field-by-field copy (copied through float registers).
+struct CVec3 {
+    CVec3(void) {}
+    CVec3(const CVec3& o) {
+        x = o.x;
+        y = o.y;
+        z = o.z;
+    }
+    f32 x, y, z;
+};
+
+f32 PSVECDotProduct(const CVec3* a, const CVec3* b);
+void PSVECNormalize(const CVec3* src, CVec3* dst);
+
+// Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
+// to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
+void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
+    ContactSet* cs = &lbl_8055E798[car];
+    CVec3 p(*(CVec3*)&cs->pts[i]);
+    CVec3 ref(*(CVec3*)&cs->ref[i]);
+    CVec3 nrm(*(CVec3*)&cs->nrm[i]);
+    CVec3 d;
+    d.x = p.x - ref.x;
+    d.y = p.y - ref.y;
+    d.z = p.z - ref.z;
+    f32 base = PSVECDotProduct(&d, &nrm);
+    CVec3 e;
+    e.x = p.x - pt->x;
+    e.y = p.y - pt->y;
+    e.z = p.z - pt->z;
+    f32 pen = PSVECDotProduct(&e, n) - base;
+    if (pen > 0.2f) {
+        return;
+    }
+    if (PSVECDotProduct(n, &nrm) < -0.2f) {
+        return;
+    }
+    f32 k = 2.5f * (0.2f + pen);
+    k = 1.0f >= k ? k : 1.0f;
+    k = k > 0.0f ? k : 0.0f;
+    CVec3 nn;
+    nn.z = n->z + k * (nrm.z - n->z);
+    nn.y = n->y + k * (nrm.y - n->y);
+    nn.x = n->x + k * (nrm.x - n->x);
+    nrm = nn;
+    PSVECNormalize(&nrm, &nrm);
+    CVec3 r;
+    r.x = pt->x + k * (ref.x - pt->x);
+    r.y = pt->y + k * (ref.y - pt->y);
+    r.z = pt->z + k * (ref.z - pt->z);
+    ref = r;
+    *(MVec4*)&cs->ref[i] = MVec4(ref.x, ref.y, ref.z);
+    *(MVec4*)&cs->nrm[i] = MVec4(nrm.x, nrm.y, nrm.z);
+}
 
 void fn_801BEDA8(MassSet** m, ContactSet** cs, CrossSet** cc, CxEntry** cx, s32* n) {
     *m = lbl_8055E794;
