@@ -868,8 +868,8 @@ void fn_802D6170(Surf* s) {
 
 void fn_802D61BC(Surf* s) {
     lbl_8055FD25 = (s->flags >> 3) & 1;
-    lbl_804C5700.mode = 6;
     lbl_804C5700.b9 = (s->flags >> 4) & 1;
+    lbl_804C5700.mode = 6;
     switch (s->fmt) {
     case 0x10:
         lbl_804C5700.mode = 2;

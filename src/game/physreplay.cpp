@@ -207,8 +207,8 @@ s32 fn_801B4818(Replay* r) { return 0x100000; }
 void fn_801B4820(Replay* r, s32* dataSize, s32* frames, u32 avail) {
     int n = avail / ((fn_801B2F24() + 1) * 0x44 + 0xC);
     n = (n < 0x7E90) ? n : 0x7E90;
-    int secs = n / 9;
     *dataSize = 0x5000;
+    int secs = n / 9;
     *frames = 50;
     fn_802E30C8("replay: Allocing %d:%2.2ds (%dK) frames and %dK data (%dK avail)", secs / 60, secs % 60,
                 *frames * sizeof(Frame) / 1024, *dataSize / 1024, avail / 1024);

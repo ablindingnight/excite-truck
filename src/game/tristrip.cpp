@@ -166,8 +166,8 @@ void fn_801E5348(void) {
 
 int fn_801E5370(int max, int subdiv, f32 scale) {
     SkidSpline* s = &lbl_80487C88;
-    s->max = max;
     lbl_8055EAA8 = 0;
+    s->max = max;
     lbl_8055EAAC = 0;
     s->count = 0;
     s->subdiv = subdiv + 1;
