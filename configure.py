@@ -361,6 +361,7 @@ config.libs = [
             Object(Matching, "Runtime.PPCEABI.H/__init_cpp_exceptions.cpp"),
             Object(Matching, "Runtime.PPCEABI.H/Gecko_ExceptionPPC.cp"),
             Object(Matching, "Runtime.PPCEABI.H/GCN_mem_alloc.c"),
+            Object(Matching, "Runtime.PPCEABI.H/trk_stubs.c"),
         ],
     },
     {
@@ -881,6 +882,8 @@ config.libs.append(
             Object(Matching, "RVL_SDK/os/OSIpc.c"),
             Object(Matching, "RVL_SDK/os/OSLink.c"),
             Object(Matching, "RVL_SDK/axfx/AXFXHooks.c"),
+            Object(Matching, "RVL_SDK/wpad/debug_msg.c"),
+            Object(Matching, "RVL_SDK/wud/debug_msg.c"),
             Object(Matching, "RVL_SDK/vi/vi.c"),
             Object(Matching, "RVL_SDK/vi/i2c.c"),
             Object(Matching, "RVL_SDK/usb/usb.c"),

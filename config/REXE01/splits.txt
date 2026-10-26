@@ -360,7 +360,7 @@ MSL/wchar_io.c:
 MSL/uart_console_io_gcn.c:
 	extab       start:0x800046A0 end:0x800046A8
 	extabindex  start:0x80004940 end:0x8000494C
-	.text       start:0x8002AF88 end:0x8002B058
+	.text       start:0x8002AF88 end:0x8002B060
 	.sbss       start:0x8055D688 end:0x8055D68C
 
 MSL/math_sun.c:
@@ -523,6 +523,9 @@ Runtime.PPCEABI.H/Gecko_ExceptionPPC.cp:
 Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.text       start:0x8002FF84 end:0x800300F4
 	.rodata     start:0x802EE808 end:0x802EE878
+
+Runtime.PPCEABI.H/trk_stubs.c:
+	.text       start:0x800300F4 end:0x8003010C
 
 revolution/ai/ai.c:
 	.text       start:0x8003010C end:0x80030658
@@ -963,6 +966,9 @@ revolution/wpad/WPADEncrypt.c:
 	.data       start:0x80312798 end:0x803130C8
 	.sbss       start:0x8055DC28 end:0x8055DC2C
 
+RVL_SDK/wpad/debug_msg.c:
+	.text       start:0x80068D68 end:0x80068DB8
+
 revolution/wud/WUD.c:
 	.text       start:0x80068DB8 end:0x8006CAA8
 	.data       start:0x803130C8 end:0x80313E8C
@@ -974,6 +980,9 @@ revolution/wud/WUD.c:
 revolution/wud/WUDHidHost.c:
 	.text       start:0x8006CAA8 end:0x8006CFA8
 	.data       start:0x80313E90 end:0x80314110
+
+RVL_SDK/wud/debug_msg.c:
+	.text       start:0x8006CFA8 end:0x8006CFF8
 
 RVL_SDK/bte/gki_buffer.c:
 	.text       start:0x8006CFF8 end:0x8006E43C
