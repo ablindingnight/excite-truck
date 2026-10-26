@@ -10,3 +10,11 @@ mw_comment_version: 14 # GC Linker 3.0
 detect_objects: true
 detect_strings: true
 write_asm: true
+# dtk's pointer analysis mistakes OSInit's literal 0x80004000 (start of usable MEM1, the SDK writes
+# (void*)0x80004000) for a reference to memcpy, which happens to sit at that address.
+block_relocations:
+- source: 0x8004ADB0
+- source: 0x8004AE28
+# __OSDBJump's `bl +0x60` is copied to the debugger jump point at run time; its target only looks like a
+# branch into OSExceptionVector.
+- source: 0x8004B358
