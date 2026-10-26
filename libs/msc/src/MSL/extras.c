@@ -7,6 +7,22 @@ inline int tolower_inline(int c)
     return ((c < 0) || (c >= 0x100)) ? c : (int)(_current_locale.ctype_cmpt_ptr->lower_map_ptr[c]);
 }
 
+#if defined(GAME_REXE01)
+// Excite Truck's older MSL has strlwr ahead of stricmp
+char* strlwr(char* str)
+{
+    char* p = str;
+
+    while (*p)
+    {
+        *p = tolower_inline(*p);
+        p++;
+    }
+
+    return str;
+}
+#endif
+
 int stricmp(const char* s1, const char* s2)
 {
     char c1, c2;

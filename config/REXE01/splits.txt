@@ -377,7 +377,7 @@ game/unk_8002B0B0.c:
 	.text       start:0x8002B0B0 end:0x8002B0D8
 
 MSL/extras.c:
-	.text       start:0x8002B130 end:0x8002B1DC
+	.text       start:0x8002B0D8 end:0x8002B1DC
 
 MSL/e_acos.c:
 	.text       start:0x8002B1DC end:0x8002B4A0

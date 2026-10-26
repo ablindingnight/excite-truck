@@ -29,7 +29,7 @@ void fn_802E746C(int h, s32* sector, s32* size);
 int fn_802E748C(s32 sector, void* buf, s32 size);  // start read
 int fn_802E7544(int h);                            // read done
 void fn_802E7548(int h);                           // finish read
-void fn_8002B0D8(char* s);                         // lowercase
+char* strlwr(char* s);
 void fn_801282F4(void);
 void fn_801282EC(s32 align);
 void* fn_801284F0(const char* name, u32 size);  // MemAlloc
@@ -184,7 +184,7 @@ inline ResToc* GetToc(const char* name) {
         *strrchr(buf, '.') = 0;
     }
     StrNCat(buf, ".toc", 0x80);
-    fn_8002B0D8(buf);
+    strlwr(buf);
     toc = (ResToc*)fn_8012C370(buf, 'ETOC', &info, 0, 0, &swap);
     if (toc && swap) {
         Swap4((u8*)&toc->version);
