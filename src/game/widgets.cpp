@@ -1285,7 +1285,26 @@ void fn_80222CFC(WidgetFragment *source) {
 }
 
 void fn_802230A4(void) {}  // placeholder (356 bytes)
-void fn_80223280(void) {}  // placeholder (820 bytes)
+extern "C" {u32 fn_802236C8(WidgetFragment*,int);extern int lbl_8055FB9C,lbl_8055FBA0;}
+struct SelectionDrawFieldsNew {char base[0x244];const char* labels[33];int count;int* selected;unsigned char available[33];char pad2f1[3];float widths[33];int icons[33];int resource;float spacing,scale,scrollX,first,second,pulse;};
+extern "C" {extern const float lbl_805634EC,lbl_805634F4,lbl_80563534;}
+static inline float SelectionDrawTopNew(const WidgetFragment* self){return lbl_805634F4-(float)self->top;}
+extern "C" {
+// MATCHING-AID: shared product helper currently steers operand allocation; original helper identity is unproved, and natural replacement remains open.
+static inline float SelectionWidthProductObservedNew(float width,float half){return width*half;}
+void fn_80223280(WidgetFragment* self){SelectionDrawFieldsNew* f=(SelectionDrawFieldsNew*)self;float y,x,selectedX,half,shadow;x=f->scrollX;y=(float)self->top;y=lbl_805634F4-y;selectedX=f->scrollX;shadow=lbl_805634EC;half=lbl_805634C4;
+int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;x+=f->spacing+SelectionWidthProductObservedNew(f->widths[i],half);if(i+1<f->count)x+=SelectionWidthProductObservedNew(f->widths[i+1],half);}else{fn_80232BA4(f->labels[i],f->resource,shadow+x,y-shadow,0xff000000u,12,f->scale,lbl_805634A8,lbl_805634A4);u32 color=fn_802236C8(self,i);fn_80232BA4(f->labels[i],f->resource,x,y,color,12,f->scale,lbl_805634A8,lbl_805634A4);x+=f->spacing+SelectionWidthProductObservedNew(f->widths[i],half);if(i+1<f->count)x+=SelectionWidthProductObservedNew(f->widths[i+1],half);}}
+i=*f->selected;int selected=i;
+// MATCHING-AID: retain the observed screen int-to-float conversions; both local values are unused in this recovered body, and their original enclosing interface remains unproved.
+float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]*GaugeHalfReferenceObservedNew()-f->spacing*lbl_805634C4;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=lbl_805634EC+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
+fn_80230924(0x96646464u,left,y-lbl_805634EC,left+width,(y-height)-lbl_80563534,lbl_805634A8);
+fn_80230924(0x96282828u,left,y-lbl_805634EC,lbl_805634EC+left,(y-height)-lbl_80563534,lbl_805634A8);
+fn_80230924(0x96282828u,left,y-lbl_805634EC,left+width,y-lbl_80563534,lbl_805634A8);
+fn_80230924(0x96aaaaaau,left,(y-height)-lbl_805634EC,left+width,(y-height)-lbl_80563534,lbl_805634A8);
+fn_80230924(0x96aaaaaau,(left+width)-lbl_805634EC,y-lbl_805634EC,left+width,(y-height)-lbl_80563534,lbl_805634A8);
+fn_80232BA4(f->labels[selected],f->resource,lbl_80563534+selectedX,y-lbl_80563534,0xff000000u,12,f->scale,lbl_805634A8,lbl_805634A4);u32 color=fn_802236C8(self,selected);fn_80232BA4(f->labels[selected],f->resource,lbl_805634EC+selectedX,y-lbl_805634EC,color,12,f->scale,lbl_805634A8,lbl_805634A4);}
+}
+
 void fn_8022375C(void) {}  // placeholder (4 bytes)
 
 struct LargeImage355 {char base[0x244];float x,y,width,height;int frame;const char* name;bool flag;char pad25d[3];void* image;int resource;};

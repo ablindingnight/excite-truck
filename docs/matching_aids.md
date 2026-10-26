@@ -16,6 +16,8 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | Rate__16CloseCallTrackerFPC10RaceCarRec (close-call stunt rating) | src/game/stunts.cpp | `const f32&` bound to the 10.0f literal | Codex v2 handoff 2026-10-25 |
 | fn_8025AD3C (achview 3-component lerp) | src/game/achview.cpp | single-use inline helpers for the z read and y lerp | Codex/Ryzen permuter 2026-10-25 |
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
+| fn_80223280 (selection draw) | src/game/widgets.cpp | shared four-use width-product helper steering operand allocation | Codex widgets 389, 2026-10-25 |
+| fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
 | Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
 | Gate::operator= (__as__4GateFRC4Gate) | src/game/zone.cpp | end points copied as one GateSeg block; the original likely grouped a/b in a segment struct | Claude 2026-10-24 |
