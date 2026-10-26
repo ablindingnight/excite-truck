@@ -190,7 +190,7 @@ f32 PSVECDistance(const void* a, const void* b);
 f32 PSVECDotProduct(const void* a, const void* b);
 void* fn_802CAC28(const char* name, int a);
 void fn_802CAC54(void* tex);
-double fn_8002F208(double x);  // log10
+double log2(double x);
 f32 fn_801E7E24(void);
 void fn_801E8C84(PVec* out);
 void fn_801E8CB8(PVec* dir, f32* strength);
@@ -555,7 +555,7 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     f32 du = (f32)__fabs(umax - umin);
     f32 dv = (f32)__fabs(vmax - vmin);
     span = FMax(du, dv);
-    f->lod = fn_8002F208(span / FMax(w, h));
+    f->lod = log2(span / FMax(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
     fn_801F5664(f, style);

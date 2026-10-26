@@ -62,7 +62,7 @@ void fn_801355C0(SFIter* it, SFNode* pos, int a, SFHit* hit, int b);
 void fn_8013530C(SFIter* it, int unk);
 int fn_801E9E30(s16* h, SFVec3* pos);
 void fn_801E9DC4(s16* h);
-double fn_8002F208(double x);
+double log2(double x);
 double sqrt(double x);
 DrawList* fn_802CA04C(int n);
 void fn_802CA094(DrawList* d);
@@ -216,7 +216,7 @@ void fn_802A1290(void) {
         n = (int)(len / sz) | 1;
         width = sz * n;
         lbl_8055F840 = fn_802CA04C(n * 12 / 2);
-        lbl_8055F848 = fn_8002F208(0.3333333333333333);
+        lbl_8055F848 = log2(0.3333333333333333);
         fn_802A1120(&lbl_8055F850, &lbl_8055F858);
         lbl_8055F860 = lbl_8055F858;
         t = lbl_8055F860.x;

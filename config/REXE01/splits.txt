@@ -486,6 +486,10 @@ MSL/e_sqrt.c:
 	.text       start:0x8002EFC0 end:0x8002F208
 	.sdata2     start:0x80560AD8 end:0x80560AE0
 
+MSL/math_ppc.c:
+	.text       start:0x8002F208 end:0x8002F234
+	.sdata2     start:0x80560AE0 end:0x80560AE8
+
 MSL/w_sqrt.c:
 	.text       start:0x8002F234 end:0x8002F238
 
@@ -885,6 +889,9 @@ revolution/OS/OSStateTM.c:
 	.data       start:0x80311458 end:0x80311520
 	.bss        start:0x8038EDA0 end:0x8038EE60
 	.sbss       start:0x8055DAA0 end:0x8055DAC0
+
+revolution/OS/trk_bba_stub.c:
+	.text       start:0x800557DC end:0x800557E0
 
 revolution/OS/OSPlayRecord.c:
 	.text       start:0x800557E0 end:0x80055EB8

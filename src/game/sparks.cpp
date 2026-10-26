@@ -116,7 +116,7 @@ struct SparkDesc {
 };
 
 extern "C" {
-double fn_8002F208(double x);
+double log2(double x);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
@@ -712,7 +712,7 @@ SparkSys::SparkSys(int n, f32 l) {
     life = l;
     invLife = 1.0f / l;
     tex = fn_802CAC28("spark.tex", 0);
-    lod = fn_8002F208(13.333333333333334);
+    lod = log2(13.333333333333334);
 }
 
 Spark::Spark(void) {}
@@ -855,7 +855,7 @@ ShardSys::ShardSys(int n) {
     count = 0;
     max = n;
     tex = fn_802CAC28("shard.tex", 0);
-    lod = fn_8002F208(10.0);
+    lod = log2(10.0);
 }
 
 Shard::Shard(void) {}

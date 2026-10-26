@@ -253,7 +253,7 @@ f32 fn_801E8874(int view);
 f32 fn_801E8894(int view);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int view);
 void fn_801E8C84(PVec* wind);
-double fn_8002F208(double x);
+double log2(double x);
 int fn_801EA140(ValVec3* p);
 void fn_802C8BD0(s32 tex);
 int fn_802CE860(int n);
@@ -284,8 +284,8 @@ Mist* lbl_804BCFA8[4];
 
 struct WeatherScales {
     WeatherScales(void) {
-        lbl_8055F880 = fn_8002F208(10.0);
-        lbl_8055F884 = fn_8002F208(2.0);
+        lbl_8055F880 = log2(10.0);
+        lbl_8055F884 = log2(2.0);
     }
 };
 
@@ -1040,7 +1040,7 @@ Mist::Mist(ValueNode* vn) {
     hit = vn->GetFloat("hit");
     v = vn->GetVec3("v");
     tex = fn_802CAC28(vn->GetValue("texture"), 0);
-    pointScale = fn_8002F208(0.5f / size);
+    pointScale = log2(0.5f / size);
     ValVec3 c = vn->GetVec3("color");
     color = MistColor(Alpha(c.x), Alpha(c.y), Alpha(c.z));
     density = vn->GetFloat("density");

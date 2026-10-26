@@ -8,7 +8,7 @@
 extern "C" {
 void DCFlushRange(void* p, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal
-double fn_8002F208(double x);            // log10
+double log2(double x);
 double ceil(double x);
 double pow(double x, double y);
 void fn_802CADD0(s32 tex, int stage);
@@ -717,7 +717,7 @@ void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
     }
 }
 
-static inline f32 Log10(f32 x) { return fn_8002F208(x); }
+static inline f32 Log2(f32 x) { return log2(x); }
 
 void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
     lbl_8055D148 = uvScale;
@@ -729,8 +729,8 @@ void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
     if (ind != -2) {
         lbl_8055FEC0 = 1;
         scale = 5.0f * scale;
-        f32 l = Log10(scale);
-        f32 d = Log10(128.0f) - l;
+        f32 l = Log2(scale);
+        f32 d = Log2(128.0f) - l;
         f32 e = ceil(0.1f + (f32)__fabs(d));
         int s = (d > 0.0f ? 1.0f : -1.0f) * e;
         s = PMin(PMax(s, -46), 17);

@@ -165,7 +165,7 @@ void* memset(void* p, int c, u32 n);
 int strcasecmp(const char* a, const char* b);
 double sin(double x);
 double cos(double x);
-double fn_8002F208(double x);
+double log2(double x);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);                    // random float
 }  // extern "C"
@@ -1277,7 +1277,7 @@ Paint::Paint(const PaintDesc* d, const char* name) {
         f32 lo;
         hi = 0.0f > hi ? 0.0f : hi;
         lo = sizeMid < 0.5f ? sizeMid : 0.5f;
-        pointSize = fn_8002F208(2.0f / (size0 + sizeA * lo + sizeB * hi));
+        pointSize = log2(2.0f / (size0 + sizeA * lo + sizeB * hi));
     }
     Reset();
 }

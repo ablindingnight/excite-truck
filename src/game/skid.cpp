@@ -91,7 +91,7 @@ public:
 };
 
 extern "C" {
-double fn_8002F208(double x);
+double log2(double x);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 int fn_801E5370(int n, int k, f32 w);
 void fn_801E53A8(const Vec* p, const Vec* a, const Vec* b, f32 alpha, int on);
@@ -117,7 +117,7 @@ void* operator new[](size_t size, const char* name);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 ModuleTag lbl_8055F708;
-f32 lbl_8055F710 = fn_8002F208(2.2222222222222223);
+f32 lbl_8055F710 = log2(2.2222222222222223);
 u8 lbl_8055F714;
 SkidPt* lbl_8055F718;     // point pool
 SkidStrip* lbl_8055F71C;  // strip pool
