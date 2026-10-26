@@ -493,6 +493,9 @@ MSL/math_ppc.c:
 MSL/w_sqrt.c:
 	.text       start:0x8002F234 end:0x8002F238
 
+Runtime.PPCEABI.H/strlen.c:
+	.text       start:0x8002F238 end:0x8002F254
+
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x8002F254 end:0x8002F31C
 
