@@ -103,7 +103,7 @@ void fn_80214CB4(int item);
 int fn_80232B70(int font);
 void fn_80230C30(f32*, f32*, int, int);
 void fn_80230924(u32, f32, f32, f32, f32, f32);
-void fn_80232BA4(const void*, int, u32, int, f32, f32, f32, f32, f32);
+void fn_80232BA4(const void*, int, f32, f32, u32, int, f32, f32, f32);
 int sprintf(char*, const char*, ...);
 f32 fn_8023293C(int font, const char* text, f32 widthScale);
 
@@ -346,7 +346,7 @@ struct ProfileTextDrawFields {
 }
 
 extern "C" {extern const f32 lbl_80563930,lbl_80563940;extern const char lbl_8055C08C[6];}
-inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text,font,color,alignment,x,y,scale,lbl_80563930,widthScale);}
+inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, lbl_80563930, widthScale);}
 void ProfileTextState::Draw(void) {
     ProfileTextDrawFields* self=(ProfileTextDrawFields*)this;
     f32 x, y;

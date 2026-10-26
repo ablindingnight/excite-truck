@@ -155,7 +155,7 @@ f32 fn_80235F64(u32,int);
 f32 fn_80235EF0(u32,int);
 void fn_802354A0(u32,int,u32,f32,f32,f32,f32,f32);
 void fn_80230924(u32,f32,f32,f32,f32,f32);
-void fn_80232BA4(const char*,u32,u32,int,f32,f32,f32,f32,f32);
+void fn_80232BA4(const char*, u32, f32, f32, u32, int, f32, f32, f32);
 void fn_80232928(int);
 void fn_80232930(void);
 
@@ -612,19 +612,19 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
             case 2:shadow=1;
             default: {
                 f32 scale=fn_8022CA40(s);
-                if(shadow)fn_80232BA4(line,s->resource08,0xFF000000,flags,px+shadowOffset,py-shadowOffset,scale,textZ,1.0f);
-                fn_80232BA4(line,s->resource08,color,flags,px,py,scale,textZ,1.0f);
+                if(shadow)fn_80232BA4(line, s->resource08, px+shadowOffset, py-shadowOffset, 0xFF000000, flags, scale, textZ, 1.0f);
+                fn_80232BA4(line, s->resource08, px, py, color, flags, scale, textZ, 1.0f);
                 break;
             }
             case 1:case 4: {
                 f32 scale=fn_8022CA40(s);
-                fn_80232BA4(line,s->resource08,glowColor,flags,px,py,scale,textZ,1.0f);
+                fn_80232BA4(line, s->resource08, px, py, glowColor, flags, scale, textZ, 1.0f);
                 break;
             }
             case 5:case 6: {
                 if(effect==5)fn_80232928(-1);
                 f32 scale=fn_8022CA40(s);
-                fn_80232BA4(line,s->resource08,cycleColor,flags,px,py,scale,textZ,1.0f);
+                fn_80232BA4(line, s->resource08, px, py, cycleColor, flags, scale, textZ, 1.0f);
                 if(effect==5)fn_80232930();
                 break;
             }

@@ -1219,7 +1219,71 @@ else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
 }
 void fn_80221970(void) {}  // placeholder (1292 bytes)
 void fn_80221F9C(void) {}  // placeholder (388 bytes)
-void fn_80222CFC(void) {}  // placeholder (936 bytes)
+extern "C" {void fn_8022ED00(void*);void fn_8022EDB8();void fn_8022EE98(void*);}
+typedef struct CircularVectorTypedNew {float v[3];} CircularVectorTypedNew;
+typedef struct CircularPoseTypedNew {RotationMatrix basis;CircularVectorTypedNew translation;float alpha,first,second;} CircularPoseTypedNew;
+typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
+typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;int font;unsigned int color;float radius,rate;} CircularPaintNew;
+
+
+extern "C" {
+extern const float lbl_805634D8,lbl_80563528;extern const char lbl_8055B8A8[3];void* fn_8022EDE4(float,const void*);void fn_80232BA4(const char*,int,float,float,unsigned int,int,float,float,float);
+void fn_80222CFC(WidgetFragment *source) {
+    int count;
+    int i2;
+    const CircularPoseTypedNew* src;
+    CircularPoseTypedNew* dst;
+    const char* text;
+    int j;
+    CircularPaintNew* self;
+    int i1;
+    float base;
+    float total;
+    float spacing;
+    float scale;
+    float pos;
+    RotationMatrix m;
+    float x;
+    float y;
+    char one[4];
+    self = (CircularPaintNew*)source;
+    count = self->list->count;
+    base = -self->rate * fn_8023659C();
+    if (count > 0) {
+        total = lbl_805634A8;
+        for (i1 = 0; i1 < count; i1++) {
+            total += fn_8023293C(self->font, fn_8022D3F8(self->list, i1, 0), lbl_805634A4);
+        }
+        spacing = ((lbl_805634D8 * self->radius) - total) / (float)count;
+        scale = lbl_80563528 / (total + (spacing * (float)count));
+        fn_80230C30(&x, &y, self->left, self->top);
+        src = (const CircularPoseTypedNew*)fn_8022EDC4();
+        dst = (CircularPoseTypedNew*)fn_8022EDE4(src->alpha, src);
+        pos = lbl_805634A8;
+        for (i2 = 0; i2 < count; i2++) {
+            text = fn_8022D3F8(self->list, i2, 0);
+            for (j = 0; j < (int)strlen(text); j++) {
+                sprintf(one, lbl_8055B8A8, (int)(signed char)text[j]);
+                dst->basis = src->basis;
+                dst->translation = src->translation;
+                RotationVec input = {x, y, 0.0f};
+                ChoiceApplyOffsetNew((ChoicePoseNew*)dst, &input);
+                float angleProduct = scale * pos; RotationVec rotation = {0.0f, 0.0f, angleProduct + base};
+                fn_80015A20(&m, &rotation);
+                Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&dst->basis, &m, &dst->basis);
+                fn_8022ED00(dst);
+                fn_80232BA4(one, self->font, lbl_805634A8, self->radius, self->color, 9, lbl_805634A4, lbl_805634A8, lbl_805634A4);
+                fn_8022EDB8();
+                pos += fn_8023293C(self->font, one, lbl_805634A4);
+            }
+            pos += spacing;
+        }
+        fn_8022EE98(dst);
+    }
+}
+
+}
+
 void fn_802230A4(void) {}  // placeholder (356 bytes)
 void fn_80223280(void) {}  // placeholder (820 bytes)
 void fn_8022375C(void) {}  // placeholder (4 bytes)
