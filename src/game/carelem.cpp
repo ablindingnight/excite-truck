@@ -106,8 +106,8 @@ void CarElem::Clear(int car) { f0 = 0.0f; }
 
 void CarElem::Compute(int car) {
     RaceCar* c = lbl_804348E8[car];
-    f32 x = c->rpm;
     f32 k = c->load;
+    f32 x = c->rpm;
     f32 t;
     if (x > f2C) {
         t = x - f20;

@@ -439,8 +439,8 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
             break;
         }
         GaugePair* p = &g->pairs[g->count];
-        f32 y = 0.0f;
         f32 x = 0.0f;
+        f32 y = 0.0f;
         if (sscanf(n->GetValue(key), "%f %f,%f", &p->val, &x, &y) != 3) {
             fn_802E317C("gauge %s: bad format", key);
         }

@@ -882,8 +882,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         PSVECNormalize(&p->frame.b.v[0], &p->frame.b.v[0]);
         PSVECNormalize(&p->frame.b.v[1], &p->frame.b.v[1]);
         PSVECNormalize(&p->frame.b.v[2], &p->frame.b.v[2]);
-        f32 back = -1.5566f;
         f32 up = 1.2283f;
+        f32 back = -1.5566f;
         lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
         lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
         lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;

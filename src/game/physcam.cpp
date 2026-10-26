@@ -237,8 +237,8 @@ void fn_80270EC4(u8* car, u32 id) {
     fn_80270C04(car, id);
     if (id & 0x100) {
         for (int g = 0; g < 3; g++) {
-            CamRegion* r = lbl_8049F9D8;
             int n = 0;
+            CamRegion* r = lbl_8049F9D8;
             for (int i = 0; i < lbl_8055F554; i++) {
                 if (g == fn_80270D1C(S32(r->cam, 0x5C))) {
                     refs[n].track = (u8*)r;

@@ -3374,8 +3374,8 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
 }
 
 void BetaMaster::vf0C(void) {
-    int i;
     int found;
+    int i;
     f32 lead;
     for (i = 0; i < stars.a.count; i++) {
         Pickup* t = stars.a.data[i];

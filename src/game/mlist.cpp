@@ -520,8 +520,8 @@ void fn_802CDB5C(int pri) {
     fn_801293C8("mlist: flush");
     fn_801293E8(lbl_804C1480);
     MList* m = lbl_8055FCD8;
-    MLRange r = m->ranges[pri];
     MLArray<MLStrip> da = m->d;
+    MLRange r = m->ranges[pri];
     MLArray<MLBatch> ea = m->e;
     MCam ident;
     SetIdentity(&ident);

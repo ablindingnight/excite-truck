@@ -498,8 +498,8 @@ void RigidBody::Update(void) {
         accel.y = force.y * invMass;
         accel.z = force.z * invMass;
     }
-    impW = 0.0f;
     nImp = 0;
+    impW = 0.0f;
     if (PSVECDotProduct(&vel, &vel) > 90000.0f) {
         PSVECNormalize(&vel, &vel);
         vel.x *= 300.0f;

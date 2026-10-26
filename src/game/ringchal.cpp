@@ -1995,8 +1995,8 @@ void RingChalMaster::vf4C(int view) {
     ILayout* l;
     TextElem* setScore;
     Box* setIcon;
-    Box* arrowIcon;
     Box* starScore;
+    Box* arrowIcon;
     int i;
     {
         PlayerData* p = players.data[fn_801E866C(view)];
@@ -2375,8 +2375,8 @@ void RingChalMaster::vf0C(void) {
                 }
             }
             if (arena.sLongCheer && arena.stats->data[k].done) {
-                f32 a = 0.0f;
                 f32 b = 0.0f;
+                f32 a = 0.0f;
                 int lvl;
                 switch (arena.stats->data[k].best) {
                 case 5:
