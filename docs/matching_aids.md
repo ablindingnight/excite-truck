@@ -14,6 +14,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas | upstream orangedude27/excite-truck |
 | fn_80198488 (pick waiting car) | src/game/aicar.cpp | volatile reads of the two counts | upstream orangedude27/excite-truck |
 | Rate__16CloseCallTrackerFPC10RaceCarRec (close-call stunt rating) | src/game/stunts.cpp | `const f32&` bound to the 10.0f literal | Codex v2 handoff 2026-10-25 |
+| fn_8025AD3C (achview 3-component lerp) | src/game/achview.cpp | single-use inline helpers for the z read and y lerp | Codex/Ryzen permuter 2026-10-25 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
 | Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
 | Gate::operator= (__as__4GateFRC4Gate) | src/game/zone.cpp | end points copied as one GateSeg block; the original likely grouped a/b in a segment struct | Claude 2026-10-24 |

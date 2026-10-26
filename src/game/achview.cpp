@@ -493,9 +493,12 @@ void fn_8025AA90(u8* p, f32 dt) {
     Mat3Mul((Mat3*)(p + 0x84), (Mat3*)(p + 0x84), fn_802C86DC());
 }
 
+// MATCHING-AID: the two single-use helpers only change MWCC's inline/register order for fn_8025AD3C.
+static inline f32 AchViewVectorZ(const f32* coordinates) { return coordinates[2]; }
+static inline f32 AchViewVectorLerpY(const f32* a, const f32* b, f32 t) { return LerpF(a[1], b[1], t); }
 void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t) {
-    out[2] = LerpF(a[2], b[2], t);
-    out[1] = LerpF(a[1], b[1], t);
+    out[2] = LerpF(AchViewVectorZ(a), AchViewVectorZ(b), t);
+    out[1] = AchViewVectorLerpY(a, b, t);
     out[0] = LerpF(a[0], b[0], t);
 }
 

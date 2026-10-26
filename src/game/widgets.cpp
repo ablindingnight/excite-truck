@@ -1243,7 +1243,95 @@ WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* na
 void fn_80224E74(void) {}  // placeholder (1736 bytes)
 void fn_80225B6C(void) {}  // placeholder (2144 bytes)
 void fn_80226B6C(WidgetFragment*);  // placeholder (336 bytes)
-void fn_802272D4(void) {}  // placeholder (1452 bytes)
+
+
+typedef struct TimedImagePose {RotationMatrix basis;RotationVec translation;float alpha;} TimedImagePose;
+typedef struct TimedImageFields {char base[0x244];float x,y,width,height;int textureHandle;float blendDuration,lastUpdateTime;TimedImagePose* pose;unsigned char blendIncreasing;char unknown265[3];float blend,rotationAngle;unsigned char rotateBackward;} TimedImageFields;
+static inline void TransformTimedImageVector(const TimedImagePose* pose,const RotationVec* transformInput,RotationVec* out){ChoiceTransformVectorNew(&pose->basis,transformInput,out);}
+extern const float lbl_805634FC,lbl_80563560;void fn_80231220(float,float,float,float,int,unsigned int,float,float,float,float);
+struct TimedImageInputVector:RotationVec{inline TimedImageInputVector(int screenWidth,int screenHeight){z=lbl_805634A8;x=(float)-screenWidth*lbl_805634C4;y=(float)-screenHeight*lbl_805634C4;} inline void SetZYX(float zValue,float yValue,float xValue){z=zValue;x=xValue;y=yValue;}};typedef char TimedImageInputVectorSize12[sizeof(TimedImageInputVector)==12?1:-1];
+void fn_8022ED00(void*);void fn_8022EDB8();
+void fn_802272D4(WidgetFragment* source)
+{
+    TimedImageFields* image = (TimedImageFields*)source;
+    RotationMatrix rotationMatrix;
+    TimedImagePose *resetPose;
+    TimedImagePose *firstPose;
+    TimedImagePose *rotationPose;
+    TimedImagePose *secondPose;
+    int textureHandle;
+
+    float blendStep;
+    float increasedBlend;
+    float decreasedBlend;
+    float now;
+
+    now = fn_8023659C();
+    textureHandle = image->textureHandle;
+    if ((textureHandle != -2) && (textureHandle != -1)) {
+        blendStep = (now - image->lastUpdateTime) / image->blendDuration;
+        if ((int) image->blendIncreasing != 0) {
+            increasedBlend = image->blend + blendStep;
+            image->blend = increasedBlend;
+            if (increasedBlend > lbl_805634A4) {
+                image->blend = lbl_805634A4;
+                image->blendIncreasing = 0;
+            }
+        } else {
+            decreasedBlend = image->blend - blendStep;
+            image->blend = decreasedBlend;
+            if (decreasedBlend < lbl_805634A8) {
+                image->blend = lbl_805634A8;
+                image->blendIncreasing = 1;
+            }
+        }
+        resetPose = image->pose;
+        resetPose->basis.m[0] = lbl_805634A4;
+        resetPose->basis.m[1] = lbl_805634A8;
+        resetPose->basis.m[2] = lbl_805634A8;
+        resetPose->basis.m[3] = lbl_805634A8;
+        resetPose->basis.m[4] = lbl_805634A4;
+        resetPose->basis.m[5] = lbl_805634A8;
+        resetPose->basis.m[6] = lbl_805634A8;
+        resetPose->basis.m[7] = lbl_805634A8;
+        resetPose->basis.m[8] = lbl_805634A4;
+        resetPose->translation.x = lbl_805634A8;
+        resetPose->translation.y = lbl_805634A8;
+        resetPose->translation.z = lbl_805634A8;
+        TimedImageInputVector transformInput(lbl_8055FB9C,lbl_8055FBA0);
+        RotationVec translatedBeforeRotation,translatedAfterRotation;
+        firstPose = image->pose;
+        TransformTimedImageVector(firstPose,&transformInput,&translatedBeforeRotation);
+        firstPose->translation.x += translatedBeforeRotation.x;
+        firstPose->translation.y += translatedBeforeRotation.y;
+        firstPose->translation.z += translatedBeforeRotation.z;
+        if ((int) image->rotateBackward != 0) {
+            image->rotationAngle -= (now - image->lastUpdateTime) / lbl_805634E4;
+        } else {
+            image->rotationAngle += (now - image->lastUpdateTime) / lbl_805634FC;
+        }
+        transformInput.x = lbl_805634A8;
+        transformInput.y = lbl_805634A8;
+        transformInput.z = image->rotationAngle;
+        rotationPose = image->pose;
+        fn_80015A20((RotationMatrix*)&rotationMatrix, (RotationVec*)&transformInput);
+        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&rotationPose->basis, &rotationMatrix, &rotationPose->basis);
+        transformInput.SetZYX(lbl_805634A8,(float)lbl_8055FBA0*lbl_805634C4,(float)lbl_8055FB9C*lbl_805634C4);
+        secondPose = image->pose;
+        TransformTimedImageVector(secondPose,&transformInput,&translatedAfterRotation);
+        secondPose->translation.x += translatedAfterRotation.x;
+        secondPose->translation.y += translatedAfterRotation.y;
+        secondPose->translation.z += translatedAfterRotation.z;
+        image->pose->alpha = lbl_805634E8 + (lbl_80563560 * image->blend);
+        fn_8022ED00(image->pose);
+        fn_80231220(image->x,image->y,image->width,image->height,image->textureHandle,-1U,lbl_805634A8,lbl_805634A8,lbl_805634A4,lbl_805634A4);
+        fn_80231220(image->x - (float) lbl_8055FB9C,image->y,image->width,image->height,image->textureHandle,-1U,lbl_805634A8,lbl_805634A8,lbl_805634A4,lbl_805634A4);
+        fn_80231220(image->x,image->y - (lbl_805634E4 + (float) lbl_8055FBA0),image->width,image->height,image->textureHandle,-1U,lbl_805634A8,lbl_805634A8,lbl_805634A4,lbl_805634A4);
+        fn_80231220(image->x - (float) lbl_8055FB9C,image->y - (lbl_805634E4 + (float) lbl_8055FBA0),image->width,image->height,image->textureHandle,-1U,lbl_805634A8,lbl_805634A8,lbl_805634A4,lbl_805634A4);
+        fn_8022EDB8();
+    }
+    image->lastUpdateTime = now;
+}
 void fn_802278F0(void*,float,float,float,float);
 void fn_80228010(void) {}  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
@@ -2332,4 +2420,5 @@ void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(Sli
 extern "C" {extern int lbl_8055FBE0,lbl_8055FBFC;
 
 }
+
 
