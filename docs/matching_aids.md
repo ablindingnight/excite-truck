@@ -18,6 +18,9 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | shared four-use width-product helper steering operand allocation | Codex widgets 389, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
+| widgets (inherited, tagged in 390) | src/game/widgets.cpp | register-qualified cursor index | Codex widgets, tagged 2026-10-26 |
+| widgets (inherited, tagged in 390) | src/game/widgets.cpp | separate unsigned-conversion literal pool | Codex widgets, tagged 2026-10-26 |
+| widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum + volatile maximum reload (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
 | Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
 | Gate::operator= (__as__4GateFRC4Gate) | src/game/zone.cpp | end points copied as one GateSeg block; the original likely grouped a/b in a segment struct | Claude 2026-10-24 |

@@ -1217,7 +1217,95 @@ else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
  } } } 
   }
 }
-void fn_80221970(void) {}  // placeholder (1292 bytes)
+extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
+void fn_80221970(WidgetFragment* self){
+  int imageExtent;
+  int trackWidth;
+  DragViewportPrefix* f=(DragViewportPrefix*)self;
+  float x=(float)(self->left-(lbl_8055FB9C/2));
+  float y=(float)((lbl_8055FBA0/2)-self->top);
+  float initialWidth=(float)((WidgetDispatch*)self)->Slot78();
+  // Width is measured before these height reads, as in the original call sequence.
+  fn_802C5320(f->first,0,x,y,lbl_805634A8,initialWidth,(float)(self->bottom-self->top));
+  ScrollLocalWordObservedNew total(f->state->total);
+  if (f->state->page < total.value) {
+    if (f->direction == 0) {
+      int left;
+      int right;
+      int top;
+      int bottom;
+      ScrollLocalWordObservedNew originX(self->left);
+      left = originX.value + 1;
+      float ratio = ((float) (self->bottom - self->top)) / ((float) total.value);
+      trackWidth = ((WidgetDispatch*)self)->Slot78();
+      int rightEdge = originX.value + trackWidth;
+      right = rightEdge - 1;
+      const int& start=f->state->start;
+      top=(self->top + ((int) (ratio * ((float) start))))+5;
+      bottom=(self->top + ((int) (ratio * ((float) (start + f->state->page)))))-5;
+      if (((bottom - 1) > (top + 1)) && ((right - 1) > (left + 1))) {
+        if (f->second) {
+          void *image = f->second;
+          imageExtent = fn_802C51C0(f->first);
+          int tw = fn_802C51C0(image);
+          fn_80230C30(&x,&y,left+((imageExtent-tw)/2),top);
+          float imageMetric=(float)fn_802C51C0(f->second);
+          fn_802C5320(f->second,0,x,y,lbl_805634A8,imageMetric,(float)(bottom-top));
+          return;
+        }
+        else {
+          fn_802E30C8(lbl_8033D9F8);
+          fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
+          int dark = lbl_8055FBE0;
+          fn_802C3424(left, bottom - 1, right, bottom, dark);
+          fn_802C3424(right - 1, top, right, bottom, dark);
+          int light = lbl_8055FBFC;
+          fn_802C3424(left, top, right, top + 1, light);
+          fn_802C3424(left, top, left + 1, bottom, light);
+        }
+      }
+    }
+    else {
+      int top;
+      int left;
+      int bottom;
+      int right;
+      int width = ((WidgetDispatch*)self)->Slot78();
+      float ratio = ((float) width) / ((float) total.value);
+      int start = f->state->start;
+      int edge = self->bottom;
+      ScrollLocalWordObservedNew originY(self->top);
+      top = originY.value + 1;
+      bottom = edge - 1;
+      int low = self->left + ((int) (ratio * ((float) start)));
+      ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
+      left = low + 5;
+      right = high.value - 5;
+      if (((right - 1) > (left + 1)) && ((bottom - 1) > (top + 1))) {
+        if (f->second) {
+          void *image = f->second;
+          imageExtent = fn_802C5220(f->first);
+          int th = fn_802C5220(image);
+          fn_80230C30(&x,&y,left,top+((imageExtent-th)/2));
+          float imageMetric=(float)fn_802C5220(f->second);
+          fn_802C5320(f->second,0,x,y,lbl_805634A8,(float)(right-left),imageMetric);
+          return;
+        }
+        else {
+          fn_802E30C8(lbl_8033D9F8);
+          fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
+          int dark = lbl_8055FBE0;
+          fn_802C3424(left, bottom - 1, right, bottom, dark);
+          fn_802C3424(right - 1, top, right, bottom, dark);
+          int light = lbl_8055FBFC;
+          fn_802C3424(left, top, right, top + 1, light);
+          fn_802C3424(left, top, left + 1, bottom, light);
+        }
+      }
+    }
+  }
+}
+
 void fn_80221F9C(void) {}  // placeholder (388 bytes)
 extern "C" {void fn_8022ED00(void*);void fn_8022EDB8();void fn_8022EE98(void*);}
 typedef struct CircularVectorTypedNew {float v[3];} CircularVectorTypedNew;
@@ -1743,6 +1831,7 @@ int fn_8021F06C(WidgetFragment* self,int key){
  case 0x123:f->cursor=strlen(f->buffer);WidgetMarkDirty(self);break;
  case 0x125:if(f->cursor>0){f->cursor--;WidgetMarkDirty(self);}break;
  case 0x127:if((unsigned int)f->cursor<strlen(f->buffer)){f->cursor++;WidgetMarkDirty(self);}break;
+ // MATCHING-AID (inherited): register-qualified cursor index remains pending natural-source cleanup.
  case 0x12e:{text=f->buffer;if(strlen(text)!=0){register int index=f->cursor;if((unsigned int)index<strlen(text)){while(f->buffer[index]){f->buffer[index]=f->buffer[index+1];index++;}}}WidgetMarkDirty(self);break;}
  case 8:if(strlen(f->buffer)!=0&&f->cursor>0){int i=--f->cursor;while(f->buffer[i]){f->buffer[i]=f->buffer[i+1];i++;}}WidgetMarkDirty(self);break;
  case 9:if(!fn_802E4A1C(0xfd))fn_802194F4(self);else fn_80219508(self);break;
@@ -2037,6 +2126,7 @@ WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,i
 struct UnsignedAssetPrefix {char base[0x244];void* context;int resource,mode;float scale,elapsed;};
 extern "C" {
 extern const float lbl_8056351C;extern const char lbl_8033DA60[];extern u32 lbl_8033E560[];
+// MATCHING-AID (inherited layout): retain the accepted separate unsigned-conversion literal pool; no original TU/data ownership is claimed.
 #pragma section sconst_type ".sdata2$20" data_mode=sda_rel
 WidgetFragment* fn_80222BDC(WidgetFragment* self,WidgetDesc* desc,void* context){fn_80218F80(self,desc);UnsignedAssetPrefix* f=(UnsignedAssetPrefix*)self;f->context=context;self->vtable=lbl_8033E560;f->resource=fn_80232578(desc->name);if(!f->resource)fn_802E317C(lbl_8033DA60,desc->name);f->mode=desc->fielda0;f->scale=(float)(u32)desc->field9c;f->elapsed=lbl_8056351C;return self;}
 #pragma section sconst_type ".sdata2" data_mode=sda_rel
@@ -2492,6 +2582,7 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
 }
 }
 
+// MATCHING-AID (inherited): full-range denominator enum and volatile maximum reload retain allocation/load behavior; natural replacements remain open.
 enum SliderDenominatorWordNew { SliderDenominatorMinNew=(-2147483647-1),SliderDenominatorMaxNew=2147483647 };
 static inline int ClampIntegerSliderNew(int limit,int value){return value>=limit?limit:value;}
 extern "C" {
