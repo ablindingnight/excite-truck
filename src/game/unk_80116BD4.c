@@ -1591,8 +1591,8 @@ void fn_80119288(void *arg0) {
 
 extern void DCFlushRange(void *, u32);
 void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
-    u32 n;
     u32 len;
+    u32 n;
     len = arg2;
     if (arg2 + arg1 > *(u32 *)((u8 *)arg0 + 0x18)) {
         len = *(u32 *)((u8 *)arg0 + 0x18) - arg1;
