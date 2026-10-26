@@ -1593,18 +1593,17 @@ extern void DCFlushRange(void *, u32);
 void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
     u32 n;
     u32 len;
-    u32 off;
     len = arg2;
     if (arg2 + arg1 > *(u32 *)((u8 *)arg0 + 0x18)) {
         len = *(u32 *)((u8 *)arg0 + 0x18) - arg1;
     }
     if (*(s32 *)((u8 *)arg0 + 4) != 0) {
-        off = arg1 >> 1;
+        arg1 >>= 1;
         n = len >> 1;
-        memset(*(u8 **)((u8 *)arg0 + 8) + off, 0, n);
-        DCFlushRange(*(u8 **)((u8 *)arg0 + 8) + off, n);
-        memset(*(u8 **)((u8 *)arg0 + 0xC) + off, 0, n);
-        DCFlushRange(*(u8 **)((u8 *)arg0 + 0xC) + off, n);
+        memset(*(u8 **)((u8 *)arg0 + 8) + arg1, 0, n);
+        DCFlushRange(*(u8 **)((u8 *)arg0 + 8) + arg1, n);
+        memset(*(u8 **)((u8 *)arg0 + 0xC) + arg1, 0, n);
+        DCFlushRange(*(u8 **)((u8 *)arg0 + 0xC) + arg1, n);
         if (len < arg2) {
             n = (arg2 - len) >> 1;
             memset(*(u8 **)((u8 *)arg0 + 8), 0, n);
