@@ -34,7 +34,7 @@ static BOOL is_valid_device(s32 dev_type);
 static void set_dpd_disable(s32 chan, s32 dev_type);
 static void set_dpd_enable(s32 chan, s32 dev_type);
 static void control_dpd_start_(s32 chan);
-static void control_dpd_end_(s32 chan);
+static void control_dpd_end_(u32 chan);
 static f32 calc_horizon(KPADInsideStatus* kp, Vec2* p1, Vec2* p2, Vec2* hori);
 static s32 KPADiRestoreDPD(s32 chan, BOOL enable);
 static void KPADiSamplingCallback(s32 chan);

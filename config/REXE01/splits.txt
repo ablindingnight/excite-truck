@@ -717,8 +717,10 @@ revolution/gx/GXPerf.c:
 
 revolution/kpad/KPAD.c:
 	.text       start:0x80045510 end:0x8004872C
-	.sdata      start:0x80558EB4 end:0x80558EF4
-	.sbss       start:0x8055D988 end:0x8055D9B4
+	.data       start:0x80303DB8 end:0x80303E08
+	.bss        start:0x8037C808 end:0x8037D808
+	.sdata      start:0x80558E88 end:0x80558EF4
+	.sbss       start:0x8055D980 end:0x8055D9B4
 	.sdata2     start:0x80560BD8 end:0x80560C34
 
 revolution/mem/mem_heapCommon.c:

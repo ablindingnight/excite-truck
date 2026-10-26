@@ -21,7 +21,11 @@ static inline BOOL kpad_is_valid_device(u32 dev_type) {
 #define is_valid_device kpad_is_valid_device
 #endif
 
+#ifdef GAME_REXE01
+static const char* __KPADVersion = "<< RVL_SDK - KPAD \trelease build: Sep 28 2006 20:20:12 (0x4200_60422) >>";
+#else
 static const char* __KPADVersion = "<< RVL_SDK - KPAD \trelease build: Oct  4 2006 11:56:50 (0x4199_60726) >>";
+#endif
 
 static Vec2 icenter_org = {0.000f, 0.000f};
 static f32 idist_org = 1.000f;
@@ -1629,7 +1633,7 @@ void control_dpd_start_(s32 chan) {
     OSRestoreInterrupts(irq_enabled);
 }
 
-void control_dpd_end_(s32 chan) {
+void control_dpd_end_(u32 chan) {
     KPADInsideStatus* kp = &inside_kpads[chan];
     BOOL irq_enabled;
 
