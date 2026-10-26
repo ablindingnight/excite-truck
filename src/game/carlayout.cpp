@@ -102,8 +102,8 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
         for (int i = 1; i < 162; i++) {
             char key[0x20];
             LayoutBone* b;
-            ValueNode* node;
             ValueNode* mod;
+            ValueNode* node;
             b = &l->bones[i];
             b->id = i;
             sprintf(key, "bone_%d", i);

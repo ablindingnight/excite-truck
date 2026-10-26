@@ -468,9 +468,9 @@ int fn_802B640C(const TextElem* e, const char* text) {
     f32 w = fn_800108C8(text, e->scale);
     f32 h = fn_8001090C(e->scale);
     u32 just = e->just;
+    f32 off;
     f32 x = e->pos.x;
     f32 right = x + w;
-    f32 off;
     if (just & 1) {
         off = 0.0f;
     } else if (just & 2) {

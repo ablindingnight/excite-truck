@@ -824,8 +824,8 @@ void fn_801B1A5C(DeityCar* c) {
     c->follower->SetLine(ps->Center(c->index));
     c->line->SetLine(ps->Racing(c->index));
     c->follower->Reset();
-    IdealFollower* f = c->follower;
     LineFollower* l = c->line;
+    IdealFollower* f = c->follower;
     c->ideal.seg = f->il.seg;
     c->ideal.t = f->il.t;
     c->ideal.mode = f->il.mode;

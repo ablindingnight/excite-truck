@@ -288,9 +288,9 @@ void fn_802BED90(PVec* v) {
 
 void fn_802BEDFC(void) {
     lbl_8055FAE4 = 0xE0005030;
-    lbl_8055FAEC = 0x00202040;
     lbl_8055FAE0 = 0.7f;
     lbl_8055FAE8 = 0xE0FFFFFF;
+    lbl_8055FAEC = 0x00202040;
     lbl_8055FAF0 = 0xE0001040;
     ValueTable* t = fn_80131808("track.val");
     if (t) {

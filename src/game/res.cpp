@@ -1701,8 +1701,8 @@ extern "C" void fn_8012E96C(const char* name) {
 }
 
 QueueNode* AsyncSetQueue::FindNodeFor(const char* name) {
-    QueueNode* n = pending.head;
     QueueNode* found = 0;
+    QueueNode* n = pending.head;
     while (n && !found) {
         ResToc* toc = GetToc(n->name);
         int in = 0;

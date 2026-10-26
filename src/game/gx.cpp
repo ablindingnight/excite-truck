@@ -1257,8 +1257,8 @@ void fn_802D07E4(const char* name, int announce) {
         return;
     }
     lbl_8055FD90 = 1;
-    char* d = lbl_804C9830;
     int n = 0x100;
+    char* d = lbl_804C9830;
     while ((*d++ = *name++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;

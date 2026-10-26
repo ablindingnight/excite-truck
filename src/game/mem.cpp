@@ -152,8 +152,8 @@ int fn_8012820C(void) {
     u32 size0;
     u32 size1;
     fn_80128208("MemBegin");
-    lbl_8055DF8C = 0;
     lbl_8055DF90 = 1;
+    lbl_8055DF8C = 0;
     base1 = 0;
     size1 = 0;
     fn_802E3DF8(0, &base0, &size0);
