@@ -826,6 +826,9 @@ revolution/OS/OSInterrupt.c:
 	.data       start:0x80305500 end:0x80305530
 	.sbss       start:0x8055DA58 end:0x8055DA6C
 
+RVL_SDK/os/OSLink.c:
+	.text       start:0x8005165C end:0x80051674
+
 revolution/os/OSMessage.c:
 	.text       start:0x80051674 end:0x80051878
 
@@ -868,6 +871,11 @@ revolution/os/OSTime.c:
 revolution/OS/OSUtf.c:
 	.text       start:0x80054F38 end:0x80055170
 	.data       start:0x80305618 end:0x80311458
+
+RVL_SDK/os/OSIpc.c:
+	.text       start:0x80055170 end:0x80055198
+	.sdata      start:0x80558F68 end:0x80558F6C
+	.sbss       start:0x8055DA98 end:0x8055DA9C
 
 revolution/OS/OSStateTM.c:
 	.text       start:0x80055198 end:0x800557DC
@@ -996,6 +1004,9 @@ RVL_SDK/bte/bte_hcisu.c:
 	.text       start:0x8007079C end:0x80070854
 	.sbss       start:0x8055DC68 end:0x8055DC70
 
+RVL_SDK/bte/bte_init.c:
+	.text       start:0x80070854 end:0x80070880
+
 revolution/BTE/main/bte_logmsg.c:
 	.text       start:0x80070880 end:0x800709E4
 	.bss        start:0x803BF240 end:0x803BFA10
@@ -1028,6 +1039,9 @@ revolution/BTE/bta/sys/bta_sys_main.c:
 
 revolution/BTE/bta/sys/ptim.c:
 	.text       start:0x80071510 end:0x800716F0
+
+RVL_SDK/bte/utl.c:
+	.text       start:0x800716F0 end:0x80071734
 
 RVL_SDK/bte/bta_dm_act.c:
 	.text       start:0x80071734 end:0x80073A70
@@ -1262,6 +1276,10 @@ RVL_SDK/axfx/AXFXReverbHiExp.c:
 	.text       start:0x8009BFC0 end:0x8009CD98
 	.data       start:0x8031ABD8 end:0x8031AD78
 	.sdata2     start:0x80560D58 end:0x80560D98
+
+RVL_SDK/axfx/AXFXHooks.c:
+	.text       start:0x8009CD98 end:0x8009CDD0
+	.sdata      start:0x805590B0 end:0x805590B8
 
 revolution/TPL/TPL.c:
 	.text       start:0x8009CDD0 end:0x8009CF04
