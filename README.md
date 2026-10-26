@@ -30,9 +30,12 @@ Exact matches only (objdiff `report.json`), as of 2026-10-25:
 
 | | Exactly matched code | Functions |
 | :--- | :--- | :--- |
-| **Whole game** | 62.9% (1,919,300 / 3,050,236 bytes) | 12,151 / 13,779 (88.2%) |
-| Excite Truck's own code | 46.9% (952,580 / 2,030,956 bytes) | 8,576 / 10,141 |
-| Nintendo SDK libraries | 99.6% (960,080 / 963,916 bytes) | 3,549 / 3,556 |
+| **Whole game** | 63.2% (1,927,928 / 3,050,236 bytes) | 12,188 / 13,779 (88.5%) |
+| Excite Truck's own code | 47.3% (960,248 / 2,030,956 bytes) | 8,587 / 10,141 |
+| Nintendo SDK libraries | 96.3% (967,680 / 1,004,704 bytes) | 3,601 / 3,630 |
+
+The SDK row now also counts SDK code that has no source file yet (it used to count only built SDK files),
+so its total grew and the percentage is lower even though more SDK code matches.
 
 ### Goals
 
