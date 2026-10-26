@@ -2,6 +2,7 @@
 
 #include "revolution/hbm/HBMAssert.hpp"
 #include "revolution/hbm/nw4hbm/db/directPrint.h"
+#include "revolution/hbm/nw4hbm/ut/Color.h"
 #include "revolution/os.h"
 
 namespace nw4hbm {
@@ -377,6 +378,10 @@ void Console_Printf(ConsoleHandle console, char const* format, ...) {
 
 s32 Console_GetTotalLines(ConsoleHandle console) {
     s32 count;
+
+    // MATCHING-AID: the original's stripped code used a ut::Color, which left Color's weak destructor at the
+    // end of this file (0x800D2DD4); this local reproduces it (same approach as the TP decomp).
+    ut::Color unused;
 
     NW4HBMAssertPointerNonnull_Line(console, 1050);
 
