@@ -48,7 +48,7 @@ void fn_80236728(void);
 void fn_80236774(void);
 f32 fn_8023293C(s32 font, const char* text, f32 scale);
 int fn_80232B70(s32 font);
-void fn_80232BA4(const char* text, s32 font, u32 color, int align, f32 x, f32 y, f32 scale, f32 a, f32 b);
+void fn_80232BA4(const char* text, s32 font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
 void fn_80233354(const char* text, s32 font, u32 color, int align, f32 x, f32 y, f32 scale, f32 a);
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8DB8(UIVert* v, int nv, const u16* idx, int ni);
@@ -223,9 +223,9 @@ void fn_802304EC(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32
         wx = (x1 - (-l + r)) - width;
     }
     if (wrap) {
-        fn_80232BA4(text, font, color, align, wx, y, scale, a, 1.0f);
+        fn_80232BA4(text, font, wx, y, color, align, scale, a, 1.0f);
     }
-    fn_80232BA4(text, font, color, align, x0, y, scale, a, 1.0f);
+    fn_80232BA4(text, font, x0, y, color, align, scale, a, 1.0f);
 }
 
 void fn_80230650(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
@@ -275,9 +275,9 @@ void fn_802307AC(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32
         wy = y0 - (-l + r);
     }
     if (wrap) {
-        fn_80232BA4(text, font, color, align, x, wy, scale, a, 1.0f);
+        fn_80232BA4(text, font, x, wy, color, align, scale, a, 1.0f);
     }
-    fn_80232BA4(text, font, color, align, x, y0, scale, a, 1.0f);
+    fn_80232BA4(text, font, x, y0, color, align, scale, a, 1.0f);
 }
 
 void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {

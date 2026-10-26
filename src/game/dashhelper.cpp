@@ -145,8 +145,7 @@ int fn_80232578(const char* name);
 void fn_802328D4(int font);
 f32 fn_8023293C(int font, const char* text, f32 scale);
 void fn_802344CC(const char* text, u32 color, int flags, f32 x, f32 y, f32 scale, int unk);
-void fn_80232BA4(const char* text, int font, u32 color, int flags, f32 x, f32 y, f32 scale, f32 z,
-                 f32 alpha);
+void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
 void fn_80233010(const char* text, int font, u32 color, int flags, f32 x, f32 y, f32 w, f32 scale,
                  f32 z, f32 alpha, int wrap);
 void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
@@ -1013,7 +1012,7 @@ void fn_80010188(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     va_start(args, y);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_80232BA4(buf, lbl_8055D490, color, flags, x, y, 0.73333335f * scale, 0.0f, 1.0f);
+    fn_80232BA4(buf, lbl_8055D490, x, y, color, flags, 0.73333335f * scale, 0.0f, 1.0f);
 }
 
 void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
@@ -1045,7 +1044,7 @@ void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     va_start(args, y);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_80232BA4(buf, lbl_8055D498, color, flags, x, y, scale, 0.0f, 1.0f);
+    fn_80232BA4(buf, lbl_8055D498, x, y, color, flags, scale, 0.0f, 1.0f);
 }
 
 void fn_800105A0(const char* text, int player) {

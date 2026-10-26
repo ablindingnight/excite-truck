@@ -16,8 +16,7 @@ int fn_802344B0(void);
 void fn_802344C4(int on);
 void fn_802344CC(const char* text, u32 color, int flags, f32 x, f32 y, f32 scale, int unk);
 void fn_802346C8(void);
-void fn_80232BA4(const char* text, int font, u32 color, int flags, f32 x, f32 y, f32 scale, f32 z,
-                 f32 alpha);
+void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
 s32 fn_80232578(const char* name);  // load font
 void fn_802328D4(s32 font);
 int fn_80232B70(int font);
@@ -45,8 +44,7 @@ void fn_8023875C(int x, int y, const char* text, u32 color, int flags) {
     if (fn_802344B0() && strlen(text) + 1 < 64) {
         fn_802344CC(text, color, flags, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, 0.4f, 0);
     } else {
-        fn_80232BA4(text, lbl_8055F0D4, color, flags, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, 0.4f, 0.0f,
-                    1.0f);
+        fn_80232BA4(text, lbl_8055F0D4, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, color, flags, 0.4f, 0.0f, 1.0f);
     }
 }
 

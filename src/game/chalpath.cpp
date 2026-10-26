@@ -866,7 +866,7 @@ extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
 void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-void fn_80232BA4(const char* text, u8* font, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs);
+void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void fn_801308F4(char* buf, s32 size, s32 value);
 extern const f32 lbl_80563B90;  // 0.0f
 
@@ -909,9 +909,9 @@ void fn_802621F0(u8* p) {
         fn_802354A0(PTR(p, 0x20), part, x - grow * hw, y + grow * hh, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),
                     (1.0f + grow) * (f32)S32(p, 0x10), c);
     }
-    fn_80232BA4(EV->Name(), PTR(p, 0x24), color, 0x11, 15.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(EV->Name(), PTR(p, 0x24), 15.0f + x, y + sTextY, color, 0x11, 0.65f, lbl_80563B90, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
-    fn_80232BA4(grade, PTR(p, 0x24), gradeColor, 0x14, 205.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(grade, PTR(p, 0x24), 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, lbl_80563B90, 1.0f);
     fn_801308F4(target, 30, EV->Target());
     if (EV->Score() <= 0) {
         fn_801345D8(line, 30, "0/%s", target + 1);
@@ -919,7 +919,7 @@ void fn_802621F0(u8* p) {
         fn_801308F4(line, 30, EV->Score());
         fn_801345D8(line, 30, "%s/%s", line, target + 1);
     }
-    fn_80232BA4(line, PTR(p, 0x24), color, 0x12, 350.0f + x, y + sTextY, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(line, PTR(p, 0x24), 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
 }
 
 void fn_80262574(u8* p) {}

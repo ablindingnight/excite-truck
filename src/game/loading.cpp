@@ -116,7 +116,7 @@ s32 fn_802CAC28(const char* name, int flags);  // load texture
 void fn_802CAC54(s32 tex);
 u32 fn_802E2C20(void);  // milliseconds
 void fn_80176734(void);
-void fn_80232BA4(const char* text, void* font, u32 color, int align, f32 x, f32 y, f32 scale, f32 a, f32 b);
+void fn_80232BA4(const char* text, void* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
 void fn_8023293C(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
@@ -282,7 +282,7 @@ void LoadingStop(void) {
 void DrawLoadingText(u32 color) {
     static LocString s_loading("Tips:LOADING");
 
-    fn_80232BA4(s_loading.Get(), lbl_8055D64C, color, 0x12, 230.0f, -194.0f, 0.73333335f, 0.0f, 1.0f);
+    fn_80232BA4(s_loading.Get(), lbl_8055D64C, 230.0f, -194.0f, color, 0x12, 0.73333335f, 0.0f, 1.0f);
 }
 
 void GetTipKey(int idx, s32 type, char* buf, u32 size) {
@@ -536,8 +536,8 @@ void DrawLoadingScreen(int alpha, f32 t) {
     fn_80231220(x0, y1, x1 - x0, y1 - y2, lbl_80558D7C, color, 0.0f, 0.0f, 1.0f, 1.0f);
     fn_80148134(65.0f, 40.0f, &title_x, &title_y, 2);
     fn_80148134(65.0f, 84.0f, &sub_x, &sub_y, 2);
-    fn_80232BA4(lbl_8055D660, lbl_8055D64C, color, 9, title_x, title_y, 1.1733334f, 0.0f, 1.0f);
-    fn_80232BA4(lbl_8055D664, lbl_8055D64C, color, 9, sub_x, sub_y, 0.88f, 0.0f, 1.0f);
+    fn_80232BA4(lbl_8055D660, lbl_8055D64C, title_x, title_y, color, 9, 1.1733334f, 0.0f, 1.0f);
+    fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88f, 0.0f, 1.0f);
     show_goals = !lbl_8055D647;
     if (!lbl_8055D646 && lbl_8055D647) {
         f32 slide = 4.0f * SCurve(t);
@@ -633,13 +633,11 @@ void DrawLoadingScreen(int alpha, f32 t) {
             }
             }
             y = -5.0f - 36.0f * i;
-            fn_80232BA4(label, lbl_8055D64C, color, 0x11, 20.0f + panel_x, y, 0.6673333f, 0.0f, 1.0f);
+            fn_80232BA4(label, lbl_8055D64C, 20.0f + panel_x, y, color, 0x11, 0.6673333f, 0.0f, 1.0f);
             if (kind != 8) {
-                fn_80232BA4(value, lbl_8055D64C, color, 0x12, 320.0f + panel_x - 20.0f, y, 0.6673333f, 0.0f,
-                            1.0f);
+                fn_80232BA4(value, lbl_8055D64C, 320.0f + panel_x - 20.0f, y, color, 0x12, 0.6673333f, 0.0f, 1.0f);
             } else {
-                fn_80232BA4(value, lbl_8055D650, color, 0x12, 5.0f + (320.0f + panel_x - 20.0f), 1.0f + y,
-                            0.9009f, 0.0f, 1.0f);
+                fn_80232BA4(value, lbl_8055D650, 5.0f + (320.0f + panel_x - 20.0f), 1.0f + y, color, 0x12, 0.9009f, 0.0f, 1.0f);
             }
         }
     }
@@ -666,8 +664,8 @@ int LoadingDraw(void) {
         static LocString s_continue("ResultsOverlay:PRESS_TO_CONTINUE");
         static LocString s_options("ResultsOverlay:PRESS_FOR_OPTIONS");
 
-        fn_80232BA4(s_options.Get(), lbl_8055D64C, -1, 0x14, -107.0f, -190.0f, 0.73333335f, 0.0f, 1.0f);
-        fn_80232BA4(s_continue.Get(), lbl_8055D64C, -1, 0x14, 107.0f, -190.0f, 0.73333335f, 0.0f, 1.0f);
+        fn_80232BA4(s_options.Get(), lbl_8055D64C, -107.0f, -190.0f, -1, 0x14, 0.73333335f, 0.0f, 1.0f);
+        fn_80232BA4(s_continue.Get(), lbl_8055D64C, 107.0f, -190.0f, -1, 0x14, 0.73333335f, 0.0f, 1.0f);
     }
     return 1;
 }

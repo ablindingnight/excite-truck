@@ -266,7 +266,7 @@ void fn_80233E34(Font* f, const UIXform* m, u32 color);
 void fn_80233E80(Font* f, u32 color);
 void fn_80233EBC(void);
 void fn_80233EC0(Font* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
-void fn_80232BA4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs);
+void fn_80232BA4(const char* text, Font* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
 
@@ -725,7 +725,7 @@ void fn_80232B80(XformFn fn) {
     lbl_8055B9A8 = (fn == NULL) ? fn_80231D84 : fn_80231AF0;
 }
 
-void fn_80232BA4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
+void fn_80232BA4(const char* text, Font* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs) {
     u32 c = color;
     fn_80231714(&c);
     if (*text) {
@@ -828,7 +828,7 @@ void fn_80233010(const char* text, Font* f, u32 color, int align, int ingame, f3
         }
         f32 yy = y - line++ * (scale * fn_80232B70(f));
         if (!ingame) {
-            fn_80232BA4(buf, f, color, align, x, yy, scale, z, xs);
+            fn_80232BA4(buf, f, x, yy, color, align, scale, z, xs);
         } else {
             fn_802344CC(buf, color, align, 0, x, yy, scale);
         }
@@ -906,7 +906,7 @@ void fn_802337A0(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f
     va_list ap;
     va_start(ap, xs);
     vsprintf(buf, fmt, ap);
-    fn_80232BA4(buf, f, color, align, x, y, scale, z, xs);
+    fn_80232BA4(buf, f, x, y, color, align, scale, z, xs);
 }
 
 void fn_8023389C(Font* f, u32 color, int align, const UIXform* m, const char* fmt, f32 x, f32 y, f32 z,
@@ -1219,7 +1219,7 @@ void fn_80234AFC(TextStyle* st, const char* fmt, f32 x, f32 y, ...) {
     va_list ap;
     va_start(ap, y);
     vsprintf(buf, fmt, ap);
-    fn_80232BA4(buf, st->font, st->color, st->align, x, y, st->scale, 1.0f, st->xs);
+    fn_80232BA4(buf, st->font, x, y, st->color, st->align, st->scale, 1.0f, st->xs);
 }
 
 }  // extern "C"

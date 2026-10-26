@@ -323,7 +323,7 @@ void fn_80241228(u8* p) {}
 void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
-void fn_80232BA4(const char* text, u8* font, s32 color, int align, f32 x, f32 y, f32 size, f32 a, f32 b);
+void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
 extern const s32 lbl_802FA300[3];  // stat level thresholds: 0, 4, 7
 extern const f32 lbl_80563758;     // 0.0
 extern const f32 lbl_8056375C;     // 0.43
@@ -349,7 +349,7 @@ void fn_8024122C(u8* p) {
             size = lbl_80563760;
             align = 9;
         }
-        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), -0x100, align, x, y, size, lbl_80563758, lbl_80563764);
+        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
     }
 }
 
