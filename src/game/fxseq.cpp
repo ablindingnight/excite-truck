@@ -144,8 +144,8 @@ f32 FXSequence::GetLength(void) {
 FXSequence* FXSequence::Load(const char* name) {
     int n;
     ValueTable* table;
-    FXSequence* seq;
     int total;
+    FXSequence* seq;
     int ok;
     int i;
     ValueNode* node;

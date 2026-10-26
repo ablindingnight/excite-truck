@@ -2123,8 +2123,8 @@ int fn_80158618(const char* name) {
 int Tracker::NumRanks(void) const { return ranks.a.count; }
 
 void Tracker::Dump(void) {
-    int count;
     int scored;
+    int count;
     f32 total;
     int i;
     fn_802E30C8("\n%s:", Label());

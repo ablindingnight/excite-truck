@@ -2229,11 +2229,11 @@ public:
 
 
 int ZoneHud::Update(CarState* c) {
-    int tb;
     int shown;
     int left;
     int final;
     int total;
+    int tb;
     if (!anim) {
         return 0;
     }

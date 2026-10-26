@@ -1892,10 +1892,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         fullFlash = 0.0f > t ? 0.0f : t;
     }
     if (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= lbl_80558DC4[0]) {
-        int i;
         int j;
         int busy;
         f32* pos;
+        int i;
         if (!wasFull) {
             if (rc->kind == 0x50) {
                 fn_801DF074(2, 1);

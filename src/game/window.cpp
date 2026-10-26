@@ -461,8 +461,8 @@ s32* fn_80217BD8(Window* win, s32 id, Widget* wd) {
 
 void fn_80217C4C(Window* win) {
     int n = win->menuCount;
-    int cur;
     int i;
+    int cur;
     int vis;
     int next;
     if (n < 1) {

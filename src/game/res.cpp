@@ -1378,8 +1378,8 @@ AsyncSetQueue* lbl_8055E014;
 extern "C" void fn_8012D908(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
-        QueueNode* n = q->pending.head;
         QueueNode* found = 0;
+        QueueNode* n = q->pending.head;
         while (n && !found) {
             ResToc* toc = GetToc(n->name);
             int in = 0;

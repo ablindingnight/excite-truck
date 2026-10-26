@@ -1059,8 +1059,8 @@ u8 ObjSet::Load(ValueNode* set, ValueTable** dynos) {
             if (strcmp(c->GetValue("dyno"), "teleport")) {
                 ObjInfo* o = infos->Add();
                 const char* dyno = c->GetValue("dyno");
-                ValueNode* d;
                 int j;
+                ValueNode* d;
                 for (j = 0; (d = (*dynos)->GetChild(j)) != 0; j++) {
                     if (!strcmp(d->GetName(), "dyno") && !strcmp(d->GetValue("name"), dyno)) {
                         break;
