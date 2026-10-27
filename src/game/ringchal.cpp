@@ -2141,9 +2141,9 @@ void RingChalMaster::vf4C(int view) {
     }
     {
         Box* target;
-        Box* next;
         Box tr;
         int s;
+        Box* next;
         if (fn_802C9A58()) {
             target = l->FindBox("target_ring_ws");
         } else {
