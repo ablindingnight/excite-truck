@@ -58,7 +58,7 @@ struct LineCache {
 };
 
 static inline bool StrEq(const char* a, const char* b) { return strcmp(a, b) == 0; }
-static inline void StrCopyN(char* d, int n, const char* s) {
+static inline void StrCopyN(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -74,7 +74,7 @@ extern "C" {
 
 char* fn_8013BC90(char* buf, s32 n, const char* src) {
     char* p = buf;
-    StrCopyN(buf, n, src);
+    StrCopyN(src, n, buf);
     if (strchr(p, '/')) {
         p = strchr(p, '/') + 1;
     }
@@ -116,7 +116,7 @@ ValueNode* fn_8013BD5C_exit(ValueNode* t) {
 
 LineInfo* fn_8013BE64(ValueNode* t, const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
-    StrCopyN(li->name, 64, name);
+    StrCopyN(name, 64, li->name);
     li->exc.Load(t->FindChild("exceptions"));
     fn_8013BD5C(&li->params, t);
     li->extra = 0;
@@ -127,7 +127,7 @@ void fn_8013BF3C(LineParams* p) { fn_8013BD30(p); }
 
 LineInfo* fn_8013BF40(const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
-    StrCopyN(li->name, 64, name);
+    StrCopyN(name, 64, li->name);
     fn_8013BF3C(&li->params);
     li->extra = 0;
     return li;
@@ -156,7 +156,7 @@ LineInfo* fn_8013BFE8(const char* full) {
     LineEntry* found;
     ValueTable* t;
     LineInfo* li;
-    StrCopyN(name.s, 64, full);
+    StrCopyN(full, 64, name.s);
     n = lbl_8042F8C8.count;
     found = 0;
     for (i = 0; i < n; i++) {

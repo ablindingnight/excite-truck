@@ -457,8 +457,11 @@ f32 fn_8016618C(OrbitCar* car) {
 f32 fn_80166274(void) {
     CarPhysics* ph = fn_801B2EC0(fn_80179630(-1))->Physics();
     CarRec* rec = fn_8017960C(fn_80179630(-1));
+    f32 top = ph->engine->topSpeed;
     f32 speed = rec->speed;
-    f32 r = speed / MAX(1.0f, ph->engine->topSpeed);
+    f32 m = 1.0f;
+    m = MAX(m, top);
+    f32 r = speed / m;
     return MAX(0.7f, r);
 }
 
