@@ -553,7 +553,7 @@ void fn_802B14B4(GMat* g) {
             int n = g->verts.Count();
             int bit = 1 << i;
             GList* lp = &g->lists[bit];
-            for (u32 m = bit; m < 65; m++, lp++) {
+            for (u32 m = bit; m < 65; lp++, m++) {
                 if ((m & bit) && !lp->Empty()) {
                     bool first = ((bit - 1) & m) == 0;
                     for (GBlock* b = lp->Head(); b; b = b->next) {

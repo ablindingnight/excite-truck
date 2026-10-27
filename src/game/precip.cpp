@@ -573,7 +573,7 @@ void fn_802A53B0(DropHit* hits, int n) {
     dir.x = r->vel.x * inv;
     dir.y = r->vel.y * inv;
     dir.z = r->vel.z * inv;
-    for (int i = 0; i < n; i++, hits++) {
+    for (int i = 0; i < n; hits++, i++) {
         DropSource* s = &lbl_804BCFB8[hits->source];
         if (hits->dist > 56.25f || !hits->enabled || s->count < 1) {
             continue;

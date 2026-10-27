@@ -1299,7 +1299,7 @@ void fn_801C4CE8(void) {
         case 5: {
             ThinkEvent* th = (ThinkEvent*)e;
             AIOrder* o = lbl_80437E30;
-            for (int i = 0; i < lbl_8055E804; i++, o++) {
+            for (int i = 0; i < lbl_8055E804; o++, i++) {
                 if (fn_801C3508(th->mask, i)) {
                     o->kind = th->kind;
                     o->param = th->param;

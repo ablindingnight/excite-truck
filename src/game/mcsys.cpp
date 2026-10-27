@@ -127,7 +127,7 @@ int fn_802E6CA8(void) {
             p = h->data;
             ok = 1;
             ChunkHeader* c = ch;
-            for (i = 0; i < h->count; i++, c++) {
+            for (i = 0; i < h->count; c++, i++) {
                 if (fn_802E721C(c->cookie, c->version, c->size) < 0) {
                     ok = 0;
                 }

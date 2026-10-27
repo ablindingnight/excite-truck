@@ -531,7 +531,7 @@ void fn_802CDB5C(int pri) {
     ctx->mtx[0] = id;
     void* cur = 0;
     MLBatch* e = &ea.p[r.lo];
-    for (int i = r.lo; i < r.hi; i++, e++) {
+    for (int i = r.lo; i < r.hi; e++, i++) {
         int open = 0;
         u8* dl = 0;
         s32 cnt = 0;

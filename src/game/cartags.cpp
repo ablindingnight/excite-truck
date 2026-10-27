@@ -138,7 +138,7 @@ void fn_802A7EEC(void) {
     if (fn_801CF064()) {
         return;
     }
-    for (i = 0, q = order; i < fn_801EA994(); i++, q++) {
+    for (i = 0, q = order; i < fn_801EA994(); q++, i++) {
         *q = i;
     }
     qsort(order, fn_801EA994(), sizeof(int), fn_802A7E08);

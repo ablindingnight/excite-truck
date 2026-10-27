@@ -833,7 +833,7 @@ void PartSys::DrawSprites(Particle* p, int n) {
     d2.y = cam->up.y + cam->right.y;
     d2.z = cam->up.z + cam->right.z;
     QuadBatch batch;
-    for (int i = 0; i < n; i++, p++) {
+    for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
@@ -887,7 +887,7 @@ void PartSys::DrawAnimated(Particle* p, int n) {
     d2.y = cam->up.y + cam->right.y;
     d2.z = cam->up.z + cam->right.z;
     QuadBatch batch;
-    for (int i = 0; i < n; i++, p++) {
+    for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
@@ -935,7 +935,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
     f32 t0 = lbl_8055F738;
     f32 shade = 0.5f * shading;
     QuadBatch batch;
-    for (int i = 0; i < n; i++, p++) {
+    for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));

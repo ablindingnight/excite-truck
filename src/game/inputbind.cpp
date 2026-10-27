@@ -648,7 +648,7 @@ BindEntry* fn_801A9234(Binding* b) {
     fn_801A7628();
     n = lbl_8055E5D0;
     e = lbl_8055E5CC;
-    for (i = 0; i < n; i++, e++) {
+    for (i = 0; i < n; e++, i++) {
         if (b->type == e->type) {
             switch (b->type) {
             case 2:

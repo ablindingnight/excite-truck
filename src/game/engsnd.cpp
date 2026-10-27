@@ -272,7 +272,7 @@ void EngineSound::Update(int muted) {
         vol = 0.0f;
     }
     EngineSample* e = samples;
-    for (int i = 0; i < count; i++, e++) {
+    for (int i = 0; i < count; e++, i++) {
         f32 a = 1.0f;
         if (r < e->rpm.lo) {
             a = (e->rpm.lo - r) * e->rpm.invLo;

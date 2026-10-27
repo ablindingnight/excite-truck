@@ -996,7 +996,7 @@ void fn_801B24B8(void) {
     }
     fn_801B1318();
     e = lbl_80435BE8.e;
-    for (int i = 0; i < lbl_80435BE8.n; i++, e++) {
+    for (int i = 0; i < lbl_80435BE8.n; e++, i++) {
         fn_801B15A8(&lbl_8055E684[e->car], e->time);
     }
     lbl_80435BE8.n = 0;
