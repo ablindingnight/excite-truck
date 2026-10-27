@@ -271,7 +271,20 @@ u8* fn_8024E920(u8* p, int del) {
     return p;
 }
 
-void fn_8024EA1C(u8* p) {
+}  // extern "C"
+
+// Remembers colour c as the car's body (alt) or trim colour.
+static inline void SaveColor(u8* p, s32 c) {
+    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    if (lbl_80498C48.alt) {
+        GetVehicleColor(v, 0)[0] = c;
+    } else {
+        GetVehicleColor(v, 0)[1] = c;
+    }
+}
+
+// Saves the selected colour for the car and shows it (tint and "UICar:COLOR%d" label).
+static inline void ShowSelColor(u8* p) {
     VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
     if (lbl_80498C48.alt) {
         GetVehicleColor(v, 0)[0] = S32(p, 0x2C);
@@ -287,6 +300,10 @@ void fn_8024EA1C(u8* p) {
     const char* str = fn_80131234(p + 0xE0);
     CopyName(str, 0x100, (char*)(p + 0xE0));
 }
+
+extern "C" {
+
+void fn_8024EA1C(u8* p) { ShowSelColor(p); }
 
 u32 fn_8024EB94(u8* p) { return U32(p, 0x1c); }
 
@@ -437,7 +454,32 @@ void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
     fn_802354A0(PTR(p, 0x24), 6, -1, x, y, 0.0f, w, h);
 }
 
-void fn_8025157C(u8* p) {}  // stub (238)
+// Colour list input: left/right pick the previous/next colour; bumping an end plays the error cue.
+int fn_8025157C(u8* p, int key) {
+    switch (key) {
+    case 0x125:
+        if (S32(p, 0x2C) > 0) {
+            s32 c = --S32(p, 0x2C);
+            SaveColor(p, c);
+            ShowSelColor(p);
+        } else {
+            fn_80216D28();
+            fn_80214D50(1);
+        }
+        return 1;
+    case 0x127:
+        if (S32(p, 0x2C) < S32(p, 0x1C) - 1) {
+            s32 c = ++S32(p, 0x2C);
+            SaveColor(p, c);
+            ShowSelColor(p);
+        } else {
+            fn_80216D28();
+            fn_80214D50(1);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 void fn_80214AF0(int s);
 
