@@ -361,13 +361,14 @@ char* fn_802CA2A8(char* dst, int n, const char* name) {
     StrCopy(dst, name, n);
     char* dot = strrchr(dst, '.');
     *dot = 0;
+    const char* ext = ".tm0";
     char* p = dst;
     while (*p) {
         n--;
         p++;
     }
     if (n > 0) {
-        StrCopy(p, ".tm0", n);
+        StrCopy(p, ext, n);
     }
     return dst;
 }

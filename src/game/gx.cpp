@@ -520,9 +520,8 @@ u32 fn_802CEA1C(u32 argb) { return fn_802CE9FC(argb >> 16, argb >> 8, argb, argb
 
 void fn_802CEA34(void) {
     GXRenderModeObj* rm = lbl_8055FD64;
-    s32 w = rm->fbWidth;
-    u32 n = ((u16)(w + 15) & 0xFFF0) * rm->xfbHeight * 2;
-    lbl_804C9760.w = w;
+    u32 n = ((rm->fbWidth + 15) & 0xFFF0) * rm->xfbHeight * 2;
+    lbl_804C9760.w = rm->fbWidth;
     lbl_804C9760.h = rm->xfbHeight;
     lbl_804C9760.bpp = 2;
     lbl_804C9760.buf = (u16*)new ("xfb.a") u8[n];
