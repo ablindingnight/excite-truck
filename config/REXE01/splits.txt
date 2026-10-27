@@ -3681,25 +3681,55 @@ game/uiobjs.cpp:
 game/achview.cpp:
 	.text       start:0x80259148 end:0x8025C028
 	.ctors      start:0x802ED460 end:0x802ED464
+	.rodata     start:0x802FA628 end:0x802FA650
+	.data       start:0x80344DE0 end:0x80345258
+	.bss        start:0x80498E98 end:0x80498EB8
+	.sdata      start:0x8055C260 end:0x8055C390
+	.sbss       start:0x8055F388 end:0x8055F3A8
+	.sdata2     start:0x80563AE0 end:0x80563B40
 
 game/recscreen.cpp:
 	.text       start:0x8025C028 end:0x8025CE78
 	.ctors      start:0x802ED464 end:0x802ED468
+	.rodata     start:0x802FA650 end:0x802FA678
+	.data       start:0x80345258 end:0x803454C8
+	.bss        start:0x80498EB8 end:0x80498ED0
+	.sdata      start:0x8055C390 end:0x8055C3E0
+	.sbss       start:0x8055F3A8 end:0x8055F3B8
+	.sdata2     start:0x80563B40 end:0x80563B58
 
 game/frname.cpp:
 	.text       start:0x8025CE78 end:0x8025E034
 	.ctors      start:0x802ED468 end:0x802ED46C
+	.rodata     start:0x802FA678 end:0x802FA690
+	.data       start:0x803454C8 end:0x80345828
+	.bss        start:0x80498ED0 end:0x80498EE8
+	.sdata      start:0x8055C3E0 end:0x8055C400
+	.sbss       start:0x8055F3B8 end:0x8055F3C8
+	.sdata2     start:0x80563B58 end:0x80563B70
 
 game/carpick.cpp:
 	.text       start:0x8025E034 end:0x8025FE8C
 	.ctors      start:0x802ED46C end:0x802ED470
+	.rodata     start:0x802FA690 end:0x802FA6A8
+	.data       start:0x80345828 end:0x80345B40
+	.bss        start:0x80498EE8 end:0x80498F00
+	.sbss       start:0x8055F3C8 end:0x8055F3D8
+	.sdata2     start:0x80563B70 end:0x80563B88
 
 game/chalpath.cpp:
 	.text       start:0x8025FE8C end:0x80262F8C
 	.ctors      start:0x802ED470 end:0x802ED474
+	.rodata     start:0x802FA6A8 end:0x802FA6E8
+	.data       start:0x80345B40 end:0x80345FD0
+	.bss        start:0x80498F00 end:0x80498F40
+	.sdata      start:0x8055C400 end:0x8055C440
+	.sbss       start:0x8055F3D8 end:0x8055F428
+	.sdata2     start:0x80563B88 end:0x80563BC8
 
 game/unk_80262F8C.c:
 	.text       start:0x80262F8C end:0x80263080
+	.sdata2     start:0x80563BC8 end:0x80563BD0
 
 game/contmenu.cpp:
 	.text       start:0x80263080 end:0x80263F30
