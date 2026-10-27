@@ -13,6 +13,10 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
+const char* lbl_8055BF10 = "last_mp_event_count";
+const char* lbl_8055BF14 = "last_mp_eve";
+const char* lbl_8055BF18 = "last_mp_difficulty";
+
 // A list widget: the base data comes first, the vptr after it.
 class VC {
 public:
@@ -110,11 +114,6 @@ static inline int FindUnlock(u8* car) {
     return -1;
 }
 
-struct NameList3 {
-    const char* n[3];
-};
-
-extern const NameList3 lbl_802FA4C8;
 extern char* lbl_8055F294;
 extern u8 lbl_8055F290;
 
@@ -169,8 +168,8 @@ int fn_8024958C(u8* car) {
 int fn_80249660(u8* p) { return 1; }
 
 int fn_80249668(s32* out) {
-    NameList3 names = lbl_802FA4C8;
-    const char* src = names.n[fn_80214D04()];
+    const char* names[3] = {"Select Location", "Select Event", "Select Difficulty"};
+    const char* src = names[fn_80214D04()];
     CopyName(src, 0x100, lbl_8055F294);
     if (lbl_8055F290 && !fn_802411D4()) {
         *out = -1;
@@ -381,8 +380,6 @@ struct EvListBuf {
     EvEntryBuf buf[0x80];   // offset 0xC
 };
 
-const char* lbl_8055BF10 = "last_mp_event_count";
-const char* lbl_8055BF14 = "last_mp_eve";
 
 extern "C" {
 void fn_801332D0(int slot, const char* name, s32* value);
