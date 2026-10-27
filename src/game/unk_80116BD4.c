@@ -2131,8 +2131,9 @@ u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
     extern u32 fn_8011A240(void*, u32, s32, u32);
     extern void fn_8011A330(void*);
     u32 result, current, remaining;
-    if (arg1 == -1 || *(u32*)((u8*)arg0 + 0x90) == (u32)arg1) return arg3;
-    *(u32*)((u8*)arg0 + 0x90) = (u32)arg1;
+    if (arg1 != -1 && *(u32*)((u8*)arg0 + 0x90) != (u32)arg1) {
+        *(u32*)((u8*)arg0 + 0x90) = (u32)arg1;
+    }
     result = fn_8011A240((u8*)arg0 + 0x54,
                          *(u32*)((u8*)arg0 + 0x90) + *(u32*)((u8*)arg0 + 0xB4),
                          arg2, arg3);
@@ -2140,12 +2141,13 @@ u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
         *(s32*)((u8*)arg0 + 0x20) = 1;
         fn_8011A330(arg0);
     }
-    *(u32*)((u8*)arg0 + 0x90) += result;
-    current = *(u32*)((u8*)arg0 + 0x90);
+    // MATCHING-AID?: the read position (0x90) and cap (0x40) are re-read like volatile fields; probably genuine
+    // async stream state (the 0xC0 counter in fn_8011A45C is volatile too). Revisit with a real struct.
+    *(volatile u32*)((u8*)arg0 + 0x90) += result;
+    current = *(volatile u32*)((u8*)arg0 + 0x90);
     *(u32*)((u8*)arg0 + 0x98) = current;
     remaining = *(u32*)((u8*)arg0 + 0xB8) - current;
-    if (remaining >= *(u32*)((u8*)arg0 + 0x40))
-        *(u32*)((u8*)arg0 + 0x48) = *(u32*)((u8*)arg0 + 0x40);
+    *(u32*)((u8*)arg0 + 0x48) = remaining < *(volatile u32*)((u8*)arg0 + 0x40) ? remaining : *(volatile u32*)((u8*)arg0 + 0x40);
     fn_8011A1A0((u32*)arg2, result);
     return result;
 }
