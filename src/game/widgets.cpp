@@ -1515,9 +1515,9 @@ struct ModelFitAssetNew {void* dispatch;int resource;ModelFitMatrixNew matrix;fl
 struct ModelFitBoundsNew {float minX,maxX,minY,maxY,minZ,maxZ;inline float RadiusNew()const;};
 extern "C" {ModelFitMatrixNew* fn_802C86DC();void fn_802C77F0(int,ModelFitBoundsNew*);void fn_802C98DC(float*,float*,float*,float*);double sqrt(double);double atan(double);extern const float lbl_80563584;
 }
-// MATCHING-AID: recovered constructor for three used rotation components; original constructor identity is unproved.
-struct ModelRotationInput390 {RotationVec value;inline ModelRotationInput390(float x,float y,float z){value.x=x;value.y=y;value.z=z;}};
-// MATCHING-AID: recovered interpolation signature; const-reference bounds preserve observed load timing. Original helper identity is unproved.
+// Rotation angles as a vector built from its three components.
+struct RotationVec3New : RotationVec {RotationVec3New(float ax,float ay,float az){x=ax;y=ay;z=az;}};
+// Linear interpolation between two bounds (bounds by const reference).
 static inline float ModelFitCenterLerpNew(const float& minimum,const float& maximum,float fraction)
 {
     float span=maximum-minimum;
@@ -1549,9 +1549,9 @@ void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int hei
     self->angle += self->speed * delta;
     self->matrix = *fn_802C86DC();
     RotationVec center;
-    ModelRotationInput390 rotation(lbl_805634A8,self->angle,lbl_805634A8);
+    RotationVec3New rotation(lbl_805634A8,self->angle,lbl_805634A8);
     RotationMatrix tmp;
-    fn_80015A20(&tmp, &rotation.value);
+    fn_80015A20(&tmp, &rotation);
     fn_80015B20(&self->matrix, &tmp, &self->matrix);
     ModelFitBoundsNew bounds;
     fn_802C77F0(self->resource, &bounds);

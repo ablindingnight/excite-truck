@@ -21,9 +21,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | register-qualified cursor index | Codex widgets, tagged 2026-10-26 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | separate unsigned-conversion literal pool | Codex widgets, tagged 2026-10-26 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum + volatile maximum reload (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
-| fn_8022A210 (model fit) | src/game/widgets.cpp | const-reference lerp bounds signature (ModelFitCenterLerpNew) steers load timing | Codex widgets 391, 2026-10-26 |
 | fn_8022A210 (model fit) | src/game/widgets.cpp | scalar wrapper struct for bound extents (ModelBoundScalarObservedNew) | Codex widgets 391, 2026-10-26 |
-| fn_8022A210 (model fit) | src/game/widgets.cpp | rotation-input constructor wrapper (ModelRotationInput390) | Codex widgets 391, 2026-10-26 |
 | fn_8011A388 (Bink stream read) | src/game/unk_80116BD4.c | volatile reads of position 0x90 and cap 0x40 (probably genuine async stream state, like 0xC0 in fn_8011A45C) | Claude, 2026-10-26 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
 | Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
