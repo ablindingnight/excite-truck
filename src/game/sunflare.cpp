@@ -56,7 +56,7 @@ struct FlareSet {
     u8 visible;       // offset 0x148
 };
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
+static inline f32 Mul(f32 b, f32 a) { return a * b; }
 
 extern "C" {
 void PSVECNormalize(const VecP* src, VecP* dst);
@@ -201,7 +201,7 @@ void fn_80291C7C(Sprite* s, int sun) {
     f32 t = (x - edge) / (0.5f * lbl_8055CFF0 - edge);
     t = (1.0f < t) ? 1.0f : t;
     t = (t > 0.0f) ? t : 0.0f;
-    int alpha = Mul(1.0f + Mul(t, -0.75f), s->color >> 24);
+    int alpha = Mul(s->color >> 24, 1.0f + Mul(t, -0.75f));
     if (alpha > 0) {
         u32 color = (alpha << 24) | (s->color & 0xFFFFFF);
         if (!sun) {

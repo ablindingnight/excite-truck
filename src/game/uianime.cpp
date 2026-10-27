@@ -122,7 +122,7 @@ struct AnimState {
     UiSpecialList* special; // offset 0x30
 };
 
-static inline void StrCopy(char* d, const char* s, int n) {
+static inline void StrCopy(char* d, int n, const char* s) {
     char* p = d;
     while ((*p++ = *s++) != 0) {
         if (--n <= 0) {
@@ -138,7 +138,7 @@ static inline void StrCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrCopy(d, s, n);
+        StrCopy(d, n, s);
     }
 }
 
@@ -243,7 +243,7 @@ inline UiSpecialList::UiSpecialList(ValueTable* t) {
                         if (!strcasecmp(s->GetName(), "special")) {
                             UiSpecial* sp = &items[n];
                             sp->autoEnd = s->GetBool("auto_end", 0);
-                            StrCopy(sp->name, s->GetValue("name"), 30);
+                            StrCopy(sp->name, 30, s->GetValue("name"));
                             sp->active = 0;
                             sp->track.id = c->GetIntValue("anim_index");
                             sp->track.n = 0;
@@ -461,7 +461,7 @@ int fn_8023695C(const char* name) { return fn_80237EFC(name); }
 
 void fn_80236960(const char* name) {
     if (name) {
-        StrCopy(lbl_80498664, name, 100);
+        StrCopy(lbl_80498664, 100, name);
     }
 }
 

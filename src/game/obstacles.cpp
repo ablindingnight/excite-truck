@@ -545,7 +545,7 @@ void fn_801ACA48(u8* p) {
 
 }  // extern "C"
 
-static inline f32 ObLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 ObLerp(f32 b, f32 a, f32 t) { return a + t * (b - a); }
 
 // A pose as stored for drawing (rotation rows + position).
 struct ObRot {
@@ -575,7 +575,7 @@ void fn_801ACB30(u8* p, u8* buf) {
         f32* cur = (f32*)(p + 0x70);
         f32* d = (f32*)&t;
         for (int i = 0; i < 12; i++) {
-            d[i] = ObLerp(prev[i], cur[i], f);
+            d[i] = ObLerp(cur[i], prev[i], f);
         }
         *(ObPose*)out = t;
     }

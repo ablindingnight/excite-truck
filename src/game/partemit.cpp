@@ -166,7 +166,7 @@ f32 PSVECDotProduct(const PVec* a, const PVec* b);
 
 extern u8 lbl_8055F73C;
 
-static inline void StrCopy(char* d, const char* s, int n) {
+static inline void StrCopy(char* d, int n, const char* s) {
     char* p = d;
     while ((*p++ = *s++) != 0) {
         if (--n <= 0) {
@@ -300,7 +300,7 @@ void fn_8029F458(const char* name, Obj* obj) {
     if (*name == '$') {
         name++;
     }
-    StrCopy(buf, name, 32);
+    StrCopy(buf, 32, name);
     s32 fx = fn_8029F3BC(buf);
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         if (lbl_804B9B7C.data[i].fx == fx) {
@@ -353,7 +353,7 @@ void fn_8029F658(ValueNode* node) {
         name++;
     }
     lbl_804B6E70[lbl_8055F81C].id = d->id;
-    StrCopy(lbl_804B6E70[lbl_8055F81C].name, name, 32);
+    StrCopy(lbl_804B6E70[lbl_8055F81C].name, 32, name);
     d->speedScale = node->GetFloat("speed_scale", 0.0f);
     d->spewK = node->GetFloat("spew_k", 0.0f);
     d->spewM = node->GetFloat("spew_m", 0.0f);
@@ -412,7 +412,7 @@ void fn_8029FB00(ValueNode* node) {
     fn_801E9DC4(&in->slot);
     if (fx == lbl_8055F818) {
         lbl_804B7770[lbl_8055F818].id = fx;
-        StrCopy(lbl_804B7770[lbl_8055F818].name, node->GetValue("name"), 32);
+        StrCopy(lbl_804B7770[lbl_8055F818].name, 32, node->GetValue("name"));
         lbl_8055F818++;
     }
 }

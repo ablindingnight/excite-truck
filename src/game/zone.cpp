@@ -554,7 +554,7 @@ public:
 
 extern "C" const char* fn_80131234(const char* key);
 
-static inline void StrCopyN(char* d, int n, const char* s) {
+static inline void StrCopyN(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -637,14 +637,14 @@ struct ZoneHud {
     }
     int Update(CarState* c);
     void SetComplete(void) {
-        StrCopyN(textC6, 0x14, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"));
-        StrCopyN(textDA, 0x14, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"));
-        StrCopyN(failText, 0x14, "");
+        StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14, textC6);
+        StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14, textDA);
+        StrCopyN("", 0x14, failText);
     }
     void SetTimedOut(void) {
-        StrCopyN(failText, 0x14, fn_80131234("ResultsOverlay:TIMED_OUT"));
-        StrCopyN(textC6, 0x14, "");
-        StrCopyN(textDA, 0x14, "");
+        StrCopyN(fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14, failText);
+        StrCopyN("", 0x14, textC6);
+        StrCopyN("", 0x14, textDA);
     }
     void ResetState(void) {
         state = 0;
@@ -2250,12 +2250,12 @@ int ZoneHud::Update(CarState* c) {
     }
     fn_801345D8(bonus, 0x14, "%d", shown);
     if (noBonus) {
-        StrCopyN(timeLeft, 0x14, "");
-        StrCopyN(bonusTitle, 0x14, "");
+        StrCopyN("", 0x14, timeLeft);
+        StrCopyN("", 0x14, bonusTitle);
     } else {
         static LocString caps("ResultsOverlay:TIME_BONUS_CAPS");
         fn_80130980(timeLeft, 0x14, 2, left);
-        StrCopyN(bonusTitle, 0x14, caps.Get());
+        StrCopyN(caps.Get(), 0x14, bonusTitle);
     }
     fn_801345D8(finalText, 0x14, "%d", final);
     fn_801308F4(totalText, 0x14, total);
@@ -2263,9 +2263,9 @@ int ZoneHud::Update(CarState* c) {
     {
         int g = fn_801609C4(total);
         if (g != -1) {
-            StrCopyN(grade, 10, GetGradeDisplayName(g));
+            StrCopyN(GetGradeDisplayName(g), 10, grade);
         } else {
-            StrCopyN(grade, 10, "-");
+            StrCopyN("-", 10, grade);
         }
     }
     if (i10C) {
@@ -2830,9 +2830,9 @@ void ZoneHud::Init(void) {
         HudBinding(2, "difficulty_level", &level),
         lbl_802FAA40,
     };
-    StrCopyN(noBonusText, 0x14, "100");
-    StrCopyN(bonus, 0x14, "50");
-    StrCopyN(totalText, 0x14, "150");
+    StrCopyN("100", 0x14, noBonusText);
+    StrCopyN("50", 0x14, bonus);
+    StrCopyN("150", 0x14, totalText);
     fn_80130980(timeLeft, 0x14, 2, 15.0f);
     level = fn_80204CF0() + 1;
     animId = ((ArtPlayer*)(anim))->Add("a_zone_finish.val", (int)(b));

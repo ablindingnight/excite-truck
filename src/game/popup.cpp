@@ -159,7 +159,7 @@ s64 lbl_8055ADF0 = -1;     // when the current popup came up
 
 static inline void* Prefs(void) { return (u8*)IdentGetCurrentSlot() + 0xC; }
 
-static inline void DrawRing(f32 x, f32 y, f32 r) {
+static inline void DrawRing(f32 y, f32 x, f32 r) {
     fn_80147F30(0xFFC8C800, 1000, -1, x, y, r, 0.0f, 1.5707964f, -0.006283185f, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
@@ -191,7 +191,7 @@ void fn_801DE890(int id) {
             if (a) {
                 fn_801476D8(a, -1, d->tex);
                 f32 half = 0.5f;
-                DrawRing(a->pos.x + a->w * half, a->pos.y + a->h * half, 0.78f * (a->w * half));
+                DrawRing(a->pos.y + a->h * half, a->pos.x + a->w * half, 0.78f * (a->w * half));
             }
         }
         break;

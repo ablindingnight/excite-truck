@@ -38,7 +38,7 @@ SurfaceInfo* fn_801D04A8(int surface);
 static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline f32 Clamp01(f32 t) { return Max(Min(t, 1.0f), 0.0f); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Lerp(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 struct RoadSoundEntry {
     RoadSoundVoice* voice;  // offset 0x0
@@ -132,11 +132,11 @@ void RoadSound::Update(void) {
             if (v) {
                 f32 vol;
                 if (speed < entries[i].speed2) {
-                    vol = Lerp(0.0f, entries[i].vol2, Clamp01((speed - entries[i].speed1) / (entries[i].speed2 - entries[i].speed1)));
+                    vol = Lerp(Clamp01((speed - entries[i].speed1) / (entries[i].speed2 - entries[i].speed1)), 0.0f, entries[i].vol2);
                 } else {
-                    vol = Lerp(entries[i].vol2, entries[i].vol3, Clamp01((speed - entries[i].speed2) / (entries[i].speed3 - entries[i].speed2)));
+                    vol = Lerp(Clamp01((speed - entries[i].speed2) / (entries[i].speed3 - entries[i].speed2)), entries[i].vol2, entries[i].vol3);
                 }
-                f32 pitch = Lerp(entries[i].pitch1, entries[i].pitch3, Clamp01((speed - entries[i].speed1) / (entries[i].speed3 - entries[i].speed1)));
+                f32 pitch = Lerp(Clamp01((speed - entries[i].speed1) / (entries[i].speed3 - entries[i].speed1)), entries[i].pitch1, entries[i].pitch3);
                 v->unk4A = 0;
                 v->unk4B = 1;
                 v->unk49 = 1;

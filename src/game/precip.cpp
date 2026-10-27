@@ -1029,7 +1029,7 @@ static inline int ClampA(f32 v, int a) {
     return b < a ? b : a;
 }
 
-static inline u32 MistColor(int r, int g, int b) { return 0xFF000000 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF); }
+static inline u32 MistColor(int r, int b, int g) { return 0xFF000000 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF); }
 
 Mist::Mist(ValueNode* vn) {
     count = vn->GetIntValue("max");
@@ -1042,7 +1042,7 @@ Mist::Mist(ValueNode* vn) {
     tex = fn_802CAC28(vn->GetValue("texture"), 0);
     pointScale = log2(0.5f / size);
     ValVec3 c = vn->GetVec3("color");
-    color = MistColor(Alpha(c.x), Alpha(c.y), Alpha(c.z));
+    color = MistColor(Alpha(c.x), Alpha(c.z), Alpha(c.y));
     density = vn->GetFloat("density");
     if (!fn_801EA140(&center)) {
         fn_802E317C("weather: terrain lookup failed for '%s'", vn->GetName());

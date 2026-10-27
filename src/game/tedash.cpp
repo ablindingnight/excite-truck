@@ -226,7 +226,7 @@ extern s32 lbl_8055CFF4;  // screen height
 
 inline f32 Timer::Now(void) { return (f32)fn_802E2C20() / 1000.0f; }
 
-static inline void StrCopy(char* d, const char* s, int n) {
+static inline void StrCopy(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -608,7 +608,7 @@ void fn_802B6AC0(void) {
     }
     do {
         Brush* b = &lbl_804BE7D8.data[lbl_804BE7D8.count++];
-        StrCopy(b->name, name, 0x20);
+        StrCopy(name, 0x20, b->name);
         if (strchr(b->name, '.')) {
             *strchr(b->name, '.') = 0;
         }
@@ -656,7 +656,7 @@ void fn_802B6AC0(void) {
                 p++;
             }
             if (n > 0) {
-                StrCopy(p, "-BAD", n);
+                StrCopy("-BAD", n, p);
             }
         }
         if (lbl_804BE7D8.count + 1 > lbl_804BE7D8.cap) {
@@ -1196,7 +1196,7 @@ void fn_802B8AE0(const char* name, u32* value) {
         return;
     }
     Stat s;
-    StrCopy(s.name, name, 0x20);
+    StrCopy(name, 0x20, s.name);
     s.value = value;
     s.peak = 0;
     lbl_804BFA70.data[lbl_804BFA70.count++] = s;
