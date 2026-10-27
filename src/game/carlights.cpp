@@ -119,7 +119,7 @@ static inline int ColorByte(f32 f) {
     return v < 255 ? v : 255;
 }
 
-static inline u32 MakeColor(int r, int g, int b) { return 0xFF000000 | (u8)r << 16 | (u8)g << 8 | (u8)b; }
+static inline u32 MakeColor(int r, int b, int g) { return 0xFF000000 | (u8)r << 16 | (u8)g << 8 | (u8)b; }
 
 static const QuadIdx lbl_802FA9B0 = {{0, 1, 2, 1, 2, 3}};
 
@@ -349,7 +349,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
         if (fn_80287E20(model, name)) {
             ValueNodeV* n = fn_80287E80(model, name);
             const ValVec3& v = n->GetVec3Or("color", def);
-            c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.y), ColorByte(255.0f * v.z));
+            c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.z), ColorByte(255.0f * v.y));
             f32 r = n->GetFloat("rad", rad);
             w = n->GetFloat("width", -1.0f);
             h = n->GetFloat("height", -1.0f);
@@ -359,7 +359,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
             }
             type = n->GetInt("light_type", 0);
         } else {
-            c = MakeColor(ColorByte(255.0f * def.x), ColorByte(255.0f * def.y), ColorByte(255.0f * def.z));
+            c = MakeColor(ColorByte(255.0f * def.x), ColorByte(255.0f * def.z), ColorByte(255.0f * def.y));
             w = rad;
             h = rad;
             type = 0;

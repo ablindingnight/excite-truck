@@ -272,7 +272,7 @@ static inline void Swap32(u8* p) {
     p[2] = t;
 }
 
-static inline void Skin2(V3* out, const SkinVtx* v, int n) {
+static inline void Skin2(const SkinVtx* v, V3* out, int n) {
     for (int i = n; i > 0; i--) {
         f32 w0 = (1.0f / 255) * v->w0;
         const BVec* a = &lbl_804DB068[v->b0];
@@ -318,7 +318,7 @@ void fn_802D4060(Surf* s) {
     v = (SkinVtx*)s->verts;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
-        Skin2(out, v, n);
+        Skin2(v, out, n);
         GXSetArray(9, out, 0xC);
         GXSetArray(0xD, s->uv, 4);
         GXSetArray(0xE, s->attr, 4);
@@ -355,7 +355,7 @@ void fn_802D42E4(Surf* s) {
         fn_802D4280(s);
         return;
     }
-    Skin2(out, v, n);
+    Skin2(v, out, n);
     GXSetArray(9, out, 0xC);
     GXSetArray(0xA, s->attr, 3);
     GXSetArray(0xD, s->uv, 4);
@@ -368,7 +368,7 @@ void fn_802D4458(Surf* s) {
     v = (SkinVtx*)s->verts;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
-        Skin2(out, v, n);
+        Skin2(v, out, n);
         GXSetArray(9, out, 0xC);
         GXSetArray(0xB, s->attr, 2);
         GXSetArray(0xD, s->uv, 4);
@@ -619,7 +619,7 @@ void fn_802D56D4(Surf* s) {
         fn_802D5680(s);
         return;
     }
-    Skin2(out, v, n);
+    Skin2(v, out, n);
     GXSetArray(9, out, 0xC);
     GXSetArray(0xA, s->attr, 3);
     GXCallDisplayList(s->dl, s->dlSize);
@@ -1131,7 +1131,7 @@ void fn_802D6C78(void) {
     DeformQueue* q = &lbl_804CAC38;
     for (int k = 0; k < q->count; k++) {
         DeformJob* j = &q->jobs[k];
-        Skin2((V3*)j->dst, (const SkinVtx*)j->src, j->n);
+        Skin2((const SkinVtx*)j->src, (V3*)j->dst, j->n);
     }
     q->count = 0;
     SetGQR6();

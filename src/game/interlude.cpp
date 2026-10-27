@@ -2036,7 +2036,7 @@ void fn_801C7BA0(void) {
 }
 
 // The signed angle from a to b (both normalised first unless already unit length).
-static inline f32 Angle(const V2& a, const V2& b) {
+static inline f32 Angle(const V2& b, const V2& a) {
     const V2* pa = &a;
     V2 na;
     f32 la = a.x * a.x + a.y * a.y;
@@ -2081,7 +2081,7 @@ void fn_801C7C04(void) {
     case 0:
         e->pt = XZ(*(IVec3*)(s + 0x6F8));
         e->offset = XZ(*(IVec3*)(s + 0x710)) - e->pt;
-        e->yaw = Angle(XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)), V2(0.0f, 1.0f));
+        e->yaw = Angle(V2(0.0f, 1.0f), XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)));
         break;
     case 1:
     default:

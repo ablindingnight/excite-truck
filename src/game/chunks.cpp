@@ -505,14 +505,14 @@ static inline int Dim(u32 c) {
     return v > 0xFF ? 0xFF : v;
 }
 
-static inline u32 DimColor(int r, int g, int b) { return 0xFF000000 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF); }
+static inline u32 DimColor(int r, int b, int g) { return 0xFF000000 | (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF); }
 
 void CarChunks::InitColors(void) {
     CarInfo** list = lbl_80488648;
     CarColor* cc = colors;
     for (u32 i = 0; (i < 8 ? list[i] : 0) != 0; i++, cc++) {
         u32 c = list[i]->color;
-        cc->dim = DimColor(Dim(c >> 16), Dim(c >> 8), Dim(c));
+        cc->dim = DimColor(Dim(c >> 16), Dim(c), Dim(c >> 8));
         cc->full = c;
     }
 }
