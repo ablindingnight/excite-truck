@@ -1526,7 +1526,12 @@ void fn_801FA550(void) {
 }
 
 void fn_801FA618(void) {
-    int old = fn_802C9C58((fn_801E87A8()->flags & 2) ? 1 : 2);
+    u32 flags = fn_801E87A8()->flags;
+    int mode = 2;
+    if (flags & 2) {
+        mode = 1;
+    }
+    int old = fn_802C9C58(mode);
     StaticObject* s;
     fn_802C7A44();
     for (s = lbl_8055EC48; s; s = s->next) {
@@ -1549,7 +1554,12 @@ void fn_801FA6B8(void) {
 }
 
 void fn_801FA738(void) {
-    int old = fn_802C9C58((fn_801E87A8()->flags & 2) ? 1 : 2);
+    u32 flags = fn_801E87A8()->flags;
+    int mode = 2;
+    if (flags & 2) {
+        mode = 1;
+    }
+    int old = fn_802C9C58(mode);
     StaticOb* o;
     fn_802C7A44();
     for (o = lbl_8055EC4C; o; o = o->next) {
