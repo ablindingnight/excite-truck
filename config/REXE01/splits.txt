@@ -3575,10 +3575,18 @@ game/unlkmenu.cpp:
 game/menusel.cpp:
 	.text       start:0x80245080 end:0x802451DC
 	.ctors      start:0x802ED428 end:0x802ED42C
+	.bss        start:0x80498890 end:0x804988D8
+	.sbss       start:0x8055F238 end:0x8055F248
 
 game/mcstatus.cpp:
 	.text       start:0x802451DC end:0x80246938
 	.ctors      start:0x802ED42C end:0x802ED430
+	.rodata     start:0x802FA350 end:0x802FA378
+	.data       start:0x80342FC0 end:0x80343270
+	.bss        start:0x804988D8 end:0x804988F0
+	.sdata      start:0x8055BE50 end:0x8055BE80
+	.sbss       start:0x8055F248 end:0x8055F250
+	.sdata2     start:0x80563830 end:0x80563898
 
 game/popwarn.cpp:
 	.text       start:0x80246938 end:0x802494F8
@@ -3602,6 +3610,10 @@ game/multievt.cpp:
 game/modeltest.cpp:
 	.text       start:0x8024BDDC end:0x8024C070
 	.ctors      start:0x802ED438 end:0x802ED43C
+	.rodata     start:0x802FA510 end:0x802FA520
+	.data       start:0x80343E90 end:0x80343EC0
+	.sbss       start:0x8055F2A0 end:0x8055F2A8
+	.sdata2     start:0x80563908 end:0x80563920
 
 game/unitmenu.cpp:
 	.text       start:0x8024C070 end:0x8024C370
