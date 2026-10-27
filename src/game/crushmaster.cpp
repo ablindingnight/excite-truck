@@ -845,8 +845,8 @@ void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
     fwd.y = 0.0f;
     fwd.z = 1.0f;
     SetLen(&up, -size);
-    SetLen(&side, w * 0.5f);
-    SetLen(&fwd, w * 0.5f);
+    SetLen(&side, w / 2.0f);
+    SetLen(&fwd, w / 2.0f);
     v[0].pos.x = 0.0f;
     v[0].pos.y = 0.0f;
     v[0].pos.z = 0.0f;

@@ -312,7 +312,7 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     }
     f32 dot = to[0] * dir[0] + to[1] * dir[1];
     f32 steer = fn_80287BC8(0.0f, 1.0f);
-    f32 half = b->radius * 0.5f;
+    f32 half = b->radius / 2.0f;
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
     }

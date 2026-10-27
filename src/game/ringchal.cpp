@@ -2036,7 +2036,7 @@ void RingChalMaster::vf4C(int view) {
                 if (dt < b + (0.3f + a)) {
                     f32 sx = icon.pos.x;
                     f32 sy = icon.pos.y;
-                    f32 x0 = starScore->pos.x - icon.w * (arena.stats->At(i)->best * 0.5f);
+                    f32 x0 = starScore->pos.x - icon.w * (arena.stats->At(i)->best / 2.0f);
                     f32 y0 = starScore->pos.y;
                     f32 cx = l->Find("score_counter")->pos.x;
                     f32 cy = l->Find("score_counter")->pos.y;
@@ -2175,7 +2175,7 @@ void RingChalMaster::vf4C(int view) {
                     ALPHA(nx.color, k);
                     nx.w = fn_80144C80(10.0f * next->w, next->w, k);
                     nx.h = fn_80144C80(10.0f * next->h, next->h, k);
-                    nx.pos.x = fn_80144C80(next->pos.x - 10.0f * next->w * 0.5f, next->pos.x, k);
+                    nx.pos.x = fn_80144C80(next->pos.x - 10.0f * next->w / 2.0f, next->pos.x, k);
                     nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h * 0.5f, next->pos.y, k);
                 }
                 if (d > 1.35f) {

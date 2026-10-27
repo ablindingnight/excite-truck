@@ -536,7 +536,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
                     v[i] = base;
-                    f32 h = i ? p->sizeY * 0.5f - 0.4f : 0.4f + p->sizeY * 0.5f;
+                    f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY * 0.5f;
                     AddScaled(&v[i], &v[i], (const Vec*)&m.rot[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
                     fn_802C8E00(color, 1, v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj);

@@ -1063,7 +1063,7 @@ void fn_8023423C(int idx, int align) {
     } else if (align & 0x20) {
         lbl_8055F06C[idx].y -= f->b6 * scale;
     } else if (align & 0x10) {
-        lbl_8055F06C[idx].y -= f->height * scale * 0.5f;
+        lbl_8055F06C[idx].y -= f->height * scale / 2.0f;
     }
 }
 

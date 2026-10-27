@@ -1443,7 +1443,7 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                     a = l->FindArt(buf);
                     if (a) {
                         ArtElem e = *a;
-                        e.pos.x = e.pos.x - e.w * 0.5f - 4.0f * e.w * 0.5f;
+                        e.pos.x = e.pos.x - e.w / 2.0f - 4.0f * e.w * 0.5f;
                         if (lbl_802F9410[i].Is(it->Type()) && !done[i]) {
                             char name[0x20];
                             TextElem* t;
@@ -1546,7 +1546,7 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                     st = *stars;
                     if (sa) {
                         ArtElem s2 = *sa;
-                        s2.pos.x = s2.pos.x - s2.w * 0.5f - 4.0f * s2.w * 0.5f;
+                        s2.pos.x = s2.pos.x - s2.w / 2.0f - 4.0f * s2.w * 0.5f;
                         st.w = sc * fn_80144C80(s2.w, st.w, p);
                         st.h = sc * fn_80144C80(s2.h, st.h, p);
                         st.pos.y = st.pos.y - 0.5f * st.h;

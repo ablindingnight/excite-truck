@@ -804,9 +804,9 @@ void DustTrail::Impact(const TrailEvent* e) {
             q.y = c.y + m.x.y * 0.15f;
             q.z = c.z + m.x.z * 0.15f;
             fn_8028E584(event, &q, &v1);
-            q.x = c.x + m.x.x * 0.5f;
-            q.y = c.y + m.x.y * 0.5f;
-            q.z = c.z + m.x.z * 0.5f;
+            q.x = c.x + m.x.x / 2.0f;
+            q.y = c.y + m.x.y / 2.0f;
+            q.z = c.z + m.x.z / 2.0f;
             fn_8028E584(event, &q, &v1);
             q.x = c.x + m.x.x * -0.15f;
             q.y = c.y + m.x.y * -0.15f;

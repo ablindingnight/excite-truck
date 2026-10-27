@@ -514,7 +514,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         f32 dist = fn_801EA9A0(view)->truck->lapDist;
         f32 t;
-        scale = 1.0f / (map->width * 0.5f);
+        scale = 1.0f / (map->width / 2.0f);
         t = (fn_801EA9A0(view)->truck->speed / 0.44444445f - map->minSpeed) /
             (map->maxSpeed - map->minSpeed);
         t = Max(Min(1.0f, t), 0.0f);

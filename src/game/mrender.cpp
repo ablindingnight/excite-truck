@@ -660,7 +660,7 @@ void fn_802C974C(f32 near, f32 far, f32 fov) {
     lbl_8055FC54 = 1.0f / a;
     lbl_8055FC50 = lbl_8055FC44 / lbl_8055FC6C;
     f32 v = atan(lbl_8055FC50);
-    lbl_8055FC58 = 1.0f / (f32)sin(1.5707964f - 2.0f * v * 0.5f);
+    lbl_8055FC58 = 1.0f / (f32)sin(1.5707964f - 2.0f * v / 2.0f);
     f32 aspect = is2D ? 1.0f : lbl_8055D020 / lbl_8055D024;
     fn_802D0368(lbl_8055FC38, lbl_8055FC3C, fov, aspect);
     fn_802CC518(lbl_8055FC64, lbl_8055FC44);

@@ -338,7 +338,7 @@ void Proxer::Process(void) {
         p->dvel.y = b->vel.y - a->vel.y;
         pairs[k].SetPos(a, b);
         dy = b->pos.y - a->pos.y;
-        if ((f32)__fabs(dy) > lapLen * 0.5f && !((a->sec | b->sec) & 8)) {
+        if ((f32)__fabs(dy) > lapLen / 2.0f && !((a->sec | b->sec) & 8)) {
             dy += lapLen * -(dy > 0.0f ? 1.0f : -1.0f);
         }
         pairs[k].dpos.y = dy;

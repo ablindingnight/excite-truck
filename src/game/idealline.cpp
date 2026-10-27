@@ -591,7 +591,7 @@ int IdealFollower::Track(V2* p, f32* progress) {
     if (!jump) {
         f32 ls;
         speed = travel - oldTravel;
-        if (speed < -line->len[il.seg->type] * 0.5f) {
+        if (speed < -line->len[il.seg->type] / 2.0f) {
             speed = speed + line->len[il.seg->type];
         }
         speed *= 59.94f;

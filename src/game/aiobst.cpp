@@ -568,7 +568,7 @@ struct Bins {
         f32 d = v->Ahead(p, &v->at) - o->rad;
         if (d > 0.0f && d < range) {
             f32 s = v->Side(p, &v->at);
-            if (s + o->rad > -kWidth * 0.5f && s - o->rad < kWidth * 0.5f) {
+            if (s + o->rad > -kWidth / 2.0f && s - o->rad < kWidth / 2.0f) {
                 int lo;
                 int hi;
                 int k;

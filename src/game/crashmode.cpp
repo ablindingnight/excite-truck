@@ -407,7 +407,7 @@ int fn_801DF93C(int view) {
     }
     if (!fn_80141F7C(left) && s->boosted) {
         f32 d = lbl_8055AE40 / fn_80176A2C();
-        f32 k = fn_80144BD8(fn_8014C8B4(d - fade, d - d * 0.5f, 0.0f, 1.0f, left));
+        f32 k = fn_80144BD8(fn_8014C8B4(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
         TextElem* a = m->layout->Find("boost_text");
         TextElem* b = m->layout->Find("boost_out");
         if (a && b) {

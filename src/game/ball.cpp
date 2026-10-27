@@ -735,7 +735,7 @@ void Ball::PickDrop(f32* xz, s16* h) {
             pp.pt = pp.pt->next;
         }
         w = pp.pt->width + pp.t * (pp.pt->next->width - pp.pt->width);
-        off = fn_80129DC4(4, -w * 0.5f, w * 0.5f);
+        off = fn_80129DC4(4, -w / 2.0f, w / 2.0f);
         pp.Place(xz, off);
         {
             BVec3 p;

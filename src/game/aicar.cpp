@@ -986,7 +986,7 @@ void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
 
 f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
     f32 m = (f32)fmod(x, p);
-    if (m > p * 0.5f) {
+    if (m > p / 2.0f) {
         m = p - m;
     }
     f32 t = m / (p * 0.5f);
