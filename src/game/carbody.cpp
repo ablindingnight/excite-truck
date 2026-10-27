@@ -106,6 +106,7 @@ struct CbPose {
 
 class CollVolume {
 public:
+    virtual ~CollVolume(void);
     void Update(void);
 };
 
@@ -118,7 +119,7 @@ s32 fn_801C1C1C(void);
 s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
 
-class RigidBody {
+class RigidBody : public CollVolume {
 public:
     RigidBody(void);
     void Reset(void);
@@ -358,7 +359,29 @@ void fn_801836DC(void) {}
 
 }  // extern "C"
 
-CarBody::~CarBody(void) {}  // stub (63)
+// A sub-object owned by the body, destroyed through its virtual destructor.
+class CbPart {
+public:
+    virtual ~CbPart(void);
+};
+
+extern "C" void fn_801D1100(u8* p);
+extern "C" void fn_802792EC(u8* p);
+extern "C" void fn_8018A6F4(u8* p);
+
+CarBody::~CarBody(void) {
+    fn_801D1100(PTR(this, 0x1EC));
+    if (*(CbPart**)((u8*)this + 0x257C)) {
+        delete *(CbPart**)((u8*)this + 0x257C);
+    }
+    if (*(CbPart**)((u8*)this + 0x2580)) {
+        delete *(CbPart**)((u8*)this + 0x2580);
+    }
+    delete *(CbPart**)((u8*)this + 0x2584);
+    fn_8018A6F4((u8*)this);
+    fn_802792EC(PTR(this, 0x26C));
+    lbl_8055E4D0--;
+}
 
 extern "C" {
 
