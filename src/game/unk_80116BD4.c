@@ -1860,21 +1860,19 @@ extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
 extern s32 fn_801199A4(void *, s32);
 s32 fn_80119C0C(void *arg0, s32 arg1) {
-    s32 state = *(s32 *)((u8 *)arg0 + 0x64);
-    if (arg1 != 0) {
-        if (state == 0) {
-            *(s32 *)((u8 *)arg0 + 0xb0) = 0;
-            *(s32 *)((u8 *)arg0 + 0x64) = 1;
-            *(s32 *)((u8 *)arg0 + 0xb8) = 0;
-            *(s32 *)((u8 *)arg0 + 0xbc) = *(s32 *)((u8 *)arg0 + 0xc0);
-        }
-    } else if (state != 0) {
-        fn_8011943C((u8 *)arg0 + 0x7c, 0);
-        fn_801199A4((u8 *)arg0 + 0x7c, 1);
-        fn_80119300((u8 *)arg0 + 0x7c, 0, *(s32 *)((u8 *)arg0 + 0x94));
-        *(s32 *)((u8 *)arg0 + 0x64) = 0;
+    u8 *p = (u8 *)arg0;
+    if (arg1 != 0 && *(s32 *)(p + 0x64) == 0) {
+        *(s32 *)(p + 0xb0) = 0;
+        *(s32 *)(p + 0x64) = 1;
+        *(s32 *)(p + 0xb8) = 0;
+        *(s32 *)(p + 0xbc) = *(s32 *)(p + 0xc0);
+    } else if (arg1 == 0 && *(s32 *)(p + 0x64) != 0) {
+        fn_8011943C(p + 0x7c, 0);
+        fn_801199A4(p + 0x7c, 1);
+        fn_80119300(p + 0x7c, 0, *(s32 *)(p + 0x94));
+        *(s32 *)(p + 0x64) = 0;
     }
-    return *(s32 *)((u8 *)arg0 + 0x64);
+    return *(s32 *)(p + 0x64);
 }
 
 s32 fn_80119CB0(void *arg0, s32 arg1) {
