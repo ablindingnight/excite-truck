@@ -169,11 +169,17 @@ struct CarSelItem {
     u8 sel;        // offset 0x0
     u8 pad1[0x3];
     u32 value;     // offset 0x4
+    u8 f8;         // offset 0x8
 
     void Set(u8 s, u32 v) {
         sel = s;
         value = v;
     }
+    // vtable pointer at 0xC (CodeWarrior places it after the members)
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual int IsSet(void);
 };
 
 // A player's car choice list (vtable lbl_80342650).
@@ -196,6 +202,21 @@ struct CarSel {
         }
     }
     void SetSlot(s32 s);
+    void SetCur(s32 c) {
+        cur = c;
+        Refresh();
+    }
+    // True when the list is active and every row has been set.
+    u8 Confirmable(void) {
+        if (active) {
+            for (int i = 0; i < count; i++) {
+                if (!items[i]->IsSet()) {
+                    return 0;
+                }
+            }
+        }
+        return active;
+    }
     void SetActive(u8 a) {
         active = a;
         Refresh();
@@ -657,6 +678,17 @@ struct JoinLeaveWidget {
         return n >= 2;
     }
 
+    // Counts the groups past the join prompt that have not confirmed yet.
+    int Unconfirmed(int k) {
+        int n = 0;
+        for (int i = 0; i < 2; i++) {
+            if (groups[k].state > 1 && groups[k].state != 4) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     // Shows the widgets of each focus group whose state changed.
     void UpdateFocus(void) {
         u32 ready = AllReady();
@@ -745,6 +777,71 @@ void fn_80242B1C(JoinLeaveWidget* w) {
     }
 }
 
-void fn_80242F68(u8* p) {}  // stub (298)
+void fn_80216D28(void);
+void fn_80214D50(int s);
+
+// Join/leave input: Back steps a player back (or leaves), Enter confirms, joins or starts the race.
+int fn_80242F68(JoinLeaveWidget* w, int key) {
+    int ctrl = fn_802E4A10();
+    if (ctrl >= 2) {
+        return 0;
+    }
+    FocusGroup* c = &w->groups[ctrl];
+    int same = ctrl == *c->sel->slot;
+    u8 owns = 0;
+    if (c->state > 1 && same) {
+        owns = 1;
+    }
+    int mine = owns ? ctrl : -1;
+    int free = c->state == 1 ? ctrl : -1;
+    switch (key) {
+    case 0x1B:
+        if (mine >= 0) {
+            FocusGroup* g = &w->groups[mine];
+            if (--g->state == 1) {
+                if (mine == 0) {
+                    lbl_8055F1FC = 1;
+                    lbl_8055F200 = 0;
+                } else {
+                    fn_80216D28();
+                    fn_80214D50(1);
+                }
+                g->state = 2;
+            }
+            g->sel->SetCur(g->state != 2);
+        } else {
+            lbl_8055F1FC = 1;
+            lbl_8055F200 = 0;
+        }
+        break;
+    case 0x0D:
+        if (w->AllReady()) {
+            if (ctrl == 0) {
+                lbl_8055F1FC = 1;
+                lbl_8055F200 = 2;
+            } else {
+                fn_80216D28();
+                fn_80214D50(1);
+            }
+        } else if (mine >= 0) {
+            FocusGroup* g = &w->groups[mine];
+            if (w->Unconfirmed(mine) > 0) {
+                if (g->state > 1 && g->sel->Confirmable()) {
+                    g->state++;
+                    g->sel->SetCur(g->state != 2);
+                }
+            }
+        } else if (free >= 0) {
+            w->groups[free].sel->SetSlot(ctrl);
+            w->groups[free].state = 2;
+        }
+        break;
+    case 0x6F:
+        break;
+    default:
+        return 0;
+    }
+    return 1;
+}
 
 }  // extern "C"
