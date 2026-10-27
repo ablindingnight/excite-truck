@@ -2298,9 +2298,9 @@ void fn_801A22A4(u8* p) {
 }
 
 u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz) {
+    f32 z = hz - 0.2f;
     f32 y = hy - 0.2f;
     f32 x = hx - 0.2f;
-    f32 z = hz - 0.2f;
     F32(p, 0x10) = s0;
     U32(p, 0xC) = a;
     U32(p, 0x4) = b;
