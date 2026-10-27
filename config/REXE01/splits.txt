@@ -3168,6 +3168,10 @@ game/drone.cpp:
 game/drivmod.cpp:
 	.text       start:0x801FFB08 end:0x80202218
 	.ctors      start:0x802ED35C end:0x802ED360
+	.data       start:0x8033B938 end:0x8033B9F8
+	.sdata      start:0x8055B3E0 end:0x8055B410
+	.sbss       start:0x8055ECA0 end:0x8055ECB0
+	.sdata2     start:0x80563050 end:0x805630A0
 
 game/terchunk.cpp:
 	.text       start:0x80202218 end:0x80202BE4
@@ -3540,6 +3544,10 @@ game/nameent.cpp:
 game/uicar.cpp:
 	.text       start:0x8023FE20 end:0x80243460
 	.ctors      start:0x802ED418 end:0x802ED41C
+	.data       start:0x803422C0 end:0x803428B0
+	.bss        start:0x80498810 end:0x80498848
+	.sdata      start:0x8055BD60 end:0x8055BD68
+	.sbss       start:0x8055F1E8 end:0x8055F208
 
 game/unk_80243460.c:
 	.text       start:0x80243460 end:0x80243478
@@ -3770,10 +3778,12 @@ game/sortwrap.cpp:
 game/cammgr.cpp:
 	.text       start:0x80265DD8 end:0x8026A600
 	.ctors      start:0x802ED484 end:0x802ED488
+	.sbss       start:0x8055F470 end:0x8055F4B0
 
 game/racerslot.cpp:
 	.text       start:0x8026A600 end:0x8026B118
 	.ctors      start:0x802ED488 end:0x802ED48C
+	.sbss       start:0x8055F4B0 end:0x8055F4B8
 
 game/jumpcam.cpp:
 	.text       start:0x8026B118 end:0x8026B844
@@ -3809,10 +3819,12 @@ game/physcam.cpp:
 game/camstate.cpp:
 	.text       start:0x80273B4C end:0x80276068
 	.ctors      start:0x802ED4A0 end:0x802ED4A4
+	.data       start:0x80347364 end:0x80347378
 
 game/namedcam.cpp:
 	.text       start:0x80276068 end:0x80278214
 	.ctors      start:0x802ED4A4 end:0x802ED4A8
+	.data       start:0x80347378 end:0x80347580
 
 game/cscript.cpp:
 	.text       start:0x80278214 end:0x802789A8
