@@ -254,8 +254,8 @@ void fn_80252C90(void) {
     MWContacts* contacts;
     s32 d;
     int n;
-    int i;
     MWSlot* s;
+    int i;
     fn_801BEDA8(&bodies, &wheels, &contacts, &d, &n);
     for (i = 0; i < n; i++) {
         fn_8025280C(&bodies[i], lbl_8055F300.speed);

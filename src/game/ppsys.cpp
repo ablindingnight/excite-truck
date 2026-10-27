@@ -330,8 +330,8 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
         AddStick(s, e->a, e->b, e->extra, e->stiff);
     }
     for (i = 0; i < d->nPins; i++) {
-        const PPinDesc* p = &d->pins[i];
         PAnchor* a = &s->anchors[s->nAnchor++];
+        const PPinDesc* p = &d->pins[i];
         a->on = 1;
         a->idx = p->idx;
         a->mtx = (const RMtx*)owner;

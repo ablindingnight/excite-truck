@@ -3625,8 +3625,8 @@ void BetaMaster::vf48(void) {
     for (i = 0; i < puddles.a.count; i++) {
         Puddle* p = puddles.a.data[i];
         if (p->b10) {
-            V3 a;
             V3 b;
+            V3 a;
             a = *(V3*)&p->x;
             a.y = a.y - 0.75f;
             b = *(V3*)&p->x;

@@ -679,8 +679,8 @@ void fn_802D5B8C(Surf* s) {
     if (!col || !uv) {
         return;
     }
-    V3* p = (V3*)s->verts;
     u32* src = (u32*)s->attr;
+    V3* p = (V3*)s->verts;
     f32* suv = (f32*)s->uv;
     V3 d;
     d.x = lbl_804C56C0.pos.x - lbl_804C5690.pos.x;
