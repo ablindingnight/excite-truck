@@ -127,7 +127,7 @@ void operator delete(void* p);
 extern void* lbl_80348678[];
 
 // Copies at most n characters, always terminating.
-static inline void CopyName(const char* s, int n, char* d) {
+static inline void CopyName(int n, char* d, const char* s) {
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -303,7 +303,7 @@ void fn_8027F204(const char* name) {
         return;
     }
     if (S32(l, 0x44) + 1 <= S32(l, 0x48)) {
-        CopyName(name, 30, (char*)(PTR(l, 0x40) + S32(l, 0x44)++ * 30));
+        CopyName(30, (char*)(PTR(l, 0x40) + S32(l, 0x44)++ * 30), name);
         return;
     }
     fn_802E30C8("add_anim_to_wait_for: can't add, there are %d already!", S32(l, 0x44));
@@ -420,7 +420,7 @@ void fn_80280A38(void) {
                 u8* e = (u8*)lbl_804B3048.data[i];
                 lbl_8055F688 = (s32)e;
                 if (e && PTR(e, 0x60)) {
-                    CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+                    CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
                 }
             }
         }
@@ -436,7 +436,7 @@ static inline void SelectEvent(int i) {
         u8* e = (u8*)lbl_804B3048.data[i];
         lbl_8055F688 = (s32)e;
         if (e && PTR(e, 0x60)) {
-            CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+            CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
         }
     } else {
         lbl_8055F688 = 0;
@@ -467,7 +467,7 @@ int fn_80280C00(void) {
                 u8* e = (u8*)lbl_804B3048.data[i];
                 lbl_8055F688 = (s32)e;
                 if (e && PTR(e, 0x60)) {
-                    CopyName(((EvCond*)PTR(e, 0x60))->Name(), 100, lbl_804B3068);
+                    CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
                 }
             } else {
                 lbl_8055F688 = 0;
@@ -667,15 +667,15 @@ int fn_80283B58(void) {
         if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
             u8* e = (u8*)lbl_804B30D8.data[i];
             if (e) {
-                CopyName(((EvCond*)PTR(e, 0x60))->Title(), 32, sBrowseTitle);
-                CopyName(((EvCond*)PTR(e, 0x60))->Desc(), 32, sBrowseDesc);
+                CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
+                CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
                 int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
                 s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
                 RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
                 if (best.HasValue()) {
                     fn_80130980(sBrowseBest, 20, 3, best.GetValue());
                 } else {
-                    CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, sBrowseBest);
+                    CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
                 }
                 lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
             } else {
@@ -712,15 +712,15 @@ int fn_80283E28(void) {
         if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
             u8* e = (u8*)lbl_804B30D8.data[i];
             if (e) {
-                CopyName(((EvCond*)PTR(e, 0x60))->Title(), 32, sBrowseTitle);
-                CopyName(((EvCond*)PTR(e, 0x60))->Desc(), 32, sBrowseDesc);
+                CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
+                CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
                 int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
                 s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
                 RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
                 if (best.HasValue()) {
                     fn_80130980(sBrowseBest, 20, 3, best.GetValue());
                 } else {
-                    CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, sBrowseBest);
+                    CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
                 }
                 lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
             } else {
@@ -854,7 +854,7 @@ void fn_80284760(u8* p) {
         }
         const char* title = fn_8027ED70()->GetString(VR(PTR(p, 0x60))->v10());
         if (title) {
-            CopyName(title, 50, (char*)p + 0x7E);
+            CopyName(50, (char*)p + 0x7E, title);
         }
         S32(p, 0xB0) = fn_8027ED70()->GetInt(VR(PTR(p, 0x60))->v10());
     } else {
