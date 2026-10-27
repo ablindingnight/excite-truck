@@ -191,10 +191,10 @@ void fn_8025280C(MWBody* b, f32 speed) {
         t.y = t.y * k;
     }
     {
-        MWVec4 n;
         MWVec4 up;
-        MWVec4 fwd;
+        MWVec4 n;
         MWVec4 a;
+        MWVec4 fwd;
         f32 radial = -2.5f * (b->z.x * e.x + b->z.z * e.y);
         f32 h;
         f32 depth;

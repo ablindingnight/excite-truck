@@ -643,8 +643,8 @@ void PanelVol::vf1C(void) {
     RVec3 f;
     RVec3 t;
     Flush(&f, &t);
-    s32 id;
     s32 n = 8;
+    s32 id;
     RVec3 p = mtx.pos;
     RVec3 nrm;
     if (!fn_801E9E78(hint, &p, &nrm, &id)) {

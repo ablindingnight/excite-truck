@@ -505,8 +505,8 @@ LinearDrone::~LinearDrone(void) {}
 
 void LinearDrone::Init(TObj* o, LinearPathData* d) {
     name = d->name;
-    path = 0;
     model = o->model;
+    path = 0;
     SetIdentity(&frame);
     seg = -1;
 }
@@ -602,8 +602,8 @@ HermiteDrone::~HermiteDrone(void) {}
 
 void HermiteDrone::Init(TObj* o, HermitePathData* d) {
     name = d->name;
-    entry = 0;
     model = o->model;
+    entry = 0;
     SetIdentity(&frame);
     seg = -1;
     t = 0.0f;

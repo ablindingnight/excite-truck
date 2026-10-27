@@ -939,8 +939,8 @@ TreeType* fn_802BE008(TCell* c) {
 typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f32 h);
 
 void fn_802BE07C(const TVec* pos, TreeQuery cb) {
-    s16 cx = (s16)(int)(pos->x / 2.0f);
     s16 cz = (s16)(int)(pos->z / 2.0f);
+    s16 cx = (s16)(int)(pos->x / 2.0f);
     s16 bx = (cx / 128) * 128 + 0x40;
     s16 bz = (cz / 128) * 128 + 0x40;
     for (int i = -0x80; i <= 0x80; i += 0x80) {

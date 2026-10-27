@@ -296,8 +296,8 @@ void fn_801DC32C(GroundHeader* g) {
     memset(lbl_80442708, -1, sizeof(lbl_80442708));
     lbl_8055E9A0 = 0;
     lbl_8055E99C = 0;
-    int minX = 0;
     int minZ = 0;
+    int minX = 0;
     int maxX = 0;
     int maxZ = 0;
     int i;
@@ -503,9 +503,9 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     int ix = Round(fx);
     int iz = Round(fz);
     int tx = ix / 32;
-    int lx = ix - tx * 32;
     int tz = iz / 32;
     int lz = iz - tz * 32;
+    int lx = ix - tx * 32;
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         if (normal) {
