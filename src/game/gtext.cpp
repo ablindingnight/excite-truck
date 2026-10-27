@@ -688,7 +688,7 @@ f32 fn_8023293C(Font* f, const char* s, f32 xs) {
                 if (strncasecmp(p, name, strlen(name)) == 0) {
                     EscSeq* e = &lbl_80497F14.data[j];
                     if (e->art) {
-                        h = h / fn_80235F64(e->art, e->artIdx);
+                        h /= (fn_80235F64(e->art, e->artIdx));
                         adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
                     } else {
                         adv = h * e->scale;
