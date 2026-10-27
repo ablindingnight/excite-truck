@@ -476,7 +476,7 @@ int fn_802B640C(const TextElem* e, const char* text) {
     } else if (just & 2) {
         off = -w;
     } else {
-        off = -w * 0.5f;
+        off = -w / 2.0f;
     }
     int r = 0;
     int inY = 0;
