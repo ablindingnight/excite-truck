@@ -29,7 +29,7 @@ public:
     virtual void s30(void);
     virtual void s34(void);
     virtual void PlaySound(const char* name);               // 0x38
-    virtual void s3C(void);
+    virtual void StopSound(const char* name);               // 0x3C
     virtual void SetSoundVolume(const char* name, f32 v);   // 0x40
 };
 
@@ -159,8 +159,14 @@ struct AchQuery {
 void AchievementsQuery(AchQuery* q);
 int AchievementsGetLevel(int category, s32 value);
 s32 AchievementsGetLevelThreshold(int category, int level);
+int AchievementsGetLevelCount(int category);
 extern "C" void fn_80130FCC(char* buf, s32 size, s32 value);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
+int strcasecmp(const char* a, const char* b);
+void fn_80236954(const char* name);
+void fn_80236958(const char* name);
+f32 fn_80214D48(void);
+void fn_802168BC(int);
 extern u8 lbl_8055F67C;     // demo: show every category one step ahead
 extern f32 lbl_8055F398;     // trophy spin angle
 extern f32 lbl_80498EAC[3];  // smoothed view direction
@@ -205,9 +211,17 @@ public:
     virtual void Update(void);
 
     void Refresh(void) {
+        shown = (f32)q.value;
+        ShowValue();
+    }
+
+    // The level-up marker flashes for a moment after the trophy is awarded.
+    bool Flashing(void) { return tally < 1.5f && levelUp; }
+
+    // Shows the tallied value, the next level's threshold and the trophy model.
+    void ShowValue(void) {
         s32 v;
         int show;
-        shown = (f32)q.value;
         v = (s32)(shown + lbl_80558DC4[0]);
         fn_80130FCC(valueText, 0x14, v);
         show = 1;
@@ -720,7 +734,67 @@ void fn_8025B520(u8* p) {
 
 void fn_8025B784(u8* p) {}
 
-void fn_8025B788(u8* p) {}  // stub (285)
+// Per-frame row update: swaps in a new trophy, counts the value up towards its best (with the tally
+// sound), then shows the level arrows and markers.
+void fn_8025B788(u8* p) {
+    AchView* v = (AchView*)p;
+    if (strcasecmp(v->previousModelName, v->modelName) != 0 && v->modelName.text[0]) {
+        fn_80236954("trophy_present");
+        v->previousModelName.CopyFrom(v->modelName);
+    }
+    if (lbl_8055F3A0 && v->tally >= 0.8f) {
+        f32 next = v->shown + v->tallyRate * fn_80214D48();
+        f32 best = v->q.best;
+        v->shown = best < next ? best : next;
+    }
+    u8 wasStarted = v->started;
+    v->started = (s32)(v->shown + lbl_80558DC4[0]) < v->q.best;
+    v->tally += fn_80214D48();
+    if (v->started) {
+        f32 x = lbl_8055F3A4;
+        f32 vol = 1.0f < x ? 1.0f : x;
+        lbl_8055F394->SetSoundVolume("achieve_tally", vol);
+    } else if (wasStarted) {
+        lbl_8055F394->StopSound("achieve_tally");
+        if (v->counting && v->levelUp) {
+            lbl_8055F394->PlaySound("achieve_trophy");
+            fn_80214AF0(0x10);
+            v->tally = 0.0f;
+        }
+    }
+    if (U8(p, 0x59)) {
+        fn_80236958("trophy_present");
+        fn_802168BC(S32(p, 0x5C));
+    }
+    v->ShowValue();
+    if (v->level >= AchievementsGetLevelCount(v->q.category)) {
+        fn_80214AF0(0x15);
+        fn_80214A9C(0x14);
+    } else {
+        fn_80214AF0(0x14);
+        fn_80214A9C(0x15);
+    }
+    if (v->level == 0 || v->counting) {
+        fn_80214A9C(0xF);
+    } else {
+        fn_80214AF0(0xF);
+    }
+    if (v->counting) {
+        fn_80214A9C(0xE);
+    } else {
+        fn_80214AF0(0xE);
+    }
+    if (v->level < 2 || v->counting) {
+        fn_80214A9C(0x11);
+    } else {
+        fn_80214AF0(0x11);
+    }
+    if (v->started || v->Flashing()) {
+        fn_80214A9C(0xD);
+    } else {
+        fn_80214AF0(0xD);
+    }
+}
 
 }  // extern "C"
 
