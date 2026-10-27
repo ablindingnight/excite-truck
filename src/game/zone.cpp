@@ -554,9 +554,11 @@ public:
 
 extern "C" const char* fn_80131234(const char* key);
 
-static inline void StrCopyN(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
+static inline void StrCopyN(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
             d[-1] = 0;
             break;
         }
