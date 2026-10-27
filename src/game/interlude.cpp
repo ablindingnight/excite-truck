@@ -2902,7 +2902,9 @@ void fn_801CA67C(void) {
             fn_80238B44(x, 90, x + 1, 105, color);
         }
         int x = (int)(0.5f + t * scale) + 10;
-        x = x > 260 ? 260 : x;
+        if (x > 260) {
+            x = 260;
+        }
         fn_80238B44(x, 90, x + 1, 105, 0xFFFFFF00);
     }
     Menu* m = &lbl_8055E86C[lbl_8055E81C];

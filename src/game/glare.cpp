@@ -237,7 +237,11 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
         v->u = u0 + fx * ((s->u1 - du) - u0);
         f32 v0 = s->v0 + dv;
         v->v = v0 + fy * ((s->v1 - dv) - v0);
-        v->color = (fx == 0.0f || fx == 1.0f || fy == 0.0f || fy == 1.0f) ? 0 : color;
+        if (fx == 0.0f || fx == 1.0f || fy == 0.0f || fy == 1.0f) {
+            v->color = 0;
+        } else {
+            v->color = color;
+        }
     }
     GXSetArray(9, buf, 0x18);
     GXSetArray(0xD, &buf->u, 0x18);
