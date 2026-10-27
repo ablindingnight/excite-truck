@@ -761,7 +761,7 @@ void SunTMH::Apply(void) {
     }
     fn_802C9994(color);
     fn_802923C4(color);
-    d.x = dir[0] * -1.0f;
+    d.x = -dir[0];
     d.y = dir[1] * -1.0f;
     d.z = dir[2] * -1.0f;
     PSVECNormalize(&d, &d);

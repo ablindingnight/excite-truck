@@ -299,7 +299,7 @@ void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     pts[1].y = 0.0f;
     pts[1].z = ay;
     V2 b;
-    b.x = ax + n.x * -1.0f;
+    b.x = ax + -n.x;
     b.y = ay + n.y * -1.0f;
     pts[2].x = b.x;
     pts[2].y = 0.0f;
