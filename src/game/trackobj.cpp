@@ -586,7 +586,7 @@ void* fn_802C6B44(const char* model);
 void fn_802C6C20(void* model);
 void fn_802C70AC(void* model, const OFrame* f, int a, int mode);
 void fn_802C7AE0(void* model, const OFrame* f, int a, f32 alpha);
-void fn_801BFD34(void* out, const void* p, const PlacedObj* m);
+void fn_801BFD34(void* out, const void* p, const OFrame* m);
 s32 fn_801D04D0(const char* surface);
 void fn_802E317C(const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);
@@ -797,7 +797,7 @@ void fn_801F7E20(ValueNode* vn, ObjDesc* d) {
     d->drop = vn->GetFloat("drop_height", d->drop);
 }
 
-int fn_801F7EB0(OFrame* f, ValueNode* vn, const PlacedObj* parent) {
+int fn_801F7EB0(OFrame* f, ValueNode* vn, const OFrame* parent) {
     ValueNode* lf = vn->FindChild("local_frame");
     if (lf) {
         fn_801F7B10(f, lf, "frame64");
@@ -856,7 +856,7 @@ static const ReaderList sReaders = {{
     {0, fn_801F86C8},
 }};
 
-ObjDesc* fn_801F8188(ValueNode* vn, const PlacedObj* parent, int named) {
+ObjDesc* fn_801F8188(ValueNode* vn, const OFrame* parent, int named) {
     const char* type = vn->GetValue("type");
     ReaderList readers = sReaders;
     ObjDesc* d = 0;
@@ -1108,12 +1108,12 @@ ObjDesc::ObjDesc(void) {
 extern "C" {
 
 ObjDesc* fn_801F9338(ValueNode* vn) {
-    PlacedObj f;
-    const PlacedObj* parent = 0;
+    OFrame f;
+    const OFrame* parent = 0;
     ObjDesc* list;
     ValueNode* c;
     int i;
-    if (fn_801F7EB0(&f.frame, vn, 0)) {
+    if (fn_801F7EB0(&f, vn, 0)) {
         parent = &f;
     }
     list = 0;
@@ -1207,7 +1207,7 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         }
         for (c = d; c; c = c->sibling) {
             PlacedObj p;
-            fn_801BFD34(&p.frame.pos, &c->frame.pos, parent);
+            fn_801BFD34(&p.frame.pos, &c->frame.pos, &parent->frame);
             p.flags = f;
             Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.node = parent->node;
