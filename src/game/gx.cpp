@@ -1174,7 +1174,7 @@ void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom) {
     lbl_804C9778.farZ = f;
     lbl_804C9778.fovy = fovy;
     lbl_804C9778.zoom = zoom;
-    lbl_804C9778.tanHalf = tan(fovy * 0.5f);
+    lbl_804C9778.tanHalf = tan(fovy / 2.0f);
     lbl_804C97B0.nearZ = n;
     lbl_804C97B0.farZ = f;
     lbl_804C97B0.dirty = 1;
