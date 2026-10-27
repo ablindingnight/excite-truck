@@ -4009,10 +4009,9 @@ int BetaMaster::vf5C(int view) {
     }
     if (vf68() && n > 1) {
         int any = 0;
-        int i;
-        for (i = 0; i < nCars; i++) {
-            BetaCar* c = &cars[i];
-            if (!c->result.dnf) {
+        BetaCar* c = cars;
+        for (int i = 0; i < nCars; i++) {
+            if (!c[i].result.dnf) {
                 any = 1;
             }
         }
