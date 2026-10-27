@@ -134,6 +134,7 @@ struct TArray {
         n = 0;
         cap = 0;
     }
+    T* At(int i) { return &data[i]; }
     T* data;  // offset 0x0
     s32 n;    // offset 0x4
     s32 cap;  // offset 0x8
@@ -372,7 +373,7 @@ s16 fn_802BC424(s16 x) {
 void fn_802BC44C(TArray<TCell>* a) {
     TCell* c;
     for (int i = 0; i < a->n; i++) {
-        c = &a->data[i];
+        c = a->At(i);
         fn_802BC3E0(c->x, c->z, fn_802BC424(c->x), c);
     }
 }
