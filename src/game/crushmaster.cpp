@@ -1381,8 +1381,8 @@ void CrushMaster::vfA8(int car) {
                 r.m.basis[2].y = 0.0f;
                 r.m.basis[2].z = v.z;
                 PSVECNormalize(&r.m.basis[2], &r.m.basis[2]);
-                r.m.basis[0].x = r.m.basis[2].z;
                 r.m.basis[0].z = -r.m.basis[2].x;
+                r.m.basis[0].x = r.m.basis[2].z;
                 r.m.basis[0].y = 0.0f;
                 r.vel = v;
             } else {

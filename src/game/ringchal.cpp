@@ -2333,8 +2333,8 @@ void RingChalMaster::vf0C(void) {
                     StrCopyN(results.bC6, "", 0x14);
                 }
                 {
-                    int total = arena.f30;
                     int tb = (int)arena.timer.t;
+                    int total = arena.f30;
                     fn_801CB5DC(i, total + tb, fn_801609C4(total + (int)arena.timer.t));
                 }
                 fn_801CB648(i, 1, arena.timer.t);

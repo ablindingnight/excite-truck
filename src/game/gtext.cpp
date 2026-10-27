@@ -779,8 +779,8 @@ void fn_80232DF4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
                 Glyph* g = &ff->glyphs[ch];
                 px = px + xs * (scale * g->pre);
                 fn_80233AA4(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
-                i += next - (text + i);
                 px = px + scale * ff->glyphs[ch].width;
+                i += next - (text + i);
                 px = px + xs * (scale * ff->glyphs[ch].post);
             }
             fn_80233EBC();
@@ -881,8 +881,8 @@ void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
                 fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
-                i += nx - (text + i);
                 y -= scale * (ff->glyphs[ch].width + ff->glyphs[ch].post);
+                i += nx - (text + i);
             }
             fn_80233EBC();
         }

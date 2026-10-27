@@ -465,8 +465,8 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
     pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
-    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
+    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     out->pos = pos;
 }
 
@@ -1322,8 +1322,8 @@ void fn_801C4CE8(void) {
             break;
         }
         if (blocked) {
-            lbl_8055E7F4--;
             lbl_8055E7E4 -= t - e->time;
+            lbl_8055E7F4--;
             return;
         }
     }

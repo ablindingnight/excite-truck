@@ -2848,8 +2848,8 @@ void BetaMaster::vfF4(void) {
             maxd = 0.0f;
             for (j = 0; j < k; j++) {
                 f32 dd;
-                d.x = pts[j].x - c.x;
                 d.y = pts[j].y - c.y;
+                d.x = pts[j].x - c.x;
                 dd = d.x * d.x + d.y * d.y;
                 maxd = maxd > dd ? maxd : dd;
             }
@@ -3020,8 +3020,8 @@ Pickup::Pickup(ValueNode* n) {
             c[1] += p.y;
         }
     }
-    pos[1] = 0.0f;
     c[0] *= 1.0f / k;
+    pos[1] = 0.0f;
     pos[0] = c[0];
     c[1] *= 1.0f / k;
     pos[2] = c[1];

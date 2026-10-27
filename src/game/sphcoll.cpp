@@ -558,8 +558,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f32 k = depth * F32(p, 0x10);
         f32 vn = -PSVECDotProduct(&v, &nrm);
         imp.z = nrm.z * k;
-        imp.x = nrm.x * k;
         imp.y = nrm.y * k;
+        imp.x = nrm.x * k;
         vt.x = v.x + nrm.x * vn;
         vt.y = v.y + nrm.y * vn;
         vt.z = v.z + nrm.z * vn;
