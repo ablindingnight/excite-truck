@@ -178,7 +178,7 @@ struct CarSelItem {
     // vtable pointer at 0xC (CodeWarrior places it after the members)
     virtual void v08(void);
     virtual void v0C(void);
-    virtual void v10(void);
+    virtual int IsFocused(void);
     virtual int IsSet(void);
 };
 
@@ -301,8 +301,41 @@ extern char lbl_8034287C[];  // "UICar:COLOR%d"
 static inline s32 Min(s32 a, s32 b) { return b < a ? b : a; }
 
 // The body colour chooser of the car picker.
-struct ColorPick {
-    u8 pad0[0x28];
+extern const f32 lbl_80563758;  // 0.0
+extern const f32 lbl_80563764;  // 1.0
+extern const f32 lbl_80563768;  // 1000.0
+extern const f32 lbl_8056376C;  // 250.0
+extern const f32 lbl_80563770;  // -1.0
+extern const f32 lbl_8056377C;  // 5.0
+extern "C" {
+f32 fn_8023659C(void);
+void fn_80216D28(void);
+void fn_80214D50(int s);
+}
+
+static inline f32 Clamp01(f32 v) {
+    f32 t = lbl_80563764 < v ? lbl_80563764 : v;
+    return t > lbl_80563758 ? t : lbl_80563758;
+}
+
+// Odd smoothstep over [-1, 1]: 3t^2 - 2t^3 mirrored for negative t.
+static inline f32 Ease(f32 t) {
+    if (t < lbl_80563770) {
+        return lbl_80563770;
+    }
+    if (t > lbl_80563764) {
+        return lbl_80563764;
+    }
+    if (t > 0.0f) {
+        return -2.0f * t * t * t + 3.0f * t * t;
+    }
+    return -2.0f * t * t * t - 3.0f * t * t;
+}
+
+// The body colour chooser of the car picker (constructor fn_802410F8).
+struct ColorPick : CarSelItem {
+    void* vt2;             // offset 0x10
+    u8 pad14[0x14];
     VehicleInfo* vehicle;  // offset 0x28
     s32 color;             // offset 0x2C
     s32* colorOut;         // offset 0x30
@@ -310,20 +343,22 @@ struct ColorPick {
     CarUIScreen* screen;   // offset 0x38
     s32 slot;              // offset 0x3C
     u8 pad40[0x8];
-    s32 f48;               // offset 0x48
-    f32 f4C;               // offset 0x4C
-    f32 f50;               // offset 0x50
-    u8 pad54[0x8];
+    s32 time;              // offset 0x48, ms when the slide started
+    f32 pos;               // offset 0x4C
+    f32 target;            // offset 0x50
+    f32 leftFlash;         // offset 0x54
+    f32 rightFlash;        // offset 0x58
     char label[0x40];      // offset 0x5C
 
-    // Saves the colour chosen for the old car, then shows the saved colour of v.
-    void SetVehicle(VehicleInfo* v) {
+    // Remembers the chosen colour for the current car.
+    void SaveColor(void) {
         if (vehicle) {
             GetVehicleColor(vehicle, slot)->trim = color;
         }
-        vehicle = v;
-        color = Min(color, v->num_colors - 1);
-        color = GetVehicleColor(vehicle, slot)->trim;
+    }
+
+    // Shows colour `color`: tints the car and names it ("UICar:COLOR%d").
+    void ShowColor(void) {
         label[0] = 0;
         if (color >= 0 && color < vehicle->num_colors) {
             u32 rgb = vehicle->colors[color];
@@ -334,9 +369,28 @@ struct ColorPick {
             CopyName(text, 0x40, label);
         }
         *colorOut = color;
-        f48 = -250;
-        f4C = color;
-        f50 = color;
+    }
+
+    // Starts sliding the swatch strip towards the new colour.
+    void Slide(void) {
+        s32 now = fn_8023659C() * lbl_80563768;
+        f32 t = Clamp01((f32)(now - time) / lbl_8056376C);
+        f32 e = Ease(t);
+        time = now;
+        pos = pos + e * (target - pos);
+        target = color;
+    }
+
+    // Saves the colour chosen for the old car, then shows the saved colour of v.
+    void SetVehicle(VehicleInfo* v) {
+        SaveColor();
+        vehicle = v;
+        color = Min(color, v->num_colors - 1);
+        color = GetVehicleColor(vehicle, slot)->trim;
+        ShowColor();
+        time = -250;
+        pos = color;
+        target = color;
     }
 };
 
@@ -597,7 +651,53 @@ void fn_8024122C(u8* p) {
     }
 }
 
-void fn_80241354(u8* p) {}  // stub (307)
+// Colour chooser input: right/left step through the car's colours; bumping an end leaves the menu.
+int fn_80241354(ColorPick* c, int key) {
+    int handled = 0;
+    if (c->IsFocused()) {
+        handled = 1;
+        switch (key) {
+        case 0x127: {
+            bool end = false;
+            if (++c->color >= c->vehicle->num_colors) {
+                c->color = c->vehicle->num_colors - 1;
+                end = true;
+            }
+            if (end) {
+                fn_80216D28();
+                fn_80214D50(1);
+                break;
+            }
+            c->SaveColor();
+            c->ShowColor();
+            c->Slide();
+            c->rightFlash = lbl_8056377C;
+            break;
+        }
+        case 0x125: {
+            bool end = false;
+            if (--c->color < 0) {
+                c->color = 0;
+                end = true;
+            }
+            if (end) {
+                fn_80216D28();
+                fn_80214D50(1);
+                break;
+            }
+            c->SaveColor();
+            c->ShowColor();
+            c->Slide();
+            c->leftFlash = lbl_8056377C;
+            break;
+        }
+        default:
+            handled = 0;
+            break;
+        }
+    }
+    return handled;
+}
 
 void fn_80241820(u8* p) {}  // stub (370)
 
