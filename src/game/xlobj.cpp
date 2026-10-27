@@ -828,8 +828,8 @@ void fn_802BAD0C(V2* v, f32 a) {
     f32 x = v->x;
     f32 c = cos(a);
     f32 s = sin(a);
-    v->y = x * s + v->y * c;
     v->x = v->x * c - v->y * s;
+    v->y = x * s + v->y * c;
 }
 
 f32 fn_802BAD90(f32 deg) { return 0.017453292f * deg; }

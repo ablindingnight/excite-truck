@@ -1170,8 +1170,8 @@ void fn_802D02F8(u32 color, u8 on) {
 }
 
 void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom) {
-    lbl_804C9778.nearZ = n;
     lbl_804C9778.dirty = 1;
+    lbl_804C9778.nearZ = n;
     lbl_804C9778.farZ = f;
     lbl_804C9778.fovy = fovy;
     lbl_804C9778.zoom = zoom;

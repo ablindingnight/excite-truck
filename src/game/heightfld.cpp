@@ -449,8 +449,8 @@ int fn_801DCE14(u16* flags, const GVec* in, GVec* out, GVec* normal, s32* mat) {
     if (flags) {
         *flags = 0;
     }
-    s32 m = 0xFF;
     f32 h;
+    s32 m = 0xFF;
     if (fn_801DC258(&h, &m, (int)flags, normal, in->x, in->z)) {
         if (mat) {
             *mat = m;

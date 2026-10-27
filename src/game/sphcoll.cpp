@@ -1618,8 +1618,8 @@ extern const f32 lbl_8056237C;
 
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
 void fn_8019F414(u8* p) {
-    u8* m = PTR(p, 0x54);
     u8* o = PTR(p, 0x4);
+    u8* m = PTR(p, 0x54);
     PVec3 t = *(PVec3*)(m + 0x30);
     f32 lift = lbl_8056237C + F32(p, 0x24) + F32(m, 0xC);
     t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);

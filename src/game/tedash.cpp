@@ -987,8 +987,8 @@ int fn_802B8310(int d, const char* s) {
         v = v > lo ? v : lo;
         if (v != sc->max) {
             sc->max = v;
-            changed = 1;
             it.scale->dirty = 1;
+            changed = 1;
         }
     }
     return changed;

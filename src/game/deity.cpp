@@ -502,8 +502,8 @@ void fn_801B0C78(int i) {
         if (!lbl_8055E68C || !lbl_8055E68C->v28(&t, i, lbl_8055E684->ai, 0)) {
             LinePlace p;
             p.seg = 0;
-            p.t = 0.0f;
             p.mode = 10000;
+            p.t = 0.0f;
             if (isPlayer) {
                 LinePlace q;
                 fn_801B0BB0(&q, c->Line());

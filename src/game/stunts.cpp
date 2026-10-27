@@ -2124,8 +2124,8 @@ int Tracker::NumRanks(void) const { return ranks.a.count; }
 
 void Tracker::Dump(void) {
     int scored;
-    int count;
     f32 total;
+    int count;
     int i;
     fn_802E30C8("\n%s:", Label());
     fn_802E30C8("   Rank         Count   Unscored   Natural   Score");

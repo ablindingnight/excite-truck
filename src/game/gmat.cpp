@@ -479,8 +479,8 @@ bool fn_802B12E0(GMat* g, GBatch* out, GBatch* in, int layer) {
         key = 0;
     }
     GList* list = &g->lists[key];
-    GAllocator* a = lbl_8055F9A0;
     s16* p = 0;
+    GAllocator* a = lbl_8055F9A0;
     GBlock* head = list->head;
     if (!head || !head->Fits(24)) {
         GBlock* b = a->Get();

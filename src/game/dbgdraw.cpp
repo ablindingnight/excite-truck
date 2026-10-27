@@ -98,8 +98,8 @@ void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width);
 
 void fn_801E3640(const DVec3* dir, DBasis* out) {
     DVec3 up;
-    out->z.x = dir->x;
     out->z.y = dir->y;
+    out->z.x = dir->x;
     out->z.z = dir->z;
     if ((f32)__fabs(dir->x) < 0.01f && (f32)__fabs(dir->z) < 0.01f) {
         up.x = 0.0f;

@@ -933,8 +933,8 @@ void fn_8029E8E0(WaterShallow* s) {
         Vec* c = s->corners;
         for (u32 i = 0; i < 4; i++, c++) {
             Vec d;
-            d.x = c->x - eye.x;
             d.y = c->y - eye.y;
+            d.x = c->x - eye.x;
             d.z = c->z - eye.z;
             Vec r;
             r.x = d.x;

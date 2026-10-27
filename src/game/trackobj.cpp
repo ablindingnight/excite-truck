@@ -1203,8 +1203,8 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         for (c = d; c; c = c->sibling) {
             PlacedObj p;
             fn_801BFD34(&p.frame.pos, &c->frame.pos, parent);
-            Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.flags = f;
+            Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.node = parent->node;
             c->Create(&p);
         }
@@ -1526,8 +1526,8 @@ void fn_801FA550(void) {
 }
 
 void fn_801FA618(void) {
-    StaticObject* s;
     int old = fn_802C9C58((fn_801E87A8()->flags & 2) ? 1 : 2);
+    StaticObject* s;
     fn_802C7A44();
     for (s = lbl_8055EC48; s; s = s->next) {
         if (s->noDraw && fn_801F7A0C()) {
@@ -1549,8 +1549,8 @@ void fn_801FA6B8(void) {
 }
 
 void fn_801FA738(void) {
-    StaticOb* o;
     int old = fn_802C9C58((fn_801E87A8()->flags & 2) ? 1 : 2);
+    StaticOb* o;
     fn_802C7A44();
     for (o = lbl_8055EC4C; o; o = o->next) {
         if (o->hidden && o->visible && fn_801F7A0C()) {

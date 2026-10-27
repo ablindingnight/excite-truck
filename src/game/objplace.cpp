@@ -725,8 +725,8 @@ ObjList* fn_802B3DA4(InlineVec<MatPlacer*, 6>* set, u16 id, int layer) {
 }
 
 void fn_802B3E00(ObjList* list, const OVec* pos, u16 kind, f32 scale) {
-    ObjLoc* l = 0;
     ObjAllocator* a = lbl_8055F9BC;
+    ObjLoc* l = 0;
     ObjBlock* tail = list->tail;
     if (!tail || tail->count + 1 > tail->cap) {
         ObjBlock* b = 0;

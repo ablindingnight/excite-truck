@@ -1525,8 +1525,8 @@ void ArenaTimer::Reset(void) { t = limit; }
 int RingChalMaster::vf20(int car) { return b9C; }
 
 void RingChalMaster::vfB8(ZoneResults* r) {
-    int i;
     ZoneResults::Entry* e;
+    int i;
     r->nCars = players.count;
     r->nHumans = fn_80179650();
     r->done = 1;
@@ -2427,8 +2427,8 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         a.x = t->mtx.origin.x;
         a.y = t->mtx.origin.z;
         b.x = car->pos.x;
-        b.y = car->pos.z;
         d.x = a.x - b.x;
+        b.y = car->pos.z;
         d.y = a.y - b.y;
         if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
             data[cur].b30 = 0;

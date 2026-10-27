@@ -594,8 +594,8 @@ void fn_80237E7C(const char* name) {
 
 int fn_80237EFC(const char* name) {
     UiSpecialList* l = lbl_8055F0C0->special;
-    int found = 0;
     int running = 0;
+    int found = 0;
     f32 now = fn_8023659C();
     for (int i = 0; i < l->n; i++) {
         if (!strcasecmp(l->items[i].name, name)) {

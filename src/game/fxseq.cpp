@@ -146,8 +146,8 @@ FXSequence* FXSequence::Load(const char* name) {
     ValueTable* table;
     int total;
     FXSequence* seq;
-    int ok;
     int i;
+    int ok;
     ValueNode* node;
     int k;
     seq = NULL;

@@ -2019,8 +2019,8 @@ int fn_8019799C(u8* d, u8* p) {
     }
     if (ok && id != S32(d, 0x2C4)) {
         f32 x = fn_80137850(p);
-        f32 ax = (f32)__fabs(x);
         f32 lim = F32(d, 0x278) + F32(p, 0x4);
+        f32 ax = (f32)__fabs(x);
         f32 w = 5.0f + F32(d, 0x274);
         ax = ax < lim ? ax : lim;
         if (ax < w) {
