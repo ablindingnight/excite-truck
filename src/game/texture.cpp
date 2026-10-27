@@ -1128,8 +1128,8 @@ inline void* SimpleHeap::Alloc(s32 n) {
             split = (HeapBlock*)((u8*)b + align + n + 1);
             split->magic = 0xABCFEED0;
             split->next = 0;
-            split->size = rest - ((align + 0x10) & ~align);
             split->owner = this;
+            split->size = rest - ((align + 0x10) & ~align);
             b->size = n;
         }
         if (split) {

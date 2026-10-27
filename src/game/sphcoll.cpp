@@ -1657,8 +1657,8 @@ extern void* lbl_80333A58[];
 
 // Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
 u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz) {
-    f32 cz = c->z;
     f32 big = hy > hz ? hy : hz;
+    f32 cz = c->z;
     f32 cy = c->y;
     big = hx > big ? hx : big;
     f32 cx = c->x;

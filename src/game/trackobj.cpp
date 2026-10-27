@@ -1200,8 +1200,8 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
     if (flags & 2) {
         u32 f;
         ObjDesc* c;
-        lbl_8055EC7C = !lbl_8055EC7C;
         f = d->sibling != 0;
+        lbl_8055EC7C = !lbl_8055EC7C;
         if (lbl_8055EC7C) {
             f |= 2;
         }

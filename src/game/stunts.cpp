@@ -2131,8 +2131,8 @@ void Tracker::Dump(void) {
     fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
     fn_802E30C8("--------------------------------------------------");
     total = 0.0f;
-    scored = 0;
     count = 0;
+    scored = 0;
     for (i = 0; i < ranks.a.count; i++) {
         struct Rank* r = &ranks.a.data[i];
         fn_802E30C8("%d: %-12.12s %3d     %4d       %3d       %10.0f", i, r->adj, r->count, r->count - r->scored,
