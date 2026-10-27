@@ -1377,7 +1377,7 @@ void fn_80148100(const GartElem* e) {
     fn_801470B0(e->pos.x, e->pos.y, e->w, e->h, e->color, -1, e->elemJust, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-void fn_80148134(f32* ox, f32* oy, int just, f32 x, f32 y) {
+void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, int just) {
     if (ox) {
         *ox = fn_801451DC(x, just);
     }

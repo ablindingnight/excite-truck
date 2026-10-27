@@ -25,7 +25,7 @@ void fn_80137C80(int a);
 void fn_8023BEC4(int event, void* out);
 void fn_802E7128(void);
 void fn_80148070(void* elem, u32 color, void* art);
-void fn_80148134(f32 x, f32 y, f32* ox, f32* oy, s32 mode);
+void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 mode);
 void fn_800103B8(f32 x, s32 a, s32 b, f32 y, f32 w, f32 h, const char* fmt, ...);
 void fn_801473F8(void* layout, const char* elem, const char* fmt, ...);
 void fn_801476C4(void* elem);
@@ -931,7 +931,7 @@ void fn_80161438(const char* title, const char* msg) {
             fn_80148070(t, -1, lbl_8055E2E0->Image("popup_box_art"));
         }
         t = (TextBox*)lbl_8055E2E0->Find("popup_msg");
-        fn_80148134(t->x, t->y, &x, &y, t->mode);
+        fn_80148134(&x, &y, t->x, t->y, t->mode);
         fn_800103B8(t->w, t->a, t->b, x, y, ((TextBox*)box)->w - 34.0f, "%s", msg);
         fn_801473F8(lbl_8055E2E0, "popup_title_elem", "%s", title);
         fn_801476C4(lbl_8055E2E0->Find("continue"));
@@ -1491,7 +1491,7 @@ inline int StuntChallenge::DrawResults(int a) {
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(t->x, t->y, &px, &py, t->mode);
+        fn_80148134(&px, &py, t->x, t->y, t->mode);
         fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
@@ -1525,7 +1525,7 @@ inline int FreestyleChallenge::DrawResults(int a) {
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(t->x, t->y, &px, &py, t->mode);
+        fn_80148134(&px, &py, t->x, t->y, t->mode);
         fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {

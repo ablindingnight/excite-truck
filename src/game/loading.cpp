@@ -123,7 +123,7 @@ void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f3
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 void fn_802354A0(void* image, int unk, u32 color, f32 x, f32 y, f32 z);
 void fn_80011280(u32 color, void* image, f32 x, f32 y, f32 width);
-void fn_80148134(f32 x, f32 y, f32* out_x, f32* out_y, int mode);
+void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int fn_80277960(const char* name, CamFrame* frame, f32* fov);
 void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t);
 void fn_802A1120(f32* center, f32* dir);
@@ -534,8 +534,8 @@ void DrawLoadingScreen(int alpha, f32 t) {
     fn_80231220(x0, y1, x1 - x0, y1 - y2, lbl_80558D84, bar_color, 0.0f, 0.0f, 1.0f, 1.0f);
     fn_80231220(x0, y0, x1 - x0, y0 - y1, lbl_80558D78, color, 0.0f, 0.0f, 1.0f, 1.0f);
     fn_80231220(x0, y1, x1 - x0, y1 - y2, lbl_80558D7C, color, 0.0f, 0.0f, 1.0f, 1.0f);
-    fn_80148134(65.0f, 40.0f, &title_x, &title_y, 2);
-    fn_80148134(65.0f, 84.0f, &sub_x, &sub_y, 2);
+    fn_80148134(&title_x, &title_y, 65.0f, 40.0f, 2);
+    fn_80148134(&sub_x, &sub_y, 65.0f, 84.0f, 2);
     fn_80232BA4(lbl_8055D660, lbl_8055D64C, title_x, title_y, color, 9, 1.1733334f, 0.0f, 1.0f);
     fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88f, 0.0f, 1.0f);
     show_goals = !lbl_8055D647;

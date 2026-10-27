@@ -6,7 +6,7 @@
 extern "C" {
 double sqrt(double x);
 f32 PSVECMag(const void* v);
-void fn_80148134(f32 x, f32 y, f32* ox, f32* oy, int mode);  // layout -> screen
+void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, int mode);  // layout -> screen
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
@@ -101,13 +101,13 @@ void fn_801390B0(Layout* l, V2* pos, V2* dir, int focus, f32 scale, f32 alpha) {
         f32 x;
         f32 y;
         u32 color = ((s32)(255.0f * alpha) << 24) | 0xFFFFFF;
-        fn_80148134(fwd.x + (pos->x - side.x), fwd.y + (pos->y - side.y), &x, &y, 0);
+        fn_80148134(&x, &y, fwd.x + (pos->x - side.x), fwd.y + (pos->y - side.y), 0);
         fn_802C8E00(color, 0, x, y, 0.0f, art->u0, art->v0);
-        fn_80148134(fwd.x + (pos->x + side.x), fwd.y + (pos->y + side.y), &x, &y, 0);
+        fn_80148134(&x, &y, fwd.x + (pos->x + side.x), fwd.y + (pos->y + side.y), 0);
         fn_802C8E00(color, 0, x, y, 0.0f, art->u1, art->v0);
-        fn_80148134(pos->x - side.x - fwd.x, pos->y - side.y - fwd.y, &x, &y, 0);
+        fn_80148134(&x, &y, pos->x - side.x - fwd.x, pos->y - side.y - fwd.y, 0);
         fn_802C8E00(color, 1, x, y, 0.0f, art->u0, art->v1);
-        fn_80148134(pos->x + side.x - fwd.x, pos->y + side.y - fwd.y, &x, &y, 0);
+        fn_80148134(&x, &y, pos->x + side.x - fwd.x, pos->y + side.y - fwd.y, 0);
         fn_802C8E00(color, 1, x, y, 0.0f, art->u1, art->v1);
     }
 }
