@@ -55,7 +55,7 @@ struct TexNode {
     u16 refs;      // offset 0x4
     s16 prio;      // offset 0x6
     RNode* list;   // offset 0x8
-    u32 key;       // offset 0xC
+    s32 key;       // offset 0xC
 };
 
 struct MSurf {
@@ -431,16 +431,18 @@ void fn_802C595C(char* dst, int n, const char* name, s32 inst) {
 
 u16 fn_802C5A50(int a, int b) { return a << 8 | b; }
 
-TexNode* fn_802C5A60(s32 tex, u32 key, u16 prio) {
-    TexNode* found = 0;
+TexNode* fn_802C5A60(s32 tex, s32 key, u16 prio) {
     TexNode* empty = 0;
     TexNode* t = lbl_804C13A8.data;
+    TexNode* found = 0;
     for (int i = 0; i < lbl_804C13A8.count; i++, t++) {
-        if (t->refs == 0) {
+        if (t->refs != 0) {
+            if (t->key == key && t->prio == prio && t->tex == tex) {
+                found = t;
+                break;
+            }
+        } else {
             empty = t;
-        } else if (t->key == key && t->prio == prio && t->tex == tex) {
-            found = t;
-            break;
         }
     }
     if (!found) {

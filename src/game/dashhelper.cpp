@@ -549,10 +549,10 @@ void fn_8000E874(int player) {
         f32 w = fn_80235EF0(lbl_80351214.art, part) + pad;
         f32 h = fn_80235F64(lbl_80351214.art, part);
         f32 x = Lerp(5.0f + lbl_8055CFF0, right, row->slide);
+        f32 ty;
         f32 x5;
         f32 x9;
         f32 xr;
-        f32 ty;
         fn_80235EF0(lbl_80351214.art, part2);
         x9 = 9.0f + x;
         x5 = 5.0f + x;
