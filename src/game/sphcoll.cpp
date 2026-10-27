@@ -542,8 +542,9 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
     if (lbl_8055E5A0) {
         n = 64;
         fn_801CF080(lbl_8055E5A0, (const RVec3*)c, hits, &n, 0, r);
-        for (int i = 0; i < n; i++) {
-            fn_8019A820(p, c, &hits[i], 0x6E, 0, r);
+        RVec3* h = hits;
+        for (int i = 0; i < n; h++, i++) {
+            fn_8019A820(p, c, h, 0x6E, 0, r);
         }
     }
     if (fn_801E9F08((u8*)o + 0x6C, c, &pt, &nrm, &surf, r)) {
