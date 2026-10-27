@@ -624,7 +624,122 @@ u8* fn_802426C0(u8* p) {
     return 0;
 }
 
-void fn_80242738(u8* p) {}  // stub (249)
+}  // extern "C"
+
+// One player's focus group in the join/leave widget.
+struct FocusGroup {
+    CarSel* sel;  // offset 0x0
+    int join;     // offset 0x4
+    int car;      // offset 0x8
+    int leave;    // offset 0xC
+    int start;    // offset 0x10
+    int ready;    // offset 0x14
+    s32 prev;     // offset 0x18
+    s32 state;    // offset 0x1C
+};
+
+extern char lbl_80342840[];  // "JoinLeaveWidget: invalid state %d found on focus group #%d"
+
+struct JoinLeaveWidget {
+    u8 pad0[0x18];
+    FocusGroup groups[2];  // offset 0x18
+    u8 allReady;           // offset 0x58
+
+    // True when every player has joined and confirmed (state 4); none may be in state 2 or 3.
+    int AllReady(void) {
+        int n = 0;
+        for (int i = 0; i < 2; i++) {
+            s32 st = groups[i].state;
+            if (st > 1 && st != 4) {
+                return 0;
+            }
+            if (st == 4) {
+                n++;
+            }
+        }
+        return n >= 2;
+    }
+};
+
+extern "C" {
+void fn_80214AF0(int s);
+void fn_80214A9C(int s);
+
+void fn_80242738(JoinLeaveWidget* w) {
+    lbl_8055F1FC = 0;
+    for (int i = 0; i < 2; i++) {
+        CarSel* s = w->groups[i].sel;
+        *s->slot = i;
+        S32(s->car, 0xD8) = *s->slot;
+        if (*s->slot < 0) {
+            CopyName(lbl_8055BD60, 0x20, s->name);
+        } else {
+            CopyName(fn_802E85B8(*s->slot), 0x20, s->name);
+        }
+        s->Refresh();
+        w->groups[i].state = 2;
+    }
+    w->allReady = 0;
+    w->groups[0].prev = 0;
+    w->groups[1].prev = 0;
+    int ready = w->AllReady();
+    if (w->allReady != ready) {
+        w->groups[0].prev = 0;
+        w->groups[1].prev = 0;
+    }
+    for (u32 i = 0; i < 2; i++) {
+        FocusGroup* g = &w->groups[i];
+        if (g->state != g->prev) {
+            switch (g->state) {
+            case 0:
+                break;
+            case 1:
+                fn_80214AF0(g->join);
+                fn_80214A9C(g->car);
+                fn_80214A9C(g->leave);
+                break;
+            case 2:
+            case 3:
+                fn_80214A9C(g->join);
+                fn_80214AF0(g->car);
+                fn_80214A9C(g->leave);
+                fn_80214AF0(g->ready);
+                if (i != 0 && g->state == 2) {
+                    fn_80214A9C(g->start);
+                } else {
+                    fn_80214AF0(g->start);
+                }
+                g->sel->active = 1;
+                g->sel->Refresh();
+                break;
+            case 4:
+                fn_80214A9C(g->join);
+                fn_80214AF0(g->car);
+                fn_80214AF0(g->leave);
+                fn_80214A9C(g->ready);
+                fn_80214AF0(g->start);
+                g->sel->active = 0;
+                g->sel->Refresh();
+                break;
+            default:
+                fn_802E317C(lbl_80342840, g->state, i);
+                break;
+            }
+            g->prev = g->state;
+        }
+    }
+    if (ready) {
+        fn_80214AF0(0x1E);
+    } else {
+        fn_80214A9C(0x1E);
+    }
+    if (ready) {
+        for (int j = 7; j <= 10; j++) {
+            fn_80214A9C(j);
+        }
+    }
+    w->allReady = ready;
+}
 
 void fn_80242B1C(u8* p) {}  // stub (275)
 
