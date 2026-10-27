@@ -2255,10 +2255,21 @@ s32 fn_8011A7CC(DVDFileInfo *info) {
     if (p[0x20 / 4] != 0) return 0;
     if (p[0x50 / 4] != 0) return 0;
     status = DVDGetDriveStatus();
-    if (status == 0) {
+    switch (status) {
+    case 0:  /* END */
         fn_8011A6A0(info);
-    } else if (status == 0xB) {
+        break;
+    case -1: /* FATAL_ERROR */
+    case 3:  /* COVER_CLOSED */
+    case 4:  /* NO_DISK */
+    case 5:  /* COVER_OPEN */
+    case 6:  /* WRONG_DISK */
+    case 7:  /* MOTOR_STOPPED */
+    case 8:  /* PAUSING */
+    case 9:  /* IGNORED */
+    case 11: /* RETRY */
         p[0x20 / 4] = 1;
+        break;
     }
     return p[0x24 / 4];
 }
@@ -3192,19 +3203,14 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
     do {
         var_r9++;
         if (arg0 & 1) {
-            temp = *right;
+            *out++ = *right++;
             var_r8--;
-            right++;
         } else {
-            temp = *left;
+            *out++ = *left++;
             var_r7--;
-            left++;
         }
-        *out = temp;
-        out++;
         arg0 >>= 1;
-        if (var_r7 == 0 || var_r8 == 0) break;
-    } while (1);
+    } while (var_r7 != 0 && var_r8 != 0);
     if (var_r7 != 0) {
         do { temp = *left; var_r7--; left++; *out = temp; out++; } while (var_r7 != 0);
     } else if (var_r8 != 0) {
