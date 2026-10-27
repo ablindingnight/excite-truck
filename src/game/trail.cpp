@@ -682,6 +682,7 @@ void DustTrail::Reset(void) {
 }
 
 void DustTrail::Update(void) {
+    TWheel* wh;
     f32 rate = 0.075f * fn_801E7E24();
     int i;
     for (i = 0; i < fn_80287B14(); i++) {
@@ -689,7 +690,7 @@ void DustTrail::Update(void) {
         f32 slip;
         f32 r;
         if (fn_802BF4F0()) {
-            TWheel* wh = b->wheels;
+            wh = b->wheels;
             int n = 4;
             int w;
             for (w = 0; w < 4; w++, wh++) {
