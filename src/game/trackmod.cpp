@@ -946,8 +946,10 @@ void OptTerrainTMH::Link(int a, void* b, int c, void* d, int e) {
 XFaderTMH::~XFaderTMH(void) {}
 
 void XFaderTMH::Swap(TObj* o) {
-    Swap32((u8*)&o->d2C);
-    Swap32((u8*)&o->d30);
+    u8* p = (u8*)&o->d2C;
+    for (int i = 0; i < 2; i++) {
+        Swap32(p + i * 4);
+    }
 }
 
 void XFaderTMH::Init(TObj* o) {}
@@ -994,11 +996,9 @@ void XFaderTMH::Add(void* scene, TObj* o, s32 id) {
 
 void FlareSourceTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
-    Swap32(p);
-    Swap32(p + 4);
-    Swap32(p + 8);
-    Swap32(p + 12);
-    Swap32(p + 16);
+    for (int i = 0; i < 5; i++) {
+        Swap32(p + i * 4);
+    }
 }
 
 void FlareSourceTMH::Init(TObj* o) { fn_802E317C("trackmod: local flare sources not support"); }
