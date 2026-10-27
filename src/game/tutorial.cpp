@@ -1718,8 +1718,8 @@ inline int ChalList::Draw(int a) {
                 if (el) {
                     GartElem b;
                     TextElem te = *el;
-                    f32 dx = te.pos.x - e1->pos.x;
                     f32 dy = te.pos.y - e1->pos.y;
+                    f32 dx = te.pos.x - e1->pos.x;
                     b = *but;
                     int off = i != sel;
                     u8 alpha;

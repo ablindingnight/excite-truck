@@ -277,8 +277,8 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                 k.t = Lerp(0.0f, 17.05f, c);
                 if (b6 != 0) {
                     u32 qx = ((u32)(v >> 16) & 0xFFF) << 4;
-                    u32 qy = ((u32)(v >> 28) & 0xFFF) << 4;
                     u32 qz = (pk.hi >> 4) & 0xFFF0;
+                    u32 qy = ((u32)(v >> 28) & 0xFFF) << 4;
                     u32 qw = (pk.hi >> 16) & 0xFFF0;
                     c = AMIN(1.0f, Dequant(qx, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;

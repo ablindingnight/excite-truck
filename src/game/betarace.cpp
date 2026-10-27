@@ -2146,8 +2146,8 @@ void BetaCar::DrawHud(ILayout* l, int view) {
     RaceCarRec* rc = fn_8017960C(id);
     PlaceInfo* info = rc->places->Get();
     PlaceDist* dist = rc->places->Dist();
-    s32 pts = Round(shown);
     int out = (info->flags >> 2) & 1;
+    s32 pts = Round(shown);
     int grade = fn_801609C4(pts);
     int pal;
     if (!fn_80161C38() && lbl_8055E4D0 > 1 && pts > shownInt && grade <= fn_80160A74() && grade >= 0) {
@@ -2838,8 +2838,8 @@ void BetaMaster::vfF4(void) {
                     break;
                 }
                 ValPoint pt = n->GetPoint(buf);
-                pts[k].x = pt.x;
                 pts[k].y = pt.y;
+                pts[k].x = pt.x;
                 c.x += pt.x;
                 c.y += pt.y;
             }
@@ -3080,8 +3080,8 @@ Pickup::Pickup(ValueNode* n) {
         f32 b[3];
         f32 cr[3];
         f32 hx;
-        f32 hy;
         f32 hz;
+        f32 hy;
         fn_802C77F0(lbl_80559ED4, box);
         m[0] = 1.0f;
         m[1] = 0.0f;
@@ -3496,8 +3496,8 @@ void BetaMaster::vf0C(void) {
     UpdateBumps(&bumps2);
     if (skipAt > 0.0f && lbl_8055E3C8 > skipAt) {
         timer.b10 = 1;
-        skipAt = -1.0f;
         timer.now = timer.limit - 30.0f;
+        skipAt = -1.0f;
     }
     if (!found) {
         timer.b10 = 0;

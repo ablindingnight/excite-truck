@@ -144,8 +144,8 @@ void fn_801E370C(const DFrame* m, u32 c0, u32 c1) {
         pos.y += m->x.y * 2.0f;
         pos.z += m->x.z * 2.0f;
         fn_802C8E00(c1, 0, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x = pos.x + m->y.x * 2.0f + m->x.x * -2.0f;
         pos.y = pos.y + m->y.y * 2.0f + m->x.y * -2.0f;
+        pos.x = pos.x + m->y.x * 2.0f + m->x.x * -2.0f;
         pos.z = pos.z + m->y.z * 2.0f + m->x.z * -2.0f;
         fn_802C8E00(c1, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
         pos.x += m->x.x * 2.0f;

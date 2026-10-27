@@ -688,8 +688,8 @@ void fn_802CF10C(u32 count) {
     if (lbl_8055FD44 == 4000) {
         OSReport("gx: hang? or perhaps the disk drive has powered down...\n");
     }
-    lbl_8055FD4C++;
     lbl_8055FD44++;
+    lbl_8055FD4C++;
     if (lbl_8055FD4C < 5) {
         return;
     }
@@ -1628,8 +1628,8 @@ void fn_802D18E8(void) {
     f32 inv = 1.0f / mag;
     lbl_8055FDCC = 0;
     d.y *= inv;
-    d.x *= inv;
     d.z *= inv;
+    d.x *= inv;
     if (lbl_8055FDC8 > 0) {
         PointLight* p = lbl_804CA088;
         GXLightObj* o = lbl_804CA118;
@@ -1854,8 +1854,8 @@ void fn_802D2640(void) {
 }
 
 void fn_802D2684(void) {
-    int alphaOnly = (lbl_8055FD1C >> 6) & 1;
     u8 env = lbl_804C5700.env;
+    int alphaOnly = (lbl_8055FD1C >> 6) & 1;
     int stage = 0;
     int coord = 0;
     u8 base2 = lbl_804C5700.base2;

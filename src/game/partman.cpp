@@ -905,8 +905,8 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         u8 r = Byte(255.0f * (redConst + redRamp * t));
         u8 a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
         u32 color = (a << 24) | (r << 16) | (g << 8) | b;
-        int row = frame / grid;
         int col = frame % grid;
+        int row = frame / grid;
         PVtx q[4];
         q[0].pos.x = pos.x + d1.x * size;
         q[0].pos.y = pos.y + d1.y * size;
@@ -959,8 +959,8 @@ void PartSys::DrawRotating(Particle* p, int n) {
         f32 two = 2.0f * size;
         f32 mtwo = -2.0f * size;
         q[0].pos.x = pos.x + a.x * -size + b.x * size;
-        q[0].pos.y = pos.y + a.y * -size + b.y * size;
         q[0].pos.z = pos.z + a.z * -size + b.z * size;
+        q[0].pos.y = pos.y + a.y * -size + b.y * size;
         q[1].pos.x = q[0].pos.x + a.x * two;
         q[1].pos.y = q[0].pos.y + a.y * two;
         q[1].pos.z = q[0].pos.z + a.z * two;

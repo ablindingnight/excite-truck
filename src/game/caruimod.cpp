@@ -342,8 +342,8 @@ void CarUIModel::LoadEfx(const char* path) {
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
         ValueTableV* t = fn_80131810(file);
         if (!t) {
-            numBones = 0;
             efx = -1;
+            numBones = 0;
             boneset = 0;
             return;
         }
@@ -892,8 +892,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         lbl_80498E18.z = lbl_80498E18.z + p->frame.b.v[1].z * up;
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);
-            f32 back = -(0.1524f + m->wheelPos[1].z);
             f32 h = -p->wheelY[1];
+            f32 back = -(0.1524f + m->wheelPos[1].z);
             p->frame.pos.x = mid.x + p->frame.b.v[2].x * back;
             p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
             p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
@@ -914,8 +914,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {
         f32 offY = 0.0f;
-        f32 d = dist;
         f32 offX = offY;
+        f32 d = dist;
         int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hh = 0.5f * (f32)h;
         f32 cy = (f32)y + hh;
@@ -1463,8 +1463,8 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
         f32 z1 = 5.0f * s;
         v[1 + i * 2].pos.x = x0;
         v[1 + i * 2].pos.y = y;
-        v[1 + i * 2].pos.z = z0;
         v[1 + i * 2].color = 0x20FFFFFF;
+        v[1 + i * 2].pos.z = z0;
         v[1 + i * 2].s = 1.333f * x0;
         v[1 + i * 2].t = 1.333f * z0;
         v[2 + i * 2].pos.x = x1;

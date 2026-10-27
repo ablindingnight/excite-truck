@@ -884,8 +884,8 @@ int fn_802EB7D4(void* dst, int n, int ch) {
             lbl_805600C0[ch]++;
             return n;
         }
-        int cnt = avail / (nch * 2);
         int got = avail / nch;
+        int cnt = avail / (nch * 2);
         lbl_805600C0[ch] = 0;
         u16* out = (u16*)dst;
         u16* src = (u16*)(lbl_805600A0 + lbl_805600B0[ch]);

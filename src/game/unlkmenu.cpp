@@ -184,8 +184,8 @@ extern "C" int fn_8024497C(void) {
 }
 
 extern "C" void fn_802449A0(void) {
-    UnlockList list;
     int arrows = 1;
+    UnlockList list;
     MenuItem items[] = {
         MenuItem("downarrow", 2, &arrows, 0, 0),
         MenuItem("#rating", 3, list.title, 0x80, 0),

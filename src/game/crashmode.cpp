@@ -378,8 +378,8 @@ int fn_801DF93C(int view) {
             fn_8014C72C(m->layout, "boost_text");
         }
         if (fn_80141F7C(left)) {
-            f32 t = Fmod(4.0f * fn_801E7E18() * fn_80176A2C(), 1.0f);
             f32 k;
+            f32 t = Fmod(4.0f * fn_801E7E18() * fn_80176A2C(), 1.0f);
             if (t < 0.5f) {
                 k = fn_8014C8B4(0.0f, 0.5f, 0.0f, 1.0f, t);
             } else {

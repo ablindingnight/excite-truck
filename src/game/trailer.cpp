@@ -390,8 +390,8 @@ void Trailer::Update(void) {
     RVec3 torque;
     RVec3 dav;
     dav.x = avel.x - car->avel.x;
-    dav.y = avel.y - car->avel.y;
     dav.z = avel.z - car->avel.z;
+    dav.y = avel.y - car->avel.y;
     torque.y = Mul(dav.y, -4071.75f);
     torque.z = 0.0f;
     torque.x = 0.0f;

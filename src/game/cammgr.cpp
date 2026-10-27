@@ -1305,8 +1305,8 @@ void fn_80268358(CamRec* c) {
     }
     KVec3 bl;
     bl.x = out[0].b.x + ka * (out[1].b.x - out[0].b.x);
-    bl.y = out[0].b.y + ka * (out[1].b.y - out[0].b.y);
     bl.z = out[0].b.z + ka * (out[1].b.z - out[0].b.z);
+    bl.y = out[0].b.y + ka * (out[1].b.y - out[0].b.y);
     KVec3 al;
     al.x = out[0].a.x + kb * (out[1].a.x - out[0].a.x);
     al.y = out[0].a.y + kb * (out[1].a.y - out[0].a.y);

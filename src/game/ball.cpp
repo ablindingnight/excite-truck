@@ -644,8 +644,8 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     fn_8017D378();
     m = *in;
     avel.x = 0.0f;
-    avel.y = 0.0f;
     avel.z = 0.0f;
+    avel.y = 0.0f;
     hint[0] = h;
     b1E9 = 1;
     Rotate(&p, &m, &launch);

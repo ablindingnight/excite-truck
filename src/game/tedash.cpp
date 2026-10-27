@@ -593,8 +593,8 @@ const char* fn_802B6A70(int mode) {
 
 void fn_802B6AC0(void) {
     char name[0x20];
-    char path[0x40];
     char pat[0x40];
+    char path[0x40];
     if (lbl_8055FA18.Waiting()) {
         return;
     }

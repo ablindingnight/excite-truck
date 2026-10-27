@@ -1449,8 +1449,8 @@ void fn_80195F6C(u8* d) {
         V2 dir;
         IdealPoint* s = il.seg;
         f32 t = il.t;
-        dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
         dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
+        dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
         pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
         pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
         f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
@@ -2144,8 +2144,8 @@ void fn_801981A0(u8* d, u8* t) {
             }
             if (S32(d, 0x140) == 0 && S32(d, 0x268) != 3) {
                 f32 span = lbl_8056217C - lbl_80562140;
-                f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
                 f32 lim = 4.0f * lbl_8055A488 * lbl_8055E564;
+                f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
                 r = span < r ? span : r;
                 r = r > 0.0f ? r : 0.0f;
                 r = 1.0f + r;

@@ -280,8 +280,8 @@ void fn_80292698(void) {
             s->rot.y.y = c + k * (y * y);
             s->rot.y.z = z * (k * y) + sn * x;
             s->rot.z.x = z * (k * x) + sn * y;
-            s->rot.z.y = z * (k * y) - sn * x;
             s->rot.z.z = c + k * (z * z);
+            s->rot.z.y = z * (k * y) - sn * x;
         } else {
             s->rot.x.x = 1.0f;
             s->rot.x.y = 0.0f;

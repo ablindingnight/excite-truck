@@ -603,8 +603,8 @@ void fn_802A53B0(DropHit* hits, int n) {
                 f32 a = fn_80287BC8(0.0f, 1.0f);
                 f32 b = fn_80287BC8(0.0f, 1.0f);
                 ValVec3 p;
-                p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
                 p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
+                p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
                 p.z = d->origin.z + d->sv.z * a + d->tv.z * b;
                 Mul(&o->frame, &p, &p);
                 p.x = p.x + o->frame.pos.x;
@@ -808,8 +808,8 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
         WPt* p = &pts[i];
         PVec* w = &wob[i % 8];
         f32 z = p->z + wind.z + w->z * dt;
-        f32 x = (p->x + wind.x + w->x * dt) + turn * z;
         f32 y = p->y + wind.y + w->y * dt;
+        f32 x = (p->x + wind.x + w->x * dt) + turn * z;
         if (z > near && z < far && x * x < (z * tx) * (z * tx) && y * y < (z * ty) * (z * ty)) {
             out->x = x;
             out->y = y;

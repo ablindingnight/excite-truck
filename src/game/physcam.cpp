@@ -659,8 +659,8 @@ void fn_80271624(int mode, u8* p) {
             case 0: {
                 f32 fov = fn_802715F0((u8*)tv);
                 f32 w[3];
-                fn_802715C4(w, (u8*)tv);
                 fn_80274F74(p, w, fov);
+                fn_802715C4(w, (u8*)tv);
                 break;
             }
             case 1:
@@ -897,8 +897,8 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     fn_80136468(&pb, track, b);
     qb.x = F32(pb.seg, 0x0) + pb.t * (F32(PTR(pb.seg, 0x14), 0x0) - F32(pb.seg, 0x0));
     qb.y = F32(pb.seg, 0x4) + pb.t * (F32(PTR(pb.seg, 0x14), 0x4) - F32(pb.seg, 0x4));
-    db.x = qb.x - c[0];
     db.y = qb.y - c[1];
+    db.x = qb.x - c[0];
     f32 eb = (f32)__fabs(r2 - (db.x * db.x + db.y * db.y));
     if (eb < lbl_8055F560) {
         return b;
@@ -1066,8 +1066,8 @@ void CamRegion::Prepare(u8* line) {
         dual = 0;
     }
     fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[0] + (&lo1)[1]));
-    d1.x = pt.x - center.x;
     d1.y = pt.y - center.y;
+    d1.x = pt.x - center.x;
     if (d1.x * d1.x + d1.y * d1.y > r2) {
         if (dual) {
             fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[1] + (&lo1)[2]));

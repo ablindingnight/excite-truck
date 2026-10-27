@@ -1382,8 +1382,8 @@ void CrushMaster::vfA8(int car) {
                 r.m.basis[2].z = v.z;
                 PSVECNormalize(&r.m.basis[2], &r.m.basis[2]);
                 r.m.basis[0].x = r.m.basis[2].z;
-                r.m.basis[0].y = 0.0f;
                 r.m.basis[0].z = -r.m.basis[2].x;
+                r.m.basis[0].y = 0.0f;
                 r.vel = v;
             } else {
                 to.x = dst.x;
@@ -1489,8 +1489,8 @@ void CrushMaster::vf4C(int view) {
         }
         col = layout.p->Find("score_column");
         for (i = 0; i < n; i++) {
-            Box b = *icon;
             int killed = i < cc->f8;
+            Box b = *icon;
             int pts;
             b.pos.y += i * hit->h;
             if (!killed) {

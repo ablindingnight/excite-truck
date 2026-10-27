@@ -446,8 +446,8 @@ void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeTy
     dst->pos.y = src->pos.y + c.y;
     dst->pos.z = src->pos.z + c.z;
     MulVec(&dst->rot[2], src, &t->cyl.axis);
-    dst->rot[0].y = 0.0f;
     dst->rot[0].x = 1.0f;
+    dst->rot[0].y = 0.0f;
     dst->rot[0].z = 0.0f;
     PSVECCrossProduct(&dst->rot[2], &dst->rot[0], &dst->rot[1]);
     PSVECCrossProduct(&dst->rot[1], &dst->rot[2], &dst->rot[0]);
@@ -517,8 +517,8 @@ void fn_802BCBDC(void) {
                 ValVec3 p1 = n->GetVec3("cyl_p1");
                 ValVec3 p2 = n->GetVec3("cyl_p2");
                 TVec c;
-                c.x = p1.x + 0.5f * (p2.x - p1.x);
                 c.y = p1.y + 0.5f * (p2.y - p1.y);
+                c.x = p1.x + 0.5f * (p2.x - p1.x);
                 c.z = p1.z + 0.5f * (p2.z - p1.z);
                 t->cyl.center = c;
                 t->cyl.axis.x = p1.x - p2.x;

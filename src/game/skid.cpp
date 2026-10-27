@@ -365,8 +365,8 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidSlot* slot;
     SkidType* t;
     SkidCar* car = e->car;
-    int idx = wi + e->index * 4;
     w = &car->wheels[wi];
+    int idx = wi + e->index * 4;
     slot = &lbl_8055F720[idx];
     if (w->terrain < 8 && (type = lbl_804B3470[w->terrain]) >= 0) {
         t = &lbl_804B3400[type];

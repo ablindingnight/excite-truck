@@ -1357,8 +1357,8 @@ f32 fn_8013E300(const V2* v);
 
 ZoneLevels::ZoneLevels(ValueTable* t) {
     int i;
-    int lvl;
     ValueNode* child;
+    int lvl;
     n = fn_8013DDD4(t, "ZoneLevel");
     levels = new ("ZoneLevel[]") ZoneLevel[n];
     lvl = 0;

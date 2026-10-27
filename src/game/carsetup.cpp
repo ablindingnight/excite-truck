@@ -220,8 +220,8 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->rsway = Lbf(c->GetFloat("rsway", 60.0f)) / 0.0254f;
     f32 ride = In(c->GetFloat("ride_height", 5.0f));
     s->modelOffset.x = 0.0f;
-    s->modelOffset.y = -s->collideCmHeight;
     s->modelOffset.z = -(s->balance - 0.5f) * s->wheelbase;
+    s->modelOffset.y = -s->collideCmHeight;
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
         s->modelOffset.x += o.x * 0.0254f;

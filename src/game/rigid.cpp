@@ -493,8 +493,8 @@ void RigidBody::Update(void) {
         f32 k = 0.0166833512f * invMass;
         vel.x += force.x * k;
         vel.y += force.y * k;
-        vel.z += force.z * k;
         accel.x = force.x * invMass;
+        vel.z += force.z * k;
         accel.y = force.y * invMass;
         accel.z = force.z * invMass;
     }

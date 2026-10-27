@@ -641,8 +641,8 @@ int fn_8028B500(const void* evp) {
     }
     Chunks* sys;
     if (ev->terrain >= 0 && ev->terrain < 8 && (sys = lbl_804B3238[ev->terrain].sys) != 0) {
-        f32 spread = MIN(0.0003f * mag, 6.0f);
         int m = n / 3;
+        f32 spread = MIN(0.0003f * mag, 6.0f);
         f32 zero = 0.0f;
         for (int i = 0; i < m; i++) {
             Vec d;

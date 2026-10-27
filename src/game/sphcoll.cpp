@@ -557,8 +557,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         o->VelAt(&v, &pt);
         f32 k = depth * F32(p, 0x10);
         f32 vn = -PSVECDotProduct(&v, &nrm);
-        imp.x = nrm.x * k;
         imp.z = nrm.z * k;
+        imp.x = nrm.x * k;
         imp.y = nrm.y * k;
         vt.x = v.x + nrm.x * vn;
         vt.y = v.y + nrm.y * vn;
@@ -1044,8 +1044,8 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     nrm.x = diff.x * k;
     nrm.y = diff.y * k;
     at.x = (pa.x + pb.x) / 2.0f;
-    nrm.z = diff.z * k;
     at.y = (pa.y + pb.y) / 2.0f;
+    nrm.z = diff.z * k;
     at.z = (pa.z + pb.z) / 2.0f;
     fn_8019A788(who ? who : p, q, (u32)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
     return 1;

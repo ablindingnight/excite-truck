@@ -555,8 +555,8 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         ValPoint flat;
         flat.x = car->vel.x;
         flat.y = car->vel.z;
-        v.x = v.x + car->axes[1].x * up;
         v.y = v.y + car->axes[1].y * up;
+        v.x = v.x + car->axes[1].x * up;
         v.z = v.z + car->axes[1].z * up;
         f32 s = sqrt(flat.x * flat.x + flat.y * flat.y);
         int n = (int)(0.25f * s) < 6 ? (int)(0.25f * s) : 6;
@@ -595,8 +595,8 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     origin.y = g->origin.y;
     origin.z = g->origin.z;
     f32 ix = 1.0f / (nx - 1);
-    f32 iy = 1.0f / (ny - 1);
     dxx = g->right.x * ix;
+    f32 iy = 1.0f / (ny - 1);
     dxz = g->right.y * ix;
     dyx = g->up.x * iy;
     dyz = g->up.y * iy;

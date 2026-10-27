@@ -850,8 +850,8 @@ void fn_802C729C(s32 i, f32 range) {
                         continue;
                     }
                     MElem* el = &m->elems[e];
-                    void* mtx = (void*)lbl_804C13C0.mtx;
                     MSurfList* sl = el->list;
+                    void* mtx = (void*)lbl_804C13C0.mtx;
                     for (int j = 0; j < sl->n; j++) {
                         MSurf* s = sl->surfs[j];
                         if (IsQueued(s->type)) {

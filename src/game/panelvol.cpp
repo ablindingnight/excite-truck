@@ -390,8 +390,8 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     PanelEdge edges[6] = {
         {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
     };
-    RVec3 a;
     RVec3 b;
+    RVec3 a;
     fn_801BFE7C(&a, lo, off);
     fn_801BFE7C(&b, hi, off);
     p->org = 0;

@@ -1050,8 +1050,8 @@ u8 ObjSet::Load(ValueNode* set, ValueTable** dynos) {
     teles = new ("ObjectTeleport") IArray<ObjTeleport>(CountTeles(set), "rc_object_teleport");
     ok = 1;
     {
-        int i;
         ValueNode* c;
+        int i;
         for (i = 0; (c = set->GetChildAt(i)) != 0; i++) {
             if (strcmp(c->GetName(), "object")) {
                 continue;
@@ -1598,8 +1598,8 @@ int RingChalMaster::vf3C(int view) {
     f32 end1 = full0 - 0.15f;
     f32 in1 = end1 - 0.8f;
     f32 full1 = in1 - 0.3f;
-    TextElem* h0 = layout->Find("intro_head_0");
     TextElem* h1 = layout->Find("intro_head_1");
+    TextElem* h0 = layout->Find("intro_head_0");
     if (t < full1) {
         fn_8000FBE4();
     }
@@ -1844,8 +1844,8 @@ int RingChalMaster::vfE0(int car, u8* out) {
                     a.x = t->mtx.origin.x;
                     a.y = t->mtx.origin.z;
                     b.x = c->pos.x;
-                    b.y = c->pos.z;
                     d.x = a.x - b.x;
+                    b.y = c->pos.z;
                     d.y = a.y - b.y;
                     inside = (f32)sqrt(d.x * d.x + d.y * d.y) < t->radius;
                     behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
@@ -2272,8 +2272,8 @@ void RingChalMaster::vf0C(void) {
                             arena.f34 = arena.f30;
                             {
                                 int pts = arena.stats->At(arena.curSet)->best;
-                                arena.difficulty++;
                                 arena.f30 += pts;
+                                arena.difficulty++;
                             }
                             if (arena.difficulty > 2) {
                                 arena.difficulty = 2;

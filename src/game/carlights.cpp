@@ -360,8 +360,8 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
             type = n->GetInt("light_type", 0);
         } else {
             c = MakeColor(ColorByte(255.0f * def.x), ColorByte(255.0f * def.y), ColorByte(255.0f * def.z));
-            h = rad;
             w = rad;
+            h = rad;
             type = 0;
         }
         fn_80295C70(s, frame, &off, w, h, c, type);

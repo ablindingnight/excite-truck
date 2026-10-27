@@ -765,8 +765,8 @@ void fn_80232DF4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
         strlen(text);
         for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             px = x0;
-            Font* ff = f;
             int i = 0;
+            Font* ff = f;
             u32 cc = c;
             if (passes == 2) {
                 ff = f->outline;
@@ -859,8 +859,8 @@ void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
         }
         for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             y = y0;
-            Font* ff = f;
             int i = 0;
+            Font* ff = f;
             u32 cc = c;
             if (passes == 2) {
                 ff = f->outline;

@@ -612,8 +612,8 @@ void MultiFacingTMH::Draw(TObj* list) {
         TCam* cam = fn_802C86DC();
         TVec dir;
         TVec c0;
-        TVec c1;
         TVec c2;
+        TVec c1;
         TVec c3;
         TVec c4;
         TVtx base;

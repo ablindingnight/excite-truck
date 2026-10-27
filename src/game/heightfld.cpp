@@ -650,8 +650,8 @@ int fn_801DDA84(f32 x, f32 z, s32* out, int max, f32 thr) {
     }
     int tx = ix / 32;
     int tz = iz / 32;
-    int lz = iz - tz * 32;
     int lx = ix - tx * 32;
+    int lz = iz - tz * 32;
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         return 0;

@@ -536,8 +536,8 @@ void fn_802CDB5C(int pri) {
         u8* dl = 0;
         s32 cnt = 0;
         s32 tex = e->tex;
-        int n = e->end - e->start;
         MLStrip* sp = &da.p[e->start];
+        int n = e->end - e->start;
         for (int j = 0; j < n; j++) {
             MLStrip s = *sp++;
             if (s.flags == (ctx->vis[s.ref] & 0x7F)) {

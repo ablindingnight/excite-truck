@@ -464,8 +464,8 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
-    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
+    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
     out->pos = pos;
 }
@@ -1275,8 +1275,8 @@ void fn_801C4CE8(void) {
                         f.pos.z += f.rot.m[8] * off.y;
                         f32 yaw = atan2(f.rot.m[6], f.rot.m[8]);
                         V2 pt;
-                        pt.x = f.pos.x;
                         pt.y = f.pos.z;
+                        pt.x = f.pos.x;
                         fn_801C3AF8(&place, &pt, yaw);
                     }
                     break;

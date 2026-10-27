@@ -297,8 +297,8 @@ void fn_802BEDFC(void) {
         ValueNode* g = t->HasChild("Graphics") ? t->FindChild("Graphics") : 0;
         if (g) {
             lbl_8055FAE0 = g->GetFloat("water_height", lbl_8055FAE0);
-            lbl_8055FAE4 = fn_802BECE4(g->GetString("near_water_color", ""), lbl_8055FAE4);
             lbl_8055FAE8 = fn_802BECE4(g->GetString("far_water_color", ""), lbl_8055FAE8);
+            lbl_8055FAE4 = fn_802BECE4(g->GetString("near_water_color", ""), lbl_8055FAE4);
             lbl_8055FAEC = fn_802BECE4(g->GetString("deep_water_sub_color", ""), lbl_8055FAEC);
             lbl_8055FAF0 = fn_802BECE4(g->GetString("shim_water_color", ""), lbl_8055FAF0);
             fn_802E30C8("water colors: N %08x, F %08x DS %08x SH %08x", lbl_8055FAE4, lbl_8055FAE8,
@@ -597,8 +597,8 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     Frame m;
     Mirror(&m, (const Frame*)cam, &up);
     f32 h = 2.0f * (f32)atan(scale * (f32)tan(0.5f * fov));
-    Perspective p(1.0f, 3000.0f, h);
     Viewport vp;
+    Perspective p(1.0f, 3000.0f, h);
     fn_802C86F0(&vp, 0, 0, 0x100, 0x100);
     Frame save;
     fn_802C8B08(&save);
@@ -645,8 +645,8 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
     for (int i = 0; i < 4; i++) {
         v[i].pos.x = (i & 1) ? r : -r;
         v[i].pos.y = (i & 2) ? r : -r;
-        v[i].pos.z = d;
         v[i].color = 0xFFFFFFFF;
+        v[i].pos.z = d;
         v[i].u = (i & 1) ? 1.0f : 0.0f;
         v[i].v = (i & 2) ? 1.0f : 0.0f;
     }

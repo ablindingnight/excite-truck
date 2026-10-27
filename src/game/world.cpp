@@ -1304,8 +1304,8 @@ void fn_801E96D8(RaceSetup* s) {
                     if (ok) {
                         WVec cur;
                         WMtx mtx;
-                        WVec c;
                         WVec up;
+                        WVec c;
                         f32 len;
                         WallVol* wv;
                         cur.x = p.x;

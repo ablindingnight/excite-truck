@@ -176,8 +176,8 @@ void fn_801BD808(void) {
     m->rot[1] = MVec4(0.0f, 1.0f, 0.0f);
     m->rot[2] = MVec4(0.0f, 0.0f, 1.0f);
     c->v30 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     fn_801BDA70();
     fn_801BDA74(car, &out);
 }
