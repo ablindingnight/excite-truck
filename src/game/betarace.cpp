@@ -2776,9 +2776,9 @@ void BetaMaster::vfFC(void) {
 
 void BetaMaster::vfF4(void) {
     TuneRef ref;
-    ValueTable* t;
     int loaded;
     int i;
+    ValueTable* t;
     lbl_8055E24C = 57.77778f;
     fn_8013A0B0(&ref, "betarace", "info");
     {

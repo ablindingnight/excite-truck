@@ -673,8 +673,8 @@ f32 fn_8023293C(Font* f, const char* s, f32 xs) {
     if (s == NULL) {
         return 0.0f;
     }
-    f32 w = 0.0f;
     f32 gaps = 0.0f;
+    f32 w = 0.0f;
     int i = 0;
     strlen(s);
     while (s[i]) {

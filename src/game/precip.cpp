@@ -578,8 +578,8 @@ void fn_802A53B0(DropHit* hits, int n) {
         if (hits->dist > 56.25f || !hits->enabled || s->count < 1) {
             continue;
         }
-        DropObj* o = hits->obj;
         Droplet* d = s->drops;
+        DropObj* o = hits->obj;
         for (int j = 0; j < s->count; j++, d++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);

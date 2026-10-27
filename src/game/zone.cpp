@@ -1468,9 +1468,9 @@ int fn_8013DE7C(ValueNode* t, const char* name) {
 }
 
 void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
-    Vec3* p = &g->a;
     Vec3* a = &prev->a;
     Vec3* b = &next->a;
+    Vec3* p = &g->a;
     int i;
     for (i = 0; i < 2; i++) {
         V2 pa;

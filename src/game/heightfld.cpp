@@ -686,8 +686,8 @@ f32 fn_801DDC8C(f32 x, f32 z) {
     if (ix < 0 || iz < 0) {
         return 0.0f;
     }
-    int tx = ix / 32;
     int tz = iz / 32;
+    int tx = ix / 32;
     int lz = iz - tz * 32;
     int lx = ix - tx * 32;
     GTile* t = TileAt(g, tx, tz);

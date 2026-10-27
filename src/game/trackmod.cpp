@@ -1181,8 +1181,8 @@ void ScrollList::Draw2(void* ctx) {
     for (i = 0; i < count; i++) {
         Scroll* s = &scrolls[i];
         if (fn_802CDB20(ctx, s->id)) {
-            f32 v = s->v * t;
             f32 u = s->u * t;
+            f32 v = s->v * t;
             f32 fv = fmod(v, 1.0);
             f32 fu = fmod(u, 1.0);
             fn_802C70AC(s->model, m, (s32)fn_802C7A3C(fu, fv, 100000.0f), -1);

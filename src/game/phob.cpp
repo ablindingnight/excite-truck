@@ -505,9 +505,9 @@ void fn_80177CEC(void) {
     }
     p = lbl_8055E434[lbl_8055E43C];
     if (p && p->vf40()) {
-        PVec3 x;
-        PVec3 y;
         PVec3 z;
+        PVec3 y;
+        PVec3 x;
         x = p->mtx.rot[0];
         z = p->mtx.rot[2];
         PSVECCrossProduct(&z, &x, &y);

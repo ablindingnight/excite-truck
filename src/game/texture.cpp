@@ -1107,10 +1107,10 @@ void TexZHint(s32 id) {
 
 inline void* SimpleHeap::Alloc(s32 n) {
     void* ret = 0;
-    HeapBlock** best = 0;
-    s32 bestSize = 0x7FFFFFFF;
     HeapBlock** pp = &free;
     HeapBlock* b;
+    s32 bestSize = 0x7FFFFFFF;
+    HeapBlock** best = 0;
     n = (n + align) & ~align;
     for (; (b = *pp) != 0; pp = &b->next) {
         if (b->size >= n && bestSize > b->size) {
