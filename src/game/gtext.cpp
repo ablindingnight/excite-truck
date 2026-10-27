@@ -716,7 +716,7 @@ f32 fn_8023293C(Font* f, const char* s, f32 xs) {
     return (w + gaps) * fn_8022EDC4()->scale;
 }
 
-u8 fn_80232B70(Font* f) { return f->height; }
+int fn_80232B70(Font* f) { return f->height; }
 
 u8 fn_80232B78(Font* f) { return f->b5; }
 
@@ -788,38 +788,46 @@ void fn_80232DF4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
     }
 }
 
+// Returns the start of the next UTF-8 character (1-3 byte sequences).
+static inline const char* NextGlyph(const char* p) {
+    const unsigned char* u = (const unsigned char*)p;
+    if ((*u & 0xF0) == 0xE0) return p + 3;
+    if ((*u & 0xE0) == 0xC0) return p + 2;
+    return p + 1;
+}
+
 void fn_80233010(const char* text, Font* f, u32 color, int align, int ingame, f32 x, f32 y, f32 maxw, f32 scale,
                  f32 z, f32 xs) {
+    const char* p = text;
     int line = 0;
-    strlen(text);
+    strlen(p);
     char buf[0x200];
-    while (*text) {
-        const char* start = text;
+    while (*p) {
+        const char* start = p;
         memset(buf, 0, sizeof(buf));
         int n = 0;
-        while (scale * fn_8023293C(f, buf, xs) < maxw && *text && *text != '\n' && *text != '|') {
-            const char* next;
-            DecodeUTF8(text, &next);
-            int len = next - text;
+        while (scale * fn_8023293C(f, buf, xs) < maxw && *p && *p != '\n' && *p != '|') {
+            const char* next = NextGlyph(p);
+            int len = next - p;
             for (int j = 0; j < len; j++) {
-                buf[n++] = *text++;
+                buf[n++] = *p++;
             }
         }
-        const char* save = text;
+        const char* save = p;
         int saven = n;
-        if (*text) {
-            while (*text != ' ' && text != start && *text != '\n' && *text != '|') {
-                text--;
+        if (*p) {
+            while (*p != ' ' && p != start && *p != '\n' && *p != '|') {
+                p--;
                 n--;
             }
         }
-        if (text == start) {
-            text = save;
+        if (p == start) {
+            p = save;
             n = saven;
         }
         buf[n] = 0;
-        if (*text == ' ' || *text == '\n' || *text == '|') {
-            text++;
+        if (*p == ' ' || *p == '\n' || *p == '|') {
+            p++;
         }
         for (int k = 0; k < n; k++) {
             if (buf[k] == '^') {
