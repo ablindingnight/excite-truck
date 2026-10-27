@@ -2330,15 +2330,7 @@ void fn_802D3DAC(void) {
 void fn_802D3DF8(GXTexObj* tex, f32 u, f32 v, s8 scale) {
     lbl_804C5700.ind = 1;
     GXLoadTexObj((GXTexObj*)((u8*)tex + 0x24), 2);
-    f32 m[2][3];
-    m[0][0] = 0.0f;
-    m[0][1] = 0.0f;
-    m[0][2] = 0.0f;
-    m[1][0] = 0.0f;
-    m[1][1] = 0.0f;
-    m[1][2] = 0.0f;
-    m[0][0] = u;
-    m[1][1] = v;
+    f32 m[2][3] = {{u, 0.0f, 0.0f}, {0.0f, v, 0.0f}};
     GXSetIndTexMtx(1, m, scale);
 }
 
