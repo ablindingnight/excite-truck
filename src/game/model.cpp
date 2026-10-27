@@ -126,9 +126,9 @@ struct LightSrc {
 template <class T>
 struct Pool {
     Pool(void) {
-        count = 0;
         data = 0;
         max = 0;
+        count = 0;
     }
     T* Alloc(void) {
         if (count < max) {
