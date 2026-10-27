@@ -139,10 +139,57 @@ struct TuneBlock {
     f32 v[16];
 };
 
-// The whole tuning table, read through raw offsets.
-struct TuneTable {
-    u8 raw[0xB8];
+// The car body's tuning: the live bodies, then the landing, drive and heat (boost) tunables.
+struct LandingTune {
+    f32 v[10];
+    void Reset(void) {
+        v[0] = 2.5f;
+        v[1] = 2.0f;
+        v[2] = 0.5f;
+        v[3] = 1.0f;
+        v[6] = 2.0f;
+        v[7] = 180.0f;
+        v[8] = 100.0f;
+        v[4] = 0.975f;
+        v[5] = 0.975f;
+    }
 };
+
+struct DriveTune {
+    f32 v[8];
+    void Reset(void) {
+        v[0] = 6.0f;
+        v[1] = 1.0f;
+        v[2] = 2.0f;
+        v[3] = 1.0f;
+        v[6] = 1.5f;
+        v[7] = 180.0f;
+        v[4] = 0.975f;
+    }
+};
+
+struct HeatTune {
+    f32 v[16];
+    void Reset(f32 burn, int e3) {
+        v[0] = 0.05f * (e3 ? 1.5f : 1.0f);
+        v[1] = 0.1f * (e3 ? 1.5f : 1.0f);
+        v[2] = 2.0f;
+        v[3] = burn;
+        v[4] = 1.0f;
+        v[5] = 3.7f;
+        v[6] = 0.625f;
+        v[7] = 0.0f;
+        v[8] = 6.25f;
+        v[10] = 0.5f;
+        v[9] = 1.0f;
+        v[11] = 145.0f;
+        v[12] = 1.0f;
+        v[14] = 1.0f;
+        v[15] = 0.5f;
+        v[13] = 170.0f;
+    }
+};
+
 
 // A handle whose constructor marks it unused.
 struct CarHandle {
@@ -180,10 +227,10 @@ void fn_801D14EC(void);
 void fn_801BD808(void);
 }
 
-extern TuneTable lbl_804348E8;
-extern TuneBlock lbl_80434908;
-extern TuneBlock lbl_80434930;
-extern TuneBlock lbl_80434950;
+u8* lbl_804348E8[8];             // the live car bodies (aicar and betarace read them too)
+static LandingTune landingTune;  // 0x80434908
+static DriveTune driveTune;      // 0x80434930
+static HeatTune heatTune;        // 0x80434950
 extern u8 lbl_8055E4F4;
 extern f32 lbl_8055E3C8;
 extern F32Pair lbl_8055E4E0;
@@ -191,8 +238,14 @@ extern u8* lbl_8055E918;
 extern s32 lbl_8055E4D0;
 extern s32 lbl_8055E4D4;
 extern u8 lbl_8055E4F6;
-extern u8 lbl_8055A3AC;
-extern u8 lbl_8055A3B6;
+f32 lbl_8055A3A0 = 1.0f;  // physics writes it
+f32 lbl_8055A3A4 = 0.9f;  // offroad speed factor
+f32 lbl_8055A3A8 = 0.9f;  // water speed factor
+u8 lbl_8055A3AC = 1;      // enable stalling
+f32 lbl_8055A3B0 = 1.5f;
+u8 lbl_8055A3B4 = 1;
+u8 lbl_8055A3B5 = 1;      // reset the tunables to their defaults
+u8 lbl_8055A3B6 = 1;
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
@@ -262,46 +315,93 @@ void fn_801819A0(u8* p, u8* cfg, f32 a, f32 b, f32 c) {
 f32 fn_80181A14(u8* p) {
     f32 k;
     if (U8(p, 0x259D)) {
-        k = lbl_80434930.v[6];
+        k = driveTune.v[6];
     } else {
-        k = lbl_80434908.v[6];
+        k = landingTune.v[6];
     }
     return F32(p, 0x2D8) * k;
 }
 
 f32 fn_80181A48(u8* p) {
-    u8* b = lbl_804348E8.raw;
     f32 k;
     if (U8(p, 0x259D)) {
-        b += 0x48;
-        k = F32(b, 0x1C);
+        k = driveTune.v[7];
     } else if (lbl_8055E4F4) {
-        b += 0x68;
-        k = F32(b, 0x34);
+        k = heatTune.v[13];
     } else {
-        b += 0x20;
-        k = F32(b, 0x1C);
+        k = landingTune.v[7];
     }
     return F32(p, 0x2D0) + k;
 }
 
 f32 fn_80181A94(void) {
     if (lbl_8055E4F4) {
-        return lbl_80434950.v[14];
+        return heatTune.v[14];
     }
-    return lbl_80434908.v[2];
+    return landingTune.v[2];
 }
 
 f32 fn_80181AC0(void) {
     if (lbl_8055E4F4) {
-        return lbl_80434950.v[15];
+        return heatTune.v[15];
     }
-    return lbl_80434908.v[3];
+    return landingTune.v[3];
 }
 
-f32 fn_80181AEC(void) { return lbl_80434930.v[3]; }
+f32 fn_80181AEC(void) { return driveTune.v[3]; }
 
-void fn_80181AFC(void) {}  // stub (236)
+extern f32 lbl_8055E4F0;        // bad landing bounce time
+extern f32 lbl_8055E4E8[2];
+extern f32 lbl_8055E4D8;
+int OptE3Demo(void);
+extern "C" {
+void fn_802049DC(const char* name, f32* var, f32 lo, f32 hi, f32 step);  // debug tunable
+int fn_8020503C(const char* name);                                       // debug switch
+}
+
+// Resets the car body tunables (when asked) and registers them with the debug tuner.
+void fn_80181AFC(void) {
+    if (lbl_8055A3B5) {
+        landingTune.Reset();
+        driveTune.Reset();
+        lbl_8055E4E8[0] = 30.0f;
+        lbl_8055E4E8[1] = 2.0f;
+    }
+    fn_802049DC("Bad landing bounce time", &lbl_8055E4F0, 0.0f, 5.0f, 0.25f);
+    fn_802049DC("Offroad speed factor", &lbl_8055A3A4, 0.1f, 1.0f, 0.1f);
+    fn_802049DC("Water speed factor", &lbl_8055A3A8, 0.1f, 1.0f, 0.1f);
+    int e3 = OptE3Demo();
+    f32 burn = 0.4f * (e3 ? 0.625f : 1.0f);
+    if (lbl_8055A3B5) {
+        heatTune.Reset(burn, e3);
+        lbl_8055E4D8 = 1.7f;
+    }
+    if (U32(fn_801769CC(), 0x4) & 0x100000) {
+        fn_802049DC("OK-Landing Min Air-time Required", &landingTune.v[1], 0.0f, 1.5f, 0.1f);
+        fn_802049DC("OK-Landing Max Speed", &landingTune.v[7], 140.0f, 200.0f, 5.0f);
+        fn_802049DC("OK-Landing Boost Strength", &landingTune.v[6], 0.25f, 6.0f, 0.25f);
+        fn_802049DC("OK-Landing Boost Time =", &landingTune.v[3], 0.0f, 4.0f, 0.25f);
+        fn_802049DC("OK-Landing Boost Time += (Air-time X", &landingTune.v[2], 0.0f, 4.0f, 0.25f);
+        fn_802049DC("OK Landing Max Boost Time", &landingTune.v[0], 1.0f, 12.0f, 1.0f);
+    }
+    if (U32(fn_801769CC(), 0x4) & 0x80000) {
+        fn_802049DC("TEMP fade rate (ground)", &heatTune.v[0], 0.0f, 2.0f, 0.05f);
+        fn_802049DC("TEMP fade rate (air)", &heatTune.v[1], 0.0f, 2.0f, 0.05f);
+        fn_802049DC("TEMP burn rate", &heatTune.v[3], 0.0f, 2.0f, 0.05f);
+        fn_802049DC("Boost strength", &heatTune.v[5], 0.25f, 6.0f, 0.25f);
+        fn_802049DC("Overheat time", &heatTune.v[8], 0.0f, 10.0f, 0.25f);
+        fn_802049DC("Overheat braking", &heatTune.v[10], 0.0f, 1.0f, 0.1f);
+        fn_802049DC("Overheat throttle", &heatTune.v[9], 0.0f, 1.0f, 0.1f);
+        fn_802049DC("Overheat target speed", &heatTune.v[11], 0.0f, 180.0f, 5.0f);
+        fn_802049DC("Nonboost slowdown", &heatTune.v[12], 0.0f, 10.0f, 0.25f);
+    }
+    if (fn_8020503C("unlimited_turbo")) {
+        heatTune.v[3] = 0.0f;
+    } else {
+        heatTune.v[3] = burn;
+    }
+    lbl_8055A3B5 = 0;
+}
 
 void fn_80181EAC(u8* p) {
     f32 a = fn_80129DC4(4, 0.6f, 0.85f);
@@ -346,7 +446,7 @@ void fn_80181FEC(void) {
 CarBody::CarBody(void) {
     *(s16*)((u8*)this + 0x2B4) = -1;
     fn_801BD808();
-    ((CarBody**)lbl_804348E8.raw)[lbl_8055E4D0++] = this;
+    lbl_804348E8[lbl_8055E4D0++] = (u8*)this;
 }
 
 extern "C" {
@@ -457,10 +557,10 @@ void fn_8018A08C(u8* p) { F32(p, 0x26D8) = lbl_8055E3C8; }
 void fn_8018A098(u8* p, f32 t) {
     U8(p, 0x259D) = 1;
     f32 m = F32(p, 0x2CC) * fn_80181AEC();
-    F32(p, 0x258C) = F32(p, 0x3A0) * (m + t * (lbl_80434930.v[0] - m));
+    F32(p, 0x258C) = F32(p, 0x3A0) * (m + t * (driveTune.v[0] - m));
 }
 
-int fn_8018A100(u8* p) { return F32(p, 0x2618) > lbl_80434930.v[1]; }
+int fn_8018A100(u8* p) { return F32(p, 0x2618) > driveTune.v[1]; }
 
 void fn_8018A120(u8* p) {
     if (!fn_801B2F2C(PTR(p, 0x1EC))) {
