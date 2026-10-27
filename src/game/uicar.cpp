@@ -218,182 +218,10 @@ extern void* lbl_80342650[];
 extern char lbl_8055BD60[8];  // ""
 
 extern "C" {
-const char* fn_802E85B8(s32 slot);
-
-void fn_802409AC(CarSel* p, CarSelItem* item) {
-    int n = p->count;
-    p->items[n] = item;
-    p->count = n + 1;
-    p->Refresh();
-}
-
-CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
-    p->car = car;
-    p->vt = lbl_80342650;
-    p->f14 = 0;
-    p->count = 0;
-    p->cur = 0;
-    p->slot = slot;
-    p->active = 1;
-    CopyName(lbl_8055BD60, 0x20, p->name);
-    S32(p->car, 0xD8) = *p->slot;
-    if (*p->slot < 0) {
-        CopyName(lbl_8055BD60, 0x20, p->name);
-    } else {
-        const char* nm = fn_802E85B8(*p->slot);
-        CopyName(nm, 0x20, p->name);
-    }
-    p->Refresh();
-    return p;
-}
-
-void fn_80240BA4(u8* p) {}  // stub (283)
-
-void fn_80241010(u8* p, s32 a, s32 b, s32 c) {
-    S32(p, 0x24) = b;
-    S32(p, 0x1C) = a + 1;
-    S32(p, 0x20) = c;
-}
-
-u8* fn_80241024(u8* p) {
-    __construct_array(p + 0x2C, (void*)fn_80241098, (void*)fn_80240928, 0x28, 5);
-    memset(p, 0, 0x2C);
-    U8(p, 0xF4) = 0;
-    U8(p, 0x158) = 0;
-    U8(p, 0x1BC) = 0;
-    U8(p, 0x220) = 0;
-    U8(p, 0x284) = 0;
-    return p;
-}
-
-u8* fn_80241098(u8* p) {
-    *(void**)p = lbl_80342734;
-    U32(p, 0x14) = 0;
-    S32(p, 0x1C) = -1;
-    U32(p, 0x24) = 0;
-    U32(p, 0x20) = 0;
-    PTR(p, 0x18) = fn_80232578("uifnt_o.gtx");
-    return p;
-}
-
-u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra) {
-    *(void**)(p + 0xC) = lbl_803426B0;
-    S32(p, 0x4) = -1;
-    U8(p, 0x0) = 0;
-    U8(p, 0x8) = 1;
-    U32(p, 0x24) = 0;
-    *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
-    U32(p, 0x28) = 0;
-    U32(p, 0x2C) = *sel;
-    PTR(p, 0x30) = (u8*)sel;
-    U32(p, 0x34) = owner;
-    U32(p, 0x38) = extra;
-    S32(p, 0x3C) = lbl_8055F1F4++;
-    PTR(p, 0x44) = fn_8023512C("caricona.art");
-    F32(p, 0x58) = 0.0f;
-    F32(p, 0x54) = 0.0f;
-    U8(p, 0x5C) = 0;
-    return p;
-}
-
-int fn_802411A4(u32* out) {
-    if (lbl_8055F1FC) {
-        *out = lbl_8055F200;
-        return 1;
-    }
-    return 0;
-}
-
-void fn_802411C8(void) { fn_8023FE20(); }
-
-int fn_802411CC(void) { return fn_8023FE34(); }
-
-void fn_802411D0(int id, u32* car, u32* color, s32* slot) { fn_8023FE60(id, car, color, slot); }
-
-int fn_802411D4(void) {
-    int r = 0;
-    if (fn_802E8504(0) && fn_802E8504(1)) {
-        r = 1;
-    }
-    return r;
-}
-
-void fn_80241224(u8* p) {}
-
-void fn_80241228(u8* p) {}
-
-void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
-void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
-extern const s32 lbl_802FA300[3];  // stat level thresholds: 0, 4, 7
-extern const f32 lbl_80563758;     // 0.0
-extern const f32 lbl_8056375C;     // 0.43
-extern const f32 lbl_80563760;     // 0.37
-extern const f32 lbl_80563764;     // 1.0
-
-// Draws the text for one car stat at its level ("UICar:STAT_%i_TEXT_%i").
-void fn_8024122C(u8* p) {
-    f32 x, y;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
-    if (S32(p, 0x1C) >= 0) {
-        int lvl = 0;
-        for (int i = 0; i < 3; i++) {
-            if (*(s32*)PTR(p, 0x24) && *(s32*)PTR(p, 0x24) >= lbl_802FA300[i]) {
-                lvl = i + 1;
-            }
-        }
-        char buf[0x1E];
-        fn_801345D8(buf, 0x1E, "UICar:STAT_%i_TEXT_%i", S32(p, 0x1C), lvl);
-        int align = 10;
-        f32 size = lbl_8056375C;
-        if (*PTR(p, 0x20)) {
-            size = lbl_80563760;
-            align = 9;
-        }
-        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
-    }
+VU* fn_8027DB40(int kind);
 }
-
-void fn_80241354(u8* p) {}  // stub (307)
-
-void fn_80241820(u8* p) {}  // stub (370)
-
-void fn_80241DE8(u8* p) {
-    for (int i = 0; i < S32(p, 0x2C); i++) {
-        u8 sel = 0;
-        u32 v = *(u32*)PTR(p, 0x34);
-        if (U8(p, 0x38) && i == S32(p, 0x30)) {
-            sel = 1;
-        }
-        u8* e = *(u8**)(p + 0x18 + i * 4);
-        U8(e, 0x0) = sel;
-        U32(e, 0x4) = v;
-    }
-}
-
-int fn_80241E40(u8* p) {
-    if (*(s32*)PTR(p, 0x34) != (s32)fn_802E4A10() || !U8(p, 0x38)) {
-        return 0;
-    }
-    u8* q = p;
-    for (int i = 0; i < S32(p, 0x2C); i++) {
-        u8 sel = 0;
-        s32 v = *(s32*)PTR(p, 0x34);
-        if (U8(p, 0x38) && i == S32(p, 0x30)) {
-            sel = 1;
-        }
-        u8* e = PTR(q, 0x18);
-        U8(e, 0x0) = sel;
-        S32(e, 0x4) = v;
-        q += 4;
-    }
-    return 1;
-}
-
-u8* fn_80241EE8(u8* p) { return p + 0x4c; }
-
-}  // extern "C"
 
 struct VehicleInfo {
     s32 index;                // offset 0x0
@@ -539,7 +367,10 @@ struct StatPanel {
 
 // The car picker: steps through the car list and updates the colour chooser and stat panel.
 struct CarPicker {
-    u8 pad0[0x10];
+    u8 f0;                 // offset 0x0
+    s32 f4;                // offset 0x4
+    u8 f8;                 // offset 0x8
+    void* vt;              // offset 0xC
     s32* unk9COut;         // offset 0x10
     s32* idOut;            // offset 0x14
     ColorPick* colors;     // offset 0x18
@@ -568,7 +399,207 @@ struct CarPicker {
     }
 };
 
+
 extern "C" {
+const char* fn_802E85B8(s32 slot);
+
+void fn_802409AC(CarSel* p, CarSelItem* item) {
+    int n = p->count;
+    p->items[n] = item;
+    p->count = n + 1;
+    p->Refresh();
+}
+
+CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
+    p->car = car;
+    p->vt = lbl_80342650;
+    p->f14 = 0;
+    p->count = 0;
+    p->cur = 0;
+    p->slot = slot;
+    p->active = 1;
+    CopyName(lbl_8055BD60, 0x20, p->name);
+    S32(p->car, 0xD8) = *p->slot;
+    if (*p->slot < 0) {
+        CopyName(lbl_8055BD60, 0x20, p->name);
+    } else {
+        const char* nm = fn_802E85B8(*p->slot);
+        CopyName(nm, 0x20, p->name);
+    }
+    p->Refresh();
+    return p;
+}
+
+// Car picker constructor: starts on the car whose id is *idOut (the first car if none matches).
+CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
+                       CarUIScreen* screen) {
+    p->f0 = 0;
+    p->f4 = -1;
+    p->f8 = 0;
+    p->vt = lbl_80342618;
+    p->unk9COut = unk9COut;
+    p->idOut = idOut;
+    p->colors = colors;
+    p->stats = stats;
+    p->screen = screen;
+    p->list = fn_8027DB40(6);
+    p->f8 = 1;
+    p->index = 0;
+    int n = p->list->v14();
+    for (int i = 0; i < n; i++) {
+        VehicleInfo* v = FindVehicleNamed(p->list->v18(i), 0);
+        if (v->id == *idOut) {
+            p->index = i;
+            break;
+        }
+    }
+    p->Select();
+    return p;
+}
+
+void fn_80241010(u8* p, s32 a, s32 b, s32 c) {
+    S32(p, 0x24) = b;
+    S32(p, 0x1C) = a + 1;
+    S32(p, 0x20) = c;
+}
+
+u8* fn_80241024(u8* p) {
+    __construct_array(p + 0x2C, (void*)fn_80241098, (void*)fn_80240928, 0x28, 5);
+    memset(p, 0, 0x2C);
+    U8(p, 0xF4) = 0;
+    U8(p, 0x158) = 0;
+    U8(p, 0x1BC) = 0;
+    U8(p, 0x220) = 0;
+    U8(p, 0x284) = 0;
+    return p;
+}
+
+u8* fn_80241098(u8* p) {
+    *(void**)p = lbl_80342734;
+    U32(p, 0x14) = 0;
+    S32(p, 0x1C) = -1;
+    U32(p, 0x24) = 0;
+    U32(p, 0x20) = 0;
+    PTR(p, 0x18) = fn_80232578("uifnt_o.gtx");
+    return p;
+}
+
+u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra) {
+    *(void**)(p + 0xC) = lbl_803426B0;
+    S32(p, 0x4) = -1;
+    U8(p, 0x0) = 0;
+    U8(p, 0x8) = 1;
+    U32(p, 0x24) = 0;
+    *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
+    U32(p, 0x28) = 0;
+    U32(p, 0x2C) = *sel;
+    PTR(p, 0x30) = (u8*)sel;
+    U32(p, 0x34) = owner;
+    U32(p, 0x38) = extra;
+    S32(p, 0x3C) = lbl_8055F1F4++;
+    PTR(p, 0x44) = fn_8023512C("caricona.art");
+    F32(p, 0x58) = 0.0f;
+    F32(p, 0x54) = 0.0f;
+    U8(p, 0x5C) = 0;
+    return p;
+}
+
+int fn_802411A4(u32* out) {
+    if (lbl_8055F1FC) {
+        *out = lbl_8055F200;
+        return 1;
+    }
+    return 0;
+}
+
+void fn_802411C8(void) { fn_8023FE20(); }
+
+int fn_802411CC(void) { return fn_8023FE34(); }
+
+void fn_802411D0(int id, u32* car, u32* color, s32* slot) { fn_8023FE60(id, car, color, slot); }
+
+int fn_802411D4(void) {
+    int r = 0;
+    if (fn_802E8504(0) && fn_802E8504(1)) {
+        r = 1;
+    }
+    return r;
+}
+
+void fn_80241224(u8* p) {}
+
+void fn_80241228(u8* p) {}
+
+void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+const char* fn_80131234(const char* key);
+void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
+extern const s32 lbl_802FA300[3];  // stat level thresholds: 0, 4, 7
+extern const f32 lbl_80563758;     // 0.0
+extern const f32 lbl_8056375C;     // 0.43
+extern const f32 lbl_80563760;     // 0.37
+extern const f32 lbl_80563764;     // 1.0
+
+// Draws the text for one car stat at its level ("UICar:STAT_%i_TEXT_%i").
+void fn_8024122C(u8* p) {
+    f32 x, y;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    if (S32(p, 0x1C) >= 0) {
+        int lvl = 0;
+        for (int i = 0; i < 3; i++) {
+            if (*(s32*)PTR(p, 0x24) && *(s32*)PTR(p, 0x24) >= lbl_802FA300[i]) {
+                lvl = i + 1;
+            }
+        }
+        char buf[0x1E];
+        fn_801345D8(buf, 0x1E, "UICar:STAT_%i_TEXT_%i", S32(p, 0x1C), lvl);
+        int align = 10;
+        f32 size = lbl_8056375C;
+        if (*PTR(p, 0x20)) {
+            size = lbl_80563760;
+            align = 9;
+        }
+        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
+    }
+}
+
+void fn_80241354(u8* p) {}  // stub (307)
+
+void fn_80241820(u8* p) {}  // stub (370)
+
+void fn_80241DE8(u8* p) {
+    for (int i = 0; i < S32(p, 0x2C); i++) {
+        u8 sel = 0;
+        u32 v = *(u32*)PTR(p, 0x34);
+        if (U8(p, 0x38) && i == S32(p, 0x30)) {
+            sel = 1;
+        }
+        u8* e = *(u8**)(p + 0x18 + i * 4);
+        U8(e, 0x0) = sel;
+        U32(e, 0x4) = v;
+    }
+}
+
+int fn_80241E40(u8* p) {
+    if (*(s32*)PTR(p, 0x34) != (s32)fn_802E4A10() || !U8(p, 0x38)) {
+        return 0;
+    }
+    u8* q = p;
+    for (int i = 0; i < S32(p, 0x2C); i++) {
+        u8 sel = 0;
+        s32 v = *(s32*)PTR(p, 0x34);
+        if (U8(p, 0x38) && i == S32(p, 0x30)) {
+            sel = 1;
+        }
+        u8* e = PTR(q, 0x18);
+        U8(e, 0x0) = sel;
+        S32(e, 0x4) = v;
+        q += 4;
+    }
+    return 1;
+}
+
+u8* fn_80241EE8(u8* p) { return p + 0x4c; }
 
 void fn_80241EF0(CarPicker* p) {
     p->index++;
