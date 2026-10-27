@@ -19,10 +19,12 @@ void operator delete(void* p);
 extern void* lbl_80345718[];
 extern char lbl_8055C3E0[1];
 
-// Copies at most n characters, always terminating.
-static inline void CopyName(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
+// Copies at most n - 1 characters and always terminates.
+static inline void CopyName(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
             d[-1] = 0;
             break;
         }
@@ -96,13 +98,11 @@ u8* fn_8025DA88(u8* p, int del) {
     return p;
 }
 
-void fn_8025DAEC(u8* p) {}  // stub (185)
-
 }  // extern "C"
 
 // One car icon's texture rectangles.
 struct IconEntry {
-    u8 pad0[0x20];  // offset 0x0
+    char name[0x20];  // offset 0x0, chassis
     u8* tex;        // offset 0x20
     u8* overlay;    // offset 0x24
     f32 u0;         // offset 0x28
@@ -110,6 +110,144 @@ struct IconEntry {
     f32 u1;         // offset 0x30
     f32 v1;         // offset 0x34
 };
+
+struct IconList {
+    IconEntry* data;  // offset 0x0
+    s32 count;        // offset 0x4
+};
+
+// The car and colour a record was set with.
+struct StatChoice {
+    s32 vehicle;  // offset 0x0
+    s32 color;    // offset 0x4
+    u8 valid;     // offset 0x8
+};
+
+class Statistic {
+public:
+    Statistic(int slot, u32 type, long event, int difficulty);
+    int HasValue(void);
+    int IsBetterThan(const Statistic* o) const;
+    void Format(char* buf, int n);
+    StatChoice GetChoice(void);
+    u8 pad[0x24];
+};
+
+struct EventInfo {
+    u8 pad0[0x4];
+    s32 track;        // offset 0x4
+    u8 pad8[0x18];
+    ValueNode* node;  // offset 0x20
+};
+
+struct TrackInfo {
+    u8 pad0[0x8];
+    char name[1];  // offset 0x8
+};
+
+struct VehicleInfo {
+    u8 pad0[0x2C];
+    char chassis[0x20];  // offset 0x2C
+    u8 pad4C[0x18];
+    u32 colors[12];      // offset 0x64
+};
+
+int IdentGetCurrentSlot(void);
+int GetNumEvents(void);
+EventInfo* GetEvent(int i);
+TrackInfo* GetTrack(int track);
+VehicleInfo* GetVehicle(int i);
+const char* StatsGetLabel(u32 type);
+const char* GetTrackFriendlyName(const char* name);
+
+extern "C" {
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+int strcasecmp(const char* a, const char* b);
+
+// One stat record line on the friendly-name screen.
+struct RecordLine {
+    const char* label;     // offset 0x0
+    char value[0x14];      // offset 0x4
+    const char* track;     // offset 0x18
+    const char* name;      // offset 0x1C
+    char text[1000];       // offset 0x20
+    s32 difficulty;        // offset 0x408
+    u8 pad40C[0x18];
+    IconList* icons;       // offset 0x424
+    s32 icon;              // offset 0x428
+    u8 hasIcon;            // offset 0x42C
+    u32 color;             // offset 0x430
+    u8 pad434[0x4];
+    u8 valid;              // offset 0x438
+};
+
+// Index of the car icon for chassis `name`, or -1.
+static inline int FindIcon(IconList* icons, const char* name) {
+    for (int i = 0; i < icons->count; i++) {
+        if (strcasecmp(icons->data[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Fills one record line for stat `type`: the best value over every event and difficulty, where it was
+// set ("%s - %s": track, friendly name) and the car icon and colour it was set with.
+void fn_8025DAEC(RecordLine* r, u32 type) {
+    int bestEv;
+    int bestD;
+    int diff;
+    int ev;
+    bestEv = -1;
+    bestD = -1;
+    for (diff = 0; diff < 3; diff++) {
+        for (ev = 0; ev < GetNumEvents(); ev++) {
+            Statistic s(IdentGetCurrentSlot(), type, ev, diff);
+            if (s.HasValue()) {
+                if (bestEv < 0) {
+                    bestEv = ev;
+                    bestD = diff;
+                } else {
+                    Statistic b(IdentGetCurrentSlot(), type, bestEv, bestD);
+                    if (s.IsBetterThan(&b)) {
+                        bestEv = ev;
+                        bestD = diff;
+                    }
+                }
+            }
+        }
+    }
+    r->label = StatsGetLabel(type);
+    if (bestEv < 0) {
+        CopyName("-", 0x14, r->value);
+        CopyName("---", 1000, r->text);
+        r->name = "-";
+        bestD = 0;
+        r->track = "-";
+    } else {
+        Statistic s(IdentGetCurrentSlot(), type, bestEv, bestD);
+        s.Format(r->value, 0x14);
+        EventInfo* e = GetEvent(bestEv);
+        if (e->node->Has("track")) {
+            r->track = GetTrackFriendlyName(e->node->GetValue("track"));
+        } else {
+            r->track = GetTrackFriendlyName(GetTrack(e->track)->name);
+        }
+        r->name = e->node->GetValue("friendly_name");
+        fn_801345D8(r->text, 1000, "%s - %s", r->track, r->name + 1);
+        StatChoice c = s.GetChoice();
+        int color = c.color;
+        r->valid = c.valid;
+        VehicleInfo* v = GetVehicle(c.vehicle);
+        r->icon = FindIcon(r->icons, v->chassis);
+        r->color = v->colors[color];
+        r->hasIcon = 1;
+    }
+    r->difficulty = bestD;
+}
+
+}  // extern "C"
+
 
 // Scales each colour channel by 255*255/65536, alpha forced opaque.
 static inline u32 DimColor(u32 c) {
