@@ -2159,15 +2159,15 @@ void fn_8011A45C(void *arg0, s32 arg1, s32 arg2) {
     temp_r3 = fn_80116D30();
     var_r31 = temp_r3;
     *counter = *counter + (temp_r31 - (temp_r3 - arg2));
-    goto loop;
-loop:
-    temp_r3_2 = fn_80116D30();
-    temp_r0 = *counter;
-    temp_r4 = temp_r3_2 - var_r31;
-    if (temp_r4 < temp_r0) goto loop;
-    var_r31 = temp_r3_2;
-    *counter = temp_r0 - temp_r4;
-    if (*counter > 0) goto loop;
+    while (*counter > 0) {
+        do {
+            temp_r3_2 = fn_80116D30();
+            temp_r0 = *counter;
+            temp_r4 = temp_r3_2 - var_r31;
+        } while (temp_r4 < temp_r0);
+        var_r31 = temp_r3_2;
+        *counter = temp_r0 - temp_r4;
+    }
 }
 
 void fn_8011A4F8(u32 arg0, void *arg1) {
@@ -3140,9 +3140,9 @@ void fn_8011C274(s32 arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
-        do {
+        while (fn_8011C1E0(arg0, arg1) == 0) {
             OSYieldThread();
-        } while (fn_8011C1E0(arg0, arg1) == 0);
+        }
     }
 }
 
