@@ -51,7 +51,7 @@ struct CatchupState {
     s32 car;    // offset 0xC
 };
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Lerp(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Round(f32 f) { return f < 0.0f ? f - 0.5f : 0.5f + f; }
@@ -123,7 +123,7 @@ void fn_8013B950(void) {
     }
     if (fn_8013BC70(&dist)) {
         f32 t = (dist - lbl_8042F8B8.begin) / ((lbl_8042F8B8.begin + lbl_8042F8B8.effect) - lbl_8042F8B8.begin);
-        lbl_8042F8A8.speed = Lerp(1.0f, lbl_8042F8B8.speed, MaxF(MinF(1.0f, t), 0.0f));
+        lbl_8042F8A8.speed = Lerp(MaxF(MinF(1.0f, t), 0.0f), 1.0f, lbl_8042F8B8.speed);
     } else {
         lbl_8042F8A8.speed = 1.0f;
     }
@@ -137,10 +137,10 @@ void fn_8013BAE4(s32 n) {
     lbl_8042F8A8.active = 0;
     fn_8013B7B4(tbl, n);
     fn_8013B6C0(&lvl, &frac, fn_801E87A8()->level);
-    lbl_8042F8B8.begin = Lerp(tbl[lvl].begin, tbl[lvl + 1].begin, frac);
-    lbl_8042F8B8.effect = Lerp(tbl[lvl].effect, tbl[lvl + 1].effect, frac);
-    lbl_8042F8B8.speed = Lerp(tbl[lvl].speed, tbl[lvl + 1].speed, frac);
-    lbl_8042F8B8.compare = Lerp(tbl[lvl].compare, tbl[lvl + 1].compare, frac);
+    lbl_8042F8B8.begin = Lerp(frac, tbl[lvl].begin, tbl[lvl + 1].begin);
+    lbl_8042F8B8.effect = Lerp(frac, tbl[lvl].effect, tbl[lvl + 1].effect);
+    lbl_8042F8B8.speed = Lerp(frac, tbl[lvl].speed, tbl[lvl + 1].speed);
+    lbl_8042F8B8.compare = Lerp(frac, tbl[lvl].compare, tbl[lvl + 1].compare);
     cnt = (int)Round(lbl_8042F8B8.compare);
     cnt = cnt > 1 ? cnt : 1;
     lbl_8055E170 = cnt < n - 1 ? cnt : n - 1;
