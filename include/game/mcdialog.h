@@ -14,13 +14,22 @@ struct McMsg {
     f32 frac;           // offset 0x8
 };
 
-// A dialog's choices: the selection check, the default choice and the (title, text) entries.
+// One dialog choice: its title and text.
+struct McChoice {
+    const char* title;  // offset 0x0
+    const char* text;   // offset 0x4
+};
+
+// A dialog: title, message, layout (0 = "mc_dialog.lyt"), the selection check, the default choice and the
+// choices.
 struct McDialogCfg {
-    u8 pad0[0xC];
-    int (*check)(u8* p);  // offset 0xC
-    s32 select;           // offset 0x10
-    s32 count;            // offset 0x14
-    const char* entries[1][2];  // offset 0x18
+    const char* title;     // offset 0x0
+    const char* text;      // offset 0x4
+    const char* layout;    // offset 0x8
+    int (*check)(u8* p);   // offset 0xC
+    s32 select;            // offset 0x10
+    s32 count;             // offset 0x14
+    McChoice entries[1];   // offset 0x18
 };
 
 // The fallback background ("*uibig.res/backsplt.img") with its two fonts.

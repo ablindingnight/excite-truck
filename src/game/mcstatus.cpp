@@ -103,7 +103,75 @@ void MemCardDialogMgr::Close(void) {
     fn_80214D50(4);
 }
 
-void MemCardDialogMgr::Setup(McDialogCfg* cfg) {}  // stub (279)
+// The choice dialog's focus state (vtable lbl_80343148): accept is focused first; without a custom
+// layout the alternative choice starts focused too.
+struct McChoiceState {
+    void* vt;      // offset 0x0
+    s32 x;         // offset 0x4
+    s32 y;         // offset 0x8
+    s32 w;         // offset 0xC
+    s32 h;         // offset 0x10
+    int unk14;     // offset 0x14
+    u8 accept;     // offset 0x18
+    u8 alt;        // offset 0x19
+};
+
+extern void* lbl_80343148[];
+extern UnkStatic123s lbl_80498890;
+extern "C" void fn_80216CA8(void);
+extern const MenuDesc lbl_802FA364;
+extern const char lbl_8055BAC0[];  // ""
+extern "C" void fn_80246210(void);
+
+// Runs a memory card choice dialog (up to four options) on the layout, or on the plain background.
+void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
+    if (!layout) {
+        bg.Setup(cfg);
+        return;
+    }
+    this->cfg = cfg;
+    McChoice choices[4];
+    int i;
+    for (i = 0; i < cfg->count; i++) {
+        choices[i] = cfg->entries[i];
+    }
+    for (; i < 4; i++) {
+        choices[i].title = 0;
+        choices[i].text = 0;
+    }
+    McChoiceState state;
+    state.unk14 = 0;
+    state.vt = lbl_80343148;
+    state.accept = 1;
+    state.alt = 1;
+    if (cfg->layout) {
+        state.alt = 0;
+    }
+    MenuItem items[] = {
+        MenuItem("__first", 5, &state, 0, 0),
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80246210, 0, 0),
+        MenuItem("#title", cfg->title, CaptionContext(strlen(cfg->title))),
+        MenuItem("#msg", cfg->text, CaptionContext(strlen(cfg->text))),
+        MenuItem("#option_1", 0, 0, (int)choices[0].text, 0),
+        MenuItem("#option_1", choices[0].title),
+        MenuItem("#option_2", 0, 0, (int)choices[1].text, 0),
+        MenuItem("#option_2", choices[1].title),
+        MenuItem("#option_3", 0, 0, (int)choices[2].text, 0),
+        MenuItem("#option_3", choices[2].title),
+        MenuItem("#option_4", 0, 0, (int)choices[3].text, 0),
+        MenuItem("#option_4", choices[3].title),
+        MenuItem(lbl_80498890),
+    };
+    MenuDesc desc = lbl_802FA364;
+    desc.layout = cfg->layout ? cfg->layout : "mc_dialog.lyt";
+    desc.items = items;
+    fn_80216CA8();
+    if (cfg->layout) {
+        fn_80214D50(5);
+    }
+    fn_802146BC(&desc, -999, -999, 1);
+    this->cfg = 0;
+}
 
 extern "C" {
 
