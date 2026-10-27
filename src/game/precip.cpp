@@ -580,7 +580,7 @@ void fn_802A53B0(DropHit* hits, int n) {
         }
         Droplet* d = s->drops;
         DropObj* o = hits->obj;
-        for (int j = 0; j < s->count; j++, d++) {
+        for (int j = 0; j < s->count; d++, j++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
             f32 dot = PSVECDotProduct(&dir, &nrm);
