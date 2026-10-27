@@ -1071,8 +1071,8 @@ void CamRegion::Prepare(u8* line) {
     if (d1.x * d1.x + d1.y * d1.y > r2) {
         if (dual) {
             fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[1] + (&lo1)[2]));
-            d2.x = pt.x - center.x;
             d2.y = pt.y - center.y;
+            d2.x = pt.x - center.x;
             if (d2.x * d2.x + d2.y * d2.y > r2) {
                 dual = 0;
             } else {

@@ -116,8 +116,8 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToMtx(out, &q);
     pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
-    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
+    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
     out->pos = pos;
 }
 
