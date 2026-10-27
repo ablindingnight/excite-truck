@@ -22,7 +22,7 @@ public:
     virtual void v0C(void);
     virtual void v10(void);
     virtual int v14(void);
-    virtual void v18(void);
+    virtual const char* v18(int i);
     virtual u8* v1C(int i);
 };
 
@@ -202,10 +202,12 @@ struct CarSel {
     }
 };
 
-// Copies at most n characters, always terminating.
-static inline void CopyName(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
+// Copies at most n - 1 characters and always terminates.
+static inline void CopyName(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
             d[-1] = 0;
             break;
         }
@@ -391,9 +393,197 @@ int fn_80241E40(u8* p) {
 
 u8* fn_80241EE8(u8* p) { return p + 0x4c; }
 
-void fn_80241EF0(u8* p) {}  // stub (251)
+}  // extern "C"
 
-void fn_802422DC(u8* p) {}  // stub (249)
+struct VehicleInfo {
+    s32 index;                // offset 0x0
+    s32 id;                   // offset 0x4
+    s32 base;                 // offset 0x8
+    char display_name[0x20];  // offset 0xC
+    u8 pad2C[0x38];           // offset 0x2C
+    u32 colors[12];           // offset 0x64
+    s32 default_color;        // offset 0x94
+    s32 num_colors;           // offset 0x98
+    s32 unk9C;                // offset 0x9C
+};
+
+struct VehicleColor {
+    s32 body;  // offset 0x0
+    s32 trim;  // offset 0x4
+};
+
+struct CarStat {
+    const char* name;  // offset 0x0
+    s32 value;         // offset 0x4
+};
+
+struct CarStats {
+    const char* chassis;  // offset 0x0
+    CarStat stats[5];     // offset 0x4
+};
+
+class CarUIScreen {
+public:
+    void SetAnim(u32 a);
+    u8 pad0[0xDC];
+    u8 tint;      // offset 0xDC
+    bool nextTint;  // offset 0xDD
+};
+
+VehicleInfo* FindVehicleNamed(const char* chassis, int n);
+VehicleColor* GetVehicleColor(VehicleInfo* v, int slot);
+CarStats* CarStatsLookup(const char* chassis);
+
+extern char lbl_8034287C[];  // "UICar:COLOR%d"
+
+static inline s32 Min(s32 a, s32 b) { return b < a ? b : a; }
+
+// The body colour chooser of the car picker.
+struct ColorPick {
+    u8 pad0[0x28];
+    VehicleInfo* vehicle;  // offset 0x28
+    s32 color;             // offset 0x2C
+    s32* colorOut;         // offset 0x30
+    u32* rgbOut;           // offset 0x34
+    CarUIScreen* screen;   // offset 0x38
+    s32 slot;              // offset 0x3C
+    u8 pad40[0x8];
+    s32 f48;               // offset 0x48
+    f32 f4C;               // offset 0x4C
+    f32 f50;               // offset 0x50
+    u8 pad54[0x8];
+    char label[0x40];      // offset 0x5C
+
+    // Saves the colour chosen for the old car, then shows the saved colour of v.
+    void SetVehicle(VehicleInfo* v) {
+        if (vehicle) {
+            GetVehicleColor(vehicle, slot)->trim = color;
+        }
+        vehicle = v;
+        color = Min(color, v->num_colors - 1);
+        color = GetVehicleColor(vehicle, slot)->trim;
+        label[0] = 0;
+        if (color >= 0 && color < vehicle->num_colors) {
+            u32 rgb = vehicle->colors[color];
+            *rgbOut = rgb;
+            screen->SetAnim(rgb);
+            fn_801345D8(label, 0x40, lbl_8034287C, color + 1);
+            const char* text = fn_80131234(label);
+            CopyName(text, 0x40, label);
+        }
+        *colorOut = color;
+        f48 = -250;
+        f4C = color;
+        f50 = color;
+    }
+};
+
+// One stat bar (vtable lbl_80342734).
+class StatBar {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void Set(int i, s32* value, u8* flag);
+    u8 pad4[0x24];
+};
+
+// The stat panel of the car picker: the car's stats, one bar and caption per stat.
+struct StatPanel {
+    CarStats stats;        // offset 0x0
+    StatBar bars[5];       // offset 0x2C
+    char text[5][0x64];    // offset 0xF4
+    u8 flag;               // offset 0x2E8
+
+    void SetCar(const char* chassis) {
+        CarStats* cs = CarStatsLookup(chassis);
+        if (cs) {
+            stats = *cs;
+            for (int i = 0; i < 5; i++) {
+                if (stats.stats[i].name) {
+                    CopyName(stats.stats[i].name, 0x64, text[i]);
+                } else {
+                    text[i][0] = 0;
+                }
+                bars[i].Set(i, &stats.stats[i].value, &flag);
+            }
+        } else {
+            memset(this, 0, sizeof(CarStats));
+            text[0][0] = 0;
+            text[1][0] = 0;
+            text[2][0] = 0;
+            text[3][0] = 0;
+            text[4][0] = 0;
+        }
+    }
+};
+
+// The car picker: steps through the car list and updates the colour chooser and stat panel.
+struct CarPicker {
+    u8 pad0[0x10];
+    s32* unk9COut;         // offset 0x10
+    s32* idOut;            // offset 0x14
+    ColorPick* colors;     // offset 0x18
+    StatPanel* stats;      // offset 0x1C
+    CarUIScreen* screen;   // offset 0x20
+    VU* list;              // offset 0x24
+    s32 index;             // offset 0x28
+    char chassis[0x20];    // offset 0x2C
+    char name[0x20];       // offset 0x4C
+    u8* item;              // offset 0x6C
+
+    void Select(void) {
+        s32 i = index;
+        if (i >= 0 && i < list->v14()) {
+            const char* c = list->v18(i);
+            VehicleInfo* v = FindVehicleNamed(c, 0);
+            *idOut = v->id;
+            *unk9COut = v->unk9C;
+            CopyName(c, 0x20, chassis);
+            CopyName(v->display_name, 0x20, name);
+            item = list->v1C(index);
+            screen->nextTint = item == 0;
+            colors->SetVehicle(v);
+            stats->SetCar(chassis);
+        }
+    }
+};
+
+extern "C" {
+
+void fn_80241EF0(CarPicker* p) {
+    p->index++;
+    if (p->index >= p->list->v14()) {
+        p->index = 0;
+    }
+    p->Select();
+}
+
+void fn_802422DC(CarPicker* p) {
+    if (--p->index < 0) {
+        p->index = p->list->v14() - 1;
+    }
+    p->Select();
+}
 
 u8* fn_802426C0(u8* p) {
     s32 i = S32(p, 0x28);
