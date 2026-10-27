@@ -170,6 +170,112 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
+struct VehicleInfo {
+    s32 index;                // offset 0x0
+    s32 id;                   // offset 0x4
+    s32 base;                 // offset 0x8
+    char display_name[0x20];  // offset 0xC
+    char chassis[0x20];       // offset 0x2C
+    u8 pad4C[0x18];
+    u32 colors[12];           // offset 0x64
+    s32 default_color;        // offset 0x94
+    s32 num_colors;           // offset 0x98
+    s32 unk9C;                // offset 0x9C
+};
+
+struct CarStat {
+    const char* name;  // offset 0x0
+    s32 value;         // offset 0x4
+};
+
+struct CarStats {
+    const char* chassis;  // offset 0x0
+    CarStat stats[5];     // offset 0x4
+};
+
+CarStats* CarStatsLookup(const char* chassis);
+BOOL GetUnlockReq(const char* name, s32* races_run, s32* aaas);
+s32 AchievementsGetModelStat(int category, const char* model);
+
+// One stat bar (vtable lbl_80342734, from the car select screen).
+class StatBar {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void Set(int i, s32* value, u8* flag);
+    u8 pad4[0x24];
+};
+
+// The stat panel: the car's stats, one bar and caption per stat.
+struct StatPanel {
+    CarStats stats;        // offset 0x0
+    StatBar bars[5];       // offset 0x2C
+    char text[5][0x64];    // offset 0xF4
+    u8 flag;               // offset 0x2E8
+
+    void SetCar(const char* chassis) {
+        CarStats* cs = CarStatsLookup(chassis);
+        if (cs) {
+            stats = *cs;
+            for (int i = 0; i < 5; i++) {
+                if (stats.stats[i].name) {
+                    CopyName(stats.stats[i].name, 0x64, text[i]);
+                } else {
+                    text[i][0] = 0;
+                }
+                bars[i].Set(i, &stats.stats[i].value, &flag);
+            }
+        } else {
+            memset(this, 0, sizeof(CarStats));
+            text[0][0] = 0;
+            text[1][0] = 0;
+            text[2][0] = 0;
+            text[3][0] = 0;
+            text[4][0] = 0;
+        }
+    }
+};
+
+extern char lbl_803442E4[];  // "\extreme_star %s"
+extern char lbl_8055C0C0[];  // "%d/%d"
+
+class GarageList {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual const char* Name(int i);      // 0x18
+    virtual int Unlocked(int i);          // 0x1C
+    virtual const char* ExtremeName(int i);  // 0x20
+    virtual int IsExtreme(int i);         // 0x24
+};
+
+extern "C" {
+int fn_80129D18(int seed, int n);
+void fn_80130FCC(char* buf, s32 size, s32 value);
+}
+
 // Garage car-select screen (partial).
 struct GarageSel {
     u8 pad0[0x2C];
@@ -273,6 +379,14 @@ u8* fn_8024E920(u8* p, int del) {
 
 }  // extern "C"
 
+// Tints the car with the selected slot's animation, or its saved paint.
+static inline void ShowCarColor(u8* p) {
+    VehicleInfo* v2 = FindVehicleNamed((const char*)(p + 0x60), 0);
+    u32 col = GetSelColor(p);
+    u32 anim = *(u32*)(PTR(p, 0xCC) + ((GarageSel*)p)->sel * 0x14 + 0x10);
+    ((CarUIScreen*)PTR(p, 0x4C))->SetAnim(anim ? anim : ((u32*)((u8*)v2 + 0x64))[col]);
+}
+
 // Remembers colour c as the car's body (alt) or trim colour.
 static inline void SaveColor(u8* p, s32 c) {
     VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
@@ -292,10 +406,7 @@ static inline void ShowSelColor(u8* p) {
         GetVehicleColor(v, 0)[1] = S32(p, 0x2C);
     }
     *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
-    VehicleInfo* v2 = FindVehicleNamed((const char*)(p + 0x60), 0);
-    u32 col = GetSelColor(p);
-    u32 anim = *(u32*)(PTR(p, 0xCC) + ((GarageSel*)p)->sel * 0x14 + 0x10);
-    ((CarUIScreen*)PTR(p, 0x4C))->SetAnim(anim ? anim : ((u32*)((u8*)v2 + 0x64))[col]);
+    ShowCarColor(p);
     fn_801345D8((char*)(p + 0xE0), 0x100, lbl_8034287C, ((GarageSel*)p)->sel + 1);
     const char* str = fn_80131234(p + 0xE0);
     CopyName(str, 0x100, (char*)(p + 0xE0));
@@ -331,7 +442,44 @@ int fn_8024EC3C(void) {
     return 0;
 }
 
-void fn_8024ECD4(u8* p) {}  // stub (298)
+// Picks a random car for the garage and shows its name, stats, unlock progress and paint.
+int fn_8024ECD4(void) {
+    s32 sel = fn_80129D18(1, S32(lbl_8055F2EC, 0x1C) - 1);
+    u8* g = lbl_8055F2EC;
+    S32(g, 0x2C) = sel;
+    const char* name = ((GarageList*)PTR(g, 0xD0))->Name(sel);
+    const char* base = name;
+    if (((u8*)GetVehicleColor(FindVehicleNamed(name, 0), 0))[8] && ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
+        name = ((GarageList*)PTR(g, 0xD0))->ExtremeName(sel);
+    }
+    VehicleInfo* v = FindVehicleNamed(name, 0);
+    CopyName(v->chassis, 0x20, (char*)(g + 0x60));
+    if (((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
+        fn_801345D8((char*)(g + 0x80), 0x40, lbl_803442E4, v->display_name + 1);
+    } else {
+        CopyName(v->display_name, 0x40, (char*)(g + 0x80));
+    }
+    S32(g, 0xC4) = ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel) ? 5 : -1;
+    *(s32*)PTR(g, 0x34) = v->id;
+    *(s32*)PTR(g, 0x30) = v->unk9C;
+    ((StatPanel*)PTR(g, 0x38))->SetCar(v->chassis);
+    U8(PTR(g, 0x4C), 0xDD) = ((GarageList*)PTR(g, 0xD0))->Unlocked(sel) == 0;
+    s32 races = -1;
+    s32 aaas = -1;
+    if (!GetUnlockReq(base, &races, &aaas)) {
+        aaas = -1;
+        races = -1;
+    }
+    if (!((GarageList*)PTR(g, 0xD0))->IsExtreme(sel) && races >= 0 && aaas >= 0) {
+        fn_801345D8((char*)(g + 0x3C), 0x10, lbl_8055C0C0, AchievementsGetModelStat(0, (char*)(g + 0x60)), races);
+        fn_801345D8((char*)(g + 0x50), 0x10, lbl_8055C0C0, AchievementsGetModelStat(1, (char*)(g + 0x60)), aaas);
+    } else {
+        fn_80130FCC((char*)(g + 0x3C), 0x10, AchievementsGetModelStat(0, (char*)(g + 0x60)));
+        fn_80130FCC((char*)(g + 0x50), 0x10, AchievementsGetModelStat(1, (char*)(g + 0x60)));
+    }
+    ShowCarColor(g);
+    return 0;
+}
 
 void fn_8024F17C(u8* p) {}  // stub (634)
 
