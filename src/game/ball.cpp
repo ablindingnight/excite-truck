@@ -761,9 +761,9 @@ inline void Ball::vf28(u8* buf) {
         BMtx t;
         int i;
         for (i = 0; i < 4; i++) {
-            BVec3* d = &t.rot[i];
             const BVec3* a = &world.rot[i];
             const BVec3* b = &prev.rot[i];
+            BVec3* d = &t.rot[i];
             d->x = b->x + k * (a->x - b->x);
             d->y = b->y + k * (a->y - b->y);
             d->z = b->z + k * (a->z - b->z);

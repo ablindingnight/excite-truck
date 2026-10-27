@@ -396,8 +396,8 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             f32 total;
             TVec f;
             TVec imp;
-            TPos at;
             TVec pt;
+            TPos at;
             pen = 0.0f > pen ? 0.0f : pen;
             extra = 0.0f;
             if (d < 0.0f) {

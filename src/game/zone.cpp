@@ -1165,8 +1165,8 @@ int fn_8013CBC0(CarState* zm, int car) {
     }
     if (r == 2 && g->ring) {
         Vec3 mid;
-        Vec3 ring;
         Vec3 at;
+        Vec3 ring;
         f32 half;
         mid.x = g->a.x + (g->b.x - g->a.x) * 0.5f;
         mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
@@ -1675,8 +1675,8 @@ void ZoneMaster::DrawNextGate(void) {
                 nextT = fn_8013CB3C();
             }
             {
-                Vec3 a = g->a;
                 Vec3 b = g->b;
+                Vec3 a = g->a;
                 f32 y = (a.y > b.y ? a.y : b.y) + 10.0f;
                 int lo;
                 int hi;

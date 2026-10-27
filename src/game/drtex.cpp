@@ -392,8 +392,8 @@ void fn_802D81C4(GXTexDesc* d) {
     TexImage* img = d->data;
     u8* tex = img->tex;
     int i;
-    int n = w * h / 2;
     u8* p = tex;
+    int n = w * h / 2;
     for (i = 0; i < n; i++) {
         *p = *p >> 4 | *p << 4;
         p++;

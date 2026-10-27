@@ -802,8 +802,8 @@ int fn_8029DFE0(WaterPool* p, const Vec* at) {
     ValPoint d;
     d.y = at->z - p->origin.z;
     d.x = at->x - p->origin.x;
-    f32 u = d.x * p->dxx + d.y * p->dxz;
     f32 v = d.x * p->dyx + d.y * p->dyz;
+    f32 u = d.x * p->dxx + d.y * p->dxz;
     int inside = 0;
     if (InRange(u, 0.5f, p->nx - 1.5f) && InRange(v, 0.5f, p->ny - 1.5f)) {
         inside = 1;

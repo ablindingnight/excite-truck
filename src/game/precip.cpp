@@ -843,8 +843,8 @@ void SnowSystem::Spawn(void) {
     while (count < max) {
         f32 r = fn_80287BC8(0.0f, 1.0f);
         f32 k = 0.5f - 0.5f * r;
-        f32 gx = grav.x * k;
         f32 gy = grav.y * k;
+        f32 gx = grav.x * k;
         f32 ax = 1.0f - (f32)__fabs(gx);
         f32 ay = 1.0f - (f32)__fabs(gy);
         f32 rx = fn_80287BC8(-ax, ax);
@@ -995,8 +995,8 @@ void RainSystem::Spawn(void) {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
             f32 k = 0.5f - 0.5f * r;
-            f32 gx = dir.x * k;
             f32 gy = dir.y * k;
+            f32 gx = dir.x * k;
             f32 ax = 1.0f - (f32)__fabs(gx);
             f32 ay = 1.0f - (f32)__fabs(gy);
             f32 rx = fn_80287BC8(-ax, ax);

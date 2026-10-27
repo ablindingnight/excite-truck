@@ -184,8 +184,8 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
         Bone* b = &set->bones[i];
         BFrame local = b->rest;
         BFrame parent;
-        BMtx33 rot;
         BMtx33 m;
+        BMtx33 rot;
         BMtx33 t;
         BVec v;
         BFrame a;

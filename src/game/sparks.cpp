@@ -822,8 +822,8 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
     f32 back = 5.0f * -dt;
     for (int i = 0; i < count; i++) {
         Spark* s = &pts[i];
-        Vec p;
         Vec d;
+        Vec p;
         p.x = s->pos.x + s->vel.x * back - prev->pos.x;
         p.y = s->pos.y + s->vel.y * back - prev->pos.y;
         p.z = s->pos.z + s->vel.z * back - prev->pos.z;

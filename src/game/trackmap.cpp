@@ -606,8 +606,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     fn_802C8D74();
     fn_801EA9A0(view);
     for (i = 0; i < fn_801EA994(); i++) {
-        Vec3 rel;
         Vec3 p;
+        Vec3 rel;
         f32 fade;
         int part;
         TruckDraw* d;

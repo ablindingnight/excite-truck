@@ -1285,8 +1285,8 @@ void fn_801B30E0(int i) {
     if (c->ideal.seg) {
         IdealPoint* first = l->line->points;
         u32 want = c->ideal.seg->ilpos;
-        s32 bestD = 0x7FFFFFFF;
         IdealPoint* p = first;
+        s32 bestD = 0x7FFFFFFF;
         do {
             s32 d = p->ilpos - want;
             if (d < 0) {

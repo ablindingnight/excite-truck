@@ -567,9 +567,9 @@ void fn_801683F4(PickupCounts* out, int player) {
         car = rec->hasModel > 0 ? rec->model : 0;
         if (car) {
             f32 l[3];
+            f32 dz = lbl_80430260[player].pos[2] - rec->pos[2];
             f32 dx = lbl_80430260[player].pos[0] - rec->pos[0];
             f32 dy = lbl_80430260[player].pos[1] - rec->pos[1];
-            f32 dz = lbl_80430260[player].pos[2] - rec->pos[2];
             CarDims* dims;
             l[0] = dx * rec->rot[0] + dy * rec->rot[1] + dz * rec->rot[2];
             l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];

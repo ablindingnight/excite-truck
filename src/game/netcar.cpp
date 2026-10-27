@@ -345,8 +345,8 @@ static inline double DL(double t, double ti, double tj, double tk) { return ((t 
 void NetCar::Extrapolate(Blend* b) {
     s32 now = lbl_8055E3C4;
     f32 s = fn_801A63C4(now, ptab[0].frame);
-    TVec p;
     TVec d;
+    TVec p;
     TVec r;
     p.x = fn_801A6370(ptab[0].pos.v[0], v[0].x, acc.x, s);
     p.y = fn_801A6370(ptab[0].pos.v[1], v[0].y, acc.y, s);
