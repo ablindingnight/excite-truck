@@ -1506,7 +1506,80 @@ void fn_802272D4(WidgetFragment* source)
 void fn_802278F0(void*,float,float,float,float);
 void fn_80228010(void) {}  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
-void fn_8022A210(void) {}  // placeholder (868 bytes)
+}
+extern "C" {void fn_80015B20(void*,const RotationMatrix*,void*);double sin(double);}
+// MATCHING-AID: recovered used scalar wrapper preserves radius allocation; original type identity is unproved.
+struct ModelBoundScalarObservedNew {float value;inline ModelBoundScalarObservedNew(float v):value(v){}};
+struct ModelFitMatrixNew {RotationMatrix basis;RotationVec translation;};
+struct ModelFitAssetNew {void* dispatch;int resource;ModelFitMatrixNew matrix;float angle,speed;};
+struct ModelFitBoundsNew {float minX,maxX,minY,maxY,minZ,maxZ;inline float RadiusNew()const;};
+extern "C" {ModelFitMatrixNew* fn_802C86DC();void fn_802C77F0(int,ModelFitBoundsNew*);void fn_802C98DC(float*,float*,float*,float*);double sqrt(double);double atan(double);extern const float lbl_80563584;
+}
+// MATCHING-AID: recovered constructor for three used rotation components; original constructor identity is unproved.
+struct ModelRotationInput390 {RotationVec value;inline ModelRotationInput390(float x,float y,float z){value.x=x;value.y=y;value.z=z;}};
+// MATCHING-AID: recovered interpolation signature; const-reference bounds preserve observed load timing. Original helper identity is unproved.
+static inline float ModelFitCenterLerpNew(const float& minimum,const float& maximum,float fraction)
+{
+    float span=maximum-minimum;
+    return minimum+span*fraction;
+}
+static inline float ModelDot3(float ax,float bx,float ay,float by,float az,float bz){return ax*bx+ay*by+az*bz;}
+static inline void ModelFitTransformNew(RotationVec* out,const ModelFitMatrixNew* mm,const RotationVec* v){
+ const float* m=mm->basis.m;
+ if(out==v){
+  float x=ModelDot3(v->x,m[0],v->y,m[3],v->z,m[6]);
+  float y=ModelDot3(v->x,m[1],v->y,m[4],v->z,m[7]);
+  float z=ModelDot3(v->x,m[2],v->y,m[5],v->z,m[8]);
+  out->x=x;out->y=y;out->z=z;
+ }else{
+  out->x=ModelDot3(v->x,m[0],v->y,m[3],v->z,m[6]);
+  out->y=ModelDot3(v->x,m[1],v->y,m[4],v->z,m[7]);
+  out->z=ModelDot3(v->x,m[2],v->y,m[5],v->z,m[8]);
+ }
+}
+inline float ModelFitBoundsNew::RadiusNew()const{ModelBoundScalarObservedNew dy(maxY-minY);ModelBoundScalarObservedNew dx(maxX-minX);ModelBoundScalarObservedNew dz(maxZ-minZ);
+ float xx=dx.value*dx.value;float yy=dy.value*dy.value;float zz=dz.value*dz.value;return GaugeHalfReferenceObservedNew()*(float)sqrt(zz+(xx+yy));}
+
+extern "C" {
+void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int height, float delta)
+{
+
+  if (self->resource != (-1))
+  {
+    self->angle += self->speed * delta;
+    self->matrix = *fn_802C86DC();
+    RotationVec center;
+    ModelRotationInput390 rotation(lbl_805634A8,self->angle,lbl_805634A8);
+    RotationMatrix tmp;
+    fn_80015A20(&tmp, &rotation.value);
+    fn_80015B20(&self->matrix, &tmp, &self->matrix);
+    ModelFitBoundsNew bounds;
+    fn_802C77F0(self->resource, &bounds);
+    float radius = bounds.RadiusNew();
+    float nearPlane;
+    float unused;
+    float horizontal;
+    float vertical;
+    fn_802C98DC(&horizontal, &nearPlane, &unused, &vertical);
+    float minimum = radius / vertical;
+    float sine = (float) sin((float) atan((horizontal * ((float) height)) / ((float) width)));
+    float candidate = radius + (lbl_80563584 * nearPlane);
+    float distance = radius / sine;
+    distance = (distance > candidate) ? (distance) : (candidate);
+    minimum = (minimum > distance) ? (minimum) : (distance);
+    self->matrix.translation.z += minimum;
+    center.z = ModelFitCenterLerpNew(bounds.minZ, bounds.maxZ, GaugeHalfReferenceObservedNew());
+    center.y = ModelFitCenterLerpNew(bounds.minY, bounds.maxY, GaugeHalfReferenceObservedNew());
+    center.x = ModelFitCenterLerpNew(bounds.minX, bounds.maxX, GaugeHalfReferenceObservedNew());
+    ModelFitTransformNew(&center, &self->matrix, &center);
+    self->matrix.translation.x -= center.x;
+    self->matrix.translation.y -= center.y;
+    self->matrix.translation.z -= center.z;
+  }
+}
+}
+extern "C" {
+
 // Observed five-word initialized prefix only; complete object size and data ownership remain unresolved.
 typedef struct StartupSharedPrefixNew {unsigned long first,kind,third,fourth,fifth;} StartupSharedPrefixNew;
 typedef char StartupSharedPrefixSizeCheckNew[(sizeof(StartupSharedPrefixNew)==20)?1:-1];
