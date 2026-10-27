@@ -1857,8 +1857,8 @@ void fn_802D2684(void) {
     int alphaOnly = (lbl_8055FD1C >> 6) & 1;
     int stage = 0;
     u8 base2 = lbl_804C5700.base2;
-    int coord = 0;
     u8 envA = lbl_804C5700.envA;
+    int coord = 0;
     GXSetTexCoordGen2(0, 1, 4, lbl_804C5700.lmap ? 0x1E : 0x3C, 0, 0x7D);
     GXSetTevOrder(0, 0, 0, 4);
     if (alphaOnly) {

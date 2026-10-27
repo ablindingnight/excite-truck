@@ -876,8 +876,8 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         }
     } else {
         int want = n * nch;
-        int toEnd = lbl_805600A4 - lbl_805600B0[ch];
         int total = lbl_805600A4 - (lbl_805600B0[ch] - lbl_805600B8);
+        int toEnd = lbl_805600A4 - lbl_805600B0[ch];
         int avail = want < toEnd ? want : toEnd;
         if (total < want && lbl_805600C0[ch]) {
             memset(dst, 0, n);

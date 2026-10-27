@@ -519,8 +519,8 @@ void fn_802BCBDC(void) {
                 ValVec3 p2 = n->GetVec3("cyl_p2");
                 TVec c;
                 c.y = p1.y + 0.5f * (p2.y - p1.y);
-                c.x = p1.x + 0.5f * (p2.x - p1.x);
                 c.z = p1.z + 0.5f * (p2.z - p1.z);
+                c.x = p1.x + 0.5f * (p2.x - p1.x);
                 t->cyl.center = c;
                 t->cyl.axis.x = p1.x - p2.x;
                 t->cyl.axis.y = p1.y - p2.y;
