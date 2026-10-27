@@ -2036,11 +2036,11 @@ RVL_SDK/arc/arc.c:
 	.sdata      start:0x80559930 end:0x80559938
 
 game/unk_80116BD4.c:
-	.text       start:0x80116BD4 end:0x801274C0
+	.text       start:0x80116BD4 end:0x80127398
 	.sdata2     start:0x80561170 end:0x80561238
 
-game/unk_801274C0.c:
-	.text       start:0x801274C0 end:0x801274C8
+game/unk_80127398.c:
+	.text       start:0x80127398 end:0x801274C8
 	.ctors      start:0x802ED11C end:0x802ED120
 
 game/prof.cpp:

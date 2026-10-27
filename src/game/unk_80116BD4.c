@@ -7595,48 +7595,6 @@ void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src
     row[7] = block[63] + ref[7];
 }
 
-extern char lbl_8055DF08;
-// Calls every callback registered in list `arg0` (-1..3).
-void fn_80127398(s32 arg0) {
-    CallbackList *list;
-    s32 i;
-    if (arg0 >= -1 && arg0 < 4) {
-        list = &(lbl_8041D728 + 1)[arg0];
-    } else {
-        list = 0;
-    }
-    if (list != 0) {
-        for (i = 0; i < list->count; i++) {
-            list->fns[i]();
-        }
-    }
-}
-
-char fn_8012742C(void) {
-    return lbl_8055DF08;
-}
-
-void fn_80127434(void) {
-    lbl_8055DF08 = 0;
-}
-
-void fn_80127440(void* alarm) {
-    fn_80127F94(fn_802ECC74(alarm));
-}
-
-void fn_80127464(void *alarm) {
-    fn_80127440(alarm);
-}
-
-void fn_80127468(OSAlarm *alarm, OSContext *ctx) {
-#pragma unused(ctx)
-    fn_80127F70(fn_802ECC74(alarm));
-}
-
-void fn_8012748C(s32 arg0) {
-    fn_80127398(arg0);
-    fn_802E300C(arg0);
-}
 extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
