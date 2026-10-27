@@ -169,6 +169,11 @@ struct CarSelItem {
     u8 sel;        // offset 0x0
     u8 pad1[0x3];
     u32 value;     // offset 0x4
+
+    void Set(u8 s, u32 v) {
+        sel = s;
+        value = v;
+    }
 };
 
 // A player's car choice list (vtable lbl_80342650).
@@ -184,21 +189,16 @@ struct CarSel {
     u8 active;              // offset 0x38
     char name[0x20];        // offset 0x39
 
+    // Marks the current row (when active) and gives every row the slot.
     void Refresh(void) {
-        u8 sel;
-        int i;
-        CarSelItem* e;
-        u32 v;
-        for (i = 0; i < count; i++) {
-            sel = 0;
-            v = *slot;
-            if (active && i == cur) {
-                sel = 1;
-            }
-            e = items[i];
-            e->sel = sel;
-            e->value = v;
+        for (int i = 0; i < count; i++) {
+            items[i]->Set(active && i == cur, *slot);
         }
+    }
+    void SetSlot(s32 s);
+    void SetActive(u8 a) {
+        active = a;
+        Refresh();
     }
 };
 
@@ -221,6 +221,19 @@ extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 VU* fn_8027DB40(int kind);
+const char* fn_802E85B8(s32 slot);
+}
+
+// Shows controller slot s (no name when negative).
+inline void CarSel::SetSlot(s32 s) {
+    *slot = s;
+    S32(car, 0xD8) = *slot;
+    if (*slot < 0) {
+        CopyName(lbl_8055BD60, 0x20, name);
+    } else {
+        CopyName(fn_802E85B8(*slot), 0x20, name);
+    }
+    Refresh();
 }
 
 struct VehicleInfo {
@@ -567,35 +580,13 @@ void fn_80241354(u8* p) {}  // stub (307)
 
 void fn_80241820(u8* p) {}  // stub (370)
 
-void fn_80241DE8(u8* p) {
-    for (int i = 0; i < S32(p, 0x2C); i++) {
-        u8 sel = 0;
-        u32 v = *(u32*)PTR(p, 0x34);
-        if (U8(p, 0x38) && i == S32(p, 0x30)) {
-            sel = 1;
-        }
-        u8* e = *(u8**)(p + 0x18 + i * 4);
-        U8(e, 0x0) = sel;
-        U32(e, 0x4) = v;
-    }
-}
+void fn_80241DE8(CarSel* p) { p->Refresh(); }
 
-int fn_80241E40(u8* p) {
-    if (*(s32*)PTR(p, 0x34) != (s32)fn_802E4A10() || !U8(p, 0x38)) {
+int fn_80241E40(CarSel* p) {
+    if (*p->slot != (s32)fn_802E4A10() || !p->active) {
         return 0;
     }
-    u8* q = p;
-    for (int i = 0; i < S32(p, 0x2C); i++) {
-        u8 sel = 0;
-        s32 v = *(s32*)PTR(p, 0x34);
-        if (U8(p, 0x38) && i == S32(p, 0x30)) {
-            sel = 1;
-        }
-        u8* e = PTR(q, 0x18);
-        U8(e, 0x0) = sel;
-        S32(e, 0x4) = v;
-        q += 4;
-    }
+    p->Refresh();
     return 1;
 }
 
@@ -639,6 +630,12 @@ struct FocusGroup {
 };
 
 extern char lbl_80342840[];  // "JoinLeaveWidget: invalid state %d found on focus group #%d"
+extern s32 lbl_8055F1F8;
+
+extern "C" {
+void fn_80214AF0(int s);
+void fn_80214A9C(int s);
+}
 
 struct JoinLeaveWidget {
     u8 pad0[0x18];
@@ -646,7 +643,7 @@ struct JoinLeaveWidget {
     u8 allReady;           // offset 0x58
 
     // True when every player has joined and confirmed (state 4); none may be in state 2 or 3.
-    int AllReady(void) {
+    u32 AllReady(void) {
         int n = 0;
         for (int i = 0; i < 2; i++) {
             s32 st = groups[i].state;
@@ -659,89 +656,94 @@ struct JoinLeaveWidget {
         }
         return n >= 2;
     }
+
+    // Shows the widgets of each focus group whose state changed.
+    void UpdateFocus(void) {
+        u32 ready = AllReady();
+        if (allReady != ready) {
+            groups[0].prev = 0;
+            groups[1].prev = 0;
+        }
+        for (u32 i = 0; i < 2; i++) {
+            FocusGroup* g = &groups[i];
+            if (g->state != g->prev) {
+                switch (g->state) {
+                case 0:
+                    break;
+                case 1:
+                    fn_80214AF0(g->join);
+                    fn_80214A9C(g->car);
+                    fn_80214A9C(g->leave);
+                    break;
+                case 2:
+                case 3:
+                    fn_80214A9C(g->join);
+                    fn_80214AF0(g->car);
+                    fn_80214A9C(g->leave);
+                    fn_80214AF0(g->ready);
+                    if (i != 0 && g->state == 2) {
+                        fn_80214A9C(g->start);
+                    } else {
+                        fn_80214AF0(g->start);
+                    }
+                    g->sel->SetActive(1);
+                    break;
+                case 4:
+                    fn_80214A9C(g->join);
+                    fn_80214AF0(g->car);
+                    fn_80214AF0(g->leave);
+                    fn_80214A9C(g->ready);
+                    fn_80214AF0(g->start);
+                    g->sel->SetActive(0);
+                    break;
+                default:
+                    fn_802E317C(lbl_80342840, g->state, i);
+                    break;
+                }
+                g->prev = g->state;
+            }
+        }
+        (ready ? fn_80214AF0 : fn_80214A9C)(0x1E);
+        if (ready) {
+            for (int j = 7; j <= 10; j++) {
+                fn_80214A9C(j);
+            }
+        }
+        allReady = ready;
+    }
 };
 
 extern "C" {
-void fn_80214AF0(int s);
-void fn_80214A9C(int s);
 
 void fn_80242738(JoinLeaveWidget* w) {
     lbl_8055F1FC = 0;
     for (int i = 0; i < 2; i++) {
-        CarSel* s = w->groups[i].sel;
-        *s->slot = i;
-        S32(s->car, 0xD8) = *s->slot;
-        if (*s->slot < 0) {
-            CopyName(lbl_8055BD60, 0x20, s->name);
-        } else {
-            CopyName(fn_802E85B8(*s->slot), 0x20, s->name);
-        }
-        s->Refresh();
+        w->groups[i].sel->SetSlot(i);
         w->groups[i].state = 2;
     }
     w->allReady = 0;
     w->groups[0].prev = 0;
     w->groups[1].prev = 0;
-    int ready = w->AllReady();
-    if (w->allReady != ready) {
-        w->groups[0].prev = 0;
-        w->groups[1].prev = 0;
-    }
-    for (u32 i = 0; i < 2; i++) {
-        FocusGroup* g = &w->groups[i];
-        if (g->state != g->prev) {
-            switch (g->state) {
-            case 0:
-                break;
-            case 1:
-                fn_80214AF0(g->join);
-                fn_80214A9C(g->car);
-                fn_80214A9C(g->leave);
-                break;
-            case 2:
-            case 3:
-                fn_80214A9C(g->join);
-                fn_80214AF0(g->car);
-                fn_80214A9C(g->leave);
-                fn_80214AF0(g->ready);
-                if (i != 0 && g->state == 2) {
-                    fn_80214A9C(g->start);
-                } else {
-                    fn_80214AF0(g->start);
-                }
-                g->sel->active = 1;
-                g->sel->Refresh();
-                break;
-            case 4:
-                fn_80214A9C(g->join);
-                fn_80214AF0(g->car);
-                fn_80214AF0(g->leave);
-                fn_80214A9C(g->ready);
-                fn_80214AF0(g->start);
-                g->sel->active = 0;
-                g->sel->Refresh();
-                break;
-            default:
-                fn_802E317C(lbl_80342840, g->state, i);
-                break;
-            }
-            g->prev = g->state;
-        }
-    }
-    if (ready) {
-        fn_80214AF0(0x1E);
-    } else {
-        fn_80214A9C(0x1E);
-    }
-    if (ready) {
-        for (int j = 7; j <= 10; j++) {
-            fn_80214A9C(j);
-        }
-    }
-    w->allReady = ready;
+    w->UpdateFocus();
 }
 
-void fn_80242B1C(u8* p) {}  // stub (275)
+// Every tenth frame, drops players whose controller is gone back to the join prompt.
+void fn_80242B1C(JoinLeaveWidget* w) {
+    if (++lbl_8055F1F8 % 10 == 0) {
+        for (u32 i = 0; i < 2; i++) {
+            if (w->groups[i].state > 1 && !fn_802E8504(*w->groups[i].sel->slot)) {
+                FocusGroup* g = &w->groups[i];
+                g->sel->SetSlot(-1);
+                g->state = 1;
+            }
+        }
+    }
+    w->UpdateFocus();
+    if (!fn_802411D4()) {
+        lbl_8055F1FC = 1;
+        lbl_8055F200 = 0;
+    }
+}
 
 void fn_80242F68(u8* p) {}  // stub (298)
 
