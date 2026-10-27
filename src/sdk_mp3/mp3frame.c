@@ -15,14 +15,15 @@
  * simulation (60 random cases). NonMatching: 1142/1142, same opcodes. */
 void MP3_IntensityStereo(MP3Decoder* d, u8* long_map, s16* long_edges, u32 flags, MP3ChannelBuf* out, s16* sf_long,
                          s16 (*sf_short)[3], s16* is_scale, s16 bound) {
-    s32 i;
     s32 b;
     s32 w;
-    s32 lim;
     s32 band;
+    s32 i;
+    s32 lim;
 
     if (flags & 7) {
-        if (d->unk9CC[5] == 0) {
+        i = d->unk9CC[5] == 0;
+        if (i) {
             d->unk9CC[5] = 1;
             for (b = 0; b < 21; b++) {
                 d->is_lb[b + 1] = long_edges[b];
