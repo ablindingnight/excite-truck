@@ -522,10 +522,15 @@ struct RaceSlot {
     u8 pad70[0x78 - 0x70];
 };
 
+// The race's object slots and how many are used.
+struct RaceSlotList {
+    RaceSlot slots[8];    // offset 0x0
+    s32 count;            // offset 0x3C0
+};
+
 struct RaceDesc {
     char track[0x20];     // offset 0x0
-    RaceSlot slots[8];    // offset 0x20
-    s32 count;            // offset 0x3E0
+    RaceSlotList list;    // offset 0x20
 };
 
 struct VehicleInfo {
@@ -1338,9 +1343,11 @@ int fn_801F9CF8(ObjMsg* m) {
 }
 
 int fn_801F9D70(RaceDesc* r) {
+    RaceSlot* s;
     int found = 0;
-    RaceSlot* s = r->slots;
-    for (int i = 0; i < r->count; i++, s++) {
+    RaceSlotList* list = &r->list;
+    s = list->slots;
+    for (int i = 0; i < list->count; s++, i++) {
         if (s->type == 0x50) {
             found = 1;
             if (!(FindVehicle(s->vehicle)->flags & 4)) {
