@@ -268,18 +268,19 @@ void fn_802DB3FC(void) {
 void fn_802DB4E4(void) {
     f32 a[2][4] = {0};
     a[0][0] = lbl_804DB068[1].x;
-    a[1][1] = lbl_804DB068[1].y;
+    a[1][2] = lbl_804DB068[1].y;
     f32 b[2][4] = {0};
     b[0][0] = lbl_804DB068[2].x;
-    b[1][1] = lbl_804DB068[2].y;
+    b[1][2] = lbl_804DB068[2].y;
     GXLoadTexMtxImm(a, 0x1E, 1);
     GXLoadTexMtxImm(b, 0x21, 1);
 }
 
 void fn_802DB58C(void) {
+    f32 s = lbl_804DB068[1].x;
     f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
-    m[0][0] = lbl_804DB068[1].x;
-    m[1][1] = lbl_804DB068[1].x;
+    m[0][0] = s;
+    m[1][2] = s;
     GXLoadTexMtxImm(m, 0x1E, 1);
 }
 
