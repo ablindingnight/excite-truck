@@ -333,20 +333,35 @@ extern Menu* lbl_8055E86C;
 extern s32 lbl_8055E870;
 extern f32 lbl_8055A958;    // duration
 
-extern u8 lbl_80437D88[];        // player state; the editor statics follow it
-extern Message lbl_80437E24;
-extern char lbl_80437FC0[0x130];  // status line
-extern char lbl_804380F0[0x100];  // input line
-extern IMtx lbl_804381F0;
-extern IMtx lbl_80438220;
-extern IVec3 lbl_80438250;
-extern IVec3 lbl_80438268;        // cursor
-extern char lbl_80438280[0x100];  // wait: who
-extern char lbl_80438380[0x100];  // wait: except
-extern IVec3 lbl_8043848C;
-extern IVec3 lbl_80438498;
-extern char lbl_804384A8[0x100];  // think: who
-extern char lbl_804385A8[0x100];  // think: except
+// One car's standing AI order, set by think events: 0 = none, 1 = follow the line, 2 = drive to a point,
+// 3 = follow a car, 4 = follow a car along the line, 5 = drive a donut.
+struct AIOrder {
+    s32 kind;   // offset 0x0
+    s32 param;  // offset 0x4: cars ahead to follow
+    f32 speed;  // offset 0x8
+    f32 x;      // offset 0xC
+    f32 z;      // offset 0x10
+};
+
+// The interlude editor's state (this file's .bss, in address order).
+u8 lbl_80437D88[0x9C];         // player state
+Message lbl_80437E24;
+AIOrder lbl_80437E30[20];      // each car's standing order
+char lbl_80437FC0[0x130];      // status line
+char lbl_804380F0[0x100];      // input line
+IMtx lbl_804381F0;
+IMtx lbl_80438220;
+IVec3 lbl_80438250;
+IVec3 lbl_8043825C;
+IVec3 lbl_80438268;            // cursor
+IVec3 lbl_80438274;
+char lbl_80438280[0x100];      // wait: who
+char lbl_80438380[0x100];      // wait: except
+IVec3 lbl_80438480;
+IVec3 lbl_8043848C;
+IVec3 lbl_80438498;
+char lbl_804384A8[0x100];      // think: who
+char lbl_804385A8[0x100];      // think: except
 extern u8 lbl_80337474[];         // debug key table
 
 static const char* const lbl_80562950 = "debug\0camera\0effect\0sound\0teleport\0think\0wait\0text\0\0\0\0";
@@ -997,16 +1012,6 @@ struct ICar {
     f32 speed;  // offset 0x25D4
 };
 
-// One car's standing AI order, set by think events: 0 = none, 1 = follow the line, 2 = drive to a point,
-// 3 = follow a car, 4 = follow a car along the line, 5 = drive a donut.
-struct AIOrder {
-    s32 kind;   // offset 0x0
-    s32 param;  // offset 0x4: cars ahead to follow
-    f32 speed;  // offset 0x8
-    f32 x;      // offset 0xC
-    f32 z;      // offset 0x10
-};
-
 // Motion targets for the gas/brake controller (catchup).
 struct IMotion {
     f32 p1, v1, a1;
@@ -1027,7 +1032,6 @@ public:
     virtual LineFollower* Follower(void);  // 0x18
 };
 
-extern AIOrder lbl_80437E30[20];
 
 extern "C" {
 IRacer* fn_801B2ED0(int i);
