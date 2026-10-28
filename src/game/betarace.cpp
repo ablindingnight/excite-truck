@@ -2496,7 +2496,8 @@ void fn_8014E61C(int id, int kind, f32 v) {
     if (m) {
         BetaCar* c = &m->cars[id];
         if (c) {
-            AwardCar(c, id, kind, v);
+            f32 amount = v;
+            AwardCar(c, id, kind, amount);
         }
     }
 }
