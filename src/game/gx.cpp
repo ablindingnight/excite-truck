@@ -2267,6 +2267,8 @@ VisTest* fn_802D39A4(f32 rate) {
 
 void fn_802D3A50(VisTest* t) { t->used = 0; }
 
+static inline f32 VisLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 int fn_802D3A5C(VisTest* t, const V3* p) {
     int x = p->x;
     int y = 448.0f * p->y / 480.0f;
@@ -2277,7 +2279,8 @@ int fn_802D3A5C(VisTest* t, const V3* p) {
         f32 f = lbl_804C9778.farZ;
         f32 n = lbl_804C9778.nearZ;
         f32 z = -p->z;
-        t->z = __cvt_fp2unsigned(16777215.0f + 16777215.0f * ((z * (-n / (f - n)) - f * n / (f - n)) / -z));
+        f32 range = f - n;
+        t->z = __cvt_fp2unsigned(16777215.0f + 16777215.0f * ((z * (-n / range) - f * n / range) / -z));
         if (lbl_804C9984.count < 0x40) {
             lbl_804C9984.queue[lbl_804C9984.count] = t;
             lbl_804C9984.count++;
@@ -2285,7 +2288,7 @@ int fn_802D3A5C(VisTest* t, const V3* p) {
     } else {
         t->hit = 0;
     }
-    t->vis = t->vis + t->rate * (target - t->vis);
+    t->vis = VisLerp(t->vis, target, t->rate);
     return t->vis >= 0.007843138f;
 }
 
