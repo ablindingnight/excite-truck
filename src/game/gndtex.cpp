@@ -700,7 +700,9 @@ void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
         fn_802D3D94(0, m);
         u8 a = PMin(PMax(Round(255.0f * alpha), 0), 0xFF);
         if (a != lbl_8055FEA0) {
-            GXColor k = Rgba(0xFF, 0xFF, 0xFF, a);
+            GXColor k;
+            k.a = a;
+            k.r = k.g = k.b = 0xFF;
             GXSetTevKColor(1, k);
         }
     }
