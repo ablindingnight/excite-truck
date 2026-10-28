@@ -134,11 +134,13 @@ extern "C" void fn_801D14EC(void) { new ("carelmgr") CarGearMgr; }
 
 void CarGear::Update(int car) { Fetch(car); }
 
+static inline f32 GearLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void CarGear::Fetch(int car) {
     RaceCar* c = lbl_804348E8[car];
     CarElem* e = &lbl_8055E908[car];
     f28 = c->gears.wheel;
-    f24 = 0.10471976f * (c->f23E8 + c->gears.f2C * (c->f2544 - c->f23E8)) / f28;
+    f24 = 0.10471976f * GearLerp(c->f23E8, c->f2544, c->gears.f2C) / f28;
     GearSrc* src = &c->gears;
     f32 max = e->f30;
     memset(gears, 0, sizeof(gears));
