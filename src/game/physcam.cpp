@@ -30,7 +30,38 @@ void fn_80271624(int mode, u8* p);
 
 void operator delete(void* p);
 
-extern const char* lbl_80346B54[];
+// One selectable camera view.
+struct CamView {
+    s32 type;       // offset 0x0
+    u8 pad4[0x4];
+    f32 off[3];     // offset 0x8, mount offset in the car frame
+    f32 rot[3];     // offset 0x14, rotation vector (degrees)
+    f32 fov;        // offset 0x20 (degrees)
+    u8 b24;         // offset 0x24
+    u8 b25;         // offset 0x25
+    u8 pad26[0x2];
+};
+
+const char* lbl_80346B24[3] = {"TV Set 1", "TV Set 2", "TV Set 3"};
+
+// Camera type names, indexed by type (see fn_80271FAC).
+const char* lbl_80346B54[19] = {
+    "FIXED", "PAN", "ZOOM", "CLOSEUP", "CHASE", "IN_CAR", "TWIRL", "WHEEL", "REV_WHEEL", "BUTT",
+    "HELI", "MAX", "R_FIXED", "S_PAN", "S_ZOOM", "S_CLOSEUP", "HOOD", "FLYCAM", "REPORT_ME",
+};
+
+CamView lbl_80346BA0[8] = {
+    {34, {0}, {0.7f, 2.0f, 0.0f}, {0.0f, -90.0f, 0.0f}, 60.0f, 1, 1},
+    {34, {0}, {-0.7f, 2.0f, 0.0f}, {0.0f, 90.0f, 0.0f}, 60.0f, 1, 1},
+    {34, {0}, {0.0f, 2.0f, 1.5239999f}, {0.0f, 0.0f, 0.0f}, 80.0f, 1, 1},
+    {4},
+    {5},
+    {34, {0}, {0.0f, 0.7f, -1.426f}, {1.2f, 180.0f, 1.6f}, 60.0f, 1, 1},
+    {7},
+    {34, {0}, {0.0f, 1.4f, 2.3000002f}, {0.3f, 178.5f, -2.2f}, 71.85f, 0, 0},
+};
+
+f32 lbl_8055C598 = -1.0f;  // focus distance override (< 0: use the target)
 
 // One camera region record (its vptr follows the data).
 class CamRegion {
@@ -133,23 +164,21 @@ void fn_80270B74(void) {
     lbl_8055F554 = 0;
 }
 
-extern char lbl_80346B00[];  // this unit's string pool ("TV Set 1", ...)
 extern s32 lbl_8055F550;
 extern u8 lbl_8055F564;
 
 // Collects the camera regions usable for this event; falls back to region 0.
 void fn_80270C04(u8* car, u32 flags) {
-    char* pool = lbl_80346B00;
     fn_80270B74();
     if (lbl_8055F550) {
         u8* cam;
         u8 check = (flags >> 8) & 1;
         lbl_8055F564 = check;
-        fn_80270B00(pool + 0x1E0, lbl_8055F550);  // "Preparing regions (%d)"
+        fn_80270B00("Preparing regions (%d)", lbl_8055F550);
         cam = (u8*)lbl_8049EDC8;
         for (int i = 0; i < lbl_8055F550; i++) {
-            fn_80270B00(pool + 0x1F8, i);  // "  Region %d:"
-            fn_80270B00(pool + 0x208);     // "  ...is ok for event type"
+            fn_80270B00("  Region %d:", i);
+            fn_80270B00("  ...is ok for event type");
             CamRegion* r = &lbl_8049F9D8[lbl_8055F554];
             r->cam = cam;
             if (check) {
@@ -159,7 +188,7 @@ void fn_80270C04(u8* car, u32 flags) {
             cam += 0x60;
         }
         if (!lbl_8055F554) {
-            fn_80270B00(pool + 0x224);  // "Found no regions!  Using only region 0"
+            fn_80270B00("Found no regions!  Using only region 0");
             lbl_8049F9D8[0].cam = (u8*)lbl_8049EDC8;
             if (check) {
                 lbl_8049F9D8[0].Prepare(car);
@@ -233,7 +262,6 @@ void qsort(void* base, u32 n, u32 size, s32 (*cmp)(u8*, const u8*));
 // heading windows tile the full circle: sorted by start, neighbours meet halfway.
 void fn_80270EC4(u8* car, u32 id) {
     AngleRef refs[64];
-    char* pool = lbl_80346B00;
     fn_80270C04(car, id);
     if (id & 0x100) {
         for (int g = 0; g < 3; g++) {
@@ -262,12 +290,12 @@ void fn_80270EC4(u8* car, u32 id) {
                 fn_80270DB0(&refs[last], &refs[0], wrap);
             }
         }
-        fn_80270B00(pool + 0x250, lbl_8055F554);  // "Region longitudes: (%d)"
+        fn_80270B00("Region longitudes: (%d)", lbl_8055F554);
         CamRegion* r = lbl_8049F9D8;
         for (int i = 0; i < lbl_8055F554; i++) {
-            fn_80270B00(pool + 0x268, i, r->lo1, r->hi1);  // "  %2d: %.3f  %.3f"
+            fn_80270B00("  %2d: %.3f  %.3f", i, r->lo1, r->hi1);
             if (r->dual) {
-                fn_80270B00(pool + 0x27C, i, r->lo2, r->hi2);  // " +%2d: %.3f  %.3f"
+                fn_80270B00(" +%2d: %.3f  %.3f", i, r->lo2, r->hi2);
             }
             r++;
         }
@@ -469,7 +497,6 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
 extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
-extern f32 lbl_8055C598;  // focus distance override (< 0: use the target)
 extern const f32 lbl_80563F44;  // -1.0
 extern const f32 lbl_80563F50;  // 1.0
 extern const f32 lbl_80563F54;  // -2.0
@@ -483,8 +510,6 @@ extern const f32 lbl_80563F70;  // fallback grid size
 extern const f32 lbl_80563F74;
 extern const f32 lbl_80563F78;  // fallback height above ground
 extern f32 lbl_80499050[12];    // last camera frame
-extern char lbl_80346E9C[];     // "PhysCam warning: car pit mode is invalid"
-extern char lbl_80346EC8[];     // "Unknown camera %d"
 int fn_80129D90(int seed, int lo, int hi);  // random int
 int fn_801769F8(void);
 u32 fn_802E2C20(void);
@@ -548,7 +573,7 @@ void fn_80271624(int mode, u8* p) {
         static bool warnedPit;
         if (!warnedPit) {
             warnedPit = true;
-            fn_802E30C8("%s", lbl_80346E9C);
+            fn_802E30C8("%s", "PhysCam warning: car pit mode is invalid");
         }
     case 0:
         group = lbl_8049A258[0].cur + 2;
@@ -713,7 +738,7 @@ void fn_80271624(int mode, u8* p) {
                 fn_802750C4(p, tv->ex[0], tv->ex[1]);
                 break;
             default:
-                fn_802E317C(lbl_80346EC8, tv->type);
+                fn_802E317C("Unknown camera %d", tv->type);
                 break;
             }
             lbl_8055F54C = tv->type;
@@ -1285,19 +1310,6 @@ int fn_80273494(int x) {
     }
 }
 
-// One selectable camera view.
-struct CamView {
-    s32 type;       // offset 0x0
-    u8 pad4[0x4];
-    f32 off[3];     // offset 0x8, mount offset in the car frame
-    f32 rot[3];     // offset 0x14, rotation vector (degrees)
-    f32 fov;        // offset 0x20 (degrees)
-    u8 b24;         // offset 0x24
-    u8 b25;         // offset 0x25
-    u8 pad26[0x2];
-};
-
-extern CamView lbl_80346BA0[];
 extern u8 lbl_8055F480;
 
 // HUD/feature flags for the camera used in `mode`.
@@ -1349,7 +1361,6 @@ void fn_80273BD0(u8* p);
 void fn_80274268(u8* p);
 void fn_802704D0(int to, int from, u8* cam);
 void fn_802704D4(int to, u8* cam);
-extern char lbl_80347310[];  // "camera_car: unexpected camera type %d"
 extern const f32 lbl_80563F4C;  // degrees to radians
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula (as camstate's).
@@ -1427,7 +1438,7 @@ void fn_80273604(u8* p, int ci) {
         break;
     }
     default:
-        fn_802E30C8(lbl_80347310, v->type);
+        fn_802E30C8("camera_car: unexpected camera type %d", v->type);
         fn_802704D4(4, p);
         break;
     }
