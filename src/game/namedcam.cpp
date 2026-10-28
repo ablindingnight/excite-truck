@@ -1,9 +1,10 @@
 // Named cameras (0x80276068-0x80278214): the named camera sets ("namedcam", "rddefault", "raceday",
 // "house") and the timed camera transitions ("physcam: Clock looped during camera transition!!").
-// Written partly against raw field offsets; the other large routines and the initialiser are still
-// stubs. Names are guesses apart from the strings.
+// Written partly against raw field offsets (the camera record layout is in game/camrec.h). Names are
+// guesses apart from the strings.
 #include "game/common.h"
 #include <string.h>
+#include "game/camrec.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -12,20 +13,6 @@
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 // A named camera setup ("namedcam" entries in the camera file).
-// A camera pose: rotation then position.
-struct CamMat3 {
-    f32 m[9];
-};
-
-struct CamVec3 {
-    f32 v[3];
-};
-
-struct CamPose {
-    CamMat3 rot;  // offset 0x0
-    CamVec3 pos;  // offset 0x24
-};
-
 struct NamedCam {
     NamedCam(void) {}
     u8 valid;       // offset 0x0
@@ -73,24 +60,6 @@ struct CamShot {
     s32 kind;        // offset 0x4C
 };
 
-// A camera record (racerslot.cpp holds its constructor).
-struct CamRec {
-    CamRec(void);
-    u8 pad0[0x10];
-    s32 mode;          // offset 0x10
-    s32 nextMode;      // offset 0x14
-    u8 pad18[0x8];
-    s32 target;        // offset 0x20
-    s32 nextTarget;    // offset 0x24
-    u8 pad28[0x30];
-    CamPose pose;      // offset 0x58
-    u8 pad88[0x34];
-    f32 fov;           // offset 0xBC
-    CamPose carFrame;  // offset 0xC0
-    u8 padF0[0x50];
-    u8* car;           // offset 0x140
-    u8 pad144[0xE4];
-};
 
 // A 3x4 frame; its empty constructor lives in modeinl.cpp (fn_80144DC8).
 struct CamFrame34 {
@@ -362,7 +331,181 @@ void fn_80276D3C(const char* name, int mode) {
     }
 }
 
-void fn_80276DC8(u8* p) {}  // stub (591)
+}  // extern "C"
+
+struct CamFrame;
+struct Mat3 {
+    f32 m[9];
+};
+struct Vec3 {
+    f32 x, y, z;
+};
+void GetTipsCamera(CamFrame* out, f32* fov);
+void Mat3FromEuler(Mat3* out, const Vec3* euler);
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
+extern "C" {
+u8* fn_8017960C(int car);
+void fn_8026A51C(CamRec* c, u8* own, int idx);
+int fn_801B89F8(void);
+f32 fn_801EA0E8(f32 x, f32 z);  // ground height
+int fn_80178CA4(void);
+f32 PSVECMag(const void* v);
+void PSVECCrossProduct(const void* a, const void* b, void* out);
+void PSVECNormalize(const void* in, void* out);
+u8* fn_802678E4(int slot);
+f32 fn_802704E0(int mode, f32 t);
+void fn_801E9DC4(s16* h);
+void fn_801C7254(Mat3* m);  // transpose
+void fn_801BFD34(CamVec3* out, const CamVec3* v, const CamPose* m);
+void fn_80144CD0(CamVec3* out, const CamVec3* p, const CamPose* m);
+void fn_8026E688(CamPose* out, const CamVec3* eye, const CamVec3* target, const CamVec3* up);
+void fn_8026E22C(CamPose* out, const CamPose* a, const CamPose* b, f32 t);
+double atan2(double y, double x);
+double atan(double x);
+double tan(double x);
+double cos(double x);
+double sin(double x);
+
+f32 lbl_804A15C0[4];  // smoothed pitch per slot
+
+static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
+static inline f32 MaxF(f32 a, f32 b) { return b > a ? b : a; }
+static inline f32 Atan2F(f32 y, f32 x) { return atan2(y, x); }
+static inline f32 CosF(f32 x) { return cos(x); }
+static inline f32 SinF(f32 x) { return sin(x); }
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVec(CamVec3* out, const CamVec3* in, const CamPose* m) {
+    if (out == in) {
+        f32 x = Dot3(in->v[0], m->rot.m[0], in->v[1], m->rot.m[3], in->v[2], m->rot.m[6]);
+        f32 y = Dot3(in->v[0], m->rot.m[1], in->v[1], m->rot.m[4], in->v[2], m->rot.m[7]);
+        f32 z = Dot3(in->v[0], m->rot.m[2], in->v[1], m->rot.m[5], in->v[2], m->rot.m[8]);
+        out->v[0] = x;
+        out->v[1] = y;
+        out->v[2] = z;
+    } else {
+        out->v[0] = Dot3(in->v[0], m->rot.m[0], in->v[1], m->rot.m[3], in->v[2], m->rot.m[6]);
+        out->v[1] = Dot3(in->v[0], m->rot.m[1], in->v[1], m->rot.m[4], in->v[2], m->rot.m[7]);
+        out->v[2] = Dot3(in->v[0], m->rot.m[2], in->v[1], m->rot.m[5], in->v[2], m->rot.m[8]);
+    }
+}
+
+// Where x lies between a and b (0 at a, 1 at b).
+static inline f32 Remap(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
+
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+// A camera placed relative to the car: position, rotation (axis times angle, in degrees) and field of
+// view (degrees).
+struct CamOffset {
+    CamVec3 pos;
+    CamVec3 rot;
+    f32 fov;
+};
+
+extern const CamOffset lbl_802FA818;
+
+// Rotation by |axis| radians about axis.
+static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
+    f32 angle = PSVECMag(axis);
+    if (angle > 0.0001f) {
+        f32 inv = 1.0f / angle;
+        f32 x = inv * axis->v[0];
+        f32 y = inv * axis->v[1];
+        f32 z = inv * axis->v[2];
+        f32 s = SinF(angle);
+        f32 c = CosF(angle);
+        f32 t = 1.0f - c;
+        m->m[0] = c + t * (x * x);
+        m->m[1] = t * x * y + s * z;
+        m->m[2] = t * x * z - s * y;
+        m->m[3] = t * x * y - s * z;
+        m->m[4] = c + t * (y * y);
+        m->m[5] = t * y * z + s * x;
+        m->m[6] = t * x * z + s * y;
+        m->m[7] = t * y * z - s * x;
+        m->m[8] = c + t * (z * z);
+    } else {
+        m->m[1] = 0.0f;
+        m->m[0] = 1.0f;
+        m->m[2] = 0.0f;
+        m->m[3] = 0.0f;
+        m->m[4] = 1.0f;
+        m->m[5] = 0.0f;
+        m->m[6] = 0.0f;
+        m->m[7] = 0.0f;
+        m->m[8] = 1.0f;
+    }
+}
+
+// Takes over player `slot`'s camera and starts a transition from it to the fixed camera beside the car
+// (lbl_802FA818), keeping the car-relative frame in lbl_804A1500.
+void fn_80276DC8(int slot) {
+    CamPose look;
+    CamPose car;
+    CamPose rel;
+    CamMat3 inv;
+    CamOffset o;
+    CamVec3 axis;
+    CamRec* src = (CamRec*)fn_802678E4(slot);
+    lbl_804A0C60[slot] = *src;
+    CamRec* rec = &lbl_804A0C60[slot];
+    lbl_804A15C0[slot] = 0.0f;
+    look = rec->pose;
+    if (!fn_80276068(rec->mode) || !S32(src->car, 0x24)) {
+        lbl_804A0C60[slot].mode = 4;
+        f32 d = fn_802704E0(4, 0.0f);
+        CamPose* f = &lbl_804A0C60[slot].carFrame;
+        look.pos.v[0] = f->pos.v[0] + f->rot.m[6] * d;
+        look.pos.v[1] = f->pos.v[1] + f->rot.m[7] * d;
+        look.pos.v[2] = f->pos.v[2] + f->rot.m[8] * d;
+        look.rot.m[6] = f->rot.m[6];
+        look.rot.m[7] = f->rot.m[7];
+        look.rot.m[8] = f->rot.m[8];
+        look.rot.m[3] = 0.0f;
+        look.rot.m[4] = 1.0f;
+        look.rot.m[5] = 0.0f;
+        PSVECCrossProduct(&look.rot.m[3], &look.rot.m[6], &look.rot.m[0]);
+        PSVECNormalize(&look.rot.m[0], &look.rot.m[0]);
+        PSVECCrossProduct(&look.rot.m[6], &look.rot.m[0], &look.rot.m[3]);
+        PSVECNormalize(&look.rot.m[3], &look.rot.m[3]);
+    }
+    car = lbl_804A0C60[slot].carFrame;
+    car.rot.m[3] = 0.0f;
+    car.rot.m[4] = 1.0f;
+    car.rot.m[5] = 0.0f;
+    if (1.0f - car.rot.m[7] < 0.15f) {
+        car.rot.m[6] = 0.0f;
+        car.rot.m[7] = 0.0f;
+        car.rot.m[8] = 1.0f;
+    }
+    PSVECCrossProduct(&car.rot.m[3], &car.rot.m[6], &car.rot.m[0]);
+    PSVECNormalize(&car.rot.m[0], &car.rot.m[0]);
+    PSVECCrossProduct(&car.rot.m[0], &car.rot.m[3], &car.rot.m[6]);
+    PSVECNormalize(&car.rot.m[6], &car.rot.m[6]);
+    fn_801E9DC4(&rec->h1EC);
+    o = lbl_802FA818;
+    rel.pos = o.pos;
+    axis.v[0] = 0.017453292f * o.rot.v[0];
+    axis.v[1] = 0.017453292f * o.rot.v[1];
+    axis.v[2] = 0.017453292f * o.rot.v[2];
+    f32 scale = F32(src->car, 0x5E4);
+    rel.pos.v[0] *= scale;
+    rel.pos.v[1] *= scale;
+    rel.pos.v[2] *= scale;
+    AxisAngle(&rel.rot, &axis);
+    f32* frame = lbl_804A1500[slot].m;
+    CamVec3* framePos = (CamVec3*)(frame + 9);
+    fn_801BFD34(framePos, &rel.pos, &car);
+    Mat3Mul((Mat3*)frame, (Mat3*)&rel.rot, (Mat3*)&car.rot);
+    inv = look.rot;
+    fn_801C7254((Mat3*)&inv);
+    Mat3Mul((Mat3*)frame, (Mat3*)frame, (Mat3*)&inv);
+    fn_80144CD0(framePos, framePos, &look);
+    fn_80276098(&src->pose, &rel, slot, 0x22, src->fov, 0.017453292f * o.fov, 2.0f);
+}
 
 extern const f32 lbl_80564054;  // -1.0
 
@@ -455,64 +598,6 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
     }
     return 0;
 }
-
-}  // extern "C"
-
-struct CamFrame;
-struct Mat3 {
-    f32 m[9];
-};
-struct Vec3 {
-    f32 x, y, z;
-};
-void GetTipsCamera(CamFrame* out, f32* fov);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-
-extern "C" {
-u8* fn_8017960C(int car);
-void fn_8026A51C(CamRec* c, u8* own, int idx);
-int fn_801B89F8(void);
-f32 fn_801EA0E8(f32 x, f32 z);  // ground height
-int fn_80178CA4(void);
-f32 PSVECMag(const void* v);
-void fn_8026E688(CamPose* out, const CamVec3* eye, const CamVec3* target, const CamVec3* up);
-void fn_8026E22C(CamPose* out, const CamPose* a, const CamPose* b, f32 t);
-double atan2(double y, double x);
-double atan(double x);
-double tan(double x);
-double cos(double x);
-double sin(double x);
-
-f32 lbl_804A15C0[4];  // smoothed pitch per slot
-
-static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 MaxF(f32 a, f32 b) { return b > a ? b : a; }
-static inline f32 Atan2F(f32 y, f32 x) { return atan2(y, x); }
-static inline f32 CosF(f32 x) { return cos(x); }
-static inline f32 SinF(f32 x) { return sin(x); }
-
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-
-static inline void MulVec(CamVec3* out, const CamVec3* in, const CamPose* m) {
-    if (out == in) {
-        f32 x = Dot3(in->v[0], m->rot.m[0], in->v[1], m->rot.m[3], in->v[2], m->rot.m[6]);
-        f32 y = Dot3(in->v[0], m->rot.m[1], in->v[1], m->rot.m[4], in->v[2], m->rot.m[7]);
-        f32 z = Dot3(in->v[0], m->rot.m[2], in->v[1], m->rot.m[5], in->v[2], m->rot.m[8]);
-        out->v[0] = x;
-        out->v[1] = y;
-        out->v[2] = z;
-    } else {
-        out->v[0] = Dot3(in->v[0], m->rot.m[0], in->v[1], m->rot.m[3], in->v[2], m->rot.m[6]);
-        out->v[1] = Dot3(in->v[0], m->rot.m[1], in->v[1], m->rot.m[4], in->v[2], m->rot.m[7]);
-        out->v[2] = Dot3(in->v[0], m->rot.m[2], in->v[1], m->rot.m[5], in->v[2], m->rot.m[8]);
-    }
-}
-
-// Where x lies between a and b (0 at a, 1 at b).
-static inline f32 Remap(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
-
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Camera for slot `slot` in the chase modes: behind and above the car, swinging round with the
 // transition and pitched by the car's climb, blended from the slot's camera; the tips camera once the
