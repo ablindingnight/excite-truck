@@ -1,8 +1,7 @@
 // Car mass lists (0x801BD628-0x801BF214): per-car point-mass tables ("masslist") and the contact lists
 // built from them each frame ("cslist", "cclist", "cxlist", "alist"), plus a 256-entry scratch table of
-// 4-float records. Only the allocation, accessors and small vector helpers are reconstructed; the mass
-// update, contact gathering and post-update passes are placeholders. Names are guesses apart from the
-// strings.
+// 4-float records. The mass update and contact gathering passes are placeholders. Names are guesses apart
+// from the strings.
 #include "game/common.h"
 
 struct MVec3 {
@@ -69,7 +68,8 @@ struct CrossSet {
 };
 
 struct CxEntry {
-    u8 data[0x14];
+    u8 data[0x4];
+    s32 surface[4];  // offset 0x4, per wheel
 };
 
 ModuleTag lbl_8055E780;
@@ -97,8 +97,20 @@ double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
 void fn_801BDA70(void);
 void fn_801BDA74(int car, ContactOut* out);
-int fn_801E9E78(s16* h, MVec3* p, MVec3* n);
+int fn_801E9E78(void* h, MVec3* p, MVec3* n);
 void fn_80279D40(void);
+void* memcpy(void* dst, const void* src, size_t n);
+void fn_802E30C8(const char* fmt, ...);  // debug print
+void fn_801BA088(MVec4* t, int a, int b, int c);
+void fn_80144B44(MVec3* v, f32 x, f32 y, f32 z);
+void StatsUpdate__Fv(MVec3* v);  // vector default constructor (empty, out of line)
+extern s32 lbl_8055A920;
+MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
+MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w);
+MVec4* fn_801BF164(MVec4* out, const MVec4* in);
+MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z);
+void fn_801BF198(MVec3* out, const MVec3* in);
+void fn_801BF0C4(MVec3* p, MVec3* n, void* h, s32* surface);
 }
 
 void* operator new[](size_t size, const char* name);
@@ -383,9 +395,59 @@ void fn_801BEDA8(MassSet** m, ContactSet** cs, CrossSet** cc, CxEntry** cx, s32*
     *n = lbl_8055E78C;
 }
 
-void fn_801BEDD4(void) {}
+// Car post-update for one car: runs the contact solver on a scratch copy of its tables, keeps the
+// result unless the car is frozen, resets it if its mass position went out of range and refreshes the
+// per-wheel ground contacts.
+static inline void PostUpdateCar(int car) {
+    int i;
+    s32 surface;
+    MVec3 p, up, pt, n;
+    MVec4 t0, t1, t2, t3, t4, t5;
+    memcpy(&lbl_80436D48[0], &lbl_8055E794[car], sizeof(MassSet));
+    memcpy(&lbl_80436D48[0xB], &lbl_8055E798[car], sizeof(ContactSet));
+    memcpy(&lbl_80436D48[0x2A], &lbl_8055E79C[car], sizeof(CrossSet));
+    lbl_8055A920 = car;
+    fn_801BA088(lbl_80436D48, 0, 0xB, 0x2A);
+    lbl_8055A920 = -1;
+    if (!lbl_8055E7A0[car]) {
+        memcpy(&lbl_8055E794[car], &lbl_80436D48[0], sizeof(MassSet));
+        memcpy(&lbl_8055E798[car], &lbl_80436D48[0xB], sizeof(ContactSet));
+    }
+    CxEntry* cx = &lbl_8055E7A4[car];
+    ContactSet* cs = &lbl_8055E798[car];
+    MassSet* m = &lbl_8055E794[car];
+    StatsUpdate__Fv(&p);
+    fn_801BF198(&p, (MVec3*)&m->pos);
+    if (!fn_801BD628(&p)) {
+        fn_802E30C8("CarPostUpdate: illegal mass position (%f %f %f)", p.x, p.y, p.z);
+        fn_801BF164(&m->pos, fn_801BF188(&t0, 0.0f, 100.0f, 0.0f));
+        fn_801BF12C(&m->quat, fn_801BF150(&t1, 0.0f, 0.0f, 0.0f, 1.0f));
+        fn_801BF164(&m->vel, fn_801BF164(&m->v60, fn_801BF188(&t2, 0.0f, 0.0f, 0.0f)));
+        fn_801BF12C(&cs->v0, fn_801BF12C(&cs->v10, fn_801BF12C(&cs->v20, fn_801BF12C(&cs->v30,
+            fn_801BF150(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
+        fn_801BF198(&p, (MVec3*)&m->pos);
+    }
+    StatsUpdate__Fv(&up);
+    fn_801BF198(&up, (MVec3*)&m->rot[2]);
+    for (i = 0; i < 4; i++) {
+        StatsUpdate__Fv(&pt);
+        fn_801BF198(&pt, &cs->pts[i].p);
+        surface = 0xFF;
+        fn_80144B44(&n, 0.0f, 1.0f, 0.0f);
+        fn_801BF0C4(&pt, &n, cx, &surface);
+        cx->surface[i] = surface;
+        fn_801BF12C((MVec4*)&cs->nrm[i], fn_801BF150(&t4, n.x, n.y, n.z, pt.y));
+        fn_801BF164((MVec4*)&cs->ref[i], fn_801BF188(&t5, pt.x, pt.y, pt.z));
+    }
+}
 
-void fn_801BF0C4(MVec3* p, MVec3* n, s16* h) {
+void fn_801BEDD4(void) {
+    for (int car = 0; car < lbl_8055E78C; car++) {
+        PostUpdateCar(car);
+    }
+}
+
+void fn_801BF0C4(MVec3* p, MVec3* n, void* h, s32* surface) {
     if (!fn_801E9E78(h, p, n)) {
         n->x = 0.0f;
         n->y = 1.0f;
@@ -394,31 +456,35 @@ void fn_801BF0C4(MVec3* p, MVec3* n, s16* h) {
     }
 }
 
-void fn_801BF12C(MVec4* out, const MVec4* in) {
+MVec4* fn_801BF12C(MVec4* out, const MVec4* in) {
     out->x = in->x;
     out->y = in->y;
     out->z = in->z;
     out->w = in->w;
+    return out;
 }
 
-void fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w) {
+MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w) {
     out->x = x;
     out->y = y;
     out->z = z;
     out->w = w;
+    return out;
 }
 
-void fn_801BF164(MVec4* out, const MVec4* in) {
+MVec4* fn_801BF164(MVec4* out, const MVec4* in) {
     out->x = in->x;
     out->y = in->y;
     out->z = in->z;
     out->w = in->w;
+    return out;
 }
 
-void fn_801BF188(MVec3* out, f32 x, f32 y, f32 z) {
+MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z) {
     out->x = x;
     out->y = y;
     out->z = z;
+    return out;
 }
 
 void fn_801BF198(MVec3* out, const MVec3* in) { SetVyxz(out, in->x, in->y, in->z); }
