@@ -62,10 +62,11 @@ UnkStatic7F lbl_8055F1F0;
 
 extern "C" {
 
+// Clears both join slots.
 void fn_8023FE20(void) {
     JoinSlot* j = lbl_80498828;
-    j[0].id = -1;
-    j[1].id = -1;
+    j++->id = -1;
+    j->id = -1;
 }
 
 // Number of joined players.
