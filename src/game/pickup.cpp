@@ -799,11 +799,12 @@ extern "C" static inline int fn_801698B8(int j, int i, int ny, int nx) {
     v = hi + lo / 2;
     if (v < 3) {
         return 3;
-    } else if (v >= 5) {
-        return 1;
-    } else {
-        return 2;
     }
+    int r = 1;
+    if (v < 5) {
+        r = 2;
+    }
+    return r;
 }
 
 extern "C" static inline int fn_80169928(int j, int i, int ny, int nx) {
