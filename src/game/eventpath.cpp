@@ -782,6 +782,18 @@ int fn_8027CAB4(ContestRef* r) {
 
 int fn_8027CB20(ContestRef* r) { return 1; }
 
+// MATCHING-AID: linker-stripped contest describer (the contest twin of fn_8027CBF8), reconstructed only so its
+// literals keep their .data pool slots; the body is a guess.
+void ContestDescribe(ContestRef* r, char* out, int n) {
+    if (fn_8027CA1C(r)) {
+        char buf[100];
+        fn_801345D8(buf, 100, "EventPath:GOAL_GRADE_%s", r->node->GetValue("passing_grade"));
+        StrCopyN(out, fn_80131234(buf), n);
+    } else {
+        StrCopyN(out, fn_80131234("EventPath:LOCKED_CHALLENGE"), n);
+    }
+}
+
 int fn_8027CB28(BracketRef* b) {
     ValueNode* c;
     for (int i = 0; (c = b->node->GetChildAt(i)) != 0; i++) {
