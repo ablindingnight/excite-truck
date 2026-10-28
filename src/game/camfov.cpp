@@ -139,10 +139,11 @@ static inline int Above(f32 v, f32 k) { return v > k; }
 
 // The view angle for the camera: blended from the last one (0x194) toward the speed-based angle, or
 // toward the boost angle while boosting (not while an AI driver is in mode 1).
-f32 fn_8026EB4C(u8* p) {
+f32 fn_8026EB4C(const u8* p) {
     f32 fov;
     f32 r = fn_8026EAEC(!Boosting(PTR(p, 0x140)) ? lbl_8055F534 : lbl_8055F530);
-    fov = fn_8026EAEC(LerpF(F32(p, 0x13C), lbl_8055F528, lbl_8055F52C));
+    f32 lo = lbl_8055F528;
+    fov = fn_8026EAEC(LerpF(F32(p, 0x13C), lo, lbl_8055F52C));
     u8* car = PTR(p, 0x140);
     int boost = 0;
     int on = Boosting(car) || car[0x259C];
