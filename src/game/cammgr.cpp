@@ -1158,7 +1158,8 @@ void fn_802682B0(u8* p) {
     int row;
     int* rowp = &row;
     if (U8(p, 0x138)) {
-        // An index the compiler cannot fold (found by decomp-permuter) gives the target's stfsu.
+        // MATCHING-AID: an index the compiler cannot fold (decomp-permuter) gives the target's stfsu; row loops,
+        // a row pointer and straight pointer stores were tried 2026-10-28 (all 5 rows off).
         lbl_80499050.m[row = 0][*rowp] = 1.0f;
         lbl_80499050.m[0][1] = 0.0f;
         lbl_80499050.m[0][2] = 0.0f;
