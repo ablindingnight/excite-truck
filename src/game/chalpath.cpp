@@ -118,112 +118,27 @@ public:
     virtual void Add(u32 chassis, int a, int b);              // 0x0C
 };
 
-extern s32 lbl_8055C400;
-
-extern "C" {
-void fn_802E317C(const char* fmt, ...);
-ChassisList* fn_8025007C(int n);
-int fn_8024DAE0(u8* a, u8* b, int c, ChassisList* list, u32 d);
-
-// Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
-int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
-    if (lbl_8055C400 >= 0) {
-        return 1;
-    }
-    SetNumPlayers(1);
-    u8* t = GetTrack(track);
-    u32 chassis = 0;
-    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable("vehicle_map")) {
-        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable("vehicle_map")->GetString("default_vehicle", 0);
-    } else {
-        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Expecting vehicle_map table and found none!");
-    }
-    ChassisList* list = 0;
-    if (chassis) {
-        list = fn_8025007C(1);
-        list->Add(chassis, 1, 0);
-    } else {
-        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Default chassis is NULL!");
-    }
-    int r = fn_8024DAE0(a, b, 0, list, d);
-    delete list;
-    return r;
-}
-
-void fn_8026003C(void) {}  // stub (482)
-
-void fn_802607C4(u8* p) {
-    U8(p, 0x1D) = 1;
-}
-
-void fn_802607D0(u8* p) {
-    U8(p, 0x1E) = 1;
-}
-
-void fn_802607DC(u8* p) {
-    U8(p, 0x1E) = 0;
-    U8(p, 0x1C) = 0;
-}
-
-void fn_802607EC(u8* p) {
-    U8(p, 0x1D) = 0;
-}
-
-void fn_802607F8(u8* p) {
-    if (!U8(p, 0x1C)) {
-        U8(p, 0x1C) = 1;
-        U8(p, 0x1F) = 1;
-    }
-}
-
-void fn_80260814(u8* p) {
-    U8(p, 0x1D) = 0;
-}
-
-void fn_80260820(u8* p) {
-    if (!U8(p, 0x1C)) {
-        U8(p, 0x1E) = 1;
-        U8(p, 0x1C) = 1;
-    }
-}
-
-void fn_8026083C(u8* p) {
-    U8(p, 0x1C) = 0;
-}
-
-void fn_80260848(u8* p) {
-    U8(p, 0x1D) = 1;
-}
-
-u8* fn_80260854(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345E28;
-        fn_80235380(PTR(p, 0x24));
-        U32(p, 0x24) = 0;
-        fn_802328D4(PTR(p, 0x28));
-        U32(p, 0x28) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_802608D4(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345EA0;
-        fn_80235380(PTR(p, 0x20));
-        U32(p, 0x20) = 0;
-        fn_802328D4(PTR(p, 0x24));
-        U32(p, 0x24) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-}  // extern "C"
+// A challenge event as the map shows it.
+class ChalEvent {
+public:
+    virtual ~ChalEvent(void);
+    virtual const char* Name(void);  // 0x0C
+    virtual void s10(void);
+    virtual void s14(void);
+    virtual void s18(void);
+    virtual void s1C(void);
+    virtual s32 Id(void);            // 0x20
+    virtual void s24(void);
+    virtual s32 Score(void);         // 0x28
+    virtual s32 Grade(void);         // 0x2C
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void s38(void);
+    virtual s32 Target(void);        // 0x3C
+    virtual void s40(void);
+    virtual void s44(void);
+    virtual int Complete(void);      // 0x48
+};
 
 // A node on the challenge map (event or difficulty marker).
 class PathNode {
@@ -362,6 +277,16 @@ struct PathScreenBuf {
     }
     ~PathScreenBuf(void) {
         lbl_8055F420 = 0;
+        Free();
+        levels.data = 0;
+        levels.count = 0;
+        levels.cap = 0;
+        events.data = 0;
+        events.count = 0;
+        events.cap = 0;
+    }
+    // Deletes the sound and the nodes.
+    void Free(void) {
         if (sound) {
             delete sound;
             sound = 0;
@@ -374,12 +299,15 @@ struct PathScreenBuf {
         for (i = 0; i < numLevels; i++) {
             delete levels.data[i];
         }
-        levels.data = 0;
-        levels.count = 0;
-        levels.cap = 0;
-        events.data = 0;
-        events.count = 0;
-        events.cap = 0;
+    }
+    // Whether every event of the path is complete.
+    bool AllComplete(void) {
+        for (int i = 0; i < numEvents; i++) {
+            if (!((ChalEvent*)evObjs[i])->Complete()) {
+                return false;
+            }
+        }
+        return true;
     }
     s32 event;           // offset 0x0
     s32 level;           // offset 0x4
@@ -398,8 +326,320 @@ struct PathItem {
     u32 w[5];
 };
 
+struct DriverInfo {
+    s32 index;        // offset 0x0
+    s32 id;           // offset 0x4
+    char name[0x40];  // offset 0x8
+    s32 rank;         // offset 0x48
+    s32 vehicle;      // offset 0x4C
+    u32 color;        // offset 0x50
+};
+
+struct VehicleInfo {
+    s32 index;        // offset 0x0
+    s32 id;           // offset 0x4
+    u8 pad8[0x2C - 0x8];
+    char name[0x74];  // offset 0x2C
+    u32 flags;        // offset 0xA0
+};
+
+struct EventInfo {
+    s32 id;     // offset 0x0
+    s32 track;  // offset 0x4
+};
+
+struct TrackEvent {
+    s32 event;  // offset 0x0
+};
+
+// What fn_8023BF4C races: the track, the event's index on it, and where the result goes.
+struct CareerRun {
+    s32 track;  // offset 0x0
+    s32 index;  // offset 0x4
+    s32 which;  // offset 0x8
+    void* out;  // offset 0xC
+};
+
+DriverInfo* GetDriver(int i);
+VehicleInfo* GetVehicle(int i);
+VehicleInfo* FindVehicle(long id);
+int IsSpecialChassisUnlocked(const char* name);
+EventInfo* GetEvent(int i);
+TrackEvent* FindTrackEvent(int track, int i);
+void SetPlayer(int player, long driver, long vehicle, unsigned long color);
+int IdentGetCurrentSlot(void);
+const char* IdentGetSlotName(int slot);
+void SetPlayerName(const char* name, int player);
+void ClearPlayer(int i);
+void AchievementsClearSession(void);
+
+void* operator new(size_t size, const char* tag);
+
+#define SCREEN_BUF ((PathScreenBuf*)lbl_8055F420)
+
 extern "C" {
 ChalPath* fn_8027B878(int a);
+void fn_802E317C(const char* fmt, ...);
+int fn_802E4A10(void);
+void fn_80137C84(int pad, int slot);
+void fn_8023BF4C(CareerRun* r);
+int fn_802E8D84(void);
+void fn_802E7128(void);
+extern u8 lbl_8055F3E8;
+extern ChalPath* lbl_8055F3E4;
+}
+
+extern const f32 lbl_80563B88;  // 1.0f
+static inline int MinI(int a, int b) { return a >= b ? b : a; }
+
+extern "C" {
+void* memset(void* d, int c, u32 n);
+u8* fn_8023512C(const char* art);
+u8* fn_80232578(const char* name);
+Sound* fn_80207848(const char* name, int flags);
+}
+
+// Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).
+static inline void RedrawNodes(void) {
+    int i;
+    for (i = 0; i < SCREEN->numEvents; i++) {
+        if (!lbl_8055F3EB) {
+            SCREEN->events[i]->Dim();
+            SCREEN->events[i]->Refresh();
+        } else if (i == SCREEN->event) {
+            SCREEN->events[i]->Select();
+        } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
+            SCREEN->events[i]->Open();
+            SCREEN->events[i]->Refresh();
+        } else {
+            SCREEN->events[i]->Refresh();
+        }
+    }
+    for (i = 0; i < SCREEN->numLevels; i++) {
+        if (!lbl_8055F3EB) {
+            if (i == SCREEN->level) {
+                SCREEN->levels[i]->Select();
+            } else {
+                SCREEN->levels[i]->Open();
+                SCREEN->levels[i]->Refresh();
+            }
+        } else if (i == SCREEN->level) {
+            SCREEN->levels[i]->Select();
+            SCREEN->levels[SCREEN->level]->Focus();
+        } else {
+            SCREEN->levels[i]->Dim();
+            SCREEN->levels[i]->Refresh();
+        }
+    }
+}
+
+// Builds the map: a "pathcontrol" node per difficulty (at most 3) and an "eventcontrol" node per event
+// (at most 6 each), and the level-up sound.
+static inline void BuildMap(PathScreenBuf* s) {
+    int i;
+    int j;
+    s->numEvents = 0;
+    s->numLevels = lbl_8055F3E4->NumLevels();
+    memset(s->evObjs, 0, sizeof(s->evObjs));
+    memset(s->lvObjs, 0, sizeof(s->lvObjs));
+    s->events.count = 0;
+    s->levels.count = 0;
+    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
+        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
+        u8* n = (u8*)operator new(0x2C, "pathcontrol");
+        if (n) {
+            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
+            S32(n, 0x14) = 0;
+            *(void**)n = lbl_80345E28;
+            S32(n, 0x20) = i;
+            PTR(n, 0x18) = (u8*)lv;
+            U8(n, 0x1C) = 0;
+            U8(n, 0x1D) = 1;
+            U8(n, 0x1E) = 0;
+            U8(n, 0x1F) = 0;
+            PTR(n, 0x24) = fn_8023512C("bar7.art");
+            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
+        }
+        s->levels.Push((PathNode*)n);
+        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
+            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
+            u8* e = (u8*)operator new(0x28, "eventcontrol");
+            if (e) {
+                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
+                S32(e, 0x14) = 0;
+                *(void**)e = lbl_80345EA0;
+                PTR(e, 0x18) = (u8*)ev;
+                U8(e, 0x1E) = 0;
+                U8(e, 0x1C) = 0;
+                U8(e, 0x1D) = 1;
+                PTR(e, 0x20) = fn_8023512C("bar7.art");
+                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
+            }
+            s->events.Push((PathNode*)e);
+            s->numEvents++;
+        }
+    }
+    s->sound = fn_80207848("a_levelup.sfx", 0);
+    if (s->sound) {
+        s->sound->SetVolume(lbl_80563B88);
+    } else {
+        fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
+    }
+}
+
+extern s32 lbl_8055C400;
+
+extern "C" {
+void fn_802E317C(const char* fmt, ...);
+ChassisList* fn_8025007C(int n);
+int fn_8024DAE0(u8* a, u8* b, int c, ChassisList* list, u32 d);
+
+// Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
+int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
+    if (lbl_8055C400 >= 0) {
+        return 1;
+    }
+    SetNumPlayers(1);
+    u8* t = GetTrack(track);
+    u32 chassis = 0;
+    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable("vehicle_map")) {
+        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable("vehicle_map")->GetString("default_vehicle", 0);
+    } else {
+        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Expecting vehicle_map table and found none!");
+    }
+    ChassisList* list = 0;
+    if (chassis) {
+        list = fn_8025007C(1);
+        list->Add(chassis, 1, 0);
+    } else {
+        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Default chassis is NULL!");
+    }
+    int r = fn_8024DAE0(a, b, 0, list, d);
+    delete list;
+    return r;
+}
+
+// Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
+// "difficulty unlocked" popup when that race completed the path.
+void fn_8026003C(void) {
+    s32 driver = GetDriver(0)->id;
+    s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
+    u32 color = GetDriver(0)->color;
+    s32 event = ((ChalEvent*)SCREEN_BUF->evObjs[SCREEN_BUF->event])->Id();
+    s32 track = GetEvent(event)->track;
+    s32 arg = SCREEN_BUF->arg;
+    if (fn_8025FECC((u8*)&vehicle, (u8*)&color, track, arg)) {
+        VehicleInfo* v = FindVehicle(vehicle);
+        int special = !(v->flags & 2);
+        int hadSpecial = special && IsSpecialChassisUnlocked(v->name);
+        bool wasComplete = SCREEN_BUF->AllComplete();
+        SCREEN_BUF->Free();
+        SetPlayer(0, driver, vehicle, color);
+        SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
+        fn_80137C84(fn_802E4A10(), 0);
+        u8 out[0xB0];
+        memset(out, 0, sizeof(out));
+        CareerRun run;
+        run.track = track;
+        run.index = -1;
+        for (int i = S32(GetTrack(track), 0x70); i-- > 0;) {
+            if (event == FindTrackEvent(track, i)->event) {
+                run.index = i;
+            }
+        }
+        run.which = arg;
+        run.out = out;
+        fn_8023BF4C(&run);
+        ClearPlayer(0);
+        AchievementsClearSession();
+        lbl_8055F3E4 = fn_8027B878(arg);
+        BuildMap(SCREEN_BUF);
+        RedrawNodes();
+        bool nowComplete = SCREEN_BUF->AllComplete();
+        if (fn_802E8D84()) {
+            fn_802E7128();
+        }
+        if (!wasComplete && nowComplete) {
+            lbl_8055F3E8 = 1;
+        }
+    }
+}
+
+void fn_802607C4(u8* p) {
+    U8(p, 0x1D) = 1;
+}
+
+void fn_802607D0(u8* p) {
+    U8(p, 0x1E) = 1;
+}
+
+void fn_802607DC(u8* p) {
+    U8(p, 0x1E) = 0;
+    U8(p, 0x1C) = 0;
+}
+
+void fn_802607EC(u8* p) {
+    U8(p, 0x1D) = 0;
+}
+
+void fn_802607F8(u8* p) {
+    if (!U8(p, 0x1C)) {
+        U8(p, 0x1C) = 1;
+        U8(p, 0x1F) = 1;
+    }
+}
+
+void fn_80260814(u8* p) {
+    U8(p, 0x1D) = 0;
+}
+
+void fn_80260820(u8* p) {
+    if (!U8(p, 0x1C)) {
+        U8(p, 0x1E) = 1;
+        U8(p, 0x1C) = 1;
+    }
+}
+
+void fn_8026083C(u8* p) {
+    U8(p, 0x1C) = 0;
+}
+
+void fn_80260848(u8* p) {
+    U8(p, 0x1D) = 1;
+}
+
+u8* fn_80260854(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80345E28;
+        fn_80235380(PTR(p, 0x24));
+        U32(p, 0x24) = 0;
+        fn_802328D4(PTR(p, 0x28));
+        U32(p, 0x28) = 0;
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+u8* fn_802608D4(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80345EA0;
+        fn_80235380(PTR(p, 0x20));
+        U32(p, 0x20) = 0;
+        fn_802328D4(PTR(p, 0x24));
+        U32(p, 0x24) = 0;
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+}  // extern "C"
+
+
+extern "C" {
 void fn_8026003C(void);
 void fn_80261AF0(u8* p, int difficulty);
 void fn_80261AE8(u8* p, u32 v);
@@ -421,8 +661,6 @@ int fn_802613E0(void);
 int fn_802616A8(void);
 u8* fn_80260DC4(u8* p, int del);
 void fn_80260E04(Words5* d, const Words5* s);
-extern u8 lbl_8055F3E8;
-extern ChalPath* lbl_8055F3E4;
 
 // The challenge map screen: unlock popups, then the map menu until backed out.
 void fn_80260954(int arg) {
@@ -519,39 +757,6 @@ extern "C" {
 
 }  // extern "C"
 
-// Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).
-static inline void RedrawNodes(void) {
-    int i;
-    for (i = 0; i < SCREEN->numEvents; i++) {
-        if (!lbl_8055F3EB) {
-            SCREEN->events[i]->Dim();
-            SCREEN->events[i]->Refresh();
-        } else if (i == SCREEN->event) {
-            SCREEN->events[i]->Select();
-        } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
-            SCREEN->events[i]->Open();
-            SCREEN->events[i]->Refresh();
-        } else {
-            SCREEN->events[i]->Refresh();
-        }
-    }
-    for (i = 0; i < SCREEN->numLevels; i++) {
-        if (!lbl_8055F3EB) {
-            if (i == SCREEN->level) {
-                SCREEN->levels[i]->Select();
-            } else {
-                SCREEN->levels[i]->Open();
-                SCREEN->levels[i]->Refresh();
-            }
-        } else if (i == SCREEN->level) {
-            SCREEN->levels[i]->Select();
-            SCREEN->levels[SCREEN->level]->Focus();
-        } else {
-            SCREEN->levels[i]->Dim();
-            SCREEN->levels[i]->Refresh();
-        }
-    }
-}
 
 extern "C" {
 
@@ -748,67 +953,12 @@ void fn_80261AF0(u8* p, int difficulty) {
 
 void* operator new(size_t size, const char* tag);
 extern void* lbl_80345E28[];
-extern const f32 lbl_80563B88;  // 1.0f
-static inline int MinI(int a, int b) { return a >= b ? b : a; }
+
 
 extern "C" {
-void* memset(void* d, int c, u32 n);
-u8* fn_8023512C(const char* art);
-u8* fn_80232578(const char* name);
-Sound* fn_80207848(const char* name, int flags);
 
-// Builds the map: a "pathcontrol" node per difficulty (at most 3) and an "eventcontrol" node per event
-// (at most 6 each), and the level-up sound.
 void fn_80261C68(PathScreenBuf* s) {
-    int i;
-    int j;
-    s->numEvents = 0;
-    s->numLevels = lbl_8055F3E4->NumLevels();
-    memset(s->evObjs, 0, sizeof(s->evObjs));
-    memset(s->lvObjs, 0, sizeof(s->lvObjs));
-    s->events.count = 0;
-    s->levels.count = 0;
-    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
-        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
-        u8* n = (u8*)operator new(0x2C, "pathcontrol");
-        if (n) {
-            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
-            S32(n, 0x14) = 0;
-            *(void**)n = lbl_80345E28;
-            S32(n, 0x20) = i;
-            PTR(n, 0x18) = (u8*)lv;
-            U8(n, 0x1C) = 0;
-            U8(n, 0x1D) = 1;
-            U8(n, 0x1E) = 0;
-            U8(n, 0x1F) = 0;
-            PTR(n, 0x24) = fn_8023512C("bar7.art");
-            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
-        }
-        s->levels.Push((PathNode*)n);
-        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
-            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
-            u8* e = (u8*)operator new(0x28, "eventcontrol");
-            if (e) {
-                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
-                S32(e, 0x14) = 0;
-                *(void**)e = lbl_80345EA0;
-                PTR(e, 0x18) = (u8*)ev;
-                U8(e, 0x1E) = 0;
-                U8(e, 0x1C) = 0;
-                U8(e, 0x1D) = 1;
-                PTR(e, 0x20) = fn_8023512C("bar7.art");
-                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
-            }
-            s->events.Push((PathNode*)e);
-            s->numEvents++;
-        }
-    }
-    s->sound = fn_80207848("a_levelup.sfx", 0);
-    if (s->sound) {
-        s->sound->SetVolume(lbl_80563B88);
-    } else {
-        fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
-    }
+    BuildMap(s);
     RedrawNodes();
 }
 
@@ -848,24 +998,6 @@ void fn_80262168(u8* p) {
 
 }  // extern "C"
 
-// A challenge event as the map shows it.
-class ChalEvent {
-public:
-    virtual ~ChalEvent(void);
-    virtual const char* Name(void);  // 0x0C
-    virtual void s10(void);
-    virtual void s14(void);
-    virtual void s18(void);
-    virtual void s1C(void);
-    virtual void s20(void);
-    virtual void s24(void);
-    virtual s32 Score(void);         // 0x28
-    virtual s32 Grade(void);         // 0x2C
-    virtual void s30(void);
-    virtual void s34(void);
-    virtual void s38(void);
-    virtual s32 Target(void);        // 0x3C
-};
 
 const char* GetGradeDisplayName(int grade);
 
