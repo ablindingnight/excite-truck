@@ -3,6 +3,11 @@
 // a radar points at the remaining trucks and crushed trucks respawn away from the forbidden zones
 // ("crush_nogo.val"). Tuning comes from the config's "crush_table". It shares the results overlay with the
 // ring challenge. Names are guesses apart from the strings.
+//
+// CrushResults, CrushMaster and CrushSubTaskMgr live in an anonymous namespace and their methods from
+// ~CrushMaster on are inline, so CodeWarrior emits them at the end of the unit after the two vtables, with
+// their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
+// instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
 #include <stdarg.h>
 
@@ -365,6 +370,7 @@ struct CrushTuning {
     f32 killSpeed;      // offset 0x28
 };
 
+namespace {
 class CrushResults {
 public:
     CrushResults(void) {
@@ -464,6 +470,7 @@ public:
     s32 f100;  // offset 0x100
     s32 f104;  // offset 0x104
 };
+}
 
 union ElemColor {
     u32 all;
@@ -612,7 +619,9 @@ public:
     virtual int vf28(void);
 };
 
+namespace {
 class CrushMaster;
+}
 
 // Where an AI truck is headed.
 struct CrushTarget {
@@ -625,24 +634,6 @@ struct CrushTarget {
     f32 until;    // offset 0x20
 };
 
-class CrushSubTaskMgr : public CSubTaskMgr {
-public:
-    CrushSubTaskMgr(CrushMaster* m) {
-        nCars = fn_801EA994();
-        master = m;
-    }
-    virtual ~CrushSubTaskMgr(void) {}
-    virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
-    virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags);
-    virtual int vf14(void);
-    virtual void vf18(int a, int b);
-    virtual int vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    CrushTarget targets[8];  // offset 0x4
-    s32 nCars;               // offset 0x124
-    CrushMaster* master;     // offset 0x128
-};
 
 // Per-car crush state.
 struct CrushCar {
@@ -663,31 +654,32 @@ struct SpawnList : ArrayRef<V2> {
     V2 storage[16];  // offset 0xC
 };
 
+namespace {
 class CrushMaster : public GameMode {
 public:
     CrushMaster(void);
     virtual ~CrushMaster(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+    virtual int vf28(void);
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car);
     virtual int vf24(void);
-    virtual int vf28(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int view);
-    virtual void vf44(void);
-    virtual void vf4C(int p);
-    virtual void vf50(int p);
     virtual int vf54(void);
-    virtual int vf5C(int p);
-    virtual int vf64(void);
-    virtual int vf68(void);
-    virtual int vf8C(int p, int key);
-    virtual int vfA0(StartPos* out, int idx);
     virtual void vfA8(int car);
     virtual void vfB8(ZoneResults* r);
+    virtual void vf44(void);
+    virtual int vfA0(StartPos* out, int idx);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf3C(int view);
+    virtual f32 vf38(void);
+    virtual int vf64(void);
+    virtual int vf5C(int p);
+    virtual int vf68(void);
+    virtual int vf8C(int p, int key);
     virtual void* vfE8(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
     int AliveAI(void) {
         int n = 0;
         int i;
@@ -718,6 +710,26 @@ public:
     RSound* sPreRace;          // offset 0x2B4
     u8 b2B8;                   // offset 0x2B8
 };
+
+class CrushSubTaskMgr : public CSubTaskMgr {
+public:
+    CrushSubTaskMgr(CrushMaster* m) {
+        nCars = fn_801EA994();
+        master = m;
+    }
+    virtual ~CrushSubTaskMgr(void) {}
+    virtual int vf0C(V2* pos, f32* speed, int car, int d, u32* flags);
+    virtual int vf10(V2* pos, f32* speed, int car, int d, u32* flags);
+    virtual void vf24(void);
+    virtual void vf20(void);
+    virtual int vf14(void);
+    virtual int vf1C(void);
+    virtual void vf18(int a, int b);
+    CrushTarget targets[8];  // offset 0x4
+    s32 nCars;               // offset 0x124
+    CrushMaster* master;     // offset 0x128
+};
+}
 
 ModuleTag lbl_8055E390;
 static UnkStatic123s lbl_80430378;
@@ -1034,7 +1046,7 @@ inline CrushMaster::CrushMaster(void) : t174(0.0f), t17C(2.0f), t184(1.5f), t18C
 
 extern "C" CrushMaster* fn_80172C28(void) { return new ("crushmaster") CrushMaster; }
 
-CrushMaster::~CrushMaster(void) {
+inline CrushMaster::~CrushMaster(void) {
     if (sPreRace) {
         delete sPreRace;
     }
@@ -1046,7 +1058,8 @@ CrushMaster::~CrushMaster(void) {
     fn_802CAC54(radarTex);
 }
 
-void CrushMaster::vfF8(void) {
+#pragma dont_inline on
+inline void CrushMaster::vfF8(void) {
     int i;
     ValueNode* t;
     layout.p = (ILayout*)fn_80145E70("crushlyt.val");
@@ -1099,6 +1112,7 @@ void CrushMaster::vfF8(void) {
     fn_802E30C8("crush: timeout %.0f (%.0f->%.0f at (%.0f->%.0f)", timeout, lbl_8043038C.speedA / 0.44444445f,
                 lbl_8043038C.speedB / 0.44444445f, lbl_8043038C.speedATime, lbl_8043038C.speedBTime);
 }
+#pragma dont_inline reset
 
 inline void CrushResults::Reset(void) {
     state = 0;
@@ -1122,7 +1136,7 @@ inline void CrushResults::Reset(void) {
     Stop(s2C);
 }
 
-void CrushResults::Load(void) {
+inline void CrushResults::Load(void) {
     Binding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
@@ -1155,7 +1169,7 @@ void CrushResults::Load(void) {
     s2C = fn_80207848("timeout.sfx", 1);
 }
 
-void CrushMaster::vfFC(void) {
+inline void CrushMaster::vfFC(void) {
     results.Unload();
     layout.Free();
 }
@@ -1167,7 +1181,7 @@ void LayoutRef::Free(void) {
     }
 }
 
-int CrushMaster::vf28(void) { return AliveAI() != 0; }
+inline int CrushMaster::vf28(void) { return AliveAI() != 0; }
 
 int IsLoadingActive(void);
 
@@ -1240,7 +1254,7 @@ inline void CrushMaster::Finish(f32 now) {
     finishTime = now;
 }
 
-void CrushMaster::vf0C(void) {
+inline void CrushMaster::vf0C(void) {
     f32 now = lbl_8055E3C8;
     int i;
     if (!b2B8 && fn_801B306C() < 6.75f) {
@@ -1288,7 +1302,7 @@ void CrushMaster::vf0C(void) {
     }
 }
 
-void CrushMaster::vf10(void) {
+inline void CrushMaster::vf10(void) {
     int i;
     b194 = 0;
     endTime = timeout;
@@ -1313,7 +1327,7 @@ void CrushMaster::vf10(void) {
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 static inline f32 Max0(f32 x) { return 0.0f > x ? 0.0f : x; }
 
-int CrushMaster::vf20(int car) {
+inline int CrushMaster::vf20(int car) {
     CrushCar* c = &cars[car];
     int r = c->active;
     if (r) {
@@ -1322,9 +1336,9 @@ int CrushMaster::vf20(int car) {
     return r;
 }
 
-int CrushMaster::vf24(void) { return finishTime > 0.0f; }
+inline int CrushMaster::vf24(void) { return finishTime > 0.0f; }
 
-int CrushMaster::vf54(void) { return 8; }
+inline int CrushMaster::vf54(void) { return 8; }
 
 static inline V2 FindSpot(const ValVec3* p) {
     V2 c;
@@ -1341,7 +1355,7 @@ static inline void NormV2(V2* d) {
     d->y *= 1.0f / len;
 }
 
-void CrushMaster::vfA8(int car) {
+inline void CrushMaster::vfA8(int car) {
     if (cars[car].active) {
         Respawn r;
         ValVec3 dst;
@@ -1419,7 +1433,7 @@ void CrushMaster::vfA8(int car) {
     }
 }
 
-void CrushMaster::vfB8(ZoneResults* r) {
+inline void CrushMaster::vfB8(ZoneResults* r) {
     ZoneResults::Entry* e;
     int i;
     r->nCars = nCars;
@@ -1433,7 +1447,7 @@ void CrushMaster::vfB8(ZoneResults* r) {
     }
 }
 
-void CrushMaster::vf44(void) {
+inline void CrushMaster::vf44(void) {
     if (fn_801B306C() < 0.0f && !IsLoadingActive()) {
         int n = fn_801EA994();
         int i;
@@ -1445,7 +1459,7 @@ void CrushMaster::vf44(void) {
     }
 }
 
-int CrushMaster::vfA0(StartPos* out, int idx) {
+inline int CrushMaster::vfA0(StartPos* out, int idx) {
     if (idx < spawns.count) {
         V2* p = &spawns.data[idx];
         V2 d;
@@ -1474,9 +1488,11 @@ static inline f32 Ease(f32 t) {
     }
 }
 
-extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
+extern "C" {
+static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
+}
 
-void CrushMaster::vf4C(int view) {
+inline void CrushMaster::vf4C(int view) {
     int car = fn_801E866C(view);
     int radar = 1;
     if (!lbl_8043038C.alwaysRadar && !fn_80171D38(view)) {
@@ -1556,7 +1572,7 @@ void CrushMaster::vf4C(int view) {
     UpdateScoreOverlays(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
 }
 
-extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
+extern "C" static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
     TextElem* a = l->Find(from);
     TextElem* b = l->Find(to);
     TextElem e;
@@ -1580,13 +1596,13 @@ extern "C" void fn_80175080(ILayout* l, const char* from, const char* to, f32 t,
     }
 }
 
-void CrushMaster::vf50(int p) { vf4C(p); }
+inline void CrushMaster::vf50(int p) { vf4C(p); }
 
-f32 CrushMaster::vf38(void) { return 7.75f; }
+inline f32 CrushMaster::vf38(void) { return 7.75f; }
 
-int CrushMaster::vf64(void) { return 1; }
+inline int CrushMaster::vf64(void) { return 1; }
 
-int CrushMaster::vf5C(int p) {
+inline int CrushMaster::vf5C(int p) {
     fn_801E866C(p);
     if (t17C.Running()) {
         vf4C(p);
@@ -1604,9 +1620,9 @@ int CrushMaster::vf5C(int p) {
     return results.state != 4;
 }
 
-int CrushMaster::vf68(void) { return results.state == 2; }
+inline int CrushMaster::vf68(void) { return results.state == 2; }
 
-int CrushMaster::vf8C(int p, int key) {
+inline int CrushMaster::vf8C(int p, int key) {
     int r = 0;
     if (vf68() && key == 'X') {
         if (results.state == 2) {
@@ -1641,7 +1657,7 @@ static inline void Blend(const TextElem* a, const TextElem* b, const char* text,
 
 static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
 
-int CrushMaster::vf3C(int view) {
+inline int CrushMaster::vf3C(int view) {
     f32 t = fn_801E7E3C()->time;
     f32 end0 = 6.75f;
     f32 in0 = end0 - 0.8f;
@@ -1767,7 +1783,7 @@ static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
     t->until = dur + lbl_8055E3C8;
 }
 
-int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags) {
+inline int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags) {
     CrushTarget* t = &targets[car];
     *flags = 0x21F;
     pos->x = t->x;
@@ -1777,7 +1793,7 @@ int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags) {
 }
 
 extern const f32 lbl_80561AF0;  // 50.0f
-int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
+inline int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
     RaceCarRec* rec = fn_8017960C(car);
     ValVec3 p;
     p.x = rec->mtx.origin.x + rec->mtx.basis[2].x * lbl_80561AF0;
@@ -1790,7 +1806,7 @@ int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
     return 1;
 }
 
-void CrushSubTaskMgr::vf24(void) {
+inline void CrushSubTaskMgr::vf24(void) {
     int i;
     for (i = 0; i < nCars; i++) {
         f32 a0;
@@ -1808,7 +1824,7 @@ void CrushSubTaskMgr::vf24(void) {
     }
 }
 
-void CrushSubTaskMgr::vf20(void) {
+inline void CrushSubTaskMgr::vf20(void) {
     int i;
     for (i = 0; i < nCars; i++) {
         CrushTarget* t = &targets[i];
@@ -1841,11 +1857,11 @@ void CrushSubTaskMgr::vf20(void) {
     }
 }
 
-int CrushSubTaskMgr::vf14(void) { return 0; }
+inline int CrushSubTaskMgr::vf14(void) { return 0; }
 
-int CrushSubTaskMgr::vf1C(void) { return 0; }
+inline int CrushSubTaskMgr::vf1C(void) { return 0; }
 
-void CrushSubTaskMgr::vf18(int a, int b) {
+inline void CrushSubTaskMgr::vf18(int a, int b) {
     if (master->vf20(a) && master->vf20(b)) {
         int victim = -1;
         if (fn_80171EC0(a)) {
