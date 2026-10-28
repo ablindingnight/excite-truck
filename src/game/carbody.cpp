@@ -459,10 +459,47 @@ void fn_801836DC(void) {}
 
 }  // extern "C"
 
+class CarHost {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void Unimpair(void);   // 0x34
+    virtual int IsImpaired(void);  // 0x38
+};
+
+struct BVec {
+    BVec(void) {}
+    BVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    f32 x, y, z;
+};
+
+static inline void Scale(BVec* o, const BVec* a, f32 k) {
+    o->x = a->x * k;
+    o->y = a->y * k;
+    o->z = a->z * k;
+}
+
 // A sub-object owned by the body, destroyed through its virtual destructor.
 class CbPart {
 public:
     virtual ~CbPart(void);
+    virtual void Update(int impaired);  // 0x0C
+};
+
+// Body effects at 0x2580/0x2584, updated every frame.
+class CbFx {
+public:
+    virtual ~CbFx(void);
+    virtual void Update(void);  // 0x0C
 };
 
 extern "C" void fn_801D1100(u8* p);
@@ -520,7 +557,88 @@ void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
 
 void fn_80186DE8(u8* p) {}  // stub (1830)
 
-void fn_80188A80(u8* p) {}  // stub (233)
+void vf20__10CollVolumeFv(u8* p);
+extern f32 lbl_80561CAC;  // 0.0
+extern f32 lbl_80561CDC;  // 0.5
+extern f32 lbl_80561D90;  // -5.0
+extern f32 lbl_80561D9C;  // 1/60 s
+extern f32 lbl_80561DE4;  // -1.0
+extern f32 lbl_80561E5C;  // -1.5
+extern f32 lbl_80561EE0;  // 0.5/60
+extern f32 lbl_80561EE4;  // -100.0
+extern f32 lbl_80561EE8;  // 0.95
+extern f32 lbl_80561EEC;  // 1 - 0.95
+extern f32 lbl_80561EF0;  // 15 degrees
+extern f32 lbl_80561EF4;  // -2.5 degrees
+
+static inline f32 SwayMin(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 SwayMax(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 SwayDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// o = a + b * k
+static inline void AddScaled(BVec* o, const BVec* a, const BVec* b, f32 k) {
+    o->x = a->x + b->x * k;
+    o->y = a->y + b->y * k;
+    o->z = a->z + b->z * k;
+}
+
+// v times the body rotation (rows at 0x3C).
+static inline void SwayRotate(BVec* out, const BVec* v, const f32* m) {
+    if (out == v) {
+        f32 x = SwayDot(v->x, m[0], v->y, m[1], v->z, m[2]);
+        f32 y = SwayDot(v->x, m[3], v->y, m[4], v->z, m[5]);
+        f32 z = SwayDot(v->x, m[6], v->y, m[7], v->z, m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = SwayDot(v->x, m[0], v->y, m[1], v->z, m[2]);
+        out->y = SwayDot(v->x, m[3], v->y, m[4], v->z, m[5]);
+        out->z = SwayDot(v->x, m[6], v->y, m[7], v->z, m[8]);
+    }
+}
+
+// Per-frame body update: the effect parts, the settle timer, and the body sway, a damped spring
+// (velocity 0x2654, angle 0x2660) driven by the filtered body-space acceleration (0x266C); only the
+// pitch is kept, held between -2.5 and 15 degrees.
+void fn_80188A80(u8* p) {
+    BVec a;
+    BVec f;
+    vf20__10CollVolumeFv(p);
+    if (*(CbPart**)(p + 0x257C)) {
+        (*(CbPart**)(p + 0x257C))->Update(((CarHost*)PTR(p, 0x270))->IsImpaired());
+    }
+    if (*(CbFx**)(p + 0x2580)) {
+        (*(CbFx**)(p + 0x2580))->Update();
+    }
+    if (*(CbFx**)(p + 0x2584)) {
+        (*(CbFx**)(p + 0x2584))->Update();
+    }
+    if (F32(p, 0x269C) < lbl_80561CDC) {
+        F32(p, 0x269C) = F32(p, 0x269C) + lbl_80561D9C;
+    } else {
+        F32(p, 0x2694) = SwayMin(F32(p, 0x2690), lbl_80561EE0 + F32(p, 0x2694));
+    }
+    BVec* vel = (BVec*)(p + 0x2654);
+    BVec* ang = (BVec*)(p + 0x2660);
+    BVec* acc = (BVec*)(p + 0x266C);
+    SwayRotate(&a, (BVec*)(p + 0x16C), (f32*)(p + 0x3C));
+    Scale(&a, &a, lbl_80561DE4);
+    AddScaled(&f, &a, acc, lbl_80561E5C);
+    AddScaled(&f, &f, vel, lbl_80561D90);
+    AddScaled(&f, &f, ang, lbl_80561EE4);
+    AddScaled(vel, vel, &f, lbl_80561D9C);
+    AddScaled(ang, ang, vel, lbl_80561D9C);
+    Scale(acc, acc, lbl_80561EE8);
+    AddScaled(acc, acc, &a, lbl_80561EEC);
+    acc->z = lbl_80561CAC;
+    acc->y = lbl_80561CAC;
+    if (ang->z < lbl_80561EF4) {
+        ang->z = lbl_80561EF4;
+        vel->z = SwayMax(vel->z, lbl_80561CAC);
+    }
+    ang->z = SwayMin(lbl_80561EF0, ang->z);
+}
 
 u32 fn_80188E24(u8* p) { return 0; }
 
@@ -583,22 +701,6 @@ public:
     void Fetch(int id);
 };
 
-class CarHost {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void Unimpair(void);   // 0x34
-    virtual int IsImpaired(void);  // 0x38
-};
 
 extern u8* lbl_8055E908;
 
@@ -803,18 +905,6 @@ void fn_8018A750(u8* p) {
 }
 
 }  // extern "C"
-
-struct BVec {
-    BVec(void) {}
-    BVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    f32 x, y, z;
-};
-
-static inline void Scale(BVec* o, const BVec* a, f32 k) {
-    o->x = a->x * k;
-    o->y = a->y * k;
-    o->z = a->z * k;
-}
 
 extern "C" {
 double fmod(double x, double y);
