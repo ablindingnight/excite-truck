@@ -126,6 +126,7 @@ public:
     void OnHit(const RVec3* a, const RVec3* b, int c, void* d);
     void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
     int vf34(struct RPacket* pk);
+    void ClearImpulses(void);
 };
 
 class CarBody : public RigidBody {
@@ -505,6 +506,12 @@ struct CVec4 {
     f32 x, y, z, w;
 };
 
+class CarGear {
+public:
+    void Fetch(int id);
+    void Clear(int id);
+};
+
 // A sub-object owned by the body, destroyed through its virtual destructor.
 class CbPart {
 public:
@@ -683,7 +690,129 @@ void fn_80189C64(u8* p) {
     F32(p, 0x26A8) = lbl_80561CAC;
 }
 
-void fn_80189CB4(u8* p) {}  // stub (245)
+// A collision shape of the body (slots at 0x14, count at 0x24).
+class CbShape {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void Reset(void);  // 0x48
+};
+
+static inline CbShape* ShapeAt(u8* p, int i) {
+    if (i >= 0 && i < S32(p, 0x24)) {
+        return ((CbShape**)(p + 0x14))[i];
+    }
+    return 0;
+}
+
+// A 3x4 frame: rotation rows, then the position.
+struct CbFrame {
+    BVec rows[3];
+    BVec pos;
+};
+
+static inline f32 PlaceDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void PlaceRotate(BVec* out, const BVec* v, const CbFrame* m) {
+    if (out == v) {
+        f32 x = PlaceDot(v->x, m->rows[0].x, v->y, m->rows[1].x, v->z, m->rows[2].x);
+        f32 y = PlaceDot(v->x, m->rows[0].y, v->y, m->rows[1].y, v->z, m->rows[2].y);
+        f32 z = PlaceDot(v->x, m->rows[0].z, v->y, m->rows[1].z, v->z, m->rows[2].z);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = PlaceDot(v->x, m->rows[0].x, v->y, m->rows[1].x, v->z, m->rows[2].x);
+        out->y = PlaceDot(v->x, m->rows[0].y, v->y, m->rows[1].y, v->z, m->rows[2].y);
+        out->z = PlaceDot(v->x, m->rows[0].z, v->y, m->rows[1].z, v->z, m->rows[2].z);
+    }
+}
+
+void fn_801E9DD0(s16* surface, f32 x, f32 z);
+void fn_801BE400(s32 car, CbFrame* frame, f32 a);
+void fn_801B30C0(s32 car, void* start, s32 reset);
+void fn_8026A394(u8* p, s32 n, s32 c);
+f32 PSVECDotProduct(const void* a, const void* b);
+f32 PSVECMag(const void* v);
+void fn_8018A750(u8* p);
+
+// Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
+// 0x3C and the surface at 0x40) at rest: clears the impulses, wheel loads and gear state.
+void fn_80189CB4(u8* p, u8* s) {
+    CbFrame frame;
+    BVec off;
+    BVec rotated;
+    F32(p, 0x130) = 0.0f;
+    F32(p, 0x134) = 0.0f;
+    F32(p, 0x138) = 0.0f;
+    F32(p, 0x13C) = 0.0f;
+    F32(p, 0x140) = 0.0f;
+    F32(p, 0x144) = 0.0f;
+    ((RigidBody*)p)->ClearImpulses();
+    fn_80189C64(p);
+    frame = *(CbFrame*)s;
+    Scale(&off, (BVec*)(p + 0x30), lbl_80561DE4);
+    PlaceRotate(&rotated, &off, &frame);
+    frame.pos.x = frame.pos.x + rotated.x;
+    frame.pos.y = frame.pos.y + rotated.y;
+    frame.pos.z = frame.pos.z + rotated.z;
+    *(CbFrame*)(p + 0x3C) = frame;
+    ((CollVolume*)p)->Update();
+    f32 vx = F32(s, 0x30);
+    f32 vy = F32(s, 0x34);
+    f32 vz = F32(s, 0x38);
+    F32(p, 0x2A4) = vx;
+    F32(p, 0x2A8) = vy;
+    F32(p, 0x2AC) = vz;
+    F32(p, 0x118) = vx;
+    F32(p, 0x11C) = vy;
+    F32(p, 0x120) = vz;
+    F32(p, 0x124) = 0.0f;
+    F32(p, 0x128) = 0.0f;
+    F32(p, 0x12C) = 0.0f;
+    F32(p, 0x25D8) = F32(p, 0x25CC) = PSVECDotProduct(p + 0x118, p + 0x54);
+    F32(p, 0x261C) = F32(p, 0x25D4) = PSVECMag(p + 0x118);
+    F32(p, 0x16C) = 0.0f;
+    F32(p, 0x170) = 0.0f;
+    F32(p, 0x174) = 0.0f;
+    F32(p, 0x26B4) = 0.0f;
+    F32(p, 0x26B8) = 0.0f;
+    F32(p, 0x26BC) = 0.0f;
+    *(s16*)(p + 0x6C) = *(s16*)(s + 0x40);
+    fn_801E9DD0((s16*)(p + 0x6C), frame.pos.x, frame.pos.z);
+    ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Clear(S32(p, 0x1EC));
+    fn_801BE400(S32(p, 0x1EC), &frame, F32(p, 0x25CC));
+    fn_801B30C0(S32(p, 0x1EC), 0, S32(s, 0x3C));
+    for (int i = 0; i < S32(p, 0x24); i++) {
+        ShapeAt(p, i)->Reset();
+    }
+    for (int w = 0; w < 4; w++) {
+        F32(p, 0x23AC + w * 0x74) = 0.0f;
+        F32(p, 0x2414 + w * 0x74) = 0.0f;
+    }
+    fn_8018A750(p);
+    s32 n = S32(p, 0x26D4);
+    S32(p, 0x2638) = 0;
+    F32(p, 0x2628) = 0.0f;
+    F32(p, 0x262C) = 0.0f;
+    U8(p, 0x2640) = 0;
+    S32(p, 0x26D4) = n + 1;
+    fn_8026A394(p, n, 0);
+}
 
 void fn_8018A088(u8* p) {}
 
@@ -713,10 +842,6 @@ public:
     void Fetch(int id);
 };
 
-class CarGear {
-public:
-    void Fetch(int id);
-};
 
 
 extern u8* lbl_8055E908;
