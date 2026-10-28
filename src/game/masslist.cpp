@@ -37,7 +37,8 @@ struct MassSet {
     MVec4 quat;     // offset 0x40
     MVec4 vel;      // offset 0x50
     MVec4 v60;      // offset 0x60
-    u8 pad70[0x30];
+    u8 pad70[0x20];
+    MVec4 v90;      // offset 0x90
     MVec4 vA0;      // offset 0xA0
 };
 
@@ -48,7 +49,9 @@ struct ContactPt {
 
 struct ContactSet {
     ContactSet(void);
-    u8 pad0[0x30];
+    MVec4 v0;             // offset 0x0
+    MVec4 v10;            // offset 0x10
+    MVec4 v20;            // offset 0x20
     MVec4 v30;            // offset 0x30
     ContactPt pts[13];    // offset 0x40
     ContactPt nrm[4];     // offset 0x110, per-wheel contact plane normal
@@ -60,7 +63,9 @@ struct ContactSet {
 
 struct CrossSet {
     CrossSet(void);
-    u8 data[0x190];
+    MVec4 pts[7];    // offset 0x0, body-space contact points
+    MVec4 v70;       // offset 0x70
+    u8 pad80[0x110];
 };
 
 struct CxEntry {
@@ -235,7 +240,75 @@ void fn_801BE168(int car, const ValMatrix* mtx, const MVec3* vel, const MVec3* a
     s->v60 = MVec4(avel->x, avel->y, avel->z);
 }
 
-void fn_801BE400(void) {}
+static inline f32 Dot3(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
+
+static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
+    const f32* r = &m->basis[0].x;
+    if (out == in) {
+        f32 x = Dot3(in->x, r[0], in->y, r[3], in->z, r[6]);
+        f32 y = Dot3(in->x, r[1], in->y, r[4], in->z, r[7]);
+        f32 z = Dot3(in->x, r[2], in->y, r[5], in->z, r[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, r[0], in->y, r[3], in->z, r[6]);
+        out->y = Dot3(in->x, r[1], in->y, r[4], in->z, r[7]);
+        out->z = Dot3(in->x, r[2], in->y, r[5], in->z, r[8]);
+    }
+}
+
+// NonMatching: 441/443; the target copies x->v70 through two more temporaries (frame 32 bytes larger).
+// Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
+// contact points moved into place.
+void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
+    MassSet* s = &lbl_8055E794[car];
+    ContactSet* c = &lbl_8055E798[car];
+    CxEntry* e = &lbl_8055E7A4[car];
+    CrossSet* x = &lbl_8055E79C[car];
+    MVec4 q;
+    s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
+    MtxToQuat(mtx, &q);
+    s->quat = MVec4(-q.x, -q.y, -q.z, q.w);
+    s->rot[0] = MVec4(mtx->basis[0].x, mtx->basis[0].y, mtx->basis[0].z);
+    s->rot[1] = MVec4(mtx->basis[1].x, mtx->basis[1].y, mtx->basis[1].z);
+    s->rot[2] = MVec4(mtx->basis[2].x, mtx->basis[2].y, mtx->basis[2].z);
+    s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
+    s->v90 = MVec4(0.0f, 0.0f, 0.0f);
+    MVec3 v;
+    v.x = mtx->basis[2].x * a;
+    v.y = mtx->basis[2].y * a;
+    v.z = mtx->basis[2].z * a;
+    s->vel = MVec4(v.x, v.y, v.z);
+    s->v60 = MVec4(0.0f, 0.0f, 0.0f);
+    MVec4 k = x->v70;
+    c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);
+    *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    for (int i = 0; i < 4; i++) {
+        *(MVec4*)&c->nrm[i] = MVec4(0.0f, 1.0f, 0.0f, -100.0f);
+        *(MVec4*)&c->ref[i] = MVec4(0.0f, -100.0f, 0.0f);
+        *(MVec4*)&c->pts[9 + i] = MVec4(0.0f, 0.0f, 0.0f);
+        *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+        MVec3 in;
+        in.x = x->pts[i].x;
+        in.y = x->pts[i].y;
+        in.z = x->pts[i].z;
+        MVec3 out;
+        MulVec(&out, &in, mtx);
+        out.x += mtx->origin.x;
+        out.y += mtx->origin.y;
+        out.z += mtx->origin.z;
+        *(MVec4*)&c->pts[i] = MVec4(out.x, out.y, out.z);
+    }
+    memset(e, 0, sizeof(CxEntry));
+    fn_801E9DC4(e);
+    lbl_8055E7A8 = 1;
+}
 
 void fn_801BEAEC(int car, int i, MVec3* out) {
     const MVec3* p = &lbl_8055E798[car].pts[i].p;
