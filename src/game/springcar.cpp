@@ -64,6 +64,7 @@ struct Lift {
 
 struct SpringWall {
     void Apply(SpringCar* car, TVec* acc);
+    bool Free(void) const { return owner == 0; }
     void Set(WallObj* w, SpringCar* car, const TVec* other);
 
     TVec n;           // offset 0x0
@@ -460,7 +461,7 @@ static f32 PlaneDist(const TVec* n, const TVec* p, const TVec* o) {
 }
 
 void SpringWall::Set(WallObj* w, SpringCar* car, const TVec* other) {
-    if (owner == 0) {
+    if (Free()) {
         TVec p;
         f32 k;
         n = *(TVec*)w->plane;
