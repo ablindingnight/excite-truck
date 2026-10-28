@@ -220,6 +220,19 @@ struct ScoreRow {
     u8 pad4[0x10];
 };
 
+// Three rows of one table.
+struct ScoreTrio {
+    ScoreTrio(void) {
+        memset(r[0].name.s, 'z', 3);
+        r[0].name.s[3] = 0;
+        memset(r[1].name.s, 'z', 3);
+        r[1].name.s[3] = 0;
+        memset(r[2].name.s, 'z', 3);
+        r[2].name.s[3] = 0;
+    }
+    ScoreRow r[3];
+};
+
 // The results screen's state (0x2C0 in AwardsMgr).
 struct Results {
     Results(void);
@@ -230,7 +243,7 @@ struct Results {
     s32 f10;            // offset 0x10
     s32 f14;            // offset 0x14
     u8 pad18[8];
-    ScoreRow rows[15];  // offset 0x20
+    ScoreTrio rows[5];  // offset 0x20
     ScoreRow best[5];   // offset 0x14C
     u8 pad1B0[0x50];
     Initials i200;      // offset 0x200
@@ -704,15 +717,7 @@ void fn_801CC768(LayoutObj* l, f32 speed) {
 
 StatHandler** fn_801CC784(HandlerVec* v) { return &v->data[v->n++]; }
 
-Results::Results(void) {
-    f8 = 0;
-    fC = 0;
-    f10 = 0;
-    f14 = 0;
-    for (ScoreRow* p = rows; p < rows + 15; p++) {
-        memset(p->name.s, 'z', 3);
-        p->name.s[3] = 0;
-    }
+Results::Results(void) : f8(0), fC(0), f10(0), f14(0) {
     memset(best[0].name.s, 'z', 3);
     best[0].name.s[3] = 0;
     memset(best[1].name.s, 'z', 3);
