@@ -68,14 +68,13 @@ void fn_8023FE20(void) {
     j[1].id = -1;
 }
 
+// Number of joined players.
 int fn_8023FE34(void) {
-    JoinSlot* j = lbl_80498828;
     int n = 0;
-    if (j[0].id >= 0) {
-        n = 1;
-    }
-    if (j[1].id >= 0) {
-        n++;
+    for (int i = 0; i < 2; i++) {
+        if (lbl_80498828[i].id >= 0) {
+            n++;
+        }
     }
     return n;
 }
