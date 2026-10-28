@@ -435,6 +435,8 @@ struct Bin {
 
 extern "C" {
 
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+
 int fn_8015F848(Bin* bins, f32 range) {
     int i;
     int last = -1;
@@ -447,7 +449,7 @@ int fn_8015F848(Bin* bins, f32 range) {
                 Bin* a = &bins[last];
                 Bin* b = &bins[i];
                 for (; last <= i; last++) {
-                    bins[last].dist = MIN(a->dist, b->dist);
+                    bins[last].dist = MinF(a->dist, b->dist);
                 }
             }
             last = i;

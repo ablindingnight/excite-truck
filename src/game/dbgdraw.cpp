@@ -118,6 +118,12 @@ u32 fn_801E36F0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
 
 // Wire box of the unit cube [-1,1]^3 placed by the frame: c0 for the -z face, c1 for the edges along z
 // and the +z face.
+static inline void DbgStep(DVec3* p, const DVec3* d, f32 k) {
+    p->x += d->x * k;
+    p->y += d->y * k;
+    p->z += d->z * k;
+}
+
 void fn_801E370C(const DFrame* m, u32 c0, u32 c1) {
     fn_802C8BD0(lbl_8055EA6C);
     if (fn_802C8DBC(0x11)) {
@@ -135,38 +141,24 @@ void fn_801E370C(const DFrame* m, u32 c0, u32 c1) {
             pos.y += m->pos.y;
             pos.z += m->pos.z;
             fn_802C8E00(c0, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-            pos.x += m->z.x * 2.0f;
-            pos.y += m->z.y * 2.0f;
-            pos.z += m->z.z * 2.0f;
+            DbgStep(&pos, &m->z, 2.0f);
             fn_802C8E00(c1, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
         }
-        pos.x += m->x.x * 2.0f;
-        pos.y += m->x.y * 2.0f;
-        pos.z += m->x.z * 2.0f;
+        DbgStep(&pos, &m->x, 2.0f);
         fn_802C8E00(c1, 0, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.y = pos.y + m->y.y * 2.0f + m->x.y * -2.0f;
-        pos.x = pos.x + m->y.x * 2.0f + m->x.x * -2.0f;
-        pos.z = pos.z + m->y.z * 2.0f + m->x.z * -2.0f;
+        DbgStep(&pos, &m->y, 2.0f);
+        DbgStep(&pos, &m->x, -2.0f);
         fn_802C8E00(c1, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x += m->x.x * 2.0f;
-        pos.y += m->x.y * 2.0f;
-        pos.z += m->x.z * 2.0f;
+        DbgStep(&pos, &m->x, 2.0f);
         fn_802C8E00(c1, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x += m->z.x * -2.0f;
-        pos.y += m->z.y * -2.0f;
-        pos.z += m->z.z * -2.0f;
+        DbgStep(&pos, &m->z, -2.0f);
         fn_802C8E00(c0, 0, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x += m->x.x * -2.0f;
-        pos.y += m->x.y * -2.0f;
-        pos.z += m->x.z * -2.0f;
+        DbgStep(&pos, &m->x, -2.0f);
         fn_802C8E00(c0, 0, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x = pos.x + m->y.x * -2.0f + m->x.x * 2.0f;
-        pos.y = pos.y + m->y.y * -2.0f + m->x.y * 2.0f;
-        pos.z = pos.z + m->y.z * -2.0f + m->x.z * 2.0f;
+        DbgStep(&pos, &m->y, -2.0f);
+        DbgStep(&pos, &m->x, 2.0f);
         fn_802C8E00(c0, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
-        pos.x += m->x.x * -2.0f;
-        pos.y += m->x.y * -2.0f;
-        pos.z += m->x.z * -2.0f;
+        DbgStep(&pos, &m->x, -2.0f);
         fn_802C8E00(c0, 1, pos.x, pos.y, pos.z, 0.0f, 0.0f);
         fn_802C8E48();
     }
