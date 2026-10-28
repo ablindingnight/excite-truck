@@ -3,7 +3,7 @@
 // a value that beats them queues a "live update" pop-up (awards_lyt.val). It also takes the place, score,
 // grade and race time once per race, feeds achievements and the high-score table, and runs the records
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
-// animation update/draw and the pop-up draw are placeholders. Names are guesses apart from the strings.
+// animation setup (fn_801CDE00) and the pop-up draw are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
 
 extern "C" {
@@ -20,6 +20,11 @@ void* fn_8023512C(const char* name);
 void* fn_80207848(const char* name, int a);
 int fn_801EA994(void);
 void fn_802E317C(const char* fmt, ...);  // fatal
+const char* fn_80131234(const char* key);  // localize
+void fn_801308F4(char* buf, s32 size, s32 value);  // format a score
+void fn_80130978(char* buf, int size, f32 v);      // format a time
+extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
 }
 
 int OptE3Demo(void);
@@ -35,9 +40,21 @@ void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
 struct HighScore {
-    u8 pad0[0x8];
+    u8 pad0[0x4];
+    s32 score;  // offset 0x4
     s32 grade;  // offset 0x8
+    f32 time;   // offset 0xC
 };
+
+struct EventInfo {
+    u8 pad0[0x8];
+    u32 kind;  // offset 0x8
+};
+
+EventInfo* GetEvent(int event);
+int StatsGetHighScoreCount(int slot, long event, long difficulty);
+const char* GetGradeDisplayName(int grade);
+const char* IdentGetSlotName(int slot);
 
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int a);
 
@@ -83,6 +100,7 @@ public:
 class RealStatistic : public Statistic {
 public:
     RealStatistic(int slot, u32 type, long event, int difficulty);
+    f32 GetValue(void);
     int IsNewRecord(f32 v);
     void SetValue(f32 v);
 };
@@ -90,7 +108,10 @@ public:
 class ArtPlayer {
 public:
     ~ArtPlayer(void);
+    void Start(int i);
+    void Pause(int i);
     void StopAll(void);
+    void Update(void);
     void Draw(int a);
 };
 
@@ -209,49 +230,63 @@ struct HandlerVec {
     s32 cap;             // offset 0x8
 };
 
-// Three-letter initials, "zzz" when empty.
-struct Initials {
-    char s[4];
-};
-
-// One high-score row: initials then score data.
-struct ScoreRow {
-    Initials name;  // offset 0x0
-    u8 pad4[0x10];
-};
-
-// Three rows of one table.
-struct ScoreTrio {
-    ScoreTrio(void) {
-        memset(r[0].name.s, 'z', 3);
-        r[0].name.s[3] = 0;
-        memset(r[1].name.s, 'z', 3);
-        r[1].name.s[3] = 0;
-        memset(r[2].name.s, 'z', 3);
-        r[2].name.s[3] = 0;
+static inline void StrCopyN(char* d, int n, const char* s) {
+    char* p = d;
+    int k = n;
+    const char* q = s;
+    while ((*p++ = *q++) != 0) {
+        if (--k <= 0) {
+            p[-1] = 0;
+            break;
+        }
     }
-    ScoreRow r[3];
+}
+
+// A fixed-size string; new ones read "zzz" until they are filled in.
+template <int N>
+struct FixedStr {
+    FixedStr(void) {
+        memset(s, 'z', 3);
+        s[3] = 0;
+    }
+    void Set(const char* t) { StrCopyN(s, N, t); }
+    char s[N];
 };
 
-// The results screen's state (0x2C0 in AwardsMgr).
+struct Vec4 {
+    f32 x, y, z, w;
+};
+
+// One high-score table row as shown.
+struct RecordRow {
+    FixedStr<20> score;  // offset 0x0
+    FixedStr<20> grade;  // offset 0x14
+    FixedStr<20> time;   // offset 0x28
+};
+
+// The records animation (awards_pr.val, "records_anim").
 struct Results {
     Results(void);
-    s32 state;          // offset 0x0
-    s32 f4;             // offset 0x4
-    s32 f8;             // offset 0x8
-    s32 fC;             // offset 0xC
-    s32 f10;            // offset 0x10
-    s32 f14;            // offset 0x14
-    u8 pad18[8];
-    ScoreTrio rows[5];  // offset 0x20
-    ScoreRow best[5];   // offset 0x14C
-    u8 pad1B0[0x50];
-    Initials i200;      // offset 0x200
-    u8 pad204[0x60];
-    Initials i264;      // offset 0x264
-    u8 pad268[0xE];
-    Initials i276;      // offset 0x276
-    u8 pad27A[0x42];
+    s32 state;                  // offset 0x0
+    f32 t;                      // offset 0x4
+    ArtPlayer* anim;            // offset 0x8
+    LayoutObj* bar;             // offset 0xC "player_bar"
+    LayoutObj* recordLand;      // offset 0x10
+    LayoutObj* fail;            // offset 0x14
+    s32 n;                      // offset 0x18
+    s32 animId;                 // offset 0x1C
+    RecordRow rows[5];          // offset 0x20
+    FixedStr<20> score;         // offset 0x14C
+    FixedStr<20> grade;         // offset 0x160
+    FixedStr<20> time;          // offset 0x174
+    FixedStr<20> recordTime;    // offset 0x188
+    FixedStr<100> recordTitle;  // offset 0x19C
+    FixedStr<100> newRecordTitle;  // offset 0x200
+    FixedStr<18> name;          // offset 0x264
+    FixedStr<64> timeHeading;   // offset 0x276
+    Vec4 scales[4];             // offset 0x2B8
+    Vec4 rowScales[5];          // offset 0x2F8
+    Vec4 nameScale;             // offset 0x348
 };
 
 // The popup queue: head and the link to append at.
@@ -259,10 +294,6 @@ struct PopupQueue {
     PopupQueue(void);
     Popup* head;   // offset 0x0
     Popup** tail;  // offset 0x4
-};
-
-struct Vec4 {
-    f32 x, y, z, w;
 };
 
 namespace {
@@ -287,8 +318,7 @@ struct AwardsMgr {
     s32 rank;                 // offset 0x2B4
     f32 time;                 // offset 0x2B8
     u8 hasTime;               // offset 0x2BC
-    Results results;          // offset 0x2C0 (state), 0x2C4 f32 ...
-    u8 pad57C[0x9C];
+    Results results;          // offset 0x2C0
 };
 
 }  // namespace
@@ -628,11 +658,138 @@ extern "C" {
 
 extern "C" void IL_Use(int k, ...);
 
-// Records animation update (placeholder; keeps its strings in the pool).
+static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
+// Records animation update: fills the texts once, then plays the bar in, pauses it at the new place and
+// grows the record rows.
 void fn_801CBD48(Results* r, AwardsMgr* m) {
-    IL_Use(0, "RecordsAnim:NEW_TIME_RECORD", "RecordsAnim:NEW_EXTRA_TIME_RECORD", "RecordsAnim:TIME_RECORD",
-           "RecordsAnim:EXTRA_TIME_RECORD", "RecordsAnim:TIME", "RecordsAnim:EXTRA_TIME",
-           "RecordsAnimation: invalid state %d");
+    if (!r->anim || !lbl_8055E884) {
+        return;
+    }
+    RealStatistic rec(IdentGetCurrentSlot(), 0x20507, m->event, m->difficulty);
+    int normal = GetEvent(m->event)->kind == 0x180302;
+    const char* newTitle = normal ? fn_80131234("RecordsAnim:NEW_TIME_RECORD")
+                                  : fn_80131234("RecordsAnim:NEW_EXTRA_TIME_RECORD");
+    const char* title = normal ? fn_80131234("RecordsAnim:TIME_RECORD")
+                               : fn_80131234("RecordsAnim:EXTRA_TIME_RECORD");
+    if (normal) {
+        r->timeHeading.Set(fn_80131234("RecordsAnim:TIME"));
+    } else {
+        r->timeHeading.Set(fn_80131234("RecordsAnim:EXTRA_TIME"));
+    }
+    if (lbl_8055E884->hasTime && rec.IsNewRecord(lbl_8055E884->time)) {
+        r->recordTitle.Set("");
+        r->newRecordTitle.Set(newTitle);
+        fn_80130978(r->recordTime.s, 20, lbl_8055E884->time);
+    } else {
+        r->newRecordTitle.Set("");
+        r->recordTitle.Set(title);
+        if (rec.HasValue()) {
+            fn_80130978(r->recordTime.s, 20, rec.GetValue());
+        } else {
+            fn_80130978(r->recordTime.s, 20, -lbl_80558DC0[0]);
+        }
+    }
+    fn_801308F4(r->score.s, 20, lbl_8055E884->score);
+    r->grade.Set(lbl_8055E884->grade != -1 ? GetGradeDisplayName(lbl_8055E884->grade) : "");
+    if (lbl_8055E884->hasTime) {
+        fn_80130978(r->time.s, 20, lbl_8055E884->time);
+    } else {
+        fn_80130978(r->time.s, 20, -lbl_80558DC0[0]);
+    }
+    StatsGetHighScoreCount(IdentGetCurrentSlot(), m->event, m->difficulty);
+    for (int i = 0; i < 5; i++) {
+        HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, i);
+        RecordRow* row = &r->rows[i];
+        if (h) {
+            fn_801308F4(row->score.s, 20, h->score);
+            row->grade.Set(h->grade != -1 ? GetGradeDisplayName(h->grade) : "");
+            fn_80130978(row->time.s, 20, h->time);
+        } else {
+            row->score.Set("-");
+            row->grade.Set("-");
+            fn_80130978(row->time.s, 20, -lbl_80558DC0[0]);
+        }
+    }
+    r->name.Set(IdentGetSlotName(IdentGetCurrentSlot()));
+    int rank = lbl_8055E884->rank;
+    int ranked = 0;
+    if (rank >= 0 && rank < sizeof(r->rows) / sizeof(r->rows[0])) {
+        ranked = 1;
+    }
+    switch (r->state) {
+    case 0:
+        r->anim->Start(r->animId);
+        r->state = 1;
+        break;
+    case 1:
+        if (r->n) {
+            LayoutObj* bar = r->bar;
+            if (bar) {
+                bar->b4A = 0;
+                bar->b4B = 1;
+                bar->b49 = 1;
+            }
+            if (lbl_8055E884->rank < 0 || r->n - 1 <= lbl_8055E884->rank) {
+                r->anim->Pause(r->animId);
+                bar = r->bar;
+                if (bar) {
+                    bar->b4A = 1;
+                    bar->b4C = 0;
+                }
+                if (ranked) {
+                    LayoutObj* o = r->recordLand;
+                    if (o) {
+                        o->b49 = 1;
+                        o->b4B = 0;
+                        o->b4A = 0;
+                    }
+                } else {
+                    LayoutObj* o = r->fail;
+                    if (o) {
+                        o->b49 = 1;
+                        o->b4B = 0;
+                        o->b4A = 0;
+                    }
+                }
+                r->state = 2;
+            }
+        }
+        break;
+    case 2: {
+        r->t = MinF(0.08341675f + r->t, 1.0f);
+        if (AbsF(r->t - 1.0f) <= lbl_80558DC4[0]) {
+            r->state = 3;
+        }
+        break;
+    }
+    case 3:
+        break;
+    default:
+        fn_802E317C("RecordsAnimation: invalid state %d", r->state);
+        break;
+    }
+    if (ranked) {
+        f32 s = 1.0f + 0.2f * r->t;
+        r->scales[0].x = s;
+        r->scales[1].x = s;
+        r->scales[1].y = -19.0f * r->t;
+        r->scales[2].x = s;
+        r->scales[2].y = 3.0f * r->t;
+        r->scales[3].x = s;
+        r->scales[3].y = 27.0f * r->t;
+        r->rowScales[rank].x = s;
+        r->rowScales[rank].y = -36.0f * r->t;
+    }
+    r->nameScale.x = 1.0f;
+    r->nameScale.y = 0.0f;
+    r->nameScale.z = 0.0f;
+    r->nameScale.w = 0.0f;
+    if (!ranked) {
+        r->nameScale.z += 20.0f * r->t;
+    }
+    r->anim->Update();
 }
 
 void fn_801CC594(AwardsMgr* m);
@@ -717,24 +874,7 @@ void fn_801CC768(LayoutObj* l, f32 speed) {
 
 StatHandler** fn_801CC784(HandlerVec* v) { return &v->data[v->n++]; }
 
-Results::Results(void) : f8(0), fC(0), f10(0), f14(0) {
-    memset(best[0].name.s, 'z', 3);
-    best[0].name.s[3] = 0;
-    memset(best[1].name.s, 'z', 3);
-    best[1].name.s[3] = 0;
-    memset(best[2].name.s, 'z', 3);
-    best[2].name.s[3] = 0;
-    memset(best[3].name.s, 'z', 3);
-    best[3].name.s[3] = 0;
-    memset(best[4].name.s, 'z', 3);
-    best[4].name.s[3] = 0;
-    memset(i200.s, 'z', 3);
-    i200.s[3] = 0;
-    memset(i264.s, 'z', 3);
-    i264.s[3] = 0;
-    memset(i276.s, 'z', 3);
-    i276.s[3] = 0;
-}
+Results::Results(void) : anim(0), bar(0), recordLand(0), fail(0) {}
 
 PopupQueue::PopupQueue(void) {
     tail = &head;
