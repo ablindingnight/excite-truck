@@ -986,10 +986,7 @@ void CarModel::vf1C(void) {
     while (i >= 0 && s < shadows[i].dist * shadows[i].dist) {
         i--;
     }
-    if (i < 0) {
-        return;
-    }
-    if (index == fn_801E866C(-1) && !fn_801E89A4(-1)) {
+    if (i < 0 || (index == fn_801E866C(-1) && !fn_801E89A4(-1))) {
         return;
     }
     Vec p = frame.pos;
