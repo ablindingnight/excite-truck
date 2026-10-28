@@ -376,9 +376,10 @@ static inline void ResolveGrid(SkagGrid* g, void* ctx) {
 }
 
 void fn_802B4E44(void* ctx) {
+    SkagGrid* grid;
     SkagGrid** g = lbl_804BE248;
     for (u32 r = 0; r < 128; r++, g++) {
-        SkagGrid* grid = *g;
+        grid = *g;
         if (grid) {
             ResolveGrid(grid, ctx);
         }

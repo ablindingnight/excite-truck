@@ -661,11 +661,12 @@ void fn_802BD5B0(TFileArray<TCell>* a, u8* base);
 void fn_802BD69C(TFileArray<TreeRec>* a, u8* base);
 
 void fn_802BD4DC(TListFile* f, u8* base) {
+    TListEntry* e;
     Swap32(&f->n);
     Swap32(&f->entries);
     f->entries = fn_802BD5A8(f->entries, base);
     for (u32 i = 0; i < f->n; i++) {
-        TListEntry* e = &f->entries[i];
+        e = &f->entries[i];
         fn_802BD69C(&e->list, base);
         fn_802BD5B0(&e->frames, base);
         fn_802BD5B0(&e->near, base);
@@ -677,11 +678,12 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base) { return (TListEntry*)((u8*)o
 TCell* fn_802BD694(TCell* off, u8* base);
 
 void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
+    TCell* c;
     Swap32(&a->n);
     Swap32(&a->data);
     a->data = fn_802BD694(a->data, base);
     for (u32 i = 0; i < a->n; i++) {
-        TCell* c = &a->data[i];
+        c = &a->data[i];
         Swap16(&c->x);
         Swap16(&c->z);
         Swap16(&c->count);

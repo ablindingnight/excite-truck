@@ -627,10 +627,11 @@ void fn_802B9B68(void) {
 }
 
 void fn_802B9D08(void) {
+    TexEntry* e;
     SafeDelete(lbl_8055FA7C);
     SafeDelete(lbl_8055FA78);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        TexEntry* e = lbl_804BFFF4.data[i];
+        e = lbl_804BFFF4.data[i];
         if (e) {
             e->head = 0;
             if (e->tex != -2) {

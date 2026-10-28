@@ -2415,11 +2415,12 @@ void RingChalMaster::vf0C(void) {
 }
 
 inline void ObjSet::CheckTeleport(Phob* car) {
+    ObjTeleport* t;
     int cur = f10;
     int next = cur + 1;
     if (next < teles->count) {
         ObjTeleport* data = teles->data;
-        ObjTeleport* t = &data[next];
+        t = &data[next];
         V2 a;
         V2 b;
         V2 d;

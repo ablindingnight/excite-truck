@@ -310,12 +310,13 @@ void fn_802B0914(void) {
 }
 
 void fn_802B0954(void) {
+    GLayer* l;
     fn_802B0874();
     for (int i = 0; i < lbl_804BE104.count; i++) {
         GMat* g = lbl_804BE104.data[i];
         if (g) {
             for (int j = 0; j < g->layers.count; j++) {
-                GLayer* l = &g->layers.data[j];
+                l = &g->layers.data[j];
                 fn_802B0690(&l->detail);
                 for (int k = 0; k < l->texs.count; k++) {
                     fn_802B0690(&l->texs.data[k].tex);

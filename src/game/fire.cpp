@@ -1491,13 +1491,14 @@ void ExhaustTorchMan::DrawEdges(void) {
 }
 
 void ExhaustTorchMan::DrawFaces(void) {
+    const FireCar* c;
     for (int i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const TorchPart* part = fn_80288060(model, k);
-                const FireCar* c = fn_80287B24(i);
+                c = fn_80287B24(i);
                 TorchEntry* e = &entries[i];
                 fn_801BFD34(&e->pos, &part->pos, c);
                 Mat3Mul((Mat3*)e->rot, &part->rot, (const Mat3*)c);

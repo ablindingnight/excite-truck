@@ -440,11 +440,12 @@ extern "C" {
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 
 int fn_8015F848(Bin* bins, f32 range) {
+    f32 d;
     int i;
     int last = -1;
     f32 bw = lbl_8055E2A4;
     for (i = 0; i < 64; i++) {
-        f32 d = bins[i].dist;
+        d = bins[i].dist;
         if (d < range) {
             if (last > 0 && (f32)__fabs(bins[last].dist - d) < range * 0.5f &&
                 bw * (f32)(i - last) < kGap) {

@@ -280,11 +280,12 @@ void fn_8028D4FC(void) {
 }
 
 void fn_8028D58C(SkidStrip* s) {
+    int keep;
     SkidPt* p;
     SkidPt* end = s->pts + s->n;
     SkidPt* start = s->pts + MAX(s->n - s->len + 2, 0);
     for (p = start; p < end; p++) {
-        int keep = 0;
+        keep = 0;
         if (p > start && p->on &&
             (p->alpha >= 0x100 || p[-1].alpha >= 0x100 || p + 1 >= end || (p[1].on && p[1].alpha >= 0x100))) {
             keep = 1;

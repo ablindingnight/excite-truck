@@ -1415,12 +1415,13 @@ LayoutOffset::~LayoutOffset(void) {
 extern "C" void fn_80148218(void) {}
 
 void OverlayCmd::Draw(void) {
+    BoxCmd* c;
     int i;
     if (!layout) {
         return;
     }
     for (i = 0; i < boxes->a.count; i++) {
-        BoxCmd* c = &boxes->a.data[i];
+        c = &boxes->a.data[i];
         int art = layout->FindSet(c->art);
         GartElem* b = layout->FindBox(c->elem);
         if (b && art) {
