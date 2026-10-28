@@ -264,10 +264,7 @@ BOOL IsSpecialChassisUnlocked(const char* name) {
         }
         races = AchievementsGetModelStat(0, name) >= req->races_run;
         grades = AchievementsGetModelStat(1, name) >= req->aaas;
-        if (races || grades) {
-            return TRUE;
-        }
-        return FALSE;
+        return races || grades;
     }
     return FALSE;
 }
