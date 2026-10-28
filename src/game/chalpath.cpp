@@ -55,6 +55,18 @@ extern void* lbl_80345E28[];
 extern void* lbl_80345EA0[];
 extern u8* lbl_8055F420;
 
+// Per-difficulty values (10, 6, 8), indexed by fn_802625D4.
+int lbl_80345B40[3] = {10, 6, 8};
+
+// The bottom and top bar art for each difficulty (easy, standard, master).
+struct BarArt {
+    const char* art[3];
+};
+extern const BarArt lbl_802FA6A8 = {{"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"}};
+extern const BarArt lbl_802FA6B4 = {{"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"}};
+extern const MenuDesc lbl_802FA6C0 = {"challengemode.lyt", 0, 0, 0, 0};
+extern const MenuDesc lbl_802FA6D4 = {"newmode1.lyt", 0, 0, 0, 0};
+
 extern "C" {
 
 int fn_8025FE8C(void) {
@@ -106,7 +118,6 @@ public:
     virtual void Add(u32 chassis, int a, int b);              // 0x0C
 };
 
-extern char lbl_80345B40[];  // this unit's string pool
 extern s32 lbl_8055C400;
 
 extern "C" {
@@ -116,24 +127,23 @@ int fn_8024DAE0(u8* a, u8* b, int c, ChassisList* list, u32 d);
 
 // Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
 int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
-    char* pool = lbl_80345B40;
     if (lbl_8055C400 >= 0) {
         return 1;
     }
     SetNumPlayers(1);
     u8* t = GetTrack(track);
     u32 chassis = 0;
-    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable(pool + 0x90)) {  // "vehicle_map"
-        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable(pool + 0x90)->GetString(pool + 0xA0, 0);  // "default_vehicle"
+    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable("vehicle_map")) {
+        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable("vehicle_map")->GetString("default_vehicle", 0);
     } else {
-        fn_802E317C(pool + 0xB0);  // "...Expecting vehicle_map table and found none!"
+        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Expecting vehicle_map table and found none!");
     }
     ChassisList* list = 0;
     if (chassis) {
         list = fn_8025007C(1);
         list->Add(chassis, 1, 0);
     } else {
-        fn_802E317C(pool + 0x104);  // "...Default chassis is NULL!"
+        fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Default chassis is NULL!");
     }
     int r = fn_8024DAE0(a, b, 0, list, d);
     delete list;
@@ -262,7 +272,6 @@ struct PathScreen {
 #define SCREEN ((PathScreen*)lbl_8055F420)
 
 extern UnkStatic123s lbl_80498F00;  // end-of-menu tag
-extern const MenuDesc lbl_802FA6C0;
 
 int GetEveMode(void);
 void UnloadEves(void);
@@ -418,7 +427,6 @@ extern ChalPath* lbl_8055F3E4;
 // The challenge map screen: unlock popups, then the map menu until backed out.
 void fn_80260954(int arg) {
     PathItem items[19];
-    char* pool = lbl_80345B40;
     int mode = GetEveMode();
     if (mode != 0x130) {
         if (mode != 0x134) {
@@ -449,17 +457,17 @@ void fn_80260954(int arg) {
         fn_80261AE8((u8*)&diff, scr.arg);
         fn_80261A7C((u8*)&items[0], (s32)fn_80261AA0);
         fn_80261A18((u8*)&items[1], (s32)fn_80261A40);
-        fn_802619E8((u8*)&items[2], (s32)(pool + 0x1B8), *(s32*)fn_80261A08((u8*)&scr.levels, 0));
-        fn_802619E8((u8*)&items[3], (s32)(pool + 0x1C8), *(s32*)fn_80261A08((u8*)&scr.levels, 1));
-        fn_802619E8((u8*)&items[4], (s32)(pool + 0x1D8), *(s32*)fn_80261A08((u8*)&scr.levels, 2));
-        fn_802619E8((u8*)&items[5], (s32)(pool + 0x1E8), *(s32*)fn_802619D8((u8*)&scr.events, 0));
-        fn_802619E8((u8*)&items[6], (s32)(pool + 0x1F8), *(s32*)fn_802619D8((u8*)&scr.events, 1));
-        fn_802619E8((u8*)&items[7], (s32)(pool + 0x208), *(s32*)fn_802619D8((u8*)&scr.events, 2));
-        fn_802619E8((u8*)&items[8], (s32)(pool + 0x218), *(s32*)fn_802619D8((u8*)&scr.events, 3));
-        fn_802619E8((u8*)&items[9], (s32)(pool + 0x228), *(s32*)fn_802619D8((u8*)&scr.events, 4));
-        fn_802619E8((u8*)&items[10], (s32)(pool + 0x238), *(s32*)fn_802619D8((u8*)&scr.events, 5));
-        fn_80261980((u8*)&items[11], (s32)(pool + 0x248), (s32)fn_802619A0(&diff), 0);
-        fn_80261980((u8*)&items[12], (s32)(pool + 0x258), (s32)fn_80261948(&diff), 0);
+        fn_802619E8((u8*)&items[2], (s32)"path_custom_0", *(s32*)fn_80261A08((u8*)&scr.levels, 0));
+        fn_802619E8((u8*)&items[3], (s32)"path_custom_1", *(s32*)fn_80261A08((u8*)&scr.levels, 1));
+        fn_802619E8((u8*)&items[4], (s32)"path_custom_2", *(s32*)fn_80261A08((u8*)&scr.levels, 2));
+        fn_802619E8((u8*)&items[5], (s32)"button_custom_0", *(s32*)fn_802619D8((u8*)&scr.events, 0));
+        fn_802619E8((u8*)&items[6], (s32)"button_custom_1", *(s32*)fn_802619D8((u8*)&scr.events, 1));
+        fn_802619E8((u8*)&items[7], (s32)"button_custom_2", *(s32*)fn_802619D8((u8*)&scr.events, 2));
+        fn_802619E8((u8*)&items[8], (s32)"button_custom_3", *(s32*)fn_802619D8((u8*)&scr.events, 3));
+        fn_802619E8((u8*)&items[9], (s32)"button_custom_4", *(s32*)fn_802619D8((u8*)&scr.events, 4));
+        fn_802619E8((u8*)&items[10], (s32)"button_custom_5", *(s32*)fn_802619D8((u8*)&scr.events, 5));
+        fn_80261980((u8*)&items[11], (s32)"#bar4_top_color", (s32)fn_802619A0(&diff), 0);
+        fn_80261980((u8*)&items[12], (s32)"#bar4_bot_color", (s32)fn_80261948(&diff), 0);
         fn_80261688((u8*)&items[13], 0x126, 0, (s32)fn_802616A8);
         fn_80261688((u8*)&items[14], 0x128, 0, (s32)fn_802613E0);
         fn_80261688((u8*)&items[15], 0xD, -2, (s32)fn_80261178);
@@ -480,7 +488,7 @@ void fn_80260954(int arg) {
                 r = -2;
                 break;
             }
-            fn_802E317C(pool + 0x268);  // "MenuDoChallengeMode: invalid return value from dialog!"
+            fn_802E317C("MenuDoChallengeMode: invalid return value from dialog!");
         }
     } while (r != -1);
     }
@@ -628,8 +636,8 @@ int fn_802616A8(void) {
 }
 
 const char* fn_80261948(s32* p) {
-    const char* t[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
-    return t[*p];
+    BarArt t = lbl_802FA6A8;
+    return t.art[*p];
 }
 
 void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
@@ -641,8 +649,8 @@ void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
 }
 
 const char* fn_802619A0(s32* p) {
-    const char* t[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
-    return t[*p];
+    BarArt t = lbl_802FA6B4;
+    return t.art[*p];
 }
 
 u8* fn_802619D8(u8* p, int i) { return PTR(p, 0x0) + i * 4; }
@@ -731,7 +739,7 @@ void fn_80261AF0(u8* p, int difficulty) {
         MenuItem((const char*)lbl_8055BAB8, 8, (const void*)fn_80261A40, 2, 0),
         MenuItem(lbl_80498F00),
     };
-    MenuDesc desc = {"newmode1.lyt", 0, 0, 0, 0};
+    MenuDesc desc = lbl_802FA6D4;
     desc.items = items;
     fn_802146BC(&desc, -999, -999, 1);
 }
@@ -752,7 +760,6 @@ Sound* fn_80207848(const char* name, int flags);
 // Builds the map: a "pathcontrol" node per difficulty (at most 3) and an "eventcontrol" node per event
 // (at most 6 each), and the level-up sound.
 void fn_80261C68(PathScreenBuf* s) {
-    char* pool = lbl_80345B40;
     int i;
     int j;
     s->numEvents = 0;
@@ -763,7 +770,7 @@ void fn_80261C68(PathScreenBuf* s) {
     s->levels.count = 0;
     for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
         s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
-        u8* n = (u8*)operator new(0x2C, pool + 0x144);  // "pathcontrol"
+        u8* n = (u8*)operator new(0x2C, "pathcontrol");
         if (n) {
             ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
             S32(n, 0x14) = 0;
@@ -774,13 +781,13 @@ void fn_80261C68(PathScreenBuf* s) {
             U8(n, 0x1D) = 1;
             U8(n, 0x1E) = 0;
             U8(n, 0x1F) = 0;
-            PTR(n, 0x24) = fn_8023512C(pool + 0x150);  // "bar7.art"
-            PTR(n, 0x28) = fn_80232578(pool + 0x15C);  // "uifnt_o.gtx"
+            PTR(n, 0x24) = fn_8023512C("bar7.art");
+            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
         }
         s->levels.Push((PathNode*)n);
         for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
             s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
-            u8* e = (u8*)operator new(0x28, pool + 0x168);  // "eventcontrol"
+            u8* e = (u8*)operator new(0x28, "eventcontrol");
             if (e) {
                 void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
                 S32(e, 0x14) = 0;
@@ -789,18 +796,18 @@ void fn_80261C68(PathScreenBuf* s) {
                 U8(e, 0x1E) = 0;
                 U8(e, 0x1C) = 0;
                 U8(e, 0x1D) = 1;
-                PTR(e, 0x20) = fn_8023512C(pool + 0x150);
-                PTR(e, 0x24) = fn_80232578(pool + 0x15C);
+                PTR(e, 0x20) = fn_8023512C("bar7.art");
+                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
             }
             s->events.Push((PathNode*)e);
             s->numEvents++;
         }
     }
-    s->sound = fn_80207848(pool + 0x178, 0);  // "a_levelup.sfx"
+    s->sound = fn_80207848("a_levelup.sfx", 0);
     if (s->sound) {
         s->sound->SetVolume(lbl_80563B88);
     } else {
-        fn_802E317C(pool + 0x188);  // "Error creating unlock sound in MCHALLENGEMODE!"
+        fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
     }
     RedrawNodes();
 }
