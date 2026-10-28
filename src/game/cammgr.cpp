@@ -1206,6 +1206,8 @@ struct MountView {
 
 // Fixed mount camera on the ideal line: for the current and the next mount, place both mount points in
 // the line's frame (an average of two samples), then blend from one mount to the other over time.
+static inline f32 CamLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void fn_80268358(CamRec* c) {
     f32 m[2][6] = {
         {lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2],
@@ -1234,8 +1236,8 @@ void fn_80268358(CamRec* c) {
             f32* p0 = (f32*)f.seg;
             f32* p1 = *(f32**)(f.seg + 0x14);
             s32 hit = 0;
-            f32 x = p0[0] + f.t * (p1[0] - p0[0]);
-            f32 z = p0[1] + f.t * (p1[1] - p0[1]);
+            f32 x = CamLerp(p0[0], p1[0], f.t);
+            f32 z = CamLerp(p0[1], p1[1], f.t);
             CamXZ xz(x, z);
             KVec3 v;
             v.x = xz.x;
@@ -1304,19 +1306,19 @@ void fn_80268358(CamRec* c) {
         kb = t / lbl_8055C4F4;
     }
     KVec3 bl;
-    bl.x = out[0].b.x + ka * (out[1].b.x - out[0].b.x);
-    bl.z = out[0].b.z + ka * (out[1].b.z - out[0].b.z);
-    bl.y = out[0].b.y + ka * (out[1].b.y - out[0].b.y);
+    bl.x = CamLerp(out[0].b.x, out[1].b.x, ka);
+    bl.z = CamLerp(out[0].b.z, out[1].b.z, ka);
+    bl.y = CamLerp(out[0].b.y, out[1].b.y, ka);
     KVec3 al;
-    al.x = out[0].a.x + kb * (out[1].a.x - out[0].a.x);
-    al.y = out[0].a.y + kb * (out[1].a.y - out[0].a.y);
-    al.z = out[0].a.z + kb * (out[1].a.z - out[0].a.z);
+    al.x = CamLerp(out[0].a.x, out[1].a.x, kb);
+    al.y = CamLerp(out[0].a.y, out[1].a.y, kb);
+    al.z = CamLerp(out[0].a.z, out[1].a.z, kb);
     KVec3 up;
-    up.x = out[0].up.x + ka * (out[1].up.x - out[0].up.x);
-    up.y = out[0].up.y + ka * (out[1].up.y - out[0].up.y);
-    up.z = out[0].up.z + ka * (out[1].up.z - out[0].up.z);
+    up.x = CamLerp(out[0].up.x, out[1].up.x, ka);
+    up.y = CamLerp(out[0].up.y, out[1].up.y, ka);
+    up.z = CamLerp(out[0].up.z, out[1].up.z, ka);
     PSVECNormalize(&up.x, &up.x);
-    c->fov = lbl_803467E8[lbl_8055F4A0].fov + ka * (lbl_803467E8[lbl_8055F4A4].fov - lbl_803467E8[lbl_8055F4A0].fov);
+    c->fov = CamLerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
 }
 

@@ -559,6 +559,8 @@ static inline f32 CamEase(f32 x) {
 // Per-frame TV (replay) camera: picks the best region's camera on a region change, eases moving cameras
 // along the car's progress through the region, applies shake/funky fov/rumble/focus, then runs the
 // camera's type. Without TV cameras it uses a grid-snapped default; with no region, an overhead view.
+static inline f32 TvLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void fn_80271624(int mode, u8* p) {
     u8* track = ((CamCarCtl*)PTR(PTR(p, 0x140), 0x270))->Track();
     int group;
@@ -631,20 +633,20 @@ void fn_80271624(int mode, u8* p) {
                     }
                     f32 e = CamEase(f);
                     f32 v[3];
-                    v[0] = tv->from[0] + e * (tv->to[0] - tv->from[0]);
-                    v[1] = tv->from[1] + e * (tv->to[1] - tv->from[1]);
-                    v[2] = tv->from[2] + e * (tv->to[2] - tv->from[2]);
+                    v[0] = TvLerp(tv->from[0], tv->to[0], e);
+                    v[1] = TvLerp(tv->from[1], tv->to[1], e);
+                    v[2] = TvLerp(tv->from[2], tv->to[2], e);
                     tv->pos[0] = v[0];
                     tv->pos[1] = v[1];
                     tv->pos[2] = v[2];
                     f32 x[3];
-                    x[0] = tv->exFrom[0] + e * (tv->exTo[0] - tv->exFrom[0]);
-                    x[1] = tv->exFrom[1] + e * (tv->exTo[1] - tv->exFrom[1]);
-                    x[2] = tv->exFrom[2] + e * (tv->exTo[2] - tv->exFrom[2]);
+                    x[0] = TvLerp(tv->exFrom[0], tv->exTo[0], e);
+                    x[1] = TvLerp(tv->exFrom[1], tv->exTo[1], e);
+                    x[2] = TvLerp(tv->exFrom[2], tv->exTo[2], e);
                     tv->ex[0] = x[0];
                     tv->ex[1] = x[1];
                     tv->ex[2] = x[2];
-                    tv->fov = tv->fovFrom + e * (tv->fovTo - tv->fovFrom);
+                    tv->fov = TvLerp(tv->fovFrom, tv->fovTo, e);
                 } else {
                     tv->pos[0] = tv->from[0];
                     tv->pos[1] = tv->from[1];
