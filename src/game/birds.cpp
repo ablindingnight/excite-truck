@@ -161,6 +161,7 @@ s32 fn_802A8A34(BoidVec* v);
 Boid* fn_802A8A3C(BoidVec* v, int i);
 
 void fn_802A81F0(void) {
+    int i;
     lbl_804BD6C4.n = 0;
     ValueTable* t = fn_80131810("birds.val");
     if (t) {
@@ -178,7 +179,7 @@ void fn_802A81F0(void) {
                     f->birds.cap = 32;
                     f->birds.n = 0;
                     f->models.n = 0;
-                    for (int i = 0; i < f->models.cap; i++) {
+                    for (i = 0; i < f->models.cap; i++) {
                         char key[64];
                         fn_801345D8(key, 64, "model%d", i);
                         if (n->Has(key)) {

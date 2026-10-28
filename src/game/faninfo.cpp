@@ -157,6 +157,7 @@ FanCell* fn_802BE844(short x, short z, int size) {
 }
 
 void fn_802BE8B4(short x, short z, int size) {
+    int k;
     u32 mask = 0;
     int counts[6];
     memset(counts, 0, sizeof(counts));
@@ -174,7 +175,7 @@ void fn_802BE8B4(short x, short z, int size) {
         }
     } else {
         int h = size / 2;
-        for (int k = 0; k < 4; k++) {
+        for (k = 0; k < 4; k++) {
             short px = x + ((k & 1) ? h : -h);
             short pz = z + ((k & 2) ? h : -h);
             FanCell* c = fn_802BE844(px, pz, h);

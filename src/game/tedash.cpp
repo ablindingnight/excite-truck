@@ -558,12 +558,13 @@ void fn_802B67C8(const char* name) {
 }
 
 void fn_802B6804(void) {
+    Stat* s;
     fn_802B67C8("stats_box");
     TextElem* num = lbl_8055FA48->Find("stats_colnumber");
     TextElem* name = lbl_8055FA48->Find("stats_colname");
     f32 row = lbl_8055FA48->FindBox("stats_col")->h;
     for (int i = 0; i < lbl_804BFA70.count; i++) {
-        Stat* s = &lbl_804BFA70.data[i];
+        s = &lbl_804BFA70.data[i];
         if (s->peak < *s->value) {
             s->peak = *s->value;
         }

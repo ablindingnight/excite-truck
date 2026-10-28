@@ -240,6 +240,7 @@ f32 fn_801CF778(const PVec3* p, const PVec3* o, const PVec3* dir) {
 
 // Ray against the mesh; *t holds the current best distance and is lowered on a hit.
 int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* nrm) {
+    PVec3* n;
     int hit = 0;
     for (int i = 0; i < mesh->numCells; i++) {
         PCell* c = &mesh->cells[i];
@@ -249,7 +250,7 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
         }
         for (int j = c->first; j < c->end; j++) {
             PTri* tr = &mesh->tris[j];
-            PVec3* n = &tr->n;
+            n = &tr->n;
             f32 d = tr->d;
             f32 dn = PSVECDotProduct(dir, n);
             if ((f32)__fabs(dn) < 0.001f) {

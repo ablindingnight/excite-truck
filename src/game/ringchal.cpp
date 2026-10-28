@@ -1822,13 +1822,14 @@ void RingChalMaster::vfFC(void) {
 static inline int Stopped(f32 speed) { return NearZeroF(speed); }
 
 int RingChalMaster::vfE0(int car, u8* out) {
+    ObjSet* s;
     int r = 0;
     f32 now = lbl_8055E3C8;
     if (now > vf38() && !arena.b48) {
         if (Stopped(fn_8017960C(players.data[car]->index)->speed)) {
             PlayerData* p = players.data[car];
             if (arena.curSet < arena.nFiles) {
-                ObjSet* s = &arena.sets->data[arena.curSet];
+                s = &arena.sets->data[arena.curSet];
                 if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
                     RaceCarRec* c = fn_8017960C(p->index);
                     ObjTeleport* t = &s->teles->data[s->f10];

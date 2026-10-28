@@ -337,6 +337,7 @@ void CarUIModel::Unload(void) {
 }
 
 void CarUIModel::LoadEfx(const char* path) {
+    int i;
     if (efx == -1) {
         char file[0x100];
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
@@ -371,7 +372,7 @@ void CarUIModel::LoadEfx(const char* path) {
             zero.y = 0.0f;
             zero.z = 0.0f;
             ValueNodeV* r = t->FindChild("at_rest");
-            for (int i = 0; i < numBones; i++) {
+            for (i = 0; i < numBones; i++) {
                 char key[0x20];
                 fn_801345D8(key, 0x20, "%d", i);
                 bones[i] = r->GetVec3Or(key, zero);
@@ -1201,6 +1202,7 @@ void CarUIScreen::Deactivate(void) {
 }
 
 void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
+    u32 a;
     lbl_8055F334 = dt;
     if (fn_802D3EBC()) {
         dt = 0.0f;
@@ -1237,7 +1239,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         CopyName(loaded, loading, 0x20);
         loading[0] = 0;
         CarUIModel* nm = model;
-        u32 a = anim;
+        a = anim;
         loadName[0] = 0;
         nm->anim = a;
         nm->animSet = a;
@@ -1410,6 +1412,7 @@ struct FloorVtx {
 };
 
 void CarUIScreen::DrawFloor(u32 color, f32 a) {
+    f32 z0;
     fn_802C942C(-1);
     Frame saved = *fn_802C86DC();
     Frame f = saved;
@@ -1458,7 +1461,7 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
         f32 c = 1.333f * (f32)cos(fi * step);
         f32 s = 1.333f * (f32)sin(fi * step);
         f32 x0 = 2.5f * c;
-        f32 z0 = 2.5f * s;
+        z0 = 2.5f * s;
         f32 x1 = 5.0f * c;
         f32 z1 = 5.0f * s;
         v[1 + i * 2].pos.x = x0;

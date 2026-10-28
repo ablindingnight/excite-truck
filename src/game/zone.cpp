@@ -1698,6 +1698,7 @@ void ZoneMaster::DrawNextGate(void) {
 
 
 void ZoneMaster::vf44(void) {
+    GateHit* h;
     FixedArray<GateHit, 8> hits;
     CarState* c = &cars[fn_801E866C(-1)];
     Gate* g = c->gate;
@@ -1730,7 +1731,7 @@ void ZoneMaster::vf44(void) {
                     }
                 }
                 {
-                    GateHit* h = &hits.data[hits.count++];
+                    h = &hits.data[hits.count++];
                     h->gate = g;
                     h->dist = sqrt(d2);
                 }

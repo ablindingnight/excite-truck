@@ -196,6 +196,7 @@ void SwfAnim::Reset() {
 }
 
 void SwfAnim::LoadFile(const char* name) {
+    Sw2Item* it;
     u8* base;
     u32 size = 0;
     u8 firstLoad = 0;
@@ -253,7 +254,7 @@ void SwfAnim::LoadFile(const char* name) {
         Sw2Frame* f = &data->frames[i];
         SwfSwap16(&f->count);
         for (int j = 0; j < f->count; j++) {
-            Sw2Item* it = &f->items[j];
+            it = &f->items[j];
             SwfSwap16(&it->shape);
             SwfSwap16(&it->cxform);
             SwfSwap32(&it->m[0]);

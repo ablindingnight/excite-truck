@@ -1036,6 +1036,7 @@ static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 // Race start: the intro timer (short in test mode), cleared race counters, every car on its line, and the
 // starting order from the qualifying times.
 void fn_801B265C(void) {
+    DeityCar* c;
     static u8 warned;
     s32 order[8];
     lbl_8055E6A8 = 1;
@@ -1061,7 +1062,7 @@ void fn_801B265C(void) {
     }
     for (int i = 0; i < lbl_8055E678; i++) {
         f32 v = -1.0f;
-        DeityCar* c = &lbl_8055E684[i];
+        c = &lbl_8055E684[i];
         if (*(s32*)((u8*)c->car + 0x1F0) == 0x51) {
             v = fn_8013B650(c->index);
         }

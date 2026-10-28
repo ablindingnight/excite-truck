@@ -347,6 +347,7 @@ const char* fn_80131234(const char* key);
 // The achievement viewer for one row (with the level-up "new" effect while tallying): the trophy front and
 // back, the progress towards the next level and every category's level bar.
 int fn_8025978C(u8* p) {
+    s32 cat;
     lbl_8055F3A0 = 0;
     TrophyView front;
     TROPHY_VIEW_INIT(front);
@@ -364,7 +365,7 @@ int fn_8025978C(u8* p) {
     s32 barColor[7];
     s32 iconColor[7];
     for (u32 i = 0; i < 7; i++) {
-        s32 cat = lbl_80344EA0[i].category;
+        cat = lbl_80344EA0[i].category;
         if (cat == S32(p, 0x18)) {
             iconColor[i] = 9;
             barColor[i] = 8;

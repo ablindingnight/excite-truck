@@ -2133,6 +2133,7 @@ extern "C" const f32 lbl_8056217C;  // 10.0
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
 void fn_801981A0(u8* d, u8* t) {
+    f32 a;
     if (S32(d, 0x140) > 0) {
         S32(d, 0x140)--;
     }
@@ -2149,7 +2150,7 @@ void fn_801981A0(u8* d, u8* t) {
         }
         if (S32(d, 0x138) != S32(d, 0x2C4) && ok && (f32)__fabs(F32(d, 0x12C)) < lbl_8055E570 * lbl_8055A488) {
             f32 x = F32(t, 0x8);
-            f32 a = F32(d, 0x130);
+            a = F32(d, 0x130);
             F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
             f32 b = F32(d, 0x134);
             f32 y = F32(t, 0xC);

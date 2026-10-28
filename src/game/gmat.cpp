@@ -527,6 +527,7 @@ void fn_802B1758(GMat* g);
 void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
+    int i;
     fn_802B1BEC();
     if (g->verts.Count() > 0) {
         fn_802B1B60(g);
@@ -538,7 +539,7 @@ void fn_802B14B4(GMat* g) {
         }
         fn_802B05EC();
         fn_802DBF00();
-        for (int i = 0; i < g->layers.Count(); i++) {
+        for (i = 0; i < g->layers.Count(); i++) {
             InlineVec<GTex, 6>* texs = &g->layers.At(i)->texs;
             if (lbl_8055FA59) {
                 fn_802CADD0(g->layers.At(i)->detail, 1);

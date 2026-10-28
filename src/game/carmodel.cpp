@@ -717,6 +717,7 @@ void fn_801ECF58(CarModel* m) {
 static inline f32 Abs(f32 x) { return __fabs(x); }
 
 void fn_801ECFE0(CarModel* m) {
+    Frame f;
     if (m->car->x22C < 0.01f) {
         return;
     }
@@ -737,7 +738,7 @@ void fn_801ECFE0(CarModel* m) {
             BoneFrame* bf = &m->car->boneFrames[j];
             if (bf->mask & mask) {
                 if (mirror) {
-                    Frame f = bf->frame;
+                    f = bf->frame;
                     f.axes[0].x *= -1.0f;
                     f.axes[0].y *= -1.0f;
                     f.axes[0].z *= -1.0f;

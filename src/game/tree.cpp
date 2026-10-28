@@ -595,6 +595,7 @@ void fn_802BD4DC(TListFile* f, u8* base);
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
 void fn_802BD210(void) {
+    TreeRec* tr;
     s32 version = 0;
     u8 swapped;
     lbl_8055FAB8 = (TListFile*)fn_8012C370("treelist.trl", 'TLST', &version, 0, 0, &swapped);
@@ -614,7 +615,7 @@ void fn_802BD210(void) {
                         s->near = fn_802BD478("tree:near_list", &e->near);
                         int n = s->list->n;
                         for (int j = 0; j < n; j++) {
-                            TreeRec* tr = &s->list->data[j];
+                            tr = &s->list->data[j];
                             TRot r;
                             r.x = tr->mtx.pos.x;
                             r.z = tr->mtx.pos.z;

@@ -388,6 +388,7 @@ void fn_80231780(const UIXform* m) {
 void fn_80231ADC(void) { lbl_8049846C.count = 0; }
 
 void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+    EscSeq* e;
     strlen(s);
     while (*s) {
         f32 adv = h;
@@ -396,7 +397,7 @@ void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, 
             for (int i = 0; i < lbl_80497F14.count; i++) {
                 const char* name = lbl_80497F14.data[i].name;
                 if (strncasecmp(s + 1, name, strlen(name)) == 0) {
-                    EscSeq* e = &lbl_80497F14.data[i];
+                    e = &lbl_80497F14.data[i];
                     if (e->art) {
                         f32 k = h / fn_80235F64(e->art, e->artIdx);
                         adv = e->scale * (k * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * k);

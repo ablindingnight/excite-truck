@@ -441,6 +441,7 @@ void fn_8027DAF4(void) {
 int fn_8027DE68(int i);
 
 VehicleList* fn_8027DB40(u32 flags) {
+    int unlocked;
     int all = flags & 1;
     int showAll = (flags >> 1) & 1;
     int lockedOut = (flags >> 2) & 1;
@@ -477,7 +478,7 @@ VehicleList* fn_8027DB40(u32 flags) {
         }
         if (u && !strcasecmp(u->type, "CAR") && CountVehiclesNamed(u->name) > 0) {
             VehicleInfo* v = FindVehicleNamed(u->name, 0);
-            int unlocked = 1;
+            unlocked = 1;
             if (!all && !IsCarUnlocked(u->name)) {
                 unlocked = 0;
             }

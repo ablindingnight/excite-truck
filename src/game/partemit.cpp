@@ -554,6 +554,7 @@ void fn_802A02F4(const EmitterDef* d, const Spawn* s) {
 
 // Fogs each player view by its distance to the emitter.
 void fn_802A042C(const EmitterDef* d, const Spawn* s) {
+    f32 a;
     for (int i = 0; i < fn_801E85A4(); i++) {
         CamView v = *fn_801E8718(i);
         PVec p;
@@ -572,7 +573,7 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
                 t = 1.0f;
             }
             t = t > 0.0f ? t : 0.0f;
-            f32 a = 255.0f * d->fogDensity;
+            a = 255.0f * d->fogDensity;
             f32 f = a + t * (0.0f - a);
             int add = f < 0.0f ? f - 0.5f : f + 0.5f;
             int al = add + (lbl_8055F820[i] >> 24);
