@@ -35,7 +35,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | whole unit (2 tagged sites) | src/game/unk_80215E68.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 site) | src/game/unk_80243460.c | `#pragma cplusplus on` so the C file can make two virtual calls; really a C++ menu item (typed rewrite pending). The dont_inline and use_lmw_stmw pragmas were no-ops and are gone | upstream orangedude27/excite-truck |
 | whole unit | src/game/unk_80262F8C.c | none left: the volatile local was the stack-passed 10th argument of fn_8022BAD0 and the scheduling pragma is gone (DecideItem::Draw now 2 rows off instead of 16); typed C++ rewrite pending | upstream orangedude27/excite-truck; Claude 2026-10-27 |
-| whole unit (43 tagged sites) | src/game/unk_80116BD4.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
+| whole unit | src/game/unk_80116BD4.c | volatile stream/DVD state only (likely genuine async fields); its unroll / opt_unroll_loops / use_lmw_stmw pragmas produced identical code for all 154 functions and were removed 2026-10-27; typed rewrite pending | upstream orangedude27/excite-truck |
 
 These upstream files had only the generic "Tricks are tagged MATCHING-AID" header and no trick construct
 (checked 2026-10-27): unk_80127398, unk_801BD620, unk_8026E224, unk_802E6B48, unk_8026B844, unk_800241DC,

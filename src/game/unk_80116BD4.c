@@ -505,9 +505,7 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
     return (q1 << 16) | q0;
 }
 
-// Bink was built with loop unrolling (a library build setting, applied here per function until the unit's
-// hand-unrolled loops are rewritten). Fills `size` bytes at dst with the 16-bit value v.
-#pragma opt_unroll_loops on
+// Fills `size` bytes at dst with the 16-bit value v.
 void fn_80116CC4(u32 *dst, u16 v, u32 size) {
     u32 n = size >> 1;
     u32 val = v | (v << 16);
@@ -518,7 +516,6 @@ void fn_80116CC4(u32 *dst, u16 v, u32 size) {
         *(u16 *)dst = v;
     }
 }
-#pragma opt_unroll_loops reset
 
 extern s64 OSGetTime(void);
 extern s64 lbl_8055DEC0;  // time of the first call
@@ -597,8 +594,6 @@ s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes) {
     return dst;
 }
 
-#pragma push
-#pragma use_lmw_stmw off
 // Tops a track's buffered data up to its fill target by inserting silence before the read position; returns the
 // milliseconds of silence added.
 u32 fn_80116F8C(StreamTrack *t) {
@@ -625,7 +620,6 @@ u32 fn_80116F8C(StreamTrack *t) {
     }
     return 0;
 }
-#pragma pop
 extern s32 fn_80116D30(void);
 // Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
 // copies the next block out of its ring buffer into the buffer it hands out.
@@ -2061,7 +2055,6 @@ void *fn_8011A168(StreamAllocator *allocator) {
     return (void *)fn_80119DD0;
 }
 
-#pragma unroll on
 void fn_8011A1A0(u32 *data, u32 size) {
     u32 count = (size + 3) >> 2;
     while (count--) {
@@ -2150,7 +2143,6 @@ u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
     return result;
 }
 
-#pragma unroll reset
 void fn_8011A45C(void *arg0, s32 arg1, s32 arg2) {
     s32 temp_r0, temp_r31, temp_r3, temp_r3_2, temp_r4, var_r31;
 // MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
@@ -4075,7 +4067,6 @@ void fn_8011DFAC(void* arg0, u32 arg1) {
     out[8] = fn_8011DF68(0x200, arg1, 4, 0x30);
 }
 
-#pragma opt_unroll_loops on
 extern u32 lbl_802F65C0[];  // Bink pixel masks (pattern blocks use the tables at +0x3E0..+0x47F)
 extern u8 lbl_802F8A40[16][64];  // run block scan orders
 #define BINK_PAT_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x3E0))         // 4-pixel masks, 1 bit per pixel
@@ -4712,7 +4703,6 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     bits.count = 0;
     return bits.next;
 }
-#pragma opt_unroll_loops reset
 
 // Decodes a video frame into the next frame buffer (alpha, luma, then the two chroma planes); returns the number
 // of skipped blocks in the luma plane (in block pairs).
