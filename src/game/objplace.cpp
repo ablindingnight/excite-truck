@@ -74,6 +74,8 @@ struct ObjBlock {
         cap = n;
         count = 0;
     }
+    bool CanAdd(void) const { return count + 1 <= cap; }
+    ObjLoc* Alloc(void) { return &data[count++]; }
     ObjLoc* data;    // offset 0x0
     s32 count;       // offset 0x4
     s32 cap;         // offset 0x8
@@ -96,6 +98,7 @@ struct DynVec {
             cap = 0;
         }
     }
+    bool CanAdd(void) const { return count + 1 <= cap; }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
@@ -728,9 +731,9 @@ void fn_802B3E00(ObjList* list, const OVec* pos, u16 kind, f32 scale) {
     ObjAllocator* a = lbl_8055F9BC;
     ObjLoc* l = 0;
     ObjBlock* tail = list->tail;
-    if (!tail || tail->count + 1 > tail->cap) {
+    if (!tail || !tail->CanAdd()) {
         ObjBlock* b = 0;
-        if (a->blocks.count + 1 <= a->blocks.cap) {
+        if (a->blocks.CanAdd()) {
             b = &a->blocks.data[a->blocks.count++];
             b->count = 0;
             b->next = 0;
@@ -744,10 +747,10 @@ void fn_802B3E00(ObjList* list, const OVec* pos, u16 kind, f32 scale) {
             }
             list->tail = b;
             b->next = 0;
-            l = &list->tail->data[list->tail->count++];
+            l = list->tail->Alloc();
         }
     } else {
-        l = &tail->data[tail->count++];
+        l = tail->Alloc();
     }
     if (l) {
         l->pos = *pos;
