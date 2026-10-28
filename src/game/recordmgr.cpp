@@ -201,9 +201,10 @@ int fn_801AE620(RaceResult* r) { return fn_801AE618(r->flags); }
 
 void fn_801AE628(void* p) {
     Leaders l;
+    int i;
     l.best = -1;
     l.n = 0;
-    for (int i = 0; i < lbl_80435780.n; i++) {
+    for (i = 0; i < lbl_80435780.n; i++) {
         RaceResult* r = &lbl_8055E624->r[i];
         if (fn_801AE620(r) && r->points >= l.best) {
             if (r->points > l.best) {
@@ -213,7 +214,7 @@ void fn_801AE628(void* p) {
             l.best = r->points;
         }
     }
-    for (int i = 0; i < lbl_80435780.n; i++) {
+    for (i = 0; i < lbl_80435780.n; i++) {
         RaceResult* r = &lbl_8055E624->r[i];
         if (fn_801AE620(r)) {
             r->x10 = fn_801AE610(p, r->place);
