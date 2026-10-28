@@ -2244,9 +2244,14 @@ int ZoneHud::Update(CarState* c) {
     final = c->finalScore;
     left = tb;
     total = c->total;
-    fn_801345D8(score, 0x14, "%d", c->hits[1] + c->hits[2] + c->hits[3]);
+    int hits = 0;
+    for (int k = 1; k < 4; k++) {
+        hits += c->hits[k];
+    }
+    fn_801345D8(score, 0x14, "%d", hits);
     if (tb && t > 0.0f) {
-        f32 u = Clamp01(InvLerp(0.0f, 1.0f, lbl_8055E3C8 - t));
+        f32 now = lbl_8055E3C8;
+        f32 u = Clamp01(InvLerp(0.0f, 1.0f, now - t));
         shown = Lerp(0.0f, tb + 0.5f, u);
         left = tb - shown;
     }
@@ -2313,6 +2318,8 @@ int ZoneHud::Update(CarState* c) {
             ((ArtPlayer*)(anim))->Pause(animId);
             state = 4;
         }
+        break;
+    case 4:
         break;
     }
     ((ArtPlayer*)(anim))->Update();
