@@ -537,8 +537,9 @@ void fn_802BCBDC(void) {
 }
 
 void fn_802BCF04(void) {
+    TreeType* t;
     for (int i = 0; i < lbl_804C00D4.n; i++) {
-        TreeType* t = &lbl_804C00D4.data[i];
+        t = &lbl_804C00D4.data[i];
         SafeDelete(t->set);
         fn_802CAC54(t->farTex);
         fn_802C6C20(t->far);
@@ -563,10 +564,11 @@ s32 fn_802BD0C8(TreeType* t) {
 }
 
 void fn_802BD0F4(TreeType* t) {
+    TreeRec* tr;
     if (t->shadow && t->set) {
         int n = t->set->list->n;
         for (int i = 0; i < n; i++) {
-            TreeRec* tr = &t->set->list->data[i];
+            tr = &t->set->list->data[i];
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;
