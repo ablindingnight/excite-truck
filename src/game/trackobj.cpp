@@ -1978,17 +1978,18 @@ void ObjDesc::vf20(void) {}
 
 void ObjDesc::vf24(void) {}
 
-StaticObject::~StaticObject(void) {
-    StaticObject** pp = &lbl_8055EC48;
+static inline void Unlink(StaticObject** pp, StaticObject* o) {
     StaticObject* s;
     while ((s = *pp) != 0) {
-        if (s == this) {
-            *pp = next;
+        if (s == o) {
+            *pp = o->next;
             break;
         }
         pp = &s->next;
     }
 }
+
+StaticObject::~StaticObject(void) { Unlink(&lbl_8055EC48, this); }
 
 void StaticObject::Draw(void) {
     if (!noDraw && fn_801F7A0C()) {
