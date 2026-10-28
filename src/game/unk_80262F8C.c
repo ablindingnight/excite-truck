@@ -13,10 +13,10 @@ extern s32 fn_80230E90(s32);
 extern f32 fn_8023659C(void);
 extern s32 fn_80214AF0(s32);
 extern s32 fn_80128668(void);
-extern s32 fn_80131234(const u8 *, const u8 *);
-extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+extern const char *fn_80131234(const char *key);
+extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32, s32);
 extern s32 fn_802328D4(s32);
-extern const u8 lbl_80346324[];
+extern const char lbl_80346324[];
 extern const u8 lbl_80346120[];
 extern f32 lbl_80563BD4;
 s32 fn_80262F8C(s32 arg0, s32 arg1) {
@@ -121,22 +121,18 @@ void fn_80263820(void *arg0) {
         *(s32 *)((u8 *)arg0 + 0x18) = 0;
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma scheduling off
+// DecideItem::Draw in the target (draws the item's localized label). The last 0 is the 10th argument, passed
+// on the stack (upstream emulated it with a volatile local). 2 rows off: the scale load is scheduled later.
 void fn_80263848(void *arg0, s32 arg1) {
-    s32 temp_r31 = *(s32 *)((u8 *)arg0 + 0x10);
-    s32 temp_r30 = *(s32 *)((u8 *)arg0 + 0xC);
-    s32 temp_r29 = *(s32 *)((u8 *)arg0 + 8);
-    s32 temp_r28 = *(s32 *)((u8 *)arg0 + 4);
-    s32 temp_r3 = ((s32 (*)(const u8 *))fn_80131234)(lbl_80346324);
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    volatile s32 sp8 = 0;
-    fn_8022BAD0(0x12, temp_r28, temp_r29, 0, temp_r30, temp_r31, temp_r3, *(s32 *)((u8 *)arg0 + 0x18), lbl_80563BD4);
+    s32 h = *(s32 *)((u8 *)arg0 + 0x10);
+    s32 w = *(s32 *)((u8 *)arg0 + 0xC);
+    s32 y = *(s32 *)((u8 *)arg0 + 8);
+    s32 x = *(s32 *)((u8 *)arg0 + 4);
+    fn_8022BAD0(0x12, x, y, 0, w, h, (s32)fn_80131234(lbl_80346324), *(s32 *)((u8 *)arg0 + 0x18), lbl_80563BD4, 0);
 }
 
 void fn_802638C4(void) {}
 
-#pragma scheduling on
 s32 fn_802638C8(void *arg0, s32 arg1) {
     if (*((u8 *)arg0 + 0x29) != 0 && arg1 != 0x126) {
         if (arg1 < 0x126) {

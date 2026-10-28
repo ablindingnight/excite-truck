@@ -22,8 +22,6 @@ void fn_80243470(void* arg0) {
     fn_802408B0((u8*)arg0 - 0x10);
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 s32 fn_80243478(s32 arg0) {
     s32 count = 0;
     s32 (*entry)[3] = lbl_803428B0[arg0];
@@ -85,8 +83,6 @@ extern s32 fn_80230E90(s32);
 extern s32 fn_80243528(s32, s32);
 extern s32 fn_8024360C(s32, s32);
 extern s32 fn_80243710(s32, s32);
-#pragma push
-#pragma use_lmw_stmw off
 s32 fn_80243764(void *arg0, void *arg1, s32 arg2, s32 arg3) {
     s32 old0 = *(s32 *)arg0;
     s32 old1 = *(s32 *)arg1;
@@ -128,7 +124,6 @@ s32 fn_80243764(void *arg0, void *arg1, s32 arg2, s32 arg3) {
     }
     return 0;
 }
-#pragma pop
 void fn_802438EC(char* arg0) {
     s32 len = strlen(arg0);
     if (len > 0) {
@@ -199,6 +194,7 @@ void fn_8024442C(void *arg0) {
 }
 
 extern s32 fn_80244558(void *);
+// MATCHING-AID: C++ mode only for the two virtual calls; the unit is really a C++ menu item (rewrite pending).
 #pragma push
 #pragma cplusplus on
 struct Dummy_80244440 {

@@ -25,27 +25,21 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | MultiEvtTestingCheck (stripped by the linker) | src/game/multievt.cpp | reconstructed body for the orphan "Testing mode only allowed from Single Race path" literal so the .data pool keeps the original offsets (unlocks fn_8024A6EC / fn_8024ACB4) | Claude, 2026-10-27 |
 | fn_801B3E24 (collision sound play) | src/game/collisionsound.cpp | volatile zero vector forces stack stores | Codex (tagged in COLLISIONSOUND-23) |
 | UI API unit (9 sites: dont_inline/scheduling pragmas, 1 register) | src/game/uiapi.cpp | imported raw from upstream; whole file needs a typed rewrite | upstream orangedude27/excite-truck |
-| Spu sound layer (6 tagged sites) | src/game/unk_802E4D84.c | 3 upstream pragmas; 3 `msg` base pointers into the message pool (fn_802E5478, fn_802E5AE8, fn_802E6264) standing in for pooled string literals. The pool also holds strings of linker-stripped functions, so literals can't reproduce its offsets until the unit owns its .data | upstream orangedude27/excite-truck; Claude 2026-10-24 |
+| Spu sound layer (3 tagged sites) | src/game/unk_802E4D84.c | 3 `msg` base pointers into the message pool (fn_802E5478, fn_802E5AE8, fn_802E6264) standing in for pooled string literals. The pool also holds strings of linker-stripped functions, so literals can't reproduce its offsets until the unit owns its .data | upstream orangedude27/excite-truck; Claude 2026-10-24 (its scheduling/dont_inline pragmas were no-ops, removed 2026-10-27) |
 | whole unit (8 tagged sites) | src/game/unk_8020A6AC.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (6 tagged sites) | src/game/unk_8020DE74.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (6 tagged sites) | src/game/unk_8020F3B4.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (3 tagged sites) | src/game/unk_8020CF68.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_80127398.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_801BD620.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 tagged sites) | src/game/unk_8020BCB8.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 tagged sites) | src/game/unk_8020F3AC.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_8026E224.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_802E6B48.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (2 tagged sites) | src/game/unk_80215E68.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (2 tagged sites) | src/game/unk_80243460.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (3 tagged sites) | src/game/unk_80262F8C.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_8026B844.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
+| whole unit (1 site) | src/game/unk_80243460.c | `#pragma cplusplus on` so the C file can make two virtual calls; really a C++ menu item (typed rewrite pending). The dont_inline and use_lmw_stmw pragmas were no-ops and are gone | upstream orangedude27/excite-truck |
+| whole unit | src/game/unk_80262F8C.c | none left: the volatile local was the stack-passed 10th argument of fn_8022BAD0 and the scheduling pragma is gone (DecideItem::Draw now 2 rows off instead of 16); typed C++ rewrite pending | upstream orangedude27/excite-truck; Claude 2026-10-27 |
 | whole unit (43 tagged sites) | src/game/unk_80116BD4.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_800241DC.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_80116644.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_80107180.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_8002B0A0.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| whole unit (1 tagged sites) | src/game/unk_8002B0B0.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
+
+These upstream files had only the generic "Tricks are tagged MATCHING-AID" header and no trick construct
+(checked 2026-10-27): unk_80127398, unk_801BD620, unk_8026E224, unk_802E6B48, unk_8026B844, unk_800241DC,
+unk_80116644, unk_80107180, unk_8002B0A0, unk_8002B0B0. They still need typed rewrites, but nothing to undo.
 
 ## Replaced by natural source
 

@@ -1111,13 +1111,10 @@ int fn_802E6AD0(int arg0) {
     return 0;
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma scheduling invalid_target
 void fn_802E6B04(void) {
     fn_802E7770();
     fn_802E2E0C(fn_802E6AD0, &lbl_8055D1F0);
 }
-#pragma scheduling on
 void fn_802E6B34(void) {
 }
 
@@ -1125,11 +1122,8 @@ void fn_802E6B38(void* arg0, signed char* arg1) {
     *arg1 = 0;
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 void fn_802E6B44(int arg0, int arg1) {
     fn_802E5264(arg0, arg1);
 }
-#pragma dont_inline reset
 }
 #pragma cplusplus reset
