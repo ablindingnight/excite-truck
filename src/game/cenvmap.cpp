@@ -169,10 +169,11 @@ void fn_80202BFC(s32 rt) {
         v[0].v = 0.0f;
         v[3].v = 1.0f;
         v[2].v = 1.0f;
-        v[3].color = colors[i];
-        v[2].color = colors[i];
-        v[1].color = colors[i];
-        v[0].color = colors[i];
+        u32 c = colors[i];
+        v[3].color = c;
+        v[2].color = c;
+        v[1].color = c;
+        v[0].color = c;
         fn_802C8DB8(v, 4, idx, 6);
         fn_802C8D74();
     }
