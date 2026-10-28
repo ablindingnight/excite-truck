@@ -693,6 +693,7 @@ public:
         return n;
     }
     void Finish(f32 now);
+    f32 TimeLeft(f32 now) { return endTime - now; }
     SpawnList spawns;          // offset 0x4
     CrushCar cars[8];          // offset 0x90
     s32 nCars;                 // offset 0x170
@@ -1311,8 +1312,7 @@ int CrushMaster::vf20(int car) {
     CrushCar* c = &cars[car];
     int r = c->active;
     if (r) {
-        f32 now = lbl_8055E3C8;
-        r = !NearZero(Max0(endTime - now));
+        r = !NearZero(Max0(TimeLeft(lbl_8055E3C8)));
     }
     return r;
 }
