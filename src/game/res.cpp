@@ -217,7 +217,7 @@ public:
         StrNCpy(path, p, sizeof(path));
         next = 0;
         entries = 0;
-        if (h) {
+        if (h != 0) {
             hdr = *h;
         } else {
             memset(&hdr, 0, sizeof(hdr));
