@@ -34,7 +34,7 @@ public:
     virtual void s28(void);
     virtual void s2C(void);
     virtual void s30(u32 a, const char* b);
-    virtual void s34(void);
+    virtual void s34(s32 a, s32 b);
     virtual void s38(s32* a, s32* b);
 };
 
@@ -75,7 +75,7 @@ void fn_80214CB4(s32 a);
 int fn_802411D4(void);
 void __dt__7UITableFv(void* p, int del);
 void __dt__7DynoTexFv(void* p, int del);
-void fn_8024974C(u32 a, u32 b, u32 c, int d);
+int fn_8024974C(s32* track, s32* eve, s32* diff, int testing);
 void fn_8024B260(u8* p);
 void fn_80214AF0(int s);
 void fn_80214A9C(int s);
@@ -154,7 +154,7 @@ void fn_80249584(u8* p) {}
 
 void fn_80249588(u8* p) {}
 
-int fn_8024958C(u8* car) {
+int fn_8024958C(u8* car, const char* track) {
     u32 ok = S32(car, 0x8) == 0x180302;
     if (ok) {
         ok = FindUnlock(car) != -1;
@@ -165,7 +165,182 @@ int fn_8024958C(u8* car) {
     return ok;
 }
 
-int fn_80249660(u8* p) { return 1; }
+int fn_80249660(u8* p, const char* track) { return 1; }
+
+}  // extern "C"
+
+// A track record as GetTrack returns it.
+struct MpTrack {
+    u8 pad0[0x8];    // offset 0x0
+    char name[0x68]; // offset 0x8
+    s32 numEves;    // offset 0x70
+};
+
+MpTrack* GetTrack(int track);
+const char* GetTrackEnviron(const char* track);
+const char* GetEventDisplayName(int ev);
+
+struct EvPair {
+    const char* track;  // offset 0x0
+    u8* ev;             // offset 0x4
+};
+
+// The event/track pairs the pickers choose from.
+struct EvPairs {
+    EvPair* items;  // offset 0x0
+    s32 count;      // offset 0x4
+    s32 cap;        // offset 0x8
+    EvPair* alloc;  // offset 0xC
+};
+
+// One course row of the picker.
+struct EvPick {
+    s32 track;         // offset 0x0
+    s32 eve;           // offset 0x4
+    const char* name;  // offset 0x8
+};
+
+// The head of a page widget: its state, then the vptr.
+struct PageHead {
+    u8 b0;      // offset 0x0
+    s32 f4;     // offset 0x4
+    u8 b8;      // offset 0x8
+    void** vt;  // offset 0xC
+};
+
+// Event picker page (vtable lbl_80343D78): the courses of the chosen location.
+struct EvPicker {
+    PageHead head;     // offset 0x0
+    s32 cur;           // offset 0x10
+    s32 count;         // offset 0x14
+    s32 f18;           // offset 0x18
+    const char* env;   // offset 0x1C
+    EvPick ents[64];   // offset 0x20
+};
+
+int GetNumTracks(void);
+int GetNumEvents(void);
+const char* GetTrackFriendlyName(const char* name);
+
+struct EvEntryBuf {
+    s32 id;         // offset 0x0
+    u8 pad4[0x14];  // offset 0x4
+};
+
+// An event list with room for 0x80 entries on the stack.
+struct EvListBuf {
+    EvListBuf(void) {
+        count = 0;
+        items = buf;
+        cap = 0x80;
+    }
+    ~EvListBuf(void) {
+        items = 0;
+        count = 0;
+        cap = 0;
+    }
+    int Find(s32 id) {
+        for (int i = 0; i < count; i++) {
+            EvEntryBuf& e = items[i];
+            if (e.id == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    EvEntryBuf* items;      // offset 0x0
+    s32 count;              // offset 0x4
+    s32 cap;                // offset 0x8
+    EvEntryBuf buf[0x80];   // offset 0xC
+};
+
+// Location picker page (vtable lbl_80343D48): one row per track environment.
+struct LocEntry {
+    const char* name;  // offset 0x0, friendly name
+    const char* env;   // offset 0x4
+};
+
+struct LocPicker {
+    PageHead head;         // offset 0x0
+    LocEntry* data;        // offset 0x10
+    s32 count;             // offset 0x14
+    s32 cap;               // offset 0x18
+    LocEntry buf[0x20];    // offset 0x1C
+    s32 cur;               // offset 0x11C
+    EvPairs** pairs;       // offset 0x120
+    EvPicker* events;      // offset 0x124
+    char movie[0x20];      // offset 0x128
+};
+
+// Difficulty picker page (vtable lbl_80343D18).
+struct DiffPicker {
+    PageHead head;  // offset 0x0
+    s32 cur;        // offset 0x10
+};
+
+// Course texture page (vtable lbl_80343C30): a DynoTex of the event pictures plus the chosen course.
+struct CourseTex {
+    u8 tex[0x18];        // offset 0x0, DynoTex (vptr first)
+    void** vt2;          // offset 0x18
+    u8 pad1C[0x10];
+    s32 f2C;             // offset 0x2C
+    EvPicker* picker;    // offset 0x30
+    s32 id;              // offset 0x34
+    char name[100];      // offset 0x38
+};
+
+// Stats page (vtable lbl_80343CA8): a StatsTable of the chosen course.
+struct StatsPage {
+    u8 table[0x34];      // offset 0x0, StatsTable
+    void** vt2;          // offset 0x34
+    u8 pad38[0x10];
+    s32 f48;             // offset 0x48
+    EvPicker* picker;    // offset 0x4C
+    void** vt;           // offset 0x50
+    u8 pad54[0x4];
+    char text[0x100];    // offset 0x58
+};
+
+extern void* lbl_80343D78[];
+extern void* lbl_80343D48[];
+extern void* lbl_80343D18[];
+extern void* lbl_80343C30[];
+extern void* lbl_80343CA8[];
+extern u8 lbl_8055F291;
+extern char lbl_8055B860[8];
+extern char lbl_8055BAC0[];
+extern char lbl_8055BABC[];
+extern char lbl_8055BAB8[];
+void* operator new(size_t size, const char* tag);
+void* operator new[](size_t size, const char* tag);
+
+// The preview movie of a track environment.
+inline void MoviePath(char* buf, const char* env) { fn_801345D8(buf, 0x20, "%s/race.%s", env, "m2v"); }
+
+extern "C" {
+void fn_801332D0(int slot, const char* name, s32* value);
+void fn_80133348(int slot, const char* name, s32 value);
+void fn_8027BCD0(EvListBuf* list);
+void fn_801286A0(void* p, s32 shrink);
+void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
+int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
+void fn_802E317C(const char* fmt, ...);
+void fn_80236914(void);
+void __ct__10StatsTableFv(void* p);
+void __ct__7DynoTexFiUc(void* p, int n, u8 f);
+void Add__7DynoTexFiPCc(void* p, int id, const char* name);
+int fn_8024A4B8(const char** a, const char** b);
+}
+
+// Stripped from the shipped game; only its message survives in the unit's .data.
+// MATCHING-AID: reconstructed so the literal pool keeps the original offsets (see docs/matching_aids.md).
+void MultiEvtTestingCheck(void) {
+    if (!fn_802411D4()) {
+        fn_802E317C("Testing mode only allowed from Single Race path");
+    }
+}
+
+extern "C" {
 
 int fn_80249668(s32* out) {
     const char* names[3] = {"Select Location", "Select Event", "Select Difficulty"};
@@ -182,7 +357,190 @@ void fn_80249720(void) { lbl_8055BF34 = fn_80214D04(); }
 
 void fn_80249744(void) { fn_80214CB4(lbl_8055BF34); }
 
-void fn_8024974C(u32 a, u32 b, u32 c, int d) {}
+// The multiplayer event menu: location, course, event count and AI strength, with the course picture,
+// preview movie and stats. Starts from the remembered choices and remembers the new ones; returns 0 when
+// backed out. In testing mode only the unlocked multiplayer events are offered.
+int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
+    if (testing && !fn_802411D4()) {
+        return 0;
+    }
+    lbl_8055F290 = testing;
+    lbl_8055F28C = (UnlockList*)new ("sa") EvListBuf;
+    fn_8027BCD0((EvListBuf*)lbl_8055F28C);
+    lbl_8055F291 = 0;
+    *track = -1;
+    *eve = 5;
+    *diff = 0;
+    fn_801332D0(0, lbl_8055BF10, eve);
+    fn_801332D0(0, lbl_8055BF14, track);
+    EvPairs* pairs = (EvPairs*)operator new(sizeof(EvPairs), "ci-list");
+    if (pairs) {
+        int n = GetNumEvents();
+        EvPair* b = new ("dsa_buf") EvPair[n];
+        pairs->items = b;
+        pairs->cap = n;
+        pairs->count = 0;
+        pairs->alloc = b;
+    }
+    int i;
+    for (i = 0; i < GetNumEvents(); i++) {
+        u8* ev = GetEvent(i);
+        const char* name = GetTrack(S32(ev, 0x4))->name;
+        if ((testing ? fn_8024958C : fn_80249660)(ev, name)) {
+            EvPair* d = pairs->items;
+            int k = pairs->count;
+            pairs->count = k + 1;
+            d[k].ev = ev;
+            d[k].track = name;
+        }
+    }
+    if (pairs->count < pairs->cap) {
+        fn_801286A0(pairs->alloc, (pairs->cap - pairs->count) * sizeof(EvPair));
+        pairs->cap = pairs->count;
+    }
+    EvPicker events;
+    events.head.b0 = 0;
+    events.head.vt = lbl_80343D78;
+    events.head.f4 = -1;
+    events.head.b8 = 0;
+    events.f18 = -1;
+    s32 lastTrack = *track;
+    s32 lastEve = *eve;
+    LocPicker loc;
+    loc.head.b0 = 0;
+    loc.head.f4 = -1;
+    loc.head.b8 = 0;
+    loc.head.vt = lbl_80343D48;
+    loc.data = loc.buf;
+    loc.cap = 0x20;
+    loc.pairs = &pairs;
+    loc.events = &events;
+    loc.cur = 0;
+    loc.count = 0;
+    for (i = 0; i < (*loc.pairs)->count; i++) {
+        const char* name = (*loc.pairs)->items[i].track;
+        const char* env = GetTrackEnviron(name);
+        int found = 0;
+        for (int j = 0; j < loc.count; j++) {
+            if (!strcasecmp(loc.data[j].env, env)) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            LocEntry* e = &loc.data[loc.count++];
+            e->name = GetTrackFriendlyName(name);
+            e->env = env;
+        }
+    }
+    fn_80265DCC(loc.data, loc.count, sizeof(LocEntry), (int (*)(u8*, u8*))fn_8024A4B8);
+    if (lastTrack >= 0 && lastTrack < GetNumTracks()) {
+        const char* env = GetTrackEnviron(GetTrack(lastTrack)->name);
+        for (int j = 0; j < loc.count; j++) {
+            if (!strcasecmp(env, loc.data[j].env)) {
+                loc.cur = j;
+                break;
+            }
+        }
+    }
+    ((VC*)loc.events)->s30((u32)loc.pairs, loc.data[loc.cur].env);
+    ((VC*)&events)->s34(lastTrack, lastEve);
+    MoviePath(loc.movie, loc.data[loc.cur].env);
+    UnlockList* unlocks = lbl_8055F28C;
+    CourseTex tex;
+    __ct__7DynoTexFiUc(&tex, unlocks->count, 0);
+    *(void**)&tex = lbl_80343C30;
+    tex.f2C = 0;
+    tex.vt2 = lbl_80343C30 + 3;
+    for (i = 0; i < unlocks->count; i++) {
+        char buf[0x21];
+        const char* name = ((VN*)PTR(GetEvent(unlocks->entries[i].id), 0x20))->v14("name");
+        const char* prefix = "career_";
+        if (!strncmp(name, prefix, strlen(prefix))) {
+            name += strlen(prefix);
+        }
+        fn_801345D8(buf, 0x21, "/%s.tex", name);
+        Add__7DynoTexFiPCc(&tex, unlocks->entries[i].id, buf);
+    }
+    tex.picker = &events;
+    tex.id = -1;
+    tex.name[0] = 0;
+    if (!testing) {
+        fn_801332D0(0, lbl_8055BF18, diff);
+    } else {
+        *diff = 0;
+    }
+    DiffPicker level;
+    level.head.b0 = 0;
+    level.head.f4 = -1;
+    level.head.b8 = 0;
+    level.head.vt = lbl_80343D18;
+    level.cur = 0;
+    if (*diff == lbl_802FA4B0[0].id) {
+        level.cur = 0;
+    } else if (*diff == lbl_802FA4B0[1].id) {
+        level.cur = 1;
+    } else if (*diff == lbl_802FA4B0[2].id) {
+        level.cur = 2;
+    }
+    StatsPage stats;
+    __ct__10StatsTableFv(&stats);
+    stats.vt = lbl_80343CA8;
+    stats.vt2 = lbl_80343CA8 + 2;
+    stats.f48 = 0;
+    stats.picker = &events;
+    stats.text[0] = 0;
+    lbl_8055F294 = stats.text;
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80249744, 0, 0),
+        MenuItem(lbl_8055BABC, 8, (const void*)fn_80249720, 1, 0),
+        MenuItem("#track", 0x10, &loc, 0, 0),
+        MenuItem("#event_count", 0x10, &events, 0, 0),
+        MenuItem("#ai_strength", 0x10, &level, 0, 0),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_8055B860, 6, 0, -2, 13),
+        MenuItem("#title", stats.text, CaptionContext(0x100)),
+        MenuItem("#course_name", tex.name),
+        MenuItem("#trackmap", 0x12, &tex, 0, 0),
+        MenuItem("#trackmap", 2, &tex.id, 0, 0),
+        MenuItem(0, 5, &tex.vt2, 0, 0),
+        MenuItem("#track_movie", loc.movie, CaptionContext(0x20)),
+        MenuItem("Stat", 0xD, &stats, 0, 0),
+        MenuItem("Value", 0xD, &stats, 1, 0),
+        MenuItem(0, 5, &stats.vt2, 0, 0),
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_80236914, 2, 0),
+        MenuItem(lbl_80498998),
+    };
+    MenuDesc desc = {testing ? "multi_evt.lyt" : "track1.lyt", (MenuItem*)items, (int (*)(int*))fn_80249668, 0, 0};
+    int r = fn_802146BC(&desc, -999, -999, 3);
+    *track = events.ents[events.cur].track;
+    *eve = events.ents[events.cur].eve;
+    *diff = lbl_802FA4B0[level.cur].id;
+    fn_80133348(0, lbl_8055BF14, *track);
+    fn_80133348(0, lbl_8055BF10, *eve);
+    fn_80133348(0, lbl_8055BF18, *diff);
+    lbl_8055F294 = 0;
+    delete (EvListBuf*)lbl_8055F28C;
+    lbl_8055F28C = 0;
+    __dt__7UITableFv(&stats, 0);
+    __dt__7DynoTexFv(&tex, 0);
+    loc.cur = 0;
+    loc.data = 0;
+    loc.count = 0;
+    loc.cap = 0;
+    events.f18 = -1;
+    events.cur = 0;
+    events.env = 0;
+    if (pairs) {
+        delete[] pairs->alloc;
+        pairs->items = 0;
+        pairs->count = 0;
+        pairs->cap = 0;
+        operator delete(pairs);
+    }
+    pairs = 0;
+    return r != -1;
+}
 
 u8* fn_8024A110(u8* p, int del) {
     if (p) {
@@ -256,41 +614,11 @@ void fn_8024A2BC(u8* p, s32 a, s32 b) {
 
 }  // extern "C"
 
-// A track record as GetTrack returns it.
-struct MpTrack {
-    u8 pad0[0x70];  // offset 0x0
-    s32 numEves;    // offset 0x70
-};
 
-MpTrack* GetTrack(int track);
-const char* GetTrackEnviron(const char* track);
-const char* GetEventDisplayName(int ev);
-
-struct EvPair {
-    const char* track;  // offset 0x0
-    u8* ev;             // offset 0x4
-};
-
-struct EvPairs {
-    EvPair* items;  // offset 0x0
-    s32 count;      // offset 0x4
-};
-
-// One course row of the picker.
-struct EvPick {
-    s32 track;         // offset 0x0
-    s32 eve;           // offset 0x4
-    const char* name;  // offset 0x8
-};
-
-struct EvPicker {
-    u8 pad0[0x10];     // offset 0x0
-    s32 cur;           // offset 0x10
-    s32 count;         // offset 0x14
-    u8 pad18[0x4];     // offset 0x18
-    const char* env;   // offset 0x1C
-    EvPick ents[1];    // offset 0x20
-};
+// The name an event is listed under.
+inline const char* EventFriendlyName(u8* ev) {
+    return ((ValueNode*)PTR(ev, 0x20))->GetString("friendly_name", GetEventDisplayName(S32(ev, 0x0)));
+}
 
 // The unlock-table row for event ev, or -1.
 static inline int FindUnlockEv(u8* ev) {
@@ -333,7 +661,7 @@ void fn_8024A304(EvPicker* p, EvPairs** pairs, const char* env) {
             if (lbl_8055F290 && j >= 0) {
                 p->ents[p->count].name = lbl_8055F28C->entries[j].name;
             } else {
-                p->ents[p->count].name = ((ValueNode*)PTR(ev, 0x20))->GetString("friendly_name", GetEventDisplayName(S32(ev, 0x0)));
+                p->ents[p->count].name = EventFriendlyName(ev);
             }
             p->count++;
         }
@@ -342,43 +670,12 @@ void fn_8024A304(EvPicker* p, EvPairs** pairs, const char* env) {
 
 int fn_8024A4B8(const char** a, const char** b) { return strcasecmp(*a, *b); }
 
-void fn_8024A4C4(u32 a, u32 b, u32 c) { fn_8024974C(a, b, c, 0); }
+int fn_8024A4C4(s32* track, s32* eve, s32* diff) { return fn_8024974C(track, eve, diff, 0); }
 
 }  // extern "C"
 
 int GetNumTracks(void);
 
-struct EvEntryBuf {
-    s32 id;         // offset 0x0
-    u8 pad4[0x14];  // offset 0x4
-};
-
-// An event list with room for 0x80 entries on the stack.
-struct EvListBuf {
-    EvListBuf(void) {
-        count = 0;
-        items = buf;
-        cap = 0x80;
-    }
-    ~EvListBuf(void) {
-        items = 0;
-        count = 0;
-        cap = 0;
-    }
-    int Find(s32 id) {
-        for (int i = 0; i < count; i++) {
-            EvEntryBuf& e = items[i];
-            if (e.id == id) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    EvEntryBuf* items;      // offset 0x0
-    s32 count;              // offset 0x4
-    s32 cap;                // offset 0x8
-    EvEntryBuf buf[0x80];   // offset 0xC
-};
 
 
 extern "C" {

@@ -119,3 +119,4 @@ real aids with `MATCHING-AID:` as they are reviewed. Data-placement pragmas (`se
 | src/game/widgets.cpp | 1398 | register |
 | src/game/zone.cpp | 2341 | pragma |
 | src/game/zone.cpp | 2495 | pragma |
+| MultiEvtTestingCheck (stripped by the linker) | src/game/multievt.cpp | reconstructed body for the orphan "Testing mode only allowed from Single Race path" literal so the .data pool keeps the original offsets (unlocks fn_8024A6EC / fn_8024ACB4) | Claude, 2026-10-27 |
