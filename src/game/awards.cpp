@@ -107,12 +107,17 @@ public:
 
 class ArtPlayer {
 public:
+    ArtPlayer(int n);
     ~ArtPlayer(void);
+    int Add(const char* name, int binds);
     void Start(int i);
     void Pause(int i);
     void StopAll(void);
     void Update(void);
     void Draw(int a);
+
+    void* list;  // offset 0x0
+    f32 t;       // offset 0x4
 };
 
 class ILayout {
@@ -264,15 +269,23 @@ struct RecordRow {
     FixedStr<20> time;   // offset 0x28
 };
 
+// One ArtPlayer binding: what a named layout element shows.
+struct Cmd {
+    s32 op;           // 1 text, 3 int, 5 scale
+    const char* name;
+    void* ptr;
+};
+
 // The records animation (awards_pr.val, "records_anim").
 struct Results {
     Results(void);
+    void Reset(void);
     s32 state;                  // offset 0x0
     f32 t;                      // offset 0x4
     ArtPlayer* anim;            // offset 0x8
-    LayoutObj* bar;             // offset 0xC "player_bar"
-    LayoutObj* recordLand;      // offset 0x10
-    LayoutObj* fail;            // offset 0x14
+    LayoutObj* moveSfx;         // offset 0xC
+    LayoutObj* landSfx;         // offset 0x10
+    LayoutObj* failSfx;         // offset 0x14
     s32 n;                      // offset 0x18
     s32 animId;                 // offset 0x1C
     RecordRow rows[5];          // offset 0x20
@@ -284,10 +297,38 @@ struct Results {
     FixedStr<100> newRecordTitle;  // offset 0x200
     FixedStr<18> name;          // offset 0x264
     FixedStr<64> timeHeading;   // offset 0x276
-    Vec4 scales[4];             // offset 0x2B8
-    Vec4 rowScales[5];          // offset 0x2F8
+    Vec4 scales[9];             // offset 0x2B8: bar, score, grade, time, then the five rows
     Vec4 nameScale;             // offset 0x348
 };
+
+static inline void StopSfx(LayoutObj* o) {
+    if (o) {
+        o->b4A = 1;
+        o->b4C = 0;
+    }
+}
+
+inline void Results::Reset(void) {
+    state = 0;
+    t = 0.0f;
+    n = 0;
+    for (int i = 0; i < 9; i++) {
+        scales[i].x = 1.0f;
+        scales[i].y = 0.0f;
+        scales[i].z = 0.0f;
+        scales[i].w = 0.0f;
+    }
+    nameScale.x = 1.0f;
+    nameScale.y = 0.0f;
+    nameScale.z = 0.0f;
+    nameScale.w = 0.0f;
+    if (anim) {
+        anim->StopAll();
+    }
+    StopSfx(moveSfx);
+    StopSfx(landSfx);
+    StopSfx(failSfx);
+}
 
 // The popup queue: head and the link to append at.
 struct PopupQueue {
@@ -323,12 +364,7 @@ struct AwardsMgr {
 
 }  // namespace
 
-#define AW_OFF(o) (*(f32*)((u8*)(o) + 0x2C4))
-#define AW_ART(o) (*(ArtPlayer**)((u8*)(o) + 0x2C8))
-#define AW_OBJ(o, i) (*(LayoutObj**)((u8*)(o) + 0x2CC + (i) * 4))
 #define AW_VOBJ(o, i) (*(VObj**)((u8*)(o) + 0x2CC + (i) * 4))
-#define AW_2D8(o) (*(s32*)((u8*)(o) + 0x2D8))
-#define AW_SCALES(o) ((Vec4*)((u8*)(o) + 0x578))
 
 ModuleTag lbl_8055E878;
 u8 lbl_8055E880;
@@ -656,7 +692,15 @@ void fn_801476C4(AwText* e);
 
 extern "C" {
 
-extern "C" void IL_Use(int k, ...);
+
+Cmd fn_801CE670(const char* name, Vec4* v);
+const char* fn_801CE698(FixedStr<18>* s);
+const char* fn_801CE69C(FixedStr<64>* s);
+const char* fn_801CE6A0(FixedStr<100>* s);
+Cmd fn_801CE6A4(const char* name, const char* text);
+const char* fn_801CE6CC(FixedStr<20>* s);
+Cmd fn_801CE6D0(const char* name, s32* v);
+extern const Cmd lbl_802FAA40;  // list terminator
 
 static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
@@ -725,32 +769,32 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         break;
     case 1:
         if (r->n) {
-            LayoutObj* bar = r->bar;
-            if (bar) {
-                bar->b4A = 0;
-                bar->b4B = 1;
-                bar->b49 = 1;
+            LayoutObj* o = r->moveSfx;
+            if (o) {
+                o->b4A = 0;
+                o->b4B = 1;
+                o->b49 = 1;
             }
             if (lbl_8055E884->rank < 0 || r->n - 1 <= lbl_8055E884->rank) {
                 r->anim->Pause(r->animId);
-                bar = r->bar;
-                if (bar) {
-                    bar->b4A = 1;
-                    bar->b4C = 0;
+                o = r->moveSfx;
+                if (o) {
+                    o->b4A = 1;
+                    o->b4C = 0;
                 }
                 if (ranked) {
-                    LayoutObj* o = r->recordLand;
-                    if (o) {
-                        o->b49 = 1;
-                        o->b4B = 0;
-                        o->b4A = 0;
+                    LayoutObj* land = r->landSfx;
+                    if (land) {
+                        land->b49 = 1;
+                        land->b4B = 0;
+                        land->b4A = 0;
                     }
                 } else {
-                    LayoutObj* o = r->fail;
-                    if (o) {
-                        o->b49 = 1;
-                        o->b4B = 0;
-                        o->b4A = 0;
+                    LayoutObj* fail = r->failSfx;
+                    if (fail) {
+                        fail->b49 = 1;
+                        fail->b4B = 0;
+                        fail->b4A = 0;
                     }
                 }
                 r->state = 2;
@@ -779,8 +823,8 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         r->scales[2].y = 3.0f * r->t;
         r->scales[3].x = s;
         r->scales[3].y = 27.0f * r->t;
-        r->rowScales[rank].x = s;
-        r->rowScales[rank].y = -36.0f * r->t;
+        (r->scales + 4)[rank].x = s;
+        (r->scales + 4)[rank].y = -36.0f * r->t;
     }
     r->nameScale.x = 1.0f;
     r->nameScale.y = 0.0f;
@@ -840,26 +884,7 @@ static inline void ResetAwards(AwardsMgr* m) {
         m->rank = -1;
         m->time = -999.0f;
         m->hasTime = 0;
-        m->results.state = 0;
-        AW_OFF(m) = 0.0f;
-        AW_2D8(m) = 0;
-        Vec4* v = AW_SCALES(m);
-        for (int i = 0; i < 10; i++) {
-            v[i].x = 1.0f;
-            v[i].y = 0.0f;
-            v[i].z = 0.0f;
-            v[i].w = 0.0f;
-        }
-        if (AW_ART(m)) {
-            AW_ART(m)->StopAll();
-        }
-        for (int i = 0; i < 3; i++) {
-            LayoutObj* o = AW_OBJ(m, i);
-            if (o) {
-                o->b4A = 1;
-                o->b4C = 0;
-            }
-        }
+        m->results.Reset();
     }
 }
 
@@ -874,7 +899,7 @@ void fn_801CC768(LayoutObj* l, f32 speed) {
 
 StatHandler** fn_801CC784(HandlerVec* v) { return &v->data[v->n++]; }
 
-Results::Results(void) : anim(0), bar(0), recordLand(0), fail(0) {}
+Results::Results(void) : anim(0), moveSfx(0), landSfx(0), failSfx(0) {}
 
 PopupQueue::PopupQueue(void) {
     tail = &head;
@@ -1275,51 +1300,89 @@ void fn_801CDDCC(void) {
     fn_801CDE00(&lbl_8055E884->results);
 }
 
-// Records animation draw (placeholder; keeps its strings in the pool).
-void fn_801CDE00(Results* r) {
-    IL_Use(0, "records_anim", "player_score", "record_score_1", "record_grade_1", "record_time_1", "record_score_2",
-           "record_grade_2", "record_time_2", "record_score_3", "record_grade_3", "record_time_3", "record_score_4",
-           "record_grade_4", "record_time_4", "record_score_5", "record_grade_5", "record_time_5", "player_grade",
-           "player_time", "time_record_excite", "time_record_super", "time_record_mirror", "time_record_title",
-           "new_time_record_title", "time_heading", "player_name", "player_bar", "a_records.val",
-           "pr_recordmove.sfx", "pr_recordland.sfx", "pr_fail.sfx");
+// Binds the record texts and scales to a_records.val; returns the animation id.
+static inline int BindRecords(Results* r, int diff) {
+    Cmd b[36] = {
+        fn_801CE6D0("player_score", &r->n),
+        fn_801CE6A4("record_score_1", fn_801CE6CC(&r->rows[0].score)),
+        fn_801CE6A4("record_grade_1", fn_801CE6CC(&r->rows[0].grade)),
+        fn_801CE6A4("record_time_1", fn_801CE6CC(&r->rows[0].time)),
+        fn_801CE6A4("record_score_2", fn_801CE6CC(&r->rows[1].score)),
+        fn_801CE6A4("record_grade_2", fn_801CE6CC(&r->rows[1].grade)),
+        fn_801CE6A4("record_time_2", fn_801CE6CC(&r->rows[1].time)),
+        fn_801CE6A4("record_score_3", fn_801CE6CC(&r->rows[2].score)),
+        fn_801CE6A4("record_grade_3", fn_801CE6CC(&r->rows[2].grade)),
+        fn_801CE6A4("record_time_3", fn_801CE6CC(&r->rows[2].time)),
+        fn_801CE6A4("record_score_4", fn_801CE6CC(&r->rows[3].score)),
+        fn_801CE6A4("record_grade_4", fn_801CE6CC(&r->rows[3].grade)),
+        fn_801CE6A4("record_time_4", fn_801CE6CC(&r->rows[3].time)),
+        fn_801CE6A4("record_score_5", fn_801CE6CC(&r->rows[4].score)),
+        fn_801CE6A4("record_grade_5", fn_801CE6CC(&r->rows[4].grade)),
+        fn_801CE6A4("record_time_5", fn_801CE6CC(&r->rows[4].time)),
+        fn_801CE6A4("player_score", fn_801CE6CC(&r->score)),
+        fn_801CE6A4("player_grade", fn_801CE6CC(&r->grade)),
+        fn_801CE6A4("player_time", fn_801CE6CC(&r->time)),
+        fn_801CE6A4("time_record_excite", diff == 0 ? fn_801CE6CC(&r->recordTime) : ""),
+        fn_801CE6A4("time_record_super", diff == 1 ? fn_801CE6CC(&r->recordTime) : ""),
+        fn_801CE6A4("time_record_mirror", diff == 2 ? fn_801CE6CC(&r->recordTime) : ""),
+        fn_801CE6A4("time_record_title", fn_801CE6A0(&r->recordTitle)),
+        fn_801CE6A4("new_time_record_title", fn_801CE6A0(&r->newRecordTitle)),
+        fn_801CE6A4("time_heading", fn_801CE69C(&r->timeHeading)),
+        fn_801CE6A4("player_name", fn_801CE698(&r->name)),
+        fn_801CE670("player_bar", &r->scales[0]),
+        fn_801CE670("player_score", &r->scales[1]),
+        fn_801CE670("player_grade", &r->scales[2]),
+        fn_801CE670("player_time", &r->scales[3]),
+        fn_801CE670("1", &r->scales[4]),
+        fn_801CE670("2", &r->scales[5]),
+        fn_801CE670("3", &r->scales[6]),
+        fn_801CE670("4", &r->scales[7]),
+        fn_801CE670("5", &r->scales[8]),
+        lbl_802FAA40,
+    };
+    return r->anim->Add("a_records.val", (int)b);
 }
 
-struct Cmd {
-    s32 op;
-    s32 a;
-    s32 b;
-};
+// Records animation setup: binds the layout, loads the sounds and resets.
+void fn_801CDE00(Results* r) {
+    r->anim = new ("records_anim") ArtPlayer(16);
+    int diff = fn_80204CF0();
+    r->animId = BindRecords(r, diff);
+    r->moveSfx = (LayoutObj*)fn_80207848("pr_recordmove.sfx", 1);
+    r->landSfx = (LayoutObj*)fn_80207848("pr_recordland.sfx", 1);
+    r->failSfx = (LayoutObj*)fn_80207848("pr_fail.sfx", 1);
+    r->Reset();
+}
 
-Cmd fn_801CE670(s32 a, s32 b) {
+Cmd fn_801CE670(const char* name, Vec4* v) {
     Cmd c;
     c.op = 5;
-    c.a = a;
-    c.b = b;
+    c.name = name;
+    c.ptr = v;
     return c;
 }
 
-void fn_801CE698(void) {}
+const char* fn_801CE698(FixedStr<18>* s) { return s->s; }
 
-void fn_801CE69C(void) {}
+const char* fn_801CE69C(FixedStr<64>* s) { return s->s; }
 
-void fn_801CE6A0(void) {}
+const char* fn_801CE6A0(FixedStr<100>* s) { return s->s; }
 
-Cmd fn_801CE6A4(s32 a, s32 b) {
+Cmd fn_801CE6A4(const char* name, const char* text) {
     Cmd c;
     c.op = 1;
-    c.a = a;
-    c.b = b;
+    c.name = name;
+    c.ptr = (void*)text;
     return c;
 }
 
-void fn_801CE6CC(void) {}
+const char* fn_801CE6CC(FixedStr<20>* s) { return s->s; }
 
-Cmd fn_801CE6D0(s32 a, s32 b) {
+Cmd fn_801CE6D0(const char* name, s32* v) {
     Cmd c;
     c.op = 3;
-    c.a = a;
-    c.b = b;
+    c.name = name;
+    c.ptr = v;
     return c;
 }
 
@@ -1329,8 +1392,8 @@ void fn_801CE6F8(void) {
     }
     AwardsMgr* m = lbl_8055E884;
     fn_801CBD48(&m->results, m);
-    if (AW_ART(m)) {
-        AW_ART(m)->Draw((int)((u8*)m + 0x608));
+    if (m->results.anim) {
+        m->results.anim->Draw((int)&m->results.nameScale);
     }
     if (m->results.state == 3) {
         UpdateContinueOverlay();
@@ -1349,9 +1412,9 @@ void fn_801CE7A0(void) {
         return;
     }
     AwardsMgr* m = lbl_8055E884;
-    if (AW_ART(m)) {
-        delete AW_ART(m);
-        AW_ART(m) = 0;
+    if (m->results.anim) {
+        delete m->results.anim;
+        m->results.anim = 0;
     }
     if (AW_VOBJ(m, 0)) {
         delete AW_VOBJ(m, 0);
