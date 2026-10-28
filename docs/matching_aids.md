@@ -13,9 +13,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 |---|---|---|---|
 | fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas (natural form known: literals + unit-string locals; apply once the unit's earlier strings exist) | upstream orangedude27/excite-truck |
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
-| fn_80223280 (selection draw) | src/game/widgets.cpp | shared four-use width-product helper steering operand allocation | Codex widgets 389, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
-| widgets (inherited, tagged in 390) | src/game/widgets.cpp | register-qualified cursor index | Codex widgets, tagged 2026-10-26 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | separate unsigned-conversion literal pool | Codex widgets, tagged 2026-10-26 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum + volatile maximum reload (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
 | fn_8022A210 (model fit) | src/game/widgets.cpp | scalar wrapper struct for bound extents (ModelBoundScalarObservedNew) | Codex widgets 391, 2026-10-26 |
@@ -144,6 +142,5 @@ real aids with `MATCHING-AID:` as they are reviewed. Data-placement pragmas (`se
 | src/game/sdmp3.cpp | 542 | volatile |
 | src/game/stunts.cpp | 2194 | pragma |
 | src/game/stunts.cpp | 2219 | pragma |
-| src/game/widgets.cpp | 1398 | register |
 | src/game/zone.cpp | 2341 | pragma |
 | src/game/zone.cpp | 2495 | pragma |

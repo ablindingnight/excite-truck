@@ -1378,10 +1378,21 @@ struct SelectionDrawFieldsNew {char base[0x244];const char* labels[33];int count
 extern "C" {extern const float lbl_805634EC,lbl_805634F4,lbl_80563534;}
 static inline float SelectionDrawTopNew(const WidgetFragment* self){return lbl_805634F4-(float)self->top;}
 extern "C" {
-// MATCHING-AID: shared product helper currently steers operand allocation; original helper identity is unproved, and natural replacement remains open.
-static inline float SelectionWidthProductObservedNew(float width,float half){return width*half;}
+// Selection half widths use ordinary load-before-product locals.
 void fn_80223280(WidgetFragment* self){SelectionDrawFieldsNew* f=(SelectionDrawFieldsNew*)self;float y,x,selectedX,half,shadow;x=f->scrollX;y=(float)self->top;y=lbl_805634F4-y;selectedX=f->scrollX;shadow=lbl_805634EC;half=lbl_805634C4;
-int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;x+=f->spacing+SelectionWidthProductObservedNew(f->widths[i],half);if(i+1<f->count)x+=SelectionWidthProductObservedNew(f->widths[i+1],half);}else{fn_80232BA4(f->labels[i],f->resource,shadow+x,y-shadow,0xff000000u,12,f->scale,lbl_805634A8,lbl_805634A4);u32 color=fn_802236C8(self,i);fn_80232BA4(f->labels[i],f->resource,x,y,color,12,f->scale,lbl_805634A8,lbl_805634A4);x+=f->spacing+SelectionWidthProductObservedNew(f->widths[i],half);if(i+1<f->count)x+=SelectionWidthProductObservedNew(f->widths[i+1],half);}}
+int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
+ float w=f->widths[i];
+ x+=f->spacing+w*half;
+}if(i+1<f->count){
+ float w=f->widths[i+1];
+ x+=w*half;
+}}else{fn_80232BA4(f->labels[i],f->resource,shadow+x,y-shadow,0xff000000u,12,f->scale,lbl_805634A8,lbl_805634A4);u32 color=fn_802236C8(self,i);fn_80232BA4(f->labels[i],f->resource,x,y,color,12,f->scale,lbl_805634A8,lbl_805634A4);{
+ float w=f->widths[i];
+ x+=f->spacing+w*half;
+}if(i+1<f->count){
+ float w=f->widths[i+1];
+ x+=w*half;
+}}}
 i=*f->selected;int selected=i;
 // MATCHING-AID: retain the observed screen int-to-float conversions; both local values are unused in this recovered body, and their original enclosing interface remains unproved.
 float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]*GaugeHalfReferenceObservedNew()-f->spacing*lbl_805634C4;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=lbl_805634EC+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
@@ -1904,8 +1915,7 @@ int fn_8021F06C(WidgetFragment* self,int key){
  case 0x123:f->cursor=strlen(f->buffer);WidgetMarkDirty(self);break;
  case 0x125:if(f->cursor>0){f->cursor--;WidgetMarkDirty(self);}break;
  case 0x127:if((unsigned int)f->cursor<strlen(f->buffer)){f->cursor++;WidgetMarkDirty(self);}break;
- // MATCHING-AID (inherited): register-qualified cursor index remains pending natural-source cleanup.
- case 0x12e:{text=f->buffer;if(strlen(text)!=0){register int index=f->cursor;if((unsigned int)index<strlen(text)){while(f->buffer[index]){f->buffer[index]=f->buffer[index+1];index++;}}}WidgetMarkDirty(self);break;}
+  case 0x12e:{text=f->buffer;if(strlen(text)!=0){int index=f->cursor;if((unsigned int)index<strlen(text)){while(f->buffer[index]){f->buffer[index]=f->buffer[index+1];index++;}}}WidgetMarkDirty(self);break;}
  case 8:if(strlen(f->buffer)!=0&&f->cursor>0){int i=--f->cursor;while(f->buffer[i]){f->buffer[i]=f->buffer[i+1];i++;}}WidgetMarkDirty(self);break;
  case 9:if(!fn_802E4A1C(0xfd))fn_802194F4(self);else fn_80219508(self);break;
  default:if(!(key&0x100)&&(unsigned int)key>31){text=f->buffer;if(strlen(text)<(unsigned int)(capacity-1)){int i=strlen(text)+1;while(i>f->cursor){f->buffer[i]=f->buffer[i-1];i--;}f->buffer[f->cursor++]=(char)key;}WidgetMarkDirty(self);}else return ((int(*)(WidgetFragment*,int))fn_802192A4)(self,key);break;
