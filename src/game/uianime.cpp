@@ -108,6 +108,10 @@ public:
     virtual ~UiSpecialList(void);
     virtual f32 Length(void);
     virtual void Apply(f32 t);
+    void Start(const char* name);
+    void StopOthers(int i);
+    void Stop(const char* name);
+    int State(const char* name);
 
     UiSpecial* items;  // offset 0x4
     s32 n;           // offset 0x8
@@ -568,38 +572,47 @@ void fn_80237D00(AnimState* s) {
     delete s;
 }
 
-void fn_80237DA0(const char* name) {
-    UiSpecialList* l = lbl_8055F0C0->special;
-    for (int i = 0; i < l->n; i++) {
-        if (!strcasecmp(l->items[i].name, name)) {
-            l->items[i].active = 1;
-            l->items[i].start = fn_8023659C();
-            for (int j = 0; j < l->n; j++) {
-                if (j != i && l->items[j].track.id == l->items[i].track.id) {
-                    l->items[j].active = 0;
-                }
-            }
+// Stops the other specials that animate the same track as special i.
+inline void UiSpecialList::StopOthers(int i) {
+    for (int j = 0; j < n; j++) {
+        if (j != i && items[j].track.id == items[i].track.id) {
+            items[j].active = 0;
         }
     }
 }
 
-void fn_80237E7C(const char* name) {
-    UiSpecialList* l = lbl_8055F0C0->special;
-    for (int i = 0; i < l->n; i++) {
-        if (!strcasecmp(l->items[i].name, name)) {
-            l->items[i].active = 0;
+// Starts the special anim `name` (restarting its clock), stopping others on its track.
+inline void UiSpecialList::Start(const char* name) {
+    for (int i = 0; i < n; i++) {
+        if (!strcasecmp(items[i].name, name)) {
+            items[i].active = 1;
+            items[i].start = fn_8023659C();
+            StopOthers(i);
         }
     }
 }
 
-int fn_80237EFC(const char* name) {
-    UiSpecialList* l = lbl_8055F0C0->special;
-    int running = 0;
+void fn_80237DA0(const char* name) { lbl_8055F0C0->special->Start(name); }
+
+// Stops the special anim `name`.
+inline void UiSpecialList::Stop(const char* name) {
+    for (int i = 0; i < n; i++) {
+        if (!strcasecmp(items[i].name, name)) {
+            items[i].active = 0;
+        }
+    }
+}
+
+void fn_80237E7C(const char* name) { lbl_8055F0C0->special->Stop(name); }
+
+// 0: `name` is not active, 1: still running, 2: active but past its last key.
+inline int UiSpecialList::State(const char* name) {
     int found = 0;
+    int running = 0;
     f32 now = fn_8023659C();
-    for (int i = 0; i < l->n; i++) {
-        if (!strcasecmp(l->items[i].name, name)) {
-            UiSpecial* s = &l->items[i];
+    for (int i = 0; i < n; i++) {
+        if (!strcasecmp(items[i].name, name)) {
+            UiSpecial* s = &items[i];
             if (s->active) {
                 found = 1;
                 if (LastTime(&s->track) > now - s->start) {
@@ -609,10 +622,15 @@ int fn_80237EFC(const char* name) {
         }
     }
     if (found) {
-        return running ? 1 : 2;
+        if (running) {
+            return 1;
+        }
+        return 2;
     }
     return 0;
 }
+
+int fn_80237EFC(const char* name) { return lbl_8055F0C0->special->State(name); }
 
 }  // extern "C"
 
