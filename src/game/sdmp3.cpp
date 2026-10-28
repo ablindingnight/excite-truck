@@ -845,6 +845,7 @@ void* fn_802EAB28(void* arg) {
 }
 
 int fn_802EB7D4(void* dst, int n, int ch) {
+    u16* out = (u16*)dst;
     s32 nch = lbl_8055D26C;
     if (lbl_805600B8 == lbl_805600B0[ch]) {
         memset(dst, 0, n);
@@ -860,7 +861,6 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         int cnt = avail / (nch * 2);
         lbl_805600C0[ch] = 0;
         u16* src = (u16*)(lbl_805600A0 + lbl_805600B0[ch]);
-        u16* out = (u16*)dst;
         if (nch == 2) {
             for (int i = 0; i < cnt; i++) {
                 out[i] = src[i * 2 + ch];
@@ -887,7 +887,6 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         int got = avail / nch;
         int cnt = avail / (nch * 2);
         lbl_805600C0[ch] = 0;
-        u16* out = (u16*)dst;
         u16* src = (u16*)(lbl_805600A0 + lbl_805600B0[ch]);
         if (nch == 2) {
             for (int i = 0; i < cnt; i++) {
