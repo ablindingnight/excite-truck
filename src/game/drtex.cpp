@@ -525,6 +525,14 @@ void fn_802D9340(GXTex* t);
 GXTex* fn_802D8E9C(const GXTexDesc* d, const char* name) {
     GXTex* t = 0;
     switch (d->format) {
+    case 0x45:
+    case 0x46:
+    case 0x48:
+    case 0x49:
+    case 0x4A:
+    case 0x4B:
+        t = fn_802D7FA0(d, name);
+        break;
     case 0:
     case 1:
     case 0x40:
@@ -545,14 +553,6 @@ GXTex* fn_802D8E9C(const GXTexDesc* d, const char* name) {
     case 3:
     case 0x47:
         t = fn_802D7D98(d, name);
-        break;
-    case 0x45:
-    case 0x46:
-    case 0x48:
-    case 0x49:
-    case 0x4A:
-    case 0x4B:
-        t = fn_802D7FA0(d, name);
         break;
     default:
         fn_802E317C("drCreateTexture: unknown type 0x%x (%s)", d->format, name);
