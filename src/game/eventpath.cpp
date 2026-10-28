@@ -79,14 +79,13 @@ template <class T> struct FixedVec {
         }
         return *this;
     }
+    int Count() const { return n; }
     void RemoveAt(int k) {
-        volatile s32& c = n;
-        int cnt;
-        if (k >= 0 && k < (cnt = c)) {
-            if (k != cnt - 1) {
-                data[k] = data[cnt - 1];
+        if (k >= 0 && k < Count()) {
+            if (k != Count() - 1) {
+                data[k] = data[Count() - 1];
             }
-            c = c - 1;
+            n--;
         }
     }
     T* data;  // offset 0x0

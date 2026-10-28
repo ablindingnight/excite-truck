@@ -540,7 +540,7 @@ void* fn_802EAB28(void* arg) {
     OSReport("kerngc/mp3:thread begins!\n");
     Mp3Reader* r = 0;
     s32 size = 0;
-    volatile u8 decoded = 0;
+    u8 decoded = 0;
     int pos = 0;
     int errs = 0;
     MP3Info info;

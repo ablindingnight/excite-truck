@@ -53,6 +53,13 @@ unk_80116644, unk_80107180, unk_8002B0A0, unk_8002B0B0. They still need typed re
 
 ## Looked at, kept (likely original or no natural form yet), 2026-10-27
 
+- volatile sweep (each removed in turn, every function compared): bonemgr size/used, cammgr id[12], physics state
+  globals, sdmp3 ring fields, crushmaster/ringchal `state` all change code without it (needed / likely genuine
+  shared state). camproj's `const volatile` 61.5f: defining the constant after fn_801EA1FC matches the function
+  without volatile but reorders .sdata2 (61.5 must precede the DegToRad literal), so it stays.
+- eventpath FixedArray::RemoveAt `volatile s32&` replaced by a const `Count()` accessor (same code, 2026-10-27);
+  sdmp3 fn_802EAB28's `volatile u8 decoded` was wrong (removing it improves the function) and is gone.
+
 - zone ZoneMaster::vf0C `#pragma dont_inline`: in the target nothing at all is inlined into vf0C, while every other
   function (and the weak copies emitted after it) inlines the same helpers; inline-size pragmas don't reproduce it.
   Most likely an original per-function pragma.
