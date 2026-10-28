@@ -3,6 +3,12 @@
 // read from place_bonus.val, the HUD layouts (betalyt*.val), the pre-race overlay and the results
 // screen with its finish animation. Names are guesses apart from the allocation tags, keys and
 // messages.
+//
+// BetaMaster, FinishAnimation and Pickup live in an anonymous namespace and their methods from the
+// destructor on are inline: CodeWarrior emits them at the end of the unit, after BetaMaster's vtable
+// and its listener bases' vtables, with their literals pooled behind those vtables (the original
+// .data layout). Inline callees defined after their caller are called, not inlined, in the original
+// (vfF8 -> Setup, vfF4 -> Pickup ctor, vf44 -> Draw); those callers are compiled without inlining.
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
@@ -274,14 +280,6 @@ struct RaceResults {
 extern s32 lbl_8055E4D0;  // cars in the race
 
 // Race event listeners BetaMaster registers itself with.
-class IRaceListener {
-public:
-    virtual void a0(void) = 0;
-    virtual void a1(void) = 0;
-    virtual void a2(void) = 0;
-    virtual void a3(void) = 0;
-    virtual void a4(void) = 0;
-};
 
 // A stunt reported by the stunt system.
 class StuntEvt {
@@ -309,6 +307,15 @@ public:
     virtual void c1(void) = 0;
     virtual void c2(class Body* b, int car) = 0;
     virtual void c3(void) = 0;
+};
+
+class IRaceListener {
+public:
+    virtual void a0(void) = 0;
+    virtual void a1(void) = 0;
+    virtual void a2(void) = 0;
+    virtual void a3(void) = 0;
+    virtual void a4(void) = 0;
 };
 
 template <typename T>
@@ -388,7 +395,9 @@ f32 fn_80149650(void) { return fn_801495D4(64); }
 
 }  // extern "C"
 
+namespace {
 class BetaMaster;
+}
 
 struct PlaceInfo {
     u32 flags;  // offset 0x0
@@ -586,6 +595,7 @@ public:
     FixedList<StuntLine, 16> lines;  // offset 0x4
 };
 
+namespace {
 // The results-screen animation of one player: place, bonus count-up, grade and stunt list.
 class FinishAnimation {
 public:
@@ -639,6 +649,7 @@ public:
     FixedStr<0x14> count;   // offset 0x225
     s32 x23C;               // offset 0x23C
 };
+}
 
 #define LOG_STATE(a, msg)                                                                                      fn_802E30C8("FinishAnimation: %s (tick %d, signal %d/%d/%d)", msg, lbl_8055E3C4, (a)->signal[0],                         (a)->signal[1], (a)->signal[2])
 
@@ -827,14 +838,7 @@ struct StuntIter {
 class CarHud {
 public:
     CarHud(int car, int acar);
-    virtual ~CarHud(void) {
-        if (bigSnd) {
-            delete bigSnd;
-        }
-        if (bonusSnd) {
-            delete bonusSnd;
-        }
-    }
+    virtual ~CarHud(void);
     virtual StuntEvent* Alloc(void);
     StuntEvent pool[16];   // offset 0x4
     StuntQueue free;       // offset 0x1244
@@ -925,9 +929,11 @@ struct Palette {
     Color c[5];
 };
 
-inline void UseColor(const Color& c);
+void UseColor(const Color& c);
 
 // A star or coin lying on the track; the models are shared by all of them.
+class BoxVolume;
+namespace {
 struct Pickup {
     Pickup(ValueNode* n);
     ~Pickup(void) {
@@ -968,6 +974,7 @@ struct Pickup {
     u8 big;                // offset 0xCC
     const char* name;      // offset 0xD0
 };
+}
 
 struct Puddle {
     Puddle(const f32* p, f32 rad, u8 fromFile) {
@@ -1198,11 +1205,55 @@ static inline void InitTimer(RaceTimer* t) {
     t->limit = t->limit0;
 }
 
+namespace {
 // The stunt race mode.
 class BetaMaster : public GameMode, public IRaceListener, public IStuntListener, public IPickupListener {
 public:
     BetaMaster(void);
     virtual ~BetaMaster(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+    virtual void vfF4(void);
+    virtual void vf10(void);
+    virtual void vf0C(void);
+    virtual int vf54(void);
+    virtual void vf9C(RaceCarRec* rc, int type);
+    virtual void vfA4(RaceCarRec* rc);
+    virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
+    virtual void vf94(RaceCarRec* rc);
+    virtual int vf8C(int p, int key);
+    virtual void vf48(void);
+    virtual void vf44(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf58(void);
+    virtual int vf68(void);
+    virtual int vf64(void);
+    virtual int vf5C(int p);
+    virtual void vf60(int view);
+    virtual int vf88(void);
+    virtual int vf3C(int p);
+    virtual f32 vf38(void);
+    virtual void vfB8(void* r);
+    virtual int vf24(void);
+    virtual void* vfE8(void);
+    virtual int vfDC(void);
+    virtual void vfA8(int a, int b);
+    virtual void vf40(void);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual void a4(void);
+    virtual void a3(void);
+    virtual void a2(void);
+    virtual void a1(void);
+    virtual void a0(void);
+    virtual void b2(StuntEvt* e, int car);
+    virtual void b1(void);
+    virtual void b0(void);
+    virtual void c3(void);
+    virtual void c2(Body* b, int car);
+    virtual void c1(void);
+    virtual void c0(Body* b);
     BetaCar* CarFor(RaceCarRec* rc) { return &cars[rc->index]; }
     int AllDone(int n) {
         int i;
@@ -1213,8 +1264,6 @@ public:
         }
         return 1;
     }
-    virtual void vf0C(void);
-    virtual void vf10(void);
     virtual int vf20(int car) {
         RacerState* s = fn_801B2ED0(car)->GetInfo();
         int r = 0;
@@ -1223,47 +1272,6 @@ public:
         }
         return r;
     }
-    virtual int vf24(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p);
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf58(void);
-    virtual int vf5C(int p);
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void);
-    virtual int vf88(void);
-    virtual int vf8C(int p, int key);
-    virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
-    virtual void vf94(RaceCarRec* rc);
-    virtual void vf9C(RaceCarRec* rc, int type);
-    virtual void vfA4(RaceCarRec* rc);
-    virtual void vfA8(int a, int b);
-    virtual void vfB8(void* r);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual int vfDC(void);
-    virtual void* vfE8(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-    virtual void a0(void);
-    virtual void a4(void);
-    virtual void a1(void);
-    virtual void a2(void);
-    virtual void a3(void);
-    virtual void b0(void);
-    virtual void b1(void);
-    virtual void b2(StuntEvt* e, int car);
-    virtual void c0(Body* b);
-    virtual void c1(void);
-    virtual void c2(Body* b, int car);
-    virtual void c3(void);
 
     f32 skipAt;                      // offset 0x10
     FixedList<Pickup*, 0x80> stars;  // offset 0x14
@@ -1281,6 +1289,7 @@ public:
     BetaCar cars[8];                 // offset 0x9E4
     s32 nCars;                       // offset 0xFE4
 };
+}
 
 // ---------------------------------------------------------------------------------------------------
 // The stunt column, the stunt pop-up and the score stars of a car's HUD (shared by the race HUD and the
@@ -2587,7 +2596,7 @@ void fn_80167838(void);
 void fn_8016A68C(void);
 }
 
-BetaMaster::~BetaMaster(void) {
+inline BetaMaster::~BetaMaster(void) {
     int i;
     fn_802328D4(lbl_8055E250);
     lbl_8055E250 = 0;
@@ -2670,7 +2679,8 @@ s32 fn_80204CF0(void);  // difficulty
 s32 fn_802ADF34(ArtAnimMan* anim, const char* file, const AnimBinding* table);
 }
 
-void BetaMaster::vfF8(void) {
+#pragma dont_inline on
+inline void BetaMaster::vfF8(void) {
     int i;
     for (i = 0; i < ARRAY_COUNT(anims); i++) {
         anims[i].anim = new ("artanim_man") ArtAnimMan(2);
@@ -2678,8 +2688,9 @@ void BetaMaster::vfF8(void) {
     }
     coins.obj = fn_80145E70("bonanza.val");
 }
+#pragma dont_inline reset
 
-void FinishAnimation::Setup(void) {
+inline void FinishAnimation::Setup(void) {
     int multi = fn_80179650() > 1;
     int ws = fn_802C9A58();
     int i;
@@ -2770,7 +2781,7 @@ double sqrt(double x);
 int sprintf(char* s, const char* fmt, ...);
 }
 
-void BetaMaster::vfFC(void) {
+inline void BetaMaster::vfFC(void) {
     int i;
     SafeDelete(coins.obj);
     for (i = 1; i >= 0; i--) {
@@ -2778,7 +2789,8 @@ void BetaMaster::vfFC(void) {
     }
 }
 
-void BetaMaster::vfF4(void) {
+#pragma dont_inline on
+inline void BetaMaster::vfF4(void) {
     TuneRef ref;
     int loaded;
     int i;
@@ -2868,6 +2880,7 @@ void BetaMaster::vfF4(void) {
         fn_80131818(t);
     }
 }
+#pragma dont_inline reset
 
 // A physics box around a spin trigger.
 class BoxVolume {
@@ -2976,7 +2989,7 @@ static inline void SatModel(const char* name) {
     fn_802C6C20(m);
 }
 
-Pickup::Pickup(ValueNode* n) {
+inline Pickup::Pickup(ValueNode* n) {
     f32 c[2];
     char buf[0x20];
     int k;
@@ -3151,7 +3164,7 @@ void fn_80168020(void);
 void fn_8016A0D4(void);
 }
 
-void BetaMaster::vf10(void) {
+inline void BetaMaster::vf10(void) {
     fn_8016783C();
     if (coins.enabled) {
         memset(coins.cars, 0, sizeof(coins.cars));
@@ -3380,7 +3393,7 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
     }
 }
 
-void BetaMaster::vf0C(void) {
+inline void BetaMaster::vf0C(void) {
     int found;
     int i;
     f32 lead;
@@ -3541,7 +3554,7 @@ void fn_80167844(void);
 void fn_8016A438(void);
 }
 
-int BetaMaster::vf54(void) {
+inline int BetaMaster::vf54(void) {
     int f;
     if (fn_80161C38()) {
         return 0x5608;
@@ -3551,7 +3564,7 @@ int BetaMaster::vf54(void) {
     return f;
 }
 
-void BetaMaster::vf9C(RaceCarRec* rc, int type) {
+inline void BetaMaster::vf9C(RaceCarRec* rc, int type) {
     if (type == 1003) {
         BetaCar* c = CarFor(rc);
         if (c) {
@@ -3562,14 +3575,14 @@ void BetaMaster::vf9C(RaceCarRec* rc, int type) {
 
 extern "C" void fn_80151688(void) {}
 
-void BetaMaster::vfA4(RaceCarRec* rc) {
+inline void BetaMaster::vfA4(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
     if (c) {
         c->Wipe();
     }
 }
 
-void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
+inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
     f32 mag = PSVECMag(hit);
     int fa = 1;
     int fb = 1;
@@ -3595,7 +3608,7 @@ void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
 
 extern "C" void fn_80151914(void) {}
 
-void BetaMaster::vf94(RaceCarRec* rc) {
+inline void BetaMaster::vf94(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
     if (c) {
         c->Finish();
@@ -3605,7 +3618,7 @@ void BetaMaster::vf94(RaceCarRec* rc) {
     }
 }
 
-int BetaMaster::vf8C(int p, int key) {
+inline int BetaMaster::vf8C(int p, int key) {
     if (key == 'X' && vf68()) {
         int n = fn_801E85A4();
         int i;
@@ -3620,7 +3633,7 @@ int BetaMaster::vf8C(int p, int key) {
     return 0;
 }
 
-void BetaMaster::vf48(void) {
+inline void BetaMaster::vf48(void) {
     BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
     u32 col;
     int i;
@@ -3734,7 +3747,8 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-void BetaMaster::vf44(void) {
+#pragma dont_inline on
+inline void BetaMaster::vf44(void) {
     int on;
     BetaCar* c;
     Pickup* p;
@@ -3755,8 +3769,9 @@ void BetaMaster::vf44(void) {
     fn_80167844();
     fn_8016A438();
 }
+#pragma dont_inline reset
 
-void Pickup::Draw(Color col) {
+inline void Pickup::Draw(Color col) {
     if (kind == 3) {
         Color tmp = col;
         UseColor(tmp);
@@ -3944,7 +3959,7 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     fn_802C744C(lbl_80559ED4, &a);
 }
 
-inline void UseColor(const Color& c) {}
+void UseColor(const Color& c) {}
 
 inline Color LerpColor(Color a, Color b, f32 t) {
     Color c;
@@ -3966,7 +3981,7 @@ void UpdateContinueOverlay(void);
 extern "C" {
 }
 
-void BetaMaster::vf4C(int view) {
+inline void BetaMaster::vf4C(int view) {
     if (b9E0) {
         vf88();
         return;
@@ -3981,16 +3996,16 @@ void BetaMaster::vf4C(int view) {
     }
 }
 
-void BetaMaster::vf50(int view) {
+inline void BetaMaster::vf50(int view) {
     BetaCar* c = &cars[fn_801E866C(view)];
     if (c) {
         c->DrawResults(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, view);
     }
 }
 
-int BetaMaster::vf58(void) { return 0; }
+inline int BetaMaster::vf58(void) { return 0; }
 
-int BetaMaster::vf68(void) {
+inline int BetaMaster::vf68(void) {
     int i;
     fn_80179650();
     for (i = 0; i < fn_801E85A4(); i++) {
@@ -4001,9 +4016,9 @@ int BetaMaster::vf68(void) {
     return 1;
 }
 
-int BetaMaster::vf64(void) { return 1; }
+inline int BetaMaster::vf64(void) { return 1; }
 
-int BetaMaster::vf5C(int view) {
+inline int BetaMaster::vf5C(int view) {
     int n = fn_80179650();
     BetaCar* mine = &cars[fn_801E86F8(view)];
     if (!mine->result.dnf) {
@@ -4032,7 +4047,7 @@ int BetaMaster::vf5C(int view) {
     return !AllDone(n);
 }
 
-void BetaMaster::vf60(int view) {
+inline void BetaMaster::vf60(int view) {
     int n = fn_801E85A4();
     if (n > 1) {
         int any = 0;
@@ -4046,7 +4061,7 @@ void BetaMaster::vf60(int view) {
     }
 }
 
-int BetaMaster::vf88(void) { return 1; }
+inline int BetaMaster::vf88(void) { return 1; }
 
 struct RaceSetup {
     u8 pad0[0x8];
@@ -4093,7 +4108,7 @@ static inline f32 Ease(f32 t) {
 }
 
 // The pre-race intro: "stars needed", the time limit and the lap count slide in one after the other.
-int BetaMaster::vf3C(int view) {
+inline int BetaMaster::vf3C(int view) {
     f32 t = fn_801E7E3C()->time;
     f32 end0 = 8.0f;
     f32 in0 = end0 - 0.8f;
@@ -4166,9 +4181,9 @@ int BetaMaster::vf3C(int view) {
     return 1;
 }
 
-f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
+inline f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
 
-void BetaMaster::vfB8(void* r) {
+inline void BetaMaster::vfB8(void* r) {
     RaceResults* res = (RaceResults*)r;
     int i;
     GameMode::FillResults(r);
@@ -4189,7 +4204,7 @@ void fn_801B0F70(int a, int b);
 void fn_80168104(void);
 }
 
-int BetaMaster::vf24(void) {
+inline int BetaMaster::vf24(void) {
     RaceCarRec** it = lbl_804348E8;
     int r;
     int any = 0;
@@ -4206,7 +4221,7 @@ int BetaMaster::vf24(void) {
     return r;
 }
 
-void* BetaMaster::vfE8(void) {
+inline void* BetaMaster::vfE8(void) {
     void* p = fn_80161C94();
     if (p) {
         return p;
@@ -4214,35 +4229,35 @@ void* BetaMaster::vfE8(void) {
     return GameMode::vfE8();
 }
 
-int BetaMaster::vfDC(void) { return 1; }
+inline int BetaMaster::vfDC(void) { return 1; }
 
-void BetaMaster::vfA8(int a, int b) { fn_801B0F70(a, b); }
+inline void BetaMaster::vfA8(int a, int b) { fn_801B0F70(a, b); }
 
-void BetaMaster::vf40(void) {
+inline void BetaMaster::vf40(void) {
     if (coins.enabled) {
         fn_80168104();
     }
 }
 
-int GameMode::vfA0(int a, int b, int c) { return 0; }
+inline int GameMode::vfA0(int a, int b, int c) { return 0; }
 
-void BetaMaster::vfC0(void) {}
+inline void BetaMaster::vfC0(void) {}
 
-void BetaMaster::vfC4(void) {}
+inline void BetaMaster::vfC4(void) {}
 
-void BetaMaster::a4(void) {}
+inline void BetaMaster::a4(void) {}
 
-void BetaMaster::a0(void) {}
+inline void BetaMaster::a0(void) {}
 
-void BetaMaster::b0(void) {}
+inline void BetaMaster::b0(void) {}
 
-void BetaMaster::b1(void) {}
+inline void BetaMaster::b1(void) {}
 
-void BetaMaster::c1(void) {}
+inline void BetaMaster::c1(void) {}
 
-void BetaMaster::c3(void) {}
+inline void BetaMaster::c3(void) {}
 
-void BetaMaster::a3(void) {}
+inline void BetaMaster::a3(void) {}
 
 extern "C" int fn_80161BB8(void);
 
@@ -4422,6 +4437,15 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     }
 }
 
+inline CarHud::~CarHud(void) {
+    if (bigSnd) {
+        delete bigSnd;
+    }
+    if (bonusSnd) {
+        delete bonusSnd;
+    }
+}
+
 inline CarHud::CarHud(int car, int acar) {
     free.tail = 0;
     free.head = 0;
@@ -4430,7 +4454,7 @@ inline CarHud::CarHud(int car, int acar) {
     InitCarHud(this, car, acar);
 }
 
-void BetaMaster::a1(void) {
+inline void BetaMaster::a1(void) {
     int i;
     nCars = lbl_8055E4D0;
     for (i = 0; i < nCars; i++) {
@@ -4497,7 +4521,7 @@ void BetaMaster::a1(void) {
     }
 }
 
-void BetaMaster::b2(StuntEvt* e, int car) {
+inline void BetaMaster::b2(StuntEvt* e, int car) {
     u8* f;
     s32 h;
     BetaCar* c = &cars[car];
@@ -4537,7 +4561,7 @@ void BetaMaster::b2(StuntEvt* e, int car) {
     }
 }
 
-void BetaMaster::c2(Body* b, int car) {
+inline void BetaMaster::c2(Body* b, int car) {
     Token* t;
     RaceCarRec* rc = fn_8017960C(car);
     if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
@@ -4597,7 +4621,7 @@ void BetaMaster::c2(Body* b, int car) {
     }
 }
 
-void BetaMaster::c0(Body* b) {
+inline void BetaMaster::c0(Body* b) {
     if (b->Info()->Has("points")) {
         bumps.Push(new ("pointtoken") PointToken(b));
     } else if (b->Info()->Has("invincibility")) {
@@ -4605,9 +4629,9 @@ void BetaMaster::c0(Body* b) {
     }
 }
 
-StuntLine* StuntList::Alloc(void) { return &lines.a.data[lines.a.count++]; }
+inline StuntLine* StuntList::Alloc(void) { return &lines.a.data[lines.a.count++]; }
 
-StuntEvent* CarHud::Alloc(void) {
+inline StuntEvent* CarHud::Alloc(void) {
     StuntEvent* n = free.head;
     if (n) {
         free.Unlink(n);
