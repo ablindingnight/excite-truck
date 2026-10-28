@@ -158,7 +158,27 @@ struct TrophyView {
 };
 
 extern void* lbl_803450F8[];
+extern void* lbl_80345038[];
 
+
+// Sets up a trophy view (identity rotation, environment map, level 5).
+#define TROPHY_VIEW_INIT(v)                      \
+    (v).vt = lbl_80345158;                       \
+    (v).handle = -1;                             \
+    (v).rot[0] = 1.0f;                           \
+    (v).rot[1] = 0.0f;                           \
+    (v).rot[2] = 0.0f;                           \
+    (v).rot[3] = 0.0f;                           \
+    (v).rot[4] = 1.0f;                           \
+    (v).rot[5] = 0.0f;                           \
+    (v).rot[6] = 0.0f;                           \
+    (v).rot[7] = 0.0f;                           \
+    (v).rot[8] = 1.0f;                           \
+    (v).model[0] = 0;                            \
+    (v).level[0] = 0;                            \
+    (v).env = fn_802CAC28("tr_env.tex", 0);      \
+    (v).shown = 0;                               \
+    (v).levelNum = 5
 
 // The trophy's menu widget (vtable lbl_803450F8): the viewer, the level and its caption.
 struct TrophyController {
@@ -193,22 +213,7 @@ void fn_80259740(int x, f32 v);
 // The trophy viewer for one achievement row: its model, level and the five level thresholds.
 int fn_80259224(u8* p) {
     TrophyView view;
-    view.vt = lbl_80345158;
-    view.handle = -1;
-    view.rot[0] = 1.0f;
-    view.rot[1] = 0.0f;
-    view.rot[2] = 0.0f;
-    view.rot[3] = 0.0f;
-    view.rot[4] = 1.0f;
-    view.rot[5] = 0.0f;
-    view.rot[6] = 0.0f;
-    view.rot[7] = 0.0f;
-    view.rot[8] = 1.0f;
-    view.model[0] = 0;
-    view.level[0] = 0;
-    view.env = fn_802CAC28("tr_env.tex", 0);
-    view.shown = 0;
-    view.levelNum = 5;
+    TROPHY_VIEW_INIT(view);
     TrophyController* ctl;
     if (fn_8025921C()) {
         ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), 5);
@@ -288,7 +293,166 @@ void fn_80259740(int x, f32 v) {
     lbl_8055F3A0 = x == 2;
 }
 
-int fn_8025978C(u8* p) { return 0; }  // stub (654)
+}  // extern "C"
+
+// The two-sided trophy's menu widget (vtable lbl_80345038): a view and the row it shows.
+struct TrophyFace {
+    TrophyFace(TrophyView* v, u8* row) {
+        unk14 = 0;
+        vt = lbl_80345038;
+        view = v;
+        owner = row;
+        category = S32(row, 0x18);
+        level = S32(row, 0xC8);
+    }
+    void* vt;          // offset 0x0
+    s32 x, y, w, h;    // offset 0x4
+    int unk14;         // offset 0x14
+    TrophyView* view;  // offset 0x18
+    u8* owner;         // offset 0x1C
+    s32 category;      // offset 0x20
+    s32 level;         // offset 0x24
+};
+
+// Shows the row's current trophy model and level on a view.
+#define TROPHY_VIEW_SHOW(v, row)                                                 \
+    {                                                                            \
+        s32 lvl = S32(row, 0xC8);                                                \
+        (v).levelNum = lvl;                                                      \
+        const char* model = AchievementsGetLevelModel(S32(row, 0x18), lvl);      \
+        if (model) {                                                             \
+            CopyName(model, 50, (v).model);                                      \
+        } else {                                                                 \
+            (v).model[0] = 0;                                                    \
+        }                                                                        \
+        if (lvl > 0) {                                                           \
+            fn_801345D8((v).level, 20, "Level %d", lvl);                         \
+        } else {                                                                 \
+            (v).level[0] = 0;                                                    \
+        }                                                                        \
+    }
+
+struct AchQuery3 {
+    s32 category;  // offset 0x0
+    s32 value;     // offset 0x4
+    s32 best;      // offset 0x8
+};
+void AchievementsQuery(AchQuery3* q);
+int AchievementsGetLevel(int category, s32 value);
+
+extern "C" {
+void fn_80236910(const char* name);
+const char* fn_80131234(const char* key);
+
+// The achievement viewer for one row (with the level-up "new" effect while tallying): the trophy front and
+// back, the progress towards the next level and every category's level bar.
+int fn_8025978C(u8* p) {
+    lbl_8055F3A0 = 0;
+    TrophyView front;
+    TROPHY_VIEW_INIT(front);
+    TrophyView back;
+    TROPHY_VIEW_INIT(back);
+    back.shown = !U8(p, 0xC4);
+    TrophyFace frontFace(&front, p);
+    TrophyFace backFace(&back, p);
+    TROPHY_VIEW_SHOW(front, p);
+    TROPHY_VIEW_SHOW(back, p);
+    char toNext[0x20];
+    fn_801345D8(toNext, 0x20, "%d %s", S32(p, 0x20) - S32(p, 0x1C), fn_80131234("Achievements:UP") + 1);
+    s32* vals[7];
+    s32 levels[7];
+    s32 barColor[7];
+    s32 iconColor[7];
+    for (u32 i = 0; i < 7; i++) {
+        s32 cat = lbl_80344EA0[i].category;
+        if (cat == S32(p, 0x18)) {
+            iconColor[i] = 9;
+            barColor[i] = 8;
+            vals[i] = (s32*)(p + 0xC8);
+        } else {
+            iconColor[i] = 10;
+            barColor[i] = 11;
+            AchQuery3 q;
+            q.category = cat;
+            AchievementsQuery(&q);
+            levels[i] = AchievementsGetLevel(cat, S32(p, 0x18) > cat ? q.best : q.value);
+            vals[i] = &levels[i];
+        }
+    }
+    if (U8(p, 0xC4) && U8(p, 0xC5)) {
+        fn_80236910("a_ep_achieve_new.val");
+    }
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_80259740, 2, 0),
+        MenuItem("achievement_custom", 5, p, 0, 0),
+        MenuItem(0, 5, &frontFace, 0, 0),
+        MenuItem(0, 5, &backFace, 0, 0),
+        MenuItem("trophy", 0x13, &front, 0, 0),
+        MenuItem("trophy", (const char*)(frontFace.owner + 0x60)),
+        MenuItem("back_trophy", 0x13, &back, 0, 0),
+        MenuItem("back_trophy", (const char*)(backFace.owner + 0x60)),
+        MenuItem("achievement_icon", lbl_80344EA0[S32(p, 0x24)].name),
+        MenuItem("achievement_title", AchievementsGetCategoryName(S32(p, 0x18))),
+        MenuItem("achievement_value", (const char*)(p + 0x2C)),
+        MenuItem("next_level_value", (const char*)(p + 0x40)),
+        MenuItem("increment_amt", toNext),
+        MenuItem("back_1", 0x14, &barColor[0], 0, 0),
+        MenuItem("icon_1", 0x14, &iconColor[0], 0, 0),
+        MenuItem("bars_1", 2, vals[0], 0, 0),
+        MenuItem("icon_1", lbl_80344EA0[0].name),
+        MenuItem("title_1", AchievementsGetCategoryName(lbl_80344EA0[0].category)),
+        MenuItem("back_2", 0x14, &barColor[1], 0, 0),
+        MenuItem("icon_2", 0x14, &iconColor[1], 0, 0),
+        MenuItem("bars_2", 2, vals[1], 0, 0),
+        MenuItem("icon_2", lbl_80344EA0[1].name),
+        MenuItem("title_2", AchievementsGetCategoryName(lbl_80344EA0[1].category)),
+        MenuItem("back_3", 0x14, &barColor[2], 0, 0),
+        MenuItem("icon_3", 0x14, &iconColor[2], 0, 0),
+        MenuItem("bars_3", 2, vals[2], 0, 0),
+        MenuItem("icon_3", lbl_80344EA0[2].name),
+        MenuItem("title_3", AchievementsGetCategoryName(lbl_80344EA0[2].category)),
+        MenuItem("back_4", 0x14, &barColor[3], 0, 0),
+        MenuItem("icon_4", 0x14, &iconColor[3], 0, 0),
+        MenuItem("bars_4", 2, vals[3], 0, 0),
+        MenuItem("icon_4", lbl_80344EA0[3].name),
+        MenuItem("title_4", AchievementsGetCategoryName(lbl_80344EA0[3].category)),
+        MenuItem("back_5", 0x14, &barColor[4], 0, 0),
+        MenuItem("icon_5", 0x14, &iconColor[4], 0, 0),
+        MenuItem("bars_5", 2, vals[4], 0, 0),
+        MenuItem("icon_5", lbl_80344EA0[4].name),
+        MenuItem("title_5", AchievementsGetCategoryName(lbl_80344EA0[4].category)),
+        MenuItem("back_6", 0x14, &barColor[5], 0, 0),
+        MenuItem("icon_6", 0x14, &iconColor[5], 0, 0),
+        MenuItem("bars_6", 2, vals[5], 0, 0),
+        MenuItem("icon_6", lbl_80344EA0[5].name),
+        MenuItem("title_6", AchievementsGetCategoryName(lbl_80344EA0[5].category)),
+        MenuItem("back_7", 0x14, &barColor[6], 0, 0),
+        MenuItem("icon_7", 0x14, &iconColor[6], 0, 0),
+        MenuItem("bars_7", 2, vals[6], 0, 0),
+        MenuItem("icon_7", lbl_80344EA0[6].name),
+        MenuItem("title_7", AchievementsGetCategoryName(lbl_80344EA0[6].category)),
+        MenuItem(lbl_80498E98),
+    };
+    MenuDesc desc = {U8(p, 0xC4) ? "ep_achieve.lyt" : "ach_viewer.lyt", items, 0, 0, 0};
+    fn_802368E0();
+    if (U8(p, 0xC4)) {
+        fn_80216CA8();
+    }
+    int r = fn_802146BC(&desc, -999, -999, 1);
+    int wait = 1;
+    while (wait) {
+        if (r == -2) {
+            if (!(F32(p, 0xCC) < 1.5f && U8(p, 0xC5))) {
+                wait = 0;
+            }
+        } else {
+            wait = 0;
+        }
+    }
+    back.Release();
+    front.Release();
+    return r;
+}
 
 u8* fn_8025A1C4(u8* p, int del) {
     if (p && del > 0) {
