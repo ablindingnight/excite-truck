@@ -112,7 +112,7 @@ struct ArrayRef {
         count = 0;
         cap = 0;
     }
-    int Full(void) { return count + 1 > cap; }
+    int Full(void) const { return count + 1 > cap; }
     T* Add(void) { return &data[count++]; }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
