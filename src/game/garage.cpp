@@ -464,8 +464,8 @@ int fn_8024ECD4(void) {
     *(s32*)PTR(g, 0x30) = v->unk9C;
     ((StatPanel*)PTR(g, 0x38))->SetCar(v->chassis);
     U8(PTR(g, 0x4C), 0xDD) = ((GarageList*)PTR(g, 0xD0))->Unlocked(sel) == 0;
-    s32 races = -1;
     s32 aaas = -1;
+    s32 races = -1;
     if (!GetUnlockReq(base, &races, &aaas)) {
         aaas = -1;
         races = -1;

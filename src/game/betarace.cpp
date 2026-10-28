@@ -2856,8 +2856,8 @@ void BetaMaster::vfF4(void) {
                 maxd = maxd > dd ? maxd : dd;
             }
             r = sqrt(maxd);
-            h = fn_801EA0E8(c.x, c.y);
             pos[0] = c.x;
+            h = fn_801EA0E8(c.x, c.y);
             pos[1] = h;
             pos[2] = c.y;
             puddles.Push(new ("puddle") Puddle(pos, r, 1));
@@ -3764,8 +3764,8 @@ void Pickup::Draw(Color col) {
         Xform m;
         f32 ang;
         p.z = pos[2];
-        p.x = pos[0];
         p.y = 1.25f + pos[1];
+        p.x = pos[0];
         at = p;
         ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.875);
         m.t = at;

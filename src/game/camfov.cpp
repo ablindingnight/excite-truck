@@ -273,8 +273,8 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         } else {
             r->v[2] = r->v[2] + lbl_80563E88;
         }
-        f32 t = (r->v[2] - lbl_80563E78) / lbl_80563E30;
         f32 h = r->v[0] + (c.y - avg);
+        f32 t = (r->v[2] - lbl_80563E78) / lbl_80563E30;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
         f32 up = lbl_80563E88 * (lbl_80563E8C + t * lbl_80563E90);
