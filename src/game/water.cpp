@@ -234,6 +234,8 @@ public:
 };
 
 const char* lbl_8055CF68 = "gen_surf.mod";
+// MATCHING-AID: unused in this build; keeps the "gen_surf.tex" literal at its pool slot (its user is gone).
+static const char* sSurfTex = "gen_surf.tex";
 s32 lbl_8055CF6C = -1;
 u8 lbl_8055CF70 = 1;
 u8 lbl_8055CF71 = 1;
@@ -249,8 +251,8 @@ struct WaterTint {
 static WaterTint lbl_8055FAD8;
 s32 lbl_8055FADC;
 f32 lbl_8055FAE0;
-u32 lbl_8055FAE4;
-u32 lbl_8055FAE8;
+u32 lbl_8055FAE4;  // far water color (the log line labels it N)
+u32 lbl_8055FAE8;  // near water color
 u32 lbl_8055FAEC;
 u32 lbl_8055FAF0;
 f32 lbl_8055FAF4;
@@ -297,8 +299,8 @@ void fn_802BEDFC(void) {
         ValueNode* g = t->HasChild("Graphics") ? t->FindChild("Graphics") : 0;
         if (g) {
             lbl_8055FAE0 = g->GetFloat("water_height", lbl_8055FAE0);
-            lbl_8055FAE8 = fn_802BECE4(g->GetString("far_water_color", ""), lbl_8055FAE8);
-            lbl_8055FAE4 = fn_802BECE4(g->GetString("near_water_color", ""), lbl_8055FAE4);
+            lbl_8055FAE8 = fn_802BECE4(g->GetString("near_water_color", ""), lbl_8055FAE8);
+            lbl_8055FAE4 = fn_802BECE4(g->GetString("far_water_color", ""), lbl_8055FAE4);
             lbl_8055FAEC = fn_802BECE4(g->GetString("deep_water_sub_color", ""), lbl_8055FAEC);
             lbl_8055FAF0 = fn_802BECE4(g->GetString("shim_water_color", ""), lbl_8055FAF0);
             fn_802E30C8("water colors: N %08x, F %08x DS %08x SH %08x", lbl_8055FAE4, lbl_8055FAE8,
