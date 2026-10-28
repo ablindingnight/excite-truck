@@ -352,6 +352,8 @@ void fn_80292B48(Chunks* sys) {
     }
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 int fn_80292BA8(PVec* pos, PVec* vel, const PVec* hit, const PVec* n) {
     PVec d;
     d.x = pos->x - hit->x;
@@ -364,7 +366,7 @@ int fn_80292BA8(PVec* pos, PVec* vel, const PVec* hit, const PVec* n) {
         pos->x = pos->x + n->x * back;
         pos->y = pos->y + n->y * back;
         pos->z = pos->z + n->z * back;
-        f32 k = 0.4f * (f32)__fabs(vn) - vn;
+        f32 k = 0.4f * AbsF(vn) - vn;
         vel->x = vel->x + n->x * k;
         vel->y = vel->y + n->y * k;
         vel->z = vel->z + n->z * k;

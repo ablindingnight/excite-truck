@@ -238,10 +238,12 @@ extern const f32 lbl_805624A4;  // -1.0
 extern const f32 lbl_805624D8;  // 0.01
 extern const f32 lbl_80562478;  // 0.5
 
+static inline double AbsD(double v) { return __fabs(v); }
+
 void fn_801ABB54(u8* p) {
     f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
     f32 imp = lbl_8056247C;
-    f32 ad = (f32)__fabs(d);
+    f32 ad = (f32)AbsD(d);
     f32 lim = F32(p, 0x238);
     if (ad > lim) {
         lim = lim < ad ? lim : ad;
