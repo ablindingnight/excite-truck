@@ -591,7 +591,8 @@ void Lift::Step(SpringCar* car, f32 rate) {
             if (r > 0.6f && car->vel.y > 0.0f && car->vel.y < 0.5f * car->speed) {
                 if (++count > 4) {
                     f32 m = 1.0f - r;
-                    t = lbl_8055E3C8;
+                    f32 now = lbl_8055E3C8;
+                    t = now;
                     m = 1.0f < m ? 1.0f : m;
                     m = m > 0.0f ? m : 0.0f;
                     f = 9.81f * (m * car->mass);

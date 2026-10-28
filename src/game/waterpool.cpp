@@ -195,6 +195,9 @@ static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
 static inline int InRange(f32 v, f32 lo, f32 hi) {
     int in = 0;
     if (v >= lo - lbl_80558DC4[0] && v <= hi + lbl_80558DC4[0]) {
@@ -403,7 +406,8 @@ extern "C" void fn_8029C73C(void) {
             g.right = n->GetPoint("right");
             g.up = n->GetPoint("up");
             WaterPool* p = new ("water pool") WaterPool(&d, &g, tex);
-            lbl_804B5010[lbl_8055F7F0++] = p;
+            lbl_804B5010[lbl_8055F7F0] = p;
+            lbl_8055F7F0++;
         }
         fn_80131818(t);
     }
@@ -431,7 +435,8 @@ extern "C" void fn_8029C998(void) {
             g.right = n->GetPoint("right");
             g.up = n->GetPoint("up");
             WaterShallow* s = new ("water shallow") WaterShallow(&g, tex);
-            lbl_804B5030[lbl_8055F7F4++] = s;
+            lbl_804B5030[lbl_8055F7F4] = s;
+            lbl_8055F7F4++;
         }
         fn_80131818(t);
     }
@@ -976,8 +981,8 @@ int fn_8029EAE8(WaterShallow* s) {
 int fn_8029EB54(WaterShallow* s, const Vec* at) {
     int in = 0;
     int inside = 0;
-    if (InRange(at->x, MIN(s->corners[0].x, s->corners[3].x), MAX(s->corners[0].x, s->corners[3].x)) &&
-        InRange(at->z, MIN(s->corners[0].z, s->corners[3].z), MAX(s->corners[0].z, s->corners[3].z))) {
+    if (InRange(at->x, MinF(s->corners[0].x, s->corners[3].x), MaxF(s->corners[0].x, s->corners[3].x)) &&
+        InRange(at->z, MinF(s->corners[0].z, s->corners[3].z), MaxF(s->corners[0].z, s->corners[3].z))) {
         inside = 1;
     }
     if (inside) {

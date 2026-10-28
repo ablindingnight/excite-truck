@@ -898,7 +898,8 @@ void fn_8017248C(int id) {
     {
         f32 lo = 4.0f;
         f32 h = 40.0f;
-        p.y += lo + h * Parab(fmod(3.742f * (2.0f * id) + lbl_8055E3C8, 2.0), 1.0f);
+        f32 now = lbl_8055E3C8;
+        p.y += lo + h * Parab(fmod(3.742f * (2.0f * id) + now, 2.0), 1.0f);
     }
     fn_801720FC(&p, 0xFFFFFF00, size);
 }

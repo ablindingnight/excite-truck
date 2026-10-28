@@ -584,7 +584,8 @@ void fn_802CEC50(u16 token) {
     case 2: {
         f32 ms = 0.001f * __cvt_sll_flt(fn_802E2C9C() - lbl_8055FD10);
         lbl_8055D0B0 = ms;
-        lbl_8055D0B4 = ms + 0.95f * (lbl_8055D0B4 - ms);
+        f32 avg = lbl_8055D0B4;
+        lbl_8055D0B4 = ms + 0.95f * (avg - ms);
         fn_802D3900();
         break;
     }
