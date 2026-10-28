@@ -532,13 +532,12 @@ GXTex* fn_802D8E9C(GXTexDesc* d, const char* name) {
         t = fn_802D7B5C(d, name);
         break;
     case 0x10:
-    case 0x11:
     case 0x17:
     case 0x42:
     case 0x43:
         t = fn_802D8A84(d, name);
         break;
-    case 0x12:
+    case 0x11:
     case 0x44:
         t = fn_802D8C00(d, name);
         break;
