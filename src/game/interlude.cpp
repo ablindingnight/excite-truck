@@ -1437,7 +1437,7 @@ void fn_801C56AC(void) {
     }
 }
 
-u8 fn_801C5B60(void) { return lbl_8055E7E2; }
+int fn_801C5B60(void) { return lbl_8055E7E2; }
 
 // A camera view handed to the camera manager (0xE0 bytes).
 struct CamView {
