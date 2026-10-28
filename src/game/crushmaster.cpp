@@ -659,7 +659,7 @@ struct SpawnList : ArrayRef<V2> {
 
 class CrushMaster : public GameMode {
 public:
-    CrushMaster(void) : t174(0.0f), t17C(2.0f), t184(1.5f), t18C(1.5f) {}
+    CrushMaster(void);
     virtual ~CrushMaster(void);
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -1012,9 +1012,9 @@ void CrushResults::Update(int score, int kills, int bonus) {
     }
 }
 
-extern "C" CrushMaster* fn_80172C28(void) {
+// Loads the crush assets: forbidden zones, zone and radar textures, the pre-race sound.
+static inline void CrushSetup(CrushMaster* m) {
     const char* nogo = "crush_nogo.val";
-    CrushMaster* m = new ("crushmaster") CrushMaster;
     lbl_8055E3A4 = fn_80139D4C(nogo);
     lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
     m->radarTex = fn_802CAC28("ovradar.tex", 0);
@@ -1023,8 +1023,11 @@ extern "C" CrushMaster* fn_80172C28(void) {
     }
     m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
     m->b2B8 = 0;
-    return m;
 }
+
+inline CrushMaster::CrushMaster(void) : t174(0.0f), t17C(2.0f), t184(1.5f), t18C(1.5f) { CrushSetup(this); }
+
+extern "C" CrushMaster* fn_80172C28(void) { return new ("crushmaster") CrushMaster; }
 
 CrushMaster::~CrushMaster(void) {
     if (sPreRace) {
