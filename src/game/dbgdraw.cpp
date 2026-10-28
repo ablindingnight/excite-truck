@@ -96,12 +96,14 @@ extern "C" {
 
 void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width);
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_801E3640(const DVec3* dir, DBasis* out) {
     DVec3 up;
-    out->z.y = dir->y;
     out->z.x = dir->x;
+    out->z.y = dir->y;
     out->z.z = dir->z;
-    if ((f32)__fabs(dir->x) < 0.01f && (f32)__fabs(dir->z) < 0.01f) {
+    if (AbsF(dir->x) < 0.01f && AbsF(dir->z) < 0.01f) {
         up.x = 0.0f;
         up.y = 0.0f;
         up.z = 1.0f;
@@ -179,6 +181,12 @@ void fn_801E3C88(void) {
 }
 
 // Arrow head (a four-sided pyramid) at pos pointing along dir.
+static inline void AddV(DVtx* o, const DVtx* a, const DVec3* b) {
+    o->x = a->x + b->x;
+    o->y = a->y + b->y;
+    o->z = a->z + b->z;
+}
+
 void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
     DBasis b;
     DVtx v[5];
@@ -199,9 +207,7 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
         v[i].color = color;
         v[i].u = 0.1f * (f32)i;
         v[i].v = 0.1f * (f32)i;
-        v[i].x += pos->x;
-        v[i].y = v[i].y + pos->y;
-        v[i].z += pos->z;
+        AddV(&v[i], &v[i], pos);
     }
     v[0].color = dark;
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
