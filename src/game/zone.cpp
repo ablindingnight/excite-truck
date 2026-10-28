@@ -2,6 +2,10 @@
 // challenge - levels of gates read from the event's zones file, crossing tests per car, the timer,
 // time bonuses, the HUD layouts and the pre-race and results overlays. Names are guesses apart from
 // the allocation tags, keys and messages.
+//
+// ZoneHud and ZoneMaster live in an anonymous namespace and ZoneMaster's virtuals from vf0C on are inline:
+// CodeWarrior emits them at the end of the unit after the ZoneSubTask/ZoneMaster vtables, with their
+// literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
 
@@ -573,6 +577,7 @@ static inline void InitText(char* s) {
 }
 
 // Results panel state owned by the master (0x134 in ZoneMaster).
+namespace {
 struct ZoneHud {
     ZoneHud(void) {
         anim = 0;
@@ -709,6 +714,7 @@ struct ZoneHud {
     s32 i114;    // offset 0x114
     s32 i118;    // offset 0x118
 };
+}
 
 // Ring of recent events (0xC bytes each).
 struct EventRing {
@@ -903,23 +909,34 @@ extern "C" void PlaceCamera(Cam* cam, PathIter* it, f32 a, f32 b);
 
 static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
 
+namespace {
 class ZoneMaster : public GameMode {
 public:
     ZoneMaster(Race* race);
     virtual ~ZoneMaster(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
     virtual int vf20(int car);
     virtual int vf24(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
     virtual void vf44(void);
     virtual void vf4C(int p);
-    virtual void vf50(int p);
-    virtual int vf54(void);
     virtual int vf5C(int p);
-    virtual int vf64(void);
     virtual int vf68(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf50(int p);
+    virtual void vfB8(ZoneResults* r);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual int vf54(void);
+    virtual CSubTaskMgr* vfE8(void);
+    virtual int vfA0(Cam* cam);
+    virtual void vfAC(int car);
+    virtual void vfA8(int car);
+    virtual int vf8C(int p, int key);
+    virtual int vf3C(int p);
+    virtual f32 vf38(void);
+    virtual int vf64(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
 
     Gate* NextGate(Gate* g) const {
         ZoneLevel* l = &levels->levels[level];
@@ -1005,16 +1022,6 @@ public:
     }
     void SetTotal(int car) { cars[car].total = cars[car].score; }
     void DrawHits(FixedArray<GateHit, 8>* hits);
-    virtual int vf8C(int p, int key);
-    virtual int vfA0(Cam* cam);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual void vfB8(ZoneResults* r);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual CSubTaskMgr* vfE8(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
 
     Wrap<Wrap<FixedArray<Layout*, 16> > > layouts;  // offset 0x8
     Layout* mainLyt;     // offset 0x54
@@ -1055,6 +1062,7 @@ public:
     u8 b294;         // offset 0x294
     u8 pad295[0x298 - 0x295];
 };
+}
 
 static inline void LoadSound(Sound*& s, const char* name) {
     s = fn_80207848(name, 1);
@@ -2391,7 +2399,7 @@ void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
 // Nothing is inlined into the per-frame update in the original build: every helper it uses is a call to
 // a weak copy emitted right after it.
 #pragma dont_inline on
-void ZoneMaster::vf0C(void) {
+inline void ZoneMaster::vf0C(void) {
     if (!b258 && fn_801B306C() < 6.75f) {
         b258 = 1;
         if (prerace && !fn_80009C84()) {
@@ -2551,7 +2559,7 @@ void ZoneMaster::vf0C(void) {
 
 #pragma dont_inline reset
 
-void ZoneMaster::vf10(void) {
+inline void ZoneMaster::vf10(void) {
     int lv;
     int i;
     lbl_8055E1BC = 0;
@@ -2647,9 +2655,9 @@ void ZoneMaster::vf10(void) {
     b258 = 0;
 }
 
-void ZoneMaster::vf50(int p) { vf4C(p); }
+inline void ZoneMaster::vf50(int p) { vf4C(p); }
 
-void ZoneMaster::vfB8(ZoneResults* r) {
+inline void ZoneMaster::vfB8(ZoneResults* r) {
     int i;
     r->nCars = nCars;
     r->nHumans = nHumans;
@@ -2663,15 +2671,15 @@ void ZoneMaster::vfB8(ZoneResults* r) {
     }
 }
 
-void ZoneMaster::vfC0(void) { b26C = 1; }
+inline void ZoneMaster::vfC0(void) { b26C = 1; }
 
-void ZoneMaster::vfC4(void) { b26C = 0; }
+inline void ZoneMaster::vfC4(void) { b26C = 0; }
 
-int ZoneMaster::vf54(void) { return 0x1008; }
+inline int ZoneMaster::vf54(void) { return 0x1008; }
 
-CSubTaskMgr* ZoneMaster::vfE8(void) { return fn_8013D288(); }
+inline CSubTaskMgr* ZoneMaster::vfE8(void) { return fn_8013D288(); }
 
-int ZoneMaster::vfA0(Cam* cam) {
+inline int ZoneMaster::vfA0(Cam* cam) {
     PathIter it;
     Path* path;
     it.Set((int)((PathSet*)fn_80156A40())->Get(0));
@@ -2682,7 +2690,7 @@ int ZoneMaster::vfA0(Cam* cam) {
     return 1;
 }
 
-void ZoneMaster::vfAC(int car) {
+inline void ZoneMaster::vfAC(int car) {
     CarState* c = &cars[car];
     if (c->human && vf20(car)) {
         c->gate = 0;
@@ -2692,9 +2700,9 @@ void ZoneMaster::vfAC(int car) {
     GameMode::vfAC(car);
 }
 
-void ZoneMaster::vfA8(int car) { vfAC(car); }
+inline void ZoneMaster::vfA8(int car) { vfAC(car); }
 
-int ZoneMaster::vf8C(int p, int key) {
+inline int ZoneMaster::vf8C(int p, int key) {
     int i;
     if (key == 's') {
         for (i = 0; i < layouts.a.a.count; i++) {
@@ -2755,7 +2763,7 @@ int ZoneMaster::vf8C(int p, int key) {
     return 0;
 }
 
-int ZoneMaster::vf3C(int p) {
+inline int ZoneMaster::vf3C(int p) {
     f32 t = ((RaceClock*)fn_801E7E3C())->t;
     f32 t0 = 6.75f;
     f32 t1 = t0 - 0.8f;
@@ -2796,7 +2804,8 @@ int ZoneMaster::vf3C(int p) {
                 char buf[0x14];
                 LayoutItem it;
                 fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(a));
-                fn_80130978(buf, 0x14, cars[fn_801E866C(0)].clock);
+                f32 t = GetCar(fn_801E866C(0))->clock;
+                fn_80130978(buf, 0x14, t);
                 it = *tb;
                 it.pos.x += fn_80147204(&it, buf) * 0.5f;
                 fn_801479A8(&it, bt, buf, Ease(a));
@@ -2806,17 +2815,19 @@ int ZoneMaster::vf3C(int p) {
     return 1;
 }
 
-f32 ZoneMaster::vf38(void) { return 7.75f; }
+inline f32 ZoneMaster::vf38(void) { return 7.75f; }
 
-int ZoneMaster::vf64(void) { return 1; }
+inline int ZoneMaster::vf64(void) { return 1; }
 
-void ZoneMaster::vfF8(void) {
+#pragma dont_inline on
+inline void ZoneMaster::vfF8(void) {
     hud.anim = new ("ArtAnimManager") ArtPlayer(1);
     hud.Init();
     hud.Reset();
 }
+#pragma dont_inline reset
 
-void ZoneHud::Reset(void) { ResetState(); }
+inline void ZoneHud::Reset(void) { ResetState(); }
 
 struct HudBinding {
     HudBinding(s32 type, const char* name, void* ptr) : type(type), name(name), ptr(ptr) {}
@@ -2826,7 +2837,7 @@ struct HudBinding {
 };
 extern const HudBinding lbl_802FAA40;  // list terminator
 
-void ZoneHud::Init(void) {
+inline void ZoneHud::Init(void) {
     HudBinding b[] = {
         HudBinding(3, "time_left", &i10C),
         HudBinding(3, "time_bonus", &i110),
@@ -2860,4 +2871,4 @@ void ZoneHud::Init(void) {
     complete2 = fn_80207848("timeout.sfx", 1);
 }
 
-void ZoneMaster::vfFC(void) { hud.Clear(); }
+inline void ZoneMaster::vfFC(void) { hud.Clear(); }
