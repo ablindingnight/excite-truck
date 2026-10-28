@@ -43,8 +43,6 @@ void* fn_8023512C(const char* name);
 void fn_80235380(void* art);
 s32 fn_80204CF0(void);
 s32 fn_80204EA0(const char* key);
-void fn_802C2914(void* p);
-void fn_802C2930(void* p, int flag);
 void fn_802C6CF8(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void* fn_802BAA68(void* xlo, const ValMatrix* m);
@@ -511,14 +509,15 @@ struct TableRef {
     ValueTable* t;
 };
 
-class ArenaBase {
+// The preload list node every arena is (preload.cpp); only its first word is used here.
+class Preloader {
 public:
-    ArenaBase(void) { fn_802C2914(this); }
-    ~ArenaBase(void) { fn_802C2930(this, 0); }
+    Preloader(void);
+    ~Preloader(void);
     s32 f0;  // offset 0x0
 };
 
-class Arena : public ArenaBase {
+class Arena : public Preloader {
 public:
     Arena(void);
     virtual int CountDynos(void);  // 0x8
