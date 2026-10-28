@@ -925,12 +925,8 @@ inline Arena::~Arena(void) {
     if (sFail) {
         delete sFail;
     }
-    if (sets) {
-        delete sets;
-    }
-    if (stats) {
-        delete stats;
-    }
+    delete sets;
+    delete stats;
 }
 
 template <class T>
