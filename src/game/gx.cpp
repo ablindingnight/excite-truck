@@ -68,6 +68,7 @@ void DCInvalidateRange(void* p, u32 n);
 void DCFlushRange(void* p, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal
 void fn_802E30C8(const char* fmt, ...);  // warning print
+int sprintf(char* buf, const char* fmt, ...);
 int fn_802E2C20(void);                   // milliseconds
 void fn_80127468(void);
 void fn_801282EC(int align);
@@ -494,7 +495,7 @@ void fn_802D2684(void);
 void fn_802D2640(void);
 void fn_802D37E4(void);
 void fn_802D3894(void);
-void fn_802D0910(void);
+void fn_802D0910(s32 fd, int x, int y, int w, int h);
 void fn_802D09E4(void);
 void fn_802CFF10(void);
 void fn_802CFF5C(u32 flags);
@@ -1250,6 +1251,17 @@ void fn_802D0610(s32 set) {
     lbl_8055FD8C = set;
 }
 
+// MATCHING-AID: linker-stripped functions, reconstructed only so the .data string pool keeps the original
+// offsets (their literals stay in the pool; see docs/matching_aids.md). Bodies are guesses.
+void GXCheckEnvMap(const char* name, int lut, int alpha) {
+    if (lut) {
+        fn_802E30C8("dr: custom envmap with lut data disallowed (%s)", name);
+    }
+    if (alpha) {
+        fn_802E30C8("dr: custom envmap with alpha obj disallowed (%s)", name);
+    }
+}
+
 void fn_802D07E4(const char* name, int announce) {
     if (lbl_8055D0B8 >= 0) {
         fn_802E30C8("gx: aborting screenshot...");
@@ -1270,6 +1282,13 @@ void fn_802D07E4(const char* name, int announce) {
                     lbl_8055D0C0 * lbl_804C9760.h);
         lbl_8055D0B8 = 0;
     }
+}
+
+// MATCHING-AID: linker-stripped (see GXCheckEnvMap).
+void GXScreenshotNumbered(int n) {
+    char name[32];
+    sprintf(name, "tmp_screenshot%02d.tga", n);
+    fn_802D07E4(name, 1);
 }
 
 void fn_802D08B4(s32 tx, s32 ty, u8 raw) {
@@ -1299,7 +1318,8 @@ void fn_802D08CC(int mode) {
     GXSetCullMode(m);
 }
 
-void fn_802D0910(void) {}
+// Writes one screenshot tile (x, y in the full w x h image); empty in this build.
+void fn_802D0910(s32 fd, int x, int y, int w, int h) {}
 
 void fn_802D0914(s32 fd, int w, int h) {
     u8 hdr[0x12];
@@ -1360,10 +1380,11 @@ void fn_802D09E8(void) {
     }
     s32 tile = lbl_8055D0B8;
     if (tile < lbl_8055D0BC * lbl_8055D0C0) {
+        int tx = tile % lbl_8055D0BC;
         int ty = tile / lbl_8055D0BC;
-        int tx = tile - ty * lbl_8055D0BC;
         fn_802E30C8(" tile %d / %d", tile + 1, lbl_8055D0BC * lbl_8055D0C0);
-        fn_802D0910();
+        fn_802D0910(lbl_8055D10C, lbl_804C9760.w * tx, lbl_804C9760.h * ty, lbl_804C9760.w * lbl_8055D0BC,
+                    lbl_804C9760.h * lbl_8055D0C0);
         lbl_8055D0B8++;
     }
     if (lbl_8055D0B8 >= lbl_8055D0BC * lbl_8055D0C0) {
@@ -1375,6 +1396,9 @@ void fn_802D09E8(void) {
                     0.001f * (fn_802E2C20() - lbl_8055FDC4));
     }
 }
+
+// MATCHING-AID: linker-stripped (see GXCheckEnvMap).
+void GXPrintRow(const f32* v) { fn_802E30C8(" %5.2f %5.2f %5.2f %5.2f ", v[0], v[1], v[2], v[3]); }
 
 void fn_802D0BD8(void) {
     GXRenderModeObj* rm = lbl_8055FD64;
