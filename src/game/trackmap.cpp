@@ -186,6 +186,8 @@ void fn_802C8638(CameraPose* cam);
 DriverInfo* FindDriver(long id);
 
 // Start/finish marker shared by all maps.
+static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
+
 class SFMarker {
 public:
     SFMarker(void) {
@@ -198,7 +200,7 @@ public:
         dir.y = -t;
         lap = 0;
         unk10 = 0.0f;
-        angle = atan2(dir.y, dir.x);
+        angle = Atan2F(dir.y, dir.x);
     }
     ~SFMarker(void) { fn_80235380(art); }
 
@@ -466,7 +468,6 @@ static inline f32 Ease(f32 t) {
     }
 }
 
-static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
 
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vertex verts[41] __attribute__((aligned(16)));
