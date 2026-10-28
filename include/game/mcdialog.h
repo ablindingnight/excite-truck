@@ -44,7 +44,7 @@ public:
     }
     virtual void Load(void);
     virtual void Unload(void);
-    virtual void Setup(McDialogCfg* cfg);
+    virtual int Setup(McDialogCfg* cfg);
     virtual void Show(const McMsg* m);
     virtual ~MemCardDialogBg(void) {}
 

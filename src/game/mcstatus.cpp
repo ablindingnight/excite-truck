@@ -52,6 +52,14 @@ extern s32 lbl_8055CFF4;
 extern s32 lbl_8055FB9C;  // screen width
 extern s32 lbl_8055FBA0;  // screen height
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
+void fn_802C5310(u8* img, int a, f32 x, f32 y, f32 z);
+void fn_802337A0(u8* font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 alpha, ...);
+s32 fn_802E2C20(void);  // milliseconds
+void fn_802E2D74(int ms);
+u16 fn_802E46F0(void);  // key
+int fn_802E47B8(void);
+void fn_80129AFC(void);
+double sin(double x);
 }
 
 struct Camera {
@@ -112,7 +120,136 @@ void MemCardDialogBg::Unload(void) {
     font2 = 0;
 }
 
-void MemCardDialogBg::Setup(McDialogCfg* cfg) {}  // stub (363)
+// The "Accept" hint at (x, y): the A button art when loaded, else "A - Accept".
+static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
+    if (bg->image2) {
+        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, "Accept", 1.0f)), 3.0f + y, 0.0f);
+        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, 0.0f, 0.5f, 1.0f, "Accept");
+    } else {
+        fn_802337A0(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, 0.0f, 0.5f, 1.0f, "A");
+    }
+}
+
+// The choice dialog without a layout: draws the message and the choices (the selected one pulses) until
+// one is accepted or the check callback reports a result.
+static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
+    int sel = cfg->select;
+    for (;;) {
+        int r;
+        Camera cam;
+        char text[0x200];
+        fn_802C8530();
+        fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
+        fn_802C88BC(2);
+        fn_80230B5C(&cam);
+        fn_802C8638(&cam);
+        fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+        f32 h = lbl_8055FBA0 + 1;
+        f32 w = lbl_8055FB9C + 1;
+        f32 x0 = -1.0f * lbl_8055FB9C * 0.5f - 1.0f;
+        f32 y0 = 1.0f + lbl_8055FBA0 * 0.5f;
+        if (bg->image) {
+            fn_802C5320(bg->image, 0, x0, y0, 0.0f, w, h);
+        } else {
+            fn_802C92D0();
+            fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
+            fn_802C92D8();
+        }
+        const char* title = cfg->title;
+        const char* msg = cfg->text;
+        f32 y = 145.0f;
+        if (strlen(title)) {
+            fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
+            fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, 0.0f, 1.0f);
+        }
+        y -= 40.0f;
+        strcpy(text, msg);
+        char* p = text;
+        while (strlen(p)) {
+            char* brk = 0;
+            char line[0x200] = {0};
+            char* d = line;
+            u32 i = 0;
+            while (i < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
+                char* c = &p[i];
+                if (*c == ' ') {
+                    brk = c;
+                } else if (*c == '^') {
+                    *c = ' ';
+                }
+                i++;
+                *d++ = *c;
+                *d = 0;
+            }
+            char keep = 0;
+            if (i != strlen(p)) {
+                if (!brk) {
+                    brk = &p[i];
+                    keep = p[i];
+                }
+                *brk = 0;
+            } else {
+                brk = &p[i] - 1;
+            }
+            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, 0.0f, 1.0f);
+            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, 0.0f, 1.0f);
+            if (!keep) {
+                p = brk + 1;
+            } else {
+                *brk = keep;
+                p = brk;
+            }
+            y -= 20.0f;
+        }
+        y = -70.0f;
+        for (int i = 0; i < cfg->count; i++) {
+            f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(3.0f * (f32)fn_802E2C20() / 1000.0f));
+            fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
+            u32 color;
+            if (sel == i) {
+                color = ((int)pulse << 24) | 0xFFD03F;
+            } else {
+                color = 0xC8646464;
+            }
+            fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, 0.0f, 1.0f);
+            y -= 20.0f;
+        }
+        DrawAccept(bg, 155.0f, -140.0f);
+        fn_802C9A70(1);
+        fn_802C855C();
+        fn_802C2B48();
+        fn_80129AFC();
+        if (fn_802E47B8()) {
+            switch (fn_802E46F0()) {
+            case 0x126:
+                if (sel > 0) {
+                    fn_80214D50(0);
+                    sel--;
+                }
+                break;
+            case 0x128:
+                if (sel + 1 < cfg->count) {
+                    fn_80214D50(0);
+                    sel++;
+                }
+                break;
+            case 0xD:
+                fn_80214D50(2);
+                return (int)cfg->entries[sel].text;
+            }
+        }
+        int (*check)(u8* p) = cfg->check;
+        if (check) {
+            r = -1;
+            if (check((u8*)&r) == 1) {
+                return r;
+            }
+        }
+        fn_802E2D74(5);
+    }
+}
+
+int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
 
 // Draws the background (or a black screen), the title, the message word-wrapped at 480 units ('^' is a
 // space that does not break) and, when m->frac is set, a row of progress dots.
