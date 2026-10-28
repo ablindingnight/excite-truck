@@ -365,6 +365,8 @@ void fn_802B5F24(int fd) {
     fn_80128678();
 }
 
+extern const f32 lbl_80564C58;  // 2.0
+
 void fn_802B5F98(const char* name) {
     int fd = fn_802E3D68("worldmodel.mml");
     if (fd == -1) {
@@ -377,11 +379,11 @@ void fn_802B5F98(const char* name) {
     for (int x = -0x200; x <= 0x200; x += 8) {
         for (int z = -0x200; z <= 0x200; z += 8) {
             V3 nrm;
-            f32 fx = (f32)x * 2.0f;
-            f32 fz = (f32)z * 2.0f;
+            f32 fx = (f32)x * lbl_80564C58;
+            f32 fz = (f32)z * lbl_80564C58;
             f32 h = fn_801DCF48(&nrm, fx, fz);
-            f32 u = (f32)(x + 0x200) * 0.0009765625f;
-            f32 v = (f32)(z + 0x200) * 0.0009765625f;
+            f32 u = (f32)(x + 0x200) / 1024.0f;
+            f32 v = (f32)(z + 0x200) / 1024.0f;
             fn_802E3AD0(fd, "\tpt %.2f,%.2f,%.2f\r\n", fx, h, fz);
             fn_802E3AD0(fd, "\tuv %.3f, %.3f\r\n", u, v);
             fn_802E3AD0(fd, "\tn %.3f, %.3f, %.3f\r\n", nrm.x, nrm.y, nrm.z);
