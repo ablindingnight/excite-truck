@@ -406,7 +406,7 @@ static inline void FrameToQuatAxis(f32 (*m)[3], IQuat* q) {
 
 static inline void RotToQuat(const Mat3* r, IQuat* q) {
     const f32(*m)[3] = (const f32(*)[3])r;
-    f32 tr = r->m[0] + r->m[4] + r->m[8];
+    f32 tr = m[2][2] + (m[0][0] + m[1][1]);
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
         q->w = 0.5f * s;
@@ -2726,10 +2726,13 @@ void fn_801C9920(const Event* e, int fd) {
         fn_802E3AD0(fd, "\t\twhat\t%s\r\n", fn_801C98F4(lbl_8056295C, w->kind));
         fn_802E3AD0(fd, "\t\twho\t%s\r\n", w->who);
         fn_802E3AD0(fd, "\t\texcept\t%s\r\n", w->except);
-        if (w->kind == 0) {
+        switch (w->kind) {
+        case 0:
             fn_802E3AD0(fd, "\t\tpt\t%.2f, %.2f, %.2f\r\n", w->pt.x, w->pt.y, w->pt.z);
-        } else {
+            break;
+        default:
             fn_802E317C("interlude: unhandled wait type %d in export", w->kind);
+            break;
         }
         break;
     }
