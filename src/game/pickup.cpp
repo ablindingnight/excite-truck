@@ -816,13 +816,15 @@ extern "C" static inline int fn_80169928(int j, int i, int ny, int nx) {
     if (i < j) {
         j = i;
     }
+    int r;
     if (j > 2) {
         return 3;
-    } else if (j > 1) {
-        return 2;
-    } else {
-        return 1;
     }
+    r = 1;
+    if (j > 1) {
+        r = 2;
+    }
+    return r;
 }
 
 
