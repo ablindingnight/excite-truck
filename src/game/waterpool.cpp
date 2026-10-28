@@ -536,10 +536,10 @@ extern "C" void fn_8029CD14(void) {
 
 extern "C" void fn_8029CD48(WaterCar* car) {
     for (int i = 0; i < 4; i++) {
-        const Vec* wp = &car->wheels[i].pos;
         if (car->wheels[i].flags & 8) {
             continue;
         }
+        const Vec* wp = &car->wheels[i].pos;
         Vec p;
         MulVec(&p, wp, car->axes);
         p.x = p.x + car->pos.x;
