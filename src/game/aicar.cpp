@@ -247,6 +247,16 @@ f32 lbl_8055E588;
 AIVec lbl_80434A10;
 
 #define CAR(d) PTR(d, 0x294)
+
+// The controller's car link: 0x290 car index, 0x294 the car's body. Some code reaches the body through the
+// const accessor, whose read MWCC does not merge with a plain CAR(d) read.
+struct AICarLink {
+    u8 pad[0x290];
+    s32 id;
+    RigidBody* body;
+    RigidBody* Body() const { return body; }
+};
+#define LINK(d) ((const AICarLink*)(d))
 #define CARID(d) S32(d, 0x290)
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
@@ -1746,7 +1756,7 @@ void fn_80196AA0(u8* d) {
             g.x = F32(car, 0x88) * lbl_8056225C;
             g.y = F32(car, 0x8C) * lbl_8056225C;
             g.z = F32(car, 0x90) * lbl_8056225C;
-            (*(RigidBody**)(d + 0x294))->AddForceAt(&g, (RVec3*)(CAR(d) + 0x94));
+            LINK(d)->Body()->AddForceAt(&g, (RVec3*)(CAR(d) + 0x94));
         }
         break;
     }

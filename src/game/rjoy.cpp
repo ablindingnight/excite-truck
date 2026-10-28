@@ -353,11 +353,13 @@ void fn_802E7FD0(void) {
             }
         }
     }
-    Remote* r = lbl_80505978;
-    s32* type = lbl_80507278;
-    s8* last = lbl_8055D230;
+    Remote* r;
+    s32* type;
+    s8* last;
     Remote* q;
-    for (int chan = 0; chan < 4; chan++, r++, type++, last++) {
+    int chan;
+    for (chan = 0, r = lbl_80505978, type = lbl_80507278, last = lbl_8055D230; chan < 4;
+         chan++, r++, type++, last++) {
         memset(r->kpad, 0, sizeof(r->kpad));
         int busy = 0;
         q = lbl_80505978;
