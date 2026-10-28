@@ -580,7 +580,7 @@ struct FixedList {
         a.count = 0;
     }
     ~FixedList(void) {}
-    int CanAdd(void) { return a.count + 1 <= a.cap; }
+    int CanAdd(void) const { return a.count + 1 <= a.cap; }
     void Push(T v) {
         T* p = &a.data[a.count++];
         *p = v;
