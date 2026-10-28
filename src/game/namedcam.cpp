@@ -1,6 +1,6 @@
 // Named cameras (0x80276068-0x80278214): the named camera sets ("namedcam", "rddefault", "raceday",
 // "house") and the timed camera transitions ("physcam: Clock looped during camera transition!!").
-// Written against raw field offsets; the large routines and the initialiser are still stubs. Names
+// Written partly against raw field offsets; the other large routines and the initialiser are still stubs. Names
 // are guesses apart from the strings.
 #include "game/common.h"
 #include <string.h>
@@ -56,9 +56,21 @@ void fn_8026A4A0(int i, f32* pose, f32* fov);
 }
 
 // A timed camera transition slot (0x50).
+// A timed camera transition: the start and end rotations as quaternions (x, y, z, w), positions and
+// fields of view, the duration and the start time.
 struct CamShot {
     CamShot(void) {}
-    u8 data[0x50];
+    u8 active;       // offset 0x0
+    u8 pad1[3];
+    f32 q0[4];       // offset 0x4
+    f32 q1[4];       // offset 0x14
+    CamVec3 p0;      // offset 0x24
+    CamVec3 p1;      // offset 0x30
+    f32 fov0;        // offset 0x3C
+    f32 fov1;        // offset 0x40
+    f32 dur;         // offset 0x44
+    f32 start;       // offset 0x48
+    s32 kind;        // offset 0x4C
 };
 
 // A camera record (racerslot.cpp holds its constructor).
@@ -81,6 +93,7 @@ static CamRec lbl_804A0C60[4];
 static CamFrame34 lbl_804A1500[4];
 
 extern f32 lbl_8055E3C8;
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern NamedCam* lbl_8055F598;
 extern NamedCam* lbl_8055F59C;
 extern s32 lbl_8055F5A0;
@@ -99,7 +112,87 @@ int fn_80276068(int mode) {
     return r;
 }
 
-void fn_80276098(f32* dst, f32* src, int a, int b, f32 from, f32 to, f32 t) {}  // stub (309)
+extern "C" f32 PSVECSquareDistance(const void* a, const void* b);
+extern "C" double sqrt(double x);
+
+static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
+
+static inline int Near(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
+
+static inline int SamePose(CamPose* a, CamPose* b) {
+    int same = Near(PSVECSquareDistance(&a->pos, &b->pos));
+    if (same) {
+        same = Near(PSVECSquareDistance(&a->rot.m[0], &b->rot.m[0]));
+    }
+    if (same) {
+        same = Near(PSVECSquareDistance(&a->rot.m[3], &b->rot.m[3]));
+    }
+    if (same) {
+        same = Near(PSVECSquareDistance(&a->rot.m[6], &b->rot.m[6]));
+    }
+    return same;
+}
+
+// The rotation of a pose as a quaternion (x, y, z, w).
+static inline void PoseToQuat(const CamPose* p, f32* q) {
+    const f32(*m)[3] = (const f32(*)[3])p->rot.m;
+    f32 tr = m[0][0] + m[1][1] + m[2][2];
+    if (tr > 0.0f) {
+        f32 s = sqrt(1.0f + tr);
+        q[3] = 0.5f * s;
+        s = 0.5f / s;
+        q[0] = s * (m[1][2] - m[2][1]);
+        q[1] = s * (m[2][0] - m[0][2]);
+        q[2] = s * (m[0][1] - m[1][0]);
+    } else {
+        int i = 0;
+        if (m[1][1] > m[0][0]) {
+            i = 1;
+        }
+        if (m[2][2] > m[i][i]) {
+            i = 2;
+        }
+        int j = (i + 1) % 3;
+        int k = (j + 1) % 3;
+        f32 s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
+        q[i] = 0.5f * s;
+        s = 0.5f / s;
+        q[3] = s * (m[j][k] - m[k][j]);
+        q[j] = s * (m[i][j] + m[j][i]);
+        q[k] = s * (m[i][k] + m[k][i]);
+    }
+}
+
+// Starts transition `slot` from pose a to pose b over `dur` (nothing to do when they already match).
+void fn_80276098(CamPose* a, CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
+    if (AbsF(fovA - fovB) <= lbl_80558DC4[0] && SamePose(a, b)) {
+        return;
+    }
+    CamShot* s = &lbl_8049FD58[slot];
+    s->dur = dur;
+    s->start = lbl_8055E3C8;
+    f32 q[4];
+    PoseToQuat(a, q);
+    s->q0[0] = q[0];
+    s->q0[1] = q[1];
+    s->q0[2] = q[2];
+    s->q0[3] = q[3];
+    s->p0.v[0] = a->pos.v[0];
+    s->p0.v[1] = a->pos.v[1];
+    s->p0.v[2] = a->pos.v[2];
+    s->fov0 = fovA;
+    PoseToQuat(b, q);
+    s->q1[0] = q[0];
+    s->q1[1] = q[1];
+    s->q1[2] = q[2];
+    s->q1[3] = q[3];
+    s->p1.v[0] = b->pos.v[0];
+    s->p1.v[1] = b->pos.v[1];
+    s->p1.v[2] = b->pos.v[2];
+    s->fov1 = fovB;
+    s->kind = kind;
+    s->active = 1;
+}
 
 void fn_8027656C(CamPose* pose, f32* fov, int a) {}  // stub (310)
 
@@ -153,7 +246,7 @@ void fn_80276CB0(const char* name, int blend) {
         c = lbl_8055F598;
     }
     if (blend) {
-        fn_80276098((f32*)&lbl_8049FE98.pose, (f32*)&c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
+        fn_80276098(&lbl_8049FE98.pose, &c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
         ((u8*)lbl_8049FD58)[0] = 0;
@@ -166,7 +259,7 @@ void fn_80276D3C(const char* name, int mode) {
         f32 pose[12];
         f32 fov;
         fn_8026A4A0(0, pose, &fov);
-        fn_80276098(pose, (f32*)&c->pose, 0, 0x22, fov, c->fov, 2.0f);
+        fn_80276098((CamPose*)pose, &c->pose, 0, 0x22, fov, c->fov, 2.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
         ((u8*)lbl_8049FD58)[0] = 0;
@@ -178,9 +271,9 @@ void fn_80276DC8(u8* p) {}  // stub (591)
 extern const f32 lbl_80564054;  // -1.0
 
 f32 fn_80277704(int i) {
-    if (lbl_8049FD58[i].data[0]) {
-        u8* e = lbl_8049FD58[i].data;
-        return (lbl_8055E3C8 - F32(e, 0x48)) / F32(e, 0x44);
+    if (lbl_8049FD58[i].active) {
+        CamShot* e = &lbl_8049FD58[i];
+        return (lbl_8055E3C8 - e->start) / e->dur;
     }
     return lbl_80564054;
 }
