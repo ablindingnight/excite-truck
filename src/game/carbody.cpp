@@ -661,6 +661,10 @@ extern f32 lbl_80561CAC, lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC,
 // Registers the body's tunables (mass, moments, power, geometry, springs, damping, tires) with a tuning
 // menu. Matched by the upstream project (orangedude27/excite-truck).
 // MATCHING-AID: register pinning + scheduling/opt_propagation pragmas, not original source. Revisit.
+// Natural form found 2026-10-27: string literals for the names, units held in locals
+// (const char* m = " m", kg = " kg", kgm2 = " kg m2", nm = " N/m", nsm = " N-s/m"; "Mass", "", " m/s", " G"
+// inline), u8* body = p + 0x32C, Add(const char*, void*, const char*, ...), no pragmas. That differs only in
+// the name pool offsets (literals start at +0x1F0 instead of +0x350) until the unit's earlier strings exist.
 #pragma push
 #pragma scheduling invalid_target
 #pragma opt_propagation off

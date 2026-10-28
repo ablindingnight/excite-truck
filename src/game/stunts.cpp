@@ -975,8 +975,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     CloseCallSlot* s;
     int n;
     if (turbo) {
-        // MATCHING-AID: a const reference to the literal sets the compare operand registers.
-        const f32& turboLimit = 10.0f;
+        f32 turboLimit = 10.0f;
         if ((now - turboTime) > turboLimit || (rc->turbo > lbl_80558DC4[0]) == 0) {
             turbo = 0;
         }

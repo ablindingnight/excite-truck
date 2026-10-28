@@ -129,7 +129,7 @@ struct Paint {
     Paint(const PaintDesc* d, const char* tex);
     ~Paint(void);
     void Reset(void);
-    void Add(TVec* pos, TVec* vel, f32 alpha);
+    void Add(const TVec* pos, const TVec* vel, f32 alpha);
     void Update(void);
     void Draw(void);
 
@@ -1293,18 +1293,10 @@ void Paint::Reset(void) {
     accum = 0.0f;
 }
 
-void Paint::Add(TVec* pos, TVec* vel, f32 alpha) {
+void Paint::Add(const TVec* pos, const TVec* vel, f32 alpha) {
     if (n < cap && Full(accum)) {
         Mark* m = &marks[n];
-        {
-            // MATCHING-AID: copy through temporaries in this order (plain m->pos = *pos schedules differently).
-            f32 x = pos->x;
-            f32 y = pos->y;
-            m->pos.x = x;
-            f32 z = pos->z;
-            m->pos.y = y;
-            m->pos.z = z;
-        }
+        m->pos = *pos;
         m->vel.x = vel->x * velScale.x + fn_80287BC8(-jitter.x, jitter.x);
         m->vel.y = lift + (vel->y * velScale.y + fn_80287BC8(-jitter.y, jitter.y));
         m->vel.z = vel->z * velScale.z + fn_80287BC8(-jitter.z, jitter.z);

@@ -2173,19 +2173,23 @@ void fn_801981A0(u8* d, u8* t) {
     U8(d, 0x154) = 0;
 }
 
-// MATCHING-AID: volatile forces the second read of each count (found by upstream); the original
-// probably re-read it through some accessor. Revisit.
+// One side's best overtaking gap (0x74 left, 0x9C right; filled by fn_8019703C): the car to pass.
+struct SideHit {
+    u8 valid;
+    Hit hit;
+    f32 best;
+    int Car() const { return valid ? hit.id : -1; }
+};
+
 void fn_80198488(u8* d) {
-    volatile u8* pa = d + 0x74;
-    volatile u8* pb = d + 0x9C;
-    u8 b = *pb;
-    u8 a = *pa;
-    if (a + b + 1 > (int)F32(d, 0x2F4)) {
+    SideHit* l = (SideHit*)(d + 0x74);
+    SideHit* r = (SideHit*)(d + 0x9C);
+    if (l->valid + r->valid + 1 > (int)F32(d, 0x2F4)) {
         int z = S32(d, 0x18) == 0;
-        if (z && a) {
-            fn_80193138(d, *pa ? S32(d, 0x90) : -1);
-        } else if (!z && b) {
-            fn_80193138(d, *pb ? S32(d, 0xB8) : -1);
+        if (z && l->valid) {
+            fn_80193138(d, l->Car());
+        } else if (!z && r->valid) {
+            fn_80193138(d, r->Car());
         }
     }
 }

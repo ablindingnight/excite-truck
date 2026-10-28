@@ -11,10 +11,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 
 | Function | File | Aid | Source |
 |---|---|---|---|
-| fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas | upstream orangedude27/excite-truck |
-| fn_80198488 (pick waiting car) | src/game/aicar.cpp | volatile reads of the two counts | upstream orangedude27/excite-truck |
-| Rate__16CloseCallTrackerFPC10RaceCarRec (close-call stunt rating) | src/game/stunts.cpp | `const f32&` bound to the 10.0f literal | Codex v2 handoff 2026-10-25 |
-| fn_8025AD3C (achview 3-component lerp) | src/game/achview.cpp | single-use inline helpers for the z read and y lerp | Codex/Ryzen permuter 2026-10-25 |
+| fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas (natural form known: literals + unit-string locals; apply once the unit's earlier strings exist) | upstream orangedude27/excite-truck |
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | shared four-use width-product helper steering operand allocation | Codex widgets 389, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
@@ -24,8 +21,8 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | fn_8022A210 (model fit) | src/game/widgets.cpp | scalar wrapper struct for bound extents (ModelBoundScalarObservedNew) | Codex widgets 391, 2026-10-26 |
 | fn_8011A388 (Bink stream read) | src/game/unk_80116BD4.c | volatile reads of position 0x90 and cap 0x40 (probably genuine async stream state, like 0xC0 in fn_8011A45C) | Claude, 2026-10-26 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
-| Paint::Add (Add__5PaintFP4TVecP4TVecf) | src/game/trail.cpp | position copied through x/y/z temporaries in a fixed order | stmtmove sweep 2026-10-24 |
 | Gate::operator= (__as__4GateFRC4Gate) | src/game/zone.cpp | end points copied as one GateSeg block; the original likely grouped a/b in a segment struct | Claude 2026-10-24 |
+| MultiEvtTestingCheck (stripped by the linker) | src/game/multievt.cpp | reconstructed body for the orphan "Testing mode only allowed from Single Race path" literal so the .data pool keeps the original offsets (unlocks fn_8024A6EC / fn_8024ACB4) | Claude, 2026-10-27 |
 | fn_801B3E24 (collision sound play) | src/game/collisionsound.cpp | volatile zero vector forces stack stores | Codex (tagged in COLLISIONSOUND-23) |
 | UI API unit (9 sites: dont_inline/scheduling pragmas, 1 register) | src/game/uiapi.cpp | imported raw from upstream; whole file needs a typed rewrite | upstream orangedude27/excite-truck |
 | Spu sound layer (6 tagged sites) | src/game/unk_802E4D84.c | 3 upstream pragmas; 3 `msg` base pointers into the message pool (fn_802E5478, fn_802E5AE8, fn_802E6264) standing in for pooled string literals. The pool also holds strings of linker-stripped functions, so literals can't reproduce its offsets until the unit owns its .data | upstream orangedude27/excite-truck; Claude 2026-10-24 |
@@ -49,7 +46,28 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | whole unit (1 tagged sites) | src/game/unk_80107180.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 tagged sites) | src/game/unk_8002B0A0.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
 | whole unit (1 tagged sites) | src/game/unk_8002B0B0.c | upstream pragmas/register/volatile; typed rewrite pending | upstream orangedude27/excite-truck |
-| fn_80236848 (pop anim state) | src/game/uianime.cpp | address of a local taken to steer load order | NucBox permuter |
+
+## Replaced by natural source
+
+| Function | Aid that was used | Natural form | When |
+|---|---|---|---|
+| fn_80198488 (aicar, pick waiting car) | volatile reads of the two counts | SideHit struct (valid + Hit + best) with a const `Car()` accessor; a const method's read is not CSE'd with the earlier plain read | Claude 2026-10-27 |
+| CloseCallTracker::Rate (stunts) | const f32& bound to 10.0f | `f32 turboLimit = 10.0f;` local | Claude 2026-10-27 |
+| fn_8025AD3C (achview lerp) | two single-use helpers | `SetVec3(out, x, y, z)` inline: arguments evaluate right to left | Claude 2026-10-27 |
+| Paint::Add (trail) | copy through x/y/z temporaries | `const TVec*` params + `m->pos = *pos;` (symbol renamed to Add__5PaintFPC4TVecPC4TVecf) | Claude 2026-10-27 |
+| fn_80236848 (uianime pop) | address of a local | compare the head global directly; load the walk pointer in the else | Claude 2026-10-27 |
+
+## Looked at, kept (likely original or no natural form yet), 2026-10-27
+
+- zone ZoneMaster::vf0C `#pragma dont_inline`: in the target nothing at all is inlined into vf0C, while every other
+  function (and the weak copies emitted after it) inlines the same helpers; inline-size pragmas don't reproduce it.
+  Most likely an original per-function pragma.
+- stunts fn_801572A4 / betarace `#pragma inline_depth(1)`: the factory inlines exactly one level (TrackerArray ctor,
+  Add/Get/Num) and calls everything below; also likely original.
+- driver PickVehicleColor `#pragma scheduling 604`: without it, one store/compare swap (2 rows); 8 natural spellings
+  tried, none move it.
+- objplace Shuffle<T>: natural loops give a pointer induction variable (6 rows); the target keeps a byte offset.
+  16 loop shapes tried.
 
 ## Existing sites (inventory 2026-10-23, before tagging)
 
@@ -119,4 +137,3 @@ real aids with `MATCHING-AID:` as they are reviewed. Data-placement pragmas (`se
 | src/game/widgets.cpp | 1398 | register |
 | src/game/zone.cpp | 2341 | pragma |
 | src/game/zone.cpp | 2495 | pragma |
-| MultiEvtTestingCheck (stripped by the linker) | src/game/multievt.cpp | reconstructed body for the orphan "Testing mode only allowed from Single Race path" literal so the .data pool keeps the original offsets (unlocks fn_8024A6EC / fn_8024ACB4) | Claude, 2026-10-27 |
