@@ -1618,11 +1618,10 @@ int RingChalMaster::vf3C(int view) {
         }
         if (t < end1) {
             f32 k;
-            TextElem* body;
             TextElem* timer;
             fn_8014784C(layout, "stop_watch_art", "stop_watch_artset", 0);
             k = Lerp(0.0f, 1.0f, Clamp01((t - in1) / (full1 - in1)));
-            body = layout->Find("time_body_0");
+            TextElem* body = layout->Find("time_body_0");
             timer = layout->Find("timer");
             if (h0 && h1 && body && timer) {
                 char buf[0x14];

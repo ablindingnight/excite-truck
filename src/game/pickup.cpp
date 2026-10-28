@@ -661,7 +661,6 @@ inline int CoinStripPickupMaker::Match(const char* name) {
 }
 
 inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
-    Bound* b;
     int rainbow;
     int count;
     int id;
@@ -674,7 +673,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
         fn_802E30C8("CoinStripPickupMaker: table name \"%s\" is not a match", n->GetName());
         return 0;
     }
-    b = fn_801399FC(n);
+    Bound* b = fn_801399FC(n);
     if (b->n < 2) {
         fn_802E30C8("CoinStripPickupMaker: bound for table \"%s\" has less than two points", n->GetName());
         fn_80128658(b);

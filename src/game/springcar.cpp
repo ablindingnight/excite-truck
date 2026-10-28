@@ -398,7 +398,6 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             TVec f;
             TVec imp;
             TVec pt;
-            TPos at;
             pen = 0.0f > pen ? 0.0f : pen;
             extra = 0.0f;
             if (d < 0.0f) {
@@ -426,7 +425,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 imp.y = -q * (car->mass / 0.016683351f);
             }
             pen = pen + extra;
-            at = *(TPos*)&car->up;
+            TPos at = *(TPos*)&car->up;
             at.y = 0.0f;
             if (!NearZero(pen) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
                 f32 m = 17.777779f / pen;

@@ -542,7 +542,6 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
     int cur;
     int n = win->menuCount;
     int best;
-    int bestScore;
     int i;
     Widget* cw;
     s32 cx;
@@ -560,7 +559,7 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
     best = cur;
     cx = cw->x;
     cy = cw->y;
-    bestScore = 100000;
+    int bestScore = 100000;
     for (i = 0; i < n; i++) {
         Widget* wd;
         s32 dx;

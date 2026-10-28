@@ -675,7 +675,6 @@ void fn_80260954(int arg) {
     lbl_8055F3E4 = fn_8027B878(arg);
     {
     PathScreenBuf scr(arg);
-    MenuDesc desc;
     s32 diff;
     fn_80261C68(&scr);
     int r;
@@ -712,7 +711,7 @@ void fn_80260954(int arg) {
         fn_80261688((u8*)&items[16], 0x121, 0, (s32)fn_802610C8);
         fn_80261688((u8*)&items[17], 0x1B, -1, (s32)fn_80260E30);
         fn_80260E04((Words5*)&items[18], (const Words5*)&lbl_80498F00);
-        desc = *(const MenuDesc*)&lbl_802FA6C0;
+        MenuDesc desc = *(const MenuDesc*)&lbl_802FA6C0;
         desc.items = (MenuItem*)items;
         for (;;) {
             r = fn_802146BC(&desc, -999, -999, 1);

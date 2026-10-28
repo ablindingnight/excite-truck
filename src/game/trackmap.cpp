@@ -474,7 +474,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vec3 path;
     Vec2 dir;
     Vec2 tpos;
-    int view;
     SFMarker* sf;
     TruckDraw* draw;
     int me;
@@ -486,7 +485,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     if (!map) {
         return;
     }
-    view = fn_801E866C(map->player);
+    int view = fn_801E866C(map->player);
     sf = lbl_8055D5B4;
     {
         Mtx34 m = *fn_801E8718(map->player);
