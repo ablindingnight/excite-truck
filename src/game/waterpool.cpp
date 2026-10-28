@@ -824,6 +824,8 @@ int fn_8029DFE0(WaterPool* p, const Vec* at) {
     return in;
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     Vec base;
     Vec pos;
@@ -840,7 +842,7 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     d.x = at->x - p->origin.x;
     d.y = at->z - p->origin.z;
     f32 s2 = v.x * v.x + v.y * v.y;
-    if ((f32)__fabs(s2) <= lbl_80558DC4[0]) {
+    if (AbsF(s2) <= lbl_80558DC4[0]) {
         return;
     }
     f32 dy = at->y - p->origin.y;

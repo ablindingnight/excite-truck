@@ -138,6 +138,8 @@ static inline void MulVec(const Frame& m, const V3& src, V3* dst) {
 
 extern "C" {
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     Frame m;
     V3 v;
@@ -164,7 +166,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     corner.y = origin.y + size.y;
     fn_801392F8(fn_8017960C(self));
     cam = fn_801E8718();
-    if ((f32)__fabs(cam->dir.x) <= lbl_80558DC4[0] && (f32)__fabs(cam->dir.z) <= lbl_80558DC4[0]) {
+    if (AbsF(cam->dir.x) <= lbl_80558DC4[0] && AbsF(cam->dir.z) <= lbl_80558DC4[0]) {
         return;
     }
     h.x = cam->dir.x;

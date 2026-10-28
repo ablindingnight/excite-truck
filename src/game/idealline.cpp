@@ -255,6 +255,9 @@ int fn_801355B8(LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return 0; }
 
 }  // extern "C"
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline double AbsD(double v) { return __fabs(v); }
+
 void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
     out->mode = il.mode;
     if (fn_801355B8(this, p, &out->seg, &out->t)) {
@@ -285,7 +288,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
             v.x = p->x - pt.x;
             v.y = p->y - pt.y;
             a = dv.x * v.x + dv.y * v.y;
-            if ((f32)__fabs(a) < 0.0005f) {
+            if (AbsF(a) < 0.0005f) {
                 break;
             }
             if (a < 0.0f) {
@@ -319,7 +322,7 @@ int LineFollower::Step(V2* p) {
         dir.x *= inv;
         off.y = p->y - pos.y;
         dir.y *= inv;
-        x = __fabs(off.y * dir.x + -off.x * dir.y);
+        x = (f32)AbsD(off.y * dir.x + -off.x * dir.y);
         wide = x > 15.0f * 0.305f + il.seg->width * 0.5f;
         a = (dir.x * off.x + dir.y * off.y) / s->len;
         if (t + a > 1.0f) {

@@ -451,9 +451,11 @@ void fn_802A4D08(void) {
     }
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_802A4E08(void) {
     ScreenFx* s = &fn_801E7E34()[fn_801E85B4()];
-    if (!((f32)__fabs(s->flash) <= lbl_80558DC4[0])) {
+    if (!(AbsF(s->flash) <= lbl_80558DC4[0])) {
         int a = Alpha(255.0f * s->flash);
         fn_802C90F0(lbl_8055F89C);
         fn_802C9124(0, 0, lbl_8055CFF0, lbl_8055CFF4, 0.0f, 0.0f, 1.0f, 1.0f, a << 24 | 0xE6F0FF);
@@ -846,8 +848,8 @@ void SnowSystem::Spawn(void) {
         f32 k = 0.5f - 0.5f * r;
         f32 gy = grav.y * k;
         f32 gx = grav.x * k;
-        f32 ax = 1.0f - (f32)__fabs(gx);
-        f32 ay = 1.0f - (f32)__fabs(gy);
+        f32 ax = 1.0f - AbsF(gx);
+        f32 ay = 1.0f - AbsF(gy);
         f32 rx = fn_80287BC8(-ax, ax);
         f32 ry = fn_80287BC8(-ay, ay);
         f32 z = near + r * (far - near);

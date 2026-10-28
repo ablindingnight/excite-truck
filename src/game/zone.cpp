@@ -362,6 +362,8 @@ struct Stats {
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 struct CarState {
     CarState(void);
     f32 BonusScale(void) {
@@ -390,7 +392,7 @@ struct CarState {
             timeLeft = Clamp01(old + dt / 5.0f);
             if (old < timeLeft) {
                 gainT = timeLeft - old;
-            } else if (NearZero(timeLeft) && !((f32)__fabs(old) <= lbl_80558DC4[0])) {
+            } else if (NearZero(timeLeft) && !(AbsF(old) <= lbl_80558DC4[0])) {
                 EndCombo();
                 EndStreak();
                 tA8.Start();

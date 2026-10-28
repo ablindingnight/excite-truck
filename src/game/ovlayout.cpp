@@ -692,6 +692,8 @@ struct MouseEvent {
     s32 d;      // offset 0x10
 };
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 class Layout : public ILayout {
 public:
     Layout(const char* name) : cmd(this) {
@@ -764,7 +766,7 @@ public:
                         if (ev.flags & 1) {
                             d.x = p.x - c->lastX;
                             d.y = p.y - c->lastY;
-                            if (!((f32)__fabs(d.x) <= lbl_80558DC4[0]) || !((f32)__fabs(d.y) <= lbl_80558DC4[0])) {
+                            if (!(AbsF(d.x) <= lbl_80558DC4[0]) || !(AbsF(d.y) <= lbl_80558DC4[0])) {
                                 c->moved = 1;
                             }
                             c->active->handler->Drag(&d, c->active->target);

@@ -891,6 +891,9 @@ struct TrackPt {
     f32 x, y;
 };
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline double AbsD(double v) { return __fabs(v); }
+
 // Finds where the looping path `track` crosses the circle of squared radius `r2` around `c`, between
 // path positions a and b (b may have wrapped past the loop end), by bisection.
 f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
@@ -917,7 +920,7 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     qa.y = F32(pa.seg, 0x4) + pa.t * (F32(PTR(pa.seg, 0x14), 0x4) - F32(pa.seg, 0x4));
     da.y = qa.y - c[1];
     da.x = qa.x - c[0];
-    f32 ea = (f32)__fabs(r2 - (da.x * da.x + da.y * da.y));
+    f32 ea = (f32)AbsD(r2 - (da.x * da.x + da.y * da.y));
     if (ea < lbl_8055F560) {
         return a;
     }
@@ -926,7 +929,7 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     qb.y = F32(pb.seg, 0x4) + pb.t * (F32(PTR(pb.seg, 0x14), 0x4) - F32(pb.seg, 0x4));
     db.y = qb.y - c[1];
     db.x = qb.x - c[0];
-    f32 eb = (f32)__fabs(r2 - (db.x * db.x + db.y * db.y));
+    f32 eb = (f32)AbsD(r2 - (db.x * db.x + db.y * db.y));
     if (eb < lbl_8055F560) {
         return b;
     }
@@ -1036,7 +1039,7 @@ void CamRegion::Prepare(u8* line) {
         f32 b = lbl_80563F8C * (rel.x * dir.x + rel.y * dir.y);
         f32 c = rel.x * rel.x + rel.y * rel.y - r2;
         f32 disc = b * b - lbl_80563F90 * a * c;
-        if (!((f32)__fabs(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
+        if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
             f32 q = (f32)sqrt(disc);
             n = 2;
             sol[0] = (-b - q) / (lbl_80563F8C * a);

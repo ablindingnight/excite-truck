@@ -35,6 +35,8 @@ int fn_80138BE4(f32 a, f32 b) { return a * b < 0.0f; }
 
 int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * lbl_80558DC4[0]; }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 int fn_80138C28(Motion* m, f32* t, f32* miss) {
     f32 a;
     f32 b;
@@ -64,7 +66,7 @@ int fn_80138C28(Motion* m, f32* t, f32* miss) {
             }
         } else if (miss) {
             f32 x = -b > 0.0f ? -b : 0.0f;
-            x = (x + b) * (2.0f * (f32)__fabs(a));
+            x = (x + b) * (2.0f * AbsF(a));
             *miss = (x * x - disc) / (2.0f * c);
         }
     }

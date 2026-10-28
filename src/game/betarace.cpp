@@ -2142,6 +2142,8 @@ inline void DrawBonanza(Coins* co, int id) {
 }  // namespace
 
 #pragma inline_depth(1)
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void BetaCar::DrawHud(ILayout* l, int view) {
     RaceCarRec* rc = fn_8017960C(id);
     PlaceInfo* info = rc->places->Get();
@@ -2207,16 +2209,16 @@ void BetaCar::DrawHud(ILayout* l, int view) {
             const char* s;
             s = 0;
             a = 0.0f;
-            if (!((f32)__fabs(flash[3]) <= lbl_80558DC4[0])) {
+            if (!(AbsF(flash[3]) <= lbl_80558DC4[0])) {
                 a = flash[3];
                 s = sThrown.Get();
-            } else if (!((f32)__fabs(flash[2]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[2]) <= lbl_80558DC4[0])) {
                 a = flash[2];
                 s = sTurbo.Get();
-            } else if (!((f32)__fabs(flash[1]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[1]) <= lbl_80558DC4[0])) {
                 a = flash[1];
                 s = sNice.Get();
-            } else if (!((f32)__fabs(flash[4]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[4]) <= lbl_80558DC4[0])) {
                 a = flash[4];
                 s = sSpin.Get();
             }
@@ -4501,7 +4503,7 @@ void BetaMaster::b2(StuntEvt* e, int car) {
             if (h == e->Id()) {
                 Pickup* t = stars.a.data[i];
                 if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
-                    (f32)__fabs(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
+                    AbsF(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
                     t->hit[car] = 1;
                 }
             }

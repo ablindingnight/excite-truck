@@ -211,9 +211,11 @@ void fn_8015EC50(Obst* o, Track* trk) {
 
 static inline int IsTube(TrackObj* o) { return o->id < 1000 && o->tag == 'TUBE'; }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 int fn_8015ECC0(TrackObj* o) {
     int r = 0;
-    if (IsTube(o) && (f32)__fabs(o->mtx->basis[2].y) > 0.9f) {
+    if (IsTube(o) && AbsF(o->mtx->basis[2].y) > 0.9f) {
         r = 1;
     }
     return r;

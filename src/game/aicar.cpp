@@ -1484,20 +1484,23 @@ void fn_801961FC(u8* d) {
     }
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline double AbsD(double v) { return __fabs(v); }
+
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
     f32 x = (1.3333334f + (a - b)) / c;
-    if ((f32)__fabs(a) < 0.1f) {
+    if (AbsF(a) < 0.1f) {
         *outB = 1.0f;
         *outA = 0.0f;
         *sign = 0;
         return;
     }
-    if ((f32)__fabs(b) < 0.44444445f || (*(u32*)&x & 0x80000000) == (*(u32*)&b & 0x80000000)) {
-        *outA = (f32)__fabs(x) / 4.905f;
+    if (AbsF(b) < 0.44444445f || (*(u32*)&x & 0x80000000) == (*(u32*)&b & 0x80000000)) {
+        *outA = AbsF(x) / 4.905f;
         *outB = 0.0f;
     } else {
         *outA = 0.0f;
-        *outB = (f32)__fabs(x) / 11.772001f;
+        *outB = AbsF(x) / 11.772001f;
     }
     *sign = a > 0.0f ? 1 : -1;
 }
@@ -1784,7 +1787,7 @@ void fn_80196C90(u8* d) {
             F32(d, 0x144) = a * 0.80999994f;
         }
     }
-    if ((f32)__fabs(F32(d, 0x144)) < (f32)__fabs(F32(d, 0x148))) {
+    if ((f32)AbsD(F32(d, 0x144)) < (f32)AbsD(F32(d, 0x148))) {
         f32 t = F32(d, 0x150);
         int ok = 0;
         if (!(__fpclassifyf(t) == 1) && __fpclassifyf(t) > 2) {

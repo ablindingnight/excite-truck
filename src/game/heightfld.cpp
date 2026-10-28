@@ -544,6 +544,8 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     return h;
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     Deform* d = &lbl_80446F18[lbl_8055E9A8[0]++];
     d->out = out;
@@ -584,7 +586,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                 if (k < 0 || __fabs(d->terms[2].k) < __fabs(m)) {
                     k = 2;
                 }
-                if (__fabs(d->terms[k].k) < __fabs(dh)) {
+                if (AbsF(d->terms[k].k) < AbsF(dh)) {
                     d->terms[k].k = dh;
                     d->terms[k].weight = i;
                 }

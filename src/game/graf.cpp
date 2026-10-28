@@ -591,6 +591,8 @@ void fn_801EBDCC(void) {
 
 void fn_801EBEF4(f32 v) { lbl_8055EB98[0] = v * v; }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_801EBF00(void) {
     if (lbl_8055EBA0) {
         lbl_804885E8[3]->Draw(0);
@@ -614,7 +616,7 @@ void fn_801EBF00(void) {
         }
         lbl_804885E8[6]->Draw(0);
         GObj* o = &fn_801E7E34()[fn_801E85B4()];
-        if (!((f32)__fabs(o->flash) <= lbl_80558DC4[0])) {
+        if (!(AbsF(o->flash) <= lbl_80558DC4[0])) {
             int a = (int)(255.0f * o->flash);
             a = a > 0 ? a : 0;
             int c = 0xFF;

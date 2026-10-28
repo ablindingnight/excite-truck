@@ -133,8 +133,8 @@ void fn_801E1894(void) {
     lbl_8055EA20 = 1;
 }
 
-// NonMatching: the flash/target compare gets f1/f2 swapped (7 instructions); local, macro, inline
-// and operand-order variants all tried.
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void fn_801E1B30(void) {
     WeatherState* w = &lbl_804874B8;
     f32 now = lbl_8055E3C8;
@@ -154,7 +154,7 @@ void fn_801E1B30(void) {
     }
     lbl_8055EA21 = 0;
     if (w->lightning != 1) {
-        if ((f32)__fabs(w->flash - w->target) < 0.001f) {
+        if (AbsF(w->flash - w->target) < 0.001f) {
             if (!NearZero(w->target)) {
                 w->target = 0.0f;
             } else {

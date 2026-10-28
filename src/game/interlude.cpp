@@ -1533,6 +1533,8 @@ static inline void MulVec(IVec3* out, const IVec3* in, const Mat3* m) {
     }
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 // The interlude camera for view idx while an interlude plays (and the editor is not flying it): the
 // current camera move at the current time, relative to the world, the start line or a car, blended in
 // from the previous camera over the interpolation time. Returns 0 when not active.
@@ -1644,7 +1646,7 @@ int fn_801C5B68(CamView* v, int idx) {
     }
     CamPose* prev = (CamPose*)(s + 0x68);
     f32* prevFov = (f32*)(s + 0x98);
-    if (!((f32)__fabs(p->interpTime) <= lbl_80558DC4[0]) && dt < p->interpTime) {
+    if (!(AbsF(p->interpTime) <= lbl_80558DC4[0]) && dt < p->interpTime) {
         f32 u = dt / p->interpTime;
         if (p->interpType == 1) {
             u = Ease(u);

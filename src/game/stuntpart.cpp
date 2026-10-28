@@ -356,6 +356,8 @@ void fn_802AA1D0(int idx) {
     p->sizeZ = box[5] - box[4];
 }
 
+static inline double AbsD(double v) { return __fabs(v); }
+
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && p->hold == 0.0f && p->trig) {
@@ -409,7 +411,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
             p->pts[1].x = s[1].x + car->pos.x;
             p->pts[1].y = s[1].y + car->pos.y;
             p->pts[1].z = s[1].z + car->pos.z;
-            f32 adt = (f32)__fabs(dt);
+            f32 adt = (f32)AbsD(dt);
             for (int i = 1; i < 8; i++) {
                 f32 t = i / 8.0f;
                 Vec a = *(const Vec*)&car->spin;

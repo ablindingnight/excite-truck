@@ -422,6 +422,8 @@ static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     }
 }
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void RigidBody::Update(void) {
     RVec3 g;
     RVec3 dr;
@@ -436,7 +438,7 @@ void RigidBody::Update(void) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
-    if (!((f32)__fabs(impW) <= lbl_80558DC4[0])) {
+    if (!(AbsF(impW) <= lbl_80558DC4[0])) {
         int i;
         f32 inv = 1.0f / impW;
         impF.x *= inv;
@@ -595,7 +597,7 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
-    if (!((f32)__fabs(impW) <= lbl_80558DC4[0])) {
+    if (!(AbsF(impW) <= lbl_80558DC4[0])) {
         int i;
         f32 inv = 1.0f / impW;
         impF.x *= inv;

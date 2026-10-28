@@ -1239,6 +1239,8 @@ int fn_801B2F40(int place) { return lbl_80435C30[place]; }
 
 u32 fn_801B2F54(int i) { return *(u32*)((u8*)lbl_8055E684[i].State() + 0x10); }
 
+static inline double AbsD(double v) { return __fabs(v); }
+
 f32 fn_801B2F90(int a, int b) {
     DeityCar* ca = &lbl_8055E684[a];
     DeityCar* cb = &lbl_8055E684[b];
@@ -1255,7 +1257,7 @@ f32 fn_801B2F90(int a, int b) {
     if (d != 0) {
         return 500.0f * (f32)d;
     }
-    return __fabs(fn_801365C4(lo->follower, hi->follower));
+    return (f32)AbsD(fn_801365C4(lo->follower, hi->follower));
 }
 
 s32 fn_801B3050(int i) { return lbl_8055E684[i].start; }

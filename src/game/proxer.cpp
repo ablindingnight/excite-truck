@@ -321,6 +321,8 @@ int fn_80137140(int i, int j) {
 
 }  // extern "C"
 
+static inline double AbsD(double v) { return __fabs(v); }
+
 void Proxer::Process(void) {
     f32 d;
     f32 gap = fn_80137C54(-1)->gap;
@@ -338,12 +340,12 @@ void Proxer::Process(void) {
         p->dvel.y = b->vel.y - a->vel.y;
         pairs[k].SetPos(a, b);
         dy = b->pos.y - a->pos.y;
-        if ((f32)__fabs(dy) > lapLen / 2.0f && !((a->sec | b->sec) & 8)) {
+        if ((f32)AbsD(dy) > lapLen / 2.0f && !((a->sec | b->sec) & 8)) {
             dy += lapLen * -(dy > 0.0f ? 1.0f : -1.0f);
         }
         pairs[k].dpos.y = dy;
         close = 0;
-        if (__fabs(dy) < gap * 2.0f && fn_80137140(pairs[k].a, pairs[k].b)) {
+        if ((f32)AbsD(dy) < gap * 2.0f && fn_80137140(pairs[k].a, pairs[k].b)) {
             close = 1;
         }
         pairs[k].close = close;
@@ -393,7 +395,7 @@ void Proxer::Process(void) {
                         }
                     }
                 } else if (!fn_8013705C(q->dvel.y, q->dpos.y)) {
-                    q->time = ((f32)__fabs(q->dpos.y) - gap) / (f32)__fabs(q->dvel.y);
+                    q->time = ((f32)AbsD(q->dpos.y) - gap) / (f32)AbsD(q->dvel.y);
                     q->bFlag = 1;
                     q->aFlag = 1;
                 } else {

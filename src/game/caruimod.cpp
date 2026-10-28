@@ -912,6 +912,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
 
 }  // extern "C"
 
+static inline double AbsD(double v) { return __fabs(v); }
+
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {
         f32 offY = 0.0f;
@@ -937,21 +939,21 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 b = t + (f32)state.rect[3];
             f32 p = 0.01f > proj ? 0.01f : proj;
             f32 f = hw / p;
-            f32 a1 = (f32)__fabs((f32)atan(l / f));
-            f32 a2 = (f32)__fabs((f32)atan(r / f));
+            f32 a1 = (f32)AbsD((f32)atan(l / f));
+            f32 a2 = (f32)AbsD((f32)atan(r / f));
             f32 ax;
             if (l < 0.0f && r > 0.0f) {
                 ax = a1 + a2;
             } else {
-                ax = (f32)__fabs(a2 - a1);
+                ax = (f32)AbsD(a2 - a1);
             }
-            f32 b1 = (f32)__fabs((f32)atan(t / f));
-            f32 b2 = (f32)__fabs((f32)atan(b / f));
+            f32 b1 = (f32)AbsD((f32)atan(t / f));
+            f32 b2 = (f32)AbsD((f32)atan(b / f));
             f32 ay;
             if (t < 0.0f && b > 0.0f) {
                 ay = b1 + b2;
             } else {
-                ay = (f32)__fabs(b2 - b1);
+                ay = (f32)AbsD(b2 - b1);
             }
             ax = MIN(ax, ay);
             f32 s = sin(0.5f * ax);

@@ -694,6 +694,9 @@ extern s32 lbl_8055CFF4;  // screen height
 extern "C" {
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline double AbsD(double v) { return __fabs(v); }
+
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
 void fn_80251B04(u8* p) {
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
@@ -705,7 +708,7 @@ void fn_80251B04(u8* p) {
         f32 s = 1.0f - (f32)__fabs(e->t);
         s = s < fade ? s : fade;
         f32 h = 48.0f * s;
-        f32 d = (f32)__fabs(F32(p, 0x28) - i);
+        f32 d = (f32)AbsD(F32(p, 0x28) - i);
         f32 y = top - 0.5f * (48.0f * (1.0f - s));
         f32 x = 82.5f * (i - F32(p, 0x28)) - 41.25f;
         if (1.0f < d) {
@@ -735,7 +738,7 @@ void fn_80251D7C(u8* p) {}  // stub (303)
 
 int fn_80252238(u8* p, int key) {
     if (key == 0xD) {
-        if ((f32)__fabs(F32(p, 0x194)) <= lbl_80558DC4[0] || (f32)__fabs(F32(p, 0x198)) <= lbl_80558DC4[0]) {
+        if (AbsF(F32(p, 0x194)) <= lbl_80558DC4[0] || AbsF(F32(p, 0x198)) <= lbl_80558DC4[0]) {
             ((MenuState*)p)->Finish(0);
             return 1;
         }
