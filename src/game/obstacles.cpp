@@ -245,7 +245,8 @@ void fn_801ABB54(u8* p) {
     f32 lim = F32(p, 0x238);
     if (ad > lim) {
         lim = lim < ad ? lim : ad;
-        imp = -(d > lbl_8056247C ? lbl_805624AC : lbl_805624A4) * lim;
+        f32 sign = d > lbl_8056247C ? lbl_805624AC : lbl_805624A4;
+        imp = -sign * lim;
     } else if (ad > lbl_805624D8) {
         imp = -d * lbl_80562478;
     }
