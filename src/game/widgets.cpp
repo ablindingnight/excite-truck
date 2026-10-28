@@ -2665,11 +2665,14 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
 }
 }
 
-// MATCHING-AID (inherited): full-range denominator enum and volatile maximum reload retain allocation/load behavior; natural replacements remain open.
+// MATCHING-AID (inherited): full-range denominator enum still retains allocation; natural replacement remains open.
 enum SliderDenominatorWordNew { SliderDenominatorMinNew=(-2147483647-1),SliderDenominatorMaxNew=2147483647 };
-static inline int ClampIntegerSliderNew(int limit,int value){return value>=limit?limit:value;}
+static inline int ClampToExclusiveMaximum(const int& maximum,int value){
+ int limit=maximum-1;
+ return value>=limit?limit:value;
+}
 extern "C" {
-void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(SliderFullPrefix*)self;f->dragging=1;int left=self->left;int minimum=f->minimum;int width=((WidgetDispatch*)self)->Slot78();int value=(f->maximum-minimum)*(x-left-5);SliderDenominatorWordNew denominator=(SliderDenominatorWordNew)(width-10);width=value/(int)denominator;value=minimum+width;if(value<minimum)value=minimum;value=ClampIntegerSliderNew(*(volatile int*)&f->maximum-1,value);*f->value=value;}
+void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(SliderFullPrefix*)self;f->dragging=1;int left=self->left;int minimum=f->minimum;int width=((WidgetDispatch*)self)->Slot78();int value=(f->maximum-minimum)*(x-left-5);SliderDenominatorWordNew denominator=(SliderDenominatorWordNew)(width-10);width=value/(int)denominator;value=minimum+width;if(value<minimum)value=minimum;value=ClampToExclusiveMaximum(f->maximum,value);*f->value=value;}
 }
 
 

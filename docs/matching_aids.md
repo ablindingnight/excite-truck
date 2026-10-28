@@ -15,7 +15,7 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
 | fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | separate unsigned-conversion literal pool | Codex widgets, tagged 2026-10-26 |
-| widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum + volatile maximum reload (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
+| widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
 | fn_8022A210 (model fit) | src/game/widgets.cpp | scalar wrapper struct for bound extents (ModelBoundScalarObservedNew) | Codex widgets 391, 2026-10-26 |
 | fn_8011A388 (Bink stream read) | src/game/unk_80116BD4.c | volatile reads of position 0x90 and cap 0x40 (probably genuine async stream state, like 0xC0 in fn_8011A45C) | Claude, 2026-10-26 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
