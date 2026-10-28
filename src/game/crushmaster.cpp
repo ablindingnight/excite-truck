@@ -936,7 +936,8 @@ void CrushResults::Update(int score, int kills, int bonus) {
         shown = bonus;
         n = 0;
         if (bonus && start > 0.0f) {
-            f32 t = Unlerp(0.0f, 1.0f, lbl_8055E3C8 - start);
+            f32 now = lbl_8055E3C8;
+            f32 t = Unlerp(0.0f, 1.0f, now - start);
             n = Lerp(0.0f, 0.5f + bonus, t);
             shown = bonus - n;
         }
