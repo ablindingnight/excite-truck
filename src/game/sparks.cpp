@@ -494,6 +494,7 @@ void fn_8028AD78(void) {
 }
 
 void fn_8028ADF4(SparkEntry* e, int n) {
+    const SparkWheel* w;
     if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
         return;
     }
@@ -502,7 +503,7 @@ void fn_8028ADF4(SparkEntry* e, int n) {
         if (!e->active || e->dist > 2500.0f) {
             continue;
         }
-        const SparkWheel* w = car->wheels;
+        w = car->wheels;
         for (int j = 0; j < 4; j++, w++) {
             if (!w->ground || w->terrain < 0 || w->terrain >= 8) {
                 continue;
