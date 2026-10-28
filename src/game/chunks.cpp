@@ -259,6 +259,8 @@ void fn_80292628(void) {
     }
 }
 
+static inline f32 SinF(f32 v) { return (f32)sin(v); }
+
 void fn_80292698(void) {
     f32 t = fn_801E7E18();
     Spin* s = lbl_804B4030;
@@ -273,7 +275,7 @@ void fn_80292698(void) {
             f32 x = inv * v.x;
             f32 y = inv * v.y;
             f32 z = inv * v.z;
-            f32 sn = sin(ang);
+            f32 sn = SinF(ang);
             f32 c = cos(ang);
             f32 k = 1.0f - c;
             s->rot.x.x = c + k * (x * x);

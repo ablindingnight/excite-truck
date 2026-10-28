@@ -828,9 +828,11 @@ Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
     return s;
 }
 
+static inline f32 CosF(f32 v) { return (f32)cos(v); }
+
 void fn_802BAD0C(V2* v, f32 a) {
     f32 x = v->x;
-    f32 c = cos(a);
+    f32 c = CosF(a);
     f32 s = sin(a);
     v->x = v->x * c - v->y * s;
     v->y = x * s + v->y * c;

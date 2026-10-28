@@ -200,6 +200,8 @@ static inline void Sub(ValVec3* out, const ValVec3* a, const ValVec3* b) {
 extern "C" {
 
 // Poses side 's': its hub at the wheel and the suspension joints aimed at it.
+static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
+
 void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     ValMatrix w;
     ValMatrix hub;
@@ -230,7 +232,7 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     fn_801E3440(&q, s->mountU, root);
     Sub(&d, &p, &q);
     PSVECNormalize(&d, &d);
-    f32 a = (f32)atan2(PSVECDotProduct(&d, &root->basis[1]), s->side * PSVECDotProduct(&d, &root->basis[0]));
+    f32 a = Atan2F(PSVECDotProduct(&d, &root->basis[1]), s->side * PSVECDotProduct(&d, &root->basis[0]));
     fn_801E353C(s->mountU, s->side * a - s->side * quarter);
     Madd(&p, &w.origin, &w.basis[1], -0.2f);
     fn_801E3440(&q, s->mountL, root);

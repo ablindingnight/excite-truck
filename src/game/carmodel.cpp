@@ -419,6 +419,8 @@ CarColors* fn_801EC1F8(void) { return &lbl_80488668; }
 
 u32* fn_801EC204(void) { return &lbl_80488668.c1; }
 
+static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
+
 void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale, f32 offset, const f32* src) {
     g->src = src;
     if (!n->Has(name)) {
@@ -444,7 +446,7 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
         if (sscanf(n->GetValue(key), "%f %f,%f", &p->val, &x, &y) != 3) {
             fn_802E317C("gauge %s: bad format", key);
         }
-        p->angle = atan2(x - cx, -(y - cy));
+        p->angle = Atan2F(x - cx, -(y - cy));
         p->val = p->val * (scale - offset) + offset;
     }
     if (g->count < 2) {

@@ -466,6 +466,8 @@ static inline f32 Ease(f32 t) {
     }
 }
 
+static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
@@ -500,7 +502,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         Racer* r = fn_801EA9A0(i);
         draw->icons[i].part = FindDriver(r->driver)->mapIcon;
         if (r->truck) {
-            draw->icons[i].angle = -(f32)atan2(r->truck->dirX, r->truck->dirZ);
+            draw->icons[i].angle = -Atan2F(r->truck->dirX, r->truck->dirZ);
         }
     }
     {
