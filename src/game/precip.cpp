@@ -626,7 +626,8 @@ void fn_802A5878(void) {
         for (int j = 0; t->GetChild(j); j++) {
             ValueNode* c = t->GetChild(j);
             if (strncmp(c->GetName(), "mist", 4) == 0) {
-                lbl_804BCFA8[lbl_8055F890++] = new ("mist") Mist(c);
+                lbl_804BCFA8[lbl_8055F890] = new ("mist") Mist(c);
+                lbl_8055F890++;
             }
         }
     }

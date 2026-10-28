@@ -1565,6 +1565,9 @@ extern const f32 lbl_80562248;  // -1.1f
 void fn_8018AE2C(u8* car, f32 pitch);
 void fn_8018AE34(u8* car, f32 roll);
 
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
 // Steers the truck's attitude: in the air level it against up; on the ground pitch from height and speed.
 void fn_801965AC(u8* d) {
     if (S32(CAR(d), 0x2620) != 0) {
@@ -1576,23 +1579,24 @@ void fn_801965AC(u8* d) {
     up.z = 0.0f;
     PVec3 pos = *(PVec3*)(CAR(d) + 0x60);
     fn_801EA18C((RVec3*)&pos, &up, 0);
-    f32 h = MAX(0.0f, F32(CAR(d), 0x64) - pos.v[1]);
-    f32 vy = MIN(F32(CAR(d), 0x11C), -0.01f);
+    f32 h = MaxF(0.0f, F32(CAR(d), 0x64) - pos.v[1]);
+    f32 vy = MinF(F32(CAR(d), 0x11C), -0.01f);
     bool air = -h / vy < 1.0f;
     f32 gain = 5.0f;
     if (air) {
         f32 a = gain * PSVECDotProduct(&up, CAR(d) + 0x54);
-        a = MIN(1.0f, a);
-        fn_8018AE2C(CAR(d), MAX(a, -1.0f));
+        a = MinF(1.0f, a);
+        fn_8018AE2C(CAR(d), MaxF(a, -1.0f));
         a = gain * PSVECDotProduct(&up, CAR(d) + 0x3C);
-        a = MIN(1.0f, a);
-        fn_8018AE34(CAR(d), MAX(a, -1.0f));
+        a = MinF(1.0f, a);
+        fn_8018AE34(CAR(d), MaxF(a, -1.0f));
     } else {
-        f32 k = MIN(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / 1.0f);
-        k = MAX(k, 0.0f);
+        f32 range = 1.0f;
+        f32 k = MinF(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / range);
+        k = MaxF(k, 0.0f);
         f32 a = gain * (F32(CAR(d), 0x58) - (0.7f + k * lbl_80562248));
-        a = MIN(1.0f, a);
-        fn_8018AE2C(CAR(d), MAX(a, -1.0f));
+        a = MinF(1.0f, a);
+        fn_8018AE2C(CAR(d), MaxF(a, -1.0f));
         fn_8018AE34(CAR(d), 0.0f);
     }
 }
