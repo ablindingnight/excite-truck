@@ -2238,7 +2238,8 @@ void RingChalMaster::vf0C(void) {
             sPreRace->Play();
         }
     }
-    if (lbl_8055E3C8 > vf38() && arena.nSets > 0) {
+    f32 now = lbl_8055E3C8;
+    if (now > vf38() && arena.nSets > 0) {
         int i;
         for (i = 0; i < players.count; i++) {
             if (!vf24()) {

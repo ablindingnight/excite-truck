@@ -650,7 +650,8 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
         int any;
         f32 nearest;
         fn_8015FB28(&f, &rc->mtx);
-        range = MAX(20.0f, 0.6f * rc->speed);
+        f32 curSpeed = rc->speed;
+        range = MAX(20.0f, 0.6f * curSpeed);
         opts.side = side;
         o = lbl_8055E2A0->a.data[seg];
         vel = &rc->vel;

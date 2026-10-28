@@ -916,7 +916,8 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
         }
     }
     fn_80136468(&pa, track, a);
-    qa.x = F32(pa.seg, 0x0) + pa.t * (F32(PTR(pa.seg, 0x14), 0x0) - F32(pa.seg, 0x0));
+    f32 paT = pa.t;
+    qa.x = F32(pa.seg, 0x0) + paT * (F32(PTR(pa.seg, 0x14), 0x0) - F32(pa.seg, 0x0));
     qa.y = F32(pa.seg, 0x4) + pa.t * (F32(PTR(pa.seg, 0x14), 0x4) - F32(pa.seg, 0x4));
     da.y = qa.y - c[1];
     da.x = qa.x - c[0];

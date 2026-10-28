@@ -1006,7 +1006,8 @@ int fn_8018BA54(u8* p, u8* pk) {
     U8(pk, 0x22) = Pack(F32(p, 0x25F0), -1.2f, 1.2f, 255.0f);
     U8(pk, 0x23) = Pack(F32(p, 0x25F4), 0.0f, 1.0f, 255.0f);
     U8(pk, 0x24) = Pack(F32(p, 0x25E4), 0.0f, 1.0f, 255.0f);
-    U8(pk, 0x3C) = (int)(0.5f + PackLerp(0.0f, 255.0f, lbl_80561CD0));
+    f32 k = lbl_80561CD0;
+    U8(pk, 0x3C) = (int)(0.5f + PackLerp(0.0f, 255.0f, k));
     u8* seg = ((CarTrackPos*)PTR(p, 0x270))->Segment();
     S32(pk, 0x40) = fn_801363A0(seg, seg + 4);
     if (U8(pk, 0x3C) == 0) {

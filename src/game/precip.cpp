@@ -803,7 +803,8 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
     wind.z = wind.z * (0.1f * dt);
     wind.y = wind.y * (0.1f * dt) - 1.2f * dt;
     MulT(cam, &wind, &wind);
-    wind.x = wind.x + d->x * 0.25f;
+    f32 dx = d->x;
+    wind.x = wind.x + dx * 0.25f;
     wind.y = wind.y + d->y * 0.25f;
     wind.z = wind.z + d->z * 0.25f;
     WPt* out = pts;
@@ -1072,7 +1073,8 @@ void Mist::Update(void) {
         f32 dt = fn_802A4AD4();
         ValVec3 dv;
         dv.x = v.x * dt;
-        dv.y = v.y * dt;
+        f32 vy = v.y;
+        dv.y = vy * dt;
         dv.z = v.z * dt;
         f32 k = -rad * (1.0f / (f32)sqrt(v.x * v.x + v.z * v.z));
         ValPoint back;

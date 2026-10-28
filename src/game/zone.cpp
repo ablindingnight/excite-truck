@@ -2457,7 +2457,8 @@ void ZoneMaster::vf0C(void) {
                             f32 add;
                             if (c->gates == c->streak) {
                                 int mx = MaxBonus(level);
-                                if (TimeBonusPoints(c) == mx) {
+                                int timeBonusPoints = TimeBonusPoints(c);
+                                if (timeBonusPoints == mx) {
                                     c->streak++;
                                     goto counted;
                                 }
@@ -2719,7 +2720,8 @@ int ZoneMaster::vf8C(int p, int key) {
         tan.x = t->dirX;
         tan.y = t->dirZ;
         half = PSVECDistance(&levels->levels->gates->a, &levels->levels->gates->b) * 0.5f;
-        len = sqrt(tan.x * tan.x + tan.y * tan.y);
+        f32 tanY = tan.y;
+        len = sqrt(tan.x * tan.x + tanY * tan.y);
         if (!((f32)__fabs(len) <= lbl_80558DC4[0])) {
             tan.x *= half / len;
             tan.y *= half / len;

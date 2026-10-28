@@ -251,7 +251,8 @@ void fn_80291E64(FlareSet* fs) {
         t = (1.0f < t) ? 1.0f : t;
         t = (t > 0.0f) ? t : 0.0f;
         VecP p;
-        p.Set(start.x + t * (end.x - start.x), start.y + t * (end.y - start.y), start.z + t * (end.z - start.z));
+        f32 startZ = start.z;
+        p.Set(start.x + t * (end.x - start.x), start.y + t * (end.y - start.y), startZ + t * (end.z - start.z));
         fn_802C8E70(&p, &f->pos);
         if (f->visible && fn_802C8FF4(&f->pos, 0.0f)) {
             fn_802C8C04(f->tex);

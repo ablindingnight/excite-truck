@@ -1670,7 +1670,8 @@ void fn_802D18E8(void) {
         lbl_8055FDCC = lbl_8055FDC8;
     } else {
         u8 c[4];
-        c[0] = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.r);
+        f32 curScale = lbl_804C97D0.scale;
+        c[0] = (int)(curScale * lbl_804C97D0.amb.r);
         c[1] = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.g);
         c[2] = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.b);
         c[3] = lbl_804C97D0.amb.a;

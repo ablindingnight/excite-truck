@@ -645,7 +645,8 @@ void fn_801F65D0(Fabric* f) {
         k = 0.5f - s->rest / (s->rest + PSVECDotProduct(&d, &d));
         ka = 0.5f * k;
         kb = -0.5f * k;
-        a->x += d.x * ka;
+        f32 dx = d.x;
+        a->x += dx * ka;
         a->y += d.y * ka;
         a->z += d.z * ka;
         b->x += d.x * kb;

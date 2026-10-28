@@ -536,7 +536,8 @@ void fn_801ACA48(u8* p) {
         ObVec3 c;
         PSVECCrossProduct((f32*)(p + 0x48), (f32*)(p + 0x1F8), &c.x);
         if (F32(p, 0x4C) < 0.92f) {
-            F32(p, 0x124) = F32(p, 0x124) + 0.1f * c.x;
+            f32 cx = c.x;
+            F32(p, 0x124) = F32(p, 0x124) + 0.1f * cx;
             F32(p, 0x128) = F32(p, 0x128) + 0.1f * c.y;
             F32(p, 0x12C) = F32(p, 0x12C) + 0.1f * c.z;
         }

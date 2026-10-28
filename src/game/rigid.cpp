@@ -508,7 +508,8 @@ void RigidBody::Update(void) {
         vel.y *= 300.0f;
         vel.z *= 300.0f;
     }
-    mtx.pos.x += vel.x * 0.0166833512f;
+    f32 velX = vel.x;
+    mtx.pos.x += velX * 0.0166833512f;
     mtx.pos.y += vel.y * 0.0166833512f;
     mtx.pos.z += vel.z * 0.0166833512f;
     MulVec(&aaccel, &torque, &worldInvI);

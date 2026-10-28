@@ -593,7 +593,8 @@ void fn_80177F40(void) {
         }
         k = lbl_8055A300;
         if (k >= 0 && k < 75) {
-            f32 sn = sin(6.2831855f * (0.25f * lbl_8055E3C8));
+            f32 now = lbl_8055E3C8;
+            f32 sn = sin(6.2831855f * (0.25f * now));
             fn_80178DBC(k, 0.5f + 0.5f * sn);
         }
         fn_801B8BF4();
@@ -1336,7 +1337,8 @@ StatePacket* fn_80179824(void) {
         p->cars[i].count = lbl_804305A0[i].count;
     }
     fn_80206550(lbl_8055E444);
-    p->time = 0.016683351f * (lbl_8055E460 - 1.0f) + lbl_8055E3C8;
+    f32 now = lbl_8055E3C8;
+    p->time = 0.016683351f * (lbl_8055E460 - 1.0f) + now;
     for (i = 0; i < lbl_8055E438; i++) {
         lbl_8055E434[i]->vf28(buf);
     }

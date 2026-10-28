@@ -579,7 +579,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f.x = vt.x * lbl_80562324;
         f.y = vt.y * lbl_80562324;
         f.z = vt.z * lbl_80562324;
-        f32 m = lbl_80562328 * F32(o, 0xD4);
+        f32 value = lbl_80562328;
+        f32 m = value * F32(o, 0xD4);
         f.x = f.x + d[0] * m;
         f.y = f.y + d[1] * m;
         f.z = f.z + d[2] * m;

@@ -664,7 +664,8 @@ void fn_802BA010(void* line, int idx) {
     XScale* sc = fn_802B8FE0(idx);
     XSeg* s = fn_80138B4C(line, 0);
     if (s) {
-        sc->u = 1.0f / s->width;
+        f32 w = s->width;
+        sc->u = 1.0f / w;
         do {
             TexEntry* te = fn_802B8EF0(idx, sc);
             if (te) {

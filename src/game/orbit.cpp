@@ -641,7 +641,8 @@ f32 fn_80166DD4(Ramp* r) { return RampValue(r); }
 void fn_80166E54(Role* r) { r->start += 0.016683351f; }
 
 void fn_80166E68(Ramp* r, f32 v) {
-    if (!NearEq(v, r->to)) {
+    f32 target = r->to;
+    if (!NearEq(v, target)) {
         f32 cur = RampValue(r);
         r->to = v;
         r->from = cur;

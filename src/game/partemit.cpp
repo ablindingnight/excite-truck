@@ -565,7 +565,8 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
         diff.x = p.x - v.pos.x;
         diff.y = p.y - v.pos.y;
         diff.z = p.z - v.pos.z;
-        f32 r2 = d->radius * d->radius;
+        f32 curRadius = d->radius;
+        f32 r2 = curRadius * d->radius;
         f32 d2 = PSVECDotProduct(&diff, &diff);
         if (d2 < r2) {
             f32 t = d2 / r2;

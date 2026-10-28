@@ -221,7 +221,8 @@ void Corner::Hit(RigidBody* b) {
         fr.x = vt.x * c;
         fr.y = vt.y * c;
         fr.z = vt.z * c;
-        f32 c2 = -30.0f * b->mass;
+        f32 curMass = b->mass;
+        f32 c2 = -30.0f * curMass;
         fr.x = fr.x + vel.x * c2;
         fr.y = fr.y + vel.y * c2;
         fr.z = fr.z + vel.z * c2;

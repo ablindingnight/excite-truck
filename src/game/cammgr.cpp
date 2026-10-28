@@ -1658,7 +1658,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         f32 s = PSVECMag((const f32*)(c->car + 0x26B4)) * scale;
         s = (lbl_80563CEC < s) ? lbl_80563CEC : s;
         f32 bump = w * s;
-        f32 e = ShakeEase((lbl_80563C6C - (now - c->f158)) / lbl_80563C6C);
+        f32 curF158 = c->f158;
+        f32 e = ShakeEase((lbl_80563C6C - (now - curF158)) / lbl_80563C6C);
         if (bump > lbl_80563CF0 && bump > c->f154 * e) {
             c->f158 = now;
             c->f154 = bump;

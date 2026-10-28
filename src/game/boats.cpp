@@ -121,7 +121,8 @@ void fn_802C2488(void) {
         m.origin.y = 0.0f;
         m.origin.z = 0.0f;
         bob = sin(3.1415927f * (b.phase + lbl_8055E3C8));
-        roll = 0.017453292f * (6.0f * (f32)sin(0.5f * (3.1415927f * (b.phase + lbl_8055E3C8))));
+        f32 now = lbl_8055E3C8;
+        roll = 0.017453292f * (6.0f * (f32)sin(0.5f * (3.1415927f * (b.phase + now))));
         ang.x = roll;
         ang.y = 0.0f;
         ang.z = roll;

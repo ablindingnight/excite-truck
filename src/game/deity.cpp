@@ -637,7 +637,8 @@ int fn_801B11DC(const void* pa, const void* pb) {
     s32 ar = a->rank;
     s32 br = b->rank;
     if (aFin && bFin) {
-        if ((f32)__fabs(a->finishTime - b->finishTime) <= lbl_80558DC4[0]) {
+        f32 curFinishTime = b->finishTime;
+        if ((f32)__fabs(a->finishTime - curFinishTime) <= lbl_80558DC4[0]) {
             return 0;
         }
         if (b->finishTime < a->finishTime) {
@@ -1045,7 +1046,8 @@ void fn_801B265C(void) {
             warned = 1;
             fn_802E30C8("%s", "deity: using 'test mode' quick intro duration");
         }
-        lbl_8055E6AC = lbl_8055E3C8 + 0.5f;
+        f32 now = lbl_8055E3C8;
+        lbl_8055E6AC = now + 0.5f;
     } else {
         f32 now = lbl_8055E3C8;
         lbl_8055E6AC = now + fn_801B88BC();
@@ -1098,7 +1100,8 @@ void fn_801B2910(void) {
     if (lbl_8055E68C) {
         lbl_8055E68C->v24();
     }
-    fn_801B234C(0.033366702f + lbl_8055E3C8);
+    f32 now = lbl_8055E3C8;
+    fn_801B234C(0.033366702f + now);
     int solo = lbl_8055E678 == 1;
     f32 left = solo ? 0.0f : -5.0f;
     f32 right = solo ? 0.0f : 5.0f;

@@ -899,7 +899,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
             p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
             p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
             f32 lift = Sum(0.0f, h + (-m->wheelPos[1].y + rad));
-            p->frame.pos.x = p->frame.pos.x + p->frame.b.v[1].x * lift;
+            f32 vx = p->frame.b.v[1].x;
+            p->frame.pos.x = p->frame.pos.x + vx * lift;
             p->frame.pos.y = p->frame.pos.y + p->frame.b.v[1].y * lift;
             p->frame.pos.z = p->frame.pos.z + p->frame.b.v[1].z * lift;
         } else {
@@ -1515,7 +1516,7 @@ void CarUIScreen::Draw(void) {
     CarPose p;
     if (lbl_8055F330) {
         fn_80253004(index, &p);
-        p.wheelY[0] = p.wheelY[0] < -0.3048f ? p.wheelY[0] : -0.3048f;
+        p.wheelY[0] = -0.3048f > p.wheelY[0] ? p.wheelY[0] : -0.3048f;
         p.wheelY[1] = p.wheelY[1] < -0.3048f ? p.wheelY[1] : -0.3048f;
         p.wheelY[2] = p.wheelY[2] < -0.3048f ? p.wheelY[2] : -0.3048f;
         p.wheelY[3] = p.wheelY[3] < -0.3048f ? p.wheelY[3] : -0.3048f;

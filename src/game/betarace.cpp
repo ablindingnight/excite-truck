@@ -1629,7 +1629,8 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     b = r->bonus;
     shown = 0;
     if (b && bonusStart > 0.0f) {
-        f32 t = Ramp(lbl_8055E3C8 - bonusStart, 0.0f, 1.0f);
+        f32 clockNow = lbl_8055E3C8;
+        f32 t = Ramp(clockNow - bonusStart, 0.0f, 1.0f);
         shown = Lerp(0.0f, 0.5f + b, t);
     }
     fn_801308F4(bonus.s, 0x14, shown);
@@ -2232,7 +2233,8 @@ void BetaCar::DrawHud(ILayout* l, int view) {
         return;
     }
     {
-        f32 lo = 0.6f + master->timer.finishTimeout;
+        f32 timeout = master->timer.finishTimeout;
+        f32 lo = 0.6f + timeout;
         f32 k = Lerp(0.0f, 1.0f, Clamp01(((0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now) - lo) / (master->timer.finishTimeout - lo)));
         f32 limit = master->timer.limit;
         f32 elapsed = limit - (0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now);
@@ -2851,7 +2853,8 @@ void BetaMaster::vfF4(void) {
             for (j = 0; j < k; j++) {
                 f32 dd;
                 d.y = pts[j].y - c.y;
-                d.x = pts[j].x - c.x;
+                f32 cx = c.x;
+                d.x = pts[j].x - cx;
                 dd = d.x * d.x + d.y * d.y;
                 maxd = maxd > dd ? maxd : dd;
             }
@@ -3107,7 +3110,8 @@ Pickup::Pickup(ValueNode* n) {
             Seg* s0 = ts.seg;
             f32 len;
             dir[0] = s0->x + ts.t * (s0->next->x - s0->x);
-            dir[1] = s0->z + ts.t * (s0->next->z - s0->z);
+            f32 z0 = s0->z;
+            dir[1] = z0 + ts.t * (s0->next->z - s0->z);
             len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
             fwd[0] = m[6];
             fwd[1] = m[8];

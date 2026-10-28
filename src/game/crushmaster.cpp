@@ -1082,7 +1082,8 @@ void CrushMaster::vfF8(void) {
             for (k = 0;; k++) {
                 char name[0x20];
                 fn_801345D8(name, 0x20, "point%d", k);
-                if (!sp->Has(name) || spawns.count + 1 > spawns.cap) {
+                int curCount = spawns.count;
+                if (!sp->Has(name) || curCount + 1 > spawns.cap) {
                     break;
                 }
                 {
@@ -1403,7 +1404,8 @@ void CrushMaster::vfA8(int car) {
                 NormV2(&d);
                 fn_801B7C8C(&r, &to, &d);
                 r.m.origin.y += 3.0f;
-                r.vel.x = r.m.basis[2].x * 8.888889f;
+                f32 basisX = r.m.basis[2].x;
+                r.vel.x = basisX * 8.888889f;
                 r.vel.y = r.m.basis[2].y * 8.888889f;
                 r.vel.z = r.m.basis[2].z * 8.888889f;
             }
@@ -1817,7 +1819,8 @@ void CrushSubTaskMgr::vf20(void) {
             f32 r = 75.0f;
             pos.x = rec->mtx.origin.x;
             pos.y = rec->mtx.origin.z;
-            d.x = pos.x - t->x;
+            f32 tx = t->x;
+            d.x = pos.x - tx;
             d.y = pos.y - t->y;
             if (d.x * d.x + d.y * d.y < r * r || lbl_8055E3C8 > t->until) {
                 V2 here;
@@ -1903,7 +1906,8 @@ void CrushSubTaskMgr::vf18(int a, int b) {
                         imp.z *= inv;
                     }
                     {
-                        f32 kk = 40.0f * v->fD4 / 0.0166833512f;
+                        f32 curFD4 = v->fD4;
+                        f32 kk = 40.0f * curFD4 / 0.0166833512f;
                         imp.x *= kk;
                         imp.y *= kk;
                         imp.z *= kk;

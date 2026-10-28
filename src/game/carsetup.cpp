@@ -224,7 +224,8 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->modelOffset.y = -s->collideCmHeight;
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
-        s->modelOffset.x += o.x * 0.0254f;
+        f32 ox = o.x;
+        s->modelOffset.x += ox * 0.0254f;
         s->modelOffset.y += o.y * 0.0254f;
         s->modelOffset.z += o.z * 0.0254f;
     }

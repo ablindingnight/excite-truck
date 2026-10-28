@@ -196,7 +196,8 @@ void fn_801DE154(void) {
     }
     for (int i = -1; i < lbl_8055E9C4; i++) {
         TextElem n = name;
-        n.pos.y += step.y * (f32)i;
+        f32 stepY = step.y;
+        n.pos.y += stepY * (f32)i;
         n.pos.x += step.x * (f32)i;
         TextElem v = value;
         v.pos.x += step.x * (f32)i;
