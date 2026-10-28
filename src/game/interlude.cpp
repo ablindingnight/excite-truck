@@ -470,6 +470,8 @@ f32 fn_801C2F58(int n, f32 x) {
 }
 
 // Blends two camera frames: orientation through quaternion slerp, position linearly.
+static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     IQuat qa;
     IQuat qb;
@@ -479,9 +481,9 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
-    pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
-    pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
-    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
+    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
+    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+    pos.x = FrameLerp(a->pos.x, b->pos.x, t);
     out->pos = pos;
 }
 

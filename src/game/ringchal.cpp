@@ -1915,6 +1915,8 @@ static inline void Normalize(V2& v) {
     v.y *= inv;
 }
 
+static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 int RingChalMaster::vfA0(Respawn* out, int idx) {
     ValueNode* cfg = fn_8000AC38()->vals;
     if (cfg) {
@@ -1971,10 +1973,10 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
                 pos.t = 0.0f;
                 pos.f8 = 10000;
                 lf.Locate(&mid, 0, &pos, 0);
-                mid.x = pos.pt->x + pos.t * (pos.pt->next->x - pos.pt->x);
-                mid.y = pos.pt->z + pos.t * (pos.pt->next->z - pos.pt->z);
-                dir.x = pos.pt->dx + pos.t * (pos.pt->next->dx - pos.pt->dx);
-                dir.y = pos.pt->dz + pos.t * (pos.pt->next->dz - pos.pt->dz);
+                mid.x = PathLerp(pos.pt->x, pos.pt->next->x, pos.t);
+                mid.y = PathLerp(pos.pt->z, pos.pt->next->z, pos.t);
+                dir.x = PathLerp(pos.pt->dx, pos.pt->next->dx, pos.t);
+                dir.y = PathLerp(pos.pt->dz, pos.pt->next->dz, pos.t);
                 Normalize(dir);
             }
             fn_801B7C8C(out, &mid, &dir);

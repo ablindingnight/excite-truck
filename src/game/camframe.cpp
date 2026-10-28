@@ -106,6 +106,8 @@ ModuleTag lbl_8055F518;
 
 extern "C" {
 
+static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     Quat qa;
     Quat qb;
@@ -115,9 +117,9 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     MtxToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToMtx(out, &q);
-    pos.y = a->pos.y + t * (b->pos.y - a->pos.y);
-    pos.z = a->pos.z + t * (b->pos.z - a->pos.z);
-    pos.x = a->pos.x + t * (b->pos.x - a->pos.x);
+    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
+    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+    pos.x = FrameLerp(a->pos.x, b->pos.x, t);
     out->pos = pos;
 }
 
