@@ -217,18 +217,24 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
     fn_802C9904();
 }
 
+static inline void ScaleFrame(DFrame* m, f32 s) {
+    m->x.x = s;
+    m->x.y = 0.0f;
+    m->x.z = 0.0f;
+    m->y.x = 0.0f;
+    m->y.y = s;
+    m->y.z = 0.0f;
+    m->z.x = 0.0f;
+    m->z.y = 0.0f;
+    m->z.z = s;
+    m->pos.x = 0.0f;
+    m->pos.y = 0.0f;
+    m->pos.z = 0.0f;
+}
+
 void fn_801E3FC8(const DVec3* pos, f32 radius) {
     DFrame m;
-    f32 s = radius / lbl_8055EA68;
-    m.x.x = s;
-    m.x.y = 0.0f;
-    m.x.z = 0.0f;
-    m.y.x = 0.0f;
-    m.y.y = s;
-    m.y.z = 0.0f;
-    m.z.x = 0.0f;
-    m.z.y = 0.0f;
-    m.z.z = s;
+    ScaleFrame(&m, radius / lbl_8055EA68);
     m.pos.x = pos->x;
     m.pos.y = pos->y;
     m.pos.z = pos->z;
