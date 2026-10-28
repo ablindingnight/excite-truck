@@ -58,6 +58,9 @@ unk_80116644, unk_80107180, unk_8002B0A0, unk_8002B0B0. They still need typed re
   Most likely an original per-function pragma.
 - stunts fn_801572A4 / betarace `#pragma inline_depth(1)`: the factory inlines exactly one level (TrackerArray ctor,
   Add/Get/Num) and calls everything below; also likely original.
+- aiobst fn_8015FBCC region and betarace BetaCar::Update `#pragma dont_inline`: both change the weak copies and
+  calls (35 / 37 functions differ without them), the same pattern as zone vf0C. betarace's second
+  `inline_depth(1)` (before DrawResults) was redundant with the first and was removed.
 - driver PickVehicleColor `#pragma scheduling 604`: without it, one store/compare swap (2 rows); 8 natural spellings
   tried, none move it.
 - objplace Shuffle<T>: natural loops give a pointer induction variable (6 rows); the target keeps a byte offset.

@@ -2256,7 +2256,6 @@ void BetaCar::DrawHud(ILayout* l, int view) {
     UpdateLapTitleOverlay(id);
 }
 
-#pragma inline_depth(1)
 void BetaCar::DrawResults(ILayout* l, int view) {
     s32 pts = Round(shown);
     DrawStunts(this, l, view);
