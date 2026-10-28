@@ -190,39 +190,47 @@ void fn_801BDA74(int car, ContactOut* out) {}
 
 // Sets a car's body from a matrix (rows + origin) and its linear/angular velocities: the rotation is
 // converted to a quaternion (Shoemake) and stored conjugated.
-// NonMatching: same algorithm and nearly the same instructions; the target re-reads m[0][0]/m[1][1] in the
-// else branch and keeps &q in r31 across sqrt.
+// Matrix -> quaternion (Shoemake); the same inline helpers as interlude's RotToQuat (a shared header originally).
+static inline void MtxToQuatAxis(f32 (*m)[3], MVec4* q) {
+    f32* v = &q->x;
+    int i = 0;
+    if (m[1][1] > m[0][0]) {
+        i = 1;
+    }
+    if (m[2][2] > m[i][i]) {
+        i = 2;
+    }
+    int j = (i + 1) % 3;
+    int k = (j + 1) % 3;
+    f32 s = sqrt(m[i][i] - (m[j][j] + m[k][k]) + 1.0f);
+    v[i] = 0.5f * s;
+    s = 0.5f / s;
+    q->w = (m[j][k] - m[k][j]) * s;
+    v[j] = (m[i][j] + m[j][i]) * s;
+    v[k] = (m[i][k] + m[k][i]) * s;
+}
+
+static inline void MtxToQuat(const ValMatrix* r, MVec4* q) {
+    const f32(*m)[3] = (const f32(*)[3])r;
+    f32 tr = r->basis[0].x + r->basis[1].y + r->basis[2].z;
+    if (tr > 0.0f) {
+        f32 s = sqrt(tr + 1.0f);
+        q->w = 0.5f * s;
+        s = 0.5f / s;
+        q->x = (m[1][2] - m[2][1]) * s;
+        q->y = (m[2][0] - m[0][2]) * s;
+        q->z = (m[0][1] - m[1][0]) * s;
+    } else {
+        MtxToQuatAxis((f32(*)[3])m, q);
+    }
+}
+
 void fn_801BE168(int car, const ValMatrix* mtx, const MVec3* vel, const MVec3* avel) {
     MassSet* s = &lbl_8055E794[car];
-    const f32(*m)[3] = (const f32(*)[3])mtx;
-    f32 q[4];
+    MVec4 q;
     s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
-    f32 tr = m[2][2] + (m[0][0] + m[1][1]);
-    if (tr > 0.0f) {
-        f32 r = sqrt(1.0f + tr);
-        f32 h = 0.5f / r;
-        q[3] = 0.5f * r;
-        q[0] = h * (m[1][2] - m[2][1]);
-        q[1] = h * (m[2][0] - m[0][2]);
-        q[2] = h * (m[0][1] - m[1][0]);
-    } else {
-        int i = 0;
-        if (m[1][1] > m[0][0]) {
-            i = 1;
-        }
-        if (m[2][2] > m[i][i]) {
-            i = 2;
-        }
-        int j = (i + 1) % 3;
-        int k = (j + 1) % 3;
-        f32 r = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
-        f32 h = 0.5f / r;
-        q[i] = 0.5f * r;
-        q[3] = h * (m[j][k] - m[k][j]);
-        q[j] = h * (m[i][j] + m[j][i]);
-        q[k] = h * (m[i][k] + m[k][i]);
-    }
-    s->quat = MVec4(-q[0], -q[1], -q[2], q[3]);
+    MtxToQuat(mtx, &q);
+    s->quat = MVec4(-q.x, -q.y, -q.z, q.w);
     s->vel = MVec4(vel->x, vel->y, vel->z);
     s->v60 = MVec4(avel->x, avel->y, avel->z);
 }
