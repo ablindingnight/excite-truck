@@ -1029,8 +1029,8 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
 
 }  // extern "C"
 
-inline void WaterIface::Close(void) {}
+void WaterIface::Close(void) {}
 
-inline void WaterIface::Begin(void) {}
+void WaterIface::Begin(void) {}
 
-inline void WaterIface::End(void) {}
+void WaterIface::End(void) {}
