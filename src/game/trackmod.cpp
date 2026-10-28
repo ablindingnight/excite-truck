@@ -943,7 +943,11 @@ void OptTerrainTMH::Link(int a, void* b, int c, void* d, int e) {
     fn_802CD33C(d, e, 0);
 }
 
-XFaderTMH::~XFaderTMH(void) {}
+// MATCHING-AID: the target keeps this dtor's own vtable store, which MWCC only does when the body
+// had a call; a stripped (empty inline) debug call stands in for it (cf. smoke SmokeNop, panelvol DbgLine).
+static inline void XFaderTeardown(XFader* faders) {}
+
+XFaderTMH::~XFaderTMH(void) { XFaderTeardown(faders); }
 
 void XFaderTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;

@@ -895,8 +895,9 @@ void HermitePathTMH::Init(TObj* o) {
     if (count >= 4) {
         fn_802E317C("path: exceeded hermite path limit");
     }
-    paths[count].data = d;
-    fn_801FE88C(this, &paths[count]);
+    HermiteEntry* e = &paths[count];
+    e->data = d;
+    fn_801FE88C(this, e);
     count++;
 }
 
@@ -1058,7 +1059,11 @@ void LinearDroneTMH::Init(TObj* o) {}
 
 void LinearDroneTMH::Swap(TObj* o) {}
 
-LinearDroneTMH::~LinearDroneTMH(void) {}
+// MATCHING-AID: the target keeps this dtor's own vtable store, which MWCC only does when the body
+// had a call; a stripped (empty inline) debug call stands in for it (cf. smoke SmokeNop, panelvol DbgLine).
+static inline void DroneTeardown(void* man) {}
+
+LinearDroneTMH::~LinearDroneTMH(void) { DroneTeardown(man); }
 
 void HermiteDroneTMH::Add(void* scene, TObj* o, s32 id) {
     HermitePathData* d = (HermitePathData*)o->data;
@@ -1083,7 +1088,8 @@ void HermiteDroneTMH::Init(TObj* o) {}
 
 void HermiteDroneTMH::Swap(TObj* o) {}
 
-HermiteDroneTMH::~HermiteDroneTMH(void) {}
+// MATCHING-AID: stripped debug call, see ~LinearDroneTMH.
+HermiteDroneTMH::~HermiteDroneTMH(void) { DroneTeardown(man); }
 
 void HermitePathTMH::Draw(TObj* list) {}
 

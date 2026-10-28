@@ -1894,7 +1894,11 @@ CollShape* fn_801FC12C(ObstacleDesc* d) {
 }
 }
 
-AnimDesc::~AnimDesc(void) {}
+// MATCHING-AID: the target keeps this dtor's own vtable store, which MWCC only does when the body
+// had a call; a stripped (empty inline) debug call stands in for it (cf. smoke SmokeNop, panelvol DbgLine).
+static inline void AnimDescTeardown(const char* model) {}
+
+AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
 
 extern "C" void fn_801FC4D8(AnimInst** list, AnimInst* a);
 extern "C" void fn_801FC644(EWSound** list, EWSound* s);
