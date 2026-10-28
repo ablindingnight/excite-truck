@@ -495,12 +495,13 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
 }
 
 void fn_802BCBDC(void) {
+    TreeType* t;
     lbl_8055FAB4 = fn_802B561C(fn_80131810, "treeclass.val");
     if (lbl_8055FAB4) {
         ValueNode* n;
         for (int i = 0; (n = lbl_8055FAB4->GetChild(i)) != 0; i++) {
             if (fn_802BC3DC(n)) {
-                TreeType* t = &lbl_804C00D4.data[lbl_804C00D4.n++];
+                t = &lbl_804C00D4.data[lbl_804C00D4.n++];
                 t->name = n->GetValue("name");
                 t->shadow = n->FindChild("tree_shadow");
                 t->far = fn_802B2C34(fn_802C6B44, n->GetValue("far_model"));

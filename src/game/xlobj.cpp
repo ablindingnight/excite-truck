@@ -650,6 +650,8 @@ void fn_802BA004(void) { lbl_8055FA84 = 0; }
 
 
 void fn_802BA010(void* line, int idx) {
+    Obj* o;
+    XPoint* pt;
     XSample smp;
     ScopeTimer timer("XLAddRacingLine");
     if (!line) {
@@ -665,10 +667,10 @@ void fn_802BA010(void* line, int idx) {
         do {
             TexEntry* te = fn_802B8EF0(idx, sc);
             if (te) {
-                XPoint* pt = s->pts;
+                pt = s->pts;
                 for (int k = 0; k < s->count; k++, pt++) {
                     fn_80136414(&smp, it, pt->idx);
-                    Obj* o = &lbl_8055FA78->data[lbl_8055FA78->count++];
+                    o = &lbl_8055FA78->data[lbl_8055FA78->count++];
                     o->Init(pt->x, pt->y, sc);
                     smp.Pos(&o->pos);
                     smp.Dir(&o->dir);
