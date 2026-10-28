@@ -254,7 +254,8 @@ void EngineSound::Update(int muted) {
     s32 me;
     int local;
     int i;
-    rpm = rpmFactor * car->rpm;
+    f32 rpmv = car->rpm;
+    rpm = rpmFactor * rpmv;
     fadeIn = fadeIn + 0.05f * (1.0f - fadeIn);
     r = rpm;
     t = car->throttle;

@@ -3111,7 +3111,8 @@ Pickup::Pickup(ValueNode* n) {
             f32 len;
             dir[0] = s0->x + ts.t * (s0->next->x - s0->x);
             f32 z0 = s0->z;
-            dir[1] = z0 + ts.t * (s0->next->z - s0->z);
+            f32 z1 = s0->next->z;
+            dir[1] = z0 + ts.t * (z1 - s0->z);
             len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
             fwd[0] = m[6];
             fwd[1] = m[8];

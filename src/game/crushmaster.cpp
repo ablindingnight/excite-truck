@@ -1912,7 +1912,8 @@ void CrushSubTaskMgr::vf18(int a, int b) {
                         imp.y *= kk;
                         imp.z *= kk;
                     }
-                    imp.y = 17.777779f * v->fD4 / 0.0166833512f;
+                    f32 fD4v = v->fD4;
+                    imp.y = 17.777779f * fD4v / 0.0166833512f;
                     at = v->mtx.origin;
                     at.y += 0.5f;
                     fn_8017B3A8(v, &imp, &at);

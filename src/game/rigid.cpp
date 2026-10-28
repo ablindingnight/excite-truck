@@ -513,7 +513,8 @@ void RigidBody::Update(void) {
     mtx.pos.y += vel.y * 0.0166833512f;
     mtx.pos.z += vel.z * 0.0166833512f;
     MulVec(&aaccel, &torque, &worldInvI);
-    avel.x += aaccel.x * 0.0166833512f;
+    f32 aaccelX = aaccel.x;
+    avel.x += aaccelX * 0.0166833512f;
     avel.y += aaccel.y * 0.0166833512f;
     avel.z += aaccel.z * 0.0166833512f;
     if (PSVECDotProduct(&avel, &avel) > 100.0f) {
