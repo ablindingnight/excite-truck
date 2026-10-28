@@ -98,6 +98,7 @@ struct ModelInfo {
 
 struct ModelNode {
     ModelNode(void) { refs = 0; }
+    ModelInfo* Info(void) const { return info; }
     s32 refs;            // offset 0x0
     ModelInfo* info;     // offset 0x4
     s32 inst;            // offset 0x8
@@ -833,7 +834,8 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
         Transform(&c, &slot->info->center, f);
         u8 clip;
         f32 dist;
-        if (fn_802C94A0(&c, slot->info->radius, &clip, &dist)) {
+        f32 r = slot->info->radius;
+        if (fn_802C94A0(&c, r, &clip, &dist)) {
             fn_802C57B4(i, fn_802D0514(f), mat, clip, dist);
         }
         lbl_8055D008 = old;
@@ -886,12 +888,13 @@ void fn_802C7458(s32 i, u32 mask) {
 
 void fn_802C74D8(s32 i, const MFrame* f, s32 tex) {
     ModelNode* slot = fn_802C5390(i);
-    ModelInfo* m = slot->info;
+    ModelInfo* m = slot->Info();
     MVec3 c;
     Transform(&c, &slot->info->center, f);
     u8 clip;
     f32 dist;
-    if (fn_802C94A0(&c, slot->info->radius, &clip, &dist)) {
+    f32 r = slot->info->radius;
+    if (fn_802C94A0(&c, r, &clip, &dist)) {
         if (lbl_8055FC20) {
             TexNode* t = fn_802C5EFC(tex);
             void* mtx = fn_802D0514(f);
@@ -1022,7 +1025,8 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 ra
     Transform(&c, &slot->info->center, f);
     u8 clip;
     f32 dist;
-    if (fn_802C94A0(&c, slot->info->radius, &clip, &dist)) {
+    f32 r = slot->info->radius;
+    if (fn_802C94A0(&c, r, &clip, &dist)) {
         void* mtx = fn_802D0514(f);
         ModelInfo* m = slot->info;
         if (!lbl_8055FC20) {
