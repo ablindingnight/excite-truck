@@ -288,6 +288,7 @@ public:
     }
     s32 Span(void);
     void Load(u8* dst, s32 n, s32 offs);
+    s32 Start(void) const { return entry->offset + set->hdr.baseOffset; }  // file offset of the resource
     u8* Poll(s32* sizeOut);
     void Cancel(void);
 
@@ -1009,7 +1010,7 @@ s32 AsyncResource::Span(void) {
 
 void AsyncResource::Load(u8* dst, s32 n, s32 offs) {
     if (!(entry->flags & 8)) {
-        s32 pos = set->hdr.baseOffset + (offs + entry->offset);
+        s32 pos = offs + Start();
         handle = fn_802E748C(set->fd + pos / 0x800, dst, n);
         buf = dst + (pos & 0x7FF);
         size = n;
