@@ -346,10 +346,9 @@ TrackMap* fn_80019C68(int player) {
         table = fn_80131808(name);
         node = table->FindChild("TrackMap");
         if (node) {
-            ValPoint origin;
             map->width = node->GetFloat("width");
             map->texSize = node->GetFloat("tex_size");
-            origin = node->GetPoint("origin");
+            ValPoint origin = node->GetPoint("origin");
             map->origin.x = origin.x;
             map->origin.x = origin.x - map->texSize / 2;
             map->origin.y = origin.y - map->texSize / 2;
