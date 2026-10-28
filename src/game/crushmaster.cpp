@@ -335,6 +335,12 @@ static inline void SetLen(ValVec3* v, f32 len) {
     }
 }
 
+static inline void Add(ValVec3* out, const ValVec3* a, const ValVec3* b) {
+    out->x = a->x + b->x;
+    out->y = a->y + b->y;
+    out->z = a->z + b->z;
+}
+
 static inline void AddScaled(ValVec3* out, const ValVec3* a, const ValVec3* b, f32 k) {
     out->x = a->x + b->x * k;
     out->y = a->y + b->y * k;
@@ -860,9 +866,7 @@ void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
         v[i].color = color;
         v[i].u = 0.1f * i;
         v[i].v = 0.1f * i;
-        v[i].pos.x += at->x;
-        v[i].pos.y += at->y;
-        v[i].pos.z += at->z;
+        Add(&v[i].pos, &v[i].pos, at);
     }
     v[0].color = dark;
     {
