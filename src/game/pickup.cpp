@@ -546,6 +546,8 @@ void fn_80168328(void) {
     }
 }
 
+static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
+
 void fn_801683F4(PickupCounts* out, int player) {
     PickupCounts res;
     RaceCarRec* rec;
@@ -580,7 +582,7 @@ void fn_801683F4(PickupCounts* out, int player) {
             lo.z = MIN(l[2], 0.0f) - 1.1f * dims->len;
             hi.x = MAX(l[0], 0.0f) + 1.1f * dims->wid;
             hi.z = MAX(l[2], 0.0f) + 1.1f * dims->len;
-            r = sqrt(dims->wid * dims->wid + dims->len * dims->len);
+            r = SqrtF(dims->wid * dims->wid + dims->len * dims->len);
         }
         for (i = 0; i < lbl_8055E354->groups.count; i++) {
             PickupGroup* g = &lbl_8055E354->groups.data[i];

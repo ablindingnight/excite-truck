@@ -534,6 +534,8 @@ extern "C" void fn_8029CD14(void) {
     }
 }
 
+static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
+
 extern "C" void fn_8029CD48(WaterCar* car) {
     for (int i = 0; i < 4; i++) {
         if (car->wheels[i].flags & 8) {
@@ -563,7 +565,7 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         v.y = v.y + car->axes[1].y * up;
         v.x = v.x + car->axes[1].x * up;
         v.z = v.z + car->axes[1].z * up;
-        f32 s = sqrt(flat.x * flat.x + flat.y * flat.y);
+        f32 s = SqrtF(flat.x * flat.x + flat.y * flat.y);
         int n = (int)(0.25f * s) < 6 ? (int)(0.25f * s) : 6;
         f32 spread = 0.125f * s;
         for (int k = 0; k < n; k++) {

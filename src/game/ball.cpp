@@ -426,6 +426,8 @@ BVec3 Home(int car) {
     return v;
 }
 
+static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
+
 extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
     BCarRec* by = fn_8017960C(car);
     struct Node {
@@ -460,7 +462,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     if (b == self) {
                         fall = 1.0f;
                     } else {
-                        fall = 1.0f - (f32)sqrt(d2) / r;
+                        fall = 1.0f - SqrtF(d2) / r;
                     }
                     PSVECNormalize(&d, &d);
                     at.x = b->mtx.pos.x + d.x;
