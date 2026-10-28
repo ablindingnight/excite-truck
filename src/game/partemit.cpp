@@ -496,7 +496,8 @@ void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
     p->pos.y = s->pos.y + d->offset.y;
     p->pos.z = s->pos.z + d->offset.z;
     p->vel.x = s->vel.x * d->vScale.x;
-    p->vel.y = s->vel.y * d->vScale.y;
+    f32 vy = s->vel.y;
+    p->vel.y = vy * d->vScale.y;
     p->vel.z = s->vel.z * d->vScale.x;
     p->pt.x = d->ptK.x + d->ptM.x * k;
     p->pt.y = d->ptK.y + d->ptM.y * k;

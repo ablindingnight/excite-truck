@@ -246,9 +246,9 @@ int fn_8029D4CC(WaterPool* p);
 void fn_8029D550(WaterPool* p, Vec* c, f32* r);
 void fn_8029D574(WaterPool* p);
 void fn_8029D644(WaterPool* p);
-void fn_8029D7D0(WaterPool* p, WaterCarEntry* e);
+void fn_8029D7D0(WaterPool* p, const WaterCarEntry* e);
 void fn_8029E8E0(WaterShallow* s);
-void fn_8029EA34(WaterShallow* s, WaterCarEntry* e);
+void fn_8029EA34(WaterShallow* s, const WaterCarEntry* e);
 int fn_8029EAE8(WaterShallow* s);
 
 void fn_8029C1C4(void) {
@@ -713,10 +713,11 @@ void fn_8029D644(WaterPool* p) {
 void fn_8029E49C(WaterPool* p, WaterCar* car, int w);
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r);
 
-void fn_8029D7D0(WaterPool* p, WaterCarEntry* e) {
+void fn_8029D7D0(WaterPool* p, const WaterCarEntry* e) {
+    f32 r2 = p->radius * p->radius;
     f32 dz = e->car->pos.z - p->center.z;
     f32 dx = e->car->pos.x - p->center.x;
-    if (dx * dx + dz * dz > p->radius * p->radius) {
+    if (dz * dz + dx * dx > r2) {
         return;
     }
     for (int w = 0; w < 4; w++) {
@@ -958,10 +959,11 @@ void fn_8029E8E0(WaterShallow* s) {
 
 void fn_8029EC64(WaterShallow* s, WaterCar* car, int w);
 
-void fn_8029EA34(WaterShallow* s, WaterCarEntry* e) {
+void fn_8029EA34(WaterShallow* s, const WaterCarEntry* e) {
+    f32 r2 = s->radius * s->radius;
     f32 dz = e->car->pos.z - s->center.z;
     f32 dx = e->car->pos.x - s->center.x;
-    if (dx * dx + dz * dz > s->radius * s->radius) {
+    if (dz * dz + dx * dx > r2) {
         return;
     }
     for (int w = 0; w < 4; w++) {
