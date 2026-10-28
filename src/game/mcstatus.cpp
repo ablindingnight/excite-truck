@@ -33,7 +33,37 @@ u8* fn_802C5130(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 u8* fn_80232578(const char* name);
 u8* fn_8023512C(const char* art);
+void fn_802C8530(void);
+void fn_802C87B4(int a, int b, s32 w, s32 h);
+void fn_802C88BC(int a);
+void fn_802C974C(f32 a, f32 b, f32 c);
+void fn_802C5320(u8* img, int a, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_802C92D0(void);
+void fn_802C92DC(int x0, int y0, int x1, int y1, u32 color);
+void fn_802C92D8(void);
+void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
+f32 fn_8023293C(u8* font, const char* text, f32 scale);
+void fn_802335F0(const char* text, u8* font, f32 x, f32 y);
+void fn_802C9A70(int a);
+void fn_802C855C(void);
+void fn_802C2B48(void);
+extern s32 lbl_8055CFF0;
+extern s32 lbl_8055CFF4;
+extern s32 lbl_8055FB9C;  // screen width
+extern s32 lbl_8055FBA0;  // screen height
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
 }
+
+struct Camera {
+    u8 data[0x30];
+};
+
+extern "C" {
+void fn_80230B5C(Camera* cam);
+void fn_802C8638(Camera* cam);
+}
+
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void operator delete(void* p);
 
@@ -84,8 +114,89 @@ void MemCardDialogBg::Unload(void) {
 
 void MemCardDialogBg::Setup(McDialogCfg* cfg) {}  // stub (363)
 
-void MemCardDialogBg::Show(const McMsg* m) {}  // stub (239)
+// Draws the background (or a black screen), the title, the message word-wrapped at 480 units ('^' is a
+// space that does not break) and, when m->frac is set, a row of progress dots.
+static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
+    char dots[0x40];
+    Camera cam;
+    char text[0x200];
+    fn_802C8530();
+    fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
+    fn_802C88BC(2);
+    fn_80230B5C(&cam);
+    fn_802C8638(&cam);
+    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    f32 h = lbl_8055FBA0 + 1;
+    f32 w = lbl_8055FB9C + 1;
+    f32 x0 = -1.0f * lbl_8055FB9C * 0.5f - 1.0f;
+    f32 y0 = 1.0f + lbl_8055FBA0 * 0.5f;
+    if (bg->image) {
+        fn_802C5320(bg->image, 0, x0, y0, 0.0f, w, h);
+    } else {
+        fn_802C92D0();
+        fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
+        fn_802C92D8();
+    }
+    const char* title = m->title;
+    const char* msg = m->text;
+    f32 y = 145.0f;
+    if (strlen(title)) {
+        fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
+        fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, 0.0f, 1.0f);
+    }
+    y -= 40.0f;
+    strcpy(text, msg);
+    char* p = text;
+    while (strlen(p)) {
+        char* brk = 0;
+        char line[0x200] = {0};
+        char* d = line;
+        u32 i = 0;
+        while (i < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
+            char* c = &p[i];
+            if (*c == ' ') {
+                brk = c;
+            } else if (*c == '^') {
+                *c = ' ';
+            }
+            i++;
+            *d++ = *c;
+            *d = 0;
+        }
+        char keep = 0;
+        if (i != strlen(p)) {
+            if (!brk) {
+                brk = &p[i];
+                keep = p[i];
+            }
+            *brk = 0;
+        } else {
+            brk = &p[i] - 1;
+        }
+        fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, 0.0f, 1.0f);
+        fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, 0.0f, 1.0f);
+        if (!keep) {
+            p = brk + 1;
+        } else {
+            *brk = keep;
+            p = brk;
+        }
+        y -= 20.0f;
+    }
+    f32 frac = m->frac;
+    if (!(AbsF(frac) <= lbl_80558DC4[0])) {
+        strcpy(dots, "");
+        for (int n = 0; n < (int)(30.0f * frac); n++) {
+            strcat(dots, ".");
+        }
+        fn_802335F0(dots, bg->font2, -270.0f, -138.0f);
+    }
+    fn_802C9A70(1);
+    fn_802C855C();
+    fn_802C2B48();
+}
 
+void MemCardDialogBg::Show(const McMsg* m) { DrawDialog(this, m); }
 void MemCardDialogMgr::Open(void) {
     open = 1;
     layout = fn_8012C33C("mc_dialog.lyt");
