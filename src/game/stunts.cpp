@@ -1520,7 +1520,8 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
         }
     }
     n = ranks.a.count;
-    if (Rank() == n - 1) {
+    int rank = Rank();
+    if (rank == n - 1) {
         jumps = 1;
     }
     if (ground > 0.8f) {

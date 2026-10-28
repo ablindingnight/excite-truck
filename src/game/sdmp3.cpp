@@ -472,10 +472,10 @@ Mp3Reader* fn_802EA834(int idx, s32* size) {
         k = -2 - idx;
         if (k >= 0 && k < 3 && lbl_805076A0[k].data) {
             r = fn_802E9A3C((u8*)lbl_805076A0[k].data, lbl_805076A0[k].size);
-            if (r) {
-                strncpy(lbl_80507640.title, "", 0x1F);
-                lbl_80507640.title[0x1F] = 0;
-            }
+        }
+        if (r) {
+            strncpy(lbl_80507640.title, "", 0x1F);
+            lbl_80507640.title[0x1F] = 0;
         }
     } else {
         char path[0x40A];

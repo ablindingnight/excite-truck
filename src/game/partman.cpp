@@ -748,6 +748,11 @@ void fn_8028FC40(PartSys* s, const V3* pos, const V3* dir, f32 angVel) {
 
 }  // extern "C"
 
+static inline f32 Clamp01(f32 x) {
+    x = 1.0f < x ? 1.0f : x;
+    return x > 0.0f ? x : 0.0f;
+}
+
 void PartSys::SetParams(const PartParams* p) {
     *(PartParams*)this = *p;
     invLife = 1.0f / p->maxLife;
@@ -757,8 +762,7 @@ void PartSys::SetParams(const PartParams* p) {
         cell = 1.0f / (f32)grid;
         break;
     }
-    f32 d = 1.0f < drag ? 1.0f : drag;
-    drag = d > 0.0f ? d : 0.0f;
+    drag = Clamp01(drag);
     Reset();
 }
 
@@ -810,10 +814,6 @@ void PartSys::Integrate(V3* out, const Particle* p, f32 age) {
     out->y = p->pos.y + v.y * age;
 }
 
-static inline f32 Clamp01(f32 x) {
-    x = 1.0f < x ? 1.0f : x;
-    return x > 0.0f ? x : 0.0f;
-}
 
 static inline u8 Byte(f32 x) {
     int v = (int)x;
