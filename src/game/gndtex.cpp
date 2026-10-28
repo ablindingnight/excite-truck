@@ -617,9 +617,13 @@ void fn_802DC71C(GModel* model, s32 tex) {
     GXSetBlendMode(1, 4, 5, 5);
 }
 
+struct BatchUV {
+    f32 u, v;
+};
+
 static inline void FlushBatch(void) {
     u32* colors = (u32*)fn_802CFF64(0x28);
-    f32* uvs = (f32*)fn_802CFF64(0x50);
+    BatchUV* uvs = (BatchUV*)fn_802CFF64(0x50);
     if (colors && uvs) {
         if (lbl_804DB480.pending) {
             fn_802D6B54(lbl_804DB480.model);
@@ -631,8 +635,8 @@ static inline void FlushBatch(void) {
             Inst* e = &lbl_804DB480.list.data[i];
             u8 a = 255.0f * e->alpha;
             colors[i] = 0xFFFFFF00 | (u8)PMin(PMax(a, 0), 0xFF);
-            uvs[i * 2] = 0.5f + e->xf.m[9] / 2048.0f;
-            uvs[i * 2 + 1] = 0.5f + e->xf.m[11] / 2048.0f;
+            uvs[i].u = 0.5f + e->xf.m[9] / 2048.0f;
+            uvs[i].v = 0.5f + e->xf.m[11] / 2048.0f;
             fn_802D2ED8(e, i);
         }
         if (i < 10) {
