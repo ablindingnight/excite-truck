@@ -1392,7 +1392,9 @@ void fn_801F9F08(void) {
     lbl_8055EC70 = 0;
     delete lbl_8055EC74;
     lbl_8055EC74 = 0;
-    delete[] lbl_8055EC54;
+    if (lbl_8055EC54) {
+        delete[] lbl_8055EC54;
+    }
     fn_801F9FA0(&lbl_8055EC4C);
     fn_801F9FA0(&lbl_8055EC50);
     fn_801FA010(&lbl_8055EC5C);
