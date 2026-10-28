@@ -1376,6 +1376,19 @@ public:
 
 AsyncSetQueue* lbl_8055E014;
 
+// Whether a set's table of contents lists a resource.
+static inline int TocHas(ResToc* toc, const char* name) {
+    int in = 0;
+    u32 i;
+    for (i = 0; i < toc->count; i++) {
+        if (!strcasecmp(toc->entries[i].name, name)) {
+            in = 1;
+            break;
+        }
+    }
+    return in;
+}
+
 extern "C" void fn_8012D908(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
@@ -1383,15 +1396,7 @@ extern "C" void fn_8012D908(const char* name) {
         QueueNode* n = q->pending.head;
         while (n && !found) {
             ResToc* toc = GetToc(n->name);
-            int in = 0;
-            u32 i;
-            for (i = 0; i < toc->count; i++) {
-                if (!strcasecmp(toc->entries[i].name, name)) {
-                    in = 1;
-                    break;
-                }
-            }
-            if (in) {
+            if (TocHas(toc, name)) {
                 found = n;
             }
             fn_8012C4D8(toc);
@@ -1706,15 +1711,7 @@ QueueNode* AsyncSetQueue::FindNodeFor(const char* name) {
     QueueNode* n = pending.head;
     while (n && !found) {
         ResToc* toc = GetToc(n->name);
-        int in = 0;
-        u32 i;
-        for (i = 0; i < toc->count; i++) {
-            if (!strcasecmp(toc->entries[i].name, name)) {
-                in = 1;
-                break;
-            }
-        }
-        if (in) {
+        if (TocHas(toc, name)) {
             found = n;
         }
         fn_8012C4D8(toc);
