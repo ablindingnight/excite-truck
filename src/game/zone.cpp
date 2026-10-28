@@ -2769,7 +2769,7 @@ int ZoneMaster::vf3C(int p) {
         fn_8000FBE4();
     }
     if (!fn_80161C38()) {
-        if (t < 6.75f) {
+        if (t < t0) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t1, t2, t)));
             LayoutItem* b0 = mainLyt->Find("star_body_0");
             LayoutItem* b1 = mainLyt->Find("star_body_1");
