@@ -926,7 +926,8 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
         return a;
     }
     fn_80136468(&pb, track, b);
-    qb.x = F32(pb.seg, 0x0) + pb.t * (F32(PTR(pb.seg, 0x14), 0x0) - F32(pb.seg, 0x0));
+    f32 pbT = pb.t;
+    qb.x = F32(pb.seg, 0x0) + pbT * (F32(PTR(pb.seg, 0x14), 0x0) - F32(pb.seg, 0x0));
     qb.y = F32(pb.seg, 0x4) + pb.t * (F32(PTR(pb.seg, 0x14), 0x4) - F32(pb.seg, 0x4));
     db.y = qb.y - c[1];
     db.x = qb.x - c[0];

@@ -870,7 +870,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         fn_80254568((Vec3a*)&c, model, "rear_c");
         Vec mid;
         mid.x = l.x + 0.5f * (r.x - l.x);
-        mid.y = l.y + 0.5f * (r.y - l.y);
+        f32 ly = l.y;
+        mid.y = ly + 0.5f * (r.y - l.y);
         mid.z = l.z + 0.5f * (r.z - l.z);
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
@@ -1000,7 +1001,8 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             cam.b.v[2].z = c2;
             MulM(m, &rx, m);
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
-            cam.pos.x = cam.pos.x + cam.b.v[0].x * nx + cam.b.v[1].x * ny;
+            f32 vx = cam.b.v[0].x;
+            cam.pos.x = cam.pos.x + vx * nx + cam.b.v[1].x * ny;
             cam.pos.y = cam.pos.y + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
             cam.pos.z = cam.pos.z + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
             if (!lbl_8055F330 || floor + fn_801DCF48(0) < cam.pos.y) {
@@ -1517,7 +1519,11 @@ void CarUIScreen::Draw(void) {
     if (lbl_8055F330) {
         fn_80253004(index, &p);
         p.wheelY[0] = -0.3048f > p.wheelY[0] ? p.wheelY[0] : -0.3048f;
-        p.wheelY[1] = p.wheelY[1] < -0.3048f ? p.wheelY[1] : -0.3048f;
+        if (p.wheelY[1] < -0.3048f) {
+            p.wheelY[1] = p.wheelY[1];
+        } else {
+            p.wheelY[1] = -0.3048f;
+        }
         p.wheelY[2] = p.wheelY[2] < -0.3048f ? p.wheelY[2] : -0.3048f;
         p.wheelY[3] = p.wheelY[3] < -0.3048f ? p.wheelY[3] : -0.3048f;
     } else {

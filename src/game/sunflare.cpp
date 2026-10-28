@@ -227,7 +227,8 @@ void fn_80291E64(FlareSet* fs) {
     Camera* c = fn_802C86DC();
     VecP pivot;
     VecP dir;
-    pivot.x = c->pos.x + c->rot.fwd.x * fs->pivotDepth;
+    f32 pivotDepthv = fs->pivotDepth;
+    pivot.x = c->pos.x + c->rot.fwd.x * pivotDepthv;
     pivot.y = c->pos.y + c->rot.fwd.y * fs->pivotDepth;
     pivot.z = c->pos.z + c->rot.fwd.z * fs->pivotDepth;
     dir.x = pivot.x - fs->sunPos.x;
