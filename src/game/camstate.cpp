@@ -600,6 +600,8 @@ extern const f32 lbl_80564040;
 
 
 // Orbits the camera around its target at `radius`, keeping it above the ground.
+static inline f32 CsLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     F32(p, 0x15C) = fmod(speed * lbl_8055E3C8, lbl_80564038);
     f32 s = radius * (f32)sin(F32(p, 0x15C));
@@ -614,8 +616,8 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     pos.z = F32(p, 0xEC) + off.z;
     if (!fn_801E9E30(p + 0x1EC, &pos.x)) {
         pos.y = lbl_80563FD8 + lbl_8055F588;
-        CsVec t(pos.x + lbl_80563FC4 * (F32(p, 0xE4) - pos.x), pos.y + lbl_80563FC4 * (F32(p, 0xE8) - pos.y),
-                pos.z + lbl_80563FC4 * (F32(p, 0xEC) - pos.z));
+        CsVec t(CsLerp(pos.x, F32(p, 0xE4), lbl_80563FC4), CsLerp(pos.y, F32(p, 0xE8), lbl_80563FC4),
+                CsLerp(pos.z, F32(p, 0xEC), lbl_80563FC4));
         pos = t;
     } else {
         lbl_8055F588 = pos.y;
