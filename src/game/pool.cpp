@@ -17,6 +17,7 @@ public:
     void Reset(void);
     void* Alloc(void);
     void Free(void* p);
+    s32 ElemSize() const { return elemSize; }
 
     u8 panic;          // offset 0x4
     u8 external;       // offset 0x5
@@ -53,9 +54,9 @@ void Pool::Init(const char* n, s32 c, s32 size, void* buffer) {
 
 void Pool::Reset(void) {
     u8* end = (u8*)free + (count - 1) * elemSize;
-    void** q;
-    for (q = free; (u8*)q < end; q = (void**)*q) {
-        *q = (u8*)q + elemSize;
+    u8* q;
+    for (q = (u8*)free; q < end; q += ElemSize()) {
+        *(void**)q = q + ElemSize();
     }
     *(void**)end = 0;
     used = 0;
