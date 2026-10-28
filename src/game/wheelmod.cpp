@@ -561,10 +561,7 @@ void fn_801F1394(Wheel* w, const ValMatrix* m) {
 
 void fn_801F13F4(Wheel* w, f32 d2, f32 height) {
     WheelShadow* s = &w->cls->shadow;
-    if (d2 > s->offDist2) {
-        return;
-    }
-    if (w->state == 3) {
+    if (d2 > s->offDist2 || w->state == 3) {
         return;
     }
     int i;
