@@ -488,6 +488,23 @@ static inline void Scale(BVec* o, const BVec* a, f32 k) {
     o->z = a->z * k;
 }
 
+struct CVec4 {
+    CVec4(void) {}
+    CVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
+        x = x_;
+        y = y_;
+        z = z_;
+        w = w_;
+    }
+    CVec4(const CVec4& o) {
+        x = o.x;
+        y = o.y;
+        z = o.z;
+        w = o.w;
+    }
+    f32 x, y, z, w;
+};
+
 // A sub-object owned by the body, destroyed through its virtual destructor.
 class CbPart {
 public:
@@ -928,7 +945,68 @@ void fn_8018A8A8(u8* p) {
     }
 }
 
-void fn_8018A9F0(u8* p) {}  // stub (237)
+void fn_801C2BDC(u8* sim, s32* n, BVec** pos, BVec** old);
+void fn_801BEB30(s32 car, u8** out);
+
+static inline f32 FlagDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// v in the body frame (rotation rows at 0x70, position at 0x94), in place.
+static inline void ToBody(u8* p, BVec* o, const BVec* v) {
+    o->x = v->x - F32(p, 0x94);
+    o->y = v->y - F32(p, 0x98);
+    o->z = v->z - F32(p, 0x9C);
+    f32 x = FlagDot(o->x, F32(p, 0x70), o->y, F32(p, 0x74), o->z, F32(p, 0x78));
+    f32 y = FlagDot(o->x, F32(p, 0x7C), o->y, F32(p, 0x80), o->z, F32(p, 0x84));
+    f32 z = FlagDot(o->x, F32(p, 0x88), o->y, F32(p, 0x8C), o->z, F32(p, 0x90));
+    o->x = x;
+    o->y = y;
+    o->z = z;
+}
+
+// Copies the flapping parts' simulated points (0x26C4 flag, 0x26C8 aerial) into the car model's point
+// list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
+void fn_8018A9F0(u8* p, u8* m) {
+    if (PTR(p, 0x26C4)) {
+        BVec* pos = 0;
+        BVec* old = 0;
+        s32 n = 0;
+        fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
+        for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
+            u8* d = PTR(p, 0x26C0);
+            ToBody(p, (BVec*)(m + 0xE24) + (S32(d, 0xA0) + i), &pos[((s32*)(d + 0x20))[i]]);
+        }
+    }
+    if (PTR(p, 0x26C8)) {
+        BVec* pos = 0;
+        BVec* old = 0;
+        s32 n = 0;
+        fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
+        for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+            u8* d = PTR(p, 0x26C0);
+            ToBody(p, (BVec*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
+        }
+    }
+    u8* x = 0;
+    fn_801BEB30(S32(p, 0x1EC), &x);
+    CVec4 h = *(CVec4*)(x + 0x70);
+    BVec* o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xCC);
+    o->x = lbl_80561CAC;
+    o->y = F32(p, 0x5AC) + (F32(m, 0x80) + h.x);
+    o->z = lbl_80561CAC;
+    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD0);
+    o->x = lbl_80561CAC;
+    o->y = F32(p, 0x5AC) + (F32(m, 0xEC) + h.y);
+    o->z = lbl_80561CAC;
+    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD4);
+    o->x = lbl_80561CAC;
+    o->y = F32(p, 0x5AC) + (F32(m, 0x158) + h.z);
+    o->z = lbl_80561CAC;
+    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD8);
+    o->x = lbl_80561CAC;
+    o->y = F32(p, 0x5AC) + (F32(m, 0x1C4) + h.w);
+    o->z = lbl_80561CAC;
+    S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
+}
 
 void fn_8018ADA4(u8* p, f32 v) { F32(p, 0x25DC) = v; }
 
@@ -990,22 +1068,6 @@ void fn_8018AF00(u8* p) {}
 
 }  // extern "C"
 
-struct CVec4 {
-    CVec4(void) {}
-    CVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
-        x = x_;
-        y = y_;
-        z = z_;
-        w = w_;
-    }
-    CVec4(const CVec4& o) {
-        x = o.x;
-        y = o.y;
-        z = o.z;
-        w = o.w;
-    }
-    f32 x, y, z, w;
-};
 
 static inline void SetVec4(u8* d, CVec4 v) {
     CVec4* o = (CVec4*)d;
