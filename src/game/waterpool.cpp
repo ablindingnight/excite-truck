@@ -586,7 +586,8 @@ extern "C" void fn_8029CD48(WaterCar* car) {
 
 WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) {
     memset(&desc, 0, sizeof(desc));
-    nx = 1.333f * (f32)sqrt(g->right.x * g->right.x + g->right.y * g->right.y);
+    f32 rightY = g->right.y;
+    nx = 1.333f * (f32)sqrt(g->right.x * g->right.x + rightY * g->right.y);
     ny = 1.333f * (f32)sqrt(g->up.x * g->up.x + g->up.y * g->up.y);
     if (nx < 3 || ny < 3 || nx * ny > 0x200) {
         fn_802E317C("water: too small or too big (%dx%d)", nx, ny);
@@ -947,7 +948,8 @@ void fn_8029E8E0(WaterShallow* s) {
             Vec d;
             d.y = c->y - eye.y;
             d.x = c->x - eye.x;
-            d.z = c->z - eye.z;
+            f32 eyeZ = eye.z;
+            d.z = c->z - eyeZ;
             Vec r;
             r.x = d.x;
             r.y = -d.y;

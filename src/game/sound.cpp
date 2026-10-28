@@ -470,7 +470,8 @@ void Sound3D::PreUpdate(Listener* l, int n) {
             Sub(&d, *pos, m->origin);
             f32 nx = d.z * m->basis[0].z + (d.x * m->basis[0].x + d.y * m->basis[0].y);
             f32 ny = d.z * m->basis[1].z + (d.x * m->basis[1].x + d.y * m->basis[1].y);
-            f32 nz = d.z * m->basis[2].z + (d.x * m->basis[2].x + d.y * m->basis[2].y);
+            f32 basisZ = m->basis[2].z;
+            f32 nz = d.z * basisZ + (d.x * m->basis[2].x + d.y * m->basis[2].y);
             d.x = nx;
             d.y = ny;
             d.z = nz;

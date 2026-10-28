@@ -205,7 +205,7 @@ f32 fn_8013AC2C(const Strength* s) {
     return (*(ValueNode**)(trk + 0x80))->GetFloat("rtt_speed_factor", 1.0f);
 }
 
-void fn_8013AC78(V2* ovr, s32* cars) {
+void fn_8013AC78(V2* ovr, const s32* cars) {
     DriverBonus bonus[50];
     SkillSlot slots[8];
     V2 sk;

@@ -387,7 +387,8 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         w[0].z = car->wheel1.z;
         w[1].x = car->wheel3.x;
         w[1].y = 0.0f;
-        w[1].z = car->wheel3.z;
+        f32 wheel3Z = car->wheel3.z;
+        w[1].z = wheel3Z;
         MulVec(&w[0], &w[0], car->axes);
         MulVec(&w[1], &w[1], car->axes);
         fn_802AA100(&n, (const Vec*)&car->spin, &car->axes[0], &car->axes[2]);

@@ -209,7 +209,8 @@ f32 fn_801A6390(s32 a, s32 b) { return 0.016683351f * (f32)(a - b); }
 f32 fn_801A63C4(s32 a, s32 b) { return 0.0192f * fn_801A6390(a, b) / 0.016683351f; }
 
 void fn_801A63F4(TVec* out, const TVec* a, const TVec* b, const TVec* t) {
-    out->z = a->z + t->z * (b->z - a->z);
+    f32 tz = t->z;
+    out->z = a->z + tz * (b->z - a->z);
     out->y = a->y + t->y * (b->y - a->y);
     out->x = a->x + t->x * (b->x - a->x);
 }

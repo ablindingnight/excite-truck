@@ -608,7 +608,8 @@ void fn_801683F4(PickupCounts* out, int player) {
                         f32 rad;
                         l[0] = dx * rec->rot[0] + dy * rec->rot[1] + dz * rec->rot[2];
                         l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];
-                        l[2] = dx * rec->rot[6] + dy * rec->rot[7] + dz * rec->rot[8];
+                        f32 rz = rec->rot[8];
+                        l[2] = dx * rec->rot[6] + dy * rec->rot[7] + dz * rz;
                         rad = p->type ? p->type->radius : 0.0f;
                         if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
                             p->taken = 1;

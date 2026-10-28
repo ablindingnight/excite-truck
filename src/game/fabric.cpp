@@ -699,7 +699,8 @@ void fn_801F6880(Fabric* f) {
                 int i = c + (r - 1) * f->cols;
                 TVec* p = &f->cur[i];
                 DrawVert* d = &f->draw[i];
-                fn_802C8E00(d->color, c > 0, p->x, p->y, p->z, d->u, d->v);
+                f32 du = d->u;
+                fn_802C8E00(d->color, c > 0, p->x, p->y, p->z, du, d->v);
                 i = c + r * f->cols;
                 d = &f->draw[i];
                 p = &f->cur[i];

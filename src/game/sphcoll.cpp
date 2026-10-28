@@ -1221,7 +1221,8 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     f32 dx = from->x - m->t.x;
     f32 dy = from->y - m->t.y;
     f32 dz = from->z - m->t.z;
-    lp.x = Dot3(dx, m->m[0], dy, m->m[1], dz, m->m[2]);
+    f32 mm = m->m[0];
+    lp.x = Dot3(dx, mm, dy, m->m[1], dz, m->m[2]);
     lp.y = Dot3(dx, m->m[3], dy, m->m[4], dz, m->m[5]);
     lp.z = Dot3(dx, m->m[6], dy, m->m[7], dz, m->m[8]);
     MulVecT(&ld, dir, m);

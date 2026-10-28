@@ -607,7 +607,8 @@ void fn_802A53B0(DropHit* hits, int n) {
                 ValVec3 p;
                 p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
                 p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
-                p.z = d->origin.z + d->sv.z * a + d->tv.z * b;
+                f32 originZ = d->origin.z;
+                p.z = originZ + d->sv.z * a + d->tv.z * b;
                 Mul(&o->frame, &p, &p);
                 p.x = p.x + o->frame.pos.x;
                 p.y = p.y + o->frame.pos.y;

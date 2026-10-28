@@ -823,7 +823,8 @@ void WoodChunks::Step(void) {
         PVec v;
         v.x = in->vel.x * drag;
         v.z = in->vel.z * drag;
-        v.y = in->vel.y * drag - 9.81f * dt * grav;
+        f32 velY = in->vel.y;
+        v.y = velY * drag - 9.81f * dt * grav;
         out->pos.x = in->pos.x + v.x * dt;
         out->pos.y = in->pos.y + v.y * dt;
         out->pos.z = in->pos.z + v.z * dt;

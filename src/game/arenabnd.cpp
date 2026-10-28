@@ -228,7 +228,8 @@ V2 fn_80139C5C(Bound* b) {
         hi.y = MaxF(p->y, hi.y);
     }
     r.y = lo.y + 0.5f * (hi.y - lo.y);
-    r.x = lo.x + 0.5f * (hi.x - lo.x);
+    f32 loX = lo.x;
+    r.x = loX + 0.5f * (hi.x - lo.x);
     return r;
 }
 

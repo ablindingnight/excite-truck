@@ -1902,7 +1902,8 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
             if (it) {
                 LayoutItem m;
                 m = *it;
-                m.scale = it->scale * 0.3f;
+                f32 curScale = it->scale;
+                m.scale = curScale * 0.3f;
                 m.color = 0xFFFFFF;
                 fn_801479A8(it, &m, "LEVEL %d", a, level + 1);
             }
@@ -2575,7 +2576,8 @@ void ZoneMaster::vf10(void) {
                 q.x = mid.x;
                 q.y = mid.z;
                 pos = fn_80136594(fn_80178C9C(), &q);
-                g->t = pos.seg->base + pos.seg->scale * pos.t;
+                f32 curScale = pos.seg->scale;
+                g->t = pos.seg->base + curScale * pos.t;
             }
         }
         qsort(l->gates, l->n, sizeof(Gate), (int (*)(const void*, const void*))fn_8013D27C);

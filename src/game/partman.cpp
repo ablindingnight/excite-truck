@@ -854,7 +854,8 @@ void PartSys::DrawSprites(Particle* p, int n) {
         int ua = ((p->rot + 1) & 2) >> 1;
         int ub = (p->rot >> 1) & 1;
         PVtx q[4];
-        q[0].pos.x = pos.x + d1.x * size;
+        f32 d1X = d1.x;
+        q[0].pos.x = pos.x + d1X * size;
         q[0].pos.y = pos.y + d1.y * size;
         q[0].pos.z = pos.z + d1.z * size;
         q[1].pos.x = pos.x + d2.x * size;
@@ -961,7 +962,8 @@ void PartSys::DrawRotating(Particle* p, int n) {
         f32 mtwo = -2.0f * size;
         q[0].pos.x = pos.x + a.x * -size + b.x * size;
         q[0].pos.z = pos.z + a.z * -size + b.z * size;
-        q[0].pos.y = pos.y + a.y * -size + b.y * size;
+        f32 posY = pos.y;
+        q[0].pos.y = posY + a.y * -size + b.y * size;
         q[1].pos.x = q[0].pos.x + a.x * two;
         q[1].pos.y = q[0].pos.y + a.y * two;
         q[1].pos.z = q[0].pos.z + a.z * two;

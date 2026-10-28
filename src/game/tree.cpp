@@ -440,7 +440,8 @@ void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeTy
     src->pos.y -= fn_802BC540(&up, t->baseRad);
     TVec c;
     MulVec(&c, src, &t->cyl.center);
-    c.x *= r->scale;
+    f32 curScale = r->scale;
+    c.x *= curScale;
     c.y *= r->scale;
     c.z *= r->scale;
     dst->pos.x = src->pos.x + c.x;

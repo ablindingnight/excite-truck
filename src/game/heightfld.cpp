@@ -457,7 +457,8 @@ int fn_801DCE14(u16* flags, const GVec* in, GVec* out, GVec* normal, s32* mat) {
         }
         out->y = h;
         out->x = in->x;
-        out->z = in->z;
+        f32 inZ = in->z;
+        out->z = inZ;
         return 1;
     }
     return 0;

@@ -279,7 +279,8 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
             f32 inv;
             f32 a;
             dv.x = s->dir.x + t * (n->dir.x - s->dir.x);
-            dv.y = s->dir.y + t * (n->dir.y - s->dir.y);
+            f32 dirY = n->dir.y;
+            dv.y = s->dir.y + t * (dirY - s->dir.y);
             pt.x = s->pos.x + t * (n->pos.x - s->pos.x);
             pt.y = s->pos.y + t * (n->pos.y - s->pos.y);
             inv = 1.0f / (f32)sqrt(dv.x * dv.x + dv.y * dv.y);

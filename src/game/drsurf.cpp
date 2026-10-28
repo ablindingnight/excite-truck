@@ -452,7 +452,8 @@ void fn_802D4988(Surf* s) {
                 m++;
                 f32 y = v->y;
                 f32 z = v->z;
-                o->x = v->x;
+                f32 vx = v->x;
+                o->x = vx;
                 o->y = y + a * wa + b * wb;
                 o->z = z;
                 v++;
