@@ -252,7 +252,7 @@ void fn_802D78D4(u16* rgb, u16* alpha, const u32* pal, int n) {
     }
 }
 
-GXTex* fn_802D7B5C(GXTexDesc* d, const char* name) {
+GXTex* fn_802D7B5C(const GXTexDesc* d, const char* name) {
     int ci4 = 1;
     if (d->format != 0 && d->format != 0x40) {
         ci4 = 0;
@@ -289,7 +289,7 @@ GXTex* fn_802D7B5C(GXTexDesc* d, const char* name) {
     return t;
 }
 
-GXTex* fn_802D7D98(GXTexDesc* d, const char* name) {
+GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
     int fmt = -1;
     if (d->format == 0x47 || d->format == 3) {
         fmt = 6;
@@ -328,7 +328,7 @@ GXTex* fn_802D7D98(GXTexDesc* d, const char* name) {
     return t;
 }
 
-GXTex* fn_802D7FA0(GXTexDesc* d, const char* name) {
+GXTex* fn_802D7FA0(const GXTexDesc* d, const char* name) {
     int bits = -1;
     int fmt = -1;
     switch (d->format) {
@@ -440,7 +440,7 @@ void fn_802D86BC(GXTexDesc* d) {
     delete[] tmp;
 }
 
-GXTex* fn_802D8A84(GXTexDesc* d, const char* name) {
+GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
     GXTex* t = d->user ? d->user : fn_802D7600(name);
     StrCopy(t->name, name, 32);
     s32 w = d->w;
@@ -463,7 +463,7 @@ GXTex* fn_802D8A84(GXTexDesc* d, const char* name) {
     return t;
 }
 
-GXTex* fn_802D8C00(GXTexDesc* d, const char* name) {
+GXTex* fn_802D8C00(const GXTexDesc* d, const char* name) {
     GXTex* t = fn_802D8A84(d, name);
     s32 h = d->h;
     s32 w = d->w;
@@ -522,7 +522,7 @@ void fn_802D8DCC(GXTexDesc* d) {
 
 void fn_802D9340(GXTex* t);
 
-GXTex* fn_802D8E9C(GXTexDesc* d, const char* name) {
+GXTex* fn_802D8E9C(const GXTexDesc* d, const char* name) {
     GXTex* t = 0;
     switch (d->format) {
     case 0:
