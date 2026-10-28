@@ -1,7 +1,7 @@
 // Named cameras (0x80276068-0x80278214): the named camera sets ("namedcam", "rddefault", "raceday",
 // "house") and the timed camera transitions ("physcam: Clock looped during camera transition!!").
-// Written partly against raw field offsets; the other large routines and the initialiser are still stubs. Names
-// are guesses apart from the strings.
+// Written partly against raw field offsets; the other large routines and the initialiser are still
+// stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <string.h>
 
@@ -113,6 +113,10 @@ int fn_80276068(int mode) {
 }
 
 extern "C" f32 PSVECSquareDistance(const void* a, const void* b);
+extern "C" void fn_8026A49C(int slot, CamPose* pose, f32* fov);
+extern "C" void fn_8012F57C(f32* out, const f32* a, const f32* b, f32 t);  // slerp
+extern "C" void fn_802E30C8(const char* fmt, ...);  // debug print
+extern "C" f32 fn_80277704(int i);
 extern "C" double sqrt(double x);
 
 static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
@@ -194,7 +198,86 @@ void fn_80276098(CamPose* a, CamPose* b, int slot, int kind, f32 fovA, f32 fovB,
     s->active = 1;
 }
 
-void fn_8027656C(CamPose* pose, f32* fov, int a) {}  // stub (310)
+// The rotation of a unit quaternion (x, y, z, w).
+static inline void QuatToPose(CamPose* p, const f32* q) {
+    f32(*m)[3] = (f32(*)[3])p->rot.m;
+    f32 x2 = q[0] + q[0];
+    f32 y2 = q[1] + q[1];
+    f32 z2 = q[2] + q[2];
+    f32 xx = q[0] * x2;
+    f32 xy = q[0] * y2;
+    f32 xz = q[0] * z2;
+    f32 yy = q[1] * y2;
+    f32 yz = q[1] * z2;
+    f32 zz = q[2] * z2;
+    f32 wx = q[3] * x2;
+    f32 wy = q[3] * y2;
+    f32 wz = q[3] * z2;
+    m[0][0] = 1.0f - (yy + zz);
+    m[1][0] = xy - wz;
+    m[2][0] = xz + wy;
+    m[0][1] = xy + wz;
+    m[1][1] = 1.0f - (xx + zz);
+    m[2][1] = yz - wx;
+    m[0][2] = xz - wy;
+    m[1][2] = yz + wx;
+    m[2][2] = 1.0f - (xx + yy);
+}
+
+// Smoothstep on [0, 1], mirrored for negative t and clamped to [-1, 1].
+static inline f32 Ease(f32 t) {
+    f32 e;
+    if (t < -1.0f) {
+        e = -1.0f;
+    } else if (t > 1.0f) {
+        e = 1.0f;
+    } else if (t > 0.0f) {
+        e = t * (-2.0f * t * t) + 3.0f * t * t;
+    } else {
+        e = t * (-2.0f * t * t) - 3.0f * t * t;
+    }
+    return e;
+}
+
+// The current pose and field of view of transition `slot`; follows a moving target unless the transition
+// is to a fixed camera (kind 0x22), and ends the transition once it is complete.
+void fn_8027656C(CamPose* out, f32* fov, int slot) {
+    f32 t = fn_80277704(slot);
+    if (lbl_8049FD58[slot].kind != 0x22) {
+        CamPose p;
+        f32 f;
+        fn_8026A49C(slot, &p, &f);
+        PoseToQuat(&p, lbl_8049FD58[slot].q1);
+        lbl_8049FD58[slot].p1.v[0] = p.pos.v[0];
+        lbl_8049FD58[slot].p1.v[1] = p.pos.v[1];
+        lbl_8049FD58[slot].p1.v[2] = p.pos.v[2];
+        lbl_8049FD58[slot].fov1 = f;
+    }
+    if (t >= 1.0f || t < 0.0f) {
+        if (t < 0.0f) {
+            fn_802E30C8("physcam: Clock looped during camera transition!!!");
+        }
+        CamShot* s = &lbl_8049FD58[slot];
+        QuatToPose(out, s->q1);
+        out->pos.v[0] = s->p1.v[0];
+        out->pos.v[1] = s->p1.v[1];
+        out->pos.v[2] = s->p1.v[2];
+        *fov = s->fov1;
+        lbl_8049FD58[slot].active = 0;
+        return;
+    }
+    f32 e = Ease(t);
+    f32 q[4];
+    fn_8012F57C(q, lbl_8049FD58[slot].q0, lbl_8049FD58[slot].q1, e);
+    CamShot* s = &lbl_8049FD58[slot];
+    QuatToPose(out, q);
+    CamVec3 v;
+    v.v[2] = s->p0.v[2] + e * (s->p1.v[2] - s->p0.v[2]);
+    v.v[1] = s->p0.v[1] + e * (s->p1.v[1] - s->p0.v[1]);
+    v.v[0] = s->p0.v[0] + e * (s->p1.v[0] - s->p0.v[0]);
+    out->pos = v;
+    *fov = s->fov0 + e * (s->fov1 - s->fov0);
+}
 
 NamedCam* fn_80276A44(const char* name) {
     NamedCam* c = lbl_8049FEE0;
