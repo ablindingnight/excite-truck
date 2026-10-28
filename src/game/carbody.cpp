@@ -702,9 +702,9 @@ void fn_8018A2C0(u8* p, TuneSink* t) {
 }
 #pragma pop
 
-void fn_8018A654(u8* p, u8* cfg) {
+void fn_8018A654(u8* p, const u8* cfg) {
     if (*(s8*)(cfg + 0xEC)) {
-        u8* m = fn_801D2008(cfg + 0xEC);
+        u8* m = fn_801D2008((u8*)cfg + 0xEC);
         PTR(p, 0x26C0) = m;
         if (S32(m, 0x10) > 0) {
             S32(p, 0x26C4) = fn_801C1C1C();
@@ -1034,6 +1034,7 @@ int fn_8018BA54(u8* p, u8* pk) {
 
 void fn_8018BDEC(u8* p) {
     f32 m[12];
+    f32* mtx = m;
     f32 z = 0.0f;
     f32 one = 1.0f;
     m[1] = z;
@@ -1049,7 +1050,7 @@ void fn_8018BDEC(u8* p) {
     m[10] = z;
     m[11] = z;
     if (PTR(p, 0x26C4)) {
-        fn_801C2BF8(PTR(p, 0x26C4), m);
+        fn_801C2BF8(PTR(p, 0x26C4), mtx);
     }
 }
 
