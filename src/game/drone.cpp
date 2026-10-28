@@ -841,8 +841,10 @@ void LinearPathTMH::Init(TObj* o) {
     if (count >= 6) {
         fn_802E317C("exceeded limit of %d paths", 6);
     }
+    f32 lo = d->intervalMin;
+    f32 hi = d->intervalMax;
     paths[count].data = d;
-    paths[count].timer = fn_80129DC4(0, d->intervalMin, d->intervalMax);
+    paths[count].timer = fn_80129DC4(0, lo, hi);
     count++;
 }
 
