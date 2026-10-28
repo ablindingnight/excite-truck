@@ -104,6 +104,11 @@ struct MLBatch {
 };
 
 struct MLRange {
+    // Widens the range to cover batch i.
+    void Add(int i) {
+        lo = i < lo ? i : lo;
+        hi = i + 1 > hi ? i + 1 : hi;
+    }
     s32 lo;     // offset 0x0 (first batch)
     s32 hi;     // offset 0x4 (last batch + 1)
     s32 first;  // offset 0x8 (first object)
@@ -348,9 +353,7 @@ void fn_802CCE24(MList* m) {
         } else {
             fn_802E317C("mlist: unhandled priority %d", pr);
         }
-        MLRange* r = &m->ranges[cls];
-        r->lo = i < r->lo ? i : r->lo;
-        r->hi = i + 1 > r->hi ? i + 1 : r->hi;
+        m->ranges[cls].Add(i);
     }
     m->flags |= 2;
 }

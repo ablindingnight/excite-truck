@@ -1386,17 +1386,20 @@ void fn_801C56AC(void) {
                 to.x = tgt.x;
                 to.y = 0.0f;
                 to.z = tgt.y;
-                fn_8018ADAC(car, ClampSigned(0.1f * PSVECDotProduct(&to, &car->side) + 0.9f * -car->yawRate));
+                f32 side = PSVECDotProduct(&to, &car->side);
+                fn_8018ADAC(car, ClampSigned(0.1f * side + 0.9f * -car->yawRate));
                 if (o->kind == 3 || o->kind == 4) {
                     IVec3 rel;
                     rel.x = lead->pos.x - car->pos.x;
                     rel.y = lead->pos.y - car->pos.y;
                     rel.z = lead->pos.z - car->pos.z;
                     f32 gap = PSVECDotProduct(&rel, &car->fwd) - o->z;
-                    f32 a = 0.5f + (o->speed - car->speed);
+                    f32 carSpeed = car->speed;
+                    f32 a = 0.5f + (o->speed - carSpeed);
                     IMotion m;
                     m.p2 = 0.0f;
-                    m.v2 = lead->speed;
+                    f32 leadSpeed = lead->speed;
+                    m.v2 = leadSpeed;
                     m.a2 = 0.0f;
                     m.p1 = -gap;
                     m.v1 = car->speed;
@@ -1404,7 +1407,8 @@ void fn_801C56AC(void) {
                     f32 r = fn_80139030(&m);
                     fn_8018ADB4(car, Clamp01(10.0f * r));
                     fn_8018ADBC(car, Clamp01(-r));
-                    f32 base = lead->speed + 0.5f * (o->speed - lead->speed);
+                    f32 leadNow = lead->speed;
+                    f32 base = leadNow + 0.5f * (o->speed - leadNow);
                     if (gap > 0.0f) {
                         speed = base + 0.5f * (gap * o->speed);
                     } else {
