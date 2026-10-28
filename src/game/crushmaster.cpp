@@ -1329,7 +1329,8 @@ static inline V2 FindSpot(const ValVec3* p) {
     V2 c;
     c.x = p->x;
     c.y = p->z;
-    return fn_80171FF0(&c, 99, 15.0f, 5.0f);
+    V2 spot = fn_80171FF0(&c, 99, 15.0f, 5.0f);
+    return spot;
 }
 
 static inline void NormV2(V2* d) {
