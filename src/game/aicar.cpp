@@ -1997,7 +1997,8 @@ f32 fn_801973FC(const V2* n, const V2* a, const V2* b) {
     V2 v;
     v.x = a->x - b->x;
     v.y = a->y - b->y;
-    return n->x * v.x + n->y * v.y;
+    f32 nx = n->x;
+    return nx * v.x + n->y * v.y;
 }
 
 void fn_8019743C(u8* d, u8* out) {}
