@@ -229,17 +229,17 @@ extern "C" {
 
 void fn_802924E8(void) { lbl_804B4168.Clear(); }
 
-extern const f32 lbl_805644D8;  // 0.0
+static inline f64 Rest(f32 x, f32 used) { return sqrt(1.0f - x * x - used); }
 
 void fn_802924F4(void) {
     Spin* s = lbl_804B4030;
     for (int i = 0; i < 6; i++, s++) {
         f32 x = Rand(-1.0f, 1.0f);
-        f32 r = sqrt(1.0f - x * x - lbl_805644D8);
-        f32 y = Rand(-(f32)sqrt(1.0f - x * x - lbl_805644D8), r);
+        f32 r = Rest(x, 0.0f);
+        f32 y = Rand(-(f32)Rest(x, 0.0f), r);
         f32 y2 = y * y;
-        f32 z = sqrt(1.0f - x * x - y2);
-        f32 sign = Rand(-1.0f, 1.0f) > lbl_805644D8 ? 1.0f : -1.0f;
+        f32 z = Rest(x, y2);
+        f32 sign = Rand(-1.0f, 1.0f) > 0.0f ? 1.0f : -1.0f;
         PVec a;
         a.x = x;
         a.y = y;
