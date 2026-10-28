@@ -365,7 +365,7 @@ void fn_802B5F24(int fd) {
     fn_80128678();
 }
 
-extern const f32 lbl_80564C58;  // 2.0
+static inline f32 GridToWorld(int v, f32 cell) { return (f32)v * cell; }
 
 void fn_802B5F98(const char* name) {
     int fd = fn_802E3D68("worldmodel.mml");
@@ -379,8 +379,8 @@ void fn_802B5F98(const char* name) {
     for (int x = -0x200; x <= 0x200; x += 8) {
         for (int z = -0x200; z <= 0x200; z += 8) {
             V3 nrm;
-            f32 fx = (f32)x * lbl_80564C58;
-            f32 fz = (f32)z * lbl_80564C58;
+            f32 fx = GridToWorld(x, 2.0f);
+            f32 fz = GridToWorld(z, 2.0f);
             f32 h = fn_801DCF48(&nrm, fx, fz);
             f32 u = (f32)(x + 0x200) / 1024.0f;
             f32 v = (f32)(z + 0x200) / 1024.0f;
