@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "macros.h"
 #include "game/menustate.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -109,7 +110,155 @@ void fn_802591D8(void) {
 
 u32 fn_8025921C(void) { return 0; }
 
-int fn_80259224(u8* p) { return 0; }  // stub (279)
+}  // extern "C"
+
+// Achievement categories in viewer order.
+struct AchCategoryRef {
+    s32 category;
+    const char* name;
+};
+AchCategoryRef lbl_80344EA0[7] = {
+    {1, "ach_1st.art"}, {2, "ach_aaa.art"}, {3, "ach_air.art"}, {4, "ach_trun.art"},
+    {5, "ach_drft.art"}, {7, "ach_hits.art"}, {6, "ach_ring.art"},
+};
+
+void* operator new(unsigned long n, const char* tag);
+extern const char lbl_8055BAB8[];  // ""
+extern const char lbl_8055B860[];  // ""
+s32 AchievementsGetLevelThreshold(int category, int level);
+extern "C" {
+u8* fn_802CAC28(const char* name, int a);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+}
+
+// Tally speeds by level.
+extern const f32 lbl_802FA628[5] = {0.75f, 0.8f, 0.85f, 0.95f, 1.0f};
+extern const MenuDesc lbl_802FA63C = {"ep_trophy.lyt", 0, 0, 0, 0};
+
+// The trophy model shown in the achievement viewer (vtable lbl_80345158; deleting dtor fn_80259680).
+struct TrophyView {
+    void* vt;          // offset 0x0
+    char model[50];    // offset 0x4
+    char level[20];    // offset 0x36
+    u8 shown;          // offset 0x4A
+    s32 levelNum;      // offset 0x4C
+    s32 handle;        // offset 0x50
+    u8 pad54[0x30];
+    f32 rot[9];        // offset 0x84
+    u8* env;           // offset 0xA8
+
+    void Release(void) {
+        vt = lbl_80345158;
+        if (handle != -1) {
+            fn_802C6CF8(handle);
+            handle = -1;
+        }
+        fn_802CAC54(env);
+    }
+};
+
+extern void* lbl_803450F8[];
+
+
+// The trophy's menu widget (vtable lbl_803450F8): the viewer, the level and its caption.
+struct TrophyController {
+    TrophyController(TrophyView* v, s32 cat, s32 lvl) {
+        unk14 = 0;
+        vt = lbl_803450F8;
+        view = v;
+        category = cat;
+        level = lvl;
+        text[0] = 0;
+        shownLevel = lvl;
+    }
+    void* vt;          // offset 0x0
+    s32 x, y, w, h;    // offset 0x4
+    int unk14;         // offset 0x14
+    TrophyView* view;  // offset 0x18
+    s32 level;         // offset 0x1C
+    char text[0x50];   // offset 0x20
+    s32 category;      // offset 0x70
+    s32 shownLevel;    // offset 0x74
+};
+
+extern UnkStatic123s lbl_80498E98;
+const char* AchievementsGetCategoryName(int cat);
+
+
+extern "C" {
+void fn_802368E0(void);
+void fn_80216CA8(void);
+void fn_80259740(int x, f32 v);
+
+// The trophy viewer for one achievement row: its model, level and the five level thresholds.
+int fn_80259224(u8* p) {
+    TrophyView view;
+    view.vt = lbl_80345158;
+    view.handle = -1;
+    view.rot[0] = 1.0f;
+    view.rot[1] = 0.0f;
+    view.rot[2] = 0.0f;
+    view.rot[3] = 0.0f;
+    view.rot[4] = 1.0f;
+    view.rot[5] = 0.0f;
+    view.rot[6] = 0.0f;
+    view.rot[7] = 0.0f;
+    view.rot[8] = 1.0f;
+    view.model[0] = 0;
+    view.level[0] = 0;
+    view.env = fn_802CAC28("tr_env.tex", 0);
+    view.shown = 0;
+    view.levelNum = 5;
+    TrophyController* ctl;
+    if (fn_8025921C()) {
+        ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), 5);
+    } else {
+        ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), S32(p, 0xC8));
+    }
+    s32 level = S32(p, 0xC8);
+    view.levelNum = level;
+    const char* model = AchievementsGetLevelModel(S32(p, 0x18), level);
+    if (model) {
+        CopyName(model, 50, view.model);
+    } else {
+        view.model[0] = 0;
+    }
+    if (level > 0) {
+        fn_801345D8(view.level, 20, "Level %d", level);
+    } else {
+        view.level[0] = 0;
+    }
+    view.shown = 1;
+    char counts[32][5];
+    for (int i = 1; i <= 5; i++) {
+        fn_801345D8(counts[i - 1], 0x20, "%d", AchievementsGetLevelThreshold(S32(p, 0x18), i));
+    }
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_80259740, 2, 0),
+        MenuItem(0, 5, ctl, 0, 0),
+        MenuItem("trophy", 0x13, &view, 0, 0),
+        MenuItem("trophy", ctl->text),
+        MenuItem("achievement_title", AchievementsGetCategoryName(S32(p, 0x18))),
+        MenuItem("achievement_icon", lbl_80344EA0[S32(p, 0x24)].name),
+        MenuItem("cnt1", counts[0]),
+        MenuItem("cnt2", counts[1]),
+        MenuItem("cnt3", counts[2]),
+        MenuItem("cnt4", counts[3]),
+        MenuItem("cnt5", counts[4]),
+        MenuItem(lbl_8055B860, 6, 0, -1, 27),
+        MenuItem(lbl_80498E98),
+    };
+    MenuDesc desc = lbl_802FA63C;
+    desc.items = items;
+    fn_802368E0();
+    fn_80216CA8();
+    int r = fn_802146BC(&desc, -999, -999, 1);
+    if (ctl) {
+        delete (MenuState*)ctl;
+    }
+    view.Release();
+    return r;
+}
 
 u8* fn_80259680(u8* p, int del) {
     if (p) {
@@ -260,12 +409,6 @@ public:
     f32 tally;           // offset 0xCC
 };
 
-// Achievement categories in viewer order.
-struct AchCategoryRef {
-    s32 category;
-    const char* name;
-};
-extern AchCategoryRef lbl_80344EA0[7];
 
 extern "C" {
 void fn_80259148(void);
