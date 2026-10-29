@@ -806,7 +806,8 @@ void fn_80117618(void *arg0, void *arg1) {
 
 void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
 
-s32 fn_8011ACC4(void *reader, void *name, s32 flags);
+struct BinkIO8011;
+s32 fn_8011ACC4(struct BinkIO8011 *reader, const char *name, u32 flags);
 BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags);
 void fn_8011FE20(void **slot, s32 size);
 void fn_8011DFAC(void *arg0, u32 arg1);
@@ -2193,7 +2194,13 @@ typedef struct BinkIO8011 {
     volatile u32 curBufSize;      // 0x48
     volatile u32 curBufUsed;      // 0x4C
     volatile u32 unk50;           // 0x50
-    u8 iodata[1];                 // 0x54: the file state (BinkFile8011)
+    u8 iodata[160];               // 0x54: the file state (BinkFile8011)
+    void (*suspend)(struct BinkIO8011 *io);       // 0xF4
+    s32 (*trySuspend)(struct BinkIO8011 *io);     // 0xF8
+    void (*resume)(struct BinkIO8011 *io);        // 0xFC
+    void (*idleOn)(struct BinkIO8011 *io);        // 0x100
+    u8 callbacks[0x1C];           // 0x104 RAD callback registration
+    u8 unk120[0x24];              // 0x120
 } BinkIO8011;
 
 // The DVD file reader's state inside BinkIO8011::iodata: a ring buffer filled ahead by async reads.
@@ -2492,38 +2499,30 @@ extern void fn_8011AC10(void*, s32, s32, s32, s32);
 extern s32 fn_8011A7CC(DVDFileInfo*);
 extern void fn_8011AC84(void*);
 extern s32 fn_8011A870(void*, s32);
-s32 fn_8011ACC4(void* arg0, void* arg1, s32 arg2) {
-    s32 size = *(s32*)((u8*)arg1 + 0x2C);
-    memset(arg0, 0, 0x144);
-    if (arg2 & 0x800000) {
-        *(u32*)((u8*)arg0 + 0x54) = *(u32*)((u8*)arg1 + 0x00);
-        *(u32*)((u8*)arg0 + 0x58) = *(u32*)((u8*)arg1 + 0x04);
-        *(u32*)((u8*)arg0 + 0x5C) = *(u32*)((u8*)arg1 + 0x08);
-        *(u32*)((u8*)arg0 + 0x60) = *(u32*)((u8*)arg1 + 0x0C);
-        *(u32*)((u8*)arg0 + 0x64) = *(u32*)((u8*)arg1 + 0x10);
-        *(u32*)((u8*)arg0 + 0x68) = *(u32*)((u8*)arg1 + 0x14);
-        *(u32*)((u8*)arg0 + 0x6C) = *(u32*)((u8*)arg1 + 0x18);
-        *(u32*)((u8*)arg0 + 0x70) = *(u32*)((u8*)arg1 + 0x1C);
-        *(u32*)((u8*)arg0 + 0x74) = *(u32*)((u8*)arg1 + 0x20);
-        *(u32*)((u8*)arg0 + 0x78) = *(u32*)((u8*)arg1 + 0x24);
-        *(u32*)((u8*)arg0 + 0x7C) = *(u32*)((u8*)arg1 + 0x28);
-        *(u32*)((u8*)arg0 + 0x80) = size;
-        *(u32*)((u8*)arg0 + 0x84) = *(u32*)((u8*)arg1 + 0x30);
-        *(u32*)((u8*)arg0 + 0x88) = *(u32*)((u8*)arg1 + 0x34);
-        *(u32*)((u8*)arg0 + 0x8C) = *(u32*)((u8*)arg1 + 0x38);
-        *(u32*)((u8*)arg0 + 0xB0) = 1;
-        *(u32*)((u8*)arg0 + 0xB4) = size;
+// BinkFileOpen: sets up `io` as a DVD file reader for `name`, or (flag 0x800000) for an already open
+// DVDFileInfo passed in place of the name, whose userData is the movie's offset in that file.
+s32 fn_8011ACC4(BinkIO8011 *io, const char *name, u32 flags) {
+    memset(io, 0, sizeof(BinkIO8011));
+
+    if (flags & 0x800000) {
+        BINKFILE(io)->fi = *(DVDFileInfo *)name;
+        BINKFILE(io)->dontClose = 1;
+        BINKFILE(io)->startOfs = (u32)BINKFILE(io)->fi.block.userData;
     } else {
-        if (DVDConvertPathToEntrynum(arg1) == -1) return 0;
-        if (DVDFastOpen((u8*)arg0 + 0x54) == 0) return 0;
+        s32 entry = DVDConvertPathToEntrynum(name);
+        if (entry == -1)
+            return 0;
+        if (!DVDFastOpen(entry, &BINKFILE(io)->fi))
+            return 0;
     }
-    ((void**)arg0)[0] = fn_8011A388;
-    ((void**)arg0)[1] = fn_8011A8FC;
-    ((void**)arg0)[2] = fn_8011AC04;
-    ((void**)arg0)[3] = fn_8011AC10;
-    ((void**)arg0)[4] = fn_8011A7CC;
-    ((void**)arg0)[5] = fn_8011AC84;
-    ((void**)arg0)[6] = fn_8011A870;
+
+    io->readHeader = (void *)fn_8011A388;
+    io->readFrame = (void *)fn_8011A8FC;
+    io->getBufferSize = (void *)fn_8011AC04;
+    io->setInfo = (void *)fn_8011AC10;
+    io->idle = (void *)fn_8011A7CC;
+    io->close = (void *)fn_8011AC84;
+    io->unk18 = (void *)fn_8011A870;
     return 1;
 }
 
