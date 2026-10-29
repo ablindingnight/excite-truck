@@ -542,7 +542,7 @@ int fn_801B0E40(int i, s32* place) {
     for (k = p - 1; k >= lo; k--) {
         if (fn_801B0DF0(fn_801B2F40(k - 1))) {
             *place = k + 1;
-            return 1;
+            break;
         }
     }
     return 1;
