@@ -538,13 +538,13 @@ s32 fn_80116D30(void) {
     return delta + ms;
 }
 
-extern void* fn_8011FF24(void);
+extern u32 fn_8011FF24(void);
 extern void *fn_8011FF2C(s32);
 // Allocates `size` bytes for player p, counting them (plus allocator overhead) in its memory total.
 void *fn_80116DDC(void *p, s32 size) {
-    void *overhead = fn_8011FF24();
+    u32 overhead = fn_8011FF24();
     s32 *fields = (s32 *)p;
-    fields[0x290 / 4] += size + (s32)overhead;
+    fields[0x290 / 4] += size + overhead;
     return fn_8011FF2C(size);
 }
 
@@ -809,7 +809,7 @@ void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
 struct BinkIO8011;
 s32 fn_8011ACC4(struct BinkIO8011 *reader, const char *name, u32 flags);
 BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags);
-void fn_8011FE20(void **slot, s32 size);
+void fn_8011FE20(void **slot, u32 amount);
 void fn_8011DFAC(void *arg0, u32 arg1);
 void *fn_8011BE48(s32 arg0);
 void fn_8011C120(void *arg0);
@@ -2842,7 +2842,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
 }
 
 
-void fn_8011FE20(void **slot, s32 size);
+void fn_8011FE20(void **slot, u32 amount);
 extern u32 lbl_80329B60[25];  // critical band frequencies (Hz)
 
 // MSL's inline sqrtf: three Newton steps from the frsqrte estimate.
@@ -4770,18 +4770,15 @@ u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyfra
     return result;
 }
 
-extern void *lbl_8055DEF0;
-extern void *lbl_8055DEF0;
+extern u32 lbl_8055DEF0;  // total size of the pushed allocations
 extern u32 lbl_8055DEF4;
-// Registers *slot for the next batched allocation (fn_8011FF2C). Sizes are rounded to 32 bytes and padded so
-// consecutive buffers start in different cache sets; the registration arrays double when full.
-void fn_8011FE20(void **slot, s32 size) {
-    void ***slots;
-    u32 *sizes;
-    u32 padded;
+// pushmalloc: registers *slot for the next batched allocation (fn_8011FF2C = popmalloc). Sizes are rounded to
+// 32 bytes and padded so consecutive buffers start in different cache sets; the registration arrays double
+// when full.
+void fn_8011FE20(void **slot, u32 amount) {
     if (lbl_80559950 == lbl_8055DEF4) {
-        slots = fn_8011FFC4(lbl_80559950 * 16);
-        sizes = (u32 *)((u8 *)slots + lbl_80559950 * 8);
+        void ***slots = fn_8011FFC4(lbl_80559950 * 16);
+        u32 *sizes = (u32 *)((u8 *)slots + lbl_80559950 * 8);
         memcpy(slots, lbl_80559948, lbl_80559950 * 4);
         memcpy(sizes, lbl_8055994C, lbl_80559950 * 4);
         lbl_80559950 *= 2;
@@ -4791,14 +4788,14 @@ void fn_8011FE20(void **slot, s32 size) {
         lbl_80559948 = slots;
         lbl_8055994C = sizes;
     }
-    padded = ((size + 31) & ~31) +
-             (((((u32)lbl_8055DEF0 >> 5) & 31) + 33 - (((u32)(size + 31) >> 5) & 31)) << 5 & 0x3E0);
-    lbl_8055DEF0 = (u8 *)lbl_8055DEF0 + padded;
-    lbl_8055994C[lbl_8055DEF4] = padded;
+    amount = (amount + 31) & ~31;
+    amount += ((((lbl_8055DEF0 >> 5) & 31) + 33 - ((amount >> 5) & 31)) << 5) & 0x3E0;
+    lbl_8055DEF0 += amount;
+    lbl_8055994C[lbl_8055DEF4] = amount;
     lbl_80559948[lbl_8055DEF4++] = slot;
 }
 
-void* fn_8011FF24(void) {
+u32 fn_8011FF24(void) {
     return lbl_8055DEF0;
 }
 
@@ -4807,7 +4804,7 @@ extern u32 lbl_8055DEF4;
 void *fn_8011FF2C(s32 arg0) {
     s32 size = (arg0 + 0x1F) & ~0x1F;
     u32 i;
-    u8 *block = fn_8011FFC4((s32)lbl_8055DEF0 + size);
+    u8 *block = fn_8011FFC4(lbl_8055DEF0 + size);
     u8 *p;
     lbl_8055DEF0 = 0;
     if (block != 0) {
