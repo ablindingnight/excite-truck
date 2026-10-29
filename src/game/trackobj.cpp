@@ -273,6 +273,12 @@ struct AnimInst {
 class Sound3D {
 public:
     virtual ~Sound3D(void);
+    void SetVolume(f32 v) {
+        if (v != volume) {
+            dirty = 1;
+            volume = v;
+        }
+    }
     u8 pad4[4];
     f32 volume;      // offset 0x8
     u8 padC[0x49 - 0xC];
@@ -287,6 +293,7 @@ public:
 
 // A placed sound (0x18).
 struct EWSound {
+    EWSound(const PlacedObj* o);
     ~EWSound(void) {
         if (snd) {
             delete snd;
@@ -1943,23 +1950,22 @@ void fn_801FC4D8(AnimInst** list, AnimInst* a) {
 }
 }
 
-void SoundDesc::Create(const PlacedObj* o) {
-    EWSound* s = new ("EWSound") EWSound;
-    if (s) {
-        s->pos = o->frame.pos;
-        ValueNode* node = o->node;
-        const char* name = node->GetString("sound", lbl_8055EC70->GetValue("sound"));
-        f32 vol = node->GetFloat("volume", lbl_8055EC70->GetFloat("volume"));
-        s->snd = fn_802077A4(name, 8, &lbl_80488898, &s->pos);
-        if (s->snd) {
-            if (vol != s->snd->volume) {
-                s->snd->dirty = 1;
-                s->snd->volume = vol;
-            }
-            s->snd->nearDist = node->GetFloat("near_distance", s->snd->nearDist);
-        }
-        s->tag = lbl_8055EC40.cur;
+inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
+    f32 vol;
+    const char* name;
+    ValueNode* node = o->node;
+    name = node->GetString("sound", lbl_8055EC70->GetValue("sound"));
+    vol = node->GetFloat("volume", lbl_8055EC70->GetFloat("volume"));
+    snd = fn_802077A4(name, 8, &lbl_80488898, &pos);
+    if (snd) {
+        snd->SetVolume(vol);
+        snd->nearDist = node->GetFloat("near_distance", snd->nearDist);
     }
+    tag = lbl_8055EC40.cur;
+}
+
+void SoundDesc::Create(const PlacedObj* o) {
+    EWSound* s = new ("EWSound") EWSound(o);
     fn_801FC644(&lbl_8055EC6C, s);
 }
 
