@@ -1898,7 +1898,8 @@ s32 fn_80119CB0(void *arg0, s32 arg1) {
 extern s32 lbl_8055DEE0[];
 extern s32 lbl_8055DEE4;
 extern s32 lbl_8055DEE8;
-extern void fn_8011A6A0(void *);
+struct BinkIO8011;
+extern void fn_8011A6A0(struct BinkIO8011 *);
 extern void TRKGetFreeBuffer(void *);
 extern s32 lbl_8055DEE0[2];  // the sample buffer allocator: alloc, free
 extern s32 lbl_8055DEE8;
@@ -2166,127 +2167,6 @@ void fn_8011A45C(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-void fn_8011A4F8(u32 arg0, void *arg1) {
-#define FIELD(p, o) (*(s32 *)((u8 *)(p) + (o)))
-    s32 temp_r3_2, temp_r3_4, temp_r4;
-    u32 temp_r3, temp_r3_3, var_r30;
-    void *temp_r31;
-    var_r30 = arg0;
-    temp_r31 = *(void **)((u8 *)arg1 + 0x7C);
-    if (FIELD(temp_r31, 0xC4) == 0) {
-        if ((arg0 != 0x8000) && (arg0 != (u32)((FIELD(temp_r31, 0xB8) - FIELD(temp_r31, 0x90)) + FIELD(temp_r31, 0x94)))) {
-            FIELD(temp_r31, 0x24) = 0; FIELD(temp_r31, 0x20) = 1; return;
-        }
-        temp_r4 = FIELD(temp_r31, 0x94);
-        if (temp_r4 != 0) {
-            temp_r3 = *(u32 *)((u8 *)temp_r31 + 0xAC);
-            memmove((void *)temp_r3, (void *)(temp_r3 + temp_r4), FIELD(temp_r31, 0xB8) - FIELD(temp_r31, 0x90));
-            temp_r3_2 = FIELD(temp_r31, 0x94); FIELD(temp_r31, 0x94) = 0; var_r30 -= temp_r3_2;
-        }
-        FIELD(temp_r31, 0x28) += var_r30; FIELD(temp_r31, 0x90) += var_r30;
-        temp_r3_3 = *(u32 *)((u8 *)temp_r31 + 0xAC) + var_r30;
-        *(u32 *)((u8 *)temp_r31 + 0xAC) = temp_r3_3;
-        if (temp_r3_3 >= *(u32 *)((u8 *)temp_r31 + 0xA8)) *(u32 *)((u8 *)temp_r31 + 0xAC) = *(u32 *)((u8 *)temp_r31 + 0xA4);
-        FIELD(temp_r31, 0xA0) -= var_r30;
-        *(u32 *)((u8 *)temp_r31 + 0x4C) += var_r30;
-        if (*(u32 *)((u8 *)temp_r31 + 0x4C) > *(u32 *)((u8 *)temp_r31 + 0x44)) *(u32 *)((u8 *)temp_r31 + 0x44) = *(u32 *)((u8 *)temp_r31 + 0x4C);
-        if (FIELD(temp_r31, 0xBC) != 0) fn_8011A45C(temp_r31, var_r30, FIELD(temp_r31, 0xCC));
-        temp_r3_4 = fn_80116D30() - FIELD(temp_r31, 0xCC);
-        FIELD(temp_r31, 0xCC) = temp_r3_4; FIELD(temp_r31, 0x30) += temp_r3_4;
-        if (FIELD(temp_r31, 0xC8) != 0 || FIELD(temp_r31, 0x2C) != 0) FIELD(temp_r31, 0x3C) += FIELD(temp_r31, 0xCC);
-        else FIELD(temp_r31, 0x38) += FIELD(temp_r31, 0xCC);
-        FIELD(temp_r31, 0x24) = 0;
-        if (FIELD(temp_r31, 0x50) == 0) fn_8011A6A0(temp_r31);
-    }
-#undef FIELD
-}
-
-void fn_8011A6A0(void* arg0) {
-    s32 status = DVDGetDriveStatus();
-    s32 remaining = *(s32*)((u8*)arg0 + 0xB8) - *(s32*)((u8*)arg0 + 0x90);
-    if (status != 10) {
-        if (status < 10) {
-            if (status == -1 || status >= 3)
-                goto set_flag;
-            goto check_read;
-        }
-        if (status < 12)
-            goto set_flag;
-        goto done;
-    }
-check_read:
-    if (*(s32*)((u8*)arg0 + 0xC4) != 0)
-        goto done;
-    if (status != 0 && status != 10)
-        goto done;
-    if (*(u32*)((u8*)arg0 + 0xA0) >= 0x8000 && remaining != 0) {
-        *(s32*)((u8*)arg0 + 0xC8) = *(s32*)((u8*)arg0 + 0x2C);
-        *(s32*)((u8*)arg0 + 0xCC) = fn_80116D30();
-        *(s32*)((u8*)arg0 + 0x24) = 1;
-        if ((u32)remaining > 0x8000)
-            remaining = 0x8000;
-        else if (remaining & 0x1F) {
-            s32 pad = (-remaining) & 0x1F;
-            *(s32*)((u8*)arg0 + 0x94) = pad;
-            remaining += pad;
-        }
-        DVDReadAsyncPrio((u8*)arg0 + 0x54, *(s32*)((u8*)arg0 + 0xAC), remaining,
-            *(s32*)((u8*)arg0 + 0xB4) + (*(s32*)((u8*)arg0 + 0x90) - *(s32*)((u8*)arg0 + 0x94)),
-            fn_8011A4F8, 0);
-        goto done;
-    }
-    *(s32*)((u8*)arg0 + 0x48) = *(s32*)((u8*)arg0 + 0x4C);
-    goto done;
-set_flag:
-    *(s32*)((u8*)arg0 + 0x20) = 1;
-done:
-    return;
-}
-
-s32 fn_8011A7CC(DVDFileInfo *info) {
-    s32 *p = (s32 *)info;
-    s32 status;
-    if (p[0x20 / 4] != 0) return 0;
-    if (p[0x50 / 4] != 0) return 0;
-    status = DVDGetDriveStatus();
-    switch (status) {
-    case 0:  /* END */
-        fn_8011A6A0(info);
-        break;
-    case -1: /* FATAL_ERROR */
-    case 3:  /* COVER_CLOSED */
-    case 4:  /* NO_DISK */
-    case 5:  /* COVER_OPEN */
-    case 6:  /* WRONG_DISK */
-    case 7:  /* MOTOR_STOPPED */
-    case 8:  /* PAUSING */
-    case 9:  /* IGNORED */
-    case 11: /* RETRY */
-        p[0x20 / 4] = 1;
-        break;
-    }
-    return p[0x24 / 4];
-}
-
-// 0x50 is a state flag the DVD callbacks also change: every access is volatile.
-s32 fn_8011A870(void *arg0, s32 arg1) {
-    if (arg1 & 1) {
-        if (*(volatile s32 *)((char *)arg0 + 0x50) == 0)
-            *(volatile s32 *)((char *)arg0 + 0x50) = 1;
-        if (arg1 & 0x80000000) {
-            // busy-wait until the flag is cleared elsewhere (volatile: re-read every pass)
-            while (*(volatile s32 *)((char *)arg0 + 0x24) != 0) {
-            }
-        }
-    } else if (arg1 & 2) {
-        if ((u32)*(volatile s32 *)((char *)arg0 + 0x50) == 1U)
-            *(volatile s32 *)((char *)arg0 + 0x50) = 0;
-        if (arg1 & 0x80000000)
-            fn_8011A7CC(arg0);
-    }
-    return *(volatile s32 *)((char *)arg0 + 0x50);
-}
-
 // RAD's Bink I/O object as the Wii library lays it out (the GameCube one has no slots at 0x18 and 0x50).
 // Layout and reader logic cross-checked against the n100f decomp's GameCube Bink (ngcfile.c), used as a
 // reference only; the code here is written from this game's own instructions.
@@ -2331,9 +2211,147 @@ typedef struct BinkFile8011 {
     u32 startOfs;                 // 0x60
     u32 fileSize;                 // 0x64
     u32 simulate;                 // 0x68 simulated read rate (bytes/s), 0 = off
+    s32 simTime;                  // 0x6C
+    volatile u32 cancelling;      // 0x70 set while fn_8011A330 cancels the pending read
+    u32 wasWorking;               // 0x74 io->working when the read started
+    u32 readStart;                // 0x78 timer at the read's start, then its duration
+    struct BinkIO8011 *io;        // 0x7C owner, for the DVD callback
 } BinkFile8011;
 
 #define BINKFILE(io) ((BinkFile8011 *)(io)->iodata)
+
+// DVDReadCallback: an async read of the ring finished. Checks the length (a full 0x8000 block, or the rest
+// of the file plus the alignment skip), drops the skip bytes, advances the ring and the counters, then starts
+// the next read unless the reader is suspended.
+void fn_8011A4F8(s32 result, DVDFileInfo *fi) {
+    BinkIO8011 *io = ((BinkFile8011 *)fi)->io;
+
+    if (BINKFILE(io)->cancelling)
+        return;
+
+    if (result != 0x8000 && result != BINKFILE(io)->fileSize - BINKFILE(io)->filePos + BINKFILE(io)->skip) {
+        io->doingRead = 0;
+        io->readError = 1;
+        return;
+    }
+
+    if (BINKFILE(io)->skip) {
+        memmove(BINKFILE(io)->bufTail, BINKFILE(io)->bufTail + BINKFILE(io)->skip, BINKFILE(io)->fileSize - BINKFILE(io)->filePos);
+        result -= BINKFILE(io)->skip;
+        BINKFILE(io)->skip = 0;
+    }
+
+    io->bytesRead += result;
+    BINKFILE(io)->filePos += result;
+    BINKFILE(io)->bufTail += result;
+    if (BINKFILE(io)->bufTail >= BINKFILE(io)->bufEnd)
+        BINKFILE(io)->bufTail = BINKFILE(io)->buf;
+    BINKFILE(io)->bufEmpty -= result;
+    io->curBufUsed += result;
+    if (io->curBufUsed > io->bufHighUsed)
+        io->bufHighUsed = io->curBufUsed;
+
+    if (BINKFILE(io)->simulate)
+        fn_8011A45C(io, result, BINKFILE(io)->readStart);
+
+    BINKFILE(io)->readStart = fn_80116D30() - BINKFILE(io)->readStart;
+    io->totalTime += BINKFILE(io)->readStart;
+    if (BINKFILE(io)->wasWorking || io->working)
+        io->threadTime += BINKFILE(io)->readStart;
+    else
+        io->idleTime += BINKFILE(io)->readStart;
+
+    io->doingRead = 0;
+    if (io->unk50 == 0)
+        fn_8011A6A0(io);
+}
+
+// ReadKickoff: flags a drive error, or (when the drive is idle and no cancel is in progress) starts the next
+// async read of up to 0x8000 bytes into the ring's tail; the file's last block is padded to 32 bytes by
+// starting the read earlier (`skip`). With no room or nothing left, the current size is what is buffered.
+void fn_8011A6A0(BinkIO8011 *io) {
+    s32 status = DVDGetDriveStatus();
+    u32 left = BINKFILE(io)->fileSize - BINKFILE(io)->filePos;
+
+    switch (status) {
+    case -1:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 11:
+        io->readError = 1;
+        return;
+    }
+
+    if (BINKFILE(io)->cancelling || (status != 0 && status != 10))
+        return;
+    {
+        if (BINKFILE(io)->bufEmpty >= 0x8000 && left) {
+            BINKFILE(io)->wasWorking = io->working;
+            BINKFILE(io)->readStart = fn_80116D30();
+            io->doingRead = 1;
+            if (left > 0x8000)
+                left = 0x8000;
+            else if (left & 31) {
+                BINKFILE(io)->skip = -left & 31;
+                left += BINKFILE(io)->skip;
+            }
+            DVDReadAsyncPrio(&BINKFILE(io)->fi, BINKFILE(io)->bufTail, left,
+                             BINKFILE(io)->filePos - BINKFILE(io)->skip + BINKFILE(io)->startOfs, fn_8011A4F8, 0);
+        } else {
+            io->curBufSize = io->curBufUsed;
+        }
+    }
+}
+
+s32 fn_8011A7CC(DVDFileInfo *info) {
+    s32 *p = (s32 *)info;
+    s32 status;
+    if (p[0x20 / 4] != 0) return 0;
+    if (p[0x50 / 4] != 0) return 0;
+    status = DVDGetDriveStatus();
+    switch (status) {
+    case 0:  /* END */
+        fn_8011A6A0((struct BinkIO8011 *)info);  // info is the BinkIO8011 itself
+        break;
+    case -1: /* FATAL_ERROR */
+    case 3:  /* COVER_CLOSED */
+    case 4:  /* NO_DISK */
+    case 5:  /* COVER_OPEN */
+    case 6:  /* WRONG_DISK */
+    case 7:  /* MOTOR_STOPPED */
+    case 8:  /* PAUSING */
+    case 9:  /* IGNORED */
+    case 11: /* RETRY */
+        p[0x20 / 4] = 1;
+        break;
+    }
+    return p[0x24 / 4];
+}
+
+// 0x50 is a state flag the DVD callbacks also change: every access is volatile.
+s32 fn_8011A870(void *arg0, s32 arg1) {
+    if (arg1 & 1) {
+        if (*(volatile s32 *)((char *)arg0 + 0x50) == 0)
+            *(volatile s32 *)((char *)arg0 + 0x50) = 1;
+        if (arg1 & 0x80000000) {
+            // busy-wait until the flag is cleared elsewhere (volatile: re-read every pass)
+            while (*(volatile s32 *)((char *)arg0 + 0x24) != 0) {
+            }
+        }
+    } else if (arg1 & 2) {
+        if ((u32)*(volatile s32 *)((char *)arg0 + 0x50) == 1U)
+            *(volatile s32 *)((char *)arg0 + 0x50) = 0;
+        if (arg1 & 0x80000000)
+            fn_8011A7CC(arg0);
+    }
+    return *(volatile s32 *)((char *)arg0 + 0x50);
+}
+
 
 extern u32 fn_8011A240(void *, u32, s32, u32);
 extern void fn_8011A45C(void *, s32, s32);
