@@ -136,7 +136,8 @@ static int IsSeqNode(ValueNode* node) { return strcasecmp(node->GetName(), "seq"
 f32 FXSequence::GetLength(void) {
     f32 len = 0.0f;
     for (int i = 0; i < count; i++) {
-        len = (len > nodes[i].end) ? len : nodes[i].end;
+        f32 e = nodes[i].end;
+        len = (len > e) ? len : e;
     }
     return len;
 }
