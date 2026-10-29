@@ -934,7 +934,7 @@ f32 fn_802C7808(s32 i) { return fn_802C5390(i)->info->radius; }
 
 static inline int IsDigit(int c) { return c >= '0' && c <= '9'; }
 
-u32 fn_802C7830(const char* s) {
+u32 fn_802C7830(char* s) {
     u32 v = 0;
     while (*s) {
         char c = *s;
