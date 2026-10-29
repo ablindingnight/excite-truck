@@ -135,6 +135,7 @@ f32 fn_8017F70C(f32 x);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 f32 fn_801C0E44(const RVec3* v);
+void fn_801E41D8(const RVec3* a, const RVec3* b, u32 color, f32 width);
 void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
 }
 f32 Max(f32 a, f32 b);
@@ -481,6 +482,24 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     }
 }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// dst = rotation of m applied to src, with the aliasing guard of the inline.
+static inline void MulRot(RVec3* dst, const RVec3& src, const RMtx* m) {
+    if (dst == &src) {
+        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
+        f32 y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
+        f32 z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+        dst->x = x;
+        dst->y = y;
+        dst->z = z;
+    } else {
+        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
+        dst->y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
+        dst->z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+    }
+}
+
 void fn_801C2B9C(RVec3* out, const RVec3* a, const RVec3* d, f32 k) {
     out->x = a->x + d->x * k;
     out->y = a->y + d->y * k;
@@ -493,7 +512,28 @@ void fn_801C2BDC(PSys* s, s32* n, RVec3** pos, RVec3** old) {
     *old = s->old;
 }
 
-// Debug draw of the sticks (placeholder).
-void fn_801C2BF8(PSys* s, void* ctx) {}
+// Debug draw: each stick as a line between its two particles, carried into the frame m.
+void fn_801C2BF8(PSys* s, const RMtx* m) {
+    u32 col;
+    int n = s->nStick;
+    int i = 0;
+    if (n > 0) {
+        col = lbl_8055E7C8.value;
+        for (; i < n; i++) {
+            PStick* st = &s->sticks[i];
+            int ia = st->a;
+            int ib = st->b;
+            RVec3 a = s->pos[ia];
+            RVec3 b = s->pos[ib];
+            RVec3 wa;
+            RVec3 wb;
+            MulRot(&wa, a, m);
+            AddTo(&wa, &m->pos);
+            MulRot(&wb, b, m);
+            AddTo(&wb, &m->pos);
+            fn_801E41D8(&wa, &wb, col, 0.04f);
+        }
+    }
+}
 
 }  // extern "C"
