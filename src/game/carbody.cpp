@@ -99,6 +99,41 @@ struct F32Pair {
 
 struct RVec3;
 
+struct BVec {
+    BVec(void) {}
+    BVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
+    f32 x, y, z;
+};
+
+// Plain 3-vector without constructors: copies move words.
+struct HVec {
+    f32 x, y, z;
+};
+
+struct CollShape;
+
+// The body's collision shape interface (vtable slots used here).
+class CbShapeV {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void SetGroup(int g);  // 0x40
+    virtual void SetMask(int m);   // 0x44
+};
+
+
 // A 12-word body pose.
 struct CbPose {
     u32 w[12];
@@ -108,6 +143,7 @@ class CollVolume {
 public:
     virtual ~CollVolume(void);
     void Update(void);
+    void AddShape(CollShape* s);
 };
 
 extern "C" {
@@ -454,7 +490,139 @@ extern "C" {
 
 void fn_80182074(u8* p) {}  // stub (864)
 
-void fn_80182DF4(u8* p) {}  // stub (570)
+// One wheel-contact corner (fn_801AE180 allocates it), linked into the body's list at 0xD0.
+struct CbCorner {
+    CbCorner* next;  // 0x00
+    BVec pos;        // 0x04
+    f32 spring;      // 0x10
+    f32 friction;    // 0x14
+    f32 damping;     // 0x18
+    BVec vel;        // 0x1C
+};
+
+CbCorner* fn_801AE180(void);
+s32 fn_801E3004(s32 model, const char* name, s32 a);
+HVec* fn_801E3630(s32 joint);
+void fn_801E323C(s32 joint);
+void fn_802C7760(s32 model, f32* x0, f32* x1, f32* y0, f32* y1, f32* z0, f32* z1);
+u8* fn_8019FFD8(u8* p, u8* frame, u8* owner);
+void fn_801A0258(u8* grp, const HVec* c, const BVec* mat, f32 r, f32 k, f32 d, f32 m, f32 im);
+u8* fn_801A2354(u8* p, u8* frame, const BVec* c, u8* owner, f32 k, f32 d, f32 hx, f32 hy, f32 hz);
+void fn_801A0444(u8* grp, u8* box);
+}  // extern "C"
+void* operator new(unsigned long n, const char* tag);
+extern "C" {
+
+static inline void AddBodyCorner(u8* p, f32 x, f32 y, f32 z, f32 spring) {
+    BVec pos;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    CbCorner* c = fn_801AE180();
+    c->pos = pos;
+    c->spring = spring;
+    c->friction = 0.5f;
+    c->vel.x = 0.0f;
+    c->vel.y = 0.0f;
+    c->vel.z = 0.0f;
+    c->damping = 0.0f;
+    c->next = *(CbCorner**)(p + 0xD0);
+    *(CbCorner**)(p + 0xD0) = c;
+}
+
+// One sphere of the body's collision group, at a point in body space (made relative to the centre of mass).
+static inline void AddBodySphere(u8* p, u8* g, f32 x, f32 y, f32 z, const BVec* mat, f32 r, f32 k, f32 d, f32 m, f32 im) {
+    BVec at(x, y, z);
+    HVec rel;
+    rel.x = at.x - F32(p, 0x30);
+    rel.y = at.y - F32(p, 0x34);
+    rel.z = at.z - F32(p, 0x38);
+    fn_801A0258(g, &rel, mat, r, k, d, m, im);
+}
+
+// Builds the body's collision: two wheel contact corners at the "wheel" joint, then a group of twelve spheres
+// sized from the model's bounding box (front, middle and rear rows) and a box around the whole body.
+void fn_80182DF4(u8* p) {
+    f32 minX = 0.0f;
+    f32 maxX = 0.0f;
+    f32 minY = 0.0f;
+    f32 maxY = 0.0f;
+    f32 minZ = 0.0f;
+    f32 maxZ = 0.0f;
+    f32 mass = 4938240000.0f;
+    f32 invMass = 0.5f / mass;
+    f32 stiff = 50000.0f;
+    f32 damp = 0.3f;
+    fn_802C7760(S32(p, 0x59C), &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
+    s32 wheel = fn_801E3004(S32(p, 0x59C), "wheel", -1);
+    if (wheel) {
+        HVec* o = fn_801E3630(wheel);
+        AddBodyCorner(p, o->x, maxY + F32(p, 0x34) + 0.1016f, o->z, 2.0f * stiff);
+        AddBodyCorner(p, -o->x, maxY + F32(p, 0x34) + 0.1016f, o->z, 2.0f * stiff);
+        fn_801E323C(wheel);
+    }
+    minY = FMax(minY, 0.2f);
+    HVec c = *(HVec*)(p + 0x30);
+    minX += c.x;
+    maxX += c.x;
+    minY += c.y;
+    maxY += c.y;
+    minZ += c.z;
+    maxZ += c.z;
+    if (S32(p, 0x1F0) == 84 && !(U32(fn_801769CC(), 0x4) & 0x1000)) {
+        maxZ -= 0.762f;
+    }
+    F32(p, 0x5BC) = maxZ;
+    u8* g = (u8*)operator new(0x184, "car-volume");
+    if (g) {
+        g = fn_8019FFD8(g, p + 0x3C, p);
+    }
+    PTR(p, 0x268) = g;
+    BVec rear(0.7f, 0.1f, 1.0f);
+    BVec mid(0.7f, 0.1f, 1.0f);
+    BVec front(0.7f, 0.1f, 1.0f);
+    f32 a = maxX - 0.45f;
+    f32 b = 0.8f * a;
+    f32 yRear = 0.36f + minY;
+    f32 yMid = 0.45f + minY;
+    f32 zRear = maxZ - 0.45f;
+    f32 h = 0.5f * (maxY - minY);
+    f32 zMid = 0.5f * (minZ + maxZ);
+    f32 zFront = 0.44999998f + minZ;
+    f32 zRearMid = 0.5f * (zRear + zMid);
+    f32 xSide = maxX - h;
+    f32 xFront = maxX - 0.44999998f;
+    f32 zFrontMid = 0.5f * (zFront + zMid);
+    f32 ySide = minY + h;
+    f32 yFront = 0.44999998f + minY;
+    AddBodySphere(p, PTR(p, 0x268), -b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), -a, 0.254f + yMid, zRearMid, &mid, 0.45f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), a, 0.254f + yMid, zRearMid, &mid, 0.45f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), 0.8f * -xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), 0.8f * xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), -xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), -xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    BVec center(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
+    u8* box = (u8*)operator new(0x74, "car_box");
+    if (box) {
+        box = fn_801A2354(box, p + 0x3C, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
+                          0.5f * (maxZ - minZ));
+    }
+    fn_801A0444(PTR(p, 0x268), box);
+    ((CollVolume*)p)->AddShape((CollShape*)PTR(p, 0x268));
+    U8(p, 0x1E8) = 1;
+    ((CbShapeV*)PTR(p, 0x268))->SetGroup(0x6D);
+    if (U32(p, 0x10) == 'PCAR') {
+        ((CbShapeV*)PTR(p, 0x268))->SetMask(1);
+    } else {
+        ((CbShapeV*)PTR(p, 0x268))->SetMask(6);
+    }
+}
 
 void fn_801836DC(void) {}
 
@@ -475,12 +643,6 @@ public:
     virtual void v30(void);
     virtual void Unimpair(void);   // 0x34
     virtual int IsImpaired(void);  // 0x38
-};
-
-struct BVec {
-    BVec(void) {}
-    BVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    f32 x, y, z;
 };
 
 static inline void Scale(BVec* o, const BVec* a, f32 k) {
@@ -922,10 +1084,6 @@ void fn_80188A80(u8* p) {
 
 u32 fn_80188E24(u8* p) { return 0; }
 
-// Plain 3-vector without constructors: copies move words.
-struct HVec {
-    f32 x, y, z;
-};
 
 // The body pose in the render snapshot: rotation rows, then the position (copied block by block).
 struct SnapRot {
