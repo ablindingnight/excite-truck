@@ -500,15 +500,12 @@ s32 fn_8028F040(SysList* a, SysList* b, s32 tex) {
         s32 t = a->items[i]->tex;
         if (t != tex) {
             int found = 0;
-            PartSys** q = b->items;
             int j = 0;
-            while (j < b->count) {
-                PartSys* o = *q++;
+            int n = b->count;
+            PartSys** q = b->items;
+            while (!found && j < n) {
+                found = (*q++)->tex == t;
                 j++;
-                found = o->tex == t;
-                if (found) {
-                    break;
-                }
             }
             if (found) {
                 return t;
