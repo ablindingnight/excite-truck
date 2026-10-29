@@ -466,7 +466,7 @@ public:
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
-    virtual void v18(void);
+    virtual u8* Info(void);  // 0x18
     virtual void v1C(void);
     virtual void v20(void);
     virtual void v24(void);
@@ -922,12 +922,174 @@ void fn_80188A80(u8* p) {
 
 u32 fn_80188E24(u8* p) { return 0; }
 
-void fn_80188E2C(u8* p) {}  // stub (464)
-
 // Plain 3-vector without constructors: copies move words.
 struct HVec {
     f32 x, y, z;
 };
+
+// The body pose in the render snapshot: rotation rows, then the position (copied block by block).
+struct SnapRot {
+    f32 m[9];
+};
+struct SnapPos {
+    f32 v[3];
+};
+struct SnapPose {
+    SnapRot rot;
+    SnapPos pos;
+};
+
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+
+extern f32 lbl_8055E460;  // render interpolation factor between the last two physics steps
+extern u8 lbl_8055E4F5;
+extern s32 lbl_8055E3C4;  // frame counter
+void fn_8018DA5C(u8* p, u8* m);
+u32 fn_8018B06C(u8* p);
+void fn_8018A9F0(u8* p, u8* m);
+double sqrt(double);
+static inline f32 Len2(f32 x, f32 z) { return sqrt(x * x + z * z); }
+
+// Fills this car's render snapshot (0xFA8 bytes at buf + 0x8): the body pose interpolated between the last
+// two physics steps, state flags and gauges, and the four wheels (interpolated hub positions, suspension and
+// spin). If a wheel sinks below its contact height, the whole body is lifted by the deepest one.
+void fn_80188E2C(u8* p, u8* buf) {
+    SnapPose tmp;
+    u8* m = buf + S32(p, 0x8);
+    memset(m, 0, 0xFA8);
+    f32 t = lbl_8055E460;
+    SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
+    if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+        *pose = *(SnapPose*)(p + 0x70);
+    } else {
+        f32* o = (f32*)&tmp;
+        const f32* prev = (const f32*)(p + 0xA0);
+        const f32* cur = (const f32*)(p + 0x70);
+        for (int i = 0; i < 12; i++) {
+            o[i] = prev[i] + t * (cur[i] - prev[i]);
+        }
+        *pose = tmp;
+    }
+    *(s16*)((u8*)pose + 0x30) = *(s16*)(p + 0x6C);
+    u16 flags = 0;
+    if (((CarHost*)PTR(p, 0x270))->IsImpaired()) {
+        flags |= 0x40;
+    }
+    if (!NearZero(F32(p, 0x2690))) {
+        flags |= 0x20;
+    }
+    F32(m, 0x34) = F32(p, 0x25D0);
+    F32(m, 0x4C) = Len2(F32(p, 0x118), F32(p, 0x120));
+    F32(m, 0x3C) = F32(p, 0x25F0);
+    F32(m, 0x38) = F32(p, 0x25F4);
+    F32(m, 0x40) = F32(p, 0x25E4);
+    F32(m, 0x44) = F32(p, 0x25F8);
+    U32(m, 0x48) = fn_8018B06C(p);
+    F32(m, 0x50) = 100.0f;
+    if (lbl_8055E4F5 && S32(p, 0x24) == 0) {
+        F32(m, 0x22C) = (lbl_8055E3C4 & 4) ? 0.0f : 1.0f;
+    } else {
+        F32(m, 0x22C) = 1.0f;
+    }
+    U16(m, 0x6E) = flags;
+    F32(m, 0x70) = F32(p, 0x118);
+    F32(m, 0x74) = F32(p, 0x11C);
+    F32(m, 0x78) = F32(p, 0x120);
+    F32(m, 0x64) = F32(p, 0x25D4);
+    F32(m, 0x2C4) = F32(p, 0x2588);
+    F32(m, 0x28C) = U8(p, 0x26E0) ? FMax(F32(p, 0x2690), 0.01f) : F32(p, 0x2690);
+    F32(m, 0x290) = F32(p, 0x2694);
+    F32(m, 0x294) = F32(p, 0x2698);
+    S32(m, 0x298) = S32(p, 0x268C);
+    f32 v = F32(p, 0x25BC);
+    if (Positive(v)) {
+        F32(m, 0x2D4) = v;
+    } else {
+        F32(m, 0x2D4) = 0.0f;
+    }
+    F32(m, 0x2A8) = F32(p, 0x25A0);
+    S32(m, 0x29C) = S32(p, 0x5A0);
+    if (F32(p, 0x25E4) > 0.1f && !(flags & 0x20)) {
+        U32(m, 0x29C) |= 0x20000000;
+    } else {
+        U32(m, 0x29C) |= 0x10000000;
+    }
+    F32(m, 0x238) = F32(p, 0x2660);
+    F32(m, 0x23C) = F32(p, 0x2664);
+    F32(m, 0x240) = F32(p, 0x2668);
+    f32 sink = 0.0f;
+    u8* wheels = m + 0x7C;
+    u8* w = p + 0x23AC;
+    u8* o = wheels;
+    for (int i = 0; i < 4; i++) {
+        HVec a = *(HVec*)(w + 0x30);
+        a.x = a.x - F32(p, 0x30);
+        a.y = a.y - F32(p, 0x34);
+        a.z = a.z - F32(p, 0x38);
+        HVec b = a;
+        a.y = a.y + F32(w, 0xC);
+        b.y = b.y + F32(w, 0x1C);
+        HVec c;
+        c.x = b.x + lbl_8055E460 * (a.x - b.x);
+        c.y = b.y + lbl_8055E460 * (a.y - b.y);
+        c.z = b.z + lbl_8055E460 * (a.z - b.z);
+        F32(o, 0x0) = c.x;
+        F32(o, 0x4) = c.y;
+        F32(o, 0x8) = c.z;
+        sink = FMax(sink, c.y - F32(w, 0x40));
+        F32(o, 0xC) = F32(w, 0x4C);
+        F32(o, 0x10) = F32(w, 0x50);
+        F32(o, 0x14) = F32(w, 0x54);
+        F32(o, 0x18) = F32(w, 0x58);
+        F32(o, 0x1C) = F32(w, 0x5C);
+        F32(o, 0x20) = F32(w, 0x60);
+        F32(o, 0x24) = F32(w, 0xC);
+        F32(o, 0x28) = F32(w, 0x14);
+        F32(o, 0x2C) = F32(w, 0x18);
+        F32(o, 0x30) = F32(w, 0x0);
+        F32(o, 0x34) = F32(w, 0x8) + 0.016683351f * (F32(w, 0x0) * (lbl_8055E460 - 1.0f));
+        F32(o, 0x38) = F32(w, 0x68);
+        F32(o, 0x3C) = F32(w, 0x44);
+        F32(o, 0x40) = F32(w, 0x48);
+        F32(o, 0x44) = F32(w, 0x10);
+        F32(o, 0x48) = 0.0f;
+        F32(o, 0x4C) = 0.0f;
+        F32(o, 0x50) = 0.0f;
+        F32(o, 0x54) = 0.0f;
+        F32(o, 0x58) = 0.0f;
+        F32(o, 0x5C) = 0.0f;
+        S32(o, 0x60) = S32(w, 0x70);
+        U8(o, 0x64) = U8(w, 0x20);
+        S32(o, 0x68) = S32(w, 0x64);
+        w += 0x74;
+        o += 0x6C;
+    }
+    F32(m, 0x2C8) = F32(((CarHost*)PTR(p, 0x270))->Info(), 0x48);
+    F32(m, 0x2CC) = F32(p, 0x26CC);
+    F32(m, 0x2D0) = F32(p, 0x5E4);
+    S32(m, 0x2D8) = S32(p, 0x26D4);
+    fn_8018DA5C(p, m);
+    if (sink > 0.01f) {
+        F32(m, 0x24) = F32(m, 0x24) + F32(m, 0xC) * sink;
+        F32(m, 0x28) = F32(m, 0x28) + F32(m, 0x10) * sink;
+        F32(m, 0x2C) = F32(m, 0x2C) + F32(m, 0x14) * sink;
+        for (int i = 0; i < 4; i++) {
+            F32(wheels + i * 0x6C, 0x4) = FMax(F32(wheels + i * 0x6C, 0x4) - sink, -0.6096f);
+        }
+        u8* e = m + 0xA7C;
+        for (int i = 0; i < S32(m, 0xA78); i++) {
+            F32(e, 0x24) = F32(e, 0x24) + F32(m, 0xC) * sink;
+            F32(e, 0x28) = F32(e, 0x28) + F32(m, 0x10) * sink;
+            F32(e, 0x2C) = F32(e, 0x2C) + F32(m, 0x14) * sink;
+            e += 0x34;
+        }
+    }
+    if (S32(p, 0x26C0)) {
+        fn_8018A9F0(p, m);
+    } else {
+        S32(m, 0xFA4) = 0;
+    }
+}
 
 // A rotation of plain row vectors, copied row by row.
 struct HRot {
