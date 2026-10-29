@@ -47,7 +47,129 @@ void fn_8018C5A0(u8* p) {}  // stub (359)
 
 void fn_8018CB3C(u8* p) {}  // stub (968)
 
-void fn_8018DA5C(u8* p) {}  // stub (270)
+struct EVec {
+    f32 x, y, z;
+};
+
+struct DMat3 {
+    f32 m[9];
+};
+
+// A part's transform (rotation + position).
+struct DFrame {
+    DMat3 rot;  // offset 0x0
+    EVec pos;   // offset 0x24
+};
+
+// A detachable part's live state (0x80 bytes from car + 0x152C).
+struct DmgSlot {
+    s32 on;         // offset 0x0
+    u8 pad4[0x14];  // offset 0x4
+    DFrame cur;     // offset 0x18
+    DFrame prev;    // offset 0x48
+    u8 pad78[4];    // offset 0x78
+    s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
+};
+
+// A loose part handed to the renderer.
+struct DmgDraw {
+    DFrame frame;  // offset 0x0
+    u32 mask;      // offset 0x30
+};
+
+// Views of the car (deformation points) and its draw model used here.
+struct DmgCarView {
+    u8 pad0[0x5F8];
+    s32 nPoints;      // offset 0x5F8
+    EVec goal[162];   // offset 0x5FC
+    EVec ease[1];     // offset 0xD94
+};
+
+struct DmgPose {
+    u8 pad0[0x2E0];
+    EVec pt[1];  // offset 0x2E0
+};
+
+extern f32 lbl_8055E460;    // tick alpha
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+
+static inline void SetE(EVec* d, const EVec* s) {
+    d->x = s->x;
+    d->y = s->y;
+    d->z = s->z;
+}
+static inline f32 DmgMax(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+// Fills the model's damage pose: eases the wheel offsets toward their targets, bends the body points by the
+// lean/twist (when the deformation is on), hides the parts that are gone and lists the flying ones with their
+// frame interpolated to the tick.
+void fn_8018DA5C(u8* p, u8* m) {
+    DmgCarView* car = (DmgCarView*)p;
+    DmgPose* mdl = (DmgPose*)m;
+    EVec* e = car->ease;
+    for (int i = 0; i < car->nPoints; i++) {
+        f32 x = car->ease[i].x * 0.8f;
+        f32 y = car->ease[i].y * 0.8f;
+        f32 z = car->ease[i].z * 0.8f;
+        car->ease[i].x = x + car->goal[i].x * (1.0f - 0.8f);
+        car->ease[i].y = y + car->goal[i].y * (1.0f - 0.8f);
+        car->ease[i].z = z + car->goal[i].z * (1.0f - 0.8f);
+        SetE(&mdl->pt[i], e + i);
+    }
+    if (U8(p, 0x26E0)) {
+        f32 lean = F32(p, 0x26E8);
+        f32 twist = 0.2f * F32(p, 0x26E4);
+        f32 roll = 0.1f * F32(p, 0x26EC);
+        lean = lean > -0.25f ? lean : -0.25f;
+        for (int i = 1; i < car->nPoints; i++) {
+            u8* pt = PTR(p, 0x26C) + i * 0x34;
+            EVec v;
+            v.x = 0.0f;
+            v.y = 0.0f;
+            v.z = 0.0f;
+            f32 z = F32(pt, 0x28);
+            f32 az = (f32)__fabs(z);
+            v.z += -0.5f * z * roll;
+            v.x += roll * (-0.3f * (F32(pt, 0x20) * (az - 0.7f)));
+            v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
+            f32 w = DmgMax(0.0f, 3.0f - az);
+            v.y += 0.5f * lean * (F32(pt, 0x24) * w);
+            v.x += twist * DmgMax(0.0f, 3.0f - (f32)__fabs(F32(pt, 0x28)));
+            mdl->pt[i] = v;
+        }
+    }
+    U32(m, 0x29C) |= U32(p, 0x1E40);
+    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    DamagePart* tp = lbl_80332840;
+    f32 t = lbl_8055E460;
+    S32(m, 0xA78) = 0;
+    for (int i = 0; i < 17; i++) {
+        if (s->on && s->state != 0 && s->state != 1) {
+            if (s->state == 3) {
+                U32(m, 0x29C) &= ~(1 << *(s32*)(tp->data + 4));
+            }
+            if (s->state == 2 || s->state == 4) {
+                DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
+                if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+                    d->frame = s->cur;
+                } else {
+                    DFrame f;
+                    f32* o = (f32*)&f;
+                    f32* a = (f32*)&s->prev;
+                    f32* b = (f32*)&s->cur;
+                    for (int j = 0; j < 12; j++) {
+                        *o++ = LerpF(*a++, *b++, t);
+                    }
+                    d->frame = f;
+                }
+                d->mask = 1 << *(s32*)(tp->data + 4);
+            }
+        }
+        tp++;
+        s++;
+    }
+}
 
 void fn_8018DE94(u8* p) {}  // stub (295)
 
