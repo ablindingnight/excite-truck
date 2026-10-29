@@ -3613,8 +3613,9 @@ inline void BetaMaster::vf94(RaceCarRec* rc) {
     if (c) {
         c->Finish();
     }
+    int i = rc->index;
     if (coins.enabled) {
-        coins.cars[rc->index].active = 0;
+        coins.cars[i].active = 0;
     }
 }
 

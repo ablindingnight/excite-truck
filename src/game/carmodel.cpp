@@ -508,7 +508,7 @@ void fn_801EC59C(Slider* s, ValueNode* n, const char* name, const f32* src, f32 
     }
 }
 
-void fn_801EC714(const Slider* s, f32* y, f32* z) {
+void fn_801EC714(Slider* s, f32* y, f32* z) {
     *y = s->by + *s->src * s->ky;
     *z = s->bz + *s->src * s->kz;
 }
