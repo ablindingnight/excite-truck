@@ -54,6 +54,7 @@ public:
     virtual int SetLine(CenterLine* line);
     virtual void Attach(CenterLine* line, V2* pos, V2* dir);
     void SetPosition(V2* pos, V2* dir, IdealPoint* start);
+    void Update(V2* pos);
     ILPos il;          // offset 0x4
     V2 dir;            // offset 0x10
     V2 off;            // offset 0x18
@@ -68,6 +69,7 @@ public:
     IdealFollower(int withTimes, CenterLine* line);
     void Reset(void);
     void Start(V2* pos, V2* dir, int resetTimes, IdealPoint* start);
+    int Track(V2* pos, f32* progress);
     u8 pad34[0x68 - 0x34];  // base, perp, lateral, ..., times, last, prev, flag (see idealline.cpp)
 };
 
@@ -117,6 +119,8 @@ public:
     s32 il;      // offset 0x1EC
     u8 pad1F0[0x5BC - 0x1F0];
     f32 ahead;   // offset 0x5BC
+    u8 pad5C0[0x5EC - 0x5C0];
+    f32 boost;   // offset 0x5EC: catch-up
 };
 
 class DAI {
@@ -187,7 +191,7 @@ public:
     virtual void mD0(void);
     virtual void mD4(void);
     virtual void mD8(void);
-    virtual void mDC(void);
+    virtual int mDC(void);
     virtual void mE0(void);
     virtual void mE4(void);
     virtual DAI* GetAI(void);  // 0xE8
@@ -229,6 +233,11 @@ public:
     virtual u8 Held(void);                // 0x38
     virtual ~DeityCar(void);              // 0x3C
     virtual DState* State2(void);         // 0x40
+    void SetRank(s32 r) {
+        if (!locked) {
+            rank = r;
+        }
+    }
     u8 state[0x38];        // offset 0x4
     LineFollower* line;    // offset 0x3C
     ILPos ideal;           // offset 0x40
@@ -843,8 +852,113 @@ void fn_801B1A5C(DeityCar* c) {
 
 }  // extern "C"
 
-// Per-car update (placeholder).
-void DeityCar::Update(void) {}
+static inline void RecordCrossing(s32 car, f32 tm) {
+    CrossQueue* q = &lbl_80435BE8;
+    if ((u32)q->n < 8) {
+        Crossing e;
+        e.car = car;
+        e.time = tm;
+        int i;
+        for (i = 0; i < q->n; i++) {
+            if (q->e[i].time > tm) {
+                break;
+            }
+        }
+        memmove(&lbl_80435BE8.e[i] + 1, &lbl_80435BE8.e[i], (q->n - i) * 8);
+        lbl_80435BE8.e[i] = e;
+        lbl_80435BE8.n++;
+    }
+}
+
+static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+extern "C" {
+u32 fn_801363A0(LineFollower* f, const ILPos* p);
+f32 fn_801B2F90(int a, int b);
+}
+
+// Per-car update: tracks the car along the centre and racing lines from a point just ahead of it, keeps the last
+// good line positions, records start/finish crossings in order, takes back a lap when it ran the line backwards,
+// runs the finish check and, with several players, scales the catch-up boost by how far the leader is ahead.
+void DeityCar::Update(void) {
+    f32 now = lbl_8055E3C8;
+    *(f32*)((u8*)this + 0x18) = now - finishTime;
+    DCar* k = car;
+    f32 q[3];
+    f32 a = k->ahead;
+    q[0] = k->pos[0] + k->fwd[0] * a;
+    q[1] = k->pos[1] + k->fwd[1] * a;
+    q[2] = k->pos[2] + k->fwd[2] * a;
+    V2 p;
+    p.x = q[0];
+    p.y = q[2];
+    PathSet* ps = fn_80156A40();
+    follower->Attach(ps->Center(index), &p, 0);
+    line->Attach(ps->Racing(index), &p, 0);
+    int free = 0;
+    if (fn_801B1130(index) && !lbl_8055E692) {
+        free = 1;
+    }
+    f32 back = 0.0f;
+    int r = follower->Track(&p, &back);
+    if (!free || lbl_8055E692) {
+        if (r == 0) {
+            r = 2;
+        } else if (r == 1) {
+            r = 3;
+        }
+    }
+    if (r == 2 || r == 0) {
+        IdealFollower* f = follower;
+        LineFollower* l = line;
+        ideal.seg = f->il.seg;
+        ideal.t = f->il.t;
+        ideal.mode = f->il.mode;
+        racing.seg = l->il.seg;
+        racing.t = l->il.t;
+        racing.mode = l->il.mode;
+    }
+    line->Update(&p);
+    IdealFollower* f = follower;
+    if (*((u8*)f + 0x64)) {
+        SetRank(index);
+    } else {
+        SetRank(fn_801363A0(f, &f->il));
+    }
+    int cross = r == 0;
+    if (lbl_8055E674 && car->type == 'PCAR' && !lbl_8055E6A8 && !(lbl_8055E3C4 & 0x3F)) {
+        cross = 1;
+    }
+    if (cross) {
+        RecordCrossing(index, now - back);
+        SetRank(lbl_8055E688);
+    }
+    if (r == 1) {
+        s32 l = *(s32*)((u8*)this + 0x14) - 1;
+        *(s32*)((u8*)this + 0x14) = l > 0 ? l : 0;
+    }
+    if (fn_801B83A0()->mDC()) {
+        fn_801B14E4(this);
+    }
+    if (lbl_8055E67C > 1 && Car()->type == 'PCAR') {
+        f32 lead = 0.0f;
+        for (int i = 0; i < lbl_8055E678; i++) {
+            DeityCar* o = &lbl_8055E684[i];
+            DCar* oc = o->Car();
+            if (i != index && oc->type == 'PCAR') {
+                s32 op = o->State()->place;
+                if (State()->place > op) {
+                    f32 d = fn_801B2F90(i, index);
+                    lead = lead > d ? lead : d;
+                }
+            }
+        }
+        f32 t = (lead - 2.0f) * 0.125f;
+        t = 1.0f < t ? 1.0f : t;
+        t = t > 0.0f ? t : 0.0f;
+        Car()->boost = LerpF(0.0f, 1.0f, t);
+    }
+}
 
 void DeityCar::v28(void* a, void* b, s32* out) {
     *out = 0;
