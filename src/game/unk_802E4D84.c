@@ -427,6 +427,7 @@ extern void fn_802E52EC(void);
 // 32 voices, clears the zero area at the end of ARAM, and starts the refill callback and the 150 Hz alarm.
 void fn_802E5478(void) {
     char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
+    float *vol;
     int i;
     void *vpb;
     void *zero;
@@ -467,8 +468,9 @@ void fn_802E5478(void) {
     fn_802E6B04();
     OSCreateAlarm(lbl_804FC690);
     OSSetPeriodicAlarm(lbl_804FC690, OSGetTime(), OSNanosecondsToTicks(6666667), fn_802E52EC);
+    vol = lbl_804FC680;
     for (i = 0; i < 4; i++) {
-        lbl_804FC680[i] = 1.0f;
+        *vol++ = 1.0f;
     }
     fn_802E2E0C(fn_802E540C, lbl_8055D1E0);
     lbl_8055FFA5 = 1;
