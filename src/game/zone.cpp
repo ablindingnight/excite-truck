@@ -731,8 +731,8 @@ struct EventRing {
         f32 bonus;  // offset 0x4
         Gate* gate;  // offset 0x8
     };
-    int Count(void) { return (cap + (tail - head)) % cap; }
-    Entry* Get(int i) {
+    int Count(void) const { return (cap + (tail - head)) % cap; }
+    Entry* Get(int i) const {
         if (i >= Count()) {
             return 0;
         }
