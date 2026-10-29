@@ -18,6 +18,11 @@ void PSVECCrossProduct(const void* a, const void* b, void* out);
 void* operator new(size_t size, const char* tag);
 
 struct CVec3 {
+    void Set(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
     f32 x;
     f32 y;
     f32 z;
@@ -417,9 +422,9 @@ extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t) {
     f32* o = &out->rot[0].x;
     const f32* p = &a->rot[0].x;
     const f32* q = &b->rot[0].x;
-    CVec3 x;
-    CVec3 y;
     CVec3 z;
+    CVec3 y;
+    CVec3 x;
     for (i = 0; i < 2; i++) {
         o[0] = p[0] + t * (q[0] - p[0]);
         o[1] = p[1] + t * (q[1] - p[1]);
@@ -434,8 +439,8 @@ extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t) {
     PSVECNormalize(&out->rot[0], &out->rot[0]);
     PSVECNormalize(&out->rot[1], &out->rot[1]);
     PSVECNormalize(&out->rot[2], &out->rot[2]);
-    x = out->rot[0];
-    z = out->rot[2];
+    x.Set(out->rot[0].x, out->rot[0].y, out->rot[0].z);
+    z.Set(out->rot[2].x, out->rot[2].y, out->rot[2].z);
     PSVECCrossProduct(&z, &x, &y);
     PSVECNormalize(&x, &x);
     PSVECNormalize(&y, &y);
