@@ -933,9 +933,8 @@ WaterShallow::WaterShallow(const PoolGeom* g, const char* texName) {
     corners[3].y = corners[1].y + u.y;
     corners[3].z = corners[1].z + u.z;
     Vec c;
-    c.x = corners[0].x + 0.5f * (corners[3].x - corners[0].x);
-    c.y = corners[0].y + 0.5f * (corners[3].y - corners[0].y);
-    c.z = corners[0].z + 0.5f * (corners[3].z - corners[0].z);
+    SetVec(&c, corners[0].x + 0.5f * (corners[3].x - corners[0].x), corners[0].y + 0.5f * (corners[3].y - corners[0].y),
+           corners[0].z + 0.5f * (corners[3].z - corners[0].z));
     center = c;
     radius = PSVECDistance(&corners[0], &center);
     tex = fn_802CAC28(texName, 0);
