@@ -720,7 +720,9 @@ void fn_8029D7D0(WaterPool* p, const WaterCarEntry* e) {
     f32 r2 = p->radius * p->radius;
     f32 dz = e->car->pos.z - p->center.z;
     f32 dx = e->car->pos.x - p->center.x;
-    if (dz * dz + dx * dx > r2) {
+    f32 xx = dx * dx;
+    f32 zz = dz * dz;
+    if (xx + zz > r2) {
         return;
     }
     for (int w = 0; w < 4; w++) {
@@ -969,7 +971,9 @@ void fn_8029EA34(WaterShallow* s, const WaterCarEntry* e) {
     f32 r2 = s->radius * s->radius;
     f32 dz = e->car->pos.z - s->center.z;
     f32 dx = e->car->pos.x - s->center.x;
-    if (dz * dz + dx * dx > r2) {
+    f32 xx = dx * dx;
+    f32 zz = dz * dz;
+    if (xx + zz > r2) {
         return;
     }
     for (int w = 0; w < 4; w++) {

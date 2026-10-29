@@ -498,9 +498,10 @@ void fn_8028ADF4(SparkEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
         return;
     }
+    f32 maxDist = 2500.0f;
     for (int i = 0; i < n; e++, i++) {
         const SparkCar* car = e->car;
-        if (!e->active || e->dist > 2500.0f) {
+        if (!e->active || e->dist > maxDist) {
             continue;
         }
         w = car->wheels;
