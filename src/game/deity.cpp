@@ -263,7 +263,7 @@ struct TeleportInfo {
     f32 pos[3];    // offset 0x24
     f32 vel[3];    // offset 0x30
     s32 a3C;       // offset 0x3C
-    u8 pad40[0x5C - 0x40];
+    s16 a40;       // offset 0x40
 };
 
 struct RaceInfo {
@@ -492,7 +492,7 @@ void fn_801B0BB0(LinePlace* out, const LineFollower* f) {
 void fn_801B0C78(int i) {
     DeityCar* c = &lbl_8055E684[i];
     TeleportInfo t;
-    *(s16*)((u8*)&t + 0x40) = -1;
+    t.a40 = -1;
     bool isPlayer = c->Car()->type == 'PCAR';
     if (isPlayer) {
         fn_801B30D0(i);
@@ -603,7 +603,7 @@ void fn_801B0F70(int i, s32 place) {
         fn_8018AF04(car);
     } else {
         TeleportInfo t;
-        *(s16*)((u8*)&t + 0x40) = -1;
+        t.a40 = -1;
         fn_801B07B4(&t, (ILPos*)&p);
         fn_801B08FC(c, &t);
     }
