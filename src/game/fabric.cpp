@@ -630,6 +630,9 @@ void fn_801F64E4(Fabric* f, const PVec* forces, f32 drag) {
 }
 
 void fn_801F65D0(Fabric* f) {
+    f32 dx;
+    f32 half = 0.5f;
+    f32 negativeHalf = -0.5f;
     int i;
     for (i = 0; i < f->numSticks; i++) {
         Stick* s = &f->sticks[i];
@@ -642,10 +645,10 @@ void fn_801F65D0(Fabric* f) {
         d.x = b->x - a->x;
         d.y = b->y - a->y;
         d.z = b->z - a->z;
-        k = 0.5f - s->rest / (s->rest + PSVECDotProduct(&d, &d));
-        ka = 0.5f * k;
-        kb = -0.5f * k;
-        f32 dx = d.x;
+        k = half - s->rest / (s->rest + PSVECDotProduct(&d, &d));
+        ka = half * k;
+        kb = negativeHalf * k;
+        dx = d.x;
         a->x += dx * ka;
         a->y += d.y * ka;
         a->z += d.z * ka;
