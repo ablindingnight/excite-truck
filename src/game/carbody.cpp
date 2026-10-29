@@ -2180,7 +2180,129 @@ void fn_8018B09C(u8* p, const RVec3* a, const RVec3* b, int c, void* d) {
 
 void fn_8018B0D0(u8* p, u32 v) { U32(p, 0x2610) = v; }
 
-void fn_8018B0D8(u8* p) {}  // stub (607)
+// A car's network/replay state packet (quantized).
+struct CbPacket {
+    u8 pad0[0x8];
+    u8 x[4];       // 0x08 position x (unaligned f32)
+    u8 pad0C[0x4];
+    u8 z[4];       // 0x10 position z
+    u8 pad14[0xC];
+    u16 rpm;       // 0x20
+    u8 steer;      // 0x22
+    u8 throttle;   // 0x23
+    u8 brake;      // 0x24
+    s8 gear;       // 0x25
+    u8 wheel[4][5];  // 0x26 per wheel: spin, slip, suspension, skid, flags
+    u16 flags;     // 0x3A
+    u8 boost;      // 0x3C
+    u8 pad3D[3];
+    s32 w40;       // 0x40
+};
+
+#define PK_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define PK_MAX(a, b) ((a) > (b) ? (a) : (b))
+// A quantized value v (0..q) back to lo..lo+span.
+static inline f32 PkNorm(u32 v, f32 lo, f32 range) {
+    f32 x = PK_MIN(1.0f, ((f32)v - lo) / range);
+    return PK_MAX(x, 0.0f);
+}
+#define PK_UNPACK(v, q, lo, span) ((lo) + PkNorm((v), 0.0f, (q)) * (span))
+
+static inline void PkCopy(void* dst, const void* src, int n) {
+    u8* d = (u8*)dst;
+    const u8* s = (const u8*)src;
+    while (n-- > 0) {
+        *d++ = *s++;
+    }
+}
+
+int vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(u8* p, f32 t, CbPacket* a, CbPacket* b, s32* na, s32* nb);
+void fn_8018ADB4(u8* p, f32 v);
+void fn_8018ADBC(u8* p, f32 v);
+void fn_801E9DD0(s16* surface, f32 x, f32 z);
+extern u8* lbl_8055E918;
+
+// CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
+// part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,
+// flags), then the ground lookup at prev's position. Both sizes read are 0x44 bytes.
+void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) {
+    int teleport = (prev->flags >> 9) & 1;
+    if (teleport) {
+        vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, cur, na, nb);
+    } else {
+        vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, prev, na, nb);
+    }
+    F32(p, 0x25D8) = F32(p, 0x25CC) = F32(p, 0x25D4) = PSVECMag(p + 0x118);
+    f32 v0 = PK_UNPACK(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
+    f32 v1 = PK_UNPACK(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
+    F32(p, 0x25D0) = v1 + t * (v0 - v1);
+    v0 = PK_UNPACK(prev->steer, 255.0f, -1.2f, 2.4f);
+    v1 = PK_UNPACK(cur->steer, 255.0f, -1.2f, 2.4f);
+    F32(p, 0x25DC) = F32(p, 0x25F0) = v1 + t * (v0 - v1);
+    if (cur->boost) {
+        f32 boost;
+        if (teleport) {
+            boost = PkNorm(cur->boost, 0.0f, 255.0f);
+        } else {
+            boost = PkNorm(prev->boost, 0.0f, 255.0f);
+            boost = PkNorm(cur->boost, 0.0f, 255.0f);
+        }
+    }
+    F32(p, 0x24A8) = 0.0f;
+    F32(p, 0x251C) = 0.0f;
+    F32(p, 0x25F8) = 1.0f;
+    F32(p, 0x23C0) = F32(p, 0x2434) = F32(p, 0x25F0) * F32(p, 0x5B0);
+    F32(p, 0x25E8) = 1.0f;
+    v0 = PK_UNPACK(prev->throttle, 255.0f, 0.0f, 1.0f);
+    v1 = PK_UNPACK(cur->throttle, 255.0f, 0.0f, 1.0f);
+    fn_8018ADB4(p, v1 + t * (v0 - v1));
+    v0 = PK_UNPACK(prev->brake, 255.0f, 0.0f, 1.0f);
+    v1 = PK_UNPACK(cur->brake, 255.0f, 0.0f, 1.0f);
+    fn_8018ADBC(p, v1 + t * (v0 - v1));
+    U32(p, 0x4) = cur->flags | prev->flags;
+    U8(p, 0x260D) = (cur->flags >> 8) & 1;
+    u8* w = p + 0x23AC;
+    const u8* c = cur->wheel[0];
+    const u8* q = prev->wheel[0];
+    for (int i = 0; i < 4; i++) {
+        f32 s0 = PK_UNPACK(q[2], 255.0f, 0.0f, 2.0f);
+        f32 s1 = PK_UNPACK(c[2], 255.0f, 0.0f, 2.0f);
+        F32(w, 0x1C) = F32(w, 0xC) = s1 + t * (s0 - s1);
+        f32 a1 = PK_UNPACK(c[0], 255.0f, -6.2831855f, 12.566371f);
+        f32 a0 = PK_UNPACK(q[0], 255.0f, -6.2831855f, 12.566371f);
+        if (a0 > a1) {
+            if (a0 - a1 > 3.1415927f) {
+                a1 += 6.2831855f;
+            }
+        } else if (a1 - a0 > 3.1415927f) {
+            a0 += 6.2831855f;
+        }
+        F32(w, 0x8) = a1 + t * (a0 - a1);
+        f32 l0 = PK_UNPACK(q[1], 255.0f, -100.0f, 200.0f);
+        f32 l1 = PK_UNPACK(c[1], 255.0f, -100.0f, 200.0f);
+        F32(w, 0x0) = l1 + t * (l0 - l1);
+        f32 k0 = PK_UNPACK(q[3], 255.0f, 0.0f, 10.0f);
+        f32 k1 = PK_UNPACK(c[3], 255.0f, 0.0f, 10.0f);
+        F32(w, 0x68) = k1 + t * (k0 - k1);
+        u8 f = c[4];
+        S32(w, 0x70) = f;
+        U8(w, 0x6C) = 1;
+        U8(w, 0x20) = f & 1;
+        w += 0x74;
+        c += 5;
+        q += 5;
+    }
+    u8* rec = lbl_8055E918 + S32(p, 0x1EC) * 0x9C;
+    S32(rec, 0x14) = cur->gear;
+    S32(rec, 0x8) = cur->gear;
+    S32(p, 0x2678) = cur->w40;
+    *nb = 0x44;
+    *na = 0x44;
+    f32 x, z;
+    PkCopy(&x, prev->x, 4);
+    PkCopy(&z, prev->z, 4);
+    fn_801E9DD0((s16*)(p + 0x6C), x, z);
+}
 
 }  // extern "C"
 
