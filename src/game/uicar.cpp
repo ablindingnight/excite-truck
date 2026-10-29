@@ -629,13 +629,17 @@ extern const f32 lbl_80563760;     // 0.37
 extern const f32 lbl_80563764;     // 1.0
 
 // Draws the text for one car stat at its level ("UICar:STAT_%i_TEXT_%i").
+// The stat value the bars compare against (field 0x24 points at it).
+static inline s32 StatOf(const u8* p) { return *(s32*)PTR(p, 0x24); }
+
 void fn_8024122C(u8* p) {
     f32 x, y;
     fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
     if (S32(p, 0x1C) >= 0) {
         int lvl = 0;
         for (int i = 0; i < 3; i++) {
-            if (*(s32*)PTR(p, 0x24) && *(s32*)PTR(p, 0x24) >= lbl_802FA300[i]) {
+            s32 v = StatOf(p);
+            if (v && v >= lbl_802FA300[i]) {
                 lvl = i + 1;
             }
         }
