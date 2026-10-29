@@ -1519,11 +1519,16 @@ void fn_80228010(void) {}  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
 }
 extern "C" {void fn_80015B20(void*,const RotationMatrix*,void*);double sin(double);}
-// MATCHING-AID: recovered used scalar wrapper preserves radius allocation; original type identity is unproved.
-struct ModelBoundScalarObservedNew {float value;inline ModelBoundScalarObservedNew(float v):value(v){}};
 struct ModelFitMatrixNew {RotationMatrix basis;RotationVec translation;};
 struct ModelFitAssetNew {void* dispatch;int resource;ModelFitMatrixNew matrix;float angle,speed;};
-struct ModelFitBoundsNew {float minX,maxX,minY,maxY,minZ,maxZ;inline float RadiusNew()const;};
+struct ModelAxisRangeNew {
+ float minimum, maximum;
+ inline float Span() const { return maximum - minimum; }
+};
+struct ModelFitBoundsNew {
+ ModelAxisRangeNew x, y, z;
+ inline float RadiusNew() const;
+};
 extern "C" {ModelFitMatrixNew* fn_802C86DC();void fn_802C77F0(int,ModelFitBoundsNew*);void fn_802C98DC(float*,float*,float*,float*);double sqrt(double);double atan(double);extern const float lbl_80563584;
 }
 // Rotation angles as a vector built from its three components.
@@ -1548,8 +1553,15 @@ static inline void ModelFitTransformNew(RotationVec* out,const ModelFitMatrixNew
   out->z=ModelDot3(v->x,m[2],v->y,m[5],v->z,m[8]);
  }
 }
-inline float ModelFitBoundsNew::RadiusNew()const{ModelBoundScalarObservedNew dy(maxY-minY);ModelBoundScalarObservedNew dx(maxX-minX);ModelBoundScalarObservedNew dz(maxZ-minZ);
- float xx=dx.value*dx.value;float yy=dy.value*dy.value;float zz=dz.value*dz.value;return GaugeHalfReferenceObservedNew()*(float)sqrt(zz+(xx+yy));}
+inline float ModelFitBoundsNew::RadiusNew() const {
+ float dy = y.Span();
+ float dx = x.Span();
+ float dz = z.Span();
+ float xx = dx * dx;
+ float yy = dy * dy;
+ float zz = dz * dz;
+ return GaugeHalfReferenceObservedNew() * (float)sqrt(zz + (xx + yy));
+}
 
 extern "C" {
 void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int height, float delta)
@@ -1579,9 +1591,9 @@ void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int hei
     distance = (distance > candidate) ? (distance) : (candidate);
     minimum = (minimum > distance) ? (minimum) : (distance);
     self->matrix.translation.z += minimum;
-    center.z = ModelFitCenterLerpNew(bounds.minZ, bounds.maxZ, GaugeHalfReferenceObservedNew());
-    center.y = ModelFitCenterLerpNew(bounds.minY, bounds.maxY, GaugeHalfReferenceObservedNew());
-    center.x = ModelFitCenterLerpNew(bounds.minX, bounds.maxX, GaugeHalfReferenceObservedNew());
+    center.z = ModelFitCenterLerpNew(bounds.z.minimum, bounds.z.maximum, GaugeHalfReferenceObservedNew());
+    center.y = ModelFitCenterLerpNew(bounds.y.minimum, bounds.y.maximum, GaugeHalfReferenceObservedNew());
+    center.x = ModelFitCenterLerpNew(bounds.x.minimum, bounds.x.maximum, GaugeHalfReferenceObservedNew());
     ModelFitTransformNew(&center, &self->matrix, &center);
     self->matrix.translation.x -= center.x;
     self->matrix.translation.y -= center.y;
