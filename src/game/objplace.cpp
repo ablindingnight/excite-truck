@@ -629,7 +629,8 @@ void fn_802B321C(InlineVec<ObjTweak, 1>* out, u8** clumpy, InlineVec<MatPlacer*,
     }
 }
 
-void fn_802B32E0(SetPlacer* set) {
+void fn_802B32E0(SetPlacer* placer) {
+    SetPlacer* set = placer;
     for (int i = 0; i < set->Count(); i++) {
         (*set->At(i))->Update();
     }

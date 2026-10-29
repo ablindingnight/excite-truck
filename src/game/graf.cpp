@@ -237,7 +237,8 @@ s32 fn_801EAFD4(GNode* n) {
     return 0;
 }
 
-void fn_801EB000(GNode* n, GrafVisitor* v) {
+void fn_801EB000(GNode* root, GrafVisitor* v) {
+    GNode* n = root;
     while (n) {
         if (n->type & 0x100) {
             fn_801EAFD4(n);
@@ -364,7 +365,8 @@ void fn_801EB66C(void* p, u32 base) {
 
 void fn_801EB6A4(void) {}
 
-void fn_801EB6A8(GNode* n) {
+void fn_801EB6A8(GNode* root) {
+    GNode* n = root;
     while (n) {
         switch (n->type) {
         case 0:
