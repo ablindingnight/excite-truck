@@ -278,6 +278,10 @@ void fn_8027EEE4(int level) {
 
 extern char lbl_80347E50[];  // this unit's string pool
 
+class EvPath;
+class EvBracket;
+struct EvResult;
+
 extern "C" {
 
 // "Career difficulty N unlocked" message box.
@@ -335,7 +339,7 @@ u8* fn_8027F834(u8* p, int del) {
     return p;
 }
 
-void fn_8027F958(u8* p) {}  // stub (976)
+int fn_8027F958(s32* bracket, EvPath* path) { return 0; }  // stub (976)
 
 int fn_80280898(void) {
     if (lbl_8055F688 == 0) {
@@ -546,7 +550,7 @@ void fn_80281138(void) {
     }
 }
 
-void fn_802812B4(u8* p) {}  // stub (2376)
+int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) { return 0; }  // stub (2376)
 
 u8* fn_802837D4(u8* p, int del) {
     if (p && del > 0) {
@@ -743,8 +747,6 @@ void fn_802840F4(u8* p) { fn_8027E908(); }
 
 void fn_802840F8(void) { fn_8027ED2C(); }
 
-void fn_802840FC(u8* p) {}  // stub (289)
-
 }  // extern "C"
 
 struct Unlockable {
@@ -777,6 +779,143 @@ public:
     virtual void v24(void);
     virtual const char* Reason(int i);  // 0x28
 };
+
+// Career path interfaces (slots used here; see pathcareer.cpp).
+class EvContest {
+public:
+    virtual ~EvContest(void);
+    virtual const char* TrackName(void);  // 0xC
+    virtual const char* Name(void);       // 0x10
+    virtual const char* TypeName(void);   // 0x14
+    virtual const char* TypeDisplayName(void);  // 0x18
+    virtual const char* FriendlyName(void);     // 0x1C
+    virtual int EventId(void);            // 0x20
+    virtual int Difficulty(void);         // 0x24
+    virtual int Best(void);               // 0x28
+    virtual int BestGrade(void);          // 0x2C
+    virtual int GradeOf(int score);       // 0x30
+    virtual int Threshold(int grade);     // 0x34
+    virtual int Passing(void);            // 0x38
+    virtual int PassScore(void);          // 0x3C
+    virtual int Unlocked(void);           // 0x40
+};
+
+class EvBracket {
+public:
+    virtual ~EvBracket(void);
+    virtual const char* Name(void);    // 0xC
+    virtual const char* Id(void);      // 0x10
+    virtual int Difficulty(void);      // 0x14
+    virtual int Count(void);           // 0x18
+    virtual EvContest* Get(int i);     // 0x1C
+    virtual int Unlocked(void);        // 0x20
+};
+
+class EvPath {
+public:
+    virtual ~EvPath(void);
+    virtual int Count(void);           // 0xC
+    virtual EvBracket* Get(int i);     // 0x10
+};
+
+// What a finished event changed.
+struct EvResult {
+    u8 improved;    // offset 0x0
+    s32 delta;      // offset 0x4
+    s32 event;      // offset 0x8
+    u8 newly[7];    // offset 0xC: [4] tier, [5] path done, [6] career done
+};
+
+const char* GetCareerCompletedChassis(void);
+const char* ShowCareerCompletedReason(void);
+
+extern "C" {
+VehicleList* fn_8025007C(int n);
+void fn_80263F30(int lastTier, int finalTier, int a);
+int fn_8027F958(s32* bracket, EvPath* path);
+int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path);
+void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg);
+
+// The career event browser: starts on the selected event (or the first one not yet unlocked), then lets the
+// player pick brackets and events; plays the tier/path/career rewards the last result earned. Returns 1 with the
+// chosen event in *sel, 0 when backed out.
+int fn_802840FC(s32* sel, EvPath* path, EvResult* res) {
+    EvResult r = *res;
+    lbl_8055F67C = 0;
+    s32 b = -1;
+    int fresh = *sel == -1;
+    s32 e = -1;
+    if (fresh) {
+        for (int i = 0; i < path->Count(); i++) {
+            EvBracket* br = path->Get(i);
+            if (!br->Unlocked()) {
+                b = i;
+                for (int j = 0; j < br->Count(); j++) {
+                    if (!br->Get(j)->Unlocked()) {
+                        e = j;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        if (b < 0) {
+            b = 0;
+        }
+        if (e < 0) {
+            e = 0;
+        }
+    } else {
+        for (int i = 0; i < path->Count(); i++) {
+            EvBracket* br = path->Get(i);
+            for (int j = 0; j < br->Count(); j++) {
+                if (*sel == br->Get(j)->EventId()) {
+                    b = i;
+                    e = j;
+                }
+            }
+        }
+    }
+    s32 prev = b;
+    int ok = 0;
+    for (int skip = !fresh; skip || fn_8027F958(&b, path); skip = 0) {
+        EvBracket* br = path->Get(b);
+        if (b != prev) {
+            e = 0;
+        }
+        prev = b;
+        int go = fn_802812B4(&e, br, &r, path);
+        if (r.newly[5]) {
+            fn_8027EEE4(br->Difficulty() + 1);
+        }
+        if (r.newly[6]) {
+            VehicleList* list = fn_8025007C(1);
+            list->Add(GetCareerCompletedChassis(), 1, 0);
+            list->SetReason(0, ShowCareerCompletedReason());
+            fn_80284580(0, 0, (ExtraVehicles*)list, 0);
+            delete list;
+        }
+        if ((r.newly[4] && br->Difficulty() == 1) || (r.newly[5] && br->Difficulty() == 2)) {
+            int last = !r.newly[6];
+            fn_80263F30(last, br->Difficulty() == 2, 1);
+        }
+        if (r.newly[5]) {
+            return 0;
+        }
+        if (r.newly[4] && br->Difficulty() < 2) {
+            fn_8027F09C(br->Difficulty() + 1);
+        }
+        memset(&r, 0, sizeof(r));
+        if (go) {
+            *sel = br->Get(e)->EventId();
+            ok = 1;
+            break;
+        }
+    }
+    return ok;
+}
+
+}  // extern "C"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
