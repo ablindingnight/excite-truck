@@ -2287,154 +2287,155 @@ s32 fn_8011A870(void *arg0, s32 arg1) {
     return *(volatile s32 *)((char *)arg0 + 0x50);
 }
 
+// RAD's Bink I/O object as the Wii library lays it out (the GameCube one has no slots at 0x18 and 0x50).
+// Layout and reader logic cross-checked against the n100f decomp's GameCube Bink (ngcfile.c), used as a
+// reference only; the code here is written from this game's own instructions.
+// The status fields are volatile: the stream callbacks update them from interrupt context.
+typedef struct BinkIO8011 {
+    u32 (*readHeader)(struct BinkIO8011 *io, s32 offset, void *dest, u32 size);                // 0x00
+    u32 (*readFrame)(struct BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size);      // 0x04
+    u32 (*getBufferSize)(struct BinkIO8011 *io, u32 size);                                      // 0x08
+    void (*setInfo)(struct BinkIO8011 *io, void *buf, u32 size, u32 filesize, u32 simulate);   // 0x0C
+    u32 (*idle)(struct BinkIO8011 *io);                                                         // 0x10
+    void (*close)(struct BinkIO8011 *io);                                                       // 0x14
+    void *unk18;                                                                                // 0x18
+    void *bink;                                                                                 // 0x1C
+    volatile u32 readError;       // 0x20
+    volatile u32 doingRead;       // 0x24
+    volatile u32 bytesRead;       // 0x28
+    volatile u32 working;         // 0x2C
+    volatile u32 totalTime;       // 0x30
+    volatile u32 foregroundTime;  // 0x34
+    volatile u32 idleTime;        // 0x38
+    volatile u32 threadTime;      // 0x3C
+    volatile u32 bufSize;         // 0x40
+    volatile u32 bufHighUsed;     // 0x44
+    volatile u32 curBufSize;      // 0x48
+    volatile u32 curBufUsed;      // 0x4C
+    volatile u32 unk50;           // 0x50
+    u8 iodata[1];                 // 0x54: the file state (BinkFile8011)
+} BinkIO8011;
+
+// The DVD file reader's state inside BinkIO8011::iodata: a ring buffer filled ahead by async reads.
+typedef struct BinkFile8011 {
+    DVDFileInfo fi;               // 0x00 (io 0x54)
+    volatile u32 filePos;         // 0x3C next file offset to read into the ring
+    u32 skip;                     // 0x40
+    u32 bufPos;                   // 0x44 file offset of the ring's head
+    u8 *bufHead;                  // 0x48 oldest unread byte
+    volatile u32 bufEmpty;        // 0x4C free bytes in the ring
+    u8 *buf;                      // 0x50 ring start (0 = unbuffered)
+    u8 *bufEnd;                   // 0x54 ring end
+    u8 *bufTail;                  // 0x58 next byte to fill
+    u32 dontClose;                // 0x5C
+    u32 startOfs;                 // 0x60
+    u32 fileSize;                 // 0x64
+    u32 simulate;                 // 0x68 simulated read rate (bytes/s), 0 = off
+} BinkFile8011;
+
+#define BINKFILE(io) ((BinkFile8011 *)(io)->iodata)
+
 extern u32 fn_8011A240(void *, u32, s32, u32);
 extern void fn_8011A45C(void *, s32, s32);
 extern void fn_8011A1A0(u32 *, u32);
-u32 fn_8011A8FC(void *arg0, s32 arg1, s32 arg2, void *arg3, u32 arg4) {
-              s32 var_r29 = arg2;
-              u32 var_r26 = arg4;
-              s32 var_r25 = (s32)arg3;
-              u32 var_r28 = 0;
-              s32 temp_r27 = var_r25;
-                s32 var_r31;
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-              volatile u32 *var_r30;
-              u32 temp_r0;
-       u32 temp_r3;
-        u32 temp_r6;
-              u32 temp_r4;
-              u32 temp_r5;
-              u32 temp_r23;
-          
-              if (*(s32 *)((u8 *)arg0 + 0x20) != 0)
-                  return 0;
-              var_r31 = fn_80116D30();
-              if (var_r29 != -1) {
-                  temp_r4 = *(u32 *)((u8 *)arg0 + 0x98);
-                  if (temp_r4 != (u32)var_r29) {
-                      if ((u32)var_r29 > temp_r4) {
-                          if ((u32)var_r29 <= *(u32 *)((u8 *)arg0 + 0x90)) {
-                              BOOL interrupts = OSDisableInterrupts();
-                              temp_r6 = (u32)var_r29 - *(u32 *)((u8 *)arg0 + 0x98);
-                              *(u32 *)((u8 *)arg0 + 0xA0) += temp_r6;
-                              temp_r4 = *(u32 *)((u8 *)arg0 + 0x9C) + temp_r6;
-                              *(u32 *)((u8 *)arg0 + 0x98) = (u32)var_r29;
-                              *(u32 *)((u8 *)arg0 + 0x4C) -= temp_r6;
-                              *(u32 *)((u8 *)arg0 + 0x9C) = temp_r4;
-                              if (temp_r4 > *(u32 *)((u8 *)arg0 + 0xA8))
-                                  *(u32 *)((u8 *)arg0 + 0x9C) =
-                                      temp_r4 - *(u32 *)((u8 *)arg0 + 0x40);
-                              OSRestoreInterrupts(interrupts);
-                          } else {
-                              goto reset_seek;
-                          }
-                      } else {
-                          goto reset_seek;
-                      }
-                  }
-              }
-              goto seek_done;
-          reset_seek:
-              fn_8011A330(arg0);
-              {
-                  BOOL interrupts = OSDisableInterrupts();
-               temp_r0 = *(u32 *)((u8 *)arg0 + 0xA4);
-               temp_r4 = 0;
-               *(u32 *)((u8 *)arg0 + 0x90) = (u32)var_r29;
-               temp_r5 = *(u32 *)((u8 *)arg0 + 0x40);
-               *(u32 *)((u8 *)arg0 + 0x98) = (u32)var_r29;
-               *(u32 *)((u8 *)arg0 + 0xA0) = temp_r5;
-               *(u32 *)((u8 *)arg0 + 0x4C) = temp_r4;
-               *(u32 *)((u8 *)arg0 + 0x9C) = temp_r0;
-               *(u32 *)((u8 *)arg0 + 0xAC) = temp_r0;
-                  OSRestoreInterrupts(interrupts);
-              }
-          seek_done:
-              if (*(u32 *)((u8 *)arg0 + 0xA4) == 0) {
-                  var_r29 = fn_80116D30();
-                  var_r28 = fn_8011A240((u8 *)arg0 + 0x54,
-                                        *(u32 *)((u8 *)arg0 + 0x90),
-                                        (s32)var_r25, var_r26);
-                  if (var_r28 < var_r26) {
-                      *(s32 *)((u8 *)arg0 + 0x20) = 1;
-                      fn_8011A330(arg0);
-                  }
-                  var_r30 = (u32 *)((u8 *)arg0 + 0x98);
-                  *(u32 *)((u8 *)arg0 + 0x90) += var_r28;
-                  *var_r30 += var_r28;
-                  *(u32 *)((u8 *)arg0 + 0x28) += var_r28;
-                  if (*(s32 *)((u8 *)arg0 + 0xBC) != 0)
-                      fn_8011A45C(arg0, var_r28, var_r29);
-                  temp_r3 = fn_80116D30();
-          temp_r5 = *(u32 *)((u8 *)arg0 + 0x30);
-          temp_r4 = temp_r3 - var_r29;
-          temp_r0 = temp_r3 - var_r31;
-          temp_r3 = temp_r5 + temp_r4;
-          *(u32 *)((u8 *)arg0 + 0x30) = temp_r3;
-          temp_r3 = *(u32 *)((u8 *)arg0 + 0x34);
-          temp_r0 = temp_r3 + temp_r0;
-          *(u32 *)((u8 *)arg0 + 0x34) = temp_r0;
-              } else {
-                  var_r30 = (u32 *)((u8 *)arg0 + 0x98);
-                  goto loop_check;
-              loop_body:
-                  fn_8011A6A0(arg0);
-                  var_r29 = *(s32 *)((u8 *)arg0 + 0x4C);
-                  if (var_r29 != 0) {
-                      if ((u32)var_r29 > var_r26)
-                          var_r29 = (s32)var_r26;
-                      var_r26 -= var_r29;
-                      var_r28 += var_r29;
-                      temp_r4 = *(u32 *)((u8 *)arg0 + 0x9C);
-                      temp_r23 = *(u32 *)((u8 *)arg0 + 0xA8) - temp_r4;
-                      *var_r30 += var_r29;
-                      if (temp_r23 <= (u32)var_r29) {
-                          memcpy((void *)var_r25, (void *)temp_r4, temp_r23);
-                          var_r25 += temp_r23;
-                          var_r29 -= temp_r23;
-                          *(u32 *)((u8 *)arg0 + 0x9C) = *(u32 *)((u8 *)arg0 + 0xA4);
-                          {
-                              BOOL interrupts = OSDisableInterrupts();
-                              *(u32 *)((u8 *)arg0 + 0x4C) -= temp_r23;
-                              *(u32 *)((u8 *)arg0 + 0xA0) += temp_r23;
-                              OSRestoreInterrupts(interrupts);
-                          }
-                      }
-                      if (var_r29 != 0) {
-                          memcpy(var_r25, (void *)*(u32 *)((u8 *)arg0 + 0x9C), var_r29);
-                          var_r25 += var_r29;
-                          * (u32 *)((u8 *)arg0 + 0x9C) += var_r29;
-                          {
-                              BOOL interrupts = OSDisableInterrupts();
-                              *(u32 *)((u8 *)arg0 + 0x4C) -= var_r29;
-                              *(u32 *)((u8 *)arg0 + 0xA0) += var_r29;
-                              OSRestoreInterrupts(interrupts);
-                          }
-                      }
-                  }
-              loop_check:
-                  if (var_r26 != 0 && *(s32 *)((u8 *)arg0 + 0x20) == 0)
-                      goto loop_body;
-                  *(s32 *)((u8 *)arg0 + 0x34) += fn_80116D30() - var_r31;
-              }
-          
-              temp_r4 = *(u32 *)((u8 *)arg0 + 0xB8) - *var_r30;
-             if (temp_r4 < *(u32 *)((u8 *)arg0 + 0x40)) {
-                 *(u32 *)((u8 *)arg0 + 0x48) = temp_r4;
-             } else {
-                 *(u32 *)((u8 *)arg0 + 0x48) =
-                     *(u32 *)((u8 *)arg0 + 0x40);
-             }
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-              if (*(volatile u32 *)((u8 *)arg0 + 0x4C) + 0x8000 >
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-                   *(volatile u32 *)((u8 *)arg0 + 0x48))
-                   *(u32 *)((u8 *)arg0 + 0x48) =
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-                       *(volatile u32 *)((u8 *)arg0 + 0x4C);
-              fn_8011A1A0((u32 *)temp_r27, var_r28);
-              return var_r28;
-         }
+// BinkFileReadFrame: reads `size` bytes of frame data at `offset` (-1 = the current position) into dest.
+// A seek inside the buffered window just drops the skipped bytes; any other seek cancels the pending reads
+// and restarts the ring there. Unbuffered files read directly (synchronously); buffered ones wait on the ring
+// (fn_8011A6A0 = ReadKickoff), copying out in at most two pieces around its end. Returns the bytes read,
+// byte-swapped to little-endian words like the rest of the file.
+u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
+    u32 start, t, avail, chunk, x;
+    BOOL enabled;
+    u32 amt = 0;
+    void *orig = dest;
+
+    if (io->readError)
+        return 0;
+
+    start = fn_80116D30();
+
+    if (offset != -1 && BINKFILE(io)->bufPos != offset) {
+        if ((u32)offset > BINKFILE(io)->bufPos && (u32)offset <= BINKFILE(io)->filePos) {
+            enabled = OSDisableInterrupts();
+            x = offset - BINKFILE(io)->bufPos;
+            BINKFILE(io)->bufEmpty += x;
+            BINKFILE(io)->bufPos = offset;
+            io->curBufUsed -= x;
+            BINKFILE(io)->bufHead += x;
+            if (BINKFILE(io)->bufHead > BINKFILE(io)->bufEnd)
+                BINKFILE(io)->bufHead -= io->bufSize;
+            OSRestoreInterrupts(enabled);
+        } else {
+            fn_8011A330(io);
+            enabled = OSDisableInterrupts();
+            BINKFILE(io)->filePos = offset;
+            BINKFILE(io)->bufPos = offset;
+            BINKFILE(io)->bufEmpty = io->bufSize;
+            io->curBufUsed = 0;
+            BINKFILE(io)->bufHead = BINKFILE(io)->buf;
+            BINKFILE(io)->bufTail = BINKFILE(io)->buf;
+            OSRestoreInterrupts(enabled);
+        }
+    }
+
+    if (BINKFILE(io)->buf == 0) {
+        t = fn_80116D30();
+        amt = fn_8011A240(&BINKFILE(io)->fi, BINKFILE(io)->filePos, (s32)dest, size);
+        if (amt < size) {
+            io->readError = 1;
+            fn_8011A330(io);
+        }
+        BINKFILE(io)->filePos += amt;
+        BINKFILE(io)->bufPos += amt;
+        io->bytesRead += amt;
+        if (BINKFILE(io)->simulate)
+            fn_8011A45C(io, amt, t);
+        x = fn_80116D30();
+        io->totalTime += x - t;
+        io->foregroundTime += x - start;
+    } else {
+        while (size && !io->readError) {
+            fn_8011A6A0(io);
+            avail = io->curBufUsed;
+            if (avail == 0)
+                continue;
+            if (avail > size)
+                avail = size;
+            BINKFILE(io)->bufPos += avail;
+            size -= avail;
+            amt += avail;
+            chunk = BINKFILE(io)->bufEnd - BINKFILE(io)->bufHead;
+            if (chunk <= avail) {
+                memcpy(dest, BINKFILE(io)->bufHead, chunk);
+                dest = (u8 *)dest + chunk;
+                avail -= chunk;
+                BINKFILE(io)->bufHead = BINKFILE(io)->buf;
+                enabled = OSDisableInterrupts();
+                io->curBufUsed -= chunk;
+                BINKFILE(io)->bufEmpty += chunk;
+                OSRestoreInterrupts(enabled);
+            }
+            if (avail) {
+                memcpy(dest, BINKFILE(io)->bufHead, avail);
+                dest = (u8 *)dest + avail;
+                BINKFILE(io)->bufHead += avail;
+                enabled = OSDisableInterrupts();
+                io->curBufUsed -= avail;
+                BINKFILE(io)->bufEmpty += avail;
+                OSRestoreInterrupts(enabled);
+            }
+        }
+        io->foregroundTime += fn_80116D30() - start;
+    }
+
+    x = BINKFILE(io)->fileSize - BINKFILE(io)->bufPos;
+    io->curBufSize = (x < io->bufSize) ? x : io->bufSize;
+    if (io->curBufUsed + 0x8000 > io->curBufSize)
+        io->curBufSize = io->curBufUsed;
+
+    fn_8011A1A0((u32 *)orig, amt);
+    return amt;
+}
 
 s32 fn_8011AC04(s32 arg0, s32 arg1) {
     return (arg1 + 0x7FFF) & 0xFFFF8000;
@@ -2467,7 +2468,7 @@ void fn_8011AC84(void *arg0) {
 }
 
 extern u32 fn_8011A388(void*, s32, s32, u32);
-extern u32 fn_8011A8FC(void *, s32, s32, void *, u32);
+extern u32 fn_8011A8FC(BinkIO8011 *, u32, s32, void *, u32);
 extern s32 fn_8011AC04(s32, s32);
 extern void fn_8011AC10(void*, s32, s32, s32, s32);
 extern s32 fn_8011A7CC(DVDFileInfo*);
