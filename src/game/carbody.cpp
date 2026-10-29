@@ -1678,7 +1678,7 @@ static inline void PlaceRotate(BVec* out, const BVec* v, const CbFrame* m) {
 
 void fn_801E9DD0(s16* surface, f32 x, f32 z);
 void fn_801BE400(s32 car, CbFrame* frame, f32 a);
-void fn_801B30C0(s32 car, void* start, s32 reset);
+void fn_801B30C0(s32 car, s32 reset, void* start);
 void fn_8026A394(u8* p, s32 n, s32 c);
 f32 PSVECDotProduct(const void* a, const void* b);
 f32 PSVECMag(const void* v);
@@ -1731,7 +1731,7 @@ void fn_80189CB4(u8* p, const u8* s) {
     ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Clear(S32(p, 0x1EC));
     f32 speed = F32(p, 0x25CC);
     fn_801BE400(S32(p, 0x1EC), &frame, speed);
-    fn_801B30C0(S32(p, 0x1EC), 0, S32(s, 0x3C));
+    fn_801B30C0(S32(p, 0x1EC), 0, PTR(s, 0x3C));
     for (int i = 0; i < S32(p, 0x24); i++) {
         ShapeAt(p, i)->Reset();
     }

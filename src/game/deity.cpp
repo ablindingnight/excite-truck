@@ -789,15 +789,20 @@ void fn_801B179C(DeityCar* c, int index, DCar* car) {
     }
 }
 
-void fn_801B18B8(DeityCar* c, IdealPoint* start, int reset) {
+void fn_801B18B8(DeityCar* c, int reset, IdealPoint* start) {
     DCar* car = c->car;
-    V2 pos;
+    f32 p[3];
     f32 k = car->ahead;
-    pos.x = car->pos[0] + car->fwd[0] * k;
-    pos.y = car->pos[2] + car->fwd[2] * k;
+    p[0] = car->pos[0] + car->fwd[0] * k;
+    p[1] = car->pos[1] + car->fwd[1] * k;
+    p[2] = car->pos[2] + car->fwd[2] * k;
+    V2 pos;
+    pos.x = p[0];
+    pos.y = p[2];
     V2 dir;
-    dir.x = c->car->fwd[0];
-    dir.y = c->car->fwd[2];
+    car = c->car;
+    dir.x = car->fwd[0];
+    dir.y = car->fwd[2];
     c->follower->Start(&pos, &dir, reset, start);
     c->line->SetPosition(&pos, &dir, 0);
 }
@@ -1277,7 +1282,7 @@ void fn_801B3084(DCar* a, DCar* b, int c, int d) {
     }
 }
 
-void fn_801B30C0(int i, IdealPoint* start, int reset) { fn_801B18B8(&lbl_8055E684[i], start, reset); }
+void fn_801B30C0(int i, int reset, IdealPoint* start) { fn_801B18B8(&lbl_8055E684[i], reset, start); }
 
 void fn_801B30D0(int i) { fn_801B196C(&lbl_8055E684[i]); }
 
