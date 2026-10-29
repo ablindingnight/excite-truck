@@ -251,16 +251,17 @@ static inline void AddAnchor(PSys* s, s32 idx, const RMtx* m, const RVec3* at) {
 extern "C" {
 
 void fn_801C1218(PSys* s) {
+    f32 damp = -0.995f;
+    f32 keep = 1.995f;
     for (int i = 0; i < s->nPart; i++) {
         RVec3* p = &s->pos[i];
         RVec3* o = &s->old[i];
         RVec3* a = &s->acc[i];
         RVec3 t = *p;
         f32 dt2 = s->dt * s->dt;
-        p->x *= 1.995f;
-        p->y *= 1.995f;
-        p->z *= 1.995f;
-        f32 damp = -0.995f;
+        p->x *= keep;
+        p->y *= keep;
+        p->z *= keep;
         p->x += o->x * damp;
         p->y += o->y * damp;
         p->z += o->z * damp;
