@@ -514,8 +514,6 @@ void* fn_80211660(int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int)
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
 static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(now-*stamp,0.0f,0.15f);int alpha=(int)PaletteNaturalLerp(255.0f,0.0f,fraction);return((u32)alpha<<24)|0x00ffffffu;}
-// MATCHING-AID: Zero-argument half getter still controls FP operand/CSE choices in fn_802200AC; original helper identity is unproved. Selection/model uses were removed with identical code; direct gauge divisions leave one differing word. See widgets391_half_scope_reduction_v1.
-static inline float GaugeHalfReferenceObservedNew(){return 0.5f;}
 extern "C" {
 void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
@@ -2212,7 +2210,7 @@ void fn_802200AC(WidgetFragment* self){int previousFrame;
  float imageHeight=(float)fn_802C5220(f->image);
  previousFrame=0;
  if(f->focus&&*f->focus==f->token)previousFrame=1;
- ((void(*)(void*,int,float,float,float,float,float,float,float,float,float))fn_802C5334)(f->image,previousFrame,coordinates[1]+(GaugeHalfReferenceObservedNew())*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)*GaugeHalfReferenceObservedNew(),(0.0f),filledWidth,imageHeight,(0.0f),(0.0f),fraction,(1.0f));
+ ((void(*)(void*,int,float,float,float,float,float,float,float,float,float))fn_802C5334)(f->image,previousFrame,coordinates[1]+0.5f*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)/2.0f,(0.0f),filledWidth,imageHeight,(0.0f),(0.0f),fraction,(1.0f));
  
 previousArrow=fn_80211660(0);
  nextArrow=fn_80211660(1);
@@ -2241,10 +2239,10 @@ float previousOffset=ObservedArrowOffset(&f->previousTime),nextOffset=ObservedAr
  
 if(previousArrow){float arrowWidth=fn_80235EF0(previousArrow,previousFrame);
  float arrowHeight=fn_80235F64(previousArrow,previousFrame);
- fn_802354A0(previousArrow,previousFrame,previousColor,previousOffset,coordinates[0]+(arrowHeight-height)*(GaugeHalfReferenceObservedNew()),(0.0f),arrowWidth,arrowHeight);
+ fn_802354A0(previousArrow,previousFrame,previousColor,previousOffset,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight);
  }if(nextArrow){float arrowWidth=fn_80235EF0(nextArrow,nextFrame);
  float arrowHeight=fn_80235F64(nextArrow,nextFrame);
- fn_802354A0(nextArrow,nextFrame,nextColor,nextX,coordinates[0]+(arrowHeight-height)*(GaugeHalfReferenceObservedNew()),(0.0f),arrowWidth,arrowHeight);
+ fn_802354A0(nextArrow,nextFrame,nextColor,nextX,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight);
  }}
 int fn_802205AC(WidgetFragment* self,int key){SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;if(!f->focus||*f->focus!=f->token)return 0;switch(key){case 0x127:if(f->value&&*f->value!=f->maximum){f->nextTime=fn_8023659C();*f->value=InlineWidgetMinimum(*f->value+f->step,f->maximum);}break;case 0x125:if(f->value&&*f->value!=f->minimum){f->previousTime=fn_8023659C();*f->value=InlineWidgetMaximum(*f->value-f->step,f->minimum);}break;case 0x126:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);fn_80230E90(0);}else return 0;break;case 0x128:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);fn_80230E90(0);}else return 0;break;default:return 0;}return 1;}
 void fn_8022071C(WidgetFragment* self){if(fn_80129BC4(self)){Bound258* f=(Bound258*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
