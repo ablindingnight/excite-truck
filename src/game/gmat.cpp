@@ -243,6 +243,7 @@ inline void ClearRange(T* p, T* end) {
 
 struct GMat {
     GMat(ValueNode* node, ValueNode* tune);
+    ~GMat(void);
     u8 crystal;                       // offset 0x0
     u8 merged;                        // offset 0x1
     s32 worldmap;                     // offset 0x4
@@ -309,31 +310,29 @@ void fn_802B0914(void) {
     fn_802B0710();
 }
 
-void fn_802B0954(void) {
+inline GMat::~GMat(void) {
     GLayer* l;
+    int k;
+    for (int j = 0; j < layers.count; j++) {
+        l = &layers.data[j];
+        fn_802B0690(&l->detail);
+        for (k = 0; k < l->texs.count; k++) {
+            fn_802B0690(&l->texs.data[k].tex);
+        }
+        l->texs.count = 0;
+    }
+    layers.count = 0;
+    if (oceanmap == worldmap) {
+        oceanmap = -2;
+    }
+    fn_802B0690(&worldmap);
+    fn_802B0690(&oceanmap);
+}
+
+void fn_802B0954(void) {
     fn_802B0874();
     for (int i = 0; i < lbl_804BE104.count; i++) {
-        GMat* g = lbl_804BE104.data[i];
-        if (g) {
-            for (int j = 0; j < g->layers.count; j++) {
-                l = &g->layers.data[j];
-                fn_802B0690(&l->detail);
-                for (int k = 0; k < l->texs.count; k++) {
-                    fn_802B0690(&l->texs.data[k].tex);
-                }
-                l->texs.count = 0;
-            }
-            g->layers.count = 0;
-            if (g->oceanmap == g->worldmap) {
-                g->oceanmap = -2;
-            }
-            fn_802B0690(&g->worldmap);
-            fn_802B0690(&g->oceanmap);
-            g->strips.~InlineVec();
-            g->verts.~GVerts();
-            g->layers.~InlineVec();
-            operator delete(g);
-        }
+        delete lbl_804BE104.data[i];
     }
     lbl_804BE104.count = 0;
 }
