@@ -524,6 +524,7 @@ class CbFx {
 public:
     virtual ~CbFx(void);
     virtual void Update(void);  // 0x0C
+    virtual void Reset(void);   // 0x10
 };
 
 extern "C" void fn_801D1100(u8* p);
@@ -560,7 +561,262 @@ void fn_8018381C(u8* p) {
     fn_801838C8(p);
 }
 
-void fn_801838C8(u8* p) {}  // stub (332)
+}  // extern "C"
+
+// The AI line follower of a car (deity.cpp).
+class IdealFollower {
+public:
+    void ClearFlag(void);
+    u8 pad0[0xC];
+    s32 fC;  // offset 0xC
+};
+
+// A car's driver as seen by the race (slot 0x18: its line follower).
+class CbDriver {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual IdealFollower* Follower(void);  // 0x18
+};
+
+// The body's own virtuals (CollVolume/RigidBody slots); 0x54 places it at a pose.
+class CbBodyV {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void SetPose(const u8* pose);  // 0x54
+};
+
+// The body's model handle at 0x268 (slot 0x28 resets it).
+class CbModel {
+public:
+    virtual void v08(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void Reset(void);  // 0x28
+};
+
+// The body's spring points and their velocities (162 each).
+struct CbSprings {
+    u8 pad0[0x5FC];
+    BVec pts[162];   // offset 0x5FC
+    BVec vels[162];  // offset 0xD94
+};
+
+// One body joint (18 of them at 0x152C): six orientation keys and two scalars.
+struct CbJoint {
+    u8 pad0[0xC];
+    f32 fC;         // offset 0xC
+    f32 f10;        // offset 0x10
+    u8 pad14[4];
+    f32 q[6][4];    // offset 0x18
+    u8 b78;         // offset 0x78
+    u8 pad79[3];
+    s32 w7C;        // offset 0x7C
+};
+
+extern "C" {
+void fn_8018BE54(u8* p, f32 s);
+void fn_8018B0D0(u8* p, u32 v);
+CbDriver* fn_801B2ED0(int id);
+void fn_801B8100(u8* pose, s32 car, s32 player);
+void fn_80189C64(u8* p);
+void fn_801BDA74(s32 id, u8* mass);
+void fn_8018F2C0(u8* p, u8* q);
+int fn_801CF064(void);
+s32* fn_801E1F44(void);
+void fn_8018F6F8(u8* p);
+
+// Puts the body back to its start state: clears the suspension/sway/damage state, the joints and the
+// wheels, re-places the car on its start pose and reapplies the tuned setup.
+void fn_801838C8(u8* p) {
+    F32(p, 0x5E4) = 0.0f;
+    fn_8018BE54(p, 1.0f);
+    F32(p, 0x5EC) = 0.0f;
+    F32(p, 0x5F0) = 1.0f;
+    F32(p, 0x26E4) = 0.0f;
+    F32(p, 0x26E8) = 0.0f;
+    F32(p, 0x26EC) = 0.0f;
+    F32(p, 0x26F0) = 0.0f;
+    F32(p, 0x26F4) = 0.0f;
+    F32(p, 0x26F8) = 0.0f;
+    F32(p, 0x26FC) = 0.0f;
+    fn_80189C64(p);
+    S32(p, 0x24) = S32(p, 0x28);
+    fn_8018B0D0(p, 0);
+    F32(p, 0x25E8) = 0.0f;
+    F32(p, 0x25D8) = 0.0f;
+    F32(p, 0x25D4) = 0.0f;
+    F32(p, 0x25D0) = 0.0f;
+    F32(p, 0x25CC) = 0.0f;
+    F32(p, 0x25EC) = 0.0f;
+    F32(p, 0x25E4) = 0.0f;
+    F32(p, 0x25E0) = 0.0f;
+    F32(p, 0x25DC) = 0.0f;
+    F32(p, 0x25E8) = 1.0f;
+    F32(p, 0x25F8) = 0.0f;
+    F32(p, 0x25F4) = 0.0f;
+    F32(p, 0x25F0) = 0.0f;
+    F32(p, 0x25FC) = 0.0f;
+    F32(p, 0x2604) = 0.0f;
+    F32(p, 0x2600) = 0.0f;
+    F32(p, 0x2608) = 0.0f;
+    U8(p, 0x260C) = 0;
+    U8(p, 0x260D) = 0;
+    U8(p, 0x260E) = 0;
+    F32(p, 0x2614) = 0.0f;
+    F32(p, 0x2618) = 0.0f;
+    F32(p, 0x2594) = 0.0f;
+    F32(p, 0x2598) = 0.0f;
+    F32(p, 0x261C) = 0.0f;
+    F32(p, 0x2588) = 0.0f;
+    F32(p, 0x2590) = 0.0f;
+    F32(p, 0x258C) = -5.0f;
+    U8(p, 0x259C) = 0;
+    U8(p, 0x259D) = 0;
+    F32(p, 0x25BC) = 0.0f;
+    F32(p, 0x25C4) = 0.0f;
+    F32(p, 0x25A0) = 0.0f;
+    F32(p, 0x25A4) = 0.0f;
+    F32(p, 0x25A8) = 1.0f;
+    F32(p, 0x25AC) = 0.0f;
+    S32(p, 0x2620) = 0;
+    F32(p, 0x2654) = 0.0f;
+    F32(p, 0x2658) = 0.0f;
+    F32(p, 0x265C) = 0.0f;
+    F32(p, 0x2660) = 0.0f;
+    F32(p, 0x2664) = 0.0f;
+    F32(p, 0x2668) = 0.0f;
+    F32(p, 0x266C) = 0.0f;
+    F32(p, 0x2670) = 0.0f;
+    F32(p, 0x2674) = 0.0f;
+    S32(p, 0x2678) = 0;
+    S32(p, 0x267C) = 0;
+    F32(p, 0x2688) = 0.0f;
+    S32(p, 0x268C) = 0;
+    F32(p, 0x2690) = 0.0f;
+    F32(p, 0x2694) = 0.0f;
+    F32(p, 0x2698) = 0.0f;
+    F32(p, 0x269C) = 0.0f;
+    F32(p, 0x26A8) = 0.0f;
+    memset(p + 0x26A0, 0, 8);
+    S32(p, 0x2648) = 0;
+    U8(p, 0x2624) = 0;
+    U8(p, 0x2625) = 0;
+    S32(p, 0x263C) = 0;
+    S32(p, 0x2638) = 0;
+    F32(p, 0x2628) = 0.0f;
+    F32(p, 0x262C) = 0.0f;
+    F32(p, 0x2630) = 0.0f;
+    F32(p, 0x2634) = 0.0f;
+    S32(p, 0x2644) = 0;
+    U8(p, 0x2640) = 0;
+    F32(p, 0x264C) = 0.0f;
+    F32(p, 0x2650) = 0.0f;
+    U8(p, 0x26AC) = 0;
+    fn_801BF1B8(PTR(p, 0x1EC), 0);
+    S32(p, 0x26B0) = -1;
+    F32(p, 0x26B4) = 0.0f;
+    F32(p, 0x26B8) = 0.0f;
+    F32(p, 0x26BC) = 0.0f;
+    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
+    CbSprings* sp = (CbSprings*)p;
+    for (int i = 0; i < 162; i++) {
+        memset(&sp->pts[i], 0, sizeof(BVec));
+        sp->pts[i].x = 0.0f;
+        sp->pts[i].y = 0.0f;
+        sp->pts[i].z = 0.0f;
+        sp->vels[i].x = 0.0f;
+        sp->vels[i].y = 0.0f;
+        sp->vels[i].z = 0.0f;
+    }
+    CbJoint* j = (CbJoint*)(p + 0x152C);
+    for (int i = 0; i < 18; i++, j++) {
+        j->f10 = 0.0f;
+        j->fC = 0.0f;
+        j->w7C = 0;
+        j->b78 = 0;
+        for (int k = 0; k < 6; k++) {
+            j->q[k][0] = 1.0f;
+            j->q[k][1] = 0.0f;
+            j->q[k][2] = 0.0f;
+            j->q[k][3] = 0.0f;
+        }
+    }
+    S32(p, 0x1E3C) = 0;
+    S32(p, 0x1E40) = 0;
+    u8* w = p + 0x23AC;
+    for (int i = 0; i < 4; i++, w += 0x74) {
+        F32(w, 0x8) = 0.0f;
+        F32(w, 0x4) = 0.0f;
+        F32(w, 0x0) = 0.0f;
+        F32(w, 0x18) = 0.0f;
+        F32(w, 0x14) = 0.0f;
+        F32(w, 0x10) = 0.0f;
+        F32(w, 0x1C) = 0.0f;
+        F32(w, 0xC) = 0.0f;
+        U8(w, 0x20) = 0;
+        F32(w, 0x24) = 0.0f;
+        F32(w, 0x28) = 0.0f;
+        F32(w, 0x2C) = 0.0f;
+        F32(w, 0x30) = 0.0f;
+        F32(w, 0x34) = 0.0f;
+        F32(w, 0x38) = 0.0f;
+        F32(w, 0x44) = 0.0f;
+        F32(w, 0x48) = 0.0f;
+        F32(w, 0x4C) = 0.0f;
+        F32(w, 0x50) = 0.0f;
+        F32(w, 0x54) = 0.0f;
+        F32(w, 0x58) = 0.0f;
+        F32(w, 0x5C) = 1.0f;
+        F32(w, 0x60) = 0.0f;
+        S32(w, 0x64) = 0;
+        F32(w, 0x68) = 0.0f;
+        U8(w, 0x6C) = 0;
+        S32(w, 0x70) = 0;
+    }
+    IdealFollower* f = fn_801B2ED0(S32(p, 0x1EC))->Follower();
+    f->fC = 0;
+    fn_801B8100(p + 0x274, S32(p, 0x1EC), S32(p, 0x1F0));
+    ((CbBodyV*)p)->SetPose(p + 0x274);
+    f->ClearFlag();
+    fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
+    ((CbModel*)PTR(p, 0x268))->Reset();
+    if (*fn_801E1F44() == 1) {
+        fn_8018F6F8(p);
+    }
+    F32(p, 0x26CC) = 1.0f;
+    F32(p, 0x26D0) = 1.0f;
+    S32(p, 0x26D4) = 0;
+    F32(p, 0x26D8) = -1000.0f;
+    F32(p, 0x26DC) = -1000.0f;
+    F32(p, 0x2684) = 9.81f;
+    (*(CbFx**)(p + 0x2584))->Reset();
+}
 
 void fn_80183DF8(u8* p) {
     if (PTR(p, 0x328)) {
