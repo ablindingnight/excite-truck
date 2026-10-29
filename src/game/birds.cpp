@@ -95,6 +95,7 @@ struct BoidVec {
 };
 
 struct Flock {
+    ~Flock(void);
     Boid lead;           // offset 0x0
     ModelVec models;     // offset 0x28
     void* modelBuf[4];   // offset 0x34
@@ -218,19 +219,17 @@ void fn_802A81F0(void) {
     }
 }
 
+inline Flock::~Flock(void) {
+    for (int j = 0; j < models.n; j++) {
+        fn_802C6CF8(models.data[j]);
+    }
+    models.n = 0;
+    birds.n = 0;
+}
+
 void fn_802A85C8(void) {
     for (int i = 0; i < lbl_804BD6C4.n; i++) {
-        Flock* f = lbl_804BD6C4.data[i];
-        if (f) {
-            for (int j = 0; j < f->models.n; j++) {
-                fn_802C6CF8(f->models.data[j]);
-            }
-            f->models.n = 0;
-            f->birds.n = 0;
-            f->birds.~BoidVec();
-            f->models.~ModelVec();
-            operator delete(f);
-        }
+        delete lbl_804BD6C4.data[i];
     }
     lbl_804BD6C4.n = 0;
 }
