@@ -19,7 +19,7 @@ struct WidgetProperty {void* value;int key,bytes;void* buffer;};
 struct WidgetDesc {u32 unknown0;int flags;int x,y,kind,dx,dy;float scale;char unknown20[0x20];char name[1];char unknown41[0x4f];int style90,field94,field98,field9c,fielda0,fielda4;};
 struct IntWatchPrefix {char prefix[0x254];int* value;};
 struct FlagTextPrefix {char prefix[0x254];unsigned char* flag;};
-struct WidgetFragment {inline int Left() const{return left;}inline int Top() const{return top;}
+struct WidgetFragment {inline int ProjectX(float scale,int index){return left+(int)(scale*(float)index);}inline int Left() const{return left;}inline int Top() const{return top;}
  void* vtable;
  int left,top,right,bottom,kind;
  unsigned char flag18,flag19,flag1a,enabled;
@@ -519,8 +519,6 @@ void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
-// MATCHING-AID: Two ScrollEdgeWord local carriers still preserve horizontal edge scheduling in fn_80221544 and fn_80221970; original type is unproved. Eight other carriers were replaced by actual coordinate/Total getters with identical code. See widgets391_morning_codex_2026-10-29_v1.
-struct ScrollEdgeWordObservedNew {int value;inline ScrollEdgeWordObservedNew(int v):value(v){}};typedef char ScrollEdgeWordObservedSize4[sizeof(ScrollEdgeWordObservedNew)==4?1:-1];
 extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
 void fn_80221544(WidgetFragment *self, void *context);
 extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
@@ -2354,9 +2352,9 @@ else { int left;
  top = y + 1;
  bottom = edge - 1;
  int low = self->left + ((int) (ratio * ((float) start)));
- ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
+ int high=self->ProjectX(ratio,start+f->state->page);
  left = low + 5;
- right = high.value - 5;
+ right = high - 5;
  if (((right - 1) > (left + 1)) && ((bottom - 1) > (top + 1))) { if (f->second) { void *image = f->second;
  imageExtent = fn_802C5220(f->first);
  int th = fn_802C5220(image);
@@ -2432,9 +2430,9 @@ void fn_80221970(WidgetFragment* self){
       top = originY + 1;
       bottom = edge - 1;
       int low = self->left + ((int) (ratio * ((float) start)));
-      ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
+      int high=self->ProjectX(ratio,start+f->state->page);
       left = low + 5;
-      right = high.value - 5;
+      right = high - 5;
       if (((right - 1) > (left + 1)) && ((bottom - 1) > (top + 1))) {
         if (f->second) {
           void *image = f->second;
