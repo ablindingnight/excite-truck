@@ -1,6 +1,7 @@
 // Name entry (0x8023FA50-0x8023FE20): the on-screen keyboard menu that asks for a player name and
 // stores it as the identity's default name. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 
 extern "C" {
 char* strcat(char* dst, const char* src);
@@ -20,30 +21,6 @@ public:
     virtual ~NameChooser(void);
     int IsDone(void);
     u8 pad4[0x34];
-};
-
-// One menu widget binding: the layout element's name, its kind and kind-specific data.
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
 };
 
 struct MenuStrList {
@@ -97,7 +74,7 @@ int fn_8023FAD4(char* name, int maxLen) {
     }
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023FA9C, 0, 0),
-        MenuItem("player", 3, "", 4, 0),
+        MenuItem("player", "", CaptionContext(4)),
         MenuItem("namechooser", 5, lbl_8055F1E0, 0, 0),
         MenuItem("circle_list", 10, &list, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
