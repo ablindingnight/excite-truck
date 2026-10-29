@@ -1068,7 +1068,13 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 ra
     fn_802C9C58(saved);
 }
 
-void fn_802C8218(int on) { lbl_8055D00C = on ? 2 : 1; }
+void fn_802C8218(int on) {
+    int mode = 1;
+    if (on) {
+        mode = 2;
+    }
+    lbl_8055D00C = mode;
+}
 
 void fn_802C8230(void) { fn_802DB2B4(); }
 

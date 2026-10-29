@@ -2098,7 +2098,11 @@ void fn_801584D4(s32 type, int car, int rank) {
     }
 }
 
-void fn_80158558(StuntWatcher* w) { lbl_8042FD34.a.data[lbl_8042FD34.a.count++] = w; }
+void fn_80158558(StuntWatcher* w) {
+    StuntWatcher** d = lbl_8042FD34.a.data;
+    int n = lbl_8042FD34.a.count++;
+    d[n] = w;
+}
 
 void fn_8015857C(StuntWatcher* w) {
     int k = lbl_8042FD34.Find(w);

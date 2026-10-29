@@ -239,10 +239,13 @@ void fn_802DB304(GXTex** out, int mode) {
 }
 
 int fn_802DB378(int mode, int i) {
-    if (mode == 2 && i == 0) {
-        return 4;
+    int r = 0xFF;
+    if (mode == 2) {
+        if (i == 0) {
+            r = 4;
+        }
     }
-    return 0xFF;
+    return r;
 }
 
 void fn_802DB394(void) {

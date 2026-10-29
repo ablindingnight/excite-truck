@@ -906,11 +906,13 @@ void fn_802BDD8C(f32 range) {
     fn_802DBECC();
 }
 
-void fn_802BDFBC(FanCell* f, int lod) {
+void fn_802BDFBC(FanCell* f, int lod, f32 blend) {
     f32 v;
     if (lod < 8) {
         v = 1.0f;
-    } else if (lod != 8) {
+    } else if (lod == 8) {
+        v = blend;
+    } else {
         v = 0.0f;
     }
     for (TCell* c = f->head; c; c = c->next) {
