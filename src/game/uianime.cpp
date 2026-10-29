@@ -348,7 +348,9 @@ void UiAnimList::Apply(f32 t) {
 }
 
 UiSpecialList::~UiSpecialList(void) {
-    delete[] items;
+    if (items) {
+        delete[] items;
+    }
     items = 0;
     n = 0;
 }
