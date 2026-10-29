@@ -125,7 +125,19 @@ void fn_801C1218(PSys* s);
 void fn_801C1364(PSys* s);
 void fn_801C1320(PSys* s);
 void fn_801C1B60(PSys* s);
+void fn_801C2B9C(RVec3* out, const RVec3* a, const RVec3* d, f32 k);
+void fn_80144B44(RVec3* v, f32 x, f32 y, f32 z);
+void fn_80144D64(RVec3* d, const RVec3* s);
+void fn_80144CD0(RVec3* out, const RVec3* p, const RMtx* m);
+void fn_80144DAC(RVec3* d, const RVec3* s);
+void StatsUpdate__Fv(RVec3* v);  // vector default constructor (empty, out of line)
+f32 fn_8017F70C(f32 x);
+void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
+void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
+f32 fn_801C0E44(const RVec3* v);
+void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
 }
+f32 Max(f32 a, f32 b);
 
 PSys::PSys(int nPart, int nStick, int nAnchor, int nLink) {
     int sb = nStick * sizeof(PStick);
@@ -395,8 +407,79 @@ void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f) {
     fn_801C1B60(s);
 }
 
-// Particle collision against boxes (placeholder).
-void fn_801C28A8(PSys* s) {}
+// Keeps particles [first, last) out of a box (frame m, half extents half): a particle that ends the step inside
+// is pushed back out through the face it came in by. Optionally returns the weighted mean of the pushed
+// particles (center) and their accumulated push (push).
+void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, const RVec3* spin, int first, int last,
+                 RVec3* center, RVec3* push) {
+    RVec3 d;
+    RVec3 v;
+    RVec3 prev;
+    RVec3 q;
+    RVec3 p;
+    RVec3 was;
+    RVec3 force;
+    RVec3 sum;
+    int n = last;
+    if (n < 0) {
+        n = s->nPart;
+    }
+    fn_80144B44(&sum, 0.0f, 0.0f, 0.0f);
+    fn_80144B44(&force, 0.0f, 0.0f, 0.0f);
+    f32 total = 0.0f;
+    for (int i = first; i < n; i++) {
+        if (s->free[i] == 0) {
+            continue;
+        }
+        f32 ez;
+        f32 ey;
+        f32 ex;
+        f32 w = s->w30[i];
+        ex = 0.254f + (half->x + w);
+        ey = 0.254f + (half->y + w);
+        ez = 0.254f + (half->z + w);
+        fn_80144D64(&was, &s->pos[i]);
+        StatsUpdate__Fv(&p);
+        fn_80144CD0(&p, &was, m);
+        StatsUpdate__Fv(&q);
+        StatsUpdate__Fv(&prev);
+        fn_80144D64(&v, vel);
+        fn_801C2B9C(&prev, &s->old[i], &v, 0.016666668f);
+        fn_80144CD0(&q, &prev, m);
+        if (fn_8017F70C(p.x) < ex && fn_8017F70C(p.y) < ey && fn_8017F70C(p.z) < ez) {
+            if (fn_8017F70C(q.x) > -0.05f + ex) {
+                p.x = p.x >= 0.0f ? ex : -ex;
+            }
+            if (fn_8017F70C(q.y) >= -0.05f + ey) {
+                if (p.y > 0.0f) {
+                    p.y = ey;
+                } else {
+                    p.y = -ey;
+                }
+            }
+            if (fn_8017F70C(q.z) >= -0.05f + ez) {
+                if (p.z > 0.0f) {
+                    p.z = ez;
+                } else {
+                    p.z = -ez;
+                }
+            }
+            fn_801BFD34(&s->pos[i], &p, m);
+            StatsUpdate__Fv(&d);
+            fn_801C0E60(&d, &was, &s->pos[i]);
+            f32 k = Max(fn_801C0E44(&d), 0.00001f);
+            fn_801C2B9C(&force, &force, &d, 1000.0f * s->w34[i]);
+            fn_801C2B9C(&sum, &sum, &s->pos[i], k);
+            total += k;
+        }
+    }
+    if (center) {
+        fn_801C0124(center, &sum, 1.0f / Max(total, 0.000001f));
+    }
+    if (push) {
+        fn_80144DAC(push, &force);
+    }
+}
 
 void fn_801C2B9C(RVec3* out, const RVec3* a, const RVec3* d, f32 k) {
     out->x = a->x + d->x * k;
