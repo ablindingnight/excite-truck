@@ -810,11 +810,15 @@ void fn_8029DF64(WaterPool* p, int x, int y, f32 amount) {
 
 static inline f32 Dot2(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }
 
+static inline void SetPt(ValPoint* o, f32 x, f32 y) {
+    o->x = x;
+    o->y = y;
+}
+
 int fn_8029DFE0(WaterPool* p, const Vec* at) {
     int in = 0;
     ValPoint d;
-    d.y = at->z - p->origin.z;
-    d.x = at->x - p->origin.x;
+    SetPt(&d, at->x - p->origin.x, at->z - p->origin.z);
     f32 v = Dot2(d.x, d.y, p->dyx, p->dyz);
     f32 u = Dot2(d.x, d.y, p->dxx, p->dxz);
     int inside = 0;
