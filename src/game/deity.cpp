@@ -1102,7 +1102,7 @@ void fn_801B2910(void) {
     }
     f32 now = lbl_8055E3C8;
     fn_801B234C(0.033366702f + now);
-    int solo = lbl_8055E678 == 1;
+    bool solo = lbl_8055E678 == 1;
     f32 left = solo ? 0.0f : -5.0f;
     f32 right = solo ? 0.0f : 5.0f;
     DCar* lastRight = 0;
