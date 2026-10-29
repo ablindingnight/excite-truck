@@ -1410,7 +1410,11 @@ void fn_80118C44(StreamPlayer *p) {
             p->resyncs++;
             fn_8011C274(lbl_8055DED4, p->queue);
             fn_801190B0(p, 0);
-            while ((p->readerCapacity * 29) >> 5 > p->readerFilled && p->readerFill(&p->readerRead) != 0) {
+            for (;;) {
+                u32 lim = (p->readerCapacity * 29) >> 5;
+                if (p->readerFilled >= lim || p->readerFill(&p->readerRead) == 0) {
+                    break;
+                }
             }
             p->startTime = 0;
             p->unk328 = 0;
