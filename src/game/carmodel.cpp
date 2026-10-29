@@ -982,9 +982,10 @@ struct ShadowQuery {
 };
 
 void CarModel::vf1C(void) {
-    f32 s = fn_801E88F0(-1);
-    s = s * s;
-    s = s * fn_802C88E8(&frame.pos);
+    f32 r = fn_801E88F0(-1);
+    f32 s = r * r;
+    f32 scale = fn_802C88E8(&frame.pos);
+    s = scale * s;
     int i = numShadows - 1;
     while (i >= 0 && s < shadows[i].dist * shadows[i].dist) {
         i--;
