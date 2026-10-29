@@ -626,7 +626,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
         int oldPaths = fn_8027BAB8(path);
         VehicleInfo* v = FindVehicle(vehicle);
         int special = !(v->flags & 2);
-        int hadSpecial = special && IsSpecialChassisUnlocked(v->name);
+        bool hadSpecial = special && IsSpecialChassisUnlocked(v->name);
         int hadExtreme = IsExtremeChassisUnlocked();
         int hadCareer = IsCareerComplete();
         fn_802840F8();

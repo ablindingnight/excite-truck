@@ -493,7 +493,7 @@ void fn_801B0C78(int i) {
     DeityCar* c = &lbl_8055E684[i];
     TeleportInfo t;
     *(s16*)((u8*)&t + 0x40) = -1;
-    int isPlayer = c->Car()->type == 'PCAR';
+    bool isPlayer = c->Car()->type == 'PCAR';
     if (isPlayer) {
         fn_801B30D0(i);
         fn_801B30E0(i);
@@ -560,7 +560,7 @@ int fn_801B0F48(u32 a, u32 b) {
 void fn_801B0F70(int i, s32 place) {
     DeityCar* c = &lbl_8055E684[i];
     DCar* car = c->Car();
-    int isPlayer = car->type == 'PCAR';
+    bool isPlayer = car->type == 'PCAR';
     LinePlace p;
     p.seg = 0;
     p.t = 0.0f;

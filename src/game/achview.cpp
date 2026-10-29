@@ -1055,7 +1055,7 @@ void fn_8025B788(u8* p) {
         f32 best = v->q.best;
         v->shown = best < next ? best : next;
     }
-    u8 wasStarted = v->started;
+    bool wasStarted = v->started;
     v->started = (s32)(v->shown + lbl_80558DC4[0]) < v->q.best;
     v->tally += fn_80214D48();
     if (v->started) {
