@@ -757,15 +757,19 @@ int fn_801784AC(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, 
     return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E468, g);
 }
 
+static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+}
+
 int fn_801784DC(const f32* pos, f32* outY, f32* outN, s32* outTri, s32 x) {
     f32 below[3];
     f32 hit[3];
     f32 n[3];
     s32 tri;
     s32 tmp;
-    below[0] = pos[0];
-    below[1] = pos[1] - 1000.0f;
-    below[2] = pos[2];
+    Set3(below, pos[0], pos[1] - 1000.0f, pos[2]);
     if (fn_801784AC(pos, below, hit, n, &tri, &tmp, x)) {
         *outY = hit[1];
         if (outN) {
