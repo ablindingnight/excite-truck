@@ -428,9 +428,10 @@ void CarUIModel::SetPose(const Frame* f, const f32* wy, const f32* steer) {
         w.pos.x = w.pos.x + t.x;
         w.pos.y = w.pos.y + t.y;
         w.pos.z = w.pos.z + t.z;
-        w.pos.x = w.pos.x + w.b.v[1].x * wy[i];
-        w.pos.y = w.pos.y + w.b.v[1].y * wy[i];
-        w.pos.z = w.pos.z + w.b.v[1].z * wy[i];
+        f32 h = wy[i];
+        w.pos.x = w.pos.x + w.b.v[1].x * h;
+        w.pos.y = w.pos.y + w.b.v[1].y * h;
+        w.pos.z = w.pos.z + w.b.v[1].z * h;
         if (!left) {
             a.x = 0.0f;
             a.y = 3.1415927f;
