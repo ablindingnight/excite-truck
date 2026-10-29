@@ -548,10 +548,11 @@ void fn_802B2D24(SetPlacer* set) {
 }
 
 void fn_802B2D94(SetPlacer* set) {
+    SetPlacer* s = set;
     lbl_8055F9B4 = 0;
     lbl_8055F9B0 = 0;
-    for (int i = 0; i < set->Count(); i++) {
-        (*set->At(i))->Draw();
+    for (int i = 0; i < s->Count(); i++) {
+        (*s->At(i))->Draw();
     }
 }
 
