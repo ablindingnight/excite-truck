@@ -2076,7 +2076,7 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
 
 void fn_80197BD0(u8* d, u8* out) {}
 
-void fn_8019813C(u8* d, u8* p, f32 a, f32 b);
+void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
 int fn_80197FE4(u8* d, u8* p) {
     int r = 0;
@@ -2116,7 +2116,7 @@ int fn_80197FE4(u8* d, u8* p) {
     return r;
 }
 
-void fn_8019813C(u8* d, u8* p, f32 a, f32 b) {
+void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
     int ok = 1;
     if (U8(d, 0x11C) && a > F32(d, 0x124)) {
         ok = 0;
@@ -2126,7 +2126,8 @@ void fn_8019813C(u8* d, u8* p, f32 a, f32 b) {
         F32(d, 0x128) = b;
         F32(d, 0x124) = a;
         F32(d, 0x12C) = F32(p, 0x4);
-        F32(d, 0x130) = (F32(d, 0x270) + F32(p, 0x10)) - 0.8888889f;
+        f32 h = F32(p, 0x10);
+        F32(d, 0x130) = (F32(d, 0x270) + h) - 0.8888889f;
         S32(d, 0x138) = S32(p, 0x18);
     }
 }
