@@ -151,10 +151,9 @@ static inline void FourCC(char* s, u32 v) {
     s[4] = 0;
 }
 
-static inline void StrNCpy(char* dst, const char* src, int len) {
+static inline void StrNCpy(char* dst, const char* s, int len) {
     char* d = dst;
     int n = len;
-    const char* s = src;
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
