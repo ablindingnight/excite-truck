@@ -522,7 +522,116 @@ void fn_801AC508(void) {
     }
 }
 
-void fn_801AC544(u8* p) {}  // stub (321)
+}  // extern "C"
+
+static inline void Mix(ObVec3* o, const ObVec3* a, f32 ka, const ObVec3* b, f32 kb) {
+    o->x = a->x * ka + b->x * kb;
+    o->y = a->y * ka + b->y * kb;
+    o->z = a->z * ka + b->z * kb;
+}
+static inline void Mix2(ObVec3* o, const ObVec3* a, const ObVec3* b, f32 t) {
+    f32 s = 1.0f - t;
+    o->x = a->x * s + b->x * t;
+    o->y = a->y * s + b->y * t;
+    o->z = a->z * s + b->z * t;
+}
+
+// Cloth setup records for ppsys.
+struct FenceVert {
+    ObVec3 pos;  // offset 0x0
+    f32 w34;     // offset 0xC
+    f32 w30;     // offset 0x10
+};
+
+struct FenceEdge {
+    s32 a;      // offset 0x0
+    s32 b;      // offset 0x4
+    f32 extra;  // offset 0x8
+    f32 stiff;  // offset 0xC: negative = slack
+};
+
+struct FencePin {
+    s32 idx;       // offset 0x0
+    u8* mtx;       // offset 0x4
+    ObVec3* at;    // offset 0x8
+};
+
+extern "C" {
+f32 PSVECDistance(const void* a, const void* b);
+void fn_801A2674(u8* p, f32 r, u32 a, u32 b);
+void fn_801C1CBC(s32 sys, int nv, FenceVert* v, int ne, FenceEdge* e, int np, FencePin* pins);
+
+// Once the last fence pole of the course has registered, builds the rope cloth that joins them: one particle
+// pinned at each pole top, four free particles strung between neighbouring bound poles (slack sticks), and the
+// collision sphere range of each span.
+void fn_801AC544(u8* p) {
+    fn_801AC184(p);
+    if (S32(p, 0x250) == lbl_8055E5EC - 1 && lbl_8055E5F0) {
+        FenceVert verts[320];
+        FenceEdge edges[320];
+        FencePin pins[64];
+        int nv = 0;
+        int ne = 0;
+        int np = 0;
+        for (int i = 0; i < lbl_8055E5EC; i++) {
+            u8* o = lbl_80435628[i];
+            ObVec3 a;
+            ObRotate(&a, (f32*)(o + 0x1EC), (ObVec3*)(o + 0x244));
+            a.x += F32(o, 0x210);
+            a.y += F32(o, 0x214);
+            a.z += F32(o, 0x218);
+            if (PTR(o, 0x23C)) {
+                f32 r = 0.5f + 1.1f * PSVECDistance(o + 0x210, PTR(o, 0x23C) + 0x210);
+                if (PTR(o, 0x240)) {
+                    fn_801A2674(PTR(o, 0x240), r, nv, nv + 5);
+                }
+                u8* prev = PTR(o, 0x23C);
+                ObVec3 b;
+                ObVec3* lp = (ObVec3*)(prev + 0x244);
+                ObRotate(&b, (f32*)(prev + 0x1EC), lp);
+                b.x += F32(prev, 0x210);
+                b.y += F32(prev, 0x214);
+                b.z += F32(prev, 0x218);
+                for (int j = 0; j < 5; j++) {
+                    if (j > 0) {
+                        f32 t = (f32)j / 5.0f;
+                        FenceVert* v = &verts[nv++];
+                        v->pos.x = b.x * (1.0f - t) + a.x * t;
+                        v->pos.y = b.y * (1.0f - t) + a.y * t;
+                        v->pos.z = b.z * (1.0f - t) + a.z * t;
+                        v->w34 = 1.0f;
+                        v->w30 = 1.0f;
+                    }
+                    FenceEdge* e = &edges[ne++];
+                    e->a = nv;
+                    e->b = nv - 1;
+                    e->extra = 0.0f;
+                    e->stiff = -0.5f;
+                }
+            }
+            FencePin* pin = &pins[np++];
+            pin->idx = nv;
+            pin->mtx = o + 0x3C;
+            pin->at = 0;
+            S32(o, 0x254) = nv;
+            FenceVert* v = &verts[nv++];
+            v->pos.x = a.x;
+            v->pos.y = a.y;
+            v->pos.z = a.z;
+            v->w34 = 1.0f;
+            v->w30 = 1.0f;
+        }
+        for (int i = 0; i < ne; i++) {
+            PSVECDistance(&verts[edges[i].a], &verts[edges[i].b]);
+            edges[i].extra = 0.0f;
+        }
+        fn_801C1CBC(lbl_8055E5F0, nv, verts, ne, edges, np, pins);
+    }
+}
+
+}  // extern "C"
+
+extern "C" {
 
 void fn_801ACA48(u8* p) {
     fn_801ABC28(p);
