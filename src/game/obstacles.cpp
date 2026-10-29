@@ -505,7 +505,8 @@ void fn_801AC454(u8* p, u8* q) {
     F32(p, 0x24C) = 0.0f;
     U32(p, 0x23C) = 0;
     if (idx > 0) {
-        u8* prev = lbl_80435628[idx - 1];
+        int last = idx - 1;
+        u8* prev = lbl_80435628[last];
         if (PSVECSquareDistance(prev + 0x60, p + 0x60) < 16.0f) {
             PTR(p, 0x23C) = prev;
             fn_802E30C8("fencepole: binding to %p", prev);
