@@ -2210,7 +2210,223 @@ void fn_80198488(u8* d) {
     }
 }
 
-void fn_80198530(u8* d) {}
+void fn_8018AE08(void* car);
+void fn_8018ADCC(void* car, f32 v);
+int fn_80167594(int i);
+int fn_801675E4(int i);
+int fn_80167634(int i);
+int fn_80167728(int i);
+int fn_80167758(void);
+int fn_80167768(f32 throttle);
+void fn_801DCF48(RVec3* n, f32 x, f32 z);
+void PSVECCrossProduct(const void* a, const void* b, void* out);
+
+static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
+static inline void SetV3(RVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
+// The AI driver's per-frame controls: steering toward the line (or the recovery steer when it is far off), the
+// throttle/brake/gear from fn_80196250 with speed caps, launch and pit overrides, the reverse-out push, the
+// turbo decision and an extra downhill push along the ground when the car is over the turbo speed.
+void fn_80198530(u8* d) {
+    f32 throttle = 1.0f;
+    f32 brake = 0.0f;
+    f32 steer;
+    int rev = F32(d, 0x28) < 0.0f;
+    int wide = rev ? F32(d, 0x24) < -1.0f : F32(d, 0x24) > 1.0f;
+    if (wide) {
+        V2 v;
+        v.x = 0.0f;
+        v.y = 1.0f;
+        f32 ay = F32(d, 0x44);
+        f32 ax = F32(d, 0x40);
+        f32 lat = v.y * ax + -v.x * ay;
+        if (rev) {
+            f32 t = Clamp01(Ramp((f32)__fabs(brake), 0.0f, 0.05f));
+            throttle = LerpF(1.0f, 0.0f, t);
+            steer = (lat + 0.9f * F32(CAR(d), 0x128)) / F32(d, 0x24C);
+            steer = MIN(1.0f, steer);
+            steer = MAX(steer, -1.0f);
+        } else {
+            steer = lat / F32(d, 0x24C);
+        }
+    } else {
+        steer = F32(d, 0x20);
+        steer = MIN(1.0f, steer);
+        steer = MAX(steer, -1.0f);
+        F32(d, 0x1D4) = F32(d, 0x26C);
+        if (F32(d, 0x278) > 0.0f) {
+            F32(d, 0x1E0) = -1000.0f;
+        }
+        S32(d, 0x2D0) |= 0x800;
+    }
+    fn_801961FC(d);
+    if (F32(d, 0x120) != 0.0f) {
+        F32(d, 0x28) = MIN(F32(d, 0x28), F32(d, 0x120));
+    }
+    s32 sign = 1;
+    u8* car = CAR(d);
+    fn_80196250(&throttle, &brake, &sign, F32(d, 0x28), PSVECDotProduct(car + 0x54, car + 0x118), F32(d, 0x2C));
+    f32 grip = 0.0f;
+    if (S32(d, 0x268) == 1 && fn_801B3064() < F32(d, 0x26C)) {
+        brake = 0.0f;
+        u8* c = CAR(d);
+        f32 speed = PSVECDotProduct(c + 0x54, c + 0x118);
+        f32 hi = 3.5555556f + F32(d, 0x28);
+        f32 lo = 1.3333334f + F32(d, 0x28);
+        f32 t = Clamp01((speed - lo) / (hi - lo));
+        grip = LerpF(0.0f, 1.0f, t);
+        if ((f32)__fabs(F32(d, 0x28)) <= lbl_80558DC4[0]) {
+            brake = 1.0f;
+        }
+    }
+    if (U8(d, 0x304)) {
+        if (--U8(d, 0x304) > 10) {
+            f32 gap = F32(d, 0x2F4) < 2.0f ? 13.333333f : 4.4444447f;
+            if (F32(d, 0x28) - F32(d, 0x270) < gap) {
+                throttle = 0.0f;
+            }
+        }
+    }
+    if (S32(d, 0x2D0) & 0x40) {
+        throttle = 0.0f;
+    }
+    if ((U32(d, 0x2D0) & 0x1150) == 0x1150) {
+        steer = 0.0f;
+        brake = 1.0f;
+    }
+    if (S32(d, 0x268) != 3) {
+        brake = MaxF(brake, F32(d, 0x2A8));
+    }
+    switch (S32(d, 0x260)) {
+    case 2:
+        brake = 0.5f;
+        throttle = 0.0f;
+        break;
+    case 1:
+        if (F32(d, 0x270) > 8.888889f) {
+            throttle = MIN(throttle, 0.2f);
+        }
+        break;
+    }
+    F32(d, 0x2A8) *= 0.9025f;
+    f32 full = 1.0f;
+    if (brake > 0.01f) {
+        throttle = 0.0f;
+    }
+    if (S32(CAR(d), 0x2620) == 0) {
+        steer *= 4.0f;
+    }
+    fn_801941A8(d, steer);
+    fn_80194170(d, throttle);
+    fn_801942B8(d, brake);
+    if (sign == 1) {
+        fn_8018AE08(CAR(d));
+    } else {
+        fn_8018ADD4(CAR(d), sign);
+    }
+    fn_8018ADC4(CAR(d), full);
+    if (sign == -1) {
+        u8* c = CAR(d);
+        if (S32(c, 0x2620) >= 3 && F32(c, 0x25D4) < 17.777779f) {
+            f32 k = -17800.0f * Clamp01(throttle);
+            RVec3 f;
+            f.x = F32(c, 0x54) * k;
+            f.y = F32(c, 0x58) * k;
+            f.z = F32(c, 0x5C) * k;
+            (*(RigidBody**)(d + 0x294))->AddForceAt(&f, (RVec3*)(c + 0x60));
+        }
+    }
+    if ((U32(d, 0x2D0) & 0x140) == 0x140) {
+        fn_801942F0(d, 0);
+        fn_8018ADCC(CAR(d), 1.0f);
+    } else {
+        fn_8018ADCC(CAR(d), grip);
+    }
+    int pit = 0;
+    if (S32(CAR(d), 0x1F0) == 0x50 && F32(d, 0x26C) - F32((u8*)LINK(d)->Body(), 0x26D8) < 3.0f) {
+        pit = 1;
+    }
+    if (pit) {
+        S32(d, 0x2D0) |= 0x800;
+    }
+    if (!(S32(d, 0x2D0) & 0x800)) {
+        if (fn_80167594(S32(d, 0x290))) {
+            F32(CAR(d), 0x25A0) = 0.0f;
+        }
+        f32 wait = 4.0f;
+        int on = (S32(fn_801769CC(), 4) >> 19) & 1;
+        int late = 0;
+        if (F32(d, 0x26C) > F32(d, 0x200) && S32(CAR(d), 0x1F0) != 0x50) {
+            late = 1;
+        }
+        if (on && F32(d, 0x26C) - F32(d, 0x1FC) > wait) {
+            int tap = fn_80167758();
+            int go = 0;
+            if (fn_80167768(F32(d, 0x240)) && (!tap || F32(d, 0x26C) - F32(d, 0x204) > 0.016683351f)) {
+                go = 1;
+            }
+            int heat = F32(CAR(d), 0x25A0) >= 0.55f;
+            if (go) {
+                if (!heat || late) {
+                    S32(d, 0x2D0) |= 0x400;
+                    F32(d, 0x1FC) = -1000.0f;
+                } else if (F32(d, 0x1FC) < 0.0f) {
+                    F32(d, 0x1FC) = F32(d, 0x26C);
+                }
+            }
+            int air = F32(CAR(d), 0x2588) > 0.0f;
+            if (air) {
+                f32 r = fn_80193D20();
+                f32 now = F32(d, 0x26C);
+                F32(d, 0x1FC) = now;
+                F32(d, 0x200) = now + r;
+            }
+        }
+    }
+    fn_8018AE24(CAR(d), (S32(d, 0x2D0) >> 10) & 1);
+    if (fn_801675E4(S32(d, 0x290))) {
+        S32(CAR(d), 0x24) = 0;
+    } else {
+        S32(CAR(d), 0x24) = S32(CAR(d), 0x28);
+    }
+    if (fn_80167634(S32(d, 0x290))) {
+        F32(CAR(d), 0x5F0) = 0.0f;
+    } else {
+        F32(CAR(d), 0x5F0) = 1.0f;
+    }
+    f32 v = F32(d, 0x270);
+    if (v > 44.444447f) {
+        f32 over = MIN(0.88977873f, F32(d, 0x28) - v);
+        over = MAX(over, 0.0f);
+        if (over > 0.0f && (f32)__fabs(steer) < 0.05f && fn_80167728(S32(d, 0x290))) {
+            u8* c = CAR(d);
+            RVec3 n;
+            fn_801DCF48(&n, F32(c, 0x60), F32(c, 0x68));
+            u8* p = PTR(d, 0x1A0);
+            RVec3 dir;
+            SetV3(&dir, F32(p, 0x8), 0.0f, F32(p, 0xC));
+            RVec3 side;
+            PSVECCrossProduct(&n, &dir, &side);
+            PSVECCrossProduct(&side, &n, &dir);
+            f32 m = PSVECMag(&dir);
+            m = MAX(0.01f, m);
+            f32 inv = 1.0f / m;
+            dir.x *= inv;
+            dir.y *= inv;
+            dir.z *= inv;
+            dir.y *= 1.1f;
+            f32 k = over * F32(CAR(d), 0xD4) / 0.016683351f;
+            dir.x *= k;
+            dir.y *= k;
+            dir.z *= k;
+            (*(RigidBody**)(d + 0x294))->AddForceAt(&dir, (RVec3*)(c + 0x60));
+        }
+    }
+}
 
 u8* fn_80198DD0(u8* d, int del) {
     if (d) {
