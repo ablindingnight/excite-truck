@@ -230,6 +230,13 @@ public:
 // The handler list; its storage follows it in AwardsMgr (handlerBuf).
 struct HandlerVec {
     HandlerVec(void);
+    ~HandlerVec(void) {
+        if (this) {
+            data = 0;
+            n = 0;
+            cap = 0;
+        }
+    }
     StatHandler** data;  // offset 0x0
     s32 n;               // offset 0x4
     s32 cap;             // offset 0x8
@@ -341,6 +348,7 @@ namespace {
 
 struct AwardsMgr {
     AwardsMgr(void);
+    ~AwardsMgr(void);
     s32 event;                // offset 0x0
     s32 difficulty;           // offset 0x4
     LayoutObj* sfx;           // offset 0x8
@@ -958,32 +966,24 @@ void fn_801CCBC4(void) {
     }
 }
 
-void fn_801CCCAC(void) {
-    AwardsMgr* m = lbl_8055E884;
-    if (m) {
-        if (m->art) {
-            fn_80235380(m->art);
-            m->art = 0;
-        }
-        if (m->sfx) {
-            delete (VObj*)m->sfx;
-        }
-        SafeDelete<ILayout>(m->layout);
-        SafeDelete<ILayout>(m->recLayout);
-        for (int i = 0; i < m->handlers.n; i++) {
-            if (m->handlers.data[i]) {
-                delete m->handlers.data[i];
-            }
-        }
-        m->handlers.n = 0;
-        HandlerVec* v = &m->handlers;
-        if (v) {
-            v->data = 0;
-            v->n = 0;
-            v->cap = 0;
-        }
-        operator delete(m);
+inline AwardsMgr::~AwardsMgr(void) {
+    if (art) {
+        fn_80235380(art);
+        art = 0;
     }
+    if (sfx) {
+        delete (VObj*)sfx;
+    }
+    SafeDelete<ILayout>(layout);
+    SafeDelete<ILayout>(recLayout);
+    for (int i = 0; i < handlers.n; i++) {
+        delete handlers.data[i];
+    }
+    handlers.n = 0;
+}
+
+void fn_801CCCAC(void) {
+    delete lbl_8055E884;
     lbl_8055E884 = 0;
 }
 
