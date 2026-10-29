@@ -882,8 +882,10 @@ void fn_802723B4(u8* src, f32* out, f32 at) {
     fn_80136468(&pos, src, at);
     f32 t = pos.t;
     u8* q = pos.seg;
-    out[0] = F32(q, 0x0) + t * (F32(PTR(q, 0x14), 0x0) - F32(q, 0x0));
-    out[1] = F32(q, 0x4) + t * (F32(PTR(q, 0x14), 0x4) - F32(q, 0x4));
+    f32 x = F32(q, 0x0);
+    out[0] = x + t * (F32(PTR(q, 0x14), 0x0) - x);
+    f32 y = F32(q, 0x4);
+    out[1] = y + t * (F32(PTR(q, 0x14), 0x4) - y);
 }
 
 // A 2D point on the track plane.

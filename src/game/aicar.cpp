@@ -982,8 +982,10 @@ f32 fn_801948B0(u8* d, f32 t, int steer) {
 
 static inline V2 LerpXY(const RVec3* a, const RVec3* b, f32 t) {
     V2 r;
-    r.y = a->y + t * (b->y - a->y);
-    r.x = a->x + t * (b->x - a->x);
+    f32 dy = b->y - a->y;
+    f32 dx = b->x - a->x;
+    r.y = a->y + t * dy;
+    r.x = a->x + t * dx;
     return r;
 }
 
