@@ -811,10 +811,14 @@ void fn_801B196C(DeityCar* c) {
     DCar* car = c->car;
     fn_80156A40()->Locate(car->il, (u8*)car + 0x60);
     DCar* k = c->car;
+    f32 q[3];
     f32 a = k->ahead;
+    q[0] = k->pos[0] + k->fwd[0] * a;
+    q[1] = k->pos[1] + k->fwd[1] * a;
+    q[2] = k->pos[2] + k->fwd[2] * a;
     V2 p;
-    p.x = k->pos[0] + k->fwd[0] * a;
-    p.y = k->pos[2] + k->fwd[2] * a;
+    p.x = q[0];
+    p.y = q[2];
     c->line->Attach(fn_80156A40()->Racing(c->index), &p, 0);
     LineFollower* l = c->line;
     c->racing.seg = l->il.seg;
@@ -1308,10 +1312,14 @@ void fn_801B30E0(int i) {
         } while (p != first);
     }
     DCar* car = c->Car();
+    f32 q[3];
     f32 k = car->ahead;
+    q[0] = car->pos[0] + car->fwd[0] * k;
+    q[1] = car->pos[1] + car->fwd[1] * k;
+    q[2] = car->pos[2] + car->fwd[2] * k;
     V2 pos;
-    pos.x = car->pos[0] + car->fwd[0] * k;
-    pos.y = car->pos[2] + car->fwd[2] * k;
+    pos.x = q[0];
+    pos.y = q[2];
     l->SetPosition(&pos, 0, best);
 }
 
