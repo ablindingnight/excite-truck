@@ -749,8 +749,8 @@ void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
     }
     int i = x + y * p->nx;
     s16* h = p->cur;
-    f32 gx = 1.5258789e-05f * (0.5f * (h[i - 1] - h[i + 1]));
-    f32 gy = 1.5258789e-05f * (0.5f * (h[x + (y - 1) * p->nx] - h[x + (y + 1) * p->nx]));
+    f32 gx = (1.0f / 65535.0f) * (0.5f * (h[i - 1] - h[i + 1]));
+    f32 gy = (1.0f / 65535.0f) * (0.5f * (h[x + (y - 1) * p->nx] - h[x + (y + 1) * p->nx]));
     n->x = gx * p->dxx + gy * p->dyx;
     n->y = (1.0f - gx * gx) + (1.0f - gy * gy);
     n->z = gx * p->dxz + gy * p->dyz;
@@ -760,7 +760,7 @@ void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
 void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y) {
     f32 h = p->cur[x + y * p->nx];
     v->pos.z = p->origin.z + x * p->dxz + y * p->dyz;
-    v->pos.y = p->origin.y + 1.5258789e-05f * (p->desc.scale * h);
+    v->pos.y = p->origin.y + (1.0f / 65535.0f) * (p->desc.scale * h);
     v->pos.x = p->origin.x + x * p->dxx + y * p->dyx;
     Vec n;
     fn_8029DA24(p, &n, x, y);

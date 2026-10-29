@@ -714,7 +714,7 @@ SparkSys::SparkSys(int n, f32 l) {
     life = l;
     invLife = 1.0f / l;
     tex = fn_802CAC28("spark.tex", 0);
-    lod = log2(13.333333333333334);
+    lod = log2(40.0f / 3.0f);
 }
 
 Spark::Spark(void) {}

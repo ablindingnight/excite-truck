@@ -227,10 +227,10 @@ void fn_80209904(void) {
         quiet = 1;
     }
     if (quiet) {
-        f32 f = lbl_8055EDB8 - 0.016683417f;
+        f32 f = lbl_8055EDB8 - 1.0f / 59.94f;
         lbl_8055EDB8 = (0.0f > f) ? 0.0f : f;
     } else {
-        f32 f = 0.016683417f + lbl_8055EDB8;
+        f32 f = 1.0f / 59.94f + lbl_8055EDB8;
         lbl_8055EDB8 = (lbl_8055B4FC < f) ? lbl_8055B4FC : f;
     }
 }

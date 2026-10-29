@@ -216,7 +216,7 @@ void fn_802BEB70(void) {
                     f32 h = fn_801DCF48(0, (f32)x * lbl_80564D50, (f32)z * lbl_80564D50) - -12.0f;
                     int ih = (int)((h < 0.0f) ? h - 0.5f : 0.5f + h);
                     c->bits = (c->bits & ~0x7FC000) | (ih << 14);
-                    c->bits = (c->bits & ~0x3C00) | ((int)((f32)ceil(1.3333333333333333) - 1.0f) << 10);
+                    c->bits = (c->bits & ~0x3C00) | ((int)((f32)ceil(4.0f / 3.0f) - 1.0f) << 10);
                 }
             }
         }

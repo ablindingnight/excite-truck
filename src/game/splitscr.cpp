@@ -181,7 +181,7 @@ void fn_802059C0(void) {
             if (lbl_8055ED6C != -2) {
                 fn_802C8CBC(lbl_8055ED6C);
                 fn_802C8DBC(4);
-                fn_802057A8(-1, 0, iconX, y, 0.0f, 1.0f);
+                fn_802057A8(-1, 0, iconX, y, 1.0f, 0.0f);
                 fn_802057A8(-1, 0, 0.0f, y, 1.0f, 1.0f);
                 y -= margin;
                 fn_802057A8(-1, 1, iconX, y, 0.0f, 0.0f);

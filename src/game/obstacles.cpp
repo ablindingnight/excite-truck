@@ -304,8 +304,8 @@ void fn_801ABC28(u8* p) {
         ((RigidBody*)p)->Flush((RVec3*)&lin, (RVec3*)&ang);
         return;
     }
-    if (PSVECDotProduct((f32*)(p + 0x118), (f32*)(p + 0x118)) > 0.01f ||
-        PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x124)) > 0.01f) {
+    if (PSVECDotProduct((f32*)(p + 0x118), (f32*)(p + 0x118)) > 0.1f * 0.1f ||
+        PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x124)) > 0.1f * 0.1f) {
         if (F32(p, 0x64) > -500.0f) {
             fn_801AC240(p);
         }
@@ -925,7 +925,7 @@ void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) 
 void fn_801AD99C(u8* p, f32* v, f32* off) {
     f32 push[3];
     f32 at[3];
-    f32 s = F32(p, 0xD4) / 0.01668335f;
+    f32 s = F32(p, 0xD4) / (1.0f / 59.94f);
     push[0] = v[0] * s;
     push[1] = v[1] * s;
     push[2] = v[2] * s;

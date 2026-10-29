@@ -187,7 +187,7 @@ void fn_802A1120(SFVec2* pos, SFVec2* dir) {
     h.t = 0.0f;
     fn_801355C0(&it, path->nodes, 0, &h, 0);
     n = fn_802A1040(path->nodes, h.node, line);
-    for (t = 0.0f; t < 1.0f; t += 0.1f) {
+    for (t = 0.0f; t < 1.0f; t += 0.025f) {
         pos->x = n->pos.x + t * (n->next->pos.x - n->pos.x);
         pos->y = n->pos.y + t * (n->next->pos.y - n->pos.y);
         if (fn_802A0F7C(&path->nodes->dir, pos, &path->nodes->pos) >= 0.0f) {

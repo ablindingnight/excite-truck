@@ -441,7 +441,7 @@ TexEntry* fn_802B8EF0(int slot, XScale* sc) {
 XScale* fn_802B8FE0(int i) {
     XScale* e = &lbl_804C004C.data[lbl_804C004C.count++];
     e->prio = 0;
-    e->v = 0.0485732f;
+    e->v = 0.04857316f;
     ValueNode* root = fn_802B59CC();
     char name[32];
     fn_801345D8(name, 0x20, "road%d", i + 1);

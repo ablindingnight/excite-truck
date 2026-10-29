@@ -314,7 +314,7 @@ void fn_802BEDFC(void) {
 f32 fn_802BEFB4(void) {
     u8* c = fn_801EA9A0(fn_801E866C(-1));
     f32 h = *(f32*)(*(u8**)(c + 8) + 0x64);
-    f32 t = FMax(FMin((h - 22.222221f) / 44.444443f, 1.0f), 0.0f);
+    f32 t = FMax(FMin((h - 22.222223f) / 44.444443f, 1.0f), 0.0f);
     return 0.7f + Mul(t, 1.3f);
 }
 
