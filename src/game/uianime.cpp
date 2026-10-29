@@ -512,14 +512,18 @@ void fn_80236A5C(const char* name, const char* parent) {
 
 void fn_80237A9C(void) {}
 
+static inline void Swap(f32& a, f32& b) {
+    f32 t = a;
+    a = b;
+    b = t;
+}
+
 void fn_80237AA0(int which, f32* out, f32 t) {
     if (which == 0) {
         out[0] = lbl_8055F0C0->present ? lbl_8055F0C0->present->Length() : 0.0f;
         out[1] = lbl_8055F0C0->unpresent ? lbl_8055F0C0->unpresent->Length() : 0.0f;
         if (!lbl_8055F0C0->reverse) {
-            f32 x = out[1];
-            out[1] = out[0];
-            out[0] = x;
+            Swap(out[0], out[1]);
         }
         if (lbl_8055F0C0->flags[0x1F]) {
             out[0] = 0.0f;
@@ -528,15 +532,16 @@ void fn_80237AA0(int which, f32* out, f32 t) {
             out[1] = 0.0f;
         }
     } else {
-        AnimState* s = lbl_8055F0C0;
         if (which == 3) {
-            if (s->reverse) {
+            if (lbl_8055F0C0->reverse) {
                 t = 1.0f - t;
             }
-        } else if (!s->reverse) {
+        } else if (!lbl_8055F0C0->reverse) {
             t = 1.0f - t;
         }
-        if ((which == 3) == s->reverse) {
+        AnimState* s = lbl_8055F0C0;
+        u32 back = which == 3;
+        if (back == s->reverse) {
             if (s->unpresent) {
                 s->unpresent->Apply(t);
             }
