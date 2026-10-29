@@ -19,7 +19,7 @@ struct WidgetProperty {void* value;int key,bytes;void* buffer;};
 struct WidgetDesc {u32 unknown0;int flags;int x,y,kind,dx,dy;float scale;char unknown20[0x20];char name[1];char unknown41[0x4f];int style90,field94,field98,field9c,fielda0,fielda4;};
 struct IntWatchPrefix {char prefix[0x254];int* value;};
 struct FlagTextPrefix {char prefix[0x254];unsigned char* flag;};
-struct WidgetFragment {
+struct WidgetFragment {inline int Left() const{return left;}inline int Top() const{return top;}
  void* vtable;
  int left,top,right,bottom,kind;
  unsigned char flag18,flag19,flag1a,enabled;
@@ -408,7 +408,7 @@ WidgetFragment* fn_8021D758(WidgetFragment* self,int destroy);
 
 
 struct ObservedStringList {u32 unknown[2];int count,version;};
-struct ObservedListViewport {int total,page,start;};
+struct ObservedListViewport {int total,page,start;inline int Total() const{return total;}};
 struct RowListPrefix {char base[0x244];ObservedStringList* list;ObservedListViewport* view;int unknown24c,columns,rows,rowHeight;int* selected;int direction;float elapsed;unsigned char active;};
 static inline void SetListViewport(ObservedListViewport* view,int position){
  view->start=position;int limit=view->total-view->page;if(position>limit)view->start=limit;
@@ -519,8 +519,7 @@ void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
-// MATCHING-AID: The two one-int ScrollLocalWord/ScrollEdgeWord records preserve allocation/scheduling in fn_80221544 and fn_80221970. No independent original type evidence; plain locals regress. See widgets391_residual_aid_inventory_v1.
-struct ScrollLocalWordObservedNew {int value;inline ScrollLocalWordObservedNew(){}inline ScrollLocalWordObservedNew(int v):value(v){}};typedef char ScrollLocalWordObservedSize4[sizeof(ScrollLocalWordObservedNew)==4?1:-1];
+// MATCHING-AID: Two ScrollEdgeWord local carriers still preserve horizontal edge scheduling in fn_80221544 and fn_80221970; original type is unproved. Eight other carriers were replaced by actual coordinate/Total getters with identical code. See widgets391_morning_codex_2026-10-29_v1.
 struct ScrollEdgeWordObservedNew {int value;inline ScrollEdgeWordObservedNew(int v):value(v){}};typedef char ScrollEdgeWordObservedSize4[sizeof(ScrollEdgeWordObservedNew)==4?1:-1];
 extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
 void fn_80221544(WidgetFragment *self, void *context);
@@ -2304,28 +2303,28 @@ void fn_80221544(WidgetFragment *self, void *context)
   }
   else
   {
-    ScrollLocalWordObservedNew y(self->top);
+    int y=self->Top();
 
-    ScrollLocalWordObservedNew x(self->left);
+    int x=self->Left();
 
     int width = ((WidgetDispatch*)self)->Slot78();
 
-    fn_80228DC4((ObservedClipPrefix *) context, f->first, x.value, y.value, width, 0);
+    fn_80228DC4((ObservedClipPrefix *) context, f->first, x, y, width, 0);
 
   }
-  ScrollLocalWordObservedNew total(f->state->total);
+  int total=f->state->Total();
 
-  if (f->state->page < total.value)
+  if (f->state->page < total)
   {
   if (f->direction == 0) { int left;
  int right;
  int top;
  int bottom;
- ScrollLocalWordObservedNew x(self->left);
- left = x.value + 1;
- float ratio = ((float) (self->bottom - self->top)) / ((float) total.value);
+ int x=self->Left();
+ left = x + 1;
+ float ratio = ((float) (self->bottom - self->top)) / ((float) total);
  trackWidth = ((WidgetDispatch*)self)->Slot78();
- int rightEdge = x.value + trackWidth;
+ int rightEdge = x + trackWidth;
  right = rightEdge - 1;
  const int& start=f->state->start;
  top=(self->top + ((int) (ratio * ((float) start))))+5;
@@ -2348,10 +2347,11 @@ else { int left;
  int top;
  int bottom;
  int width = ((WidgetDispatch*)self)->Slot78();
- float ratio = ((float) width) / ((float) total.value);
+ float ratio = ((float) width) / ((float) total);
  int start = f->state->start;
  int edge = self->bottom;
- top = self->top + 1;
+ int y=self->Top();
+ top = y + 1;
  bottom = edge - 1;
  int low = self->left + ((int) (ratio * ((float) start)));
  ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
@@ -2381,18 +2381,18 @@ void fn_80221970(WidgetFragment* self){
   float initialWidth=(float)((WidgetDispatch*)self)->Slot78();
   // Width is measured before these height reads, as in the original call sequence.
   fn_802C5320(f->first,0,x,y,(0.0f),initialWidth,(float)(self->bottom-self->top));
-  ScrollLocalWordObservedNew total(f->state->total);
-  if (f->state->page < total.value) {
+  int total=f->state->Total();
+  if (f->state->page < total) {
     if (f->direction == 0) {
       int left;
       int right;
       int top;
       int bottom;
-      ScrollLocalWordObservedNew originX(self->left);
-      left = originX.value + 1;
-      float ratio = ((float) (self->bottom - self->top)) / ((float) total.value);
+      int originX=self->Left();
+      left = originX + 1;
+      float ratio = ((float) (self->bottom - self->top)) / ((float) total);
       trackWidth = ((WidgetDispatch*)self)->Slot78();
-      int rightEdge = originX.value + trackWidth;
+      int rightEdge = originX + trackWidth;
       right = rightEdge - 1;
       const int& start=f->state->start;
       top=(self->top + ((int) (ratio * ((float) start))))+5;
@@ -2425,10 +2425,11 @@ void fn_80221970(WidgetFragment* self){
       int bottom;
       int right;
       int width = ((WidgetDispatch*)self)->Slot78();
-      float ratio = ((float) width) / ((float) total.value);
+      float ratio = ((float) width) / ((float) total);
       int start = f->state->start;
       int edge = self->bottom;
-      top = self->top + 1;
+      int originY=self->Top();
+      top = originY + 1;
       bottom = edge - 1;
       int low = self->left + ((int) (ratio * ((float) start)));
       ScrollEdgeWordObservedNew high(self->left + ((int) (ratio * ((float) (start + f->state->page)))));
