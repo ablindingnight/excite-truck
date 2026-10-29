@@ -633,7 +633,8 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
         SetPlayer(0, driver, vehicle, x);
         SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
         fn_80137C84(fn_802E4A10(), 0);
-        AchSetScoreLimiter(fn_8027DE68(0) == 0);
+        int lim = fn_8027DE68(0) == 0;
+        AchSetScoreLimiter(lim);
         if (path->Get(bi)->Unlocked()) {
             lbl_8055C790 = 0;
         } else {
@@ -671,9 +672,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 list->SetReason(list->Count() - 1, why);
             }
             fn_80284580(q.a4, q.a8, list, &x);
-            if (list) {
-                delete list;
-            }
+            delete list;
             fn_8025A204();
             AchievementsCommitSession();
             if (path->IsCareer()) {
