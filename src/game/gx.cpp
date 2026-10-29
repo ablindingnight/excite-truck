@@ -2238,12 +2238,11 @@ void fn_802D3894(void) {
 }
 
 void fn_802D3900(void) {
-    VisTest** q = lbl_804C9984.queue;
     for (int i = 0; i < lbl_804C9984.count; i++) {
-        VisTest* t = *q++;
+        VisTest* t = lbl_804C9984.queue[i];
         u32 z;
         GXPeekZ(t->x, t->y, &z);
-        t->hit = z >= t->z;
+        t->hit = t->z < z;
     }
     lbl_804C9984.count = 0;
 }
