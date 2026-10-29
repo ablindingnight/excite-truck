@@ -176,8 +176,8 @@ typedef struct StreamPlayer {
     s32 unk128;                         // 0x128
     s32 unk12C;                         // 0x12C
     u8 pad130[0x138 - 0x130];
-    u32 readerCapacity;                 // 0x138
-    u32 readerFilled;                   // 0x13C
+    volatile u32 readerCapacity;        // 0x138  the reader's current buffer size (volatile in RAD's BINKIO)
+    volatile u32 readerFilled;          // 0x13C  bytes buffered
     u8 pad140[0x1F4 - 0x140];
     u8 request[0x234 - 0x1F4];          // 0x1F4
     void *readBuffer;                   // 0x234
