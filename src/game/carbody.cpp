@@ -570,7 +570,7 @@ void fn_80182DF4(u8* p) {
     minZ += c.z;
     maxZ += c.z;
     if (S32(p, 0x1F0) == 84 && !(U32(fn_801769CC(), 0x4) & 0x1000)) {
-        maxZ -= 0.762f;
+        maxZ -= 30.0f * 0.0254f;  // 30 in
     }
     F32(p, 0x5BC) = maxZ;
     u8* g = (u8*)operator new(0x184, "car-volume");
