@@ -488,6 +488,12 @@ void fn_802A002C(void) {
     }
 }
 
+static inline void SetPV(PVec* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
     f32 k = d->speedScale * PSVECMag(&s->vel);
     k = 1.0f < k ? 1.0f : k;
@@ -495,10 +501,7 @@ void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
     p->pos.x = s->pos.x + d->offset.x;
     p->pos.y = s->pos.y + d->offset.y;
     p->pos.z = s->pos.z + d->offset.z;
-    p->vel.x = s->vel.x * d->vScale.x;
-    f32 vy = s->vel.y;
-    p->vel.y = vy * d->vScale.y;
-    p->vel.z = s->vel.z * d->vScale.x;
+    SetPV(&p->vel, s->vel.x * d->vScale.x, s->vel.y * d->vScale.y, s->vel.z * d->vScale.x);
     p->pt.x = d->ptK.x + d->ptM.x * k;
     p->pt.y = d->ptK.y + d->ptM.y * k;
     p->v.x = d->vK.x + d->vM.x * k;
