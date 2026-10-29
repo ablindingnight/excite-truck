@@ -1803,8 +1803,8 @@ void fn_80196C90(u8* d) {
 void fn_80137788(Pair* p, int car, V2* out);
 void fn_801377EC(Pair* p, int car, V2* out);
 int fn_8019799C(u8* d, u8* p);
-int fn_8019703C(u8* d, u8* p);
-int fn_80197FE4(u8* d, u8* p);
+int fn_8019703C(const u8* d, const u8* p);
+int fn_80197FE4(u8* d, const u8* p);
 
 // Another car near this one, seen from `car`.
 struct NearCar {
@@ -1907,7 +1907,7 @@ struct Hit {
     s32 id;
 };
 
-int fn_8019703C(u8* d, u8* p) {
+int fn_8019703C(const u8* d, const u8* p) {
     int any = 0;
     f32 z = F32(p, 0x8);
     f32 x = F32(p, 0x4);
@@ -2078,7 +2078,7 @@ void fn_80197BD0(u8* d, u8* out) {}
 
 void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
-int fn_80197FE4(u8* d, u8* p) {
+int fn_80197FE4(u8* d, const u8* p) {
     int r = 0;
     if (!(S32(d, 0x2D0) & 4)) {
         int b = 1;
