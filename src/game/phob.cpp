@@ -218,6 +218,11 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern void* lbl_80338400[];
 
 struct PVec3 {
+    void Set(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
     f32 x;
     f32 y;
     f32 z;
@@ -508,8 +513,8 @@ void fn_80177CEC(void) {
         PVec3 z;
         PVec3 y;
         PVec3 x;
-        x = p->mtx.rot[0];
-        z = p->mtx.rot[2];
+        x.Set(p->mtx.rot[0].x, p->mtx.rot[0].y, p->mtx.rot[0].z);
+        z.Set(p->mtx.rot[2].x, p->mtx.rot[2].y, p->mtx.rot[2].z);
         PSVECCrossProduct(&z, &x, &y);
         PSVECNormalize(&x, &x);
         PSVECNormalize(&y, &y);
