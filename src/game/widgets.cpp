@@ -514,13 +514,14 @@ void* fn_80211660(int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int)
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
 static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(now-*stamp,0.0f,0.15f);int alpha=(int)PaletteNaturalLerp(255.0f,0.0f,fraction);return((u32)alpha<<24)|0x00ffffffu;}
-// Read-only half-coefficient accessor; original helper boundary is unproved.
+// MATCHING-AID: Zero-argument half getter still controls FP operand/CSE choices in fn_802200AC; original helper identity is unproved. Selection/model uses were removed with identical code; direct gauge divisions leave one differing word. See widgets391_half_scope_reduction_v1.
 static inline float GaugeHalfReferenceObservedNew(){return 0.5f;}
 extern "C" {
 void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
+// MATCHING-AID: The two one-int ScrollLocalWord/ScrollEdgeWord records preserve allocation/scheduling in fn_80221544 and fn_80221970. No independent original type evidence; plain locals regress. See widgets391_residual_aid_inventory_v1.
 struct ScrollLocalWordObservedNew {int value;inline ScrollLocalWordObservedNew(){}inline ScrollLocalWordObservedNew(int v):value(v){}};typedef char ScrollLocalWordObservedSize4[sizeof(ScrollLocalWordObservedNew)==4?1:-1];
 struct ScrollEdgeWordObservedNew {int value;inline ScrollEdgeWordObservedNew(int v):value(v){}};typedef char ScrollEdgeWordObservedSize4[sizeof(ScrollEdgeWordObservedNew)==4?1:-1];
 extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
@@ -617,7 +618,7 @@ inline float ModelFitBoundsNew::RadiusNew() const {
  float xx = dx * dx;
  float yy = dy * dy;
  float zz = dz * dz;
- return GaugeHalfReferenceObservedNew() * (float)sqrt(zz + (xx + yy));
+ return 0.5f * (float)sqrt(zz + (xx + yy));
 }
 
 extern "C" {
@@ -2641,7 +2642,7 @@ int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
 i=*f->selected;int selected=i;
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
-float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]*GaugeHalfReferenceObservedNew()-f->spacing/2.0f;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
+float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]/2.0f-f->spacing/2.0f;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
 fn_80230924(0x96646464u,left,y-(2.0f),left+width,(y-height)-lbl_80563534,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-lbl_80563534,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),left+width,y-lbl_80563534,(0.0f));
@@ -3086,9 +3087,9 @@ void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int hei
     distance = (distance > candidate) ? (distance) : (candidate);
     minimum = (minimum > distance) ? (minimum) : (distance);
     self->matrix.translation.z += minimum;
-    center.z = ModelFitCenterLerpNew(bounds.z.minimum, bounds.z.maximum, GaugeHalfReferenceObservedNew());
-    center.y = ModelFitCenterLerpNew(bounds.y.minimum, bounds.y.maximum, GaugeHalfReferenceObservedNew());
-    center.x = ModelFitCenterLerpNew(bounds.x.minimum, bounds.x.maximum, GaugeHalfReferenceObservedNew());
+    center.z = ModelFitCenterLerpNew(bounds.z.minimum, bounds.z.maximum, 0.5f);
+    center.y = ModelFitCenterLerpNew(bounds.y.minimum, bounds.y.maximum, 0.5f);
+    center.x = ModelFitCenterLerpNew(bounds.x.minimum, bounds.x.maximum, 0.5f);
     ModelFitTransformNew(&center, &self->matrix, &center);
     self->matrix.translation.x -= center.x;
     self->matrix.translation.y -= center.y;

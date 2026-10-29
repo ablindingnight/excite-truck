@@ -144,3 +144,5 @@ real aids with `MATCHING-AID:` as they are reviewed. Data-placement pragmas (`se
 | src/game/stunts.cpp | 2219 | pragma |
 | src/game/zone.cpp | 2341 | pragma |
 | src/game/zone.cpp | 2495 | pragma |
+| fn_802200AC (widgets gauge draw) | src/game/widgets.cpp | zero-input half getter (four uses); unproved original boundary, controls FP operand/CSE choices; plain literal/static/local constants and Mul/Half/centering forms regress (all-/2.0f form leaves one operand-order word at +0x16c) | unresolved; Codex/Claude source-policy review 2026-10-29 |
+| fn_80221544, fn_80221970 (widgets scroll) | src/game/widgets.cpp | one-int ScrollLocalWord/ScrollEdgeWord local carriers; unproved original types; plain-value removals change both functions | unresolved; Codex/Claude source-policy review 2026-10-29 |
