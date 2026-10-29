@@ -358,11 +358,12 @@ void fn_801DC32C(GroundHeader* g) {
 GroundHeader* fn_801DC9B0(void) {
     u32 ver = 0;
     u8 swapped;
-    fn_8012E96C("track.gnd");
-    GroundHeader* g = (GroundHeader*)fn_8012C370("track.gnd", 'Grnd', &ver, 0, 0, &swapped);
+    const char* name = "track.gnd";
+    fn_8012E96C(name);
+    GroundHeader* g = (GroundHeader*)fn_8012C370(name, 'Grnd', &ver, 0, 0, &swapped);
     if (g) {
         if (ver != 0) {
-            fn_802E317C("ground: version mismatch on %s (%x != %x)", "track.gnd", ver, 0);
+            fn_802E317C("ground: version mismatch on %s (%x != %x)", name, ver, 0);
         }
         if (swapped) {
             fn_801DC32C(g);
