@@ -1674,7 +1674,7 @@ extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
-extern s32 fn_801199A4(void *, s32);
+extern void fn_801199A4(void *, s32);
 
 // Moves buffered data from a track's ring into its voice buffers, splitting interleaved stereo into the left and
 // right voices.
@@ -1789,15 +1789,18 @@ s32 fn_80119994(void) { return 0; }
 
 s32 fn_8011999C(void) { return 0; }
 
-s32 fn_801199A4(void* arg0, s32 arg1) {
+void fn_801199A4(void* arg0, s32 arg1) {
     extern void fn_8003381C(void*, s16*);
     s16 rect[8];
-    u32 width = *(u32*)((u8*)arg0 + 0x10);
-    u32 x0 = width >> 1;
-    u32 x1 = ((width + *(u32*)((u8*)arg0 + 0x1C)) >> 1) - 1;
+    u32 width;
     u32 limit;
+    u32 x0;
+    u32 x1;
     rect[0] = 1;
     rect[1] = 10;
+    width = *(u32*)((u8*)arg0 + 0x10);
+    x0 = width >> 1;
+    x1 = ((width + *(u32*)((u8*)arg0 + 0x1C)) >> 1) - 1;
     if (arg1 != 0)
         limit = x0;
     else
@@ -1825,7 +1828,6 @@ s32 fn_801199A4(void* arg0, s32 arg1) {
         rect[7] = limit;
         fn_8003381C(*(void**)((u8*)arg0 + 4), rect);
     }
-    return 0;
 }
 
 void fn_80119AB0(void *arg0, s32 arg1) {
@@ -1857,7 +1859,7 @@ extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
-extern s32 fn_801199A4(void *, s32);
+extern void fn_801199A4(void *, s32);
 s32 fn_80119C0C(void *arg0, s32 arg1) {
     u8 *p = (u8 *)arg0;
     if (arg1 != 0 && *(s32 *)(p + 0x64) == 0) {
@@ -7707,4 +7709,4 @@ extern f64 fn_8002EFBC(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
-extern s32 fn_801199A4(void *, s32);
+extern void fn_801199A4(void *, s32);
