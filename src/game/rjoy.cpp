@@ -9,7 +9,7 @@ void* memset(void* dst, int c, size_t n);
 double atan2(double y, double x);
 void fn_802E30C8(const char* fmt, ...);
 s32 fn_802E2C20(void);  // milliseconds
-void fn_802D9BF0(void);
+int fn_802D9BF0(void);
 u8 fn_802E9A24(void);
 void fn_802E2E0C(int (*cb)(int, int), const char* name);
 int fn_802ECC10(void);
@@ -164,8 +164,7 @@ f32 fn_802E78A4(f32 x) {
 void fn_802E7920(s32 chan, s32 a) {
     Remote* r = &lbl_80505978[chan];
     s32 now = fn_802E2C20();
-    fn_802D9BF0();
-    int off = 0;
+    int off = fn_802D9BF0();
     if (r->rumble < 0x5000) {
         if (now - r->lastOff > 1000) {
             r->lastOn = now;
