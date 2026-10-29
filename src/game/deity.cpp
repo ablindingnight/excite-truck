@@ -68,6 +68,7 @@ public:
     IdealFollower(int withTimes, CenterLine* line);
     void Reset(void);
     void Start(V2* pos, V2* dir, int resetTimes, IdealPoint* start);
+    u8 pad34[0x68 - 0x34];  // base, perp, lateral, ..., times, last, prev, flag (see idealline.cpp)
 };
 
 class PathSet {
@@ -775,11 +776,7 @@ void fn_801B179C(DeityCar* c, int index, DCar* car) {
     c->start = index;
     *(s32*)((u8*)c + 0x8) = index + 1;
     PathSet* ps = fn_80156A40();
-    void* mem = operator new(0x68, "Deity:center_line");
-    if (mem) {
-        mem = new (mem) IdealFollower(1, ps->Center(index));
-    }
-    c->follower = (IdealFollower*)mem;
+    c->follower = new ("Deity:center_line") IdealFollower(1, ps->Center(index));
     void* m2 = operator new(0x34, "Deity:racing_line");
     if (m2) {
         m2 = fn_801352B8(m2);
