@@ -924,7 +924,136 @@ u32 fn_80188E24(u8* p) { return 0; }
 
 void fn_80188E2C(u8* p) {}  // stub (464)
 
-void fn_8018956C(u8* p) {}  // stub (412)
+// Plain 3-vector without constructors: copies move words.
+struct HVec {
+    f32 x, y, z;
+};
+
+// A rotation of plain row vectors, copied row by row.
+struct HRot {
+    HRot(const HRot& o) : rows0(o.rows0), rows1(o.rows1), rows2(o.rows2) {}
+    HVec rows0, rows1, rows2;
+};
+
+// A frame: rotation rows, then the position.
+struct HFrame {
+    HFrame(const HRot& r) : rot(r) {}
+    HRot rot;
+    HVec pos;
+};
+
+static inline f32 HitDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+static inline f32 HitMin(f32 a, f32 b) { return a < b ? a : b; }
+
+void fn_8018E3EC(u8* p, const HVec* imp, const HVec* at, int a, s32 id, int kind, u8* other, int c);
+void PSVECNormalize(const void* a, void* b);
+f32 PSVECMag(const void* v);
+f32 PSVECDotProduct(const void* a, const void* b);
+
+// Collision response: scales the impulse `imp` at the world point `at` by the mass ratio of the two cars
+// for a car-on-car hit (and drops it when this car is the heavier one hit from the front), by the body
+// stiffness otherwise, and passes it on in centre-of-mass space when it is large enough.
+void fn_8018956C(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
+    fn_80189C64(p);
+    f32 mag = PSVECMag(imp);
+    int carHit = other && kind == 0x6D;
+    f32 scale = 1.0f;
+    s32 otherId = -1;
+    if (kind == 0x6D && other) {
+        u32 t = U32(other, 0x10);
+        if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR' || t == 'TRLR') {
+            otherId = S32(other, 0x1EC);
+            HVec dir = *imp;
+            if (mag > 0.1f) {
+                PSVECNormalize(&dir, &dir);
+            }
+            f32 a = __fabs(PSVECDotProduct(&dir, p + 0x118));
+            f32 b = __fabs(PSVECDotProduct(&dir, other + 0x118));
+            f32 d = b - a;
+            if (d > 6.6666665f && b > 1.5f * a) {
+                scale = HitMin(b / FMax(a, 0.001f), 5.0f);
+            } else if (d < -6.6666665f && a > 1.5f * b) {
+                scale = FMax(b / FMax(a, 0.001f), 0.2f);
+                HVec local;
+                local.x = at->x - F32(p, 0x94);
+                local.y = at->y - F32(p, 0x98);
+                local.z = at->z - F32(p, 0x9C);
+                f32 x = HitDot(local.x, F32(p, 0x70), local.y, F32(p, 0x74), local.z, F32(p, 0x78));
+                f32 y = HitDot(local.x, F32(p, 0x7C), local.y, F32(p, 0x80), local.z, F32(p, 0x84));
+                f32 z = HitDot(local.x, F32(p, 0x88), local.y, F32(p, 0x8C), local.z, F32(p, 0x90));
+                local.x = x;
+                local.y = y;
+                local.z = z;
+                if (local.z < -0.508f && PSVECDotProduct(imp, p + 0x88) > 0.0f) {
+                    scale = 0.0f;
+                }
+            }
+        }
+    } else if (kind == 0x6E && !other) {
+    } else if (kind == 0x70 && other) {
+        u32 t = U32(other, 0x10);
+        if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
+            otherId = S32(other, 0x1EC);
+        }
+    }
+    HVec hit = *imp;
+    f32 k = F32(p, 0x5F4);
+    if (carHit) {
+        k *= scale;
+    } else if (kind != 0x70) {
+        k *= 0.4f * F32(p, 0x318);
+    } else {
+        k *= 7.0f;
+    }
+    if (!(U32(fn_801769CC(), 0x4) & 0x4000)) {
+        k *= 10.0f;
+    }
+    hit.x *= k;
+    hit.y *= k;
+    hit.z *= k;
+    if (mag * k > 741.6667f) {
+        const HRot* rot = (const HRot*)(p + 0x3C);
+        const HVec* org = (const HVec*)(p + 0x60);
+        const HVec* com = (const HVec*)(p + 0x30);
+        HFrame fr(*rot);
+        if (&fr.pos == com) {
+            f32 x = HitDot(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
+            f32 y = HitDot(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
+            f32 z = HitDot(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
+            fr.pos.x = x;
+            fr.pos.y = y;
+            fr.pos.z = z;
+        } else {
+            fr.pos.x = HitDot(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
+            fr.pos.y = HitDot(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
+            fr.pos.z = HitDot(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
+        }
+        fr.pos.x = fr.pos.x + org->x;
+        fr.pos.y = fr.pos.y + org->y;
+        fr.pos.z = fr.pos.z + org->z;
+        f32 dx = at->x - fr.pos.x;
+        f32 dy = at->y - fr.pos.y;
+        f32 dz = at->z - fr.pos.z;
+        HVec lp;
+        lp.x = HitDot(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
+        lp.y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
+        lp.z = HitDot(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);
+        HVec li;
+        if (&li == &hit) {
+            f32 x = HitDot(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
+            f32 y = HitDot(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
+            f32 z = HitDot(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
+            li.x = x;
+            li.y = y;
+            li.z = z;
+        } else {
+            li.x = HitDot(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
+            li.y = HitDot(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
+            li.z = HitDot(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
+        }
+        fn_8018E3EC(p, &li, &lp, 0, otherId, kind, other, c);
+    }
+}
 
 int fn_80189BDC(u8* p) {
     if (U32(p, 0x10) != 'TRLR') {
