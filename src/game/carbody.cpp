@@ -1686,7 +1686,7 @@ void fn_8018A750(u8* p);
 
 // Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
 // 0x3C and the surface at 0x40) at rest: clears the impulses, wheel loads and gear state.
-void fn_80189CB4(u8* p, u8* s) {
+void fn_80189CB4(u8* p, const u8* s) {
     CbFrame frame;
     BVec off;
     BVec rotated;
@@ -1729,7 +1729,8 @@ void fn_80189CB4(u8* p, u8* s) {
     *(s16*)(p + 0x6C) = *(s16*)(s + 0x40);
     fn_801E9DD0((s16*)(p + 0x6C), frame.pos.x, frame.pos.z);
     ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Clear(S32(p, 0x1EC));
-    fn_801BE400(S32(p, 0x1EC), &frame, F32(p, 0x25CC));
+    f32 speed = F32(p, 0x25CC);
+    fn_801BE400(S32(p, 0x1EC), &frame, speed);
     fn_801B30C0(S32(p, 0x1EC), 0, S32(s, 0x3C));
     for (int i = 0; i < S32(p, 0x24); i++) {
         ShapeAt(p, i)->Reset();
