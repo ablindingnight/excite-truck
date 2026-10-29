@@ -13,7 +13,6 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 |---|---|---|---|
 | fn_8018A2C0 (physics tuning sliders) | src/game/carbody.cpp | register pinning, scheduling + opt_propagation pragmas (natural form known: literals + unit-string locals; apply once the unit's earlier strings exist) | upstream orangedude27/excite-truck |
 | ut::Color::~Color weak copy (end of db_console) | libs/msc/src/RVL_SDK/hbm/nw4hbm/db/db_console.cpp | unused ut::Color local in Console_GetTotalLines | TP decomp approach, 2026-10-25 |
-| fn_80223280 (selection draw) | src/game/widgets.cpp | two unused screen int-to-float conversion locals | Codex widgets 389, 2026-10-25 |
 | widgets (inherited, tagged in 390) | src/game/widgets.cpp | full-range denominator enum (slider fn_80220A50) | Codex widgets, tagged 2026-10-26 |
 | fn_8011A388 (Bink stream read) | src/game/unk_80116BD4.c | volatile reads of position 0x90 and cap 0x40 (probably genuine async stream state, like 0xC0 in fn_8011A45C) | Claude, 2026-10-26 |
 | Shuffle<T> (fn_802B2504, fn_802B28BC) | src/game/objplace.cpp | byte-offset counter divided back to an index | upstream orangedude27/excite-truck |
@@ -42,6 +41,10 @@ Each one carries a `MATCHING-AID:` comment. List them with:
 These upstream files had only the generic "Tricks are tagged MATCHING-AID" header and no trick construct
 (checked 2026-10-27): unk_80127398, unk_801BD620, unk_8026E224, unk_802E6B48, unk_8026B844, unk_800241DC,
 unk_80116644, unk_80107180, unk_8002B0A0, unk_8002B0B0. They still need typed rewrites, but nothing to undo.
+
+## Evidence-based reclassifications
+
+- Widget selection draw (`fn_80223280`): its unused screen conversions are retained as a natural reconstruction of conversion setup/stores present in the original, consistently with gauge span (`fn_8021CB4C`) and choice height (`fn_8021DB58`). Plain locals, discarded casts and const locals reproduce the same code; integer-only controls remove the observed work. The exact original spelling and purpose remain unknown. Reviewed by Claude and Codex, 2026-10-29; see `claude_reply_widgets391_owner_contracts_and_unused_conversions_2026-10-29.md`. This is a classification correction, not new code or a new match.
 
 ## Replaced by natural source
 

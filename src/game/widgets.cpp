@@ -1729,6 +1729,8 @@ WidgetFragment* fn_8021CAD4(WidgetFragment* self,int destroy){
   fn_802C519C(fields->first);fn_802C519C(fields->second);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);
  }return self;
 }
+// Reconstructed unused int-to-float conversion work observed in the original.
+// MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
 void fn_8021CB4C(WidgetFragment* self,void* context){fn_802C3034(context);GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
 void fn_8021CBBC(WidgetFragment* self){GaugeValuePrefix* f=(GaugeValuePrefix*)self;float x=(float)(self->left-lbl_8055FB9C/2);float y=CenteredGaugeY349(lbl_8055FBA0,self->top);fn_802C5310(f->background,0,x,y-(8.0f),(0.0f));float value=f->target->Value();int width=((WidgetDispatch*)self)->Slot78();int pixel=(int)(value*(float)(width-f->inset));pixel+=self->left;fn_80230C30(&x,&y,pixel,self->top+3);fn_802C5310(f->marker,0,x,y,(0.0f));}
 void fn_8021CD04(WidgetFragment* self,int x,int y){
@@ -1907,7 +1909,8 @@ void fn_8021DB58(WidgetFragment* self){
  else{selected=0;if(fields->focus&&fields->token==*fields->focus)selected=1;}
  float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,self->left,self->top);
  float available=(float)((WidgetDispatch*)self)->Slot78()+lbl_8055E050->margin;
- // MWCC retains conversion work even when the float result is unused; see UNUSED-FLOAT-CONVERSION-COMPILER-PROBE.json.
+// Reconstructed unused int-to-float conversion work observed in the original.
+// MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
  float unusedHeight=(float)(self->bottom-self->top);
  fn_80219660(self);
  int previousFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
@@ -2638,7 +2641,8 @@ int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
  x+=w*half;
 }}}
 i=*f->selected;int selected=i;
-// MATCHING-AID: retain the observed screen int-to-float conversions; both local values are unused in this recovered body, and their original enclosing interface remains unproved.
+// Reconstructed unused int-to-float conversion work observed in the original.
+// MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
 float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]*GaugeHalfReferenceObservedNew()-f->spacing/2.0f;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
 fn_80230924(0x96646464u,left,y-(2.0f),left+width,(y-height)-lbl_80563534,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-lbl_80563534,(0.0f));
