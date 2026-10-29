@@ -310,7 +310,7 @@ void fn_8019315C(u8* d, int car) {
     }
 }
 
-u8 fn_80193184(u8* d, int car) {
+int fn_80193184(u8* d, int car) {
     u8* o = lbl_804349C0[car];
     if (o) {
         return U8(o, 0x2FE);
@@ -2075,7 +2075,88 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
     }
 }
 
-void fn_80197BD0(u8* d, u8* out) {}
+static inline int SignDiffers(f32 a, f32 b) { return (s32)(*(u32*)&b & 0x80000000) != (s32)(*(u32*)&a & 0x80000000); }
+static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
+static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
+    V2 r;
+    r.x = LerpF(a.x, b.x, t);
+    r.y = LerpF(a.y, b.y, t);
+    return r;
+}
+
+// Following: while the driver tails another car (0xFC), pick the side to pass on, ease the lateral line toward a
+// point beside it and match its speed; then pull the target point toward the follow line by the follow weight,
+// which fades out once the car is no longer close.
+void fn_80197BD0(u8* d, u8* out) {
+    int fade = 1;
+    f32 lo = lbl_8055A488;
+    f32 hi = 1.1f * lbl_8055A48C;
+    if (U8(d, 0xFC)) {
+        if (F32(d, 0xEC) < 4.0f || S32(d, 0x100) > 1) {
+            fn_8019315C(d, S32(d, 0x114));
+            f32 w = lo + (f32)__fabs(F32(d, 0x104)) * (hi - lo);
+            u8* o = lbl_804349C0[S32(d, 0x114)];
+            int mine = 0;
+            if (o && S32(d, 0x290) == S32(o, 0x114)) {
+                mine = 1;
+            }
+            f32 side = F32(d, 0xF8);
+            f32 off = side - F32(d, 0x108);
+            int wide = (f32)__fabs(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
+            if (wide && SignDiffers(off, side) && !mine) {
+                off = side > 0.0f ? 1.0f : -1.0f;
+            }
+            int moved = 0;
+            if (S32(d, 0x114) != S32(d, 0x118) || F32(d, 0xEC) > 1.1f) {
+                moved = 1;
+            }
+            if (moved) {
+                F32(d, 0x10C) = off;
+            }
+            f32 gap = 0.915f + 0.5f * (w + lbl_8055A488);
+            if ((f32)__fabs(off) < gap) {
+                int busy = 0;
+                if (U8(d, 0x9C) || U8(d, 0x74)) {
+                    busy = 1;
+                }
+                if (busy && SignDiffers(off, F32(d, 0xCC))) {
+                    fn_8019309C(d, S32(d, 0xDC), 0);
+                }
+                f32 cur = F32(d, 0x54);
+                f32 dir = F32(d, 0x10C) > 0.0f ? 1.0f : -1.0f;
+                f32 to = F32(d, 0xF8) - gap * dir;
+                f32 from = F32(d, 0x278);
+                f32 t = Clamp01(Unlerp(cur, 0.0f, F32(d, 0xEC)));
+                F32(d, 0xF4) = LerpF(from, to, t);
+                f32 u = Clamp01((F32(d, 0xEC) - 4.0f) / -3.3f);
+                F32(d, 0xF0) = LerpF(F32(d, 0xF0), LerpF(0.0f, 1.0f, u), 0.5f);
+                if (!fn_80193184(d, S32(d, 0x114))) {
+                    f32 base = F32(d, 0x270) + F32(d, 0x110);
+                    F32(out, 0x8) = LerpF(F32(out, 0x8), LerpF(base, F32(out, 0x8), 0.9f / (f32)S32(d, 0x100)),
+                                          F32(d, 0xF0));
+                }
+                fade = 0;
+            }
+        }
+    } else {
+        S32(d, 0x114) = -1;
+        S32(d, 0x118) = -1;
+    }
+    f32 k = F32(d, 0xF0);
+    if (k > 0.05f) {
+        f32 at = F32(d, 0xF4);
+        U8(d, 0x250) = 1;
+        V2 tgt;
+        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
+        tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
+        V2 c = LerpV2(*(V2*)out, tgt, k);
+        ((V2*)out)->x = c.x;
+        ((V2*)out)->y = c.y;
+    }
+    if (fade) {
+        F32(d, 0xF0) *= 0.972196f;
+    }
+}
 
 void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
