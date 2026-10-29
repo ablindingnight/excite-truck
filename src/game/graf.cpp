@@ -288,7 +288,8 @@ void fn_801EB13C(GModel* m) {
     }
 }
 
-void fn_801EB2D4(GNode* n, u32 base) {
+void fn_801EB2D4(GNode* root, u32 base) {
+    GNode* n = root;
     while (n) {
         GSwap32(&n->type);
         fn_801EB634(&n->next, base);
