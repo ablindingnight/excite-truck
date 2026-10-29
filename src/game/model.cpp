@@ -945,7 +945,7 @@ u32 fn_802C7830(const char* s) {
     return v;
 }
 
-void fn_802C7888(Remap* src, int n) {
+void fn_802C7888(const Remap* src, int n) {
     for (int i = 0; i < n; i++) {
         if (src->out) {
             *src->out = -1;

@@ -1673,11 +1673,11 @@ static int FacingX(const OFrame* f);
 extern "C" {
 void fn_801FBCF4(StaticOb** list, StaticOb* o);
 OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
-CollShape* fn_801FBEA8(ObstacleDesc* d);
-CollShape* fn_801FBF48(ObstacleDesc* d);
+CollShape* fn_801FBEA8(const ObstacleDesc* d);
+CollShape* fn_801FBF48(const ObstacleDesc* d);
 CollShape* fn_801FBFE8(ObstacleDesc* d);
-CollShape* fn_801FC048(ObstacleDesc* d);
-CollShape* fn_801FC12C(ObstacleDesc* d);
+CollShape* fn_801FC048(const ObstacleDesc* d);
+CollShape* fn_801FC12C(const ObstacleDesc* d);
 }
 
 static inline FacingFn PickFacing(u32 fl) { return (fl & 0x20) ? FacingX : (fl & 1) ? FacingZ : FacingNone; }
@@ -1866,11 +1866,11 @@ OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame
     return &o->frame;
 }
 
-CollShape* fn_801FBEA8(ObstacleDesc* d) {
+CollShape* fn_801FBEA8(const ObstacleDesc* d) {
     return new ("ewcv:tubevol") TubeVol(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
-CollShape* fn_801FBF48(ObstacleDesc* d) {
+CollShape* fn_801FBF48(const ObstacleDesc* d) {
     return new ("ewcv:ringvol") RingVol(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
@@ -1883,12 +1883,12 @@ CollShape* fn_801FBFE8(ObstacleDesc* d) {
     return (CollShape*)p;
 }
 
-CollShape* fn_801FC048(ObstacleDesc* d) {
+CollShape* fn_801FC048(const ObstacleDesc* d) {
     f32 k = 50000.0f;
     return new ("ewcv:spherevol") SphereVol(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
 }
 
-CollShape* fn_801FC12C(ObstacleDesc* d) {
+CollShape* fn_801FC12C(const ObstacleDesc* d) {
     f32 k = 50000.0f;
     return new ("ewcv:wallvol") BoxVol(k, 0.2f, d->shape.f[0], d->shape.f[1], d->shape.f[2]);
 }
