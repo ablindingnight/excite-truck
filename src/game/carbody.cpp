@@ -163,6 +163,7 @@ public:
     void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
     int vf34(struct RPacket* pk);
     void ClearImpulses(void);
+    void Init(struct BodyDesc* d);
 };
 
 class CarBody : public RigidBody {
@@ -488,7 +489,235 @@ CarBody::CarBody(void) {
 
 extern "C" {
 
-void fn_80182074(u8* p) {}  // stub (864)
+// The car's identity block from its descriptor (0x6C..0xDF), kept at 0x1F4.
+struct CbIdent {
+    char name[0x40];   // 0x00
+    char model[0x20];  // 0x40 (0x234 in the body)
+    s32 w60;           // 0x60
+    s32 w64;           // 0x64
+    s32 vehicle;       // 0x68 (0x25C)
+    u8 b6C;            // 0x6C
+    s32 w70;           // 0x70
+};
+
+// Descriptor block 0x18..0x67, kept at 0x274.
+struct CbDescBlock {
+    s32 w[14];  // 0x00
+    s32 w38;    // 0x38
+    s32 w3C;    // 0x3C
+    s16 h40;    // 0x40
+    s32 w44;    // 0x44
+    s32 w48;    // 0x48
+    s32 w4C;    // 0x4C
+};
+
+// One wheel's setup inside CbSetup.
+struct CbWheelSetup {
+    s32 w[9];
+};
+
+// Tuned car setup (0x138 bytes): read from the car's physics tables, kept twice in the body (0x32C, 0x464).
+struct CbSetup {
+    f32 mass;                                                           // 0x00
+    f32 f04, f08, f0C, f10, f14, f18, f1C, f20, f24, f28, f2C, f30;    // 0x04
+    s32 i34, i38, i3C, i40, i44, i48, i4C;                              // 0x34
+    f32 f50, f54, f58, f5C, f60, f64, f68, f6C, f70, f74, f78, f7C;    // 0x50
+    CbWheelSetup wheels[4];                                             // 0x80
+    f32 f110, f114, f118, f11C, f120, f124, f128;                       // 0x110
+    HVec modelOffset;                                                   // 0x12C
+};
+
+struct ValVec3C {
+    f32 x, y, z;
+};
+
+class CbValueNode {
+public:
+    virtual const char* GetName(void);
+    virtual int Has(const char* key);
+    virtual int GetPair(int index, const char** key, const char** value);
+    virtual const char* GetValue(const char* key);
+    virtual const char* GetString(const char* key, const char* def);
+    virtual s32 GetIntValue(const char* key);
+    virtual s32 GetInt(const char* key, s32 def);
+    virtual f32 GetFloat(const char* key);
+    virtual f32 GetFloat(const char* key, f32 def);
+    virtual s32 GetIntValue2(const char* key);
+    virtual int GetBool(const char* key, int def);
+    virtual ValVec3C GetVec3(const char* key);
+    virtual ValVec3C GetVec3Or(const char* key, ValVec3C def);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual s32 GetEnum(const char* key, const char* def);  // 0x54
+};
+
+class CbValueTable {
+public:
+    virtual CbValueNode* FindChild(const char* name);  // 0x8
+};
+
+CbValueTable* fn_80131808(const char* name);
+void fn_80131818(CbValueTable* table);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+s32 fn_802792E4(s32 vehicle);
+s32 fn_80279874(void);
+int fn_8027AA48(void);
+void fn_80279F58(CbSetup* setup, CbValueTable* table);
+void* fn_8027A798(const char* model);
+void fn_8027A8B4(CbSetup* setup, void* tune);
+void fn_801B86BC(s32 car, void* look);
+u8* fn_801B2EDC(s32 car, u8* body);
+void fn_801795D8(u8* p, s32 car);
+void fn_801BDA74(s32 car, u8* setup);
+void fn_801BEB30(s32 car, u8** out);
+void fn_801836DC(void);
+void fn_8018C5A0(u8* p, u8* desc);
+void fn_8018A654(u8* p, const u8* cfg);
+u8* fn_80209448(u8* p);
+u8* fn_80209D4C(u8* p);
+u8* fn_8020DE74(u8* p);
+void fn_801D108C(s32 car);
+int fn_8020503C(const char* name);
+void fn_802E30C8(const char* fmt, ...);
+void fn_80182DF4(u8* p);
+extern u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
+void vf20__10CollVolumeFv(u8* p);
+}  // extern "C"
+struct PlayerLook;
+struct BodyDesc;
+void GetPlayerLook(PlayerLook* look, s32 vehicle);
+u8* FindVehicle(s32 vehicle);
+extern "C" {
+
+// CarBody::Init: copies the descriptor's identity and setup blocks, reads the chassis tuning from
+// "<model>.car/physics.val" (camera, head positions in inches, suspension, speed limiter, gravity boosts),
+// sets up the rigid body, wheels, collision shapes and sub-systems, then resets the body.
+void fn_80182074(u8* p, u8* desc) {
+    char path[0x50];
+    CbSetup setup;
+    U8(p, 0x2680) = 0;
+    S32(p, 0x59C) = S32(desc, 0xE4);
+    S32(p, 0x5A4) = S32(desc, 0xE8);
+    S32(p, 0x5A0) = S32(desc, 0xDC);
+    if (S32(p, 0x5A0) == 0) {
+        S32(p, 0x5A0) = 0x0FF807FF;
+    }
+    if (U32(fn_801769CC(), 0x4) & 0x400) {
+        U32(p, 0x5A0) |= 0x80000000;
+    }
+    S32(p, 0x1EC) = S32(desc, 0xE0);
+    S32(p, 0x1F0) = S32(desc, 0x68);
+    *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
+    S32(p, 0x26C) = fn_802792E4(S32(p, 0x25C));
+    *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
+    S32(p, 0x328) = fn_80279874();
+    if (!fn_8027AA48()) {
+        S32(p, 0x328) = 0;
+    }
+    fn_801345D8(path, 0x50, "%s.car/physics.val", (char*)(p + 0x234));
+    CbValueTable* table = fn_80131808(path);
+    CbValueNode* chassis = table->FindChild("Chassis");
+    F32(p, 0x5B4) = chassis->GetFloat("chase_camera_dist", 0.0f);
+    F32(p, 0x5B8) = chassis->GetFloat("chase_camera_height", 0.0f);
+    ValVec3C head = chassis->GetVec3("head_pos");
+    F32(p, 0x5C4) = head.x;
+    F32(p, 0x5C8) = head.y;
+    F32(p, 0x5D0) = 0.2f * head.x;
+    F32(p, 0x5D4) = head.y + 3.0f;
+    F32(p, 0x5CC) = head.z;
+    F32(p, 0x5D8) = head.z;
+    ValVec3C back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
+    F32(p, 0x5D0) = back.x;
+    F32(p, 0x5D4) = back.y;
+    F32(p, 0x5C4) = F32(p, 0x5C4) * 0.0254f;
+    F32(p, 0x5C8) = F32(p, 0x5C8) * 0.0254f;
+    F32(p, 0x5CC) = F32(p, 0x5CC) * 0.0254f;
+    F32(p, 0x5D0) = back.x * 0.0254f;
+    F32(p, 0x5D4) = back.y * 0.0254f;
+    F32(p, 0x5D8) = back.z * 0.0254f;
+    F32(p, 0x5C0) = 0.0174f * chassis->GetFloat("head_pitch");
+    if (chassis->Has("treehit_class")) {
+        S32(p, 0x5E8) = chassis->GetEnum("treehit_class", "light");
+    } else {
+        S32(p, 0x5E8) = 1;
+    }
+    GetPlayerLook((PlayerLook*)(p + 0x2C4), S32(p, 0x25C));
+    fn_801B86BC(S32(desc, 0xE0), p + 0x2C4);
+    U8(p, 0x25C0) = (U32(FindVehicle(S32(p, 0x25C)), 0xA0) >> 2) & 1;
+    fn_80279F58(&setup, table);
+    fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
+    setup.mass = setup.mass * F32(p, 0x2EC);
+    setup.f110 = setup.f110 * (0.5f * (F32(p, 0x2F4) + F32(p, 0x2F8)));
+    setup.f114 = setup.f114 * F32(p, 0x2FC);
+    for (int i = 0; i < 4; i++) {
+        CbValueNode* axle = table->FindChild((i == 0 || i == 1) ? "Front" : "Rear");
+        F32(p + i * 0x74, 0x23E8) = F32(desc + i * 4, 0x10C);
+        F32(p + i * 0x74, 0x23EC) = 0.0254f * axle->GetFloat("max_compression", 8.0f) - F32(p + i * 0x74, 0x23E8);
+        *(f32*)((u8*)&setup.wheels[i] + 0x18) = F32(p + i * 0x74, 0x23E8);
+    }
+    F32(desc, 0x8) = setup.mass / 0.4545f;
+    F32(desc, 0xC) = setup.f04 / 0.042279866f;
+    F32(desc, 0x10) = setup.f08 / 0.042279866f;
+    F32(desc, 0x14) = setup.f0C / 0.042279866f;
+    ((RigidBody*)p)->Init((BodyDesc*)desc);
+    PTR(p, 0x270) = fn_801B2EDC(S32(p, 0x1EC), p);
+    fn_801795D8(p, S32(p, 0x1EC));
+    F32(p, 0x5AC) = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
+    F32(p, 0x5B0) = setup.f128;
+    F32(p, 0x5A8) = 444.44446f;
+    if (U32(fn_801769CC(), 0x4) != 0x180201) {
+        F32(p, 0x5A8) = 0.44444445f * (F32(p, 0x2C8) + chassis->GetFloat("speed_limiter", F32(p, 0x5A8)));
+    } else if (!lbl_8055E4F7) {
+        lbl_8055E4F7 = 1;
+        fn_802E30C8("%s", "CAR: Disabling speed limiter in zone mode.");
+    }
+    f32 boost = chassis->GetFloat("gravity_boost", 0.0f);
+    F32(p, 0x5DC) = boost;
+    F32(p, 0x5E0) = chassis->GetFloat("down_gravity_boost", boost);
+    U8(p, 0x26E0) = chassis->GetBool("squishy", 0);
+    F32(p, 0x30) = setup.modelOffset.x;
+    F32(p, 0x34) = setup.modelOffset.y;
+    F32(p, 0x38) = setup.modelOffset.z;
+    vf20__10CollVolumeFv(p);
+    if (U32(p, 0x10) == 'ACAR') {
+        setup.f2C = 0.75f;
+    }
+    *(CbSetup*)(p + 0x32C) = setup;
+    *(CbSetup*)(p + 0x464) = *(CbSetup*)(p + 0x32C);
+    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
+    u8* wheels = 0;
+    fn_801BEB30(S32(p, 0x1EC), &wheels);
+    for (int w = 0; w < 4; w++) {
+        *(BVec*)(p + 0x23DC + w * 0x74) = BVec(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
+    }
+    fn_801836DC();
+    fn_80182DF4(p);
+    fn_8018C5A0(p, desc);
+    fn_8018A654(p, desc);
+    int player = S32(desc, 0x0) == 'PCAR';
+    PTR(p, 0x257C) = fn_80209448(p);
+    if (player) {
+        PTR(p, 0x2580) = fn_80209D4C(p);
+    } else {
+        PTR(p, 0x2580) = 0;
+    }
+    PTR(p, 0x2584) = fn_8020DE74(p);
+    fn_801D108C(S32(p, 0x1EC));
+    fn_80131818(table);
+    u8 trees = 0;
+    if (player && fn_8020503C("player_destroys_trees")) {
+        trees = 1;
+    }
+    U8(p, 0x25C8) = trees;
+    if (U32(fn_801769CC(), 0x4) == 0x180304) {
+        U8(p, 0x25C8) = 1;
+    }
+    fn_801838C8(p);
+}
 
 // One wheel-contact corner (fn_801AE180 allocates it), linked into the body's list at 0xD0.
 struct CbCorner {
