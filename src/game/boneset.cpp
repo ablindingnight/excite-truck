@@ -168,7 +168,7 @@ void fn_801E598C(BoneSet* set) {}
 
 s32 fn_801E5990(BoneSet* set) { return set->numBones; }
 
-void fn_801E5998(BoneSet* set, Bone* out, s32* n) {
+void fn_801E5998(const BoneSet* set, Bone* out, s32* n) {
     int nb = set->numBones;
     for (int i = 0; i < nb; i++) {
         out[i] = set->bones[i];
