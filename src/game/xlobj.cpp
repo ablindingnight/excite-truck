@@ -426,7 +426,9 @@ s32 fn_802B8E50(const char* name) {
 
 GroundCell* fn_802B8EB8(s16 x, s16 y, int size, int corner) {
     int h = size / 2;
-    return fn_802BE844(corner & 1 ? x + h : x - h, corner & 2 ? y + h : y - h, h);
+    s16 cx = corner & 1 ? x + h : x - h;
+    s16 cy = corner & 2 ? y + h : y - h;
+    return fn_802BE844(cx, cy, h);
 }
 
 TexEntry* fn_802B8EF0(int slot, XScale* sc) {

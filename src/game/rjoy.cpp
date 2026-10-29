@@ -478,9 +478,10 @@ const char* fn_802E85B8(s32 chan) {
 
 void fn_802E85F4(s32 chan) {
     Remote* r = &lbl_80505978[chan];
-    f32 a = 0.2617994f;
-    a = a >= r->angle ? r->angle : a;
-    a = a <= -0.5235988f ? -0.5235988f : a;
+    f32 lo = -0.5235988f;
+    f32 hi = 0.2617994f;
+    f32 a = hi < r->angle ? hi : r->angle;
+    a = a > lo ? a : lo;
     r->hist[r->histPos] = a;
     r->histPos = (r->histPos + 1) % 16;
 }
