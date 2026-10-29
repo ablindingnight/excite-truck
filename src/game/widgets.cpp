@@ -1196,7 +1196,7 @@ extern "C" {
 
 }
 
-struct FocusTemporaryNew {int selected;const char* label;};
+static inline int FocusSelected(FocusPaintPrefix* w){int on=0;if(w->focus&&*w->focus==w->token)on=1;return on;}
 extern "C" {
 void fn_8021AA18(FocusPaintPrefix* self);
 }
@@ -1589,7 +1589,7 @@ int fn_8021A9A4(WidgetFragment* self){
  if(fields->watched&&*(int*)fields->watched==fields->kind)selected=1;
  return (selected!=0)|mode;
 }
-void fn_8021AA18(FocusPaintPrefix* self){FocusTemporaryNew temporary;FullDrawStatePrefix state;const FullDrawStatePrefix* live=(const FullDrawStatePrefix*)fn_8022EDC4();state.matrix=live->matrix;state.light=live->light;state.alpha=live->alpha;state.first=live->first;state.second=live->second;temporary.selected=0;if(self->focus&&*self->focus==self->token)temporary.selected=1;if(!*(unsigned char*)fn_80216708()&&!temporary.selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;temporary.label=((WidgetDispatch*)self)->Slot88();int width=((WidgetDispatch*)self)->Slot78();self->child->Paint(self->first,self->second,self->third,width,height,temporary.label);fn_8022EDB8();}
+void fn_8021AA18(FocusPaintPrefix* self){FullDrawStatePrefix state;const FullDrawStatePrefix* live=(const FullDrawStatePrefix*)fn_8022EDC4();state.matrix=live->matrix;state.light=live->light;state.alpha=live->alpha;state.first=live->first;state.second=live->second;int selected=FocusSelected(self);if(!*(unsigned char*)fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
 int fn_8021AB88(WidgetFragment*){return 0;}
 int fn_8021AB90(WidgetFragment* self,int key){if(*(unsigned char*)fn_80216708()){switch(key){case 0x126:fn_80217AC0(self->window);return 1;case 0x128:fn_802179A0(self->window);return 1;}}return fn_802192A4(self,key);}
 WidgetFragment* fn_8021AC24(WidgetFragment* self,int x,int y,void* handle){
