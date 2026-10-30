@@ -249,8 +249,9 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     }
     f->acc += now - f->last;
     f->last = now;
+    f32 e;
     f32 a = f->acc;
-    f32 e = lbl_8055C4B8;
+    e = lbl_8055C4B8;
     f32 st = lbl_8055C4B4;
     f32 x = (a - st) / (e - st);
     f->t = ShakeEase(lbl_80563C20 + ClampF(x) * lbl_80563C2C);
