@@ -1368,8 +1368,10 @@ public:
             f32 now = lbl_8055E3C8;
             if (!phase) {
                 if (now - start > delay) {
-                    for (int i = 0; i < entries.count; i++) {
-                        SurfEntry* e = &entries.data[i];
+                    SurfEntry* e;
+                    int i;
+                    for (i = 0; i < entries.count; i++) {
+                        e = &entries.data[i];
                         e->obj->SetSurface(surftype);
                         e->obj->SetMode(e->mode);
                     }
