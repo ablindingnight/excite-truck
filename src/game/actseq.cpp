@@ -1082,11 +1082,15 @@ public:
             dir = d;
             state = 2;
             if (killBound) {
-                for (int i = 0; i < fn_80179650(); i++) {
-                    int car = fn_80179630(i);
-                    int inside = fn_80139B5C(fn_8017960C(car), killBound);
+                int cp;
+                int car;
+                int i;
+                int inside;
+                for (i = 0; i < fn_80179650(); i++) {
+                    car = fn_80179630(i);
+                    inside = fn_80139B5C(fn_8017960C(car), killBound);
                     if (inside) {
-                        int cp = fn_801B2EC0(car)->Laps()->checkpoint;
+                        cp = fn_801B2EC0(car)->Laps()->checkpoint;
                         fn_801B83A0()->Respawn(car, cp);
                     }
                     fn_802E30C8("Car %d was %s the kill bound.", car, inside ? "inside" : "outside");
