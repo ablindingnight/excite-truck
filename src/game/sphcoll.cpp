@@ -287,6 +287,7 @@ public:
     virtual void v48(void);
     virtual void v4C(void);
     virtual u8* v50(void);
+    virtual u8* v54(void);
 };
 
 #define VE(p) ((VEx*)(p))
@@ -2378,7 +2379,108 @@ void fn_801A2684(const u8* p, RVec3* lo, RVec3* hi) {
     MulAdd(&hi->x, (f32*)(o + 0x24), &e.x, r);
 }
 
-void fn_801A26FC(u8* p) {}  // stub (360)
+extern const f32 lbl_805623AC;  // 10.0
+void fn_801C2BDC(s32 sys, s32* n, RVec3** pts, s32* stride);
+void fn_801C28A8(s32 sys, const Xform* f, const RVec3* ext, const RVec3* vel, const RVec3* spin, s32 a, s32 b,
+                 RVec3* at, RVec3* push);
+
+static inline f32 DistSq(const RVec3* a, const RVec3* b) {
+    RVec3 d;
+    d.x = a->x - b->x;
+    d.y = a->y - b->y;
+    d.z = a->z - b->z;
+    return PSVECDotProduct(&d, &d);
+}
+
+// Moves frame x by c, given in its own axes.
+static inline void Shift(Xform* x, const RVec3* c) {
+    RVec3 w;
+    MulVec(&w, c, (CFrame*)x);
+    x->pos.v[0] += w.x;
+    x->pos.v[1] += w.y;
+    x->pos.v[2] += w.z;
+}
+
+// Particle sphere against an object: a group collides its box-shaped body (moving with the car, if any), a
+// box itself; the particle system resolves the contact and a hard push plays the hit sound.
+void fn_801A26FC(u8* p, u8* o) {
+    if (S32(o, 0x18) == 'GRUP') {
+        f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)PTR(o, 0xC))->t);
+        f32 r = F32(p, 0x24) + VE(o)->v3C();
+        if (dd < r * r) {
+            u8* box = PTR(o, 0x17C);
+            RVec3 c = *(RVec3*)(box + 0x38);
+            RVec3 vel;
+            vel.x = lbl_805622D0;
+            vel.y = lbl_805622D0;
+            vel.z = lbl_805622D0;
+            RVec3 spin;
+            spin.x = lbl_805622D0;
+            spin.y = lbl_805622D0;
+            spin.z = lbl_805622D0;
+            u8* body = PTR(o, 0x4);
+            if (body) {
+                vel = *(RVec3*)(body + 0x118);
+                spin = *(RVec3*)(body + 0x124);
+                c.x += F32(body, 0x30);
+                c.y += F32(body, 0x34);
+                c.z += F32(body, 0x38);
+            }
+            Xform x = *(Xform*)VE(box)->v54();
+            Shift(&x, &c);
+            RVec3 ext;
+            SetV(&ext, F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C));
+            RVec3 at;
+            RVec3 push;
+            fn_801C28A8(S32(p, 0x30), &x, &ext, &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
+            if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
+                RVec3 up;
+                up.x = lbl_805622D0;
+                up.y = lbl_805622E0;
+                up.z = lbl_805622D0;
+                fn_801B34DC(o, 0, &at, &push, &up.x, U32(p, 0x20));
+            }
+        }
+    } else if (S32(o, 0x18) == 'BOX ') {
+        f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)VE(o)->v50())->t);
+        f32 r = F32(p, 0x24) + F32(o, 0x30);
+        if (dd < r * r) {
+            RVec3 vel;
+            vel.x = lbl_805622D0;
+            vel.y = lbl_805622D0;
+            vel.z = lbl_805622D0;
+            RVec3 spin;
+            spin.x = lbl_805622D0;
+            spin.y = lbl_805622D0;
+            spin.z = lbl_805622D0;
+            u8* body = PTR(o, 0x4);
+            if (body) {
+                vel = *(RVec3*)(body + 0x118);
+                spin = *(RVec3*)(body + 0x124);
+            }
+            RVec3 ext;
+            SetV(&ext, F32(o, 0x24), F32(o, 0x28), F32(o, 0x2C));
+            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &ext, &vel, &spin, 0, -1, 0, 0);
+        }
+    } else if (S32(o, 0x18) == 'POLY') {
+        s32 n = 0;
+        RVec3* pts;
+        s32 stride;
+        fn_801C2BDC(S32(p, 0x30), &n, &pts, &stride);
+        for (int i = 0; i < n; i++) {
+            RVec3 vel;
+            vel.x = lbl_805622D0;
+            vel.y = lbl_805622D0;
+            vel.z = lbl_805622D0;
+            RVec3 hit;
+            f32 depth;
+            RVec3 dir;
+            if (fn_80198F64(&pts[i].x, (u32)o, &hit.x, &depth, &dir.x, &vel.x, 0.25f)) {
+                MulAdd(&pts[i].x, &pts[i].x, &dir.x, depth);
+            }
+        }
+    }
+}
 
 u8* fn_801A2C9C(u8* p) { return p + 0x44; }
 
