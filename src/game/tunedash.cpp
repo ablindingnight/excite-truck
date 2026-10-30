@@ -131,12 +131,14 @@ int fn_802044E8(void) {
                 fn_802043B0(&normal);
                 fn_802043B0(&selected);
                 f32 rowH = n2->pos.y - n1->pos.y;
+                int end;
+                TuneItem* it;
                 int rows = (int)(list->h / rowH);
                 int first = lbl_8055ED40 - lbl_8055ED40 % rows;
                 TextElem name = *n1;
                 TextElem value = *v1;
-                int end = first + rows;
-                TuneItem* it = &lbl_80488BD0[first];
+                end = first + rows;
+                it = &lbl_80488BD0[first];
                 for (int i = first; i < end && i < lbl_8055ED3C; it++, i++) {
                     if (i == lbl_8055ED40) {
                         name.color = value.color = selected;
