@@ -184,8 +184,7 @@ public:
                     return;
                 }
                 if (!(t->pos.y < -2000.0f)) {
-                    LastHit* lh = &lbl_804C1050[car];
-                    if (id != lh->id || lbl_8055FB38 - lh->time > 8.0f) {
+                    if (id != lbl_804C1050[car].id || lbl_8055FB38 - lbl_804C1050[car].time > 8.0f) {
                         if (c->wobble) {
                             Shake* s = fn_802C120C();
                             s->tree = t;
@@ -220,7 +219,7 @@ public:
                             }
                         }
                     }
-                    lh->id = id;
+                    lbl_804C1050[car].id = id;
                     lbl_804C1050[car].time = lbl_8055FB38;
                 }
             }
