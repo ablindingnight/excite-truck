@@ -77,6 +77,22 @@ unk_80116644, unk_80107180, unk_8002B0A0, unk_8002B0B0. They still need typed re
 - objplace Shuffle<T>: natural loops give a pointer induction variable (6 rows); the target keeps a byte offset.
   16 loop shapes tried.
 
+## goto / pragma review, 2026-10-29
+
+Every `goto`, `register` and code-shaping `#pragma` in `src/game` is now classified. Closers (`reset`, `pop`,
+`inline_depth(smart)`) and data-placement or `unused` pragmas are not counted. Most `goto`s are natural C:
+- search-loop exits (`found`);
+- early exits to a shared tail (`done`);
+- error paths (`fail`, `close`, `nomem`, `retry`);
+- shared switch tails in the Bink decoder.
+
+Still suspected aids, not yet tagged:
+- chalpath path-screen loop: `goto start` enters a do-while in the middle. Try `for (;;)` with fn_8026003C at the end.
+- keybd screenshot keys: `goto shot` gives two compares where `||` folds into a range check. Try a two-case switch.
+- crushmaster `CrushMaster::vfF8`: `#pragma dont_inline on`. Same pattern as zone vfF8 (likely original), not measured yet.
+- Bink fn_8011AF94: still m2c-shaped control flow (`init_test`/`outer_test`/`decode` labels, `var_rNN` names). It needs a
+  typed rewrite.
+
 ## Existing sites (inventory 2026-10-23, before tagging)
 
 Found by scanning `src/game/*.cpp` for `register`, `volatile` and optimiser pragmas
