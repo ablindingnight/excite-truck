@@ -191,7 +191,9 @@ public:
     virtual int Threshold(int grade);     // 0x34
     virtual int Passing(void);            // 0x38
     virtual int PassScore(void);          // 0x3C
-    virtual int Unlocked(void);           // 0x40
+    virtual int Unlocked(void);           // 0x40: passed
+    virtual int v44(void);
+    virtual int Perfected(void);          // 0x48
 };
 
 class EvBracket {
@@ -263,6 +265,25 @@ public:
     u8 padC8[4];       // offset 0xC8
     u8 perfect;        // offset 0xCC
     u8 showStars;      // offset 0xCD
+};
+
+// An event of the bracket screen (vtable lbl_80348738): eases into place and slides out while it is the
+// current one; shows "best/pass" and the best grade and plays the passed / perfected / grade-up
+// animations when they change. Every live bar is listed in lbl_804B30D8.
+class EvEventBar : public LogoMover {
+public:
+    virtual void Enter(void);
+    virtual void Update(void);
+
+    EvContest* contest;  // offset 0x60
+    f32 slide;           // offset 0x64: 0 in place, 1 slid out
+    s32 baseX;           // offset 0x68
+    char text[30];       // offset 0x6C: "best/pass"
+    char grade[10];      // offset 0x8A: best grade's name
+    s32 current;         // offset 0x94
+    u8 passed;           // offset 0x98
+    u8 perfected;        // offset 0x99
+    s32 unlocked;        // offset 0x9C
 };
 
 // An event's unlock condition (object at event + 0x60).
@@ -1383,9 +1404,128 @@ void fn_802854E0(u8* p) {
     }
 }
 
-void fn_802857A8(u8* p) {}  // stub (324)
+void fn_801308F4(char* buf, int n, int value);
+const char* GetGradeDisplayName(int grade);
 
-void fn_80285CB8(u8* p) {}  // stub (667)
+// Appends s to the string in d (n bytes in all), always terminating.
+static inline void AppendName(char* d, int n, const char* s) {
+    while (*d) {
+        n--;
+        d++;
+    }
+    if (n > 0) {
+        CopyName(n, d, s);
+    }
+}
+
+// Plays the bar's animation `<anim><slot>` and waits for it.
+static inline void PlayBarAnim(EvEventBar* b, const char* anim) {
+    char buf[100];
+    fn_801345D8(buf, 100, "%s%d", anim, lbl_804B30D8.Find(b) + 1);
+    fn_80236954(buf);
+    fn_8027F204(buf);
+}
+
+// Refreshes the bar: "best/pass", the passed / perfected / grade-up animations, the grade.
+static inline void RefreshEvent(EvEventBar* b) {
+    if (b->contest) {
+        fn_801308F4(b->text, 30, b->contest->Best());
+        AppendName(b->text, 30, "/");
+        char pass[20];
+        fn_801308F4(pass, 20, b->contest->PassScore());
+        AppendName(b->text, 30, pass + 1);
+        if (!b->passed && b->contest->Unlocked()) {
+            fn_8027ED70()->PlaySound("scoreup_passevent");
+            PlayBarAnim(b, "event_passed_");
+        }
+        if (!b->perfected && b->contest->Perfected()) {
+            fn_8027ED70()->PlaySound("scoreup_perfectevent");
+            PlayBarAnim(b, "event_perfected_");
+        }
+        if (b->contest->Unlocked()) {
+            b->unlocked = 1;
+        } else {
+            b->unlocked = 0;
+        }
+        int grade = b->contest->BestGrade();
+        if (grade >= 0 && grade < 5) {
+            const char* name = GetGradeDisplayName(grade);
+            if (strcasecmp(name, b->grade) != 0) {
+                if (grade == 0) {
+                    fn_8027ED70()->PlaySound("scoreup_AAA");
+                    PlayBarAnim(b, "gradeup_S_");
+                } else {
+                    fn_8027ED70()->PlaySound("scoreup_gradeup");
+                    PlayBarAnim(b, "gradeup_");
+                }
+            }
+            CopyName(10, b->grade, name);
+        }
+        b->current = (u8*)b == (u8*)lbl_8055F698;
+    } else {
+        b->text[0] = 0;
+        b->grade[0] = 0;
+        b->current = 0;
+        b->passed = 0;
+        b->perfected = 0;
+    }
+}
+
+// Event bar setup: jumps into place and takes the event's passed/perfected state as already seen.
+void fn_802857A8(u8* p) {
+    EvEventBar* b = (EvEventBar*)p;
+    b->m.active = 1;
+    b->m.idx = fn_80221EA8();
+    if (b->contest) {
+        b->m.vis = 0;
+        b->m.jumpOn = 1;
+        s32 y;
+        s32 x = b->x;
+        y = b->y;
+        b->m.jumpX = x;
+        b->m.jumpY = y;
+        b->baseX = x;
+        b->slide = 0.0f;
+        b->passed = b->contest->Unlocked();
+        b->perfected = b->contest->Perfected();
+        RefreshEvent(b);
+    } else {
+        b->m.vis = 1;
+    }
+}
+
+// Event bar frame: motion, refresh, slides out while current (its menu items follow), state markers.
+void fn_80285CB8(u8* p) {
+    EvEventBar* b = (EvEventBar*)p;
+    b->LogoMover::Update();
+    if (b->contest) {
+        RefreshEvent(b);
+        int was = (int)(-27.0f * b->slide);
+        f32 d = fn_80214D48() / 0.1f;
+        b->slide = Clamp01F(b->slide + ((u8*)b == (u8*)lbl_8055F698 ? d : -d));
+        int dx = (int)(-27.0f * b->slide);
+        b->m.jumpX = b->baseX + dx;
+        b->m.jumpY = b->y;
+        b->m.jumpOn = 1;
+        fn_80214BE4(lbl_804B30D8.Find(b) + 11, dx - was, 0);
+        fn_80214BE4(lbl_804B30D8.Find(b) + 21, dx - was, 0);
+        if (b->passed) {
+            fn_80214AF0(lbl_804B30D8.Find(b) + 11);
+        } else {
+            fn_80214A9C(lbl_804B30D8.Find(b) + 11);
+        }
+        if (b->perfected) {
+            fn_80214AF0(lbl_804B30D8.Find(b) + 21);
+        } else {
+            fn_80214A9C(lbl_804B30D8.Find(b) + 21);
+        }
+        b->passed = b->contest->Unlocked();
+        b->perfected = b->contest->Perfected();
+    } else {
+        fn_80214A9C(lbl_804B30D8.Find(b) + 11);
+        fn_80214A9C(lbl_804B30D8.Find(b) + 21);
+    }
+}
 
 void fn_80286724(u8* p) { VR(PTR(p, 0x1C))->v0C(); }
 
