@@ -730,25 +730,15 @@ int fn_80280C00(void) {
         lbl_8055F68C = lbl_8055F688;
         if (!lbl_8055F690) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
-                u8* e = (u8*)lbl_804B3048.data[i];
-                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done()) {
+                EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
+                if (e->cup && ((EvCond*)e->cup)->Done()) {
                     lbl_8055F690 = (s32)e;
                     break;
                 }
             }
         }
         if (lbl_8055F690) {
-            int i = lbl_804B3048.Find((u8*)lbl_8055F690);
-            lbl_804B3068[0] = 0;
-            if (i >= 0 && i < lbl_804B3048.count) {
-                u8* e = (u8*)lbl_804B3048.data[i];
-                lbl_8055F688 = (s32)e;
-                if (e && ((EvCupBar*)e)->Cup()) {
-                    CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
-                }
-            } else {
-                lbl_8055F688 = 0;
-            }
+            SelectEvent(lbl_804B3048.Find((u8*)lbl_8055F690));
         }
     }
     return 0;
