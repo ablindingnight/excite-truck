@@ -1846,8 +1846,8 @@ int RingChalMaster::vfE0(int car, u8* out) {
                     inside = (f32)sqrt(d.x * d.x + d.y * d.y) < t->radius;
                     behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
                     if (s->f10 == s->teles->count - 1 && inside) {
-                        s->teles->data[s->f10].b30 = 0;
                         r = 0;
+                        s->teles->data[s->f10].b30 = 0;
                     } else {
                         if (inside || behind) {
                             if (!p->b8) {
