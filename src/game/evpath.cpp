@@ -152,6 +152,7 @@ s32 lbl_8055F690;
 s32 lbl_8055F694;
 u32 lbl_8055F698;
 s32 lbl_8055F69C;
+u8 lbl_8055F6A0;  // first showing of the cup screen: advance to the next cup
 
 // The "cup unlocked" flash shown in the unlock message box (menu item type 5).
 class EventUnlockFx : public MenuState {
@@ -167,11 +168,53 @@ public:
 static UnkStatic123s lbl_804B2FF8;            // this unit's end-of-menu tag
 static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
-static char lbl_804B3068[100];                // name of the next event to unlock
+static char lbl_804B3068[100];                // the selected cup's help text
 static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
 static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
 static char sBrowseDesc[32];                  // lbl_804B30D8 + 0x40
 static char sBrowseBest[20];                  // lbl_804B30D8 + 0x60
+
+// Career path interfaces (slots used here; see pathcareer.cpp).
+class EvContest {
+public:
+    virtual ~EvContest(void);
+    virtual const char* TrackName(void);  // 0xC
+    virtual const char* Name(void);       // 0x10
+    virtual const char* TypeName(void);   // 0x14
+    virtual const char* TypeDisplayName(void);  // 0x18
+    virtual const char* FriendlyName(void);     // 0x1C
+    virtual int EventId(void);            // 0x20
+    virtual int Difficulty(void);         // 0x24
+    virtual int Best(void);               // 0x28
+    virtual int BestGrade(void);          // 0x2C
+    virtual int GradeOf(int score);       // 0x30
+    virtual int Threshold(int grade);     // 0x34
+    virtual int Passing(void);            // 0x38
+    virtual int PassScore(void);          // 0x3C
+    virtual int Unlocked(void);           // 0x40
+};
+
+class EvBracket {
+public:
+    virtual ~EvBracket(void);
+    virtual const char* Name(void);    // 0xC
+    virtual const char* Id(void);      // 0x10
+    virtual int Difficulty(void);      // 0x14
+    virtual int Count(void);           // 0x18
+    virtual EvContest* Get(int i);     // 0x1C
+    virtual int Unlocked(void);        // 0x20
+    virtual int Open(void);            // 0x24
+    virtual int AllDone(void);         // 0x28
+    virtual int Gated(void);           // 0x2C
+    virtual const char* Text(void);    // 0x30
+};
+
+class EvPath {
+public:
+    virtual ~EvPath(void);
+    virtual int Count(void);           // 0xC
+    virtual EvBracket* Get(int i);     // 0x10
+};
 
 // A cup on the event path screen (vtable lbl_80348798, 0xD0 bytes): eases into place, shows the
 // cup's icon, its progress and a star per event. Every live marker is listed in lbl_804B3048.
@@ -196,7 +239,19 @@ public:
     virtual void Update(void);
     virtual void Draw(void);
 
-    VR* cup;           // offset 0x60
+    // Shows bracket c; `still` skips the ease-in.
+    void SetCup(EvBracket* c, u8 s) {
+        cup = c;
+        still = s;
+        for (int i = 0; i < cup->Count(); i++) {
+            fill[i] = cup->Get(i)->Unlocked() ? 1.0f : 0.0f;
+        }
+        perfect = cup->AllDone();
+    }
+
+    EvBracket* Cup(void) const { return cup; }
+
+    EvBracket* cup;    // offset 0x60
     u8 still;          // offset 0x64: no ease-in
     f32 timer;         // offset 0x68
     s32 f6C;           // offset 0x6C
@@ -209,6 +264,36 @@ public:
     u8 perfect;        // offset 0xCC
     u8 showStars;      // offset 0xCD
 };
+
+// An event's unlock condition (object at event + 0x60).
+class EvCond {
+public:
+    virtual void v08(void);
+    virtual const char* Title(void);  // 0x0C
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual const char* Desc(void);   // 0x1C
+    virtual s32 EventId(void);        // 0x20
+    virtual int Difficulty(void);     // 0x24
+    virtual void v28(void);
+    virtual int Done(void);          // 0x2C
+    virtual const char* Name(void);  // 0x30
+};
+
+// Makes event i current (none when out of range) and copies its caption.
+static inline void SelectEvent(int i) {
+    lbl_804B3068[0] = 0;
+    if (i >= 0 && i < lbl_804B3048.count) {
+        u8* e = (u8*)lbl_804B3048.data[i];
+        lbl_8055F688 = (s32)e;
+        if (e && ((EvCupBar*)e)->Cup()) {
+            CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
+        }
+    } else {
+        lbl_8055F688 = 0;
+    }
+}
 
 extern "C" {
 
@@ -290,10 +375,37 @@ int fn_8027EE88(void) {
 }  // extern "C"
 
 extern char lbl_8055BAB8[4];  // ""
+extern char lbl_8055BAC0[4];  // ""
 extern "C" const char* fn_80131234(const char* key);
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 
 extern "C" {
+
+// Per-difficulty (excite, super, mirror) names and art.
+static inline const char* NewModeLayout(int d) {
+    const char* names[3] = {"newmode1.lyt", "newmode2.lyt", "newmode3.lyt"};
+    return names[d];
+}
+
+static inline const char* EventTitle(int d) {
+    const char* names[3] = {"EventPath:EXCITE_EVENT", "EventPath:SUPER_EVENT", "EventPath:MIRROR_EVENT"};
+    return names[d];
+}
+
+static inline const char* CupTitle(int d) {
+    const char* names[3] = {"EventPath:EXCITE_CUP", "EventPath:SUPER_CUP", "EventPath:MIRROR_CUP"};
+    return names[d];
+}
+
+static inline const char* BarBottom(int d) {
+    const char* names[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
+    return names[d];
+}
+
+static inline const char* BarTop(int d) {
+    const char* names[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
+    return names[d];
+}
 
 // "Career difficulty N unlocked" box; the layout depends on the new difficulty.
 void fn_8027EEE4(int level) {
@@ -307,12 +419,7 @@ void fn_8027EEE4(int level) {
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
         MenuItem(lbl_804B2FF8),
     };
-    const char* layouts[3] = {"newmode1.lyt", "newmode2.lyt", "newmode3.lyt"};
-    const char* events[3] = {"EventPath:EXCITE_EVENT", "EventPath:SUPER_EVENT", "EventPath:MIRROR_EVENT"};
-    const char* cups[3] = {"EventPath:EXCITE_CUP", "EventPath:SUPER_CUP", "EventPath:MIRROR_CUP"};
-    const char* bots[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
-    const char* tops[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
-    MenuDesc desc = {layouts[level - 1], 0, (int (*)(int*))fn_8027EE88, 0, 0};
+    MenuDesc desc = {NewModeLayout(level - 1), 0, (int (*)(int*))fn_8027EE88, 0, 0};
     desc.items = items;
     lbl_8055F684 = 0;
     lbl_8055F685 = 0;
@@ -345,6 +452,19 @@ void fn_8027F09C(int difficulty) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
+int fn_802E499C(u16* keys);
+
+// Key sequences on the path screens (left/right twice; left, left, right, right). Unused.
+static inline int TapLeftRight(void) {
+    u16 keys[5] = {0x125, 0x127, 0x125, 0x127, 0};
+    return fn_802E499C(keys);
+}
+
+static inline int TapLeftLeftRightRight(void) {
+    u16 keys[5] = {0x125, 0x125, 0x127, 0x127, 0};
+    return fn_802E499C(keys);
+}
+
 void fn_8027F204(const char* name) {
     u8* l = (u8*)lbl_8055F69C;
     if (!l) {
@@ -361,14 +481,14 @@ s32 fn_802168E4(void);
 
 // "Cup completed" box: congratulations and the next cup (or what this one unlocked), with the cup's
 // marker easing in.
-void fn_8027F288(VR* cup, VR* next) {
+void fn_8027F288(EvBracket* cup, EvBracket* next) {
     char msg[100];
     if (next) {
-        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED", cup->v10());
-    } else if (cup && cup->v28()) {
-        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PERFECTED", cup->v10());
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED", cup->Id());
+    } else if (cup && cup->AllDone()) {
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PERFECTED", cup->Id());
     } else {
-        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PASSED", cup->v10());
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PASSED", cup->Id());
     }
     s32 shown = fn_802168E4();
     if (shown) {
@@ -376,18 +496,13 @@ void fn_8027F288(VR* cup, VR* next) {
     }
     EvCupBar bar;
     if (next) {
-        bar.cup = next;
-        bar.still = 1;
-        for (int i = 0; i < bar.cup->v18(); i++) {
-            bar.fill[i] = VR(bar.cup->v1C(i))->v40() ? 1.0f : 0.0f;
-        }
-        bar.perfect = bar.cup->v28();
+        bar.SetCup(next, 1);
     }
     char unlock[100] = "nocup_unlock";
     if (next) {
-        fn_801345D8(unlock, 100, "%s_unlock", next->v10());
+        fn_801345D8(unlock, 100, "%s_unlock", next->Id());
     } else {
-        fn_801345D8(unlock, 100, "%s_unlock", cup->v10());
+        fn_801345D8(unlock, 100, "%s_unlock", cup->Id());
     }
     const char* file = fn_8027ED70()->GetFile(unlock);
     int frame = fn_8027ED70()->GetFrame(unlock);
@@ -396,7 +511,7 @@ void fn_8027F288(VR* cup, VR* next) {
         MenuItem("bg_image", 3, file, 0, 0),
         MenuItem("bg_image", 2, &frame, 0, 0),
         MenuItem("path", 5, &bar, 0, 0),
-        MenuItem("cup_name", 3, bar.cup ? bar.cup->v0C() : "", 0, 0),
+        MenuItem("cup_name", 3, bar.cup ? bar.cup->Name() : "", 0, 0),
         MenuItem("cup_icon", 3, bar.title, 0, 0),
         MenuItem("cup_icon", 2, &bar.frame, 0, 0),
         MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
@@ -437,7 +552,84 @@ u8* fn_8027F834(u8* p, int del) {
     return p;
 }
 
-int fn_8027F958(s32* bracket, EvPath* path) { return 0; }  // stub (976)
+int fn_8024739C(int* item);
+int fn_80280898(void);
+int fn_802808D0(void);
+void fn_80280A38(void);
+int fn_80280C00(void);
+int fn_80280DC8(void);
+int fn_80280F7C(void);
+void fn_80281138(void);
+
+// A path's cup screen: a marker per cup (at most five) with its name and progress, coloured and titled for
+// the path's difficulty. Returns 1 with the picked cup in *sel, 0 when backed out.
+int fn_8027F958(s32* sel, EvPath* path) {
+    int diff = path->Get(0)->Difficulty();
+    EvCupBar bars[5];
+    int count = path->Count();
+    int n = count < 5 ? count : 5;
+    for (int i = 0; i < n; i++) {
+        bars[i].SetCup(path->Get(i), 0);
+    }
+    MenuItem items[] = {
+        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80281138, 0, 0),
+        MenuItem("cup_help", 3, lbl_804B3068, 0, 0),
+        MenuItem("path_1", 5, &bars[0], 0, 0),
+        MenuItem("cup_bar_1", 2, &bars[0].style, 0, 0),
+        MenuItem("cup_name_1", 3, bars[0].cup ? bars[0].cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_1", 3, bars[0].progress, 0, 0),
+        MenuItem("path_2", 5, &bars[1], 0, 0),
+        MenuItem("cup_bar_2", 2, &bars[1].style, 0, 0),
+        MenuItem("cup_name_2", 3, bars[1].cup ? bars[1].cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_2", 3, bars[1].progress, 0, 0),
+        MenuItem("path_3", 5, &bars[2], 0, 0),
+        MenuItem("cup_bar_3", 2, &bars[2].style, 0, 0),
+        MenuItem("cup_name_3", 3, bars[2].cup ? bars[2].cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_3", 3, bars[2].progress, 0, 0),
+        MenuItem("path_4", 5, &bars[3], 0, 0),
+        MenuItem("cup_bar_4", 2, &bars[3].style, 0, 0),
+        MenuItem("cup_name_4", 3, bars[3].cup ? bars[3].cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_4", 3, bars[3].progress, 0, 0),
+        MenuItem("path_5", 5, &bars[4], 0, 0),
+        MenuItem("cup_bar_5", 2, &bars[4].style, 0, 0),
+        MenuItem("cup_name_5", 3, bars[4].cup ? bars[4].cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_5", 3, bars[4].progress, 0, 0),
+        MenuItem("#bar4_top_color", 3, BarTop(diff), 0, 0),
+        MenuItem("#bar4_bot_color", 3, BarBottom(diff), 0, 0),
+        MenuItem("#screen_title", fn_80131234(CupTitle(diff))),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80280F7C, 0, 0x125),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80280DC8, 0, 0x127),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80280C00, 0, 0x128),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80280A38, 0, 0x126),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_802808D0, -2, 13),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80280898, -1, 0x1B),
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
+        MenuItem(lbl_804B2FF8),
+    };
+    MenuDesc desc = {"ep_chcup.lyt", 0, (int (*)(int*))fn_8024739C, 0, 0};
+    desc.items = items;
+    if (lbl_8055F6A0) {
+        lbl_8055F6A0 = 0;
+        SelectEvent(*sel);
+        if (*sel < path->Count() - 1) {
+            (*sel)++;
+            lbl_8055F694 = (s32)&bars[*sel];
+        }
+    } else {
+        SelectEvent(*sel);
+    }
+    int picked = fn_802146BC(&desc, -999, -999, 1) == -2;
+    if (picked) {
+        *sel = lbl_804B3048.Find((u8*)lbl_8055F688);
+    }
+    lbl_8055F688 = 0;
+    lbl_804B3048.count = 0;
+    lbl_8055F68C = 0;
+    lbl_8055F690 = 0;
+    lbl_804B3068[0] = 0;
+    lbl_8055F694 = 0;
+    return picked;
+}
 
 int fn_80280898(void) {
     if (lbl_8055F688 == 0) {
@@ -462,7 +654,7 @@ int fn_802808D0(void) {
         int ok;
         u8* e = (u8*)lbl_804B3048.data[i];
         ok = 0;
-        if (PTR(e, 0x60) && (IsUnlockAll() || ((VR*)PTR(e, 0x60))->v24())) {
+        if (((EvCupBar*)e)->Cup() && (IsUnlockAll() || ((VR*)PTR(e, 0x60))->v24())) {
             ok = 1;
         }
         if (ok) {
@@ -482,21 +674,6 @@ int fn_802808D0(void) {
 
 }  // extern "C"
 
-// An event's unlock condition (object at event + 0x60).
-class EvCond {
-public:
-    virtual void v08(void);
-    virtual const char* Title(void);  // 0x0C
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual const char* Desc(void);   // 0x1C
-    virtual s32 EventId(void);        // 0x20
-    virtual int Difficulty(void);     // 0x24
-    virtual void v28(void);
-    virtual int Done(void);          // 0x2C
-    virtual const char* Name(void);  // 0x30
-};
 
 
 extern "C" {
@@ -504,12 +681,12 @@ extern "C" {
 // When the current event is done, picks the first not-yet-done event as the next unlock.
 void fn_80280A38(void) {
     u8* cur = (u8*)lbl_8055F688;
-    if (cur && PTR(cur, 0x60) && ((EvCond*)PTR(cur, 0x60))->Done()) {
+    if (cur && ((EvCupBar*)cur)->Cup() && ((EvCond*)PTR(cur, 0x60))->Done()) {
         lbl_8055F690 = lbl_8055F688;
         if (!lbl_8055F68C) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 u8* e = (u8*)lbl_804B3048.data[i];
-                if (PTR(e, 0x60) && !((EvCond*)PTR(e, 0x60))->Done()) {
+                if (((EvCupBar*)e)->Cup() && !((EvCond*)PTR(e, 0x60))->Done()) {
                     lbl_8055F68C = (s32)e;
                     break;
                 }
@@ -521,7 +698,7 @@ void fn_80280A38(void) {
             if (i >= 0 && i < lbl_804B3048.count) {
                 u8* e = (u8*)lbl_804B3048.data[i];
                 lbl_8055F688 = (s32)e;
-                if (e && PTR(e, 0x60)) {
+                if (e && ((EvCupBar*)e)->Cup()) {
                     CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
                 }
             }
@@ -531,19 +708,6 @@ void fn_80280A38(void) {
 
 }  // extern "C"
 
-// Makes event i current (none when out of range) and copies its caption.
-static inline void SelectEvent(int i) {
-    lbl_804B3068[0] = 0;
-    if (i >= 0 && i < lbl_804B3048.count) {
-        u8* e = (u8*)lbl_804B3048.data[i];
-        lbl_8055F688 = (s32)e;
-        if (e && PTR(e, 0x60)) {
-            CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
-        }
-    } else {
-        lbl_8055F688 = 0;
-    }
-}
 
 extern "C" {
 void fn_80216D28(void);
@@ -551,12 +715,12 @@ void fn_80216D28(void);
 // While the current event is not done, picks the first done event as the one to show.
 int fn_80280C00(void) {
     u8* cur = (u8*)lbl_8055F688;
-    if (cur && PTR(cur, 0x60) && !((EvCond*)PTR(cur, 0x60))->Done()) {
+    if (cur && ((EvCupBar*)cur)->Cup() && !((EvCond*)PTR(cur, 0x60))->Done()) {
         lbl_8055F68C = lbl_8055F688;
         if (!lbl_8055F690) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 u8* e = (u8*)lbl_804B3048.data[i];
-                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done()) {
+                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done()) {
                     lbl_8055F690 = (s32)e;
                     break;
                 }
@@ -568,7 +732,7 @@ int fn_80280C00(void) {
             if (i >= 0 && i < lbl_804B3048.count) {
                 u8* e = (u8*)lbl_804B3048.data[i];
                 lbl_8055F688 = (s32)e;
-                if (e && PTR(e, 0x60)) {
+                if (e && ((EvCupBar*)e)->Cup()) {
                     CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
                 }
             } else {
@@ -584,12 +748,12 @@ int fn_80280DC8(void) {
     if (lbl_8055F688) {
         int i = lbl_804B3048.Find((u8*)lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
-        if (PTR(cur, 0x60)) {
+        if (((EvCupBar*)cur)->Cup()) {
             bool done = ((EvCond*)PTR(cur, 0x60))->Done();
             int k;
             for (k = i + 1; k < lbl_804B3048.count; k++) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done() == done) {
                     break;
                 }
             }
@@ -608,12 +772,12 @@ int fn_80280F7C(void) {
     if (lbl_8055F688) {
         int i = lbl_804B3048.Find((u8*)lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
-        if (PTR(cur, 0x60)) {
+        if (((EvCupBar*)cur)->Cup()) {
             bool done = ((EvCond*)PTR(cur, 0x60))->Done();
             int k;
             for (k = i - 1; k >= 0; k--) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                if (PTR(e, 0x60) && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done() == done) {
                     break;
                 }
             }
@@ -878,43 +1042,6 @@ public:
     virtual const char* Reason(int i);  // 0x28
 };
 
-// Career path interfaces (slots used here; see pathcareer.cpp).
-class EvContest {
-public:
-    virtual ~EvContest(void);
-    virtual const char* TrackName(void);  // 0xC
-    virtual const char* Name(void);       // 0x10
-    virtual const char* TypeName(void);   // 0x14
-    virtual const char* TypeDisplayName(void);  // 0x18
-    virtual const char* FriendlyName(void);     // 0x1C
-    virtual int EventId(void);            // 0x20
-    virtual int Difficulty(void);         // 0x24
-    virtual int Best(void);               // 0x28
-    virtual int BestGrade(void);          // 0x2C
-    virtual int GradeOf(int score);       // 0x30
-    virtual int Threshold(int grade);     // 0x34
-    virtual int Passing(void);            // 0x38
-    virtual int PassScore(void);          // 0x3C
-    virtual int Unlocked(void);           // 0x40
-};
-
-class EvBracket {
-public:
-    virtual ~EvBracket(void);
-    virtual const char* Name(void);    // 0xC
-    virtual const char* Id(void);      // 0x10
-    virtual int Difficulty(void);      // 0x14
-    virtual int Count(void);           // 0x18
-    virtual EvContest* Get(int i);     // 0x1C
-    virtual int Unlocked(void);        // 0x20
-};
-
-class EvPath {
-public:
-    virtual ~EvPath(void);
-    virtual int Count(void);           // 0xC
-    virtual EvBracket* Get(int i);     // 0x10
-};
 
 // What a finished event changed.
 struct EvResult {
