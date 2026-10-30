@@ -765,8 +765,8 @@ public:
     ChalList(void) {}
     virtual ~ChalList(void) {}
     virtual void Init(void) {
-        pick = 0;
         sel = 1;
+        pick = 0;
         done = 0;
         exit = 0;
         told = 0;
