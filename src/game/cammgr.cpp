@@ -1028,9 +1028,11 @@ void fn_80267EF8(u8* p) {
     f32 u = t / lbl_80563C34;
     vol = lbl_80563C20;
     if (t < lbl_80563C6C) {
-        vol = lbl_80563C2C + (t / lbl_80563C6C) * lbl_80563C28;
+        f32 fadeIn = t / lbl_80563C6C;
+        vol = lbl_80563C2C + fadeIn * lbl_80563C28;
     } else if (t > lbl_80563C84) {
-        vol = vol + ((t - lbl_80563C84) / lbl_80563C6C) * lbl_80563C2C;
+        f32 fadeOut = (t - lbl_80563C84) / lbl_80563C6C;
+        vol += fadeOut * lbl_80563C2C;
     }
     fn_80209190(lbl_8055F494, vol);
     u8* cheer = (u8*)lbl_8055F490;
@@ -1039,7 +1041,8 @@ void fn_80267EF8(u8* p) {
         U8(cheer, 0x4D) = 1;
         F32(cheer, 0x8) = cv;
     }
-    ang = lbl_80563C24 * (lbl_80563C20 + ShakeEase(u) * lbl_80563C88);
+    f32 ease = ShakeEase(u);
+    ang = lbl_80563C24 * (lbl_80563C20 + ease * lbl_80563C88);
     CamPose cam;
     CamPose car;
     cam = *(CamPose*)(p + 0x58);
