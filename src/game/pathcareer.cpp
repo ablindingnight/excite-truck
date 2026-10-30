@@ -441,19 +441,21 @@ void fn_8027DAF4(void) {
 int fn_8027DE68(int i);
 
 VehicleList* fn_8027DB40(u32 flags) {
-    int unlocked;
     int all = flags & 1;
+    int unlocked;
     int showAll = (flags >> 1) & 1;
+    int n;
+    int limit;
     int lockedOut = (flags >> 2) & 1;
     if (IsUnlockAll()) {
         all = 1;
     }
     int maxPoints = GetMaxExcitePoints();
-    int limit = 0;
+    limit = 0;
     if (!all && !fn_8027DE68(0)) {
         limit = 1;
     }
-    int n = 0;
+    n = 0;
     for (int i = 0; i < GetUnlockableCount(); i++) {
         Unlockable* u = GetUnlockable(i);
         if (limit && u->points > maxPoints) {
