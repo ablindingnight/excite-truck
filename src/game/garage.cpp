@@ -28,7 +28,7 @@ public:
     u8 pad4[0xD4];
     u32 channel;      // offset 0xD8
     u8 tint;          // offset 0xDC
-    u8 nextTint;      // offset 0xDD
+    bool nextTint;    // offset 0xDD
     u8 padDE[0x1E];
     u8 state[0x1C];   // offset 0xFC, the view's menu widget
     u8 shine;         // offset 0x118
@@ -111,18 +111,92 @@ public:
 extern void* lbl_8034453C[];
 extern void* lbl_803444D8[];
 
-// Shared car icon textures, released with the last list.
-struct IconEntry {
-    u8 pad0[0x20];  // offset 0x0
-    u8* tex;        // offset 0x20
-    u8* texE;       // offset 0x24
-    u8 pad28[0x10]; // offset 0x28
+// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
+// Fixed-capacity name buffer (original class name unknown).
+// Append is a bounded concatenation that always terminates.
+template<int N> struct IconName {
+    char text[N];
+    operator char*() { return text; }
+    operator const char*() const { return text; }
+    static void CopyTail(const char* s, int n, char* d) {
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+    void Append(const char* s) {
+        char* d = text;
+        int n = N;
+        while (*d) { n--; d++; }
+        if (n > 0) { CopyTail(s, n, d); }
+    }
 };
 
+struct IconEntry {
+    IconName<32> name;  // offset 0x0
+    u8* tex;            // offset 0x20
+    u8* texE;           // offset 0x24
+    f32 u1;             // offset 0x28
+    f32 v1;             // offset 0x2C
+    f32 u2;             // offset 0x30
+    f32 v2;             // offset 0x34
+};
+
+static inline void CopyIconName(char* d, int n, const char* s) {
+    char* p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
+
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+extern "C" u8* fn_802CAC28(const char* name, int flags);
+extern "C" int strcmp(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
+
+// The car icon table (caricons.val): two icons per Car entry, plain and "_e"; shared by the car lists and
+// released with the last one.
 struct IconPool {
+    IconPool(void) {
+        ValueTable* t = fn_80131808("caricons.val");
+        count = 0;
+        entries = new ("cicon") IconEntry[50];
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (strcmp(n->GetName(), "Car")) {
+                continue;
+            }
+            for (int k = 0; k < 2; k++) {
+                IconEntry* c = &entries[count++];
+                CopyIconName(c->name, 32, n->GetValue("chassis"));
+                if (k) {
+                    c->name.Append("_e");
+                }
+                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                c->texE = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                c->u1 = n->GetFloat("u1");
+                c->v1 = n->GetFloat("v1");
+                c->u2 = n->GetFloat("u2");
+                c->v2 = n->GetFloat("v2");
+            }
+        }
+        fn_80131818(t);
+    }
     IconEntry* entries;  // offset 0x0
     s32 count;           // offset 0x4
 };
+
+static inline int FindIcon(IconPool* pool, const char* name) {
+    for (int i = 0; i < pool->count; i++) {
+        if (strcasecmp(pool->entries[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 extern IconPool* lbl_8055F2E4;
 
@@ -185,6 +259,17 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
+extern const f32 lbl_80563960;  // 0.0
+extern "C" u8* fn_8023512C(const char* name);
+extern "C" void fn_802E317C(const char* fmt, ...);
+
+// Animated slot: shown value chases the selected one.
+struct SlotAnim {
+    s32 shown;  // offset 0x0
+    s32 sel;    // offset 0x4
+    f32 t;      // offset 0x8
+};
+
 struct VehicleInfo {
     s32 index;                // offset 0x0
     s32 id;                   // offset 0x4
@@ -196,6 +281,16 @@ struct VehicleInfo {
     s32 default_color;        // offset 0x94
     s32 num_colors;           // offset 0x98
     s32 unk9C;                // offset 0x9C
+};
+
+VehicleInfo* FindVehicle(s32 id);
+
+// One list entry: its two icons (plain, extreme), the car, and the colour value shown for it.
+struct CarEntry {
+    s32 icon[2];           // offset 0x0
+    VehicleInfo* vehicle;  // offset 0x8
+    u8 extreme;            // offset 0xC
+    u32 value;             // offset 0x10
 };
 
 struct CarStat {
@@ -345,7 +440,7 @@ void fn_8024EBAC(u8* p, s32 v, int set);
 u32 fn_8024EBE4(u8* p);
 int fn_8024EC3C(void);
 int fn_8024ECD4(void);
-void fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui);
+u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui);
 u8* fn_8025007C(int n);
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar);
 }
@@ -667,46 +762,140 @@ int fn_8024EC3C(void) {
     return 0;
 }
 
-// Picks a random car for the garage and shows its name, stats, unlock progress and paint.
-int fn_8024ECD4(void) {
-    s32 sel = fn_80129D18(1, S32(lbl_8055F2EC, 0x1C) - 1);
-    u8* g = lbl_8055F2EC;
-    S32(g, 0x2C) = sel;
+// The same bounded copy written with a destination cursor.
+static inline void CopyNameD(const char* s, int n, char* d) {
+    char* p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
+
+// Shows car `sel` of the list: its name (the extreme version when owned), stats, unlock progress and paint.
+static inline void ShowCar(u8* g, s32 sel) {
     const char* name = ((GarageList*)PTR(g, 0xD0))->Name(sel);
+    VehicleInfo* info = FindVehicleNamed(name, 0);
     const char* base = name;
-    if (((u8*)GetVehicleColor(FindVehicleNamed(name, 0), 0))[8] && ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
+    if (((u8*)GetVehicleColor(info, 0))[8] && ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
         name = ((GarageList*)PTR(g, 0xD0))->ExtremeName(sel);
     }
     VehicleInfo* v = FindVehicleNamed(name, 0);
-    CopyName(v->chassis, 0x20, (char*)(g + 0x60));
+    CopyNameD(v->chassis, 0x20, (char*)(g + 0x60));
     if (((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
         fn_801345D8((char*)(g + 0x80), 0x40, "\\extreme_star %s", v->display_name + 1);
     } else {
-        CopyName(v->display_name, 0x40, (char*)(g + 0x80));
+        CopyNameD(v->display_name, 0x40, (char*)(g + 0x80));
     }
     S32(g, 0xC4) = ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel) ? 5 : -1;
     *(s32*)PTR(g, 0x34) = v->id;
     *(s32*)PTR(g, 0x30) = v->unk9C;
     ((StatPanel*)PTR(g, 0x38))->SetCar(v->chassis);
-    U8(PTR(g, 0x4C), 0xDD) = ((GarageList*)PTR(g, 0xD0))->Unlocked(sel) == 0;
-    s32 aaas = -1;
+    ((CarUIScreen*)PTR(g, 0x4C))->nextTint = ((GarageList*)PTR(g, 0xD0))->Unlocked(sel) == 0;
     s32 races = -1;
+    s32 aaas = -1;
     if (!GetUnlockReq(base, &races, &aaas)) {
         aaas = -1;
         races = -1;
     }
     if (!((GarageList*)PTR(g, 0xD0))->IsExtreme(sel) && races >= 0 && aaas >= 0) {
-        fn_801345D8((char*)(g + 0x3C), 0x10, lbl_8055C0C0, AchievementsGetModelStat(0, (char*)(g + 0x60)), races);
-        fn_801345D8((char*)(g + 0x50), 0x10, lbl_8055C0C0, AchievementsGetModelStat(1, (char*)(g + 0x60)), aaas);
+        fn_801345D8((char*)(g + 0x3C), 0x10, "%d/%d", AchievementsGetModelStat(0, (char*)(g + 0x60)), races);
+        fn_801345D8((char*)(g + 0x50), 0x10, "%d/%d", AchievementsGetModelStat(1, (char*)(g + 0x60)), aaas);
     } else {
         fn_80130FCC((char*)(g + 0x3C), 0x10, AchievementsGetModelStat(0, (char*)(g + 0x60)));
         fn_80130FCC((char*)(g + 0x50), 0x10, AchievementsGetModelStat(1, (char*)(g + 0x60)));
     }
     ShowCarColor(g);
+}
+
+// Picks a random car for the garage and shows it.
+int fn_8024ECD4(void) {
+    s32 sel = fn_80129D18(1, S32(lbl_8055F2EC, 0x1C) - 1);
+    u8* g = lbl_8055F2EC;
+    S32(g, 0x2C) = sel;
+    ShowCar(g, sel);
     return 0;
 }
 
-void fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {}  // stub (634)
+// The slot strip (vtable lbl_8034453C): one animated slot per entry of `list`, plus the icon frame art.
+static inline void InitSlotStrip(u8* p, GarageList* list) {
+    S32(p, 0x1C) = list->Count();
+    *(void**)p = lbl_8034453C;
+    S32(p, 0x14) = 0;
+    PTR(p, 0x18) = (u8*)new ("icon") SlotAnim[S32(p, 0x1C)];
+    for (int i = 0; i < S32(p, 0x1C); i++) {
+        SlotAnim* s = &((SlotAnim*)PTR(p, 0x18))[i];
+        s->sel = 0;
+        s->shown = 0;
+        s->t = lbl_80563960;
+    }
+    PTR(p, 0x24) = fn_8023512C("caricona.art");
+    PTR(p, 0x20) = fn_802CAC28("cariconb.tex", 0);
+}
+
+// The car slot list (vtable lbl_803444D8, over the slot strip lbl_8034453C): one animated slot and one entry
+// per car of `list`, starting on the car `car` points at.
+u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {
+    InitSlotStrip(p, list);
+    S32(p, 0x2C) = 0;
+    *(void**)p = lbl_803444D8;
+    F32(p, 0x28) = S32(p, 0x2C);
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") IconPool;
+    }
+    lbl_8055F2E8++;
+    PTR(p, 0xC8) = (u8*)lbl_8055F2E4;
+    PTR(p, 0xD0) = (u8*)list;
+    PTR(p, 0x30) = (u8*)color;
+    PTR(p, 0x34) = (u8*)car;
+    PTR(p, 0x38) = (u8*)panel;
+    PTR(p, 0x4C) = (u8*)ui;
+    U8(p, 0x80) = 0;
+    PTR(p, 0xCC) = (u8*)new ("c_list") CarEntry[S32(p, 0x1C)];
+    ValueTable* t = fn_80131808("caricons.val");
+    s32 sel = 0;
+    for (int i = 0; i < S32(p, 0x1C); i++) {
+        CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
+        e->vehicle = FindVehicleNamed(((GarageList*)PTR(p, 0xD0))->Name(i), 0);
+        if (e->vehicle->id == *(s32*)PTR(p, 0x34)) {
+            sel = i;
+        }
+        e->extreme = ((GarageList*)PTR(p, 0xD0))->IsExtreme(i);
+        for (int k = 0; k < 2; k++) {
+            const char* name = ((GarageList*)PTR(p, 0xD0))->Name(i);
+            if (k == 1 && e->extreme) {
+                VehicleInfo* x = FindVehicle(e->vehicle->base);
+                if (x->id == *(s32*)PTR(p, 0x34)) {
+                    sel = i;
+                }
+                name = x->chassis;
+            }
+            e->icon[k] = FindIcon((IconPool*)PTR(p, 0xC8), name);
+            if (e->icon[k] < 0) {
+                fn_802E317C("mvehicle: can't find %s in caricons.val", name);
+            }
+        }
+        int on = 0;
+        if (((u8*)GetVehicleColor(e->vehicle, 0))[8] && e->extreme) {
+            on = 1;
+        }
+        SlotAnim* s = &((SlotAnim*)PTR(p, 0x18))[i];
+        if (on != s->sel) {
+            s->sel = on;
+            s->t = (f32)__fabs(s->t);
+        }
+        s->shown = on;
+        s->t = lbl_80563960;
+        e->value = 0;
+    }
+    fn_80131818(t);
+    S32(p, 0x2C) = sel;
+    F32(p, 0x28) = sel;
+    ShowCar(p, sel);
+    S32(p, 0xC0) = 1;
+    return p;
+}
 
 u8* fn_8024FB64(u8* p, int del) {
     if (p) {
@@ -750,13 +939,6 @@ u8* fn_8025007C(int n) {
     }
     return o;
 }
-
-// Animated slot: shown value chases the selected one.
-struct SlotAnim {
-    s32 shown;  // offset 0x0
-    s32 sel;    // offset 0x4
-    f32 t;      // offset 0x8
-};
 
 f32 fn_80214D48(void);
 extern const f32 lbl_80563960;
