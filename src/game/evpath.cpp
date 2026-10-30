@@ -1387,11 +1387,11 @@ void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg);
 // The career event browser: starts on the selected event (or the first one not yet unlocked), then lets the
 // player pick brackets and events; plays the tier/path/career rewards the last result earned. Returns 1 with the
 // chosen event in *sel, 0 when backed out.
-int fn_802840FC(s32* sel, EvPath* path, EvResult* res) {
-    EvResult r = *res;
+int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
     lbl_8055F67C = 0;
-    s32 b = -1;
+    EvResult r = *res;
     int fresh = *sel == -1;
+    s32 b = -1;
     s32 e = -1;
     if (fresh) {
         for (int i = 0; i < path->Count(); i++) {
@@ -1424,8 +1424,8 @@ int fn_802840FC(s32* sel, EvPath* path, EvResult* res) {
             }
         }
     }
-    s32 prev = b;
     int ok = 0;
+    s32 prev = b;
     for (int skip = !fresh; skip || fn_8027F958(&b, path); skip = 0) {
         EvBracket* br = path->Get(b);
         if (b != prev) {
