@@ -632,10 +632,12 @@ void fn_802AB770(int idx) {
     const StuntCar* car;
     StuntPart* p = &lbl_8055F928[idx];
     car = fn_80287B24(idx);
+    u32 color;
     f32 dt = fn_801E7E24();
     if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
+        u8 g;
         u8 r = fn_80129D90(0, 140, 255);
-        u8 g = fn_80129D90(0, 250, 255);
+        g = fn_80129D90(0, 250, 255);
         u8 b = fn_80129D90(0, 240, 255);
         p->fogColor = MakeFog(b, g, r);
     }
@@ -664,7 +666,7 @@ void fn_802AB770(int idx) {
     if (on) {
         z = -1000.0f * p->fogT - jump;
     }
-    u32 color = p->fogColor;
+    color = p->fogColor;
     lbl_8055F92D = fn_802C2C00(1);
     lbl_804BD7B0.color = fn_802C990C(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
