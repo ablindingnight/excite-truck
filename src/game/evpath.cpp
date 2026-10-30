@@ -178,7 +178,7 @@ static char sBrowseBest[20];                  // lbl_804B30D8 + 0x60
 // Career path interfaces (slots used here; see pathcareer.cpp).
 class EvContest {
 public:
-    virtual ~EvContest(void);
+    virtual ~EvContest(void) {}
     virtual const char* TrackName(void);  // 0xC
     virtual const char* Name(void);       // 0x10
     virtual const char* TypeName(void);   // 0x14
@@ -199,7 +199,7 @@ public:
 
 class EvBracket {
 public:
-    virtual ~EvBracket(void);
+    virtual ~EvBracket(void) {}
     virtual const char* Name(void);    // 0xC
     virtual const char* Id(void);      // 0x10
     virtual int Difficulty(void);      // 0x14
@@ -273,6 +273,9 @@ public:
 // animations when they change. Every live bar is listed in lbl_804B30D8.
 class EvEventBar : public LogoMover {
 public:
+    EvEventBar(void);
+    virtual ~EvEventBar(void);
+    void Reset(void);
     virtual void Enter(void);
     virtual void Update(void);
 
@@ -834,7 +837,388 @@ void fn_80281138(void) {
     }
 }
 
-int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) { return 0; }  // stub (2376)
+}  // extern "C"
+
+// What a finished event changed.
+struct EvResult {
+    u8 improved;    // offset 0x0
+    s32 delta;      // offset 0x4
+    s32 event;      // offset 0x8
+    u8 newly[7];    // offset 0xC: [4] tier, [5] path done, [6] career done
+};
+
+class Statistic {
+public:
+    int HasValue(void);
+    u8 pad[0x24];
+};
+
+class RealStatistic : public Statistic {
+public:
+    RealStatistic(int slot, u32 type, long event, int difficulty);
+    f32 GetValue(void);
+};
+
+int IdentGetCurrentSlot(void);
+extern s32 lbl_8055C7E0;
+
+extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
+
+// Makes event bar i current (none when out of range or without a condition) and shows its title,
+// description and best time.
+static inline void SelectBar(int i) {
+    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+    } else {
+        lbl_8055F698 = 0;
+    }
+    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        u8* e = (u8*)lbl_804B30D8.data[i];
+        if (e) {
+            CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
+            CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
+            int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
+            s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
+            RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+            if (best.HasValue()) {
+                fn_80130980(sBrowseBest, 20, 3, best.GetValue());
+            } else {
+                CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
+            }
+            lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
+        } else {
+            sBrowseDesc[0] = 0;
+            sBrowseTitle[0] = 0;
+            lbl_8055C7E0 = -1;
+        }
+    } else {
+        sBrowseDesc[0] = 0;
+        sBrowseTitle[0] = 0;
+        lbl_8055C7E0 = -1;
+    }
+}
+
+extern "C" void fn_801308F4(char* buf, int n, int value);  // format a score
+const char* GetGradeDisplayName(int grade);
+
+
+// Appends s to the string in d (n bytes in all), always terminating.
+static inline void AppendName(char* d, int n, const char* s) {
+    while (*d) {
+        n--;
+        d++;
+    }
+    if (n > 0) {
+        CopyName(n, d, s);
+    }
+}
+
+// The score being counted up (object at ScoreAccumulator + 0x20).
+struct ScoreTally {
+    s32 from;   // offset 0x0
+    s32 to;     // offset 0x4
+    f32 rate;   // offset 0x8: points per second
+    u8 unlocks; // offset 0xC: announce unlocks passed on the way
+    f32 acc;    // offset 0x10: counted so far
+
+    ScoreTally(int from, int to) {
+        this->from = from;
+        this->to = to;
+        unlocks = 0;
+        rate = 30.0f;
+    }
+
+    // The current value, at most the target.
+    s32 Value(void) const {
+        s32 v = (s32)((f32)from + acc);
+        s32 m = to;
+        return v < m ? v : m;
+    }
+};
+
+struct AnimName {
+    char name[30];
+};
+
+// The finished event's score while it counts up (vtable lbl_80348678; menu item type 5 through its
+// MenuState part at +4). It stands in for the event on the bracket screen, reporting the counted value
+// as the best; queued animations (add_anim_to_wait_for) are waited for before the follow-up boxes.
+class ScoreAccumulator : public EvContest, public MenuState {
+public:
+    ScoreAccumulator(void) {
+        lbl_8055F69C = (s32)this;
+        inner = 0;
+        tally = 0;
+        sel = -1;
+        next = -1;
+        showCup = 0;
+        nextCup = 0;
+        cup = 0;
+        showUnlock = 0;
+        unlockLevel = 0;
+        quit = 0;
+    }
+    virtual ~ScoreAccumulator(void) {
+        lbl_8055F69C = 0;
+        delete tally;
+    }
+
+    EvContest* inner;          // offset 0x1C
+    ScoreTally* tally;         // offset 0x20
+    s32 sel;                   // offset 0x24
+    u8 perfect;                // offset 0x28
+    u8 counted;                // offset 0x29
+    u8 shown;                  // offset 0x2A
+    u8 showCup;                // offset 0x2B: then the cup-completed box
+    EvBracket* cup;            // offset 0x2C
+    EvBracket* nextCup;        // offset 0x30
+    u8 showUnlock;             // offset 0x34: then the difficulty-unlocked box
+    s32 unlockLevel;           // offset 0x38
+    u8 quit;                   // offset 0x3C: then leave the screen
+    FixedArray<AnimName, 10> anims;  // offset 0x40
+    f32 wait;                  // offset 0x178
+    s32 next;                  // offset 0x17C: event to select afterwards
+};
+
+// The bar's caption without animations: "best/pass", whether it is passed, its best grade.
+inline void EvEventBar::Reset(void) {
+    if (contest) {
+        fn_801308F4(text, 30, contest->Best());
+        AppendName(text, 30, "/");
+        char pass[20];
+        fn_801308F4(pass, 20, contest->PassScore());
+        AppendName(text, 30, pass + 1);
+        if (contest->Unlocked()) {
+            unlocked = 1;
+        } else {
+            unlocked = 0;
+        }
+        int g = contest->BestGrade();
+        if (g >= 0 && g < 5) {
+            CopyName(10, grade, GetGradeDisplayName(g));
+        }
+        current = (u8*)this == (u8*)lbl_8055F698;
+    } else {
+        text[0] = 0;
+        grade[0] = 0;
+        current = 0;
+        passed = 0;
+        perfected = 0;
+    }
+}
+
+inline EvEventBar::EvEventBar(void) : LogoMover(0.2f) {
+    m.ease = 1;
+    contest = 0;
+    lbl_804B30D8.Add((u8*)this);
+    Reset();
+}
+
+inline EvEventBar::~EvEventBar(void) {
+    if ((u32)lbl_8055F698 == (u32)this) {
+        lbl_8055F698 = 0;
+    }
+    lbl_804B30D8.Remove(this);
+}
+
+// The bracket as the event screen shows it (vtable lbl_80348644): event `index` is replaced by the score
+// accumulator while it counts.
+class BracketView : public EvBracket {
+public:
+    BracketView(EvBracket* b, EvContest* e, int i) {
+        br = b;
+        stand = e;
+        index = i;
+    }
+
+    EvBracket* br;     // offset 0x4
+    EvContest* stand;  // offset 0x8
+    s32 index;         // offset 0xC
+};
+
+// A set of named textures, one of which is drawn at a time (gart.cpp).
+class DynoTex {
+public:
+    DynoTex(int max, u8 flip);
+    virtual ~DynoTex(void);
+    void Add(int id, const char* name);
+
+    void* entries;  // offset 0x4
+    int max;        // offset 0x8
+    int count;      // offset 0xC
+    s32 current;    // offset 0x10
+    u8 flip;        // offset 0x14
+};
+
+extern "C" int fn_802054EC(const char* key, int level, int event);
+
+class ValueNodeV {
+public:
+    virtual const char* GetName(void);
+    virtual int Has(const char* key);
+    virtual int GetPair(int index, const char** key, const char** value);
+    virtual const char* GetValue(const char* key);
+};
+
+struct EventDesc {
+    u8 pad[0x20];
+    ValueNodeV* table;  // offset 0x20
+};
+
+void* GetEvent(int event);
+void* operator new(unsigned long n, const char* tag);
+
+extern "C" {
+int fn_802839D0(void);
+int fn_80283A50(void);
+int fn_80283AC8(void);
+int fn_80283B58(void);
+int fn_80283E28(void);
+
+// The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
+// marker, the selected event's title, best time and map; after a result the improved event's score counts
+// up first. Returns 1 when an event was picked (its index in *event).
+int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) {
+    int diff = br->Difficulty();
+    ScoreAccumulator acc;
+    if (res->newly[2]) {
+        int i;
+        for (i = 0; i < path->Count(); i++) {
+            if (path->Get(i) == br) {
+                break;
+            }
+        }
+        EvBracket* next = i < path->Count() - 1 ? path->Get(i + 1) : 0;
+        acc.cup = br;
+        acc.nextCup = next;
+        acc.showCup = 1;
+        acc.quit = 1;
+        lbl_8055F6A0 = next != 0;
+    }
+    if (res->newly[4]) {
+        acc.quit = 1;
+    }
+    if (res->newly[5]) {
+        acc.quit = 1;
+    }
+    EvEventBar bars[5];
+    int count = br->Count();
+    int n = count < 5 ? count : 5;
+    DynoTex maps(n, fn_802054EC("mirror_mode", br->Difficulty(), -1));
+    int start = -1;
+    int cur = *event;
+    if (res->improved) {
+        int done;
+        if (br->Unlocked()) {
+            done = br->Get(cur)->Perfected();
+        } else {
+            done = br->Get(cur)->Unlocked();
+        }
+        if (done && cur < n - 1) {
+            cur++;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        EvContest* c = br->Get(i);
+        if (res->improved && c->EventId() == res->event) {
+            int delta = res->delta;
+            start = i;
+            acc.inner = c;
+            acc.sel = i;
+            if (delta > 0) {
+                int best = c->Best();
+                ScoreTally* t = new ("ScoreAccumulator") ScoreTally(best - delta, best);
+                acc.tally = t;
+                t->acc = 0.0f;
+            }
+            acc.next = cur;
+            bars[i].contest = &acc;
+            bars[i].Reset();
+        } else {
+            bars[i].contest = c;
+            bars[i].Reset();
+        }
+        const char* name = ((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name");
+        if (!strncmp(name, "career_", strlen("career_"))) {
+            name += strlen("career_");
+        }
+        char file[33];
+        fn_801345D8(file, 33, "/%s.tex", name);
+        maps.Add(c->EventId(), file);
+    }
+    BracketView view(br, res->improved ? &acc : 0, start);
+    EvCupBar cup;
+    cup.SetCup(&view, 1);
+    MenuItem items[] = {
+        MenuItem(0, 5, (MenuState*)&acc, 0, 0),
+        MenuItem("path_1", 5, &cup, 0, 0),
+        MenuItem("cup_name_1", 3, cup.cup ? cup.cup->Name() : "", 0, 0),
+        MenuItem("cup_events_passed_1", 3, cup.progress, 0, 0),
+        MenuItem("cup_icon", 3, cup.title, 0, 0),
+        MenuItem("cup_icon", 2, &cup.frame, 0, 0),
+        MenuItem("#course_name", 3, sBrowseDesc, 0, 0),
+        MenuItem("#best_time", 3, sBrowseBest, 0, 0),
+        MenuItem("#trackmap", 0x12, &maps, 0, 0),
+        MenuItem("#trackmap", 2, &lbl_8055C7E0, 0, 0),
+        MenuItem("event_1", 5, &bars[0], 0, 0),
+        MenuItem("event_bar_1", 2, &bars[0].current, 0, 0),
+        MenuItem("event_name_1", 3, bars[0].contest ? bars[0].contest->TrackName() : "", 0, 0),
+        MenuItem("event_points_1", 3, bars[0].text, 0, 0),
+        MenuItem("event_grade_1", 3, bars[0].grade, 0, 0),
+        MenuItem("event_grade_1", 2, &bars[0].unlocked, 0, 0),
+        MenuItem("event_2", 5, &bars[1], 0, 0),
+        MenuItem("event_bar_2", 2, &bars[1].current, 0, 0),
+        MenuItem("event_name_2", 3, bars[1].contest ? bars[1].contest->TrackName() : "", 0, 0),
+        MenuItem("event_points_2", 3, bars[1].text, 0, 0),
+        MenuItem("event_grade_2", 3, bars[1].grade, 0, 0),
+        MenuItem("event_grade_2", 2, &bars[1].unlocked, 0, 0),
+        MenuItem("event_3", 5, &bars[2], 0, 0),
+        MenuItem("event_bar_3", 2, &bars[2].current, 0, 0),
+        MenuItem("event_name_3", 3, bars[2].contest ? bars[2].contest->TrackName() : "", 0, 0),
+        MenuItem("event_points_3", 3, bars[2].text, 0, 0),
+        MenuItem("event_grade_3", 3, bars[2].grade, 0, 0),
+        MenuItem("event_grade_3", 2, &bars[2].unlocked, 0, 0),
+        MenuItem("event_4", 5, &bars[3], 0, 0),
+        MenuItem("event_bar_4", 2, &bars[3].current, 0, 0),
+        MenuItem("event_name_4", 3, bars[3].contest ? bars[3].contest->TrackName() : "", 0, 0),
+        MenuItem("event_points_4", 3, bars[3].text, 0, 0),
+        MenuItem("event_grade_4", 3, bars[3].grade, 0, 0),
+        MenuItem("event_grade_4", 2, &bars[3].unlocked, 0, 0),
+        MenuItem("event_5", 5, &bars[4], 0, 0),
+        MenuItem("event_bar_5", 2, &bars[4].current, 0, 0),
+        MenuItem("event_name_5", 3, bars[4].contest ? bars[4].contest->TrackName() : "", 0, 0),
+        MenuItem("event_points_5", 3, bars[4].text, 0, 0),
+        MenuItem("event_grade_5", 3, bars[4].grade, 0, 0),
+        MenuItem("event_grade_5", 2, &bars[4].unlocked, 0, 0),
+        MenuItem("#bar4_top_color", 3, BarTop(diff), 0, 0),
+        MenuItem("#bar4_bot_color", 3, BarBottom(diff), 0, 0),
+        MenuItem("#screen_title", fn_80131234(EventTitle(diff))),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80283E28, 0, 0x126),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80283B58, 0, 0x128),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80283AC8, -2, 13),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_80283A50, -1, 0x1B),
+        MenuItem(lbl_8055B860, 6, (const void*)fn_802839D0, 0, 0x121),
+        MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
+        MenuItem(lbl_804B2FF8),
+    };
+    MenuDesc desc = {0, 0, (int (*)(int*))fn_8024739C, 0, 0};
+    desc.layout = "ep_chevent.lyt";
+    desc.items = items;
+    if (res->improved) {
+        SelectBar(*event);
+    } else {
+        SelectBar(cur);
+    }
+    int picked = fn_802146BC(&desc, -999, -999, 1) == -2;
+    *event = lbl_804B30D8.Find((u8*)lbl_8055F698);
+    lbl_8055F698 = 0;
+    lbl_804B30D8.count = 0;
+    sBrowseTitle[0] = 0;
+    sBrowseDesc[0] = 0;
+    sBrowseBest[0] = 0;
+    lbl_8055C7E0 = -1;
+    return picked;
+}
 
 u8* fn_802837D4(u8* p, int del) {
     if (p && del > 0) {
@@ -919,56 +1303,6 @@ int fn_80283AC8(void) {
 
 }  // extern "C"
 
-class Statistic {
-public:
-    int HasValue(void);
-    u8 pad[0x24];
-};
-
-class RealStatistic : public Statistic {
-public:
-    RealStatistic(int slot, u32 type, long event, int difficulty);
-    f32 GetValue(void);
-};
-
-int IdentGetCurrentSlot(void);
-extern s32 lbl_8055C7E0;
-
-extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
-
-// Makes event bar i current (none when out of range or without a condition) and shows its title,
-// description and best time.
-static inline void SelectBar(int i) {
-    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-        lbl_8055F698 = (u32)lbl_804B30D8.data[i];
-    } else {
-        lbl_8055F698 = 0;
-    }
-    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-        u8* e = (u8*)lbl_804B30D8.data[i];
-        if (e) {
-            CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
-            CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
-            int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
-            s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
-            RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
-            if (best.HasValue()) {
-                fn_80130980(sBrowseBest, 20, 3, best.GetValue());
-            } else {
-                CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
-            }
-            lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
-        } else {
-            sBrowseDesc[0] = 0;
-            sBrowseTitle[0] = 0;
-            lbl_8055C7E0 = -1;
-        }
-    } else {
-        sBrowseDesc[0] = 0;
-        sBrowseTitle[0] = 0;
-        lbl_8055C7E0 = -1;
-    }
-}
 
 extern "C" {
 
@@ -1044,13 +1378,6 @@ public:
 };
 
 
-// What a finished event changed.
-struct EvResult {
-    u8 improved;    // offset 0x0
-    s32 delta;      // offset 0x4
-    s32 event;      // offset 0x8
-    u8 newly[7];    // offset 0xC: [4] tier, [5] path done, [6] career done
-};
 
 const char* GetCareerCompletedChassis(void);
 const char* ShowCareerCompletedReason(void);
@@ -1384,19 +1711,6 @@ void fn_802854E0(u8* p) {
     }
 }
 
-void fn_801308F4(char* buf, int n, int value);
-const char* GetGradeDisplayName(int grade);
-
-// Appends s to the string in d (n bytes in all), always terminating.
-static inline void AppendName(char* d, int n, const char* s) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        CopyName(n, d, s);
-    }
-}
 
 // Plays the bar's animation `<anim><slot>` and waits for it.
 static inline void PlayBarAnim(EvEventBar* b, const char* anim) {
@@ -1569,21 +1883,6 @@ int fn_802869CC(u8* p, int key) {
     return 0;
 }
 
-// The score being counted up (object at ScoreAccumulator + 0x20).
-struct ScoreTally {
-    s32 from;   // offset 0x0
-    s32 to;     // offset 0x4
-    f32 rate;   // offset 0x8: points per second
-    u8 unlocks; // offset 0xC: announce unlocks passed on the way
-    f32 acc;    // offset 0x10: counted so far
-
-    // The current value, at most the target.
-    s32 Value(void) const {
-        s32 v = (s32)((f32)from + acc);
-        s32 m = to;
-        return v < m ? v : m;
-    }
-};
 
 // While any of the queued animations still plays (or for a moment after), waits.
 static inline int AnimsBusy(u8* p) {
