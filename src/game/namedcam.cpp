@@ -511,8 +511,7 @@ extern const f32 lbl_80564054;  // -1.0
 
 f32 fn_80277704(int i) {
     if (lbl_8049FD58[i].active) {
-        CamShot* e = &lbl_8049FD58[i];
-        return (lbl_8055E3C8 - e->start) / e->dur;
+        return (lbl_8055E3C8 - lbl_8049FD58[i].start) / lbl_8049FD58[i].dur;
     }
     return lbl_80564054;
 }
