@@ -1713,9 +1713,11 @@ void ZoneMaster::vf44(void) {
     CarState* c = &cars[fn_801E866C(-1)];
     Gate* g = c->gate;
     if (c->human && g) {
+        Watcher* w;
+        int nRing;
         int nPlain = 0;
-        int nRing = 0;
-        Watcher* w = fn_802C86DC();
+        nRing = 0;
+        w = fn_802C86DC();
         int i;
         for (i = 0; i < 10; i++) {
             int ok = 1;
@@ -1750,12 +1752,14 @@ void ZoneMaster::vf44(void) {
         }
     }
     if (hits.count > 0) {
+        Gate* gg;
+        Vec3* p;
         if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
             int i;
             for (i = 0; i < hits.count; i++) {
-                Gate* gg = hits.data[i].gate;
+                gg = hits.data[i].gate;
                 if (!gg->ring) {
-                    Vec3* p = &gg->a;
+                    p = &gg->a;
                     int k;
                     for (k = 0; k < 2; k++) {
                         fn_802981F8(p);
