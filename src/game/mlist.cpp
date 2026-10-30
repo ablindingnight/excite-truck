@@ -536,9 +536,10 @@ void fn_802CDB5C(int pri) {
     MLBatch* e = &ea.p[r.lo];
     for (int i = r.lo; i < r.hi; e++, i++) {
         int open = 0;
+        s32 tex;
         u8* dl = 0;
         s32 cnt = 0;
-        s32 tex = e->tex;
+        tex = e->tex;
         MLStrip* sp = &da.p[e->start];
         int n = e->end - e->start;
         for (int j = 0; j < n; j++) {
