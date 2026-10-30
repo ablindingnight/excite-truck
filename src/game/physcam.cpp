@@ -266,8 +266,9 @@ void fn_80270EC4(u8* car, u32 id) {
     if (id & 0x100) {
         for (int g = 0; g < 3; g++) {
             int n = 0;
+            int i;
             CamRegion* r = lbl_8049F9D8;
-            for (int i = 0; i < lbl_8055F554; i++) {
+            for (i = 0; i < lbl_8055F554; i++) {
                 if (g == fn_80270D1C(S32(r->cam, 0x5C))) {
                     refs[n].track = (u8*)r;
                     refs[n].alt = 0;
@@ -291,8 +292,9 @@ void fn_80270EC4(u8* car, u32 id) {
             }
         }
         fn_80270B00("Region longitudes: (%d)", lbl_8055F554);
+        int i;
         CamRegion* r = lbl_8049F9D8;
-        for (int i = 0; i < lbl_8055F554; i++) {
+        for (i = 0; i < lbl_8055F554; i++) {
             fn_80270B00("  %2d: %.3f  %.3f", i, r->lo1, r->hi1);
             if (r->dual) {
                 fn_80270B00(" +%2d: %.3f  %.3f", i, r->lo2, r->hi2);
