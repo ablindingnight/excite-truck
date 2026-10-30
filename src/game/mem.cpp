@@ -496,8 +496,9 @@ void LightStack::Align(s32 align) {
 void LightStack::Shutdown(void) { fn_802E30C8("LightStackAllocator: Max alloc %dK/%dK", peak / 1024, (s32)size / 1024); }
 
 void* LightStack::Alloc(s32 s, const char* name, int type) {
+    u32 total;
     s32 aligned = AlignUp(s, 16);
-    u32 total = aligned + 0x20;
+    total = aligned + 0x20;
     u8* data;
     if (total + used > size) {
         fn_802E317C("LightStackAlloc: Out of room for %s:%dK", name, aligned / 1024);
