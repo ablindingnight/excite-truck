@@ -730,7 +730,7 @@ void fn_802C47B8(int x0, int y0, int x1, int y1, u32 color) {
         for (; x0 * step < step * x1; x0 += step) {
             fn_802C32B8(x0, y0, color);
         }
-    } else if (abs(dy) > abs(dx)) {
+    } else if (abs(dx) < abs(dy)) {
         int step = y0 < y1 ? 1 : -1;
         float slope = (float)step * (float)dx / (float)dy;
         float x = (float)x0;
