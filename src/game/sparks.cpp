@@ -745,8 +745,9 @@ void SparkSys::Reset(void) {
 void SparkSys::Update(void) { Step(); }
 
 void SparkSys::Draw(void) {
+    SparkMtx cam;
     int view = fn_801E85B4();
-    SparkMtx cam = *fn_801E8718(view);
+    cam = *fn_801E8718(view);
     if (count > 0) {
         f32 old = fn_802C9A4C(lod);
         fn_802C8BD0(tex);
