@@ -1023,6 +1023,7 @@ void fn_80267EF8(u8* p) {
         return;
     }
     f32 vol;
+    f32 ang;
     f32 u = t / lbl_80563C34;
     vol = lbl_80563C20;
     if (t < lbl_80563C6C) {
@@ -1037,7 +1038,7 @@ void fn_80267EF8(u8* p) {
         U8(cheer, 0x4D) = 1;
         F32(cheer, 0x8) = cv;
     }
-    f32 ang = lbl_80563C24 * (lbl_80563C20 + ShakeEase(u) * lbl_80563C88);
+    ang = lbl_80563C24 * (lbl_80563C20 + ShakeEase(u) * lbl_80563C88);
     CamPose cam;
     CamPose car;
     cam = *(CamPose*)(p + 0x58);
