@@ -30,6 +30,7 @@ public:
     virtual void s30(void);
     virtual void s34(void);
     virtual void PlaySound(const char* name);  // 0x38
+    virtual void StopSound(const char* name);  // 0x3C
 };
 
 class VR {
@@ -933,8 +934,43 @@ public:
 int IdentGetCurrentSlot(void);
 extern s32 lbl_8055C7E0;
 
+extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
+
+// Makes event bar i current (none when out of range or without a condition) and shows its title,
+// description and best time.
+static inline void SelectBar(int i) {
+    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+    } else {
+        lbl_8055F698 = 0;
+    }
+    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        u8* e = (u8*)lbl_804B30D8.data[i];
+        if (e) {
+            CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
+            CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
+            int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
+            s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
+            RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+            if (best.HasValue()) {
+                fn_80130980(sBrowseBest, 20, 3, best.GetValue());
+            } else {
+                CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
+            }
+            lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
+        } else {
+            sBrowseDesc[0] = 0;
+            sBrowseTitle[0] = 0;
+            lbl_8055C7E0 = -1;
+        }
+    } else {
+        sBrowseDesc[0] = 0;
+        sBrowseTitle[0] = 0;
+        lbl_8055C7E0 = -1;
+    }
+}
+
 extern "C" {
-void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
 
 // Selects the next event that has an unlock condition and shows its title, description and best time.
 int fn_80283B58(void) {
@@ -946,35 +982,7 @@ int fn_80283B58(void) {
                 i = 0;
             }
         } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
-        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-            lbl_8055F698 = (u32)lbl_804B30D8.data[i];
-        } else {
-            lbl_8055F698 = 0;
-        }
-        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-            u8* e = (u8*)lbl_804B30D8.data[i];
-            if (e) {
-                CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
-                CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
-                int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
-                s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
-                RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
-                if (best.HasValue()) {
-                    fn_80130980(sBrowseBest, 20, 3, best.GetValue());
-                } else {
-                    CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
-                }
-                lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
-            } else {
-                sBrowseDesc[0] = 0;
-                sBrowseTitle[0] = 0;
-                lbl_8055C7E0 = -1;
-            }
-        } else {
-            sBrowseDesc[0] = 0;
-            sBrowseTitle[0] = 0;
-            lbl_8055C7E0 = -1;
-        }
+        SelectBar(i);
     } else {
         fn_80216D28();
     }
@@ -991,35 +999,7 @@ int fn_80283E28(void) {
                 i += lbl_804B30D8.Count();
             }
         } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
-        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-            lbl_8055F698 = (u32)lbl_804B30D8.data[i];
-        } else {
-            lbl_8055F698 = 0;
-        }
-        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-            u8* e = (u8*)lbl_804B30D8.data[i];
-            if (e) {
-                CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
-                CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
-                int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
-                s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
-                RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
-                if (best.HasValue()) {
-                    fn_80130980(sBrowseBest, 20, 3, best.GetValue());
-                } else {
-                    CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
-                }
-                lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
-            } else {
-                sBrowseDesc[0] = 0;
-                sBrowseTitle[0] = 0;
-                lbl_8055C7E0 = -1;
-            }
-        } else {
-            sBrowseDesc[0] = 0;
-            sBrowseTitle[0] = 0;
-            lbl_8055C7E0 = -1;
-        }
+        SelectBar(i);
     } else {
         fn_80216D28();
     }
@@ -1589,7 +1569,97 @@ int fn_802869CC(u8* p, int key) {
     return 0;
 }
 
-void fn_80286A34(u8* p) {}  // stub (513)
+// The score being counted up (object at ScoreAccumulator + 0x20).
+struct ScoreTally {
+    s32 from;   // offset 0x0
+    s32 to;     // offset 0x4
+    f32 rate;   // offset 0x8: points per second
+    u8 unlocks; // offset 0xC: announce unlocks passed on the way
+    f32 acc;    // offset 0x10: counted so far
+
+    // The current value, at most the target.
+    s32 Value(void) const {
+        s32 v = (s32)((f32)from + acc);
+        s32 m = to;
+        return v < m ? v : m;
+    }
+};
+
+// While any of the queued animations still plays (or for a moment after), waits.
+static inline int AnimsBusy(u8* p) {
+    for (int i = 0; i < S32(p, 0x44); i++) {
+        if (fn_8023695C((char*)PTR(p, 0x40) + i * 30)) {
+            F32(p, 0x178) = 1.0f;
+            return 1;
+        }
+    }
+    f32 t = F32(p, 0x178) - fn_80214D48();
+    F32(p, 0x178) = 0.0f > t ? 0.0f : t;
+    return F32(p, 0x178) > lbl_80558DC4[0];
+}
+
+void fn_802168BC(int a);
+void fn_8027ED78(const char* title, const char* msg);
+
+// Score tally frame: counts up (stopping the tally sound at the target), waits for the queued animations,
+// then selects the event and shows what the result opened (cup done, difficulty unlocked, career done);
+// unlockables whose points the count passes pop up as it goes.
+void fn_80286A34(u8* p) {
+    ScoreTally* t = (ScoreTally*)PTR(p, 0x20);
+    if (!t) {
+        return;
+    }
+    if (!U8(p, 0x29)) {
+        s32 v = t->Value();
+        if (v == t->to) {
+            U8(p, 0x29) = 1;
+            fn_8027ED70()->StopSound("scoreup_tally");
+        }
+    } else if (!U8(p, 0x2A) && !AnimsBusy(p)) {
+        fn_80214AF0(0x1F);
+        if (S32(p, 0x17C) >= 0) {
+            SelectBar(S32(p, 0x17C));
+        } else {
+            SelectBar(S32(p, 0x24));
+        }
+        U8(p, 0x2A) = 1;
+        if (U8(p, 0x2B)) {
+            fn_8027F288((EvBracket*)PTR(p, 0x2C), (EvBracket*)PTR(p, 0x30));
+        }
+        if (U8(p, 0x34)) {
+            fn_8027F09C(S32(p, 0x38));
+        }
+        if (U8(p, 0x3C)) {
+            fn_802168BC(-1);
+        }
+    }
+    if (lbl_8055F684) {
+        f32 dt = fn_80214D48();
+        t = (ScoreTally*)PTR(p, 0x20);
+        s32 lo = t->Value();
+        if (lo < t->to) {
+            t->acc += t->rate * dt;
+            s32 hi = t->Value();
+            if (t->unlocks) {
+                for (int i = 0; i < GetUnlockableCount(); i++) {
+                    Unlockable* u = GetUnlockable(i);
+                    if (lo < u->points && hi >= u->points) {
+                        char title[20];
+                        char msg[200];
+                        if (!strcasecmp(u->type, "CAR")) {
+                            CopyName(20, title, fn_80131234("EventPath:UNLOCK_TITLE"));
+                            CopyName(200, msg, u->name);
+                        } else if (!strcasecmp(u->type, "RANK")) {
+                            CopyName(20, title, fn_80131234("EventPath:RANK_UP_TITLE"));
+                            CopyName(200, msg, u->name);
+                        }
+                        fn_8027ED78(title, msg);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void fn_80287238(u8* p) {
     u8* o = PTR(p, 0x20);
