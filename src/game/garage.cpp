@@ -344,7 +344,7 @@ struct StatPanel {
     char text[5][0x64];    // offset 0xF4
     u8 flag;               // offset 0x2E8
 
-    StatPanel(void) {
+    void Clear(void) {
         memset(&stats, 0, sizeof(CarStats));
         text[0][0] = 0;
         text[1][0] = 0;
@@ -533,6 +533,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         CarUIScreen ui(0);
         ui.channel = fn_802E4A10();
         StatPanel panel;
+        panel.Clear();
         GaragePair* pair = &lbl_80498C48.pairs[slot];
         CarPick cars(screen, lbl_80498C48.alt ? &pair->d : &pair->b, lbl_80498C48.alt ? &pair->c : &pair->a, &panel,
                      &ui);
@@ -910,7 +911,106 @@ u8* fn_8024FB64(u8* p, int del) {
     return p;
 }
 
-void fn_8024FBD8(u8* p) {}  // stub (264)
+}  // extern "C"
+
+extern void* lbl_803443B0[];
+
+// The menu screens' shared UI objects (uiobjs.cpp).
+class UIObjects {
+public:
+    virtual ~UIObjects(void);
+    virtual void AddImage(const char* name, const char* file, int frame);
+    virtual void AddFont(const char* name, const char* file);
+    virtual void AddSound(const char* name, const char* file, u8 loop);  // 0x14
+    virtual void DrawImage(const char* name, f32 x, f32 y, int z, int frame);
+    virtual void DrawImageFade(const char* name, f32 x, f32 y, f32 a, int z, int frame);
+    virtual void s20(void);
+    virtual void s24(void);
+    virtual const char* GetString(u32 id);
+    virtual s32 GetInt(u32 id);
+    virtual void s30(void);
+    virtual void s34(void);
+    virtual void PlaySound(const char* name);  // 0x38
+    virtual void s3C(void);
+    virtual void SetVolume(const char* name, f32 v);  // 0x40
+};
+
+extern "C" UIObjects* fn_80258354(void);
+extern const f32 lbl_80563964;  // 1.0
+
+// The car unlock screen's state (vtable lbl_803443B0): walks `list`, revealing each unlocked car with the
+// trophy cue.
+struct UnlockScreen {
+    UnlockScreen(GarageList* list, CarUIScreen* ui, StatPanel* panel, int arg) {
+        PTR(data, 0x18) = (u8*)list;
+        S32(data, 0x14) = 0;
+        *(void**)data = lbl_803443B0;
+        PTR(data, 0x20) = (u8*)ui;
+        PTR(data, 0x24) = (u8*)panel;
+        S32(data, 0x1C) = 0;
+        if (arg) {
+            S32(data, 0x1C) = arg;
+        }
+        U8(data, 0x28) = 0;
+        U8(data, 0x48) = 0;
+        U8(data, 0x88) = 0;
+        U8(data, 0x108) = 0;
+        PTR(data, 0x188) = (u8*)fn_80258354();
+        if (PTR(data, 0x188)) {
+            ((UIObjects*)PTR(data, 0x188))->AddSound("trophy_snd", "a_trophy1.sfx", 0);
+            ((UIObjects*)PTR(data, 0x188))->SetVolume("trophy_snd", lbl_80563964);
+        }
+    }
+    ~UnlockScreen(void) {
+        *(void**)data = lbl_803443B0;
+        UIObjects* o = (UIObjects*)PTR(data, 0x188);
+        if (o) {
+            delete o;
+        }
+    }
+    u8 data[0x1A0];
+};
+
+extern "C" {
+
+// The car unlock screen: shows every car of `list` in turn ("carunlock.lyt").
+void fn_8024FBD8(GarageList* list, int arg) {
+    fn_8013C804();
+    CarStatsInit();
+    CarUIScreen ui(1);
+    ui.channel = fn_802E4A10();
+    StatPanel panel;
+    panel.Clear();
+    UnlockScreen screen(list, &ui, &panel, arg);
+    MenuItem items[] = {
+        MenuItem(0, 5, screen.data, 0, 0),
+        MenuItem("#title", (char*)screen.data + 0x108),
+        MenuItem("#car_model", 0x13, &ui, 0, 0),
+        MenuItem("#car_model", (char*)screen.data + 0x28),
+        MenuItem("#car_position", 5, ui.state, 0, 0),
+        MenuItem("#unlock_msg", (char*)screen.data + 0x88),
+        MenuItem("#chassis", (char*)screen.data + 0x48),
+        MenuItem("#stat_text_1", panel.text[0]),
+        MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
+        MenuItem("#stat_text_2", panel.text[1]),
+        MenuItem("#stat_art_2", 2, &panel.stats.stats[1].value, 0, 0),
+        MenuItem("#stat_text_3", panel.text[2]),
+        MenuItem("#stat_art_3", 2, &panel.stats.stats[2].value, 0, 0),
+        MenuItem("#stat_text_4", panel.text[3]),
+        MenuItem("#stat_custom_4", 5, &panel.bars[3], 0, 0),
+        MenuItem("#stat_text_5", panel.text[4]),
+        MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
+        MenuItem(lbl_80498C30),
+    };
+    MenuDesc desc = {"carunlock.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    for (int i = 0; i < list->Count(); i++) {
+        S32(screen.data, 0x18C) = i;
+        fn_802146BC(&desc, -999, -999, 1);
+    }
+    CarStatsShutdown();
+    fn_8013C8B8();
+}
 
 u8* fn_8024FFF8(u8* p, int del) {
     if (p) {
