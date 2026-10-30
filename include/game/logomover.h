@@ -3,6 +3,29 @@
 
 #include "game/menustate.h"
 
+extern "C" {
+void fn_80214A9C(int i);
+void fn_80214AF0(int i);
+void fn_80214BE4(int i, int dx, int dy);
+f32 fn_80214D48(void);
+}
+
+// Odd smoothstep: -1 below -1, 1 above 1.
+static inline f32 SmoothSign(f32 v) {
+    if (v < -1.0f) {
+        return -1.0f;
+    }
+    if (v > 1.0f) {
+        return 1.0f;
+    }
+    if (v > 0.0f) {
+        return v * (-2.0f * v * v) + 3.0f * v * v;
+    }
+    return v * (-2.0f * v * v) - 3.0f * v * v;
+}
+
+static inline f32 LerpF(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
 // A LogoMover's motion state (from 0x18): eases from (fromX, fromY) to (toX, toY).
 struct LogoMotion {
     LogoMotion(f32 time) {
@@ -50,7 +73,56 @@ public:
     virtual ~LogoMover(void) {}
     virtual void Enter(void);
     virtual void Exit(void);
-    virtual void Update(void);
+    // One frame of motion: shows/hides the menu item, applies a pending jump or move, eases toward the target.
+    virtual void Update(void) {
+        if (m.vis != m.lastVis) {
+            if (m.vis == 0) {
+                fn_80214AF0(m.idx);
+            } else {
+                fn_80214A9C(m.idx);
+            }
+            m.lastVis = m.vis;
+        }
+        if (m.jumpOn) {
+            m.fromX = m.toX = m.jumpX;
+            m.fromY = m.toY = m.jumpY;
+            fn_80214BE4(m.idx, m.jumpX - x, m.jumpY - y);
+            m.jumpOn = 0;
+            m.t = 1.1f;
+        }
+        if (m.moveOn) {
+            m.fromX = x;
+            m.fromY = y;
+            m.toX = m.moveX;
+            m.toY = m.moveY;
+            m.t = 0.0f;
+            m.moveOn = 0;
+        }
+        m.t += m.rate * fn_80214D48();
+        f32 k;
+        switch (m.ease) {
+        case 1: {
+            f32 v = m.t < 1.0f ? m.t : 1.0f;
+            k = v * v;
+            break;
+        }
+        case 2: {
+            f32 v = m.t < 1.0f ? m.t : 1.0f;
+            k = SmoothSign(v);
+            break;
+        }
+        default:
+            k = m.t < 1.0f ? m.t : 1.0f;
+            break;
+        }
+        int nx = (int)LerpF((f32)m.fromX, (f32)m.toX, k);
+        int ny = (int)LerpF((f32)m.fromY, (f32)m.toY, k);
+        fn_80214BE4(m.idx, nx - x, ny - y);
+        if (m.f44 && m.Done()) {
+            m.f44 = 0;
+            m.vis = 1;
+        }
+    }
 
     LogoMotion m;  // offset 0x18
 };

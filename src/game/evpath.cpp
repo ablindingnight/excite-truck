@@ -1226,7 +1226,117 @@ void fn_80284760(u8* p) {
     }
 }
 
-void fn_802849E8(u8* p) {}  // stub (702)
+void fn_80236958(const char* name);
+
+static inline f32 Clamp01F(f32 v) {
+    f32 t = 1.0f < v ? 1.0f : v;
+    return t > 0.0f ? t : 0.0f;
+}
+
+// Menu slot of a cup marker: the bonus slot (5) or its place in the registry.
+static inline int CupSlot(EvCupBar* b) { return b->still ? 5 : lbl_804B3048.Find(b); }
+
+// Can the event be picked: it has a bracket that is open (or everything is unlocked).
+static inline int Selectable(EvCupBar* e) {
+    int ok = 0;
+    if (e->Cup() && (IsUnlockAll() || e->cup->Open())) {
+        ok = 1;
+    }
+    return ok;
+}
+
+// Refreshes the cup's caption: the "perfected" animation once, its style (6 when current), its "done/total"
+// progress when it is open, and its icon.
+static inline void RefreshCup(EvCupBar* b) {
+    if (b->cup) {
+        if (b->cup->AllDone() && !b->perfect) {
+            fn_80236954(lbl_80348940);
+            fn_8027F204(lbl_80348940);
+        }
+        int show = 0;
+        b->style = (u8*)b == (u8*)lbl_8055F688 ? 6 : 7;
+        if (b->cup->Open()) {
+            if (!b->cup->AllDone() || fn_8023695C(lbl_80348940)) {
+                show = 1;
+            }
+        }
+        b->showStars = show;
+        if (show) {
+            int n = b->cup->Count();
+            int done = 0;
+            for (int i = 0; i < n; i++) {
+                if (b->cup->Get(i)->Unlocked()) {
+                    done++;
+                }
+            }
+            fn_801345D8(b->progress, 10, "%d/%d", done, n);
+        } else {
+            b->progress[0] = 0;
+        }
+    }
+    const char* title = fn_8027ED70()->GetFile(b->cup->Id());
+    if (title) {
+        CopyName(50, b->title, title);
+    }
+    b->frame = fn_8027ED70()->GetFrame(b->cup->Id());
+}
+
+// The cup marker's frame: motion (unless still), caption, its menu items' visibility, the stars easing
+// toward done/not done, the highlight fade, and the end of its unlock animation.
+void fn_802849E8(u8* p) {
+    EvCupBar* b = (EvCupBar*)p;
+    if (!b->still) {
+        b->LogoMover::Update();
+    }
+    if (b->cup) {
+        RefreshCup(b);
+        if (b->cup->Open()) {
+            fn_80214AF0(CupSlot(b) + 11);
+        } else {
+            fn_80214A9C(CupSlot(b) + 11);
+        }
+        if (b->perfect) {
+            fn_80214AF0(CupSlot(b) + 21);
+        } else {
+            fn_80214A9C(CupSlot(b) + 21);
+        }
+        b->perfect = b->cup->AllDone();
+        f32 step = fn_80214D48() / 0.5f;
+        for (int i = 0; i < b->cup->Count(); i++) {
+            f32* f = &b->fill[i];
+            *f = Clamp01F(*f + (b->cup->Get(i)->Unlocked() ? step : -step));
+        }
+        f32 fade = fn_80214D48() / 0.1f;
+        if ((u8*)b == (u8*)lbl_8055F688) {
+            f32 t = b->timer + fade;
+            b->timer = 1.0f < t ? 1.0f : t;
+        } else {
+            f32 t = b->timer - fade;
+            b->timer = 0.0f > t ? 0.0f : t;
+        }
+        if ((u8*)b == (u8*)lbl_8055F694) {
+            char buf[30];
+            fn_801345D8(buf, 30, "unlock_%d", CupSlot(b) + 1);
+            if (fn_8023695C(buf) == 2) {
+                fn_80236958(buf);
+                lbl_8055F694 = 0;
+                SelectEvent(lbl_804B3048.Find(b));
+            }
+        }
+    } else {
+        fn_80214A9C(CupSlot(b) + 11);
+        fn_80214A9C(CupSlot(b) + 21);
+        fn_80214A9C(CupSlot(b) + 1);
+    }
+    if (CupSlot(b) == 0) {
+        EvCupBar* cur = (EvCupBar*)lbl_8055F688;
+        if (cur && Selectable(cur)) {
+            fn_80214AF0(0x1F);
+        } else {
+            fn_80214A9C(0x1F);
+        }
+    }
+}
 
 }  // extern "C"
 
