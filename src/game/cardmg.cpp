@@ -19,9 +19,87 @@ struct DamagePart {
 
 extern DamagePart lbl_80332840[];
 
+struct EVec {
+    f32 x, y, z;
+};
+
+struct DMat3 {
+    f32 m[9];
+};
+
+// A part's transform (rotation + position).
+struct DFrame {
+    DMat3 rot;  // offset 0x0
+    EVec pos;   // offset 0x24
+};
+
+extern "C" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
+
+static inline void MulM(DMat3* out, const DMat3* a, const DMat3* b) {
+    if (out == b || out == a) {
+        f32 m0 = Dot(a->m[0], b->m[0], a->m[3], b->m[1], a->m[6], b->m[2]);
+        f32 m3 = Dot(a->m[0], b->m[3], a->m[3], b->m[4], a->m[6], b->m[5]);
+        f32 m6 = Dot(a->m[0], b->m[6], a->m[3], b->m[7], a->m[6], b->m[8]);
+        f32 m1 = Dot(a->m[1], b->m[0], a->m[4], b->m[1], a->m[7], b->m[2]);
+        f32 m4 = Dot(a->m[1], b->m[3], a->m[4], b->m[4], a->m[7], b->m[5]);
+        f32 m7 = Dot(a->m[1], b->m[6], a->m[4], b->m[7], a->m[7], b->m[8]);
+        f32 m2 = Dot(a->m[2], b->m[0], a->m[5], b->m[1], a->m[8], b->m[2]);
+        f32 m5 = Dot(a->m[2], b->m[3], a->m[5], b->m[4], a->m[8], b->m[5]);
+        f32 m8 = Dot(a->m[2], b->m[6], a->m[5], b->m[7], a->m[8], b->m[8]);
+        out->m[0] = m0;
+        out->m[3] = m3;
+        out->m[6] = m6;
+        out->m[1] = m1;
+        out->m[4] = m4;
+        out->m[7] = m7;
+        out->m[2] = m2;
+        out->m[5] = m5;
+        out->m[8] = m8;
+    } else {
+        out->m[0] = Dot(a->m[0], b->m[0], a->m[3], b->m[1], a->m[6], b->m[2]);
+        out->m[3] = Dot(a->m[0], b->m[3], a->m[3], b->m[4], a->m[6], b->m[5]);
+        out->m[6] = Dot(a->m[0], b->m[6], a->m[3], b->m[7], a->m[6], b->m[8]);
+        out->m[1] = Dot(a->m[1], b->m[0], a->m[4], b->m[1], a->m[7], b->m[2]);
+        out->m[4] = Dot(a->m[1], b->m[3], a->m[4], b->m[4], a->m[7], b->m[5]);
+        out->m[7] = Dot(a->m[1], b->m[6], a->m[4], b->m[7], a->m[7], b->m[8]);
+        out->m[2] = Dot(a->m[2], b->m[0], a->m[5], b->m[1], a->m[8], b->m[2]);
+        out->m[5] = Dot(a->m[2], b->m[3], a->m[5], b->m[4], a->m[8], b->m[5]);
+        out->m[8] = Dot(a->m[2], b->m[6], a->m[5], b->m[7], a->m[8], b->m[8]);
+    }
+}
+
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVec(EVec* out, const EVec* in, const DMat3* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
+        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
+        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+    }
+}
+
 extern "C" {
 
-void fn_8018BFA0(u8* p) {}  // stub (347)
+// Rotates frame a by b's rotation about b's position: out = a * b, keeping b's pivot where a puts it.
+void fn_8018BFA0(DFrame* out, const DFrame* a, const DFrame* b) {
+    f32 v[3];
+    MulM(&out->rot, &a->rot, &b->rot);
+    MulVec((EVec*)v, &b->pos, &a->rot);
+    out->pos.x = a->pos.x + v[0];
+    out->pos.y = a->pos.y + v[1];
+    out->pos.z = a->pos.z + v[2];
+    MulVec((EVec*)v, &b->pos, &out->rot);
+    out->pos.x = out->pos.x - v[0];
+    out->pos.y = out->pos.y - v[1];
+    out->pos.z = out->pos.z - v[2];
+}
 
 void fn_8018C50C(u8* p) {}
 
@@ -47,20 +125,6 @@ int fn_8018C514(u8* p, const f32* pos) {
 void fn_8018C5A0(u8* p) {}  // stub (359)
 
 void fn_8018CB3C(u8* p) {}  // stub (968)
-
-struct EVec {
-    f32 x, y, z;
-};
-
-struct DMat3 {
-    f32 m[9];
-};
-
-// A part's transform (rotation + position).
-struct DFrame {
-    DMat3 rot;  // offset 0x0
-    EVec pos;   // offset 0x24
-};
 
 // A detachable part's live state (0x80 bytes from car + 0x152C).
 struct DmgSlot {
