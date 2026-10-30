@@ -2095,8 +2095,8 @@ void fn_80197BD0(u8* d, u8* out) {
         if (F32(d, 0xEC) < 4.0f || S32(d, 0x100) > 1) {
             fn_8019315C(d, S32(d, 0x114));
             f32 w = lo + (f32)__fabs(F32(d, 0x104)) * (hi - lo);
-            u8* o = lbl_804349C0[S32(d, 0x114)];
             int mine = 0;
+            u8* o = lbl_804349C0[S32(d, 0x114)];
             if (o && S32(d, 0x290) == S32(o, 0x114)) {
                 mine = 1;
             }
