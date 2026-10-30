@@ -855,6 +855,10 @@ public:
     }
     virtual s32 Type(void) const { return 3; }
     virtual int Airborne(const RaceCarRec* rc) {
+        f32 spd;
+        f32 k;
+        f32 fade;
+        f32 side;
         u8 was;
         f32 amount;
         if (rc->air == 0) {
@@ -866,10 +870,10 @@ public:
         was = sliding;
         sliding = Sliding(rc, was, rc->speed);
         if (sliding) {
-            f32 spd = rc->speed;
-            f32 side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
-            f32 k = was ? 0.15f : 0.35f;
-            f32 fade = 1.0f - 8.0f * ground;
+            spd = rc->speed;
+            side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            k = was ? 0.15f : 0.35f;
+            fade = 1.0f - 8.0f * ground;
             fade = fade > 0.0f ? fade : 0.0f;
             amount = Clamp01(5.0f * (side / (spd * k) - 1.0f)) * fade;
         }
