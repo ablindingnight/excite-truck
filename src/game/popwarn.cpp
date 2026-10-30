@@ -1067,13 +1067,6 @@ int fn_80248668(void) {
 
 }  // extern "C"
 
-void LogoMover::Enter(void) {
-    m.active = 1;
-    m.idx = fn_80221EA8((u8*)this);
-}
-
-void LogoMover::Exit(void) { m.active = 0; }
-
 
 extern "C" {
 

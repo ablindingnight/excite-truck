@@ -8,6 +8,7 @@ void fn_80214A9C(int i);
 void fn_80214AF0(int i);
 void fn_80214BE4(int i, int dx, int dy);
 f32 fn_80214D48(void);
+s32 fn_80221EA8(u8* item);  // the menu item index of a widget
 }
 
 // Odd smoothstep: -1 below -1, 1 above 1.
@@ -34,7 +35,6 @@ struct LogoMotion {
         t = 1.0f;
         Reset(2);
     }
-    ~LogoMotion(void) { Reset(1); }
     bool Done(void) const { return t >= 1.0f; }
     void Reset(s32 n) {
         active = 0;
@@ -70,9 +70,20 @@ struct LogoMotion {
 class LogoMover : public MenuState {
 public:
     LogoMover(f32 time) : m(time) {}
-    virtual ~LogoMover(void) {}
-    virtual void Enter(void);
-    virtual void Exit(void);
+    // Leaves the item hidden (written out: a call here would make the dtor store the vptr first).
+    virtual ~LogoMover(void) {
+        m.active = 0;
+        m.jumpOn = 0;
+        m.moveOn = 0;
+        m.lastVis = 1;
+        m.vis = 0;
+        m.f44 = 0;
+    }
+    virtual void Enter(void) {
+        m.active = 1;
+        m.idx = fn_80221EA8((u8*)this);
+    }
+    virtual void Exit(void) { m.active = 0; }
     // One frame of motion: shows/hides the menu item, applies a pending jump or move, eases toward the target.
     virtual void Update(void) {
         if (m.vis != m.lastVis) {

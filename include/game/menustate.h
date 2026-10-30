@@ -3,10 +3,40 @@
 
 #include "game/common.h"
 
+// The menu state interface. Its all-pure vtable (24 zero words) is what follows the vtables of every unit
+// that builds menu states (as in unlkmenu.cpp).
+class IMenuState {
+public:
+    virtual ~IMenuState(void) = 0;
+    virtual void Enter(void) = 0;
+    virtual void Exit(void) = 0;
+    virtual void Unk14(void) = 0;
+    virtual void Unk18(void) = 0;
+    virtual void Update(void) = 0;
+    virtual void Unk20(void) = 0;
+    virtual void Unk24(void) = 0;
+    virtual void Draw(void) = 0;
+    virtual void Unk2C(void) = 0;
+    virtual void Unk30(void) = 0;
+    virtual void Unk34(void) = 0;
+    virtual void Unk38(void) = 0;
+    virtual void Unk3C(void) = 0;
+    virtual void Unk40(void) = 0;
+    virtual void Unk44(void) = 0;
+    virtual void Unk48(void) = 0;
+    virtual void Unk4C(void) = 0;
+    virtual void Unk50(void) = 0;
+    virtual int Unk54(void) = 0;
+    virtual int Key(int key) = 0;
+    virtual int Unk5C(void) = 0;
+};
+
+inline IMenuState::~IMenuState(void) {}
+
 // A menu widget (the menu runner, menu.cpp, owns the base virtuals at 0x802153A0/0x80215CA0..). Menu
 // items of type 5 point at one; derived widgets override the slots they need. The base ctor clears
 // unk14, which is why every derived ctor stores unk14 before its vptr.
-class MenuState {
+class MenuState : public IMenuState {
 public:
     MenuState(void) { unk14 = 0; }
     virtual ~MenuState(void) {}

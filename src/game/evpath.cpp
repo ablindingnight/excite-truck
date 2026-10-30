@@ -124,12 +124,10 @@ void fn_8027E908(void);
 UIObjects* fn_80258354(void);
 void fn_80286A34(u8* p);
 void fn_80287238(u8* p);
-u8* fn_80283938(u8* p, int del);
 }
 
 void operator delete(void* p);
 
-extern void* lbl_80348678[];
 
 // Copies at most n characters, always terminating.
 static inline void CopyName(int n, char* d, const char* s) {
@@ -179,37 +177,38 @@ static char sBrowseBest[20];                  // lbl_804B30D8 + 0x60
 class EvContest {
 public:
     virtual ~EvContest(void) {}
-    virtual const char* TrackName(void);  // 0xC
-    virtual const char* Name(void);       // 0x10
-    virtual const char* TypeName(void);   // 0x14
-    virtual const char* TypeDisplayName(void);  // 0x18
-    virtual const char* FriendlyName(void);     // 0x1C
-    virtual int EventId(void);            // 0x20
-    virtual int Difficulty(void);         // 0x24
-    virtual int Best(void);               // 0x28
-    virtual int BestGrade(void);          // 0x2C
-    virtual int GradeOf(int score);       // 0x30
-    virtual int Threshold(int grade);     // 0x34
-    virtual int Passing(void);            // 0x38
-    virtual int PassScore(void);          // 0x3C
-    virtual int Unlocked(void);           // 0x40: passed
-    virtual int v44(void);
-    virtual int Perfected(void);          // 0x48
+    virtual const char* TrackName(void) = 0;  // 0xC
+    virtual const char* Name(void) = 0;       // 0x10
+    virtual const char* TypeName(void) = 0;   // 0x14
+    virtual const char* TypeDisplayName(void) = 0;  // 0x18
+    virtual const char* FriendlyName(void) = 0;     // 0x1C
+    virtual int EventId(void) = 0;            // 0x20
+    virtual int Difficulty(void) = 0;         // 0x24
+    virtual int Best(void) const = 0;         // 0x28
+    virtual int BestGrade(void) = 0;          // 0x2C
+    virtual int GradeOf(int score) = 0;       // 0x30
+    virtual int Threshold(int grade) = 0;     // 0x34
+    virtual int Passing(void) = 0;            // 0x38
+    virtual int PassScore(void) = 0;          // 0x3C
+    virtual int Unlocked(void) = 0;           // 0x40: passed
+    virtual int v44(void) = 0;
+    virtual int Perfected(void) = 0;          // 0x48
+    virtual int v4C(void) = 0;
 };
 
 class EvBracket {
 public:
     virtual ~EvBracket(void) {}
-    virtual const char* Name(void);    // 0xC
-    virtual const char* Id(void);      // 0x10
-    virtual int Difficulty(void);      // 0x14
-    virtual int Count(void);           // 0x18
-    virtual EvContest* Get(int i);     // 0x1C
-    virtual int Unlocked(void);        // 0x20
-    virtual int Open(void);            // 0x24
-    virtual int AllDone(void);         // 0x28
-    virtual int Gated(void);           // 0x2C
-    virtual const char* Text(void);    // 0x30
+    virtual const char* Name(void) = 0;    // 0xC
+    virtual const char* Id(void) = 0;      // 0x10
+    virtual int Difficulty(void) = 0;      // 0x14
+    virtual int Count(void) = 0;           // 0x18
+    virtual EvContest* Get(int i) = 0;     // 0x1C
+    virtual int Unlocked(void) = 0;        // 0x20
+    virtual int Open(void) = 0;            // 0x24
+    virtual int AllDone(void) = 0;         // 0x28
+    virtual int Gated(void) = 0;           // 0x2C
+    virtual const char* Text(void) = 0;    // 0x30
 };
 
 class EvPath {
@@ -218,6 +217,8 @@ public:
     virtual int Count(void);           // 0xC
     virtual EvBracket* Get(int i);     // 0x10
 };
+
+namespace {
 
 // A cup on the event path screen (vtable lbl_80348798, 0xD0 bytes): eases into place, shows the
 // cup's icon, its progress and a star per event. Every live marker is listed in lbl_804B3048.
@@ -289,6 +290,8 @@ public:
     u8 perfected;        // offset 0x99
     s32 unlocked;        // offset 0x9C
 };
+
+}  // namespace
 
 // An event's unlock condition (object at event + 0x60).
 class EvCond {
@@ -477,6 +480,8 @@ void fn_8027F09C(int difficulty) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
+s32 lbl_8055C7E0 = -1;  // the browsed event's id (trackmap), -1 for none
+
 int fn_802E499C(u16* keys);
 
 // Key sequences on the path screens (left/right twice; left, left, right, right). Unused.
@@ -551,30 +556,6 @@ void fn_8027F288(EvBracket* cup, EvBracket* next) {
     if (shown) {
         fn_80214AF0(0x1F);
     }
-}
-
-extern void* lbl_80348798[];
-
-u8* fn_8027F834(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80348798;
-        if ((u32)lbl_8055F688 == (u32)p) {
-            lbl_8055F688 = 0;
-        }
-        lbl_804B3048.Remove(p);
-        if (p) {
-            U8(p, 0x18) = 0;
-            U8(p, 0x50) = 0;
-            U8(p, 0x5C) = 0;
-            S32(p, 0x24) = 1;
-            S32(p, 0x20) = 0;
-            U8(p, 0x44) = 0;
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
 }
 
 int fn_8024739C(int* item);
@@ -860,7 +841,6 @@ public:
 };
 
 int IdentGetCurrentSlot(void);
-extern s32 lbl_8055C7E0;
 
 extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
 
@@ -903,13 +883,18 @@ const char* GetGradeDisplayName(int grade);
 
 
 // Appends s to the string in d (n bytes in all), always terminating.
-static inline void AppendName(char* d, int n, const char* s) {
+static inline void AppendName(const char* s, int n, char* d) {
     while (*d) {
         n--;
         d++;
     }
     if (n > 0) {
-        CopyName(n, d, s);
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) {
+                d[-1] = 0;
+                break;
+            }
+        }
     }
 }
 
@@ -927,6 +912,7 @@ struct ScoreTally {
         unlocks = 0;
         rate = 30.0f;
     }
+    ~ScoreTally(void) {}
 
     // The current value, at most the target.
     s32 Value(void) const {
@@ -939,6 +925,8 @@ struct ScoreTally {
 struct AnimName {
     char name[30];
 };
+
+namespace {
 
 // The finished event's score while it counts up (vtable lbl_80348678; menu item type 5 through its
 // MenuState part at +4). It stands in for the event on the bracket screen, reporting the counted value
@@ -963,6 +951,33 @@ public:
         delete tally;
     }
 
+    virtual const char* TrackName(void) { return inner->TrackName(); }
+    virtual const char* Name(void) { return inner->Name(); }
+    virtual const char* TypeName(void) { return inner->TypeName(); }
+    virtual const char* TypeDisplayName(void) { return inner->TypeDisplayName(); }
+    virtual const char* FriendlyName(void) { return inner->FriendlyName(); }
+    virtual int EventId(void) { return inner->EventId(); }
+    virtual int Difficulty(void) { return inner->Difficulty(); }
+    virtual int Best(void) const;
+    virtual int BestGrade(void) { return GradeOf(Best()); }
+    virtual int GradeOf(int score) { return inner->GradeOf(score); }
+    virtual int Threshold(int grade) { return inner->Threshold(grade); }
+    virtual int Passing(void) { return inner->Passing(); }
+    virtual int PassScore(void) { return inner->PassScore(); }
+    virtual int Unlocked(void) {
+        int a = PassScore();
+        return a <= Best();
+    }
+    virtual int v44(void) { return inner->v44(); }
+    virtual int Perfected(void) {
+        int a = v4C();
+        return a <= Best();
+    }
+    virtual int v4C(void) { return inner->v4C(); }
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual int Key(int key);
+
     EvContest* inner;          // offset 0x1C
     ScoreTally* tally;         // offset 0x20
     s32 sel;                   // offset 0x24
@@ -984,10 +999,10 @@ public:
 inline void EvEventBar::Reset(void) {
     if (contest) {
         fn_801308F4(text, 30, contest->Best());
-        AppendName(text, 30, "/");
+        AppendName("/", 30, text);
         char pass[20];
         fn_801308F4(pass, 20, contest->PassScore());
-        AppendName(text, 30, pass + 1);
+        AppendName(pass + 1, 30, text);
         if (contest->Unlocked()) {
             unlocked = 1;
         } else {
@@ -1031,10 +1046,43 @@ public:
         index = i;
     }
 
+    virtual const char* Name(void) { return br->Name(); }
+    virtual const char* Id(void) { return br->Id(); }
+    virtual int Difficulty(void) { return br->Difficulty(); }
+    virtual int Count(void) { return br->Count(); }
+    virtual EvContest* Get(int i) {
+        EvContest* r = stand;
+        if (r && i == index) {
+            return r;
+        }
+        return br->Get(i);
+    }
+    virtual int Unlocked(void) {
+        for (int i = 0; i < Count(); i++) {
+            if (!Get(i)->Unlocked()) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    virtual int Open(void) { return br->Open(); }
+    virtual int AllDone(void) {
+        for (int i = 0; i < Count(); i++) {
+            if (!Get(i)->Perfected()) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    virtual int Gated(void) { return br->Gated(); }
+    virtual const char* Text(void) { return br->Text(); }
+
     EvBracket* br;     // offset 0x4
     EvContest* stand;  // offset 0x8
     s32 index;         // offset 0xC
 };
+
+}  // namespace
 
 // A set of named textures, one of which is drawn at a time (gart.cpp).
 class DynoTex {
@@ -1066,6 +1114,14 @@ struct EventDesc {
 };
 
 void* GetEvent(int event);
+
+// s without a leading `prefix`.
+static inline const char* SkipPrefix(const char* s, const char* prefix) {
+    if (!strncmp(s, prefix, strlen(prefix))) {
+        s += strlen(prefix);
+    }
+    return s;
+}
 void* operator new(unsigned long n, const char* tag);
 
 extern "C" {
@@ -1138,12 +1194,8 @@ int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) {
             bars[i].contest = c;
             bars[i].Reset();
         }
-        const char* name = ((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name");
-        if (!strncmp(name, "career_", strlen("career_"))) {
-            name += strlen("career_");
-        }
         char file[33];
-        fn_801345D8(file, 33, "/%s.tex", name);
+        fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name"), "career_"));
         maps.Add(c->EventId(), file);
     }
     BracketView view(br, res->improved ? &acc : 0, start);
@@ -1218,60 +1270,6 @@ int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) {
     sBrowseBest[0] = 0;
     lbl_8055C7E0 = -1;
     return picked;
-}
-
-u8* fn_802837D4(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-extern void* lbl_80348738[];
-
-u8* fn_80283814(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80348738;
-        if ((u32)lbl_8055F698 == (u32)p) {
-            lbl_8055F698 = 0;
-        }
-        lbl_804B30D8.Remove(p);
-        if (p) {
-            U8(p, 0x18) = 0;
-            U8(p, 0x50) = 0;
-            U8(p, 0x5C) = 0;
-            S32(p, 0x24) = 1;
-            S32(p, 0x20) = 0;
-            U8(p, 0x44) = 0;
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_80283938(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80348678;
-        *(void**)(p + 0x4) = (u8*)lbl_80348678 + 0x50;
-        lbl_8055F69C = 0;
-        if (PTR(p, 0x20)) {
-            operator delete(PTR(p, 0x20));
-        }
-        u8* m = p + 0x40;
-        if (m) {
-            if (m) {
-                U32(p, 0x40) = 0;
-                U32(p, 0x44) = 0;
-                U32(p, 0x48) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
 }
 
 int fn_802839D0(void) {
@@ -1496,15 +1494,16 @@ void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg) {
     delete list;
 }
 
-extern char lbl_80348940[];  // "cup_perfected" (string pool)
-s32 fn_80221EA8(void);
 int fn_8023695C(const char* name);
 
 // Event screen setup: progress text ("%d/%d" of the cup's parts) and the event's title.
-void fn_80284760(u8* p) {
+}  // extern "C"
+
+inline void EvCupBar::Enter(void) {
+    u8* p = (u8*)this;
     if (!U8(p, 0x64)) {
         U8(p, 0x18) = 1;
-        S32(p, 0x1C) = fn_80221EA8();
+        S32(p, 0x1C) = fn_80221EA8(p);
     }
     if (PTR(p, 0x60)) {
         S32(p, 0x20) = 0;
@@ -1518,13 +1517,13 @@ void fn_80284760(u8* p) {
         F32(p, 0x68) = 0.0f;
         if (PTR(p, 0x60)) {
             if (VR(PTR(p, 0x60))->v28() && !U8(p, 0xCC)) {
-                fn_80236954(lbl_80348940);
-                fn_8027F204(lbl_80348940);
+                fn_80236954("cup_perfected");
+                fn_8027F204("cup_perfected");
             }
             int show = 0;
             S32(p, 0x70) = p == (u8*)lbl_8055F688 ? 6 : 7;
             if (VR(PTR(p, 0x60))->v24()) {
-                if (!VR(PTR(p, 0x60))->v28() || fn_8023695C(lbl_80348940)) {
+                if (!VR(PTR(p, 0x60))->v28() || fn_8023695C("cup_perfected")) {
                     show = 1;
                 }
             }
@@ -1554,6 +1553,8 @@ void fn_80284760(u8* p) {
     }
 }
 
+extern "C" {
+
 void fn_80236958(const char* name);
 
 static inline f32 Clamp01F(f32 v) {
@@ -1578,13 +1579,13 @@ static inline int Selectable(EvCupBar* e) {
 static inline void RefreshCup(EvCupBar* b) {
     if (b->cup) {
         if (b->cup->AllDone() && !b->perfect) {
-            fn_80236954(lbl_80348940);
-            fn_8027F204(lbl_80348940);
+            fn_80236954("cup_perfected");
+            fn_8027F204("cup_perfected");
         }
         int show = 0;
         b->style = (u8*)b == (u8*)lbl_8055F688 ? 6 : 7;
         if (b->cup->Open()) {
-            if (!b->cup->AllDone() || fn_8023695C(lbl_80348940)) {
+            if (!b->cup->AllDone() || fn_8023695C("cup_perfected")) {
                 show = 1;
             }
         }
@@ -1611,7 +1612,10 @@ static inline void RefreshCup(EvCupBar* b) {
 
 // The cup marker's frame: motion (unless still), caption, its menu items' visibility, the stars easing
 // toward done/not done, the highlight fade, and the end of its unlock animation.
-void fn_802849E8(u8* p) {
+}  // extern "C"
+
+inline void EvCupBar::Update(void) {
+    u8* p = (u8*)this;
     EvCupBar* b = (EvCupBar*)p;
     if (!b->still) {
         b->LogoMover::Update();
@@ -1666,7 +1670,6 @@ void fn_802849E8(u8* p) {
     }
 }
 
-}  // extern "C"
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern "C" double cos(double x);
@@ -1676,32 +1679,29 @@ extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 
 // The fill level of each of an event icon's stars.
-struct EvIconStars {
-    u8 pad[0xB4];
-    f32 fill[8];  // offset 0xB4
-};
-
 // Draws the event's stars on an arc under its icon: full, empty, or empty with the fill fading in.
-void fn_802854E0(u8* p) {
-    if (!PTR(p, 0x60) || !U8(p, 0xCD)) {
+}  // extern "C"
+
+inline void EvCupBar::Draw(void) {
+    if (!cup || !showStars) {
         return;
     }
     f32 x;
     f32 y;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
-    f32 cx = x + 0.5f * S32(p, 0xC);
-    f32 cy = y - 0.5f * S32(p, 0x10);
-    f32 radius = 0.3f * S32(p, 0xC);
-    f32 step = VR(PTR(p, 0x60))->v18() == 4 ? 0.6981317f : 0.61086524f;
+    fn_80230C30(&x, &y, this->x, this->y);
+    f32 cx = x + 0.5f * w;
+    f32 cy = y - 0.5f * h;
+    f32 radius = 0.3f * w;
+    f32 step = cup->Count() == 4 ? 0.6981317f : 0.61086524f;
     f32 start = 4.712389f;  // 3pi/2: straight down
-    for (int i = 0; i < VR(PTR(p, 0x60))->v18(); i++) {
-        f32 a = start + step * (i - 0.5f * (VR(PTR(p, 0x60))->v18() - 1));
+    for (int i = 0; i < cup->Count(); i++) {
+        f32 a = start + step * (i - 0.5f * (cup->Count() - 1));
         x = cx + radius * (f32)cos(a);
         y = cy + radius * (f32)sin(a);
-        if (VR(VR(PTR(p, 0x60))->v1C(i))->v40()) {
-            if (!((f32)__fabs(((EvIconStars*)p)->fill[i] - 1.0f) <= lbl_80558DC4[0])) {
+        if (cup->Get(i)->Unlocked()) {
+            if (!((f32)__fabs(fill[i] - 1.0f) <= lbl_80558DC4[0])) {
                 fn_8027ED70()->DrawImage("star_small_empty", x, y, 20, -1);
-                fn_8027ED70()->DrawImageFade("star_small_full", x, y, 2.0f - ((EvIconStars*)p)->fill[i], 20, -1);
+                fn_8027ED70()->DrawImageFade("star_small_full", x, y, 2.0f - fill[i], 20, -1);
             } else {
                 fn_8027ED70()->DrawImage("star_small_full", x, y, 20, -1);
             }
@@ -1710,6 +1710,8 @@ void fn_802854E0(u8* p) {
         }
     }
 }
+
+extern "C" {
 
 
 // Plays the bar's animation `<anim><slot>` and waits for it.
@@ -1724,10 +1726,10 @@ static inline void PlayBarAnim(EvEventBar* b, const char* anim) {
 static inline void RefreshEvent(EvEventBar* b) {
     if (b->contest) {
         fn_801308F4(b->text, 30, b->contest->Best());
-        AppendName(b->text, 30, "/");
+        AppendName("/", 30, b->text);
         char pass[20];
         fn_801308F4(pass, 20, b->contest->PassScore());
-        AppendName(b->text, 30, pass + 1);
+        AppendName(pass + 1, 30, b->text);
         if (!b->passed && b->contest->Unlocked()) {
             fn_8027ED70()->PlaySound("scoreup_passevent");
             PlayBarAnim(b, "event_passed_");
@@ -1766,10 +1768,13 @@ static inline void RefreshEvent(EvEventBar* b) {
 }
 
 // Event bar setup: jumps into place and takes the event's passed/perfected state as already seen.
-void fn_802857A8(u8* p) {
+}  // extern "C"
+
+inline void EvEventBar::Enter(void) {
+    u8* p = (u8*)this;
     EvEventBar* b = (EvEventBar*)p;
     b->m.active = 1;
-    b->m.idx = fn_80221EA8();
+    b->m.idx = fn_80221EA8((u8*)b);
     if (b->contest) {
         b->m.vis = 0;
         b->m.jumpOn = 1;
@@ -1788,8 +1793,13 @@ void fn_802857A8(u8* p) {
     }
 }
 
+extern "C" {
+
 // Event bar frame: motion, refresh, slides out while current (its menu items follow), state markers.
-void fn_80285CB8(u8* p) {
+}  // extern "C"
+
+inline void EvEventBar::Update(void) {
+    u8* p = (u8*)this;
     EvEventBar* b = (EvEventBar*)p;
     b->LogoMover::Update();
     if (b->contest) {
@@ -1821,21 +1831,9 @@ void fn_80285CB8(u8* p) {
     }
 }
 
-void fn_80286724(u8* p) { VR(PTR(p, 0x1C))->v0C(); }
 
-void fn_80286738(u8* p) { VR(PTR(p, 0x1C))->v10(); }
-
-void fn_8028674C(u8* p) { VR(PTR(p, 0x1C))->v14(); }
-
-void fn_80286760(u8* p) { VR(PTR(p, 0x1C))->v18(); }
-
-void fn_80286774(u8* p, int a) { VR(PTR(p, 0x1C))->v1C(a); }
-
-void fn_80286788(u8* p) { VR(PTR(p, 0x1C))->v20(); }
-
-void fn_8028679C(u8* p) { VR(PTR(p, 0x1C))->v24(); }
-
-s32 fn_802867B0(const u8* p) {
+inline int ScoreAccumulator::Best(void) const {
+    const u8* p = (const u8*)this;
     u8* o = PTR(p, 0x20);
     if (o) {
         s32 v = (s32)((f32)S32(o, 0x0) + F32(o, 0x10));
@@ -1845,31 +1843,9 @@ s32 fn_802867B0(const u8* p) {
     return VR(PTR(p, 0x1C))->v28();
 }
 
-void fn_80286834(u8* p) { VR(p)->v30(VR(p)->v28()); }
 
-void fn_80286884(u8* p, int a) { VR(PTR(p, 0x1C))->v30(a); }
-
-void fn_80286898(u8* p) { VR(PTR(p, 0x1C))->v34(); }
-
-void fn_802868AC(u8* p, const char* a) { VR(PTR(p, 0x1C))->v38(a); }
-
-void fn_802868C0(u8* p) { VR(PTR(p, 0x1C))->v3C(); }
-
-int fn_802868D4(u8* p) {
-    int a = VR(p)->v3C();
-    return a <= VR(p)->v28();
-}
-
-void fn_8028693C(u8* p) { VR(PTR(p, 0x1C))->v44(); }
-
-int fn_80286950(u8* p) {
-    int a = VR(p)->v4C();
-    return a <= VR(p)->v28();
-}
-
-void fn_802869B8(u8* p) { VR(PTR(p, 0x1C))->v4C(); }
-
-int fn_802869CC(u8* p, int key) {
+inline int ScoreAccumulator::Key(int key) {
+    u8* p = (u8*)this;
     switch (key) {
     case 0xD: {
         u8* o = PTR(p, 0x20);
@@ -1883,18 +1859,20 @@ int fn_802869CC(u8* p, int key) {
     return 0;
 }
 
+extern "C" {
+
 
 // While any of the queued animations still plays (or for a moment after), waits.
-static inline int AnimsBusy(u8* p) {
-    for (int i = 0; i < S32(p, 0x44); i++) {
-        if (fn_8023695C((char*)PTR(p, 0x40) + i * 30)) {
-            F32(p, 0x178) = 1.0f;
+static inline int AnimsBusy(ScoreAccumulator* a) {
+    for (int i = 0; i < a->anims.count; i++) {
+        if (fn_8023695C(a->anims.data[i].name)) {
+            a->wait = 1.0f;
             return 1;
         }
     }
-    f32 t = F32(p, 0x178) - fn_80214D48();
-    F32(p, 0x178) = 0.0f > t ? 0.0f : t;
-    return F32(p, 0x178) > lbl_80558DC4[0];
+    f32 t = a->wait - fn_80214D48();
+    a->wait = 0.0f > t ? 0.0f : t;
+    return a->wait > lbl_80558DC4[0];
 }
 
 void fn_802168BC(int a);
@@ -1903,38 +1881,40 @@ void fn_8027ED78(const char* title, const char* msg);
 // Score tally frame: counts up (stopping the tally sound at the target), waits for the queued animations,
 // then selects the event and shows what the result opened (cup done, difficulty unlocked, career done);
 // unlockables whose points the count passes pop up as it goes.
-void fn_80286A34(u8* p) {
-    ScoreTally* t = (ScoreTally*)PTR(p, 0x20);
+}  // extern "C"
+
+inline void ScoreAccumulator::Update(void) {
+    ScoreTally* t = tally;
     if (!t) {
         return;
     }
-    if (!U8(p, 0x29)) {
+    if (!counted) {
         s32 v = t->Value();
         if (v == t->to) {
-            U8(p, 0x29) = 1;
+            counted = 1;
             fn_8027ED70()->StopSound("scoreup_tally");
         }
-    } else if (!U8(p, 0x2A) && !AnimsBusy(p)) {
+    } else if (!shown && !AnimsBusy(this)) {
         fn_80214AF0(0x1F);
-        if (S32(p, 0x17C) >= 0) {
-            SelectBar(S32(p, 0x17C));
+        if (next >= 0) {
+            SelectBar(next);
         } else {
-            SelectBar(S32(p, 0x24));
+            SelectBar(sel);
         }
-        U8(p, 0x2A) = 1;
-        if (U8(p, 0x2B)) {
-            fn_8027F288((EvBracket*)PTR(p, 0x2C), (EvBracket*)PTR(p, 0x30));
+        shown = 1;
+        if (showCup) {
+            fn_8027F288(cup, nextCup);
         }
-        if (U8(p, 0x34)) {
-            fn_8027F09C(S32(p, 0x38));
+        if (showUnlock) {
+            fn_8027F09C(unlockLevel);
         }
-        if (U8(p, 0x3C)) {
+        if (quit) {
             fn_802168BC(-1);
         }
     }
     if (lbl_8055F684) {
         f32 dt = fn_80214D48();
-        t = (ScoreTally*)PTR(p, 0x20);
+        t = tally;
         s32 lo = t->Value();
         if (lo < t->to) {
             t->acc += t->rate * dt;
@@ -1960,7 +1940,9 @@ void fn_80286A34(u8* p) {
     }
 }
 
-void fn_80287238(u8* p) {
+
+inline void ScoreAccumulator::Enter(void) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x20);
     if (o) {
         F32(o, 0x10) = 0.0f;
@@ -1977,58 +1959,19 @@ void fn_80287238(u8* p) {
     }
 }
 
-void fn_802872DC(u8* p) { VR(PTR(p, 0x4))->v0C(); }
-
-void fn_802872F0(u8* p) { VR(PTR(p, 0x4))->v10(); }
-
-void fn_80287304(u8* p) { VR(PTR(p, 0x4))->v14(); }
-
-void fn_80287318(u8* p) { VR(PTR(p, 0x4))->v18(); }
-
-u8* fn_8028732C(u8* p, s32 x) {
-    u8* r = PTR(p, 0x8);
-    if (r && x == S32(p, 0xC)) {
-        return r;
-    }
-    return VR(PTR(p, 0x4))->v1C(x);
-}
+extern "C" {
 
 void fn_80287360(u8* p) {}
 
-int fn_80287364(u8* p) {
-    for (int i = 0; i < VR(p)->v18(); i++) {
-        if (!VR(VR(p)->v1C(i))->v40()) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-void fn_802873F8(u8* p) { VR(PTR(p, 0x4))->v24(); }
-
-int fn_8028740C(u8* p) {
-    for (int i = 0; i < VR(p)->v18(); i++) {
-        if (!VR(VR(p)->v1C(i))->v48()) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-void fn_802874A0(u8* p) { VR(PTR(p, 0x4))->v2C(); }
-
-void fn_802874B4(u8* p, int a) { VR(PTR(p, 0x4))->v30(a); }
-
-
 }  // extern "C"
 
-void EventUnlockFx::Enter(void) {
+inline void EventUnlockFx::Enter(void) {
     start = fn_8023659C();
     done = 0;
     fn_80214A9C(0x1D);
 }
 
-void EventUnlockFx::Update(void) {
+inline void EventUnlockFx::Update(void) {
     f32 t = fn_8023659C();
     if (t < start || t - start > 1.5f) {
         done = 1;
@@ -2038,16 +1981,9 @@ void EventUnlockFx::Update(void) {
     }
 }
 
-int EventUnlockFx::Key(int key) { return done == 0; }
+inline int EventUnlockFx::Key(int key) { return done == 0; }
 
 extern "C" {
 
-int fn_8028775C(u8* p, int k) { return fn_802869CC(p - 4, k); }
-
-void fn_80287764(u8* p) { fn_80286A34(p - 4); }
-
-void fn_8028776C(u8* p) { fn_80287238(p - 4); }
-
-u8* fn_80287774(u8* p, int del) { return fn_80283938(p - 4, del); }
 
 }  // extern "C"
