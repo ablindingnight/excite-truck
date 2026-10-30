@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "macros.h"
 #include "game/menu.h"
+#include "game/logomover.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -12,42 +13,6 @@
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
-// A menu widget; the menu runner calls its virtuals.
-class MenuState {
-public:
-    MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
-    virtual void Enter(void);   // 0x0C
-    virtual void Exit(void);    // 0x10
-    virtual void Unk14(void);
-    virtual void Unk18(void);
-    virtual void Update(void);  // 0x1C
-    virtual void Unk20(void);
-    virtual void Unk24(void);
-    virtual void Draw(void);    // 0x28
-    virtual void Unk2C(void);
-    virtual void Unk30(void);
-    virtual void Unk34(void);
-    virtual void Unk38(void);
-    virtual void Unk3C(void);
-    virtual void Unk40(void);
-    virtual void Unk44(void);
-    virtual void Unk48(void);
-    virtual void Unk4C(void);
-    virtual void Unk50(void);
-    virtual void Unk54(void);
-    virtual int Key(int key);   // 0x58
-    virtual void Unk5C(void);
-
-    void Finish(int r);
-
-    s32 x;      // offset 0x4
-    s32 y;      // offset 0x8
-    s32 w;      // offset 0xC
-    s32 h;      // offset 0x10
-    int unk14;  // offset 0x14
-};
 
 // A popup that waits for the card, then counts down before closing.
 struct WaitPopup {
@@ -1042,56 +1007,6 @@ void fn_80248398(void) {
 
 extern f32 lbl_8055BEF4;  // 0.7f
 
-// The logo's motion state (from 0x18): eases from (fromX, fromY) to (toX, toY).
-struct LogoMotion {
-    LogoMotion(void) {
-        rate = 1.0f / lbl_8055BEF4;
-        ease = 2;
-        t = 1.0f;
-        Reset(2);
-    }
-    ~LogoMotion(void) { Reset(1); }
-    bool Done(void) const { return t >= 1.0f; }
-    void Reset(s32 n) {
-        active = 0;
-        jumpOn = 0;
-        moveOn = 0;
-        lastVis = n;
-        vis = 0;
-        f44 = 0;
-    }
-
-    u8 active;     // offset 0x18
-    s32 idx;       // offset 0x1C: this item's index in the menu
-    s32 vis;       // offset 0x20
-    s32 lastVis;   // offset 0x24
-    s32 fromX;     // offset 0x28
-    s32 fromY;     // offset 0x2C
-    s32 toX;       // offset 0x30
-    s32 toY;       // offset 0x34
-    f32 rate;      // offset 0x38
-    f32 t;         // offset 0x3C
-    s32 ease;      // offset 0x40: 1 = quadratic, 2 = smooth, else linear
-    u8 f44;        // offset 0x44: show when the move ends
-    s32 jumpX;     // offset 0x48
-    s32 jumpY;     // offset 0x4C
-    u8 jumpOn;     // offset 0x50
-    s32 moveX;     // offset 0x54
-    s32 moveY;     // offset 0x58
-    u8 moveOn;     // offset 0x5C
-};
-
-// The thank-you screen's moving logo (0x60 bytes); lbl_8055F278 while shown.
-class LogoMover : public MenuState {
-public:
-    virtual ~LogoMover(void) {}
-    virtual void Enter(void);
-    virtual void Exit(void);
-    virtual void Update(void);
-
-    LogoMotion m;  // offset 0x18
-};
-
 typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
 
 extern "C" {
@@ -1101,7 +1016,7 @@ void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY);
 // "Thank you" screen at the end of the demo: the logo drifts in, closes after 5 s.
 void fn_802483E0(void) {
     MenuTimer t(5000, 0);
-    LogoMover logo;
+    LogoMover logo(lbl_8055BEF4);
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80248398, 0, 0),
         MenuItem("logo_mover", 5, &logo, 0, 0),

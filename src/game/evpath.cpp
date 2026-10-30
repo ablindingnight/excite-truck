@@ -5,7 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/menu.h"
-#include "game/menustate.h"
+#include "game/logomover.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -25,8 +25,8 @@ public:
     virtual void DrawImageFade(const char* name, f32 x, f32 y, f32 a, int z, int frame);     // 0x1C
     virtual void s20(void);
     virtual void s24(void);
-    virtual const char* GetString(u32 id);  // 0x28
-    virtual s32 GetInt(u32 id);             // 0x2C
+    virtual const char* GetFile(const char* name);  // 0x28
+    virtual int GetFrame(const char* name);         // 0x2C
     virtual void s30(void);
     virtual void s34(void);
     virtual void PlaySound(const char* name);  // 0x38
@@ -35,8 +35,8 @@ public:
 class VR {
 public:
     virtual ~VR(void);
-    virtual void v0C(void);
-    virtual u32 v10(void);
+    virtual const char* v0C(void);  // display name
+    virtual const char* v10(void);  // id
     virtual void v14(void);
     virtual int v18(void);
     virtual u8* v1C(s32 x);
@@ -66,6 +66,10 @@ public:
         cap = 0;
     }
     int Count(void) const { return count; }
+    void Add(T v) {
+        int n = count++;
+        data[n] = v;
+    }
     template <typename V>
     int Find(V* v) {
         for (int i = 0; i < Count(); i++) {
@@ -168,6 +172,43 @@ static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
 static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
 static char sBrowseDesc[32];                  // lbl_804B30D8 + 0x40
 static char sBrowseBest[20];                  // lbl_804B30D8 + 0x60
+
+// A cup on the event path screen (vtable lbl_80348798, 0xD0 bytes): eases into place, shows the
+// cup's icon, its progress and a star per event. Every live marker is listed in lbl_804B3048.
+class EvCupBar : public LogoMover {
+public:
+    EvCupBar(void) : LogoMover(0.25f) {
+        cup = 0;
+        still = 0;
+        style = 0;
+        progress[0] = 0;
+        lbl_804B3048.Add((u32)this);
+        title[0] = 0;
+        frame = 0;
+    }
+    virtual ~EvCupBar(void) {
+        if ((u32)lbl_8055F688 == (u32)this) {
+            lbl_8055F688 = 0;
+        }
+        lbl_804B3048.Remove(this);
+    }
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+
+    VR* cup;           // offset 0x60
+    u8 still;          // offset 0x64: no ease-in
+    f32 timer;         // offset 0x68
+    s32 f6C;           // offset 0x6C
+    s32 style;         // offset 0x70
+    char progress[10]; // offset 0x74: "done/total"
+    char title[50];    // offset 0x7E: icon file
+    s32 frame;         // offset 0xB0: icon frame
+    f32 fill[5];       // offset 0xB4: star fill per event
+    u8 padC8[4];       // offset 0xC8
+    u8 perfect;        // offset 0xCC
+    u8 showStars;      // offset 0xCD
+};
 
 extern "C" {
 
@@ -316,7 +357,61 @@ void fn_8027F204(const char* name) {
     fn_802E30C8("add_anim_to_wait_for: can't add, there are %d already!", S32(l, 0x44));
 }
 
-void fn_8027F288(u8* p) {}  // stub (363)
+s32 fn_802168E4(void);
+
+// "Cup completed" box: congratulations and the next cup (or what this one unlocked), with the cup's
+// marker easing in.
+void fn_8027F288(VR* cup, VR* next) {
+    char msg[100];
+    if (next) {
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED", cup->v10());
+    } else if (cup && cup->v28()) {
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PERFECTED", cup->v10());
+    } else {
+        fn_801345D8(msg, 100, "EventPath:%s_COMPLETED_NONEXT_PASSED", cup->v10());
+    }
+    s32 shown = fn_802168E4();
+    if (shown) {
+        fn_80214A9C(0x1F);
+    }
+    EvCupBar bar;
+    if (next) {
+        bar.cup = next;
+        bar.still = 1;
+        for (int i = 0; i < bar.cup->v18(); i++) {
+            bar.fill[i] = VR(bar.cup->v1C(i))->v40() ? 1.0f : 0.0f;
+        }
+        bar.perfect = bar.cup->v28();
+    }
+    char unlock[100] = "nocup_unlock";
+    if (next) {
+        fn_801345D8(unlock, 100, "%s_unlock", next->v10());
+    } else {
+        fn_801345D8(unlock, 100, "%s_unlock", cup->v10());
+    }
+    const char* file = fn_8027ED70()->GetFile(unlock);
+    int frame = fn_8027ED70()->GetFrame(unlock);
+    MenuItem items[] = {
+        MenuItem(0, 5, &lbl_804B3018, 0, 0),
+        MenuItem("bg_image", 3, file, 0, 0),
+        MenuItem("bg_image", 2, &frame, 0, 0),
+        MenuItem("path", 5, &bar, 0, 0),
+        MenuItem("cup_name", 3, bar.cup ? bar.cup->v0C() : "", 0, 0),
+        MenuItem("cup_icon", 3, bar.title, 0, 0),
+        MenuItem("cup_icon", 2, &bar.frame, 0, 0),
+        MenuItem("title", fn_80131234("EventPath:CONGRATULATIONS")),
+        MenuItem("message", fn_80131234(msg)),
+        MenuItem(lbl_8055B860, 6, 0, -2, 13),
+        MenuItem(lbl_804B2FF8),
+    };
+    MenuDesc desc = {"ep_completecup.lyt", 0, 0, 0, 0};
+    desc.items = items;
+    lbl_8055F680->PlaySound("passed_cup");
+    fn_802146BC(&desc, -999, -999, 1);
+    if (shown) {
+        fn_80214AF0(0x1F);
+    }
+}
 
 extern void* lbl_80348798[];
 
@@ -994,11 +1089,11 @@ void fn_80284760(u8* p) {
                 U8(p, 0x74) = 0;
             }
         }
-        const char* title = fn_8027ED70()->GetString(VR(PTR(p, 0x60))->v10());
+        const char* title = fn_8027ED70()->GetFile(VR(PTR(p, 0x60))->v10());
         if (title) {
             CopyName(50, (char*)p + 0x7E, title);
         }
-        S32(p, 0xB0) = fn_8027ED70()->GetInt(VR(PTR(p, 0x60))->v10());
+        S32(p, 0xB0) = fn_8027ED70()->GetFrame(VR(PTR(p, 0x60))->v10());
     } else {
         S32(p, 0x20) = 1;
     }
