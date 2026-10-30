@@ -11,19 +11,12 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-// One entry of the damageable part table.
-struct DamagePart {
-    s32 kind;          // offset 0x0
-    u8 data[0x3C];     // offset 0x4
-};
-
-extern DamagePart lbl_80332840[];
-
 struct EVec {
     f32 x, y, z;
 };
 
 struct DMat3 {
+    DMat3(void) {}
     f32 m[9];
 };
 
@@ -32,6 +25,19 @@ struct DFrame {
     DMat3 rot;  // offset 0x0
     EVec pos;   // offset 0x24
 };
+
+// One entry of the damageable part table.
+struct DamagePart {
+    s32 kind;          // offset 0x0
+    const char* name;  // offset 0x4
+    s32 bit;           // offset 0x8, the part model visibility bit
+    EVec axis;         // offset 0xC, hinge axis
+    EVec pivot;        // offset 0x18
+    EVec anchor;       // offset 0x24
+    u8 pad30[0x10];    // offset 0x30
+};
+
+extern DamagePart lbl_80332840[];
 
 extern "C" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
 
@@ -124,17 +130,208 @@ int fn_8018C514(u8* p, const f32* pos) {
 
 void fn_8018C5A0(u8* p) {}  // stub (359)
 
-void fn_8018CB3C(u8* p) {}  // stub (968)
+}  // extern "C"
 
 // A detachable part's live state (0x80 bytes from car + 0x152C).
 struct DmgSlot {
-    s32 on;         // offset 0x0
-    u8 pad4[0x14];  // offset 0x4
+    DFrame* on;     // offset 0x0, the part's bone frame (0: no such part)
+    s32 point;      // offset 0x4
+    s32 hub;        // offset 0x8, body point the hinge rides on
+    f32 angle;      // offset 0xC
+    f32 spin;       // offset 0x10
+    f32 limit;      // offset 0x14
     DFrame cur;     // offset 0x18
     DFrame prev;    // offset 0x48
-    u8 pad78[4];    // offset 0x78
+    u8 valid;       // offset 0x78
     s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
 };
+
+extern "C" f32 PSVECDotProduct(const f32* a, const f32* b);
+
+struct RVec3;
+class RigidBody {
+public:
+    void VelAt(RVec3* out, const RVec3* at);
+    void VelAt2(RVec3* out, const RVec3* at);
+};
+
+struct Mat3;
+struct Vec3;
+void Mat3FromEuler(Mat3* m, const Vec3* e);
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+
+// A rotation plus position, filled from euler angles (modeinl.cpp).
+struct Mtx33 {
+    void SetEuler(f32 y, f32 x, f32 z);
+    DMat3 rot;  // offset 0x0
+    EVec pos;   // offset 0x24
+};
+
+extern "C" {
+void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
+s32 fn_80129D18(int a, int b);
+u8* fn_801769CC(void);
+}
+extern const f32 lbl_80561F74;  // 0.0
+extern const f32 lbl_80561F88;  // 1.0
+extern const f32 lbl_80561F90;  // 4.905
+extern const f32 lbl_80561F94;  // 0.4
+extern const f32 lbl_80561F98;  // 0.3
+extern const f32 lbl_80561F9C;  // 5.0
+extern const f32 lbl_80561FA0;  // -5.0
+extern const f32 lbl_80561FA4;  // 0.0002
+extern const f32 lbl_80561FA8;  // 1/59.94
+extern const f32 lbl_80561FAC;  // 20.0
+extern const f32 lbl_80561FB0;  // -20.0
+extern const f32 lbl_80561FB4;  // 0.045
+extern const f32 lbl_80561FB8;  // 2000.0
+extern const f32 lbl_80561FBC;  // -0.045
+extern const f32 lbl_80561FC0;  // 2.0
+extern const f32 lbl_80561FC4;  // -1.0
+
+extern "C" {
+
+static inline f32 MinF(f32 v, f32 hi) { return hi < v ? hi : v; }
+static inline f32 MaxF(f32 v, f32 lo) { return v > lo ? v : lo; }
+static inline f32 ClampF(f32 v, f32 lo, f32 hi) { return MaxF(MinF(v, hi), lo); }
+static inline f32 Lower(f32 a, f32 b) { return a < b ? a : b; }
+
+static inline void Scale(EVec* out, const EVec* v, f32 k) {
+    out->x = v->x * k;
+    out->y = v->y * k;
+    out->z = v->z * k;
+}
+
+// Turns m by the euler angles e (applied first).
+static inline void TurnEuler(DMat3* m, const EVec* e) {
+    DMat3 r;
+    Mat3FromEuler((Mat3*)&r, (const Vec3*)e);
+    Mat3Mul((Mat3*)m, (Mat3*)&r, (Mat3*)m);
+}
+
+// Swings the hinged parts (hood, decklid, ...). A hanging part (2) is driven by the torque of the
+// wind and car motion about its hinge, damped and limited, and may snap shut and reattach; a bouncing
+// part (4) swings freely between its stops. Both rebuild the part frame on the car each tick.
+void fn_8018CB3C(u8* p) {
+    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    const DamagePart* d = lbl_80332840;
+    for (int i = 0; i < 17; i++, s++, d++) {
+        if (s->on && s->state == 2) {
+            DFrame f = *s->on;
+            EVec ang;
+            Scale(&ang, &d->axis, s->angle);
+            TurnEuler(&f.rot, &ang);
+            EVec hinge;
+            MulVec(&hinge, &d->pivot, &f.rot);
+            hinge.x += f.pos.x;
+            hinge.y += f.pos.y;
+            hinge.z += f.pos.z;
+            EVec at;
+            MulVec(&at, &s->on->pos, (DMat3*)(p + 0x3C));
+            at.x += F32(p, 0x60);
+            at.y += F32(p, 0x64);
+            at.z += F32(p, 0x68);
+            EVec h;
+            MulVec(&h, &hinge, (DMat3*)(p + 0x3C));
+            h.x += F32(p, 0x60);
+            h.y += F32(p, 0x64);
+            h.z += F32(p, 0x68);
+            EVec v1;
+            ((RigidBody*)p)->VelAt((RVec3*)&v1, (RVec3*)&h);
+            EVec v2;
+            ((RigidBody*)p)->VelAt2((RVec3*)&v2, (RVec3*)&at);
+            EVec arm;
+            arm.x = h.x - at.x;
+            arm.y = h.y - at.y;
+            arm.z = h.z - at.z;
+            v2.y += lbl_80561F90;
+            Scale(&v2, &v2, lbl_80561F94);
+            if (fn_80129D18(4, 4) < 3) {
+                v2.x += v1.x * lbl_80561F98;
+                v2.y += v1.y * lbl_80561F98;
+                v2.z += v1.z * lbl_80561F98;
+            }
+            EVec torque;
+            PSVECCrossProduct(&arm.x, &v2.x, &torque.x);
+            EVec ax;
+            MulVec(&ax, &d->axis, &s->on->rot);
+            EVec axw;
+            MulVec(&axw, &ax, (DMat3*)(p + 0x3C));
+            f32 t = -PSVECDotProduct(&torque.x, &axw.x);
+            t = ClampF(t, lbl_80561FA0, lbl_80561F9C);
+            f32 w = s->spin + t;
+            s->spin = w - lbl_80561FA4 * (lbl_80561FA8 * w);
+            s->spin = ClampF(s->spin, lbl_80561FB0, lbl_80561FAC);
+            if (s->angle > lbl_80561F88) {
+                s->angle = lbl_80561F88;
+                s->spin = Lower(s->spin, lbl_80561F74);
+            } else if (s->angle < lbl_80561FB4) {
+                if ((U32(fn_801769CC(), 0x4) & 0x4000) && s->spin < lbl_80561F74 && fn_80129D18(4, 10) < 1) {
+                    s->angle = lbl_80561F74;
+                    s->spin = lbl_80561F74;
+                    s->state = 0;
+                } else {
+                    s->spin = s->spin + lbl_80561FA8 * (lbl_80561FB8 * (lbl_80561FB4 - s->angle));
+                }
+            }
+            s->angle = s->angle + lbl_80561FA8 * s->spin;
+            s->angle = MaxF(s->angle, lbl_80561FBC);
+            Mtx33 m;
+            m.pos = s->on->pos;
+            EVec* hub = (EVec*)(p + 0xD94) + s->hub;
+            m.pos.x += hub->x;
+            m.pos.y += hub->y;
+            m.pos.z += hub->z;
+            EVec e;
+            Scale(&e, &d->axis, s->angle);
+            EVec er;
+            MulVec(&er, &e, &s->on->rot);
+            m.SetEuler(er.y, er.x, er.z);
+            s->prev = s->cur;
+            fn_8018BFA0(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
+            if (!s->valid) {
+                s->valid = 1;
+                s->prev = s->cur;
+            }
+            s->spin = lbl_80561F74;
+        } else if (s->on && s->state == 4) {
+            s->angle = s->angle + lbl_80561FA8 * s->spin;
+            if (s->angle < lbl_80561F74 || s->angle > s->limit) {
+                s->angle = lbl_80561FC0 * ClampF(s->angle, lbl_80561F74, s->limit) - s->angle;
+                s->spin = -s->spin;
+            }
+            Mtx33 m;
+            m.pos = s->on->pos;
+            EVec* hub = (EVec*)(p + 0xD94) + s->hub;
+            m.pos.x += hub->x;
+            m.pos.y += hub->y;
+            m.pos.z += hub->z;
+            EVec e;
+            Scale(&e, &d->axis, s->angle);
+            EVec er;
+            MulVec(&er, &e, &s->on->rot);
+            m.SetEuler(er.y, er.x, er.z);
+            s->prev = s->cur;
+            if (U32(fn_801769CC(), 0x10) & 2) {
+                DFrame cf = *(DFrame*)(p + 0x70);
+                cf.rot.m[0] *= lbl_80561FC4;
+                cf.rot.m[1] *= lbl_80561FC4;
+                cf.rot.m[2] *= lbl_80561FC4;
+                fn_8018BFA0(&s->cur, &cf, (DFrame*)&m);
+                s->cur.rot.m[0] *= lbl_80561FC4;
+                s->cur.rot.m[1] *= lbl_80561FC4;
+                s->cur.rot.m[2] *= lbl_80561FC4;
+            } else {
+                fn_8018BFA0(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
+            }
+            if (!s->valid) {
+                s->valid = 1;
+                s->prev = s->cur;
+            }
+        }
+    }
+}
+
 
 // A loose part handed to the renderer.
 struct DmgDraw {
@@ -212,7 +409,7 @@ void fn_8018DA5C(u8* p, u8* m) {
     for (int i = 0; i < 17; i++) {
         if (s->on && s->state != 0 && s->state != 1) {
             if (s->state == 3) {
-                U32(m, 0x29C) &= ~(1 << *(s32*)(tp->data + 4));
+                U32(m, 0x29C) &= ~(1 << tp->bit);
             }
             if (s->state == 2 || s->state == 4) {
                 DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
@@ -228,7 +425,7 @@ void fn_8018DA5C(u8* p, u8* m) {
                     }
                     d->frame = f;
                 }
-                d->mask = 1 << *(s32*)(tp->data + 4);
+                d->mask = 1 << tp->bit;
             }
         }
         tp++;
@@ -617,12 +814,6 @@ struct WFrame {
     PVec3 basis[3];
 };
 
-struct RVec3;
-class RigidBody {
-public:
-    void VelAt(RVec3* out, const RVec3* at);
-};
-
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);
 void fn_801BEB30(s32 car, u8** out);
@@ -726,10 +917,10 @@ extern const f32 lbl_80562064;
 // Unit start-up: register the module tag and fill the damage table's computed entries.
 void fn_8018FACC(void) {
     RegisterModuleTag(&lbl_8055E500);
-    *(f32*)(lbl_80332840[0].data + 0x8) = lbl_80562058;
-    *(f32*)(lbl_80332840[1].data + 0x8) = lbl_8056205C;
-    *(f32*)(lbl_80332840[8].data + 0xC) = lbl_80562060;
-    *(f32*)(lbl_80332840[9].data + 0xC) = lbl_80562064;
+    lbl_80332840[0].axis.x = lbl_80562058;
+    lbl_80332840[1].axis.x = lbl_8056205C;
+    lbl_80332840[8].axis.y = lbl_80562060;
+    lbl_80332840[9].axis.y = lbl_80562064;
 }
 
 }  // extern "C"
