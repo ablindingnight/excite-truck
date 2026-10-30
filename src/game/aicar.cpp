@@ -173,7 +173,7 @@ void fn_8018AE24(void* car, int v);
 void fn_8018AF04(void* car);
 void fn_8018A174(void* car);
 void* fn_801B83A0(void);
-void fn_8013B744(s32 car);
+f32 fn_8013B744(s32 car);
 f32 fn_801671FC(s32 car);
 int fn_801B89F8(void);
 s32 fn_801B2F24(void);
@@ -1047,6 +1047,38 @@ f32 fn_80134C1C(void);
 f32 fn_801B3064(void);
 f32 fn_80139048(void);
 f32 PSVECDistance(const u8* a, const u8* b);
+class LineFollower;
+// A point of the ideal line (idealline.cpp).
+struct IdealPoint {
+    V2 pos;            // offset 0x0
+    V2 dir;            // offset 0x8
+    u32 ilpos;         // offset 0x10
+    IdealPoint* next;  // offset 0x14
+    u8 pad18[0xC];
+    f32 speed;         // offset 0x24
+    f32 width;         // offset 0x28
+    f32 height;        // offset 0x2C
+    u8 pad30[4];
+    u8 type;           // offset 0x34
+    u8 section;        // offset 0x35
+    u8 pad36[6];
+};
+
+// A position on the ideal line (idealline.cpp).
+struct ILPos {
+    ILPos(void) {
+        seg = 0;
+        mode = 10000;
+        t = 0.0f;
+    }
+    IdealPoint* seg;  // offset 0x0
+    f32 t;            // offset 0x4
+    s32 mode;         // offset 0x8
+};
+
+extern f32 lbl_8055A48C;  // -100000
+void fn_80135B9C(LineFollower* f, f32 dist, V2* outPos, V2* outDir, f32* outSpeed, ILPos* outIl);
+
 void fn_80194FD0(u8* d, u8* out, f32 t);
 f32 fn_80194F70(const RVec3* n, const RVec3* a, const RVec3* b);
 }
@@ -1122,9 +1154,132 @@ f32 fn_80194F70(const RVec3* n, const RVec3* a, const RVec3* b) {
 
 void fn_80194FC4(u8* d) {}
 
-void fn_80194FC8(u8* d) { fn_8013B744(CARID(d)); }
+f32 fn_80194FC8(u8* d) { return fn_8013B744(CARID(d)); }
 
-void fn_80194FD0(u8* d, u8* out, f32 t) {}
+}  // extern "C"
+
+extern const f32 lbl_80562140;  // 1.0
+extern "C" const f32 lbl_80562144;  // 0.0
+extern const f32 lbl_80562160;
+extern const f32 lbl_8056216C;
+extern "C" const f32 lbl_8056217C;
+extern f32 lbl_805621C0;  // line switch length (1.5)
+extern const f32 lbl_805621F0;
+extern const f32 lbl_805621F4;
+extern const f32 lbl_805621F8;
+extern const f32 lbl_805621FC;
+extern const f32 lbl_80562200;
+extern u32 lbl_8055D430;  // debug flags
+f32 fn_801931AC(f32 t, f32 a, f32 b, f32 len);
+f32 fn_801948B0(u8* d, f32 t, int steer);
+f32 fn_80194FC8(u8* d);
+u8* fn_8017960C(s32 car);
+void fn_80137788(Pair* p, int car, V2* out);
+
+static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
+    V2 r;
+    r.x = LerpF(a.x, b.x, t);
+    r.y = LerpF(a.y, b.y, t);
+    return r;
+}
+
+// Where the AI's line is `ahead` metres on: while it is switching lines (old 0x168, new 0x19C) the two
+// are blended over the switch length.
+static inline void LineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height) {
+    f32 at = F32(d, 0x26C);
+    int blend = at - F32(d, 0x1D0) < lbl_805621C0;
+    if (blend) {
+        ILPos a;
+        ILPos b;
+        V2 pa;
+        V2 pb;
+        V2 da;
+        V2 db;
+        f32 sa;
+        f32 sb;
+        fn_80135B9C((LineFollower*)(d + 0x168), ahead, &pa, &da, &sa, &a);
+        fn_80135B9C((LineFollower*)(d + 0x19C), ahead, &pb, &db, &sb, &b);
+        if (speed) {
+            *speed = sa + ((at - F32(d, 0x1D0)) / lbl_805621C0) * (sb - sa);
+        }
+        if (pos) {
+            *pos = LerpV2(pa, pb, (at - F32(d, 0x1D0)) / lbl_805621C0);
+        }
+        if (height) {
+            f32 ha = LerpF(a.seg->height, a.seg->next->height, a.t);
+            f32 hb = LerpF(b.seg->height, b.seg->next->height, b.t);
+            *height = ha + ((at - F32(d, 0x1D0)) / lbl_805621C0) * (hb - ha);
+        }
+    } else if (height) {
+        ILPos b;
+        fn_80135B9C((LineFollower*)(d + 0x19C), ahead, pos, 0, speed, &b);
+        *height = LerpF(b.seg->height, b.seg->next->height, b.t);
+    } else {
+        fn_80135B9C((LineFollower*)(d + 0x19C), ahead, pos, 0, speed, 0);
+    }
+}
+
+static inline f32 Clamp01F(f32 v) {
+    f32 t = lbl_80562140 < v ? lbl_80562140 : v;
+    return t > lbl_80562144 ? t : lbl_80562144;
+}
+
+extern "C" {
+
+// The AI's driving target: how far ahead to look (from the line's curvature speed), the line point and
+// speed there, ramp-ups after a start or restart, the steering offset, and (debug) chasing the car ahead.
+void fn_80194FD0(u8* d, u8* out, f32 t) {
+    u8* prm = PTR(d, 0x2C8);
+    ILPos il;
+    fn_80135B9C((LineFollower*)PTR(d, 0x164), F32(prm, 0x70) + F32(prm, 0x6C) * F32(d, 0x270), 0, 0, 0, &il);
+    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(LerpF(il.seg->speed, il.seg->next->speed, il.t), F32(prm, 0x60),
+                                                 F32(prm, 0x64), F32(PTR(PTR(d, 0x164), 0x2C), 0x14));
+    f32 ahead = F32(out, 0xC) * F32(d, 0x270);
+    ahead = F32(PTR(d, 0x2C8), 0x68) > ahead ? F32(PTR(d, 0x2C8), 0x68) : ahead;
+    LineAhead(d, ahead, (V2*)out, (f32*)(out + 0x8), (f32*)(d + 0x8));
+    F32(d, 0xC) = F32(out, 0x0);
+    F32(d, 0x10) = F32(out, 0x4);
+    U8(d, 0x14) = 1;
+    LineAhead(d, lbl_805621F0 * ahead, 0, (f32*)(out + 0x8), 0);
+    F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
+    if (U8(d, 0x2A6)) {
+        f32 st = F32(d, 0x1EC);
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((lbl_8056217C + st) - st));
+        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + (lbl_80562144 + k * lbl_80562140) * lbl_805621F4);
+    }
+    f32 side = fn_801948B0(d, t, 0);
+    F32(out, 0x0) += F32(d, 0x58) * side;
+    F32(out, 0x4) = F32(out, 0x4) + F32(d, 0x5C) * side;
+    if (S32(d, 0x268) == 3) {
+        f32 st = F32(d, 0x1DC);
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((lbl_805621F8 + st) - st));
+        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + k * lbl_805621FC);
+    }
+    int chase = 0;
+    if ((lbl_8055D430 & 1) && (lbl_8055D430 & 0x20)) {
+        chase = 1;
+    }
+    if (chase) {
+        s32 lead = S32(d, 0x2C4);
+        if (lead != -1) {
+            Pair* pr = lbl_8055E0D0->Rec(S32(d, 0x290))->table[lead];
+            if (pr->dist2 < lbl_80562200) {
+                u8* car = fn_8017960C(lead);
+                V2 rel;
+                fn_80137788(pr, S32(d, 0x290), &rel);
+                if (rel.y > lbl_80562144) {
+                    F32(out, 0x0) = F32(car, 0x60);
+                    F32(out, 0x4) = F32(car, 0x68);
+                    F32(out, 0x8) = lbl_8056216C + F32(car, 0x25CC);
+                } else {
+                    f32 v = F32(car, 0x25CC) - lbl_80562160;
+                    F32(out, 0x8) = v > lbl_80562160 ? v : lbl_80562160;
+                }
+            }
+        }
+    }
+    ((AISink*)PTR(d, 0x28C))->Drive(out, out + 0x8, d + 0x2D0);
+}
 
 void fn_801955F0(u8* d, u8* out, f32 t) {
     fn_80194FD0(d, out, t);
@@ -1390,34 +1545,6 @@ void fn_80195D80(u8* d, f32 t) {
     }
 }
 
-// A point of the ideal line (idealline.cpp).
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10
-    IdealPoint* next;  // offset 0x14
-    u8 pad18[0x10];
-    f32 width;         // offset 0x28
-    u8 pad2C[8];
-    u8 type;           // offset 0x34
-    u8 section;        // offset 0x35
-    u8 pad36[6];
-};
-
-// A position on the ideal line (idealline.cpp).
-struct ILPos {
-    ILPos(void) {
-        seg = 0;
-        mode = 10000;
-        t = 0.0f;
-    }
-    IdealPoint* seg;  // offset 0x0
-    f32 t;            // offset 0x4
-    s32 mode;         // offset 0x8
-};
-
-extern f32 lbl_8055A48C;  // -100000
-void fn_80135B9C(LineFollower* f, f32 dist, V2* outPos, V2* outDir, f32* outSpeed, ILPos* outIl);
 
 // Re-anchors the AI on the ideal line: lane half-width and margin, track limits, the look-ahead point and
 // the line direction there.
@@ -2077,12 +2204,6 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
 
 static inline int SignDiffers(f32 a, f32 b) { return (s32)(*(u32*)&b & 0x80000000) != (s32)(*(u32*)&a & 0x80000000); }
 static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
-static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
-    V2 r;
-    r.x = LerpF(a.x, b.x, t);
-    r.y = LerpF(a.y, b.y, t);
-    return r;
-}
 
 // Following: while the driver tails another car (0xFC), pick the side to pass on, ease the lateral line toward a
 // point beside it and match its speed; then pull the target point toward the follow line by the follow weight,
