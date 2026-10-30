@@ -724,9 +724,11 @@ void fn_801ECFE0(CarModel* m) {
         return;
     }
     fn_801ECC70(m);
+    s32 tint;
+    BoneSurf* bs;
     int mirror = (fn_801E87A8()->flags >> 1) & 1;
-    BoneSurf* bs = m->boneSurfs;
-    s32 tint = lbl_8055EBC0;
+    bs = m->boneSurfs;
+    tint = lbl_8055EBC0;
     for (int i = 0; i < m->numBoneSurfs; bs++, i++) {
         u32 mask = m->car->groupMask & bs->mask;
         BoneArg arg;
@@ -753,7 +755,8 @@ void fn_801ECFE0(CarModel* m) {
         }
         if (!lbl_8055E614) {
             if (mirror) {
-                Frame f = m->scaled;
+                Frame f;
+                f = m->scaled;
                 f.axes[0].x *= -1.0f;
                 f.axes[0].y *= -1.0f;
                 f.axes[0].z *= -1.0f;
