@@ -969,8 +969,8 @@ void fn_801CCBC4(void) {
 inline AwardsMgr::~AwardsMgr(void) {
     if (art) {
         fn_80235380(art);
-        art = 0;
     }
+    art = 0;
     if (sfx) {
         delete (VObj*)sfx;
     }
