@@ -873,9 +873,10 @@ void ShardSys::Reset(void) { count = 0; }
 void ShardSys::Step(void) {
     f32 age = fn_801E7E18() - 2.0f;
     f32 dt = fn_801E7E24();
+    f32 drag;
     f32 down = 0.75f * (9.81f * dt);
     Shard* out = pts;
-    f32 drag = 1.0f;
+    drag = 1.0f;
     for (int i = 0; i < count; i++) {
         Shard* s = &pts[i];
         if (s->t > age) {
