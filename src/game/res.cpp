@@ -1237,7 +1237,7 @@ void AsyncResourceSet::Update(void) {
         set.hdr = *(ResSetHeader*)buf;
         fn_8012A80C(&set.hdr);
         set.mem = 0;
-        if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
+        if (set.hdr.loadSize + set.hdr.baseOffset > bufSize) {
             fn_802E317C("res: resident size exceeded buf! (%d > %d)", set.hdr.baseOffset + set.hdr.loadSize, bufSize);
         }
         if (set.hdr.flags & 1) {
