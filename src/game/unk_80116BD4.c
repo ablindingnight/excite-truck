@@ -3804,10 +3804,11 @@ void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
 // Refills an exhausted bundle of nibble pairs: reads the count, then that many bytes, each two Huffman-coded
 // nibbles (low first).
 void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
+    u32 len;
     u32 *next;
     u32 value;
     u32 count;
-    u32 len, mask, e, lo, hi;
+    u32 mask, lo, hi, e;
     u8 *dst, *lookup, *symbols;
     u32 width;
 
@@ -3828,11 +3829,12 @@ void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
         count -= width;
     }
     if (len != 0) {
+        mask = b->maxBits;
         dst = b->data;
         b->cur = dst;
         b->end = dst + len;
-        width = b->maxBits;
-        mask = 0xFFFFFFFFU >> (32 - width);
+        width = mask;
+        mask = 0xFFFFFFFFU >> (32 - mask);
         lookup = b->lookup;
         symbols = b->symbols;
         do {
