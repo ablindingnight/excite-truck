@@ -347,7 +347,127 @@ void fn_802704D4(u8* a, u8* b) { fn_802704D0(a, U32(b, 0x4), b); }
 
 f32 fn_802704E0(int mode, f32 t) { return fn_8026EA8C(mode, t); }
 
-void fn_802704E4(u8* p) {}  // stub (360)
+extern const f32 lbl_80563EC0;  // 4.0
+extern const f32 lbl_80563ED0;  // 0.35
+extern const f32 lbl_80563ED8;  // 8.0
+extern const f32 lbl_80563E44;  // -10.0
+extern const f32 lbl_80563E58;  // 2.0
+extern const f32 lbl_80563EA4;  // 0.2
+extern const f32 lbl_80563F00;  // 4/3
+extern const f32 lbl_80563F04;  // 80/3
+extern const f32 lbl_80563F08;  // -0.5
+extern const f32 lbl_80563F0C;  // 0.9
+extern const f32 lbl_80563F14;  // 0.7
+extern const f32 lbl_80563F18;  // -13.0
+extern const f32 lbl_80563F20;  // 2.1
+extern const f32 lbl_80563F24;  // 2.5
+extern const f32 lbl_80563F28;
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+f32 PSVECMag(const f32* v);
+int fn_801EA03C(const s16* hint, f32* pos);
+
+// A vector copied as words (the original's struct copies of these move lwz/stw pairs).
+struct PVec3 {
+    f32 v[3];
+};
+
+// A camera frame's rows (right, up, view axis) without its position.
+struct CamAxes {
+    CVec3 right, up, fwd;
+};
+
+// Chase camera: keeps a trailing frame (0xF0) behind the car's frame (0xC0), eases the view direction
+// (0x108) toward the car's heading, places the eye behind the target above the ground and aims it.
+void fn_802704E4(u8* p) {
+    int wide = fn_80178CA4() > 1;
+    f32 dist = (wide ? lbl_80563ED8 : lbl_80563EC0) +
+               F32(PTR(p, 0x140), 0x5B4) * (lbl_80563E30 - lbl_80563ED0 * F32(p, 0x13C));
+    f32 lift = lbl_80563F20 + F32(PTR(p, 0x140), 0x5B8);
+    if (S32(p, 0x4) != 9) {
+        *(PVec3*)(p + 0x114) = *(PVec3*)(p + 0xE4);
+        *(CamAxes*)(p + 0xF0) = *(CamAxes*)(p + 0xC0);
+        F32(p, 0x114) = F32(p, 0x114) + F32(p, 0xD8) * lbl_80563E44;
+        F32(p, 0x118) = F32(p, 0x118) + F32(p, 0xDC) * lbl_80563E44;
+        F32(p, 0x11C) = F32(p, 0x11C) + F32(p, 0xE0) * lbl_80563E44;
+    }
+    f32 on = U8(PTR(p, 0x140), 0x260C) ? lbl_80563E30 : lbl_80563E78;
+    F32(p, 0xBC) = fn_8026ECE4(p, &dist);
+    PVec3 target = *(PVec3*)(p + 0xE4);
+    target.v[1] += (wide ? lbl_80563F24 : lbl_80563E58) * F32(PTR(p, 0x140), 0x5E4);
+    if ((f32)__fabs(on - F32(p, 0x19C)) <= lbl_80558DC4[0]) {
+        int below = F32(PTR(p, 0x140), 0x25D8) < lbl_80563F28;
+        int moving = !((f32)__fabs(on) <= lbl_80558DC4[0]);
+        CsVec d;
+        d.x = target.v[0] - F32(p, 0x114);
+        d.y = target.v[1] - F32(p, 0x118);
+        d.z = target.v[2] - F32(p, 0x11C);
+        f32 len = PSVECMag(&d.x);
+        len = len > lbl_80563EA8 ? len : lbl_80563EA8;
+        f32 inv = lbl_80563E30 / len;
+        F32(p, 0x108) = d.x * inv;
+        F32(p, 0x10C) = d.y * inv;
+        F32(p, 0x110) = d.z * inv;
+        f32 t = (PSVECMag((f32*)(p + 0x12C)) - lbl_80563F00) / lbl_80563F04;
+        t = lbl_80563E30 < t ? lbl_80563E30 : t;
+        t = t > lbl_80563E78 ? t : lbl_80563E78;
+        f32 k;
+        if ((moving && !below) || (below && !moving)) {
+            k = t * lbl_80563EA8;
+        } else {
+            k = fn_8026FCE0(t, lbl_80563F08);
+        }
+        f32 s = k + lbl_80563F0C * (F32(p, 0x198) - k);
+        F32(p, 0x198) = s;
+        PVec3 f = *(PVec3*)(p + 0xD8);
+        if (moving) {
+            f.v[0] *= lbl_80563E6C;
+            f.v[1] *= lbl_80563E6C;
+            f.v[2] *= lbl_80563E6C;
+        }
+        f.v[1] *= lbl_80563EA4;
+        f32 m = PSVECMag(f.v);
+        m = lbl_80563E60 > m ? lbl_80563E60 : m;
+        f32 inv2 = lbl_80563E30 / m;
+        f.v[0] *= inv2;
+        f.v[1] *= inv2;
+        f.v[2] *= inv2;
+        f32 w = s + lbl_80563F14 * (lbl_80563E30 - s);
+        CsVec r;
+        r.x = f.v[0] + w * (F32(p, 0x108) - f.v[0]);
+        r.y = f.v[1] + w * (F32(p, 0x10C) - f.v[1]);
+        r.z = f.v[2] + w * (F32(p, 0x110) - f.v[2]);
+        F32(p, 0x108) = r.x;
+        F32(p, 0x10C) = r.y;
+        F32(p, 0x110) = r.z;
+    } else {
+        F32(p, 0x108) *= lbl_80563E6C;
+        F32(p, 0x10C) *= lbl_80563E6C;
+        F32(p, 0x110) *= lbl_80563E6C;
+    }
+    u8* car = PTR(p, 0x140);
+    f32 back = lbl_80563F18 * F32(car, 0x5E4);
+    F32(p, 0x114) = target.v[0] + F32(p, 0x108) * back;
+    F32(p, 0x118) = target.v[1] + F32(p, 0x10C) * back;
+    F32(p, 0x11C) = target.v[2] + F32(p, 0x110) * back;
+    f32 out = -dist * F32(car, 0x5E4);
+    F32(p, 0x7C) = F32(p, 0xE4) + F32(p, 0x108) * out;
+    F32(p, 0x80) = F32(p, 0xE8) + F32(p, 0x10C) * out;
+    F32(p, 0x84) = F32(p, 0xEC) + F32(p, 0x110) * out;
+    F32(p, 0x80) = F32(p, 0x80) + lift * F32(car, 0x5E4);
+    PVec3 eye = *(PVec3*)(p + 0x7C);
+    if (fn_801EA03C((const s16*)(PTR(p, 0x140) + 0x6C), eye.v)) {
+        f32 g = (lbl_80563E50 + eye.v[1]) * F32(PTR(p, 0x140), 0x5E4);
+        eye.v[1] = F32(p, 0x80) > g ? F32(p, 0x80) : g;
+    } else {
+        eye.v[0] = F32(p, 0x7C);
+        eye.v[1] = F32(p, 0x80);
+        eye.v[2] = F32(p, 0x84);
+    }
+    fn_8026EF48((const s32*)p, eye.v, target.v);
+    CsVec up(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+    fn_8026E870(eye.v, target.v, p, &up.x);
+    F32(p, 0x19C) = on;
+}
 
 }  // extern "C"
 
