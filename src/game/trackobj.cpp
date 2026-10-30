@@ -1600,8 +1600,9 @@ void fn_801FA7F4(const char* name, const OFrame* f, ValueNode* node) {
 
 OFrame* fn_801FA8E0(CollShape* s, const OFrame* f, s32 event) {
     s32 id = lbl_8055EC78++;
+    SolBuilder* b;
     ValueNode* node = fn_8013184C();
-    SolBuilder* b = lbl_8055EC74;
+    b = lbl_8055EC74;
     SolObj* o = NewSolObj(id, event, s, f, node);
     o->next = b->head;
     b->head = o;
