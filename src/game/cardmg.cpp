@@ -138,6 +138,28 @@ static inline void MulVec(EVec* out, const EVec* in, const DMat3* m) {
     }
 }
 
+// A detachable part's live state (0x80 bytes from car + 0x152C).
+struct DmgSlot {
+    DFrame* on;     // offset 0x0, the part's bone frame (0: no such part)
+    s32 point;      // offset 0x4
+    s32 hub;        // offset 0x8, body point the hinge rides on
+    f32 angle;      // offset 0xC
+    f32 spin;       // offset 0x10
+    f32 limit;      // offset 0x14
+    DFrame cur;     // offset 0x18
+    DFrame prev;    // offset 0x48
+    u8 valid;       // offset 0x78
+    s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
+};
+
+// A point of frame f in its parent's space.
+static inline void ToWorld(EVec* out, const EVec* in, const DFrame* f) {
+    MulVec(out, in, &f->rot);
+    out->x += f->pos.x;
+    out->y += f->pos.y;
+    out->z += f->pos.z;
+}
+
 extern "C" {
 
 // Rotates frame a by b's rotation about b's position: out = a * b, keeping b's pivot where a puts it.
@@ -175,23 +197,113 @@ int fn_8018C514(u8* p, const f32* pos) {
     return idx;
 }
 
-void fn_8018C5A0(u8* p) {}  // stub (359)
+}  // extern "C"
+
+// The car's paint/flag state block (carstate.cpp).
+struct CarColors {
+    u8 c[164][4];
+};
+
+struct CarFlags {
+    u8 f[18];
+};
+
+struct CarState {
+    CarColors col;   // offset 0x0
+    f32 time;        // offset 0x290
+    f32 duration;    // offset 0x294
+    s32 x298;        // offset 0x298
+    s32 x29C;        // offset 0x29C
+    CarFlags flags;  // offset 0x2A0
+};
+
+void* GetEvent(int event);
+
+struct EventDesc {
+    u8 pad[0x20];
+    ValueNode* table;  // offset 0x20
+};
+
+extern "C" {
+void* memset(void* p, int c, unsigned long n);
+int fn_801E2CCC(s32 model, const char* name, DFrame** bone);
+void fn_802E317C(const char* fmt, ...);
+void fn_80279B28(u8* block, CarState* out);
+void fn_80279CD8(CarState* s);
+u8* fn_801769CC(void);
+}
+extern const f32 lbl_80561F74;  // 0.0
+extern const f32 lbl_80561F78;  // pi/2
+extern const f32 lbl_80561F7C;  // 1818.0
+extern const f32 lbl_80561F80;  // 0.4545
+extern const f32 lbl_80561F84;  // -0.0001
+extern const f32 lbl_80561F88;  // 1.0
+extern const f32 lbl_80561F8C;  // 0.5
+
+extern "C" {
+
+// Sets the car's damage up: finds each part's bone and the body points it rides on (its anchor and its
+// origin), the dent stiffness from the car's mass and bounce (scaled by the event's player_damage_tweak),
+// the paint state, and the body point each light, window and helper sits nearest to.
+void fn_8018C5A0(u8* p, u8* desc) {
+    memset(p + 0x152C, 0, 0x900);
+    DamagePart* d = lbl_80332840;
+    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    for (int i = 0; i < 17; i++, d++, s++) {
+        if (fn_801E2CCC(S32(p, 0x59C), d->name, &s->on)) {
+            EVec v;
+            ToWorld(&v, &d->anchor, s->on);
+            s->point = fn_8018C514(p, &v.x);
+            EVec o;
+            o.x = lbl_80561F74;
+            o.y = lbl_80561F74;
+            o.z = lbl_80561F74;
+            ToWorld(&v, &o, s->on);
+            s->hub = fn_8018C514(p, &v.x);
+            s->limit = lbl_80561F78;
+        }
+    }
+    S32(p, 0x5F8) = *(s32*)PTR(p, 0x26C);
+    f32 bounce = F32(p, 0x314);
+    F32(p, 0x5F4) = lbl_80561F7C / (lbl_80561F80 * F32(desc, 0x8));
+    if (bounce >= lbl_80561F84) {
+        F32(p, 0x5F4) = F32(p, 0x5F4) * bounce;
+    } else {
+        F32(p, 0x5F4) = (f32)__fabs(bounce);
+    }
+    if (S32(p, 0x1F0) == 0x50) {
+        ValueNode* t = ((EventDesc*)GetEvent(*(s32*)fn_801769CC()))->table;
+        F32(p, 0x5F4) = F32(p, 0x5F4) * t->GetFloat("player_damage_tweak", lbl_80561F88);
+    }
+    F32(p, 0x5F4) = F32(p, 0x5F4) * lbl_80561F8C;
+    if (PTR(p, 0x328)) {
+        fn_80279B28(PTR(p, 0x328), (CarState*)(p + 0x1E44));
+    } else {
+        fn_80279CD8((CarState*)(p + 0x1E44));
+    }
+    *(CarState*)(p + 0x20F8) = *(CarState*)(p + 0x1E44);
+    for (int i = 0; i < 16; i++) {
+        U8(p, 0x1E2C + i) = 0xFF;
+    }
+    LightPart* l = lbl_80332D08;
+    for (int i = 0; i < 13; i++, l++) {
+        DFrame* bone = 0;
+        u8* q = p + l->index;
+        if (l->name[0] == '$') {
+            if (l->name[1] == 'W') {
+                q[0x1E2C] = fn_8018C514(p, (f32*)(p + (l->name[2] - '0') * 0x74 + 0x23DC));
+            } else {
+                fn_802E317C("cardmg: unknown special helper %s", l->name);
+            }
+        }
+        if (fn_801E2CCC(S32(p, 0x59C), l->name, &bone)) {
+            q[0x1E2C] = fn_8018C514(p, &bone->pos.x);
+        }
+    }
+}
 
 }  // extern "C"
 
-// A detachable part's live state (0x80 bytes from car + 0x152C).
-struct DmgSlot {
-    DFrame* on;     // offset 0x0, the part's bone frame (0: no such part)
-    s32 point;      // offset 0x4
-    s32 hub;        // offset 0x8, body point the hinge rides on
-    f32 angle;      // offset 0xC
-    f32 spin;       // offset 0x10
-    f32 limit;      // offset 0x14
-    DFrame cur;     // offset 0x18
-    DFrame prev;    // offset 0x48
-    u8 valid;       // offset 0x78
-    s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
-};
 
 extern "C" f32 PSVECDotProduct(const f32* a, const f32* b);
 
