@@ -1167,7 +1167,59 @@ void fn_80250108(u8* p) {
     }
 }
 
-void fn_80250204(u8* p) {}  // stub (925)
+double fmod(double x, double y);
+
+// Car list input: left/right step through the cars (bumping an end plays the error cue); "2" swaps an
+// extreme car between its plain and extreme paint once its slot has settled (either of two keys).
+int fn_80250204(u8* p, int key) {
+    s32 sel = S32(p, 0x2C);
+    CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[sel];
+    u8* paint = (u8*)GetVehicleColor(e->vehicle, 0);
+    switch (key) {
+    case 0x125:
+        if (sel > 0) {
+            s32 n = sel - 1;
+            S32(p, 0x2C) = n;
+            ShowCar(p, n);
+        } else {
+            fn_80216D28();
+            fn_80214D50(1);
+        }
+        return 1;
+    case 0x127: {
+        s32 n = sel + 1;
+        if (n < S32(p, 0x1C)) {
+            S32(p, 0x2C) = n;
+            ShowCar(p, n);
+        } else {
+            fn_80216D28();
+            fn_80214D50(1);
+        }
+        return 1;
+    }
+    case 0x126:
+    case 0x128: {
+        u8 extreme = e->extreme;
+        if (extreme) {
+            if (NearZero(fmod(AbsF(((SlotAnim*)PTR(p, 0x18))[sel].t), 1.0))) {
+                int on = 0;
+                if (!paint[8] && extreme) {
+                    on = 1;
+                }
+                paint[8] = on;
+                ShowCar(p, S32(p, 0x2C));
+            } else {
+                fn_80216D28();
+            }
+        } else {
+            fn_80216D28();
+            fn_80214D50(1);
+        }
+        return 1;
+    }
+    }
+    return 0;
+}
 
 }  // extern "C"
 
