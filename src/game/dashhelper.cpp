@@ -859,7 +859,8 @@ void fn_8000F4F0(void) {
         phase = Lerp(0.0f, 1.0f, Clamp01(InvLerp(-t, 0.5f, 1.5f)));
         left = 1.5f - -t;
         if (left < 0.7f) {
-            alpha = (left / 0.7f) * alpha;
+            f32 fade = left / 0.7f;
+            alpha *= fade;
         }
         CopyString(fn_80131268("BigText:321_GO_GO"), sizeof(text), text);
     }
