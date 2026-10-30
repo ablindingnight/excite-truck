@@ -267,6 +267,10 @@ void fn_8027EEE4(int level) {
         MenuItem(lbl_804B2FF8),
     };
     const char* layouts[3] = {"newmode1.lyt", "newmode2.lyt", "newmode3.lyt"};
+    const char* events[3] = {"EventPath:EXCITE_EVENT", "EventPath:SUPER_EVENT", "EventPath:MIRROR_EVENT"};
+    const char* cups[3] = {"EventPath:EXCITE_CUP", "EventPath:SUPER_CUP", "EventPath:MIRROR_CUP"};
+    const char* bots[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
+    const char* tops[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
     MenuDesc desc = {layouts[level - 1], 0, (int (*)(int*))fn_8027EE88, 0, 0};
     desc.items = items;
     lbl_8055F684 = 0;
@@ -276,7 +280,6 @@ void fn_8027EEE4(int level) {
 
 }  // extern "C"
 
-extern char lbl_80347E50[];  // this unit's string pool
 
 class EvPath;
 class EvBracket;
@@ -287,17 +290,17 @@ extern "C" {
 // "Career difficulty N unlocked" message box.
 void fn_8027F09C(int difficulty) {
     char buf[100];
-    fn_801345D8(buf, 100, lbl_80347E50 + 0x3D8, difficulty);  // "EventPath:CAREER_DIFFICULTY_%d_UNLOCK_INSTRUCTIONS"
+    fn_801345D8(buf, 100, "EventPath:CAREER_DIFFICULTY_%d_UNLOCK_INSTRUCTIONS", difficulty);
     MenuItem items[] = {
         MenuItem(0, 5, &lbl_804B3018, 0, 0),
-        MenuItem("title", fn_80131234(lbl_80347E50 + 0x40C)),  // "EventPath:CHALLENGE"
+        MenuItem("title", fn_80131234("EventPath:CHALLENGE")),
         MenuItem("message", fn_80131234(buf)),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
         MenuItem(lbl_804B2FF8),
     };
     MenuDesc desc = {"unlock_crr_chal.lyt", 0, 0, 0, 0};
     desc.items = items;
-    fn_8027ED70()->PlaySound(lbl_80347E50 + 0x214);  // "passed_career"
+    fn_8027ED70()->PlaySound("passed_career");
     fn_802146BC(&desc, -999, -999, 1);
 }
 
