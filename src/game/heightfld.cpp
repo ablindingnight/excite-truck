@@ -273,8 +273,9 @@ int fn_801DB74C(int x, int z, f32* out, s32* mat, int unused, GVec* normal, f32 
 int fn_801DC258(f32* out, s32* mat, int unused, GVec* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 fx = g->scaleX * (x + g->offX);
+    f32 ix;
     f32 fz = g->scaleZ * (z + g->offZ);
-    f32 ix = floor(fx);
+    ix = floor(fx);
     f32 iz = floor(fz);
     return fn_801DB74C((int)ix, (int)iz, out, mat, unused, normal, fx - ix, fz - iz);
 }
