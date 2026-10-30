@@ -882,6 +882,16 @@ extern "C" void fn_801308F4(char* buf, int n, int value);  // format a score
 const char* GetGradeDisplayName(int grade);
 
 
+// Copies s to d, at most n bytes in all, always terminating.
+static inline void CopyTail(const char* s, int n, char* d) {
+    while ((*d++ = *s++) != 0) {
+        if (--n <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
+
 // Appends s to the string in d (n bytes in all), always terminating.
 static inline void AppendName(const char* s, int n, char* d) {
     while (*d) {
@@ -889,12 +899,7 @@ static inline void AppendName(const char* s, int n, char* d) {
         d++;
     }
     if (n > 0) {
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) {
-                d[-1] = 0;
-                break;
-            }
-        }
+        CopyTail(s, n, d);
     }
 }
 
@@ -1808,8 +1813,8 @@ inline void EvEventBar::Update(void) {
         f32 d = fn_80214D48() / 0.1f;
         b->slide = Clamp01F(b->slide + ((u8*)b == (u8*)lbl_8055F698 ? d : -d));
         int dx = (int)(-27.0f * b->slide);
-        b->m.jumpX = b->baseX + dx;
         b->m.jumpY = b->y;
+        b->m.jumpX = b->baseX + dx;
         b->m.jumpOn = 1;
         fn_80214BE4(lbl_804B30D8.Find(b) + 11, dx - was, 0);
         fn_80214BE4(lbl_804B30D8.Find(b) + 21, dx - was, 0);
