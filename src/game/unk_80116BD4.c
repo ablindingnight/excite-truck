@@ -2533,10 +2533,11 @@ s32 fn_8011ACC4(BinkIO8011 *io, const char *name, u32 flags) {
 }
 
 f32 fn_8011AE18(s32 arg0) {
-    f32 temp;
-    temp = (f32)(((u32)arg0 >> 5) & 0x1FFFFFF) * lbl_80329D48[((u32)arg0 * 4) & 0x7C];
-    if (arg0 & 0x10000000) {
-        temp = (f32)(-((f64)temp));
+    u32 bits = (u32)arg0;
+    s32 magnitude = (bits & ~0x10000000U) >> 5;
+    f32 temp = (f32)magnitude * lbl_80329D48[bits & 31U];
+    if (bits & 0x10000000U) {
+        temp = -temp;
     }
     return temp;
 }
