@@ -4,6 +4,7 @@
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -23,7 +24,9 @@ public:
     CarUIScreen(int mode);
     virtual ~CarUIScreen(void);
     void UnloadModel(void);
+    int ModelLoaded(void);
     void SetAnim(u32 anim);
+    void SetShine(u8 a);
 
     u8 pad4[0xD4];
     u32 channel;      // offset 0xD8
@@ -39,11 +42,6 @@ public:
 class VDel {
 public:
     virtual ~VDel(void);
-};
-
-class MenuState {
-public:
-    void Finish(int r);
 };
 
 // Two (0, 2) value pairs built by the constructor.
@@ -281,6 +279,7 @@ struct VehicleInfo {
     s32 default_color;        // offset 0x94
     s32 num_colors;           // offset 0x98
     s32 unk9C;                // offset 0x9C
+    u32 flags;                // offset 0xA0, 2: extreme, 4: shiny
 };
 
 VehicleInfo* FindVehicle(s32 id);
@@ -388,6 +387,7 @@ public:
     virtual int Unlocked(int i);          // 0x1C
     virtual const char* ExtremeName(int i);  // 0x20
     virtual int IsExtreme(int i);         // 0x24
+    virtual const char* Title(int i);     // 0x28
 };
 
 extern "C" {
@@ -940,56 +940,126 @@ extern const f32 lbl_80563964;  // 1.0
 
 // The car unlock screen's state (vtable lbl_803443B0): walks `list`, revealing each unlocked car with the
 // trophy cue.
-struct UnlockScreen {
-    UnlockScreen(GarageList* list, CarUIScreen* ui, StatPanel* panel, int arg) {
-        PTR(data, 0x18) = (u8*)list;
-        S32(data, 0x14) = 0;
-        *(void**)data = lbl_803443B0;
-        PTR(data, 0x20) = (u8*)ui;
-        PTR(data, 0x24) = (u8*)panel;
-        S32(data, 0x1C) = 0;
-        if (arg) {
-            S32(data, 0x1C) = arg;
+extern "C" {
+void fn_80236954(const char* event);
+void fn_80214AF0(int s);
+f32 fn_80214D48(void);
+}
+extern const f32 lbl_80563970;  // 2.0
+
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
+class UnlockScreen : public MenuState {
+public:
+    UnlockScreen(GarageList* list, CarUIScreen* ui, StatPanel* panel, u32* color) {
+        this->list = list;
+        this->ui = ui;
+        this->panel = panel;
+        this->color = 0;
+        if (color) {
+            this->color = color;
         }
-        U8(data, 0x28) = 0;
-        U8(data, 0x48) = 0;
-        U8(data, 0x88) = 0;
-        U8(data, 0x108) = 0;
-        PTR(data, 0x188) = (u8*)fn_80258354();
-        if (PTR(data, 0x188)) {
-            ((UIObjects*)PTR(data, 0x188))->AddSound("trophy_snd", "a_trophy1.sfx", 0);
-            ((UIObjects*)PTR(data, 0x188))->SetVolume("trophy_snd", lbl_80563964);
+        model[0] = 0;
+        name[0] = 0;
+        message[0] = 0;
+        title[0] = 0;
+        objects = fn_80258354();
+        if (objects) {
+            objects->AddSound("trophy_snd", "a_trophy1.sfx", 0);
+            objects->SetVolume("trophy_snd", lbl_80563964);
         }
     }
-    ~UnlockScreen(void) {
-        *(void**)data = lbl_803443B0;
-        UIObjects* o = (UIObjects*)PTR(data, 0x188);
-        if (o) {
-            delete o;
+    virtual ~UnlockScreen(void) {
+        if (objects) {
+            delete objects;
         }
     }
-    u8 data[0x1A0];
+    virtual void Update(void) {
+        s32 i = index;
+        if (i >= 0 && i < list->Count()) {
+            if (i != shown) {
+                shown = i;
+                if (objects) {
+                    objects->PlaySound("trophy_snd");
+                }
+                CopyIconName(model, 0x20, list->Name(index));
+                VehicleInfo* v = FindVehicleNamed(model, 0);
+                CopyNameD(v->display_name, 0x40, name);
+                if (!(v->flags & 2)) {
+                    CopyNameD("EventPath:CAR_UNLOCKED", 0x80, message);
+                    ui->SetAnim(v->colors[v->default_color]);
+                } else {
+                    CopyNameD("EventPath:EXTREME_UNLOCKED", 0x80, message);
+                    if (color) {
+                        ui->SetAnim(*color);
+                    } else {
+                        ui->SetAnim(v->colors[v->default_color]);
+                    }
+                }
+                const char* text = fn_80131234((u8*)message);
+                if (text != message) {
+                    CopyNameD(text, 0x80, message);
+                }
+                CopyIconName(title, 0x80, list->Title(index));
+                ui->SetShine((v->flags >> 2) & 1);
+            }
+            if (ui->ModelLoaded()) {
+                if (!revealed) {
+                    fn_80236954("reveal_car");
+                }
+                revealed = 1;
+            } else {
+                wait = lbl_80563970;
+            }
+        }
+        panel->SetCar(model);
+        f32 t = wait - fn_80214D48();
+        wait = lbl_80563960 > t ? lbl_80563960 : t;
+        if (AbsF(wait) <= lbl_80558DC4[0]) {
+            fn_80214AF0(0x1F);
+        }
+        t = hold - fn_80214D48();
+        hold = lbl_80563960 > t ? lbl_80563960 : t;
+        if (AbsF(hold) <= lbl_80558DC4[0]) {
+            fn_80214AF0(0x1F);
+        }
+    }
+
+    GarageList* list;      // offset 0x18
+    u32* color;            // offset 0x1C
+    CarUIScreen* ui;       // offset 0x20
+    StatPanel* panel;      // offset 0x24
+    char model[0x20];      // offset 0x28
+    char name[0x40];       // offset 0x48
+    char message[0x80];    // offset 0x88
+    char title[0x80];      // offset 0x108
+    UIObjects* objects;    // offset 0x188
+    s32 index;             // offset 0x18C
+    s32 shown;             // offset 0x190
+    f32 wait;              // offset 0x194
+    f32 hold;              // offset 0x198
+    u8 revealed;           // offset 0x19C
 };
 
 extern "C" {
 
 // The car unlock screen: shows every car of `list` in turn ("carunlock.lyt").
-void fn_8024FBD8(GarageList* list, int arg) {
+void fn_8024FBD8(GarageList* list, u32* color) {
     fn_8013C804();
     CarStatsInit();
     CarUIScreen ui(1);
     ui.channel = fn_802E4A10();
     StatPanel panel;
     panel.Clear();
-    UnlockScreen screen(list, &ui, &panel, arg);
+    UnlockScreen screen(list, &ui, &panel, color);
     MenuItem items[] = {
-        MenuItem(0, 5, screen.data, 0, 0),
-        MenuItem("#title", (char*)screen.data + 0x108),
+        MenuItem(0, 5, &screen, 0, 0),
+        MenuItem("#title", screen.title),
         MenuItem("#car_model", 0x13, &ui, 0, 0),
-        MenuItem("#car_model", (char*)screen.data + 0x28),
+        MenuItem("#car_model", screen.model),
         MenuItem("#car_position", 5, ui.state, 0, 0),
-        MenuItem("#unlock_msg", (char*)screen.data + 0x88),
-        MenuItem("#chassis", (char*)screen.data + 0x48),
+        MenuItem("#unlock_msg", screen.message),
+        MenuItem("#chassis", screen.name),
         MenuItem("#stat_text_1", panel.text[0]),
         MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
         MenuItem("#stat_text_2", panel.text[1]),
@@ -1005,7 +1075,7 @@ void fn_8024FBD8(GarageList* list, int arg) {
     MenuDesc desc = {"carunlock.lyt", 0, 0, 0, 0};
     desc.items = items;
     for (int i = 0; i < list->Count(); i++) {
-        S32(screen.data, 0x18C) = i;
+        screen.index = i;
         fn_802146BC(&desc, -999, -999, 1);
     }
     CarStatsShutdown();
@@ -1285,7 +1355,6 @@ extern s32 lbl_8055CFF4;  // screen height
 extern "C" {
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 static inline double AbsD(double v) { return __fabs(v); }
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
@@ -1324,8 +1393,6 @@ void fn_80251D0C(u8* p) {
     fn_80214A9C(0x1F);
     U8(p, 0x19C) = 0;
 }
-
-void fn_80251D7C(u8* p) {}  // stub (303)
 
 int fn_80252238(u8* p, int key) {
     if (key == 0xD) {
