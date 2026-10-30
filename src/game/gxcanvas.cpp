@@ -611,8 +611,9 @@ void fn_802C4108(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
             int n = w;
             do {
                 u16 p = *s++;
+                u32 ia;
                 int a = ((p >> 8) & 0xF0) >> 4;
-                u32 ia = 15 - a;
+                ia = 15 - a;
                 u8 b = (ia * ((*d & 0x1F) << 3) + a * ((p & 0xF) << 4)) / 15;
                 u8 r = (ia * ((*d >> 8) & 0xF8) + a * ((p >> 4) & 0xF0)) / 15;
                 u8 g = (ia * ((*d >> 3) & 0xFC) + a * (p & 0xF0)) / 15;
