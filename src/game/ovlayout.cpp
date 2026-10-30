@@ -548,7 +548,8 @@ public:
     ChannelHandler(void) { idx = 0; }
     virtual void Drag(const V2* d, void* target) {
         u8* c = (u8*)&((T*)target)->color + idx;
-        f32 v = *c + d->x;
+        f32 dx = d->x;
+        f32 v = dx + *c;
         v = 255.0f < v ? 255.0f : v;
         *c = v > 0.0f ? v : 0.0f;
     }
