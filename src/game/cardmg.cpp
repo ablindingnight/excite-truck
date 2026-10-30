@@ -34,10 +34,57 @@ struct DamagePart {
     EVec axis;         // offset 0xC, hinge axis
     EVec pivot;        // offset 0x18
     EVec anchor;       // offset 0x24
-    u8 pad30[0x10];    // offset 0x30
+    f32 size;          // offset 0x30
+    s32 x34;           // offset 0x34
+    s32 x38;           // offset 0x38
+    s32 mirror;        // offset 0x3C
 };
 
-extern DamagePart lbl_80332840[];
+// The damageable parts: name, model visibility bit, hinge axis (set up by the initialiser), pivot and anchor.
+DamagePart lbl_80332840[17] = {
+    {0, "right hood hinge", 3, {0.0f, 0.0f, 0.0f}, {-0.508f, 0.1016f, 0.508f}, {-0.508f, 0.1016f, 1.5239999f}, 0.127f, 0, 0, 0},
+    {1, "right decklid hinge", 4, {0.0f, 0.0f, 0.0f}, {-0.508f, -0.2032f, -0.508f}, {-0.508f, -0.2032f, -1.5239999f}, 0.0381f, 0, 0, 0},
+    {2, "left front bumper", 5, {0.0f, 0.0f, 0.0f}, {0.508f, 0.0f, 0.1016f}, {0.508f, 0.0f, 0.1016f}, 0.0762f, 0, 2, 0},
+    {3, "left rear bumper", 6, {0.0f, 0.0f, 0.0f}, {0.508f, 0.0f, -0.1016f}, {0.508f, 0.0f, -0.1016f}, 0.0762f, 0, 0, 0},
+    {4, "left front flare", 7, {0.0f, 0.0f, 0.0f}, {0.0762f, 0.254f, 0.6096f}, {0.0762f, 0.254f, 0.6096f}, 0.0762f, 0, 0, 0},
+    {5, "right front flare", 8, {0.0f, 0.0f, 0.0f}, {-0.0762f, 0.254f, 0.6096f}, {-0.0762f, 0.254f, 0.6096f}, 0.0762f, 0, 0, 0},
+    {6, "left rear flare", 9, {0.0f, 0.0f, 0.0f}, {0.0762f, 0.254f, 0.6096f}, {0.0762f, 0.254f, 0.6096f}, 0.0762f, 0, 0, 0},
+    {7, "right rear flare", 10, {0.0f, 0.0f, 0.0f}, {-0.0762f, 0.254f, 0.6096f}, {-0.0762f, 0.254f, 0.6096f}, 0.0762f, 0, 0, 0},
+    {8, "left side mirror", 19, {0.0f, 0.0f, 0.0f}, {-0.0762f, 0.254f, -0.508f}, {-0.0762f, 0.254f, -0.508f}, 0.0762f, 0, 0, 1},
+    {9, "right side mirror", 20, {0.0f, 0.0f, 0.0f}, {0.0762f, 0.254f, -0.508f}, {0.0762f, 0.254f, -0.508f}, 0.0762f, 0, 0, 1},
+    {10, "item 1", 24, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0762f, 0, 2, 0},
+    {11, "item 2", 25, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0762f, 0, 2, 0},
+    {12, "item 3", 26, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0762f, 0, 2, 0},
+    {13, "item 4", 27, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0762f, 0, 2, 0},
+    {14, "left wiper", 21, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 10000.0f, 0, 0, 0},
+    {15, "right wiper", 22, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 10000.0f, 0, 0, 0},
+    {16, "rear wiper", 23, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 10000.0f, 0, 0, 0},
+};
+
+// The breakable lights and windows (and the wheel and hood-latch helpers): name, part index, hit radius, body
+// point (-1: none).
+struct LightPart {
+    const char* name;  // offset 0x0
+    s32 index;         // offset 0x4
+    f32 radius;        // offset 0x8
+    s32 point;         // offset 0xC
+};
+
+LightPart lbl_80332D08[13] = {
+    {"left headlight", 2, 0.0254f, 15},
+    {"right headlight", 3, 0.0254f, 16},
+    {"left taillight", 0, 0.0254f, 17},
+    {"right taillight", 1, 0.0254f, 18},
+    {"front window", 4, 0.0254f, 11},
+    {"left window", 5, 0.0254f, 13},
+    {"right window", 6, 0.0254f, 14},
+    {"rear window", 7, 0.0254f, 12},
+    {"$W0", 8, 0.2032f, -1},
+    {"$W1", 9, 0.2032f, -1},
+    {"$W2", 10, 0.2032f, -1},
+    {"$W3", 11, 0.2032f, -1},
+    {"hood latch", 12, 0.0254f, -1},
+};
 
 extern "C" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
 
