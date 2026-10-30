@@ -295,10 +295,12 @@ void fn_802DB620(void) {
 }
 
 int fn_802DB69C(GXTex** layers, int mode) {
-    int map = 0;
+    GXTex** p = layers;
     int stage = 0;
+    int map = 0;
+    GXTex* t;
     for (int i = 0; i < lbl_8055FEA4; i++) {
-        GXTex* t = *layers;
+        t = *p;
         int base = map;
         GXLoadTexObj(&t->obj, map++);
         if (t->hasAlpha) {
@@ -308,7 +310,7 @@ int fn_802DB69C(GXTex** layers, int mode) {
         }
         int s = stage++;
         GXSetTevOrder(s, i, base, fn_802DB378(mode, i));
-        layers++;
+        p++;
     }
     GXSetNumTexGens(lbl_8055FEA4);
     return stage;
