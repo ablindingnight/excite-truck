@@ -696,13 +696,14 @@ void RingFireMan::Update(void) {
 }
 
 int RingFireMan::Add(const Vec* p, const Vec* e1, const Vec* e2, s16 hint, f32 life) {
+    int idx;
     FireRing* r = FindFree();
     if (r == 0 || !Snap(r, p, e1, e2, &hint)) {
         return -1;
     }
     r->life = life;
     r->active = 1;
-    int idx = r - rings;
+    idx = r - rings;
     lbl_8055F7C4->Add(idx, &r->p0, &r->e1, &r->e2, hint);
     return idx;
 }
