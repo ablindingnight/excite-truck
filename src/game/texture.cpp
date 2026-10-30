@@ -1154,8 +1154,9 @@ SimpleHeap* fn_802CC404(TexCache* c) { return c->heapRef->heap; }
 
 void fn_802CC410(TexCache* c) {
     for (;;) {
+        MipLoad* l;
         s32 done = -2;
-        for (MipLoad* l = c->loads; l; l = l->next) {
+        for (l = c->loads; l; l = l->next) {
             if (l->wait == -1) {
                 s32 n;
                 TTHeader* h = (TTHeader*)l->res->Poll(&n);
