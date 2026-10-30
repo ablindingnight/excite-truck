@@ -1864,10 +1864,9 @@ void fn_801C73DC(void) {
     int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
         if (fn_801C34CC(lbl_8055E7F8[sel].time, lbl_8055E7F8[other].time)) {
-            Event* a = &lbl_8055E7F8[sel];
             Event* b = &lbl_8055E7F8[other];
-            int t = a->order;
-            a->order = b->order;
+            int t = lbl_8055E7F8[sel].order;
+            lbl_8055E7F8[sel].order = b->order;
             b->order = t;
             qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
         }
