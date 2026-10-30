@@ -1093,8 +1093,9 @@ void Mist::Update(void) {
                 p->z = p->z + dv.z;
             } else {
                 f32 r = fn_80287BC8(-0.75f, 0.75f);
+                f32 z;
                 f32 s = 1.0f - r * r;
-                f32 z = center.z + side.y * r + back.y * s;
+                z = center.z + side.y * r + back.y * s;
                 f32 y = center.y + fn_80287BC8(0.0f, hit);
                 p->x = center.x + side.x * r + back.x * s;
                 p->y = y;
