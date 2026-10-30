@@ -1018,8 +1018,9 @@ void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
 void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 range) {
     MSurfList* sl;
     u32 mat = fn_802C7A3C();
+    u32 old;
     s32 saved = fn_802C9C58(v);
-    u32 old = lbl_8055D008;
+    old = lbl_8055D008;
     lbl_8055D008 = 8;
     ModelNode* slot = fn_802C5390(i);
     MVec3 c;
