@@ -173,6 +173,7 @@ public:
 
 class ObstacleObjDesc : public ObjDesc {
 public:
+    ObstacleObjDesc(ValueNode* vn);
     virtual ~ObstacleObjDesc(void);
     virtual void Read(PlacedObj* o, ValueNode* vn);
     virtual void Create(const PlacedObj* o);
@@ -916,8 +917,7 @@ ObjDesc* fn_801F861C(ValueNode* vn) { return new ("SoundDI") SoundDesc; }
 int fn_801F88F4(ValueNode* vn);
 int fn_801F8988(ObstacleDesc* d, ValueNode* vn);
 
-ObjDesc* fn_801F86C8(ValueNode* vn) {
-    ObstacleObjDesc* d = new ("ObstacleDI") ObstacleObjDesc;
+static inline void ReadObstacle(ObstacleObjDesc* d, ValueNode* vn) {
     d->flags = 0;
     d->phys.tag = 0;
     fn_801F8988(&d->phys, vn);
@@ -947,7 +947,12 @@ ObjDesc* fn_801F86C8(ValueNode* vn) {
     }
     d->event = vn->GetInt("sobj_event", -1);
     d->props = vn->FindChild("default_properties");
-    return d;
+}
+
+inline ObstacleObjDesc::ObstacleObjDesc(ValueNode* vn) { ReadObstacle(this, vn); }
+
+ObjDesc* fn_801F86C8(ValueNode* vn) {
+    return new ("ObstacleDI") ObstacleObjDesc(vn);
 }
 
 int fn_801F88F4(ValueNode* vn) {
