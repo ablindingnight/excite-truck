@@ -218,7 +218,8 @@ void fn_80205D5C(void) {
 }
 
 void fn_80205FCC(void) {
-    Camera saved = *fn_802C86DC();
+    Camera saved;
+    saved = *fn_802C86DC();
     Camera m;
     fn_802C88FC(&m);
     m.rot.up.x *= -1.0f;
