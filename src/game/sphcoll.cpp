@@ -2537,6 +2537,7 @@ void fn_801A26FC(u8* p, u8* o) {
             spin.x = lbl_805622D0;
             spin.y = lbl_805622D0;
             spin.z = lbl_805622D0;
+            Xform x;
             u8* body = PTR(o, 0x4);
             if (body) {
                 vel = *(RVec3*)(body + 0x118);
@@ -2545,12 +2546,12 @@ void fn_801A26FC(u8* p, u8* o) {
                 c.y += F32(body, 0x34);
                 c.z += F32(body, 0x38);
             }
-            Xform x = *(Xform*)VE(box)->v54();
+            x = *(Xform*)VE(box)->v54();
             Shift(&x, &c);
             RVec3 ext;
             SetV(&ext, F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C));
-            RVec3 at;
             RVec3 push;
+            RVec3 at;
             fn_801C28A8(S32(p, 0x30), &x, &ext, &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
                 RVec3 up;
@@ -2562,7 +2563,7 @@ void fn_801A26FC(u8* p, u8* o) {
         }
     } else if (S32(o, 0x18) == 'BOX ') {
         f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)VE(o)->v50())->t);
-        f32 r = F32(p, 0x24) + F32(o, 0x30);
+        f32 r = F32(o, 0x30) + F32(p, 0x24);
         if (dd < r * r) {
             RVec3 vel;
             vel.x = lbl_805622D0;
