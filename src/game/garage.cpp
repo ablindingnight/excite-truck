@@ -1099,7 +1099,91 @@ void fn_80250108(u8* p) {
 
 void fn_80250204(u8* p) {}  // stub (925)
 
-void fn_80251078(u8* p) {}  // stub (271)
+}  // extern "C"
+
+extern const f32 lbl_80563980;  // 0.5
+extern const f32 lbl_80563984;  // 255.0
+extern const f32 lbl_80563988;  // 0.8
+extern "C" {
+f32 fn_80235EF0(u8* art, int part);
+f32 fn_80235F64(u8* art, int part);
+void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+}
+
+// A car's paint `i`, or white when out of range.
+static inline u32 PaintColor(CarEntry* e, s32 i) {
+    int ok = 0;
+    if (i >= 0 && i < e->vehicle->num_colors) {
+        ok = 1;
+    }
+    return ok ? e->vehicle->colors[i] : (u32)-1;
+}
+
+static inline f32 Clamp01(f32 v) {
+    f32 t = lbl_80563964 < v ? lbl_80563964 : v;
+    return t > lbl_80563960 ? t : lbl_80563960;
+}
+
+static inline int RoundF(f32 v) { return (int)(v < lbl_80563960 ? v - lbl_80563980 : v + lbl_80563980); }
+
+// Scales `c` by the tint `t`, per channel.
+static inline u32 TintColor(u32 c, u32 t) {
+    int a = t >> 24;
+    int r = (t >> 16) & 0xFF;
+    int g = (t >> 8) & 0xFF;
+    int b = t & 0xFF;
+    b = b * b * (int)(c & 0xFF) / 256 / 256;
+    g = g * g * (int)((c >> 8) & 0xFF) / 256 / 256;
+    r = a * r * (int)((c >> 16) & 0xFF) / 256 / 256;
+    return 0xFF000000 | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+}
+
+extern "C" {
+
+// Draws car slot `i`: its frame (greyed when locked), the two pulsing extreme stars, and the car icon painted
+// with its colour.
+void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
+    CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
+    u32* sel = GetVehicleColor(e->vehicle, 0);
+    u32 color = PaintColor(e, lbl_80498C48.alt ? sel[0] : sel[1]);
+    if (e->value) {
+        color = e->value;
+    }
+    int locked = ((GarageList*)PTR(p, 0xD0))->Unlocked(i) == 0;
+    int extreme = 0;
+    if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
+        extreme = 1;
+    }
+    fn_802354A0(PTR(p, 0x24), shown && extreme, locked ? 0xFF808080 : -1, x, y, lbl_80563960, w, h);
+    f32 fade = fn_80216CB4();
+    if (extreme) {
+        for (int k = 0; k < 2; k++) {
+            int part = 5;
+            if (k == 0) {
+                part = 4;
+            }
+            f32 t = (alpha - lbl_80563960) / lbl_80563964;
+            f32 pw = fn_80235EF0(PTR(p, 0x24), part) * (lbl_80563980 + Clamp01(t) * lbl_80563980);
+            f32 ph = fn_80235F64(PTR(p, 0x24), part) * (lbl_80563980 + Clamp01(t) * lbl_80563980);
+            int a = RoundF(lbl_80563984 * fade);
+            a = a > 0x13F ? 0x13F : a;
+            fn_802354A0(PTR(p, 0x24), part, (a << 24) | 0xFFFFFF, (x + lbl_80563980 * w) - lbl_80563980 * pw,
+                        k == 0 ? y + ph : y - h, lbl_80563960, pw, ph);
+        }
+    }
+    int k = shown > 0 ? shown : 0;
+    k = k >= 1 ? 1 : k;
+    IconEntry* ic = &((IconPool*)PTR(p, 0xC8))->entries[e->icon[k]];
+    f32 u1 = ic->u1;
+    f32 v1 = ic->v1;
+    f32 u2 = ic->u2;
+    f32 v2 = ic->v2;
+    fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
+                lbl_80563988 * w, lbl_80563988 * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, u2, v2);
+    fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
+                lbl_80563988 * w, lbl_80563988 * h, ic->texE, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
+                u2, v2);
+}
 
 void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
     s32 v = S32(PTR(p, 0xCC) + i * 0x14, 0x10);
