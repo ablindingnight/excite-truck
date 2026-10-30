@@ -3,6 +3,7 @@
 // and the chassis list entries. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -16,10 +17,23 @@ VehicleInfo* FindVehicleNamed(const char* name, int i);
 u32* GetVehicleColor(VehicleInfo* v, int i);
 const char* GetSpecialChassis(const char* name);
 
+// The 3D car view (caruimod.cpp).
 class CarUIScreen {
 public:
+    CarUIScreen(int mode);
+    virtual ~CarUIScreen(void);
     void UnloadModel(void);
     void SetAnim(u32 anim);
+
+    u8 pad4[0xD4];
+    u32 channel;      // offset 0xD8
+    u8 tint;          // offset 0xDC
+    u8 nextTint;      // offset 0xDD
+    u8 padDE[0x1E];
+    u8 state[0x1C];   // offset 0xFC, the view's menu widget
+    u8 shine;         // offset 0x118
+    f32 unk11C;       // offset 0x11C
+    s32 mode;         // offset 0x120
 };
 
 class VDel {
@@ -34,7 +48,8 @@ public:
 
 // Two (0, 2) value pairs built by the constructor.
 struct GaragePair {
-    GaragePair(void) {
+    GaragePair(void) { Clear(); }
+    void Clear(void) {
         c = 0;
         a = 0;
         d = 2;
@@ -56,7 +71,7 @@ struct GarageFlags {
     u8 alt;                // offset 0x4
     u8 pad5[0x3];
     GaragePair pairs[4];   // offset 0x8
-    u8 pad48[0x70];        // offset 0x48
+    char points[0x70];     // offset 0x48, "#unlock_pts" text
 };
 
 extern "C" {
@@ -200,7 +215,8 @@ s32 AchievementsGetModelStat(int category, const char* model);
 // One stat bar (vtable lbl_80342734, from the car select screen).
 class StatBar {
 public:
-    virtual void v08(void);
+    StatBar(void);
+    virtual ~StatBar(void);
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -233,6 +249,15 @@ struct StatPanel {
     char text[5][0x64];    // offset 0xF4
     u8 flag;               // offset 0x2E8
 
+    StatPanel(void) {
+        memset(&stats, 0, sizeof(CarStats));
+        text[0][0] = 0;
+        text[1][0] = 0;
+        text[2][0] = 0;
+        text[3][0] = 0;
+        text[4][0] = 0;
+    }
+
     void SetCar(const char* chassis) {
         CarStats* cs = CarStatsLookup(chassis);
         if (cs) {
@@ -256,15 +281,14 @@ struct StatPanel {
     }
 };
 
-extern char lbl_803442E4[];  // "\extreme_star %s"
 extern char lbl_8055C0C0[];  // "%d/%d"
 
 class GarageList {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual void Add(const char* name, u8 unlocked, u8 extreme);  // 0x0C
     virtual void v10(void);
-    virtual void v14(void);
+    virtual int Count(void);                 // 0x14
     virtual const char* Name(int i);      // 0x18
     virtual int Unlocked(int i);          // 0x1C
     virtual const char* ExtremeName(int i);  // 0x20
@@ -303,9 +327,210 @@ void fn_8024DAD8(u8* p) { fn_8024739C(p); }
 
 void fn_8024DADC(u8* p) { fn_8024739C(p); }
 
-void fn_8024DAE0(u8* p) {}  // stub (769)
+}  // extern "C"
 
 extern void* lbl_80344410[];
+extern void* lbl_80344474[];
+
+extern "C" {
+void fn_8013C804(void);
+void fn_8013C8B8(void);
+void fn_80257C10(const char* chassis);
+int fn_80128314(int heap);
+int fn_80265D58(void);
+void fn_8024EA1C(u8* p);
+u32 fn_8024EB94(u8* p);
+u8* fn_8024EB9C(u8* p, int i);
+void fn_8024EBAC(u8* p, s32 v, int set);
+u32 fn_8024EBE4(u8* p);
+int fn_8024EC3C(void);
+int fn_8024ECD4(void);
+void fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui);
+u8* fn_8025007C(int n);
+int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar);
+}
+int IdentGetCurrentSlot(void);
+void CarStatsInit(void);
+void CarStatsShutdown(void);
+extern u8 lbl_8055FC8C;            // widescreen
+extern const char lbl_8055B860[];  // ""
+
+// Heap use at the start of a screen, for leak checks.
+class HeapMark {
+public:
+    HeapMark(const char* name) {
+        this->name = name;
+        heap0 = fn_80128314(0);
+        heap1 = fn_80128314(1);
+        other = fn_80265D58();
+    }
+    ~HeapMark(void) {}
+
+    const char* name;
+    int heap0;
+    int heap1;
+    int other;
+};
+
+// The car slot list's teardown (vtables lbl_803444D8, then lbl_8034453C): the slot entries, the shared icon
+// pool with the last list, then the strip's slot animations, widget and texture.
+static inline void DestroyCarSlots(u8* p) {
+    *(void**)p = lbl_803444D8;
+    delete[] PTR(p, 0xCC);
+    if (--lbl_8055F2E8 == 0) {
+        FreeIconPool(lbl_8055F2E4);
+        lbl_8055F2E4 = 0;
+    }
+    *(void**)p = lbl_8034453C;
+    delete[] PTR(p, 0x18);
+    fn_80235380(PTR(p, 0x24));
+    fn_802CAC54(PTR(p, 0x20));
+}
+
+// The car list (vtable lbl_80344474), the garage's current list while it runs.
+struct CarPick {
+    CarPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {
+        fn_8024F17C(data, list, color, car, panel, ui);
+        *(void**)data = lbl_80344474;
+        lbl_8055F2EC = data;
+    }
+    ~CarPick(void) {
+        lbl_8055F2EC = 0;
+        DestroyCarSlots(data);
+    }
+    char* Chassis(void) { return (char*)data + 0x60; }
+    char* Name(void) { return (char*)data + 0x80; }
+    u8 data[0xD4];
+};
+
+// The paint list (vtable lbl_80344410): one entry per colour of the chosen car.
+struct ColorPick {
+    ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out) {
+        fn_8024F17C(data, list, color, car, panel, ui);
+        *(void**)data = lbl_80344410;
+        PTR(data, 0xD8) = (u8*)ui;
+        PTR(data, 0xD4) = (u8*)list;
+        PTR(data, 0xDC) = (u8*)out;
+    }
+    ~ColorPick(void) {
+        *(void**)data = lbl_80344410;
+        delete (VDel*)PTR(data, 0xD4);
+        DestroyCarSlots(data);
+    }
+    u8 data[0x1E0];
+};
+
+// The garage: pick a car (unless the list has only one), then its paint; "3" opens the car's tuning screen.
+// Returns 0 when backed out.
+int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar) {
+    int cur = IdentGetCurrentSlot();
+    if (lbl_80498C48.unk0 != cur) {
+        lbl_80498C48.unk0 = cur;
+        for (int i = 0; i < 4; i++) {
+            lbl_80498C48.pairs[i].Clear();
+        }
+    }
+    lbl_80498C48.alt = screen->Count() == 1;
+    fn_8013C804();
+    CarStatsInit();
+    int r = -1;
+    {
+        CarUIScreen ui(0);
+        ui.channel = fn_802E4A10();
+        StatPanel panel;
+        GaragePair* pair = &lbl_80498C48.pairs[slot];
+        CarPick cars(screen, lbl_80498C48.alt ? &pair->d : &pair->b, lbl_80498C48.alt ? &pair->c : &pair->a, &panel,
+                     &ui);
+        for (;;) {
+            if (!lbl_80498C48.alt) {
+                const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
+                MenuItem items[] = {
+                    MenuItem("#car_model", 0x13, &ui, 0, 0),
+                    MenuItem("#car_model", cars.Chassis()),
+                    MenuItem("#car_name", cars.Name()),
+                    MenuItem("#car_position", 5, ui.state, 0, 0),
+                    MenuItem("#stat_text_1", panel.text[0]),
+                    MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
+                    MenuItem("#stat_text_2", panel.text[1]),
+                    MenuItem("#stat_art_2", 2, &panel.stats.stats[1].value, 0, 0),
+                    MenuItem("#stat_text_3", panel.text[2]),
+                    MenuItem("#stat_art_3", 2, &panel.stats.stats[2].value, 0, 0),
+                    MenuItem("#stat_text_4", panel.text[3]),
+                    MenuItem("#stat_custom_4", 5, &panel.bars[3], 0, 0),
+                    MenuItem("#stat_text_5", panel.text[4]),
+                    MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
+                    MenuItem("#unlock_pts", lbl_80498C48.points),
+                    MenuItem("#locker", 2, cars.data + 0xC0, 0, 0),
+                    MenuItem("#car_bar_color", bars[bar]),
+                    MenuItem("#races_run", (char*)cars.data + 0x3C),
+                    MenuItem("#aaa", (char*)cars.data + 0x50),
+                    MenuItem(0, 5, cars.data, 0, 0),
+                    MenuItem(lbl_8055B860, 6, (const void*)fn_8024ECD4, 0, 0x72),
+                    MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
+                    MenuItem(lbl_8055B860, 6, (const void*)fn_8024EC3C, -2, 0xD),
+                    MenuItem(lbl_80498C30),
+                };
+                MenuDesc desc = {0, 0, (int (*)(int*))fn_8024DAD8, 0, 0};
+                desc.layout = lbl_8055FC8C ? "carchoose2a_w.lyt" : "carchoose2a.lyt";
+                desc.items = items;
+                HeapMark mark("choosevehicle1");
+                r = fn_802146BC(&desc, -999, -999, 1);
+            }
+            if (lbl_80498C48.alt || r == -2) {
+                HeapMark mark("choosevehicle2");
+                VehicleInfo* v = FindVehicleNamed(cars.Chassis(), 0);
+                GarageList* colors = (GarageList*)fn_8025007C(v->num_colors);
+                for (int i = 0; i < v->num_colors; i++) {
+                    colors->Add(cars.Chassis(), 1, 0);
+                }
+                ColorPick paint(colors, lbl_80498C48.alt ? &pair->d : &pair->b,
+                                lbl_80498C48.alt ? &pair->c : &pair->a, &panel, &ui, color);
+                fn_8024EBAC(paint.data, fn_8024EBE4(paint.data), 1);
+                u8* e = fn_8024EB9C(paint.data, 0);
+                for (int i = 0; i < fn_8024EB94(paint.data); i++) {
+                    e = fn_8024EB9C(paint.data, i);
+                    S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
+                }
+                fn_8024EA1C(paint.data);
+                const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
+                MenuItem items[] = {
+                    MenuItem(0, 5, paint.data, 0, 0),
+                    MenuItem("#car_model", 0x13, &ui, 0, 0),
+                    MenuItem("#car_model", cars.Chassis()),
+                    MenuItem("#car_name", cars.Name()),
+                    MenuItem("#color_name", (char*)paint.data + 0xE0),
+                    MenuItem("#car_position", 5, ui.state, 0, 0),
+                    MenuItem("#locker", 2, cars.data + 0xC0, 0, 0),
+                    MenuItem("#car_bar_color", bars[bar]),
+                    MenuItem("#races_run", (char*)cars.data + 0x3C),
+                    MenuItem("#aaa", (char*)cars.data + 0x50),
+                    MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
+                    MenuItem(lbl_8055B860, 6, 0, -2, 0xD),
+                    MenuItem(lbl_80498C30),
+                };
+                MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
+                desc.items = items;
+                int r2 = fn_802146BC(&desc, -999, -999, 1);
+                if (r2 == -2 && lbl_80498C48.alt) {
+                    r = r2;
+                } else if (r2 == -1 && !lbl_80498C48.alt) {
+                    continue;
+                }
+            }
+            if (r != 3) {
+                break;
+            }
+            fn_80257C10(cars.Chassis());
+        }
+    }
+    CarStatsShutdown();
+    fn_8013C8B8();
+    GaragePair* pair = &lbl_80498C48.pairs[slot];
+    *vehicle = lbl_80498C48.alt ? pair->c : pair->a;
+    return r != -1;
+}
+
+extern "C" {
 
 u8* fn_8024E6E4(u8* p, int del) {
     if (p) {
@@ -455,7 +680,7 @@ int fn_8024ECD4(void) {
     VehicleInfo* v = FindVehicleNamed(name, 0);
     CopyName(v->chassis, 0x20, (char*)(g + 0x60));
     if (((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
-        fn_801345D8((char*)(g + 0x80), 0x40, lbl_803442E4, v->display_name + 1);
+        fn_801345D8((char*)(g + 0x80), 0x40, "\\extreme_star %s", v->display_name + 1);
     } else {
         CopyName(v->display_name, 0x40, (char*)(g + 0x80));
     }
@@ -481,7 +706,7 @@ int fn_8024ECD4(void) {
     return 0;
 }
 
-void fn_8024F17C(u8* p) {}  // stub (634)
+void fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {}  // stub (634)
 
 u8* fn_8024FB64(u8* p, int del) {
     if (p) {
