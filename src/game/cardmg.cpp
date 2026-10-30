@@ -265,7 +265,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
     }
     S32(p, 0x5F8) = *(s32*)PTR(p, 0x26C);
     f32 bounce = F32(p, 0x314);
-    F32(p, 0x5F4) = lbl_80561F7C / (lbl_80561F80 * F32(desc, 0x8));
+    F32(p, 0x5F4) = lbl_80561F7C / (F32(desc, 0x8) * lbl_80561F80);
     if (bounce >= lbl_80561F84) {
         F32(p, 0x5F4) = F32(p, 0x5F4) * bounce;
     } else {
