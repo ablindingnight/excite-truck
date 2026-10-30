@@ -281,8 +281,8 @@ void fn_8028D4FC(void) {
 
 void fn_8028D58C(SkidStrip* s) {
     int keep;
-    SkidPt* p;
     SkidPt* end = s->pts + s->n;
+    SkidPt* p;
     SkidPt* start = s->pts + MAX(s->n - s->len + 2, 0);
     for (p = start; p < end; p++) {
         keep = 0;
