@@ -503,7 +503,7 @@ WidgetFragment* fn_8021B460(WidgetFragment* self,RotatingChoiceDescriptorNew* de
 extern "C" {
 
 int fn_8021E620(WidgetFragment* self,int key);  // placeholder (436 bytes)
-void fn_8021F4F0(void);  // placeholder (392 bytes)
+void fn_8021F4F0(WidgetFragment *self);
 }
 struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,step;void* image;int* focus;int token;float previousTime,nextTime;};
 typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
@@ -556,7 +556,46 @@ int fn_802C9A58();
 inline int Round355(float value){return (int)(value<(0.0f)?value-(0.5f):(0.5f)+value);}
 WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name);  // placeholder (700 bytes)
 void fn_80224E74(void);  // placeholder (1736 bytes)
-void fn_80225B6C(void);  // placeholder (2144 bytes)
+struct RollingRow;
+class CycleList {
+public:
+    CycleList(const char** names, const signed long* values, int count, int a);
+    ~CycleList(void);
+    const char* Name(void);
+    signed long Value(void);
+    void Next(void);
+    void Prev(void);
+    void Set(int i);
+    const char* NameAt(int i);
+
+    const char** names;  // offset 0x0
+    const signed long* values;   // offset 0x4
+    signed long first;           // offset 0x8
+    signed long cur;             // offset 0xC
+    signed long count;           // offset 0x10
+    signed long unk14;           // offset 0x14
+    unsigned char unk18;            // offset 0x18
+};
+typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
+struct PaletteFontObserved391;
+typedef struct PalettePaintNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];PaletteListTypedNew* list;PaletteFontObserved391* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;} PalettePaintNew;
+// Observed initialized foreign address view only; no storage or original container ownership.
+
+
+
+extern "C" {
+extern const float lbl_805634A4,lbl_805634A8,lbl_805634C4,lbl_805634EC,lbl_80563504,lbl_80563508,lbl_80563514,lbl_80563534,lbl_8056354C,lbl_80563550,lbl_80563554,lbl_80563558,lbl_8056355C;
+const char* fn_8022DC68(PaletteListTypedNew*,int);void fn_80233600(const char*,PaletteFontObserved391*,unsigned int,int,float,float,float);
+static inline unsigned int PaletteGrayColorObservedNew(int r,int g,int b,int a){return((unsigned int)(unsigned char)a<<24)|((unsigned int)(unsigned char)r<<16)|((unsigned int)(unsigned char)g<<8)|(unsigned char)b;}
+
+}
+
+extern "C" {void fn_8022591C(WidgetFragment*);
+static inline double PaletteAbs391(double value){return __fabs(value);}
+static inline float PaletteFractionObservedNew(float current,float low,float high){float extent=high-low;float offset=current-low;return(float)PaletteAbs391(offset)/(float)PaletteAbs391(extent);}
+}
+static inline void PaletteFillCenters391(float* out,float origin,float height){out[0]=origin+(4.0f)*height;out[1]=origin+(3.0f)*height;out[2]=origin+(2.0f)*height;out[3]=origin+height;out[4]=origin;out[5]=origin-height;out[6]=origin-(2.0f)*height;out[7]=origin-(3.0f)*height;out[8]=origin-(4.0f)*height;}
+void fn_80225B6C(WidgetFragment* source);
 void fn_80226B6C(WidgetFragment*);  // placeholder (336 bytes)
 
 
@@ -2158,7 +2197,51 @@ int fn_8021F06C(WidgetFragment* self,int key){
 WidgetFragment* fn_8021F394(WidgetFragment* self,int x,int y,int parameter,int* value,int height){fn_80219568(self,x,y,0,height,0,0);BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->parameter=parameter;self->vtable=lbl_8033E8FC;f->value=value;fn_801A7E54(f->buffer,24,(int)value);fn_80219440(self,0,value,16);fn_80219718(self);return self;}
 void fn_8021F42C(WidgetFragment* self,int,void*){fn_801A7E54((char*)self+0x254,24,*(int*)((char*)self+0x270));WidgetMarkDirty(self);}
 int fn_8021F478(int* result){fn_801A7844(1);KeyboardFilePrefix* file=&lbl_80490934;if(fn_801A7C8C(file->handle)){fn_801A7E54(file,24,file->handle);fn_802E47E8();*result=-2;return 1;}return 0;}
-void fn_8021F4F0(void) {}
+struct CaptionContext {int value;inline CaptionContext(int v=0):value(v){}};
+struct WidgetMenuEntry {
+ const char* name;int type;const void* data;int arg0,arg1;
+ inline WidgetMenuEntry(){}
+ inline void TextNew(const char* n,const char* t,CaptionContext context){type=3;name=n;data=t;arg0=context.value;arg1=0;}
+ inline void GenericNew(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
+ inline WidgetMenuEntry(const CaptionContext& context,const char* t,const char* n){type=3;data=t;name=n;arg1=0;arg0=context.value;}
+ inline WidgetMenuEntry(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
+ inline WidgetMenuEntry(const StartupSharedPrefixNew& end){name=(const char*)end.first;type=end.kind;data=(const void*)end.third;arg0=end.fourth;arg1=end.fifth;}
+};
+struct WidgetKeyboardFields {char prefix[0x254];char text[24];const char* value;int handle;};
+struct WidgetMenuDesc {const char* layout;WidgetMenuEntry* items;int(*poll)(int*);int flags,extra;};
+typedef char WidgetMenuEntrySize20[sizeof(WidgetMenuEntry)==20?1:-1];typedef char WidgetMenuDescSize20[sizeof(WidgetMenuDesc)==20?1:-1];typedef char CaptionContextSize4[sizeof(CaptionContext)==4?1:-1];typedef char WidgetKeyboardFieldsSize274[sizeof(WidgetKeyboardFields)==0x274?1:-1];
+extern "C" {extern WidgetMenuDesc lbl_802F9EE0;extern const char lbl_8033D9A4[],lbl_8055B890[6],lbl_8055B898[8],lbl_8055B8A0[3],lbl_8055B860[8];void fn_801A7A5C();int fn_802146BC(WidgetMenuDesc*,int,int,int);}
+extern "C" {extern const char lbl_8033D998[];int fn_8021F478(int*);}
+void fn_8021F4F0(WidgetFragment *self)
+{
+  WidgetKeyboardFields *f = (WidgetKeyboardFields *) self;
+  fn_801A7A5C();
+  CaptionContext caption(128);
+  strcpy(lbl_80490934.path, f->text);
+  KeyboardFilePrefix *file = &lbl_80490934;
+  file->handle = f->handle;
+  WidgetMenuEntry items[] = {
+    WidgetMenuEntry(caption,lbl_8033D9A4,lbl_8055B890),
+    WidgetMenuEntry(CaptionContext(128),f->value,lbl_8055B898),
+    WidgetMenuEntry(lbl_8055B8A0, 0, 0, -1, 0),
+    WidgetMenuEntry(lbl_8055B860, 6, 0, -1, 27),
+    WidgetMenuEntry(lbl_80490920)
+  };
+
+
+
+
+
+  WidgetMenuDesc desc = {lbl_8033D998,0,fn_8021F478,0,0};
+  desc.items = items;
+  if ((-2) == fn_802146BC(&desc, -999, -999, 1))
+  {
+    strcpy(f->text, file->path);
+    fn_80219718(self);
+  }
+  fn_802194FC(self);
+  WidgetMarkDirty(self);
+}  // placeholder (392 bytes)
 WidgetFragment* fn_8021F678(WidgetFragment* self,int x,int y,int width,int height,float minimum,float maximum,float* value,int rate){fn_80218F34(self,x,y,x+width,y+height,0);FloatSliderPrefix* f=(FloatSliderPrefix*)self;self->vtable=lbl_8033E878;f->value=value;f->minimum=minimum;f->maximum=maximum;f->dragging=0;f->rate=InlineWidgetAbsolute(rate);f->negative=rate<0;f->background=fn_802C5130(lbl_8033D9B0);f->marker=fn_802C5130(lbl_8033D9BC);f->oldX=self->left;f->oldY=self->top;f->oldWidth=((WidgetDispatch*)self)->Slot78();f->oldHeight=self->bottom-self->top;int newHeight=fn_802C5220(f->background);if(self->bottom-self->top>newHeight)newHeight=self->bottom-self->top;fn_80219284(self,((WidgetDispatch*)self)->Slot78()-1,newHeight);fn_80219440(self,0,value,4);f->focus=0;f->token=fn_80228F40(x,y);return self;}
 void fn_8021F7EC(WidgetFragment* self){if(fn_80129BC4(self)){Bound274* f=(Bound274*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
 int fn_8021F848(WidgetFragment* self,int key){FloatSliderPrefix* f=(FloatSliderPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=*f->value;switch(key){case 0x127:{int index=(int)((0.005f)+(float)(f->rate-1)*(old-f->minimum)/(f->maximum-f->minimum));float value=f->minimum+(float)(index+1)*(f->maximum-f->minimum)/(float)(f->rate-1);if(value<f->minimum)value=f->minimum;if(value>f->maximum)value=f->maximum;*f->value=value;if(ObservedAbsDecision(*f->value-old)<=lbl_80558DC4[0])fn_80216D28();return 1;}case 0x125:{int index=(int)((0.005f)+(float)(f->rate-1)*(old-f->minimum)/(f->maximum-f->minimum));float value=f->minimum+(float)(index-1)*(f->maximum-f->minimum)/(float)(f->rate-1);if(value<f->minimum)value=f->minimum;if(value>f->maximum)value=f->maximum;*f->value=value;if(ObservedAbsDecision(*f->value-old)<=lbl_80558DC4[0])fn_80216D28();return 1;}case 0x126:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);return 1;}break;case 0x128:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);return 1;}break;}return 0;}
@@ -2592,7 +2675,7 @@ void fn_80222CFC(WidgetFragment *source) {
             total += fn_8023293C(self->font, fn_8022D3F8(self->list, i1, 0), (1.0f));
         }
         spacing = (((6.2831855f) * self->radius) - total) / (float)count;
-        scale = lbl_80563528 / (total + (spacing * (float)count));
+        scale = (-6.2831855f) / (total + (spacing * (float)count));
         fn_80230C30(&x, &y, self->left, self->top);
         src = (const CircularPoseTypedNew*)fn_8022EDC4();
         dst = (CircularPoseTypedNew*)fn_8022EDE4(src->alpha, src);
@@ -2618,7 +2701,61 @@ void fn_80222CFC(WidgetFragment *source) {
         fn_8022EE98(dst);
     }
 }
-WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* list,int* selected) { return self; } // Unimplemented constructor; ABI-only placeholder.
+void fn_8022375C(WidgetFragment*);extern const char lbl_8033DA84[];extern u32 lbl_8033E4DC[];extern const float lbl_8056352C,lbl_80563530;int fn_80232578(const char*);
+struct SelectionConstructBaseObservedNew {char storage[0x244];inline SelectionConstructBaseObservedNew(int x,int y){fn_80218F34((WidgetFragment*)this,x,y,0,0,0);}};
+struct SelectionFullPrefix:SelectionConstructBaseObservedNew {const char* labels[33];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];int resource;float period,scale,speed,first,second,pulse;char gap418[4];bool locked;};
+typedef char Selection391FullSize420[sizeof(SelectionFullPrefix)==0x420?1:-1];
+WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* rawList,int* selectedInput){SelectionFullPrefix* instance=(SelectionFullPrefix*)self;fn_80218F34(self,x,y,0,0,0);
+  ObservedStringList *list = (ObservedStringList *) rawList;
+
+  int count = list->count;
+  SelectionFullPrefix *f = (SelectionFullPrefix *) self;
+
+  self->vtable = lbl_8033E4DC;
+  f->selected=selectedInput;f->count=count;
+
+
+  f->resource = fn_80232578(lbl_8033DA84);
+
+  f->period = (18.0f);
+  f->scale = (1.0f);
+  float zero = (0.0f);
+
+  int byteOffset;
+  SelectionFullPrefix *entry;
+  int i;
+  const char* label;
+  for (i=0,byteOffset=0; i < 33; i++, byteOffset += 4)
+  {
+    instance->available[i] = 0;
+    if (i < f->count)
+    {
+      int flags = 0;
+      label=fn_8022D3F8(list,i,&flags);
+      if ((flags & 3) != 1)
+      {
+        f->available[i] = 1;
+      }
+      entry = (SelectionFullPrefix *) (((u32) f) + byteOffset);
+      entry->icons[0] = (flags >> 2) & 63;
+      entry->widths[0] = f->scale * fn_8023293C(f->resource, label, (1.0f));
+      entry->labels[0] = label;
+      continue;
+    }
+    entry = (SelectionFullPrefix *) (((u32) f) + byteOffset);
+    entry->labels[0] = 0;
+    entry->widths[0] = zero;
+    entry->icons[0] = -1;
+  }
+
+  f->pulse = (0.0f);
+  f->second = (0.0f);
+  f->first = (0.0f);
+  f->speed = (-240.0f);
+  f->locked = 0;
+  fn_8022375C(self);
+
+return self;}
 WidgetFragment* fn_80223208(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E4DC;SelectResourcePrefix* f=(SelectResourcePrefix*)self;fn_802328D4(f->resource);f->resource=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80223280(WidgetFragment* self){SelectionDrawFieldsNew* f=(SelectionDrawFieldsNew*)self;float y,x,selectedX,half,shadow;x=f->scrollX;y=(float)self->top;y=(240.0f)-y;selectedX=f->scrollX;shadow=(2.0f);half=(0.5f);
 int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
@@ -2637,13 +2774,13 @@ int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
 i=*f->selected;int selected=i;
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
-float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]/2.0f-f->spacing/2.0f;left=lbl_80563534+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
-fn_80230924(0x96646464u,left,y-(2.0f),left+width,(y-height)-lbl_80563534,(0.0f));
-fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-lbl_80563534,(0.0f));
-fn_80230924(0x96282828u,left,y-(2.0f),left+width,y-lbl_80563534,(0.0f));
-fn_80230924(0x96aaaaaau,left,(y-height)-(2.0f),left+width,(y-height)-lbl_80563534,(0.0f));
-fn_80230924(0x96aaaaaau,(left+width)-(2.0f),y-(2.0f),left+width,(y-height)-lbl_80563534,(0.0f));
-fn_80232BA4(f->labels[selected],f->resource,lbl_80563534+selectedX,y-lbl_80563534,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(self,selected);fn_80232BA4(f->labels[selected],f->resource,(2.0f)+selectedX,y-(2.0f),color,12,f->scale,(0.0f),(1.0f));}
+float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]/2.0f-f->spacing/2.0f;left=4.0f+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
+fn_80230924(0x96646464u,left,y-(2.0f),left+width,(y-height)-4.0f,(0.0f));
+fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-4.0f,(0.0f));
+fn_80230924(0x96282828u,left,y-(2.0f),left+width,y-4.0f,(0.0f));
+fn_80230924(0x96aaaaaau,left,(y-height)-(2.0f),left+width,(y-height)-4.0f,(0.0f));
+fn_80230924(0x96aaaaaau,(left+width)-(2.0f),y-(2.0f),left+width,(y-height)-4.0f,(0.0f));
+fn_80232BA4(f->labels[selected],f->resource,4.0f+selectedX,y-4.0f,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(self,selected);fn_80232BA4(f->labels[selected],f->resource,(2.0f)+selectedX,y-(2.0f),color,12,f->scale,(0.0f),(1.0f));}
 void fn_802235B4(WidgetFragment* self){SelectBooleanNavigationRelativeNew* f=(SelectBooleanNavigationRelativeNew*)self;int* value=f->selected;int selected=*value;int bounds[2]={selected+1,f->count};int step=1;for(;bounds[0]<bounds[1];bounds[0]++,step++){if(((SelectBooleanNavigationRelativeNew*)((unsigned int)f+((unsigned int)selected+(unsigned int)step)))->available[0]){*value+=step;return fn_8022375C(self);}}for(int step=selected;step>0;step--){if(((SelectBooleanNavigationRelativeNew*)((char*)f+(unsigned int)(selected-step)))->available[0]){*value-=step;return fn_8022375C(self);}}}
 void fn_80223644(WidgetFragment* self){NavigationPreviousNew* f=(NavigationPreviousNew*)self;int* value=f->selected;int selected=*value;for(int step=1;selected-step>=0;step++){if(((NavigationPreviousNew*)((char*)f+((unsigned int)selected-(unsigned int)step)))->available[0]){*value-=step;fn_8022375C(self);return;}}for(int step=f->count-selected-1;step>0;step--){if(((NavigationPreviousNew*)(((unsigned int)f+(unsigned int)selected)+(unsigned int)step))->available[0]){*value+=step;fn_8022375C(self);return;}}}
 u32 fn_802236C8(WidgetFragment* self,int index){SelectionColorPrefix* f=(SelectionColorPrefix*)self;if(f->locked)return 0xe6969696u;u32 color=0xff9f9f9fu;if(f->flags[index])color=0xffffffffu;if(index==*f->selected&&(1.0f)==f->pulse)color=0xffffd03fu;return color;}
@@ -2667,9 +2804,9 @@ void fn_80223CC4(WidgetFragment* self){TweenPrefix* f=(TweenPrefix*)self;if(f->s
 WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name){
  fn_80218F80(self,desc);LargeImage355* f=(LargeImage355*)self;self->vtable=lbl_8033E350;f->name=0;f->flag=0;f->resource=-2;f->image=0;
  if(!fn_802C9A58()&&((WidgetDispatch*)self)->Slot78()>600&&self->bottom-self->top>460){
- int left=lbl_8055CFF0/2+Round355(lbl_80563538*(float)(self->left-lbl_8055CFF0/2));
+ int left=lbl_8055CFF0/2+Round355(1.3333333f*(float)(self->left-lbl_8055CFF0/2));
  int top=lbl_8055CFF4/2+Round355((float)(self->top-lbl_8055CFF4/2));
- int width=Round355(lbl_80563538*(float)((WidgetDispatch*)self)->Slot78());
+ int width=Round355(1.3333333f*(float)((WidgetDispatch*)self)->Slot78());
  int height=Round355((float)(self->bottom-self->top));
  self->left=left;self->top=top;self->right=left+width;self->bottom=top+height;
  }
@@ -2686,7 +2823,7 @@ void fn_80224328(WidgetFragment* self){RenderPrefix* f=(RenderPrefix*)self;if(f-
 WidgetFragment* fn_8022435C(WidgetFragment* self,void* context,WidgetDesc* desc,int(*callback)(void*),int* frame){fn_80218F80(self,desc);self->vtable=lbl_8033E248;ToggleImagePrefix* f=(ToggleImagePrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->width=(float)desc->dx;f->height=(float)desc->dy;f->active=0;f->pressed=0;f->mode=(u32)desc->field9c>>31;float alpha;if(f->mode==0)alpha=(0.0f);else alpha=(0.1f);f->blend=alpha;f->alpha=alpha;f->token=fn_80228F40(self->left,self->top);f->focus=0;f->callback=callback;f->context=context;f->speed=InlineWidgetAbsolute(desc->field9c);f->asset=(ImageAlphaAsset*)fn_8022EE9C();f->scope=fn_8022EE9C();f->elapsed=(0.0f);f->frame=frame?*frame:0;char path[256];strcpy(path,(const char*)desc+0x40);f->image=fn_802C5130(path);if(!f->image)fn_802E30C8(lbl_8033DABC,path);return self;}
 WidgetFragment* fn_802244C8(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E248;ThreeCleanupPrefix* f=(ThreeCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->assetSecond);fn_8022EE98(f->assetFirst);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8022455C(WidgetFragment* self){TimedFocusPrefix* f=(TimedFocusPrefix*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,0,f->focus,4);((WidgetDispatch*)self)->Slot74(0,0);}
-void fn_802245C8(WidgetFragment* self){ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(fn_8023659C()<f->elapsed)f->elapsed=fn_8023659C();switch(f->mode){case 0:if(f->active){float wave=(0.5f)+(0.5f)*(float)sin((float)(f->speed+1)*(fn_8023659C()-f->elapsed));f->alpha=InlineWidgetMinimum((float)(f->speed+1)*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<(0.005f)){f->pressed=0;f->alpha=(0.0f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)(f->speed+1)*(fn_8023659C()-f->elapsed),(0.0f));}break;case 1:if(f->active){float wave=lbl_8056353C+((0.1f)+lbl_8056353C*(float)sin((float)-f->speed*(fn_8023659C()-f->elapsed)));f->alpha=InlineWidgetMinimum((0.1f)+(float)f->speed*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<lbl_80563540){f->pressed=0;f->alpha=(0.1f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)f->speed*(fn_8023659C()-f->elapsed),(0.1f));}break;}fn_802192AC(self);}
+void fn_802245C8(WidgetFragment* self){ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(fn_8023659C()<f->elapsed)f->elapsed=fn_8023659C();switch(f->mode){case 0:if(f->active){float wave=(0.5f)+(0.5f)*(float)sin((float)(f->speed+1)*(fn_8023659C()-f->elapsed));f->alpha=InlineWidgetMinimum((float)(f->speed+1)*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<(0.005f)){f->pressed=0;f->alpha=(0.0f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)(f->speed+1)*(fn_8023659C()-f->elapsed),(0.0f));}break;case 1:if(f->active){float wave=0.45f+((0.1f)+0.45f*(float)sin((float)-f->speed*(fn_8023659C()-f->elapsed)));f->alpha=InlineWidgetMinimum((0.1f)+(float)f->speed*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<0.105000004f){f->pressed=0;f->alpha=(0.1f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)f->speed*(fn_8023659C()-f->elapsed),(0.1f));}break;}fn_802192AC(self);}
 void fn_80224864(WidgetFragment* self,int,void*){TimedFocusPrefix* f=(TimedFocusPrefix*)self;if(!f->active&&f->token==*f->focus){f->inactive=0;f->active=1;}else if(f->active&&f->token!=*f->focus){f->active=0;f->inactive=1;}f->stamp=fn_8023659C();f->previous=f->value;}
 void fn_802248FC(WidgetFragment* self){ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(f->image){if(!self->enabled)f->asset->alpha=(0.5f);else if(f->active)f->asset->alpha=f->alpha;else f->asset->alpha=f->mode==1?(1.0f):(0.0f);fn_8022EEF8(f->scope,(void*)fn_8022EDC4(),f->asset);fn_8022ED00(f->scope);int frame,height;height=self->bottom-self->top;frame=f->frame%fn_802C51AC(f->image);fn_802C5320(f->image,frame,f->x,f->y,(0.0f),(float)((WidgetDispatch*)self)->Slot78(),(float)height);fn_8022EDB8();}}
 int fn_80224A38(WidgetFragment* self,int key){ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;switch(key){case 13:if(f->callback&&!f->callback(f->context))return 1;fn_802168BC(f->context);return 1;case 0x126:fn_80217D84(self->window);return 1;case 0x128:fn_80217C4C(self->window);return 1;}return 0;}
@@ -2695,12 +2832,178 @@ WidgetFragment* fn_80224B54(WidgetFragment* self,int context,WidgetDesc* desc){f
 WidgetFragment* fn_80224D40(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E1C4;AssetFormatPrefix* f=(AssetFormatPrefix*)self;if(f->owned)fn_8022EE98(f->asset);fn_802328D4(f->resource);f->resource=0;f->first=0;strcpy(f->text,lbl_8055B88C);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80224DDC(WidgetFragment* self,float x,float y,float z){ResourceTextPrefix* f=(ResourceTextPrefix*)self;f->owned=1;f->asset=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=(RotationMatrix*)f->asset;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
 void fn_80224E74(void) {}
-WidgetFragment* fn_8022553C(WidgetFragment* self,RollingListData* list,WidgetDesc* desc){fn_80218F80(self,desc);RollingListFullPrefix* f=(RollingListFullPrefix*)self;f->list=list;self->vtable=lbl_8033E140;f->resource=fn_80232578(lbl_8033DA84);f->count=InlineIntegerMinimum(InlineIntegerMaximum(desc->field9c,1),3);f->x=(float)lbl_8055FB9C/lbl_80563544;f->x+=(float)self->left;f->y=(float)lbl_8055FBA0/2.0f-(float)self->top;f->lineHeight=(5.0f)+(float)fn_80232B70(f->resource);f->period=f->lineHeight*(float)f->list->count;f->upper=f->y+(0.5f)*f->period;f->lower=f->y-(0.5f)*f->period;int row=0;f->rows=(RollingRow*)__nwa__FUlPCc(f->list->count*12,lbl_8033DAEC);for(int i=f->list->index;i<f->list->count;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}for(int i=0;i<f->list->index;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}f->direction=0;f->stamp=fn_8023659C();f->elapsed=(0.0f);f->nextStamp=fn_8023659C();f->focus=0;f->token=fn_80228F40(self->left,self->top);return self;}
+WidgetFragment* fn_8022553C(WidgetFragment* self,RollingListData* list,WidgetDesc* desc){fn_80218F80(self,desc);RollingListFullPrefix* f=(RollingListFullPrefix*)self;f->list=list;self->vtable=lbl_8033E140;f->resource=fn_80232578(lbl_8033DA84);f->count=InlineIntegerMinimum(InlineIntegerMaximum(desc->field9c,1),3);f->x=(float)lbl_8055FB9C/(-2.0f);f->x+=(float)self->left;f->y=(float)lbl_8055FBA0/2.0f-(float)self->top;f->lineHeight=(5.0f)+(float)fn_80232B70(f->resource);f->period=f->lineHeight*(float)f->list->count;f->upper=f->y+(0.5f)*f->period;f->lower=f->y-(0.5f)*f->period;int row=0;f->rows=(RollingRow*)__nwa__FUlPCc(f->list->count*12,lbl_8033DAEC);for(int i=f->list->index;i<f->list->count;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}for(int i=0;i<f->list->index;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}f->direction=0;f->stamp=fn_8023659C();f->elapsed=(0.0f);f->nextStamp=fn_8023659C();f->focus=0;f->token=fn_80228F40(self->left,self->top);return self;}
 WidgetFragment* fn_80225828(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E140;RollingRowsPrefix* f=(RollingRowsPrefix*)self;if(f->rows)__dla__FPv(f->rows);f->rows=0;if(self->y)fn_802328D4(self->y);self->y=0;self->x=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_802258C8(WidgetFragment* self){Bound27c* f=(Bound27c*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}
 void fn_80225918(WidgetFragment* self){fn_802192AC(self);}
-void fn_8022591C(WidgetFragment* self){RollingInterpolationPrefix* f=(RollingInterpolationPrefix*)self;if(f->direction){float now=fn_8023659C();if(f->stamp>now)f->stamp=now-lbl_80563548;float elapsed=now-f->stamp;if(elapsed>lbl_80563548){for(int i=0;i<f->list->count;i++){float target=f->rows[i].target;f->rows[i].current=target;f->rows[i].previous=target;}f->direction=0;}else{for(int i=0;i<f->list->count;i++){switch(f->direction){case 0:break;case 2:if(f->rows[i].target>f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,lbl_80563548);else if(f->rows[i].target<f->rows[i].previous){if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->upper+(f->rows[i].target-f->lower),elapsed,lbl_80563548);else if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->lower-(f->upper-f->rows[i].previous),f->rows[i].target,elapsed,lbl_80563548);}break;case 1:if(f->rows[i].target<f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,lbl_80563548);else if(f->rows[i].target>f->rows[i].previous){if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->lower-(f->upper-f->rows[i].target),elapsed,lbl_80563548);else if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->upper+(f->rows[i].previous-f->lower),f->rows[i].target,elapsed,lbl_80563548);}break;}if(f->rows[i].current>f->upper)f->rows[i].current-=f->period;else if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;}}}}
-void fn_80225B6C(void) {}
+void fn_8022591C(WidgetFragment* self){RollingInterpolationPrefix* f=(RollingInterpolationPrefix*)self;if(f->direction){float now=fn_8023659C();if(f->stamp>now)f->stamp=now-0.2f;float elapsed=now-f->stamp;if(elapsed>0.2f){for(int i=0;i<f->list->count;i++){float target=f->rows[i].target;f->rows[i].current=target;f->rows[i].previous=target;}f->direction=0;}else{for(int i=0;i<f->list->count;i++){switch(f->direction){case 0:break;case 2:if(f->rows[i].target>f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target<f->rows[i].previous){if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->upper+(f->rows[i].target-f->lower),elapsed,0.2f);else if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->lower-(f->upper-f->rows[i].previous),f->rows[i].target,elapsed,0.2f);}break;case 1:if(f->rows[i].target<f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target>f->rows[i].previous){if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->lower-(f->upper-f->rows[i].target),elapsed,0.2f);else if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->upper+(f->rows[i].previous-f->lower),f->rows[i].target,elapsed,0.2f);}break;}if(f->rows[i].current>f->upper)f->rows[i].current-=f->period;else if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;}}}}
+void fn_80225B6C(WidgetFragment* source){PalettePaintNew* arg0=(PalettePaintNew*)source;
+    int var_r23;
+    int *temp_r4;
+    int temp_r0;
+    int var_r14;
+    unsigned int var_ctr;
+    float *var_r18;
+    RollingRow *temp_r16;
+    const float *var_r4;
+    unsigned int var_r6;
+    unsigned int var_r5;
+    int var_r7;
+    unsigned char *var_r17;
+    int temp_r21;
+    int temp_r5;
+
+    float var_f4_8;
+
+
+
+
+
+
+
+    float var_f2;
+    float var_f3;
+
+    float var_f30;
+    float var_f3_2;
+    float temp_f1;
+    float var_f29;
+    float var_f28;
+    float var_f27;
+    float temp_f26;
+    float temp_f25;
+    float temp_f24;
+    float temp_f2_2;
+    float var_f5;
+
+    float temp_f0;
+    float temp_f0_2;
+
+
+
+
+
+
+
+
+
+
+    fn_8022591C(source);
+    if ((int) arg0->enabled == 0) {
+        if (((float) __fabs(arg0->elapsed) <= *lbl_80558DC4) || (fn_8023659C() < arg0->nextStamp)) {
+            arg0->nextStamp = fn_8023659C();
+        }
+        temp_f0 = arg0->elapsed + ((4.0f) * (fn_8023659C() - arg0->nextStamp));
+        var_f3 = (1.0f);
+        var_f3=MapMinBranchNew(var_f3,temp_f0);
+        var_f3=MapMaxBranchNew(var_f3,(0.001f));
+        arg0->elapsed = var_f3;
+        arg0->nextStamp = fn_8023659C();
+    } else {
+        if (((float) __fabs(arg0->elapsed - (1.0f)) <= *lbl_80558DC4) || (fn_8023659C() < arg0->nextStamp)) {
+            arg0->nextStamp = fn_8023659C();
+        }
+        temp_f0_2 = arg0->elapsed - ((4.0f) * (fn_8023659C() - arg0->nextStamp));
+        var_f3_2 = (0.999f);
+        var_f3_2=MapMinBranchNew(var_f3_2,temp_f0_2);
+        var_f3_2=MapMaxBranchNew(var_f3_2,(0.0f));
+        arg0->elapsed = var_f3_2;
+        arg0->nextStamp = fn_8023659C();
+    }
+
+
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    float positions[9];PaletteFillCenters391(positions,arg0->y,arg0->lineHeight);
+    
+    
+    
+    
+    float normal[9]={0.0f,0.0f,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f,0.0f};
+    normal[0]=PaletteNaturalLerp(0.0f,0.15f,PaletteNaturalRemap((float)arg0->count,3.0f,4.0f));
+    normal[1]=PaletteNaturalLerp(0.0f,0.15f,PaletteNaturalRemap((float)arg0->count,2.0f,3.0f));
+    normal[2]=PaletteNaturalLerp(0.0f,0.35f,PaletteNaturalRemap((float)arg0->count,1.0f,3.0f));
+    normal[3]=PaletteNaturalLerp(0.0f,0.75f,PaletteNaturalRemap((float)arg0->count,0.0f,3.0f));
+    normal[5]=PaletteNaturalLerp(0.0f,0.75f,PaletteNaturalRemap((float)arg0->count,0.0f,3.0f));
+    normal[6]=PaletteNaturalLerp(0.0f,0.35f,PaletteNaturalRemap((float)arg0->count,1.0f,3.0f));
+    normal[7]=PaletteNaturalLerp(0.0f,0.15f,PaletteNaturalRemap((float)arg0->count,2.0f,3.0f));
+    normal[8]=PaletteNaturalLerp(0.0f,0.15f,PaletteNaturalRemap((float)arg0->count,3.0f,4.0f));
+    var_r23=0;
+    unsigned char colorsA[9]={255,255,255,255,255,255,255,255,255};
+    
+    
+    
+    
+    
+    
+    
+    
+    unsigned char colorsB[9]={255,255,255,255,128,255,255,255,255};
+    
+    
+    
+    
+    
+    
+    
+    
+    float alternate[9]={0.0f,0.0f,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f,0.0f};
+    
+    
+    
+    
+    
+    
+    
+    
+    temp_r4 = arg0->focus;
+    if ((temp_r4 != 0) && ((int) arg0->token != (int) *temp_r4)) {
+        var_r23 = 1;
+    }
+    temp_r0 = var_r23 == 0;
+    var_r18 = (temp_r0 != 0 ? &normal[0] : &alternate[0]);
+    var_r17 = (temp_r0 != 0 ? &colorsA[0] : &colorsB[0]);
+    var_f29 = (1.0f);
+    var_r14 = 0;
+    var_f30 = (0.0f);
+
+    for(;var_r14<(int)arg0->list->first;var_r14++){
+    temp_f24 = (255.0f);
+    temp_f25 = (1.5f);
+    var_f27 = (3.0f);
+    var_f28 = (0.5f);
+        temp_r16 = arg0->rows;
+        temp_f1 = temp_r16[var_r14].current;
+        float radiusHeight391=arg0->lineHeight;float radiusProduct391=var_f27*radiusHeight391;float bound=var_f28+radiusProduct391;
+        if (!((float)PaletteAbs391(temp_f1-arg0->y) > bound)) {
+            var_f4_8 = (0.0f);
+            var_r4=&positions[0];var_f2=var_f4_8;var_r6=0;var_r5=0;var_r7=0;
+            for(var_ctr=9;var_ctr!=0;--var_ctr){if((temp_f1<=var_r4[0])&&(temp_f1>var_r4[1])){var_f4_8=var_r18[var_r7];var_r6=var_r17[var_r7];var_f2=var_r18[var_r7+1];var_r5=var_r17[var_r7+1];break;}
+var_r4++;var_r7++;}
+            temp_f2_2 = (&positions[0])[var_r7];
+            float highPosition391=positions[var_r7+1];var_f5 = PaletteFractionObservedNew(temp_r16[var_r14].current,temp_f2_2,highPosition391);
+            temp_f26 = var_f4_8 + (var_f5 * (var_f2 - var_f4_8));
+            if(var_f29 < var_f5) var_f5=var_f29;
+            var_f5=(var_f5>var_f30)?var_f5:var_f30;
+
+            temp_r21 = (int) ((float) var_r6 + (var_f5 * ((float) var_r5 - (float) var_r6)));
+            temp_r5 = 0xFF - (unsigned char) temp_r21;
+            {unsigned int shadowColorWord=PaletteGrayColorObservedNew(temp_r5,temp_r5,temp_r5,(int)(temp_f24*temp_f26));fn_80233600(arg0->list->NameAt(var_r14), arg0->resource,shadowColorWord, 0xC, temp_f25 + arg0->x, temp_r16[var_r14].current - temp_f25, (0.0f));}
+            {unsigned int foregroundColorWord=PaletteGrayColorObservedNew(temp_r21,temp_r21,temp_r21,(int)(temp_f24*temp_f26));fn_80233600(arg0->list->NameAt(var_r14), arg0->resource,foregroundColorWord, 0xC, arg0->x, arg0->rows[var_r14].current, (0.0f));}
+        }
+    }
+}
 int fn_802263CC(WidgetFragment* self,int key){RollingActionPrefix* f=(RollingActionPrefix*)self;if(f->focus&&f->token!=*f->focus)return 0;switch(key){case 0x127:if(f->list->vertical){fn_80217C4C(self->window);return 1;}break;case 0x125:if(f->list->vertical){fn_80217D84(self->window);return 1;}break;case 0x128:fn_8022DBFC(f->list);fn_80226570(self,-1);f->direction=2;f->stamp=fn_8023659C();return 1;case 0x126:fn_8022DC20(f->list);fn_80226570(self,1);f->direction=1;f->stamp=fn_8023659C();return 1;case 13:{void* context;int(*callback)(void*)=f->list->callback;context=fn_8022DBE8(f->list);if(!callback||callback(context))fn_802168BC(context);return 1;}}return 0;}
 int fn_80226528(WidgetFragment* self,int key){Bound27c* f=(Bound27c*)self;if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
 void fn_80226570(WidgetFragment* self,int delta){RollingRowsPrefix* f=(RollingRowsPrefix*)self;for(int i=0;i<f->list->count;i++){f->rows[i].previous=f->rows[i].current;f->rows[i].target-=f->speed*(float)delta;if(f->rows[i].target>f->upper)f->rows[i].target-=f->period;if(f->rows[i].target<f->lower)f->rows[i].target+=f->period;}}
