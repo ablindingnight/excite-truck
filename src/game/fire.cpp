@@ -1493,21 +1493,21 @@ void ExhaustTorchMan::DrawEdges(void) {
 }
 
 void ExhaustTorchMan::DrawFaces(void) {
+    int i;
     const FireCar* c;
-    for (int i = 0; i < fn_80287B14(); i++) {
+    for (i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const TorchPart* part = fn_80288060(model, k);
                 c = fn_80287B24(i);
-                TorchEntry* e = &entries[i];
-                fn_801BFD34(&e->pos, &part->pos, c);
-                Mat3Mul((Mat3*)e->rot, &part->rot, (const Mat3*)c);
+                fn_801BFD34(&entries[i].pos, &part->pos, c);
+                Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
                 Vec p;
-                p.x = e->pos.x + e->rot[1].x * entries[i].len;
-                p.y = e->pos.y + e->rot[1].y * entries[i].len;
-                p.z = e->pos.z + e->rot[1].z * entries[i].len;
+                p.x = entries[i].pos.x + entries[i].rot[1].x * entries[i].len;
+                p.y = entries[i].pos.y + entries[i].rot[1].y * entries[i].len;
+                p.z = entries[i].pos.z + entries[i].rot[1].z * entries[i].len;
                 DrawFace(&entries[i], entries[i].frame, entries[i].len);
             }
         }
