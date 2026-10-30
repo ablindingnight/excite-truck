@@ -341,7 +341,126 @@ u8* lbl_8055E5A0;  // track collision mesh
 
 extern "C" {
 
-int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32* vel, f32 r) { return 0; }  // stub (470)
+}  // extern "C"
+
+// A rounded edge of a polyhedron volume ("curve": a cylinder around an axis).
+struct PolyCurve {
+    RVec3 center;  // offset 0x0
+    RVec3 axis;    // offset 0xC
+    f32 radius;    // offset 0x18
+};
+
+// One penetrated face or edge: push direction and depth.
+struct PolyPush {
+    RVec3 n;  // offset 0x0
+    f32 d;    // offset 0xC
+};
+
+extern const f32 lbl_805622D0;  // 0.0
+extern const f32 lbl_805622D4;  // 0.001
+extern const f32 lbl_805622D8;  // 0.01
+
+extern "C" {
+
+// Sphere (centre c, radius r, moving along vel) against a polyhedron volume. In the volume's frame it
+// collects every face the sphere reaches (allowing for its motion) and every rounded edge it cuts into,
+// pushes the centre out by their depth-weighted average and returns the contact point, depth and normal.
+int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32* vel, f32 r) {
+    u8* o = (u8*)world;
+    CFrame* f = (CFrame*)PTR(o, 0xC);
+    RVec3 lc;
+    lc.x = c[0] - f->t.x;
+    lc.y = c[1] - f->t.y;
+    lc.z = c[2] - f->t.z;
+    {
+        f32 x = Dot3(lc.x, f->m[0], lc.y, f->m[1], lc.z, f->m[2]);
+        f32 y = Dot3(lc.x, f->m[3], lc.y, f->m[4], lc.z, f->m[5]);
+        f32 z = Dot3(lc.x, f->m[6], lc.y, f->m[7], lc.z, f->m[8]);
+        lc.x = x;
+        lc.y = y;
+        lc.z = z;
+    }
+    RVec3 lo = *(RVec3*)(o + 0x24);
+    RVec3 hi = *(RVec3*)(o + 0x30);
+    if (lc.x > hi.x + r || lc.y > hi.y + r || lc.z > hi.z + r || lc.x < lo.x - r || lc.y < lo.y - r ||
+        lc.z < lo.z - r) {
+        return 0;
+    }
+    RVec3 lv;
+    MulVecT(&lv, (const RVec3*)vel, (CFrame*)PTR(o, 0xC));
+    f32 sum = lbl_805622D0;
+    int count = 0;
+    PolyPush push[9];
+    PolyPlane* pl = ((PolyVol*)o)->planes;
+    for (int i = 0; i < S32(o, 0xBC); i++, pl++) {
+        f32 a = (f32)__fabs(PSVECDotProduct(&lv, &pl->n));
+        f32 d = (PSVECDotProduct(&lc, &pl->n) - pl->d) + a;
+        if (d >= lbl_805622D4) {
+            sum += d * d;
+            PolyPush* q = &push[count++];
+            q->n = *(RVec3*)&pl->n;
+            q->d = d;
+        }
+    }
+    PolyCurve* cv = (PolyCurve*)(o + 0xC0);
+    for (int i = 0; i < S32(o, 0xDC); i++, cv++) {
+        RVec3 dd;
+        dd.x = lc.x - cv->center.x;
+        dd.y = lc.y - cv->center.y;
+        dd.z = lc.z - cv->center.z;
+        f32 t = -PSVECDotProduct(&dd, &cv->axis);
+        dd.x += cv->axis.x * t;
+        dd.y += cv->axis.y * t;
+        dd.z += cv->axis.z * t;
+        f32 m = PSVECMag(&dd.x);
+        f32 pen = cv->radius - m;
+        if (m > lbl_805622D8 && pen > lbl_805622D4) {
+            f32 k = lbl_805622DC / m;
+            PolyPush* q = &push[count++];
+            q->n.x = dd.x * k;
+            q->n.y = dd.y * k;
+            sum += pen * pen;
+            q->n.z = dd.z * k;
+            q->d = pen;
+        }
+    }
+    if (count == 0) {
+        return 0;
+    }
+    f32 inv = lbl_805622E0 / sum;
+    RVec3 pc = lc;
+    PolyPush* q = push;
+    for (; count > 0; count--, q++) {
+        f32 k = -q->d * (inv * (q->d * q->d));
+        pc.x += q->n.x * k;
+        pc.y += q->n.y * k;
+        pc.z += q->n.z * k;
+    }
+    RVec3 w;
+    CFrame* g = (CFrame*)PTR(o, 0xC);
+    MulVec(&w, &pc, g);
+    w.x += g->t.x;
+    w.y += g->t.y;
+    w.z += g->t.z;
+    RVec3 dv;
+    dv.x = w.x - c[0];
+    dv.y = w.y - c[1];
+    dv.z = w.z - c[2];
+    f32 m = PSVECMag(&dv.x);
+    f32 dep = r - m;
+    *depth = dep;
+    if (dep > lbl_805622D0) {
+        f32 k = lbl_805622DC / m;
+        hit[0] = w.x;
+        hit[1] = w.y;
+        hit[2] = w.z;
+        n[0] = dv.x * k;
+        n[1] = dv.y * k;
+        n[2] = dv.z * k;
+        return 1;
+    }
+    return 0;
+}
 
 // Friction impulse at contact point pt (normal n) between volumes a and b: the opposing tangential
 // relative velocity, scaled by -1000 and clamped to half of mu * (a's + b's friction).
