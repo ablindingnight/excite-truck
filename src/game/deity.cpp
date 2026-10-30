@@ -909,8 +909,8 @@ void DeityCar::Update(void) {
         }
     }
     if (r == 2 || r == 0) {
-        IdealFollower* f = follower;
         LineFollower* l = line;
+        IdealFollower* f = follower;
         ideal.seg = f->il.seg;
         ideal.t = f->il.t;
         ideal.mode = f->il.mode;
