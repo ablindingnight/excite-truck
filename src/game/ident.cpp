@@ -216,12 +216,14 @@ void IdentSaveEvent(int event) {
 }
 
 void IdentResetAll(void) {
+    int n;
+    const char* src;
     int i;
 
     lbl_8055D46C->current = 0;
     for (i = 0; i < NUM_SLOTS; i++) {
-        const char* src = "";
-        int n = NAME_LEN;
+        src = "";
+        n = NAME_LEN;
         char* dst;
 
         lbl_8055D46C->slots[i].state = 0;
