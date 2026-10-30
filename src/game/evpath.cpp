@@ -139,6 +139,10 @@ static inline void CopyName(int n, char* d, const char* s) {
     }
 }
 
+struct AnimName {
+    char name[30];
+};
+
 ModuleTag lbl_8055F670;
 s32 lbl_8055F678;
 u8 lbl_8055F67C;
@@ -500,11 +504,12 @@ void fn_8027F204(const char* name) {
     if (!l) {
         return;
     }
-    if (S32(l, 0x44) + 1 <= S32(l, 0x48)) {
-        CopyName(30, (char*)(PTR(l, 0x40) + S32(l, 0x44)++ * 30), name);
+    ArrayBase<AnimName>* anims = (ArrayBase<AnimName>*)(l + 0x40);
+    if (anims->Count() + 1 <= anims->cap) {
+        CopyName(30, anims->data[anims->count++].name, name);
         return;
     }
-    fn_802E30C8("add_anim_to_wait_for: can't add, there are %d already!", S32(l, 0x44));
+    fn_802E30C8("add_anim_to_wait_for: can't add, there are %d already!", anims->Count());
 }
 
 s32 fn_802168E4(void);
@@ -927,9 +932,6 @@ struct ScoreTally {
     }
 };
 
-struct AnimName {
-    char name[30];
-};
 
 namespace {
 
