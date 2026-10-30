@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -171,7 +172,129 @@ void fn_8018DA5C(u8* p, u8* m) {
     }
 }
 
-void fn_8018DE94(u8* p) {}  // stub (295)
+// A deformable point of the car body (0x34 bytes, from the model at car + 0x26C).
+struct DentVec {
+    f32 x, y, z;
+};
+
+struct DentPoint {
+    s32 unk0;     // offset 0x0
+    s32 goal;     // offset 0x4: index into the car's spring goals (car + 0x5FC)
+    DentVec lo;   // offset 0x8
+    DentVec hi;   // offset 0x14
+    DentVec pos;  // offset 0x20
+    f32 unk2C;    // offset 0x2C
+    f32 soft;     // offset 0x30
+};
+
+// A spring link between two dent points (0x14 bytes).
+struct DentLink {
+    s32 a;        // offset 0x0
+    s32 b;        // offset 0x4
+    f32 along;    // offset 0x8: share of the push passed along the link
+    f32 across;   // offset 0xC: share of the push passed across it
+    f32 lift;     // offset 0x10
+};
+
+static inline f32 DentClamp(f32 v, f32 lo, f32 hi) {
+    v = hi < v ? hi : v;
+    return v > lo ? v : lo;
+}
+
+f32 PSVECMag(const f32* v);
+void PSVECNormalize(const f32* v, f32* out);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+
+// Dents point i of the body by `push`: moves its spring goal (pushing out only along the point's outward
+// direction is cancelled), clamps it to the point's box, then passes the push on to linked points (not back to
+// `from`), up to three links deep.
+void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
+    DentPoint* pt = (DentPoint*)PTR(p, 0x26C) + i;
+    f32 k = 10.0f * (0.0000068539325f * pt->soft);
+    f32 mag = PSVECMag(&push->x);
+    DentVec d;
+    d.x = push->x * k;
+    d.y = push->y * k;
+    d.z = push->z * k;
+    d.y = d.y < 0.0f ? d.y : 0.0f;
+    DentVec* g = (DentVec*)(p + 0x5FC) + pt->goal;
+    g->x += d.x * 2.0f;
+    g->y += d.y * 2.0f;
+    g->z += d.z * 2.0f;
+    if (PSVECDotProduct(&g->x, &pt->pos.x) > 0.0f) {
+        DentVec n = pt->pos;
+        PSVECNormalize(&n.x, &n.x);
+        f32 out = -PSVECDotProduct(&g->x, &n.x);
+        g->x += n.x * out;
+        g->y += n.y * out;
+        g->z += n.z * out;
+    }
+    g->x = DentClamp(g->x, pt->lo.x, pt->hi.x);
+    g->y = DentClamp(g->y, pt->lo.y, pt->hi.y);
+    g->z = DentClamp(g->z, pt->lo.z, pt->hi.z);
+    if (depth <= 2) {
+        DentVec* gi = (DentVec*)(p + 0x5FC) + i;
+        DentVec at;
+        at.x = pt->pos.x + gi->x;
+        at.y = pt->pos.y + gi->y;
+        at.z = pt->pos.z + gi->z;
+        for (int n = 0; n < S32(PTR(p, 0x26C), 0x20F0); n++) {
+            int other;
+            DentLink* l = (DentLink*)PTR(PTR(p, 0x26C), 0x20EC) + n;
+            other = l->a;
+            if ((other == i && l->b != from) || (l->b == i && other != from)) {
+                if (other == i) {
+                    other = l->b;
+                }
+                DentPoint* o = (DentPoint*)PTR(p, 0x26C) + other;
+                DentVec* go = (DentVec*)(p + 0x5FC) + other;
+                DentVec op;
+                op.x = o->pos.x + go->x;
+                f32 py = o->pos.y + go->y;
+                op.y = py;
+                op.z = o->pos.z + go->z;
+                DentVec dir;
+                dir.x = op.x - at.x;
+                dir.y = op.y - at.y;
+                dir.z = op.z - at.z;
+                f32 len = PSVECMag(&dir.x);
+                DentVec f;
+                if (len > 0.01f) {
+                    f32 inv = 1.0f / len;
+                    dir.x *= inv;
+                    dir.y *= inv;
+                    dir.z *= inv;
+                    f32 t = -PSVECDotProduct(&dir.x, &push->x);
+                    f.x = push->x + dir.x * t;
+                    f.y = push->y + dir.y * t;
+                    f.z = push->z + dir.z * t;
+                    f32 c = l->across;
+                    f.x *= c;
+                    f.y *= c;
+                    f.z *= c;
+                    f32 s = l->along * PSVECDotProduct(&push->x, &dir.x);
+                    f.x += dir.x * s;
+                    f.y += dir.y * s;
+                    f.z += dir.z * s;
+                    DentVec up;
+                    up.x = 0.0f;
+                    up.y = 1.0f;
+                    up.z = 0.0f;
+                    f32 m = mag * l->lift;
+                    f.x += up.x * m;
+                    f.y += up.y * m;
+                    f.z += up.z * m;
+                } else {
+                    f32 a = l->along;
+                    f.x = push->x * a;
+                    f.y = push->y * a;
+                    f.z = push->z * a;
+                }
+                fn_8018DE94(p, other, &f, i, depth + 1);
+            }
+        }
+    }
+}
 
 }  // extern "C"
 
