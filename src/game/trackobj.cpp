@@ -1300,28 +1300,27 @@ void fn_801F9B28(void) {
 int fn_801F9BD0(const void* a, const void* b) { return (*(StaticOb**)a)->id - (*(StaticOb**)b)->id; }
 
 void fn_801F9BE8(void) {
-    StaticOb* o;
+    int n;
     lbl_8055EC58 = 0;
-    for (o = lbl_8055EC4C; o; o = o->next) {
+    for (StaticOb* o = lbl_8055EC4C; o; o = o->next) {
         if (o->id >= 0) {
             lbl_8055EC58++;
         }
     }
-    for (o = lbl_8055EC50; o; o = o->next) {
+    for (StaticOb* o = lbl_8055EC50; o; o = o->next) {
         if (o->id >= 0) {
             lbl_8055EC58++;
         }
     }
     if (lbl_8055EC58 >= 1) {
-        int n;
         lbl_8055EC54 = new ("StaticGOB tab") StaticOb*[lbl_8055EC58];
         n = 0;
-        for (o = lbl_8055EC4C; o; o = o->next) {
+        for (StaticOb* o = lbl_8055EC4C; o; o = o->next) {
             if (o->id >= 0) {
                 lbl_8055EC54[n++] = o;
             }
         }
-        for (o = lbl_8055EC50; o; o = o->next) {
+        for (StaticOb* o = lbl_8055EC50; o; o = o->next) {
             if (o->id >= 0) {
                 lbl_8055EC54[n++] = o;
             }
