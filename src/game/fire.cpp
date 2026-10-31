@@ -1086,6 +1086,7 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     r->emitter = fn_8028E2F8(&e, "ring fire", lbl_8055CA80);
     int n = MIN((int)(4.0f * radius), 12);
     n = MAX(n, 1);
+    Mat3* rp = &rot;
     f32 c = cos(6.2831855f / n);
     f32 s = sin(6.2831855f / n);
     rot.m[0][0] = c;
@@ -1098,11 +1099,14 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     rot.m[2][1] = 0.0f;
     rot.m[2][2] = 1.0f;
     Mat3 basis = *(const Mat3*)m->axes;
-    for (int i = 0; i < n; i++) {
+    int i = 0;
+    if (n > 0) {
+        for (; i < n; i++) {
         r->pts[i].x = m->pos.x + basis.m[1][0] * radius;
         r->pts[i].y = m->pos.y + basis.m[1][1] * radius;
         r->pts[i].z = m->pos.z + basis.m[1][2] * radius;
-        MulMat(&basis, &basis, &rot);
+            MulMat(&basis, &basis, rp);
+        }
     }
     r->count = n;
     r->t = 0.0f;
