@@ -750,11 +750,12 @@ int fn_80280DC8(void) {
         int i = lbl_804B3048.Find((u8*)lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
-            bool done = ((EvCond*)PTR(cur, 0x60))->Done();
+            u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
             int k;
             for (k = i + 1; k < lbl_804B3048.count; k++) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                EvCond* c = (EvCond*)((EvCupBar*)e)->Cup();
+                if (c && c->Done() == done) {
                     break;
                 }
             }
@@ -774,11 +775,12 @@ int fn_80280F7C(void) {
         int i = lbl_804B3048.Find((u8*)lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
-            bool done = ((EvCond*)PTR(cur, 0x60))->Done();
+            u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
             int k;
             for (k = i - 1; k >= 0; k--) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                if (((EvCupBar*)e)->Cup() && ((EvCond*)PTR(e, 0x60))->Done() == done) {
+                EvCond* c = (EvCond*)((EvCupBar*)e)->Cup();
+                if (c && c->Done() == done) {
                     break;
                 }
             }
