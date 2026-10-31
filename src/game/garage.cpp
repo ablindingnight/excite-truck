@@ -774,6 +774,9 @@ static inline void CopyNameD(const char* s, int n, char* d) {
 }
 
 // Shows car `sel` of the list: its name (the extreme version when owned), stats, unlock progress and paint.
+// Index of the car currently shown.
+static inline s32 SelectedCar(u8* g) { return S32(g, 0x2C); }
+
 static inline void ShowCar(u8* g, s32 sel) {
     const char* name = ((GarageList*)PTR(g, 0xD0))->Name(sel);
     VehicleInfo* info = FindVehicleNamed(name, 0);
@@ -1191,7 +1194,7 @@ int fn_80250204(u8* p, int key) {
                     on = 1;
                 }
                 paint[8] = on;
-                ShowCar(p, S32(p, 0x2C));
+                ShowCar(p, SelectedCar(p));
             } else {
                 fn_80216D28();
             }
