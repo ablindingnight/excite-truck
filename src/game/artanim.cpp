@@ -33,18 +33,24 @@ struct ArtJustify {
     u8 horiz;          // offset 0x8
 };
 
+// A parent/attach transform: uniform scale and an offset.
+struct ArtXform {
+    f32 scale;   // offset 0x0
+    f32 pos[3];  // offset 0x4
+};
+
 // One animated element: a model (type 2) or a line of text (type 1).
 struct ArtElem {
     s32 type;     // offset 0x0
     s32* dst;     // offset 0x4, receives each key's signal
-    s32 index;    // offset 0x8
+    ArtXform* xform;  // offset 0x8, attach transform
     s32 handle;   // offset 0xC, model or font
     union {
         struct {
             f32 scale;   // offset 0x10
             f32 off[3];  // offset 0x14
             s32 group;   // offset 0x20
-            s32 mapped;  // offset 0x24
+            s32* mapped;  // offset 0x24, group override
         } model;
         struct {
             u32 justify;       // offset 0x10
@@ -141,6 +147,14 @@ double sqrt(double x);
 double sin(double x);
 double cos(double x);
 f32 PSVECDotProduct(const f32* a, const f32* b);
+s32 fn_802C2C00(s32 mode);
+void fn_8012F57C(f32* out, const f32* a, const f32* b, f32 t);  // slerp
+void fn_802C9900(f32 alpha);
+void fn_802C9904(void);
+void fn_802C744C(s32 model, f32 m[4][3]);
+void fn_802C70AC(s32 model, f32 m[4][3], s32 a, u32 mask);
+void fn_8023389C(s32 font, u32 color, u32 justify, f32 m[4][3], const char* fmt, f32 x, f32 y, f32 z, f32 scale,
+                 f32 xs, ...);
 s32 fn_802C6FC0(const char* name, int a, int b);
 s32 fn_80232578(const char* name);
 void fn_802E317C(const char* fmt, ...);
@@ -340,10 +354,10 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                     e->dst = (s32*)m->value;
                 }
                 if ((m = fn_802AC0E8(map, gm, 5)) != 0) {
-                    e->index = m->value;
+                    e->xform = (ArtXform*)m->value;
                 }
                 if ((m = fn_802AC0E8(map, gm, 2)) != 0) {
-                    e->model.mapped = m->value;
+                    e->model.mapped = (s32*)m->value;
                 } else {
                     fn_802E30C8("artanim: unmapped integer %s", gm);
                 }
@@ -366,7 +380,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                     e->dst = (s32*)m->value;
                 }
                 if ((m = fn_802AC0E8(map, e->text.text + 1, 5)) != 0) {
-                    e->index = m->value;
+                    e->xform = (ArtXform*)m->value;
                 }
                 if ((m = fn_802AC0E8(map, e->text.text + 1, 1)) != 0) {
                     e->text.text = (const char*)m->value;
@@ -576,8 +590,152 @@ void fn_802AD414(ArtAnim* a, f32 t) {
     }
 }
 
-// Placeholder: draws each element at time t, not decompiled yet.
-void fn_802AD4C4(ArtAnim* a, f32 t, int flags) { fn_802AD414(a, t); }
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+// Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
+static inline f32 Ease(f32 x) {
+    if (x < -1.0f) {
+        return -1.0f;
+    } else if (x > 1.0f) {
+        return 1.0f;
+    } else if (x > 0.0f) {
+        return x * (-2.0f * x * x) + 3.0f * x * x;
+    } else {
+        return x * (-2.0f * x * x) - 3.0f * x * x;
+    }
+}
+
+// out = in * m (row vector; m's first three rows), safe when out aliases in.
+static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {
+    if (out == in) {
+        f32 x = in[2] * m[2][0] + (in[0] * m[0][0] + in[1] * m[1][0]);
+        f32 y = in[2] * m[2][1] + (in[0] * m[0][1] + in[1] * m[1][1]);
+        f32 z = in[2] * m[2][2] + (in[0] * m[0][2] + in[1] * m[1][2]);
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+    } else {
+        out[0] = in[2] * m[2][0] + (in[0] * m[0][0] + in[1] * m[1][0]);
+        out[1] = in[2] * m[2][1] + (in[0] * m[0][1] + in[1] * m[1][1]);
+        out[2] = in[2] * m[2][2] + (in[0] * m[0][2] + in[1] * m[1][2]);
+    }
+}
+
+static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
+
+// Draws every path's element at time t: the two keys around t are blended along the key's curve (position, scale
+// and alpha linearly, rotation by slerp) into a matrix, under the optional parent transform.
+void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
+    f32 m[4][3];
+    f32 q[4];
+    f32 pos[3];
+    f32 scale[3];
+    f32 off[3];
+    s32 save = fn_802C2C00(0);
+    for (int i = 0; i < a->nPaths; i++) {
+        ArtPath* p = &a->paths[i];
+        for (int k = 0; k < p->nKeys - 1; k++) {
+            ArtKey* k0 = &p->keys[k];
+            ArtKey* k1 = &p->keys[k + 1];
+            if (t >= k0->t && t <= 0.001f + k1->t) {
+                f32 u = (t - k0->t) / (k1->t - k0->t);
+                u = 1.0f < u ? 1.0f : u;
+                u = u > 0.0f ? u : 0.0f;
+                u = Lerp(0.0f, 1.0f, u);
+                if (k0->curve == 1) {
+                    u = Ease(u);
+                } else if (k0->curve == 2) {
+                    u = u * u;
+                } else if (k0->curve == 3) {
+                    u = 1.0f - (1.0f - u) * (1.0f - u);
+                }
+                fn_8012F57C(q, k0->q, k1->q, u);
+                pos[2] = k0->pos[2] + u * (k1->pos[2] - k0->pos[2]);
+                pos[1] = k0->pos[1] + u * (k1->pos[1] - k0->pos[1]);
+                pos[0] = k0->pos[0] + u * (k1->pos[0] - k0->pos[0]);
+                f32 ps = parent ? parent->scale : 1.0f;
+                if (parent) {
+                    pos[0] = pos[0] + parent->pos[0];
+                    pos[1] = pos[1] + parent->pos[1];
+                    pos[2] = pos[2] + parent->pos[2];
+                }
+                f32 x2 = q[0] + q[0];
+                f32 y2 = q[1] + q[1];
+                f32 z2 = q[2] + q[2];
+                f32 xx = q[0] * x2;
+                f32 yy = q[1] * y2;
+                f32 zz = q[2] * z2;
+                f32 xy = q[0] * y2;
+                f32 xz = q[0] * z2;
+                f32 yz = q[1] * z2;
+                f32 wx = q[3] * x2;
+                f32 wy = q[3] * y2;
+                f32 wz = q[3] * z2;
+                m[0][0] = 1.0f - (yy + zz);
+                m[0][1] = xy + wz;
+                m[0][2] = xz - wy;
+                m[1][0] = xy - wz;
+                m[1][1] = 1.0f - (xx + zz);
+                m[1][2] = yz + wx;
+                m[2][0] = xz + wy;
+                m[2][1] = yz - wx;
+                m[2][2] = 1.0f - (xx + yy);
+                m[3][0] = pos[0] * ps;
+                m[3][1] = pos[1] * ps;
+                m[3][2] = pos[2] * ps;
+                ArtElem* e = &a->elems[p->elem];
+                f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
+                scale[2] = k0->scale[2] + u * (k1->scale[2] - k0->scale[2]);
+                scale[1] = k0->scale[1] + u * (k1->scale[1] - k0->scale[1]);
+                scale[0] = k0->scale[0] + u * (k1->scale[0] - k0->scale[0]);
+                f32 es = 1.0f;
+                if (e->xform) {
+                    m[3][0] = m[3][0] + e->xform->pos[0] * ps;
+                    m[3][1] = m[3][1] + e->xform->pos[1] * ps;
+                    m[3][2] = m[3][2] + e->xform->pos[2] * ps;
+                    es = 1.0f * e->xform->scale;
+                }
+                if (e->type == 2) {
+                    MulVec(off, e->model.off, m);
+                    m[3][0] = m[3][0] + off[0];
+                    m[3][1] = m[3][1] + off[1];
+                    m[3][2] = m[3][2] + off[2];
+                    f32 sx = es * (ps * (scale[0] * e->model.scale));
+                    m[0][0] = m[0][0] * sx;
+                    m[0][1] = m[0][1] * sx;
+                    m[0][2] = m[0][2] * sx;
+                    f32 sy = es * (ps * (scale[1] * e->model.scale));
+                    m[1][0] = m[1][0] * sy;
+                    m[1][1] = m[1][1] * sy;
+                    m[1][2] = m[1][2] * sy;
+                    f32 sz = es * (ps * (scale[2] * e->model.scale));
+                    m[2][0] = m[2][0] * sz;
+                    m[2][1] = m[2][1] * sz;
+                    m[2][2] = m[2][2] * sz;
+                    fn_802C9900(alpha);
+                    s32 group = e->model.mapped ? *e->model.mapped : e->model.group;
+                    if (group < 0) {
+                        fn_802C744C(e->handle, m);
+                    } else {
+                        fn_802C70AC(e->handle, m, -1, 1 << group);
+                    }
+                    fn_802C9904();
+                } else if (e->type == 1) {
+                    u32 c = e->text.color;
+                    f32 av = alpha * (f32)(c >> 24);
+                    int al = Round(av);
+                    al = al > 0 ? al : 0;
+                    al = al < 255 ? al : 255;
+                    fn_8023389C(e->handle, (al << 24) | (c & 0xFF0000) | (c & 0xFF00) | (c & 0xFF),
+                                e->text.justify, m, "%s", 0.0f, 0.0f, 0.0f, es * (ps * (scale[0] * e->text.scale)), 1.0f,
+                                e->text.text);
+                }
+                break;
+            }
+        }
+    }
+    fn_802C2C00(save);
+}
 
 void fn_802ADBB4(void) {
     u32 now = fn_802E2C20();
@@ -732,7 +890,7 @@ void ArtPlayer::Draw(int flags) {
     for (int i = 0; i < list->count; i++) {
         ArtItem* item = &list->items[i];
         if (item->active) {
-            fn_802AD4C4(item->anim, t - item->t0, flags);
+            fn_802AD4C4(item->anim, t - item->t0, (ArtXform*)flags);
         }
     }
 }
