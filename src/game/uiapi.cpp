@@ -247,10 +247,11 @@ static inline void CopyName(const char* src, int n, char* dst) {
 
 // UIBegin: mode 0 = lite (only the two lite arrows), 1 = arcade-style sounds, else race-day sounds.
 extern "C" void fn_80211690(int mode) {
+    bool lite;
     int i;
     fn_802E0F98();
     lbl_8055EF40 = mode;
-    bool lite = mode == 0;
+    lite = mode == 0;
     bool timer = !lite;
     lbl_8055EF18 = fn_80128314(0);
     lbl_8055EF08 = 1;
@@ -334,9 +335,9 @@ extern "C" void fn_80211690(int mode) {
         SetSound(&lbl_80490558[0], "a_press.sfx", 0.8f);
         SetSound(&lbl_80490558[2], accept, 0.8f);
         SetSound(&lbl_80490558[3], "a_back.sfx", 0.8f);
-        SetSound(&lbl_80490558[1], "a_error.sfx", 0.48f);
+        SetSound(&lbl_80490558[1], "a_error.sfx", 0.8f * 0.6f);
         SetSound(&lbl_80490558[4], "a_unprsnt.sfx", 0.8f);
-        SetSound(&lbl_80490558[5], "a_popup.sfx", 0.48f);
+        SetSound(&lbl_80490558[5], "a_popup.sfx", 0.8f * 0.6f);
         SetSound(&lbl_80490558[6], accept, 0.8f);
         SetSound(&lbl_80490558[7], accept, 0.8f);
     } else {
