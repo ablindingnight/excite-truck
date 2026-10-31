@@ -134,13 +134,13 @@ struct SimpleHeap {
             total += b->size;
         }
         fn_802E30C8("\t%dK total", total >> 10);
+        u32 total2 = 0;
         fn_802E30C8("Free:");
-        total = 0;
         for (HeapBlock* b = free; b; b = b->next) {
             fn_802E30C8("\tuser ptr %8.8p: %d", b + 1, b->size);
-            total += b->size;
+            total2 += b->size;
         }
-        fn_802E30C8("\t%dK total", total >> 10);
+        fn_802E30C8("\t%dK total", total2 >> 10);
     }
     void Free(void* p) {
         HeapBlock* b = (HeapBlock*)((u8*)p - (align + 1));
@@ -881,7 +881,11 @@ void fn_802CB424(void) {
 
 
 void fn_802CB6B4(void) {
-    delete lbl_8055FCBC;
+    TexCache* c = lbl_8055FCBC;
+    if (c) {
+        c->~TexCache();
+        operator delete(c);
+    }
     lbl_8055FCBC = 0;
 }
 
