@@ -1177,7 +1177,8 @@ config.libs.append(
             Object(NonMatching, "game/controls.cpp"),
             Object(NonMatching, "game/mcdialog.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
-            Object(NonMatching, "game/uicar.cpp"),
+            # uicar.cpp was built without loop optimisation: its unrolled stat/focus loops re-read memory each pass
+            Object(NonMatching, "game/uicar.cpp", extra_cflags=["-opt noloop"]),
             Object(NonMatching, "game/menusel.cpp"),
             Object(NonMatching, "game/mcstatus.cpp"),
             Object(Matching, "game/unk_80243460.c"),
