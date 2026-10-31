@@ -853,23 +853,23 @@ public:
 
 class Meter {
 public:
-    virtual ~Meter(void);
-    virtual void vf0C(void);
-    virtual void Reset(void);                             // 0x10
-    virtual f32 Rate(RaceCarRec* rc);                     // 0x14
-    virtual void vf18(void);
-    virtual void SetActive(int on);                       // 0x1C
-    virtual void Hit(f32 mag, int other) {}                              // 0x20
+    virtual ~Meter(void) {}                                            // 0x08
+    virtual void vf0C(void);                                           // 0x0C
+    virtual void Reset(void) {}                                        // 0x10
+    virtual f32 Rate(RaceCarRec* rc);                                  // 0x14
+    virtual void vf18(void);                                           // 0x18
+    virtual void SetActive(u8 on) {}                                   // 0x1C
+    virtual void Hit(f32 mag, int other) {}                            // 0x20
     virtual void Bump(const RaceCarRec* rc, int kind, void* other) {}  // 0x24
-    virtual void Stop(void);                              // 0x28
+    virtual void Stop(const RaceCarRec* rc) {}                         // 0x28
     virtual void Award(f32 v, RaceCarRec* rc, int kind) {}             // 0x2C
-    virtual void Start(RaceCarRec* rc);                   // 0x30
-    virtual void Land(RaceCarRec* rc);                    // 0x34
-    virtual s32 Total(void);                              // 0x38
-    virtual void Crash(RaceCarRec* rc);                   // 0x3C
-    virtual int Pending(f32* out);                        // 0x40
-    virtual int Count(void);                              // 0x44
-    virtual void Fill(StuntList* l);                      // 0x48
+    virtual void Start(const RaceCarRec* rc) {}                        // 0x30
+    virtual void Land(const RaceCarRec* rc) {}                         // 0x34
+    virtual s32 Total(void) const { return 0; }                        // 0x38
+    virtual void Crash(RaceCarRec* rc);                                // 0x3C
+    virtual int Pending(f32* out) const { return 0; }                  // 0x40
+    virtual int Count(void) const { return 0; }                        // 0x44
+    virtual void Fill(StuntList* l);                                   // 0x48
 };
 
 struct RacerState {
@@ -1074,7 +1074,7 @@ public:
     }
     void DrawBonusStar(ILayout* l, int n);
     void Retire(void);
-    void Finish(void);
+    void Finish(const RaceCarRec* rc);
 
     s32 id;              // offset 0x0
     s32 mode;            // offset 0x4
@@ -2393,10 +2393,10 @@ void BetaCar::Retire(void) {
     fn_801CB648(id, master->timer.limit - left, 0);
 }
 
-void BetaCar::Finish(void) {
+void BetaCar::Finish(const RaceCarRec* rc) {
     f32 add;
     CarHud* h;
-    meterObj->Stop();
+    meterObj->Stop(rc);
     h = hud;
     add = 0.0f;
     if (h->current) {
@@ -2521,8 +2521,6 @@ s32 fn_8014E708(int id) {
     }
     return 0;
 }
-
-s32 Meter_vf38(void) { return 0; }
 
 void fn_8014E740(const f32* pos, f32 r) {
     BetaMaster* m = lbl_8055E268;
@@ -3605,7 +3603,7 @@ inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* h
 inline void BetaMaster::vf94(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
     if (c) {
-        c->Finish();
+        c->Finish(rc);
     }
     int i = rc->index;
     if (coins.enabled) {
