@@ -499,19 +499,20 @@ void fn_80217C4C(Window* win) {
 }
 
 void fn_80217D84(Window* win) {
+    Widget* wd;
     int n = win->menuCount;
     int cur;
     int vis;
     int i;
     int next;
+    int j;
     if (n < 1) {
         return;
     }
     cur = -1;
     vis = 0;
     i = n;
-    do {
-        Widget* wd;
+    while (i-- > 0) {
         if (win->menuCur == win->menu[i].id) {
             cur = i;
         }
@@ -519,10 +520,10 @@ void fn_80217D84(Window* win) {
         if (Visible(wd) && wd->enabled) {
             vis++;
         }
-    } while (i-- > 0);
+    }
     next = -1;
-    for (i = 1; i < n; i++) {
-        int idx = (cur + n - i) % n;
+    for (j = 1; j < n; j++) {
+        int idx = (cur + n - j) % n;
         Widget* wd = win->menu[idx].w;
         if (Visible(wd) && wd->enabled) {
             next = idx;
