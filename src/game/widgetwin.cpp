@@ -29,6 +29,7 @@ struct PadPos {
 };
 
 class Window;
+class Widget;
 
 class Window {
 public:
@@ -98,7 +99,7 @@ int fn_8021885C(Window* w);
 int fn_80218A34(Window* w);
 int fn_80218ADC(Window* w);
 int fn_80218B88(Window* w);
-int fn_80218C98(Window* w);
+void fn_80218C98(Window* w, Widget* widget, int group);
 int fn_8012742C(void);
 void fn_80214D50(int sound);
 void fn_8023660C(void);
@@ -378,7 +379,7 @@ int fn_802168E0(Window* w) { return fn_80218B88(w); }
 
 Window* fn_802168E4(void) { return lbl_8055EF88; }
 
-int fn_802168EC(Window* w) { return fn_80218C98(w); }
+void fn_802168EC(Window* w, Widget* widget, int group) { fn_80218C98(w, widget, group); }
 
 s32 fn_802168F0(Window* w) {
     Window* prev;
