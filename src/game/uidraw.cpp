@@ -498,10 +498,10 @@ char* fn_8023139C(char* buf, int size, u32 value) {
         lim = value;
     }
     char* p = buf + size;
-    p[-1] = 0;
+    *--p = 0;
     value = lim;
     int group = 4;
-    p -= 2;
+    --p;
     do {
         if (--group == 0) {
             *p-- = ',';
