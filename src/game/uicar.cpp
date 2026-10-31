@@ -3,6 +3,7 @@
 // and the list selection state. Written against raw field offsets; the large routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -105,62 +106,6 @@ void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
     }
     fn_802E317C("mroll.cpp: get_player_info got bad index %d (there are only %d players set up)", id, n);
 }
-
-void fn_8023FF1C(u8* p) {}  // stub (549)
-
-u8* JoinLeaveWidget_vf08(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_802407F0(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_80240830(u8* p, int del) {
-    if (p) {
-        *(void**)(p + 0xC) = lbl_80342618;
-        delete (VDel*)PTR(p, 0x24);
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_802408B0(u8* p, int del) {
-    if (p) {
-        *(void**)(p + 0xC) = lbl_803426B0;
-        *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
-        lbl_8055F1F4--;
-        fn_80235380(PTR(p, 0x44));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_80240928(u8* p, int del) {
-    if (p) {
-        U32(p, 0x24) = 0;
-        *(void**)p = lbl_80342734;
-        U32(p, 0x20) = 0;
-        fn_802328D4(PTR(p, 0x18));
-        U32(p, 0x18) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 
 }  // extern "C"
 
@@ -286,10 +231,15 @@ struct CarStats {
 
 class CarUIScreen {
 public:
+    CarUIScreen(int mode);
+    virtual ~CarUIScreen(void);
     void SetAnim(u32 a);
-    u8 pad0[0xDC];
-    u8 tint;      // offset 0xDC
-    bool nextTint;  // offset 0xDD
+    u8 pad4[0xD8];
+    u8 tint;          // offset 0xDC
+    bool nextTint;    // offset 0xDD
+    u8 padDE[0x1E];
+    u8 state[0x1C];   // offset 0xFC, the view's menu widget
+    u8 pad118[0xC];
 };
 
 VehicleInfo* FindVehicleNamed(const char* chassis, int n);
@@ -493,6 +443,335 @@ struct CarPicker {
 };
 
 
+// One player's focus group in the join/leave widget.
+struct FocusGroup {
+    CarSel* sel;  // offset 0x0
+    int join;     // offset 0x4
+    int car;      // offset 0x8
+    int leave;    // offset 0xC
+    int start;    // offset 0x10
+    int ready;    // offset 0x14
+    s32 prev;     // offset 0x18
+    s32 state;    // offset 0x1C
+};
+
+extern char lbl_80342840[];  // "JoinLeaveWidget: invalid state %d found on focus group #%d"
+extern s32 lbl_8055F1F8;
+
+extern "C" {
+void fn_80214AF0(int s);
+void fn_80214A9C(int s);
+}
+
+struct JoinLeaveWidget {
+    void* vt;              // offset 0x0
+    u8 pad4[0x10];
+    s32 f14;               // offset 0x14
+    FocusGroup groups[2];  // offset 0x18
+    u8 allReady;           // offset 0x58
+
+    // True when every player has joined and confirmed (state 4); none may be in state 2 or 3.
+    u32 AllReady(void) {
+        int n = 0;
+        for (int i = 0; i < 2; i++) {
+            s32 st = groups[i].state;
+            if (st > 1 && st != 4) {
+                return 0;
+            }
+            if (st == 4) {
+                n++;
+            }
+        }
+        return n >= 2;
+    }
+
+    // Counts the groups past the join prompt that have not confirmed yet.
+    int Unconfirmed(int k) {
+        int n = 0;
+        for (int i = 0; i < 2; i++) {
+            if (groups[k].state > 1 && groups[k].state != 4) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // Shows the widgets of each focus group whose state changed.
+    void UpdateFocus(void) {
+        u32 ready = AllReady();
+        if (allReady != ready) {
+            groups[0].prev = 0;
+            groups[1].prev = 0;
+        }
+        for (u32 i = 0; i < 2; i++) {
+            FocusGroup* g = &groups[i];
+            if (g->state != g->prev) {
+                switch (g->state) {
+                case 0:
+                    break;
+                case 1:
+                    fn_80214AF0(g->join);
+                    fn_80214A9C(g->car);
+                    fn_80214A9C(g->leave);
+                    break;
+                case 2:
+                case 3:
+                    fn_80214A9C(g->join);
+                    fn_80214AF0(g->car);
+                    fn_80214A9C(g->leave);
+                    fn_80214AF0(g->ready);
+                    if (i != 0 && g->state == 2) {
+                        fn_80214A9C(g->start);
+                    } else {
+                        fn_80214AF0(g->start);
+                    }
+                    g->sel->SetActive(1);
+                    break;
+                case 4:
+                    fn_80214A9C(g->join);
+                    fn_80214AF0(g->car);
+                    fn_80214AF0(g->leave);
+                    fn_80214A9C(g->ready);
+                    fn_80214AF0(g->start);
+                    g->sel->SetActive(0);
+                    break;
+                default:
+                    fn_802E317C(lbl_80342840, g->state, i);
+                    break;
+                }
+                g->prev = g->state;
+            }
+        }
+        (ready ? fn_80214AF0 : fn_80214A9C)(0x1E);
+        if (ready) {
+            for (int j = 7; j <= 10; j++) {
+                fn_80214A9C(j);
+            }
+        }
+        allReady = ready;
+    }
+};
+
+// Gives the next free focus group choice list s and its widget ids.
+static inline void AddFocus(JoinLeaveWidget* w, CarSel* s, int join, int car, int leave, int start, int ready) {
+    for (int i = 0; i < 2; i++) {
+        FocusGroup* g = &w->groups[i];
+        if (!g->sel) {
+            g->sel = s;
+            g->car = car;
+            g->join = join;
+            g->leave = leave;
+            g->start = start;
+            g->ready = ready;
+            g->prev = 0;
+            if (*s->slot < 0) {
+                g->state = 1;
+            } else {
+                g->state = 2;
+            }
+            return;
+        }
+    }
+    fn_802E317C("JoinLeaveWidget: tried to add too many focii! (%d is the max)", 2);
+}
+
+extern void* __vt__15JoinLeaveWidget[];
+extern u8 lbl_8055FC8C;  // wide-screen layout
+void CarStatsInit(void);
+void CarStatsShutdown(void);
+extern "C" {
+void fn_8013C804(void);
+void fn_8013C8B8(void);
+void fn_80129AEC(int a);
+u32 fn_802E4A10(void);
+void fn_8023D4B8(s32 ch);
+void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
+u8* fn_80240928(u8* p, int del);
+u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra);
+u8* fn_80241024(u8* p);
+CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
+                       CarUIScreen* screen);
+CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car);
+void fn_802409AC(CarSel* p, CarSelItem* item);
+void fn_802409A4(u8* p, u8 v);
+int fn_802411A4(int* out);
+}
+
+// One player's half of the roll-call screen: the car view, colour chooser, stat panel, car picker and the
+// choice list over them. The chooser and stat panel are built by their (out-of-line) constructors.
+struct RollPanel {
+    CarUIScreen screen;  // offset 0x0
+    u8 color[0x9C];      // offset 0x124: ColorPick (fn_802410F8)
+    u8 stats[0x2EC];     // offset 0x1C0: StatPanel (fn_80241024)
+    CarPicker picker;    // offset 0x4AC
+    CarSel sel;          // offset 0x51C
+    s32 colorIndex;      // offset 0x578
+
+    RollPanel(JoinSlot* s, u8 flag) : screen(0) {
+        fn_802410F8(color, (u32)&s->color, (u32*)&colorIndex, (u32)&screen);
+        fn_80241024(stats);
+        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, (ColorPick*)color, (StatPanel*)stats, &screen);
+        fn_80240A1C(&sel, &s->id, (u8*)&screen);
+        fn_802409AC(&sel, (CarSelItem*)&picker);
+        fn_802409AC(&sel, (CarSelItem*)color);
+        fn_802409A4(stats, flag);
+    }
+    ~RollPanel(void) {
+        picker.vt = lbl_80342618;
+        delete (VDel*)picker.list;
+        __destroy_arr(stats + 0x2C, (void*)fn_80240928, 0x28, 5);
+        *(void**)(color + 0xC) = lbl_803426B0;
+        *(void**)(color + 0x10) = (u8*)lbl_803426B0 + 0x18;
+        lbl_8055F1F4--;
+        fn_80235380(PTR(color, 0x44));
+    }
+};
+
+// Both players' panels.
+struct RollPanels {
+    RollPanel p1;  // offset 0x0
+    RollPanel p2;  // offset 0x57C
+    RollPanels(u8 flag) : p1(&lbl_80498828[0], flag), p2(&lbl_80498828[1], flag) {}
+};
+
+extern "C" {
+
+// MenuDoRollCall: both players pick a car and colour ("rollcall2.lyt"); returns 1 to go on, 0 to go back.
+int fn_8023FF1C(u8 flag) {
+    CarStatsInit();
+    fn_8013C804();
+    RollPanels pp(flag);
+    JoinLeaveWidget w;
+    w.vt = __vt__15JoinLeaveWidget;
+    w.f14 = 0;
+    memset(w.groups, 0, sizeof(w.groups));
+    AddFocus(&w, &pp.p1.sel, 3, 1, 5, 7, 9);
+    AddFocus(&w, &pp.p2.sel, 4, 2, 6, 8, 10);
+    MenuItem items[] = {
+        MenuItem(NULL, 5, &w, 0, 0),
+        MenuItem(NULL, 5, &pp.p1.sel, 0, 0),
+        MenuItem("#carmodel_1", 0x13, &pp.p1.screen, 0, 0),
+        MenuItem("#carmodel_1", pp.p1.picker.chassis),
+        MenuItem("#model_1", 0x10, NULL, (int)&pp.p1.picker, 0),
+        MenuItem("#color_1", 5, pp.p1.color + 0x10, 0, 0),
+        MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),
+        MenuItem("#controller_1", pp.p1.sel.name),
+        MenuItem("#car_position_1", 5, pp.p1.screen.state, 0, 0),
+        MenuItem("#stat_text_1_p1", ((StatPanel*)pp.p1.stats)->text[0]),
+        MenuItem("#stat_art_1_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[0].value, 0, 0),
+        MenuItem("#stat_text_2_p1", ((StatPanel*)pp.p1.stats)->text[1]),
+        MenuItem("#stat_art_2_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[1].value, 0, 0),
+        MenuItem("#stat_text_3_p1", ((StatPanel*)pp.p1.stats)->text[2]),
+        MenuItem("#stat_art_3_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[2].value, 0, 0),
+        MenuItem("#stat_text_4_p1", ((StatPanel*)pp.p1.stats)->text[3]),
+        MenuItem("#stat_custom_4_p1", 5, &((StatPanel*)pp.p1.stats)->bars[3], 0, 0),
+        MenuItem("#stat_text_5_p1", ((StatPanel*)pp.p1.stats)->text[4]),
+        MenuItem("#stat_art_5_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[4].value, 0, 0),
+        MenuItem(NULL, 5, &pp.p2.sel, 0, 0),
+        MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
+        MenuItem("#carmodel_2", pp.p2.picker.chassis),
+        MenuItem("#model_2", 0x10, NULL, (int)&pp.p2.picker, 0),
+        MenuItem("#color_2", 5, pp.p2.color + 0x10, 0, 0),
+        MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
+        MenuItem("#controller_2", pp.p2.sel.name),
+        MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
+        MenuItem("#stat_text_1_p2", ((StatPanel*)pp.p2.stats)->text[0]),
+        MenuItem("#stat_art_1_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[0].value, 0, 0),
+        MenuItem("#stat_text_2_p2", ((StatPanel*)pp.p2.stats)->text[1]),
+        MenuItem("#stat_art_2_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[1].value, 0, 0),
+        MenuItem("#stat_text_3_p2", ((StatPanel*)pp.p2.stats)->text[2]),
+        MenuItem("#stat_art_3_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[2].value, 0, 0),
+        MenuItem("#stat_text_4_p2", ((StatPanel*)pp.p2.stats)->text[3]),
+        MenuItem("#stat_custom_4_p2", 5, &((StatPanel*)pp.p2.stats)->bars[3], 0, 0),
+        MenuItem("#stat_text_5_p2", ((StatPanel*)pp.p2.stats)->text[4]),
+        MenuItem("#stat_art_5_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[4].value, 0, 0),
+        MenuItem(lbl_80498810),
+    };
+    MenuDesc desc = {lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt", items, fn_802411A4, 0, 0};
+    fn_80129AEC(-1);
+    int result = 1;
+    int run = 1;
+    while (run) {
+        int r = fn_802146BC(&desc, -999, -999, 1);
+        switch (r) {
+        case 0:
+            result = 1;
+            run = 0;
+            break;
+        case 1:
+            fn_8023D4B8(fn_802E4A10());
+            break;
+        case 2:
+            result = 0;
+            run = 0;
+            break;
+        default:
+            fn_802E317C("MenuDoRollCall: received an invalid return value (%d) from the dialog!", r);
+            break;
+        }
+    }
+    fn_80129AEC(0);
+    fn_8013C8B8();
+    CarStatsShutdown();
+    return result;
+}
+
+u8* JoinLeaveWidget_vf08(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+u8* fn_802407F0(u8* p, int del) {
+    if (p && del > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+
+u8* fn_80240830(u8* p, int del) {
+    if (p) {
+        *(void**)(p + 0xC) = lbl_80342618;
+        delete (VDel*)PTR(p, 0x24);
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+u8* fn_802408B0(u8* p, int del) {
+    if (p) {
+        *(void**)(p + 0xC) = lbl_803426B0;
+        *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
+        lbl_8055F1F4--;
+        fn_80235380(PTR(p, 0x44));
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+u8* fn_80240928(u8* p, int del) {
+    if (p) {
+        U32(p, 0x24) = 0;
+        *(void**)p = lbl_80342734;
+        U32(p, 0x20) = 0;
+        fn_802328D4(PTR(p, 0x18));
+        U32(p, 0x18) = 0;
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
+
+}  // extern "C"
+
 extern "C" {
 const char* fn_802E85B8(s32 slot);
 
@@ -597,7 +876,7 @@ u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra) {
     return p;
 }
 
-int fn_802411A4(u32* out) {
+int fn_802411A4(int* out) {
     if (lbl_8055F1FC) {
         *out = lbl_8055F200;
         return 1;
@@ -835,113 +1114,6 @@ u8* fn_802426C0(u8* p) {
 }
 
 }  // extern "C"
-
-// One player's focus group in the join/leave widget.
-struct FocusGroup {
-    CarSel* sel;  // offset 0x0
-    int join;     // offset 0x4
-    int car;      // offset 0x8
-    int leave;    // offset 0xC
-    int start;    // offset 0x10
-    int ready;    // offset 0x14
-    s32 prev;     // offset 0x18
-    s32 state;    // offset 0x1C
-};
-
-extern char lbl_80342840[];  // "JoinLeaveWidget: invalid state %d found on focus group #%d"
-extern s32 lbl_8055F1F8;
-
-extern "C" {
-void fn_80214AF0(int s);
-void fn_80214A9C(int s);
-}
-
-struct JoinLeaveWidget {
-    u8 pad0[0x18];
-    FocusGroup groups[2];  // offset 0x18
-    u8 allReady;           // offset 0x58
-
-    // True when every player has joined and confirmed (state 4); none may be in state 2 or 3.
-    u32 AllReady(void) {
-        int n = 0;
-        for (int i = 0; i < 2; i++) {
-            s32 st = groups[i].state;
-            if (st > 1 && st != 4) {
-                return 0;
-            }
-            if (st == 4) {
-                n++;
-            }
-        }
-        return n >= 2;
-    }
-
-    // Counts the groups past the join prompt that have not confirmed yet.
-    int Unconfirmed(int k) {
-        int n = 0;
-        for (int i = 0; i < 2; i++) {
-            if (groups[k].state > 1 && groups[k].state != 4) {
-                n++;
-            }
-        }
-        return n;
-    }
-
-    // Shows the widgets of each focus group whose state changed.
-    void UpdateFocus(void) {
-        u32 ready = AllReady();
-        if (allReady != ready) {
-            groups[0].prev = 0;
-            groups[1].prev = 0;
-        }
-        for (u32 i = 0; i < 2; i++) {
-            FocusGroup* g = &groups[i];
-            if (g->state != g->prev) {
-                switch (g->state) {
-                case 0:
-                    break;
-                case 1:
-                    fn_80214AF0(g->join);
-                    fn_80214A9C(g->car);
-                    fn_80214A9C(g->leave);
-                    break;
-                case 2:
-                case 3:
-                    fn_80214A9C(g->join);
-                    fn_80214AF0(g->car);
-                    fn_80214A9C(g->leave);
-                    fn_80214AF0(g->ready);
-                    if (i != 0 && g->state == 2) {
-                        fn_80214A9C(g->start);
-                    } else {
-                        fn_80214AF0(g->start);
-                    }
-                    g->sel->SetActive(1);
-                    break;
-                case 4:
-                    fn_80214A9C(g->join);
-                    fn_80214AF0(g->car);
-                    fn_80214AF0(g->leave);
-                    fn_80214A9C(g->ready);
-                    fn_80214AF0(g->start);
-                    g->sel->SetActive(0);
-                    break;
-                default:
-                    fn_802E317C(lbl_80342840, g->state, i);
-                    break;
-                }
-                g->prev = g->state;
-            }
-        }
-        (ready ? fn_80214AF0 : fn_80214A9C)(0x1E);
-        if (ready) {
-            for (int j = 7; j <= 10; j++) {
-                fn_80214A9C(j);
-            }
-        }
-        allReady = ready;
-    }
-};
 
 extern "C" {
 
