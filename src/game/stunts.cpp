@@ -1975,6 +1975,33 @@ int fn_80157278(int car) { return lbl_804348E8[car]->model == 'ACAR'; }
 
 void fn_80157560(Tracker* t);
 
+#pragma inline_depth(1)
+Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
+    TrackerArray* m;
+    lbl_8042FD08[car] = 1.0f;
+    m = new ("arraytracker") TrackerArray(hispeed);
+    {
+        int i;
+        m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
+        m->Add(new ("airtracker") AirTracker(hud, car, m->cnt));
+        m->Add(new ("drifttracker") DriftTracker(hud, car, m->cnt));
+        m->Add(new ("ccalltracker") CloseCallTracker(hud, car, m->cnt));
+        m->Add(new ("360tracker") SpinTracker(hud, car));
+        m->Add(new ("throwtracker") ThrowTracker(hud, car));
+        m->Add(new ("jmpcmbtracker") JumpComboTracker(hud, car));
+        m->Add(new ("carhittracker") CarHitTracker(hud, car));
+        m->Add(new ("crashtracker") CrashTracker(hud, car));
+        m->Add(new ("ringtracker") RingTracker(hud, car));
+        for (i = 0; i < m->Num(); i++) {
+            fn_80157560(m->Get(i));
+        }
+        m->active = 1;
+        m->car = car;
+    }
+    return m;
+}
+#pragma inline_depth(smart)
+
 
 }  // extern "C"
 
@@ -2206,31 +2233,3 @@ f32 CountTracker::Collect(const RaceCarRec* rc) {
     return pts;
 }
 
-extern "C" {
-#pragma inline_depth(1)
-Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
-    TrackerArray* m;
-    lbl_8042FD08[car] = 1.0f;
-    m = new ("arraytracker") TrackerArray(hispeed);
-    {
-        int i;
-        m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
-        m->Add(new ("airtracker") AirTracker(hud, car, m->cnt));
-        m->Add(new ("drifttracker") DriftTracker(hud, car, m->cnt));
-        m->Add(new ("ccalltracker") CloseCallTracker(hud, car, m->cnt));
-        m->Add(new ("360tracker") SpinTracker(hud, car));
-        m->Add(new ("throwtracker") ThrowTracker(hud, car));
-        m->Add(new ("jmpcmbtracker") JumpComboTracker(hud, car));
-        m->Add(new ("carhittracker") CarHitTracker(hud, car));
-        m->Add(new ("crashtracker") CrashTracker(hud, car));
-        m->Add(new ("ringtracker") RingTracker(hud, car));
-        for (i = 0; i < m->Num(); i++) {
-            fn_80157560(m->Get(i));
-        }
-        m->active = 1;
-        m->car = car;
-    }
-    return m;
-}
-#pragma inline_depth(smart)
-}
