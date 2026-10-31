@@ -256,18 +256,19 @@ s32 fn_802C83C4(void) { return lbl_8055FC90; }
 
 void fn_802C83CC(void) {
     int n = 10;
-    lbl_804C1410.rot.right.x = 1.0f;
-    lbl_804C1410.rot.right.y = 0.0f;
-    lbl_804C1410.rot.right.z = 0.0f;
-    lbl_804C1410.rot.up.x = 0.0f;
-    lbl_804C1410.rot.up.y = 1.0f;
-    lbl_804C1410.rot.up.z = 0.0f;
-    lbl_804C1410.rot.fwd.x = 0.0f;
-    lbl_804C1410.rot.fwd.y = 0.0f;
-    lbl_804C1410.rot.fwd.z = 1.0f;
-    lbl_804C1410.pos.x = 0.0f;
-    lbl_804C1410.pos.y = 0.0f;
-    lbl_804C1410.pos.z = 0.0f;
+    VecP* b = (VecP*)&lbl_804C1410;
+    b[0].x = 1.0f;
+    b[0].y = 0.0f;
+    b[0].z = 0.0f;
+    b[1].x = 0.0f;
+    b[1].y = 1.0f;
+    b[1].z = 0.0f;
+    b[2].x = 0.0f;
+    b[2].y = 0.0f;
+    b[2].z = 1.0f;
+    b[3].x = 0.0f;
+    b[3].y = 0.0f;
+    b[3].z = 0.0f;
     lbl_8055FC5C = 0;
     lbl_8055FC60 = 0;
     lbl_8055FC64 = n;
