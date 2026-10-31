@@ -1615,12 +1615,7 @@ void fn_802D1678(void) {
 }
 
 void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, const u8* color, f32 radius) {
-    GXColor c;
-    c.r = color[0];
-    c.g = color[1];
-    c.b = color[2];
-    c.a = color[3];
-    GXInitLightColor(l, c);
+    GXInitLightColor(l, *(const GXColor*)color);
     V3 d;
     d.x = pos->x + cam->x;
     d.y = pos->y + cam->y;
@@ -1632,7 +1627,7 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, const u8* color, f
     d.y *= inv;
     d.z *= inv;
     GXInitSpecularDirHA(l, cam->x, cam->y, -cam->z, d.x, d.y, -d.z);
-    GXInitLightAttn(l, 0.0f, 0.0f, 1.0f - 0.5f * radius, 0.0f, 0.0f, 0.0f);
+    GXInitLightAttn(l, 0.0f, 0.0f, 1.0f, radius / 2.0f, 0.0f, 1.0f - radius / 2.0f);
 }
 
 void fn_802D18E8(void) {
