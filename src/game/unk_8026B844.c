@@ -28,10 +28,6 @@ f32 fn_8026B844(f32 f) {
     return c;
 }
 
-BOOL fn_8026BFF0(s32 x) {
-    switch (x) { case 3: case 4: return TRUE; default: return FALSE; }
-}
-
 // Camera frames (camframe.cpp's CamFrame: three axes and a position).
 typedef struct CamVec {
     f32 x, y, z;
@@ -70,6 +66,189 @@ CamCar* fn_8017960C(s32 car);
 void fn_8026E688(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
 void fn_801BFD34(CamVec* out, const CamVec* v, const CamFrame* m);
 void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(CamRot* out, const CamRot* a, const CamRot* b);
+
+// The pad as fn_801298E8 fills it (achview's ViewPad): sticks, then the analog trigger at 0x1C.
+typedef struct FreePad {
+    f32 stick[4];        // offset 0x0
+    u8 pad10[0xC];
+    f32 trigger;         // offset 0x1C
+    u8 pad20[0x44];
+} FreePad;
+typedef int (*CamGate)(s32 x, s32 y);
+
+extern u32 lbl_8055F4FC;        // the free camera's last update time (ms)
+extern f32 lbl_8055F4F4;        // its yaw
+extern f32 lbl_8055F4F8;        // its pitch
+extern s32 lbl_8055CFF0;        // screen width
+extern s32 lbl_8055CFF4;        // screen height
+extern const f32 lbl_80563D98;  // -1.0f
+extern const f32 lbl_80563D9C;  // 0.5f
+extern const f32 lbl_80563DA0;  // 5.0f
+extern const f32 lbl_80563D94;  // 1.0f
+extern const f32 lbl_80563D88;  // 1000.0f
+extern const f32 lbl_80563D8C;  // 1/30 s
+extern const f32 lbl_80563D90;  // PI
+extern const f32 lbl_80563DA4;  // 100.0f
+extern const f32 lbl_80563DA8;  // 2 PI
+extern const f32 lbl_80563DAC;  // -2 PI
+extern const f32 lbl_80563DB0;  // PI / 3
+extern const f32 lbl_80563DB4;  // -PI / 3
+extern const f32 lbl_80563DB8;  // 20.0f
+extern const f32 lbl_80563DBC;  // 480.0f
+extern const f32 lbl_80563DC0;  // 19.0f
+extern const f32 lbl_80563DC4;  // 50.0f
+extern const f32 lbl_80563DC8;  // 80.0f
+extern const f32 lbl_80563DCC;  // 60.0f
+void fn_80127A84(s32* x, s32* y, s32* buttons);
+int fn_801298E8(FreePad* pad, int chan);
+u32 fn_802E2C20(void);
+int fn_802E4A1C(int key);
+f32 fn_801EA0E8(f32 x, f32 z);
+void Mat3FromEuler__FP4Mat3PC4Vec3(CamRot* out, const CamVec* euler);
+
+static __inline f32 CamMin(f32 a, f32 b) { return a < b ? a : b; }
+static __inline f32 CamMax(f32 a, f32 b) { return a > b ? a : b; }
+static __inline f32 CamDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
+    if (out == in) {
+        f32 x = CamDot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
+        f32 y = CamDot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
+        f32 z = CamDot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = CamDot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
+        out->y = CamDot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
+        out->z = CamDot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
+    }
+}
+
+// The free (debug) camera: stick yaw/pitch and movement, trigger boost, keys up/down, the pointer at a screen
+// edge pans (faster the higher the camera is), and the camera keeps its height above the ground.
+void fn_8026B8A0(void) {
+    FreePad pad;
+    CamRot yawM;
+    CamRot pitchM;
+    CamVec right;
+    CamVec fwd;
+    CamVec in;
+    CamVec in2;
+    CamVec yawE;
+    CamVec pitchE;
+    CamVec move;
+    CamVec move2;
+    s32 mx;
+    s32 my;
+    s32 buttons;
+    int free;
+    f32 dt;
+    f32 h;
+    CamGate gate;
+
+    fn_80127A84(&mx, &my, &buttons);
+    gate = (CamGate)lbl_8055F4E8;
+    free = 1;
+    if (gate && !gate(mx, my)) {
+        free = 0;
+    }
+    dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F4FC) / lbl_80563D88, lbl_80563D8C);
+    lbl_8055F4FC = fn_802E2C20();
+    right = lbl_80499050.rot.axes[0];
+    right.y = lbl_80563D78;
+    fwd = lbl_80499050.rot.axes[2];
+    fwd.y = lbl_80563D78;
+    if (fn_801298E8(&pad, 0)) {
+        f32 turn = lbl_80563D90;
+        f32 t = CamMax(CamMin(lbl_80563D94, (pad.trigger - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
+        f32 speed = lbl_80563D94 * (lbl_80563DA4 * (lbl_80563D94 + t * lbl_80563DA0));
+        f32 x;
+        f32 z;
+        lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.stick[0]));
+        if (lbl_8055F4F4 > lbl_80563DA8) {
+            lbl_8055F4F4 -= lbl_80563DA8;
+        } else if (lbl_8055F4F4 < lbl_80563DAC) {
+            lbl_8055F4F4 += lbl_80563DA8;
+        }
+        lbl_8055F4F8 = CamMax(CamMin(lbl_80563DB0, lbl_8055F4F8 + turn * (dt * fn_8026B844(pad.stick[1]))), lbl_80563DB4);
+        z = speed * (dt * -fn_8026B844(pad.stick[2]));
+        x = speed * (dt * fn_8026B844(pad.stick[3]));
+        in.x = x;
+        in.y = lbl_80563D78;
+        in.z = z;
+        CamMulVec(&move, &in, &lbl_80499050.rot);
+        lbl_80499050.pos.x += move.x;
+        lbl_80499050.pos.y += move.y;
+        lbl_80499050.pos.z += move.z;
+    }
+    {
+        f32 side = lbl_80563D78;
+        f32 rate = lbl_80563DA4;
+        f32 vert = side;
+        if (fn_802E4A1C(0x1E)) {
+            vert = lbl_80563D94;
+        } else if (fn_802E4A1C(0x2C)) {
+            vert = lbl_80563D98;
+        }
+        in2.x = dt * (side * rate);
+        in2.y = lbl_80563D78;
+        in2.z = dt * (vert * rate);
+        CamMulVec(&move2, &in2, &lbl_80499050.rot);
+        lbl_80499050.pos.x += move2.x;
+        lbl_80499050.pos.y += move2.y;
+        lbl_80499050.pos.z += move2.z;
+    }
+    h = lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z);
+    if (free) {
+        f32 t = CamMax(CamMin(lbl_80563D94, (h - lbl_80563DB8) / lbl_80563DBC), lbl_80563D78);
+        f32 pan = lbl_80563DC4 * (lbl_80563D94 + t * lbl_80563DC0);
+        f32 px = lbl_80563D78;
+        f32 py = px;
+        f32 a;
+        f32 b;
+        if (mx < 0x50) {
+            px = lbl_80563D98 + (f32)mx / lbl_80563DC8;
+        } else if (mx > lbl_8055CFF0 - 0x50) {
+            px = (f32)(mx - (lbl_8055CFF0 - 0x50)) / lbl_80563DC8;
+        }
+        if (my < 0x3C) {
+            py = lbl_80563D98 + (f32)my / lbl_80563DCC;
+        } else if (my > lbl_8055CFF4 - 0x3C) {
+            py = (f32)(my - (lbl_8055CFF4 - 0x3C)) / lbl_80563DCC;
+        }
+        a = dt * (px * pan);
+        b = dt * (-py * pan);
+        lbl_80499050.pos.x = lbl_80499050.pos.x + right.x * a + fwd.x * b;
+        lbl_80499050.pos.y = lbl_80499050.pos.y + right.y * a + fwd.y * b;
+        lbl_80499050.pos.z = lbl_80499050.pos.z + right.z * a + fwd.z * b;
+    }
+    lbl_80499050.pos.y = lbl_80499050.pos.y + (h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z)));
+    lbl_80499050.rot.axes[0].x = lbl_80563D94;
+    lbl_80499050.rot.axes[0].y = lbl_80563D78;
+    lbl_80499050.rot.axes[0].z = lbl_80563D78;
+    lbl_80499050.rot.axes[1].x = lbl_80563D78;
+    lbl_80499050.rot.axes[1].y = lbl_80563D94;
+    lbl_80499050.rot.axes[1].z = lbl_80563D78;
+    lbl_80499050.rot.axes[2].x = lbl_80563D78;
+    lbl_80499050.rot.axes[2].y = lbl_80563D78;
+    lbl_80499050.rot.axes[2].z = lbl_80563D94;
+    yawE.x = lbl_80563D78;
+    yawE.y = lbl_8055F4F4;
+    yawE.z = lbl_80563D78;
+    Mat3FromEuler__FP4Mat3PC4Vec3(&yawM, &yawE);
+    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &yawM, &lbl_80499050.rot);
+    pitchE.x = -lbl_8055F4F8;
+    pitchE.y = lbl_80563D78;
+    pitchE.z = lbl_80563D78;
+    Mat3FromEuler__FP4Mat3PC4Vec3(&pitchM, &pitchE);
+    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &pitchM, &lbl_80499050.rot);
+}
+
+BOOL fn_8026BFF0(s32 x) {
+    switch (x) { case 3: case 4: return TRUE; default: return FALSE; }
+}
+
+
 
 static __inline void CopyFrame(CamFrame* d, const CamFrame* s) {
     d->rot = s->rot;
