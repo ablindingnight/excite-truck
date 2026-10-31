@@ -557,7 +557,7 @@ void fn_801942F0(u8* d, int on);
 void fn_80193D30(u8* d);
 void fn_8019416C(u8* d, const char* why);
 
-void fn_801939C8(u8* d) {
+void AIDriver_Connect(u8* d) {
     if (U8(d, 0x2A4)) {
         fn_802E30C8("AIDriver::Connect(): Car %d: already connected!", CARID(d));
         return;
