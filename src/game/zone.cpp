@@ -813,7 +813,7 @@ public:
     virtual void vf90(int a, int b, int c, int d) {}
     virtual void vf94(int p) {}
     virtual void vf98(void);
-    virtual void vf9C(int p, int type) {}
+    virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
     virtual int vfA0(struct Cam* cam);
     virtual void vfA4(int p) {}
     virtual void vfA8(int car);

@@ -238,7 +238,7 @@ public:
     virtual void vf90(struct RaceCarRec* a, struct RaceCarRec* b, void* p, const f32* hit) {}
     virtual void vf94(struct RaceCarRec* rc) {}
     virtual void vf98(void);
-    virtual void vf9C(struct RaceCarRec* rc, int type) {}
+    virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
     virtual int vfA0(int a, int b, int c);
     virtual void vfA4(struct RaceCarRec* rc) {}
     virtual void vfA8(int a, int b);
@@ -859,10 +859,10 @@ public:
     virtual f32 Rate(RaceCarRec* rc);                     // 0x14
     virtual void vf18(void);
     virtual void SetActive(int on);                       // 0x1C
-    virtual void Hit(f32 mag, int other);                 // 0x20
-    virtual void Bump(void);                              // 0x24
+    virtual void Hit(f32 mag, int other) {}                              // 0x20
+    virtual void Bump(const RaceCarRec* rc, int kind, void* other) {}  // 0x24
     virtual void Stop(void);                              // 0x28
-    virtual void Award(RaceCarRec* rc, f32 v, int kind);  // 0x2C
+    virtual void Award(f32 v, RaceCarRec* rc, int kind) {}             // 0x2C
     virtual void Start(RaceCarRec* rc);                   // 0x30
     virtual void Land(RaceCarRec* rc);                    // 0x34
     virtual s32 Total(void);                              // 0x38
@@ -1217,7 +1217,7 @@ public:
     virtual void vf10(void);
     virtual void vf0C(void);
     virtual int vf54(void);
-    virtual void vf9C(RaceCarRec* rc, int type);
+    virtual void vf9C(RaceCarRec* rc, int type, void* other);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
     virtual void vf94(RaceCarRec* rc);
@@ -2498,7 +2498,7 @@ static inline void AwardCar(BetaCar* c, int id, int kind, f32 v) {
     case 9:
         break;
     }
-    c->meterObj->Award(fn_8017960C(id), v, kind);
+    c->meterObj->Award(v, fn_8017960C(id), kind);
 }
 
 extern "C" {
@@ -2513,8 +2513,6 @@ void fn_8014E61C(int id, int kind, f32 v) {
         }
     }
 }
-
-void fn_8014E704(void) {}
 
 s32 fn_8014E708(int id) {
     BetaMaster* m = lbl_8055E268;
@@ -3564,16 +3562,14 @@ inline int BetaMaster::vf54(void) {
     return f;
 }
 
-inline void BetaMaster::vf9C(RaceCarRec* rc, int type) {
+inline void BetaMaster::vf9C(RaceCarRec* rc, int type, void* other) {
     if (type == 1003) {
         BetaCar* c = CarFor(rc);
         if (c) {
-            c->meterObj->Bump();
+            c->meterObj->Bump(rc, type, other);
         }
     }
 }
-
-extern "C" void fn_80151688(void) {}
 
 inline void BetaMaster::vfA4(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
@@ -3605,8 +3601,6 @@ inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* h
         }
     }
 }
-
-extern "C" void fn_80151914(void) {}
 
 inline void BetaMaster::vf94(RaceCarRec* rc) {
     BetaCar* c = CarFor(rc);
