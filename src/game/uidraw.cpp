@@ -3,6 +3,7 @@
 // timer, TV safe-area margins and number formatting with thousands separators. Names are guesses.
 #include "game/common.h"
 #include "game/gtext.h"
+#include "game/uidraw.h"
 #include <math.h>
 
 #include "game/uicontext.h"
@@ -111,7 +112,7 @@ void fn_80230114(void) {
     UIContextEnd();
 }
 
-void fn_80230150(u32 color, int flags, f32 x, f32 y, f32 z, f32 w, f32 h, f32 speed, f32 t, f32 margin) {
+void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 speed, f32 t, f32 margin) {
     f32 x0 = x;
     f32 y0 = y;
     f32 x1 = x0 + w;
@@ -192,8 +193,8 @@ void fn_80230150(u32 color, int flags, f32 x, f32 y, f32 z, f32 w, f32 h, f32 sp
     fn_802C8D74();
 }
 
-void fn_802304EC(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
-                 u32 color, int align) {
+void fn_802304EC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
+                 f32 speed, f32 t, f32 margin) {
     f32 width = fn_8023293C(font, text, 1.0f);
     f32 x0 = x + t * speed;
     width = scale * width;
@@ -217,8 +218,8 @@ void fn_802304EC(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f
     fn_80232BA4(text, font, x0, y, color, align, scale, a, 1.0f);
 }
 
-void fn_80230650(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
-                 u32 color, int align) {
+void fn_80230650(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
+                 f32 speed, f32 t, f32 margin) {
     f32 width = fn_8023293C(font, text, 1.0f);
     f32 y0 = y + t * speed;
     width = scale * width;
@@ -243,8 +244,8 @@ void fn_80230650(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f
     fn_80233354(text, font, color, align, x, y0, scale, a);
 }
 
-void fn_802307AC(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
-                 u32 color, int align) {
+void fn_802307AC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
+                 f32 speed, f32 t, f32 margin) {
     int lines = fn_80232B70(font);
     f32 y0 = y + t * speed;
     f32 height = scale * lines;

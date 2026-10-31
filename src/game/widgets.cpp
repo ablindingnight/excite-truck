@@ -1,5 +1,6 @@
 #include "game/uicontext.h"
 #include "game/gtext.h"
+#include "game/uidraw.h"
 typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
 static inline void SetVec3(Vec3* out,float x,float y,float z){out->x=x;out->y=y;out->z=z;}
 static inline void SetMat3Row(Mat3* m,int row,float x,float y,float z){m->m[row][0]=x;m->m[row][1]=y;m->m[row][2]=z;}
@@ -21,7 +22,7 @@ struct OwnedWidget {virtual ~OwnedWidget();virtual void Slot0c();virtual void Sl
 struct CallbackPrefix {char prefix[0x254];unsigned char active,unknown255,flag256,flag257;int(*callback)(void*);void* context;};
 struct OwnedWidgetPrefix {char prefix[0x244];OwnedWidget* child;int x,y,kind;};
 struct ImagePrefix {void* vtable;void* image;};
-struct ResourcePrefix {void* vtable;Font* resource;const char* text;};
+struct ResourcePrefix {void* vtable;GTextFont* resource;const char* text;};
 struct ModelResourcePrefix {void* vtable;int resource;};
 struct WidgetProperty {void* value;int key,bytes;void* buffer;};
 struct WidgetDesc {u32 unknown0;int flags;int x,y,kind,dx,dy;float scale;char unknown20[0x20];char name[1];char unknown41[0x4f];int style90,field94,field98,field9c,fielda0,fielda4;};
@@ -138,7 +139,7 @@ void fn_80229790(WidgetFragment* self);
 void fn_802297D0(WidgetFragment* self);
 extern u32 lbl_8033F9E0[];
 
-void fn_80230C30(float*,float*,int,int);
+
 
 
 extern const char lbl_8055B8A4[3];
@@ -286,7 +287,7 @@ struct DynoWidgetPrefix {char base[0x244];DynoTex* texture;int* frame;};
 extern "C" {
 extern u32 lbl_8033DE28[],lbl_8033DDA4[];extern const char lbl_8033DCDC[];
 SwfAnim* __dt__7SwfAnimFv(SwfAnim*,int);
-void fn_80230924(u32,float,float,float,float,float);
+
 WidgetFragment* fn_80228418(WidgetFragment* self,WidgetDesc* desc,SwfAnim* animation);
 WidgetFragment* fn_802284BC(WidgetFragment* self,int destroy);
 void fn_8022854C(WidgetFragment* self);
@@ -535,7 +536,7 @@ void fn_80221F9C(void);  // placeholder (388 bytes)
 extern "C" {void fn_8022ED00(UIContext*);void fn_8022EDB8();void fn_8022EE98(UIContext*);}
 typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
-typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;Font* font;unsigned int color;float radius,rate;} CircularPaintNew;
+typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;GTextFont* font;unsigned int color;float radius,rate;} CircularPaintNew;
 
 
 extern "C" {
@@ -546,7 +547,7 @@ void fn_80222CFC(WidgetFragment *source);
 
 WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* list,int* selected);  // placeholder (356 bytes)
 extern "C" {u32 fn_802236C8(WidgetFragment*,int);extern int lbl_8055FB9C,lbl_8055FBA0;}
-struct SelectionDrawFieldsNew {char base[0x244];const char* labels[33];int count;int* selected;unsigned char available[33];char pad2f1[3];float widths[33];int icons[33];Font* resource;float spacing,scale,scrollX,first,second,pulse;};
+struct SelectionDrawFieldsNew {char base[0x244];const char* labels[33];int count;int* selected;unsigned char available[33];char pad2f1[3];float widths[33];int icons[33];GTextFont* resource;float spacing,scale,scrollX,first,second,pulse;};
 extern "C" {extern const float lbl_805634EC,lbl_805634F4,lbl_80563534;}
 static inline float SelectionDrawTopNew(const WidgetFragment* self){return (240.0f)-(float)self->top;}
 extern "C" {
@@ -584,7 +585,7 @@ public:
 };
 typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
 
-typedef struct PalettePaintNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];PaletteListTypedNew* list;Font* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;} PalettePaintNew;
+typedef struct PalettePaintNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];PaletteListTypedNew* list;GTextFont* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;} PalettePaintNew;
 // Observed initialized foreign address view only; no storage or original container ownership.
 
 
@@ -608,7 +609,7 @@ void fn_80226B6C(WidgetFragment*);  // placeholder (336 bytes)
 
 typedef struct TimedImageFields {char base[0x244];float x,y,width,height;int textureHandle;float blendDuration,lastUpdateTime;UIContext* pose;unsigned char blendIncreasing;char unknown265[3];float blend,rotationAngle;unsigned char rotateBackward;} TimedImageFields;
 static inline void TransformTimedImageVector(const UIContext* pose,const RotationVec* transformInput,RotationVec* out){ChoiceTransformVectorNew(&pose->xf.basis,transformInput,out);}
-extern const float lbl_805634FC,lbl_80563560;void fn_80231220(float,float,float,float,int,unsigned int,float,float,float,float);
+extern const float lbl_805634FC,lbl_80563560;
 struct TimedImageInputVector:RotationVec{inline TimedImageInputVector(int screenWidth,int screenHeight){z=(0.0f);x=(float)-screenWidth/2.0f;y=(float)-screenHeight/2.0f;} inline void SetZYX(float zValue,float yValue,float xValue){z=zValue;x=xValue;y=yValue;}};typedef char TimedImageInputVectorSize12[sizeof(TimedImageInputVector)==12?1:-1];
 void fn_8022ED00(UIContext*);void fn_8022EDB8();
 void fn_802272D4(WidgetFragment* source);
@@ -784,7 +785,7 @@ struct Bound258 {char base[0x258];int* focus;int token;};
 struct Bound25c {char base[0x25c];int* focus;int token;};
 struct Bound27c {char base[0x27c];int* focus;int token;};
 struct Bound264 {char base[0x258];int(*callback)(void*);void* context;int token;int* focus;};
-struct SelectionPrefix {char base[0x2c8];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];Font* resource;float period,scale,speed,first,second,pulse;char gap418[4];unsigned char locked;};
+struct SelectionPrefix {char base[0x2c8];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];GTextFont* resource;float period,scale,speed,first,second,pulse;char gap418[4];unsigned char locked;};
 typedef char SelectionPulseOffset[(sizeof(SelectionPrefix)==0x420)?1:-1];
 struct PrefixFlag248 {char base[0x248];unsigned char value;};
 struct PrefixFlag250 {char base[0x250];unsigned char value;};
@@ -910,7 +911,7 @@ struct PairImage25c {char base[0x25c];void* first;void* second;};
 struct AssetImage244 {char base[0x244];void* image;UIContext* asset;};
 struct SceneResourcePrefix {char base[0x244];void* model;float x,y,height,width;int frame;UIContext* asset;unsigned char owned;};
 struct ResourceHandlePrefix {char base[0x254];int handle;char gap258[8];UIContext* asset;};
-struct TripleResourcePrefix {char base[0x250];Font* resource;void* first;void* second;};
+struct TripleResourcePrefix {char base[0x250];GTextFont* resource;void* first;void* second;};
 struct RichCaptionPrefix {char base[0x244];const char* label;char text[256];BitmapFontObserved391* renderer;};
 struct SliderRangePrefix {char base[0x244];int* value;char gap248[8];int minimum,maximum;unsigned char dragging;};
 struct MenuRecord {char base[0x20];void* context;int(*callback)(void*);};
@@ -918,7 +919,7 @@ struct MenuRowPrefix {void* handle;char rest[32];};
 struct MenuSelectionPrefix {char base[0x244];MenuRowPrefix* rows;unsigned char active;char pad249[3];int row,column;};
 extern "C" {
 extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033E0BC[],lbl_8033E038[],lbl_8033DFB4[],lbl_8033DEAC[],lbl_8033DF30[],lbl_8033EFF4[],lbl_8033E878[],lbl_8033E770[],lbl_8033DCF8[],lbl_8033EF68[];
-void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);void fn_801E4A2C(BitmapFontObserved391*);int fn_801E4A6C(BitmapFontObserved391*,const char*);int fn_801E4BA8(BitmapFontObserved391*);void fn_80230C30(float*,float*,int,int);MenuRecord* fn_8022D97C(void*,int);
+void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);void fn_801E4A2C(BitmapFontObserved391*);int fn_801E4A6C(BitmapFontObserved391*,const char*);int fn_801E4BA8(BitmapFontObserved391*);MenuRecord* fn_8022D97C(void*,int);
 WidgetFragment* fn_80220874(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80222C8C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80226AD0(WidgetFragment* self,int destroy);
@@ -982,7 +983,7 @@ int fn_802268E8(WidgetFragment* self);
 
 
 struct AssetRotationPrefix {char base[0x25c];UIContext* matrix;unsigned char owned;};
-struct AssetFormatPrefix {char base[0x244];int first;Font* resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];UIContext* asset;};
+struct AssetFormatPrefix {char base[0x244];int first;GTextFont* resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];UIContext* asset;};
 extern "C" {
 extern const float lbl_805634F8;extern const char lbl_8033DA2C[],lbl_8055B88C[4];extern u32 lbl_8033E1C4[],lbl_8033F7F4[];
 UIContext* fn_8022EE9C();void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);void fn_802E317C(const char*,...);
@@ -995,7 +996,7 @@ void fn_80227880(float x,float y,float width,float height);
 void fn_802238D0(WidgetFragment* self,int mode,void*);
 }
 
-struct SourceResourcePrefix {char base[0x244];int kind;union {void* resource;Font* font;};char gap24c[12];const char* name;char cached[32];};
+struct SourceResourcePrefix {char base[0x244];int kind;union {void* resource;GTextFont* font;};char gap24c[12];const char* name;char cached[32];};
 typedef UIContext FullDrawStatePrefix;
 typedef char DrawContextSize60_Normal392[sizeof(FullDrawStatePrefix)==60?1:-1];
 struct FocusPaintPrefix {
@@ -1032,7 +1033,7 @@ void fn_8021CB4C(WidgetFragment* self,void* context);
 void fn_8021CBBC(WidgetFragment*);
 }
 
-struct SelectResourcePrefix {char base[0x3fc];Font* resource;};
+struct SelectResourcePrefix {char base[0x3fc];GTextFont* resource;};
 struct RenderRequestPrefix {char base[0x244];float x,y,w,h;void* resource;const char* name;bool notify;char pad25d[3];int(*callback)(void*);void* context;};
 struct ImageDescriptorPrefix {char base[0x244];float x,y;int value;void* image;float width,height,alpha;UIContext* asset;void* context;};
 extern "C" {
@@ -1064,7 +1065,7 @@ void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,i
 }
 
 struct MultiValuePrefix {char base[0x244];void* value;void* first;void* second;bool dragging;char gap251[3];int direction;};
-struct ThreeResourcePrefix {char base[0x244];bool flag;char gap245[3];void* first;void* second;Font* resource;void* image;void* overlay;};
+struct ThreeResourcePrefix {char base[0x244];bool flag;char gap245[3];void* first;void* second;GTextFont* resource;void* image;void* overlay;};
 extern "C" {
 extern u32 lbl_8033E770[],lbl_8033DF30[];
 }
@@ -1132,7 +1133,7 @@ extern "C" {
 int fn_8021F848(WidgetFragment* self,int key);
 }
 
-struct ResourceTextPrefix {char base[0x244];int context;Font* resource;int style,flags;float scale;unsigned char localized;char text[64];bool owned;char gap29a[2];UIContext* asset;};
+struct ResourceTextPrefix {char base[0x244];int context;GTextFont* resource;int style,flags;float scale;unsigned char localized;char text[64];bool owned;char gap29a[2];UIContext* asset;};
 struct FormattedChoiceDescriptor {int unknown0,font,x,y,kind,width,height;float lineHeight;char name[0x64];int option84,option88,option8c,option90,option94,option98,option9c,optiona0,optiona4;};
 
 
@@ -1144,7 +1145,7 @@ WidgetFragment* fn_80227E84(WidgetFragment* self,void* first,WidgetDesc* desc,vo
 WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,int divisions,float minimum,float maximum);
 }
 
-struct UnsignedAssetPrefix {char base[0x244];void* context;Font* resource;int mode;float scale,elapsed;};
+struct UnsignedAssetPrefix {char base[0x244];void* context;GTextFont* resource;int mode;float scale,elapsed;};
 extern "C" {
 extern const float lbl_8056351C;extern const char lbl_8033DA60[];extern u32 lbl_8033E560[];
 WidgetFragment* fn_80222BDC(WidgetFragment* self,WidgetDesc* desc,void* context);
@@ -1157,7 +1158,7 @@ WidgetFragment* fn_8022435C(WidgetFragment* self,void* context,WidgetDesc* desc,
 }
 
 struct RollingListData {char base[8];int count,index;};
-struct RollingListFullPrefix {char base[0x244];RollingListData* list;Font* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;};
+struct RollingListFullPrefix {char base[0x244];RollingListData* list;GTextFont* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;};
 static inline int InlineIntegerMinimum(int value,int bound){if(value<bound)return value;return bound;}
 static inline int InlineIntegerMaximum(int value,int bound){if(value>bound)return value;return bound;}
 extern "C" { extern const float lbl_80563544;extern const char lbl_8033DAEC[],lbl_8033DA84[];
@@ -1195,7 +1196,7 @@ extern const float lbl_805634EC;
 void fn_802278F0(void* image,float x,float y,float width,float height);
 }
 
-struct ResourceInit357 {char base[0x244];int kind;union {void* resource;Font* fontResource;};int argument,style,flags;const char* name;char cache[32];float scale;bool flag;};
+struct ResourceInit357 {char base[0x244];int kind;union {void* resource;GTextFont* fontResource;};int argument,style,flags;const char* name;char cache[32];float scale;bool flag;};
 extern "C" {
 extern const char lbl_8033D8B8[];
 void fn_80219AB4(WidgetFragment* self,int kind,const char* name,int style,int argument,int flags,bool flag);
@@ -1289,15 +1290,15 @@ void fn_80228AEC(WidgetFragment *source, float opacity);
 }
 
 typedef struct ImageFillPaintNew ImageFillPaintNew;typedef struct ImageFillPaintTableNew {void* prefix[30];int(*Width)(ImageFillPaintNew*);} ImageFillPaintTableNew;
-struct ImageFillPaintNew {ImageFillPaintTableNew* vtable;int left,top,right,bottom,kind;char gap18[0x22c];int mode;void* image;int* watched;int index;unsigned int color;int style;char gap25c[0x20];float scale;unsigned char nativeSize;};
+struct ImageFillPaintNew {ImageFillPaintTableNew* vtable;int left,top,right,bottom,kind;char gap18[0x22c];int mode;union {void* image;GTextFont* font;};int* watched;int index;unsigned int color;const char* text;char gap25c[0x20];float scale;unsigned char nativeSize;};
 typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlobalNew;
 
 extern "C" {
 extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
-float fn_8023659C(void);void fn_80230C30(float*,float*,int,int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);int fn_80235FD8(void*);double fmod(double,double);double sin(double);
-void fn_80230150(float,unsigned int,int,float,float,float,float,float,float,float);void fn_802304EC(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_80230650(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_802307AC(int,void*,float,float,float,float,unsigned int,int,float,float,float);void fn_80230924(unsigned int,float,float,float,float,float);void fn_802354A0(void*,int,unsigned int,float,float,float,float,float);
-// Graphics declarations preserve the observed independent GPR/FPR argument orders.
-// Their interleaving is a matching compiler form, not a claim about original headers.
+float fn_8023659C(void);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);int fn_80235FD8(void*);double fmod(double,double);double sin(double);
+void fn_802354A0(void*,int,unsigned int,float,float,float,float,float);
+// Shared UIDraw declarations use one consistent source contract.
+// Remaining opaque graphics imports are bounded views, not recovered original headers.
 void fn_80219FE0(WidgetFragment *source);
 }
 
@@ -1457,9 +1458,9 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
     float x;
     float y;
     int mode;
-    void *shaderImage;
-    void *stretchImage;
-    void *gradientImage;
+    GTextFont *shaderImage;
+    GTextFont *stretchImage;
+    GTextFont *gradientImage;
     int frameCount;
     int solidFlags;
     int pulseFrame;
@@ -1559,23 +1560,23 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
             }
             break;
         case 2:
-            shaderImage = fields->image;
+            shaderImage = fields->font;
             if (shaderImage != 0) {
-                fn_802304EC(fields->style, shaderImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, (60.0f));
+                fn_802304EC(fields->text, shaderImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, (60.0f));
                 return;
             }
             break;
         case 4:
-            stretchImage = fields->image;
+            stretchImage = fields->font;
             if (stretchImage != 0) {
-                fn_80230650(fields->style, stretchImage, x, y, zero, fields->scale, fields->color, 0x41, (float) fields->index, time, (40.0f));
+                fn_80230650(fields->text, stretchImage, x, y, zero, fields->scale, fields->color, 0x41, (float) fields->index, time, (40.0f));
                 return;
             }
             break;
         case 5:
-            gradientImage = fields->image;
+            gradientImage = fields->font;
             if (gradientImage != 0) {
-                fn_802307AC(fields->style, gradientImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, (5.0f));
+                fn_802307AC(fields->text, gradientImage, x, y, zero, fields->scale, fields->color, 9, (float) fields->index, time, (5.0f));
                 return;
             }
             break;
@@ -2705,7 +2706,7 @@ void fn_80222CFC(WidgetFragment *source) {
 }
 void fn_8022375C(WidgetFragment*);extern const char lbl_8033DA84[];extern u32 lbl_8033E4DC[];extern const float lbl_8056352C,lbl_80563530;
 struct SelectionConstructBaseObservedNew {char storage[0x244];inline SelectionConstructBaseObservedNew(int x,int y){fn_80218F34((WidgetFragment*)this,x,y,0,0,0);}};
-struct SelectionFullPrefix:SelectionConstructBaseObservedNew {const char* labels[33];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];Font* resource;float period,scale,speed,first,second,pulse;char gap418[4];bool locked;};
+struct SelectionFullPrefix:SelectionConstructBaseObservedNew {const char* labels[33];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];GTextFont* resource;float period,scale,speed,first,second,pulse;char gap418[4];bool locked;};
 typedef char Selection391FullSize420[sizeof(SelectionFullPrefix)==0x420?1:-1];
 WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* rawList,int* selectedInput){SelectionFullPrefix* instance=(SelectionFullPrefix*)self;fn_80218F34(self,x,y,0,0,0);
   ObservedStringList *list = (ObservedStringList *) rawList;

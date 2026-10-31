@@ -21,7 +21,7 @@ struct Glyph {
 
 
 struct FontEntry {
-    Font* font;  // offset 0x0
+    GTextFont* font;  // offset 0x0
     char* name;  // offset 0x4
     int refs;    // offset 0x8
 };
@@ -62,7 +62,7 @@ struct TextItem {
 };
 
 struct IngameText {
-    Font* font;  // offset 0x0
+    GTextFont* font;  // offset 0x0
     int count;   // offset 0x4
 };
 
@@ -102,7 +102,7 @@ public:
 };
 
 typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
-typedef void (*DrawFn)(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
+typedef void (*DrawFn)(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
 
 extern "C" {
 int vsprintf(char* buf, const char* fmt, va_list args);
@@ -234,18 +234,18 @@ bool lbl_8055F074;          // drawing black text
 
 extern "C" {
 
-void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
-void fn_80231D84(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
+void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
+void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
 DrawFn lbl_8055B9A8 = fn_80231D84;
 
 
-void fn_80233AA4(Font* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
-void fn_80233BF0(const char* s, Font* f, f32* x, f32* y, int align, f32 scale, f32 xs);
-void fn_80233DD8(Font* f, u32 color);
-void fn_80233E34(Font* f, const UIXform* m, u32 color);
-void fn_80233E80(Font* f, u32 color);
+void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
+void fn_80233BF0(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs);
+void fn_80233DD8(GTextFont* f, u32 color);
+void fn_80233E34(GTextFont* f, const UIXform* m, u32 color);
+void fn_80233E80(GTextFont* f, u32 color);
 void fn_80233EBC(void);
-void fn_80233EC0(Font* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
+void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
 
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
@@ -261,7 +261,7 @@ int fn_8023150C(const char* name) {
     return -1;
 }
 
-void fn_8023158C(Font* f, const char* name) {
+void fn_8023158C(GTextFont* f, const char* name) {
     FontEntry* e = &lbl_8055F068->e[lbl_8055F068->count++];
     e->font = f;
     e->refs = 1;
@@ -281,7 +281,7 @@ int fn_802315FC(int idx) {
     return 0;
 }
 
-int fn_802316A4(Font* f) {
+int fn_802316A4(GTextFont* f) {
     FontEntry* e = lbl_8055F068->e;
     for (int i = 0; i < lbl_8055F068->count; e++, i++) {
         if (e->font == f) {
@@ -299,7 +299,7 @@ u32 fn_80231718(u32 c) {
     return (c & 0xFF000000) | (((m >> 16) & 0xFF) << 16) | (((m >> 8) & 0xFF) << 8) | (m & 0xFF);
 }
 
-Font* fn_80231730(const char* name) {
+GTextFont* fn_80231730(const char* name) {
     char buf[24];
     sprintf(buf, "_ol_%s", name);
     if (fn_8012C33C(buf)) {
@@ -367,7 +367,7 @@ void fn_80231780(const UIXform* m) {
 
 void fn_80231ADC(void) { lbl_8049846C.count = 0; }
 
-void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     EscSeq* e;
     strlen(s);
     while (*s) {
@@ -415,7 +415,7 @@ void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, 
     }
 }
 
-void fn_80231D84(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     strlen(s);
     while (*s) {
         f32 adv;
@@ -476,7 +476,7 @@ void fn_80232024(const char** s, u32* color) {
     }
 }
 
-void fn_80232040(const char* s, Font* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale, f32 z,
+void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale, f32 z,
                  f32 xs, f32 spacing) {
     u32 c;
     f32 py;
@@ -498,7 +498,7 @@ void fn_80232040(const char* s, Font* f, u32 color, int align, const UIXform* m,
     fn_80233BF0(str, f, &px, &py, align, scale, xs);
     while (passes > 0) {
         outline = passes == 2;
-        Font* ff = f;
+        GTextFont* ff = f;
         u32 cc = c;
         if (outline) {
             ff = f->outline;
@@ -583,7 +583,7 @@ void fn_802324D8(void) {
     lbl_8055F068 = NULL;
 }
 
-Font* fn_80232578(const char* name) {
+GTextFont* fn_80232578(const char* name) {
     int idx = fn_8023150C(name);
     if (idx >= 0) {
         FontEntry* e = &lbl_8055F068->e[idx];
@@ -595,7 +595,7 @@ Font* fn_80232578(const char* name) {
     u8 swapped = 0;
     u32 size = 0;
     u32 version;
-    Font* f = (Font*)fn_8012C370(name, 'GTEX', &version, &size, &ok, &swapped);
+    GTextFont* f = (GTextFont*)fn_8012C370(name, 'GTEX', &version, &size, &ok, &swapped);
     if (f != NULL) {
         if (version != 8) {
             fn_802E317C("gText: Font \"%s\" has bad version %d", name, version);
@@ -639,7 +639,7 @@ Font* fn_80232578(const char* name) {
     return f;
 }
 
-void fn_802328D4(Font* f) {
+void fn_802328D4(GTextFont* f) {
     if (f->outline && fn_802316A4(f->outline)) {
         f->outline = NULL;
     }
@@ -650,7 +650,7 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
-f32 fn_8023293C(Font* f, const char* s, f32 xs) {
+f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     if (s == NULL) {
         return 0.0f;
     }
@@ -697,16 +697,16 @@ f32 fn_8023293C(Font* f, const char* s, f32 xs) {
     return (w + gaps) * fn_8022EDC4()->scale;
 }
 
-int fn_80232B70(Font* f) { return f->height; }
+int fn_80232B70(GTextFont* f) { return f->height; }
 
-int fn_80232B78(Font* f) { return f->b5; }
+int fn_80232B78(GTextFont* f) { return f->b5; }
 
 void fn_80232B80(XformFn fn) {
     lbl_8055F070 = fn;
     lbl_8055B9A8 = (fn == NULL) ? fn_80231D84 : fn_80231AF0;
 }
 
-void fn_80232BA4(const char* text, Font* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs) {
+void fn_80232BA4(const char* text, GTextFont* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs) {
     u32 c = color;
     fn_80231714(&c);
     if (*text) {
@@ -714,7 +714,7 @@ void fn_80232BA4(const char* text, Font* f, f32 x, f32 y, u32 color, int align, 
     }
 }
 
-void fn_80232C50(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 width, f32 z,
+void fn_80232C50(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 width, f32 z,
                  f32 xs) {
     u32 c = color;
     f32 spacing = width - scale * fn_8023293C(f, text, xs);
@@ -725,7 +725,7 @@ void fn_80232C50(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
     }
 }
 
-void fn_80232D3C(const char* text, Font* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale,
+void fn_80232D3C(const char* text, GTextFont* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale,
                  f32 z, f32 xs) {
     u32 c = color;
     fn_80231714(&c);
@@ -734,7 +734,7 @@ void fn_80232D3C(const char* text, Font* f, u32 color, int align, const UIXform*
     }
 }
 
-void fn_80232DF4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
+void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
     f32 px = x;
     f32 py = y;
     u32 c = color;
@@ -747,7 +747,7 @@ void fn_80232DF4(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
         for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             px = x0;
             int i = 0;
-            Font* ff = f;
+            GTextFont* ff = f;
             u32 cc = c;
             if (passes == 2) {
                 ff = f->outline;
@@ -777,7 +777,7 @@ static inline const char* NextGlyph(const char* p) {
     return p + 1;
 }
 
-void fn_80233010(const char* text, Font* f, u32 color, int align, int ingame, f32 x, f32 y, f32 maxw, f32 scale,
+void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingame, f32 x, f32 y, f32 maxw, f32 scale,
                  f32 z, f32 xs) {
     const char* p = text;
     int line = 0;
@@ -824,7 +824,7 @@ void fn_80233010(const char* text, Font* f, u32 color, int align, int ingame, f3
     }
 }
 
-void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
+void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
     u32 c = color;
     fn_80231714(&c);
     f32 y0 = y;
@@ -849,7 +849,7 @@ void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
         for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             y = y0;
             int i = 0;
-            Font* ff = f;
+            GTextFont* ff = f;
             u32 cc = c;
             if (passes == 2) {
                 ff = f->outline;
@@ -872,9 +872,9 @@ void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
 
 
 
-void fn_802335F0(const char* text, Font* f, f32 x, f32 y) { fn_80233600(text, f, -1, 9, x, y, 0.0f); }
+void fn_802335F0(const char* text, GTextFont* f, f32 x, f32 y) { fn_80233600(text, f, -1, 9, x, y, 0.0f); }
 
-void fn_80233600(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 z) {
+void fn_80233600(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 z) {
     u32 c = color;
     fn_80231714(&c);
     if (*text) {
@@ -882,7 +882,7 @@ void fn_80233600(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
     }
 }
 
-void fn_802336AC(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, ...) {
+void fn_802336AC(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, z);
@@ -890,7 +890,7 @@ void fn_802336AC(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f
     fn_80233600(buf, f, color, align, x, y, z);
 }
 
-void fn_802337A0(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
+void fn_802337A0(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, xs);
@@ -898,7 +898,7 @@ void fn_802337A0(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f
     fn_80232BA4(buf, f, x, y, color, align, scale, z, xs);
 }
 
-void fn_8023389C(Font* f, u32 color, int align, const UIXform* m, const char* fmt, f32 x, f32 y, f32 z,
+void fn_8023389C(GTextFont* f, u32 color, int align, const UIXform* m, const char* fmt, f32 x, f32 y, f32 z,
                  f32 scale, f32 xs, ...) {
     char buf[128];
     va_list ap;
@@ -907,7 +907,7 @@ void fn_8023389C(Font* f, u32 color, int align, const UIXform* m, const char* fm
     fn_80232D3C(buf, f, color, align, m, x, y, scale, z, xs);
 }
 
-void fn_802339A8(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
+void fn_802339A8(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, xs);
@@ -915,7 +915,7 @@ void fn_802339A8(Font* f, u32 color, int align, const char* fmt, f32 x, f32 y, f
     fn_80232DF4(buf, f, color, align, x, y, scale, z, xs);
 }
 
-void fn_80233AA4(Font* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
+void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     if (c != ' ') {
         u32 color = lbl_8055F050;
         UIVert v[4];
@@ -928,7 +928,7 @@ void fn_80233AA4(Font* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     }
 }
 
-void fn_80233BF0(const char* s, Font* f, f32* x, f32* y, int align, f32 scale, f32 xs) {
+void fn_80233BF0(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs) {
     if (align & 1) {
         const char* next;
         u16 c = DecodeUTF8(s, &next);
@@ -948,25 +948,25 @@ void fn_80233BF0(const char* s, Font* f, f32* x, f32* y, int align, f32 scale, f
     }
 }
 
-void fn_80233DD8(Font* f, u32 color) {
+void fn_80233DD8(GTextFont* f, u32 color) {
     UIContext* ctx = fn_8022EDC4();
     lbl_8055F050 = fn_80230B9C(color);
     fn_802C8B98(f->tex, ctx);
 }
 
-void fn_80233E34(Font* f, const UIXform* m, u32 color) {
+void fn_80233E34(GTextFont* f, const UIXform* m, u32 color) {
     lbl_8055F050 = fn_80230B9C(color);
     fn_802C8B98(f->tex, m);
 }
 
-void fn_80233E80(Font* f, u32 color) {
+void fn_80233E80(GTextFont* f, u32 color) {
     lbl_8055F050 = fn_80230B9C(color);
     fn_802C8C04(f->tex);
 }
 
 void fn_80233EBC(void) { fn_802C8D74(); }
 
-void fn_80233EC0(Font* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
+void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
     if (c != ' ') {
         u32 color = lbl_8055F050;
         UIVert v[4];
@@ -982,7 +982,7 @@ void fn_80233EC0(Font* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1)
 f32 fn_8023400C(int idx) {
     f32 w = 0.0f;
     f32 gaps = 0.0f;
-    Font* f = lbl_8055F058.font;
+    GTextFont* f = lbl_8055F058.font;
     const char* s = lbl_8055F06C[idx].text;
     int i = 0;
     strlen(s);
@@ -1027,7 +1027,7 @@ f32 fn_8023400C(int idx) {
 }
 
 void fn_8023423C(int idx, int align) {
-    Font* f = lbl_8055F058.font;
+    GTextFont* f = lbl_8055F058.font;
     f32 scale = lbl_8055F06C[idx].scale;
     f32 xs = lbl_8055F06C[idx].xs;
     if (align & 1) {
@@ -1100,7 +1100,7 @@ int fn_80234654(void) {
 
 void fn_802346C8(void) {
     for (int passes = (lbl_8055F058.font->outline != NULL) + 1; passes > 0; passes--) {
-        Font* f;
+        GTextFont* f;
         if (passes == 2) {
             f = lbl_8055F058.font->outline;
         } else {
@@ -1196,7 +1196,7 @@ void fn_802346C8(void) {
 void fn_80234AEC(void) { lbl_8055F058.count = 0; }
 
 struct TextStyle {
-    Font* font;  // offset 0x0
+    GTextFont* font;  // offset 0x0
     u32 color;   // offset 0x4
     int align;   // offset 0x8
     f32 scale;   // offset 0xC

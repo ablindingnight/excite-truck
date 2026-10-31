@@ -5,7 +5,7 @@
 #include "game/gtext.h"
 struct UIStyleRecordFields {
     u8 active; // Three bytes of natural alignment, not semantic fields.
-    u32 resource04; Font* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
+    u32 resource04; GTextFont* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
     f32 height;      // +0x34
     int field38;
     u32 field3C_0,field3C_1,field3C_2,field3C_3,field3C_4,field3C_5,field3C_6,field3C_7;
@@ -168,7 +168,7 @@ int fn_8022AA84(int i);
 f32 fn_8022AAA8(int i,const char* text);
 int fn_8022AB18(int i,int axis,int mode);
 int fn_8022AB94(const signed char* text,signed char value);
-f32 fn_8022ABC8(Font* font,const char* text,int n);
+f32 fn_8022ABC8(GTextFont* font,const char* text,int n);
 void fn_8022C9D0(void);
 UIStyleRecordFields* fn_8022CA2C(int i);
 f32 fn_8022CA40(UIStyleRecordFields* s);
@@ -271,7 +271,7 @@ int fn_8022AB94(const signed char* text,signed char value) {
     return n;
 }
 
-f32 fn_8022ABC8(Font* font,const char* text,int n) {
+f32 fn_8022ABC8(GTextFont* font,const char* text,int n) {
     char buffer[2048];
     strncpy(buffer,text,n);
     buffer[n]=0;
@@ -307,7 +307,7 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         height=0.0f;
         int lines=fn_8022AB94((const signed char*)text,10)+1;
         if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8((int)s->resource04);
-        Font* font=s->resource08;
+        GTextFont* font=s->resource08;
         if(font) {
             if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70(font);
             else {
