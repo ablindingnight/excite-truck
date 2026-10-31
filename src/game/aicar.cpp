@@ -1111,13 +1111,15 @@ void fn_80194C4C(u8* d, u8* out, f32 t) {
     if (S32(g, 0x30) == 0) {
         o->speed = speed;
         for (int i = 0; i < fn_801B2F24(); i++) {
+            u8* me;
             AIRacer* r = fn_801B2EC0(i);
             if (i == CARID(d)) {
                 continue;
             }
             if (S32(r->State(), 0x30) == 0) {
-                o->speed = o->speed + fn_80194F70((RVec3*)(CAR(d) + 0x54), (RVec3*)(r->Car() + 0x60),
-                                                  (RVec3*)(CAR(d) + 0x60));
+                me = CAR(d);
+                u8* other = r->Car();
+                o->speed = o->speed + fn_80194F70((RVec3*)(CAR(d) + 0x54), (RVec3*)(other + 0x60), (RVec3*)(me + 0x60));
                 break;
             }
         }
