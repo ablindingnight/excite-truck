@@ -1102,9 +1102,9 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     int i = 0;
     if (n > 0) {
         for (; i < n; i++) {
-        r->pts[i].x = m->pos.x + basis.m[1][0] * radius;
-        r->pts[i].y = m->pos.y + basis.m[1][1] * radius;
-        r->pts[i].z = m->pos.z + basis.m[1][2] * radius;
+            r->pts[i].x = m->pos.x + basis.m[1][0] * radius;
+            r->pts[i].y = m->pos.y + basis.m[1][1] * radius;
+            r->pts[i].z = m->pos.z + basis.m[1][2] * radius;
             MulMat(&basis, &basis, rp);
         }
     }
