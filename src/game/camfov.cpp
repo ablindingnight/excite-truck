@@ -414,7 +414,7 @@ void fn_802704E4(u8* p) {
     PVec3 eye;
     CVec3 r;
     int wide = fn_80178CA4() > 1;
-    f32 dist = AddMul(wide ? lbl_80563ED8 : lbl_80563EC0, lbl_80563E30 - c->speedFrac * lbl_80563ED0, F32(c->car, 0x5B4));
+    f32 dist = AddMul(wide ? lbl_80563ED8 : lbl_80563EC0, lbl_80563E30 - MulF(lbl_80563ED0, c->speedFrac), F32(c->car, 0x5B4));
     lift = F32(c->car, 0x5B8) + lbl_80563F20;
     if (c->mode != 9) {
         c->trailPos = c->pos;
