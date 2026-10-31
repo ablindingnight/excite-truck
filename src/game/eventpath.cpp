@@ -23,6 +23,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal
 class Grades {
 public:
     Grades(ValueNode* table);
+    ~Grades(void) {}
     void Load(ValueNode* table);
     int GetThreshold(int grade);
     s32 thresholds[5];  // offset 0x0
