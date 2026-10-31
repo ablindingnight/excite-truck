@@ -400,7 +400,7 @@ void fn_801C1364(PSys* s) {
                 AddScaled(p, p, &s->up, -h);
                 AddScaled(&v, &v, &s->up, -PSVECDotProduct(&s->up, &v));
                 f32 vv = PSVECDotProduct(&v, &v);
-                if (vv > 1e-10f) {
+                if (vv > 0.00001f * 0.00001f) {
                     f32 f = 0.0050000004f / (f32)sqrt(vv);
                     f = 1.0f < f ? 1.0f : f;
                     AddScaled(p, p, &v, -f);
