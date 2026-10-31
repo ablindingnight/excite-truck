@@ -94,7 +94,7 @@ struct StatValue {
 class StatEntry {
 public:
     StatEntry(void) { type = 0; }
-    BOOL Matches(u32 type, const char* name);
+    BOOL Matches(u32 type, const char* name) const;
 
     u32 type;                         // offset 0x0
     const char* name;                 // offset 0x4
@@ -507,7 +507,7 @@ BOOL MatchContestName(const char* a, const char* b) {
     return match;
 }
 
-BOOL StatEntry::Matches(u32 type, const char* name) {
+BOOL StatEntry::Matches(u32 type, const char* name) const {
     return this->type == type && MatchContestName(this->name, name);
 }
 
