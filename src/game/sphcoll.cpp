@@ -3024,27 +3024,20 @@ void fn_801A0F10(u8* p) {
 }
 
 // Sweeps a ray against the group: a cheap slab test on the bounding sphere, then each member.
-int fn_801A1148(u8* p, u32 from, u32 dir, u32 t, u32 out) {
+int fn_801A1148(u8* p, const f32* from, const f32* dir, f32* t, f32* out) {
     const f32* c = (const f32*)(PTR(p, 0xC) + 0x24);
-    const f32* f = (const f32*)from;
-    f32 fy;
-    f32 fx;
-    f32 fz;
-    fx = f[0];
-    fy = f[1];
-    fz = f[2];
     f32 d[3];
-    d[0] = c[0] - fx;
-    d[1] = c[1] - fy;
-    d[2] = c[2] - fz;
-    f32 proj = PSVECDotProduct(d, (void*)dir);
+    d[0] = c[0] - from[0];
+    d[1] = c[1] - from[1];
+    d[2] = c[2] - from[2];
+    f32 proj = PSVECDotProduct(d, dir);
     f32 rad = F32(p, 0x178);
-    if (proj >= -rad && proj < *(f32*)t + rad) {
+    if (proj >= -rad && proj < *t + rad) {
         fn_801A0160(p);
         int hit = 0;
         for (int i = 0; i < S32(p, 0x174); i++) {
             u8* s = (u8*)((SphGroupDel*)p)->vols[i];
-            if (fn_8019DDFC((f32*)from, (f32*)dir, (f32*)t, (f32*)out, (f32*)(s + 0x34), F32(s, 0x24))) {
+            if (fn_8019DDFC((f32*)from, (f32*)dir, t, out, (f32*)(s + 0x34), F32(s, 0x24))) {
                 hit = 1;
             }
         }
