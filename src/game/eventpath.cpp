@@ -364,9 +364,12 @@ int fn_8027AFA0(Bracket* b, ValueNode* n) {
             if (b->contests.n > 0) {
                 b->unlocked = fn_8027D0E0(b->name);
                 b->open = fn_8027D068(b->name);
+                int j = 0;
                 b->allDone = 1;
-                for (int j = 0; j < b->contests.n; j++) {
-                    b->allDone = (b->allDone & b->contests.data[j].v48()) != 0;
+                if (b->contests.n > 0) {
+                    for (; j < b->contests.n; j++) {
+                        b->allDone = (b->allDone & b->contests.data[j].v48()) != 0;
+                    }
                 }
                 fn_8027D158(b->name, b->text, 100);
                 b->gated = diff > 0;
