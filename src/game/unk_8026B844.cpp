@@ -913,18 +913,19 @@ void fn_8026DDD8(s32 mode) {
             lbl_8049A168.pos.z = lbl_80563D78;
         }
     } else if (fn_8026BFF0(mode) && !fn_8026BFF0((s32)lbl_8055F4E0)) {
-        lbl_80499050.rot.axes[0].x = lbl_80563D94;
-        lbl_80499050.rot.axes[0].y = lbl_80563D78;
-        lbl_80499050.rot.axes[0].z = lbl_80563D78;
-        lbl_80499050.rot.axes[1].x = lbl_80563D78;
-        lbl_80499050.rot.axes[1].y = lbl_80563D94;
-        lbl_80499050.rot.axes[1].z = lbl_80563D78;
-        lbl_80499050.rot.axes[2].x = lbl_80563D78;
-        lbl_80499050.rot.axes[2].y = lbl_80563D78;
-        lbl_80499050.rot.axes[2].z = lbl_80563D94;
-        lbl_80499050.pos.x = lbl_80563D78;
-        lbl_80499050.pos.y = lbl_80563D78;
-        lbl_80499050.pos.z = lbl_80563D78;
+        CamVec* b = (CamVec*)&lbl_80499050;
+        b[0].x = lbl_80563D94;
+        b[0].y = lbl_80563D78;
+        b[0].z = lbl_80563D78;
+        b[1].x = lbl_80563D78;
+        b[1].y = lbl_80563D94;
+        b[1].z = lbl_80563D78;
+        b[2].x = lbl_80563D78;
+        b[2].y = lbl_80563D78;
+        b[2].z = lbl_80563D94;
+        b[3].x = lbl_80563D78;
+        b[3].y = lbl_80563D78;
+        b[3].z = lbl_80563D78;
     } else if (!fn_8026BFF0(mode) && fn_8026BFF0((s32)lbl_8055F4E0)) {
         CamCar* car = fn_8017960C(fn_8026A344(0));
         if (car) {
