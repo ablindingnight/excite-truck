@@ -1051,35 +1051,37 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + sl->point;
                 if (PSVECDotProduct(&g->x, &g->x) > t->size * t->size) {
-                    if ((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= lbl_80558DC4[0]) {
-                        sl->state = 3;
-                        sl->valid = 0;
-                    } else if ((u32)t->kind <= 1) {
-                        if (sl->state != 2) {
-                            sl->state = 2;
-                            sl->valid = 0;
-                        }
-                    } else {
-                        int roll = fn_80129D18(4, 10);
-                        if (sl->state == 2) {
-                            if (roll < 2) {
-                                sl->state = 3;
+                    if (!((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= lbl_80558DC4[0])) {
+                        if ((u32)t->kind <= 1) {
+                            if (sl->state != 2) {
+                                sl->state = 2;
                                 sl->valid = 0;
                             }
                         } else {
-                            if (roll < 7) {
-                                sl->state = 2;
-                            } else if (roll < 8) {
-                                sl->state = 3;
+                            int roll = fn_80129D18(4, 10);
+                            if (sl->state == 2) {
+                                if (roll < 2) {
+                                    sl->state = 3;
+                                    sl->valid = 0;
+                                }
                             } else {
-                                sl->state = 1;
+                                if (roll < 7) {
+                                    sl->state = 2;
+                                } else if (roll < 8) {
+                                    sl->state = 3;
+                                } else {
+                                    sl->state = 1;
+                                }
+                                sl->valid = 0;
                             }
-                            sl->valid = 0;
+                            if (sl->state == 2) {
+                                sl->angle = sl->angle > lbl_80561FF4 ? sl->angle : lbl_80561FF4;
+                                sl->spin = sl->spin > lbl_80561FD0 ? sl->spin : lbl_80561FD0;
+                            }
                         }
-                        if (sl->state == 2) {
-                            sl->angle = sl->angle > lbl_80561FF4 ? sl->angle : lbl_80561FF4;
-                            sl->spin = sl->spin > lbl_80561FD0 ? sl->spin : lbl_80561FD0;
-                        }
+                    } else {
+                        sl->state = 3;
+                        sl->valid = 0;
                     }
                     if (sl->state == 3) {
                         s32 bone = t->bit;
