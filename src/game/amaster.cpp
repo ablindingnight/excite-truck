@@ -271,7 +271,7 @@ void fn_801B83A8(void) {
     lbl_8055E750 = 0.0f;
 }
 
-void fn_801B8418(void) {}
+void GameMode_vf10(void) {}
 
 void fn_801B841C(void) {
     lbl_8055E744->vf0C();
@@ -283,19 +283,19 @@ void fn_801B841C(void) {
     }
 }
 
-void fn_801B8488(void) {}
+void GameMode_vf0C(void) {}
 
 void fn_801B848C(int p) { lbl_8055E744->vf14(p); }
 
 void fn_801B84A4(int p) { lbl_8055E744->vf4C(p); }
 
-void fn_801B84BC(void) {}
+void GameMode_vf4C(void) {}
 
 void fn_801B84C0(int p) { lbl_8055E744->vf50(p); }
 
 int fn_801B84D8(int p) { return lbl_8055E744->vf54(p); }
 
-int fn_801B84F0(void) { return 0; }
+int GameMode_vf54(void) { return 0; }
 
 void fn_801B84F8(void) {
     lbl_8055E748 = 1;

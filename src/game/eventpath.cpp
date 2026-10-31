@@ -334,9 +334,9 @@ int fn_8027AD4C(Contest* c, ValueNode* n) {
     return c->valid;
 }
 
-u8 fn_8027AF84(Contest* c) { return c->open; }
+u8 Contest_vf44(Contest* c) { return c->open; }
 
-u8 fn_8027AF8C(Contest* c) { return c->unlocked; }
+u8 Contest_vf40(Contest* c) { return c->unlocked; }
 
 void fn_8027AF94(Contest* c) { c->valid = 0; }
 
@@ -380,7 +380,7 @@ int fn_8027AFA0(Bracket* b, ValueNode* n) {
     return b->valid;
 }
 
-u8 fn_8027B280(Contest* c) { return c->done; }
+u8 Contest_vf48(Contest* c) { return c->done; }
 
 void fn_8027B288(Bracket* b) {
     for (int i = 0; i < b->contests.n; i++) {

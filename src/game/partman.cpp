@@ -1000,7 +1000,7 @@ PartTweak2::~PartTweak2(void) {}
 
 extern "C" {
 
-int fn_802916DC(void* t) { return 0; }
+int PartTweak_vf14(void* t) { return 0; }
 
 void fn_802916E4(PartTweak* t) {}
 
@@ -1008,18 +1008,18 @@ void fn_802916E8(void* t) {}
 
 void fn_802916EC(void* t) {}
 
-s32 fn_802916F0(u8* t) { return *(s32*)(t + 0x4); }
+s32 PartTweak_vf0C(u8* t) { return *(s32*)(t + 0x4); }
 
-s32 fn_802916F8(u8* t) { return *(s32*)(t + 0x118); }
+s32 PartTweak_vf10(u8* t) { return *(s32*)(t + 0x118); }
 
-void fn_80291700(void* t) { fn_802916E8(t); }
+void PartTweak_vf18(void* t) { fn_802916E8(t); }
 
-void fn_80291704(void* t) { fn_802916EC(t); }
+void PartTweak_vf1C(void* t) { fn_802916EC(t); }
 
-void fn_80291708(u8* t) { t[0x11C] = 1; }
+void PartTweak_vf20(u8* t) { t[0x11C] = 1; }
 
-void fn_80291714(u8* t) { t[0x11C] = 0; }
+void PartTweak_vf24(u8* t) { t[0x11C] = 0; }
 
-u8 fn_80291720(u8* t) { return t[0x11C]; }
+u8 PartTweak_vf28(u8* t) { return t[0x11C]; }
 
 }  // extern "C"

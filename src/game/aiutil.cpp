@@ -84,9 +84,9 @@ f32 fn_80160BE0(const V2* a, const V2* b) {
     return d.x * d.x + d.y * d.y;
 }
 
-int fn_80160C18(void) { return 0; }
+int GameMode_vf24(void) { return 0; }
 
-f32 fn_80160C20(void) { return 5.0f; }
+f32 GameMode_vf38(void) { return 5.0f; }
 
 void GameMode::vf44(void) {}
 
