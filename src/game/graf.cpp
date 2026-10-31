@@ -148,8 +148,9 @@ void fn_802E317C(const char* fmt, ...);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 static inline void GSwap32(void* p) {
+    u8 t;
     u8* b = (u8*)p;
-    u8 t = b[0];
+    t = b[0];
     b[0] = b[3];
     b[3] = t;
     t = b[1];
