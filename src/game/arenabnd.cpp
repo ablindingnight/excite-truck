@@ -99,7 +99,8 @@ struct EventInfo {
 
 struct TableRef {
     TableRef(void) { node = 0; }
-    ~TableRef(void) { node = 0; }
+    TableRef(const char* what, const char* name);
+    ~TableRef(void);
     ValueNode* node;
 };
 
@@ -286,17 +287,18 @@ void fn_8013A074(void) {
 
 }  // extern "C"
 
-extern "C" TableRef fn_8013A0B0(const char* what, const char* name) {
-    TableRef r;
+TableRef::TableRef(const char* what, const char* name) {
+    node = 0;
     if (lbl_8055E138 && *name) {
         if (lbl_8055E138->HasChild(name)) {
-            r.node = lbl_8055E138->FindChild(name);
+            node = lbl_8055E138->FindChild(name);
         } else {
             fn_802E30C8("%s: no %s table in \"%s\"", what, name, lbl_8042F7C0);
         }
     }
-    if (!r.node) {
-        r.node = lbl_8055E13C->FindChild(name);
+    if (!node) {
+        node = lbl_8055E13C->FindChild(name);
     }
-    return r;
 }
+
+TableRef::~TableRef(void) { node = 0; }

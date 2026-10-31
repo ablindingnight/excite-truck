@@ -563,6 +563,7 @@ struct Settings {
 
 struct TableRef {
     TableRef(void) { node = 0; }
+    TableRef(const char* what, const char* name);
     ~TableRef(void);
     ValueNode* node;
 };
@@ -578,7 +579,6 @@ struct EWState {
 };
 
 VehicleInfo* FindVehicle(s32 id);
-TableRef fn_8013A0B0(const char* what, const char* name);
 
 struct Mat3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
@@ -1291,7 +1291,7 @@ void fn_801F9AA4(const char* file, u32 flags) {
 }
 
 void fn_801F9B28(void) {
-    TableRef r = fn_8013A0B0("eventwob", "objects");
+    TableRef r("eventwob", "objects");
     if (r.node) {
         fn_801F9928(r.node, 3);
     }
