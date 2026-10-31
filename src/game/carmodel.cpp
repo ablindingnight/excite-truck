@@ -447,13 +447,15 @@ void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale,
             fn_802E317C("gauge %s: bad format", key);
         }
         p->angle = Atan2F(x - cx, -(y - cy));
-        p->val = p->val * (scale - offset) + offset;
+        p->val *= scale - offset;
+        p->val += offset;
     }
     if (g->count < 2) {
         fn_802E317C("gauge %s: pair_count < 2", name);
     }
+    int last = g->count - 1;
     g->min = g->pairs[0].val;
-    g->max = g->pairs[g->count - 1].val;
+    g->max = g->pairs[last].val;
 }
 
 }  // extern "C"
