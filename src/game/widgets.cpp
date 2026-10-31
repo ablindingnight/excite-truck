@@ -566,25 +566,7 @@ inline int Round355(float value){return (int)(value<(0.0f)?value-(0.5f):(0.5f)+v
 WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name);  // placeholder (700 bytes)
 void fn_80224E74(void);  // placeholder (1736 bytes)
 struct RollingRow;
-class CycleList {
-public:
-    CycleList(const char** names, const signed long* values, int count, int a);
-    ~CycleList(void);
-    const char* Name(void);
-    signed long Value(void);
-    void Next(void);
-    void Prev(void);
-    void Set(int i);
-    const char* NameAt(int i);
-
-    const char** names;  // offset 0x0
-    const signed long* values;   // offset 0x4
-    signed long first;           // offset 0x8
-    signed long cur;             // offset 0xC
-    signed long count;           // offset 0x10
-    signed long unk14;           // offset 0x14
-    unsigned char unk18;            // offset 0x18
-};
+#include "game/uilists.h"
 typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
 
 typedef struct PalettePaintNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];PaletteListTypedNew* list;GTextFont* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;} PalettePaintNew;

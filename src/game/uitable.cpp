@@ -119,38 +119,9 @@ public:
     const char* fmt;  // offset 0x10
 };
 
-class CycleList {
-public:
-    CycleList(const char** names, const s32* values, int count, int a);
-    ~CycleList(void);
-    const char* Name(void);
-    s32 Value(void);
-    void Next(void);
-    void Prev(void);
-    void Set(int i);
-    const char* NameAt(int i);
+#include "game/uilists.h"
 
-    const char** names;  // offset 0x0
-    const s32* values;   // offset 0x4
-    s32 first;           // offset 0x8
-    s32 cur;             // offset 0xC
-    s32 count;           // offset 0x10
-    s32 unk14;           // offset 0x14
-    u8 unk18;            // offset 0x18
-};
 
-class NameList {
-public:
-    NameList(const char** src, int n, int a);
-    ~NameList(void);
-    int Count(void);
-    int Unk44(void);
-    char* Name(int i);
-
-    char names[4][0x10];  // offset 0x0
-    s32 count;            // offset 0x40
-    s32 unk44;            // offset 0x44
-};
 
 static inline f32 Snap(f32 v, f32 s) { return s * (f32)(int)(0.5f + v / s); }
 static inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
