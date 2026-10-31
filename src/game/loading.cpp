@@ -517,8 +517,8 @@ void DrawLoadingScreen(int alpha, f32 t) {
     BOOL show_goals;
 
     offset = fn_802C9A58() ? -107.0f : 0.0f;
-    x0 = -0.5f * lbl_8055CFF0 + offset;
     y0 = 0.5f * lbl_8055CFF4;
+    x0 = -0.5f * lbl_8055CFF0 + offset;
     y1 = y0 - 256.0f;
     x1 = 256.0f + x0;
     y2 = y1 - 256.0f;
