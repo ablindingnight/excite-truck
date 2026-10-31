@@ -359,7 +359,10 @@ void fn_80292B48(Chunks* sys) {
     }
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline f32 AbsF(f32 v) {
+    double a = __fabs(v);
+    return a;
+}
 
 int fn_80292BA8(PVec* pos, PVec* vel, const PVec* hit, const PVec* n) {
     PVec d;
