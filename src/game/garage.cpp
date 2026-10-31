@@ -210,7 +210,6 @@ static inline void FreeIconPool(IconPool* pool) {
     }
 }
 extern s32 lbl_8055F2E8;
-extern void* lbl_803443B0[];
 extern void* lbl_80344384[];
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
@@ -913,7 +912,6 @@ u8* fn_8024FB64(u8* p, int del) {
 
 }  // extern "C"
 
-extern void* lbl_803443B0[];
 
 // The menu screens' shared UI objects (uiobjs.cpp).
 class UIObjects {
@@ -938,7 +936,7 @@ public:
 extern "C" UIObjects* fn_80258354(void);
 extern const f32 lbl_80563964;  // 1.0
 
-// The car unlock screen's state (vtable lbl_803443B0): walks `list`, revealing each unlocked car with the
+// The car unlock screen's state (vtable __vt__12UnlockScreen): walks `list`, revealing each unlocked car with the
 // trophy cue.
 extern "C" {
 void fn_80236954(const char* event);
@@ -1080,20 +1078,6 @@ void fn_8024FBD8(GarageList* list, u32* color) {
     }
     CarStatsShutdown();
     fn_8013C8B8();
-}
-
-u8* fn_8024FFF8(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_803443B0;
-        VDel* c = (VDel*)PTR(p, 0x188);
-        if (c) {
-            delete c;
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
 }
 
 u8* fn_8025007C(int n) {
