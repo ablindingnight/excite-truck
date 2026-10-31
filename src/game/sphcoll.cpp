@@ -106,6 +106,7 @@ public:
     void Push(Phob* who, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
     void VelAt(RVec3* out, const RVec3* at);
     void AddTorque(const RVec3* t);
+    void AddForceAt(const RVec3* f, const RVec3* at);
 };
 
 class VGroup {
@@ -645,7 +646,7 @@ extern const f32 lbl_80562330;
 extern const f32 lbl_805622D4;
 extern const f32 lbl_8056232C;
 extern const f32 lbl_805622D0;
-extern "C" int fn_801E9F08(u8* hint, const f32* at, RVec3* pos, RVec3* n, u32* surf, f32 maxDist);
+extern "C" int fn_801E9F08(u8* hint, const f32* at, RVec3* pos, RVec3* n, int* surf, f32 maxDist);
 
 // Sphere (centre c, radius r) on the ground: every track-mesh hit pushes via fn_8019A820; then the
 // ground contact gives a spring impulse, a clamped friction force (with d, the slip accumulator, nudged
@@ -662,7 +663,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
     RVec3 t;
     RVec3 fr;
     int n;
-    u32 surf;
+    int surf;
     RigidBody* o = (RigidBody*)PTR(p, 0x4);
     if (lbl_8055E5A0) {
         n = 64;
@@ -1979,7 +1980,176 @@ void fn_8019F6F0(u8* p) {
     }
 }
 
-void fn_8019F780(u8* p) {}  // stub (514)
+extern const f32 lbl_80562300;
+extern const f32 lbl_80562380;  // 1.5
+extern const f32 lbl_80562384;  // -3
+extern const f32 lbl_80562388;  // -30
+extern const f32 lbl_8056238C;  // 2pi
+extern const double lbl_80562390;  // 2pi
+extern const f32 lbl_80562398;  // 0.0254
+extern const f32 lbl_8056239C;  // pi
+extern const f32 lbl_805623A0;  // 0.4
+extern const f32 lbl_805623A4;  // 4pi/3
+extern const f32 lbl_805623A8;  // 500
+extern const f32 lbl_805623AC;  // 10
+extern const f32 lbl_805623B0;  // 1000
+extern const f32 lbl_805623B4;
+extern const f32 lbl_805622E8;  // 0.5
+extern f32 lbl_8055E3C8;  // race time
+extern "C" double fn_801E9DDC(u8* hint, f32 x, f32 z);
+extern "C" void fn_801B3B24(u8* p, const RVec3* at, const RVec3* v);
+extern "C" double fmod(double x, double y);
+extern "C" double sin(double x);
+
+// A box volume's per-corner slip accumulators.
+struct BoxSlip {
+    u8 pad0[0x64];  // offset 0x0
+    RVec3 slip[8];  // offset 0x64
+};
+
+// Box (half extents at 0x58) on the ground: each of the eight corners below the track height gets a spring
+// impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
+// the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
+void fn_8019F780(u8* p) {
+    RVec3 at;
+    RVec3 pos;
+    RVec3 nrm;
+    RVec3 v;
+    int surf;
+    RigidBody* rb = (RigidBody*)PTR(p, 0x4);
+    at.x = F32(p, 0x34);
+    at.y = F32(p, 0x38);
+    at.z = F32(p, 0x3C);
+    if (fn_801E9F08((u8*)rb + 0x6C, &at.x, &pos, &nrm, &surf, lbl_80562380 + F32(p, 0x24))) {
+        if (surf == 7) {
+            if (!U8(p, 0x4C)) {
+                rb->VelAt(&v, &pos);
+                fn_801B3B24(p, &pos, &v);
+                U8(p, 0x4C) = 1;
+            }
+            F32(p, 0x50) = pos.y;
+        } else {
+            U8(p, 0x4C) = 0;
+            const RVec3* h = (const RVec3*)(p + 0x58);
+            BoxCorner corners[8] = {
+                BoxCorner(-h->x, -h->y, -h->z), BoxCorner(h->x, -h->y, -h->z),
+                BoxCorner(-h->x, h->y, -h->z),  BoxCorner(h->x, h->y, -h->z),
+                BoxCorner(-h->x, -h->y, h->z),  BoxCorner(h->x, -h->y, h->z),
+                BoxCorner(-h->x, h->y, h->z),   BoxCorner(h->x, h->y, h->z),
+            };
+            for (int i = 0; i < 8; i++) {
+                RVec3 w;
+                RVec3 d;
+                RVec3 vel;
+                RVec3 vt;
+                RVec3 imp;
+                RVec3 f;
+                RVec3 fr;
+                CFrame* m = (CFrame*)PTR(p, 0xC);
+                MulVec(&w, (RVec3*)&corners[i], m);
+                w.x = w.x + m->t.x;
+                w.y = w.y + m->t.y;
+                w.z = w.z + m->t.z;
+                pos.x = w.x;
+                pos.z = w.z;
+                pos.y = fn_801E9DDC((u8*)rb + 0x6C, w.x, w.z);
+                d.x = pos.x - w.x;
+                d.y = pos.y - w.y;
+                d.z = pos.z - w.z;
+                f32 depth = PSVECDotProduct(&d, &nrm);
+                f32* acc = &((BoxSlip*)p)->slip[i].x;
+                if (depth > lbl_805622D0) {
+                    rb->VelAt(&vel, &w);
+                    f32 vn = PSVECDotProduct(&vel, &nrm);
+                    vt.x = vel.x + nrm.x * -vn;
+                    vt.y = vel.y + nrm.y * -vn;
+                    vt.z = vel.z + nrm.z * -vn;
+                    acc[0] = acc[0] + vt.x * lbl_8056231C;
+                    acc[1] = acc[1] + vt.y * lbl_8056231C;
+                    acc[2] = acc[2] + vt.z * lbl_8056231C;
+                    f32 am = PSVECMag(acc);
+                    if (am > lbl_80562320) {
+                        f32 s = lbl_80562320 / am;
+                        acc[0] *= s;
+                        acc[1] *= s;
+                        acc[2] *= s;
+                    }
+                    f32 e = vn < lbl_805622D0 ? lbl_805622E0 : lbl_80562300;
+                    f32 k = depth * F32(p, 0x10) * e;
+                    imp.x = nrm.x * k;
+                    imp.y = nrm.y * k;
+                    imp.z = nrm.z * k;
+                    f32 c = lbl_80562384 * F32(rb, 0xD4);
+                    f.x = vt.x * c;
+                    f.y = vt.y * c;
+                    f.z = vt.z * c;
+                    f32 g = lbl_80562388 * F32(rb, 0xD4);
+                    f.x = f.x + acc[0] * g;
+                    f.y = f.y + acc[1] * g;
+                    f.z = f.z + acc[2] * g;
+                    f32 fm = PSVECMag(&f.x);
+                    f32 lim = k * F32(p, 0x54);
+                    if (fm > lim) {
+                        f32 s = lim / fm;
+                        f.x *= s;
+                        f.y *= s;
+                        f.z *= s;
+                    }
+                    imp.x += f.x;
+                    imp.y += f.y;
+                    imp.z += f.z;
+                    VE(p)->v1C(&imp, &w, surf, 0);
+                    f32 b = fn_8019DF88((u8*)rb + 0x60, &vel, (u8*)rb + 0x148, &w, &nrm.x, F32(rb, 0xD4), lbl_805622D0);
+                    if (b > lbl_805622D0) {
+                        fr.x = nrm.x * b;
+                        fr.y = nrm.y * b;
+                        fr.z = nrm.z * b;
+                        f32 lo = lbl_805622D4;
+                        f32 ww = lo > depth ? lo : depth;
+                        VE(p)->v20(0, &fr, &w, surf, 0, 0, ww);
+                    }
+                } else {
+                    ((BoxSlip*)p)->slip[i].x = lbl_805622D0;
+                    ((BoxSlip*)p)->slip[i].y = lbl_805622D0;
+                    ((BoxSlip*)p)->slip[i].z = lbl_805622D0;
+                }
+            }
+        }
+    } else {
+        for (int i = 0; i < 24; i++) {
+            ((SphCache*)p)->v[i] = lbl_805622D0;
+        }
+    }
+    if (U8(p, 0x4C)) {
+        RVec3 bv;
+        RVec3 drag;
+        RVec3 up;
+        f32 sub = F32(p, 0x50) - F32(p, 0x38) + F32(p, 0x24);
+        rb->VelAt(&bv, (RVec3*)(p + 0x34));
+        f32 ph = fmod(F32(p, 0x34) + lbl_8056238C * lbl_8055E3C8 * lbl_805622E8, lbl_80562390);
+        f32 s = sin(ph);
+        sub += lbl_80562398 * (lbl_805622E0 + s);
+        if (sub > lbl_805622D0) {
+            f32 r = F32(p, 0x24);
+            f32 r2 = r * r;
+            f32 area = lbl_8056239C * r2;
+            f32 vol = lbl_805623A0 * (lbl_805623A4 * r * r2);
+            f32 dk = -area * (lbl_805623A8 + lbl_805623AC * PSVECMag(&bv.x));
+            drag.x = bv.x * dk;
+            drag.y = bv.y * dk;
+            drag.z = bv.z * dk;
+            rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
+            f32 lift = lbl_805623B0 + lbl_8056232C * sub;
+            sub = MinF(sub, lbl_8056234C * F32(p, 0x24));
+            up.x = lbl_805622D0;
+            up.z = lbl_805622D0;
+            up.y = lbl_805623B4 * (lift * (vol * sub));
+            rb->AddForceAt(&up, (RVec3*)(p + 0x34));
+        } else {
+            U8(p, 0x4C) = 0;
+        }
+    }
+}
 
 void fn_8019FF88(u8* p) { fn_8019EBC0(p); }
 
