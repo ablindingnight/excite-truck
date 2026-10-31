@@ -289,7 +289,7 @@ void fn_80252C90(void) {
             s->spin[j] = w->spin[j];
         }
         for (j = 0; j < 4; j++) {
-            s->spin[j] = fmod(6.2831855f + s->spin[j], 6.283185307179586);
+            s->spin[j] = fmod(6.2831855f + s->spin[j], 6.2831855f);
             s->h[j] = c[j].pos.y + w->drop[j];
         }
         for (j = 0; j < 4; j++) {

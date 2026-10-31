@@ -583,8 +583,8 @@ void MatPlacer::Draw(void) {
             f32 t2 = 2.0f * t;
             ObjRot* r = p->rots;
             for (u32 k = 0; k < 16; k++, r++) {
-                r->m[3] = p->sway * (f32)sin(fmod(3.1415927f * k / 5.0f + t, 6.283185307179586));
-                r->m[5] = p->sway * (f32)cos(fmod(3.1415927f * k / 5.0f + t2, 6.283185307179586));
+                r->m[3] = p->sway * (f32)sin(fmod(3.1415927f * k / 5.0f + t, 6.2831855f));
+                r->m[5] = p->sway * (f32)cos(fmod(3.1415927f * k / 5.0f + t2, 6.2831855f));
             }
         }
         fn_802C8BD0(fn_802C28C0());
