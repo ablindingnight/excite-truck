@@ -618,7 +618,18 @@ void fn_8026C014(int player) {
         yaw += yawRate * s;
         target = pad.y0 * lbl_80563DB0;
         lbl_8055F510 = target + lbl_80563E04 * (lbl_8055F510 - target);
-        CamIdentity(&lbl_80499050.rot);
+        {
+            CamVec* b = (CamVec*)&lbl_80499050;
+            b[0].x = lbl_80563D94;
+            b[0].y = lbl_80563D78;
+            b[0].z = lbl_80563D78;
+            b[1].x = lbl_80563D78;
+            b[1].y = lbl_80563D94;
+            b[1].z = lbl_80563D78;
+            b[2].x = lbl_80563D78;
+            b[2].y = lbl_80563D78;
+            b[2].z = lbl_80563D94;
+        }
         CamSet(&yawE, lbl_80563D78, yaw, lbl_80563D78);
         Mat3FromEuler__FP4Mat3PC4Vec3(&yawM, &yawE);
         Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &yawM, &lbl_80499050.rot);
