@@ -201,93 +201,111 @@ u8* fn_8025E614(u8* p, int del) {
     return p;
 }
 
-// "Next car" on the records screen: moves to the next car any list has unlocked, refills the car name
-// header and, per cup, the best time over the three difficulties with the car/colour it was set with.
-int fn_8025E678(int* key) {
-    if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
-        lbl_8055F3D4->cur++;
-        CarPickScreen* s = lbl_8055F3D4;
-        memset(s->names, 0, sizeof(s->names));
-        memset(s->rows, 0, sizeof(s->rows));
-        for (int i = 0; i < Min(s->all->Count(), 6); i++) {
-            CopyName(s->names[i].name, 0x20, s->all->Get(i)->Name());
-            s->names[i].state = i == s->cur ? 6 : 7;
+// Refills the records screen for the current car: the car name header and, per cup, the best time over
+// the three difficulties with the car/colour it was set with.
+static inline void RefillRecords(CarPickScreen* s) {
+    memset(s->names, 0, sizeof(s->names));
+    memset(s->rows, 0, sizeof(s->rows));
+    for (int i = 0; i < Min(s->all->Count(), 6); i++) {
+        CopyName(s->names[i].name, 0x20, s->all->Get(i)->Name());
+        s->names[i].state = i == s->cur ? 6 : 7;
+    }
+    int unlocked = 0;
+    for (int j = 0; j < 3; j++) {
+        if (s->lists[j]->Count() > s->cur && s->lists[j]->Get(s->cur)->Unlocked()) {
+            unlocked = 1;
         }
-        int unlocked = 0;
-        for (int j = 0; j < 3; j++) {
-            if (s->lists[j]->Count() > s->cur && s->lists[j]->Get(s->cur)->Unlocked()) {
-                unlocked = 1;
-            }
-        }
-        for (int k = 0; k < 6; k++) {
-            s->icons[k]->visible = 0;
-        }
-        if (unlocked) {
-            CarChoice* car = s->all->Get(s->cur);
-            for (int k = 0; k < Min(car->CupCount(), 6); k++) {
-                CupChoice* cup = car->Cup(k);
-                CupRecordRow* row = &s->rows[k];
-                CopyName(row->name, 0x20, cup->Name());
-                CopyName(row->course, 0x20, cup->Course());
-                Statistic stats[3] = {
-                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0),
-                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1),
-                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2),
-                };
-                s->icons[k]->visible = 1;
-                if (stats[0].IsBetterThan(&stats[1])) {
-                    if (stats[0].IsBetterThan(&stats[2])) {
-                        stats[0].Format(row->value, 0x14);
-                        row->best = 0;
-                    } else if (stats[2].HasValue()) {
-                        stats[2].Format(row->value, 0x14);
-                        row->best = 2;
-                    }
-                } else if (stats[1].IsBetterThan(&stats[2])) {
-                    stats[1].Format(row->value, 0x14);
-                    row->best = 1;
+    }
+    for (int k = 0; k < 6; k++) {
+        s->icons[k]->visible = 0;
+    }
+    if (unlocked) {
+        CarChoice* car = s->all->Get(s->cur);
+        for (int k = 0; k < Min(car->CupCount(), 6); k++) {
+            CupChoice* cup = car->Cup(k);
+            CupRecordRow* row = &s->rows[k];
+            CopyName(row->name, 0x20, cup->Name());
+            CopyName(row->course, 0x20, cup->Course());
+            Statistic stats[3] = {
+                Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0),
+                Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1),
+                Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2),
+            };
+            s->icons[k]->visible = 1;
+            if (stats[0].IsBetterThan(&stats[1])) {
+                if (stats[0].IsBetterThan(&stats[2])) {
+                    stats[0].Format(row->value, 0x14);
+                    row->best = 0;
                 } else if (stats[2].HasValue()) {
                     stats[2].Format(row->value, 0x14);
                     row->best = 2;
-                } else {
-                    fn_80130978(row->value, 0x14, -lbl_80558DC0);
-                    row->best = 0;
-                    s->icons[k]->visible = 0;
                 }
-                if (s->icons[k]->visible) {
-                    Statistic* best = 0;
-                    if (row->best == 0) {
-                        best = &stats[0];
-                    } else if (row->best == 1) {
-                        best = &stats[1];
-                    } else if (row->best == 2) {
-                        best = &stats[2];
-                    }
-                    StatChoice c = best->GetChoice();
-                    CarIconWidget* icon = s->icons[k];
-                    icon->color = c.color;
-                    icon->valid = c.valid;
-                    VehicleInfo* v = GetVehicle(c.vehicle);
-                    icon->index = FindIcon(icon->set, v->chassis);
-                    icon->tint = v->colors[icon->color];
+            } else if (stats[1].IsBetterThan(&stats[2])) {
+                stats[1].Format(row->value, 0x14);
+                row->best = 1;
+            } else if (stats[2].HasValue()) {
+                stats[2].Format(row->value, 0x14);
+                row->best = 2;
+            } else {
+                fn_80130978(row->value, 0x14, -lbl_80558DC0);
+                row->best = 0;
+                s->icons[k]->visible = 0;
+            }
+            if (s->icons[k]->visible) {
+                Statistic* best = 0;
+                if (row->best == 0) {
+                    best = &stats[0];
+                } else if (row->best == 1) {
+                    best = &stats[1];
+                } else if (row->best == 2) {
+                    best = &stats[2];
                 }
+                StatChoice c = best->GetChoice();
+                CarIconWidget* icon = s->icons[k];
+                icon->color = c.color;
+                icon->valid = c.valid;
+                VehicleInfo* v = GetVehicle(c.vehicle);
+                icon->index = FindIcon(icon->set, v->chassis);
+                icon->tint = v->colors[icon->color];
             }
         }
-        CarPickScreen* t = lbl_8055F3D4;
-        for (int k = 0; k < 5; k++) {
-            for (int j = 0; j < 3; j++) {
-                if (j == t->rows[k].best) {
-                    fn_80214AF0(k + 1 + j * 10);
-                } else {
-                    fn_80214A9C(k + 1 + j * 10);
-                }
+    }
+}
+
+// Highlights each cup row's best difficulty.
+static inline void HighlightBest(void) {
+    CarPickScreen* t = lbl_8055F3D4;
+    for (int k = 0; k < 5; k++) {
+        for (int j = 0; j < 3; j++) {
+            if (j == t->rows[k].best) {
+                fn_80214AF0(k + 1 + j * 10);
+            } else {
+                fn_80214A9C(k + 1 + j * 10);
             }
         }
+    }
+}
+
+// "Next car" on the records screen: moves to the next car any list has unlocked.
+int fn_8025E678(int* key) {
+    if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
+        lbl_8055F3D4->cur++;
+        RefillRecords(lbl_8055F3D4);
+        HighlightBest();
     }
     return 0;
 }
 
-void fn_8025ECBC(u8* p) {}  // stub (366)
+// "Previous car" on the records screen.
+int fn_8025ECBC(int* key) {
+    if (lbl_8055F3D4->cur > 0) {
+        lbl_8055F3D4->cur--;
+        RefillRecords(lbl_8055F3D4);
+        HighlightBest();
+    }
+    return 0;
+}
+
 
 }  // extern "C"
 
@@ -316,7 +334,7 @@ void fn_8025F274(u8* p) {
     }
 }
 
-void fn_8025F46C(u8* p) {}  // stub (339)
+void fn_8025F46C(CarPickScreen* s) { RefillRecords(s); }
 
 void fn_8025F9B8(u8* p, u32 v) { U32(p, 0x18) = v; }
 
