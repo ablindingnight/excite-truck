@@ -47,8 +47,6 @@ Fence* lbl_8055F834;
 
 extern "C" {
 
-void fn_802A0940(void) {}
-
 int fn_802A0944(const Fence* e) {
     int i;
     if (e->type != 1) {

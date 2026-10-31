@@ -3042,7 +3042,7 @@ game/stub17.cpp:
 	.sbss       start:0x8055EAE0 end:0x8055EAF0
 
 game/world.cpp:
-	.text       start:0x801E78D8 end:0x801E9C80
+	.text       start:0x801E78D8 end:0x801E9C84
 	.ctors      start:0x802ED31C end:0x802ED320
 	.rodata     start:0x802F99F8 end:0x802F9A08
 	.data       start:0x80339BA0 end:0x80339E08
@@ -3052,7 +3052,7 @@ game/world.cpp:
 	.sdata2     start:0x80562DA0 end:0x80562E28
 
 game/ground.cpp:
-	.text       start:0x801E9C80 end:0x801EA1FC
+	.text       start:0x801E9C84 end:0x801EA1FC
 	.ctors      start:0x802ED320 end:0x802ED324
 	.sbss       start:0x8055EB48 end:0x8055EB50
 	.sdata2     start:0x80562E28 end:0x80562E38
@@ -3765,7 +3765,7 @@ game/carpick.cpp:
 	.sdata2     start:0x80563B70 end:0x80563B88
 
 game/chalpath.cpp:
-	.text       start:0x8025FE8C end:0x80262F8C
+	.text       start:0x8025FE8C end:0x80262FCC
 	.ctors      start:0x802ED470 end:0x802ED474
 	.rodata     start:0x802FA6A8 end:0x802FA6E8
 	.data       start:0x80345B40 end:0x80345FD0
@@ -3775,7 +3775,7 @@ game/chalpath.cpp:
 	.sdata2     start:0x80563B88 end:0x80563BC8
 
 game/unk_80262F8C.c:
-	.text       start:0x80262F8C end:0x80263080
+	.text       start:0x80262FCC end:0x80263080
 	.sdata2     start:0x80563BC8 end:0x80563BD0
 
 game/contmenu.cpp:
@@ -4102,7 +4102,7 @@ game/drawline.cpp:
 	.sbss       start:0x8055F800 end:0x8055F810
 
 game/partemit.cpp:
-	.text       start:0x8029F03C end:0x802A0940
+	.text       start:0x8029F03C end:0x802A0944
 	.ctors      start:0x802ED518 end:0x802ED51C
 	.data       start:0x80349810 end:0x803498E0
 	.bss        start:0x804B5070 end:0x804BCF88
@@ -4111,7 +4111,7 @@ game/partemit.cpp:
 	.sdata2     start:0x805646B0 end:0x805646D0
 
 game/fence.cpp:
-	.text       start:0x802A0940 end:0x802A0D60
+	.text       start:0x802A0944 end:0x802A0D60
 	.ctors      start:0x802ED51C end:0x802ED520
 	.data       start:0x803498E0 end:0x80349900
 	.sdata      start:0x8055CB68 end:0x8055CB70

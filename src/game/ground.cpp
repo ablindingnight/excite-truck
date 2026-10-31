@@ -26,8 +26,6 @@ ModuleTag lbl_8055EB48;
 
 extern "C" {
 
-void fn_801E9C80(void) {}
-
 int fn_801E9C84(const V3* from, const V3* at, V3* outPos, V3* outNormal, s16* hint, int flags, f32 maxDist) {
     V3 p = *from;
     V3 n;

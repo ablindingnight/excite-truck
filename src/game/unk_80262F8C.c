@@ -1,4 +1,4 @@
-// Code 0x80262F8C-0x80263080, imported verbatim from the upstream project (github.com/orangedude27/excite-truck,
+// Code 0x80262FCC-0x80263080 (0x80262F8C, UnlockAnim::~UnlockAnim, is chalpath's last weak function), imported verbatim from the upstream project (github.com/orangedude27/excite-truck,
 // CC0; file src/auto/text_80262F8C_.c), where its functions match exactly. Unit name is provisional.
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
@@ -19,13 +19,6 @@ extern s32 fn_802328D4(s32);
 extern const char lbl_80346324[];
 extern const u8 __vt__10OptionItem[];
 extern f32 lbl_80563BD4;
-s32 fn_80262F8C(s32 arg0, s32 arg1) {
-    if (arg0 != 0 && arg1 > 0) {
-        __dl__FPv((void *)arg0);
-    }
-    return arg0;
-}
-
 void fn_80262FCC(void *arg0) {
     *(f32 *)((u8 *)arg0 + 0x18) = fn_8023659C();
     *((u8 *)arg0 + 0x1C) = 0;

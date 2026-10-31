@@ -915,7 +915,7 @@ public:
     f32 f18;        // offset 0x18
 };
 
-// The unlock animation shown in the challenge unlock box (vtable lbl_80345F70, dtor fn_80262F8C).
+// The unlock animation shown in the challenge unlock box (vtable lbl_80345F70; its weak dtor is the last function of the unit).
 class UnlockAnim : public AnimWidget {
 public:
     UnlockAnim(void) {}
