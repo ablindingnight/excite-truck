@@ -1532,7 +1532,8 @@ void fn_80195D80(u8* d, f32 t) {
         F32(d, 0x1D0) = lbl_8055E3C8;
     }
     *(LinePos*)(d + 0x1A0) = *(LinePos*)(pos + 0x4);
-    if (t - F32(d, 0x1D0) < lbl_805621C0) {
+    bool recent = t - F32(d, 0x1D0) < lbl_805621C0;
+    if (recent) {
         f32 s = F32(car, 0x5BC);
         RVec3 p;
         p.x = F32(car, 0x94) + F32(car, 0x54) * s;
