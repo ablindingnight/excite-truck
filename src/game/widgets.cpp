@@ -152,7 +152,7 @@ void fn_8022264C(ResourcePrefix* self,int first,int second,int* left,int* top,in
 
 extern u32 lbl_8033F9BC[];
 
-void fn_802353F4(void*,int,float,float,float);
+
 
 ImagePrefix* fn_802226D4(ImagePrefix* self,const char* path);
 ImagePrefix* fn_80222718(ImagePrefix* self,int destroy);

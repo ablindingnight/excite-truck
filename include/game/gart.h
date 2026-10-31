@@ -5,6 +5,7 @@ struct gArtSet;
 extern "C" {
 gArtSet* fn_8023512C(const char*);
 void fn_80235380(gArtSet*);
+void fn_802353F4(gArtSet*,int,float,float,float);
 float fn_80235EF0(gArtSet*,int);
 float fn_80235F64(gArtSet*,int);
 int fn_80235FD8(gArtSet*);
