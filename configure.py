@@ -965,7 +965,7 @@ config.libs.append(
             Object(NonMatching, "game/achieve.cpp"),
             Object(Matching, "game/driver.cpp"),
             Object(NonMatching, "game/loading.cpp"),
-            Object(NonMatching, "game/stats.cpp"),
+            Object(Matching, "game/stats.cpp"),
             Object(NonMatching, "game/davmap.cpp"),
             Object(NonMatching, "game/eve.cpp"),
             Object(NonMatching, "game/stdoverlay.cpp"),
