@@ -213,6 +213,7 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     ValVec3 q;
     ValVec3 p;
     ValVec3 turn;
+    Mat3* pr;
     w = *wheel;
     f32 k = 0.2159f * -s->side;
     w.origin.x += root->basis[0].x * k;
@@ -253,6 +254,7 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     Sub(&d, &p, &q);
     f32 c;
     f32 stretch = PSVECDotProduct(&d, &root->basis[1]) / s->springLen;
+    pr = &rot;
     c = cos(-lower);
     f32 sn = sin(-lower);
     rot.m[0][0] = c;
@@ -273,7 +275,9 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     scale.m[2][0] = 0.0f;
     scale.m[2][1] = 0.0f;
     scale.m[2][2] = 1.0f;
-    Mul(&m, &scale, &rot);
+    Mat3* ps = &scale;
+    Mat3* pm = &m;
+    Mul(pm, ps, pr);
     fn_801E35D4(s->spring, &m);
     fn_801E34E4(s->mountU, root);
     fn_801E34E4(s->mountL, root);
