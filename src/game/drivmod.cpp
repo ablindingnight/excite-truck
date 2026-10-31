@@ -561,6 +561,217 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
     }
 }
 
-void fn_80201018(u8* p) {}  // stub (1137)
+}  // extern "C"
+
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+
+// The six rider bones aimed by the ragdoll (fn_802009CC).
+struct RiderLinks {
+    BoneLink l[6];
+};
+
+struct Mat3;
+struct Vec3;
+void Mat3FromEuler(Mat3* out, const Vec3* e);
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+extern const f32 lbl_80563050;  // 0.5
+extern const f32 lbl_80563064;  // 0.0762 (3 in)
+extern const f32 lbl_80563074;  // 0.1
+extern const f32 lbl_80563078;  // 0.9
+extern const f32 lbl_8056307C;  // pi/3
+extern const f32 lbl_80563080;  // 10 deg
+extern const f32 lbl_80563084;  // -1000
+extern const f32 lbl_80563088;  // 2.5
+extern const f32 lbl_8056308C;  // -10 deg
+extern const f32 lbl_80563090;  // 15 deg
+extern const f32 lbl_80563094;  // 8
+extern const f32 lbl_80563098;  // -15 deg
+extern const f32 lbl_8056309C;  // 1.5
+
+extern "C" {
+extern const RiderLinks lbl_802F9D00;
+void fn_801E353C(u8* helper, f32 angle);
+void fn_801E34E4(u8* helper, DMtx* m);
+void fn_801E3284(DMtx* out, u8* helper, const DMtx* frame);
+void fn_801C2694(u8* sys, BVec* pts, int* n, const BVec* g, const BVec* up, const BVec* a, const BVec* b);
+s32 fn_801E65BC(u8* skel, BonePose* bones, int n, int x);
+void fn_802C70AC(s32 model, const DMtx* m, s32 a, int b);
+
+// Per-frame rider update for car state `car`: steering lean, seat frame, the body twist from yaw and roll,
+// the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
+// bent by speed and pitch) drawn at the car.
+void fn_80201018(DriverModel* d, u8* car, int show) {
+    BonePose pose[32];
+    DBone bones[32];
+    BVec pts[32];
+    RiderLinks links;
+    DMtx m;
+    BRot rot;
+    DMtx m2;
+    BRot tilt;
+    BRot turn;
+    DVec3 root;
+    BVec v;
+    BVec g;
+    BVec up;
+    BVec a;
+    BVec b;
+    BVec e1;
+    BVec e2;
+    DVec3 off;
+    DVec3 off2;
+    int cnt;
+    int n;
+    if (!show) {
+        return;
+    }
+    if (!d) {
+        return;
+    }
+    m = *(DMtx*)car;
+    f32 oldx = d->fC8;
+    f32 oldy = d->fCC;
+    d->fC8 = lbl_8056305C;
+    d->fCC = lbl_8056305C;
+    switch (S32(car, 0x48)) {
+    case -1:
+        d->fC8 = lbl_80563058;
+        d->fCC = lbl_8056306C;
+        break;
+    case 0:
+        d->fC8 = oldx;
+        d->fCC = lbl_8056305C;
+        break;
+    case 1:
+        d->fC8 = lbl_8056306C;
+        d->fCC = lbl_80563058;
+        break;
+    case 2:
+        d->fC8 = lbl_8056306C;
+        d->fCC = lbl_8056306C;
+        break;
+    case 3:
+        d->fC8 = lbl_8056305C;
+        d->fCC = lbl_80563058;
+        break;
+    case 4:
+        d->fC8 = lbl_8056305C;
+        d->fCC = lbl_8056306C;
+        break;
+    case 5:
+        d->fC8 = lbl_80563058;
+        d->fCC = lbl_80563058;
+        break;
+    case 6:
+        d->fC8 = lbl_80563058;
+        d->fCC = lbl_8056306C;
+        break;
+    }
+    f32 ny = d->fCC;
+    d->fCC = lbl_80563050 * ny + lbl_80563050 * oldy;
+    if ((f32)__fabs(d->fCC) < lbl_80563074 || ny * oldy > lbl_8056305C) {
+        if (S32(car, 0x48) == 0) {
+            d->fC8 = lbl_80563078 * oldx;
+        }
+    } else {
+        d->fC8 = oldx;
+    }
+    fn_801E353C(d->wheel, -lbl_8056307C * F32(car, 0x3C));
+    fn_801E34E4(d->wheel, &m);
+    d->body = m;
+    MulVec(&off, &d->butt, &d->body);
+    d->body.pos.x = d->body.pos.x + off.x;
+    d->body.pos.y = d->body.pos.y + off.y;
+    d->body.pos.z = d->body.pos.z + off.z;
+    f32 roll = -F32(car, 0x238);
+    roll = MaxF(MinF(lbl_80563080, roll), -lbl_80563080);
+    v.z = roll;
+    v.y = lbl_8056305C;
+    v.x = F32(car, 0x240) + d->yaw;
+    f32 ang = PSVECMag(&v.x);
+    if (ang > lbl_80563070) {
+        f32 inv = lbl_80563058 / ang;
+        f32 ax = inv * v.x;
+        f32 ay = inv * v.y;
+        f32 az = inv * v.z;
+        f32 sn = sin(ang);
+        f32 cs = cos(ang);
+        f32 t = lbl_80563058 - cs;
+        rot.r[0].x = cs + t * (ax * ax);
+        rot.r[0].y = ay * (t * ax) + sn * az;
+        rot.r[0].z = az * (t * ax) - sn * ay;
+        rot.r[1].x = ay * (t * ax) - sn * az;
+        rot.r[1].y = cs + t * (ay * ay);
+        rot.r[1].z = az * (t * ay) + sn * ax;
+        rot.r[2].x = az * (t * ax) + sn * ay;
+        rot.r[2].y = az * (t * ay) - sn * ax;
+        rot.r[2].z = cs + t * (az * az);
+    } else {
+        SetIdentity(&rot.r[0].x);
+    }
+    MulM(&d->rest.row[0].x, &d->body.row[0].x, &rot.r[0].x);
+    d->rest.pos = d->body.pos;
+    fn_801E3284(&d->wheelMtx, d->wheel, &m);
+    a.x = lbl_8056305C;
+    a.y = lbl_8056305C;
+    a.z = lbl_8056305C;
+    b.x = lbl_8056305C;
+    b.y = lbl_8056305C;
+    b.z = lbl_8056305C;
+    up.x = lbl_8056305C;
+    up.y = lbl_80563058;
+    up.z = lbl_8056305C;
+    g.x = lbl_8056305C;
+    g.y = lbl_80563084;
+    g.z = lbl_8056305C;
+    fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
+    n = 32;
+    fn_801E5998(d->skel, bones, &n);
+    for (int k = 0; k < n; k++) {
+        if (k) {
+            MulM(&pose[k].rot.r[0].x, &bones[k].m.row[0].x, &rot.r[0].x);
+            MulVec((DVec3*)&pose[k].pos, &bones[k].m.pos, (DMtx*)&rot);
+        } else {
+            pose[k] = *(BonePose*)&bones[k];
+        }
+        pose[k].pos.x = pose[k].pos.x + d->butt.x;
+        pose[k].pos.y = pose[k].pos.y + d->butt.y;
+        pose[k].pos.z = pose[k].pos.z + d->butt.z;
+    }
+    f32 lean = lbl_80563094 * F32(car, 0x23C);
+    lean = MaxF(MinF(lbl_80563090, lean), lbl_80563098);
+    e1.y = F32(car, 0x3C) * lbl_80563090;
+    e1.z = lbl_80563088 * -F32(car, 0x238) + F32(car, 0x3C) * lbl_8056308C;
+    e1.x = lbl_8056309C * F32(car, 0x240) - lean;
+    Mat3FromEuler((Mat3*)&tilt, (Vec3*)&e1);
+    Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
+    links = lbl_802F9D00;
+    fn_802009CC(pose, pts, links.l, 6, (u8*)bones, (BonePose*)&m);
+    pose[9].pos.x = pose[9].pos.x + pose[8].rot.r[0].x * lbl_80563064;
+    pose[9].pos.y = pose[9].pos.y + pose[8].rot.r[0].y * lbl_80563064;
+    pose[9].pos.z = pose[9].pos.z + pose[8].rot.r[0].z * lbl_80563064;
+    pose[6].pos.x = pose[6].pos.x + pose[5].rot.r[0].x * lbl_80563064;
+    pose[6].pos.y = pose[6].pos.y + pose[5].rot.r[0].y * lbl_80563064;
+    pose[6].pos.z = pose[6].pos.z + pose[5].rot.r[0].z * lbl_80563064;
+    e2.x = d->yaw;
+    e2.y = lbl_8056305C;
+    e2.z = lbl_8056305C;
+    Mat3FromEuler((Mat3*)&turn, (Vec3*)&e2);
+    Mat3Mul((Mat3*)&pose[0].rot, (Mat3*)&turn, (Mat3*)&pose[0].rot);
+    root = *(DVec3*)&pose[0].pos;
+    for (int i = 0; i < n; i++) {
+        pose[i].pos.x -= root.x;
+        pose[i].pos.y -= root.y;
+        pose[i].pos.z -= root.z;
+    }
+    s32 r = fn_801E65BC(d->skel, pose, n, 0);
+    m2 = m;
+    MulVec(&off2, &root, &m2);
+    m2.pos.x = m2.pos.x + off2.x;
+    m2.pos.y = m2.pos.y + off2.y;
+    m2.pos.z = m2.pos.z + off2.z;
+    fn_802C70AC(d->model, &m2, r, -1);
+}
 
 }  // extern "C"
