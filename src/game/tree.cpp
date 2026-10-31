@@ -401,18 +401,19 @@ f32 fn_802BC540(const TVec* v, f32 k) {
 
 }  // extern "C"
 
-static inline void MulVec(TVec* out, const TMtx* m, const TVec* v) {
+static inline void MulVec(TVec* out, const TMtx* mtx, const TVec* v) {
+    const TVec* m = mtx->rot;
     if (out == v) {
-        f32 x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
-        f32 y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
-        f32 z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
+        f32 x = Dot3(v->x, m[0].x, v->y, m[1].x, v->z, m[2].x);
+        f32 y = Dot3(v->x, m[0].y, v->y, m[1].y, v->z, m[2].y);
+        f32 z = Dot3(v->x, m[0].z, v->y, m[1].z, v->z, m[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
-        out->y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
-        out->z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
+        out->x = Dot3(v->x, m[0].x, v->y, m[1].x, v->z, m[2].x);
+        out->y = Dot3(v->x, m[0].y, v->y, m[1].y, v->z, m[2].y);
+        out->z = Dot3(v->x, m[0].z, v->y, m[1].z, v->z, m[2].z);
     }
 }
 
