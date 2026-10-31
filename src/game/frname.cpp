@@ -2,6 +2,7 @@
 // icons ("caricona.art", "caricons0.tex", ...). Written against raw field offsets; the large screen
 // routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -36,9 +37,244 @@ ModuleTag lbl_8055F3B8;
 UnkStatic123s lbl_80498ED0;
 UnkStatic7F lbl_8055F3C0;
 
+// One car icon's texture rectangles.
+struct IconEntry {
+    char name[0x20];  // offset 0x0, chassis
+    u8* tex;        // offset 0x20
+    u8* overlay;    // offset 0x24
+    f32 u0;         // offset 0x28
+    f32 v0;         // offset 0x2C
+    f32 u1;         // offset 0x30
+    f32 v1;         // offset 0x34
+};
+
+struct IconList {
+    IconEntry* data;  // offset 0x0
+    s32 count;        // offset 0x4
+};
+
+// One stat record line on the friendly-name screen.
+struct RecordLine {
+    const char* label;     // offset 0x0
+    char value[0x14];      // offset 0x4
+    const char* track;     // offset 0x18
+    const char* name;      // offset 0x1C
+    char text[1000];       // offset 0x20
+    s32 difficulty;        // offset 0x408
+    u8 pad40C[0x18];
+    IconList* icons;       // offset 0x424
+    s32 icon;              // offset 0x428
+    u8 hasIcon;            // offset 0x42C
+    u32 color;             // offset 0x430
+    u8 pad434[0x4];
+    u8 valid;              // offset 0x438
+};
+
+// The shared car icon table (caricons.val; also carpick's CarIconSet): loaded on first use, reference
+// counted through lbl_8055F2E8. CLEANUP: the original keeps this class in a shared header.
+template<int N> struct IconTail {
+    static void CopyTail(const char* s, int n, char* d) {
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+    static void Append(char* text, const char* s) {
+        char* d = text;
+        int n = N;
+        while (*d) { n--; d++; }
+        if (n > 0) { CopyTail(s, n, d); }
+    }
+};
+void* operator new(size_t n, const char* tag);
+void* operator new[](size_t n, const char* tag);
+void operator delete[](void* p);
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+extern "C" u8* fn_802CAC28(const char* name, int flags);
+extern "C" int strcmp(const char* a, const char* b);
+extern "C" void gxForgetTexture(u8* tex);
+
+struct CarIconTable : public IconList {
+    CarIconTable(void) {
+        ValueTable* t = fn_80131808("caricons.val");
+        count = 0;
+        data = new ("cicon") IconEntry[50];
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (strcmp(n->GetName(), "Car")) {
+                continue;
+            }
+            for (int k = 0; k < 2; k++) {
+                IconEntry* c = &data[count++];
+                CopyName(n->GetValue("chassis"), 32, c->name);
+                if (k) {
+                    IconTail<32>::Append(c->name, "_e");
+                }
+                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                c->u0 = n->GetFloat("u1");
+                c->v0 = n->GetFloat("v1");
+                c->u1 = n->GetFloat("u2");
+                c->v1 = n->GetFloat("v2");
+            }
+        }
+        fn_80131818(t);
+    }
+    ~CarIconTable(void) {
+        for (int i = 0; i < count; i++) {
+            IconEntry& e = data[i];
+            gxForgetTexture(e.tex);
+            gxForgetTexture(e.overlay);
+        }
+        delete[] data;
+    }
+};
+extern CarIconTable* lbl_8055F2E4;
+extern s32 lbl_8055F2E8;
+
+// The group list the stunt-records screen hides (FriendlyNames' layout, built and torn down in place).
+struct GroupHider {
+    void* vtable;
+    u8 pad4[0x10];
+    void* owner;      // offset 0x14
+    u32* groups;      // offset 0x18
+    int count;        // offset 0x1C
+    int cap;          // offset 0x20
+    u32 storage[30];  // offset 0x24
+    u32& Next(void) { return groups[count++]; }
+};
+extern void* lbl_803456B8[];
+
+int GetEveMode(void);
+void UnloadEves(void);
+void LoadModeEves(int mode);
+extern "C" u8* fn_8025D9D0(u8* p);
+extern "C" void fn_8025DAEC(RecordLine* r, u32 type);
+extern "C" u8 lbl_8055B860;
+
+// Hides the HUD groups of the two difficulties a stunt record was not set on.
+static inline void HideOtherDifficulties(int line, RecordLine* l) {
+    for (int d = 0; d < 3; d++) {
+        if (d != l->difficulty) {
+            GroupHider* h = (GroupHider*)lbl_8055F3C4;
+            h->Next() = line + 1 + d * 10;
+        }
+    }
+}
+
+// Releases one record line (its car icon widget).
+static inline void FreeRecordLine(RecordLine* l) {
+    *(void**)l->pad40C = lbl_80345718;
+    fn_80235380(*(u8**)((u8*)l + 0x434));
+}
+
 extern "C" {
 
-void fn_8025CE78(u8* p) {}  // stub (701)
+// The stunt records screen ("tricks.lyt"): the best of five stunt stats, each with where it was set and
+// the car it was set with; the difficulty columns that did not set a record are hidden.
+void fn_8025CE78(void) {
+    int mode = GetEveMode();
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(0x130);
+    }
+    RecordLine l6;
+    RecordLine l5;
+    RecordLine l4;
+    RecordLine l3;
+    RecordLine l2;
+    RecordLine l1;
+    RecordLine l0;
+    fn_8025D9D0((u8*)&l0);
+    fn_8025D9D0((u8*)&l1);
+    fn_8025D9D0((u8*)&l2);
+    fn_8025D9D0((u8*)&l3);
+    fn_8025D9D0((u8*)&l4);
+    fn_8025D9D0((u8*)&l5);
+    fn_8025D9D0((u8*)&l6);
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") CarIconTable;
+    }
+    lbl_8055F2E8++;
+    l0.icons = lbl_8055F2E4;
+    l1.icons = lbl_8055F2E4;
+    l2.icons = lbl_8055F2E4;
+    l3.icons = lbl_8055F2E4;
+    l4.icons = lbl_8055F2E4;
+    l5.icons = lbl_8055F2E4;
+    l6.icons = lbl_8055F2E4;
+    GroupHider hider;
+    hider.vtable = lbl_803456B8;
+    hider.owner = 0;
+    hider.groups = hider.storage;
+    hider.count = 0;
+    hider.cap = 30;
+    lbl_8055F3C4 = (s32)&hider;
+    fn_8025DAEC(&l0, 0x40901);
+    HideOtherDifficulties(0, &l0);
+    fn_8025DAEC(&l1, 0x40902);
+    HideOtherDifficulties(1, &l1);
+    fn_8025DAEC(&l2, 0x41206);
+    HideOtherDifficulties(2, &l2);
+    fn_8025DAEC(&l3, 0x48203);
+    HideOtherDifficulties(3, &l3);
+    fn_8025DAEC(&l4, 0x50204);
+    HideOtherDifficulties(4, &l4);
+    MenuItem items[] = {
+        MenuItem(NULL, 5, &hider, 0, 0),
+        MenuItem("stunt_name_1", l0.label),
+        MenuItem("stunt_record_1", l0.value),
+        MenuItem("stunt_location_1", l0.text),
+        MenuItem("car_icon_1", 5, l0.pad40C, 0, 0),
+        MenuItem("stunt_name_2", l1.label),
+        MenuItem("stunt_record_2", l1.value),
+        MenuItem("stunt_location_2", l1.text),
+        MenuItem("car_icon_2", 5, l1.pad40C, 0, 0),
+        MenuItem("stunt_name_3", l2.label),
+        MenuItem("stunt_record_3", l2.value),
+        MenuItem("stunt_location_3", l2.text),
+        MenuItem("car_icon_3", 5, l2.pad40C, 0, 0),
+        MenuItem("stunt_name_4", l3.label),
+        MenuItem("stunt_record_4", l3.value),
+        MenuItem("stunt_location_4", l3.text),
+        MenuItem("car_icon_4", 5, l3.pad40C, 0, 0),
+        MenuItem("stunt_name_5", l4.label),
+        MenuItem("stunt_record_5", l4.value),
+        MenuItem("stunt_location_5", l4.text),
+        MenuItem("car_icon_5", 5, l4.pad40C, 0, 0),
+        MenuItem("stunt_name_6", l5.label),
+        MenuItem("stunt_record_6", l5.value),
+        MenuItem("stunt_location_6", l5.text),
+        MenuItem("car_icon_6", 5, l5.pad40C, 0, 0),
+        MenuItem("stunt_name_7", l6.label),
+        MenuItem("stunt_record_7", l6.value),
+        MenuItem("stunt_location_7", l6.text),
+        MenuItem("car_icon_7", 5, l6.pad40C, 0, 0),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 0x1B),
+        MenuItem(lbl_80498ED0),
+    };
+    MenuDesc desc = {"tricks.lyt", items, NULL, 0, 0};
+    fn_802146BC(&desc, -999, -999, 1);
+    if (--lbl_8055F2E8 == 0) {
+        delete lbl_8055F2E4;
+        lbl_8055F2E4 = 0;
+    }
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(mode);
+    }
+    lbl_8055F3C4 = 0;
+    hider.groups = 0;
+    hider.count = 0;
+    hider.cap = 0;
+    FreeRecordLine(&l6);
+    FreeRecordLine(&l5);
+    FreeRecordLine(&l4);
+    FreeRecordLine(&l3);
+    FreeRecordLine(&l2);
+    FreeRecordLine(&l1);
+    FreeRecordLine(&l0);
+}
 
 }  // extern "C"
 
@@ -100,21 +336,6 @@ u8* fn_8025DA88(u8* p, int del) {
 
 }  // extern "C"
 
-// One car icon's texture rectangles.
-struct IconEntry {
-    char name[0x20];  // offset 0x0, chassis
-    u8* tex;        // offset 0x20
-    u8* overlay;    // offset 0x24
-    f32 u0;         // offset 0x28
-    f32 v0;         // offset 0x2C
-    f32 u1;         // offset 0x30
-    f32 v1;         // offset 0x34
-};
-
-struct IconList {
-    IconEntry* data;  // offset 0x0
-    s32 count;        // offset 0x4
-};
 
 // The car and colour a record was set with.
 struct StatChoice {
@@ -164,22 +385,6 @@ extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 int strcasecmp(const char* a, const char* b);
 
-// One stat record line on the friendly-name screen.
-struct RecordLine {
-    const char* label;     // offset 0x0
-    char value[0x14];      // offset 0x4
-    const char* track;     // offset 0x18
-    const char* name;      // offset 0x1C
-    char text[1000];       // offset 0x20
-    s32 difficulty;        // offset 0x408
-    u8 pad40C[0x18];
-    IconList* icons;       // offset 0x424
-    s32 icon;              // offset 0x428
-    u8 hasIcon;            // offset 0x42C
-    u32 color;             // offset 0x430
-    u8 pad434[0x4];
-    u8 valid;              // offset 0x438
-};
 
 // Index of the car icon for chassis `name`, or -1.
 static inline int FindIcon(IconList* icons, const char* name) {
