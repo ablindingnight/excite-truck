@@ -147,9 +147,9 @@ struct Racer {
 class WObj {
 public:
     virtual ~WObj(void);
-    virtual void Update(void);    // 0xC
+    virtual void Update(void) {}    // 0xC
     virtual void Draw(void);      // 0x10
-    virtual void PostDraw(void);  // 0x14
+    virtual void PostDraw(void) {}  // 0x14
 };
 
 class AnimObj : public WObj {
@@ -768,8 +768,6 @@ void fn_801E7E48(void) {
     lbl_8055EB28 = (s32)(fn_802E2C9C() - start) / 1000.0f;
 }
 
-void fn_801E8144(void) {}
-
 void fn_801E8148(void) {
     int i;
     for (i = 0; i < lbl_8055EB34; i++) {
@@ -880,8 +878,6 @@ void fn_801E8410(void) {
         }
     }
 }
-
-void fn_801E85A0(void) {}
 
 s32 fn_801E85A4(void) { return lbl_8055EB2C; }
 
