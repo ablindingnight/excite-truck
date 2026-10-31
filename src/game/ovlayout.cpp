@@ -595,9 +595,10 @@ struct FixedList {
         }
         return -1;
     }
+    s32 Count(void) const { return a.count; }
     void RemoveAt(int i) {
-        if (i >= 0 && i < a.count) {
-            int last = a.count - 1;
+        if (i >= 0 && i < Count()) {
+            int last = Count() - 1;
             if (i != last) {
                 a.data[i] = a.data[last];
             }
