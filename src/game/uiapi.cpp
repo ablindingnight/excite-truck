@@ -85,8 +85,8 @@ extern "C" void *memcpy(void *, const void *, unsigned long);
 // Name of the last layout UIBegin saw (first .data object of the unit).
 extern "C" char lbl_8033CAE8[100];
 char lbl_8033CAE8[100] = "__OOPS_NO_LAST_LAYOUT__";
-extern "C" s32 fn_80214E10(s32);
-extern "C" s32 fn_80214FE0(s32, s32, s32, s32);
+extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*));
+extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo);
 extern "C" s32 fn_80206430(void);
 extern "C" s32 fn_8022BAD0(s32, s32, s32, s32, float);
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1694,8 +1694,79 @@ extern "C" void fn_80214D50(s32 arg0) {
     }
 }
 
-extern "C" void fn_80214FD8(s32 arg0, s32 arg1) {
-    ((s32 (*)(s32, s32, s32))fn_80214E10)(arg0, arg1, 0);
+extern "C" void fn_80214A9C(s32);
+extern "C" void fn_80214AF0(s32);
+extern "C" s32 fn_802152CC(void);
+extern "C" void* lbl_8033D420[];
+
+// UIOkBox: title + message with a single OK button (group 31 is hidden while it shows).
+extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*)) {
+    int result = 2;
+    const char* caption = "Button - OK";
+    Window* active = (Window*)fn_802168E4();
+    if (active) {
+        fn_80214A9C(0x1F);
+    }
+    MenuItem items[] = {
+        MenuItem("ok", 2, &result, 0, 0),
+        MenuItem("ok", 0, NULL, -2, 0),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 27),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -2, 13),
+        MenuItem("buttonok", caption, 4),
+        MenuItem("title", title, 0x20),
+        MenuItem("message", message, 4),
+        MenuItem(lbl_80490510),
+    };
+    MenuDesc desc = {"ok.lyt", items, NULL, 0, 0};
+    if (!poll) {
+        poll = (int (*)(int*))fn_802152CC;
+    }
+    desc.poll = poll;
+    fn_802146BC(&desc, -999, -999, 1);
+    if (active) {
+        fn_80214AF0(0x1F);
+    }
+}
+
+extern "C" void fn_80214FD8(const char* title, const char* message) {
+    fn_80214E10(title, message, 0);
+}
+
+// Custom handler of the yes/no box: remembers which answer starts selected.
+struct UIYesNoHandler {
+    void* vtable;
+    int x, y, dx, dy;
+    void* owner;
+    u8 defaultNo;
+    UIYesNoHandler(u8 d) {
+        vtable = lbl_8033D420;
+        owner = 0;
+        defaultNo = d;
+    }
+};
+
+// UIYesNoBox: returns 1 for yes.
+extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo) {
+    Window* active = (Window*)fn_802168E4();
+    if (active) {
+        fn_80214A9C(0x1F);
+    }
+    UIYesNoHandler handler(defaultNo);
+    MenuItem items[] = {
+        MenuItem("__first", 5, &handler, 0, 0),
+        MenuItem("title", title, 4),
+        MenuItem("message", message, 4),
+        MenuItem("yes", 0, NULL, -2, 0),
+        MenuItem("no", 0, NULL, -3, 0),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -3, 27),
+        MenuItem(lbl_80490510),
+    };
+    MenuDesc desc = {"yesno.lyt", items, poll, 0, 0};
+    int yes = fn_802146BC(&desc, -999, -999, 1) == -2;
+    if (active) {
+        fn_80214AF0(0x1F);
+    }
+    return yes;
 }
 
 extern "C" s32 fn_80215194(s32 arg0, s32 arg1) {
@@ -1712,12 +1783,13 @@ extern "C" s32 fn_802151D4(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-extern "C" s32 fn_80214FE0(s32, s32, s32, s32);
-extern "C" void fn_80215214(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    fn_80214FE0(arg0, arg1, arg2, 1);
+extern "C" void fn_80215214(const char* title, const char* message, int (*poll)(int*)) {
+    fn_80214FE0(title, message, poll, 1);
 }
 
-extern "C" void fn_8021521C(s32 arg0, s32 arg1, s32 arg2) { fn_80214FE0(arg0, arg1, 0, arg2); }
+extern "C" void fn_8021521C(const char* title, const char* message, int defaultNo) {
+    fn_80214FE0(title, message, 0, defaultNo);
+}
 
 // Was the last layout UIBegin/UIDoMappedDialog saw the given one?
 extern "C" int fn_80215228(void) { return stricmp(lbl_8033CAE8, lbl_8055B6B0) == 0; }
