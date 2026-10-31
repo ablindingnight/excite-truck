@@ -1115,7 +1115,7 @@ int fn_80191A98(u8* p) { return PF(PTR(p, 0x8))->b1 != 0; }
 
 void PlayerDriver_vf48(u8* p) {}  // stub (1100)
 
-void fn_80192BE4(u8* p) {}
+void DeityCar_vf6C(u8* p) {}
 
 void fn_80192BE8(u8* p) { VP(PTR(p, 0x4))->v4C(); }
 

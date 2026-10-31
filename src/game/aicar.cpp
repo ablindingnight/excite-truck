@@ -1152,7 +1152,7 @@ f32 fn_80194F70(const RVec3* n, const RVec3* a, const RVec3* b) {
     return PSVECDotProduct(n, &v);
 }
 
-void fn_80194FC4(u8* d) {}
+void DeityCar_vf70(u8* d) {}
 
 f32 fn_80194FC8(u8* d) { return fn_8013B744(CARID(d)); }
 

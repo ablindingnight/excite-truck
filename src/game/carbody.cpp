@@ -596,7 +596,7 @@ extern "C" {
 // CarBody::Init: copies the descriptor's identity and setup blocks, reads the chassis tuning from
 // "<model>.car/physics.val" (camera, head positions in inches, suspension, speed limiter, gravity boosts),
 // sets up the rigid body, wheels, collision shapes and sub-systems, then resets the body.
-void fn_80182074(u8* p, u8* desc) {
+void CarBody_vf08(u8* p, u8* desc) {
     char path[0x50];
     CbSetup setup;
     U8(p, 0x2680) = 0;
@@ -945,7 +945,7 @@ u8* fn_801837DC(u8* p, int del) {
     return p;
 }
 
-void fn_8018381C(u8* p) {
+void CarBody_vf10(u8* p) {
     *(CbPose*)(p + 0x3C) = *(CbPose*)(p + 0x274);
     ((CollVolume*)p)->Update();
     ((RigidBody*)p)->Reset();
@@ -1222,7 +1222,7 @@ void fn_80183DF8(u8* p) {
 
 void fn_80183E7C(u8* p) {}  // stub (3032)
 
-u32 fn_80186DDC(u8* p) { return 0; }
+u32 DeityCar_vf58(u8* p) { return 0; }
 
 void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
 
@@ -1311,7 +1311,7 @@ void fn_80188A80(u8* p) {
     ang->z = SwayMin(lbl_80561EF0, ang->z);
 }
 
-u32 fn_80188E24(u8* p) { return 0; }
+u32 DeityCar_vf7C(u8* p) { return 0; }
 
 
 // The body pose in the render snapshot: rotation rows, then the position (copied block by block).
@@ -1815,7 +1815,7 @@ void fn_8018A180(u8* p) {
     ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Fetch(S32(p, 0x1EC));
 }
 
-void fn_8018A2BC(u8* p) {}
+void DeityCar_vf78(u8* p) {}
 
 // Physics tuning sliders: a sink taking (label, value, units, min, max, step).
 struct TuneSink {

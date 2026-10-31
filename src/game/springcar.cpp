@@ -241,8 +241,8 @@ public:
 };
 
 extern "C" {
-void fn_80182074(CarBody* b, void* desc);  // CarBody::Init
-void fn_8018381C(CarBody* b);              // CarBody::Reset
+void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
+void CarBody_vf10(CarBody* b);              // CarBody::Reset
 void fn_80183DF8(CarBody* b);
 void fn_80186DE4(CarBody* b);
 void fn_80188E2C(CarBody* b, u8* buf);
@@ -288,7 +288,7 @@ static inline void Scale(TVec* v, f32 k) {
 SpringCar::SpringCar(Controller* c) { ctl = c; }
 
 void SpringCar::Init(void* desc) {
-    fn_80182074(this, desc);
+    CarBody_vf08(this, desc);
     fn_80265D38(this, index);
     f2708 = 0;
     dead = 0;
@@ -355,7 +355,7 @@ void SpringCar::Update(void) {
 }
 
 void SpringCar::Reset(void) {
-    fn_8018381C(this);
+    CarBody_vf10(this);
     ClearWalls();
     lift.Reset();
     ctl->Detach();

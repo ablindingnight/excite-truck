@@ -143,9 +143,9 @@ public:
 
 extern "C" {
 CarBody* fn_80182010(CarBody* b);          // CarBody ctor
-void fn_80182074(CarBody* b, void* desc);  // CarBody::Init
+void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
 void fn_801836E0(CarBody* b, int del);     // CarBody dtor
-void fn_8018381C(CarBody* b);              // CarBody::Reset
+void CarBody_vf10(CarBody* b);              // CarBody::Reset
 void fn_80189C64(CarBody* b);
 void fn_8018A08C(CarBody* b);
 void fn_8018ADA4(CarBody* b, f32 steer);
@@ -359,7 +359,7 @@ Trailer::~Trailer(void) {
 
 void Trailer::Init(void* desc) {
     low = (fn_801769CC()->flags >> 12) & 1;
-    fn_80182074(this, desc);
+    CarBody_vf08(this, desc);
     RVec3 p;
     fn_801B8CC0(&p, model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
     hitchLocal = p;
@@ -380,7 +380,7 @@ void Trailer::Init(void* desc) {
 void Trailer::Reset(void) {
     detached = 0;
     slack = 0.0f;
-    fn_8018381C(this);
+    CarBody_vf10(this);
     Reglue();
 }
 

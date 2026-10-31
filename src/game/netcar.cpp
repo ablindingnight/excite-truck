@@ -175,8 +175,8 @@ extern "C" {
 void* memset(void* p, int c, u32 n);
 double sqrt(double x);
 void fn_8012F57C(TQuat* out, const TQuat* a, const TQuat* b, f32 t);  // slerp
-void fn_80182074(CarBody* b, void* desc);  // CarBody::Init
-void fn_8018381C(CarBody* b);              // CarBody::Reset
+void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
+void CarBody_vf10(CarBody* b);              // CarBody::Reset
 void fn_8018ADA4(CarBody* b, f32 v);
 void fn_8018ADB4(CarBody* b, f32 v);
 void fn_8018ADBC(CarBody* b, f32 v);
@@ -221,7 +221,7 @@ ZVec::ZVec(void) { memset(this, 0, sizeof(*this)); }
 NetCar::NetCar(void) { ptab = new ("netcar:ptab") Packet[3]; }
 
 void NetCar::Reset(void) {
-    fn_8018381C(this);
+    CarBody_vf10(this);
     Clear();
 }
 
@@ -250,7 +250,7 @@ void NetCar::Clear(void) {
 }
 
 void NetCar::Init(void* desc) {
-    fn_80182074(this, desc);
+    CarBody_vf08(this, desc);
     linkObj = fn_801B2EC0(index);
     waiting = 0;
     first = 1;

@@ -2524,7 +2524,7 @@ s32 fn_8014E708(int id) {
     return 0;
 }
 
-s32 fn_8014E738(void) { return 0; }
+s32 Meter_vf38(void) { return 0; }
 
 void fn_8014E740(const f32* pos, f32 r) {
     BetaMaster* m = lbl_8055E268;
