@@ -94,17 +94,18 @@ static inline void Identity(ValMatrix* m) {
 }
 
 static inline void RotZ(Mtx33* m, f32 angle) {
+    ValVec3* b = (ValVec3*)m;
     f32 c = cos(angle);
     f32 s = sin(angle);
-    m->basis[0].x = c;
-    m->basis[0].y = s;
-    m->basis[0].z = 0.0f;
-    m->basis[1].x = -s;
-    m->basis[1].y = c;
-    m->basis[1].z = 0.0f;
-    m->basis[2].x = 0.0f;
-    m->basis[2].y = 0.0f;
-    m->basis[2].z = 1.0f;
+    b[0].x = c;
+    b[0].y = s;
+    b[0].z = 0.0f;
+    b[1].x = -s;
+    b[1].y = c;
+    b[1].z = 0.0f;
+    b[2].x = 0.0f;
+    b[2].y = 0.0f;
+    b[2].z = 1.0f;
 }
 
 extern "C" {
