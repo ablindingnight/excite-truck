@@ -7,6 +7,7 @@
 #include <types.h>
 #include "game/menustate.h"
 #include "game/uilists.h"
+#include "game/menu.h"
 
 extern "C" s32 fn_80218C14(s32, s32);
 extern "C" s32 fn_802E317C(const char *);
@@ -17,7 +18,7 @@ extern "C" unsigned long strlen(const char *);
 extern "C" char lbl_8055B808[];
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
-extern "C" s32 fn_8021481C(void *);
+extern "C" void fn_8021481C(const char*);
 extern "C" char lbl_8033D388[];
 extern "C" char lbl_8033D268[];
 extern "C" char lbl_8055B810[];
@@ -617,7 +618,7 @@ struct UIWidgetView {
 extern "C" void* lbl_8033D54C[];
 extern "C" void* lbl_8033D480[];
 extern "C" void* lbl_8033D590[];
-extern "C" s32 lbl_80490510[];
+extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
 extern "C" f32 lbl_80558DC4[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
@@ -1324,7 +1325,8 @@ class Window {
 public:
     Window(const char* name, long x, long y, long w, long h, long flags);
 
-    u8 pad0[0x438];
+    u8 pad0[0x434];
+    void* update;       // 0x434 per-frame dialog update
     void* funcs[4];     // 0x438 mapped UI functions (0x440 = back)
     u8 pad448[0xDE8 - 0x448];
 };
@@ -1480,39 +1482,67 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
     }
 }
 
+extern "C" void fn_802D08C4(int);
+extern "C" void fn_80127A24(void);
+extern "C" void fn_802E47E8(void);
+extern "C" void fn_80218D54(Window*, int);
+extern "C" void fn_80236918(const char*);
+extern "C" int fn_802168F0(Window*);
+extern "C" void fn_802E3D00(void);
+extern "C" void fn_80236950(void);
+extern "C" void fn_8021683C(Window*);
+extern "C" const char* lbl_8055B6BC;
+
+// UIDoMappedDialog: builds the mapped window, runs it until it returns a result, then tears it down.
+extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
+    int result;
+    fn_802D08C4(1);
+    int mem = fn_80128314(0);
+    Window* win;
+    fn_802141A0(&win, (UIMapping*)desc, x, y, modal, 0);
+    fn_80127A24();
+    fn_802E47E8();
+    s32 (*poll)(s32*) = lbl_8055EF0C;
+    fn_80218D54(win, 0);
+    lbl_8055EF0C = (s32 (*)(s32*))desc->poll;
+    const char* layout = desc->layout;
+    win->update = (void*)fn_80211FF0;
+    fn_80236918(layout);
+    result = fn_802168F0(win);
+    if (lbl_8055EF40) {
+        fn_802E3D00();
+    }
+    fn_80236950();
+    fn_8021683C(win);
+    lbl_8055EF0C = poll;
+    fn_80212340(desc);
+    int now = fn_80128314(0);
+    if (now != mem) {
+        fn_802E30C8("UIDoMappedDialog overlap %s, %d != %d", desc->layout, now, mem);
+    }
+    fn_802D08C4(0);
+    CopyName(desc->layout ? desc->layout : lbl_8055B6BC, 100, lbl_8033CAE8);
+    return result;
+}
+
 extern "C" s32 fn_802ECEEC(void);
 extern "C" void fn_802E30C8(const char *, ...);
-extern "C" s32 fn_802146BC(void *, s32, s32, s32, s32, s32, s32, s32);
-extern "C" s32 lbl_80490510[];
+extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
 extern "C" s32 lbl_802F9EA4[];
 extern "C" u8 lbl_8055B860;
-extern "C" s32 fn_8021481C(void *arg0) {
-    s32 args[19];
+// Plays a movie inside the playvid layout (skipped while a movie cannot play).
+extern "C" void fn_8021481C(const char* movie) {
     if (fn_802ECEEC() == 0) {
-        fn_802E30C8((const char *)("UI: playing video '%s' in a layout"), arg0);
-        args[0] = lbl_802F9EA4[0];
-        args[1] = 0;
-        args[2] = lbl_802F9EA4[2];
-        args[3] = lbl_802F9EA4[3];
-        args[4] = lbl_802F9EA4[4];
-        args[5] = (s32)"#movie_file";
-        args[6] = 3;
-        args[7] = 0;
-        args[8] = 0;
-        args[9] = (s32)&lbl_8055B860;
-        args[10] = 6;
-        args[11] = 0;
-        args[12] = -2;
-        args[13] = 0xD;
-        args[14] = lbl_80490510[0];
-        args[15] = lbl_80490510[1];
-        args[16] = lbl_80490510[2];
-        args[17] = lbl_80490510[3];
-        args[18] = lbl_80490510[4];
-        fn_802146BC(args, -0x3E7, -0x3E7, 1, lbl_802F9EA4[4], lbl_802F9EA4[3], lbl_802F9EA4[2], lbl_802F9EA4[0]);
-        fn_802E30C8((const char *)("UI: finished playing video '%s'"), arg0);
+        fn_802E30C8("UI: playing video '%s' in a layout", movie);
+        MenuItem items[] = {
+            MenuItem("#movie_file", 3, movie, 0, 0),
+            MenuItem((const char*)&lbl_8055B860, 6, NULL, -2, 13),
+            MenuItem(lbl_80490510),
+        };
+        MenuDesc desc = {"playvid.lyt", items, NULL, 0, 0};
+        fn_802146BC(&desc, -999, -999, 1);
+        fn_802E30C8("UI: finished playing video '%s'", movie);
     }
-    return 0;
 }
 
 extern "C" s32 fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
@@ -1538,7 +1568,6 @@ extern "C" void fn_802149C4(s32 arg0) {
 #pragma pop
 extern "C" s32 fn_80218C14(s32, s32);
 extern "C" s32 fn_80214934(const void*, s32, void*, s32);
-extern "C" s32 fn_8021481C(void*);
 extern "C" char lbl_8033D388[];
 extern "C" char lbl_8033D268[];
 extern "C" char lbl_8055B810[];
