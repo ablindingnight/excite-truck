@@ -342,12 +342,16 @@ ArtPlayer::ArtPlayer(int n) {
 }
 
 ArtPlayer::~ArtPlayer(void) {
-    for (int i = list->count; i > 0;) {
-        i--;
+    int i = list->count;
+    while (i-- > 0) {
         fn_802AD30C(list->items[i].anim);
     }
     list->count = 0;
-    delete list;
+    ArtList* l = list;
+    if (l) {
+        l->~ArtList();
+        operator delete(l);
+    }
 }
 
 int ArtPlayer::Add(const char* name, int x) {
