@@ -706,8 +706,9 @@ void LoadingBegin(EventInfo* info, s32 difficulty) {
         lbl_8055D660 = fn_80131234("TIPS:TutorialTitle");
     }
     type = info->type;
-    lbl_8055D668 = info->id;
+    s32 id = info->id;
     lbl_8055D66C = difficulty;
+    lbl_8055D668 = id;
     lbl_8055D647 = type != 0x180302;
     ev = GetEvent(lbl_8055D668);
     GetTrack(ev->track);
