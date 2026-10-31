@@ -20,7 +20,7 @@ void fn_801332D0(int owner, const char* key, s32* value);
 int fn_8013365C(const char* name, void (*cb)(void));
 void fn_801336E0(int handle, void (*cb)(void));
 void fn_802C5F48(void);
-void fn_802C6080(void);
+void mrModelEnd(void);
 void fn_802CFFAC(int r, int g, int b);
 void fn_802D0160(int r, int g, int b);
 void fn_802D0188(int r, int g, int b);
@@ -292,7 +292,7 @@ void fn_802C84EC(void) {
         fn_801336E0(lbl_8055D028, fn_802C82C0);
         lbl_8055D028 = -1;
     }
-    fn_802C6080();
+    mrModelEnd();
 }
 
 void fn_802C8530(void) {

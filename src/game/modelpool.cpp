@@ -7,7 +7,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 char* strcpy(char* d, const char* s);
 void fn_802C6FB4(s32 model);
 void fn_802C703C(s32 inst);
-void fn_802C61BC(u8* data, const char* name);
+void mrModelFixup(u8* data, const char* name);
 void fn_802C6FA8(s32 model);
 s32 fn_802C6DC4(const char* name, s32 model, int a, int b);
 }
@@ -184,7 +184,7 @@ void fn_802CE7D4(u8* data, s32 size, void* arg) {
     ModelSlot* s = (ModelSlot*)arg;
     if (s->used) {
         s->model = (s32)data;
-        fn_802C61BC(data, s->name);
+        mrModelFixup(data, s->name);
         fn_802C6FA8(s->model);
         s->inst = fn_802C6DC4(s->name, s->model, 0, 0);
         s->state = 2;

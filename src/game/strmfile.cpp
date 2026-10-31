@@ -59,7 +59,7 @@ void fn_802E7318(void) {
     lbl_8055FFE0 = 1;
 }
 
-void fn_802E7330(void) {
+void StrmEnd(void) {
     lbl_8055FFE0 = 0;
     fn_802E30C8("StrmEnd: used %d of %d entries, %d sectors", lbl_8055FFD8, 0x100, lbl_8055FFDC);
 }

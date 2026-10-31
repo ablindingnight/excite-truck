@@ -499,7 +499,7 @@ static inline int TapLeftLeftRightRight(void) {
     return fn_802E499C(keys);
 }
 
-void fn_8027F204(const char* name) {
+void add_anim_to_wait_for(const char* name) {
     u8* l = (u8*)lbl_8055F69C;
     if (!l) {
         return;
@@ -1515,7 +1515,7 @@ inline void EvCupBar::Enter(void) {
         if (PTR(p, 0x60)) {
             if (VR(PTR(p, 0x60))->v28() && !U8(p, 0xCC)) {
                 fn_80236954("cup_perfected");
-                fn_8027F204("cup_perfected");
+                add_anim_to_wait_for("cup_perfected");
             }
             int show = 0;
             S32(p, 0x70) = p == (u8*)lbl_8055F688 ? 6 : 7;
@@ -1577,7 +1577,7 @@ static inline void RefreshCup(EvCupBar* b) {
     if (b->cup) {
         if (b->cup->AllDone() && !b->perfect) {
             fn_80236954("cup_perfected");
-            fn_8027F204("cup_perfected");
+            add_anim_to_wait_for("cup_perfected");
         }
         int show = 0;
         b->style = (u8*)b == (u8*)lbl_8055F688 ? 6 : 7;
@@ -1716,7 +1716,7 @@ static inline void PlayBarAnim(EvEventBar* b, const char* anim) {
     char buf[100];
     fn_801345D8(buf, 100, "%s%d", anim, lbl_804B30D8.Find(b) + 1);
     fn_80236954(buf);
-    fn_8027F204(buf);
+    add_anim_to_wait_for(buf);
 }
 
 // Refreshes the bar: "best/pass", the passed / perfected / grade-up animations, the grade.

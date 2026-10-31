@@ -1093,7 +1093,7 @@ s32 fn_80179318(void);
 void fn_80176858(void);
 void fn_80129360(u32 sample, int a);
 void fn_8020C8F4(u32 sample);
-int fn_802794AC(s32 player, int a);
+int CarTypeIsReal(s32 player, int a);
 void fn_801B8100(CarPose* pose, int car, s32 player);
 f32 fn_80139048(void);
 RaceLen* fn_80137C54(int i);
@@ -1235,7 +1235,7 @@ void debug_event(void) {
             TeleportEvent* tp = (TeleportEvent*)e;
             int k = 0;
             for (int i = 0; i < lbl_8055E804; i++) {
-                if (!fn_801C3508(tp->mask, i) || !fn_802794AC(((ICar*)fn_8017960C(i))->player, 0)) {
+                if (!fn_801C3508(tp->mask, i) || !CarTypeIsReal(((ICar*)fn_8017960C(i))->player, 0)) {
                     continue;
                 }
                 ICar* car = (ICar*)fn_8017960C(i);
@@ -1295,7 +1295,7 @@ void debug_event(void) {
                 place.vel.y = place.frame.rot.m[7] * tp->speed;
                 place.vel.z = place.frame.rot.m[8] * tp->speed;
                 ((CarObj*)car)->Place(&place);
-                if (fn_802794AC(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
+                if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);
                 }
                 k++;

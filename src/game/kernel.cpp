@@ -590,7 +590,7 @@ void fn_801275AC(void);
 void fn_802E8D2C(void);
 void fn_80127EF8(void);
 void fn_802E46E4(void);
-void fn_802E7330(void);
+void StrmEnd(void);
 void fn_802E99A8(void);
 void fn_801282A0(void);
 void fn_802E3090(void);
@@ -642,7 +642,7 @@ void fn_802E2B34(void) {
     fn_802E8D2C();
     fn_80127EF8();
     fn_802E46E4();
-    fn_802E7330();
+    StrmEnd();
     fn_802E99A8();
     fn_801282A0();
     fn_802E2A58();

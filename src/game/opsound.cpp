@@ -142,7 +142,7 @@ int fn_802146BC(const MenuDesc* desc, int x, int y, int a);
 void fn_80214A9C(int sound);
 void fn_80236900(void);
 void fn_80236914(void);
-void fn_801330E8(int section);
+void OptionsDefault(int section);
 void fn_801331C4(int section, const char* key, f32* v);
 void fn_8013323C(int section, const char* key, f32 v);
 void fn_801332D0(int section, const char* key, s32* v);
@@ -253,7 +253,7 @@ void fn_8023CA54(void) {
 }
 
 int fn_8023CB54(void) {
-    fn_801330E8(4);
+    OptionsDefault(4);
     fn_8023CA54();
     return 0;
 }

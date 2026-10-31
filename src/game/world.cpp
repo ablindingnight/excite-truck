@@ -488,7 +488,7 @@ s32 lbl_8055AF10 = -1;
 
 extern "C" {
 
-void fn_801E7984(RaceSetup* s);
+void WorldBeginCommon(RaceSetup* s);
 void fn_801E7C28(RaceSetup* s);
 void fn_801E83D4(void);
 void fn_801E8410(void);
@@ -532,7 +532,7 @@ void fn_801E78D8(RaceSetup* s) {
 
 void fn_801E797C(void) { fn_80206464(0); }
 
-void fn_801E7984(RaceSetup* s) {
+void WorldBeginCommon(RaceSetup* s) {
     s32 t0;
     StartOpts o;
     fn_801E78D8(s);
@@ -628,7 +628,7 @@ void fn_801E7984(RaceSetup* s) {
 
 void fn_801E7C1C(RaceSetup* s) {
     lbl_8055EB11 = 0;
-    fn_801E7984(s);
+    WorldBeginCommon(s);
 }
 
 void fn_801E7C28(RaceSetup* s) {

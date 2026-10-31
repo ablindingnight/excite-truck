@@ -106,7 +106,7 @@ void fn_80133024(void) {
 // Stripped from ET; only its string remains.
 void OptionsLoadFile(const char* name) { fn_802E317C("Couldn't load %s", name); }
 
-void fn_801330E8(int section) {
+void OptionsDefault(int section) {
     if (!fn_80133BA0(lbl_80559B58, 0, section)) {
         fn_802E317C("OptionsDefault: can't load %s", fn_80133AD8(section));
     }

@@ -953,7 +953,7 @@ s32 fn_80178C4C(u16* m) {
     return m[0] + 4;
 }
 
-void fn_80178C88(void) {
+void PhysTaskDumpCars(void) {
     const char* dump[] = {"PhysTaskDumpCars: %2d - (%3.2f, %3.2f, %3.2f) tri %d"};
 }
 

@@ -565,7 +565,7 @@ void fn_802C5F48(void) {
 
 const char* fn_802C7A10(s32 i);
 
-void fn_802C6080(void) {
+void mrModelEnd(void) {
     for (int i = 0; i < lbl_804C139C.count; i++) {
         if (lbl_804C139C.data[i].refs > 0) {
             fn_802E30C8("mrModelEnd: model %d not destroyed, will try to get name...", i);
@@ -594,7 +594,7 @@ void fn_802C6080(void) {
     lbl_804C139C.max = 0;
 }
 
-void fn_802C61BC(ModelInfo* m, const char* name) {
+void mrModelFixup(ModelInfo* m, const char* name) {
     if ((u32)m->nElems < 16000 && (u32)m->nExtras < 16000) {
         return;
     }
@@ -699,7 +699,7 @@ ModelInfo* fn_802C6B44(const char* name) {
                 fn_802E317C("Bad MOD version: %04x; expecting %04x (%s)", ver, 12, name);
             }
             DCStoreRangeNoSync(m, size);
-            fn_802C61BC(m, name);
+            mrModelFixup(m, name);
         }
         if (first) {
             fn_802C5DF0(m, fn_802D6C48);

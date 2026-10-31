@@ -955,7 +955,7 @@ int fn_8012C4E4(void* p, void (*cb)(void*, void*), void* arg) { return fn_8012BC
 
 void fn_8012DD00(void);
 
-void fn_8012C4E8(void) {
+void ResourceEnd(void) {
     ResourceSet* s;
     fn_8012DD00();
     fn_8012A67C();

@@ -38,7 +38,7 @@ int sprintf(char* buf, const char* fmt, ...);
 int fn_801298E8(void* out, s32 ch);
 void fn_801A7844(int a);
 int fn_801A8E38(void* b);  // button down
-int fn_801A8F10(void* b);  // button bound
+int ControlExists(void* b);  // button bound
 f32 fn_801A7F98(void* b);  // button analog value
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 int fn_802E85B0(s32 ch);
@@ -401,9 +401,9 @@ inline void PhysDriver::Update(f32 dt) {
         }
     }
     b = &b8C;
-    if (!fn_801A8F10(&b8C)) {
+    if (!ControlExists(&b8C)) {
         b = &bBC;
-    } else if (dthr && fn_801A8F10(&bBC)) {
+    } else if (dthr && ControlExists(&bBC)) {
         b = &bBC;
     }
     if (forced || dthr || fn_801A8EE4(b)) {
@@ -434,9 +434,9 @@ inline void PhysDriver::Update(f32 dt) {
     }
     {
     DButton* bb = &b9C;
-    if (!fn_801A8F10(&b9C)) {
+    if (!ControlExists(&b9C)) {
         bb = &bCC;
-    } else if (dbrk && fn_801A8F10(&bCC)) {
+    } else if (dbrk && ControlExists(&bCC)) {
         bb = &bCC;
     }
     if (forced || dbrk || fn_801A8EE4(bb)) {

@@ -31,7 +31,7 @@ void fn_80279488(void) {
     fn_802793AC();
 }
 
-int fn_802794AC(int type, CarDesc* car) {
+int CarTypeIsReal(int type, CarDesc* car) {
     switch (type) {
     case 'P':
     case 'Q':

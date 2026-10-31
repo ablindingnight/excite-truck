@@ -17,7 +17,7 @@ int fn_801EA994(void);           // human count
 u8* fn_801EA9A0(int i);          // car info (first byte: still racing)
 int fn_801769B8(void);           // game mode
 void* fn_80137C4C(void);
-int fn_802794AC(s32 type, void* car);
+int CarTypeIsReal(s32 type, void* car);
 int fn_801B8728(void* s);
 int fn_801B2C70(void* s);
 void fn_801B8778(void);
@@ -406,7 +406,7 @@ void fn_801AEF28(RaceSetup* s) {
     t->n = 0;
     for (int i = 0; i < s->n; i++) {
         s32 type = s->e[i].type;
-        if (!fn_802794AC(type, s->car)) {
+        if (!CarTypeIsReal(type, s->car)) {
             break;
         }
         t->e[i] = s->e[i];

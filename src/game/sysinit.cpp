@@ -4,7 +4,7 @@
 extern "C" {
 void fn_80129C24(void);
 void fn_8012BE90(void);
-void fn_8012C4E8(void);
+void ResourceEnd(void);
 void fn_80129C60(void);
 }
 
@@ -18,7 +18,7 @@ void fn_80129BD4(void) {
 }
 
 void fn_80129BF8(void) {
-    fn_8012C4E8();
+    ResourceEnd();
     fn_80129C60();
 }
 

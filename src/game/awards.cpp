@@ -577,7 +577,7 @@ int fn_801CB900(StatHandler* h, int type) {
     return r;
 }
 
-StatHandler* fn_801CB954(u32 type, const StatDesc* d) {
+StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
     switch (type & 0x300) {
     default:
         fn_802E317C("StatHandler::Create: stat type %x has invalid data type flag %x", type, type & 0x300);
@@ -861,7 +861,7 @@ inline AwardsMgr::AwardsMgr(void) {
     off[3] = 1;
     for (int i = 1; i <= 7; i++) {
         StatDesc* d = (StatDesc*)this;
-        StatHandler* h = fn_801CB954(StatsGetTypeFromIndex(i), d);
+        StatHandler* h = StatHandler_Create(StatsGetTypeFromIndex(i), d);
         *fn_801CC784(&handlers) = h;
     }
     sfx = (LayoutObj*)fn_80207848("levelup.sfx", 1);

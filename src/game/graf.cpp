@@ -91,7 +91,7 @@ extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
 int fn_8012C33C(const char* name);
-void fn_802C61BC(void* res, const char* name);
+void mrModelFixup(void* res, const char* name);
 s32 fn_802C6DC4(const char* tag, void* res, int a, int b);
 void fn_802C6FA8(void* res);
 void fn_802C6FB4(void* res);
@@ -278,7 +278,7 @@ void fn_801EB13C(GModel* m) {
     GSwap32(&m->res);
     GSwap32(&m->unkC);
     m->res = (u8*)m + (u32)m->res;
-    fn_802C61BC(m->res, "simple_model");
+    mrModelFixup(m->res, "simple_model");
     if (m->kind == 1) {
         GSwap32(&m->type);
         GSwap32(&m->unk14);

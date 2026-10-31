@@ -5,7 +5,7 @@
 extern "C" {
 void* memset(void* p, int c, size_t n);
 int fn_80265D7C(int car);
-int fn_802794AC(u32 type, void* car);
+int CarTypeIsReal(u32 type, void* car);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -104,7 +104,7 @@ void fn_801EA59C(int idx, s32 x8, const CarSetup* setup) {
     if (idx >= lbl_8055EB78->count) {
         lbl_8055EB78->count = idx + 1;
     }
-    if (fn_802794AC(setup->type, 0)) {
+    if (CarTypeIsReal(setup->type, 0)) {
         if (idx >= lbl_8055EB78->humans) {
             lbl_8055EB78->humans = idx + 1;
         }

@@ -174,7 +174,7 @@ f32 fn_801A85E8(Binding* b);
 int fn_801A8A10(Binding* b);
 int fn_801A8E38(Binding* b);
 int fn_801A8EE4(Binding* b);
-int fn_801A8F10(const Binding* b);
+int ControlExists(const Binding* b);
 void fn_801A90A4(char* out, int len, Binding* b);
 void fn_801A9110(Binding* b, const char* name);
 void fn_801A91B0(Binding* b, BindEntry* e);
@@ -344,7 +344,7 @@ void fn_801A7F8C(void) { lbl_8055E5C8 = 0; }
 
 f32 fn_801A7F98(Binding* b) {
     JoyStatus* p;
-    if (!fn_801A8F10(b)) {
+    if (!ControlExists(b)) {
         return 0.0f;
     }
     p = &lbl_80435050[b->pad];
@@ -526,7 +526,7 @@ int fn_801A8EE4(Binding* b) {
     return t == 1 || t == 3 || t == 4 || t == 6;
 }
 
-int fn_801A8F10(const Binding* b) {
+int ControlExists(const Binding* b) {
     s32 type = b->type;
     JoyInfo info = lbl_80435050[b->pad].info;
     if (type == 4) {
