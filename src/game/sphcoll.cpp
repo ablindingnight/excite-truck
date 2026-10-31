@@ -450,9 +450,10 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     f32 dep = r - m;
     *depth = dep;
     if (dep > lbl_805622D0) {
-        f32 k = lbl_805622DC / m;
+        f32 k;
         hit[0] = w.x;
         hit[1] = w.y;
+        k = lbl_805622DC / m;
         hit[2] = w.z;
         n[0] = dv.x * k;
         n[1] = dv.y * k;
@@ -2549,9 +2550,9 @@ void fn_801A26FC(u8* p, u8* o) {
             x = *(Xform*)VE(box)->v54();
             Shift(&x, &c);
             RVec3 at;
+            RVec3 push;
             RVec3 ext;
             SetV(&ext, F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C));
-            RVec3 push;
             fn_801C28A8(S32(p, 0x30), &x, &ext, &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
                 RVec3 up;
