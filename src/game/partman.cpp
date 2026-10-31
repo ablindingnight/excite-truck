@@ -621,13 +621,13 @@ extern "C" void fn_802916E4(PartTweak* t);
 PartTweak::~PartTweak(void) { fn_802916E4(this); }
 
 static inline f32 Wave(f32 a) {
-    f32 x = (f32)fmod(a, 6.283185307179586) - 3.1415927f;
+    f32 x = (f32)fmod(a, 6.2831855f) - 3.1415927f;
     if (!(*(u32*)&x & 0x80000000)) {
         f32 t = 2.0f * x / 3.1415927f - 1.0f;
         return 1.0f - t * t;
     }
-    x = -x;
-    f32 t = 2.0f * x / 3.1415927f - 1.0f;
+    f32 y = -x;
+    f32 t = 2.0f * y / 3.1415927f - 1.0f;
     return -(1.0f - t * t);
 }
 
