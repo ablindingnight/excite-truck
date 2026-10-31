@@ -12,20 +12,17 @@ extern const f32 lbl_80563D7C;
 extern const f32 lbl_80563D80;
 extern const f32 lbl_80563D84;
 
+static __inline f32 CamMin(f32 a, f32 b) { return a < b ? a : b; }
+static __inline f32 CamMax(f32 a, f32 b) { return a > b ? a : b; }
+
 void fn_8026B840(void) {}
 
 f32 fn_8026B844(f32 f) {
     f32 c = lbl_80563D78;
     if (f > c) {
-        f32 t = (f - lbl_80563D7C) / lbl_80563D80;
-        if (c > t) c = t;
-        return c;
+        return CamMax(c, (f - lbl_80563D7C) / lbl_80563D80);
     }
-    {
-        f32 t = (lbl_80563D7C + f) / lbl_80563D84;
-        if (c < t) c = t;
-    }
-    return c;
+    return CamMin(c, (lbl_80563D7C + f) / lbl_80563D84);
 }
 
 // Camera frames (camframe.cpp's CamFrame: three axes and a position).
@@ -106,8 +103,6 @@ int fn_802E4A1C(int key);
 f32 fn_801EA0E8(f32 x, f32 z);
 void Mat3FromEuler__FP4Mat3PC4Vec3(CamRot* out, const CamVec* euler);
 
-static __inline f32 CamMin(f32 a, f32 b) { return a < b ? a : b; }
-static __inline f32 CamMax(f32 a, f32 b) { return a > b ? a : b; }
 static __inline f32 CamDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
     if (out == in) {
