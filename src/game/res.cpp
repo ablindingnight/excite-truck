@@ -180,7 +180,8 @@ inline ResToc* GetToc(const char* name) {
     ResToc* toc;
     StrNCpy(buf, name, 0x80);
     if (*strrchr(buf, '.')) {
-        *strrchr(buf, '.') = 0;
+        char* dot = strrchr(buf, '.');
+        *dot = 0;
     }
     StrNCat(buf, ".toc", 0x80);
     strlwr(buf);
