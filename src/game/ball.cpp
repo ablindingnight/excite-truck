@@ -199,15 +199,15 @@ public:
     }
 };
 
-class BSoundBase {
+class GameSound {
 public:
-    virtual ~BSoundBase(void);
-    static void operator delete(void* p);
+    virtual ~GameSound(void);
 };
 
-class BSfx : public BSoundBase {
+class Sound3D : public GameSound {
 public:
-    virtual ~BSfx(void) {}
+    virtual ~Sound3D(void) {}
+    static void operator delete(void* p);
 };
 
 extern "C" BSound* fn_802077A4(const char* name, int prio, const BVec3* vel, const BVec3* pos);
@@ -522,13 +522,13 @@ inline void Ball::Init(BallDesc* d) {
 inline Ball::~Ball(void) {
     fn_801D0C84((IBallListener*)this);
     if (sndExpl) {
-        delete (BSfx*)sndExpl;
+        delete (Sound3D*)sndExpl;
     }
     if (sndRoll) {
-        delete (BSfx*)sndRoll;
+        delete (Sound3D*)sndRoll;
     }
     if (sndStart) {
-        delete (BSfx*)sndStart;
+        delete (Sound3D*)sndStart;
     }
 }
 
