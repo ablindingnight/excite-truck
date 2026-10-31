@@ -1012,8 +1012,8 @@ void fn_80241820(ColorPick* c) {
         fn_80230C30(&x, &y, c->x, c->y);
         f32 w = c->w;
         f32 h;
-        f32 cell = w / lbl_80563780;
         h = c->h;
+        f32 cell = w / lbl_80563780;
         s32 now = fn_8023659C() * lbl_80563768;
         f32 t = Clamp01((f32)(now - c->time) / lbl_8056376C);
         f32 e = Ease(t);
