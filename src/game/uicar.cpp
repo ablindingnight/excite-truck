@@ -108,7 +108,7 @@ void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
 
 void fn_8023FF1C(u8* p) {}  // stub (549)
 
-u8* fn_802407B0(u8* p, int del) {
+u8* JoinLeaveWidget_vf08(u8* p, int del) {
     if (p && del > 0) {
         operator delete(p);
     }
@@ -851,7 +851,7 @@ struct JoinLeaveWidget {
 
 extern "C" {
 
-void fn_80242738(JoinLeaveWidget* w) {
+void JoinLeaveWidget_vf0C(JoinLeaveWidget* w) {
     lbl_8055F1FC = 0;
     for (int i = 0; i < 2; i++) {
         w->groups[i].sel->SetSlot(i);
@@ -864,7 +864,7 @@ void fn_80242738(JoinLeaveWidget* w) {
 }
 
 // Every tenth frame, drops players whose controller is gone back to the join prompt.
-void fn_80242B1C(JoinLeaveWidget* w) {
+void JoinLeaveWidget_vf1C(JoinLeaveWidget* w) {
     if (++lbl_8055F1F8 % 10 == 0) {
         for (u32 i = 0; i < 2; i++) {
             if (w->groups[i].state > 1 && !fn_802E8504(*w->groups[i].sel->slot)) {
@@ -885,7 +885,7 @@ void fn_80216D28(void);
 void fn_80214D50(int s);
 
 // Join/leave input: Back steps a player back (or leaves), Enter confirms, joins or starts the race.
-int fn_80242F68(JoinLeaveWidget* w, int key) {
+int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
     int ctrl = fn_802E4A10();
     if (ctrl >= 2) {
         return 0;

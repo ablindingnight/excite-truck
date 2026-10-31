@@ -328,7 +328,7 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
     return t;
 }
 
-GXTex* fn_802D7FA0(const GXTexDesc* d, const char* name) {
+GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
     int bits = -1;
     int fmt = -1;
     switch (d->format) {
@@ -522,7 +522,7 @@ void fn_802D8DCC(GXTexDesc* d) {
 
 void fn_802D9340(GXTex* t);
 
-GXTex* fn_802D8E9C(const GXTexDesc* d, const char* name) {
+GXTex* drCreateTexture(const GXTexDesc* d, const char* name) {
     GXTex* t = 0;
     switch (d->format) {
     case 0x45:
@@ -531,7 +531,7 @@ GXTex* fn_802D8E9C(const GXTexDesc* d, const char* name) {
     case 0x49:
     case 0x4A:
     case 0x4B:
-        t = fn_802D7FA0(d, name);
+        t = create_generic_texture(d, name);
         break;
     case 0:
     case 1:

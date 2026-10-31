@@ -266,7 +266,7 @@ struct NodeVec3 {
     PathNode* buf[3]; // offset 0xC
 };
 
-// The whole screen as it sits on fn_80260954's stack (PathScreen is its head).
+// The whole screen as it sits on MenuDoChallengeMode's stack (PathScreen is its head).
 struct PathScreenBuf {
     PathScreenBuf(int a) {
         lbl_8055F420 = (u8*)this;
@@ -663,7 +663,7 @@ u8* fn_80260DC4(u8* p, int del);
 void fn_80260E04(Words5* d, const Words5* s);
 
 // The challenge map screen: unlock popups, then the map menu until backed out.
-void fn_80260954(int arg) {
+void MenuDoChallengeMode(int arg) {
     PathItem items[19];
     int mode = GetEveMode();
     if (mode != 0x130) {

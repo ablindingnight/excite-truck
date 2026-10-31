@@ -54,7 +54,7 @@ struct ScreenDesc {
 };
 
 extern "C" {
-void* fn_802D8E9C(TexDesc* desc, const char* name);
+void* drCreateTexture(TexDesc* desc, const char* name);
 void fn_802D8FB4(void* tex);
 u8* fn_802D2F78(int* width, int* height);
 void fn_802D2FD8(void);
@@ -142,7 +142,7 @@ void fn_802DACD4(void) {
     image.unk0 = 0;
     image.data = lbl_8055FE7C;
     desc.image = &image;
-    lbl_8055FE80 = fn_802D8E9C(&desc, "rom_tex");
+    lbl_8055FE80 = drCreateTexture(&desc, "rom_tex");
 }
 
 void fn_802DAE18(void) {

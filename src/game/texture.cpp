@@ -80,7 +80,7 @@ void fn_801282EC(int a);
 void fn_801282F4(void);
 int fn_802C90E0(void);
 void* fn_802D8DCC(const GXTexDesc* d, const char* name);
-void* fn_802D8E9C(const GXTexDesc* d, const char* name);
+void* drCreateTexture(const GXTexDesc* d, const char* name);
 void fn_802D8FB4(void* gx);
 int fn_802D9068(void);
 void* fn_802D9154(void);
@@ -416,7 +416,7 @@ void* fn_802CA4E0(const TTHeader* h, const char* name, int rt, u32 data, s32 kin
         fn_802E30C8("texture: create %s in scene", name);
     }
     fn_802CA3F4(&d, h, rt == 1 ? 3 : 1, data, kind);
-    return fn_802D8E9C(&d, name);
+    return drCreateTexture(&d, name);
 }
 
 static inline void Swap16(void* p) {

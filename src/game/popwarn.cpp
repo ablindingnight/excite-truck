@@ -507,7 +507,7 @@ int fn_80247AD0(void);
 void fn_8024CF60(void);
 void fn_8024CFB4(void);
 void fn_8027DDCC(int a);
-void fn_80260954(int a);
+void MenuDoChallengeMode(int a);
 void fn_8023BEA8(void);
 void fn_80214FD8(const char* title, const char* text);
 void fn_80239F74(void);
@@ -550,10 +550,10 @@ void MenuDoDemo(void) {
                     fn_8027DDCC(2);
                     break;
                 case 6:
-                    fn_80260954(0);
+                    MenuDoChallengeMode(0);
                     break;
                 case 7:
-                    fn_80260954(1);
+                    MenuDoChallengeMode(1);
                     break;
                 case 8: {
                     FlagGuard guard;
