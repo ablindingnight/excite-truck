@@ -199,8 +199,8 @@ struct FixedList {
         return -1;
     }
     void Remove(int k) {
-        if (k >= 0 && k < a.count) {
-            int last = a.count - 1;
+        if (k >= 0 && k < Count()) {
+            int last = Count() - 1;
             if (k != last) {
                 a.data[k] = a.data[last];
             }
