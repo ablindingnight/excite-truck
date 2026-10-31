@@ -1,3 +1,4 @@
+#include "game/gart.h"
 #include "game/uicontext.h"
 #include "game/gtext.h"
 #include "game/fonttext.h"
@@ -22,7 +23,7 @@ struct WidgetDispatch {virtual ~WidgetDispatch();virtual void Slot0c();virtual v
 struct OwnedWidget {virtual ~OwnedWidget();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual int Slot1c();};
 struct CallbackPrefix {char prefix[0x254];unsigned char active,unknown255,flag256,flag257;int(*callback)(void*);void* context;};
 struct OwnedWidgetPrefix {char prefix[0x244];OwnedWidget* child;int x,y,kind;};
-struct ImagePrefix {void* vtable;void* image;};
+struct ImagePrefix {void* vtable;gArtSet* image;};
 struct ResourcePrefix {void* vtable;GTextFont* resource;const char* text;};
 struct ModelResourcePrefix {void* vtable;int resource;};
 struct WidgetProperty {void* value;int key,bytes;void* buffer;};
@@ -150,9 +151,9 @@ void fn_802225E8(ResourcePrefix* self,int x,int y);
 void fn_8022264C(ResourcePrefix* self,int first,int second,int* left,int* top,int* right,int* bottom);
 
 extern u32 lbl_8033F9BC[];
-void* fn_8023512C(const char*);void fn_80235380(void*);
+
 void fn_802353F4(void*,int,float,float,float);
-float fn_80235EF0(void*,int);float fn_80235F64(void*,int);
+
 ImagePrefix* fn_802226D4(ImagePrefix* self,const char* path);
 ImagePrefix* fn_80222718(ImagePrefix* self,int destroy);
 void fn_80222788(ImagePrefix* self,int x,int y,int unused,int frame);
@@ -518,7 +519,7 @@ struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,s
 typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
 extern "C" {
 extern float lbl_80558DC4[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
-void* fn_80211660(int);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
+void* fn_80211660(int);void fn_802354A0(void*,int,u32,float,float,float,float,float);void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
 }
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
@@ -614,7 +615,7 @@ extern const float lbl_805634FC,lbl_80563560;
 struct TimedImageInputVector:RotationVec{inline TimedImageInputVector(int screenWidth,int screenHeight){z=(0.0f);x=(float)-screenWidth/2.0f;y=(float)-screenHeight/2.0f;} inline void SetZYX(float zValue,float yValue,float xValue){z=zValue;x=xValue;y=yValue;}};typedef char TimedImageInputVectorSize12[sizeof(TimedImageInputVector)==12?1:-1];
 void fn_8022ED00(UIContext*);void fn_8022EDB8();
 void fn_802272D4(WidgetFragment* source);
-void fn_802278F0(void*,float,float,float,float);
+void fn_802278F0(gArtSet*,float,float,float,float);
 void fn_80228010(void);  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
 }
@@ -680,7 +681,7 @@ struct ProviderDrawMetrics {char unknown[0x70];float margin;};
 extern "C" {
 extern ProviderDrawMetrics* lbl_8055E050;extern float lbl_80558DC4[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
 void* fn_80211660(int);int fn_8022AB18(int,int,int);float fn_8022AAA8(int,const char*);int fn_8022AA84(int);
-float fn_80235EF0(void*,int);float fn_80235F64(void*,int);void fn_802354A0(void*,int,u32,float,float,float,float,float);
+void fn_802354A0(void*,int,u32,float,float,float,float,float);
 }
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
@@ -909,10 +910,11 @@ void fn_80224864(WidgetFragment* self,int,void*);
 
 struct PairImage248 {char base[0x248];void* first;void* second;};
 struct PairImage25c {char base[0x25c];void* first;void* second;};
-struct AssetImage244 {char base[0x244];void* image;UIContext* asset;};
+struct ArtImage244Prefix {char base[0x244];gArtSet* image;};
+struct GXAssetImage244Prefix {char base[0x244];void* image;UIContext* asset;};
 struct SceneResourcePrefix {char base[0x244];void* model;float x,y,height,width;int frame;UIContext* asset;unsigned char owned;};
 struct ResourceHandlePrefix {char base[0x254];int handle;char gap258[8];UIContext* asset;};
-struct TripleResourcePrefix {char base[0x250];GTextFont* resource;void* first;void* second;};
+struct TripleResourcePrefix {char base[0x250];GTextFont* resource;gArtSet* first;gArtSet* second;};
 struct RichCaptionPrefix {char base[0x244];const char* label;char text[256];BitmapFont* renderer;};
 struct SliderRangePrefix {char base[0x244];int* value;char gap248[8];int minimum,maximum;unsigned char dragging;};
 struct MenuRecord {char base[0x20];void* context;int(*callback)(void*);};
@@ -947,7 +949,7 @@ extern "C" {
 extern KeyboardFilePrefix lbl_80490934;extern u32 lbl_8033DEAC[];extern const char lbl_8033DC4C[],lbl_8033DC58[];
 void fn_801A7844(int);int fn_801A7C8C(int);void fn_802E47E8();void fn_802E30C8(const char*,...);
 int fn_8021F478(int* result);
-void fn_80227C9C(void* self,float x,float y,float width,float height);
+void fn_80227C9C(gArtSet* self,float x,float y,float width,float height);
 void fn_80227DE8(WidgetFragment* self);
 WidgetFragment* fn_80227D00(WidgetFragment* self,WidgetDesc* desc);
 void fn_802299FC(WidgetFragment* self);
@@ -1066,7 +1068,7 @@ void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,i
 }
 
 struct MultiValuePrefix {char base[0x244];void* value;void* first;void* second;bool dragging;char gap251[3];int direction;};
-struct ThreeResourcePrefix {char base[0x244];bool flag;char gap245[3];void* first;void* second;GTextFont* resource;void* image;void* overlay;};
+struct ThreeResourcePrefix {char base[0x244];bool flag;char gap245[3];void* first;void* second;GTextFont* resource;gArtSet* image;gArtSet* overlay;};
 extern "C" {
 extern u32 lbl_8033E770[],lbl_8033DF30[];
 }
@@ -1181,9 +1183,9 @@ int fn_802CAC28(const char*,int);
 
 }
 
-struct EffectImage351 {char base[0x244];void* image;float x,y,height,width;int mode;UIContext* matrix;bool owned;};
+struct EffectImage351 {char base[0x244];gArtSet* image;float x,y,height,width;int mode;UIContext* matrix;bool owned;};
 extern "C" {
-extern unsigned char lbl_8055EFBC;extern const char lbl_8055B8A4[3];extern u32 lbl_8033E038[];int fn_80235FD8(void*);
+extern unsigned char lbl_8055EFBC;extern const char lbl_8055B8A4[3];extern u32 lbl_8033E038[];
 WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc);
 }
 
@@ -1194,7 +1196,7 @@ void fn_8021EDA4(WidgetFragment* self);
 
 extern "C" {
 extern const float lbl_805634EC;
-void fn_802278F0(void* image,float x,float y,float width,float height);
+void fn_802278F0(gArtSet* image,float x,float y,float width,float height);
 }
 
 struct ResourceInit357 {char base[0x244];int kind;union {void* resource;GTextFont* fontResource;};int argument,style,flags;const char* name;char cache[32];float scale;bool flag;};
@@ -1296,7 +1298,7 @@ typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlob
 
 extern "C" {
 extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
-float fn_8023659C(void);float fn_80235EF0(void*,int);float fn_80235F64(void*,int);int fn_80235FD8(void*);double fmod(double,double);double sin(double);
+float fn_8023659C(void);double fmod(double,double);double sin(double);
 void fn_802354A0(void*,int,unsigned int,float,float,float,float,float);
 // Shared UIDraw declarations use one consistent source contract.
 // Remaining opaque graphics imports are bounded views, not recovered original headers.
@@ -1453,8 +1455,8 @@ void fn_80219AB4(WidgetFragment* self,int kind,const char* name,int style,int ar
  default:fn_802E317C(lbl_8033D8B8,kind);break;
  }
 }
-WidgetFragment* fn_80219E44(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F434;SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(f->resource)fn_80235380(f->resource);break;case 2:case 4:case 5:if(f->font)fn_802328D4(f->font);break;}f->resource=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80219F14(WidgetFragment* self){fn_802192AC(self);SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(strncasecmp(f->cached,f->name,31)!=0){if(f->resource)fn_80235380(f->resource);f->resource=fn_8023512C(f->name);const char* source=f->name;int remaining=32;char* destination=f->cached;while((*destination++=*source++)!=0){if(--remaining<=0){destination[-1]=0;break;}}}break;}}
+WidgetFragment* fn_80219E44(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F434;SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(f->resource)fn_80235380(static_cast<gArtSet*>(f->resource));break;case 2:case 4:case 5:if(f->font)fn_802328D4(f->font);break;}f->resource=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+void fn_80219F14(WidgetFragment* self){fn_802192AC(self);SourceResourcePrefix* f=(SourceResourcePrefix*)self;switch(f->kind){case 3:case 6:case 8:case 9:if(strncasecmp(f->cached,f->name,31)!=0){if(f->resource)fn_80235380(static_cast<gArtSet*>(f->resource));f->resource=fn_8023512C(f->name);const char* source=f->name;int remaining=32;char* destination=f->cached;while((*destination++=*source++)!=0){if(--remaining<=0){destination[-1]=0;break;}}}break;}}
 void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPaintNew*)source;
     float x;
     float y;
@@ -1470,9 +1472,9 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
     unsigned int frameSign;
     int *imageWatch;
     int solidHeight;
-    void *borderImage;
-    void *pulseImage;
-    void *image;
+    gArtSet* borderImage;
+    gArtSet* pulseImage;
+    gArtSet* image;
     float time;
     float borderWidth;
     float nativeHeight;
@@ -1501,7 +1503,7 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
             fn_80230150( x,fields->color, solidFlags | 8, y - (float) solidHeight, zero, (float) ((WidgetDispatch*)source)->Slot78(), (float) solidHeight, (float) fields->index, time, (60.0f));
             return;
         case 9:
-            borderImage = fields->image;
+            borderImage = static_cast<gArtSet*>(fields->image);
             if (borderImage != 0) {
                 borderWidth = ((ImageFillGlobalNew*)lbl_8055E050)->padding + (float) ((WidgetDispatch*)source)->Slot78();
                 borderX = x - (borderWidth / 2.0f);
@@ -1520,7 +1522,7 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
             }
             break;
         case 8:
-            pulseImage = fields->image;
+            pulseImage = static_cast<gArtSet*>(fields->image);
             if (pulseImage != 0) {
                 pulseWatch = fields->watched;
                 if (pulseWatch != 0) {
@@ -1543,7 +1545,7 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
             break;
         case 3:
         case 6:
-            image = fields->image;
+            image = static_cast<gArtSet*>(fields->image);
             if (image != 0) {
                 imageWatch = fields->watched;
                 if (imageWatch != 0) {
@@ -1952,7 +1954,7 @@ void fn_8021DB58(WidgetFragment* self){
  fn_80219660(self);
  int previousFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
  int nextFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
- void* previousArrow=fn_80211660(0);void* nextArrow=fn_80211660(1);
+ gArtSet* previousArrow=static_cast<gArtSet*>(fn_80211660(0));gArtSet* nextArrow=static_cast<gArtSet*>(fn_80211660(1));
  float previousOffset=ObservedArrowOffset(&fields->previousTime),nextOffset=ObservedArrowOffset(&fields->nextTime);
  float baseX=x+(float)fn_8022AB18(fields->fontResource,0,3);
  fn_8022AAA8(fields->fontResource,fields->provider->Text());
@@ -2275,8 +2277,8 @@ WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,i
 WidgetFragment* fn_8022003C(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E7F4;fn_802C519C((void*)self->label);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_802200AC(WidgetFragment* self){int previousFrame;
  int nextFrame;
- void* previousArrow;
- void* nextArrow;
+ gArtSet* previousArrow;
+ gArtSet* nextArrow;
  float nextX;
  float fraction;
  float height;
@@ -2296,8 +2298,8 @@ void fn_802200AC(WidgetFragment* self){int previousFrame;
  if(f->focus&&*f->focus==f->token)previousFrame=1;
  ((void(*)(void*,int,float,float,float,float,float,float,float,float,float))fn_802C5334)(f->image,previousFrame,coordinates[1]+0.5f*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)/2.0f,(0.0f),filledWidth,imageHeight,(0.0f),(0.0f),fraction,(1.0f));
  
-previousArrow=fn_80211660(0);
- nextArrow=fn_80211660(1);
+previousArrow=static_cast<gArtSet*>(fn_80211660(0));
+ nextArrow=static_cast<gArtSet*>(fn_80211660(1));
  {bool previousSelected;
  {int* focus=f->focus;
  previousSelected=false;
@@ -2615,7 +2617,7 @@ void fn_8022264C(ResourcePrefix* self,int first,int second,int* left,int* top,in
 }
 ImagePrefix* fn_802226D4(ImagePrefix* self,const char* path){self->vtable=lbl_8033F9BC;self->image=fn_8023512C(path);return self;}
 ImagePrefix* fn_80222718(ImagePrefix* self,int destroy){
- if(self){void* image=self->image;self->vtable=lbl_8033F9BC;if(image)fn_80235380(image);if(destroy>0)__dl__FPv(self);}return self;
+ if(self){gArtSet* image=self->image;self->vtable=lbl_8033F9BC;if(image)fn_80235380(image);if(destroy>0)__dl__FPv(self);}return self;
 }
 void fn_80222788(ImagePrefix* self,int x,int y,int unused,int frame){
  if(self->image){float zero=(0.0f);float a,b;fn_80230C30(&a,&b,x,y);fn_802353F4(self->image,frame,a,b,zero);}
@@ -3020,7 +3022,7 @@ int fn_802267C4(WidgetFragment* self,int key){SelectionCallbackPrefix* f=(Select
 int fn_802268A0(WidgetFragment* self,int key){Bound264* f=(Bound264*)self;if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
 int fn_802268E8(WidgetFragment* self){SelectionActionPrefix* f=(SelectionActionPrefix*)self;if(!f->focus)return 0;int selected=f->token==*f->focus;unsigned int state;if(self->flag18)state=(selected!=0)+2;else state=selected!=0;if(f->child->State()==3&&state==3)state=1;if(!self->enabled)state=4;return state;}
 WidgetFragment* fn_802269A8(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E0BC;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=gxGetImage(desc->name);if(!f->image)fn_802E30C8(lbl_8033DAF8,desc->name);f->asset=fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;f->value=desc->field9c;return self;}
-WidgetFragment* fn_80226AD0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E0BC;AssetImage244* f=(AssetImage244*)self;if(f->asset)fn_8022EE98(f->asset);f->asset=0;if(f->image)fn_802C519C(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_80226AD0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E0BC;GXAssetImage244Prefix* f=(GXAssetImage244Prefix*)self;if(f->asset)fn_8022EE98(f->asset);f->asset=0;if(f->image)fn_802C519C(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80226B6C(WidgetFragment* self){FullDrawStatePrefix scope;CenteredImagePrefix* f=(CenteredImagePrefix*)self;float time=fn_8023659C();UIContext* m=f->asset;float zero=(0.0f),one=(1.0f);SetMat3Row(&m->xf.basis,0,one,zero,zero);SetMat3Row(&m->xf.basis,1,zero,one,zero);SetMat3Row(&m->xf.basis,2,zero,zero,one);SetUIVec3(&m->xf.translation,zero,zero,zero);RotationVec rotation;SetVec3(&rotation,zero,zero,SpinAngle359(f->value,time/(30.0f)));RotationMatrix matrix;RotationMatrix* target=&f->asset->xf.basis;fn_80015A20(&matrix,&rotation);fn_80015B20(target,&matrix,target);f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;if(f->image){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);fn_802C5320(f->image,0,-f->width/2.0f,f->height/2.0f,(0.0f),f->width,f->height);fn_8022EDB8();}}
 WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
  const char* strings=lbl_8033D878;fn_80218F80(self,desc);self->vtable=lbl_8033E038;EffectImage351* f=(EffectImage351*)self;
@@ -3035,7 +3037,7 @@ WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
  if(!(ObservedAbsDecision(x)<=lbl_80558DC4[0]&&ObservedAbsDecision(y)<=lbl_80558DC4[0]&&ObservedAbsDecision(z)<=lbl_80558DC4[0]))((void(*)(WidgetFragment*,float,float,float))fn_80227044)(self,x,y,z);
  return self;
 }
-WidgetFragment* fn_80226F00(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E038;SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned)fn_8022EE98(f->asset);if(f->model)fn_80235380(f->model);f->model=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_80226F00(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E038;EffectImage351* f=(EffectImage351*)self;if(f->owned)fn_8022EE98(f->matrix);if(f->image)fn_80235380(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80226F94(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80230C30(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model,f->frame,0xffffffffu,f->x,f->y,(0.0f),f->width,f->height);if(f->owned)fn_8022EDB8();}
 void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=&f->matrix->xf.basis;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
 WidgetFragment* fn_802270DC(WidgetFragment* self,WidgetDesc* desc){
@@ -3129,7 +3131,7 @@ void fn_802272D4(WidgetFragment* source)
     image->lastUpdateTime = now;
 }
 void fn_80227880(float x,float y,float width,float height){fn_80230924(0x40ffffffu,x,y,x+width,y-height,(0.0f));fn_80230924(0x99000000u,x,y,x+width,y-height,(0.0f));}
-void fn_802278F0(void* image,float x,float y,float width,float height){if(image){
+void fn_802278F0(gArtSet* image,float x,float y,float width,float height){if(image){
  float offset=(0.0f);int frame=8;
  while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)fn_802353F4(image,frame,x+offset,y,(0.0f));else{float h=fn_80235F64(image,frame);fn_802354A0(image,frame,0xffffffffu,x+offset,y,(0.0f),width-offset,h);}offset+=tile-(1.0f);frame++;if(frame>=10)frame=8;}
  offset=(0.0f);frame=10;float h=fn_80235F64(image,10);float bottom=h+(y-height);
@@ -3143,10 +3145,10 @@ void fn_802278F0(void* image,float x,float y,float width,float height){if(image)
  float cornerY=(y-height-(2.0f))+fn_80235F64(image,2);fn_802353F4(image,2,x-(2.0f),cornerY,(0.0f));
  y=(y-height-(2.0f))+fn_80235F64(image,3);w=fn_80235EF0(image,3);fn_802353F4(image,3,((2.0f)+(x+width))-w,y,(0.0f));
  }}
-void fn_80227C9C(void* self,float x,float y,float width,float height){fn_80227880(x,y,width,height);((void(*)(void*,float,float,float,float))fn_802278F0)(self,x,y,width,height);}
-WidgetFragment* fn_80227D00(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033DEAC;void* image=fn_8023512C(lbl_8033DC4C);((AssetImage244*)self)->image=image;if(!image)fn_802E30C8(lbl_8033DC58);return self;}
-WidgetFragment* fn_80227D64(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033DEAC;AssetImage244* f=(AssetImage244*)self;if(f->image)fn_80235380(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80227DE8(WidgetFragment* self){float x,y;fn_80230C30(&x,&y,self->left,self->top);float width=(float)((WidgetDispatch*)self)->Slot78();fn_80227C9C(((AssetImage244*)self)->image,x,y,width,(float)(self->bottom-self->top));}
+void fn_80227C9C(gArtSet* self,float x,float y,float width,float height){fn_80227880(x,y,width,height);fn_802278F0(self,x,y,width,height);}
+WidgetFragment* fn_80227D00(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033DEAC;gArtSet* image=fn_8023512C(lbl_8033DC4C);((ArtImage244Prefix*)self)->image=image;if(!image)fn_802E30C8(lbl_8033DC58);return self;}
+WidgetFragment* fn_80227D64(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033DEAC;ArtImage244Prefix* f=(ArtImage244Prefix*)self;if(f->image)fn_80235380(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+void fn_80227DE8(WidgetFragment* self){float x,y;fn_80230C30(&x,&y,self->left,self->top);float width=(float)((WidgetDispatch*)self)->Slot78();fn_80227C9C(((ArtImage244Prefix*)self)->image,x,y,width,(float)(self->bottom-self->top));}
 WidgetFragment* fn_80227E84(WidgetFragment* self,void* first,WidgetDesc* desc,void* second){const char* strings=lbl_8033D878;fn_80218F80(self,desc);ThreeResourcePrefix* f=(ThreeResourcePrefix*)self;f->first=first;self->vtable=lbl_8033DF30;f->second=second;f->flag=*(const int*)((const char*)desc+0xb0)==1;f->resource=fn_80232578(strings+0x20c);if(!f->resource)fn_802E30C8(strings+0x408);f->image=fn_8023512C(strings+0x42c);if(!f->image)fn_802E30C8(strings+0x438);f->overlay=fn_8023512C(strings+0x3d4);if(!f->overlay)fn_802E30C8(strings+0x3e0);return self;}
 WidgetFragment* fn_80227F5C(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033DF30;TripleResourcePrefix* f=(TripleResourcePrefix*)self;if(f->resource)fn_802328D4(f->resource);f->resource=0;if(f->first)fn_80235380(f->first);f->first=0;if(f->second)fn_80235380(f->second);f->second=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80228010(void) {}

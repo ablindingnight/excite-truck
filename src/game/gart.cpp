@@ -1,3 +1,4 @@
+#include "game/gart.h"
 // gArt (0x80234D44-0x80236550): reference-counted 2D art sets. An art set is a texture plus a ".tab"
 // table of pictures (texture rectangles and sizes), drawn as screen quads; open sets are tracked so
 // they can be reported and freed at shutdown. Also a small set of named textures (dynotex). Names are
@@ -113,7 +114,7 @@ TrackNode* lbl_8055F084;  // the open art sets
 
 extern "C" {
 
-void fn_80235380(gArtSet* s);
+
 void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 
 void fn_80234D44(gArtSet* s) {

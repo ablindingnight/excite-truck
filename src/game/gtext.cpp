@@ -1,3 +1,4 @@
+#include "game/gart.h"
 // gText (0x80231504-0x80234D44): bitmap fonts ("GTEX" files, byte-swapped when built big-endian), a
 // font tracker with reference counts, UTF-8 string drawing and measuring, escape sequences that draw
 // gArt pictures inline ("esc_seq.val"), outlined text, word-wrapped and vertical text, and a buffer of
@@ -125,11 +126,11 @@ void fn_802CB228(s32 tex);
 
 u32 fn_80230B9C(u32 color);
 void fn_80231380(UIVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
-gArtSet* fn_8023512C(const char* name);
-void fn_80235380(gArtSet* s);
+
+
 void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-f32 fn_80235EF0(gArtSet* s, int idx);  // width
-f32 fn_80235F64(gArtSet* s, int idx);  // height
+  // width
+  // height
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8BD0(s32 tex);
 void fn_802C8C04(s32 tex);
