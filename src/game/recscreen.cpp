@@ -71,7 +71,322 @@ void fn_8025C054(void) {
     }
 }
 
-void fn_8025C204(u8* p) {}  // stub (644)
+}  // extern "C"
+
+// Copies at most n - 1 characters and always terminates.
+static inline void CopyName(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
+
+// One car icon's texture rectangles.
+struct IconEntry {
+    char name[0x20];  // offset 0x0, chassis
+    u8* tex;          // offset 0x20
+    u8* overlay;      // offset 0x24
+    f32 u0;           // offset 0x28
+    f32 v0;           // offset 0x2C
+    f32 u1;           // offset 0x30
+    f32 v1;           // offset 0x34
+};
+
+struct IconList {
+    IconEntry* data;  // offset 0x0
+    s32 count;        // offset 0x4
+};
+
+// The shared car icon table (caricons.val; also frname's and carpick's): loaded on first use, reference
+// counted through lbl_8055F2E8. CLEANUP: the original keeps this class in a shared header.
+template<int N> struct IconTail {
+    static void CopyTail(const char* s, int n, char* d) {
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+    static void Append(char* text, const char* s) {
+        char* d = text;
+        int n = N;
+        while (*d) { n--; d++; }
+        if (n > 0) { CopyTail(s, n, d); }
+    }
+};
+void* operator new(size_t n, const char* tag);
+void* operator new[](size_t n, const char* tag);
+void operator delete[](void* p);
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+extern "C" u8* fn_802CAC28(const char* name, int flags);
+extern "C" int strcmp(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
+extern "C" void gxForgetTexture(u8* tex);
+extern "C" u8* fn_8023512C(const char* name);
+
+struct CarIconTable : public IconList {
+    CarIconTable(void) {
+        ValueTable* t = fn_80131808("caricons.val");
+        count = 0;
+        data = new ("cicon") IconEntry[50];
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (strcmp(n->GetName(), "Car")) {
+                continue;
+            }
+            for (int k = 0; k < 2; k++) {
+                IconEntry* c = &data[count++];
+                CopyName(n->GetValue("chassis"), 32, c->name);
+                if (k) {
+                    IconTail<32>::Append(c->name, "_e");
+                }
+                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                c->u0 = n->GetFloat("u1");
+                c->v0 = n->GetFloat("v1");
+                c->u1 = n->GetFloat("u2");
+                c->v1 = n->GetFloat("v2");
+            }
+        }
+        fn_80131818(t);
+    }
+    ~CarIconTable(void) {
+        for (int i = 0; i < count; i++) {
+            IconEntry& e = data[i];
+            gxForgetTexture(e.tex);
+            gxForgetTexture(e.overlay);
+        }
+        delete[] data;
+    }
+};
+extern CarIconTable* lbl_8055F2E4;
+extern s32 lbl_8055F2E8;
+
+// Index of the car icon for chassis `name`, or -1.
+static inline int FindIcon(IconList* icons, const char* name) {
+    for (int i = 0; i < icons->count; i++) {
+        if (strcasecmp(icons->data[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// A car icon widget in a records row (drawn by fn_8025CC78, released by fn_8025CC14).
+struct CarIconWidget {
+    void* vtable;     // offset 0x0
+    u8 pad4[0x10];
+    s32 unk14;        // offset 0x14
+    IconList* icons;  // offset 0x18
+    s32 icon;         // offset 0x1C
+    u8 visible;       // offset 0x20
+    u32 color;        // offset 0x24
+    u8* art;          // offset 0x28
+    u8 valid;         // offset 0x2C
+};
+
+static inline void InitIcon(CarIconWidget* w) {
+    w->unk14 = 0;
+    w->vtable = lbl_803453B8;
+    w->icons = 0;
+    w->visible = 0;
+    w->art = fn_8023512C("caricona.art");
+}
+
+static inline void FreeIcon(CarIconWidget* w) {
+    w->vtable = lbl_803453B8;
+    fn_80235380(w->art);
+}
+
+// One high score row: score, grade and time text.
+struct ScoreRow {
+    char score[20];     // offset 0x0
+    const char* grade;  // offset 0x14
+    char time[20];      // offset 0x18
+};
+
+struct HighScore {
+    u8 pad0[0x4];
+    s32 score;   // offset 0x4
+    s32 grade;   // offset 0x8
+    f32 time;    // offset 0xC
+    u32 choice;  // offset 0x10
+};
+
+struct VehicleChoice {
+    s32 vehicle;  // offset 0x0
+    s32 color;    // offset 0x4
+    u8 valid;     // offset 0x8
+};
+
+struct EventInfo {
+    u8 pad0[0x4];
+    s32 track;        // offset 0x4
+    u32 id;           // offset 0x8
+    u8 padC[0x14];
+    ValueNode* node;  // offset 0x20
+};
+
+struct TrackInfo {
+    u8 pad0[0x8];
+    char name[1];  // offset 0x8
+};
+
+struct VehicleInfo {
+    u8 pad0[0x2C];
+    char chassis[0x20];  // offset 0x2C
+    u8 pad4C[0x18];
+    u32 colors[12];      // offset 0x64
+};
+
+class Statistic {
+public:
+    Statistic(int slot, u32 type, long event, int difficulty);
+    int HasValue(void);
+    u8 pad[0x24];
+};
+
+class RealStatistic : public Statistic {
+public:
+    RealStatistic(int slot, u32 type, long event, int difficulty);
+    f32 GetValue(void);
+};
+
+int IdentGetCurrentSlot(void);
+HighScore* StatsGetHighScore(int slot, long event, long difficulty, int rank);
+VehicleChoice StatsUnpackChoice(u32 packed);
+const char* GetGradeDisplayName(int grade);
+EventInfo* GetEvent(int i);
+TrackInfo* GetTrack(int track);
+VehicleInfo* GetVehicle(int i);
+const char* GetTrackFriendlyName(const char* name);
+const char* fn_80131234(const char* key);
+extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
+
+extern "C" {
+void fn_801308F4(char* buf, s32 size, s32 value);
+void fn_80130980(char* buf, s32 size, int fields, f32 secs);
+int fn_801345D8(char* buf, int n, const char* fmt, ...);
+s32 fn_802168E4(void);
+void fn_80214A9C(s32 s);
+void fn_80214AF0(s32 s);
+
+// The event records screen ("ep_records.lyt"): the five best scores of one event and difficulty with
+// their grades, times and cars, the event's best time and its location.
+void fn_8025C204(int event, int difficulty) {
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") CarIconTable;
+    }
+    lbl_8055F2E8++;
+    CarIconTable* set = lbl_8055F2E4;
+    ScoreRow rows[5];
+    CarIconWidget icons[5];
+    InitIcon(&icons[0]);
+    InitIcon(&icons[1]);
+    InitIcon(&icons[2]);
+    InitIcon(&icons[3]);
+    InitIcon(&icons[4]);
+    icons[0].icons = set;
+    icons[0].visible = 0;
+    icons[1].icons = set;
+    icons[1].visible = 0;
+    icons[2].icons = set;
+    icons[2].visible = 0;
+    icons[3].icons = set;
+    icons[3].visible = 0;
+    icons[4].icons = set;
+    icons[4].visible = 0;
+    for (int i = 0; i < 5; i++) {
+        CopyName("", 20, rows[i].score);
+        rows[i].grade = "";
+        f32 time = -lbl_80558DC0[0];
+        HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
+        if (hs) {
+            fn_801308F4(rows[i].score, 20, hs->score);
+            if (hs->grade != -1) {
+                rows[i].grade = GetGradeDisplayName(hs->grade);
+            }
+            time = hs->time;
+            icons[i].visible = 1;
+            VehicleChoice c = StatsUnpackChoice(hs->choice);
+            int color = c.color;
+            icons[i].valid = c.valid;
+            VehicleInfo* v = GetVehicle(c.vehicle);
+            icons[i].icon = FindIcon(icons[i].icons, v->chassis);
+            icons[i].color = v->colors[color];
+        }
+        fn_80130980(rows[i].time, 20, 3, time);
+    }
+    EventInfo* e = GetEvent(event);
+    const char* track;
+    if (e->node->Has("track")) {
+        track = GetTrackFriendlyName(e->node->GetValue("track"));
+    } else {
+        track = GetTrackFriendlyName(GetTrack(e->track)->name);
+    }
+    char location[1000];
+    fn_801345D8(location, 1000, "%s - %s", track, e->node->GetValue("friendly_name") + 1);
+    int extra = GetEvent(event)->id != 0x180302;
+    const char* head = fn_80131234("Records:TIME");
+    if (extra) {
+        head = fn_80131234("Records:EXTRA_TIME");
+    }
+    char best[20];
+    RealStatistic stat(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+    if (stat.HasValue()) {
+        fn_80130980(best, 20, 3, stat.GetValue());
+    } else {
+        CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, best);
+    }
+    MenuItem items[] = {
+        MenuItem("location", location),
+        MenuItem("best_time", best),
+        MenuItem("time_head", head),
+        MenuItem("#score_1", rows[0].score),
+        MenuItem("#grade_1", rows[0].grade),
+        MenuItem("#time_1", rows[0].time),
+        MenuItem("car_icon_1", 5, &icons[0], 0, 0),
+        MenuItem("#score_2", rows[1].score),
+        MenuItem("#grade_2", rows[1].grade),
+        MenuItem("#time_2", rows[1].time),
+        MenuItem("car_icon_2", 5, &icons[1], 0, 0),
+        MenuItem("#score_3", rows[2].score),
+        MenuItem("#grade_3", rows[2].grade),
+        MenuItem("#time_3", rows[2].time),
+        MenuItem("car_icon_3", 5, &icons[2], 0, 0),
+        MenuItem("#score_4", rows[3].score),
+        MenuItem("#grade_4", rows[3].grade),
+        MenuItem("#time_4", rows[3].time),
+        MenuItem("car_icon_4", 5, &icons[3], 0, 0),
+        MenuItem("#score_5", rows[4].score),
+        MenuItem("#grade_5", rows[4].grade),
+        MenuItem("#time_5", rows[4].time),
+        MenuItem("car_icon_5", 5, &icons[4], 0, 0),
+        MenuItem(lbl_8055B860, 6, 0, -2, 27),
+        MenuItem(lbl_80498EB8),
+    };
+    s32 music = fn_802168E4();
+    MenuDesc desc = {"ep_records.lyt", items, NULL, 0, 0};
+    if (music) {
+        fn_80214A9C(0x1F);
+    }
+    fn_802146BC(&desc, -999, -999, 1);
+    if (music) {
+        fn_80214AF0(0x1F);
+    }
+    if (--lbl_8055F2E8 == 0) {
+        delete lbl_8055F2E4;
+        lbl_8055F2E4 = 0;
+    }
+    FreeIcon(&icons[4]);
+    FreeIcon(&icons[3]);
+    FreeIcon(&icons[2]);
+    FreeIcon(&icons[1]);
+    FreeIcon(&icons[0]);
+}
 
 u8* fn_8025CC14(u8* p, int del) {
     if (p) {
@@ -85,17 +400,6 @@ u8* fn_8025CC14(u8* p, int del) {
 }
 
 }  // extern "C"
-
-// One car icon's texture rectangles.
-struct IconEntry {
-    u8 pad0[0x20];  // offset 0x0
-    u8* tex;        // offset 0x20
-    u8* overlay;    // offset 0x24
-    f32 u0;         // offset 0x28
-    f32 v0;         // offset 0x2C
-    f32 u1;         // offset 0x30
-    f32 v1;         // offset 0x34
-};
 
 // Scales each colour channel by 255*255/65536, alpha forced opaque.
 static inline u32 DimColor(u32 c) {
