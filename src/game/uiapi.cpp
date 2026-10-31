@@ -1554,18 +1554,11 @@ extern "C" s32 fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
     return 0;
 }
 
-#pragma push
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 extern "C" void fn_802149C4(s32 arg0) {
     char sp8[0x64];
-    // MATCHING-AID: register pinning from upstream; revisit.
-    register char *buf = sp8;
-    fn_80214934(lbl_8055B810, arg0, buf, 0x64);
+    fn_80214934("transin", arg0, sp8, 0x64);
     fn_8021481C(sp8);
 }
-#pragma dont_inline reset
-#pragma pop
 extern "C" s32 fn_80218C14(s32, s32);
 extern "C" s32 fn_80214934(const void*, s32, void*, s32);
 extern "C" char lbl_8033D388[];
