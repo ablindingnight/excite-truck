@@ -1230,17 +1230,17 @@ void fn_80186DE8(u8* p) {}  // stub (1830)
 
 void vf20__10CollVolumeFv(u8* p);
 extern const f32 lbl_80561CAC;  // 0.0
-extern f32 lbl_80561CDC;  // 0.5
-extern f32 lbl_80561D90;  // -5.0
-extern f32 lbl_80561D9C;  // 1/60 s
-extern f32 lbl_80561DE4;  // -1.0
-extern f32 lbl_80561E5C;  // -1.5
-extern f32 lbl_80561EE0;  // 0.5/60
-extern f32 lbl_80561EE4;  // -100.0
-extern f32 lbl_80561EE8;  // 0.95
-extern f32 lbl_80561EEC;  // 1 - 0.95
-extern f32 lbl_80561EF0;  // 15 degrees
-extern f32 lbl_80561EF4;  // -2.5 degrees
+extern const f32 lbl_80561CDC;  // 0.5
+extern const f32 lbl_80561D90;  // -5.0
+extern const f32 lbl_80561D9C;  // 1/60 s
+extern const f32 lbl_80561DE4;  // -1.0
+extern const f32 lbl_80561E5C;  // -1.5
+extern const f32 lbl_80561EE0;  // 0.5/60
+extern const f32 lbl_80561EE4;  // -100.0
+extern const f32 lbl_80561EE8;  // 0.95
+extern const f32 lbl_80561EEC;  // 1 - 0.95
+extern const f32 lbl_80561EF0;  // 15 degrees
+extern const f32 lbl_80561EF4;  // -2.5 degrees
 
 static inline f32 SwayMin(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 SwayMax(f32 a, f32 b) { return a > b ? a : b; }
@@ -1834,7 +1834,7 @@ extern int lbl_8055A420;  // ""
 extern int lbl_8055A424;  // " m/s"
 extern int lbl_8055A42C;  // " G"
 extern const f32 lbl_80561CAC;
-extern f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
+extern const f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
     lbl_80561D00, lbl_80561D0C, lbl_80561D28, lbl_80561D34, lbl_80561D44, lbl_80561D68, lbl_80561DE4, lbl_80561EBC,
     lbl_80561F0C, lbl_80561F10, lbl_80561F14, lbl_80561F18;
 
