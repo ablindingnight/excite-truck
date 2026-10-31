@@ -768,6 +768,16 @@ public:
     virtual void v08(void);
     virtual void v0C(void);
     virtual u8* Current(void);  // 0x10
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void Impair(s32 by);  // 0x30
+    virtual void v34(void);
+    virtual int Busy(void);       // 0x38
 };
 
 extern "C" {
@@ -800,7 +810,401 @@ void fn_8018E330(u8* p) {
     F32(p, 0x2628) = lbl_80561F74;
 }
 
-void fn_8018E3EC(u8* p) {}  // stub (949)
+struct DVec {
+    f32 x, y, z;
+};
+
+// The car's spring goals, one per body point.
+struct DentCar {
+    u8 pad0[0x5FC];
+    DentVec goal[1];  // offset 0x5FC
+};
+
+// A vector as the collision code passes it around (copied word by word).
+struct AVec {
+    f32 v[3];
+};
+
+// A body point viewed from its spring-goal index on (the point array starts 4 bytes into the model).
+struct DentNode {
+    s32 goal;    // offset 0x0
+    DentVec lo;  // offset 0x4
+    DentVec hi;  // offset 0x10
+    DentVec pos; // offset 0x1C
+    f32 unk28;   // offset 0x28
+    f32 soft;    // offset 0x2C
+    u8 fixed;    // offset 0x30: never dented
+    u8 pad31[0x3];
+};
+
+struct BoneBox {
+    DVec lo;  // offset 0x0
+    DVec hi;  // offset 0xC
+};
+
+// Car model (partial).
+struct CarModel {
+    u8 pad0[0x2138];
+    BoneBox boxes[1];  // offset 0x2138, one per bone
+};
+
+// A breaking-glass event: where, how fast, which car.
+struct GlassMsg {
+    EVec pos;  // offset 0x0
+    EVec vel;  // offset 0xC
+    s16 car;   // offset 0x18
+};
+
+void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
+extern const f32 lbl_80561FE4;  // -0.5
+extern const f32 lbl_80561F88;  // 1.0
+extern const f32 lbl_80561F98;  // 0.3
+extern const f32 lbl_80561FC4;  // -1
+extern const f32 lbl_80561FD0;  // 0.2
+extern const f32 lbl_80561FD4;  // 0.1
+extern const f32 lbl_80561FE8;  // 3
+extern const f32 lbl_80561FEC;  // 10
+extern const f32 lbl_80561FF4;  // 0.01
+extern const f32 lbl_80561FF8;  // -0.1
+extern const f32 lbl_80561FFC;  // 0.001
+extern const f32 lbl_80562000;  // 1500
+extern const f32 lbl_80562004;  // 15000
+extern const f32 lbl_80562008;  // 30000
+extern const f32 lbl_8056200C;  // 13.333333
+extern const f32 lbl_80562010;  // 300000
+extern const f32 lbl_80562014;  // 100000
+extern const f32 lbl_80562018;  // 1.8
+extern const f32 lbl_8056201C;  // 2.25
+extern const f32 lbl_80562020;  // 300
+extern const f32 lbl_80562024;  // 0.35
+extern const f32 lbl_80562028;  // 1/150000
+extern const f32 lbl_8056202C;  // 0.6
+extern const f32 lbl_80562030;  // 0.03
+extern const f32 lbl_80562034;  // 0.9
+extern const f32 lbl_8055A460;  // 4
+extern f32 lbl_80558DC4[];      // FLT_EPSILON
+int fn_80189BDC(u8* p);
+u8* fn_8017960C(s32 car);
+void fn_8018A174(u8* p);
+void fn_801796CC(int kind, void* msg, int size);
+void fn_801B8610(s32 car, s32 by);
+void fn_8018F76C(u8* p, int i);
+void fn_802E30C8(const char* fmt, ...);
+f32 PSVECSquareDistance(const f32* a, const f32* b);
+
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > lbl_80558DC4[0]; }
+static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < lbl_80561FE8 + F32(car, 0x26D8); }
+
+// Which corner of the car a body-space point is nearest: 0/1 front left/right, 3/2 rear left/right.
+static inline int HitCorner(const AVec* at) {
+    return at->v[2] > lbl_80561F74 ? !(at->v[0] < lbl_80561F74) : (at->v[0] < lbl_80561F74 ? 3 : 2);
+}
+
+// A collision impulse `imp` at body point `at` (negated when `flip`) from car `other` (-1: the world) of
+// surface kind `kind`: accumulates the impulse, decides whether the hit is hard enough to crash the car, dents
+// the nearest body point and spreads the dent, breaks off parts and lights pushed past their limits, and
+// raises the car's impairment.
+void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind) {
+    GlassMsg msg;
+    AVec di;
+    AVec da;
+    AVec h;
+    DentVec cand;
+    AVec g0;
+    DentVec nd;
+    DentVec dg;
+    DentVec c0;
+    DentVec w;
+    DentVec r;
+    DVec c;
+    f32 inv = lbl_80561FF8 / F32(p, 0xD4);
+    F32(p, 0x26F0) += imp->v[0] * inv;
+    F32(p, 0x26F4) += imp->v[1] * inv;
+    F32(p, 0x26F8) += imp->v[2] * inv;
+    if (!fn_80189BDC(p)) {
+        return;
+    }
+    if (NearZero(F32(p, 0x2690))) {
+        if ((F32(p, 0x4C) < lbl_80561F74 && kind != 0x6D) || kind == 0x3E7) {
+            fn_8018E330(p);
+        }
+    }
+    if (kind == 0x73) {
+        int fast = U8(p, 0x25C8) || Boosting(p);
+        if (fast) {
+            return;
+        }
+    }
+    if (kind == 0x74) {
+        return;
+    }
+    di = *imp;
+    if (flip) {
+        di.v[0] *= lbl_80561FC4;
+        di.v[1] *= lbl_80561FC4;
+        di.v[2] *= lbl_80561FC4;
+    }
+    da = *at;
+    f32 mag = PSVECMag(di.v);
+    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && F32(p, 0x2690) < lbl_80561FFC) {
+        if (mag < lbl_80562000) {
+            return;
+        }
+        if (HitTooSoon(p)) {
+            return;
+        }
+        if (other >= 0 && Boosting(p)) {
+            return;
+        }
+        h = di;
+        h.v[1] = lbl_80561F74 < h.v[1] ? lbl_80561F74 : h.v[1];
+        f32 hm = PSVECMag(h.v);
+        if (other >= 0) {
+            hm *= lbl_80561F98;
+            if (S32(p, 0x1F0) != 0x50 && !Boosting(p)) {
+                if (Boosting(fn_8017960C(other)) || hm > lbl_80562004) {
+                    if (F32(fn_8017960C(other), 0x25D4) > F32(p, 0x25D4)) {
+                        fn_8018A174(p);
+                    }
+                }
+            }
+        } else if (kind == 0x73) {
+            hm *= lbl_8055A460;
+        }
+        if (other < 0 || !Boosting(fn_8017960C(other))) {
+            if (hm < lbl_80562008) {
+                return;
+            }
+            if (other < 0 && F32(p, 0x25D4) < lbl_8056200C && hm < lbl_80562010) {
+                return;
+            }
+        }
+        if (U32(fn_801769CC(), 0x4) == 0x180304 && S32(p, 0x1F0) == 0x50 && other >= 0) {
+            return;
+        }
+        fn_8018E330(p);
+    }
+    DentNode* best = 0;
+    f32 bestD = lbl_80562014;
+    for (int i = 1; i < S32(p, 0x5F8); i++) {
+        DentNode* d = (DentNode*)(PTR(p, 0x26C) + 4) + i;
+        if (!d->fixed) {
+            cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * lbl_80562018;
+            cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * lbl_80562018;
+            cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * lbl_80562018;
+            f32 dd = PSVECSquareDistance(&cand.x, da.v);
+            if (dd < lbl_8056201C && dd < bestD) {
+                bestD = dd;
+                best = d;
+            }
+        }
+    }
+    if (best) {
+        g0 = *(AVec*)((DentVec*)(p + 0x5FC) + best->goal);
+        fn_8018DE94(p, best->goal, (DentVec*)&di, -1, 0);
+        nd.x = di.v[0] * lbl_80561FC4;
+        nd.y = di.v[1] * lbl_80561FC4;
+        nd.z = di.v[2] * lbl_80561FC4;
+        PSVECNormalize(&nd.x, &nd.x);
+        DentVec* gb = (DentVec*)(p + 0x5FC) + best->goal;
+        dg.x = g0.v[0] - gb->x;
+        dg.y = g0.v[1] - gb->y;
+        dg.z = g0.v[2] - gb->z;
+        f32 moved = (f32)__fabs(PSVECDotProduct(&nd.x, &dg.x));
+        gb = (DentVec*)(p + 0x5FC) + best->goal;
+        c0.x = best->pos.x + gb->x;
+        c0.y = best->pos.y + gb->y;
+        c0.z = best->pos.z + gb->z;
+        for (int i = 1; i < S32(p, 0x5F8); i++) {
+            DentPoint* q = (DentPoint*)PTR(p, 0x26C) + i;
+            DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
+            w.x = q->pos.x + g->x;
+            w.y = q->pos.y + g->y;
+            w.z = q->pos.z + g->z;
+            r.x = w.x - c0.x;
+            r.y = w.y - c0.y;
+            r.z = w.z - c0.z;
+            f32 t = PSVECDotProduct(&nd.x, &r.x);
+            f32 a = t < moved ? t : moved;
+            if (a > lbl_80561F74) {
+                f32 r2 = PSVECDotProduct(&r.x, &r.x);
+                if (lbl_80561FD4 > r2) {
+                    r2 = lbl_80561FD4;
+                }
+                f32 s = lbl_80561FD0 / r2;
+                if (lbl_80561F88 < s) {
+                    s = lbl_80561F88;
+                }
+                f32 m = -a * s;
+                g->x += nd.x * m;
+                g->y += nd.y * m;
+                g->z += nd.z * m;
+                g->x = DentClamp(g->x, q->lo.x, q->hi.x);
+                g->y = DentClamp(g->y, q->lo.y, q->hi.y);
+                g->z = DentClamp(g->z, q->lo.z, q->hi.z);
+            }
+        }
+        DmgSlot* sl = (DmgSlot*)(p + 0x152C);
+        DamagePart* t = lbl_80332840;
+        for (int i = 0; i < 17; i++) {
+            if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
+                DentVec* g = (DentVec*)(p + 0x5FC) + sl->point;
+                if (PSVECDotProduct(&g->x, &g->x) > t->size * t->size) {
+                    if ((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= lbl_80558DC4[0]) {
+                        sl->state = 3;
+                        sl->valid = 0;
+                    } else if ((u32)t->kind <= 1) {
+                        if (sl->state != 2) {
+                            sl->state = 2;
+                            sl->valid = 0;
+                        }
+                    } else {
+                        int roll = fn_80129D18(4, 10);
+                        if (sl->state == 2) {
+                            if (roll < 2) {
+                                sl->state = 3;
+                                sl->valid = 0;
+                            }
+                        } else {
+                            if (roll < 7) {
+                                sl->state = 2;
+                            } else if (roll < 8) {
+                                sl->state = 3;
+                            } else {
+                                sl->state = 1;
+                            }
+                            sl->valid = 0;
+                        }
+                        if (sl->state == 2) {
+                            sl->angle = sl->angle > lbl_80561FF4 ? sl->angle : lbl_80561FF4;
+                            sl->spin = sl->spin > lbl_80561FD0 ? sl->spin : lbl_80561FD0;
+                        }
+                    }
+                    if (sl->state == 3) {
+                        s32 bone = t->bit;
+                        DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[bone].lo;
+                        DVec* hi = lo + 1;
+                        c.x = lo->x + (lo + 1)->x;
+                        c.y = lo->y + hi->y;
+                        c.z = lo->z + (lo + 1)->z;
+                        c.x *= lbl_80561FE4;
+                        c.y *= lbl_80561FE4;
+                        c.z *= lbl_80561FE4;
+                        fn_801BF2A4(p, 1 << bone, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
+                    }
+                }
+            }
+            sl++;
+            t++;
+        }
+        LightPart* l = lbl_80332D08;
+        for (int i = 0; i < 13; i++) {
+            int idx = l->index;
+            u32 bit = 1 << idx;
+            u8 pt = U8(p, 0x1E2C + idx);
+            if (pt != 0xFF && !(U32(p, 0x1E3C) & bit)) {
+                DentVec* g = (DentVec*)(p + 0x5FC) + pt;
+                if (PSVECDotProduct(&g->x, &g->x) > l->radius * l->radius) {
+                    U32(p, 0x1E3C) |= bit;
+                    if (l->point > 0) {
+                        U32(p, 0x1E40) |= 1 << l->point;
+                    }
+                    if (idx >= 2 && idx <= 7) {
+                        DentPoint* q = (DentPoint*)PTR(p, 0x26C) + U8(p, 0x1E2C + idx);
+                        ToWorld(&msg.pos, (EVec*)&q->pos, (DFrame*)(p + 0x3C));
+                        ((RigidBody*)p)->VelAt((RVec3*)&msg.vel, (RVec3*)&msg.pos);
+                        msg.car = *(s16*)(p + 0x6C);
+                        fn_801796CC(7, &msg, sizeof(GlassMsg));
+                    }
+                    if (idx >= 8 && idx <= 11 && fn_80129D18(4, 10) < 5) {
+                        fn_8018F76C(p, idx - 8);
+                    }
+                    if (idx == 12) {
+                        if (fn_80129D18(4, 10) < 5) {
+                            S32(p, 0x268C) = 6;
+                        } else {
+                            S32(p, 0x268C) = 3;
+                        }
+                        DmgSlot* hood = (DmgSlot*)(p + 0x152C);
+                        if (hood->state != 3) {
+                            hood->state = 2;
+                            hood->valid = 0;
+                            hood->spin = lbl_80561FEC;
+                            hood->angle = hood->angle > lbl_80561F8C ? hood->angle : lbl_80561F8C;
+                        }
+                    }
+                }
+            }
+            l++;
+        }
+    }
+    f32 was = F32(p, 0x2690);
+    if (U32(fn_801769CC(), 0x4) & 0x4000) {
+        int hit = 0;
+        s32 st = S32(p, 0x268C);
+        if (st == 0) {
+            if (mag > lbl_80562020) {
+                f32 cap = kind == 0x70 ? lbl_80562024 : lbl_80561FD4;
+                f32 add = lbl_80562028 * mag;
+                add = add < cap ? add : cap;
+                f32 v = F32(p, 0x2690) += add;
+                if (v > lbl_8056202C || (v > lbl_80561F8C && add > lbl_80562030)) {
+                    if (fn_80129D18(4, 2) == 0) {
+                        S32(p, 0x268C) = 2;
+                    } else {
+                        S32(p, 0x268C) = 3;
+                    }
+                    if (S32(p, 0x26B0) < 0 && fn_80129D18(4, 6) == 0) {
+                        S32(p, 0x26B0) = HitCorner(&da);
+                    }
+                }
+            }
+        } else if (st >= 1 && st <= 4) {
+            if (mag > lbl_80562020) {
+                f32 cap = kind == 0x70 ? lbl_80562024 : lbl_80561FD4;
+                f32 add = lbl_80562028 * mag;
+                add = add < cap ? add : cap;
+                f32 v = F32(p, 0x2690) += add;
+                if (kind == 0x70 && other == S32(p, 0x1EC) && v > lbl_80562034) {
+                    F32(p, 0x2690) = was > lbl_80562034 ? was : lbl_80562034;
+                }
+                if (F32(p, 0x2690) > lbl_80561F88) {
+                    F32(p, 0x2690) = lbl_80561F88;
+                    switch (fn_80129D18(4, 3)) {
+                    case 0:
+                        S32(p, 0x268C) = 10;
+                        break;
+                    case 1:
+                        S32(p, 0x268C) = 11;
+                        break;
+                    default:
+                        S32(p, 0x268C) = 12;
+                        break;
+                    }
+                    if (fn_80129D18(4, 4) == 0) {
+                        int corner = HitCorner(&da);
+                        if (!(U32(p + corner * 0x74, 0x241C) & 8)) {
+                            fn_8018F76C(p, corner);
+                        }
+                    }
+                    fn_802E30C8("car %d: impaired", S32(p, 0x1EC));
+                    fn_801B8610(S32(p, 0x1EC), other);
+                    hit = 1;
+                }
+            }
+        } else if (st >= 9) {
+            if (!((DmgModel*)PTR(p, 0x270))->Busy()) {
+                fn_802E30C8("car %d: re-impairing?", S32(p, 0x1EC));
+                hit = 1;
+            }
+        }
+        if (hit) {
+            ((DmgModel*)PTR(p, 0x270))->Impair(other);
+        }
+    }
+    F32(p, 0x269C) = lbl_80561F74;
+}
 
 
 }  // extern "C"
@@ -1007,10 +1411,6 @@ void fn_8018F76C(u8* p, int i) {
     U32(w, 0x241C) |= 8;
 }
 
-struct DVec {
-    f32 x, y, z;
-};
-
 // Live state of one damageable part (17 of them at car + 0x152C).
 struct PartState {
     u32 attached;    // offset 0x0
@@ -1021,19 +1421,6 @@ struct PartState {
     s32 state;       // offset 0x7C
 };
 
-struct BoneBox {
-    DVec lo;  // offset 0x0
-    DVec hi;  // offset 0xC
-};
-
-// Car model (partial).
-struct CarModel {
-    u8 pad0[0x2138];
-    BoneBox boxes[1];  // offset 0x2138, one per bone
-};
-
-void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
-extern const f32 lbl_80561FE4;  // -0.5
 
 // Breaks off every part that is detached (or flagged to break) at its bone box centre.
 void fn_8018F9B4(u8* p) {
