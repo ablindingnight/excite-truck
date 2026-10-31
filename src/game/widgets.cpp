@@ -535,7 +535,7 @@ extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
 void fn_80221970(WidgetFragment* self);
 
 void fn_80221F9C(void);  // placeholder (388 bytes)
-extern "C" {void fn_8022ED00(UIContext*);void fn_8022EDB8();void fn_8022EE98(UIContext*);}
+extern "C" {}
 typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
 typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;GTextFont* font;unsigned int color;float radius,rate;} CircularPaintNew;
@@ -595,7 +595,7 @@ typedef struct TimedImageFields {char base[0x244];float x,y,width,height;int tex
 static inline void TransformTimedImageVector(const UIContext* pose,const RotationVec* transformInput,RotationVec* out){ChoiceTransformVectorNew(&pose->xf.basis,transformInput,out);}
 extern const float lbl_805634FC,lbl_80563560;
 struct TimedImageInputVector:RotationVec{inline TimedImageInputVector(int screenWidth,int screenHeight){z=(0.0f);x=(float)-screenWidth/2.0f;y=(float)-screenHeight/2.0f;} inline void SetZYX(float zValue,float yValue,float xValue){z=zValue;x=xValue;y=yValue;}};typedef char TimedImageInputVectorSize12[sizeof(TimedImageInputVector)==12?1:-1];
-void fn_8022ED00(UIContext*);void fn_8022EDB8();
+
 void fn_802272D4(WidgetFragment* source);
 void fn_802278F0(gArtSet*,float,float,float,float);
 void fn_80228010(void);  // placeholder (1032 bytes)
@@ -869,7 +869,7 @@ int fn_8021F06C(WidgetFragment* self,int key);
 
 struct ScopedAssetPrefix {char base[0x368];int resource;char gap36c[4];UIContext* asset;};
 extern "C" {
-extern u32 lbl_8033F180[];void fn_8022EE98(UIContext*);void fn_8022EEF8(UIContext*,const UIContext*,const UIContext*);void fn_8022ED00(UIContext*);void fn_8022EDB8();
+extern u32 lbl_8033F180[];
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy);
 void fn_8021B944(WidgetFragment* self);
 void fn_80223A58(WidgetFragment* self);
@@ -971,7 +971,7 @@ struct AssetRotationPrefix {char base[0x25c];UIContext* matrix;unsigned char own
 struct AssetFormatPrefix {char base[0x244];int first;GTextFont* resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];UIContext* asset;};
 extern "C" {
 extern const float lbl_805634F8;extern const char lbl_8033DA2C[],lbl_8055B88C[4];extern u32 lbl_8033E1C4[],lbl_8033F7F4[];
-UIContext* fn_8022EE9C();void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);void fn_802E317C(const char*,...);
+void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);void fn_802E317C(const char*,...);
 void fn_80224DDC(WidgetFragment*,float,float,float);
 void fn_80227044(WidgetFragment*,float,float,float);
 WidgetFragment* fn_80224D40(WidgetFragment* self,int destroy);

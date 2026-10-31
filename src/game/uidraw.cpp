@@ -17,8 +17,8 @@ void UIContextEnd(void);
 extern "C" {
 void fn_80129C64(int a);
 UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
-void fn_8022ED00(UIContext*);
-void fn_8022EDB8(void);
+
+
 
 void fn_802321D8(void);
 void fn_802324D8(void);

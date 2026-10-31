@@ -16,5 +16,15 @@ public:
 };
 typedef char UIXformSize48[sizeof(UIXform)==48?1:-1];
 typedef char UIContextSize60[sizeof(UIContext)==60?1:-1];
-extern "C" { UIContext* fn_8022EDC4(void); UIContext* fn_8022EDE4(const UIXform*,float); }
+extern "C" {
+// Push borrows the mutable context until pop; the producer stores this pointer, not a copy.
+void fn_8022ED00(UIContext*);
+void fn_8022EDB8(void);
+UIContext* fn_8022EDC4(void);
+UIContext* fn_8022EDE4(const UIXform*,float);
+void fn_8022EE98(UIContext*);
+UIContext* fn_8022EE9C(void);
+// Either input may alias out; the producer explicitly handles those cases.
+void fn_8022EEF8(UIContext*,const UIContext*,const UIContext*);
+}
 #endif
