@@ -2508,8 +2508,8 @@ void fn_80198530(u8* d) {
     }
     switch (S32(d, 0x260)) {
     case 2:
-        brake = 0.5f;
         throttle = 0.0f;
+        brake = 0.5f;
         break;
     case 1:
         if (F32(d, 0x270) > 8.888889f) {
