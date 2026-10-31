@@ -2,7 +2,9 @@
 #define UICONTEXT_H
 // The UI draw context (uictx.cpp produces it; widgets/gtext/uidraw/widgetwin read it). Layout from the matched
 // producer; the scalar at 0x34 is still unnamed and distinct from scale at 0x38.
-struct UIXform {float m[3][3];float pos[3];};
+#include "game/math_types.h"
+struct UIVec3 {float v[3];};
+struct UIXform {Mat3 basis;UIVec3 translation;};
 class UIContext {
 public:
  static void* operator new(unsigned long,const char*);
@@ -14,5 +16,5 @@ public:
 };
 typedef char UIXformSize48[sizeof(UIXform)==48?1:-1];
 typedef char UIContextSize60[sizeof(UIContext)==60?1:-1];
-extern "C" { UIContext* fn_8022EDC4(void); }
+extern "C" { UIContext* fn_8022EDC4(void); UIContext* fn_8022EDE4(const UIXform*,float); }
 #endif

@@ -1,4 +1,5 @@
 #include "game/uicontext.h"
+typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
 struct RotatingChoiceDescriptorNew;
 static inline float MapMinBranchNew(float a,float b){if(a<b)return a;return b;}
 static inline float MapMaxBranchNew(float a,float b){if(a>b)return a;return b;}
@@ -487,17 +488,17 @@ WidgetFragment* fn_802295AC(WidgetFragment* self,int destroy);
 void fn_80219AB4(WidgetFragment*,int,const char*,int,int,int,bool);  // placeholder (912 bytes)
 void fn_80219FE0(WidgetFragment*);
 }
-struct RotationVec {float x,y,z;};struct RotationMatrix {float m[9];};
+
 extern "C" {void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);}
-struct ChoicePoseNew {RotationMatrix basis;RotationVec translation;};
+typedef UIXform ChoicePoseNew;
 struct RotatingChoiceFieldsNew {char base[0x368];int resource;unsigned char mode;char pad36d[3];void* pose;};
 struct RotatingChoiceDescriptorNew {u32 first;int flags,x,y,width,height,kind;float scale;char name[0x64];u32 option84,gap88,gap8c,option90,option94,gap98,gap9c,gapa0;float rx,ry,rz;};
-extern "C" {extern u32 lbl_8033F180[];extern const float lbl_805634F0,lbl_805634F4,lbl_805634F8;void* fn_8022EDE4(float,const void*);}
+extern "C" {extern u32 lbl_8033F180[];extern const float lbl_805634F0,lbl_805634F4,lbl_805634F8;}
 static inline float ChoiceDotContractNew(float x,float y,float z,float a,float b,float c){return z*c+(x*a+y*b);}
-static inline void ChoiceTransformVectorNew(const RotationMatrix* matrix,const RotationVec* input,RotationVec* out){const float* m=matrix->m;if(out==input){float first,second,third;first=ChoiceDotContractNew(input->x,input->y,input->z,m[0],m[3],m[6]);second=ChoiceDotContractNew(input->x,input->y,input->z,m[1],m[4],m[7]);third=ChoiceDotContractNew(input->x,input->y,input->z,m[2],m[5],m[8]);out->x=first;out->y=second;out->z=third;}else{out->x=ChoiceDotContractNew(input->x,input->y,input->z,m[0],m[3],m[6]);out->y=ChoiceDotContractNew(input->x,input->y,input->z,m[1],m[4],m[7]);out->z=ChoiceDotContractNew(input->x,input->y,input->z,m[2],m[5],m[8]);}}
+static inline void ChoiceTransformVectorNew(const RotationMatrix* matrix,const RotationVec* input,RotationVec* out){const float (*m)[3]=matrix->m;if(out==input){float first,second,third;first=ChoiceDotContractNew(input->x,input->y,input->z,m[0][0],m[1][0],m[2][0]);second=ChoiceDotContractNew(input->x,input->y,input->z,m[0][1],m[1][1],m[2][1]);third=ChoiceDotContractNew(input->x,input->y,input->z,m[0][2],m[1][2],m[2][2]);out->x=first;out->y=second;out->z=third;}else{out->x=ChoiceDotContractNew(input->x,input->y,input->z,m[0][0],m[1][0],m[2][0]);out->y=ChoiceDotContractNew(input->x,input->y,input->z,m[0][1],m[1][1],m[2][1]);out->z=ChoiceDotContractNew(input->x,input->y,input->z,m[0][2],m[1][2],m[2][2]);}}
 
 extern "C" {
-static inline void ChoiceApplyOffsetNew(ChoicePoseNew* pose,const RotationVec* input){RotationVec translated;ChoiceTransformVectorNew(&pose->basis,input,&translated);pose->translation.x+=translated.x;pose->translation.y+=translated.y;pose->translation.z+=translated.z;}
+static inline void ChoiceApplyOffsetNew(ChoicePoseNew* pose,const RotationVec* input){RotationVec translated;ChoiceTransformVectorNew(&pose->basis,input,&translated);pose->translation.v[0]+=translated.x;pose->translation.v[1]+=translated.y;pose->translation.v[2]+=translated.z;}
 WidgetFragment* fn_8021B460(WidgetFragment* self,RotatingChoiceDescriptorNew* desc,const char* label,int* value);
 }
 
@@ -528,13 +529,13 @@ void fn_80221970(WidgetFragment* self);
 void fn_80221F9C(void);  // placeholder (388 bytes)
 extern "C" {void fn_8022ED00(void*);void fn_8022EDB8();void fn_8022EE98(void*);}
 typedef struct CircularVectorTypedNew {float v[3];} CircularVectorTypedNew;
-typedef struct CircularPoseTypedNew {RotationMatrix basis;CircularVectorTypedNew translation;float alpha,first,second;} CircularPoseTypedNew;
+typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
 typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;int font;unsigned int color;float radius,rate;} CircularPaintNew;
 
 
 extern "C" {
-extern const float lbl_805634D8,lbl_80563528;extern const char lbl_8055B8A8[3];void* fn_8022EDE4(float,const void*);void fn_80232BA4(const char*,int,float,float,unsigned int,int,float,float,float);
+extern const float lbl_805634D8,lbl_80563528;extern const char lbl_8055B8A8[3];void fn_80232BA4(const char*,int,float,float,unsigned int,int,float,float,float);
 void fn_80222CFC(WidgetFragment *source);
 
 }
@@ -634,16 +635,16 @@ static inline float ModelFitCenterLerpNew(const float& minimum,const float& maxi
 }
 static inline float ModelDot3(float ax,float bx,float ay,float by,float az,float bz){return ax*bx+ay*by+az*bz;}
 static inline void ModelFitTransformNew(RotationVec* out,const ModelFitMatrixNew* mm,const RotationVec* v){
- const float* m=mm->basis.m;
+ const float (*mrow)[3]=mm->basis.m;
  if(out==v){
-  float x=ModelDot3(v->x,m[0],v->y,m[3],v->z,m[6]);
-  float y=ModelDot3(v->x,m[1],v->y,m[4],v->z,m[7]);
-  float z=ModelDot3(v->x,m[2],v->y,m[5],v->z,m[8]);
+  float x=ModelDot3(v->x,mrow[0][0],v->y,mrow[1][0],v->z,mrow[2][0]);
+  float y=ModelDot3(v->x,mrow[0][1],v->y,mrow[1][1],v->z,mrow[2][1]);
+  float z=ModelDot3(v->x,mrow[0][2],v->y,mrow[1][2],v->z,mrow[2][2]);
   out->x=x;out->y=y;out->z=z;
  }else{
-  out->x=ModelDot3(v->x,m[0],v->y,m[3],v->z,m[6]);
-  out->y=ModelDot3(v->x,m[1],v->y,m[4],v->z,m[7]);
-  out->z=ModelDot3(v->x,m[2],v->y,m[5],v->z,m[8]);
+  out->x=ModelDot3(v->x,mrow[0][0],v->y,mrow[1][0],v->z,mrow[2][0]);
+  out->y=ModelDot3(v->x,mrow[0][1],v->y,mrow[1][1],v->z,mrow[2][1]);
+  out->z=ModelDot3(v->x,mrow[0][2],v->y,mrow[1][2],v->z,mrow[2][2]);
  }
 }
 inline float ModelFitBoundsNew::RadiusNew() const {
@@ -1720,10 +1721,10 @@ WidgetFragment* fn_8021B460(WidgetFragment* self,RotatingChoiceDescriptorNew* de
 fn_8021B2B0(self,desc->x,desc->y,label,8,value,desc->width);self->vtable=lbl_8033F180;RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;f->mode=(u32)desc->flags>>31;
 ChoiceResourceSpec spec={};spec.words[0]=(u32)desc->name;*((float*)&spec.words[1])=desc->scale;spec.words[2]=desc->flags;spec.words[3]=desc->option90;spec.words[4]=desc->option90;spec.words[7]=desc->option84;spec.words[10]=desc->option94;spec.words[11]=desc->option94;spec.words[14]=desc->option84;
 int resource=fn_8022A86C(&spec);f->resource=resource;self->height=resource;fn_80219718(self);
-ChoicePoseNew pose;pose.basis.m[0]=(1.0f);pose.basis.m[1]=(0.0f);pose.basis.m[2]=(0.0f);pose.basis.m[3]=(0.0f);pose.basis.m[4]=(1.0f);pose.basis.m[5]=(0.0f);pose.basis.m[6]=(0.0f);pose.basis.m[7]=(0.0f);pose.basis.m[8]=(1.0f);pose.translation.x=(0.0f);pose.translation.y=(0.0f);pose.translation.z=(0.0f);
+ChoicePoseNew pose;pose.basis.m[0][0]=(1.0f);pose.basis.m[0][1]=(0.0f);pose.basis.m[0][2]=(0.0f);pose.basis.m[1][0]=(0.0f);pose.basis.m[1][1]=(1.0f);pose.basis.m[1][2]=(0.0f);pose.basis.m[2][0]=(0.0f);pose.basis.m[2][1]=(0.0f);pose.basis.m[2][2]=(1.0f);pose.translation.v[0]=(0.0f);pose.translation.v[1]=(0.0f);pose.translation.v[2]=(0.0f);
 RotationVec input={(float)desc->x-(320.0f),(240.0f)-(float)desc->y,0.0f};ChoiceApplyOffsetNew(&pose,&input);
 float x,y,z;memcpy(&x,&desc->rx,4);memcpy(&y,&desc->ry,4);memcpy(&z,&desc->rz,4);
-if((0.0f)==x&&(0.0f)==y&&(0.0f)==z)f->pose=0;else{RotationVec rotation={(0.017453292f)*x,(0.017453292f)*y,(0.017453292f)*z};RotationMatrix matrix;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&pose.basis,&matrix,&pose.basis);input.x=-input.x;input.y=-input.y;ChoiceApplyOffsetNew(&pose,&input);f->pose=fn_8022EDE4((1.0f),&pose);}return self;
+if((0.0f)==x&&(0.0f)==y&&(0.0f)==z)f->pose=0;else{RotationVec rotation={(0.017453292f)*x,(0.017453292f)*y,(0.017453292f)*z};RotationMatrix matrix;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&pose.basis,&matrix,&pose.basis);input.x=-input.x;input.y=-input.y;ChoiceApplyOffsetNew(&pose,&input);f->pose=fn_8022EDE4(&pose,(1.0f));}return self;
 }
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;self->vtable=lbl_8033F180;if(f->asset){fn_8022EE98(f->asset);f->asset=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;if(f->asset){const void* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80219660(self);if(f->asset)fn_8022EDB8();}
@@ -2678,20 +2679,20 @@ void fn_80222CFC(WidgetFragment *source) {
         spacing = (((6.2831855f) * self->radius) - total) / (float)count;
         scale = (-6.2831855f) / (total + (spacing * (float)count));
         fn_80230C30(&x, &y, self->left, self->top);
-        src = (const CircularPoseTypedNew*)fn_8022EDC4();
-        dst = (CircularPoseTypedNew*)fn_8022EDE4(src->alpha, src);
+        src = fn_8022EDC4();
+        dst = fn_8022EDE4(&src->xf, src->alpha);
         pos = (0.0f);
         for (i2 = 0; i2 < count; i2++) {
             text = fn_8022D3F8(self->list, i2, 0);
             for (j = 0; j < (int)strlen(text); j++) {
                 sprintf(one, lbl_8055B8A8, (int)(signed char)text[j]);
-                dst->basis = src->basis;
-                dst->translation = src->translation;
+                dst->xf.basis = src->xf.basis;
+                dst->xf.translation = src->xf.translation;
                 RotationVec input = {x, y, 0.0f};
-                ChoiceApplyOffsetNew((ChoicePoseNew*)dst, &input);
+                ChoiceApplyOffsetNew(&dst->xf, &input);
                 float angleProduct = scale * pos; RotationVec rotation = {0.0f, 0.0f, angleProduct + base};
                 fn_80015A20(&m, &rotation);
-                Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&dst->basis, &m, &dst->basis);
+                Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&dst->xf.basis, &m, &dst->xf.basis);
                 fn_8022ED00(dst);
                 fn_80232BA4(one, self->font, (0.0f), self->radius, self->color, 9, (1.0f), (0.0f), (1.0f));
                 fn_8022EDB8();
@@ -3079,15 +3080,15 @@ void fn_802272D4(WidgetFragment* source)
             }
         }
         resetPose = image->pose;
-        resetPose->basis.m[0] = (1.0f);
-        resetPose->basis.m[1] = (0.0f);
-        resetPose->basis.m[2] = (0.0f);
-        resetPose->basis.m[3] = (0.0f);
-        resetPose->basis.m[4] = (1.0f);
-        resetPose->basis.m[5] = (0.0f);
-        resetPose->basis.m[6] = (0.0f);
-        resetPose->basis.m[7] = (0.0f);
-        resetPose->basis.m[8] = (1.0f);
+        resetPose->basis.m[0][0] = (1.0f);
+        resetPose->basis.m[0][1] = (0.0f);
+        resetPose->basis.m[0][2] = (0.0f);
+        resetPose->basis.m[1][0] = (0.0f);
+        resetPose->basis.m[1][1] = (1.0f);
+        resetPose->basis.m[1][2] = (0.0f);
+        resetPose->basis.m[2][0] = (0.0f);
+        resetPose->basis.m[2][1] = (0.0f);
+        resetPose->basis.m[2][2] = (1.0f);
         resetPose->translation.x = (0.0f);
         resetPose->translation.y = (0.0f);
         resetPose->translation.z = (0.0f);

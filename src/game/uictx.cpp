@@ -183,18 +183,18 @@ void fn_8022EE98(UIContext* c) { delete c; }
 
 UIContext* fn_8022EE9C(void) {
     UIXform xf;
-    xf.m[0][0] = 1.0f;
-    xf.m[0][1] = 0.0f;
-    xf.m[0][2] = 0.0f;
-    xf.m[1][0] = 0.0f;
-    xf.m[1][1] = 1.0f;
-    xf.m[1][2] = 0.0f;
-    xf.m[2][0] = 0.0f;
-    xf.m[2][1] = 0.0f;
-    xf.m[2][2] = 1.0f;
-    xf.pos[0] = 0.0f;
-    xf.pos[1] = 0.0f;
-    xf.pos[2] = 0.0f;
+    xf.basis.m[0][0] = 1.0f;
+    xf.basis.m[0][1] = 0.0f;
+    xf.basis.m[0][2] = 0.0f;
+    xf.basis.m[1][0] = 0.0f;
+    xf.basis.m[1][1] = 1.0f;
+    xf.basis.m[1][2] = 0.0f;
+    xf.basis.m[2][0] = 0.0f;
+    xf.basis.m[2][1] = 0.0f;
+    xf.basis.m[2][2] = 1.0f;
+    xf.translation.v[0] = 0.0f;
+    xf.translation.v[1] = 0.0f;
+    xf.translation.v[2] = 0.0f;
     return fn_8022EDE4(&xf, 1.0f);
 }
 
@@ -203,38 +203,38 @@ void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
     out->unk34 = l->unk34 * r->unk34;
     out->scale = l->scale * r->scale;
     if (out == l || out == r) {
-        f32 m00 = Dot(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
-        f32 m10 = Dot(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
-        f32 m20 = Dot(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
-        f32 m01 = Dot(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
-        f32 m11 = Dot(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
-        f32 m21 = Dot(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
-        f32 m02 = Dot(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
-        f32 m12 = Dot(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
-        f32 m22 = Dot(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
-        out->xf.m[0][0] = m00;
-        out->xf.m[1][0] = m10;
-        out->xf.m[2][0] = m20;
-        out->xf.m[0][1] = m01;
-        out->xf.m[1][1] = m11;
-        out->xf.m[2][1] = m21;
-        out->xf.m[0][2] = m02;
-        out->xf.m[1][2] = m12;
-        out->xf.m[2][2] = m22;
+        f32 m00 = Dot(r->xf.basis.m[0][0], l->xf.basis.m[0][0], r->xf.basis.m[1][0], l->xf.basis.m[0][1], r->xf.basis.m[2][0], l->xf.basis.m[0][2]);
+        f32 m10 = Dot(r->xf.basis.m[0][0], l->xf.basis.m[1][0], r->xf.basis.m[1][0], l->xf.basis.m[1][1], r->xf.basis.m[2][0], l->xf.basis.m[1][2]);
+        f32 m20 = Dot(r->xf.basis.m[0][0], l->xf.basis.m[2][0], r->xf.basis.m[1][0], l->xf.basis.m[2][1], r->xf.basis.m[2][0], l->xf.basis.m[2][2]);
+        f32 m01 = Dot(r->xf.basis.m[0][1], l->xf.basis.m[0][0], r->xf.basis.m[1][1], l->xf.basis.m[0][1], r->xf.basis.m[2][1], l->xf.basis.m[0][2]);
+        f32 m11 = Dot(r->xf.basis.m[0][1], l->xf.basis.m[1][0], r->xf.basis.m[1][1], l->xf.basis.m[1][1], r->xf.basis.m[2][1], l->xf.basis.m[1][2]);
+        f32 m21 = Dot(r->xf.basis.m[0][1], l->xf.basis.m[2][0], r->xf.basis.m[1][1], l->xf.basis.m[2][1], r->xf.basis.m[2][1], l->xf.basis.m[2][2]);
+        f32 m02 = Dot(r->xf.basis.m[0][2], l->xf.basis.m[0][0], r->xf.basis.m[1][2], l->xf.basis.m[0][1], r->xf.basis.m[2][2], l->xf.basis.m[0][2]);
+        f32 m12 = Dot(r->xf.basis.m[0][2], l->xf.basis.m[1][0], r->xf.basis.m[1][2], l->xf.basis.m[1][1], r->xf.basis.m[2][2], l->xf.basis.m[1][2]);
+        f32 m22 = Dot(r->xf.basis.m[0][2], l->xf.basis.m[2][0], r->xf.basis.m[1][2], l->xf.basis.m[2][1], r->xf.basis.m[2][2], l->xf.basis.m[2][2]);
+        out->xf.basis.m[0][0] = m00;
+        out->xf.basis.m[1][0] = m10;
+        out->xf.basis.m[2][0] = m20;
+        out->xf.basis.m[0][1] = m01;
+        out->xf.basis.m[1][1] = m11;
+        out->xf.basis.m[2][1] = m21;
+        out->xf.basis.m[0][2] = m02;
+        out->xf.basis.m[1][2] = m12;
+        out->xf.basis.m[2][2] = m22;
     } else {
-        out->xf.m[0][0] = Dot(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
-        out->xf.m[1][0] = Dot(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
-        out->xf.m[2][0] = Dot(r->xf.m[0][0], l->xf.m[2][0], r->xf.m[1][0], l->xf.m[2][1], r->xf.m[2][0], l->xf.m[2][2]);
-        out->xf.m[0][1] = Dot(r->xf.m[0][1], l->xf.m[0][0], r->xf.m[1][1], l->xf.m[0][1], r->xf.m[2][1], l->xf.m[0][2]);
-        out->xf.m[1][1] = Dot(r->xf.m[0][1], l->xf.m[1][0], r->xf.m[1][1], l->xf.m[1][1], r->xf.m[2][1], l->xf.m[1][2]);
-        out->xf.m[2][1] = Dot(r->xf.m[0][1], l->xf.m[2][0], r->xf.m[1][1], l->xf.m[2][1], r->xf.m[2][1], l->xf.m[2][2]);
-        out->xf.m[0][2] = Dot(r->xf.m[0][2], l->xf.m[0][0], r->xf.m[1][2], l->xf.m[0][1], r->xf.m[2][2], l->xf.m[0][2]);
-        out->xf.m[1][2] = Dot(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
-        out->xf.m[2][2] = Dot(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
+        out->xf.basis.m[0][0] = Dot(r->xf.basis.m[0][0], l->xf.basis.m[0][0], r->xf.basis.m[1][0], l->xf.basis.m[0][1], r->xf.basis.m[2][0], l->xf.basis.m[0][2]);
+        out->xf.basis.m[1][0] = Dot(r->xf.basis.m[0][0], l->xf.basis.m[1][0], r->xf.basis.m[1][0], l->xf.basis.m[1][1], r->xf.basis.m[2][0], l->xf.basis.m[1][2]);
+        out->xf.basis.m[2][0] = Dot(r->xf.basis.m[0][0], l->xf.basis.m[2][0], r->xf.basis.m[1][0], l->xf.basis.m[2][1], r->xf.basis.m[2][0], l->xf.basis.m[2][2]);
+        out->xf.basis.m[0][1] = Dot(r->xf.basis.m[0][1], l->xf.basis.m[0][0], r->xf.basis.m[1][1], l->xf.basis.m[0][1], r->xf.basis.m[2][1], l->xf.basis.m[0][2]);
+        out->xf.basis.m[1][1] = Dot(r->xf.basis.m[0][1], l->xf.basis.m[1][0], r->xf.basis.m[1][1], l->xf.basis.m[1][1], r->xf.basis.m[2][1], l->xf.basis.m[1][2]);
+        out->xf.basis.m[2][1] = Dot(r->xf.basis.m[0][1], l->xf.basis.m[2][0], r->xf.basis.m[1][1], l->xf.basis.m[2][1], r->xf.basis.m[2][1], l->xf.basis.m[2][2]);
+        out->xf.basis.m[0][2] = Dot(r->xf.basis.m[0][2], l->xf.basis.m[0][0], r->xf.basis.m[1][2], l->xf.basis.m[0][1], r->xf.basis.m[2][2], l->xf.basis.m[0][2]);
+        out->xf.basis.m[1][2] = Dot(r->xf.basis.m[0][2], l->xf.basis.m[1][0], r->xf.basis.m[1][2], l->xf.basis.m[1][1], r->xf.basis.m[2][2], l->xf.basis.m[1][2]);
+        out->xf.basis.m[2][2] = Dot(r->xf.basis.m[0][2], l->xf.basis.m[2][0], r->xf.basis.m[1][2], l->xf.basis.m[2][1], r->xf.basis.m[2][2], l->xf.basis.m[2][2]);
     }
-    out->xf.pos[0] = l->xf.pos[0] + r->xf.pos[0];
-    out->xf.pos[1] = l->xf.pos[1] + r->xf.pos[1];
-    out->xf.pos[2] = l->xf.pos[2] + r->xf.pos[2];
+    out->xf.translation.v[0] = l->xf.translation.v[0] + r->xf.translation.v[0];
+    out->xf.translation.v[1] = l->xf.translation.v[1] + r->xf.translation.v[1];
+    out->xf.translation.v[2] = l->xf.translation.v[2] + r->xf.translation.v[2];
 }
 
 }  // extern "C"

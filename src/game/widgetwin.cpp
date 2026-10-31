@@ -149,14 +149,14 @@ u8 lbl_8055EF99;
 static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
     if (in == out) {
         VecP t;
-        t.x = in->z * m->m[2][0] + (in->x * m->m[0][0] + in->y * m->m[1][0]);
-        t.y = in->z * m->m[2][1] + (in->x * m->m[0][1] + in->y * m->m[1][1]);
-        t.z = in->z * m->m[2][2] + (in->x * m->m[0][2] + in->y * m->m[1][2]);
+        t.x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
+        t.y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
+        t.z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
         *out = t;
     } else {
-        out->x = in->z * m->m[2][0] + (in->x * m->m[0][0] + in->y * m->m[1][0]);
-        out->y = in->z * m->m[2][1] + (in->x * m->m[0][1] + in->y * m->m[1][1]);
-        out->z = in->z * m->m[2][2] + (in->x * m->m[0][2] + in->y * m->m[1][2]);
+        out->x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
+        out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
+        out->z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
     }
 }
 
@@ -233,9 +233,9 @@ void fn_80216244(void) {
             v.y = (f32)w->y;
             v.z = 0.0f;
             XformVec(&m, &v, &t);
-            m.pos[0] += t.x;
-            m.pos[1] += t.y;
-            m.pos[2] += t.z;
+            m.translation.v[0] += t.x;
+            m.translation.v[1] += t.y;
+            m.translation.v[2] += t.z;
             fn_802C8638(&m);
             fn_8023108C(w == lbl_8055EF88);
             fn_80218574(w);
