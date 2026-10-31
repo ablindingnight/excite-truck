@@ -833,7 +833,7 @@ int fn_8029DFE0(WaterPool* p, const Vec* at) {
     return in;
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     Vec base;

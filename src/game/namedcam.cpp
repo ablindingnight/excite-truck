@@ -101,7 +101,7 @@ extern "C" void fn_802E30C8(const char* fmt, ...);  // debug print
 extern "C" f32 fn_80277704(int i);
 extern "C" double sqrt(double x);
 
-static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
+static inline f32 AbsF(f32 x) { double a = __fabs(x); return a; }
 
 static inline int Near(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
 

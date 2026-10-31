@@ -1615,7 +1615,7 @@ void fn_801961FC(u8* d) {
     }
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 static inline double AbsD(double v) { return __fabs(v); }
 
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {

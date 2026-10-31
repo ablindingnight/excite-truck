@@ -945,7 +945,7 @@ f32 fn_80214D48(void);
 }
 extern const f32 lbl_80563970;  // 2.0
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
 class UnlockScreen : public MenuState {
 public:
