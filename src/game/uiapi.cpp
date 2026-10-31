@@ -81,7 +81,9 @@ extern "C" char lbl_8055B750[];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *memcpy(void *, const void *, unsigned long);
-extern u8 lbl_8033CAE8[];
+// Name of the last layout UIBegin saw (first .data object of the unit).
+extern "C" char lbl_8033CAE8[100];
+char lbl_8033CAE8[100] = "__OOPS_NO_LAST_LAYOUT__";
 extern "C" s32 fn_80214E10(s32);
 extern "C" s32 fn_80214FE0(s32, s32, s32, s32);
 extern "C" s32 fn_80206430(void);
@@ -138,7 +140,7 @@ s32 fn_80211678(u8 *arg0) {
     return ((s8) *arg0 - 0x24) == 0;
 }
 
-extern "C" int fn_80211690(int);
+extern "C" void fn_80211690(int);
 extern "C" void fn_80211D24(int);
 extern "C" int fn_802E2C20(void);
 extern "C" int fn_802ECC10(void);
@@ -156,13 +158,30 @@ public:
     virtual ~UIVoice(void);
 };
 struct UISoundSlot {
-    void* bank;
+    const char* bank;
     float volume;
     UIVoice* voices[4];
 };
 class UITable {
 public:
+    UITable(int rows, int cols, const int* widths);
     ~UITable(void);
+    // The callers pass the flag unconverted (no extsb), so it is an int at the call site; uitable.cpp
+    // still declares it char (same callee code, symbol name kept for objdiff pairing).
+    void Set(int row, int col, const char* s, int flag);
+
+    char* buf;      // 0x00
+    s32 cols;       // 0x04
+    s32 used;       // 0x08
+    s32 rows;       // 0x0C
+    s32 visible;    // 0x10
+    s32 rowSize;    // 0x14
+    s32* widths;    // 0x18
+    s32* offsets;   // 0x1C
+    s32 page;       // 0x20
+    s32 changes;    // 0x24
+    u32 magic;      // 0x28
+    s32 sel;        // 0x2C
 };
 extern "C" UISoundSlot lbl_80490558[8];
 extern "C" void* lbl_80490528[3][4];
@@ -185,6 +204,165 @@ extern "C" int fn_80128314(int);
 extern "C" void fn_802E1058(void);
 extern "C" void* memset(void*, int, unsigned long);
 extern "C" void fn_802E30C8(const char *, ...);
+extern "C" void fn_802E0F98(void);
+extern "C" void fn_8012BEF0(const char*);
+extern "C" void fn_8020A47C(void);
+extern "C" void fn_8023889C(void);
+extern "C" void* gxGetImage(const char*);
+extern "C" s32 fn_8023512C(const char*);
+extern "C" void fn_8022A5E4(void);
+extern "C" void fn_80216710(void);
+extern "C" void* fn_8022D228(void*, int, int);
+extern "C" void fn_8022D350(void*, const char*, int);
+extern "C" UIVoice* fn_80207848(const char*, int);
+extern "C" int lbl_8055EF08;
+extern "C" int lbl_8055EF3C;
+extern "C" void* lbl_8055EF24;
+extern "C" void* lbl_8055EF28;
+extern void *lbl_8055EF38;
+void LoadTimerProgress(void);
+void LoadTimerEnd(const char* name, int);
+void* operator new(unsigned long size, const char* tag);
+
+static inline void SetSound(UISoundSlot* slot, const char* bank, float volume) {
+    slot->bank = bank;
+    slot->volume = volume;
+    memset(slot->voices, 0, sizeof(slot->voices));
+}
+
+// Copies at most n characters, always terminating.
+static inline void CopyName(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
+
+// UIBegin: mode 0 = lite (only the two lite arrows), 1 = arcade-style sounds, else race-day sounds.
+extern "C" void fn_80211690(int mode) {
+    int i;
+    fn_802E0F98();
+    lbl_8055EF40 = mode;
+    bool lite = mode == 0;
+    bool timer = !lite;
+    lbl_8055EF18 = fn_80128314(0);
+    lbl_8055EF08 = 1;
+    if (!lite) {
+        fn_8012BEF0("uiaction.res");
+        if (timer) {
+            LoadTimerProgress();
+        }
+    }
+    fn_8020A47C();
+    if (!lite) {
+        fn_8023889C();
+    }
+    const char* art[3][4] = {
+        {"a_lslide.img", "a_rslide.img", "a_uscroll.img", "a_dscroll.img"},
+        {"blinkerlt.img", "blinkerrt.img", "blinkerup.img", "blinkerdn.img"},
+        {"blinkerlt.img", "blinkerrt.img", "blinkerup.img", "blinkerdn.img"},
+    };
+    static const char* sItemNames[8] = {"Item 0", "Item 1", "Item 2", "Item 3",
+                                        "Item 4", "Item 5", "Item 6", "Item 7"};
+    static long sItemValues[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
+    for (i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            const char* name = art[i][j];
+            if (lite) {
+                if (i == 2 && (j == 0 || j == 1)) {
+                    lbl_80490528[i][j] = gxGetImage(name);
+                } else {
+                    lbl_80490528[i][j] = 0;
+                }
+            } else {
+                lbl_80490528[i][j] = gxGetImage(name);
+            }
+        }
+    }
+    if (!lite) {
+        lbl_8055EF1C = fn_8023512C("blinkerlt2.art");
+        lbl_8055EF20 = fn_8023512C("blinkerrt2.art");
+    }
+    lbl_8055EF10 = 0.0f;
+    fn_8022A5E4();
+    fn_80216710();
+    if (!lite) {
+        void* list = operator new(0x14, "generic_list");
+        if (list) list = fn_8022D228(list, 0x20, 0x40);
+        lbl_8055EF24 = list;
+        list = operator new(0x14, "generic_menu_list");
+        if (list) list = fn_8022D228(list, 8, 0x40);
+        lbl_8055EF28 = list;
+        for (i = 0; i < 32; i++) {
+            char name[0x40];
+            sprintf(name, "Generic %d", i + 1);
+            int value = i % 4 - 1;
+            if (value < 0) {
+                value = 0;
+            }
+            fn_8022D350(lbl_8055EF24, name, value);
+        }
+        for (i = 0; i < 8; i++) {
+            char option[0x20];
+            sprintf(option, "Option%d", i);
+            fn_8022D350(lbl_8055EF28, option, i * 4);
+        }
+        int widths[1] = {32};
+        lbl_8055EF2C = new ("generic_table") UITable(20, 1, widths);
+        for (i = 0; i < lbl_8055EF2C->rows; i++) {
+            char entry[0x20];
+            sprintf(entry, "Entry %d", i + 1);
+            lbl_8055EF2C->Set(i, 0, entry, i % 3);
+        }
+        lbl_8055EF30 = new ("generic_button_list") CycleList(sItemNames, sItemValues, 8, 0);
+        const char* tabs[3] = {"Menu1", "Menu2", "Menu3"};
+        lbl_8055EF34 = new ("generic_tab_list") NameList(tabs, 3, 0);
+    } else {
+        lbl_8055EF24 = 0;
+        lbl_8055EF28 = 0;
+    }
+    memset(lbl_80490558, 0, sizeof(lbl_80490558));
+    if (mode == 1) {
+        const char* accept = "a_accept.sfx";
+        SetSound(&lbl_80490558[0], "a_press.sfx", 0.8f);
+        SetSound(&lbl_80490558[2], accept, 0.8f);
+        SetSound(&lbl_80490558[3], "a_back.sfx", 0.8f);
+        SetSound(&lbl_80490558[1], "a_error.sfx", 0.48f);
+        SetSound(&lbl_80490558[4], "a_unprsnt.sfx", 0.8f);
+        SetSound(&lbl_80490558[5], "a_popup.sfx", 0.48f);
+        SetSound(&lbl_80490558[6], accept, 0.8f);
+        SetSound(&lbl_80490558[7], accept, 0.8f);
+    } else {
+        SetSound(&lbl_80490558[0], "rd_press.sfx", 0.8f);
+        SetSound(&lbl_80490558[2], "rd_accept.sfx", 0.8f);
+        SetSound(&lbl_80490558[3], "rd_accept.sfx", 0.8f);
+        SetSound(&lbl_80490558[1], "rd_accept.sfx", 0.8f);
+        SetSound(&lbl_80490558[4], "rd_unprsnt.sfx", 0.8f);
+        SetSound(&lbl_80490558[5], 0, 0.8f);
+        SetSound(&lbl_80490558[6], "repair.sfx", 0.8f);
+        SetSound(&lbl_80490558[7], "register.sfx", 0.8f);
+    }
+    for (i = 0; i < 8; i++) {
+        if (lbl_80490558[i].bank) {
+            for (int j = 0; j < 4; j++) {
+                lbl_80490558[i].voices[j] = fn_80207848(lbl_80490558[i].bank, 0);
+            }
+        }
+    }
+    lbl_8055EF3C = -1;
+    lbl_8055EF38 = (void*)-1;
+    if (timer) {
+        LoadTimerEnd("-UIBegin", 0);
+    }
+    CopyName(lbl_8055B6B0, 100, lbl_8033CAE8);
+    const char* label = lite ? "UIBeginLite" : "UIBegin";
+    fn_802E30C8("%s: overhead = %dK", label, (fn_80128314(0) - lbl_8055EF18) / 1024);
+    fn_802ECC18(1);
+}
 
 // UIEnd: tears down what UIBegin set up (mode 0 = lite: only the two lite arrows were loaded).
 extern "C" void fn_80211D24(int mode) {
@@ -303,7 +481,6 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     extern char lbl_8033D504[];
     extern const char lbl_8055B724[], lbl_8055B728[], lbl_8055B720[], lbl_8055B730[];
     extern const char lbl_8055B738[], lbl_8055B73C[], lbl_8055B744[], lbl_8055B748[];
-    extern const char lbl_8033CDA4[];
     struct ObjA { void *vtable; void *value; };
     struct ObjB { void *vtable; void *value; s32 count; s32 divisor; };
     char *name = (char *)fn_80029004(arg0, 0x2e);
@@ -337,7 +514,7 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
         if (c) c = fn_802226D4(c, arg0);
         return c;
     }
-    ((s32 (*)(const char *, const char *))fn_802E317C)(lbl_8033CDA4, name + 1);
+    ((s32 (*)(const char *, const char *))fn_802E317C)("make_image: unknown extension %s", name + 1);
     return 0;
 }
 
@@ -448,7 +625,9 @@ extern "C" int lbl_8055EF4C;
 extern "C" int lbl_8055EF50;
 extern "C" int lbl_8055EF54;
 extern "C" int lbl_8055EF58;
+// Default option list (NUL-separated) for Multi widgets without a style.
 extern "C" const char* lbl_8055B754;
+const char* lbl_8055B754 = "MIN\0LOW\0MEDIUM\0HIGH\0MAX\0";
 
 void* operator new(unsigned long size, const char* tag);
 extern "C" char* strstr(const char*, const char*);
@@ -1125,20 +1304,19 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
 extern "C" s32 fn_802ECEEC(void);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" s32 fn_802146BC(void *, s32, s32, s32, s32, s32, s32, s32);
-extern "C" u8 lbl_8033CAE8[];
 extern "C" s32 lbl_80490510[];
 extern "C" s32 lbl_802F9EA4[];
 extern "C" u8 lbl_8055B860;
 extern "C" s32 fn_8021481C(void *arg0) {
     s32 args[19];
     if (fn_802ECEEC() == 0) {
-        fn_802E30C8((const char *)(lbl_8033CAE8 + 0x72C), arg0);
+        fn_802E30C8((const char *)("UI: playing video '%s' in a layout"), arg0);
         args[0] = lbl_802F9EA4[0];
         args[1] = 0;
         args[2] = lbl_802F9EA4[2];
         args[3] = lbl_802F9EA4[3];
         args[4] = lbl_802F9EA4[4];
-        args[5] = (s32)(lbl_8033CAE8 + 0x750);
+        args[5] = (s32)"#movie_file";
         args[6] = 3;
         args[7] = 0;
         args[8] = 0;
@@ -1153,7 +1331,7 @@ extern "C" s32 fn_8021481C(void *arg0) {
         args[17] = lbl_80490510[3];
         args[18] = lbl_80490510[4];
         fn_802146BC(args, -0x3E7, -0x3E7, 1, lbl_802F9EA4[4], lbl_802F9EA4[3], lbl_802F9EA4[2], lbl_802F9EA4[0]);
-        fn_802E30C8((const char *)(lbl_8033CAE8 + 0x760), arg0);
+        fn_802E30C8((const char *)("UI: finished playing video '%s'"), arg0);
     }
     return 0;
 }
@@ -1334,7 +1512,6 @@ extern "C" void* fn_8021525C(void) {
     return lbl_8055EF38;
 }
 
-extern u8 lbl_8033CAE8[];
 extern "C" void *fn_80215264(void) {
     return lbl_8033CAE8;
 }
