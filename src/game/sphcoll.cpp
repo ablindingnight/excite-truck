@@ -1899,10 +1899,10 @@ f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, 
     f32 rx = at->x - F32(com, 0x0);
     f32 ry = at->y - F32(com, 0x4);
     f32 rz = at->z - F32(com, 0x8);
-    f32 vx, vy, vz;
-    vz = v->z;
-    vy = v->y;
+    f32 vz, vy, vx;
     vx = v->x;
+    vy = v->y;
+    vz = v->z;
     vel.x = vx;
     vel.y = vy;
     vel.z = vz;
