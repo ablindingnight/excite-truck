@@ -85,16 +85,16 @@ struct Mtx34 {
     f32 m[12];
 };
 
-// Two all-pure interfaces whose (zeroed) vtables are all that is left of this unit's .data; the
-// constructors below are stripped by the linker.
-class IShort {
+// The race and tree-hit listener interfaces: this is the first unit that emits their weak all-pure (zeroed)
+// vtables, so boostman/treehit and the rest link to these copies. The constructors below are stripped by the linker.
+class IHitListener {
 public:
     virtual void vf08(void) = 0;
     virtual void vf0C(void) = 0;
     virtual void vf10(void) = 0;
 };
 
-class ILong {
+class IRaceListener {
 public:
     virtual void vf08(void) = 0;
     virtual void vf0C(void) = 0;
@@ -103,7 +103,7 @@ public:
     virtual void vf18(void) = 0;
 };
 
-class LongImpl : public ILong {
+class LongImpl : public IRaceListener {
 public:
     LongImpl(void);
     virtual void vf08(void);
@@ -113,7 +113,7 @@ public:
     virtual void vf18(void);
 };
 
-class ShortImpl : public IShort {
+class ShortImpl : public IHitListener {
 public:
     ShortImpl(void);
     virtual void vf08(void);
