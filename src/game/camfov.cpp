@@ -500,6 +500,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
         k = lbl_80563E30 - lbl_80563ED0 * sf;
         break;
     }
+    f32 y;
     f32 scale = F32(c->car, 0x5E4);
     f32 pa = fn_8026EA8C(mode, c->pitchT);
     f32 pb = fn_8026EA8C(c->lastMode, c->pitchT);
@@ -532,7 +533,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     }
     f32 gap = seven ? lbl_80563EDC : lbl_80563E50;
     c->time = lbl_8055E3C8;
-    f32 y = c->view.pos.v[1];
+    y = c->view.pos.v[1];
     if (!fn_801EA03C((const s16*)(c->car + 0x6C), c->view.pos.v)) {
         c->view.pos.v[1] = y;
         c->bump = lbl_80563EE0 - lbl_80563EE4 * (lbl_80563EE0 - c->bump);
@@ -543,7 +544,8 @@ void fn_8026F420(int mode, int prev, u8* p) {
         }
         c->bump = c->bump * lbl_80563EE4;
     }
-    f32 v = lbl_80563EE0 < c->bump ? lbl_80563EE0 : c->bump;
+    f32 bumpv = c->bump;
+    f32 v = lbl_80563EE0 < bumpv ? lbl_80563EE0 : bumpv;
     v = v > lbl_80563E78 ? v : lbl_80563E78;
     c->bump = v;
     c->view.pos.v[1] = c->view.pos.v[1] + c->bump;
