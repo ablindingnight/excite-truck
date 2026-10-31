@@ -600,6 +600,7 @@ struct UIDesc {
     int field90, field94, field98;
     u32 field9c;        // 0x9C
     int fielda0;        // 0xA0
+    u8 rest[0x90];      // 0xA4 (descriptor stride 0x134)
 };
 struct UIStyle {
     const char* name;
@@ -615,6 +616,7 @@ struct UIWidgetView {
 
 extern "C" void* lbl_8033D54C[];
 extern "C" void* lbl_8033D480[];
+extern "C" void* lbl_8033D590[];
 extern "C" s32 lbl_80490510[];
 extern "C" f32 lbl_80558DC4[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
@@ -1299,6 +1301,183 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         fn_802168EC(window, widgets[i], d->window);
     }
     lbl_8055EF38 = (void*)-1;
+}
+
+// Layout + mapping a window is built from (UIDoMappedDialog and friends).
+struct UILayout {
+    u8 pad0[4];
+    char name[0x20];    // 0x04 layout / background image name
+    s8 hasBack;         // 0x24 also build back.lyt
+    s8 hasCamera;       // 0x25
+    u8 pad26[2];
+    char camera[0x3C];  // 0x28
+    UIDesc* descs;      // 0x64 widget descriptors, terminated by type 0
+};
+struct UIMapping {
+    const char* name;   // 0x00 layout name ('$' = built in)
+    UIStyle* styles;    // 0x04 style table, terminated by kind 0x7B
+    int field8;
+    UILayout* layout;   // 0x0C
+    UILayout* back;     // 0x10
+};
+class Window {
+public:
+    Window(const char* name, long x, long y, long w, long h, long flags);
+
+    u8 pad0[0x438];
+    void* funcs[4];     // 0x438 mapped UI functions (0x440 = back)
+    u8 pad448[0xDE8 - 0x448];
+};
+// Key binding widget: calls its mapped action when the key is pressed.
+struct UIHotKey {
+    u8 base[0x244];
+    u16 key;            // 0x244
+    void* action;       // 0x248
+    void* param;        // 0x24C
+    UIHotKey(void* p, void* a, u16 k) {
+        fn_80218F34((WidgetFragment*)this, 0, 0, 0, 0, 0);
+        *(void**)this = lbl_8033D590;
+        param = p;
+        action = a;
+        key = k;
+    }
+};
+
+extern "C" UILayout* fn_8022E0EC(const char*);
+extern "C" UILayout* fn_8022E4C0(UIMapping*);
+extern "C" void fn_80276D3C(const char*, int);
+extern "C" int fn_802C51C0(void*);
+extern "C" int fn_802C5220(void*);
+extern "C" Window* fn_80216770(const char*, int, int, int, int, int);
+extern "C" void fn_80236914(void);
+extern "C" int strcmp(const char*, const char*);
+extern "C" const char* lbl_8055EF44;
+extern "C" int lbl_8055CFF0;
+extern "C" int lbl_8055CFF4;
+
+// Builds a window from a mapping: layout widgets, the optional back layout, hot keys and mapped functions.
+extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flags, int widgetWindow) {
+    UIStyle* styles = map->styles;
+    UILayout* layout;
+    if (map->name) {
+        if (fn_80211678((u8*)map->name)) {
+            layout = fn_8022E4C0(map);
+        } else {
+            layout = fn_8022E0EC(map->name);
+        }
+        map->layout = layout;
+        lbl_8055EF44 = map->name;
+    } else {
+        layout = map->layout;
+    }
+    map->back = 0;
+    if (layout->hasCamera) {
+        if (!lbl_8055EF40) {
+            fn_80276D3C(layout->camera, 1);
+        } else {
+            fn_802E30C8("UI: Not in Lite Mode, can't use camera %s", layout->camera);
+        }
+    }
+    int w = lbl_8055CFF0;
+    int h = lbl_8055CFF4;
+    const char* background = map->layout->name;
+    if (background && strstr(background, ".img") && fn_8012C33C((s32)background)) {
+        void* image = gxGetImage(background);
+        if (fn_802C51C0(image) > 0 && fn_802C5220(image) > 0) {
+            w = fn_802C51C0(image);
+            h = fn_802C5220(image);
+        }
+        fn_802C519C(image);
+    }
+    if (x == -999) {
+        x = (lbl_8055CFF0 - w) / 2;
+    }
+    if (y == -999) {
+        y = (lbl_8055CFF4 - h) / 2;
+    }
+    Window* win;
+    if (widgetWindow) {
+        win = new ("WidgetTWindow") Window("", x, y, w, h, flags);
+    } else {
+        win = fn_80216770(map->layout->name, x, y, w, h, flags);
+    }
+    *out = win;
+    UIDesc* d;
+    for (d = layout->descs; d->type; d++) {
+    }
+    if (layout->hasBack) {
+        map->back = fn_8022E0EC("back.lyt");
+        for (d = map->back->descs; d->type; d++) {
+        }
+    }
+    int i;
+    for (i = 0; styles[i].kind != 0x7B; i++) {
+        UIStyle* s = &styles[i];
+        switch (s->kind) {
+        case 5:
+            if (s->name && !strcmp(s->name, "__first")) {
+                lbl_8055EF38 = 0;
+                UICustom* custom = new ("Custom") UICustom(0, 0, 0, 0, 0, (UICustomHandler*)s->value);
+                fn_802168EC(win, (WidgetFragment*)custom, -1);
+                lbl_8055EF38 = (void*)-1;
+            }
+            break;
+        }
+    }
+    if (layout->hasBack) {
+        for (d = map->back->descs; d->type; d++) {
+            fn_802123B8(win, d, styles);
+        }
+    }
+    for (d = layout->descs; d->type; d++) {
+        fn_802123B8(win, d, styles);
+    }
+    int haveBack = 0;
+    for (i = 0; styles[i].kind != 0x7B; i++) {
+        UIStyle* s = &styles[i];
+        switch (s->kind) {
+        case 6: {
+            lbl_8055EF38 = 0;
+            UIHotKey* key = new ("HotKey") UIHotKey(s->arg1, s->value, (u16)(u32)s->arg2);
+            fn_802168EC(win, (WidgetFragment*)key, -1);
+            lbl_8055EF38 = (void*)-1;
+            break;
+        }
+        case 8:
+            switch ((int)s->arg1) {
+            case 0:
+                win->funcs[0] = s->value;
+                break;
+            case 1:
+                win->funcs[1] = s->value;
+                break;
+            case 2:
+                haveBack = 1;
+                win->funcs[2] = s->value;
+                break;
+            case 3:
+                win->funcs[3] = s->value;
+                break;
+            default:
+                ((s32 (*)(const char *, ...))fn_802E317C)("UIMAP_FUNC: bad func %d", s->arg1);
+                break;
+            }
+            break;
+        case 5:
+            if (!s->name) {
+                lbl_8055EF38 = 0;
+                UICustom* custom = new ("Custom") UICustom(0, 0, 0, 0, 0, (UICustomHandler*)s->value);
+                fn_802168EC(win, (WidgetFragment*)custom, -1);
+                lbl_8055EF38 = (void*)-1;
+            }
+            break;
+        case 7:
+            break;
+        }
+    }
+    if (!haveBack) {
+        win->funcs[2] = (void*)fn_80236914;
+    }
 }
 
 extern "C" s32 fn_802ECEEC(void);
