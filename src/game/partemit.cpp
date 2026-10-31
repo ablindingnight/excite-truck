@@ -406,9 +406,9 @@ void fn_8029FB00(ValueNode* node) {
     in->v.y = v.y;
     in->v.z = v.z;
     in->obj = 0;
-    in->vel.x = v.x;
-    in->vel.y = v.y;
-    in->vel.z = v.z;
+    in->vel.x = in->v.x;
+    in->vel.y = in->v.y;
+    in->vel.z = in->v.z;
     fn_801E9DC4(&in->slot);
     if (fx == lbl_8055F818) {
         lbl_804B7770[lbl_8055F818].id = fx;
