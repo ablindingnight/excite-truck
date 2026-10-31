@@ -742,9 +742,8 @@ void fn_802C47B8(int x0, int y0, int x1, int y1, u32 color) {
         int step = x0 < x1 ? 1 : -1;
         float slope = (float)step * (float)dy / (float)dx;
         float y = (float)y0;
-        for (; x0 != x1; x0 += step) {
+        for (; x0 != x1; x0 += step, y += slope) {
             fn_802C32B8(x0, (int)y, color);
-            y += slope;
         }
     }
 }
