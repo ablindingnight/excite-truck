@@ -512,11 +512,12 @@ void Sound3D::Update(Listener* l, int n) {
                     f32 dist = PSVECMag(&d);
                     if (dist > 0.1f) {
                         f32 w = 1.0f / dist;
+                        const ValVec3* right = &l->mtx->basis[0];
                         d.x *= w;
                         d.y *= w;
                         d.z *= w;
                         wsum += w;
-                        f32 p = PSVECDotProduct(&d, &l->mtx->basis[0]);
+                        f32 p = PSVECDotProduct(&d, right);
                         if (dist < 1.5f) {
                             p *= dist / 1.5f;
                         }
