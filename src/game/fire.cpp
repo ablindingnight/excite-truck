@@ -1197,12 +1197,13 @@ int GroundFire::Moved(const FireCar* c) {
 }
 
 void GroundFire::Corners(Vec* p, Vec* e1, Vec* e2) {
-    MulVec(p, &off, m.rot);
+    const Vec* rows = m.rot;
+    MulVec(p, &off, rows);
     p->x = p->x + m.pos.x;
     p->y = p->y + m.pos.y;
     p->z = p->z + m.pos.z;
-    Scale(e1, &m.rot[0], 0.4f);
-    Scale(e2, &m.rot[2], 0.75f);
+    Scale(e1, &rows[0], 0.4f);
+    Scale(e2, &rows[2], 0.75f);
 }
 
 void GroundFire::Start(int idx) {
