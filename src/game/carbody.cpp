@@ -300,7 +300,7 @@ extern "C" {
 extern const f32 lbl_80561CA0;  // torque unit scale
 extern const f32 lbl_80561CA4;  // 1e-5
 extern const f32 lbl_80561CA8;  // 5252 (hp = torque * rpm / 5252)
-extern f32 lbl_80561CAC;        // 0.0
+extern const f32 lbl_80561CAC;        // 0.0
 extern const f32 lbl_80561CB0;  // -2.0
 extern const f32 lbl_80561CB4;  // 8000
 extern const f32 lbl_80561CB8;  // 0.3
@@ -1229,7 +1229,7 @@ void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
 void fn_80186DE8(u8* p) {}  // stub (1830)
 
 void vf20__10CollVolumeFv(u8* p);
-extern f32 lbl_80561CAC;  // 0.0
+extern const f32 lbl_80561CAC;  // 0.0
 extern f32 lbl_80561CDC;  // 0.5
 extern f32 lbl_80561D90;  // -5.0
 extern f32 lbl_80561D9C;  // 1/60 s
@@ -1614,7 +1614,7 @@ int fn_80189BDC(u8* p) {
     return fn_801B83A0()->sCC(S32(p, 0x1EC));
 }
 
-extern f32 lbl_80561CAC;  // 0.0
+extern const f32 lbl_80561CAC;  // 0.0
 
 void fn_80189C64(u8* p) {
     if (U8(p, 0x26AC)) {
@@ -1833,7 +1833,8 @@ extern int lbl_8055A418;  // "Mass"
 extern int lbl_8055A420;  // ""
 extern int lbl_8055A424;  // " m/s"
 extern int lbl_8055A42C;  // " G"
-extern f32 lbl_80561CAC, lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
+extern const f32 lbl_80561CAC;
+extern f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
     lbl_80561D00, lbl_80561D0C, lbl_80561D28, lbl_80561D34, lbl_80561D44, lbl_80561D68, lbl_80561DE4, lbl_80561EBC,
     lbl_80561F0C, lbl_80561F10, lbl_80561F14, lbl_80561F18;
 
