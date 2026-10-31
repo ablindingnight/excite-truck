@@ -444,10 +444,11 @@ void Trailer::Update(void) {
         a.y += world.pos.y;
         a.z += world.pos.z;
         RVec3 b;
-        MulVec(&b, &hitchCar, car->world.rot);
-        b.x += car->world.pos.x;
-        b.y += car->world.pos.y;
-        b.z += car->world.pos.z;
+        CarBody* c = car;
+        MulVec(&b, &hitchCar, c->world.rot);
+        b.x += c->world.pos.x;
+        b.y += c->world.pos.y;
+        b.z += c->world.pos.z;
         HitchMsg m;
         m.a0 = 1;
         m.car = car->index;
