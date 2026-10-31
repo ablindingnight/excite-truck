@@ -709,7 +709,7 @@ f32 fn_8023293C(Font* f, const char* s, f32 xs) {
 
 int fn_80232B70(Font* f) { return f->height; }
 
-u8 fn_80232B78(Font* f) { return f->b5; }
+int fn_80232B78(Font* f) { return f->b5; }
 
 void fn_80232B80(XformFn fn) {
     lbl_8055F070 = fn;

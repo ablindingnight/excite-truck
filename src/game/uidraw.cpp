@@ -22,7 +22,7 @@ void UIContextEnd(void);
 extern "C" {
 void fn_80129C64(int a);
 UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
-void fn_8022ED00(void);
+void fn_8022ED00(UIContext*);
 void fn_8022EDB8(void);
 
 void fn_802321D8(void);
@@ -92,7 +92,7 @@ void fn_80230090(void) {
     xf.translation.v[1] = 0.0f;
     xf.translation.v[2] = 0.0f;
     lbl_8055F028 = fn_8022EDE4(&xf);
-    fn_8022ED00();
+    fn_8022ED00(lbl_8055F028);
     fn_802321D8();
     fn_8022F248();
     fn_8023509C();
@@ -315,19 +315,19 @@ void fn_80230B38(void) {
 // Stripped from ET; only its constant remains.
 f32 UIDrawStrippedPeriod(void) { return 2.0f; }
 
-void fn_80230B5C(f32* m) {
-    m[0] = 1.0f;
-    m[3] = 0.0f;
-    m[2] = 0.0f;
-    m[1] = 0.0f;
-    m[4] = 1.0f;
-    m[7] = 0.0f;
-    m[6] = 0.0f;
-    m[5] = 0.0f;
-    m[8] = 1.0f;
-    m[9] = 0.0f;
-    m[10] = 0.0f;
-    m[11] = -365.0f;
+void fn_80230B5C(UIXform* m) {
+    m->basis.m[0][0] = 1.0f;
+    m->basis.m[1][0] = 0.0f;
+    m->basis.m[0][2] = 0.0f;
+    m->basis.m[0][1] = 0.0f;
+    m->basis.m[1][1] = 1.0f;
+    m->basis.m[2][1] = 0.0f;
+    m->basis.m[2][0] = 0.0f;
+    m->basis.m[1][2] = 0.0f;
+    m->basis.m[2][2] = 1.0f;
+    m->translation.v[0] = 0.0f;
+    m->translation.v[1] = 0.0f;
+    m->translation.v[2] = -365.0f;
 }
 
 static inline u32 RGBA(int a, int r, int g, int b) { return (a << 24) | (r << 16) | (g << 8) | b; }
