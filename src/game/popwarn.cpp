@@ -246,7 +246,7 @@ void fn_80246E00(void) { fn_80246CB8("LogoDlby.lyt"); }
 // Not in the DOL (dead-stripped).
 void ShowWiiStrap(void) { fn_80246CB8("WiiStrap.lyt"); }
 
-u8* CupSelect_vf68(u8* p, int del) {
+u8* fn_80246E0C(u8* p, int del) {
     if (p && del > 0) {
         operator delete(p);
     }
@@ -1194,7 +1194,7 @@ void MenuTimer::Update(void) {
 
 extern "C" {
 
-int MenuTimer_vf58(u8* p, int key) {
+int fn_80248FB0(u8* p, int key) {
     s32 now = fn_802E2C20();
     s32 t0 = S32(p, 0x1C);
     if (now < t0 + 750) {
@@ -1227,7 +1227,7 @@ int MenuTimer_vf58(u8* p, int key) {
     return 1;
 }
 
-void CupSelect_vf6C(u8* p) {
+void fn_802490AC(u8* p) {
     U8(p, 0x1C) = 0;
     S32(p, 0x18) = fn_802E2C20();
     if (fn_802C9A58()) {
@@ -1237,13 +1237,13 @@ void CupSelect_vf6C(u8* p) {
     }
 }
 
-void CupSelect_vf7C(u8* p) {
+void fn_80249104(u8* p) {
     if (!U8(p, 0x1C) && fn_802E2C20() - S32(p, 0x18) >= 15000) {
         fn_802168BC(-2);
     }
 }
 
-int CupSelect_vfB8(u8* p) {
+int fn_80249154(u8* p) {
     if (!U8(p, 0x1C) && fn_802E2C20() - S32(p, 0x18) >= 1500) {
         fn_802168BC(-2);
     }
