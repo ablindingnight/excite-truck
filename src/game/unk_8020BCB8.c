@@ -4,10 +4,10 @@
 // before the PC port. Tricks are tagged MATCHING-AID.
 
 extern char lbl_8055EDF0[4];
-extern int fn_8000D838(void*);
+extern int RegisterModuleTag__FP9ModuleTag(void*);
 extern unsigned int lbl_8055EE14;
 void fn_8020BCB8(void)
 {
-    fn_8000D838(&lbl_8055EDF0);
+    RegisterModuleTag__FP9ModuleTag(&lbl_8055EDF0);
     lbl_8055EE14 = 0x7f000000;
 }

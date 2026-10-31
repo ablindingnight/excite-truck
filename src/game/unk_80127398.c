@@ -62,7 +62,7 @@ void fn_8012748C(s32 arg0) {
 }
 
 extern char lbl_8055DF00[4];
-extern void fn_8000D838(void *queue);
+extern void RegisterModuleTag__FP9ModuleTag(void *queue);
 void fn_801274C0(void) {
-    fn_8000D838(lbl_8055DF00);
+    RegisterModuleTag__FP9ModuleTag(lbl_8055DF00);
 }

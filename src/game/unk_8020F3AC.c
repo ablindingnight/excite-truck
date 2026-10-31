@@ -4,7 +4,7 @@
 // before the PC port. Tricks are tagged MATCHING-AID.
 
 extern char lbl_8055EEA8[4];
-extern void fn_8000D838(void *queue);
+extern void RegisterModuleTag__FP9ModuleTag(void *queue);
 void fn_8020F3AC(void) {
-    fn_8000D838(lbl_8055EEA8);
+    RegisterModuleTag__FP9ModuleTag(lbl_8055EEA8);
 }
