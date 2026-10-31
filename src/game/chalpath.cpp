@@ -1073,7 +1073,108 @@ void fn_80262584(u8* p) {
     }
 }
 
-void fn_802625D4(u8* p) {}  // stub (585)
+}  // extern "C"
+
+static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+// Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
+static inline f32 Ease(f32 x) {
+    if (x < -1.0f) {
+        return -1.0f;
+    } else if (x > 1.0f) {
+        return 1.0f;
+    } else if (x > 0.0f) {
+        return x * (-2.0f * x * x) + 3.0f * x * x;
+    } else {
+        return x * (-2.0f * x * x) - 3.0f * x * x;
+    }
+}
+
+// The node's label source (slot 0xC returns the text).
+class NodeText {
+public:
+    virtual void Unk8(void);
+    virtual const char* GetText(void);  // 0xC
+};
+
+extern "C" {
+f32 fn_8023659C(void);
+void fn_80230F6C(u32* color);
+
+// Difficulty node: its tile and label; while selected a highlight frame grows and shrinks around it.
+void fn_802625D4(u8* p) {
+    static f32 sStart = -100.0f;
+    static f32 kSmall = 0.05f;
+    static f32 kBig = 0.1f;
+    static f32 kGrow = 0.5f;
+    static f32 kShrink = 0.5f;
+    f32 x;
+    f32 y;
+    u32 color;
+    int part;
+    u32 tile;
+    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    tile = 0xFFFFFFFF;
+    part = lbl_80345B40[S32(p, 0x20)] + 1;
+    color = 0xFFFFFFFF;
+    if (U8(p, 0x1C)) {
+        part = lbl_80345B40[S32(p, 0x20)];
+        color = 0xFFFFFFFF;
+        tile = 0xFFFFFFFF;
+    } else if (U8(p, 0x1D)) {
+        tile = 0xFFFFFFFF;
+    }
+    static f32 sPeriod = kGrow + kShrink;
+    static f32 sSmallW = kSmall * (f32)S32(p, 0xC);
+    static f32 sSmallH = kSmall * (f32)S32(p, 0x10);
+    static f32 sBigW = kBig * (f32)S32(p, 0xC);
+    static f32 sBigH = kBig * (f32)S32(p, 0x10);
+    if (U8(p, 0x1E) && lbl_8055F3E9) {
+        fn_80214AF0(S32(p, 0x20) + 10);
+    } else {
+        fn_80214A9C(S32(p, 0x20) + 10);
+    }
+    if (U8(p, 0x1C)) {
+        f32 fx = x - sBigW / 2.0f;
+        f32 fy = y + sBigH / 2.0f;
+        f32 fw = sBigW + (f32)S32(p, 0xC);
+        f32 fh = sBigH + (f32)S32(p, 0x10);
+        if (!U8(p, 0x1E)) {
+            f32 now = fn_8023659C();
+            if (now - sStart > sPeriod) {
+                sStart = now;
+            }
+            f32 t = now - sStart;
+            if (t < kGrow) {
+                t = InvLerp(0.0f, kGrow, t);
+                t = MIN(1.0f, t);
+                t = MAX(t, 0.0f);
+                f32 s = Lerp(0.0f, 1.0f, t);
+                fx = Lerp(x - sSmallW / 2.0f, x - sBigW / 2.0f, Ease(s));
+                fy = Lerp(y + sSmallH / 2.0f, y + sBigH / 2.0f, Ease(s));
+                fw = Lerp(sSmallW + (f32)S32(p, 0xC), sBigW + (f32)S32(p, 0xC), Ease(s));
+                fh = Lerp(sSmallH + (f32)S32(p, 0x10), sBigH + (f32)S32(p, 0x10), Ease(s));
+            } else {
+                t = InvLerp(kGrow, kGrow + kShrink, t);
+                t = MIN(1.0f, t);
+                t = MAX(t, 0.0f);
+                f32 s = Lerp(0.0f, 1.0f, t);
+                fx = Lerp(x - sBigW / 2.0f, x - sSmallW / 2.0f, Ease(s));
+                fy = Lerp(y + sBigH / 2.0f, y + sSmallH / 2.0f, Ease(s));
+                fw = Lerp(sBigW + (f32)S32(p, 0xC), sSmallW + (f32)S32(p, 0xC), Ease(s));
+                fh = Lerp(sBigH + (f32)S32(p, 0x10), sSmallH + (f32)S32(p, 0x10), Ease(s));
+            }
+            fn_80230F6C(&color);
+        } else {
+            color = 0xFFFFCA44;
+        }
+        fn_802354A0(PTR(p, 0x24), 0x12, fx, fy, 0.0f, fw, fh, tile);
+    }
+    fn_802354A0(PTR(p, 0x24), part, x, y, 0.0f, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
+    fn_80232BA4(((NodeText*)PTR(p, 0x18))->GetText(), PTR(p, 0x28), 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
+                1.0f);
+}
 
 }  // extern "C"
 
