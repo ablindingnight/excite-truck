@@ -934,7 +934,184 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
-void fn_8019BD54(u8* p, u8* q, int a, int b) {}  // stub (704)
+extern const f32 lbl_805622E0;  // 1.0
+void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
+void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
+
+static inline int IsCarObj(const u8* o) {
+    if (o) {
+        switch (S32(o, 0x10)) {
+        case 'ACAR':
+        case 'CAR ':
+        case 'NCAR':
+        case 'PCAR':
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern const f32 lbl_805622E8;  // 0.5
+f32 PSVECSquareDistance(const void* a, const void* b);
+extern f32 lbl_8055A4C0;           // 0.8, car-on-car friction
+extern const f32 lbl_80562308;     // 0.05
+extern const f32 lbl_80562340;     // 0.0016683352
+extern const f32 lbl_80562344;     // 2.8
+
+// Sphere p against box q (half extents 0x24..0x2C, bounding radius 0x30, end-cap flags at 0x34), the box
+// optionally offset by `off` in its own frame. Clamps the sphere centre into the box (`dir`, a direction in box
+// space, keeps the x face open when moving away from it); a centre fully inside is backed out along the
+// relative velocity. Cars touching cars scrape with a friction scaled by how aligned they are.
+int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
+    CFrame f;
+    RVec3 w;
+    RVec3 cp;
+    RVec3 l;
+    RVec3 c;
+    RVec3 va;
+    RVec3 vb;
+    RVec3 rv;
+    RVec3 back;
+    RVec3 dd;
+    RVec3 d;
+    RVec3 n;
+    RVec3 o;
+    f32 d2;
+    if (!off) {
+        d2 = PSVECSquareDistance(p + 0x34, VE(q)->v50() + 0x24);
+    } else {
+        CFrame* m = (CFrame*)VE(q)->v50();
+        MulVec(&w, off, m);
+        w.x = w.x + m->t.x;
+        w.y = w.y + m->t.y;
+        w.z = w.z + m->t.z;
+        d2 = PSVECSquareDistance(p + 0x34, &w);
+    }
+    f32 rr = F32(q, 0x30) + F32(p, 0x24);
+    if (d2 > rr * rr) {
+        return 0;
+    }
+    f = *(CFrame*)VE(q)->v50();
+    if (off) {
+        MulVec(&o, off, &f);
+        f.t.x = f.t.x + o.x;
+        f.t.y = f.t.y + o.y;
+        f.t.z = f.t.z + o.z;
+    }
+    RigidBody* pb = (RigidBody*)PTR(p, 0x4);
+    RigidBody* qb = (RigidBody*)PTR(q, 0x4);
+    u32 in = 0;
+    c.x = F32(p, 0x34);
+    c.y = F32(p, 0x38);
+    c.z = F32(p, 0x3C);
+    ToBoxSpace(&l, &c, &f);
+    if (!dir || l.x * dir->x > lbl_805622D0 || (f32)__fabs(dir->y) > F32(q, 0x28)) {
+        if (l.x > F32(q, 0x24)) {
+            l.x = F32(q, 0x24);
+        } else if (l.x < -F32(q, 0x24)) {
+            l.x = -F32(q, 0x24);
+        } else {
+            in |= 1;
+        }
+    }
+    if (l.y > F32(q, 0x28)) {
+        l.y = F32(q, 0x28);
+    } else if (l.y < -F32(q, 0x28)) {
+        l.y = -F32(q, 0x28);
+    } else {
+        in |= 2;
+    }
+    u32 caps = U32(q, 0x34);
+    if ((caps & 1) && l.z > F32(q, 0x2C)) {
+        return 0;
+    }
+    if ((caps & 2) && l.z < -F32(q, 0x2C)) {
+        return 0;
+    }
+    if (l.z > F32(q, 0x2C)) {
+        l.z = F32(q, 0x2C);
+    } else if (l.z < -F32(q, 0x2C)) {
+        l.z = -F32(q, 0x2C);
+    } else {
+        in |= 4;
+    }
+    if (in == 7) {
+        if (pb) {
+            pb->VelAt(&va, &c);
+        } else {
+            va.x = lbl_805622D0;
+            va.y = lbl_805622D0;
+            va.z = lbl_805622D0;
+        }
+        if (qb) {
+            qb->VelAt(&vb, &c);
+        } else {
+            vb.x = lbl_805622D0;
+            vb.y = lbl_805622D0;
+            vb.z = lbl_805622D0;
+        }
+        rv.x = va.x - vb.x;
+        rv.y = va.y - vb.y;
+        rv.z = va.z - vb.z;
+        back.x = c.x + rv.x * lbl_80562340;
+        back.y = c.y + rv.y * lbl_80562340;
+        back.z = c.z + rv.z * lbl_80562340;
+        dd.x = f.t.x - c.x;
+        dd.y = f.t.y - c.y;
+        dd.z = f.t.z - c.z;
+        if (PSVECDotProduct(&dd, &rv) > lbl_805622D4) {
+            ToBoxSpace(&l, &back, &f);
+        }
+    }
+    MulVec(&cp, &l, &f);
+    cp.x = cp.x + f.t.x;
+    cp.y = cp.y + f.t.y;
+    cp.z = cp.z + f.t.z;
+    d.x = cp.x - c.x;
+    d.y = cp.y - c.y;
+    d.z = cp.z - c.z;
+    f32 len = sqrt(PSVECDotProduct(&d, &d));
+    if (len < lbl_80562308) {
+        return 0;
+    }
+    f32 comp = lbl_80562300 + (-len + F32(p, 0x24));
+    f32 fq = lbl_805622D0;
+    if (comp > fq) {
+        f32 fp = fq;
+        f32 k = lbl_805622DC / len;
+        n.x = d.x * k;
+        n.y = d.y * k;
+        n.z = d.z * k;
+        if (qb && pb) {
+            u32 qf = U32(q, 0x1C);
+            u32 pf = U32(p, 0x1C);
+            u32 mask = ((~(qf ^ pf) >> 2 & 1) ? 2 : 0) | 1;
+            int qa = (qf & mask) != 0;
+            int pa = (pf & mask) != 0;
+            if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
+                f32 fr = lbl_8055A4C0;
+                f32 t = lbl_80562344 * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
+                fr = fr * MaxF(MinF(lbl_805622E0, t), lbl_805622D0);
+                if (pa) {
+                    fp = fr;
+                }
+                if (qa) {
+                    fq = fr;
+                }
+            }
+        }
+        if (pb) {
+            fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, fp, fq);
+        } else {
+            n.x = n.x * lbl_805622DC;
+            n.y = n.y * lbl_805622DC;
+            n.z = n.z * lbl_805622DC;
+            fn_8019A788(q, p, (u32)&cp, &n, 0, 0, comp, fq, fp);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 // Sphere p against ring q (major radius 0x24, tube radius 0x28): in ring space, within the slab, the
 // nearest point of the ring's centre circle gives the contact.
@@ -1082,7 +1259,7 @@ void fn_8019CF60(u8* p, u8* q) {
 void fn_801A1F44(RVec3* out, u8* q);
 
 // Sets flat sphere p's radius from how edge-on it is to box q, then collides them.
-void fn_8019D06C(u8* p, u8* q, int a, int b) {
+void fn_8019D06C(u8* p, u8* q, const RVec3* a, const RVec3* b) {
     RVec3 c;
     fn_801A1F44(&c, q);
     f32 d[3];
@@ -2293,22 +2470,6 @@ void fn_801A0444(u8* p, u8* q) {
     F32(p, 0x16C) = F32(q, 0x2C);
 }
 
-extern const f32 lbl_805622E0;  // 1.0
-void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
-void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
-
-static inline int IsCarObj(const u8* o) {
-    if (o) {
-        switch (S32(o, 0x10)) {
-        case 'ACAR':
-        case 'CAR ':
-        case 'NCAR':
-        case 'PCAR':
-            return 1;
-        }
-    }
-    return 0;
-}
 
 extern const f32 lbl_805623B8;  // 0.3048 (feet to metres)
 extern const f32 lbl_805623BC;  // 1.1
@@ -2380,7 +2541,7 @@ void fn_801A0464(u8* p, u8* q) {
             l.z = z;
             fn_801A0160(p);
             for (int i = 0; i < S32(p, 0x174); i++) {
-                fn_8019BD54((u8*)((SphGroup*)p)->vols[i], q, 0, (int)&l);
+                fn_8019BD54((u8*)((SphGroup*)p)->vols[i], q, 0, &l);
             }
             u8* car;
             if (S32(q, 0x20) < 8 && IsCarObj(car = PTR(p, 0x4))) {
@@ -2435,9 +2596,9 @@ void fn_801A0464(u8* p, u8* q) {
             c.v[2] = c.v[2] + F32(pb, 0x38);
         }
         if (S32(q, 0x18) == 'SPHR') {
-            fn_8019BD54(q, PTR(p, 0x17C), (int)&c, 0);
+            fn_8019BD54(q, PTR(p, 0x17C), (RVec3*)&c, 0);
         } else {
-            fn_8019D06C(q, PTR(p, 0x17C), (int)&c, 0);
+            fn_8019D06C(q, PTR(p, 0x17C), (RVec3*)&c, 0);
         }
     } else if (type == 'TUBE') {
         fn_8019EA7C(q, PTR(p, 0x17C));
