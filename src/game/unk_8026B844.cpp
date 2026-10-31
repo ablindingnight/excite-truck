@@ -2,8 +2,9 @@
 // CC0; file src/auto/text_8026B840_.c), where its functions match exactly. Unit name is provisional.
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
-// Compiled as C++ (2026-10-31): the original copies the pad struct member by member and addresses this file's
-// globals from the .bss base, both C++ behaviours. fn_8026C014 (the debug camera) is a draft, not yet matching.
+// Compiled as C++ (2026-10-31): the original copies the pad struct member by member, which MWCC does only in C++.
+// fn_8026C014 (the debug camera) is a draft, not yet matching; it reaches both .bss objects from one base register,
+// which is still unexplained.
 #include "types.h"
 
 extern "C" {
