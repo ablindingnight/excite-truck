@@ -4,6 +4,7 @@
 // texture-environment presets, region screenshots, visibility (z peek) tests and a couple of debug
 // helpers. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "macros.h"
 
 struct GXColor {
     u8 r, g, b, a;
@@ -1104,15 +1105,10 @@ void fn_802D0014(f32 start, f32 end, f32 depth) {
 }
 
 void fn_802D007C(f32 a) {
-    int v = 255.5f * a;
-    f32 x = (f32)v < 255.0f ? (f32)v : 255.0f;
-    if (x <= 0.0f) {
-        x = 0.0f;
-    }
+    f32 x = MIN(255.0f, (f32)(int)(255.5f * a));
+    x = MAX(x, 0.0f);
     GXColor c;
-    c.r = 0xFF;
-    c.g = 0xFF;
-    c.b = 0xFF;
+    c.r = c.g = c.b = 0xFF;
     c.a = (int)x;
     lbl_804C97D0.alpha = c.a;
     lbl_804C97D0.dirty = 1;
