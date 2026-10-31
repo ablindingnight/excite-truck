@@ -228,7 +228,7 @@ void fn_802E8920(s32 size) {
     }
 }
 
-int fn_802E8A18(void) {
+int test_banner_ok(void) {
     u8 file[0x8C];
     int ok = 0;
     s32 r = NANDOpen("banner.bin", file, 1);
@@ -348,7 +348,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
     }
     const bool first = lbl_8055D255;
     lbl_8055D255 = false;
-    int banner = fn_802E8A18();
+    int banner = test_banner_ok();
     int have = fn_802E8AE8(name);
     if (!banner && !have) {
         fn_802E30C8("rmemcard: new user, missing both banner and memcard");

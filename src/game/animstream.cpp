@@ -105,7 +105,7 @@ void* fn_801E68D4(void) {
     return 0;
 }
 
-void fn_801E6924(void* b) {
+void release_buffer(void* b) {
     for (int i = 0; i < 8; i++) {
         if (lbl_80487CC0[i] == b) {
             lbl_8055EAC8[i] = 0;
@@ -172,7 +172,7 @@ AnimInst* fn_801E6A3C(const char* name, int streaming, int flags) {
 
 void fn_801E6B98(AnimInst* a) {
     if (a->buf) {
-        fn_801E6924(a->buf);
+        release_buffer(a->buf);
     }
     fn_801E598C(a->skel);
     fn_802C6CF8(a->model);
@@ -237,7 +237,7 @@ void fn_801E6CD0(AnimInst* a, AnimRes* r, f32 t) {
             fn_802E317C("anim: %s is wrong version (%x != %x)", r->name, 2);
         }
     } else if (a->buf) {
-        fn_801E6924(a->buf);
+        release_buffer(a->buf);
         a->buf = 0;
     }
 }
