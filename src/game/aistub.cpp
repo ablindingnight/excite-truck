@@ -9,7 +9,7 @@ UnkStatic7F lbl_8055E14C;
 
 extern "C" {
 
-void fn_8013A1E8(void) {}
+void fn_8013A1E8(int n) {}
 
 void fn_8013A1EC(void) {}
 

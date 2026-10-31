@@ -22,7 +22,7 @@ void fn_80137884(s32 count);
 void fn_80139044(int* p);
 void fn_8013BAE4(s32 count);
 void fn_801663C8(s32 count, void* cars, void* extra);
-void fn_8013A1E8(void);
+void fn_8013A1E8(int n);
 void fn_8015F554(void);
 void fn_80160850(void);
 void fn_80160AE4(void);
@@ -274,7 +274,7 @@ void fn_8013477C(AIRace* race) {
             lbl_8042F758[i] = new ("AI::AICarInfo") AICarInfo(i);
         }
     }
-    fn_8013A1E8();
+    fn_8013A1E8(grid->count);
     fn_8015F554();
     fn_80160850();
 }
