@@ -508,16 +508,16 @@ void fn_802CEC44(void);
 void fn_802CECF4(u16 token);
 void fn_802CF10C(u32 count);
 
-u32 fn_802CE9FC(u8 r, u8 g, u8 b, u8 a) {
+GXColor fn_802CE9FC(u8 r, u8 g, u8 b, u8 a) {
     GXColor c;
     c.r = r;
     c.g = g;
     c.b = b;
     c.a = a;
-    return *(u32*)&c;
+    return c;
 }
 
-u32 fn_802CEA1C(u32 argb) { return fn_802CE9FC(argb >> 16, argb >> 8, argb, argb >> 24); }
+GXColor fn_802CEA1C(u32 argb) { return fn_802CE9FC(argb >> 16, argb >> 8, argb, argb >> 24); }
 
 void fn_802CEA34(void) {
     GXRenderModeObj* rm = lbl_8055FD64;
@@ -855,8 +855,7 @@ void fn_802CF850(void) {
     GXSetScissor(0, 0, lbl_8055FD64->fbWidth, lbl_8055FD64->efbHeight);
     GXSetPixelFmt(1, 0);
     GXSetDispCopyGamma(0);
-    u32 c = fn_802CE9FC(0, 0, 0, 0);
-    GXSetCopyClear(*(GXColor*)&c, 0xFFFFFF);
+    GXSetCopyClear(fn_802CE9FC(0, 0, 0, 0), 0xFFFFFF);
     GXSetDither(1);
     VIWaitForRetrace();
     VISetNextFrameBuffer(lbl_804C9760.buf);
@@ -1083,8 +1082,7 @@ void* fn_802CFFA0(u32 size) { return fn_802CFF64(size); }
 void fn_802CFFA4(u16 blend) { lbl_8055FD86 = blend; }
 
 void fn_802CFFAC(u8 r, u8 g, u8 b) {
-    u32 c = fn_802CE9FC(r, g, b, 0);
-    GXColor col = *(GXColor*)&c;
+    GXColor col = fn_802CE9FC(r, g, b, 0);
     lbl_804C97B0.color.r = col.r;
     lbl_804C97B0.color.g = col.g;
     lbl_804C97B0.color.b = col.b;
@@ -1164,8 +1162,7 @@ void fn_802D01E0(s32 x, s32 y, s32 w, s32 h) {
 void fn_802D02F8(u32 color, u8 on) {
     lbl_804C9778.overlayC = on;
     lbl_804C9778.overlayZ = 1;
-    u32 c = fn_802CEA1C(color);
-    GXColor col = *(GXColor*)&c;
+    GXColor col = fn_802CEA1C(color);
     lbl_804C9778.overlay.r = col.r;
     lbl_804C9778.overlay.g = col.g;
     lbl_804C9778.overlay.b = col.b;
@@ -1539,8 +1536,7 @@ void fn_802D0EEC(void) {
         lbl_8055FD88 = lbl_8055FD86;
     }
     if (lbl_8055FE58) {
-        u32 c = fn_802CEA1C(lbl_804DB458[1]);
-        GXSetTevColor(3, *(GXColor*)&c);
+        GXSetTevColor(3, fn_802CEA1C(lbl_804DB458[1]));
         lbl_8055FE58 = 0;
     }
     if (lbl_804C97B0.dirty) {
@@ -1550,8 +1546,8 @@ void fn_802D0EEC(void) {
     }
     if (lbl_804C97D0.dirty) {
         lbl_804C97D0.dirty = 0;
-        u32 w = fn_802CE9FC(0xFF, 0xFF, 0xFF, 0xFF);
-        u32 k = fn_802CE9FC(0, 0, 0, 0xFF);
+        GXColor w = fn_802CE9FC(0xFF, 0xFF, 0xFF, 0xFF);
+        GXColor k = fn_802CE9FC(0, 0, 0, 0xFF);
         f32 s = -1048576.0f;
         GXInitLightPos(&lbl_804C97D0.obj, lbl_804C97D0.dir.x * s, lbl_804C97D0.dir.y * s, -(lbl_804C97D0.dir.z * s));
         GXColor c;
@@ -1562,11 +1558,10 @@ void fn_802D0EEC(void) {
         GXInitLightColor(&lbl_804C97D0.obj, c);
         GXInitLightDistAttn(&lbl_804C97D0.obj, 1.0f, 1.0f, 0);
         GXLoadLightObjImm(&lbl_804C97D0.obj, 1);
-        GXSetChanMatColor(0, *(GXColor*)&w);
-        u32 a = fn_802CE9FC(0, 0, 0, lbl_804C97D0.alpha);
-        GXSetChanMatColor(2, *(GXColor*)&a);
+        GXSetChanMatColor(0, w);
+        GXSetChanMatColor(2, fn_802CE9FC(0, 0, 0, lbl_804C97D0.alpha));
         GXSetChanAmbColor(0, lbl_804C97D0.color);
-        GXSetChanAmbColor(2, *(GXColor*)&k);
+        GXSetChanAmbColor(2, k);
     }
     if (lbl_8055FD25 != lbl_8055FD85 || lbl_8055FD84) {
         lbl_8055FD85 = lbl_8055FD25;
@@ -2102,7 +2097,7 @@ int fn_802D31D8(void) {
     GXSetAlphaUpdate(1);
     GXSetDstAlpha(0, 0);
     fn_802CF5D4();
-    lbl_8055FD1C &= ~0x10;
+    lbl_8055FD1C &= ~0x8;
     GXSetNumTevStages(1);
     GXSetNumTexGens(0);
     GXSetZMode(1, 6, 0);
@@ -2111,8 +2106,7 @@ int fn_802D31D8(void) {
     GXSetTevAlphaOp(0, 0, 0, 0, 0, 0);
     GXSetTevColorOp(0, 0, 0, 0, 1, 0);
     GXSetTevColorIn(0, 0xF, 0xF, 0xF, 0xF);
-    u32 c = fn_802CE9FC(0, 0, 0, 4);
-    GXSetTevColor(1, *(GXColor*)&c);
+    GXSetTevColor(1, fn_802CE9FC(0, 0, 0, 4));
     return 1;
 }
 
@@ -2216,8 +2210,7 @@ void fn_802D362C(u32 color) {
     GXSetBlendMode(1, 4, 5, 3);
     GXSetZMode(0, 3, 0);
     GXSetTexCoordGen2(0, 1, 0xC, 0x3C, 0, 0x7D);
-    u32 c = fn_802CEA1C(color);
-    GXSetTevColor(1, *(GXColor*)&c);
+    GXSetTevColor(1, fn_802CEA1C(color));
     fn_802D3420();
 }
 
