@@ -6,6 +6,7 @@
 
 #include <types.h>
 #include "game/menustate.h"
+#include "game/uilists.h"
 
 extern "C" s32 fn_80218C14(s32, s32);
 extern "C" s32 fn_802E317C(const char *);
@@ -89,7 +90,6 @@ extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
 extern float lbl_80563450;
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
-extern "C" unsigned char lbl_80490558[];
 extern "C" char *lbl_8055B6B0;
 
 extern "C" s32 fn_80128668(void);
@@ -139,7 +139,7 @@ s32 fn_80211678(u8 *arg0) {
 }
 
 extern "C" int fn_80211690(int);
-extern "C" int fn_80211D24(int);
+extern "C" void fn_80211D24(int);
 extern "C" int fn_802E2C20(void);
 extern "C" int fn_802ECC10(void);
 extern "C" int lbl_8055EF14;
@@ -149,6 +149,111 @@ extern "C" float lbl_80563434;
 extern "C" float lbl_80563440;
 extern "C" float lbl_80563444;
 extern "C" double lbl_80563448;
+
+// One button-sound slot: the sound bank plus four playing voices.
+class UIVoice {
+public:
+    virtual ~UIVoice(void);
+};
+struct UISoundSlot {
+    void* bank;
+    float volume;
+    UIVoice* voices[4];
+};
+class UITable {
+public:
+    ~UITable(void);
+};
+extern "C" UISoundSlot lbl_80490558[8];
+extern "C" void* lbl_80490528[3][4];
+extern "C" void* lbl_8055EF24;
+extern "C" void* lbl_8055EF28;
+extern "C" UITable* lbl_8055EF2C;
+extern "C" CycleList* lbl_8055EF30;
+extern "C" NameList* lbl_8055EF34;
+extern "C" int lbl_8055EF18;
+extern "C" void fn_802ECC18(int);
+extern "C" void fn_8022D2BC(void*, int);
+extern "C" void fn_8021676C(void);
+extern "C" void fn_8022A7D0(void);
+extern "C" void fn_8020A550(void);
+extern "C" void fn_80235380(s32);
+extern "C" void fn_802C519C(void*);
+extern "C" void fn_80238920(void);
+extern "C" void fn_8012BF24(const char*);
+extern "C" int fn_80128314(int);
+extern "C" void fn_802E1058(void);
+extern "C" void* memset(void*, int, unsigned long);
+extern "C" void fn_802E30C8(const char *, ...);
+
+// UIEnd: tears down what UIBegin set up (mode 0 = lite: only the two lite arrows were loaded).
+extern "C" void fn_80211D24(int mode) {
+    int j;
+    bool lite;
+    int i;
+    fn_802ECC18(0);
+    lite = mode == 0;
+    for (i = 0; i < 8; i++) {
+        for (j = 0; j < 4; j++) {
+            if (lbl_80490558[i].voices[j]) {
+                delete lbl_80490558[i].voices[j];
+            }
+        }
+    }
+    memset(lbl_80490558, 0, sizeof(lbl_80490558));
+    if (lbl_8055EF24) {
+        fn_8022D2BC(lbl_8055EF24, 1);
+        lbl_8055EF24 = 0;
+    }
+    if (lbl_8055EF28) {
+        fn_8022D2BC(lbl_8055EF28, 1);
+        lbl_8055EF28 = 0;
+    }
+    if (lbl_8055EF2C) {
+        delete lbl_8055EF2C;
+        lbl_8055EF2C = 0;
+    }
+    if (lbl_8055EF30) {
+        delete lbl_8055EF30;
+        lbl_8055EF30 = 0;
+    }
+    if (lbl_8055EF34) {
+        delete lbl_8055EF34;
+        lbl_8055EF34 = 0;
+    }
+    fn_8021676C();
+    fn_8022A7D0();
+    fn_8020A550();
+    if (!lite) {
+        if (lbl_8055EF1C) {
+            fn_80235380(lbl_8055EF1C);
+        }
+        lbl_8055EF1C = 0;
+        if (lbl_8055EF20) {
+            fn_80235380(lbl_8055EF20);
+        }
+        lbl_8055EF20 = 0;
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 4; j++) {
+                fn_802C519C(lbl_80490528[i][j]);
+                lbl_80490528[i][j] = 0;
+            }
+        }
+        fn_80238920();
+        fn_8012BF24("uiaction.res");
+    } else {
+        fn_802C519C(lbl_80490528[2][0]);
+        lbl_80490528[2][0] = 0;
+        fn_802C519C(lbl_80490528[2][1]);
+        lbl_80490528[2][1] = 0;
+    }
+    int mem = fn_80128314(0);
+    if (mem != lbl_8055EF18) {
+        fn_802E30C8("UI overlap: %d K vs %d K", mem, lbl_8055EF18);
+    }
+    fn_802E1058();
+}
+
 extern "C" void fn_80211F44(void) { fn_80211690(1); }
 
 extern "C" void fn_80211F4C(void) { fn_80211D24(1); }
@@ -337,9 +442,6 @@ extern "C" s32 lbl_80490510[];
 extern "C" f32 lbl_80558DC4[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
-extern "C" void* lbl_8055EF2C;
-extern "C" void* lbl_8055EF30;
-extern "C" void* lbl_8055EF34;
 extern void *lbl_8055EF38;
 extern "C" int lbl_8055EF48;
 extern "C" int lbl_8055EF4C;
@@ -517,7 +619,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 31: {
         UIStyle* column = FindStyle(styles, d->name, 0xd);
         p = (WidgetFragment*)operator new(0x264, "Column");
-        if (p) p = fn_8021B9AC(p, d, column ? column->value : lbl_8055EF2C, column ? column->arg1 : 0);
+        if (p) p = fn_8021B9AC(p, d, column ? column->value : (void*)lbl_8055EF2C, column ? column->arg1 : 0);
         widgets[count++] = p;
         break;
     }
@@ -899,7 +1001,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 38: {
         UIStyle* menu = FindStyle(styles, d->style, 0xe);
         p = (WidgetFragment*)operator new(0x268, "MenuImage");
-        if (p) p = fn_80223AB4(p, d, menu ? menu->value : lbl_8055EF30);
+        if (p) p = fn_80223AB4(p, d, menu ? menu->value : (void*)lbl_8055EF30);
         widgets[count++] = p;
         break;
     }
@@ -945,7 +1047,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 44: {
         UIStyle* menu = FindStyle(styles, d->style, 0xe);
         p = (WidgetFragment*)operator new(0x284, "ButtonList");
-        if (p) p = fn_8022553C(p, menu ? menu->value : lbl_8055EF30, d);
+        if (p) p = fn_8022553C(p, menu ? menu->value : (void*)lbl_8055EF30, d);
         widgets[count++] = p;
         break;
     }
@@ -967,7 +1069,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 48: {
         UIStyle* tabs = FindStyle(styles, d->style, 0xf);
         UIStyle* text = FindStyle(styles, d->style, 3);
-        void* first = tabs ? tabs->value : lbl_8055EF34;
+        void* first = tabs ? tabs->value : (void*)lbl_8055EF34;
         p = (WidgetFragment*)operator new(0x25c, "TopTabDisplay");
         if (p) p = fn_80227E84(p, first, d, text ? text->value : 0);
         widgets[count++] = p;
@@ -1163,7 +1265,6 @@ extern "C" void fn_80214CB4(s32 arg0) {
 }
 #pragma dont_inline reset
 
-extern "C" s32 lbl_80490528[];
 extern "C" s32 fn_802168E4(void);
 extern "C" s32 fn_80218120(void);
 extern "C" s32 fn_802E317C(const char *);
@@ -1182,17 +1283,15 @@ extern "C" f32 fn_80214D48(void) {
 
 extern "C" void fn_80214D50(s32 arg0) {
     s32 index;
-    s32 offset;
     void *obj;
     float value;
     if (fn_80206430() == 0) return;
     index = lbl_8055EF5C + 1;
     lbl_8055EF5C = index;
     if (index >= 4) { index = 0; lbl_8055EF5C = 0; }
-    offset = arg0 * 0x18;
-    obj = *(void **)(lbl_80490558 + offset + index * 4 + 8);
+    obj = lbl_80490558[arg0].voices[index];
     if (obj != 0) {
-        value = *(float *)(lbl_80490558 + offset + 4) * fn_80209028();
+        value = lbl_80490558[arg0].volume * fn_80209028();
         if (value != *(float *)((char *)obj + 8)) {
             *((u8 *)obj + 0x4D) = 1;
             *(float *)((char *)obj + 8) = value;
