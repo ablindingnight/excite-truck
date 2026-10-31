@@ -1521,17 +1521,16 @@ void ArenaTimer::Reset(void) { t = limit; }
 int RingChalMaster::vf20(int car) { return b9C; }
 
 void RingChalMaster::vfB8(ZoneResults* r) {
-    ZoneResults::Entry* e;
     int i;
     r->nCars = players.count;
     r->nHumans = fn_80179650();
     r->done = 1;
     r->bE = 0;
-    for (i = 0, e = r->entries; i < players.count; i++, e++) {
-        e->car = i;
-        e->b10 = 0;
-        e->score = players.data[i]->score;
-        e->place = 1;
+    for (i = 0; i < players.count; i++) {
+        r->entries[i].car = i;
+        r->entries[i].b10 = 0;
+        r->entries[i].score = players.data[i]->score;
+        r->entries[i].place = 1;
         r->bC = 1;
     }
 }
