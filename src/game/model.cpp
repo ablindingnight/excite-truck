@@ -843,21 +843,29 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
 }
 
 void fn_802C729C(s32 i, f32 range) {
+    MElem* el;
+    void* mtx;
+    int j;
+    MSurfList* sl;
+    ModelInfo* m;
+    MSphere* sp;
+    int e;
+    f32 radius;
     if (lbl_804C13C0.mtx != 0xFFFFFFFF && i != -1) {
-        ModelInfo* m = fn_802C53A8(i);
+        m = fn_802C53A8(i);
         if (m->nElems > 0) {
-            f32 radius = 1000.0f;
-            MSphere* sp = fn_802C5E7C(m);
-            for (int e = 0; e < m->nElems; e++) {
+            radius = 1000.0f;
+            sp = fn_802C5E7C(m);
+            for (e = 0; e < m->nElems; e++) {
                 if (m->elems[e].bit == 2) {
                     if (sp && !(PSVECSquareDistance(&lbl_804C13C0.pos, &sp[e].c) <
                                 (range + sp[e].r) * (range + sp[e].r))) {
                         continue;
                     }
-                    MElem* el = &m->elems[e];
-                    MSurfList* sl = el->list;
-                    void* mtx = (void*)lbl_804C13C0.mtx;
-                    for (int j = 0; j < sl->n; j++) {
+                    el = &m->elems[e];
+                    sl = el->list;
+                    mtx = (void*)lbl_804C13C0.mtx;
+                    for (j = 0; j < sl->n; j++) {
                         MSurf* s = sl->surfs[j];
                         if (IsQueued(s->type)) {
                             TexNode* t = s->tex[0];
