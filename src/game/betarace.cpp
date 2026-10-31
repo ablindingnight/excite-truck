@@ -3770,9 +3770,11 @@ inline void Pickup::Draw(Color col) {
         UseColor(tmp);
         DrawSpin(VPos(pos[0], pos[1], pos[2]), (const Xform*)hB8);
     } else if (kind == 4) {
-        Color oc = fn_802C9950(col);
-        int ot = fn_802C9994(0);
+        int ot;
+        Color oc;
         V3 p;
+        oc = fn_802C9950(col);
+        ot = fn_802C9994(0);
         V3 at;
         Xform m;
         f32 ang;
@@ -3781,8 +3783,9 @@ inline void Pickup::Draw(Color col) {
         p.x = pos[0];
         at = p;
         ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.0);
+        Mat3* mr = (Mat3*)&m;
         m.t = at;
-        m.r.SetRotY(ang);
+        mr->SetRotY(ang);
         fn_802C744C(lbl_80559ECC, &m);
         fn_802C9994(ot);
         fn_802C9950(oc);
