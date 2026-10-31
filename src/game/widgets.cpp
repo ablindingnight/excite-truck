@@ -2769,7 +2769,7 @@ int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
 i=*f->selected;int selected=i;
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
-float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;(void)screenWidth;(void)screenHeight;float left=selectedX-f->widths[selected]/2.0f-f->spacing/2.0f;left=4.0f+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
+float screenWidth=(float)lbl_8055FB9C;float screenHeight=(float)lbl_8055FBA0;float left=selectedX-f->widths[selected]/2.0f-f->spacing/2.0f;left=4.0f+left;int textHeight=fn_80232B70(f->resource);float height=(2.0f)+f->scale*(float)textHeight;float width=f->spacing+f->widths[selected];
 fn_80230924(0x96646464u,left,y-(2.0f),left+width,(y-height)-4.0f,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-4.0f,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),left+width,y-4.0f,(0.0f));
