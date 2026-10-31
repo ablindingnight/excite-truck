@@ -873,8 +873,10 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         Vec mid;
         mid.x = l.x + 0.5f * (r.x - l.x);
         f32 ly = l.y;
-        mid.y = ly + 0.5f * (r.y - l.y);
-        mid.z = l.z + 0.5f * (r.z - l.z);
+        f32 yv = r.y;
+        mid.y = ly + 0.5f * (yv - l.y);
+        f32 zv = r.z;
+        mid.z = l.z + 0.5f * (zv - l.z);
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
         p->frame.b.v[2].z = mid.z - c.z;
@@ -888,7 +890,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         PSVECNormalize(&p->frame.b.v[2], &p->frame.b.v[2]);
         f32 up = 1.2283f;
         f32 back = -1.5566f;
-        lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
+        f32 xv = mid.x;
+        lbl_80498E18.x = xv + p->frame.b.v[2].x * back;
         lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
         lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;
         lbl_80498E18.x = lbl_80498E18.x + p->frame.b.v[1].x * up;
@@ -896,8 +899,9 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         lbl_80498E18.z = lbl_80498E18.z + p->frame.b.v[1].z * up;
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);
+            f32 back;
             f32 h = -p->wheelY[1];
-            f32 back = -(0.1524f + m->wheelPos[1].z);
+            back = -(0.1524f + m->wheelPos[1].z);
             p->frame.pos.x = mid.x + p->frame.b.v[2].x * back;
             p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
             p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
@@ -1312,9 +1316,9 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
             }
             fn_802AB9E4();
         }
-        f32 a;
         f32 b;
         f32 c;
+        f32 a;
         f32 d;
         fn_802C98DC(&a, &b, &c, &d);
         if (time > 2.0f) {

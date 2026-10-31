@@ -429,13 +429,15 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     fn_80144B44(&force, 0.0f, 0.0f, 0.0f);
     f32 total = 0.0f;
     for (int i = first; i < n; i++) {
+        f32 w;
+        f32 k;
         if (s->free[i] == 0) {
             continue;
         }
         f32 ez;
         f32 ey;
         f32 ex;
-        f32 w = s->w30[i];
+        w = s->w30[i];
         ex = 0.254f + (half->x + w);
         ey = 0.254f + (half->y + w);
         ez = 0.254f + (half->z + w);
@@ -468,7 +470,7 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
             fn_801BFD34(&s->pos[i], &p, m);
             StatsUpdate__Fv(&d);
             fn_801C0E60(&d, &was, &s->pos[i]);
-            f32 k = Max(fn_801C0E44(&d), 0.00001f);
+            k = Max(fn_801C0E44(&d), 0.00001f);
             fn_801C2B9C(&force, &force, &d, 1000.0f * s->w34[i]);
             fn_801C2B9C(&sum, &sum, &s->pos[i], k);
             total += k;

@@ -255,8 +255,9 @@ int fn_801DB74C(int x, int z, f32* out, s32* mat, int unused, GVec* normal, f32 
     }
     f32 g[4][4];
     for (int j = 0; j < 4; j++) {
+        int i;
         int sz = z + j - 1;
-        for (int i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             if (!Sample(x + i - 1, sz, &g[i][j], 0, 0)) {
                 g[i][j] = h0;
             }

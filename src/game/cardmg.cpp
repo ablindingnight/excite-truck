@@ -669,7 +669,8 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 DentVec* go = (DentVec*)(p + 0x5FC) + other;
                 DentVec op;
                 op.x = o->pos.x + go->x;
-                f32 py = o->pos.y + go->y;
+                f32 yv = go->y;
+                f32 py = o->pos.y + yv;
                 op.y = py;
                 op.z = o->pos.z + go->z;
                 DentVec dir;

@@ -525,9 +525,10 @@ void fn_8026003C(void) {
     s32 driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
     u32 color = GetDriver(0)->color;
+    s32 arg;
     s32 event = ((ChalEvent*)SCREEN_BUF->evObjs[SCREEN_BUF->event])->Id();
     s32 track = GetEvent(event)->track;
-    s32 arg = SCREEN_BUF->arg;
+    arg = SCREEN_BUF->arg;
     if (fn_8025FECC((u8*)&vehicle, (u8*)&color, track, arg)) {
         VehicleInfo* v = FindVehicle(vehicle);
         int special = !(v->flags & 2);
