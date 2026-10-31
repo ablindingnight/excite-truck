@@ -224,7 +224,7 @@ public:
 
 namespace {
 
-// A cup on the event path screen (vtable lbl_80348798, 0xD0 bytes): eases into place, shows the
+// A cup on the event path screen (vtable __vt__EvCupBar, 0xD0 bytes): eases into place, shows the
 // cup's icon, its progress and a star per event. Every live marker is listed in lbl_804B3048.
 class EvCupBar : public LogoMover {
 public:
@@ -273,7 +273,7 @@ public:
     u8 showStars;      // offset 0xCD
 };
 
-// An event of the bracket screen (vtable lbl_80348738): eases into place and slides out while it is the
+// An event of the bracket screen (vtable __vt__Q220@unnamed@evpath_cpp@10EvEventBar): eases into place and slides out while it is the
 // current one; shows "best/pass" and the best grade and plays the passed / perfected / grade-up
 // animations when they change. Every live bar is listed in lbl_804B30D8.
 class EvEventBar : public LogoMover {
@@ -925,7 +925,7 @@ struct ScoreTally {
 
 namespace {
 
-// The finished event's score while it counts up (vtable lbl_80348678; menu item type 5 through its
+// The finished event's score while it counts up (vtable __vt__ScoreAccumulator; menu item type 5 through its
 // MenuState part at +4). It stands in for the event on the bracket screen, reporting the counted value
 // as the best; queued animations (add_anim_to_wait_for) are waited for before the follow-up boxes.
 class ScoreAccumulator : public EvContest, public MenuState {
@@ -1033,7 +1033,7 @@ inline EvEventBar::~EvEventBar(void) {
     lbl_804B30D8.Remove(this);
 }
 
-// The bracket as the event screen shows it (vtable lbl_80348644): event `index` is replaced by the score
+// The bracket as the event screen shows it (vtable __vt__Q220@unnamed@evpath_cpp@11BracketView): event `index` is replaced by the score
 // accumulator while it counts.
 class BracketView : public EvBracket {
 public:
