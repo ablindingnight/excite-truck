@@ -227,6 +227,7 @@ void UnlockList::Update(void) {
 }
 
 void UnlockList::Draw(void) {
+    f32 textY;
     f32 px;
     f32 py;
     fn_80230C30(&px, &py, x, y);
@@ -247,6 +248,7 @@ void UnlockList::Draw(void) {
         f32 nameY = rowY - 3.0f;
         f32 ptsY = rowY - 4.0f;
         f32 lockY = 2.0f + rowY;
+        textY = rowY - 4.0f;
         char buf[0x40] = {0};
         if (strcasecmp(u->type, "car") == 0) {
             sprintf(buf, "%s Car", fn_8013C9C8(fn_8013C8E8(u->name)));
@@ -262,7 +264,7 @@ void UnlockList::Draw(void) {
         }
         fn_802C5310(image, frame, lockX, lockY, 0.0f);
         fn_802337A0(font, -1, 10, "%d Pts", ptsX, ptsY, 0.0f, ptsScale, 1.0f, u->points);
-        fn_80232BA4(buf, font, textX, ptsY, -1, 9, ptsScale, 0.0f, 1.0f);
+        fn_80232BA4(buf, font, textX, textY, -1, 9, ptsScale, 0.0f, 1.0f);
         rowY -= 33.0f;
     }
 }
