@@ -374,7 +374,7 @@ int fn_80248668(void);
 int fn_80278A1C(const char* movie);
 void fn_802E317C(const char* fmt, ...);
 void fn_8020C91C(int song);
-void fn_8023BFBC(int track, int eve);
+void GameDoEve(int track, int eve);
 
 }  // extern "C"
 
@@ -430,7 +430,7 @@ void fn_80247210(void) {
     }
     fn_8020C91C(song);
     fn_8020A634();
-    fn_8023BFBC(track, 0);
+    GameDoEve(track, 0);
     fn_802483E0();
     fn_8020C91C(-1);
     lbl_8055F260 = 0;
@@ -523,7 +523,7 @@ void fn_80263F30(int a, int b, int c);
 int fn_8024CF54(void);
 
 // Demo main menu loop: dispatches the demo menu's choices until the title screen is left.
-void fn_802473A4(void) {
+void MenuDoDemo(void) {
     lbl_8055F260 = 1;
     fn_8020A600();
     fn_802ECEC4();

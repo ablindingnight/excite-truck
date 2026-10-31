@@ -220,10 +220,10 @@ public:
 
 extern "C" {
 
-void fn_801EB2D4(GNode* n, u32 base);
+void fixup_display_list(GNode* n, u32 base);
 void fn_801EB634(void* p, u32 base);
 void fn_801EB66C(void* p, u32 base);
-void fn_801EB6A8(GNode* n);
+void init_display_list(GNode* n);
 void fn_801EB96C(GModelHandler** slot, GModelHandler* (*create)(void));
 void fn_801EB9A4(GModelHandler** slot);
 void fn_801EBB7C(u32* p, u32 base);
@@ -290,7 +290,7 @@ void fn_801EB13C(GModel* m) {
     }
 }
 
-void fn_801EB2D4(GNode* root, u32 base) {
+void fixup_display_list(GNode* root, u32 base) {
     GNode* n = root;
     while (n) {
         GSwap32(&n->type);
@@ -304,13 +304,13 @@ void fn_801EB2D4(GNode* root, u32 base) {
             for (int i = 0; i < n->group.count; i++) {
                 GSwap32(&n->group.kids[i].key);
                 fn_801EB634(&n->group.kids[i].node, base);
-                fn_801EB2D4(n->group.kids[i].node, base);
+                fixup_display_list(n->group.kids[i].node, base);
             }
             break;
         case 0x101:
             GSwap32(&n->sub.a);
             fn_801EB634(&n->sub.child, base);
-            fn_801EB2D4(n->sub.child, base);
+            fixup_display_list(n->sub.child, base);
             break;
         case 0x102:
         case 0x103:
@@ -319,7 +319,7 @@ void fn_801EB2D4(GNode* root, u32 base) {
             GSwap32(&n->sub.c);
             GSwap32(&n->sub.d);
             fn_801EB634(&n->sub.child, base);
-            fn_801EB2D4(n->sub.child, base);
+            fixup_display_list(n->sub.child, base);
             if (n->type == 0x103) {
                 GSwap32(&n->sub.e);
             }
@@ -366,20 +366,20 @@ void fn_801EB66C(void* p, u32 base) {
 
 void fn_801EB6A4(void) {}
 
-void fn_801EB6A8(GNode* root) {
+void init_display_list(GNode* root) {
     GNode* n = root;
     while (n) {
         switch (n->type) {
         case 0:
             for (int i = 0; i < n->group.count; i++) {
-                fn_801EB6A8(n->group.kids[i].node);
+                init_display_list(n->group.kids[i].node);
             }
             break;
         case 0x101:
         case 0x102:
         case 0x103:
             fn_801EAFD4(n);
-            fn_801EB6A8(n->sub.child);
+            init_display_list(n->sub.child);
             break;
         case 4: {
             GModel* m = n->model;
@@ -454,13 +454,13 @@ int fn_801EB9FC(const char* name) {
             fn_801EB854();
             if (swapped) {
                 fn_801EB634(lbl_8055EBA0, (u32)lbl_8055EBA0);
-                fn_801EB2D4(lbl_8055EBA0->root, (u32)lbl_8055EBA0);
+                fixup_display_list(lbl_8055EBA0->root, (u32)lbl_8055EBA0);
                 fn_801EBB7C((u32*)&lbl_8055EBA0->list0, (u32)lbl_8055EBA0);
                 fn_801EBB7C((u32*)&lbl_8055EBA0->list1, (u32)lbl_8055EBA0);
                 fn_802CDDC8(lbl_8055EBA0->list0, lbl_8055EBA0->list0);
                 fn_802CDDC8(lbl_8055EBA0->list1, lbl_8055EBA0->list1);
             }
-            fn_801EB6A8(lbl_8055EBA0->root);
+            init_display_list(lbl_8055EBA0->root);
             fn_801EB90C();
         } else {
             fn_802E317C("bad graf version %d", ver, 0x15);

@@ -33,7 +33,7 @@ void fn_801EEFDC(EventHandler h, u8 type) {
     }
 }
 
-void fn_801EF024(EventHandler h) {
+void EventUnInstallHandler(EventHandler h) {
     int found = 0;
     int t;
     for (t = 0; t < 18; t++) {

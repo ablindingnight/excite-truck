@@ -185,8 +185,8 @@ int fn_802E3D68(const char* name);
 void fn_802E3AD0(int fd, const char* fmt, ...);
 void fn_802E3734(int* fd);
 int fn_802E3BB4(const char* pattern, char* name, int n);
-int fn_802E3C24(int h, char* name, int n);
-void fn_802E3CA4(int h);
+int FileFindNext(int h, char* name, int n);
+void FileFindClose(int h);
 f32 fn_801DCF48(V3* nrm, f32 x, f32 z);
 void fn_802BBEE4(void);
 void fn_802C21C0(void);
@@ -665,8 +665,8 @@ void fn_802B6AC0(void) {
         if (lbl_804BE7D8.count + 1 > lbl_804BE7D8.cap) {
             break;
         }
-    } while (fn_802E3C24(h, name, 0x20) == 0);
-    fn_802E3CA4(h);
+    } while (FileFindNext(h, name, 0x20) == 0);
+    FileFindClose(h);
 }
 
 int fn_802B6E00(int x, int z) { return x < -0x200 || x > 0x200 || z < -0x200 || z > 0x200; }

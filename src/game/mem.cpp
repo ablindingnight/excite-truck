@@ -236,7 +236,7 @@ void* operator new(size_t size) {
 
 extern "C" {
 
-void fn_80128584(void* p, int type) {
+void MemFree(void* p, int type) {
     if (lbl_8055DF80 && !p) {
         return;
     }
@@ -251,15 +251,15 @@ void fn_80128584(void* p, int type) {
     }
 }
 
-void fn_80128658(void* p) { fn_80128584(p, 1); }
+void fn_80128658(void* p) { MemFree(p, 1); }
 
-void fn_80128660(void* p) { fn_80128584(p, 2); }
+void fn_80128660(void* p) { MemFree(p, 2); }
 
 }  // extern "C"
 
-void operator delete(void* p) { fn_80128584(p, 3); }
+void operator delete(void* p) { MemFree(p, 3); }
 
-void operator delete[](void* p) { fn_80128584(p, 0); }
+void operator delete[](void* p) { MemFree(p, 0); }
 
 extern "C" {
 

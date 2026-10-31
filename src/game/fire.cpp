@@ -156,7 +156,7 @@ void fn_801E9DD8(void);
 int fn_801E9E30(s16* h, Vec* pos);
 s32 fn_801EE0C8(void* model);
 void fn_801EEFDC(int (*h)(const void* ev), u8 type);
-void fn_801EF024(int (*h)(const void* ev));
+void EventUnInstallHandler(int (*h)(const void* ev));
 s32 fn_80287B14(void);
 const FireCar* fn_80287B24(s32 i);
 void fn_80287B38(void (*cb)(FireCarEntry* e, int n));
@@ -1276,8 +1276,8 @@ BoostFireMan::BoostFireMan(void) {
 }
 
 BoostFireMan::~BoostFireMan(void) {
-    fn_801EF024(fn_8029C024);
-    fn_801EF024(fn_8029C054);
+    EventUnInstallHandler(fn_8029C024);
+    EventUnInstallHandler(fn_8029C054);
     fn_8028E398(emitter);
 }
 
@@ -1521,7 +1521,7 @@ BackfireMan::BackfireMan(void) {
 }
 
 BackfireMan::~BackfireMan(void) {
-    fn_801EF024(fn_8029BFF8);
+    EventUnInstallHandler(fn_8029BFF8);
     delete torch;
 }
 
@@ -1595,7 +1595,7 @@ TorchFireMan::TorchFireMan(void) {
 }
 
 TorchFireMan::~TorchFireMan(void) {
-    fn_801EF024(fn_8029C190);
+    EventUnInstallHandler(fn_8029C190);
     fn_8028E398(emitter);
 }
 

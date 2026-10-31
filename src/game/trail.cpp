@@ -174,7 +174,7 @@ extern "C" {
 f32 fn_801E7E18(void);                                        // time
 f32 fn_801E7E24(void);                                        // frame time
 void fn_801EEFDC(EventHandler h, u8 type);
-void fn_801EF024(EventHandler h);
+void EventUnInstallHandler(EventHandler h);
 int fn_80287B14(void);
 TBody* fn_80287B24(int i);
 void fn_80287B38(RacerHook h);
@@ -486,7 +486,7 @@ void fn_802A1590(void) {
 
 void fn_802A1660(void) {
     int i;
-    fn_801EF024(fn_802A1C30);
+    EventUnInstallHandler(fn_802A1C30);
     fn_802A1DC0();
     for (i = 0; i < 8; i++) {
         if (lbl_804BCF88[i]) {

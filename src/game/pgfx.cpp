@@ -38,9 +38,9 @@ int fn_802C8FF4(ValVec3* p, f32 margin);
 void fn_80010724(int x, int y, const char* text);
 void fn_802E317C(const char* fmt, ...);
 void fn_801EEFDC(int (*handler)(const PGfxEvent*), int kind);
-void fn_801EF024(int (*handler)(const PGfxEvent*));
+void EventUnInstallHandler(int (*handler)(const PGfxEvent*));
 
-int fn_801B64B4(const PGfxEvent* ev) {
+int pgfx_handler(const PGfxEvent* ev) {
     switch (ev->type) {
     case 0:
         fn_801E3CB4(&ev->pos, &ev->a.to, ev->a.size, ev->a.color);
@@ -71,8 +71,8 @@ int fn_801B64B4(const PGfxEvent* ev) {
     }
 }
 
-void fn_801B6604(void) { fn_801EEFDC(fn_801B64B4, 3); }
+void fn_801B6604(void) { fn_801EEFDC(pgfx_handler, 3); }
 
-void fn_801B6614(void) { fn_801EF024(fn_801B64B4); }
+void fn_801B6614(void) { EventUnInstallHandler(pgfx_handler); }
 
 }  // extern "C"

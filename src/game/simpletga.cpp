@@ -117,7 +117,7 @@ void fn_802B52B4(SimpleTGA* img) {
     fn_80128658(img);
 }
 
-int fn_802B52C0(const char* name, const SimpleTGA* img) {
+int save_simple_tga(const char* name, const SimpleTGA* img) {
     int ok = 0;
     TGAHeader hdr;
     s32 fd;

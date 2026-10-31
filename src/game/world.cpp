@@ -380,7 +380,7 @@ void fn_801EA1DC(void);
 void fn_8013A074(void);
 void fn_8020449C(void);
 void fn_802E3D00(void);
-WorldState* fn_80176A70(void);
+WorldState* PhysicsGetStatePacked(void);
 int fn_801EA994(void);
 void fn_801EA9DC(int i, u8* racer);
 void fn_80176BA8(void);
@@ -725,7 +725,7 @@ void fn_801E7E48(void) {
     s64 start;
     int i;
     start = fn_802E2C9C();
-    w = fn_80176A70();
+    w = PhysicsGetStatePacked();
     lbl_8055EB14 = Max(DMax(DMin(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
     lbl_8055EB18 = w->views[0].time;
     lbl_8055EB04 = w;

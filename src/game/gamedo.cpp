@@ -392,7 +392,7 @@ void fn_8023BF68(const char* arg) {
     }
 }
 
-void fn_8023BFBC(int track, int eve) {
+void GameDoEve(int track, int eve) {
     Track* t = GetTrack(track);
     Event* e = FindTrackEvent(track, eve);
     fn_802E30C8("GameDoEve: eve [%s] contest [%s] at %s", t->name,

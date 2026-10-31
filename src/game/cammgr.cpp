@@ -58,7 +58,7 @@ extern CamPose lbl_80499920;
 extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
 
 extern "C" {
-void fn_801EF024(void* cb);
+void EventUnInstallHandler(void* cb);
 void fn_801BFD34(u8* a, f32* b, u8* c);
 f32 fn_80129DC4(int stream, f32 lo, f32 hi);
 s32 fn_80129D90(int stream, s32 lo, s32 hi);
@@ -829,7 +829,7 @@ void fn_80267680(void) {
 }
 
 void fn_8026785C(void) {
-    fn_801EF024((void*)fn_8026A554);
+    EventUnInstallHandler((void*)fn_8026A554);
     fn_80278288();
     fn_802733F0();
     if (lbl_8055F490) {
@@ -1381,7 +1381,7 @@ void fn_80276044(CamRec* c);
 void fn_80276054(CamRec* c);
 u32 fn_801769A8(void);
 void fn_80273490(int type, CamRec* c);
-void fn_80273604(CamRec* c, int which);
+void camera_car(CamRec* c, int which);
 void fn_80275B9C(f32 a, f32 b, f32 c, CamRec* rec);
 void fn_80277A14(CamRec* c, int idx);
 void fn_80278360(CamRec* c);
@@ -1517,16 +1517,16 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             *own = 1;
             break;
         case 0xC:
-            fn_80273604(c, 1);
+            camera_car(c, 1);
             break;
         case 0xD:
-            fn_80273604(c, 2);
+            camera_car(c, 2);
             break;
         case 0xE:
-            fn_80273604(c, 3);
+            camera_car(c, 3);
             break;
         case 0xF:
-            fn_80273604(c, 4);
+            camera_car(c, 4);
             break;
         case 0x13:
             c->pose = lbl_80499920;

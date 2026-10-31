@@ -265,7 +265,7 @@ s32 fn_802E3BB4(void* a, void* b, void* c) {
     return -1;
 }
 
-s32 fn_802E3C24(void* a, void* b, void* c) {
+s32 FileFindNext(void* a, void* b, void* c) {
     FileFinder* f = fn_802E339C();
     if (f) {
         return f->FindNext(a, b, c);
@@ -274,7 +274,7 @@ s32 fn_802E3C24(void* a, void* b, void* c) {
     return 0;
 }
 
-void fn_802E3CA4(void* a) {
+void FileFindClose(void* a) {
     FileFinder* f = fn_802E339C();
     if (f) {
         f->FindClose(a);

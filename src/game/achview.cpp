@@ -608,7 +608,7 @@ u8* fn_8025A4CC(u8* p, int del) {
 }
 
 // Browse run: left/right page through the categories until the player backs out.
-void fn_8025A50C(void) {
+void MenuDoAchievementsViewer(void) {
     fn_80259148();
     lbl_80498EAC[0] = 0.0f;
     lbl_80498EAC[1] = -1.0f;

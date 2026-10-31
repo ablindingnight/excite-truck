@@ -31,7 +31,7 @@ void fn_8025C028(void) { lbl_8055C390 = fn_80214D04(); }
 
 void fn_8025C04C(void) { fn_80214CB4(lbl_8055C390); }
 
-void fn_8025A50C(void);
+void MenuDoAchievementsViewer(void);
 void fn_8025CE78(void);
 void fn_8025E034(void);
 extern char lbl_8055B860[8];
@@ -55,7 +55,7 @@ void fn_8025C054(void) {
     while (run) {
         switch (fn_802146BC(&desc, -999, -999, 1)) {
         case 0:
-            fn_8025A50C();
+            MenuDoAchievementsViewer();
             break;
         case 1:
             fn_8025CE78();

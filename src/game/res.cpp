@@ -21,8 +21,8 @@ int fn_802E39D0(int fd, void* buf, s32 n);  // read, checked
 void fn_802E3A14(int fd, s32 pos);       // seek
 void fn_802E3804(int fd, void* buf, s32 n);  // read
 int fn_802E3BB4(const char* pattern, char* name, s32 n);  // find first
-int fn_802E3C24(int h, char* name, s32 n);                // find next
-void fn_802E3CA4(int h);                                  // find close
+int FileFindNext(int h, char* name, s32 n);                // find next
+void FileFindClose(int h);                                  // find close
 void fn_802E4CA8(char* dst, const char* src, s32 n);
 int fn_802E7354(const char* path);
 void fn_802E746C(int h, s32* sector, s32* size);
@@ -907,8 +907,8 @@ void fn_8012BF28(void) {
                     } else {
                         fn_802E30C8("reload: failed even to open %s", name);
                     }
-                } while (fn_802E3C24(h, name, sizeof(name)));
-                fn_802E3CA4(h);
+                } while (FileFindNext(h, name, sizeof(name)));
+                FileFindClose(h);
             }
         }
     }
@@ -978,7 +978,7 @@ const char* fn_8012C58C(void* data) {
     return name;
 }
 
-AsyncResource* fn_8012C5B8(const char* name, u32 type, u32* info) {
+AsyncResource* ResourceGetStream(const char* name, u32 type, u32* info) {
     int idx;
     AsyncResource* r = 0;
     ResourceSet* set = fn_8012B534(name, &idx, 1);
@@ -1782,7 +1782,7 @@ extern "C" int fn_8012EDA8(StreamBuf* b, const char* name, u32 type, u32* info) 
     }
     b->pos = 0;
     for (j = 0; j < 2; j++, slots++) {
-        slots->res = fn_8012C5B8(name, type, info);
+        slots->res = ResourceGetStream(name, type, info);
         if (!slots->res) {
             return 0;
         }

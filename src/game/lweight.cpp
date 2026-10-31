@@ -31,7 +31,7 @@ struct WeightImage {
 extern "C" {
 WeightImage* fn_802B51E4(int w, int h);
 void fn_802B52B4(WeightImage* img);
-void fn_802B52C0(const char* name, WeightImage* img);
+void save_simple_tga(const char* name, WeightImage* img);
 }
 
 ModuleTag lbl_8055FA88;
@@ -125,7 +125,7 @@ void fn_802BBA08(const char* name, int base) {
                 }
             }
         }
-        fn_802B52C0(path, img);
+        save_simple_tga(path, img);
         fn_802B52B4(img);
     }
 }

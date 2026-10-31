@@ -608,7 +608,7 @@ int fn_8020402C(void);
 void fn_80204050(void);
 void fn_80203FF8(void);
 void fn_801EEFDC(int (*cb)(ObjMsg*), int type);
-void fn_801EF024(int (*cb)(ObjMsg*));
+void EventUnInstallHandler(int (*cb)(ObjMsg*));
 void* fn_801E6A3C(const char* model, int streaming, int c);
 void* fn_801E6BEC(const char* stream);
 void fn_801E6CC8(void* anim, int once);
@@ -1398,7 +1398,7 @@ void fn_801FA0B0(FileEntry** list);
 void fn_801FA138(EWSound** list);
 
 void fn_801F9F08(void) {
-    fn_801EF024(fn_801F9CF8);
+    EventUnInstallHandler(fn_801F9CF8);
     fn_80204020();
     lbl_8055EC70 = 0;
     delete lbl_8055EC74;

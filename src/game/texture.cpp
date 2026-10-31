@@ -74,7 +74,7 @@ char* strrchr(const char* s, int c);
 int strcasecmp(const char* a, const char* b);
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
-AsyncResource* fn_8012C5B8(const char* name, u32 type, u32* version);
+AsyncResource* ResourceGetStream(const char* name, u32 type, u32* version);
 void fn_8012C958(AsyncResource* r);
 void fn_801282EC(int a);
 void fn_801282F4(void);
@@ -378,7 +378,7 @@ s32 fn_802CA380(const char* name) {
     u32 ver;
     s32 span = 0;
     fn_802CA2A8(buf, 32, name);
-    AsyncResource* r = fn_8012C5B8(buf, 'TEX ', &ver);
+    AsyncResource* r = ResourceGetStream(buf, 'TEX ', &ver);
     if (r) {
         span = r->Span();
         fn_8012C958(r);
@@ -1065,7 +1065,7 @@ void fn_802CBFCC(TexCache* c, MipLoad* l) {
 void fn_802CC03C(TexCache* c, MipLoad* l, s32 id) {
     char buf[32];
     u32 ver;
-    l->res = fn_8012C5B8(fn_802CA2A8(buf, 32, lbl_8055FCB0[id].name), 'TEX ', &ver);
+    l->res = ResourceGetStream(fn_802CA2A8(buf, 32, lbl_8055FCB0[id].name), 'TEX ', &ver);
     l->tex = id;
     l->gx = fn_802D9154();
     if (!l->res) {

@@ -380,7 +380,7 @@ void fn_80176A34(s32 frame) {
 
 void fn_80176A6C(void) { fn_801771A8(); }
 
-StatePacket* fn_80176A70(void) {
+StatePacket* PhysicsGetStatePacked(void) {
     s32 frame = lbl_8055E3C4;
     s32 t0 = fn_802E2C20();
     int n = 0;

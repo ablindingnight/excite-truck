@@ -179,7 +179,7 @@ struct PickupCounts {
     s32 done;  // offset 0x14
 };
 
-extern "C" PickupType* fn_80167874(int type);
+extern "C" PickupType* get_pickup_type_info(int type);
 
 struct PickupObjMan {
     PickupObjMan(void);
@@ -238,7 +238,7 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
 inline void PickupObjMan::Add(int type, const V2& pos, f32 hover) {
     Pickup* p = &objs.data[objs.count++];
     p->type = 0;
-    p->type = fn_80167874(type);
+    p->type = get_pickup_type_info(type);
     p->pos[0] = pos.x;
     p->pos[1] = 0.0f;
     p->pos[2] = pos.z;
@@ -248,7 +248,7 @@ inline void PickupObjMan::Add(int type, const V2& pos, f32 hover) {
     p->pos[1] += p->hover;
     p->taken = 0;
     fn_801EA1E0(p->pos[0], p->pos[2], &p->pos[1], 1);
-    fn_80167874(type)->count++;
+    get_pickup_type_info(type)->count++;
     if (grouping) {
         groups.Back().count++;
     } else {
@@ -338,7 +338,7 @@ inline PickupObjMan::PickupObjMan(void) {
 
 extern "C" {
 
-PickupType* fn_80167874(int type) {
+PickupType* get_pickup_type_info(int type) {
     PickupType* t;
     for (t = lbl_80330020; t->type != 6; t++) {
         if (t->type == type) {

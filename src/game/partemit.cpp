@@ -146,7 +146,7 @@ CamView* fn_801E8718(int i);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int i);
 void fn_801E9DC4(s16* h);
 void fn_801EEFDC(EventHandler h, u8 type);
-void fn_801EF024(EventHandler h);
+void EventUnInstallHandler(EventHandler h);
 void fn_802029FC(void);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
 s32 fn_8028E3F4(const char* name);
@@ -226,8 +226,8 @@ void fn_8029F0D0(void) {
         delete[] lbl_8055F820;
     }
     lbl_8055F820 = 0;
-    fn_801EF024(fn_802A0720);
-    fn_801EF024(fn_802A0620);
+    EventUnInstallHandler(fn_802A0720);
+    EventUnInstallHandler(fn_802A0620);
     fn_8029FDDC();
     fn_8029FFBC();
 }

@@ -43,7 +43,7 @@ void fn_80178DBC(int i, f32 v);
 void fn_801B8BF4(void);
 int fn_801C5B60(void);
 void fn_801B841C(void);
-void fn_801C4CE8(void);
+void debug_event(void);
 void fn_801D47F8(void);
 void fn_80134A8C(void);
 void fn_80134B50(void);
@@ -606,7 +606,7 @@ void fn_80177F40(void) {
         if (!fn_801C5B60()) {
             fn_801B841C();
         }
-        fn_801C4CE8();
+        debug_event();
         fn_801D47F8();
         fn_801EA1F0();
         if (!net) {

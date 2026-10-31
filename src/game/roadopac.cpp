@@ -20,7 +20,7 @@ struct OpacImage {
 
 extern "C" {
 void fn_802B52B4(OpacImage* img);
-void fn_802B52C0(const char* name, OpacImage* img);
+void save_simple_tga(const char* name, OpacImage* img);
 }
 
 static inline void Plot(OpacImage* im, int x, int y, u32 c) { im->data[x + (im->h - 1 - y) * im->w] = c; }
@@ -70,7 +70,7 @@ s32 fn_802C21B8(void) { return lbl_8055FB50; }
 
 void fn_802C21C0(void) {
     if (lbl_8055FB54) {
-        fn_802B52C0("roadopac.tga", lbl_8055FB54);
+        save_simple_tga("roadopac.tga", lbl_8055FB54);
     }
 }
 

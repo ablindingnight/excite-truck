@@ -118,7 +118,7 @@ void fn_80127434(void);
 void fn_8023D7CC(void);
 void fn_8023D70C(void);
 void fn_8020A600(void);
-void fn_8023BFBC(int eve, int track);
+void GameDoEve(int eve, int track);
 }
 
 struct Eve {
@@ -462,7 +462,7 @@ int DirectToTrack(const char* name) {
 
         if (found) {
             fn_8020A600();
-            fn_8023BFBC(track, eve);
+            GameDoEve(track, eve);
         } else if (lbl_8034EC58[0] != '\0') {
             fn_802E30C8("no eves for \"%s\"", lbl_8034EC58);
         } else {

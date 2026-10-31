@@ -325,7 +325,7 @@ public:
 // find_best_region: the camera record (index into lbl_8049EDC8) whose region suits `car` best for
 // camera group `type` (-1 = any); regions that do not apply still win over nothing if their camera
 // is enabled.
-int fn_802710A0(u8* car, int type) {
+int find_best_region(u8* car, int type) {
     f32 best = lbl_80563F44;
     f32 altBest = best;
     CamRegion* r;
@@ -375,7 +375,7 @@ int fn_802710A0(u8* car, int type) {
                 warnedGroups = true;
                 fn_802E30C8("%s", "find_best_region: didn't find any, trying all groups...");
             }
-            return fn_802710A0(car, -1);
+            return find_best_region(car, -1);
         }
         static bool warnedAny;
         if (!warnedAny) {
@@ -588,7 +588,7 @@ void fn_80271624(int mode, u8* p) {
         int fresh = 0;
         int idx;
         if (mode == 11) {
-            idx = fn_802710A0(PTR(p, 0x140), group);
+            idx = find_best_region(PTR(p, 0x140), group);
             if (idx >= 0) {
                 S32(p, 0x14C) = idx;
                 if (idx != S32(p, 0x150)) {
@@ -1409,7 +1409,7 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
 }
 
 // Applies the current view of camera cycle `ci` to camera `p`.
-void fn_80273604(u8* p, int ci) {
+void camera_car(u8* p, int ci) {
     CamCycle* cyc = &lbl_8049A258[ci];
     CamView* v = &lbl_80346BA0[cyc->first + cyc->cur];
     switch (v->type) {

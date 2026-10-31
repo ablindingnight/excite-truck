@@ -145,7 +145,7 @@ int fn_802E8D84(void);
 void fn_802E6FBC(void);
 void fn_8027B77C(void);
 void fn_8027B690(void);
-void fn_8026311C(void);
+void MenuDoControlUnified(void);
 void fn_80263F30(int a, int b, int c);
 void fn_80230E90(int a);
 void fn_802168BC(int a);
@@ -781,7 +781,7 @@ extern "C" void fn_80239F74(void) {
                                 audio.Next();
                                 break;
                             case 3:
-                                fn_8026311C();
+                                MenuDoControlUnified();
                                 break;
                             case 16:
                                 fn_80263F30(0, 1, 0);

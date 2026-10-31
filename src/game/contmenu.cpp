@@ -343,7 +343,7 @@ int fn_802630C0(void) {
 
 int fn_80263104(void) { return lbl_8055F434 == lbl_8055C440; }
 
-void fn_8026311C(void) {
+void MenuDoControlUnified(void) {
     RumbleItem rumble[2];
     SpeakerItem speaker[2];
     for (int i = 0; i < 2; i++) {

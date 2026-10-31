@@ -453,7 +453,7 @@ void fn_8000AF04(u32 flags) {
 
 enum { MODE_RACE = 0, MODE_INTRO = 0xD };
 
-void fn_8000AF1C(RaceSetup* rs) {
+void gameloop_begin(RaceSetup* rs) {
     int intro;
     ViewCam* c;
     int i;
@@ -525,7 +525,7 @@ void fn_8000B09C(RaceSetup* rs) {
     fn_801E7DEC(rs);
 }
 
-void fn_8000B150(RaceResult* res) {
+void gameloop_postrace(RaceResult* res) {
     RaceResultEntry* e;
     int i;
     fn_8017685C(1);
@@ -826,7 +826,7 @@ int fn_8000BB08(void) {
 }
 
 
-void fn_8000BC44(void) {
+void game_loop(void) {
     ViewCam* c;
     int i;
     for (i = 0, c = lbl_8034F5B8; i < fn_801E85AC(); c++, i++) {
@@ -926,7 +926,7 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
     int frames;
     RaceResult result;
 
-    fn_8000AF1C(rs);
+    gameloop_begin(rs);
     fn_80176780(0x1200, 0);
     if (listener) {
         listener->Begin();
@@ -943,7 +943,7 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
             frames = 0;
             fn_8000BD64();
             while (lbl_8055D3D4) {
-                fn_8000BC44();
+                game_loop();
                 if (lbl_8055D3D4) {
                     fn_8000B2AC();
                 }
@@ -954,7 +954,7 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
             }
             fn_8000BD98(frames);
             fn_802E30C8("gameloop: last frames' DMADrawTime: %1.2f", lbl_8055D0B4);
-            fn_8000B150(&result);
+            gameloop_postrace(&result);
             if (listener) {
                 listener->End(&result);
             }

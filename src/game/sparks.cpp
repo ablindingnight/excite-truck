@@ -127,7 +127,7 @@ int fn_801E8758(int view);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
 void fn_801EEFDC(int (*h)(const void* ev), u8 type);
-void fn_801EF024(int (*h)(const void* ev));
+void EventUnInstallHandler(int (*h)(const void* ev));
 const SparkCar* fn_80287B24(s32 i);
 void fn_80287B38(void (*cb)(SparkEntry* e, int n));
 int fn_80287B5C(int n);
@@ -362,11 +362,11 @@ void fn_8028A664(void) {
 }
 
 void fn_8028A784(void) {
-    fn_801EF024(fn_8028BB14);
-    fn_801EF024(fn_8028BA9C);
-    fn_801EF024(fn_8028BA44);
-    fn_801EF024(fn_8028B500);
-    fn_801EF024(fn_8028B93C);
+    EventUnInstallHandler(fn_8028BB14);
+    EventUnInstallHandler(fn_8028BA9C);
+    EventUnInstallHandler(fn_8028BA44);
+    EventUnInstallHandler(fn_8028B500);
+    EventUnInstallHandler(fn_8028B93C);
     fn_8028B4CC();
     fn_8028AD78();
     if (lbl_8055F700) {

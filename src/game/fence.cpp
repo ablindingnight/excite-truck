@@ -36,7 +36,7 @@ typedef int (*EventHandler)(const Fence* e);
 
 extern "C" {
 void fn_801EEFDC(EventHandler h, u8 type);
-void fn_801EF024(EventHandler h);
+void EventUnInstallHandler(EventHandler h);
 }
 
 s32 lbl_8055CB68 = -2;  // fence texture
@@ -71,7 +71,7 @@ void fn_802A09B0(void) {
 }
 
 void fn_802A0AFC(void) {
-    fn_801EF024(fn_802A0944);
+    EventUnInstallHandler(fn_802A0944);
     fn_802CAC54(lbl_8055CB68);
     lbl_8055CB68 = -2;
     delete[] lbl_8055F834;

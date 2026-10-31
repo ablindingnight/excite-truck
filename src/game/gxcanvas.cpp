@@ -367,7 +367,7 @@ void fn_802C365C(int x0, int y0, int x1, int y1, u32 color) {
     } while (--h > 0);
 }
 
-void fn_802C3918(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
+void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C3C68(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C3D74(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
@@ -377,7 +377,7 @@ void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
 
 void fn_802C3754(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     if (gxIs16(src->fmt) && gxIs16(dst->fmt)) {
-        fn_802C3918(src, x0, y0, x1, y1, dst, dx, dy);
+        copy_16_to_16(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (src->fmt == 5 && dst->fmt == 5) {
         fn_802C3C68(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (gxIs16(src->fmt) && dst->fmt == 5) {
@@ -401,7 +401,7 @@ void fn_802C3850(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     }
 }
 
-void fn_802C3918(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
+void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
     if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {

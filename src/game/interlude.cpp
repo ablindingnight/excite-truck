@@ -1103,7 +1103,7 @@ void fn_801B8E28(int car);
 
 // The interlude player, once per frame: runs every event whose time has come, in order. A wait (cars to
 // cross a point) or a fade still running holds the queue and pauses the clock.
-void fn_801C4CE8(void) {
+void debug_event(void) {
     if (lbl_8055E7E1) {
         fn_801769E0();
         lbl_8055E7E1 = 0;

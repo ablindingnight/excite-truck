@@ -82,7 +82,7 @@ struct StuntOpts {
 StuntOpts* fn_801E87A8(void);
 s32 fn_801EE0C8(void* model);
 void fn_801EEFDC(int (*h)(const void* ev), u8 type);
-void fn_801EF024(int (*h)(const void* ev));
+void EventUnInstallHandler(int (*h)(const void* ev));
 s32 fn_80287B14(void);
 const StuntCar* fn_80287B24(s32 i);
 f32 fn_80287BC8(f32 lo, f32 hi);
@@ -573,9 +573,9 @@ extern "C" {
 
 void fn_802AB504(void) {
     lbl_8055F92C = 0;
-    fn_801EF024(fn_802A9F30);
-    fn_801EF024(fn_802A9F90);
-    fn_801EF024(fn_802A9FB0);
+    EventUnInstallHandler(fn_802A9F30);
+    EventUnInstallHandler(fn_802A9F90);
+    EventUnInstallHandler(fn_802A9FB0);
     delete lbl_8055F924;
     lbl_8055F924 = 0;
     delete[] lbl_8055F928;

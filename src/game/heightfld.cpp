@@ -415,7 +415,7 @@ GroundHeader* fn_801DCA60(void) {
 
 void fn_801DCD24(void* p) { operator delete(p); }
 
-void fn_801DCD28(int fake) {
+void load_ground(int fake) {
     lbl_8055E998 = 0;
     if (!fake) {
         lbl_8055E990 = fn_801DC9B0();
@@ -443,7 +443,7 @@ void fn_801DCDA4(void) {
     fn_801D049C();
 }
 
-void fn_801DCE0C(int fake) { fn_801DCD28(fake); }
+void fn_801DCE0C(int fake) { load_ground(fake); }
 
 void fn_801DCE10(void) {}
 

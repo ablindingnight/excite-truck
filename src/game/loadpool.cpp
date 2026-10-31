@@ -7,7 +7,7 @@ class AsyncResource;
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-AsyncResource* fn_8012C5B8(const char* name, u32 type, u32* info);  // ResourceGetStream
+AsyncResource* ResourceGetStream(const char* name, u32 type, u32* info);  // ResourceGetStream
 void fn_8012C958(AsyncResource* r);                                 // ResourceStreamClose
 }
 
@@ -115,7 +115,7 @@ int fn_80134424(LoadPool* pool, const char* name, u32 type, u32* info, LoadCallb
         if (s->state == 0) {
             s32 total;
             s->state = 1;
-            s->res = fn_8012C5B8(name, type, info);
+            s->res = ResourceGetStream(name, type, info);
             if (!s->res) {
                 fn_802E317C("loadpool: can't load %s", name);
             }

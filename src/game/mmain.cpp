@@ -9,7 +9,7 @@ void fn_802E6CA4(int a);
 void fn_802E6CA8(void);
 void fn_8023D7CC(void);
 void fn_8023D70C(void);
-void fn_802473A4(void);
+void MenuDoDemo(void);
 void fn_80247210(void);
 void fn_80129AEC(int a);
 void fn_802E47E8(void);
@@ -46,7 +46,7 @@ void fn_8023B618(void) {
 
 void fn_8023B640(void) {
     fn_802E30C8("mmain: demo mode!");
-    fn_802473A4();
+    MenuDoDemo();
 }
 
 void fn_8023B670(void) {

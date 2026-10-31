@@ -529,7 +529,7 @@ void KernelErrorHandler(u16 err) {
     fn_802E30C8("%s", lbl_8034CCE0[0].name);
 }
 
-void fn_802E27F0(void) {
+void stack_check(void) {
     u32 here;
     lbl_804DB780.size = 0x7400;
     lbl_804DB780.top = &here;
@@ -624,7 +624,7 @@ int fn_802E2A5C(void) {
     fn_802E2CFC(&d);
     fn_802E30C8("date: %d/%d/%d (%d)", d.month, d.day, d.year, d.wday);
     fn_802E30C8("time: %d:%02d:%02d", d.hour, d.min, d.sec);
-    fn_802E27F0();
+    stack_check();
     fn_80127C90(fn_802E2A1C, "check_stack");
     return 1;
 }
