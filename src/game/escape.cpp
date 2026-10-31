@@ -38,15 +38,15 @@ public:
     virtual void* FindArtSet(const char* name);            // 0x18
 };
 
-class Sound {
+class GameSound {
 public:
-    virtual ~Sound(void);
+    virtual ~GameSound(void);
 };
 
-// The pause sounds; the inline dtor only chains to Sound's.
-class PauseSound : public Sound {
+// The pause menu's 2D sounds (Sound2D, sound.cpp); escape is the first unit to emit the weak inline dtor.
+class Sound2D : public GameSound {
 public:
-    virtual ~PauseSound(void) {}
+    virtual ~Sound2D(void) {}
 
     void SetVolume(f32 v) {
         if (v != volume) {
@@ -102,7 +102,7 @@ void fn_800103B8(u32 color, u32 flags, const char* fmt, f32 scale, f32 x, f32 y,
 void* fn_802090D4(const char* name);
 void fn_80209190(void* p, f32 value);
 Layout* fn_80145E70(const char* name);
-PauseSound* fn_80207848(const char* name, int flags);
+Sound2D* fn_80207848(const char* name, int flags);
 void fn_80209110(void** p);
 f32 fn_80209028(void);
 int fn_80265D64(void);
@@ -136,8 +136,8 @@ int (*lbl_8055D408)(int item);     // item callback
 void (*lbl_8055D40C)(void);        // background draw callback
 void* lbl_8055D410;
 Layout* lbl_8055D414;
-PauseSound* lbl_8055D418;
-PauseSound* lbl_8055D41C;
+Sound2D* lbl_8055D418;
+Sound2D* lbl_8055D41C;
 s32 lbl_8055D420;  // missing controller index
 
 static int fn_8000C7CC(void) { return OptE3Demo() == 0; }
