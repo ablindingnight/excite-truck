@@ -2193,7 +2193,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
             if (t) {
                 TextElem e = *t;
                 f32 left = 0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now;
-                f32 k = Lerp(0.0f, 1.0f, Clamp01(((f32)fmod(left, 1.875) - 1.0f) / -0.2f));
+                f32 k = Lerp(0.0f, 1.0f, Clamp01(((f32)fmod(left, 1.0) - 1.0f) / -0.2f));
                 char buf[8];
                 e.scale *= 1.0f + 0.4f * k;
                 e.color = fn_80147C50(0xFFFFFFFF, 0xFFFF0000, k);
@@ -2364,7 +2364,7 @@ void BetaCar::DrawBonusStar(ILayout* l, int n) {
         t = result.SinceFinish(this);
         if (a && b) {
             GartElem e;
-            f32 ph = fmod(t, 1.875);
+            f32 ph = fmod(t, 1.0);
             if (ph < 0.5f) {
                 e = *a;
                 e.color = fn_80147C50(e.color & 0xFFFFFF, e.color, Lerp(0.0f, 1.0f, Ramp(ph, 0.0f, 0.25f)));
@@ -3401,7 +3401,7 @@ inline void BetaMaster::vf0C(void) {
         Pickup* t = stars.a.data[i];
         SpinBody* body = (SpinBody*)t->hB8;
         if (body) {
-            f32 ang = 0.5235988f * (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * lbl_8055E3C8, 1.875)) + t->angle;
+            f32 ang = 0.5235988f * (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * lbl_8055E3C8, 1.0)) + t->angle;
             f32 c;
             f32 s;
             body->pos[0] = t->pos[0];
@@ -3788,7 +3788,7 @@ inline void Pickup::Draw(Color col) {
         p.y = 1.25f + pos[1];
         p.x = pos[0];
         at = p;
-        ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.875);
+        ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.0);
         m.t = at;
         m.r.SetRotY(ang);
         fn_802C744C(lbl_80559ECC, &m);
