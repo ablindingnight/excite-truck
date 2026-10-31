@@ -156,7 +156,7 @@ extern "C" {
 
 // Builds the driver model on skeleton skel: finds the wheel/hand helpers, poses the model and turns its hips,
 // knees and feet (relative to the seat) into a 7-point ragdoll pinned to the bike.
-DriverModel* fn_801FFB74(const char* name, u8* skel) {
+DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
         fn_802E30C8("drivmod: %s has no butt!", name);
@@ -284,7 +284,104 @@ DriverModel* fn_801FFB74(const char* name, u8* skel) {
     return d;
 }
 
-void fn_802002D4(u8* p) {}  // stub (418)
+// The upper-body driver (skeletons with a "neck" and no "butt"; others use fn_801FFB74): shoulders, hands and the
+// points between them make the 7-point ragdoll.
+DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
+    lbl_8055ECA8 = name;
+    if (fn_801E320C(skel, "butt")) {
+        return fn_801FFB74(name, skel, opt);
+    }
+    if (!fn_801E320C(skel, "neck")) {
+        return 0;
+    }
+    DriverModel* d = new ("drivrmod") DriverModel;
+    memset(d, 0, sizeof(DriverModel));
+    d->wheel = fn_801E3004(skel, "wheel", -1);
+    d->lhand = fn_801E31D8(d->wheel, "Lhand", -1);
+    d->rhand = fn_801E31D8(d->wheel, "Rhand", -1);
+    d->hand = fn_801E3004(skel, "hand", -1);
+    d->model = fn_802C6FC0("driver01.mod", 0, 0);
+    d->skel = fn_801E592C(d->model);
+    DVec3 ls = *(DVec3*)fn_801FFB08(skel, "lshoulder");
+    DVec3 lh;
+    fn_801E3488(&lh, d->lhand);
+    DVec3 lmid;
+    lmid.x = 0.5f * lh.x + 0.5f * ls.x;
+    lmid.y = 0.5f * lh.y + 0.5f * ls.y - 0.2032f;
+    lmid.z = 0.5f * lh.z + 0.5f * ls.z;
+    DVec3 rs = *(DVec3*)fn_801FFB08(skel, "rshoulder");
+    DVec3 rh;
+    fn_801E3488(&rh, d->rhand);
+    DVec3 rmid;
+    rmid.x = 0.5f * rh.x + 0.5f * rs.x;
+    rmid.y = 0.5f * rh.y + 0.5f * rs.y - 0.2032f;
+    rmid.z = 0.5f * rh.z + 0.5f * rs.z;
+    DVec3 chest;
+    chest.x = 0.5f * ls.x + 0.5f * rs.x;
+    chest.y = 0.5f * ls.y + 0.5f * rs.y - 1.27f;
+    chest.z = 0.5f * ls.z + 0.5f * rs.z;
+    DBone bones[32];
+    int n = 32;
+    fn_801E5998(d->skel, bones, &n);
+    d->butt.x = rs.x - bones[4].m.pos.x;
+    d->butt.y = rs.y - bones[4].m.pos.y;
+    d->butt.z = rs.z - bones[4].m.pos.z;
+    d->butt.y = d->butt.y + 0.0762f;
+    d->body.row[0].x = 1.0f;
+    d->body.row[0].y = 0.0f;
+    d->body.row[0].z = 0.0f;
+    d->body.row[1].x = 0.0f;
+    d->body.row[1].y = 1.0f;
+    d->body.row[1].z = 0.0f;
+    d->body.row[2].x = 0.0f;
+    d->body.row[2].y = 0.0f;
+    d->body.row[2].z = 1.0f;
+    d->body.pos.x = 0.0f;
+    d->body.pos.y = 0.0f;
+    d->body.pos.z = 0.0f;
+    DVec3 off;
+    MulVec(&off, &d->butt, &d->body);
+    d->body.pos.x = d->body.pos.x + off.x;
+    d->body.pos.y = d->body.pos.y + off.y;
+    d->body.pos.z = d->body.pos.z + off.z;
+    d->rest = d->body;
+    fn_801E33E4(&d->wheelMtx, d->wheel);
+    DEdgeDesc edges[6] = {
+        {0, 1, 0.0f, 0.0f}, {1, 2, 0.0f, 0.0f}, {3, 4, 0.0f, 0.0f},
+        {4, 5, 0.0f, 0.0f}, {1, 6, -0.5f, 0.1f}, {4, 6, -0.5f, 0.1f},
+    };
+    DVertDesc verts[7];
+    verts[0].pos = ls;
+    verts[0].w34 = 1.0f;
+    verts[0].w30 = 1.0f;
+    verts[1].pos = lmid;
+    verts[1].w34 = 1.0f;
+    verts[1].w30 = 1.0f;
+    verts[2].pos = lh;
+    verts[2].w34 = 1.0f;
+    verts[2].w30 = 1.0f;
+    verts[3].pos = rs;
+    verts[3].w34 = 1.0f;
+    verts[3].w30 = 1.0f;
+    verts[4].pos = rmid;
+    verts[4].w34 = 1.0f;
+    verts[4].w30 = 1.0f;
+    verts[5].pos = rh;
+    verts[5].w34 = 1.0f;
+    verts[5].w30 = 1.0f;
+    verts[6].pos = chest;
+    verts[6].w34 = 1.0f;
+    verts[6].w30 = 1.0f;
+    DPinDesc pins[5] = {
+        {0, &d->rest, 0}, {2, &d->wheelMtx, 0}, {3, &d->rest, 0}, {5, &d->wheelMtx, 0}, {6, &d->body, 0},
+    };
+    d->sys = fn_801C1BA4(7, 6, 5);
+    fn_801C1CBC(d->sys, 7, verts, 6, edges, 5, pins);
+    d->fC4 = 0.0f;
+    d->fCC = 0.0f;
+    d->fC8 = 0.0f;
+    return d;
+}
 
 void fn_8020095C(u8* p) {
     if (p) {
