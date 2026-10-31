@@ -135,7 +135,7 @@ int fn_801345D8(char* buf, int n, const char* fmt, ...);
 extern const f32 lbl_802FA628[5] = {0.75f, 0.8f, 0.85f, 0.95f, 1.0f};
 extern const MenuDesc lbl_802FA63C = {"ep_trophy.lyt", 0, 0, 0, 0};
 
-// The trophy model shown in the achievement viewer (vtable lbl_80345158; deleting dtor fn_80259680).
+// The trophy model shown in the achievement viewer (vtable lbl_80345158; deleting dtor AchievementTrophyModel_vf08).
 struct TrophyView {
     void* vt;          // offset 0x0
     char model[50];    // offset 0x4
@@ -265,7 +265,7 @@ int fn_80259224(u8* p) {
     return r;
 }
 
-u8* fn_80259680(u8* p, int del) {
+u8* AchievementTrophyModel_vf08(u8* p, int del) {
     if (p) {
         *(void**)p = lbl_80345158;
         if (S32(p, 0x50) != -1) {
@@ -642,7 +642,7 @@ void MenuDoAchievementsViewer(void) {
     fn_802591D8();
 }
 
-void fn_8025A83C(u8* p) {
+void AchievementTrophyModel_vf10(u8* p) {
     F32(p, 0x84) = 1.0f;
     F32(p, 0x88) = 0.0f;
     F32(p, 0x8C) = 0.0f;
@@ -655,7 +655,7 @@ void fn_8025A83C(u8* p) {
     ((VA*)p)->v0C(p + 4);
 }
 
-void fn_8025A87C(u8* p) {
+void AchievementTrophyModel_vf24(u8* p) {
     F32(p, 0x84) = 1.0f;
     F32(p, 0x88) = 0.0f;
     F32(p, 0x8C) = 0.0f;
@@ -690,7 +690,7 @@ int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* name, int a, int b);
 
 // Loads the trophy model "*uiaction.res/<name>.mo0" (replacing the old one) and resets its rotation.
-void fn_8025A8B8(u8* p, const char* name) {
+void AchievementTrophyModel_vf0C(u8* p, const char* name) {
     if (S32(p, 0x50) != -1) {
         fn_802C6CF8(S32(p, 0x50));
         S32(p, 0x50) = -1;
@@ -765,7 +765,7 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
 // (right, up, forward) is rebuilt around the tilted up vector.
-void fn_8025AA90(u8* p, f32 dt) {
+void AchievementTrophyModel_vf14(u8* p, f32 dt) {
     ViewPad pad;
     Mat3 rot;
     f32 r[3];
@@ -896,7 +896,7 @@ static inline void TrophyCenterOffset(u8* p, f32* bounds, u8* cam) {
     fn_801BFE7C((f32*)(p + 0x78), (f32*)(p + 0x78), (f32*)(cam + 0x24));
 }
 
-void fn_8025AE18(u8* p) {
+void AchievementTrophyModel_vf1C(u8* p) {
     Mat3 scale;
     TrophySizes sizes;
     f32 bounds[6];
