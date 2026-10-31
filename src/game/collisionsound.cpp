@@ -107,7 +107,7 @@ inline void ScaleVInto(const V3& p,float f,V3& result){result.x=p.x*f;result.y=p
 
 inline bool CollisionAbove(float value,float threshold){return value>threshold;}
 inline float CollisionMin(float limit,float value){if(limit<value)return limit;return value;}
-int fn_801B32C8(Contact* self,int kind){int result=0;int kinds[2];kinds[0]=self->kind;int selected=-1;kinds[1]=kind;if(kinds[0]==109)selected=0;else if(kinds[1]==109)selected=1; if(selected!=-1)switch(kinds[!selected]){case 1:case 110:result=1;break;}return result;}
+int fn_801B32C8(const Contact* self,int kind){int result=0;int kinds[2];kinds[0]=self->kind;int selected=-1;kinds[1]=kind;if(kinds[0]==109)selected=0;else if(kinds[1]==109)selected=1; if(selected!=-1)switch(kinds[!selected]){case 1:case 110:result=1;break;}return result;}
 Body* fn_801B3338(Contact* self) {
  Body* p=self->body;
  if(p){bool car=false;u32 tag=p->tag;
