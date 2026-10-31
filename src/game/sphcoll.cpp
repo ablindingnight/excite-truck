@@ -279,7 +279,7 @@ public:
     virtual void v24(void);
     virtual void v28(void);
     virtual void v2C(void);
-    virtual void v30(void);
+    virtual u8* v30(void);
     virtual void v34(u8* q);
     virtual void v38(void);
     virtual f32 v3C(void);  // bounding radius
@@ -526,7 +526,336 @@ void fn_80199870(u8* p, void* w) {
     }
 }
 
-void fn_80199894(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {}  // stub (955)
+extern const f32 lbl_805622E0;  // 1.0
+void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
+void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
+
+static inline int IsCarObj(const u8* o) {
+    if (o) {
+        switch (S32(o, 0x10)) {
+        case 'ACAR':
+        case 'CAR ':
+        case 'NCAR':
+        case 'PCAR':
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static inline f32 ClampExt(f32 v, f32 e) {
+    if (e < v) {
+        v = e;
+    }
+    return v > -e ? v : -e;
+}
+
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
+extern const f32 lbl_805622E8;  // 0.5
+extern const f32 lbl_80562300;  // 0.2
+extern const f32 lbl_80562308;  // 0.05
+
+// The race rules object (fn_801B83A0) seen through its car-hit hook.
+class HitRules {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual void vf28(void);
+    virtual void vf2C(void);
+    virtual void vf30(void);
+    virtual void vf34(void);
+    virtual void vf38(void);
+    virtual void vf3C(void);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(void);
+    virtual void vf50(void);
+    virtual void vf54(void);
+    virtual void vf58(void);
+    virtual void vf5C(void);
+    virtual void vf60(void);
+    virtual void vf64(void);
+    virtual void vf68(void);
+    virtual void vf6C(void);
+    virtual void vf70(void);
+    virtual void vf74(void);
+    virtual void vf78(void);
+    virtual void vf7C(void);
+    virtual void vf80(void);
+    virtual void vf84(void);
+    virtual void vf88(void);
+    virtual void vf8C(void);
+    virtual void vf90(void);
+    virtual void vf94(void);
+    virtual void vf98(void);
+    virtual void CarHit(u8* car, s32 kind, u8* vol);  // 0x9C
+};
+
+// The current-player context a volume's owner exposes (v30): read, switched to a car, restored.
+class PlayerCtx {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual int Get(void);       // 0x14
+    virtual void Set(int ctx);  // 0x18
+};
+
+extern "C" {
+HitRules* fn_801B83A0(void);
+f32 fn_8018AE7C(u8* car);
+void fn_802C1A0C(PlayerCtx* c, int car);
+void PSVECCrossProduct(const void* a, const void* b, void* out);
+}
+extern const f32 lbl_805622EC;  // 1.524 (5 ft)
+extern const f32 lbl_805622F0;  // -1.524
+extern const f32 lbl_805622F4;  // 0.95
+extern const f32 lbl_805622F8;  // 0.8
+extern const f32 lbl_805622FC;  // 222500
+extern const f32 lbl_80562304;  // 8.888889
+extern const f32 lbl_8056230C;  // 10000
+extern const f32 lbl_80562310;  // 6.6666665
+
+// Resolves one contact between volumes p and q at point x along normal n (pointing into p) with compression s:
+// volumes tagged 1000+ only report the touch; otherwise a spring push at heights clamped to +-5 ft, and while
+// closing, the restitution and clamped friction impulses through both bodies' inverse inertia, plus a car-hit
+// event for hard enough player crashes.
+void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
+    RVec3 pa;
+    RVec3 pq;
+    RVec3 imp;
+    RVec3 va;
+    RVec3 vb;
+    RVec3 rel;
+    RVec3 fr;
+    RVec3 ra;
+    RVec3 rb;
+    RVec3 tt;
+    RVec3 ca;
+    RVec3 cb;
+    RVec3 ia;
+    RVec3 ib;
+    RVec3 ta;
+    RVec3 tb;
+    RVec3 J;
+    RVec3 tv;
+    RVec3 tt2;
+    RVec3 ca2;
+    RVec3 cb2;
+    RVec3 ia2;
+    RVec3 ib2;
+    RVec3 ta2;
+    RVec3 tb2;
+    RVec3 z1;
+    RVec3 z2;
+    RVec3 z3;
+    RVec3 z4;
+    s32 qk = S32(q, 0x20);
+    s32 pk = S32(p, 0x20);
+    CFrame* fp = (CFrame*)PTR(p, 0xC);
+    CFrame* fq = (CFrame*)PTR(q, 0xC);
+    RigidBody* pb = (RigidBody*)PTR(p, 0x4);
+    RigidBody* qb = (RigidBody*)PTR(q, 0x4);
+    if (qk == 0x3EA) {
+        fn_80199870((u8*)pb, q);
+        return;
+    }
+    if (qk >= 1000 && pb && IsCarObj((u8*)pb)) {
+        fn_801B83A0()->CarHit((u8*)pb, qk, q);
+    }
+    if (qk >= 1000 || pk >= 1000) {
+        z1.x = lbl_805622D0;
+        z1.y = lbl_805622D0;
+        z1.z = lbl_805622D0;
+        VE(p)->v1C(&z1, pt, qk, (u32)qb);
+        z2.x = lbl_805622D0;
+        z2.y = lbl_805622D0;
+        z2.z = lbl_805622D0;
+        VE(q)->v1C(&z2, pt, pk, (u32)pb);
+        z3.x = lbl_805622D0;
+        z3.y = lbl_805622D0;
+        z3.z = lbl_805622D0;
+        VE(q)->v20((u32)p, &z3, pt, qk, (u32)pt, (u32)pb, lbl_805622D4);
+        z4.x = lbl_805622D0;
+        z4.y = lbl_805622D0;
+        z4.z = lbl_805622D0;
+        VE(p)->v20((u32)q, &z4, pt, pk, (u32)pt, (u32)qb, lbl_805622D4);
+        return;
+    }
+    pa.x = pt->x;
+    pa.y = pt->y;
+    pa.z = pt->z;
+    pq.x = pt->x;
+    pq.y = pt->y;
+    pq.z = pt->z;
+    if (pb && qb) {
+        f32 ha = MaxF(MinF(lbl_805622EC, ((CFrame*)PTR(p, 0xC))->t.y - pt->y), lbl_805622F0);
+        f32 hb = MaxF(MinF(lbl_805622EC, ((CFrame*)PTR(q, 0xC))->t.y - pt->y), lbl_805622F0);
+        pa.y = pt->y + lbl_805622F4 * ha;
+        pq.y = pt->y + lbl_805622F4 * hb;
+    }
+    if (pb) {
+        pb->VelAt(&va, pt);
+    } else {
+        va.x = lbl_805622D0;
+        va.y = lbl_805622D0;
+        va.z = lbl_805622D0;
+    }
+    if (qb) {
+        qb->VelAt(&vb, pt);
+    } else {
+        vb.x = lbl_805622D0;
+        vb.y = lbl_805622D0;
+        vb.z = lbl_805622D0;
+    }
+    rel.x = va.x - vb.x;
+    rel.y = va.y - vb.y;
+    rel.z = va.z - vb.z;
+    f32 vn = PSVECDotProduct(&rel, n);
+    f32 st = MaxF(F32(p, 0x10), F32(q, 0x10));
+    if (vn > lbl_805622D0) {
+        st *= lbl_805622F8;
+    }
+    f32 k = s * st;
+    if (k > lbl_805622FC) {
+        k = lbl_805622FC;
+    }
+    f32 kk = lbl_805622E8 * k;
+    imp.x = n->x * kk;
+    imp.y = n->y * kk;
+    imp.z = n->z * kk;
+    fr.x = lbl_805622D0;
+    fr.y = lbl_805622D0;
+    fr.z = lbl_805622D0;
+    fn_801996BC(&fr, pt, n, p, q, k);
+    imp.x += fr.x;
+    imp.y += fr.y;
+    imp.z += fr.z;
+    ra.x = pt->x - fp->t.x;
+    ra.y = pt->y - fp->t.y;
+    ra.z = pt->z - fp->t.z;
+    rb.x = pt->x - fq->t.x;
+    rb.y = pt->y - fq->t.y;
+    rb.z = pt->z - fq->t.z;
+    if (vn < lbl_805622D0) {
+        PSVECCrossProduct(&ra, n, &ca);
+        PSVECCrossProduct(&rb, n, &cb);
+        if (pb) {
+            MulVec(&ia, &ca, (CFrame*)((u8*)pb + 0x148));
+        } else {
+            ia.x = lbl_805622D0;
+            ia.y = lbl_805622D0;
+            ia.z = lbl_805622D0;
+        }
+        PSVECCrossProduct(&ia, &ra, &ta);
+        if (qb) {
+            MulVec(&ib, &cb, (CFrame*)((u8*)qb + 0x148));
+        } else {
+            ib.x = lbl_805622D0;
+            ib.y = lbl_805622D0;
+            ib.z = lbl_805622D0;
+        }
+        PSVECCrossProduct(&ib, &rb, &tb);
+        tt.x = ta.x + tb.x;
+        tt.y = ta.y + tb.y;
+        tt.z = ta.z + tb.z;
+        f32 ima = pb ? lbl_805622E0 / F32(pb, 0xD4) : lbl_805622D0;
+        f32 imb = qb ? lbl_805622E0 / F32(qb, 0xD4) : lbl_805622D0;
+        f32 e = lbl_805622D0;
+        if (-vn < lbl_80562304) {
+            e = lbl_80562300;
+        }
+        f32 dt = PSVECDotProduct(n, &tt);
+        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(&rel, n) / (ima + imb + dt);
+        J.x = n->x * j;
+        J.y = n->y * j;
+        J.z = n->z * j;
+        tv.x = rel.x + n->x * -vn;
+        tv.y = rel.y + n->y * -vn;
+        tv.z = rel.z + n->z * -vn;
+        f32 mu = lbl_805622E8 * (F32(p, 0x14) + F32(q, 0x14));
+        f32 tl = PSVECMag(&tv.x);
+        if (tl > lbl_80562308) {
+            f32 inv = lbl_805622E0 / MaxF(tl, lbl_80562308);
+            tv.x *= inv;
+            tv.y *= inv;
+            tv.z *= inv;
+            PSVECCrossProduct(&ra, &tv, &ca2);
+            PSVECCrossProduct(&rb, &tv, &cb2);
+            if (pb) {
+                MulVec(&ia2, &ca2, (CFrame*)((u8*)pb + 0x148));
+            } else {
+                ia2.x = lbl_805622D0;
+                ia2.y = lbl_805622D0;
+                ia2.z = lbl_805622D0;
+            }
+            PSVECCrossProduct(&ia2, &ra, &ta2);
+            if (qb) {
+                MulVec(&ib2, &cb2, (CFrame*)((u8*)qb + 0x148));
+            } else {
+                ib2.x = lbl_805622D0;
+                ib2.y = lbl_805622D0;
+                ib2.z = lbl_805622D0;
+            }
+            PSVECCrossProduct(&ib2, &rb, &tb2);
+            tt2.x = ta2.x + tb2.x;
+            tt2.y = ta2.y + tb2.y;
+            tt2.z = ta2.z + tb2.z;
+            f32 dt2 = PSVECDotProduct(&tv, &tt2);
+            f32 jt = lbl_805622DC * PSVECDotProduct(&rel, &tv) / (ima + imb + dt2);
+            jt = ClampExt(jt, (f32)__fabs(j * mu));
+            J.x = J.x + tv.x * jt;
+            J.y = J.y + tv.y * jt;
+            J.z = J.z + tv.z * jt;
+        }
+        f32 w = lbl_805622E0;
+        if (pb && IsCarObj((u8*)pb) && (u32)(qk - 0x73) <= 1) {
+            int fast = 1;
+            if (!U8(pb, 0x25C8)) {
+                fast = F32(pb, 0x25BC) > lbl_80558DC4[0];
+            }
+            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= lbl_8056230C &&
+                F32(pb, 0x25D4) > lbl_80562310 && VE(q)->v30()) {
+                f32 sc = fn_8018AE7C((u8*)pb);
+                J.x *= sc;
+                J.y *= sc;
+                J.z *= sc;
+                PlayerCtx* ctx = (PlayerCtx*)VE(q)->v30();
+                int was = ctx->Get();
+                fn_802C1A0C(ctx, S32(pb, 0x1EC));
+                int now = ctx->Get();
+                if (was && !now) {
+                    ctx->Set(was);
+                    fn_801A4A10(PTR(q, 0x8), pt, pb, &J);
+                    ctx->Set(now);
+                }
+            }
+        }
+        VE(p)->v20((u32)q, &J, &pa, U32(q, 0x20), (u32)pt, (u32)qb, w);
+        J.x *= lbl_805622DC;
+        J.y *= lbl_805622DC;
+        J.z *= lbl_805622DC;
+        VE(q)->v20((u32)p, &J, &pq, U32(p, 0x20), (u32)pt, (u32)pb, w);
+        if (a) {
+            fn_801B34DC((u8*)a, (u8*)b, pt, &J, &n->x, U32(q, 0x20));
+        } else {
+            fn_801B34DC(p, q, pt, &J, &n->x, U32(q, 0x20));
+        }
+    }
+    VE(p)->v1C(&imp, &pa, U32(q, 0x20), (u32)qb);
+    imp.x *= lbl_805622DC;
+    imp.y *= lbl_805622DC;
+    imp.z *= lbl_805622DC;
+    VE(q)->v1C(&imp, &pq, U32(p, 0x20), (u32)pb);
+}
 
 u32 fn_8019A780(u8* p) { return U32(p, 0x8); }
 
@@ -535,13 +864,13 @@ extern const f32 lbl_805622DC;  // -1.0
 // Contact between p and q along n; volumes without an owner hand the test to q with the normal flipped.
 void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
     if (U32(p, 0x4) || a) {
-        fn_80199894(p, q, x, n, a, b, s, u, v);
+        fn_80199894(p, q, (const RVec3*)x, n, a, b, s, u, v);
     } else {
         RVec3 m;
         m.x = n->x * lbl_805622DC;
         m.y = n->y * lbl_805622DC;
         m.z = n->z * lbl_805622DC;
-        fn_80199894(q, p, x, &m, b, a, s, v, u);
+        fn_80199894(q, p, (const RVec3*)x, &m, b, a, s, v, u);
     }
 }
 
@@ -933,23 +1262,6 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
 }
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
-
-extern const f32 lbl_805622E0;  // 1.0
-void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
-void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
-
-static inline int IsCarObj(const u8* o) {
-    if (o) {
-        switch (S32(o, 0x10)) {
-        case 'ACAR':
-        case 'CAR ':
-        case 'NCAR':
-        case 'PCAR':
-            return 1;
-        }
-    }
-    return 0;
-}
 
 extern const f32 lbl_805622E8;  // 0.5
 f32 PSVECSquareDistance(const void* a, const void* b);
@@ -2473,13 +2785,6 @@ void fn_801A0444(u8* p, u8* q) {
 
 extern const f32 lbl_805623B8;  // 0.3048 (feet to metres)
 extern const f32 lbl_805623BC;  // 1.1
-
-static inline f32 ClampExt(f32 v, f32 e) {
-    if (e < v) {
-        v = e;
-    }
-    return v > -e ? v : -e;
-}
 
 // Squared distance between the frame centres of p and q.
 static inline f32 CentreDist2(u8* p, u8* q) {
