@@ -1163,7 +1163,7 @@ extern "C" const f32 lbl_80562144;  // 0.0
 extern const f32 lbl_80562160;
 extern const f32 lbl_8056216C;
 extern "C" const f32 lbl_8056217C;
-extern f32 lbl_805621C0;  // line switch length (1.5)
+extern const f32 lbl_805621C0;  // line switch length (1.5)
 extern const f32 lbl_805621F0;
 extern const f32 lbl_805621F4;
 extern const f32 lbl_805621F8;
@@ -1514,7 +1514,7 @@ public:
     void Update(V2* p);
 };
 
-extern f32 lbl_805621C0;  // 1.5f
+extern const f32 lbl_805621C0;  // 1.5f
 
 extern "C" {
 u32 fn_801388F4(u32 a);
