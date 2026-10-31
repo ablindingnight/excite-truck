@@ -821,37 +821,29 @@ void fn_802E13D8(BinkMovie* r, f32 x, f32 y, f32 w, f32 h) {
         v[i].x = i & 1 ? 60.0f : 0.0f;
         v[i].y = i & 2 ? 40.0f : 0.0f;
         v[i].z = 0.0f;
-        v[i].c = -1;
         v[i].u = i & 1 ? 1.0f : 0.0f;
         v[i].v = i & 2 ? 1.0f : 0.0f;
+        v[i].c = -1;
     }
-    static const u16 idx[6] = {0, 1, 2, 2, 1, 3};
-    u16 ix[6];
-    for (int i = 0; i < 6; i++) {
-        ix[i] = idx[i];
-    }
+    u16 ix[6] = {0, 1, 2, 2, 1, 3};
     fn_802C8DB8(v, 4, ix, 6);
     fn_802C8D74();
     u32* b = m->bink;
     x = 320.0f + x;
     y = 240.0f + -y;
-    w = w / (f32)b[0];
-    h = h / (f32)b[1];
+    f32 sx = w / (f32)b[0];
+    f32 sy = h / (f32)b[1];
     GXSetZMode(0, 7, 0);
     GXSetColorUpdate(1);
     GXSetAlphaCompare(7, 0, 1, 0, 0);
-    fn_802E1DA4(m->tex, m->bink[0], m->bink[1], x, y, w, h, 1.0f);
+    fn_802E1DA4(m->tex, m->bink[0], m->bink[1], x, y, sx, sy, 1.0f);
     fn_802D007C(1.0f);
     GXSetTevSwapMode(0, 0, 0);
     GXSetTevSwapMode(1, 0, 0);
     GXSetTevSwapMode(2, 0, 0);
     GXSetTevSwapMode(3, 0, 0);
     GXSetTevColorS10(1, lbl_80565238);
-    GXColor k;
-    k.r = 0xFF;
-    k.g = 0xFF;
-    k.b = 0xFF;
-    k.a = 0xFF;
+    GXColor k = {0xFF, 0xFF, 0xFF, 0xFF};
     GXSetTevKColor(0, k);
     GXSetTevKColor(1, k);
     GXSetTevKColor(2, k);
