@@ -11,10 +11,7 @@ struct VecP {
     f32 x, y, z;
 };
 
-struct UIXform {
-    f32 m[3][3];  // offset 0x0
-    f32 pos[3];   // offset 0x24
-};
+#include "game/uicontext.h"
 
 // Fade timing a window reports for its open and close.
 struct WinFade {

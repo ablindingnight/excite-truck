@@ -23,21 +23,8 @@ public:
     u8 pad4[0x20 - 0x4];
 };
 
-struct UIXform {
-    f32 m[3][3];  // offset 0x0
-    f32 t[3];     // offset 0x24
-};
+#include "game/uicontext.h"
 
-class UIContext {
-public:
-    static void* operator new(size_t size, const char* tag);
-    static void operator delete(void* p);
-
-    UIXform xf;   // offset 0x0
-    f32 alpha;    // offset 0x30
-    f32 unk34;    // offset 0x34
-    f32 unk38;    // offset 0x38
-};
 
 class cnode {
 public:
@@ -188,7 +175,7 @@ UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha) {
     c->xf = *xf;
     c->alpha = alpha;
     c->unk34 = 1.0f;
-    c->unk38 = 1.0f;
+    c->scale = 1.0f;
     return c;
 }
 
@@ -205,16 +192,16 @@ UIContext* fn_8022EE9C(void) {
     xf.m[2][0] = 0.0f;
     xf.m[2][1] = 0.0f;
     xf.m[2][2] = 1.0f;
-    xf.t[0] = 0.0f;
-    xf.t[1] = 0.0f;
-    xf.t[2] = 0.0f;
+    xf.pos[0] = 0.0f;
+    xf.pos[1] = 0.0f;
+    xf.pos[2] = 0.0f;
     return fn_8022EDE4(&xf, 1.0f);
 }
 
 void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
     out->alpha = l->alpha * r->alpha;
     out->unk34 = l->unk34 * r->unk34;
-    out->unk38 = l->unk38 * r->unk38;
+    out->scale = l->scale * r->scale;
     if (out == l || out == r) {
         f32 m00 = Dot(r->xf.m[0][0], l->xf.m[0][0], r->xf.m[1][0], l->xf.m[0][1], r->xf.m[2][0], l->xf.m[0][2]);
         f32 m10 = Dot(r->xf.m[0][0], l->xf.m[1][0], r->xf.m[1][0], l->xf.m[1][1], r->xf.m[2][0], l->xf.m[1][2]);
@@ -245,9 +232,9 @@ void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
         out->xf.m[1][2] = Dot(r->xf.m[0][2], l->xf.m[1][0], r->xf.m[1][2], l->xf.m[1][1], r->xf.m[2][2], l->xf.m[1][2]);
         out->xf.m[2][2] = Dot(r->xf.m[0][2], l->xf.m[2][0], r->xf.m[1][2], l->xf.m[2][1], r->xf.m[2][2], l->xf.m[2][2]);
     }
-    out->xf.t[0] = l->xf.t[0] + r->xf.t[0];
-    out->xf.t[1] = l->xf.t[1] + r->xf.t[1];
-    out->xf.t[2] = l->xf.t[2] + r->xf.t[2];
+    out->xf.pos[0] = l->xf.pos[0] + r->xf.pos[0];
+    out->xf.pos[1] = l->xf.pos[1] + r->xf.pos[1];
+    out->xf.pos[2] = l->xf.pos[2] + r->xf.pos[2];
 }
 
 }  // extern "C"

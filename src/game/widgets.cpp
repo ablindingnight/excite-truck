@@ -1,4 +1,4 @@
-struct UIContext;
+#include "game/uicontext.h"
 struct RotatingChoiceDescriptorNew;
 static inline float MapMinBranchNew(float a,float b){if(a<b)return a;return b;}
 static inline float MapMaxBranchNew(float a,float b){if(a>b)return a;return b;}
@@ -365,7 +365,7 @@ void fn_8021D61C(WidgetFragment* self);
 
 struct ChoiceDrawStatePrefix {char unknown[0x34];float scale;};
 extern "C" {
-void* fn_8021165C(int,int);const ChoiceDrawStatePrefix* fn_8022EDC4();
+void* fn_8021165C(int,int);
 void fn_80219660(WidgetFragment*);
 void fn_8021D378(WidgetFragment *self);
 
@@ -992,7 +992,7 @@ void fn_802238D0(WidgetFragment* self,int mode,void*);
 }
 
 struct SourceResourcePrefix {char base[0x244];int kind;void* resource;char gap24c[12];const char* name;char cached[32];};
-struct FullDrawStatePrefix {RotationMatrix matrix;RotationVec translation;float alpha,first,second;};
+typedef UIContext FullDrawStatePrefix;
 typedef char DrawContextSize60_Normal392[sizeof(FullDrawStatePrefix)==60?1:-1];
 struct FocusPaintPrefix {
  char base[0x244]; // 0x000..0x243: observed widget prefix
@@ -1629,7 +1629,7 @@ int fn_8021A9A4(WidgetFragment* self){
  if(fields->watched&&*(int*)fields->watched==fields->kind)selected=1;
  return (selected!=0)|mode;
 }
-void fn_8021AA18(FocusPaintPrefix* self){FullDrawStatePrefix state;const FullDrawStatePrefix* live=(const FullDrawStatePrefix*)fn_8022EDC4();state=*live;int selected=FocusSelected(self);if(!*(unsigned char*)fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
+void fn_8021AA18(FocusPaintPrefix* self){FullDrawStatePrefix state;const FullDrawStatePrefix* live=fn_8022EDC4();state.xf=live->xf;state.alpha=live->alpha;state.unk34=live->unk34;state.scale=live->scale;int selected=FocusSelected(self);if(!*(unsigned char*)fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
 int fn_8021AB88(WidgetFragment*){return 0;}
 int fn_8021AB90(WidgetFragment* self,int key){if(*(unsigned char*)fn_80216708()){switch(key){case 0x126:fn_80217AC0(self->window);return 1;case 0x128:fn_802179A0(self->window);return 1;}}return fn_802192A4(self,key);}
 WidgetFragment* fn_8021AC24(WidgetFragment* self,int x,int y,void* handle){
@@ -1863,7 +1863,7 @@ void fn_8021D378(WidgetFragment *self) {
         }
         firstImage = fn_8021165C(0, 2);
         secondImage = fn_8021165C(1, 2);
-        scale = fn_8022EDC4()->scale;
+        scale = fn_8022EDC4()->unk34;
         zero = (0.0f);
         x = zero;
         y = zero;

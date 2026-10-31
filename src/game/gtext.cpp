@@ -80,18 +80,8 @@ struct VecP {
     f32 x, y, z;
 };
 
-struct UIXform {
-    f32 m[3][3];  // offset 0x0
-    f32 pos[3];   // offset 0x24
-};
+#include "game/uicontext.h"
 
-class UIContext {
-public:
-    UIXform xf;  // offset 0x0
-    f32 alpha;   // offset 0x30
-    f32 unk34;   // offset 0x34
-    f32 scale;   // offset 0x38
-};
 
 struct UIVert {
     f32 data[6];
@@ -142,7 +132,7 @@ s32 fn_802CAC28(const char* name, s32 key);
 s32 fn_802CAC34(const char* name, const char* data);
 void gxForgetTexture(s32 tex);
 void fn_802CB228(s32 tex);
-UIContext* fn_8022EDC4(void);
+
 u32 fn_80230B9C(u32 color);
 void fn_80231380(UIVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 gArtSet* fn_8023512C(const char* name);

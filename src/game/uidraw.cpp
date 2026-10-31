@@ -4,20 +4,8 @@
 #include "game/common.h"
 #include <math.h>
 
-struct UIXform {
-    f32 m[3][3];  // offset 0x0
-    f32 pos[3];   // offset 0x24
-};
+#include "game/uicontext.h"
 
-class UIContext {
-public:
-    static void operator delete(void* p);
-
-    UIXform xf;  // offset 0x0
-    f32 alpha;   // offset 0x30
-    f32 unk34;   // offset 0x34
-    f32 scale;   // offset 0x38
-};
 
 struct UIVert {
     f32 x;      // offset 0x0
@@ -33,10 +21,10 @@ void UIContextEnd(void);
 
 extern "C" {
 void fn_80129C64(int a);
-UIContext* fn_8022EDE4(const UIXform* xf);
+UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
 void fn_8022ED00(void);
 void fn_8022EDB8(void);
-UIContext* fn_8022EDC4(void);
+
 void fn_802321D8(void);
 void fn_802324D8(void);
 void fn_8022F248(void);
