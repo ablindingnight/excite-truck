@@ -41,10 +41,15 @@ struct TRot {
     RVec3 axis[3];
 };
 
+struct TRow {
+    f32 v[3];
+};
+
 struct TMtx {
     union {
         RVec3 rot[3];  // offset 0x0
         TRot r;
+        TRow row[3];
     };
     RVec3 pos;     // offset 0x24
 };
@@ -225,7 +230,10 @@ inline void Trailer::Reglue(void) {
     s.mtx.pos.x += c->world.pos.x;
     s.mtx.pos.y += c->world.pos.y;
     s.mtx.pos.z += c->world.pos.z;
-    s.mtx.r = car->world.r;
+    const TRow* src = car->world.row;
+    s.mtx.row[0] = src[0];
+    s.mtx.row[1] = src[1];
+    s.mtx.row[2] = src[2];
     f32 v = PSVECDotProduct(&car->vel, &mtx.rot[2]);
     s.vel.x = s.mtx.rot[2].x * v;
     s.vel.y = s.mtx.rot[2].y * v;
@@ -239,7 +247,7 @@ inline void Trailer::Reglue(void) {
         at.x = hitchLocal.x + offset.x;
         at.y = hitchLocal.y + offset.y;
         at.z = hitchLocal.z + offset.z;
-        fn_801AD148(&hitch, &at, 175196.86f, 3.05f, car);
+        fn_801AD148(&hitch, &at, 175196.86f, 0.305f * 10.0f, car);  // 10 feet
     } else {
         RVec3 at;
         at.x = hitchLocal.x + offset.x;
