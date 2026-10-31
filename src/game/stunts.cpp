@@ -1177,8 +1177,11 @@ public:
     f32 value;  // offset 0x250
 };
 
+static inline f32 HitMax(f32 a, f32 b) { return a > b ? a : b; }
+
 struct CarHit {
     CarHit(void) { timer = 0.0f; }
+    bool Active(void) const { return timer > lbl_80558DC4[0]; }
     f32 timer;  // offset 0x0
     f32 mag;    // offset 0x4
 };
@@ -1206,17 +1209,17 @@ public:
         f290 = 0.0f;
         f28C = 0.0f;
         for (i = 0; i < 8; i++) {
-            if ((hits[i].timer > lbl_80558DC4[0]) != 0) {
+            if (hits[i].Active()) {
                 int w;
-                f28C = hits[i].mag > f28C ? hits[i].mag : f28C;
-                if ((hits[i].timer > lbl_80558DC4[0]) != 0) {
+                f28C = HitMax(f28C, hits[i].mag);
+                if (hits[i].Active()) {
                     hits[i].timer -= 0.016683351f;
                 }
                 w = Wrecked(i);
-                if (w || (hits[i].timer > lbl_80558DC4[0]) == 0) {
+                if (w || !hits[i].Active()) {
                     hits[i].timer = 0.0f;
                     wrecked = w;
-                    f290 = f290 > hits[i].mag ? f290 : hits[i].mag;
+                    f290 = HitMax(f290, hits[i].mag);
                 }
             }
         }
