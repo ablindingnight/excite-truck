@@ -801,7 +801,135 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     return 0;
 }
 
-int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 a, f32 r) { return 0; }  // stub (541)
+extern const f32 lbl_80562300;  // 0.2
+extern const f32 lbl_80562334;  // 4.4444447
+extern const f32 lbl_80562338;  // 0.254
+extern const f32 lbl_8056233C;  // 0.025025027
+extern "C" void fn_802E30C8(const char* fmt, ...);
+extern "C" void fn_802E317C(const char* fmt, ...);
+
+// l = (p - frame origin) in the frame's axes.
+static inline void ToBoxSpace(RVec3* l, const RVec3* p, const CFrame* f) {
+    f32 dx = p->x - f->t.x;
+    f32 dy = p->y - f->t.y;
+    f32 dz = p->z - f->t.z;
+    l->x = Dot3(dx, f->m[0], dy, f->m[1], dz, f->m[2]);
+    l->y = Dot3(dx, f->m[3], dy, f->m[4], dz, f->m[5]);
+    l->z = Dot3(dx, f->m[6], dy, f->m[7], dz, f->m[8]);
+}
+
+// Clamps box-space point l into the box of half extents ext.
+static inline void ClampToBox(RVec3* l, const RVec3* ext) {
+    l->x = MaxF(MinF(ext->x, l->x), -ext->x);
+    l->y = MaxF(MinF(ext->y, l->y), -ext->y);
+    l->z = MaxF(MinF(ext->z, l->z), -ext->z);
+}
+
+// collide_explicit_sphere_box: sphere p (centre c, radius r) against box q (half extents at 0x24). The closest
+// box point gives the compression; a sphere centre already inside the box ("delta_length" ~ 0) is treated as
+// tunneling and pushed back along the box body's velocity when it moves fast enough.
+int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
+    CFrame f = *(CFrame*)VE(q)->v50();
+    const RVec3* ext = (const RVec3*)(q + 0x24);
+    RVec3 l;
+    RVec3 cp;
+    RVec3 d;
+    ToBoxSpace(&l, c, &f);
+    if (debug) {
+        fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);
+    }
+    ClampToBox(&l, ext);
+    MulVec(&cp, &l, &f);
+    cp.x = cp.x + f.t.x;
+    cp.y = cp.y + f.t.y;
+    cp.z = cp.z + f.t.z;
+    d.x = cp.x - c->x;
+    d.y = cp.y - c->y;
+    d.z = cp.z - c->z;
+    f32 comp;
+    f32 len = sqrt(PSVECDotProduct(&d, &d));
+    comp = lbl_80562300 + (-len + r);
+    if (len < lbl_805622D8) {
+        if (debug) {
+            fn_802E30C8("-collide_explicit_sphere_box: delta_length = %f", len);
+        }
+        RigidBody* rb = (RigidBody*)PTR(q, 0x4);
+        if (rb) {
+            d.x = F32(rb, 0x118) * lbl_805622DC;
+            d.y = F32(rb, 0x11C) * lbl_805622DC;
+            d.z = F32(rb, 0x120) * lbl_805622DC;
+            len = PSVECMag(&d.x);
+            if (debug) {
+                fn_802E30C8("tunneling: %1.2f", len);
+            }
+            if (len < lbl_80562334) {
+                if (debug) {
+                    fn_802E30C8("too slow");
+                }
+                return 0;
+            }
+            comp = lbl_80562338;
+            if (len < lbl_805622D8) {
+                return 0;
+            }
+        } else if (rb) {
+            fn_802E317C("volume: explicit_sphere_box method: code should never get here");
+            RVec3 v;
+            rb->VelAt(&v, c);
+            cp.x = c->x + v.x * lbl_8056233C;
+            cp.y = c->y + v.y * lbl_8056233C;
+            cp.z = c->z + v.z * lbl_8056233C;
+            ToBoxSpace(&l, &cp, &f);
+            if (debug) {
+                fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);
+            }
+            ClampToBox(&l, ext);
+            RVec3 back;
+            MulVec(&back, &l, &f);
+            back.x = back.x + f.t.x;
+            back.y = back.y + f.t.y;
+            back.z = back.z + f.t.z;
+            if (debug) {
+                fn_802E30C8("backing up to %f, %f, %f", back.x, back.y, back.z);
+            }
+            d.x = back.x - c->x;
+            d.y = back.y - c->y;
+            d.z = back.z - c->z;
+            len = PSVECMag(&d.x);
+            if (len < lbl_805622D8) {
+                if (debug) {
+                    fn_802E30C8("-collide_explicit_sphere_box: (2) delta_length = %f", len);
+                }
+                return 0;
+            }
+            comp = lbl_80562338;
+        } else {
+            return 0;
+        }
+    }
+    if (comp > lbl_805622D0) {
+        RVec3 n;
+        f32 k = lbl_805622DC / len;
+        n.x = d.x * k;
+        n.y = d.y * k;
+        n.z = d.z * k;
+        if (debug) {
+            fn_802E30C8("colliding! cylinder_box(%p, %p: %d)", p, q, S32(p, 0x20));
+            CFrame* pf = (CFrame*)PTR(p, 0xC);
+            fn_802E30C8("%f,%f,%f", pf->t.x, pf->t.y, pf->t.z);
+            fn_802E30C8("comp = %f!", comp);
+        }
+        fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, lbl_805622D0, lbl_805622D0);
+        if (debug) {
+            fn_802E30C8("-collide_explicit_sphere_box: COLLIDE!");
+        }
+        return 1;
+    }
+    if (debug) {
+        fn_802E30C8("-collide_explicit_sphere_box: MISS (compression = %f)", comp);
+    }
+    return 0;
+}
 
 u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
