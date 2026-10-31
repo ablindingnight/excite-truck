@@ -120,6 +120,9 @@ void operator delete[](void* p);
 
 extern "C" {
 f32 PSVECDistance(const void* a, const void* b);
+f32 PSVECDotProduct(const void* a, const void* b);
+f32 PSVECMag(const void* v);
+double sqrt(double x);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 void fn_801C1218(PSys* s);
 void fn_801C1364(PSys* s);
@@ -293,8 +296,123 @@ void fn_801C1320(PSys* s) {
     }
 }
 
-// Constraint relaxation (placeholder: the original solver is not reconstructed yet).
-void fn_801C1364(PSys* s) {}
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+// dst = rotation of m applied to src, with the aliasing guard of the inline.
+static inline void MulRot(RVec3* dst, const RVec3& src, const RMtx* m) {
+    if (dst == &src) {
+        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
+        f32 y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
+        f32 z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+        dst->x = x;
+        dst->y = y;
+        dst->z = z;
+    } else {
+        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
+        dst->y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
+        dst->z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+    }
+}
+
+// dst = m applied to src (rotation, then the frame's position).
+static inline void Transform(RVec3* dst, const RVec3& src, const RMtx* m) {
+    MulRot(dst, src, m);
+    AddTo(dst, &m->pos);
+}
+
+// Constraint relaxation, two passes: anchored particles snap to their frames, axis links pull their two particles
+// along the link's frame axis, sticks restore their rest length (slack sticks only resist stretching), and
+// particles below the ground plane are pushed back out, losing their normal velocity and some of the rest
+// to friction.
+void fn_801C1364(PSys* s) {
+    int pass;
+    int i;
+    RVec3 axis;
+    RVec3 d;
+    RVec3 proj;
+    RVec3 d2;
+    RVec3 v;
+    RVec3 r;
+    for (pass = 0; pass < 2; pass++) {
+        for (i = 0; i < s->nAnchor; i++) {
+            PAnchor* a = &s->anchors[i];
+            if (a->on) {
+                Transform(&s->pos[a->idx], a->local, a->mtx);
+            }
+        }
+        for (i = 0; i < s->nLink; i++) {
+            PLink* l = &s->links[i];
+            RVec3* pa = &s->pos[l->a];
+            RVec3* pb = &s->pos[l->b];
+            f32 wb;
+            f32 wa;
+            wa = s->w34[l->a];
+            wb = s->w34[l->b];
+            if (!s->free[l->a]) {
+                wb = 0.01f;
+            }
+            if (!s->free[l->b]) {
+                wa = 0.01f;
+            }
+            MulRot(&axis, *(RVec3*)&l->d, (const RMtx*)l->g);
+            Sub(&d, pb, pa);
+            f32 dot = PSVECDotProduct(&axis, &d);
+            Scale(&proj, &axis, dot);
+            f32 len = PSVECMag(&proj);
+            f32 den = len * (wb + wa);
+            den = den > 0.0001f ? den : 0.0001f;
+            f32 k = l->c * len / den;
+            f32 ka = wb * k;
+            f32 kb = -wa * k;
+            AddScaled(pa, pa, &proj, ka);
+            AddScaled(pb, pb, &proj, kb);
+        }
+        for (i = 0; i < s->nStick; i++) {
+            PStick* st = &s->sticks[i];
+            RVec3* pa = &s->pos[st->a];
+            RVec3* pb = &s->pos[st->b];
+            f32 wa = s->w34[st->a];
+            f32 wb = s->w34[st->b];
+            if (!s->free[st->a]) {
+                wb = 0.01f;
+            }
+            if (!s->free[st->b]) {
+                wa = 0.01f;
+            }
+            Sub(&d2, pb, pa);
+            f32 len = PSVECMag(&d2);
+            f32 den = len * (wb + wa);
+            den = den > 0.0001f ? den : 0.0001f;
+            f32 k = st->stiff * (len - st->rest) / den;
+            if (!st->slack || k > 0.0f) {
+                f32 ka = wb * k;
+                f32 kb = -wa * k;
+                AddScaled(pa, pa, &d2, ka);
+                AddScaled(pb, pb, &d2, kb);
+            }
+        }
+        for (i = 0; i < s->nPart; i++) {
+            RVec3* p = &s->pos[i];
+            Sub(&v, p, &s->old[i]);
+            Sub(&r, p, &s->org);
+            f32 h = PSVECDotProduct(&r, &s->up) - s->w30[i];
+            if (h < 0.0f) {
+                AddScaled(p, p, &s->up, -h);
+                AddScaled(&v, &v, &s->up, -PSVECDotProduct(&s->up, &v));
+                f32 vv = PSVECDotProduct(&v, &v);
+                if (vv > 1e-10f) {
+                    f32 f = 0.0050000004f / (f32)sqrt(vv);
+                    f = 1.0f < f ? 1.0f : f;
+                    AddScaled(p, p, &v, -f);
+                } else {
+                    p->x = p->x - v.x;
+                    p->y = p->y - v.y;
+                    p->z = p->z - v.z;
+                }
+            }
+        }
+    }
+}
 
 void fn_801C1B60(PSys* s) {
     fn_801C1218(s);
@@ -481,24 +599,6 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     }
     if (push) {
         fn_80144DAC(push, &force);
-    }
-}
-
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-
-// dst = rotation of m applied to src, with the aliasing guard of the inline.
-static inline void MulRot(RVec3* dst, const RVec3& src, const RMtx* m) {
-    if (dst == &src) {
-        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
-        f32 y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
-        f32 z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
-        dst->x = x;
-        dst->y = y;
-        dst->z = z;
-    } else {
-        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
-        dst->y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
-        dst->z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
     }
 }
 
