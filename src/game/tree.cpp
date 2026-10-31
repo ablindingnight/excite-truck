@@ -17,7 +17,7 @@ f32 PSVECMag(const void* v);
 f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
-void* fn_8012C370(const char* name, u32 magic, s32* version, int a, int b, u8* swapped);  // load resource
+void* fn_8012C370(const char* name, u32 magic, u32* version, int a, int b, u8* swapped);  // load resource
 void fn_8012C4D8(void* p);                                                               // free resource
 void fn_80131810(void);
 void fn_80131818(ValueTable* table);
@@ -600,7 +600,7 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
 void fn_802BD210(void) {
     TreeRec* tr;
-    s32 version = 0;
+    u32 version = 0;
     u8 swapped;
     lbl_8055FAB8 = (TListFile*)fn_8012C370("treelist.trl", 'TLST', &version, 0, 0, &swapped);
     if (lbl_8055FAB8) {
