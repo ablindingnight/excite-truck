@@ -39,7 +39,6 @@ struct CamFrame {
     Vec fwd;       // offset 0x18
     Vec pos;       // offset 0x24
 
-    void RebuildRight(void) { PSVECCrossProduct((Vec*)&axes[1], &fwd, (Vec*)&axes[0]); }
 };
 
 // One leg of the tips camera sequence.
@@ -407,9 +406,10 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     f32 fov;
     s32 t;
 
-    cam.axes[0].x = 1.0f;
-    cam.axes[0].y = 0.0f;
-    cam.axes[0].z = 0.0f;
+    Vec* right = (Vec*)&cam.axes[0];
+    right->x = 1.0f;
+    right->y = 0.0f;
+    right->z = 0.0f;
     cam.axes[1].x = 0.0f;
     cam.axes[1].y = 1.0f;
     cam.axes[1].z = 0.0f;
@@ -426,7 +426,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.fwd.x = dir[0];
     cam.fwd.y = 0.0f;
     cam.fwd.z = dir[1];
-    cam.RebuildRight();
+    PSVECCrossProduct((Vec*)&cam.axes[1], &cam.fwd, right);
     t = fn_802E2C20() - lbl_8055D63C;
     k = 5.0f + 20.0f * (1.0f + -(f32)cos(6.2831855f * ((t % 50000) / 50000.0f)));
     cam.pos.x += cam.fwd.x * k;
