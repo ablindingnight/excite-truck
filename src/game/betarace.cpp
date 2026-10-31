@@ -1850,10 +1850,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         flash[4] = t > 0.0f ? t : 0.0f;
     }
     if (moving) {
-        f32 t = 0.06673341f + fade;
+        f32 t = (4.0f / 59.94f) + fade;
         fade = 1.0f < t ? 1.0f : t;
     } else {
-        f32 t = fade - 0.06673341f;
+        f32 t = fade - (4.0f / 59.94f);
         fade = 0.0f > t ? 0.0f : t;
     }
     {

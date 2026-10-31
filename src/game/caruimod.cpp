@@ -1010,7 +1010,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             if (!lbl_8055F330 || floor + fn_801DCF48(0) < cam.pos.y) {
                 break;
             }
-            pitch += 0.0019635f;
+            pitch += 1.5707964f / 800.0f;
         }
     } else {
         Identity(&cam);
@@ -1273,7 +1273,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
     time = time + dt;
     if (!model->loaded) {
         if (time > 2.0f) {
-            yaw = yaw + 0.418879f * dt;
+            yaw = yaw + (6.2831855f / 15.0f) * dt;
             pitch = pitch + 0.02f * (0.197f - pitch);
         }
         Camera(x, y, w, h, yaw, pitch);
@@ -1318,7 +1318,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         f32 d;
         fn_802C98DC(&a, &b, &c, &d);
         if (time > 2.0f) {
-            yaw = yaw + 0.418879f * dt;
+            yaw = yaw + (6.2831855f / 15.0f) * dt;
             pitch = pitch + 0.02f * (0.197f - pitch);
         }
         Camera(x, y, w, h, yaw, pitch);

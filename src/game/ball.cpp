@@ -665,7 +665,7 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
         d.x = m.rot[2].x * 0.707f + m.rot[1].x * 0.4949f;
         f32 rotY = m.rot[2].y;
         d.y = rotY * 0.707f + m.rot[1].y * 0.4949f;
-        s = 35.5556f * k;
+        s = (128.0f / 3.6f) * k;  // 128 km/h in m/s
         d.z = m.rot[2].z * 0.707f + m.rot[1].z * 0.4949f;
         vel.x = d.x * s;
         vel.y = d.y * s;

@@ -133,8 +133,8 @@ void fn_80279D40(CarSetup* s) {
     s->mx = 2705.9114f;
     s->my = 2705.9114f;
     s->mz = 422.79865f;
-    s->ftrack = 1.524f;
-    s->rtrack = 1.524f;
+    s->ftrack = 0.0254f * 60.0f;  // 60 inches
+    s->rtrack = 0.0254f * 60.0f;
     s->wheelbase = 2.7432f;
     s->balance = 0.5f;
     s->torqueBalance = 1.0f;

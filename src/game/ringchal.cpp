@@ -1976,7 +1976,7 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
             }
             fn_801B7C8C(out, &mid, &dir);
             {
-                f32 s = 0.444444f * sp->GetFloat("speed", 0.0f);
+                f32 s = (4.0f / 9.0f) * sp->GetFloat("speed", 0.0f);
                 out->vel.x = out->basis[2].x * s;
                 out->vel.y = out->basis[2].y * s;
                 out->vel.z = out->basis[2].z * s;

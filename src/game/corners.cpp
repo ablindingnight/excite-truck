@@ -199,7 +199,7 @@ void Corner::Hit(RigidBody* b) {
         vt.x = v.x + n.x * -vn;
         vt.y = v.y + n.y * -vn;
         vt.z = v.z + n.z * -vn;
-        AddScaled(&vel, &vt, 0.016683363f);
+        AddScaled(&vel, &vt, 1.0f / 59.94f);  // one NTSC frame
         f32 mag = PSVECMag((Vec*)&vel);
         if (mag > 0.02f) {
             f32 s = 0.02f / mag;

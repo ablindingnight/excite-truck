@@ -212,11 +212,11 @@ void fn_80291C7C(Sprite* s, int sun) {
             u.Set(cs, sn, 0.0f);
             v.Set(sn, -cs, 0.0f);
         } else {
-            u.x = -0.70710677f;
-            u.y = 0.70710677f;
+            u.x = -0.70711f;
+            u.y = 0.70711f;
             u.z = 0.0f;
-            v.x = 0.70710677f;
-            v.y = 0.70710677f;
+            v.x = 0.70711f;
+            v.y = 0.70711f;
             v.z = 0.0f;
         }
         fn_802D3BB4(lbl_804B4010.obj, s->radius, &p, &u, &v, color);

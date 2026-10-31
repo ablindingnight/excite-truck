@@ -160,7 +160,7 @@ s64 lbl_8055ADF0 = -1;     // when the current popup came up
 static inline void* Prefs(void) { return (u8*)IdentGetCurrentSlot() + 0xC; }
 
 static inline void DrawRing(f32 y, f32 x, f32 r) {
-    fn_80147F30(0xFFC8C800, 1000, -1, x, y, r, 0.0f, 1.5707964f, -0.006283185f, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80147F30(0xFFC8C800, 1000, -1, x, y, r, 0.0f, 1.5707964f, -6.2831855f / 1000.0f, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 extern "C" {

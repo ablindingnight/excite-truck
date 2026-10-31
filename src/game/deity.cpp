@@ -427,7 +427,7 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     } else {
         for (IdealPoint* p = from->next; p != to->next; p = p->next) {
             if (p->ilpos == 0) {
-                f32 tm = lbl_8055E3C8 - 0.016683417f * (f32)(idx + 1) * 0.0625f;
+                f32 tm = lbl_8055E3C8 - (1.0f / 59.94f) * (f32)(idx + 1) * 0.0625f;
                 CrossQueue* q = &lbl_80435BE8;
                 if ((u32)q->n < 8) {
                     Crossing e;
@@ -709,7 +709,7 @@ void fn_801B14BC(u32* flags, u32 bit, int on) {
 }
 
 void fn_801B14E4(DeityCar* c) {
-    if (fn_801366C0(c->follower, (u8*)c->car + 0x118, 4.444444f)) {
+    if (fn_801366C0(c->follower, (u8*)c->car + 0x118, 16.0f / 3.6f)) {
         c->stuck++;
     } else {
         c->stuck = 0;
