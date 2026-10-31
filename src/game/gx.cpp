@@ -1488,7 +1488,8 @@ void fn_802D0EEC(void) {
     if (d) {
         if (d & 6) {
             if (f & 6) {
-                GXSetZMode(1, f & 4 ? 3 : 7, (f >> 1) & 1);
+                int upd = (f >> 1) & 1;
+                GXSetZMode(1, f & 4 ? 3 : 7, upd);
             } else {
                 GXSetZMode(0, 7, 0);
             }
@@ -1514,8 +1515,8 @@ void fn_802D0EEC(void) {
         }
         if (d & 0x80) {
             ApplyBlend();
-            lbl_804C5700.dirty = 1;
             lbl_8055FD88 = lbl_8055FD86;
+            lbl_804C5700.dirty = 1;
         }
         if (d & 0x100) {
             lbl_804C5700.dirty = 1;
@@ -1528,8 +1529,8 @@ void fn_802D0EEC(void) {
     }
     if (lbl_8055FD86 != lbl_8055FD88) {
         ApplyBlend();
-        lbl_804C5700.dirty = 1;
         lbl_8055FD88 = lbl_8055FD86;
+        lbl_804C5700.dirty = 1;
     }
     if (lbl_8055FE58) {
         GXSetTevColor(3, fn_802CEA1C(lbl_804DB458[1]));
