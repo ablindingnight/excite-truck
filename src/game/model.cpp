@@ -70,7 +70,7 @@ struct MSurfList {
 };
 
 struct MElem {
-    u32 bit;          // offset 0x0
+    s32 bit;          // offset 0x0
     u32 flags;        // offset 0x4
     MSurfList* list;  // offset 0x8
     MPrim* prim;      // offset 0xC
@@ -615,7 +615,7 @@ void mrModelFixup(ModelInfo* m, const char* name) {
     int i;
     for (i = 0; i < m->nElems; i++) {
         MElem* e = &m->elems[i];
-        Swap32(&e->bit);
+        Swap32((u32*)&e->bit);
         Swap32(&e->flags);
         Swap32(&e->list);
         Swap32(&e->prim);
@@ -846,6 +846,7 @@ void fn_802C729C(s32 i, f32 range) {
     if (lbl_804C13C0.mtx != 0xFFFFFFFF && i != -1) {
         ModelInfo* m = fn_802C53A8(i);
         if (m->nElems > 0) {
+            f32 radius = 1000.0f;
             MSphere* sp = fn_802C5E7C(m);
             for (int e = 0; e < m->nElems; e++) {
                 if (m->elems[e].bit == 2) {
@@ -861,7 +862,7 @@ void fn_802C729C(s32 i, f32 range) {
                         if (IsQueued(s->type)) {
                             TexNode* t = s->tex[0];
                             fn_802C53C4(el, t, mtx, 0xFFFFFFFF, 0);
-                            fn_802CC550(t->tex, 1000.0f, fn_802C57B0(el->prim)->size);
+                            fn_802CC550(t->tex, radius, fn_802C57B0(el->prim)->size);
                         }
                     }
                 }
