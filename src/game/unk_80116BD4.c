@@ -875,6 +875,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     s32 (*open)(void *reader, void *name, u32 flags);
     s32 startArg;
     u32 i;
+    u32 track;
     u32 n;
     s32 any;
     s32 f;
@@ -1138,11 +1139,11 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     }
     lbl_80559944 = 1;
     lbl_8041D608[0] = 0;
-    for (i = 0; i < p->numTracks;) {
+    for (track = 0; track < p->numTracks;) {
         StreamTrack *t;
         BinkAudioFlags8011 af;
-        p->tracks[i].ringStart = 0;
-#define AF (p->audioFlags[p->trackIds[i]])
+        p->tracks[track].ringStart = 0;
+#define AF (p->audioFlags[p->trackIds[track]])
         af = AF;
         if ((af.valid || af.dct) && lbl_8055DECC != 0) {
             u32 rate = af.rate;
@@ -1150,14 +1151,14 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                 rate = (s32)((f64)(s32)local.rateDen * ((f64)(s32)rate * (f64)(s32)local.fpsNum) /
                              ((f64)(s32)local.fpsDen * (f64)(s32)local.rateNum));
             }
-            if (((BinkSoundOpen8011)lbl_8055DECC)(&p->tracks[i], rate, af.is16 * 8 + 8, af.stereo + 1, p->flags, p)) {
+            if (((BinkSoundOpen8011)lbl_8055DECC)(&p->tracks[track], rate, af.is16 * 8 + 8, af.stereo + 1, p->flags, p)) {
                 s32 latency;
-                if (p->tracks[i].blockMask == 0) {
-                    p->tracks[i].blockMask = -1;
+                if (p->tracks[track].blockMask == 0) {
+                    p->tracks[track].blockMask = -1;
                 }
-                p->tracks[i].ringSize = (p->audioMaxSize[p->trackIds[i]] + 0xFF) & ~0xFF;
-                p->tracks[i].ringStart = fn_80116DDC(p, p->tracks[i].ringSize);
-                t = &p->tracks[i];
+                p->tracks[track].ringSize = (p->audioMaxSize[p->trackIds[track]] + 0xFF) & ~0xFF;
+                p->tracks[track].ringStart = fn_80116DDC(p, p->tracks[track].ringSize);
+                t = &p->tracks[track];
                 if (t->ringStart == 0) {
                     t->Close(t);
                 } else {
@@ -1166,33 +1167,33 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                         latency = 0;
                     }
                     t->eightBit = AF.is16 * 8 + 8 == 8;
-                    p->tracks[i].ringEnd = p->tracks[i].ringStart + p->tracks[i].ringSize;
-                    p->tracks[i].writePtr = p->tracks[i].ringStart;
-                    p->tracks[i].readPtr = p->tracks[i].ringStart;
-                    p->tracks[i].fillTarget = fn_80116BD4(rate * (AF.stereo + 1) * 2, latency, 1000) & ~3;
-                    if (p->tracks[i].fillTarget > p->tracks[i].ringSize) {
-                        p->tracks[i].fillTarget = p->tracks[i].ringSize;
+                    p->tracks[track].ringEnd = p->tracks[track].ringStart + p->tracks[track].ringSize;
+                    p->tracks[track].writePtr = p->tracks[track].ringStart;
+                    p->tracks[track].readPtr = p->tracks[track].ringStart;
+                    p->tracks[track].fillTarget = fn_80116BD4(rate * (AF.stereo + 1) * 2, latency, 1000) & ~3;
+                    if (p->tracks[track].fillTarget > p->tracks[track].ringSize) {
+                        p->tracks[track].fillTarget = p->tracks[track].ringSize;
                     }
-                    p->tracks[i].handle = (s32)fn_8011B584(AF.rate, AF.stereo + 1, !AF.valid && AF.dct);
-                    if (p->tracks[i].handle == 0) {
-                        p->tracks[i].Close(&p->tracks[i]);
-                        p->tracks[i].ringStart = 0;
+                    p->tracks[track].handle = (s32)fn_8011B584(AF.rate, AF.stereo + 1, !AF.valid && AF.dct);
+                    if (p->tracks[track].handle == 0) {
+                        p->tracks[track].Close(&p->tracks[track]);
+                        p->tracks[track].ringStart = 0;
                     }
                     lbl_8055DED0++;
-                    p->tracks[i].deadline = p->numSets - (p->rateNum * 3) / (p->rateDen * 4);
-                    p->tracks[i].available = 0;
+                    p->tracks[track].deadline = p->numSets - (p->rateNum * 3) / (p->rateDen * 4);
+                    p->tracks[track].available = 0;
                 }
             }
         }
 #undef AF
-        if (p->tracks[i].gain == 0) {
-            p->tracks[i].gain = 0x10000;
+        if (p->tracks[track].gain == 0) {
+            p->tracks[track].gain = 0x10000;
         }
-        if (p->tracks[i].ringStart == 0) {
+        if (p->tracks[track].ringStart == 0) {
             p->numTracks--;
-            memcpy(&p->trackIds[i], &p->trackIds[i + 1], (p->numTracks - i) * 4);
+            memcpy(&p->trackIds[track], &p->trackIds[track + 1], (p->numTracks - track) * 4);
         } else {
-            i++;
+            track++;
         }
     }
     if (p->numTracks != 0) {
