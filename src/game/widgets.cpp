@@ -1,5 +1,6 @@
 #include "game/uicontext.h"
 #include "game/gtext.h"
+#include "game/fonttext.h"
 #include "game/uidraw.h"
 typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
 static inline void SetVec3(Vec3* out,float x,float y,float z){out->x=x;out->y=y;out->z=z;}
@@ -792,10 +793,10 @@ struct PrefixFlag250 {char base[0x250];unsigned char value;};
 struct PrefixFlag258 {char base[0x258];unsigned char value;};
 struct RenderPrefix {char base[0x244];float x,y,w,h;void* resource;};
 struct TweenPrefix {char base[0x24c];int selected;char gap250[12];float blend;char gap260[4];int* state;};
-struct BitmapFontObserved391;
+
 // RichCaptionPrefix supplies the same text/font fields to the legacy bitmap draw callback.
 extern "C" {
-void fn_801E4BEC(BitmapFontObserved391*,u32,u32,int,int,const char*,...);
+
 void fn_801A7E54(void*,int,int);void fn_802C40B8(int,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
 void fn_802168BC(void*);void fn_802237DC(WidgetFragment*);
 int fn_8021AB88(WidgetFragment*);
@@ -912,14 +913,14 @@ struct AssetImage244 {char base[0x244];void* image;UIContext* asset;};
 struct SceneResourcePrefix {char base[0x244];void* model;float x,y,height,width;int frame;UIContext* asset;unsigned char owned;};
 struct ResourceHandlePrefix {char base[0x254];int handle;char gap258[8];UIContext* asset;};
 struct TripleResourcePrefix {char base[0x250];GTextFont* resource;void* first;void* second;};
-struct RichCaptionPrefix {char base[0x244];const char* label;char text[256];BitmapFontObserved391* renderer;};
+struct RichCaptionPrefix {char base[0x244];const char* label;char text[256];BitmapFont* renderer;};
 struct SliderRangePrefix {char base[0x244];int* value;char gap248[8];int minimum,maximum;unsigned char dragging;};
 struct MenuRecord {char base[0x20];void* context;int(*callback)(void*);};
 struct MenuRowPrefix {void* handle;char rest[32];};
 struct MenuSelectionPrefix {char base[0x244];MenuRowPrefix* rows;unsigned char active;char pad249[3];int row,column;};
 extern "C" {
 extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033E0BC[],lbl_8033E038[],lbl_8033DFB4[],lbl_8033DEAC[],lbl_8033DF30[],lbl_8033EFF4[],lbl_8033E878[],lbl_8033E770[],lbl_8033DCF8[],lbl_8033EF68[];
-void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);void fn_801E4A2C(BitmapFontObserved391*);int fn_801E4A6C(BitmapFontObserved391*,const char*);int fn_801E4BA8(BitmapFontObserved391*);MenuRecord* fn_8022D97C(void*,int);
+void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);MenuRecord* fn_8022D97C(void*,int);
 WidgetFragment* fn_80220874(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80222C8C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80226AD0(WidgetFragment* self,int destroy);

@@ -1,6 +1,7 @@
 // Bitmap font text (0x801E4A2C-0x801E4E44): string widths, line heights and aligned, formatted
 // drawing, with a debug-text fallback when no font is loaded. Names are guesses.
 #include "game/common.h"
+#include "game/fonttext.h"
 #include <stdarg.h>
 
 extern "C" {

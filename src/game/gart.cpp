@@ -3,6 +3,7 @@
 // they can be reported and freed at shutdown. Also a small set of named textures (dynotex). Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/uicontext.h"
 #include <math.h>
 #include <string.h>
 
@@ -79,10 +80,6 @@ struct TrackNode {
     TrackNode* next;  // offset 0x4
 };
 
-struct CamMtx {
-    u8 pad0[0x38];
-    f32 scale;  // offset 0x38
-};
 
 struct QuadXY {
     f32 x;
@@ -97,13 +94,9 @@ struct QuadVert {
     f32 v;
 } __attribute__((aligned(8)));
 
-struct QuadMtx {
-    f32 rot[3][3];
-    f32 pos[3];
-};
 
 extern "C" {
-const CamMtx* fn_8022EDC4(void);
+
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8C04(s32 tex);
 u32 fn_80230B9C(int color);
@@ -326,7 +319,7 @@ void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
             v0 = p->v0;
             u0 = p->u0;
             s32 tex = s->tex;
-            const CamMtx* cam = fn_8022EDC4();
+            const UIContext* cam = fn_8022EDC4();
             fn_802C8B98(tex, cam);
             u32 c = fn_80230B9C(color);
             if (!NearZero(cam->scale - 1.0f)) {
@@ -373,7 +366,7 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
             s32 tex = s->tex;
             sh = h;
             sw = w;
-            const CamMtx* cam = fn_8022EDC4();
+            const UIContext* cam = fn_8022EDC4();
             fn_802C8B98(tex, cam);
             u32 c = fn_80230B9C(color);
             if (!NearZero(cam->scale - 1.0f)) {
@@ -388,23 +381,23 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
 }
 
 void fn_80235AFC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle, u32 color) {
-    QuadMtx m __attribute__((aligned(16)));
-    QuadMtx* mp = &m;
-    mp->pos[0] = x;
-    mp->pos[1] = y;
-    mp->pos[2] = z;
+    UIXform m __attribute__((aligned(16)));
+    UIXform* mp = &m;
+    mp->translation.v[0] = x;
+    mp->translation.v[1] = y;
+    mp->translation.v[2] = z;
     f32 c = cos(angle);
     f32 sn = sin(angle);
     f32 zero = 0.0f;
-    mp->rot[0][0] = c;
-    mp->rot[0][1] = sn;
-    mp->rot[0][2] = zero;
-    mp->rot[1][0] = -sn;
-    mp->rot[1][1] = c;
-    mp->rot[1][2] = zero;
-    mp->rot[2][0] = zero;
-    mp->rot[2][1] = zero;
-    mp->rot[2][2] = 1.0f;
+    mp->basis.m[0][0] = c;
+    mp->basis.m[0][1] = sn;
+    mp->basis.m[0][2] = zero;
+    mp->basis.m[1][0] = -sn;
+    mp->basis.m[1][1] = c;
+    mp->basis.m[1][2] = zero;
+    mp->basis.m[2][0] = zero;
+    mp->basis.m[2][1] = zero;
+    mp->basis.m[2][2] = 1.0f;
     Picture* p = fn_8023505C(s, idx);
     f32 hw = Mul(w, 0.5f);
     f32 hh = Mul(h, 0.5f);
@@ -557,7 +550,7 @@ void DynoTex::Draw(int id, int x, int y, int w, int h) {
         fw = w;
         fy = y;
         fx = x;
-        const CamMtx* cam = fn_8022EDC4();
+        const UIContext* cam = fn_8022EDC4();
         fn_802C8B98(tex, cam);
         u32 c = fn_80230B9C(-1);
         if (!NearZero(cam->scale - 1.0f)) {

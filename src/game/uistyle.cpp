@@ -3,9 +3,10 @@
 #include "game/common.h"
 #include "game/uistyle.h"
 #include "game/gtext.h"
+#include "game/fonttext.h"
 struct UIStyleRecordFields {
     u8 active; // Three bytes of natural alignment, not semantic fields.
-    u32 resource04; GTextFont* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
+    BitmapFont* resource04; GTextFont* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
     f32 height;      // +0x34
     int field38;
     u32 field3C_0,field3C_1,field3C_2,field3C_3,field3C_4,field3C_5,field3C_6,field3C_7;
@@ -40,7 +41,7 @@ extern const char lbl_8055B918[5],lbl_8055B920[5],lbl_8033FC40[];
 void* memset(void*,int,unsigned long);
 void fn_8022C520(void);
 
-void fn_801E4A2C(int);
+
 
 void fn_802C4C80(int);
 void fn_802C519C(int);
@@ -79,8 +80,8 @@ void fn_8022B390(int,const char*,int,int*,int*);
 void fn_8022ACFC(int,const char*,f32,f32,f32*,f32*,f32*,f32*);
 void fn_8022BD40(int,f32,f32,f32,f32,f32,f32,const char*,u32,u8);
 void fn_80230C30(f32*,f32*,int,int);
-int fn_801E4A6C(int,const char*);
-int fn_801E4BA8(int);
+
+
 extern ModuleTag lbl_8055EFC0;
 extern UnkStatic123s lbl_80490950;
 extern UnkStatic7F lbl_8055EFC8;
@@ -99,7 +100,7 @@ int fn_802C51C0(u32);
 u32 fn_802C4F14(u32);
 void fn_802C4C90(u32,int,int,u32,int);
 u32 fn_802C51AC(u32);
-void fn_801E4DBC(u32,int,int,int,int,const char*,int);
+
 char* strchr(const char*,int);
 unsigned long strlen(const char*);
 extern const char lbl_8033FC08[];
@@ -110,8 +111,8 @@ extern const char lbl_8033FC08[];
 extern const char lbl_8055B930[7],lbl_8055B938[6],lbl_8055B940[7],lbl_8055B948[7],lbl_8055B950[8];
 int fn_802C4EFC(u32);
 int fn_802C5220(u32);
-int fn_801E4B48(int);
-int fn_801E4B00(int);
+
+
 
 
 static inline int StyleAddPair(int a,int b) { return a+b; }
@@ -132,7 +133,7 @@ void fn_802E30C8(const char*,...);
 
 extern const char lbl_8055B8C0[2];
 void fn_802C4F2C(u32,int*,int*);
-int fn_801E4AB0(int,const char*,int);
+
 template<class T> static inline T StyleMinimum(const T& a,const T& b) {return a<b?a:b;}
 template<class T> static inline T StyleMaximum(const T& a,const T& b) {return a>b?a:b;}
 
@@ -306,7 +307,7 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
     if(text) {
         height=0.0f;
         int lines=fn_8022AB94((const signed char*)text,10)+1;
-        if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8((int)s->resource04);
+        if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8(s->resource04);
         GTextFont* font=s->resource08;
         if(font) {
             if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70(font);
@@ -319,7 +320,7 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         for(int i=0;i<lines;i++) {
             const char* end=strchr(text,10);
             int n=end?(int)(end-text):(int)strlen(text);
-            if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0((int)s->resource04,text,n));
+            if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0(s->resource04,text,n));
             if(s->resource08) {
                 if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
                 else {
@@ -336,10 +337,10 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         else if(s->field38&16) dy=(-height)*0.5f;
         else if(s->field38&32) {
             dy=0.0f;
-            if(s->resource04)dy=-(f32)fn_801E4B00((int)s->resource04);
+            if(s->resource04)dy=-(f32)fn_801E4B00(s->resource04);
             if(s->resource08)dy=-(f32)fn_80232B78(s->resource08);
         }
-        width+=0.5f*(f32)(fn_801E4A6C((int)s->resource04,lbl_8055B8C0)+1);
+        width+=0.5f*(f32)(fn_801E4A6C(s->resource04,lbl_8055B8C0)+1);
         int a=(int)s->field3C_2,b=(int)s->field3C_4;
         left=StyleMinimum(left,(x+dx)+(f32)(b<a?b:a));
         right=StyleMaximum(right,(width+(x+dx))+(f32)(b>a?b:a));
@@ -376,10 +377,10 @@ void fn_8022B390(int style,const char* text,int n,int* outX,int* outY) {
         if((signed char)*text!=10) {
             ch[0]=*text;
             if(s->resource08) x+=(int)fn_8023293C(s->resource08,ch,1.0f);
-            else if(s->resource04) x+=fn_801E4A6C((int)s->resource04,ch);
+            else if(s->resource04) x+=fn_801E4A6C(s->resource04,ch);
         } else {
             if(s->resource08) y+=fn_80232B70(s->resource08);
-            else if(s->resource04) y+=fn_801E4BA8((int)s->resource04);
+            else if(s->resource04) y+=fn_801E4BA8(s->resource04);
             x=(int)s->field3C_2;
         }
     }
@@ -400,7 +401,7 @@ int fn_8022B498(int style,const char* text) {
     if(text) {
         left=0;right=0;
         width=0;
-        if(s->resource04) width=fn_801E4A6C((int)s->resource04,text);
+        if(s->resource04) width=fn_801E4A6C(s->resource04,text);
         if(s->resource08) {
             f32 scale;
             if(s->height<1.0f) scale=1.0f;
@@ -428,9 +429,9 @@ int fn_8022B620(int style,const char* text) {
     if(text) {
         int top=0;
         if(s->resource04) {
-            if(s->field38&8) top=fn_801E4BA8((int)s->resource04);
-            else if(s->field38&16) top=fn_801E4BA8((int)s->resource04)/2;
-            else if(s->field38&32) top=fn_801E4B48((int)s->resource04);
+            if(s->field38&8) top=fn_801E4BA8(s->resource04);
+            else if(s->field38&16) top=fn_801E4BA8(s->resource04)/2;
+            else if(s->field38&32) top=fn_801E4B48(s->resource04);
             else top=0;
         }
         if(s->resource08) {
@@ -444,9 +445,9 @@ int fn_8022B620(int style,const char* text) {
         }
         int bottom=0;
         if(s->resource04) {
-            if(s->field38&16) bottom=fn_801E4BA8((int)s->resource04)/2;
-            else if(s->field38&32) bottom=fn_801E4B00((int)s->resource04);
-            else if(s->field38&64) bottom=fn_801E4BA8((int)s->resource04);
+            if(s->field38&16) bottom=fn_801E4BA8(s->resource04)/2;
+            else if(s->field38&32) bottom=fn_801E4B00(s->resource04);
+            else if(s->field38&64) bottom=fn_801E4BA8(s->resource04);
             else bottom=0;
         }
         if(s->resource08) {
@@ -475,7 +476,7 @@ void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
     } else if(s->field64_1) fn_802C51AC(s->field64_1);
     if(text && !s->resource08) {
         fn_802E317C(lbl_8033FC08);
-        int height=fn_801E4BA8((int)s->resource04);
+        int height=fn_801E4BA8(s->resource04);
         int lines=fn_8022AB94((const signed char*)text,10)+1;
         if(s->field38&16) y-=((lines-1)*height)/2;
         else if(s->field38&64) y-=(lines-1)*height;
