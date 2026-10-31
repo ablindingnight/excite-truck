@@ -130,11 +130,13 @@ extern "C" void* fn_8021165C(int dir, int set) {
 
 extern s32 lbl_8055EF1C;
 extern s32 lbl_8055EF20;
+// The lite-mode blinker art (0 = left, else right).
 s32 fn_80211660(s32 arg0) {
     if (arg0 == 0) {
         return lbl_8055EF1C;
+    } else {
+        return lbl_8055EF20;
     }
-    return lbl_8055EF20;
 }
 
 s32 fn_80211678(u8 *arg0) {
@@ -640,7 +642,7 @@ extern "C" void fn_802E30C8(const char *, ...);
 extern "C" int fn_80129BC4(void);
 extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
-extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, u32);
+extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
 extern "C" WidgetFragment* fn_8021B2B0(WidgetFragment*, int, int, const char*, int, void*, int);
 extern "C" WidgetFragment* fn_8021D044(WidgetFragment*, int, int, void*, const char*, int, int, int, int);
 extern "C" WidgetFragment* fn_8021D6A0(WidgetFragment*, int, int, void*, void*, const char*, int, int, int);
@@ -1574,7 +1576,7 @@ extern "C" s32 fn_80214A38(s32 arg0) {
     s32 result = 0;
     s32 check = fn_802168E4();
     if (check != 0) result = ((s32 (*)(s32, s32))fn_802168D4)(check, arg0);
-    else fn_802E317C(lbl_8033D274);
+    else ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D274);
     return result;
 }
 
@@ -1717,7 +1719,8 @@ extern "C" void fn_80215214(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 extern "C" void fn_8021521C(s32 arg0, s32 arg1, s32 arg2) { fn_80214FE0(arg0, arg1, 0, arg2); }
 
-extern "C" void fn_80215228(void) { stricmp((const char *)lbl_8033CAE8, lbl_8055B6B0); }
+// Was the last layout UIBegin/UIDoMappedDialog saw the given one?
+extern "C" int fn_80215228(void) { return stricmp(lbl_8033CAE8, lbl_8055B6B0) == 0; }
 
 extern void *lbl_8055EF38;
 extern "C" void* fn_8021525C(void) {
@@ -1736,10 +1739,10 @@ extern "C" void* fn_80215270(int dir, int set) {
     return ((void* (*)[4])lbl_80490528)[set][dir];
 }
 
-extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, u32 arg6) {
+extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6) {
     *arg0 = arg4;
     *arg2 = arg4 + arg6 - 0x1A;
-    *arg1 = arg4 + (s32)(((arg6 >> 31) + arg6) >> 1);
+    *arg1 = arg4 + arg6 / 2;
     *arg3 = arg5 + 4;
 }
 
@@ -1968,9 +1971,9 @@ void fn_802157A8(int arg0, int arg1, int arg2, unsigned int arg3) {
 
 void fn_802157DC(void *arg0, int arg1, int arg2, int *arg3, int *arg4, int *arg5, int *arg6) {
     int var_r0;
-    int *temp = *(int **)((char *)arg0 + 4);
     *arg3 = arg1;
     *arg4 = arg2;
+    int *temp = *(int **)((char *)arg0 + 4);
     var_r0 = temp != 0 ? temp[2] : 0;
     *arg5 = *arg3 + var_r0;
     *arg6 = *arg4 + *(int *)((char *)arg0 + 8);
@@ -1984,9 +1987,13 @@ extern "C" void fn_80215824(void) {
 
 }
 
-extern "C" void fn_80215828(void *arg0) {
-    void (*fn)(void) = *(void (**)(void))(*(char **)arg0 + 0x10);
-    fn();
+extern "C" void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6) {
+    struct Obj {
+        virtual void v0();
+        virtual void v1();
+        virtual void v2(void *, void *, void *, void *);
+    };
+    ((Obj *)self)->v2(arg1, arg2, arg3, arg6);
 }
 
 extern "C" s32 fn_8021583C(void *arg0, s32 unused1, s32 unused2, s32 arg1, s32 arg2) {
@@ -1994,14 +2001,14 @@ extern "C" s32 fn_8021583C(void *arg0, s32 unused1, s32 unused2, s32 arg1, s32 a
         virtual void f0();
         virtual void f1();
         virtual void f2();
-        virtual void call(s32*, s32*, s32*, s32*);
+        virtual void call(s32, s32, s32*, s32*, s32*, s32*);
     };
     s32 sp14;
     s32 sp10;
     s32 spC;
     s32 sp8;
     s32 result;
-    ((Local*)arg0)->call(&sp14, &sp10, &spC, &sp8);
+    ((Local*)arg0)->call(unused1, unused2, &sp14, &sp10, &spC, &sp8);
     result = 0;
     if (arg1 >= sp14 && arg1 < spC && arg2 >= sp10 && arg2 < sp8) result=1;
     return result;
@@ -2073,16 +2080,12 @@ extern "C" void fn_802159FC(void *arg0) {
 
 extern "C" void fn_80215A10(void *arg0) {
     *(u8 *)((u8 *)arg0 + 0x18) = 1;
-    void *obj = *(void **)((u8 *)arg0 + 0x244);
-    void **vt = *(void ***)obj;
-    ((void (*)(void *))*(void **)((u8 *)vt + 0x44))(obj);
+    ((VfObj *)*(void **)((u8 *)arg0 + 0x244))->vf15();
 }
 
 extern "C" void fn_80215A2C(void *arg0) {
     *(u8 *)((u8 *)arg0 + 0x18) = 0;
-    void *obj = *(void **)((u8 *)arg0 + 0x244);
-    void **vt = *(void ***)obj;
-    ((void (*)(void *))*(void **)((u8 *)vt + 0x48))(obj);
+    ((VfObj *)*(void **)((u8 *)arg0 + 0x244))->vf16();
 }
 
 extern "C" void fn_80215A48(void *arg0) {
