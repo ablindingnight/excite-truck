@@ -1409,12 +1409,13 @@ void fn_801B30D0(int i) { fn_801B196C(&lbl_8055E684[i]); }
 void fn_801B30E0(int i) {
     DeityCar* c = &lbl_8055E684[i];
     LineFollower* l = c->Line();
-    IdealPoint* best = 0;
+    IdealPoint* best;
     if (c->ideal.seg) {
         IdealPoint* first = l->line->points;
         u32 want = c->ideal.seg->ilpos;
         IdealPoint* p = first;
         s32 bestD = 0x7FFFFFFF;
+        best = 0;
         do {
             s32 d = p->ilpos - want;
             if (d < 0) {
@@ -1426,6 +1427,8 @@ void fn_801B30E0(int i) {
             }
             p = p->next;
         } while (p != first);
+    } else {
+        best = 0;
     }
     DCar* car = c->Car();
     f32 q[3];
