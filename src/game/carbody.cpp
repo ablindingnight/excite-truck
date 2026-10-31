@@ -1646,9 +1646,14 @@ public:
     virtual void Reset(void);  // 0x48
 };
 
+struct CbShapeList {
+    u8 pad[0x14];
+    CbShape* shapes[4];  // offset 0x14
+};
+
 static inline CbShape* ShapeAt(u8* p, int i) {
     if (i >= 0 && i < S32(p, 0x24)) {
-        return ((CbShape**)(p + 0x14))[i];
+        return ((CbShapeList*)p)->shapes[i];
     }
     return 0;
 }
@@ -1706,9 +1711,12 @@ void fn_80189CB4(u8* p, const u8* s) {
     frame.pos.z = frame.pos.z + rotated.z;
     *(CbFrame*)(p + 0x3C) = frame;
     ((CollVolume*)p)->Update();
-    f32 vx = F32(s, 0x30);
-    f32 vy = F32(s, 0x34);
-    f32 vz = F32(s, 0x38);
+    f32 vz;
+    f32 vy;
+    f32 vx;
+    vx = F32(s, 0x30);
+    vy = F32(s, 0x34);
+    vz = F32(s, 0x38);
     F32(p, 0x2A4) = vx;
     F32(p, 0x2A8) = vy;
     F32(p, 0x2AC) = vz;
