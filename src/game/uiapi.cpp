@@ -72,7 +72,7 @@ public:
 extern "C" void fn_8021915C(void *, unsigned int);
 
 extern "C" void fn_80221E7C(void);
-extern "C" void fn_80215270(void);
+extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
 extern "C" s32 fn_80211678(void);
@@ -121,8 +121,8 @@ extern "C" void *fn_80211604(void *arg0, s32 arg1) {
     return arg0;
 }
 
-extern "C" void fn_8021165C(void) {
-    fn_80215270();
+extern "C" void* fn_8021165C(int dir, int set) {
+    return fn_80215270(dir, set);
 }
 
 extern s32 lbl_8055EF1C;
@@ -191,9 +191,9 @@ extern "C" void *fn_801284F8(s32, const char *);
 extern "C" s32 fn_8012C33C(s32);
 extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
-extern "C" void *fn_802228B0(void *, s32, s32, s32);
-extern "C" void *fn_802226D4(s32);
-extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+extern "C" void *fn_802228B0(void *, const char *, s32, s32);
+extern "C" void *fn_802226D4(void *, const char *);
+extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     extern int lbl_8033D528[];
     extern char lbl_8033D504[];
     extern const char lbl_8055B724[], lbl_8055B728[], lbl_8055B720[], lbl_8055B730[];
@@ -224,12 +224,12 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
     }
     if (stricmp(name + 1, lbl_8055B738) == 0) {
         c = fn_801284F8(16, lbl_8055B73C);
-        if (c) return fn_802228B0(arg0, arg2, arg3, arg4);
+        if (c) c = fn_802228B0(c, arg0, arg2, arg3);
         return c;
     }
     if (stricmp(name + 1, lbl_8055B744) == 0) {
         c = fn_801284F8(8, lbl_8055B748);
-        if (c) return fn_802226D4((s32)arg0);
+        if (c) c = fn_802226D4(c, arg0);
         return c;
     }
     ((s32 (*)(const char *, const char *))fn_802E317C)(lbl_8033CDA4, name + 1);
@@ -298,6 +298,726 @@ extern "C" void fn_80212340(void *arg0) {
         }
         p[3] = 0;
     }
+}
+
+// Widget factory: builds the widget(s) for one parsed UI descriptor and adds them to the window.
+// Constructors live in widgets.cpp (plain functions returning the object); styles are looked up by name and kind
+// in the window's style table (fn_8021227C). Cross-checked against the PS2 Test Drive: Eve of Destruction twin.
+struct WidgetFragment;
+struct UIDesc {
+    u32 type;           // 0x00 widget kind (switch below)
+    int flags;          // 0x04
+    int x, y;           // 0x08
+    int kind;           // 0x10
+    int dx, dy;         // 0x14 size
+    float scale;        // 0x1C
+    char style[0x20];   // 0x20 style name
+    char name[0x48];    // 0x40 text / resource name ('#' = style reference)
+    int window;         // 0x88
+    int group;          // 0x8C
+    int field90, field94, field98;
+    u32 field9c;        // 0x9C
+    int fielda0;        // 0xA0
+};
+struct UIStyle {
+    const char* name;
+    int kind;
+    void* value;        // 0x08
+    void* arg1;         // 0x0C
+    void* arg2;         // 0x10
+};
+struct UIWidgetView {
+    u8 pad[0x240];
+    void* style;        // 0x240
+};
+
+extern "C" void* lbl_8033D54C[];
+extern "C" void* lbl_8033D480[];
+extern "C" s32 lbl_80490510[];
+extern "C" f32 lbl_80558DC4[];  // FLT_EPSILON
+extern "C" void* lbl_8055EF24;
+extern "C" void* lbl_8055EF28;
+extern "C" void* lbl_8055EF2C;
+extern "C" void* lbl_8055EF30;
+extern "C" void* lbl_8055EF34;
+extern void *lbl_8055EF38;
+extern "C" int lbl_8055EF48;
+extern "C" int lbl_8055EF4C;
+extern "C" int lbl_8055EF50;
+extern "C" int lbl_8055EF54;
+extern "C" int lbl_8055EF58;
+extern "C" const char* lbl_8055B754;
+
+void* operator new(unsigned long size, const char* tag);
+extern "C" char* strstr(const char*, const char*);
+extern "C" int abs(int);
+extern "C" void* fn_80215270(int, int);
+extern "C" void fn_802E30C8(const char *, ...);
+extern "C" int fn_80129BC4(void);
+extern "C" unsigned int fn_8022D1B4(const char*);
+extern "C" void fn_802168EC(void*, WidgetFragment*, int);
+extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, u32);
+extern "C" WidgetFragment* fn_8021B2B0(WidgetFragment*, int, int, const char*, int, void*, int);
+extern "C" WidgetFragment* fn_8021D044(WidgetFragment*, int, int, void*, const char*, int, int, int, int);
+extern "C" WidgetFragment* fn_8021D6A0(WidgetFragment*, int, int, void*, void*, const char*, int, int, int);
+extern "C" WidgetFragment* fn_8021B460(WidgetFragment*, UIDesc*, const char*, void*);
+extern "C" void* fn_80222530(void*, const char*, const char*);
+extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, void*);
+extern "C" WidgetFragment* fn_8021B9AC(WidgetFragment*, UIDesc*, void*, void*);
+extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
+extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
+extern "C" WidgetFragment* fn_8022435C(WidgetFragment*, void*, UIDesc*, void*, void*);
+extern "C" WidgetFragment* fn_8021A5B8(WidgetFragment*, const char*, u8, u8, int, float);
+extern "C" WidgetFragment* fn_80219A28(WidgetFragment*, UIDesc*, const char*, void*);
+extern "C" WidgetFragment* fn_80219870(WidgetFragment*, int, int, const char*, void*, int);
+extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
+extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
+extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
+extern "C" WidgetFragment* fn_8021F678(WidgetFragment*, int, int, int, int, float, float, void*, int);
+extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
+extern "C" WidgetFragment* fn_8021BD98(WidgetFragment*, int, int, void*, const char*, int, float, float);
+extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, const char*, int, float, float);
+extern "C" WidgetFragment* fn_8021BEC0(WidgetFragment*, int, int, void*, int, int, int, int);
+extern "C" WidgetFragment* fn_8021CA0C(WidgetFragment*, int, int, int, int, void*);
+extern "C" WidgetFragment* fn_8021C97C(WidgetFragment*, int, int, void*, int, void*);
+extern "C" WidgetFragment* fn_8021C344(WidgetFragment*, int, int, void*, int, int, int, int, const char*, int);
+extern "C" WidgetFragment* fn_8021D7C8(WidgetFragment*, int, int, int, int, int, void*);
+extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, void*);
+extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
+extern "C" WidgetFragment* fn_80218F34(WidgetFragment*, int, int, int, int, int);
+extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
+extern "C" WidgetFragment* fn_80220E48(WidgetFragment*, int, int, int, int, void*, int);
+extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, void*);
+extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
+extern "C" WidgetFragment* fn_802230A4(WidgetFragment*, int, int, void*, void*);
+extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
+extern "C" WidgetFragment* fn_80223AB4(WidgetFragment*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_8022886C(WidgetFragment*, UIDesc*, void*, void*);
+extern "C" WidgetFragment* fn_802286E4(WidgetFragment*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_802241C8(WidgetFragment*, UIDesc*);
+extern "C" WidgetFragment* fn_80224B54(WidgetFragment*, void*, UIDesc*);
+extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
+extern "C" WidgetFragment* fn_802269A8(WidgetFragment*, UIDesc*);
+extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
+extern "C" WidgetFragment* fn_802270DC(WidgetFragment*, UIDesc*);
+extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_80227D00(WidgetFragment*, UIDesc*);
+extern "C" WidgetFragment* fn_8021FF34(WidgetFragment*, UIDesc*, void*, int, float, float);
+extern "C" WidgetFragment* fn_80228418(WidgetFragment*, UIDesc*, void*);
+extern "C" WidgetFragment* fn_8022855C(WidgetFragment*, UIDesc*, void*, void*);
+
+// Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
+struct UIImageRef {
+    void* vtable;
+    const char* name;
+    int flags;
+    UIImageRef(const char* n, int f) {
+        vtable = lbl_8033D54C;
+        flags = f;
+        name = n;
+    }
+};
+
+// Handler object a "Custom" widget reports its rectangle to.
+struct UICustomHandler {
+    void* vtable;
+    int x, y, dx, dy;
+    void* owner;        // 0x14
+};
+struct UICustom {
+    u8 base[0x244];
+    UICustomHandler* handler;
+    UICustom(int x, int y, int dx, int dy, int kind, UICustomHandler* h) {
+        fn_80218F34((WidgetFragment*)this, x, y, x + dx, y + dy, kind);
+        *(void**)this = lbl_8033D480;
+        handler = h;
+        h->owner = this;
+        h->x = x;
+        h->y = y;
+        h->dx = dx;
+        h->dy = dy;
+    }
+};
+
+static u8 sUiBss0[0x160];
+static u8 sDefaultSpin[0x2c];
+static u8 sDefaultMulti[0x14];
+static char sDefaultInput[0x40];
+static u8 sDefaultControl[0x20];
+static UICustomHandler sCustomHandlers[16];
+static u8 sDefaultView[0x20];
+
+static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
+    return (UIStyle*)fn_8021227C(styles, (char*)name, kind);
+}
+
+extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
+    WidgetFragment* widgets[4] = {0, 0, 0, 0};
+    int count = 0;
+    WidgetFragment* p;
+    lbl_8055EF38 = (void*)d->group;
+    switch (d->type) {
+    case 5: {
+        UIStyle* text = FindStyle(styles, d->style, 3);
+        if (text) {
+            UIStyle* value = FindStyle(styles, d->style, 2);
+            p = (WidgetFragment*)operator new(0x368, "StaticText");
+            if (p) p = fn_8021B2B0(p, d->x, d->y, (const char*)text->value, d->flags, value ? value->value : 0, 0);
+            widgets[count++] = p;
+            break;
+        }
+        UIStyle* multi = FindStyle(styles, d->style, 7);
+        if (multi) {
+            p = (WidgetFragment*)operator new(0x2c4, "Multi");
+            if (p) p = fn_8021D044(p, d->x, d->y, multi->value, (const char*)multi->arg1, d->flags, 0, 0, 0);
+            widgets[count++] = p;
+            break;
+        }
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x368, "StaticText");
+        if (p) p = fn_8021B2B0(p, d->x, d->y, d->name, d->flags, value ? value->value : 0, 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 28: {
+        UIStyle* text;
+        UIStyle* value;
+        if (d->name[0] == '#') {
+            text = FindStyle(styles, d->name + 1, 3);
+            if (!text) {
+                text = FindStyle(styles, d->name + 1, 7);
+                if (text) {
+                    int first = fn_80212214(d->field9c);
+                    int second = fn_80212214(d->fielda0);
+                    p = (WidgetFragment*)operator new(0x2c8, "CustomMulti");
+                    if (p) p = fn_8021D6A0(p, d->x, d->y, text->value, text->arg1, d->style, d->flags, first, second);
+                    widgets[count++] = p;
+                    break;
+                }
+            }
+            value = FindStyle(styles, d->name + 1, 2);
+        } else {
+            text = 0;
+        }
+        if (!text || !text->value || !strstr((const char*)text->value, ".gtx")) {
+            p = (WidgetFragment*)operator new(0x374, "CustomText");
+            if (p) p = fn_8021B460(p, d, (text && text->value) ? (const char*)text->value : d->name, value ? value->value : 0);
+            widgets[count++] = p;
+            break;
+        }
+        void* image = operator new(0xc, "gTextImage");
+        if (image) image = fn_80222530(image, d->style, (const char*)text->value);
+        p = (WidgetFragment*)operator new(0x258, "gText");
+        if (p) p = fn_8021995C(p, d->x, d->y, d->kind, image, 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 31: {
+        UIStyle* column = FindStyle(styles, d->name, 0xd);
+        p = (WidgetFragment*)operator new(0x264, "Column");
+        if (p) p = fn_8021B9AC(p, d, column ? column->value : lbl_8055EF2C, column ? column->arg1 : 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 2: {
+        UIStyle* button = FindStyle(styles, d->style, 0);
+        UIStyle* text = d->name[0] == '#' ? FindStyle(styles, d->name + 1, 3) : 0;
+        void* image = button ? button->arg1 : 0;
+        const char* label = text ? (const char*)text->value : d->name;
+        void* handler = button ? button->value : (void*)fn_80212338;
+        UIImageRef* ref = new ("StyleImage") UIImageRef(label, d->flags);
+        if (d->field9c == 1 || !fn_80129BC4()) {
+            p = (WidgetFragment*)operator new(0x260, "IButton");
+            if (p) p = fn_802224B4(p, image, d->x, d->y, d->dx, d->dy, ref, handler, 0, d->field9c != 0);
+            widgets[count++] = p;
+            break;
+        }
+        p = (WidgetFragment*)operator new(0x268, "MenuBtn");
+        if (p) p = fn_80226630(p, image, d->x, d->y, d->dx, d->dy, ref, handler);
+        widgets[count++] = p;
+        break;
+    }
+    case 42: {
+        UIStyle* button = FindStyle(styles, d->style, 0);
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        void* image = button ? button->arg1 : 0;
+        void* handler = button ? button->value : (void*)fn_80212338;
+        void* watched = value ? value->value : 0;
+        p = (WidgetFragment*)operator new(0x28c, "FadeButton");
+        if (p) p = fn_8022435C(p, image, d, handler, watched);
+        widgets[count++] = p;
+        break;
+    }
+    case 3:
+        fn_802E30C8("BButtons aren't supported anymore.  If you want one, talk to Chris");
+        break;
+    case 34:
+        p = (WidgetFragment*)operator new(0x258, "BackWidget");
+        if (p) p = fn_8021A5B8(p, d->name, 1, 1, 1, d->kind);
+        widgets[count++] = p;
+        break;
+    case 17:
+        fn_802E30C8("Stamprolls are not supported anymore, talk to Chris if you think you want one.");
+    case 33: {
+        int useStyle = 0;
+        if (d->flags == 2 || d->flags == 4 || d->flags == 5) {
+            useStyle = 1;
+        }
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        UIStyle* text = FindStyle(styles, d->style, 3);
+        const char* path = text ? (const char*)text->value : d->name;
+        void* watched = useStyle ? (void*)d->style : (value ? value->value : 0);
+        if (strstr(path, ".img")) {
+            p = (WidgetFragment*)operator new(0x258, "imgstamproll");
+            if (p) {
+                void* image = operator new(0x10, "imgimg");
+                if (image) image = fn_802228B0(image, path, d->dx, d->dy);
+                p = fn_8021995C(p, d->x, d->y, d->kind, image, watched);
+            }
+            widgets[count++] = p;
+            break;
+        }
+        p = (WidgetFragment*)operator new(0x284, "ArtWidget");
+        if (p) p = fn_80219A28(p, d, path, watched);
+        widgets[count++] = p;
+        break;
+    }
+    case 13: {
+        UIStyle* flag = FindStyle(styles, d->style, 1);
+        p = (WidgetFragment*)operator new(0x358, "CheckBox");
+        if (p) p = fn_80219870(p, d->x, d->y, d->name, flag ? flag->value : &lbl_8055EF48, d->flags);
+        widgets[count++] = p;
+        break;
+    }
+    case 14: {
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x25c, "RadioButton");
+        if (p) {
+            void* watched = value ? value->value : &lbl_8055EF4C;
+            p = fn_8021A77C(p, d->x, d->y, d->field9c, watched, new ("rimg") UIImageRef(d->name, d->flags));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 15: {
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x25c, "BRadioButton");
+        if (p) {
+            void* watched = value ? value->value : &lbl_8055EF4C;
+            p = fn_8021A77C(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 2, -1, -1));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 8: {
+        void* value;
+        void* low;
+        void* high;
+        UIStyle* range = FindStyle(styles, d->style, 2);
+        if (range) {
+            value = range->value;
+            low = range->arg1;
+            high = range->arg2;
+        } else {
+            UIStyle* list = FindStyle(styles, d->style, 7);
+            if (list) {
+                value = list->value;
+                low = 0;
+                high = (void*)fn_8022D1B4((const char*)list->arg1);
+            } else {
+                value = &lbl_8055EF4C;
+                low = 0;
+                high = (void*)5;
+            }
+        }
+        p = (WidgetFragment*)operator new(0x264, "IntArrowBtn");
+        if (p) p = fn_8021B0CC(p, d->x, d->y + 1, value, low, high, -1, fn_80215270(0, 1));
+        widgets[count++] = p;
+        if (d->dx - 37 > 10) {
+            p = (WidgetFragment*)operator new(0x264, "IntSlider");
+            if (p) p = fn_80220778(p, d->x + 21, d->y, d->dx - 37, d->dy, value, low, high);
+            widgets[count++] = p;
+        }
+        p = (WidgetFragment*)operator new(0x264, "IntArrowBtn");
+        if (p) p = fn_8021B0CC(p, d->x + d->dx - 14, d->y + 1, value, low, high, 1, fn_80215270(1, 1));
+        widgets[count++] = p;
+        break;
+    }
+    case 18: {
+        UIStyle* range = FindStyle(styles, d->style, 9);
+        float low = 0.0f;
+        float high = 1.0f;
+        if (range) {
+            low = fn_80212248((s32)range->arg1);
+            high = fn_80212248((s32)range->arg2);
+        }
+        if ((f32)__fabs(low - high) <= lbl_80558DC4[0]) {
+            break;
+        }
+        if (!d->field9c) {
+            break;
+        }
+        if (d->dx - 37 > 10) {
+            p = (WidgetFragment*)operator new(0x27c, "Slider");
+            if (p) p = fn_8021F678(p, d->x + 21, d->y, d->dx - 37, d->dy, low, high,
+                                   range ? range->value : &lbl_8055EF50, d->field9c);
+            widgets[count++] = p;
+        }
+        p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
+        if (p) {
+            void* value = range ? range->value : &lbl_8055EF50;
+            p = fn_8021AF0C(p, d->x, d->y + 1, value, abs((int)d->field9c), -1, fn_80215270(0, 1), low, high);
+        }
+        widgets[count++] = p;
+        p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
+        if (p) {
+            void* value = range ? range->value : &lbl_8055EF50;
+            p = fn_8021AF0C(p, d->x + d->dx - 14, d->y + 1, value, abs((int)d->field9c), 1, fn_80215270(1, 1), low, high);
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 6: {
+        UIStyle* value = FindStyle(styles, d->style, 9);
+        p = (WidgetFragment*)operator new(0x2b4, "Numeric");
+        if (p) p = fn_8021BD98(p, d->x, d->y, value ? value->value : &lbl_8055EF50, d->name, d->flags, 100.0f, 0.0f);
+        widgets[count++] = p;
+        break;
+    }
+    case 7: {
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x2b4, "IntNumeric");
+        if (p) p = fn_8021CEEC(p, d->x, d->y, value ? value->value : &lbl_8055EF4C, d->name, d->flags, 1.0f, 0.0f);
+        widgets[count++] = p;
+        break;
+    }
+    case 9: {
+        UIStyle* spin = FindStyle(styles, d->style, 0xc);
+        void* target = spin ? spin->value : (void*)sDefaultSpin;
+        s32 left, x, right, line;
+        switch (d->flags) {
+        case 0:
+        default:
+            fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
+            p = (WidgetFragment*)operator new(0x2bc, "SpinCtl");
+            if (p) p = fn_8021BEC0(p, x, d->y, target, 15, left, right, line);
+            widgets[count++] = p;
+            break;
+        case 1:
+            fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
+            p = (WidgetFragment*)operator new(0x2bc, "SpinCtl");
+            if (p) p = fn_8021BEC0(p, x, d->y, target, 20, left, right, line);
+            widgets[count++] = p;
+            break;
+        case 4:
+            p = (WidgetFragment*)operator new(0x25c, "SpinSldr");
+            if (p) p = fn_8021CA0C(p, d->x + 15, d->y, d->dx - 30, d->dy, target);
+            widgets[count++] = p;
+            p = (WidgetFragment*)operator new(0x25c, "SpinArrow");
+            if (p) p = fn_8021C97C(p, d->x + 1, d->y + 2, fn_80215270(0, 2), -1, target);
+            widgets[count++] = p;
+            p = (WidgetFragment*)operator new(0x25c, "SpinArrow");
+            if (p) p = fn_8021C97C(p, d->x + d->dx - 15, d->y + 2, fn_80215270(1, 2), 1, target);
+            widgets[count++] = p;
+            break;
+        case 5:
+            fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
+            p = (WidgetFragment*)operator new(0x2d4, "SpinText");
+            if (p) p = fn_8021C344(p, x, d->y, target, 15, left, right, line, d->name, d->field9c);
+            widgets[count++] = p;
+            break;
+        }
+        break;
+    }
+    case 49: {
+        UIStyle* list = FindStyle(styles, d->style, 0x10);
+        s32 left, x, right, line;
+        fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
+        p = (WidgetFragment*)operator new(0x26c, "MutableMulti");
+        if (p) p = fn_8021D7C8(p, d->x, d->y, d->dx, d->dy, d->flags,
+                               list ? list->arg1 : (void*)sDefaultMulti);
+        widgets[count++] = p;
+        break;
+    }
+    case 10: {
+        UIStyle* multi = FindStyle(styles, d->style, 7);
+        void* value = &lbl_8055EF4C;
+        const char* list = lbl_8055B754;
+        if (multi) {
+            value = multi->value;
+            list = (const char*)multi->arg1;
+        }
+        if (d->dx > 0) {
+            fn_8022D1B4(list);
+            if (d->dx - 37 <= 10) {
+                break;
+            }
+            s32 left, x, right, line;
+            fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
+            p = (WidgetFragment*)operator new(0x2c4, "Multi");
+            if (p) p = fn_8021D044(p, x, d->y, value, list, d->flags, left, right, line);
+            widgets[count++] = p;
+            break;
+        }
+        p = (WidgetFragment*)operator new(0x2c4, "Multi");
+        if (p) p = fn_8021D044(p, d->x, d->y, value, list, d->flags, 0, 0, 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 16: {
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x25c, "TabButton");
+        if (p) {
+            void* watched = value ? value->value : &lbl_8055EF54;
+            p = fn_8021A808(p, d->x, d->y, d->field9c, watched, new ("timg") UIImageRef(d->name, d->flags));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 27: {
+        UIStyle* value = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x25c, "BTabButton");
+        if (p) {
+            void* watched = value ? value->value : &lbl_8055EF54;
+            p = fn_8021A808(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 1, -1, -1));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 11: {
+        UIStyle* input = FindStyle(styles, d->style, 3);
+        void* buffer = sDefaultInput;
+        void* capacity = (void*)0x40;
+        if (input) {
+            buffer = input->value;
+            capacity = input->arg1;
+        }
+        p = (WidgetFragment*)operator new(0xa64, "Input");
+        if (p) p = fn_8021EA64(p, d->x, d->y, d->dx, 10, buffer, capacity, 1, d->flags, 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 26: {
+        UIStyle* custom = FindStyle(styles, d->style, 5);
+        if (custom) {
+            widgets[count++] = (WidgetFragment*)new ("Custom")
+                UICustom(d->x, d->y, d->dx, d->dy, d->kind, (UICustomHandler*)custom->value);
+        } else {
+            lbl_8055EF58 = (lbl_8055EF58 + 1) & 0xF;
+            widgets[count++] = (WidgetFragment*)new ("Custom")
+                UICustom(d->x, d->y, d->dx, d->dy, d->kind,
+                         &sCustomHandlers[lbl_8055EF58]);
+        }
+        break;
+    }
+    case 35: {
+        UIStyle* list = FindStyle(styles, d->style, 0xa);
+        p = (WidgetFragment*)operator new(0x258, "CircleList");
+        if (p) p = fn_80222BDC(p, d, list ? list->value : lbl_8055EF24);
+        widgets[count++] = p;
+        break;
+    }
+    case 23: {
+        UIStyle* selected = FindStyle(styles, d->style, 2);
+        UIStyle* list = FindStyle(styles, d->style, 0xa);
+        UIStyle* view = FindStyle(styles, d->style, 0xb);
+        p = (WidgetFragment*)operator new(0x26c, "ListBox");
+        if (p) p = fn_8021E0C0(p, d->x, d->y, d->dx, d->dy, list ? list->value : lbl_8055EF24,
+                               selected ? selected->value : &lbl_8055EF4C,
+                               view ? view->value : (void*)sDefaultView);
+        widgets[count++] = p;
+        break;
+    }
+    case 20: {
+        UIStyle* view = FindStyle(styles, d->style, 0xb);
+        p = (WidgetFragment*)operator new(0x260, "VScrollBar");
+        if (p) p = fn_80220E48(p, d->x - 3, d->y + 21, d->dx, d->dy - 40,
+                               view ? view->value : (void*)sDefaultView, 0);
+        widgets[count++] = p;
+        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
+        if (p) {
+            void* state = view ? view->value : (void*)sDefaultView;
+            p = fn_8021B1C4(p, d->x, d->y, state, -1, fn_80215270(2, 0));
+        }
+        widgets[count++] = p;
+        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
+        if (p) {
+            void* state = view ? view->value : (void*)sDefaultView;
+            p = fn_8021B1C4(p, d->x, d->y + d->dy - 18, state, 1, fn_80215270(3, 0));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 21: {
+        UIStyle* view = FindStyle(styles, d->style, 0xb);
+        p = (WidgetFragment*)operator new(0x260, "HScrollBar");
+        if (p) p = fn_80220E48(p, d->x + 21, d->y, d->dx - 40, d->dy,
+                               view ? view->value : (void*)sDefaultView, 1);
+        widgets[count++] = p;
+        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
+        if (p) {
+            void* state = view ? view->value : (void*)sDefaultView;
+            p = fn_8021B1C4(p, d->x, d->y + 3, state, -1, fn_80215270(0, 0));
+        }
+        widgets[count++] = p;
+        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
+        if (p) {
+            void* state = view ? view->value : (void*)sDefaultView;
+            p = fn_8021B1C4(p, d->x + d->dx - 18, d->y + 3, state, 1, fn_80215270(1, 0));
+        }
+        widgets[count++] = p;
+        break;
+    }
+    case 12: {
+        UIStyle* control = FindStyle(styles, d->style, 4);
+        p = (WidgetFragment*)operator new(0x274, "CDetect");
+        if (p) p = fn_8021F394(p, d->x, d->y, control ? (const char*)control->arg1 : "Unmapped control",
+                               control ? control->value : (void*)sDefaultControl, 6);
+        widgets[count++] = p;
+        break;
+    }
+    case 36: {
+        UIStyle* selected = FindStyle(styles, d->style, 2);
+        UIStyle* list = FindStyle(styles, d->style, 0xa);
+        p = (WidgetFragment*)operator new(0x420, "BottomBar");
+        if (p) p = fn_802230A4(p, d->x, d->y, list ? list->value : lbl_8055EF28,
+                               selected ? selected->value : &lbl_8055EF4C);
+        widgets[count++] = p;
+        break;
+    }
+    case 37: {
+        UIStyle* selected = FindStyle(styles, d->style, 2);
+        UIStyle* list = FindStyle(styles, d->style, 0xa);
+        p = (WidgetFragment*)operator new(0x424, "BarTab");
+        if (p) p = fn_80223800(p, d->x, d->y, list ? list->value : lbl_8055EF28,
+                               selected ? selected->value : &lbl_8055EF54);
+        widgets[count++] = p;
+        break;
+    }
+    case 38: {
+        UIStyle* menu = FindStyle(styles, d->style, 0xe);
+        p = (WidgetFragment*)operator new(0x268, "MenuImage");
+        if (p) p = fn_80223AB4(p, d, menu ? menu->value : lbl_8055EF30);
+        widgets[count++] = p;
+        break;
+    }
+    case 39: {
+        UIStyle* movie = FindStyle(styles, d->style, 3);
+        if (movie) {
+            p = (WidgetFragment*)operator new(0x268, "MovieWidget");
+            if (p) p = fn_80223CF0(p, d, movie->value);
+            widgets[count++] = p;
+        } else {
+            p = (WidgetFragment*)operator new(0x268, "MovieWidget");
+            if (p) p = fn_80223CF0(p, d, 0);
+            widgets[count++] = p;
+        }
+        break;
+    }
+    case 54: {
+        UIStyle* model = FindStyle(styles, d->style, 0x13);
+        UIStyle* name = FindStyle(styles, d->style, 3);
+        if (model) {
+            p = (WidgetFragment*)operator new(0x280, "ModelWidget");
+            if (p) p = fn_8022886C(p, d, model->value, name ? name->value : 0);
+            widgets[count++] = p;
+        } else {
+            p = (WidgetFragment*)operator new(0x280, "ModelWidget");
+            if (p) p = fn_802286E4(p, d, name ? name->value : 0);
+            widgets[count++] = p;
+        }
+        break;
+    }
+    case 41:
+        p = (WidgetFragment*)operator new(0x258, "DynamicLoadBackground");
+        if (p) p = fn_802241C8(p, d);
+        widgets[count++] = p;
+        break;
+    case 43: {
+        UIStyle* text = FindStyle(styles, d->style, 3);
+        p = (WidgetFragment*)operator new(0x2a0, "TextBox");
+        if (p) p = fn_80224B54(p, text ? text->value : 0, d);
+        widgets[count++] = p;
+        break;
+    }
+    case 44: {
+        UIStyle* menu = FindStyle(styles, d->style, 0xe);
+        p = (WidgetFragment*)operator new(0x284, "ButtonList");
+        if (p) p = fn_8022553C(p, menu ? menu->value : lbl_8055EF30, d);
+        widgets[count++] = p;
+        break;
+    }
+    case 45:
+        p = (WidgetFragment*)operator new(0x260, "RotImage");
+        if (p) p = fn_802269A8(p, d);
+        widgets[count++] = p;
+        break;
+    case 46:
+        p = (WidgetFragment*)operator new(0x264, "ControlButton");
+        if (p) p = fn_80226CBC(p, d);
+        widgets[count++] = p;
+        break;
+    case 47:
+        p = (WidgetFragment*)operator new(0x274, "ColorBackground");
+        if (p) p = fn_802270DC(p, d);
+        widgets[count++] = p;
+        break;
+    case 48: {
+        UIStyle* tabs = FindStyle(styles, d->style, 0xf);
+        UIStyle* text = FindStyle(styles, d->style, 3);
+        void* first = tabs ? tabs->value : lbl_8055EF34;
+        p = (WidgetFragment*)operator new(0x25c, "TopTabDisplay");
+        if (p) p = fn_80227E84(p, first, d, text ? text->value : 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 51:
+        p = (WidgetFragment*)operator new(0x248, "TabBox");
+        if (p) p = fn_80227D00(p, d);
+        widgets[count++] = p;
+        break;
+    case 50: {
+        UIStyle* range = FindStyle(styles, d->style, 9);
+        UIStyle* steps = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x268, "SimpleSlider");
+        if (p) p = fn_8021FF34(p, d, range ? range->value : 0, steps ? *(int*)steps->value : 10,
+                               range ? fn_80212248((s32)range->arg1) : 0.0f,
+                               range ? fn_80212248((s32)range->arg2) : 1.0f);
+        widgets[count++] = p;
+        break;
+    }
+    case 52: {
+        UIStyle* movie = FindStyle(styles, d->style, 0x11);
+        p = (WidgetFragment*)operator new(0x24c, "UISW2Movie");
+        if (p) p = fn_80228418(p, d, movie ? movie->value : 0);
+        widgets[count++] = p;
+        break;
+    }
+    case 53: {
+        UIStyle* texture = FindStyle(styles, d->style, 0x12);
+        UIStyle* frame = FindStyle(styles, d->style, 2);
+        p = (WidgetFragment*)operator new(0x24c, "DynoTexWidget");
+        if (p) p = fn_8022855C(p, d, texture ? texture->value : 0, frame ? frame->value : 0);
+        widgets[count++] = p;
+        break;
+    }
+    default:
+        ((s32 (*)(const char *, ...))fn_802E317C)("Unknown type: %d", d->type);
+        break;
+    }
+    UIStyle* group = FindStyle(styles, d->style, 0x14);
+    if (!group) {
+        group = FindStyle(styles, d->name, 0x14);
+    }
+    for (int i = 0; i < count; i++) {
+        if (group) {
+            ((UIWidgetView*)widgets[i])->style = group->value;
+        }
+        fn_802168EC(window, widgets[i], d->window);
+    }
+    lbl_8055EF38 = (void*)-1;
 }
 
 extern "C" s32 fn_802ECEEC(void);
@@ -518,6 +1238,14 @@ extern "C" void* fn_8021525C(void) {
 extern u8 lbl_8033CAE8[];
 extern "C" void *fn_80215264(void) {
     return lbl_8033CAE8;
+}
+
+// Arrow/scroll button art: [set][direction], sets 0-2 (out-of-range sets fall back to set 1).
+extern "C" void* fn_80215270(int dir, int set) {
+    if (set >= 3) {
+        set = 1;
+    }
+    return ((void* (*)[4])lbl_80490528)[set][dir];
 }
 
 extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, u32 arg6) {
