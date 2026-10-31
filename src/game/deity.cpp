@@ -1378,7 +1378,7 @@ f32 fn_801B2F90(int a, int b) {
         hi = cb;
         lo = ca;
     }
-    s32 d = *(s32*)((u8*)hi + 0x14) - *(s32*)((u8*)lo + 0x14) - (lo->rank < hi->rank);
+    s32 d = *(s32*)((u8*)hi + 0x14) - *(s32*)((u8*)lo + 0x14) - ((u32)hi->rank < (u32)lo->rank);
     if (d != 0) {
         return 500.0f * (f32)d;
     }
