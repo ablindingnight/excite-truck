@@ -1207,6 +1207,8 @@ void fn_801B234C(f32 t);
 
 // Puts the cars on the grid: reset, place order from the start positions, then two columns (one if racing
 // alone), each car following the one ahead in its column.
+extern const f32 lbl_805625B8;  // 5.0f: lane offset
+
 void fn_801B2910(void) {
     lbl_8055E6A0 = 0;
     fn_801E89F4(0);
@@ -1223,8 +1225,8 @@ void fn_801B2910(void) {
     f32 now = lbl_8055E3C8;
     fn_801B234C(0.033366702f + now);
     bool solo = lbl_8055E678 == 1;
-    f32 left = solo ? 0.0f : -5.0f;
-    f32 right = solo ? 0.0f : 5.0f;
+    f32 left = solo ? 0.0f : -lbl_805625B8;
+    f32 right = solo ? 0.0f : lbl_805625B8;
     DCar* lastRight = 0;
     DCar* lastLeft = 0;
     for (int i = 0; i < lbl_8055E678; i++) {
