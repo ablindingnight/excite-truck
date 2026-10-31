@@ -36,6 +36,11 @@ struct Mat3 {
     PVec x, y, z;
 };
 
+// The hit point is copied from p as a raw 12-byte block (word loads/stores), not field by field.
+struct PVecRaw {
+    f32 v[3];
+};
+
 // A random tumble: an axis, a speed and this frame's rotation (0x34).
 struct Spin {
     Spin(void) {}
@@ -547,13 +552,13 @@ void CarChunks::Step(void) {
         PVec p = in->pos;
         s16 slot = in->slot;
         if (state == 2) {
-            p.y = p.y + v.y * dt;
             p.x = p.x + v.x * dt;
+            p.y = p.y + v.y * dt;
             p.z = p.z + v.z * dt;
             PVec hit;
             PVec nrm;
             nrm.x = 0.0f;
-            hit = p;
+            *(PVecRaw*)&hit = *(const PVecRaw*)&p;
             nrm.y = 1.0f;
             nrm.z = 0.0f;
             s32 id = 0;
@@ -694,13 +699,13 @@ void TerrainChunks::Step(void) {
         PVec p = in->pos;
         s16 slot = in->slot;
         if (state == 2) {
-            p.y = p.y + v.y * dt;
             p.x = p.x + v.x * dt;
+            p.y = p.y + v.y * dt;
             p.z = p.z + v.z * dt;
             PVec hit;
             PVec nrm;
             nrm.x = 0.0f;
-            hit = p;
+            *(PVecRaw*)&hit = *(const PVecRaw*)&p;
             nrm.y = 1.0f;
             nrm.z = 0.0f;
             s32 id = 0;
