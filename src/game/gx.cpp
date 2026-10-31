@@ -1807,10 +1807,10 @@ void fn_802D2218(void) {
     f32 pm[3][4];
     fn_802D0DD4(pm, &id);
     GXLoadPosMtxImm(pm, 0);
-    f32 w = lbl_804C9778.vw;
-    f32 h = lbl_804C9778.vh;
+    f32 hw = 0.5f * lbl_804C9778.vw;
+    f32 hh = 0.5f * lbl_804C9778.vh;
     f32 o[4][4];
-    C_MTXOrtho(o, 0.0f, h, 0.0f, w, 0.0f, 1.0f);
+    C_MTXOrtho(o, hh, -hh, -hw, hw, 1.0f, 2.0f);
     GXSetProjection(o, 1);
     GXSetDstAlpha(0, 0);
     GXSetBlendMode(0, 1, 0, 5);
@@ -1832,9 +1832,13 @@ void fn_802D2218(void) {
     GXSetVtxAttrFmt(0, 9, 1, 4, 0);
     GXBegin(0x98, 0, 4);
     for (int i = 0; i < 4; i++) {
-        WGPIPE.f = (i & 1 ? -1 : 1) * w;
-        WGPIPE.f = (i & 2 ? -1 : 1) * h;
-        WGPIPE.f = -0.5f;
+        f32 p[3];
+        p[0] = hw * (i & 1 ? -1 : 1);
+        p[1] = hh * (i & 2 ? -1 : 1);
+        p[2] = 1.99999f;
+        WGPIPE.f = p[0];
+        WGPIPE.f = p[1];
+        WGPIPE.f = p[2];
     }
     GXSetNumTexGens(1);
     GXSetTevOrder(0, 0, 0, 4);
