@@ -84,7 +84,7 @@ void fn_802C974C(f32 a, f32 b, f32 c);
 EVec3* fn_802C9A40(void);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, int a);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802CAE98(s32 tex, const char* name);
 void fn_802CAF1C(s32 tex, int a, int b);
 s32 fn_802CB128(int w, int h, int a, int b);
@@ -459,7 +459,7 @@ void fn_80203C50(int mode) {
 
 void fn_80203D84(s32* tex) {
     if (*tex != -2) {
-        fn_802CAC54(*tex);
+        gxForgetTexture(*tex);
         *tex = -2;
     }
 }

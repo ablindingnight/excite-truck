@@ -129,7 +129,7 @@ void fn_80179320(void);
 void fn_801B2C6C(void);
 void fn_801B5354(void);
 void fn_80177A18(void);
-void fn_801B537C(s32 (*fn)(void*));
+void PhysReplayUninstallEventHandler(s32 (*fn)(void*));
 void fn_801E1D9C(void);
 void fn_8026785C(void);
 void fn_8017D334(void);
@@ -1135,7 +1135,7 @@ void fn_801791A4(Phob* p) {}
 void fn_801791A8(void) {
     int i;
     fn_80177A18();
-    fn_801B537C((s32 (*)(void*))fn_80178C4C);
+    PhysReplayUninstallEventHandler((s32 (*)(void*))fn_80178C4C);
     fn_801E1D9C();
     fn_8026785C();
     fn_8017D334();

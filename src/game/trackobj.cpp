@@ -213,7 +213,7 @@ static const TypeList sTypes = {{
 extern "C" {
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
-void fn_802C6CF8(void* model);
+void mrModelUnload(void* model);
 void* fn_802C6FC0(const char* model, int a, int b);
 void fn_801E6CD0(void* anim, void* stream, f32 t);
 void fn_801E6CC4(void* stream);
@@ -238,7 +238,7 @@ typedef int (*FacingFn)(const OFrame* f);
 // A static object drawn from the lists (0x48).
 struct StaticOb {
     StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i);
-    ~StaticOb(void) { fn_802C6CF8(model); }
+    ~StaticOb(void) { mrModelUnload(model); }
     void* model;       // offset 0x0
     OFrame frame;      // offset 0x4
     OFrame* vol;       // offset 0x34
@@ -493,7 +493,7 @@ struct ShadowRef {
     }
     ~ShadowRef(void) {
         if (h != -1) {
-            fn_802C6CF8((void*)h);
+            mrModelUnload((void*)h);
         }
     }
     s32 h;       // offset 0x0

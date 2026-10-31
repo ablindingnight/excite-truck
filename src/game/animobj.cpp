@@ -7,7 +7,7 @@ extern "C" {
 void* memset(void* dst, int c, size_t n);
 void fn_80176948(const char* name, s32* offset);  // find an animation slot
 void* fn_802C6FC0(const char* name, int a, int b);  // load a model
-void fn_802C6CF8(void* model);
+void mrModelUnload(void* model);
 void fn_802C744C(void* model, const void* frame);
 void fn_802C70AC(s32 sprite, const void* frame, s32 tex, s32 size);
 void fn_802DAC54(void);
@@ -123,7 +123,7 @@ AnimModel::AnimModel(const char* name, const char* model) {
     Bind(name);
 }
 
-AnimModel::~AnimModel(void) { fn_802C6CF8(model); }
+AnimModel::~AnimModel(void) { mrModelUnload(model); }
 
 void AnimModel::Draw(void) { fn_802C744C(model, &frame); }
 

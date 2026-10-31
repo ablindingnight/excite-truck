@@ -20,7 +20,7 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 void fn_80128658(void* p);  // MemFree
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C77F0(s32 model, f32* box);
 void fn_801E9E30(s16* h, f32* pos);
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
@@ -457,7 +457,7 @@ inline PickupObjMan::~PickupObjMan(void) {
     grouping = 0;
     for (i = 0; i < 5; i++) {
         if (lbl_80330020[i].handle != -1) {
-            fn_802C6CF8(lbl_80330020[i].handle);
+            mrModelUnload(lbl_80330020[i].handle);
             lbl_80330020[i].handle = -1;
         }
     }

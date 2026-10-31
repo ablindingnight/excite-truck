@@ -92,7 +92,7 @@ unsigned long strlen(const char*);
 extern char lbl_80498A00[4][18];
 extern int lbl_80498A48[4];
 extern char* lbl_8055F2C4;
-void fn_802E6CA8(void);
+void MemCardSystemLoad(void);
 void fn_802E6FBC(void);
 void fn_802E7128(void);
 int fn_802E8D84(void);
@@ -126,7 +126,7 @@ void fn_8024C370(void) {}
 
 int fn_8024C524(void) {
     fn_802E712C();
-    fn_802E6CA8();
+    MemCardSystemLoad();
     fn_8024C464();
     return 0;
 }

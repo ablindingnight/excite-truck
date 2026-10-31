@@ -295,7 +295,7 @@ void fn_802CB424(void);
 void fn_802CB6B4(void);
 void fn_802CB82C(s32 id);
 s32 fn_802CAC28(const char* name, s32 key);
-void fn_802CAC54(s32 id);
+void gxForgetTexture(s32 id);
 void fn_802CAD28(s32 id);
 TexEntry* fn_802CB018(void);
 TTHeader* fn_802CB2FC(u16 w, u16 h, u8 a, u8 b, u16 c, u8 d);
@@ -339,10 +339,10 @@ void fn_802CA0E4(void) {
 
 void fn_802CA1E0(void) {
     if (lbl_8055D03C != -1) {
-        fn_802CAC54(lbl_8055D03C);
+        gxForgetTexture(lbl_8055D03C);
         lbl_8055D03C = -1;
     }
-    fn_802CAC54(lbl_8055FCB4);
+    gxForgetTexture(lbl_8055FCB4);
     lbl_8055FCB4 = -1;
     for (int i = 0; i < 512; i++) {
         if (lbl_8055FCB0[i].refs) {
@@ -603,7 +603,7 @@ s32 fn_802CAC34(const char* name, TTHeader* res) { return fn_802CA898(name, 0, r
 
 s32 fn_802CAC44(const char* name, s32 kind) { return fn_802CA898(name, 0, 0, kind); }
 
-void fn_802CAC54(s32 id) {
+void gxForgetTexture(s32 id) {
     if (id == -1) {
         return;
     }

@@ -10,7 +10,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* table);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 inst);
+void mrModelUnload(s32 inst);
 void fn_802C7040(s32 inst);
 void fn_802C9900(f32 alpha);
 void fn_802C9904(void);
@@ -142,7 +142,7 @@ struct OmlList {
     }
     ~OmlList(void) {
         for (int i = 0; i < models.count; i++) {
-            fn_802C6CF8(models.data[i]);
+            mrModelUnload(models.data[i]);
         }
     }
     GroupRefs groups;  // offset 0x0
@@ -253,7 +253,7 @@ void fn_801D985C(MorphGroup** head);
 void fn_801D9948(OmlList** head);
 
 void fn_801D9828(void) {
-    fn_802C6CF8(lbl_8055E960);
+    mrModelUnload(lbl_8055E960);
     fn_801D985C(&lbl_8055E96C);
     fn_801D9948(&lbl_8055E964);
 }

@@ -151,7 +151,7 @@ void fn_80233010(const char* text, int font, u32 color, int flags, f32 x, f32 y,
 void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
                  f32 alpha, ...);
 int fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(int model);
+void mrModelUnload(int model);
 Sound* fn_80207848(const char* name, int flags);
 Layout* fn_80145E70(const char* name);
 void fn_802C86F0(Viewport* vp, int x, int y, int w, int h);
@@ -728,7 +728,7 @@ void fn_8000F158(void) {
 void fn_8000F188(const char* name) { lbl_80558A94 = fn_802C6FC0(name, 0, 0); }
 
 void fn_8000F1B4(void) {
-    fn_802C6CF8(lbl_80558A94);
+    mrModelUnload(lbl_80558A94);
     lbl_80558A94 = -1;
 }
 

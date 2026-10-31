@@ -9,7 +9,7 @@ int strcasecmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 s32 fn_8023512C(const char* name);
 void fn_80235380(s32 art);
 void fn_80176734(void);
@@ -338,7 +338,7 @@ void PSVECNormalize(const void* a, void* b);
 void PSVECCrossProduct(const void* a, const void* b, void* c);
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 }  // extern "C"
 void fn_8000C630(long, int);
 extern "C" {
@@ -1001,11 +1001,11 @@ void fn_801617BC(void) {
 
 void fn_801618B4(void) {
     int i;
-    fn_802CAC54(lbl_8055E2E8);
-    fn_802CAC54(lbl_8055E2EC);
-    fn_802CAC54(lbl_8055E2F0);
-    fn_802CAC54(lbl_8055E2F4);
-    fn_802CAC54(lbl_8055E2F8);
+    gxForgetTexture(lbl_8055E2E8);
+    gxForgetTexture(lbl_8055E2EC);
+    gxForgetTexture(lbl_8055E2F0);
+    gxForgetTexture(lbl_8055E2F4);
+    gxForgetTexture(lbl_8055E2F8);
     fn_80235380(lbl_8055E2FC);
     if (lbl_8055E2E0) {
         delete lbl_8055E2E0;
@@ -1425,8 +1425,8 @@ inline void Challenge::Shutdown(void) {
         }
     }
     delete snd;
-    fn_802CAC54(tex);
-    fn_802C6CF8(model);
+    gxForgetTexture(tex);
+    mrModelUnload(model);
 }
 
 inline void Challenge::Camera(void) {

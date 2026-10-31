@@ -21,7 +21,7 @@ void fn_801E9DC4(s16* h);
 int fn_801E9E30(s16* h, void* pos);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void* fn_802C6FC0(const char* name, int a, int b);  // load a model
-void fn_802C6CF8(void* model);
+void mrModelUnload(void* model);
 void fn_802C744C(void* model, const void* frame);
 void fn_802E30C8(const char* fmt, ...);
 }
@@ -221,7 +221,7 @@ void fn_802A81F0(void) {
 
 inline Flock::~Flock(void) {
     for (int j = 0; j < models.n; j++) {
-        fn_802C6CF8(models.data[j]);
+        mrModelUnload(models.data[j]);
     }
     models.n = 0;
     birds.n = 0;

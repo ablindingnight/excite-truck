@@ -159,7 +159,7 @@ const MVec3* fn_802C9A40(void);
 s32 fn_802C9C58(s32 v);
 s32 fn_802CAC28(const char* name, s32 key);
 s32 fn_802CAC44(const char* name, s32 kind);
-void fn_802CAC54(s32 id);
+void gxForgetTexture(s32 id);
 const char* fn_802CAE34(s32 id);
 int fn_802CAF8C(s32 id);
 s32 fn_802CAFC8(s32 id);
@@ -466,7 +466,7 @@ TexNode* fn_802C5A60(s32 tex, s32 key, u16 prio) {
 }
 
 void fn_802C5BA0(TexNode* t) {
-    fn_802CAC54(t->tex);
+    gxForgetTexture(t->tex);
     if (--t->refs == 0) {
         lbl_8055FC21 = 1;
     }
@@ -733,7 +733,7 @@ void fn_802C6C38(s32 i) {
     }
 }
 
-void fn_802C6CF8(s32 i) {
+void mrModelUnload(s32 i) {
     if (i == -1) {
         fn_802E30C8("mrModelUnload: unloading MODEL_INVALID!!");
         return;

@@ -154,7 +154,7 @@ void fn_802C8D74(void);
 int fn_802C94A0(const MVec3* c, f32 r, u8* clip, f32* dist);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 s32 fn_802CAC28(const char* name, s32 key);
-void fn_802CAC54(s32 id);
+void gxForgetTexture(s32 id);
 s32 fn_802CAFC8(s32 id);
 s32 fn_802CAFF0(s32 id);
 void fn_802CC550(s32 id, f32 dist, f32 scale);
@@ -362,7 +362,7 @@ void fn_802CD254(MList* m) {
     int i;
     for (i = 0; i < m->e.n; i++) {
         MLBatch* e = &m->e.p[i];
-        fn_802CAC54(e->tex);
+        gxForgetTexture(e->tex);
         e->tex = -2;
     }
     for (i = 0; i < m->numObjs; i++) {

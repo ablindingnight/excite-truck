@@ -25,7 +25,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // file exists
 int fn_802CAC28(const char* name, int a);  // load a texture
-void fn_802CAC54(int tex);
+void gxForgetTexture(int tex);
 int fn_80129D90(int seed, int lo, int hi);  // random int
 f32 fn_80214D48(void);                      // frame time
 const Mat3* fn_8022EDC4(void);              // camera
@@ -250,7 +250,7 @@ void fn_8022F77C(Background* bg) {
 
 void fn_8022F824(Background* bg) {
     fn_8022F418(bg);
-    fn_802CAC54(bg->tex);
+    gxForgetTexture(bg->tex);
     fn_8022F77C(bg);
     operator delete(bg);
 }

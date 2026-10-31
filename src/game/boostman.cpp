@@ -148,7 +148,7 @@ extern "C" {
 void fn_801777CC(IRaceListener* l);  // add race listener
 void fn_801777D0(IRaceListener* l);  // remove race listener
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int n);
 void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
@@ -536,11 +536,11 @@ BoostMan::~BoostMan(void) {
     fn_801777D0(this);
     Clear();
     if (lines != -2) {
-        fn_802CAC54(lines);
+        gxForgetTexture(lines);
         lines = -2;
     }
     if (arrows != -2) {
-        fn_802CAC54(arrows);
+        gxForgetTexture(arrows);
         arrows = -2;
     }
 }

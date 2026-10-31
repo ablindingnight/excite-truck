@@ -14,7 +14,7 @@ int fn_8012C33C(const char* name);       // resource exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 inst);
+void mrModelUnload(s32 inst);
 void fn_802C7040(s32 inst);
 void fn_802C7A44(void);
 void fn_802C7A50(void);
@@ -141,7 +141,7 @@ s32 fn_80202248(const char* name) {
 
 void fn_802022A0(s32* inst) {
     if (*inst != -1) {
-        fn_802C6CF8(*inst);
+        mrModelUnload(*inst);
         *inst = -1;
     }
 }

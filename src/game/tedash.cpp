@@ -210,7 +210,7 @@ void fn_802BE8B4(s16 x, s16 z, s16 size);
 int fn_802BC09C(s32 x, s32 z, s32 layer, s32 a, f32 t);
 void fn_801E41D8(V3* a, V3* b, u32 color, f32 w);
 s32 fn_8026E214(void* fn);
-void fn_802C6CF8(s32 h);
+void mrModelUnload(s32 h);
 void fn_802C7040(s32 h);
 void fn_80230B5C(void* m);
 void fn_802C8638(void* m);
@@ -1094,7 +1094,7 @@ void fn_802B87A0(void) {
     fn_8026E214((void*)lbl_8055FA00);
     SafeDelete(lbl_8055FA48);
     if (lbl_8055FA34 != -1) {
-        fn_802C6CF8(lbl_8055FA34);
+        mrModelUnload(lbl_8055FA34);
         lbl_8055FA34 = -1;
     }
     lbl_804BFA70.count = 0;

@@ -139,7 +139,7 @@ ValueNode* fn_802AE414(const char* name);
 int fn_802BF4F0(void);
 f32 fn_802BF590(void);
 ModelInfo* fn_802C6C34(s32 model);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void fn_802C7040(s32 model);
 void fn_802C8230(f32 a);
@@ -154,7 +154,7 @@ void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 int fn_802C9640(const Vec* c, f32 r);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802E317C(const char* fmt, ...);
 double sqrt(double x);
 f32 PSVECDistance(const Vec* a, const Vec* b);
@@ -357,7 +357,7 @@ extern "C" void fn_8029C570(void) {
 
 extern "C" void fn_8029C650(void) {
     if (lbl_8055CAA8 != -1) {
-        fn_802C6CF8(lbl_8055CAA8);
+        mrModelUnload(lbl_8055CAA8);
     }
 }
 
@@ -639,7 +639,7 @@ extern "C" void fn_8029D460(ValueNode* n, f32 t, f32 x, f32 y) {
 }
 
 WaterPool::~WaterPool(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] verts;
     delete[] buf;
 }
@@ -940,7 +940,7 @@ WaterShallow::WaterShallow(const PoolGeom* g, const char* texName) {
     tex = fn_802CAC28(texName, 0);
 }
 
-WaterShallow::~WaterShallow(void) { fn_802CAC54(tex); }
+WaterShallow::~WaterShallow(void) { gxForgetTexture(tex); }
 
 extern "C" {
 

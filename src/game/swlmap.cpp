@@ -17,7 +17,7 @@ void fn_802C88BC(int unk);
 int fn_802C2C00(int on);
 void fn_801D9B58(void);
 void fn_802CB228(int rt);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 
 }  // extern "C"
 
@@ -82,7 +82,7 @@ void fn_802C2874(void) {
         lbl_8055FB6C = -2;
     }
     if (lbl_8055FB70 != -2) {
-        fn_802CAC54(lbl_8055FB70);
+        gxForgetTexture(lbl_8055FB70);
         lbl_8055FB70 = -2;
     }
 }

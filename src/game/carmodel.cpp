@@ -297,7 +297,7 @@ int fn_801333E8(int a, const char* name, u8* flag);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 void* fn_80179CB0(void);
 struct ModelInfo* fn_802C6C34(s32 model);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void fn_802C70AC(s32 model, const Frame* f, s32 mat, u32 mask);
 void fn_802C7AE0(s32 model, const Frame* f, u32 mask, f32 t);
@@ -564,12 +564,12 @@ CarModel::~CarModel(void) {
     int i;
     for (i = 0; i < numLods; i++) {
         drawModels[i] = -1;
-        fn_802C6CF8(lodModels[i]);
+        mrModelUnload(lodModels[i]);
     }
     for (i = 0; i < numShadows; i++) {
-        fn_802C6CF8(shadows[i].model);
+        mrModelUnload(shadows[i].model);
     }
-    fn_802C6CF8(chassis);
+    mrModelUnload(chassis);
     fn_801E323C(wheelBone);
     fn_801E323C(shiftLight);
     fn_8020095C(rider);
@@ -1203,7 +1203,7 @@ void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir) {
 
 void fn_801EEC68(CarModel* m) {
     if (m->xray != -1) {
-        fn_802C6CF8(m->xray);
+        mrModelUnload(m->xray);
         m->xray = -1;
     }
 }

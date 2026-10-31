@@ -15,7 +15,7 @@ struct Joint;
 
 extern "C" {
 int fn_802C6FC0(const char* name, int a, int b);  // load a model
-void fn_802C6CF8(int model);                        // release a model
+void mrModelUnload(int model);                        // release a model
 void fn_802C7760(int model, f32* x0, f32* x1, f32* y0, f32* y1, f32* z0, f32* z1);  // bounds
 void fn_802C744C(int model, const ValMatrix* m);
 void fn_802C70AC(int model, const ValMatrix* m, int a, int b);
@@ -165,15 +165,15 @@ XraySusp* fn_801EF428(XraySusp* x, int del) {
     fn_801E323C(ctx->sides[0].spring);
     fn_801E323C(ctx->sides[0].shock);
     fn_801E323C(ctx->sides[0].springEnd);
-    fn_802C6CF8(ctx->sides[0].hub);
+    mrModelUnload(ctx->sides[0].hub);
     fn_801E323C(ctx->sides[1].mountU);
     fn_801E323C(ctx->sides[1].mountL);
     fn_801E323C(ctx->sides[1].shaft);
     fn_801E323C(ctx->sides[1].spring);
     fn_801E323C(ctx->sides[1].shock);
     fn_801E323C(ctx->sides[1].springEnd);
-    fn_802C6CF8(ctx->sides[1].hub);
-    fn_802C6CF8(ctx->model);
+    mrModelUnload(ctx->sides[1].hub);
+    mrModelUnload(ctx->model);
     delete ctx;
     ctx = 0;
         if (del > 0) {

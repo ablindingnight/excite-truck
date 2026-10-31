@@ -389,7 +389,7 @@ void fn_801B5360(void) {}
 
 void fn_801B5364(int type, EventHandler h) { lbl_80435C70.handlers[type] = h; }
 
-void fn_801B537C(EventHandler h) {
+void PhysReplayUninstallEventHandler(EventHandler h) {
     for (int i = 0; i < 16; i++) {
         if (lbl_80435C70.handlers[i] == h) {
             lbl_80435C70.handlers[i] = 0;

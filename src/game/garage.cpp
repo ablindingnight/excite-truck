@@ -80,7 +80,7 @@ void fn_80216D28(void);
 void fn_80214D50(int s);
 void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
-void fn_802CAC54(u8* p);
+void gxForgetTexture(u8* p);
 void fn_802354A0(u8* o, int kind, s32 v, f32 x, f32 y, f32 z, f32 w, f32 h);
 f32 fn_80216CB4(void);  // menu fade-in (0..1)
 void fn_80214A9C(int s);
@@ -202,8 +202,8 @@ static inline void FreeIconPool(IconPool* pool) {
     if (pool) {
         for (int i = 0; i < pool->count; i++) {
             IconEntry* e = &pool->entries[i];
-            fn_802CAC54(e->tex);
-            fn_802CAC54(e->texE);
+            gxForgetTexture(e->tex);
+            gxForgetTexture(e->texE);
         }
         delete[] pool->entries;
         operator delete(pool);
@@ -478,7 +478,7 @@ static inline void DestroyCarSlots(u8* p) {
     *(void**)p = lbl_8034453C;
     delete[] PTR(p, 0x18);
     fn_80235380(PTR(p, 0x24));
-    fn_802CAC54(PTR(p, 0x20));
+    gxForgetTexture(PTR(p, 0x20));
 }
 
 // The car list (vtable lbl_80344474), the garage's current list while it runs.
@@ -642,7 +642,7 @@ u8* fn_8024E6E4(u8* p, int del) {
                 *(void**)p = lbl_8034453C;
                 delete[] PTR(p, 0x18);
                 fn_80235380(PTR(p, 0x24));
-                fn_802CAC54(PTR(p, 0x20));
+                gxForgetTexture(PTR(p, 0x20));
             }
         }
         if (del > 0) {
@@ -666,7 +666,7 @@ u8* fn_8024E818(u8* p, int del) {
                 *(void**)p = lbl_8034453C;
                 delete[] PTR(p, 0x18);
                 fn_80235380(PTR(p, 0x24));
-                fn_802CAC54(PTR(p, 0x20));
+                gxForgetTexture(PTR(p, 0x20));
             }
         }
         if (del > 0) {
@@ -688,7 +688,7 @@ u8* fn_8024E920(u8* p, int del) {
             *(void**)p = lbl_8034453C;
             delete[] PTR(p, 0x18);
             fn_80235380(PTR(p, 0x24));
-            fn_802CAC54(PTR(p, 0x20));
+            gxForgetTexture(PTR(p, 0x20));
         }
         if (del > 0) {
             operator delete(p);
@@ -902,7 +902,7 @@ u8* fn_8024FB64(u8* p, int del) {
         *(void**)p = lbl_8034453C;
         delete[] PTR(p, 0x18);
         fn_80235380(PTR(p, 0x24));
-        fn_802CAC54(PTR(p, 0x20));
+        gxForgetTexture(PTR(p, 0x20));
         if (del > 0) {
             operator delete(p);
         }

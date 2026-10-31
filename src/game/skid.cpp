@@ -108,7 +108,7 @@ void fn_802C9648(f32 a);
 f32 fn_802C9A4C(f32 lod);
 void fn_802C967C(void);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802E317C(const char* fmt, ...);
 }
 
@@ -221,7 +221,7 @@ int fn_8028D17C(void) {
 
 void fn_8028D25C(void) {
     for (int i = 0; i < lbl_8055F728; i++) {
-        fn_802CAC54(lbl_804B3400[i].tex);
+        gxForgetTexture(lbl_804B3400[i].tex);
     }
 }
 

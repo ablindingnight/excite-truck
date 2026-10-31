@@ -33,9 +33,9 @@ extern "C" {
 void PSVECCrossProduct(const DVec3* a, const DVec3* b, DVec3* out);
 f32 PSVECMag(const DVec3* v);
 s32 fn_802CAC28(const char* name, int a);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C744C(s32 model, const DFrame* m);
 void fn_802C7760(s32 model, f32* x0, f32* y0, f32* z0, f32* x1, f32* y1, f32* z1);
 void fn_802C8BD0(s32 tex);
@@ -176,8 +176,8 @@ void fn_801E3C04(void) {
 }
 
 void fn_801E3C88(void) {
-    fn_802CAC54(lbl_8055EA6C);
-    fn_802C6CF8(lbl_8055EA64);
+    gxForgetTexture(lbl_8055EA6C);
+    mrModelUnload(lbl_8055EA64);
 }
 
 // Arrow head (a four-sided pyramid) at pos pointing along dir.

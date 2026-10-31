@@ -905,12 +905,12 @@ struct CoinFrame {
 };
 
 extern "C" {
-void fn_802CAC54(s32 tex);
-void fn_802C6CF8(s32 model);
+void gxForgetTexture(s32 tex);
+void mrModelUnload(s32 model);
 }
 
 struct TexRef {
-    ~TexRef(void) { fn_802CAC54(h); }
+    ~TexRef(void) { gxForgetTexture(h); }
     s32 h;
 };
 
@@ -938,13 +938,13 @@ struct Pickup {
     Pickup(ValueNode* n);
     ~Pickup(void) {
         if (--lbl_8055E258 == 0) {
-            fn_802CAC54(lbl_80559EDC);
+            gxForgetTexture(lbl_80559EDC);
             lbl_80559EDC = -1;
-            fn_802C6CF8(lbl_80559ED4);
-            fn_802C6CF8(lbl_80559ED8);
-            fn_802C6CF8(lbl_80559ECC);
-            fn_802C6CF8(lbl_80559ED0);
-            fn_802C6CF8(lbl_8055E254);
+            mrModelUnload(lbl_80559ED4);
+            mrModelUnload(lbl_80559ED8);
+            mrModelUnload(lbl_80559ECC);
+            mrModelUnload(lbl_80559ED0);
+            mrModelUnload(lbl_8055E254);
             lbl_80559ED0 = -1;
             lbl_80559ECC = -1;
             lbl_8055E254 = -1;
@@ -2618,9 +2618,9 @@ inline BetaMaster::~BetaMaster(void) {
         if (cars[i].fullSnd) {
             delete cars[i].fullSnd;
         }
-        fn_802CAC54(cars[i].tex[2]);
-        fn_802CAC54(cars[i].tex[1]);
-        fn_802CAC54(cars[i].tex[0]);
+        gxForgetTexture(cars[i].tex[2]);
+        gxForgetTexture(cars[i].tex[1]);
+        gxForgetTexture(cars[i].tex[0]);
         delete cars[i].stunts;
         delete cars[i].hud;
         cars[i].hud = 0;

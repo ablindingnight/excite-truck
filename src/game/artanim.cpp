@@ -122,7 +122,7 @@ void fn_8023895C(void);
 void fn_802389E4(void);
 void fn_80238A80(int x, int y, u32 color, const char* fmt, ...);
 void fn_80238B44(int x, int y, int w, int h, u32 color);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 u32 fn_802E2C20(void);
 void fn_802E30C8(const char* fmt, ...);
 }
@@ -254,7 +254,7 @@ void fn_802AD30C(ArtAnim* a) {
         if (e->type == 1) {
             fn_802328D4(e->handle);
         } else if (e->type == 2) {
-            fn_802C6CF8(e->handle);
+            mrModelUnload(e->handle);
         }
     }
     for (i = 0; i < a->nPaths; i++) {

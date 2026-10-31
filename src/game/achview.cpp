@@ -42,8 +42,8 @@ public:
 
 extern "C" {
 void fn_80236914(void);
-void fn_802C6CF8(s32 h);
-void fn_802CAC54(u8* p);
+void mrModelUnload(s32 h);
+void gxForgetTexture(u8* p);
 void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 f32 PSVECDotProduct(const f32* a, const f32* b);
@@ -150,10 +150,10 @@ struct TrophyView {
     void Release(void) {
         vt = lbl_80345158;
         if (handle != -1) {
-            fn_802C6CF8(handle);
+            mrModelUnload(handle);
             handle = -1;
         }
-        fn_802CAC54(env);
+        gxForgetTexture(env);
     }
 };
 
@@ -269,10 +269,10 @@ u8* AchievementTrophyModel_vf08(u8* p, int del) {
     if (p) {
         *(void**)p = lbl_80345158;
         if (S32(p, 0x50) != -1) {
-            fn_802C6CF8(S32(p, 0x50));
+            mrModelUnload(S32(p, 0x50));
             S32(p, 0x50) = -1;
         }
-        fn_802CAC54(PTR(p, 0xA8));
+        gxForgetTexture(PTR(p, 0xA8));
         if (del > 0) {
             operator delete(p);
         }
@@ -692,7 +692,7 @@ s32 fn_802C6FC0(const char* name, int a, int b);
 // Loads the trophy model "*uiaction.res/<name>.mo0" (replacing the old one) and resets its rotation.
 void AchievementTrophyModel_vf0C(u8* p, const char* name) {
     if (S32(p, 0x50) != -1) {
-        fn_802C6CF8(S32(p, 0x50));
+        mrModelUnload(S32(p, 0x50));
         S32(p, 0x50) = -1;
     }
     if (*name && strlen(name)) {

@@ -89,7 +89,7 @@ u32 fn_802E7130(void);
 int fn_802E721C(u32 cookie, u32 version, s32 size);
 int fn_802E6FBC(void);
 
-int fn_802E6CA8(void) {
+int MemCardSystemLoad(void) {
     u8* p;
     MemCardHeader* h;
     int ok;
@@ -244,4 +244,4 @@ int fn_802E721C(u32 cookie, u32 version, s32 size) {
 
 }  // extern "C"
 
-// NonMatching: fn_802E6CA8 numbers its saved registers differently (69 diffs, registers only).
+// NonMatching: MemCardSystemLoad numbers its saved registers differently (69 diffs, registers only).

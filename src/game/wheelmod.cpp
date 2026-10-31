@@ -21,7 +21,7 @@ ValueTable* fn_80131808(const char* name);                    // load a .val
 void fn_80131818(ValueTable* t);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_802C6FC0(const char* name, int remap, int b);  // load a model
-void fn_802C6CF8(int model);
+void mrModelUnload(int model);
 void fn_802C70AC(int model, const ValMatrix* m, int a, u32 mask);
 void fn_802C7AE0(int model, const ValMatrix* m, f32 height, int a);  // shadow
 void fn_802C77F0(int model, f32* bounds);
@@ -411,16 +411,16 @@ void fn_801F0CC4(void) {
         for (l = 0; l < lbl_8055EBEC[i].numLods; l++) {
             for (j = 0; j < 2; j++) {
                 if (lod->slow[j] != -1) {
-                    fn_802C6CF8(lod->slow[j]);
+                    mrModelUnload(lod->slow[j]);
                 }
                 if (lod->fast[j] != -1) {
-                    fn_802C6CF8(lod->fast[j]);
+                    mrModelUnload(lod->fast[j]);
                 }
             }
             lod++;
         }
         for (k = 0; k < lbl_8055EBEC[i].shadow.count; k++) {
-            fn_802C6CF8(lbl_8055EBEC[i].shadow.lods[k].model);
+            mrModelUnload(lbl_8055EBEC[i].shadow.lods[k].model);
         }
     }
     delete[] lbl_8055EBEC;

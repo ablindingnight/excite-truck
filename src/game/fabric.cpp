@@ -189,7 +189,7 @@ f32 PSVECSquareDistance(const void* a, const void* b);
 f32 PSVECDistance(const void* a, const void* b);
 f32 PSVECDotProduct(const void* a, const void* b);
 void* fn_802CAC28(const char* name, int a);
-void fn_802CAC54(void* tex);
+void gxForgetTexture(void* tex);
 double log2(double x);
 f32 fn_801E7E24(void);
 void fn_801E8C84(PVec* out);
@@ -570,7 +570,7 @@ void fn_801F639C(Fabric* f) {
     delete[] f->anchors;
     delete[] f->sticks;
     fn_801F6358(f);
-    fn_802CAC54(f->tex);
+    gxForgetTexture(f->tex);
 }
 
 // Verlet step with one force for every particle.

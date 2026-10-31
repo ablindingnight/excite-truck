@@ -48,7 +48,7 @@ void fn_802328D4(int);
 void fn_802C4C80(int);
 void fn_802C519C(int);
 void fn_80235380(int);
-int fn_802C5130(const char*);
+int gxGetImage(const char*);
 int fn_8023512C(const char*);
 int fn_802C49E8(const char*);
 
@@ -734,7 +734,7 @@ void fn_8022CAA8(UIStyleRecordFields* s,const UIStyleInputFields* input) {
     s->field60=input->field50;
     s->field64_0=0;s->field64_1=0;s->field64_2=0;s->field64_3=0;
     if(resource) {
-        if(fn_8022A7D4(resource)) s->field64_1=fn_802C5130(resource);
+        if(fn_8022A7D4(resource)) s->field64_1=gxGetImage(resource);
         else if(fn_8022A804(resource)) s->field64_2=fn_8023512C(resource);
         else s->field64_0=fn_802C49E8(resource);
     }

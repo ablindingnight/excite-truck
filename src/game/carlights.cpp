@@ -81,7 +81,7 @@ void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802C8DB8(void* v, int nv, u16* idx, int ni);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 }
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -169,8 +169,8 @@ void fn_80294970(void) {
 }
 
 void fn_80294C68(void) {
-    fn_802CAC54(lbl_8055C990);
-    fn_802CAC54(lbl_8055C994);
+    gxForgetTexture(lbl_8055C990);
+    gxForgetTexture(lbl_8055C994);
     lbl_8055C990 = -1;
     lbl_8055C994 = -1;
     for (int i = 0; i < fn_80287B14(); i++) {

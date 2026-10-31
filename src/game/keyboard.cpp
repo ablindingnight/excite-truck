@@ -9,7 +9,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 const char* fn_80131234(const char* key);  // localize
 s32 fn_80232578(const char* name);         // load font
 void fn_802328D4(s32 font);
-void* fn_802C5130(const char* name);  // load image
+void* gxGetImage(const char* name);  // load image
 void fn_802C519C(void* img);
 f32 fn_8023293C(s32 font, const char* text, f32 scale);
 void fn_80230C30(f32* x, f32* y, int lx, int ly);
@@ -253,7 +253,7 @@ NameChooser::NameChooser(char* buf, int max) {
 
 void NameChooser::Enter(void) {
     font = fn_80232578("uifnt_o.gtx");
-    box = fn_802C5130("namebox.img");
+    box = gxGetImage("namebox.img");
     if (box == NULL) {
         fn_802E30C8("mname: Error getting selector box");
     }

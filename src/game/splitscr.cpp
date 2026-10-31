@@ -85,7 +85,7 @@ void fn_802C88FC(Camera* m);
 void fn_802C8638(Camera* cam);
 void fn_80010188(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_802C2C00(int on);
 int fn_801E85A4(void);       // player views
 int fn_801E866C(int view);  // car of a view
@@ -238,7 +238,7 @@ void fn_802061F8(void) { lbl_8055ED6C = fn_802CAC28("mpov_car.tex", 0); }
 
 void fn_80206228(void) {
     if (lbl_8055ED6C != -2) {
-        fn_802CAC54(lbl_8055ED6C);
+        gxForgetTexture(lbl_8055ED6C);
         lbl_8055ED6C = -2;
     }
 }

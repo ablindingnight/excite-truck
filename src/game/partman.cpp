@@ -18,7 +18,7 @@ f32 fn_80287BC8(f32 lo, f32 hi);            // random float
 int fn_80287B5C(int n);                     // random int
 f32 fn_801E7E18(void);                      // game time
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 f32 fn_802C9A4C(f32 x);
@@ -653,7 +653,7 @@ PartSys::PartSys(const PartParams* p, const char* tex) {
 inline Particle::Particle(void) {}
 
 PartSys::~PartSys(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] parts;
 }
 

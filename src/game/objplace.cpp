@@ -17,7 +17,7 @@ void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
 int fn_8012C33C(const char* name);       // file exists
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void* fn_802C6B44(const char* name);  // load a model
 void fn_802C6C20(void* model);
 const char* fn_802C9C24(void* info);  // texture name
@@ -204,7 +204,7 @@ struct ObjModel {
     ObjModel(void) { tex = -2; }
     ~ObjModel(void) {
         if (tex != -2) {
-            fn_802CAC54(tex);
+            gxForgetTexture(tex);
             tex = -2;
         }
         if (model) {

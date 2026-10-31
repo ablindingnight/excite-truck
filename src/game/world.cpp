@@ -305,7 +305,7 @@ void fn_8026A2B0(int view);
 int fn_8026A2C8(void);
 u8* fn_801EA9A0(int i);
 void fn_8026A248(int player, int view);
-void fn_802C6CF8(s32 h);
+void mrModelUnload(s32 h);
 s32 fn_802C6FC0(const char* file, int a, int b);
 void fn_80204460(void);
 void fn_801EA2E8(void);
@@ -1358,7 +1358,7 @@ void fn_801E96D8(RaceSetup* s) {
 
 void fn_801E9BE4(void) {
     if (lbl_8055AF10 != -1) {
-        fn_802C6CF8(lbl_8055AF10);
+        mrModelUnload(lbl_8055AF10);
     }
     lbl_8055AF10 = -1;
 }

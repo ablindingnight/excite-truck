@@ -93,7 +93,7 @@ f32 fn_801F159C(void* w);
 f32 fn_8023659C(void);
 void fn_8027A714(CarSetup* s, const char* name);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C70AC(s32 model, const Frame* f, s32 mat, u32 mask);
 s32 fn_802C7A34(int a, Vec* p, s32 n);
 s32 fn_802C7A40(int a, Vec* p, s32 n, int b, s32* c, int d);
@@ -327,8 +327,8 @@ void CarUIModel::Load(const char* carName) {
 void CarUIModel::Unload(void) {
     if (loaded) {
         loaded = 0;
-        fn_802C6CF8(model);
-        fn_802C6CF8(shadow);
+        mrModelUnload(model);
+        mrModelUnload(shadow);
         fn_801F0000(fwheels);
         fn_801F0000(rwheels);
         UnloadEfx();
@@ -399,7 +399,7 @@ void CarUIModel::LoadEfx(const char* path) {
 
 void CarUIModel::UnloadEfx(void) {
     if (efx != -1) {
-        fn_802C6CF8(efx);
+        mrModelUnload(efx);
         efx = -1;
     }
     if (boneset) {
@@ -599,7 +599,7 @@ f32 fn_802C9A50(void);
 int fn_802C9C8C(u32 a);
 void fn_802C9CE0(void);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_802D3EBC(void);
 void fn_802E30C8(const char* fmt, ...);
 }
@@ -1131,7 +1131,7 @@ CarUIScreen::CarUIScreen(int m) {
 CarUIScreen::~CarUIScreen(void) {
     Deactivate();
     delete model;
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     DestroyLoader();
     DestroyLoader();
 }
@@ -1196,7 +1196,7 @@ void CarUIScreen::Deactivate(void) {
         fn_80252C78();
     }
     if (bg != -1) {
-        fn_802C6CF8(bg);
+        mrModelUnload(bg);
         bg = -1;
     }
     loaded[0] = 0;

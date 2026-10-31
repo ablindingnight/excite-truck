@@ -7,7 +7,7 @@ ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 void fn_802C744C(s32 model, const ValMatrix* m);
 double sin(double x);
@@ -87,7 +87,7 @@ void fn_802C2298(void) {
 void fn_802C2410(void) {
     int i;
     for (i = 0; i < lbl_804C109C.count; i++) {
-        fn_802C6CF8(lbl_804C109C.data[i].model);
+        mrModelUnload(lbl_804C109C.data[i].model);
     }
     lbl_804C109C.count = 0;
 }

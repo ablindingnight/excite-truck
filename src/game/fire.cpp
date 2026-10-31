@@ -183,7 +183,7 @@ void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 f32 fn_802C9A4C(f32 lod);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802E317C(const char* fmt, ...);
 double sqrt(double x);
 double cos(double x);
@@ -919,7 +919,7 @@ RingSlots::~RingSlots(void) {
     for (int i = 0; i < 4; i++) {
         slots[i].state = 0;
     }
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     tex = -1;
 }
 
@@ -1356,8 +1356,8 @@ ExhaustTorchMan::ExhaustTorchMan(void) {
 }
 
 ExhaustTorchMan::~ExhaustTorchMan(void) {
-    fn_802CAC54(faceTex);
-    fn_802CAC54(edgeTex);
+    gxForgetTexture(faceTex);
+    gxForgetTexture(edgeTex);
 }
 
 void ExhaustTorchMan::Reset(void) {

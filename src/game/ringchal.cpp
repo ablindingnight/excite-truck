@@ -43,7 +43,7 @@ void* fn_8023512C(const char* name);
 void fn_80235380(void* art);
 s32 fn_80204CF0(void);
 s32 fn_80204EA0(const char* key);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void* fn_802BAA68(void* xlo, const ValMatrix* m);
 void fn_8016A0B0(void);
@@ -429,7 +429,7 @@ struct ObjInfo {
         if (loaded) {
             loaded = 0;
             if (model != -1) {
-                fn_802C6CF8(model);
+                mrModelUnload(model);
                 model = -1;
             }
             obj = 0;

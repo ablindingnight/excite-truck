@@ -81,7 +81,7 @@ void fn_80139E18(BoundSet* s);
 int fn_80139EC4(BoundSet* s, f32 x, f32 y);
 int fn_802B04D4(const ValVec3* p);
 s32 fn_802CAC28(const char* name, int a);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 }
 
 struct Binding {
@@ -1054,8 +1054,8 @@ inline CrushMaster::~CrushMaster(void) {
         fn_80139E18(lbl_8055E3A4);
         lbl_8055E3A4 = 0;
     }
-    fn_802CAC54(lbl_8055E3A8);
-    fn_802CAC54(radarTex);
+    gxForgetTexture(lbl_8055E3A8);
+    gxForgetTexture(radarTex);
 }
 
 #pragma dont_inline on

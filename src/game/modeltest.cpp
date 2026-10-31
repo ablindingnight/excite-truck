@@ -10,7 +10,7 @@ void fn_8024BBF4(u8* p);
 void fn_8024BCC0(u8* p);
 void fn_8024A1AC(u8* p);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802C8530(void);
 void fn_802C87B4(int x, int y, int w, int h);
@@ -130,7 +130,7 @@ void fn_8024BE04(u8* p) {
             break;
         }
     }
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     fn_802E30C8("-ModelTest");
 }
 

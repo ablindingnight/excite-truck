@@ -22,7 +22,7 @@ void fn_8012C4D8(void* p);                                                      
 void fn_80131810(void);
 void fn_80131818(ValueTable* table);
 s32 fn_802CAC28(const char* name, int a);  // texture handle
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_801D04D0(const char* name);  // surface type by name
 void fn_80127464(void);             // keep alive
 void fn_802B8AE0(const char* name, s32* value);
@@ -542,10 +542,10 @@ void fn_802BCF04(void) {
     for (int i = 0; i < lbl_804C00D4.n; i++) {
         t = &lbl_804C00D4.data[i];
         SafeDelete(t->set);
-        fn_802CAC54(t->farTex);
+        gxForgetTexture(t->farTex);
         fn_802C6C20(t->far);
         t->far = 0;
-        fn_802CAC54(t->nearTex);
+        gxForgetTexture(t->nearTex);
         fn_802C6C20(t->near);
         t->near = 0;
     }

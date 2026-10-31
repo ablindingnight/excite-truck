@@ -76,7 +76,7 @@ int fn_801E85B4(void);
 int fn_801E85A4(void);
 int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* model, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C7040(s32 model);
 void fn_802C9648(void);
 void fn_802C967C(void);
@@ -91,7 +91,7 @@ void fn_802CB228(s32 target);
 void fn_802CB274(s32 target);
 void fn_802C9294(s32 target, int a);
 s32 fn_802CAC28(const char* name, int a);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C86F0(Viewport* v, int x, int y, int w, int h);
 void fn_802C8750(Viewport* v, int del);
 void fn_802C8B08(Frame* cam);
@@ -162,7 +162,7 @@ struct Skybox {
             fn_802CB228(faces[i]);
         }
         if (sun != -2) {
-            fn_802CAC54(sun);
+            gxForgetTexture(sun);
         }
     }
     s32 faces[6];      // offset 0x0
@@ -384,7 +384,7 @@ void fn_802BF40C(void) {
     }
     lbl_8055FADC = 0;
     if (lbl_8055CF6C != -1) {
-        fn_802C6CF8(lbl_8055CF6C);
+        mrModelUnload(lbl_8055CF6C);
         lbl_8055CF6C = -1;
     }
 }
@@ -549,11 +549,11 @@ WaterEnvMap::~WaterEnvMap(void) {
         target = -2;
     }
     if (world != -1) {
-        fn_802C6CF8(world);
+        mrModelUnload(world);
         world = -1;
     }
     if (envModel != -1) {
-        fn_802C6CF8(envModel);
+        mrModelUnload(envModel);
         envModel = -1;
     }
     if (sky) {
@@ -724,10 +724,10 @@ WaterSystem::WaterSystem(void) {
 
 WaterSystem::~WaterSystem(void) {
     if (mask != -2) {
-        fn_802CAC54(mask);
+        gxForgetTexture(mask);
     }
     if (deep != -2) {
-        fn_802CAC54(deep);
+        gxForgetTexture(deep);
     }
     if (env) {
         delete env;
@@ -882,7 +882,7 @@ int WaterEnvMap::IsValid(void) { return 1; }
 
 TexEnv::~TexEnv(void) {
     if (tex != -2) {
-        fn_802CAC54(tex);
+        gxForgetTexture(tex);
     }
 }
 

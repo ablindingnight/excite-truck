@@ -24,9 +24,9 @@ f32 fn_80204CFC(const char* name);  // tuning value
 void fn_802049DC(const char* name, f32* v, f32 lo, f32 hi, f32 step);  // debug tweak
 void fn_801331C4(int type, const char* name, f32* out);
 int fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(int model);
+void mrModelUnload(int model);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_80176A1C(void);
 void fn_801E9DC4(s16* h);
 void* fn_80171698(void);
@@ -1613,13 +1613,13 @@ ZoneMaster::~ZoneMaster(void) {
     if (prerace) {
         delete prerace;
     }
-    fn_802C6CF8(ringModel);
+    mrModelUnload(ringModel);
     layouts.a.a.DeleteAll();
-    fn_802CAC54(tex[0]);
-    fn_802CAC54(tex[1]);
-    fn_802CAC54(tex[2]);
-    fn_802CAC54(tex[3]);
-    fn_802CAC54(tex[4]);
+    gxForgetTexture(tex[0]);
+    gxForgetTexture(tex[1]);
+    gxForgetTexture(tex[2]);
+    gxForgetTexture(tex[3]);
+    gxForgetTexture(tex[4]);
     delete levels;
     levels = 0;
     delete missflag;
@@ -2393,8 +2393,8 @@ Glow::Glow(void) {
 }
 
 Glow::~Glow(void) {
-    fn_802CAC54(lite);
-    fn_802CAC54(glow);
+    gxForgetTexture(lite);
+    gxForgetTexture(glow);
 }
 
 void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }

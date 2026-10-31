@@ -145,7 +145,7 @@ int fn_802CB128(int w, int h, int a, int b);
 void fn_802CB228(int rt);
 void fn_802CB274(int rt);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8530(void);
 void fn_802C855C(void);
 int fn_801E866C(int player);
@@ -389,23 +389,23 @@ void fn_8001A04C(TrackMap* map) {
     }
     if (map) {
         if (map->frontTex != -2) {
-            fn_802CAC54(map->frontTex);
+            gxForgetTexture(map->frontTex);
             map->frontTex = -2;
         }
         if (map->backTex != -2) {
-            fn_802CAC54(map->backTex);
+            gxForgetTexture(map->backTex);
             map->backTex = -2;
         }
         if (map->tex != -2) {
-            fn_802CAC54(map->tex);
+            gxForgetTexture(map->tex);
             map->tex = -2;
         }
         if (map->line2Tex != -2) {
-            fn_802CAC54(map->line2Tex);
+            gxForgetTexture(map->line2Tex);
             map->line2Tex = -2;
         }
         if (map->lineTex != -2) {
-            fn_802CAC54(map->lineTex);
+            gxForgetTexture(map->lineTex);
             map->lineTex = -2;
         }
         if (map->target != -2) {

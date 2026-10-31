@@ -209,10 +209,10 @@ f32 fn_801E7E24(void);
 WeatherCfg* fn_801E1F44(void);
 void fn_80287B38(void (*cb)(DropHit* hits, int n));
 s32 fn_802CAC28(const char* name, int a);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 ValueNode* fn_802AE414(const char* name);
 s32 fn_802C6FC0(const char* model, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_8028E398(s32 sys);
 int fn_802C2C00(int mode);
 void fn_802C990C(u32 color);
@@ -376,10 +376,10 @@ void fn_802A597C(void);
 
 void fn_802A4B90(void) {
     if (lbl_8055F898 != -1) {
-        fn_802C6CF8(lbl_8055F898);
+        mrModelUnload(lbl_8055F898);
         lbl_8055F898 = -1;
     }
-    fn_802CAC54(lbl_8055F89C);
+    gxForgetTexture(lbl_8055F89C);
     fn_802A597C();
     if (lbl_8055F894) {
         fn_8028E398(lbl_8055F894);
@@ -672,9 +672,9 @@ SnowSystem::SnowSystem(int n, int v) {
 }
 
 SnowSystem::~SnowSystem(void) {
-    fn_802CAC54(quadTex);
+    gxForgetTexture(quadTex);
     quadTex = -1;
-    fn_802CAC54(flakeTex);
+    gxForgetTexture(flakeTex);
     flakeTex = -1;
     delete[] pts;
     pts = 0;
@@ -872,7 +872,7 @@ RainSystem::RainSystem(int n, int v) {
 }
 
 RainSystem::~RainSystem(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] pts;
 }
 
@@ -1055,7 +1055,7 @@ Mist::Mist(ValueNode* vn) {
 }
 
 Mist::~Mist(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] pts;
 }
 

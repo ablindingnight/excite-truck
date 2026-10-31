@@ -97,7 +97,7 @@ void fn_802C6FA8(void* res);
 void fn_802C6FB4(void* res);
 void fn_802C703C(s32 h);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 int fn_801E2CCC(s32 model, const char* name, f32** out);
 void fn_802C744C(s32 model, const GFrame* m);
 void fn_802C8B08(GFrame* cam);
@@ -492,10 +492,10 @@ void fn_801EBB7C(u32* p, u32 base) {
 }
 
 void fn_801EBBB4(void) {
-    fn_802C6CF8(lbl_8055AFBC);
+    mrModelUnload(lbl_8055AFBC);
     lbl_8055AFBC = -1;
     if (lbl_8055AFB8 != -1) {
-        fn_802C6CF8(lbl_8055AFB8);
+        mrModelUnload(lbl_8055AFB8);
         lbl_8055AFB8 = -1;
     }
     if (lbl_8055EBA0) {

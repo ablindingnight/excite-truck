@@ -6,7 +6,7 @@
 extern "C" {
 int fn_8012C33C(const char* name);         // resource exists
 s32 fn_802CAC28(const char* name, int a);  // texture handle
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void* fn_802CA294(s32 handle);
 void fn_802D9628(void* tex, int x, int y, u32 color);
 }
@@ -44,7 +44,7 @@ s32 fn_802C2074(const char* name) {
 
 void fn_802C20DC(s32* tex) {
     if (*tex != -2) {
-        fn_802CAC54(*tex);
+        gxForgetTexture(*tex);
         *tex = -2;
     }
 }

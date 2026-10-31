@@ -128,7 +128,7 @@ void fn_80216D34(void);
 void fn_802C2CDC(void* p, int a, int b);
 void fn_802C2D94(void* p);
 int fn_8012C33C(const char* name);
-void* fn_802C5130(const char* name);
+void* gxGetImage(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 const Style* fn_8022EE9C(void);
 void fn_8022EE98(void);
@@ -225,7 +225,7 @@ Window::Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f) {
     if (bg && *bg) {
         if (strstr(bg, ".img")) {
             if (fn_8012C33C(bg)) {
-                image = fn_802C5130(bg);
+                image = gxGetImage(bg);
             } else {
                 fn_802E30C8("UI: missing background %s", bg);
             }

@@ -58,7 +58,7 @@ int fn_80232B70(int font);  // font height
 void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
 void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
                  f32 alpha, ...);
-int fn_802C5130(const char* name);  // load image
+int gxGetImage(const char* name);  // load image
 void fn_802C519C(int image);
 int fn_802C51C0(int image);  // image width
 void fn_802C5310(int image, int frame, f32 x, f32 y, f32 z);
@@ -137,7 +137,7 @@ class UnlockList : public MenuState {
 public:
     UnlockList(void) {
         font = fn_80232578("uifnt.gtx");
-        image = fn_802C5130("chcklock.img");
+        image = gxGetImage("chcklock.img");
         count = GetUnlockableCount();
         top = 0;
         sprintf(title, "Game Reputation Rating: %d", fn_80019888());

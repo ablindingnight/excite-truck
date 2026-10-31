@@ -12,11 +12,11 @@ u32* fn_801E87A8(void);           // race options
 void fn_802A1120(void* pos, void* dir);
 int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* name, int a, int b);  // load a model
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C744C(s32 model, const void* frame);
 void fn_802C77F0(s32 model, f32* box);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_801E85B4(void);
 int fn_801E866C(int a);
 f32 fn_801E7E24(void);
@@ -42,7 +42,7 @@ struct LapModel {
     LapModel(const char* n) : name(n), model(-1) {}
     ~LapModel(void) {
         if (model != -1) {
-            fn_802C6CF8(model);
+            mrModelUnload(model);
             model = -1;
         }
     }
@@ -194,11 +194,11 @@ void fn_802A93A4(void) {
         LapModel* m = lbl_804BD740;
         for (u32 i = 0; i < 4; i++, m++) {
             if (m->model != -1) {
-                fn_802C6CF8(m->model);
+                mrModelUnload(m->model);
                 m->model = -1;
             }
         }
-        fn_802CAC54(lbl_8055CC58);
+        gxForgetTexture(lbl_8055CC58);
         lbl_8055CC58 = -2;
     }
 }

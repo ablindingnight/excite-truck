@@ -112,7 +112,7 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 ILayout* fn_80145E70(const char* name);  // load layout
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_802E2C20(void);  // milliseconds
 s64 fn_802E2C9C(void);  // time
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
@@ -291,7 +291,7 @@ void fn_801DEE3C(void) {
             d->layout = 0;
         }
         if (d->tex != -1) {
-            fn_802CAC54(d->tex);
+            gxForgetTexture(d->tex);
             d->tex = -1;
         }
         fn_801DE88C(i);

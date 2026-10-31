@@ -64,7 +64,7 @@ void fn_802ECEC0(void);
 void fn_802ECEC4(void);
 void fn_802483E0(void);
 u8* fn_80232578(const char* name);
-u8* fn_802C5130(const char* name);
+u8* gxGetImage(const char* name);
 u8* fn_8023512C(const char* art);
 }
 
@@ -284,7 +284,7 @@ public:
     CupSelect(int s) {
         tileSel = fn_8023512C("tile_cup_s.art");
         tile = fn_8023512C("tile_cup.art");
-        tracks = fn_802C5130("e3_trks.img");
+        tracks = gxGetImage("e3_trks.img");
         text = new ("font") CupText("uifnt_o.gtx");
         text->scale = lbl_8056389C;
         text->flags = (text->flags & ~7) | 4;

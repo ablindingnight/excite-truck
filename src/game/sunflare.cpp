@@ -75,7 +75,7 @@ int fn_802C8FF4(const VecP* p, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, s32 key);
-void fn_802CAC54(s32 id);
+void gxForgetTexture(s32 id);
 void* fn_802D39A4(void* tex, f32 scale);
 void fn_802D3A50(void* obj);
 int fn_802D3A5C(void* obj, const VecP* p);
@@ -132,7 +132,7 @@ void fn_802917C0(FlareSet* fs, ValueNode* node) {
 void fn_802919AC(FlareSet* fs) {
     Flare* f = fs->flares;
     for (int i = 0; i < fs->count; f++, i++) {
-        fn_802CAC54(f->tex);
+        gxForgetTexture(f->tex);
         f->tex = -1;
     }
 }
@@ -156,7 +156,7 @@ void fn_80291A1C(void) {
 
 void fn_80291AC8(void) {
     Sprite* s = &lbl_804B4010;
-    fn_802CAC54(s->tex);
+    gxForgetTexture(s->tex);
     s->tex = -1;
     fn_802D3A50(s->obj);
     s->obj = NULL;

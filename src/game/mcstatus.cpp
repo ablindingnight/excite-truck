@@ -29,7 +29,7 @@ int fn_801298E8(void* info, s32 ch);
 void fn_80214FD8(const char* title, const char* msg);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
-u8* fn_802C5130(const char* name);
+u8* gxGetImage(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 u8* fn_80232578(const char* name);
 u8* fn_8023512C(const char* art);
@@ -96,7 +96,7 @@ MemCardDialogMgr::~MemCardDialogMgr(void) { lbl_8055F244 = 0; }
 
 void MemCardDialogBg::Load(void) {
     const char* str = lbl_80342FC0;
-    if ((image = fn_802C5130(str + 0x60)) == 0) {
+    if ((image = gxGetImage(str + 0x60)) == 0) {
         fn_802E30C8(str + 0x78);
     }
     image2 = 0;

@@ -5,7 +5,7 @@
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 s32 fn_802CAC28(const char* name, int a);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 }
 
 s32 lbl_8055CAE0 = -1;
@@ -25,7 +25,7 @@ void fn_8029EF70(void) {
 
 void fn_8029EFBC(void) {
     if (fn_8029EFF0(lbl_8055CAE0)) {
-        fn_802CAC54(lbl_8055CAE0);
+        gxForgetTexture(lbl_8055CAE0);
     }
 }
 

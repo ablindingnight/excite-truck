@@ -62,7 +62,7 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 const char* fn_80131234(const char* key);  // localize
 Layout* fn_80145E70(const char* name);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 Sound* fn_80207848(const char* name, int flags);
 int fn_801E85A4(void);
 int fn_80204CF0(void);
@@ -328,7 +328,7 @@ void UpdateOutOfTimeOverlay(void) {
 }
 
 inline ScoreOverlay::~ScoreOverlay(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
 }
 
 inline void ScoreOverlay::Update(int player, int score) {

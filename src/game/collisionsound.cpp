@@ -70,7 +70,7 @@ void* __nw__FUlPCc(unsigned long,const char*);
 void* memset(void*,int,size_t);
 void fn_801796CC(int,const Message*,int);
 void fn_801B5364(int,void*);
-void fn_801B537C(void*);
+void PhysReplayUninstallEventHandler(void*);
 void fn_802E317C(const char*,...);
 void __construct_array(void*,void*,void*,int,int);
 extern ModuleTag lbl_8055E6B8;
@@ -120,7 +120,7 @@ int fn_801B3398(const Message* input){Message message=*input;fn_801796CC(1,&mess
 void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=fn_801B3B70(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
 void fn_801B34A4(){fn_801B3DBC(lbl_8055E6C0);memset(lbl_80435C50,0,0x20);}
 void fn_801B3B24(){}
-void fn_801B3B28(){fn_801B537C((void*)fn_801B3390);fn_801B537C((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
+void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
 Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)fn_801B3C64,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
 Entry* fn_801B3C64(Entry* self){self->vtable=lbl_80335DAC;self->a=lbl_80562624;self->b=lbl_80562624;self->c=lbl_80562624;self->d=lbl_80562624;self->e=lbl_80562624;self->f=lbl_80562624;self->sound=0;return self;}
 void fn_801B3DBC(Manager* self){fn_801B435C(self);}

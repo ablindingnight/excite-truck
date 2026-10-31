@@ -20,7 +20,7 @@ void fn_802E30C8(const char* fmt, ...);  // warning print
 int fn_802E2C20(void);                   // milliseconds
 int fn_8012C33C(const char* name);       // file exists
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 ValueNode* fn_802B59CC(void);
 void fn_802B8AE0(const char* name, s32* value);
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
@@ -637,7 +637,7 @@ void fn_802B9D08(void) {
         if (e) {
             e->head = 0;
             if (e->tex != -2) {
-                fn_802CAC54(e->tex);
+                gxForgetTexture(e->tex);
             }
             delete e;
         }
@@ -1029,7 +1029,7 @@ void fn_802BB674(const char* name, int slot) {
     TexEntry* te = lbl_804C0088[slot];
     if (te && strcasecmp(te->name, name) != 0) {
         if (te->tex != -2) {
-            fn_802CAC54(te->tex);
+            gxForgetTexture(te->tex);
         }
         te->SetName(name);
     }

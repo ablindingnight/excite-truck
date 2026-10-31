@@ -6,7 +6,7 @@ extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E712C(void);
 void fn_802E6CA4(int a);
-void fn_802E6CA8(void);
+void MemCardSystemLoad(void);
 void fn_8023D7CC(void);
 void fn_8023D70C(void);
 void MenuDoDemo(void);
@@ -35,7 +35,7 @@ extern "C" {
 void fn_8023B5EC(void) {
     fn_802E712C();
     fn_802E6CA4(1);
-    fn_802E6CA8();
+    MemCardSystemLoad();
 }
 
 void fn_8023B618(void) {

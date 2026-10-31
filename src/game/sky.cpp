@@ -12,7 +12,7 @@ void PSVECNormalize(const void* src, void* dst);
 int fn_8012C33C(const char* name);
 void* fn_802C6B44(const char* name);
 s32 fn_802C6DC4(const char* name, void* model, int a, int b);
-void fn_802C6CF8(s32 inst);
+void mrModelUnload(s32 inst);
 void fn_802C744C(s32 inst, const ValMatrix* m);
 void fn_802A4E08(void);
 }
@@ -115,7 +115,7 @@ void fn_802C0F4C(void) {
 
 void fn_802C0FD4(s32* inst) {
     if (*inst != -1) {
-        fn_802C6CF8(*inst);
+        mrModelUnload(*inst);
         *inst = -1;
     }
 }

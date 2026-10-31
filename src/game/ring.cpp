@@ -14,7 +14,7 @@ void fn_80131818(ValueTable* t);
 const char* fn_80204EA0(const char* name);  // tuning string
 int fn_8012C33C(const char* name);          // file exists
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C70AC(s32 model, const ValMatrix* m, int a, int b);
 void fn_802C9900(f32 a);
 void fn_802C9904(void);
@@ -120,7 +120,7 @@ struct RingType {
     ~RingType(void) { Unload(); }
     void Unload(void) {
         if (loaded) {
-            fn_802C6CF8(model);
+            mrModelUnload(model);
             loaded = 0;
         }
     }
@@ -513,7 +513,7 @@ void fn_8016A8F8(void) {
     for (i = 1; lbl_804302F0.count + 1 <= lbl_804302F0.cap && i < 100; i++) {
         RingType* t = lbl_804302F0.Add();
         if (t->loaded) {
-            fn_802C6CF8(t->model);
+            mrModelUnload(t->model);
             t->loaded = 0;
         }
         t->Make(i);

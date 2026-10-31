@@ -15,7 +15,7 @@ int fn_8012C33C(const char* name);  // resource exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 s32 fn_802CAC28(const char* name, int a);  // texture handle
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 void fn_802C8DB8(void* verts, int n, const u16* idx, int ni);
 void fn_802C8D74(void);
@@ -234,7 +234,7 @@ void fn_80296838(FlipBook* b) {
             for (int i = 0; i < b->count; i++) {
                 FlipFrame* f = &b->frames[i];
                 if (f->tex != -1 && f->tex != -2) {
-                    fn_802CAC54(f->tex);
+                    gxForgetTexture(f->tex);
                     f->tex = -2;
                 }
             }

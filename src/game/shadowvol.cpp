@@ -12,7 +12,7 @@ void fn_802C9CE0(void);
 void fn_802C7ADC(int flag);
 void fn_802C7AE0(s32 inst, const ValMatrix* m, u32 color, f32 alpha);
 s32 fn_802C6FC0(void* model, int a, int b);
-void fn_802C6CF8(s32 inst);
+void mrModelUnload(s32 inst);
 f32 fn_801E88F0(int car);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern char lbl_8055CA60[3];  // "%s"
@@ -135,7 +135,7 @@ void fn_80297A30(void) {
 
 void fn_80297A84(void) {
     for (int i = 0; i < lbl_8055F7AC; i++) {
-        fn_802C6CF8(lbl_8055F7A8[i].inst);
+        mrModelUnload(lbl_8055F7A8[i].inst);
     }
     delete[] lbl_8055F7A8;
     lbl_8055F7A8 = NULL;

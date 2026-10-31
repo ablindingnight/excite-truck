@@ -68,7 +68,7 @@ void PSVECNormalize(const void* src, void* dst);
 void fn_802C7730(TFrame* f);
 void fn_802C7040(void* model);
 void* fn_802CAC28(const char* name, int a);
-void fn_802CAC54(void* tex);
+void gxForgetTexture(void* tex);
 }
 
 // Every handler's base (vtable slots 0x8-0x2C).
@@ -597,7 +597,7 @@ void PointFacingTMH::Draw(TObj* list) {
     }
 }
 
-MultiFacingTMH::~MultiFacingTMH(void) { fn_802CAC54(tex); }
+MultiFacingTMH::~MultiFacingTMH(void) { gxForgetTexture(tex); }
 
 // A textured quad: position, colour and texture coordinates (0x18).
 struct TVtx {

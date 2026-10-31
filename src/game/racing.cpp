@@ -182,7 +182,7 @@ f32 fn_80011EB0(int player);
 int fn_8023512C(const char* name);
 void fn_80235380(int art);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_801333E8(int type, const char* name, u8* out);
 TrackMap* fn_80019C68(int player);
 void fn_8001A04C(TrackMap* map);
@@ -547,7 +547,7 @@ RacingOverlay::~RacingOverlay(void) {
     delete layout;
     fn_8001A04C(map);
     map = 0;
-    fn_802CAC54(zoneTex);
+    gxForgetTexture(zoneTex);
     zoneTex = -2;
     fn_80235380(zoneArt);
     zoneArt = 0;

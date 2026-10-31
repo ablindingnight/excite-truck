@@ -11,7 +11,7 @@ int fn_801345D8(char* dst, int n, const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
 int fn_8012C33C(const char* name);       // file exists
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_802CAF8C(s32 tex);  // texture has alpha
 ValueNode* fn_802B59CC(void);
 int fn_802B05E4(void);
@@ -285,7 +285,7 @@ s32 fn_802B0628(const char* name) {
 
 void fn_802B0690(s32* tex) {
     if (*tex != -2) {
-        fn_802CAC54(*tex);
+        gxForgetTexture(*tex);
         *tex = -2;
     }
 }

@@ -148,7 +148,7 @@ void fn_802C8E48(void);
 const Vec* fn_802C9A40(void);
 f32 fn_802C9A4C(f32 lod);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 double sin(double x);
 double cos(double x);
 }
@@ -720,7 +720,7 @@ SparkSys::SparkSys(int n, f32 l) {
 Spark::Spark(void) {}
 
 SparkSys::~SparkSys(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] pts;
 }
 
@@ -864,7 +864,7 @@ ShardSys::ShardSys(int n) {
 Shard::Shard(void) {}
 
 ShardSys::~ShardSys(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] pts;
 }
 

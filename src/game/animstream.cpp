@@ -77,7 +77,7 @@ s32 fn_801E5990(void* skel);
 s32 fn_801E5E24(void* skel, const AQuat* pose, s32 n, ValMatrix* out);
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 void fn_802C70AC(s32 model, const ValMatrix* m, s32 a, int b);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
@@ -175,7 +175,7 @@ void fn_801E6B98(AnimInst* a) {
         release_buffer(a->buf);
     }
     fn_801E598C(a->skel);
-    fn_802C6CF8(a->model);
+    mrModelUnload(a->model);
     delete a;
 }
 

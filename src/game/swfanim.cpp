@@ -11,7 +11,7 @@ u32 fn_802E2C20(void);                   // milliseconds
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal
 s32 fn_802CAC28(const char* name, int a);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 s32 fn_8022EDC4(void);
 }
 
@@ -318,7 +318,7 @@ void SwfAnim::Unload() {
     if (data) {
         for (u32 i = 0; i < data->numTextures; i++) {
             if (data->textures[i].handle != -2) {
-                fn_802CAC54(data->textures[i].handle);
+                gxForgetTexture(data->textures[i].handle);
                 data->textures[i].handle = -2;
             }
         }

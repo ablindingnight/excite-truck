@@ -108,7 +108,7 @@ void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 u32 fn_802C990C(u32 color);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 double cos(double x);
 double sin(double x);
 double fmod(double x, double y);
@@ -580,9 +580,9 @@ void fn_802AB504(void) {
     lbl_8055F924 = 0;
     delete[] lbl_8055F928;
     lbl_8055F928 = 0;
-    fn_802CAC54(lbl_8055CC60);
+    gxForgetTexture(lbl_8055CC60);
     lbl_8055CC60 = -2;
-    fn_802CAC54(lbl_8055CC64);
+    gxForgetTexture(lbl_8055CC64);
     lbl_8055CC64 = -2;
 }
 

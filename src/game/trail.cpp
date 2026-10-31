@@ -192,7 +192,7 @@ void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 f32 fn_802C9A4C(f32 size);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 int fn_802CE860(int n);
 void fn_802CE868(void);
 void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z);
@@ -1284,7 +1284,7 @@ Paint::Paint(const PaintDesc* d, const char* name) {
 }
 
 Paint::~Paint(void) {
-    fn_802CAC54(tex);
+    gxForgetTexture(tex);
     delete[] marks;
 }
 

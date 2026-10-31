@@ -147,7 +147,7 @@ void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localize
 ILayout* fn_80145E70(const char* name);    // load layout
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 Sound2D* fn_80207848(const char* name, int flags);
 void fn_801476D8(const ArtElem* a, u32 color, s32 tex);
 void fn_8014C72C(ILayout* l, const char* name);
@@ -482,10 +482,10 @@ CrashMode::~CrashMode(void) {
     if (boostSnd) {
         delete boostSnd;
     }
-    fn_802CAC54(betaTex);
-    fn_802CAC54(tapTex);
-    fn_802CAC54(zoneTex);
-    fn_802CAC54(boostTex);
+    gxForgetTexture(betaTex);
+    gxForgetTexture(tapTex);
+    gxForgetTexture(zoneTex);
+    gxForgetTexture(boostTex);
     lbl_8055EA04 = 0;
     delete layout;
 }

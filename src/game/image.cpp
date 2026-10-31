@@ -23,7 +23,7 @@ u8 lbl_8055FC14;
 
 extern "C" {
 
-void* fn_802C5130(const char* name) {
+void* gxGetImage(const char* name) {
     if (strlen(name) > 15) {
         if (!lbl_8055FC14) {
             fn_802E30C8("image: gxGetImage(\"%s\"): Name is too long. Won't report again.", name);

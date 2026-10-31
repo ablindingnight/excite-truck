@@ -17,7 +17,7 @@ void fn_802E30C8(const char* fmt, ...);
 void fn_801E323C(u8* p);
 void fn_801C1C7C(u8* p);
 void fn_801E598C(u8* p);
-void fn_802C6CF8(u8* p);
+void mrModelUnload(u8* p);
 }
 
 void operator delete(void* p);
@@ -64,7 +64,7 @@ void fn_8020095C(u8* p) {
         fn_801E323C(PTR(p, 0x28));
         fn_801C1C7C(PTR(p, 0x0));
         fn_801E598C(PTR(p, 0xC));
-        fn_802C6CF8(PTR(p, 0x8));
+        mrModelUnload(PTR(p, 0x8));
         operator delete(p);
     }
 }

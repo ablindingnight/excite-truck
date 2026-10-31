@@ -69,7 +69,7 @@ void fn_802CA094(DrawList* d);
 void fn_802CA09C(DrawList* d, u32 color, int flag, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802CA0A0(DrawList* d);
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802A92CC(void);
@@ -250,7 +250,7 @@ void fn_802A1290(void) {
 
 void fn_802A14F8(void) {
     if (lbl_8055F844 != -2) {
-        fn_802CAC54(lbl_8055F844);
+        gxForgetTexture(lbl_8055F844);
         lbl_8055F844 = -2;
     }
     if (lbl_8055F840) {

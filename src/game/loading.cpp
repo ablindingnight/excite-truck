@@ -113,7 +113,7 @@ void fn_802328D4(void* font);
 void* fn_8023512C(const char* name);  // load image
 void fn_80235380(void* image);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 u32 fn_802E2C20(void);  // milliseconds
 void fn_80176734(void);
 void fn_80232BA4(const char* text, void* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
@@ -243,13 +243,13 @@ void LoadingInit(void) {
 
 void LoadingShutdown(void) {
     lbl_8055D62C = 0;
-    fn_802CAC54(lbl_80558D84);
+    gxForgetTexture(lbl_80558D84);
     lbl_80558D84 = NO_TEXTURE;
-    fn_802CAC54(lbl_80558D80);
+    gxForgetTexture(lbl_80558D80);
     lbl_80558D80 = NO_TEXTURE;
-    fn_802CAC54(lbl_80558D78);
+    gxForgetTexture(lbl_80558D78);
     lbl_80558D78 = NO_TEXTURE;
-    fn_802CAC54(lbl_80558D7C);
+    gxForgetTexture(lbl_80558D7C);
     lbl_80558D7C = NO_TEXTURE;
     fn_802328D4(lbl_8055D64C);
     lbl_8055D64C = NULL;

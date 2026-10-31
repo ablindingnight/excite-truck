@@ -9,7 +9,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 int fn_8012C33C(const char* name);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
 void fn_8012E96C(const char* name);
@@ -20,7 +20,7 @@ s32 fn_802B1138(const char* name);
 s32 fn_802B2C98(const char* name);
 void* fn_802C6B44(const char* name);
 s32 fn_802C6DC4(const char* name, void* model, int a, int b);
-void fn_802C6CF8(s32 inst);
+void mrModelUnload(s32 inst);
 }
 
 typedef s32 (*TexLoader)(const char* name);
@@ -63,7 +63,7 @@ struct UMat {
             fn_802B5404(&road[k].tex);
         }
         if (sky != -1) {
-            fn_802C6CF8(sky);
+            mrModelUnload(sky);
         }
     }
     const char* name;  // offset 0x0
@@ -103,7 +103,7 @@ s32 fn_802B539C(const char* name) {
 
 void fn_802B5404(s32* tex) {
     if (*tex != -2) {
-        fn_802CAC54(*tex);
+        gxForgetTexture(*tex);
         *tex = -2;
     }
 }

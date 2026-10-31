@@ -22,7 +22,7 @@ int fn_8012F2E4(StringTable* t);
 int fn_8012F2E8(StringTable* t);
 const char* fn_8012F2F0(StringTable* t, int row, int col);
 s32 fn_802CAC28(const char* name, s32 key);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802CC5B8(s32 tex);
 extern f32 lbl_80558DC4[];
 }
@@ -295,7 +295,7 @@ void fn_80235380(gArtSet* s) {
             operator delete(p);
             p = next;
         }
-        fn_802CAC54(s->tex);
+        gxForgetTexture(s->tex);
         fn_80234DE4(s);
         operator delete(s);
     }
@@ -518,13 +518,13 @@ DynoTex::DynoTex(int max, u8 flip) {
 
 DynoTex::~DynoTex(void) {
     for (int i = 0; i < count; i++) {
-        fn_802CAC54(entries[i].tex);
+        gxForgetTexture(entries[i].tex);
     }
     operator delete[](entries);
     max = 0;
     count = 0;
     if (current != -2) {
-        fn_802CAC54(current);
+        gxForgetTexture(current);
     }
 }
 

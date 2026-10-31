@@ -6,7 +6,7 @@ void* operator new[](size_t size, const char* tag);
 
 extern "C" {
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 }
@@ -72,7 +72,7 @@ void fn_802A09B0(void) {
 
 void fn_802A0AFC(void) {
     EventUnInstallHandler(fn_802A0944);
-    fn_802CAC54(lbl_8055CB68);
+    gxForgetTexture(lbl_8055CB68);
     lbl_8055CB68 = -2;
     delete[] lbl_8055F834;
     lbl_8055F834 = 0;

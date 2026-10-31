@@ -11,7 +11,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
 s32 fn_802CAC28(const char* name, int flags);
-void fn_802CAC54(s32 handle);
+void gxForgetTexture(s32 handle);
 void* fn_802CA294(s32 handle);
 u32 fn_802D972C(void* tex, int x, int y);
 void fn_802D9628(void* tex, int x, int y, u32 color);
@@ -56,7 +56,7 @@ s32 fn_802BB87C(const char* name) {
 
 void fn_802BB8E4(s32* handle) {
     if (*handle != -2) {
-        fn_802CAC54(*handle);
+        gxForgetTexture(*handle);
         *handle = -2;
     }
 }

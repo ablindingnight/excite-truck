@@ -206,7 +206,7 @@ void fn_802C7888(TexRemap* r, int n);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
 int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* model, int a, int b);
-void fn_802C6CF8(s32 model);
+void mrModelUnload(s32 model);
 u32 fn_802C9950(u32 color);
 u32 fn_802C9994(u32 color);
 void fn_802C744C(s32 model, const Chunk* c);
@@ -507,7 +507,7 @@ void CarChunks::LoadModels(const char* base) {
 
 void CarChunks::FreeModels(void) {
     for (int i = 0; i < numModels; i++) {
-        fn_802C6CF8(models[i]);
+        mrModelUnload(models[i]);
         models[i] = -1;
     }
 }
@@ -671,7 +671,7 @@ void TerrainChunks::LoadModels(const char* base, int inst, const char* remap) {
 
 void TerrainChunks::FreeModels(void) {
     for (int i = 0; i < numModels; i++) {
-        fn_802C6CF8(models[i]);
+        mrModelUnload(models[i]);
         models[i] = -1;
     }
 }
@@ -813,7 +813,7 @@ void WoodChunks::LoadModels(const char* base, int inst, const char* remap) {
 
 void WoodChunks::FreeModels(void) {
     for (int i = 0; i < numModels; i++) {
-        fn_802C6CF8(models[i]);
+        mrModelUnload(models[i]);
         models[i] = -1;
     }
 }

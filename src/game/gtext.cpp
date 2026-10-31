@@ -140,7 +140,7 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 s32 fn_802CAC28(const char* name, s32 key);
 s32 fn_802CAC34(const char* name, const char* data);
-void fn_802CAC54(s32 tex);
+void gxForgetTexture(s32 tex);
 void fn_802CB228(s32 tex);
 UIContext* fn_8022EDC4(void);
 u32 fn_80230B9C(u32 color);
@@ -292,7 +292,7 @@ void fn_8023158C(Font* f, const char* name) {
 int fn_802315FC(int idx) {
     FontEntry* e = &lbl_8055F068->e[idx];
     if (--e->refs < 1) {
-        fn_802CAC54(e->font->tex);
+        gxForgetTexture(e->font->tex);
         fn_8012C4D8(e->font);
         operator delete[](e->name);
         lbl_8055F068->e[idx] = lbl_8055F068->e[--lbl_8055F068->count];
@@ -585,7 +585,7 @@ void fn_8023243C(void) {
             fn_80235380(lbl_80497F14.data[i].art);
         }
         if (lbl_80497F14.data[i].tex != -1) {
-            fn_802CAC54(lbl_80497F14.data[i].tex);
+            gxForgetTexture(lbl_80497F14.data[i].tex);
         }
     }
     lbl_80497F14.count = 0;

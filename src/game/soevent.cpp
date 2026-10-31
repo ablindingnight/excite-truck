@@ -17,7 +17,7 @@ void fn_801796CC(u8 type, const void* data, u32 n);
 void fn_801A4868(void* obj, int a);
 int fn_801B2F24(void);  // racer count
 int fn_802C6FC0(const char* name, int a, int b);  // load a model
-void fn_802C6CF8(int model);
+void mrModelUnload(int model);
 int fn_802C7830(const char* name);  // chunk mask
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 f32 PSVECMag(const void* v);
@@ -436,7 +436,7 @@ void fn_801D2AD4(const char* file) {
 void fn_801D2B94(void) {
     for (int i = 0; i < lbl_8055E930; i++) {
         if (lbl_80438958[i].spawn.model != -1) {
-            fn_802C6CF8(lbl_80438958[i].spawn.model);
+            mrModelUnload(lbl_80438958[i].spawn.model);
         }
     }
 }
