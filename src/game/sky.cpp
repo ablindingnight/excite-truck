@@ -47,15 +47,16 @@ static inline void Scale(ValVec3* out, const ValVec3* v, f32 s) {
 
 struct SkyMtx {
     SkyMtx(void) {
-        basis[0].x = 1.0f;
-        basis[0].y = 0.0f;
-        basis[0].z = 0.0f;
-        basis[1].x = 0.0f;
-        basis[1].y = 1.0f;
-        basis[1].z = 0.0f;
-        basis[2].x = 0.0f;
-        basis[2].y = 0.0f;
-        basis[2].z = 1.0f;
+        ValVec3* b = (ValVec3*)this;
+        b[0].x = 1.0f;
+        b[0].y = 0.0f;
+        b[0].z = 0.0f;
+        b[1].x = 0.0f;
+        b[1].y = 1.0f;
+        b[1].z = 0.0f;
+        b[2].x = 0.0f;
+        b[2].y = 0.0f;
+        b[2].z = 1.0f;
     }
     ValVec3 basis[3];
     ValVec3 origin;
