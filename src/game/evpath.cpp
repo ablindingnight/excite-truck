@@ -1805,8 +1805,9 @@ inline void EvEventBar::Update(void) {
         f32 d = fn_80214D48() / 0.1f;
         b->slide = Clamp01F(b->slide + ((u8*)b == (u8*)lbl_8055F698 ? d : -d));
         int dx = (int)(-27.0f * b->slide);
+        s32 baseX = b->baseX;
         b->m.jumpY = b->y;
-        b->m.jumpX = b->baseX + dx;
+        b->m.jumpX = baseX + dx;
         b->m.jumpOn = 1;
         fn_80214BE4(lbl_804B30D8.Find(b) + 11, dx - was, 0);
         fn_80214BE4(lbl_804B30D8.Find(b) + 21, dx - was, 0);
