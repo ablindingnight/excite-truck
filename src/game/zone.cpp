@@ -368,6 +368,8 @@ static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
+extern const f32 lbl_8056149C;  // 5.0: seconds a gate adds
+
 struct CarState {
     CarState(void);
     f32 BonusScale(void) {
@@ -393,7 +395,7 @@ struct CarState {
         int r = 1;
         if (lbl_8055E1BC) {
             f32 old = timeLeft;
-            timeLeft = Clamp01(old + dt / 5.0f);
+            timeLeft = Clamp01(old + dt / lbl_8056149C);
             if (old < timeLeft) {
                 gainT = timeLeft - old;
             } else if (NearZero(timeLeft) && !(AbsF(old) <= lbl_80558DC4[0])) {
@@ -419,7 +421,7 @@ struct CarState {
         maxCombo = maxCombo > combo ? maxCombo : combo;
         if (refill) {
             refill = 0;
-            AddTime(5.0f);
+            AddTime(lbl_8056149C);
         }
         if (combo % lbl_8042FB3C.awesomeComboX == 0) {
             tB8.Start();
@@ -430,7 +432,7 @@ struct CarState {
         EndCombo();
         EndStreak();
         if (!lbl_8055E1BC) {
-            AddTime(5.0f);
+            AddTime(lbl_8056149C);
         }
     }
     void SetWidth(Truck* t) {
