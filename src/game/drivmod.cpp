@@ -621,7 +621,6 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
     BVec e2;
     DVec3 off;
     DVec3 off2;
-    int cnt;
     int n;
     if (!show) {
         return;
@@ -679,6 +678,7 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
     }
     fn_801E353C(d->wheel, -lbl_8056307C * F32(car, 0x3C));
     fn_801E34E4(d->wheel, &m);
+    int cnt = 32;
     d->body = m;
     MulVec(&off, &d->butt, &d->body);
     d->body.pos.x = d->body.pos.x + off.x;
