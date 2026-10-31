@@ -1,7 +1,7 @@
 // Art animations (0x802AC0E8-0x802AE2E0): keyframed UI art animations loaded from .val files
 // (elements with paths of timed keys), the loaded-animation cache, the per-screen player list
 // and a debug viewer. Names are guesses apart from the allocation tags, value keys and messages.
-// The loader (fn_802AC4A8) and the element player (fn_802AD4C4) are placeholders for now.
+// The element player (fn_802AD4C4) is still a placeholder; the loader defines the element/key layouts.
 #include "game/common.h"
 #include "macros.h"
 
@@ -33,19 +33,38 @@ struct ArtJustify {
     u8 horiz;          // offset 0x8
 };
 
+// One animated element: a model (type 2) or a line of text (type 1).
 struct ArtElem {
     s32 type;     // offset 0x0
-    s32* dst;     // offset 0x4
-    u8 pad8[0xC - 0x8];
-    s32 handle;   // offset 0xC
-    u8 pad10[0x28 - 0x10];
+    s32* dst;     // offset 0x4, receives each key's signal
+    s32 index;    // offset 0x8
+    s32 handle;   // offset 0xC, model or font
+    union {
+        struct {
+            f32 scale;   // offset 0x10
+            f32 off[3];  // offset 0x14
+            s32 group;   // offset 0x20
+            s32 mapped;  // offset 0x24
+        } model;
+        struct {
+            u32 justify;       // offset 0x10
+            u32 color;         // offset 0x14
+            f32 scale;         // offset 0x18
+            const char* text;  // offset 0x1C
+        } text;
+    };
 };
 
+// One timed key of a path.
 struct ArtKey {
     ArtKey(void);
-    f32 t;        // offset 0x0
-    u8 pad4[0x34 - 0x4];
-    s32 value;    // offset 0x34
+    f32 t;         // offset 0x0
+    f32 scale[3];  // offset 0x4
+    f32 alpha;     // offset 0x10
+    f32 pos[3];    // offset 0x14
+    f32 q[4];      // offset 0x20, rotation quaternion
+    s32 curve;     // offset 0x30: linear, hermite, start, stop
+    s32 signal;    // offset 0x34
 };
 
 struct ArtPath {
@@ -99,7 +118,7 @@ class ArtPlayer {
 public:
     ArtPlayer(int n);
     ~ArtPlayer(void);
-    int Add(const char* name, int x);
+    int Add(const char* name, int map);
     void Start(int i);
     void Pause(int i);
     void Resume(int i);
@@ -112,7 +131,19 @@ public:
     f32 t;          // offset 0x4
 };
 
+extern f32 lbl_80558DC4[];  // FLT_EPSILON
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+
 extern "C" {
+void* memset(void* p, int c, size_t n);
+double sqrt(double x);
+double sin(double x);
+double cos(double x);
+f32 PSVECDotProduct(const f32* a, const f32* b);
+s32 fn_802C6FC0(const char* name, int a, int b);
+s32 fn_80232578(const char* name);
+void fn_802E317C(const char* fmt, ...);
 int sscanf(const char* s, const char* fmt, ...);
 char* strstr(const char* s, const char* sub);
 int strcmp(const char* a, const char* b);
@@ -129,6 +160,18 @@ void fn_802E30C8(const char* fmt, ...);
 
 
 extern f32 lbl_8055E3C8;  // race clock
+
+// Copies at most n - 1 characters and always terminates.
+static inline void CopyName(const char* src, int n, char* dst) {
+    char* d = dst;
+    int left = n;
+    while ((*d++ = *src++) != 0) {
+        if (--left <= 0) {
+            d[-1] = 0;
+            break;
+        }
+    }
+}
 
 ModuleTag lbl_8055F930;
 UnkStatic7F lbl_8055F938;
@@ -226,15 +269,264 @@ void fn_802AC458(void) {
 
 void fn_802AC49C(void) { lbl_8055F93C = 0; }
 
-// Placeholder: the .val loader (elements, paths and keys), not decompiled yet.
-ArtAnim* fn_802AC4A8(const char* name, int x) {
-    for (int i = 0; i < lbl_8055F93C; i++) {
-        if (!strcmp(lbl_804BD7C0[i]->name, name)) {
-            lbl_804BD7C0[i]->refs++;
-            return lbl_804BD7C0[i];
+static inline ValVec3 MakeVec3(f32 x, f32 y, f32 z) {
+    ValVec3 v;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+}
+
+static inline ValPoint MakePoint(f32 x, f32 y) {
+    ValPoint v;
+    v.x = x;
+    v.y = y;
+    return v;
+}
+
+// Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
+// optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
+ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
+    ValueNode* paths[64];
+    ValueNode* elems[64];
+    ValueNode* frames[128];
+    ArtAnim* a = new ("artanim") ArtAnim;
+    memset(a, 0, sizeof(ArtAnim));
+    a->refs = 1;
+    CopyName(name, 0x18, a->name);
+    ValueTable* t = fn_80131808(name);
+    ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
+    int nElems = 0;
+    int nPaths = 0;
+    ValueNode* n;
+    for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+        if (!strcmp(n->GetName(), "elem")) {
+            elems[nElems++] = n;
+        } else if (!strcmp(n->GetName(), "path")) {
+            paths[nPaths++] = n;
         }
     }
-    return 0;
+    a->nElems = nElems;
+    a->elems = new ("animelem") ArtElem[nElems];
+    a->nPaths = nPaths;
+    a->paths = new ("animpath") ArtPath[nPaths];
+    for (int i = 0; i < nElems; i++) {
+        ValueNode* en = elems[i];
+        ArtElem* e = &a->elems[i];
+        const char* type = en->GetValue("type");
+        memset(e, 0, sizeof(ArtElem));
+        if (!strcmp(type, "model")) {
+            e->type = 2;
+            const char* model = en->GetValue("model");
+            ArtMap* m = fn_802AC0E8(map, model, 4);
+            if (m) {
+                model = (const char*)m->value;
+            }
+            e->handle = fn_802C6FC0(model, 0, 0);
+            e->model.scale = en->GetFloat("scale", 1.0f);
+            const ValVec3& off = en->GetVec3Or("offset", MakeVec3(0.0f, 0.0f, 0.0f));
+            e->model.off[0] = off.x;
+            e->model.off[1] = off.y;
+            e->model.off[2] = off.z;
+            ValPoint xy;
+            xy = en->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+            e->model.off[0] = e->model.off[0] + xy.x;
+            e->model.off[1] = e->model.off[1] - xy.y;
+            e->model.group = en->GetInt("group", -1);
+            e->model.mapped = 0;
+            const char* gm = en->GetString("group_mapping", 0);
+            if (gm) {
+                if ((m = fn_802AC0E8(map, gm, 3)) != 0) {
+                    e->dst = (s32*)m->value;
+                }
+                if ((m = fn_802AC0E8(map, gm, 5)) != 0) {
+                    e->index = m->value;
+                }
+                if ((m = fn_802AC0E8(map, gm, 2)) != 0) {
+                    e->model.mapped = m->value;
+                } else {
+                    fn_802E30C8("artanim: unmapped integer %s", gm);
+                }
+            }
+        } else if (!strcmp(type, "text")) {
+            e->type = 1;
+            if (strcmp("overlay.gtx", en->GetValue("font"))) {
+                e->handle = fn_80232578(en->GetValue("font"));
+                e->text.scale = en->GetFloat("scale", 1.0f);
+            } else {
+                e->handle = fn_80232578("uifnt_o.gtx");
+                e->text.scale = 0.73333335f * en->GetFloat("scale", 1.0f);
+            }
+            e->text.color = fn_802AC174(en->GetString("color", ""));
+            e->text.justify = fn_802AC1BC(en->GetString("justify", "center_middle"));
+            e->text.text = en->GetValue("text");
+            if (e->text.text[0] == '#') {
+                ArtMap* m;
+                if ((m = fn_802AC0E8(map, e->text.text + 1, 3)) != 0) {
+                    e->dst = (s32*)m->value;
+                }
+                if ((m = fn_802AC0E8(map, e->text.text + 1, 5)) != 0) {
+                    e->index = m->value;
+                }
+                if ((m = fn_802AC0E8(map, e->text.text + 1, 1)) != 0) {
+                    e->text.text = (const char*)m->value;
+                } else {
+                    fn_802E30C8("artanim: unmapped string %s", e->text.text + 1);
+                }
+            }
+        } else {
+            fn_802E317C("artanim: unknown elem type %s", type);
+        }
+    }
+    for (int i = 0; i < nPaths; i++) {
+        ValueNode* pn = paths[i];
+        ArtPath* p = &a->paths[i];
+        p->elem = pn->GetIntValue("elem_idx");
+        ValPoint pxy;
+            pxy = pn->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+        f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
+        int nFrames = 0;
+        ValueNode* c;
+        for (int j = 0; (c = pn->GetChildAt(j)) != 0; j++) {
+            if (!strcmp(c->GetName(), "frame")) {
+                frames[nFrames++] = c;
+            }
+        }
+        p->nKeys = nFrames;
+        p->keys = new ("artframe") ArtKey[nFrames];
+        for (int k = 0; k < nFrames; k++) {
+            ArtKey* key = &p->keys[k];
+            ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
+            ValueNode* f = frames[k];
+            key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
+            if (f->Has("spin")) {
+                ValVec3 axis;
+                axis.x = 0.0f;
+                axis.y = 0.0f;
+                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
+                f32 d = PSVECDotProduct(&axis.x, &axis.x);
+                if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
+                    f32 len = sqrt(d);
+                    f32 half = 0.5f * len;
+                    f32 s = sin(half);
+                    f32 w = cos(half);
+                    f32 k2 = s / len;
+                    key->q[0] = axis.x * k2;
+                    key->q[1] = axis.y * k2;
+                    key->q[2] = axis.z * k2;
+                    key->q[3] = w;
+                } else {
+                    key->q[0] = 0.0f;
+                    key->q[1] = 0.0f;
+                    key->q[2] = 0.0f;
+                    key->q[3] = 1.0f;
+                }
+            } else {
+                const char* q = f->GetString("q", "0,0,0,1");
+                if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
+                    fn_802E317C("artanim: bad quaternion %s in %s", q, name);
+                }
+            }
+            if (f->Has("xy")) {
+                ValPoint v;
+            v = f->GetPoint("xy");
+                v.x = v.x + pxy.x;
+                v.y = v.y + pxy.y;
+                key->pos[0] = v.x - 320.0f;
+                key->pos[1] = 240.0f - v.y;
+                key->pos[2] = 0.0f;
+            } else if (f->Has("offset")) {
+                const ValVec3& o = f->GetVec3("offset");
+                key->pos[0] = o.x;
+                key->pos[1] = o.y;
+                key->pos[2] = o.z;
+                key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
+                key->pos[1] = key->pos[1] + (240.0f - pxy.y);
+            } else {
+                const f32* src;
+                f32 zero[3];
+                if (prev) {
+                    src = prev->pos;
+                } else {
+                    zero[0] = 0.0f;
+                    zero[1] = 0.0f;
+                    zero[2] = 0.0f;
+                    src = zero;
+                }
+                key->pos[0] = src[0];
+                key->pos[1] = src[1];
+                key->pos[2] = src[2];
+            }
+            if (f->Has("scale3")) {
+                const ValVec3& s = f->GetVec3("scale3");
+                key->scale[0] = s.x;
+                key->scale[1] = s.y;
+                key->scale[2] = s.z;
+            } else if (f->Has("scale")) {
+                f32 s = f->GetFloat("scale");
+                key->scale[0] = s;
+                key->scale[1] = s;
+                key->scale[2] = s;
+            } else if (prev) {
+                key->scale[0] = prev->scale[0];
+                key->scale[1] = prev->scale[1];
+                key->scale[2] = prev->scale[2];
+            } else {
+                key->scale[0] = 1.0f;
+                key->scale[1] = 1.0f;
+                key->scale[2] = 1.0f;
+            }
+            key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
+            s32 curve = prev ? prev->curve : 0;
+            key->curve = f->Has("curve") ? f->GetEnum("curve", "linear\0hermite\0start\0stop\0") : curve;
+            key->signal = f->GetInt("signal", prev ? prev->signal : 0);
+        }
+    }
+    if (t->HasChild("global_transform")) {
+        ValueNode* g = t->FindChild("global_transform");
+        f32 off[3];
+        if (g->Has("xy")) {
+            ValPoint v;
+            v = g->GetPoint("xy");
+            off[2] = 0.0f;
+            off[0] = v.x;
+            off[1] = -v.y;
+        } else if (g->Has("offset")) {
+            const ValVec3& o = g->GetVec3("offset");
+            off[0] = o.x;
+            off[1] = o.y;
+            off[2] = o.z;
+        } else {
+            off[0] = 0.0f;
+            off[1] = 0.0f;
+            off[2] = 0.0f;
+        }
+        f32 scale = g->GetFloat("scale", 1.0f);
+        f32 alpha = g->GetFloat("alpha", 1.0f);
+        for (int i = 0; i < nPaths; i++) {
+            ArtPath* p = &a->paths[i];
+            for (int k = 0; k < p->nKeys; k++) {
+                ArtKey* key = &p->keys[k];
+                key->pos[0] = key->pos[0] + off[0];
+                key->pos[1] = key->pos[1] + off[1];
+                key->pos[2] = key->pos[2] + off[2];
+                key->scale[0] = key->scale[0] * scale;
+                key->scale[1] = key->scale[1] * scale;
+                key->scale[2] = key->scale[2] * scale;
+                key->alpha = key->alpha * alpha;
+            }
+        }
+    }
+    a->length = 0.0f;
+    for (int i = 0; i < a->nPaths; i++) {
+        ArtPath* p = &a->paths[i];
+        f32 last = p->keys[p->nKeys - 1].t;
+        a->length = a->length > last ? a->length : last;
+    }
+    fn_802AC2B4((ArtNode*)named, "__anim_end__", &a->length);
+    fn_80131818(t);
+    lbl_804BD7C0[lbl_8055F93C++] = a;
+    return a;
 }
 
 }  // extern "C"
@@ -276,7 +568,7 @@ void fn_802AD414(ArtAnim* a, f32 t) {
             if (t >= p->keys[k].t && t <= 0.001f + p->keys[k + 1].t) {
                 s32* dst = a->elems[p->elem].dst;
                 if (dst) {
-                    *dst = p->keys[k].value;
+                    *dst = p->keys[k].signal;
                 }
                 break;
             }
@@ -354,8 +646,8 @@ ArtPlayer::~ArtPlayer(void) {
     }
 }
 
-int ArtPlayer::Add(const char* name, int x) {
-    ArtAnim* anim = fn_802AC4A8(name, x);
+int ArtPlayer::Add(const char* name, int map) {
+    ArtAnim* anim = fn_802AC4A8(name, (ArtMap*)map);
     if (anim) {
         ArtItem* item = &list->items[list->count++];
         char* d = item->name;
