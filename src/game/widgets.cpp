@@ -403,11 +403,11 @@ int fn_8021D97C(WidgetFragment* self,int key);
 }
 
 
-struct ChoiceResourceSpec {u32 words[22];};
+#include "game/uistyle.h"
 struct ChoiceResourcePrefix {char base[0x2c4];int resource;};
 extern "C" {
-extern u32 lbl_8033EB14[];int fn_8022A86C(const ChoiceResourceSpec*);void fn_8022A8E4(int);
-WidgetFragment* fn_8021D6A0(WidgetFragment* self,int x,int y,int* value,const char* list,int first,int second,int third,int fourth);
+extern u32 lbl_8033EB14[];int fn_8022A86C(const UIStyleInputFields*);void fn_8022A8E4(int);
+WidgetFragment* fn_8021D6A0(WidgetFragment* self,int x,int y,int* value,const char* list,const char* first,int second,int third,int fourth);
 WidgetFragment* fn_8021D758(WidgetFragment* self,int destroy);
 }
 
@@ -1717,7 +1717,7 @@ WidgetFragment* fn_8021B404(WidgetFragment* self,int destroy){
 }
 WidgetFragment* fn_8021B460(WidgetFragment* self,RotatingChoiceDescriptorNew* desc,const char* label,int* value){
 fn_8021B2B0(self,desc->x,desc->y,label,8,value,desc->width);self->vtable=lbl_8033F180;RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;f->mode=(u32)desc->flags>>31;
-ChoiceResourceSpec spec={};spec.words[0]=(u32)desc->name;*((float*)&spec.words[1])=desc->scale;spec.words[2]=desc->flags;spec.words[3]=desc->option90;spec.words[4]=desc->option90;spec.words[7]=desc->option84;spec.words[10]=desc->option94;spec.words[11]=desc->option94;spec.words[14]=desc->option84;
+UIStyleInputFields spec={};spec.fontName=desc->name;spec.height=desc->scale;spec.field08=desc->flags;spec.words0C[0]=desc->option90;spec.words0C[1]=desc->option90;spec.words0C[4]=desc->option84;spec.words0C[7]=desc->option94;spec.words0C[8]=desc->option94;spec.field38=desc->option84;
 int resource=fn_8022A86C(&spec);f->resource=resource;self->height=resource;fn_80219718(self);
 ChoicePoseNew pose;pose.basis.m[0][0]=(1.0f);pose.basis.m[0][1]=(0.0f);pose.basis.m[0][2]=(0.0f);pose.basis.m[1][0]=(0.0f);pose.basis.m[1][1]=(1.0f);pose.basis.m[1][2]=(0.0f);pose.basis.m[2][0]=(0.0f);pose.basis.m[2][1]=(0.0f);pose.basis.m[2][2]=(1.0f);pose.translation.v[0]=(0.0f);pose.translation.v[1]=(0.0f);pose.translation.v[2]=(0.0f);
 RotationVec input={(float)desc->x-(320.0f),(240.0f)-(float)desc->y,0.0f};ChoiceApplyOffsetNew(&pose,&input);
@@ -1727,7 +1727,7 @@ if((0.0f)==x&&(0.0f)==y&&(0.0f)==z)f->pose=0;else{RotationVec rotation={(0.01745
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;self->vtable=lbl_8033F180;if(f->asset){fn_8022EE98(f->asset);f->asset=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;if(f->asset){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80219660(self);if(f->asset)fn_8022EDB8();}
 WidgetFragment* fn_8021B9AC(WidgetFragment* self,FormattedChoiceDescriptor* desc,PageTextList* provider,int column){fn_80218F80(self,(WidgetDesc*)desc);self->vtable=lbl_8033F0FC;fn_8021BA64(self,desc->width,desc->height,provider,column,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);return self;}
-void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;ChoiceResourceSpec spec={};spec.words[0]=(u32)font;spec.words[2]=flags;spec.words[3]=value;spec.words[4]=second;spec.words[5]=third;spec.words[6]=horizontal;spec.words[7]=vertical;spec.words[10]=first;spec.words[11]=second;spec.words[12]=third;spec.words[13]=horizontal;spec.words[14]=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
+void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;UIStyleInputFields spec={};spec.fontName=font;spec.field08=flags;spec.words0C[0]=value;spec.words0C[1]=second;spec.words0C[2]=third;spec.words0C[3]=horizontal;spec.words0C[4]=vertical;spec.words0C[7]=first;spec.words0C[8]=second;spec.words0C[9]=third;spec.words0C[10]=horizontal;spec.field38=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
 WidgetFragment* fn_8021BBA0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F0FC;OptionalResourcePrefix* f=(OptionalResourcePrefix*)self;fn_8022A8E4(f->resource);if(f->optional)fn_802C519C(f->optional);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021BC20(WidgetFragment* self){PageTextPrefix* f=(PageTextPrefix*)self;int end;int x=self->left;int start=f->list->page*f->list->pageSize;int y=self->top;end=start+f->list->pageSize;if(f->list->count<end)end=f->list->count;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=fn_8022D850(f->list,i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
 void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(context);RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
@@ -1892,10 +1892,10 @@ void fn_8021D61C(WidgetFragment* self){
  else strcpy((char*)self+0x268,lbl_8055B87C);
  fn_80219718(self);WidgetMarkDirty(self);
 }
-WidgetFragment* fn_8021D6A0(WidgetFragment* self,int x,int y,int* value,const char* list,int first,int second,int third,int fourth){
+WidgetFragment* fn_8021D6A0(WidgetFragment* self,int x,int y,int* value,const char* list,const char* first,int second,int third,int fourth){
  fn_8021D044(self,x,y,value,list,8,0,0,0);self->vtable=lbl_8033EB14;
- ChoiceResourceSpec spec={};spec.words[0]=first;spec.words[2]=second;spec.words[3]=third;spec.words[4]=third;spec.words[5]=fourth;
- spec.words[10]=third;spec.words[11]=third;spec.words[12]=fourth;
+ UIStyleInputFields spec={};spec.fontName=first;spec.field08=second;spec.words0C[0]=third;spec.words0C[1]=third;spec.words0C[2]=fourth;
+ spec.words0C[7]=third;spec.words0C[8]=third;spec.words0C[9]=fourth;
  int resource=fn_8022A86C(&spec);((ChoiceResourcePrefix*)self)->resource=resource;self->height=resource;
  fn_80219718(self);return self;
 }

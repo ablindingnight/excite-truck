@@ -11,12 +11,7 @@ struct UIStyleRecordFields {
     u32 field64_0,field64_1,field64_2,field64_3;
 };
 typedef char CheckUIStyleRecord[sizeof(UIStyleRecordFields)==0x74?1:-1];
-struct UIStyleInputFields {
-    const char* fontName; f32 height; u32 field08;
-    u32 words0C[11];
-    u32 field38,field3C,field40;
-    const char* resource; u32 field48; f32 field4C,field50; u32 field54;
-};
+#include "game/uistyle.h"
 typedef char CheckUIStyleInput[sizeof(UIStyleInputFields)==0x58?1:-1];
 typedef char CheckStylePointerWidth[(sizeof(void*)==4 && sizeof(u32)==4)?1:-1];
 struct UIStyleNameFields {int value; const char* name;};
