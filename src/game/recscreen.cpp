@@ -99,9 +99,9 @@ struct IconEntry {
 
 // Scales each colour channel by 255*255/65536, alpha forced opaque.
 static inline u32 DimColor(u32 c) {
-    int b = (int)(c & 0xFF) * 255 * 255 / 256 / 256;
-    int g = (int)((c >> 8) & 0xFF) * 255 * 255 / 256 / 256;
-    int r = (int)((c >> 16) & 0xFF) * 255 * 255 / 256 / 256;
+    int b = (u8)c * 255 * 255 / 256 / 256;
+    int g = (u8)(c >> 8) * 255 * 255 / 256 / 256;
+    int r = (u8)(c >> 16) * 255 * 255 / 256 / 256;
     return 0xFF000000 | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
 }
 
