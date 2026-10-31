@@ -9,14 +9,7 @@
 #include "game/uicontext.h"
 
 
-struct UIVert {
-    f32 x;      // offset 0x0
-    f32 y;      // offset 0x4
-    f32 z;      // offset 0x8
-    u32 color;  // offset 0xC
-    f32 u;      // offset 0x10
-    f32 v;      // offset 0x14
-};
+#include "game/uivertex.h"
 
 void UIContextBegin(void);
 void UIContextEnd(void);
@@ -41,7 +34,7 @@ void fn_80236774(void);
 
 
 void fn_802C8B98(s32 tex, const void* m);
-void fn_802C8DB8(UIVert* v, int nv, const u16* idx, int ni);
+void fn_802C8DB8(UIVertex* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 void fn_802C87B4(int x, int y, int w, int h);
 void fn_802C88BC(int a);
@@ -74,7 +67,7 @@ u8 lbl_8055B998 = 1;      // pulsing enabled
 extern "C" {
 
 void fn_80230C9C(f32* a, f32* b, f32 lo, f32 hi, f32 range);
-void fn_80231380(UIVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
+void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 u32 fn_80230B9C(u32 color);
 
 void fn_80230090(void) {
@@ -175,7 +168,7 @@ void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 sp
                 wx1 = x1;
             }
         }
-        UIVert v[4] __attribute__((aligned(16)));
+        UIVertex v[4] __attribute__((aligned(16)));
         fn_80231380(&v[0], color, wx0, wy0, z, 0.0f, 0.0f);
         fn_80231380(&v[1], color, wx1, wy0, z, 1.0f, 0.0f);
         fn_80231380(&v[2], color, wx0, wy1, z, 0.0f, 1.0f);
@@ -183,7 +176,7 @@ void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 sp
         u16 idx[6] = {0, 3, 1, 0, 2, 3};
         fn_802C8DB8(v, 4, idx, 6);
     }
-    UIVert v[4] __attribute__((aligned(16)));
+    UIVertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], color, x0, y0, z, 0.0f, 0.0f);
     fn_80231380(&v[1], color, x1, y0, z, 1.0f, 0.0f);
     fn_80231380(&v[2], color, x0, y1, z, 0.0f, 1.0f);
@@ -273,7 +266,7 @@ void fn_802307AC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 sca
 void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     fn_802C8B98(-1, fn_8022EDC4());
     u32 c = fn_80230B9C(color);
-    UIVert v[4] __attribute__((aligned(16)));
+    UIVertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], c, x0, y0, z, 0.0f, 0.0f);
     fn_80231380(&v[1], c, x1, y0, z, 0.0f, 0.0f);
     fn_80231380(&v[2], c, x0, y1, z, 0.0f, 0.0f);
@@ -283,11 +276,11 @@ void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     fn_802C8D74();
 }
 
-UIVert fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
-    UIVert r;
-    r.x = x;
-    r.y = y;
-    r.z = z;
+UIVertex fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
+    UIVertex r;
+    r.position.x = x;
+    r.position.y = y;
+    r.position.z = z;
     r.color = color;
     r.u = u;
     r.v = w;
@@ -466,7 +459,7 @@ void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0,
     fn_802C8B98(tex, fn_8022EDC4());
     u32 c = fn_80230B9C(color);
     f32 z = 0.0f;
-    UIVert v[4] __attribute__((aligned(16)));
+    UIVertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], c, x, y, z, u0, v0);
     fn_80231380(&v[1], c, x + w, y, z, u1, v0);
     fn_80231380(&v[2], c, x, y - h, z, u0, v1);
@@ -476,10 +469,10 @@ void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0,
     fn_802C8D74();
 }
 
-void fn_80231380(UIVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
+void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
+    v->position.x = x;
+    v->position.y = y;
+    v->position.z = z;
     v->color = color;
     v->u = u;
     v->v = w;

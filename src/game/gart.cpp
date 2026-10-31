@@ -81,18 +81,7 @@ struct TrackNode {
 };
 
 
-struct QuadXY {
-    f32 x;
-    f32 y;
-} __attribute__((aligned(8)));
-
-struct QuadVert {
-    QuadXY xy;
-    u32 a8;
-    u32 aC;
-    f32 u;
-    f32 v;
-} __attribute__((aligned(8)));
+#include "game/uivertex.h"
 
 
 extern "C" {
@@ -100,15 +89,15 @@ extern "C" {
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8C04(s32 tex);
 u32 fn_80230B9C(int color);
-QuadVert fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
-void fn_80231380(QuadVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
-void fn_802C8DB8(QuadVert* v, int nv, const u16* idx, int ni);
+UIVertex fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
+void fn_802C8DB8(UIVertex* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 f32 fn_802C9A4C(f32 a);
 }
 
 static inline void DrawRect(u32 c, f32 x, f32 y, f32 z, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1) {
-    QuadVert v[4] __attribute__((aligned(16)));
+    UIVertex v[4] __attribute__((aligned(16)));
     v[0] = fn_80230A68(c, x, y, z, u0, v0);
     v[1] = fn_80230A68(c, x + w, y, z, u1, v0);
     v[2] = fn_80230A68(c, x, y - h, z, u0, v1);
@@ -381,7 +370,7 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
 }
 
 void fn_80235AFC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle, u32 color) {
-    UIXform m __attribute__((aligned(16)));
+    UIXform m;
     UIXform* mp = &m;
     mp->translation.v[0] = x;
     mp->translation.v[1] = y;
@@ -401,7 +390,7 @@ void fn_80235AFC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, f32 ang
     Picture* p = fn_8023505C(s, idx);
     f32 hw = Mul(w, 0.5f);
     f32 hh = Mul(h, 0.5f);
-    QuadVert v[4] __attribute__((aligned(16)));
+    UIVertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], color, -hw, hh, zero, p->u0, p->v0);
     fn_80231380(&v[1], color, hw, hh, zero, p->u1, p->v0);
     fn_80231380(&v[2], color, -hw, -hh, zero, p->u0, p->v1);
@@ -425,7 +414,7 @@ void fn_80235CBC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
             f32 v1 = p->v1;
             fn_802C8C04(s->tex);
             u32 c = fn_80230B9C(color);
-            QuadVert v[4] __attribute__((aligned(16)));
+            UIVertex v[4] __attribute__((aligned(16)));
             v[0] = fn_80230A68(c, x, y, z, u0, v0);
             v[1] = fn_80230A68(c, x + w, y, z, u1, v0);
             v[2] = fn_80230A68(c, x, y - h, z, u0, v1);
