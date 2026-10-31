@@ -27,7 +27,14 @@ struct ImagePrefix {void* vtable;gArtSet* image;};
 struct ResourcePrefix {void* vtable;GTextFont* resource;const char* text;};
 struct ModelResourcePrefix {void* vtable;int resource;};
 struct WidgetProperty {void* value;int key,bytes;void* buffer;};
-struct WidgetDesc {u32 unknown0;int flags;int x,y,kind,dx,dy;float scale;char unknown20[0x20];char name[1];char unknown41[0x4f];int style90,field94,field98,field9c,fielda0,fielda4;};
+// The factory identifies type/style and two separate integers at +0x88/+0x8c.
+// name marks the start of string storage; its capacity is not established here.
+struct WidgetDesc {
+ u32 type;int flags;int x,y,kind,dx,dy;float scale;
+ char style[0x20];char name[1];char unknown41[0x47];
+ int field88,field8c;
+ int style90,field94,field98,field9c,fielda0,fielda4;
+};
 struct IntWatchPrefix {char prefix[0x254];int* value;};
 struct FlagTextPrefix {char prefix[0x254];unsigned char* flag;};
 struct WidgetFragment {inline int ProjectX(float scale,int index){return left+(int)(scale*(float)index);}inline int Left() const{return left;}inline int Top() const{return top;}
