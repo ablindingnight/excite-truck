@@ -17,7 +17,7 @@ extern const char *fn_80131234(const char *key);
 extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32, s32);
 extern s32 fn_802328D4(s32);
 extern const char lbl_80346324[];
-extern const u8 lbl_80346120[];
+extern const u8 __vt__10OptionItem[];
 extern f32 lbl_80563BD4;
 s32 fn_80262F8C(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
