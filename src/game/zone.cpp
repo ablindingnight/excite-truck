@@ -1485,7 +1485,7 @@ void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
     Vec3* a = &prev->a;
     Vec3* b = &next->a;
     Vec3* p = &g->a;
-    int i;
+    u32 i;
     for (i = 0; i < 2; i++) {
         V2 pa;
         V2 pb;
@@ -1736,7 +1736,7 @@ void ZoneMaster::vf44(void) {
                     break;
                 }
                 {
-                    int k;
+                    u32 k;
                     Vec3* p = &g->a;
                     for (k = 0; k < 2; k++) {
                         fn_801E9E30(&g->h, p);
@@ -1762,7 +1762,7 @@ void ZoneMaster::vf44(void) {
                 gg = hits.data[i].gate;
                 if (!gg->ring) {
                     p = &gg->a;
-                    int k;
+                    u32 k;
                     for (k = 0; k < 2; k++) {
                         fn_802981F8(p);
                         p++;
@@ -2577,7 +2577,7 @@ inline void ZoneMaster::vf10(void) {
         for (j = 0; j < l->n; j++) {
             Gate* g = &l->gates[j];
             Vec3* p = &g->a;
-            int k;
+            u32 k;
             for (k = 0; k < 2; k++) {
                 fn_801E9E30(&g->h, p);
                 p->y += 0.5f;
