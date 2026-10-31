@@ -22,36 +22,27 @@ ModuleTag lbl_8055F3C8;
 UnkStatic123s lbl_80498EE8;
 UnkStatic7F lbl_8055F3D0;
 
-extern "C" {
-
-void fn_8025E034(u8* p) {}  // stub (376)
-
-u8* fn_8025E614(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345A30;
-        fn_80235380(PTR(p, 0x2C));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-void fn_8025E678(u8* p) {}  // stub (401)
-
-void fn_8025ECBC(u8* p) {}  // stub (366)
-
-}  // extern "C"
+// A cup of a car choice.
+class CupChoice {
+public:
+    virtual void v08(void);
+    virtual const char* Name(void);    // 0x0C
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual const char* Course(void);  // 0x1C
+    virtual long Event(void);          // 0x20
+};
 
 // A car choice in one of the pick lists.
 class CarChoice {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual const char* Name(void);  // 0x0C
     virtual void v10(void);
     virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
+    virtual int CupCount(void);      // 0x18
+    virtual CupChoice* Cup(int i);   // 0x1C
     virtual void v20(void);
     virtual int Unlocked(void);  // 0x24
     virtual void v28(void);
@@ -65,11 +56,51 @@ public:
     virtual CarChoice* Get(int i);      // 0x10
 };
 
+// One car name in the grid header.
+struct CarNameSlot {
+    char name[0x20];  // offset 0x0
+    s32 state;        // offset 0x20 (6 = current car, 7 = other)
+};
+
+// One cup of the current car: its best time over the three difficulties.
+struct CupRecordRow {
+    char name[0x20];    // offset 0x0
+    char course[0x20];  // offset 0x20
+    char value[0x14];   // offset 0x40
+    s32 best;           // offset 0x54 difficulty the time was set on
+};
+
+// One icon row entry from the car icon table (0x38 bytes; the name comes first).
+struct IconRow {
+    char name[0x20];
+    u8 pad20[0x18];
+};
+struct IconTable {
+    IconRow* data;  // offset 0x0
+    s32 count;      // offset 0x4
+};
+
+// "car_icon" widget beside each cup row: the car and colour its record was set with.
+struct CarIconWidget {
+    u8 pad0[0x18];
+    IconTable* set;  // offset 0x18
+    s32 index;       // offset 0x1C
+    s32 color;       // offset 0x20
+    u8 valid;        // offset 0x24
+    u8 visible;      // offset 0x25
+    u8 pad26[2];
+    u32 tint;        // offset 0x28
+    u8 pad2C[4];
+};
+
 struct CarPickScreen {
     CarChoiceList* all;       // offset 0x0
     CarChoiceList* lists[3];  // offset 0x4
-    u8 pad10[0x144 - 0x10];
-    s32 sel;                  // offset 0x144, then every 0x58 bytes per column
+    s32 cur;                  // offset 0x10
+    u8 pad14[4];
+    CarNameSlot names[6];     // offset 0x18
+    CupRecordRow rows[6];     // offset 0xF0
+    CarIconWidget* icons[6];  // offset 0x300
 };
 
 extern CarPickScreen* lbl_8055F3D4;
@@ -96,6 +127,169 @@ static inline int AnyUnlocked(int i) {
     }
     return 0;
 }
+
+
+extern "C" {
+int strcasecmp(const char* a, const char* b);
+void* memset(void* d, int c, unsigned long n);
+void fn_80130978(char* buf, int n, f32 t);
+void fn_80214AF0(s32 s);
+}
+extern f32 lbl_80558DC0;
+
+static inline void CopyName(char* d, int n, const char* s) {
+    char* p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
+
+static inline int Min(int a, int b) { return a < b ? a : b; }
+
+// The car and colour a record was set with.
+struct StatChoice {
+    s32 vehicle;  // offset 0x0
+    s32 color;    // offset 0x4
+    u8 valid;     // offset 0x8
+};
+
+class Statistic {
+public:
+    Statistic(int slot, u32 type, long event, int difficulty);
+    int HasValue(void);
+    int IsBetterThan(const Statistic* o) const;
+    void Format(char* buf, int n);
+    StatChoice GetChoice(void);
+    u8 pad[0x24];
+};
+
+struct VehicleInfo {
+    u8 pad0[0x2C];
+    char chassis[0x20];  // offset 0x2C
+    u8 pad4C[0x18];
+    u32 colors[12];      // offset 0x64
+};
+
+int IdentGetCurrentSlot(void);
+VehicleInfo* GetVehicle(int i);
+
+// Index of the car icon for chassis `name`, or -1.
+static inline int FindIcon(IconTable* icons, const char* name) {
+    for (int i = 0; i < icons->count; i++) {
+        if (strcasecmp(icons->data[i].name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+extern "C" {
+
+void fn_8025E034(u8* p) {}  // stub (376)
+
+u8* fn_8025E614(u8* p, int del) {
+    if (p) {
+        *(void**)p = lbl_80345A30;
+        fn_80235380(PTR(p, 0x2C));
+        if (del > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+
+// "Next car" on the records screen: moves to the next car any list has unlocked, refills the car name
+// header and, per cup, the best time over the three difficulties with the car/colour it was set with.
+int fn_8025E678(int* key) {
+    if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
+        lbl_8055F3D4->cur++;
+        CarPickScreen* s = lbl_8055F3D4;
+        memset(s->names, 0, sizeof(s->names));
+        memset(s->rows, 0, sizeof(s->rows));
+        for (int i = 0; i < Min(s->all->Count(), 6); i++) {
+            CopyName(s->names[i].name, 0x20, s->all->Get(i)->Name());
+            s->names[i].state = i == s->cur ? 6 : 7;
+        }
+        int unlocked = 0;
+        for (int j = 0; j < 3; j++) {
+            if (s->lists[j]->Count() > s->cur && s->lists[j]->Get(s->cur)->Unlocked()) {
+                unlocked = 1;
+            }
+        }
+        for (int k = 0; k < 6; k++) {
+            s->icons[k]->visible = 0;
+        }
+        if (unlocked) {
+            CarChoice* car = s->all->Get(s->cur);
+            for (int k = 0; k < Min(car->CupCount(), 6); k++) {
+                CupChoice* cup = car->Cup(k);
+                CupRecordRow* row = &s->rows[k];
+                CopyName(row->name, 0x20, cup->Name());
+                CopyName(row->course, 0x20, cup->Course());
+                Statistic stats[3] = {
+                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0),
+                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1),
+                    Statistic(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2),
+                };
+                s->icons[k]->visible = 1;
+                if (stats[0].IsBetterThan(&stats[1])) {
+                    if (stats[0].IsBetterThan(&stats[2])) {
+                        stats[0].Format(row->value, 0x14);
+                        row->best = 0;
+                    } else if (stats[2].HasValue()) {
+                        stats[2].Format(row->value, 0x14);
+                        row->best = 2;
+                    }
+                } else if (stats[1].IsBetterThan(&stats[2])) {
+                    stats[1].Format(row->value, 0x14);
+                    row->best = 1;
+                } else if (stats[2].HasValue()) {
+                    stats[2].Format(row->value, 0x14);
+                    row->best = 2;
+                } else {
+                    fn_80130978(row->value, 0x14, -lbl_80558DC0);
+                    row->best = 0;
+                    s->icons[k]->visible = 0;
+                }
+                if (s->icons[k]->visible) {
+                    Statistic* best = 0;
+                    if (row->best == 0) {
+                        best = &stats[0];
+                    } else if (row->best == 1) {
+                        best = &stats[1];
+                    } else if (row->best == 2) {
+                        best = &stats[2];
+                    }
+                    StatChoice c = best->GetChoice();
+                    CarIconWidget* icon = s->icons[k];
+                    icon->color = c.color;
+                    icon->valid = c.valid;
+                    VehicleInfo* v = GetVehicle(c.vehicle);
+                    icon->index = FindIcon(icon->set, v->chassis);
+                    icon->tint = v->colors[icon->color];
+                }
+            }
+        }
+        CarPickScreen* t = lbl_8055F3D4;
+        for (int k = 0; k < 5; k++) {
+            for (int j = 0; j < 3; j++) {
+                if (j == t->rows[k].best) {
+                    fn_80214AF0(k + 1 + j * 10);
+                } else {
+                    fn_80214A9C(k + 1 + j * 10);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void fn_8025ECBC(u8* p) {}  // stub (366)
+
+}  // extern "C"
 
 extern "C" {
 void fn_80214AF0(s32 s);
@@ -167,16 +361,6 @@ struct CarIcon {
     f32 u2;         // offset 0x30
     f32 v2;         // offset 0x34
 };
-
-static inline void CopyName(char* d, int n, const char* s) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void AppendName(const char* s, int n, char* d) {
     while (*d) {
