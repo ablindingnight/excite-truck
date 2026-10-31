@@ -687,7 +687,7 @@ public:
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
-    virtual void vf14(void);
+    virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
     virtual int vf20(int car) = 0;
@@ -713,7 +713,7 @@ public:
     virtual void vf70(void);
     virtual void vf74(void);
     virtual void vf78(void);
-    virtual int vf7C(void);
+    virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
     virtual int vf88(void);
@@ -727,7 +727,7 @@ public:
     virtual void vfA8(int car);
     virtual void vfAC(int car);
     virtual int vfB0(int car, struct Respawn* r);
-    virtual void vfB4(void);
+    virtual void vfB4(int car, struct Damage* d);
     virtual void vfB8(ZoneResults* r);
     virtual int vfBC(ZoneResults* r);
     virtual void vfC0(void);
