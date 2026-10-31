@@ -177,7 +177,7 @@ struct CarSelItem {
     }
     // vtable pointer at 0xC (CodeWarrior places it after the members)
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual int IsShown(void);
     virtual int IsFocused(void);
     virtual int IsSet(void);
 };
@@ -335,14 +335,19 @@ static inline f32 Ease(f32 t) {
 // The body colour chooser of the car picker (constructor fn_802410F8).
 struct ColorPick : CarSelItem {
     void* vt2;             // offset 0x10
-    u8 pad14[0x14];
+    s32 x;                 // offset 0x14
+    s32 y;                 // offset 0x18
+    s32 w;                 // offset 0x1C
+    s32 h;                 // offset 0x20
+    u8 pad24[0x4];
     VehicleInfo* vehicle;  // offset 0x28
     s32 color;             // offset 0x2C
     s32* colorOut;         // offset 0x30
     u32* rgbOut;           // offset 0x34
     CarUIScreen* screen;   // offset 0x38
     s32 slot;              // offset 0x3C
-    u8 pad40[0x8];
+    u8 pad40[0x4];
+    u8* art;               // offset 0x44
     s32 time;              // offset 0x48, ms when the slide started
     f32 pos;               // offset 0x4C
     f32 target;            // offset 0x50
@@ -703,7 +708,96 @@ int fn_80241354(ColorPick* c, int key) {
     return handled;
 }
 
-void fn_80241820(u8* p) {}  // stub (370)
+}  // extern "C"
+u8* fn_80211660(long i);
+extern "C" {
+void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_80235758(u8* art, int part, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
+f32 fn_80235F64(u8* art, int part);
+f32 fn_80235EF0(u8* art, int part);
+void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
+void fn_8022BD40(int font, const char* text, int a, int b, f32 x, f32 y, f32 z, f32 w, f32 h, f32 scale);
+extern const f32 lbl_80563780;  // 3.5 swatches across
+extern const f32 lbl_80563784;  // 0.5
+extern const f32 lbl_80563788;  // 0.3 edge alpha
+extern const f32 lbl_8056378C;  // 0.7
+extern const f32 lbl_80563790;  // 255.0
+extern const f32 lbl_80563794;  // 4.0 arrow gap
+
+// Colour chooser: a sliding strip of colour swatches (faded and clipped at the edges) with arrows that
+// flash when stepped; without a car (or hidden) it shows its label instead.
+void fn_80241820(ColorPick* c) {
+    if (c->vehicle && c->IsShown()) {
+        f32 x;
+        f32 y;
+        fn_80230C30(&x, &y, c->x, c->y);
+        f32 w = c->w;
+        f32 h;
+        f32 cell = w / lbl_80563780;
+        h = c->h;
+        s32 now = fn_8023659C() * lbl_80563768;
+        f32 t = Clamp01((f32)(now - c->time) / lbl_8056376C);
+        f32 e = Ease(t);
+        f32 cur = c->pos + e * (c->target - c->pos);
+        f32 start = x + w * lbl_80563784 - cell * lbl_80563784 - cell * cur;
+        u32 frame;
+        u32 tint;
+        for (int i = 0; i < c->vehicle->num_colors; i++) {
+            f32 sx = start + (f32)i * cell;
+            if (sx + cell > x && sx < x + w) {
+                f32 d = sx + cell * lbl_80563784 - x;
+                if (d > w * lbl_80563784) {
+                    d = w - d;
+                }
+                f32 a = (d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758);
+                a = lbl_80563764 < a ? lbl_80563764 : a;
+                a = a > lbl_80563758 ? a : lbl_80563758;
+                u32 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
+                tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
+                frame = (alpha << 24) | 0xFFFFFF;
+                if (sx > x && sx + cell < x + w) {
+                    fn_802354A0(c->art, 3, sx, y, lbl_80563758, cell, h, tint);
+                    fn_802354A0(c->art, 6, sx, y, lbl_80563758, cell, h, frame);
+                } else if (sx > x) {
+                    f32 vis = cell - (sx + cell - (x + w));
+                    f32 u = vis / cell;
+                    fn_80235758(c->art, 3, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, tint);
+                    fn_80235758(c->art, 6, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, frame);
+                } else {
+                    f32 vis = cell - (x - sx);
+                    f32 u = (cell - vis) / cell;
+                    fn_80235758(c->art, 3, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, tint);
+                    fn_80235758(c->art, 6, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, frame);
+                }
+            }
+        }
+        if (c->IsShown()) {
+            if (c->color > 0) {
+                u8* art = fn_80211660(0);
+                f32 ah = fn_80235F64(art, 1);
+                f32 ay = y - (h - ah) * lbl_80563784;
+                f32 gap = lbl_80563794 + c->leftFlash;
+                fn_802353F4(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
+            }
+            if (c->color < c->vehicle->num_colors - 1) {
+                u8* art = fn_80211660(1);
+                f32 ah = fn_80235F64(art, 1);
+                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), y - (h - ah) * lbl_80563784,
+                            lbl_80563758);
+            }
+            f32 l = c->leftFlash - lbl_80563764;
+            c->leftFlash = lbl_80563758 > l ? lbl_80563758 : l;
+            f32 r = c->rightFlash - lbl_80563764;
+            c->rightFlash = lbl_80563758 > r ? lbl_80563758 : r;
+        }
+    } else {
+        f32 x = c->x;
+        f32 y = c->y;
+        f32 w = c->w;
+        f32 h = c->h;
+        fn_8022BD40(0xCC, c->label, 0, 0, x + lbl_80563784 * w, y + lbl_80563784 * h, lbl_80563758, w, h, lbl_80563764);
+    }
+}
 
 void fn_80241DE8(CarSel* p) { p->Refresh(); }
 
