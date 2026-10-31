@@ -2,6 +2,7 @@
 // with the chassis/uv fields. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -82,7 +83,8 @@ struct IconTable {
 
 // "car_icon" widget beside each cup row: the car and colour its record was set with.
 struct CarIconWidget {
-    u8 pad0[0x18];
+    virtual ~CarIconWidget(void);
+    u8 pad4[0x14];
     IconTable* set;  // offset 0x18
     s32 index;       // offset 0x1C
     s32 color;       // offset 0x20
@@ -97,7 +99,7 @@ struct CarPickScreen {
     CarChoiceList* all;       // offset 0x0
     CarChoiceList* lists[3];  // offset 0x4
     s32 cur;                  // offset 0x10
-    u8 pad14[4];
+    struct CarIconSet* set;   // offset 0x14
     CarNameSlot names[6];     // offset 0x18
     CupRecordRow rows[6];     // offset 0xF0
     CarIconWidget* icons[6];  // offset 0x300
@@ -147,6 +149,99 @@ static inline void CopyName(char* d, int n, const char* s) {
     }
 }
 
+extern "C" void gxForgetTexture(u8* tex);
+void operator delete[](void* p);
+
+// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
+// Fixed-capacity name buffer (original class name unknown).
+// Append is a bounded concatenation that always terminates.
+template<int N> struct IconName {
+    char text[N];
+    operator char*() { return text; }
+    operator const char*() const { return text; }
+    static void CopyTail(const char* s, int n, char* d) {
+        while ((*d++ = *s++) != 0) {
+            if (--n <= 0) { d[-1] = 0; break; }
+        }
+    }
+    void Append(const char* s) {
+        char* d = text;
+        int n = N;
+        while (*d) { n--; d++; }
+        if (n > 0) { CopyTail(s, n, d); }
+    }
+};
+typedef char CarIconNameSize32[(sizeof(IconName<32>) == 32) ? 1 : -1];
+
+struct CarIcon {
+    IconName<32> name;  // offset 0x0
+    u8* tex;        // offset 0x20
+    u8* overlay;    // offset 0x24
+    f32 u1;         // offset 0x28
+    f32 v1;         // offset 0x2C
+    f32 u2;         // offset 0x30
+    f32 v2;         // offset 0x34
+};
+
+static inline void AppendName(const char* s, int n, char* d) {
+    while (*d) {
+        n--;
+        d++;
+    }
+    if (n > 0) {
+        CopyName(d, n, s);
+    }
+}
+
+void* operator new(size_t n, const char* tag);
+void* operator new[](size_t n, const char* tag);
+ValueTable* fn_80131808(const char* name);
+void fn_80131818(ValueTable* t);
+extern "C" u8* fn_802CAC28(const char* name, int flags);
+extern "C" int strcmp(const char* a, const char* b);
+
+// The car icon table (caricons.val): two icons per Car entry, plain and "_e".
+struct CarIconSet {
+    CarIconSet(void) {
+        ValueTable* t = fn_80131808("caricons.val");
+        count = 0;
+        icons = new ("cicon") CarIcon[50];
+        ValueNode* n;
+        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+            if (strcmp(n->GetName(), "Car")) {
+                continue;
+            }
+            for (int k = 0; k < 2; k++) {
+                CarIcon* c = &icons[count++];
+                CopyName(c->name, 32, n->GetValue("chassis"));
+                if (k) {
+                    c->name.Append("_e");
+                }
+                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                c->u1 = n->GetFloat("u1");
+                c->v1 = n->GetFloat("v1");
+                c->u2 = n->GetFloat("u2");
+                c->v2 = n->GetFloat("v2");
+            }
+        }
+        fn_80131818(t);
+    }
+    ~CarIconSet(void) {
+        for (int i = 0; i < count; i++) {
+            gxForgetTexture(icons[i].tex);
+            gxForgetTexture(icons[i].overlay);
+        }
+        delete[] icons;
+    }
+    CarIcon* icons;  // offset 0x0
+    s32 count;       // offset 0x4
+};
+
+extern CarIconSet* lbl_8055F2E4;
+extern s32 lbl_8055F2E8;
+
+
 static inline int Min(int a, int b) { return a < b ? a : b; }
 
 // The car and colour a record was set with.
@@ -186,9 +281,95 @@ static inline int FindIcon(IconTable* icons, const char* name) {
     return -1;
 }
 
+int GetEveMode(void);
+void UnloadEves(void);
+void LoadModeEves(int mode);
+extern "C" CarChoiceList* fn_8027B834(int i);
+extern "C" u8* fn_8025F9C0(u8* p);
+extern "C" void fn_8025F9B8(u8* p, u32 v);
+extern "C" CarIconSet* fn_8025FA18(void);
+extern "C" int fn_8025E678(int* key);
+extern "C" int fn_8025ECBC(int* key);
+extern "C" void fn_8025F274(u8* p);
+extern "C" void fn_8025F46C(CarPickScreen* s);
+extern "C" u8 lbl_8055B860;
+
 extern "C" {
 
-void fn_8025E034(u8* p) {}  // stub (376)
+// The records screen ("times.lyt"): best cup and event times for each car, browsed with left/right.
+void fn_8025E034(void) {
+    int mode = GetEveMode();
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(0x130);
+    }
+    CarPickScreen screen;
+    lbl_8055F3D4 = &screen;
+    for (int i = 0; i < 3; i++) {
+        screen.lists[i] = fn_8027B834(i);
+    }
+    screen.set = fn_8025FA18();
+    for (int k = 0; k < 6; k++) {
+        u8* w = (u8*)operator new(0x30, "car_icon");
+        if (w) w = fn_8025F9C0(w);
+        screen.icons[k] = (CarIconWidget*)w;
+        fn_8025F9B8(w, (u32)screen.set);
+    }
+    screen.cur = 0;
+    screen.all = screen.lists[2];
+    fn_8025F46C(&screen);
+    MenuItem items[] = {
+        MenuItem("", 8, (void*)fn_8025F274, 0, 0),
+        MenuItem("#cup_name_1", screen.names[0].name),
+        MenuItem("#cup_select_1", 2, &screen.names[0].state, 0, 0),
+        MenuItem("#cup_name_2", screen.names[1].name),
+        MenuItem("#cup_select_2", 2, &screen.names[1].state, 0, 0),
+        MenuItem("#cup_name_3", screen.names[2].name),
+        MenuItem("#cup_select_3", 2, &screen.names[2].state, 0, 0),
+        MenuItem("#cup_name_4", screen.names[3].name),
+        MenuItem("#cup_select_4", 2, &screen.names[3].state, 0, 0),
+        MenuItem("#cup_name_5", screen.names[4].name),
+        MenuItem("#cup_select_5", 2, &screen.names[4].state, 0, 0),
+        MenuItem("#event_location_1", screen.rows[0].name),
+        MenuItem("#event_course_1", screen.rows[0].course),
+        MenuItem("#event_time_1", screen.rows[0].value),
+        MenuItem("#event_location_2", screen.rows[1].name),
+        MenuItem("#event_course_2", screen.rows[1].course),
+        MenuItem("#event_time_2", screen.rows[1].value),
+        MenuItem("#event_location_3", screen.rows[2].name),
+        MenuItem("#event_course_3", screen.rows[2].course),
+        MenuItem("#event_time_3", screen.rows[2].value),
+        MenuItem("#event_location_4", screen.rows[3].name),
+        MenuItem("#event_course_4", screen.rows[3].course),
+        MenuItem("#event_time_4", screen.rows[3].value),
+        MenuItem("#event_location_5", screen.rows[4].name),
+        MenuItem("#event_course_5", screen.rows[4].course),
+        MenuItem("#event_time_5", screen.rows[4].value),
+        MenuItem("car_icon_1", 5, screen.icons[0], 0, 0),
+        MenuItem("car_icon_2", 5, screen.icons[1], 0, 0),
+        MenuItem("car_icon_3", 5, screen.icons[2], 0, 0),
+        MenuItem("car_icon_4", 5, screen.icons[3], 0, 0),
+        MenuItem("car_icon_5", 5, screen.icons[4], 0, 0),
+        MenuItem((const char*)&lbl_8055B860, 6, (void*)fn_8025ECBC, 0, 0x125),
+        MenuItem((const char*)&lbl_8055B860, 6, (void*)fn_8025E678, 0, 0x127),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 0x1B),
+        MenuItem(lbl_80498EE8),
+    };
+    MenuDesc desc = {"times.lyt", items, NULL, 0, 0};
+    fn_802146BC(&desc, -999, -999, 1);
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(mode);
+    }
+    lbl_8055F3D4 = 0;
+    for (int k = 0; k < 6; k++) {
+        delete screen.icons[k];
+    }
+    if (--lbl_8055F2E8 == 0) {
+        delete lbl_8055F2E4;
+        lbl_8055F2E4 = 0;
+    }
+}
 
 u8* fn_8025E614(u8* p, int del) {
     if (p) {
@@ -203,7 +384,7 @@ u8* fn_8025E614(u8* p, int del) {
 
 // Refills the records screen for the current car: the car name header and, per cup, the best time over
 // the three difficulties with the car/colour it was set with.
-static inline void RefillRecords(CarPickScreen* s) {
+inline void fn_8025F46C(CarPickScreen* s) {
     memset(s->names, 0, sizeof(s->names));
     memset(s->rows, 0, sizeof(s->rows));
     for (int i = 0; i < Min(s->all->Count(), 6); i++) {
@@ -288,7 +469,7 @@ static inline void HighlightBest(void) {
 int fn_8025E678(int* key) {
     if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
         lbl_8055F3D4->cur++;
-        RefillRecords(lbl_8055F3D4);
+        fn_8025F46C(lbl_8055F3D4);
         HighlightBest();
     }
     return 0;
@@ -298,7 +479,7 @@ int fn_8025E678(int* key) {
 int fn_8025ECBC(int* key) {
     if (lbl_8055F3D4->cur > 0) {
         lbl_8055F3D4->cur--;
-        RefillRecords(lbl_8055F3D4);
+        fn_8025F46C(lbl_8055F3D4);
         HighlightBest();
     }
     return 0;
@@ -332,74 +513,6 @@ void fn_8025F274(u8* p) {
     }
 }
 
-// Out-of-line copy of RefillRecords (the original was one inline function that fn_8025E034 calls
-// before it can be inlined; E678/ECBC inline it). Kept as a direct body until E034 is written.
-void fn_8025F46C(CarPickScreen* s) {
-    memset(s->names, 0, sizeof(s->names));
-    memset(s->rows, 0, sizeof(s->rows));
-    for (int i = 0; i < Min(s->all->Count(), 6); i++) {
-        CopyName(s->names[i].name, 0x20, s->all->Get(i)->Name());
-        s->names[i].state = i == s->cur ? 6 : 7;
-    }
-    int unlocked = 0;
-    for (int j = 0; j < 3; j++) {
-        if (s->lists[j]->Count() > s->cur && s->lists[j]->Get(s->cur)->Unlocked()) {
-            unlocked = 1;
-        }
-    }
-    for (int k = 0; k < 6; k++) {
-        s->icons[k]->visible = 0;
-    }
-    if (unlocked) {
-        CarChoice* car = s->all->Get(s->cur);
-        for (int k = 0; k < Min(car->CupCount(), 6); k++) {
-            CupChoice* cup = car->Cup(k);
-            CupRecordRow* row = &s->rows[k];
-            CopyName(row->name, 0x20, cup->Name());
-            CopyName(row->course, 0x20, cup->Course());
-            Statistic s0(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0);
-            Statistic s1(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1);
-            Statistic s2(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2);
-            s->icons[k]->visible = 1;
-            if (s0.IsBetterThan(&s1)) {
-                if (s0.IsBetterThan(&s2)) {
-                    s0.Format(row->value, 0x14);
-                    row->best = 0;
-                } else if (s2.HasValue()) {
-                    s2.Format(row->value, 0x14);
-                    row->best = 2;
-                }
-            } else if (s1.IsBetterThan(&s2)) {
-                s1.Format(row->value, 0x14);
-                row->best = 1;
-            } else if (s2.HasValue()) {
-                s2.Format(row->value, 0x14);
-                row->best = 2;
-            } else {
-                fn_80130978(row->value, 0x14, -lbl_80558DC0);
-                row->best = 0;
-                s->icons[k]->visible = 0;
-            }
-            if (s->icons[k]->visible) {
-                Statistic* best = 0;
-                if (row->best == 0) {
-                    best = &s0;
-                } else if (row->best == 1) {
-                    best = &s1;
-                } else if (row->best == 2) {
-                    best = &s2;
-                }
-                StatChoice c = best->GetChoice();
-                CarIconWidget* icon = s->icons[k];
-                icon->color = c.color;
-                icon->valid = c.valid;
-                VehicleInfo* v = GetVehicle(c.vehicle);
-                icon->index = FindIcon(icon->set, v->chassis);
-                icon->tint = v->colors[icon->color];
-            }
-        }
-    }
-}
 
 void fn_8025F9B8(u8* p, u32 v) { U32(p, 0x18) = v; }
 
@@ -414,87 +527,6 @@ u8* fn_8025F9C0(u8* p) {
 
 }  // extern "C"
 
-// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
-// Fixed-capacity name buffer (original class name unknown).
-// Append is a bounded concatenation that always terminates.
-template<int N> struct IconName {
-    char text[N];
-    operator char*() { return text; }
-    operator const char*() const { return text; }
-    static void CopyTail(const char* s, int n, char* d) {
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) { d[-1] = 0; break; }
-        }
-    }
-    void Append(const char* s) {
-        char* d = text;
-        int n = N;
-        while (*d) { n--; d++; }
-        if (n > 0) { CopyTail(s, n, d); }
-    }
-};
-typedef char CarIconNameSize32[(sizeof(IconName<32>) == 32) ? 1 : -1];
-
-struct CarIcon {
-    IconName<32> name;  // offset 0x0
-    u8* tex;        // offset 0x20
-    u8* overlay;    // offset 0x24
-    f32 u1;         // offset 0x28
-    f32 v1;         // offset 0x2C
-    f32 u2;         // offset 0x30
-    f32 v2;         // offset 0x34
-};
-
-static inline void AppendName(const char* s, int n, char* d) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        CopyName(d, n, s);
-    }
-}
-
-void* operator new(size_t n, const char* tag);
-void* operator new[](size_t n, const char* tag);
-ValueTable* fn_80131808(const char* name);
-void fn_80131818(ValueTable* t);
-extern "C" u8* fn_802CAC28(const char* name, int flags);
-extern "C" int strcmp(const char* a, const char* b);
-
-// The car icon table (caricons.val): two icons per Car entry, plain and "_e".
-struct CarIconSet {
-    CarIconSet(void) {
-        ValueTable* t = fn_80131808("caricons.val");
-        count = 0;
-        icons = new ("cicon") CarIcon[50];
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (strcmp(n->GetName(), "Car")) {
-                continue;
-            }
-            for (int k = 0; k < 2; k++) {
-                CarIcon* c = &icons[count++];
-                CopyName(c->name, 32, n->GetValue("chassis"));
-                if (k) {
-                    c->name.Append("_e");
-                }
-                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
-                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
-                c->u1 = n->GetFloat("u1");
-                c->v1 = n->GetFloat("v1");
-                c->u2 = n->GetFloat("u2");
-                c->v2 = n->GetFloat("v2");
-            }
-        }
-        fn_80131818(t);
-    }
-    CarIcon* icons;  // offset 0x0
-    s32 count;       // offset 0x4
-};
-
-extern CarIconSet* lbl_8055F2E4;
-extern s32 lbl_8055F2E8;
 
 extern "C" {
 
