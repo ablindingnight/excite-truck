@@ -210,6 +210,8 @@ void fn_801B78EC(Respawn* r, LineFollower* f, int byIlpos, f32 side, f32 dist, f
 
 f32 fn_801B79AC(void) { return fn_80137C54(-1)->carLen; }
 
+extern const f32 lbl_80562700;  // 5.0f: lane offset of the grid columns
+
 void fn_801B79D4(Respawn* r, int car, int mode) {
     LineFollower* f = fn_801B2ED0(car)->Follower();
     f32 row = fn_80139048();
@@ -220,9 +222,9 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
     }
     f32 side;
     if (car & 1) {
-        side = 5.0f;
+        side = lbl_80562700;
     } else {
-        side = -5.0f;
+        side = -lbl_80562700;
     }
     row = 0.5f * -fn_801B79AC() - (f32)(car / 2) * row;
     f32 back = 100.0f;
