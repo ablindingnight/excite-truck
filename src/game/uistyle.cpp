@@ -1,9 +1,11 @@
 // Unified research draft. Four bodies remain provisional; no Matching promotion.
 // Partial UIStyle research source. No unit registration or promotion claim.
 #include "game/common.h"
+#include "game/uistyle.h"
+#include "game/gtext.h"
 struct UIStyleRecordFields {
     u8 active; // Three bytes of natural alignment, not semantic fields.
-    u32 resource04,resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
+    u32 resource04; Font* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
     f32 height;      // +0x34
     int field38;
     u32 field3C_0,field3C_1,field3C_2,field3C_3,field3C_4,field3C_5,field3C_6,field3C_7;
@@ -11,7 +13,7 @@ struct UIStyleRecordFields {
     u32 field64_0,field64_1,field64_2,field64_3;
 };
 typedef char CheckUIStyleRecord[sizeof(UIStyleRecordFields)==0x74?1:-1];
-#include "game/uistyle.h"
+
 typedef char CheckUIStyleInput[sizeof(UIStyleInputFields)==0x58?1:-1];
 typedef char CheckStylePointerWidth[(sizeof(void*)==4 && sizeof(u32)==4)?1:-1];
 struct UIStyleNameFields {int value; const char* name;};
@@ -24,8 +26,8 @@ char* strstr(const char*,const char*);
 char* strncpy(char*,const char*,unsigned long);
 int strcasecmp(const char*,const char*);
 void fn_802E317C(const char*,...);
-int fn_80232B70(int);
-f32 fn_8023293C(int,const char*,f32);
+
+
 void fn_8022C9D0(void);
 void fn_8022CAA8(UIStyleRecordFields*,const UIStyleInputFields*);
 void fn_8022A8E4(int);
@@ -37,9 +39,9 @@ extern UIStyleRecordFields lbl_80497D68;
 extern const char lbl_8055B918[5],lbl_8055B920[5],lbl_8033FC40[];
 void* memset(void*,int,unsigned long);
 void fn_8022C520(void);
-int fn_80232578(const char*);
+
 void fn_801E4A2C(int);
-void fn_802328D4(int);
+
 void fn_802C4C80(int);
 void fn_802C519C(int);
 void fn_80235380(int);
@@ -110,7 +112,7 @@ int fn_802C4EFC(u32);
 int fn_802C5220(u32);
 int fn_801E4B48(int);
 int fn_801E4B00(int);
-int fn_80232B78(int);
+
 
 static inline int StyleAddPair(int a,int b) { return a+b; }
 static inline f32 StyleMultiply(f32 a,f32 b) { return a*b; }
@@ -150,8 +152,8 @@ f32 fn_80235F64(u32,int);
 f32 fn_80235EF0(u32,int);
 void fn_802354A0(u32,int,u32,f32,f32,f32,f32,f32);
 void fn_80230924(u32,f32,f32,f32,f32,f32);
-void fn_80232BA4(const char*, u32, f32, f32, u32, int, f32, f32, f32);
-void fn_80232928(int);
+
+
 void fn_80232930(void);
 
 
@@ -166,7 +168,7 @@ int fn_8022AA84(int i);
 f32 fn_8022AAA8(int i,const char* text);
 int fn_8022AB18(int i,int axis,int mode);
 int fn_8022AB94(const signed char* text,signed char value);
-f32 fn_8022ABC8(int font,const char* text,int n);
+f32 fn_8022ABC8(Font* font,const char* text,int n);
 void fn_8022C9D0(void);
 UIStyleRecordFields* fn_8022CA2C(int i);
 f32 fn_8022CA40(UIStyleRecordFields* s);
@@ -240,7 +242,7 @@ f32 fn_8022AAA8(int i,const char* text) {
     UIStyleRecordFields* s=fn_8022CA2C(i);
     if(s->resource08) {
         f32 scale=fn_8022CA40(s);
-        f32 width=fn_8023293C((int)s->resource08,text,1.0f);
+        f32 width=fn_8023293C(s->resource08,text,1.0f);
         width*=scale;
         return width;
     }
@@ -269,7 +271,7 @@ int fn_8022AB94(const signed char* text,signed char value) {
     return n;
 }
 
-f32 fn_8022ABC8(int font,const char* text,int n) {
+f32 fn_8022ABC8(Font* font,const char* text,int n) {
     char buffer[2048];
     strncpy(buffer,text,n);
     buffer[n]=0;
@@ -305,12 +307,12 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         height=0.0f;
         int lines=fn_8022AB94((const signed char*)text,10)+1;
         if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8((int)s->resource04);
-        u32 font=s->resource08;
+        Font* font=s->resource08;
         if(font) {
-            if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70((int)font);
+            if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70(font);
             else {
-                outerBase=(f32)fn_80232B70((int)font);
-                height=(s->height*(f32)(lines*fn_80232B70((int)font)))/outerBase;
+                outerBase=(f32)fn_80232B70(font);
+                height=(s->height*(f32)(lines*fn_80232B70(font)))/outerBase;
             }
         }
         width=0.0f;
@@ -319,10 +321,10 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
             int n=end?(int)(end-text):(int)strlen(text);
             if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0((int)s->resource04,text,n));
             if(s->resource08) {
-                if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8((int)s->resource08,text,n));
+                if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
                 else {
-                    innerBase=(f32)fn_80232B70((int)s->resource08);
-                    width=StyleMaximum(width,(s->height*fn_8022ABC8((int)s->resource08,text,n))/innerBase);
+                    innerBase=(f32)fn_80232B70(s->resource08);
+                    width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/innerBase);
                 }
             }
             end=strchr(text,10);text=end;if(text)text++;
@@ -335,7 +337,7 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         else if(s->field38&32) {
             dy=0.0f;
             if(s->resource04)dy=-(f32)fn_801E4B00((int)s->resource04);
-            if(s->resource08)dy=-(f32)fn_80232B78((int)s->resource08);
+            if(s->resource08)dy=-(f32)fn_80232B78(s->resource08);
         }
         width+=0.5f*(f32)(fn_801E4A6C((int)s->resource04,lbl_8055B8C0)+1);
         int a=(int)s->field3C_2,b=(int)s->field3C_4;
@@ -373,10 +375,10 @@ void fn_8022B390(int style,const char* text,int n,int* outX,int* outY) {
     for(int i=0;*text && i<n;i++,text++) {
         if((signed char)*text!=10) {
             ch[0]=*text;
-            if(s->resource08) x+=(int)fn_8023293C((int)s->resource08,ch,1.0f);
+            if(s->resource08) x+=(int)fn_8023293C(s->resource08,ch,1.0f);
             else if(s->resource04) x+=fn_801E4A6C((int)s->resource04,ch);
         } else {
-            if(s->resource08) y+=fn_80232B70((int)s->resource08);
+            if(s->resource08) y+=fn_80232B70(s->resource08);
             else if(s->resource04) y+=fn_801E4BA8((int)s->resource04);
             x=(int)s->field3C_2;
         }
@@ -402,8 +404,8 @@ int fn_8022B498(int style,const char* text) {
         if(s->resource08) {
             f32 scale;
             if(s->height<1.0f) scale=1.0f;
-            else scale=s->height/(f32)fn_80232B70((int)s->resource08);
-            width=(int)(scale*fn_8023293C((int)s->resource08,text,1.0f));
+            else scale=s->height/(f32)fn_80232B70(s->resource08);
+            width=(int)(scale*fn_8023293C(s->resource08,text,1.0f));
         }
         flags=s->field38;
         if(flags&2) left=-width;
@@ -433,10 +435,10 @@ int fn_8022B620(int style,const char* text) {
         }
         if(s->resource08) {
             if(s->field38&8) {
-                if(s->height<1.0f) top=fn_80232B70((int)s->resource08);
+                if(s->height<1.0f) top=fn_80232B70(s->resource08);
                 else top=(int)s->height;
             } else if(s->field38&16) {
-                if(s->height<1.0f) top=fn_80232B70((int)s->resource08)/2;
+                if(s->height<1.0f) top=fn_80232B70(s->resource08)/2;
                 else top=(int)(0.5f*s->height);
             } else top=0;
         }
@@ -450,10 +452,10 @@ int fn_8022B620(int style,const char* text) {
         if(s->resource08) {
             f32 scale;
             if(s->height<1.0f) scale=1.0f;
-            else scale=s->height/(f32)fn_80232B70((int)s->resource08);
-            if(s->field38&16) bottom=(int)(StyleMultiply(scale*(f32)fn_80232B70((int)s->resource08),0.5f));
-            else if(s->field38&32) bottom=(int)(scale*(f32)fn_80232B78((int)s->resource08));
-            else if(s->field38&64) bottom=(int)(scale*(f32)fn_80232B70((int)s->resource08));
+            else scale=s->height/(f32)fn_80232B70(s->resource08);
+            if(s->field38&16) bottom=(int)(StyleMultiply(scale*(f32)fn_80232B70(s->resource08),0.5f));
+            else if(s->field38&32) bottom=(int)(scale*(f32)fn_80232B78(s->resource08));
+            else if(s->field38&64) bottom=(int)(scale*(f32)fn_80232B70(s->resource08));
             else bottom=0;
         }
         int edge=(int)s->field3C_5;
@@ -542,7 +544,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         if(s->field38&4)px-=StyleMultiply(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
         else if((s->field38&2)&&text&&s->resource08) {
             f32 scale=fn_8022CA40(s);
-            px-=fn_8023293C((int)s->resource08,text,1.0f)*scale;
+            px-=fn_8023293C(s->resource08,text,1.0f)*scale;
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
         f32 imageHeight=fn_80235F64(s->field64_2,current);
@@ -578,7 +580,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         fn_80230924(s->colors20[frame],px,py,px+width,py-height,depth);
     }
     if(text&&s->resource08) {
-        int lineHeight=fn_80232B70((int)s->resource08);
+        int lineHeight=fn_80232B70(s->resource08);
         int lines=fn_8022AB94((const signed char*)text,10)+1;
         if(s->field38&16)y-=(f32)(((lines-1)*lineHeight)/2);
         else if(s->field38&64)y-=(f32)((lines-1)*lineHeight);
@@ -694,7 +696,7 @@ UIStyleRecordFields* fn_8022CA2C(int i) {return &lbl_80490968[i];}
 
 f32 fn_8022CA40(UIStyleRecordFields* s) {
     if(s->height<1.0f) return 1.0f;
-    return s->height/(f32)fn_80232B70((int)s->resource08);
+    return s->height/(f32)fn_80232B70(s->resource08);
 }
 
 void fn_8022CAA8(UIStyleRecordFields* s,const UIStyleInputFields* input) {

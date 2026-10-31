@@ -3,6 +3,7 @@
 // gArt pictures inline ("esc_seq.val"), outlined text, word-wrapped and vertical text, and a buffer of
 // text drawn later in-game. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gtext.h"
 #include <stdarg.h>
 #include <string.h>
 
@@ -18,17 +19,6 @@ struct Glyph {
     f32 v1;     // offset 0x18
 };
 
-struct Font {
-    s32 tex;         // offset 0x0
-    u8 height;       // offset 0x4
-    u8 b5;           // offset 0x5
-    u8 b6;           // offset 0x6
-    Font* outline;   // offset 0x8
-    u16 count;       // offset 0xC
-    Glyph* glyphs;   // offset 0x10
-    u32 unk14;       // offset 0x14
-    char* texName;   // offset 0x18
-};
 
 struct FontEntry {
     Font* font;  // offset 0x0
@@ -248,7 +238,7 @@ void fn_80231AF0(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, 
 void fn_80231D84(const char* s, Font* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
 DrawFn lbl_8055B9A8 = fn_80231D84;
 
-Font* fn_80232578(const char* name);
+
 void fn_80233AA4(Font* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 void fn_80233BF0(const char* s, Font* f, f32* x, f32* y, int align, f32 scale, f32 xs);
 void fn_80233DD8(Font* f, u32 color);
@@ -256,7 +246,7 @@ void fn_80233E34(Font* f, const UIXform* m, u32 color);
 void fn_80233E80(Font* f, u32 color);
 void fn_80233EBC(void);
 void fn_80233EC0(Font* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
-void fn_80232BA4(const char* text, Font* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
+
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
 
@@ -880,7 +870,7 @@ void fn_80233354(const char* text, Font* f, u32 color, int align, f32 x, f32 y, 
     }
 }
 
-void fn_80233600(const char* text, Font* f, u32 color, int align, f32 x, f32 y, f32 z);
+
 
 void fn_802335F0(const char* text, Font* f, f32 x, f32 y) { fn_80233600(text, f, -1, 9, x, y, 0.0f); }
 

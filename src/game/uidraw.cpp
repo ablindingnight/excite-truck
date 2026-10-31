@@ -2,6 +2,7 @@
 // text, filled and textured quads, colour fading by the current UI context, the shared pulse/flash
 // timer, TV safe-area margins and number formatting with thousands separators. Names are guesses.
 #include "game/common.h"
+#include "game/gtext.h"
 #include <math.h>
 
 #include "game/uicontext.h"
@@ -34,10 +35,10 @@ void fn_802350BC(void);
 void fn_802365D8(void);
 void fn_80236728(void);
 void fn_80236774(void);
-f32 fn_8023293C(s32 font, const char* text, f32 scale);
-int fn_80232B70(s32 font);
-void fn_80232BA4(const char* text, s32 font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
-void fn_80233354(const char* text, s32 font, u32 color, int align, f32 x, f32 y, f32 scale, f32 a);
+
+
+
+
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8DB8(UIVert* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
@@ -191,7 +192,7 @@ void fn_80230150(u32 color, int flags, f32 x, f32 y, f32 z, f32 w, f32 h, f32 sp
     fn_802C8D74();
 }
 
-void fn_802304EC(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
+void fn_802304EC(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
                  u32 color, int align) {
     f32 width = fn_8023293C(font, text, 1.0f);
     f32 x0 = x + t * speed;
@@ -216,7 +217,7 @@ void fn_802304EC(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32
     fn_80232BA4(text, font, x0, y, color, align, scale, a, 1.0f);
 }
 
-void fn_80230650(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
+void fn_80230650(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
                  u32 color, int align) {
     f32 width = fn_8023293C(font, text, 1.0f);
     f32 y0 = y + t * speed;
@@ -242,7 +243,7 @@ void fn_80230650(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32
     fn_80233354(text, font, color, align, x, y0, scale, a);
 }
 
-void fn_802307AC(const char* text, s32 font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
+void fn_802307AC(const char* text, Font* font, f32 x, f32 y, f32 a, f32 scale, f32 speed, f32 t, f32 margin,
                  u32 color, int align) {
     int lines = fn_80232B70(font);
     f32 y0 = y + t * speed;
