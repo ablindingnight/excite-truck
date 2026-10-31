@@ -380,7 +380,7 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
 
 void fn_801933FC(u8* d, V2* v) { fn_8019330C(v, v, CAR(d) + 0x70); }
 
-void fn_8019340C(u8* d, RVec3* pt, RVec3* imp, int a, u8* other) {
+void AIDriver_vf3C(u8* d, RVec3* pt, RVec3* imp, int a, u8* other) {
     int isCar = 0;
     if (other && U32(other, 0x10) == 'PCAR') {
         isCar = 1;
@@ -427,7 +427,7 @@ int fn_80193524(u8* a, u8* b) {
     return r;
 }
 
-void fn_801935EC(u8* d) {
+void AIDriver_vf44(u8* d) {
     F32(d, 0x224) = 0.0f;
     F32(d, 0x228) = 0.0f;
     F32(d, 0x22C) = lbl_8055E3C8;
@@ -438,7 +438,7 @@ extern const f32 lbl_80562174;  // 2.0
 extern const f32 lbl_8056216C;  // 22.2 (80 km/h)
 extern const f32 lbl_80562170;  // 2.2 (8 km/h)
 
-void fn_80193604(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
+void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
     if (other) {
         if (U32(other, 0x10) == 'PCAR') {
             RVec3 rel;
@@ -554,7 +554,7 @@ u8* fn_801938F4(u8* d) {
 }
 
 void fn_801942F0(u8* d, int on);
-void fn_80193D30(u8* d);
+void AIDriver_vf30(u8* d);
 void fn_8019416C(u8* d, const char* why);
 
 void AIDriver_Connect(u8* d) {
@@ -565,16 +565,16 @@ void AIDriver_Connect(u8* d) {
     U8(d, 0x2A4) = 1;
     F32(d, 0x24C) = F32(CAR(d), 0x5B0);
     fn_801942F0(d, 1);
-    fn_80193D30(d);
+    AIDriver_vf30(d);
 }
 
-void fn_80193A38(u8* d) {
+void AIDriver_vf28(u8* d) {
     U8(d, 0x2A4) = 0;
     u8* car = CAR(d);
     S32(car, 0x24) = S32(car, 0x28);
 }
 
-u8* fn_80193A50(u8* d, int del) {
+u8* AIDriver_vf08(u8* d, int del) {
     if (d) {
         s32 id = CARID(d);
         if (id != -1000) {
@@ -593,7 +593,7 @@ u8* fn_80193A50(u8* d, int del) {
     return d;
 }
 
-void fn_80193AEC(u8* d, u8* car) {
+void AIDriver_vf0C(u8* d, u8* car) {
     CAR(d) = car;
     S32(d, 0x214) = 2;
     U8(d, 0x2A4) = 0;
@@ -625,7 +625,7 @@ void fn_80193AEC(u8* d, u8* car) {
         lbl_8055E588 = fn_80134B58((void*)"max_overheat_t", 240.0f);
         lbl_8055E578 = 0;
     }
-    fn_80193D30(d);
+    AIDriver_vf30(d);
 }
 
 void fn_80193CD4(u8* d) { U8(d, 0x2A5) = 1; }
@@ -639,7 +639,7 @@ f32 fn_80193D20(void) { return fn_80129DC4(3, lbl_8055E584, lbl_8055E588); }
 
 void fn_80195D80(u8* d, f32 t);
 
-void fn_80193D30(u8* d) {
+void AIDriver_vf30(u8* d) {
     f32 t = lbl_8055E3C8;
     lbl_8055E57C = 0.0f;
     lbl_8055E574 = fn_801769B8() == 2;
@@ -2655,6 +2655,6 @@ void fn_80198E7C(int car) {
 
 void fn_80198EA0(int car) { fn_80198E7C(car); }
 
-u32 fn_80198EA4(u8* d) { return 0; }
+u32 AIDriver_vf14(u8* d) { return 0; }
 
 }  // extern "C"

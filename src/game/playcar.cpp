@@ -918,7 +918,7 @@ int fn_8018B06C(u8* body);
 
 static inline BOOL OptHardcore(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 & 4); }
 
-void fn_801912D8(u8* p) {
+void PlayerDriver_vf24(u8* p) {
     Gearbox* gb = (Gearbox*)PTR(p, 0x38);
     U8(PTR(p, 0x34), 0x2680) = gb->Kind();
     S32(PTR(p, 0x34), 0x267C) = 0;
@@ -972,7 +972,7 @@ void fn_80191568(u8* p) { VP(PTR(p, 0x4))->v6C(); }
 
 u8 fn_8019157C(u8* p) { return U8(p, 0x14); }
 
-void fn_80191584(u8* p) {
+void PlayerDriver_vf28(u8* p) {
     U8(PTR(p, 0x34), 0x2680) = 0;
     fn_8018AE24(PTR(p, 0x34), 0);
     U8(PTR(p, 0x34), 0x260E) = 0;
@@ -981,7 +981,7 @@ void fn_80191584(u8* p) {
     S32(p, 0x8) = -1;
 }
 
-void fn_801915FC(u8* p, u8* car) {
+void PlayerDriver_vf0C(u8* p, u8* car) {
     PTR(p, 0x34) = car;
     S32(p, 0x3C) = S32(car, 0x1EC);
     ((VPa*)p)->v24();
@@ -995,12 +995,12 @@ void fn_801915FC(u8* p, u8* car) {
 
 void fn_80191688(u8* p) { VP(PTR(p, 0x4))->v70(); }
 
-void fn_8019169C(u8* p, u8* car) {
+void PlayerDriver_vf10(u8* p, u8* car) {
     PTR(p, 0x34) = car;
     S32(p, 0x3C) = S32(car, 0x1EC);
 }
 
-u8* fn_801916AC(u8* p, int del) {
+u8* PlayerDriver_vf08(u8* p, int del) {
     if (p) {
         U32(p, 0x38) = 0;
         if (del > 0) {
@@ -1010,7 +1010,7 @@ u8* fn_801916AC(u8* p, int del) {
     return p;
 }
 
-void fn_801916F4(u8* p) {
+void PlayerDriver_vf30(u8* p) {
     VP(PTR(p, 0x38))->v24(0);
     if (S32(p, 0x30)) {
         S32(p, 0x30) = 4;
@@ -1067,7 +1067,7 @@ public:
 extern "C" {
 int fn_8018B06C(u8* body);
 
-void fn_80191860(u8* p, FieldSaver* s) {
+void PlayerDriver_vf4C(u8* p, FieldSaver* s) {
     SaveField f[3] = {
         {p + 4, 1, "auto_shifting"},
         {p + 5, 1, "auto_clutch"},
@@ -1113,7 +1113,7 @@ void fn_80191928(u8* p) {
 
 int fn_80191A98(u8* p) { return PF(PTR(p, 0x8))->b1 != 0; }
 
-void fn_80191AB4(u8* p) {}  // stub (1100)
+void PlayerDriver_vf48(u8* p) {}  // stub (1100)
 
 void fn_80192BE4(u8* p) {}
 
@@ -1176,9 +1176,9 @@ void fn_80192F58(u8* p) { VP(PTR(p, 0x4))->v08(); }
 
 u8 fn_80192F6C(u8* p) { return U8(p, 0x12); }
 
-void fn_80192F74(u8* p) { S32(p, 0xC) = lbl_8055E3C4; }
+void PlayerDriver_vf38(u8* p) { S32(p, 0xC) = lbl_8055E3C4; }
 
-void fn_80192F80(u8* p) {
+void PlayerDriver_vf2C(u8* p) {
     U32(fn_80178C90(), 0x0) = 0;
     s32 v = fn_801B2F54(PTR(p, 0x3C));
     S32(fn_80178C90(), 0x4) = v;
@@ -1190,9 +1190,9 @@ void fn_80192F80(u8* p) {
     F32(fn_80178C90(), 0x10) = c;
 }
 
-int fn_80193010(void) { return 0x20; }
+int PlayerDriver_vf14(void) { return 0x20; }
 
-void fn_80193018(u8* p, const RVec3* v) {
+void PlayerDriver_vf3C(u8* p, const RVec3* v) {
     f32 a = F32(p, 0x10) + v->x;
     f32 b = F32(p, 0x14) + v->y;
     f32 c = F32(p, 0x18) + v->z;
@@ -1201,9 +1201,9 @@ void fn_80193018(u8* p, const RVec3* v) {
     F32(p, 0x18) = c;
 }
 
-void fn_8019304C(u8* p) { F32(p, 0x40) = 0.0f; }
+void PlayerDriver_vf44(u8* p) { F32(p, 0x40) = 0.0f; }
 
-void fn_80193058(u8* p) {}
+void PlayerDriver_vf50(u8* p) {}
 
 u8 fn_8019305C(u8* p) { return U8(p, 0x11); }
 

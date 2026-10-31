@@ -132,7 +132,7 @@ extern void *fn_80131808(const char *);
 extern void fn_80131818(void *);
 extern void fn_802E58B8(int);
 extern int strcmp(const char *, const char *);
-void fn_8020AAC0(int unused, int arg1) {
+void VoiceSoundMixer_vf2C(int unused, int arg1) {
     typedef void *(*GetAt)(void *, int);
     typedef const char *(*GetName)(void *);
     typedef const char *(*GetString)(void *, const char *, int);
@@ -181,19 +181,19 @@ copy_done:
     fn_802E58B8(arg1);
 }
 
-extern void fn_802E5950(int, int); void fn_8020AC0C(int arg0, int arg1, int arg2) { fn_802E5950(arg1, arg2); }
+extern void fn_802E5950(int, int); void VoiceSoundMixer_vf30(int arg0, int arg1, int arg2) { fn_802E5950(arg1, arg2); }
 
-extern void fn_802E59BC(void *); void fn_8020AC18(void *arg0, int arg1) { fn_802E59BC((void *)arg1); }
+extern void fn_802E59BC(void *); void VoiceSoundMixer_vf34(void *arg0, int arg1) { fn_802E59BC((void *)arg1); }
 
 extern void fn_802E5A54(void);
-void fn_8020AC20(void) {
+void VoiceSoundMixer_vf38(void) {
     lbl_8055EE08 = 0;
     fn_802E5A54();
 }
 
 #pragma push
 #pragma processor 750
-void fn_8020AC2C(void *arg0) {
+void VoiceSoundMixer_vf20(void *arg0) {
  int i,j,mode,now; void *p,*handle; float volume,x,v,high,low;
  lbl_8055B590=fn_80209028();
  lbl_8055B594=fn_802091CC();
@@ -261,25 +261,25 @@ void fn_8020B2BC(void *arg0, int arg1, int arg2) {
     ptr[arg2] = 0;
 }
 
-void fn_8020B2D0(void) {
+void VoiceSoundMixer_vf3C(void) {
 
 }
 
 extern unsigned char lbl_8033C520[];
 extern unsigned char lbl_80489BD0[];
 extern int fn_80128668(void);
-int fn_8020B2D4(int arg0, int arg1) {
+int VoiceSoundMixer_vf08(int arg0, int arg1) {
     if (arg0 != 0 && arg1 > 0) {
         fn_80128668();
     }
     return arg0;
 }
 
-void *fn_8020B314(void) {
+void *VoiceSoundMixer_vf0C(void) {
     return lbl_8033C520;
 }
 
-void fn_8020B320(void) {
+void VoiceSoundMixer_vf10(void) {
 // MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
     volatile unsigned char *p = lbl_80489BD0;
     p[0] = 0;
@@ -289,11 +289,11 @@ void fn_8020B320(void) {
     *(volatile int *)(p + 8) = 0x20;
 }
 
-void fn_8020B340(void) {
+void VoiceSoundMixer_vf40(void) {
     fn_802E5824();
 }
 
-void fn_8020B344(void) {
+void VoiceSoundMixer_vf44(void) {
     fn_802E5828();
 }
 

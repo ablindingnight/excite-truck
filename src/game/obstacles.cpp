@@ -97,8 +97,8 @@ f32 PSVECSquareDistance(const u8* a, const u8* b);
 void fn_801AC240(u8* p);
 void fn_801ABFF8(u8* p, VVisit* f);
 void fn_801ACF94(void);
-void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi);
-void fn_801AD99C(u8* p, f32* v, f32* off);
+void DynamicObstacle_vfA4(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi);
+void DynamicObstacle_vfA0(u8* p, f32* v, f32* off);
 void fn_801D09A8(u8* p, s32 id);
 }
 
@@ -949,7 +949,7 @@ void fn_801AD5F4(u8* p, ObstacleSink* q) {
 void fn_801D0934(u8* p);
 
 // DynamicObstacle destructor; the secondary base at 0x23C is torn down first.
-u8* fn_801AD6B0(u8* p, int del) {
+u8* DynamicObstacle_vf0C(u8* p, int del) {
     if (p) {
         *(void**)p = lbl_80335744;
         *(void**)(p + 0x23C) = (u8*)lbl_80335744 + 0x54;
@@ -974,7 +974,7 @@ u8* fn_801AD6B0(u8* p, int del) {
     return p;
 }
 
-void fn_801AD750(u8* p, u8* q) {
+void DynamicObstacle_vf08(u8* p, u8* q) {
     fn_801A9AB0(p, q);
     U32(p, 0x240) = U32(q, 0x80);
     u8* b = p;
@@ -984,7 +984,7 @@ void fn_801AD750(u8* p, u8* q) {
     fn_801D08C0(b);
 }
 
-void fn_801AD7A4(u8* p, int a, int b, int c) {
+void DynamicObstacle_vf4C(u8* p, int a, int b, int c) {
     if (c < 8) {
         if (p) {
             p += 0x23C;
@@ -993,7 +993,7 @@ void fn_801AD7A4(u8* p, int a, int b, int c) {
     }
 }
 
-void fn_801AD7C4(u8* p, const f32* v, const f32* at, int force, u8* car) {
+void DynamicObstacle_vf48(u8* p, const f32* v, const f32* at, int force, u8* car) {
     fn_801AC0A0(p, v, at, force, car);
     if (car && IsCar(car)) {
         s32 id = S32(car, 0x1EC);
@@ -1015,12 +1015,12 @@ void fn_801AD870(u8* p, int a, int b, s32* c, s32* d) {
 
 u32 fn_801AD880(u8* p) { return 0; }
 
-void fn_801AD888(u8* p) {
+void DynamicObstacle_vfA8(u8* p) {
     ((VO*)p)->v10();
     fn_801AC254(p);
 }
 
-void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) {
+void DynamicObstacle_vfA4(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) {
     *(Pose12*)(p + 0x3C) = *pose;
     ((CollVolume*)p)->Update();
     F32(p, 0x118) = lo->x;
@@ -1032,7 +1032,7 @@ void fn_801AD8C8(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) 
     fn_801AC240(p);
 }
 
-void fn_801AD99C(u8* p, f32* v, f32* off) {
+void DynamicObstacle_vfA0(u8* p, f32* v, f32* off) {
     f32 push[3];
     f32 at[3];
     f32 s = F32(p, 0xD4) / (1.0f / 59.94f);
@@ -1045,7 +1045,7 @@ void fn_801AD99C(u8* p, f32* v, f32* off) {
     ((VO*)p)->v48(push, at, 100, 0);
 }
 
-void fn_801ADA38(u8* p, int on) {
+void DynamicObstacle_vf9C(u8* p, int on) {
     if (on) {
         void* f = lbl_80335940;
         fn_801ABFF8(p, (VVisit*)&f);
@@ -1054,39 +1054,39 @@ void fn_801ADA38(u8* p, int on) {
     }
 }
 
-u8 fn_801ADA7C(u8* p) { return U8(p, 0x220); }
+u8 DynamicObstacle_vf8C(u8* p) { return U8(p, 0x220); }
 
-s32 fn_801ADA84(u8* p) { return *(s16*)(p + 0x6C); }
+s32 DynamicObstacle_vf98(u8* p) { return *(s16*)(p + 0x6C); }
 
-u8* fn_801ADA8C(u8* p) { return p + 0x118; }
+u8* DynamicObstacle_vf94(u8* p) { return p + 0x118; }
 
-u8* fn_801ADA94(u8* p) { return p + 0x60; }
+u8* DynamicObstacle_vf90(u8* p) { return p + 0x60; }
 
-void fn_801ADA9C(u8* p) { ((VO*)PTR(p, 0x240))->v18("dyno", "unknown"); }
+void DynamicObstacle_vf88(u8* p) { ((VO*)PTR(p, 0x240))->v18("dyno", "unknown"); }
 
-u32 fn_801ADAB8(u8* p) { return U32(p, 0x240); }
+u32 DynamicObstacle_vf84(u8* p) { return U32(p, 0x240); }
 
 void fn_801ADAC0(u8* self, u8* p) { fn_801AC240(p); }
 
 
 
-void fn_801ADAF4(u8* p) { fn_801AD888(p - 0x23C); }
+void DynamicObstacle_vf80(u8* p) { DynamicObstacle_vfA8(p - 0x23C); }
 
-void fn_801ADAFC(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) { fn_801AD8C8(p - 0x23C, pose, lo, hi); }
+void DynamicObstacle_vf7C(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) { DynamicObstacle_vfA4(p - 0x23C, pose, lo, hi); }
 
-void fn_801ADB04(u8* p, f32* v, f32* off) { fn_801AD99C(p - 0x23C, v, off); }
+void DynamicObstacle_vf78(u8* p, f32* v, f32* off) { DynamicObstacle_vfA0(p - 0x23C, v, off); }
 
-void fn_801ADB0C(u8* p, int on) { fn_801ADA38(p - 0x23C, on); }
+void DynamicObstacle_vf74(u8* p, int on) { DynamicObstacle_vf9C(p - 0x23C, on); }
 
-void fn_801ADB14(u8* p) { fn_801ADA7C(p - 0x23C); }
+void DynamicObstacle_vf70(u8* p) { DynamicObstacle_vf8C(p - 0x23C); }
 
-void fn_801ADB1C(u8* p) { fn_801ADA84(p - 0x23C); }
+void DynamicObstacle_vf6C(u8* p) { DynamicObstacle_vf98(p - 0x23C); }
 
-void fn_801ADB24(u8* p) { fn_801ADA8C(p - 0x23C); }
+void DynamicObstacle_vf68(u8* p) { DynamicObstacle_vf94(p - 0x23C); }
 
-void fn_801ADB2C(u8* p) { fn_801ADA94(p - 0x23C); }
+void DynamicObstacle_vf64(u8* p) { DynamicObstacle_vf90(p - 0x23C); }
 
-void fn_801ADB34(u8* p) { fn_801ADA9C(p - 0x23C); }
+void DynamicObstacle_vf60(u8* p) { DynamicObstacle_vf88(p - 0x23C); }
 
-void fn_801ADB3C(u8* p) { fn_801ADAB8(p - 0x23C); }
+void DynamicObstacle_vf5C(u8* p) { DynamicObstacle_vf84(p - 0x23C); }
 }  // extern "C"
