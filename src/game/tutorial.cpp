@@ -207,6 +207,7 @@ struct TVec2 {
     f32 x;
     f32 z;
 };
+static inline f32 Dot2(f32 ax, f32 bx, f32 az, f32 bz) { return ax * bx + az * bz; }
 
 struct TPath {
     s32 count;  // offset 0x0
@@ -1267,7 +1268,7 @@ inline void Challenge::Collect(void) {
                                         f32 inv = 1.0f / (f32)sqrt(v.x * v.x + v.z * v.z);
                                         v.x *= inv;
                                         v.z *= inv;
-                                        if (v.x * t->dir.x + v.z * t->dir.z > 0.1f) {
+                                        if (Dot2(v.x, t->dir.x, v.z, t->dir.z) > 0.1f) {
                                             got++;
                                             t->active = 0;
                                             snd->Play();
