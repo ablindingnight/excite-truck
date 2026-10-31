@@ -200,7 +200,6 @@ void fn_801CEEC8(void* p);
 void fn_801B848C(void* p);
 void fn_801E1EA4(void* p);
 void* fn_80176C0C(void* dst, const void* src);
-void fn_8017B0B0(void* p);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -215,7 +214,6 @@ extern s32 lbl_8055E488;
 extern u32 lbl_8055D430;
 extern s32 lbl_8055E8F8;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
-extern void* lbl_80338400[];
 
 struct PVec3 {
     void Set(f32 x_, f32 y_, f32 z_) {
@@ -373,6 +371,25 @@ class WheelPhob {
 public:
     WheelPhob(void);
     u8 pad0[0x1FC];
+};
+
+class CollVolume {
+public:
+    virtual ~CollVolume(void);
+};
+
+class RigidBody : public CollVolume {
+public:
+    RigidBody(void);
+    virtual ~RigidBody(void) {}
+    u8 pad4[0x29C - 0x4];
+};
+
+// A rigid body whose shape can be mutated at run time (mutphob.cpp).
+class MutPhob : public RigidBody {
+public:
+    MutPhob(void) {}
+    virtual ~MutPhob(void);
 };
 
 ModuleTag lbl_8055E408;
@@ -675,26 +692,7 @@ Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") StaticPhob; }
 
 Phob* fn_80178290(void) { return (Phob*)new ("WheelPhob") WheelPhob; }
 
-Phob* fn_801782C8(void) {
-    void* p = operator new(0x29C, "MutablePhob");
-    if (p) {
-        fn_8017B0B0(p);
-        *(void**)p = lbl_80338400;
-    }
-    return (Phob*)p;
-}
-
-void* fn_80179EE8(void* p, int flag);
-
-void* fn_8017831C(void* p, int flag) {
-    if (p) {
-        fn_80179EE8(p, 0);
-        if (flag > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
+Phob* fn_801782C8(void) { return (Phob*)new ("MutablePhob") MutPhob; }
 
 Phob* fn_8018FB18(void);
 Phob* fn_80134F48(void);
