@@ -313,7 +313,7 @@ void fn_801796EC(int kind, void* msg, int size);
 void fn_801D0650(u8* p);
 void fn_801D06C4(u8* p);
 int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r);
-int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s);
+int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r, f32 s);
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
@@ -926,13 +926,11 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 // Sphere (c, r) of p against sphere (d, s) of q: reports the contact (normal flattened in y) to the
 // volume that has an owner.
-int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {
+int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r, f32 s) {
     PVec3 dd;
     PVec3 n;
     PVec3 at;
     f32 rs = r + s;
-    const f32* cv = (const f32*)c;
-    const f32* dv = (const f32*)d;
     f32 dx = cv[0] - dv[0];
     f32 dz = cv[2] - dv[2];
     f32 dy = cv[1] - dv[1];
@@ -951,7 +949,9 @@ int fn_8019AA34(u8* p, u8* c, u8* q, u8* d, u32 a, u32 b, f32 r, f32 s) {
                 n.v[2] = dd.v[2] * inv;
                 PSVECNormalize(n.v, n.v);
                 f32 k = -0.5f * ((r + dist) - s);
-                MulAdd(at.v, cv, n.v, k);
+                at.v[0] = cv[0] + n.v[0] * k;
+                at.v[1] = cv[1] + n.v[1] * k;
+                at.v[2] = cv[2] + n.v[2] * k;
                 if (U32(p, 0x4)) {
                     fn_8019A788(p, q, (u32)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
                 } else {
@@ -1075,7 +1075,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
 
 int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
     f32 s = F32(q, 0x24);
-    return fn_8019AA34(p, p + 0x34, q, q + 0x34, a, b, F32(p, 0x24), s);
+    return fn_8019AA34(p, (f32*)(p + 0x34), q, (f32*)(q + 0x34), a, b, F32(p, 0x24), s);
 }
 
 // Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
@@ -1507,8 +1507,8 @@ int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
     MulAdd(a.v, org.v, axis.v, h);
     MulAdd(b.v, org.v, axis.v, -h);
     hit = 0;
-    hit = (hit | fn_8019AA34(p, c, q, (u8*)a.v, 0, 0, r, rad)) != 0;
-    hit = (hit | fn_8019AA34(p, c, q, (u8*)b.v, 0, 0, r, rad)) != 0;
+    hit = (hit | fn_8019AA34(p, (f32*)c, q, a.v, 0, 0, r, rad)) != 0;
+    hit = (hit | fn_8019AA34(p, (f32*)c, q, b.v, 0, 0, r, rad)) != 0;
     return hit;
 }
 
