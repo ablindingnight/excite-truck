@@ -1174,7 +1174,14 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                     if (p->tracks[track].fillTarget > p->tracks[track].ringSize) {
                         p->tracks[track].fillTarget = p->tracks[track].ringSize;
                     }
-                    p->tracks[track].handle = (s32)fn_8011B584(AF.rate, AF.stereo + 1, !AF.valid && AF.dct);
+                    {
+                        BinkAudioFlags8011 f = AF;
+                        int dct = 0;
+                        if (!f.valid && f.dct) {
+                            dct = 1;
+                        }
+                        p->tracks[track].handle = (s32)fn_8011B584(f.rate, f.stereo + 1, dct);
+                    }
                     if (p->tracks[track].handle == 0) {
                         p->tracks[track].Close(&p->tracks[track]);
                         p->tracks[track].ringStart = 0;
