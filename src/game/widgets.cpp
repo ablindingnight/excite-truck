@@ -1,5 +1,6 @@
 #include "game/uicontext.h"
 typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
+static inline void SetVec3(Vec3* out,float x,float y,float z){out->x=x;out->y=y;out->z=z;}
 struct RotatingChoiceDescriptorNew;
 static inline float MapMinBranchNew(float a,float b){if(a<b)return a;return b;}
 static inline float MapMaxBranchNew(float a,float b){if(a>b)return a;return b;}
@@ -364,7 +365,6 @@ void fn_8021D61C(WidgetFragment* self);
 }
 
 
-struct ChoiceDrawStatePrefix {char unknown[0x34];float scale;};
 extern "C" {
 void* fn_8021165C(int,int);
 void fn_80219660(WidgetFragment*);
@@ -528,7 +528,6 @@ void fn_80221970(WidgetFragment* self);
 
 void fn_80221F9C(void);  // placeholder (388 bytes)
 extern "C" {void fn_8022ED00(void*);void fn_8022EDB8();void fn_8022EE98(void*);}
-typedef struct CircularVectorTypedNew {float v[3];} CircularVectorTypedNew;
 typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
 typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;int font;unsigned int color;float radius,rate;} CircularPaintNew;
@@ -612,7 +611,7 @@ void fn_802278F0(void*,float,float,float,float);
 void fn_80228010(void);  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
 }
-extern "C" {void fn_80015B20(void*,const RotationMatrix*,void*);double sin(double);}
+extern "C" {void fn_80015B20(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);double sin(double);}
 struct ModelFitMatrixNew {RotationMatrix basis;RotationVec translation;};
 struct ModelFitAssetNew {void* dispatch;int resource;ModelFitMatrixNew matrix;float angle,speed;};
 struct ModelAxisRangeNew {
@@ -978,7 +977,7 @@ int fn_802268E8(WidgetFragment* self);
 
 
 struct RotationPrefix {char base[0x299];unsigned char owned;char gap29a[2];RotationMatrix* matrix;};
-struct AssetRotationPrefix {char base[0x25c];RotationMatrix* matrix;unsigned char owned;};
+struct AssetRotationPrefix {char base[0x25c];UIContext* matrix;unsigned char owned;};
 struct AssetFormatPrefix {char base[0x244];int first,resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];void* asset;};
 extern "C" {
 extern const float lbl_805634F8;extern const char lbl_8033DA2C[],lbl_8055B88C[4];extern u32 lbl_8033E1C4[],lbl_8033F7F4[];
@@ -1097,8 +1096,7 @@ void fn_8021FD68(WidgetFragment* self);
 struct MenuTablePrefix {MenuRowPrefix rows[8];int count;};
 struct RollingActionList {char base[0x14];int(*callback)(void*);unsigned char vertical;};
 struct RollingActionPrefix {char base[0x244];RollingActionList* list;char gap248[8];float stamp;char gap254[32];int direction;char gap278[4];int* focus;int token;};
-struct CenteredImageState {char base[0x24];float x,y;};
-struct CenteredImagePrefix {char base[0x244];void* image;CenteredImageState* asset;float x,y,height,width;int value;};
+struct CenteredImagePrefix {char base[0x244];void* image;UIContext* asset;float x,y,height,width;int value;};
 extern "C" {
 void fn_8022DBFC(void*);void fn_8022DC20(void*);void* fn_8022DBE8(void*);extern u32 lbl_8033E0BC[];extern const char lbl_8033DAF8[];
 
@@ -1177,7 +1175,7 @@ int fn_802CAC28(const char*,int);
 
 }
 
-struct EffectImage351 {char base[0x244];void* image;float x,y,height,width;int mode;RotationMatrix* matrix;bool owned;};
+struct EffectImage351 {char base[0x244];void* image;float x,y,height,width;int mode;UIContext* matrix;bool owned;};
 extern "C" {
 extern unsigned char lbl_8055EFBC;extern const char lbl_8055B8A4[3];extern u32 lbl_8033E038[];int fn_80235FD8(void*);
 WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc);
@@ -1208,9 +1206,8 @@ void fn_80220F90(WidgetFragment* self,int x,int y);
 }
 
 struct ObservedTransform {float m[12];};
-struct SpinVector359 {float x,y,z;SpinVector359(float a,float b,float c):x(a),y(b),z(c){}};
 extern "C" {
-void fn_80015B20(void*,const RotationMatrix*,void*);
+void fn_80015B20(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);
 static inline float SpinAngle359(int rate,float time){return time*(float)rate;}
 void fn_80226B6C(WidgetFragment* self);
 }
@@ -3017,9 +3014,9 @@ void fn_80226768(WidgetFragment* self,int,int){Bound264* f=(Bound264*)self;if(se
 int fn_802267C4(WidgetFragment* self,int key){SelectionCallbackPrefix* f=(SelectionCallbackPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;switch(key){case 13:if(!f->callback||f->callback(f->context))fn_802168BC(f->context);return 1;case 0x126:fn_80217D84(self->window);fn_80230E90(0);return 1;case 0x128:fn_80217C4C(self->window);fn_80230E90(0);return 1;}return 0;}
 int fn_802268A0(WidgetFragment* self,int key){Bound264* f=(Bound264*)self;if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
 int fn_802268E8(WidgetFragment* self){SelectionActionPrefix* f=(SelectionActionPrefix*)self;if(!f->focus)return 0;int selected=f->token==*f->focus;unsigned int state;if(self->flag18)state=(selected!=0)+2;else state=selected!=0;if(f->child->State()==3&&state==3)state=1;if(!self->enabled)state=4;return state;}
-WidgetFragment* fn_802269A8(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E0BC;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=gxGetImage(desc->name);if(!f->image)fn_802E30C8(lbl_8033DAF8,desc->name);f->asset=(CenteredImageState*)fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->x=f->x+f->width/2.0f;f->asset->y=f->y-f->height/2.0f;f->value=desc->field9c;return self;}
+WidgetFragment* fn_802269A8(WidgetFragment* self,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E0BC;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=gxGetImage(desc->name);if(!f->image)fn_802E30C8(lbl_8033DAF8,desc->name);f->asset=fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;f->value=desc->field9c;return self;}
 WidgetFragment* fn_80226AD0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E0BC;AssetImage244* f=(AssetImage244*)self;if(f->asset)fn_8022EE98(f->asset);f->asset=0;if(f->image)fn_802C519C(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80226B6C(WidgetFragment* self){FullDrawStatePrefix scope;CenteredImagePrefix* f=(CenteredImagePrefix*)self;float time=fn_8023659C();ObservedTransform* m=(ObservedTransform*)f->asset;float zero=(0.0f),one=(1.0f);m->m[0]=one;m->m[1]=zero;m->m[2]=zero;m->m[3]=zero;m->m[4]=one;m->m[5]=zero;m->m[6]=zero;m->m[7]=zero;m->m[8]=one;m->m[9]=zero;m->m[10]=zero;m->m[11]=zero;SpinVector359 rotation(zero,zero,SpinAngle359(f->value,time/(30.0f)));RotationMatrix matrix;void* target=f->asset;fn_80015A20(&matrix,(RotationVec*)&rotation);fn_80015B20(target,&matrix,target);f->asset->x=f->x+f->width/2.0f;f->asset->y=f->y-f->height/2.0f;if(f->image){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);fn_802C5320(f->image,0,-f->width/2.0f,f->height/2.0f,(0.0f),f->width,f->height);fn_8022EDB8();}}
+void fn_80226B6C(WidgetFragment* self){FullDrawStatePrefix scope;CenteredImagePrefix* f=(CenteredImagePrefix*)self;float time=fn_8023659C();ObservedTransform* m=(ObservedTransform*)f->asset;float zero=(0.0f),one=(1.0f);m->m[0]=one;m->m[1]=zero;m->m[2]=zero;m->m[3]=zero;m->m[4]=one;m->m[5]=zero;m->m[6]=zero;m->m[7]=zero;m->m[8]=one;m->m[9]=zero;m->m[10]=zero;m->m[11]=zero;RotationVec rotation;SetVec3(&rotation,zero,zero,SpinAngle359(f->value,time/(30.0f)));RotationMatrix matrix;RotationMatrix* target=&f->asset->xf.basis;fn_80015A20(&matrix,&rotation);fn_80015B20(target,&matrix,target);f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;if(f->image){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);fn_802C5320(f->image,0,-f->width/2.0f,f->height/2.0f,(0.0f),f->width,f->height);fn_8022EDB8();}}
 WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
  const char* strings=lbl_8033D878;fn_80218F80(self,desc);self->vtable=lbl_8033E038;EffectImage351* f=(EffectImage351*)self;
  f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();
@@ -3035,7 +3032,7 @@ WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
 }
 WidgetFragment* fn_80226F00(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E038;SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned)fn_8022EE98(f->asset);if(f->model)fn_80235380(f->model);f->model=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80226F94(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const void* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80230C30(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model,f->frame,0xffffffffu,f->x,f->y,(0.0f),f->width,f->height);if(f->owned)fn_8022EDB8();}
-void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=(RotationMatrix*)fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=f->matrix;fn_80015A20(&matrix,(RotationVec*)&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
+void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=&f->matrix->xf.basis;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
 WidgetFragment* fn_802270DC(WidgetFragment* self,WidgetDesc* desc){
  fn_80218F80(self,desc);self->vtable=lbl_8033DFB4;TimedImage349* f=(TimedImage349*)self;
  fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();
@@ -3371,7 +3368,7 @@ void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int hei
     RotationVec3New rotation((0.0f),self->angle,(0.0f));
     RotationMatrix tmp;
     fn_80015A20(&tmp, &rotation);
-    fn_80015B20(&self->matrix, &tmp, &self->matrix);
+    fn_80015B20(&self->matrix.basis, &tmp, &self->matrix.basis);
     ModelFitBoundsNew bounds;
     fn_802C77F0(self->resource, &bounds);
     float radius = bounds.RadiusNew();
