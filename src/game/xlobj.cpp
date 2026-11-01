@@ -494,7 +494,10 @@ void fn_802B9108(s16 size) {
     g.cells = new ("tmp") Cell<Item*>[n];
     g.pool = new ("tmpalloc") Pool<Item*>(n * 6 / 4);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        TexEntry* te = lbl_804BFFF4.data[i];
+        TexEntry* te;
+        Obj* o;
+        Item* it;
+        te = lbl_804BFFF4.data[i];
         switch (te->head->Type()) {
         case 0:
         case 1:
@@ -503,8 +506,8 @@ void fn_802B9108(s16 size) {
             }
             break;
         case 2:
-            for (Item* it = te->head; it; it = it->next) {
-                Obj* o = it->AsObj();
+            for (it = te->head; it; it = it->next) {
+                o = it->AsObj();
                 if (g.size == LowBit(o->X())) {
                     g.Add(it, o->X(), o->Y());
                 }
@@ -549,8 +552,9 @@ void fn_802B9108(s16 size) {
         for (int y = size - 0x200; y < 0x200; y += d) {
             GroundCell* cell = fn_802BE844(x, y, size);
             int start = lbl_8055FA80->count;
+            int dd;
             int s = g.size;
-            int dd = s * 2;
+            dd = s * 2;
             for (Chunk<Item*>* c = g.cells[(y - s + 0x200) / dd * (0x400 / dd) + (x - s + 0x200) / dd].head; c;
                  c = c->next) {
                 int cnt = c->count;
