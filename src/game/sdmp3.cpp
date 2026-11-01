@@ -538,11 +538,14 @@ static inline int SyncAt(const u8* b) { return b[0] == 0xFF && (b[1] & 0xE0) == 
 
 void* fn_802EAB28(void* arg) {
     OSReport("kerngc/mp3:thread begins!\n");
+    int pos;
+    int errs;
+    u8 decoded;
     Mp3Reader* r = 0;
     s32 size = 0;
-    u8 decoded = 0;
-    int pos = 0;
-    int errs = 0;
+    decoded = 0;
+    pos = 0;
+    errs = 0;
     MP3Info info;
     s32 used;
     while (lbl_80560062) {
@@ -601,8 +604,8 @@ void* fn_802EAB28(void* arg) {
             if (left < 0x780) {
                 fn_802E30C8("mp3: perhaps not enough bytes left?");
             }
-            int n = lbl_805600AC < left ? lbl_805600AC : left;
             int done = 1;
+            int n = lbl_805600AC < left ? lbl_805600AC : left;
             if (pos >= size) {
                 fn_802E30C8("mp3: at end of file");
                 done = 1;
@@ -622,13 +625,16 @@ void* fn_802EAB28(void* arg) {
                         int p = 10;
                         if (ver >= 0x200 && ver <= 0x2FF) {
                             while (p + 6 < n) {
+                                char* f;
+                                char* txt;
+                                int fsz;
                                 if (!lbl_805600A8[p]) {
                                     break;
                                 }
-                                char* f = (char*)lbl_805600A8 + p;
-                                int fsz = ((u8)f[3] << 14) + ((u8)f[4] << 7) + (u8)f[5] + 6;
+                                f = (char*)lbl_805600A8 + p;
+                                fsz = ((u8)f[3] << 14) + ((u8)f[4] << 7) + (u8)f[5] + 6;
                                 if (f[0] == 'T') {
-                                    char* txt = f + 7;
+                                    txt = f + 7;
                                     if (!strncmp(f, "TT2", 3)) {
                                         strncpy(lbl_80507640.title, txt, 0x1F);
                                         lbl_80507640.title[0x1F] = 0;
@@ -764,8 +770,9 @@ void* fn_802EAB28(void* arg) {
                         if (space < need) {
                             break;
                         }
+                        int i;
                         int skip = -1;
-                        for (int i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
+                        for (i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
                             if (SyncAt(lbl_805600A8 + off + i)) {
                                 if (i) {
                                     u8* b = lbl_805600A8 + off;
