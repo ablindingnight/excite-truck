@@ -624,17 +624,19 @@ void CarBody_vf08(u8* p, u8* desc) {
     }
     fn_801345D8(path, 0x50, "%s.car/physics.val", (char*)(p + 0x234));
     CbValueTable* table = fn_80131808(path);
+    ValVec3C head;
+    ValVec3C back;
     CbValueNode* chassis = table->FindChild("Chassis");
     F32(p, 0x5B4) = chassis->GetFloat("chase_camera_dist", 0.0f);
     F32(p, 0x5B8) = chassis->GetFloat("chase_camera_height", 0.0f);
-    ValVec3C head = chassis->GetVec3("head_pos");
+    head = chassis->GetVec3("head_pos");
     F32(p, 0x5C4) = head.x;
     F32(p, 0x5C8) = head.y;
+    back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
     F32(p, 0x5D0) = 0.2f * head.x;
     F32(p, 0x5D4) = head.y + 3.0f;
     F32(p, 0x5CC) = head.z;
     F32(p, 0x5D8) = head.z;
-    ValVec3C back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
     F32(p, 0x5D0) = back.x;
     F32(p, 0x5D4) = back.y;
     F32(p, 0x5C4) = F32(p, 0x5C4) * 0.0254f;
