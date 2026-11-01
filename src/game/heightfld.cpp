@@ -138,9 +138,9 @@ static inline GTile* TileAt(GroundHeader* g, int tx, int tz) {
 
 static inline GLayer* LayerAt(s32 i) { return i >= 0 ? &lbl_8055E990->layers[i] : 0; }
 
-extern "C" int fn_801DB348(int x, int z, f32* out, s32* mat, int unused);
+extern "C" int fn_801DB348(int x, int z, f32* out, s32* mat, u16* unused);
 
-static inline int Sample(int x, int z, f32* out, s32* mat, int unused) {
+static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     if (x < 0 || z < 0) {
         return 0;
     }
@@ -207,7 +207,7 @@ static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3,
 
 extern "C" {
 
-int fn_801DB348(int x, int z, f32* out, s32* mat, int unused) {
+int fn_801DB348(int x, int z, f32* out, s32* mat, u16* unused) {
     if (mat) {
         *mat = 0;
     }
@@ -247,7 +247,7 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     return h;
 }
 
-int fn_801DB74C(int x, int z, f32* out, s32* mat, int unused, GVec* normal, f32 fx, f32 fz) {
+int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32 fx, f32 fz) {
     f32 h0;
     if (!Sample(x, z, &h0, mat, unused) && !Sample(x + 1, z, &h0, mat, unused) && !Sample(x, z + 1, &h0, mat, unused) &&
         !Sample(x + 1, z + 1, &h0, mat, unused)) {
@@ -271,7 +271,7 @@ int fn_801DB74C(int x, int z, f32* out, s32* mat, int unused, GVec* normal, f32 
     return 1;
 }
 
-int fn_801DC258(f32* out, s32* mat, int unused, GVec* normal, f32 x, f32 z) {
+int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 fx = g->scaleX * (x + g->offX);
     f32 ix;
@@ -454,13 +454,15 @@ int fn_801DCE14(u16* flags, const GVec* in, GVec* out, GVec* normal, s32* mat) {
     }
     f32 h;
     s32 m = 0xFF;
-    if (fn_801DC258(&h, &m, (int)flags, normal, in->x, in->z)) {
+    f32 x = in->x;
+    f32 z = in->z;
+    if (fn_801DC258(&h, &m, flags, normal, x, z)) {
         if (mat) {
             *mat = m;
         }
+        f32 inZ = in->z;
         out->y = h;
         out->x = in->x;
-        f32 inZ = in->z;
         out->z = inZ;
         return 1;
     }
