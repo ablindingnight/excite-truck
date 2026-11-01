@@ -527,8 +527,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
             break;
         }
         c->view.pos.v[1] = c->view.pos.v[1] + (h + lbl_80563E58 * lift) * F32(c->car, 0x5E4);
-        f32 floor = lbl_80563E30 + c->pos.v[1];
-        c->view.pos.v[1] = c->view.pos.v[1] > floor ? c->view.pos.v[1] : floor;
+        c->view.pos.v[1] = c->view.pos.v[1] > (lbl_80563E30 + c->pos.v[1]) ? c->view.pos.v[1] : (lbl_80563E30 + c->pos.v[1]);
         CsVec up3(lbl_80563E78, lbl_80563E30, lbl_80563E78);
         fn_8026E870(c->view.pos.v, &tgt.x, p, &up3.x);
     }
@@ -679,9 +678,10 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
         } else {
+            f32 sideZ = -c->tf.axes.fwd.x;
             side.x = c->tf.axes.fwd.z;
             side.y = c->tf.axes.fwd.y;
-            side.z = -c->tf.axes.fwd.x;
+            side.z = sideZ;
             f32 kk = lbl_80563EA8 * (PSVECDotProduct(&side.x, f.v) > lbl_80563E78 ? lbl_80563E30 : lbl_80563E6C);
             c->tf.axes.fwd.x = c->tf.axes.fwd.x + side.x * kk;
             c->tf.axes.fwd.y = c->tf.axes.fwd.y + side.y * kk;
