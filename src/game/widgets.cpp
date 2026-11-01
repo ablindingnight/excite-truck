@@ -50,8 +50,8 @@ struct WidgetFragment {inline int ProjectX(float scale,int index){return left+(i
  u32 unknown258,unknown25c,unknown260;
  int* value;
 };
-// Prefix only. The original string storage begins at +0x268; its capacity
-// and the complete allocation size have not been recovered.
+// Prefix only. Factory allocation is 0x368 for StaticText and 0x374 for CustomText.
+// String storage starts at +0x268; its declared capacity and the unknown fields remain unproved.
 typedef char WidgetPrefixSizeCheck[(sizeof(WidgetFragment)==0x268)?1:-1];
 extern "C" {
 void fn_80227880(float,float,float,float);
@@ -506,7 +506,7 @@ void fn_80219FE0(WidgetFragment*);
 
 extern "C" {void fn_80015A20(RotationMatrix*,const RotationVec*);void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);}
 typedef UIXform ChoicePoseNew;
-struct RotatingChoiceFieldsNew {char base[0x368];int resource;unsigned char mode;char pad36d[3];void* pose;};
+struct RotatingChoiceFieldsNew {char base[0x368];int resource;unsigned char mode;UIContext* pose;};
 struct RotatingChoiceDescriptorNew {u32 first;int flags,x,y,width,height,kind;float scale;char name[0x64];u32 option84,gap88,gap8c,option90,option94,gap98,gap9c,gapa0;float rx,ry,rz;};
 extern "C" {extern u32 lbl_8033F180[];extern const float lbl_805634F0,lbl_805634F4,lbl_805634F8;}
 static inline float ChoiceDotContractNew(float x,float y,float z,float a,float b,float c){return z*c+(x*a+y*b);}
@@ -874,7 +874,7 @@ int fn_802E4A1C(int);
 int fn_8021F06C(WidgetFragment* self,int key);
 }
 
-struct ScopedAssetPrefix {char base[0x368];int resource;char gap36c[4];UIContext* asset;};
+
 extern "C" {
 extern u32 lbl_8033F180[];
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy);
@@ -1719,11 +1719,11 @@ RotationVec input={(float)desc->x-(320.0f),(240.0f)-(float)desc->y,0.0f};ChoiceA
 float x,y,z;memcpy(&x,&desc->rx,4);memcpy(&y,&desc->ry,4);memcpy(&z,&desc->rz,4);
 if((0.0f)==x&&(0.0f)==y&&(0.0f)==z)f->pose=0;else{RotationVec rotation={(0.017453292f)*x,(0.017453292f)*y,(0.017453292f)*z};RotationMatrix matrix;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&pose.basis,&matrix,&pose.basis);input.x=-input.x;input.y=-input.y;ChoiceApplyOffsetNew(&pose,&input);f->pose=fn_8022EDE4(&pose,(1.0f));}return self;
 }
-WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;self->vtable=lbl_8033F180;if(f->asset){fn_8022EE98(f->asset);f->asset=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */ScopedAssetPrefix* f=(ScopedAssetPrefix*)self;if(f->asset){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80219660(self);if(f->asset)fn_8022EDB8();}
+WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;self->vtable=lbl_8033F180;if(f->pose){fn_8022EE98(f->pose);f->pose=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;if(f->pose){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->pose,context);fn_8022ED00(&scope);}fn_80219660(self);if(f->pose)fn_8022EDB8();}
 WidgetFragment* fn_8021B9AC(WidgetFragment* self,FormattedChoiceDescriptor* desc,PageTextList* provider,int column){fn_80218F80(self,(WidgetDesc*)desc);self->vtable=lbl_8033F0FC;fn_8021BA64(self,desc->width,desc->height,provider,column,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);return self;}
 void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;UIStyleInputFields spec={};spec.fontName=font;spec.field08=flags;spec.words0C[0]=value;spec.words0C[1]=second;spec.words0C[2]=third;spec.words0C[3]=horizontal;spec.words0C[4]=vertical;spec.words0C[7]=first;spec.words0C[8]=second;spec.words0C[9]=third;spec.words0C[10]=horizontal;spec.field38=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
-WidgetFragment* fn_8021BBA0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F0FC;OptionalResourcePrefix* f=(OptionalResourcePrefix*)self;fn_8022A8E4(f->resource);if(f->optional)fn_802C519C(f->optional);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+WidgetFragment* fn_8021BBA0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F0FC;PageTextPrefix* f=(PageTextPrefix*)self;fn_8022A8E4(f->font);if(f->image)fn_802C519C(f->image);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021BC20(WidgetFragment* self){PageTextPrefix* f=(PageTextPrefix*)self;int end;int x=self->left;int start=f->list->page*f->list->pageSize;int y=self->top;end=start+f->list->pageSize;if(f->list->count<end)end=f->list->count;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=fn_8022D850(f->list,i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
 void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(context);RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
 WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,const char* format,int height,float scale,float bias){fn_80219568(self,x,y,0,height,0,0);FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->value=value;self->vtable=lbl_8033EF68;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);return self;}
@@ -3392,3 +3392,13 @@ void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int hei
 void fn_8022A574(ModelResourcePrefix* self){if(self->resource!=-1)fn_802C744C(self->resource,(char*)self+8);}
 void fn_8022A594(){RegisterModuleTag__FP9ModuleTag(lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
 }
+
+// Allocation/offset guards for observed storage views, not recovered class declarations.
+typedef char CustomTextObservedAllocation[sizeof(RotatingChoiceFieldsNew)==0x374?1:-1];
+typedef char CustomTextResourceOffset[((unsigned long)&((RotatingChoiceFieldsNew*)0)->resource)==0x368?1:-1];
+typedef char CustomTextModeOffset[((unsigned long)&((RotatingChoiceFieldsNew*)0)->mode)==0x36c?1:-1];
+typedef char CustomTextContextOffset[((unsigned long)&((RotatingChoiceFieldsNew*)0)->pose)==0x370?1:-1];
+typedef char ColumnObservedAllocation[sizeof(PageTextPrefix)==0x264?1:-1];
+typedef char ColumnRowHeightOffset[((unsigned long)&((PageTextPrefix*)0)->rowHeight)==0x250?1:-1];
+typedef char ColumnListOffset[((unsigned long)&((PageTextPrefix*)0)->list)==0x254?1:-1];
+typedef char ResourceTextObservedAllocation[sizeof(ResourceTextPrefix)==0x2a0?1:-1];
