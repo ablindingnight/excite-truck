@@ -428,8 +428,8 @@ int fn_801E1048(int car) {
     int r;
     CarRec* rec;
     Wheel* ws;
-    int i;
     int j;
+    int i;
     Wheel* w;
     int hit;
     m = lbl_8055EA10;
