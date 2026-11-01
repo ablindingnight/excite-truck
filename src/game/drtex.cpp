@@ -508,15 +508,11 @@ void fn_802D8DCC(GXTexDesc* d) {
     Fix((u8**)&img->pal, img);
     Fix(&img->tex, img);
     Fix(&img->alpha, img);
-    switch (d->format) {
-    case 0x40:
-    case 0:
+    u32 fmt = d->format;
+    if (fmt == 0x40 || fmt == 0) {
         fn_802D81C4(d);
-        return;
-    case 0x41:
-    case 1:
+    } else if (fmt == 0x41 || fmt == 1) {
         fn_802D86BC(d);
-        return;
     }
 }
 
