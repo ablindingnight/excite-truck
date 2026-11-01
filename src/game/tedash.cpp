@@ -1004,17 +1004,16 @@ static Cmd2 lbl_8034A95C[3] = {
 };
 
 void fn_802B83CC(void) {
-    Cursor* c = &lbl_804BFF80;
-    if (!c->clicked[0]) {
+    if (!lbl_804BFF80.clicked[0]) {
         return;
     }
-    int d = c->s.x - c->prev.x;
+    int d = lbl_804BFF80.s.x - lbl_804BFF80.prev.x;
     if (!d) {
         return;
     }
     const Cmd2* m = lbl_8034A95C;
     for (u32 i = 0; i < 3; i++, m++) {
-        if ((m->name && strcmp(m->name, c->clicked) == 0) || (m->pred && m->pred(c->clicked))) {
+        if ((m->name && strcmp(m->name, lbl_804BFF80.clicked) == 0) || (m->pred && m->pred(lbl_804BFF80.clicked))) {
             if (lbl_8034A95C[i].fn(d, lbl_804BFF80.clicked)) {
                 lbl_804BFF80.prev = lbl_804BFF80.s;
             }
