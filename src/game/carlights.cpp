@@ -133,8 +133,8 @@ extern "C" {
 void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int unused, Vec off, f32 rad);
 
 void fn_80294970(void) {
-    int i;
     LightSet* s = lbl_804B42F0;
+    int i;
     for (i = 0; i < fn_80287B14(); s++, i++) {
         s->count = 0;
     }
