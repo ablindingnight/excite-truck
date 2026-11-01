@@ -613,7 +613,7 @@ struct TimedImageInputVector:RotationVec{inline TimedImageInputVector(int screen
 
 void fn_802272D4(WidgetFragment* source);
 void fn_802278F0(gArtSet*,float,float,float,float);
-void fn_80228010(void);  // placeholder (1032 bytes)
+void fn_80228010(WidgetFragment*);  // placeholder (1032 bytes)
 void fn_80228AEC(WidgetFragment*,float);
 }
 extern "C" {void fn_80015B20(RotationMatrix*,const RotationMatrix*,const RotationMatrix*);double sin(double);}
@@ -3148,7 +3148,7 @@ void fn_802272D4(WidgetFragment* source)
         secondPose->xf.translation.v[0] += translatedAfterRotation.x;
         secondPose->xf.translation.v[1] += translatedAfterRotation.y;
         secondPose->xf.translation.v[2] += translatedAfterRotation.z;
-        image->pose->alpha = (0.3f) + (lbl_80563560 * image->blend);
+        image->pose->alpha = (0.3f) + ((0.7f) * image->blend);
         fn_8022ED00(image->pose);
         fn_80231220(image->x,image->y,image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
         fn_80231220(image->x - (float) lbl_8055FB9C,image->y,image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
@@ -3179,7 +3179,94 @@ WidgetFragment* fn_80227D64(WidgetFragment* self,int destroy){if(self){self->vta
 void fn_80227DE8(WidgetFragment* self){float x,y;fn_80230C30(&x,&y,self->left,self->top);float width=(float)((WidgetDispatch*)self)->Slot78();fn_80227C9C(((ArtImage244Prefix*)self)->image,x,y,width,(float)(self->bottom-self->top));}
 WidgetFragment* fn_80227E84(WidgetFragment* self,void* first,WidgetDesc* desc,void* second){const char* strings=lbl_8033D878;fn_80218F80(self,desc);ThreeResourcePrefix* f=(ThreeResourcePrefix*)self;f->first=first;self->vtable=lbl_8033DF30;f->second=second;f->flag=*(const int*)((const char*)desc+0xb0)==1;f->resource=fn_80232578(strings+0x20c);if(!f->resource)fn_802E30C8(strings+0x408);f->image=fn_8023512C(strings+0x42c);if(!f->image)fn_802E30C8(strings+0x438);f->overlay=fn_8023512C(strings+0x3d4);if(!f->overlay)fn_802E30C8(strings+0x3e0);return self;}
 WidgetFragment* fn_80227F5C(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033DF30;TripleResourcePrefix* f=(TripleResourcePrefix*)self;if(f->resource)fn_802328D4(f->resource);f->resource=0;if(f->first)fn_80235380(f->first);f->first=0;if(f->second)fn_80235380(f->second);f->second=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80228010(void) {}
+// Observed tabs drawing view only; not a complete class or allocation-size claim.
+struct NameTabsPaintShared {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];unsigned char fixedOrigin;char gap245[3];NameList* list;const char* title;GTextFont* font;gArtSet* frame;gArtSet* panel;};
+static inline const char* NameTabsTitleShared(const NameTabsPaintShared* f,int selected){if(f->title)return f->title;return f->list->Name(selected);}
+// NonMatching: current clean draw remains26 original-address instruction words off.
+void fn_80228010(WidgetFragment* source) {
+ float bottom;
+ float firstWidth;
+ float lastWidth;
+ float frameHeight;
+ float negativeHeight;
+ float x;
+ float y;
+ float gap;
+ float half;
+ float zero;
+ float halfHeight;
+ float nextX;
+ float measured;
+ float width;
+ float rowY;
+ float textX;
+ float textY;
+ float left;
+ float available;
+ float panelY;
+ float leftWidth;
+ float rightWidth;
+ float capWidth;
+ float bodyWidth;
+ float titleX;
+ float bodyHeight;
+
+ NameTabsPaintShared* const f=(NameTabsPaintShared*)source;
+ if(!f->font || !f->frame || !f->panel)return;
+ firstWidth = fn_80235EF0(f->frame,0);
+ lastWidth = fn_80235EF0(f->frame,2);
+ frameHeight = fn_80235F64(f->frame,1);
+ int selected=f->list->Unk44();
+ negativeHeight = -frameHeight;
+ x = (-259.0f);
+ y = (207.0f);
+ if(!f->fixedOrigin){fn_80230C30(&x,&y,f->left,f->top);y-=negativeHeight;x-=(-32.0f);}
+ int count=f->list->Count();
+ nextX = (2.0f)+x;
+ bool multiple=count>1;
+ if(multiple){
+  half = (0.5f);
+  zero = (0.0f);
+  halfHeight = frameHeight*half;
+  gap = (9.0f)+lastWidth;
+  for(int index=0;index<count;index++){
+   bool active=index==selected;
+   const char* text=f->list->Name(index);
+   measured = fn_8023293C(f->font,text,(1.0f));
+   width = zero>measured?zero:measured;
+   rowY = y;
+   fn_802353F4(f->frame,0,nextX,rowY,(0.0f));
+   nextX+=firstWidth;
+   fn_802354A0(f->frame,1,-1U,nextX,rowY,(0.0f),width,frameHeight);
+   textX = nextX+(width*half);
+   textY = rowY-halfHeight;
+   unsigned int color=active?-1U:0xFF707070U;
+   fn_80232BA4(text,f->font,textX,textY,color,0x14,(1.0f),(0.0f),(1.0f));
+   nextX+=width;
+   fn_802353F4(f->frame,2,nextX,rowY,(0.0f));
+   nextX+=gap;
+  }
+ }
+ bottom=y+negativeHeight;
+ left = (-32.0f)+x;
+ int availableInteger=((WidgetDispatch*)source)->Slot78();
+ available = (float)availableInteger;
+ panelY = (y-frameHeight)-(7.0f);
+ leftWidth = fn_80235EF0(f->frame,3);
+ rightWidth = fn_80235EF0(f->frame,4);
+ capWidth = multiple?(leftWidth+rightWidth):(0.0f);
+ bodyWidth = available-capWidth;
+ bodyHeight = fn_80235F64(f->frame,5);
+ fn_80227880(left,y-frameHeight,available,(float)(f->bottom-f->top));
+ nextX=left;
+ if(multiple){fn_802353F4(f->frame,3,left,panelY,(0.0f));nextX=left+leftWidth;}
+ fn_802354A0(f->frame,5,-1U,nextX,panelY,(0.0f),bodyWidth,bodyHeight);
+ titleX = nextX+((0.5f)*bodyWidth);
+ const char* title=NameTabsTitleShared(f,selected);
+ fn_80232BA4(title,f->font,titleX,((5.0f)+panelY)-((0.5f)*bodyHeight),-1U,0x14,(1.2f),(0.0f),(1.0f));
+ if(multiple){nextX+=bodyWidth;fn_802353F4(f->frame,4,nextX,panelY,(0.0f));}
+ fn_802278F0(f->panel,left,bottom,available,(float)(f->bottom-f->top));
+}
 WidgetFragment* fn_80228418(WidgetFragment* self,WidgetDesc* desc,SwfAnim* animation){
  fn_80218F80(self,desc);SwfWidgetPrefix* fields=(SwfWidgetPrefix*)self;
  fields->animation=0;self->vtable=lbl_8033DE28;fields->owned=0;
