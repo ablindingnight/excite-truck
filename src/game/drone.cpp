@@ -532,6 +532,7 @@ void LinearDrone::Start(LinearPathData* d) {
 
 extern "C" void fn_801FEA28(LinearDrone* d);
 
+template <class T> static inline void SwSet3(T& v, f32 a, f32 b, f32 c) { v.x = a; v.y = b; v.z = c; }
 void LinearDrone::Advance(f32 dt) {
     const LinearKey* k = &path->keys[seg];
     const PVec* p0 = &k[0].pos;
@@ -579,14 +580,14 @@ void LinearDrone::Advance(f32 dt) {
         d2.z = p2->z - p1->z;
         f32 u = inv * PSVECDistance(&frame.pos, p0);
         PVec up;
-        up.x = ((const LinearKey*)p0)->up.x + u * (((const LinearKey*)p1)->up.x - ((const LinearKey*)p0)->up.x);
-        up.y = ((const LinearKey*)p0)->up.y + u * (((const LinearKey*)p1)->up.y - ((const LinearKey*)p0)->up.y);
-        up.z = ((const LinearKey*)p0)->up.z + u * (((const LinearKey*)p1)->up.z - ((const LinearKey*)p0)->up.z);
+        SwSet3(up, ((const LinearKey*)p0)->up.x + u * (((const LinearKey*)p1)->up.x - ((const LinearKey*)p0)->up.x), ((const LinearKey*)p0)->up.y + u * (((const LinearKey*)p1)->up.y - ((const LinearKey*)p0)->up.y), ((const LinearKey*)p0)->up.z + u * (((const LinearKey*)p1)->up.z - ((const LinearKey*)p0)->up.z));
         frame.x = up;
         PVec dir;
         dir.x = d.x + u * (d2.x - d.x);
-        dir.y = d.y + u * (d2.y - d.y);
-        dir.z = d.z + u * (d2.z - d.z);
+        f32 yv = d.y;
+        dir.y = yv + u * (d2.y - yv);
+        f32 zv = d.z;
+        dir.z = zv + u * (d2.z - zv);
         frame.z = dir;
         PSVECNormalize(&frame.z, &frame.z);
     } else {
