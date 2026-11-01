@@ -1339,9 +1339,10 @@ StatePacket* fn_80179824(void) {
     }
     lbl_8055E444 = p->nViews;
     for (i = 0; i < lbl_8055E440; i++) {
-        fn_802678E8(&p->cars[i], i);
-        p->cars[i].id = lbl_804305A0[i].id;
-        p->cars[i].count = lbl_804305A0[i].count;
+        CarStateOut* c = &p->cars[i];
+        fn_802678E8(c, i);
+        c->id = lbl_804305A0[i].id;
+        c->count = lbl_804305A0[i].count;
     }
     fn_80206550(lbl_8055E444);
     f32 now = lbl_8055E3C8;
