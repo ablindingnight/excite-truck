@@ -215,6 +215,11 @@ struct TPath {
     TVec2 pts[1];  // offset 0x8
 };
 
+struct CarState {
+    TVec3 basis[3];  // offset 0x0
+    TVec3 origin;    // offset 0x24
+};
+
 struct TCar {
     u8 pad0[0x10];
     u32 model;  // offset 0x10
@@ -222,8 +227,7 @@ struct TCar {
     TVec3 fwd;  // offset 0x18
     u8 pad24[0x30 - 0x24];
     TVec3 vel;  // offset 0x30
-    u8 pad3C[0x60 - 0x3C];
-    TVec3 pos;  // offset 0x60
+    CarState frame;  // offset 0x3C (origin = position, 0x60)
     u8 pad6C[0x118 - 0x6C];
     TVec3 v118;  // offset 0x118
 };
@@ -1280,7 +1284,7 @@ inline void Challenge::Collect(void) {
                             } else if (t->active) {
                                 t->crossed[i] = 0;
                             }
-                        } else if (PSVECSquareDistance(t, &car->pos) < radius * radius) {
+                        } else if (PSVECSquareDistance(t, &car->frame.origin) < radius * radius) {
                             got++;
                             t->active = 0;
                             snd->Play();
@@ -1612,11 +1616,6 @@ inline void ChalList::Start(void) {
     }
 }
 
-struct CarState {
-    TVec3 basis[3];  // offset 0x0
-    TVec3 origin;    // offset 0x24
-};
-
 inline void ChalList::Update(void) {
     int i;
     if (lbl_8055A0B4 <= fn_80161D50() && lbl_8055A0B8 > fn_80161D50() && !told) {
@@ -1631,7 +1630,7 @@ inline void ChalList::Update(void) {
         fn_8018ADBC(car, 1.0f);
         fn_8018ADB4(car, 0.0f);
         fn_8018ADA4(car, 0.0f);
-        m = *(CarState*)&car->fwd;
+        m = car->frame;
         m.origin.x = 0.0f;
         m.origin.y = 999.0f + 20.0f * (f32)i;
         m.origin.z = 0.0f;
@@ -1648,7 +1647,7 @@ inline void ChalList::Update(void) {
         pick = 0;
         done = 1;
         lbl_8055E304 = sel;
-        if (sel < lbl_8042FDEC.count) {
+        if (lbl_8055E304 < lbl_8042FDEC.count) {
             fn_80176780(0x8002, 0);
         } else {
             fn_8017691C();
