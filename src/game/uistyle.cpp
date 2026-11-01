@@ -286,7 +286,7 @@ void fn_8022AC1C(int style,const char* text,int x,int y,int* a,int* b,int* c,int
 }
 
 void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom) {
-        f32 innerBase,outerBase;
+        f32 outerBase;
     f32 width;
     UIStyleRecordFields* s=fn_8022CA2C(style);
     f32 left=x,top=y,right=x,bottom=y;
@@ -324,17 +324,16 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
             if(s->resource08) {
                 if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
                 else {
-                    innerBase=(f32)fn_80232B70(s->resource08);
-                    width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/innerBase);
+                    width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/(f32)fn_80232B70(s->resource08));
                 }
             }
             end=strchr(text,10);text=end;if(text)text++;
         }
         dx=0.0f;dy=0.0f;
         if(s->field38&2) dx=-width;
-        else if(s->field38&4) dx=(-width)*0.5f;
+        else if(s->field38&4) dx=(-width)/2.0f;
         if(s->field38&64) dy=-height;
-        else if(s->field38&16) dy=(-height)*0.5f;
+        else if(s->field38&16) dy=(-height)/2.0f;
         else if(s->field38&32) {
             dy=0.0f;
             if(s->resource04)dy=-(f32)fn_801E4B00(s->resource04);
