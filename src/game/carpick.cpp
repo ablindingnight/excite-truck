@@ -397,12 +397,13 @@ inline void fn_8025F46C(CarPickScreen* s) {
             unlocked = 1;
         }
     }
-    for (int k = 0; k < 6; k++) {
+    int k;
+    for (k = 0; k < 6; k++) {
         s->icons[k]->visible = 0;
     }
     if (unlocked) {
         CarChoice* car = s->all->Get(s->cur);
-        for (int k = 0; k < Min(car->CupCount(), 6); k++) {
+        for (k = 0; k < Min(car->CupCount(), 6); k++) {
             CupChoice* cup = car->Cup(k);
             CopyName(s->rows[k].name, 0x20, cup->Name());
             CopyName(s->rows[k].course, 0x20, cup->Course());
