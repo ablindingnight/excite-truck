@@ -457,6 +457,9 @@ public:
 
 static inline f32 ObAbsDiff(f32 a, f32 b) { return (f32)__fabs(a - b); }
 
+// The frame (pose matrix) a body's collision shapes hang off.
+static inline const RMtx* ObFrameOf(u8* p) { return (const RMtx*)(p + 0x3C); }
+
 static inline f32 ObMax(f32 a, f32 b) { return a > b ? a : b; }
 
 // A flattened sphere ('FLSR', 0x5C bytes): radius a across, b along its axis; bounded by the larger.
@@ -573,7 +576,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     switch (q->type) {
     case 0:
     case 17:
-        shape = new ("ball:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, origin);
+        shape = new ("ball:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, origin);
         corners = 1;
         break;
     case 1:
@@ -583,17 +586,17 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 z = q->c;
         fn_801A9798(p, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478, spring);
         if (q->type == 1) {
-            shape = new ("box1:box-volume") BoxShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
+            shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
             corners = 0;
         } else {
             f32 r = (z + (y + x)) / 3.0f / 2.0f;
-            shape = new ("box2:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
+            shape = new ("box2:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, r, origin);
             corners = 0;
         }
         break;
     }
     case 7:
-        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, (const RMtx*)(p + 0x3C), lbl_80562498, lbl_8056249C, q->a, q->b);
+        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, ObFrameOf(p), lbl_80562498, lbl_8056249C, q->a, q->b);
         U8(p, 0x221) = 1;
         corners = 0;
         break;
@@ -675,13 +678,13 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, RVec3(w, h * lbl_80562478, -w), spring);
         AddCornerV(p, RVec3(-w, h * lbl_80562478, w), spring);
         AddCornerV(p, RVec3(w, h * lbl_80562478, w), spring);
-        shape = new ("cone:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
+        shape = new ("cone:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, r, origin);
         corners = 0;
         break;
     }
     case 5:
         fn_801A9798(p, q->a, q->b * lbl_80562478, q->a, spring);
-        shape = new ("barrel:flat-volume") FlatSphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, q->b * lbl_80562478, origin);
+        shape = new ("barrel:flat-volume") FlatSphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, q->b * lbl_80562478, origin);
         corners = 0;
         break;
     case 3: {
@@ -695,7 +698,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, RVec3(x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478), spring);
         AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, -z * lbl_80562478), spring);
         AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, z * lbl_80562478), spring);
-        shape = new ("wedge:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
+        shape = new ("wedge:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, r, origin);
         corners = 0;
         break;
     }
@@ -749,7 +752,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 hx = (q->b - q->a) / 2.0f;
         f32 hy = (q->d - q->c) / 2.0f;
         RVec3 c(origin.x, lbl_805624C0 + q->c, q->f - lbl_805624C0);
-        CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, lbl_805624C0, c);
+        CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, lbl_805624C0, c);
         ((CollVolume*)p)->AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
@@ -768,7 +771,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     }
     case 13:
     case 18:
-        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, (const RMtx*)(p + 0x3C), lbl_805624CC * k, skin, q->a, q->b * lbl_80562478 - q->a);
+        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, ObFrameOf(p), lbl_805624CC * k, skin, q->a, q->b * lbl_80562478 - q->a);
         F32(p, 0x238) = lbl_805624D0 * q->c / q->a;
         AddCornerV(p, RVec3(q->a, q->a, lbl_8056247C), spring * lbl_80562478);
         corners = 1;
@@ -778,7 +781,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 y = q->b;
         f32 z = q->c;
         fn_801A9798(p, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478, spring);
-        shape = new ("box1:box-volume") BoxShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
+        shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
         F32(p, 0x228) = q->d;
         F32(p, 0x22C) = q->e;
         F32(p, 0x230) = q->f;
@@ -807,9 +810,9 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         }
         fn_802C6C20(m);
         if (ObAbsDiff(q->b, q->a) <= lbl_80558DC4[0]) {
-            shape = new ("obstacle:cornerball") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, *(const RVec3*)&q->c);
+            shape = new ("obstacle:cornerball") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, *(const RVec3*)&q->c);
         } else {
-            shape = new ("obstacle:cornerball") FlatSphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, q->b, *(const RVec3*)&q->c);
+            shape = new ("obstacle:cornerball") FlatSphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, q->b, *(const RVec3*)&q->c);
         }
         break;
     }
