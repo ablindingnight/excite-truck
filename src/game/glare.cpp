@@ -63,7 +63,7 @@ void operator delete[](void* p);
 struct BlurTex {
     BlurTex(int fw, int fh, u8 half) {
         mip = half;
-        if (half) {
+        if (mip) {
             w = fw / 2;
             h = fh / 2;
         } else {
