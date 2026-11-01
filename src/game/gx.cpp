@@ -719,10 +719,14 @@ void fn_802CF10C(u32 count) {
     DCInvalidateRange(buf, lbl_804C9760.w * lbl_804C9760.h * 2);
     if (lbl_8055FD50) {
         for (int y = (lbl_8055FD4C >> 2) & 1; y < lbl_804C9760.h; y += 2) {
-            for (int x = 0; x < lbl_804C9760.w; x++) {
-                int i = y * lbl_804C9760.w + x;
-                int d = buf[i] - 0x400;
-                int lo = buf[i] & 0xFF;
+            int i;
+            int d;
+            int x;
+            int lo;
+            for (x = 0; x < lbl_804C9760.w; x++) {
+                i = y * lbl_804C9760.w + x;
+                d = buf[i] - 0x400;
+                lo = buf[i] & 0xFF;
                 buf[i] = lo > d ? lo : d;
             }
         }
@@ -730,9 +734,10 @@ void fn_802CF10C(u32 count) {
     if (lbl_804C5710.active) {
         u16* dst = lbl_804C9760.cur;
         if (lbl_8055FD4C % 60 < 30) {
+            int y;
             int w = lbl_804C5710.w;
             int k = 0;
-            for (int y = 0; y < lbl_804C5710.h; y++) {
+            for (y = 0; y < lbl_804C5710.h; y++) {
                 u16* d = &dst[lbl_804C9760.w * (y + lbl_804C5710.y) + lbl_804C5710.x];
                 u16* s = &lbl_804C5710.data[k];
                 for (int x = 0; x < w; x++) {
@@ -741,11 +746,13 @@ void fn_802CF10C(u32 count) {
                 k += w;
             }
         } else {
-            u16 c = lbl_804C5710.data[0];
             int w = lbl_804C5710.w;
-            for (int y = 0; y < lbl_804C5710.h; y++) {
-                u16* d = &dst[lbl_804C9760.w * (y + lbl_804C5710.y) + lbl_804C5710.x];
-                for (int x = 0; x < w; x++) {
+            int y;
+            u16 c = lbl_804C5710.data[0];
+            for (y = 0; y < lbl_804C5710.h; y++) {
+                int x;
+                u16* d = &dst[lbl_804C9760.w * (lbl_804C5710.y + y) + lbl_804C5710.x];
+                for (x = 0; x < w; x++) {
                     d[x] = c;
                 }
             }
