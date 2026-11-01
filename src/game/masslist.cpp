@@ -84,9 +84,10 @@ CxEntry* lbl_8055E7A4;      // per car
 u8 lbl_8055E7A8;
 MVec4 lbl_80436D48[0x100];
 
+// A car setup block (carsetup.cpp CarSetup, 0x138 bytes): defaulted by fn_801BDA70, then applied to the car.
 struct ContactOut {
     ContactOut(void) {}
-    u8 data[0x158];
+    u8 data[0x138];
 };
 
 extern "C" {
@@ -95,10 +96,10 @@ double cos(double x);
 double sin(double x);
 double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
-void fn_801BDA70(void);
+void fn_801BDA70(ContactOut* out);
 void fn_801BDA74(int car, ContactOut* out);
 int fn_801E9E78(void* h, MVec3* p, MVec3* n);
-void fn_80279D40(void);
+void fn_80279D40(ContactOut* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, int c);
@@ -193,14 +194,14 @@ void fn_801BD808(void) {
     m->rot[0] = MVec4(1.0f, 0.0f, 0.0f);
     m->rot[1] = MVec4(0.0f, 1.0f, 0.0f);
     m->rot[2] = MVec4(0.0f, 0.0f, 1.0f);
-    c->v30 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    fn_801BDA70();
+    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v30 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    fn_801BDA70(&out);
     fn_801BDA74(car, &out);
 }
 
-void fn_801BDA70(void) { fn_80279D40(); }
+void fn_801BDA70(ContactOut* out) { fn_80279D40(out); }
 
 // Contact gathering (placeholders).
 void fn_801BDA74(int car, ContactOut* out) {}
