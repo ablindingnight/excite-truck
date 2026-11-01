@@ -1257,10 +1257,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
         f32 k = Clamp01F((F32(d, 0x26C) - st) / ((lbl_805621F8 + st) - st));
         F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + k * lbl_805621FC);
     }
-    int chase = 0;
-    if ((lbl_8055D430 & 1) && (lbl_8055D430 & 0x20)) {
-        chase = 1;
-    }
+    int chase = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x20);
     if (chase) {
         s32 lead = S32(d, 0x2C4);
         if (lead != -1) {
@@ -2570,10 +2567,7 @@ void fn_80198530(u8* d) {
         }
         if (on && F32(d, 0x26C) - F32(d, 0x1FC) > wait) {
             int tap = fn_80167758();
-            int go = 0;
-            if (fn_80167768(F32(d, 0x240)) && (!tap || F32(d, 0x26C) - F32(d, 0x204) > 0.016683351f)) {
-                go = 1;
-            }
+            int go = fn_80167768(F32(d, 0x240)) && (!tap || F32(d, 0x26C) - F32(d, 0x204) > 0.016683351f);
             int heat = F32(CAR(d), 0x25A0) >= 0.55f;
             if (go) {
                 if (!heat || late) {
