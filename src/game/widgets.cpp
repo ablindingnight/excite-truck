@@ -3274,7 +3274,7 @@ void fn_80228010(WidgetFragment* source) {
  negativeHeight = -frameHeight;
  x = (-259.0f);
  y = (207.0f);
- if(!f->fixedOrigin){fn_80230C30(&x,&y,f->left,f->top);y-=negativeHeight;x-=(-32.0f);}
+ if(!f->fixedOrigin){fn_80230C30(&x,&y,f->left,f->top);x-=(-32.0f);y-=negativeHeight;}
  int count=f->list->Count();
  nextX = (2.0f)+x;
  bool multiple=count>1;
