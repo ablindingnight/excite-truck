@@ -202,8 +202,7 @@ void fn_8013C428(LineInfo* li) {
     int i;
     for (i = 0; i < lbl_8042F8C8.count; i++) {
         if (lbl_8042F8C8.e[i].info == li) {
-            LineEntry* e = &lbl_8042F8C8.e[i];
-            if (--e->refs == 0) {
+            if (--lbl_8042F8C8.e[i].refs == 0) {
                 if (li->extra) {
                     fn_80128658(li->extra);
                 }
