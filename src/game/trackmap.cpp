@@ -352,9 +352,9 @@ TrackMap* fn_80019C68(int player) {
             map->texSize = node->GetFloat("tex_size");
             ValPoint origin = node->GetPoint("origin");
             map->origin.x = origin.x;
-            map->origin.x = origin.x - map->texSize / 2;
-            f32 originY = origin.y;
-            map->origin.y = originY - map->texSize / 2;
+            map->origin.y = origin.y;
+            map->origin.x = map->origin.x - map->texSize / 2;
+            map->origin.y = map->origin.y - map->texSize / 2;
             map->minSpeed = node->GetFloat("min_speed", 70.0f);
             map->maxSpeed = node->GetFloat("max_speed", 120.0f);
             map->minWidth = node->GetFloat("min_wid", map->width / 4.5f);
