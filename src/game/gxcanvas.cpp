@@ -799,10 +799,10 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
     if (frame >= st->frames) {
         return;
     }
-    int oy = y - st->oy;
     int ox = x - st->ox;
-    int rowEnd = st->h < c->cy1 - oy ? st->h : c->cy1 - oy;
+    int oy = y - st->oy;
     int row = c->cy0 - oy < 0 ? 0 : c->cy0 - oy;
+    int rowEnd = st->h < c->cy1 - oy ? st->h : c->cy1 - oy;
     int colEnd = st->w < c->cx1 - ox ? st->w : c->cx1 - ox;
     u16* lut;
     int colStart = c->cx0 - ox < 0 ? 0 : c->cx0 - ox;
