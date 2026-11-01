@@ -361,7 +361,7 @@ struct VisTests {
 struct PointLight {
     PointLight(void) {}
     V3 pos;         // offset 0x0
-    u8 color[4];    // offset 0xC
+    GXColor color;  // offset 0xC
     f32 radius;     // offset 0x10
 };
 
@@ -1615,8 +1615,8 @@ void fn_802D1678(void) {
     fn_802D6C68();
 }
 
-void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, const u8* color, f32 radius) {
-    GXInitLightColor(l, *(const GXColor*)color);
+void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32 radius) {
+    GXInitLightColor(l, color);
     V3 d;
     d.x = pos->x + cam->x;
     d.y = pos->y + cam->y;
@@ -1631,6 +1631,15 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, const u8* color, f
     GXInitLightAttn(l, 0.0f, 0.0f, 1.0f, radius / 2.0f, 0.0f, 1.0f - radius / 2.0f);
 }
 
+static inline GXColor ScaleColor(const GXColor& c, f32 s) {
+    GXColor out;
+    out.r = (int)(s * c.r);
+    out.g = (int)(s * c.g);
+    out.b = (int)(s * c.b);
+    out.a = c.a;
+    return out;
+}
+
 void fn_802D18E8(void) {
     V3 d;
     d.x = lbl_804C5690.pos.x - lbl_804C56C0.pos.x;
@@ -1640,36 +1649,26 @@ void fn_802D18E8(void) {
     mag = mag > 0.001f ? mag : 0.001f;
     f32 inv = 1.0f / mag;
     lbl_8055FDCC = 0;
+    d.x *= inv;
     d.y *= inv;
     d.z *= inv;
-    d.x *= inv;
     if (lbl_8055FDC8 > 0) {
         PointLight* p = lbl_804CA088;
         GXLightObj* o = lbl_804CA118;
         for (int i = 0; i < lbl_8055FDC8; i++) {
-            u8 c[4];
-            c[0] = p->color[0];
-            c[1] = p->color[1];
-            c[2] = p->color[2];
-            c[3] = p->color[3];
-            fn_802D17BC(o, &d, &p->pos, c, p->radius);
+            fn_802D17BC(o, &d, &p->pos, p->color, p->radius);
             p++;
             o++;
         }
         lbl_8055FDCC = lbl_8055FDC8;
     } else {
-        u8 c[4];
-        f32 curScale = lbl_804C97D0.scale;
-        c[0] = (int)(curScale * lbl_804C97D0.amb.r);
-        c[1] = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.g);
-        c[2] = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.b);
-        c[3] = lbl_804C97D0.amb.a;
-        fn_802D17BC(lbl_804CA118, &d, &lbl_804C97D0.dir, c, 64.0f);
+        fn_802D17BC(lbl_804CA118, &d, &lbl_804C97D0.dir, ScaleColor(lbl_804C97D0.amb, lbl_804C97D0.scale), 64.0f);
         lbl_8055FDCC++;
     }
     u32 mask = 0;
+    int i;
     GXLightObj* o = lbl_804CA118;
-    for (int i = 0; i < lbl_8055FDCC; i++) {
+    for (i = 0; i < lbl_8055FDCC; i++) {
         u32 bit = 2 << i;
         GXLoadLightObjImm(o, bit);
         mask |= bit;
