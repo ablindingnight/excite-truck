@@ -1,4 +1,5 @@
 #include "game/gart.h"
+#include "game/gxcanvas.h"
 #include "game/image.h"
 #include "game/uicontext.h"
 #include "game/gtext.h"
@@ -107,7 +108,7 @@ void fn_80219044(WidgetFragment* self);
 void fn_80219358(WidgetFragment* self,float duration);
 void fn_802193C8(WidgetFragment* self,float duration);
 
-void* fn_802C3034(void*);
+
 void fn_8022B91C(int,int,int,const char*,u32);
 void fn_8022BAD0(int,int,int,int,int,int,const char*,u32,unsigned char,float);
 void fn_8022AC1C(int,const char*,int,int,int*,int*,int*,int*);
@@ -1400,7 +1401,7 @@ WidgetFragment* fn_80219568(WidgetFragment* self,int x,int y,int width,int heigh
  return self;
 }
 void fn_802195DC(WidgetFragment* self,void* context){
- fn_802C3034(context);int frame=((WidgetDispatch*)self)->Slot84();const char* text=((WidgetDispatch*)self)->Slot88();
+ fn_802C3034(reinterpret_cast<gxCanvas*>(context));int frame=((WidgetDispatch*)self)->Slot84();const char* text=((WidgetDispatch*)self)->Slot88();
  fn_8022B91C(self->height,self->x,self->y,text,frame);
 }
 int fn_80219658(WidgetFragment*){return 0;}
@@ -1639,7 +1640,7 @@ WidgetFragment* fn_8021AC24(WidgetFragment* self,int x,int y,void* handle){
  TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;fields->handle=handle;fields->active=0;fields->elapsed=(0.0f);fields->period=(0.3f);return self;
 }
 int fn_8021ACC0(WidgetFragment* self,void* context){
- fn_802C3034(context);TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;
+ fn_802C3034(reinterpret_cast<gxCanvas*>(context));TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;
  fn_802C51AC(fields->handle);int result=fn_802C51AC(fields->handle);
  if(result>0)result=fn_802C51AC(fields->handle);return result;
 }
@@ -1712,7 +1713,7 @@ WidgetFragment* fn_8021B2B0(WidgetFragment* self,int x,int y,const char* label,i
 }
 void fn_8021B32C(WidgetFragment* self){fn_802192AC(self);CaptionBufferPrefix* f=(CaptionBufferPrefix*)self;const char* label=f->label;if(strcmp(label,f->text)!=0){strcpy(f->text,label);fn_80219718(self);WidgetMarkDirty(self);}}
 int fn_8021B3A0(WidgetFragment* self){int* value=self->value;if(value)return *value;return 0;}
-void fn_8021B3BC(WidgetFragment* self,void* context){fn_802C3034(context);fn_802C3424(self->x,self->y,self->width,self->height,(int)self->label);}
+void fn_8021B3BC(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802C3424(self->x,self->y,self->width,self->height,(int)self->label);}
 WidgetFragment* fn_8021B404(WidgetFragment* self,int destroy){
  if(self){if(self)fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}
  return self;
@@ -1732,7 +1733,7 @@ WidgetFragment* fn_8021B9AC(WidgetFragment* self,FormattedChoiceDescriptor* desc
 void fn_8021BA64(WidgetFragment* self,int width,int height,PageTextList* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;UIStyleInputFields spec={};spec.fontName=font;spec.field08=flags;spec.words0C[0]=value;spec.words0C[1]=second;spec.words0C[2]=third;spec.words0C[3]=horizontal;spec.words0C[4]=vertical;spec.words0C[7]=first;spec.words0C[8]=second;spec.words0C[9]=third;spec.words0C[10]=horizontal;spec.field38=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,lbl_8055B878)-23)/2;fn_80219440(self,0,&list->version,4);fn_8022D924(list,height/rowHeight);}
 WidgetFragment* fn_8021BBA0(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033F0FC;PageTextPrefix* f=(PageTextPrefix*)self;fn_8022A8E4(f->font);if(f->image)fn_802C519C(f->image);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_8021BC20(WidgetFragment* self){PageTextPrefix* f=(PageTextPrefix*)self;int end;int x=self->left;int start=f->list->page*f->list->pageSize;int y=self->top;end=start+f->list->pageSize;if(f->list->count<end)end=f->list->count;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=fn_8022D850(f->list,i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
-void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(context);RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
+void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
 WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,const char* format,int height,float scale,float bias){fn_80219568(self,x,y,0,height,0,0);FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->value=value;self->vtable=lbl_8033EF68;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);return self;}
 void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);fn_80130568(f->text);fn_80219718(self);WidgetMarkDirty(self);}
 void fn_8021BEBC(WidgetFragment* self,int,void*){fn_8021BE48(self);}
@@ -1766,7 +1767,7 @@ WidgetFragment* fn_8021CAD4(WidgetFragment* self,int destroy){
 }
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
-void fn_8021CB4C(WidgetFragment* self,void* context){fn_802C3034(context);GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
+void fn_8021CB4C(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
 void fn_8021CBBC(WidgetFragment* self){GaugeValuePrefix* f=(GaugeValuePrefix*)self;float x=(float)(self->left-lbl_8055FB9C/2);float y=CenteredGaugeY349(lbl_8055FBA0,self->top);fn_802C5310(f->background,0,x,y-(8.0f),(0.0f));float value=f->target->Value();int width=((WidgetDispatch*)self)->Slot78();int pixel=(int)(value*(float)(width-f->inset));pixel+=self->left;fn_80230C30(&x,&y,pixel,self->top+3);fn_802C5310(f->marker,0,x,y,(0.0f));}
 void fn_8021CD04(WidgetFragment* self,int x,int y){
  ProviderWidgetPrefix* fields=(ProviderWidgetPrefix*)self;
@@ -1879,7 +1880,7 @@ void fn_8021D378(WidgetFragment *self) {
     }
 }
 void fn_8021D568(WidgetFragment* self,void* context){
- fn_802C3034(context);ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
+ fn_802C3034(reinterpret_cast<gxCanvas*>(context));ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
  if(fields->focus&&fields->token==*fields->focus){
   int x=self->left,y=self->top;int width=((WidgetDispatch*)self)->Slot78();
   fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBC0);
@@ -2066,7 +2067,7 @@ void fn_8021E2A0(WidgetFragment* self){
 }
 void fn_8021E3BC(WidgetFragment* self,void* context){
  int drawY;int drawX;int color,index;RowListPrefix* fields=(RowListPrefix*)self;int start=0;if(fields->view)start=fields->view->start;
- fn_802192A0(self,context);fn_802C3034(context);int flags=0;color=lbl_8055FBDC;
+ fn_802192A0(self,context);fn_802C3034(reinterpret_cast<gxCanvas*>(context));int flags=0;color=lbl_8055FBDC;
  for(int row=0;row<fields->rows&&(index=row+start,fn_8022D3F8(fields->list,index,&flags)!=0);++row){
   int x,y;bool selected=*fields->selected==index;
   if(selected){x=self->left;y=self->top;int width=x+((WidgetDispatch*)self)->Slot78();
@@ -2108,7 +2109,7 @@ void fn_8021E7D4(WidgetFragment* self){
 WidgetFragment* fn_8021E884(WidgetFragment* self,int destroy){
  if(self){fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;
 }
-void fn_8021E8DC(WidgetFragment* self,void* context){DropdownRowPrefix* f=(DropdownRowPrefix*)self;if(f->list.active){((WidgetDispatch*)self)->Slot1c(self->left,self->bottom+3);int height=self->bottom-self->top;int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,f->width,f->height);fn_8021E3BC(self,context);fn_80219284(self,width,height);((WidgetDispatch*)self)->Slot1c(self->left,self->top*2-3-self->bottom);}fn_802C3034(context);fn_802192A0(self,context);int y,x;x=self->left;y=self->top;int width=((WidgetDispatch*)self)->Slot78();fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBDC);const char* label=fn_8022D3F8(f->list.list,*f->list.selected,0);char buffer[80];sprintf(buffer,lbl_8055B884,f->list.columns,label?label:lbl_8055B88C);fn_802C4F58(self->left+1,self->top+1,buffer,lbl_8055FBC0);}
+void fn_8021E8DC(WidgetFragment* self,void* context){DropdownRowPrefix* f=(DropdownRowPrefix*)self;if(f->list.active){((WidgetDispatch*)self)->Slot1c(self->left,self->bottom+3);int height=self->bottom-self->top;int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,f->width,f->height);fn_8021E3BC(self,context);fn_80219284(self,width,height);((WidgetDispatch*)self)->Slot1c(self->left,self->top*2-3-self->bottom);}fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802192A0(self,context);int y,x;x=self->left;y=self->top;int width=((WidgetDispatch*)self)->Slot78();fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBDC);const char* label=fn_8022D3F8(f->list.list,*f->list.selected,0);char buffer[80];sprintf(buffer,lbl_8055B884,f->list.columns,label?label:lbl_8055B88C);fn_802C4F58(self->left+1,self->top+1,buffer,lbl_8055FBC0);}
 WidgetFragment* fn_8021EA64(WidgetFragment* self,int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear){
  fn_80218F34(self,x,y,x+width,y+height+3,0);self->vtable=lbl_8033E988;
  if(clear)buffer[0]=0;TextEntryPrefix* fields=(TextEntryPrefix*)self;
@@ -2136,7 +2137,7 @@ void fn_8021EC1C(WidgetFragment *self, void *context) {TextPaintReceiverNew* fie
     int imageLeft;
     int finalLeft;
 
-    fn_802C3034(context);
+    fn_802C3034(reinterpret_cast<gxCanvas*>(context));
     initialLeft = fields->left;
     initialTop = fields->top;
     fn_802C2FC8(context, initialLeft, initialTop, initialLeft + ((WidgetDispatch*)self)->Slot78(), fields->bottom);
@@ -2267,7 +2268,7 @@ float snapped=(float)(int)((0.005f)+(float)steps*(raw-f->minimum)/(f->maximum-f-
   }
 }
 int fn_8021FBC4(WidgetFragment* self,int x,int y){HitAreaPrefix* f=(HitAreaPrefix*)self;int result=0,insideY=0,insideX=0;if(x>=f->x-20&&x<f->x+f->width+20)insideX=1;if(insideX&&y>=f->y-20)insideY=1;if(insideY&&y<f->y+f->height+20)result=1;return result;}
-void fn_8021FC40(WidgetFragment* self,void* context){fn_802C3034(context);fn_802192A0(self,context);FloatSliderPrefix* f=(FloatSliderPrefix*)self;int top,left;int span=((WidgetDispatch*)self)->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
+void fn_8021FC40(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802192A0(self,context);FloatSliderPrefix* f=(FloatSliderPrefix*)self;int top,left;int span=((WidgetDispatch*)self)->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
 void fn_8021FD68(WidgetFragment* self){FloatSliderPrefix* f=(FloatSliderPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;float width=(float)((WidgetDispatch*)self)->Slot78();float height=(float)(self->bottom-self->top);float x=(float)(self->left-lbl_8055FB9C/2),y=(float)(lbl_8055FBA0/2-self->top);fn_802C5320(f->background,selected,x,y,(0.0f),width,height);fn_802C5334(f->marker,selected,x,y,(0.0f),(float)fill,height,(0.0f),(0.0f),(float)fill/width,(1.0f));}
 WidgetFragment* fn_8021FF34(WidgetFragment* self,WidgetDesc* desc,float* value,int divisions,float minimum,float maximum){fn_80218F34(self,desc->x,desc->y,desc->x+desc->dx,desc->y+desc->dy,0);self->vtable=lbl_8033E7F4;SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;f->value=value;f->minimum=minimum;f->maximum=maximum;f->step=(maximum-minimum)/(float)divisions;f->image=gxGetImage(lbl_8033D9BC);f->focus=0;f->token=fn_80228F40(desc->x,desc->y);f->nextTime=fn_8023659C()-(0.3f);f->previousTime=f->nextTime;return self;}
 WidgetFragment* fn_8022003C(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E7F4;fn_802C519C((void*)self->label);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
@@ -2335,9 +2336,9 @@ int fn_80220948(WidgetFragment* self,int key){SliderFullPrefix* f=(SliderFullPre
 void fn_80220A50(WidgetFragment* self,int x,int unused){SliderFullPrefix* f=(SliderFullPrefix*)self;f->dragging=1;int left=self->left;int minimum=f->minimum;int track=((WidgetDispatch*)self)->Slot78()-10;int value=minimum+(f->maximum-minimum)*(x-left-5)/track;if(value<minimum)value=minimum;value=ClampToExclusiveMaximum(f->maximum,value);*f->value=value;}
 void fn_80220AFC(WidgetFragment* self,int x,int y){((RowInputDispatch*)self)->Slot4c(x,y);((PrefixFlag258*)self)->value=0;}
 void fn_80220B3C(WidgetFragment* self,int x,int y){if(((PrefixFlag258*)self)->value)((PointerEventDispatch*)self)->Slot3c(x,y);}
-void fn_80220B5C(WidgetFragment* self,void* context){int top,left;fn_802C3034(context);SliderFullPrefix* f=(SliderFullPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
+void fn_80220B5C(WidgetFragment* self,void* context){int top,left;fn_802C3034(reinterpret_cast<gxCanvas*>(context));SliderFullPrefix* f=(SliderFullPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
 void fn_80220C54(WidgetFragment* self){float height;SliderFullPrefix* f=(SliderFullPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;float x=(float)(self->left-lbl_8055FB9C/2);float y=(float)(lbl_8055FBA0/2-self->top);height=(float)fn_802C5220(f->background);fn_802C5320(f->background,selected,x,y,(0.0f),(float)((WidgetDispatch*)self)->Slot78(),height);height=(float)fn_802C5220(f->marker);fn_802C5320(f->marker,selected,(5.0f)+x,y-(5.0f),(0.0f),(float)fill,height);}
-void fn_80220E08(WidgetFragment* self,void* context){fn_802C3034(context);fn_802C40B8(((CanvasWidgetPrefix*)self)->canvas,self->left,self->top);}
+void fn_80220E08(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802C40B8(((CanvasWidgetPrefix*)self)->canvas,self->left,self->top);}
 WidgetFragment* fn_80220E48(WidgetFragment* self,int x,int y,int width,int height,void* view,int vertical){const char* strings=lbl_8033D878;fn_80218F34(self,x,y,x+width,y+height,0);self->vtable=lbl_8033E770;ScrollbarPrefix* f=(ScrollbarPrefix*)self;if(!vertical){f->track=gxGetImage(strings+0x150);f->marker=gxGetImage(strings+0x15c);}else{f->track=gxGetImage(strings+0x168);f->marker=gxGetImage(strings+0x174);}((WidgetDispatch*)self)->Slot1c(self->left,self->top);if(!vertical){int width=fn_802C51C0(f->track);fn_80219284(self,width,self->bottom-self->top);}else{int height=fn_802C5220(f->track);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}f->view=view;f->vertical=vertical;fn_80219440(self,0,view,12);f->dragging=0;return self;}
 void fn_80220F90(WidgetFragment* self,int x,int y){
  DragViewportPrefix* f=(DragViewportPrefix*)self;f->dragging=1;float ratio;
@@ -2377,7 +2378,7 @@ void fn_80221544(WidgetFragment *self, void *context)
 
   DragViewportPrefix *f = (DragViewportPrefix *) self;
 
-  fn_802C3034(context);
+  fn_802C3034(reinterpret_cast<gxCanvas*>(context));
 
   if (f->direction == 0)
   {
@@ -3254,8 +3255,8 @@ int fn_80228D90(WidgetFragment* self,int){return ((AdapterPrefix*)self)->target-
 int fn_80228DA4(WidgetFragment*){return 0;}
 int fn_80228DAC(WidgetFragment* self){return ((AdapterPrefix*)self)->target->State();}
 void fn_80228DC0(WidgetFragment*){}
-void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(context);ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
-void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){fn_802C3034(context);ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
+void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
+void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
 int fn_80228F40(int x,int y){return x+1000*y;}
 WidgetFragment* fn_80228F4C(WidgetFragment* self,int destroy){if(self){fn_80223208(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy){if(self){fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}

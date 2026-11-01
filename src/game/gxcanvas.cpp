@@ -4,6 +4,7 @@
 // RLE-encoded "STMP" stamps drawn through a 256-entry palette. Colours are passed as a pair of 16-bit
 // values (565 in the high half, 555 in the low half). Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gxcanvas.h"
 
 extern "C" {
 void* fn_801284E8(const char* tag, s32 size);  // MemAlloc
