@@ -329,8 +329,8 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
 }
 
 GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
-    int bits = -1;
     int fmt = -1;
+    int bits = -1;
     switch (d->format) {
     case 0x48:  // I4
         bits = 4;
