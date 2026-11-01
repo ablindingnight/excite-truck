@@ -745,9 +745,12 @@ int fn_80280C00(void) {
 }
 
 // Next event in the same state (done/not done) as the current one.
+// Index of a cup bar in the current path's list (the bar is held as an s32 handle).
+static inline int BarIndex(const s32& bar) { return lbl_804B3048.Find((u8*)bar); }
+
 int fn_80280DC8(void) {
     if (lbl_8055F688) {
-        int i = lbl_804B3048.Find((u8*)lbl_8055F688);
+        int i = BarIndex(lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
             u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
@@ -772,7 +775,7 @@ int fn_80280DC8(void) {
 // Previous event in the same state as the current one.
 int fn_80280F7C(void) {
     if (lbl_8055F688) {
-        int i = lbl_804B3048.Find((u8*)lbl_8055F688);
+        int i = BarIndex(lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
             u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
