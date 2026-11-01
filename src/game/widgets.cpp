@@ -579,7 +579,7 @@ extern u32 lbl_8033E350[];extern int lbl_8055CFF0,lbl_8055CFF4;extern const floa
 int fn_802C9A58();
 inline int Round355(float value){return (int)(value<(0.0f)?value-(0.5f):(0.5f)+value);}
 WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name);  // placeholder (700 bytes)
-void fn_80224E74(void);  // placeholder (1736 bytes)
+void fn_80224E74(WidgetFragment*);  // placeholder (1736 bytes)
 struct RollingRow;
 #include "game/uilists.h"
 typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
@@ -2834,7 +2834,38 @@ int fn_80224B0C(WidgetFragment* self,int key){int* focus=(int*)self->unknown258;
 WidgetFragment* fn_80224B54(WidgetFragment* self,int context,WidgetDesc* desc){fn_80218F80(self,desc);self->vtable=lbl_8033E1C4;ResourceTextPrefix* f=(ResourceTextPrefix*)self;strcpy(f->text,lbl_8055B88C);f->localized=0;switch(desc->fielda0){case 0:f->localized=1;strcpy(f->text,lbl_8055B88C);break;case 1:{int second=fn_80129D90(1,1,8);int first=fn_80129D90(1,0x42,0x45);sprintf(f->text,lbl_8033DAD8,first,second);break;}}if(context)f->context=context;else f->context=(int)fn_80131234((const char*)desc+0x20);f->resource=fn_80232578((const char*)desc+0x40);f->style=desc->style90;f->flags=desc->flags;f->scale=desc->scale/(float)fn_80232B70(f->resource);f->owned=0;f->asset=0;float x,y,z;memcpy(&x,(const char*)desc+0xa4,4);memcpy(&y,(const char*)desc+0xa8,4);memcpy(&z,(const char*)desc+0xac,4);if(!(ObservedAbsDecision(x)<=lbl_80558DC4[0]&&ObservedAbsDecision(y)<=lbl_80558DC4[0]&&ObservedAbsDecision(z)<=lbl_80558DC4[0]))fn_80224DDC(self,x,y,z);return self;}
 WidgetFragment* fn_80224D40(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E1C4;AssetFormatPrefix* f=(AssetFormatPrefix*)self;if(f->owned)fn_8022EE98(f->asset);fn_802328D4(f->resource);f->resource=0;f->first=0;strcpy(f->text,lbl_8055B88C);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80224DDC(WidgetFragment* self,float x,float y,float z){ResourceTextPrefix* f=(ResourceTextPrefix*)self;f->owned=1;f->asset=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=&f->asset->xf.basis;fn_80015A20(&matrix,&rotation);Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(target,&matrix,target);}
-void fn_80224E74(void) {}
+extern "C" void fn_80232C50(const char*,GTextFont*,unsigned int,int,float,float,float,float,float,float);
+static inline const char* NextResourceTextGlyphNew(const char* p){const unsigned char* u=(const unsigned char*)p;if((*u&0xf0)==0xe0)return p+3;if((*u&0xe0)==0xc0)return p+2;return p+1;}
+// NonMatching: text origin uses F24 instead of the original F25 (four instruction words).
+void fn_80224E74(WidgetFragment* self){
+
+
+ ResourceTextPrefix* f=(ResourceTextPrefix*)self;char firstPass[512];char output[512];FullDrawStatePrefix scope;
+ if(f->owned){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);}
+ float width=(float)((WidgetDispatch*)self)->Slot78();int top=self->top;float height=(float)(self->bottom-top);const char* text=(const char*)f->context;strlen((const char*)text);
+ float left=(float)self->left;double originY=(float)top;
+ if(f->flags&16){int lines=0;while(*text){++lines;const char* begin=text;memset(firstPass,0,512);char* destination=firstPass;
+  do{const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)*destination++=*text++;}while(f->scale*fn_8023293C(f->resource,firstPass,(1.0f))<width&&*text&&*text!='\n');
+  const char* end=text;if(*text){while(*text!=' '&&*text!='\n'&&text>begin)--text;}if(text<=begin)text=end;if(*text==' '||*text=='\n')++text;
+ }
+ originY=(float)originY+(0.5f)*(float)(self->bottom-self->top);int lineHeight=fn_80232B70(f->resource);float fontHeight=(float)lineHeight;float scaledLineCount=((0.5f)*(float)(lines-1))*f->scale;originY=(float)originY-scaledLineCount*fontHeight;
+ }
+ int line=0;text=(const char*)f->context;
+ while(*text){const char* begin=text;memset(output,0,512);int size=0;
+  while(f->scale*fn_8023293C(f->resource,output,(1.0f))<width&&*text&&*text!='\n'){
+   const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)output[size++]=(char)*text++;
+  }
+  const char* end=text;int originalSize=size;if(*text){while(*text!=' '&&text!=begin&&*text!='\n'){--text;--size;}}if(text==begin){text=end;size=originalSize;}output[size]=0;if(*text==' '||*text=='\n')++text;
+  for(int i=0;i<size;i++){if(output[i]=='^')output[i]=' ';}
+  int screenHeight=lbl_8055FBA0;float projectedX=(float)lbl_8055FB9C/(-2.0f);float x=projectedX+left;int h=fn_80232B70(f->resource);float metric=f->scale*(float)h;float y=(float)line++*metric;y=(float)originY+y;y=(((float)screenHeight/2.0f))-y;
+  if(!f->localized&&y<((float)screenHeight/2.0f)-(height+(float)self->top)){fn_80232BA4(f->text,f->resource,x+width,y,f->style,10,f->scale-(0.1f),(0.0f),(1.0f));goto finish;}
+  int flags=f->flags;if(flags&4)x+=(width/2.0f);
+  if(flags&2)fn_80232C50(output,f->resource,f->style,9,x,y,f->scale,width,(0.0f),(1.0f));
+  else fn_80232BA4(output,f->resource,x,y,f->style,flags,f->scale,(0.0f),(1.0f));
+
+ }
+ finish:if(f->owned)fn_8022EDB8();
+}
 WidgetFragment* fn_8022553C(WidgetFragment* self,RollingListData* list,WidgetDesc* desc){fn_80218F80(self,desc);RollingListFullPrefix* f=(RollingListFullPrefix*)self;f->list=list;self->vtable=lbl_8033E140;f->resource=fn_80232578(lbl_8033DA84);f->count=InlineIntegerMinimum(InlineIntegerMaximum(desc->field9c,1),3);f->x=(float)lbl_8055FB9C/(-2.0f);f->x+=(float)self->left;f->y=(float)lbl_8055FBA0/2.0f-(float)self->top;f->lineHeight=(5.0f)+(float)fn_80232B70(f->resource);f->period=f->lineHeight*(float)f->list->count;f->upper=f->y+(0.5f)*f->period;f->lower=f->y-(0.5f)*f->period;int row=0;f->rows=(RollingRow*)__nwa__FUlPCc(f->list->count*12,lbl_8033DAEC);for(int i=f->list->index;i<f->list->count;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}for(int i=0;i<f->list->index;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}f->direction=0;f->stamp=fn_8023659C();f->elapsed=(0.0f);f->nextStamp=fn_8023659C();f->focus=0;f->token=fn_80228F40(self->left,self->top);return self;}
 WidgetFragment* fn_80225828(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E140;RollingRowsPrefix* f=(RollingRowsPrefix*)self;if(f->rows)__dla__FPv(f->rows);f->rows=0;if(((RollingListFullPrefix*)self)->resource)fn_802328D4(((RollingListFullPrefix*)self)->resource);((RollingListFullPrefix*)self)->resource=0;self->x=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_802258C8(WidgetFragment* self){Bound27c* f=(Bound27c*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}
