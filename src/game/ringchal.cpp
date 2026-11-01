@@ -411,7 +411,7 @@ struct RArray : ArrayRef<T> {
 
 template <class T>
 struct IArray : ArrayRef<T> {
-    IArray(int n, const char* tag) : ArrayRef<T>(buf = new (tag) T[n], n) {}
+    IArray(int n, const char* tag) : ArrayRef<T>(new (tag) T[n], n) { buf = this->data; }
     ~IArray(void) { delete[] buf; }
     T* Add(void) { return &this->data[this->count++]; }
     T* buf;     // offset 0xC
@@ -1040,6 +1040,8 @@ static inline int CountTeles(ValueNode* set) {
     return n;
 }
 
+static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
+
 u8 ObjSet::Load(ValueNode* set, ValueTable** dynos) {
     u8 ok;
     infos = new ("ObjectInfo") IArray<ObjInfo>(CountInfos(set), "rc_object_info");
@@ -1065,7 +1067,7 @@ u8 ObjSet::Load(ValueNode* set, ValueTable** dynos) {
                 if (!d) {
                     fn_802E317C("freestyle: unknown dyno type %s", dyno);
                 }
-                if (d->FindChild("xlo_info")) {
+                if (HasChild(d, "xlo_info")) {
                     o->type = 0;
                     o->xlo = d->FindChild("xlo_info");
                 } else if (!strcmp(dyno, "teleport")) {
