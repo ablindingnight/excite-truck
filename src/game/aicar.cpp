@@ -1519,13 +1519,16 @@ extern "C" {
 u32 fn_801388F4(u32 a);
 
 // Tracks the car's race-line position; re-aims the line follower at most every 1.5 s.
+// True when the driver had a line segment and the car has moved onto a different one.
+static inline bool SegChanged(u8* d, u8* seg) { return PTR(d, 0x1C8) && PTR(d, 0x1C8) != seg; }
+
 void fn_80195D80(u8* d, f32 t) {
     u8* pos = ((VPosSrc*)PTR(d, 0x28C))->Pos();
     F32(d, 0x2CC) = F32(PTR(pos, 0x2C), 0x14);
     U32(d, 0x2C8) = U32(PTR(pos, 0x2C), 0x28);
     U32(d, 0x18) = fn_801388F4(U32(pos, 0x4));
     u8* car = CAR(d);
-    bool changed = PTR(d, 0x1C8) && PTR(d, 0x1C8) != PTR(pos, 0x2C);
+    bool changed = SegChanged(d, PTR(pos, 0x2C));
     if (changed) {
         *(LinePos*)(d + 0x16C) = *(LinePos*)(d + 0x1A0);
         F32(d, 0x1D0) = lbl_8055E3C8;
