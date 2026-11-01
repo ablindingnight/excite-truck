@@ -504,8 +504,10 @@ void LineSet::Reset(void) {
     IdealLineRes* l;
     f32 now = lbl_8055E3C8;
     int i;
+    LineEntry e;
     for (i = 0; i < ARRAY_COUNT(cars); i++) {
-        l = lines.a.data[i % lines.a.count].line;
+        e = lines.a.data[i % lines.a.count];
+        l = e.line;
         cars[i].next = now + fn_80129DC4(4, minT, maxT);
         cars[i].line = l;
     }
