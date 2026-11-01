@@ -203,15 +203,16 @@ u32 lbl_8033F9E0[9]={0,0,(u32)fn_80222584,(u32)fn_80215828,(u32)fn_802225E8,(u32
 }
 
 
-struct PlaybackPrefix {
- char base[0x244];void* active;int resource;float amount;
+struct Background;
+struct BackgroundWidgetPrefix {
+ char base[0x244];Background* active;const char* textureName;float amount;
  unsigned char flag250,flag251,pad252[2];int option;
 };
-typedef char PlaybackPrefixSizeCheck[(sizeof(PlaybackPrefix)==0x258)?1:-1];
+typedef char BackgroundWidgetPrefixSizeCheck[(sizeof(BackgroundWidgetPrefix)==0x258)?1:-1];
 extern "C" {
 extern u32 lbl_8033F3B0[];
-void fn_8022FFE8(void*);void fn_8022F8CC(void*);void fn_8022F824(void*);
-WidgetFragment* fn_8021A5B8(WidgetFragment* self,int resource,unsigned char a,unsigned char b,int option,float amount);
+void fn_8022FFE8(Background*);void fn_8022F8CC(Background*);void fn_8022F824(Background*);
+WidgetFragment* fn_8021A5B8(WidgetFragment* self,const char* textureName,unsigned char a,unsigned char b,int option,float amount);
 WidgetFragment* fn_8021A650(WidgetFragment* self,int destroy);
 void fn_8021A6A8(WidgetFragment* self);
 void fn_8021A744(WidgetFragment* self);
@@ -244,7 +245,7 @@ void fn_8021952C(WidgetFragment* self,int x,int y);
 
 extern "C" {
 extern const float lbl_805634E4,lbl_805634E8;
-void* fn_8022F638(int,int,int,int,float);
+Background* fn_8022F638(const char*,unsigned char,unsigned char,int,float);
 void fn_80218968(void*,int,float);void fn_8021889C(void*,int,float);
 void fn_8021A6EC(WidgetFragment* self);
 void fn_8021A910(WidgetFragment* self,int mode,void*);
@@ -1578,23 +1579,23 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
         }
     }
 }
-WidgetFragment* fn_8021A5B8(WidgetFragment* self,int resource,unsigned char a,unsigned char b,int option,float amount){
+WidgetFragment* fn_8021A5B8(WidgetFragment* self,const char* textureName,unsigned char a,unsigned char b,int option,float amount){
  fn_80218F34(self,0,0,0,0,(int)amount);self->vtable=lbl_8033F3B0;
- PlaybackPrefix* fields=(PlaybackPrefix*)self;fields->resource=resource;fields->amount=amount;fields->flag250=a;fields->flag251=b;fields->option=option;fields->active=0;return self;
+ BackgroundWidgetPrefix* fields=(BackgroundWidgetPrefix*)self;fields->textureName=textureName;fields->amount=amount;fields->flag250=a;fields->flag251=b;fields->option=option;fields->active=0;return self;
 }
 WidgetFragment* fn_8021A650(WidgetFragment* self,int destroy){
  if(self){fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;
 }
 void fn_8021A6A8(WidgetFragment* self){
- PlaybackPrefix* fields=(PlaybackPrefix*)self;
+ BackgroundWidgetPrefix* fields=(BackgroundWidgetPrefix*)self;
  if(fields->active){fn_8022FFE8(fields->active);fn_8022F8CC(fields->active);}
 }
 void fn_8021A6EC(WidgetFragment* self){
- PlaybackPrefix* fields=(PlaybackPrefix*)self;
+ BackgroundWidgetPrefix* fields=(BackgroundWidgetPrefix*)self;
  fields->flag250=1;fields->flag251=1;fields->amount=(30.0f);fields->option=1;
- fields->active=fn_8022F638(fields->resource,1,1,1,(30.0f));
+ fields->active=fn_8022F638(fields->textureName,1,1,1,(30.0f));
 }
-void fn_8021A744(WidgetFragment* self){PlaybackPrefix* fields=(PlaybackPrefix*)self;fn_8022F824(fields->active);fields->active=0;}
+void fn_8021A744(WidgetFragment* self){BackgroundWidgetPrefix* fields=(BackgroundWidgetPrefix*)self;fn_8022F824(fields->active);fields->active=0;}
 WidgetFragment* fn_8021A77C(WidgetFragment* self,int x,int y,int kind,void* watched,OwnedWidget* child){
  fn_80222340(self,x,y,0,0,0,child);self->vtable=lbl_8033F324;
  WatchedChildPrefix* fields=(WatchedChildPrefix*)self;fields->watched=watched;fields->kind=kind;
