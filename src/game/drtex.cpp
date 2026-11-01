@@ -714,13 +714,12 @@ void fn_802D9628(GXTex* t, int x, int y, u32 color) {
     GXGetTexObjHeight(&t->obj);
     u8* data = (u8*)GXGetTexObjData(&t->obj) - 0x40000000;
     if (fmt == 0) {
-        u8* blk = data + (x / 8 + (y / 8) * (w / 8)) * 32;
-        int off = (x % 8 + (y % 8) * 8) * 4 / 8;
+        u8* p = data + (x / 8 + (y / 8) * (w / 8)) * 32 + ((y % 8) * 8 + x % 8) * 4 / 8;
         u8 v = color;
         if (x & 1) {
-            blk[off] = (v >> 4) | (blk[off] & 0xF0);
+            *p = (*p & 0xF0) | (v >> 4);
         } else {
-            blk[off] = (blk[off] & 0xF) | (v & 0xF0);
+            *p = (*p & 0xF) | (v & 0xF0);
         }
     }
 }
