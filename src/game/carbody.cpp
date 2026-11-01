@@ -784,10 +784,14 @@ void fn_80182DF4(u8* p) {
     f32 maxY = 0.0f;
     f32 minZ = 0.0f;
     f32 maxZ = 0.0f;
+    f32 stiff;
+    f32 damp;
     f32 mass = 4938240000.0f;
+    f32 zRear;
     f32 invMass = 0.5f / mass;
-    f32 stiff = 50000.0f;
-    f32 damp = 0.3f;
+    f32 zFront;
+    stiff = 50000.0f;
+    damp = 0.3f;
     fn_802C7760(S32(p, 0x59C), &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
     s32 wheel = fn_801E3004(S32(p, 0x59C), "wheel", -1);
     if (wheel) {
@@ -820,10 +824,10 @@ void fn_80182DF4(u8* p) {
     f32 b = 0.8f * a;
     f32 yRear = 0.36f + minY;
     f32 yMid = 0.45f + minY;
-    f32 zRear = maxZ - 0.45f;
+    zRear = maxZ - 0.45f;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);
-    f32 zFront = 0.44999998f + minZ;
+    zFront = 0.44999998f + minZ;
     f32 zRearMid = 0.5f * (zRear + zMid);
     f32 xSide = maxX - h;
     f32 xFront = maxX - 0.44999998f;
