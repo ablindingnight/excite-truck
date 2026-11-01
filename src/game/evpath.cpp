@@ -742,7 +742,7 @@ int fn_80280C00(void) {
             }
         }
         if (lbl_8055F690) {
-            SelectEvent(lbl_804B3048.Find((u8*)lbl_8055F690));
+            SelectEvent(BarIndex(lbl_8055F690));
         }
     }
     return 0;
