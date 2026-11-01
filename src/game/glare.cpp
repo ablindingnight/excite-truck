@@ -191,17 +191,21 @@ static inline int AnyGlare(void) {
 }
 
 void fn_802DD754(void) {
+    BlurTex* t;
+    int j;
+    Streak* s;
+    int pass;
     if (AnyGlare()) {
         fn_802DE788();
-        for (int pass = 0; pass < 5; pass++) {
-            BlurTex* t = lbl_8055FED8;
+        for (pass = 0; pass < 5; pass++) {
+            t = lbl_8055FED8;
             GXSetTexCopySrc(0, 0, lbl_8055FED0, lbl_8055FED4);
             GXSetTexCopyDst(t->w, t->h, 4, t->mip);
             GXCopyTex(t->data, 0);
             t->valid = 1;
             GXLoadTexObj(&lbl_8055FED8->obj, 0);
-            Streak* s = lbl_804DB6A0.s;
-            for (int j = 0; j < lbl_804DB6A0.count; j++) {
+            s = lbl_804DB6A0.s;
+            for (j = 0; j < lbl_804DB6A0.count; j++) {
                 fn_802DD898(s, pass, (f32)(1 << pass), 0.5f);
                 s++;
             }
