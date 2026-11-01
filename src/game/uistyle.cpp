@@ -536,9 +536,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     if(s->field64_1) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
-        u32 count=fn_802C51AC(s->field64_1);
-        u32 animationFrame=frame%count;
-        fn_802C5310(s->field64_1,animationFrame,px,py,0.0f);
+        fn_802C5310(s->field64_1,frame%fn_802C51AC(s->field64_1),px,py,0.0f);
     } else if(s->field64_2) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
@@ -548,22 +546,27 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         if(s->field38&4)px-=StyleMultiply(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
         else if((s->field38&2)&&text&&s->resource08) {
             f32 scale=fn_8022CA40(s);
-            px-=fn_8023293C(s->resource08,text,1.0f)*scale;
+            px-=StyleMultiply(fn_8023293C(s->resource08,text,1.0f),scale);
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
         f32 imageHeight=fn_80235F64(s->field64_2,current);
         fn_802354A0(s->field64_2,current,0xFFFFFFFF,px,py,0.0f,imageWidth,imageHeight);
-        if(effect==1) {
+        switch(effect) {
+        case 1: {
             f32 halfGlow=0.5f*glow;
             f32 factor=1.0f+glow;
             fn_802354A0(s->field64_2,current,((u32)alpha<<24)|0xFFFFFF,
                 px-halfGlow*imageWidth,py+halfGlow*imageHeight,0.0f,factor*imageWidth,factor*imageHeight);
+            break;
+        }
+        default: break;
         }
         if(frame==1) {
             int suffix=(int)s->field3C_6;
             if(suffix>=0) {
+                f32 w;
                 f32 h=fn_80235F64(s->field64_2,current);
-                f32 w=fn_80235EF0(s->field64_2,suffix);
+                w=fn_80235EF0(s->field64_2,(int)s->field3C_6);
                 f32 dx=fn_80235EF0(s->field64_2,current);
                 fn_802354A0(s->field64_2,suffix,0xFFFFFFFF,px+dx,py,0.0f,w,h);
             }
@@ -571,15 +574,15 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         if(s->field64_3&&frame==1) {
             int overlay=(int)s->field3C_7;
             f32 h=fn_80235F64(s->field64_3,overlay);
-            f32 w=fn_80235EF0(s->field64_3,overlay);
+            f32 w=fn_80235EF0(s->field64_3,(int)s->field3C_7);
             fn_802354A0(s->field64_3,overlay,0xFFFFFFFF,px+s->field5C,py+s->field60,0.0f,w,h);
         }
     } else if(alternate) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
-        if(s->field38&16)py+=height*0.5f;
+        if(s->field38&16)py+=StyleMultiply(height,0.5f);
         else if(s->field38&64)py+=height;
-        if(s->field38&4)px-=(lbl_8055E050.active->horizontalBias+width)*0.5f;
+        if(s->field38&4)px-=StyleMultiply(lbl_8055E050.active->horizontalBias+width,0.5f);
         else if(s->field38&2)px-=lbl_8055E050.active->horizontalBias+width;
         fn_80230924(s->colors20[frame],px,py,px+width,py-height,depth);
     }
@@ -590,16 +593,14 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         else if(s->field38&64)y-=(f32)((lines-1)*lineHeight);
         char line[1024];
         int shadow=initialShadow;
-        f32 textZ=0.0f;
-        f32 shadowOffset=2.0f;
         for(int i=0;i<lines;i++) {
             const char* end=strchr(text,10);
             int n=end?(int)(end-text):(int)strlen(text);
             strncpy(line,text,n);line[n]=0;
             f32 px,py;
-            int dx=alternate?(int)s->field3C_4:(int)s->field3C_2;
-            int dy=alternate?(int)s->field3C_5:(int)s->field3C_3;
-            fn_8022BB60(&px,&py,x+(f32)dx,y+(f32)dy);
+            f32 lineX=x+(f32)(alternate?(int)s->field3C_4:(int)s->field3C_2);
+            f32 lineY=y+(f32)(alternate?(int)s->field3C_5:(int)s->field3C_3);
+            fn_8022BB60(&px,&py,lineX,lineY);
             int flags=0;
             u32 color=s->colors0C[frame];
             if(s->field38&1)flags|=1;
@@ -609,11 +610,12 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
             if(s->field38&16)flags|=16;
             if(s->field38&32)flags|=32;
             if(s->field38&64)flags|=64;
+            f32 textZ=0.0f;
             switch(effect) {
             case 2:shadow=1;
             default: {
                 f32 scale=fn_8022CA40(s);
-                if(shadow)fn_80232BA4(line, s->resource08, px+shadowOffset, py-shadowOffset, 0xFF000000, flags, scale, textZ, 1.0f);
+                if(shadow)fn_80232BA4(line, s->resource08, px+2.0f, py-2.0f, 0xFF000000, flags, scale, textZ, 1.0f);
                 fn_80232BA4(line, s->resource08, px, py, color, flags, scale, textZ, 1.0f);
                 break;
             }
