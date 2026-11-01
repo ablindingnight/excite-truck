@@ -2,31 +2,8 @@
 // three-line status/error box and the yes/no prompts shown around memory card access. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <string.h>
-
-// One menu widget binding: the layout element's name, its kind and kind-specific data.
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
 
 struct MenuStrList {
     u8 pad0[0x14];
@@ -46,7 +23,6 @@ void* __nw__FUlPCc(u32 size, const char* tag);
 MenuStrList* fn_8022D228(MenuStrList* l, int count, int len);
 void fn_8022D2BC(MenuStrList* l, int flags);
 void fn_8022D350(MenuStrList* l, const char* s, int a);
-int fn_802146BC(MenuDesc* desc, int x, int y, int a);
 void fn_80214A9C(int sound);
 void fn_80214AF0(int sound);
 void fn_80236914(void);
@@ -104,7 +80,7 @@ void fn_8023E5B4(CardTask* task) {
         MenuItem("title", 3, task->Title(), strlen(task->Title()), 0),
         MenuItem("circle_list", 10, list, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {"msaving.lyt", items, fn_8023F878, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
@@ -218,7 +194,7 @@ void fn_8023E7A8(int status) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("lbutton", 3, "", 4, 0),
         MenuItem("rbutton", 3, "", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {"mem3line.lyt", items, fn_8023ECF8, 0, 0};
     int show;
@@ -256,7 +232,7 @@ void fn_8023ED30(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "A - Continue", 4, 0),
         MenuItem("lbutton", 3, "", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
     lbl_8055F1C4 = 0;
@@ -277,7 +253,7 @@ int fn_8023EEF8(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "A - Continue", 4, 0),
         MenuItem("lbutton", 3, "B - Free More Blocks", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
     lbl_8055F1C4 = 0;
@@ -298,7 +274,7 @@ int fn_8023F0E8(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "FORMAT", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
     desc.layout = fn_8023E5A8();
@@ -318,7 +294,7 @@ int fn_8023F2C4(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "RETRY", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, fn_8023F91C, 0, 0};
     desc.layout = fn_8023E5A8();
@@ -338,7 +314,7 @@ int fn_8023F4B8(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "YES", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
     desc.layout = fn_8023E5A8();
@@ -358,7 +334,7 @@ int fn_8023F694(void) {
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("rbutton", 3, "SAVE", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
-        *(MenuItem*)&lbl_804987E0,
+        MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
     desc.layout = fn_8023E5A8();
