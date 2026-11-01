@@ -512,7 +512,8 @@ void fn_8026F420(int mode, int prev, u8* p) {
     c->view.pos.v[1] = c->view.pos.v[1] - lbl_80563EA8;
     if (seven || U8(c->car, 0x260C)) {
         c->view.pos.v[0] = c->pos.v[0] * lbl_80563E58 - c->tf.pos.v[0];
-        c->view.pos.v[1] = c->pos.v[1] * lbl_80563E58 - c->tf.pos.v[1];
+        f32 scaledY = c->pos.v[1] * lbl_80563E58;
+        c->view.pos.v[1] = scaledY - c->tf.pos.v[1];
         c->view.pos.v[2] = c->pos.v[2] * lbl_80563E58 - c->tf.pos.v[2];
         f32 h = lbl_80563E4C;
         switch (mode) {
