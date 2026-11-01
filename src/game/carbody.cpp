@@ -166,6 +166,8 @@ public:
     void Init(struct BodyDesc* d);
     void Flush(RVec3* force, RVec3* torque);
     void AddForceAt(const RVec3* f, const RVec3* at);
+    void AddTorque(const RVec3* t);
+    void AddImpulse(f32 k, const RVec3* j, const RVec3* at);
 };
 
 class CarBody : public RigidBody {
@@ -864,7 +866,7 @@ public:
     virtual void v08(void);
     virtual void v0C(void);
     virtual void v10(void);
-    virtual void v14(void);
+    virtual int v14(void);
     virtual u8* Info(void);  // 0x18
     virtual void v1C(void);
     virtual void v20(void);
@@ -918,6 +920,14 @@ public:
     virtual ~CbFx(void);
     virtual void Update(void);  // 0x0C
     virtual void Reset(void);   // 0x10
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void Land(f32 sink);  // 0x2C
+    virtual void v30(void);
 };
 
 extern "C" void fn_801D1100(u8* p);
@@ -1222,12 +1232,6 @@ void fn_80183DF8(u8* p) {
     }
 }
 
-void fn_80183E7C(u8* p) {}  // stub (3032)
-
-u32 DeityCar_vf58(u8* p) { return 0; }
-
-void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
-
 }  // extern "C"
 
 // The physics solver's per-body records (masslist.cpp names them MassSet/ContactSet/CrossSet/CxEntry).
@@ -1289,17 +1293,18 @@ struct CbWheel {
     u8 grounded;     // offset 0x20
     u8 pad21[0x3];
     f32 contact[3];  // offset 0x24
-    f32 local[3];    // offset 0x30
+    f32 local[3];    // offset 0x30, body-space mount point
     f32 v3C;         // offset 0x3C
     f32 v40;         // offset 0x40
-    f32 nUp;         // offset 0x44
-    f32 nFwd;        // offset 0x48
-    f32 ground[3];   // offset 0x4C
-    f32 groundH;     // offset 0x58
-    f32 comp;        // offset 0x5C
-    s8 sound;        // offset 0x60
-    u8 pad61[0x3];
-    u32 flags;       // offset 0x64
+    f32 nRight;      // offset 0x44, ground normal . body right
+    f32 nFwd;        // offset 0x48, ground normal . body forward
+    f32 ground[3];   // offset 0x4C, contact plane anchor
+    f32 normal[3];   // offset 0x58, contact plane normal
+    f32 groundH;     // offset 0x64
+    f32 comp;        // offset 0x68
+    s8 sound;        // offset 0x6C
+    u8 pad6D[0x3];
+    u32 flags;       // offset 0x70
 };
 
 struct SurfType {
@@ -1419,6 +1424,993 @@ static inline void AddScaled(f32* f, const u8* dir, f32 k) {
     f[1] = f[1] + F32(dir, 4) * k;
     f[2] = f[2] + F32(dir, 8) * k;
 }
+
+struct CbEvent {
+    s32 id;
+    f32 a;
+    f32 b;
+    s32 c;
+};
+
+struct CbLeanEvent {
+    s32 id;
+    f32 lean;
+    s32 dive;
+};
+
+struct CbSpinEvent {
+    s32 id;
+    u8 left;
+};
+
+// out = v[0] * row0 + v[1] * row1 + v[2] * row2 (m: rows at 0, 3, 6), safe when out aliases v.
+static inline void ObRotateRows(BVec* out, const f32* m, const f32* v) {
+    if ((const f32*)out == v) {
+        f32 x = v[2] * m[6] + v[0] * m[0] + v[1] * m[3];
+        f32 y = v[2] * m[7] + v[0] * m[1] + v[1] * m[4];
+        f32 z = v[2] * m[8] + v[0] * m[2] + v[1] * m[5];
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = v[2] * m[6] + v[0] * m[0] + v[1] * m[3];
+        out->y = v[2] * m[7] + v[0] * m[1] + v[1] * m[4];
+        out->z = v[2] * m[8] + v[0] * m[2] + v[1] * m[5];
+    }
+}
+
+int IsLoadingActive(void);
+
+extern "C" {
+void fn_801BEB1C(s32 id, CbSolContact** c);
+void fn_801796CC(int kind, void* data, int size);
+void fn_801796EC(int kind, void* data, int size);
+int fn_80129D18(int a, int b);
+f32 fn_80129DC4(int a, f32 lo, f32 hi);
+f32 fn_801E9FDC(s16* cell, f32 x, f32 z);
+int fn_802B04D4(const u8* p);
+f32 fn_80181A94(void);
+f32 fn_80181AC0(void);
+void fn_8014E61C(s32 id, int kind, f32 v);
+void fn_80161A38(int a, s32 id, int c);
+int fn_8018A100(u8* p);
+int fn_801E1048(s32 id);
+f32 fn_801DDC8C(f32 x, f32 z);
+f32 fn_801DCF48(BVec* n, f32 x, f32 z);
+void fn_802E30C8(const char* fmt, ...);
+extern char lbl_803325AC[];
+extern s32 lbl_8055E3C4;
+int fn_8014E708(s32 id);
+void fn_801DF074(int a, int b);
+f32 fn_801B8950(s32 id);
+void fn_801B8964(s32 id, f32 v);
+void fn_8018E330(u8* p);
+f32 fn_801DCEC0(void);
+double sqrt(double x);
+void PSVECCrossProduct(const void* a, const void* b, void* out);
+extern const f32 lbl_80561CB8, lbl_80561CEC, lbl_80561CF0, lbl_80561CF4, lbl_80561CF8, lbl_80561D08, lbl_80561D0C,
+    lbl_80561D40, lbl_80561D64, lbl_80561D7C, lbl_80561D84, lbl_80561D94, lbl_80561D9C, lbl_80561DA8,
+    lbl_80561DAC, lbl_80561DB0, lbl_80561DB4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC4, lbl_80561DC8,
+    lbl_80561DCC, lbl_80561DD4, lbl_80561DD8, lbl_80561DDC, lbl_80561DE0, lbl_80561DE8, lbl_80561DF0,
+    lbl_80561DF4, lbl_80561DF8, lbl_80561DFC, lbl_80561E00, lbl_80561E04, lbl_80561E08, lbl_80561E0C,
+    lbl_80561E10, lbl_80561E14, lbl_80561E18, lbl_80561E1C, lbl_80561E20, lbl_80561E24, lbl_80561E28,
+    lbl_80561E2C, lbl_80561E30, lbl_80561E34, lbl_80561E38, lbl_80561E3C, lbl_80561E40, lbl_80561E44,
+    lbl_80561E48, lbl_80561E4C;
+}
+
+extern "C" {
+
+// Before a physics step: copy the solver's wheel ground points/normals in, run the timers (stun, wheelie, air,
+// boost, heat, spin), apply the self-righting, stunt, landing, ramp, water, slope and steering forces/torques,
+// track boost/overheat state and tricks (flips and spins counted while airborne), and drive the sound/FX hooks.
+void fn_80183E7C(u8* p) {
+    CbSolContact* sol;
+    f32 airLift = lbl_80561CAC;
+    if (IsLoadingActive()) {
+        F32(p, 0x25DC) = lbl_80561CAC;
+        F32(p, 0x25E0) = lbl_80561CAC;
+        F32(p, 0x25E4) = lbl_80561CD0;
+        U8(p, 0x260D) = 0;
+    }
+    if (U8(p, 0x25C0)) {
+        F32(p, 0x25BC) = lbl_8055E4E0.a;
+    }
+    fn_801BEB1C(S32(p, 0x1EC), &sol);
+    CbWheel* w = (CbWheel*)(p + 0x23AC);
+    for (int i = 0; i < 4; i++, w++) {
+        *(HVec*)w->ground = *(HVec*)&sol->v150[i];
+        *(HVec*)w->normal = *(HVec*)&sol->v110[i];
+    }
+    if (!U8(p, 0x260D)) {
+        F32(p, 0x2598) = lbl_80561CAC;
+    } else {
+        F32(p, 0x2598) = F32(p, 0x2598) + lbl_80561D9C;
+    }
+    f32 stun = F32(p, 0x2650) - lbl_80561D9C;
+    if (stun < lbl_80561CAC) {
+        stun = lbl_80561CAC;
+    }
+    F32(p, 0x2650) = stun;
+    if ((f32)__fabs(stun) > lbl_80558DC4[0]) {
+        if (F32(p, 0x25D4) < lbl_80561DA0) {
+            f32 s = lbl_80561CDC;
+            if (stun < s) {
+                s = stun;
+            }
+            F32(p, 0x2650) = s;
+        }
+        f32 roll;
+        if (S32(p, 0x2620) > 2 && (roll = PSVECDotProduct(p + 0x124, p + 0x48), (f32)__fabs(roll) < lbl_80561CD8)) {
+            f32 a = Clamp01((F32(p, 0x2650) - lbl_80561CAC) / lbl_80561CD0);
+            f32 b = Clamp01((F32(p, 0x25D4) - lbl_80561DA4) / lbl_80561DA8);
+            f32 k = (lbl_80561CAC + b * lbl_80561CD0) * lbl_80561DAC * lbl_80561D98 * lbl_80561CE4 * F32(p, 0xD4) *
+                    (lbl_80561CAC + a * lbl_80561CD0);
+            BVec t;
+            t.x = F32(p, 0x48) * (roll > lbl_80561CAC ? k : -k);
+            t.y = F32(p, 0x4C) * (roll > lbl_80561CAC ? k : -k);
+            t.z = F32(p, 0x50) * (roll > lbl_80561CAC ? k : -k);
+            ((RigidBody*)p)->AddTorque((const RVec3*)&t);
+        }
+    }
+    if (F32(p, 0x258C) > lbl_80561CCC || U8(p, 0x259C)) {
+        CbEvent ev;
+        ev.id = S32(p, 0x1EC);
+        ev.a = lbl_80561CD0;
+        ev.b = F32(p, 0x25D0);
+        ev.c = -1;
+        fn_801796CC(4, &ev, sizeof(ev));
+    }
+    if (F32(p, 0x2608) - F32(p, 0x25E0) > lbl_80561D40) {
+        F32(p, 0x2608) = lbl_80561CAC;
+        if (fn_80129D18(4, 10) < 3) {
+            (*(CbFx**)(p + 0x2584))->v1C();
+            CbEvent ev;
+            ev.id = S32(p, 0x1EC);
+            ev.a = lbl_80561CD0;
+            ev.b = F32(p, 0x25D0);
+            ev.c = -1;
+            fn_801796CC(4, &ev, sizeof(ev));
+        }
+    }
+    F32(p, 0x2608) = F32(p, 0x25E0) + lbl_80561DB0 * (F32(p, 0x2608) - F32(p, 0x25E0));
+    int still;
+    if (!(U32(fn_801769CC(), 4) & 0x4000)) {
+        still = (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0];
+    } else {
+        still = !((f32)__fabs(F32(p, 0x2690) - lbl_80561CD0) <= lbl_80558DC4[0]);
+    }
+    if ((f32)__fabs(F32(p, 0x2650)) > lbl_80558DC4[0]) {
+        still = 0;
+    }
+    if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
+        if (S32(p, 0x2620) > 2 || F32(p, 0x4C) >= lbl_80561DB4) {
+            F32(p, 0x2614) = lbl_80561CAC;
+        } else if (S32(p, 0x2620) == 0 || (f32)__fabs(F32(p, 0x2614)) > lbl_80558DC4[0] || F32(p, 0x4C) < lbl_80561CAC) {
+            f32 t = F32(p, 0x2614) + lbl_80561D9C;
+            int slow = F32(p, 0x25D4) < lbl_80561D50;
+            F32(p, 0x2614) = t;
+            if (slow) {
+                F32(p, 0x2614) = t + lbl_80561DB8;
+            }
+        } else {
+            F32(p, 0x2614) = lbl_80561CAC;
+        }
+        if (F32(p, 0x2614) >= lbl_80561D44) {
+            if (F32(p, 0x4C) > lbl_80561CDC) {
+                F32(p, 0x2614) = lbl_80561CAC;
+            } else if ((f32)__fabs(F32(p, 0x58)) <= lbl_80561CDC) {
+                f32 side = -F32(p, 0x40);
+                if ((f32)__fabs(-F32(p, 0x40)) < lbl_80561CCC) {
+                    side = lbl_80561D00;
+                }
+                BVec axis;
+                axis.x = F32(p, 0x54) * side;
+                axis.y = F32(p, 0x58) * side;
+                axis.z = F32(p, 0x5C) * side;
+                f32 k = lbl_80561DAC * lbl_80561CF4 * lbl_80561D98 * F32(p, 0xD4);
+                BVec t;
+                t.x = axis.x * k;
+                t.y = axis.y * k;
+                t.z = axis.z * k;
+                f32 spin = lbl_80561CF8 * (PSVECDotProduct(p + 0x124, &axis) - lbl_80561CF0);
+                f32 damp = lbl_80561CD0 - Clamp01(spin);
+                t.x = t.x * damp;
+                t.y = t.y * damp;
+                t.z = t.z * damp;
+                ((RigidBody*)p)->AddTorque((const RVec3*)&t);
+            }
+        }
+    }
+    if (S32(p, 0x2620) == 0) {
+        S32(p, 0x2648) = 7;
+    } else if (S32(p, 0x2620) < 3) {
+        if (S32(p, 0x2648) == 0) {
+            S32(p, 0x2648) = 1;
+        }
+    } else {
+        S32(p, 0x2648) = 0;
+        U8(p, 0x2624) = 0;
+        U8(p, 0x2625) = 0;
+    }
+    if (S32(p, 0x2648) > 0 && S32(p, 0x2648) < 7) {
+        BVec t;
+        t.x = F32(p, 0x124) * lbl_80561DBC;
+        t.y = F32(p, 0x128) * lbl_80561DBC;
+        t.z = F32(p, 0x12C) * lbl_80561DBC;
+        if ((f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+            ((RigidBody*)p)->AddTorque((const RVec3*)&t);
+        }
+        S32(p, 0x2648) = S32(p, 0x2648) + 1;
+    }
+    BVec a;
+    BVec b;
+    BVec up;
+    a.x = F32(p, 0x23F8) - F32(p, 0x2554);
+    a.y = F32(p, 0x23FC) - F32(p, 0x2558);
+    a.z = F32(p, 0x2400) - F32(p, 0x255C);
+    b.x = F32(p, 0x246C) - F32(p, 0x24E0);
+    b.y = F32(p, 0x2470) - F32(p, 0x24E4);
+    b.z = F32(p, 0x2474) - F32(p, 0x24E8);
+    PSVECCrossProduct(&a, &b, &up);
+    f32 nz = F32(p, 0x25AC) + lbl_80561D0C * (up.z - F32(p, 0x25AC));
+    f32 ny = F32(p, 0x25A8) + lbl_80561D0C * (up.y - F32(p, 0x25A8));
+    f32 nx = F32(p, 0x25A4) + lbl_80561D0C * (up.x - F32(p, 0x25A4));
+    F32(p, 0x25A8) = ny;
+    F32(p, 0x25A4) = nx;
+    F32(p, 0x25AC) = nz;
+    f32 len = PSVECMag(p + 0x25A4);
+    if (len <= lbl_80561CCC) {
+        F32(p, 0x25A4) = lbl_80561CAC;
+        F32(p, 0x25A8) = lbl_80561CD0;
+        F32(p, 0x25AC) = lbl_80561CAC;
+    } else {
+        f32 inv = lbl_80561CD0 / len;
+        F32(p, 0x25A4) = F32(p, 0x25A4) * inv;
+        F32(p, 0x25A8) = F32(p, 0x25A8) * inv;
+        F32(p, 0x25AC) = F32(p, 0x25AC) * inv;
+    }
+    f32 dn;
+    if (F32(p, 0x2590) > lbl_80561DC0 && (dn = PSVECDotProduct(p + 0x25A4, p + 0x118)) > lbl_80561DC0 &&
+        dn < lbl_80561DA4 && S32(p, 0x2620) > 0) {
+        f32 k = (lbl_80561DA4 - dn) * F32(p, 0xD4) / lbl_80561D9C;
+        BVec f;
+        f.x = F32(p, 0x25A4) * k;
+        f.y = F32(p, 0x25A8) * k;
+        f.z = F32(p, 0x25AC) * k;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+    }
+    u32 ramp = (U32(fn_801769CC(), 4) >> 20) & 1;
+    u32 jump = (U32(fn_801769CC(), 4) >> 21) & 1;
+    int stunts = 0;
+    if (ramp || jump) {
+        stunts = 1;
+    }
+    if (stunts && S32(p, 0x2620) && F32(p, 0x2618) > lbl_80561DB4) {
+        f32 sink = -PSVECDotProduct(p + 0x25A4, p + 0x118);
+        f32 lim = landingTune.v[5] + Clamp01((F32(p, 0x2618) - lbl_80561DC4) / lbl_80561DC8) * (landingTune.v[4] - landingTune.v[5]);
+        if (jump) {
+            lim = driveTune.v[4];
+        }
+        BVec dir;
+        dir.x = F32(p, 0x118);
+        dir.y = F32(p, 0x11C);
+        dir.z = F32(p, 0x120);
+        f32 sp = PSVECMag(p + 0x118);
+        if (sp < lbl_80561CD0) {
+            sp = lbl_80561CD0;
+        }
+        f32 inv = lbl_80561CD0 / sp;
+        dir.x = dir.x * inv;
+        dir.y = dir.y * inv;
+        dir.z = dir.z * inv;
+        f32 into = -PSVECDotProduct(&dir, p + 0x25A4);
+        BVec ahead;
+        BVec behind;
+        ahead.x = F32(p, 0x60) + F32(p, 0x118) * lbl_80561CDC;
+        behind.x = F32(p, 0x60) + F32(p, 0x118) * lbl_80561CB0;
+        ahead.z = F32(p, 0x68) + F32(p, 0x120) * lbl_80561CDC;
+        behind.z = F32(p, 0x68) + F32(p, 0x120) * lbl_80561CB0;
+        ahead.y = F32(p, 0x64) + F32(p, 0x11C) * lbl_80561CDC;
+        behind.y = F32(p, 0x64) + F32(p, 0x11C) * lbl_80561CB0;
+        ahead.y = fn_801E9FDC((s16*)(p + 0x6C), ahead.x, ahead.z);
+        behind.y = fn_801E9FDC((s16*)(p + 0x6C), behind.x, behind.z);
+        BVec slope;
+        slope.x = ahead.x - behind.x;
+        slope.y = ahead.y - behind.y;
+        slope.z = ahead.z - behind.z;
+        f32 sl = PSVECMag(&slope);
+        if (sl < lbl_80561CCC) {
+            sl = lbl_80561CCC;
+        }
+        inv = lbl_80561CD0 / sl;
+        slope.x = slope.x * inv;
+        slope.y = slope.y * inv;
+        slope.z = slope.z * inv;
+        f32 flat = PSVECDotProduct(&slope, p + 0x25A4);
+        int smooth = 0;
+        if (lbl_80561CDC * (flat / lbl_80561DCC + into / lbl_80561D08) > lbl_80561CD0 && lbl_8055E4F6) {
+            smooth = 1;
+        }
+        f32 tilt = PSVECDotProduct(p + 0x25A4, p + 0x48);
+        int bad = 0;
+        int hard = 0;
+        if (!smooth && tilt > lim && F32(p, 0x2618) > landingTune.v[1]) {
+            hard = 1;
+        }
+        if (hard && sink < landingTune.v[8]) {
+            bad = 1;
+        }
+        if (!fn_802B04D4(p + 0x60)) {
+            if (ramp) {
+                if (tilt < lbl_80561DD0 && F32(p, 0x2618) > lbl_80561CDC) {
+                    if ((f32)__fabs(lbl_8055E4F0) > lbl_80558DC4[0]) {
+                        (*(CbFx**)(p + 0x2584))->v24();
+                    }
+                    F32(p, 0x2590) = lbl_8055E4F0;
+                    fn_8014E61C(S32(p, 0x1EC), 2, lbl_80561DD0 - tilt);
+                } else if (!bad || (f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0]) {
+                    (*(CbFx**)(p + 0x2584))->Land(sink);
+                } else {
+                    U8(p, 0x259D) = 0;
+                    f32 boost = landingTune.v[0];
+                    f32 b2 = F32(p, 0x2618) * fn_80181A94();
+                    b2 = F32(p, 0x2CC) * fn_80181AC0() + b2;
+                    if (b2 < boost) {
+                        boost = b2;
+                    }
+                    F32(p, 0x258C) = F32(p, 0x3A0) * boost;
+                    fn_8014E61C(S32(p, 0x1EC), 1, sink);
+                    fn_80161A38(2, S32(p, 0x1EC), 0);
+                    (*(CbFx**)(p + 0x2584))->v20();
+                }
+            }
+            if (jump && fn_8018A100(p) && fn_801E1048(S32(p, 0x1EC))) {
+                fn_8014E61C(S32(p, 0x1EC), 0, lbl_80561CAC);
+                if (bad) {
+                    fn_8014E61C(S32(p, 0x1EC), 1, sink);
+                }
+            }
+        }
+    }
+    if (F32(p, 0x2618) > lbl_80561DB4) {
+        f32 sink = -PSVECDotProduct(p + 0x25A4, p + 0x118);
+        if (sink > lbl_80561DD4 &&
+            (F32(p, 0x64) - F32(p, 0x2558) - lbl_80561D2C * lbl_80561D9C * sink < lbl_80561CAC || S32(p, 0x2620))) {
+            f32 d = lbl_80561CAC;
+            if (sink - lbl_80561DD4 > lbl_80561CAC) {
+                d = sink - lbl_80561DD4;
+            }
+            f32 k = d * F32(p, 0xD4) / lbl_80561D9C;
+            BVec f;
+            f.x = F32(p, 0x25A4) * k;
+            f.y = F32(p, 0x25A8) * k;
+            f.z = F32(p, 0x25AC) * k;
+            ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+        }
+    }
+    if (S32(p, 0x2620) && F32(p, 0x2618) > lbl_80561DB4) {
+        BVec right;
+        right.x = F32(p, 0x3C);
+        right.y = F32(p, 0x40);
+        right.z = F32(p, 0x44);
+        f32 slide = -PSVECDotProduct(&right, p + 0x118);
+        f32 t = Clamp01((F32(p, 0x2618) - lbl_80561DB4) / lbl_80561DD8);
+        f32 d = lbl_80561CAC;
+        if (slide > lbl_80561CAC) {
+            if (slide - lbl_80561DDC > lbl_80561CAC) {
+                d = slide - lbl_80561DDC;
+            }
+        } else if (lbl_80561DDC + slide < lbl_80561CAC) {
+            d = lbl_80561DDC + slide;
+        }
+        f32 k = (lbl_80561CAC + t * lbl_80561CDC) * d * F32(p, 0xD4) / lbl_80561D9C;
+        BVec f;
+        f.x = right.x * k;
+        f.y = right.y * k;
+        f.z = right.z * k;
+        f32 n = -PSVECDotProduct(p + 0x25A4, &f);
+        f.x = f.x + F32(p, 0x25A4) * n;
+        f.y = f.y + F32(p, 0x25A8) * n;
+        f.z = f.z + F32(p, 0x25AC) * n;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+    }
+    if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0] && F32(p, 0x2618) > lbl_80561DE0 &&
+        (f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+        f32 stall = lbl_80561D34 * F32(p, 0x264C);
+        if (stall > lbl_80561CD0) {
+            stall = lbl_80561CD0;
+        }
+        f32 pitch = F32(p, 0x2600) + lbl_80561D64 * stall * fn_80129DC4(4, lbl_80561DE4, lbl_80561CD0);
+        f32 roll = F32(p, 0x2604);
+        BVec fl;
+        fl.x = F32(p, 0x118);
+        fl.y = lbl_80561CAC;
+        fl.z = F32(p, 0x120);
+        f32 m = PSVECMag(&fl);
+        if (m < lbl_80561CD0) {
+            m = lbl_80561CD0;
+        }
+        f32 inv = lbl_80561CD0 / m;
+        fl.x = fl.x * inv;
+        fl.y = fl.y * inv;
+        fl.z = fl.z * inv;
+        if (PSVECDotProduct(&fl, p + 0x54) < lbl_80561DCC) {
+            fl.x = fl.x * lbl_80561DE4;
+            fl.y = fl.y * lbl_80561DE4;
+            fl.z = fl.z * lbl_80561DE4;
+        }
+        f32 nose = PSVECDotProduct(&fl, p + 0x48);
+        f32 wantP = lbl_80561CFC * pitch - nose;
+        f32 wantR = -roll - F32(p, 0x40) * (lbl_80561CD0 - (f32)__fabs(F32(p, 0x58)));
+        f32 wp = PSVECDotProduct(p + 0x124, p + 0x3C);
+        f32 wr = PSVECDotProduct(p + 0x124, p + 0x54);
+        f32 gain = lbl_80561CFC;
+        if (U8(p, 0x2680)) {
+            gain = lbl_80561CD0;
+        }
+        f32 lead = lbl_80561CF8 * (lbl_80561CAC + Clamp01((F32(p, 0x2618) - lbl_80561DE0) / lbl_80561DB4) * lbl_80561CDC);
+        if (!U8(p, 0x2680)) {
+            lead = lbl_80561CAC;
+        }
+        f32 tp = gain * F32(p, 0xD8) * ((wantP - wp) + lead * (pitch - nose)) / lbl_80561D9C;
+        f32 tr = gain * F32(p, 0xE0) * (wantR - wr) / lbl_80561D9C;
+        BVec t;
+        t.x = F32(p, 0x3C) * tp + F32(p, 0x54) * tr;
+        t.y = F32(p, 0x40) * tp + F32(p, 0x58) * tr;
+        t.z = F32(p, 0x44) * tp + F32(p, 0x5C) * tr;
+        ((RigidBody*)p)->AddTorque((const RVec3*)&t);
+    }
+    if (S32(p, 0x2648) == 7) {
+        BVec y(lbl_80561CAC, lbl_80561CD0, lbl_80561CAC);
+        BVec side;
+        PSVECCrossProduct(&y, p + 0x54, &side);
+        side.y = lbl_80561CAC;
+        f32 k = lbl_80561CDC * -PSVECDotProduct(p + 0x118, &side) * F32(p, 0xD4);
+        BVec f;
+        f.x = side.x * k;
+        f.y = side.y * k;
+        f.z = side.z * k;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+    }
+    f32 stalled = F32(p, 0x264C);
+    F32(p, 0x264C) = lbl_80561CAC;
+    if (S32(p, 0x2648) == 7) {
+        if (!U8(p, 0x2624) && U8(p, 0x260D) && F32(p, 0x2598) < lbl_80561DE0 && F32(p, 0x2618) >= lbl_80561DE8 &&
+            F32(p, 0x2618) <= lbl_80561CFC && F32(p, 0x25D4) > lbl_80561DEC) {
+            U8(p, 0x2624) = 1;
+        }
+        if (U8(p, 0x2624) && F32(p, 0x2618) >= lbl_80561CB8 && (U8(p, 0x2624) = 0, F32(p, 0x11C) > lbl_80561DDC) &&
+            (f32)__fabs(F32(p, 0x2588)) <= lbl_80558DC4[0] && (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+            s32 id = S32(p, 0x1EC);
+            U8(p, 0x2625) = 1;
+            fn_801796EC(13, &id, 4);
+            (*(CbFx**)(p + 0x2584))->v28();
+            fn_8014E61C(S32(p, 0x1EC), 6, lbl_80561CAC);
+            fn_80161A38(1, S32(p, 0x1EC), 0);
+            BVec kick(lbl_80561CAC, lbl_80561D34 * F32(p, 0xD4), lbl_80561CAC);
+            ((RigidBody*)p)->AddImpulse(lbl_80561CD0, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
+        }
+        f32 top = lbl_80561D60 * fn_80181A48(p);
+        f32 cap = lbl_80561DD0 * top;
+        if (F32(p, 0x261C) < cap) {
+            cap = F32(p, 0x261C);
+        }
+        F32(p, 0x261C) = cap;
+        f32 flat = sqrt(F32(p, 0x118) * F32(p, 0x118) + F32(p, 0x120) * F32(p, 0x120));
+        int nosedive = 0;
+        f32 dive = -F32(p, 0x2600);
+        if (lbl_8055A3AC && U32(p, 0x10) == 'PCAR' && dive > lbl_80561CAC && dive > lbl_80561DD0) {
+            f32 st = lbl_80561CD0;
+            if (lbl_80561D9C + stalled < lbl_80561CD0) {
+                st = lbl_80561D9C + stalled;
+            }
+            F32(p, 0x264C) = st;
+            nosedive = 1;
+            dive = lbl_80561DD0 + Clamp01((st - lbl_80561CDC) / lbl_80561CDC) * lbl_80561DF0;
+        }
+        f32 lean = lbl_80561CEC * dive;
+        if (lean > lbl_80561CD0) {
+            lean = lbl_80561CD0;
+        }
+        if (lean < lbl_80561DE4) {
+            lean = lbl_80561DE4;
+        }
+        if (F32(p, 0x2618) > lbl_80561CD0) {
+            CbLeanEvent ev;
+            ev.id = S32(p, 0x1EC);
+            ev.lean = lean;
+            ev.dive = nosedive;
+            fn_801796CC(15, &ev, sizeof(ev));
+        }
+        f32 target;
+        if (lean >= lbl_80561CAC) {
+            if (lbl_80561DF8 * F32(p, 0x261C) < top) {
+                top = lbl_80561DF8 * F32(p, 0x261C);
+            }
+            target = F32(p, 0x261C) + Clamp01((lean - lbl_80561CAC) / lbl_80561DB4) * (top - F32(p, 0x261C));
+        } else {
+            f32 t = Clamp01((lean - lbl_80561CAC) / lbl_80561DF4);
+            target = F32(p, 0x261C) + t * (lbl_80561DD0 * F32(p, 0x261C) - F32(p, 0x261C));
+            airLift = airLift + lbl_8055A3B0 * -lean;
+        }
+        BVec dir;
+        dir.x = F32(p, 0x118);
+        dir.y = lbl_80561CAC;
+        dir.z = F32(p, 0x120);
+        f32 want = target - lbl_80561DA0 * F32(p, 0x25E4);
+        f32 m = PSVECMag(&dir);
+        if (m < lbl_80561CCC) {
+            m = lbl_80561CCC;
+        }
+        f32 one = lbl_80561CD0;
+        f32 inv = one / m;
+        dir.x = dir.x * inv;
+        dir.y = dir.y * inv;
+        dir.z = dir.z * inv;
+        if (want < flat) {
+            one = one + lbl_80561D2C * F32(p, 0x25E4);
+        }
+        f32 k = one * ((want - flat) * F32(p, 0xD4));
+        BVec f;
+        f.x = dir.x * k;
+        f.y = dir.y * k;
+        f.z = dir.z * k;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+    }
+    if (U32(p, 0x10) == 'PCAR') {
+        f32 x = F32(p, 0x60);
+        f32 z = F32(p, 0x68);
+        f32 floor = fn_801DDC8C(F32(p, 0x60), F32(p, 0x68));
+        if (floor < lbl_80561CAC) {
+            floor = lbl_80561CAC;
+        }
+        f32 t = F32(p, 0x2688) - lbl_80561DFC;
+        if (t < lbl_80561CAC) {
+            t = lbl_80561CAC;
+        }
+        F32(p, 0x2688) = t;
+        if (floor > lbl_80561E00) {
+            BVec f;
+            if (F32(p, 0x64) - lbl_80561E04 < fn_801DCF48(&f, x, z) && F32(p, 0x11C) < floor) {
+                f32 push = lbl_80561E08 + (floor - F32(p, 0x11C));
+                f.x = lbl_80561CAC;
+                f.z = lbl_80561CAC;
+                f.y = push * F32(p, 0xD4) / lbl_80561D9C;
+                ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+                fn_802E30C8(lbl_803325AC, lbl_8055E3C4, push / lbl_80561D60, floor / lbl_80561D60);
+                if ((f32)__fabs(F32(p, 0x2688)) <= lbl_80558DC4[0]) {
+                    fn_8014E61C(S32(p, 0x1EC), 8, lbl_80561CAC);
+                }
+                F32(p, 0x2688) = lbl_80561CD0;
+            }
+            if ((f32)__fabs(F32(p, 0x2688)) > lbl_80558DC4[0]) {
+                F32(p, 0x2688) = lbl_80561CD0;
+            }
+        } else if ((f32)__fabs(t) > lbl_80558DC4[0]) {
+            if (F32(p, 0x11C) > lbl_80561E0C) {
+                F32(p, 0x2688) = lbl_80561CD0;
+            }
+            if (S32(p, 0x2620) == 4 || (f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0]) {
+                F32(p, 0x2688) = lbl_80561CAC;
+            }
+        }
+    }
+    if (F32(p, 0x258C) > lbl_80558DC4[0] && !U8(p, 0x259D) && F32(p, 0x2618) < lbl_80561D00 &&
+        F32(p, 0x25D4) > lbl_80561DA4) {
+        s32 id = S32(p, 0x1EC);
+        fn_801796CC(14, &id, 4);
+    }
+    f32 t2588 = F32(p, 0x2588) - lbl_80561D9C;
+    if (t2588 < lbl_80561CAC) {
+        t2588 = lbl_80561CAC;
+    }
+    f32 t2590 = F32(p, 0x2590) - lbl_80561D9C;
+    F32(p, 0x2588) = t2588;
+    if (t2590 < lbl_80561CAC) {
+        t2590 = lbl_80561CAC;
+    }
+    f32 boost = F32(p, 0x258C) - lbl_80561D9C;
+    F32(p, 0x2590) = t2590;
+    if (boost < lbl_80561E10) {
+        boost = lbl_80561E10;
+    }
+    F32(p, 0x258C) = boost;
+    f32 pad = F32(p, 0x25BC);
+    if (pad > lbl_80558DC4[0]) {
+        if (pad < boost) {
+            pad = boost;
+        }
+        f32 left = F32(p, 0x25BC) - lbl_80561D9C;
+        F32(p, 0x258C) = pad;
+        if (left < lbl_80561CAC) {
+            left = lbl_80561CAC;
+        }
+        F32(p, 0x25BC) = left;
+        if (!fn_8014E708(S32(p, 0x1EC))) {
+            s32 id = S32(p, 0x1EC);
+            fn_801796CC(16, &id, 4);
+        }
+    }
+    if (S32(p, 0x2620) > 0 && F32(p, 0x2618) > lbl_80561D64 && lbl_8055E4F4 && S32(p, 0x1F0) == 0x50) {
+        fn_801DF074(5, 1);
+    }
+    if (S32(p, 0x2620) == 0) {
+        F32(p, 0x2618) = F32(p, 0x2618) + lbl_80561D9C;
+    } else {
+        F32(p, 0x2618) = lbl_80561CAC;
+        sqrt(F32(p, 0x118) * F32(p, 0x118) + F32(p, 0x120) * F32(p, 0x120));
+        F32(p, 0x261C) = F32(p, 0x25D4);
+    }
+    int sunk = 0;
+    if (fn_802BF4F0()) {
+        sunk = 1;
+        CbWheel* wh = (CbWheel*)(p + 0x23AC);
+        for (int i = 0; i < 4; i++, wh++) {
+            CbWheel c = *wh;
+            BVec pt;
+            ObRotateRows(&pt, (const f32*)(p + 0x3C), c.local);
+            pt.x = pt.x + F32(p, 0x60);
+            pt.y = pt.y + F32(p, 0x64);
+            pt.z = pt.z + F32(p, 0x68);
+            if (pt.y > fn_802BF590()) {
+                sunk = 0;
+                break;
+            }
+        }
+    }
+    if (sunk) {
+        F32(p, 0x2588) = lbl_80561CAC;
+    }
+    int deep = 0;
+    if (fn_802BF4F0() && F32(p, 0x64) < lbl_80561CFC + fn_802BF590()) {
+        deep = 1;
+    }
+    if (F32(p, 0x25C4) > lbl_80561CCC || (S32(p, 0x2620) > 0 && fn_802B04D4(p + 0x60) && deep)) {
+        if ((f32)__fabs(F32(p, 0x25C4)) <= lbl_80558DC4[0]) {
+            (*(CbFx**)(p + 0x2584))->v30();
+            if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+                fn_8018E330(p);
+            }
+        }
+        f32 k = lbl_80561CB0 * F32(p, 0xD4);
+        BVec f;
+        f.x = F32(p, 0x118) * k;
+        F32(p, 0x25C4) = F32(p, 0x25C4) + lbl_80561D9C;
+        f.y = F32(p, 0x11C) * k;
+        f.z = F32(p, 0x120) * k;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+        f32 surf = lbl_80561DB4 + fn_802BF590();
+        f32 grow = lbl_80561CD0 + Clamp01((F32(p, 0x25C4) - lbl_80561D84) / lbl_80561D7C) * lbl_80561E14;
+        BVec front;
+        front.x = F32(p, 0x60) + F32(p, 0x54) * lbl_80561CD8;
+        front.y = F32(p, 0x64) + F32(p, 0x58) * lbl_80561CD8;
+        f32 df = Clamp01((front.y - surf) / (surf - lbl_80561D08 - surf));
+        front.z = F32(p, 0x68) + F32(p, 0x5C) * lbl_80561CD8;
+        f32 tf = Clamp01((F32(p, 0x25C4) - lbl_80561CAC) / lbl_80561CB8);
+        BVec ff;
+        ff.x = lbl_80561CAC;
+        ff.z = lbl_80561CAC;
+        ff.y = (lbl_80561CAC + df * lbl_80561CD0) * (lbl_80561D40 + tf * lbl_80561D7C) * (lbl_80561CDC * grow) * F32(p, 0xD4) /
+               lbl_80561D9C;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
+        BVec back;
+        back.x = F32(p, 0x60) + F32(p, 0x54) * lbl_80561CB0;
+        back.y = F32(p, 0x64) + F32(p, 0x58) * lbl_80561CB0;
+        f32 db = Clamp01((back.y - surf) / (surf - lbl_80561D08 - surf));
+        back.z = F32(p, 0x68) + F32(p, 0x5C) * lbl_80561CB0;
+        f32 tb = Clamp01((F32(p, 0x25C4) - lbl_80561D40) / lbl_80561D38);
+        BVec fb;
+        fb.x = lbl_80561CAC;
+        fb.z = lbl_80561CAC;
+        fb.y = (lbl_80561CAC + db * lbl_80561CD0) * (lbl_80561D00 + tb * lbl_80561DD0) * (lbl_80561CB8 * grow) * F32(p, 0xD4) /
+               lbl_80561D9C;
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
+    } else {
+        F32(p, 0x25C4) = lbl_80561CAC;
+    }
+    f32 cool = heatTune.v[1];
+    if (F32(p, 0x2618) < lbl_80561D08) {
+        cool = heatTune.v[0];
+        if (sunk) {
+            cool = heatTune.v[2];
+        }
+    }
+    f32 heat = F32(p, 0x25A0) - lbl_80561D9C * cool;
+    if (heat < lbl_80561CAC) {
+        heat = lbl_80561CAC;
+    }
+    F32(p, 0x25A0) = heat;
+    U8(p, 0x259C) = 0;
+    if (lbl_8055E4F4) {
+        if ((f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0] && U32(p, 0x10) == 'PCAR') {
+            f32 h = heatTune.v[7];
+            if (heat < h) {
+                h = heat;
+            }
+            F32(p, 0x25A0) = h;
+        }
+        if (F32(p, 0x258C) < lbl_80561D00 && U8(p, 0x260D) && F32(p, 0x2618) < lbl_80561D40 &&
+            F32(p, 0x25A0) < lbl_80561E18 && F32(p, 0x2588) < lbl_80561DC0 &&
+            (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+            f32 h = F32(p, 0x25A0) + lbl_80561D9C * F32(p, 0x398) * heatTune.v[3] * F32(p, 0x2D4);
+            if (h > lbl_80561CD0) {
+                h = lbl_80561CD0;
+            }
+            F32(p, 0x25A0) = h;
+            U8(p, 0x259C) = 1;
+        }
+        if (S32(p, 0x2620) > 2) {
+            int boosting = 1;
+            if (F32(p, 0x258C) <= lbl_80561DC0 && !U8(p, 0x259C)) {
+                boosting = 0;
+            }
+            if (!boosting || F32(p, 0x25E0) <= lbl_80561CDC) {
+                f32 vmax = F32(p, 0x5A8);
+                if (F32(p, 0x25D4) > vmax) {
+                    f32 over = Clamp01((F32(p, 0x25D4) - vmax) / (lbl_80561DDC + vmax - vmax));
+                    f32 k = heatTune.v[12] * lbl_80561D98 * -(lbl_80561CAC + over * lbl_80561CD0) * F32(p, 0xD4) /
+                            F32(p, 0x25D4);
+                    BVec f;
+                    f.x = F32(p, 0x118) * k;
+                    f.y = F32(p, 0x11C) * k;
+                    f.z = F32(p, 0x120) * k;
+                    if (U32(p, 0x10) == 'PCAR') {
+                        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+                    }
+                }
+            }
+        }
+        if (F32(p, 0x25A0) > lbl_80561DB0 && F32(p, 0x2588) < lbl_80561CCC) {
+            F32(p, 0x25A0) = heatTune.v[6];
+            F32(p, 0x2588) = heatTune.v[8];
+            fn_801DF074(6, 1);
+            (*(CbFx**)(p + 0x2584))->v14();
+        }
+    }
+    f32 vol = fn_801B8950(S32(p, 0x1EC));
+    int loud = 0;
+    if (F32(p, 0x25E0) > lbl_80561CDC && F32(p, 0x258C) > lbl_80561DC0) {
+        loud = 1;
+    }
+    f32 want = lbl_80561CAC;
+    if (loud) {
+        want = lbl_80561CD0;
+    }
+    f32 dv = want - vol;
+    if (dv > lbl_80561DFC) {
+        dv = lbl_80561DFC;
+    }
+    f32 dvc = lbl_80561E1C;
+    if (dv > lbl_80561E1C) {
+        dvc = dv;
+    }
+    fn_801B8964(S32(p, 0x1EC), vol + dvc);
+    int trick = 0;
+    if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0] && (f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+        f32 yaw = lbl_80561E20 * F32(p, 0x25D8) * F32(p, 0x25F0) * F32(p, 0x5B0);
+        f32 sp = PSVECMag(p + 0x118);
+        f32 m = lbl_80561CD0;
+        if (sp > m) {
+            m = sp;
+        }
+        BVec dir;
+        f32 inv = lbl_80561CD0 / m;
+        dir.x = F32(p, 0x118) * inv;
+        dir.y = F32(p, 0x11C) * inv;
+        dir.z = F32(p, 0x120) * inv;
+        if (U8(p, 0x2680)) {
+            BVec d2;
+            d2.y = lbl_80561CFC * dir.y;
+            d2.x = dir.x;
+            d2.z = dir.z;
+            BVec side;
+            PSVECCrossProduct(&d2, p + 0x54, &side);
+            f32 g = lbl_80561CD0;
+            if ((s32)fn_8018B06C(p) < 0) {
+                g = lbl_80561CAC;
+            }
+            f32 st = F32(p, 0x25F0) * g;
+            f32 lat = PSVECDotProduct(&side, p + 0x48);
+            f32 t = Clamp01((F32(p, 0x25D4) - lbl_80561E24) / lbl_80561E28);
+            yaw = yaw + t * (lbl_80561D44 * lbl_80561DEC * (lbl_80561D38 * st - lat) - yaw);
+        }
+        f32 now = lbl_8055E3C8;
+        if (S32(p, 0x2638) == 0 && S32(p, 0x2644) > 0 &&
+            (now - F32(p, 0x2634) > lbl_80561D38 || F32(p, 0x2618) < lbl_80561D00)) {
+            fn_8014E61C(S32(p, 0x1EC), 7, (f32)S32(p, 0x2644));
+            S32(p, 0x2644) = 0;
+            trick = 1;
+        }
+        if (F32(p, 0x2618) < lbl_80561CDC) {
+            S32(p, 0x263C) = 0;
+            if (S32(p, 0x2638)) {
+                S32(p, 0x2638) = 0;
+                if (S32(p, 0x2644) > 1) {
+                    fn_8014E61C(S32(p, 0x1EC), 7, (f32)(S32(p, 0x2644) - 1));
+                    trick = 1;
+                }
+            }
+            S32(p, 0x2644) = 0;
+        }
+        if (S32(p, 0x2638)) {
+            CbSpinEvent ev;
+            ev.id = S32(p, 0x1EC);
+            ev.left = S32(p, 0x2638) == 1;
+            fn_801796CC(17, &ev, sizeof(ev));
+        }
+        if (!lbl_8055A3B4 || U32(p, 0x10) != 'PCAR' || F32(p, 0x2618) <= lbl_80561CDC || F32(p, 0x25D4) <= lbl_80561DD4 ||
+            S32(p, 0x2638)) {
+            if (S32(p, 0x2638)) {
+                f32 sgn = lbl_80561CD0;
+                if (S32(p, 0x2638) == 1) {
+                    sgn = lbl_80561DE4;
+                }
+                BVec fwd;
+                fwd.x = F32(p, 0x54);
+                yaw = lbl_80561E30 * sgn;
+                fwd.z = F32(p, 0x5C);
+                fwd.y = lbl_80561CAC;
+                BVec v;
+                v.x = dir.x;
+                v.z = dir.z;
+                v.y = lbl_80561CAC;
+                if (PSVECDotProduct(&fwd, &v) < lbl_80561CAC) {
+                    U8(p, 0x2640) = 1;
+                } else if (U8(p, 0x2640)) {
+                    S32(p, 0x2638) = 0;
+                    F32(p, 0x2628) = lbl_80561CAC;
+                    F32(p, 0x262C) = lbl_80561CAC;
+                    F32(p, 0x2634) = now;
+                }
+            }
+        } else {
+            int held = 0;
+            if (F32(p, 0x25E4) > lbl_80561D40 && U8(p, 0x260D)) {
+                held = 1;
+            }
+            if (F32(p, 0x25F0) < lbl_80561E2C) {
+                F32(p, 0x2628) = now;
+            }
+            if (F32(p, 0x25F0) > lbl_80561D64) {
+                F32(p, 0x262C) = now;
+            }
+            if (!held) {
+                F32(p, 0x2630) = now;
+            }
+            if (S32(p, 0x2644) == 0 && !held) {
+                F32(p, 0x2628) = lbl_80561D94;
+                F32(p, 0x262C) = lbl_80561D94;
+            }
+            f32 l = F32(p, 0x2628);
+            f32 r = F32(p, 0x262C);
+            f32 gap = l - r;
+            if (l < r) {
+                r = l;
+            }
+            int side = F32(p, 0x2628) <= F32(p, 0x262C) ? 2 : 1;
+            if ((f32)__fabs(gap) < lbl_80561D38 && now - r < lbl_80561CD0 && held &&
+                (S32(p, 0x263C) == 0 || side == S32(p, 0x263C))) {
+                S32(p, 0x2638) = side;
+                S32(p, 0x263C) = side;
+                U8(p, 0x2640) = 0;
+                f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
+                f32 sgn = lbl_80561CD0;
+                if (S32(p, 0x2638) == 1) {
+                    sgn = lbl_80561DE4;
+                }
+                if (sgn * spin >= lbl_80561DE8 || S32(p, 0x2644)) {
+                    F32(p, 0x2628) = now;
+                    F32(p, 0x262C) = lbl_80561CAC;
+                    S32(p, 0x2644) = S32(p, 0x2644) + 1;
+                } else {
+                    S32(p, 0x2638) = 0;
+                }
+            }
+        }
+        f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
+        f32 fs = Clamp01((F32(p, 0x25D4) - lbl_80561E00) / lbl_80561E34);
+        f32 fa = Clamp01((F32(p, 0x2618) - lbl_80561D00) / lbl_80561E40);
+        f32 k = lbl_80561E3C * F32(p, 0x5E4) * F32(p, 0x5E4) * (lbl_80561CD0 + fa * lbl_80561E14) *
+                (yaw * (lbl_80561CD0 + fs * lbl_80561E38) - spin);
+        BVec t;
+        t.x = F32(p, 0x48) * k;
+        t.y = F32(p, 0x4C) * k;
+        t.z = F32(p, 0x50) * k;
+        ((RigidBody*)p)->AddTorque((const RVec3*)&t);
+    }
+    int spins = S32(p, 0x2644) - (S32(p, 0x2638) != 0);
+    if (spins > 0 && !trick) {
+        fn_8014E61C(S32(p, 0x1EC), 9, (f32)spins);
+    }
+    if (S32(p, 0x2620) < 3) {
+        f32 grav = F32(p, 0x5DC);
+        f32 gravUp = F32(p, 0x5E0);
+        if (S32(p, 0x2620) == 0) {
+            f32 pitch = F32(p, 0x2600);
+            if (pitch < lbl_80561E44) {
+                grav = grav + (f32)__fabs(pitch) * (lbl_80561CDC * grav - grav);
+                gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC * gravUp - gravUp);
+            } else if (pitch > lbl_80561CCC) {
+                grav = grav + (f32)__fabs(pitch) * (lbl_80561CDC + grav - grav);
+                gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC + gravUp - gravUp);
+            }
+        }
+        if (!U8(p, 0x2625) && F32(p, 0x2618) >= lbl_80561CB8) {
+            f32 s = lbl_80561CD0 + F32(p, 0x5F0) * (lbl_8055E4D8 - lbl_80561CD0);
+            grav = grav * s;
+            gravUp = gravUp * s;
+        }
+        if (F32(p, 0x11C) > lbl_80561CAC) {
+            gravUp = grav;
+        }
+        airLift = airLift + gravUp;
+        BVec f;
+        f.x = lbl_80561CAC;
+        f.z = lbl_80561CAC;
+        f.y = airLift * (lbl_80561D98 * -F32(p, 0xD4));
+        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+        F32(p, 0x2684) = lbl_80561D98 * (lbl_80561CD0 + airLift);
+    }
+    f32 depth = fn_801DCEC0();
+    F32(p, 0x26D0) = depth;
+    int fast = F32(p, 0x25D4) >= lbl_80561CDC;
+    F32(p, 0x26CC) = F32(p, 0x26CC) + lbl_80561D00 * (depth - F32(p, 0x26CC));
+    if (fast || F32(p, 0x25F4) >= lbl_80561D00 || F32(p, 0x25E4) <= lbl_80561DD0) {
+        F32(p, 0x26A8) = lbl_80561CAC;
+    } else {
+        F32(p, 0x26A8) = F32(p, 0x26A8) + lbl_80561D9C;
+    }
+    u8 stuck = F32(p, 0x26A8) > lbl_80561CD8;
+    if (stuck != U8(p, 0x26AC)) {
+        U8(p, 0x26AC) = stuck;
+        fn_801BF1B8(PTR(p, 0x1EC), stuck);
+    }
+    if (U8(p, 0x26E0)) {
+        f32 sy = F32(p, 0x26E8) * lbl_80561E48;
+        f32 vy = F32(p, 0x26F4) * lbl_80561E10;
+        f32 sz = F32(p, 0x26EC) * lbl_80561E48;
+        f32 vz = F32(p, 0x26F8) * lbl_80561E10;
+        f32 ax = F32(p, 0x26E4) * lbl_80561E48 + F32(p, 0x26F0) * lbl_80561E10;
+        if (S32(p, 0x2620) > 0) {
+            f32 r = lbl_80561CD8 * F32(p, 0x2604);
+            F32(p, 0x26FC) = F32(p, 0x2600);
+            ax = ax + r;
+        }
+        BVec acc;
+        ObRotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
+        f32 ay = sy + vy + lbl_80561D34 * F32(p, 0x26FC) * (lbl_80561CD0 - F32(p, 0x25F0) * F32(p, 0x25F0)) +
+                 acc.y * lbl_80561E4C;
+        ax = ax + acc.x * lbl_80561E4C;
+        f32 az = sz + vz + acc.z * lbl_80561E4C;
+        f32 nvx = F32(p, 0x26F0) + ax * lbl_80561D9C;
+        f32 nvy = F32(p, 0x26F4) + ay * lbl_80561D9C;
+        f32 dx = nvx * lbl_80561D9C;
+        f32 nvz = F32(p, 0x26F8) + az * lbl_80561D9C;
+        f32 dy = nvy * lbl_80561D9C;
+        f32 dz = nvz * lbl_80561D9C;
+        int lean = F32(p, 0x26FC) > lbl_80561CB8;
+        F32(p, 0x26F0) = nvx;
+        F32(p, 0x26F4) = nvy;
+        F32(p, 0x26F8) = nvz;
+        F32(p, 0x26E4) = F32(p, 0x26E4) + dx;
+        F32(p, 0x26E8) = F32(p, 0x26E8) + dy;
+        F32(p, 0x26EC) = F32(p, 0x26EC) + dz;
+        if (lean) {
+            f32 k = lbl_80561CD8 * lbl_80561D98 * nvy * F32(p, 0xD4);
+            BVec f;
+            f.x = F32(p, 0x48) * k;
+            f.y = F32(p, 0x4C) * k;
+            f.z = F32(p, 0x50) * k;
+            ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+        }
+    }
+}
+
+u32 DeityCar_vf58(u8* p) { return 0; }
+
+void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
+
+}  // extern "C"
 
 extern "C" {
 
@@ -1683,8 +2675,8 @@ void fn_80186DE8(u8* p) {
             w->local[2] = x->pts[j].z;
             w->local[1] = x->pts[j].y - w6[j];
             f32 up = PSVECDotProduct(nrm, car + 0x54);
-            w->nFwd = PSVECDotProduct(nrm, car + 0x3C);
-            w->nUp = up;
+            w->nRight = PSVECDotProduct(nrm, car + 0x3C);
+            w->nFwd = up;
             w->grounded = nrm[1] > lbl_80561CCC;
             f32 comp = c->pts[5 + j].w;
             if (comp > lbl_80561E90) {
