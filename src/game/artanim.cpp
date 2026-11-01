@@ -659,10 +659,13 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                     pos[1] = pos[1] + parent->pos[1];
                     pos[2] = pos[2] + parent->pos[2];
                 }
+                f32 xx;
+                f32 z2;
+                f32 y2;
                 f32 x2 = q[0] + q[0];
-                f32 y2 = q[1] + q[1];
-                f32 z2 = q[2] + q[2];
-                f32 xx = q[0] * x2;
+                y2 = q[1] + q[1];
+                z2 = q[2] + q[2];
+                xx = q[0] * x2;
                 f32 yy = q[1] * y2;
                 f32 zz = q[2] * z2;
                 f32 xy = q[0] * y2;
@@ -682,8 +685,8 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 m[2][2] = 1.0f - (xx + yy);
                 m[3][0] = pos[0] * ps;
                 m[3][1] = pos[1] * ps;
-                m[3][2] = pos[2] * ps;
                 ArtElem* e = &a->elems[p->elem];
+                m[3][2] = pos[2] * ps;
                 f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
                 scale[2] = k0->scale[2] + u * (k1->scale[2] - k0->scale[2]);
                 scale[1] = k0->scale[1] + u * (k1->scale[1] - k0->scale[1]);
@@ -692,8 +695,8 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 if (e->xform) {
                     m[3][0] = m[3][0] + e->xform->pos[0] * ps;
                     m[3][1] = m[3][1] + e->xform->pos[1] * ps;
-                    m[3][2] = m[3][2] + e->xform->pos[2] * ps;
                     es = 1.0f * e->xform->scale;
+                    m[3][2] = m[3][2] + e->xform->pos[2] * ps;
                 }
                 if (e->type == 2) {
                     MulVec(off, e->model.off, m);
