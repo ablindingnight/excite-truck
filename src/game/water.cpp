@@ -642,15 +642,14 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
     }
     IdxTable idx = sQuad;
     f32 r = 0.3f * scale;
-    f32 d = 0.9f * scale;
     WVert v[4];
     for (int i = 0; i < 4; i++) {
         v[i].pos.x = (i & 1) ? r : -r;
         v[i].pos.y = (i & 2) ? r : -r;
-        v[i].color = 0xFFFFFFFF;
-        v[i].pos.z = d;
+        v[i].pos.z = (0.9f * scale);
         v[i].u = (i & 1) ? 1.0f : 0.0f;
         v[i].v = (i & 2) ? 1.0f : 0.0f;
+        v[i].color = 0xFFFFFFFF;
     }
     Frame m;
     m.x.x = 1.0f;
