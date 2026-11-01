@@ -1,3 +1,4 @@
+#include "game/stringlist.h"
 #include "game/uitable.h"
 #include "game/gart.h"
 #include "game/gxcanvas.h"
@@ -433,9 +434,12 @@ WidgetFragment* fn_8021D758(WidgetFragment* self,int destroy);
 }
 
 
-struct ObservedStringList {u32 unknown[2];int count,version;};
+
+// Fixed-record menu prefix only; distinct from StringList. Complete size is unproved.
+struct MenuEntryCountPrefix {void* entries;int unknown4,count;};
+typedef char MenuEntryCountOffset8[((unsigned long)&((MenuEntryCountPrefix*)0)->count)==8?1:-1];
 struct ObservedListViewport {int total,page,start;inline int Total() const{return total;}};
-struct RowListPrefix {char base[0x244];ObservedStringList* list;ObservedListViewport* view;int unknown24c,columns,rows,rowHeight;int* selected;int direction;float elapsed;unsigned char active;};
+struct RowListPrefix {char base[0x244];StringList* list;ObservedListViewport* view;int unknown24c,columns,rows,rowHeight;int* selected;int direction;float elapsed;unsigned char active;};
 static inline void SetListViewport(ObservedListViewport* view,int position){
  view->start=position;int limit=view->total-view->page;if(position>limit)view->start=limit;
  if(view->start<0)view->start=0;
@@ -446,7 +450,7 @@ extern u32 lbl_8033EA90[];extern const char lbl_8055B880[2];
 extern const float lbl_80563504,lbl_80563510;
 int fn_8022B620(int,const char*);void fn_8021E7D4(WidgetFragment*);
 void fn_802192AC(WidgetFragment*);
-WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, ObservedStringList *list, int *selected, ObservedListViewport *view);
+WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, StringList *list, int *selected, ObservedListViewport *view);
 typedef struct RowInputListNew {int unknown0,unknown4,count,version;} RowInputListNew;
 typedef struct RowInputViewNew {int total,page,start;} RowInputViewNew;
 typedef struct RowInputReceiverNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x218];unsigned char dirty;char gap235[15];RowInputListNew* list;RowInputViewNew* view;int unknown24c,columns,rows,rowHeight;int* selected;int direction;float elapsed;unsigned char active;} RowInputReceiverNew;
@@ -462,7 +466,7 @@ WidgetFragment* fn_8021E884(WidgetFragment* self,int destroy);
 
 extern "C" {
 extern int lbl_8055FBDC;
-const char* fn_8022D3F8(ObservedStringList*,int,int*);
+const char* fn_8022D3F8(StringList*,int,int*);
 void fn_8021E3BC(WidgetFragment* self,void* context);
 void fn_8021E51C(WidgetFragment* self);
 }
@@ -554,7 +558,7 @@ void fn_80221F9C(WidgetFragment*,void*);  // placeholder (388 bytes)
 extern "C" {}
 typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
-typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];ObservedStringList* list;GTextFont* font;unsigned int color;float radius,rate;} CircularPaintNew;
+typedef struct CircularPaintNew {void* vtable;int left,top,right,bottom,kind;char gap18[0x22c];StringList* list;GTextFont* font;unsigned int color;float radius,rate;} CircularPaintNew;
 
 
 extern "C" {
@@ -1974,7 +1978,7 @@ void fn_8021DB58(WidgetFragment* self){
    fn_802354A0(nextArrow,nextFrame,nextColor,nextX,y+height/2.0f,(0.0f),width,height);}
  }
 }
-WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, ObservedStringList *list, int *selected, ObservedListViewport *view)
+WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, StringList *list, int *selected, ObservedListViewport *view)
 {
   fn_80218F34(self, x, y, x + width, y + height, 0);
   self->vtable = lbl_8033EA90;
@@ -1991,13 +1995,13 @@ WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int h
   fields->rows = height / rowHeight;
   if (view)
   {
-    view->total = list->count;
+    view->total = list->used;
     view->page = fields->rows;
     fn_80219440(self, 0, view, 12);
     fn_8021E7D4(self);
   }
   fn_80219440(self, 0, selected, 4);
-  fn_80219440(self, 0, &list->version, 4);
+  fn_80219440(self, 0, &list->added, 4);
   return self;
 }
 void fn_8021E1C8(WidgetFragment *source, int unusedX, int y) {RowInputReceiverNew* fields=(RowInputReceiverNew*)source;
@@ -2089,15 +2093,15 @@ int fn_8021E620(WidgetFragment* self,int key){
  RowListPrefix* f=(RowListPrefix*)self;
  switch(key){
  case 0x126:if(*f->selected>0)--*f->selected;fn_8021E7D4(self);return 1;
- case 0x128:if(*f->selected+1<f->list->count)++*f->selected;fn_8021E7D4(self);return 1;
- case 0x122:{int last=f->list->count-1;int next=*f->selected+f->view->page;*f->selected=last<next?last:next;
+ case 0x128:if(*f->selected+1<f->list->used)++*f->selected;fn_8021E7D4(self);return 1;
+ case 0x122:{int last=f->list->used-1;int next=*f->selected+f->view->page;*f->selected=last<next?last:next;
  SetListViewport(f->view,f->view->start+f->view->page);
  fn_8021E7D4(self);return 1;}
  case 0x121:{int next=*f->selected-f->view->page;*f->selected=next<0?0:next;
  SetListViewport(f->view,f->view->start-f->view->page);
  fn_8021E7D4(self);return 1;}
  case 0x124:*f->selected=0;fn_8021E7D4(self);return 1;
- case 0x123:*f->selected=f->list->count-1;fn_8021E7D4(self);return 1;
+ case 0x123:*f->selected=f->list->used-1;fn_8021E7D4(self);return 1;
  }return 0;
 }
 void fn_8021E7D4(WidgetFragment* self){
@@ -2551,7 +2555,7 @@ void Finish__9MenuStateFi(void*,void* context){fn_802168BC(reinterpret_cast<int>
 extern int lbl_8055FBE4;
 // NonMatching: clean two-argument menu draw remains41 original-address words off.
 void fn_80221F9C(WidgetFragment* self, void* context) {
-    ObservedStringList* list;
+    MenuEntryCountPrefix* list;
     int ty;
     int top;
     int i;
@@ -2579,7 +2583,7 @@ void fn_80221F9C(WidgetFragment* self, void* context) {
     background = lbl_8055FBFC;
     highlight = lbl_8055FBF8;
     for (col = 0; col < ((MenuTablePrefix*)f->rows)->count; col++) {
-        list = (ObservedStringList*)f->rows[col].handle;
+        list = (MenuEntryCountPrefix*)f->rows[col].handle;
         fn_802C4F58(x + 2, y + 2, (const char*)&f->rows[col] + 4, color);
         if (col == f->row) {
             fn_802C3424(x, y + 10, x + 50, y + (list->count + 1) * 10, background);
@@ -2725,7 +2729,7 @@ void fn_80222CFC(WidgetFragment *source) {
     float y;
     char one[4];
     self = (CircularPaintNew*)source;
-    count = self->list->count;
+    count = self->list->used;
     base = -self->rate * fn_8023659C();
     if (count > 0) {
         total = (0.0f);
@@ -2764,9 +2768,9 @@ struct SelectionConstructBaseObservedNew {char storage[0x244];inline SelectionCo
 struct SelectionFullPrefix:SelectionConstructBaseObservedNew {const char* labels[33];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];GTextFont* resource;float period,scale,speed,first,second,pulse;char gap418[4];bool locked;};
 typedef char Selection391FullSize420[sizeof(SelectionFullPrefix)==0x420?1:-1];
 WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* rawList,int* selectedInput){SelectionFullPrefix* instance=(SelectionFullPrefix*)self;fn_80218F34(self,x,y,0,0,0);
-  ObservedStringList *list = (ObservedStringList *) rawList;
+  StringList *list = (StringList *) rawList;
 
-  int count = list->count;
+  int count = list->used;
   SelectionFullPrefix *f = (SelectionFullPrefix *) self;
 
   self->vtable = lbl_8033E4DC;

@@ -14,16 +14,7 @@ extern f32 lbl_80558DC4[];
 
 void* operator new[](size_t size, const char* tag);
 
-class StringList {
-public:
-    char* Get(int i, int* flag);
-
-    s32 count;     // offset 0x0
-    s32 len;       // offset 0x4
-    s32 used;      // offset 0x8
-    s32 added;     // offset 0xC
-    char** items;  // offset 0x10
-};
+#include "game/stringlist.h"
 
 #include "game/uitable.h"
 
