@@ -1633,7 +1633,7 @@ int RingChalMaster::vf3C(int view) {
                 {
                     TextElem e;
                     e = *body;
-                    e.pos.x -= 0.5f * Width(&e, buf);
+                    e.pos.x += -0.5f * Width(&e, buf);
                     Blend(&e, timer, buf, Ease(k));
                 }
             }
