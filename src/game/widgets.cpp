@@ -1,4 +1,5 @@
 #include "game/gart.h"
+#include "game/image.h"
 #include "game/uicontext.h"
 #include "game/gtext.h"
 #include "game/fonttext.h"
@@ -181,11 +182,11 @@ public:
 extern "C" {
 extern u32 lbl_8033F998[];
 
-void* gxGetImage(const char*);int fn_802C51C0(void*);int fn_802C5220(void*);
+
 AnimationPrefix* fn_802228B0(AnimationPrefix* self,const char* path,int width,int height);
 
-void fn_802C519C(void*);int fn_802C51AC(void*);
-void fn_802C5320(void*,int,float,float,float,float,float);
+
+
 AnimationPrefix* fn_80222998(AnimationPrefix* self,int destroy);
 int fn_802229FC(AnimationPrefix* self);
 void fn_80222A3C(AnimationPrefix* self,int x,int y,int unused,u32 frame);
@@ -270,7 +271,7 @@ WidgetFragment* fn_8021AF0C(WidgetFragment* self,int x,int y,void* watched,int o
 
 extern "C" {
 extern int lbl_8055FB9C,lbl_8055FBA0;
-void fn_802C5310(void*,int,float,float,float);
+
 void fn_8021AD10(WidgetFragment* self);
 }
 
@@ -527,7 +528,7 @@ struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,s
 typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
 extern "C" {
 extern float lbl_80558DC4[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
-void* fn_80211660(int);void fn_802354A0(void*,int,u32,float,float,float,float,float);void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
+void* fn_80211660(int);void fn_802354A0(void*,int,u32,float,float,float,float,float);
 }
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
@@ -706,7 +707,7 @@ struct LeafChildDispatch {virtual ~LeafChildDispatch();virtual void Slot0c();vir
 struct LeafChildPrefix {char base[0x244];LeafChildDispatch* child;int first,second;};
 struct LeafResource250 {char base[0x250];void* resource;};
 extern "C" {
-int fn_802C5280(void*,int,int,int);void fn_802C744C(int,void*);
+void fn_802C744C(int,void*);
 void fn_80229604(WidgetFragment* self,int,int);
 void fn_802298F8(WidgetFragment*,void*);
 void fn_802298FC(WidgetFragment*,void*);
@@ -1002,7 +1003,7 @@ struct FocusPaintPrefix {
 struct FullFormatDispatch {virtual ~FullFormatDispatch();virtual void Bind(void**,int*);virtual void Format(char*,int);virtual int Increase();virtual int Decrease();virtual int CanNext();virtual int CanPrevious();virtual float Value();};
 struct ExtendedFormatPrefix {char base[0x254];char text[80];FullFormatDispatch* target;int* focus;int token,left,right,lineY;};
 extern "C" {
-extern u32 lbl_8033F434[],lbl_8033EEDC[];int strncasecmp(const char*,const char*,unsigned long);void fn_802C5310(void*,int,float,float,float);
+extern u32 lbl_8033F434[],lbl_8033EEDC[];int strncasecmp(const char*,const char*,unsigned long);
 WidgetFragment* fn_80219E44(WidgetFragment* self,int destroy);
 void fn_80219F14(WidgetFragment* self);
 
@@ -1040,7 +1041,7 @@ WidgetFragment* fn_802241C8(WidgetFragment* self,WidgetDesc* desc);
 struct ToggleImagePrefix {char base[0x244];int frame,mode;float elapsed;void* context;int token;int* focus;int(*callback)(void*);bool active,pressed;char gap262[2];int speed;float alpha,blend,x,y,width,height;void* image;UIContext* asset;UIContext* scope;};
 struct SelectionCallbackPrefix {char base[0x258];int(*callback)(void*);void* context;int token;int* focus;};
 extern "C" {
-int fn_802C51AC(void*);
+
 void fn_802248FC(WidgetFragment* self);
 int fn_80224A38(WidgetFragment* self,int key);
 int fn_802267C4(WidgetFragment* self,int key);
@@ -1085,7 +1086,7 @@ WidgetFragment* fn_8021F678(WidgetFragment* self,int x,int y,int width,int heigh
 }
 
 extern "C" {
-extern const float lbl_80563518;extern u32 lbl_8033E7F4[];void fn_802C5334(void*,int,float,float,float,float,float,float,float,float,float);
+extern const float lbl_80563518;extern u32 lbl_8033E7F4[];
 void fn_8021FA98(WidgetFragment *self, int x, int y);
 void fn_8021FC40(WidgetFragment* self,void* context);
 void fn_8021FD68(WidgetFragment* self);

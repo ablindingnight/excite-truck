@@ -1,6 +1,6 @@
 #ifndef GAME_GART_H
 #define GAME_GART_H
-// Opaque reference-counted 2D art set; unrelated to GX image handles or either font record.
+// Opaque reference-counted 2D art set; also backs the null-safe image API. Not a font record.
 struct gArtSet;
 extern "C" {
 gArtSet* fn_8023512C(const char*);
