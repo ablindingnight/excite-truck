@@ -1117,7 +1117,7 @@ public:
                         state = 2;
                         set.Init(name, path, 0, sector);
                         ok = 1;
-                        deadline = fn_802E2C20() + fileSize / 3000 + 500;
+                        deadline = fn_802E2C20() + 500 + fileSize / 3000;
                     }
                 }
             }
@@ -1190,8 +1190,8 @@ int AsyncResourceSet::Restart(const char* name) {
         CopyHeader(&set.hdr, (ResSetHeader*)buf);
         fn_8012A80C(&set.hdr);
         set.mem = 0;
-        if (set.hdr.loadSize + set.hdr.baseOffset > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)", set.hdr.baseOffset + set.hdr.loadSize, bufSize);
+        if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
+            fn_802E317C("res: resident size exceeded buf! (%d > %d)", bufSize, set.hdr.loadSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
@@ -1238,8 +1238,8 @@ void AsyncResourceSet::Update(void) {
         set.hdr = *(ResSetHeader*)buf;
         fn_8012A80C(&set.hdr);
         set.mem = 0;
-        if (set.hdr.loadSize + set.hdr.baseOffset > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)", set.hdr.baseOffset + set.hdr.loadSize, bufSize);
+        if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
+            fn_802E317C("res: resident size exceeded buf! (%d > %d)", bufSize, set.hdr.loadSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
