@@ -943,8 +943,7 @@ void DeityCar::Update(void) {
             DeityCar* o = &lbl_8055E684[i];
             DCar* oc = o->Car();
             if (i != index && oc->type == 'PCAR') {
-                s32 op = o->State()->place;
-                if (State()->place > op) {
+                if (State()->place > (o->State()->place)) {
                     f32 d = fn_801B2F90(i, index);
                     lead = lead > d ? lead : d;
                 }

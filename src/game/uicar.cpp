@@ -1060,8 +1060,7 @@ void fn_80241820(ColorPick* c) {
             }
             if (c->color < c->vehicle->num_colors - 1) {
                 u8* art = fn_80211660(1);
-                f32 ah = fn_80235F64(art, 1);
-                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), y - (h - ah) * lbl_80563784,
+                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), y - (h - (fn_80235F64(art, 1))) * lbl_80563784,
                             lbl_80563758);
             }
             f32 l = c->leftFlash - lbl_80563764;
