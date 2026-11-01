@@ -3790,8 +3790,9 @@ inline void Pickup::Draw(Color col) {
         fn_802C9994(ot);
         fn_802C9950(oc);
     } else {
+        int ot;
         Color oc = fn_802C9950(col);
-        int ot = fn_802C9994(0);
+        ot = fn_802C9994(0);
         DrawMorph(VPos(pos[0], 1.25f + pos[1], pos[2]), 0, 0);
         fn_802C9994(ot);
         fn_802C9950(oc);
