@@ -705,9 +705,9 @@ void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, bool* fir
             if (type == e->type) {
                 e->flags |= 2;
                 if (got) {
-                    u32 f = e->flags;
-                    e->flags = f | 1;
-                    *got = !(f & 1);
+                    u32 was = e->flags & 1;
+                    e->flags |= 1;
+                    *got = was == 0;
                 }
                 if (sizeOut) {
                     *sizeOut = e->size;
