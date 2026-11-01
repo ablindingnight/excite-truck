@@ -100,14 +100,18 @@ PathFile* fn_801D9CC4(const char* name) {
         return 0;
     }
     if (swapped) {
+        int i;
+        Path* p;
+        PathKey* k;
+        int j;
         Swap32(&f->count);
-        for (int i = 0; i < f->count; i++) {
-            Path* p = &f->paths[i];
+        for (i = 0; i < f->count; i++) {
+            p = &f->paths[i];
             Swap32(&p->count);
             Swap32(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
-            for (int j = 0; j < p->count; j++) {
-                PathKey* k = &p->keys[j];
+            for (j = 0; j < p->count; j++) {
+                k = &p->keys[j];
                 Swap32(&k->t);
                 Swap32(&k->pos.x);
                 Swap32(&k->pos.y);
