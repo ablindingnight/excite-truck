@@ -559,6 +559,9 @@ void fn_8000E874(int player) {
         xr = x + w;
         ty = 1.0f + (y - h * 0.5f);
         switch (row->type) {
+        f32 size;
+        f32 bw;
+        f32 bh;
         case 1:
             fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.1f, x9, ty, row);
             break;
@@ -594,8 +597,8 @@ void fn_8000E874(int player) {
         case 7:
             fn_8000DFD8(row, fn_8000E338(row->a), x5, ty);
             {
-                f32 bw = 89.0f;
-                f32 bh = 17.0f;
+                bw = 89.0f;
+                bh = 17.0f;
                 fn_800109E4(lbl_8055D48C.value, x5 + row->c * bw / 100.0f - 5.0f, ty + bh * 0.5f, 2.0f, bh);
             }
             break;
@@ -608,7 +611,7 @@ void fn_8000E874(int player) {
         case 10:
             fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.0f, x9, ty, row);
             if (row->b >= 0) {
-                f32 size = 20.0f;
+                size = 20.0f;
                 fn_80010E94(lbl_8055D4CC, row->b, x9, ty + 0.5f * size, size, size);
             }
             break;
