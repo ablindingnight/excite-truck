@@ -343,15 +343,17 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
     const LightFrame* frame;
     ValVec3 def = color;
     if (fn_80288070(model, name, &frame)) {
+        ValueNodeV* n;
+        f32 r;
         u32 c;
         f32 w;
         f32 h;
         s32 type;
         if (fn_80287E20(model, name)) {
-            ValueNodeV* n = fn_80287E80(model, name);
+            n = fn_80287E80(model, name);
             const ValVec3& v = n->GetVec3Or("color", def);
             c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.z), ColorByte(255.0f * v.y));
-            f32 r = n->GetFloat("rad", rad);
+            r = n->GetFloat("rad", rad);
             w = n->GetFloat("width", -1.0f);
             h = n->GetFloat("height", -1.0f);
             if (w <= 0.0f || h <= 0.0f) {
