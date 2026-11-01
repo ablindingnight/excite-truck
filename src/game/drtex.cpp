@@ -464,8 +464,8 @@ GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
 
 GXTex* fn_802D8C00(const GXTexDesc* d, const char* name) {
     GXTex* t = fn_802D8A84(d, name);
-    s32 h = d->h;
     s32 w = d->w;
+    s32 h = d->h;
     t->hasAlpha = 1;
     GXGetTexBufferSize(w, h, 14, 0, 1);
     u8* alpha = d->data->alpha;
