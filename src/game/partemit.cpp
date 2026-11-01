@@ -556,6 +556,8 @@ void fn_802A02F4(const EmitterDef* d, const Spawn* s) {
 }
 
 // Fogs each player view by its distance to the emitter.
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
 void fn_802A042C(const EmitterDef* d, const Spawn* s) {
     f32 a;
     for (int i = 0; i < fn_801E85A4(); i++) {
@@ -578,15 +580,12 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
             }
             t = t > 0.0f ? t : 0.0f;
             a = 255.0f * d->fogDensity;
-            f32 f = a + t * (0.0f - a);
+            f32 f = Lerp(a, 0.0f, t);
             int add = f < 0.0f ? f - 0.5f : f + 0.5f;
             int al = add + (lbl_8055F820[i] >> 24);
             al = al > 0 ? al : 0;
-            int c = 0xFF;
-            if (al < 0xFF) {
-                c = al;
-            }
-            lbl_8055F820[i] = (c << 24) | (d->fogColor & 0xFFFFFF);
+            int c = al < 0xFF ? al : 0xFF;
+            lbl_8055F820[i] = (c << 24) | (d->fogColor & 0xFF0000) | (d->fogColor & 0xFF00) | (d->fogColor & 0xFF);
         }
     }
 }
