@@ -994,20 +994,23 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802C8D74();
                 break;
             case 2: {
+                Item* it;
+                int j;
+                u16* st;
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC278();
                 fn_802CADD0(te->tex, 1);
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                for (Item* it = te->head; it; it = it->next) {
+                for (it = te->head; it; it = it->next) {
                     if (!it->head) {
                         continue;
                     }
                     fn_802D3D94(0, ((Obj*)it)->mtx);
                     for (Chunk<u16*>* c = it->head; c; c = c->next) {
-                        for (int j = 0; j < c->count; j++) {
-                            u16* st = c->data[j];
+                        for (j = 0; j < c->count; j++) {
+                            st = c->data[j];
                             fn_802DC280(verts, nverts, st, st[0] + 1);
                             lbl_8055FA6C += Tris(c->data[j][0] - 1);
                         }
