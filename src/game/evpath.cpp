@@ -1565,13 +1565,7 @@ static inline f32 Clamp01F(f32 v) {
 static inline int CupSlot(EvCupBar* b) { return b->still ? 5 : lbl_804B3048.Find(b); }
 
 // Can the event be picked: it has a bracket that is open (or everything is unlocked).
-static inline int Selectable(EvCupBar* e) {
-    int ok = 0;
-    if (e->Cup() && (IsUnlockAll() || e->cup->Open())) {
-        ok = 1;
-    }
-    return ok;
-}
+static inline int Selectable(EvCupBar* e) { return e->Cup() && (IsUnlockAll() || e->cup->Open()); }
 
 // Refreshes the cup's caption: the "perfected" animation once, its style (6 when current), its "done/total"
 // progress when it is open, and its icon.
@@ -1581,13 +1575,8 @@ static inline void RefreshCup(EvCupBar* b) {
             fn_80236954("cup_perfected");
             add_anim_to_wait_for("cup_perfected");
         }
-        int show = 0;
         b->style = (u8*)b == (u8*)lbl_8055F688 ? 6 : 7;
-        if (b->cup->Open()) {
-            if (!b->cup->AllDone() || fn_8023695C("cup_perfected")) {
-                show = 1;
-            }
-        }
+        int show = b->cup->Open() && (!b->cup->AllDone() || fn_8023695C("cup_perfected"));
         b->showStars = show;
         if (show) {
             int n = b->cup->Count();
