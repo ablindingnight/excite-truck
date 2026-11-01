@@ -74,6 +74,7 @@ static u16 __WPAD_dpd_diff_count_threshold = WPAD_DEFAULT_DPD_DIFF_COUNT_THRESHO
 static u16 __WPAD_acc_hyst_count_threshold = WPAD_DEFAULT_ACC_HYST_COUNT_THRESHOLD;
 static u16 __WPAD_dpd_hyst_count_threshold = WPAD_DEFAULT_DPD_HYST_COUNT_THRESHOLD;
 
+static BOOL OnShutdown(BOOL final, u32 event);
 static OSShutdownFunctionInfo ShutdownFunctionInfo = {OnShutdown, 127};
 
 extern void DEBUGPrint(const char*, ...);
@@ -100,7 +101,6 @@ void WPADiAfh() {
 char __WPADInitMsg[] = "WPADInit()\n";
 
 // forward declarations: functions below are ordered to match the original binary
-BOOL OnShutdown(BOOL final, u32 event);
 s32 WPADiGetStatus(s32 chan);
 BOOL __SetSensorBarPower(BOOL flag);
 static u8 __GetDpdSensitivity();
@@ -204,7 +204,7 @@ BOOL WPADiSendSetReportType(WPADCmdQueue* queue, u32 fmt, WPADCallback callback)
 void WPADGetAddress(s32 chan, u8* addr);
 void WPADShutdown();
 
-BOOL OnShutdown(BOOL final, u32 event) {
+static BOOL OnShutdown(BOOL final, u32 event) {
     BOOL ret;
     s32 status;
 

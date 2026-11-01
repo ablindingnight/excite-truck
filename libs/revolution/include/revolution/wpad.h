@@ -401,7 +401,6 @@ u8 WPADGetSensorBarPosition(void);
 s32 WPADGetStatus(void);
 
 void WPADInit(void);
-BOOL OnShutdown(BOOL final, u32 event);
 u8 WPADGetDpdSensitivity(void);
 
 void __WPADShutdown(void);
