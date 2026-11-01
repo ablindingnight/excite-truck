@@ -452,7 +452,7 @@ void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst,
             int n = w;
             do {
                 u16 p = *s++;
-                *d++ = ((p << 1) & 0xFFC0) | (p & 0x1F) | (((p << 1) & 0x400) >> 5);
+                *d++ = ((p << 1) & 0xFFC0) | (((p << 1) & 0x400) >> 5) | (p & 0x1F);
             } while (--n > 0);
             s += sskip;
             d += dskip;
