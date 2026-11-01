@@ -274,13 +274,14 @@ void fn_801C1218(PSys* s) {
         RVec3* o = &s->old[i];
         RVec3* a = &s->acc[i];
         RVec3 t = *p;
-        f32 dt2 = s->dt * s->dt;
         p->x *= keep;
         p->y *= keep;
         p->z *= keep;
         p->x += o->x * damp;
         p->y += o->y * damp;
         p->z += o->z * damp;
+        f32 dt = s->dt;
+        f32 dt2 = dt * dt;
         p->x += a->x * dt2;
         p->y += a->y * dt2;
         p->z += a->z * dt2;
