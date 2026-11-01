@@ -1017,9 +1017,9 @@ int Arena::CountRingSets(void) {
 }
 
 static inline int CountInfos(ValueNode* set) {
+    ValueNode* c;
     int n = 0;
     int i;
-    ValueNode* c;
     for (i = 0; (c = set->GetChildAt(i)) != 0; i++) {
         if (!strcasecmp(c->GetName(), "object") && strcasecmp(c->GetValue("dyno"), "teleport")) {
             n++;
@@ -1029,9 +1029,9 @@ static inline int CountInfos(ValueNode* set) {
 }
 
 static inline int CountTeles(ValueNode* set) {
+    ValueNode* c;
     int n = 0;
     int i;
-    ValueNode* c;
     for (i = 0; (c = set->GetChildAt(i)) != 0; i++) {
         if (!strcasecmp(c->GetName(), "object") && !strcasecmp(c->GetValue("dyno"), "teleport")) {
             n++;
@@ -1043,13 +1043,13 @@ static inline int CountTeles(ValueNode* set) {
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
 u8 ObjSet::Load(ValueNode* set, ValueTable** dynos) {
+    ValueNode* c;
     u8 ok;
+    int i;
     infos = new ("ObjectInfo") IArray<ObjInfo>(CountInfos(set), "rc_object_info");
     teles = new ("ObjectTeleport") IArray<ObjTeleport>(CountTeles(set), "rc_object_teleport");
     ok = 1;
     {
-        ValueNode* c;
-        int i;
         for (i = 0; (c = set->GetChildAt(i)) != 0; i++) {
             if (strcmp(c->GetName(), "object")) {
                 continue;
