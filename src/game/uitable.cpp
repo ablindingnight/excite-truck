@@ -25,31 +25,7 @@ public:
     char** items;  // offset 0x10
 };
 
-class UITable {
-public:
-    UITable(int rows, int cols, const int* widths);
-    ~UITable(void);
-    void Clear(void);
-    char* At(int row, int col);
-    char* Get(int row, int col, int* flag);
-    void Set(int row, int col, const char* s, char flag);
-    void SetVisible(int n);
-    void SetPage(int p);
-    void SetSel(int s);
-
-    char* buf;     // offset 0x0
-    s32 cols;      // offset 0x4
-    s32 used;      // offset 0x8
-    s32 rows;      // offset 0xC
-    s32 visible;   // offset 0x10
-    s32 rowSize;   // offset 0x14
-    s32* widths;   // offset 0x18
-    s32* offsets;  // offset 0x1C
-    s32 page;      // offset 0x20
-    s32 changes;   // offset 0x24
-    u32 magic;     // offset 0x28
-    s32 sel;       // offset 0x2C
-};
+#include "game/uitable.h"
 
 struct TableEntry {
     u8 pad[0x28];
