@@ -1068,10 +1068,10 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         if (sscanf(use->GetValue(key), "%f %s", &dist, mode) != 2) {
             fn_802E317C("Lod table %s: bad value %s", name, use->GetValue(key));
         }
-        int y = strchr(mode, 'y') != 0;
+        char* y = strchr(mode, 'y');
         LodEntry* e = &m->lods[m->numLods];
         e->dist = dist;
-        e->noMirror = y;
+        e->noMirror = y != 0;
         m->numLods++;
     }
     if (m->mirrorLod >= m->numLods) {
