@@ -633,7 +633,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 r = q->a * lbl_80562478;
         fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, -(q->c * lbl_80562478 - r)),
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
-        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, q->c * lbl_80562478 - r),
+        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, lbl_80562478 * q->c - r),
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
