@@ -560,8 +560,8 @@ void fn_8018DA5C(u8* p, u8* m) {
         }
     }
     U32(m, 0x29C) |= U32(p, 0x1E40);
-    DmgSlot* s = (DmgSlot*)(p + 0x152C);
     DamagePart* tp = lbl_80332840;
+    DmgSlot* s = (DmgSlot*)(p + 0x152C);
     f32 t = lbl_8055E460;
     S32(m, 0xA78) = 0;
     for (int i = 0; i < 17; i++) {
