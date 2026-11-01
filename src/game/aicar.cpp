@@ -2160,31 +2160,19 @@ void fn_8019743C(u8* d, u8* out) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
             f32 lo = 0.61f + lbl_8055A488 + F32(d, 0x278) + F32(d, 0x7C) + 0.5f * F32(d, 0x84);
-            if (lo < F32(d, 0xC4)) {
-                lo = F32(d, 0xC4);
-            }
-            F32(d, 0xC4) = lo;
+            F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
         }
         if (U8(d, 0x9C)) {
             f32 hi = (F32(d, 0x278) + F32(d, 0xA4) + 0.5f * F32(d, 0xAC)) - (0.61f + lbl_8055A488);
-            if (F32(d, 0xC8) < hi) {
-                hi = F32(d, 0xC8);
-            }
-            F32(d, 0xC8) = hi;
+            F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
         }
         f32 push = F32(d, 0xE8);
         if (push > 0.0f) {
             f32 lo = F32(d, 0x278) + push;
-            if (lo < F32(d, 0xC4)) {
-                lo = F32(d, 0xC4);
-            }
-            F32(d, 0xC4) = lo;
+            F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
         } else if (push < 0.0f) {
             f32 hi = F32(d, 0x278) + push;
-            if (F32(d, 0xC8) < hi) {
-                hi = F32(d, 0xC8);
-            }
-            F32(d, 0xC8) = hi;
+            F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
         }
         u32 blocked = 0;
         u8* side = 0;
