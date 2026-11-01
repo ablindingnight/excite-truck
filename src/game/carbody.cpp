@@ -3918,15 +3918,15 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     F32(p, 0x251C) = 0.0f;
     F32(p, 0x25F8) = 1.0f;
     F32(p, 0x23C0) = F32(p, 0x2434) = F32(p, 0x25F0) * F32(p, 0x5B0);
-    F32(p, 0x25E8) = 1.0f;
     v0 = PK_UNPACK(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PK_UNPACK(cur->throttle, 255.0f, 0.0f, 1.0f);
+    F32(p, 0x25E8) = 1.0f;
     fn_8018ADB4(p, v1 + t * (v0 - v1));
     v0 = PK_UNPACK(prev->brake, 255.0f, 0.0f, 1.0f);
     v1 = PK_UNPACK(cur->brake, 255.0f, 0.0f, 1.0f);
+    U8(p, 0x260D) = (cur->flags >> 8) & 1;
     fn_8018ADBC(p, v1 + t * (v0 - v1));
     U32(p, 0x4) = cur->flags | prev->flags;
-    U8(p, 0x260D) = (cur->flags >> 8) & 1;
     u8* w = p + 0x23AC;
     const u8* c = cur->wheel[0];
     const u8* q = prev->wheel[0];
@@ -3943,14 +3943,14 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
         } else if (a1 - a0 > 3.1415927f) {
             a0 += 6.2831855f;
         }
-        F32(w, 0x8) = a1 + t * (a0 - a1);
         f32 l0 = PK_UNPACK(q[1], 255.0f, -100.0f, 200.0f);
+        F32(w, 0x8) = a1 + t * (a0 - a1);
         f32 l1 = PK_UNPACK(c[1], 255.0f, -100.0f, 200.0f);
         F32(w, 0x0) = l1 + t * (l0 - l1);
         f32 k0 = PK_UNPACK(q[3], 255.0f, 0.0f, 10.0f);
         f32 k1 = PK_UNPACK(c[3], 255.0f, 0.0f, 10.0f);
-        F32(w, 0x68) = k1 + t * (k0 - k1);
         u8 f = c[4];
+        F32(w, 0x68) = k1 + t * (k0 - k1);
         S32(w, 0x70) = f;
         U8(w, 0x6C) = 1;
         U8(w, 0x20) = f & 1;
