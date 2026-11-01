@@ -329,7 +329,10 @@ extern "C" {
 void fn_801DF6FC(void) { new ("crashmode") CrashMode(); }
 
 int fn_801DF93C(int view) {
+    ArtElem* fl;
+    ArtElem* fr;
     ArtElem* up;
+    ArtElem* dn;
     int car;
     CrashMode* m;
     CrashState* s;
@@ -351,15 +354,16 @@ int fn_801DF93C(int view) {
     fill = Clamp(s->pump, 0.0f, 1.0f);
     dur = lbl_8055AE40 / fn_80176A2C();
     fade = dur / 7.0f;
-    left = Max(0.0f, dur - (fn_801E7E18() - s->time));
+    f32 now = fn_801E7E18();
+    left = Max(0.0f, dur - (now - s->time));
     if (left > dur - fade || !s->boosted) {
         u32 c0 = fn_80144C68(0xFF, 0x1E, 0x64, 0xF0);
         u32 c1 = fn_80144C68(0xFF, 0xF0, 0x32, 0);
         fn_80147C50(c0, c1, fill);
         DrawArt(m->layout, "bar_left", -1, m->boostTex);
         DrawArt(m->layout, "bar_right", -1, m->boostTex);
-        ArtElem* fl = m->layout->FindArt("bar_fill_left");
-        ArtElem* fr = m->layout->FindArt("bar_fill_right");
+        fl = m->layout->FindArt("bar_fill_left");
+        fr = m->layout->FindArt("bar_fill_right");
         if (fl && fr) {
             f32 split = fl->w / (fl->w + fr->w);
             f32 a = fn_8014C8B4(0.0f, split, 0.0f, 1.0f, fill);
@@ -395,7 +399,7 @@ int fn_801DF93C(int view) {
             }
             k = fn_80144BD8(k);
             up = m->layout->FindArt("arrow_up");
-            ArtElem* dn = m->layout->FindArt("arrow_dn");
+            dn = m->layout->FindArt("arrow_dn");
             if (up && dn) {
                 ArtElem e(*up);
                 V2 p = LerpV2(up->pos, dn->pos, k);
