@@ -401,13 +401,15 @@ MatPlacer::MatPlacer(ValueNode* node, int i) {
 }
 
 // Spreads the weighted objects over the 128 slots, with gaps when the weights leave room.
+// A random index below n.
+static inline int RandomBelow(const s32& n) { return fn_80129D90(0, 0, n); }
 inline void MatPlacer::Rebuild(void) {
     int total = 0;
     for (int i = 0; i < placers.count; i++) {
         total += placers.data[i]->weight;
     }
     if (total > 128) {
-        int k = fn_80129D90(0, 0, placers.count);
+        int k = RandomBelow(placers.count);
         do {
             ObjectPlacer* p = placers.data[k];
             if (p->weight > 0) {
