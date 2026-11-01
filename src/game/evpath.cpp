@@ -171,6 +171,10 @@ public:
 static UnkStatic123s lbl_804B2FF8;            // this unit's end-of-menu tag
 static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
+// Index of a cup bar in the current path's list (the bar is held as an s32 handle).
+static inline int BarIndex(const s32& bar) { return lbl_804B3048.Find((u8*)bar); }
+// Menu slot of an event: the bonus slot (5) or its place in the registry.
+static inline int EventSlot(u8* e) { return U8(e, 0x64) ? 5 : lbl_804B3048.Find(e); }
 static char lbl_804B3068[100];                // the selected cup's help text
 static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
 static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
@@ -669,7 +673,7 @@ int fn_802808D0(void) {
             ok = 1;
         }
         if (ok) {
-            int idx = U8((u8*)lbl_8055F688, 0x64) ? 5 : lbl_804B3048.Find((u8*)lbl_8055F688);
+            int idx = EventSlot((u8*)lbl_8055F688);
             char buf[0x1E];
             fn_801345D8(buf, 0x1E, "select_%d", idx + 1);
             fn_80236954(buf);
@@ -745,9 +749,6 @@ int fn_80280C00(void) {
 }
 
 // Next event in the same state (done/not done) as the current one.
-// Index of a cup bar in the current path's list (the bar is held as an s32 handle).
-static inline int BarIndex(const s32& bar) { return lbl_804B3048.Find((u8*)bar); }
-
 int fn_80280DC8(void) {
     if (lbl_8055F688) {
         int i = BarIndex(lbl_8055F688);
@@ -799,8 +800,6 @@ int fn_80280F7C(void) {
 
 int fn_802368EC(void);
 
-// Menu slot of an event: the bonus slot (5) or its place in the registry.
-static inline int EventSlot(u8* e) { return U8(e, 0x64) ? 5 : lbl_804B3048.Find(e); }
 
 // Plays the "back to slot" animation, then the unlock animation for the newly opened event.
 void fn_80281138(void) {
