@@ -533,8 +533,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         ui.channel = fn_802E4A10();
         StatPanel panel;
         panel.Clear();
-        GaragePair* pair = &lbl_80498C48.pairs[slot];
-        CarPick cars(screen, lbl_80498C48.alt ? &pair->d : &pair->b, lbl_80498C48.alt ? &pair->c : &pair->a, &panel,
+        CarPick cars(screen, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel,
                      &ui);
         for (;;) {
             if (!lbl_80498C48.alt) {
@@ -578,8 +577,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 for (int i = 0; i < v->num_colors; i++) {
                     colors->Add(cars.Chassis(), 1, 0);
                 }
-                ColorPick paint(colors, lbl_80498C48.alt ? &pair->d : &pair->b,
-                                lbl_80498C48.alt ? &pair->c : &pair->a, &panel, &ui, color);
+                ColorPick paint(colors, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b,
+                                lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
                 fn_8024EBAC(paint.data, fn_8024EBE4(paint.data), 1);
                 u8* e = fn_8024EB9C(paint.data, 0);
                 for (int i = 0; i < fn_8024EB94(paint.data); i++) {
@@ -620,8 +619,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
     }
     CarStatsShutdown();
     fn_8013C8B8();
-    GaragePair* pair = &lbl_80498C48.pairs[slot];
-    *vehicle = lbl_80498C48.alt ? pair->c : pair->a;
+    *vehicle = lbl_80498C48.alt ? lbl_80498C48.pairs[slot].c : lbl_80498C48.pairs[slot].a;
     return r != -1;
 }
 
