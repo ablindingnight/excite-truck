@@ -1216,7 +1216,7 @@ void fn_80007238(void) {
     LoadingFadeOut();
 }
 
-void fn_80007318(void) {
+void fn_80007318(int) {
     Camera cam;
     fn_80005C20();
     fn_80230B5C(&cam);
