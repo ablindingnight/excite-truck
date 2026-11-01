@@ -549,7 +549,7 @@ void fn_80221544(WidgetFragment *self, void *context);
 extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
 void fn_80221970(WidgetFragment* self);
 
-void fn_80221F9C(void);  // placeholder (388 bytes)
+void fn_80221F9C(WidgetFragment*,void*);  // placeholder (388 bytes)
 extern "C" {}
 typedef UIContext CircularPoseTypedNew;
 typedef struct CircularListTypedNew {int version;void* entries;int count;} CircularListTypedNew;
@@ -2547,7 +2547,61 @@ void fn_80221E7C(WidgetFragment* self){WidgetFragment* parent=(WidgetFragment*)s
 void fn_80221EA0(WidgetFragment* self,int key,void* value,int size){fn_80219440((WidgetFragment*)self->kind,key,value,size);}
 int fn_80221EA8(GroupSearchProxyNew* self){GroupSearchWordNew one=1;GroupSearchWordNew group=self->context->group;for(int index=0;index<32;index++){if(group==(one<<index))return index;}fn_802E317C(lbl_8033DA2C,group);return 0;}
 void Finish__9MenuStateFi(void*,void* context){fn_802168BC(reinterpret_cast<int>(context));}
-void fn_80221F9C(void) {}
+extern int lbl_8055FBE4;
+// NonMatching: clean two-argument menu draw remains41 original-address words off.
+void fn_80221F9C(WidgetFragment* self, void* context) {
+    ObservedStringList* list;
+    int ty;
+    int top;
+    int i;
+    int y;
+    int color;
+    int background;
+    int highlight;
+    int col;
+    int x;
+    MenuSelectionPrefix* f;
+    int w;
+    int t;
+    int off;
+    int c;
+    int l;
+    fn_802C3034(reinterpret_cast<gxCanvas*>(context));
+    l = self->left;
+    t = self->top;
+    w = ((WidgetDispatch*)self)->Slot78();
+    fn_802C3424(l, t, l + w, t + 10, lbl_8055FBE4);
+    f = (MenuSelectionPrefix*)self;
+    x = self->left;
+    y = self->top;
+    color = lbl_8055FBC0;
+    background = lbl_8055FBFC;
+    highlight = lbl_8055FBF8;
+    for (col = 0; col < ((MenuTablePrefix*)f->rows)->count; col++) {
+        list = (ObservedStringList*)f->rows[col].handle;
+        fn_802C4F58(x + 2, y + 2, (const char*)&f->rows[col] + 4, color);
+        if (col == f->row) {
+            fn_802C3424(x, y + 10, x + 50, y + (list->count + 1) * 10, background);
+            top = y + 11;
+            ty = y + 12;
+            i = 0;
+            off = 0;
+            for (; i < list->count; i++) {
+                if (i == f->column) {
+                    fn_802C3424(x + 1, top, x + 49, off + y + 19, color);
+                }
+                c = color;
+                if (i == f->column) {
+                    c = highlight;
+                }
+                fn_802C4F58(x + 2, ty, (const char*)fn_8022D97C(list, i), c);
+                off += 10;
+                top += 10;
+                ty += 10;
+            }
+        }
+        x += 50;
+    }}
 void fn_80222120(WidgetFragment* self,int x,int y){((PrefixFlag248*)self)->value=1;((RowInputDispatch*)self)->Slot4c(x,y);WidgetMarkDirty(self);}
 void fn_80222178(WidgetFragment* self,int x,int y){((RowInputDispatch*)self)->Slot4c(x,y);MenuSelectionPrefix* f=(MenuSelectionPrefix*)self;f->active=0;if(f->row>=0&&f->column>=0){MenuRecord* record=fn_8022D97C(f->rows[f->row].handle,f->column);if(!record->callback||record->callback(record->context))fn_802168BC(reinterpret_cast<int>(record->context));}f->row=-1;f->column=-1;WidgetMarkDirty(self);}
 void fn_80222234(MenuHitWidgetNew *self, int x, int y) {
