@@ -341,12 +341,16 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
             if(s->resource08)dy=-(f32)fn_80232B78(s->resource08);
         }
         width+=0.5f*(f32)(fn_801E4A6C(s->resource04,lbl_8055B8C0)+1);
-        int a=(int)s->field3C_2,b=(int)s->field3C_4;
+        int b;
+        int a;
+        a=(int)s->field3C_2;b=(int)s->field3C_4;
         left=StyleMinimum(left,(x+dx)+(f32)(b<a?b:a));
         right=StyleMaximum(right,(width+(x+dx))+(f32)(b>a?b:a));
-        a=(int)s->field3C_3;b=(int)s->field3C_5;
-        top=StyleMinimum(top,(y+dy)+(f32)(b<a?b:a));
-        bottom=StyleMaximum(bottom,(height+(y+dy))+(f32)(b>a?b:a));
+        int lowerOffset;
+        int upperOffset;
+        upperOffset=(int)s->field3C_3;lowerOffset=(int)s->field3C_5;
+        top=StyleMinimum(top,(y+dy)+(f32)(lowerOffset<upperOffset?lowerOffset:upperOffset));
+        bottom=StyleMaximum(bottom,(height+(y+dy))+(f32)(lowerOffset>upperOffset?lowerOffset:upperOffset));
     }
     *outLeft=left;*outRight=right;*outTop=top;*outBottom=bottom;
 }
