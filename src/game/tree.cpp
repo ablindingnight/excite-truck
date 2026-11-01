@@ -730,6 +730,7 @@ void fn_802BD814(void) {
         if (t->set) {
             TArray<TCell>* frames = t->set->frames;
             TArray<TreeRec>* list = t->set->list;
+            TArray<TCell>* near;
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->nearId, t->nearTex);
             for (int j = 0; j < frames->n; j++) {
@@ -753,7 +754,7 @@ void fn_802BD814(void) {
             }
             fn_802DC8B4();
             fn_802C8D74();
-            TArray<TCell>* near = t->set->near;
+            near = t->set->near;
             TArray<TreeRec>* list2 = t->set->list;
             if (t->farTris <= 10) {
                 fn_802C8BD0(fn_802C28C0());
