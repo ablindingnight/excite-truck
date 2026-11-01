@@ -347,6 +347,7 @@ void fn_8029F658(ValueNode* node) {
     zero2.y = 0.0f;
     EmitterDef* d = &lbl_804B5070[lbl_8055F81C];
     d->id = node->GetIntValue("id");
+    ValVec3 fc;
     const char* name = node->GetName();
     name += strlen("trkeffect");
     if (*name == '_') {
@@ -372,7 +373,7 @@ void fn_8029F658(ValueNode* node) {
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
-    ValVec3 fc = node->GetVec3Or("fog_color", ValVec3(white));
+    fc = node->GetVec3Or("fog_color", ValVec3(white));
     d->fogColor = FogColor((int)(255.0f * fc.x), (int)(255.0f * fc.y), (int)(255.0f * fc.z));
     d->repeat = node->GetInt("repeat", 1);
     const ValVec3& dp = node->GetVec3Or("dpos", ValVec3(zero3));
