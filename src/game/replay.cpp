@@ -205,6 +205,10 @@ struct PromptTimes {
 };
 
 struct ReplayClock {
+    void Start(void) {
+        last = fn_802E2C20();
+        time = 0;
+    }
     s32 last;  // offset 0x0
     s32 time;  // offset 0x4
 };
@@ -707,8 +711,7 @@ void fn_80009534(void) {
     lbl_8055D36D = 1;
     lbl_8055D36C = 0;
     lbl_805589B0 = 1;
-    lbl_8055D380.last = fn_802E2C20();
-    lbl_8055D380.time = 0;
+    lbl_8055D380.Start();
     lbl_8034F44C.shown = -600;
     lbl_8034F44C.touched = 0;
     lbl_8034F44C.visible = 1;
