@@ -324,12 +324,12 @@ extern f32 lbl_80558DC4[];      // FLT_EPSILON
 
 extern "C" {
 void fn_8019EECC(u8* owner, ObVec3* c);
-u8* fn_8019FFD8(u8* p, u8* frame, u8* owner);
-void fn_801A0258(u8* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin);
-void fn_801A0444(u8* grp, u8* box);
-u8* fn_801A2354(u8* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
-u8* fn_801A3190(u8* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
-u8* fn_801A3DAC(u8* p, u8* frame, const char* name, u8* owner);
+CollShape* fn_8019FFD8(void* p, u8* frame, u8* owner);
+void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin);
+void fn_801A0444(CollShape* grp, CollShape* box);
+CollShape* fn_801A2354(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+CollShape* fn_801A3190(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
+CollShape* fn_801A3DAC(void* p, u8* frame, const char* name, u8* owner);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 ObMesh* fn_802C6B44(const char* name);
@@ -514,11 +514,11 @@ extern "C" {
 // corners and collision shape for its type (ball, boxes, post, wall, horse, cone, barrel, wedge, poly volume,
 // barrier, tube, mesh corners), the shared surface kind, corner friction, the linked obstacle chain and its path.
 void fn_801A9AB0(u8* p, ObDesc* q) {
+    f32 cs;
     RVec3 origin;
     ObVec3 zero;
     CollShape* shape;
     int corners;
-    s32 kind;
     f32 k;
     f32 spring;
     f32 skin;
@@ -552,7 +552,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     origin.y = lbl_8056247C;
     origin.z = lbl_8056247C;
     spring = lbl_8056248C * k;
-    kind = q->kind;
+    s32 kind = q->kind;
     switch (q->type) {
     case 0:
     case 17:
@@ -581,12 +581,12 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         corners = 0;
         break;
     case 12: {
-        u8* s = (u8*)operator new(0x74, "obstacle-wall:box");
+        CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
             s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, lbl_805624A0,
                             lbl_80562490, q->a, lbl_80562478 * q->b, q->a);
         }
-        shape = (CollShape*)s;
+        shape = s;
         kind = 110;
         corners = 0;
         break;
@@ -609,21 +609,20 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, c, spring);
         c.z *= lbl_805624A4;
         AddCornerV(p, c, spring);
-        u8* grp = (u8*)operator new(0x184, "horse-volume");
-        if (grp) {
-            grp = fn_8019FFD8(grp, p + 0x3C, p);
+        shape = (CollShape*)operator new(0x184, "horse-volume");
+        if (shape) {
+            shape = fn_8019FFD8(shape, p + 0x3C, p);
         }
         f32 r = q->a * lbl_80562478;
-        fn_801A0258(grp, RVec3(lbl_8056247C, lbl_8056247C, -(q->c * lbl_80562478 - r)),
+        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, -(q->c * lbl_80562478 - r)),
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
-        fn_801A0258(grp, RVec3(lbl_8056247C, lbl_8056247C, q->c * lbl_80562478 - r),
+        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, q->c * lbl_80562478 - r),
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
-        u8* box = (u8*)operator new(0x74, "horse-box");
+        CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
             box = fn_801A2354(box, p + 0x3C, origin, p, k, skin, lbl_805624B0, lbl_805624B0, lbl_805624B0);
         }
-        fn_801A0444(grp, box);
-        shape = (CollShape*)grp;
+        fn_801A0444(shape, box);
         corners = 0;
         break;
     }
@@ -634,7 +633,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         ObVec3 v = MakeVec(q->a, -h * lbl_80562478, q->a);
         AddCornerV(p, v, spring);
         f32 m[9];
-        f32 cs = cos(lbl_805624B8);
+        cs = cos(lbl_805624B8);
         f32 sn = sin(lbl_805624B8);
         m[0] = cs;
         m[1] = lbl_8056247C;
@@ -680,15 +679,20 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 10: {
-        ValueTable* t = fn_80131808((const char*)&q->a);
-        int n = 0;
+        ObPlane* out;
+        ValueTable* t;
+        int n;
+        int i;
+        ValueNode* e;
+        ValueNode* ext;
         ObPlane pl[8];
-        ValueNode* ext = t->FindChild("extents");
+        t = fn_80131808((const char*)&q->a);
+        n = 0;
+        ext = t->FindChild("extents");
         ValVec3 lo = ext->GetVec3("min");
         ValVec3 hi = ext->GetVec3("max");
-        ObPlane* out = pl;
-        ValueNode* e;
-        for (int i = 0; (e = t->GetChild(i)) != 0; i++) {
+        out = pl;
+        for (i = 0; (e = t->GetChild(i)) != 0; i++) {
             if (strcmp(e->GetName(), "plane") == 0) {
                 ValVec3 nv = e->GetVec3("n");
                 f32 d = e->GetFloat("k");
@@ -701,22 +705,22 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
             }
         }
         fn_80131818(t);
-        u8* s = (u8*)operator new(0xE0, "polyvol");
+        CollShape* s = (CollShape*)operator new(0xE0, "polyvol");
         if (s) {
             s = fn_801A3190(s, p + 0x3C, pl, n, &lo, &hi, k, skin);
         }
+        shape = s;
         U8(p, 0x221) = 1;
-        shape = (CollShape*)s;
         corners = 0;
         break;
     }
     case 20: {
-        u8* s = (u8*)operator new(0x40, "pmshvol");
+        CollShape* s = (CollShape*)operator new(0x40, "pmshvol");
         if (s) {
             s = fn_801A3DAC(s, p + 0x3C, (const char*)&q->a, p);
         }
+        shape = s;
         U8(p, 0x221) = 1;
-        shape = (CollShape*)s;
         corners = 0;
         break;
     }
@@ -729,12 +733,12 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         c.z = q->f - lbl_805624C0;
         CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, lbl_805624C0, c);
         ((CollVolume*)p)->AddShape(ball);
-        u8* s = (u8*)operator new(0x74, "barrier-wall");
+        CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
             s = fn_801A2354(s, p + 0x3C, RVec3(hx - q->a, hy - q->c, q->f - lbl_805624C0), p, k, skin, hx, hy,
                             lbl_805624C4);
         }
-        shape = (CollShape*)s;
+        shape = s;
         AddCorner(p, q->a, q->c - lbl_805624C8, q->e, spring);
         AddCorner(p, q->b, q->c - lbl_805624C8, q->e, spring);
         AddCorner(p, q->a, q->c - lbl_805624C8, q->f, spring);
