@@ -1595,8 +1595,9 @@ int RingChalMaster::vf3C(int view) {
     f32 end1 = full0 - 0.15f;
     f32 in1 = end1 - 0.8f;
     f32 full1 = in1 - 0.3f;
+    TextElem* h0;
     TextElem* h1 = layout->Find("intro_head_1");
-    TextElem* h0 = layout->Find("intro_head_0");
+    h0 = layout->Find("intro_head_0");
     if (t < full1) {
         fn_8000FBE4();
     }
@@ -1611,7 +1612,8 @@ int RingChalMaster::vf3C(int view) {
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
                 fn_801308F4(buf, sizeof(buf), fn_80160998(fn_80160A74()));
                 {
-                    TextElem e = *body;
+                    TextElem e;
+                    e = *body;
                     e.pos.x -= 0.5f * Width(&e, buf);
                     Blend(&e, denom, buf, Ease(k));
                 }
@@ -1629,7 +1631,8 @@ int RingChalMaster::vf3C(int view) {
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k));
                 fn_80130978(buf, sizeof(buf), arena.timer.t);
                 {
-                    TextElem e = *body;
+                    TextElem e;
+                    e = *body;
                     e.pos.x -= 0.5f * Width(&e, buf);
                     Blend(&e, timer, buf, Ease(k));
                 }
