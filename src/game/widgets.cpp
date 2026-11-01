@@ -36,6 +36,10 @@ struct WidgetDesc {
  int field88,field8c;
  int style90,field94,field98,field9c,fielda0,fielda4;
 };
+// Observed canvas member only; this prefix does not establish the complete widget size.
+struct gxCanvas;
+struct CanvasWidgetPrefix {char prefix[0x244];gxCanvas* canvas;};
+typedef char CanvasWidgetMemberOffset[((unsigned long)&((CanvasWidgetPrefix*)0)->canvas)==0x244?1:-1];
 struct IntWatchPrefix {char prefix[0x254];int* value;};
 struct FlagTextPrefix {char prefix[0x254];unsigned char* flag;};
 struct WidgetFragment {inline int ProjectX(float scale,int index){return left+(int)(scale*(float)index);}inline int Left() const{return left;}inline int Top() const{return top;}
@@ -789,7 +793,7 @@ struct TweenPrefix {char base[0x24c];int selected;char gap250[12];float blend;ch
 // RichCaptionPrefix supplies the same text/font fields to the legacy bitmap draw callback.
 extern "C" {
 
-void fn_801A7E54(void*,int,int);void fn_802C40B8(int,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
+void fn_801A7E54(void*,int,int);void fn_802C40B8(gxCanvas*,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
 void fn_802168BC(void*);void fn_802237DC(WidgetFragment*);
 int fn_8021AB88(WidgetFragment*);
 int fn_8021C974(WidgetFragment*);
@@ -2332,7 +2336,7 @@ void fn_80220AFC(WidgetFragment* self,int x,int y){((RowInputDispatch*)self)->Sl
 void fn_80220B3C(WidgetFragment* self,int x,int y){if(((PrefixFlag258*)self)->value)((PointerEventDispatch*)self)->Slot3c(x,y);}
 void fn_80220B5C(WidgetFragment* self,void* context){int top,left;fn_802C3034(context);SliderFullPrefix* f=(SliderFullPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;top=self->top;left=self->left;int width=((WidgetDispatch*)self)->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,self->left+5,self->top+5,fill,selected);}
 void fn_80220C54(WidgetFragment* self){float height;SliderFullPrefix* f=(SliderFullPrefix*)self;int span=((WidgetDispatch*)self)->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;float x=(float)(self->left-lbl_8055FB9C/2);float y=(float)(lbl_8055FBA0/2-self->top);height=(float)fn_802C5220(f->background);fn_802C5320(f->background,selected,x,y,(0.0f),(float)((WidgetDispatch*)self)->Slot78(),height);height=(float)fn_802C5220(f->marker);fn_802C5320(f->marker,selected,(5.0f)+x,y-(5.0f),(0.0f),(float)fill,height);}
-void fn_80220E08(WidgetFragment* self,void* context){fn_802C3034(context);fn_802C40B8(self->x,self->left,self->top);}
+void fn_80220E08(WidgetFragment* self,void* context){fn_802C3034(context);fn_802C40B8(((CanvasWidgetPrefix*)self)->canvas,self->left,self->top);}
 WidgetFragment* fn_80220E48(WidgetFragment* self,int x,int y,int width,int height,void* view,int vertical){const char* strings=lbl_8033D878;fn_80218F34(self,x,y,x+width,y+height,0);self->vtable=lbl_8033E770;ScrollbarPrefix* f=(ScrollbarPrefix*)self;if(!vertical){f->track=gxGetImage(strings+0x150);f->marker=gxGetImage(strings+0x15c);}else{f->track=gxGetImage(strings+0x168);f->marker=gxGetImage(strings+0x174);}((WidgetDispatch*)self)->Slot1c(self->left,self->top);if(!vertical){int width=fn_802C51C0(f->track);fn_80219284(self,width,self->bottom-self->top);}else{int height=fn_802C5220(f->track);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}f->view=view;f->vertical=vertical;fn_80219440(self,0,view,12);f->dragging=0;return self;}
 void fn_80220F90(WidgetFragment* self,int x,int y){
  DragViewportPrefix* f=(DragViewportPrefix*)self;f->dragging=1;float ratio;
