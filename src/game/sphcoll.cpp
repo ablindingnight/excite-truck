@@ -3780,7 +3780,12 @@ void fn_801A38E4(u32 world, u8* p) {
         f32 k = (f32)__fabs(PSVECDotProduct(down.v, PTR(p, 0xC) + 0xC));
         F32(p, 0x24) = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
     }
-    case 'SPHR': {
+    case 'SPHR':
+        break;
+    default:
+        return;
+    }
+    {
         OwnerBody* owner = (OwnerBody*)PTR(p, 0x4);
         if (owner) {
             u8* e = PTR(owner, 0xD0);
@@ -3807,8 +3812,6 @@ void fn_801A38E4(u32 world, u8* p) {
         if (fn_80198F64((f32*)(p + 0x34), world, hit2.v, &depth2, n2.v, vel2.v, F32(p, 0x24))) {
             fn_8019A788(p, (u8*)world, (u32)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
         }
-        break;
-    }
     }
 }
 
