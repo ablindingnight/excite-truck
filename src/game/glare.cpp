@@ -200,10 +200,9 @@ void fn_802DD754(void) {
             GXCopyTex(t->data, 0);
             t->valid = 1;
             GXLoadTexObj(&lbl_8055FED8->obj, 0);
-            f32 scale = (f32)(1 << pass);
             Streak* s = lbl_804DB6A0.s;
             for (int j = 0; j < lbl_804DB6A0.count; j++) {
-                fn_802DD898(s, pass, scale, 0.5f);
+                fn_802DD898(s, pass, (f32)(1 << pass), 0.5f);
                 s++;
             }
         }
