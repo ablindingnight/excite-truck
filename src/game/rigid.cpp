@@ -496,7 +496,8 @@ void RigidBody::Update(void) {
         vel.x += force.x * k;
         vel.y += force.y * k;
         accel.x = force.x * invMass;
-        vel.z += force.z * k;
+        f32 zv = force.z;
+        vel.z += zv * k;
         accel.y = force.y * invMass;
         accel.z = force.z * invMass;
     }
@@ -526,19 +527,22 @@ void RigidBody::Update(void) {
     {
         RMtx r;
         f32 ang;
-        dr.x = avel.x * 0.0166833512f;
+        f32 xv = avel.x;
+        dr.x = xv * 0.0166833512f;
         dr.y = avel.y * 0.0166833512f;
         dr.z = avel.z * 0.0166833512f;
         ang = PSVECMag(&dr);
         if (ang > 0.0001f) {
             f32 inv = 1.0f / ang;
             f32 ax = inv * dr.x;
+            f32 s;
             f32 ay = inv * dr.y;
             f32 az = inv * dr.z;
-            f32 s = sin(ang);
+            s = sin(ang);
+            f32 tx;
             f32 co = cos(ang);
             f32 t = 1.0f - co;
-            f32 tx = t * ax;
+            tx = t * ax;
             f32 ty = t * ay;
             r.rot.m[0][0] = co + t * (ax * ax);
             r.rot.m[0][1] = ay * tx + s * az;
