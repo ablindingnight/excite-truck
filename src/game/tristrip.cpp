@@ -123,10 +123,10 @@ int fn_801E501C(int unused, const TVec3* dir, f32 width, u8 alpha) {
 }
 
 void fn_801E5174(f32 x, f32 y, f32 z) {
-    SkidQuad* q = &lbl_80487C78;
     if (lbl_8055EAA8 + 4 > 60 || lbl_8055EAAC + 6 > 174) {
         fn_801E4E44();
     }
+    SkidQuad* q = &lbl_80487C78;
     int n = lbl_8055EAA8;
     TVtx* v0 = &lbl_80487578[n];
     TVtx* v1 = &lbl_80487578[n + 1];
@@ -152,11 +152,10 @@ void fn_801E5174(f32 x, f32 y, f32 z) {
     v0->v = 1.0f;
     v3->v = 0.0f;
     v2->v = 0.0f;
-    n += 3;
-    AddTri(n);
-    n++;
-    lbl_8055EAA8 = n;
-    AddTri(n);
+    lbl_8055EAA8 = n + 3;
+    AddTri(lbl_8055EAA8);
+    lbl_8055EAA8++;
+    AddTri(lbl_8055EAA8);
 }
 
 void fn_801E5348(void) {
