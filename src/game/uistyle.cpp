@@ -554,9 +554,8 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         switch(effect) {
         case 1: {
             f32 halfGlow=0.5f*glow;
-            f32 factor=1.0f+glow;
             fn_802354A0(s->field64_2,current,((u32)alpha<<24)|0xFFFFFF,
-                px-halfGlow*imageWidth,py+halfGlow*imageHeight,0.0f,factor*imageWidth,factor*imageHeight);
+                px-halfGlow*imageWidth,py+halfGlow*imageHeight,0.0f,(1.0f+glow)*imageWidth,(1.0f+glow)*imageHeight);
             break;
         }
         default: break;
