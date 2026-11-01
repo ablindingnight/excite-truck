@@ -39,13 +39,16 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 int fn_80138C28(Motion* m, f32* t, f32* miss) {
     f32 a;
+    f32 hi;
     f32 b;
     f32 c;
     f32 disc;
     if (miss) {
         *miss = 0.0f;
     }
-    a = (m->a2 - m->a1) / 2;
+    a = m->a1;
+    hi = m->a2;
+    a = (hi - a) / 2;
     b = m->v2 - m->v1;
     c = m->p2 - m->p1;
     if (!fn_80138BFC(a)) {
