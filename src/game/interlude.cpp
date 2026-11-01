@@ -1337,6 +1337,7 @@ void debug_event(void) {
 
 // Drives the AI cars by their standing orders while an interlude runs.
 void fn_801C56AC(void) {
+    f32 orderSpeed;
     if (lbl_8055E7E2) {
         AIOrder* o = lbl_80437E30;
         for (int i = 0; i < 8; i++, o++) {
@@ -1409,8 +1410,9 @@ void fn_801C56AC(void) {
                     f32 r = fn_80139030(&m);
                     fn_8018ADB4(car, Clamp01(10.0f * r));
                     fn_8018ADBC(car, Clamp01(-r));
+                    orderSpeed = o->speed;
                     f32 leadNow = lead->speed;
-                    f32 base = leadNow + 0.5f * (o->speed - leadNow);
+                    f32 base = leadNow + 0.5f * (orderSpeed - leadNow);
                     if (gap > 0.0f) {
                         speed = base + 0.5f * (gap * o->speed);
                     } else {
