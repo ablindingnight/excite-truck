@@ -2244,16 +2244,21 @@ typedef struct BinkFile8011 {
 // DVDReadCallback: an async read of the ring finished. Checks the length (a full 0x8000 block, or the rest
 // of the file plus the alignment skip), drops the skip bytes, advances the ring and the counters, then starts
 // the next read unless the reader is suspended.
+static __inline u32 BinkLeft(BinkFile8011 *f) { return f->fileSize - f->filePos; }
+
 void fn_8011A4F8(s32 result, DVDFileInfo *fi) {
     BinkIO8011 *io = ((BinkFile8011 *)fi)->io;
 
     if (BINKFILE(io)->cancelling)
         return;
 
-    if (result != 0x8000 && result != BINKFILE(io)->fileSize - BINKFILE(io)->filePos + BINKFILE(io)->skip) {
-        io->doingRead = 0;
-        io->readError = 1;
-        return;
+    if (result != 0x8000) {
+        u32 left = BinkLeft(BINKFILE(io));
+        if (result != left + BINKFILE(io)->skip) {
+            io->doingRead = 0;
+            io->readError = 1;
+            return;
+        }
     }
 
     if (BINKFILE(io)->skip) {
