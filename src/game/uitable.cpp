@@ -34,15 +34,8 @@ public:
     char* Get(int row, int col, int* flag);
     void Set(int row, int col, const char* s, char flag);
     void SetVisible(int n);
-    void SetPage(int p) {
-        page = p;
-        changes++;
-    }
-    void SetSel(int s) {
-        sel = s;
-        SetPage(s / visible);
-        changes++;
-    }
+    void SetPage(int p);
+    void SetSel(int s);
 
     char* buf;     // offset 0x0
     s32 cols;      // offset 0x4
@@ -255,6 +248,17 @@ void UITable::SetVisible(int n) {
     if (sel >= 0) {
         SetSel(sel);
     }
+}
+
+void UITable::SetPage(int p) {
+    page = p;
+    changes++;
+}
+
+void UITable::SetSel(int s) {
+    sel = s;
+    changes++;
+    SetPage(s / visible);
 }
 
 extern "C" TableEntry* fn_8022D97C(EntryList* l, int i) { return &l->entries[i]; }
