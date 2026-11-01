@@ -300,8 +300,8 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
     }
     GXTex* t = d->user ? d->user : fn_802D7600(name);
     StrCopy(t->name, name, 32);
-    s32 h = d->h;
     s32 w = d->w;
+    s32 h = d->h;
     t->lut = 0;
     t->lut2 = 0;
     t->hasAlpha = 0;
@@ -447,7 +447,6 @@ GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
     s32 h = d->h;
     t->lut = 0;
     t->lut2 = 0;
-    t->hasAlpha = 0;
     GXGetTexBufferSize(w, h, 14, 0, 1);
     void* data = d->data->tex;
     t->data = data;
