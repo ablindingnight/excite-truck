@@ -120,7 +120,7 @@ void fn_8023293C(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
-void fn_802354A0(void* image, int unk, u32 color, f32 x, f32 y, f32 z);
+void fn_802354A0(void* image, int idx, f32 x, f32 y, f32 z, f32 width, f32 height, int color);
 void fn_80011280(u32 color, void* image, f32 x, f32 y, f32 width);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int fn_80277960(const char* name, CamFrame* frame, f32* fov);
@@ -478,7 +478,7 @@ void DrawLoadingBackground(int alpha) {
     f32 width = (1.7777778f * lbl_8055CFF0) / 1.3333334f;
     f32 height = lbl_8055CFF4;
 
-    fn_802354A0(lbl_8055D654, 0, (alpha << 24) | 0xFFFFFF, -0.5f * width, 0.5f * height, 0.0f);
+    fn_802354A0(lbl_8055D654, 0, -0.5f * width, 0.5f * height, 0.0f, width, height, (alpha << 24) | 0xFFFFFF);
 }
 
 
@@ -537,7 +537,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
     fn_80148134(&title_x, &title_y, 65.0f, 40.0f, 2);
     fn_80148134(&sub_x, &sub_y, 65.0f, 84.0f, 2);
     fn_80232BA4(lbl_8055D660, lbl_8055D64C, title_x, title_y, color, 9, 1.1733334f, 0.0f, 1.0f);
-    fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88f, 0.0f, 1.0f);
+    fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88000005f, 0.0f, 1.0f);
     show_goals = !lbl_8055D647;
     if (!lbl_8055D646 && lbl_8055D647) {
         f32 slide = 4.0f * SCurve(t);
