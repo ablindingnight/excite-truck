@@ -363,10 +363,8 @@ void fn_801C1364(PSys* s) {
             f32 den = len * (wb + wa);
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = l->c * len / den;
-            f32 ka = wb * k;
-            AddScaled(pa, pa, &proj, ka);
-            f32 kb = -wa * k;
-            AddScaled(pb, pb, &proj, kb);
+            AddScaled(pa, pa, &proj, wb * k);
+            AddScaled(pb, pb, &proj, -wa * k);
         }
         for (i = 0; i < s->nStick; i++) {
             PStick* st = &s->sticks[i];
@@ -386,10 +384,8 @@ void fn_801C1364(PSys* s) {
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = st->stiff * (len - st->rest) / den;
             if (!st->slack || k > 0.0f) {
-                f32 ka = wb * k;
-                f32 kb = -wa * k;
-                AddScaled(pa, pa, &d2, ka);
-                AddScaled(pb, pb, &d2, kb);
+                AddScaled(pa, pa, &d2, wb * k);
+                AddScaled(pb, pb, &d2, -wa * k);
             }
         }
         for (i = 0; i < s->nPart; i++) {
