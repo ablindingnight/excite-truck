@@ -664,7 +664,7 @@ void fn_802D9418(void) {
     fn_802D2614();
     GXTexObj* o = &lbl_8055FE24->obj;
     int w = GXGetTexObjWidth(o);
-    u16 h = GXGetTexObjHeight(o);
+    int h = GXGetTexObjHeight(o);
     GXSetTexCopySrc(0, 0, w, h);
     GXSetTexCopyDst(w, h, GXGetTexObjFmt(o), 0);
     GXSetZMode(1, 7, 1);
