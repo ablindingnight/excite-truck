@@ -860,7 +860,7 @@ int fn_801787B4(PhysClock* c) {
         d = d < 50000 ? d : 50000;
         tick = 16683.0f * speed;
         c->last = now;
-        ti = tick < 0.0f ? (int)(tick - 0.5f) : (int)(0.5f + tick);
+        ti = (int)(tick < 0.0f ? tick - 0.5f : 0.5f + tick);
         if (!lbl_8055E3BD) {
             lbl_8055E460 += (f32)d / (f32)(ti < 1 ? 1 : ti);
         }
@@ -870,10 +870,7 @@ int fn_801787B4(PhysClock* c) {
             lbl_8055E460 = acc - (f32)n;
         }
         c->resync = 1;
-        if (lbl_8055E3BD) {
-            return 1;
-        }
-        return n;
+        return lbl_8055E3BD ? 1 : n;
     }
     lbl_8055E460 = 1.0f;
     {
