@@ -570,7 +570,7 @@ void fn_8027F288(EvBracket* cup, EvBracket* next) {
 int fn_8024739C(int* item);
 int fn_80280898(void);
 int fn_802808D0(void);
-void fn_80280A38(void);
+int fn_80280A38(void);
 int fn_80280C00(void);
 int fn_80280DC8(void);
 int fn_80280F7C(void);
@@ -694,21 +694,21 @@ int fn_802808D0(void) {
 extern "C" {
 
 // When the current event is done, picks the first not-yet-done event as the next unlock.
-void fn_80280A38(void) {
+int fn_80280A38(void) {
     u8* cur = (u8*)lbl_8055F688;
     if (cur && ((EvCupBar*)cur)->Cup() && ((EvCond*)PTR(cur, 0x60))->Done()) {
         lbl_8055F690 = lbl_8055F688;
         if (!lbl_8055F68C) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
-                u8* e = (u8*)lbl_804B3048.data[i];
-                if (((EvCupBar*)e)->Cup() && !((EvCond*)PTR(e, 0x60))->Done()) {
+                EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
+                if (e->cup && !((EvCond*)e->cup)->Done()) {
                     lbl_8055F68C = (s32)e;
                     break;
                 }
             }
         }
         if (lbl_8055F68C) {
-            int i = lbl_804B3048.Find((u8*)lbl_8055F68C);
+            int i = BarIndex(lbl_8055F68C);
             lbl_804B3068[0] = 0;
             if (i >= 0 && i < lbl_804B3048.count) {
                 u8* e = (u8*)lbl_804B3048.data[i];
@@ -716,9 +716,12 @@ void fn_80280A38(void) {
                 if (e && ((EvCupBar*)e)->Cup()) {
                     CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
                 }
+            } else {
+                lbl_8055F688 = 0;
             }
         }
     }
+    return 0;
 }
 
 }  // extern "C"
