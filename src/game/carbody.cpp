@@ -3335,7 +3335,7 @@ static inline void PlaceRotate(BVec* out, const BVec* v, const CbFrame* m) {
 void fn_801E9DD0(s16* surface, f32 x, f32 z);
 void fn_801BE400(s32 car, CbFrame* frame, f32 a);
 void fn_801B30C0(s32 car, s32 reset, void* start);
-void fn_8026A394(u8* p, s32 n, s32 c);
+void fn_8026A394(u8* car);
 f32 PSVECDotProduct(const void* a, const void* b);
 f32 PSVECMag(const void* v);
 void fn_8018A750(u8* p);
@@ -3399,13 +3399,12 @@ void fn_80189CB4(u8* p, const u8* s) {
         F32(p, 0x2414 + w * 0x74) = 0.0f;
     }
     fn_8018A750(p);
-    s32 n = S32(p, 0x26D4);
     S32(p, 0x2638) = 0;
     F32(p, 0x2628) = 0.0f;
     F32(p, 0x262C) = 0.0f;
     U8(p, 0x2640) = 0;
-    S32(p, 0x26D4) = n + 1;
-    fn_8026A394(p, n, 0);
+    S32(p, 0x26D4)++;
+    fn_8026A394(p);
 }
 
 void fn_8018A088(u8* p) {}
