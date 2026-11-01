@@ -372,7 +372,7 @@ fail:
 }
 
 void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha) {
-    int hasAlpha;
+    int hasAlpha = 0;
     int a;
     if (alpha >= 0.99f) {
         a = 0xFF;
@@ -381,7 +381,6 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     } else {
         a = (int)(0.5f + 255.0f * alpha);
     }
-    hasAlpha = 0;
     if (v->info.frames[0].a.buf) {
         hasAlpha = 1;
     }
