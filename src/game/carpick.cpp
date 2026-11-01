@@ -137,7 +137,7 @@ void* memset(void* d, int c, unsigned long n);
 void fn_80130978(char* buf, int n, f32 t);
 void fn_80214AF0(s32 s);
 }
-extern f32 lbl_80558DC0;
+extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
 
 static inline void CopyName(char* d, int n, const char* s) {
     char* p = d;
@@ -404,39 +404,38 @@ inline void fn_8025F46C(CarPickScreen* s) {
         CarChoice* car = s->all->Get(s->cur);
         for (int k = 0; k < Min(car->CupCount(), 6); k++) {
             CupChoice* cup = car->Cup(k);
-            CupRecordRow* row = &s->rows[k];
-            CopyName(row->name, 0x20, cup->Name());
-            CopyName(row->course, 0x20, cup->Course());
+            CopyName(s->rows[k].name, 0x20, cup->Name());
+            CopyName(s->rows[k].course, 0x20, cup->Course());
             Statistic s0(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0);
             Statistic s1(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1);
             Statistic s2(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2);
             s->icons[k]->visible = 1;
             if (s0.IsBetterThan(&s1)) {
                 if (s0.IsBetterThan(&s2)) {
-                    s0.Format(row->value, 0x14);
-                    row->best = 0;
+                    s0.Format(s->rows[k].value, 0x14);
+                    s->rows[k].best = 0;
                 } else if (s2.HasValue()) {
-                    s2.Format(row->value, 0x14);
-                    row->best = 2;
+                    s2.Format(s->rows[k].value, 0x14);
+                    s->rows[k].best = 2;
                 }
             } else if (s1.IsBetterThan(&s2)) {
-                s1.Format(row->value, 0x14);
-                row->best = 1;
+                s1.Format(s->rows[k].value, 0x14);
+                s->rows[k].best = 1;
             } else if (s2.HasValue()) {
-                s2.Format(row->value, 0x14);
-                row->best = 2;
+                s2.Format(s->rows[k].value, 0x14);
+                s->rows[k].best = 2;
             } else {
-                fn_80130978(row->value, 0x14, -lbl_80558DC0);
-                row->best = 0;
+                fn_80130978(s->rows[k].value, 0x14, -lbl_80558DC0[0]);
+                s->rows[k].best = 0;
                 s->icons[k]->visible = 0;
             }
             if (s->icons[k]->visible) {
                 Statistic* best = 0;
-                if (row->best == 0) {
+                if (s->rows[k].best == 0) {
                     best = &s0;
-                } else if (row->best == 1) {
+                } else if (s->rows[k].best == 1) {
                     best = &s1;
-                } else if (row->best == 2) {
+                } else if (s->rows[k].best == 2) {
                     best = &s2;
                 }
                 StatChoice c = best->GetChoice();
