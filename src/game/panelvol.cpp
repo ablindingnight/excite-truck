@@ -402,6 +402,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     fn_8017E388(&p->rest);
     int xb = 1;
     int yb = 4;
+    const RVec3* av;
     int zb = 2;
     if (b.y - a.y > b.x - a.x) {
         yb = 1;
@@ -410,7 +411,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     }
     for (i = 0; i < 4; i++) {
         RVec3 c;
-        fn_80144B44(&c, (i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
+        fn_80144B44(&c, (i & xb) ? a.x : b.x, (yb & i) ? a.y : b.y, (i & zb) ? a.z : b.z);
         fn_801BFD34(&verts[i].p, &c, &m);
         verts[i].u = 4.545f;
         verts[i].v = 0.127f;
@@ -430,7 +431,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
         links[i].c = 0;
     }
     fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
-    const RVec3* av = fn_801BF754(car);
+    av = fn_801BF754(car);
     const RMtx* cm = fn_801602B4(car);
     fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
     return 1;
