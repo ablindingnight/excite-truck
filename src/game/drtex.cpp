@@ -733,9 +733,9 @@ u32 fn_802D972C(GXTex* t, int x, int y) {
     if (fmt == 0) {
         u8* blk = data + (x / 8 + (y / 8) * (w / 8)) * 32;
         int off = ((y % 8) * 8 + x % 8) * 4 / 8;
-        u32 v = x & 1 ? blk[off] & 0xF : blk[off] >> 4;
+        u32 v = (x & 1) == 0 ? blk[off] >> 4 & 0xF : blk[off] & 0xF;
         v = v | v << 4;
-        return v << 24 | (v << 16 | v) | v << 8;
+        return v | v << 8 | v << 16 | v << 24;
     }
     if (fmt == 6) {
         u8* blk = data + (x / 4 + (y / 4) * (w / 4)) * 64;
