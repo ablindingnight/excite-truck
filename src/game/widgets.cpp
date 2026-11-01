@@ -2293,7 +2293,7 @@ void fn_802200AC(WidgetFragment* self){int previousFrame;
  float imageHeight=(float)fn_802C5220(f->image);
  previousFrame=0;
  if(f->focus&&*f->focus==f->token)previousFrame=1;
- ((void(*)(void*,int,float,float,float,float,float,float,float,float,float))fn_802C5334)(f->image,previousFrame,coordinates[1]+0.5f*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)/2.0f,(0.0f),filledWidth,imageHeight,(0.0f),(0.0f),fraction,(1.0f));
+ fn_802C5334(f->image,previousFrame,coordinates[1]+0.5f*(width-(float)fn_802C51C0(f->image)),coordinates[0]+(imageHeight-height)/2.0f,(0.0f),filledWidth,imageHeight,(0.0f),(0.0f),fraction,(1.0f));
  
 previousArrow=static_cast<gArtSet*>(fn_80211660(0));
  nextArrow=static_cast<gArtSet*>(fn_80211660(1));
@@ -2789,7 +2789,7 @@ void fn_80223644(WidgetFragment* self){NavigationPreviousNew* f=(NavigationPrevi
 u32 fn_802236C8(WidgetFragment* self,int index){SelectionColorPrefix* f=(SelectionColorPrefix*)self;if(f->locked)return 0xe6969696u;u32 color=0xff9f9f9fu;if(f->flags[index])color=0xffffffffu;if(index==*f->selected&&(1.0f)==f->pulse)color=0xffffd03fu;return color;}
 void fn_80223728(WidgetFragment* self){fn_802192AC(self);((SelectionPrefix*)self)->pulse=(1.0f);}
 void fn_8022375C(WidgetFragment*) {}
-int fn_80223760(WidgetFragment* self,int key){if(((SelectionPrefix*)self)->locked)return 0;switch(key){case 0x125:((void(*)(WidgetFragment*))fn_80223644)(self);return 1;case 0x127:((void(*)(WidgetFragment*))fn_802235B4)(self);return 1;}return 0;}
+int fn_80223760(WidgetFragment* self,int key){if(((SelectionPrefix*)self)->locked)return 0;switch(key){case 0x125:fn_80223644(self);return 1;case 0x127:fn_802235B4(self);return 1;}return 0;}
 void fn_802237D0(WidgetFragment* self){((SelectionPrefix*)self)->locked=1;}
 void fn_802237DC(WidgetFragment* self){((SelectionPrefix*)self)->locked=0;}
 int fn_802237E8(WidgetFragment* self){return ((SelectionPrefix*)self)->count;}
@@ -2797,8 +2797,8 @@ int fn_802237F0(WidgetFragment* self,int index){return ((SelectionPrefix*)self)-
 WidgetFragment* fn_80223800(WidgetFragment* self,int x,int y,void* model,int* watched){fn_802230A4(self,x,y,model,watched);((SelectWatchedPrefix*)self)->watched=watched;self->vtable=lbl_8033E458;if(watched)fn_80219440(self,0,watched,4);fn_80219440(self,1,fn_80216708(),1);return self;}
 void fn_80223880(WidgetFragment* self){((WidgetDispatch*)self)->Slot74(2,0);fn_802237DC(self);fn_8021818C(self->window);}
 void fn_802238D0(WidgetFragment* self,int mode,void*){SelectWatchedPrefix* f=(SelectWatchedPrefix*)self;void* window;for(int i=0;i<fn_802237E8(self);i++){if(i==*f->watched){float duration=mode==2?(0.0f):(0.3f);window=self->window;int item=fn_802237F0(self,i);fn_80218968(window,item,duration);}else{float duration=mode==2?(0.0f):(0.3f);window=self->window;int item=fn_802237F0(self,i);fn_8021889C(window,item,duration);}}WidgetMarkDirty(self);}
-int fn_802239C8(WidgetFragment* self,int key){if(*fn_80216708()){switch(key){case 0x127:((void(*)(WidgetFragment*))fn_802235B4)(self);return 1;case 0x125:((void(*)(WidgetFragment*))fn_80223644)(self);return 1;}}return fn_802192A4(self,key);}
-void fn_80223A58(WidgetFragment* self){if(*fn_80216708())fn_802237DC(self);else fn_802237D0(self);((void(*)(WidgetFragment*))fn_80223280)(self);}
+int fn_802239C8(WidgetFragment* self,int key){if(*fn_80216708()){switch(key){case 0x127:fn_802235B4(self);return 1;case 0x125:fn_80223644(self);return 1;}}return fn_802192A4(self,key);}
+void fn_80223A58(WidgetFragment* self){if(*fn_80216708())fn_802237DC(self);else fn_802237D0(self);fn_80223280(self);}
 int fn_80223AAC(WidgetFragment*){return 1;}
 WidgetFragment* fn_80223AB4(WidgetFragment* self,WidgetDesc* desc,void* context){fn_80218F80(self,desc);self->vtable=lbl_8033E3D4;ImageDescriptorPrefix* f=(ImageDescriptorPrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->value=desc->field9c;const char* name=(const char*)desc+0x40;if(name)f->image=gxGetImage(name);else f->image=0;f->width=(float)desc->dx;f->height=(float)desc->dx;f->alpha=(1.0f);f->asset=fn_8022EE9C();f->context=context;return self;}
 WidgetFragment* fn_80223B94(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E3D4;TwoCleanupPrefix* f=(TwoCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->asset);fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
@@ -3031,7 +3031,7 @@ WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
  newMode:const char* name=strings+0x328;f->image=fn_8023512C(name);if(!f->image)fn_802E30C8(strings+0x338,name);
  if(f->image&&fn_80235FD8(f->image)!=15){fn_802E30C8(strings+0x368,name,fn_80235FD8(f->image));fn_80235380(f->image);f->image=0;}
  f->owned=0;f->matrix=0;float x,y,z;memcpy(&x,(const char*)desc+0xa4,4);memcpy(&y,(const char*)desc+0xa8,4);memcpy(&z,(const char*)desc+0xac,4);
- if(!(ObservedAbsDecision(x)<=lbl_80558DC4[0]&&ObservedAbsDecision(y)<=lbl_80558DC4[0]&&ObservedAbsDecision(z)<=lbl_80558DC4[0]))((void(*)(WidgetFragment*,float,float,float))fn_80227044)(self,x,y,z);
+ if(!(ObservedAbsDecision(x)<=lbl_80558DC4[0]&&ObservedAbsDecision(y)<=lbl_80558DC4[0]&&ObservedAbsDecision(z)<=lbl_80558DC4[0]))fn_80227044(self,x,y,z);
  return self;
 }
 WidgetFragment* fn_80226F00(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E038;EffectImage351* f=(EffectImage351*)self;if(f->owned)fn_8022EE98(f->matrix);if(f->image)fn_80235380(f->image);f->image=0;fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
