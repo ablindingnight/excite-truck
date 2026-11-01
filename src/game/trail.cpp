@@ -317,6 +317,8 @@ static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
 static inline void Scale(TVec* o, const f32* v, f32 k) {
     o->x = v[0] * k;
     o->y = v[1] * k;
@@ -738,7 +740,7 @@ void DustTrail::Emit(const TRacer* r, int wheel) {
         t = Ramp(MaxF(r->body->wheels[2].slip, r->body->wheels[3].slip), 0.0f, 2.7f);
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
-        a = 0.25f + Mul(t, 0.75f);
+        a = Lerp(0.25f, 1.0f, t);
         if (r->camDist < 2500.0f) {
             fn_8028E58C(small, &p, &r->body->vel, a);
             if (rear) {
