@@ -275,10 +275,9 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
             lbl_8042F858.entries[idx].start = sk.y * (*(ValueNode**)(d + 0x58))->GetFloat("override_start_skill");
         }
         if ((*(ValueNode**)(d + 0x58))->Has("override_skill")) {
-            SkillEntry* se = &lbl_8042F858.entries[idx];
-            se->race = sk.y * (*(ValueNode**)(d + 0x58))->GetFloat("override_skill");
+            lbl_8042F858.entries[idx].race = sk.y * (*(ValueNode**)(d + 0x58))->GetFloat("override_skill");
             if (!hasStart) {
-                se->start = se->race;
+                lbl_8042F858.entries[idx].start = lbl_8042F858.entries[idx].race;
             }
         }
     }
