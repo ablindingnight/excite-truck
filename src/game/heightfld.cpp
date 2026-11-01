@@ -381,8 +381,9 @@ GroundHeader* fn_801DCA60(void) {
     lbl_80446F08.w = 256;
     GroundHeader* g = (GroundHeader*)operator new(sizeof(GroundHeader), "fake-GroundHeader");
     memset(g, 0, sizeof(GroundHeader));
-    f32 size = 1024.0f * 2.0f;
-    g->offZ = g->offX = size / 2.0f;
+    f32 tile = 1024.0f;
+    f32 size = tile * 2.0f;
+    g->offZ = g->offX = size * 0.5f;
     g->scaleZ = g->scaleX = lbl_80446F08.w / size;
     lbl_80446F08.data = new ("heightfield") f32[lbl_80446F08.w * lbl_80446F08.h];
     for (int z = 0; z < lbl_80446F08.w; z++) {
