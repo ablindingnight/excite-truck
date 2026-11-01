@@ -906,6 +906,7 @@ void ShardSys::Draw(void) {
         Vec light = *fn_802C9A40();
         f32 now = fn_801E7E18();
         for (int i = 0; i < count; i++) {
+            u32 color;
             Shard* s = &pts[i];
             Vec a;
             Mat3 r;
@@ -913,10 +914,12 @@ void ShardSys::Draw(void) {
             f32 ang = PSVECMag(&a);
             if (ang > 0.0001f) {
                 f32 inv = 1.0f / ang;
+                f32 y;
                 f32 x = inv * a.x;
-                f32 y = inv * a.y;
+                y = inv * a.y;
+                f32 sn;
                 f32 z = inv * a.z;
-                f32 sn = sin(ang);
+                sn = sin(ang);
                 f32 cs = cos(ang);
                 f32 c1 = 1.0f - cs;
                 r.m[0][0] = cs + c1 * (x * x);
@@ -942,7 +945,7 @@ void ShardSys::Draw(void) {
             f32 d = PSVECDotProduct((const Vec*)r.m[1], &light);
             int al = (int)(192.0f * (d * d));
             al = MAX(al, 0);
-            u32 color = MIN(al, 0xFF) << 24 | 0xFFFFFF;
+            color = MIN(al, 0xFF) << 24 | 0xFFFFFF;
             Vec p;
             fn_802C8E00(color, 0, s->pos.x, s->pos.y, s->pos.z, 0.0f, 1.0f);
             AddScaled(&p, &s->pos, (const Vec*)r.m[0], 0.1f);
