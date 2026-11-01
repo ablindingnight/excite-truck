@@ -660,12 +660,13 @@ int fn_801DDA84(f32 x, f32 z, s32* out, int max, f32 thr) {
     int tx = ix / 32;
     int tz = iz / 32;
     int lx = ix - tx * 32;
+    int n;
     int lz = iz - tz * 32;
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         return 0;
     }
-    int n = 0;
+    n = 0;
     s32 li = t->layer;
     if (li >= 0) {
         GLayer* l = &lbl_8055E990->layers[li];
