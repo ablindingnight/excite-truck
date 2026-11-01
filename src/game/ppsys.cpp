@@ -346,8 +346,8 @@ void fn_801C1364(PSys* s) {
             RVec3* pb = &s->pos[l->b];
             f32 wb;
             f32 wa;
-            wa = s->w34[l->a];
             wb = s->w34[l->b];
+            wa = s->w34[l->a];
             if (!s->free[l->a]) {
                 wb = 0.01f;
             }
@@ -363,16 +363,16 @@ void fn_801C1364(PSys* s) {
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = l->c * len / den;
             f32 ka = wb * k;
-            f32 kb = -wa * k;
             AddScaled(pa, pa, &proj, ka);
+            f32 kb = -wa * k;
             AddScaled(pb, pb, &proj, kb);
         }
         for (i = 0; i < s->nStick; i++) {
             PStick* st = &s->sticks[i];
             RVec3* pa = &s->pos[st->a];
             RVec3* pb = &s->pos[st->b];
-            f32 wa = s->w34[st->a];
             f32 wb = s->w34[st->b];
+            f32 wa = s->w34[st->a];
             if (!s->free[st->a]) {
                 wb = 0.01f;
             }

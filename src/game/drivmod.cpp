@@ -615,12 +615,13 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
     BVec v;
     BVec g;
     BVec up;
-    BVec a;
     BVec b;
+    BVec a;
     BVec e1;
     BVec e2;
     DVec3 off;
     DVec3 off2;
+    int cnt;
     int n;
     if (!show) {
         return;
@@ -678,10 +679,11 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
     }
     fn_801E353C(d->wheel, -lbl_8056307C * F32(car, 0x3C));
     fn_801E34E4(d->wheel, &m);
-    int cnt = 32;
+    cnt = 32;
     d->body = m;
     MulVec(&off, &d->butt, &d->body);
-    d->body.pos.x = d->body.pos.x + off.x;
+    f32 x2 = off.x;
+    d->body.pos.x = d->body.pos.x + x2;
     d->body.pos.y = d->body.pos.y + off.y;
     d->body.pos.z = d->body.pos.z + off.z;
     f32 roll = -F32(car, 0x238);
@@ -693,9 +695,10 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
     if (ang > lbl_80563070) {
         f32 inv = lbl_80563058 / ang;
         f32 ax = inv * v.x;
+        f32 sn;
         f32 ay = inv * v.y;
         f32 az = inv * v.z;
-        f32 sn = sin(ang);
+        sn = sin(ang);
         f32 cs = cos(ang);
         f32 t = lbl_80563058 - cs;
         rot.r[0].x = cs + t * (ax * ax);
@@ -735,8 +738,10 @@ void fn_80201018(DriverModel* d, u8* car, int show) {
         } else {
             pose[k] = *(BonePose*)&bones[k];
         }
-        pose[k].pos.x = pose[k].pos.x + d->butt.x;
-        pose[k].pos.y = pose[k].pos.y + d->butt.y;
+        f32 xv = pose[k].pos.x;
+        pose[k].pos.x = xv + d->butt.x;
+        f32 yv = pose[k].pos.y;
+        pose[k].pos.y = yv + d->butt.y;
         pose[k].pos.z = pose[k].pos.z + d->butt.z;
     }
     f32 lean = lbl_80563094 * F32(car, 0x23C);
