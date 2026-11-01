@@ -455,6 +455,8 @@ public:
     f32 f50;        // offset 0x50
 };
 
+static inline f32 ObAbsDiff(f32 a, f32 b) { return (f32)__fabs(a - b); }
+
 static inline f32 ObMax(f32 a, f32 b) { return a > b ? a : b; }
 
 // A flattened sphere ('FLSR', 0x5C bytes): radius a across, b along its axis; bounded by the larger.
@@ -535,6 +537,8 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     RVec3 origin;
     CollShape* shape;
     int corners;
+    const char* path;
+    const char* id;
     f32 k;
     f32 spring;
     f32 skin;
@@ -742,12 +746,9 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 11: {
-        f32 hx = (q->b - q->a) * lbl_80562478;
-        f32 hy = (q->d - q->c) * lbl_80562478;
-        RVec3 c;
-        c.x = origin.x;
-        c.y = lbl_805624C0 + q->c;
-        c.z = q->f - lbl_805624C0;
+        f32 hx = (q->b - q->a) / 2.0f;
+        f32 hy = (q->d - q->c) / 2.0f;
+        RVec3 c(origin.x, lbl_805624C0 + q->c, q->f - lbl_805624C0);
         CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, lbl_805624C0, c);
         ((CollVolume*)p)->AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
@@ -805,7 +806,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
             }
         }
         fn_802C6C20(m);
-        if ((f32)__fabs(q->b - q->a) <= lbl_80558DC4[0]) {
+        if (ObAbsDiff(q->b, q->a) <= lbl_80558DC4[0]) {
             shape = new ("obstacle:cornerball") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, *(const RVec3*)&q->c);
         } else {
             shape = new ("obstacle:cornerball") FlatSphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, q->a, q->b, *(const RVec3*)&q->c);
@@ -850,8 +851,6 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         lbl_8055E5E4 = 0;
     }
     if (q->extra && q->extra->Has("path")) {
-        const char* path;
-        const char* id;
         int i;
         path = q->extra->GetValue("path");
         id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
