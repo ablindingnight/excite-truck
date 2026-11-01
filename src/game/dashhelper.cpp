@@ -1345,8 +1345,8 @@ static inline void Rotate(Vec2* v, f32 angle) {
 
 void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 start, f32 step,
                  f32 u0, f32 v0, f32 u1, f32 v1) {
-    Vec2 p;
     Vec2 d;
+    Vec2 p;
     f32 ratio;
     int i;
 
