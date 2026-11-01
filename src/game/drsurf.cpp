@@ -274,9 +274,9 @@ static inline void Swap32(u8* p) {
 
 static inline void Skin2(const SkinVtx* v, V3* out, int n) {
     for (int i = n; i > 0; i--) {
-        f32 w0 = (1.0f / 255) * v->w0;
         const BVec* a = &lbl_804DB068[v->b0];
         const BVec* b = &lbl_804DB068[v->b1];
+        f32 w0 = (1.0f / 255) * v->w0;
         f32 w1 = (1.0f / 255) * v->w1;
         out->x = v->x + a->x * w0;
         out->y = v->y + a->y * w0;
