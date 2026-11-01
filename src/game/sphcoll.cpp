@@ -2823,7 +2823,7 @@ void fn_801A0464(u8* p, u8* q) {
             return;
         }
         f32 dd = CentreDist2(p, q);
-        f32 r = F32(p, 0x178) + F32(q, 0x178);
+        f32 r = F32(q, 0x178) + F32(p, 0x178);
         if (dd < r * r) {
             fn_801A0160(q);
             for (int i = 0; i < S32(q, 0x174); i++) {
@@ -2835,8 +2835,9 @@ void fn_801A0464(u8* p, u8* q) {
         FromBoxCentre(&d, p, q);
         if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(p, 0x178) + F32(q, 0x24) &&
             (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(p, 0x178) + F32(q, 0x2C)) {
+            u8* pb;
             CFrame* f = (CFrame*)PTR(q, 0xC);
-            u8* pb = PTR(p, 0x4);
+            pb = PTR(p, 0x4);
             RVec3 l;
             l.x = F32(pb, 0x60) - f->t.x;
             l.y = F32(pb, 0x64) - f->t.y;
