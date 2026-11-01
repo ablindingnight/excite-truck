@@ -664,18 +664,17 @@ int fn_801DDA84(f32 x, f32 z, s32* out, int max, f32 thr) {
     }
     int n = 0;
     s32 li = t->layer;
-    if (li < 0) {
-        return 0;
-    }
-    GLayer* l = &lbl_8055E990->layers[li];
-    for (;;) {
-        if ((f32)__fabs(l->base + l->scale * l->h[lx][lz]) > thr && n < max) {
-            out[n++] = l->weight;
+    if (li >= 0) {
+        GLayer* l = &lbl_8055E990->layers[li];
+        for (;;) {
+            if ((f32)__fabs(l->base + l->scale * l->h[lx][lz]) > thr && n < max) {
+                out[n++] = l->weight;
+            }
+            if (l->next < 0) {
+                break;
+            }
+            l = &lbl_8055E990->layers[l->next];
         }
-        if (l->next < 0) {
-            break;
-        }
-        l = &lbl_8055E990->layers[l->next];
     }
     return n;
 }
@@ -701,16 +700,15 @@ f32 fn_801DDC8C(f32 x, f32 z) {
         return 0.0f;
     }
     f32 h = 0.0f;
-    if (t->layer < 0) {
-        return h;
-    }
-    GLayer* l = &g->layers[t->layer];
-    for (;;) {
-        h += (l->base + l->scale * l->h[lx][lz]) * lbl_804425DC[l->weight];
-        if (l->next < 0) {
-            break;
+    if (t->layer >= 0) {
+        GLayer* l = &g->layers[t->layer];
+        for (;;) {
+            h += (l->base + l->scale * l->h[lx][lz]) * lbl_804425DC[l->weight];
+            if (l->next < 0) {
+                break;
+            }
+            l = &g->layers[l->next];
         }
-        l = &g->layers[l->next];
     }
     return h;
 }
