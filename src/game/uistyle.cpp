@@ -509,12 +509,12 @@ void fn_8022BB60(f32* px,f32* py,f32 x,f32 y) {
 }
 
 static inline f32 BlendStyleByte(u32 a,u32 b,f32 t){ f32 bf=(f32)b; f32 af=(f32)a; return af+t*(bf-af); }
+static inline u32 PackStyleARGB(u32 alpha,u32 red,u32 green,u32 blue) {
+    return ((blue & 255) | ((green & 255) << 8)) |
+           ((alpha << 24) | ((red & 255) << 16));
+}
 u32 fn_8022BC30(u32 a,u32 b,f32 t) {
-int c0=(int)BlendStyleByte((a>>0)&255,(b>>0)&255,t);
-int c1=(int)BlendStyleByte((a>>8)&255,(b>>8)&255,t);
-int c2=(int)BlendStyleByte((a>>16)&255,(b>>16)&255,t);
-int c3=(int)BlendStyleByte(a>>24,b>>24,t);
-return (c0&255)|((c1&255)<<8)|((c2&255)<<16)|(c3<<24);
+return PackStyleARGB((int)BlendStyleByte(a>>24,b>>24,t),(int)BlendStyleByte((a>>16)&255,(b>>16)&255,t),(int)BlendStyleByte((a>>8)&255,(b>>8)&255,t),(int)BlendStyleByte((a>>0)&255,(b>>0)&255,t));
 }
 
 void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused,const char* text,u32 frame,u8 initialShadow) {
