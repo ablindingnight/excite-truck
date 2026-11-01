@@ -534,8 +534,15 @@ void IdealFollower::Start(V2* p, V2* d, int resetTimes, IdealPoint* start) {
 
 void IdealFollower::ClearFlag(void) { flag = 0; }
 
+static inline bool Differ(const ILPos& a, const ILPos& b) {
+    bool diff = true;
+    if (a.seg->section == b.seg->section && a.seg->type == b.seg->type) {
+        diff = false;
+    }
+    return diff;
+}
+
 int IdealFollower::Track(V2* p, f32* progress) {
-    bool diff;
     bool moved;
     int r;
     u32 cur;
@@ -584,11 +591,7 @@ int IdealFollower::Track(V2* p, f32* progress) {
     lateral = Dot4(dir.y, -dir.x, off.x, off.y);
     jump = true;
     if (!moved) {
-        diff = true;
-        if (old.seg->section == il.seg->section && old.seg->type == il.seg->type) {
-            diff = false;
-        }
-        if (!diff) {
+        if (!Differ(old, il)) {
             jump = false;
         }
     }
