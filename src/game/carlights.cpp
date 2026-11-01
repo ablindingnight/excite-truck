@@ -159,9 +159,10 @@ void fn_80294970(void) {
             fn_80295CC4(&lbl_804B42F0[i], model, "right headlight", white, 0, front, 0.35f);
             fn_80295CC4(&lbl_804B42F0[i], model, "left taillight", red, 0, back, 0.15f);
             fn_80295CC4(&lbl_804B42F0[i], model, "right taillight", red, 0, back, 0.15f);
+            const char* accFmt = "acc light %d";
             for (int j = 0; j < 8; j++) {
                 char buf[0x40];
-                fn_801345D8(buf, 0x40, "acc light %d", j + 1);
+                fn_801345D8(buf, 0x40, accFmt, j + 1);
                 fn_80295CC4(&lbl_804B42F0[i], model, buf, acc, 0, up, 0.15f);
             }
         }
