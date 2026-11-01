@@ -211,7 +211,7 @@ int fn_802D76DC(u32 fmt) {
 
 void fn_802D7780(GXTex* t, const GXTexDesc* d) {
     int s = d->wrap & 1;
-    int tt = (d->wrap >> 1 & 1) != 0;
+    int tt = (d->wrap & 2) >> 1 != 0;
     if (!(d->mips & 2)) {
         GXInitTexObjFilter(&t->obj, 0, 0);
         if (t->hasAlpha) {
