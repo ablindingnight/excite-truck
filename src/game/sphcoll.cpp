@@ -2985,7 +2985,6 @@ void fn_801A0464(u8* p, u8* q) {
 // Per-frame update of the sphere group; with a track mesh loaded and a car owner, each of its 4 wheels
 // (moved by the car's velocity) is tested against the mesh and every hit reported to the car.
 void fn_801A0F10(u8* p) {
-    RVec3* h;
     RVec3 hits[64];
     PVec3 wp;
     PVec3 c;
@@ -3008,8 +3007,8 @@ void fn_801A0F10(u8* p) {
                 c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805622E0;
                 n = 64;
                 fn_801CF080(lbl_8055E5A0, (RVec3*)c.v, hits, &n, 0, lbl_8056234C);
-                h = hits;
-                for (int k = 0; k < n; h++, k++) {
+                for (int k = 0; k < n; k++) {
+                    RVec3* h = &hits[k];
                     d.v[0] = c.v[0] - h->x;
                     d.v[1] = c.v[1] - h->y;
                     d.v[2] = c.v[2] - h->z;
