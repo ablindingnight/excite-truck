@@ -4,6 +4,11 @@
 #include "game/common.h"
 
 struct TVec3 {
+    void Set(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
     f32 x, y, z;
 };
 
@@ -132,9 +137,7 @@ void fn_801E5174(f32 x, f32 y, f32 z) {
     TVtx* v1 = &lbl_80487578[n + 1];
     TVtx* v2 = &lbl_80487578[n + 2];
     TVtx* v3 = &lbl_80487578[n + 3];
-    v0->pos.x = x - q->half;
-    v0->pos.y = y;
-    v0->pos.z = z;
+    v0->pos.Set(x - q->half, y, z);
     v1->pos.x = x + q->half;
     v1->pos.y = y;
     v1->pos.z = z;
