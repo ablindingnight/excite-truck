@@ -149,7 +149,7 @@ static inline void Swap32(void* p) {
     b[2] = t;
 }
 
-static inline u8 MipMapped(s32 n) { return n >= 2; }
+static inline u8 MipMapped(s32 n) { return n > 2; }
 
 extern "C" {
 
@@ -321,7 +321,7 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
     int mip = MipMapped(d->lods);
     GXInitTexObj(&t->obj, data, w, h, fmt, 1, 1, mip);
     if (mip) {
-        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(d->lods - 1), 0.0f, 1, 1, 0);
+        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(d->lods - 1), -0.7f, 1, 1, 0);
     }
     GXInvalidateTexAll();
     fn_802D7780(t, d);
@@ -332,27 +332,27 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
     int bits = -1;
     int fmt = -1;
     switch (d->format) {
-    case 0x45:
+    case 0x48:  // I4
         bits = 4;
         fmt = 0;
         break;
-    case 0x46:
+    case 0x49:  // I8
         bits = 8;
         fmt = 1;
         break;
-    case 0x47:
+    case 0x4A:  // IA4
         bits = 8;
         fmt = 2;
         break;
-    case 0x48:
+    case 0x4B:  // IA8
         bits = 16;
         fmt = 3;
         break;
-    case 0x49:
+    case 0x45:  // RGB565
         bits = 16;
         fmt = 4;
         break;
-    case 0x4A:
+    case 0x46:  // RGB5A3
         bits = 16;
         fmt = 5;
         break;
@@ -379,7 +379,7 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
         lods = 4;
     }
     if (mip) {
-        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(lods - 1), 0.0f, 1, 1, 0);
+        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(lods - 1), -0.7f, 1, 1, 0);
     }
     GXInvalidateTexAll();
     fn_802D7780(t, d);
@@ -456,7 +456,7 @@ GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
     int mip = MipMapped(d->lods);
     GXInitTexObj(&t->obj, data, w, h, 14, 1, 1, mip);
     if (mip) {
-        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(d->lods - 1), 0.0f, 1, 1, 0);
+        GXInitTexObjLOD(&t->obj, 5, 1, 0.0f, (f32)(d->lods - 1), -0.7f, 1, 1, 0);
     }
     GXInvalidateTexAll();
     fn_802D7780(t, d);
@@ -474,7 +474,7 @@ GXTex* fn_802D8C00(const GXTexDesc* d, const char* name) {
     int mip = MipMapped(d->lods);
     GXInitTexObj(&t->obj2, alpha, w, h, 0, 1, 1, mip);
     if (mip) {
-        GXInitTexObjLOD(&t->obj2, 5, 1, 0.0f, (f32)(d->lods - 1), 0.0f, 0, 1, 0);
+        GXInitTexObjLOD(&t->obj2, 5, 1, 0.0f, (f32)(d->lods - 1), -0.7f, 0, 1, 0);
     }
     fn_802D7780(t, d);
     return t;
