@@ -589,7 +589,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                     k = 1;
                     m = d->terms[1].k;
                 }
-                if (k < 0 || __fabs(d->terms[2].k) < __fabs(m)) {
+                if (k < 0 || __fabs(m) > __fabs(d->terms[2].k)) {
                     k = 2;
                 }
                 if (AbsF(d->terms[k].k) < AbsF(dh)) {
