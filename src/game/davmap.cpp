@@ -91,7 +91,7 @@ public:
     }
     void Add(T x) { *Alloc() = x; }
     T* Alloc(void) { return &data[count++]; }
-    int Find(T x) {
+    int Find(T x) const {
         int i;
 
         for (i = 0; i < count; i++) {
@@ -253,7 +253,8 @@ void CollectColors(ColorList* list, DAVMap* map) {
         *list->Alloc() = v->colors[i];
     }
     for (i = 0; i < map->num_drivers; i++) {
-        int k = list->Find(FindDriver(map->drivers[i])->color);
+        u32 c = FindDriver(map->drivers[i])->color;
+        int k = list->Find(c);
         if (k != -1) {
             list->RemoveAt(k);
         }
