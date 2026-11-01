@@ -259,9 +259,15 @@ struct ObPos {
 };
 
 // A volume's i-th collision shape (up to four, at 0x14; count at 0x24), or 0 when out of range.
+struct ObShapeList {
+    u8 pad0[0x14];
+    CollShape* shapes[4];  // offset 0x14
+    s32 count;             // offset 0x24
+};
+
 static inline CollShape* ShapeAt(u8* p, int i) {
-    if (i >= 0 && i < S32(p, 0x24)) {
-        return ((CollShape**)(p + 0x14))[i];
+    if (i >= 0 && i < ((ObShapeList*)p)->count) {
+        return ((ObShapeList*)p)->shapes[i];
     }
     return 0;
 }
@@ -353,7 +359,18 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
     *(BodyCorner**)(body + 0xD0) = c;
 }
 
-static inline void AddCornerV(u8* body, const ObVec3& v, f32 spring) { AddCornerV(body, (const RVec3&)v, spring); }
+static inline void AddCornerV(u8* body, const ObVec3& v, f32 spring) {
+    BodyCorner* c = fn_801AE180();
+    c->pos = (const RVec3&)v;
+    c->spring = spring;
+    c->friction = lbl_80562478;
+    c->vel.x = lbl_8056247C;
+    c->vel.y = lbl_8056247C;
+    c->vel.z = lbl_8056247C;
+    c->damping = lbl_8056247C;
+    c->next = *(BodyCorner**)(body + 0xD0);
+    *(BodyCorner**)(body + 0xD0) = c;
+}
 
 static inline ObVec3 MakeVec(f32 x, f32 y, f32 z) {
     ObVec3 v;
@@ -516,7 +533,6 @@ extern "C" {
 void fn_801A9AB0(u8* p, ObDesc* q) {
     f32 cs;
     RVec3 origin;
-    ObVec3 zero;
     CollShape* shape;
     int corners;
     f32 k;
@@ -539,10 +555,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     *(ObRot*)(p + 0x3C) = q->rot;
     *(ObPos*)(p + 0x60) = q->pos;
     ((CollVolume*)p)->Update();
-    zero.x = lbl_8056247C;
-    zero.y = lbl_8056247C;
-    zero.z = lbl_8056247C;
-    *(ObVec3*)(p + 0x30) = zero;
+    *(RVec3*)(p + 0x30) = RVec3(lbl_8056247C, lbl_8056247C, lbl_8056247C);
     vf20__10CollVolumeFv(p);
     shape = 0;
     corners = 1;
@@ -569,7 +582,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
             shape = new ("box1:box-volume") BoxShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
             corners = 0;
         } else {
-            f32 r = (z + (y + x)) / lbl_80562494 * lbl_80562478;
+            f32 r = (z + (y + x)) / 3.0f / 2.0f;
             shape = new ("box2:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
             corners = 0;
         }
@@ -627,10 +640,14 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 4: {
+        f32 w = q->b;
         f32 h = q->c;
         f32 r = q->a * lbl_80562478;
-        f32 w = q->b;
-        ObVec3 v = MakeVec(q->a, -h * lbl_80562478, q->a);
+        ObVec3 start;
+        start.x = q->a;
+        start.z = q->a;
+        start.y = -h * lbl_80562478;
+        ObVec3 v = start;
         AddCornerV(p, v, spring);
         f32 m[9];
         cs = cos(lbl_805624B8);
@@ -650,10 +667,10 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, v, spring);
         ObRotate(&v, m, &v);
         AddCornerV(p, v, spring);
-        AddCorner(p, -w, h * lbl_80562478, -w, spring);
-        AddCorner(p, w, h * lbl_80562478, -w, spring);
-        AddCorner(p, -w, h * lbl_80562478, w, spring);
-        AddCorner(p, w, h * lbl_80562478, w, spring);
+        AddCornerV(p, RVec3(-w, h * lbl_80562478, -w), spring);
+        AddCornerV(p, RVec3(w, h * lbl_80562478, -w), spring);
+        AddCornerV(p, RVec3(-w, h * lbl_80562478, w), spring);
+        AddCornerV(p, RVec3(w, h * lbl_80562478, w), spring);
         shape = new ("cone:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
         corners = 0;
         break;
@@ -668,12 +685,12 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 y = q->b;
         f32 z = q->c;
         f32 r = y * lbl_80562478;
-        AddCorner(p, -x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478, spring);
-        AddCorner(p, x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478, spring);
-        AddCorner(p, -x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478, spring);
-        AddCorner(p, x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478, spring);
-        AddCorner(p, lbl_8056247C, y * lbl_80562478, -z * lbl_80562478, spring);
-        AddCorner(p, lbl_8056247C, y * lbl_80562478, z * lbl_80562478, spring);
+        AddCornerV(p, RVec3(-x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478), spring);
+        AddCornerV(p, RVec3(x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478), spring);
+        AddCornerV(p, RVec3(-x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478), spring);
+        AddCornerV(p, RVec3(x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478), spring);
+        AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, -z * lbl_80562478), spring);
+        AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, z * lbl_80562478), spring);
         shape = new ("wedge:ball-volume") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, r, origin);
         corners = 0;
         break;
@@ -728,7 +745,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 hx = (q->b - q->a) * lbl_80562478;
         f32 hy = (q->d - q->c) * lbl_80562478;
         RVec3 c;
-        c.x = zero.x;
+        c.x = origin.x;
         c.y = lbl_805624C0 + q->c;
         c.z = q->f - lbl_805624C0;
         CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, (const RMtx*)(p + 0x3C), k, skin, lbl_805624C0, c);
@@ -739,12 +756,12 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
                             lbl_805624C4);
         }
         shape = s;
-        AddCorner(p, q->a, q->c - lbl_805624C8, q->e, spring);
-        AddCorner(p, q->b, q->c - lbl_805624C8, q->e, spring);
-        AddCorner(p, q->a, q->c - lbl_805624C8, q->f, spring);
-        AddCorner(p, q->b, q->c - lbl_805624C8, q->f, spring);
-        AddCorner(p, q->a, q->d - lbl_805624C8, q->f + q->g, spring);
-        AddCorner(p, q->b, q->d - lbl_805624C8, q->f + q->g, spring);
+        AddCornerV(p, RVec3(q->a, q->c - lbl_805624C8, q->e), spring);
+        AddCornerV(p, RVec3(q->b, q->c - lbl_805624C8, q->e), spring);
+        AddCornerV(p, RVec3(q->a, q->c - lbl_805624C8, q->f), spring);
+        AddCornerV(p, RVec3(q->b, q->c - lbl_805624C8, q->f), spring);
+        AddCornerV(p, RVec3(q->a, q->d - lbl_805624C8, q->f + q->g), spring);
+        AddCornerV(p, RVec3(q->b, q->d - lbl_805624C8, q->f + q->g), spring);
         corners = 0;
         break;
     }
@@ -752,7 +769,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     case 18:
         shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, (const RMtx*)(p + 0x3C), lbl_805624CC * k, skin, q->a, q->b * lbl_80562478 - q->a);
         F32(p, 0x238) = lbl_805624D0 * q->c / q->a;
-        AddCorner(p, q->a, q->a, lbl_8056247C, spring * lbl_80562478);
+        AddCornerV(p, RVec3(q->a, q->a, lbl_8056247C), spring * lbl_80562478);
         corners = 1;
         break;
     case 16: {
@@ -770,13 +787,18 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 21: {
+        ObMeshPart* part;
+        u8* pt;
+        ObMesh* m;
+        int i;
+        int j;
         corners = 0;
-        ObMesh* m = fn_802C6B44((const char*)&q->f);
-        for (int i = 0; i < m->count; i++) {
-            ObMeshPart* part = m->parts[i];
+        m = fn_802C6B44((const char*)&q->f);
+        for (i = 0; i < m->count; i++) {
+            part = m->parts[i];
             if (part->tag == 'MRJT') {
-                u8* pt = (u8*)part;
-                for (int j = 0; j < part->count; j++) {
+                pt = (u8*)part;
+                for (j = 0; j < part->count; j++) {
                     AddCornerV(p, *(ObVec3*)(pt + 0x50), spring);
                     pt += 0x50;
                 }
@@ -828,11 +850,14 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         lbl_8055E5E4 = 0;
     }
     if (q->extra && q->extra->Has("path")) {
-        const char* path = q->extra->GetValue("path");
-        const char* id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
+        const char* path;
+        const char* id;
+        int i;
+        path = q->extra->GetValue("path");
+        id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
         fn_801DA758(p, id, path);
         U8(p, 0x222) = 1;
-        for (int i = 0; i < S32(p, 0x24); i++) {
+        for (i = 0; i < ((ObShapeList*)p)->count; i++) {
             ShapeAt(p, i)->SetId(0x72);
         }
     }
