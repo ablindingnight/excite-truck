@@ -181,10 +181,10 @@ int fn_801E5370(int max, int subdiv, f32 scale) {
 // Adds a ribbon edge (p - side, p + side) with tangent tan; when drawing, the span from the previous
 // edge is tessellated with a Hermite curve.
 void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, f32 alpha) {
-    SkidSpline* s = &lbl_80487C88;
-    if (s->count >= s->max) {
+    if (lbl_80487C88.count >= lbl_80487C88.max) {
         fn_802E317C("tristrip: exceeded skid vert limit");
     }
+    SkidSpline* s = &lbl_80487C88;
     TVec3 a;
     TVec3 b;
     a.x = p->x - side->x;
@@ -197,10 +197,7 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
         f32 len = fn_802C88D4(s);
         int n = s->subdiv;
         int m = (int)((f32)n - len * s->scale);
-        int k = 1;
-        if (m > 1) {
-            k = m;
-        }
+        int k = m > 1 ? m : 1;
         if (k < n) {
             n = k;
         }
