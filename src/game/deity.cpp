@@ -895,10 +895,7 @@ void DeityCar::Update(void) {
     PathSet* ps = fn_80156A40();
     follower->Attach(ps->Center(index), &p, 0);
     line->Attach(ps->Racing(index), &p, 0);
-    int free = 0;
-    if (fn_801B1130(index) && !lbl_8055E692) {
-        free = 1;
-    }
+    int free = fn_801B1130(index) && !lbl_8055E692;
     f32 back = 0.0f;
     int r = follower->Track(&p, &back);
     if (!free || lbl_8055E692) {

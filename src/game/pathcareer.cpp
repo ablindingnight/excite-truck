@@ -491,10 +491,7 @@ VehicleList* fn_8027DB40(u32 flags) {
             if (!unlocked && lockedOut) {
                 continue;
             }
-            int sp = 0;
-            if (special && (all || (checkSpecial && IsSpecialChassisUnlocked(u->name)))) {
-                sp = 1;
-            }
+            int sp = special && (all || (checkSpecial && IsSpecialChassisUnlocked(u->name)));
             list->Add(u->name, unlocked, sp);
         }
     }
