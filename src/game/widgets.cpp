@@ -543,7 +543,7 @@ void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);  // placeholder (1044 bytes)
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
-extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
+extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
 void fn_80221544(WidgetFragment *self, void *context);
 extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
 void fn_80221970(WidgetFragment* self);
@@ -1050,7 +1050,7 @@ extern "C" {
 void fn_802248FC(WidgetFragment* self);
 int fn_80224A38(WidgetFragment* self,int key);
 int fn_802267C4(WidgetFragment* self,int key);
-void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height);
+void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int);
 }
 
 struct SliderFullPrefix {char base[0x244];int* value;void* background;void* marker;int minimum,maximum;bool dragging;char gap259[3];int* focus;int token;};
@@ -2381,7 +2381,7 @@ void fn_80221544(WidgetFragment *self, void *context)
 
   if (f->direction == 0)
   {
-    ((void (*)(ObservedClipPrefix *, void *, int, int, int, int)) fn_80228E80)((ObservedClipPrefix *) context, f->first, self->left, self->top, self->bottom - self->top, 0);
+    fn_80228E80((ObservedClipPrefix *) context, f->first, self->left, self->top, self->bottom - self->top, 0);
 
   }
   else
@@ -2415,7 +2415,7 @@ bottom=(self->top + ((int) (ratio * ((float) (start + f->state->page)))))-5;
  if (((bottom - 1) > (top + 1)) && ((right - 1) > (left + 1))) { if (f->second) { void *image = f->second;
  imageExtent = fn_802C51C0(f->first);
  int tw = fn_802C51C0(image);
- ((void (*)(ObservedClipPrefix *, void *, int, int, int, int)) fn_80228E80)((ObservedClipPrefix *) context, f->second, left + ((imageExtent - tw) / 2), top, bottom - top, 0);
+ fn_80228E80((ObservedClipPrefix *) context, f->second, left + ((imageExtent - tw) / 2), top, bottom - top, 0);
  }
 else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
  int dark = lbl_8055FBE0;
@@ -3255,7 +3255,7 @@ int fn_80228DA4(WidgetFragment*){return 0;}
 int fn_80228DAC(WidgetFragment* self){return ((AdapterPrefix*)self)->target->State();}
 void fn_80228DC0(WidgetFragment*){}
 void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(context);ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
-void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height){fn_802C3034(context);ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
+void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){fn_802C3034(context);ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
 int fn_80228F40(int x,int y){return x+1000*y;}
 WidgetFragment* fn_80228F4C(WidgetFragment* self,int destroy){if(self){fn_80223208(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy){if(self){fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;}
