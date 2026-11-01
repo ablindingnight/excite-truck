@@ -354,10 +354,14 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
 }
 
 void fn_802A8DE8(void) {
-    for (int i = 0; i < lbl_804BD6C4.n; i++) {
-        Flock* f = lbl_804BD6C4.data[i];
-        for (int j = 0; j < f->birds.n; j++) {
-            Boid* b = &f->birds.data[j];
+    Flock* f;
+    int j;
+    int i;
+    Boid* b;
+    for (i = 0; i < lbl_804BD6C4.n; i++) {
+        f = lbl_804BD6C4.data[i];
+        for (j = 0; j < f->birds.n; j++) {
+            b = &f->birds.data[j];
             BirdFrame m;
             m.pos.x = b->pos.x;
             m.pos.y = b->pos.y;
