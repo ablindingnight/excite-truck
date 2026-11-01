@@ -3,6 +3,7 @@
 // drawing every window with the pointer on top, and the modal run loop that fades a window in,
 // runs it until it reports a result and fades it out again. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gxcanvas.h"
 
 void* operator new(size_t size, const char* tag);
 void OptE3Demo(void);
@@ -55,7 +56,7 @@ struct WinRect {
 };
 
 extern "C" {
-void fn_802C3034(int color);
+
 void fn_802C3424(s32 x0, s32 y0, s32 x1, s32 y1, s32 a);
 Window* fn_8021832C(Window* w);
 void fn_802C974C(f32 nearPlane, f32 farPlane, f32 fov);
@@ -169,7 +170,7 @@ extern "C" {
 int fn_80216054(void) { return 1; }
 
 void fn_8021605C(WinRect* r, int color) {
-    fn_802C3034(color);
+    fn_802C3034(reinterpret_cast<gxCanvas*>(color));
     fn_802C3424(r->x, r->y, r->x + r->w, r->y + r->h, lbl_8055FBDC);
 }
 

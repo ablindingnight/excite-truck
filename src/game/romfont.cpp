@@ -1,6 +1,7 @@
 // ROM font text (0x802DACD4-0x802DB2A0): loads the console's ROM font and draws boot-screen
 // messages with it straight onto a cleared screen. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/gxcanvas.h"
 
 extern "C" {
 u16 OSGetFontEncode(void);
@@ -58,7 +59,7 @@ void* drCreateTexture(TexDesc* desc, const char* name);
 void fn_802D8FB4(void* tex);
 u8* fn_802D2F78(int* width, int* height);
 void fn_802D2FD8(void);
-void fn_802C3034(ScreenDesc* desc);
+
 void fn_802C32B8(int x, int y, u32 color);
 void fn_802CED50(int x, int y, int w, int h);
 }
@@ -98,7 +99,7 @@ static inline u8* ClearScreen(void) {
     desc.stride = width * 2;
     desc.width2 = width;
     desc.height2 = height;
-    fn_802C3034(&desc);
+    fn_802C3034(reinterpret_cast<gxCanvas*>(&desc));
     return pixels;
 }
 
