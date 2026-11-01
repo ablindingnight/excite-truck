@@ -660,10 +660,12 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     RVec3 z4;
     s32 qk = S32(q, 0x20);
     s32 pk = S32(p, 0x20);
+    RigidBody* pb;
+    RigidBody* qb;
     CFrame* fp = (CFrame*)PTR(p, 0xC);
     CFrame* fq = (CFrame*)PTR(q, 0xC);
-    RigidBody* pb = (RigidBody*)PTR(p, 0x4);
-    RigidBody* qb = (RigidBody*)PTR(q, 0x4);
+    pb = (RigidBody*)PTR(p, 0x4);
+    qb = (RigidBody*)PTR(q, 0x4);
     if (qk == 0x3EA) {
         fn_80199870((u8*)pb, q);
         return;
@@ -1312,13 +1314,14 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     RigidBody* pb = (RigidBody*)PTR(p, 0x4);
     RigidBody* qb = (RigidBody*)PTR(q, 0x4);
+    u32 caps;
     u32 in = 0;
     c.x = F32(p, 0x34);
     c.y = F32(p, 0x38);
     c.z = F32(p, 0x3C);
     ToBoxSpace(&l, &c, &f);
     if (!dir || l.x * dir->x > lbl_805622D0 || (f32)__fabs(dir->y) > F32(q, 0x28)) {
-        if (l.x > F32(q, 0x24)) {
+        if (F32(q, 0x24) < l.x) {
             l.x = F32(q, 0x24);
         } else if (l.x < -F32(q, 0x24)) {
             l.x = -F32(q, 0x24);
@@ -1326,21 +1329,21 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             in |= 1;
         }
     }
-    if (l.y > F32(q, 0x28)) {
+    if (F32(q, 0x28) < l.y) {
         l.y = F32(q, 0x28);
     } else if (l.y < -F32(q, 0x28)) {
         l.y = -F32(q, 0x28);
     } else {
         in |= 2;
     }
-    u32 caps = U32(q, 0x34);
-    if ((caps & 1) && l.z > F32(q, 0x2C)) {
+    caps = U32(q, 0x34);
+    if ((caps & 1) && F32(q, 0x2C) < l.z) {
         return 0;
     }
     if ((caps & 2) && l.z < -F32(q, 0x2C)) {
         return 0;
     }
-    if (l.z > F32(q, 0x2C)) {
+    if (F32(q, 0x2C) < l.z) {
         l.z = F32(q, 0x2C);
     } else if (l.z < -F32(q, 0x2C)) {
         l.z = -F32(q, 0x2C);
@@ -1388,7 +1391,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     f32 comp = lbl_80562300 + (-len + F32(p, 0x24));
     f32 fq = lbl_805622D0;
-    if (comp > fq) {
+    if (fq < comp) {
         f32 fp = fq;
         f32 k = lbl_805622DC / len;
         n.x = d.x * k;
