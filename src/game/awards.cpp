@@ -582,13 +582,17 @@ StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
     default:
         fn_802E317C("StatHandler::Create: stat type %x has invalid data type flag %x", type, type & 0x300);
     case 0x200: {
+        int ev;
+        int diff;
+        int bestD;
+        int bestEv;
         IntStatHandler* h =
             new ("award_int") IntStatHandler(new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty));
         if (h) {
-            int bestEv = -1;
-            int bestD = -1;
-            for (int diff = 0; diff < 3; diff++) {
-                for (int ev = 0; ev < GetNumEvents(); ev++) {
+            bestEv = -1;
+            bestD = -1;
+            for (diff = 0; diff < 3; diff++) {
+                for (ev = 0; ev < GetNumEvents(); ev++) {
                     if (ev != d->event || diff != d->difficulty) {
                         Statistic s(IdentGetCurrentSlot(), type, ev, diff);
                         if (s.HasValue()) {
@@ -613,13 +617,17 @@ StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
         return h;
     }
     case 0x100: {
+        int bestD;
+        int ev;
+        int diff;
+        int bestEv;
         RealStatHandler* h = new ("award_real")
             RealStatHandler(new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty));
         if (h) {
-            int bestEv = -1;
-            int bestD = -1;
-            for (int diff = 0; diff < 3; diff++) {
-                for (int ev = 0; ev < GetNumEvents(); ev++) {
+            bestEv = -1;
+            bestD = -1;
+            for (diff = 0; diff < 3; diff++) {
+                for (ev = 0; ev < GetNumEvents(); ev++) {
                     if (ev != d->event || diff != d->difficulty) {
                         Statistic s(IdentGetCurrentSlot(), type, ev, diff);
                         if (s.HasValue()) {
