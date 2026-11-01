@@ -285,8 +285,35 @@ void fn_8022AC1C(int style,const char* text,int x,int y,int* a,int* b,int* c,int
     *a=(int)fa; *b=(int)fb; *c=(int)fc; *d=(int)fd;
 }
 
+static inline void StyleMultilineWidth(UIStyleRecordFields* s,const char* text,int lines,f32& width) {
+    width=0.0f;
+    for(int i=0;i<lines;i++) {
+        const char* end=strchr(text,10);
+        int n=end?(int)(end-text):(int)strlen(text);
+        if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0(s->resource04,text,n));
+        if(s->resource08) {
+            if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
+            else {
+                width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/(f32)fn_80232B70(s->resource08));
+            }
+        }
+        end=strchr(text,10);text=end;if(text)text++;
+    }
+}
+
+static inline void StyleMultilineFontHeight(UIStyleRecordFields* s,int lines,f32& height) {
+    f32 outerBase;
+    GTextFont* font=s->resource08;
+    if(font) {
+        if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70(font);
+        else {
+            outerBase=(f32)fn_80232B70(font);
+            height=(s->height*(f32)(lines*fn_80232B70(font)))/outerBase;
+        }
+    }
+}
+
 void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom) {
-        f32 outerBase;
     f32 width;
     UIStyleRecordFields* s=fn_8022CA2C(style);
     f32 left=x,top=y,right=x,bottom=y;
@@ -308,27 +335,8 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
         height=0.0f;
         int lines=fn_8022AB94((const signed char*)text,10)+1;
         if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8(s->resource04);
-        GTextFont* font=s->resource08;
-        if(font) {
-            if(s->height<1.0f) height=(f32)lines*(f32)fn_80232B70(font);
-            else {
-                outerBase=(f32)fn_80232B70(font);
-                height=(s->height*(f32)(lines*fn_80232B70(font)))/outerBase;
-            }
-        }
-        width=0.0f;
-        for(int i=0;i<lines;i++) {
-            const char* end=strchr(text,10);
-            int n=end?(int)(end-text):(int)strlen(text);
-            if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0(s->resource04,text,n));
-            if(s->resource08) {
-                if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
-                else {
-                    width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/(f32)fn_80232B70(s->resource08));
-                }
-            }
-            end=strchr(text,10);text=end;if(text)text++;
-        }
+        StyleMultilineFontHeight(s,lines,height);
+        StyleMultilineWidth(s,text,lines,width);
         dx=0.0f;dy=0.0f;
         if(s->field38&2) dx=-width;
         else if(s->field38&4) dx=(-width)/2.0f;
