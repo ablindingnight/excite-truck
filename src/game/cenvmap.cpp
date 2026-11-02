@@ -352,7 +352,8 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                 side.x *= s;
                 side.y *= s;
                 for (int k = 0; k < 4; k++) {
-                    EVec3 q = *p;
+                    EVec3 q;
+                    q = *p;
                     f32 sx, sy;
                     if (k & 1) {
                         q.x += side.x * w;
