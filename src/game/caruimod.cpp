@@ -1073,11 +1073,12 @@ void CarUIScreen::LoadView(const char* view) {
         if (t->HasChild(view)) {
             ValueNodeV* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
+            ValVec3 v;
             ValVec3 zero;
             zero.x = 0.0f;
             zero.y = 0.0f;
             zero.z = 0.0f;
-            ValVec3 v = n->GetVec3Or("camera_offset", zero);
+            v = n->GetVec3Or("camera_offset", zero);
             camOffset.x = v.x;
             camOffset.y = v.y;
             camOffset.z = v.z;
