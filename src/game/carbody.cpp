@@ -2478,8 +2478,9 @@ void fn_80186DE8(u8* p) {
         u8* car = lbl_804348E8[i];
         CbSolMass* m = &mass[i];
         CbSolContact* c = &contact[i];
+        CbSolVec grip4;
         CbSolCx* e = &cx[i];
-        CbSolVec grip4 = x->vB0;
+        grip4 = x->vB0;
         f32 air = lbl_80561CD0 - F32(car, 0x25D4);
         if (air > lbl_80561CD0) {
             air = lbl_80561CD0;
@@ -2487,6 +2488,7 @@ void fn_80186DE8(u8* p) {
         if (air < lbl_80561CAC) {
             air = lbl_80561CAC;
         }
+        f32 grip;
         f32 airK = lbl_80561CD0 + lbl_80561D44 * air;
         int surf = 0;
         if (e->surface[0] > surf) {
@@ -2513,7 +2515,7 @@ void fn_80186DE8(u8* p) {
             }
             wet = lbl_80561D00 + d * lbl_80561DD0;
         }
-        f32 grip = st->grip * wet;
+        grip = st->grip * wet;
         f32 slip = st->slip * wet;
         int landing = 0;
         if (lbl_8055E3C8 - F32(car, 0x26DC) < lbl_80561CDC && F32(car, 0x25D4) < lbl_80561DA0) {
@@ -2612,9 +2614,10 @@ void fn_80186DE8(u8* p) {
         F32(car, 0x68) = m->pos.z;
         ((CollVolume*)car)->Update();
         *(s16*)(car + 0x6C) = e->id;
+        f32 vz;
         f32 vx = m->vel.x;
         f32 vy = m->vel.y;
-        f32 vz = m->vel.z;
+        vz = m->vel.z;
         f32 wx = m->avel.x;
         f32 wy = m->avel.y;
         f32 wz = m->avel.z;
