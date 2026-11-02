@@ -1240,12 +1240,12 @@ void fn_801CD970(int car) {
         }
         if (fn_8026B0C0(car)) {
             if (p->shown) {
-                if (p->time < 0.25f) {
+                if (p->time >= 0.25f) {
+                    p->time = 2.75f;
+                } else {
                     PopQueue(m);
                     p->time = -1.0f;
                     p->used = 0;
-                } else {
-                    p->time = 2.75f;
                 }
             }
             p = 0;
@@ -1274,7 +1274,8 @@ void fn_801CD970(int car) {
     k = k > 0.0f ? k : 0.0f;
     f32 slide = out + k * (0.0f - out);
     if (box) {
-        AwBox b = *box;
+        AwBox b;
+        b = *box;
         b.pos.x += slide;
         fn_80148070(&b, -1, m->art);
     }
