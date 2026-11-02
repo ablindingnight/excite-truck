@@ -981,7 +981,8 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
 }
 
 void fn_8000C0E8(RaceSetup* rs) {
-    RaceSetup copy = *rs;
+    RaceSetup copy;
+    copy = *rs;
     int i;
     RacerSlot* s;
     copy.unk3F4 = 1;
