@@ -1139,17 +1139,19 @@ void fn_802D6C78(void) {
     SetGQR6();
     q = &lbl_804D2C40;
     if (q->count) {
+        int pc;
         DeformJob* next = q->jobs;
         int left = q->count - 1;
+        int c;
         int n = next->n;
         u8* src = (u8*)next->src;
         u8* dst = (u8*)next->dst;
         next++;
-        int c = n > 0x100 ? 0x100 : n;
+        c = n > 0x100 ? 0x100 : n;
         LCLoadData(LC_BUF(0), src, c * 0x14);
         n -= c;
         src += c * 0x14;
-        int pc = 0;
+        pc = 0;
         u8* pdst = 0;
         f32* pout = 0;
         u8* cur = LC_BUF(0);
@@ -1200,16 +1202,18 @@ void fn_802D6C78(void) {
         DeformJob* next = q->jobs;
         int left = q->count - 1;
         int n = next->n;
+        f32* pout;
         u8* src = (u8*)next->src;
+        int pc;
         u8* dst = (u8*)next->dst;
         next++;
         int c = n > 0xE0 ? 0xE0 : n;
         LCLoadData(LC_BUF(0), src, c * 0x18);
         n -= c;
         src += c * 0x18;
-        int pc = 0;
+        pc = 0;
         u8* pdst = 0;
-        f32* pout = 0;
+        pout = 0;
         u8* cur = LC_BUF(0);
         int buf = 1;
         for (;;) {
@@ -1264,6 +1268,8 @@ void fn_802D6C78(void) {
         DeformJob* next = q->jobs;
         int left = q->count - 1;
         int n = next->n;
+        u8* pdst;
+        int pc;
         u8* src = (u8*)next->src;
         u8* dst = (u8*)next->dst;
         next++;
@@ -1271,8 +1277,8 @@ void fn_802D6C78(void) {
         LCLoadData(LC_BUF(0), src, c * 0x10);
         n -= c;
         src += c * 0x10;
-        int pc = 0;
-        u8* pdst = 0;
+        pc = 0;
+        pdst = 0;
         f32* pout = 0;
         u8* cur = LC_BUF(0);
         int buf = 1;
