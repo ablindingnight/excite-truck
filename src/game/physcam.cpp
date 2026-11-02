@@ -1427,7 +1427,8 @@ void camera_car(u8* p, int ci) {
         CamRotFromVec(&rot, w);
         fn_801BFD34(p + 0x7C, off, p + 0xC0);
         Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
-        F32(p, 0xBC) = lbl_80563F4C * v->fov;
+        f32 fovv = v->fov;
+        F32(p, 0xBC) = lbl_80563F4C * fovv;
         break;
     }
     case 0:
@@ -1440,11 +1441,11 @@ void camera_car(u8* p, int ci) {
     case 5:
     case 7: {
         int t = fn_80273494(S32(p, 0x4));
-        if (t == 6 || t == 0 || t == ci) {
-            fn_802704D0(v->type, lbl_80346BA0[cyc->first + (cyc->count + cyc->cur - 1) % cyc->count].type, p);
-        } else {
+        if (!(t == 6 || t == 0 || t == ci)) {
             CamCycle* o = &lbl_8049A258[t];
             fn_802704D0(v->type, lbl_80346BA0[o->first + o->cur].type, p);
+        } else {
+            fn_802704D0(v->type, lbl_80346BA0[cyc->first + (cyc->count + cyc->cur - 1) % cyc->count].type, p);
         }
         break;
     }
