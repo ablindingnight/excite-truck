@@ -388,9 +388,10 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
 
 void fn_802D81C4(GXTexDesc* d) {
     s32 w = d->w;
+    u8* tex;
     s32 h = d->h;
     TexImage* img = d->data;
-    u8* tex = img->tex;
+    tex = img->tex;
     int i;
     u8* p = tex;
     int n = w * h / 2;
@@ -402,13 +403,14 @@ void fn_802D81C4(GXTexDesc* d) {
     for (i = 0; i < 16; i++) {
         Swap32(&pal[i]);
     }
-    int row = w / 2;
     fn_801282EC(0x20);
+    int row = w / 2;
     u8* tmp = new ("tmp_tx8") u8[row * h];
     memcpy(tmp, tex, row * h);
     int tw = row / 4;
+    int y;
     u8* src = tmp;
-    for (int y = 0; y < h; y++) {
+    for (y = 0; y < h; y++) {
         for (int x = 0; x < row; x++) {
             tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = src[x];
         }
