@@ -1290,8 +1290,8 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
                  s16 sfc, s16* scfsi, s8 gr, s8 ch, s16* bound, s16* region0, s16* region1, s16* preflag,
                  s16* is_scale) {
     s8 i;
-    s8 sfb;
     s32 w;
+    s8 sfb;
     s8 end;
     s8 start;
     s32 len1;
@@ -1308,10 +1308,10 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
     s8 nr3;
 
     if (d->lsf == 0) {
-        d->unkC = d->unk10;
-        d->unk10 += part2_3;
         len1 = lbl_802F44C8[sfc];
         len2 = lbl_802F44D8[sfc];
+        d->unkC = d->unk10;
+        d->unk10 += part2_3;
         *bound = 0;
         if (flags & 7) {
             if (flags & 6) {
@@ -1490,8 +1490,8 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
             }
             if (c >= 180 && c < 244) {
                 t = c - 180;
-                slen0 = (t >> 4) & 3;
-                slen1 = (t >> 2) & 3;
+                slen0 = (t & 0x30) >> 4;
+                slen1 = (t & 0xC) >> 2;
                 slen2 = t & 3;
                 slen3 = 0;
                 *preflag = 0;
@@ -1567,25 +1567,23 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen0, (u32*)&d->unkC);
                     }
                 }
+                start = t / 3 + 3;
                 t += nr1;
-                start = end;
                 end = t / 3 + 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen1, (u32*)&d->unkC);
                     }
                 }
-                t += nr2;
-                start = end;
-                end = t / 3 + 3;
+                start = t / 3 + 3;
+                end = (nr2 + t) / 3 + 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen2, (u32*)&d->unkC);
                     }
                 }
-                t += nr3;
-                start = end;
-                end = t / 3 + 3;
+                start = (nr2 + t) / 3 + 3;
+                end = (nr3 + (nr2 + t)) / 3 + 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen3, (u32*)&d->unkC);
@@ -1600,25 +1598,23 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen0, (u32*)&d->unkC);
                     }
                 }
+                start = nr0 / 3;
                 t = nr0 + nr1;
-                start = end;
                 end = t / 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen1, (u32*)&d->unkC);
                     }
                 }
-                t += nr2;
-                start = end;
-                end = t / 3;
+                start = t / 3;
+                end = (nr2 + t) / 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen2, (u32*)&d->unkC);
                     }
                 }
-                t += nr3;
-                start = end;
-                end = t / 3;
+                start = (nr2 + t) / 3;
+                end = (nr3 + (nr2 + t)) / 3;
                 for (sfb = start; sfb < end; sfb++) {
                     for (w = 0; w < 3; w++) {
                         sf_short[sfb][w] = MP3_GetBitsRing(ring, slen3, (u32*)&d->unkC);
@@ -1633,13 +1629,18 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
             for (i = 0; i < nr0; i++) {
                 sf_long[i] = MP3_GetBitsRing(ring, slen0, (u32*)&d->unkC);
             }
-            for (i = nr0; i < nr0 + nr1; i++) {
+            end = nr0 + nr1;
+            for (i = nr0; i < end; i++) {
                 sf_long[i] = MP3_GetBitsRing(ring, slen1, (u32*)&d->unkC);
             }
-            for (i = nr0 + nr1; i < nr0 + nr1 + nr2; i++) {
+            start = nr0 + nr1;
+            end = start + nr2;
+            for (i = start; i < end; i++) {
                 sf_long[i] = MP3_GetBitsRing(ring, slen2, (u32*)&d->unkC);
             }
-            for (i = nr0 + nr1 + nr2; i < nr0 + nr1 + nr2 + nr3; i++) {
+            start = nr0 + nr1 + nr2;
+            end = start + nr3;
+            for (i = start; i < end; i++) {
                 sf_long[i] = MP3_GetBitsRing(ring, slen3, (u32*)&d->unkC);
             }
         }
