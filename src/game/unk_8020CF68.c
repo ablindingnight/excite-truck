@@ -394,14 +394,14 @@ int fn_8020DB0C(int arg0) {
     case 0x125:
         switch (lbl_8055EE78) {
         case 0:
-            if (!(__fabsf(lbl_8055EE8C) <= lbl_80558DC4)) {
+            if (!((float)__fabs(lbl_8055EE8C) <= lbl_80558DC4)) {
                 lbl_8055EE98 = lbl_8056332C * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 1:
-            if (!(__fabsf(lbl_8055EE90) <= lbl_80558DC4)) {
+            if (!((float)__fabs(lbl_8055EE90) <= lbl_80558DC4)) {
                 lbl_8055EE98 = lbl_8056332C * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
