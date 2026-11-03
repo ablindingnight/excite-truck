@@ -130,9 +130,9 @@ struct FlockList {
     Flock* buf[10]; // offset 0xC
 };
 
-ModuleTag lbl_8055F8C8;
-FlockList lbl_804BD6C4;
 UnkStaticFFFF lbl_8055F8D0;
+FlockList lbl_804BD6C4;
+ModuleTag lbl_8055F8C8;
 f32 lbl_8055F8D4;  // frame time
 f32 lbl_8055F8D8;  // last time
 

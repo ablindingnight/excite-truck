@@ -732,8 +732,8 @@ public:
 }
 
 ModuleTag lbl_8055E390;
-static UnkStatic123s lbl_80430378;
 UnkStaticFFFF lbl_8055E398;
+static UnkStatic123s lbl_80430378;
 UnkStaticFFFF lbl_8055E39C;
 UnkStatic7F lbl_8055E3A0;
 static CrushTuning lbl_8043038C;

@@ -244,9 +244,9 @@ const char* lbl_8032E9E0[15] = {
     "Stunt:FINAL_STATS_CAR_WRECK",  "Stunt:FINAL_STATS_CRASH",         "Stunt:FINAL_STATS_RING",
 };
 
-ModuleTag lbl_8055E280;
-static FixedList<StuntWatcher*, 8> lbl_8042FD34;
 UnkStatic7F lbl_8055E288;
+static FixedList<StuntWatcher*, 8> lbl_8042FD34;
+ModuleTag lbl_8055E280;
 
 f32 lbl_8042FD08[8];  // per-car score scale
 

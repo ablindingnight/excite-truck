@@ -131,9 +131,9 @@ extern u8 lbl_8055F024;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 ModuleTag lbl_8055EF60;
-UnkStaticFFFF lbl_8055EF68;
-static UnkStatic123 lbl_804908B0;
 UnkStatic7F lbl_8055EF6C;
+static UnkStatic123 lbl_804908B0;
+UnkStaticFFFF lbl_8055EF68;
 static Window* lbl_804908C8[16];
 u8 lbl_8055EF70;   // the active window reported a result
 s32 lbl_8055EF74;  // that result
