@@ -1900,9 +1900,9 @@ void fn_802D2684(void) {
         GXSetTevOp(1, 0);
     } else {
         int in[4];
-        int n = 0;
         GXSetTevColorOp(0, 0, 0, 0, 1, 0);
         GXSetTevColorIn(0, 0xF, 8, 0xA, 0xF);
+        int n = 0;
         if (lbl_8055FD1C & 0x100) {
             in[0] = 4;
             n = 1;
