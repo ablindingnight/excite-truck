@@ -3250,10 +3250,6 @@ void fn_80228010(WidgetFragment* source) {
  float negativeHeight;
  float x;
  float y;
- float gap;
- float half;
- float zero;
- float halfHeight;
  float nextX;
  float measured;
  float width;
@@ -3267,8 +3263,8 @@ void fn_80228010(WidgetFragment* source) {
  float rightWidth;
  float capWidth;
  float bodyWidth;
- float titleX;
  float bodyHeight;
+ float titleX;
 
  NameTabsPaintShared* const f=(NameTabsPaintShared*)source;
  if(!f->font || !f->frame || !f->panel)return;
@@ -3284,26 +3280,22 @@ void fn_80228010(WidgetFragment* source) {
  nextX = (2.0f)+x;
  bool multiple=count>1;
  if(multiple){
-  half = (0.5f);
-  zero = (0.0f);
-  halfHeight = frameHeight*half;
-  gap = (9.0f)+lastWidth;
   for(int index=0;index<count;index++){
    bool active=index==selected;
    const char* text=f->list->Name(index);
    measured = fn_8023293C(f->font,text,(1.0f));
-   width = zero>measured?zero:measured;
+   width = (0.0f)>measured?(0.0f):measured;
    rowY = y;
    fn_802353F4(f->frame,0,nextX,rowY,(0.0f));
    nextX+=firstWidth;
    fn_802354A0(f->frame,1,-1U,nextX,rowY,(0.0f),width,frameHeight);
-   textX = nextX+(width*half);
-   textY = rowY-halfHeight;
+   textX = nextX+(width/2.0f);
+   textY = rowY-(frameHeight/2.0f);
    unsigned int color=active?-1U:0xFF707070U;
    fn_80232BA4(text,f->font,textX,textY,color,0x14,(1.0f),(0.0f),(1.0f));
    nextX+=width;
    fn_802353F4(f->frame,2,nextX,rowY,(0.0f));
-   nextX+=gap;
+   nextX+=((9.0f)+lastWidth);
   }
  }
  bottom=y+negativeHeight;
