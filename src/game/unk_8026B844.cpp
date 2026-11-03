@@ -192,8 +192,8 @@ void fn_8026B8A0(void) {
         lbl_80499050.pos.z += move.z;
     }
     {
-        f32 side = lbl_80563D78;
         f32 rate = lbl_80563DA4;
+        f32 side = lbl_80563D78;
         f32 vert = side;
         if (fn_802E4A1C(0x1E)) {
             vert = lbl_80563D94;
@@ -212,8 +212,8 @@ void fn_8026B8A0(void) {
     h = lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z);
     if (free) {
         f32 t = CamMax(CamMin(lbl_80563D94, (h - lbl_80563DB8) / lbl_80563DBC), lbl_80563D78);
-        f32 pan = lbl_80563DC4 * (lbl_80563D94 + t * lbl_80563DC0);
         f32 px = lbl_80563D78;
+        f32 pan = lbl_80563DC4 * (lbl_80563D94 + t * lbl_80563DC0);
         f32 py = px;
         f32 a;
         f32 b;
@@ -229,9 +229,11 @@ void fn_8026B8A0(void) {
         }
         a = dt * (px * pan);
         b = dt * (-py * pan);
-        lbl_80499050.pos.x = lbl_80499050.pos.x + right.x * a + fwd.x * b;
+        f32 xv = right.x;
+        lbl_80499050.pos.x = lbl_80499050.pos.x + xv * a + fwd.x * b;
         lbl_80499050.pos.y = lbl_80499050.pos.y + right.y * a + fwd.y * b;
-        lbl_80499050.pos.z = lbl_80499050.pos.z + right.z * a + fwd.z * b;
+        f32 zv = lbl_80499050.pos.z;
+        lbl_80499050.pos.z = zv + right.z * a + fwd.z * b;
     }
     lbl_80499050.pos.y = lbl_80499050.pos.y + (h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z)));
     lbl_80499050.rot.axes[0].x = lbl_80563D94;
