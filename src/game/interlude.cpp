@@ -2919,7 +2919,8 @@ void fn_801CA67C(void) {
         f32 scale = 250.0f / dur;
         for (int i = 0; i < lbl_8055E7F0; i++) {
             int color = fn_801C34CC(lbl_8055E7F8[i].time, lbl_8055E7F8[lbl_8055E828].time) ? -1 : 0xFF000000;
-            int x = (int)(0.5f + lbl_8055E7F8[i].time * scale) + 10;
+            f32 timev = lbl_8055E7F8[i].time;
+            int x = (int)(0.5f + timev * scale) + 10;
             x = x <= 260 ? x : 260;
             fn_80238B44(x, 90, x + 1, 105, color);
         }
@@ -2929,11 +2930,12 @@ void fn_801CA67C(void) {
         }
         fn_80238B44(x, 90, x + 1, 105, 0xFFFFFF00);
     }
+    int y;
     Menu* m = &lbl_8055E86C[lbl_8055E81C];
     fn_801C94BC(398, 8, 600, lineH * (m->count + 1) + 10, bg);
     fn_801C94BC(398, 8, 600, h + 10, 0x32000000);
     fn_801C94B8(400, 10, m->title, -1);
-    int y = lineH + 10;
+    y = lineH + 10;
     for (int i = 0; i < m->count; i++) {
         MenuItem* it = &m->items[i];
         char line[0x100];
