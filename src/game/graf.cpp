@@ -206,7 +206,7 @@ const GrafFactory lbl_802F9A08[25] = {
 
 ModuleTag lbl_8055EB88;
 u32 lbl_8055EB90 = GColor(0xFF, 0xFF, 0, 0);
-f32 lbl_8055EB94 = GFloat(0.7853982f);
+extern const f32 lbl_8055EB94 = GFloat(0.7853982f);
 f32 lbl_8055EB98[2];   // display list fog/lod parameters
 GrafRes* lbl_8055EBA0;
 f32 lbl_8055EBA4;      // parallax scale

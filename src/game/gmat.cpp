@@ -82,8 +82,8 @@ template <class T>
 struct DynVec {
     bool Room(void) { return count + 1 <= cap; }
     T* Next(void) { return &data[count++]; }
-    DynVec(int n) {
-        data = new ("dsa_buf") T[n];
+    DynVec(int n, const char* tag = "dsa_buf") {
+        data = new (tag) T[n];
         cap = n;
         count = 0;
         buf = data;

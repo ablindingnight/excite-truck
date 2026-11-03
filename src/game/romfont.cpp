@@ -66,7 +66,7 @@ void fn_802CED50(int x, int y, int w, int h);
 
 ModuleTag lbl_8055FE68;
 s16 lbl_8055FE70 = MakeS16(0x100);
-s16 lbl_8055FE72 = MakeS16(0x405);
+extern const s16 lbl_8055FE72 = MakeS16(0x405);
 s16 lbl_8055FE74 = MakeS16(0x401);
 void* lbl_8055FE78;  // font data
 void* lbl_8055FE7C;  // font sheet

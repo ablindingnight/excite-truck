@@ -207,8 +207,8 @@ public:
     void* car;  // offset 0x8
 };
 
-extern f32 lbl_80560108;
-extern f32 lbl_8056010C;
+extern const f32 lbl_80560108;
+extern const f32 lbl_8056010C;
 extern void* lbl_8055E0D4;  // AI system
 extern u32 lbl_8055E3C4;
 

@@ -967,7 +967,7 @@ int fn_802B825C(int d, const char* s) {
         ObjScale* sc = it.scale;
         f32 v = sc->max;
         f32 n = sc->min + fn_802B822C(d);
-        v = v >= n ? n : v;
+        v = v < n ? v : n;
         v = v > 0.05f ? v : 0.05f;
         if (v != sc->min) {
             sc->min = v;
@@ -986,7 +986,7 @@ int fn_802B8310(int d, const char* s) {
         ObjScale* sc = it.scale;
         f32 lo = sc->min;
         f32 n = sc->max + fn_802B822C(d);
-        v = v >= n ? n : v;
+        v = v < n ? v : n;
         v = v > lo ? v : lo;
         if (v != sc->max) {
             sc->max = v;

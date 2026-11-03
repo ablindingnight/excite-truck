@@ -137,16 +137,15 @@ void fn_8013BAE4(s32 n) {
     lbl_8042F8A8.active = 0;
     fn_8013B7B4(tbl, n);
     fn_8013B6C0(&lvl, &frac, fn_801E87A8()->level);
-    lbl_8042F8B8.begin = Lerp(frac, tbl[lvl].begin, tbl[lvl + 1].begin);
-    lbl_8042F8B8.effect = Lerp(frac, tbl[lvl].effect, tbl[lvl + 1].effect);
-    lbl_8042F8B8.speed = Lerp(frac, tbl[lvl].speed, tbl[lvl + 1].speed);
-    lbl_8042F8B8.compare = Lerp(frac, tbl[lvl].compare, tbl[lvl + 1].compare);
+    Catchup* lo = &tbl[lvl];
+    lbl_8042F8B8.begin = Lerp(frac, lo[0].begin, lo[1].begin);
+    lbl_8042F8B8.effect = Lerp(frac, lo[0].effect, lo[1].effect);
+    lbl_8042F8B8.speed = Lerp(frac, lo[0].speed, lo[1].speed);
+    lbl_8042F8B8.compare = Lerp(frac, lo[0].compare, lo[1].compare);
     cnt = (int)Round(lbl_8042F8B8.compare);
     cnt = cnt > 1 ? cnt : 1;
     lbl_8055E170 = cnt < n - 1 ? cnt : n - 1;
-    if (lbl_8042F8B8.speed >= 1.0f) {
-        lbl_8042F8B8.speed = 1.0f;
-    }
+    lbl_8042F8B8.speed = lbl_8042F8B8.speed < 1.0f ? lbl_8042F8B8.speed : 1.0f;
 }
 
 void fn_8013BC34(void) {

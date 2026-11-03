@@ -519,5 +519,5 @@ void fn_80138BA0(IdealLineRes* a, IdealLineRes* b) {
 
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
-u32 lbl_8055E0F0 = MakeILPos(0xFFFF, 0);
+extern const u32 lbl_8055E0F0 = MakeILPos(0xFFFF, 0);
 u32 lbl_8055E0F4 = MakeILPos(0x7F00, 0);

@@ -221,8 +221,9 @@ int fn_80259224(u8* p) {
         ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), S32(p, 0xC8));
     }
     s32 level = S32(p, 0xC8);
+    s32 cat = S32(p, 0x18);
     view.levelNum = level;
-    const char* model = AchievementsGetLevelModel(S32(p, 0x18), level);
+    const char* model = AchievementsGetLevelModel(cat, level);
     if (model) {
         CopyName(model, 50, view.model);
     } else {
@@ -318,8 +319,9 @@ struct TrophyFace {
 #define TROPHY_VIEW_SHOW(v, row)                                                 \
     {                                                                            \
         s32 lvl = S32(row, 0xC8);                                                \
+        s32 cat = S32(row, 0x18);                                                \
         (v).levelNum = lvl;                                                      \
-        const char* model = AchievementsGetLevelModel(S32(row, 0x18), lvl);      \
+        const char* model = AchievementsGetLevelModel(cat, lvl);                 \
         if (model) {                                                             \
             CopyName(model, 50, (v).model);                                      \
         } else {                                                                 \
@@ -852,7 +854,11 @@ struct LightDir {
     f32 x, y, z;
 };
 
-extern f32 lbl_8055F39C;  // trophy view field of view
+ModuleTag lbl_8055F388;
+UnkStatic123s lbl_80498E98;
+UnkStatic7F lbl_8055F390;
+extern const f32 lbl_80563B38;
+extern const f32 lbl_8055F39C = lbl_80563B38;  // trophy view field of view
 
 extern "C" {
 u8* fn_8025B134(u8* p);
@@ -1183,8 +1189,3 @@ void fn_8025BED0(u8* p) {
 
 }  // extern "C"
 
-ModuleTag lbl_8055F388;
-UnkStatic123s lbl_80498E98;
-UnkStatic7F lbl_8055F390;
-extern const f32 lbl_80563B38;
-f32 lbl_8055F39C = lbl_80563B38;

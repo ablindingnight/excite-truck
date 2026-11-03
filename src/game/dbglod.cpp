@@ -45,11 +45,12 @@ const char* lbl_8055AED8 = "";
 bool lbl_8055AEDC = true;
 
 ModuleTag lbl_8055EA70;
-UnkStaticFFFF lbl_8055EA78;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+extern const u32 lbl_8055EA78 = MakeILPos(0xFFFF, 0);
 s16 lbl_8055EA7C = MakeS16(0x100);
-s16 lbl_8055EA7E = MakeS16(0x405);
-s16 lbl_8055EA80 = MakeS16(0x401);
-UnkStatic7F lbl_8055EA84;
+extern const s16 lbl_8055EA7E = MakeS16(0x405);
+extern const s16 lbl_8055EA80 = MakeS16(0x401);
+u32 lbl_8055EA84 = MakeILPos(0x7F00, 0);
 const char* lbl_8055EA88;
 bool lbl_8055EA8C;
 bool lbl_8055EA8D;

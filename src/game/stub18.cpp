@@ -11,9 +11,9 @@ inline s16 MakeS16(s16 v) { return v; }
 
 ModuleTag lbl_8055F5D0;
 static UnkStatic123 lbl_804A16D0;
-s16 lbl_8055F5D8 = MakeS16(0x100);
-s16 lbl_8055F5DA = MakeS16(0x405);
-s16 lbl_8055F5DC = MakeS16(0x401);
+extern const s16 lbl_8055F5D8 = MakeS16(0x100);
+extern const s16 lbl_8055F5DA = MakeS16(0x405);
+extern const s16 lbl_8055F5DC = MakeS16(0x401);
 UnkStatic7F lbl_8055F5E0;
 
 extern "C" {

@@ -564,8 +564,10 @@ static const char* GetClassicButtonName(void) { return "the  Square  button"; }
 f32 lbl_8055892C = 1.0f;
 
 ModuleTag lbl_8055D330;
-UnkStaticFFFF lbl_8055D338;
-UnkStatic7F lbl_8055D33C;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055D338 = MakeILPos(0xFFFF, 0);
+u32 lbl_8055D33C = MakeILPos(0x7F00, 0);
 RetryFlags lbl_8055D340;
 GameOverlay* lbl_8055D344;
 s32 lbl_8055D348;

@@ -54,7 +54,8 @@ extern f32 lbl_8055E3C8;  // race clock
 ModuleTag lbl_8055E228;
 UnkStaticFFFF lbl_8055E230;
 static UnkStatic123 lbl_8042FC70;
-UnkStatic7F lbl_8055E234;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+extern const u32 lbl_8055E234 = MakeILPos(0x7F00, 0);
 
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);

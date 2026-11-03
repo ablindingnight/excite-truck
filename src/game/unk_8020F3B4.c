@@ -6,9 +6,9 @@
 extern struct Unk_804900AC { long *m_entries; long m_count; long m_capacity; } lbl_804900AC;
 extern void fn_801345D8(void *, ...);
 extern long lbl_8055B664;
-extern signed char lbl_8055EEF4;
-extern signed char lbl_8055EEF5;
-extern signed char lbl_8055EEF6;
+extern unsigned char lbl_8055EEF4;
+extern unsigned char lbl_8055EEF5;
+extern unsigned char lbl_8055EEF6;
 extern char lbl_80489CA0[16];
 extern long fn_8020F608(long, long);
 extern struct Unk_804902C4 {
@@ -23,20 +23,57 @@ extern long lbl_8055B658;
 extern long __AXFXGetLfoSinTable_801769CC();
 extern long lbl_8055B674;
 extern long lbl_8033C970[4];
-extern float lbl_80563400;
-extern void fn_802EC1C0();
+extern const float lbl_80563400;
+extern void fn_802EC1C0(float vol);
+extern long fn_802EC0FC(void);
 extern void fn_802EC1E4();
 extern long fn_802EC12C();
 long fn_8020F3B4(void) { return -1; }
  
 long fn_8020F3BC(long arg0, long arg1, long arg2) {
     long result = arg1;
-    ((void (*)(long, long, long *, long))fn_801345D8)(arg1, arg2, &lbl_8055B664, arg0);
+    fn_801345D8((void *)arg1, arg2, &lbl_8055B664, arg0);
     return result;
 }
  
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
+extern char lbl_8055B66C;
+long fn_8020F400(long arg0, long arg1, long arg2) {
+    long result = arg1;
+    fn_801345D8((void *)arg1, arg2, &lbl_8055B66C, arg0);
+    return result;
+}
+
+extern char lbl_804904D0[0x40];
+extern long lbl_8055B650;
+extern long lbl_8055B654;
+extern char lbl_8033C95C[];
+extern int fn_8012E938(const char *name);
+extern void fn_8012E81C(const char *name);
+extern void fn_802EC294(int slot, const char *name);
+extern void fn_802E30C8(const char *, ...);
+
+void fn_8020F444(void) {
+    char buf[0x40];
+    if (!lbl_8055EEF4 && fn_8012E938((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)))) {
+        fn_8012E81C((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)));
+        fn_802EC294(0, (const char *)fn_8020F3BC((long)lbl_804904D0, (long)buf, sizeof(buf)));
+        fn_802E30C8(lbl_8033C95C, buf);
+        lbl_8055EEF4 = 1;
+    }
+    if (!lbl_8055EEF5 && fn_8012E938((const char *)fn_8020F400(lbl_8055B650, (long)buf, sizeof(buf)))) {
+        fn_8012E81C((const char *)fn_8020F400(lbl_8055B650, (long)buf, sizeof(buf)));
+        fn_802EC294(1, (const char *)fn_8020F3BC(lbl_8055B650, (long)buf, sizeof(buf)));
+        fn_802E30C8(lbl_8033C95C, buf);
+        lbl_8055EEF5 = 1;
+    }
+    if (!lbl_8055EEF6 && fn_8012E938((const char *)fn_8020F400(lbl_8055B654, (long)buf, sizeof(buf)))) {
+        fn_8012E81C((const char *)fn_8020F400(lbl_8055B654, (long)buf, sizeof(buf)));
+        fn_802EC294(2, (const char *)fn_8020F3BC(lbl_8055B654, (long)buf, sizeof(buf)));
+        fn_802E30C8(lbl_8033C95C, buf);
+        lbl_8055EEF6 = 1;
+    }
+}
+
 void fn_8020F5C8(void) {
     lbl_8055EEF6 = 1;
     lbl_8055EEF5 = 1;
@@ -56,48 +93,14 @@ void *fn_8020F5F0(long arg0) {
 }
 
 extern void *memset(void *, int, unsigned long);
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 long fn_8020F608(long arg0, long arg1) {
     long i;
     char *ptr;
 
     ptr = (char *)fn_8020F5F0(arg1);
     memset(ptr, 0, 0x1900);
-    for (i = 0; i < 2; i++) {
-        *(long *)(ptr + 0x000) = arg0;
-        *(long *)(ptr + 0x064) = arg0;
-        *(long *)(ptr + 0x0C8) = arg0;
-        *(long *)(ptr + 0x12C) = arg0;
-        *(long *)(ptr + 0x190) = arg0;
-        *(long *)(ptr + 0x1F4) = arg0;
-        *(long *)(ptr + 0x258) = arg0;
-        *(long *)(ptr + 0x2BC) = arg0;
-        *(long *)(ptr + 0x320) = arg0;
-        *(long *)(ptr + 0x384) = arg0;
-        *(long *)(ptr + 0x3E8) = arg0;
-        *(long *)(ptr + 0x44C) = arg0;
-        *(long *)(ptr + 0x4B0) = arg0;
-        *(long *)(ptr + 0x514) = arg0;
-        *(long *)(ptr + 0x578) = arg0;
-        *(long *)(ptr + 0x5DC) = arg0;
-        *(long *)(ptr + 0x640) = arg0;
-        *(long *)(ptr + 0x6A4) = arg0;
-        *(long *)(ptr + 0x708) = arg0;
-        *(long *)(ptr + 0x76C) = arg0;
-        *(long *)(ptr + 0x7D0) = arg0;
-        *(long *)(ptr + 0x834) = arg0;
-        *(long *)(ptr + 0x898) = arg0;
-        *(long *)(ptr + 0x8FC) = arg0;
-        *(long *)(ptr + 0x960) = arg0;
-        *(long *)(ptr + 0x9C4) = arg0;
-        *(long *)(ptr + 0xA28) = arg0;
-        *(long *)(ptr + 0xA8C) = arg0;
-        *(long *)(ptr + 0xAF0) = arg0;
-        *(long *)(ptr + 0xB54) = arg0;
-        *(long *)(ptr + 0xBB8) = arg0;
-        *(long *)(ptr + 0xC1C) = arg0;
-        ptr += 0xC80;
+    for (i = 0; i < 64; i++) {
+        *(long *)(ptr + i * 100) = arg0;
     }
 }
 #pragma dont_inline reset
@@ -122,31 +125,103 @@ long fn_8020F6FC(void) {
     return value;
 }
 
+extern long fn_80129D18(long seed, long range);
 void fn_8020F730(void) {
     long i;
     long count = lbl_804900AC.m_count;
-    long *entries = lbl_804902C4.m_entries;
     lbl_804902C4.m_count = 0;
-    for (i = 0; i < count; i++) {
-        entries[lbl_804902C4.m_count++] = i;
-    }
-    for (i = 0; i < lbl_804902C4.m_count; i++) {
-        long index = fn_80129D18(6);
-        long temp = entries[i];
-        entries[i] = entries[index];
-        entries[index] = temp;
+    if (count != 0) {
+        for (i = 0; i < count; i++) {
+            lbl_804902C4.m_entries[lbl_804902C4.m_count++] = i;
+        }
+        for (i = 0; i < lbl_804902C4.m_count; i++) {
+            long index = fn_80129D18(6, lbl_804902C4.m_count);
+            long *e = lbl_804902C4.m_entries;
+            long temp = e[i];
+            e[i] = e[index];
+            e[index] = temp;
+        }
     }
     lbl_8055EEC4 = 0;
 }
 
-void fn_8020FC6C(void) {
+extern long fn_802EC104(long index);
+void fn_8020F950(void) {
+    long cap = lbl_804900AC.m_capacity;
+    long n;
+    long i;
+    lbl_804900AC.m_count = 0;
+    n = fn_802EC0FC();
+    if (cap < n) {
+        n = cap;
+    }
+    for (i = 0; i < n; i++) {
+        lbl_804900AC.m_entries[lbl_804900AC.m_count++] = fn_802EC104(i);
+    }
+    fn_8020F730();
+}
+
+#pragma cplusplus on
+long IdentGetCurrentSlot(void);
+#pragma cplusplus off
+extern int strcasecmp(const char *, const char *);
+extern int strncasecmp(const char *, const char *, unsigned long);
+long fn_8020F9F4(void) {
+    char *e = (char *)fn_8020F5F0(IdentGetCurrentSlot());
+    long i;
+    for (i = 0; i < 64; i++, e += 100) {
+        if (e[4] == 0) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+void *fn_8020FAF0(const char *name) {
+    char *base = (char *)fn_8020F5F0(IdentGetCurrentSlot());
+    char *e = base;
+    long i;
+    for (i = 0; i < 64; i++, e += 100) {
+        if (strcasecmp(e + 4, name) == 0) {
+            return base + i * 100;
+        }
+    }
+    return base + fn_8020F9F4() * 100;
+}
+
+long fn_8020FB80(const char *name) {
+    long i;
+    for (i = 0; i < lbl_804900AC.m_count; i++) {
+        if (strncasecmp(((char **)lbl_804900AC.m_entries)[i], name, 0x3F) == 0) {
+            return i;
+        }
+    }
+    return ((long (*)(long))fn_8020F3B4)(0);
+}
+
+long fn_8020FC04(const char *name) {
+    long *p = (long *)fn_8020FAF0(name);
+    if (p != 0) {
+        if (*p == 0) {
+            return 0;
+        }
+        if (*p == 1) {
+            return lbl_804900AC.m_entries[fn_8020F6FC()];
+        }
+        return (long)(p + 9);
+    }
+    return 0;
+}
+
+long fn_8020FC6C(const char *name) {
     struct Unk_804900AC *state = &lbl_804900AC;
+    const char *found;
     if (state->m_count == 0) {
-        ((long (*)(long))fn_8020F3B4)(0);
-    } else if (fn_8020FC04() != 0) {
-        fn_8020FB80();
+        return ((long (*)(long))fn_8020F3B4)(0);
+    } else if ((found = (const char *)fn_8020FC04(name)) != 0) {
+        return fn_8020FB80(found);
     } else {
-        ((long (*)(long))fn_8020F3B4)(0);
+        return ((long (*)(long))fn_8020F3B4)(0);
     }
 }
 
@@ -154,7 +229,114 @@ extern long lbl_8055EEBC;
 extern long lbl_8055EEE0;
 extern long lbl_8055EEE4;
 extern long lbl_8055EEE8;
-extern void fn_8020FE90(void);
+extern void *fn_8001285C(long);
+extern long fn_802EC1D8(void);
+extern void fn_802E30C8(const char *, ...);
+extern char lbl_8033C980[];
+#pragma push
+#pragma cplusplus on
+// The current event's info object (event + 0x20); slot 0x18 looks up a string by key.
+class EventInfo {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual const char *GetString(long key, long fallback);
+};
+
+extern "C" void fn_8020FCC4(void) {
+    EventInfo *object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+    const char *name = object->GetString((long)&lbl_8055B674, (long)lbl_8033C970);
+    long idx = fn_8020FC6C(name);
+    if (idx >= 0 && idx < lbl_804900AC.m_count) {
+        fn_802E30C8(lbl_8033C980, idx, ((char **)lbl_804900AC.m_entries)[idx], name);
+    }
+    if (idx == ((long (*)(long))fn_8020F3B4)(0) && lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(1)) {
+        idx = ((long (*)(long))fn_8020F3B4)(1);
+    }
+    if (idx == ((long (*)(long))fn_8020F3B4)(0) && lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(2)) {
+        idx = ((long (*)(long))fn_8020F3B4)(2);
+    }
+    if (lbl_8055B658 != -1 && lbl_8055B658 != idx) {
+        fn_802EC1D8();
+    }
+    lbl_8055B658 = idx;
+}
+#pragma cplusplus reset
+#pragma pop
+
+extern char *strncpy(char *, const char *, unsigned long);
+void fn_8020FDE4(long arg0, const char *label, const char *name) {
+    long *e = (long *)fn_8020FAF0(name);
+    char *dest;
+    memset(e, 0, 4);
+    e[0] = arg0;
+    strncpy((char *)e + 0x24, label, 0x3F);
+    dest = (char *)e + 4;
+    {
+        int left = 0x20;
+        while ((*dest++ = *name++) != 0) {
+            if (--left <= 0) {
+                dest[-1] = 0;
+                break;
+            }
+        }
+    }
+}
+
+void fn_8020FE90(void) {
+    fn_802EC12C();
+    fn_802EC1D8();
+    if (lbl_8055EEE0 == -2) {
+        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
+    } else if (lbl_8055EEE0 == -1) {
+        lbl_8055B658 = fn_8020F6FC();
+    } else {
+        lbl_8055B658 = lbl_8055EEE0 + lbl_8055EEE4 * 10;
+    }
+}
+void fn_8020FEF0(long dir) {
+    long sel = lbl_8055EEE0;
+    long page;
+    long max;
+    if (sel == -2 && lbl_8055EEBC > 0) {
+        if (dir == 1) {
+            lbl_8055EEE0 = -1;
+            fn_8020FE90();
+        }
+        return;
+    }
+    if (sel == -1) {
+        if (dir == -1) {
+            lbl_8055EEE0 = -2;
+            fn_8020FE90();
+        }
+        return;
+    }
+    {
+        long old = lbl_8055EEE4;
+        max = lbl_8055EEE8 - 1;
+        page = old + dir;
+        page = page > 0 ? page : 0;
+        if (page < max) {
+            max = page;
+        }
+        lbl_8055EEE4 = max;
+        if (old == max) {
+            return;
+        }
+    }
+    if (lbl_8055EEBC == 0) {
+        lbl_8055EEE0 = -2;
+    } else if (sel >= 0 && sel + max * 10 >= lbl_8055EEBC) {
+        lbl_8055EEE0 = (lbl_8055EEBC - 1) % 10;
+    }
+    if (lbl_8055EEE0 >= 0) {
+        fn_8020FE90();
+    }
+}
+
 void fn_8020FFE4(long arg0) {
     long old = lbl_8055EEE0;
     long value = lbl_8055EEBC;
@@ -175,46 +357,94 @@ void fn_8020FFE4(long arg0) {
     if (old != lbl_8055EEE0) fn_8020FE90();
 }
 
-extern float fn_80235EF0(long, long);
-extern void fn_80147940(void *, long *, long, long);
-void fn_802101F8(void **arg0, long arg1, long arg2, void *arg3) {
-    long sp20;
-    float sp1C;
-    float sp18;
-    long sp14;
-    long sp10;
-    float spC;
-    long sp8;
-    float temp_f31;
-    long temp_r29;
-    long temp_r31;
-    long var_r30;
-
-    if (arg0 != 0) {
-        if (arg3 == 0) return;
-        temp_r31 = ((long (*)(void *))(*(void ***)*arg0)[3])(*arg0);
-        var_r30 = 0;
-        sp8 = *(long *)((char *)arg3 + 0);
-        spC = *(float *)((char *)arg3 + 4);
-        sp10 = *(long *)((char *)arg3 + 8);
-        sp14 = *(long *)((char *)arg3 + 0xC);
-        sp18 = *(float *)((char *)arg3 + 0x10);
-        sp1C = *(float *)((char *)arg3 + 0x14);
-        sp20 = *(long *)((char *)arg3 + 0x18);
-        do {
-            temp_r29 = arg2 + var_r30;
-            if (var_r30 == 1) {
-                temp_f31 = fn_80235EF0(temp_r31, arg2 + 2);
-                sp18 = (*(float *)((char *)arg3 + 0x10) - fn_80235EF0(temp_r31, arg2)) - temp_f31;
-            } else {
-                sp18 = fn_80235EF0(temp_r31, temp_r29);
-            }
-            fn_80147940(arg0, &sp8, arg1, temp_r29);
-            var_r30 += 1;
-            spC += sp18;
-        } while (var_r30 < 3);
+extern unsigned char lbl_8055EEEC;
+extern unsigned char lbl_8055EEED;
+#pragma push
+#pragma cplusplus on
+extern "C" void fn_802100AC(void) {
+    EventInfo *ev;
+    fn_802EC12C();
+    if (lbl_8055EEE0 == -2) {
+        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        fn_8020FDE4(0, "", ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        if (lbl_8055EEEC) {
+            fn_8020F608(0, IdentGetCurrentSlot());
+        }
+    } else if (lbl_8055EEE0 == -1) {
+        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        fn_8020FDE4(1, "", ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        if (lbl_8055EEED) {
+            fn_8020F608(1, IdentGetCurrentSlot());
+        }
+    } else {
+        long idx = lbl_8055EEE0 + lbl_8055EEE4 * 10;
+        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        fn_8020FDE4(2, ((char **)lbl_804900AC.m_entries)[idx], ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        lbl_8055B658 = idx;
     }
 }
+#pragma cplusplus reset
+#pragma pop
+
+extern float fn_80235EF0(long, long);
+extern void fn_80147940(void *, void *, long, long);
+typedef struct PanelPos {
+    float x;
+    float y;
+    float z;
+} PanelPos;
+
+typedef struct PanelBox {
+    long color;     /* 0x00 */
+    PanelPos pos;   /* 0x04 */
+    float w;        /* 0x10 */
+    float h;        /* 0x14 */
+    long unk18;     /* 0x18 */
+} PanelBox;
+
+#pragma push
+#pragma cplusplus on
+// A UI widget; slot 0x18 returns its font.
+class PanelWidget {
+public:
+    virtual void vf08(void);
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(void);
+    virtual long GetFont(void);
+};
+
+extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3) {
+    PanelBox *src = (PanelBox *)arg3;
+    PanelBox b;
+    long font;
+    long i;
+
+    if (arg0 == 0 || src == 0) return;
+    {
+        font = arg0->GetFont();
+        i = 0;
+        b.color = src->color;
+        b.pos = src->pos;
+        b.w = src->w;
+        b.h = src->h;
+        b.unk18 = src->unk18;
+        do {
+            long idx = arg2 + i;
+            if (i == 1) {
+                float right = fn_80235EF0(font, arg2 + 2);
+                b.w = (src->w - fn_80235EF0(font, arg2)) - right;
+            } else {
+                b.w = fn_80235EF0(font, idx);
+            }
+            fn_80147940(arg0, &b, arg1, idx);
+            i++;
+            b.pos.x += b.w;
+        } while (i < 3);
+    }
+}
+#pragma cplusplus reset
+#pragma pop
 
  
 void fn_8021031C(void) {
@@ -230,7 +460,6 @@ void fn_8021031C(void) {
 extern long fn_80207848(void *, long);
 extern long fn_802EC1D8(void);
 extern long fn_802EC12C(void);
-extern long fn_8020FCC4(void);
 extern char lbl_8033C9AC[0xD];
 extern long lbl_8055EED0;
 void fn_8021037C(void) {
@@ -244,8 +473,6 @@ void fn_802103B8(void) {
     fn_8020F5C8();
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 void fn_802103BC(void) {
     struct VTable { void *pad[2]; void (*call)(void *, long); };
     struct Object { struct VTable *vtable; };
@@ -264,15 +491,17 @@ void fn_802103BC(void) {
     lbl_8055EED0 = 0;
 }
 #pragma dont_inline reset
-extern long fn_80009C84(long);
-extern signed char lbl_8055EEC0, lbl_8055EEC8, lbl_8055B660;
+extern long fn_80009C84(void);
+extern int fn_801B85CC(void);
+extern unsigned char lbl_8055EEC0;
+extern unsigned char lbl_8055EEC8, lbl_8055B660;
 extern long lbl_8055EECC, lbl_8055B658;
 void fn_80210444(void) {
-    lbl_8055EEC0 = 0;
     lbl_8055B660 = 1;
+    lbl_8055EEC0 = 0;
     lbl_8055EEC8 = 0;
     lbl_8055EECC = 0;
-    if (fn_80009C84(1) == 0 && fn_801B85CC() == 0 &&
+    if (fn_80009C84() == 0 && fn_801B85CC() == 0 &&
         lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(1)) {
         lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
         fn_802EC12C();
@@ -280,13 +509,54 @@ void fn_80210444(void) {
     }
 }
 
+long fn_802104B8(void) {
+    return lbl_8055B658 != -1;
+}
+
+long fn_802104D0(void) {
+    return fn_802EC0FC() > 0;
+}
+
 long fn_802104FC(void) {
     return (lbl_8055B658 + 1) == 0;
 }
 
  
-void fn_80210510(void) {
-    fn_802EC1C0();
+void fn_80210510(float volume) {
+    fn_802EC1C0(volume);
+}
+
+void fn_80210514(long arg0) {
+    switch (arg0) {
+    case 0:
+        fn_8020F608(0, IdentGetCurrentSlot());
+        break;
+    case 1:
+        fn_8020F608(1, IdentGetCurrentSlot());
+        break;
+    }
+}
+
+long fn_80210570(void) {
+    long mode = 3;
+    long *e = (long *)fn_8020F5F0(IdentGetCurrentSlot());
+    long i;
+    for (i = 0; i < 64; i++, e = (long *)((char *)e + 100)) {
+        if (mode == 3) {
+            mode = e[0];
+        } else if (e[0] != mode) {
+            return 2;
+        }
+    }
+    switch (mode) {
+    case 0:
+        return 0;
+    case 1:
+        return 1;
+    case 2:
+        return 2;
+    }
+    return 0;
 }
  
 extern long fn_80145E70(void *);
@@ -303,6 +573,93 @@ extern long lbl_8033C9C8[];
 extern long lbl_8055EED4;
 extern long lbl_8055EEF0;
 extern long lbl_8055B658;
+extern long IsLoadingActive__Fv(void);
+extern long fn_802E2C20(void);
+extern long fn_802EC124(void);
+extern void fn_802EC11C(long);
+extern void fn_802EC138(void);
+extern void fn_802EC158(void);
+extern long lbl_8055EECC;
+
+#pragma push
+#pragma cplusplus on
+extern "C" void fn_80210688(unsigned char arg0) {
+    long count;
+    long loading;
+    long busy;
+    long now;
+    long inWindow;
+    EventInfo *object;
+
+    if (!lbl_8055EEF4 || !lbl_8055EEF5 || !lbl_8055EEF6) {
+        fn_8020F444();
+    }
+    count = fn_802EC0FC();
+    if (count != lbl_8055EEBC) {
+        fn_802EC12C();
+        fn_8020F950();
+        fn_8020FCC4();
+        lbl_8055EEC0 = 1;
+    } else {
+        lbl_8055EEC0 = 0;
+    }
+    lbl_8055EEBC = count;
+
+    loading = 0;
+    if (IsLoadingActive__Fv() && !fn_80009C84()) {
+        loading = 1;
+    }
+    busy = 1;
+    if (!fn_801B85CC() && !fn_80009C84()) {
+        busy = 0;
+    }
+
+    if (lbl_8055B658 == -1) {
+        return;
+    }
+    if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(0) && loading) {
+        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(2);
+        fn_802EC12C();
+        fn_802EC1D8();
+    } else if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(2) && !loading) {
+        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
+        fn_802EC12C();
+        fn_802EC1D8();
+    } else if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(0) && busy) {
+        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(1);
+        fn_802EC12C();
+        fn_802EC1D8();
+    }
+
+    inWindow = 0;
+    if (lbl_8055EEC8) {
+        now = fn_802E2C20();
+        if (now >= lbl_8055EECC && now < lbl_8055EECC + 4000) {
+            inWindow = 1;
+        }
+    }
+    if (fn_802EC124() == -1 && !inWindow) {
+        fn_802EC11C(lbl_8055B658);
+        fn_802EC138();
+        object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        if (*(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970)) == 1 &&
+            lbl_8055EEBC > 0) {
+            lbl_8055B658 = fn_8020F6FC();
+        }
+    }
+
+    if (lbl_8055B660 != arg0) {
+        if (arg0) {
+            fn_802EC158();
+        } else {
+            fn_802EC138();
+        }
+    }
+    lbl_8055B660 = arg0;
+}
+#pragma cplusplus reset
+#pragma pop
+
 void fn_802108C8(void) {
     lbl_8055EED4 = fn_80145E70(&lbl_8033C9BC[0]);
     lbl_8055EEF0 = fn_802090D4(&lbl_8033C9C8[0]);
@@ -325,8 +682,8 @@ void fn_80210950(void *arg0, void *arg1) {
     lbl_8055EEDC = arg1;
 }
 
-extern long fn_8020FEF0(long);
-extern long fn_802100AC(void);
+extern void fn_8020FEF0(long);
+extern void fn_802100AC(void);
 extern long fn_80012158(void);
 long fn_802111E4(long arg0) {
     switch (arg0) {
@@ -343,8 +700,7 @@ long fn_802111E4(long arg0) {
         fn_8020FEF0(-1);
         break;
     case 0x53: {
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-        long (* volatile hook)(long) = (long (*)(long))lbl_8055EED8;
+        long (*hook)(long) = (long (*)(long))lbl_8055EED8;
         hook((arg0 - 0x58) == 0);
         fn_802100AC();
         break;
@@ -365,21 +721,57 @@ extern void fn_80206444(void);
 extern void fn_80209190(long, float);
 extern long __AXFXGetLfoSinTable_801769CC(void);
 extern void *fn_8001285C(long);
-extern void *fn_8020FAF0(void);
 extern long lbl_8033C970[4];
 extern long lbl_8055B65C;
 extern long lbl_8055B674;
-extern signed char lbl_8055EEEC;
-extern signed char lbl_8055EEED;
-extern float lbl_80563400;
-void fn_802113D8(void) {
+extern unsigned char lbl_8055EEEC;
+extern unsigned char lbl_8055EEED;
+extern const float lbl_80563400;
+#pragma push
+#pragma cplusplus on
+extern "C" void fn_802112AC(void) {
+    long mode;
+    long n;
+    EventInfo *object;
+
+    if (lbl_8055EEC0) {
+        lbl_8055EEE0 = -2;
+        if (lbl_8055EEBC > 0) {
+            fn_8020FCC4();
+            object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+            mode = *(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+            if (mode == 1) {
+                lbl_8055EEE0 = -1;
+            } else if (mode == 2) {
+                n = lbl_8055B658;
+                if (n >= 0) {
+                    lbl_8055EEE4 = n / 10;
+                    lbl_8055EEE0 = n % 10;
+                    lbl_8055EEE8 = lbl_8055EEBC / 10;
+                    if (lbl_8055EEBC % 10 != 0 || lbl_8055EEBC == 0) {
+                        lbl_8055EEE8++;
+                    }
+                    if (lbl_8055EEE4 >= lbl_8055EEE8) {
+                        lbl_8055EEE4 = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+#pragma cplusplus reset
+#pragma pop
+
+#pragma push
+#pragma cplusplus on
+extern "C" void fn_802113D8(void) {
     long mode;
     long n;
     long q;
     long r;
     long zero = 0;
     long minusTwo = -2;
-    long *object;
+    EventInfo *object;
 
     if (fn_80265D64() == 0) {
         __AXDSPInitCallback_801769E0();
@@ -391,9 +783,8 @@ void fn_802113D8(void) {
     lbl_8055B65C = lbl_8055B658;
     lbl_8055EEEC = zero;
     lbl_8055EEED = zero;
-    object = (long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8;
-    (*(void (**)(long *, long, long))(*(long **)object)[6])(object, (long)&lbl_8055B674, (long)lbl_8033C970);
-    mode = *(long *)fn_8020FAF0();
+    object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+    mode = *(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
     if (mode == 1) {
         lbl_8055EEE0 = -1;
     } else if (mode == 2) {
@@ -406,12 +797,23 @@ void fn_802113D8(void) {
         }
     }
 }
+#pragma cplusplus reset
+#pragma pop
+
+extern const float lbl_80563404;
+extern void fn_80206454(void);
+extern void fn_801769EC(void);
+void fn_802114C4(void) {
+    fn_80209190(lbl_8055EEF0, lbl_80563404);
+    fn_80206454();
+    fn_801769EC();
+}
 
 extern void fn_801345D8(void *, ...);
 extern long lbl_8055B664;
-extern signed char lbl_8055EEF4;
-extern signed char lbl_8055EEF5;
-extern signed char lbl_8055EEF6;
+extern unsigned char lbl_8055EEF4;
+extern unsigned char lbl_8055EEF5;
+extern unsigned char lbl_8055EEF6;
 // Code of main that had no source file yet: decomp.wtf gave it this one.
  // split_file divides it into the game's real files (file_status shows its range).
 

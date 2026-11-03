@@ -149,9 +149,7 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     f->pos.y *= 0.5f;
     f->pos.z *= 0.5f;
     f32 y = lbl_804BD6F8[0].y;
-    if (y > vb.y) {
-        y = vb.y;
-    }
+    y = y <= vb.y ? y : vb.y;
     f->rot[0].x = lbl_804BD6F8[1].x - lbl_804BD6F8[0].x;
     f->rot[0].y = lbl_804BD6F8[1].y - lbl_804BD6F8[0].y;
     f->rot[0].z = lbl_804BD6F8[1].z - lbl_804BD6F8[0].z;

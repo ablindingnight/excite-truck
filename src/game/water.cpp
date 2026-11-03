@@ -135,7 +135,7 @@ struct RingTable {
 
 static const PtTable sAlpha = {{
     {0.0f, 0.6f}, {0.62831855f, 0.4f}, {1.2566371f, 0.0f}, {3.1415927f, 0.0f},
-    {5.340708f, 1.0f}, {5.9690256f, 1.0f}, {6.2831855f, 0.6f},
+    {5.340708f, 1.0f}, {5.969026f, 1.0f}, {6.2831855f, 0.6f},
 }};
 
 static const RingTable sRings = {{

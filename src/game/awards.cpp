@@ -995,15 +995,17 @@ void fn_801CCCAC(void) {
     lbl_8055E884 = 0;
 }
 
-static inline int FindHandler(AwardsMgr* m, u32 type) {
-    int i;
-    for (i = 0; i < m->handlers.n; i++) {
+static inline int FindHandlerIndex(AwardsMgr* m, u32 type) {
+    for (int i = 0; i < m->handlers.n; i++) {
         if (fn_801CB900(m->handlers.data[i], type)) {
-            goto found;
+            return i;
         }
     }
-    i = -1;
-found:
+    return -1;
+}
+
+static inline int FindHandler(AwardsMgr* m, u32 type) {
+    int i = FindHandlerIndex(m, type);
     if (i < 0) {
         fn_802E317C("Awards: can't find stat info for type %d!", type);
     }

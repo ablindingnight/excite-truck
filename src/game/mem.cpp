@@ -361,11 +361,12 @@ void* StackHeap::Alloc(s32 size, const char* name, int type) {
     }
     used = size + used + 64;
     if (used < this->size) {
-        *(u32*)&b->data[AlignUp(b->request, 4)] = STACK_COOKIE;
+        u32* c = (u32*)&b->data[AlignUp(b->request, 4)];
+        *c = STACK_COOKIE;
     }
     peak = peak < used ? used : peak;
     {
-        u8* end = (u8*)b + size + 64;
+        u8* end = (u8*)b + 64 + size;
         u8* data = b->data;
         if (end >= highest) {
             highest = end;

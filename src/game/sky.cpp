@@ -63,7 +63,7 @@ struct SkyMtx {
 };
 
 ModuleTag lbl_8055FB08;
-static f32 lbl_8055FB10 = DegToRad(45.0f);  // minimum sun elevation
+extern const f32 lbl_8055FB10 = DegToRad(45.0f);  // minimum sun elevation
 s32 lbl_8055FB14;                    // current sky instance
 s32 lbl_8055FB18;                    // loaded sky instance
 ValVec3 lbl_804C0800;                // sun position

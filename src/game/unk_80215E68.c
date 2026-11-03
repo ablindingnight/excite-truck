@@ -147,13 +147,13 @@ extern void fn_802C974C(f32, f32, f32);
 extern void fn_802C5310(s32, s32, f32, f32, f32);
 extern u32 lbl_8055EF80;
 extern u32 lbl_8055EF84;
-extern f32 lbl_80563458;
-extern f64 lbl_80563460;
-extern f32 lbl_80563468;
-extern f32 lbl_8056346C;
-extern f32 lbl_80563470;
-extern f32 lbl_80563474;
-extern f32 lbl_80563478;
+extern const f32 lbl_80563458;
+extern const f64 lbl_80563460;
+extern const f32 lbl_80563468;
+extern const f32 lbl_8056346C;
+extern const f32 lbl_80563470;
+extern const f32 lbl_80563474;
+extern const f32 lbl_80563478;
 s32 fn_802160AC(void) {
     u8 sp8[0x30];
     s32 temp_r31;
@@ -181,8 +181,6 @@ void fn_80216194(void) {
     } while (i++ < 3);
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 s32 fn_802161CC(s32 arg0) {
     u32 *p = lbl_804908C8;
     s32 i = 0;
@@ -198,7 +196,7 @@ s32 fn_802161CC(s32 arg0) {
 
 extern s32 fn_80127A50(void *);
 extern s32 lbl_8055CFF0, lbl_8055CFF4;
-extern f32 lbl_8056347C, lbl_80563480;
+extern const f32 lbl_8056347C, lbl_80563480;
 extern void fn_80217590(void *,s32,s32), fn_802176D4(void *,s32,s32), fn_8021749C(void *,s32,s32), fn_802175F0(void *,s32,s32), fn_80217734(void *,s32,s32);
 extern void fn_80217834(void *), fn_80217854(void *);
 extern s32 fn_802E47B8(void), fn_802E46F0(void);

@@ -251,6 +251,21 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
+static inline void MulVecR(V3* out, const V3* in, const Mat3* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
+        f32 y = Dot3(in->x, m->m[1][0], in->y, m->m[1][1], in->z, m->m[1][2]);
+        f32 z = Dot3(in->x, m->m[2][0], in->y, m->m[2][1], in->z, m->m[2][2]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
+        out->y = Dot3(in->x, m->m[1][0], in->y, m->m[1][1], in->z, m->m[1][2]);
+        out->z = Dot3(in->x, m->m[2][0], in->y, m->m[2][1], in->z, m->m[2][2]);
+    }
+}
+
 static inline int Queue(DeformQueue* q, int n, void* src, void* dst) {
     if (q->count < 0x400) {
         DeformJob* j = &q->jobs[q->count++];
@@ -627,19 +642,22 @@ void fn_802D56D4(Surf* s) {
 }
 
 void fn_802D5838(Surf* s) {
+    int n = s->nverts;
     V3* p = (V3*)s->verts;
     V3* nrm = (V3*)s->attr;
-    int n = s->nverts;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
         V3 l;
-        MulVec(&l, fn_802D2D04(), &lbl_804C5690.rot);
+        const V3* dir = fn_802D2D04();
+        const Mat3* rot = &lbl_804C5690.rot;
+        MulVecR(&l, dir, rot);
         V3* o = out;
         for (int i = 0; i < n; i++) {
             if (PSVECDotProduct(nrm, &l) < 0.0f) {
-                o->x = p->x + l.x * lbl_8055FDE0;
-                o->y = p->y + l.y * lbl_8055FDE0;
-                o->z = p->z + l.z * lbl_8055FDE0;
+                f32 e = lbl_8055FDE0;
+                o->x = p->x + l.x * e;
+                o->y = p->y + l.y * e;
+                o->z = p->z + l.z * e;
             } else {
                 o->x = p->x;
                 o->y = p->y;

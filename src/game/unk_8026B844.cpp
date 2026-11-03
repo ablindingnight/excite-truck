@@ -185,7 +185,8 @@ void fn_8026B8A0(void) {
         in.x = x;
         in.y = lbl_80563D78;
         in.z = z;
-        CamMulVec(&move, &in, &lbl_80499050.rot);
+        const CamRot* rot = &lbl_80499050.rot;
+        CamMulVec(&move, &in, rot);
         lbl_80499050.pos.x += move.x;
         lbl_80499050.pos.y += move.y;
         lbl_80499050.pos.z += move.z;
@@ -202,7 +203,8 @@ void fn_8026B8A0(void) {
         in2.x = dt * (side * rate);
         in2.y = lbl_80563D78;
         in2.z = dt * (vert * rate);
-        CamMulVec(&move2, &in2, &lbl_80499050.rot);
+        const CamRot* rot2 = &lbl_80499050.rot;
+        CamMulVec(&move2, &in2, rot2);
         lbl_80499050.pos.x += move2.x;
         lbl_80499050.pos.y += move2.y;
         lbl_80499050.pos.z += move2.z;
@@ -562,7 +564,9 @@ void fn_8026C014(int player) {
         if (!CamIsZero(&move)) {
             CamCopy(&lbl_8049A1C0.vel, &move);
         }
-        CamMulVec(&w, &lbl_8049A1C0.vel, &lbl_80499050.rot);
+        const CamVec* v = &lbl_8049A1C0.vel;
+        const CamRot* rot = &lbl_80499050.rot;
+        CamMulVec(&w, v, rot);
         lbl_80499050.pos.x = lbl_80499050.pos.x + w.x;
         lbl_80499050.pos.y = lbl_80499050.pos.y + w.y;
         lbl_80499050.pos.z = lbl_80499050.pos.z + w.z;

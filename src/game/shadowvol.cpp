@@ -60,7 +60,7 @@ static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 ModuleTag lbl_8055F798;
-f32 lbl_8055F7A0 = MakeF32(0.78539819f);
+extern const f32 lbl_8055F7A0 = MakeF32(0.78539819f);
 int lbl_8055F7A4;            // caster count
 StaticShadow* lbl_8055F7A8;  // static shadows
 int lbl_8055F7AC;            // static shadow count

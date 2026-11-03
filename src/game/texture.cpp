@@ -273,7 +273,7 @@ static inline u16 TexShort(int v) { return v; }
 
 ModuleTag lbl_8055FCA0;
 u16 lbl_8055FCA8 = TexShort(0x100);
-u16 lbl_8055FCAA = TexShort(0x405);
+extern const u16 lbl_8055FCAA = TexShort(0x405);
 u16 lbl_8055FCAC = TexShort(0x401);
 TexEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture

@@ -294,8 +294,9 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 static inline int Positive(f32 x) { return x > lbl_80558DC4[0]; }
 
 ModuleTag lbl_8055E4C0;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+extern const u32 lbl_8055E4C8 = MakeILPos(0x7F00, 0);
 CarHandle lbl_8055E4CC;
-UnkStatic7F lbl_8055E4C8;
 
 extern "C" {
 
@@ -1416,13 +1417,8 @@ extern const f32 lbl_80561CB0, lbl_80561CC0, lbl_80561CDC, lbl_80561DE4, lbl_805
 }
 
 static inline f32 Clamp01(f32 x) {
-    if (x > lbl_80561CD0) {
-        x = lbl_80561CD0;
-    }
-    if (x < lbl_80561CAC) {
-        x = lbl_80561CAC;
-    }
-    return x;
+    f32 t = lbl_80561CD0 < x ? lbl_80561CD0 : x;
+    return t > lbl_80561CAC ? t : lbl_80561CAC;
 }
 
 static inline void AddScaled(f32* f, const u8* dir, f32 k) {
@@ -2754,9 +2750,7 @@ void fn_80186DE8(u8* p) {
             f32 sp = F32(car, 0x25D4);
             if (sp > lbl_80561EA0) {
                 f32 cl = sp;
-                if (cl > lbl_80561EA4) {
-                    cl = lbl_80561EA4;
-                }
+                cl = cl <= lbl_80561EA4 ? cl : lbl_80561EA4;
                 steerK = steerK * (lbl_80561CD0 + F32(car, 0x450) * (lbl_80561EA8 + lbl_80561EAC * cl - lbl_80561CD0));
             }
             if (sp > lbl_80561CAC) {
@@ -2859,9 +2853,7 @@ void fn_80186DE8(u8* p) {
         }
         x->pts[6] = a;
         CbSolVec r = c->pts[4];
-        if (r.x < lbl_80561ECC) {
-            r.x = lbl_80561ECC;
-        }
+        r.x = r.x >= lbl_80561ECC ? r.x : lbl_80561ECC;
         r.w = ground[0];
         c->pts[4] = r;
         if (rpmT >= lbl_80561ED0) {

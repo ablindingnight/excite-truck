@@ -121,7 +121,7 @@ static inline u16 TexShort(int v) { return v; }
 
 ModuleTag lbl_8055FE08;
 u16 lbl_8055FE10 = TexShort(0x100);
-u16 lbl_8055FE12 = TexShort(0x405);
+extern const u16 lbl_8055FE12 = TexShort(0x405);
 u16 lbl_8055FE14 = TexShort(0x401);
 GXTex* lbl_8055FE18;  // bound base texture
 GXTex* lbl_8055FE1C;  // bound envmap

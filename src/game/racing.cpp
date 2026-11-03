@@ -243,7 +243,7 @@ extern u8 lbl_8055E520;
 int GetNumPlayers(void);
 
 extern RaceInfo* lbl_8055D350;
-extern f32 lbl_80562068;
+extern const f32 lbl_80562068;
 
 class GameOverlay {
 public:

@@ -18,10 +18,12 @@ public:
 };
 
 ModuleTag lbl_8055E190;
-UnkStaticFFFF lbl_8055E198;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055E198 = MakeILPos(0xFFFF, 0);
 static UnkStatic123 lbl_8042FB10;
-UnkStatic7F lbl_8055E19C;
-UnkStaticFFFF lbl_8055E1A0;
+u32 lbl_8055E19C = MakeILPos(0x7F00, 0);
+extern const u32 lbl_8055E1A0 = MakeILPos(0xFFFF, 0);
 
 extern "C" {
 

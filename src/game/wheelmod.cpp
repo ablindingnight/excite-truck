@@ -166,13 +166,9 @@ static inline void Identity(ValMatrix* m) {
     m->origin.z = 0.0f;
 }
 
-struct PiOver4 {
-    PiOver4(void) { value = 0.7853982f; }
-    f32 value;
-};
-
 ModuleTag lbl_8055EBE0;
-PiOver4 lbl_8055EBE8;
+static inline f32 Angle(f32 a) { return a; }
+extern const f32 lbl_8055EBE8 = Angle(0.7853982f);
 WheelClass* lbl_8055EBEC;  // class table
 s32 lbl_8055EBF0;          // classes loaded
 Wheel* lbl_80488798[64];   // by car * 4 + wheel

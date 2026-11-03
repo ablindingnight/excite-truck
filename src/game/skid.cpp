@@ -117,7 +117,7 @@ void* operator new[](size_t size, const char* name);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 ModuleTag lbl_8055F708;
-f32 lbl_8055F710 = log2(2.2222222222222223);
+extern const f32 lbl_8055F710 = log2(2.2222223f);
 u8 lbl_8055F714;
 SkidPt* lbl_8055F718;     // point pool
 SkidStrip* lbl_8055F71C;  // strip pool

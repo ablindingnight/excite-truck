@@ -371,7 +371,7 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
         return;
     }
     f32 k = 2.5f * (0.2f + pen);
-    k = 1.0f >= k ? k : 1.0f;
+    k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
     CVec3 nn;
     nn.z = n->z + k * (nrm.z - n->z);

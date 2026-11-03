@@ -18,7 +18,7 @@ extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32, s32);
 extern s32 fn_802328D4(s32);
 extern const char lbl_80346324[];
 extern const u8 __vt__10OptionItem[];
-extern f32 lbl_80563BD4;
+extern const f32 lbl_80563BD4;
 void fn_80262FCC(void *arg0) {
     *(f32 *)((u8 *)arg0 + 0x18) = fn_8023659C();
     *((u8 *)arg0 + 0x1C) = 0;

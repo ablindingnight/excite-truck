@@ -139,7 +139,7 @@ static CamCycle lbl_8049A258[5];
 static TvCamera lbl_8049A2C8[200];
 static RegionSphere lbl_8049EDC8[32];
 static CamRegion lbl_8049F9D8[32];
-f32 lbl_8055F560 = lbl_80563F9C;
+extern const f32 lbl_8055F560 = lbl_80563F9C;
 
 extern "C" int fn_80273494(int x);
 

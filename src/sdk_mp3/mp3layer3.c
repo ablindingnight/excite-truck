@@ -599,12 +599,12 @@ void fn_800C1E88(s32* coeff, s32* input, s32* output) {
         s64 acc;
 
         acc = 0;
-        acc += (s64)c0 * input[0];
-        acc += (s64)c1 * input[1];
-        acc += (s64)c2 * input[2];
-        acc += (s64)c3 * input[3];
-        acc += (s64)coeff[4] * input[4];
-        acc += (s64)coeff[5] * input[5];
+        acc += (s64)input[0] * c0;
+        acc += (s64)input[1] * c1;
+        acc += (s64)input[2] * c2;
+        acc += (s64)input[3] * c3;
+        acc += (s64)input[4] * coeff[4];
+        acc += (s64)input[5] * coeff[5];
 
         *output = (s32)(acc >> 20);
 

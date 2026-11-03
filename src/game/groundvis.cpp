@@ -171,7 +171,7 @@ extern const f32 lbl_80564AF0;  // cell size
 
 ModuleTag lbl_8055F960;
 UnkStaticFFFF lbl_8055F968;
-f32 lbl_8055F96C = QuarterPi();
+extern const f32 lbl_8055F96C = QuarterPi();
 GroundSet* lbl_8055F970;   // active ground set
 u32 lbl_8055F974;          // terrain
 u32 lbl_8055F978;          // objects

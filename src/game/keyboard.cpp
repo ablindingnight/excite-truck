@@ -106,8 +106,10 @@ public:
 
 ModuleTag lbl_8055F208;
 static UnkStatic123 lbl_80498848;
-UnkStatic7F lbl_8055F210;
-UnkStaticFFFF lbl_8055F214;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055F210 = MakeILPos(0x7F00, 0);
+u32 lbl_8055F214 = MakeILPos(0xFFFF, 0);
 
 static inline void StrNCopy(char* dst, const char* src, int len) {
     char* d = dst;

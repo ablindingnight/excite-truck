@@ -388,7 +388,7 @@ static inline f32 Angle(f32 a) { return a; }
 
 ModuleTag lbl_8055EBF8;
 UnkStaticFFFF lbl_8055EC00;
-f32 lbl_8055EC04 = Angle(0.7853982f);  // lowest sun elevation
+extern const f32 lbl_8055EC04 = Angle(0.7853982f);  // lowest sun elevation
 
 extern "C" {
 void fn_801C0E60(TVec* out, const f32* a, const f32* b);

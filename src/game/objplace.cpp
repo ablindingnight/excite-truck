@@ -84,8 +84,8 @@ struct ObjBlock {
 
 template <class T>
 struct DynVec {
-    DynVec(int n) {
-        data = new ("dsa_buf") T[n];
+    DynVec(int n, const char* tag = "dsa_buf") {
+        data = new (tag) T[n];
         cap = n;
         count = 0;
         buf = data;

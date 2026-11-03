@@ -3108,5 +3108,6 @@ int fn_801CB114(int key) {
 }  // extern "C"
 
 ModuleTag lbl_8055E7D0;
-UnkStaticFFFF lbl_8055E7D8;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+extern const u32 lbl_8055E7D8 = MakeILPos(0xFFFF, 0);
 UnkStatic7F lbl_8055E7DC;

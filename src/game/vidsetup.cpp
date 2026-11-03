@@ -61,7 +61,7 @@ ModuleTag lbl_8055FB88;
 // Three shorts shared by many units (a common header). The target stores 0x401 before 0x405;
 // no declaration form tried yet reproduces that order, so this unit stays NonMatching.
 s16 lbl_8055FB90 = MakeS16(0x100);
-s16 lbl_8055FB92 = MakeS16(0x405);
+extern const s16 lbl_8055FB92 = MakeS16(0x405);
 s16 lbl_8055FB94 = MakeS16(0x401);
 u32 lbl_8055FB98;
 s32 lbl_8055FB9C;

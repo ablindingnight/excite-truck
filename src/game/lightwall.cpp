@@ -82,6 +82,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
     f32 v0 = 1.0f - t;
     f32 v1 = 1.75f + v0;
     if (fn_802C8DBC(n * 4)) {
+        u32 rgb = color & 0xFFFFFF;
         for (int i = 0; i < n; i++) {
             const LVec* p = &pts[i];
             f32 d = PSVECDistance(p, eye);
@@ -100,7 +101,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
                 if (1.0f > w) {
                     w = 1.0f;
                 }
-                u32 c = (alpha << 24) | (color & 0xFFFFFF);
+                u32 c = (alpha << 24) | rgb;
                 LVec v;
                 f32 s = 0.5f * -w;
                 v.x = p->x + right->x * s;

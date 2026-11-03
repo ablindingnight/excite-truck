@@ -43,8 +43,10 @@ extern char lbl_8055B860[8];
 
 ModuleTag lbl_8055F1D0;
 static UnkStatic123 lbl_804987F8;
-UnkStatic7F lbl_8055F1D8;
-UnkStaticFFFF lbl_8055F1DC;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055F1D8 = MakeILPos(0x7F00, 0);
+u32 lbl_8055F1DC = MakeILPos(0xFFFF, 0);
 NameChooser* lbl_8055F1E0;
 
 extern "C" {

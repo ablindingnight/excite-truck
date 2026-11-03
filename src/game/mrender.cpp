@@ -645,7 +645,7 @@ void fn_802C974C(f32 near, f32 far, f32 fov) {
     lbl_8055FC40 = fov;
     lbl_804C144C.fov = fov;
     if (!is2D || lbl_8055FC75) {
-        if (!Equal(lbl_8055D020, 1.0f)) {
+        if ((f32)__fabs(lbl_8055D020 - 1.0f) > lbl_80558DC4[0]) {
             fov = 2.0f * (f32)atan((f32)tan(0.5f * fov) / lbl_8055D020);
         }
     }

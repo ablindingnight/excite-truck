@@ -9,11 +9,11 @@
 #include "game/uilists.h"
 #include "game/menu.h"
 
-extern "C" s32 fn_80218C14(s32, s32);
-extern "C" s32 fn_802E317C(const char *);
+extern "C" s32 fn_80218C14(s32, s32, s32);
+extern "C" s32 fn_802E317C(const char *, ...);
 extern "C" s32 fn_80214934(const void *, s32, void *, s32);
 extern "C" s32 fn_80029004(const char *, s32);
-extern "C" s32 fn_801345D8(void *, s32, const char *, s32, s32, const char *);
+extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" char lbl_8055B808[];
 extern "C" s32 fn_802C4F14(s32);
@@ -90,7 +90,7 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
 extern "C" s32 fn_80206430(void);
 extern "C" s32 fn_8022BAD0(s32, s32, s32, s32, float);
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
-extern float lbl_80563450;
+extern const float lbl_80563450;
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
 extern "C" char *lbl_8055B6B0;
@@ -518,7 +518,7 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
         if (c) c = fn_802226D4(c, arg0);
         return c;
     }
-    ((s32 (*)(const char *, const char *))fn_802E317C)("make_image: unknown extension %s", name + 1);
+    fn_802E317C("make_image: unknown extension %s", name + 1);
     return 0;
 }
 
@@ -1562,7 +1562,7 @@ extern "C" void fn_802149C4(s32 arg0) {
     fn_80214934("transin", arg0, sp8, 0x64);
     fn_8021481C(sp8);
 }
-extern "C" s32 fn_80218C14(s32, s32);
+extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_80214934(const void*, s32, void*, s32);
 extern "C" char lbl_8033D388[];
 extern "C" char lbl_8033D268[];
@@ -1583,8 +1583,6 @@ extern "C" s32 fn_80214A38(s32 arg0) {
 
 extern "C" void fn_802192AC(void);
 extern "C" void fn_80219354(void);
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma scheduling invalid_target
 extern "C" void fn_80214A9C(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
@@ -1605,8 +1603,6 @@ extern "C" void fn_80214AF0(s32 arg0) {
     }
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma scheduling invalid_target
 extern "C" void fn_80214B44(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
@@ -1639,15 +1635,14 @@ extern "C" void fn_80214BE4(s32 group, s32 x, s32 y) {
 }
 
 extern "C" void fn_80214C54(s32 arg0, s32 arg1) {
-    if (fn_802168E4() != 0) {
-        fn_80218C14(arg0, arg1);
+    s32 w = fn_802168E4();
+    if (w != 0) {
+        fn_80218C14(w, arg0, arg1);
     } else {
         fn_802E317C(lbl_8033D388);
     }
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 extern "C" void fn_80214CB4(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
@@ -1659,12 +1654,13 @@ extern "C" void fn_80214CB4(s32 arg0) {
 #pragma dont_inline reset
 
 extern "C" s32 fn_802168E4(void);
-extern "C" s32 fn_80218120(void);
-extern "C" s32 fn_802E317C(const char *);
+extern "C" s32 fn_80218120(s32);
+extern "C" s32 fn_802E317C(const char *, ...);
 extern "C" char lbl_8033D3D4[];
 extern "C" s32 fn_80214D04(void) {
-    if (fn_802168E4() != 0) {
-        return fn_80218120();
+    s32 w = fn_802168E4();
+    if (w != 0) {
+        return fn_80218120(w);
     }
     fn_802E317C(lbl_8033D3D4);
     return 0;
@@ -1819,15 +1815,11 @@ extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4
     *arg3 = arg5 + 4;
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 extern "C" void fn_802152C8(void) {
 }
 #pragma dont_inline reset
 
 extern "C" s32 fn_802192A4(void *, s32);
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 extern "C" void fn_802152C8(void);
 #pragma dont_inline reset
 extern "C" s32 fn_802152CC(void) {
@@ -1988,7 +1980,7 @@ extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
 }
 
 extern "C" s32 fn_80029004(const char *, s32);
-extern "C" s32 fn_801345D8(void *, s32, const char *, s32, s32, const char *);
+extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" char lbl_8055B808[];
 extern "C" s32 fn_802C4F14(s32);
@@ -2170,8 +2162,6 @@ extern "C" void fn_80215A48(void *arg0) {
     ((void (*)(void *))*(void **)((u8 *)vt + 0x4C))(obj);
 }
 
-// MATCHING-AID: compiler pragma from upstream; revisit.
-#pragma dont_inline on
 #pragma dont_inline reset
 extern "C" void fn_80215A74(void *arg0) {
     u8 *self = (u8 *)arg0;

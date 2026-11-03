@@ -131,6 +131,11 @@ struct Pool {
         max = 0;
         count = 0;
     }
+    void Init(int n, const char* tag) {
+        max = n;
+        data = new (tag) T[n];
+        count = 0;
+    }
     T* Alloc(void) {
         if (count < max) {
             return &data[count++];
@@ -544,21 +549,11 @@ TexNode* fn_802C5EFC(s32 tex) {
 }
 
 void fn_802C5F48(void) {
-    lbl_804C139C.max = 640;
-    lbl_804C139C.data = new ("model:modelnode[]") ModelNode[640];
-    lbl_804C139C.count = 0;
-    lbl_804C1338.max = 2048;
-    lbl_804C1338.data = new ("model:surfnode[]") RNode[2048];
-    lbl_804C1338.count = 0;
-    lbl_804C13A8.max = 1024;
-    lbl_804C13A8.data = new ("model:texnode[]") TexNode[1024];
-    lbl_804C13A8.count = 0;
-    lbl_804C1390.max = 1024;
-    lbl_804C1390.data = new ("model:sort[]") TexNode*[1024];
-    lbl_804C1390.count = 0;
-    lbl_804C13B4.max = 128;
-    lbl_804C13B4.data = new ("model:remap[]") Remap[128];
-    lbl_804C13B4.count = 0;
+    lbl_804C139C.Init(640, "model:modelnode[]");
+    lbl_804C1338.Init(2048, "model:surfnode[]");
+    lbl_804C13A8.Init(1024, "model:texnode[]");
+    lbl_804C1390.Init(1024, "model:sort[]");
+    lbl_804C13B4.Init(128, "model:remap[]");
     lbl_804C13C0.mtx = 0xFFFFFFFF;
     lbl_8055D00C = 1;
 }

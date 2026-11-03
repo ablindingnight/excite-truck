@@ -1080,10 +1080,12 @@ public:
 };
 
 ModuleTag lbl_8055E1A8;
-UnkStaticFFFF lbl_8055E1B0;
-UnkStaticFFFF lbl_8055E1B4;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+u32 lbl_8055E1B0 = MakeILPos(0xFFFF, 0);
+u32 lbl_8055E1B4 = MakeILPos(0xFFFF, 0);
 static UnkStatic123s lbl_8042FB28;
-UnkStatic7F lbl_8055E1B8;
+extern const u32 lbl_8055E1B8 = MakeILPos(0x7F00, 0);
 u8 lbl_8055E1BC;
 ZoneMaster* lbl_8055E1C0;
 Color lbl_8055E1C4(0xFF2A85F0);

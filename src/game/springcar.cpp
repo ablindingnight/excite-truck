@@ -383,7 +383,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         v.z = acc->z + car->vel.z;
         d = PSVECDotProduct(&v, &n);
         t = time / ramp;
-        t = 1.0f >= t ? t : 1.0f;
+        t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
         p.x = car->pos.x + v.x * 0.016683351f;
         p.y = car->pos.y + v.y * 0.016683351f;
@@ -402,7 +402,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             extra = 0.0f;
             if (d < 0.0f) {
                 f32 u = (dist - 0.5f) / -0.5f;
-                u = 1.0f >= u ? u : 1.0f;
+                u = 1.0f < u ? 1.0f : u;
                 u = u > 0.0f ? u : 0.0f;
                 extra = 0.0f + u * ((6.6666665f + -d) - 0.0f);
             }
@@ -421,7 +421,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             }
             if (v.y > 0.44444445f && car->airborne == 0) {
                 f32 q = 0.1f * v.y;
-                q = 0.44444445f >= q ? q : 0.44444445f;
+                q = 0.44444445f < q ? 0.44444445f : q;
                 imp.y = -q * (car->mass / 0.016683351f);
             }
             pen = pen + extra;
@@ -429,7 +429,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             at.y = 0.0f;
             if (!NearZero(pen) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
                 f32 m = 17.777779f / pen;
-                m = 1.0f >= m ? m : 1.0f;
+                m = 1.0f < m ? 1.0f : m;
                 m = 0.8f * m;
                 pt.x = car->pos.x + at.x * m;
                 pt.y = car->pos.y + at.y * m;

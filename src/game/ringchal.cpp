@@ -1991,7 +1991,7 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
     return 0;
 }
 
-#define ALPHA(c, v) ((c).ch.a = (int)(255.0f * (v)))
+#define ALPHA(c, v) ((c).all = ((int)(255.0f * (v)) << 24) | ((c).all & 0xFFFFFF))
 
 void RingChalMaster::vf4C(int view) {
     ILayout* l;

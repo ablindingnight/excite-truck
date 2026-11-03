@@ -2,8 +2,10 @@
 #include "game/common.h"
 
 ModuleTag lbl_8055EAE0;
-UnkStaticFFFF lbl_8055EAE8;
-UnkStatic7F lbl_8055EAEC;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055EAE8 = MakeILPos(0xFFFF, 0);
+u32 lbl_8055EAEC = MakeILPos(0x7F00, 0);
 
 extern "C" {
 

@@ -285,13 +285,8 @@ s32 fn_802A8A34(BoidVec* v) { return v->n; }
 Boid* fn_802A8A3C(BoidVec* v, int i) { return &v->data[i]; }
 
 static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f;
-    if (r >= x) {
-        r = x;
-    }
-    if (r <= 0.0f) {
-        r = 0.0f;
-    }
+    f32 r = 1.0f < x ? 1.0f : x;
+    r = r > 0.0f ? r : 0.0f;
     return r;
 }
 

@@ -21,7 +21,7 @@ ModuleTag lbl_8055ED20;
 
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
-u32 lbl_8055ED28 = MakeILPos(0xFFFF, 0);
+extern const u32 lbl_8055ED28 = MakeILPos(0xFFFF, 0);
 u32 lbl_8055ED2C = MakeILPos(0x7F00, 0);
 
 extern "C" {

@@ -733,5 +733,7 @@ void IdealFollower::Attach(CenterLine* l, V2* p, V2* d) {
     }
 }
 
-UnkStaticFFFF lbl_8055E0C0;
-UnkStatic7F lbl_8055E0C4;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055E0C0 = MakeILPos(0xFFFF, 0);
+u32 lbl_8055E0C4 = MakeILPos(0x7F00, 0);

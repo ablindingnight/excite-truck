@@ -64,10 +64,12 @@ struct Frame {
 };
 
 ModuleTag lbl_8055E118;
-UnkStaticFFFF lbl_8055E120;
+static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
+
+extern const u32 lbl_8055E120 = MakeILPos(0xFFFF, 0);
 static UnkStatic123 lbl_8042F7A8;
-UnkStatic7F lbl_8055E124;
-UnkStaticFFFF lbl_8055E128;
+u32 lbl_8055E124 = MakeILPos(0x7F00, 0);
+extern const u32 lbl_8055E128 = MakeILPos(0xFFFF, 0);
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -78,7 +80,7 @@ static inline f32 Clamp01(f32 t) {
     if (1.0f < t) {
         t = 1.0f;
     }
-    t = t <= 0.0f ? 0.0f : t;
+    t = t > 0.0f ? t : 0.0f;
     return t;
 }
 

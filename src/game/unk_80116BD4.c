@@ -756,11 +756,10 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
     return maxDiff;
 }
 
-s32 fn_80117598(s32 arg0,s32 arg1){
- s32 off=((arg0+0x340)-arg0);
- s32* p=(s32*)(arg0-off);
- s32 v=p[0x33c/4];
- return (~v) & ((v-arg1 | arg1-v)>>31);
+s32 fn_80117598(s32 arg0, s32 arg1) {
+    StreamPlayer *p = (StreamPlayer *)((u8 *)arg0 - ((u8 *)((StreamPlayer *)arg0)->queue - (u8 *)arg0));
+    s32 v = p->tick;
+    return ~v & ((v - arg1 | arg1 - v) >> 31);
 }
 
 // Queue callback: `arg0` is the player's queue entry; feeds the player's tracks and stores the tick.
@@ -1362,10 +1361,7 @@ s32 fn_801186B8(StreamPlayer *p) {
             memset(p->frameBuffer, 0, p->frameBufferSize);
         }
         if (p->memoryData == 0 && p->unk114 == 0) {
-            u32 n = p->maxFrameSize;
-            if (n >= p->readerCapacity) {
-                n = p->readerCapacity;
-            }
+            u32 n = p->maxFrameSize < p->readerCapacity ? p->maxFrameSize : p->readerCapacity;
             if (p->readerFilled < (n * 4 - n) >> 2) {
                 p->readerFill(&p->readerRead);
             }
@@ -2578,10 +2574,10 @@ void fn_8011AED8(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
     for (i = 0; i < arg2; i++) {
         l = (s32)(*arg1++ * farg0);
         r = (s32)(farg0 * *right++);
-        if (l < -32768) l = -32768;
-        if (l > 32767) l = 32767;
-        if (r < -32768) r = -32768;
-        if (r > 32767) r = 32767;
+        l = l >= -32768 ? l : -32768;
+        l = l <= 32767 ? l : 32767;
+        r = r >= -32768 ? r : -32768;
+        r = r <= 32767 ? r : 32767;
         *out++ = l;
         *out++ = r;
     }
@@ -5540,7 +5536,7 @@ void fn_80121BF4(f32 *a)
     a[15] = x4i;
 }
 
-extern f32 lbl_80561230;
+extern const f32 lbl_80561230;
 void fn_80121C68(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, m, mh;

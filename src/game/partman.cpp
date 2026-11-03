@@ -705,7 +705,7 @@ void PartSys::Update(f32 t) {
     head = i;
 }
 
-static const DrawFn lbl_80348FD0[3] = {&PartSys::DrawSprites, &PartSys::DrawAnimated, &PartSys::DrawRotating};
+static DrawFn lbl_80348FD0[3] = {&PartSys::DrawSprites, &PartSys::DrawAnimated, &PartSys::DrawRotating};
 
 void PartSys::Draw(void) {
     if (head < 0) {

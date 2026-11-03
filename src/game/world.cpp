@@ -482,7 +482,7 @@ RaceSetup lbl_80487DE0;
 f32 lbl_804881D8[4];  // wind direction and strength
 char lbl_804881E8[0x40];
 
-s32 lbl_8055AF08;
+s32 lbl_8055AF08 = 4;
 s32 lbl_8055AF0C = -1;  // the view being drawn
 s32 lbl_8055AF10 = -1;
 
