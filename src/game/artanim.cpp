@@ -657,7 +657,8 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 pos[2] = k0->pos[2] + u * (k1->pos[2] - k0->pos[2]);
                 pos[1] = k0->pos[1] + u * (k1->pos[1] - k0->pos[1]);
                 pos[0] = k0->pos[0] + u * (k1->pos[0] - k0->pos[0]);
-                f32 ps = parent ? parent->scale : 1.0f;
+                f32 scalev = parent->scale;
+                f32 ps = parent ? scalev : 1.0f;
                 if (parent) {
                     pos[0] = pos[0] + parent->pos[0];
                     pos[1] = pos[1] + parent->pos[1];
@@ -672,11 +673,12 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 xx = q[0] * x2;
                 f32 yy = q[1] * y2;
                 f32 zz = q[2] * z2;
-                f32 xy = q[0] * y2;
+                f32 wy;
                 f32 xz = q[0] * z2;
+                f32 xy = q[0] * y2;
                 f32 yz = q[1] * z2;
                 f32 wx = q[3] * x2;
-                f32 wy = q[3] * y2;
+                wy = q[3] * y2;
                 f32 wz = q[3] * z2;
                 m[0][0] = 1.0f - (yy + zz);
                 m[0][1] = xy + wz;
@@ -689,9 +691,9 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 m[2][2] = 1.0f - (xx + yy);
                 m[3][0] = pos[0] * ps;
                 m[3][1] = pos[1] * ps;
+                f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
                 ArtElem* e = &a->elems[p->elem];
                 m[3][2] = pos[2] * ps;
-                f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
                 scale[2] = k0->scale[2] + u * (k1->scale[2] - k0->scale[2]);
                 scale[1] = k0->scale[1] + u * (k1->scale[1] - k0->scale[1]);
                 scale[0] = k0->scale[0] + u * (k1->scale[0] - k0->scale[0]);
@@ -699,8 +701,8 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 if (e->xform) {
                     m[3][0] = m[3][0] + e->xform->pos[0] * ps;
                     m[3][1] = m[3][1] + e->xform->pos[1] * ps;
-                    es = 1.0f * e->xform->scale;
                     m[3][2] = m[3][2] + e->xform->pos[2] * ps;
+                    es = 1.0f * e->xform->scale;
                 }
                 if (e->type == 2) {
                     MulVec(off, e->model.off, m);
