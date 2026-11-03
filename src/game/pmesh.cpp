@@ -118,8 +118,9 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
         if (PSVECSquareDistance(&c->center, &lp) > (c->radius + radius) * (c->radius + radius)) {
             continue;
         }
+        int j;
         int limit = c->end;
-        for (int j = c->first; j < limit; j++) {
+        for (j = c->first; j < limit; j++) {
             PTri* t = &mesh->tris[j];
             f32 dist = t->d - PSVECDotProduct(&lp, &t->n);
             if (-dist > radius || -dist < 0.0f) {
@@ -133,8 +134,8 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
             tv[0] = mesh->verts[t->v[0]];
             tv[1] = mesh->verts[t->v[1]];
             tv[2] = mesh->verts[t->v[2]];
-            int outIdx[3];
             f32 ed[3];
+            int outIdx[3];
             int outside = 0;
             int inside = -1;
             int k;
