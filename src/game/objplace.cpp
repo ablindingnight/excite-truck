@@ -673,8 +673,8 @@ void MatPlacer::Update(void) {
         Rebuild();
     } else {
         ObjectPlacer* old[128];
-        LocalVec<ObjectPlacer*, 128> added;
         LocalVec<ObjectPlacer*, 128> removed;
+        LocalVec<ObjectPlacer*, 128> added;
         memcpy(old, slots, sizeof(slots));
         Rebuild();
         for (int k = 0; k < 128; k++) {
@@ -683,8 +683,9 @@ void MatPlacer::Update(void) {
         for (int k = 0; k < 128; k++) {
             added.Push(slots[k]);
         }
+        int i;
         int limit = removed.count;
-        for (int i = 0; i < limit;) {
+        for (i = 0; i < limit;) {
             int j;
             for (j = 0; j < added.count; j++) {
                 if (added.data[j] == removed.data[i]) {
