@@ -782,7 +782,11 @@ void fn_802B7518(s16 x, s16 z, int v) {
         if (v) {
             if (fn_802BC09C(x, z, lbl_8055FA28, 0xFF, (f32)(u32)v / 255.0f)) {
                 lbl_8055FA50[0] = lbl_8055FA50[0] < x ? lbl_8055FA50[0] : x;
-                lbl_8055FA50[1] = lbl_8055FA50[1] > x ? lbl_8055FA50[1] : x;
+                if (lbl_8055FA50[1] > x) {
+                    lbl_8055FA50[1] = lbl_8055FA50[1];
+                } else {
+                    lbl_8055FA50[1] = x;
+                }
                 lbl_8055FA50[2] = lbl_8055FA50[2] < z ? lbl_8055FA50[2] : z;
                 lbl_8055FA50[3] = lbl_8055FA50[3] > z ? lbl_8055FA50[3] : z;
             } else {
