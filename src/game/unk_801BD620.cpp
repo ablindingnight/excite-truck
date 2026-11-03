@@ -35,6 +35,21 @@ static inline void Store(MVec4& m, Vec v) {
 }
 static inline Vec operator*(Vec a, const Vec& k) { return Vec(a.x * k.x, a.y * k.x, a.z * k.x); }
 
+static inline Vec Min(const Vec& a, const Vec& k) {
+    Vec r;
+    r.x = a.x < k.x ? a.x : k.x;
+    r.y = a.y < k.x ? a.y : k.x;
+    r.z = a.z < k.x ? a.z : k.x;
+    return r;
+}
+static inline Vec Max(const Vec& a, const Vec& k) {
+    Vec r;
+    r.x = a.x > k.x ? a.x : k.x;
+    r.y = a.y > k.x ? a.y : k.x;
+    r.z = a.z > k.x ? a.z : k.x;
+    return r;
+}
+
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
 extern "C" {
@@ -95,18 +110,14 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         ay = force->y * inv->w - (ident.x + 9.81f);
         az = force->z * inv->w;
 
-        vx = vel.x < ident.x + 200.0f ? vel.x : ident.x + 200.0f;
-        vy = vel.y < ident.x + 200.0f ? vel.y : ident.x + 200.0f;
-        vz = vel.z < ident.x + 200.0f ? vel.z : ident.x + 200.0f;
-        vx = vx > ident.x + -200.0f ? vx : ident.x + -200.0f;
-        vy = vy > ident.x + -200.0f ? vy : ident.x + -200.0f;
-        vz = vz > ident.x + -200.0f ? vz : ident.x + -200.0f;
-        wx = spin.x < ident.x + 20.0f ? spin.x : ident.x + 20.0f;
-        wy = spin.y < ident.x + 20.0f ? spin.y : ident.x + 20.0f;
-        wz = spin.z < ident.x + 20.0f ? spin.z : ident.x + 20.0f;
-        wx = wx > ident.x + -20.0f ? wx : ident.x + -20.0f;
-        wy = wy > ident.x + -20.0f ? wy : ident.x + -20.0f;
-        wz = wz > ident.x + -20.0f ? wz : ident.x + -20.0f;
+        vel = Max(Min(vel, Vec(zero.x + 200.0f)), Vec(zero.x + -200.0f));
+        spin = Max(Min(spin, Vec(zero.x + 20.0f)), Vec(zero.x + -20.0f));
+        vx = vel.x;
+        vy = vel.y;
+        vz = vel.z;
+        wx = spin.x;
+        wy = spin.y;
+        wz = spin.z;
 
         // torque into the body frame, through the inverse inertia, and back out
         lx = r1.x * torque->x + r1.y * torque->y + r1.z * torque->z;
