@@ -3632,8 +3632,8 @@ inline int BetaMaster::vf8C(int p, int key) {
 
 inline void BetaMaster::vf48(void) {
     BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
-    u32 col;
     int i;
+    u32 col;
     if (c && c->mode != 0) {
         if (c->mode == 1) {
         }
@@ -3645,9 +3645,9 @@ inline void BetaMaster::vf48(void) {
             V3 b;
             V3 a;
             a = *(V3*)&p->x;
-            a.y = a.y - 0.75f;
             b = *(V3*)&p->x;
-            b.y = b.y + 0.75f;
+            a.y = a.y - 0.75f;
+            b.y += 0.75f;
             fn_801E41D8(&a, &b, col, p->r);
         }
     }
