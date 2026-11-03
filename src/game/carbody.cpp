@@ -3658,9 +3658,10 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
 void fn_8018A9F0(u8* p, u8* m) {
     if (PTR(p, 0x26C4)) {
+        s32 n;
         BVec* pos = 0;
         BVec* old = 0;
-        s32 n = 0;
+        n = 0;
         fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
         for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
             u8* d = PTR(p, 0x26C0);
@@ -3668,9 +3669,10 @@ void fn_8018A9F0(u8* p, u8* m) {
         }
     }
     if (PTR(p, 0x26C8)) {
+        s32 n;
         BVec* pos = 0;
         BVec* old = 0;
-        s32 n = 0;
+        n = 0;
         fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
         for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
             u8* d = PTR(p, 0x26C0);
@@ -3686,7 +3688,7 @@ void fn_8018A9F0(u8* p, u8* m) {
     o->z = lbl_80561CAC;
     o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD0);
     o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (F32(m, 0xEC) + h.y);
+    o->y = F32(p, 0x5AC) + (h.y + F32(m, 0xEC));
     o->z = lbl_80561CAC;
     o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD4);
     o->x = lbl_80561CAC;
