@@ -463,11 +463,21 @@ u32 fn_80116BCC(void) {
 // Returns a * b / d with a 64-bit intermediate (the quotient must fit in 32 bits): shifts for a power-of-two d,
 // divides directly when the product fits, else uses two-digit long division (Hacker's Delight divlu).
 u32 fn_80116BD4(u32 a, u32 b, u32 d) {
+    u32 remainderHigh;
     u32 hi = __mulhwu(a, b);
+    u32 un10;
     u32 lo = a * b;
     u32 s;
-    u32 vn1, vn0, un32, un10, un1, un0, un21, q1, q0, r, p;
-
+    u32 vn1;
+    u32 vn0;
+    u32 un32;
+    u32 un1;
+    u32 un0;
+    u32 un21;
+    u32 q1;
+    u32 q0;
+    u32 r;
+    u32 p;
     if ((d & (d - 1)) == 0) {
         s = __cntlzw(d);
         return (hi << (s + 1)) | (lo >> (31 - s));
@@ -482,27 +492,27 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
     vn1 = d >> 16;
     vn0 = d & 0xFFFF;
     un1 = un10 >> 16;
-
     q1 = un32 / vn1;
-    r = ((un32 - q1 * vn1) << 16) | un1;
+    p = un32 - (q1 * vn1);
+    remainderHigh = p << 16;
+    r = remainderHigh | un1;
     p = q1 * vn0;
     if (r < p) {
         r += d;
         q1--;
-        if (r >= d && r < p) {
+        if ((r >= d) && (r < p)) {
             r += d;
             q1--;
         }
     }
     un21 = r - p;
-
     q0 = un21 / vn1;
-    r = ((un21 - q0 * vn1) << 16) | (un10 & 0xFFFF);
+    r = ((un21 - (q0 * vn1)) << 16) | (un10 & 0xFFFF);
     p = q0 * vn0;
     if (r < p) {
         r += d;
         q0--;
-        if (r >= d && r < p) {
+        if ((r >= d) && (r < p)) {
             q0--;
         }
     }
@@ -3903,74 +3913,124 @@ void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
     bits->count = count;
 }
 
-void fn_8011D9E4(void *arg0, void *arg1) {
-    u32 *bits;
-    u32 value, bitCount, available, mask, count, i, code, len;
-    u8 *dst, *table, *lookup;
+void fn_8011D9E4(void* arg0, void* arg1) {
+    u32* bits;
+    u32 value;
+    u32 bitCount;
+    u32 available;
+    u32 mask;
+    u32 count;
+    u8* lookup;
+    u32 i;
+    u32 code;
+    u32 len;
+    u8* dst;
+    u8* table;
     s32 symbol;
-    if (*(u32 *)arg0 != *(u32 *)((u8 *)arg0 + 4)) return;
-    bitCount = *(u32 *)((u8 *)arg1 + 8);
-    available = *(u32 *)((u8 *)arg0 + 0x28);
-    bits = *(u32 **)((u8 *)arg1 + 4);
-    value = *(u32 *)arg1;
+    if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
+        return;
+    }
+    bitCount = *((u32 *) (((u8 *) arg1) + 8));
+    available = *((u32 *) (((u8 *) arg0) + 0x28));
+    bits = *((u32 **) (((u8 *) arg1) + 4));
+    value = *((u32 *) arg1);
     if (bitCount < available) {
-        u32 next = *bits++;
+        u32 next = *(bits++);
         count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - available));
         value = next >> (available - bitCount);
-        bitCount = bitCount + 32 - available;
+        bitCount = (bitCount + 32) - available;
     } else {
         count = value & (0xFFFFFFFFU >> (32 - available));
         value >>= available;
         bitCount -= available;
     }
     if (count != 0) {
-        dst = *(u8 **)((u8 *)arg0 + 0x2C);
-        *(u8 **)arg0 = dst;
-        *(u8 **)((u8 *)arg0 + 4) = dst + count;
-        if (bitCount == 0) { value = *bits++ >> 1; bitCount = 31; }
-        else { bitCount--; value >>= 1; }
+        dst = *((u8 **) (((u8 *) arg0) + 0x2C));
+        *((u8 **) arg0) = dst;
+        *((u8 **) (((u8 *) arg0) + 4)) = dst + count;
+        if (bitCount == 0) {
+            value = (*(bits++)) >> 1;
+            bitCount = 31;
+        } else {
+            bitCount--;
+            value >>= 1;
+        }
         if ((value & 1) == 0) {
-            table = (u8 *)arg0 + 0x10;
-            lookup = *(u8 **)((u8 *)arg0 + 0x24);
-            available = *(u32 *)((u8 *)arg0 + 0x20);
+            table = ((u8 *) arg0) + 0x10;
+            lookup = *((u8 **) (((u8 *) arg0) + 0x24));
+            available = *((u32 *) (((u8 *) arg0) + 0x20));
             mask = 0xFFFFFFFFU >> (32 - available);
             for (i = 0; i < count; i++) {
                 if (bitCount >= available) {
-                    code = value & mask; symbol = lookup[code]; len = symbol >> 4;
-                    symbol = table[symbol & 15]; value >>= len; bitCount -= len;
+                    code = value & mask;
+                    symbol = lookup[code];
+                    len = symbol >> 4;
+                    symbol = table[symbol & 15];
+                    value >>= len;
+                    bitCount -= len;
                 } else {
                     u32 next = *bits;
                     code = (value | (next << bitCount)) & mask;
-                    symbol = lookup[code]; len = symbol >> 4; symbol = table[symbol & 15];
-                    if (bitCount >= len) { value >>= len; bitCount -= len; }
-                    else { value = next >> (len - bitCount); bits++; bitCount = bitCount + 32 - len; }
+                    symbol = lookup[code];
+                    len = symbol >> 4;
+                    symbol = table[symbol & 15];
+                    if (bitCount >= len) {
+                        value >>= len;
+                        bitCount -= len;
+                    } else {
+                        value = next >> (len - bitCount);
+                        bits++;
+                        bitCount = (bitCount + 32) - len;
+                    }
                 }
                 if (symbol != 0) {
-                    if (bitCount == 0) { value = *bits++ >> 1; bitCount = 31; }
-                    else { bitCount--; value >>= 1; }
-                    if (value & 1) symbol = -symbol;
+                    if (bitCount == 0) {
+                        value = (*(bits++)) >> 1;
+                        bitCount = 31;
+                    } else {
+                        bitCount--;
+                        value >>= 1;
+                    }
+                    if (value & 1) {
+                        symbol = -symbol;
+                    }
                 }
-                *dst++ = symbol;
+                *(dst++) = symbol;
             }
+
         } else {
             if (bitCount < 4) {
-                u32 next = *bits++;
+                u32 next = *(bits++);
                 code = (value | (next << bitCount)) & 15;
-                value = next >> (4 - bitCount); bitCount += 28;
-            } else { code = value & 15; value >>= 4; bitCount -= 4; }
-            if (code != 0) {
-                if (bitCount == 0) { value = *bits++ >> 1; bitCount = 31; }
-                else { bitCount--; value >>= 1; }
-                if (value & 1) code = -code;
+                value = next >> (4 - bitCount);
+                bitCount += 28;
+            } else {
+                code = value & 15;
+                value >>= 4;
+                bitCount -= 4;
             }
-            memset(*(void **)((u8 *)arg0 + 0x2C), code, count);
+            if (code != 0) {
+                if (bitCount == 0) {
+                    value = (*(bits++)) >> 1;
+                    bitCount = 31;
+                } else {
+                    bitCount--;
+                    value >>= 1;
+                }
+                if (value & 1) {
+                    code = -code;
+                }
+            }
+            memset(*((void **) (((u8 *) arg0) + 0x2C)), code, count);
         }
     } else {
-        dst = *(u8 **)((u8 *)arg0 + 0x2C);
-        *(u8 **)((u8 *)arg0 + 4) = dst; *(u8 **)arg0 = dst + 4;
+        dst = *((u8 **) (((u8 *) arg0) + 0x2C));
+        *((u8 **) (((u8 *) arg0) + 4)) = dst;
+        *((u8 **) arg0) = dst + 4;
     }
-    *(u32 **)((u8 *)arg1 + 4) = bits;
-    *(u32 *)arg1 = value; *(u32 *)((u8 *)arg1 + 8) = bitCount;
+    *((u32 **) (((u8 *) arg1) + 4)) = bits;
+    *((u32 *) arg1) = value;
+    *((u32 *) (((u8 *) arg1) + 8)) = bitCount;
 }
 
 void fn_8011DC5C(void *arg0, void *arg1) {
@@ -6947,21 +7007,19 @@ void fn_801254E4(int n, f32 *a, int nc, f32 *c) {
 #define BINK_MUL(x, y) (((x) * (y)) >> 11)
 
 // Dequantizes and inverse-transforms an 8x8 block of coefficients (columns, then rows) into 8-bit pixels at dst.
-void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
+void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
     s32 tmp[64];
-    s32 *t = tmp;
+    s32* t = tmp;
     s32 i;
-
     for (i = 0; i < 8; i++) {
         s32 s1 = block[8];
         s32 s2 = block[16];
-        s32 s7;
-        s32 s5 = block[40];
         s32 s3 = block[24];
         s32 s4 = block[32];
+        s32 s5 = block[40];
         s32 s6 = block[48];
-        s7 = block[56];
-        if ((s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0) {
+        s32 s7 = block[56];
+        if (((((((s1 | s2) | s3) | s4) | s5) | s6) | s7) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -6980,26 +7038,26 @@ void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             s32 d4 = (s4 * quant[32]) >> 11;
             s32 d6 = (s6 * quant[48]) >> 11;
             s32 a0 = d0 + d4;
-            s32 a2 = d2 + d6;
             s32 a1 = d0 - d4;
-            s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
+            s32 a2 = d2 + d6;
+            s32 a3 = ((2896 * (d2 - d6)) >> 11) - a2;
             s32 e0 = a0 + a2;
             s32 e3 = a0 - a2;
             s32 e1 = a1 + a3;
             s32 e2 = a1 - a3;
             s32 d1 = (s1 * quant[8]) >> 11;
             s32 d3 = (s3 * quant[24]) >> 11;
-            s32 d7 = (s7 * quant[56]) >> 11;
             s32 d5 = (s5 * quant[40]) >> 11;
+            s32 d7 = (s7 * quant[56]) >> 11;
             s32 a4 = d5 + d3;
             s32 a5 = d5 - d3;
             s32 a6 = d1 + d7;
             s32 a7 = d1 - d7;
             s32 b0 = a4 + a6;
-            s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-            s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-            s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-            s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
+            s32 b1 = (3784 * (a5 + a7)) >> 11;
+            s32 b2 = ((((-5352) * a5) >> 11) + b1) - b0;
+            s32 b3 = ((2896 * (a6 - a4)) >> 11) - b2;
+            s32 b4 = (((2217 * a7) >> 11) - b1) + b3;
             block++;
             quant++;
             t[0] = e0 + b0;
@@ -7013,32 +7071,34 @@ void fn_80125664(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             t++;
         }
     }
+
     t = tmp;
     for (i = 0; i < 8; i++) {
         s32 a0 = t[0] + t[4];
         s32 a1 = t[0] - t[4];
         s32 a2 = t[2] + t[6];
-        s32 a3 = BINK_MUL(BINK_A1, t[2] - t[6]) - a2;
+        s32 a3 = ((2896 * (t[2] - t[6])) >> 11) - a2;
         s32 a4 = t[5] + t[3];
         s32 a5 = t[5] - t[3];
         s32 a6 = t[1] + t[7];
         s32 a7 = t[1] - t[7];
         s32 b0 = a4 + a6;
-        s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-        s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-        s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-        s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
-        dst[0] = (a0 + a2 + b0 + 0x7F) >> 8;
-        dst[7] = (a0 + a2 - b0 + 0x7F) >> 8;
-        dst[1] = (a1 + a3 + b2 + 0x7F) >> 8;
-        dst[6] = (a1 + a3 - b2 + 0x7F) >> 8;
-        dst[2] = (a1 - a3 + b3 + 0x7F) >> 8;
-        dst[5] = (a1 - a3 - b3 + 0x7F) >> 8;
-        dst[4] = (a0 - a2 + b4 + 0x7F) >> 8;
-        dst[3] = (a0 - a2 - b4 + 0x7F) >> 8;
+        s32 b1 = (3784 * (a5 + a7)) >> 11;
+        s32 b2 = ((((-5352) * (t[5] - t[3])) >> 11) + b1) - b0;
+        s32 b3 = ((2896 * (a6 - a4)) >> 11) - b2;
+        s32 b4 = (((2217 * a7) >> 11) - b1) + b3;
+        dst[0] = (((a0 + a2) + b0) + 0x7F) >> 8;
+        dst[7] = (((a0 + a2) - b0) + 0x7F) >> 8;
+        dst[1] = (((a1 + a3) + b2) + 0x7F) >> 8;
+        dst[6] = (((a1 + a3) - b2) + 0x7F) >> 8;
+        dst[2] = (((a1 - a3) + b3) + 0x7F) >> 8;
+        dst[5] = (((a1 - a3) - b3) + 0x7F) >> 8;
+        dst[4] = (((a0 - a2) + b4) + 0x7F) >> 8;
+        dst[3] = (((a0 - a2) - b4) + 0x7F) >> 8;
         t += 8;
         dst += stride;
     }
+
 }
 
 // Like fn_80125664, but draws the block at double size (16x16) into dst.
@@ -7495,25 +7555,23 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
 // Reads the residue of an 8x8 block into `block` (signed bytes), bit plane by bit plane, stopping after
 // `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
 // split, 2 = group of 4, 3 = single coefficient.
-void fn_80126A10(s8 *block, BitReader8011 *bits, u32 limit) {
+void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
     u32 value;
-    u32 *next;
-    u32 avail;
+    u32* next;
     u32 n = 0;
-    u32 bit;
-    u32 coef;
-    s32 mask;
     s32 planes;
+    u32 bit;
+    s32 mask;
     s32 nzCount;
     s32 i;
     u32 e;
-    u8 *nz_p;
-    u8 *p;
-    u8 *start;
-    u8 *end;
+    u8* nz_p;
+    u8* p;
+    u8* start;
+    u32 avail;
+    u8* end;
     u8 nz[64];
     u8 list[128];
-
     avail = bits->count;
     next = bits->next;
     value = bits->value;
@@ -7532,110 +7590,231 @@ void fn_80126A10(s8 *block, BitReader8011 *bits, u32 limit) {
     start[0] = 4 << 2;
     start[1] = 24 << 2;
     start[2] = 44 << 2;
-    start[3] = 0 << 2 | 2;
+    start[3] = (0 << 2) | 2;
     end = start + 4;
-    mask = 1 << planes;
+    mask = 1;
+    mask <<= planes;
     nzCount = 0;
     for (planes++; planes != 0; planes--) {
         nz_p = nz;
         for (i = 0; i < nzCount; i++) {
-            BINK_GETBIT(bit);
+            if (avail == 0) {
+                bit = *next;
+                avail = 31;
+                next++;
+                value = bit >> 1;
+            } else {
+                bit = value;
+                value >>= 1;
+                avail--;
+            }
+            ;
             if (bit & 1) {
-                block[*nz_p] += block[*nz_p] < 0 ? -mask : mask;
-                if (n++ == limit) {
+                block[*nz_p] += (block[*nz_p] < 0) ? (-mask) : (mask);
+                if ((n++) == limit) {
                     goto done;
                 }
             }
             nz_p++;
         }
+
         p = start;
         while (p < end) {
             e = *p;
             if (e != 0) {
-                BINK_GETBIT(bit);
+                if (avail == 0) {
+                    bit = *next;
+                    avail = 31;
+                    next++;
+                    value = bit >> 1;
+                } else {
+                    bit = value;
+                    value >>= 1;
+                    avail--;
+                }
+                ;
                 if (bit & 1) {
                     switch (e & 3) {
-                    case 0:
-                        coef = e >> 2;
-                        *p = ((coef + 4) << 2) + 1;
-                        goto group4;
-                    case 1:
-                        coef = e >> 2;
-                        *p = (coef << 2) + 2;
-                        end[0] = ((coef + 4) << 2) + 2;
-                        end[1] = ((coef + 8) << 2) + 2;
-                        end[2] = ((coef + 12) << 2) + 2;
-                        end += 3;
-                        continue;
-                    case 2:
-                        *p = 0;
-                        coef = e >> 2;
-                        p++;
-                    group4:
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef) << 2) + 3;
+                        case 0:
+                            e = e >> 2;
+                            *p = ((e + 4) << 2) + 1;
+                            goto group4;
+
+                        case 1:
+                            e = e >> 2;
+                            *p = (e << 2) + 2;
+                            end[0] = ((e + 4) << 2) + 2;
+                            end[1] = ((e + 8) << 2) + 2;
+                            end[2] = ((e + 12) << 2) + 2;
+                            end += 3;
+                            continue;
+
+                        case 2:
+                            *p = 0;
+                            e = e >> 2;
+                            p++;
+                            group4:
+                        if (avail == 0) {
+                            bit = *next;
+                            avail = 31;
+                            next++;
+                            value = bit >> 1;
                         } else {
-                            nz[nzCount++] = coef;
-                            BINK_GETBIT(bit);
-                            block[coef] = (bit & 1) ? -mask : mask;
-                            if (n++ == limit) {
+                            bit = value;
+                            value >>= 1;
+                            avail--;
+                        }
+
+                            ;
+                            if (bit & 1) {
+                            *(--start) = (e << 2) + 3;
+                        } else {
+                            nz[nzCount++] = e;
+                            if (avail == 0) {
+                                bit = *next;
+                                avail = 31;
+                                next++;
+                                value = bit >> 1;
+                            } else {
+                                bit = value;
+                                value >>= 1;
+                                avail--;
+                            }
+                            ;
+                            block[e] = (bit & 1) ? (-mask) : (mask);
+                            if ((n++) == limit) {
                                 goto done;
                             }
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 1) << 2) + 3;
+                            if (avail == 0) {
+                            bit = *next;
+                            avail = 31;
+                            next++;
+                            value = bit >> 1;
                         } else {
-                            nz[nzCount++] = coef + 1;
-                            BINK_GETBIT(bit);
-                            block[coef + 1] = (bit & 1) ? -mask : mask;
-                            if (n++ == limit) {
+                            bit = value;
+                            value >>= 1;
+                            avail--;
+                        }
+                            ;
+                            if (bit & 1) {
+                            *(--start) = ((e + 1) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = e + 1;
+                            if (avail == 0) {
+                                bit = *next;
+                                avail = 31;
+                                next++;
+                                value = bit >> 1;
+                            } else {
+                                bit = value;
+                                value >>= 1;
+                                avail--;
+                            }
+                            ;
+                            block[e + 1] = (bit & 1) ? (-mask) : (mask);
+                            if ((n++) == limit) {
                                 goto done;
                             }
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 2) << 2) + 3;
+                            if (avail == 0) {
+                            bit = *next;
+                            avail = 31;
+                            next++;
+                            value = bit >> 1;
                         } else {
-                            nz[nzCount++] = coef + 2;
-                            BINK_GETBIT(bit);
-                            block[coef + 2] = (bit & 1) ? -mask : mask;
-                            if (n++ == limit) {
+                            bit = value;
+                            value >>= 1;
+                            avail--;
+                        }
+                            ;
+                            if (bit & 1) {
+                            *(--start) = ((e + 2) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = e + 2;
+                            if (avail == 0) {
+                                bit = *next;
+                                avail = 31;
+                                next++;
+                                value = bit >> 1;
+                            } else {
+                                bit = value;
+                                value >>= 1;
+                                avail--;
+                            }
+                            ;
+                            block[e + 2] = (bit & 1) ? (-mask) : (mask);
+                            if ((n++) == limit) {
                                 goto done;
                             }
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 3) << 2) + 3;
+                            if (avail == 0) {
+                            bit = *next;
+                            avail = 31;
+                            next++;
+                            value = bit >> 1;
                         } else {
-                            nz[nzCount++] = coef + 3;
-                            BINK_GETBIT(bit);
-                            block[coef + 3] = (bit & 1) ? -mask : mask;
-                            if (n++ == limit) {
+                            bit = value;
+                            value >>= 1;
+                            avail--;
+                        }
+                            ;
+                            if (bit & 1) {
+                            *(--start) = ((e + 3) << 2) + 3;
+                        } else {
+                            nz[nzCount++] = e + 3;
+                            if (avail == 0) {
+                                bit = *next;
+                                avail = 31;
+                                next++;
+                                value = bit >> 1;
+                            } else {
+                                bit = value;
+                                value >>= 1;
+                                avail--;
+                            }
+                            ;
+                            block[e + 3] = (bit & 1) ? (-mask) : (mask);
+                            if ((n++) == limit) {
                                 goto done;
                             }
                         }
-                        continue;
-                    case 3:
-                        coef = e >> 2;
-                        nz[nzCount++] = coef;
-                        BINK_GETBIT(bit);
-                        block[coef] = (bit & 1) ? -mask : mask;
-                        if (n++ == limit) {
+                            continue;
+
+                        case 3:
+                            e = e >> 2;
+                            nz[nzCount++] = e;
+                            if (avail == 0) {
+                            bit = *next;
+                            avail = 31;
+                            next++;
+                            value = bit >> 1;
+                        } else {
+                            bit = value;
+                            value >>= 1;
+                            avail--;
+                        }
+                            ;
+                            block[e] = (bit & 1) ? (-mask) : (mask);
+                            if ((n++) == limit) {
                             goto done;
                         }
-                        *p = 0;
-                        break;
+                            *p = 0;
+                            break;
+
                     }
+
                 }
             }
             p++;
         }
+
         mask >>= 1;
     }
-done:
+
+    done:
     bits->next = next;
+
     bits->value = value;
     bits->count = avail;
 }
