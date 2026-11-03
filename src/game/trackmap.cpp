@@ -479,6 +479,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* sf;
     TruckDraw* draw;
     int me;
+    int view;
     int i;
     f32 scale;
     f32 radius;
@@ -487,7 +488,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     if (!map) {
         return;
     }
-    int view = fn_801E866C(map->player);
+    view = fn_801E866C(map->player);
     sf = lbl_8055D5B4;
     {
         Mtx34 m = *fn_801E8718(map->player);
@@ -566,8 +567,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         v.z = c.z * (0.5f * radius);
         MulVec(&v, &v, &basis);
         v.x += basis.pos.x;
-        v.y += basis.pos.y;
-        v.z += basis.pos.z;
+        f32 y2 = basis.pos.y;
+        v.y += y2;
+        f32 zv = basis.pos.z;
+        v.z += zv;
         fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) * 0.5f, y + h * (0.5f * c.y - 1.0f) * 0.5f,
                     0.0f, 0.5f + 0.5f * scale * v.x + map->origin.x / map->texSize,
                     1.0f - (0.5f + 0.5f * scale * v.y) + map->origin.y / map->texSize);
@@ -619,7 +622,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         fn_801EA9A0(i);
         p = fn_8017960C(i)->pos;
         rel.x = p.x - basis.pos.x;
-        rel.y = p.z - basis.pos.y;
+        f32 yv = basis.pos.y;
+        rel.y = p.z - yv;
         rel.z = 0.0f - basis.pos.z;
         MulVecT(&rel, &rel, &basis);
         {
@@ -642,19 +646,19 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         }
     }
     {
+        f32 cy;
         f32 cx = x + w * 0.5f;
-        f32 cy = y - h * 0.5f;
+        cy = y - h * 0.5f;
         unsigned int j;
         for (j = 0; j < sizeof(lbl_803583C8) / sizeof(lbl_803583C8[0]); j++) {
-            MapMarker* m = &lbl_803583C8[j];
             Vec2 c;
             c.x = cx;
             c.y = cy;
-            if (m->active) {
+            if (lbl_803583C8[j].active) {
                 Vec3 rel;
                 f32 size;
-                rel.x = m->pos.x - basis.pos.x;
-                rel.y = m->pos.y - basis.pos.y;
+                rel.x = lbl_803583C8[j].pos.x - basis.pos.x;
+                rel.y = lbl_803583C8[j].pos.y - basis.pos.y;
                 rel.z = 0.0f - basis.pos.z;
                 MulVecT(&rel, &rel, &basis);
                 {
@@ -669,8 +673,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
                     rel.y *= w * 0.5f;
                     rel.z *= w * 0.5f;
                 }
-                size = fn_80235EF0(m->art, m->part);
-                fn_802354A0(m->art, m->part, -1, c.x + rel.x - size * 0.5f, size * 0.5f + (c.y + rel.y), 0.0f,
+                size = fn_80235EF0(lbl_803583C8[j].art, lbl_803583C8[j].part);
+                fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, -1, c.x + rel.x - size * 0.5f, size * 0.5f + (c.y + rel.y), 0.0f,
                             size, size);
             }
         }
