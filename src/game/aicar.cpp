@@ -2181,16 +2181,17 @@ void fn_8019743C(u8* d, u8* out) {
         if (!(F32(d, 0xC8) >= F32(d, 0xC4))) {
             u32 which;
             blocked = U8(d, 0x74);
-            if (!blocked || !U8(d, 0x9C)) {
-                which = blocked == 0;
-                side = blocked == 0 ? d + 0xA0 : d + 0x78;
-                blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
-            } else {
+            if (!(!blocked || !U8(d, 0x9C))) {
                 int lcar = S32(d, 0x90);
                 u8 r = fn_80193110(d, S32(d, 0xB8));
                 u32 l = fn_80193110(d, lcar);
                 which = ((l & 0xFF) << 1) | (r & 0xFF);
-                if (which == 0 || which == 3) {
+                if (!(which == 0 || which == 3)) {
+                    which = (which >> 1) & 1;
+                    side = which == 0 ? d + 0x78 : d + 0xA0;
+                    int car = S32(side, 0x18);
+                    blocked = fn_8019309C(d, car, fn_801930DC(d, car)) == 0;
+                } else {
                     u8 v;
                     if ((which & 2) && (v = fn_801930DC(d, S32(d, 0x90))) != 0) {
                         which = 1;
@@ -2204,12 +2205,11 @@ void fn_8019743C(u8* d, u8* out) {
                     }
                     side = which == 0 ? d + 0x78 : d + 0xA0;
                     blocked = fn_8019309C(d, S32(side, 0x18), v) == 0;
-                } else {
-                    which = (which >> 1) & 1;
-                    side = which == 0 ? d + 0x78 : d + 0xA0;
-                    int car = S32(side, 0x18);
-                    blocked = fn_8019309C(d, car, fn_801930DC(d, car)) == 0;
                 }
+            } else {
+                which = blocked == 0;
+                side = blocked == 0 ? d + 0xA0 : d + 0x78;
+                blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
             }
             if (which == 0) {
                 S32(d, 0xC4) = S32(d, 0xC8);
@@ -2230,7 +2230,7 @@ void fn_8019743C(u8* d, u8* out) {
         f32 pos = F32(d, 0x278) + 0.5f * F32(d, 0x27C);
         if (pos < F32(d, 0xC4)) {
             diff = F32(d, 0xC4) - pos;
-        } else if (F32(d, 0xC8) < pos) {
+        } else if (pos > F32(d, 0xC8)) {
             diff = F32(d, 0xC8) - pos;
         }
         if (!((f32)__fabs(diff) <= 0.01f)) {
@@ -2243,11 +2243,11 @@ void fn_8019743C(u8* d, u8* out) {
             f32 t = (f32)__fabs(diff) / 0.61f;
             t = Clamp01(t);
             f32 cur = F32(d, 0xE0);
-            if (t <= cur) {
-                F32(d, 0xE0) = t + 0.994009f * (cur - t);
-            } else {
+            if (cur < t) {
                 f32 m = 1.0f - 0.01f * k;
                 F32(d, 0xE0) = t + m * m * (cur - t);
+            } else {
+                F32(d, 0xE0) = t + 0.994009f * (cur - t);
             }
             decay = 0;
         } else {
@@ -2256,7 +2256,7 @@ void fn_8019743C(u8* d, u8* out) {
     } else {
         F32(d, 0xE8) = 0.0f;
     }
-    if (0.05f < F32(d, 0xE0)) {
+    if (F32(d, 0xE0) > 0.05f) {
         f32 x = F32(d, 0xE4);
         U8(d, 0x250) = 1;
         f32 w = F32(d, 0xE0);
