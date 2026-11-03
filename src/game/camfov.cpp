@@ -250,21 +250,21 @@ static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
 void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
-    CamRect* r = &lbl_8049A218[*cam];
     u8* car = PTR(cam, 0x140);
+    CamRect* r = &lbl_8049A218[*cam];
     if (!fn_801769F8()) {
         CVec3 c = *(CVec3*)(car + 0x60);
         const s16* hint = (const s16*)(car + 0x6C);
         bool onGround = S32(car, 0x2620) > 0;
         f32 y = c.y;
         f32 z = c.z;
-        f32 h0 = fn_801E9FDC(hint, lbl_80563E84 + c.x, lbl_80563E84 + z);
+        f32 h0 = fn_801E9FDC(hint, c.x + lbl_80563E84, lbl_80563E84 + z);
         h0 = OverObstacle(h0, lbl_80563E84 + c.x, y, lbl_80563E84 + z);
         f32 h1 = fn_801E9FDC(hint, c.x - lbl_80563E84, lbl_80563E84 + z);
         h1 = OverObstacle(h1, c.x - lbl_80563E84, y, lbl_80563E84 + z);
         f32 h2 = fn_801E9FDC(hint, c.x - lbl_80563E84, z - lbl_80563E84);
         h2 = OverObstacle(h2, c.x - lbl_80563E84, y, z - lbl_80563E84);
-        f32 h3 = fn_801E9FDC(hint, lbl_80563E84 + c.x, z - lbl_80563E84);
+        f32 h3 = fn_801E9FDC(hint, c.x + lbl_80563E84, z - lbl_80563E84);
         h3 = OverObstacle(h3, lbl_80563E84 + c.x, y, z - lbl_80563E84);
         f32 avg = lbl_80563E68 * (h0 + (h1 + (h2 + h3)));
         if (onGround) {
@@ -298,7 +298,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
             r->v[3] = v > lbl_80563E78 ? v : lbl_80563E78;
         }
     }
-    f32 lift = lbl_80563E78 > r->v[1] ? lbl_80563E78 : r->v[1];
+    f32 lift = r->v[1] < lbl_80563E78 ? lbl_80563E78 : r->v[1];
     f32 top = lbl_8049A208[3];
     f32 m = lbl_80563EA8 + lbl_8049A208[2];
     top = top > m ? top : m;
