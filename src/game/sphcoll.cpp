@@ -3215,8 +3215,8 @@ void fn_801A18D4(u8* p, RVec3* lo, RVec3* hi) {
     RVec3 b;
     u8* m = PTR(p, 0xC);
     f32 k = F32(p, 0x24);
-    axis = *(PVec3*)(m + 0x18);
     org = *(PVec3*)(m + 0x24);
+    axis = *(PVec3*)(m + 0x18);
     MulAdd(&b.x, org.v, axis.v, -k);
     MulAdd(&a.x, org.v, axis.v, k);
     {
