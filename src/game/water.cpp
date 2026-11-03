@@ -320,7 +320,7 @@ f32 fn_802BEFB4(void) {
 
 f32 fn_802BF02C(f32 x) {
     PtTable t = sAlpha;
-    for (u32 i = 1; i < 7; i++) {
+    for (unsigned int i = 1; i < 7; i++) {
         if (t.p[i].x > x) {
             f32 u = FMax(FMin((x - t.p[i - 1].x) / (t.p[i].x - t.p[i - 1].x), 1.0f), 0.0f);
             return t.p[i - 1].y + u * (t.p[i].y - t.p[i - 1].y);
