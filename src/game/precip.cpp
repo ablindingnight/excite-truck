@@ -703,7 +703,8 @@ void SnowSystem::Reset(void) {
 }
 
 void SnowSystem::Update(void) {
-    WFrame cam = *fn_801E8718(view);
+    WFrame cam;
+    cam = *fn_801E8718(view);
     Frustum();
     ValVec3 g;
     g.x = 0.0f;
@@ -719,7 +720,8 @@ void SnowSystem::Update(void) {
         d.y = lastPos.y - cam.pos.y;
         d.z = lastPos.z - cam.pos.z;
         MulT(&cam, &d, &d);
-        vel.x = vel.x + d.x * 0.2f;
+        f32 xv = d.x;
+        vel.x = vel.x + xv * 0.2f;
         vel.y = vel.y + d.y * 0.2f;
         vel.z = vel.z + d.z * 0.2f;
         PVec c;
