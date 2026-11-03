@@ -270,7 +270,6 @@ extern bool lbl_8055FA59;  // draw debug
 InlineVec<GMat*, 32> lbl_804BE104;
 static GVec lbl_804BE190[8];  // ocean corners
 extern const f32 kWorldScale;
-const f32 kWorldScale = 2.0f;
 
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
@@ -593,11 +592,11 @@ void fn_802B14B4(GMat* g) {
 void fn_802B1758(GMat* g) {
     if (g->lists[0].head && g->worldmap != -2) {
         s32 tex = g->worldmap;
-        f32 m[3];
-        m[0] = 1.0f / (1024.0f * kWorldScale);
-        m[1] = 0.0f;
-        m[2] = 1.0f;
-        fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
+        BVec m;
+        m.x = 1.0f / (1024.0f * kWorldScale);
+        m.y = 0.0f;
+        m.z = 1.0f;
+        fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         int n;
@@ -608,8 +607,8 @@ void fn_802B1758(GMat* g) {
         }
         for (int k = 0; k < g->strips.count; k++) {
             GStrip* s = &g->strips.data[k];
-            m[2] = s->alpha;
-            fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
+            m.z = s->alpha;
+            fn_802DAA18(fn_802DA704(1, &m, 1));
             fn_802DC464(verts, n, s->idx, s->idx[0] + 1);
         }
         fn_802DC440();
@@ -623,11 +622,11 @@ void fn_802B1758(GMat* g) {
         } else {
             scale = 8.0f / (1024.0f * kWorldScale);
         }
-        f32 m[3];
-        m[0] = scale;
-        m[1] = 0.0f;
-        m[2] = 1.0f;
-        fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
+        BVec m;
+        m.x = scale;
+        m.y = 0.0f;
+        m.z = 1.0f;
+        fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         f32 near = -2.0f + 1024.0f * kWorldScale * 0.5f;
@@ -658,6 +657,8 @@ void fn_802B1758(GMat* g) {
     }
     g->strips.count = 0;
 }
+
+const f32 kWorldScale = 2.0f;
 
 void fn_802B1B60(GMat* g) {
     BVec v[2];
