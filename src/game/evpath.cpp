@@ -1312,7 +1312,7 @@ extern "C" {
 int fn_80283B58(void) {
     int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (cur >= 0) {
-        int i = cur;
+        s32 i = cur;
         do {
             if (++i >= lbl_804B30D8.Count()) {
                 i = 0;
@@ -1329,7 +1329,7 @@ int fn_80283B58(void) {
 int fn_80283E28(void) {
     int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (cur >= 0) {
-        int i = cur;
+        s32 i = cur;
         do {
             if (--i < 0) {
                 i += lbl_804B30D8.Count();
