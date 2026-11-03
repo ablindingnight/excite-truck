@@ -1868,7 +1868,7 @@ void fn_801C7394(void) {
 }
 
 void fn_801C73DC(void) {
-    int sel = lbl_8055E828;
+    s32 sel = lbl_8055E828;
     int other = sel - 1;
     int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
@@ -1883,7 +1883,7 @@ void fn_801C73DC(void) {
 }
 
 void fn_801C7480(void) {
-    int sel = lbl_8055E828;
+    s32 sel = lbl_8055E828;
     int other = sel + 1;
     int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
