@@ -2170,7 +2170,7 @@ void fn_802D3420(void) {
     GXSetVtxAttrFmt(0, 9, 1, 4, 0);
     GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
     f32 u = (f32)lbl_804C9778.vw / 640.0f;
-    f32 v = (f32)lbl_804C9778.vh / 448.0f;
+    f32 v = u * (f32)lbl_804C9778.vh / 448.0f;
     GXBegin(0x80, 0, 4);
     WGPIPE.f = -1.0f;
     WGPIPE.f = 1.0f;
