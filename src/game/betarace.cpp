@@ -2690,7 +2690,7 @@ inline void BetaMaster::vfF8(void) {
 #pragma dont_inline reset
 
 inline void FinishAnimation::Setup(void) {
-    int multi = fn_80179650() > 1;
+    bool multi = fn_80179650() > 1;
     int ws = fn_802C9A58();
     int i;
     AnimBinding table[40] = {
