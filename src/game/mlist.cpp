@@ -547,8 +547,8 @@ void fn_802CDB5C(int pri) {
             MLStrip s = *sp++;
             if (s.flags == (ctx->vis[s.ref] & 0x7F)) {
                 if (!open) {
-                    fn_802C8B70(tex);
                     open = 1;
+                    fn_802C8B70(tex);
                     dl = fn_802DB2A8(n * 2);
                     if (!dl) {
                         fn_802C8D74();
