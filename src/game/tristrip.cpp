@@ -206,6 +206,7 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
             fn_801E4E44();
         }
         u32 c0 = (AlphaByte(s->alpha) << 24) | 0xFFFFFF;
+        int i;
         int nv = lbl_8055EAA8;
         TVtx* v = &lbl_80487578[nv];
         v->pos = s->p0;
@@ -219,21 +220,23 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
         v->color = c0;
         nv += 2;
         lbl_8055EAA8 = nv;
-        for (int i = 1; i <= n; i++) {
+        for (i = 1; i <= n; i++) {
             f32 t = (f32)i * step;
+            f32 h4;
             f32 t2 = t * t;
             f32 t3 = t2 * t;
             u32 c = (AlphaByte(s->alpha + t * (alpha - s->alpha)) << 24) | 0xFFFFFF;
             f32 h2 = t3 - 2.0f * t2 + t;
-            f32 h4 = t3 - t2;
+            h4 = t3 - t2;
             TVec3 tp;
             tp.x = s->tan.x * h2 + tan->x * h4;
             tp.y = s->tan.y * h2 + tan->y * h4;
-            tp.z = s->tan.z * h2 + tan->z * h4;
+            f32 z2 = tan->z;
+            tp.z = s->tan.z * h2 + z2 * h4;
             f32 h1 = 1.0f + (2.0f * t3 - 3.0f * t2);
             f32 h3 = -2.0f * t3 + 3.0f * t2;
             v = &lbl_80487578[nv];
-            v->pos.x = tp.x + s->p0.x * h1 + a.x * h3;
+            v->pos.x = tp.x + s->p0.x * h1 + h3 * a.x;
             v->pos.y = tp.y + s->p0.y * h1 + a.y * h3;
             v->pos.z = tp.z + s->p0.z * h1 + a.z * h3;
             v->u = 0.0f;
@@ -245,8 +248,9 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
             h3 = -2.0f * t3 + 3.0f * t2;
             v = &lbl_80487578[nv];
             v->pos.x = tp.x + s->p1.x * h1 + b.x * h3;
-            v->pos.y = tp.y + s->p1.y * h1 + b.y * h3;
-            v->pos.z = tp.z + s->p1.z * h1 + b.z * h3;
+            v->pos.y = tp.y + h1 * s->p1.y + b.y * h3;
+            f32 zv = s->p1.z;
+            v->pos.z = tp.z + zv * h1 + b.z * h3;
             v->u = 1.0f;
             v->v = t;
             v->color = c;
