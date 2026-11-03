@@ -251,9 +251,10 @@ void SwfAnim::LoadFile(const char* name) {
         }
     }
     for (i = 0; i < data->numFrames; i++) {
+        int j;
         Sw2Frame* f = &data->frames[i];
         SwfSwap16(&f->count);
-        for (int j = 0; j < f->count; j++) {
+        for (j = 0; j < f->count; j++) {
             it = &f->items[j];
             SwfSwap16(&it->shape);
             SwfSwap16(&it->cxform);
