@@ -1521,7 +1521,7 @@ inline void CrushMaster::vf4C(int view) {
         }
         col = layout.p->Find("score_column");
         for (i = 0; i < n; i++) {
-            int killed = i < cc->f8;
+            bool killed = i < cc->f8;
             Box b = *icon;
             int pts;
             b.pos.y += i * hit->h;
