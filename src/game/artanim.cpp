@@ -300,8 +300,6 @@ static inline ValPoint MakePoint(f32 x, f32 y) {
 
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
-template <class T> static inline void SwSet3(T& v, f32 a, f32 b, f32 c) { v.x = a; v.y = b; v.z = c; }
-static inline void SwSetA2(f32* v, f32 a, f32 b) { v[0] = a; v[1] = b; }
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* paths[64];
     ValueNode* elems[64];
@@ -347,7 +345,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             e->model.off[2] = off.z;
             ValPoint xy;
             xy = en->GetPointOr("xy", MakePoint(0.0f, 0.0f));
-            SwSetA2(e->model.off, e->model.off[0] + xy.x, e->model.off[1] - xy.y);
+            e->model.off[0] = e->model.off[0] + xy.x;
+            e->model.off[1] = e->model.off[1] - xy.y;
             e->model.group = en->GetInt("group", -1);
             e->model.mapped = 0;
             const char* gm = en->GetString("group_mapping", 0);
@@ -419,7 +418,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
             if (f->Has("spin")) {
                 ValVec3 axis;
-                SwSet3(axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
+                axis.x = 0.0f;
+                axis.y = 0.0f;
+                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
                 if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
                     f32 len = sqrt(d);
