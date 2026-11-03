@@ -1135,7 +1135,8 @@ int fn_8013CBC0(CarState* zm, int car) {
     p.x = pos.x;
     p.y = pos.z;
     dir.x = t->dirX;
-    dir.y = t->dirZ;
+    f32 dirZv = t->dirZ;
+    dir.y = dirZv;
     q.x = p.x + dir.x * -0.083416760f;
     q.y = p.y + dir.y * -0.083416760f;
     a.x = g->a.x;
@@ -1173,7 +1174,8 @@ int fn_8013CBC0(CarState* zm, int car) {
             pb.x = p.x - b.x;
             pb.y = p.y - b.y;
             qb.x = q.x - b.x;
-            qb.y = q.y - b.y;
+            f32 yv = q.y;
+            qb.y = yv - b.y;
             if (pb.y * perp.x + -pb.x * perp.y > 0.0f || qb.y * perp.x + -qb.x * perp.y > 0.0f) {
                 r = 2;
             }
@@ -1190,10 +1192,14 @@ int fn_8013CBC0(CarState* zm, int car) {
         half = PSVECDistance(&g->a, &g->b) * 0.5f;
         ring.x = mid.x;
         ring.y = g->ringY;
-        ring.z = mid.z;
-        at.x = t->pos.x + t->vel.x * t->dt;
-        at.y = t->pos.y + t->vel.y * t->dt;
-        at.z = t->pos.z + t->vel.z * t->dt;
+        f32 zv = mid.z;
+        ring.z = zv;
+        f32 dtv = t->dt;
+        at.x = t->pos.x + t->vel.x * dtv;
+        f32 dt2 = t->dt;
+        at.y = t->pos.y + t->vel.y * dt2;
+        f32 dt_ = t->dt;
+        at.z = t->pos.z + t->vel.z * dt_;
         if (PSVECSquareDistance(&at, &ring) > half * half) {
             r = 1;
         }
