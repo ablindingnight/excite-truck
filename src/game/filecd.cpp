@@ -125,9 +125,10 @@ public:
         if (len == 0) {
             return 0;
         }
+        s32 n;
         s32 aligned = pos & ~3;
         s32 skip = pos - aligned;
-        s32 n = (len + skip + 0x1F) & ~0x1F;
+        n = (len + skip + 0x1F) & ~0x1F;
         if (n > 0x20000) {
             n = 0x20000;
         }
