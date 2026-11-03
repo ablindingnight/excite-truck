@@ -748,8 +748,8 @@ void WaterSystem::Draw(void) {
     fn_802C8B08(&cam);
     f32 h = cam.pos.y - lbl_8055FAF4;
     f32 sx;
-    f32 nearZ;
     f32 farZ;
+    f32 nearZ;
     f32 dz;
     fn_802C98DC(&sx, &nearZ, &farZ, &dz);
     f32 tilt = h * cam.z.y;
@@ -759,8 +759,10 @@ void WaterSystem::Draw(void) {
     f32 vx = fn_802C9C50();
     f32 vy = fn_802C9C40();
     f32 vw = fn_802C9C38();
+    f32 k;
+    f32 cx;
     f32 vh = fn_802C9C48();
-    f32 k = 640.0f / (vh * env->Scale());
+    k = 640.0f / (vh * env->Scale());
     PVec fwd;
     if ((f32)__fabs(cam.z.y) < 0.99f) {
         fwd = cam.z;
@@ -778,7 +780,7 @@ void WaterSystem::Draw(void) {
     up.z = 0.0f;
     PVec side;
     PSVECCrossProduct(&fwd, &up, &side);
-    f32 cx = 0.5f * (640.0f - vh);
+    cx = 0.5f * (640.0f - vh);
     f32 cy = 0.5f * (480.0f - vw);
     for (int r = 0; r < 64; r++) {
         f32 t = (f32)r / 63.0f * ((f32)r / 63.0f);
