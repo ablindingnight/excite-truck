@@ -140,11 +140,8 @@ int fn_8026A698(u8* p, int i) {
     }
     int n = fn_80178CA4();
     int multi = n > 1;
-    int done = 0;
     u8* c = PTR(p, 0x140);
-    if (!((f32)__fabs(F32(c, 0x2690)) <= lbl_80558DC4[0]) && fn_801B8570(S32(c, 0x1EC))) {
-        done = 1;
-    }
+    int done = !((f32)__fabs(F32(c, 0x2690)) <= lbl_80558DC4[0]) && fn_801B8570(S32(c, 0x1EC));
     if (!done) {
         s->t = 0.0f;
         if (s->active) {
@@ -196,8 +193,8 @@ int fn_8026A698(u8* p, int i) {
         s->active = 1;
         s->frame = *(const SFrame*)(p + 0x88);
         s->fov = F32(p, 0x194);
-        f32 turn = 2.3561945f;
         s->yaw = atan2(s->frame.rot.m[6], s->frame.rot.m[8]);
+        f32 turn = 2.3561945f;
         turn = PSVECDotProduct((f32*)(PTR(p, 0x140) + 0x118), (f32*)(p + 0xC0)) > 0.0f ? turn : -turn;
         s->spin = turn;
         if (MIN(room[0], room[1]) < 10.0f) {
@@ -231,14 +228,16 @@ int fn_8026A698(u8* p, int i) {
         at.y += F32(p, 0xD0) * 0.7f;
         at.z += F32(p, 0xD4) * 0.7f;
         s->target = at;
+        SVec v;
         SVec d;
         d.x = at.x - s->pos.x;
         d.y = at.y - s->pos.y;
         d.z = at.z - s->pos.z;
-        s->vel.x = s->vel.x + 0.2f * (d.x - s->vel.x);
+        f32 xv = s->vel.x;
+        s->vel.x = xv + 0.2f * (d.x - xv);
         s->vel.y = s->vel.y + 0.2f * (d.y - s->vel.y);
         s->vel.z = s->vel.z + 0.2f * (d.z - s->vel.z);
-        SVec v = s->vel;
+        v = s->vel;
         s->pos.x += v.x * 1.0f;
         s->pos.y += v.y * 1.0f;
         s->pos.z += v.z * 1.0f;
@@ -304,8 +303,8 @@ int fn_8026A698(u8* p, int i) {
         e = k * (-2.0f * k * k) - 3.0f * k * k;
     }
     fn_8026E22C(p + 0x58, &s->frame, &f, e);
-    S32(p, 0x10) = 5;
     F32(p, 0xBC) = s->fov + e * (1.3089969f - s->fov);
+    S32(p, 0x10) = 5;
     s->frameNo = lbl_8055E3C4;
     return 1;
 }
