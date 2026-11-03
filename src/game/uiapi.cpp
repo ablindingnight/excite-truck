@@ -551,8 +551,8 @@ extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *fn_8021227C(void *arg0, char *arg1, s32 arg2) {
     char buf[0x100];
-    char *name = arg1;
     void *entry = arg0;
+    char *name = arg1;
     if (*arg1 == '#') {
         name = arg1 + 1;
         sprintf(buf, lbl_8055B750, name);
