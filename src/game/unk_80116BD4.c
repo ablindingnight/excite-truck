@@ -2602,7 +2602,7 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 *var_r5_2;
     u32 *var_r7;
     s32 temp_r0;
-    s32 temp_r18;
+    int temp_r18;
     s32 temp_r4;
     s32 temp_r4_2;
     s32 temp_r5_3;
