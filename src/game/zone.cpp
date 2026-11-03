@@ -2416,12 +2416,14 @@ void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
 // a weak copy emitted right after it.
 #pragma dont_inline on
 inline void ZoneMaster::vf0C(void) {
-    if (!b258 && fn_801B306C() < 6.75f) {
+    f32 t = fn_801B306C();
+    if (!b258 && t < 6.75f) {
         b258 = 1;
         if (prerace && !fn_80009C84()) {
-            prerace->play = 1;
-            prerace->b4B = 0;
-            prerace->b4A = 0;
+            Sound* p = prerace;
+            p->play = 1;
+            p->b4B = 0;
+            p->b4A = 0;
         }
     }
     if (!vf24()) {
