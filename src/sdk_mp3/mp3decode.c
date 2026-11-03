@@ -45,15 +45,14 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     s16 big_values[2][2];
     s16 preflag[2][2];
     s16 bound[2];
-
     d->unk278 = ctx;
     d->unk8 = 0;
     lbl_8055DD88 = out;
-    if ((s16)MP3_FindSync(d->unk278, buf, &d->unk8) == 0) {
+    if (((s16) MP3_FindSync(d->unk278, buf, &d->unk8)) == 0) {
         return 8;
     }
     id = MP3_GetBits(d->unk278, buf, 1, &d->unk8);
-    if ((s16)MP3_GetBits(d->unk278, buf, 2, &d->unk8) != 1) {
+    if (((s16) MP3_GetBits(d->unk278, buf, 2, &d->unk8)) != 1) {
         return 0xD;
     }
     start = d->unk8 - 15;
@@ -103,7 +102,7 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     }
     mdb = MP3_GetBits(d->unk278, buf, 9 - d->lsf, &d->unk8);
     if (stereo == 3) {
-        MP3_GetBits(d->unk278, buf, 5 - d->lsf * 4, &d->unk8);
+        MP3_GetBits(d->unk278, buf, 5 - (d->lsf * 4), &d->unk8);
     } else {
         MP3_GetBits(d->unk278, buf, 3 - d->lsf, &d->unk8);
     }
@@ -115,8 +114,8 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
             scfsi[ch][2] = (bits >> 1) & 1;
             scfsi[ch][3] = bits & 1;
         }
-    }
 
+    }
     for (gr = 0; gr < ngr; gr++) {
         for (ch = 0; ch < d->channels; ch++) {
             part2_3[gr][ch] = MP3_GetBits(d->unk278, buf, 12, &d->unk8);
@@ -140,11 +139,14 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
                 subblock_gain[gr][ch][2] = bits & 7;
                 if (block_type[gr][ch] == 0) {
                     flags[gr][ch] = 1;
-                } else if (block_type[gr][ch] == 1) {
+                } else
+                    if (block_type[gr][ch] == 1) {
                     flags[gr][ch] = 2;
-                } else if (block_type[gr][ch] == 3) {
+                } else
+                    if (block_type[gr][ch] == 3) {
                     flags[gr][ch] = 4;
-                } else if (mixed[gr][ch] != 0) {
+                } else
+                    if (mixed[gr][ch] != 0) {
                     flags[gr][ch] = 8;
                 } else {
                     flags[gr][ch] = 0x10;
@@ -167,56 +169,55 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
             sf_scale[gr][ch] = MP3_GetBits(d->unk278, buf, 1, &d->unk8);
             count1_table[gr][ch] = MP3_GetBits(d->unk278, buf, 1, &d->unk8);
         }
+
     }
 
     if (d->unk8 < 0) {
         n = (end >> 3) - ((d->unk8 >> 3) + d->unk278);
     } else {
-        n = (end >> 3) - (d->unk8 >> 3);
+        n = end >> 3;
+        n = n - (d->unk8 >> 3);
     }
     d->unk18 = d->unk14 >> 3;
     p = buf + (d->unk8 >> 3);
     while (n != 0) {
-        d->ring[d->unk18 & 0x1FFF] = *p++;
+        d->ring[d->unk18 & 0x1FFF] = *(p++);
         d->unk18++;
         n--;
     }
+
     d->unk14 = (d->unk18 & 0x1FFF) << 3;
     if (d->lsf == 0) {
-        d->unk10 = d->unk14 - mdb * 8 - (frame_bits - ((const s16(*)[2])lbl_80560DA0)[d->channels - 1][prot]);
+        d->unk10 = (d->unk14 - (mdb * 8)) - (frame_bits - ((const s16 (*)[2]) lbl_80560DA0)[d->channels - 1][prot]);
     } else {
-        d->unk10 = d->unk14 - mdb * 8 - (frame_bits - ((const s16(*)[2])lbl_80560DA8)[d->channels - 1][prot]);
+        d->unk10 = (d->unk14 - (mdb * 8)) - (frame_bits - ((const s16 (*)[2]) lbl_80560DA8)[d->channels - 1][prot]);
     }
-    d->count1_end = ((const s16(*)[3])lbl_802F34D8)[d->lsf][d->sr_index];
-    if (d->unk10 < 0 && d->unkC == 0 && (s32)(-d->unk10 + 0x200000u - d->unkC) > 0x200000) {
+    d->count1_end = ((const s16 (*)[3]) lbl_802F34D8)[d->lsf][d->sr_index];
+    if (((d->unk10 < 0) && (d->unkC == 0)) && (((s32) (((-d->unk10) + 0x200000u) - d->unkC)) > 0x200000)) {
         for (gr = 0; gr < ngr; gr++) {
             for (i = 0; i < 0x480; i++) {
-                *lbl_8055DD88++ = 0;
+                *(lbl_8055DD88++) = 0;
             }
+
         }
+
         return 0;
+    }
+    for (gr = 0; gr < ngr; gr++) {
+        for (ch = 0; ch < d->channels; ch++) {
+            fn_800C3DA0(d, d->ring, flags[gr][ch], d->sf_long[gr][ch], d->sf_long[0][ch], d->sf_short[gr][ch], part2_3[gr][ch], sfc[gr][ch], scfsi[ch], gr, ch, &bound[gr], &region0[gr][ch], &region1[gr][ch], &preflag[gr][ch], &is_scale[gr][ch]);
+            MP3_DecodeBigValues((HuffState *) d, d->ring, d->huff_out[gr][ch], big_values[gr][ch], flags[gr][ch], region0[gr][ch], region1[gr][ch], count1_table[gr][ch], ch, table_select[gr][ch], &bound[gr]);
+        }
+
     }
 
     for (gr = 0; gr < ngr; gr++) {
-        for (ch = 0; ch < d->channels; ch++) {
-            fn_800C3DA0(d, d->ring, flags[gr][ch], d->sf_long[gr][ch], d->sf_long[0][ch], d->sf_short[gr][ch],
-                        part2_3[gr][ch], sfc[gr][ch], scfsi[ch], gr, ch, &bound[gr], &region0[gr][ch],
-                        &region1[gr][ch], &preflag[gr][ch], &is_scale[gr][ch]);
-            MP3_DecodeBigValues((HuffState*)d, d->ring, d->huff_out[gr][ch], big_values[gr][ch], flags[gr][ch],
-                                region0[gr][ch], region1[gr][ch], count1_table[gr][ch], ch, table_select[gr][ch],
-                                &bound[gr]);
-        }
-    }
-    for (gr = 0; gr < ngr; gr++) {
-        MP3_Dequantize(d, d->long_map, d->short_map, d->mixed_map, d->long_edges, d->short_edges, flags[gr],
-                       d->gr_out, d->huff_out[gr][0], global_gain[gr], subblock_gain[gr][0], sf_scale[gr],
-                       d->sf_long[gr][0], d->sf_short[gr][0], preflag[gr]);
+        MP3_Dequantize(d, d->long_map, d->short_map, d->mixed_map, d->long_edges, d->short_edges, flags[gr], d->gr_out, d->huff_out[gr][0], global_gain[gr], subblock_gain[gr][0], sf_scale[gr], d->sf_long[gr][0], d->sf_short[gr][0], preflag[gr]);
         if (d->mode_ext & 2) {
             fn_800C57B0(d->long_end, d->short_bands, flags[gr][0], d->gr_out);
         }
         if (d->mode_ext & 1) {
-            MP3_IntensityStereo(d, d->long_map, d->long_edges, flags[gr][1], d->gr_out, d->sf_long[gr][0],
-                                d->sf_short[gr][0], is_scale[gr], bound[gr]);
+            MP3_IntensityStereo(d, d->long_map, d->long_edges, flags[gr][1], d->gr_out, d->sf_long[gr][0], d->sf_short[gr][0], is_scale[gr], bound[gr]);
         }
         if (flags[gr][0] & 0xF) {
             MP3_Antialias(d->band_count, d->long_end, d->channels, flags[gr][0], d->gr_out);
@@ -230,6 +231,7 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
             lbl_8055DD88 += 0x240;
         }
     }
+
     return 0;
 }
 
