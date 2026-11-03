@@ -731,6 +731,7 @@ extern "C" void fn_80239F74(void) {
                         TrackCaption trackCap(&track);
                         IconCaption iconCap;
                         SoundCaption sound;
+                        MenuDesc desc;
                         MenuItem items[] = {
                             MenuItem(0, 5, &sound, 0, 0),
                             MenuItem("cvideo", 5, &aspect, 0, 0),
@@ -748,7 +749,7 @@ extern "C" void fn_80239F74(void) {
                             MenuItem(lbl_8055B860, 6, (void*)SoundCaption::Dolby, 0x10, 0x121),
                             *(MenuItem*)&lbl_804986F8,
                         };
-                        MenuDesc desc = lbl_802FA054;
+                        desc = lbl_802FA054;
                         desc.items = items;
                         lbl_8049870C.saved = lbl_8049870C.cur;
                         run = 1;
