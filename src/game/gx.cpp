@@ -1557,7 +1557,8 @@ void fn_802D0EEC(void) {
         f32 s = -1048576.0f;
         GXInitLightPos(&lbl_804C97D0.obj, lbl_804C97D0.dir.x * s, lbl_804C97D0.dir.y * s, -(lbl_804C97D0.dir.z * s));
         GXColor c;
-        c.r = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.r);
+        f32 scalev = lbl_804C97D0.scale;
+        c.r = (int)(scalev * lbl_804C97D0.amb.r);
         c.g = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.g);
         c.b = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.b);
         c.a = lbl_804C97D0.amb.a;
