@@ -502,7 +502,8 @@ void fn_802B9108(s16 size) {
         case 0:
         case 1:
             if (g.size == 4) {
-                BinShadows(g, te, 2.0f);
+                f32 scale = 2.0f;
+                BinShadows(g, te, scale);
             }
             break;
         case 2:
