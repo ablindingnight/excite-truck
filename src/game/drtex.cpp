@@ -426,7 +426,7 @@ void fn_802D81C4(GXTexDesc* d) {
 void fn_802D86BC(GXTexDesc* d) {
     TexImage* img = d->data;
     s32 w = d->w;
-    s32 h = d->h;
+    u32 h = d->h;
     u8* tex = img->tex;
     u32* pal = img->pal;
     for (int i = 0; i < 256; i++) {
