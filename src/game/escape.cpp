@@ -98,7 +98,7 @@ int fn_802E8504(int pad);
 int fn_80137C74(void);
 void fn_80148070(LayoutArtItem* item, u32 color, void* set);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, u32 unk);
-void fn_800103B8(u32 color, u32 flags, const char* fmt, f32 scale, f32 x, f32 y, f32 w, ...);
+void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void* fn_802090D4(const char* name);
 void fn_80209190(void* p, f32 value);
 Layout* fn_80145E70(const char* name);
@@ -272,7 +272,7 @@ static void fn_8000CD24(void) {
         if (msg) {
             const char* names[2] = {"Pause:MISSING_CTRL_0", "Pause:MISSING_CTRL_1"};
             fn_80148134(&x, &y, msg->pos.x, msg->pos.y, msg->unkC);
-            fn_800103B8(msg->color, msg->unk14, "%s", msg->scale, x, y, box->w - 34.0f,
+            fn_800103B8(msg->scale, msg->color, msg->unk14, x, y, box->w - 34.0f, "%s",
                         fn_80131234(names[lbl_8055D420]));
             fn_80011A2C();
         }

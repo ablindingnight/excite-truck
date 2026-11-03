@@ -1030,10 +1030,10 @@ void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     }
 }
 
-void fn_800103B8(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, f32 w, ...) {
+void fn_800103B8(f32 scale, u32 color, int flags, f32 x, f32 y, f32 w, const char* fmt, ...) {
     va_list args;
     char buf[0x200];
-    va_start(args, w);
+    va_start(args, fmt);
     vsprintf(buf, fmt, args);
     va_end(args);
     fn_80233010(buf, lbl_8055D490, color, flags, x, y, w, 0.73333335f * scale, 0.0f, 1.0f, 1);

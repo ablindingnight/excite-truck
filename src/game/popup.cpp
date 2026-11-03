@@ -131,7 +131,7 @@ void fn_801769E0(void);
 void fn_801769EC(void);
 int fn_801769F8(void);
 void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h);
-void fn_800103B8(u32 color, u32 flags, const char* fmt, f32 scale, f32 x, f32 y, f32 w, ...);
+void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_800121A4(void);
 void fn_80011A2C(void);
@@ -353,7 +353,7 @@ int fn_801DF110(void) {
                 d->draw(d->arg, d->text);
             } else {
                 fn_80011278(-1, -170.0f, 70.0f, 340.0f, 190.0f);
-                fn_800103B8(-1, 0xC, "%s", 1.0f, 0.0f, 50.0f, 300.0f, lbl_804872B0[lbl_8055E9E8].text);
+                fn_800103B8(1.0f, -1, 0xC, 0.0f, 50.0f, 300.0f, "%s", lbl_804872B0[lbl_8055E9E8].text);
                 fn_8000FF88(-1, 0xC, "Press A to continue", 1.0f, 0.0f, -200.0f);
                 fn_801DE890(lbl_8055E9E8);
             }
