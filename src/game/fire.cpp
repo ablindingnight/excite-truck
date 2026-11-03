@@ -1125,12 +1125,12 @@ void BigRingMan::Tick(BigRing* r, f32 now) {
         v.z = 0.0f;
         for (int i = 0; i < r->count; i++) {
             f32 f = fn_80129DC4(0, 0.0f, 1.0f);
-            const Vec* a = &r->pts[i];
             const Vec* b = &r->pts[(i + 1) % r->count];
             Vec p;
-            p.x = a->x + f * (b->x - a->x);
-            p.y = a->y + f * (b->y - a->y);
-            p.z = a->z + f * (b->z - a->z);
+            p.x = r->pts[i].x + f * (b->x - r->pts[i].x);
+            f32 yv = r->pts[i].y;
+            p.y = yv + f * (b->y - yv);
+            p.z = r->pts[i].z + f * (b->z - r->pts[i].z);
             fn_8028E584(r->emitter, &p, &v);
             fn_80288A58(&p, &v);
         }
