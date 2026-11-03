@@ -706,7 +706,7 @@ WaterSystem::WaterSystem(void) {
         deep = fn_802CAC28("gen_waterd.tex", 0);
     }
     u16* p = &idx[0][0][0];
-    for (s32 r = 0; r < 63; r++) {
+    for (u32 r = 0; r < 63; r++) {
         for (int c = 0; c < 15; c++) {
             int a = r * 16 + c;
             s32 b = (r + 1) * 16 + c;
