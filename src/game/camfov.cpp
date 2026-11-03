@@ -600,7 +600,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             break;
         }
         f32 dist = lbl_80563EEC + F32(c->car, 0x5B4) * k;
-        f32 lift = lbl_80563EF0 + F32(c->car, 0x5B8);
+        f32 lift = F32(c->car, 0x5B8) + lbl_80563EF0;
         c->fov = fn_8026ECE4(p, &dist);
         target = c->pos;
         target.v[1] += lbl_80563EF4;
@@ -671,15 +671,19 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[2] *= inv2;
         if (PSVECDotProduct(f.v, &c->tf.axes.fwd.x) > lbl_80563F10) {
             f32 w = s + lbl_80563F14 * (lbl_80563E30 - s);
-            r.z = f.v[2] + w * (c->tf.axes.fwd.z - f.v[2]);
-            r.y = f.v[1] + w * (c->tf.axes.fwd.y - f.v[1]);
-            r.x = f.v[0] + w * (c->tf.axes.fwd.x - f.v[0]);
+            f32 zv = c->tf.axes.fwd.z;
+            r.z = f.v[2] + w * (zv - f.v[2]);
+            f32 yv = c->tf.axes.fwd.y;
+            r.y = f.v[1] + w * (yv - f.v[1]);
+            f32 xv = c->tf.axes.fwd.x;
+            r.x = f.v[0] + w * (xv - f.v[0]);
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
         } else {
+            f32 z2 = c->tf.axes.fwd.z;
             f32 sideZ = -c->tf.axes.fwd.x;
-            side.x = c->tf.axes.fwd.z;
+            side.x = z2;
             side.y = c->tf.axes.fwd.y;
             side.z = sideZ;
             f32 kk = lbl_80563EA8 * (PSVECDotProduct(&side.x, f.v) > lbl_80563E78 ? lbl_80563E30 : lbl_80563E6C);
