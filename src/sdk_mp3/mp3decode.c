@@ -46,8 +46,8 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     s16 preflag[2][2];
     s16 bound[2];
     d->unk278 = ctx;
-    d->unk8 = 0;
     lbl_8055DD88 = out;
+    d->unk8 = 0;
     if (((s16) MP3_FindSync(d->unk278, buf, &d->unk8)) == 0) {
         return 8;
     }

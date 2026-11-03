@@ -552,11 +552,11 @@ void fn_800C1C1C(s32* in, s32* out) {
     s32 i2 = in[2];
     s32 i4 = in[4];
     s32 i5 = in[5];
+    s32 s26;
     s32 i6 = in[6];
     s32 i7 = in[7];
     s32 i8 = in[8];
     s32 s08;
-    s32 s26;
     s32 s35;
     s32 s17;
     s32 d17;

@@ -1999,9 +1999,9 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     }
     bps = t->channels * (t->rate * 2);
     t->curRate = freq;
+    t->bufSize = (bps * 600 / 1000 + 0x3FF) & ~0x3FF;
     t->interval = 0x21C;
     t->unk68 = 0;
-    t->bufSize = (bps * 600 / 1000 + 0x3FF) & ~0x3FF;
     t->chunk = (bps * 50 / 1000 + 0xFF) & ~0xFF;
     t->threshold = t->bufSize * 90 / 100;
     if (bink->frameRate != 0 && bink->frameRateDiv != 0) {

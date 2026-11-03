@@ -1572,7 +1572,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         f32 bump = w * s;
         f32 curF158 = c->f158;
         f32 e = ShakeEase((lbl_80563C6C - (now - curF158)) / lbl_80563C6C);
-        if (bump > lbl_80563CF0 && bump > c->f154 * e) {
+        f32 currentShake = c->f154 * e;
+        if (bump > lbl_80563CF0 && bump > currentShake) {
             c->f158 = now;
             c->f154 = bump;
         }
