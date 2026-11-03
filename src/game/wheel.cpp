@@ -252,7 +252,8 @@ void fn_801AFC44(int car, int index, const RMtx* m, const RVec3* v, const RVec3*
         w->time = now;
         w->SetActive(1);
         SphereShape* s = (SphereShape*)w->Shape();
-        s->radius = c->wheels[index].radius;
+        f32 radiusv = c->wheels[index].radius;
+        s->radius = radiusv;
         if (++lbl_8055E654 >= lbl_8055E650) {
             lbl_8055E654 = 0;
         }
