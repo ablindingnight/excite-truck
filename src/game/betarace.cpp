@@ -2822,8 +2822,8 @@ inline void BetaMaster::vfF4(void) {
         loaded = 0;
     }
     if (!loaded) {
-        ValueNode* ev = GetEvent(fn_801769CC()->event)->vals;
         ValueNode* n;
+        ValueNode* ev = GetEvent(fn_801769CC()->event)->vals;
         for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
             if (n->Has("bound0")) {
                 Pickup* p = new ("trigger") Pickup(n);
