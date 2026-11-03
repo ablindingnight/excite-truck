@@ -1388,7 +1388,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
         if (fn_8013CB44("ZoneLevel", child)) {
             ZoneLevel* prev = lvl > 0 ? levels : 0;
             ZoneLevel* l = &levels[lvl];
-            int j;
+            s32 j;
             char buf[0x80];
             if (prev) {
                 l->n = prev->n;
@@ -1423,7 +1423,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                     int nn = l->n;
                     Gate* a = 0;
                     Gate* b = 0;
-                    int k;
+                    s32 k;
                     for (k = 1; k < nn; k++) {
                         a = &l->gates[(nn + (j - k)) % nn];
                         if (!a->ring) {
