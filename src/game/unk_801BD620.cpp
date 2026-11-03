@@ -27,6 +27,7 @@ struct Vec {
 };
 
 static inline Vec Load(const MVec4& m) { return Vec(m.x, m.y, m.z); }
+static inline Vec Load4(const MVec4& m) { return Vec(m.x, m.y, m.z, m.w); }
 static inline void Store(MVec4& m, Vec v) {
     m.x = v.x;
     m.y = v.y;
@@ -66,14 +67,21 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
     }
 
     for (step = 12; step != 0; step--) {
-        MVec4* pos = &t[a];
-        MVec4* r1 = &t[a + 1];
-        MVec4* r2 = &t[a + 2];
-        MVec4* r3 = &t[a + 3];
-        MVec4* q = &t[a + 4];
-        MVec4* vel = &t[a + 5];
-        MVec4* spin = &t[a + 6];
+        MVec4* pPos = &t[a];
+        MVec4* pR1 = &t[a + 1];
+        MVec4* pR2 = &t[a + 2];
+        MVec4* pR3 = &t[a + 3];
+        MVec4* pQ = &t[a + 4];
+        MVec4* pVel = &t[a + 5];
+        MVec4* pSpin = &t[a + 6];
         MVec4* inv = &t[a + 8];
+        Vec pos = Load(*pPos);
+        Vec vel = Load(*pVel);
+        Vec spin = Load(*pSpin);
+        Vec q = Load4(*pQ);
+        Vec r1 = Load(*pR1);
+        Vec r2 = Load(*pR2);
+        Vec r3 = Load(*pR3);
         f32 dt = ident.w * ((ident.x + 0.0192f) * (ident.x + 0.08333f));
         f32 vx, vy, vz, wx, wy, wz;
         f32 ax, ay, az;
@@ -87,46 +95,46 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         ay = force->y * inv->w - (ident.x + 9.81f);
         az = force->z * inv->w;
 
-        vx = vel->x < ident.x + 200.0f ? vel->x : ident.x + 200.0f;
-        vy = vel->y < ident.x + 200.0f ? vel->y : ident.x + 200.0f;
-        vz = vel->z < ident.x + 200.0f ? vel->z : ident.x + 200.0f;
+        vx = vel.x < ident.x + 200.0f ? vel.x : ident.x + 200.0f;
+        vy = vel.y < ident.x + 200.0f ? vel.y : ident.x + 200.0f;
+        vz = vel.z < ident.x + 200.0f ? vel.z : ident.x + 200.0f;
         vx = vx > ident.x + -200.0f ? vx : ident.x + -200.0f;
         vy = vy > ident.x + -200.0f ? vy : ident.x + -200.0f;
         vz = vz > ident.x + -200.0f ? vz : ident.x + -200.0f;
-        wx = spin->x < ident.x + 20.0f ? spin->x : ident.x + 20.0f;
-        wy = spin->y < ident.x + 20.0f ? spin->y : ident.x + 20.0f;
-        wz = spin->z < ident.x + 20.0f ? spin->z : ident.x + 20.0f;
+        wx = spin.x < ident.x + 20.0f ? spin.x : ident.x + 20.0f;
+        wy = spin.y < ident.x + 20.0f ? spin.y : ident.x + 20.0f;
+        wz = spin.z < ident.x + 20.0f ? spin.z : ident.x + 20.0f;
         wx = wx > ident.x + -20.0f ? wx : ident.x + -20.0f;
         wy = wy > ident.x + -20.0f ? wy : ident.x + -20.0f;
         wz = wz > ident.x + -20.0f ? wz : ident.x + -20.0f;
 
         // torque into the body frame, through the inverse inertia, and back out
-        lx = r1->x * torque->x + r1->y * torque->y + r1->z * torque->z;
-        ly = r2->y * torque->y + r2->z * torque->z + r2->x * torque->x;
-        lz = r3->z * torque->z + r3->x * torque->x + r3->y * torque->y;
+        lx = r1.x * torque->x + r1.y * torque->y + r1.z * torque->z;
+        ly = r2.y * torque->y + r2.z * torque->z + r2.x * torque->x;
+        lz = r3.z * torque->z + r3.x * torque->x + r3.y * torque->y;
         lx = inv->x * lx;
         ly = inv->y * ly;
         lz = inv->z * lz;
-        wx += (r1->x * lx + r2->x * ly + r3->x * lz) * dt;
-        wy += (r1->y * lx + r2->y * ly + r3->y * lz) * dt;
-        wz += (r1->z * lx + r2->z * ly + r3->z * lz) * dt;
+        wx += (r1.x * lx + r2.x * ly + r3.x * lz) * dt;
+        wy += (r1.y * lx + r2.y * ly + r3.y * lz) * dt;
+        wz += (r1.z * lx + r2.z * ly + r3.z * lz) * dt;
 
         vx += ax * dt;
         vy += ay * dt;
         vz += az * dt;
-        pos->x += vx * dt;
-        pos->y += vy * dt;
-        pos->z += vz * dt;
+        pPos->x = pos.x + vx * dt;
+        pPos->y = pos.y + vy * dt;
+        pPos->z = pos.z + vz * dt;
 
         // q -= (0.5 w) * q * dt, then renormalise
         ox = wx * (ident.x + 0.5f);
         oy = wy * (ident.x + 0.5f);
         oz = wz * (ident.x + 0.5f);
         ow = ident.w * (2.0f * ident.x);
-        qx = q->x;
-        qy = q->y;
-        qz = q->z;
-        qw = q->w;
+        qx = q.x;
+        qy = q.y;
+        qz = q.z;
+        qw = q.w;
         dx = qy * oz + qx * ow + ox * qw - oy * qz;
         dy = qz * ox + qy * ow + oy * qw - oz * qx;
         dz = qx * oy + qz * ow + oz * qw - ox * qy;
@@ -141,16 +149,16 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         qz *= n;
         qw *= n;
 
-        vel->x = vx;
-        vel->y = vy;
-        vel->z = vz;
-        spin->x = wx;
-        spin->y = wy;
-        spin->z = wz;
-        q->x = qx;
-        q->y = qy;
-        q->z = qz;
-        q->w = qw;
+        pVel->x = vx;
+        pVel->y = vy;
+        pVel->z = vz;
+        pSpin->x = wx;
+        pSpin->y = wy;
+        pSpin->z = wz;
+        pQ->x = qx;
+        pQ->y = qy;
+        pQ->z = qz;
+        pQ->w = qw;
         {
             f32 sx = qx * 1.4142135f;
             f32 sy = qy * 1.4142135f;
@@ -159,15 +167,15 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
             f32 xx = 2.0f * (qx * qx);
             f32 yy = 2.0f * (qy * qy);
             f32 zz = 2.0f * (qz * qz);
-            r1->x = (ident.w - ident.w * yy) - ident.w * zz;
-            r1->y = sx * sy - sz * sw;
-            r1->z = ident.x + (sz * sx + sy * sw);
-            r2->x = sx * sy + sz * sw;
-            r2->y = (ident.w - ident.w * xx) - ident.w * zz;
-            r2->z = sy * sz - sx * sw;
-            r3->x = sz * sx - sy * sw;
-            r3->y = ident.x + (sy * sz + sx * sw);
-            r3->z = (ident.w - ident.w * xx) - ident.w * yy;
+            pR1->x = (ident.w - ident.w * yy) - ident.w * zz;
+            pR1->y = sx * sy - sz * sw;
+            pR1->z = ident.x + (sz * sx + sy * sw);
+            pR2->x = sx * sy + sz * sw;
+            pR2->y = (ident.w - ident.w * xx) - ident.w * zz;
+            pR2->z = sy * sz - sx * sw;
+            pR3->x = sz * sx - sy * sw;
+            pR3->y = ident.x + (sy * sz + sx * sw);
+            pR3->z = (ident.w - ident.w * xx) - ident.w * yy;
         }
         force->x = ident.x;
         force->y = ident.x;
