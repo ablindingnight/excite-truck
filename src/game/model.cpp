@@ -628,8 +628,9 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         switch (x->tag) {
         case 'MRJT': {
             Swap32(&x->n);
+            int j;
             u8* p = (u8*)x + 0x2C;
-            for (int j = 0; j < x->n; j++) {
+            for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 for (int k = 0; k < 12; k++) {
                     Swap32(&q[k]);
@@ -640,8 +641,9 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         }
         case 'MRBN': {
             Swap32(&x->n);
+            int j;
             u8* p = (u8*)x + 0x10;
-            for (int j = 0; j < x->n; j++) {
+            for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 for (int k = 0; k < 12; k++) {
                     Swap32(&q[k]);
@@ -653,8 +655,9 @@ void mrModelFixup(ModelInfo* m, const char* name) {
             break;
         }
         case 'SPHL': {
+            int j;
             MSphere* s = (MSphere*)&x->n;
-            for (int j = 0; j < m->nElems; j++) {
+            for (j = 0; j < m->nElems; j++) {
                 Swap32(&s->c.x);
                 Swap32(&s->c.y);
                 Swap32(&s->c.z);
