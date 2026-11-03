@@ -215,12 +215,14 @@ void GXSetIndTexMtx(int id, const f32 m[2][3], s8 exp);
 void GXSetTexCoordGen2(int dst, int type, int src, u32 mtx, u8 norm, u32 pt);
 void GXSetBlendMode(int type, int src, int dst, int op);
 void GXSetAlphaCompare(int c0, u8 r0, int op, int c1, u8 r1);
-void GXSetZMode(u8 test, int func, u8 update);
+enum GXCompare { GX_NEVER, GX_LESS, GX_EQUAL, GX_LEQUAL, GX_GREATER, GX_NEQUAL, GX_GEQUAL, GX_ALWAYS };
+enum GXFogType { GX_FOG_NONE = 0, GX_FOG_PERSP_LIN = 2 };
+void GXSetZMode(u8 test, GXCompare func, u8 update);
 void GXSetColorUpdate(u8 on);
 void GXSetAlphaUpdate(u8 on);
 void GXSetDstAlpha(u8 on, u8 a);
 void GXSetCullMode(int mode);
-void GXSetFog(int type, f32 start, f32 end, f32 n, f32 f, GXColor c);
+void GXSetFog(GXFogType type, f32 start, f32 end, f32 n, f32 f, GXColor c);
 void GXSetProjection(const f32 m[4][4], int type);
 void GXLoadPosMtxImm(const void* m, u32 id);
 void GXLoadNrmMtxImm(const void* m, u32 id);
@@ -1415,12 +1417,12 @@ void fn_802D0BD8(void) {
 
 void fn_802D0C98(void) {
     lbl_8055FD4C = 0;
-    GXSetZMode(1, 3, 1);
+    GXSetZMode(1, GX_LEQUAL, 1);
     GXSetColorUpdate(1);
     fn_802D09E8();
     GXSetColorUpdate(lbl_8055D0C4);
     lbl_8055FD74 |= 1;
-    GXSetZMode(1, 7, 1);
+    GXSetZMode(1, GX_ALWAYS, 1);
     lbl_8055FD74 = (lbl_8055FD74 | 2) & ~4;
     u16 h = GXSetDispCopyYScale(GXGetYScaleFactor(lbl_8055FD64->efbHeight, lbl_8055FD64->xfbHeight));
     GXSetDispCopySrc(0, 0, lbl_8055FD64->fbWidth, lbl_8055FD64->efbHeight);
@@ -1458,10 +1460,10 @@ void fn_802D0DD4(f32 out[3][4], const RMtx* m) {
 void fn_802D0E48(int pass) {
     if (pass == 0) {
         GXSetAlphaCompare(3, lbl_8055FD24, 1, 0, 0);
-        GXSetZMode(1, 3, 0);
+        GXSetZMode(1, GX_LEQUAL, 0);
     } else if (pass == 1) {
         GXSetAlphaCompare(4, lbl_8055FD24, 1, 0, 0);
-        GXSetZMode(1, 3, 1);
+        GXSetZMode(1, GX_LEQUAL, 1);
     }
 }
 
@@ -1496,9 +1498,9 @@ void fn_802D0EEC(void) {
         if (d & 6) {
             if (f & 6) {
                 int upd = (f >> 1) & 1;
-                GXSetZMode(1, f & 4 ? 3 : 7, upd);
+                GXSetZMode(1, f & 4 ? GX_LEQUAL : GX_ALWAYS, upd);
             } else {
-                GXSetZMode(0, 7, 0);
+                GXSetZMode(0, GX_ALWAYS, 0);
             }
         }
         if (d & 1) {
@@ -1545,7 +1547,7 @@ void fn_802D0EEC(void) {
     }
     if (lbl_804C97B0.dirty) {
         lbl_804C97B0.dirty = 0;
-        GXSetFog(lbl_804C97B0.range ? 2 : 0, lbl_804C97B0.start, lbl_804C97B0.end, lbl_804C97B0.nearZ,
+        GXSetFog(lbl_804C97B0.range ? GX_FOG_PERSP_LIN : GX_FOG_NONE, lbl_804C97B0.start, lbl_804C97B0.end, lbl_804C97B0.nearZ,
                  lbl_804C97B0.farZ, lbl_804C97B0.color);
     }
     if (lbl_804C97D0.dirty) {
@@ -1823,8 +1825,8 @@ void fn_802D2218(void) {
     GXSetBlendMode(0, 1, 0, 5);
     GXSetColorUpdate(lbl_804C9778.overlayC);
     GXSetAlphaUpdate(lbl_804C9778.overlayC);
-    GXSetZMode(1, 7, lbl_804C9778.overlayZ);
-    GXSetFog(0, 0.0f, 0.0f, 0.0f, 0.0f, lbl_804C97B0.color);
+    GXSetZMode(1, GX_ALWAYS, lbl_804C9778.overlayZ);
+    GXSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, lbl_804C97B0.color);
     GXSetNumTevStages(1);
     GXSetNumTexGens(0);
     GXSetTevColor(1, lbl_804C9778.overlay);
@@ -2102,7 +2104,7 @@ int fn_802D31D8(void) {
     lbl_8055FD1C &= ~0x8;
     GXSetNumTevStages(1);
     GXSetNumTexGens(0);
-    GXSetZMode(1, 6, 0);
+    GXSetZMode(1, GX_GEQUAL, 0);
     GXSetTevOrder(0, 0xFF, 0xFF, 4);
     GXSetTevAlphaIn(0, 7, 7, 7, 1);
     GXSetTevAlphaOp(0, 0, 0, 0, 0, 0);
@@ -2210,7 +2212,7 @@ void fn_802D362C(u32 color) {
     GXSetTevAlphaOp(0, 0xE, 0, 0, 1, 0);
     GXSetTevAlphaIn(0, 4, 7, 1, 7);
     GXSetBlendMode(1, 4, 5, 3);
-    GXSetZMode(0, 3, 0);
+    GXSetZMode(0, GX_LEQUAL, 0);
     GXSetTexCoordGen2(0, 1, 0xC, 0x3C, 0, 0x7D);
     GXSetTevColor(1, fn_802CEA1C(color));
     fn_802D3420();
