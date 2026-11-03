@@ -2818,7 +2818,7 @@ void fn_801A0464(u8* p, u8* q) {
     if (type == 'GRUP') {
         u8* qb = PTR(q, 0x4);
         u8* pb;
-        if (qb && (pb = PTR(p, 0x4)) != 0 && F32(pb, 0xD4) < F32(qb, 0xD4)) {
+        if (qb && (pb = PTR(p, 0x4)) != 0 && F32(qb, 0xD4) > F32(pb, 0xD4)) {
             ((VGroup*)q)->v10(p);
             return;
         }
