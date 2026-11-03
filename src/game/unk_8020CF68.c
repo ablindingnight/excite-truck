@@ -260,8 +260,8 @@ extern "C" void fn_8020D2D4(void) {
                 fn_801345D8(value, 0x20, pool + 0x84, fn_8000C69C());
                 break;
             default: {
-                char *dest = value;
                 int left = 0x20;
+                char *dest = value;
                 while ((*dest++ = *text++) != 0) {
                     if (--left <= 0) {
                         dest[-1] = 0;
@@ -291,9 +291,11 @@ extern "C" void fn_8020D2D4(void) {
                     LayoutPane glow = *pane;
                     float grow = lbl_8056331C + scale;
                     glow.w = pane->w * grow;
-                    glow.h = pane->h * grow;
+                    float hv = pane->h;
+                    glow.h = grow * hv;
                     glow.pos.x = glow.pos.x - lbl_80563340 * pane->w * scale;
-                    glow.pos.y = glow.pos.y - lbl_80563340 * pane->h * scale;
+                    float yv = glow.pos.y;
+                    glow.pos.y = yv - lbl_80563340 * pane->h * scale;
                     glow.color = (pane->color & 0x00FFFFFF) | ((unsigned long)alpha << 24);
                     fn_80147940(lbl_8055EEA0, &glow, pool + 0xA0, 1);
                 }
@@ -302,8 +304,8 @@ extern "C" void fn_8020D2D4(void) {
                 int canDec = 1;
                 int canInc = 1;
                 char arrowName[0x20];
-                unsigned long leftColor;
                 unsigned long rightColor;
+                unsigned long leftColor;
                 LayoutPane *arrow;
                 float t;
 
