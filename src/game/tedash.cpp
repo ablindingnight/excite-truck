@@ -714,25 +714,26 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
                 continue;
             }
             u32 k = lbl_8055CEA0;
-            u32 bi = i / k;
             u32 bj = j / k;
+            u32 bi = i / k;
             u32 ri = i - bi * k;
             u32 rj = j - bj * k;
             int v;
-            if (ri == 0 && rj == 0) {
-                v = b->data[bj * b->w + bi];
-            } else {
+            if (!(ri == 0 && rj == 0)) {
                 u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
                 u32 j1 = bj + 1 < b->h - 1 ? bj + 1 : b->h - 1;
+                f32 d;
                 f32 tx = (f32)ri / (f32)k;
                 f32 a = b->data[bj * b->w + bi];
                 f32 c = b->data[bj * b->w + i1];
-                f32 d = b->data[j1 * b->w + bi];
-                f32 e = b->data[j1 * b->w + i1];
+                d = b->data[j1 * b->w + bi];
                 f32 top = a + tx * (c - a);
+                f32 e = b->data[j1 * b->w + i1];
                 f32 bot = d + tx * (e - d);
                 f32 ty = (f32)rj / (f32)k;
                 v = (int)(top + ty * (bot - top));
+            } else {
+                v = b->data[bj * b->w + bi];
             }
             cb(gx, gz, (u8)v);
         }
