@@ -939,9 +939,10 @@ void PartSys::DrawRotating(Particle* p, int n) {
     for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
+        f32 inv;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
         size = size > 0.001f ? size : 0.001f;
-        f32 inv = 1.0f / (1.414f * size);
+        inv = 1.0f / (1.414f * size);
         f32 ang = (f32)fmod(6.2831855f * (f32)p->spin * 0.00390625f + p->angVel * age * (angConst + angRamp * t),
                             6.2831855f);
         ang = 6.2831855f + ang;
@@ -965,7 +966,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[0].pos.y = posY + a.y * -size + b.y * size;
         q[1].pos.x = q[0].pos.x + a.x * two;
         q[1].pos.y = q[0].pos.y + a.y * two;
-        q[1].pos.z = q[0].pos.z + a.z * two;
+        q[1].pos.z = q[0].pos.z + two * a.z;
         q[2].pos.x = q[1].pos.x + b.x * mtwo;
         q[2].pos.y = q[1].pos.y + b.y * mtwo;
         q[2].pos.z = q[1].pos.z + b.z * mtwo;
