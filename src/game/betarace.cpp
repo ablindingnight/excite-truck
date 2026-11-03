@@ -3486,7 +3486,8 @@ inline void BetaMaster::vf0C(void) {
                     }
                     if (anims[j].state == 2 && fn_80179650() > 1) {
                         int ext;
-                        int soon = timer.limit - timer.now < timer.finishTimeout;
+                        f32 nowv = timer.now;
+                        int soon = timer.limit - nowv < timer.finishTimeout;
                         if (!soon) {
                             timer.limit = timer.now + timer.finishTimeout;
                             ext = 1;
