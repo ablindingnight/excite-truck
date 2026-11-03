@@ -1551,8 +1551,9 @@ void BackfireMan::Event(const BackfireEvt* ev) {
     if ((entries[ev->car].state & 0xF) != 1) {
         return;
     }
+    int n;
     FireModel* model = fn_80288208(ev->car);
-    int n = model->nParts;
+    n = model->nParts;
     BackfireEntry* e = &entries[ev->car];
     if (ev->mode < 0) {
         e->state = 2;
