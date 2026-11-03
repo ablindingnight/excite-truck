@@ -2044,7 +2044,7 @@ int fn_8019703C(const u8* d, const u8* p) {
     f32 z = F32(p, 0x8);
     f32 x = F32(p, 0x4);
     int fast = F32(d, 0x270) > 2.2222223f;
-    int near = (f32)__fabs(x) < lbl_8055A488 + 1.1f * lbl_8055A488;
+    bool near = (f32)__fabs(x) < lbl_8055A488 + 1.1f * lbl_8055A488;
     if (!(S32(d, 0x2D0) & 1) && fast && near) {
         if (x > 0.0f) {
             f32 v = F32(d, 0x278) + x;
