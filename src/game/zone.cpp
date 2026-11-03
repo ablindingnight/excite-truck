@@ -1895,7 +1895,8 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
             if (it) {
                 LayoutItem m;
                 m = *it;
-                m.scale = it->scale * 0.3f;
+                f32 scalev = it->scale;
+                m.scale = scalev * 0.3f;
                 m.color = 0xFFFFFF;
                 fn_801479A8(it, &m, "PERFECT LEVEL", a);
             }
@@ -1918,8 +1919,8 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
             LayoutItem* it = mainLyt->Find("middle_message");
             if (it) {
                 LayoutItem m;
-                m = *it;
                 f32 curScale = it->scale;
+                m = *it;
                 m.scale = curScale * 0.3f;
                 m.color = 0xFFFFFF;
                 fn_801479A8(it, &m, "LEVEL %d", a, level + 1);
