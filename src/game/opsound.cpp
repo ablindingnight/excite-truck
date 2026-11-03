@@ -320,8 +320,8 @@ void fn_8023CC84(const char* layout) {
                 fn_8023CBA4();
             }
         }
-        lbl_8055F160 = lbl_8055F164 > 0.01f;
         fn_8013323C(4, "music_volume", lbl_8055F164);
+        lbl_8055F160 = lbl_8055F164 > 0.01f;
         fn_80133460(4, "music_enabled", lbl_8055F160);
         fn_8013323C(4, "spotter_volume", lbl_8055F168);
         fn_8013323C(4, "tire_volume", lbl_8055F170);
