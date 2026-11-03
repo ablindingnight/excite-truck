@@ -102,7 +102,7 @@ int fn_801E9E78(void* h, MVec3* p, MVec3* n);
 void fn_80279D40(ContactOut* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_801BA088(MVec4* t, int a, int b, int c);
+void fn_801BA088(MVec4* t, int a, int b, s16 c);
 void fn_80144B44(MVec3* v, f32 x, f32 y, f32 z);
 void StatsUpdate__Fv(MVec3* v);  // vector default constructor (empty, out of line)
 extern s32 lbl_8055A920;

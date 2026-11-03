@@ -81,7 +81,7 @@ float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 // 5 velocity, 6 angular velocity, 8 inverse inertia (w = inverse mass), 9 force and 10 torque accumulators, which are
 // spread over the steps (x12 before, /12 after).
 // NonMatching: the per-step contact/suspension pass over the b/c rows (four wheels) is not written yet.
-void fn_801BA088(MVec4* t, int a, int b, int c) {
+void fn_801BA088(MVec4* t, int a, int b, s16 c) {
     Vec ident(0.0f, 0.0f, 0.0f, 1.0f);
     Vec zero(0.0f, 0.0f, 0.0f, 0.0f);
     MVec4* force;
