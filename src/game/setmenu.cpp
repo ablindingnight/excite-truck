@@ -92,7 +92,7 @@ void fn_80236914(void);
 void fn_80236900(void);
 int fn_8027AA48(void);
 void fn_80214A9C(int id);
-void fn_80214BE4(int sound, int a);
+void fn_80214BE4(s32 group, s32 x, s32 y);
 int fn_80214D04(void);
 const char* fn_80131234(const char* key);  // localize
 void fn_802E30C8(const char* fmt, ...);    // debug print
@@ -142,7 +142,7 @@ int fn_8023C308(int* result) {
         int d = v - adjust;
         lbl_8055F154 += d;
         if (d) {
-            fn_80214BE4(7, 0);
+            fn_80214BE4(7, 0, d);
         }
     }
     if (lbl_8055F148 != lbl_8055F150) {
