@@ -3614,7 +3614,7 @@ game/mcstatus.cpp:
 	.sdata2     start:0x80563830 end:0x80563898
 
 game/popwarn.cpp:
-	.text       start:0x80246938 end:0x802494F8
+	.text       start:0x80246938 end:0x8024958C
 	.ctors      start:0x802ED430 end:0x802ED434
 	.rodata     start:0x802FA378 end:0x802FA4B0
 	.data       start:0x80343270 end:0x80343998
@@ -3624,7 +3624,7 @@ game/popwarn.cpp:
 	.sdata2     start:0x80563898 end:0x80563908
 
 game/multievt.cpp:
-	.text       start:0x802494F8 end:0x8024BDDC
+	.text       start:0x8024958C end:0x8024BDDC
 	.ctors      start:0x802ED434 end:0x802ED438
 	.rodata     start:0x802FA4B0 end:0x802FA510
 	.data       start:0x80343998 end:0x80343E90

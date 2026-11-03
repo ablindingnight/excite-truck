@@ -1,4 +1,4 @@
-// Multiplayer event menu (0x802494F8-0x8024BDDC, "multi_evt.lyt" / "multi_country.lyt" /
+// Multiplayer event menu (0x8024958C-0x8024BDDC, "multi_evt.lyt" / "multi_country.lyt" /
 // "multi_course.lyt"): choosing the location, course, event and difficulty for a multiplayer race,
 // remembering the last choices ("last_mp_event_count", ...), and the stats table beside the course list.
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
@@ -134,25 +134,8 @@ s32 lbl_8055BF34 = -1;
 
 extern "C" {
 
-u8* fn_802494F8(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
+// fn_802494F8..fn_80249588 are popwarn.cpp's ValueLabel/PopWarnValue inline methods (moved 2026-11-02).
 
-u8* fn_80249538(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-void fn_80249578(u8* p) { fn_8023E52C(*(u32*)PTR(p, 0x10)); }
-
-void fn_80249584(u8* p) {}
-
-void fn_80249588(u8* p) {}
 
 int fn_8024958C(u8* car, const char* track) {
     u32 ok = S32(car, 0x8) == 0x180302;

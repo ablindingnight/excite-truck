@@ -1,4 +1,4 @@
-// Front-end popups (0x80246938-0x802494F8): the wireless and caution warnings ("pop_warn.lyt",
+// Front-end popups (0x80246938-0x8024958C): the wireless and caution warnings ("pop_warn.lyt",
 // "WARN:CAUTION_TITLE"), the mode/difficulty choice popups, the menu music cues and the attract-mode
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
@@ -83,13 +83,13 @@ s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEC0;
 extern void* lbl_803435A0[];
-extern UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""
 extern char lbl_8055BABC[4];  // ""
 
 ModuleTag lbl_8055F250;
-s32 lbl_8055F258;
+UnkStatic123 lbl_804988F0;  // this unit's end-of-menu tag
+UnkStatic7F lbl_8055F258;
 s32 lbl_8055F25C;
 u8 lbl_8055F260;  // career mode active
 f32 lbl_8055F264;
@@ -169,7 +169,61 @@ public:
     f32 scroll; // offset 0x1C
 };
 
-extern char lbl_80498908[0x40];  // version text buffer
+char lbl_80498908[0x40];  // version text buffer
+
+// A menu value widget (the vptr follows the base data). Same layout as setmenu/unitmenu's copies; the base
+// virtuals are menu.cpp's fn_80215FEC..fn_80216054 / fn_80215FDC / fn_80215FE4.
+class MenuWidget {
+public:
+    MenuWidget(void) {
+        flag0 = 0;
+        id = -1;
+        flag8 = 0;
+    }
+
+    u8 flag0;  // offset 0x0
+    s32 id;    // offset 0x4
+    u8 flag8;  // offset 0x8
+
+    virtual u8 vf08(void);
+    virtual u8 vf0C(void);
+    virtual int vf10(void);
+    virtual int vf14(void);
+    virtual ~MenuWidget(void) {}
+    virtual const char* Current(void) = 0;
+    virtual void Prev(void) = 0;
+    virtual void Next(void) = 0;
+    virtual int vf28(void);
+    virtual int vf2C(void);
+};
+
+extern "C" const char* fn_8023E52C(int index);  // controls.cpp: name from the control-type string table
+
+// A read-only menu value: shows the string-table name of the int it points at; Prev/Next do nothing (vtable
+// lbl_803438C0). Its inline methods are emitted at the end of this unit (0x802494F8..0x8024958C).
+class ValueLabel : public MenuWidget {
+public:
+    ValueLabel(int* value) { this->value = value; }
+    virtual ~ValueLabel(void) {}
+    virtual const char* Current(void) { return fn_8023E52C(*value); }
+    virtual void Prev(void) {}
+    virtual void Next(void) {}
+
+    int* value;  // offset 0x10
+};
+
+// A static 0x40-byte record: an int and a ValueLabel showing it. Only the label is constructed (by __sinit); the
+// rest stays zero.
+struct PopWarnValue {
+    PopWarnValue(void) : label(&index) {}
+
+    int index;         // offset 0x0
+    u8 unk4[0x10];     // offset 0x4
+    ValueLabel label;  // offset 0x14
+    u8 unk28[0x18];    // offset 0x28
+};
+
+PopWarnValue lbl_80498958;
 
 extern "C" {
 int fn_8024762C(void);
