@@ -2366,7 +2366,7 @@ void RingChalMaster::vf0C(void) {
                 int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, lbl_8055E3C8 - st->time));
                 if (n) {
                     arena.f34 += n;
-                    if (arena.sTally && !arena.sTally->busy && arena.f34 != arena.f30) {
+                    if (arena.sTally && !arena.sTally->busy && arena.f30 != arena.f34) {
                         arena.sTally->stop = 0;
                         arena.sTally->loop = 1;
                         arena.sTally->playing = 1;
