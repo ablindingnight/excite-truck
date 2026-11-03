@@ -1790,7 +1790,8 @@ void fn_801C6E40(void) {
         Mat3 d;
         Mat3 inv;
         CamPose* dst = (CamPose*)(s + 0x498);
-        inv = cur->rot;
+        Mat3 rotv = cur->rot;
+        inv = rotv;
         fn_801C7254(&inv);
         Mat3Mul(&d, &dst->rot, &inv);
         fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
