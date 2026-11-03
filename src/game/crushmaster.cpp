@@ -1535,8 +1535,11 @@ inline void CrushMaster::vf4C(int view) {
             pts = killed ? lbl_8043038C.pointsPerKill * (cc->f10[i] + 1) : 0;
             if (pts) {
                 TextElem t = *col;
-                t.pos.x = b.pos.x + b.w * 0.5f;
-                t.pos.y = b.pos.y + b.h * 0.5f;
+                f32 yv;
+                f32 xv = b.pos.x;
+                t.pos.x = xv + b.w * 0.5f;
+                yv = b.pos.y;
+                t.pos.y = yv + b.h * 0.5f;
                 fn_80147230(&t, "%d", pts);
             }
         }
