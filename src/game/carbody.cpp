@@ -3842,7 +3842,7 @@ static inline f32 PkNorm(u32 v, f32 lo, f32 range) {
     f32 x = PK_MIN(1.0f, ((f32)v - lo) / range);
     return PK_MAX(x, 0.0f);
 }
-#define PK_UNPACK(v, q, lo, span) ((lo) + PkNorm((v), 0.0f, (q)) * (span))
+static inline f32 PkUnpack(u32 v, f32 q, f32 lo, f32 span) { return lo + PkNorm(v, 0.0f, q) * span; }
 
 static inline void PkCopy(void* dst, const void* src, int n) {
     u8* d = (u8*)dst;
@@ -3869,11 +3869,11 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
         vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, prev, na, nb);
     }
     F32(p, 0x25D8) = F32(p, 0x25CC) = F32(p, 0x25D4) = PSVECMag(p + 0x118);
-    f32 v0 = PK_UNPACK(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
-    f32 v1 = PK_UNPACK(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
+    f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
+    f32 v1 = PkUnpack(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
     F32(p, 0x25D0) = v1 + t * (v0 - v1);
-    v0 = PK_UNPACK(prev->steer, 255.0f, -1.2f, 2.4f);
-    v1 = PK_UNPACK(cur->steer, 255.0f, -1.2f, 2.4f);
+    v0 = PkUnpack(prev->steer, 255.0f, -1.2f, 2.4f);
+    v1 = PkUnpack(cur->steer, 255.0f, -1.2f, 2.4f);
     F32(p, 0x25DC) = F32(p, 0x25F0) = v1 + t * (v0 - v1);
     if (cur->boost) {
         f32 boost;
@@ -3888,12 +3888,12 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     F32(p, 0x251C) = 0.0f;
     F32(p, 0x25F8) = 1.0f;
     F32(p, 0x23C0) = F32(p, 0x2434) = F32(p, 0x25F0) * F32(p, 0x5B0);
-    v0 = PK_UNPACK(prev->throttle, 255.0f, 0.0f, 1.0f);
-    v1 = PK_UNPACK(cur->throttle, 255.0f, 0.0f, 1.0f);
+    v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
+    v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
     F32(p, 0x25E8) = 1.0f;
     fn_8018ADB4(p, v1 + t * (v0 - v1));
-    v0 = PK_UNPACK(prev->brake, 255.0f, 0.0f, 1.0f);
-    v1 = PK_UNPACK(cur->brake, 255.0f, 0.0f, 1.0f);
+    v0 = PkUnpack(prev->brake, 255.0f, 0.0f, 1.0f);
+    v1 = PkUnpack(cur->brake, 255.0f, 0.0f, 1.0f);
     fn_8018ADBC(p, v1 + t * (v0 - v1));
     U8(p, 0x260D) = (cur->flags >> 8) & 1;
     U32(p, 0x4) = cur->flags | prev->flags;
@@ -3901,12 +3901,12 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     const u8* c = cur->wheel[0];
     const u8* q = prev->wheel[0];
     for (int i = 0; i < 4; i++) {
-        f32 s0 = PK_UNPACK(q[2], 255.0f, 0.0f, 2.0f);
-        f32 s1 = PK_UNPACK(c[2], 255.0f, 0.0f, 2.0f);
+        f32 s0 = PkUnpack(q[2], 255.0f, 0.0f, 2.0f);
+        f32 s1 = PkUnpack(c[2], 255.0f, 0.0f, 2.0f);
         F32(w, 0x1C) = F32(w, 0xC) = s1 + t * (s0 - s1);
         f32 a0;
-        f32 a1 = PK_UNPACK(c[0], 255.0f, -6.2831855f, 12.566371f);
-        a0 = PK_UNPACK(q[0], 255.0f, -6.2831855f, 12.566371f);
+        f32 a1 = PkUnpack(c[0], 255.0f, -6.2831855f, 12.566371f);
+        a0 = PkUnpack(q[0], 255.0f, -6.2831855f, 12.566371f);
         if (a0 > a1) {
             if (a0 - a1 > 3.1415927f) {
                 a1 += 6.2831855f;
@@ -3916,11 +3916,11 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
         }
         F32(w, 0x8) = a1 + t * (a0 - a1);
         f32 l1;
-        f32 l0 = PK_UNPACK(q[1], 255.0f, -100.0f, 200.0f);
-        l1 = PK_UNPACK(c[1], 255.0f, -100.0f, 200.0f);
-        f32 k0 = PK_UNPACK(q[3], 255.0f, 0.0f, 10.0f);
+        f32 l0 = PkUnpack(q[1], 255.0f, -100.0f, 200.0f);
+        l1 = PkUnpack(c[1], 255.0f, -100.0f, 200.0f);
+        f32 k0 = PkUnpack(q[3], 255.0f, 0.0f, 10.0f);
         F32(w, 0x0) = l1 + t * (l0 - l1);
-        f32 k1 = PK_UNPACK(c[3], 255.0f, 0.0f, 10.0f);
+        f32 k1 = PkUnpack(c[3], 255.0f, 0.0f, 10.0f);
         u8 f = c[4];
         F32(w, 0x68) = k1 + t * (k0 - k1);
         S32(w, 0x70) = f;
