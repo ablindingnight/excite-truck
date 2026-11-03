@@ -28,10 +28,13 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
     s16* q;
     s32 limit;
     s16 region1_end;
-    s32 region;
-    s32 i;
-    s32 end;
     s16 region2_end;
+    HuffTable* ht;
+    s32 i;
+    s32 tbl;
+    s32 linbits;
+    s32 region;
+    s32 end;
 
     if (mixed) {
         region1_end = lbl_802F3D60[d->lsf][d->sr_index][region0];
@@ -46,9 +49,8 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
     q = out;
     nregions = 2 + (mixed != 0);
     for (region = 0; region < nregions; region++, table_select++) {
-        HuffTable* ht;
-        s32 tbl = *table_select;
-        s32 linbits = lbl_8031C298[tbl];
+        tbl = *table_select;
+        linbits = lbl_8031C298[tbl];
 
         if (tbl > 23) {
             tbl = 17;
@@ -72,8 +74,8 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
             end = limit;
         }
         ht = &lbl_8031D580[tbl];
-        for (; i < end; i += 2, q += 2) {
-            s32 r;
+        for (; i < end; q += 2, i += 2) {
+            s16 r;
             s16 x;
             s32 bits = MP3_PeekBitsRing(buf, 16, &d->pos) << 16;
             s16 y;
@@ -89,15 +91,15 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
                 b0 = buf[idx++];
                 idx &= 0x1FFF;
                 b1 = buf[idx];
-                d->pos -= 20;
                 bits |= ((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 4) & 0xF) << 12;
+                d->pos -= 20;
             } else {
                 d->pos -= 16;
             }
             r = MP3_HuffLookup(bits, lbl_802F3F30[tbl], ht);
             x = (r & 0xF0) >> 4;
             y = r & 0xF;
-            d->pos += (s16)r >> 8;
+            d->pos += r >> 8;
             if (x == 15 && linbits != 0) {
                 x += (u16)MP3_GetBitsRing(buf, linbits, &d->pos);
             }
