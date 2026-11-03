@@ -1016,7 +1016,7 @@ class Token;
 class Body;
 
 extern "C" {
-CoinFrame fn_801683F4(void);
+CoinFrame fn_801683F4(int player);
 int fn_801B8514(void);
 Racer* fn_801B2EC0(int id);
 Racer* fn_801B2ED0(int id);
@@ -1773,7 +1773,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     Coins* co = &master->coins;
     if (co->enabled && co->cars[id].active) {
         CoinCar* cc = &co->cars[id];
-        CoinFrame f = fn_801683F4();
+        CoinFrame f = fn_801683F4(id);
         int i;
         for (i = 0; i < 4; i++) {
             if (cc->flash[i] > 0.0f) {
