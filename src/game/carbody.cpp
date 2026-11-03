@@ -788,8 +788,8 @@ void fn_80182DF4(u8* p) {
     f32 stiff;
     f32 damp;
     f32 mass = 4938240000.0f;
-    f32 zRear;
     f32 invMass = 0.5f / mass;
+    f32 zRear;
     f32 zFront;
     stiff = 50000.0f;
     damp = 0.3f;
