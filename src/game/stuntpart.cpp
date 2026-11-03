@@ -393,7 +393,8 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         fn_802AA100(&n, (const Vec*)&car->spin, &car->axes[0], &car->axes[2]);
         if (PSVECDotProduct(&n, &n) > 0.01f) {
             PSVECNormalize(&n, &n);
-            p->facing = MAX(0.0f, PSVECDotProduct(&n, &car->axes[2]));
+            f32 facing = PSVECDotProduct(&n, &car->axes[2]);
+            p->facing = MAX(0.0f, facing);
             f32 best = -9999.9f;
             PSVECCrossProduct(&n, &car->axes[1], &c);
             for (u32 j = 0; j < 2; j++) {
