@@ -1199,9 +1199,9 @@ void debug_event(void) {
         case 2:
             blocked = 1;
             if (!lbl_8055E7E8) {
-                lbl_8055E7E8 = 1;
                 lbl_8055E7EC = fn_80179318();
                 fn_80176858();
+                lbl_8055E7E8 = 1;
             } else if (lbl_8055E7EC != fn_80179318()) {
                 blocked = 0;
             }
@@ -1233,8 +1233,9 @@ void debug_event(void) {
         }
         case 4: {
             TeleportEvent* tp = (TeleportEvent*)e;
+            int i;
             int k = 0;
-            for (int i = 0; i < lbl_8055E804; i++) {
+            for (i = 0; i < lbl_8055E804; i++) {
                 if (!fn_801C3508(tp->mask, i) || !CarTypeIsReal(((ICar*)fn_8017960C(i))->player, 0)) {
                     continue;
                 }
@@ -1265,7 +1266,8 @@ void debug_event(void) {
                         f32 spacing = 0.61f + (fn_80137C54(-1)->len + w);
                         fn_801B8048(&place, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
                     } else {
-                        CamPose f = car->pose.place.frame;
+                        CamPose f;
+                        f = car->pose.place.frame;
                         IVec3 euler;
                         euler.x = 0.0f;
                         euler.y = tp->yaw;
@@ -1273,10 +1275,12 @@ void debug_event(void) {
                         Mat3 r;
                         fn_80015A20(&r, &euler);
                         Mat3Mul(&f.rot, &r, &f.rot);
-                        f.pos.x += f.rot.m[0] * off.x;
+                        f32 xv = off.x;
+                        f.pos.x += f.rot.m[0] * xv;
                         f.pos.y += f.rot.m[1] * off.x;
                         f.pos.z += f.rot.m[2] * off.x;
-                        f.pos.x += f.rot.m[6] * off.y;
+                        f32 yv = off.y;
+                        f.pos.x += f.rot.m[6] * yv;
                         f.pos.y += f.rot.m[7] * off.y;
                         f.pos.z += f.rot.m[8] * off.y;
                         f32 yaw = atan2(f.rot.m[6], f.rot.m[8]);
