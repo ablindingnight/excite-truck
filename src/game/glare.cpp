@@ -214,38 +214,56 @@ void fn_802DD754(void) {
     }
 }
 
-f32 kFrac[24][2] = {
-    {0.0f, 0.0f},   {0.09f, 0.0f},  {0.0f, 0.3f},   {0.09f, 0.3f},  {0.0f, 0.7f},   {0.09f, 0.7f},
-    {0.0f, 1.0f},   {0.09f, 1.0f},  {0.91f, 0.0f},  {1.0f, 0.0f},   {0.91f, 0.3f},  {1.0f, 0.3f},
-    {0.91f, 0.7f},  {1.0f, 0.7f},   {0.91f, 1.0f},  {1.0f, 1.0f},   {0.3f, 0.09f},  {0.7f, 0.09f},
-    {0.3f, 0.91f},  {0.7f, 0.91f},  {0.3f, 0.0f},   {0.7f, 0.0f},   {0.3f, 0.97f},  {0.7f, 0.97f},
-};
 
+// One vertex of a streak quad: position and texture coordinate at fraction (fx, fy) of the streak,
+// with the texture inset by (du, dv).
+static inline void GlareVtx(GVtx* buf, int* n, const Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
+    GVtx* v = &buf[(*n)++];
+    v->x = s->x0 + fx * (s->x1 - s->x0);
+    v->y = s->y0 + fy * (s->y1 - s->y0);
+    v->z = 0.5f;
+    f32 u1 = s->u1 - du;
+    f32 u0 = s->u0 + du;
+    v->u = u0 + fx * (u1 - u0);
+    f32 v1 = s->v1 - dv;
+    f32 v0 = s->v0 + dv;
+    v->v = v0 + fy * (v1 - v0);
+    v->color = color;
+}
+
+// Draws one light streak as a framed quad: an outer ring (lit at the edge, faded inside) as a strip.
 void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     int a = (int)(k * (255.0f * s->power));
     a = a > 0 ? a : 0;
     u32 color = (a < 0xFF ? a : 0xFF) | 0xFFFFFF00;
     f32 du = (0.01f * (0.5f * (scale * (s->u1 - s->u0)))) / 1.01f;
     f32 dv = (0.01f * (0.5f * (scale * (s->v1 - s->v0)))) / 1.01f;
-    GVtx* buf = (GVtx*)fn_802CFF64(0x240);
     int n = 0;
-    for (int i = 0; i < 24; i++) {
-        GVtx* v = &buf[n++];
-        f32 fx = kFrac[i][0];
-        f32 fy = kFrac[i][1];
-        v->x = s->x0 + fx * (s->x1 - s->x0);
-        v->y = s->y0 + fy * (s->y1 - s->y0);
-        v->z = 0.5f;
-        f32 u0 = s->u0 + du;
-        v->u = u0 + fx * ((s->u1 - du) - u0);
-        f32 v0 = s->v0 + dv;
-        v->v = v0 + fy * ((s->v1 - dv) - v0);
-        if (fx == 0.0f || fx == 1.0f || fy == 0.0f || fy == 1.0f) {
-            v->color = 0;
-        } else {
-            v->color = color;
-        }
-    }
+    GVtx* buf = (GVtx*)fn_802CFF64(0x240);
+    GlareVtx(buf, &n, s, 0.0f, 0.0f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.0f, 1.0f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.97f, color, du, dv);
+    GlareVtx(buf, &n, s, 1.0f, 1.0f, color, du, dv);
+    GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.97f, color, du, dv);
+    GlareVtx(buf, &n, s, 1.0f, 0.0f, color, du, dv);
+    GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.0f, 0.0f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.97f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.3f, 0.9f, 0, du, dv);
+    GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.97f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.7f, 0.9f, 0, du, dv);
+    GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.7f, 0.3f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
+    GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.3f, 0.9f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.7f, 0.3f, 0, du, dv);
+    GlareVtx(buf, &n, s, 0.7f, 0.9f, 0, du, dv);
     GXSetArray(9, buf, 0x18);
     GXSetArray(0xD, &buf->u, 0x18);
     GXSetArray(0xB, &buf->color, 0x18);
