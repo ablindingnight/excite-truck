@@ -824,14 +824,16 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
     MulMat(&m, &m, (const Mat3*)cam);
     f32 back = 5.0f * -dt;
     for (int i = 0; i < count; i++) {
+        u32 color;
         Spark* s = &pts[i];
         Vec d;
         Vec p;
+        f32 yv = s->pos.y;
         p.x = s->pos.x + s->vel.x * back - prev->pos.x;
-        p.y = s->pos.y + s->vel.y * back - prev->pos.y;
-        p.z = s->pos.z + s->vel.z * back - prev->pos.z;
+        p.y = yv + s->vel.y * back - prev->pos.y;
         f32 a = invLife * (now - s->t);
-        u32 color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
+        color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
+        p.z = s->pos.z + s->vel.z * back - prev->pos.z;
         MulVec(&p, &p, (const Vec*)&m);
         p.x = p.x + cam->pos.x;
         p.y = p.y + cam->pos.y;
@@ -843,7 +845,7 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
         Vec q[4];
         AddScaled(&q[0], &s->pos, &cam->rot[0], -0.0375f);
         AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
-        AddScaled(&q[2], &p, &cam->rot[0], -0.0375f * sign);
+        AddScaled(&q[2], &p, &cam->rot[0], -sign * 0.0375f);
         AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
         fn_802C8E00(color, 0, q[0].x, q[0].y, q[0].z, 0.0f, 1.0f);
         fn_802C8E00(color, 0, q[1].x, q[1].y, q[1].z, 1.0f, 1.0f);
