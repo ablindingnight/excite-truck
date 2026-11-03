@@ -1668,12 +1668,14 @@ int fn_801C5B68(CamView* v, int idx) {
         prev->pos.x = v->pos.x;
         prev->pos.y = v->pos.y;
         prev->pos.z = v->pos.z;
-        *prevFov = p->fov;
+        f32 fovv = p->fov;
+        *prevFov = fovv;
     }
     v->fov = p->fov;
     CamPose* saved = (CamPose*)(s + 0x148) + idx;
     saved->rot = v->rot;
-    saved->pos = v->pos;
+    IVec3 posv = v->pos;
+    saved->pos = posv;
     IVec3* heading = (IVec3*)(s + 0x208) + idx;
     *heading = c->heading;
     v->car = car;
