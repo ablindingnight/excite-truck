@@ -1964,8 +1964,8 @@ s32 fn_80119C0C(void *arg0, s32 arg1);
 s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
     u32 bps;
     u32 total;
-    u32 i;
     u32 n;
+    u32 i;
     u8 *buf;
 
     if (lbl_8055DEE0[0] == 0) {
@@ -1999,10 +1999,10 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     } else {
         total = t->chunk;
     }
-    if (chans != 1) {
-        t->voiceSize = t->bufSize >> 1;
-    } else {
+    if (chans == 1) {
         t->voiceSize = t->bufSize;
+    } else {
+        t->voiceSize = t->bufSize >> 1;
     }
     buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
     t->bufL = (s16 *)buf;
