@@ -53,9 +53,17 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
     int step;
 
     force = &t[a + 9];
-    Store(*force, Load(*force) * Vec(zero.x + 12.0f));
+    {
+        Vec v = Load(*force);
+        Vec r = v * Vec(zero.x + 12.0f);
+        Store(*force, r);
+    }
     torque = &t[a + 10];
-    Store(*torque, Load(*torque) * Vec(zero.x + 12.0f));
+    {
+        Vec v = Load(*torque);
+        Vec r = v * Vec(zero.x + 12.0f);
+        Store(*torque, r);
+    }
 
     for (step = 12; step != 0; step--) {
         MVec4* pos = &t[a];
@@ -169,12 +177,16 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         torque->z = ident.x;
     }
 
-    force->x *= ident.x + 0.08333f;
-    force->y *= ident.x + 0.08333f;
-    force->z *= ident.x + 0.08333f;
-    torque->x *= ident.x + 0.08333f;
-    torque->y *= ident.x + 0.08333f;
-    torque->z *= ident.x + 0.08333f;
+    {
+        Vec v = Load(*force);
+        Vec r = v * Vec(zero.x + 0.08333f);
+        Store(*force, r);
+    }
+    {
+        Vec v = Load(*torque);
+        Vec r = v * Vec(zero.x + 0.08333f);
+        Store(*torque, r);
+    }
 }
 
 }  // extern "C"
