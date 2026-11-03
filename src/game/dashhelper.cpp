@@ -363,23 +363,28 @@ int fn_8000DFA8(int type) { return lbl_802FC2A8[type].part; }
 
 int fn_8000DFC0(int type) { return lbl_802FC2A8[type].part2; }
 
-void fn_8000DFD8(DashRow* row, u32 color, f32 x, f32 y) {
+extern const f32 kBarWidth;
+extern const f32 kBarHeight;
+void fn_8000DFD8(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + 17.0f * 0.5f, 89.0f, 17.0f);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + kBarHeight / 2.0f, kBarWidth, kBarHeight);
     }
-    fn_800109E4(-1, x, y + 17.0f * 0.5f, row->b * 89.0f / 100.0f, 17.0f);
-    fn_800109E4(color, x, y + 17.0f * 0.5f, row->a * 89.0f / 100.0f, 17.0f);
-    fn_80010074(-1, 0x14, "%s", 1.0f, x + 89.0f * 0.5f, y, row);
+    fn_800109E4(-1, x, y + kBarHeight / 2.0f, row->b * kBarWidth / 100.0f, kBarHeight);
+    fn_800109E4(color, x, y + kBarHeight / 2.0f, row->a * kBarWidth / 100.0f, kBarHeight);
+    fn_80010074(-1, 0x14, "%s", 1.0f, x + kBarWidth / 2.0f, y, row);
 }
 
-void fn_8000E15C(DashRow* row, u32 color, f32 x, f32 y) {
+void fn_8000E15C(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + 17.0f * 0.5f, 89.0f, 17.0f);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + kBarHeight / 2.0f, kBarWidth, kBarHeight);
     }
-    fn_800109E4(-1, x, y + 17.0f * 0.5f, row->b * 89.0f / 100.0f, 17.0f);
-    fn_800109E4(color, x, y + 17.0f * 0.5f, row->a * 89.0f / 100.0f, 17.0f);
+    fn_800109E4(-1, x, y + kBarHeight / 2.0f, row->b * kBarWidth / 100.0f, kBarHeight);
+    fn_800109E4(color, x, y + kBarHeight / 2.0f, row->a * kBarWidth / 100.0f, kBarHeight);
     fn_80010074(-1, 0x11, "%s", 1.0f, 4.0f + x, y, row);
 }
+
+const f32 kBarWidth = 89.0f;
+const f32 kBarHeight = 17.0f;
 
 u32 fn_8000E2D8(int kind) {
     switch (kind) {
