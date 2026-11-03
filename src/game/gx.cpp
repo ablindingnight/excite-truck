@@ -2313,7 +2313,8 @@ void fn_802D3BB4(const V3* c, f32 r, const V3* a, const V3* b, u32 color, f32 al
     v[0].pos.y = c->y + a->y * r;
     v[0].pos.z = c->z + a->z * r;
     v[1].pos.x = c->x + b->x * r;
-    v[1].pos.y = c->y + b->y * r;
+    f32 yv = b->y;
+    v[1].pos.y = c->y + yv * r;
     v[1].pos.z = c->z + b->z * r;
     v[2].pos.x = c->x + b->x * -r;
     v[2].pos.y = c->y + b->y * -r;
