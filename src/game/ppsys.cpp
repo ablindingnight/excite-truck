@@ -472,7 +472,8 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
     }
     for (i = 0; i < d->nLinks; i++) {
         const PLink* l = &d->links[i];
-        PLink* k = &s->links[s->nLink++];
+        s32 nLinkv = s->nLink;
+        PLink* k = &s->links[nLinkv++];
         k->a = l->a;
         k->b = l->b;
         k->c = l->c;
