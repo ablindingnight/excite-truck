@@ -426,7 +426,7 @@ void StackHeap::Dump(int flags) {
         count = 0;
         while (off < used) {
             StackBlock* b = (StackBlock*)(base + off);
-            int internal;
+            bool internal;
             if (b->cookie != STACK_COOKIE) {
                 fn_802E317C("MemDump fails %x", b);
             }
