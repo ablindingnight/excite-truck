@@ -63,7 +63,7 @@ public:
 };
 
 extern "C" {
-int fn_801E9EC4(s16* hint, RVec3* hit, RVec3* n, u32* flags);  // ground contact under a point
+int fn_801E9EC4(s16* hint, RVec3* hit, RVec3* n, u32* flags, f32 x, f32 z);  // ground contact under a point
 f32 fn_8019DF88(f32 mass, f32 e, const RVec3* pos, const RVec3* vel, const RMat33* invI, const RVec3* at,
                 const RVec3* n);  // contact impulse
 void fn_802E30C8(const char* fmt, ...);
@@ -178,7 +178,7 @@ void Corner::Hit(RigidBody* b) {
     p.z = p.z + b->mtx.pos.z;
     f32 depth = 0.0f;
     flags = 0;
-    int found = fn_801E9EC4(b->hint, &hit, &n, &flags);
+    int found = fn_801E9EC4(b->hint, &hit, &n, &flags, p.x, p.z);
     if (found) {
         d.x = hit.x - p.x;
         d.y = hit.y - p.y;
