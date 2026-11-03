@@ -1046,7 +1046,7 @@ void fn_802B8510(int op) {
     b->w = th;
     tw = tmp.w;
     b->h = tw;
-    for (u32 x = 0; x < b->w; x++) {
+    for (unsigned int x = 0; x < b->w; x++) {
         for (u32 y = 0; y < b->h; y++) {
             if (op == 6) {
                 b->data[x + y * b->w] = tmp.data[tw * (x + 1) - 1 - y];
