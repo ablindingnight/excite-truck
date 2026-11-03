@@ -2174,17 +2174,10 @@ void fn_8019743C(u8* d, u8* out) {
             f32 hi = F32(d, 0x278) + push;
             F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
         }
-        u32 blocked = 0;
         u8* side = 0;
+        u32 blocked = 0;
         f32 k = 2.0f;
-        if (F32(d, 0xC4) <= F32(d, 0xC8)) {
-            if (U8(d, 0x74) && (u8)fn_80193110(d, S32(d, 0x90))) {
-                k *= 2.0f;
-            }
-            if (U8(d, 0x9C) && (u8)fn_80193110(d, S32(d, 0xB8))) {
-                k *= 2.0f;
-            }
-        } else {
+        if (!(F32(d, 0xC8) >= F32(d, 0xC4))) {
             u32 which;
             blocked = U8(d, 0x74);
             if (!blocked || !U8(d, 0x9C)) {
@@ -2222,26 +2215,31 @@ void fn_8019743C(u8* d, u8* out) {
             } else {
                 S32(d, 0xC8) = S32(d, 0xC4);
             }
+        } else {
+            if (U8(d, 0x74) && (u8)fn_80193110(d, S32(d, 0x90))) {
+                k *= 2.0f;
+            }
+            if (U8(d, 0x9C) && (u8)fn_80193110(d, S32(d, 0xB8))) {
+                k *= 2.0f;
+            }
         }
         if (blocked && (U8(d, 0x2FD) || F32(side, 0x8) < 0.61f)) {
             S32(d, 0x2D0) |= 0x40;
         }
         f32 pos = F32(d, 0x278) + 0.5f * F32(d, 0x27C);
-        if (F32(d, 0xC4) > pos) {
+        if (pos < F32(d, 0xC4)) {
             diff = F32(d, 0xC4) - pos;
         } else if (F32(d, 0xC8) < pos) {
             diff = F32(d, 0xC8) - pos;
         }
-        if ((f32)__fabs(diff) <= 0.01f) {
-            F32(d, 0xE8) = 0.0f;
-        } else {
+        if (!((f32)__fabs(diff) <= 0.01f)) {
             if (fn_8019700C(S32(d, 0xDC))) {
                 S32(d, 0x2D0) |= 0x40;
                 F32(out, 0x8) -= 2.2222223f;
             }
             F32(d, 0xE4) = F32(d, 0x278) + diff;
-            f32 t = (f32)__fabs(diff) / 0.61f;
             F32(d, 0xE8) = 0.0f;
+            f32 t = (f32)__fabs(diff) / 0.61f;
             t = Clamp01(t);
             f32 cur = F32(d, 0xE0);
             if (t <= cur) {
@@ -2251,6 +2249,8 @@ void fn_8019743C(u8* d, u8* out) {
                 F32(d, 0xE0) = t + m * m * (cur - t);
             }
             decay = 0;
+        } else {
+            F32(d, 0xE8) = 0.0f;
         }
     } else {
         F32(d, 0xE8) = 0.0f;
