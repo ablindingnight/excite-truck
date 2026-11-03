@@ -328,7 +328,7 @@ public:
         int i;
         for (i = 0; i < n; i++) {
             FixedList<IdealLineRes*, 8> cand;
-            int right;
+            bool right;
             if (fn_801B2ED0(i)->GetInfo()->side > 0.0f) {
                 right = 1;
             } else {
