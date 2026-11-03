@@ -800,8 +800,8 @@ void HermiteDrone::UpdateRestock(f32 dt) {
         }
         t = t + (dt - 1.0f / k->rate);
         u = u - 1.0f;
-        seg++;
         q0 = q1;
+        seg++;
         v0 = v1;
         q1 = entry->data->Clamp(seg + 1)->rot;
         v1 = entry->data->Clamp(seg + 1)->v;
