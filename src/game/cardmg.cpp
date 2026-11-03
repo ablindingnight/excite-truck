@@ -958,13 +958,13 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             return;
         }
         h = di;
-        h.v[1] = lbl_80561F74 < h.v[1] ? lbl_80561F74 : h.v[1];
+        h.v[1] = h.v[1] > lbl_80561F74 ? lbl_80561F74 : h.v[1];
         f32 hm = PSVECMag(h.v);
         if (other >= 0) {
             hm *= lbl_80561F98;
             if (S32(p, 0x1F0) != 0x50 && !Boosting(p)) {
                 if (Boosting(fn_8017960C(other)) || hm > lbl_80562004) {
-                    if (F32(fn_8017960C(other), 0x25D4) > F32(p, 0x25D4)) {
+                    if (F32(p, 0x25D4) < F32(fn_8017960C(other), 0x25D4)) {
                         fn_8018A174(p);
                     }
                 }
@@ -1015,7 +1015,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         gb = (DentVec*)(p + 0x5FC) + best->goal;
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
-        c0.z = best->pos.z + gb->z;
+        c0.z = gb->z + best->pos.z;
         for (int i = 1; i < S32(p, 0x5F8); i++) {
             DentPoint* q = (DentPoint*)PTR(p, 0x26C) + i;
             DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
@@ -1191,8 +1191,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         }
                     }
                     fn_802E30C8("car %d: impaired", S32(p, 0x1EC));
-                    fn_801B8610(S32(p, 0x1EC), other);
                     hit = 1;
+                    fn_801B8610(S32(p, 0x1EC), other);
                 }
             }
         } else if (st >= 9) {
