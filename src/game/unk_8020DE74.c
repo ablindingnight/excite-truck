@@ -312,8 +312,8 @@ static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
 extern "C" void fn_8020E598(Hud *h) {
     unsigned char *v;
     int underwater;
-    int k;
     unsigned char *wheel;
+    int k;
 
     if (h->start != 0) {
         int begin = 0;
@@ -468,7 +468,7 @@ extern "C" void fn_8020E598(Hud *h) {
 
     if (h->splash != 0 && fn_802BF4F0()) {
         if (underwater) {
-            float s = lbl_805633C8 * VF32(h->vehicle, 0x25D4);
+            float s = VF32(h->vehicle, 0x25D4) * lbl_805633C8;
             HudPart_SetAlpha(h->splash, lbl_80563370 + HudClamp01((s - lbl_80563370) / lbl_805633CC) * lbl_805633D0);
             HudPart_SetLevel(h->splash, lbl_80563368 + HudClamp01((s - lbl_80563370) / lbl_805633D4) * lbl_805633D8);
             HudPart_Show(h->splash);
