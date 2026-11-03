@@ -876,6 +876,7 @@ void fn_801ED718(CarModel* m) {
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
     if (tex != -1) {
+        Frame f;
         P2 v[12];
         for (int i = 0; i < 12; i++) {
             v[i].ia = 0;
@@ -886,7 +887,7 @@ void fn_801ED718(CarModel* m) {
         SetVtx(&v[6], 0.09f, 0.0225f, 1.0f, 0.0f);
         SetVtx(&v[9], -0.09f, 0.0225f, 0.0f, 0.0f);
         u16 idx[6] = {0, 3, 1, 1, 3, 2};
-        Frame f = m->frame;
+        f = m->frame;
         Vec off;
         Vec w;
         off.x = -0.3f;
