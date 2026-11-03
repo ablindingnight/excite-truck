@@ -125,7 +125,7 @@ public:
         if (len == 0) {
             return 0;
         }
-        s32 n;
+        u32 n;
         s32 aligned = pos & ~3;
         s32 skip = pos - aligned;
         n = (len + skip + 0x1F) & ~0x1F;
