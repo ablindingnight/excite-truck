@@ -141,9 +141,12 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     ZVec vb;
     fn_802A8FEC(&vb, &b);
     ZFrame* f = &lbl_804BD760;
-    f->pos.x = lbl_804BD6F8[0].x + vb.x;
-    f->pos.y = lbl_804BD6F8[0].y + vb.y;
-    f->pos.z = lbl_804BD6F8[0].z + vb.z;
+    f32 xv = vb.x;
+    f->pos.x = lbl_804BD6F8[0].x + xv;
+    f32 yv = vb.y;
+    f->pos.y = lbl_804BD6F8[0].y + yv;
+    f32 zv = vb.z;
+    f->pos.z = lbl_804BD6F8[0].z + zv;
     lbl_804BD6F8[1] = vb;
     f->pos.x *= 0.5f;
     f->pos.y *= 0.5f;
@@ -151,7 +154,8 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     f32 y = lbl_804BD6F8[0].y;
     y = y <= vb.y ? y : vb.y;
     f->rot[0].x = lbl_804BD6F8[1].x - lbl_804BD6F8[0].x;
-    f->rot[0].y = lbl_804BD6F8[1].y - lbl_804BD6F8[0].y;
+    f32 y2 = lbl_804BD6F8[0].y;
+    f->rot[0].y = lbl_804BD6F8[1].y - y2;
     f->rot[0].z = lbl_804BD6F8[1].z - lbl_804BD6F8[0].z;
     f->pos.y = y;
     f->rot[0].y = 0.0f;
