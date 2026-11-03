@@ -2492,6 +2492,7 @@ void fn_80186DE8(u8* p) {
         }
         grip = st->grip * wet;
         f32 slip = st->slip * wet;
+        CbSolVec v;
         int landing = 0;
         if (lbl_8055E3C8 - F32(car, 0x26DC) < lbl_80561CDC && F32(car, 0x25D4) < lbl_80561DA0) {
             landing = 1;
@@ -2540,7 +2541,7 @@ void fn_80186DE8(u8* p) {
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
         }
-        CbSolVec v = x->pts[6];
+        v = x->pts[6];
         f32 s6 = v.w;
         if (F32(car, 0x2618) > lbl_80561CFC) {
             s6 = s6 * heatTune.v[4];
@@ -2590,8 +2591,8 @@ void fn_80186DE8(u8* p) {
         f32 vy = m->vel.y;
         vz = m->vel.z;
         f32 wx = m->avel.x;
-        f32 wy = m->avel.y;
         f32 wz = m->avel.z;
+        f32 wy = m->avel.y;
         f32 ox = F32(car, 0x16C);
         f32 oy = F32(car, 0x170);
         f32 oz = F32(car, 0x174);
