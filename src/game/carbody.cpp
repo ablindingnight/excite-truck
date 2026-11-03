@@ -3194,10 +3194,14 @@ void fn_8018956C(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, in
             fr.pos.z = HitDot(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
         }
         fr.pos.x = fr.pos.x + org->x;
-        fr.pos.y = fr.pos.y + org->y;
-        fr.pos.z = fr.pos.z + org->z;
+        f32 yv = fr.pos.y;
+        f32 y_ = org->y;
+        fr.pos.y = y_ + yv;
+        f32 zv = org->z;
+        fr.pos.z = zv + fr.pos.z;
         f32 dx = at->x - fr.pos.x;
-        f32 dy = at->y - fr.pos.y;
+        f32 y2 = at->y;
+        f32 dy = y2 - fr.pos.y;
         f32 dz = at->z - fr.pos.z;
         HVec lp;
         lp.x = HitDot(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
