@@ -7168,8 +7168,8 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 
     for (i = 0; i < 8; i++) {
         s32 s1 = block[8];
-        s32 s2 = block[16];
         s32 s3 = block[24];
+        s32 s2 = block[16];
         s32 s4 = block[32];
         s32 s5 = block[40];
         s32 s6 = block[48];
@@ -7196,14 +7196,14 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
             s32 a1 = d0 - d4;
             s32 a2 = d2 + d6;
             s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
-            s32 e0 = a0 + a2;
             s32 e3 = a0 - a2;
+            s32 e0 = a0 + a2;
             s32 e1 = a1 + a3;
             s32 e2 = a1 - a3;
             s32 d1 = (s1 * quant[8]) >> 11;
             s32 d3 = (s3 * quant[24]) >> 11;
-            s32 d5 = (s5 * quant[40]) >> 11;
             s32 d7 = (s7 * quant[56]) >> 11;
+            s32 d5 = (s5 * quant[40]) >> 11;
             s32 a4 = d5 + d3;
             s32 a5 = d5 - d3;
             s32 a6 = d1 + d7;
