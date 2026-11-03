@@ -727,9 +727,9 @@ void HermiteDrone::UpdateLoop(f32 dt) {
         t = t + (dt - 1.0f / k->rate);
         u = u - 1.0f;
         seg = (seg + 1) % entry->data->count;
+        k = entry->data->Loop(seg);
         q0 = q1;
         v0 = v1;
-        k = entry->data->Loop(seg);
         q1 = entry->data->Loop(seg + 1)->rot;
         v1 = entry->data->Loop(seg + 1)->v;
     }
