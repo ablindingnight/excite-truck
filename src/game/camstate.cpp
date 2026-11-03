@@ -584,7 +584,8 @@ void fn_80275938(u8* p) {
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
-    F32(p, 0xBC) = lbl_80564024 * c.fov;
+    f32 fovv = c.fov;
+    F32(p, 0xBC) = lbl_80564024 * fovv;
 }
 
 double fmod(double x, double y);
