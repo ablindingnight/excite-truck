@@ -421,7 +421,7 @@ void fn_801F5664(Fabric* f, int style) {
     switch (style) {
     case 2:
         SetAnchor(f, &a[0], (f->rows - 1) * f->cols);
-        SetAnchor(f, &a[1], f->rows * f->cols - 1);
+        SetAnchor(f, &a[1], f->cols * f->rows - 1);
         k = 2;
     case 1:
         SetAnchor(f, &a[k], 0);
