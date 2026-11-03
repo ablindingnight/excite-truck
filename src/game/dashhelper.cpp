@@ -364,24 +364,20 @@ int fn_8000DFA8(int type) { return lbl_802FC2A8[type].part; }
 int fn_8000DFC0(int type) { return lbl_802FC2A8[type].part2; }
 
 void fn_8000DFD8(DashRow* row, u32 color, f32 x, f32 y) {
-    f32 w = 89.0f;
-    f32 h = 17.0f;
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + h * 0.5f, w, h);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + 17.0f * 0.5f, 89.0f, 17.0f);
     }
-    fn_800109E4(-1, x, y + h * 0.5f, row->b * w / 100.0f, h);
-    fn_800109E4(color, x, y + h * 0.5f, row->a * w / 100.0f, h);
-    fn_80010074(-1, 0x14, "%s", 1.0f, x + w * 0.5f, y, row);
+    fn_800109E4(-1, x, y + 17.0f * 0.5f, row->b * 89.0f / 100.0f, 17.0f);
+    fn_800109E4(color, x, y + 17.0f * 0.5f, row->a * 89.0f / 100.0f, 17.0f);
+    fn_80010074(-1, 0x14, "%s", 1.0f, x + 89.0f * 0.5f, y, row);
 }
 
 void fn_8000E15C(DashRow* row, u32 color, f32 x, f32 y) {
-    f32 w = 89.0f;
-    f32 h = 17.0f;
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + h * 0.5f, w, h);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + 17.0f * 0.5f, 89.0f, 17.0f);
     }
-    fn_800109E4(-1, x, y + h * 0.5f, row->b * w / 100.0f, h);
-    fn_800109E4(color, x, y + h * 0.5f, row->a * w / 100.0f, h);
+    fn_800109E4(-1, x, y + 17.0f * 0.5f, row->b * 89.0f / 100.0f, 17.0f);
+    fn_800109E4(color, x, y + 17.0f * 0.5f, row->a * 89.0f / 100.0f, 17.0f);
     fn_80010074(-1, 0x11, "%s", 1.0f, 4.0f + x, y, row);
 }
 
