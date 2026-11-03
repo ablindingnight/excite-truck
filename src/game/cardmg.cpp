@@ -530,7 +530,8 @@ void fn_8018DA5C(u8* p, u8* m) {
     EVec* e = car->ease;
     for (int i = 0; i < car->nPoints; i++) {
         f32 x = car->ease[i].x * 0.8f;
-        f32 y = car->ease[i].y * 0.8f;
+        f32 yv = car->ease[i].y;
+        f32 y = yv * 0.8f;
         f32 z = car->ease[i].z * 0.8f;
         car->ease[i].x = x + car->goal[i].x * (1.0f - 0.8f);
         car->ease[i].y = y + car->goal[i].y * (1.0f - 0.8f);
