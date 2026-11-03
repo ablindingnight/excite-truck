@@ -2009,10 +2009,10 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     } else {
         total = t->chunk;
     }
-    if (chans == 1) {
-        t->voiceSize = t->bufSize;
-    } else {
+    if (chans != 1) {
         t->voiceSize = t->bufSize >> 1;
+    } else {
+        t->voiceSize = t->bufSize;
     }
     buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
     t->bufL = (s16 *)buf;
