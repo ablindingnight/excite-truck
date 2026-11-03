@@ -1396,15 +1396,17 @@ void fn_8018F76C(u8* p, int i) {
     }
     u8* x;
     fn_801BEB30(S32(p, 0x1EC), &x);
+    CVec4 c;
     PColor pc = *(PColor*)(x + 0x70);
-    CVec4 c = *(CVec4*)&pc;
+    c = *(CVec4*)&pc;
     (&c.x)[i] *= 0.15f;
     *(CVec4*)(x + 0x70) = c;
     WFrame m = *(WFrame*)(p + 0x3C);
     WVec3 hub = *(WVec3*)(w + 0x23D0);
     hub.x += m.basis[1].x * 0.3f;
     hub.y += m.basis[1].y * 0.3f;
-    hub.z += m.basis[1].z * 0.3f;
+    f32 zv = m.basis[1].z;
+    hub.z += zv * 0.3f;
     WVec3 vel;
     ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&hub);
     f32 spin = F32(w, 0x23AC);
