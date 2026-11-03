@@ -643,8 +643,9 @@ int fn_801B11DC(const void* pa, const void* pb) {
     bool aFin = lbl_8055E680 + 1 == a->finishLap;
     bool bFin = lbl_8055E680 + 1 == b->finishLap;
     s32 ap = ((DState*)a->State2())->lap;
+    s32 ar;
     s32 bp = ((DState*)b->State2())->lap;
-    s32 ar = a->rank;
+    ar = a->rank;
     s32 br = b->rank;
     if (aFin && bFin) {
         f32 curFinishTime = b->finishTime;
