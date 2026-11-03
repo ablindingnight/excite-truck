@@ -345,10 +345,10 @@ void fn_80231780(const UIXform* m) {
             fn_802354A0(e->art, e->artIdx, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z,
                         k * it->w, k * it->h, color);
         } else {
-            if (m) {
-                fn_802C8B98(lbl_80497F14.data[it->esc].tex, m);
-            } else {
+            if (!m) {
                 fn_802C8B98(lbl_80497F14.data[it->esc].tex, fn_8022EDC4());
+            } else {
+                fn_802C8B98(lbl_80497F14.data[it->esc].tex, m);
             }
             fn_802C8DBC(4);
             f32 x0 = it->x;
