@@ -582,7 +582,7 @@ struct Bins {
                     f32 t = (s - o->rad - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
                     lo = LERP(0.0f, 64.0f, t);
-                    t = (lbl_8055E2A4 + (s + o->rad) - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
+                    t = (lbl_8055E2A4 + (s + o->rad) - -0.5f * kWidth) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
                     hi = LERP(0.0f, 64.0f, t);
                     break;
