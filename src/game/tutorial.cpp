@@ -1843,7 +1843,8 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             {
                 Delta2 d;
                 f32 len;
-                d.x = pts[2].x - pts[0].x;
+                f32 xv = pts[0].x;
+                d.x = pts[2].x - xv;
                 d.z = pts[2].z - pts[0].z;
                 best = 2;
                 max = d.x * d.x + d.z * d.z;
@@ -1861,14 +1862,12 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 }
             }
             {
-                TVec2* a = &pts[best];
-                TVec2* b = &pts[(best + 1) % 3];
-                TVec2* f = &pts[(best + 2) % 3];
                 f32 inv;
-                pos.x = a->x + 0.5f * (b->x - a->x);
-                pos.z = a->z + 0.5f * (b->z - a->z);
-                dir.x = f->x - pos.x;
-                dir.z = f->z - pos.z;
+                pos.x = pts[best].x + 0.5f * (pts[(best + 1) % 3].x - pts[best].x);
+                f32 zv = pts[best].z;
+                pos.z = zv + 0.5f * (pts[(best + 1) % 3].z - zv);
+                dir.x = pts[(best + 2) % 3].x - pos.x;
+                dir.z = pts[(best + 2) % 3].z - pos.z;
                 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
                 dir.x *= inv;
                 dir.z *= inv;
@@ -1888,7 +1887,8 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 pos.x = n->x + h.t * (n->next->x - n->x);
                 pos.z = n->z + h.t * (n->next->z - n->z);
                 dir.x = n->dx + h.t * (n->next->dx - n->dx);
-                dir.z = n->dz + h.t * (n->next->dz - n->dz);
+                f32 dzv = n->dz;
+                dir.z = dzv + h.t * (n->next->dz - dzv);
                 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
                 dir.x *= inv;
                 dir.z *= inv;
