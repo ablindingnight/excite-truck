@@ -284,7 +284,7 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;
     for (int k = 0; k < 13; k++) {
-        u8 t = ((u8*)&w[k])[0];
+        s8 t = ((u8*)&w[k])[0];
         ((u8*)&w[k])[0] = ((u8*)&w[k])[3];
         ((u8*)&w[k])[3] = t;
         t = ((u8*)&w[k])[1];
