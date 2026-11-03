@@ -402,6 +402,7 @@ void fn_801AED74(void) {
 RecordMgr* fn_801AFA20(RaceSetup* s);
 
 void fn_801AEF28(RaceSetup* s) {
+    int i;
     RaceState* st = (RaceState*)lbl_80435740;
     lbl_8055E635 = 1;
     lbl_8055E620 = CarLapTable::Create();
@@ -410,7 +411,7 @@ void fn_801AEF28(RaceSetup* s) {
     RaceEntries* t = &st->entries;
     t->n = 0;
     s32* order = t->order;
-    for (int i = 0; i < s->n; i++) {
+    for (i = 0; i < s->n; i++) {
         s32 type = s->e[i].type;
         if (!CarTypeIsReal(type, s->car)) {
             break;
@@ -418,7 +419,8 @@ void fn_801AEF28(RaceSetup* s) {
         t->e[i].type = type;
         t->e[i].driver = s->e[i].driver;
         order[i] = i;
-        t->n++;
+        s32 nv = t->n;
+        nv++;
         if (fn_801AE600(type)) {
             lbl_8055E620->t[i] = LapResultTable::Create();
         }
