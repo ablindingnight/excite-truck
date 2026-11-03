@@ -932,6 +932,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         f32 hh = 0.5f * (f32)h;
         f32 hw = 0.5f * (f32)w2;
         f32 cx;
+        f32 nd;
         f32 cy = (f32)y + hh;
         x -= (w2 - w) / 2;
         cx = (f32)x + hw;
@@ -979,7 +980,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         } else {
             fn_802545C4(&pose, bg, model);
         }
-        f32 nd = -d;
+        nd = -d;
         f32 nx = -offX;
         f32 floor = 2.0f * aspect;
         f32 ny = -offY;
@@ -1037,8 +1038,11 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         Mtx33 rx;
         fn_80015A20(&rx, &b);
         Mat3Mul((Mat3*)&cam, (const Mat3*)&rx, (const Mat3*)&cam);
-        cam.pos.y = (cam.pos.y - model->rideHeight) + camOffset.y;
-        cam.pos.z = (cam.pos.z - dist) + camOffset.z;
+        f32 z2;
+        f32 rideHeightv = model->rideHeight;
+        cam.pos.y = (cam.pos.y - rideHeightv) + camOffset.y;
+        z2 = cam.pos.z;
+        cam.pos.z = (z2 - dist) + camOffset.z;
         cam.pos.x = cam.pos.x + camOffset.x;
         MulVec(&cam.pos, &cam.pos, cam.b.v);
     }
