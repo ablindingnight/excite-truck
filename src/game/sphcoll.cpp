@@ -940,7 +940,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     dd.v[2] = dz;
     dd.v[1] = dy;
     int hit = 0;
-    if ((f32)__fabs(dx) < rs && (f32)__fabs(dz) < rs && (f32)__fabs(dy) < rs) {
+    if (__fabsf(dx) < rs && (f32)__fabs(dz) < rs && (f32)__fabs(dy) < rs) {
         f32 dist = PSVECMag(dd.v);
         if (!(AbsF(dist) <= lbl_80558DC4[0])) {
             f32 pen = s + (-dist + r);

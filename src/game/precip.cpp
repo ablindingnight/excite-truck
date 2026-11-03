@@ -1003,7 +1003,7 @@ void RainSystem::Spawn(void) {
             f32 gy = dir.y * k;
             f32 gx = dir.x * k;
             f32 ax = 1.0f - (f32)__fabs(gx);
-            f32 ay = 1.0f - (f32)__fabs(gy);
+            f32 ay = 1.0f - __fabsf(gy);
             f32 rx = fn_80287BC8(-ax, ax);
             f32 ry = fn_80287BC8(-ay, ay);
             f32 z = near + r * (far - near);

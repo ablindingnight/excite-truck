@@ -214,7 +214,7 @@ void fn_80202D50(EVec3 dir) {
 }
 
 void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
-    if ((f32)__fabs(f->z.y) < 0.999f) {
+    if (__fabsf(f->z.y) < 0.999f) {
         EVec3 d;
         EFrame m;
         d.x = v->x - f->pos.x;

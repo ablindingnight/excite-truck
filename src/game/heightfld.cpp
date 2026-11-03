@@ -578,7 +578,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     for (i = 0; i < 75; i++) {
         lbl_804424B0[i] = 1.0f;
         f32 dh = fn_801DCF0C(x, z) - h0;
-        if (!(__fabs(dh) <= lbl_80558DC4[0])) {
+        if (!((float)__fabs(dh) <= lbl_80558DC4[0])) {
             if (n >= 3) {
                 int k = -1;
                 f32 m = 0.0f;
@@ -586,11 +586,11 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                     k = 0;
                     m = d->terms[0].k;
                 }
-                if (k < 0 || __fabs(d->terms[1].k) < __fabs(m)) {
+                if (k < 0 || (float)__fabs(d->terms[1].k) < (float)__fabs(m)) {
                     k = 1;
                     m = d->terms[1].k;
                 }
-                if (k < 0 || __fabs(m) > __fabs(d->terms[2].k)) {
+                if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[2].k)) {
                     k = 2;
                 }
                 if (AbsF(d->terms[k].k) < AbsF(dh)) {
@@ -612,10 +612,10 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     if (!(__fabs(d->terms[0].k) <= lbl_80558DC4[0])) {
         any = 1;
     }
-    if (!(__fabs(d->terms[1].k) <= lbl_80558DC4[0])) {
+    if (!((float)__fabs(d->terms[1].k) <= lbl_80558DC4[0])) {
         any = 1;
     }
-    if (!(__fabs(d->terms[2].k) <= lbl_80558DC4[0])) {
+    if (!((float)__fabs(d->terms[2].k) <= lbl_80558DC4[0])) {
         any = 1;
     }
     if (!any) {

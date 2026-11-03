@@ -1466,7 +1466,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 turn = VDot(PTR(p, 0x34) + 0x118, &u) / ref;
         turn = MaxF(MinF(lbl_805620D4, lbl_805620BC * turn), lbl_80562130);
         u8* c6 = PTR(p, 0x34);
-        f32 sl = MaxF(MinF(kOne, (f32)__fabs(F32(c6, 0x25F0)) / lbl_805620D0), kZero);
+        f32 sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / lbl_805620D0), kZero);
         turn *= sl;
         f32 airt = MaxF(F32(c6, 0x23B8), kZero) + MaxF(F32(c6, 0x242C), kZero);
         str *= MinF(lbl_80562134 * airt, kOne);

@@ -2310,10 +2310,10 @@ void fn_80183E7C(u8* p) {
         if (S32(p, 0x2620) == 0) {
             f32 pitch = F32(p, 0x2600);
             if (pitch < lbl_80561E44) {
-                grav = grav + (f32)__fabs(pitch) * (lbl_80561CDC * grav - grav);
+                grav = grav + __fabsf(pitch) * (lbl_80561CDC * grav - grav);
                 gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC * gravUp - gravUp);
             } else if (pitch > lbl_80561CCC) {
-                grav = grav + (f32)__fabs(pitch) * (lbl_80561CDC + grav - grav);
+                grav = grav + __fabsf(pitch) * (lbl_80561CDC + grav - grav);
                 gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC + gravUp - gravUp);
             }
         }
@@ -2479,7 +2479,7 @@ void fn_80186DE8(u8* p) {
         }
         SurfType* st = fn_801D04A8(surf);
         f32 wet = lbl_80561CD0;
-        if ((f32)__fabs(F32(car, 0x2650)) > lbl_80558DC4[0]) {
+        if (__fabsf(F32(car, 0x2650)) > lbl_80558DC4[0]) {
             f32 d = (lbl_80561D2C - F32(car, 0x2650) - lbl_80561CFC) / lbl_80561CFC;
             if (d > lbl_80561CD0) {
                 d = lbl_80561CD0;
