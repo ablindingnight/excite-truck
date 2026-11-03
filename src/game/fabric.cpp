@@ -323,7 +323,7 @@ void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
     out->u = uv.x;
     out->v = uv.y;
     {
-        int b = ToByte(c.z);
+        u8 b = ToByte(c.z);
         int g = ToByte(c.y);
         int r = ToByte(c.x);
         out->color = 0xFF000000 | ((u8)r << 16) | ((u8)g << 8) | (u8)b;

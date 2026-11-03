@@ -1022,7 +1022,7 @@ void fn_802621F0(u8* p) {
     f32 grow;
     u8 alpha;
     u32 gradeColor;
-    u32 tile;
+    u8 tile;
     int part;
     fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
     color = 0xFFFFFFFF;

@@ -2187,7 +2187,7 @@ void fn_8019743C(u8* d, u8* out) {
                 blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
             } else {
                 int lcar = S32(d, 0x90);
-                u32 r = fn_80193110(d, S32(d, 0xB8));
+                u8 r = fn_80193110(d, S32(d, 0xB8));
                 u32 l = fn_80193110(d, lcar);
                 which = ((l & 0xFF) << 1) | (r & 0xFF);
                 if (which == 0 || which == 3) {

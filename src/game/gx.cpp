@@ -2306,7 +2306,7 @@ void fn_802D3BB4(const V3* c, f32 r, const V3* a, const V3* b, u32 color, f32 al
         i[k] = idx[k];
     }
     QuadVtx v[4];
-    u32 col = (color & 0xFFFFFF) | ((int)(alpha * (color >> 24)) << 24);
+    u8 col = (color & 0xFFFFFF) | ((int)(alpha * (color >> 24)) << 24);
     v[0].pos.x = c->x + a->x * r;
     v[0].pos.y = c->y + a->y * r;
     v[0].pos.z = c->z + a->z * r;
