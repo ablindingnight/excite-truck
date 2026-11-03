@@ -485,9 +485,11 @@ void fn_8025DDD0(u8* p) {
     f32 fw;
     f32 fh;
     fn_80230C30(&sx, &sy, S32(p, 0x4), S32(p, 0x8));
+    c = U8(p, 0x2C);
     fw = (f32)S32(p, 0xC);
     fh = (f32)S32(p, 0x10);
-    fn_802354A0(PTR(p, 0x28), U8(p, 0x2C), sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    f32 shadowY = 3.0f + sy;
+    fn_802354A0(PTR(p, 0x28), c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
     e = &((IconEntry*)*(u8**)PTR(p, 0x18))[S32(p, 0x1C)];
     y = sy;
     x = sx;
