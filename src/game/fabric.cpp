@@ -400,15 +400,13 @@ void fn_801F5664(Fabric* f, int style) {
     int i;
     switch (style) {
     case 1:
+    case 4:
         n = 2;
         break;
     case 2:
         n = 4;
         break;
     case 3:
-        break;
-    case 4:
-        n = 2;
         break;
     case 5:
         n = rows;
