@@ -956,8 +956,9 @@ void fn_802BE07C(const TVec* pos, TreeQuery cb) {
     s16 cz = (s16)(int)(pos->z / 2.0f);
     s16 cx = (s16)(int)(pos->x / 2.0f);
     s16 bx = (cx / 128) * 128 + 0x40;
+    int i;
     s16 bz = (cz / 128) * 128 + 0x40;
-    for (int i = -0x80; i <= 0x80; i += 0x80) {
+    for (i = -0x80; i <= 0x80; i += 0x80) {
         for (int j = -0x80; j <= 0x80; j += 0x80) {
             FanCell* f = fn_802BE844(bx + i, bz + j, 0x40);
             for (TCell* c = f->head; c; c = c->next) {
