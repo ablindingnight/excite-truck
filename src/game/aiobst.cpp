@@ -278,7 +278,7 @@ void fn_8015EF84(ValueNode* list) {
                 ValPoint t = n->GetPoint("p");
                 p = t;
                 f32 r2 = n->GetFloat("rad");
-                int j;
+                s32 j;
                 r2 = r2 * r2;
                 j = 0;
                 while (j < lbl_8055E29C->a.count) {
