@@ -39,6 +39,22 @@ extern unsigned char lbl_80489BD0[];
 extern int fn_80128668(void);
 extern char lbl_8033C458[];
 typedef struct { char *name; int state; } UnkStruct_8020A860;
+extern char lbl_8033C338[];
+extern int strcasecmp(const char *, const char *);
+
+// Looks a sample up by name in the loaded sample table (0x24 bytes each); unknown names get the default entry.
+void *fn_8020A6AC(void *name) {
+    char *entry = lbl_804892D0;
+    int i;
+    for (i = 0; i < (int)lbl_8055EE08; i++) {
+        if (strcasecmp((const char *)name, entry) == 0) {
+            return entry;
+        }
+        entry += 0x24;
+    }
+    return lbl_8033C338;
+}
+
 void fn_8020A72C(void) {
     void *m = (void *)fn_801284F8(0xC, lbl_8033C35C);
     if (m != 0) {

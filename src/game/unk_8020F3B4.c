@@ -28,7 +28,7 @@ extern void fn_802EC1C0(float vol);
 extern long fn_802EC0FC(void);
 extern void fn_802EC1E4();
 extern long fn_802EC12C();
-long fn_8020F3B4(void) { return -1; }
+long fn_8020F3B4(long slot) { return -1; }
  
 long fn_8020F3BC(long arg0, long arg1, long arg2) {
     long result = arg1;
@@ -112,8 +112,8 @@ void fn_8020F6E0(long arg0, long arg1) {
     fn_8020F608(0, arg0);
 }
  
-void fn_8020F6F8(void) {
-    fn_802EC0FC();
+long fn_8020F6F8(void) {
+    return fn_802EC0FC();
 }
  
 long fn_8020F6FC(void) {
@@ -196,7 +196,7 @@ long fn_8020FB80(const char *name) {
             return i;
         }
     }
-    return ((long (*)(long))fn_8020F3B4)(0);
+    return fn_8020F3B4(0);
 }
 
 long fn_8020FC04(const char *name) {
@@ -217,11 +217,11 @@ long fn_8020FC6C(const char *name) {
     struct Unk_804900AC *state = &lbl_804900AC;
     const char *found;
     if (state->m_count == 0) {
-        return ((long (*)(long))fn_8020F3B4)(0);
+        return fn_8020F3B4(0);
     } else if ((found = (const char *)fn_8020FC04(name)) != 0) {
         return fn_8020FB80(found);
     } else {
-        return ((long (*)(long))fn_8020F3B4)(0);
+        return fn_8020F3B4(0);
     }
 }
 
@@ -252,11 +252,11 @@ extern "C" void fn_8020FCC4(void) {
     if (idx >= 0 && idx < lbl_804900AC.m_count) {
         fn_802E30C8(lbl_8033C980, idx, ((char **)lbl_804900AC.m_entries)[idx], name);
     }
-    if (idx == ((long (*)(long))fn_8020F3B4)(0) && lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(1)) {
-        idx = ((long (*)(long))fn_8020F3B4)(1);
+    if (idx == fn_8020F3B4(0) && lbl_8055B658 == fn_8020F3B4(1)) {
+        idx = fn_8020F3B4(1);
     }
-    if (idx == ((long (*)(long))fn_8020F3B4)(0) && lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(2)) {
-        idx = ((long (*)(long))fn_8020F3B4)(2);
+    if (idx == fn_8020F3B4(0) && lbl_8055B658 == fn_8020F3B4(2)) {
+        idx = fn_8020F3B4(2);
     }
     if (lbl_8055B658 != -1 && lbl_8055B658 != idx) {
         fn_802EC1D8();
@@ -289,7 +289,7 @@ void fn_8020FE90(void) {
     fn_802EC12C();
     fn_802EC1D8();
     if (lbl_8055EEE0 == -2) {
-        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
+        lbl_8055B658 = fn_8020F3B4(0);
     } else if (lbl_8055EEE0 == -1) {
         lbl_8055B658 = fn_8020F6FC();
     } else {
@@ -405,12 +405,22 @@ typedef struct PanelBox {
 #pragma push
 #pragma cplusplus on
 // A UI widget; slot 0x18 returns its font.
+// A text box from the layout (0x20 bytes); color at 0x18.
+typedef struct TextBox {
+    long unk00;
+    PanelPos pos;   /* 0x04 */
+    float size;     /* 0x10 */
+    long unk14;
+    long color;     /* 0x18 */
+    long unk1C;
+} TextBox;
+
 class PanelWidget {
 public:
     virtual void vf08(void);
-    virtual void vf0C(void);
+    virtual TextBox *FindText(const char *name);
     virtual void vf10(void);
-    virtual void vf14(void);
+    virtual PanelBox *FindPane(const char *name);
     virtual long GetFont(void);
 };
 
@@ -502,8 +512,8 @@ void fn_80210444(void) {
     lbl_8055EEC8 = 0;
     lbl_8055EECC = 0;
     if (fn_80009C84() == 0 && fn_801B85CC() == 0 &&
-        lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(1)) {
-        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
+        lbl_8055B658 == fn_8020F3B4(1)) {
+        lbl_8055B658 = fn_8020F3B4(0);
         fn_802EC12C();
         fn_802EC1D8();
     }
@@ -617,16 +627,16 @@ extern "C" void fn_80210688(unsigned char arg0) {
     if (lbl_8055B658 == -1) {
         return;
     }
-    if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(0) && loading) {
-        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(2);
+    if (lbl_8055B658 == fn_8020F3B4(0) && loading) {
+        lbl_8055B658 = fn_8020F3B4(2);
         fn_802EC12C();
         fn_802EC1D8();
-    } else if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(2) && !loading) {
-        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(0);
+    } else if (lbl_8055B658 == fn_8020F3B4(2) && !loading) {
+        lbl_8055B658 = fn_8020F3B4(0);
         fn_802EC12C();
         fn_802EC1D8();
-    } else if (lbl_8055B658 == ((long (*)(long))fn_8020F3B4)(0) && busy) {
-        lbl_8055B658 = ((long (*)(long))fn_8020F3B4)(1);
+    } else if (lbl_8055B658 == fn_8020F3B4(0) && busy) {
+        lbl_8055B658 = fn_8020F3B4(1);
         fn_802EC12C();
         fn_802EC1D8();
     }
@@ -681,6 +691,158 @@ void fn_80210950(void *arg0, void *arg1) {
     lbl_8055EED8 = arg0;
     lbl_8055EEDC = arg1;
 }
+
+typedef struct CourseVec2 {
+    float x;
+    float y;
+} CourseVec2;
+
+// The menu layout object, read fresh from its global at every use.
+#define COURSE_LAYOUT ((PanelWidget *)lbl_8055EED4)
+
+extern char lbl_8033C940[];
+extern char lbl_8055B680[6], lbl_8055B688[5], lbl_8055B690[6], lbl_8055B698[3], lbl_8055B69C[4], lbl_8055B6A0[8];
+extern const float lbl_80563400, lbl_80563404, lbl_80563408, lbl_8056340C, lbl_80563410, lbl_80563414;
+extern const float lbl_80563418, lbl_8056341C, lbl_80563420, lbl_80563424;
+
+#pragma push
+#pragma cplusplus on
+extern "C" void fn_80230B5C(void *);
+extern "C" void fn_802C8638(void *);
+extern "C" void fn_802C974C(float, float, float);
+extern "C" void fn_800109E4(unsigned long, float, float, float, float);
+extern "C" void fn_80011A2C(void);
+extern "C" void fn_802C9904(void);
+extern "C" float fn_80230EF4(int);
+extern "C" float fn_800108C8(const char *, float);
+extern "C" void fn_80147230(void *, const char *, ...);
+extern "C" void fn_801473F8(PanelWidget *, const char *, const char *, ...);
+extern "C" void fn_801476C4(void *);
+extern "C" void fn_8014784C(PanelWidget *, const char *, const char *, int);
+extern "C" void *memset(void *, int, unsigned long);
+extern "C" char *strncpy(char *, const char *, unsigned long);
+extern "C" unsigned long strlen(const char *);
+
+// Draws one of the option buttons below the list, highlighted when it is the selected one.
+static inline void CourseMenu_DrawOption(const char *pool, const char *text, const char *pane, int sel,
+                                         long hilite) {
+    TextBox *t = COURSE_LAYOUT->FindText(text);
+    if (t != 0) {
+        long style = 6;
+        TextBox box;
+        if (sel) {
+            style = 3;
+        }
+        fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), style, COURSE_LAYOUT->FindPane(pane));
+        box = *t;
+        if (sel) {
+            box.color = hilite;
+        }
+        fn_801476C4(&box);
+    }
+}
+
+// Draws the custom-course menu: a page of 10 names with their numbers, the cursor, the option buttons,
+// the page counter and the page arrows.
+extern "C" void fn_8021095C(void) {
+    const char *pool = lbl_8033C940;
+    char camera[0x30];
+
+    if (lbl_8055EEDC != 0) {
+        ((void (*)(void))lbl_8055EEDC)();
+    }
+    fn_80230B5C(camera);
+    fn_802C8638(camera);
+    fn_802C974C(lbl_80563404, lbl_80563408, lbl_8056340C);
+    fn_800109E4(0x7F000000, lbl_80563410, lbl_80563414, lbl_80563418, lbl_8056341C);
+    fn_80011A2C();
+    if (lbl_8055EED4 != 0) {
+        CourseVec2 col;
+        CourseVec2 step;
+        CourseVec2 cursor;
+        long hilite;
+        TextBox *name;
+        TextBox *num;
+        TextBox *next;
+        PanelBox *mark;
+        long base;
+        long i;
+
+        fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 0, COURSE_LAYOUT->FindPane(pool + 0xA0));
+        hilite = ((long)(lbl_80563420 * fn_80230EF4(1)) << 24) | 0xFFFF00;
+        col.x = lbl_80563400;
+        col.y = lbl_80563400;
+        step.x = lbl_80563400;
+        step.y = lbl_80563400;
+        cursor.x = lbl_80563400;
+        cursor.y = lbl_80563400;
+        name = COURSE_LAYOUT->FindText(lbl_8055B680);
+        num = COURSE_LAYOUT->FindText(lbl_8055B688);
+        next = COURSE_LAYOUT->FindText(lbl_8055B690);
+        if (name != 0 && num != 0 && next != 0) {
+            col.x = num->pos.x - name->pos.x;
+            step.x = next->pos.x - name->pos.x;
+            col.y = num->pos.y - name->pos.y;
+            step.y = next->pos.y - name->pos.y;
+        }
+        mark = COURSE_LAYOUT->FindPane(pool + 0xAC);
+        if (mark != 0 && name != 0) {
+            cursor.x = mark->pos.x - name->pos.x;
+            cursor.y = mark->pos.y - name->pos.y;
+        }
+        base = lbl_8055EEE4 * 10;
+        for (i = base; i < lbl_804900AC.m_count && i < base + 10; i++) {
+            long row = i - base;
+            TextBox nameBox;
+            TextBox numBox;
+            char buf[0xFF];
+            nameBox = *name;
+            nameBox.pos.x = nameBox.pos.x + step.x * (float)row;
+            nameBox.pos.y = nameBox.pos.y + step.y * (float)row;
+            numBox = *num;
+            numBox.pos.x = nameBox.pos.x + col.x;
+            numBox.pos.y = nameBox.pos.y + col.y;
+            if (row == lbl_8055EEE0) {
+                PanelBox *cur = COURSE_LAYOUT->FindPane(pool + 0xAC);
+                if (cur != 0) {
+                    PanelBox b = *cur;
+                    b.pos.x = nameBox.pos.x + cursor.x;
+                    b.pos.y = nameBox.pos.y + cursor.y;
+                    fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 9, &b);
+                }
+                nameBox.color = hilite;
+                numBox.color = hilite;
+            }
+            memset(buf, 0, sizeof(buf));
+            strncpy(buf, ((char **)lbl_804900AC.m_entries)[i], sizeof(buf) - 1);
+            while (strlen(buf) > 4 && fn_800108C8(buf, nameBox.size) > lbl_80563424) {
+                buf[strlen(buf) - 1] = 0;
+            }
+            fn_80147230(&nameBox, lbl_8055B698, buf);
+            fn_80147230(&numBox, lbl_8055B69C, i + 1);
+        }
+        CourseMenu_DrawOption(pool, pool + 0xB8, pool + 0xC8, lbl_8055EEE0 == -2 && lbl_8055EEEC == 0, hilite);
+        CourseMenu_DrawOption(pool, pool + 0xD4, pool + 0xE8, lbl_8055EEE0 == -2 && lbl_8055EEEC == 1, hilite);
+        if (fn_8020F6F8() > 0) {
+            CourseMenu_DrawOption(pool, pool + 0xF8, pool + 0x104, lbl_8055EEE0 == -1 && lbl_8055EEED == 0, hilite);
+            CourseMenu_DrawOption(pool, pool + 0x110, pool + 0x120, lbl_8055EEE0 == -1 && lbl_8055EEED == 1, hilite);
+        }
+        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x130));
+        fn_801473F8(COURSE_LAYOUT, pool + 0x144, lbl_8055B6A0, lbl_8055EEE4 + 1, lbl_8055EEE8);
+        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x150));
+        if (lbl_8055EEE4 < lbl_8055EEE8 - 1 && lbl_8055EEE0 >= 0) {
+            fn_8014784C(COURSE_LAYOUT, pool + 0x15C, pool + 0x168, 1);
+        }
+        if (lbl_8055EEE4 > 0 && lbl_8055EEE0 >= 0) {
+            fn_8014784C(COURSE_LAYOUT, pool + 0x178, pool + 0x184, 1);
+        }
+        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x194));
+    }
+    fn_80011A2C();
+    fn_802C9904();
+}
+#pragma cplusplus reset
+#pragma pop
 
 extern void fn_8020FEF0(long);
 extern void fn_802100AC(void);

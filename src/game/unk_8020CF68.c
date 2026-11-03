@@ -54,6 +54,24 @@ extern char lbl_8033C690[], lbl_8033C6A0[];
 extern void fn_8000C6E4(void);
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+// Raises the selected sound-menu value one step (the counterpart of fn_8020CFEC).
+void fn_8020CF6C(int arg0) {
+    switch (arg0) {
+    case 0:
+        lbl_8055EE8C = MIN(lbl_80563318 + lbl_8055EE8C, lbl_8056331C);
+        fn_8020C908(lbl_8055EE8C);
+        break;
+    case 1:
+        lbl_8055EE90 = MIN(lbl_80563318 + lbl_8055EE90, lbl_8056331C);
+        break;
+    case 4:
+        fn_8000C6E4();
+        break;
+    }
+}
+
 void fn_8020CFEC(int arg0) {
     switch (arg0) {
     case 0:
