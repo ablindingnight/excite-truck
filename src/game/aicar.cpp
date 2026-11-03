@@ -1246,7 +1246,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((lbl_8056217C + st) - st));
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + lbl_8056217C) - st));
         F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + (lbl_80562144 + k * lbl_80562140) * lbl_805621F4);
     }
     f32 side = fn_801948B0(d, t, 0);
@@ -1254,7 +1254,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(out, 0x4) = F32(out, 0x4) + F32(d, 0x5C) * side;
     if (S32(d, 0x268) == 3) {
         f32 st = F32(d, 0x1DC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((lbl_805621F8 + st) - st));
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + lbl_805621F8) - st));
         F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + k * lbl_805621FC);
     }
     int chase = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x20);
@@ -1269,7 +1269,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
                 if (rel.y > lbl_80562144) {
                     F32(out, 0x0) = F32(car, 0x60);
                     F32(out, 0x4) = F32(car, 0x68);
-                    F32(out, 0x8) = lbl_8056216C + F32(car, 0x25CC);
+                    F32(out, 0x8) = F32(car, 0x25CC) + lbl_8056216C;
                 } else {
                     f32 v = F32(car, 0x25CC) - lbl_80562160;
                     F32(out, 0x8) = v > lbl_80562160 ? v : lbl_80562160;
