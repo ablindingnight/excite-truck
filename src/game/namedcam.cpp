@@ -239,12 +239,11 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
         if (t < 0.0f) {
             fn_802E30C8("physcam: Clock looped during camera transition!!!");
         }
-        CamShot* s = &lbl_8049FD58[slot];
-        QuatToPose(out, s->q1);
-        out->pos.v[0] = s->p1.v[0];
-        out->pos.v[1] = s->p1.v[1];
-        out->pos.v[2] = s->p1.v[2];
-        *fov = s->fov1;
+        QuatToPose(out, lbl_8049FD58[slot].q1);
+        out->pos.v[0] = lbl_8049FD58[slot].p1.v[0];
+        out->pos.v[1] = lbl_8049FD58[slot].p1.v[1];
+        out->pos.v[2] = lbl_8049FD58[slot].p1.v[2];
+        *fov = lbl_8049FD58[slot].fov1;
         lbl_8049FD58[slot].active = 0;
         return;
     }
