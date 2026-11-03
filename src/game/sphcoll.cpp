@@ -1210,7 +1210,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             fn_802E317C("volume: explicit_sphere_box method: code should never get here");
             RVec3 v;
             rb->VelAt(&v, c);
-            cp.x = c->x + v.x * lbl_8056233C;
+            f32 xv = c->x;
+            cp.x = xv + v.x * lbl_8056233C;
             cp.y = c->y + v.y * lbl_8056233C;
             cp.z = c->z + v.z * lbl_8056233C;
             ToBoxSpace(&l, &cp, &f);
