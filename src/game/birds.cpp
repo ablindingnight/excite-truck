@@ -298,16 +298,20 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     dir[0] *= inv;
     dir[1] *= inv;
     f32 to[2];
-    to[0] = target->x - b->pos.x;
-    to[1] = target->z - b->pos.z;
+    f32 x2 = b->pos.x;
+    f32 x_ = target->x;
+    to[0] = x_ - x2;
+    f32 zv = b->pos.z;
+    to[1] = target->z - zv;
     f32 d2 = to[0] * to[0] + to[1] * to[1];
     if (!((f32)__fabs(d2) <= lbl_80558DC4[0])) {
         f32 k = 1.0f / (f32)sqrt(d2);
         to[0] *= k;
         to[1] *= k;
     }
+    f32 steer;
     f32 dot = to[0] * dir[0] + to[1] * dir[1];
-    f32 steer = fn_80287BC8(0.0f, 1.0f);
+    steer = fn_80287BC8(0.0f, 1.0f);
     f32 half = b->radius / 2.0f;
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
@@ -316,7 +320,8 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     f32 third = r / 3.0f;
     third *= third;
     f32 t = Clamp01((d2 - third) / (r * r - third));
-    f32 ang = lbl_8055F8D4 * ((0.0f + t * (steer - 0.0f)) * (0.017453292f * b->turn));
+    f32 turnv = b->turn;
+    f32 ang = lbl_8055F8D4 * ((0.0f + t * (steer - 0.0f)) * (0.017453292f * turnv));
     f32 c = cos(ang);
     f32 s = sin(ang);
     f32 m[9];
@@ -330,7 +335,8 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     m[7] = 0.0f;
     m[8] = c;
     BVec* v = &b->vel;
-    f32 x = v->x * m[0] + v->y * m[3] + v->z * m[6];
+    f32 xv = v->x;
+    f32 x = xv * m[0] + v->y * m[3] + v->z * m[6];
     f32 y = v->x * m[1] + v->y * m[4] + v->z * m[7];
     f32 z = v->x * m[2] + v->y * m[5] + v->z * m[8];
     v->x = x;
