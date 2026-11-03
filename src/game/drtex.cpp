@@ -242,14 +242,17 @@ void fn_802D7780(GXTex* t, const GXTexDesc* d) {
     }
 }
 
-static inline u16 To565(const u8* c) { return (c[0] << 8 & 0xF800) | (c[1] << 3 & 0x7E0) | (c[2] >> 3 & 0x1F); }
+static inline u16 To565(const u8* c) { return (c[0] << 8 & 0xF800) | (c[1] << 3 & 0x7E0) | ((c[2] & 0xF8) >> 3); }
 
 void fn_802D78D4(u16* rgb, u16* alpha, const u32* pal, int n) {
     for (int i = 0; i < n; i++) {
-        u32 c = pal[i];
-        u8* b = (u8*)&c;
-        rgb[i] = To565(b);
-        alpha[i] = b[3] << 8;
+        union {
+            u32 word;
+            u8 b[4];
+        } c;
+        c.word = pal[i];
+        rgb[i] = To565(c.b);
+        alpha[i] = c.b[3] << 8;
     }
 }
 
