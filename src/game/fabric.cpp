@@ -609,13 +609,15 @@ void fn_801F63F0(Fabric* f, const PVec* force, f32 drag) {
 
 // Verlet step with a force per particle.
 void fn_801F64E4(Fabric* f, const PVec* forces, f32 drag) {
+    f32 k2;
     f32 k1 = 2.0f - drag;
-    f32 k2 = -(1.0f - drag);
+    k2 = -(1.0f - drag);
     PVec t;
     int i;
     for (i = 0; i < f->count; i++, forces++) {
+        TVec* p;
         TVec* c = &f->cur[i];
-        TVec* p = &f->prev[i];
+        p = &f->prev[i];
         t.x = c->x * k1;
         t.y = c->y * k1;
         t.z = c->z * k1;
