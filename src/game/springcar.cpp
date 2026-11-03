@@ -385,18 +385,19 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         t = time / ramp;
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
-        p.x = car->pos.x + v.x * 0.016683351f;
+        f32 xv = v.x;
+        p.x = car->pos.x + xv * 0.016683351f;
         p.y = car->pos.y + v.y * 0.016683351f;
         p.z = car->pos.z + v.z * 0.016683351f;
-        target = vel + t * (depth - vel);
         dist = PlaneDist(&n, &p, &owner->plane->origin);
-        ramping = 0.0f > this->dist, time < ramp;
+        target = vel + t * (depth - vel);
+        ramping = this->dist < 0.0f, time < ramp;
         if (ramping) {
             f32 pen = target - d;
             f32 extra;
             f32 total;
-            TVec f;
             TVec imp;
+            TVec f;
             TVec pt;
             pen = 0.0f > pen ? 0.0f : pen;
             extra = 0.0f;
@@ -408,7 +409,8 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             }
             total = extra + pen;
             f.x = n.x * total;
-            f.y = n.y * total;
+            f32 yv = n.y;
+            f.y = yv * total;
             f.z = n.z * total;
             acc->x = acc->x + f.x;
             acc->y = acc->y + f.y;
@@ -444,7 +446,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             car->push.y = 0.0f;
             car->push.z = 0.0f;
         }
-        time = time + 0.016683351f;
+        time += 0.016683351f;
         if (time > 0.2f + ramp && !ramping) {
             owner = 0;
         }
