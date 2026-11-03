@@ -409,6 +409,7 @@ void fn_801AEF28(RaceSetup* s) {
     lbl_8055E628 = fn_801AFA20(s);
     RaceEntries* t = &st->entries;
     t->n = 0;
+    s32* order = t->order;
     for (int i = 0; i < s->n; i++) {
         s32 type = s->e[i].type;
         if (!CarTypeIsReal(type, s->car)) {
@@ -416,7 +417,7 @@ void fn_801AEF28(RaceSetup* s) {
         }
         t->e[i].type = type;
         t->e[i].driver = s->e[i].driver;
-        t->order[i] = i;
+        order[i] = i;
         t->n++;
         if (fn_801AE600(type)) {
             lbl_8055E620->t[i] = LapResultTable::Create();
