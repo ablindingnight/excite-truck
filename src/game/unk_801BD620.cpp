@@ -50,6 +50,9 @@ static inline Vec Max(const Vec& a, const Vec& k) {
     return r;
 }
 
+static inline Vec operator+(Vec a, const Vec& b) { return Vec(a.x + b.x, a.y + b.y, a.z + b.z); }
+static inline Vec Mul(const Vec& a, const Vec& b) { return Vec(a.x * b.x, a.y * b.y, a.z * b.z); }
+
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
 extern "C" {
@@ -122,15 +125,20 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         wz = spin.z;
 
         // torque into the body frame, through the inverse inertia, and back out
-        lx = r1.x * torque->x + r1.y * torque->y + r1.z * torque->z;
-        ly = r2.y * torque->y + r2.z * torque->z + r2.x * torque->x;
-        lz = r3.z * torque->z + r3.x * torque->x + r3.y * torque->y;
-        lx = inv->x * lx;
-        ly = inv->y * ly;
-        lz = inv->z * lz;
-        wx += (r1.x * lx + r2.x * ly + r3.x * lz) * dt;
-        wy += (r1.y * lx + r2.y * ly + r3.y * lz) * dt;
-        wz += (r1.z * lx + r2.z * ly + r3.z * lz) * dt;
+        {
+            Vec tq = Load(*torque);
+            Vec lt(r1.x * tq.x + r1.y * tq.y + r1.z * tq.z, r2.y * tq.y + r2.z * tq.z + r2.x * tq.x,
+                   r3.z * tq.z + r3.x * tq.x + r3.y * tq.y);
+            Vec iv = Load(*inv);
+            Vec la = Mul(iv, lt);
+            Vec wa(r1.x * la.x + r2.x * la.y + r3.x * la.z, r1.y * la.x + r2.y * la.y + r3.y * la.z,
+                   r1.z * la.x + r2.z * la.y + r3.z * la.z);
+            Vec dw = wa * Vec(dt);
+            spin = spin + dw;
+        }
+        wx = spin.x;
+        wy = spin.y;
+        wz = spin.z;
 
         vx += ax * dt;
         vy += ay * dt;
