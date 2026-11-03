@@ -476,7 +476,8 @@ void fn_801AF6FC(void) {
         lbl_8055E628->Results(lbl_8055E624->r, lbl_8055E624->n);
     }
     if (mode == 1) {
-        for (int i = 0; i < t->n; i++) {
+        int count = t->n;
+        for (int i = 0; i < count; i++) {
             st->best[i].a = fn_801AE9E0(i, &st->best[i].b);
         }
     }

@@ -465,7 +465,8 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     int k = 1;
     const MLSphere* sp = sa.p;
     int i;
-    for (i = 0; i < sa.n; i++, k++, vp++) {
+    int count = sa.n;
+    for (i = 0; i < count; i++, k++, vp++) {
         *vp = Cull(sp);
         sp++;
     }
@@ -601,7 +602,8 @@ void fn_802CDDC8(MList* m, u32 base) {
     Relocate(m->c.p, base);
     Relocate(m->d.p, base);
     int i;
-    for (i = 0; i < m->d.n; i++) {
+    int count = m->d.n;
+    for (i = 0; i < count; i++) {
         MLStrip* s = &m->d.p[i];
         Swap16(&s->ref);
         Swap16(&s->flags);

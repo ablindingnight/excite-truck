@@ -222,7 +222,8 @@ V2 fn_80139C5C(Bound* b) {
     hi.y = b->pts[0].y;
     lo.x = b->pts[0].x;
     lo.y = b->pts[0].y;
-    for (i = 1; i < b->n; i++, p++) {
+    int limit = b->n;
+    for (i = 1; i < limit; i++, p++) {
         lo.x = MinF(p->x, lo.x);
         lo.y = MinF(p->y, lo.y);
         hi.x = MaxF(p->x, hi.x);

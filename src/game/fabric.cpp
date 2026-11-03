@@ -464,7 +464,8 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
     f->prev = f->verts + n;
     f->draw = (DrawVert*)new ("fabric draw tab") u8[n * sizeof(DrawVert)];
     f->count = n;
-    for (r = 0; r < f->rows; r++) {
+    int limit = f->rows;
+    for (r = 0; r < limit; r++) {
         f32 t = (f32)r / (f32)(f->rows - 1);
         Corner l;
         Corner rr;

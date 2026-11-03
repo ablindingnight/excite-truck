@@ -699,7 +699,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
         }
     }
     len = 0.0f;
-    for (k = 1; k < b->n; k++) {
+    int limit = b->n;
+    for (k = 1; k < limit; k++) {
         len += Dist(&b->pts[k - 1], &b->pts[k]);
     }
     steps = 1;

@@ -118,7 +118,8 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
         if (PSVECSquareDistance(&c->center, &lp) > (c->radius + radius) * (c->radius + radius)) {
             continue;
         }
-        for (int j = c->first; j < c->end; j++) {
+        int limit = c->end;
+        for (int j = c->first; j < limit; j++) {
             PTri* t = &mesh->tris[j];
             f32 dist = t->d - PSVECDotProduct(&lp, &t->n);
             if (-dist > radius || -dist < 0.0f) {
@@ -309,7 +310,8 @@ void fn_801CFA48(PMesh* m) {
         PSwap32(&c->first);
         PSwap32(&c->end);
     }
-    for (i = 0; i < m->numVerts; i++) {
+    int count = m->numVerts;
+    for (i = 0; i < count; i++) {
         PVec3* v = &m->verts[i];
         PSwap32(&v->x);
         PSwap32(&v->y);

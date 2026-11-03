@@ -1680,7 +1680,8 @@ void ZoneMaster::DrawNextGate(void) {
         while (g->ring) {
             g = NextGate(g);
         }
-        for (i = c->gates + 1; i < lbl_8042FB3C.levelupGates; i++) {
+        int limit = lbl_8042FB3C.levelupGates;
+        for (i = c->gates + 1; i < limit; i++) {
             do {
                 g = NextGate(g);
             } while (g->ring);

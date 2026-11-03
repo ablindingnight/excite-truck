@@ -1001,7 +1001,8 @@ u8* fn_8024B3E8(u8* p, EvList* list) {
     for (int i = 0; i < list->count; i++) {
         EvEntry* e = &list->items[i];
         int isNew = 1;
-        for (int j = 0; j < S32(p, 0x1C); j++) {
+        int count = S32(p, 0x1C);
+        for (int j = 0; j < count; j++) {
             if (!e->unlocked || !strcasecmp(((GroupEntry*)PTR(p, 0x18))[j].name, e->group)) {
                 isNew = 0;
             }

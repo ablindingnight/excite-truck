@@ -1016,7 +1016,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
         c0.z = gb->z + best->pos.z;
-        for (int i = 1; i < S32(p, 0x5F8); i++) {
+        int count = S32(p, 0x5F8);
+        for (int i = 1; i < count; i++) {
             DentPoint* q = (DentPoint*)PTR(p, 0x26C) + i;
             DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
             w.x = q->pos.x + g->x;

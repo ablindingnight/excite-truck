@@ -683,7 +683,8 @@ void MatPlacer::Update(void) {
         for (int k = 0; k < 128; k++) {
             added.Push(slots[k]);
         }
-        for (int i = 0; i < removed.count;) {
+        int limit = removed.count;
+        for (int i = 0; i < limit;) {
             int j;
             for (j = 0; j < added.count; j++) {
                 if (added.data[j] == removed.data[i]) {
