@@ -2954,11 +2954,12 @@ static inline f32 Len2(f32 x, f32 z) { return sqrt(x * x + z * z); }
 // Fills this car's render snapshot (0xFA8 bytes at buf + 0x8): the body pose interpolated between the last
 // two physics steps, state flags and gauges, and the four wheels (interpolated hub positions, suspension and
 // spin). If a wheel sinks below its contact height, the whole body is lifted by the deepest one.
+template <class T> static inline void SwSet2(T& v, f32 a, f32 b) { v.x = a; v.y = b; }
 void fn_80188E2C(u8* p, u8* buf) {
     SnapPose tmp;
     u8* m = buf + S32(p, 0x8);
-    memset(m, 0, 0xFA8);
     f32 t = lbl_8055E460;
+    memset(m, 0, 0xFA8);
     SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
     if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
         *pose = *(SnapPose*)(p + 0x70);
@@ -3031,9 +3032,10 @@ void fn_80188E2C(u8* p, u8* buf) {
         a.y = a.y + F32(w, 0xC);
         b.y = b.y + F32(w, 0x1C);
         HVec c;
-        c.x = b.x + lbl_8055E460 * (a.x - b.x);
-        c.y = b.y + lbl_8055E460 * (a.y - b.y);
-        c.z = b.z + lbl_8055E460 * (a.z - b.z);
+        f32 xv = b.x;
+        SwSet2(c, xv + lbl_8055E460 * (a.x - xv), b.y + lbl_8055E460 * (a.y - b.y));
+        f32 zv = b.z;
+        c.z = zv + lbl_8055E460 * (a.z - zv);
         F32(o, 0x0) = c.x;
         F32(o, 0x4) = c.y;
         F32(o, 0x8) = c.z;
