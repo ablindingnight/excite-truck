@@ -592,8 +592,9 @@ void fn_802D5270(Surf* s) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
             V3 a, b;
+            f32 w0;
             f32 w1 = (1.0f / 255) * v->w1;
-            f32 w0 = (1.0f / 255) * v->w0;
+            w0 = (1.0f / 255) * v->w0;
             const SkinMtx* ma = &lbl_804DAC48[v->b0 >> 2];
             const SkinMtx* mb = &lbl_804DAC48[v->b1 >> 2];
             MulVec(&a, p, &ma->rot);
@@ -607,9 +608,9 @@ void fn_802D5270(Surf* s) {
             o->x = a.x * w0;
             o->y = a.y * w0;
             o->z = a.z * w0;
-            o->x = o->x + b.x * w1;
-            o->y = o->y + b.y * w1;
-            o->z = o->z + b.z * w1;
+            o->x = o->x + w1 * b.x;
+            o->y = o->y + w1 * b.y;
+            o->z = o->z + w1 * b.z;
             v++;
             p = (const V3*)((u8*)p + 0x10);
             o++;
