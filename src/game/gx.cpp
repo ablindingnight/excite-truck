@@ -2301,14 +2301,11 @@ struct QuadVtx {
     f32 u, v;
 };
 
-void fn_802D3BB4(const V3* c, f32 r, const V3* a, const V3* b, u32 color, f32 alpha) {
-    static const u16 idx[6] = {0, 1, 2, 1, 2, 3};
-    u16 i[6];
-    for (int k = 0; k < 6; k++) {
-        i[k] = idx[k];
-    }
+void fn_802D3BB4(VisTest* t, f32 r, const V3* c, const V3* a, const V3* b, u32 color) {
+    int alpha = t->vis * (color >> 24);
+    u32 col = (alpha << 24) | (color & 0xFFFFFF);
+    u16 i[6] = {0, 1, 2, 1, 2, 3};
     QuadVtx v[4];
-    u8 col = (color & 0xFFFFFF) | ((int)(alpha * (color >> 24)) << 24);
     v[0].pos.x = c->x + a->x * r;
     v[0].pos.y = c->y + a->y * r;
     v[0].pos.z = c->z + a->z * r;
