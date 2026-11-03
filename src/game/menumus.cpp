@@ -173,8 +173,8 @@ void fn_8020C2AC(void) {
             loaded = &lbl_8055EE42;
             break;
         case 2:
-            song = lbl_8055B5D4;
             loaded = &lbl_8055EE43;
+            song = lbl_8055B5D4;
             break;
         }
         if (!*loaded && fn_8012E938(song)) {
