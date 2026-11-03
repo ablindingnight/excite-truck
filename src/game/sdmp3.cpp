@@ -543,8 +543,8 @@ void* fn_802EAB28(void* arg) {
     u8 decoded;
     Mp3Reader* r = 0;
     s32 size = 0;
-    decoded = 0;
     pos = 0;
+    decoded = 0;
     errs = 0;
     MP3Info info;
     s32 used;
