@@ -1902,15 +1902,16 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
                     m->cars[a].bonus = Round(0.5f + left);
                 }
                 if (grade == 2) {
+                    ValVec3 tgt;
                     ValVec3 at;
                     ValVec3 imp;
-                    ValVec3 tgt;
                     RaceCarRec* ka;
                     RaceCarRec* v;
                     f32 len;
                     m->t18C.Start();
                     ka = fn_8017960C(a);
-                    tgt.x = ka->mtx.origin.x + ka->mtx.basis[2].x * 50.0f;
+                    f32 xv = ka->mtx.basis[2].x;
+                    tgt.x = ka->mtx.origin.x + xv * 50.0f;
                     tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * 50.0f;
                     tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * 50.0f;
                     v = fn_8017960C(victim);
@@ -1934,7 +1935,8 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
                     }
                     f32 fD4v = v->fD4;
                     imp.y = 17.777779f * fD4v / 0.0166833512f;
-                    at = v->mtx.origin;
+                    ValVec3 originv = v->mtx.origin;
+                    at = originv;
                     at.y += 0.5f;
                     fn_8017B3A8(v, &imp, &at);
                     fn_8018F9B4(v);
