@@ -134,7 +134,7 @@ int fn_80235FD8(int art);
 int fn_8023512C(const char* name);
 void fn_80235380(int art);
 void fn_802353F4(int art, int part, f32 x, f32 y, f32 z);
-void fn_802354A0(int art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 f32 fn_801E7E18(void);
 RaceProgress* fn_801E7E3C(void);
 int fn_801E85A4(void);
@@ -1163,7 +1163,7 @@ void fn_80010E94(int art, int part, f32 x, f32 y, f32 w, f32 h) {
     if (0.0f == w && 0.0f == h) {
         fn_802353F4(art, part, x, y, 1.0f);
     } else {
-        fn_802354A0(art, part, -1, x, y, 1.0f, w, h);
+        fn_802354A0(art, part, x, y, 1.0f, w, h, -1);
     }
 }
 
@@ -1282,56 +1282,56 @@ void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
     b = fn_80235F64(art, 0);
     p.x = x;
     p.y = y;
-    fn_802354A0(art, 0, color, p.x, p.y, 0.0f, pw, b);
+    fn_802354A0(art, 0, p.x, p.y, 0.0f, pw, b, color);
 
     pw = fn_80235EF0(art, 1);
     p.y = y;
     p.x = x + w - pw;
-    fn_802354A0(art, 1, color, p.x, p.y, 0.0f, pw, fn_80235F64(art, 1));
+    fn_802354A0(art, 1, p.x, p.y, 0.0f, pw, fn_80235F64(art, 1), color);
 
     pw = fn_80235EF0(art, 2);
     b = fn_80235F64(art, 2);
     p.x = x;
     p.y = b + (y - h);
-    fn_802354A0(art, 2, color, p.x, p.y, 0.0f, pw, fn_80235F64(art, 2));
+    fn_802354A0(art, 2, p.x, p.y, 0.0f, pw, fn_80235F64(art, 2), color);
 
     pw = fn_80235EF0(art, 3);
     p.x = x + w - pw;
     b = fn_80235F64(art, 3);
     p.y = b + (y - h);
-    fn_802354A0(art, 3, color, p.x, p.y, 0.0f, pw, fn_80235F64(art, 3));
+    fn_802354A0(art, 3, p.x, p.y, 0.0f, pw, fn_80235F64(art, 3), color);
 
     a = fn_80235EF0(art, 0);
     p.y = y;
     p.x = x + a;
     pw = w - (a + fn_80235EF0(art, 1));
-    fn_802354A0(art, 4, color, p.x, p.y, 0.0f, pw, fn_80235F64(art, 0));
+    fn_802354A0(art, 4, p.x, p.y, 0.0f, pw, fn_80235F64(art, 0), color);
 
     a = fn_80235EF0(art, 2);
     p.x = x + a;
     pw = w - (a + fn_80235EF0(art, 3));
     b = fn_80235F64(art, 2);
     p.y = b + (y - h);
-    fn_802354A0(art, 5, color, p.x, p.y, 0.0f, pw, b);
+    fn_802354A0(art, 5, p.x, p.y, 0.0f, pw, b, color);
 
     pw = fn_80235EF0(art, 0);
     a = fn_80235F64(art, 0);
     p.x = x;
     p.y = y - a;
-    fn_802354A0(art, 6, color, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 2)));
+    fn_802354A0(art, 6, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 2)), color);
 
     pw = fn_80235EF0(art, 1);
     p.x = x + w - pw;
     a = fn_80235F64(art, 1);
     p.y = y - a;
-    fn_802354A0(art, 7, color, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 3)));
+    fn_802354A0(art, 7, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 3)), color);
 
     a = fn_80235EF0(art, 0);
     p.x = x + a;
     pw = w - a - fn_80235EF0(art, 1);
     b = fn_80235F64(art, 0);
     p.y = y - b;
-    fn_802354A0(art, 8, color, p.x, p.y, 0.0f, pw, h - b - fn_80235F64(art, 2));
+    fn_802354A0(art, 8, p.x, p.y, 0.0f, pw, h - b - fn_80235F64(art, 2), color);
 }
 
 static inline void Rotate(Vec2* v, f32 angle) {
