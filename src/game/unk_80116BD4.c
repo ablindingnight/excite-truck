@@ -2565,7 +2565,7 @@ f32 fn_8011AE18(s32 arg0) {
 void fn_8011AE68(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
     s16 *out = (s16 *)arg0;
     u32 i;
-    s32 v;
+    u32 v;
     for (i = 0; i < arg2; i++) {
         v = (s32)(*arg1++ * farg0);
         if (v < -32768) v = -32768;
@@ -3926,7 +3926,7 @@ void fn_8011D9E4(void* arg0, void* arg1) {
     u32 len;
     u8* dst;
     u8* table;
-    s32 symbol;
+    u32 symbol;
     if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
         return;
     }
@@ -7299,7 +7299,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
         s32 a4 = t[5] + t[3];
         s32 a5 = t[5] - t[3];
         s32 a6 = t[1] + t[7];
-        s32 a7 = t[1] - t[7];
+        u32 a7 = t[1] - t[7];
         s32 b0 = a4 + a6;
         s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
         s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
