@@ -2051,14 +2051,14 @@ int fn_8019E500(u8* p, u8* q) {
             continue;
         }
         EdgeFrame e;
-        BoxAxis* aa = &ax[(i + 1) % 3];
         BoxAxis* ab = &ax[(i + 2) % 3];
+        BoxAxis* aa = &ax[(i + 1) % 3];
         BoxAxis* ai = &ax[i];
         e.axis.x = ai->dir.v[0];
         e.axis.y = ai->dir.v[1];
         e.axis.z = ai->dir.v[2];
-        f32 ea = aa->ext - r;
         f32 eb = ab->ext - r;
+        f32 ea = aa->ext - r;
         e.b.x = ab->dir.v[0];
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
