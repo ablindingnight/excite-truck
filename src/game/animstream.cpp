@@ -335,24 +335,23 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
             u = 1.0f;
         }
         u = u > 0.0f ? u : 0.0f;
-        AQuat* p = &a->pose[i];
         if (i > 0) {
             f32 s = 1.0f - u;
-            p->x = b->q0.x * s + b->q1.x * u;
-            p->y = b->q0.y * s + b->q1.y * u;
-            p->z = b->q0.z * s + b->q1.z * u;
-            p->w = b->q0.w * s + b->q1.w * u;
-            f32 n = 1.0f / (f32)sqrt(p->x * p->x + (p->y * p->y + (p->z * p->z + p->w * p->w)));
-            p->x *= n;
-            p->y *= n;
-            p->z *= n;
-            p->w *= n;
+            a->pose[i].x = b->q0.x * s + b->q1.x * u;
+            a->pose[i].y = b->q0.y * s + b->q1.y * u;
+            a->pose[i].z = b->q0.z * s + b->q1.z * u;
+            a->pose[i].w = b->q0.w * s + b->q1.w * u;
+            f32 n = 1.0f / (f32)sqrt(a->pose[i].x * a->pose[i].x + (a->pose[i].y * a->pose[i].y + (a->pose[i].z * a->pose[i].z + a->pose[i].w * a->pose[i].w)));
+            a->pose[i].x *= n;
+            a->pose[i].y *= n;
+            a->pose[i].z *= n;
+            a->pose[i].w *= n;
         } else {
             f32 s = 1.0f - u;
-            p->x = b->q0.x * s + b->q1.x * u;
-            p->y = b->q0.y * s + b->q1.y * u;
-            p->z = b->q0.z * s + b->q1.z * u;
-            p->w = 0.0f;
+            a->pose[i].x = b->q0.x * s + b->q1.x * u;
+            a->pose[i].y = b->q0.y * s + b->q1.y * u;
+            a->pose[i].z = b->q0.z * s + b->q1.z * u;
+            a->pose[i].w = 0.0f;
         }
     }
 }
