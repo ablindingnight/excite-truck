@@ -685,7 +685,7 @@ void MatPlacer::Update(void) {
         for (int k = 0; k < 128; k++) {
             added.Push(slots[k]);
         }
-        int i;
+        s32 i;
         int limit = removed.count;
         for (i = 0; i < limit;) {
             int j;
