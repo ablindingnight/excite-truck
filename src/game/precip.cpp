@@ -757,11 +757,9 @@ void SnowSystem::Draw(void) {
     for (int gx = 0; gx < lbl_8055CFF0 / 64 + 1; gx++) {
         for (int gy = 0; gy < lbl_8055CFF4 / 64 + 1; gy++) {
             int x1 = (gx + 1) * 64;
-            f32 v = (f32)(gy * 7) / 5.0f;
             int y1 = (gy + 1) * 64;
-            f32 u = (f32)(gx * 7) / 3.0f;
             fn_802C9124(gx * 64, gy * 64, lbl_8055CFF0 < x1 ? lbl_8055CFF0 : x1, lbl_8055CFF4 < y1 ? lbl_8055CFF4 : y1,
-                        driftX + u, driftY + v, (1.0f + driftX) + u, (1.0f + driftY) + v, 0x6EFFFFFF);
+                        driftX + (f32)(gx * 7) / 3.0f, driftY + (f32)(gy * 7) / 5.0f, (1.0f + driftX) + (f32)(gx * 7) / 3.0f, (1.0f + driftY) + (f32)(gy * 7) / 5.0f, 0x6EFFFFFF);
         }
     }
     fn_802C9118();
