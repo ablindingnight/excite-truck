@@ -409,7 +409,8 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
         p->redConst = start.x;
         p->greenRamp = end.y - start.y;
         p->greenConst = start.y;
-        p->blueRamp = end.z - start.z;
+        f32 zv = end.z;
+        p->blueRamp = zv - start.z;
         p->blueConst = start.z;
     } else {
         p->redRamp = vn->GetFloat("Red_ramp", 0.0f);
