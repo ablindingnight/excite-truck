@@ -1308,8 +1308,9 @@ void fn_80195654(u8* d, u8* out) {
         u8* b = PTR(d, 0x16C);
         u8* an = PTR(a, 0x14);
         u8* bn = PTR(b, 0x14);
+        f32 vb;
         f32 va = F32(a, 0x24) + F32(d, 0x1A4) * (F32(an, 0x24) - F32(a, 0x24));
-        f32 vb = F32(b, 0x24) + F32(d, 0x170) * (F32(bn, 0x24) - F32(b, 0x24));
+        vb = F32(b, 0x24) + F32(d, 0x170) * (F32(bn, 0x24) - F32(b, 0x24));
         t = vb + (dt / 1.5f) * (va - vb);
     } else {
         u8* a = PTR(d, 0x1A0);
