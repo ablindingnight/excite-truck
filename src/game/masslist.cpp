@@ -294,9 +294,9 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     v.z = mtx->basis[2].z * a;
     s->vel = MVec4(v.x, v.y, v.z);
     s->v60 = MVec4(0.0f, 0.0f, 0.0f);
-    MVec4 k = x->v70;
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    MVec4 k = x->v70;
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);
     *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -308,7 +308,8 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         *(MVec4*)&c->pts[9 + i] = MVec4(0.0f, 0.0f, 0.0f);
         *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
-        in.x = x->pts[i].x;
+        f32 xv = x->pts[i].x;
+        in.x = xv;
         in.y = x->pts[i].y;
         in.z = x->pts[i].z;
         MVec3 out;
