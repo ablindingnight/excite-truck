@@ -4,7 +4,7 @@
 
 static inline void Swap4(void* v) {
     u8* p = (u8*)v;
-    u8 t = p[0];
+    s8 t = p[0];
     p[0] = p[3];
     p[3] = t;
     t = p[1];
