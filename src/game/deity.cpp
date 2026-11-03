@@ -640,10 +640,10 @@ int fn_801B1130(int i) {
 int fn_801B11DC(const void* pa, const void* pb) {
     DeityCar* a = &lbl_8055E684[*(const s32*)pa];
     DeityCar* b = &lbl_8055E684[*(const s32*)pb];
-    bool aFin = a->finishLap == lbl_8055E680 + 1;
-    bool bFin = b->finishLap == lbl_8055E680 + 1;
-    s32 ap = ((DState*)a->State2())->place;
-    s32 bp = ((DState*)b->State2())->place;
+    bool aFin = lbl_8055E680 + 1 == a->finishLap;
+    bool bFin = lbl_8055E680 + 1 == b->finishLap;
+    s32 ap = ((DState*)a->State2())->lap;
+    s32 bp = ((DState*)b->State2())->lap;
     s32 ar = a->rank;
     s32 br = b->rank;
     if (aFin && bFin) {
@@ -659,10 +659,10 @@ int fn_801B11DC(const void* pa, const void* pb) {
     if (aFin || bFin) {
         return aFin ? -1 : 1;
     }
-    if (ap != bp) {
-        return bp - ap;
+    if (ap == bp) {
+        return br - ar;
     }
-    return br - ar;
+    return bp - ap;
 }
 
 }  // extern "C"
