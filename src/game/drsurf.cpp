@@ -1088,7 +1088,8 @@ void fn_802D68C4(ColVtx* verts, int unused, const u16* idx, int n) {
     GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
     GXBegin(0x90, 0, n);
     for (; n > 0; n--) {
-        ColVtx v = verts[*idx++];
+        ColVtx v;
+        v = verts[*idx++];
         WGPIPE.f = v.x;
         WGPIPE.f = v.y;
         WGPIPE.f = v.z;
