@@ -613,15 +613,19 @@ void MatPlacer::Draw(void) {
 extern "C" {
 
 void fn_802B321C(InlineVec<ObjTweak, 1>* out, u8** clumpy, InlineVec<MatPlacer*, 6>* set, int layer) {
+    ObjectPlacer* p;
+    int k;
+    MatPlacer* m;
+    ObjTweak* t;
     if (layer < 0 || layer >= set->count) {
         fn_802E30C8("GetTweakers(%d): This layer index is out of range (%d->%d)", layer, 0, set->count);
         return;
     }
-    MatPlacer* m = set->data[layer];
+    m = set->data[layer];
     if (out) {
-        for (int k = 0; k < m->placers.count && out->count + 1 <= out->cap; k++) {
-            ObjectPlacer* p = m->placers.data[k];
-            ObjTweak* t = &out->data[out->count++];
+        for (k = 0; k < m->placers.count && out->count + 1 <= out->cap; k++) {
+            p = m->placers.data[k];
+            t = &out->data[out->count++];
             t->name = p->name;
             t->placer = p;
             t->scales = &p->minScale;
