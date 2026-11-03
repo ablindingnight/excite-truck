@@ -1031,7 +1031,7 @@ void fn_80241820(ColorPick* c) {
                 f32 a = (d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758);
                 a = lbl_80563764 < a ? lbl_80563764 : a;
                 a = a > lbl_80563758 ? a : lbl_80563758;
-                u32 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
+                u8 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
                 tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
                 frame = (alpha << 24) | 0xFFFFFF;
                 if (sx > x && sx + cell < x + w) {
