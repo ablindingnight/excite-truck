@@ -480,10 +480,10 @@ void Pair::UpdateDist(void) { dist2 = Len2(dpos.x, dpos.y); }
 extern "C" {
 
 static inline void ScaleV(V2* o, const V2& v, f32 s) {
-    f32 x = v.x * s;
-    f32 y = v.y * s;
-    o->x = x;
-    o->y = y;
+    f32 x = v.x;
+    f32 y = v.y;
+    o->x = x * s;
+    o->y = y * s;
 }
 static inline void CopyV(V2* o, const V2& v) {
     f32 x = v.x;
