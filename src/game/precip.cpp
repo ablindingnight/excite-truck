@@ -948,7 +948,7 @@ void RainSystem::Frustum(void) {
     tanHalf = t;
     near = 1.0f + n;
     f32 s = f + n;
-    f32 b = -0.5f * s - 2.0f * f * n;
+    f32 b = -s * 0.5f - 2.0f * f * n;
     f32 c = n * (f * 0.125f) - 0.015f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
 }
