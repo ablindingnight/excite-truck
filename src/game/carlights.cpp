@@ -191,7 +191,8 @@ void fn_80294CCC(const Vec* p, const Vec* r, const Vec* u, f32 w, f32 h, u32 col
     LightVtx v[4];
     f32 nw = -w;
     f32 lx = p->x + r->x * nw;
-    f32 ly = p->y + r->y * nw;
+    f32 yv = r->y;
+    f32 ly = p->y + yv * nw;
     f32 lz = p->z + r->z * nw;
     f32 rx = p->x + r->x * w;
     f32 ry = p->y + r->y * w;
