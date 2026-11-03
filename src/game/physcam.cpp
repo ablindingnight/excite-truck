@@ -1023,14 +1023,16 @@ void CamRegion::Prepare(u8* line) {
     V2 d2;
     center.x = F32(cam, 0x0);
     center.y = F32(cam, 0x8);
+    f32 wrap;
     f32 rad = F32(cam, 0xC);
-    f32 wrap = *(f32*)(PTR(line, 0x2C) + 8);
+    wrap = *(f32*)(PTR(line, 0x2C) + 8);
     f32 r2 = rad * rad;
     S32(line, 0xC) = fn_80270D1C(S32(cam, 0x5C));
     int k = 0;
-    int done = 0;
+    u8* seg;
     u8* first = PTR(PTR(line, 0x2C), 0x1C);
-    u8* seg = first;
+    int done = 0;
+    seg = first;
     do {
         int n = 0;
         s.x = F32(seg, 0x0) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
@@ -1039,10 +1041,11 @@ void CamRegion::Prepare(u8* line) {
         e.y = F32(seg, 0x4) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
-        rel.x = s.x - center.x;
         f32 a = dir.x * dir.x + dir.y * dir.y;
-        rel.y = s.y - center.y;
-        f32 b = lbl_80563F8C * (rel.x * dir.x + rel.y * dir.y);
+        rel.x = s.x - center.x;
+        f32 yv = center.y;
+        rel.y = s.y - yv;
+        f32 b = lbl_80563F8C * (dir.x * rel.x + rel.y * dir.y);
         f32 c = rel.x * rel.x + rel.y * rel.y - r2;
         f32 disc = b * b - lbl_80563F90 * a * c;
         if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
