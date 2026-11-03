@@ -248,7 +248,9 @@ void fn_80008390(void) {
 
     lbl_8034F3D0.list.Clear();
     if (GetNumPlayers() > 1) {
-        lbl_8034F3D0.list.Add(multi[0]);
+        for (i = 0; i < sizeof(multi) / sizeof(multi[0]); i++) {
+            lbl_8034F3D0.list.Add(multi[i]);
+        }
     }
     if (!lbl_8055D370) {
         for (i = 0; i < sizeof(basic) / sizeof(basic[0]); i++) {
