@@ -618,7 +618,6 @@ int fn_8028B500(const void* evp) {
         if (ev->terrain == 0x6E || ev->terrain < 8) {
             cap = 100.0f;
         }
-        f32 zero = 0.0f;
         for (int i = 0; i < n; i++) {
             Vec d;
             Scale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
@@ -628,7 +627,7 @@ int fn_8028B500(const void* evp) {
             f32 dot = PSVECDotProduct(&ev->normal, &d);
             f32 s = -dot + fn_80287BC8(-1.5f, 3.0f);
             s = MIN(cap, s);
-            s = MAX(s, zero);
+            s = MAX(s, 0.0f);
             AddScaled(&d, &d, &ev->normal, s);
             lbl_8055F6FC->Spawn(&ev->pos, &d, hint, ev->car);
         }

@@ -187,11 +187,10 @@ struct StuntEmitters {
         StuntDesc r;
         StuntDesc e;
         fn_8028E61C(&e);
-        f32 t = 0.3f;
         f32 t2 = 0.3f * 0.3f;
         e.kind = 2;
         e.max = 300;
-        e.size0 = t;
+        e.size0 = 0.3f;
         e.size1 = 1.0f;
         e.frames = 5;
         e.shading = 0.5f;
@@ -211,7 +210,7 @@ struct StuntEmitters {
         e.a5C = 3.9f;
         f32 g = -1.499f * (4.0f / t2);
         e.a4C = g;
-        e.a50 = (-0.001f - 0.5f * g * t2) / t;
+        e.a50 = (-0.001f - 0.5f * g * t2) / 0.3f;
         e.a54 = 0.001f;
         e.a78 = 0.0f;
         e.a7C = 2.0f;
