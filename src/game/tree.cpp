@@ -866,9 +866,10 @@ void fn_802BDD8C(f32 range) {
                 if (t->farTris <= 10) {
                     fn_802C8BD0(fn_802C28C0());
                     fn_802DC71C(t->farId, t->farTex);
+                    f32 span;
                     f32 r2 = range * range;
                     f32 in = range - 50.0f;
-                    f32 span = r2 - in * in;
+                    span = r2 - in * in;
                     TMtx cam;
                     fn_801F1C24(&cam);
                     const TVec* eye = (const TVec*)(fn_801E8718(-1) + 0x24);
