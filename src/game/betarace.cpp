@@ -4317,7 +4317,11 @@ inline void BetaCar::Reset(void) {
         LocalCarDesc* d = fn_801769CC();
         LocalCarDesc* e = fn_801769CC();
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), e->event, d->track, 0);
-        shownInt = hs ? hs->score : 0;
+        if (hs) {
+            shownInt = hs->score;
+        } else {
+            shownInt = 0;
+        }
     }
     meterSmooth = 0.0f;
     meter = 0.0f;
