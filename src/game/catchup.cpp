@@ -83,8 +83,8 @@ f32 fn_80138DF4(Motion* m) {
             f32 t;
             f32 miss;
             if (fn_80138C28(m, &t, &miss)) {
-                r = (m->v2 + t * m->a2 - m->v1) / MaxF(t, 0.01f);
                 lbl_8055E100 = -5;
+                r = (m->v2 + t * m->a2 - m->v1) / MaxF(t, 0.01f);
             } else {
                 lbl_8055E100 = -4;
                 r = miss;
@@ -95,11 +95,7 @@ f32 fn_80138DF4(Motion* m) {
             if (fn_80138BE4(m->Dv(), m->Dp())) {
                 r = -r;
             }
-            if (fn_80138BE4(m->Dv(), m->Dp())) {
-                lbl_8055E100 = -3;
-            } else {
-                lbl_8055E100 = -2;
-            }
+            lbl_8055E100 = fn_80138BE4(m->Dv(), m->Dp()) ? -3 : -2;
         }
     } else {
         lbl_8055E100 = -1;
