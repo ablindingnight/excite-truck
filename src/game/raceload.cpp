@@ -164,11 +164,11 @@ void fn_80009DC8(RaceSetup* rs) {
         tmp.flags = 0;
         tmp.unk74 = 0;
         for (i = 0; i < n; i++) {
-            s = &list->slots[list->count++];
+            RacerSlot* trailer = &list->slots[list->count++];
             vehicle = FindVehicleByFlags(1, i)->id;
-            *s = tmp;
-            s->vehicle = vehicle;
-            CopyString(FindVehicle(vehicle)->name, 32, s->vehicleName);
+            *trailer = tmp;
+            trailer->vehicle = vehicle;
+            CopyString(FindVehicle(vehicle)->name, 32, trailer->vehicleName);
         }
     }
 }
