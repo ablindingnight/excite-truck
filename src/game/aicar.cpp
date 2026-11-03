@@ -497,9 +497,9 @@ void fn_8019386C(u8* d) { fn_80193CE0(d); }
 void fn_80193870(u8* d) { fn_801945F8(d, "console"); }
 
 void fn_80193878(u8* d) {
+    RVec3 pos;
     RVec3 at;
     RVec3 imp;
-    RVec3 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
     pos.z = 13349.999f;
@@ -507,9 +507,9 @@ void fn_80193878(u8* d) {
     imp.x = 10.0f;
     imp.y = 0.0f;
     imp.z = 0.0f;
-    at.x = F32(car, 0x94) + 10.0f;
-    at.y = F32(car, 0x98) + 0.0f;
-    at.z = F32(car, 0x9C) + 0.0f;
+    at.x = F32(car, 0x94) + imp.x;
+    at.y = F32(car, 0x98) + imp.y;
+    at.z = F32(car, 0x9C) + imp.z;
     ((RigidBody*)CAR(d))->AddImpulse(1.0f, &pos, &at);
 }
 
