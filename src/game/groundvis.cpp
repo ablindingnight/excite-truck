@@ -504,6 +504,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
         half = n->size / 2;
         f32 radius = lbl_80564AF0 * half;
         Vec c;
+        f32 blend;
         f32 k;
         if (half > 64) {
             c.x = n->x * lbl_80564AF0;
@@ -523,7 +524,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             continue;
         }
 
-        f32 blend = -1.0f;
+        blend = -1.0f;
         int draw;
         if (n->size > 128) {
             blend = 1.0f;
@@ -627,8 +628,9 @@ void fn_802AEB3C(const GroundFrame* cam) {
                     }
                 }
                 if (e[mid] == 0xFFFF) {
+                    s16 my;
                     s16 mx = n->x + step * midX[i];
-                    s16 my = n->y + step * midY[i];
+                    my = n->y + step * midY[i];
                     if (1.0f == alpha) {
                         e[mid] = fn_802AFFA8(mx, my);
                     } else {
@@ -713,16 +715,20 @@ void fn_802AEB3C(const GroundFrame* cam) {
                 }
             }
         } else {
+            GroundNode cur;
             int h = n->size / 2;
             if (h == 4) {
                 fn_802BDFBC(cell, h, n->scale);
             }
-            GroundNode cur = *n;
+            cur = *n;
+            u16* p;
+            u16* m1;
             int q = cur.size / 2;
+            u16* m2;
             int o = q / 2;
-            u16* p = fn_802AFEC0(q);
-            u16* m1 = p + (q + 1);
-            u16* m2 = p + (q + 1) * 2;
+            p = fn_802AFEC0(q);
+            m1 = p + (q + 1);
+            m2 = p + (q + 1) * 2;
             u16* m3 = p + (q + 1) * 3;
             fn_802AFEA4(&lbl_804BD8E8, -q);
             // Children go on the stack far-to-near for the view quadrant.
