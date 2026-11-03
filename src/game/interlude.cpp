@@ -855,13 +855,13 @@ void fn_801C3D88(const char* name) {
             w->mask = fn_801C3954(w->who);
             strcpy(w->except, n->GetString("except", "nobody"));
             w->mask &= ~fn_801C3954(w->except);
-            if (w->kind != 0) {
-                fn_802E317C("interlude: unhandled wait type %d", w->kind);
-            } else {
+            if (w->kind == 0) {
                 const ValVec3& p = n->GetVec3("pt");
                 w->pt.x = p.x;
                 w->pt.y = p.y;
                 w->pt.z = p.z;
+            } else {
+                fn_802E317C("interlude: unhandled wait type %d", w->kind);
             }
             break;
         }
