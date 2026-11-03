@@ -341,6 +341,12 @@ extern "C" {
 
 PanelVol* fn_801BF214(void) { return new ("panel") PanelVol; }
 
+// A vector whose empty default constructor is out of line: the original calls it for each local (the linker
+// folded every such empty ctor into one function, labelled StatsUpdate__Fv in symbols.txt).
+struct WVec : RVec3 {
+    WVec(void);
+};
+
 int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {
     if ((f32)__fabs(lo->x - hi->x) <= lbl_80558DC4[0] && (f32)__fabs(lo->y - hi->y) <= lbl_80558DC4[0] &&
         (f32)__fabs(lo->z - hi->z) <= lbl_80558DC4[0]) {
@@ -373,7 +379,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     p->part = part;
     p->car = fn_801C0168(p->owner);
     fn_801C014C(p, off);
-    RVec3 neg;
+    WVec neg;
     fn_801C0124(&neg, off, -1.0f);
     CollShape* s = fn_801C00F8(p, 0);
     if (s && fn_801C00F0(s) == 'SPHR') {
@@ -390,8 +396,8 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     PanelEdge edges[6] = {
         {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
     };
-    RVec3 b;
-    RVec3 a;
+    WVec b;
+    WVec a;
     fn_801BFE7C(&a, lo, off);
     fn_801BFE7C(&b, hi, off);
     p->org = 0;
@@ -416,7 +422,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
         verts[i].u = 4.545f;
         verts[i].v = 0.127f;
     }
-    RVec3 pts[4];
+    WVec pts[4];
     for (i = 0; i < 4; i++) {
         fn_80144DAC(&pts[i], &verts[i].p);
     }
