@@ -1404,8 +1404,8 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             u32 qf = U32(q, 0x1C);
             u32 pf = U32(p, 0x1C);
             u32 mask = ((~(qf ^ pf) >> 2 & 1) ? 2 : 0) | 1;
-            int qa = (qf & mask) != 0;
-            int pa = (pf & mask) != 0;
+            bool qa = (qf & mask) != 0;
+            bool pa = (pf & mask) != 0;
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
                 f32 fr = lbl_8055A4C0;
                 f32 t = lbl_80562344 * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
