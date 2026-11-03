@@ -234,18 +234,19 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
 }
 
 s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
+    const BFrame* p = world;
     BFrame skin[32];
     if (root) {
-        *root = world[0];
+        *root = p[0];
     }
-    s32 nd = set->numDest;
     Bone* b = set->bones;
-    for (int i = 0; i < n; i++, b++, world++) {
+    s32 nd = set->numDest;
+    for (int i = 0; i < n; i++, b++, p++) {
         if (b->dest >= 0) {
-            BFrame w = *world;
+            BFrame w = *p;
             BMtx33 l = b->rest.r;
-            fn_801C7254(&l);
             BFrame* s = &skin[b->dest];
+            fn_801C7254(&l);
             Mat3Mul((Mat3*)s, (const Mat3*)&w, (const Mat3*)&l);
             BVec tmp;
             StatsUpdate__Fv(&tmp);
