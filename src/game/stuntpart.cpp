@@ -413,12 +413,12 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
             p->pts[1].z = s[1].z + car->pos.z;
             f32 adt = (f32)AbsD(dt);
             for (int i = 1; i < 8; i++) {
-                f32 t = i / 8.0f;
                 Vec a = *(const Vec*)&car->spin;
+                f32 t = i / 8.0f;
                 Vec b = n;
                 f32 k = -PSVECMag((const Vec*)&car->vel) * lbl_8055CC68;
                 Scale(&a, &a, 1.0f * (t * k));
-                Scale(&b, &b, 1.0f * ((1.0f - t) * k));
+                Scale(&b, &b, 1.0f * (k * (1.0f - t)));
                 sum.x = b.x + a.x;
                 sum.y = b.y + a.y;
                 sum.z = b.z + a.z;
@@ -428,11 +428,9 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
-                    const Vec* a0 = &p->pts[i * 2];
-                    const Vec* a1 = &p->pts[i * 2 + 1];
-                    q.x = Lerp(a0->x, a1->x, r);
-                    q.y = Lerp(a0->y, a1->y, r);
-                    q.z = Lerp(a0->z, a1->z, r);
+                    q.x = Lerp(p->pts[i * 2].x, p->pts[i * 2 + 1].x, r);
+                    q.y = Lerp(p->pts[i * 2].y, p->pts[i * 2 + 1].y, r);
+                    q.z = Lerp(p->pts[i * 2].z, p->pts[i * 2 + 1].z, r);
                     AddScaled(&q, &q, &car->axes[1], -1.0f);
                     fn_8028E584(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
                 }
