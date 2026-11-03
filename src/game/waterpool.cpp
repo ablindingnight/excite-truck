@@ -859,20 +859,25 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     f32 speed = sqrt(v.x * v.x + v.y * v.y);
     f32 inv = 1.0f / speed;
     q.x = d.x + v.x * (depth * inv);
-    q.y = d.y + v.y * (depth * inv);
-    f32 fu = q.x * p->dxx + q.y * p->dxz;
+    f32 yv = d.y;
+    q.y = yv + v.y * (depth * inv);
+    f32 dxzv = p->dxz;
+    f32 fu = q.x * p->dxx + q.y * dxzv;
+    int gy;
     int gx = fu < 0.0f ? fu - 0.5f : 0.5f + fu;
-    f32 fv = q.x * p->dyx + q.y * p->dyz;
-    int gy = fv < 0.0f ? fv - 0.5f : 0.5f + fv;
+    f32 dyzv = p->dyz;
+    f32 fv = q.x * p->dyx + q.y * dyzv;
+    gy = fv < 0.0f ? fv - 0.5f : 0.5f + fv;
     if (gx < 1 || gx >= p->nx - 1 || gy < 1 || gy >= p->ny - 1) {
         return;
     }
     p->cur[gx + gy * p->nx] = -32768;
     dir.x = v.y * inv;
     dir.y = v.x * inv;
-    base.x = p->origin.x + q.x;
+    base.x = q.x + p->origin.x;
     base.y = 0.25f + p->origin.y;
-    base.z = p->origin.z + q.y;
+    f32 zv = p->origin.z;
+    base.z = zv + q.y;
     f32 a = 0.125f * speed;
     a = 2.0f < a ? 2.0f : a;
     int n = (int)(0.25f * speed) < 10 ? (int)(0.25f * speed) : 10;
