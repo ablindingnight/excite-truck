@@ -1504,8 +1504,8 @@ inline void CrushMaster::vf4C(int view) {
     }
     if (layout.p) {
         CrushCar* cc;
-        int n;
         Box* icon;
+        int n;
         Box* hit;
         TextElem* col;
         int i;
