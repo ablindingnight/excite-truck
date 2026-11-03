@@ -386,7 +386,7 @@ public:
         int r = Rank();
         f32 f = 0.0f;
         if (r < ranks.a.count - 1) {
-            u32 lo = r > 0 ? ranks.a.data[r - 1].thresh : 0;
+            s32 lo = r > 0 ? ranks.a.data[r - 1].thresh : 0;
             u32 v = Value();
             f32 span = (f32)(ranks.a.data[r].thresh - lo);
             f32 cur = (f32)(v - lo);
