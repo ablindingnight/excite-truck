@@ -243,7 +243,7 @@ void fn_80008390(void) {
     static const s32 basic[] = {0x1, 0x15, 0x14, 0x13};
     static const s32 advanced[] = {0x1, 0x15, 0x14, 0x13, 0x10};
     static const s32 dpad[] = {0x2, 0x3, 0x4, 0x5};
-    u32 i;
+    s32 i;
     int j;
 
     lbl_8034F3D0.list.Clear();
