@@ -1728,9 +1728,13 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 la = F32(p, 0x28);
     f32 lb = F32(q, 0x28);
     if (nn < lbl_8056232C) {
-        mid.x = (ca.x + cb.x) / 2.0f;
-        mid.y = (ca.y + cb.y) / 2.0f;
-        mid.z = (ca.z + cb.z) / 2.0f;
+        f32 zv;
+        f32 xv = ca.x;
+        mid.x = (xv + cb.x) / 2.0f;
+        f32 yv = ca.y;
+        mid.y = (yv + cb.y) / 2.0f;
+        zv = cb.z;
+        mid.z = (ca.z + zv) / 2.0f;
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
         w.z = mid.z - ca.z;
@@ -1786,7 +1790,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     if ((f32)__fabs(dist) <= lbl_80558DC4[0]) {
         return 0;
     }
-    f32 pen = (F32(p, 0x24) + F32(q, 0x24)) - dist;
+    f32 pen = (F32(q, 0x24) + F32(p, 0x24)) - dist;
     if (pen < 0.0f) {
         return 0;
     }
