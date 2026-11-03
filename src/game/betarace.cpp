@@ -4270,7 +4270,9 @@ extern "C" int fn_80161BB8(void);
 
 
 extern "C" {
-void fn_80206750(Sound* s, int car, int pan);
+// Where a car's sound plays: shared mix (0) or routed to that player's own output (2); sound.cpp tests it as a flag.
+enum SoundRoute { SOUND_ROUTE_MIX = 0, SOUND_ROUTE_PLAYER = 2 };
+void fn_80206750(Sound* s, int car, SoundRoute route);
 void fn_8018A120(RaceCarRec* rc);
 }
 
@@ -4328,7 +4330,7 @@ inline void BetaCar::Reset(void) {
     meterObj->vf0C();
     {
         CarHud* h = hud;
-        int pan;
+        SoundRoute pan;
         {
             StuntIter it(&h->pending, 0);
             for (; it.Valid(); it.Next()) {
@@ -4342,7 +4344,7 @@ inline void BetaCar::Reset(void) {
             h->free.PushBack(h->current);
             h->current = 0;
         }
-        pan = fn_80009C84() ? 0 : 2;
+        pan = fn_80009C84() ? SOUND_ROUTE_MIX : SOUND_ROUTE_PLAYER;
         if (h->bigSnd) {
             fn_80206750(h->bigSnd, h->racer, pan);
         }
@@ -4351,7 +4353,7 @@ inline void BetaCar::Reset(void) {
     bA9 = 1;
     bAA = 0;
     {
-        int pan = fn_80009C84() ? 0 : 2;
+        SoundRoute pan = fn_80009C84() ? SOUND_ROUTE_MIX : SOUND_ROUTE_PLAYER;
         if (starSnd) {
             fn_80206750(starSnd, id, pan);
         }
@@ -4585,7 +4587,7 @@ inline void BetaMaster::c2(Body* b, int car) {
             }
             if (pts > 0.5f) {
                 if (coinSnd) {
-                    fn_80206750(coinSnd, car, 0);
+                    fn_80206750(coinSnd, car, SOUND_ROUTE_MIX);
                     coinSnd->Play();
                 }
                 c->score += pts;
@@ -4617,7 +4619,7 @@ inline void BetaMaster::c2(Body* b, int car) {
             }
             if (got) {
                 if (starSnd) {
-                    fn_80206750(starSnd, car, fn_80009C84() ? 0 : 2);
+                    fn_80206750(starSnd, car, fn_80009C84() ? SOUND_ROUTE_MIX : SOUND_ROUTE_PLAYER);
                     starSnd->Play();
                 }
                 fn_8018A120(rc);
