@@ -140,12 +140,17 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         wy = spin.y;
         wz = spin.z;
 
-        vx += ax * dt;
-        vy += ay * dt;
-        vz += az * dt;
-        pPos->x = pos.x + vx * dt;
-        pPos->y = pos.y + vy * dt;
-        pPos->z = pos.z + vz * dt;
+        {
+            Vec acc(ax, ay, az);
+            Vec dv = acc * Vec(dt);
+            vel = vel + dv;
+            Vec dp = vel * Vec(dt);
+            pos = pos + dp;
+            Store(*pPos, pos);
+        }
+        vx = vel.x;
+        vy = vel.y;
+        vz = vel.z;
 
         // q -= (0.5 w) * q * dt, then renormalise
         ox = wx * (ident.x + 0.5f);
