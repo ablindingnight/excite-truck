@@ -455,7 +455,7 @@ public:
     virtual const char* GetName(void);
 
     void SetState(int s) {
-        if (shown != s) {
+        if (s != shown) {
             shown = s;
             start = GetTime();
         }
