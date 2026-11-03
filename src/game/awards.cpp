@@ -1242,12 +1242,12 @@ void fn_801CD970(int car) {
         }
         if (fn_8026B0C0(car)) {
             if (p->shown) {
-                if (p->time >= 0.25f) {
-                    p->time = 2.75f;
-                } else {
+                if (p->time < 0.25f) {
                     PopQueue(m);
                     p->time = -1.0f;
                     p->used = 0;
+                } else {
+                    p->time = 2.75f;
                 }
             }
             p = 0;
@@ -1285,10 +1285,11 @@ void fn_801CD970(int car) {
     AwText* val = l->Find(lbl_802F9930[fn_80204CF0()]);
     AwText* title = l->Find("live_update_title");
     if (msg && val && title) {
+        AwText e;
         char num[0x14];
         char label[0x40];
         char value[0x10];
-        AwText e = *msg;
+        e = *msg;
         e.pos.x += slide;
         Statistic* s = p->h->stat;
         s->Format(num, sizeof(num));
