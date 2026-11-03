@@ -420,10 +420,10 @@ s32 fn_802168F0(Window* w) {
     fn_80217734(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
     fn_80211F64();
     fn_80211F64();
-    rate = 1.0f / FadeMax(fade.in, 0.01f);
     t = 1.0f;
-    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? t : 0.0f;
+    rate = 1.0f / FadeMax(fade.in, 0.01f);
     one = 1.0f;
+    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? t : 0.0f;
     started = 0;
     lbl_8055EF94 = t;
     while (!lbl_8055EF70) {
