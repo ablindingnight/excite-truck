@@ -1287,8 +1287,9 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         f32 box[6];
         fn_802C77F0(model->model, (Vec*)box);
         fn_802C7808(model->model);
+        f32 dy;
         f32 dx = box[1] - box[0];
-        f32 dy = box[3] - box[2];
+        dy = box[3] - box[2];
         f32 dz = box[5] - box[4];
         sqrt(dx * dx + dy * dy + dz * dz);
         sqrt(2.0);
