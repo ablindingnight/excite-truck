@@ -233,7 +233,8 @@ static inline void GlareVtx(GVtx* buf, int* n, const Streak* s, f32 fx, f32 fy, 
 
 // Draws one light streak as a framed quad: an outer ring (lit at the edge, faded inside) as a strip.
 void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
-    int a = (int)(k * (255.0f * s->power));
+    f32 powerv = s->power;
+    int a = (int)(k * (255.0f * powerv));
     a = a > 0 ? a : 0;
     u32 color = (a < 0xFF ? a : 0xFF) | 0xFFFFFF00;
     f32 du = (0.01f * (0.5f * (scale * (s->u1 - s->u0)))) / 1.01f;
