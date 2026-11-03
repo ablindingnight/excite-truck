@@ -5,6 +5,7 @@
 // surfaces and builds and caches the per-format vertex descriptor display lists. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "revolution/GX/GXTypes.h"
 
 struct GXVtxDescList {
     int attr;
@@ -53,7 +54,7 @@ void PSMTXTransApply(const void* src, void* dst, f32 x, f32 y, f32 z);
 void GXLoadPosMtxImm(const void* m, u32 id);
 void GXSetArray(int attr, const void* base, u8 stride);
 void GXCallDisplayList(const void* list, u32 size);
-void GXSetCullMode(int mode);
+void GXSetCullMode(GXCullMode mode);
 void GXSetBlendMode(int type, int src, int dst, int op);
 void GXClearVtxDesc(void);
 void GXSetVtxDesc(int attr, int type);
@@ -668,10 +669,10 @@ void fn_802D5838(Surf* s) {
             o++;
         }
         GXSetArray(9, out, 0xC);
-        GXSetCullMode(lbl_8055FDE4 ? 2 : 1);
+        GXSetCullMode(lbl_8055FDE4 ? GX_CULL_BACK : GX_CULL_FRONT);
         GXSetBlendMode(1, 1, 1, 5);
         GXCallDisplayList(s->dl, s->dlSize);
-        GXSetCullMode(lbl_8055FDE4 ? 1 : 2);
+        GXSetCullMode(lbl_8055FDE4 ? GX_CULL_FRONT : GX_CULL_BACK);
         GXSetBlendMode(3, 1, 1, 5);
         GXCallDisplayList(s->dl, s->dlSize);
     }
