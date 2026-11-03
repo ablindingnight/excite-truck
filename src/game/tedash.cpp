@@ -1041,9 +1041,10 @@ void fn_802B8510(int op) {
     }
     Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
     Brush tmp = *b;
-    u32 tw = tmp.w;
+    u32 tw;
     u32 th = tmp.h;
     b->w = th;
+    tw = tmp.w;
     b->h = tw;
     for (u32 x = 0; x < b->w; x++) {
         for (u32 y = 0; y < b->h; y++) {
