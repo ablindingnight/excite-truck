@@ -1300,8 +1300,8 @@ void PlayerDriver_vf48(u8* p) {
         f.x *= k;
         f.y *= k;
         f.z *= k;
-        f32 b = ((Gearbox*)PTR(p, 0x38))->Speed();
         f32 q = kOne - lean * lean;
+        f32 b = ((Gearbox*)PTR(p, 0x38))->Speed();
         f.x = f.x * b * q;
         f.y = f.y * b * q;
         f.z = f.z * b * q;
