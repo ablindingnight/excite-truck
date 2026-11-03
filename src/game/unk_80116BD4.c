@@ -7259,8 +7259,8 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
     u32 *next;
     u32 avail;
     u32 bit;
-    u32 v;
     u32 coef;
+    u32 v;
     u32 e;
     u32 width;
     u32 planes;
@@ -7337,7 +7337,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                             *--start = ((coef + 1) << 2) + 3;
                         } else {
                             BINK_GETBITS(v, width);
-                            val = mask | (v & (sign - 1));
+                            val = mask | ((sign - 1) & v);
                             if (v & sign) {
                                 val = -val;
                             }
