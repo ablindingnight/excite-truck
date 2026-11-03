@@ -561,8 +561,9 @@ void fn_802B2D94(SetPlacer* set) {
 
 void MatPlacer::Draw(void) {
     for (int i = 0; i < placers.count; i++) {
+        ObjBlock* b;
         ObjectPlacer* p = placers.data[i];
-        ObjBlock* b = p->list.head;
+        b = p->list.head;
         if (!b) {
             continue;
         }
