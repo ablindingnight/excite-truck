@@ -159,10 +159,10 @@ void fn_80279D40(CarSetup* s) {
     s->ebHeat = 1.0f;
     s->ebStrength = 1.0f;
     s->jbTime = 1.0f;
-    WheelDefaults(&s->wheels[0], 1);
-    WheelDefaults(&s->wheels[1], 1);
-    WheelDefaults(&s->wheels[2], 0);
-    WheelDefaults(&s->wheels[3], 0);
+    // wheels 0/1 front, 2/3 rear
+    for (int i = 0; i < 4; i++) {
+        WheelDefaults(&s->wheels[i], (i & 2) == 0);
+    }
     s->grip = 1.0f;
     s->slip = 1.0f;
     s->loadFactor = 1.0f;
