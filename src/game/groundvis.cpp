@@ -723,7 +723,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             cur = *n;
             u16* p;
             u16* m1;
-            int q = cur.size / 2;
+            s32 q = cur.size / 2;
             u16* m2;
             int o = q / 2;
             p = fn_802AFEC0(q);
