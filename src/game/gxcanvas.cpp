@@ -658,7 +658,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         do {
             int n = w;
             do {
-                u32 p = *s++;
+                s32 p = *s++;
                 u8 qb = ((*d & 0x1F) << 3) + 1;
                 u8 qr = ((*d >> 8) & 0xF8) + 1;
                 u8 qg = ((*d >> 3) & 0xFC) + 1;
