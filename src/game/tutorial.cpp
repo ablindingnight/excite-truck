@@ -891,8 +891,8 @@ extern "C" {
 int fn_80160CE4(void) { return lbl_8055A0B8 - lbl_8055A0C0; }
 
 void fn_80160CF4(void) {
-    Event* e = GetEvent(fn_801769CC()->event);
     int i = 1;
+    Event* e = GetEvent(fn_801769CC()->event);
     ValueNode* n;
     lbl_8055E300 = 0;
     lbl_8042FDEC.Push(new ("ChalList") ChalList);
