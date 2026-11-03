@@ -657,7 +657,8 @@ void PanelVol::vf1C(void) {
     if (!fn_801E9E78(hint, &p, &nrm, &id)) {
         return;
     }
-    p.x += nrm.x * 0.127f;
+    f32 xv = nrm.x;
+    p.x += xv * 0.127f;
     p.y += nrm.y * 0.127f;
     p.z += nrm.z * 0.127f;
     nrm.x *= 0.1f;
@@ -673,8 +674,9 @@ void PanelVol::vf1C(void) {
     fn_801C2694(strip, pts, &n, &p, &nrm, &f, &t);
     int i;
     for (i = 0; i < n; i++) {
+        RVec3 b;
         RVec3 a = pts[i];
-        RVec3 b = a;
+        b = a;
         b.y += 0.2f;
         DbgLine(a, b);
     }
