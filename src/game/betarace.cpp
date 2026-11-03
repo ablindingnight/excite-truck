@@ -1925,8 +1925,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         if (puddles->count > 0) {
             for (; j < puddles->count; j++) {
                 Puddle* p = puddles->items[j];
-                f32 dx = rc->pos[0] - p->x;
-                f32 dz = rc->pos[2] - p->z;
+                f32 zv = p->z;
+                f32 dz = rc->pos[2] - zv;
+                f32 xv = p->x;
+                f32 dx = rc->pos[0] - xv;
                 if (dx * dx + dz * dz < p->r * p->r ? rc->i2620 > 0 : 0) {
                     f32 v = rc->f25A0 - 0.1f;
                     rc->f25A0 = 0.0f > v ? 0.0f : v;
@@ -1989,8 +1991,8 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
         fn_801D488C(star, 1, 1, &lastPos);
         fn_8014E61C(id, 3, *(f32*)&star);
-        boosts++;
         star = 0;
+        boosts++;
         maxBoosts = boosts > maxBoosts ? boosts : maxBoosts;
     }
     if (fn_801B2EC0(id)->GetInfo()->state == 0 && rc->kind == 0x50 && rc->speed > 44.444447f) {
