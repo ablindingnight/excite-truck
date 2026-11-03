@@ -813,8 +813,9 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
         WPt* p = &pts[i];
         PVec* w = &wob[i % 8];
         f32 z = p->z + wind.z + w->z * dt;
+        f32 x;
         f32 y = p->y + wind.y + w->y * dt;
-        f32 x = (p->x + wind.x + w->x * dt) + turn * z;
+        x = (p->x + wind.x + w->x * dt) + turn * z;
         if (z > near && z < far && x * x < (z * tx) * (z * tx) && y * y < (z * ty) * (z * ty)) {
             out->x = x;
             out->y = y;
