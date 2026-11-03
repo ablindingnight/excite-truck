@@ -566,15 +566,17 @@ void fn_80275410(u8* p) {
 
 // As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
 void fn_802756A4(u8* p) {
+    CamPreset c;
     u8* car = PTR(p, 0x140);
-    CamPreset c = lbl_802FA7C0;
+    c = lbl_802FA7C0;
     CamVec off = *(CVec3*)(car + 0x2538) + CamVec(lbl_80564030, lbl_80563FDC, lbl_80563FD8);
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
-    F32(p, 0xBC) = lbl_80564024 * c.fov;
+    f32 fovv = c.fov;
+    F32(p, 0xBC) = lbl_80564024 * fovv;
 }
 
 void fn_80275938(u8* p) {
