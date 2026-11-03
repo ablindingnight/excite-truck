@@ -2211,7 +2211,7 @@ struct WidgetMenuEntry {
  inline WidgetMenuEntry(){}
  inline void TextNew(const char* n,const char* t,CaptionContext context){type=3;name=n;data=t;arg0=context.value;arg1=0;}
  inline void GenericNew(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
- inline WidgetMenuEntry(const CaptionContext& context,const char* t,const char* n){type=3;data=t;name=n;arg1=0;arg0=context.value;}
+ inline WidgetMenuEntry(const CaptionContext& context,const char* t,const char* n){type=3;data=t;name=n;arg0=context.value;arg1=0;}
  inline WidgetMenuEntry(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
  inline WidgetMenuEntry(const StartupSharedPrefixNew& end){name=(const char*)end.first;type=end.kind;data=(const void*)end.third;arg0=end.fourth;arg1=end.fifth;}
 };
