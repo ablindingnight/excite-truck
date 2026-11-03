@@ -664,6 +664,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
     f32 len;
     int steps;
     f32 spacing;
+    int limit;
     int k;
     if (!Match(n->GetName())) {
         fn_802E30C8("CoinStripPickupMaker: table name \"%s\" is not a match", n->GetName());
@@ -699,7 +700,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
         }
     }
     len = 0.0f;
-    int limit = b->n;
+    limit = b->n;
     for (k = 1; k < limit; k++) {
         len += Dist(&b->pts[k - 1], &b->pts[k]);
     }
@@ -743,11 +744,13 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
             {
                 V2 perp = dir;
                 f32 x = perp.x;
-                perp.x = perp.z;
+                f32 zv = perp.z;
+                perp.x = zv;
                 perp.z = -x;
                 inv = 1.0f / (f32)sqrt(perp.x * perp.x + perp.z * perp.z);
                 base.x = seg[0].x + dir.x * t;
-                base.z = seg[0].z + dir.z * t;
+                f32 z2 = dir.z;
+                base.z = seg[0].z + z2 * t;
                 perp.x *= inv;
                 perp.z *= inv;
                 px = perp.x;
@@ -765,8 +768,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 } else {
                     ty = type;
                 }
-                m->Add(ty, p, 0.0f);
                 rt++;
+                m->Add(ty, p, 0.0f);
             }
             along += spacing;
         }
