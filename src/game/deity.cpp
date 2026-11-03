@@ -642,8 +642,8 @@ int fn_801B11DC(const void* pa, const void* pb) {
     DeityCar* b = &lbl_8055E684[*(const s32*)pb];
     bool aFin = a->finishLap == lbl_8055E680 + 1;
     bool bFin = b->finishLap == lbl_8055E680 + 1;
-    u32 ap = ((DState*)a->State2())->place;
-    u32 bp = ((DState*)b->State2())->place;
+    s32 ap = ((DState*)a->State2())->place;
+    s32 bp = ((DState*)b->State2())->place;
     s32 ar = a->rank;
     s32 br = b->rank;
     if (aFin && bFin) {
