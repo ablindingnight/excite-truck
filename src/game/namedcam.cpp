@@ -452,8 +452,8 @@ void fn_80276DC8(int slot) {
     CamRec* src = (CamRec*)fn_802678E4(slot);
     lbl_804A0C60[slot] = *src;
     CamRec* rec = &lbl_804A0C60[slot];
-    lbl_804A15C0[slot] = 0.0f;
     look = rec->pose;
+    lbl_804A15C0[slot] = 0.0f;
     if (!fn_80276068(rec->mode) || !S32(src->car, 0x24)) {
         lbl_804A0C60[slot].mode = 4;
         f32 d = fn_802704E0(4, 0.0f);
