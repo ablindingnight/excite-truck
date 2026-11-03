@@ -182,16 +182,9 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         qz = q.z;
         qw = q.w;
 
-        pVel->x = vx;
-        pVel->y = vy;
-        pVel->z = vz;
-        pSpin->x = wx;
-        pSpin->y = wy;
-        pSpin->z = wz;
-        pQ->x = qx;
-        pQ->y = qy;
-        pQ->z = qz;
-        pQ->w = qw;
+        Store(*pVel, vel);
+        Store(*pSpin, spin);
+        StoreQ(*pQ, q);
         {
             f32 sx = qx * 1.4142135f;
             f32 sy = qy * 1.4142135f;
@@ -200,22 +193,15 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
             f32 xx = 2.0f * (qx * qx);
             f32 yy = 2.0f * (qy * qy);
             f32 zz = 2.0f * (qz * qz);
-            pR1->x = (ident.w - ident.w * yy) - ident.w * zz;
-            pR1->y = sx * sy - sz * sw;
-            pR1->z = ident.x + (sz * sx + sy * sw);
-            pR2->x = sx * sy + sz * sw;
-            pR2->y = (ident.w - ident.w * xx) - ident.w * zz;
-            pR2->z = sy * sz - sx * sw;
-            pR3->x = sz * sx - sy * sw;
-            pR3->y = ident.x + (sy * sz + sx * sw);
-            pR3->z = (ident.w - ident.w * xx) - ident.w * yy;
+            Vec n1((ident.w - ident.w * yy) - ident.w * zz, sx * sy - sz * sw, ident.x + (sz * sx + sy * sw));
+            Vec n2(sx * sy + sz * sw, (ident.w - ident.w * xx) - ident.w * zz, sy * sz - sx * sw);
+            Vec n3(sz * sx - sy * sw, ident.x + (sy * sz + sx * sw), (ident.w - ident.w * xx) - ident.w * yy);
+            Store(*pR1, n1);
+            Store(*pR2, n2);
+            Store(*pR3, n3);
         }
-        force->x = ident.x;
-        force->y = ident.x;
-        force->z = ident.x;
-        torque->x = ident.x;
-        torque->y = ident.x;
-        torque->z = ident.x;
+        Store(*force, zero);
+        Store(*torque, zero);
     }
 
     {
