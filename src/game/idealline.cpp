@@ -323,9 +323,9 @@ int LineFollower::Step(V2* p) {
         dir.x *= inv;
         off.y = p->y - pos.y;
         dir.y *= inv;
-        x = (f32)AbsD(off.y * dir.x + -off.x * dir.y);
+        x = (f32)AbsD(dir.x * off.y + -dir.y * off.x);
         wide = x > 15.0f * 0.305f + il.seg->width * 0.5f;
-        a = (dir.x * off.x + dir.y * off.y) / s->len;
+        a = (dir.x * off.x + off.y * dir.y) / s->len;
         if (t + a > 1.0f) {
             int i;
             t = 0.0f;
@@ -337,9 +337,11 @@ int LineFollower::Step(V2* p) {
                     r = 0;
                 }
                 pos.x = s->pos.x;
-                off.x = p->x - pos.x;
+                f32 xv = p->x;
+                off.x = xv - pos.x;
                 pos.y = s->pos.y;
-                off.y = p->y - pos.y;
+                f32 y2 = p->y;
+                off.y = y2 - pos.y;
                 dir.x = s->dir.x;
                 dir.y = s->dir.y;
                 a = (dir.x * off.x + dir.y * off.y) / s->len;
@@ -383,7 +385,8 @@ int LineFollower::Step(V2* p) {
         pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
         pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
         dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
-        dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
+        f32 yv = s->dir.y;
+        dir.y = yv + t * (s->next->dir.y - yv);
         inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
         dir.x *= inv;
         dir.y *= inv;
