@@ -319,8 +319,12 @@ public:
         cars[car].line = l;
     }
     virtual void Assign(void) {
-        int n = fn_801B2F24();
-        f32 now = lbl_8055E3C8;
+        int n;
+        f32 now;
+        LineEntry* e;
+        IdealLineRes* l;
+        n = fn_801B2F24();
+        now = lbl_8055E3C8;
         int i;
         for (i = 0; i < n; i++) {
             FixedList<IdealLineRes*, 8> cand;
@@ -332,13 +336,13 @@ public:
             }
             int j;
             for (j = 0; j < lines.a.count && !cand.a.Full(); j++) {
-                LineEntry* e = &lines.a.data[j];
+                e = &lines.a.data[j];
                 if (right == e->side) {
                     *cand.a.Add() = e->line;
                 }
             }
             if (cand.a.count > 0) {
-                IdealLineRes* l = cand.a.data[i % cand.a.count];
+                l = cand.a.data[i % cand.a.count];
                 cars[i].next = now + fn_80129DC4(4, minT, maxT);
                 cars[i].line = l;
             }
