@@ -1301,7 +1301,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         w.z = w.z + m->t.z;
         d2 = PSVECSquareDistance(p + 0x34, &w);
     }
-    f32 rr = F32(q, 0x30) + F32(p, 0x24);
+    f32 rr = F32(p, 0x24) + F32(q, 0x30);
     if (d2 > rr * rr) {
         return 0;
     }
