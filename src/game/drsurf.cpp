@@ -491,6 +491,7 @@ void fn_802D4C44(Surf* s) {
     if (out) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
+            f32 wa;
             f32 w0 = (1.0f / 255) * v->w0;
             f32 w1 = (1.0f / 255) * v->w1;
             const BVec* ba = &lbl_804DB068[v->b0];
@@ -499,7 +500,7 @@ void fn_802D4C44(Surf* s) {
             p.x = v->x + ba->x * w0 + bb->x * w1;
             p.y = v->y + ba->y * w0 + bb->y * w1;
             p.z = v->z + ba->z * w0 + bb->z * w1;
-            f32 wa = lbl_804CA308[v->ia];
+            wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
             a.x = (1.0f / 255) * v->a[0];
