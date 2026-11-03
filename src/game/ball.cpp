@@ -479,7 +479,8 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     k = -fall * force;
                     d.y -= 0.15f;
                     imp.x = d.x * k;
-                    imp.y = d.y * k;
+                    f32 yv = d.y;
+                    imp.y = k * yv;
                     imp.z = d.z * k;
                     b->Push(0, 0, &imp, &at, 1001, 0, by, 1.0f);
                 }
