@@ -1797,9 +1797,15 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
  * trace. Returns 0. NonMatching: 216/216, same opcodes, scheduling/registers differ. */
 s32 fn_800C4E5C(s32* in, s32* out) {
     s32 b[32];
-    s32 r0, r3, r4, r5, r6, r7, r8, r9;
-
-    MP3_Reorder32((u32*)b, (u32*)in, 0);
+    s32 r0;
+    s32 r3;
+    s32 r4;
+    s32 r5;
+    s32 r6;
+    s32 r7;
+    s32 r8;
+    s32 r9;
+    MP3_Reorder32((u32 *) b, (u32 *) in, 0);
     fn_800C51BC(b, b + 16, lbl_8031D7C0);
     fn_800C5298(b, b + 8, lbl_8031D7C0 + 16);
     fn_800C5430(b, b + 4, lbl_8031D7C0 + 24);
@@ -1906,8 +1912,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r3 = r3 - r7;
     r0 = r0 + r3;
     r3 = r5 + r0;
-    r3 = -r3;
-    out[35] = r3;
+    out[35] = -r3;
     r8 = b[10];
     r7 = 0x0;
     r6 = b[9];
@@ -1990,17 +1995,42 @@ s32 fn_800C4E5C(s32* in, s32* out) {
  * NonMatching: same opcodes, register pairs differ (42 diff lines; per-step forms don't change it). */
 void fn_800C51BC(s32* dst, s32* src, s32* c) {
     s32 i;
-    s32 s, d, u;
-
+    s64 wide_difference;
+    s32 s;
+    s32 d;
+    s32 u;
+    s32 difference;
     for (i = 0; i < 4; i++) {
-        s = src[0]; d = dst[0]; u = d + s; dst[0] = u; src[0] = (s32)(((s64)(d - s) * c[0]) >> 24);
-        s = src[1]; d = dst[1]; u = d + s; dst[1] = u; src[1] = (s32)(((s64)(d - s) * c[1]) >> 24);
-        s = src[2]; d = dst[2]; u = d + s; dst[2] = u; src[2] = (s32)(((s64)(d - s) * c[2]) >> 24);
-        s = src[3]; d = dst[3]; u = d + s; dst[3] = u; src[3] = (s32)(((s64)(d - s) * c[3]) >> 24);
+        s = src[0];
+        d = dst[0];
+        u = d + s;
+        dst[0] = u;
+        difference = d;
+        difference = difference - s;
+        src[0] = (s32) ((((s64) difference) * c[0]) >> 24);
+        s = src[1];
+        d = dst[1];
+        u = d + s;
+        dst[1] = u;
+        wide_difference = (s64) (d - s);
+        u = c[1];
+        src[1] = (s32) ((wide_difference * u) >> 24);
+        s = src[2];
+        d = dst[2];
+        u = d;
+        u = u + s;
+        dst[2] = u;
+        src[2] = (s32) ((((s64) (d - s)) * c[2]) >> 24);
+        s = src[3];
+        d = dst[3];
+        u = d + s;
+        dst[3] = u;
+        src[3] = (s32) ((((s64) (d - s)) * c[3]) >> 24);
         dst += 4;
         src += 4;
         c += 4;
     }
+
 }
 
 /* Q24 butterfly stage: two 16-word blocks, coefficients c[0..7] reused for both.
@@ -2128,83 +2158,88 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
  * From ChatGPT's candidate B (round 23), verified against the original in a PPC simulation (40/40) and by
  * ChatGPT (792 cases). NonMatching: 661/661, identical opcode sequence, register numbers differ. */
 void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
+    s32 b;
     s32 i;
-    s32 *left;
-    s32 *right;
-    s32 a, b;
-
+    s32* left;
+    s32* right;
+    s32 a;
     if (flags & 7) {
-        /* Full selected region of the last 576-sample spectral block. */
-        left  = g[0].xr;
         right = g[1].xr;
+        left = g[0].xr;
         for (i = 0; i < count0; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-    } else if (flags & 8) {
-        /* Mixed/special mode: 36 spectral values + three other bands,
-         * each beginning 12 words into its 576-word area. */
-        left  = g[0].xr;
+
+    } else
+        if (flags & 8) {
+        left = g[0].xr;
         right = g[1].xr;
         for (i = 0; i < 36; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
 
-        left  = (s32*)((u8*)g + 0x30);
-        right = (s32*)((u8*)g + 0x2430);
+        left = (s32 *) (((u8 *) g) + 0x30);
+        right = (s32 *) (((u8 *) g) + 0x2430);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-        left  = (s32*)((u8*)g + 0x930);
-        right = (s32*)((u8*)g + 0x2D30);
+
+        left = (s32 *) (((u8 *) g) + 0x930);
+        right = (s32 *) (((u8 *) g) + 0x2D30);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-        left  = (s32*)((u8*)g + 0x1230);
-        right = (s32*)((u8*)g + 0x3630);
+
+        left = (s32 *) (((u8 *) g) + 0x1230);
+        right = (s32 *) (((u8 *) g) + 0x3630);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-    } else if (flags & 16) {
-        /* Three complete 576-word regions, starting at region index 0. */
-        left  = (s32*)((u8*)g + 0x0000);
-        right = (s32*)((u8*)g + 0x2400);
+
+    } else
+        if (flags & 16) {
+        left = (s32 *) (((u8 *) g) + 0x0000);
+        right = (s32 *) (((u8 *) g) + 0x2400);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-        left  = (s32*)((u8*)g + 0x0900);
-        right = (s32*)((u8*)g + 0x2D00);
+
+        left = (s32 *) (((u8 *) g) + 0x0900);
+        right = (s32 *) (((u8 *) g) + 0x2D00);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
-        left  = (s32*)((u8*)g + 0x1200);
-        right = (s32*)((u8*)g + 0x3600);
+
+        left = (s32 *) (((u8 *) g) + 0x1200);
+        right = (s32 *) (((u8 *) g) + 0x3600);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
-            *left++  = a + b;
-            *right++ = a - b;
+            *(left++) = a + b;
+            *(right++) = a - b;
         }
+
     }
 }
 
