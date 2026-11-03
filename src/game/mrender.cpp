@@ -480,22 +480,28 @@ void fn_802C8E48(void) {
 
 void fn_802C8E70(const VecP* p, VecP* out) {
     Camera* c = &lbl_804C1410;
+    f32 z;
+    f32 y;
     f32 x = p->x - c->pos.x;
     out->x = x;
-    f32 y = p->y - c->pos.y;
+    y = p->y - c->pos.y;
     out->y = y;
-    f32 z = p->z - c->pos.z;
+    z = p->z - c->pos.z;
     out->z = z;
-    f32 rx = z * c->rot.right.z + (x * c->rot.right.x + y * c->rot.right.y);
-    f32 ry = z * c->rot.up.z + (x * c->rot.up.x + y * c->rot.up.y);
-    f32 rz = z * c->rot.fwd.z + (x * c->rot.fwd.x + y * c->rot.fwd.y);
+    f32 z2 = c->rot.right.z;
+    f32 rx = z * z2 + (x * c->rot.right.x + y * c->rot.right.y);
+    f32 zv = c->rot.up.z;
+    f32 ry = z * zv + (x * c->rot.up.x + y * c->rot.up.y);
+    f32 z_ = c->rot.fwd.z;
+    f32 rz = z * z_ + (x * c->rot.fwd.x + y * c->rot.fwd.y);
     out->x = rx;
     out->y = ry;
     out->z = rz;
     f32 depth = lbl_8055FC38 > out->z ? lbl_8055FC38 : out->z;
     f32 k = 1.0f / (lbl_8055FC44 * depth);
     out->x = lbl_8055FC5C + 0.5f * lbl_8055FC64 * (1.0f + k * out->x);
-    out->y = lbl_8055FC60 + 0.5f * lbl_8055FC68 * (1.0f + lbl_8055FC6C * (k * -out->y));
+    f32 yv = out->y;
+    out->y = lbl_8055FC60 + 0.5f * lbl_8055FC68 * (1.0f + lbl_8055FC6C * (k * -yv));
 }
 
 f32 fn_802C8FEC(void) { return lbl_8055FC6C; }
