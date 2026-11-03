@@ -323,9 +323,9 @@ void AchMerge(AchStats* dst, AchStats* src) {
     AchModelStat* s;
     AchModelStat* d;
     u32 i;
-    u32 j;
     int found;
     int empty;
+    u32 j;
 
     for (i = 0; i < NUM_CATEGORIES; i++) {
         dst->totals[i] += src->totals[i];
