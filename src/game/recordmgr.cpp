@@ -121,9 +121,9 @@ struct CarLapTable {
 };
 
 // A race entry (0x78), copied from the race setup.
-struct RaceEntry {
-    RaceEntry(void) {}
-    s32 type;        // offset 0x0
+// The part of an entry that describes the driver; copied as a unit (offsets below are within RaceEntry).
+struct RaceDriver {
+    RaceDriver(void) {}
     char name[0x40]; // offset 0x4
     char tag[0x20];  // offset 0x44
     s32 x64;         // offset 0x64
@@ -131,6 +131,11 @@ struct RaceEntry {
     s32 x6C;         // offset 0x6C
     u8 x70;          // offset 0x70
     s32 x74;         // offset 0x74
+};
+
+struct RaceEntry {
+    s32 type;          // offset 0x0
+    RaceDriver driver; // offset 0x4
 };
 
 struct RaceSetup {
@@ -231,7 +236,7 @@ void fn_801AE628(void* p) {
     }
 }
 
-int fn_801AE790(RaceEntry* e) { return e->x70 & 3; }
+int fn_801AE790(RaceEntry* e) { return e->driver.x70 & 3; }
 
 RaceResult* fn_801AF8D0(int i);
 
@@ -409,14 +414,16 @@ void fn_801AEF28(RaceSetup* s) {
         if (!CarTypeIsReal(type, s->car)) {
             break;
         }
-        t->e[i] = s->e[i];
+        t->e[i].type = type;
+        t->e[i].driver = s->e[i].driver;
         t->order[i] = i;
         t->n++;
         if (fn_801AE600(type)) {
             lbl_8055E620->t[i] = LapResultTable::Create();
         }
     }
-    for (int i = 0; i < st->entries.n; i++) {
+    int n = t->Count();
+    for (int i = 0; i < n; i++) {
         st->best[i].a = -1.0f;
         st->best[i].b = 1.0f;
     }
