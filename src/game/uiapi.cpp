@@ -848,10 +848,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 17:
         fn_802E30C8("Stamprolls are not supported anymore, talk to Chris if you think you want one.");
     case 33: {
-        int useStyle = 0;
-        if (d->flags == 2 || d->flags == 4 || d->flags == 5) {
-            useStyle = 1;
-        }
+        int useStyle = d->flags == 2 || d->flags == 4 || d->flags == 5;
         UIStyle* value = FindStyle(styles, d->style, 2);
         UIStyle* text = FindStyle(styles, d->style, 3);
         const char* path = text ? (const char*)text->value : d->name;
