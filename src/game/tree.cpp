@@ -954,10 +954,10 @@ typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f
 
 void fn_802BE07C(const TVec* pos, TreeQuery cb) {
     s16 cz = (s16)(int)(pos->z / 2.0f);
-    s16 cx = (s16)(int)(pos->x / 2.0f);
+    u16 cx = (s16)(int)(pos->x / 2.0f);
     s16 bx = (cx / 128) * 128 + 0x40;
     int i;
-    s16 bz = (cz / 128) * 128 + 0x40;
+    u16 bz = (cz / 128) * 128 + 0x40;
     for (i = -0x80; i <= 0x80; i += 0x80) {
         for (int j = -0x80; j <= 0x80; j += 0x80) {
             FanCell* f = fn_802BE844(bx + i, bz + j, 0x40);
