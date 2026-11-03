@@ -708,7 +708,7 @@ WaterSystem::WaterSystem(void) {
     for (int r = 0; r < 63; r++) {
         for (int c = 0; c < 15; c++) {
             int a = r * 16 + c;
-            int b = (r + 1) * 16 + c;
+            s32 b = (r + 1) * 16 + c;
             p[0] = a;
             p[1] = a + 1;
             p[2] = b;
