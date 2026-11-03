@@ -294,10 +294,10 @@ void fn_802AE7F4(void) {
     f32 sum = dist[0];
     f32* out = &lbl_804BE090.vals[1];
     int s = 2;
-    for (int i = 0; i < 7; i++) {
+    for (int i = 1; i < 8; i++) {
         *out = sum;
-        f32 d = diag * (f32)(s * 3);
-        sum += d > dist[i + 1] ? d : dist[i + 1];
+        f32 d = diag * (f32)(s * 2 + s);
+        sum += d > dist[i] ? d : dist[i];
         s *= 2;
         out++;
     }
