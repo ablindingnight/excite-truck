@@ -1423,7 +1423,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                     int nn = l->n;
                     Gate* a = 0;
                     Gate* b = 0;
-                    s32 k;
+                    int k;
                     for (k = 1; k < nn; k++) {
                         a = &l->gates[(nn + (j - k)) % nn];
                         if (!a->ring) {
