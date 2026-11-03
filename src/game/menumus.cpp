@@ -250,6 +250,7 @@ void fn_8020C59C(void) {
     lbl_8055EE40 = fn_8000D75C();
     int loading;
     int over;
+    MusicTrack* t;
     int pre;
     int track;
     loading = 0;
@@ -301,7 +302,7 @@ void fn_8020C59C(void) {
     f32 d = Max(Min(lbl_8055EE50 - lbl_8055EE4C, 0.2f), -0.2f);
     lbl_8055EE4C = Max(Min(lbl_8055EE4C + d, 1.0f), 0.0f);
     fn_8020C140();
-    MusicTrack* t = lbl_80489BE0;
+    t = lbl_80489BE0;
     for (int i = 0; i < 3; i++, t++) {
         if (i == track) {
             int sting = 0;
