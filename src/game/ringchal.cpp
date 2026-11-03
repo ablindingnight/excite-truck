@@ -2135,8 +2135,8 @@ void RingChalMaster::vf4C(int view) {
         Box arrow;
         arrow = *arrowIcon;
         if (arena.curSet > 0) {
-            f32 k = Remap(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
             int s = arena.curSet;
+            f32 k = Remap(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
             arrow.pos.y = fn_80144C80(arrowIcon->pos.y + (s - 1) * 40, arrowIcon->pos.y + s * 40, fn_80144BD8(k));
         }
         fn_80147940(l, &arrow, "arrow_art", 0);
