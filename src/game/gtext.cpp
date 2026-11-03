@@ -859,7 +859,7 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
             fn_80233DD8(ff, cc);
             while (text[i]) {
                 const char* nx;
-                u16 ch = DecodeUTF8(text + i, &nx);
+                s16 ch = DecodeUTF8(text + i, &nx);
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
                 fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
