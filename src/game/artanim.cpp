@@ -300,6 +300,8 @@ static inline ValPoint MakePoint(f32 x, f32 y) {
 
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
+template <class T> static inline void SwSet3(T& v, f32 a, f32 b, f32 c) { v.x = a; v.y = b; v.z = c; }
+static inline void SwSetA2(f32* v, f32 a, f32 b) { v[0] = a; v[1] = b; }
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* paths[64];
     ValueNode* elems[64];
@@ -312,8 +314,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
     int nElems = 0;
     int nPaths = 0;
+    int i;
     ValueNode* n;
-    for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+    for (i = 0; (n = t->GetChild(i)) != 0; i++) {
         if (!strcmp(n->GetName(), "elem")) {
             elems[nElems++] = n;
         } else if (!strcmp(n->GetName(), "path")) {
@@ -344,8 +347,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             e->model.off[2] = off.z;
             ValPoint xy;
             xy = en->GetPointOr("xy", MakePoint(0.0f, 0.0f));
-            e->model.off[0] = e->model.off[0] + xy.x;
-            e->model.off[1] = e->model.off[1] - xy.y;
+            SwSetA2(e->model.off, e->model.off[0] + xy.x, e->model.off[1] - xy.y);
             e->model.group = en->GetInt("group", -1);
             e->model.mapped = 0;
             const char* gm = en->GetString("group_mapping", 0);
@@ -394,6 +396,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     }
     for (int i = 0; i < nPaths; i++) {
         ValueNode* pn = paths[i];
+        int k;
         ArtPath* p = &a->paths[i];
         p->elem = pn->GetIntValue("elem_idx");
         ValPoint pxy;
@@ -408,16 +411,15 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
-        for (int k = 0; k < nFrames; k++) {
+        for (k = 0; k < nFrames; k++) {
+            ValueNode* f;
             ArtKey* key = &p->keys[k];
             ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
-            ValueNode* f = frames[k];
+            f = frames[k];
             key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
             if (f->Has("spin")) {
                 ValVec3 axis;
-                axis.x = 0.0f;
-                axis.y = 0.0f;
-                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
+                SwSet3(axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
                 if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
                     f32 len = sqrt(d);
@@ -535,7 +537,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     for (int i = 0; i < a->nPaths; i++) {
         ArtPath* p = &a->paths[i];
         f32 last = p->keys[p->nKeys - 1].t;
-        a->length = a->length > last ? a->length : last;
+        f32 lengthv = a->length;
+        a->length = lengthv > last ? lengthv : last;
     }
     fn_802AC2B4((ArtNode*)named, "__anim_end__", &a->length);
     fn_80131818(t);
