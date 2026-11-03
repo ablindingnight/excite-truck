@@ -156,8 +156,8 @@ void fn_802526E0(MWMtx* m) {
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p = b->pos;
     MWVec2 d(p.x, p.z);
-    MWVec2 e;
     MWVec2 t;
+    MWVec2 e;
     f32 len;
     if (d.x * d.x + d.y * d.y < 1.0f) {
         d.x = 1.0f;
@@ -192,25 +192,26 @@ void fn_8025280C(MWBody* b, f32 speed) {
     }
     {
         MWVec4 up;
-        MWVec4 n;
         MWVec4 a;
+        MWVec4 n;
         MWVec4 fwd;
         f32 radial = -2.5f * (b->z.x * e.x + b->z.z * e.y);
         f32 h;
         f32 depth;
         b->vel = MWVec4(t.x, b->vel.y, t.y);
-        fwd = b->z;
-        up = b->x;
+        MWVec4 zv = b->z;
+        fwd = zv;
         a = b->accel;
         a.y = radial;
+        up = b->x;
         h = fn_801DCF48((MWVec3*)&n, p.x, p.z);
         depth = p.y - h;
         depth = 0.0f > depth ? 0.0f : depth;
         if (depth > 1.5f) {
             f32 u = PSVECDotProduct(&n, &fwd);
             f32 v = -PSVECDotProduct(&n, &up);
-            f32 u3 = u * u * u;
             f32 v3 = v * v * v;
+            f32 u3 = u * u * u;
             a.x = (a.x + up.x * u3 + fwd.x * v3) * 0.98f;
             a.y = (a.y + up.y * u3 + fwd.y * v3) * 0.98f;
             a.z = (a.z + up.z * u3 + fwd.z * v3) * 0.98f;
