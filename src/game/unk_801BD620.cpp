@@ -68,6 +68,8 @@ static inline void StoreQ(MVec4& m, Quat q) {
     m.w = q.w;
 }
 
+static inline Vec operator-(Vec a, const Vec& b) { return Vec(a.x - b.x, a.y - b.y, a.z - b.z); }
+
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
 extern "C" {
@@ -202,6 +204,21 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         }
         Store(*force, zero);
         Store(*torque, zero);
+
+        // forces for the next step: aerodynamic drag F -= |v| v Cd (Cd = t[c+6].x)
+        {
+            Quat par = LoadQ(t[b + 0x19]);
+            Vec f = Load(*force);
+            Quat c8 = LoadQ(t[c + 8]);
+            Vec p = Load(*pPos);
+            Quat c9 = LoadQ(t[c + 9]);
+            Vec v = Load(*pVel);
+            f32 speed = zero.x + fn_8002B0B0(v.x * v.x + v.y * v.y + v.z * v.z);
+            f32 k = speed * t[c + 6].x;
+            Vec drag = v * Vec(k);
+            f = f - drag;
+            Store(*force, f);
+        }
     }
 
     {
