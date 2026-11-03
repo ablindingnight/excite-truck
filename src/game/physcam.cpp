@@ -594,8 +594,8 @@ void fn_80271624(int mode, u8* p) {
                 if (idx != S32(p, 0x150)) {
                     S32(p, 0x150) = idx;
                     RegionSphere* rs = &lbl_8049EDC8[idx];
-                    fresh = 1;
                     S32(p, 0x148) = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
+                    fresh = 1;
                 }
             }
         } else {
@@ -693,7 +693,7 @@ void fn_80271624(int mode, u8* p) {
                 break;
             }
             case 1:
-                fn_80274730(p, lbl_80563F4C * tv->fov, lbl_80563F44, lbl_80563F44, lbl_80563F48);
+                fn_80274730(p, tv->fov * lbl_80563F4C, lbl_80563F44, lbl_80563F44, lbl_80563F48);
                 break;
             case 2:
                 fn_80274E94(p);
