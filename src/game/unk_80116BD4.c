@@ -7171,9 +7171,9 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
     }
     t = tmp;
     for (i = 0; i < 8; i++) {
-        s32 a0 = t[0] + t[4];
+        u32 a0 = t[0] + t[4];
         s32 a1 = t[0] - t[4];
-        s32 a2 = t[2] + t[6];
+        u32 a2 = t[2] + t[6];
         s32 a3 = BINK_MUL(BINK_A1, t[2] - t[6]) - a2;
         s32 a4 = t[5] + t[3];
         s32 a5 = t[5] - t[3];
