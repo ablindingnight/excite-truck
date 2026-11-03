@@ -255,7 +255,7 @@ const char* GetSpecialChassis(const char* name) {
 
 BOOL IsSpecialChassisUnlocked(const char* name) {
     UnlockReq* req = FindUnlockReq(name);
-    BOOL races;
+    bool races;
     BOOL grades;
 
     if (req != NULL) {
@@ -282,7 +282,7 @@ BOOL GetUnlockReq(const char* name, s32* races_run, s32* aaas) {
 
 void ShowUnlockReason(const char* name) {
     UnlockReq* req = FindUnlockReq(name);
-    BOOL races;
+    bool races;
 
     if (req != NULL) {
         races = AchievementsGetModelStat(0, name) >= req->races_run;
