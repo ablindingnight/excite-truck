@@ -2512,7 +2512,7 @@ void fn_8019F780(u8* p) {
     at.x = F32(p, 0x34);
     at.y = F32(p, 0x38);
     at.z = F32(p, 0x3C);
-    if (fn_801E9F08((u8*)rb + 0x6C, &at.x, &pos, &nrm, &surf, lbl_80562380 + F32(p, 0x24))) {
+    if (fn_801E9F08((u8*)rb + 0x6C, &at.x, &pos, &nrm, &surf, F32(p, 0x24) + lbl_80562380)) {
         if (surf == 7) {
             if (!U8(p, 0x4C)) {
                 rb->VelAt(&v, &pos);
@@ -2547,7 +2547,8 @@ void fn_8019F780(u8* p) {
                 pos.y = fn_801E9DDC((u8*)rb + 0x6C, w.x, w.z);
                 d.x = pos.x - w.x;
                 d.y = pos.y - w.y;
-                d.z = pos.z - w.z;
+                f32 zv = pos.z;
+                d.z = zv - w.z;
                 f32 depth = PSVECDotProduct(&d, &nrm);
                 f32* acc = &((BoxSlip*)p)->slip[i].x;
                 if (depth > lbl_805622D0) {
@@ -2632,10 +2633,10 @@ void fn_8019F780(u8* p) {
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = lbl_805623B0 + lbl_8056232C * sub;
-            sub = MinF(sub, lbl_8056234C * F32(p, 0x24));
+            sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
             up.x = lbl_805622D0;
             up.z = lbl_805622D0;
-            up.y = lbl_805623B4 * (lift * (vol * sub));
+            up.y = lbl_805623B4 * (lift * (sub * vol));
             rb->AddForceAt(&up, (RVec3*)(p + 0x34));
         } else {
             U8(p, 0x4C) = 0;
