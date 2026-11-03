@@ -389,8 +389,9 @@ MatPlacer::MatPlacer(ValueNode* node, int i) {
     }
     Shuffle(order, 128);
     clumpy = wasClumpy = node->GetBool("clumpy", 1);
+    int k;
     ValueNode* c;
-    for (int k = 0; (c = node->GetChildAt(k)) != 0; k++) {
+    for (k = 0; (c = node->GetChildAt(k)) != 0; k++) {
         if (fn_802B1DE8(c)) {
             ObjectPlacer* p = new ("ObjectPlacer") ObjectPlacer(c);
             placers.Push(p);
