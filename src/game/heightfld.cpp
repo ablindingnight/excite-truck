@@ -526,27 +526,28 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
         int ox = lx ^ 1;
         int oz = lz ^ 1;
         h = t->base + t->scale * t->h[lx][lz];
-        f32 hz = t->base + t->scale * t->h[lx][oz];
         f32 hx = t->base + t->scale * t->h[ox][lz];
+        f32 hz = t->base + t->scale * t->h[lx][oz];
         for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
             f32 w = lbl_804424B0[l->weight];
             h += w * (l->base + l->scale * l->h[lx][lz]);
-            hx += w * (l->base + l->scale * l->h[ox][lz]);
             hz += w * (l->base + l->scale * l->h[lx][oz]);
+            hx += w * (l->base + l->scale * l->h[ox][lz]);
         }
-        hx -= h;
         hz -= h;
+        hx -= h;
         f32 sx = (lx & 1 ? -1.0f : 1.0f) / g->scaleX;
         f32 sz = (lz & 1 ? -1.0f : 1.0f) / g->scaleZ;
-        normal->x = -hx * sx;
+        normal->x = -sx * hx;
         normal->z = -hz * sz;
-        normal->y = __fabs(sx * sz);
+        normal->y = __fabs(sz * sx);
         PSVECNormalize(normal, normal);
         return h;
     }
     h = t->base + t->scale * t->h[lx][lz];
     for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-        h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
+        f32 basev = l->base;
+        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
     }
     return h;
 }
