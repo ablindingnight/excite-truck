@@ -2011,6 +2011,9 @@ void StaticObject::Draw(void) {
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
+
 void StaticObject::vf1C(void) {
     f32 s = fn_801E88F0(-1);
     f32 s2 = s * s;
@@ -2018,8 +2021,8 @@ void StaticObject::vf1C(void) {
     f32 a;
     if (d2 > shadow.cutoff * shadow.cutoff) {
         f32 d = (f32)sqrt(d2);
-        f32 t = FMax(FMin(((d - shadow.cutoff) - 0.0f) / 5.0f, 1.0f), 0.0f);
-        a = shadow.extend + t * (0.0f - shadow.extend);
+        f32 t = FMax(FMin(Unlerp(d - shadow.cutoff, 0.0f, 5.0f), 1.0f), 0.0f);
+        a = Lerp(shadow.extend, 0.0f, t);
     } else {
         a = shadow.extend;
     }

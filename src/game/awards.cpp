@@ -1224,6 +1224,9 @@ void fn_801CD7BC(int car, int valid, f32 t) {
 
 // Live-update pop-up draw: the head of the queue slides in from the right for its first quarter second and
 // out for its last, showing the stat's label, its value (the art for the difficulty) and the title.
+static inline f32 AwLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 AwUnlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
+
 void fn_801CD970(int car) {
     if (fn_801CE898()) {
         return;
@@ -1234,12 +1237,7 @@ void fn_801CD970(int car) {
     }
     f32 dt = fn_801E7E24();
     Popup* p;
-    for (;;) {
-        p = m->q.head;
-        if (!p) {
-            p = 0;
-            break;
-        }
+    while ((p = m->q.head) != 0) {
         if (fn_8026B0C0(car)) {
             if (p->shown) {
                 if (p->time < 0.25f) {
@@ -1271,10 +1269,10 @@ void fn_801CD970(int car) {
     }
     f32 t = p->time < 0.25f ? p->time : 3.0f - p->time;
     f32 out = box->w + (640.0f - (box->pos.x + box->w));
-    f32 k = (t - 0.0f) / 0.25f;
-    k = k > 1.0f ? 1.0f : k;
+    f32 k = AwUnlerp(t, 0.0f, 0.25f);
+    k = k < 1.0f ? k : 1.0f;
     k = k > 0.0f ? k : 0.0f;
-    f32 slide = out + k * (0.0f - out);
+    f32 slide = AwLerp(out, 0.0f, k);
     if (box) {
         AwBox b;
         b = *box;

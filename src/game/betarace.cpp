@@ -3944,17 +3944,15 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     c.x = box[0] + (box[1] - box[0]) * 0.5f;
     n.x = c.x * -1.0f;
     MulVec(&n, &n, &b.r);
-    f32 yv = n.y;
-    f32 y2 = b.t.y;
-    b.t.y = y2 + yv;
-    b.t.x = b.t.x + n.x;
-    b.t.z = n.z + b.t.z;
-    b.t.y = b.t.y + c.y;
-    f32 xv = b.t.x;
-    b.t.x = c.x + xv;
-    b.t.z = b.t.z + c.z;
-    b.t.y = b.t.y + 0.0f;
-    a.t.y = a.t.y + 0.0f;
+    f32 lift = 0.0f;
+    b.t.x += n.x;
+    b.t.y += n.y;
+    b.t.z += n.z;
+    b.t.x += c.x;
+    b.t.y += c.y;
+    b.t.z += c.z;
+    b.t.y += lift;
+    a.t.y += lift;
     ScaleRot(&b.r, 1.0f);
     ScaleRot(&a.r, 1.0f);
     if (fn_801E87A8()->flags & 2) {
