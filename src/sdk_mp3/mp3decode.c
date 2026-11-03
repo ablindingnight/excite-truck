@@ -13,29 +13,28 @@ static s32 lbl_8055DD8C;
 s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
     u32 bits;
     s16 table_select[2][2][3];
-    u8 ngr;
     s8 gr;
-    s16 sf_scale[2][2];
+    u8 ngr;
+    s16 count1_table[2][2];
     s32 start;
-    s16 region1[2][2];
+    s16 sfc[2][2];
     s16 is_scale[2][2];
     s16 bitrate;
-    s16 prot;
+    s32 end;
     s16 scfsi[2][4];
-    s16 mdb;
     s32 frame_bits;
+    s16 prot;
     s16 region0[2][2];
     s16 i;
-    s32 neg_unk10;
     s32 n;
-    s32 end;
+    s16 mdb;
     u32 flags[2][2];
     s16 id;
     s16 padding;
-    s16 sfc[2][2];
+    s16 region1[2][2];
     s16 part2_3[2][2];
     s8 block_type[2][2];
-    s16 count1_table[2][2];
+    s16 sf_scale[2][2];
     s16 stereo;
     s16 subblock_gain[2][2][3];
     s8 window_switching[2][2];
@@ -62,11 +61,11 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
         start += d->unk278 * 8;
     }
     if (id == 0) {
-        ngr = 1;
         d->lsf = 1;
+        ngr = 1;
     } else {
-        ngr = 2;
         d->lsf = 0;
+        ngr = 2;
     }
     prot = MP3_GetBits(d->unk278, buf, 1, &d->unk8);
     bits = MP3_GetBits(d->unk278, buf, 16, &d->unk8);
@@ -81,8 +80,8 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     if (d->sr_index == 3) {
         return 0xF;
     }
-    stereo = (bits >> 6) & 3;
     padding = (bits >> 9) & 1;
+    stereo = (bits >> 6) & 3;
     if (stereo == 3) {
         d->channels = 1;
     } else {
@@ -189,8 +188,7 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
         d->unk10 = d->unk14 - mdb * 8 - (frame_bits - ((const s16(*)[2])lbl_80560DA8)[d->channels - 1][prot]);
     }
     d->count1_end = ((const s16(*)[3])lbl_802F34D8)[d->lsf][d->sr_index];
-    neg_unk10 = -d->unk10;
-    if (d->unk10 < 0 && d->unkC == 0 && neg_unk10 + 0x200000 - d->unkC > 0x200000) {
+    if (d->unk10 < 0 && d->unkC == 0 && (s32)(-d->unk10 + 0x200000u - d->unkC) > 0x200000) {
         for (gr = 0; gr < ngr; gr++) {
             for (i = 0; i < 0x480; i++) {
                 *lbl_8055DD88++ = 0;
