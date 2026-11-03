@@ -115,12 +115,12 @@ void fn_801E4FF4(void) {
 }
 
 int fn_801E501C(int unused, const TVec3* dir, f32 width, u8 alpha) {
+    lbl_8055EAA8 = 0;
+    lbl_8055EAAC = 0;
     u32 color = (alpha << 24) | 0xFFFFFF;
     for (int i = 0; i < 60; i++) {
         lbl_80487578[i].color = color;
     }
-    lbl_8055EAA8 = 0;
-    lbl_8055EAAC = 0;
     lbl_80487C78.dir = *dir;
     lbl_80487C78.half = 0.5f * width;
     lbl_8055EAB0 = 2;
