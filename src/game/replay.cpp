@@ -110,7 +110,7 @@ void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_80278924(f32* a, f32* b);
 f32 fn_801E7E18(void);
 int fn_802787F4(void);
-void fn_80010188(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...);
 int fn_80278358(void);
 void fn_80211F64(void);
 void fn_80129AFC(void);
@@ -542,18 +542,18 @@ void fn_80008F98(void) {
         if (!fn_802787F4() || !inRange) {
             x = 0.5f * lbl_8055CFF0 - 20.0f;
             y = 0.5f * lbl_8055CFF4 - 20.0f;
-            fn_80010188(0xFFFFFFFF, 10, "%1.1f", 1.0f, x, y, t);
+            fn_80010188(1.0f, 0xFFFFFFFF, 10, x, y, "%1.1f", t);
             y += -25.0f;
             if (fn_80278358()) {
-                fn_80010188(0xFFFF0000, 10, "R", 1.0f, x, y);
+                fn_80010188(1.0f, 0xFFFF0000, 10, x, y, "R");
             }
             y += -25.0f;
             if (!fn_80278358()) {
-                fn_80010188(0xFF8040FF, 10, "A: %1.1f", 1.0f, x, y, a);
+                fn_80010188(1.0f, 0xFF8040FF, 10, x, y, "A: %1.1f", a);
             }
             y += -25.0f;
             if (!fn_80278358()) {
-                fn_80010188(0xFF4080FF, 10, "B: %1.1f", 1.0f, x, y, b);
+                fn_80010188(1.0f, 0xFF4080FF, 10, x, y, "B: %1.1f", b);
             }
         }
         fn_802C855C();

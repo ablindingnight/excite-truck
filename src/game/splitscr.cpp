@@ -83,7 +83,7 @@ void fn_802C8D74(void);
 Camera* fn_802C86DC(void);
 void fn_802C88FC(Camera* m);
 void fn_802C8638(Camera* cam);
-void fn_80010188(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 int fn_802C2C00(int on);
@@ -228,9 +228,9 @@ void fn_80205FCC(void) {
     fn_802C8638(&m);
     static LocString finish("SplitScreen:FINISH");
     static LocString start("SplitScreen:START");
-    fn_80010188(-1, 0xC, start.Get(), 0.75f, 0.5f * (f32)lbl_8055CFF0, 3.0f + 0.07f * (f32)lbl_8055CFF4);
+    fn_80010188(0.75f, -1, 0xC, 0.5f * (f32)lbl_8055CFF0, 3.0f + 0.07f * (f32)lbl_8055CFF4, start.Get());
     f32 y = 0.93f * (f32)lbl_8055CFF4 + 4.0f;
-    fn_80010188(-1, 0x24, finish.Get(), 0.75f, 0.5f * (f32)lbl_8055CFF0, y);
+    fn_80010188(0.75f, -1, 0x24, 0.5f * (f32)lbl_8055CFF0, y, finish.Get());
     fn_802C8638(&saved);
 }
 
