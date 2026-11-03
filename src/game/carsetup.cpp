@@ -234,10 +234,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     t->FindChild("Rear");
     for (i = 0; i < 4; i++) {
         WheelSetup* w = &s->wheels[i];
-        int front = 0;
-        if (i == 0 || i == 1) {
-            front = 1;
-        }
+        int front = i == 0 || i == 1;
         f32 spring = c->GetFloat("spring_factor", 1.0f);
         f32 shock = c->GetFloat("shock_factor", 1.0f);
         f32 bump = c->GetFloat("bump_factor", 1.0f);
