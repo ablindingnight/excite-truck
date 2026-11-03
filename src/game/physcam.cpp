@@ -1417,8 +1417,8 @@ void camera_car(u8* p, int ci) {
         *(Words12*)(p + 0x58) = *(Words12*)(p + 0xC0);
         f32 w[3];
         w[0] = lbl_80563F4C * v->rot[0];
-        w[1] = lbl_80563F4C * v->rot[1];
-        w[2] = lbl_80563F4C * v->rot[2];
+        w[1] = v->rot[1] * lbl_80563F4C;
+        w[2] = v->rot[2] * lbl_80563F4C;
         f32 off[3];
         off[0] = v->off[0];
         off[1] = v->off[1];
