@@ -736,8 +736,8 @@ void fn_802CF10C(u32 count) {
     if (lbl_804C5710.active) {
         u16* dst = lbl_804C9760.cur;
         if (lbl_8055FD4C % 60 < 30) {
-            int y;
             int w = lbl_804C5710.w;
+            int y;
             int k = 0;
             for (y = 0; y < lbl_804C5710.h; y++) {
                 u16* d = &dst[lbl_804C9760.w * (y + lbl_804C5710.y) + lbl_804C5710.x];
