@@ -1657,8 +1657,8 @@ void fn_80183E7C(u8* p) {
     f32 nx = F32(p, 0x25A4) + lbl_80561D0C * (up.x - F32(p, 0x25A4));
     F32(p, 0x25A8) = ny;
     F32(p, 0x25A4) = nx;
-    F32(p, 0x25AC) = nz;
     f32 len = PSVECMag(p + 0x25A4);
+    F32(p, 0x25AC) = nz;
     if (len <= lbl_80561CCC) {
         F32(p, 0x25A4) = lbl_80561CAC;
         F32(p, 0x25A8) = lbl_80561CD0;
@@ -1679,9 +1679,10 @@ void fn_80183E7C(u8* p) {
         f.z = F32(p, 0x25AC) * k;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
     }
+    int stunts;
     u32 ramp = (U32(fn_801769CC(), 4) >> 20) & 1;
     u32 jump = (U32(fn_801769CC(), 4) >> 21) & 1;
-    int stunts = 0;
+    stunts = 0;
     if (ramp || jump) {
         stunts = 1;
     }
@@ -1704,8 +1705,8 @@ void fn_80183E7C(u8* p) {
         dir.y = dir.y * inv;
         dir.z = dir.z * inv;
         f32 into = -PSVECDotProduct(&dir, p + 0x25A4);
-        BVec ahead;
         BVec behind;
+        BVec ahead;
         ahead.x = F32(p, 0x60) + F32(p, 0x118) * lbl_80561CDC;
         behind.x = F32(p, 0x60) + F32(p, 0x118) * lbl_80561CB0;
         ahead.z = F32(p, 0x68) + F32(p, 0x120) * lbl_80561CDC;
@@ -1752,8 +1753,9 @@ void fn_80183E7C(u8* p) {
                     (*(CbFx**)(p + 0x2584))->Land(sink);
                 } else {
                     U8(p, 0x259D) = 0;
+                    f32 b2;
                     f32 boost = landingTune.v[0];
-                    f32 b2 = F32(p, 0x2618) * fn_80181A94();
+                    b2 = F32(p, 0x2618) * fn_80181A94();
                     b2 = F32(p, 0x2CC) * fn_80181AC0() + b2;
                     if (b2 < boost) {
                         boost = b2;
@@ -1836,8 +1838,9 @@ void fn_80183E7C(u8* p) {
             fl.z = fl.z * lbl_80561DE4;
         }
         f32 nose = PSVECDotProduct(&fl, p + 0x48);
+        f32 wantR;
         f32 wantP = lbl_80561CFC * pitch - nose;
-        f32 wantR = -roll - F32(p, 0x40) * (lbl_80561CD0 - (f32)__fabs(F32(p, 0x58)));
+        wantR = -roll - F32(p, 0x40) * (lbl_80561CD0 - (f32)__fabs(F32(p, 0x58)));
         f32 wp = PSVECDotProduct(p + 0x124, p + 0x3C);
         f32 wr = PSVECDotProduct(p + 0x124, p + 0x54);
         f32 gain = lbl_80561CFC;
