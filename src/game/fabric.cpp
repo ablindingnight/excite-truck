@@ -928,15 +928,18 @@ extern "C" {
 
 void fn_801F7400(Quad* q, u8* data, ValueNode* vn) {
     s32* idx = (s32*)(data + 0x58);
-    Corner* c0 = (Corner*)(data + 0x10) + idx[0];
     Corner* c1 = (Corner*)(data + 0x10) + idx[1];
+    Corner* c0 = (Corner*)(data + 0x10) + idx[0];
     Corner* c2 = (Corner*)(data + 0x10) + idx[2];
     q->c[0] = *c0;
     q->c[1] = *c1;
     q->c[2] = *c2;
-    q->c[3].pos.x = q->c[1].pos.x + q->c[2].pos.x - q->c[0].pos.x;
-    q->c[3].pos.y = q->c[1].pos.y + q->c[2].pos.y - q->c[0].pos.y;
-    q->c[3].pos.z = q->c[1].pos.z + q->c[2].pos.z - q->c[0].pos.z;
+    f32 xv = q->c[0].pos.x;
+    q->c[3].pos.x = q->c[1].pos.x + q->c[2].pos.x - xv;
+    f32 yv = q->c[1].pos.y;
+    q->c[3].pos.y = yv + q->c[2].pos.y - q->c[0].pos.y;
+    f32 zv = q->c[1].pos.z;
+    q->c[3].pos.z = zv + q->c[2].pos.z - q->c[0].pos.z;
     q->c[3].color = c1->color;
     q->c[3].u = c1->u + c2->u - c0->u;
     q->c[3].v = c1->v + c2->v - c0->v;
