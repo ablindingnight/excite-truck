@@ -475,9 +475,7 @@ s32 fn_802168F0(Window* w) {
     }
     zero = 0.0f;
     for (;;) {
-        if (zero > tOut) {
-            tOut = zero;
-        }
+        tOut = tOut > zero ? tOut : zero;
         lbl_8055EF94 = tOut;
         if (fn_8012742C()) {
             lbl_8055EF74 = -1;

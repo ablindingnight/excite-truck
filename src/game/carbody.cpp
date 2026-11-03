@@ -1529,9 +1529,7 @@ void fn_80183E7C(u8* p) {
         F32(p, 0x2598) = F32(p, 0x2598) + lbl_80561D9C;
     }
     f32 stun = F32(p, 0x2650) - lbl_80561D9C;
-    if (stun < lbl_80561CAC) {
-        stun = lbl_80561CAC;
-    }
+    stun = stun > lbl_80561CAC ? stun : lbl_80561CAC;
     F32(p, 0x2650) = stun;
     if ((f32)__fabs(stun) > lbl_80558DC4[0]) {
         if (F32(p, 0x25D4) < lbl_80561DA0) {
@@ -1819,9 +1817,7 @@ void fn_80183E7C(u8* p) {
     if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0] && F32(p, 0x2618) > lbl_80561DE0 &&
         (f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
         f32 stall = lbl_80561D34 * F32(p, 0x264C);
-        if (stall > lbl_80561CD0) {
-            stall = lbl_80561CD0;
-        }
+        stall = stall < lbl_80561CD0 ? stall : lbl_80561CD0;
         f32 pitch = F32(p, 0x2600) + lbl_80561D64 * stall * fn_80129DC4(4, lbl_80561DE4, lbl_80561CD0);
         f32 roll = F32(p, 0x2604);
         BVec fl;
@@ -1963,9 +1959,7 @@ void fn_80183E7C(u8* p) {
         f32 x = F32(p, 0x60);
         f32 z = F32(p, 0x68);
         f32 floor = fn_801DDC8C(F32(p, 0x60), F32(p, 0x68));
-        if (floor < lbl_80561CAC) {
-            floor = lbl_80561CAC;
-        }
+        floor = floor > lbl_80561CAC ? floor : lbl_80561CAC;
         f32 t = F32(p, 0x2688) - lbl_80561DFC;
         if (t < lbl_80561CAC) {
             t = lbl_80561CAC;
@@ -2135,9 +2129,7 @@ void fn_80183E7C(u8* p) {
             F32(p, 0x25A0) < lbl_80561E18 && F32(p, 0x2588) < lbl_80561DC0 &&
             (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
             f32 h = F32(p, 0x25A0) + lbl_80561D9C * F32(p, 0x398) * heatTune.v[3] * F32(p, 0x2D4);
-            if (h > lbl_80561CD0) {
-                h = lbl_80561CD0;
-            }
+            h = h < lbl_80561CD0 ? h : lbl_80561CD0;
             F32(p, 0x25A0) = h;
             U8(p, 0x259C) = 1;
         }
@@ -2179,9 +2171,7 @@ void fn_80183E7C(u8* p) {
         want = lbl_80561CD0;
     }
     f32 dv = want - vol;
-    if (dv > lbl_80561DFC) {
-        dv = lbl_80561DFC;
-    }
+    dv = dv < lbl_80561DFC ? dv : lbl_80561DFC;
     f32 dvc = lbl_80561E1C;
     if (dv > lbl_80561E1C) {
         dvc = dv;
