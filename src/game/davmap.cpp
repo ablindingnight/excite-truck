@@ -435,7 +435,7 @@ int GetNumRacersForEve(Eve* eve) {
 
 void BuildReversedMap(DAVMap* out, s32 event, const DAVMap* src) {
     int n = GetNumRacersForEve(GetEvent(event));
-    int i;
+    s32 i;
 
     memset(out, 0, sizeof(DAVMap));
     for (i = 0; i < n; i++) {
