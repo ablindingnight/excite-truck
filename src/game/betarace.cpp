@@ -4555,7 +4555,7 @@ inline void BetaMaster::b2(StuntEvt* e, int car) {
         }
     }
     if (e->Type() == 's') {
-        int turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
+        bool turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
         BetaCar* bc = &cars[car];
         f = &bc->bA8;
         if (f[0]) {
