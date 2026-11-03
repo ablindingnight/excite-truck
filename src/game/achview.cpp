@@ -444,12 +444,17 @@ int fn_8025978C(u8* p) {
     int r = fn_802146BC(&desc, -999, -999, 1);
     int wait = 1;
     while (wait) {
-        if (r == -2) {
-            if (!(F32(p, 0xCC) < 1.5f && U8(p, 0xC5))) {
+        switch (r) {
+        case -2: {
+            int busy = F32(p, 0xCC) < 1.5f && U8(p, 0xC5);
+            if (!busy) {
                 wait = 0;
             }
-        } else {
+            break;
+        }
+        default:
             wait = 0;
+            break;
         }
     }
     back.Release();
