@@ -106,9 +106,11 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         f32 dx, dy, dz, dw;
         f32 n;
 
-        ax = force->x * inv->w;
-        ay = force->y * inv->w - (ident.x + 9.81f);
-        az = force->z * inv->w;
+        Vec f = Load(*force);
+        Vec im = Load4(*inv);
+        ax = f.x * im.w;
+        ay = f.y * im.w - (ident.x + 9.81f);
+        az = f.z * im.w;
 
         vel = Max(Min(vel, Vec(zero.x + 200.0f)), Vec(zero.x + -200.0f));
         spin = Max(Min(spin, Vec(zero.x + 20.0f)), Vec(zero.x + -20.0f));
