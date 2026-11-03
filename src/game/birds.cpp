@@ -284,6 +284,8 @@ s32 fn_802A8A34(BoidVec* v) { return v->n; }
 
 Boid* fn_802A8A3C(BoidVec* v, int i) { return &v->data[i]; }
 
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     r = r > 0.0f ? r : 0.0f;
@@ -319,9 +321,9 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     f32 r = b->radius;
     f32 third = r / 3.0f;
     third *= third;
-    f32 t = Clamp01((d2 - third) / (r * r - third));
+    f32 t = Clamp01(Unlerp(d2, third, r * r));
     f32 turnv = b->turn;
-    f32 ang = lbl_8055F8D4 * ((0.0f + t * (steer - 0.0f)) * (0.017453292f * turnv));
+    f32 ang = lbl_8055F8D4 * (Lerp(0.0f, steer, t) * (0.017453292f * turnv));
     f32 c = cos(ang);
     f32 s = sin(ang);
     f32 m[9];
@@ -343,8 +345,8 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     v->y = y;
     v->z = z;
     PSVECNormalize(&b->vel, &b->vel);
-    f32 u = Clamp01((d2 - 0.0f) / (r * r - 0.0f));
-    f32 spd = b->speedMin + u * (b->speedMax - b->speedMin);
+    f32 u = Clamp01(Unlerp(d2, 0.0f, r * r));
+    f32 spd = Lerp(b->speedMin, b->speedMax, u);
     b->vel.x *= spd;
     b->vel.y *= spd;
     b->vel.z *= spd;
