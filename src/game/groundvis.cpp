@@ -563,6 +563,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
                 fn_802BDFBC(cell, fn_802B0130(n), n->scale);
             }
             s32 used = 0;
+            int i;
             GroundList* bag = 0;
             if (!fn_802B0124(cell)) {
                 bag = fn_802B4F10(&used, n->x - step, n->y - step, step * 2, fn_802B0118(cell));
@@ -605,7 +606,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             fn_802B0024(&buf, id);
 
             u16 prev = n->edge[3][0];
-            for (int i = 0; i < 4; i++) {
+            for (i = 0; i < 4; i++) {
                 u16* e = n->edge[i];
                 u16* first = i < 2 ? e : e + n->size;
                 u16* last = i >= 2 ? e : e + n->size;
