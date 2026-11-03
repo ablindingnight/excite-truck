@@ -533,7 +533,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     if (*name == 0 && kind == 1) {
         name = "white.tex";
     }
-    int shared = res != 0;
+    bool shared = res != 0;
     if (*name == 0 || *name == '.' || *name == '#') {
         return -1;
     }
