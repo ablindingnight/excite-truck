@@ -2610,8 +2610,8 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     s32 temp_r6_2;
     s32 var_ctr;
     s32 var_r0_2;
-    s32 var_r0_3;
     s32 var_r5_3;
+    s32 var_r0_3;
     u32 temp_r10;
     u32 temp_r5;
     u32 temp_r5_2;
@@ -2716,8 +2716,8 @@ decode:
             for (var_ctr = 0; var_ctr < temp_r18; var_ctr++) {
                 if (var_r3 == (u32)(*var_r7 * 2)) {
                     var_f29 = *var_r8;
-                    var_r7++;
                     var_r8++;
+                    var_r7++;
                     var_r28++;
                     var_f28 = -var_f29;
                 }
