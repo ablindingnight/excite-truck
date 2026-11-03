@@ -1263,9 +1263,10 @@ void fn_801E96D8(RaceSetup* s) {
     EventInfo* ev = (EventInfo*)GetEvent(s->event);
     const char* file = ev->node->GetString("wall_file", 0);
     if (file) {
+        ValueNode* nd;
         ValueTable* t = fn_80131808(file);
         int n = 0;
-        ValueNode* nd = t->GetChild(0);
+        nd = t->GetChild(0);
         while (nd) {
             BOOL right = strncasecmp(nd->GetName(), "Right", 5) == 0;
             BOOL line;
@@ -1300,8 +1301,8 @@ void fn_801E96D8(RaceSetup* s) {
                     if (ok) {
                         WVec cur;
                         WMtx mtx;
-                        WVec up;
                         WVec c;
+                        WVec up;
                         f32 len;
                         WallVol* wv;
                         cur.x = p.x;
@@ -1309,7 +1310,8 @@ void fn_801E96D8(RaceSetup* s) {
                         cur.z = p.y;
                         cur.y = fn_801DCF48(0, p.x, p.y);
                         c.x = cur.x + 0.5f * (prev.x - cur.x);
-                        c.y = cur.y + 0.5f * (prev.y - cur.y);
+                        f32 yv = cur.y;
+                        c.y = yv + 0.5f * (prev.y - yv);
                         c.z = cur.z + 0.5f * (prev.z - cur.z);
                         mtx.z.x = cur.x - prev.x;
                         mtx.z.y = 0.0f;
