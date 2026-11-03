@@ -782,7 +782,8 @@ extern "C" void fn_8021095C(void) {
         if (name != 0 && num != 0 && next != 0) {
             col.x = num->pos.x - name->pos.x;
             step.x = next->pos.x - name->pos.x;
-            col.y = num->pos.y - name->pos.y;
+            float y2 = num->pos.y;
+            col.y = y2 - name->pos.y;
             step.y = next->pos.y - name->pos.y;
         }
         mark = COURSE_LAYOUT->FindPane(pool + 0xAC);
@@ -798,7 +799,8 @@ extern "C" void fn_8021095C(void) {
             char buf[0xFF];
             nameBox = *name;
             nameBox.pos.x = nameBox.pos.x + step.x * (float)row;
-            nameBox.pos.y = nameBox.pos.y + step.y * (float)row;
+            float yv = step.y;
+            nameBox.pos.y = nameBox.pos.y + yv * (float)row;
             numBox = *num;
             numBox.pos.x = nameBox.pos.x + col.x;
             numBox.pos.y = nameBox.pos.y + col.y;
@@ -806,8 +808,10 @@ extern "C" void fn_8021095C(void) {
                 PanelBox *cur = COURSE_LAYOUT->FindPane(pool + 0xAC);
                 if (cur != 0) {
                     PanelBox b = *cur;
-                    b.pos.x = nameBox.pos.x + cursor.x;
-                    b.pos.y = nameBox.pos.y + cursor.y;
+                    float y_ = cursor.y;
+                    float xv = cursor.x;
+                    b.pos.x = nameBox.pos.x + xv;
+                    b.pos.y = nameBox.pos.y + y_;
                     fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 9, &b);
                 }
                 nameBox.color = hilite;
