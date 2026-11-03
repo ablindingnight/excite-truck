@@ -1825,9 +1825,7 @@ void fn_80183E7C(u8* p) {
         fl.y = lbl_80561CAC;
         fl.z = F32(p, 0x120);
         f32 m = PSVECMag(&fl);
-        if (m < lbl_80561CD0) {
-            m = lbl_80561CD0;
-        }
+        m = m > lbl_80561CD0 ? m : lbl_80561CD0;
         f32 inv = lbl_80561CD0 / m;
         fl.x = fl.x * inv;
         fl.y = fl.y * inv;
@@ -1907,12 +1905,8 @@ void fn_80183E7C(u8* p) {
             dive = lbl_80561DD0 + Clamp01((st - lbl_80561CDC) / lbl_80561CDC) * lbl_80561DF0;
         }
         f32 lean = lbl_80561CEC * dive;
-        if (lean > lbl_80561CD0) {
-            lean = lbl_80561CD0;
-        }
-        if (lean < lbl_80561DE4) {
-            lean = lbl_80561DE4;
-        }
+        lean = lean < lbl_80561CD0 ? lean : lbl_80561CD0;
+        lean = lean > lbl_80561DE4 ? lean : lbl_80561DE4;
         if (F32(p, 0x2618) > lbl_80561CD0) {
             CbLeanEvent ev;
             ev.id = S32(p, 0x1EC);
@@ -1937,9 +1931,7 @@ void fn_80183E7C(u8* p) {
         dir.z = F32(p, 0x120);
         f32 want = target - lbl_80561DA0 * F32(p, 0x25E4);
         f32 m = PSVECMag(&dir);
-        if (m < lbl_80561CCC) {
-            m = lbl_80561CCC;
-        }
+        m = m > lbl_80561CCC ? m : lbl_80561CCC;
         f32 one = lbl_80561CD0;
         f32 inv = one / m;
         dir.x = dir.x * inv;
@@ -1961,9 +1953,7 @@ void fn_80183E7C(u8* p) {
         f32 floor = fn_801DDC8C(F32(p, 0x60), F32(p, 0x68));
         floor = floor > lbl_80561CAC ? floor : lbl_80561CAC;
         f32 t = F32(p, 0x2688) - lbl_80561DFC;
-        if (t < lbl_80561CAC) {
-            t = lbl_80561CAC;
-        }
+        t = t > lbl_80561CAC ? t : lbl_80561CAC;
         F32(p, 0x2688) = t;
         if (floor > lbl_80561E00) {
             BVec f;
@@ -2471,9 +2461,7 @@ void fn_80186DE8(u8* p) {
         if (air > lbl_80561CD0) {
             air = lbl_80561CD0;
         }
-        if (air < lbl_80561CAC) {
-            air = lbl_80561CAC;
-        }
+        air = air > lbl_80561CAC ? air : lbl_80561CAC;
         f32 grip;
         f32 airK = lbl_80561CD0 + lbl_80561D44 * air;
         int surf = 0;
@@ -2496,9 +2484,7 @@ void fn_80186DE8(u8* p) {
             if (d > lbl_80561CD0) {
                 d = lbl_80561CD0;
             }
-            if (d < lbl_80561CAC) {
-                d = lbl_80561CAC;
-            }
+            d = d > lbl_80561CAC ? d : lbl_80561CAC;
             wet = lbl_80561D00 + d * lbl_80561DD0;
         }
         grip = st->grip * wet;
@@ -2509,9 +2495,7 @@ void fn_80186DE8(u8* p) {
         }
         if (S32(car, 0x2620) >= 3 && !landing) {
             f32 speed = PSVECMag(car + 0x118);
-            if (speed < lbl_80561CD0) {
-                speed = lbl_80561CD0;
-            }
+            speed = speed > lbl_80561CD0 ? speed : lbl_80561CD0;
             f32 drag = lbl_80561D98 * (-st->drag * F32(car, 0xD4)) / speed;
             f32 force[3];
             force[0] = F32(car, 0x118) * drag;
@@ -2539,9 +2523,7 @@ void fn_80186DE8(u8* p) {
                 AddScaled(force, car + 0x3C, k);
             }
             speed = PSVECMag(car + 0x118);
-            if (speed < lbl_80561CD0) {
-                speed = lbl_80561CD0;
-            }
+            speed = speed > lbl_80561CD0 ? speed : lbl_80561CD0;
             f32 k = lbl_80561D98 * (lbl_80561E5C * F32(car, 0xD4)) * F32(car, 0x25E4) / speed;
             force[0] = force[0] + F32(car, 0x118) * k;
             force[1] = force[1] + F32(car, 0x11C) * k;
@@ -2820,12 +2802,8 @@ void fn_80186DE8(u8* p) {
         f32 out = throttle;
         if (F32(car, 0x25D4) > vmax && brake > lbl_80561CDC && U32(car, 0x10) == 'PCAR') {
             out = lbl_80561CD0 - lbl_80561EC8 * (F32(car, 0x25D4) - vmax);
-            if (out < lbl_80561CAC) {
-                out = lbl_80561CAC;
-            }
-            if (out > throttle) {
-                out = throttle;
-            }
+            out = out > lbl_80561CAC ? out : lbl_80561CAC;
+            out = out < throttle ? out : throttle;
             boosting = 1;
             if (F32(car, 0x258C) <= lbl_80561DC0 && !U8(car, 0x259C)) {
                 boosting = 0;
@@ -2852,15 +2830,9 @@ void fn_80186DE8(u8* p) {
         c->v190 = CbSolVec4(steerK, out, brake, water[0]);
         f32 bk2 = F32(car, 0x25E4);
         f32 hb = lbl_80561D50 * hold;
-        if (hb < bk2) {
-            hb = bk2;
-        }
-        if (hb < lbl_80561CAC) {
-            hb = lbl_80561CAC;
-        }
-        if (bk2 < lbl_80561CAC) {
-            bk2 = lbl_80561CAC;
-        }
+        hb = hb > bk2 ? hb : bk2;
+        hb = hb > lbl_80561CAC ? hb : lbl_80561CAC;
+        bk2 = bk2 > lbl_80561CAC ? bk2 : lbl_80561CAC;
         c->v1A0 = CbSolVec4(bk2, bk2, hb, hb);
         fn_8018CB3C(car);
         ((CbStepV*)PTR(car, 0x270))->Step();

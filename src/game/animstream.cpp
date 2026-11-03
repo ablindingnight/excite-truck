@@ -329,9 +329,7 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
     for (int i = 0; i < a->numBones + 1; i++) {
         BoneKey* b = &a->bones[i];
         f32 t0 = b->t0;
-        if (t0 >= b->t1 - 0.001f) {
-            t0 = b->t1 - 0.001f;
-        }
+        t0 = t0 < b->t1 - 0.001f ? t0 : b->t1 - 0.001f;
         f32 u = (time - t0) / (b->t1 - t0);
         if (1.0f < u) {
             u = 1.0f;

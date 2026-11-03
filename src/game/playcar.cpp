@@ -1413,9 +1413,7 @@ void PlayerDriver_vf48(u8* p) {
         ((Gearbox*)PTR(p, 0x38))->v50(kZero, lbl_805620D0 * fn_8018AE4C(c5), wob + buzz);
         c5 = PTR(p, 0x34);
         f32 sr = F32(c5, 0x25D4) / lbl_805620D8;
-        if (kOne < sr) {
-            sr = kOne;
-        }
+        sr = sr < kOne ? sr : kOne;
         f32 str = kOne * MaxF(sr, kZero);
         w.x = F32(c5, 0x124) * lbl_80562128;
         w.y = F32(c5, 0x128) * lbl_80562128;
