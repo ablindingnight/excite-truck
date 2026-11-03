@@ -696,33 +696,37 @@ void fn_802D5ACC(Surf* s) {
 
 
 void fn_802D5B8C(Surf* s) {
+    u32* col;
+    f32* uv;
     int n = s->nverts;
-    u32* col = (u32*)fn_802CFF64(n * 4);
-    f32* uv = (f32*)fn_802CFF64(n * 8);
+    col = (u32*)fn_802CFF64(n * 4);
+    uv = (f32*)fn_802CFF64(n * 8);
     if (!col || !uv) {
         return;
     }
     u32* src = (u32*)s->attr;
+    int i;
     V3* p = (V3*)s->verts;
+    u32* c;
     f32* suv = (f32*)s->uv;
     V3 d;
     d.x = lbl_804C56C0.pos.x - lbl_804C5690.pos.x;
     d.y = lbl_804C56C0.pos.y - lbl_804C5690.pos.y;
     d.z = lbl_804C56C0.pos.z - lbl_804C5690.pos.z;
     MulVec(&d, &d, &lbl_804C5690.rot);
-    f32 u0 = lbl_804DB068[1].x;
     f32 v0 = lbl_804DB068[1].y;
+    f32 u0 = lbl_804DB068[1].x;
     f32 k = lbl_804DB068[1].z;
-    u32* c = col;
+    c = col;
     f32* t = uv;
-    for (int i = 0; i < n; i++) {
+    for (i = 0; i < n; i++) {
         f32 f = 1.0f - PSVECSquareDistance(p, &d) * k;
         u32 a = *src;
         int x = MAX((int)((u8)a * f), 0);
         *c = (a & ~0xFF) | (x < 0xFF ? x : 0xFF);
         p++;
-        src++;
         c++;
+        src++;
         t[0] = suv[0] + u0;
         t[1] = suv[1] + v0;
         suv += 2;
