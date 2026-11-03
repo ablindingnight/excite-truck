@@ -88,9 +88,10 @@ void fn_8024BDFC(u8* p) { fn_8024A1AC(p - 0x18); }
 // temporaries on the stack; matrix and calls match.
 void fn_8024BE04(u8* p) {
     fn_802E30C8("ModelTest!");
+    MTMtx* vp;
     s32 tex = fn_802CAC28("leather.tex", 0);
     MTMtx view;
-    MTMtx* vp = &view;
+    vp = &view;
     for (u32 frame = 0;; frame++) {
         vp->SetView(lbl_80563910);
         fn_802C8530();
