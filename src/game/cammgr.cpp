@@ -1208,11 +1208,7 @@ void fn_80268358(CamRec* c) {
     }
     f32 t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
-    if (lbl_803467E8[lbl_8055F4A0].on) {
-        ka = ShakeEase(t / lbl_8055C4F0);
-    } else {
-        ka = t / lbl_8055C4F0;
-    }
+    ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
     if (lbl_803467E8[lbl_8055F4A0].on) {
         kb = ShakeEase(t / lbl_8055C4F4);
