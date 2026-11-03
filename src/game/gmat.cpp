@@ -597,8 +597,9 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18();
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
+        int n;
         GVec* verts = g->verts.data;
-        int n = g->verts.count;
+        n = g->verts.count;
         for (GBlock* b = g->lists[0].head; b; b = b->next) {
             fn_802DC464(verts, n, (u16*)b->data, b->count);
         }
@@ -629,8 +630,9 @@ void fn_802B1758(GMat* g) {
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         f32 near = -2.0f + 1024.0f * kWorldScale * 0.5f;
+        int k;
         GVec* c = lbl_804BE190;
-        for (int k = 0; k < 4; k++, c++) {
+        for (k = 0; k < 4; k++, c++) {
             f32 x = near * (f32)((k & 1) ? -1 : 1);
             f32 z = near * (f32)((k & 2) ? -1 : 1);
             f32 y = fn_801DCF48(0, x, z);
