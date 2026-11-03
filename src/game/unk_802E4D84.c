@@ -978,9 +978,9 @@ void fn_802E6264(void) {
                         memset(&addr, 0, sizeof(addr));
                         addr.loopFlag = 1;
                         addr.format = 10;
+                        end = start + (s->size >> 1) - 1;
                         addr.loopAddressHi = start >> 16;
                         addr.loopAddressLo = start;
-                        end = start + (s->size >> 1) - 1;
                         addr.endAddressHi = end >> 16;
                         addr.endAddressLo = end;
                         addr.currentAddressHi = start >> 16;
