@@ -387,8 +387,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     events.head.f4 = -1;
     events.head.b8 = 0;
     events.f18 = -1;
-    s32 lastTrack = *track;
     s32 lastEve = *eve;
+    s32 lastTrack = *track;
     LocPicker loc;
     loc.head.b0 = 0;
     loc.head.f4 = -1;
@@ -401,9 +401,9 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     loc.cur = 0;
     loc.count = 0;
     for (i = 0; i < (*loc.pairs)->count; i++) {
+        int found = 0;
         const char* name = (*loc.pairs)->items[i].track;
         const char* env = GetTrackEnviron(name);
-        int found = 0;
         for (int j = 0; j < loc.count; j++) {
             if (!strcasecmp(loc.data[j].env, env)) {
                 found = 1;
@@ -520,8 +520,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         pairs->count = 0;
         pairs->cap = 0;
         operator delete(pairs);
+        pairs = 0;
     }
-    pairs = 0;
     return r != -1;
 }
 
