@@ -1442,7 +1442,7 @@ void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec*
     AddScaled(&c[0], p, a, -len);
     AddScaled(&c[0], &c[0], b, len);
     AddScaled(&c[1], &c[0], a, 2.0f * len);
-    AddScaled(&c[2], &c[0], b, -2.0f * len);
+    AddScaled(&c[2], &c[0], b, -len * 2.0f);
     AddScaled(&c[3], &c[1], b, -2.0f * len);
     fn_802C8E00(0xC0FFFFFF, 0, c[0].x, c[0].y, c[0].z, u0, v0);
     fn_802C8E00(0xC0FFFFFF, 0, c[1].x, c[1].y, c[1].z, u1, v0);
