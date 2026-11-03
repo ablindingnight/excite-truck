@@ -1100,7 +1100,8 @@ inline void CrushMaster::vfF8(void) {
                     break;
                 }
                 {
-                    ValPoint pt = sp->GetPoint(name);
+                    ValPoint pt;
+                    pt = sp->GetPoint(name);
                     spawns.data[spawns.count++] = *(V2*)&pt;
                 }
             }
