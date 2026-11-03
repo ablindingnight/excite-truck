@@ -547,22 +547,47 @@ void fn_800C1A80(s32* a, s32* b, s32* out) {
  * long long. NonMatching: 155/155 with the same opcodes, scheduled differently. */
 #define MP3_Q20(x, k) ((s32)(((s64)(x) * (k)) >> 20))
 void fn_800C1C1C(s32* in, s32* out) {
-    s32 s08, s26, s35, s17, d17, d62, d80, d35, t, u, m, x4;
-    s32 a, b, c, d, e, f, g, h;
-
-    d17 = in[1] - in[7];
-    s08 = in[0] + in[8];
-    s26 = in[2] + in[6];
-    s35 = in[3] + in[5];
-    t = s26 + s08;
-    d62 = in[6] - in[2];
-    d80 = in[8] - in[0];
-    s17 = in[1] + in[7];
-    u = s35 + t;
-    d35 = in[3] - in[5];
-    x4 = in[4] + s17;
-
+    s32 i0 = in[0];
+    s32 i1 = in[1];
+    s32 i2 = in[2];
+    s32 i4 = in[4];
+    s32 i5 = in[5];
+    s32 i6 = in[6];
+    s32 i7 = in[7];
+    s32 i8 = in[8];
+    s32 s08;
+    s32 s26;
+    s32 s35;
+    s32 s17;
+    s32 d17;
+    s32 d62;
+    s32 d80;
+    s32 d35;
+    s32 t;
+    s32 i3 = in[3];
+    s32 u;
+    s32 m;
+    s32 x4;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+    s32 e;
+    s32 f;
+    s32 g;
+    s32 h;
+    d62 = i6 - i2;
+    d17 = i1 - i7;
     a = MP3_Q20(d17, -1816186LL);
+    s08 = i8 + i0;
+    s26 = i6 + i2;
+    s35 = i3 + i5;
+    t = s08 + s26;
+    u = s35 + t;
+    d80 = i8 - i0;
+    s17 = i1 + i7;
+    d35 = i3 - i5;
+    x4 = i4 + s17;
     b = MP3_Q20(s26 - s08, 1970683LL);
     c = MP3_Q20(s35 - s08, -364166LL);
     d = MP3_Q20(s35 - s26, -1606512LL);
@@ -570,17 +595,16 @@ void fn_800C1C1C(s32* in, s32* out) {
     f = MP3_Q20(d35 - d80, -2065296LL);
     g = MP3_Q20(d35 + d62, -1348028LL);
     h = MP3_Q20(d35 - d62 + d80, -1816186LL);
-
-    m = in[4] * 2 - s17;
+    m = i4 * 2 - s17;
     out[0] = x4 + u;
+    out[1] = g - (a + f);
     out[2] = d - (m + b);
-    out[6] = x4 * -2 + u;
-    out[8] = m + (c + d);
+    out[3] = h;
     out[4] = m - b - c;
     out[5] = a - e - f;
-    out[7] = a + (e + g);
-    out[1] = g - (a + f);
-    out[3] = h;
+    out[6] = x4 * -2 + u;
+    out[7] = a + (g + e);
+    out[8] = m + (c + d);
 }
 
 #undef MP3_Q20
