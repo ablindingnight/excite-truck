@@ -191,8 +191,9 @@ void fn_801D9F84(PathFollower* p, PathFile* f) {
 
 int fn_801D9FC4(PathFollower* p, const char* name) {
     PathFile* f = p->file;
+    int i;
     int n = f->count;
-    for (int i = 0; i < n; i++) {
+    for (i = 0; i < n; i++) {
         if (strcmp(f->paths[i].name, name) == 0) {
             return 1;
         }
