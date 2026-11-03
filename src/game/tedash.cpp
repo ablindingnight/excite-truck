@@ -689,12 +689,13 @@ s16 fn_802B6ED8(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_80
 
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : x + 0.5f); }
 
+extern const f32 kWorldScale;
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
     }
-    s16 cx = (s16)Round(pos->x / 2.0f) & ~(fn_802B6E30() - 1);
-    s16 cz = (s16)Round(pos->z / 2.0f) & ~(fn_802B6E30() - 1);
+    s16 cx = (s16)Round(pos->x / kWorldScale) & ~(fn_802B6E30() - 1);
+    s16 cz = (s16)Round(pos->z / kWorldScale) & ~(fn_802B6E30() - 1);
     u32 nw = lbl_8055CEA0 * b->w;
     u32 nh = lbl_8055CEA0 * b->h;
     if (lbl_8055FA38 == 5) {
@@ -742,6 +743,8 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
         fn_8020404C();
     }
 }
+const f32 kWorldScale = 2.0f;
+
 
 void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
     V3 p;
