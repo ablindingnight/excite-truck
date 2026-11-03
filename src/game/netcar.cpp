@@ -464,7 +464,7 @@ void NetCar::Rotate(Blend* b) {
     } else {
         f32* c = &cur.x;
         f32* m = &mtx.x.x;
-        int i = 0;
+        s32 i = 0;
         int j;
         int l;
         f32 s;
