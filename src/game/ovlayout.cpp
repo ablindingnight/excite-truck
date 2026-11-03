@@ -1351,7 +1351,8 @@ void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
     out->u1 = a->u1 + t * (b->u1 - a->u1);
     out->v0 = a->v0 + t * (b->v0 - a->v0);
     out->v1 = a->v1 + t * (b->v1 - a->v1);
-    out->w = a->w + t * (b->w - a->w);
+    f32 wv = b->w;
+    out->w = a->w + t * (wv - a->w);
     out->h = a->h + t * (b->h - a->h);
 }
 
