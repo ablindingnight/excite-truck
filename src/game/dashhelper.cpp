@@ -535,8 +535,8 @@ void fn_8000E874(int player) {
         top = fn_80011DC0(player);
     }
     y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0))) + top;
-    pad = lbl_80351214.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
+    pad = lbl_80351214.wide ? 56.0f : 0.0f;
     for (i = 0, row = lbl_80351214.rows; i < lbl_80351214.count; row++, i++) {
         char buf[20];
         int part2 = fn_8000DFC0(row->type);
