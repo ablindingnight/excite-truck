@@ -1111,17 +1111,17 @@ void fn_802346C8(void) {
         int n = fn_80234654() * 4;
         if (n > 0 && fn_802C8DBC(n)) {
             for (int i = 0; i < lbl_8055F058.count; i++) {
-                TextItem* it = &lbl_8055F06C[i];
-                f32 h = f->height * it->scale;
-                f32 y0 = it->y;
-                f32 y1 = h + y0;
+                f32 h = f->height * lbl_8055F06C[i].scale;
+                f32 y1;
+                f32 y0 = lbl_8055F06C[i].y;
+                y1 = h + y0;
                 u32* cp;
                 if (passes == 2) {
-                    cp = &it->masked;
+                    cp = &lbl_8055F06C[i].masked;
                 } else {
-                    cp = &it->color;
+                    cp = &lbl_8055F06C[i].color;
                 }
-                f32 x = it->x;
+                f32 x = lbl_8055F06C[i].x;
                 strlen(lbl_8055F06C[i].text);
                 int j = 0;
                 while (lbl_8055F06C[i].text[j]) {
@@ -1167,19 +1167,19 @@ void fn_802346C8(void) {
                         continue;
                     }
                     const char* next;
+                    f32 xsv = lbl_8055F06C[i].xs;
                     u16 c = DecodeUTF8(s + j, &next);
-                    Glyph* g = &f->glyphs[c];
-                    x += it->xs * g->pre;
-                    f32 x1 = x + it->scale * g->width;
+                    x += xsv * f->glyphs[c].pre;
+                    f32 x1 = x + lbl_8055F06C[i].scale * f->glyphs[c].width;
                     if (c != ' ') {
-                        fn_802C8E00(*cp, 0, x, y1, 0.0f, g->u0, g->v0);
+                        fn_802C8E00(*cp, 0, x, y1, 0.0f, f->glyphs[c].u0, f->glyphs[c].v0);
                         fn_802C8E00(*cp, 0, x1, y1, 0.0f, f->glyphs[c].u1, f->glyphs[c].v0);
                         fn_802C8E00(*cp, 1, x, y0, 0.0f, f->glyphs[c].u0, f->glyphs[c].v1);
                         fn_802C8E00(*cp, 1, x1, y0, 0.0f, f->glyphs[c].u1, f->glyphs[c].v1);
                     }
                     j += next - (s + j);
-                    x += it->scale * f->glyphs[c].width;
-                    x += it->xs * f->glyphs[c].post;
+                    x += f->glyphs[c].width * lbl_8055F06C[i].scale;
+                    x += lbl_8055F06C[i].xs * f->glyphs[c].post;
                 }
             }
             fn_802C8E48();
