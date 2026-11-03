@@ -504,7 +504,8 @@ s32 fn_8028F040(SysList* a, SysList* b, s32 tex) {
             int n = b->count;
             PartSys** q = b->items;
             while (!found && j < n) {
-                found = (*q++)->tex == t;
+                found = t == (*q)->tex;
+                q++;
                 j++;
             }
             if (found) {
