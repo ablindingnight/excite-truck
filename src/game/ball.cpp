@@ -408,10 +408,10 @@ public:
 };
 
 ModuleTag lbl_8055E498;
-UnkStaticFFFF lbl_8055E4A0;
-static UnkStatic123 lbl_804348C0;
-UnkStaticFFFF lbl_8055E4A4;
 UnkStatic7F lbl_8055E4A8;
+static UnkStatic123 lbl_804348C0;
+UnkStaticFFFF lbl_8055E4A0;
+UnkStaticFFFF lbl_8055E4A4;
 
 extern "C" f32 fn_8017D378(void) { return lbl_8055E3C8; }
 

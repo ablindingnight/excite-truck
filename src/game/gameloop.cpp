@@ -346,10 +346,10 @@ public:
     u32 unk14;
 };
 
-ModuleTag lbl_8055D3C0;
-UnkStaticFFFF lbl_8055D3C8;
-static GameLoopStatic lbl_8034F5A0;
 UnkStatic7F lbl_8055D3CC;
+ModuleTag lbl_8055D3C0;
+static GameLoopStatic lbl_8034F5A0;
+UnkStaticFFFF lbl_8055D3C8;
 
 ViewCam lbl_8034F5B8[4];
 s32 lbl_8034F5D8[8];  // allowed racing cameras
