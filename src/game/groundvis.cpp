@@ -445,9 +445,9 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
     if (depth + r < lbl_804BE0B0.znear || depth - r > lbl_804BE0B0.zfar) {
         return 0;
     }
-    f32 ax = fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[0]));
+    f32 ax = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[0]));
     if (InCone(ax, depth, lbl_804BE0B0.tanV, lbl_804BE0B0.secV, 18.0f, radius, k)) {
-        f32 ay = fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[1]));
+        f32 ay = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[1]));
         if (InCone(ay, depth, lbl_804BE0B0.tanH, lbl_804BE0B0.secH, 40.0f, radius, k)) {
             *dist = fn_802AE6E0(c, &lbl_804BE0B0.cam.pos);
             return 1;
