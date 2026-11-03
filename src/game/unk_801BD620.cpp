@@ -53,6 +53,21 @@ static inline Vec Max(const Vec& a, const Vec& k) {
 static inline Vec operator+(Vec a, const Vec& b) { return Vec(a.x + b.x, a.y + b.y, a.z + b.z); }
 static inline Vec Mul(const Vec& a, const Vec& b) { return Vec(a.x * b.x, a.y * b.y, a.z * b.z); }
 
+// Quaternions copy all four components.
+struct Quat {
+    f32 x, y, z, w;
+    Quat() {}
+    Quat(f32 a, f32 b, f32 c, f32 d) : x(a), y(b), z(c), w(d) {}
+    Quat(const Quat& o) : x(o.x), y(o.y), z(o.z), w(o.w) {}
+};
+static inline Quat LoadQ(const MVec4& m) { return Quat(m.x, m.y, m.z, m.w); }
+static inline void StoreQ(MVec4& m, Quat q) {
+    m.x = q.x;
+    m.y = q.y;
+    m.z = q.z;
+    m.w = q.w;
+}
+
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
 extern "C" {
@@ -96,7 +111,7 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         Vec pos = Load(*pPos);
         Vec vel = Load(*pVel);
         Vec spin = Load(*pSpin);
-        Vec q = Load4(*pQ);
+        Quat q = LoadQ(*pQ);
         Vec r1 = Load(*pR1);
         Vec r2 = Load(*pR2);
         Vec r3 = Load(*pR3);
@@ -153,27 +168,19 @@ void fn_801BA088(MVec4* t, int a, int b, int c) {
         vz = vel.z;
 
         // q -= (0.5 w) * q * dt, then renormalise
-        ox = wx * (ident.x + 0.5f);
-        oy = wy * (ident.x + 0.5f);
-        oz = wz * (ident.x + 0.5f);
-        ow = ident.w * (2.0f * ident.x);
+        {
+            Quat o(wx * (ident.x + 0.5f), wy * (ident.x + 0.5f), wz * (ident.x + 0.5f), ident.w * (2.0f * ident.x));
+            Quat d(q.y * o.z + q.x * o.w + o.x * q.w - o.y * q.z, q.z * o.x + q.y * o.w + o.y * q.w - o.z * q.x,
+                   q.x * o.y + q.z * o.w + o.z * q.w - o.x * q.y,
+                   q.w * o.w - q.z * o.z - ident.w * (q.y * o.y) - ident.w * (q.x * o.x));
+            Quat nq(q.x - d.x * dt, q.y - d.y * dt, q.z - d.z * dt, q.w - d.w * dt);
+            n = ident.w / fn_8002B0B0(nq.x * nq.x + nq.y * nq.y + nq.z * nq.z + nq.w * nq.w);
+            q = Quat(nq.x * n, nq.y * n, nq.z * n, nq.w * n);
+        }
         qx = q.x;
         qy = q.y;
         qz = q.z;
         qw = q.w;
-        dx = qy * oz + qx * ow + ox * qw - oy * qz;
-        dy = qz * ox + qy * ow + oy * qw - oz * qx;
-        dz = qx * oy + qz * ow + oz * qw - ox * qy;
-        dw = qw * ow - qz * oz - ident.w * (qy * oy) - ident.w * (qx * ox);
-        qx -= dx * dt;
-        qy -= dy * dt;
-        qz -= dz * dt;
-        qw -= dw * dt;
-        n = ident.w / fn_8002B0B0(qx * qx + qy * qy + qz * qz + qw * qw);
-        qx *= n;
-        qy *= n;
-        qz *= n;
-        qw *= n;
 
         pVel->x = vx;
         pVel->y = vy;
