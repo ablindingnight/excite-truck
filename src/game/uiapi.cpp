@@ -741,8 +741,8 @@ static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
 }
 
 extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
-    WidgetFragment* widgets[4] = {0, 0, 0, 0};
     int count = 0;
+    WidgetFragment* widgets[4] = {0, 0, 0, 0};
     WidgetFragment* p;
     lbl_8055EF38 = (void*)d->group;
     switch (d->type) {
@@ -769,8 +769,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 28: {
-        UIStyle* text;
         UIStyle* value;
+        UIStyle* text;
         if (d->name[0] == '#') {
             text = FindStyle(styles, d->name + 1, 3);
             if (!text) {
