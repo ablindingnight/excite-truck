@@ -1369,9 +1369,11 @@ void fn_80179AF4(Phob* v, u8* buf) {
     } else {
         PMtx t;
         int i;
+        const f32* b;
+        const f32* a;
         f32* d = &t.rot[0].x;
-        const f32* a = &v->world.rot[0].x;
-        const f32* b = &v->prev.rot[0].x;
+        a = &v->world.rot[0].x;
+        b = &v->prev.rot[0].x;
         f32 k = lbl_8055E460;
         for (i = 0; i < 2; i++) {
             d[0] = b[0] + k * (a[0] - b[0]);
