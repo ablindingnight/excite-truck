@@ -429,8 +429,8 @@ static inline void SetIdentity(MCam* m) {
 void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_801293C8("mlist: calc");
     MCam ident;
-    SetIdentity(&ident);
     lbl_8055FCD8 = m;
+    SetIdentity(&ident);
     RenderCtx* ctx = lbl_8055DFC4;
     void* id = fn_802D0514(&ident);
     ctx->mtx[0] = id;
@@ -442,8 +442,9 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         ctx->mtx[j] = id;
     }
     MLArray<MLSphere> sa = m->a;
+    MCam cam;
     const MCam* v = fn_802C86DC();
-    MCam cam = *v;
+    cam = *v;
     lbl_804C5610 = cam;
     MMtx33 rt = cam.r;
     Transpose(&rt);
@@ -461,9 +462,10 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
                 F4(F2(0.0f, 0.0f), F2(zf * (1.0f - q))), F4(F2(0.0f, 0.0f), F2(1.0f / aspect)));
     u8* vis = ctx->vis;
     vis[0] = 0x81;
+    const MLSphere* sp;
     u8* vp = vis + 1;
     int k = 1;
-    const MLSphere* sp = sa.p;
+    sp = sa.p;
     int i;
     int count = sa.n;
     for (i = 0; i < count; i++, k++, vp++) {
