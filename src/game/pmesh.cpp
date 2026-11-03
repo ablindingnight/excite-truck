@@ -162,7 +162,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 u16 flags = t->flags;
                 PVec3 cp = proj;
                 if (outside == 1) {
-                    int k0 = outIdx[0];
+                    s32 k0 = outIdx[0];
                     f32 s = -ed[k0];
                     cp.x = proj.x + t->edge[k0].x * s;
                     cp.y = proj.y + t->edge[k0].y * s;
