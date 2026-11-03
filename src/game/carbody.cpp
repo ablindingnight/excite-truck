@@ -660,7 +660,7 @@ void CarBody_vf08(u8* p, u8* desc) {
     setup.mass = setup.mass * F32(p, 0x2EC);
     setup.f110 = setup.f110 * (0.5f * (F32(p, 0x2F4) + F32(p, 0x2F8)));
     setup.f114 = setup.f114 * F32(p, 0x2FC);
-    for (int i = 0; i < 4; i++) {
+    for (s32 i = 0; i < 4; i++) {
         CbValueNode* axle = table->FindChild((i == 0 || i == 1) ? "Front" : "Rear");
         F32(p + i * 0x74, 0x23E8) = F32(desc + i * 4, 0x10C);
         F32(p + i * 0x74, 0x23EC) = 0.0254f * axle->GetFloat("max_compression", 8.0f) - F32(p + i * 0x74, 0x23E8);
@@ -3674,7 +3674,7 @@ void fn_8018A9F0(u8* p, u8* m) {
         BVec* old = 0;
         n = 0;
         fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
-        for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+        for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
             u8* d = PTR(p, 0x26C0);
             ToBody(p, (BVec*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
         }
