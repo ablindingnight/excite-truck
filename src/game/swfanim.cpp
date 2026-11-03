@@ -257,12 +257,9 @@ void SwfAnim::LoadFile(const char* name) {
             it = &f->items[j];
             SwfSwap16(&it->shape);
             SwfSwap16(&it->cxform);
-            SwfSwap32(&it->m[0]);
-            SwfSwap32(&it->m[1]);
-            SwfSwap32(&it->m[2]);
-            SwfSwap32(&it->m[3]);
-            SwfSwap32(&it->m[4]);
-            SwfSwap32(&it->m[5]);
+            for (int k = 0; k < 6; k++) {
+                SwfSwap32(&it->m[k]);
+            }
         }
     }
 }

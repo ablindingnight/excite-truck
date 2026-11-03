@@ -350,10 +350,9 @@ void fn_801DC32C(GroundHeader* g) {
     }
     for (i = 0; i < g->numItems; i++) {
         GItem* it = &g->items[i];
-        Swap32(&it->w[0]);
-        Swap32(&it->w[1]);
-        Swap32(&it->w[2]);
-        Swap32(&it->w[3]);
+        for (int k = 0; k < 4; k++) {
+            Swap32(&it->w[k]);
+        }
     }
 }
 
