@@ -127,8 +127,8 @@ long fn_8020F6FC(void) {
 
 extern long fn_80129D18(long seed, long range);
 void fn_8020F730(void) {
-    long i;
     long count = lbl_804900AC.m_count;
+    long i;
     lbl_804902C4.m_count = 0;
     if (count != 0) {
         for (i = 0; i < count; i++) {
