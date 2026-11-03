@@ -483,30 +483,33 @@ extern "C" {
 // Poses the rider's bones on the skeleton points: each bone sits on its point (in the model's frame f)
 // and, when it has a child, is turned from its bind direction to aim at the child.
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
-    for (int i = 0; i < n; i++, links++) {
-        BonePose* o = &out[links->index];
-        const BRot* b = (const BRot*)(bind + links->index * 0x38);
+    const BoneLink* p = links;
+    for (int i = 0; i < n; i++, p++) {
+        BonePose* o = &out[p->index];
+        const BRot* b = (const BRot*)(bind + p->index * 0x38);
         BVec v;
-        v.x = pts[links->point].x - f->pos.x;
-        v.y = pts[links->point].y - f->pos.y;
-        v.z = pts[links->point].z - f->pos.z;
+        v.x = pts[p->point].x - f->pos.x;
+        v.y = pts[p->point].y - f->pos.y;
+        v.z = pts[p->point].z - f->pos.z;
         {
+            f32 zv;
             f32 x = v.z * f->rot.r[0].z + (v.x * f->rot.r[0].x + v.y * f->rot.r[0].y);
             f32 y = v.z * f->rot.r[1].z + (v.x * f->rot.r[1].x + v.y * f->rot.r[1].y);
-            f32 z = v.z * f->rot.r[2].z + (v.x * f->rot.r[2].x + v.y * f->rot.r[2].y);
+            zv = f->rot.r[2].z;
+            f32 z = v.z * zv + (v.x * f->rot.r[2].x + v.y * f->rot.r[2].y);
             v.x = x;
             v.y = y;
             v.z = z;
         }
         o->pos = v;
-        if (links->child >= 0) {
+        if (p->child >= 0) {
             BVec c;
-            c.x = pts[links->child].x - f->pos.x;
-            c.y = pts[links->child].y - f->pos.y;
-            c.z = pts[links->child].z - f->pos.z;
+            c.x = pts[p->child].x - f->pos.x;
+            c.y = pts[p->child].y - f->pos.y;
+            c.z = pts[p->child].z - f->pos.z;
             {
                 f32 x = c.z * f->rot.r[0].z + (c.x * f->rot.r[0].x + c.y * f->rot.r[0].y);
-                f32 y = c.z * f->rot.r[1].z + (c.x * f->rot.r[1].x + c.y * f->rot.r[1].y);
+                f32 y = f->rot.r[1].z * c.z + (c.x * f->rot.r[1].x + c.y * f->rot.r[1].y);
                 f32 z = c.z * f->rot.r[2].z + (c.x * f->rot.r[2].x + c.y * f->rot.r[2].y);
                 c.x = x;
                 c.y = y;
@@ -541,7 +544,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     r.r[0].z = az * (t * ax) - sn * ay;
                     r.r[1].x = ay * (t * ax) - sn * az;
                     r.r[1].y = cs + t * (ay * ay);
-                    r.r[1].z = az * (t * ay) + sn * ax;
+                    r.r[1].z = az * (ay * t) + ax * sn;
                     r.r[2].x = az * (t * ax) + sn * ay;
                     r.r[2].y = az * (t * ay) - sn * ax;
                     r.r[2].z = cs + t * (az * az);
