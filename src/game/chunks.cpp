@@ -49,6 +49,9 @@ struct Spin {
     Mat3 rot;   // offset 0x10
 };
 
+// Chunk::state: resting (sinking into the ground), bouncing (collides with the ground), falling (no collision).
+enum ChunkState { CHUNK_RESTING = 1, CHUNK_BOUNCING = 2, CHUNK_FALLING = 3 };
+
 // A car or terrain chunk (0x4C).
 struct Chunk {
     Mat3 rot;     // offset 0x0
@@ -487,7 +490,7 @@ void CarChunks::Spawn(const PVec* pos, const PVec* vel, int slot, int color) {
     c->vel = *vel;
     c->age = 0.0f;
     c->slot = slot;
-    c->state = fn_80287B5C(3) ? 2 : 3;
+    c->state = fn_80287B5C(3) ? CHUNK_BOUNCING : CHUNK_FALLING;
     c->model = fn_80287B5C(numModels);
     c->spin = s;
     c->color = color;
