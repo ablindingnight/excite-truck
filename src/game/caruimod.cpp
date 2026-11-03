@@ -930,10 +930,11 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         f32 d = dist;
         int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hh = 0.5f * (f32)h;
-        f32 cy = (f32)y + hh;
         f32 hw = 0.5f * (f32)w2;
+        f32 cx;
+        f32 cy = (f32)y + hh;
         x -= (w2 - w) / 2;
-        f32 cx = (f32)x + hw;
+        cx = (f32)x + hw;
         f32 proj;
         f32 dummy;
         fn_802C98DC(&proj, &dummy, &dummy, &dummy);
@@ -944,9 +945,10 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         if (state.active) {
             f32 l = (f32)state.rect[0] - cx;
             f32 t = (f32)state.rect[1] - cy;
+            f32 b;
             f32 r = l + (f32)state.rect[2];
-            f32 b = t + (f32)state.rect[3];
-            f32 p = 0.01f > proj ? 0.01f : proj;
+            b = t + (f32)state.rect[3];
+            f32 p = proj < 0.01f ? 0.01f : proj;
             f32 f = hw / p;
             f32 a1 = (f32)AbsD((f32)atan(l / f));
             f32 a2 = (f32)AbsD((f32)atan(r / f));
@@ -1010,8 +1012,10 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
             f32 vx = cam.b.v[0].x;
             cam.pos.x = cam.pos.x + vx * nx + cam.b.v[1].x * ny;
-            cam.pos.y = cam.pos.y + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
-            cam.pos.z = cam.pos.z + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
+            f32 yv = cam.pos.y;
+            cam.pos.y = yv + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
+            f32 zv = cam.pos.z;
+            cam.pos.z = zv + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
             if (!lbl_8055F330 || floor + fn_801DCF48(0) < cam.pos.y) {
                 break;
             }
