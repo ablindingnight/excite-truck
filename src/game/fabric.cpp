@@ -355,8 +355,9 @@ void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
 }
 
 void fn_801F5508(Fabric* f) {
+    Stick* s;
     int n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
-    Stick* s = new ("fabric sticks") Stick[n];
+    s = new ("fabric sticks") Stick[n];
     int k = 0;
     int r;
     int c;
