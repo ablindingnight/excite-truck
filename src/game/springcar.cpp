@@ -369,6 +369,8 @@ void SpringCar::vf14(void) {
     ctl->vf34();
 }
 
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
 void SpringWall::Apply(SpringCar* car, TVec* acc) {
     if (owner) {
         TVec v;
@@ -405,7 +407,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 f32 u = (dist - 0.5f) / -0.5f;
                 u = 1.0f < u ? 1.0f : u;
                 u = u > 0.0f ? u : 0.0f;
-                extra = 0.0f + u * ((6.6666665f + -d) - 0.0f);
+                extra = Lerp(0.0f, 6.6666665f + -d, u);
             }
             total = extra + pen;
             f.x = n.x * total;
