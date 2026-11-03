@@ -31,8 +31,12 @@ s32 fn_802BC30C(int layer);
 void fn_802DC078(void* verts, int nverts, u16* idx, int n, int first, int layer);
 void fn_802BB0FC(void* verts, int n);
 void fn_802BB3B8(void* verts, int n);
-void fn_802DA704(int n, const f32* m, int k);
-void fn_802DAA18(void);
+struct BoneCmd;
+struct BVec {
+    f32 x, y, z;
+};
+BoneCmd* fn_802DA704(int start, const BVec* v, int n);
+void fn_802DAA18(BoneCmd* c);
 void fn_802DC3C0(s32 tex);
 void fn_802DC464(void* verts, int nverts, const u16* idx, int n);
 void fn_802DC440(void);
@@ -593,8 +597,7 @@ void fn_802B1758(GMat* g) {
         m[0] = 1.0f / (1024.0f * kWorldScale);
         m[1] = 0.0f;
         m[2] = 1.0f;
-        fn_802DA704(1, m, 1);
-        fn_802DAA18();
+        fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         int n;
@@ -606,8 +609,7 @@ void fn_802B1758(GMat* g) {
         for (int k = 0; k < g->strips.count; k++) {
             GStrip* s = &g->strips.data[k];
             m[2] = s->alpha;
-            fn_802DA704(1, m, 1);
-            fn_802DAA18();
+            fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
             fn_802DC464(verts, n, s->idx, s->idx[0] + 1);
         }
         fn_802DC440();
@@ -625,8 +627,7 @@ void fn_802B1758(GMat* g) {
         m[0] = scale;
         m[1] = 0.0f;
         m[2] = 1.0f;
-        fn_802DA704(1, m, 1);
-        fn_802DAA18();
+        fn_802DAA18(fn_802DA704(1, (BVec*)m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         f32 near = -2.0f + 1024.0f * kWorldScale * 0.5f;
@@ -659,15 +660,15 @@ void fn_802B1758(GMat* g) {
 }
 
 void fn_802B1B60(GMat* g) {
-    f32 m[6][3];
-    GLayer* l = g->layers.data;
-    for (int k = 0; k < l->texs.count; k++) {
-        m[k][0] = l->texs.data[k].u;
-        m[k][1] = l->texs.data[k].v;
-        m[k][2] = 1.0f / 2048.0f;
+    BVec v[2];
+    InlineVec<GTex, 6>* texs = &g->layers.data->texs;
+    BVec* p = v;
+    for (int k = 0; k < texs->count; k++, p++) {
+        p->x = texs->data[k].u;
+        p->y = texs->data[k].v;
+        p->z = 1.0f / 2048.0f;
     }
-    fn_802DA704(1, &m[0][0], 2);
-    fn_802DAA18();
+    fn_802DAA18(fn_802DA704(1, v, 2));
 }
 
 void fn_802B1BEC(void) {}
