@@ -1214,7 +1214,8 @@ void fn_801AC544(u8* p) {
                         FenceVert* v = &verts[nv++];
                         v->pos.x = b.x * (1.0f - t) + a.x * t;
                         v->pos.y = b.y * (1.0f - t) + a.y * t;
-                        v->pos.z = b.z * (1.0f - t) + a.z * t;
+                        f32 zv = b.z;
+                        v->pos.z = zv * (1.0f - t) + a.z * t;
                         v->w34 = 1.0f;
                         v->w30 = 1.0f;
                     }
