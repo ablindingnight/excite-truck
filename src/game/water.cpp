@@ -342,8 +342,9 @@ void fn_802BF160(void) {
     fn_802D3D6C();
     for (u32 i = 0; i < 3; i++) {
         f32 a = fmod(lbl_8055FAF8 + rings.r[i].phase, 6.2831855f);
+        f32 w;
         f32 c = cos(a);
-        f32 w = 1.0f - rings.r[i].scale;
+        w = 1.0f - rings.r[i].scale;
         f32 s = FMax(FMin((c - -1.0f) * 0.5f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
         f32 inv = 1.0f / rings.r[i].scale;
