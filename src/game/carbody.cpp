@@ -3895,8 +3895,8 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     v0 = PkUnpack(prev->brake, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->brake, 255.0f, 0.0f, 1.0f);
     fn_8018ADBC(p, v1 + t * (v0 - v1));
-    U8(p, 0x260D) = (cur->flags >> 8) & 1;
     U32(p, 0x4) = cur->flags | prev->flags;
+    U8(p, 0x260D) = (cur->flags >> 8) & 1;
     u8* w = p + 0x23AC;
     const u8* c = cur->wheel[0];
     const u8* q = prev->wheel[0];
@@ -3918,8 +3918,8 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
         f32 l1;
         f32 l0 = PkUnpack(q[1], 255.0f, -100.0f, 200.0f);
         l1 = PkUnpack(c[1], 255.0f, -100.0f, 200.0f);
-        f32 k0 = PkUnpack(q[3], 255.0f, 0.0f, 10.0f);
         F32(w, 0x0) = l1 + t * (l0 - l1);
+        f32 k0 = PkUnpack(q[3], 255.0f, 0.0f, 10.0f);
         f32 k1 = PkUnpack(c[3], 255.0f, 0.0f, 10.0f);
         u8 f = c[4];
         F32(w, 0x68) = k1 + t * (k0 - k1);
