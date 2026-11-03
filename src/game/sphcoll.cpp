@@ -1015,8 +1015,10 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         o->VelAt(&v, &pt);
         f32 k = depth * F32(p, 0x10);
         f32 vn = -PSVECDotProduct(&v, &nrm);
-        imp.z = nrm.z * k;
-        imp.y = nrm.y * k;
+        f32 zv = nrm.z;
+        imp.z = zv * k;
+        f32 yv = nrm.y;
+        imp.y = yv * k;
         imp.x = nrm.x * k;
         vt.x = v.x + nrm.x * vn;
         vt.y = v.y + nrm.y * vn;
