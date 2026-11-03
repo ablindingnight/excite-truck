@@ -1238,7 +1238,7 @@ static inline u32 TintColor(u32 c, u32 t) {
     int a = t >> 24;
     int r = (t >> 16) & 0xFF;
     int g = (t >> 8) & 0xFF;
-    int b = t & 0xFF;
+    s32 b = t & 0xFF;
     b = b * b * (int)(c & 0xFF) / 256 / 256;
     g = g * g * (int)((c >> 8) & 0xFF) / 256 / 256;
     r = a * r * (int)((c >> 16) & 0xFF) / 256 / 256;
