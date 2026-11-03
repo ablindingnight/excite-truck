@@ -553,7 +553,7 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
         f32 target = fn_80166F90(s->role);
         f32 diff;
         int hold;
-        int crazy;
+        bool crazy;
         if (s->frozen) {
             target = s->frozenDist;
         }
