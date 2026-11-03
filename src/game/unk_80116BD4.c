@@ -4157,8 +4157,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     s32 rowSkip;
     u32 skipCount;
     u32 idx;
-    u32 y;
     u32 x;
+    u32 y;
     u8 *src;
     s32 i;
 
@@ -4296,10 +4296,11 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         break;
                     }
                     case 8: {
+                        u8 *d1;
                         u32 c0 = *colors.cur++;
                         u32 c1 = *colors.cur++;
                         u8 *d0 = dst;
-                        u8 *d1 = dst + pitch;
+                        d1 = dst + pitch;
                         c0 |= c0 << 8;
                         c0 |= c0 << 16;
                         c1 |= c1 << 8;
@@ -4325,8 +4326,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         break;
                     }
                     case 9: {
-                        u8 *d0 = dst;
                         u8 *d1 = dst + pitch;
+                        u8 *d0 = dst;
                         if ((u32)colors.cur & 3) {
                             for (i = 0; i < 8; i++) {
                                 u32 w;
@@ -4478,8 +4479,9 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 break;
             case 3: {  // run: runs of one color or of literal colors along a scan order
                 u32 value = bits.value;
-                u32 *next = bits.next;
                 u32 avail = bits.count;
+                u32* nextv = bits.next;
+                u32 *next = nextv;
                 u8 *scan;
                 u32 v;
                 u32 bit;
@@ -4533,8 +4535,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
             }
             case 6: {  // fill with one color
                 u32 c = *colors.cur++;
-                blockMap[idx >> 1] = 1;
                 c |= c << 8;
+                blockMap[idx >> 1] = 1;
                 c |= c << 16;
                 for (i = 0; i < 8; i++) {
                     ((u32 *)(dst + i * pitch))[0] = c;
