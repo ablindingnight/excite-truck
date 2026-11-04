@@ -52,9 +52,9 @@ public:
             const char* key;
             s32 unk;
         } k = {key, 0};
+        int i = 0;
         ValuePair* r = 0;
-        int i;
-        for (i = 0; i < count; i++) {
+        for (;  i < count; i++) {
             if (!strcasecmp(key, pairs[i].key)) {
                 r = &pairs[i];
                 break;
@@ -62,20 +62,8 @@ public:
         }
         return r;
     }
-    virtual int Has(const char* key) {
-        ValuePair* p = FindPair(key);
-        if (!p && parent) {
-            p = parent->FindPairInherited(key);
-        }
-        return p != 0;
-    }
-    ValuePair* FindPairInherited(const char* key) {
-        ValuePair* p = FindPair(key);
-        if (!p && parent) {
-            p = parent->FindPairInherited(key);
-        }
-        return p;
-    }
+    virtual int Has(const char* key);
+    ValuePair* FindPairInherited(const char* key);
 
     virtual int GetPair(int index, const char** key, const char** value) {
         if (index >= 0 && index < count) {
@@ -86,16 +74,7 @@ public:
         }
         return 0;
     }
-    virtual const char* GetValue(const char* key) {
-        ValuePair* p = FindPair(key);
-        if (!p && parent) {
-            p = parent->FindPairInherited(key);
-        }
-        if (!p) {
-            fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
-        }
-        return p->value;
-    }
+    virtual const char* GetValue(const char* key);
     virtual s32 GetIntValue(const char* key) { return atoi(GetValue(key)); }
     virtual f32 GetFloat(const char* key) { return atof(GetValue(key)); }
     virtual s32 GetIntValue2(const char* key) {
@@ -205,6 +184,46 @@ public:
     ValueNodeImpl* parent;     // offset 0x14
     ValueFile* file;           // offset 0x18
 };
+
+int ValueNodeImpl::Has(const char* key) {
+    ValuePair* p = FindPair(key);
+    if (!p && parent) {
+        p = parent->FindPairInherited(key);
+    }
+    return p != 0;
+}
+
+const char* ValueNodeImpl::GetValue(const char* key) {
+    ValuePair* p = FindPair(key);
+    if (!p && parent) {
+        p = parent->FindPairInherited(key);
+    }
+    if (!p) {
+        fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
+    }
+    return p->value;
+}
+
+// Searches this table, then the parents. The search is written out here rather than through FindPair so the recursion
+// inlines one level deeper; defined after the class so its callers make a real call.
+inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
+    struct {
+        const char* key;
+        s32 unk;
+    } k = {key, 0};
+    ValuePair* r = 0;
+    int i;
+    for (i = 0; i < count; i++) {
+        if (!strcasecmp(key, pairs[i].key)) {
+            r = &pairs[i];
+            break;
+        }
+    }
+    if (!r && parent) {
+        r = parent->FindPairInherited(key);
+    }
+    return r;
+}
 
 class ValueNodeStatic : public ValueNodeImpl {
 public:
