@@ -325,8 +325,8 @@ int fn_802B5D94(const char* s) { return fn_802B5D2C("object", s); }
 int fn_802B5DA0(const char* s) { return fn_802B5D94(s) != -1; }
 
 int fn_802B5DD0(const char* s) {
-    int i = fn_802B5D2C("layer", s);
     int r = 0;
+    int i = fn_802B5D2C("layer", s);
     if (i != -1 && i != fn_802B05DC()) {
         r = 1;
     }
@@ -970,18 +970,22 @@ int fn_802B8110(int d, const char* s) {
 f32 fn_802B822C(int d) { return 0.05f * (f32)d; }
 
 int fn_802B825C(int d, const char* s) {
-    int changed = 0;
+    ObjScale* sc;
+    int changed;
+    f32 v;
+    f32 n;
+    changed = 0;
     ObjItem it;
     if (fn_802B5B74(&it)) {
-        ObjScale* sc = it.scale;
-        f32 v = sc->max;
-        f32 n = sc->min + fn_802B822C(d);
+        sc = it.scale;
+        v = sc->max;
+        n = sc->min + fn_802B822C(d);
         v = v < n ? v : n;
         v = v > 0.05f ? v : 0.05f;
         if (v != sc->min) {
             sc->min = v;
-            changed = 1;
             it.scale->dirty = 1;
+            changed = 1;
         }
     }
     return changed;

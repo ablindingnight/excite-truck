@@ -444,10 +444,12 @@ void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
     fn_80230C30(&x, &y, self->x, self->y);
+    f32 cellHeight;
     f32 cellWidth = (f32)self->width / 10.0f;
-    f32 cellHeight = (f32)self->height * 0.25f;
+    cellHeight = (f32)self->height * 0.25f;
+    f32 top;
     f32 left = x + cellWidth * (f32)self->selectedColumn;
-    f32 top = y - cellHeight * (f32)self->selectedRow;
+    top = y - cellHeight * (f32)self->selectedRow;
     fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - 4.0f, 0.0f);
     fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, 4.0f + (top - cellHeight), 0.0f);
     fn_80230924(0xFFAF7F00, left, top, left + 4.0f, top - cellHeight, 0.0f);

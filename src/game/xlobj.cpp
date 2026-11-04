@@ -778,8 +778,8 @@ void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
     f32 det = c->x * b->y - b->x * c->y;
     f32 i00 = b->y / det;
     f32 i01 = -b->x / det;
-    f32 i10 = -c->y / det;
     f32 i11 = c->x / det;
+    f32 i10 = -c->y / det;
     s->mtx[0][0] = i00;
     s->mtx[0][1] = 0.0f;
     s->mtx[0][2] = i01;

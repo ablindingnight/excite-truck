@@ -563,8 +563,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     color = fn_80230B9C(-1);
     for (i = 0; i < 21; i++) {
-        Vec3 c = lbl_803582C0[i];
         Vec3 v;
+        Vec3 c = lbl_803582C0[i];
         v.x = c.x * (0.5f * radius);
         v.y = c.y * (0.5f * radius);
         v.z = c.z * (0.5f * radius);
@@ -691,8 +691,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         Truck* tr = fn_8017960C(fn_801E866C(map->player));
         SFMarker* m = lbl_8055D5B4;
-        Vec2 c;
         Vec2 tp;
+        Vec2 c;
         Vec3 p;
         Vec3 rel;
         c.x = x + w * 0.5f;
@@ -721,7 +721,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             fade = Ease(1.0f - PSVECDotProduct(&rel, &rel) / ((w * 0.5f) * (w * 0.5f)));
             a = 255.0f * fade;
             fn_80235AFC(m->art, 0, ((int)(a < 0.0f ? a - 0.5f : 0.5f + a) << 24) | 0xFF | 0xFFFF00,
-                        c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->angle + m->unk10);
+                        c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->unk10 + m->angle);
         }
     }
 }

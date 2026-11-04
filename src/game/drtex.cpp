@@ -691,10 +691,11 @@ void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
     u32 kb = __cvt_fp2unsigned(256.0f * t);
     u32 ka = 0x100 - kb;
     for (int i = 0; i < n; i++) {
+        u32 cb;
         u32 ca = *pa++;
-        u32 cb = *pb++;
-        u32 a0 = ca & 0xFF;
+        cb = *pb++;
         u32 b0 = cb & 0xFF;
+        u32 a0 = ca & 0xFF;
         ca >>= 8;
         u32 a1 = ca & 0xFF;
         ca >>= 8;

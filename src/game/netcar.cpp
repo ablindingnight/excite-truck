@@ -360,8 +360,8 @@ void NetCar::Extrapolate(Blend* b) {
         double b2 = DL(tn, 0.0, t1, t0);
         double b0 = DL(tn, t0, 0.0, t1);
         d.x = ptab[0].pos.v[0] * b0 + (ptab[2].pos.v[0] * b2 + ptab[1].pos.v[0] * b1);
-        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + ptab[1].pos.v[1] * b1);
-        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + ptab[1].pos.v[2] * b1);
+        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + b1 * ptab[1].pos.v[1]);
+        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + b1 * ptab[1].pos.v[2]);
     }
     fn_801A63F4(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;

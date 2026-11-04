@@ -298,11 +298,11 @@ extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** wheels)
     const XrayCar* car = (const XrayCar*)carMtx;
     f32 back = car->wheelbase - 1.397f;
     ValMatrix m = car->mtx;
-    f32 half;
     f32 up = fn_801F159C(wheels[1]) - 0.3556f;
+    f32 half;
+    half = car->track - 0.76835f;
     Madd(&m.origin, &m.origin, &m.basis[2], back);
     Madd(&m.origin, &m.origin, &m.basis[1], up);
-    half = car->track - 0.76835f;
     ValMatrix left = m;
     Madd(&left.origin, &m.origin, &m.basis[0], -half);
     ValMatrix right = m;

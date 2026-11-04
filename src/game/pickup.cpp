@@ -468,10 +468,12 @@ extern "C" {
 void fn_80167EEC(void) { delete lbl_8055E354; }
 
 void fn_80168020(void) {
+    PickupObjMan* m;
+    Pickup* p;
     int i;
-    PickupObjMan* m = lbl_8055E354;
+    m = lbl_8055E354;
     for (i = 0; i < m->objs.count; i++) {
-        Pickup* p = &m->objs.data[i];
+        p = &m->objs.data[i];
         fn_801E9E30(0, p->pos);
         p->pos[1] = p->hover + (p->pos[1] + p->type->yoff);
         p->taken = 0;

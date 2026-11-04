@@ -289,7 +289,7 @@ extern "C" void fn_8020D2D4(void) {
                     glow.pos.x = glow.pos.x - 0.5f * pane->w * scale;
                     float yv = glow.pos.y;
                     glow.pos.y = yv - 0.5f * pane->h * scale;
-                    glow.color = (pane->color & 0x00FFFFFF) | ((unsigned long)alpha << 24);
+                    glow.color = ((unsigned long)alpha << 24) | (pane->color & 0x00FFFFFF);
                     fn_80147940(lbl_8055EEA0, &glow, pool + 0xA0, 1);
                 }
             }

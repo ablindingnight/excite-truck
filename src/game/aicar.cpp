@@ -331,8 +331,9 @@ f32 fn_801931EC(f32 t, f32 len) {
 }
 
 void fn_8019321C(V2* out, const V2* in, const u8* m) {
+    f32 dz;
     f32 dx = F32(m, 0x18);
-    f32 dz = F32(m, 0x20);
+    dz = F32(m, 0x20);
     V2 dir;
     dir.x = dx;
     dir.y = dz;
@@ -349,14 +350,15 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     side.y = -dir.x;
     V2 r;
     r.x = dir.y * in->x + dir.x * in->y + org.x;
-    r.y = (f32)-dir.x * in->x + dir.y * in->y + org.y;
+    r.y = (f32)-in->x * dir.x + dir.y * in->y + org.y;
     out->x = r.x;
     out->y = r.y;
 }
 
 void fn_8019330C(V2* out, const V2* in, const u8* m) {
+    f32 dz;
     f32 dx = F32(m, 0x18);
-    f32 dz = F32(m, 0x20);
+    dz = F32(m, 0x20);
     V2 dir;
     dir.x = dx;
     dir.y = dz;
@@ -1627,7 +1629,7 @@ void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
         *sign = 0;
         return;
     }
-    if (AbsF(b) < 0.44444445f || (*(s32*)&x & (s32)0x80000000) == (*(s32*)&b & (s32)0x80000000)) {
+    if (AbsF(b) < 0.44444445f || (*(s32*)&b & (s32)0x80000000) == (*(s32*)&x & (s32)0x80000000)) {
         *outA = AbsF(x) / 4.905f;
         *outB = 0.0f;
     } else {
@@ -2087,8 +2089,10 @@ void fn_801971AC(u8* d, V2* io) {
         tgt.x = F32(d, 0x48) + F32(d, 0x58) * off;
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * off;
         V2 r;
-        r.x = io->x + k * (tgt.x - io->x);
-        r.y = io->y + k * (tgt.y - io->y);
+        f32 xv = io->x;
+        r.x = xv + k * (tgt.x - xv);
+        f32 yv = io->y;
+        r.y = yv + k * (tgt.y - yv);
         V2 c = r;
         io->x = c.x;
         io->y = c.y;
@@ -2170,10 +2174,10 @@ void fn_8019743C(u8* d, u8* out) {
         }
         f32 push = F32(d, 0xE8);
         if (push > 0.0f) {
-            f32 lo = F32(d, 0x278) + push;
+            f32 lo = push + F32(d, 0x278);
             F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
         } else if (push < 0.0f) {
-            f32 hi = F32(d, 0x278) + push;
+            f32 hi = push + F32(d, 0x278);
             F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
         }
         u8* side = 0;
@@ -2183,8 +2187,9 @@ void fn_8019743C(u8* d, u8* out) {
             u32 which;
             blocked = U8(d, 0x74);
             if (!(!blocked || !U8(d, 0x9C))) {
+                u8 r;
                 int lcar = S32(d, 0x90);
-                u8 r = fn_80193110(d, S32(d, 0xB8));
+                r = fn_80193110(d, S32(d, 0xB8));
                 u32 l = fn_80193110(d, lcar);
                 which = ((l & 0xFF) << 1) | (r & 0xFF);
                 if (!(which == 0 || which == 3)) {
@@ -2212,10 +2217,10 @@ void fn_8019743C(u8* d, u8* out) {
                 side = blocked == 0 ? d + 0xA0 : d + 0x78;
                 blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
             }
-            if (which == 0) {
-                S32(d, 0xC4) = S32(d, 0xC8);
-            } else {
+            if (which != 0) {
                 S32(d, 0xC8) = S32(d, 0xC4);
+            } else {
+                S32(d, 0xC4) = S32(d, 0xC8);
             }
         } else {
             if (U8(d, 0x74) && (u8)fn_80193110(d, S32(d, 0x90))) {

@@ -374,7 +374,8 @@ int fn_801B06D8(const V2* pos, const V2* dir) {
 }
 
 void fn_801B07B4(TeleportInfo* t, const ILPos* at) {
-    ILPos p = *at;
+    ILPos p;
+    p = *at;
     while (fn_801B06D8(&p.seg->pos, &p.seg->dir)) {
         p.seg = p.seg->next;
     }
@@ -1107,12 +1108,12 @@ void fn_801B24B8(void) {
     if (fn_801769F8()) {
         return;
     }
+    Crossing* e;
     CrossQueue* q = &lbl_80435BE8;
-    Crossing* e = q->e;
+    e = q->e;
     for (int i = 0; i < q->n; i++, e++) {
-        DeityCar* c = &lbl_8055E684[e->car];
-        if (!c->locked) {
-            c->rank = lbl_8055E688 - i + 9;
+        if (!lbl_8055E684[e->car].locked) {
+            lbl_8055E684[e->car].rank = lbl_8055E688 - i + 9;
         }
     }
     fn_801B1318();

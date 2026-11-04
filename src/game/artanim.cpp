@@ -581,11 +581,15 @@ void fn_802AD30C(ArtAnim* a) {
 }
 
 void fn_802AD414(ArtAnim* a, f32 t) {
-    for (int i = 0; i < a->nPaths; i++) {
-        ArtPath* p = &a->paths[i];
-        for (int k = 0; k < p->nKeys - 1; k++) {
+    ArtPath* p;
+    int k;
+    int i;
+    s32* dst;
+    for (i = 0; i < a->nPaths; i++) {
+        p = &a->paths[i];
+        for (k = 0; k < p->nKeys - 1; k++) {
             if (t >= p->keys[k].t && t <= 0.001f + p->keys[k + 1].t) {
-                s32* dst = a->elems[p->elem].dst;
+                dst = a->elems[p->elem].dst;
                 if (dst) {
                     *dst = p->keys[k].signal;
                 }
@@ -817,11 +821,15 @@ ArtPlayer::~ArtPlayer(void) {
 int ArtPlayer::Add(const char* name, int map) {
     ArtAnim* anim = fn_802AC4A8(name, (ArtMap*)map);
     if (anim) {
-        ArtItem* item = &list->items[list->count++];
-        char* d = item->name;
-        int k = 100;
+        int k;
+        char c;
+        char* d;
+        ArtItem* item;
+        item = &list->items[list->count++];
+        d = item->name;
+        k = 100;
         for (;;) {
-            char c = *name++;
+            c = *name++;
             *d++ = c;
             if (!c) {
                 break;

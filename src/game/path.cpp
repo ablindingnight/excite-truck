@@ -274,10 +274,11 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         V3 pos;
         pos.z = a->pos.z + f * (b->pos.z - a->pos.z);
         f32 y2 = b->pos.y;
+        f32 xv;
         f32 y_ = a->pos.y;
         pos.y = y_ + f * (y2 - y_);
-        f32 xv = b->pos.x;
         f32 x_ = a->pos.x;
+        xv = b->pos.x;
         pos.x = x_ + f * (xv - x_);
         m->pos.z = pos.z;
         m->pos.y = pos.y;
@@ -303,9 +304,10 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         vel->y = d.y * rate;
         vel->z = d.z * rate;
         Quat na;
+        f32 yv;
         f32 x2 = a->rot.x;
         na.x = x2 * -1.0f;
-        f32 yv = a->rot.y;
+        yv = a->rot.y;
         na.y = yv * -1.0f;
         na.z = a->rot.z * -1.0f;
         na.w = a->rot.w * -1.0f;

@@ -1130,7 +1130,7 @@ int fn_8013CBC0(CarState* zm, int car) {
     f32 c0;
     f32 c1;
     int nearA;
-    pos.x = t->pos.x + t->vel.x * t->dt;
+    pos.x = t->pos.x + t->dt * t->vel.x;
     pos.y = t->pos.y + t->vel.y * t->dt;
     pos.z = t->pos.z + t->vel.z * t->dt;
     p.x = pos.x;
@@ -1166,18 +1166,18 @@ int fn_8013CBC0(CarState* zm, int car) {
     pa.x = p.x - a.x;
     pa.y = p.y - a.y;
     qa.x = q.x - a.x;
+    c0 = perp.x * pa.x + pa.y * perp.y;
     qa.y = q.y - a.y;
-    c0 = perp.x * pa.x + perp.y * pa.y;
     c1 = perp.x * qa.x + perp.y * qa.y;
     if (c0 * c1 <= 0.0f) {
         r = 1;
-        if (perp.y * pa.x + -perp.x * pa.y > 0.0f || perp.y * qa.x + -perp.x * qa.y > 0.0f) {
+        if (perp.y * pa.x + -perp.x * pa.y > 0.0f || qa.x * perp.y + -perp.x * qa.y > 0.0f) {
             pb.x = p.x - b.x;
             pb.y = p.y - b.y;
             qb.x = q.x - b.x;
             f32 yv = q.y;
             qb.y = yv - b.y;
-            if (pb.y * perp.x + -pb.x * perp.y > 0.0f || qb.y * perp.x + -qb.x * perp.y > 0.0f) {
+            if (perp.x * pb.y + -pb.x * perp.y > 0.0f || qb.y * perp.x + -qb.x * perp.y > 0.0f) {
                 r = 2;
             }
         }
@@ -1883,7 +1883,7 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
     a->x = c.x + d1.x;
     a->y = c.y + d1.y;
     b->x = c.x + d2.x;
-    b->y = c.y + d2.y;
+    b->y = d2.y + c.y;
 }
 
 // Stripped by the linker; keeps its literals in place.

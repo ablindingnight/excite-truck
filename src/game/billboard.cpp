@@ -40,8 +40,9 @@ void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     for (i = 0; i < 4; i++) {
         f32 u = (i & 1) ? 1.0f : 0.0f;
         f32 v = (i & 2) ? 1.0f : 0.0f;
+        f32 b;
         f32 a = size * ((2.0f * u - 1.0f) * sx);
-        f32 b = size * ((1.0f + -2.0f * v) * sy);
+        b = size * ((1.0f + -2.0f * v) * sy);
         ValVec3 p;
         p.x = pos.x + right->m[0] * a + up->m[3] * b;
         p.y = pos.y + right->m[1] * a + up->m[4] * b;

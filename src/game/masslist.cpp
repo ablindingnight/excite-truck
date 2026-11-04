@@ -244,8 +244,8 @@ void fn_801BDA70(CarSetup* out) { fn_80279D40(out); }
 void fn_801BDA74(int car, CarSetup* s) {
     MVec4 mass(s->mx, s->my, s->mz, s->mass);
     MVec4 inv(1.0f / s->mx, 1.0f / s->my, 1.0f / s->mz, 1.0f / s->mass);
-    MassSet* m = &lbl_8055E794[car];
     CrossSet* x = &lbl_8055E79C[car];
+    MassSet* m = &lbl_8055E794[car];
     int i;
     lbl_8055E7A0[car] = 0;
     m->mass = mass;
@@ -269,11 +269,11 @@ void fn_801BDA74(int car, CarSetup* s) {
         f32 x0 = 3559.99f * s->loadFactor;
         f32 a0 = 1.46f * g;
         f32 x1 = 8900.0f * s->loadFactor;
-        f32 a1 = 1.25f * g;
         f32 b0 = 104857.3f * g * sl;
         f32 b1 = 648575.7f * g * sl;
-        f32 ka = (a1 - a0) / (x1 - x0);
+        f32 a1 = 1.25f * g;
         f32 kb = (b1 - b0) / (x1 - x0);
+        f32 ka = (a1 - a0) / (x1 - x0);
         MVec4 fit(a0 - ka * x0, ka, b0 - kb * x0, kb);
         x->row[10] = fit;
         x->row[11] = fit;

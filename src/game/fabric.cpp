@@ -309,15 +309,15 @@ void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
     c = vn->GetVec3Or("color", white);
     if ((PVec*)out == &p) {
         PVec t;
-        t.x = p.z * m->m[2][0] + (p.x * m->m[0][0] + p.y * m->m[1][0]);
+        t.x = p.z * m->m[2][0] + (m->m[0][0] * p.x + p.y * m->m[1][0]);
         t.y = p.z * m->m[2][1] + (p.x * m->m[0][1] + p.y * m->m[1][1]);
         t.z = p.z * m->m[2][2] + (p.x * m->m[0][2] + p.y * m->m[1][2]);
         out->pos = t;
     } else {
         f32 yv = p.y;
-        out->pos.x = m->m[2][0] * p.z + (m->m[0][0] * p.x + yv * m->m[1][0]);
+        out->pos.x = m->m[2][0] * p.z + (m->m[0][0] * p.x + m->m[1][0] * yv);
         out->pos.y = p.z * m->m[2][1] + (p.x * m->m[0][1] + m->m[1][1] * p.y);
-        out->pos.z = p.z * m->m[2][2] + (p.x * m->m[0][2] + m->m[1][2] * p.y);
+        out->pos.z = m->m[2][2] * p.z + (m->m[0][2] * p.x + m->m[1][2] * p.y);
     }
     out->pos.x += m->t[0];
     out->pos.y += m->t[1];

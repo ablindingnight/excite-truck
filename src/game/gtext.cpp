@@ -464,8 +464,8 @@ void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
         u16 c = DecodeUTF8(s, &next);
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
-        fn_80233AA4(f, c, x, y + h, x + scale * g->width, y, z);
         s += next - s;
+        fn_80233AA4(f, c, x, y + h, x + scale * g->width, y, z);
         x += scale * f->glyphs[c].width;
         x += spacing + xs * (scale * f->glyphs[c].post);
     }
@@ -665,11 +665,15 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
         f32 h = f->height;
         int skip;
         if (s[i] == '\\') {
-            const char* p = s + i + 1;
-            for (int j = 0; j < lbl_80497F14.count; j++) {
-                const char* name = lbl_80497F14.data[j].name;
+            const char* p;
+            const char* name;
+            int j;
+            EscSeq* e;
+            p = s + i + 1;
+            for (j = 0; j < lbl_80497F14.count; j++) {
+                name = lbl_80497F14.data[j].name;
                 if (strncasecmp(p, name, strlen(name)) == 0) {
-                    EscSeq* e = &lbl_80497F14.data[j];
+                    e = &lbl_80497F14.data[j];
                     if (e->art) {
                         h /= (fn_80235F64(e->art, e->artIdx));
                         adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
@@ -993,11 +997,15 @@ f32 fn_8023400C(int idx) {
         f32 h = f->height;
         int skip;
         if (s[i] == '\\') {
-            const char* p = s + i + 1;
-            for (int j = 0; j < lbl_80497F14.count; j++) {
-                const char* name = lbl_80497F14.data[j].name;
+            const char* p;
+            const char* name;
+            int j;
+            EscSeq* e;
+            p = s + i + 1;
+            for (j = 0; j < lbl_80497F14.count; j++) {
+                name = lbl_80497F14.data[j].name;
                 if (strncasecmp(p, name, strlen(name)) == 0) {
-                    EscSeq* e = &lbl_80497F14.data[j];
+                    e = &lbl_80497F14.data[j];
                     if (e->art) {
                         h = h / fn_80235F64(e->art, e->artIdx);
                         adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);

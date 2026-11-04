@@ -849,10 +849,11 @@ void SnowSystem::Spawn(void) {
     while (count < max) {
         f32 r = fn_80287BC8(0.0f, 1.0f);
         f32 k = 0.5f - 0.5f * r;
+        f32 ay;
         f32 gy = grav.y * k;
         f32 gx = grav.x * k;
         f32 ax = 1.0f - AbsF(gx);
-        f32 ay = 1.0f - AbsF(gy);
+        ay = 1.0f - AbsF(gy);
         f32 rx = fn_80287BC8(-ax, ax);
         f32 ry = fn_80287BC8(-ay, ay);
         f32 z = near + r * (far - near);
@@ -995,16 +996,18 @@ void RainSystem::Fill(void) {
 }
 
 void RainSystem::Spawn(void) {
+    f32 tx;
     f32 ty = tanHalf;
-    f32 tx = ty / fn_802C9A50();
+    tx = ty / fn_802C9A50();
     if (vel.z >= -0.01f) {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
             f32 k = 0.5f - 0.5f * r;
+            f32 ay;
             f32 gy = dir.y * k;
             f32 gx = dir.x * k;
             f32 ax = 1.0f - (f32)__fabs(gx);
-            f32 ay = 1.0f - __fabsf(gy);
+            ay = 1.0f - __fabsf(gy);
             f32 rx = fn_80287BC8(-ax, ax);
             f32 ry = fn_80287BC8(-ay, ay);
             f32 z = near + r * (far - near);
@@ -1017,7 +1020,7 @@ void RainSystem::Spawn(void) {
     } else {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
-            f32 z = near + (r + -vel.z * (r * r - r)) * (far - near);
+            f32 z = near + (far - near) * (r + -(r * r - r) * vel.z);
             f32 a = fn_80287BC8(-z, z);
             f32 b = fn_80287BC8(-z, z);
             PVec p;

@@ -487,7 +487,8 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
         tr->vol = fn_801FA8E0(fn_802BC9B0(&t->cyl, t->surf, r->scale), &m, hit);
         tr->drop = tr->mtx.pos.y - tr->vol->y;
         if (t->run && t->surf != 0x74) {
-            TCyl c = t->cyl;
+            TCyl c;
+            c = t->cyl;
             c.half = t->cyl.half + 2.5f;
             c.rad = t->cyl.rad + 7.5f;
             fn_801FA8E0(fn_802BC9B0(&c, 1003, r->scale), &m, hit);

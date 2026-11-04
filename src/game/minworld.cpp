@@ -135,9 +135,9 @@ void fn_802526E0(MWMtx* m) {
     m->pos.x = d.x;
     m->pos.y = 0.0f;
     m->pos.z = d.y;
-    m->pos.x = m->pos.x * 325.0f;
+    m->pos.x *= 325.0f;
     m->pos.y = m->pos.y * 325.0f;
-    m->pos.z = m->pos.z * 325.0f;
+    m->pos.z *= 325.0f;
     m->pos.y = 4.0f + fn_801DCF48(0, m->pos.x, m->pos.z);
     m->x.x = d.x;
     m->x.y = 0.0f;
