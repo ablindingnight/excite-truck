@@ -1535,9 +1535,7 @@ void fn_80183E7C(u8* p) {
     if ((f32)__fabs(stun) > lbl_80558DC4[0]) {
         if (F32(p, 0x25D4) < lbl_80561DA0) {
             f32 s = lbl_80561CDC;
-            if (stun < s) {
-                s = stun;
-            }
+            s = s < stun ? s : stun;
             F32(p, 0x2650) = s;
         }
         f32 roll;
@@ -1698,9 +1696,7 @@ void fn_80183E7C(u8* p) {
         dir.y = F32(p, 0x11C);
         dir.z = F32(p, 0x120);
         f32 sp = PSVECMag(p + 0x118);
-        if (sp < lbl_80561CD0) {
-            sp = lbl_80561CD0;
-        }
+        sp = sp > lbl_80561CD0 ? sp : lbl_80561CD0;
         f32 inv = lbl_80561CD0 / sp;
         dir.x = dir.x * inv;
         dir.y = dir.y * inv;
@@ -1721,9 +1717,7 @@ void fn_80183E7C(u8* p) {
         slope.y = ahead.y - behind.y;
         slope.z = ahead.z - behind.z;
         f32 sl = PSVECMag(&slope);
-        if (sl < lbl_80561CCC) {
-            sl = lbl_80561CCC;
-        }
+        sl = sl > lbl_80561CCC ? sl : lbl_80561CCC;
         inv = lbl_80561CD0 / sl;
         slope.x = slope.x * inv;
         slope.y = slope.y * inv;
@@ -1758,9 +1752,7 @@ void fn_80183E7C(u8* p) {
                     f32 boost = landingTune.v[0];
                     b2 = F32(p, 0x2618) * fn_80181A94();
                     b2 = F32(p, 0x2CC) * fn_80181AC0() + b2;
-                    if (b2 < boost) {
-                        boost = b2;
-                    }
+                    boost = boost < b2 ? boost : b2;
                     F32(p, 0x258C) = F32(p, 0x3A0) * boost;
                     fn_8014E61C(S32(p, 0x1EC), 1, sink);
                     fn_80161A38(2, S32(p, 0x1EC), 0);
