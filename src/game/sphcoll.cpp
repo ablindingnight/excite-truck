@@ -1099,12 +1099,19 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     l.z = z;
     f32 len = F32(q, 0x28);
     if (l.z < len && l.z > -len) {
-        f32 dist = (f32)sqrt(l.x * l.x + l.y * l.y);
+        f32 dist = (f32)sqrt(Sq(l.x) + Sq(l.y));
         if (!((f32)__fabs(dist) <= lbl_80558DC4[0])) {
-            r += -dist + F32(q, 0x24);
+            f32 R = F32(q, 0x24);
+            r += -dist + R;
             if (r > 0.0f) {
-                BoxCorner ct(f->t.x, f->t.y, f->t.z);
-                BoxCorner cc(c[0], c[1], c[2]);
+                RVec3 cc;
+                cc.x = c[0];
+                cc.y = c[1];
+                cc.z = c[2];
+                RVec3 ct;
+                ct.x = f->t.x;
+                ct.y = f->t.y;
+                ct.z = f->t.z;
                 RVec3 s;
                 RVec3 w;
                 RVec3 nw;
