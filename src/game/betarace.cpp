@@ -144,16 +144,13 @@ struct V2 {
 };
 
 // Layout elements (see ovlayout.cpp).
-struct ElemBase {
+struct BoxElem {
+    BoxElem(void) {}
     const char* name;  // offset 0x0
     V2 pos;            // offset 0x4
     s32 elemJust;      // offset 0xC
-};
-
-struct BoxElem : ElemBase {
-    BoxElem(void) {}
-    f32 w;  // offset 0x10
-    f32 h;  // offset 0x14
+    f32 w;             // offset 0x10
+    f32 h;             // offset 0x14
 };
 
 struct TextElem {
