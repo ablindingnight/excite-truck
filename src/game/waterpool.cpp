@@ -195,6 +195,7 @@ static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
+static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -752,7 +753,7 @@ void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
     f32 gx = (1.0f / 65535.0f) * (0.5f * (h[i - 1] - h[i + 1]));
     f32 gy = (1.0f / 65535.0f) * (0.5f * (h[x + (y - 1) * p->nx] - h[x + (y + 1) * p->nx]));
     n->x = gx * p->dxx + gy * p->dyx;
-    n->y = (1.0f - gx * gx) + (1.0f - gy * gy);
+    n->y = (1.0f - Sq(gx)) + (1.0f - Sq(gy));
     n->z = gx * p->dxz + gy * p->dyz;
     PSVECNormalize(n, n);
 }
