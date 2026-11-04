@@ -3012,12 +3012,12 @@ s32 fn_801FB1F4(int a);
 s32 fn_801FA8E0(BoxShape* v, const f32* m, s32 h);
 }
 
-static inline void SatModel(const char* name) {
+static inline void SatModel(const char* name, const char* tex) {
     Model* m = fn_802C6B44(name);
     TexOverride o;
     int i;
     memset(&o, 0, sizeof(o));
-    StrCopyN(o.tex, 0x10, "sat.tex");
+    StrCopyN(o.tex, 0x10, tex);
     o.flag = 1;
     for (i = 0; i < m->nMats; i++) {
         StrCopyN(o.mat, 0x10, fn_802C9C24(m->mats + i * 0x10));
@@ -3051,9 +3051,9 @@ inline Pickup::Pickup(ValueNode* n) {
         const char* bar = "morphbar.mod";
         const char* ring = "morphring1.mod";
         const char* qst = "morphqst.mod";
-        SatModel(bar);
-        SatModel(ring);
-        SatModel(qst);
+        SatModel(bar, "sat.tex");
+        SatModel(ring, "sat.tex");
+        SatModel(qst, "sat.tex");
         lbl_8055E254 = fn_802C6FC0(ring, 1, 0);
         lbl_80559ED0 = fn_802C6FC0(bar, 0, 0);
         lbl_80559ECC = fn_802C6FC0(qst, 0, 0);
@@ -4508,9 +4508,10 @@ inline CarHud::CarHud(int car, int acar) {
 }
 
 inline void BetaMaster::a1(void) {
-    int i;
+    int i = 0;
     nCars = lbl_8055E4D0;
-    for (i = 0; i < nCars; i++) {
+    if (nCars > 0) {
+        for (; i < nCars; i++) {
         int acar = lbl_804348E8[i]->model == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
         cars[i].stunts = new ("pr_stuntdash") StuntList;
@@ -4551,6 +4552,7 @@ inline void BetaMaster::a1(void) {
             }
             cars[i].fullSnd = fn_802076A0("counter.sfx", 7, cars[i].id, 0);
         }
+    }
     }
     for (i = 0; i < bumps.a.count; i++) {
         Token* t = bumps.a.data[i];
