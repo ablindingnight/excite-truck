@@ -62,6 +62,9 @@ struct TMtx {
 struct TModel {
     u8 pad0[0x4];
     struct TModelData* data;  // offset 0x4
+    u8 pad8[0x24];
+    f32 x0, x1;  // offset 0x2C: horizontal extent
+    f32 y0, y1;  // offset 0x34: vertical extent
 };
 
 struct TModelData {
@@ -965,8 +968,8 @@ void fn_802BE07C(const TVec* pos, TreeQuery cb) {
                 TreeType* t = fn_802BE008(c);
                 if (t->set && t->farTris <= 10) {
                     TreeRec* tr = &t->set->list->data[c->first];
-                    f32 h = t->far->data->id;
-                    cb(t->farTex, &tr->mtx.pos, sizeof(TreeRec), c->count, 0.5f * h, h);
+                    TModel* m = t->far;
+                    cb(t->farTex, &tr->mtx.pos, sizeof(TreeRec), c->count, (m->x1 - m->x0) * 0.5f, m->y1 - m->y0);
                 }
             }
         }
