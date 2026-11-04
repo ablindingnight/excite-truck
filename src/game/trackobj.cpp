@@ -150,9 +150,10 @@ struct ObstacleDesc {
     ValueNode* node;  // offset 0x80
 };
 
+namespace {
 class AnimDesc : public ObjDesc {
 public:
-    AnimDesc(void) : ObjDesc(0) {}
+    AnimDesc(ValueNode* vn);
     virtual ~AnimDesc(void);
     virtual void Create(const PlacedObj* o);
     OFrame place;            // offset 0x10C
@@ -162,6 +163,7 @@ public:
     u8 looped;               // offset 0x164
     u8 streaming;            // offset 0x165
 };
+}  // namespace
 
 class SoundDesc : public ObjDesc {
 public:
@@ -892,25 +894,23 @@ ObjDesc* fn_801F8188(ValueNode* vn, const OFrame* parent, int named) {
     return d;
 }
 
-ObjDesc* fn_801F83E4(ValueNode* vn) {
-    AnimDesc* d;
-    if ((d = new ("AnimDI") AnimDesc) != 0) {
-        char key[32];
-        d->animModel = vn->GetString("anim_model", vn->GetValue("model"));
-        d->streams[0] = vn->GetValue("anim_stream");
-        for (d->numStreams = 1; d->numStreams < 8; d->numStreams++) {
-            sprintf(key, "anim_stream%d", d->numStreams + 1);
-            if (!vn->Has(key)) {
-                break;
-            }
-            d->streams[d->numStreams] = vn->GetValue(key);
+inline AnimDesc::AnimDesc(ValueNode* vn) : ObjDesc(0) {
+    char key[32];
+    animModel = vn->GetString("anim_model", vn->GetValue("model"));
+    streams[0] = vn->GetValue("anim_stream");
+    for (numStreams = 1; numStreams < 8; numStreams++) {
+        sprintf(key, "anim_stream%d", numStreams + 1);
+        if (!vn->Has(key)) {
+            break;
         }
-        d->looped = vn->GetBool("looped", 1);
-        d->streaming = vn->GetBool("streaming", 1);
-        vn->GetValue("name");
+        streams[numStreams] = vn->GetValue(key);
     }
-    return d;
+    looped = vn->GetBool("looped", 1);
+    streaming = vn->GetBool("streaming", 1);
+    vn->GetValue("name");
 }
+
+ObjDesc* fn_801F83E4(ValueNode* vn) { return new ("AnimDI") AnimDesc(vn); }
 
 ObjDesc* fn_801F861C(ValueNode* vn) { return new ("SoundDI") SoundDesc; }
 
