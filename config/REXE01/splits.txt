@@ -4578,13 +4578,11 @@ game/vmem.cpp:
 	.sdata      start:0x8055D1C8 end:0x8055D1D0
 	.sbss       start:0x8055FF68 end:0x8055FF70
 
-game/unk_802E4D84.c:
-	.text       start:0x802E4D84 end:0x802E6B48
-	.sdata2     start:0x80565128 end:0x80565160
-
-game/unk_802E6B48.c:
-	.text       start:0x802E6B48 end:0x802E6B50
+game/unk_802E4D84.cpp:
+	.text       start:0x802E4D84 end:0x802E6B50
 	.ctors      start:0x802ED604 end:0x802ED608
+	.sbss       start:0x8055FF70 end:0x8055FFB8
+	.sdata2     start:0x80565128 end:0x80565160
 
 game/mcsys.cpp:
 	.text       start:0x802E6B50 end:0x802E72B8

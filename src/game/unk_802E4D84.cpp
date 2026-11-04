@@ -6,6 +6,34 @@
 // before the PC port. Tricks are tagged MATCHING-AID.
 // This is the game's Spu sound layer. It was C++ (it uses delete[], and bool results are stored unmasked), so it is
 // compiled as C++ with C names until the unit is renamed.
+#include "game/common.h"
+
+// Compiled as C++ (2026-11-03): the unit owns a ModuleTag registered by its static initializer (the 8-byte function
+// after the code, formerly the separate split unk_802E6B48) and the globals after it (.sbss 0x8055FF70..0x8055FFB8,
+// definition order = address order). The functions keep C linkage.
+extern "C" {
+struct SpuSample;
+ModuleTag lbl_8055FF70;
+int lbl_8055FF78;
+void* lbl_8055FF7C;
+void* lbl_8055FF80;
+unsigned int lbl_8055FF84;
+int lbl_8055FF88;
+int lbl_8055FF8C;
+unsigned char* lbl_8055FF90;
+unsigned char lbl_8055FF94[4];  // holds the voice table pointer
+int lbl_8055FF98;
+struct SpuSample** lbl_8055FF9C;
+int lbl_8055FFA0;
+unsigned char lbl_8055FFA4;
+unsigned char lbl_8055FFA5;
+unsigned char lbl_8055FFA6;
+int lbl_8055FFA8;
+int lbl_8055FFAC;
+void* lbl_8055FFB0;
+unsigned char lbl_8055FFB4;
+char lbl_8055FFB5;
+
 #pragma cplusplus on
 extern "C" {
 
@@ -1129,3 +1157,5 @@ void fn_802E6B44(int arg0, int arg1) {
 }
 }
 #pragma cplusplus reset
+
+}  // extern "C"
