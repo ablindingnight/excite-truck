@@ -1295,7 +1295,7 @@ void debug_event(void) {
                     fn_802E317C("interlude: unhandled teleport where %d", tp->where);
                     break;
                 }
-                place.vel.x = place.frame.rot.m[6] * tp->speed;
+                place.vel.x = tp->speed * place.frame.rot.m[6];
                 place.vel.y = place.frame.rot.m[7] * tp->speed;
                 place.vel.z = place.frame.rot.m[8] * tp->speed;
                 ((CarObj*)car)->Place(&place);

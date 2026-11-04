@@ -1882,12 +1882,14 @@ void fn_802D2640(void) {
 }
 
 void fn_802D2684(void) {
+    u8 envA;
     u8 env = lbl_804C5700.env;
     int alphaOnly = (lbl_8055FD1C >> 6) & 1;
+    int coord;
     int stage = 0;
     u8 base2 = lbl_804C5700.base2;
-    u8 envA = lbl_804C5700.envA;
-    int coord = 0;
+    envA = lbl_804C5700.envA;
+    coord = 0;
     GXSetTexCoordGen2(0, 1, 4, lbl_804C5700.lmap ? 0x1E : 0x3C, 0, 0x7D);
     GXSetTevOrder(0, 0, 0, 4);
     if (alphaOnly) {
@@ -1904,7 +1906,7 @@ void fn_802D2684(void) {
         GXSetTevColorOp(0, 0, 0, 0, 1, 0);
         GXSetTevColorIn(0, 0xF, 8, 0xA, 0xF);
         int n = 0;
-        if (lbl_8055FD1C & 0x100) {
+        if (0x100 & lbl_8055FD1C) {
             in[0] = 4;
             n = 1;
         }

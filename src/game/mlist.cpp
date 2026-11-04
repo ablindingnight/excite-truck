@@ -531,17 +531,21 @@ void fn_802CDB5C(int pri) {
     MLArray<MLBatch> ea = m->e;
     MCam ident;
     SetIdentity(&ident);
+    MLBatch* e;
+    int o;
+    void* id;
+    void* cur;
     RenderCtx* ctx = lbl_8055DFC4;
-    void* id = fn_802D0514(&ident);
+    id = fn_802D0514(&ident);
     fn_802D0610(id);
     ctx->mtx[0] = id;
-    void* cur = 0;
-    MLBatch* e = &ea.p[r.lo];
+    e = &ea.p[r.lo];
+    cur = 0;
     for (int i = r.lo; i < r.hi; e++, i++) {
         int open = 0;
         s32 tex;
-        u8* dl = 0;
         s32 cnt = 0;
+        u8* dl = 0;
         tex = e->tex;
         MLStrip* sp = &da.p[e->start];
         int n = e->end - e->start;
@@ -551,7 +555,7 @@ void fn_802CDB5C(int pri) {
                 if (!open) {
                     open = 1;
                     fn_802C8B70(tex);
-                    dl = fn_802DB2A8(n * 2);
+                    dl = fn_802DB2A8(2 * n);
                     if (!dl) {
                         fn_802C8D74();
                         open = 0;
@@ -562,13 +566,13 @@ void fn_802CDB5C(int pri) {
                 if (cur != mt) {
                     cur = mt;
                     fn_802D0610(mt);
-                    dl += 0x10;
+                    dl = 0x10 + dl;
                     cnt++;
                 }
                 MLPrim* pr = s.prim;
                 fn_802D6B08(pr);
                 fn_802CC550(tex, lbl_804C5480[s.ref], pr->size);
-                dl += 0x10;
+                dl = dl + 0x10;
                 cnt++;
             }
         }
@@ -579,7 +583,7 @@ void fn_802CDB5C(int pri) {
     }
     fn_802DB2A0();
     fn_801293D0();
-    for (int o = r.first; o < r.end; o++) {
+    for (o = r.first; o < r.end; o++) {
         m->objs[o]->Flush(m);
     }
 }

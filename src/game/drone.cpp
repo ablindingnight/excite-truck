@@ -661,15 +661,16 @@ static inline void QuatToFrame(OFrame* f, const Quat* q) {
 }
 
 void HermiteDrone::Start(HermiteEntry* e) {
-    entry = e;
-    HermitePathData* d = e->data;
-    seg = 0;
+    HermitePathData* d;
     t = 0.0f;
+    d = e->data;
+    entry = e;
+    v1 = d->keys[1].v;
     q0 = d->keys[0].rot;
     q1 = d->keys[1].rot;
     v0 = d->keys[0].v;
-    v1 = d->keys[1].v;
     v = d->keys[0].v;
+    seg = 0;
     frame.pos = d->keys[0].pos;
     QuatToFrame(&frame, &d->keys[0].rot);
 }

@@ -3863,9 +3863,9 @@ struct MeshRes {
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
 u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
-    InitVolume(p, id, owner);
     U32(p, 0x8) = 0;
     S32(p, 0x18) = 'PMSH';
+    InitVolume(p, id, owner);
     F32(p, 0x10) = 1.0f;
     F32(p, 0x14) = 1.0f;
     S32(p, 0x20) = 100;

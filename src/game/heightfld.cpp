@@ -686,30 +686,42 @@ int fn_801DDA84(f32 x, f32 z, s32* out, int max, f32 thr) {
 }
 
 f32 fn_801DDC8C(f32 x, f32 z) {
-    GroundHeader* g = lbl_8055E990;
+    f32 h;
+    f32 fz;
+    GroundHeader* g;
+    g = lbl_8055E990;
     if (!g->tiled) {
         return 0.0f;
     }
-    f32 fx = g->scaleX * (x + g->offX);
-    f32 fz = g->scaleZ * (z + g->offZ);
-    int ix = Round(fx);
-    int iz = Round(fz);
+    f32 fx;
+    int iz;
+    int tx;
+    int lz;
+    int ix;
+    fx = g->scaleX * (x + g->offX);
+    int lx;
+    fz = (z + g->offZ) * g->scaleZ;
+    ix = Round(fx);
+    iz = Round(fz);
+    int tz;
     if (ix < 0 || iz < 0) {
         return 0.0f;
     }
-    int tz = iz / 32;
-    int tx = ix / 32;
-    int lz = iz - tz * 32;
-    int lx = ix - tx * 32;
-    GTile* t = TileAt(g, tx, tz);
+    tx = ix / 32;
+    GTile* t;
+    tz = iz / 32;
+    lx = ix - tx * 32;
+    lz = iz - 32 * tz;
+    t = TileAt(g, tx, tz);
     if (!t) {
         return 0.0f;
     }
-    f32 h = 0.0f;
+    h = 0.0f;
     if (t->layer >= 0) {
-        GLayer* l = &g->layers[t->layer];
+        GLayer* l;
+        l = &g->layers[t->layer];
         for (;;) {
-            h += (l->base + l->scale * l->h[lx][lz]) * lbl_804425DC[l->weight];
+            h += (l->base + l->h[lx][lz] * l->scale) * lbl_804425DC[l->weight];
             if (l->next < 0) {
                 break;
             }

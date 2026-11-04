@@ -586,37 +586,45 @@ void fn_802D50B4(Surf* s) {
 }
 
 void fn_802D5270(Surf* s) {
+    int n;
+    const V3* p;
+    V3* out;
+    const SkinMtx* ma;
+    V3* o;
     SkinVtx* v;
-    int n = s->nverts;
     v = (SkinVtx*)s->verts;
-    V3* out = (V3*)fn_802CFF64(n * 0xC);
+    n = s->nverts;
+    out = (V3*)fn_802CFF64(0xC * n);
     if (out) {
-        const V3* p = (const V3*)v;
-        V3* o = out;
-        for (int i = n; i > 0; i--) {
-            V3 a, b;
+        p = (const V3*)v;
+        o = out;
+        int i;
+        for (i = n; i > 0; i--) {
             f32 w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            w0 = (1.0f / 255) * v->w0;
-            const SkinMtx* ma = &lbl_804DAC48[v->b0 >> 2];
-            const SkinMtx* mb = &lbl_804DAC48[v->b1 >> 2];
+            f32 w1;
+            V3 a, b;
+            w1 = v->w1 * (1.0f / 255);
+            const SkinMtx* mb;
+            ma = &lbl_804DAC48[v->b0 >> 2];
+            mb = &lbl_804DAC48[v->b1 >> 2];
+            w0 = v->w0 * (1.0f / 255);
             MulVec(&a, p, &ma->rot);
             a.x += ma->pos.x;
-            a.y += ma->pos.y;
-            a.z += ma->pos.z;
+            a.y = a.y + ma->pos.y;
+            a.z = a.z + ma->pos.z;
             MulVec(&b, p, &mb->rot);
-            b.x += mb->pos.x;
-            b.y += mb->pos.y;
+            b.x = b.x + mb->pos.x;
+            b.y = b.y + mb->pos.y;
             b.z += mb->pos.z;
             o->x = a.x * w0;
             o->y = a.y * w0;
             o->z = a.z * w0;
-            o->x = o->x + w1 * b.x;
+            o->x += w1 * b.x;
             o->y = o->y + w1 * b.y;
             o->z = o->z + w1 * b.z;
+            o++;
             v++;
             p = (const V3*)((u8*)p + 0x10);
-            o++;
         }
         GXSetArray(9, out, 0xC);
         GXSetArray(0xA, s->attr, 3);

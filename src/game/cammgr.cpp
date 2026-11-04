@@ -1276,39 +1276,47 @@ struct CamPt {
 // Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
 // (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
-    const u8* next = PTR(seg, 0x14);
+    f32 inv;
+    const u8* next;
+    next = PTR(seg, 0x14);
+    f32 sn;
     CamPt pos;
+    f32 nx;
     CamPt d;
     CamPt pt;
     d.x = F32(seg, 0x8) + t * (F32(next, 0x8) - F32(seg, 0x8));
     d.y = F32(seg, 0xC) + t * (F32(next, 0xC) - F32(seg, 0xC));
-    pos.x = F32(seg, 0x0) + t * (F32(next, 0x0) - F32(seg, 0x0));
+    pos.x = F32(seg, 0x0) + (F32(next, 0x0) - F32(seg, 0x0)) * t;
     pos.y = F32(seg, 0x4) + t * (F32(next, 0x4) - F32(seg, 0x4));
-    f32 inv = lbl_80563C2C / (f32)sqrt(d.x * d.x + d.y * d.y);
+    inv = lbl_80563C2C / (f32)sqrt(d.x * d.x + d.y * d.y);
     F32(rec, 0x28) = lbl_80563C20;
-    f32 nx = d.x * inv;
-    f32 yv = d.y;
+    f32 yv;
+    nx = d.x * inv;
+    f32 px;
+    yv = d.y;
+    f32 c;
+    f32 off;
     d.x = yv * inv;
     d.y = -nx;
-    f32 off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
+    off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
     pt.x = pos.x + off * d.x;
-    pt.y = pos.y + d.y * off;
+    pt.y = pos.y + off * d.y;
     F32(rec, 0x24) = pt.x;
     F32(rec, 0x2C) = pt.y;
     fn_801EA140((f32*)(rec + 0x24));
-    f32 px = d.x;
+    px = d.x;
     F32(rec, 0x28) = F32(rec, 0x28) + lbl_80563C94;
-    f32 c = (f32)cos(angle);
-    f32 sn = (f32)sin(angle);
+    c = (f32)cos(angle);
+    sn = (f32)sin(angle);
     F32(rec, 0xC) = lbl_80563C20;
+    d.x = px * c - d.y * sn;
     F32(rec, 0x10) = lbl_80563C2C;
     F32(rec, 0x14) = lbl_80563C20;
-    d.x = px * c - d.y * sn;
-    d.y = px * sn + d.y * c;
+    d.y = sn * px + d.y * c;
     F32(rec, 0x18) = d.x;
     F32(rec, 0x1C) = lbl_80563C20;
     F32(rec, 0x20) = d.y;
-    PSVECCrossProduct((f32*)(rec + 0xC), (f32*)(rec + 0x18), (f32*)rec);
+    PSVECCrossProduct((f32*)(0xC + rec), (f32*)(0x18 + rec), (f32*)rec);
 }
 
 void fn_80268D94(void) {

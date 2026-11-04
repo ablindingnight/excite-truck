@@ -741,34 +741,43 @@ void fn_80232D3C(const char* text, GTextFont* f, u32 color, int align, const UIX
 }
 
 void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
+    u32 c;
+    f32 py;
     f32 px = x;
-    f32 py = y;
-    u32 c = color;
+    py = y;
+    c = color;
     fn_80231714(&c);
     if (*text) {
-        f32 lh = f->height * scale * fn_8022EDC4()->unk34;
+        f32 lh;
+        int passes;
+        lh = f->height * scale * fn_8022EDC4()->unk34;
         fn_80233BF0(text, f, &px, &py, align, scale, xs);
         f32 x0 = px;
         strlen(text);
-        for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
+        for (passes = (f->outline != NULL) + 1; passes > 0; passes--) {
+            int i;
+            GTextFont* ff;
+            u32 cc;
             px = x0;
-            int i = 0;
-            GTextFont* ff = f;
-            u32 cc = c;
+            i = 0;
+            cc = c;
+            ff = f;
             if (passes == 2) {
                 ff = f->outline;
                 cc = fn_80231718(cc);
             }
             fn_80233E80(ff, cc);
             while (text[i]) {
+                u16 ch;
                 const char* next;
-                u16 ch = DecodeUTF8(text + i, &next);
-                Glyph* g = &ff->glyphs[ch];
-                px = px + xs * (scale * g->pre);
+                Glyph* g;
+                ch = DecodeUTF8(text + i, &next);
+                g = &ff->glyphs[ch];
+                px += (scale * g->pre) * xs;
                 fn_80233AA4(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
-                px = px + scale * ff->glyphs[ch].width;
+                px += scale * ff->glyphs[ch].width;
+                px += xs * (scale * ff->glyphs[ch].post);
                 i += next - (text + i);
-                px = px + xs * (scale * ff->glyphs[ch].post);
             }
             fn_80233EBC();
         }
