@@ -3,6 +3,7 @@
 // routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -17,7 +18,6 @@ u8* fn_8023512C(const char* name);
 
 void operator delete(void* p);
 
-extern void* lbl_80345718[];
 extern char lbl_8055C3E0[1];
 
 // Copies at most n - 1 characters and always terminates.
@@ -53,21 +53,43 @@ struct IconList {
     s32 count;        // offset 0x4
 };
 
+extern "C" u8* fn_8023512C(const char* name);
+extern "C" void fn_80235380(u8* p);
+
+// A record line's car icon: a menu state (vtable lbl_80345718, followed in .data by the zero-filled space of this
+// unit's weak IMenuState copy). Same shape as recscreen's. Declared before FriendlyNames: MWCC emits vtables in
+// reverse declaration order.
+namespace {
+class RecordIcon : public MenuState {
+public:
+    RecordIcon(void) {
+        icons = 0;
+        visible = 0;
+        art = fn_8023512C("caricona.art");
+    }
+    virtual ~RecordIcon(void) { fn_80235380(art); }
+    virtual void Draw(void);
+
+    IconList* icons;  // offset 0x18
+    s32 icon;         // offset 0x1C
+    u8 visible;       // offset 0x20
+    u32 color;        // offset 0x24
+    u8* art;          // offset 0x28
+    u8 valid;         // offset 0x2C
+};
+}  // namespace
+
 // One stat record line on the friendly-name screen.
 struct RecordLine {
+    RecordLine(void);
+
     const char* label;     // offset 0x0
     char value[0x14];      // offset 0x4
     const char* track;     // offset 0x18
     const char* name;      // offset 0x1C
     char text[1000];       // offset 0x20
     s32 difficulty;        // offset 0x408
-    u8 pad40C[0x18];
-    IconList* icons;       // offset 0x424
-    s32 icon;              // offset 0x428
-    u8 hasIcon;            // offset 0x42C
-    u32 color;             // offset 0x430
-    u8 pad434[0x4];
-    u8 valid;              // offset 0x438
+    RecordIcon widget;     // offset 0x40C
 };
 
 // The shared car icon table (caricons.val; also carpick's CarIconSet): loaded on first use, reference
@@ -132,152 +154,6 @@ struct CarIconTable : public IconList {
 extern CarIconTable* lbl_8055F2E4;
 extern s32 lbl_8055F2E8;
 
-// The group list the stunt-records screen hides (FriendlyNames' layout, built and torn down in place).
-struct GroupHider {
-    void* vtable;
-    u8 pad4[0x10];
-    void* owner;      // offset 0x14
-    u32* groups;      // offset 0x18
-    int count;        // offset 0x1C
-    int cap;          // offset 0x20
-    u32 storage[30];  // offset 0x24
-    u32& Next(void) { return groups[count++]; }
-};
-extern void* lbl_803456B8[];
-
-int GetEveMode(void);
-void UnloadEves(void);
-void LoadModeEves(int mode);
-extern "C" u8* fn_8025D9D0(u8* p);
-extern "C" void fn_8025DAEC(RecordLine* r, u32 type);
-extern "C" u8 lbl_8055B860;
-
-// Hides the HUD groups of the two difficulties a stunt record was not set on.
-static inline void HideOtherDifficulties(int line, RecordLine* l) {
-    for (int d = 0; d < 3; d++) {
-        if (d != l->difficulty) {
-            GroupHider* h = (GroupHider*)lbl_8055F3C4;
-            h->Next() = line + 1 + d * 10;
-        }
-    }
-}
-
-// Releases one record line (its car icon widget).
-static inline void FreeRecordLine(RecordLine* l) {
-    *(void**)l->pad40C = lbl_80345718;
-    fn_80235380(*(u8**)((u8*)l + 0x434));
-}
-
-extern "C" {
-
-// The stunt records screen ("tricks.lyt"): the best of five stunt stats, each with where it was set and
-// the car it was set with; the difficulty columns that did not set a record are hidden.
-void fn_8025CE78(void) {
-    int mode = GetEveMode();
-    if (mode != 0x130) {
-        UnloadEves();
-        LoadModeEves(0x130);
-    }
-    RecordLine l6;
-    RecordLine l5;
-    RecordLine l4;
-    RecordLine l3;
-    RecordLine l2;
-    RecordLine l1;
-    RecordLine l0;
-    fn_8025D9D0((u8*)&l0);
-    fn_8025D9D0((u8*)&l1);
-    fn_8025D9D0((u8*)&l2);
-    fn_8025D9D0((u8*)&l3);
-    fn_8025D9D0((u8*)&l4);
-    fn_8025D9D0((u8*)&l5);
-    fn_8025D9D0((u8*)&l6);
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") CarIconTable;
-    }
-    lbl_8055F2E8++;
-    l0.icons = lbl_8055F2E4;
-    l1.icons = lbl_8055F2E4;
-    l2.icons = lbl_8055F2E4;
-    l3.icons = lbl_8055F2E4;
-    l4.icons = lbl_8055F2E4;
-    l5.icons = lbl_8055F2E4;
-    l6.icons = lbl_8055F2E4;
-    GroupHider hider;
-    hider.vtable = lbl_803456B8;
-    hider.owner = 0;
-    hider.groups = hider.storage;
-    hider.count = 0;
-    hider.cap = 30;
-    lbl_8055F3C4 = (s32)&hider;
-    fn_8025DAEC(&l0, 0x40901);
-    HideOtherDifficulties(0, &l0);
-    fn_8025DAEC(&l1, 0x40902);
-    HideOtherDifficulties(1, &l1);
-    fn_8025DAEC(&l2, 0x41206);
-    HideOtherDifficulties(2, &l2);
-    fn_8025DAEC(&l3, 0x48203);
-    HideOtherDifficulties(3, &l3);
-    fn_8025DAEC(&l4, 0x50204);
-    HideOtherDifficulties(4, &l4);
-    MenuItem items[] = {
-        MenuItem(NULL, 5, &hider, 0, 0),
-        MenuItem("stunt_name_1", 3, l0.label, 0, 0),
-        MenuItem("stunt_record_1", 3, l0.value, 0, 0),
-        MenuItem("stunt_location_1", 3, l0.text, 0, 0),
-        MenuItem("car_icon_1", 5, l0.pad40C, 0, 0),
-        MenuItem("stunt_name_2", 3, l1.label, 0, 0),
-        MenuItem("stunt_record_2", l1.value),
-        MenuItem("stunt_location_2", l1.text),
-        MenuItem("car_icon_2", 5, l1.pad40C, 0, 0),
-        MenuItem("stunt_name_3", l2.label),
-        MenuItem("stunt_record_3", l2.value),
-        MenuItem("stunt_location_3", l2.text),
-        MenuItem("car_icon_3", 5, l2.pad40C, 0, 0),
-        MenuItem("stunt_name_4", l3.label),
-        MenuItem("stunt_record_4", l3.value),
-        MenuItem("stunt_location_4", l3.text),
-        MenuItem("car_icon_4", 5, l3.pad40C, 0, 0),
-        MenuItem("stunt_name_5", l4.label),
-        MenuItem("stunt_record_5", l4.value),
-        MenuItem("stunt_location_5", l4.text),
-        MenuItem("car_icon_5", 5, l4.pad40C, 0, 0),
-        MenuItem("stunt_name_6", l5.label),
-        MenuItem("stunt_record_6", l5.value),
-        MenuItem("stunt_location_6", l5.text),
-        MenuItem("car_icon_6", 5, l5.pad40C, 0, 0),
-        MenuItem("stunt_name_7", l6.label),
-        MenuItem("stunt_record_7", l6.value),
-        MenuItem("stunt_location_7", l6.text),
-        MenuItem("car_icon_7", 5, l6.pad40C, 0, 0),
-        MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 0x1B),
-        MenuItem(lbl_80498ED0),
-    };
-    MenuDesc desc = {"tricks.lyt", items, NULL, 0, 0};
-    fn_802146BC(&desc, -999, -999, 1);
-    if (--lbl_8055F2E8 == 0) {
-        delete lbl_8055F2E4;
-        lbl_8055F2E4 = 0;
-    }
-    if (mode != 0x130) {
-        UnloadEves();
-        LoadModeEves(mode);
-    }
-    lbl_8055F3C4 = 0;
-    hider.groups = 0;
-    hider.count = 0;
-    hider.cap = 0;
-    FreeRecordLine(&l6);
-    FreeRecordLine(&l5);
-    FreeRecordLine(&l4);
-    FreeRecordLine(&l3);
-    FreeRecordLine(&l2);
-    FreeRecordLine(&l1);
-    FreeRecordLine(&l0);
-}
-
-}  // extern "C"
-
 template <class T>
 class ArrayBase {
 public:
@@ -294,45 +170,138 @@ public:
 template <class T>
 class SimpleArray : public ArrayBase<T> {};
 
-// The friendly-name list (one per screen; lbl_8055F3C4 is cleared when it goes away).
-class FriendlyNames {
+// The HUD groups the stunt-records screen hides, a menu state built and torn down on the screen's stack
+// (lbl_8055F3C4 points at it).
+class FriendlyNames : public MenuState {
 public:
-    ~FriendlyNames(void);
-    u8 pad0[0x18];
+    FriendlyNames(void) {
+        names.data = storage;
+        names.count = 0;
+        names.cap = 30;
+        lbl_8055F3C4 = (s32)this;
+    }
+    virtual ~FriendlyNames(void) { lbl_8055F3C4 = 0; }
+    virtual void Enter(void);
+    u32& Next(void) { return names.data[names.count++]; }
+
     SimpleArray<u32> names;  // offset 0x18
+    u32 storage[30];         // offset 0x24
 };
 
-FriendlyNames::~FriendlyNames(void) { lbl_8055F3C4 = 0; }
+int GetEveMode(void);
+void UnloadEves(void);
+void LoadModeEves(int mode);
+extern "C" void fn_8025DAEC(RecordLine* r, u32 type);
+extern "C" u8 lbl_8055B860;
+
+// Hides the HUD groups of the two difficulties a stunt record was not set on.
+static inline void HideOtherDifficulties(int line, RecordLine* l) {
+    for (int d = 0; d < 3; d++) {
+        if (d != l->difficulty) {
+            FriendlyNames* h = (FriendlyNames*)lbl_8055F3C4;
+            h->Next() = line + 1 + d * 10;
+        }
+    }
+}
+
 
 extern "C" {
 
-u8* fn_8025D9D0(u8* p) {
-    U32(p, 0x420) = 0;
-    *(void**)(p + 0x40C) = lbl_80345718;
-    U32(p, 0x424) = 0;
-    U8(p, 0x42C) = 0;
-    PTR(p, 0x434) = fn_8023512C("caricona.art");
-    PTR(p, 0x0) = (u8*)lbl_8055C3E0;
-    CopyName(lbl_8055C3E0, 0x14, (char*)(p + 0x4));
-    U32(p, 0x408) = 0;
-    char* empty;
-    PTR(p, 0x1C) = (u8*)(empty = lbl_8055C3E0);
-    PTR(p, 0x18) = (u8*)empty;
-    U8(p, 0x20) = 0;
-    U8(p, 0x42C) = 0;
-    return p;
+// The stunt records screen ("tricks.lyt"): the best of five stunt stats, each with where it was set and
+// the car it was set with; the difficulty columns that did not set a record are hidden.
+void fn_8025CE78(void) {
+    int mode = GetEveMode();
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(0x130);
+    }
+    RecordLine lines[7];
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") CarIconTable;
+    }
+    lbl_8055F2E8++;
+    lines[0].widget.icons = lbl_8055F2E4;
+    lines[1].widget.icons = lbl_8055F2E4;
+    lines[2].widget.icons = lbl_8055F2E4;
+    lines[3].widget.icons = lbl_8055F2E4;
+    lines[4].widget.icons = lbl_8055F2E4;
+    lines[5].widget.icons = lbl_8055F2E4;
+    lines[6].widget.icons = lbl_8055F2E4;
+    FriendlyNames hider;
+    fn_8025DAEC(&lines[0], 0x40901);
+    HideOtherDifficulties(0, &lines[0]);
+    fn_8025DAEC(&lines[1], 0x40902);
+    HideOtherDifficulties(1, &lines[1]);
+    fn_8025DAEC(&lines[2], 0x41206);
+    HideOtherDifficulties(2, &lines[2]);
+    fn_8025DAEC(&lines[3], 0x48203);
+    HideOtherDifficulties(3, &lines[3]);
+    fn_8025DAEC(&lines[4], 0x50204);
+    HideOtherDifficulties(4, &lines[4]);
+    MenuItem items[] = {
+        MenuItem(NULL, 5, &hider, 0, 0),
+        MenuItem("stunt_name_1", 3, lines[0].label, 0, 0),
+        MenuItem("stunt_record_1", 3, lines[0].value, 0, 0),
+        MenuItem("stunt_location_1", 3, lines[0].text, 0, 0),
+        MenuItem("car_icon_1", 5, &lines[0].widget, 0, 0),
+        MenuItem("stunt_name_2", 3, lines[1].label, 0, 0),
+        MenuItem("stunt_record_2", lines[1].value),
+        MenuItem("stunt_location_2", lines[1].text),
+        MenuItem("car_icon_2", 5, &lines[1].widget, 0, 0),
+        MenuItem("stunt_name_3", lines[2].label),
+        MenuItem("stunt_record_3", lines[2].value),
+        MenuItem("stunt_location_3", lines[2].text),
+        MenuItem("car_icon_3", 5, &lines[2].widget, 0, 0),
+        MenuItem("stunt_name_4", lines[3].label),
+        MenuItem("stunt_record_4", lines[3].value),
+        MenuItem("stunt_location_4", lines[3].text),
+        MenuItem("car_icon_4", 5, &lines[3].widget, 0, 0),
+        MenuItem("stunt_name_5", lines[4].label),
+        MenuItem("stunt_record_5", lines[4].value),
+        MenuItem("stunt_location_5", lines[4].text),
+        MenuItem("car_icon_5", 5, &lines[4].widget, 0, 0),
+        MenuItem("stunt_name_6", lines[5].label),
+        MenuItem("stunt_record_6", lines[5].value),
+        MenuItem("stunt_location_6", lines[5].text),
+        MenuItem("car_icon_6", 5, &lines[5].widget, 0, 0),
+        MenuItem("stunt_name_7", lines[6].label),
+        MenuItem("stunt_record_7", lines[6].value),
+        MenuItem("stunt_location_7", lines[6].text),
+        MenuItem("car_icon_7", 5, &lines[6].widget, 0, 0),
+        MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 0x1B),
+        MenuItem(lbl_80498ED0),
+    };
+    MenuDesc desc = {"tricks.lyt", items, NULL, 0, 0};
+    fn_802146BC(&desc, -999, -999, 1);
+    if (--lbl_8055F2E8 == 0) {
+        delete lbl_8055F2E4;
+        lbl_8055F2E4 = 0;
+    }
+    if (mode != 0x130) {
+        UnloadEves();
+        LoadModeEves(mode);
+    }
 }
 
-u8* fn_8025DA88(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345718;
-        fn_80235380(PTR(p, 0x28));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
+}  // extern "C"
+
+
+extern "C" {
+
+}  // extern "C"
+
+RecordLine::RecordLine(void) {
+    label = lbl_8055C3E0;
+    CopyName(lbl_8055C3E0, 0x14, value);
+    difficulty = 0;
+    char* empty;
+    name = (empty = lbl_8055C3E0);
+    track = empty;
+    text[0] = 0;
+    widget.visible = 0;
 }
+
+extern "C" {
 
 }  // extern "C"
 
@@ -442,11 +411,11 @@ void fn_8025DAEC(RecordLine* r, u32 type) {
         fn_801345D8(r->text, 1000, "%s - %s", r->track, r->name + 1);
         StatChoice c = s.GetChoice();
         int color = c.color;
-        r->valid = c.valid;
+        r->widget.valid = c.valid;
         VehicleInfo* v = GetVehicle(c.vehicle);
-        r->icon = FindIcon(r->icons, v->chassis);
-        r->color = v->colors[color];
-        r->hasIcon = 1;
+        r->widget.icon = FindIcon(r->widget.icons, v->chassis);
+        r->widget.color = v->colors[color];
+        r->widget.visible = 1;
     }
     r->difficulty = bestD;
 }
@@ -468,8 +437,8 @@ void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
-void fn_8025DDD0(u8* p) {
-    if (!U8(p, 0x20)) {
+void RecordIcon::Draw(void) {
+    if (!visible) {
         return;
     }
     u32 c;
@@ -484,27 +453,27 @@ void fn_8025DDD0(u8* p) {
     f32 u0;
     f32 fw;
     f32 fh;
-    fn_80230C30(&sx, &sy, S32(p, 0x4), S32(p, 0x8));
-    c = U8(p, 0x2C);
-    fw = (f32)S32(p, 0xC);
-    fh = (f32)S32(p, 0x10);
+    fn_80230C30(&sx, &sy, this->x, this->y);
+    c = valid;
+    fw = (f32)w;
+    fh = (f32)h;
     f32 shadowY = 3.0f + sy;
-    fn_802354A0(PTR(p, 0x28), c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
-    e = &((IconEntry*)*(u8**)PTR(p, 0x18))[S32(p, 0x1C)];
+    fn_802354A0(art, c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    e = &icons->data[icon];
     y = sy;
     x = sx;
     u0 = e->u0;
     v0 = e->v0;
     u1 = e->u1;
     v1 = e->v1;
-    c = U32(p, 0x24);
+    c = color;
     fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
     fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
 }
 
-void fn_8025DF80(u8* p) {
-    for (int i = 0; i < S32(p, 0x1C); i++) {
-        fn_80214A9C(((s32*)PTR(p, 0x18))[i]);
+void FriendlyNames::Enter(void) {
+    for (int i = 0; i < names.count; i++) {
+        fn_80214A9C(names.data[i]);
     }
 }
 

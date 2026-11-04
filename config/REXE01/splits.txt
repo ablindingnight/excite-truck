@@ -3756,7 +3756,7 @@ game/frname.cpp:
 	.text       start:0x8025CE78 end:0x8025E034
 	.ctors      start:0x802ED468 end:0x802ED46C
 	.rodata     start:0x802FA678 end:0x802FA68C
-	.data       start:0x803454C8 end:0x80345828
+	.data       start:0x803454C8 end:0x80345825
 	.bss        start:0x80498ED0 end:0x80498EE4
 	.sdata      start:0x8055C3E0 end:0x8055C400
 	.sbss       start:0x8055F3B8 end:0x8055F3C8
