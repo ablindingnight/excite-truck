@@ -98,6 +98,10 @@ struct JumpState {
 };
 
 struct V2 {
+    void Set(f32 ax, f32 az) {
+        x = ax;
+        z = az;
+    }
     f32 x, z;
 };
 
@@ -177,6 +181,8 @@ void fn_8026B260(void) {
 }
 
 // NonMatching: the jump-radius loop gets different float registers (14 instructions).
+static inline f32 Sq(f32 x) { return x * x; }
+
 void fn_8026B3D4(int player) {
     f32 now = lbl_8055E3C8;
     JumpCar* c = fn_8017960C(player);
@@ -208,9 +214,8 @@ void fn_8026B3D4(int player) {
             p.z = c->z;
             for (i = 0, j = lbl_8049A028; i < lbl_8055F4C8 && !found; j++, i++) {
                 V2 d;
-                d.x = p.x - j->x;
-                d.z = p.z - j->z;
-                if (d.x * d.x + d.z * d.z < j->rad * j->rad) {
+                d.Set(p.x - j->x, p.z - j->z);
+                if (d.x * d.x + d.z * d.z < Sq(j->rad)) {
                     s->jump = i;
                     found = 1;
                     s->time = now;
