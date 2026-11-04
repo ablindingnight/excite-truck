@@ -253,7 +253,7 @@ void fn_801BDA74(int car, CarSetup* s) {
     x->row[4] = MVec4(0.044f, 0.044f, 0.044f, 0.044f);
     x->row[5] = MVec4(0.189f, 0.189f, 0.189f, 0.189f);
     for (i = 0; i < 4; i++) {
-        x->row[i] = MVec4(0.762f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
+        x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
                           1.371f * ((i & 2) ? -1.0f : 1.0f));
     }
     x->row[18] = MVec4(sin(s->wheelLock), sin(s->wheelLock), 0.0f, 0.0f);

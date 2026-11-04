@@ -2248,7 +2248,7 @@ void fn_8019743C(u8* d, u8* out) {
                 f32 m = 1.0f - 0.01f * k;
                 F32(d, 0xE0) = t + m * m * (cur - t);
             } else {
-                F32(d, 0xE0) = t + 0.994009f * (cur - t);
+                F32(d, 0xE0) = t + 0.997f * 0.997f * (cur - t);
             }
             decay = 0;
         } else {
@@ -2265,7 +2265,7 @@ void fn_8019743C(u8* d, u8* out) {
         F32(out, 0x4) = F32(out, 0x4) + w * ((F32(d, 0x4C) + F32(d, 0x5C) * x) - F32(out, 0x4));
     }
     if (decay) {
-        F32(d, 0xE0) = F32(d, 0xE0) * 0.9801f;
+        F32(d, 0xE0) = F32(d, 0xE0) * (0.99f * 0.99f);
     }
 }
 

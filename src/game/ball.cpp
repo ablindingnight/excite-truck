@@ -663,11 +663,11 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     } else if (DbgFlag(0x10)) {
         BVec3 d;
         f32 s;
-        d.x = m.rot[2].x * 0.707f + m.rot[1].x * 0.4949f;
+        d.x = m.rot[2].x * 0.707f + m.rot[1].x * (0.707f * 0.7f);
         f32 rotY = m.rot[2].y;
-        d.y = rotY * 0.707f + m.rot[1].y * 0.4949f;
+        d.y = rotY * 0.707f + m.rot[1].y * (0.707f * 0.7f);
         s = (128.0f / 3.6f) * k;  // 128 km/h in m/s
-        d.z = m.rot[2].z * 0.707f + m.rot[1].z * 0.4949f;
+        d.z = m.rot[2].z * 0.707f + m.rot[1].z * (0.707f * 0.7f);
         vel.x = d.x * s;
         vel.y = d.y * s;
         vel.z = d.z * s;
