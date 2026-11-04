@@ -553,7 +553,20 @@ struct CarResult {
 };
 
 // One line of the stunt summary on the results screen.
-class StuntLine {
+class StuntDisplay {
+public:
+    virtual ~StuntDisplay(void) {}
+    virtual void Text0(const char* fmt, ...) = 0;
+    virtual void Text1(const char* fmt, ...) = 0;
+    virtual void Text2(const char* fmt, ...) = 0;
+    virtual void SetValue(f32 v) = 0;
+    virtual void SetPoints(s32 p) = 0;
+    virtual void SetType(s32 t) = 0;
+    virtual void Stop(void) = 0;
+    virtual void SetReady(u8 r) = 0;
+};
+
+class StuntLine : public StuntDisplay {
 public:
     StuntLine(void) {}
     virtual ~StuntLine(void) {}
@@ -575,18 +588,24 @@ public:
         vsprintf(value, fmt, ap);
         va_end(ap);
     }
-    virtual void vf18(void) {}
-    virtual void SetF4(s32 v) { xF4 = v; }
-    virtual void vf20(void) {}
-    virtual void vf24(void) {}
-    virtual void vf28(void) {}
+    virtual void SetValue(f32 v) {}
+    virtual void SetPoints(s32 v) { xF4 = v; }
+    virtual void SetType(s32 t) {}
+    virtual void Stop(void) {}
+    virtual void SetReady(u8 r) {}
     char label[0x50];  // offset 0x4
     char mid[0x50];    // offset 0x54
     char value[0x50];  // offset 0xA4
     s32 xF4;           // offset 0xF4
 };
 
-class StuntList {
+class StuntFactory {
+public:
+    virtual ~StuntFactory(void) {}
+    virtual StuntDisplay* Alloc(void) = 0;
+};
+
+class StuntList : public StuntFactory {
 public:
     virtual ~StuntList(void) {}
     virtual StuntLine* Alloc(void);
@@ -668,7 +687,7 @@ inline f32 Floor(f32 x) { return floor(x); }
 extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
 inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
-class StuntEvent {
+class StuntEvent : public StuntDisplay {
 public:
     StuntEvent(void) {
         prev = 0;
@@ -833,7 +852,7 @@ struct StuntIter {
     StuntEvent* prev;  // offset 0xC
 };
 
-class CarHud {
+class CarHud : public StuntFactory {
 public:
     CarHud(int car, int acar);
     virtual ~CarHud(void);
