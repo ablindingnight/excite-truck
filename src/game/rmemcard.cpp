@@ -77,6 +77,10 @@ struct Writer {
 };
 
 struct SaveTask {
+    SaveTask(void) {  // run by the unit's static initializer for lbl_80507288
+        state = 0;
+        w.state = 1;
+    }
     s32 state;          // offset 0x0
     Writer w;           // offset 0x4
     void* banner;       // offset 0x260
@@ -635,11 +639,3 @@ void fn_802E9888(void) {}
 
 }  // extern "C"
 
-struct SaveTaskInit {
-    SaveTaskInit(void) {
-        lbl_80507288.state = 0;
-        lbl_80507288.w.state = 1;
-    }
-};
-
-static SaveTaskInit sSaveInit;
