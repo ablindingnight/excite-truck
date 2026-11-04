@@ -449,12 +449,11 @@ extern "C" {
 void fn_80177814(s32* out) {
     static s32 seed;
     s32 t = fn_802E2C20();
-    s32 s = seed;
-    out[0] = (s + t) % 30000;
-    seed = s + 0x9947;
+    out[0] = (seed + t) % 30000;
+    seed += 0x9947;
     t = fn_802E2C20();
     out[1] = (seed + t) % 30000;
-    seed = seed + 0x2F1CD;
+    seed += 0x2F1CD;
 }
 
 void fn_801778C0(void) {
