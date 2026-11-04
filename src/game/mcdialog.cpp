@@ -77,7 +77,7 @@ void fn_8023E5B4(CardTask* task) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023F874, 0, 0),
         MenuItem(lbl_8055BABC, 8, (void*)fn_8023F870, 1, 0),
-        MenuItem("title", 3, task->Title(), strlen(task->Title()), 0),
+        MenuItem("title", task->Title(), CaptionContext(strlen(task->Title()))),
         MenuItem("circle_list", 10, list, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
         MenuItem(lbl_804987E0),

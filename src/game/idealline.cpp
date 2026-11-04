@@ -138,7 +138,7 @@ public:
     int Track(V2* pos, f32* progress);
     void UpdatePerp(void);
 
-    u32 Rel(u32 x) {
+    u32 Rel(u32 x) const {
         u32 b = base;
         if (b) {
             return (x - b + line->total) % line->total;
@@ -673,7 +673,7 @@ ILPos fn_80136594(LineFollower* f, V2* p) {
     return r;
 }
 
-f32 fn_801365C4(IdealFollower* f, IdealFollower* o) {
+f32 fn_801365C4(const IdealFollower* f, const IdealFollower* o) {
     bool same;
     int back;
     int i;
