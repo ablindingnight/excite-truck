@@ -953,7 +953,7 @@ void DeityCar::Update(void) {
                 }
             }
         }
-        f32 t = (lead - 2.0f) * 0.125f;
+        f32 t = (lead - 2.0f) / 8.0f;
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
         Car()->boost = LerpF(0.0f, 1.0f, t);
