@@ -1,5 +1,7 @@
 // Track B1 partial draft. Offsets are observed fields, not asserted class names.
 #include "game/common.h"
+#include "game/menustate.h"
+void* operator new(unsigned long size, const char* tag);
 void* operator new[](unsigned long,const char*);
 extern "C" {
 extern const char lbl_80346338[12];
@@ -24,8 +26,14 @@ extern const char lbl_803464EC[9];
 }
 
 
-struct CreditMethodTableFields {const void* slots[24];};
-typedef char CreditTableSize[sizeof(CreditMethodTableFields)==96?1:-1];
+
+class CreditsFade;
+class CreditsKeyEnabler;
+
+
+
+
+
 extern "C" {
 // Reconstructed typed input view; original type and helper boundaries are unknown.
 struct CreditTokenInputObservedNew {
@@ -43,29 +51,15 @@ CreditItemFields(void);
     CreditItemFields(const CreditItemFields& other) {token=other.token;kind=other.kind;callback=other.callback;mode=other.mode;extra=other.extra;}
     const void* token; int kind; void* callback; int mode; int extra;
 };
-struct CreditFadeFields {
-    const void* vtable;
-    u8 pad4[0x10];
-    int state;                    // +0x14
-    f32 value, saved, result;      // +0x18,+0x1C,+0x20; result overlaps timer done
-};
-struct CreditTimerFields {
-    const void* vtable;
-    u8 pad4[0x10];
-    int state;
-    f32 remaining, duration;
-    u8 done;
-};
 extern const u32 lbl_8055C458;
 extern f32 lbl_8055C454;
 
 // Unsized address view reproduces original absolute access to the known 4-byte object.
 extern f32 lbl_80558DC4[];
-extern const CreditMethodTableFields lbl_803466D8, lbl_803465B8, lbl_80346558;
 extern const char lbl_8055C4A8[8], lbl_803464EC[];
-extern CreditFadeFields* lbl_8055F444;
+extern CreditsFade* lbl_8055F444;
 extern void* lbl_8055F448;
-extern CreditTimerFields* lbl_8055F44C;
+extern CreditsKeyEnabler* lbl_8055F44C;
 extern u8 lbl_8055F450;
 
 void fn_80236914(void);
@@ -84,20 +78,9 @@ void* fn_80264A54(void);
 void fn_802643B8(CreditItemFields* self);
 void fn_80264404(CreditItemFields* self);
 void fn_80264444(CreditItemFields* self);
-void fn_8026451C(CreditFadeFields* self);
 int fn_802645C0(void);
 f32 fn_80264588(void);
 void fn_802645EC(void);
-void fn_802645FC(CreditFadeFields* self);
-CreditFadeFields* fn_80265558(CreditFadeFields* self);
-void fn_8026557C(CreditFadeFields* self, f32 value);
-void fn_80265584(CreditFadeFields* self);
-void fn_80265598(CreditFadeFields* self);
-CreditTimerFields* fn_802655A4(CreditTimerFields* self);
-void fn_80265610(CreditTimerFields* self, f32 duration);
-void fn_80265618(CreditTimerFields* self);
-void fn_8026562C(CreditTimerFields* self);
-int fn_80265688(void);
 void fn_802658FC(void);
 void fn_80265904(void);
 void fn_80265A28(void);
@@ -105,47 +88,25 @@ void fn_80265A34(void);
 int fn_80265B5C(void);
 
 // Physical views, not claims about original class or field names.
-struct CreditStateFields {const void* methods; u8 reserved4[0x10]; int state;};
 struct CreditListHeader {
     ~CreditListHeader(void) {items=0;count=0;capacity=0;}
-    CreditStateFields** items;int count,capacity;
+    MenuState** items;int count,capacity;
 };
 struct CreditStateListFields : public CreditListHeader {
-void Append(CreditStateFields* value){CreditStateFields** data=items;int index=count++;data[index]=value;}
+void Append(MenuState* value){MenuState** data=items;int index=count++;data[index]=value;}
 
     CreditStateListFields(void) {items=storage;capacity=50;count=0;}
     ~CreditStateListFields(void) {}
-    CreditStateFields* storage[50];
+    MenuState* storage[50];
 };
 extern CreditStateListFields lbl_80498F78;
 extern const char lbl_803464A8[];
-extern const CreditMethodTableFields lbl_803464F8,lbl_80346618;
 void* __nw__FUlPCc(unsigned long,const char*);
 void __dl__FPv(void*);
-void Finish__9MenuStateFi(void*,int);
 unsigned long strlen(const char*);
-struct CreditScrollFields {
-    const void* methods; s32 x,y,width,height; int state;
-    void* font; char text[150]; u8 reservedB2[2]; int length; f32 offset;
-};
-typedef char CreditScrollLayout[sizeof(CreditScrollFields)==0xBC?1:-1];
 void fn_80264484(CreditItemFields* self);
-CreditFadeFields* fn_80264538(CreditFadeFields* self,int deleteFlag);
-CreditTimerFields* fn_802655C8(CreditTimerFields* self,int deleteFlag);
-void* fn_80265B9C(void* self,int deleteFlag);
-void* fn_80265BDC(void* self,int deleteFlag);
-void* fn_80265C1C(void* self,int deleteFlag);
 }
-class CreditUpdateInterface {
-public: virtual void Slot08(void); virtual void Slot0C(void);
-virtual void Slot10(void); virtual void Slot14(void); virtual void Slot18(void);
-virtual void Update(void);
-};
 extern "C" {
-void fn_80264FD4(CreditStateFields* self);
-CreditScrollFields* fn_8026523C(CreditScrollFields* self);
-void fn_80265268(CreditScrollFields* self,void* font,const char* text,f32 offset);
-void fn_80264618(CreditFadeFields* self);
 
 struct CreditMenuDescFields {const char* layout;CreditItemFields* items;void* poll;int argC,arg10;};
 extern const CreditMenuDescFields lbl_802FA73C,lbl_802FA750;
@@ -161,9 +122,9 @@ static ModuleTag creditsModuleTag;
 static UnkStatic7F creditsStatic7F;
 UnkStatic123s creditsStatic123;
 CreditStateListFields lbl_80498F78;
-CreditFadeFields* lbl_8055F444;
+CreditsFade* lbl_8055F444;
 void* lbl_8055F448;
-CreditTimerFields* lbl_8055F44C;
+CreditsKeyEnabler* lbl_8055F44C;
 u8 lbl_8055F450;
 
 void* __nwa__FUlPCc(unsigned long,const char*);
@@ -175,8 +136,6 @@ int strcasecmp(const char*,const char*);
 void fn_802640C4(CreditItemFields*,ValueNode*);
 void fn_80236910(const char*);
 }
-// Dispatch-only interface: the observed deleting destructor is slot +0x08.
-class CreditDeleteInterface {public:virtual ~CreditDeleteInterface(void);};
 extern "C" {
 int fn_802656C8(ValueNode* node);
 
@@ -194,14 +153,90 @@ struct CreditTextDescFields {
 struct CreditGlyphStorageObservedNew {CreditGlyphStorageObservedNew(int);~CreditGlyphStorageObservedNew(){items=0;count=0;capacity=0;}void* items;int count,capacity;};
 struct CreditGlyphBatchFields:CreditGlyphStorageObservedNew {CreditGlyphBatchFields(int);~CreditGlyphBatchFields(){__dla__FPv(allocation);}void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
 struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);~CreditFontGroupFields();void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
-struct CreditBackgroundHeader {CreditBackgroundHeader(const void* t){state=0;methods=t;}const void* methods;u8 reserved4[0x10];int state;};
-struct CreditBackgroundFields:CreditBackgroundHeader {CreditBackgroundFields();~CreditBackgroundFields();CreditFontGroupFields fire,smoke;};
+// The credits' menu states: menu items of type 5 point at one. MWCC emits their vtables in REVERSE declaration
+// order, so they are declared here in the reverse of their .data order (lbl_803464F8 QuitHotkey, KeyEnabler,
+// ExtraDelay, FireText, background, lbl_803466D8 fade), followed by the zero-filled space of this unit's
+// weak IMenuState vtable copy.
+// The fade that times the whole credits run; one lives on fn_80263F30's stack (lbl_8055F444 points at it).
+class CreditsFade : public MenuState {
+public:
+    CreditsFade(void);
+    virtual ~CreditsFade(void);
+    virtual void Enter(void);
+    virtual void Update(void);
+
+    f32 value;   // offset 0x18
+    f32 saved;   // offset 0x1C
+    f32 result;  // offset 0x20: seconds since the fade finished
+};
+
+// The credits' background: fire and smoke glyph sprays (lbl_8055F448 points at it).
+class CreditBackgroundFields : public MenuState {
+public:
+    CreditBackgroundFields(void);
+    virtual ~CreditBackgroundFields(void);
+    virtual void Update(void);
+    virtual void Unk20(void);
+    virtual void Draw(void);
+
+    CreditFontGroupFields fire;   // offset 0x18
+    CreditFontGroupFields smoke;  // offset 0x78
+};
+
+// "firetext" item ("TextWoot"): types its text out, with sparks at the caret.
+class CreditsFireText : public MenuState {
+public:
+    CreditsFireText(void);
+    virtual ~CreditsFireText(void);
+    virtual void Draw(void);
+    void Set(void* f, const char* t, f32 delay);
+
+    void* font;      // offset 0x18
+    char text[150];  // offset 0x1C
+    int length;      // offset 0xB4
+    f32 offset;      // offset 0xB8: seconds before typing starts
+};
+typedef char CreditsFireTextSize[sizeof(CreditsFireText) == 0xBC ? 1 : -1];
+
+// "ExtraDelay" item: swaps the text-hold time lbl_8055C454 while its page is shown.
+class CreditsExtraDelay : public MenuState {
+public:
+    CreditsExtraDelay(void);
+    virtual ~CreditsExtraDelay(void);
+    virtual void Enter(void);
+    virtual void Exit(void);
+    void Set(f32 v);
+
+    f32 value;  // offset 0x18
+    f32 saved;  // offset 0x1C
+};
+
+// "KeyEnabler" item: keys are allowed once its timer runs out (lbl_8055F44C points at it).
+class CreditsKeyEnabler : public MenuState {
+public:
+    CreditsKeyEnabler(void);
+    virtual ~CreditsKeyEnabler(void);
+    virtual void Enter(void);
+    virtual void Update(void);
+    void SetDuration(f32 d);
+
+    f32 remaining;  // offset 0x18
+    f32 duration;   // offset 0x1C
+    u8 done;        // offset 0x20
+};
+
+// "QuitHotkey" item: any key ends the credits once keys are enabled.
+class CreditsQuitHotkey : public MenuState {
+public:
+    CreditsQuitHotkey(void) {}
+    virtual ~CreditsQuitHotkey(void);
+    virtual int Key(int key);
+};
 typedef char CreditDescriptorSize[sizeof(CreditTextDescFields)==0x3C?1:-1];
 typedef char CreditGroupSize[sizeof(CreditFontGroupFields)==0x60?1:-1];
 typedef char CreditBackgroundSize[sizeof(CreditBackgroundFields)==0xD8?1:-1];
 extern const CreditTextDescFields lbl_802FA700;
 extern CreditTextDescFields lbl_80346364;
-extern const CreditMethodTableFields lbl_80346678;
 extern const char lbl_8055C490[8];
 
 int fn_8023512C(const void*);
@@ -229,7 +264,6 @@ void fn_80131818(ValueTable*);
 int fn_802ECF00(int);
 int fn_802ECF04(void);
 extern int lbl_8055C450;
-CreditBackgroundFields* __dt__22CreditBackgroundFieldsFv(CreditBackgroundFields*,int);
 void fn_80263F30(int before,u8 allowSkip,int after);
 
 void fn_80235380(int);
@@ -321,16 +355,12 @@ static inline void CreditDrawFireGroupObservedNew(CreditFontGroupFields* self) {
 
 }
 extern "C" {
-CreditBackgroundFields* __dt__22CreditBackgroundFieldsFv(CreditBackgroundFields* self,int deleteFlag);
-void fn_80264D5C(CreditBackgroundFields* self);
-void fn_80264FE4(CreditBackgroundFields* self);
 
 extern const f32 lbl_80563C18,lbl_80563C1C;
 void fn_8022ACFC(void*,const char*,f32,f32,f32*,f32*,f32*,f32*);
 u32 fn_8022AA84(void*);
 void fn_8022BD40(void*,const char*,int,int,f32,f32,f32,f32,f32,f32);
 void fn_80264A5C(f32,f32);
-void fn_802652E8(CreditScrollFields* self);
 
 void fn_80230C30(f32*,f32*,int,int);
 f32 fn_80129DC4(int,f32,f32);
@@ -358,27 +388,6 @@ inline void CreditFontGroupFields::Spawn(const ValPoint& position) {CreditFontGr
 extern "C" {
 void fn_80264A5C(f32 x,f32 y);
 
-void fn_802153A0(void);
-void fn_80215CA0(void);
-void fn_80215CA4(void);
-void fn_80215CA8(void);
-void fn_80215CAC(void);
-void fn_80215CB0(void);
-void fn_80215CB4(void);
-void fn_80215CB8(void);
-void fn_80215CBC(void);
-void fn_80215CC0(void);
-void fn_80215CC4(void);
-void fn_80215CC8(void);
-void fn_80215CCC(void);
-void fn_80215CD0(void);
-void fn_80215CD4(void);
-void fn_80215CD8(void);
-void fn_80215CDC(void);
-void fn_80215CE0(void);
-void fn_80215CE4(void);
-void fn_80215CEC(void);
-void fn_802153A4(void);
 
 extern const char lbl_80346338[12];
 extern const char lbl_80346344[14];
@@ -420,162 +429,6 @@ __declspec(section ".data") const char lbl_803464C8[14]="a_credits.val";
 __declspec(section ".data") const char lbl_803464D8[17]="credits_fade.lyt";
 __declspec(section ".data") const char lbl_803464EC[9]="fade_out";
 
-__declspec(section ".data") const CreditMethodTableFields lbl_803464F8 = {{
-    0,
-    0,
-    (const void*)fn_80265B9C,
-    (const void*)fn_802153A0,
-    (const void*)fn_80215CA0,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_80215CAC,
-    (const void*)fn_80215CB0,
-    (const void*)fn_80215CB4,
-    (const void*)fn_80215CB8,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_80265688,
-    (const void*)fn_80215CEC
-}};
-__declspec(section ".data") const CreditMethodTableFields lbl_80346558 = {{
-    0,
-    0,
-    (const void*)fn_802655C8,
-    (const void*)fn_80265618,
-    (const void*)fn_80215CA0,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_8026562C,
-    (const void*)fn_80215CB0,
-    (const void*)fn_80215CB4,
-    (const void*)fn_80215CB8,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_802153A4,
-    (const void*)fn_80215CEC
-}};
-__declspec(section ".data") const CreditMethodTableFields lbl_803465B8 = {{
-    0,
-    0,
-    (const void*)fn_80265BDC,
-    (const void*)fn_80265584,
-    (const void*)fn_80265598,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_80215CAC,
-    (const void*)fn_80215CB0,
-    (const void*)fn_80215CB4,
-    (const void*)fn_80215CB8,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_802153A4,
-    (const void*)fn_80215CEC
-}};
-__declspec(section ".data") const CreditMethodTableFields lbl_80346618 = {{
-    0,
-    0,
-    (const void*)fn_80265C1C,
-    (const void*)fn_802153A0,
-    (const void*)fn_80215CA0,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_80215CAC,
-    (const void*)fn_80215CB0,
-    (const void*)fn_80215CB4,
-    (const void*)fn_802652E8,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_802153A4,
-    (const void*)fn_80215CEC
-}};
-__declspec(section ".data") const CreditMethodTableFields lbl_80346678 = {{
-    0,
-    0,
-    (const void*)__dt__22CreditBackgroundFieldsFv,
-    (const void*)fn_802153A0,
-    (const void*)fn_80215CA0,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_80264D5C,
-    (const void*)fn_80264FD4,
-    (const void*)fn_80215CB4,
-    (const void*)fn_80264FE4,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_802153A4,
-    (const void*)fn_80215CEC
-}};
-__declspec(section ".data") const CreditMethodTableFields lbl_803466D8 = {{
-    0,
-    0,
-    (const void*)fn_80264538,
-    (const void*)fn_802645FC,
-    (const void*)fn_80215CA0,
-    (const void*)fn_80215CA4,
-    (const void*)fn_80215CA8,
-    (const void*)fn_80264618,
-    (const void*)fn_80215CB0,
-    (const void*)fn_80215CB4,
-    (const void*)fn_80215CB8,
-    (const void*)fn_80215CBC,
-    (const void*)fn_80215CC0,
-    (const void*)fn_80215CC4,
-    (const void*)fn_80215CC8,
-    (const void*)fn_80215CCC,
-    (const void*)fn_80215CD0,
-    (const void*)fn_80215CD4,
-    (const void*)fn_80215CD8,
-    (const void*)fn_80215CDC,
-    (const void*)fn_80215CE0,
-    (const void*)fn_80215CE4,
-    (const void*)fn_802153A4,
-    (const void*)fn_80215CEC
-}};
 
 __declspec(section ".rodata") const CreditTextDescFields lbl_802FA700={lbl_80346344,1.0471975803375244f,2.094395160675049f,100.0f,200.0f,0.0f,200.0f,0.0f,0.0f,128,0.30000001192092896f,0.5f,0.009999999776482582f,1.5f,0.800000011920929f};
 __declspec(section ".rodata") const CreditMenuDescFields lbl_802FA73C={lbl_803464D8,0,0,0,0};
@@ -608,7 +461,7 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
         if(!fn_802ECF00(lbl_8055C450))fn_802E317C(lbl_803463AC,lbl_8055C450);
         fn_80265940();
         CreditBackgroundFields background;
-        CreditFadeFields fade;fn_8026451C(&fade);
+        CreditsFade fade;
         ValueNode* node;int keepGoing;int index;keepGoing=1;index=0;
         while(keepGoing && (node=table->GetChild(index))!=0) {
             if(!strcasecmp(node->GetName(),lbl_803463E4))keepGoing=fn_802656C8(node);
@@ -617,7 +470,6 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
         fn_8020A648(-1);fn_80265A74();
         if(!fn_802ECF04())fn_802E317C(lbl_803463F8);
         fn_80131818(table);
-        fn_80264538(&fade,-1);
     }
     if(after)fn_80265940();
     fn_8020A648(previous);
@@ -639,25 +491,19 @@ extern "C" void fn_802640C4(CreditItemFields* self,ValueNode* node) {
         fn_80264098(self,3);
         self->callback=(void*)node->GetValue(lbl_8055C474);self->mode=0;
     } else if(!strcasecmp(type,lbl_80346428)) {
-        CreditScrollFields* state=(CreditScrollFields*)__nw__FUlPCc(0xBC,lbl_80346434);
-        if(state)state=fn_8026523C(state);
-        f32 offset=node->GetFloat(lbl_8055C484,(0.0f));
-        const char* text=node->GetValue(lbl_8055C474);
-        int font=node->GetIntValue(lbl_8055C47C);
-        fn_80265268(state,(void*)font,text,offset);
-        lbl_80498F78.Append((CreditStateFields*)state);
+        CreditsFireText* state=new(lbl_80346434) CreditsFireText;
+        state->Set((void*)node->GetIntValue(lbl_8055C47C),node->GetValue(lbl_8055C474),node->GetFloat(lbl_8055C484,(0.0f)));
+        lbl_80498F78.Append(state);
         self->token=node->GetValue(lbl_8055C46C);fn_80264098(self,5);self->callback=state;
     } else if(!strcasecmp(type,lbl_80346440)) {
-        CreditFadeFields* state=(CreditFadeFields*)__nw__FUlPCc(0x20,lbl_8034644C);
-        if(state)state=fn_80265558(state);
-        fn_8026557C(state,node->GetFloat(lbl_8055C484,(0.0f)));
-        lbl_80498F78.Append((CreditStateFields*)state);
+        CreditsExtraDelay* state=new(lbl_8034644C) CreditsExtraDelay;
+        state->Set(node->GetFloat(lbl_8055C484,(0.0f)));
+        lbl_80498F78.Append(state);
         self->token=0;fn_80264098(self,5);self->callback=state;
     } else if(!strcasecmp(type,lbl_80346458)) {
-        CreditTimerFields* state=(CreditTimerFields*)__nw__FUlPCc(0x24,lbl_80346464);
-        if(state)state=fn_802655A4(state);
-        fn_80265610(state,node->GetFloat(lbl_8055C484,(0.0f)));
-        lbl_80498F78.Append((CreditStateFields*)state);
+        CreditsKeyEnabler* state=new(lbl_80346464) CreditsKeyEnabler;
+        state->SetDuration(node->GetFloat(lbl_8055C484,(0.0f)));
+        lbl_80498F78.Append(state);
         self->token=0;fn_80264098(self,5);self->callback=state;
     } else fn_802E317C(lbl_80346470,type);
 }
@@ -682,21 +528,14 @@ extern "C" void fn_80264444(CreditItemFields* self) {
 }
 
 extern "C" void fn_80264484(CreditItemFields* self) {
-    CreditStateFields* state=(CreditStateFields*)__nw__FUlPCc(0x18,lbl_803464A8);
-    if(state) {state->state=0;state->methods=&lbl_803464F8;}
+    CreditsQuitHotkey* state=new(lbl_803464A8) CreditsQuitHotkey;
     lbl_80498F78.Append(state);
     self->token=0;fn_80264098(self,5);self->callback=state;
 }
 
-extern "C" void fn_8026451C(CreditFadeFields* self) {
-    self->vtable = &lbl_803466D8;
-    self->state = 0;
-    lbl_8055F444 = self;
-}
+CreditsFade::CreditsFade(void) { lbl_8055F444 = this; }
 
-extern "C" CreditFadeFields* fn_80264538(CreditFadeFields* self,int deleteFlag) {
-    if(self) {lbl_8055F444=0;if(deleteFlag>0)__dl__FPv(self);}return self;
-}
+CreditsFade::~CreditsFade(void) { lbl_8055F444 = 0; }
 
 extern "C" void* fn_80264580(void) { return lbl_8055F444; }
 
@@ -709,22 +548,22 @@ extern "C" int fn_802645C0(void) { return (f32)__fabs((f64)lbl_8055F444->value) 
 
 extern "C" void fn_802645EC(void) { lbl_8055F444->saved = lbl_8055C454; }
 
-extern "C" void fn_802645FC(CreditFadeFields* self) {
-    self->value = (0.5f);
-    self->saved = lbl_8055C454;
-    self->result = (0.0f);
+void CreditsFade::Enter(void) {
+    value = (0.5f);
+    saved = lbl_8055C454;
+    result = (0.0f);
 }
 
-extern "C" void fn_80264618(CreditFadeFields* self) {
-    if((f32)__fabs((f64)(*(volatile f32*)&self->saved))<=(*(const volatile f32*)lbl_80558DC4)) {Finish__9MenuStateFi(self,0);fn_80216CA8();}
-    f32 next=self->value-fn_80214D48();
-    self->value=(0.0f)>next?(0.0f):next;
-    if(fn_802645C0())self->result+=fn_80214D48();
-    next=self->saved-fn_80214D48();
-    self->saved=(0.0f)>next?(0.0f):next;
+void CreditsFade::Update(void) {
+    if((f32)__fabs((f64)(*(volatile f32*)&saved))<=(*(const volatile f32*)lbl_80558DC4)) {Finish(0);fn_80216CA8();}
+    f32 next=value-fn_80214D48();
+    value=(0.0f)>next?(0.0f):next;
+    if(fn_802645C0())result+=fn_80214D48();
+    next=saved-fn_80214D48();
+    saved=(0.0f)>next?(0.0f):next;
 }
 
-CreditBackgroundFields::CreditBackgroundFields():CreditBackgroundHeader(&lbl_80346678),fire(lbl_802FA700),smoke(lbl_80346364){lbl_8055F448=this;}
+CreditBackgroundFields::CreditBackgroundFields():fire(lbl_802FA700),smoke(lbl_80346364){lbl_8055F448=this;}
 
 inline CreditFontGroupFields::~CreditFontGroupFields(){if(resource){fn_80235380(resource);resource=0;}}
 CreditBackgroundFields::~CreditBackgroundFields(){lbl_8055F448=0;}
@@ -742,52 +581,49 @@ extern "C" void fn_80264A5C(f32 x,f32 y) {
     ValPoint smokePosition={screenX,(5.0f)+screenY};self->smoke.Spawn(smokePosition);
 }
 
-extern "C" void fn_80264D5C(CreditBackgroundFields* self) {
-    CreditUpdateGroup(&self->fire,fn_80214D48());
-    CreditUpdateGroup(&self->smoke,fn_80214D48());
+void CreditBackgroundFields::Update(void) {
+    CreditUpdateGroup(&fire,fn_80214D48());
+    CreditUpdateGroup(&smoke,fn_80214D48());
 }
 
-extern "C" void fn_80264FD4(CreditStateFields* self) {
-    ((CreditUpdateInterface*)self)->Update();
+void CreditBackgroundFields::Unk20(void) { Update(); }
+
+void CreditBackgroundFields::Draw(void) {
+    CreditDrawGroup(&smoke);CreditDrawFireGroupObservedNew(&fire);
 }
 
-extern "C" void fn_80264FE4(CreditBackgroundFields* self) {
-    CreditDrawGroup(&self->smoke);CreditDrawFireGroupObservedNew(&self->fire);
+CreditsFireText::CreditsFireText(void) {
+    font=0;
+    text[0]=0;length=0;offset=(0.0f);
 }
 
-extern "C" CreditScrollFields* fn_8026523C(CreditScrollFields* self) {
-    self->state=0;self->methods=&lbl_80346618;self->font=0;
-    self->text[0]=0;self->length=0;self->offset=(0.0f);
-    return self;
-}
-
-extern "C" void fn_80265268(CreditScrollFields* self,void* font,const char* text,f32 offset) {
-    self->font=font;int n=150;char* dst=self->text;
-    while((*dst++=*text++)!=0) {if(--n<=0){dst[-1]=0;break;}}
-    self->length=strlen(self->text);self->offset=offset;
+void CreditsFireText::Set(void* f,const char* t,f32 delay) {
+    font=f;int n=150;char* dst=text;
+    while((*dst++=*t++)!=0) {if(--n<=0){dst[-1]=0;break;}}
+    length=strlen(text);offset=delay;
 }
 
 struct CreditTextBoundsNew {f32 left,top,right,bottom;};
-extern "C" void fn_802652E8(CreditScrollFields* self) {
+void CreditsFireText::Draw(void) {
     f32 elapsed=fn_80264588();
-    if(elapsed<self->offset)return; {
-        f32 progress=lbl_80563C18*(elapsed-self->offset);
+    if(elapsed<offset)return; {
+        f32 progress=lbl_80563C18*(elapsed-offset);
         CreditTextBoundsNew full;
-        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&full.left,&full.top,&full.right,&full.bottom);
+        fn_8022ACFC(font,text,(f32)x,(f32)y,&full.left,&full.top,&full.right,&full.bottom);
         int cutoff=(int)progress;
-        bool complete=cutoff>self->length;
-        if(complete)cutoff=self->length;
+        bool complete=cutoff>length;
+        if(complete)cutoff=length;
         else fn_802645EC();
-        char savedByte=self->text[cutoff];self->text[cutoff]=0;int saved=savedByte;
+        char savedByte=text[cutoff];text[cutoff]=0;int saved=savedByte;
         CreditTextBoundsNew partial;
-        fn_8022ACFC(self->font,self->text,(f32)self->x,(f32)self->y,&partial.left,&partial.top,&partial.right,&partial.bottom);
+        fn_8022ACFC(font,text,(f32)x,(f32)y,&partial.left,&partial.top,&partial.right,&partial.bottom);
         f32 delta=(full.right-full.left)-(partial.right-partial.left);
-        f32 x=(f32)self->x;
-        u32 flags=fn_8022AA84(self->font);
-        if(flags&2)x-=delta;
-        else if(flags&4)x-=(0.5f)*delta;
-        fn_8022BD40(self->font,self->text,0,0,x,(f32)self->y,(0.0f),full.right-full.left,full.bottom-full.top,(1.0f));
-        self->text[cutoff]=saved;
+        f32 drawX=(f32)x;
+        u32 flags=fn_8022AA84(font);
+        if(flags&2)drawX-=delta;
+        else if(flags&4)drawX-=(0.5f)*delta;
+        fn_8022BD40(font,text,0,0,drawX,(f32)y,(0.0f),full.right-full.left,full.bottom-full.top,(1.0f));
+        text[cutoff]=saved;
         if(!complete) {
             f32 fraction=progress-(f32)cutoff;
             f32 caret=(f32)(int)(lbl_80563C1C*fraction)+(full.left+partial.right-partial.left);
@@ -796,46 +632,38 @@ extern "C" void fn_802652E8(CreditScrollFields* self) {
     }
 }
 
-extern "C" CreditFadeFields* fn_80265558(CreditFadeFields* self) {
-    self->vtable = &lbl_803465B8;
-    self->state = 0;
-    self->value = (0.0f);
-    self->saved = (0.0f);
-    return self;
+CreditsExtraDelay::CreditsExtraDelay(void) {
+    value = (0.0f);
+    saved = (0.0f);
 }
 
-extern "C" void fn_8026557C(CreditFadeFields* self, f32 value) { self->value = value; }
+void CreditsExtraDelay::Set(f32 v) { value = v; }
 
-extern "C" void fn_80265584(CreditFadeFields* self) {
-    self->saved = lbl_8055C454;
-    lbl_8055C454 = self->value;
+void CreditsExtraDelay::Enter(void) {
+    saved = lbl_8055C454;
+    lbl_8055C454 = value;
 }
 
-extern "C" void fn_80265598(CreditFadeFields* self) { lbl_8055C454 = self->saved; }
+void CreditsExtraDelay::Exit(void) { lbl_8055C454 = saved; }
 
-extern "C" CreditTimerFields* fn_802655A4(CreditTimerFields* self) {
-    self->vtable = &lbl_80346558;
-    self->state = 0;
-    lbl_8055F44C = self;
-    self->duration = (0.0f);
-    return self;
+CreditsKeyEnabler::CreditsKeyEnabler(void) {
+    lbl_8055F44C = this;
+    duration = (0.0f);
 }
 
-extern "C" CreditTimerFields* fn_802655C8(CreditTimerFields* self,int deleteFlag) {
-    if(self) {lbl_8055F44C=0;if(deleteFlag>0)__dl__FPv(self);}return self;
-}
+CreditsKeyEnabler::~CreditsKeyEnabler(void) { lbl_8055F44C = 0; }
 
-extern "C" void fn_80265610(CreditTimerFields* self, f32 duration) { self->duration = duration; }
+void CreditsKeyEnabler::SetDuration(f32 d) { duration = d; }
 
-extern "C" void fn_80265618(CreditTimerFields* self) { self->done = 0; self->remaining = self->duration; }
+void CreditsKeyEnabler::Enter(void) { done = 0; remaining = duration; }
 
-extern "C" void fn_8026562C(CreditTimerFields* self) {
+void CreditsKeyEnabler::Update(void) {
     fn_802645EC();
-    if (self->remaining > lbl_80558DC4[0]) self->remaining -= fn_80214D48();
-    else self->done = 1;
+    if (remaining > lbl_80558DC4[0]) remaining -= fn_80214D48();
+    else done = 1;
 }
 
-extern "C" int fn_80265688(void) {
+int CreditsQuitHotkey::Key(int key) {
     if (fn_80265B5C()) { fn_802168BC(-1); return 1; }
     fn_80216D28(); return 0;
 }
@@ -863,7 +691,7 @@ int allocated=count+5;CreditItemFields* items=new(lbl_803464B4) CreditItemFields
     fn_80236910(lbl_803464C8);
     int result=fn_802146BC(&desc,-999,-999,1);
     if(items)__dla__FPv((char*)items-16);
-    for(int i=0;i<lbl_80498F78.count;i++)delete (CreditDeleteInterface*)lbl_80498F78.items[i];
+    for(int i=0;i<lbl_80498F78.count;i++)delete lbl_80498F78.items[i];
     lbl_80498F78.count=0;
     return result!=-1;
 }
@@ -905,17 +733,11 @@ extern "C" void fn_80265A74(void) {
 static inline bool CreditTimerDone(void){return lbl_8055F44C && lbl_8055F44C->done;}
 extern "C" int fn_80265B5C(void){return CreditTimerDone() || lbl_8055F450;}
 
-extern "C" void* fn_80265B9C(void* self,int deleteFlag) {
-    if(self && deleteFlag>0)__dl__FPv(self);return self;
-}
+CreditsQuitHotkey::~CreditsQuitHotkey(void) {}
 
-extern "C" void* fn_80265BDC(void* self,int deleteFlag) {
-    if(self && deleteFlag>0)__dl__FPv(self);return self;
-}
+CreditsExtraDelay::~CreditsExtraDelay(void) {}
 
-extern "C" void* fn_80265C1C(void* self,int deleteFlag) {
-    if(self && deleteFlag>0)__dl__FPv(self);return self;
-}
+CreditsFireText::~CreditsFireText(void) {}
 
 
 extern "C" {
