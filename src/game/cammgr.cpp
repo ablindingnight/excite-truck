@@ -1535,9 +1535,13 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             fn_80275B9C(lbl_80563CC0, lbl_80563CC4, lbl_80563CC8, c);
             break;
         case 0x1E:
-            fn_80275B9C(lbl_80563CDC + lbl_80563C20 * lbl_80563CE0, lbl_80563CD4 + lbl_80563C20 * lbl_80563CD8,
-                        lbl_80563CCC + lbl_80563C20 * lbl_80563CD0, c);
+        {
+            f32 speed = lbl_80563CCC + lbl_80563C20 * lbl_80563CD0;
+            f32 height = lbl_80563CD4 + lbl_80563C20 * lbl_80563CD8;
+            f32 radius = lbl_80563CDC + lbl_80563C20 * lbl_80563CE0;
+            fn_80275B9C(radius, height, speed, c);
             break;
+        }
         case 0x1B:
             fn_802704D4(7, c);
             break;
