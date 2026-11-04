@@ -6,6 +6,11 @@
 // fn_8026C014 (the debug camera) is a draft, not yet matching; it reaches both .bss objects from one base register,
 // which is still unexplained.
 #include "types.h"
+#include "game/common.h"
+
+// The unit's module tag, registered by its static initializer (the 8-byte function after the code, formerly the
+// separate split unk_8026E224).
+ModuleTag lbl_8055F4D8;
 
 extern "C" {
 
