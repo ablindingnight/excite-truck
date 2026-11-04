@@ -261,9 +261,9 @@ u32 fn_8011FC2C(void *arg0, s32 arg1, s32 arg2, s32 *arg3, s32 arg4, s32 arg5, s
 void fn_80117330(void *arg0);
 void fn_80117074(StreamPlayer *p);
 
-extern s32 lbl_8055DED4;
-u32 fn_8011C1E0(s32 arg0, void *arg1);
-void fn_8011C2EC(s32 arg0, void *arg1);
+extern void *lbl_8055DED4;
+u32 fn_8011C1E0(void *arg0, void *arg1);
+void fn_8011C2EC(void *arg0, void *arg1);
 s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes);
 void fn_80117074(StreamPlayer *p);
 void fn_80118C44(StreamPlayer *p);
@@ -277,7 +277,7 @@ u32 fn_80116F8C(struct StreamTrack *t);
 s32 fn_80116D30(void);
 void fn_8011BC48(s32 arg0);
 s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
-void fn_8011C274(s32 arg0, void *arg1);
+void fn_8011C274(void *arg0, void *arg1);
 void fn_80120084(void *arg0);
 extern void memset(void *, int, unsigned int);
 
@@ -1216,13 +1216,13 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         p->running = 1;
         if (p->tracks[0].unk60 == 0) {
             if (lbl_8055DED4 == 0) {
-                lbl_8055DED4 = (s32)fn_8011BE48(-13);
+                lbl_8055DED4 = fn_8011BE48(-13);
                 if (lbl_8055DED4 != 0) {
-                    fn_8011C120((void *)lbl_8055DED4);
+                    fn_8011C120(lbl_8055DED4);
                 }
             }
             if (lbl_8055DED4 != 0) {
-                fn_8011BEC8((void *)lbl_8055DED4, p->queue, (s32)fn_80117598, (s32)fn_801175C4);
+                fn_8011BEC8(lbl_8055DED4, p->queue, (s32)fn_80117598, (s32)fn_801175C4);
             }
         }
     }
@@ -1452,7 +1452,7 @@ void fn_80118DC0(StreamPlayer *p) {
     u32 i;
     if (p != 0) {
         fn_80118F78(p, 1);
-        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? (void *)lbl_8055DED4 : (void *)0, (s32)p->queue, 1)) {
+        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? lbl_8055DED4 : 0, (s32)p->queue, 1)) {
         case 2:
             lbl_8055DED4 = 0;
             break;
@@ -3176,7 +3176,7 @@ void fn_8011C120(void *arg0) {
     }
 }
 
-u32 fn_8011C1E0(s32 arg0, void *arg1) {
+u32 fn_8011C1E0(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
@@ -3191,7 +3191,7 @@ u32 fn_8011C1E0(s32 arg0, void *arg1) {
 }
 
 // Waits (yielding) until fn_8011C1E0 reports the request finished.
-void fn_8011C274(s32 arg0, void *arg1) {
+void fn_8011C274(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
@@ -3201,7 +3201,7 @@ void fn_8011C274(s32 arg0, void *arg1) {
     }
 }
 
-void fn_8011C2EC(s32 arg0, void *arg1) {
+void fn_8011C2EC(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {

@@ -286,7 +286,8 @@ void ShowUnlockReason(const char* name) {
 
     if (req != NULL) {
         races = AchievementsGetModelStat(0, name) >= req->races_run;
-        if (AchievementsGetModelStat(1, name) >= req->aaas) {
+        bool grades = AchievementsGetModelStat(1, name) >= req->aaas;
+        if (grades) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_S_GRADES");
         } else if (races) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_RACES_RUN");
