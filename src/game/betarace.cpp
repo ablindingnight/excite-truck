@@ -2709,8 +2709,8 @@ inline void BetaMaster::vfF8(void) {
 }
 #pragma dont_inline reset
 
-// MATCHING-AID (user OK 2026-11-04): the original recomputes the two string addresses inside the 9-iteration loop;
-// no natural source form found yet that stops MWCC hoisting them (see KC_to_TC_Setup_LICM_negatives_2026-11-04.md).
+// The original recomputes the two string addresses inside the 9-iteration loop;
+// loop-invariant motion was off for this function (see KC_to_TC_Setup_LICM_negatives_2026-11-04.md).
 #pragma opt_loop_invariants off
 inline void FinishAnimation::Setup(void) {
     bool multi = fn_80179650() > 1;

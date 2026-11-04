@@ -41,8 +41,9 @@ so its total grew and the percentage is lower even though more SDK code matches.
 
 - A 100% matching decompilation: every function compiles back to the original bytes.
 - Code that reads like the original source: real structures and names, natural control flow, and no matching
-  "tricks" (no register pinning, no `#pragma` tweaks, no `volatile` or fake temporaries added only to steer the
-  compiler). `volatile` is used only where the data really is shared with callbacks or interrupts.
+  "tricks" (no register pinning, no `volatile` or fake temporaries added only to steer the compiler). `volatile`
+  is used only where the data really is shared with callbacks or interrupts. Compiler `#pragma`s such as
+  `dont_inline` or `opt_loop_invariants` are ordinary source controls and are not counted as tricks.
 - That goal is not reached yet. The tricks still in the code (about 100, most of them inherited with imported
   code) are marked `// MATCHING-AID:` and listed in [docs/matching_aids.md](docs/matching_aids.md), and are
   being replaced by natural code over time.

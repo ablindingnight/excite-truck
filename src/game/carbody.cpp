@@ -3533,7 +3533,7 @@ extern const f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_805
 
 // Registers the body's tunables (mass, moments, power, geometry, springs, damping, tires) with a tuning
 // menu. Matched by the upstream project (orangedude27/excite-truck).
-// MATCHING-AID: register pinning + scheduling/opt_propagation pragmas, not original source. Revisit.
+// MATCHING-AID: register pinning, not original source. Revisit.
 // Natural form found 2026-10-27: string literals for the names, units held in locals
 // (const char* m = " m", kg = " kg", kgm2 = " kg m2", nm = " N/m", nsm = " N-s/m"; "Mass", "", " m/s", " G"
 // inline), u8* body = p + 0x32C, Add(const char*, void*, const char*, ...), no pragmas. That differs only in

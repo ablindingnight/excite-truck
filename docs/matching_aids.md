@@ -1,9 +1,11 @@
 # Matching aids to revisit
 
-Some functions match only with compiler tricks the original developers did not write: `#pragma`
-switches (`scheduling invalid_target`, `opt_propagation off`, ...), `register` pinning, `volatile`
-locals, or odd temporaries. They are fine for byte-matching but should be replaced by natural source
-when we find the real shape (also better for the PC port).
+Some functions match only with compiler tricks the original developers did not write: `register`
+pinning, `volatile` locals, or odd temporaries. They are fine for byte-matching but should be replaced
+by natural source when we find the real shape (also better for the PC port).
+
+Compiler `#pragma`s are not aids (project decision, 2026-11-04): they are legitimate source controls and
+may be used anywhere. Rows below that mention pragmas are aids only for their other items.
 
 Each one carries a `MATCHING-AID:` comment. List them with:
 
