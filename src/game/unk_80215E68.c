@@ -121,11 +121,11 @@ u32 vf28__10MenuWidgetFv(void) { return 1; }
 
 u32 vf2C__10MenuWidgetFv(void) { return 1; }
 
-u8 vf08__10MenuWidgetFv(void *arg0) { return *(u8 *)((u8 *)arg0 + 8); }
+u8 vf08__14MenuWidgetBaseFv(void *arg0) { return *(u8 *)((u8 *)arg0 + 8); }
 
-u8 vf0C__10MenuWidgetFv(u8 *arg0) { return *arg0; }
+u8 vf0C__14MenuWidgetBaseFv(u8 *arg0) { return *arg0; }
 
-s32 vf10__10MenuWidgetFv(const void *arg0) {
+s32 vf10__14MenuWidgetBaseFv(const void *arg0) {
     s32 result = 0;
     if (*(const u8 *)arg0 != 0 && *(const s32 *)((const u8 *)arg0 + 4) == fn_802E4A10()) result = 1;
     return result;

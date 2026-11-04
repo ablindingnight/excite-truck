@@ -1171,9 +1171,9 @@ config.libs.append(
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/gamedo.cpp"),
-            Object(NonMatching, "game/setmenu.cpp"),
+            Object(Matching, "game/setmenu.cpp"),
             Object(NonMatching, "game/opsound.cpp"),
-            Object(NonMatching, "game/controls.cpp"),
+            Object(Matching, "game/controls.cpp"),
             Object(NonMatching, "game/mcdialog.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
             # uicar.cpp was built without loop optimisation: its unrolled stat/focus loops re-read memory each pass
