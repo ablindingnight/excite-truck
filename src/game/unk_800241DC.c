@@ -3,7 +3,10 @@
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
 
-int fn_800241DC(int arg0, int arg1, unsigned int arg2, unsigned int arg3, int (*arg4)()) {
+// A binary search (bsearch-shaped: key, base, count, element size, compare), library-style code: built with the
+// runtime flags and exceptions on (-Cpp_exceptions on), since the original object has an exception table entry
+// (extab 8 + extabindex 12 bytes). compare(key, element) < 0 searches below, > 0 above; element 0 is tried first.
+int fn_800241DC(int arg0, int arg1, unsigned int arg2, unsigned int arg3, int (*arg4)(int, int *)) {
     int *candidate;
     unsigned int low;
     unsigned int high;
@@ -11,7 +14,7 @@ int fn_800241DC(int arg0, int arg1, unsigned int arg2, unsigned int arg3, int (*
     int result;
     if (arg0 == 0 || arg1 == 0 || arg2 == 0 || arg3 == 0 || arg4 == 0)
         return 0;
-    result = arg4();
+    result = arg4(arg0, (int *)arg1);
     if (result == 0)
         return arg1;
     if (result < 0)
@@ -31,3 +34,4 @@ int fn_800241DC(int arg0, int arg1, unsigned int arg2, unsigned int arg3, int (*
     }
     return 0;
 }
+
