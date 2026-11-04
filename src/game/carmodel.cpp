@@ -471,8 +471,11 @@ extern "C" {
 
 void fn_801EC4A8(Gauge* g, const Frame* f) {
     if (g->bone) {
-        f32 v = g->max < *g->src ? g->max : *g->src;
-        v = v > g->min ? v : g->min;
+        f32 lo = g->min;
+        f32 hi = g->max;
+        f32 v = *g->src;
+        v = hi < v ? hi : v;
+        v = v > lo ? v : lo;
         int i;
         for (i = 0; i < g->count - 2; i++) {
             if (g->pairs[i + 1].val > v) {
