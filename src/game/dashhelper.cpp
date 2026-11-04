@@ -461,14 +461,8 @@ void fn_8000E3B4(int player) {
             fn_80010074(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
             break;
         case 2:
-            {
-                f32 w3 = fn_800108C8("000", 1.0f);
-                fn_80010074(-1, 0x12, "%d", 1.0f, x10 + w3, ty, row->a);
-            }
-            {
-                f32 w4 = fn_800108C8("000 ", 1.0f);
-                fn_80010074(-1, 0x11, "%s", 1.0f, x10 + w4, ty, row);
-            }
+            fn_80010074(-1, 0x12, "%d", 1.0f, x10 + fn_800108C8("000", 1.0f), ty, row->a);
+            fn_80010074(-1, 0x11, "%s", 1.0f, x10 + fn_800108C8("000 ", 1.0f), ty, row);
             break;
         case 3:
             sprintf(buf, "%d", row->a);
