@@ -1570,7 +1570,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
         k = (k > lbl_80563C20) ? k : lbl_80563C20;
         w = lbl_80563C20 + k * lbl_80563C2C;
-        f32 s = PSVECMag((const f32*)(c->car + 0x26B4)) * scale;
+        f32 s = PSVECMag((const f32*)(c->car + 0x26B4));
+        s *= scale;
         f32 value = lbl_80563CEC;
         s = (value < s) ? lbl_80563CEC : s;
         f32 bump = w * s;
