@@ -779,10 +779,10 @@ void SnowSystem::Frustum(void) {
     fn_801E88B4(&x, &y, &w, &h, view);
     f32 t = tan(half);
     tanHalf = t;
-    near = 0.3f + n;
     f32 s = f + n;
-    f32 b = -s * 0.1f - 2.0f * f * n;
+    f32 b = -0.1f * s - 2.0f * f * n;
     f32 c = n * (f * 0.005f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
+    near = 0.3f + n;
     far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
 }
 
@@ -947,10 +947,10 @@ void RainSystem::Frustum(void) {
     fn_801E88B4(&x, &y, &w, &h, view);
     f32 t = tan(half);
     tanHalf = t;
-    near = 1.0f + n;
     f32 s = f + n;
-    f32 b = -s * 0.5f - 2.0f * f * n;
+    f32 b = -0.5f * s - 2.0f * f * n;
     f32 c = n * (f * 0.125f) - 0.015f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
+    near = 1.0f + n;
     far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
 }
 

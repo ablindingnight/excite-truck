@@ -331,52 +331,46 @@ f32 fn_801931EC(f32 t, f32 len) {
 }
 
 void fn_8019321C(V2* out, const V2* in, const u8* m) {
-    f32 dz;
-    f32 dx = F32(m, 0x18);
-    dz = F32(m, 0x20);
+    V2 org;
+    V2 side;
     V2 dir;
-    dir.x = dx;
-    dir.y = dz;
-    f32 len = (f32)sqrt(dx * dx + dz * dz);
+    V2 r;
+    dir.x = F32(m, 0x18);
+    dir.y = F32(m, 0x20);
+    f32 len = (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
     len = 0.01f > len ? 0.01f : len;
     f32 inv = 1.0f / len;
-    V2 org;
-    org.x = F32(m, 0x24);
-    org.y = F32(m, 0x2C);
     dir.x *= inv;
     dir.y *= inv;
-    V2 side;
     side.x = dir.y;
     side.y = -dir.x;
-    V2 r;
-    r.x = dir.y * in->x + dir.x * in->y + org.x;
-    r.y = (f32)-in->x * dir.x + dir.y * in->y + org.y;
+    org.x = F32(m, 0x24);
+    org.y = F32(m, 0x2C);
+    r.x = side.x * in->x + dir.x * in->y + org.x;
+    r.y = side.y * in->x + dir.y * in->y + org.y;
     out->x = r.x;
     out->y = r.y;
 }
 
 void fn_8019330C(V2* out, const V2* in, const u8* m) {
-    f32 dz;
-    f32 dx = F32(m, 0x18);
-    dz = F32(m, 0x20);
+    V2 org;
+    V2 side;
     V2 dir;
-    dir.x = dx;
-    dir.y = dz;
-    f32 len = (f32)sqrt(dx * dx + dz * dz);
+    V2 rel;
+    dir.x = F32(m, 0x18);
+    dir.y = F32(m, 0x20);
+    f32 len = (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
     len = 0.01f > len ? 0.01f : len;
     f32 inv = 1.0f / len;
-    V2 org;
-    org.x = F32(m, 0x24);
-    org.y = F32(m, 0x2C);
     dir.x *= inv;
     dir.y *= inv;
-    V2 side;
     side.x = dir.y;
     side.y = -dir.x;
-    V2 rel;
+    org.x = F32(m, 0x24);
+    org.y = F32(m, 0x2C);
     rel.x = in->x - org.x;
     rel.y = in->y - org.y;
-    out->x = rel.x * dir.y + rel.y * (f32)-dir.x;
+    out->x = rel.x * side.x + rel.y * side.y;
     out->y = rel.x * dir.x + rel.y * dir.y;
 }
 
@@ -783,27 +777,21 @@ void fn_80194170(u8* d, f32 v) {
     fn_8018ADB4(CAR(d), F32(d, 0x240));
 }
 
+static inline s32 SignBit(f32 x) { return *(s32*)&x & 0x80000000; }
+static inline f32 ClampS(f32 x, f32 lo, f32 hi) {
+    x = hi < x ? hi : x;
+    return x > lo ? x : lo;
+}
 void fn_801941A8(u8* d, f32 v) {
-    f32 dv = v - F32(d, 0x23C);
-    dv = 0.2f < dv ? 0.2f : dv;
-    dv = dv > -0.2f ? dv : -0.2f;
-    f32 n = dv + F32(d, 0x23C);
-    f32 k = F32(d, 0x248);
-    F32(d, 0x23C) = n;
-    if (k < 2.0f) {
-        f32 b = F32(CAR(d), 0x25F0);
-        f32 a = n;
-        if ((*(s32*)&a & (s32)0x80000000) != (*(s32*)&b & (s32)0x80000000)) {
-            F32(d, 0x248) = k + 0.1f;
-        }
+    f32 dv = ClampS(v - F32(d, 0x23C), -0.2f, 0.2f);
+    F32(d, 0x23C) += dv;
+    if (F32(d, 0x248) < 2.0f && SignBit(F32(CAR(d), 0x25F0)) != SignBit(F32(d, 0x23C))) {
+        F32(d, 0x248) += 0.1f;
     }
     f32 g = Clamp01(F32(d, 0x248));
-    f32 s = F32(d, 0x23C) * (1.0f - g);
-    F32(d, 0x23C) = s;
-    s = 1.0f < s ? 1.0f : s;
-    s = s > -1.0f ? s : -1.0f;
-    F32(d, 0x23C) = s;
-    fn_8018ADAC(CAR(d), s);
+    F32(d, 0x23C) = F32(d, 0x23C) * (1.0f - g);
+    F32(d, 0x23C) = ClampS(F32(d, 0x23C), -1.0f, 1.0f);
+    fn_8018ADAC(CAR(d), F32(d, 0x23C));
 }
 
 void fn_801942B8(u8* d, f32 v) {
