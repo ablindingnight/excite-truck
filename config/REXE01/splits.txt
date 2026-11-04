@@ -3328,9 +3328,11 @@ game/unk_8020DE74.cpp:
 
 game/unk_8020F3B4.c:
 	.text       start:0x8020F3B4 end:0x802114F4
+	.sdata2     start:0x80563400 end:0x80563430
 
 game/uiapi.cpp:
 	.text       start:0x802115AC end:0x80215CF4
+	.sdata2     start:0x80563430 end:0x80563458
 
 game/unk_80215E68.c:
 	.text       start:0x80215E68 end:0x80216054

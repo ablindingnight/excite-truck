@@ -23,7 +23,6 @@ extern long lbl_8055B658;
 extern long __AXFXGetLfoSinTable_801769CC();
 extern long lbl_8055B674;
 extern long lbl_8033C970[4];
-extern const float lbl_80563400;
 extern void fn_802EC1C0(float vol);
 extern long fn_802EC0FC(void);
 extern void fn_802EC1E4();
@@ -486,7 +485,7 @@ void fn_802103B8(void) {
 void fn_802103BC(void) {
     struct VTable { void *pad[2]; void (*call)(void *, long); };
     struct Object { struct VTable *vtable; };
-    fn_802EC1C0(lbl_80563400);
+    fn_802EC1C0(0.0f);
     fn_802EC12C();
     fn_802EC1E4();
     if (lbl_8055EED4 != 0) {
@@ -702,8 +701,6 @@ typedef struct CourseVec2 {
 
 extern char lbl_8033C940[];
 extern char lbl_8055B680[6], lbl_8055B688[5], lbl_8055B690[6], lbl_8055B698[3], lbl_8055B69C[4], lbl_8055B6A0[8];
-extern const float lbl_80563400, lbl_80563404, lbl_80563408, lbl_8056340C, lbl_80563410, lbl_80563414;
-extern const float lbl_80563418, lbl_8056341C, lbl_80563420, lbl_80563424;
 
 #pragma push
 #pragma cplusplus on
@@ -753,8 +750,8 @@ extern "C" void fn_8021095C(void) {
     }
     fn_80230B5C(camera);
     fn_802C8638(camera);
-    fn_802C974C(lbl_80563404, lbl_80563408, lbl_8056340C);
-    fn_800109E4(0x7F000000, lbl_80563410, lbl_80563414, lbl_80563418, lbl_8056341C);
+    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     fn_80011A2C();
     if (lbl_8055EED4 != 0) {
         CourseVec2 col;
@@ -769,13 +766,13 @@ extern "C" void fn_8021095C(void) {
         long i;
 
         fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 0, COURSE_LAYOUT->FindPane(pool + 0xA0));
-        hilite = ((long)(lbl_80563420 * fn_80230EF4(1)) << 24) | 0xFFFF00;
-        col.x = lbl_80563400;
-        col.y = lbl_80563400;
-        step.x = lbl_80563400;
-        step.y = lbl_80563400;
-        cursor.x = lbl_80563400;
-        cursor.y = lbl_80563400;
+        hilite = ((long)(255.0f * fn_80230EF4(1)) << 24) | 0xFFFF00;
+        col.x = 0.0f;
+        col.y = 0.0f;
+        step.x = 0.0f;
+        step.y = 0.0f;
+        cursor.x = 0.0f;
+        cursor.y = 0.0f;
         name = COURSE_LAYOUT->FindText(lbl_8055B680);
         num = COURSE_LAYOUT->FindText(lbl_8055B688);
         next = COURSE_LAYOUT->FindText(lbl_8055B690);
@@ -819,7 +816,7 @@ extern "C" void fn_8021095C(void) {
             }
             memset(buf, 0, sizeof(buf));
             strncpy(buf, ((char **)lbl_804900AC.m_entries)[i], sizeof(buf) - 1);
-            while (strlen(buf) > 4 && fn_800108C8(buf, nameBox.size) > lbl_80563424) {
+            while (strlen(buf) > 4 && fn_800108C8(buf, nameBox.size) > 385.0f) {
                 buf[strlen(buf) - 1] = 0;
             }
             fn_80147230(&nameBox, lbl_8055B698, buf);
@@ -892,7 +889,6 @@ extern long lbl_8055B65C;
 extern long lbl_8055B674;
 extern unsigned char lbl_8055EEEC;
 extern unsigned char lbl_8055EEED;
-extern const float lbl_80563400;
 #pragma push
 #pragma cplusplus on
 extern "C" void fn_802112AC(void) {
@@ -943,7 +939,7 @@ extern "C" void fn_802113D8(void) {
         __AXDSPInitCallback_801769E0();
     }
     fn_80206444();
-    fn_80209190(lbl_8055EEF0, lbl_80563400);
+    fn_80209190(lbl_8055EEF0, 0.0f);
     lbl_8055EEE0 = minusTwo;
     lbl_8055EEE4 = zero;
     lbl_8055B65C = lbl_8055B658;
@@ -966,11 +962,10 @@ extern "C" void fn_802113D8(void) {
 #pragma cplusplus reset
 #pragma pop
 
-extern const float lbl_80563404;
 extern void fn_80206454(void);
 extern void fn_801769EC(void);
 void fn_802114C4(void) {
-    fn_80209190(lbl_8055EEF0, lbl_80563404);
+    fn_80209190(lbl_8055EEF0, 1.0f);
     fn_80206454();
     fn_801769EC();
 }

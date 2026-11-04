@@ -90,7 +90,6 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
 extern "C" s32 fn_80206430(void);
 extern "C" s32 fn_8022BAD0(s32, s32, s32, s32, float);
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
-extern const float lbl_80563450;
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
 extern "C" char *lbl_8055B6B0;
@@ -150,9 +149,6 @@ extern "C" int fn_802ECC10(void);
 extern "C" int lbl_8055EF14;
 extern "C" float lbl_8055EF10;
 extern "C" int lbl_8055EF40;
-extern "C" float lbl_80563434;
-extern "C" float lbl_80563440;
-extern "C" float lbl_80563444;
 extern "C" double lbl_80563448;
 
 // One button-sound slot: the sound bank plus four playing voices.
@@ -443,23 +439,15 @@ extern "C" void fn_80211F4C(void) { fn_80211D24(1); }
 extern "C" int fn_80211F54(void) { return lbl_8055EF40 == 0; }
 
 extern "C" void fn_80211F64(void) {
-    float temp_f0;
-    float var_f3;
-    int temp_r31;
-    temp_r31 = fn_802E2C20();
+    int now = fn_802E2C20();
     if (fn_802ECC10() == 0) {
-        var_f3 = lbl_80563444;
-        temp_f0 = lbl_80563440 * (float)(temp_r31 - lbl_8055EF14);
-        if (var_f3 < temp_f0) {
-            var_f3 = var_f3;
-        } else {
-            var_f3 = temp_f0;
-        }
-        lbl_8055EF10 = var_f3;
+        // frame time in seconds, capped at a quarter second
+        float dt = 0.001f * (float)(now - lbl_8055EF14);
+        lbl_8055EF10 = 0.25f < dt ? 0.25f : dt;
     } else {
-        lbl_8055EF10 = lbl_80563434;
+        lbl_8055EF10 = 0.0f;
     }
-    lbl_8055EF14 = temp_r31;
+    lbl_8055EF14 = now;
 }
 
 extern "C" void fn_80211FF0(void) {
@@ -1583,7 +1571,7 @@ extern "C" void fn_80219354(void);
 extern "C" void fn_80214A9C(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32, float))fn_802168CC)(temp, arg0, lbl_80563434);
+        ((s32 (*)(s32, s32, float))fn_802168CC)(temp, arg0, 0.0f);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D2A0);
     }
@@ -1594,7 +1582,7 @@ extern "C" char lbl_8033D2C0[];
 extern "C" void fn_80214AF0(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32, float))fn_802168D0)(temp, arg0, lbl_80563434);
+        ((s32 (*)(s32, s32, float))fn_802168D0)(temp, arg0, 0.0f);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D2C0);
     }
@@ -1952,7 +1940,7 @@ extern "C" void fn_80215500(void) {
 }
 
 extern "C" void fn_80215504(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), 0, *(s32 *)((char *)arg0 + 4), arg6, lbl_80563450);
+    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), 0, *(s32 *)((char *)arg0 + 4), arg6, 1.0f);
 }
 
 extern "C" void fn_80215544(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
