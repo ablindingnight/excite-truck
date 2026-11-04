@@ -167,7 +167,7 @@ static inline f32 FadeMin(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
 
-int fn_80216054(void) { return 1; }
+int vf14__10MenuWidgetFv(void) { return 1; }
 
 void fn_8021605C(WinRect* r, int color) {
     fn_802C3034(reinterpret_cast<gxCanvas*>(color));

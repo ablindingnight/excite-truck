@@ -115,15 +115,17 @@ void fn_80215FCC(void *arg0) {
     *(u32 *)((u8 *)arg0 + 0x10) ^= 1;
 }
 
-u32 fn_80215FDC(void) { return 1; }
+// MenuWidget's out-of-line virtuals (C++ class in the original menu unit; defined here under their mangled names so
+// the C++ units that derive from MenuWidget link against them).
+u32 vf28__10MenuWidgetFv(void) { return 1; }
 
-u32 fn_80215FE4(void) { return 1; }
+u32 vf2C__10MenuWidgetFv(void) { return 1; }
 
-u8 fn_80215FEC(void *arg0) { return *(u8 *)((u8 *)arg0 + 8); }
+u8 vf08__10MenuWidgetFv(void *arg0) { return *(u8 *)((u8 *)arg0 + 8); }
 
-u8 fn_80215FF4(u8 *arg0) { return *arg0; }
+u8 vf0C__10MenuWidgetFv(u8 *arg0) { return *arg0; }
 
-s32 fn_80215FFC(const void *arg0) {
+s32 vf10__10MenuWidgetFv(const void *arg0) {
     s32 result = 0;
     if (*(const u8 *)arg0 != 0 && *(const s32 *)((const u8 *)arg0 + 4) == fn_802E4A10()) result = 1;
     return result;

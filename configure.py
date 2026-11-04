@@ -1188,7 +1188,7 @@ config.libs.append(
             Object(NonMatching, "game/popwarn.cpp"),
             Object(NonMatching, "game/multievt.cpp"),
             Object(NonMatching, "game/modeltest.cpp"),
-            Object(NonMatching, "game/unitmenu.cpp", extra_cflags=["-opt nopropagation"]),
+            Object(Matching, "game/unitmenu.cpp", extra_cflags=["-opt nopropagation"]),
             Object(NonMatching, "game/profile.cpp"),
             Object(NonMatching, "game/garage.cpp"),
             Object(NonMatching, "game/minworld.cpp"),

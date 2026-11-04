@@ -172,7 +172,7 @@ public:
 char lbl_80498908[0x40];  // version text buffer
 
 // A menu value widget (the vptr follows the base data). Same layout as setmenu/unitmenu's copies; the base
-// virtuals are menu.cpp's fn_80215FEC..fn_80216054 / fn_80215FDC / fn_80215FE4.
+// virtuals are menu.cpp's vf08__10MenuWidgetFv..vf14__10MenuWidgetFv / vf28__10MenuWidgetFv / vf2C__10MenuWidgetFv.
 class MenuWidget {
 public:
     MenuWidget(void) {
