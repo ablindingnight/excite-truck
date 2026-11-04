@@ -1122,13 +1122,27 @@ struct MountView {
 // the line's frame (an average of two samples), then blend from one mount to the other over time.
 static inline f32 CamLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+// d += v * k. Returns d: chained calls reload through the returned reference, which the optimizer cannot forward
+// (the target's frsp right after each stfs).
+static inline KVec3& CamMad(KVec3& d, const f32* v, f32 k) {
+    d.x += v[0] * k;
+    d.y += v[1] * k;
+    d.z += v[2] * k;
+    return d;
+}
+// A vector built from three values: the arguments evaluate right to left, so z loads first.
+struct KV3 {
+    KV3(f32 ax, f32 ay, f32 az) {
+        x = ax;
+        y = ay;
+        z = az;
+    }
+    f32 x, y, z;
+};
+
 void fn_80268358(CamRec* c) {
-    f32 m[2][6] = {
-        {lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2],
-         lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]},
-        {lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2],
-         lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2]},
-    };
+    KV3 mv[4] = {KV3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), KV3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), KV3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), KV3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
+    f32 (*m)[6] = (f32(*)[6])mv;
     MountView out[2];
     f32 zero;
     f32 t;
@@ -1159,7 +1173,6 @@ void fn_80268358(CamRec* c) {
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
             p0 = (f32*)f.seg;
             p1 = *(f32**)(f.seg + 0x14);
-            hit = 0;
             x = CamLerp(p0[0], p1[0], f.t);
             z = CamLerp(p0[1], p1[1], f.t);
             KVec3 v;
@@ -1168,6 +1181,7 @@ void fn_80268358(CamRec* c) {
             v.y = lbl_80563C20;
             v.z = xz.z;
             KVec3 n;
+            hit = 0;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
             r->m[6] = f.dir[0];
@@ -1178,9 +1192,7 @@ void fn_80268358(CamRec* c) {
             PSVECNormalize(&r->m[0], &r->m[0]);
             PSVECCrossProduct(&r->m[6], &r->m[0], &r->m[3]);
             PSVECNormalize(&r->m[3], &r->m[3]);
-            r->t.x = v.x;
-            r->t.y = v.y;
-            r->t.z = v.z;
+            r->t = v;
             if (f.buf) {
                 delete[] f.buf;
             }
@@ -1209,12 +1221,7 @@ void fn_80268358(CamRec* c) {
             o->b.y += res2.y * half;
             o->b.z += res2.z * half;
         }
-        o->up.x += fr[0].m[3] * half;
-        o->up.y += fr[0].m[4] * half;
-        o->up.z += fr[0].m[5] * half;
-        o->up.x += fr[1].m[3] * half;
-        o->up.y += fr[1].m[4] * half;
-        o->up.z += fr[1].m[5] * half;
+        CamMad(CamMad(o->up, &fr[0].m[3], half), &fr[1].m[3], half);
     }
     t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
@@ -1225,18 +1232,9 @@ void fn_80268358(CamRec* c) {
     } else {
         kb = t / lbl_8055C4F4;
     }
-    KVec3 bl;
-    bl.x = CamLerp(out[0].b.x, out[1].b.x, ka);
-    bl.z = CamLerp(out[0].b.z, out[1].b.z, ka);
-    bl.y = CamLerp(out[0].b.y, out[1].b.y, ka);
-    KVec3 al;
-    al.x = CamLerp(out[0].a.x, out[1].a.x, kb);
-    al.y = CamLerp(out[0].a.y, out[1].a.y, kb);
-    KVec3 up;
-    al.z = CamLerp(out[0].a.z, out[1].a.z, kb);
-    up.x = CamLerp(out[0].up.x, out[1].up.x, ka);
-    up.y = CamLerp(out[0].up.y, out[1].up.y, ka);
-    up.z = CamLerp(out[0].up.z, out[1].up.z, ka);
+    KV3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
+    KV3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
+    KV3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
     PSVECNormalize(&up.x, &up.x);
     c->fov = CamLerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
