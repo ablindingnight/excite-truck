@@ -1487,6 +1487,21 @@ static inline void ApplyBlend(void) {
     }
 }
 
+static inline void ScaleV3(V3* out, const V3* v, f32 k) {
+    out->x = v->x * k;
+    out->y = v->y * k;
+    out->z = v->z * k;
+}
+
+static inline GXColor ScaleColor(const GXColor& c, f32 s) {
+    GXColor out;
+    out.r = (int)(s * c.r);
+    out.g = (int)(s * c.g);
+    out.b = (int)(s * c.b);
+    out.a = c.a;
+    return out;
+}
+
 void fn_802D0EEC(void) {
     if (lbl_8055FDB4) {
         return;
@@ -1554,15 +1569,10 @@ void fn_802D0EEC(void) {
         lbl_804C97D0.dirty = 0;
         GXColor w = fn_802CE9FC(0xFF, 0xFF, 0xFF, 0xFF);
         GXColor k = fn_802CE9FC(0, 0, 0, 0xFF);
-        f32 s = -1048576.0f;
-        GXInitLightPos(&lbl_804C97D0.obj, lbl_804C97D0.dir.x * s, lbl_804C97D0.dir.y * s, -(lbl_804C97D0.dir.z * s));
-        GXColor c;
-        f32 scalev = lbl_804C97D0.scale;
-        c.r = (int)(scalev * lbl_804C97D0.amb.r);
-        c.g = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.g);
-        c.b = (int)(lbl_804C97D0.scale * lbl_804C97D0.amb.b);
-        c.a = lbl_804C97D0.amb.a;
-        GXInitLightColor(&lbl_804C97D0.obj, c);
+        V3 p;
+        ScaleV3(&p, &lbl_804C97D0.dir, -1048576.0f);
+        GXInitLightPos(&lbl_804C97D0.obj, p.x, p.y, -p.z);
+        GXInitLightColor(&lbl_804C97D0.obj, ScaleColor(lbl_804C97D0.amb, lbl_804C97D0.scale));
         GXInitLightDistAttn(&lbl_804C97D0.obj, 1.0f, 1.0f, 0);
         GXLoadLightObjImm(&lbl_804C97D0.obj, 1);
         GXSetChanMatColor(0, w);
@@ -1639,15 +1649,6 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32
     d.z *= inv;
     GXInitSpecularDirHA(l, cam->x, cam->y, -cam->z, d.x, d.y, -d.z);
     GXInitLightAttn(l, 0.0f, 0.0f, 1.0f, radius / 2.0f, 0.0f, 1.0f - radius / 2.0f);
-}
-
-static inline GXColor ScaleColor(const GXColor& c, f32 s) {
-    GXColor out;
-    out.r = (int)(s * c.r);
-    out.g = (int)(s * c.g);
-    out.b = (int)(s * c.b);
-    out.a = c.a;
-    return out;
 }
 
 void fn_802D18E8(void) {
