@@ -3,7 +3,7 @@
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
 #include "game/common.h"
-#include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
 #include "macros.h"
 #include "game/menu.h"
 #include "game/logomover.h"
