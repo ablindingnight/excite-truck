@@ -1130,9 +1130,13 @@ void fn_80268358(CamRec* c) {
          lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2]},
     };
     MountView out[2];
-    f32 zero = lbl_80563C20;
+    f32 zero;
+    f32 t;
     f32 half = lbl_80563C6C;
+    zero = lbl_80563C20;
     for (int i = 0; i < 2; i++) {
+        int j;
+        int k;
         MountView* o = &out[i];
         o->a.x = zero;
         o->a.y = zero;
@@ -1144,22 +1148,28 @@ void fn_80268358(CamRec* c) {
         o->up.y = zero;
         o->up.z = zero;
         KFrame fr[2];
-        for (int j = 0; j < 2; j++) {
+        for (j = 0; j < 2; j++) {
+            f32* p1;
+            s32 hit;
+            f32* p0;
+            f32 z;
+            f32 x;
+            KFrame* r;
             IdealFollower f;
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
-            f32* p0 = (f32*)f.seg;
-            f32* p1 = *(f32**)(f.seg + 0x14);
-            s32 hit = 0;
-            f32 x = CamLerp(p0[0], p1[0], f.t);
-            f32 z = CamLerp(p0[1], p1[1], f.t);
-            CamXZ xz(x, z);
+            p0 = (f32*)f.seg;
+            p1 = *(f32**)(f.seg + 0x14);
+            hit = 0;
+            x = CamLerp(p0[0], p1[0], f.t);
+            z = CamLerp(p0[1], p1[1], f.t);
             KVec3 v;
+            CamXZ xz(x, z);
             v.x = xz.x;
             v.y = lbl_80563C20;
             v.z = xz.z;
             KVec3 n;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
-            KFrame* r = &fr[j];
+            r = &fr[j];
             r->m[6] = f.dir[0];
             r->m[7] = lbl_80563C20;
             r->m[8] = f.dir[1];
@@ -1189,7 +1199,7 @@ void fn_80268358(CamRec* c) {
             o->a.z += res.z * half;
         }
         KVec3 in2 = *(KVec3*)&m[i][3];
-        for (int k = 0; k < 2; k++) {
+        for (k = 0; k < 2; k++) {
             KVec3 res2;
             KMulVec(&res2, &in2, &fr[k]);
             res2.x += fr[k].t.x;
@@ -1206,7 +1216,7 @@ void fn_80268358(CamRec* c) {
         o->up.y += fr[1].m[4] * half;
         o->up.z += fr[1].m[5] * half;
     }
-    f32 t = lbl_8055E3C8 - c->mount.start;
+    t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
     ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
@@ -1222,8 +1232,8 @@ void fn_80268358(CamRec* c) {
     KVec3 al;
     al.x = CamLerp(out[0].a.x, out[1].a.x, kb);
     al.y = CamLerp(out[0].a.y, out[1].a.y, kb);
-    al.z = CamLerp(out[0].a.z, out[1].a.z, kb);
     KVec3 up;
+    al.z = CamLerp(out[0].a.z, out[1].a.z, kb);
     up.x = CamLerp(out[0].up.x, out[1].up.x, ka);
     up.y = CamLerp(out[0].up.y, out[1].up.y, ka);
     up.z = CamLerp(out[0].up.z, out[1].up.z, ka);

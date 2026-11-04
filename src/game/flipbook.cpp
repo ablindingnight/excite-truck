@@ -114,32 +114,38 @@ FlipBook* lbl_8055F788;
 extern "C" {
 
 void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 v1, f32 v2) {
-    const CamMtx* m = fn_802C86DC();
+    f32 sx;
+    f32 sy;
+    const CamMtx* m;
+    f32 w;
+    int i;
+    f32 sz;
     V3 d;
     f32 uv[4][2];
+    m = fn_802C86DC();
     FlipVert v[4];
     d.x = m->right.x * -size;
     d.y = m->right.y * -size;
     d.z = m->right.z * -size;
-    f32 sx = d.x + m->up.x * size;
-    f32 sy = d.y + m->up.y * size;
-    f32 sz = d.z + m->up.z * size;
+    sx = d.x + m->up.x * size;
+    sy = d.y + m->up.y * size;
+    sz = d.z + m->up.z * size;
     v[0].pos.x = p->x + sx;
     v[0].pos.y = p->y + sy;
     v[0].pos.z = p->z + sz;
     v[2].pos.x = p->x + sx * -1.0f;
-    v[2].pos.y = p->y + sy * -1.0f;
+    v[2].pos.y = p->y + -1.0f * sy;
     v[2].pos.z = p->z + sz * -1.0f;
-    f32 w = 2.0f * size;
-    d.x = sx + m->right.x * w;
+    w = 2.0f * size;
+    d.x = sx + w * m->right.x;
     d.y = sy + w * m->right.y;
     d.z = sz + m->right.z * w;
     v[1].pos.x = p->x + d.x;
     v[1].pos.y = p->y + d.y;
     v[1].pos.z = p->z + d.z;
-    v[3].pos.x = p->x + d.x * -1.0f;
-    v[3].pos.y = p->y + d.y * -1.0f;
-    v[3].pos.z = p->z + d.z * -1.0f;
+    v[3].pos.x = p->x + -1.0f * d.x;
+    v[3].pos.y = p->y + -d.y * 1.0f;
+    v[3].pos.z = p->z + -1.0f * d.z;
     uv[0][0] = u1;
     uv[0][1] = v1;
     uv[1][0] = u2;
@@ -148,7 +154,7 @@ void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 
     uv[2][1] = v2;
     uv[3][0] = u1;
     uv[3][1] = v2;
-    for (int i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++) {
         v[i].color = color;
         v[i].u = uv[i][0];
         v[i].v = uv[i][1];

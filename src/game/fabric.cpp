@@ -358,14 +358,17 @@ void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
 
 void fn_801F5508(Fabric* f) {
     Stick* s;
-    int n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
+    int n;
+    n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
     s = new ("fabric sticks") Stick[n];
-    int k = 0;
-    int r;
     int c;
+    int r;
+    int k;
+    k = 0;
     for (r = 0; r < f->rows; r++) {
         for (c = 1; c < f->cols; c++) {
-            int b = r * f->cols + c;
+            int b;
+            b = r * f->cols + c;
             int a = b - 1;
             s[k].a = a;
             s[k].b = b;
@@ -375,8 +378,9 @@ void fn_801F5508(Fabric* f) {
     }
     for (c = 0; c < f->cols; c++) {
         for (r = 1; r < f->rows; r++) {
+            int b;
             int a = c + (r - 1) * f->cols;
-            int b = c + r * f->cols;
+            b = c + r * f->cols;
             s[k].a = a;
             s[k].b = b;
             s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
