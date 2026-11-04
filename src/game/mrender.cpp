@@ -651,8 +651,9 @@ void fn_802C974C(f32 near, f32 far, f32 fov) {
     lbl_8055FC40 = fov;
     lbl_804C144C.fov = fov;
     if (!is2D || lbl_8055FC75) {
-        if ((f32)__fabs(lbl_8055D020 - 1.0f) > lbl_80558DC4[0]) {
-            fov = 2.0f * (f32)atan((f32)tan(0.5f * fov) / lbl_8055D020);
+        if (!((f32)__fabs(lbl_8055D020 - 1.0f) <= lbl_80558DC4[0])) {
+            f32 q = (f32)tan(0.5f * fov) / lbl_8055D020;
+            fov = 2.0f * (f32)atan(q);
         }
     }
     lbl_8055FC4C = fov;
@@ -881,5 +882,4 @@ void fn_802CA0A0(Flare* f) { f->Done(); }
 
 }  // extern "C"
 
-// NonMatching: fn_802C83CC (stfsu addressing), fn_802C8E70 and Flare::Draw (register numbering) and
-// fn_802C974C (the aspect check branches through mfcr in ours) still differ.
+// NonMatching: fn_802C83CC (stfsu addressing), fn_802C8E70 and Flare::Draw (register numbering) still differ.
