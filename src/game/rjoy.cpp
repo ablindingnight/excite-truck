@@ -441,10 +441,12 @@ void fn_802E830C(s32* m) {
 }
 
 struct RemoteOut {
-    f32 v[8];     // offset 0x0
-    u8 b[0x20];   // offset 0x20
-    u32 w[8];     // offset 0x40
-    u8 isExt;     // offset 0x60
+    f32 v0, v1, v2, v3, v4, v5, v6, v7;  // offset 0x0
+    u8 b[0x20];                          // offset 0x20
+    u32 w0;                              // offset 0x40
+    u32 w[6];                            // offset 0x44
+    u32 w7;                              // offset 0x5C
+    u8 isExt;                            // offset 0x60
 };
 
 u8 fn_802E8364(RemoteOut* out, s32 chan) {
