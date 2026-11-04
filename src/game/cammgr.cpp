@@ -1402,6 +1402,12 @@ extern const f32 lbl_80563CE8;
 extern const f32 lbl_80563CEC;
 extern const f32 lbl_80563CF0;  // smallest bump
 
+// Camera rumble target for a car speed: rumble per speed, capped at 1.
+static inline f32 RumbleForSpeed(f32 speed) {
+    f32 r = lbl_80563CBC * speed;
+    return (lbl_80563C2C < r) ? lbl_80563C2C : r;
+}
+
 // Runs camera type c->mode for one frame: follows the car's frame, flags cuts (a mode change other than
 // between 4 and 25, or a new car), smooths the rumble, dispatches on the type and finally arms the hit
 // shake from the car's impact speed. Sets *own for types that fill the sound pose themselves.
@@ -1436,8 +1442,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
     c->eye.v[1] = c->carFrame.pos.v[1];
     c->eye.v[2] = c->carFrame.pos.v[2];
     if (!fn_801769F8()) {
-        f32 r = F32(c->car, 0x25D4) * lbl_80563CBC;
-        r = (lbl_80563C2C < r) ? lbl_80563C2C : r;
+        f32 r = RumbleForSpeed(F32(c->car, 0x25D4));
         if (!c->b138 && !c->b139) {
             c->f13C = c->f13C + lbl_80563CA0 * (r - c->f13C);
         } else {
@@ -1666,10 +1671,7 @@ void fn_8026A394(u8* car) {
         if (c->car == car) {
             c->b139 = 1;
             c->b138 = 1;
-            f32 speed = F32(c->car, 0x25D4);
-            f32 v = lbl_80563CBC * speed;
-            f32 m = lbl_80563C2C;
-            c->f13C = m < v ? m : v;
+            c->f13C = RumbleForSpeed(F32(c->car, 0x25D4));
             c->f154 = lbl_80563C20;
             c->f158 = lbl_80563C20;
             c->prev.pose = c->pose;
