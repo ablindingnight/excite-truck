@@ -45,6 +45,7 @@ struct gxStamp {
     u8* runs;         // offset 0x818
 };
 
+static inline s8 gxFmt(const gxCanvas* c) { return c->fmt; }
 static inline int gxIs16(s8 fmt) { return fmt != 5 && fmt != 6; }
 static inline int gxBpp(s8 fmt) { return fmt == 5 ? 4 : 2; }
 
@@ -386,7 +387,7 @@ void fn_802C3754(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     } else if (src->fmt == 5 && gxIs16(dst->fmt)) {
         fn_802C3F00(src, x0, y0, x1, y1, dst, dx, dy);
     } else {
-        fn_802E317C("unsupported copy (%d -> %d)", src->fmt, dst->fmt);
+        fn_802E317C("unsupported copy (%d -> %d)", gxFmt(src), gxFmt(dst));
     }
 }
 
@@ -398,7 +399,7 @@ void fn_802C3850(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     } else if (src->fmt == 5 && gxIs16(dst->fmt)) {
         fn_802C4388(src, x0, y0, x1, y1, dst, dx, dy);
     } else {
-        fn_802E317C("unsupported alpha blit (%d -> %d)", src->fmt, dst->fmt);
+        fn_802E317C("unsupported alpha blit (%d -> %d)", gxFmt(src), gxFmt(dst));
     }
 }
 
