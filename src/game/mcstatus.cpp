@@ -122,10 +122,10 @@ void MemCardDialogBg::Unload(void) {
 // The "Accept" hint at (x, y): the A button art when loaded, else "A - Accept".
 static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
     if (bg->image2) {
-        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, "Accept", 1.0f)), 3.0f + y, 0.0f);
-        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, 0.0f, 0.5f, 1.0f, "Accept");
+        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, "Accept", 1.0f)), 3.0f + y, lbl_80563830);
+        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, "Accept");
     } else {
-        fn_802337A0(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, 0.0f, 0.5f, 1.0f, "A");
+        fn_802337A0(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, lbl_80563830, 0.5f, 1.0f, "A");
     }
 }
 
@@ -148,7 +148,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         f32 x0 = -1.0f * lbl_8055FB9C * 0.5f - 1.0f;
         f32 y0 = 1.0f + lbl_8055FBA0 * 0.5f;
         if (bg->image) {
-            fn_802C5320(bg->image, 0, x0, y0, 0.0f, w, h);
+            fn_802C5320(bg->image, 0, x0, y0, lbl_80563830, w, h);
         } else {
             fn_802C92D0();
             fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
@@ -158,8 +158,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         const char* msg = cfg->text;
         f32 y = 145.0f;
         if (strlen(title)) {
-            fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
-            fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, 0.0f, 1.0f);
+            fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+            fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
         }
         y -= 40.0f;
         strcpy(text, msg);
@@ -190,8 +190,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             } else {
                 brk = &p[i] - 1;
             }
-            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, 0.0f, 1.0f);
-            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, 0.0f, 1.0f);
+            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
+            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
             if (!keep) {
                 p = brk + 1;
             } else {
@@ -203,14 +203,14 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         y = -70.0f;
         for (int i = 0; i < cfg->count; i++) {
             f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(3.0f * (f32)fn_802E2C20() / 1000.0f));
-            fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
+            fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             u32 color;
             if (sel == i) {
                 color = ((int)pulse << 24) | 0xFFD03F;
             } else {
                 color = 0xC8646464;
             }
-            fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, 0.0f, 1.0f);
+            fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
         DrawAccept(bg, 155.0f, -140.0f);
@@ -267,7 +267,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     f32 x0 = -1.0f * lbl_8055FB9C * 0.5f - 1.0f;
     f32 y0 = 1.0f + lbl_8055FBA0 * 0.5f;
     if (bg->image) {
-        fn_802C5320(bg->image, 0, x0, y0, 0.0f, w, h);
+        fn_802C5320(bg->image, 0, x0, y0, lbl_80563830, w, h);
     } else {
         fn_802C92D0();
         fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
@@ -277,8 +277,8 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     const char* msg = m->text;
     f32 y = 145.0f;
     if (strlen(title)) {
-        fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, 0.0f, 1.0f);
-        fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, 0.0f, 1.0f);
+        fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+        fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
     }
     y -= 40.0f;
     strcpy(text, msg);
@@ -309,8 +309,8 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
         } else {
             brk = &p[i] - 1;
         }
-        fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, 0.0f, 1.0f);
-        fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, 0.0f, 1.0f);
+        fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
+        fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
         if (!keep) {
             p = brk + 1;
         } else {
@@ -566,21 +566,21 @@ void MemBar::Draw(void) {
         sy = (sy + 0.5f * fh) - 0.5f * ah;
         f32 fill = total * frac;
         if (fill < lw) {
-            fn_80235758(art, 3, sx, sy, fill, ah, 0.0f, 0.0f, fill / lw, 1.0f, -1);
+            fn_80235758(art, 3, sx, sy, fill, ah, lbl_80563830, lbl_80563830, fill / lw, 1.0f, -1);
         } else if (fill < lw + mid) {
-            fn_802353F4(art, 3, sx, sy, 0.0f);
-            fn_80235758(art, 4, sx + lw, sy, fill - lw, ah, 0.0f, 0.0f, (fill - lw) / mid, 1.0f, -1);
+            fn_802353F4(art, 3, sx, sy, lbl_80563830);
+            fn_80235758(art, 4, sx + lw, sy, fill - lw, ah, lbl_80563830, lbl_80563830, (fill - lw) / mid, 1.0f, -1);
         } else {
-            fn_802353F4(art, 3, sx, sy, 0.0f);
-            fn_802354A0(art, 4, sx + lw, sy, 0.0f, mid, ah, -1);
-            fn_80235758(art, 5, mid + (sx + lw), sy, (fill - lw) - mid, ah, 0.0f, 0.0f, ((fill - lw) - mid) / rw, 1.0f,
+            fn_802353F4(art, 3, sx, sy, lbl_80563830);
+            fn_802354A0(art, 4, sx + lw, sy, lbl_80563830, mid, ah, -1);
+            fn_80235758(art, 5, mid + (sx + lw), sy, (fill - lw) - mid, ah, lbl_80563830, lbl_80563830, ((fill - lw) - mid) / rw, 1.0f,
                         -1);
         }
-        fn_802353F4(art, 0, sx, sy, 0.0f);
-        fn_802354A0(art, 1, sx + lw, sy, 0.0f, mid, ah, -1);
-        fn_802353F4(art, 2, mid + (sx + lw), sy, 0.0f);
+        fn_802353F4(art, 0, sx, sy, lbl_80563830);
+        fn_802354A0(art, 1, sx + lw, sy, lbl_80563830, mid, ah, -1);
+        fn_802353F4(art, 2, mid + (sx + lw), sy, lbl_80563830);
     } else {
-        fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, 0.0f);
+        fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);
     }
 }
 
@@ -608,3 +608,5 @@ void fn_8024683C(void) {
 }
 
 }  // extern "C"
+
+const f32 lbl_80563830 = 0.0f;  // the dialog fade start (declared in mcdialog.h; menusel reads it too)
