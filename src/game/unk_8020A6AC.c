@@ -11,7 +11,6 @@ extern int fn_802090CC(void), fn_802E2C20(void);
 extern void fn_802E625C(int);
 extern void fn_802E61EC(void *, float), fn_802E620C(void *, float), fn_802E6234(void *, float), fn_802E6238(void *, float), fn_802E623C(void *, float), fn_802E622C(void *, float), fn_802E6240(void *, int);
 extern float lbl_8055B590, lbl_8055B594, lbl_80558DC4;
-extern const float lbl_805632B8;
 extern int lbl_8055EDF8;
 extern unsigned int lbl_8055EE00;
 
@@ -28,7 +27,6 @@ extern int fn_8012A364(void *, void *);
 typedef struct { void **vtable; } Unk8012A570;
     extern void *fn_8020A860();
   extern int fn_80208E90(void *, int);
-  extern const float lbl_805632B0, lbl_805632B4;
   extern float lbl_8055B598;
 
   extern void *lbl_8055EE04;
@@ -129,7 +127,7 @@ typedef struct VoiceSoundMixer {
 } VoiceSoundMixer;
 
 int VoiceSoundMixer_vf18(VoiceSoundMixer *self) {
-    lbl_8055B598 = fn_80019B60() ? lbl_805632B0 : lbl_805632B4;
+    lbl_8055B598 = fn_80019B60() ? 0.0f : 1.0f;
     lbl_8055EE04 = self;
     self->m_voices = (void **)fn_8012850C(0x800, lbl_8033C37C);
     memset(self->m_voices, 0, 0x800);
@@ -208,7 +206,6 @@ extern const char lbl_8033C3C0[];
 extern const char lbl_8055B5A0[];
 extern const char lbl_8055B5A8[];
 extern const char lbl_8055B5B0[];
-extern const float lbl_805632B4;
 extern void *fn_80131808(const char *);
 extern void fn_80131818(void *);
 extern void fn_802E58B8(int);
@@ -253,7 +250,7 @@ extern "C" void VoiceSoundMixer_vf2C(int unused, int arg1) {
                         break;
                     }
                 }
-                *(float *)(entry + 0x20) = item->GetValue("volume", lbl_805632B4);
+                *(float *)(entry + 0x20) = item->GetValue("volume", 1.0f);
             }
         }
         fn_80131818(list);
@@ -285,7 +282,7 @@ void VoiceSoundMixer_vf20(void *arg0) {
  now=fn_802E2C20();
  lbl_8055EE00=now-(*(int *)((char *)(arg0)+(8)));
  if(lbl_8055EE00>200U) lbl_8055EE00=200;
- high=lbl_805632B4; low=lbl_805632B0;
+ high=1.0f; low=0.0f;
  (*(int *)((char *)(arg0)+(8)))=now;
  for(i=0;i<512;i++) {
  p=(*(void ** *)((char *)(arg0)+(4)))[i];
@@ -296,19 +293,19 @@ void VoiceSoundMixer_vf20(void *arg0) {
  handle=(*(void * *)((char *)(p)+(8)));
  if(handle) {
  v=(*(float *)((char *)(p)+(0x1c)))*(*(float *)((char *)((*(void * *)((char *)(p)+(0x18))))+(0x20)));
- if((*(unsigned char *)((char *)(p)+(0x3e)))) volume=lbl_805632B0;
+ if((*(unsigned char *)((char *)(p)+(0x3e)))) volume=0.0f;
  else {if(!(*(unsigned char *)((char *)(p)+(0x3c)))) v*=lbl_8055B590;volume=lbl_8055B598*v;}
  if((*(void * *)((char *)(p)+(0xc)))) {
  x=high+-(*(float *)((char *)(p)+(0x20)));
  if(high<x)x=high;
  x=x>low?x:low;
  ((void (*)(void *,float))fn_802E61E4)(handle,volume*x);
- fn_802E61EC((*(void * *)((char *)(p)+(8))),lbl_805632B8);
+ fn_802E61EC((*(void * *)((char *)(p)+(8))),(-1.0f));
  x=high+(*(float *)((char *)(p)+(0x20)));
  if(high<x)x=high;
  x=x>low?x:low;
  ((void (*)(void *,float))fn_802E61E4)((*(void * *)((char *)(p)+(0xc))),volume*x);
- fn_802E61EC((*(void * *)((char *)(p)+(0xc))),lbl_805632B4);
+ fn_802E61EC((*(void * *)((char *)(p)+(0xc))),1.0f);
  }else{
  ((void (*)(void *,float))fn_802E61E4)(handle,volume);
  fn_802E61EC((*(void * *)((char *)(p)+(8))),(*(float *)((char *)(p)+(0x20))));
@@ -369,7 +366,6 @@ extern char lbl_8033C4A0[];
 extern char lbl_8033C4C8[];
 extern char lbl_8055B5B8[8];
 extern char lbl_8055B5C0[5];
-extern const float lbl_805632BC, lbl_805632C0, lbl_805632C4;
 extern void *fn_802E5AE8(void *);
 extern void *fn_8020A6AC(void *);
 extern double fn_802E6040(void *);
@@ -400,7 +396,7 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
     float length;
 
     voice->vtable = (void **)lbl_8033C3F4;
-    *(float *)((char *)voice + 0x48) = lbl_805632B0;
+    *(float *)((char *)voice + 0x48) = 0.0f;
     voice->slot = slot;
     voice->unk44 = 0;
     voice->state = 3;
@@ -452,14 +448,14 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
     voice->sample = (char *)fn_8020A6AC(name);
     length = fn_802E6040(voice->stream0);
     *(float *)((char *)voice + 0x48) = length;
-    *(unsigned long *)((char *)voice + 0x4C) = lbl_805632BC * (lbl_805632C0 + lbl_805632C4 * length);
-    voice->pan = lbl_805632B0;
-    voice->volume = lbl_805632B0;
-    voice->param24 = lbl_805632B4;
-    voice->param28 = lbl_805632B4;
-    voice->param2C = lbl_805632B0;
-    voice->param30 = lbl_805632B0;
-    voice->param34 = lbl_805632B0;
+    *(unsigned long *)((char *)voice + 0x4C) = 1000.0f * (0.1f + 1.02f * length);
+    voice->pan = 0.0f;
+    voice->volume = 0.0f;
+    voice->param24 = 1.0f;
+    voice->param28 = 1.0f;
+    voice->param2C = 0.0f;
+    voice->param30 = 0.0f;
+    voice->param34 = 0.0f;
     voice->param38 = 0;
 }
 
@@ -609,21 +605,21 @@ static inline void MixerVoice_Apply(MixerVoiceData *voice) {
 
     v = voice->volume * *(float *)(voice->sample + 0x20);
     if (voice->muted) {
-        gain = lbl_805632B0;
+        gain = 0.0f;
     } else {
         gain = lbl_8055B598 * (voice->unscaled ? v : v * lbl_8055B590);
     }
     if (voice->handle1 != 0) {
-        side = lbl_805632B4 + -voice->pan;
-        side = lbl_805632B4 < side ? lbl_805632B4 : side;
-        side = side > lbl_805632B0 ? side : lbl_805632B0;
+        side = 1.0f + -voice->pan;
+        side = 1.0f < side ? 1.0f : side;
+        side = side > 0.0f ? side : 0.0f;
         fn_802E61E4(voice->handle0, gain * side);
-        fn_802E61EC(voice->handle0, lbl_805632B8);
-        side = lbl_805632B4 + voice->pan;
-        side = lbl_805632B4 < side ? lbl_805632B4 : side;
-        side = side > lbl_805632B0 ? side : lbl_805632B0;
+        fn_802E61EC(voice->handle0, (-1.0f));
+        side = 1.0f + voice->pan;
+        side = 1.0f < side ? 1.0f : side;
+        side = side > 0.0f ? side : 0.0f;
         fn_802E61E4(voice->handle1, gain * side);
-        fn_802E61EC(voice->handle1, lbl_805632B4);
+        fn_802E61EC(voice->handle1, 1.0f);
     } else {
         fn_802E61E4(voice->handle0, gain);
         fn_802E61EC(voice->handle0, voice->pan);
@@ -690,7 +686,6 @@ int fn_8020B874(void *object, void *name) {
 
 extern void fn_802E61E4(void *, float);
 extern int lbl_8055EDFC;
-extern const float lbl_805632B0;
 void fn_8020B908(void *arg0) {
     void *p;
     if (*((unsigned char *)arg0 + 0x3E) == 0 && *(int *)((char *)arg0 + 4) != 3) {
@@ -715,10 +710,10 @@ void fn_8020B908(void *arg0) {
         }
         p = *(void **)((char *)arg0 + 8);
         if (p != 0)
-            fn_802E61E4(p, lbl_805632B0);
+            fn_802E61E4(p, 0.0f);
         p = *(void **)((char *)arg0 + 0xC);
         if (p != 0)
-            fn_802E61E4(p, lbl_805632B0);
+            fn_802E61E4(p, 0.0f);
     }
 }
 
@@ -790,7 +785,6 @@ extern void *memset(void *, int, unsigned int);
 extern char lbl_8033C388[];
 extern char lbl_8033C37C[];
 extern float lbl_8055B598;
-extern const float lbl_805632B0, lbl_805632B4;
 extern void *lbl_8055EE04;
 extern int lbl_8055EE0C;
 extern void *lbl_8055EE10;

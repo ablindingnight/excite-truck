@@ -3287,6 +3287,7 @@ game/musicplr.cpp:
 
 game/unk_8020A6AC.c:
 	.text       start:0x8020A6AC end:0x8020BCB8
+	.sdata2     start:0x805632B0 end:0x805632C8
 
 game/unk_8020BCB8.c:
 	.text       start:0x8020BCB8 end:0x8020BCE4
@@ -3821,6 +3822,7 @@ game/racerslot.cpp:
 	.text       start:0x8026A600 end:0x8026B118
 	.ctors      start:0x802ED488 end:0x802ED48C
 	.sbss       start:0x8055F4B0 end:0x8055F4B8
+	.sdata2     start:0x80563D08 end:0x80563D68
 
 game/jumpcam.cpp:
 	.text       start:0x8026B118 end:0x8026B844
