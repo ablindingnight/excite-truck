@@ -1482,8 +1482,8 @@ static inline void ApplyBlend(void) {
         GXSetBlendMode(0, 0, 0, 5);
     } else {
         int hi = lbl_8055FD86 >> 8;
-        int d = fn_802D0EC8(lbl_8055FD86 & 0xFF);
-        GXSetBlendMode(1, fn_802D0EC8(hi), d, 5);
+        int lo = lbl_8055FD86 & 0xFF;
+        GXSetBlendMode(1, fn_802D0EC8(hi), fn_802D0EC8(lo), 5);
     }
 }
 
