@@ -952,7 +952,7 @@ void PhysTaskDumpCars(void) {
     const char* dump[] = {"PhysTaskDumpCars: %2d - (%3.2f, %3.2f, %3.2f) tri %d"};
 }
 
-void vf24__9RigidBodyFv(Phob* p) {}  // RigidBody::vf24 (empty; C name = mangled name)
+void vf24__10CollVolumeFv(Phob* p) {}  // CollVolume::vf24 (empty; in every collision vtable; C name = mangled name)
 
 PhysStats* fn_80178C90(void) { return &lbl_804305C0; }
 
@@ -1125,7 +1125,7 @@ void fn_80179140(void) {
     }
 }
 
-void vf14__9RigidBodyFv(Phob* p) {}  // RigidBody::vf14 (empty; C name = mangled name)
+void vf14__10CollVolumeFv(Phob* p) {}  // CollVolume::vf14 (empty; in every collision vtable; C name = mangled name)
 
 void fn_801791A8(void) {
     int i;

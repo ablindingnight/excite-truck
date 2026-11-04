@@ -215,9 +215,7 @@ public:
     virtual void Reset(void);
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
-    virtual void vf14(void);  // RigidBody overrides these (phob.cpp), the vtable points at them
-    virtual void vf18(void);
-    virtual void vf24(void);
+    virtual void vf18(void);  // RigidBody overrides these three (vf14/vf24 are CollVolume's, phob.cpp)
     virtual void vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
