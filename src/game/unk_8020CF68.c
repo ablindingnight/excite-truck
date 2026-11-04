@@ -7,8 +7,6 @@ extern int lbl_8055EE74, lbl_8055EE78, lbl_8055EEA0;
 extern void *lbl_8055EE7C, *lbl_8055EE80;
 extern char lbl_8055EE94;
 extern float lbl_8055EE84, lbl_8055EE88, lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
-extern const float lbl_8056331C, lbl_80563320;
-extern const float lbl_8056332C;
 __declspec(section ".data") extern float lbl_80558DC4;
 extern const double lbl_80563360;
 extern int fn_802E2C20(void);
@@ -39,7 +37,6 @@ int fn_8020CF68(void) {
     return fn_802104D0();
 }
 
-extern const float lbl_80563318;
 extern void fn_8020A5F8(float);
 extern void fn_8020C908(float);
 extern void fn_80209030(float);
@@ -49,7 +46,6 @@ extern void fn_8000C730(void);
 extern void fn_8020D0CC(int);
 extern int lbl_8055EE78;
 extern float lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
-extern const float lbl_80563320;
 extern char lbl_8033C690[], lbl_8033C6A0[];
 extern void fn_8000C6E4(void);
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -60,11 +56,11 @@ extern void fn_8000C6E4(void);
 void fn_8020CF6C(int arg0) {
     switch (arg0) {
     case 0:
-        lbl_8055EE8C = MIN(lbl_80563318 + lbl_8055EE8C, lbl_8056331C);
+        lbl_8055EE8C = MIN(0.1f + lbl_8055EE8C, 1.0f);
         fn_8020C908(lbl_8055EE8C);
         break;
     case 1:
-        lbl_8055EE90 = MIN(lbl_80563318 + lbl_8055EE90, lbl_8056331C);
+        lbl_8055EE90 = MIN(0.1f + lbl_8055EE90, 1.0f);
         break;
     case 4:
         fn_8000C6E4();
@@ -75,11 +71,11 @@ void fn_8020CF6C(int arg0) {
 void fn_8020CFEC(int arg0) {
     switch (arg0) {
     case 0:
-        lbl_8055EE8C = MAX(lbl_8055EE8C - lbl_80563318, lbl_80563320);
+        lbl_8055EE8C = MAX(lbl_8055EE8C - 0.1f, 0.0f);
         fn_8020C908(lbl_8055EE8C);
         break;
     case 1:
-        lbl_8055EE90 = MAX(lbl_8055EE90 - lbl_80563318, lbl_80563320);
+        lbl_8055EE90 = MAX(lbl_8055EE90 - 0.1f, 0.0f);
         break;
     case 4:
         fn_8000C730();
@@ -103,13 +99,13 @@ void fn_8020D0CC(int arg0) {
     if (value == 2 && fn_8020CF68() == 0)
         lbl_8055EE78 = (lbl_8055EE78 + arg0 + 3) % 3;
     fn_80230E90(1);
-    lbl_8055EE9C = lbl_80563320;
-    lbl_8055EE98 = lbl_80563320;
+    lbl_8055EE9C = 0.0f;
+    lbl_8055EE98 = 0.0f;
 }
 
 void fn_8020D178(void) {
     lbl_8055EE74 = (int)fn_802090D4(lbl_8033C6B0);
-    fn_80209190(lbl_8055EE74, lbl_8056331C);
+    fn_80209190(lbl_8055EE74, 1.0f);
     lbl_8055EE7C = 0;
     lbl_8055EE80 = 0;
     lbl_8055EEA0 = (int)fn_80145E70(lbl_8033C6BC);
@@ -139,16 +135,16 @@ void fn_8020D224(void) {
     if (fn_80265D64() == 0)
         __AXDSPInitCallback_801769E0();
     fn_80206444();
-    fn_80209190(lbl_8055EE74, lbl_80563320);
+    fn_80209190(lbl_8055EE74, 0.0f);
     lbl_8055EE78 = 0;
-    lbl_8055EE9C = lbl_80563320;
-    lbl_8055EE98 = lbl_80563320;
+    lbl_8055EE9C = 0.0f;
+    lbl_8055EE98 = 0.0f;
     fn_80230E90(1);
 }
 
 void fn_8020D29C(void) {
     lbl_8055EE94 = 0;
-    fn_80209190(lbl_8055EE74, lbl_8056331C);
+    fn_80209190(lbl_8055EE74, 1.0f);
     fn_80206454();
     fn_801769EC();
 }
@@ -184,9 +180,6 @@ typedef struct LayoutPane {
 
 extern const SoundMenuLabels lbl_802F9E58;
 extern char lbl_8055B630[6], lbl_8055B638[3], lbl_8055B63C[7];
-extern const float lbl_80563324, lbl_80563328, lbl_80563330, lbl_80563334, lbl_80563338, lbl_8056333C;
-extern const float lbl_80563340, lbl_80563344, lbl_80563348, lbl_8056334C, lbl_80563350;
-extern const float lbl_80563354, lbl_80563358, lbl_8056335C;
 extern void fn_80230B5C(void *);
 extern void fn_802C8638(void *);
 extern void fn_802C974C(float, float, float);
@@ -230,9 +223,9 @@ extern "C" void fn_8020D2D4(void) {
     }
     fn_80230B5C(camera);
     fn_802C8638(camera);
-    fn_802C974C(lbl_8056331C, lbl_80563324, lbl_80563328);
-    now = lbl_8056332C * (float)fn_802E2C20();
-    fn_800109E4(0x7F000000, lbl_80563330, lbl_80563334, lbl_80563338, lbl_8056333C);
+    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    now = 0.001f * (float)fn_802E2C20();
+    fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     if (lbl_8055EEA0 != 0) {
         fn_801473F8(lbl_8055EEA0, lbl_8055B630, lbl_8055B638, fn_80131234(pool + 0x68));
     }
@@ -251,10 +244,10 @@ extern "C" void fn_8020D2D4(void) {
 
             switch (i) {
             case 0:
-                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(lbl_80563340 + lbl_80563344 * lbl_8055EE8C));
+                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(0.5f + 100.0f * lbl_8055EE8C));
                 break;
             case 1:
-                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(lbl_80563340 + lbl_80563344 * lbl_8055EE90));
+                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(0.5f + 100.0f * lbl_8055EE90));
                 break;
             case 4:
                 fn_801345D8(value, 0x20, pool + 0x84, fn_8000C69C());
@@ -276,7 +269,7 @@ extern "C" void fn_8020D2D4(void) {
             selected = i == lbl_8055EE78;
             box = *((SoundMenuLayout *)lbl_8055EEA0)->FindText(textName);
             alpha = 0xFF;
-            scale = lbl_80563320;
+            scale = 0.0f;
             if (selected) {
                 fn_80230F78(&alpha, &scale, &box.color, 1);
             }
@@ -289,13 +282,13 @@ extern "C" void fn_8020D2D4(void) {
                 fn_80147940(lbl_8055EEA0, &back, pool + 0xA0, selected ? 1 : 2);
                 if (selected) {
                     LayoutPane glow = *pane;
-                    float grow = lbl_8056331C + scale;
+                    float grow = 1.0f + scale;
                     glow.w = pane->w * grow;
                     float hv = pane->h;
                     glow.h = grow * hv;
-                    glow.pos.x = glow.pos.x - lbl_80563340 * pane->w * scale;
+                    glow.pos.x = glow.pos.x - 0.5f * pane->w * scale;
                     float yv = glow.pos.y;
-                    glow.pos.y = yv - lbl_80563340 * pane->h * scale;
+                    glow.pos.y = yv - 0.5f * pane->h * scale;
                     glow.color = (pane->color & 0x00FFFFFF) | ((unsigned long)alpha << 24);
                     fn_80147940(lbl_8055EEA0, &glow, pool + 0xA0, 1);
                 }
@@ -312,11 +305,11 @@ extern "C" void fn_8020D2D4(void) {
                 switch (i) {
                 case 0:
                     if ((float)__fabs(lbl_8055EE8C) <= lbl_80558DC4) canDec = 0;
-                    if (lbl_8056331C == lbl_8055EE8C) canInc = 0;
+                    if (1.0f == lbl_8055EE8C) canInc = 0;
                     break;
                 case 1:
                     if ((float)__fabs(lbl_8055EE90) <= lbl_80558DC4) canDec = 0;
-                    if (lbl_8056331C == lbl_8055EE90) canInc = 0;
+                    if (1.0f == lbl_8055EE90) canInc = 0;
                     break;
                 case 2:
                     canInc = 0;
@@ -326,37 +319,37 @@ extern "C" void fn_8020D2D4(void) {
                 leftColor = 0xFFFFFFFF;
                 rightColor = 0xFFFFFFFF;
                 if (!canDec) {
-                    t = (now - lbl_8055EE98 - lbl_80563320) / lbl_80563348;
-                    t = lbl_8056331C < t ? lbl_8056331C : t;
-                    t = t > lbl_80563320 ? t : lbl_80563320;
-                    leftColor = ((unsigned long)(int)(lbl_8056334C + t * lbl_80563350) << 24) | 0x00FFFFFF;
+                    t = (now - lbl_8055EE98 - 0.0f) / 0.2f;
+                    t = 1.0f < t ? 1.0f : t;
+                    t = t > 0.0f ? t : 0.0f;
+                    leftColor = ((unsigned long)(int)(255.0f + t * (-255.0f)) << 24) | 0x00FFFFFF;
                 }
                 if (!canInc) {
-                    t = (now - lbl_8055EE9C - lbl_80563320) / lbl_80563348;
-                    t = lbl_8056331C < t ? lbl_8056331C : t;
-                    t = t > lbl_80563320 ? t : lbl_80563320;
-                    rightColor = ((unsigned long)(int)(lbl_8056334C + t * lbl_80563350) << 24) | 0x00FFFFFF;
+                    t = (now - lbl_8055EE9C - 0.0f) / 0.2f;
+                    t = 1.0f < t ? 1.0f : t;
+                    t = t > 0.0f ? t : 0.0f;
+                    rightColor = ((unsigned long)(int)(255.0f + t * (-255.0f)) << 24) | 0x00FFFFFF;
                 }
                 fn_801345D8(arrowName, 0x20, pool + 0xAC, textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
                     LayoutPane a = *arrow;
-                    t = (now - lbl_8055EE98 - lbl_80563354) / lbl_80563358;
-                    t = lbl_8056331C < t ? lbl_8056331C : t;
-                    t = t > lbl_80563320 ? t : lbl_80563320;
+                    t = (now - lbl_8055EE98 - 0.4f) / (-0.4f);
+                    t = 1.0f < t ? 1.0f : t;
+                    t = t > 0.0f ? t : 0.0f;
                     a.color = leftColor;
-                    a.pos.x = a.pos.x - (lbl_80563320 + t * lbl_8056335C);
+                    a.pos.x = a.pos.x - (0.0f + t * 10.0f);
                     fn_80147940(lbl_8055EEA0, &a, pool + 0xBC, 1);
                 }
                 fn_801345D8(arrowName, 0x20, pool + 0xCC, textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
                     LayoutPane a = *arrow;
-                    t = (now - lbl_8055EE9C - lbl_80563354) / lbl_80563358;
-                    t = lbl_8056331C < t ? lbl_8056331C : t;
-                    t = t > lbl_80563320 ? t : lbl_80563320;
+                    t = (now - lbl_8055EE9C - 0.4f) / (-0.4f);
+                    t = 1.0f < t ? 1.0f : t;
+                    t = t > 0.0f ? t : 0.0f;
                     a.color = rightColor;
-                    a.pos.x = a.pos.x + (lbl_80563320 + t * lbl_8056335C);
+                    a.pos.x = a.pos.x + (0.0f + t * 10.0f);
                     fn_80147940(lbl_8055EEA0, &a, pool + 0xE0, 1);
                 }
             }
@@ -397,20 +390,20 @@ int fn_8020DB0C(int arg0) {
         switch (lbl_8055EE78) {
         case 0:
             if (!((float)__fabs(lbl_8055EE8C) <= lbl_80558DC4)) {
-                lbl_8055EE98 = lbl_8056332C * (float)fn_802E2C20();
+                lbl_8055EE98 = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 1:
             if (!((float)__fabs(lbl_8055EE90) <= lbl_80558DC4)) {
-                lbl_8055EE98 = lbl_8056332C * (float)fn_802E2C20();
+                lbl_8055EE98 = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 4:
-            lbl_8055EE98 = lbl_8056332C * (float)fn_802E2C20();
+            lbl_8055EE98 = 0.001f * (float)fn_802E2C20();
             break;
         default:
             var_r31 = 0;
@@ -421,21 +414,21 @@ int fn_8020DB0C(int arg0) {
     case 0x127:
         switch (lbl_8055EE78) {
         case 0:
-            if (lbl_8055EE8C < lbl_8056331C) {
-                lbl_8055EE9C = lbl_8056332C * (float)fn_802E2C20();
+            if (lbl_8055EE8C < 1.0f) {
+                lbl_8055EE9C = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 1:
-            if (lbl_8055EE90 < lbl_8056331C) {
-                lbl_8055EE9C = lbl_8056332C * (float)fn_802E2C20();
+            if (lbl_8055EE90 < 1.0f) {
+                lbl_8055EE9C = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 4:
-            lbl_8055EE9C = lbl_8056332C * (float)fn_802E2C20();
+            lbl_8055EE9C = 0.001f * (float)fn_802E2C20();
             break;
         default:
             var_r31 = 0;
