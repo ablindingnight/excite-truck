@@ -93,7 +93,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
     s32 arg1 = a1;
     s32 arg2 = a2;
-    Vec kv[4];
+    // limit constants (zero + K) assigned in the pass where they are first used: MWCC hoists them and spills each
+    // once, before the loop, to its home slot (declaration order = slot order from 0x1D88 down), reloading per use
+    f32 c1D88, c1D84, c1D80, c1D7C, c1D78, c1D74, c1D70, c1D6C, c1D68, c1D64, c1D60, c1D5C, c1D58, c1D54, c1D50;
     Vec ident;
     Vec tmp;
     s32 sp2038;
@@ -1030,25 +1032,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC21 = &t[c + 21];
     rowC22 = &t[c + 22];
     for (;;) {
-        // the limits are rebuilt at the top of every pass, before the pass test (MWCC hoists the adds and their
-        // zero, which is the store-forwarded ident.y - the frsp f31 the target keeps for the whole loop; ident.x is
-        // not read in the loop, so the epilogue reloads it, as in the target)
+        // the zero is read from ident.y every pass; MWCC hoists it (store-forwarded: the frsp f31 the target keeps
+        // for the whole loop). ident.x is not read in the loop, so the epilogue reloads it, as in the target.
         temp_f31 = ident.y;
-        kv[0].x = lbl_805627D4;
-        kv[0].y = temp_f31 + lbl_80562814;
-        kv[0].z = temp_f31 + (temp_f31 + lbl_80562810);
-        kv[0].w = temp_f31 + lbl_8056280C;
-        kv[1].x = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
-        kv[1].y = temp_f31 + (lbl_80562804 * temp_f31);
-        kv[1].z = temp_f31 + (temp_f31 + lbl_80562800);
-        kv[1].w = temp_f31 + lbl_805627F8;
-        kv[2].x = temp_f31 + lbl_805627F4;
-        kv[2].y = temp_f31 + lbl_805627D8;
-        kv[2].z = (lbl_805627AC) * (temp_f31 + (lbl_805627AC));
-        kv[2].w = temp_f31 + lbl_805627CC;
-        kv[3].x = temp_f31 + lbl_805627C8;
-        kv[3].y = temp_f31 + lbl_805627C4;
-        kv[3].z = temp_f31 + lbl_805627C0;
         if (sp1F80 == 0) break;
         Vec V1C80(temp_f31 + lbl_805627B4);
         Vec V1C70(temp_f31 + lbl_805627B8);
@@ -1095,12 +1081,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V1AE0;
         V1AE0.y = V1AF0.y - V1C30.y;
         V1AF0.y = V1AE0.y;
-        Vec V1AD0(kv[3].z);
+        c1D88 = temp_f31 + lbl_805627C0;
+        Vec V1AD0(c1D88);
         Vec V1AC0;
         V1AC0.x = V1BF0.x < V1AD0.x ? V1BF0.x : V1AD0.x;
         V1AC0.y = V1BF0.y < V1AD0.x ? V1BF0.y : V1AD0.x;
         V1AC0.z = V1BF0.z < V1AD0.x ? V1BF0.z : V1AD0.x;
-        Vec V1AB0(kv[3].y);
+        c1D84 = temp_f31 + lbl_805627C4;
+        Vec V1AB0(c1D84);
         Vec V1AA0;
         V1AA0.x = V1AC0.x > V1AB0.x ? V1AC0.x : V1AB0.x;
         V1AA0.y = V1AC0.y > V1AB0.x ? V1AC0.y : V1AB0.x;
@@ -1108,12 +1096,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1BF0.x = V1AA0.x;
         V1BF0.y = V1AA0.y;
         V1BF0.z = V1AA0.z;
-        Vec V1A90(kv[3].x);
+        c1D80 = temp_f31 + lbl_805627C8;
+        Vec V1A90(c1D80);
         Vec V1A80;
         V1A80.x = V1BD0.x < V1A90.x ? V1BD0.x : V1A90.x;
         V1A80.y = V1BD0.y < V1A90.x ? V1BD0.y : V1A90.x;
         V1A80.z = V1BD0.z < V1A90.x ? V1BD0.z : V1A90.x;
-        Vec V1A70(kv[2].w);
+        c1D7C = temp_f31 + lbl_805627CC;
+        Vec V1A70(c1D7C);
         Vec V1A60;
         V1A60.x = V1A80.x > V1A70.x ? V1A80.x : V1A70.x;
         V1A60.y = V1A80.y > V1A70.x ? V1A80.y : V1A70.x;
@@ -1250,13 +1240,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B70.w = V1B90.w;
         V1B50.w = V1B70.w;
         Vec V18B0;
-        V1900.x = V18F0.x * kv[0].x;
-        V1900.y = V18F0.y * kv[0].x;
-        V1900.z = V18F0.z * kv[0].x;
+        c1D50 = lbl_805627D4;
+        V1900.x = V18F0.x * c1D50;
+        V1900.y = V18F0.y * c1D50;
+        V1900.z = V18F0.z * c1D50;
         V18B0.x = (V18F0.x * V18F0.x) + (V18F0.x * V18F0.x);
         V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
         V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
-        temp_f16_6 = V18F0.w * kv[0].x;
+        temp_f16_6 = V18F0.w * c1D50;
         Vec V18A0(temp_f31 + lbl_805627AC);
         V18A0.y = V18A0.x;
         V18A0.z = V18A0.y;
@@ -1671,7 +1662,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V14B0.x = V14D0.x;
         var_f18 = V14C0.x < V14B0.x ? V14C0.x : V14B0.x;
         V14A0.x = var_f18;
-        V1490.x = kv[2].y;
+        c1D74 = temp_f31 + lbl_805627D8;
+        V1490.x = c1D74;
         var_f2_5 = var_f18;
         var_f2_5 = var_f2_5 > V1490.x ? var_f2_5 : V1490.x;
         V1480.x = var_f2_5;
@@ -1681,7 +1673,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         temp_f1_14 = fn_8002B0A0(V1450.w);
         V1440.w = temp_f1_14;
         V1430.x = V14B0.x;
-        V1420.w = kv[2].z;
+        c1D78 = (lbl_805627AC) * (temp_f31 + (lbl_805627AC));
+        V1420.w = c1D78;
         var_f6 = temp_f1_14;
         var_f6 = var_f6 < V1420.w ? var_f6 : V1420.w;
         V1410.w = var_f6;
@@ -2134,9 +2127,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSUB(V0C50, V0D80, V0C60);
             DOT_BEGIN(V0C80, V0C50);
             Vec V0C40(((V19E0.x + V19E0.y) + V19E0.z));
-            Vec V0C30(kv[2].x);
+            c1D70 = temp_f31 + lbl_805627F4;
+            Vec V0C30(c1D70);
             Vec V0C20((V0C40.x < V0C30.x ? V0C40.x : V0C30.x));
-            Vec V0C10(kv[1].w);
+            c1D6C = temp_f31 + lbl_805627F8;
+            Vec V0C10(c1D6C);
             Vec V0C00((V0C20.x > V0C10.x ? V0C20.x : V0C10.x));
             VSCALE(V0BF0, V0C80, V0C00.x);
             VSUB(V0BE0, V0D80, V0BF0);
@@ -2174,12 +2169,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0AB0.x = (V0AD0.x * V0AC0.x);
             V0AA0.y = (V0AE0.y - V0AB0.x);
             Vec V0A80;
-            V0A80.y = kv[1].z;
+            c1D68 = temp_f31 + (temp_f31 + lbl_80562800);
+            V0A80.y = c1D68;
             Vec V0A70;
             V0A70.y = (V0AA0.y < V0A80.y ? V0AA0.y : V0A80.y);
             Vec V0A60(V0BA0.x);
             Vec V0A50;
-            V0A50.y = kv[1].y;
+            c1D64 = temp_f31 + (lbl_80562804 * temp_f31);
+            V0A50.y = c1D64;
             Vec V0A40;
             V0A40.y = (V0A70.y > V0A50.y ? V0A70.y : V0A50.y);
             Vec V0A30;
@@ -2207,7 +2204,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0960(fn_8002B0A0(V0970.x));
             Vec V0950(V0B50.x);
             Vec V0940((temp_f31 + lbl_80562804));
-            Vec V0930(kv[1].x);
+            c1D60 = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
+            Vec V0930(c1D60);
             Vec V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
@@ -2234,7 +2232,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0840;
             V0840.y = (V0850.y * V0A30.y);
             Vec V0830((V0850.x + V0840.y));
-            Vec V0820(kv[0].w);
+            c1D5C = temp_f31 + lbl_8056280C;
+            Vec V0820(c1D5C);
             Vec V0810((V0830.x > V0820.x ? V0830.x : V0820.x));
             Vec V0800;
             V0800.y = (temp_f31 + V0810.x);
@@ -2248,7 +2247,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V07C0.y = (V0A30.y * V0800.y);
             Vec V07B0((temp_f31 + lbl_80562810));
             Vec V07A0;
-            V07A0.y = kv[0].z;
+            c1D58 = temp_f31 + (temp_f31 + lbl_80562810);
+            V07A0.y = c1D58;
             Vec V0790;
             V0790.y = (V07C0.y > V07A0.y ? V07C0.y : V07A0.y);
             Vec V0780;
@@ -2258,7 +2258,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             DOT_BEGIN(V0980, V0980);
             Vec V0760(((V19E0.x + V19E0.y) + V19E0.z));
             Vec V0750((temp_f31 + fn_8002B0B0(V0760.x)));
-            Vec V0740(kv[0].y);
+            c1D54 = temp_f31 + lbl_80562814;
+            Vec V0740(c1D54);
             Vec V0730((V0750.x > V0740.x ? V0750.x : V0740.x));
             Vec V0720(V0730.x);
             Vec V0710;
