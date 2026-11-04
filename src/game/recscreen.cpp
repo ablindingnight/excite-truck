@@ -4,6 +4,7 @@
 // apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -18,7 +19,6 @@ void fn_80235380(u8* p);
 
 void operator delete(void* p);
 
-extern void* lbl_803453B8[];
 extern s32 lbl_8055C390;
 
 ModuleTag lbl_8055F3A8;
@@ -175,11 +175,20 @@ static inline int FindIcon(IconList* icons, const char* name) {
     return -1;
 }
 
-// A car icon widget in a records row (drawn by fn_8025CC78, released by fn_8025CC14).
-struct CarIconWidget {
-    void* vtable;     // offset 0x0
-    u8 pad4[0x10];
-    s32 unk14;        // offset 0x14
+// A car icon in a records row: a menu state (vtable lbl_803453B8 = __vt__10RecordIcon, followed in .data by the
+// zero-filled space of this unit's weak IMenuState copy). Constructed and destroyed inline as the stack array in
+// the records screen; the deleting dtor (fn_8025CC14) is the weak out-of-line copy its vtable needs.
+namespace {
+class RecordIcon : public MenuState {
+public:
+    RecordIcon(void) {
+        icons = 0;
+        visible = 0;
+        art = fn_8023512C("caricona.art");
+    }
+    virtual ~RecordIcon(void) { fn_80235380(art); }
+    virtual void Draw(void);
+
     IconList* icons;  // offset 0x18
     s32 icon;         // offset 0x1C
     u8 visible;       // offset 0x20
@@ -187,19 +196,7 @@ struct CarIconWidget {
     u8* art;          // offset 0x28
     u8 valid;         // offset 0x2C
 };
-
-static inline void InitIcon(CarIconWidget* w) {
-    w->unk14 = 0;
-    w->vtable = lbl_803453B8;
-    w->icons = 0;
-    w->visible = 0;
-    w->art = fn_8023512C("caricona.art");
-}
-
-static inline void FreeIcon(CarIconWidget* w) {
-    w->vtable = lbl_803453B8;
-    fn_80235380(w->art);
-}
+}  // namespace
 
 // One high score row: score, grade and time text.
 struct ScoreRow {
@@ -283,12 +280,7 @@ void fn_8025C204(int event, int difficulty) {
     lbl_8055F2E8++;
     CarIconTable* set = lbl_8055F2E4;
     ScoreRow rows[5];
-    CarIconWidget icons[5];
-    InitIcon(&icons[0]);
-    InitIcon(&icons[1]);
-    InitIcon(&icons[2]);
-    InitIcon(&icons[3]);
-    InitIcon(&icons[4]);
+    RecordIcon icons[5];
     icons[0].icons = set;
     icons[0].visible = 0;
     icons[1].icons = set;
@@ -381,23 +373,8 @@ void fn_8025C204(int event, int difficulty) {
         delete lbl_8055F2E4;
         lbl_8055F2E4 = 0;
     }
-    FreeIcon(&icons[4]);
-    FreeIcon(&icons[3]);
-    FreeIcon(&icons[2]);
-    FreeIcon(&icons[1]);
-    FreeIcon(&icons[0]);
 }
 
-u8* fn_8025CC14(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_803453B8;
-        fn_80235380(PTR(p, 0x28));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 }  // extern "C"
 
@@ -415,8 +392,8 @@ void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
-void fn_8025CC78(u8* p) {
-    if (!U8(p, 0x20)) {
+void RecordIcon::Draw(void) {
+    if (!visible) {
         return;
     }
     u32 c;
@@ -431,18 +408,18 @@ void fn_8025CC78(u8* p) {
     f32 u0;
     f32 fw;
     f32 fh;
-    fn_80230C30(&sx, &sy, S32(p, 0x4), S32(p, 0x8));
-    fw = (f32)S32(p, 0xC);
-    fh = (f32)S32(p, 0x10);
-    fn_802354A0(PTR(p, 0x28), U8(p, 0x2C), sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
-    e = &((IconEntry*)*(u8**)PTR(p, 0x18))[S32(p, 0x1C)];
+    fn_80230C30(&sx, &sy, this->x, this->y);
+    fw = (f32)w;
+    fh = (f32)h;
+    fn_802354A0(art, valid, sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    e = &(*(IconEntry**)icons)[icon];
     y = sy;
     x = sx;
     u0 = e->u0;
     v0 = e->v0;
     u1 = e->u1;
     v1 = e->v1;
-    c = U32(p, 0x24);
+    c = color;
     fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
     fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
 }
