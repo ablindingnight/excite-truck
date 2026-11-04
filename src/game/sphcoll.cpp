@@ -63,6 +63,7 @@ struct CFrame {
 extern "C" const f32 lbl_805622DC;  // -1.0
 extern "C" const f32 lbl_805622E0;  // 1.0
 
+static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
@@ -1443,8 +1444,8 @@ int fn_8019C854(u8* p, u8* q) {
     l.x = F32(p, 0x34) - f->t.x;
     l.y = F32(p, 0x38) - f->t.y;
     l.z = F32(p, 0x3C) - f->t.z;
-    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
     f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
+    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
     f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
     l.x = x;
     l.y = y;
@@ -1453,7 +1454,7 @@ int fn_8019C854(u8* p, u8* q) {
     f32 R = F32(q, 0x24);
     f32 tr = F32(q, 0x28);
     if (l.z < rs + tr && l.z > -(rs + tr)) {
-        f32 dist = (f32)sqrt(l.x * l.x + l.y * l.y);
+        f32 dist = (f32)sqrt(Sq(l.x) + Sq(l.y));
         f32 pen = (rs + tr) - AbsF(dist - R);
         if (pen > 0.0f) {
             if (dist > R + tr) {
