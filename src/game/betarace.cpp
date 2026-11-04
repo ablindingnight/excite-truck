@@ -4426,16 +4426,18 @@ inline void BetaMaster::a2(void) {
             t->switchLeft = t->switchTime;
         }
     }
+    i = 0;
     if (bumps.a.count > 0) {
-        for (i = 0; i < bumps.a.count; i++) {
+        for (; i < bumps.a.count; i++) {
             Token* t = bumps.a.data[i];
             t->active = 1;
             t->start = -999.0f;
             t->Show();
         }
     }
+    i = 0;
     if (bumps2.a.count > 0) {
-        for (i = 0; i < bumps2.a.count; i++) {
+        for (; i < bumps2.a.count; i++) {
             Token* t = bumps2.a.data[i];
             t->active = 1;
             t->start = -999.0f;

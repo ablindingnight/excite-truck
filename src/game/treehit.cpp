@@ -184,7 +184,8 @@ public:
                     return;
                 }
                 if (!(t->pos.y < -2000.0f)) {
-                    if (id != lbl_804C1050[car].id || lbl_8055FB38 - lbl_804C1050[car].time > 8.0f) {
+                    f32 wait = 8.0f;
+                    if (id != lbl_804C1050[car].id || lbl_8055FB38 - lbl_804C1050[car].time > wait) {
                         if (c->wobble) {
                             Shake* s = fn_802C120C();
                             s->tree = t;

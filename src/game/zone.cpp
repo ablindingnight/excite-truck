@@ -2457,7 +2457,8 @@ inline void ZoneMaster::vf0C(void) {
                             c->finalScore++;
                             c->score++;
                             c->gate = NextGate(c->gate);
-                            ringhit->SetPitch(lbl_802F93B0[ClampI(events.a.Count() - 1, 0, 4)]);
+                            int k = ClampI(events.a.Count() - 1, 0, 4);
+                            ringhit->SetPitch(lbl_802F93B0[k]);
                             ringhit->Play();
                             break;
                         }
