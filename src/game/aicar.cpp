@@ -787,7 +787,7 @@ void fn_801941A8(u8* d, f32 v) {
     f32 dv = v - F32(d, 0x23C);
     dv = 0.2f < dv ? 0.2f : dv;
     dv = dv > -0.2f ? dv : -0.2f;
-    f32 n = F32(d, 0x23C) + dv;
+    f32 n = dv + F32(d, 0x23C);
     f32 k = F32(d, 0x248);
     F32(d, 0x23C) = n;
     if (k < 2.0f) {

@@ -284,8 +284,9 @@ void fn_80270EC4(u8* car, u32 id) {
             if (n > 0) {
                 qsort(refs, n, sizeof(AngleRef), fn_80270D4C);
                 f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
+                int i;
                 int last = n - 1;
-                for (int i = 0; i < last; i++) {
+                for (i = 0; i < last; i++) {
                     fn_80270DB0(&refs[i], &refs[i + 1], wrap);
                 }
                 fn_80270DB0(&refs[last], &refs[0], wrap);

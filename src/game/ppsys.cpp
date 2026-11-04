@@ -497,6 +497,7 @@ void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) 
 }
 
 void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
+    RVec3* p = out;
     s->org = *org;
     s->up = *up;
     RVec3 a;
@@ -507,8 +508,8 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     fn_801C1B60(s);
     s32 k = s->nPart;
     for (int j = 0; j < s->nPart; j++) {
-        Set(out, &s->pos[j]);
-        out++;
+        Set(p, &s->pos[j]);
+        p++;
     }
     *n = k;
 }

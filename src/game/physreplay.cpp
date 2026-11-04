@@ -300,8 +300,8 @@ f32 fn_801B4D10(Replay* r, s32 time) { return (f32)((time - fn_801B4B9C(r)) % 6)
 
 void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t) {
     s32 u0 = a->unk0;
-    s32 u4 = a->unk4;
     h->unk0 = u0;
+    s32 u4 = a->unk4;
     h->unk4 = u4;
     h->x = Lerp(Unpack(a->x, -300.0f, 300.0f), Unpack(b->x, -300.0f, 300.0f), t);
     h->y = Lerp(Unpack(a->y, -300.0f, 300.0f), Unpack(b->y, -300.0f, 300.0f), t);

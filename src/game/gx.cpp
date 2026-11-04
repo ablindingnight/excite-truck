@@ -624,8 +624,8 @@ void fn_802CED78(void) {
     GXReadXfRasMetric(&c1, &d1, &a1, &b1);
     int xfWaitIn = (b1 - b0) != 0;
     int xfWaitOut = (a1 - a0) != 0;
+    bool vtx = c0 == c1;
     int clocks = d1 == d0;
-    bool vtx = c1 == c0;
     GXGetGPStatus(&overhi, &underlow, &readIdle, &cmdIdle, &brk);
     OSReport("GP status (%c%c%c%c%c) metric (%d%d%d%d) --> ", overhi ? 'O' : '-', underlow ? 'U' : '-',
              readIdle ? '-' : 'R', cmdIdle ? '-' : 'C', brk ? 'B' : '-', xfWaitIn, xfWaitOut, clocks, vtx);

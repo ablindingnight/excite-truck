@@ -281,13 +281,14 @@ void fn_80292698(void) {
         if (ang > 0.0001f) {
             f32 inv = 1.0f / ang;
             f32 x = inv * v.x;
+            f32 z;
             f32 y = inv * v.y;
-            f32 z = inv * v.z;
+            z = inv * v.z;
             f32 sn = SinF(ang);
             f32 c = cos(ang);
             f32 k = 1.0f - c;
             s->rot.x.x = c + k * (x * x);
-            s->rot.x.y = y * (k * x) + sn * z;
+            s->rot.x.y = y * (k * x) + z * sn;
             s->rot.x.z = z * (k * x) - sn * y;
             s->rot.y.x = y * (k * x) - sn * z;
             s->rot.y.y = c + k * (y * y);

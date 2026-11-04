@@ -3383,7 +3383,7 @@ void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
         lo->x = lo->x < w.x ? lo->x : w.x;
         lo->y = lo->y < w.y ? lo->y : w.y;
         lo->z = lo->z < w.z ? lo->z : w.z;
-        hi->x = hi->x > w.x ? hi->x : w.x;
+        hi->x = w.x < hi->x ? hi->x : w.x;
         hi->y = hi->y > w.y ? hi->y : w.y;
         hi->z = hi->z > w.z ? hi->z : w.z;
     }

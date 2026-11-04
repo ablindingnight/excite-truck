@@ -461,14 +461,15 @@ void fn_802D4988(Surf* s) {
             YMorphVtx* m = v;
             V3* o = out;
             for (; n > 0; n--) {
+                f32 vx;
                 f32 a = (1.0f / 255) * m->da;
                 f32 b = (1.0f / 255) * m->db;
-                f32 wa = lbl_804CA308[m->ia];
                 f32 wb = lbl_804CA308[m->ib];
+                f32 wa = lbl_804CA308[m->ia];
                 m++;
-                f32 y = v->y;
                 f32 z = v->z;
-                f32 vx = v->x;
+                f32 y = v->y;
+                vx = v->x;
                 o->x = vx;
                 o->y = y + a * wa + b * wb;
                 o->z = z;

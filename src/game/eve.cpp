@@ -596,7 +596,7 @@ void FixupMyoEves(void) {
     }
     for (i = 0; i < lbl_8055D508; i++) {
         for (j = 0; j < lbl_8055D518; j++) {
-            if (lbl_80352AD0[i].track == lbl_803551E0[j].track.index) {
+            if (lbl_803551E0[j].track.index == lbl_80352AD0[i].track) {
                 lbl_80352AD0[i].enabled = 0;
             }
         }
