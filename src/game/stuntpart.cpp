@@ -359,7 +359,7 @@ static inline double AbsD(double v) { return __fabs(v); }
 
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
-    if (p->power >= 0.35f && p->hold == 0.0f && p->trig) {
+    if (p->power >= 0.35f && !p->hold && p->trig) {
         p->trig = 0;
         p->grow = MIN(p->grow + 2.0f * dt, 1.0f);
         f32 s = MIN(1.0f, (p->power - 0.35f) / 0.65f);

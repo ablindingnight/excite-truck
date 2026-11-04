@@ -57,10 +57,40 @@ static inline void HudPart_SetLevel(HudPart *part, float level) {
     }
 }
 
+// The HUD object built by fn_8020DE74.
+struct Hud {
+    void *vtable;
+    unsigned char *vehicle;  /* 0x04 */
+    HudPart *p08;
+    HudPart *flash;          /* 0x0C: the flash picked from flashes[] */
+    HudPart *flashes[2];     /* 0x10 */
+    HudPart *speedLines;     /* 0x18 */
+    HudPart *p1C, *p20, *p24, *p28, *p2C;
+    HudPart *air;            /* 0x30 */
+    HudPart *splash;         /* 0x34 */
+    HudPart *dive;           /* 0x38 */
+    HudPart *surface;        /* 0x3C */
+    HudPart *drift;          /* 0x40 */
+    HudPart *p44;
+    HudPart *boost;          /* 0x48 */
+    HudPart *tilt;           /* 0x4C */
+    HudPart *p50;
+    HudPart *start;          /* 0x54 */
+    unsigned char started;   /* 0x58 */
+    long flashCount;         /* 0x5C */
+    float driftTime;         /* 0x60 */
+    float flashLevel;        /* 0x64 */
+    float speedAlpha;        /* 0x68 */
+    float boostLevel;        /* 0x6C */
+    unsigned char underwater;/* 0x70 */
+    unsigned char b71;
+    unsigned char startPending; /* 0x72 */
+};
+
 // Builds the HUD parts for a vehicle; the extra gauges exist only for the 'PCAR' type.
 extern "C" void *fn_8020DE74(unsigned char *vehicle) {
     const char *names = lbl_8033C7A0;
-    unsigned char *hud = (unsigned char *)operator new(0x74, lbl_8055B648);
+    Hud *hud = (Hud *)operator new(0x74, lbl_8055B648);
     if (hud != 0) {
         long isCar;
         void *res2;
@@ -69,89 +99,89 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
         unsigned long i;
         char buf[0x20];
 
-        *(void ***)hud = lbl_8033C8C4;
-        *(unsigned char **)(hud + 4) = vehicle;
+        hud->vtable = lbl_8033C8C4;
+        hud->vehicle = vehicle;
         res = vehicle + 0x118;
         res2 = vehicle + 0x60;
         owner = *(void **)(vehicle + 0x1EC);
         isCar = *(long *)(vehicle + 0x10) == 0x50434152;
         if (isCar) {
-            *(void **)(hud + 0x28) = fn_802077A4(names + 0x00, 5, res, res2);
-            *(void **)(hud + 0x30) = fn_802077A4(names + 0x10, 8, res, res2);
+            hud->p28 = (HudPart *)fn_802077A4(names + 0x00, 5, res, res2);
+            hud->air = (HudPart *)fn_802077A4(names + 0x10, 8, res, res2);
         } else {
-            *(void **)(hud + 0x28) = 0;
-            *(void **)(hud + 0x30) = 0;
+            hud->p28 = 0;
+            hud->air = 0;
         }
-        *(void **)(hud + 8) = fn_802077A4(names + 0x1C, 5, res, res2);
-        *(long *)(hud + 0x5C) = 0;
-        memset(hud + 0x10, 0, 8);
-        *(void **)(hud + 0xC) = 0;
+        hud->p08 = (HudPart *)fn_802077A4(names + 0x1C, 5, res, res2);
+        hud->flashCount = 0;
+        memset(hud->flashes, 0, 8);
+        hud->flash = 0;
         for (i = 0; i < 2; i++) {
             HudPart *part;
             fn_801345D8(buf, 0x20, names + 0x2C, i + 1);
             part = (HudPart *)fn_802077A4(buf, 5, res, res2);
-            ((HudPart **)(hud + 0x10))[i] = part;
+            hud->flashes[i] = part;
             if (part == 0) break;
             part->owner = owner;
-            HudPart_SetLevel(((HudPart **)(hud + 0x10))[i], lbl_80563368);
-            *(void **)(hud + 0xC) = ((HudPart **)(hud + 0x10))[i];
-            (*(long *)(hud + 0x5C))++;
+            HudPart_SetLevel(hud->flashes[i], lbl_80563368);
+            hud->flash = hud->flashes[i];
+            hud->flashCount++;
         }
         if (isCar) {
-            *(void **)(hud + 0x18) = fn_802077A4(names + 0x38, 5, res, res2);
+            hud->speedLines = (HudPart *)fn_802077A4(names + 0x38, 5, res, res2);
         } else {
-            *(void **)(hud + 0x18) = 0;
+            hud->speedLines = 0;
         }
-        if (*(HudPart **)(hud + 8) != 0) {
-            (*(HudPart **)(hud + 8))->owner = owner;
-            HudPart_SetLevel(*(HudPart **)(hud + 8), lbl_8056336C);
+        if (hud->p08 != 0) {
+            hud->p08->owner = owner;
+            HudPart_SetLevel(hud->p08, lbl_8056336C);
         }
-        if (*(HudPart **)(hud + 0x28) != 0) (*(HudPart **)(hud + 0x28))->owner = owner;
-        if (*(HudPart **)(hud + 0x30) != 0) (*(HudPart **)(hud + 0x30))->owner = owner;
+        if (hud->p28 != 0) hud->p28->owner = owner;
+        if (hud->air != 0) hud->air->owner = owner;
         if (isCar) {
-            *(void **)(hud + 0x1C) = fn_802077A4(names + 0x4C, 5, res, res2);
+            hud->p1C = (HudPart *)fn_802077A4(names + 0x4C, 5, res, res2);
         } else {
-            *(void **)(hud + 0x1C) = 0;
+            hud->p1C = 0;
         }
-        *(void **)(hud + 0x20) = fn_802077A4(names + 0x5C, 5, res, res2);
-        *(void **)(hud + 0x34) = fn_802077A4(names + 0x68, 5, res, res2);
+        hud->p20 = (HudPart *)fn_802077A4(names + 0x5C, 5, res, res2);
+        hud->splash = (HudPart *)fn_802077A4(names + 0x68, 5, res, res2);
         if (isCar) {
-            *(void **)(hud + 0x38) = fn_802077A4(names + 0x78, 5, res, res2);
-            *(void **)(hud + 0x3C) = fn_802077A4(names + 0x88, 5, res, res2);
+            hud->dive = (HudPart *)fn_802077A4(names + 0x78, 5, res, res2);
+            hud->surface = (HudPart *)fn_802077A4(names + 0x88, 5, res, res2);
         } else {
-            *(void **)(hud + 0x38) = 0;
-            *(void **)(hud + 0x3C) = 0;
+            hud->dive = 0;
+            hud->surface = 0;
         }
-        if (*(HudPart **)(hud + 0x34) != 0) (*(HudPart **)(hud + 0x34))->owner = owner;
-        if (*(HudPart **)(hud + 0x38) != 0) (*(HudPart **)(hud + 0x38))->owner = owner;
-        if (*(HudPart **)(hud + 0x3C) != 0) (*(HudPart **)(hud + 0x3C))->owner = owner;
-        *(void **)(hud + 0x40) = fn_802077A4(names + 0x98, 5, res, res2);
-        if (*(HudPart **)(hud + 0x40) != 0) (*(HudPart **)(hud + 0x40))->owner = owner;
+        if (hud->splash != 0) hud->splash->owner = owner;
+        if (hud->dive != 0) hud->dive->owner = owner;
+        if (hud->surface != 0) hud->surface->owner = owner;
+        hud->drift = (HudPart *)fn_802077A4(names + 0x98, 5, res, res2);
+        if (hud->drift != 0) hud->drift->owner = owner;
         if (isCar) {
-            *(void **)(hud + 0x24) = fn_802077A4(names + 0xA8, 5, res, res2);
-            *(void **)(hud + 0x2C) = fn_802077A4(names + 0xB8, 5, res, res2);
-            *(void **)(hud + 0x48) = fn_802076A0(names + 0xCC, 1, owner, 2);
-            *(void **)(hud + 0x4C) = fn_802076A0(names + 0xDC, 1, owner, 2);
-            *(void **)(hud + 0x50) = fn_802076A0(names + 0xEC, 1, owner, 2);
-            *(void **)(hud + 0x44) = fn_802076A0(names + 0x100, 1, owner, 0);
-            *(void **)(hud + 0x54) = fn_802076A0(names + 0x110, 1, owner, 0);
+            hud->p24 = (HudPart *)fn_802077A4(names + 0xA8, 5, res, res2);
+            hud->p2C = (HudPart *)fn_802077A4(names + 0xB8, 5, res, res2);
+            hud->boost = (HudPart *)fn_802076A0(names + 0xCC, 1, owner, 2);
+            hud->tilt = (HudPart *)fn_802076A0(names + 0xDC, 1, owner, 2);
+            hud->p50 = (HudPart *)fn_802076A0(names + 0xEC, 1, owner, 2);
+            hud->p44 = (HudPart *)fn_802076A0(names + 0x100, 1, owner, 0);
+            hud->start = (HudPart *)fn_802076A0(names + 0x110, 1, owner, 0);
         } else {
-            *(void **)(hud + 0x24) = 0;
-            *(void **)(hud + 0x2C) = 0;
-            *(void **)(hud + 0x48) = 0;
-            *(void **)(hud + 0x4C) = 0;
-            *(void **)(hud + 0x50) = 0;
-            *(void **)(hud + 0x44) = 0;
-            *(void **)(hud + 0x54) = 0;
+            hud->p24 = 0;
+            hud->p2C = 0;
+            hud->boost = 0;
+            hud->tilt = 0;
+            hud->p50 = 0;
+            hud->p44 = 0;
+            hud->start = 0;
         }
-        *(float *)(hud + 0x60) = lbl_80563370;
-        *(unsigned char *)(hud + 0x70) = 0;
-        *(float *)(hud + 0x64) = lbl_80563370;
-        *(float *)(hud + 0x68) = lbl_80563370;
-        *(float *)(hud + 0x6C) = lbl_80563370;
-        *(unsigned char *)(hud + 0x58) = 0;
-        *(unsigned char *)(hud + 0x72) = 0;
-        *(unsigned char *)(hud + 0x71) = (FindVehicle(*(long *)(vehicle + 0x25C))[0xA0 / 4] >> 2) & 1;
+        hud->driftTime = lbl_80563370;
+        hud->underwater = 0;
+        hud->flashLevel = lbl_80563370;
+        hud->speedAlpha = lbl_80563370;
+        hud->boostLevel = lbl_80563370;
+        hud->started = 0;
+        hud->startPending = 0;
+        hud->b71 = (FindVehicle(*(long *)(vehicle + 0x25C))[0xA0 / 4] >> 2) & 1;
     }
     return hud;
 }
@@ -211,35 +241,6 @@ extern "C" void *fn_8020E288(void *arg0, s32 arg1) {
     return arg0;
 }
 
-// The HUD object built by fn_8020DE74.
-struct Hud {
-    void *vtable;
-    unsigned char *vehicle;  /* 0x04 */
-    HudPart *p08;
-    HudPart *flash;          /* 0x0C: the flash picked from flashes[] */
-    HudPart *flashes[2];     /* 0x10 */
-    HudPart *speedLines;     /* 0x18 */
-    HudPart *p1C, *p20, *p24, *p28, *p2C;
-    HudPart *air;            /* 0x30 */
-    HudPart *splash;         /* 0x34 */
-    HudPart *dive;           /* 0x38 */
-    HudPart *surface;        /* 0x3C */
-    HudPart *drift;          /* 0x40 */
-    HudPart *p44;
-    HudPart *boost;          /* 0x48 */
-    HudPart *tilt;           /* 0x4C */
-    HudPart *p50;
-    HudPart *start;          /* 0x54 */
-    unsigned char started;   /* 0x58 */
-    long flashCount;         /* 0x5C */
-    float driftTime;         /* 0x60 */
-    float flashLevel;        /* 0x64 */
-    float speedAlpha;        /* 0x68 */
-    float boostLevel;        /* 0x6C */
-    unsigned char underwater;/* 0x70 */
-    unsigned char b71;
-    unsigned char startPending; /* 0x72 */
-};
 
 typedef struct HudVec { float x, y, z; } HudVec;
 

@@ -13,10 +13,10 @@ ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 }
 
-static inline f32 Lb(f32 x) { return 0.4545f * x; }    // pounds to kilograms
-static inline f32 Ft(f32 x) { return 0.305f * x; }     // feet to metres
-static inline f32 In(f32 x) { return 0.0254f * x; }    // inches to metres
-static inline f32 Lbf(f32 x) { return 4.45f * x; }     // pounds-force to newtons
+#define Lb(x) (0.4545f * (x))  // pounds to kilograms
+#define Ft(x) (0.305f * (x))  // feet to metres
+#define In(x) (0.0254f * (x))  // inches to metres
+#define Lbf(x) (4.45f * (x))  // pounds-force to newtons
 static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
@@ -173,12 +173,8 @@ void fn_80279D40(CarSetup* s) {
 }
 
 void fn_80279F58(CarSetup* s, ValueTable* t) {
-    ValueNode* c;
-    int i;
-    ValueNode* tr;
-    ValueNode* e;
     fn_80279D40(s);
-    c = t->FindChild("Chassis");
+    ValueNode* c = t->FindChild("Chassis");
     s->mass = Lb(c->GetFloat("mass"));
     s->mx = Ft(Ft(Lb(c->GetFloat("mx"))));
     s->my = Ft(Ft(Lb(c->GetFloat("my"))));
@@ -191,16 +187,16 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->collideCmHeight = In(c->GetFloat("collide_cm_height", 29.999998f));
     s->airDrag = c->GetFloat("air_drag", 6.0f) * 0.093025006f;
 
-    tr = t->FindChild("Transmission");
+    ValueNode* tr = t->FindChild("Transmission");
     s->torqueBalance = tr->GetFloat("torque_balance");
     s->numGears = tr->GetIntValue("num_gears");
-    for (i = 0; i < s->numGears; i++) {
+    for (int i = 0; i < s->numGears; i++) {
         char key[0x20];
         sprintf(key, "g%d", i + 1);
         s->gears[i] = tr->GetFloat(key);
     }
 
-    e = t->FindChild("EngineNormal");
+    ValueNode* e = t->FindChild("EngineNormal");
     s->torqueMax = Ft(Lbf(e->GetFloat("torque_max")));
     s->torqueRpm = e->GetFloat("torque_rpm");
     s->powerMax = 746.0f * e->GetFloat("power_max");
@@ -232,12 +228,12 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
 
     t->FindChild("Front");
     t->FindChild("Rear");
-    for (i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         WheelSetup* w = &s->wheels[i];
         int front = i == 0 || i == 1;
         f32 spring = c->GetFloat("spring_factor", 1.0f);
-        f32 shock = c->GetFloat("shock_factor", 1.0f);
-        f32 bump = c->GetFloat("bump_factor", 1.0f);
+        f32 shock = c->GetFloat("shock_factor", spring);
+        f32 bump = c->GetFloat("bump_factor", shock);
         f32 rebound = c->GetFloat("rebound_factor", shock);
         rebound = c->GetFloat(front ? "frebound_factor" : "rrebound_factor", rebound);
         w->unk18 = 2.0f;
