@@ -366,8 +366,8 @@ void* StackHeap::Alloc(s32 size, const char* name, int type) {
     }
     peak = peak < used ? used : peak;
     {
-        u8* end = (u8*)b + 64 + size;
         u8* data = b->data;
+        u8* end = (u8*)b + 64 + size;
         if (end >= highest) {
             highest = end;
         }

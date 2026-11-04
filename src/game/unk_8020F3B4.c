@@ -944,8 +944,8 @@ extern "C" void fn_802113D8(void) {
     }
     fn_80206444();
     fn_80209190(lbl_8055EEF0, lbl_80563400);
-    lbl_8055EEE4 = zero;
     lbl_8055EEE0 = minusTwo;
+    lbl_8055EEE4 = zero;
     lbl_8055B65C = lbl_8055B658;
     lbl_8055EEEC = zero;
     lbl_8055EEED = zero;
