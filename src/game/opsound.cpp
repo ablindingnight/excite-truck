@@ -28,9 +28,19 @@ public:
         }
     }
 
+    // Rewinds the sample: restart flag set, play position back to 0.
+    void Rewind(void) {
+        restart = 1;
+        pos = 0.0f;
+    }
+
     f32 pitch;  // offset 0x4
     f32 vol;    // offset 0x8
-    u8 padC[0x49 - 0xC];
+    u8 padC[0x28 - 0xC];
+    f32 pos;      // offset 0x28
+    u8 pad2C[0x34 - 0x2C];
+    u8 restart;   // offset 0x34
+    u8 pad35[0x49 - 0x35];
     u8 play;      // offset 0x49
     u8 b4A;       // offset 0x4A
     u8 b4B;       // offset 0x4B
@@ -156,6 +166,14 @@ public:
     virtual void Enter(void);
     virtual void Changed(int item);
     virtual void Unk24(void);
+    // Restarts the announcer preview at the current announcer volume (runs right after construction, while no
+    // sample is loaded: MWCC folds the null test into a branch but keeps the body, as in the original).
+    void ResetPreview(void) {
+        if (sound) {
+            sound->Rewind();
+        }
+        sound->SetVolume(*announcer);
+    }
     void UpdateMixerName(void) {
         s32 i = *mixer;
         if (i >= 0 && i < fn_80208D3C()) {
@@ -257,6 +275,7 @@ void fn_8023CC84(const char* layout) {
         char mixerName[0x100];
         SoundOptions opts(&lbl_8055F16C, &lbl_8055F164, &lbl_8055F17C, &mixer, mixerName, &lbl_8055F168,
                           &lbl_8055F170, &lbl_8055F174);
+        opts.ResetPreview();
         MenuStrList list;
         int i;
         fn_8022D228(&list, 0x11, 0x20);
