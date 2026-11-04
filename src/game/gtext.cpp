@@ -653,17 +653,24 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
 f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
+    f32 adv;
+    f32 h;
+    f32 gaps;
+    f32 w;
     if (s == NULL) {
         return 0.0f;
     }
-    f32 gaps = 0.0f;
-    f32 w = 0.0f;
-    int i = 0;
+    int i;
+    w = 0.0f;
+    gaps = 0.0f;
+    i = 0;
     strlen(s);
     while (s[i]) {
-        f32 adv = f->height;
-        f32 h = f->height;
+        adv = f->height;
+        h = f->height;
         int skip;
+        u16 c;
+        Glyph* g;
         if (s[i] == '\\') {
             const char* p;
             const char* name;
@@ -676,7 +683,7 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
                     e = &lbl_80497F14.data[j];
                     if (e->art) {
                         h /= (fn_80235F64(e->art, e->artIdx));
-                        adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
+                        adv = (h * fn_80235EF0(e->art, e->artIdx)) * e->scale + e->scale * (e->postspace * h);
                     } else {
                         adv = h * e->scale;
                     }
@@ -693,11 +700,11 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
             continue;
         }
         const char* next;
-        u16 c = DecodeUTF8(s + i, &next);
-        Glyph* g = &f->glyphs[c];
-        i += next - (s + i);
+        c = DecodeUTF8(s + i, &next);
+        g = &f->glyphs[c];
         w += g->width;
-        gaps += g->pre + g->post;
+        i += next - (s + i);
+        gaps = (g->pre + g->post) + gaps;
     }
     gaps *= xs;
     return (w + gaps) * fn_8022EDC4()->scale;

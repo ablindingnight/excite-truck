@@ -825,8 +825,14 @@ static inline u8 Byte(f32 x) {
 }
 
 void PartSys::DrawSprites(Particle* p, int n) {
-    CamMtx* cam = fn_802C86DC();
-    f32 t0 = lbl_8055F738;
+    CamMtx* cam;
+    f32 age;
+    CamMtx m;
+    f32 size;
+    f32 t0;
+    cam = fn_802C86DC();
+    int i;
+    t0 = lbl_8055F738;
     V3 d1;
     V3 d2;
     d1.x = cam->up.x - cam->right.x;
@@ -836,27 +842,37 @@ void PartSys::DrawSprites(Particle* p, int n) {
     d2.y = cam->up.y + cam->right.y;
     d2.z = cam->up.z + cam->right.z;
     QuadBatch batch;
-    for (int i = 0; i < n; p++, i++) {
-        f32 age = t0 - p->birth;
-        f32 t = age * invLife;
-        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
+    for (i = 0; i < n; p++, i++) {
+        f32 t;
+        int ua;
+        u8 a;
+        age = t0 - p->birth;
+        u8 g;
+        f32 d1X;
+        t = age * invLife;
+        size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
         V3 pos;
         Integrate(&pos, p, age);
-        CamMtx m = *fn_802C86DC();
+        f32 fade;
+        u8 b;
+        int ub;
+        m = *fn_802C86DC();
         V3 d;
+        u32 color;
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
         d.z = m.pos.z - pos.z;
-        f32 fade = Clamp01(nearAlpha + PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist) * (1.0f - nearAlpha));
-        u8 b = Byte(255.0f * (blueConst + blueRamp * t));
-        u8 g = Byte(255.0f * (greenConst + greenRamp * t));
-        s8 r = Byte(255.0f * (redConst + redRamp * t));
-        u8 a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
-        u32 color = (a << 24) | (r << 16) | (g << 8) | b;
-        int ua = ((p->rot + 1) & 2) >> 1;
-        int ub = (p->rot >> 1) & 1;
+        fade = Clamp01(nearAlpha + PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist) * (1.0f - nearAlpha));
+        b = Byte(255.0f * (blueConst + blueRamp * t));
+        s8 r;
+        g = Byte(255.0f * (greenConst + greenRamp * t));
+        r = Byte(255.0f * (redConst + redRamp * t));
+        a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
+        color = (a << 24) | (r << 16) | (g << 8) | b;
+        ua = ((p->rot + 1) & 2) >> 1;
+        ub = (p->rot >> 1) & 1;
         PVtx q[4];
-        f32 d1X = d1.x;
+        d1X = d1.x;
         q[0].pos.x = pos.x + d1X * size;
         q[0].pos.y = pos.y + d1.y * size;
         q[0].pos.z = pos.z + size * d1.z;
