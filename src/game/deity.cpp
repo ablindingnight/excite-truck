@@ -870,6 +870,8 @@ f32 fn_801B2F90(int a, int b);
 // Per-car update: tracks the car along the centre and racing lines from a point just ahead of it, keeps the last
 // good line positions, records start/finish crossings in order, takes back a lap when it ran the line backwards,
 // runs the finish check and, with several players, scales the catch-up boost by how far the leader is ahead.
+#pragma push
+#pragma opt_propagation off
 void DeityCar::Update(void) {
     f32 now = lbl_8055E3C8;
     *(f32*)((u8*)this + 0x18) = now - finishTime;
@@ -945,6 +947,7 @@ void DeityCar::Update(void) {
         Car()->boost = LerpF(0.0f, 1.0f, t);
     }
 }
+#pragma pop
 
 void DeityCar::v28(void* a, void* b, s32* out) {
     *out = 0;
