@@ -28,10 +28,10 @@ struct Vec {
 #define SCALE_ROW(m, s) { Vec k_(s); Vec v_(m); Vec a_(v_); \
     Vec r_; r_.x = a_.x * k_.x; r_.y = a_.y * k_.x; r_.z = a_.z * k_.x; Vec o_(r_); m.x = o_.x; m.y = o_.y; m.z = o_.z; }
 #define F(p, o) (*(f32*)((u8*)(p) + (o)))
-#define CROSS_BEGIN(a, b) kv[0].x = a.y * b.z; kv[0].y = a.z * b.x; kv[0].z = a.x * b.y
-#define CROSS_END(o, a, b) Vec o; o.x = kv[0].x - b.y * a.z; o.y = kv[0].y - b.z * a.x; o.z = kv[0].z - b.x * a.y
+#define CROSS_BEGIN(a, b) tmp.x = a.y * b.z; tmp.y = a.z * b.x; tmp.z = a.x * b.y
+#define CROSS_END(o, a, b) Vec o; o.x = tmp.x - b.y * a.z; o.y = tmp.y - b.z * a.x; o.z = tmp.z - b.x * a.y
 #define DOT_BEGIN(a, b) V19E0.x = a.x * b.x; V19E0.y = a.y * b.y; V19E0.z = a.z * b.z
-#define MXV_END(o, c, v) Vec o; o.x = kv[0].x + c.x * v.z; o.y = kv[0].y + c.y * v.z; o.z = kv[0].z + c.z * v.z
+#define MXV_END(o, c, v) Vec o; o.x = tmp.x + c.x * v.z; o.y = tmp.y + c.y * v.z; o.z = tmp.z + c.z * v.z
 #define VADD(o, a, b) Vec o; o.x = a.x + b.x; o.y = a.y + b.y; o.z = a.z + b.z
 #define VLOAD(o, p) Vec o(p)
 #define VLOAD4(o, p) Vec o; o.x = (p).x; o.y = (p).y; o.z = (p).z; o.w = (p).w
@@ -40,7 +40,7 @@ struct Vec {
 #define VSUB(o, a, b) Vec o; o.x = a.x - b.x; o.y = a.y - b.y; o.z = a.z - b.z
 #define VSET(d, s) d.x = s.x; d.y = s.y; d.z = s.z
 #define ROTATE(r, v) Vec r; r.x = v.y; r.y = v.z; r.z = v.w; r.w = v.x; v.x = r.x; v.y = r.y; v.z = r.z; v.w = r.w
-#define MXV_BEGIN(a, b, v) kv[0].x = a.x * v.x + b.x * v.y; kv[0].y = a.y * v.x + b.y * v.y; kv[0].z = a.z * v.x + b.z * v.y
+#define MXV_BEGIN(a, b, v) tmp.x = a.x * v.x + b.x * v.y; tmp.y = a.y * v.x + b.y * v.y; tmp.z = a.z * v.x + b.z * v.y
 
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
@@ -90,7 +90,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
     s32 arg1 = a1;
     s32 arg2 = a2;
-    Vec kv[6];
+    Vec kv[2];
+    Vec ident;
+    Vec tmp;
     s32 sp2038;
     s32 sp2034;
     s32 sp2030;
@@ -978,16 +980,16 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
 
 
-    kv[1].x = 0.0f;
-    kv[1].y = 0.0f;
-    kv[1].z = 0.0f;
-    kv[1].w = 1.0f;
-    kv[0].x = 0.0f;
-    kv[0].y = 0.0f;
-    kv[0].z = 0.0f;
-    kv[0].w = 0.0f;
-    SCALE_ROW(t[a + 9], kv[1].x + 12.0f);
-    SCALE_ROW(t[a + 10], kv[1].x + 12.0f);
+    ident.x = 0.0f;
+    ident.y = 0.0f;
+    ident.z = 0.0f;
+    ident.w = 1.0f;
+    tmp.x = 0.0f;
+    tmp.y = 0.0f;
+    tmp.z = 0.0f;
+    tmp.w = 0.0f;
+    SCALE_ROW(t[a + 9], ident.x + 12.0f);
+    SCALE_ROW(t[a + 10], ident.x + 12.0f);
     {
     rowA0 = &t[a];
     rowA1 = &t[a + 1];
@@ -1024,22 +1026,22 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC19 = &t[c + 19];
     rowC21 = &t[c + 21];
     temp_f31 = 0.0f;
-    kv[2].x = 1.4142135f;
-    kv[2].y = temp_f31 + 0.001f;
-    kv[2].z = temp_f31 + (temp_f31 + 500.0f);
-    kv[2].w = temp_f31 + 0.01f;
+    kv[0].x = 1.4142135f;
+    kv[0].y = temp_f31 + 0.001f;
+    kv[0].z = temp_f31 + (temp_f31 + 500.0f);
+    kv[0].w = temp_f31 + 0.01f;
     rowC22 = &t[c + 22];
-    kv[3].x = (temp_f31 + (1.0f)) * (temp_f31 + 2.0f);
-    kv[3].y = temp_f31 + (2.0f * temp_f31);
-    kv[3].z = temp_f31 + (temp_f31 + 500000.0f);
-    kv[3].w = temp_f31 + -3.0f;
-    kv[4].x = temp_f31 + 3.0f;
-    kv[4].y = temp_f31 + -1.0f;
-    kv[4].z = (1.0f) * (temp_f31 + (1.0f));
-    kv[4].w = temp_f31 + -20.0f;
-    kv[5].x = temp_f31 + 20.0f;
-    kv[5].y = temp_f31 + -200.0f;
-    kv[5].z = temp_f31 + 200.0f;
+    kv[1].x = (temp_f31 + (1.0f)) * (temp_f31 + 2.0f);
+    kv[1].y = temp_f31 + (2.0f * temp_f31);
+    kv[1].z = temp_f31 + (temp_f31 + 500000.0f);
+    kv[1].w = temp_f31 + -3.0f;
+    kv[2].x = temp_f31 + 3.0f;
+    kv[2].y = temp_f31 + -1.0f;
+    kv[2].z = (1.0f) * (temp_f31 + (1.0f));
+    kv[2].w = temp_f31 + -20.0f;
+    kv[3].x = temp_f31 + 20.0f;
+    kv[3].y = temp_f31 + -200.0f;
+    kv[3].z = temp_f31 + 200.0f;
     for (;;) {
         if (sp1F80 == 0) break;
         Vec V1C80(temp_f31 + 0.0192f);
@@ -1087,12 +1089,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V1AE0;
         V1AE0.y = V1AF0.y - V1C30.y;
         V1AF0.y = V1AE0.y;
-        Vec V1AD0(kv[5].z);
+        Vec V1AD0(kv[3].z);
         Vec V1AC0;
         V1AC0.x = V1BF0.x < V1AD0.x ? V1BF0.x : V1AD0.x;
         V1AC0.y = V1BF0.y < V1AD0.x ? V1BF0.y : V1AD0.x;
         V1AC0.z = V1BF0.z < V1AD0.x ? V1BF0.z : V1AD0.x;
-        Vec V1AB0(kv[5].y);
+        Vec V1AB0(kv[3].y);
         Vec V1AA0;
         V1AA0.x = V1AC0.x > V1AB0.x ? V1AC0.x : V1AB0.x;
         V1AA0.y = V1AC0.y > V1AB0.x ? V1AC0.y : V1AB0.x;
@@ -1100,12 +1102,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1BF0.x = V1AA0.x;
         V1BF0.y = V1AA0.y;
         V1BF0.z = V1AA0.z;
-        Vec V1A90(kv[5].x);
+        Vec V1A90(kv[3].x);
         Vec V1A80;
         V1A80.x = V1BD0.x < V1A90.x ? V1BD0.x : V1A90.x;
         V1A80.y = V1BD0.y < V1A90.x ? V1BD0.y : V1A90.x;
         V1A80.z = V1BD0.z < V1A90.x ? V1BD0.z : V1A90.x;
-        Vec V1A70(kv[4].w);
+        Vec V1A70(kv[2].w);
         Vec V1A60;
         V1A60.x = V1A80.x > V1A70.x ? V1A80.x : V1A70.x;
         V1A60.y = V1A80.y > V1A70.x ? V1A80.y : V1A70.x;
@@ -1152,13 +1154,13 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V19A0.x = V19B0.x * V19D0.x;
         V19A0.y = V19B0.y * V19D0.y;
         V19A0.z = V19B0.z * V19D0.z;
-        kv[0].x = (V1B90.x * V19A0.x) + (V1B70.x * V19A0.y);
-        kv[0].y = (V1B90.y * V19A0.x) + (V1B70.y * V19A0.y);
-        kv[0].z = (V1B90.z * V19A0.x) + (V1B70.z * V19A0.y);
+        tmp.x = (V1B90.x * V19A0.x) + (V1B70.x * V19A0.y);
+        tmp.y = (V1B90.y * V19A0.x) + (V1B70.y * V19A0.y);
+        tmp.z = (V1B90.z * V19A0.x) + (V1B70.z * V19A0.y);
         Vec V1990;
-        V1990.x = kv[0].x + (V1B50.x * V19A0.z);
-        V1990.y = kv[0].y + (V1B50.y * V19A0.z);
-        V1990.z = kv[0].z + (V1B50.z * V19A0.z);
+        V1990.x = tmp.x + (V1B50.x * V19A0.z);
+        V1990.y = tmp.y + (V1B50.y * V19A0.z);
+        V1990.z = tmp.z + (V1B50.z * V19A0.z);
         Vec V1980;
         V1980.x = V1990.x * V1C50.w;
         V1980.y = V1990.y * V1C50.w;
@@ -1194,18 +1196,18 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1900.y = V1BB0.y * V1920.y;
         V1900.z = V1BB0.z * V1920.z;
         V1900.w = V1BB0.w * V1920.w;
-        kv[0].x = (V1BB0.y * V1920.z) + (V1BB0.x * V1920.w);
-        kv[0].y = (V1BB0.z * V1920.x) + (V1BB0.y * V1920.w);
-        kv[0].z = V1BB0.x * V1920.y;
-        kv[0].w = (V1900.w - V1900.z) - (kv[1].w * V1900.y);
-        kv[0].x = kv[0].x + (V1920.x * V1BB0.w);
-        kv[0].y = kv[0].y + (V1920.y * V1BB0.w);
-        kv[0].z = kv[0].z + (V1BB0.z * V1920.w) + (V1920.z * V1BB0.w);
+        tmp.x = (V1BB0.y * V1920.z) + (V1BB0.x * V1920.w);
+        tmp.y = (V1BB0.z * V1920.x) + (V1BB0.y * V1920.w);
+        tmp.z = V1BB0.x * V1920.y;
+        tmp.w = (V1900.w - V1900.z) - (ident.w * V1900.y);
+        tmp.x = tmp.x + (V1920.x * V1BB0.w);
+        tmp.y = tmp.y + (V1920.y * V1BB0.w);
+        tmp.z = tmp.z + (V1BB0.z * V1920.w) + (V1920.z * V1BB0.w);
         Vec V18F0;
-        V18F0.x = kv[0].x - (V1920.y * V1BB0.z);
-        V18F0.y = kv[0].y - (V1920.z * V1BB0.x);
-        V18F0.z = kv[0].z - (V1920.x * V1BB0.y);
-        V18F0.w = kv[0].w - (kv[1].w * V1900.x);
+        V18F0.x = tmp.x - (V1920.y * V1BB0.z);
+        V18F0.y = tmp.y - (V1920.z * V1BB0.x);
+        V18F0.z = tmp.z - (V1920.x * V1BB0.y);
+        V18F0.w = tmp.w - (ident.w * V1900.x);
         Vec V18E0;
         V18E0.x = V18F0.x;
         V18E0.y = V18F0.y;
@@ -1229,7 +1231,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1900.z = V1BB0.z * V1BB0.z;
         V1900.w = V1BB0.w * V1BB0.w;
         V1900.x = (((V1BB0.x * V1BB0.x) + V1900.y) + V1900.z) + V1900.w;
-        temp_f4_7 = kv[1].w / fn_8002B0B0(V1900.x);
+        temp_f4_7 = ident.w / fn_8002B0B0(V1900.x);
         V18F0.x = V1BB0.x * temp_f4_7;
         V18F0.y = V1BB0.y * temp_f4_7;
         V18F0.z = V1BB0.z * temp_f4_7;
@@ -1242,13 +1244,13 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B70.w = V1B90.w;
         V1B50.w = V1B70.w;
         Vec V18B0;
-        V1900.x = V18F0.x * kv[2].x;
-        V1900.y = V18F0.y * kv[2].x;
-        V1900.z = V18F0.z * kv[2].x;
+        V1900.x = V18F0.x * kv[0].x;
+        V1900.y = V18F0.y * kv[0].x;
+        V1900.z = V18F0.z * kv[0].x;
         V18B0.x = (V18F0.x * V18F0.x) + (V18F0.x * V18F0.x);
         V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
         V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
-        temp_f16_6 = V18F0.w * kv[2].x;
+        temp_f16_6 = V18F0.w * kv[0].x;
         Vec V18A0(temp_f31 + 1.0f);
         V18A0.y = V18A0.x;
         V18A0.z = V18A0.y;
@@ -1259,20 +1261,20 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V1880;
         V1880.x = (V1900.y * V1900.z) + (V1900.x * temp_f16_6);
         V1880.z = (V1900.x * V1900.y) + (V1900.z * temp_f16_6);
-        kv[0].x = V18A0.z - ((temp_f31 + 1.0f) * V18B0.y);
-        kv[0].y = V18A0.z - (V18A0.z * V18B0.x);
-        V1B90.x = kv[0].x - (V18A0.z * V18B0.z);
+        tmp.x = V18A0.z - ((temp_f31 + 1.0f) * V18B0.y);
+        tmp.y = V18A0.z - (V18A0.z * V18B0.x);
+        V1B90.x = tmp.x - (V18A0.z * V18B0.z);
         V1B90.y = V1890.z;
         V1B90.z = V1B50.w + ((V1900.z * V1900.x) + (V1900.y * temp_f16_6));
-        V1B70.y = kv[0].y - (V18A0.z * V18B0.z);
+        V1B70.y = tmp.y - (V18A0.z * V18B0.z);
         V1900.w = V1890.x;
-        kv[0].z = kv[0].y;
+        tmp.z = tmp.y;
         V1B70.z = V1900.w;
         V1880.y = V1880.z;
         V1B70.x = V1880.y;
         V1B50.x = V1890.y;
         V1B50.y = V1B50.w + V1880.x;
-        V1B50.z = kv[0].z - ((temp_f31 + 1.0f) * V18B0.y);
+        V1B50.z = tmp.z - ((temp_f31 + 1.0f) * V18B0.y);
         Vec V1870(V1BF0);
         rowA5->x = V1870.x;
         rowA5->y = V1870.y;
@@ -1663,7 +1665,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V14B0.x = V14D0.x;
         var_f18 = V14C0.x < V14B0.x ? V14C0.x : V14B0.x;
         V14A0.x = var_f18;
-        V1490.x = kv[4].y;
+        V1490.x = kv[2].y;
         var_f2_5 = var_f18;
         var_f2_5 = var_f2_5 > V1490.x ? var_f2_5 : V1490.x;
         V1480.x = var_f2_5;
@@ -1673,7 +1675,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         temp_f1_14 = fn_8002B0A0(V1450.w);
         V1440.w = temp_f1_14;
         V1430.x = V14B0.x;
-        V1420.w = kv[4].z;
+        V1420.w = kv[2].z;
         var_f6 = temp_f1_14;
         var_f6 = var_f6 < V1420.w ? var_f6 : V1420.w;
         V1410.w = var_f6;
@@ -2098,9 +2100,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0CE0.y = V0CF0.y;
             V1900.y = (V0CB0.y * V0CB0.y);
             CROSS_BEGIN(V0D60, V0D50);
-            V0D40.x = (kv[0].x - (V0D50.y * V0D60.z));
-            V0D40.y = (kv[0].y - (V0D50.z * V0D60.x));
-            V0D40.z = (kv[0].z - (V0D50.x * V0D60.y));
+            V0D40.x = (tmp.x - (V0D50.y * V0D60.z));
+            V0D40.y = (tmp.y - (V0D50.z * V0D60.x));
+            V0D40.z = (tmp.z - (V0D50.x * V0D60.y));
             V0D10.x = (V0D20.x + V0D40.x);
             V0D10.y = (V0D20.y + V0D40.y);
             V0D10.z = (V0D20.z + V0D40.z);
@@ -2109,9 +2111,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0CE0.x = V0CF0.x;
             V0CE0.z = V0CF0.z;
             V1900.z = (V0CB0.z * V0CB0.z);
-            V18F0.w = (kv[1].w - kv[1].w);
+            V18F0.w = (ident.w - ident.w);
             V1900.x = (((V0CB0.x * V0CB0.x) + V1900.y) + V1900.z);
-            f32 inv = kv[1].w / fn_8002B0B0(V1900.x);
+            f32 inv = ident.w / fn_8002B0B0(V1900.x);
             V18F0.x = (V0CB0.x * inv);
             V18F0.y = (V0CB0.y * inv);
             V18F0.z = (V0CB0.z * inv);
@@ -2126,9 +2128,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSUB(V0C50, V0D80, V0C60);
             DOT_BEGIN(V0C80, V0C50);
             Vec V0C40(((V19E0.x + V19E0.y) + V19E0.z));
-            Vec V0C30(kv[4].x);
+            Vec V0C30(kv[2].x);
             Vec V0C20((V0C40.x < V0C30.x ? V0C40.x : V0C30.x));
-            Vec V0C10(kv[3].w);
+            Vec V0C10(kv[1].w);
             Vec V0C00((V0C20.x > V0C10.x ? V0C20.x : V0C10.x));
             VSCALE(V0BF0, V0C80, V0C00.x);
             VSUB(V0BE0, V0D80, V0BF0);
@@ -2166,12 +2168,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0AB0.x = (V0AD0.x * V0AC0.x);
             V0AA0.y = (V0AE0.y - V0AB0.x);
             Vec V0A80;
-            V0A80.y = kv[3].z;
+            V0A80.y = kv[1].z;
             Vec V0A70;
             V0A70.y = (V0AA0.y < V0A80.y ? V0AA0.y : V0A80.y);
             Vec V0A60(V0BA0.x);
             Vec V0A50;
-            V0A50.y = kv[3].y;
+            V0A50.y = kv[1].y;
             Vec V0A40;
             V0A40.y = (V0A70.y > V0A50.y ? V0A70.y : V0A50.y);
             Vec V0A30;
@@ -2199,7 +2201,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0960(fn_8002B0A0(V0970.x));
             Vec V0950(V0B50.x);
             Vec V0940((temp_f31 + 2.0f));
-            Vec V0930(kv[3].x);
+            Vec V0930(kv[1].x);
             Vec V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
@@ -2226,7 +2228,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0840;
             V0840.y = (V0850.y * V0A30.y);
             Vec V0830((V0850.x + V0840.y));
-            Vec V0820(kv[2].w);
+            Vec V0820(kv[0].w);
             Vec V0810((V0830.x > V0820.x ? V0830.x : V0820.x));
             Vec V0800;
             V0800.y = (temp_f31 + V0810.x);
@@ -2240,7 +2242,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V07C0.y = (V0A30.y * V0800.y);
             Vec V07B0((temp_f31 + 500.0f));
             Vec V07A0;
-            V07A0.y = kv[2].z;
+            V07A0.y = kv[0].z;
             Vec V0790;
             V0790.y = (V07C0.y > V07A0.y ? V07C0.y : V07A0.y);
             Vec V0780;
@@ -2250,11 +2252,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             DOT_BEGIN(V0980, V0980);
             Vec V0760(((V19E0.x + V19E0.y) + V19E0.z));
             Vec V0750((temp_f31 + fn_8002B0B0(V0760.x)));
-            Vec V0740(kv[2].y);
+            Vec V0740(kv[0].y);
             Vec V0730((V0750.x > V0740.x ? V0750.x : V0740.x));
             Vec V0720(V0730.x);
             Vec V0710;
-            V0710.w = (kv[1].w * V0720.x);
+            V0710.w = (ident.w * V0720.x);
             Vec V0700(V0950.x);
             Vec V06F0((temp_f31 + (V0700.x / V0720.x)));
             Vec V06E0;
@@ -2293,7 +2295,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0520(V0A60.x);
             Vec V0510((V0530.x > V0520.x ? V0530.x : V0520.x));
             Vec V0500;
-            V0500.w = (kv[1].w * V0510.x);
+            V0500.w = (ident.w * V0510.x);
             Vec V04F0;
             V04F0.w = (V0500.w * V0620.y);
             Vec V04E0(V0540.x);
@@ -2323,11 +2325,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0A10.z = V0430.z;
             CROSS_BEGIN(V0BB0, V0440);
             Vec V0420;
-            V0420.x = (kv[0].x - (V0440.y * V0BB0.z));
+            V0420.x = (tmp.x - (V0440.y * V0BB0.z));
             V19E0.x = (V0420.x * V0CB0.x);
-            V0420.y = (kv[0].y - (V0440.z * V0BB0.x));
+            V0420.y = (tmp.y - (V0440.z * V0BB0.x));
             V19E0.y = (V0420.y * V0CB0.y);
-            V0420.z = (kv[0].z - (V0440.x * V0BB0.y));
+            V0420.z = (tmp.z - (V0440.x * V0BB0.y));
             V19E0.z = (V0420.z * V0CB0.z);
             Vec V0410(((V19E0.x + V19E0.y) + V19E0.z));
             Vec V0400((V1300.x + V0410.x));
@@ -2541,8 +2543,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA10->z = V00B0.z;
         }
     }
-        SCALE_ROW(t[a + 9], kv[1].x + 0.08333f);
-        SCALE_ROW(t[a + 10], kv[1].x + 0.08333f);
+        SCALE_ROW(t[a + 9], ident.x + 0.08333f);
+        SCALE_ROW(t[a + 10], ident.x + 0.08333f);
     }
 }
 #undef F
