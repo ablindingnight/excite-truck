@@ -601,8 +601,8 @@ void fn_800C1C1C(s32* in, s32* out) {
     out[2] = d - (m + b);
     out[3] = h;
     out[4] = m - b - c;
-    out[5] = a - e - f;
     out[6] = x4 * -2 + u;
+    out[5] = a - e - f;
     out[7] = a + (g + e);
     out[8] = m + (c + d);
 }

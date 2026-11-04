@@ -2626,10 +2626,10 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     s32 var_r0_2;
     s32 var_r5_3;
     s32 var_r0_3;
+    u32 temp_r9;
     u32 temp_r10;
     u32 temp_r5;
     u32 temp_r5_2;
-    u32 temp_r9;
     u32 var_r0;
     u32 var_r24_2;
     u32 var_r3;

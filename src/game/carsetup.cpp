@@ -173,9 +173,9 @@ void fn_80279D40(CarSetup* s) {
 }
 
 void fn_80279F58(CarSetup* s, ValueTable* t) {
-    ValueNode* tr;
     ValueNode* c;
     int i;
+    ValueNode* tr;
     ValueNode* e;
     fn_80279D40(s);
     c = t->FindChild("Chassis");
