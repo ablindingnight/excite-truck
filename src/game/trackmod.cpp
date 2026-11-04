@@ -1171,29 +1171,31 @@ int ScrollList::Kind(void) { return 3; }
 void ScrollList::Draw(void* ctx) {}
 
 void ScrollList::Draw2(void* ctx) {
+    f32 uv[2];
+    f32 m[4][3];
     f32 t = fn_801E7E18();
-    f32 m[3][4];
-    int i;
-    m[0][0] = 1.0f;
-    m[0][1] = 0.0f;
-    m[0][2] = 0.0f;
-    m[0][3] = 0.0f;
-    m[1][0] = 0.0f;
-    m[1][1] = 1.0f;
-    m[1][2] = 0.0f;
-    m[1][3] = 0.0f;
-    m[2][0] = 0.0f;
-    m[2][1] = 0.0f;
-    m[2][2] = 1.0f;
-    m[2][3] = 0.0f;
-    for (i = 0; i < count; i++) {
+    f32 zero = 0.0f;
+    f32 one = 1.0f;
+    m[0][1] = zero;
+    m[0][0] = one;
+    m[0][2] = zero;
+    m[1][0] = zero;
+    m[1][1] = one;
+    m[1][2] = zero;
+    m[2][0] = zero;
+    m[2][1] = zero;
+    m[2][2] = one;
+    m[3][0] = zero;
+    m[3][1] = zero;
+    m[3][2] = zero;
+    for (int i = 0; i < count; i++) {
         if (fn_802CDB20(ctx, scrolls[i].id)) {
-            f32 fv;
-            f32 u = scrolls[i].u * t;
-            f32 v = scrolls[i].v * t;
-            fv = fmod(v, 1.0);
-            f32 fu = fmod(u, 1.0);
-            fn_802C70AC(scrolls[i].model, m, (s32)fn_802C7A3C(fu, fv, 100000.0f), -1);
+            f32 v = scrolls[i].v;
+            f32 u = scrolls[i].u;
+            uv[1] = v * t;
+            uv[0] = u * t;
+            f32 fv = fmod(uv[1], 1.0);
+            fn_802C70AC(scrolls[i].model, (f32*)m, (s32)fn_802C7A3C(fmod(uv[0], 1.0), fv, 100000.0f), -1);
         }
     }
 }

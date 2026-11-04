@@ -926,19 +926,20 @@ void HermitePathTMH::Unk1C(void) {
 
 extern "C" {
 void fn_801FE88C(HermitePathTMH* t, HermiteEntry* e) {
-    static char starts[] = "init\0interval";
-    static char finishes[] = "loop\0reverse\0restock";
+    const char* starts = "init\0interval";
+    const char* finishes = "loop\0reverse\0restock";
     ValueNode* vn = fn_802AE414(e->data->name);
     if (!vn) {
         fn_802E317C("path: hermite paths must have an entry in some trkefx file");
     }
     strncpy(e->pool, vn->GetValue("pool"), 0x10);
     e->pool[15] = 0;
-    e->start = vn->GetEnum("start", "init\0interval");
-    e->finish = vn->GetEnum("finish", "loop\0reverse\0restock");
+    e->start = vn->GetEnum("start", starts);
+    e->finish = vn->GetEnum("finish", finishes);
     if (e->start == 1) {
         e->intervalMin = vn->GetFloat("interval_min");
-        e->intervalMax = vn->GetFloat("interval_max");
+        f32 max = vn->GetFloat("interval_max");
+        e->intervalMax = max;
         e->timer = 0.0f;
     }
 }
