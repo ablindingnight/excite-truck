@@ -3,6 +3,13 @@
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
 #include "types.h"
+#include "game/common.h"
+
+// Compiled as C++ (2026-11-03): the unit owns a ModuleTag, registered by its static initializer (the 8-byte
+// function after the code, formerly the separate split unk_8020F3AC). The functions keep C linkage.
+ModuleTag lbl_8055EEA8;
+
+extern "C" {
 // Code of main that had no source file yet: decomp.wtf gave it this one.
 // split_file divides it into the game's real files (file_status shows its range).
 
@@ -643,3 +650,5 @@ extern const float lbl_805633DC;
 extern const float lbl_805633F4;
 extern const float lbl_805633F8;
 extern const float lbl_805633FC;
+
+}  // extern "C"
