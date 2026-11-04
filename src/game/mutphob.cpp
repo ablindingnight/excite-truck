@@ -102,7 +102,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void);    // 0x3C
-    virtual void SetId(int id);  // 0x40
+    virtual void SetSurface(int id);  // 0x40
     CollVolume* owner;  // offset 0x4
     s32 a8;             // offset 0x8
     const RMtx* mtx;    // offset 0xC
@@ -610,7 +610,7 @@ void fn_801D4294(MutPhob* p, const PhobConfig* c) {
         fn_802E317C("mut_phob: invalid type %d", c->kind);
         break;
     }
-    p->shape->SetId(c->surf);
+    p->shape->SetSurface(c->surf);
     p->b1E9 = c->groundTest;
     p->SetActive(1);
 }

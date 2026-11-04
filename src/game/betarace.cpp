@@ -2924,7 +2924,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void) = 0;  // 0x3C
-    virtual void SetMass(int m) { x20 = m; }  // 0x40
+    virtual void SetSurface(int m) { x20 = m; }  // 0x40 (surface/material id, 100 by default)
     virtual void vf44(void);
     virtual void vf48(void);
     virtual void vf4C(void);
@@ -3185,7 +3185,7 @@ inline Pickup::Pickup(ValueNode* n) {
         hz = 1.0f + 1.5f * (box[5] - box[4]) * 0.5f;
         hy = 1.0f + (box[3] - box[2]);
         vol = new ("spinvol") BoxShape(hx, hy, hx);
-        vol->SetMass(1000);
+        vol->SetSurface(1000);
         hC0 = fn_801FB1F4(1);
         hB8 = fn_801FA8E0(vol, m, hC0);
         vol->half[0] = hx;

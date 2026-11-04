@@ -5779,7 +5779,7 @@ Add__49FixedList<PQ222@unnamed@betarace_cpp@6Pickup,128>FRCPQ222@unnamed@betarac
 __ct__Q222@unnamed@betarace_cpp@6PickupFP9ValueNode = .text:0x8015011C; // type:function size:0x9BC
 __dt__9CollShapeFv = .text:0x80150AD8; // type:function size:0x40 scope:weak
 __dt__13CollShapeBaseFv = .text:0x80150B18; // type:function size:0x40 scope:weak
-SetMass__9CollShapeFi = .text:0x80150B58; // type:function size:0x8 scope:weak
+SetSurface__9CollShapeFi = .text:0x80150B58; // type:function size:0x8 scope:weak
 vf10__Q222@unnamed@betarace_cpp@10BetaMasterFv = .text:0x80150B60; // type:function size:0x7C
 vf0C__Q222@unnamed@betarace_cpp@10BetaMasterFv = .text:0x80150BDC; // type:function size:0xA28
 Ready__5TokenFv = .text:0x80151604; // type:function size:0x8 scope:weak
