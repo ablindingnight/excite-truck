@@ -1425,8 +1425,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
     }
     fn_802733F4(c);
     if (c->lastCar != c->car) {
-        c->lastCar = c->car;
         c->b139 = 1;
+        c->lastCar = c->car;
         c->b138 = 1;
     }
     if (c->b138) {
