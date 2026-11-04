@@ -640,10 +640,13 @@ ILPos fn_80136468(LineFollower* f, f32 m) {
         return ILPos();
     }
     mode = f->il.mode;
+    const f32* len;
     if (m > 0.0f) {
-        m = fmod(m, l->len[0]);
+        len = &l->len[0];
+        m = fmod(m, *len);
     } else {
-        m = l->len[0] - (f32)fmod(-m, l->len[0]);
+        len = &l->len[0];
+        m = *len - (f32)fmod(-m, *len);
     }
     s = l->points;
     for (i = 10000;;) {
@@ -653,7 +656,7 @@ ILPos fn_80136468(LineFollower* f, f32 m) {
         }
         s = n;
         if (--i <= 0) {
-            fn_802E30C8("CenterLine::convert_meters_to_ilpos(%f/%f) mode %d: INSANE", m, l->len[0], mode);
+            fn_802E30C8("CenterLine::convert_meters_to_ilpos(%f/%f) mode %d: INSANE", m, *len, mode);
             s = f->line->points;
             m = 0.0f;
             break;

@@ -162,9 +162,10 @@ AnimInst* fn_801E6A3C(const char* name, int streaming, int flags) {
         b->q1.w = 1.0f;
         b->t1 = 0.0f;
         b->t0 = 0.0f;
-        a->pose[i].x = 0.0f;
-        a->pose[i].y = 0.0f;
-        a->pose[i].z = 0.0f;
+        AQuat* p = &a->pose[i];
+        p->x = 0.0f;
+        p->y = 0.0f;
+        p->z = 0.0f;
         a->pose[i].w = 1.0f;
     }
     return a;
