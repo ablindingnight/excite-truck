@@ -286,10 +286,10 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
     s16 ch;
     s16 sb;
     u32 flags;
-    s32* pa;
     s32* pb;
-    s32* pc;
+    s32* pa;
     s32* pc2;
+    s32* pc;
     s32* p;
     s32* outbuf2;
     s32 t0, t1;
@@ -304,8 +304,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
             if (flags & 1) {
                 pa = work[0];
                 pc2 = outbuf2;
-                pc = outbuf;
                 pb = prev;
+                pc = outbuf;
                 for (sb = 0; sb < d->band_count; sb++) {
                     fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
                     if (!(sb & 1)) {
@@ -315,9 +315,9 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                     }
                     fn_800C2DBC(pa + 18, pb, pb + 17);
                     pa += 36;
+                    pb += 18;
                     pc2++;
                     pc++;
-                    pb += 18;
                 }
             } else {
                 pa = work[0];
@@ -344,8 +344,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                     }
                     pa += 36;
                     pc2++;
-                    pc++;
                     pb += 18;
+                    pc++;
                 }
             }
         } else if (flags & 8) {
@@ -385,8 +385,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                 fn_800C3088(pa, tmp0, tmp1, tmp2);
                 pa += 36;
             }
-            pb = prev;
             pa = work[0];
+            pb = prev;
             pc = outbuf;
             for (sb = 0; sb < d->band_count; sb++) {
                 if (!(sb & 1)) {
@@ -432,8 +432,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                 fn_800C3088(pa, tmp0, tmp1, tmp2);
                 pa += 36;
             }
-            pb = prev;
             pa = work[0];
+            pb = prev;
             pc = outbuf;
             for (sb = 0; sb < d->band_count; sb++) {
                 if (!(sb & 1)) {
@@ -613,11 +613,15 @@ void fn_800C1C1C(s32* in, s32* out) {
  * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
  * but the original adds each low product word (addc) before computing its high word (mulhw). */
 void fn_800C1E88(s32* coeff, s32* input, s32* output) {
+    s32 c3;
+    s32 c2;
+    s32 c0;
     s32 n;
-    s32 c0 = coeff[0];
-    s32 c1 = coeff[1];
-    s32 c2 = coeff[2];
-    s32 c3 = coeff[3];
+    s32 c1;
+    c1 = coeff[1];
+    c0 = coeff[0];
+    c2 = coeff[2];
+    c3 = coeff[3];
 
     for (n = 0; n < 4; n++) {
         s64 acc;
@@ -626,7 +630,7 @@ void fn_800C1E88(s32* coeff, s32* input, s32* output) {
         acc += (s64)input[0] * c0;
         acc += (s64)input[1] * c1;
         acc += (s64)input[2] * c2;
-        acc += (s64)input[3] * c3;
+        acc = acc + (s64)input[3] * c3;
         acc += (s64)input[4] * coeff[4];
         acc += (s64)input[5] * coeff[5];
 
@@ -751,8 +755,8 @@ void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     s32* w = lbl_8031D670;
     s32 x, c0, c1, y0, y1;
 
-    x = cur[0];
     c0 = *w++;
+    x = cur[0];
     c1 = *w++;
     y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
@@ -779,8 +783,8 @@ void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-192] = (s32)(((s64)x * c1) >> 20) + prev[14];
     x = cur[4];
     c0 = *w++;
-    c1 = *w++;
     out1[256] = (s32)(((s64)x * c0) >> 20) + prev[4];
+    c1 = *w++;
     out2[-256] = (s32)(((s64)x * c1) >> 20) + prev[13];
     x = cur[5];
     c0 = *w++;
@@ -842,8 +846,8 @@ void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
     out2[-192] = y1 + prev[14];
     x = cur[4];
     c0 = *w++;
-    c1 = *w++;
     out1[256] = (s32)(((s64)x * c0) >> 20) + prev[4];
+    c1 = *w++;
     out2[-256] = (s32)(((s64)x * c1) >> 20) - prev[13];
     x = cur[5];
     c0 = *w++;
@@ -937,21 +941,21 @@ void fn_800C2C18(s32* cur, s32* prev, s32* out1, s32* out2) {
     c0 = *w++;
     c1 = *w++;
     y0 = (s32)(((s64)x * c0) >> 20);
-    y1 = (s32)(((s64)x * c1) >> 20);
     out1[384] = (y0 + prev[6]);
+    y1 = (s32)(((s64)x * c1) >> 20);
     out2[-384] = -(y1 + *pp--);
-    x = cur[7];
     c0 = w[0];
-    c1 = w[1];
+    x = cur[7];
     y0 = (s32)(((s64)x * c0) >> 20);
     out1[448] = -(y0 + prev[7]);
+    c1 = w[1];
     y1 = (s32)(((s64)x * c1) >> 20);
     out2[-448] = (y1 + *pp--);
+    c1 = w[3];
     x = cur[8];
     c0 = w[2];
-    c1 = w[3];
-    y0 = (s32)(((s64)x * c0) >> 20);
     y1 = (s32)(((s64)x * c1) >> 20);
+    y0 = (s32)(((s64)x * c0) >> 20);
     out1[512] = (y0 + prev[8]);
     out2[-512] = -(y1 + *pp--);
 }
@@ -1187,60 +1191,60 @@ void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
     s32 lo, hi;
 
     for (j = 0; j < 15; j++) {
-        a = 0;
         b = 0;
+        a = 0;
         lo = v[pos & 0x3ff];
-        hi = v[(pos + 0x3e0) & 0x3ff];
+        hi = v[(0x3e0 + pos) & 0x3ff];
         a += (s64)hi * w[8];
         a += (s64)lo * w[0];
-        b += (s64)hi * -w[0];
+        b = b + ((s64)hi * -w[0]);
         b += (s64)lo * w[8];
-        lo = v[(pos + 0x60) & 0x3ff];
         hi = v[(pos + 0x380) & 0x3ff];
+        lo = v[(pos + 0x60) & 0x3ff];
         a += (s64)hi * -w[9];
-        a += (s64)lo * w[1];
         b += (s64)hi * w[1];
+        a += (s64)lo * w[1];
         b += (s64)lo * w[9];
         lo = v[(pos + 0x80) & 0x3ff];
-        hi = v[(pos + 0x360) & 0x3ff];
+        hi = v[(0x360 + pos) & 0x3ff];
         a += (s64)hi * w[10];
         a += (s64)lo * w[2];
         b += (s64)hi * -w[2];
         b += (s64)lo * w[10];
-        lo = v[(pos + 0xe0) & 0x3ff];
+        lo = v[(0xe0 + pos) & 0x3ff];
         hi = v[(pos + 0x300) & 0x3ff];
         a += (s64)hi * -w[11];
-        a += (s64)lo * w[3];
         b += (s64)hi * w[3];
         b += (s64)lo * w[11];
+        a += (s64)lo * w[3];
         lo = v[(pos + 0x100) & 0x3ff];
         hi = v[(pos + 0x2e0) & 0x3ff];
-        a += (s64)hi * w[12];
-        a += (s64)lo * w[4];
+        a = a + (s64)hi * w[12];
+        a = a + (s64)lo * w[4];
         b += (s64)hi * -w[4];
         b += (s64)lo * w[12];
         lo = v[(pos + 0x160) & 0x3ff];
         hi = v[(pos + 0x280) & 0x3ff];
-        a += (s64)hi * -w[13];
-        a += (s64)lo * w[5];
+        a = a + ((s64)hi * -w[13]);
         b += (s64)hi * w[5];
+        a += (s64)lo * w[5];
         b += (s64)lo * w[13];
         lo = v[(pos + 0x180) & 0x3ff];
         hi = v[(pos + 0x260) & 0x3ff];
         a += (s64)hi * w[14];
         a += (s64)lo * w[6];
         b += (s64)hi * -w[6];
-        b += (s64)lo * w[14];
+        b = b + (s64)lo * w[14];
         lo = v[(pos + 0x1e0) & 0x3ff];
-        hi = v[(pos + 0x200) & 0x3ff];
-        a += (s64)hi * -w[15];
-        a += (s64)lo * w[7];
-        b += (s64)hi * w[7];
+        hi = v[(0x200 + pos) & 0x3ff];
+        a = a + ((s64)hi * -w[15]);
+        a = a + (s64)lo * w[7];
+        b = b + (s64)hi * w[7];
         b += (s64)lo * w[15];
         sa = (s32)(a >> 25);
         sb = (s32)(b >> 25);
         if ((sa >> 31) != (sa >> 15)) sa = (sa >> 31) ^ 0x7FFF;
-        if ((sb >> 31) != (sb >> 15)) sb = (sb >> 31) ^ 0x7FFF;
+        if ((sb >> 31) != (sb >> 15)) sb = 0x7FFF ^ (sb >> 31);
         if (mode == 0) {
             ((s16*)out)[2 * j] = sa;
             ((s16*)out)[60 - 2 * j] = sb;
@@ -1249,7 +1253,7 @@ void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
             ((s16*)out)[30 - j] = sb;
         }
         pos++;
-        w += 16;
+        w = w + 16;
     }
 }
 
@@ -1799,8 +1803,8 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     s32 b[32];
     s32 r0;
     s32 r3;
-    s32 r4;
     s32 r5;
+    s32 r4;
     s32 r6;
     s32 r7;
     s32 r8;
@@ -1814,8 +1818,8 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r0 = b[0];
     r0 = -r0;
     out[48] = r0;
-    r4 = b[31];
     r3 = b[30];
+    r4 = b[31];
     r5 = b[24];
     r0 = b[28];
     r4 = r4 + r3;
@@ -1839,7 +1843,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r5 = b[22];
     r3 = r6 + r3;
     r5 = r5 + r3;
-    r3 = r5 + r0;
+    r3 = r0 + r5;
     r3 = -r3;
     out[45] = r3;
     r7 = b[7];
@@ -1855,7 +1859,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r3 = r6 + r3;
     r3 = r3 - r7;
     r0 = r0 + r3;
-    r3 = r5 + r0;
+    r3 = r0 + r5;
     r3 = -r3;
     out[43] = r3;
     r3 = b[10];
@@ -1895,7 +1899,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r3 = b[21];
     r3 = r3 - r6;
     r5 = r5 + r3;
-    r3 = r5 + r0;
+    r3 = r0 + r5;
     r3 = -r3;
     out[37] = r3;
     r7 = b[7];
@@ -1911,7 +1915,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r3 = r3 - r6;
     r3 = r3 - r7;
     r0 = r0 + r3;
-    r3 = r5 + r0;
+    r3 = r0 + r5;
     out[35] = -r3;
     r8 = b[10];
     r7 = 0x0;
@@ -1940,7 +1944,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     out[2] = r4;
     r4 = b[22];
     r5 = r5 - r4;
-    r4 = r5 + r0;
+    r4 = r0 + r5;
     out[3] = r4;
     r8 = b[5];
     r4 = b[7];
@@ -1950,7 +1954,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     r4 = b[27];
     r4 = r4 - r8;
     r0 = r0 + r4;
-    r4 = r5 + r0;
+    r4 = r0 + r5;
     out[5] = r4;
     r8 = b[15];
     r4 = b[11];
@@ -2178,14 +2182,14 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
         left = g[0].xr;
         right = g[1].xr;
         for (i = 0; i < 36; i++) {
-            a = *left;
             b = *right;
+            a = *left;
             *(left++) = a + b;
             *(right++) = a - b;
         }
 
-        left = (s32 *) (((u8 *) g) + 0x30);
         right = (s32 *) (((u8 *) g) + 0x2430);
+        left = (s32 *) (((u8 *) g) + 0x30);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
@@ -2193,8 +2197,8 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
             *(right++) = a - b;
         }
 
-        left = (s32 *) (((u8 *) g) + 0x930);
         right = (s32 *) (((u8 *) g) + 0x2D30);
+        left = (s32 *) (((u8 *) g) + 0x930);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
@@ -2202,8 +2206,8 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
             *(right++) = a - b;
         }
 
-        left = (s32 *) (((u8 *) g) + 0x1230);
         right = (s32 *) (((u8 *) g) + 0x3630);
+        left = (s32 *) (((u8 *) g) + 0x1230);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
@@ -2222,8 +2226,8 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
             *(right++) = a - b;
         }
 
-        left = (s32 *) (((u8 *) g) + 0x0900);
         right = (s32 *) (((u8 *) g) + 0x2D00);
+        left = (s32 *) (((u8 *) g) + 0x0900);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;
@@ -2231,8 +2235,8 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
             *(right++) = a - b;
         }
 
-        left = (s32 *) (((u8 *) g) + 0x1200);
         right = (s32 *) (((u8 *) g) + 0x3600);
+        left = (s32 *) (((u8 *) g) + 0x1200);
         for (i = 0; i < count1; i++) {
             a = *left;
             b = *right;

@@ -97,13 +97,17 @@ void fn_80278A28(LayoutBone* b) {
 
 void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, const char* car) {
     if (boneTable) {
+        int w;
+        LayoutLink* lk;
+        int n;
+        int i;
         l->numBones = 0;
         l->bones[0].id = 0;
-        for (int i = 1; i < 162; i++) {
-            char key[0x20];
+        for (i = 1; i < 162; i++) {
             LayoutBone* b;
-            ValueNode* mod;
             ValueNode* node;
+            ValueNode* mod;
+            char key[0x20];
             b = &l->bones[i];
             b->id = i;
             sprintf(key, "bone_%d", i);
@@ -111,8 +115,8 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
                 break;
             }
             node = (ValueNode*)boneTable->FindChild(key);
-            l->numBones = i + 1;
             mod = node;
+            l->numBones = 1 + i;
             if (modTable && modTable->HasChild(key)) {
                 mod = (ValueNode*)modTable->FindChild(key);
             }
@@ -128,10 +132,10 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
                 fn_80278A28(b);
             }
         }
-        l->numLinks = 0;
         ValueNode* child;
-        int n = 0;
-        while ((child = boneTable->GetChild(n++)) != NULL) {
+        l->numLinks = 0;
+        n = 0;
+        while (NULL != (child = boneTable->GetChild(n++))) {
             if (strcasecmp(child->GetName(), "link") == 0) {
                 l->numLinks++;
             }
@@ -139,9 +143,9 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
         l->links = new ("layout: boneconn") LayoutLink[l->numLinks];
         n = 0;
         l->numLinks = n;
-        while ((child = boneTable->GetChild(n++)) != NULL) {
+        while (NULL != (child = boneTable->GetChild(n++))) {
             if (strcasecmp(child->GetName(), "link") == 0) {
-                LayoutLink* lk = &l->links[l->numLinks++];
+                lk = &l->links[l->numLinks++];
                 lk->i = child->GetIntValue("i");
                 lk->j = child->GetIntValue("j");
                 lk->linear = child->GetFloat("linear");
@@ -155,12 +159,18 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
                 }
             }
         }
-        for (int w = 0; w < 4; w++) {
+        for (w = 0; w < 4; w++) {
+            ValueNode* node;
             const char* names[4] = {"lf", "rf", "lr", "rr"};
+            LayoutWheel* wh;
             char key[0x20];
             sprintf(key, "wheel_%s", names[w]);
-            ValueNode* node = boneTable->HasChild(key) ? (ValueNode*)boneTable->FindChild(key) : NULL;
-            LayoutWheel* wh = &l->wheels[w];
+            if (boneTable->HasChild(key)) {
+                node = (ValueNode*)boneTable->FindChild(key);
+            } else {
+                node = NULL;
+            }
+            wh = &l->wheels[w];
             memset(wh, 0, sizeof(LayoutWheel));
             if (node) {
                 wh->boneId = node->GetIntValue("bone_id");
@@ -178,24 +188,33 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
 }
 
 CarLayout* fn_80279004(const char* car, int unused) {
+    CarLayout* l;
+    ValueTable* mods;
+    ValueTable* bones;
+    int i;
     char path[0x80];
     char modPath[0x80];
-    char key[0x20];
-    CarLayout* l = new ("layout") CarLayout;
+    l = new ("layout") CarLayout;
     sprintf(path, "%s.car/physics.val", car);
+    char key[0x20];
     l->physicsTable = fn_80131808(path);
     sprintf(path, "%s.car/bone.mvl", car);
     if (!fn_8012C33C(path)) {
         sprintf(path, "%s.car/bone.val", car);
     }
-    ValueTable* bones = fn_80131808(path);
+    bones = fn_80131808(path);
     sprintf(modPath, "%s.car/bonemod.bvl", car);
-    ValueTable* mods = fn_8012C33C(modPath) ? fn_80131808(modPath) : NULL;
+    if (fn_8012C33C(modPath)) {
+        mods = fn_80131808(modPath);
+    } else {
+        mods = NULL;
+    }
     fn_80278A64(l, bones, mods, car);
     memset(l->bounds, 0, sizeof(l->bounds));
     if (bones->HasChild("bounds")) {
-        ValueNode* node = (ValueNode*)bones->FindChild("bounds");
-        for (int i = 0; i < 32; i++) {
+        ValueNode* node;
+        node = (ValueNode*)bones->FindChild("bounds");
+        for (i = 0; i < 32; i++) {
             sprintf(key, "min_%d", i);
             const ValVec3& mn = node->GetVec3(key);
             l->bounds[i].min.x = mn.x;
