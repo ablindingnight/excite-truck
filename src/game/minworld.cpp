@@ -251,26 +251,24 @@ void fn_80252C78(void) {
 
 void fn_80252C90(void) {
     MWWheels* w;
-    MWBody* b;
-    MWBody* bodies;
-    MWWheel* c;
-    MWWheels* wheels;
-    s32 d;
     int n;
-    MWContacts* contacts;
+    MWWheels* wheels;
+    MWWheel* c;
     int i;
+    MWContacts* contacts;
+    MWBody* bodies;
+    MWBody* b;
     MWSlot* s;
+    s32 d;
     fn_801BEDA8(&bodies, &wheels, &contacts, &d, &n);
     for (i = 0; i < n; i++) {
         fn_8025280C(&bodies[i], lbl_8055F300.speed);
     }
-    fn_801BEDD4();
     s = lbl_80498D00;
-    for (i = 0; i < n; i++, s++) {
+    fn_801BEDD4();
+    for (i = 0; n > i; i++, s++) {
         b = &bodies[i];
         w = &wheels[i];
-        c = contacts[i].w;
-        int j;
         s->mtx.pos.x = b->pos.x;
         s->mtx.pos.y = b->pos.y;
         s->mtx.pos.z = b->pos.z;
@@ -278,8 +276,10 @@ void fn_80252C90(void) {
         s->mtx.x.y = b->x.y;
         s->mtx.x.z = b->x.z;
         s->mtx.y.x = b->y.x;
+        c = contacts[i].w;
         s->mtx.y.y = b->y.y;
         s->mtx.y.z = b->y.z;
+        int j;
         s->mtx.z.x = b->z.x;
         s->mtx.z.y = b->z.y;
         s->mtx.z.z = b->z.z;
@@ -294,7 +294,7 @@ void fn_80252C90(void) {
         }
         for (j = 0; j < 4; j++) {
             s->spin[j] = fmod(6.2831855f + s->spin[j], 6.2831855f);
-            s->h[j] = w->drop[j] + c[j].pos.y;
+            s->h[j] = c[j].pos.y + w->drop[j];
         }
         for (j = 0; j < 4; j++) {
             w->spin[j] = s->spin[j];

@@ -1220,57 +1220,90 @@ static inline BOOL OptRumble(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 
 // then works out the force-feedback wobble from the wheels and the car's spin.
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
+    f32 cl;
     RVec3 at;
+    int i;
     RVec3 f;
+    f32 dir;
+    f32 c;
     RVec3 at2;
-    RVec3 f2;
+    f32 grip;
     f32 spin[9];
-    RVec3 w;
-    RVec3 u;
+    f32 side;
+    f32 st;
+    f32 air;
+    f32 s;
+    u8* car;
+    RVec3 f2;
     RumbleMsg msg;
-    f32 ia[2];
+    f32 wob;
+    RVec3 w;
+    f32 lim;
     f32 ib;
-    f32 ic;
+    RVec3 u;
+    int hold;
+    f32 yaw;
     fn_80191928(p);
+    f32 fwd;
+    f32 ia[2];
     lbl_8055E51C = VMag(fn_8018AE5C(PTR(p, 0x34)));
-    u8* car = PTR(p, 0x34);
-    f32 fwd = VDot(car + 0x118, car + 0x54);
+    f32 ic;
+    car = PTR(p, 0x34);
+    f32 rough;
+    fwd = VDot(car + 0x118, car + 0x54);
+    f32 sp;
+    f32 ga;
     ((Gearbox*)PTR(p, 0x38))->v64();
-    f32 dir = (U32(fn_801769CC(), 0x10) & 2) ? kNegOne : kOne;
+    f32 sum;
+    if (!((U32(fn_801769CC(), 0x10) & 2))) {
+        dir = kOne;
+    } else {
+        dir = kNegOne;
+    }
     ((Gearbox*)PTR(p, 0x38))->SetDir(fn_8018B084(PTR(p, 0x34)));
     lbl_8055E0D0->SortCar(S32(p, 0x3C));
     car = PTR(p, 0x34);
-    f32 sp = (f32)__fabs(VDot(car + 0x118, car + 0x54));
-    f32 st = ((Gearbox*)PTR(p, 0x38))->Steer(sp);
-    fn_8018ADA4(PTR(p, 0x34), dir * (kZero + st));
+    sp = (f32)__fabs(VDot(car + 0x118, car + 0x54));
+    f32 mag;
+    u8* c4;
+    st = ((Gearbox*)PTR(p, 0x38))->Steer(sp);
+    fn_8018ADA4(PTR(p, 0x34), dir * (st + kZero));
     if (((Gearbox*)PTR(p, 0x38))->Clutch() < lbl_805620D0) {
         fn_8018ADB4(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Throttle());
     } else {
         fn_8018ADB4(PTR(p, 0x34), kZero);
     }
     U8(PTR(p, 0x34), 0x260E) = ((Gearbox*)PTR(p, 0x38))->v30();
-    f32 air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : lbl_80562080;
+    air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : lbl_80562080;
     car = PTR(p, 0x34);
-    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && F32(car, 0x25F4) > lbl_805620D4 && fwd < lbl_805620D8 &&
+    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && lbl_805620D4 < F32(car, 0x25F4) && fwd < lbl_805620D8 &&
         S32(car, 0x2620) >= 3 && !lbl_8055E52A) {
+        f32 roll;
+        f32 boost;
+        f32 m;
         rx.x = F32(car, 0x54) + F32(car, 0x48) * kZero;
+        f32 g;
+        f32 steer;
         rx.y = F32(car, 0x58) + F32(car, 0x4C) * kZero;
         rx.z = F32(car, 0x5C) + F32(car, 0x50) * kZero;
-        f32 steer = MaxF(MinF(kOne, F32(PTR(p, 0x34), 0x25F0)), kNegOne);
-        u8* c2 = PTR(p, 0x34);
-        f32 boost = MinF(kOne, (F32(c2, 0x25D4) - lbl_805620DC) / lbl_805620E0);
+        f32 k;
+        steer = MaxF(MinF(kOne, F32(PTR(p, 0x34), 0x25F0)), kNegOne);
+        u8* c2;
+        c2 = PTR(p, 0x34);
+        boost = MinF(kOne, (F32(c2, 0x25D4) - lbl_805620DC) / lbl_805620E0);
         boost = MaxF(boost, kZero);
-        f32 roll = MaxF(MinF(kOne, lbl_805620E4 * (steer * -F32(c2, 0x128))), kZero);
-        f32 k = kOne - (kOne - kZero) * roll * (steer * steer);
+        roll = MaxF(MinF(kOne, (steer * -F32(c2, 0x128)) * lbl_805620E4), kZero);
+        k = kOne - (kOne - kZero) * roll * (steer * steer);
         rx.x *= k;
         rx.y *= k;
+        f32 slow;
         rx.z *= k;
-        f32 slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / lbl_805620A8), kZero);
-        f32 g = slow * (lbl_805620E8 * (steer * (f32)__fabs(steer)));
-        rx.x = rx.x + F32(car, 0x3C) * g;
+        slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / lbl_805620A8), kZero);
+        g = slow * (lbl_805620E8 * (steer * (f32)__fabs(steer)));
+        rx.x += g * F32(car, 0x3C);
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
-        f32 m = lbl_805620EC * air * F32(PTR(p, 0x34), 0x25F8);
+        m = lbl_805620EC * air * F32(PTR(p, 0x34), 0x25F8);
         rx.x *= m;
         rx.y *= m;
         rx.z *= m;
@@ -1291,17 +1324,22 @@ void PlayerDriver_vf48(u8* p) {
         ((RigidBody*)PTR(p, 0x34))->AddForceAt(&rx, &at);
     }
     if (S32(PTR(p, 0x34), 0x2620) >= 3 && ((Gearbox*)PTR(p, 0x38))->Speed() > lbl_805620C0) {
-        u8* c3 = PTR(p, 0x34);
-        f32 k = lbl_805620F4 * air;
-        f32 lean = F32(c3, 0x25F0);
+        f32 lean;
+        f32 q;
+        u8* c3;
+        f32 k;
+        c3 = PTR(p, 0x34);
+        lean = F32(c3, 0x25F0);
+        q = kOne - lean * lean;
         f.x = F32(c3, 0x54) + F32(c3, 0x48) * kZero;
-        f.y = F32(c3, 0x58) + F32(c3, 0x4C) * kZero;
-        f.z = F32(c3, 0x5C) + F32(c3, 0x50) * kZero;
+        f32 b;
+        f.y = F32(c3, 0x58) + kZero * F32(c3, 0x4C);
+        k = lbl_805620F4 * air;
+        f.z = F32(c3, 0x5C) + kZero * F32(c3, 0x50);
         f.x *= k;
         f.y *= k;
         f.z *= k;
-        f32 q = kOne - lean * lean;
-        f32 b = ((Gearbox*)PTR(p, 0x38))->Speed();
+        b = ((Gearbox*)PTR(p, 0x38))->Speed();
         f.x = f.x * b * q;
         f.y = f.y * b * q;
         f.z = f.z * b * q;
@@ -1320,11 +1358,11 @@ void PlayerDriver_vf48(u8* p) {
     fn_8018ADCC(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Clutch());
     fn_8018AE2C(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->v44());
     fn_8018AE34(PTR(p, 0x34), dir * ((Gearbox*)PTR(p, 0x38))->v48());
-    f32 cl = ((Gearbox*)PTR(p, 0x38))->v18();
+    cl = ((Gearbox*)PTR(p, 0x38))->v18();
     if (((Gearbox*)PTR(p, 0x38))->v34() || S32(p, 0x30) == 3) {
         fn_8018ADD4(PTR(p, 0x34), -1);
         car = PTR(p, 0x34);
-        if (VDot(car + 0x118, car + 0x54) < lbl_805620FC ||
+        if (VDot(car + 0x118, 0x54 + car) < lbl_805620FC ||
             ((Gearbox*)PTR(p, 0x38))->Throttle() > lbl_80562100) {
             fn_8018ADB4(PTR(p, 0x34), MaxF(kOne, ((Gearbox*)PTR(p, 0x38))->Throttle()));
         } else {
@@ -1343,10 +1381,11 @@ void PlayerDriver_vf48(u8* p) {
         fn_8018ADD4(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->v20());
         ((Gearbox*)PTR(p, 0x38))->SetGear(fn_8018B06C(PTR(p, 0x34)));
     }
-    f32 c = kOne - ((Gearbox*)PTR(p, 0x38))->Clutch();
+    c = kOne - ((Gearbox*)PTR(p, 0x38))->Clutch();
     fn_8018ADC4(PTR(p, 0x34), cl > c ? cl : c);
     if (lbl_8055E52B && ((Gearbox*)PTR(p, 0x38))->v3C()) {
-        int calm = (f32)__fabs(F32(PTR(p, 0x34), 0x2690)) <= lbl_80558DC4[0];
+        int calm;
+        calm = (f32)__fabs(F32(PTR(p, 0x34), 0x2690)) <= lbl_80558DC4[0];
         if (!lbl_8055E52C && (lbl_8055E52B || calm)) {
             fn_801B86A4(S32(p, 0x3C));
         }
@@ -1354,7 +1393,7 @@ void PlayerDriver_vf48(u8* p) {
     } else {
         lbl_8055E52C = 0;
     }
-    int hold = ((Gearbox*)PTR(p, 0x38))->Busy();
+    hold = ((Gearbox*)PTR(p, 0x38))->Busy();
     if (fn_801796B4() || fn_801796C4()) {
         fn_8018ADBC(PTR(p, 0x34), kOne);
         fn_8018ADB4(PTR(p, 0x34), kZero);
@@ -1367,7 +1406,8 @@ void PlayerDriver_vf48(u8* p) {
     } else {
         fn_8018AE24(PTR(p, 0x34), hold);
         if (OptRumble()) {
-            Rumble* r = fn_801D0BF8(S32(p, 0x3C), 0);
+            Rumble* r;
+            r = fn_801D0BF8(S32(p, 0x3C), 0);
             if (r) {
                 msg.pad = 0;
                 msg.kind = ((Gearbox*)PTR(p, 0x38))->Busy();
@@ -1382,59 +1422,82 @@ void PlayerDriver_vf48(u8* p) {
         fn_8018ADB4(PTR(p, 0x34), kZero);
         fn_8018ADA4(PTR(p, 0x34), kZero);
     }
-    f32 yaw = -VDot(p + 0x10, PTR(p, 0x34) + 0x3C);
-    f32 side = (f32)__fabs(VDot(p + 0x10, PTR(p, 0x34) + 0x54));
-    f32 s = yaw < kZero ? kNegOne : kOne;
-    ((f32*)(p + 0x20))[lbl_8055E3C4 % 4] = lbl_805620C0 * (yaw + s * (lbl_80562098 * side));
-    f32 sum = kZero;
-    f32 mag = kZero;
-    for (int i = 0; i < 4; i++) {
-        f32 h = ((f32*)(p + 0x20))[i];
-        sum += h;
-        mag += (f32)__fabs(h);
+    yaw = -VDot(p + 0x10, PTR(p, 0x34) + 0x3C);
+    side = (f32)__fabs(VDot(0x10 + p, PTR(p, 0x34) + 0x54));
+    if (yaw < kZero) {
+        s = kNegOne;
+    } else {
+        s = kOne;
     }
-    f32 wob = mag * (sum > kZero ? kOne : kNegOne);
+    sum = kZero;
+    mag = kZero;
+    ((f32*)(0x20 + p))[lbl_8055E3C4 % 4] = (yaw + s * (lbl_80562098 * side)) * lbl_805620C0;
+    for (i = 0; i < 4; i++) {
+        f32 h;
+        h = ((f32*)(p + 0x20))[i];
+        sum = sum + h;
+        mag = mag + (f32)__fabs(h);
+    }
+    wob = (sum > kZero ? kOne : kNegOne) * mag;
+    int odd;
+    f32 gb;
     wob *= F32(p, 0x1C);
-    u8* c4 = PTR(p, 0x34);
     wob *= lbl_80562108;
-    f32 grip = F32(c4, 0x24FC) + F32(c4, 0x2570);
-    f32 rough = VMag(c4 + 0x26B4);
-    f32 lim = MinF(kOne, lbl_805620BC * F32(PTR(p, 0x34), 0x264C));
+    c4 = PTR(p, 0x34);
+    grip = F32(c4, 0x2570) + F32(c4, 0x24FC);
+    rough = VMag(c4 + 0x26B4);
+    lim = MinF(kOne, F32(PTR(p, 0x34), 0x264C) * lbl_805620BC);
+    ga = lbl_8056210C * rough + lim;
     F32(p, 0x40) = lbl_80562110 * F32(p, 0x40) + lbl_80562114 * rough;
-    f32 ga = lbl_8056210C * rough + lim;
-    f32 gb = F32(p, 0x40) + lbl_80562118 * MaxF(MinF(kOne, grip), kZero);
+    gb = F32(p, 0x40) + lbl_80562118 * MaxF(MinF(kOne, grip), kZero);
     fn_8018AE54(PTR(p, 0x34));
-    int odd = (lbl_8055E3C4 >> 1) & 1;
+    odd = (lbl_8055E3C4 >> 1) & 1;
     if (!fn_801796B4() && fn_801CF050() && !fn_801796C4() &&
         NearZero(F32(PTR(p, 0x34), 0x2690))) {
-        u8* c5 = PTR(p, 0x34);
-        fmod(lbl_8055E3C8, lbl_80562120);
-        f32 buzz = (lbl_805620D0 * ga + lbl_805620D0 * gb) * (odd ? kNegOne : kOne);
-        ((Gearbox*)PTR(p, 0x38))->v50(kZero, lbl_805620D0 * fn_8018AE4C(c5), wob + buzz);
+        f32 a;
+        u8* c5;
+        const f32* v;
+        f32 buzz;
+        f32 str;
+        f32 sr;
+        f32 airt;
         c5 = PTR(p, 0x34);
-        f32 sr = F32(c5, 0x25D4) / lbl_805620D8;
+        fmod(lbl_8055E3C8, lbl_80562120);
+        buzz = (lbl_805620D0 * ga + lbl_805620D0 * gb) * (odd ? kNegOne : kOne);
+        ((Gearbox*)PTR(p, 0x38))->v50(kZero, fn_8018AE4C(c5) * lbl_805620D0, wob + buzz);
+        f32 turn;
+        c5 = PTR(p, 0x34);
+        sr = F32(c5, 0x25D4) / lbl_805620D8;
         sr = sr < kOne ? sr : kOne;
-        f32 str = kOne * MaxF(sr, kZero);
+        str = kOne * MaxF(sr, kZero);
         w.x = F32(c5, 0x124) * lbl_80562128;
         w.y = F32(c5, 0x128) * lbl_80562128;
         w.z = F32(c5, 0x12C) * lbl_80562128;
-        f32 a = VMag(&w);
+        a = VMag(&w);
+        f32 slip;
         if (a > lbl_8056212C) {
-            f32 inv = kOne / a;
-            f32 ax = inv * w.x;
-            f32 ay = inv * w.y;
-            f32 az = inv * w.z;
-            f32 sn = sin(a);
-            f32 cs = cos(a);
-            f32 t = kOne - cs;
-            spin[0] = cs + t * (ax * ax);
-            spin[1] = ay * (t * ax) + sn * az;
-            spin[2] = az * (t * ax) - sn * ay;
-            spin[3] = ay * (t * ax) - sn * az;
+            f32 cs;
+            f32 inv;
+            inv = kOne / a;
+            f32 sn;
+            f32 az;
+            f32 ay;
+            f32 ax;
+            f32 t;
+            ax = inv * w.x;
+            ay = inv * w.y;
+            az = inv * w.z;
+            sn = sin(a);
+            cs = cos(a);
+            t = kOne - cs;
+            spin[0] = cs + (ax * ax) * t;
+            spin[1] = ay * (ax * t) + sn * az;
+            spin[2] = az * (ax * t) - sn * ay;
+            spin[3] = (ax * t) * ay - sn * az;
             spin[4] = cs + t * (ay * ay);
-            spin[5] = az * (t * ay) + sn * ax;
-            spin[6] = az * (t * ax) + sn * ay;
-            spin[7] = az * (t * ay) - sn * ax;
+            spin[5] = az * (ay * t) + sn * ax;
+            spin[6] = (t * ax) * az + sn * ay;
+            spin[7] = az * (ay * t) - sn * ax;
             spin[8] = cs + t * (az * az);
         } else {
             spin[1] = kZero;
@@ -1447,31 +1510,37 @@ void PlayerDriver_vf48(u8* p) {
             spin[7] = kZero;
             spin[8] = kOne;
         }
-        const f32* v = (const f32*)(PTR(p, 0x34) + 0x3C);
+        f32 sl;
+        f32 ref;
+        v = (const f32*)(PTR(p, 0x34) + 0x3C);
+        u8* c6;
         if (&u.x == v) {
-            f32 x = v[0] * spin[0] + v[1] * spin[3] + v[2] * spin[6];
-            f32 y = v[0] * spin[1] + v[1] * spin[4] + v[2] * spin[7];
-            f32 z = v[0] * spin[2] + v[1] * spin[5] + v[2] * spin[8];
+            f32 x;
+            f32 z;
+            f32 y;
+            x = spin[0] * v[0] + v[1] * spin[3] + spin[6] * v[2];
+            y = v[0] * spin[1] + v[1] * spin[4] + v[2] * spin[7];
+            z = v[0] * spin[2] + spin[5] * v[1] + spin[8] * v[2];
             u.x = x;
             u.y = y;
             u.z = z;
         } else {
-            u.x = v[0] * spin[0] + v[1] * spin[3] + v[2] * spin[6];
-            u.y = v[0] * spin[1] + v[1] * spin[4] + v[2] * spin[7];
-            u.z = v[0] * spin[2] + v[1] * spin[5] + v[2] * spin[8];
+            u.x = spin[0] * v[0] + spin[3] * v[1] + spin[6] * v[2];
+            u.y = v[0] * spin[1] + spin[4] * v[1] + v[2] * spin[7];
+            u.z = spin[2] * v[0] + spin[5] * v[1] + spin[8] * v[2];
         }
-        f32 slip = MaxF(kZero, kOne - lbl_80562080 * (F32(c5, 0x2414) + F32(c5, 0x2488)));
+        slip = MaxF(kZero, kOne - lbl_80562080 * (F32(c5, 0x2488) + F32(c5, 0x2414)));
         str *= slip;
-        f32 ref = MaxF(lbl_805620C0, F32(PTR(p, 0x34), 0x25D4));
-        f32 turn = VDot(PTR(p, 0x34) + 0x118, &u) / ref;
+        ref = MaxF(lbl_805620C0, F32(PTR(p, 0x34), 0x25D4));
+        turn = VDot(0x118 + PTR(p, 0x34), &u) / ref;
         turn = MaxF(MinF(lbl_805620D4, lbl_805620BC * turn), lbl_80562130);
-        u8* c6 = PTR(p, 0x34);
-        f32 sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / lbl_805620D0), kZero);
-        turn *= sl;
-        f32 airt = MaxF(F32(c6, 0x23B8), kZero) + MaxF(F32(c6, 0x242C), kZero);
+        c6 = PTR(p, 0x34);
+        sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / lbl_805620D0), kZero);
+        airt = MaxF(F32(c6, 0x23B8), kZero) + MaxF(F32(c6, 0x242C), kZero);
         str *= MinF(lbl_80562134 * airt, kOne);
         ((Gearbox*)PTR(p, 0x38))->v54(str);
         ((Gearbox*)PTR(p, 0x38))->v58(ga, gb);
+        turn *= sl;
         ((Gearbox*)PTR(p, 0x38))->v78(1);
     } else {
         ((Gearbox*)PTR(p, 0x38))->v78(0);

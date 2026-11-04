@@ -358,11 +358,7 @@ void CarUIModel::LoadEfx(const char* path) {
             facingPos = n->GetIntValue("facing_pos");
             facingNeg = n->GetIntValue("facing_neg");
             numBones = n->GetIntValue("num_bones");
-            if (n->Has("group_mask")) {
-                groupMask = fn_802C7830(n->GetValue("group_mask"));
-            } else {
-                groupMask = -1;
-            }
+            groupMask = n->Has("group_mask") ? fn_802C7830(n->GetValue("group_mask")) : -1;
         } else {
             fn_802E317C("carmodelview: %s has no boneset table", file);
         }

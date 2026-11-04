@@ -235,9 +235,14 @@ void fn_802A85C8(void) {
 }
 
 void fn_802A86A4(void) {
-    for (int i = 0; i < lbl_804BD6C4.n; i++) {
-        Flock* f = lbl_804BD6C4.data[i];
+    Boid* b;
+    f32 r;
+    int i;
+    int j;
+    for (i = 0; i < lbl_804BD6C4.n; i++) {
+        Flock* f;
         BoidDesc d;
+        f = lbl_804BD6C4.data[i];
         memset(&d, 0, 0);
         d.pos.x = f->pt.x;
         d.pos.y = f->pt.y;
@@ -251,9 +256,9 @@ void fn_802A86A4(void) {
         d.radius = f->birdRad;
         d.speedMax = f->birdSpeedMax;
         d.speedMin = f->birdSpeedMin;
-        f32 r = f->birdRad / 4.0f;
-        for (int j = 0; j < f->birds.n; j++) {
-            Boid* b = &f->birds.data[j];
+        r = f->birdRad / 4.0f;
+        for (j = 0; j < f->birds.n; j++) {
+            b = &f->birds.data[j];
             BVec off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));
             d.pos.x = f->lead.pos.x + off.x;
             d.pos.y = f->lead.pos.y + off.y;

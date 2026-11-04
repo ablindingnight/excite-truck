@@ -293,21 +293,25 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
 
 // Terrain silhouette rings around the camera.
 void fn_80203380(const EFrame* m) {
+    u32 r;
+    int i;
+    f32 a;
     fn_802C8BD0(-1);
+    f32 dist;
     f32 rings[4] = {5.0f, 30.0f, 70.0f, 120.0f};
     fn_802C8DBC(0xA0);
-    for (u32 r = 0; r < 4; r++) {
-        f32 dist = rings[r];
-        for (int i = 0; i < 20; i++) {
+    for (r = 0; r < 4; r++) {
+        dist = rings[r];
+        for (i = 0; i < 20; i++) {
             EVec2 p;
-            EVec3 w;
             f32 sx, sy;
+            a = 3.1415927f * (i * 2) / 20.0f;
             p.x = 0.0f;
+            EVec3 w;
             p.y = dist;
-            f32 a = 3.1415927f * (i * 2) / 20.0f;
             Rotate(&p, a);
             p.x += m->pos.x;
-            p.y += m->pos.z;
+            p.y = p.y + m->pos.z;
             w.y = fn_801DCF48(0, p.x, p.y);
             w.x = p.x;
             w.z = p.y;
