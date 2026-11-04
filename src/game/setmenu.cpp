@@ -4,7 +4,7 @@
 // from the layout names and labels.
 #include <stdarg.h>
 #include "game/common.h"
-#include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
 
 void* operator new[](size_t size, const char* tag);
 

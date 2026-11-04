@@ -1,7 +1,7 @@
 // Track B2 full-body draft from original assembly; data qualification incomplete. External declarations identify
 // unresolved code and storage; this TU is not registered or linked into the game.
 #include "game/common.h"
-#include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
 
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int);
