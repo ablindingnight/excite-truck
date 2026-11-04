@@ -105,8 +105,7 @@ f32 fn_8026EA8C(int mode, f32 t) {
 
 f32 fn_8026EAEC(f32 fov) {
     if (fn_80178CA4() > 1) {
-        f32 half = 0.5f;
-        fov = 2.0f * (f32)atan(0.4f * (f32)tan(fov * half));
+        fov = 2.0f * (f32)atan(0.4f * (f32)tan(fov / 2.0f));
     }
     return fov;
 }

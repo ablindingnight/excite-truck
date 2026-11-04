@@ -465,8 +465,7 @@ void fn_801DFFB4(void) {
         left = (left > x) ? left : x;
         if (!((f32)__fabs(left) <= lbl_80558DC4[0])) {
             e = m->layout->FindBox("whiteout");
-            f32 half = 0.5f;
-            f32 t = Max1(Min1((left - dur * half) / (0.1f - dur * half), 1.0f), 0.0f);
+            f32 t = Max1(Min1((left - dur / 2.0f) / (0.1f - dur / 2.0f), 1.0f), 0.0f);
             e->color = ((int)Lerp(0.0f, 255.0f, t) << 24) | 0xFFFFFF;
             e->w = (f32)lbl_8055CFF0 / fn_802C9A50();
             fn_80148100(e);
