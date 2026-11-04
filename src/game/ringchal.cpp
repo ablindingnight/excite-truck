@@ -86,7 +86,6 @@ struct TextElem {
 };
 
 struct Box {
-    Box(void) {}
     Box& operator=(const Box& o);
     const char* name;  // offset 0x0
     V2 pos;            // offset 0x4
@@ -362,6 +361,29 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+// MATCHING-AID: expanded forms of Stop/StrCopyN for the functions under #pragma dont_inline below (the original
+// inlines these helpers there but calls the class methods defined after them; only the pragma + these reproduce it).
+#define STOP_SOUND(s_)                                                                                                 \
+    do {                                                                                                               \
+        RSound* snd_ = (s_);                                                                                           \
+        if (snd_) {                                                                                                    \
+            snd_->stop = 1;                                                                                            \
+            snd_->f4C = 0;                                                                                             \
+        }                                                                                                              \
+    } while (0)
+#define STR_COPY_N(dst_, src_, len_)                                                                                   \
+    do {                                                                                                               \
+        const char* s_ = (src_);                                                                                       \
+        char* d_ = (dst_);                                                                                             \
+        int n_ = (len_);                                                                                               \
+        while ((*d_++ = *s_++) != 0) {                                                                                 \
+            if (--n_ <= 0) {                                                                                           \
+                d_[-1] = 0;                                                                                            \
+                break;                                                                                                 \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+
 class LocString {
 public:
     LocString(const char* key);
@@ -459,6 +481,7 @@ struct ObjTeleport {
     f32 radius;     // offset 0x34
 };
 
+namespace {
 struct ObjSet {
     ObjSet(void) {
         loaded = 0;
@@ -504,6 +527,8 @@ struct ArenaTimer {
     f32 limit;  // offset 0x4
 };
 
+}  // namespace
+
 struct TableRef {
     ~TableRef(void) { fn_80131818(t); }
     ValueTable* t;
@@ -517,6 +542,7 @@ public:
     s32 f0;  // offset 0x0
 };
 
+namespace {
 class Arena : public Preloader {
 public:
     Arena(void);
@@ -657,6 +683,8 @@ public:
     s32 f104;  // offset 0x104
 };
 
+}  // namespace
+
 struct ZoneResults {
     struct Entry {
         s32 car;    // offset 0x0
@@ -748,32 +776,33 @@ public:
     virtual void vfFC(void);
 };
 
+namespace {
 class RingChalMaster : public GameMode {
 public:
     virtual ~RingChalMaster(void);
-    virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car);
-    virtual int vf24(void);
-    virtual int vf28(void);
-    virtual f32 vf38(void);
     virtual int vf3C(int view);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf4C(int p);
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf5C(int p);
-    virtual int vf64(void);
-    virtual int vf68(void);
-    virtual int vf8C(int p, int key);
-    virtual int vfA0(struct Respawn* out, int idx);
-    virtual void vfA8(int car);
-    virtual int vfB0(int car, struct Respawn* r);
-    virtual int vfE0(int car, u8* out);
+    virtual f32 vf38(void);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
     virtual void vfFC(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual int vf54(void);
+    virtual int vfA0(struct Respawn* out, int idx);
+    virtual void vf0C(void);
+    virtual int vf24(void);
+    virtual int vf68(void);
+    virtual int vf64(void);
+    virtual int vf5C(int p);
+    virtual int vf8C(int p, int key);
+    virtual int vf28(void);
+    virtual void vfA8(int car);
+    virtual int vfB0(int car, struct Respawn* r);
+    virtual int vfE0(int car, u8* out);
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
     ILayout* layout;          // offset 0x98
@@ -785,6 +814,8 @@ public:
     u8 padA9[3];
     RingResults results;   // offset 0xAC
 };
+
+}  // namespace
 
 struct Race {
     u8 pad0[0x3E0];
@@ -937,7 +968,7 @@ void RArray<T>::Push(const T& v) {
 }
 
 template <class T>
-int RArray<T>::Count(void) {
+inline int RArray<T>::Count(void) {
     return this->count;
 }
 
@@ -1307,7 +1338,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
     }
 }
 
-RingChalMaster::~RingChalMaster(void) {
+inline RingChalMaster::~RingChalMaster(void) {
     int i;
     if (sPreRace) {
         delete sPreRace;
@@ -1323,10 +1354,14 @@ RingChalMaster::~RingChalMaster(void) {
 
 
 
-void RingChalMaster::vf10(void) {
+#pragma dont_inline on
+inline void RingChalMaster::vf10(void) {
     int i;
     for (i = 0; i < players.count; i++) {
-        players.data[i]->Reset();
+        PlayerData* pd = players.data[i];
+        pd->score = 0;
+        pd->b8 = 0;
+        pd->fC = 0.0f;
     }
     fn_8016A0D4();
     if (arena.f40 == 0) {
@@ -1399,19 +1434,20 @@ void RingChalMaster::vf10(void) {
     if (results.layout) {
         ((ArtPlayer*)(results.layout))->StopAll();
     }
-    Stop(results.sBonus);
-    Stop(results.sNoBonus);
-    Stop(results.s1C);
+    STOP_SOUND(results.sBonus);
+    STOP_SOUND(results.sNoBonus);
+    STOP_SOUND(results.s1C);
     results.b20 = 0;
-    Stop(results.s24);
-    Stop(results.s28);
-    Stop(results.s2C);
-    Stop(sPreRace);
+    STOP_SOUND(results.s24);
+    STOP_SOUND(results.s28);
+    STOP_SOUND(results.s2C);
+    STOP_SOUND(sPreRace);
     bA8 = 0;
 }
+#pragma dont_inline reset
 
 
-int Arena::PointValue(void) {
+inline int Arena::PointValue(void) {
     switch (difficulty) {
     case 0:
         return 5;
@@ -1426,11 +1462,11 @@ int Arena::PointValue(void) {
 }
 
 template <class T>
-T* RArray<T>::At(int i) {
+inline T* RArray<T>::At(int i) {
     return &this->data[i];
 }
 
-void Arena::ShowSetGems(void) {
+inline void Arena::ShowSetGems(void) {
     char name[0x1E];
     if (f24 != -1) {
         if (f24 != -1) {
@@ -1461,13 +1497,13 @@ void Arena::ShowSetGems(void) {
     }
 }
 
-void Arena::ActivateRingSet(void) {
+inline void Arena::ActivateRingSet(void) {
     char name[0x1E];
     SET_NAME(this, name, 0x1E);
     fn_8016A15C(name);
 }
 
-void Arena::ActivateObjSet(void) {
+inline void Arena::ActivateObjSet(void) {
     if (curSet < nFiles) {
         ObjSet* s = &sets->data[curSet];
         int i;
@@ -1482,14 +1518,14 @@ void Arena::ActivateObjSet(void) {
     }
 }
 
-void Arena::ClearGems(void) {
+inline void Arena::ClearGems(void) {
     if (f24 != -1) {
         fn_8001B450(f24);
         f24 = -1;
     }
 }
 
-void ObjSet::Reset(void) {
+inline void ObjSet::Reset(void) {
     int i;
     active = 0;
     time = -100.0f;
@@ -1499,7 +1535,7 @@ void ObjSet::Reset(void) {
     }
 }
 
-void Arena::Deactivate(int i) {
+inline void Arena::Deactivate(int i) {
     char name[0x1E];
     SET_NAME(this, name, 0x1E);
     fn_8016A240(name);
@@ -1520,11 +1556,11 @@ void Arena::Deactivate(int i) {
     }
 }
 
-void ArenaTimer::Reset(void) { t = limit; }
+inline void ArenaTimer::Reset(void) { t = limit; }
 
-int RingChalMaster::vf20(int car) { return b9C; }
+inline int RingChalMaster::vf20(int car) { return b9C; }
 
-void RingChalMaster::vfB8(ZoneResults* r) {
+inline void RingChalMaster::vfB8(ZoneResults* r) {
     int i;
     r->nCars = players.count;
     r->nHumans = fn_80179650();
@@ -1539,14 +1575,16 @@ void RingChalMaster::vfB8(ZoneResults* r) {
     }
 }
 
-void RingChalMaster::vfF8(void) {
+#pragma dont_inline on
+inline void RingChalMaster::vfF8(void) {
     layout = (ILayout*)fn_80145E70("freestyle.val");
     results.layout = new ("ArtAnimManager") ArtAnimManager(1);
     results.Load();
     results.Reset();
 }
+#pragma dont_inline reset
 
-void RingResults::Reset(void) {
+inline void RingResults::Reset(void) {
     state = 0;
     start = -1.0f;
     b8 = 1;
@@ -1589,7 +1627,7 @@ static inline void Blend(const TextElem* a, const TextElem* b, const char* text,
 
 static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
 
-int RingChalMaster::vf3C(int view) {
+inline int RingChalMaster::vf3C(int view) {
     f32 t = fn_801E7E3C()->time;
     f32 end0 = 6.75f;
     f32 in0 = end0 - 0.8f;
@@ -1634,7 +1672,7 @@ int RingChalMaster::vf3C(int view) {
                 {
                     TextElem e;
                     e = *body;
-                    e.pos.x += -0.5f * Width(&e, buf);
+                    e.pos.x += 0.5f * Width(&e, buf);
                     Blend(&e, timer, buf, Ease(k));
                 }
             }
@@ -1643,9 +1681,9 @@ int RingChalMaster::vf3C(int view) {
     return 1;
 }
 
-f32 RingChalMaster::vf38(void) { return 7.75f; }
+inline f32 RingChalMaster::vf38(void) { return 7.75f; }
 
-void RingResults::Load(void) {
+inline void RingResults::Load(void) {
     Binding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
@@ -1678,7 +1716,7 @@ void RingResults::Load(void) {
     s2C = fn_80207848("timeout.sfx", 1);
 }
 
-void RingChalMaster::vf40(void) {
+inline void RingChalMaster::vf40(void) {
     int i;
     for (i = 0; i < arena.nFiles; i++) {
         ObjSet* s = &arena.sets->data[i];
@@ -1710,7 +1748,7 @@ void RingChalMaster::vf40(void) {
     }
 }
 
-void RingChalMaster::vf44(void) {
+inline void RingChalMaster::vf44(void) {
     int any = 0;
     int i;
     for (i = 0; i < players.count; i++) {
@@ -1724,12 +1762,12 @@ void RingChalMaster::vf44(void) {
     }
 }
 
-void RingChalMaster::vf50(int p) { vf4C(p); }
+inline void RingChalMaster::vf50(int p) { vf4C(p); }
 
-int RingChalMaster::vf54(void) { return 0x1408; }
+inline int RingChalMaster::vf54(void) { return 0x1408; }
 
 
-int RingChalMaster::vf24(void) {
+inline int RingChalMaster::vf24(void) {
     int r = 0;
     if (fn_801B8514() && arena.b49 && !b9C) {
         r = 1;
@@ -1737,16 +1775,16 @@ int RingChalMaster::vf24(void) {
     return r;
 }
 
-int RingChalMaster::vf68(void) {
+inline int RingChalMaster::vf68(void) {
     if (vf24()) {
         return results.state == 2;
     }
     return 0;
 }
 
-int RingChalMaster::vf64(void) { return 1; }
+inline int RingChalMaster::vf64(void) { return 1; }
 
-int RingChalMaster::vf5C(int p) {
+inline int RingChalMaster::vf5C(int p) {
     if (lbl_8055E3C8 - fA0 < 2.25f) {
         vf4C(p);
     } else {
@@ -1763,7 +1801,7 @@ int RingChalMaster::vf5C(int p) {
     return results.state != 4;
 }
 
-int RingChalMaster::vf8C(int p, int key) {
+inline int RingChalMaster::vf8C(int p, int key) {
     if (vf68() && key == 'X') {
         if (results.state == 2) {
             results.b9 = 1;
@@ -1789,11 +1827,11 @@ int RingChalMaster::vf8C(int p, int key) {
     return 0;
 }
 
-int RingChalMaster::vf28(void) { return !arena.b49; }
+inline int RingChalMaster::vf28(void) { return !arena.b49; }
 
-void RingChalMaster::vfA8(int car) { fn_801B0C78(car); }
+inline void RingChalMaster::vfA8(int car) { fn_801B0C78(car); }
 
-int RingChalMaster::vfB0(int car, Respawn* r) {
+inline int RingChalMaster::vfB0(int car, Respawn* r) {
     PlayerData* p = players.data[car];
     p->b8 = 0;
     p->fC = 0.0f;
@@ -1818,14 +1856,14 @@ int RingChalMaster::vfB0(int car, Respawn* r) {
     return 0;
 }
 
-void RingChalMaster::vfFC(void) {
+inline void RingChalMaster::vfFC(void) {
     results.Unload();
     delete layout;
 }
 
 static inline int Stopped(f32 speed) { return NearZeroF(speed); }
 
-int RingChalMaster::vfE0(int car, u8* out) {
+inline int RingChalMaster::vfE0(int car, u8* out) {
     ObjSet* s;
     int r = 0;
     f32 now = lbl_8055E3C8;
@@ -1917,7 +1955,7 @@ static inline void Normalize(V2& v) {
 
 static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
-int RingChalMaster::vfA0(Respawn* out, int idx) {
+inline int RingChalMaster::vfA0(Respawn* out, int idx) {
     ValueNode* cfg = fn_8000AC38()->vals;
     if (cfg) {
         char name[0x10];
@@ -1994,7 +2032,8 @@ int RingChalMaster::vfA0(Respawn* out, int idx) {
 
 #define ALPHA(c, v) ((c).all = ((int)(255.0f * (v)) << 24) | ((c).all & 0xFFFFFF))
 
-void RingChalMaster::vf4C(int view) {
+#pragma dont_inline on
+inline void RingChalMaster::vf4C(int view) {
     ILayout* l;
     TextElem* setScore;
     Box* setIcon;
@@ -2156,7 +2195,7 @@ void RingChalMaster::vf4C(int view) {
         tr = *target;
         s = arena.curSet;
         if (s > 0 && !arena.b49) {
-            f32 d = Time() - arena.stats->At(s - 1)->time - 1.9f;
+            f32 d = Time() - arena.stats->At(s - 1)->time - (1.7f + 0.2f);
             if (Time() - arena.stats->At(s - 1)->time > 0.0f && d <= 2.2f) {
                 s = s - 1;
             }
@@ -2182,7 +2221,7 @@ void RingChalMaster::vf4C(int view) {
                     nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h / 2.0f, next->pos.y, k);
                 }
                 if (d > 1.35f) {
-                    f32 k = Remap(1.35f, 1.9f, 0.0f, 1.0f, d);
+                    f32 k = Remap(1.35f, 1.7f + 0.2f, 0.0f, 1.0f, d);
                     nx.pos.x = fn_80144C80(next->pos.x, target->pos.x, fn_80144BD8(k));
                     nx.pos.y = fn_80144C80(next->pos.y, target->pos.y, fn_80144BD8(k));
                     ALPHA(tr.color, 1.0f - Remap(1.5f, 1.65f, 0.0f, 1.0f, d));
@@ -2216,6 +2255,7 @@ void RingChalMaster::vf4C(int view) {
         }
     }
 }
+#pragma dont_inline reset
 
 inline Box& Box::operator=(const Box& o) {
     name = o.name;
@@ -2234,12 +2274,16 @@ inline void ArenaTimer::Draw(ILayout* l) {
     fn_801475D0(l, "timer", "%s", buf);
 }
 
-void RingChalMaster::vf0C(void) {
+#pragma dont_inline on
+inline void RingChalMaster::vf0C(void) {
     f32 rt = fn_801B306C();
     if (!bA8 && rt < 6.75f) {
         bA8 = 1;
         if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
-            sPreRace->Play();
+            RSound* pre = sPreRace;
+            pre->playing = 1;
+            pre->loop = 0;
+            pre->stop = 0;
         }
     }
     f32 now = lbl_8055E3C8;
@@ -2328,13 +2372,13 @@ void RingChalMaster::vf0C(void) {
                     fA0 = lbl_8055E3C8;
                 }
                 if (arena.b48) {
-                    StrCopyN(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
-                    StrCopyN(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
-                    StrCopyN(results.complete, "", 0x14);
+                    STR_COPY_N(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+                    STR_COPY_N(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+                    STR_COPY_N(results.complete, "", 0x14);
                 } else {
-                    StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
-                    StrCopyN(results.bB2, "", 0x14);
-                    StrCopyN(results.bC6, "", 0x14);
+                    STR_COPY_N(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+                    STR_COPY_N(results.bB2, "", 0x14);
+                    STR_COPY_N(results.bC6, "", 0x14);
                 }
                 {
                     int tb = (int)arena.timer.t;
@@ -2350,7 +2394,8 @@ void RingChalMaster::vf0C(void) {
             if (arena.f28 > 1.75f) {
                 arena.f28 = 0.0f;
             }
-            if (arena.timer.Expired()) {
+            int expired = arena.timer.t <= 0.0f;
+            if (expired) {
                 arena.b49 = 1;
             } else if (fn_801B306C() <= 0.0f) {
                 arena.timer.t -= 0.0166833512f;
@@ -2364,17 +2409,24 @@ void RingChalMaster::vf0C(void) {
             if (arena.f34 < arena.f30 && arena.stats->data[k].done) {
                 SetStat* st = &arena.stats->data[k];
                 f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (arena.f30 - arena.f34));
-                int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, lbl_8055E3C8 - st->time));
+                f32 hi = 0.25f + lo;
+                f32 u = (lbl_8055E3C8 - st->time - lo) / (hi - lo);
+                CLAMP01(u);
+                f32 from = 0.0f;
+                f32 to = 1.0f;
+                int n = from + u * (to - from);
                 if (n) {
                     arena.f34 += n;
-                    if (arena.sTally && !arena.sTally->busy && arena.f30 != arena.f34) {
-                        arena.sTally->stop = 0;
-                        arena.sTally->loop = 1;
-                        arena.sTally->playing = 1;
+                    RSound* tally = arena.sTally;
+                    if (tally && !tally->busy && arena.f30 != arena.f34) {
+                        tally->stop = 0;
+                        tally->loop = 1;
+                        tally->playing = 1;
                     }
-                    if (arena.f34 == arena.f30 && arena.sTally && arena.sTally->busy) {
-                        arena.sTally->stop = 1;
-                        arena.sTally->f4C = 0;
+                    tally = arena.sTally;
+                    if (arena.f34 == arena.f30 && tally && tally->busy) {
+                        tally->stop = 1;
+                        tally->f4C = 0;
                     }
                 }
             }
@@ -2408,8 +2460,14 @@ void RingChalMaster::vf0C(void) {
                     break;
                 }
                 if (!NearZeroF(a)) {
-                    f32 t = Unlerp(0.0f, b, lbl_8055E3C8 - arena.stats->data[k].time);
-                    arena.sLongCheer->SetVol(Lerp(a, 0.0f, t));
+                    f32 t = (lbl_8055E3C8 - arena.stats->data[k].time) / b;
+                    CLAMP01(t);
+                    f32 v = a + t * (0.0f - a);
+                    RSound* cheer = arena.sLongCheer;
+                    if (v != cheer->vol) {
+                        cheer->dirty = 1;
+                        cheer->vol = v;
+                    }
                 }
             }
         }
@@ -2418,6 +2476,7 @@ void RingChalMaster::vf0C(void) {
         results.Update(arena.f30 + (int)arena.timer.t, arena.f30, (int)arena.timer.t);
     }
 }
+#pragma dont_inline reset
 
 inline void ObjSet::CheckTeleport(Phob* car) {
     ObjTeleport* t;
@@ -2451,7 +2510,7 @@ inline RaceCarRec* PlayerData::Car(void) { return fn_8017960C(index); }
 
 inline u8 PlayerData::Stuck(void) { return b8; }
 
-void Arena::SetName(char* buf, int n) { SET_NAME(this, buf, n); }
+inline void Arena::SetName(char* buf, int n) { SET_NAME(this, buf, n); }
 
 
 
