@@ -949,7 +949,7 @@ struct Palette {
 void UseColor(const Color& c);
 
 // A star or coin lying on the track; the models are shared by all of them.
-class BoxVolume;
+class BoxShape;
 namespace {
 struct Pickup {
     Pickup(ValueNode* n);
@@ -983,7 +983,7 @@ struct Pickup {
     u32 colors[15];        // offset 0x3C
     u8 pad78[0x8C - 0x78];
     u32 glow[10];          // offset 0x8C
-    class BoxVolume* vol;  // offset 0xB4
+    class BoxShape* vol;  // offset 0xB4
     s32 hB8;               // offset 0xB8
     f32 angle;             // offset 0xBC
     s32 hC0;               // offset 0xC0
@@ -2897,10 +2897,48 @@ inline void BetaMaster::vfF4(void) {
 }
 #pragma dont_inline reset
 
-// A physics box around a spin trigger.
-class BoxVolume {
+// The root of the collision shapes: only a virtual destructor.
+class CollShapeBase {
 public:
-    BoxVolume(f32 x, f32 y, f32 z) {
+    virtual ~CollShapeBase(void) {}
+};
+
+// The abstract collision shape (collvol.cpp's CollShape; shape tag at +0x18, mass at +0x20).
+class CollShape : public CollShapeBase {
+public:
+    virtual ~CollShape(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(void) = 0;
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual void vf28(void);
+    virtual void vf2C(void);
+    virtual void vf30(void);
+    virtual void vf34(void);
+    virtual void vf38(void) = 0;
+    virtual f32 Radius(void) = 0;  // 0x3C
+    virtual void SetMass(int m) { x20 = m; }  // 0x40
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(void);
+
+    s32 x4;       // offset 0x4
+    s32 x8;       // offset 0x8
+    s32 xC;       // offset 0xC
+    f32 x10;      // offset 0x10
+    f32 x14;      // offset 0x14
+    u32 type;     // offset 0x18
+    s32 x1C;      // offset 0x1C
+    s32 x20;      // offset 0x20
+};
+
+// A box shape (collvol.cpp's BoxShape), used here around a spin trigger.
+class BoxShape : public CollShape {
+public:
+    BoxShape(f32 x, f32 y, f32 z) {
         x4 = 0;
         x8 = 0;
         xC = 0;
@@ -2915,30 +2953,10 @@ public:
         x34 = 0;
         radius = 0.2f + (f32)sqrt(x * x + (y * y + z * z));
     }
-    virtual void vf08(void);
-    virtual void vf0C(void);
     virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
     virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void SetMass(int m);  // 0x40
+    virtual f32 Radius(void);
 
-    s32 x4;       // offset 0x4
-    s32 x8;       // offset 0x8
-    s32 xC;       // offset 0xC
-    f32 x10;      // offset 0x10
-    f32 x14;      // offset 0x14
-    u32 type;     // offset 0x18
-    s32 x1C;      // offset 0x1C
-    s32 x20;      // offset 0x20
     f32 half[3];  // offset 0x24
     f32 radius;   // offset 0x30
     s32 x34;      // offset 0x34
@@ -2987,7 +3005,7 @@ void fn_80136594(TrackSample* out, s32 track, const f32* xz);
 void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 double acos(double x);
 s32 fn_801FB1F4(int a);
-s32 fn_801FA8E0(BoxVolume* v, const f32* m, s32 h);
+s32 fn_801FA8E0(BoxShape* v, const f32* m, s32 h);
 }
 
 static inline void SatModel(const char* name) {
@@ -3162,7 +3180,7 @@ inline Pickup::Pickup(ValueNode* n) {
         hx = 1.0f + 1.5f * (box[1] - box[0]) * 0.5f;
         hz = 1.0f + 1.5f * (box[5] - box[4]) * 0.5f;
         hy = 1.0f + (box[3] - box[2]);
-        vol = new ("spinvol") BoxVolume(hx, hy, hx);
+        vol = new ("spinvol") BoxShape(hx, hy, hx);
         vol->SetMass(1000);
         hC0 = fn_801FB1F4(1);
         hB8 = fn_801FA8E0(vol, m, hC0);
