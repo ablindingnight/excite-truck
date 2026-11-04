@@ -4533,15 +4533,19 @@ inline void BetaMaster::a1(void) {
 }
 
 inline void BetaMaster::b2(StuntEvt* e, int car) {
+    BetaCar* c;
+    Pickup* t;
+    bool turbo;
+    BetaCar* bc;
     u8* f;
     s32 h;
-    BetaCar* c = &cars[car];
+    c = &cars[car];
     if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
         int i;
         for (i = 0; i < stars.a.count; i++) {
             h = stars.a.data[i]->hC0;
             if (h == e->Id()) {
-                Pickup* t = stars.a.data[i];
+                t = stars.a.data[i];
                 if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
                     AbsF(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
                     t->hit[car] = 1;
@@ -4550,8 +4554,8 @@ inline void BetaMaster::b2(StuntEvt* e, int car) {
         }
     }
     if (e->Type() == 's') {
-        bool turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
-        BetaCar* bc = &cars[car];
+        turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
+        bc = &cars[car];
         f = &bc->bA8;
         if (f[0]) {
             bc->meterObj->Crash(lbl_804348E8[bc->id]);
