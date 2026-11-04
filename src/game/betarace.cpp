@@ -2709,6 +2709,9 @@ inline void BetaMaster::vfF8(void) {
 }
 #pragma dont_inline reset
 
+// MATCHING-AID (user OK 2026-11-04): the original recomputes the two string addresses inside the 9-iteration loop;
+// no natural source form found yet that stops MWCC hoisting them (see KC_to_TC_Setup_LICM_negatives_2026-11-04.md).
+#pragma opt_loop_invariants off
 inline void FinishAnimation::Setup(void) {
     bool multi = fn_80179650() > 1;
     int ws = fn_802C9A58();
@@ -2773,6 +2776,7 @@ inline void FinishAnimation::Setup(void) {
     noBonusSnd = fn_80207848("pr_score_nobonus.sfx", 1);
     transitionSnd = fn_80207848("pr_transition.sfx", 1);
 }
+#pragma opt_loop_invariants reset
 
 template <typename T, int N>
 T* FixedList<T, N>::Add(const T& v) {
