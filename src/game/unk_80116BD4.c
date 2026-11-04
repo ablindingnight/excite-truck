@@ -7013,13 +7013,12 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
     s32 i;
     for (i = 0; i < 8; i++) {
         s32 s1 = block[8];
-        s32 s2 = block[16];
         s32 s3 = block[24];
         s32 s4 = block[32];
         s32 s5 = block[40];
         s32 s6 = block[48];
         s32 s7 = block[56];
-        if (((((((s1 | s2) | s3) | s4) | s5) | s6) | s7) == 0) {
+        if (((((((s1 | block[16]) | s3) | s4) | s5) | s6) | s7) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -7034,7 +7033,7 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
             t++;
         } else {
             s32 d0 = (block[0] * quant[0]) >> 11;
-            s32 d2 = (s2 * quant[16]) >> 11;
+            s32 d2 = (block[16] * quant[16]) >> 11;
             s32 d4 = (s4 * quant[32]) >> 11;
             s32 d6 = (s6 * quant[48]) >> 11;
             s32 a0 = d0 + d4;
