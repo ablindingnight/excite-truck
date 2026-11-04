@@ -511,16 +511,19 @@ void fn_802B13F8(GMat* g, void* ctx, GBatch* b, int layer, f32 alpha) {
         return;
     }
     u16* idx = b->idx;
-    g->pending->head->count -= 24 - b->used;
+    GList* l = g->pending;
+    u16 used = b->used;
+    GBlock* head = l->head;
+    head->count -= 24 - used;
     g->pending = 0;
-    bool fade = false;
-    if (layer == 4 && alpha < 1.0f) {
-        fade = true;
-    }
-    if (fade && g->strips.count + 1 <= g->strips.cap) {
-        GStrip* s = &g->strips.data[g->strips.count++];
-        s->alpha = 1.0f - alpha;
-        s->idx = idx;
+    int fade = layer == 4 && alpha < 1.0f;
+    if (fade) {
+        if (g->strips.count + 1 <= g->strips.cap) {
+            f32 a = 1.0f - alpha;
+            GStrip* s = &g->strips.data[g->strips.count++];
+            s->alpha = a;
+            s->idx = idx;
+        }
     }
     fn_802BAFF8(ctx, &idx);
 }
