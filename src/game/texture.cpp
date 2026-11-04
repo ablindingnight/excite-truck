@@ -866,8 +866,10 @@ inline TexCache::TexCache(void) {
     best = 0;
     memset(slots, 0, sizeof(slots));
     s32 n = 0;
-    for (i = 0; i < 512; i++) {
+    i = 0;
+    while (n < 512) {
         slots[i].tex = n++;
+        i++;
     }
     frame = 0;
 }
