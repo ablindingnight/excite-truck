@@ -1243,12 +1243,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B70.w = V1B90.w;
         V1B50.w = V1B70.w;
         Vec V18B0;
-        V18B0.x = (V18F0.x * V18F0.x) + (V18F0.x * V18F0.x);
-        V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
-        V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
         V1900.x = V18F0.x * kv[2].x;
         V1900.y = V18F0.y * kv[2].x;
         V1900.z = V18F0.z * kv[2].x;
+        V18B0.x = (V18F0.x * V18F0.x) + (V18F0.x * V18F0.x);
+        V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
+        V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
         temp_f16_6 = V18F0.w * kv[2].x;
         Vec V18A0(temp_f31 + 1.0f);
         V18A0.y = V18A0.x;
@@ -1262,12 +1262,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1880.z = (V1900.x * V1900.y) + (V1900.z * temp_f16_6);
         kv[0].x = V18A0.z - ((temp_f31 + 1.0f) * V18B0.y);
         kv[0].y = V18A0.z - (V18A0.z * V18B0.x);
-        kv[0].z = kv[0].y;
         V1B90.x = kv[0].x - (V18A0.z * V18B0.z);
         V1B90.y = V1890.z;
         V1B90.z = V1B50.w + ((V1900.z * V1900.x) + (V1900.y * temp_f16_6));
         V1B70.y = kv[0].y - (V18A0.z * V18B0.z);
         V1900.w = V1890.x;
+        kv[0].z = kv[0].y;
         V1B70.z = V1900.w;
         V1880.y = V1880.z;
         V1B70.x = V1880.y;
@@ -1479,7 +1479,6 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V0E10;
         Vec V0E00;
         V1C50.w = (temp_f31 + 1.0f) * ((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f));
-        temp_f1_10 = V19E0.x + V19E0.y + V19E0.z;
         V17E0.x = ((temp_f31 + 0.0192f));
         V17D0.x = ((temp_f31 + 0.08333f));
         V17C0.x = (((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f)));
@@ -1487,6 +1486,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V17B0.y = rowB25->y;
         V17B0.z = rowB25->z;
         V17B0.w = rowB25->w;
+        temp_f1_10 = V19E0.x + V19E0.y + V19E0.z;
         V17A0.x = V17B0.x;
         V17A0.y = V17B0.y;
         V17A0.z = V17B0.z;
