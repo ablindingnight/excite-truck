@@ -812,14 +812,15 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
     for (int i = 0; i < count; i++) {
         WPt* p = &pts[i];
         PVec* w = &wob[i % 8];
-        f32 z = p->z + wind.z + w->z * dt;
-        f32 x;
-        f32 y = p->y + wind.y + w->y * dt;
-        x = (p->x + wind.x + w->x * dt) + turn * z;
-        if (z > near && z < far && x * x < (z * tx) * (z * tx) && y * y < (z * ty) * (z * ty)) {
-            out->x = x;
-            out->y = y;
-            out->z = z;
+        PVec v;
+        v.x = p->x + wind.x + w->x * dt;
+        v.y = p->y + wind.y + w->y * dt;
+        v.z = p->z + wind.z + w->z * dt;
+        v.x += turn * v.z;
+        if (v.z > near && v.z < far && v.x * v.x < (v.z * tx) * (v.z * tx) && v.y * v.y < (v.z * ty) * (v.z * ty)) {
+            out->x = v.x;
+            out->y = v.y;
+            out->z = v.z;
             out++;
         }
     }
@@ -955,25 +956,25 @@ void RainSystem::Frustum(void) {
 }
 
 void RainSystem::Move(const PVec* d) {
+    f32 tx = tanHalf / fn_802C9A50();
     f32 ty = tanHalf;
-    f32 tx = ty / fn_802C9A50();
     f32 k = -10.0f * fn_802A4AD4();
-    f32 mz;
-    f32 my;
-    f32 mx = d->x + vel.x * k;
-    my = d->y + vel.y * k;
-    mz = d->z + vel.z * k;
+    PVec m;
+    m.x = d->x + dir.x * k;
+    m.y = d->y + dir.y * k;
+    m.z = d->z + dir.z * k;
     WPt* out = pts;
     for (int i = 0; i < count; i++) {
         WPt* p = &pts[i];
-        f32 x = mx + p->x;
-        f32 y = p->y + my;
-        f32 z = p->z + mz;
-        if (z > near && z < far && x * x < (0.25f + z * tx) * (0.25f + z * tx) &&
-            y * y < (0.25f + z * ty) * (0.25f + z * ty)) {
-            out->x = x;
-            out->y = y;
-            out->z = z;
+        PVec v;
+        v.x = p->x + m.x;
+        v.y = p->y + m.y;
+        v.z = p->z + m.z;
+        if (v.z > near && v.z < far && v.x * v.x < (0.25f + v.z * tx) * (0.25f + v.z * tx) &&
+            v.y * v.y < (0.25f + v.z * ty) * (0.25f + v.z * ty)) {
+            out->x = v.x;
+            out->y = v.y;
+            out->z = v.z;
             out++;
         }
     }
