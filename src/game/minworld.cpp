@@ -250,13 +250,16 @@ void fn_80252C78(void) {
 }
 
 void fn_80252C90(void) {
+    MWWheels* w;
+    MWBody* b;
     MWBody* bodies;
+    MWWheel* c;
     MWWheels* wheels;
-    MWContacts* contacts;
     s32 d;
     int n;
-    MWSlot* s;
+    MWContacts* contacts;
     int i;
+    MWSlot* s;
     fn_801BEDA8(&bodies, &wheels, &contacts, &d, &n);
     for (i = 0; i < n; i++) {
         fn_8025280C(&bodies[i], lbl_8055F300.speed);
@@ -264,9 +267,9 @@ void fn_80252C90(void) {
     fn_801BEDD4();
     s = lbl_80498D00;
     for (i = 0; i < n; i++, s++) {
-        MWBody* b = &bodies[i];
-        MWWheels* w = &wheels[i];
-        MWWheel* c = contacts[i].w;
+        b = &bodies[i];
+        w = &wheels[i];
+        c = contacts[i].w;
         int j;
         s->mtx.pos.x = b->pos.x;
         s->mtx.pos.y = b->pos.y;
