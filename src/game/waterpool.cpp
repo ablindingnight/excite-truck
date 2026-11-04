@@ -759,14 +759,9 @@ void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
 }
 
 void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y) {
-    f32 h = p->cur[x + y * p->nx];
-    f32 dxzv = p->dxz;
-    f32 dyzv = p->dyz;
-    f32 dyxv = p->dyx;
-    v->pos.z = p->origin.z + x * dxzv + y * dyzv;
-    v->pos.y = p->origin.y + (1.0f / 65535.0f) * (p->desc.scale * h);
-    f32 xv = p->origin.x;
-    v->pos.x = xv + x * p->dxx + y * dyxv;
+    s16 h = p->cur[x + y * p->nx];
+    SetVec(&v->pos, p->origin.x + x * p->dxx + y * p->dyx, p->origin.y + (1.0f / 65535.0f) * (p->desc.scale * h),
+           p->origin.z + x * p->dxz + y * p->dyz);
     Vec n;
     fn_8029DA24(p, &n, x, y);
     Vec d;
@@ -779,10 +774,10 @@ void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y) {
     r.y = d.y + n.y * k;
     r.z = d.z + n.z * k;
     PSVECNormalize(&r, &r);
-    f32 m = 0.5f / (f32)sqrt((1.0f + r.y) * (1.0f + r.y) + (r.x * r.x + r.z * r.z));
+    f32 m = 0.5f / (f32)sqrt(Sq(1.0f + r.y) + (Sq(r.x) + Sq(r.z)));
     v->s = 0.5f + r.x * m;
     v->t = 0.5f + r.z * m;
-    v->color = p->desc.color | (p->desc.minAlpha + (int)((p->desc.maxAlpha - p->desc.minAlpha) * (1.0f - r.y * r.y))) << 24;
+    v->color = p->desc.color | (p->desc.minAlpha + (int)((p->desc.maxAlpha - p->desc.minAlpha) * (1.0f - Sq(r.y)))) << 24;
 }
 
 void fn_8029DDB8(WaterPool* p) {
@@ -959,19 +954,18 @@ void fn_8029E8E0(WaterShallow* s) {
     if (fn_802C8DBC(4)) {
         Vec eye = fn_802C86DC()->pos;
         Vec* c = s->corners;
-        for (u32 i = 0; i < 4; i++, c++) {
+        for (int i = 0; i < ARRAY_SIZE(s->corners); i++, c++) {
             Vec d;
-            d.y = c->y - eye.y;
             d.x = c->x - eye.x;
-            f32 eyeZ = eye.z;
-            d.z = c->z - eyeZ;
+            d.y = c->y - eye.y;
+            d.z = c->z - eye.z;
             Vec r;
-            r.x = d.x;
-            r.y = -d.y;
-            r.z = d.z;
+            SetVec(&r, d.x, -d.y, d.z);
             PSVECNormalize(&r, &r);
-            f32 m = 0.5f / (f32)sqrt((1.0f + r.y) * (1.0f + r.y) + (r.x * r.x + r.z * r.z));
-            fn_802C8E00(-1, i >= 2, c->x, c->y, c->z, 0.5f + r.x * m, 0.5f + r.z * m);
+            f32 m = 0.5f / (f32)sqrt(Sq(1.0f + r.y) + (Sq(r.x) + Sq(r.z)));
+            f32 t = 0.5f + r.z * m;
+            f32 u = 0.5f + r.x * m;
+            fn_802C8E00(-1, i > 1, c->x, c->y, c->z, u, t);
         }
         fn_802C8E48();
     }
