@@ -70,8 +70,10 @@ ValVec3 lbl_804C0800;                // sun position
 
 extern "C" {
 
+static inline f32 Sq(f32 x) { return x * x; }
+
 void fn_802C0D70(ValVec3* d) {
-    f32 h = sqrt(d->z * d->z + d->x * d->x);
+    f32 h = sqrt(Sq(d->x) + Sq(d->z));
     f32 up = -d->y;
     if ((f32)atan(up / h) < lbl_8055FB10) {
         fn_802E30C8("sky: bad sun direction (%.0f < %.0f degrees); adjusting", 180.0f * (f32)atan(up / h) / 3.1415927f,
