@@ -50,6 +50,8 @@ const DiffLevel* fn_80204B18(int level);
 
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != NULL; }
 
+namespace {
+
 class Difficulty {
 public:
     Difficulty(int level, int event) {
@@ -107,6 +109,8 @@ public:
     ValueNode* eventNode;   // offset 0xC
     const char* prefix;     // offset 0x10
 };
+
+}  // namespace
 
 ModuleTag lbl_8055ED50;
 u8 lbl_8055ED58;               // initialized

@@ -1127,7 +1127,7 @@ config.libs.append(
             Object(NonMatching, "game/cenvmap.cpp"),
             Object(NonMatching, "game/terrpick.cpp"),
             Object(NonMatching, "game/tunedash.cpp"),
-            Object(NonMatching, "game/difficulty.cpp", extra_cflags=["-opt nocse"]),
+            Object(Matching, "game/difficulty.cpp", extra_cflags=["-opt nocse"]),
             Object(NonMatching, "game/splitscr.cpp"),
             Object(NonMatching, "game/sound.cpp"),
             Object(NonMatching, "game/soundmgr.cpp"),
