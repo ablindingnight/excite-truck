@@ -211,7 +211,7 @@ int fn_80246AE8(void) {
     lbl_80498908[0] = 0;
     MenuItem items[] = {
         MenuItem("excite_truck", 5, &logo, 0, 0),
-        MenuItem("version", lbl_80498908, CaptionContext(0x40)),
+        MenuItem("version", 3, lbl_80498908, 0x40, 0),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80246938, -2, 13),
         MenuItem(lbl_804988F0),
     };

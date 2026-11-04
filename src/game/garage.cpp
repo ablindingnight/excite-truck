@@ -1053,7 +1053,7 @@ void fn_8024FBD8(GarageList* list, u32* color) {
     UnlockScreen screen(list, &ui, &panel, color);
     MenuItem items[] = {
         MenuItem(0, 5, &screen, 0, 0),
-        MenuItem("#title", screen.title),
+        MenuItem("#title", 3, screen.title, 0, 0),
         MenuItem("#car_model", 0x13, &ui, 0, 0),
         MenuItem("#car_model", screen.model),
         MenuItem("#car_position", 5, ui.state, 0, 0),
