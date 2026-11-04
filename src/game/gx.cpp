@@ -618,17 +618,17 @@ void fn_802CED50(s32 x, s32 y, s32 w, s32 h) {
 }
 
 void fn_802CED78(void) {
-    u32 a0, a1, b0, b1, c0, c1, d0, d1;
-    u8 brk, readIdle, cmdIdle, underlow, overhi;
+    u32 d0, c0, b0, a0, d1, c1, b1, a1;
+    u8 readIdle, cmdIdle, overhi, underlow, brk;
     GXReadXfRasMetric(&c0, &d0, &a0, &b0);
     GXReadXfRasMetric(&c1, &d1, &a1, &b1);
+    int clocks = d0 == d1;
+    int vtx = c0 == c1;
     int xfWaitIn = (b1 - b0) != 0;
     int xfWaitOut = (a1 - a0) != 0;
-    bool vtx = c0 == c1;
-    int clocks = d1 == d0;
     GXGetGPStatus(&overhi, &underlow, &readIdle, &cmdIdle, &brk);
     OSReport("GP status (%c%c%c%c%c) metric (%d%d%d%d) --> ", overhi ? 'O' : '-', underlow ? 'U' : '-',
-             readIdle ? '-' : 'R', cmdIdle ? '-' : 'C', brk ? 'B' : '-', xfWaitIn, xfWaitOut, clocks, vtx);
+             readIdle ? '-' : 'R', cmdIdle ? '-' : 'C', brk ? 'B' : '-', clocks, vtx, xfWaitIn, xfWaitOut);
     if (!vtx && xfWaitIn) {
         OSReport("GP hang due to XF stall bug.\n");
     } else if (!clocks && vtx && xfWaitIn) {
