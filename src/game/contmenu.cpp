@@ -257,7 +257,11 @@ public:
     }
     virtual void Update(void) {
         if ((f32)fn_802E2C20() / 1000.0f - start < 0.5f) {
-            fn_802E8528(pad, 1.0f, 0.0f);
+            // MATCHING-AID (Codex locator lead, 2026-11-04): the two named argument locals give the original's
+            // load order (both floats before pad); a const or literal form loads pad first.
+            f32 strength = 1.0f;
+            f32 stopLevel = 0.0f;
+            fn_802E8528(pad, strength, stopLevel);
         } else {
             fn_802E8528(pad, 0.0f, 0.0f);
         }
