@@ -406,6 +406,24 @@ u32 fn_801B08E8(u32 a, u32 b, u32 n) {
     return b - a;
 }
 
+static inline void RecordCrossing(s32 car, f32 tm) {
+    CrossQueue* q = &lbl_80435BE8;
+    if ((u32)q->n < 8) {
+        Crossing e;
+        e.car = car;
+        e.time = tm;
+        int i;
+        for (i = 0; i < q->n; i++) {
+            if (q->e[i].time > tm) {
+                break;
+            }
+        }
+        memmove(&lbl_80435BE8.e[i] + 1, &lbl_80435BE8.e[i], (q->n - i) * 8);
+        lbl_80435BE8.e[i] = e;
+        lbl_80435BE8.n++;
+    }
+}
+
 void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     s32 idx;
     u32 n1;
@@ -419,11 +437,11 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     n2 = c->Ideal()->line->total;
     u32 fwd = fn_801B08E8(from->ilpos, to->ilpos, n1);
     u32 back = fn_801B08E8(to->ilpos, from->ilpos, n2);
-    if (back < fwd) {
+    int backward = fwd < back;
+    if (backward != 0) {
         for (IdealPoint* p = to->next; p != from->next; p = p->next) {
             if (p->ilpos == 0) {
-                DState* s = c->State();
-                s32 l = DS(c)->lap - 1;
+                s32 l = *(s32*)((u8*)c + 0x14) - 1;
                 *(s32*)((u8*)c + 0x14) = l > 0 ? l : 0;
                 break;
             }
@@ -431,22 +449,7 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     } else {
         for (IdealPoint* p = from->next; p != to->next; p = p->next) {
             if (p->ilpos == 0) {
-                f32 tm = lbl_8055E3C8 - (1.0f / 59.94f) * (f32)(idx + 1) * 0.0625f;
-                CrossQueue* q = &lbl_80435BE8;
-                if ((u32)q->n < 8) {
-                    Crossing e;
-                    e.car = idx;
-                    e.time = tm;
-                    int i;
-                    for (i = 0; i < q->n; i++) {
-                        if (q->e[i].time > tm) {
-                            break;
-                        }
-                    }
-                    memmove(&q->e[i + 1], &q->e[i], (q->n - i) * 8);
-                    q->e[i] = e;
-                    q->n++;
-                }
+                RecordCrossing(idx, lbl_8055E3C8 - (1.0f / 59.94f) * (f32)(idx + 1) * 0.0625f);
                 break;
             }
         }
@@ -856,24 +859,6 @@ void fn_801B1A5C(DeityCar* c) {
 }
 
 }  // extern "C"
-
-static inline void RecordCrossing(s32 car, f32 tm) {
-    CrossQueue* q = &lbl_80435BE8;
-    if ((u32)q->n < 8) {
-        Crossing e;
-        e.car = car;
-        e.time = tm;
-        int i;
-        for (i = 0; i < q->n; i++) {
-            if (q->e[i].time > tm) {
-                break;
-            }
-        }
-        memmove(&lbl_80435BE8.e[i] + 1, &lbl_80435BE8.e[i], (q->n - i) * 8);
-        lbl_80435BE8.e[i] = e;
-        lbl_80435BE8.n++;
-    }
-}
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
