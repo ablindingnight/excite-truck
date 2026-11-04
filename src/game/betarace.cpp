@@ -56,6 +56,8 @@ UnkStaticFFFF lbl_8055E230;
 static UnkStatic123 lbl_8042FC70;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E234 = MakeILPos(0x7F00, 0);
+static inline s32 NoModel(void) { return -1; }
+s32 lbl_8055E254 = NoModel();  // the spin-trigger model, loaded on first use
 
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
@@ -1406,8 +1408,10 @@ inline u8 ColB(u32 c) { return c >> 8; }
 inline u8 ColG(u32 c) { return c >> 16; }
 inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
     V2 r;
-    r.y = a.y + t * (b.y - a.y);
-    r.x = a.x + t * (b.x - a.x);
+    f32 dy = b.y - a.y;
+    f32 dx = b.x - a.x;
+    r.y = a.y + t * dy;
+    r.x = a.x + t * dx;
     return r;
 }
 inline void SetV2(V2& d, const V2& s) {
@@ -3676,10 +3680,8 @@ inline void BetaMaster::vf48(void) {
     for (i = 0; i < puddles.a.count; i++) {
         Puddle* p = puddles.a.data[i];
         if (p->b10) {
-            V3 b;
-            V3 a;
-            a = *(V3*)&p->x;
-            b = *(V3*)&p->x;
+            V3 a = *(V3*)&p->x;
+            V3 b = *(V3*)&p->x;
             a.y = a.y - 0.75f;
             b.y += 0.75f;
             fn_801E41D8(&a, &b, col, p->r);
@@ -4227,13 +4229,16 @@ inline f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
 
 inline void BetaMaster::vfB8(void* r) {
     RaceResults* res = (RaceResults*)r;
+    BetaCar* c;
     int i;
     GameMode::FillResults(r);
     fn_802E30C8("BetaRace: FillResults");
+    c = cars;
     for (i = 0; i < lbl_8055E4D0; i++) {
-        s32 t = cars[i].result.total;
+        s32 t = c->result.total;
         res->e[i].score = t;
         fn_802E30C8("  car %d scored %d", i, t);
+        c++;
     }
 }
 
