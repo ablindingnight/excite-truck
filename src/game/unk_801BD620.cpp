@@ -44,6 +44,9 @@ struct Vec {
 
 ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
+// The unit's float constants are named objects defined after fn_801BA088 (in the target's .sdata2 order), so MWCC
+// does not fold them: the target adds 0 + 12 for real and keeps the zero first in every `zero + K`.
+extern const f32 lbl_805627A8, lbl_805627AC, lbl_805627B0, lbl_805627B4, lbl_805627B8, lbl_805627BC, lbl_805627C0, lbl_805627C4, lbl_805627C8, lbl_805627CC, lbl_805627D0, lbl_805627D4, lbl_805627D8, lbl_805627DC, lbl_805627E0, lbl_805627E4, lbl_805627E8, lbl_805627EC, lbl_805627F0, lbl_805627F4, lbl_805627F8, lbl_805627FC, lbl_80562800, lbl_80562804, lbl_80562808, lbl_8056280C, lbl_80562810, lbl_80562814, lbl_80562818, lbl_8056281C, lbl_80562820, lbl_80562824, lbl_80562828, lbl_8056282C, lbl_80562830, lbl_80562834;
 extern "C" {
 
 float fn_8002B0A0(double x);  // fabsf wrapper
@@ -90,7 +93,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
     s32 arg1 = a1;
     s32 arg2 = a2;
-    Vec kv[2];
+    Vec kv[4];
     Vec ident;
     Vec tmp;
     s32 sp2038;
@@ -980,16 +983,16 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
 
 
-    ident.x = 0.0f;
-    ident.y = 0.0f;
-    ident.z = 0.0f;
-    ident.w = 1.0f;
-    tmp.x = 0.0f;
-    tmp.y = 0.0f;
-    tmp.z = 0.0f;
-    tmp.w = 0.0f;
-    SCALE_ROW(t[a + 9], ident.x + 12.0f);
-    SCALE_ROW(t[a + 10], ident.x + 12.0f);
+    ident.x = lbl_805627A8;
+    ident.y = lbl_805627A8;
+    ident.z = lbl_805627A8;
+    ident.w = lbl_805627AC;
+    tmp.x = lbl_805627A8;
+    tmp.y = lbl_805627A8;
+    tmp.z = lbl_805627A8;
+    tmp.w = lbl_805627A8;
+    SCALE_ROW(t[a + 9], ident.x + lbl_805627B0);
+    SCALE_ROW(t[a + 10], ident.x + lbl_805627B0);
     {
     rowA0 = &t[a];
     rowA1 = &t[a + 1];
@@ -1025,34 +1028,36 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC18 = &t[c + 18];
     rowC19 = &t[c + 19];
     rowC21 = &t[c + 21];
-    temp_f31 = 0.0f;
-    kv[0].x = 1.4142135f;
-    kv[0].y = temp_f31 + 0.001f;
-    kv[0].z = temp_f31 + (temp_f31 + 500.0f);
-    kv[0].w = temp_f31 + 0.01f;
     rowC22 = &t[c + 22];
-    kv[1].x = (temp_f31 + (1.0f)) * (temp_f31 + 2.0f);
-    kv[1].y = temp_f31 + (2.0f * temp_f31);
-    kv[1].z = temp_f31 + (temp_f31 + 500000.0f);
-    kv[1].w = temp_f31 + -3.0f;
-    kv[2].x = temp_f31 + 3.0f;
-    kv[2].y = temp_f31 + -1.0f;
-    kv[2].z = (1.0f) * (temp_f31 + (1.0f));
-    kv[2].w = temp_f31 + -20.0f;
-    kv[3].x = temp_f31 + 20.0f;
-    kv[3].y = temp_f31 + -200.0f;
-    kv[3].z = temp_f31 + 200.0f;
     for (;;) {
+        // the limits are rebuilt at the top of every pass, before the pass test (MWCC hoists the adds and their
+        // zero, which is the store-forwarded ident.x - the frsp f31 the target keeps for the whole loop)
+        temp_f31 = ident.x;
+        kv[0].x = lbl_805627D4;
+        kv[0].y = temp_f31 + lbl_80562814;
+        kv[0].z = temp_f31 + (temp_f31 + lbl_80562810);
+        kv[0].w = temp_f31 + lbl_8056280C;
+        kv[1].x = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
+        kv[1].y = temp_f31 + (lbl_80562804 * temp_f31);
+        kv[1].z = temp_f31 + (temp_f31 + lbl_80562800);
+        kv[1].w = temp_f31 + lbl_805627F8;
+        kv[2].x = temp_f31 + lbl_805627F4;
+        kv[2].y = temp_f31 + lbl_805627D8;
+        kv[2].z = (lbl_805627AC) * (temp_f31 + (lbl_805627AC));
+        kv[2].w = temp_f31 + lbl_805627CC;
+        kv[3].x = temp_f31 + lbl_805627C8;
+        kv[3].y = temp_f31 + lbl_805627C4;
+        kv[3].z = temp_f31 + lbl_805627C0;
         if (sp1F80 == 0) break;
-        Vec V1C80(temp_f31 + 0.0192f);
-        Vec V1C70(temp_f31 + 0.08333f);
+        Vec V1C80(temp_f31 + lbl_805627B4);
+        Vec V1C70(temp_f31 + lbl_805627B8);
         sp1F80 = sp1F80 - 1;
-        Vec V1C60((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f));
+        Vec V1C60((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         Vec V1C50;
-        V1C50.w = (temp_f31 + 1.0f) * ((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f));
-        Vec V1C40(temp_f31 + 9.81f);
+        V1C50.w = (temp_f31 + lbl_805627AC) * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        Vec V1C40(temp_f31 + lbl_805627BC);
         Vec V1C30;
-        V1C30.y = temp_f31 + (temp_f31 + 9.81f);
+        V1C30.y = temp_f31 + (temp_f31 + lbl_805627BC);
         Vec V1C20(*rowA0);
         Vec V1C10(V1C20);
         Vec V1C00(*rowA5);
@@ -1183,14 +1188,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1C10.x = V1950.x;
         V1C10.y = V1950.y;
         V1C10.z = V1950.z;
-        Vec V1940(temp_f31 + 0.5f);
+        Vec V1940(temp_f31 + lbl_805627D0);
         Vec V1930;
         V1930.x = V1BD0.x * V1940.x;
         V1930.y = V1BD0.y * V1940.x;
         V1930.z = V1BD0.z * V1940.x;
         Vec V1920(V1930);
         Vec V1910(temp_f31 + temp_f31);
-        V1920.w = (temp_f31 + 1.0f) * V1910.x;
+        V1920.w = (temp_f31 + lbl_805627AC) * V1910.x;
         Vec V1900;
         V1900.x = V1BB0.x * V1920.x;
         V1900.y = V1BB0.y * V1920.y;
@@ -1251,7 +1256,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
         V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
         temp_f16_6 = V18F0.w * kv[0].x;
-        Vec V18A0(temp_f31 + 1.0f);
+        Vec V18A0(temp_f31 + lbl_805627AC);
         V18A0.y = V18A0.x;
         V18A0.z = V18A0.y;
         Vec V1890;
@@ -1261,7 +1266,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V1880;
         V1880.x = (V1900.y * V1900.z) + (V1900.x * temp_f16_6);
         V1880.z = (V1900.x * V1900.y) + (V1900.z * temp_f16_6);
-        tmp.x = V18A0.z - ((temp_f31 + 1.0f) * V18B0.y);
+        tmp.x = V18A0.z - ((temp_f31 + lbl_805627AC) * V18B0.y);
         tmp.y = V18A0.z - (V18A0.z * V18B0.x);
         V1B90.x = tmp.x - (V18A0.z * V18B0.z);
         V1B90.y = V1890.z;
@@ -1274,7 +1279,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B70.x = V1880.y;
         V1B50.x = V1890.y;
         V1B50.y = V1B50.w + V1880.x;
-        V1B50.z = tmp.z - ((temp_f31 + 1.0f) * V18B0.y);
+        V1B50.z = tmp.z - ((temp_f31 + lbl_805627AC) * V18B0.y);
         Vec V1870(V1BF0);
         rowA5->x = V1870.x;
         rowA5->y = V1870.y;
@@ -1479,10 +1484,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec V0E20;
         Vec V0E10;
         Vec V0E00;
-        V1C50.w = (temp_f31 + 1.0f) * ((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f));
-        V17E0.x = ((temp_f31 + 0.0192f));
-        V17D0.x = ((temp_f31 + 0.08333f));
-        V17C0.x = (((temp_f31 + 0.0192f) * (temp_f31 + 0.08333f)));
+        V1C50.w = (temp_f31 + lbl_805627AC) * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        V17E0.x = ((temp_f31 + lbl_805627B4));
+        V17D0.x = ((temp_f31 + lbl_805627B8));
+        V17C0.x = (((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8)));
         V17B0.x = rowB25->x;
         V17B0.y = rowB25->y;
         V17B0.z = rowB25->z;
@@ -1669,9 +1674,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         var_f2_5 = var_f18;
         var_f2_5 = var_f2_5 > V1490.x ? var_f2_5 : V1490.x;
         V1480.x = var_f2_5;
-        V1470.x = ((temp_f31 + 900.0f));
-        V1460.x = ((temp_f31 + 1000.0f));
-        V1450.w = V17A0.w * ((temp_f31 + 1000.0f));
+        V1470.x = ((temp_f31 + lbl_805627DC));
+        V1460.x = ((temp_f31 + lbl_805627E0));
+        V1450.w = V17A0.w * ((temp_f31 + lbl_805627E0));
         temp_f1_14 = fn_8002B0A0(V1450.w);
         V1440.w = temp_f1_14;
         V1430.x = V14B0.x;
@@ -1684,10 +1689,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V13F0.x = temp_f4_12;
         V13E0.x = V1480.x * V13F0.x;
         V13D0.x = V13E0.x;
-        V13C0.x = ((temp_f31 + 0.999f));
+        V13C0.x = ((temp_f31 + lbl_805627E4));
         V13B0.w = rowB8->w;
         V13A0.w = V13B0.w;
-        V1390.w = V13A0.w * ((temp_f31 + 0.999f));
+        V1390.w = V13A0.w * ((temp_f31 + lbl_805627E4));
         temp_f14_14 = V1390.w + V13D0.x;
         V1380.w = temp_f14_14;
         V1370.x = V1770.x + V1380.w;
@@ -1711,8 +1716,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1300.y = V1310.y;
         V1300.z = V1310.z;
         V1300.w = V1310.w;
-        V12F0.x = ((temp_f31 + 3.16f));
-        V12E0.w = V1C50.w * ((temp_f31 + 3.16f));
+        V12F0.x = ((temp_f31 + lbl_805627E8));
+        V12E0.w = V1C50.w * ((temp_f31 + lbl_805627E8));
         temp_f1_15 = V1370.x * V12E0.w;
         V12D0.x = temp_f1_15;
         V12C0.x = V1520.x + V12D0.x;
@@ -1752,12 +1757,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1500.w = V1510.w + V1510.z;
         V18F0.x = V1500.x + V1500.z;
         V1250.y = V1770.x + V18F0.x;
-        V1240.x = ((temp_f31 + 4.0f));
-        var_f0_2 = V16D0.x * ((temp_f31 + 4.0f));
+        V1240.x = ((temp_f31 + lbl_805627EC));
+        var_f0_2 = V16D0.x * ((temp_f31 + lbl_805627EC));
         V1230.x = var_f0_2;
-        V1230.y = V16D0.y * ((temp_f31 + 4.0f));
-        V1230.z = V16D0.z * ((temp_f31 + 4.0f));
-        V1230.w = V16D0.w * ((temp_f31 + 4.0f));
+        V1230.y = V16D0.y * ((temp_f31 + lbl_805627EC));
+        V1230.z = V16D0.z * ((temp_f31 + lbl_805627EC));
+        V1230.w = V16D0.w * ((temp_f31 + lbl_805627EC));
         V1220.x = V1430.x;
         var_f0_2 = V1230.x < V1220.x ? V1230.x : V1220.x;
         var_f2_6 = V1230.y;
@@ -1835,12 +1840,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1300.z = V1110.z;
         V1100.w = V1300.w - V1120.w;
         V1300.w = V1100.w;
-        V10F0.x = ((temp_f31 + 100000.0f));
-        var_f10 = V16B0.x * ((temp_f31 + 100000.0f));
+        V10F0.x = ((temp_f31 + lbl_805627F0));
+        var_f10 = V16B0.x * ((temp_f31 + lbl_805627F0));
         V10E0.x = var_f10;
-        V10E0.y = V16B0.y * ((temp_f31 + 100000.0f));
-        V10E0.z = V16B0.z * ((temp_f31 + 100000.0f));
-        V10E0.w = V16B0.w * ((temp_f31 + 100000.0f));
+        V10E0.y = V16B0.y * ((temp_f31 + lbl_805627F0));
+        V10E0.z = V16B0.z * ((temp_f31 + lbl_805627F0));
+        V10E0.w = V16B0.w * ((temp_f31 + lbl_805627F0));
         V10D0.x = V10E0.x;
         V10D0.y = V10E0.y;
         var_f1_8 = V10D0.y;
@@ -2144,8 +2149,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0B70((V0BA0.x > V0B80.x ? V0BA0.x : V0B80.x));
             Vec V0B60;
             V0B60.y = (temp_f31 + V0B70.x);
-            Vec V0B50((temp_f31 + 1.0f));
-            Vec V0B40((temp_f31 + 10000.0f));
+            Vec V0B50((temp_f31 + lbl_805627AC));
+            Vec V0B40((temp_f31 + lbl_805627FC));
             Vec V0B30;
             V0B30.y = (V0B60.y * V0B40.x);
             Vec V0B20((temp_f31 + V0B30.y));
@@ -2162,7 +2167,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0AC0((V1710.x * V0B00.y));
             Vec V0AB0;
             Vec V0AA0;
-            Vec V0A90((temp_f31 + 500000.0f));
+            Vec V0A90((temp_f31 + lbl_80562800));
             V19E0.z = (V0C80.z * V0CE0.z);
             V0AD0.x = ((V19E0.x + V19E0.y) + V19E0.z);
             V0AB0.x = (V0AD0.x * V0AC0.x);
@@ -2200,14 +2205,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0970((V16D0.x * V0BB0.y));
             Vec V0960(fn_8002B0A0(V0970.x));
             Vec V0950(V0B50.x);
-            Vec V0940((temp_f31 + 2.0f));
+            Vec V0940((temp_f31 + lbl_80562804));
             Vec V0930(kv[1].x);
             Vec V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
-            Vec V08F0((temp_f31 + 5.0f));
+            Vec V08F0((temp_f31 + lbl_80562808));
             Vec V08E0(V0940.x);
-            Vec V08D0(((temp_f31 + 5.0f) * (temp_f31 + 2.0f)));
+            Vec V08D0(((temp_f31 + lbl_80562808) * (temp_f31 + lbl_80562804)));
             VSCALE(V08C0, V0900, V08D0.x);
             Vec V08B0(V08C0);
             VSCALE(V08A0, V08B0, V1C50.w);
@@ -2240,7 +2245,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V07D0.z = V07E0.z;
             Vec V07C0;
             V07C0.y = (V0A30.y * V0800.y);
-            Vec V07B0((temp_f31 + 500.0f));
+            Vec V07B0((temp_f31 + lbl_80562810));
             Vec V07A0;
             V07A0.y = kv[0].z;
             Vec V0790;
@@ -2263,30 +2268,30 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V06E0.y = (temp_f31 + V06F0.x);
             Vec V06D0((V0720.x * V0720.x));
             Vec V06C0(V06D0.x);
-            Vec V06B0((temp_f31 + 0.0493f));
+            Vec V06B0((temp_f31 + lbl_80562818));
             Vec V06A0((V0720.x * V06B0.x));
             Vec V0690((V06C0.x * V06A0.x));
-            Vec V0680((temp_f31 + -0.403f));
+            Vec V0680((temp_f31 + lbl_8056281C));
             Vec V0670((V06C0.x * V0680.x));
-            Vec V0660((temp_f31 + 1.1f));
+            Vec V0660((temp_f31 + lbl_80562820));
             Vec V0650((V0720.x * V0660.x));
             Vec V0640((V0670.x + V0650.x));
             Vec V0630((V0690.x + V0640.x));
             Vec V0620;
             V0620.y = (temp_f31 + V0630.x);
-            Vec V0610((temp_f31 + -0.9f));
+            Vec V0610((temp_f31 + lbl_80562824));
             Vec V0600;
             V0600.y = (V06E0.y * V06E0.y);
             Vec V05F0((V0610.x * V0600.y));
-            Vec V05E0((temp_f31 + 0.79f));
+            Vec V05E0((temp_f31 + lbl_80562828));
             Vec V05D0((V05E0.x * V06E0.y));
-            Vec V05C0((temp_f31 + 0.833f));
+            Vec V05C0((temp_f31 + lbl_8056282C));
             Vec V05B0((V05D0.x + V05C0.x));
             Vec V05A0((V05F0.x + V05B0.x));
             Vec V0590;
             V0590.z = (temp_f31 + V05A0.x);
-            Vec V0580((temp_f31 + -100.0f));
-            Vec V0570((temp_f31 + 2.68f));
+            Vec V0580((temp_f31 + lbl_80562830));
+            Vec V0570((temp_f31 + lbl_80562834));
             Vec V0560((V0720.x - V0570.x));
             Vec V0550((V0580.x * V0560.x));
             Vec V0540(V0700.x);
@@ -2543,10 +2548,48 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA10->z = V00B0.z;
         }
     }
-        SCALE_ROW(t[a + 9], ident.x + 0.08333f);
-        SCALE_ROW(t[a + 10], ident.x + 0.08333f);
+        SCALE_ROW(t[a + 9], ident.x + lbl_805627B8);
+        SCALE_ROW(t[a + 10], ident.x + lbl_805627B8);
     }
 }
+
+// .sdata2 0x805627A8..0x80562838, in address order
+const f32 lbl_805627A8 = 0.0f;
+const f32 lbl_805627AC = 1.0f;
+const f32 lbl_805627B0 = 12.0f;
+const f32 lbl_805627B4 = 0.0192f;
+const f32 lbl_805627B8 = 0.08333f;
+const f32 lbl_805627BC = 9.81f;
+const f32 lbl_805627C0 = 2e+02f;
+const f32 lbl_805627C4 = -2e+02f;
+const f32 lbl_805627C8 = 2e+01f;
+const f32 lbl_805627CC = -2e+01f;
+const f32 lbl_805627D0 = 0.5f;
+const f32 lbl_805627D4 = 1.4142135f;
+const f32 lbl_805627D8 = -1.0f;
+const f32 lbl_805627DC = 9e+02f;
+const f32 lbl_805627E0 = 1e+03f;
+const f32 lbl_805627E4 = 0.999f;
+const f32 lbl_805627E8 = 3.16f;
+const f32 lbl_805627EC = 4.0f;
+const f32 lbl_805627F0 = 1e+05f;
+const f32 lbl_805627F4 = 3.0f;
+const f32 lbl_805627F8 = -3.0f;
+const f32 lbl_805627FC = 1e+04f;
+const f32 lbl_80562800 = 5e+05f;
+const f32 lbl_80562804 = 2.0f;
+const f32 lbl_80562808 = 5.0f;
+const f32 lbl_8056280C = 0.01f;
+const f32 lbl_80562810 = 5e+02f;
+const f32 lbl_80562814 = 0.001f;
+const f32 lbl_80562818 = 0.0493f;
+const f32 lbl_8056281C = -0.403f;
+const f32 lbl_80562820 = 1.1f;
+const f32 lbl_80562824 = -0.9f;
+const f32 lbl_80562828 = 0.79f;
+const f32 lbl_8056282C = 0.833f;
+const f32 lbl_80562830 = -1e+02f;
+const f32 lbl_80562834 = 2.68f;
 #undef F
 
 }  // extern "C"
