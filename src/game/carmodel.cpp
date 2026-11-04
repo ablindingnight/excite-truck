@@ -529,7 +529,7 @@ void fn_801ECCE0(CarModel* m, u32 pass);
 CarModel::CarModel(Racer* r, CarDef* d) {
     car = 0;
     index = r->index;
-    if (r->index == 0) {
+    if (index == 0) {
         fn_801EC1D4();
     }
     char buf[64];
@@ -554,10 +554,10 @@ CarModel::CarModel(Racer* r, CarDef* d) {
     r->color = c;
     Bind(r->name);
     drawWheel = 1;
-    if (*(u32*)r->name == 'PCRA') {
+    if (*(u32*)r->name == 'PCAR') {
         fn_801333E8(1, "draw_player_wheel", &drawWheel);
     }
-    if (*(u32*)r->name == 'PCRA' && fn_801E87A8()->mode == 0x180304) {
+    if (*(u32*)r->name == 'PCAR' && fn_801E87A8()->mode == 0x180304) {
         lbl_8055EBC8 = this;
     }
 }
