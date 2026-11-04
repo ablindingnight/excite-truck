@@ -222,11 +222,11 @@ void fn_8025CE78(void) {
     HideOtherDifficulties(4, &l4);
     MenuItem items[] = {
         MenuItem(NULL, 5, &hider, 0, 0),
-        MenuItem("stunt_name_1", l0.label),
-        MenuItem("stunt_record_1", l0.value),
-        MenuItem("stunt_location_1", l0.text),
+        MenuItem("stunt_name_1", 3, l0.label, 0, 0),
+        MenuItem("stunt_record_1", 3, l0.value, 0, 0),
+        MenuItem("stunt_location_1", 3, l0.text, 0, 0),
         MenuItem("car_icon_1", 5, l0.pad40C, 0, 0),
-        MenuItem("stunt_name_2", l1.label),
+        MenuItem("stunt_name_2", 3, l1.label, 0, 0),
         MenuItem("stunt_record_2", l1.value),
         MenuItem("stunt_location_2", l1.text),
         MenuItem("car_icon_2", 5, l1.pad40C, 0, 0),

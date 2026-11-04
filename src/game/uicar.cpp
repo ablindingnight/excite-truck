@@ -651,7 +651,7 @@ int fn_8023FF1C(u8 flag) {
         MenuItem(NULL, 5, &w, 0, 0),
         MenuItem(NULL, 5, &pp.p1.sel, 0, 0),
         MenuItem("#carmodel_1", 0x13, &pp.p1.screen, 0, 0),
-        MenuItem("#carmodel_1", pp.p1.picker.chassis),
+        MenuItem("#carmodel_1", 3, pp.p1.picker.chassis, 0, 0),
         MenuItem("#model_1", 0x10, NULL, (int)&pp.p1.picker, 0),
         MenuItem("#color_1", 5, pp.p1.color + 0x10, 0, 0),
         MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),

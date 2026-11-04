@@ -335,13 +335,13 @@ void fn_8025C204(int event, int difficulty) {
     }
     MenuItem items[] = {
         MenuItem("location", location),
-        MenuItem("best_time", best),
-        MenuItem("time_head", head),
-        MenuItem("#score_1", rows[0].score),
-        MenuItem("#grade_1", rows[0].grade),
+        MenuItem("best_time", 3, best, 0, 0),
+        MenuItem("time_head", 3, head, 0, 0),
+        MenuItem("#score_1", 3, rows[0].score, 0, 0),
+        MenuItem("#grade_1", 3, rows[0].grade, 0, 0),
         MenuItem("#time_1", rows[0].time),
         MenuItem("car_icon_1", 5, &icons[0], 0, 0),
-        MenuItem("#score_2", rows[1].score),
+        MenuItem("#score_2", 3, rows[1].score, 0, 0),
         MenuItem("#grade_2", rows[1].grade),
         MenuItem("#time_2", rows[1].time),
         MenuItem("car_icon_2", 5, &icons[1], 0, 0),
