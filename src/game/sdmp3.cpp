@@ -177,7 +177,6 @@ u8 lbl_805600C9;        // fading out
 s32 lbl_805600CC;       // fade start
 volatile u8 lbl_805600D0;  // enabled
 volatile u8 lbl_805600D1;  // restart
-u8 lbl_805600D2;        // channel drift
 
 namespace {
 
@@ -362,12 +361,13 @@ static inline f32 Ramp(f32 x, f32 a, f32 len) {
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802E9EB8(void) {
-    if (lbl_805600D2) {
+    static u8 channelDrift;
+    if (channelDrift) {
         fn_802E30C8("mp3: trying to restart after channel drift");
         for (int i = 0; i < 2; i++) {
             fn_802E61BC(lbl_80560090[i]);
         }
-        lbl_805600D2 = 0;
+        channelDrift = 0;
     }
     if (OSTryLockMutex(lbl_805584A0)) {
         if (lbl_80560070.Poll()) {
@@ -390,7 +390,7 @@ void fn_802E9EB8(void) {
             for (int i = 0; i < 2; i++) {
                 fn_802E61D8(lbl_80560090[i]);
                 lbl_805600B0[i] = r;
-                lbl_805600D2 = 1;
+                channelDrift = 1;
             }
         }
         lbl_805600D1 = 0;

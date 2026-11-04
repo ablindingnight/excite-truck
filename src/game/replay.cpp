@@ -236,7 +236,6 @@ u8 lbl_8055D39C;
 u8 lbl_8055D39D;
 
 bool lbl_805589B0 = 1;  // advanced overlay
-s32 lbl_805589EC = 4;  // camera mode
 
 void fn_80008390(void) {
     static const s32 multi[] = {0xF};
@@ -389,7 +388,8 @@ void fn_80008684(int camera) {
 enum { CAM_LEFT = 12, CAM_RIGHT = 13 };
 
 int fn_80008C5C(void) {
-    int prev = lbl_805589EC;
+    static s32 camMode = 4;
+    int prev = camMode;
     PadState pad;
     u32 dir;
     int any;
@@ -397,29 +397,29 @@ int fn_80008C5C(void) {
     if (!lbl_8055D37A && !fn_802ECC10() && fn_801298E8(&pad, 0)) {
         dir = pad.dir;
         if (dir == 8) {
-            lbl_805589EC = fn_8000865C() ? CAM_RIGHT : CAM_LEFT;
+            camMode = fn_8000865C() ? CAM_RIGHT : CAM_LEFT;
         } else if (dir == 2) {
-            lbl_805589EC = fn_8000865C() ? CAM_LEFT : CAM_RIGHT;
+            camMode = fn_8000865C() ? CAM_LEFT : CAM_RIGHT;
         } else if (dir == 4) {
-            lbl_805589EC = 7;
+            camMode = 7;
         } else if (dir == 1) {
-            lbl_805589EC = 14;
+            camMode = 14;
         }
         any = 0;
         if (pad.dir - 1 <= 7 && ((1 << (pad.dir - 1)) & 0x8B)) {
             any = 1;
         }
-        if (!any && lbl_8055D394 > 1.0f && lbl_805589EC != 4) {
-            lbl_805589EC = 4;
+        if (!any && lbl_8055D394 > 1.0f && camMode != 4) {
+            camMode = 4;
         }
-        if (lbl_805589EC != prev && (lbl_8055D394 > 1.0f || prev == 4)) {
+        if (camMode != prev && (lbl_8055D394 > 1.0f || prev == 4)) {
             lbl_8055D394 = 0.0f;
         } else {
-            lbl_805589EC = prev;
+            camMode = prev;
         }
         lbl_8055D394 += 0.016683351f;
     }
-    return lbl_805589EC;
+    return camMode;
 }
 
 int fn_80008DBC(int key) {

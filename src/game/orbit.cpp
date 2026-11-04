@@ -226,7 +226,6 @@ bool lbl_8055E329;
 u8 lbl_8055E32A;   // enabled
 u8 lbl_8055E32B;   // turtle
 DynArray<OrbitCarState>* lbl_8055E32C;
-s32 lbl_8055E330;
 void* lbl_8055E334;  // boost bounds
 
 OrbitConfig lbl_8042FE38;
@@ -466,7 +465,8 @@ f32 fn_80166274(void) {
 }
 
 void fn_801662FC(void) {
-    if ((lbl_8055E329 = (u8)lbl_8055E330++ == 0xFF) && lbl_8055E328) {
+    static s32 frame;
+    if ((lbl_8055E329 = (u8)frame++ == 0xFF) && lbl_8055E328) {
         if (!NearEq(lbl_8055E31C, 1.0f)) {
             fn_802E30C8("G: g_speed_factor: %.2f, p_total_lon: %.2f (hold at %.2f) (player %.3f)", lbl_8055E31C,
                         lbl_8055E320, lbl_8042FE38.freezeLon, fn_80166274());

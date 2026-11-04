@@ -279,7 +279,6 @@ TexEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture
 s32 lbl_8055FCB8;     // bound texture
 TexCache* lbl_8055FCBC;
-s32 lbl_8055FCC0;
 f32 lbl_8055FCC4;     // size scale
 
 const char* lbl_8055D038 = "null.tex";
@@ -1214,6 +1213,7 @@ void fn_802CC5B8(s32 id) {
 }
 
 void fn_802CC60C(void) {
+    static s32 frame;
     for (int i = 0; i < 512; i++) {
         lbl_8055FCB0[i].size = 1e12f;
         lbl_8055FCB0[i].uses = 0;
@@ -1222,7 +1222,7 @@ void fn_802CC60C(void) {
     c->best = 0;
     c->resident = 0;
     c->cut = 0;
-    if (!(u8)lbl_8055FCC0++) {
+    if (!(u8)frame++) {
         c->startTime = fn_802E2C20();
     }
 }

@@ -414,7 +414,6 @@ u8 lbl_8055E45D;
 u8 lbl_8055E45E;
 u8 lbl_8055E45F;
 f32 lbl_8055E460;
-s32 lbl_8055E464;
 s32 lbl_8055E468;
 char lbl_8055E46C[4];
 
@@ -448,13 +447,14 @@ static inline void Swap(char& a, char& b) {
 extern "C" {
 
 void fn_80177814(s32* out) {
+    static s32 seed;
     s32 t = fn_802E2C20();
-    s32 s = lbl_8055E464;
+    s32 s = seed;
     out[0] = (s + t) % 30000;
-    lbl_8055E464 = s + 0x9947;
+    seed = s + 0x9947;
     t = fn_802E2C20();
-    out[1] = (lbl_8055E464 + t) % 30000;
-    lbl_8055E464 = lbl_8055E464 + 0x2F1CD;
+    out[1] = (seed + t) % 30000;
+    seed = seed + 0x2F1CD;
 }
 
 void fn_801778C0(void) {
