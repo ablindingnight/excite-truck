@@ -1908,6 +1908,9 @@ void fn_80196AA0(u8* d) {
 
 extern "C" int __fpclassifyf(f32 x);
 
+static inline int IsNan(f32 x) { return __fpclassifyf(x) == 1; }
+static inline int IsFinite(f32 x) { return __fpclassifyf(x) > 2; }
+
 void fn_80196C90(u8* d) {
     F32(d, 0x144) *= F32(d, 0x14C);
     int any = 0;
@@ -1919,13 +1922,13 @@ void fn_80196C90(u8* d) {
         f32 a = F32(d, 0x144);
         b = F32(d, 0xCC);
         if ((*(s32*)&a & (s32)0x80000000) == (*(s32*)&b & (s32)0x80000000)) {
-            F32(d, 0x144) = a * 0.80999994f;
+            F32(d, 0x144) *= 0.80999994f;
         }
     }
     if ((f32)AbsD(F32(d, 0x144)) < (f32)AbsD(F32(d, 0x148))) {
         f32 t = F32(d, 0x150);
         int ok = 0;
-        if (!(__fpclassifyf(t) == 1) && __fpclassifyf(t) > 2) {
+        if (!IsNan(t) && IsFinite(t)) {
             ok = 1;
         }
         if (!ok) {
