@@ -112,11 +112,6 @@ ModuleTag lbl_8055ED50;
 u8 lbl_8055ED58;               // initialized
 Difficulty* lbl_8055ED5C;      // current difficulty
 
-const DiffLevel lbl_802F9D68[3] = {
-    {"easy", "Easy", "easy_difficulty"},
-    {"medium", "Medium", "medium_difficulty"},
-    {"hard", "Hard", "hard_difficulty"},
-};
 
 extern "C" {
 
@@ -131,6 +126,16 @@ const char* fn_80204AA4(int event) {
     }
     return NULL;
 }
+
+}  // extern "C"
+
+const DiffLevel lbl_802F9D68[3] = {
+    {"easy", "Easy", "easy_difficulty"},
+    {"medium", "Medium", "medium_difficulty"},
+    {"hard", "Hard", "hard_difficulty"},
+};
+
+extern "C" {
 
 const DiffLevel* fn_80204B18(int level) { return &lbl_802F9D68[level]; }
 
