@@ -387,9 +387,9 @@ public:
         f32 f = 0.0f;
         if (r < ranks.a.count - 1) {
             s32 lo = r > 0 ? ranks.a.data[r - 1].thresh : 0;
-            u32 v = Value();
-            f32 span = (f32)(ranks.a.data[r].thresh - lo);
+            s32 v = Value();
             f32 cur = (f32)(v - lo);
+            f32 span = (f32)(ranks.a.data[r].thresh - lo);
             if (span > 0.0f) {
                 f = cur / span;
             }
