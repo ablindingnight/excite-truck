@@ -1,6 +1,6 @@
 // Car mass lists (0x801BD628-0x801BF214): per-car point-mass tables ("masslist") and the contact lists
 // built from them each frame ("cslist", "cclist", "cxlist", "alist"), plus a 256-entry scratch table of
-// 4-float records. The mass update and contact gathering passes are placeholders. Names are guesses apart
+// 4-float records. Names are guesses apart
 // from the strings.
 #include "game/common.h"
 
@@ -36,7 +36,8 @@ struct MassSet {
     MVec4 quat;     // offset 0x40
     MVec4 vel;      // offset 0x50
     MVec4 v60;      // offset 0x60
-    u8 pad70[0x20];
+    MVec4 mass;     // offset 0x70 (inertia x, y, z, mass)
+    MVec4 invMass;  // offset 0x80 (reciprocals)
     MVec4 v90;      // offset 0x90
     MVec4 vA0;      // offset 0xA0
 };
@@ -62,9 +63,8 @@ struct ContactSet {
 
 struct CrossSet {
     CrossSet(void);
-    MVec4 pts[7];    // offset 0x0, body-space contact points
-    MVec4 v70;       // offset 0x70
-    u8 pad80[0x110];
+    MVec4 row[25];   // offset 0x0, the integrator's per-car parameter rows (fn_801BA088 t[]): 0-3 wheel anchors
+                     // (body space), 7-9 and 12-17 per-wheel suspension lanes, 10-11 tyre force fit, ...
 };
 
 struct CxEntry {
@@ -85,9 +85,44 @@ u8 lbl_8055E7A8;
 MVec4 lbl_80436D48[0x100];
 
 // A car setup block (carsetup.cpp CarSetup, 0x138 bytes): defaulted by fn_801BDA70, then applied to the car.
-struct ContactOut {
-    ContactOut(void) {}
-    u8 data[0x138];
+struct WheelSetup {
+    f32 rideHeight;      // offset 0x0
+    f32 spring;          // offset 0x4
+    f32 bump;            // offset 0x8
+    f32 rebound;         // offset 0xC
+    f32 bumpstopHeight;  // offset 0x10
+    f32 bumpstopRate;    // offset 0x14
+    f32 unk18;           // offset 0x18
+    f32 unk1C;           // offset 0x1C
+    f32 unk20;           // offset 0x20
+};
+
+// carsetup.cpp's car setup block (0x138 bytes): defaulted by fn_801BDA70, then applied to the car.
+struct CarSetup {
+    f32 mass;             // offset 0x0
+    f32 mx;               // offset 0x4
+    f32 my;               // offset 0x8
+    f32 mz;               // offset 0xC
+    f32 ftrack;           // offset 0x10
+    f32 rtrack;           // offset 0x14
+    f32 wheelbase;        // offset 0x18
+    f32 balance;          // offset 0x1C
+    f32 collideCmHeight;  // offset 0x20
+    f32 cmHeight;         // offset 0x24
+    f32 airDrag;          // offset 0x28
+    f32 torqueBalance;    // offset 0x2C
+    u8 engine[0x48];      // offset 0x30 (gearing and engine; not read here)
+    f32 fsway;            // offset 0x78
+    f32 rsway;            // offset 0x7C
+    WheelSetup wheels[4];  // offset 0x80
+    f32 grip;             // offset 0x110
+    f32 slip;             // offset 0x114
+    f32 loadFactor;       // offset 0x118
+    f32 unk11C;           // offset 0x11C
+    f32 brake;            // offset 0x120
+    f32 speedSteering;    // offset 0x124
+    f32 wheelLock;        // offset 0x128
+    f32 modelOffset[3];   // offset 0x12C
 };
 
 extern "C" {
@@ -96,10 +131,10 @@ double cos(double x);
 double sin(double x);
 double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
-void fn_801BDA70(ContactOut* out);
-void fn_801BDA74(int car, ContactOut* out);
+void fn_801BDA70(CarSetup* out);
+void fn_801BDA74(int car, CarSetup* out);
 int fn_801E9E78(void* h, MVec3* p, MVec3* n);
-void fn_80279D40(ContactOut* out);
+void fn_80279D40(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
@@ -174,7 +209,7 @@ void fn_801BD790(void) {
 
 // Adds a car: clears its records and starts it at rest, upright, 2 units up.
 void fn_801BD808(void) {
-    ContactOut out;
+    CarSetup out;
     int car = lbl_8055E78C++;
     MassSet* m = &lbl_8055E794[car];
     ContactSet* c = &lbl_8055E798[car];
@@ -201,10 +236,73 @@ void fn_801BD808(void) {
     fn_801BDA74(car, &out);
 }
 
-void fn_801BDA70(ContactOut* out) { fn_80279D40(out); }
+void fn_801BDA70(CarSetup* out) { fn_80279D40(out); }
 
-// Contact gathering (placeholders).
-void fn_801BDA74(int car, ContactOut* out) {}
+// Applies a car setup to car `car`: mass/inertia (and reciprocals) and the integrator's parameter rows - wheel anchors,
+// suspension lanes per wheel, a two-point linear tyre force fit, toe angles, brake split, drive split.
+#define DEG(d) ((d) * 3.141592653589793 / 180.0)
+void fn_801BDA74(int car, CarSetup* s) {
+    MVec4 mass(s->mx, s->my, s->mz, s->mass);
+    MVec4 inv(1.0f / s->mx, 1.0f / s->my, 1.0f / s->mz, 1.0f / s->mass);
+    MassSet* m = &lbl_8055E794[car];
+    CrossSet* x = &lbl_8055E79C[car];
+    int i;
+    lbl_8055E7A0[car] = 0;
+    m->mass = mass;
+    m->invMass = inv;
+    x->row[4] = MVec4(0.044f, 0.044f, 0.044f, 0.044f);
+    x->row[5] = MVec4(0.189f, 0.189f, 0.189f, 0.189f);
+    for (i = 0; i < 4; i++) {
+        x->row[i] = MVec4(0.762f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
+                          1.371f * ((i & 2) ? -1.0f : 1.0f));
+    }
+    x->row[18] = MVec4(sin(s->wheelLock), sin(s->wheelLock), 0.0f, 0.0f);
+    x->row[19] = MVec4(DEG(-0.1), -DEG(-0.1), DEG(0.1), -DEG(0.1));
+    x->row[20] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    x->row[21] = MVec4(0.0f, 0.0f, 0.5f, 0.5f);
+    x->row[6] = MVec4(0.5f * s->airDrag * 1.29f, 0.0f, 0.0f, s->collideCmHeight - s->cmHeight);
+    x->row[22] = MVec4(s->brake * s->unk11C, s->brake * s->unk11C, s->brake * (1.0f - s->unk11C),
+                       s->brake * (1.0f - s->unk11C));
+    {
+        f32 g = 0.9f * s->grip;
+        f32 sl = 0.25f * s->slip;
+        f32 x0 = 3559.99f * s->loadFactor;
+        f32 a0 = 1.46f * g;
+        f32 x1 = 8900.0f * s->loadFactor;
+        f32 a1 = 1.25f * g;
+        f32 b0 = 104857.3f * g * sl;
+        f32 b1 = 648575.7f * g * sl;
+        f32 ka = (a1 - a0) / (x1 - x0);
+        f32 kb = (b1 - b0) / (x1 - x0);
+        MVec4 fit(a0 - ka * x0, ka, b0 - kb * x0, kb);
+        x->row[10] = fit;
+        x->row[11] = fit;
+    }
+    for (i = 0; i < 4; i++) {
+        WheelSetup* w = &s->wheels[i];
+        int front = (i & 2) == 0;
+        int left = (i & 1) == 0;
+        f32 share = front ? s->balance : 1.0f - s->balance;
+        f32 load = 9.81f * (0.5f * share * s->mass);
+        x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
+                          w->unk18 - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
+                          (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
+    }
+    x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
+    x->row[13] = MVec4(s->wheels[0].bump, s->wheels[1].bump, s->wheels[2].bump, s->wheels[3].bump);
+    x->row[14] = MVec4(s->wheels[0].rebound, s->wheels[1].rebound, s->wheels[2].rebound, s->wheels[3].rebound);
+    x->row[15] = MVec4(s->fsway, 0.0f, s->rsway, 0.0f);
+    x->row[16] = MVec4(s->wheels[0].bumpstopHeight, s->wheels[1].bumpstopHeight, s->wheels[2].bumpstopHeight,
+                       s->wheels[3].bumpstopHeight);
+    x->row[17] = MVec4(s->wheels[0].bumpstopRate, s->wheels[1].bumpstopRate, s->wheels[2].bumpstopRate,
+                       s->wheels[3].bumpstopRate);
+    x->row[8] = MVec4(s->wheels[0].unk1C, s->wheels[1].unk1C, s->wheels[2].unk1C, s->wheels[3].unk1C);
+    x->row[9] = MVec4(s->wheels[0].unk20, s->wheels[1].unk20, s->wheels[2].unk20, s->wheels[3].unk20);
+    x->row[7] = MVec4(s->wheels[0].unk18, s->wheels[1].unk18, s->wheels[2].unk18, s->wheels[3].unk18);
+    x->row[21] = MVec4(0.5f * (1.0f - s->torqueBalance), 0.5f * (1.0f - s->torqueBalance), 0.5f * s->torqueBalance,
+                       0.5f * s->torqueBalance);
+    x->row[23] = MVec4(1.296f, 0.0f, 0.0f, 0.216f);
+}
 
 // Sets a car's body from a matrix (rows + origin) and its linear/angular velocities: the rotation is
 // converted to a quaternion (Shoemake) and stored conjugated.
@@ -271,7 +369,7 @@ static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
     }
 }
 
-// NonMatching: 441/443; the target copies x->v70 through two more temporaries (frame 32 bytes larger).
+// NonMatching: 441/443; the target copies x->row[7] through two more temporaries (frame 32 bytes larger).
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
 void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
@@ -296,7 +394,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->v60 = MVec4(0.0f, 0.0f, 0.0f);
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    MVec4 k = x->v70;
+    MVec4 k = x->row[7];
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);
     *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -308,10 +406,10 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         *(MVec4*)&c->pts[9 + i] = MVec4(0.0f, 0.0f, 0.0f);
         *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
-        f32 xv = x->pts[i].x;
+        f32 xv = x->row[i].x;
         in.x = xv;
-        in.y = x->pts[i].y;
-        in.z = x->pts[i].z;
+        in.y = x->row[i].y;
+        in.z = x->row[i].z;
         MVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;
