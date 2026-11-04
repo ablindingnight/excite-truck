@@ -387,9 +387,8 @@ void fn_802B224C(ValueNode* node) {
 MatPlacer::MatPlacer(ValueNode* node, int i) {
     clumpy = 0;
     wasClumpy = 0;
-    int n = 0;
-    for (u32 k = 0; k < 128; k++) {
-        order[k] = n++;
+    for (int k = 0; k < ARRAY_SIZE(order); k++) {
+        order[k] = k;
     }
     Shuffle(order, 128);
     clumpy = wasClumpy = node->GetBool("clumpy", 1);
