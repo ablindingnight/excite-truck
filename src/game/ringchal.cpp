@@ -1597,9 +1597,8 @@ int RingChalMaster::vf3C(int view) {
     f32 end1 = full0 - 0.15f;
     f32 in1 = end1 - 0.8f;
     f32 full1 = in1 - 0.3f;
-    TextElem* h0;
+    TextElem* h0 = layout->Find("intro_head_0");
     TextElem* h1 = layout->Find("intro_head_1");
-    h0 = layout->Find("intro_head_0");
     if (t < full1) {
         fn_8000FBE4();
     }
