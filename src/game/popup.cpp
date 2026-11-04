@@ -190,8 +190,7 @@ void fn_801DE890(int id) {
             ArtElem* a = (ArtElem*)d->layout->FindArt("stuntbar_bg_circle");
             if (a) {
                 fn_801476D8(a, -1, d->tex);
-                f32 half = 0.5f;
-                DrawRing(a->pos.y + a->h * half, a->pos.x + a->w * half, 0.78f * (a->w * half));
+                DrawRing(a->pos.y + a->h / 2.0f, a->pos.x + a->w / 2.0f, 0.78f * (a->w / 2.0f));
             }
         }
         break;
