@@ -7,7 +7,7 @@
 #include <string.h>
 
 extern "C" {
-void OSReport(const char* fmt, ...);
+int OSReport(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
 void fn_802E30C8(const char* fmt, ...);  // warning print
 int fn_801345D8(char* dst, int n, const char* fmt, ...);
@@ -411,36 +411,35 @@ void fn_802E9EB8(void) {
     }
 }
 
-void fn_802EA5D4(const char* dir, int depth) {
-    char* ext;
-    Track* t;
-    char* name;
+int fn_802EA5D4(const char* dir, int depth) {
     char pat[0x100];
     char sub[0x200];
     FindData fd;
+    char* shortName;
+    char* name;
+    char* ext;
+    Track* t;
+    int r;
     fn_801345D8(pat, 0x100, "%s/*", dir);
-    if (VFFindFirst(pat, 0x71, &fd) == 0) {
+    r = VFFindFirst(pat, 0x71, &fd);
+    if (r == 0) {
+        shortName = fd.shortName;
         do {
-            if (lbl_8056007C >= 100) {
-                OSReport(" mp3: too many tracks\n");
-                break;
-            }
-            name = fd.shortName;
-            if (fd.longName[0]) {
-                name = fd.longName;
-            }
-            if ((fd.attr & 0x10) && depth > 0) {
-                if (name[0] && strcmp(name, ".") && strcmp(name, "..")) {
-                    if (strlen(dir) + strlen(fd.shortName) + 1 < 0x200) {
-                        fn_801345D8(sub, 0x200, "%s/%s", dir, fd.shortName);
-                        fn_802EA5D4(sub, depth - 1);
-                    } else {
-                        fn_802E30C8("mp3: sub path would be too long");
-                    }
+            if (lbl_8056007C < 100) {
+                name = fd.shortName;
+                if (fd.longName[0]) {
+                    name = fd.longName;
                 }
-            } else {
-                ext = strrchr(name, '.');
-                if (ext && !strcasecmp(ext, ".mp3")) {
+                if ((fd.attr & 0x10) && depth > 0) {
+                    if (*name && strcmp(name, ".") && strcmp(name, "..")) {
+                        if (strlen(shortName) + strlen(dir) + 1 < 0x200) {
+                            fn_801345D8(sub, 0x200, "%s/%s", dir, shortName);
+                            fn_802EA5D4(sub, depth - 1);
+                        } else {
+                            fn_802E30C8("mp3: sub path would be too long");
+                        }
+                    }
+                } else if ((ext = strrchr(name, '.')) != 0 && !strcasecmp(ext, ".mp3")) {
                     t = &lbl_80508818[lbl_8056007C];
                     if (strlen(fd.shortName) < 0x208 && strlen(dir) < 0x200) {
                         strncpy(t->file, fd.shortName, 0x207);
@@ -453,9 +452,12 @@ void fn_802EA5D4(const char* dir, int depth) {
                         fn_802E30C8("mp3: filename too long");
                     }
                 }
+            } else {
+                return OSReport(" mp3: too many tracks\n");
             }
-        } while (VFFindNext(&fd) == 0);
+        } while ((r = VFFindNext(&fd)) == 0);
     }
+    return r;
 }
 
 void fn_802EA7E0(void) {
