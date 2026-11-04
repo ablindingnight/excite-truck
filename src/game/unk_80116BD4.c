@@ -7120,8 +7120,8 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         s32 s3 = block[24];
         s32 s4 = block[32];
         s32 s6 = block[48];
-        s32 s5 = block[40];
         s32 s7 = block[56];
+        s32 s5 = block[40];
         if ((s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
@@ -7154,8 +7154,8 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             s32 d7 = (s7 * quant[56]) >> 11;
             s32 a4 = d5 + d3;
             s32 a5 = d5 - d3;
-            s32 a6 = d1 + d7;
             s32 a7 = d1 - d7;
+            s32 a6 = d1 + d7;
             s32 b0 = a4 + a6;
             s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
             s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
