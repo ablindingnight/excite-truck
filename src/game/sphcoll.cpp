@@ -136,7 +136,7 @@ struct Xform {
 extern void* lbl_80333968[];
 extern void* lbl_80333818[];
 extern void* lbl_803337C8[];
-extern void* lbl_803338C0[];
+extern void* __vt__8BoxShape[];
 extern void* lbl_80333868[];
 
 class VEx;
@@ -2188,11 +2188,11 @@ void fn_8019ECA4(u8* p, u8* q) {
 
 void fn_8019ECBC(u8* p, u32 v) { U32(p, 0xc) = v; }
 
-extern void* lbl_80333B98[];
+extern void* __vt__9CollShape[];
 
 // Collision volume base constructor from file data (byte-swapped when `swap`).
 void fn_8019ECC4(u8* p, u32 a, u32 swap) {
-    *(void**)p = lbl_80333B98;
+    *(void**)p = __vt__9CollShape;
     if (swap) {
         Swap32(p + 0x18);
         Swap32(p + 0x10);
@@ -3306,7 +3306,7 @@ void fn_801A1CA0(const u8* p) {
 
 u8* fn_801A1CE4(u8* p, u32 a, u32 swap) {
     fn_8019ECC4(p, a, swap);
-    *(void**)p = lbl_803338C0;
+    *(void**)p = __vt__8BoxShape;
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
@@ -3406,7 +3406,7 @@ u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32
     F32(p, 0x14) = s1;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_803338C0;
+    *(void**)p = __vt__8BoxShape;
     F32(p, 0x24) = x;
     F32(p, 0x28) = y;
     F32(p, 0x2C) = z;

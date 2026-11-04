@@ -222,7 +222,7 @@ public:
     f32 fov;    // offset 0x2C
 };
 
-extern void* lbl_803338C0[];
+extern void* __vt__8BoxShape[];
 
 extern "C" {
 double sqrt(double x);
@@ -239,7 +239,7 @@ struct WallVol {
         f14 = 0.0f;
         f20 = 100;
         f1C = 0;
-        vtbl = lbl_803338C0;
+        vtbl = __vt__8BoxShape;
         width = w;
         height = h;
         length = l;
