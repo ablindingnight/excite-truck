@@ -2144,7 +2144,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             DOT_BEGIN(V0C80, V0BB0);
             Vec V0B90(((V19E0.x + V19E0.y) + V19E0.z));
             Vec V0B80((V16F0.x + V0B90.x));
-            Vec V0B70(V0BA0.x);
+            Vec V0B70((V0BA0.x > V0B80.x ? V0BA0.x : V0B80.x));
             Vec V0B60;
             V0B60.y = (temp_f31 + V0B70.x);
             Vec V0B50((temp_f31 + 1.0f));
@@ -2152,7 +2152,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0B30;
             V0B30.y = (V0B60.y * V0B40.x);
             Vec V0B20((temp_f31 + V0B30.y));
-            Vec V0B10(V0B50.x);
+            Vec V0B10((V0B50.x < V0B20.x ? V0B50.x : V0B20.x));
             Vec V0B00;
             V0B00.y = (temp_f31 + V0B10.x);
             Vec V0AF0;
@@ -2174,7 +2174,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0A80.y = kv[3].z;
             Vec V0A70;
             V0A70.y = (V0AA0.y < V0A80.y ? V0AA0.y : V0A80.y);
-            Vec V0A60(V0B70.x);
+            Vec V0A60(V0BA0.x);
             Vec V0A50;
             V0A50.y = kv[3].y;
             Vec V0A40;
@@ -2202,7 +2202,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec V0980(V0990);
             Vec V0970((V16D0.x * V0BB0.y));
             Vec V0960(fn_8002B0A0(V0970.x));
-            Vec V0950(V0B10.x);
+            Vec V0950(V0B50.x);
             Vec V0940((temp_f31 + 2.0f));
             Vec V0930(kv[3].x);
             Vec V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
