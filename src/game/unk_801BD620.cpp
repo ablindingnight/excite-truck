@@ -1031,8 +1031,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC22 = &t[c + 22];
     for (;;) {
         // the limits are rebuilt at the top of every pass, before the pass test (MWCC hoists the adds and their
-        // zero, which is the store-forwarded ident.x - the frsp f31 the target keeps for the whole loop)
-        temp_f31 = ident.x;
+        // zero, which is the store-forwarded ident.y - the frsp f31 the target keeps for the whole loop; ident.x is
+        // not read in the loop, so the epilogue reloads it, as in the target)
+        temp_f31 = ident.y;
         kv[0].x = lbl_805627D4;
         kv[0].y = temp_f31 + lbl_80562814;
         kv[0].z = temp_f31 + (temp_f31 + lbl_80562810);
