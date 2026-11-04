@@ -32,6 +32,10 @@ struct McDialogCfg {
     McChoice entries[1];   // offset 0x18
 };
 
+// The dialog fade start (0.0f), a named constant defined in mcstatus's .sdata2; menusel's static initializer
+// loads it from there through this constructor (menusel has no .sdata2 of its own).
+extern const f32 lbl_80563830;
+
 // The fallback background ("*uibig.res/backsplt.img") with its two fonts.
 class MemCardDialogBg {
 public:
@@ -40,7 +44,7 @@ public:
         image2 = 0;
         font = 0;
         font2 = 0;
-        fade = 0.0f;
+        fade = lbl_80563830;
     }
     virtual void Load(void);
     virtual void Unload(void);

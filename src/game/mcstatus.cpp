@@ -76,7 +76,6 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 void operator delete(void* p);
 
 extern char lbl_80342FC0[];  // string pool
-extern const f32 lbl_80563830;
 
 // A remote's status block.
 struct WpadInfo {
