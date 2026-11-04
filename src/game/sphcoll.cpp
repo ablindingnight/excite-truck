@@ -933,10 +933,10 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     PVec3 dd;
     PVec3 n;
     PVec3 at;
-    f32 rs = r + s;
     f32 dx = cv[0] - dv[0];
-    f32 dz = cv[2] - dv[2];
+    f32 rs = r + s;
     f32 dy = cv[1] - dv[1];
+    f32 dz = cv[2] - dv[2];
     dd.v[0] = dx;
     dd.v[2] = dz;
     dd.v[1] = dy;
@@ -2421,13 +2421,14 @@ extern void* lbl_80333A58[];
 // Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
 u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz) {
     f32 big = hy > hz ? hy : hz;
-    f32 cz = c->z;
-    f32 cy = c->y;
     big = hx > big ? hx : big;
+    f32 cy;
+    f32 cz = c->z;
+    cy = c->y;
     f32 cx = c->x;
-    U32(p, 0x8) = 0;
     InitVolume(p, frame, owner);
     S32(p, 0x18) = 'SPHR';
+    U32(p, 0x8) = 0;
     F32(p, 0x10) = k;
     F32(p, 0x14) = skin;
     S32(p, 0x20) = 100;
@@ -3702,9 +3703,9 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     ValueTable* t;
     ValueNode* ext;
     U32(p, 0xC) = id;
-    F32(p, 0x10) = s0;
     U32(p, 0x4) = 0;
     U32(p, 0x8) = 0;
+    F32(p, 0x10) = s0;
     S32(p, 0x18) = 'POLY';
     F32(p, 0x14) = s1;
     S32(p, 0x20) = 100;
@@ -3718,11 +3719,13 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     *(ValVec3*)(p + 0x30) = ext->GetVec3("max");
     for (i = 0; (n = (ValueNode*)t->GetChild(i)) != 0; i++) {
         if (strcmp(n->GetName(), "plane") == 0) {
-            u8* pl = p + S32(p, 0xBC)++ * 0x10;
+            u8* pl;
+            pl = p + S32(p, 0xBC)++ * 0x10;
             *(ValVec3*)(pl + 0x3C) = n->GetVec3("n");
             F32(pl, 0x48) = n->GetFloat("k");
         } else if (strcmp(n->GetName(), "curve") == 0) {
-            u8* c = p + S32(p, 0xDC)++ * 0x1C;
+            u8* c;
+            c = p + S32(p, 0xDC)++ * 0x1C;
             *(ValVec3*)(c + 0xC0) = n->GetVec3("center");
             *(ValVec3*)(c + 0xCC) = n->GetVec3("axis");
             F32(c, 0xD8) = n->GetFloat("radius");

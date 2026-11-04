@@ -958,13 +958,15 @@ void RainSystem::Move(const PVec* d) {
     f32 ty = tanHalf;
     f32 tx = ty / fn_802C9A50();
     f32 k = -10.0f * fn_802A4AD4();
+    f32 mz;
+    f32 my;
     f32 mx = d->x + vel.x * k;
-    f32 my = d->y + vel.y * k;
-    f32 mz = d->z + vel.z * k;
+    my = d->y + vel.y * k;
+    mz = d->z + vel.z * k;
     WPt* out = pts;
     for (int i = 0; i < count; i++) {
         WPt* p = &pts[i];
-        f32 x = p->x + mx;
+        f32 x = mx + p->x;
         f32 y = p->y + my;
         f32 z = p->z + mz;
         if (z > near && z < far && x * x < (0.25f + z * tx) * (0.25f + z * tx) &&

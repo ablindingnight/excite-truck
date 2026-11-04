@@ -976,19 +976,22 @@ void fn_802BB3B8(void* verts, int nverts) {
         }
         if (te->tex != -2) {
             switch (head->type) {
+            Item* it;
+            int j;
+            u16* st;
             case 0:
             case 1:
                 fn_802C8BD0(te->tex);
                 fn_802DC130();
-                for (Item* it = te->head; it; it = it->next) {
+                for (it = te->head; it; it = it->next) {
                     if (!it->head) {
                         continue;
                     }
                     if (it->on) {
                         fn_802D3D94(0, ((Shadow*)it)->mtx);
                         for (Chunk<u16*>* c = it->head; c; c = c->next) {
-                            for (int j = 0; j < c->count; j++) {
-                                u16* st = c->data[j];
+                            for (j = 0; j < c->count; j++) {
+                                st = c->data[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
                                 lbl_8055FA6C += Tris(c->data[j][0] - 1);
                             }

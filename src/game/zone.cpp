@@ -2207,11 +2207,12 @@ void ZoneMaster::DrawRing(Gate* g, int c) {
 }
 
 void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
+    DrawNextGate();
     FixedArray<Vec3, 32> pts;
     int i;
-    DrawNextGate();
     for (i = hits->count - 1; i >= 0; i--) {
-        Gate* g = hits->data[i].gate;
+        Gate* g;
+        g = hits->data[i].gate;
         if (g->ring) {
             if (pts.count > 0) {
                 glow.Draw(pts.data, pts.count, i288);

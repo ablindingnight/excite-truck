@@ -892,8 +892,8 @@ extern unsigned char lbl_8055EEED;
 #pragma push
 #pragma cplusplus on
 extern "C" void fn_802112AC(void) {
-    long mode;
     long n;
+    long mode;
     EventInfo *object;
 
     if (lbl_8055EEC0) {
@@ -907,9 +907,9 @@ extern "C" void fn_802112AC(void) {
             } else if (mode == 2) {
                 n = lbl_8055B658;
                 if (n >= 0) {
-                    lbl_8055EEE4 = n / 10;
                     lbl_8055EEE0 = n % 10;
                     lbl_8055EEE8 = lbl_8055EEBC / 10;
+                    lbl_8055EEE4 = n / 10;
                     if (lbl_8055EEBC % 10 != 0 || lbl_8055EEBC == 0) {
                         lbl_8055EEE8++;
                     }
