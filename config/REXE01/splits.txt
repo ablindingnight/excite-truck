@@ -3766,7 +3766,7 @@ game/carpick.cpp:
 	.text       start:0x8025E034 end:0x8025FE8C
 	.ctors      start:0x802ED46C end:0x802ED470
 	.rodata     start:0x802FA690 end:0x802FA6A4
-	.data       start:0x80345828 end:0x80345B40
+	.data       start:0x80345828 end:0x80345B3D
 	.bss        start:0x80498EE8 end:0x80498EFC
 	.sbss       start:0x8055F3C8 end:0x8055F3D8
 	.sdata2     start:0x80563B70 end:0x80563B88

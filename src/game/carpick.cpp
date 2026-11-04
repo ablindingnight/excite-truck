@@ -3,6 +3,7 @@
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -17,7 +18,6 @@ u8* fn_8023512C(const char* name);
 
 void operator delete(void* p);
 
-extern void* lbl_80345A30[];
 
 ModuleTag lbl_8055F3C8;
 UnkStatic123s lbl_80498EE8;
@@ -82,9 +82,16 @@ struct IconTable {
 };
 
 // "car_icon" widget beside each cup row: the car and colour its record was set with.
-struct CarIconWidget {
+// One car icon on the pick screen: a menu state (menu items "car_icon_N" point at it) that draws the chosen car's
+// icon in a frame. Its vtable is lbl_80345A30 (__vt__13CarIconWidget), followed in .data by the zero-filled space
+// of this unit's weak IMenuState copy.
+class CarIconWidget : public MenuState {
+public:
+    CarIconWidget(void);
     virtual ~CarIconWidget(void);
-    u8 pad4[0x14];
+    virtual void Draw(void);
+    void SetTable(IconTable* t);
+
     IconTable* set;  // offset 0x18
     s32 index;       // offset 0x1C
     s32 color;       // offset 0x20
@@ -92,7 +99,7 @@ struct CarIconWidget {
     u8 visible;      // offset 0x25
     u8 pad26[2];
     u32 tint;        // offset 0x28
-    u8 pad2C[4];
+    u8* art;         // offset 0x2C: "caricona.art", the frame
 };
 
 struct CarPickScreen {
@@ -285,8 +292,6 @@ int GetEveMode(void);
 void UnloadEves(void);
 void LoadModeEves(int mode);
 extern "C" CarChoiceList* fn_8027B834(int i);
-extern "C" u8* fn_8025F9C0(u8* p);
-extern "C" void fn_8025F9B8(u8* p, u32 v);
 extern "C" CarIconSet* fn_8025FA18(void);
 extern "C" int fn_8025E678(int* key);
 extern "C" int fn_8025ECBC(int* key);
@@ -310,10 +315,9 @@ void fn_8025E034(void) {
     }
     screen.set = fn_8025FA18();
     for (int k = 0; k < 6; k++) {
-        u8* w = (u8*)operator new(0x30, "car_icon");
-        if (w) w = fn_8025F9C0(w);
-        screen.icons[k] = (CarIconWidget*)w;
-        fn_8025F9B8(w, (u32)screen.set);
+        CarIconWidget* w = new ("car_icon") CarIconWidget;
+        screen.icons[k] = w;
+        w->SetTable((IconTable*)screen.set);
     }
     screen.cur = 0;
     screen.all = screen.lists[2];
@@ -371,16 +375,11 @@ void fn_8025E034(void) {
     }
 }
 
-u8* fn_8025E614(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345A30;
-        fn_80235380(PTR(p, 0x2C));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
+}  // extern "C"
+
+CarIconWidget::~CarIconWidget(void) { fn_80235380(art); }
+
+extern "C" {
 
 // Refills the records screen for the current car: the car name header and, per cup, the best time over
 // the three difficulties with the car/colour it was set with.
@@ -514,16 +513,17 @@ void fn_8025F274(u8* p) {
 }
 
 
-void fn_8025F9B8(u8* p, u32 v) { U32(p, 0x18) = v; }
+}  // extern "C"
 
-u8* fn_8025F9C0(u8* p) {
-    U32(p, 0x14) = 0;
-    *(void**)p = lbl_80345A30;
-    U32(p, 0x18) = 0;
-    U8(p, 0x25) = 0;
-    PTR(p, 0x2C) = fn_8023512C("caricona.art");
-    return p;
+void CarIconWidget::SetTable(IconTable* t) { set = t; }
+
+CarIconWidget::CarIconWidget(void) {
+    set = 0;
+    visible = 0;
+    art = fn_8023512C("caricona.art");
 }
+
+extern "C" {
 
 }  // extern "C"
 
@@ -566,8 +566,10 @@ void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
-void fn_8025FC8C(u8* p) {
-    if (!U8(p, 0x25)) {
+}  // extern "C"
+
+void CarIconWidget::Draw(void) {
+    if (!visible) {
         return;
     }
     u32 c;
@@ -582,21 +584,18 @@ void fn_8025FC8C(u8* p) {
     f32 u0;
     f32 fw;
     f32 fh;
-    fn_80230C30(&sx, &sy, S32(p, 0x4), S32(p, 0x8));
-    fw = (f32)S32(p, 0xC);
-    fh = (f32)S32(p, 0x10);
-    fn_802354A0(PTR(p, 0x2C), U8(p, 0x24), sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
-    e = &((IconEntry*)*(u8**)PTR(p, 0x18))[S32(p, 0x1C)];
+    fn_80230C30(&sx, &sy, this->x, this->y);
+    fw = (f32)w;
+    fh = (f32)h;
+    fn_802354A0(art, valid, sx - 3.0f, 3.0f + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    e = &(*(IconEntry**)set)[index];
     y = sy;
     x = sx;
     u0 = e->u0;
     v0 = e->v0;
     u1 = e->u1;
     v1 = e->v1;
-    c = U32(p, 0x28);
+    c = tint;
     fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
     fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
 }
-
-
-}  // extern "C"
