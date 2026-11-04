@@ -286,8 +286,6 @@ f32 lbl_8055A3A8 = 0.9f;  // water speed factor
 u8 lbl_8055A3AC = 1;      // enable stalling
 f32 lbl_8055A3B0 = 1.5f;
 u8 lbl_8055A3B4 = 1;
-u8 lbl_8055A3B5 = 1;      // reset the tunables to their defaults
-u8 lbl_8055A3B6 = 1;
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
@@ -405,7 +403,8 @@ int fn_8020503C(const char* name);                                       // debu
 
 // Resets the car body tunables (when asked) and registers them with the debug tuner.
 void fn_80181AFC(void) {
-    if (lbl_8055A3B5) {
+    static bool firstTime = true;  // reset the tunables to their defaults
+    if (firstTime) {
         landingTune.Reset();
         driveTune.Reset();
         lbl_8055E4E8[0] = 30.0f;
@@ -416,7 +415,7 @@ void fn_80181AFC(void) {
     fn_802049DC("Water speed factor", &lbl_8055A3A8, 0.1f, 1.0f, 0.1f);
     int e3 = OptE3Demo();
     f32 burn = 0.4f * (e3 ? 0.625f : 1.0f);
-    if (lbl_8055A3B5) {
+    if (firstTime) {
         heatTune.Reset(burn, e3);
         lbl_8055E4D8 = 1.7f;
     }
@@ -444,7 +443,7 @@ void fn_80181AFC(void) {
     } else {
         heatTune.v[3] = burn;
     }
-    lbl_8055A3B5 = 0;
+    firstTime = false;
 }
 
 void fn_80181EAC(u8* p) {
@@ -457,6 +456,7 @@ void fn_80181EAC(u8* p) {
 }
 
 void fn_80181F30(void) {
+    static bool firstInit = true;
     u32 flags = U32(fn_801769CC(), 0x4);
     lbl_8055E4F4 = (flags >> 19) & 1;
     lbl_8055E4D0 = 0;
@@ -464,11 +464,11 @@ void fn_80181F30(void) {
     fn_801AFC28();
     lbl_8055E4D4 = 1;
     fn_80181AFC();
-    if (lbl_8055A3B6) {
+    if (firstInit) {
         lbl_8055E4E0.a = 10.0f;
         lbl_8055E4E0.b = 2.0f;
     }
-    lbl_8055A3B6 = 0;
+    firstInit = false;
     fn_80204A1C("Enable Stalling", &lbl_8055A3AC);
     lbl_8055E4F6 = 0;
     fn_8018C50C();
