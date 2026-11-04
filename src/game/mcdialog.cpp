@@ -191,8 +191,8 @@ void fn_8023E7A8(int status) {
         MenuItem("line2", 3, line2, 128, 0),
         MenuItem("line3", 3, line3, 128, 0),
         MenuItem("line4", "", CaptionContext(4)),
-        MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("lbutton", "", CaptionContext(4)),
+        MenuItem("line5", 3, "", 4, 0),
+        MenuItem("lbutton", 3, "", 4, 0),
         MenuItem("rbutton", "", CaptionContext(4)),
         MenuItem(lbl_804987E0),
     };
@@ -225,7 +225,7 @@ void fn_8023ED30(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem("title", 3, "Settings are corrupt", 4, 0),
-        MenuItem("line1", 3, "Unable to load settings.", 4, 0),
+        MenuItem("line1", "Unable to load settings.", CaptionContext(4)),
         MenuItem("line2", 3, "Press A to continue.", 4, 0),
         MenuItem("line3", 3, "", 4, 0),
         MenuItem("line4", 3, "", 4, 0),
@@ -245,8 +245,8 @@ int fn_8023EEF8(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
-        MenuItem("title", 3, "Out of Room", 4, 0),
-        MenuItem("line1", 3, "Your Xbox does not have enough", 4, 0),
+        MenuItem("title", "Out of Room", CaptionContext(4)),
+        MenuItem("line1", "Your Xbox does not have enough", CaptionContext(4)),
         MenuItem("line2", 3, "free blocks to store settings.", 4, 0),
         MenuItem("line3", 3, "Press A to continue without saving", 4, 0),
         MenuItem("line4", 3, "or B to free more blocks.", 4, 0),
@@ -272,8 +272,8 @@ int fn_8023F0E8(void) {
         MenuItem("line3", "", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", "FORMAT", CaptionContext(4)),
-        MenuItem("lbutton", "DON'T SAVE", CaptionContext(4)),
+        MenuItem("rbutton", 3, "FORMAT", 4, 0),
+        MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
@@ -286,9 +286,9 @@ int fn_8023F2C4(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023F9E8, -1, 27),
-        MenuItem("title", "Memory Card Not Found", CaptionContext(4)),
-        MenuItem("line1", "Please insert a memory card", CaptionContext(4)),
-        MenuItem("line2", "with at least 280KB of free space", CaptionContext(4)),
+        MenuItem("title", 3, "Memory Card Not Found", 4, 0),
+        MenuItem("line1", 3, "Please insert a memory card", 4, 0),
+        MenuItem("line2", 3, "with at least 280KB of free space", 4, 0),
         MenuItem("line3", "into MEMORY CARD slot 1", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
@@ -312,8 +312,8 @@ int fn_8023F4B8(void) {
         MenuItem("line3", "MEMORY CARD slot 1?", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", "YES", CaptionContext(4)),
-        MenuItem("lbutton", "DON'T SAVE", CaptionContext(4)),
+        MenuItem("rbutton", 3, "YES", 4, 0),
+        MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
@@ -332,8 +332,8 @@ int fn_8023F694(void) {
         MenuItem("line3", "your previous saved game.", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", "SAVE", CaptionContext(4)),
-        MenuItem("lbutton", "DON'T SAVE", CaptionContext(4)),
+        MenuItem("rbutton", 3, "SAVE", 4, 0),
+        MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
