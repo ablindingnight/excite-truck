@@ -425,8 +425,8 @@ static inline void RecordCrossing(s32 car, f32 tm) {
 }
 
 void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
-    s32 idx;
     u32 n1;
+    s32 idx;
     u32 n2;
     IdealPoint* from = c->Ideal()->il.seg;
     c->Car()->Teleport(t);
@@ -435,9 +435,9 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     idx = c->index;
     n1 = c->Ideal()->line->total;
     n2 = c->Ideal()->line->total;
-    u32 fwd = fn_801B08E8(from->ilpos, to->ilpos, n1);
-    u32 back = fn_801B08E8(to->ilpos, from->ilpos, n2);
-    int backward = fwd < back;
+    u32 back = fn_801B08E8(to->ilpos, from->ilpos, n1);
+    u32 fwd = fn_801B08E8(from->ilpos, to->ilpos, n2);
+    int backward = back < fwd;
     if (backward != 0) {
         for (IdealPoint* p = to->next; p != from->next; p = p->next) {
             if (p->ilpos == 0) {
