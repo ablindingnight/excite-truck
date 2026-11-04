@@ -1317,7 +1317,7 @@ int fn_80283B58(void) {
             if (++i >= lbl_804B30D8.Count()) {
                 i = 0;
             }
-        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
+        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && cur != i);
         SelectBar(i);
     } else {
         fn_80216D28();
@@ -1334,7 +1334,7 @@ int fn_80283E28(void) {
             if (--i < 0) {
                 i += lbl_804B30D8.Count();
             }
-        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && i != cur);
+        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && cur != i);
         SelectBar(i);
     } else {
         fn_80216D28();

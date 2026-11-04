@@ -1780,7 +1780,7 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
                 fn_800C34B4(buf + 1024, (u8*)&out[i2 + 1], d->unk27C, mode);
             } else {
                 fn_800C34B4(buf, (u8*)&out[k * 32], d->unk27C, mode);
-                fn_800C34B4(buf + 1024, (u8*)&out[i1 + n], d->unk27C, mode);
+                fn_800C34B4(buf + 1024, (u8*)&out[n + i1], d->unk27C, mode);
             }
         } else {
             fn_800C34B4(buf, (u8*)&out[k * 32], d->unk27C, 1);
