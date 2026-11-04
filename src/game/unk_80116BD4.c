@@ -7021,8 +7021,8 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
         s7 = block[56];
         if (((((((s1 | block[16]) | s3) | s4) | s5) | s6) | s7) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
-            block++;
             quant++;
+            block++;
             t[0] = dc;
             t[8] = dc;
             t[16] = dc;
@@ -7033,10 +7033,13 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
             t[56] = dc;
             t++;
         } else {
+            s32 b4;
             s32 d0 = (block[0] * quant[0]) >> 11;
+            s32 b3;
             s32 d2 = (block[16] * quant[16]) >> 11;
             s32 d4 = (s4 * quant[32]) >> 11;
             s32 d6 = (s6 * quant[48]) >> 11;
+            s32 b1;
             s32 a0 = d0 + d4;
             s32 a2 = d2 + d6;
             s32 a1 = d0 - d4;
@@ -7050,14 +7053,16 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
             s32 d7 = (s7 * quant[56]) >> 11;
             s32 d5 = (s5 * quant[40]) >> 11;
             s32 a4 = d5 + d3;
-            s32 a5 = d5 - d3;
             s32 a6 = d1 + d7;
+            s32 b0;
+            s32 a5 = d5 - d3;
             s32 a7 = d1 - d7;
-            s32 b0 = a4 + a6;
-            s32 b1 = (3784 * (a5 + a7)) >> 11;
-            s32 b2 = ((((-5352) * a5) >> 11) + b1) - b0;
-            s32 b3 = ((2896 * (a6 - a4)) >> 11) - b2;
-            s32 b4 = (((2217 * a7) >> 11) - b1) + b3;
+            s32 b2;
+            b0 = a4 + a6;
+            b1 = (3784 * (a5 + a7)) >> 11;
+            b2 = ((((-5352) * a5) >> 11) + b1) - b0;
+            b3 = ((2896 * (a6 - a4)) >> 11) - b2;
+            b4 = (((2217 * a7) >> 11) - b1) + b3;
             block++;
             quant++;
             t[0] = e0 + b0;
@@ -7080,8 +7085,8 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
         s32 a3 = ((2896 * (t[2] - t[6])) >> 11) - a2;
         s32 a4 = t[5] + t[3];
         s32 a5 = t[5] - t[3];
-        s32 a6 = t[1] + t[7];
         s32 a7 = t[1] - t[7];
+        s32 a6 = t[1] + t[7];
         s32 b0 = a4 + a6;
         s32 b1 = (3784 * (a5 + a7)) >> 11;
         s32 b2 = ((((-5352) * (t[5] - t[3])) >> 11) + b1) - b0;

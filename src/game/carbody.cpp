@@ -3690,7 +3690,7 @@ void fn_8018A9F0(u8* p, u8* m) {
     o->z = lbl_80561CAC;
     o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD8);
     o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (F32(m, 0x1C4) + h.w);
+    o->y = F32(p, 0x5AC) + (h.w + F32(m, 0x1C4));
     o->z = lbl_80561CAC;
     S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
 }

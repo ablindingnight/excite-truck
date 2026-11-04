@@ -699,14 +699,14 @@ void HermiteDrone::Curve(const HermiteKey* k0, const HermiteKey* k1, const Hermi
     f32 u2 = u * u;
     f32 u3 = u * u2;
     f32 h00 = 1.0f + (2.0f * u3 - 3.0f * u2);
+    f32 h01 = -2.0f * u3 + 3.0f * u2;
     f32 h10 = 0.5f * (u + (u3 - 2.0f * u2));
     f32 h11 = 0.5f * (u3 - u2);
-    f32 h01 = -2.0f * u3 + 3.0f * u2;
     PVec a;
     a.x = k1->pos.x * h00 + m0.x * h10 + m1.x * h11;
     a.y = k1->pos.y * h00 + m0.y * h10 + m1.y * h11;
     a.z = k1->pos.z * h00 + m0.z * h10 + m1.z * h11;
-    frame.pos.x = a.x + k2->pos.x * h01;
+    frame.pos.x = a.x + h01 * k2->pos.x;
     frame.pos.y = a.y + k2->pos.y * h01;
     frame.pos.z = a.z + k2->pos.z * h01;
 }
