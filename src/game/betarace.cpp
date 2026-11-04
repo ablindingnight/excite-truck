@@ -2216,7 +2216,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
             if (t) {
                 TextElem e = *t;
                 f32 left = 0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now;
-                f32 k = Lerp(0.0f, 1.0f, Clamp01(((f32)fmod(left, 1.0) - 1.0f) / -0.2f));
+                f32 k = Lerp(0.0f, 1.0f, Clamp01(((f32)fmod(left, 1.0) - 1.0f) / (0.8f - 1.0f)));  // flash over the last 0.2 of each second
                 char buf[8];
                 e.scale *= 1.0f + 0.4f * k;
                 e.color = fn_80147C50(0xFFFFFFFF, 0xFFFF0000, k);
