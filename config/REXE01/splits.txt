@@ -3220,7 +3220,7 @@ game/difficulty.cpp:
 	.ctors      start:0x802ED370 end:0x802ED374
 	.rodata     start:0x802F9D68 end:0x802F9D8C
 	.data       start:0x8033BB68 end:0x8033BC13
-	.sdata      start:0x8055B468 end:0x8055B4C0
+	.sdata      start:0x8055B468 end:0x8055B4BD
 	.sbss       start:0x8055ED50 end:0x8055ED60
 
 game/splitscr.cpp:
