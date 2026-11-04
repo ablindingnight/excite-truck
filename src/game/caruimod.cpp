@@ -970,7 +970,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             ax = MIN(ax, ay);
             f32 s = sin(0.5f * ax);
             s = 0.01f > s ? 0.01f : s;
-            d = 3.1903f / s;
+            d = 3.190296f / s;
             offX = (0.5f * (l + r)) * (proj * d) / hw;
             offY = (0.5f * (t + b)) * (-aspect * d) / hh;
         }
