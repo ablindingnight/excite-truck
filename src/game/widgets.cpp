@@ -466,7 +466,7 @@ WidgetFragment* fn_8021E884(WidgetFragment* self,int destroy);
 
 extern "C" {
 extern int lbl_8055FBDC;
-const char* fn_8022D3F8(StringList*,int,int*);
+
 void fn_8021E3BC(WidgetFragment* self,void* context);
 void fn_8021E51C(WidgetFragment* self);
 }
@@ -2073,19 +2073,19 @@ void fn_8021E2A0(WidgetFragment* self){
 void fn_8021E3BC(WidgetFragment* self,void* context){
  int drawY;int drawX;int color,index;RowListPrefix* fields=(RowListPrefix*)self;int start=0;if(fields->view)start=fields->view->start;
  fn_802192A0(self,context);fn_802C3034(reinterpret_cast<gxCanvas*>(context));int flags=0;color=lbl_8055FBDC;
- for(int row=0;row<fields->rows&&(index=row+start,fn_8022D3F8(fields->list,index,&flags)!=0);++row){
+ for(int row=0;row<fields->rows&&(index=row+start,fields->list->Get(index,&flags)!=0);++row){
   int x,y;bool selected=*fields->selected==index;
   if(selected){x=self->left;y=self->top;int width=x+((WidgetDispatch*)self)->Slot78();
    {int h=fields->rowHeight;int bottom=(row+1)*h;int top=row*h;fn_802C3424(x+2,y+top+2,width-2,y+bottom+2,color);}
   }
-  int disabled=flags!=0?2:0;selected=selected!=0;drawY=self->top;drawX=self->left;const char* label=fn_8022D3F8(fields->list,index,0);fn_8022B91C(7,drawX+2,drawY+row*fields->rowHeight+2,label,selected|disabled);
+  int disabled=flags!=0?2:0;selected=selected!=0;drawY=self->top;drawX=self->left;const char* label=fields->list->Get(index,0);fn_8022B91C(7,drawX+2,drawY+row*fields->rowHeight+2,label,selected|disabled);
  }
 }
 void fn_8021E51C(WidgetFragment* self){
  int y;int x;RowListPrefix* f=(RowListPrefix*)self;int start=0;if(f->view)start=f->view->start;int flags=0;int index;
- for(int row=0;row<f->rows&&(index=row+start,fn_8022D3F8(f->list,index,&flags)!=0);++row){
+ for(int row=0;row<f->rows&&(index=row+start,f->list->Get(index,&flags)!=0);++row){
  int disabled;bool selected;y=self->top;x=self->left;selected=*f->selected==index;disabled=flags!=0?2:0;selected=selected!=0;
- const char* label=fn_8022D3F8(f->list,index,0);
+ const char* label=f->list->Get(index,0);
  fn_8022BAD0(7,x+2,y+row*f->rowHeight+2,0,0,0,label,selected|disabled,0,(1.0f));
  }
 }
@@ -2114,7 +2114,7 @@ void fn_8021E7D4(WidgetFragment* self){
 WidgetFragment* fn_8021E884(WidgetFragment* self,int destroy){
  if(self){fn_8021915C(self,0);if(destroy>0)__dl__FPv(self);}return self;
 }
-void fn_8021E8DC(WidgetFragment* self,void* context){DropdownRowPrefix* f=(DropdownRowPrefix*)self;if(f->list.active){((WidgetDispatch*)self)->Slot1c(self->left,self->bottom+3);int height=self->bottom-self->top;int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,f->width,f->height);fn_8021E3BC(self,context);fn_80219284(self,width,height);((WidgetDispatch*)self)->Slot1c(self->left,self->top*2-3-self->bottom);}fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802192A0(self,context);int y,x;x=self->left;y=self->top;int width=((WidgetDispatch*)self)->Slot78();fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBDC);const char* label=fn_8022D3F8(f->list.list,*f->list.selected,0);char buffer[80];sprintf(buffer,lbl_8055B884,f->list.columns,label?label:lbl_8055B88C);fn_802C4F58(self->left+1,self->top+1,buffer,lbl_8055FBC0);}
+void fn_8021E8DC(WidgetFragment* self,void* context){DropdownRowPrefix* f=(DropdownRowPrefix*)self;if(f->list.active){((WidgetDispatch*)self)->Slot1c(self->left,self->bottom+3);int height=self->bottom-self->top;int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,f->width,f->height);fn_8021E3BC(self,context);fn_80219284(self,width,height);((WidgetDispatch*)self)->Slot1c(self->left,self->top*2-3-self->bottom);}fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802192A0(self,context);int y,x;x=self->left;y=self->top;int width=((WidgetDispatch*)self)->Slot78();fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBDC);const char* label=f->list.list->Get(*f->list.selected,0);char buffer[80];sprintf(buffer,lbl_8055B884,f->list.columns,label?label:lbl_8055B88C);fn_802C4F58(self->left+1,self->top+1,buffer,lbl_8055FBC0);}
 WidgetFragment* fn_8021EA64(WidgetFragment* self,int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear){
  fn_80218F34(self,x,y,x+width,y+height+3,0);self->vtable=lbl_8033E988;
  if(clear)buffer[0]=0;TextEntryPrefix* fields=(TextEntryPrefix*)self;
@@ -2734,7 +2734,7 @@ void fn_80222CFC(WidgetFragment *source) {
     if (count > 0) {
         total = (0.0f);
         for (i1 = 0; i1 < count; i1++) {
-            total += fn_8023293C(self->font, fn_8022D3F8(self->list, i1, 0), (1.0f));
+            total += fn_8023293C(self->font, self->list->Get(i1, 0), (1.0f));
         }
         spacing = (((6.2831855f) * self->radius) - total) / (float)count;
         scale = (-6.2831855f) / (total + (spacing * (float)count));
@@ -2743,7 +2743,7 @@ void fn_80222CFC(WidgetFragment *source) {
         dst = fn_8022EDE4(&src->xf, src->alpha);
         pos = (0.0f);
         for (i2 = 0; i2 < count; i2++) {
-            text = fn_8022D3F8(self->list, i2, 0);
+            text = self->list->Get(i2, 0);
             for (j = 0; j < (int)strlen(text); j++) {
                 sprintf(one, lbl_8055B8A8, (int)(signed char)text[j]);
                 dst->xf.basis = src->xf.basis;
@@ -2793,7 +2793,7 @@ WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* rawList,int* 
     if (i < f->count)
     {
       int flags = 0;
-      label=fn_8022D3F8(list,i,&flags);
+      label=list->Get(i,&flags);
       if ((flags & 3) != 1)
       {
         f->available[i] = 1;
