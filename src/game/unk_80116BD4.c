@@ -2715,8 +2715,8 @@ decode:
         var_r5_2 = (u32 *)arg4 + var_r28;
         while (var_r29 > (u32)(*var_r5_2 * 2)) {
             var_f29 = *var_r4_2;
-            var_r4_2++;
             var_r5_2++;
+            var_r4_2++;
             var_r28++;
             var_f28 = -var_f29;
         }

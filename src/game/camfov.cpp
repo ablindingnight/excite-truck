@@ -599,7 +599,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             k = lbl_80563E30 - lbl_80563ED0 * sf;
             break;
         }
-        f32 dist = lbl_80563EEC + F32(c->car, 0x5B4) * k;
+        f32 dist = lbl_80563EEC + k * F32(c->car, 0x5B4);
         f32 lift = F32(c->car, 0x5B8) + lbl_80563EF0;
         c->fov = fn_8026ECE4(p, &dist);
         target = c->pos;

@@ -1067,8 +1067,9 @@ int fn_802344B0(void) { return lbl_8055F06C != NULL; }
 void fn_802344C4(u8 v) { lbl_8055F064 = v; }
 
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale) {
-    u32 c = color;
+    u32 c;
     const char* str = s;
+    c = color;
     fn_80232024(&str, &c);
     if (lbl_8055F058.count >= 0x60) {
         fn_802346C8();
