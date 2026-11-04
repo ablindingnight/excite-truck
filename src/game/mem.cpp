@@ -283,7 +283,9 @@ void fn_801286A0(void* p, u32 amount) {
     b->size -= amount;
     b->request -= amount;
     lbl_8041E140.used -= amount;
-    *(u32*)((u8*)p + fn_801281F4(b->request, 4)) = STACK_COOKIE;
+    int off = fn_801281F4(b->request, 4);
+    u32 magic = STACK_COOKIE;
+    *(u32*)((u8*)p + off) = magic;
 }
 
 void fn_80128710(void* p) {}

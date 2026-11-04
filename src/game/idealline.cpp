@@ -470,10 +470,12 @@ int LineFollower::SetLine(CenterLine* l) {
     if (l != line) {
         Clear();
         line = l;
-        if (l) {
+        switch ((u32)l) {
+        default:
             return 1;
+        case 0:
+            return 0;
         }
-        return 0;
     }
     return 2;
 }

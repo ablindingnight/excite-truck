@@ -3306,9 +3306,13 @@ void fn_801A1B9C(u8* p) {
 
 void fn_801A1CA0(const u8* p) {
     if (S32(p, 0x20) < 1000) {
-        fn_801E44F4(PTR(p, 0xC), 0x40FFFF00, F32(p, 0x24), F32(p, 0x24), F32(p, 0x28));
+        f32 x = F32(p, 0x24);
+        f32 z = F32(p, 0x28);
+        fn_801E44F4(PTR(p, 0xC), 0x40FFFF00, x, x, z);
     } else {
-        fn_801E44F4(PTR(p, 0xC), 0x4000FF80, F32(p, 0x24), F32(p, 0x24), F32(p, 0x28));
+        f32 x = F32(p, 0x24);
+        f32 z = F32(p, 0x28);
+        fn_801E44F4(PTR(p, 0xC), 0x4000FF80, x, x, z);
     }
 }
 
