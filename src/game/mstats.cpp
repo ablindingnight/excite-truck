@@ -124,7 +124,20 @@ public:
     StatsTable stats;     // offset 0x18C
 };
 
+struct CaptionContext {
+    int value;
+    CaptionContext(int v = 0) : value(v) {}
+};
+
 struct MenuItem {
+    // A text item (type 3).
+    MenuItem(const char* n, const char* t, CaptionContext context = CaptionContext()) {
+        type = 3;
+        name = n;
+        data = t;
+        arg0 = (int)context.value;
+        arg1 = 0;
+    }
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
         type = t;
         name = n;
@@ -174,7 +187,7 @@ extern "C" void fn_80257284(void) {
         MenuItem("event", 13, &state.events, 0, 0),
         MenuItem("record", 13, &state.stats, 0, 0),
         MenuItem("value", 13, &state.stats, 1, 0),
-        MenuItem("#profile_name", 3, IdentGetSlotName(IdentGetCurrentSlot()), 0, 0),
+        MenuItem("#profile_name", IdentGetSlotName(IdentGetCurrentSlot())),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
         *(MenuItem*)&lbl_80498E38,
