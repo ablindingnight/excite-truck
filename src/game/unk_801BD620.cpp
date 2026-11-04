@@ -1305,7 +1305,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA3->x = V1810.x;
         rowA3->y = V1810.y;
         rowA3->z = V1810.z;
-        Vec V1800(V1B50.w);
+        Vec V1800(temp_f31);
         V1800.y = V1800.x;
         V1800.z = V1800.y;
         rowA9->x = V1800.y;
