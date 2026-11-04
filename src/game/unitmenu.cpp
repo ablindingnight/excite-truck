@@ -1,6 +1,7 @@
 // Speed units menu (0x8024C070-0x8024C370, "units.lyt"): one option cycler between MPH and KPH, kept
 // in the "units" option. Names are guesses apart from the layout, option and labels.
 #include "game/common.h"
+#include "game/menuwidget.h"
 
 struct MenuItem {
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
@@ -25,30 +26,6 @@ struct MenuDesc {
     int unk10;
 };
 
-// A menu widget (menu.cpp).
-class MenuWidget {
-public:
-    MenuWidget(void) {
-        flag0 = 0;
-        id = -1;
-        flag8 = 0;
-    }
-
-    u8 flag0;  // offset 0x0
-    s32 id;    // offset 0x4
-    u8 flag8;  // offset 0x8
-
-    virtual u8 vf08(void);
-    virtual u8 vf0C(void);
-    virtual int vf10(void);
-    virtual int vf14(void);
-    virtual ~MenuWidget(void) {}
-    virtual const char* Current(void) = 0;
-    virtual void Prev(void) = 0;
-    virtual void Next(void) = 0;
-    virtual int vf28(void);
-    virtual int vf2C(void);
-};
 
 // Steps *out through a table of values, showing the matching label.
 class ValueMulti : public MenuWidget {

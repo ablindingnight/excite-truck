@@ -1,6 +1,7 @@
 // Track B2 full-body draft from original assembly; data qualification incomplete. External declarations identify
 // unresolved code and storage; this TU is not registered or linked into the game.
 #include "game/common.h"
+#include "game/menuwidget.h"
 
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int);
@@ -123,26 +124,15 @@ int fn_8023DFB0(void);
 int fn_8023DFD4(void);
 int fn_8023E028(void);
 
-class ControlsChoiceBase {
-public:
-    ControlsChoiceBase(void) : state0(0),header4(-1),state8(0) {}
-    u8 state0; u8 pad1[3]; int header4;
-    u8 state8; u8 pad9[3];
-    // Imported callback declarations only: no held base implementation.
-    virtual void Base08(void);
-    virtual void Base0C(void);
-    virtual void Base10(void);
-    virtual void Base14(void);
-};
-class ControlsChoiceFields : public ControlsChoiceBase {
+// The controller-type option cycler on the controls menu (vtable lbl_80341C50: the MenuWidget base virtuals plus
+// these): steps through the control types fn_801A902C counts, -1 = none.
+class ControlsChoiceFields : public MenuWidget {
 public:
     ControlsChoiceFields(const ControlInputFields* value);
     virtual ~ControlsChoiceFields(void) {}
-    virtual char* Label(void);
+    virtual const char* Current(void);
+    virtual void Prev(void);
     virtual void Next(void);
-    virtual void Previous(void);
-    virtual void Base28(void);
-    virtual void Base2C(void);
     int selected;
     char label[20];
 };
@@ -614,11 +604,11 @@ extern "C" void fn_8023E504(ControlsChoiceFields* self, ControlInputFields* out)
 
 extern "C" const char* fn_8023E52C(int index) { return lbl_80341C40[index]; }
 
-char* ControlsChoiceFields::Label(void) { return label; }
+const char* ControlsChoiceFields::Current(void) { return label; }
 
-void ControlsChoiceFields::Previous(void) { fn_8023E3D8(this, 1); }
+void ControlsChoiceFields::Next(void) { fn_8023E3D8(this, 1); }
 
-void ControlsChoiceFields::Next(void) { fn_8023E3D8(this, -1); }
+void ControlsChoiceFields::Prev(void) { fn_8023E3D8(this, -1); }
 
 extern "C" {
 const char* lbl_80341C40[] = {"NES Grip", "Remote Grip", "NES Grip (DPAD Steer)", "Remote Grip (DPD Steer)"};
