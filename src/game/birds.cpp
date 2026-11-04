@@ -251,7 +251,7 @@ void fn_802A86A4(void) {
         d.radius = f->birdRad;
         d.speedMax = f->birdSpeedMax;
         d.speedMin = f->birdSpeedMin;
-        f32 r = f->birdRad * 0.25f;
+        f32 r = f->birdRad / 4.0f;
         for (int j = 0; j < f->birds.n; j++) {
             Boid* b = &f->birds.data[j];
             BVec off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));

@@ -1190,7 +1190,7 @@ int fn_8013CBC0(CarState* zm, int car) {
         mid.x = g->a.x + (g->b.x - g->a.x) * 0.5f;
         mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
         mid.z = g->a.z + (g->b.z - g->a.z) * 0.5f;
-        half = PSVECDistance(&g->a, &g->b) * 0.5f;
+        half = PSVECDistance(&g->a, &g->b) / 2.0f;
         ring.x = mid.x;
         ring.y = g->ringY;
         f32 zv = mid.z;

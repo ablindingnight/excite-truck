@@ -634,7 +634,7 @@ int fn_8028B500(const void* evp) {
         int m = 1.5f * n;
         k = MIN(k, 8.0f);
         Vec v;
-        v.x = ev->vel.x * 0.25f;
+        v.x = ev->vel.x / 4.0f;
         v.y = ev->vel.y * 0.25f + 0.25f * k;
         v.z = ev->vel.z * 0.25f;
         lbl_8055F6F0->Emit(m, &ev->pos, &v, k);

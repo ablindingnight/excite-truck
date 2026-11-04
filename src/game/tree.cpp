@@ -531,7 +531,7 @@ void fn_802BCBDC(void) {
                 t->cyl.axis.x = p1.x - p2.x;
                 t->cyl.axis.y = p1.y - p2.y;
                 t->cyl.axis.z = p1.z - p2.z;
-                t->cyl.half = PSVECMag(&t->cyl.axis) * 0.5f;
+                t->cyl.half = PSVECMag(&t->cyl.axis) / 2.0f;
                 PSVECNormalize(&t->cyl.axis, &t->cyl.axis);
                 t->cyl.rad = n->GetFloat("rad");
                 t->baseRad = n->GetFloat("base_rad");

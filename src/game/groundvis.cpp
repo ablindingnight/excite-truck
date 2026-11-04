@@ -469,11 +469,11 @@ void fn_802AEB3C(const GroundFrame* cam) {
 
     f32 aspect = fn_802C8FEC();
     f32 fov = fn_802C973C();
-    f32 hfov = 2.0f * (f32)atan((f32)tan(fov * 0.5f) / aspect);
-    lbl_804BE0B0.tanV = tan(fov * 0.5f);
-    lbl_804BE0B0.secV = 1.0f / (f32)sin(1.5707964f - fov * 0.5f);
-    lbl_804BE0B0.tanH = tan(hfov * 0.5f);
-    lbl_804BE0B0.secH = 1.0f / (f32)sin(1.5707964f - hfov * 0.5f);
+    f32 hfov = 2.0f * (f32)atan((f32)tan(fov / 2.0f) / aspect);
+    lbl_804BE0B0.tanV = tan(fov / 2.0f);
+    lbl_804BE0B0.secV = 1.0f / (f32)sin(1.5707964f - fov / 2.0f);
+    lbl_804BE0B0.tanH = tan(hfov / 2.0f);
+    lbl_804BE0B0.secH = 1.0f / (f32)sin(1.5707964f - hfov / 2.0f);
     f32 tmp;
     fn_802C98DC(&tmp, &lbl_804BE0B0.znear, &lbl_804BE0B0.zfar, &tmp);
 
@@ -530,7 +530,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             blend = 1.0f;
             draw = 0;
         } else {
-            f32 e = lbl_8055F98C + (dist - 1.4142f * (n->size * lbl_80564AF0 * 0.5f));
+            f32 e = lbl_8055F98C + (dist - 1.4142f * (n->size * lbl_80564AF0 / 2.0f));
             if (0.0f > e) {
                 e = 0.0f;
             }

@@ -629,7 +629,7 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
-        f32 near = -2.0f + 1024.0f * kWorldScale * 0.5f;
+        f32 near = -2.0f + 1024.0f * kWorldScale / 2.0f;
         int k;
         GVec* c = lbl_804BE190;
         for (k = 0; k < 4; k++, c++) {

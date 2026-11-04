@@ -2084,7 +2084,7 @@ void RingChalMaster::vf4C(int view) {
             k = Remap(0.0f, 0.75f, 0.0f, 1.0f, arena.f28);
             hl.w = fn_80144C80(icon.w, 2.5f * icon.w, k);
             hl.h = fn_80144C80(icon.h, 2.5f * icon.h, k);
-            hl.pos.x = fn_80144C80(icon.pos.x, icon.pos.x - (2.5f * icon.w - icon.w) * 0.5f, k);
+            hl.pos.x = fn_80144C80(icon.pos.x, icon.pos.x - (2.5f * icon.w - icon.w) / 2.0f, k);
             hl.pos.y = fn_80144C80(icon.pos.y, icon.pos.y - (2.5f * icon.h - icon.h) * 0.5f, k);
             ALPHA(hl.color, 1.0f - k);
             fn_80147940(l, &hl, "star_art", 0);
@@ -2180,7 +2180,7 @@ void RingChalMaster::vf4C(int view) {
                     nx.w = fn_80144C80(10.0f * next->w, next->w, k);
                     nx.h = fn_80144C80(10.0f * next->h, next->h, k);
                     nx.pos.x = fn_80144C80(next->pos.x - 10.0f * next->w / 2.0f, next->pos.x, k);
-                    nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h * 0.5f, next->pos.y, k);
+                    nx.pos.y = fn_80144C80(next->pos.y - 10.0f * next->h / 2.0f, next->pos.y, k);
                 }
                 if (d > 1.35f) {
                     f32 k = Remap(1.35f, 1.9f, 0.0f, 1.0f, d);

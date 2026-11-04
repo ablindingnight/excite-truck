@@ -805,9 +805,9 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
     wind.y = wind.y * (0.1f * dt) - 1.2f * dt;
     MulT(cam, &wind, &wind);
     f32 dx = d->x;
-    wind.x = wind.x + dx * 0.25f;
-    wind.y = wind.y + d->y * 0.25f;
-    wind.z = wind.z + d->z * 0.25f;
+    wind.x = wind.x + dx / 4.0f;
+    wind.y = wind.y + d->y / 4.0f;
+    wind.z = wind.z + d->z / 4.0f;
     WPt* out = pts;
     for (int i = 0; i < count; i++) {
         WPt* p = &pts[i];
@@ -914,9 +914,9 @@ void RainSystem::Update(void) {
         Move((const PVec*)&d);
         Spawn();
     } else {
-        vel.x = dir.x * 0.25f;
-        vel.y = dir.y * 0.25f;
-        vel.z = dir.z * 0.25f;
+        vel.x = dir.x / 4.0f;
+        vel.y = dir.y / 4.0f;
+        vel.z = dir.z / 4.0f;
         Fill();
     }
     lastPos = cam->pos;
