@@ -333,7 +333,7 @@ void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
 
 extern void* lbl_803339B8[];
-extern void* lbl_80333918[];
+extern void* __vt__9TubeShape[];
 extern void* lbl_80333728[];
 
 ModuleTag lbl_8055E590;
@@ -2030,7 +2030,7 @@ struct TubeVol {
         f1C = 0;
         r = rr;
         len = l;
-        vt = lbl_80333918;
+        vt = __vt__9TubeShape;
     }
 };
 
@@ -2205,12 +2205,12 @@ void fn_8019ECC4(u8* p, u32 a, u32 swap) {
     U32(p, 0xC) = a + 4;
 }
 
-extern void* lbl_80333B48[];
+extern void* __vt__11SphereShape[];
 
 // Sphere volume constructor from file data (byte-swapped when `swap`).
 u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
     fn_8019ECC4(p, a, swap);
-    *(void**)p = lbl_80333B48;
+    *(void**)p = __vt__11SphereShape;
     if (swap) {
         Swap32(p + 0x24);
         f32* w = (f32*)(p + 0x28);
@@ -2425,7 +2425,7 @@ u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f3
     F32(p, 0x14) = skin;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_80333B48;
+    *(void**)p = __vt__11SphereShape;
     F32(p, 0x24) = 0.5f * big;
     F32(p, 0x34) = 0.0f;
     F32(p, 0x38) = 0.0f;
@@ -2730,7 +2730,7 @@ void fn_801A01E0(const u8* p, RVec3* lo, RVec3* hi) {
     MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
 
-extern void* lbl_80333B48[];
+extern void* __vt__11SphereShape[];
 
 void fn_801A0378(u8* p, u8* s);
 extern const f32 lbl_805622D0;  // 0.0
@@ -2749,7 +2749,7 @@ void fn_801A0258(u8* grp, const RVec3* c, f32 r, f32 s0, f32 s1) {
         F32(s, 0x14) = s1;
         S32(s, 0x20) = 100;
         U32(s, 0x1C) = 0;
-        *(void**)s = lbl_80333B48;
+        *(void**)s = __vt__11SphereShape;
         F32(s, 0x24) = r;
         F32(s, 0x34) = lbl_805622D0;
         F32(s, 0x38) = lbl_805622D0;
@@ -3204,7 +3204,7 @@ void fn_801A17B8(u8* p) {
 
 u8* fn_801A1898(u8* p, u32 a, u32 swap) {
     fn_801A1520(p, a, swap);
-    *(void**)p = lbl_80333918;
+    *(void**)p = __vt__9TubeShape;
     return p;
 }
 

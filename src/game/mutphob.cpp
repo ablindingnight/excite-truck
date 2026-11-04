@@ -153,6 +153,9 @@ public:
         rad = r;
         half = h;
     }
+    // key function: defined out of line in the original collision unit (not identified yet), so units
+    // that build tubes do not emit TubeBase's vtable (the target mutphob .data has none)
+    virtual ~TubeBase(void);
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28: half the length between the end spheres
 };
@@ -212,9 +215,17 @@ public:
     virtual void Reset(void);
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
+    virtual void vf14(void);  // RigidBody overrides these (phob.cpp), the vtable points at them
+    virtual void vf18(void);
+    virtual void vf24(void);
+    virtual void vf3C(void);
+    virtual int vf40(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
+    virtual void vf54(void) = 0;  // three pure virtuals the target vtable ends with
+    virtual void vf58(void) = 0;
+    virtual void vf5C(void) = 0;
     void Update(void);
     void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
     u8 padD0[0x118 - 0xD0];
