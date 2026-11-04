@@ -1696,6 +1696,8 @@ extern void fn_801199A4(void *, s32);
 
 // Moves buffered data from a track's ring into its voice buffers, splitting interleaved stereo into the left and
 // right voices.
+#pragma push
+#pragma opt_dead_assignments off
 void fn_801195D8(StreamTrack *t) {
     u16 *src;
     u32 n;
@@ -1750,6 +1752,7 @@ void fn_801195D8(StreamTrack *t) {
         }
     }
 }
+#pragma pop
 
 // Keeps a track's voices fed: tops them up from the ring, or writes silence while the voices outrun the data.
 s32 fn_80119824(StreamTrack *t) {
