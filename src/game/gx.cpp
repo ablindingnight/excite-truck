@@ -1063,6 +1063,8 @@ void fn_802CFEEC(void) {
     fn_802CFDE0();
 }
 
+#pragma push
+#pragma peephole off
 void fn_802CFF10(void) {
     lbl_8055FD44 = 0;
     fn_802CF5D0();
@@ -1071,6 +1073,7 @@ void fn_802CFF10(void) {
     lbl_8055FDAC = 0;
     lbl_8055FE39 = 0;
 }
+#pragma pop
 
 void fn_802CFF50(void) { lbl_8055FD20 = -1; }
 

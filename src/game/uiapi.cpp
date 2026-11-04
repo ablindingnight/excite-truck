@@ -1682,6 +1682,8 @@ extern "C" s32 fn_802152CC(void);
 extern "C" void* lbl_8033D420[];
 
 // UIOkBox: title + message with a single OK button (group 31 is hidden while it shows).
+#pragma push
+#pragma global_optimizer off
 extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*)) {
     int result = 2;
     const char* caption = "Button - OK";
@@ -1709,6 +1711,7 @@ extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(
         fn_80214AF0(0x1F);
     }
 }
+#pragma pop
 
 extern "C" void fn_80214FD8(const char* title, const char* message) {
     fn_80214E10(title, message, 0);

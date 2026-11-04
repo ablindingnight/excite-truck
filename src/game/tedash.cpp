@@ -906,6 +906,8 @@ void fn_802B7D1C(void) {
     fn_802B7B08();
 }
 
+#pragma push
+#pragma opt_loop_invariants off
 void fn_802B7D4C(void) {
     if (lbl_8055FA40 == 6) {
         fn_802B6568(lbl_8055FA48->Find("objects"), "All Objects");
@@ -946,6 +948,7 @@ void fn_802B7D4C(void) {
     }
     fn_802B6568(lbl_8055FA48->Find("objects"), "Object layer: %d", lbl_8055FA40 + 1);
 }
+#pragma pop
 
 int fn_802B8110(int d, const char* s) {
     int changed = 0;

@@ -704,6 +704,8 @@ TCell* fn_802BD694(TCell* off, u8* base) { return (TCell*)((u8*)off + (u32)base)
 
 TreeRec* fn_802BD80C(TreeRec* off, u8* base);
 
+#pragma push
+#pragma opt_unroll_loops off
 void fn_802BD69C(TFileArray<TreeRec>* a, u8* base) {
     Swap32(&a->n);
     Swap32(&a->data);
@@ -715,6 +717,7 @@ void fn_802BD69C(TFileArray<TreeRec>* a, u8* base) {
         }
     }
 }
+#pragma pop
 
 TreeRec* fn_802BD80C(TreeRec* off, u8* base) { return (TreeRec*)((u8*)off + (u32)base); }
 
