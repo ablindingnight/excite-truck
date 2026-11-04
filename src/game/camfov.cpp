@@ -671,12 +671,9 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[2] *= inv2;
         if (PSVECDotProduct(f.v, &c->tf.axes.fwd.x) > lbl_80563F10) {
             f32 w = s + lbl_80563F14 * (lbl_80563E30 - s);
-            f32 yv = c->tf.axes.fwd.y;
-            f32 zv = c->tf.axes.fwd.z;
-            r.z = f.v[2] + w * (zv - f.v[2]);
-            r.y = f.v[1] + w * (yv - f.v[1]);
-            f32 xv = c->tf.axes.fwd.x;
-            r.x = f.v[0] + w * (xv - f.v[0]);
+            r.z = LerpF(w, f.v[2], c->tf.axes.fwd.z);
+            r.y = LerpF(w, f.v[1], c->tf.axes.fwd.y);
+            r.x = LerpF(w, f.v[0], c->tf.axes.fwd.x);
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
