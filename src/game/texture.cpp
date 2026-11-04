@@ -1280,8 +1280,9 @@ void fn_802CC770(void) {
             } else {
                 TexCache* c = lbl_8055FCBC;
                 MipSlot* s = &c->slots[i];
-                s->score = 4.0f;
-                Rank(c, s, 4.0f);
+                f32 score = 4.0f;
+                s->score = score;
+                Rank(c, s, score);
             }
         }
     }
