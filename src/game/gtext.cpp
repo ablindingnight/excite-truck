@@ -1141,6 +1141,7 @@ void fn_802346C8(void) {
                 f32 y1;
                 f32 y0 = lbl_8055F06C[i].y;
                 y1 = h + y0;
+                int j;
                 u32* cp;
                 if (passes == 2) {
                     cp = &lbl_8055F06C[i].masked;
@@ -1149,7 +1150,7 @@ void fn_802346C8(void) {
                 }
                 f32 x = lbl_8055F06C[i].x;
                 strlen(lbl_8055F06C[i].text);
-                int j = 0;
+                j = 0;
                 while (lbl_8055F06C[i].text[j]) {
                     const char* s = lbl_8055F06C[i].text;
                     f32 adv;
@@ -1196,7 +1197,7 @@ void fn_802346C8(void) {
                     f32 xsv = lbl_8055F06C[i].xs;
                     u16 c = DecodeUTF8(s + j, &next);
                     x += xsv * f->glyphs[c].pre;
-                    f32 x1 = x + lbl_8055F06C[i].scale * f->glyphs[c].width;
+                    f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
                     if (c != ' ') {
                         fn_802C8E00(*cp, 0, x, y1, 0.0f, f->glyphs[c].u0, f->glyphs[c].v0);
                         fn_802C8E00(*cp, 0, x1, y1, 0.0f, f->glyphs[c].u1, f->glyphs[c].v0);
