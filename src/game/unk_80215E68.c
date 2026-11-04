@@ -46,7 +46,7 @@ extern s32 fn_80215EC4(s32, s32);
 #pragma small_data off
 extern u8 lbl_80490710[0x1A0];
 #pragma small_data on
-extern void fn_8002F634(void *, void *, s32, s32);
+extern void __destroy_arr(void *, void *, s32, s32);
 extern f32 lbl_8055EF94;
 extern s32 lbl_8055EF74;
 extern s32 fn_80217270(s32);
@@ -58,21 +58,21 @@ extern s32 fn_80218464(void);
 // Code of main that had no source file yet: decomp.wtf gave it this one.
 // split_file divides it into the game's real files (file_status shows its range).
 
-extern s32 fn_80128668(void);
+extern s32 __dl__FPv(void);
 s32 fn_80215E68(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        __dl__FPv();
     }
     return arg0;
 }
 
 void fn_80215EA8(void) {
-    fn_8002F634(lbl_80490710, fn_80215EC4, 0x18, 0x10);
+    __destroy_arr(lbl_80490710, fn_80215EC4, 0x18, 0x10);
 }
 
 s32 fn_80215EC4(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        __dl__FPv();
     }
     return arg0;
 }
@@ -84,14 +84,14 @@ void fn_80215F04(void *arg0) {
 
 s32 fn_80215F1C(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        __dl__FPv();
     }
     return arg0;
 }
 
 s32 fn_80215F5C(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        __dl__FPv();
     }
     return arg0;
 }
