@@ -1291,7 +1291,7 @@ int fn_801B2C70(DeitySnap* s) {
     s->players = lbl_8055E67C;
     s->bC = 0;
     s->leaderDone = lbl_8055E698;
-    s->allDone = lbl_8055E69C >= lbl_8055E67C;
+    s->allDone = lbl_8055E67C <= lbl_8055E69C;
     for (int i = 0; i < lbl_8055E678; i++) {
         s->car[i].place = *(s32*)((u8*)&lbl_8055E684[i] + 0x8);
         s->car[i].a8 = 0;

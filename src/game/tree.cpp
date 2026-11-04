@@ -472,8 +472,8 @@ void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeTy
 }
 
 CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
-    f32 r = c->rad * scale;
     f32 h = c->half * scale;
+    f32 r = c->rad * scale;
     TubeShape* s = new ("tree-volume") TubeShape(r, h);
     s->SetId(id);
     return s;

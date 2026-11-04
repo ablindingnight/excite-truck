@@ -509,8 +509,8 @@ extern "C" {
 void fn_801E1384(BoostArea* a, u32 color) {
     if (a->bound) {
         int i;
-        fn_802C8DBC(a->ny * ((a->nx - 1) * 2));
         int limit = a->nx;
+        fn_802C8DBC(a->ny * ((a->nx - 1) * 2));
         for (i = 1; i < limit; i++) {
             int j;
             a->Vtx(i - 1, 0)->Emit(color, 0);

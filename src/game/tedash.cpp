@@ -1000,7 +1000,7 @@ int fn_802B8310(int d, const char* s) {
         f32 lo = sc->min;
         f32 n = sc->max + fn_802B822C(d);
         v = v < n ? v : n;
-        v = v > lo ? v : lo;
+        v = lo < v ? v : lo;
         if (v != sc->max) {
             sc->max = v;
             it.scale->dirty = 1;
