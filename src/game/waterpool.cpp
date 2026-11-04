@@ -866,7 +866,7 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     int gy;
     int gx = fu < 0.0f ? fu - 0.5f : 0.5f + fu;
     f32 dyzv = p->dyz;
-    f32 fv = q.x * p->dyx + q.y * dyzv;
+    f32 fv = p->dyx * q.x + dyzv * q.y;
     gy = fv < 0.0f ? fv - 0.5f : 0.5f + fv;
     if (gx < 1 || gx >= p->nx - 1 || gy < 1 || gy >= p->ny - 1) {
         return;

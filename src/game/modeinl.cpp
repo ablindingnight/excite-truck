@@ -186,12 +186,13 @@ int fn_80144C90(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 f32 fn_80144CC8(f32 x) { return x * x; }
 
 void fn_80144CD0(Vec3* out, const Vec3* p, const f32* m) {
+    f32 dy;
     f32 dx = p->x - m[9];
-    f32 dy = p->y - m[10];
+    dy = p->y - m[10];
     f32 dz = p->z - m[11];
     out->x = m[2] * dz + (dx * m[0] + dy * m[1]);
     out->y = dz * m[5] + (dx * m[3] + m[4] * dy);
-    out->z = dz * m[8] + (dx * m[6] + dy * m[7]);
+    out->z = dz * m[8] + (dx * m[6] + m[7] * dy);
 }
 
 struct W3 {
