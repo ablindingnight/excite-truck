@@ -979,7 +979,8 @@ public:
     }
     int MaxBonus(int lvl) const {
         ZoneLevel* l = &levels->levels[lvl];
-        return Round(lbl_8042FB3C.timeBonus * l->score * l->mult);
+        f32 bonus = lbl_8042FB3C.timeBonus * l->score;
+        return Round(bonus * l->mult);
     }
     int TimeBonusPoints(CarState* c) {
         if (lbl_8042FB3C.BonusAt(fn_8013CB3C() - c->bonusT) > 0.0f) {
