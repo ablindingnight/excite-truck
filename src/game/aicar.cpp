@@ -948,9 +948,10 @@ f32 fn_801948B0(u8* d, f32 t, int steer) {
     f32 push = 0.0f;
     if (steer && U8(d, 0x14)) {
         f32 x = F32(d, 0x8);
-        f32 over = gain * 0.5f + (f32)__fabs(x) - F32(d, 0x274);
+        f32 over = gain / 2.0f + (f32)__fabs(x) - F32(d, 0x274);
         over = over > 0.0f ? over : 0.0f;
-        push = -(x > 0.0f ? 1.0f : -1.0f) * over;
+        f32 sign = x > 0.0f ? 1.0f : -1.0f;
+        push = -sign * over;
     }
     f32 lim[2] = {0};
     out += push + F32(d, 0x220) * gain;
@@ -966,7 +967,7 @@ f32 fn_801948B0(u8* d, f32 t, int steer) {
         }
     }
     F32(d, 0x238) = out;
-    return out;
+    return F32(d, 0x238);
 }
 
 static inline V2 LerpXY(const RVec3* a, const RVec3* b, f32 t) {
