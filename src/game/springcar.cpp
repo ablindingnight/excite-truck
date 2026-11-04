@@ -354,6 +354,8 @@ void SpringCar::Update(void) {
     }
 }
 
+#pragma push
+#pragma opt_unroll_loops off
 void SpringCar::Reset(void) {
     CarBody_vf10(this);
     ClearWalls();
@@ -363,6 +365,7 @@ void SpringCar::Reset(void) {
     lost = 0;
     dead = 0;
 }
+#pragma pop
 
 void SpringCar::vf14(void) {
     fn_80183DF8(this);

@@ -333,19 +333,25 @@ void FloatValue::Dec(void) {
     *value = (min > v) ? min : v;
 }
 
+#pragma push
+#pragma global_optimizer off
 int FloatValue::CanInc(void) {
     if (NearEq(max, *value)) {
         return 0;
     }
     return 1;
 }
+#pragma pop
 
+#pragma push
+#pragma global_optimizer off
 int FloatValue::CanDec(void) {
     if (NearEq(min, *value)) {
         return 0;
     }
     return 1;
 }
+#pragma pop
 
 void IntValue::GetPtr(void** p, int* size) {
     *p = value;
