@@ -313,9 +313,11 @@ void fn_802E7DDC(Remote* r, const KStatus* k) {
     if (hold & 4) {
         d |= 2;
     }
+    f32 x = k->accX;
+    f32 y = -k->accY;
     r->dir = d;
-    f32 ang = -(f32)atan2(-k->accY, k->accX);
-    r->angle = ang;
+    r->angle = -(f32)atan2(x, y);
+    f32 ang = r->angle;
     if (ang > 3.1415927f) {
         ang -= 6.2831855f;
     } else if (ang < -3.1415927f) {
