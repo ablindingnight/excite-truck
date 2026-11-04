@@ -1200,10 +1200,12 @@ Arena::Arena(void) {
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
 int Arena::CountDynos(void) {
-    int n = 0;
+    int n;
+    int c;
+    n = 0;
     int i;
     for (i = 0; i < sets->count; i++) {
-        int c = 0;
+        c = 0;
         int j;
         for (j = 0; j < sets->data[i].infos->count; j++) {
             if (sets->data[i].infos->data[j].type == 0) {

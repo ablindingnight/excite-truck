@@ -412,6 +412,9 @@ void fn_802E9EB8(void) {
 }
 
 void fn_802EA5D4(const char* dir, int depth) {
+    char* ext;
+    Track* t;
+    char* name;
     char pat[0x100];
     char sub[0x200];
     FindData fd;
@@ -422,7 +425,7 @@ void fn_802EA5D4(const char* dir, int depth) {
                 OSReport(" mp3: too many tracks\n");
                 break;
             }
-            char* name = fd.shortName;
+            name = fd.shortName;
             if (fd.longName[0]) {
                 name = fd.longName;
             }
@@ -436,9 +439,9 @@ void fn_802EA5D4(const char* dir, int depth) {
                     }
                 }
             } else {
-                char* ext = strrchr(name, '.');
+                ext = strrchr(name, '.');
                 if (ext && !strcasecmp(ext, ".mp3")) {
-                    Track* t = &lbl_80508818[lbl_8056007C];
+                    t = &lbl_80508818[lbl_8056007C];
                     if (strlen(fd.shortName) < 0x208 && strlen(dir) < 0x200) {
                         strncpy(t->file, fd.shortName, 0x207);
                         t->file[0x207] = 0;

@@ -336,11 +336,15 @@ void fn_802B1FD4(void) {
     for (int i = 0; i < lbl_804BE1FC.count; i++) {
         SetPlacer* set = lbl_804BE1FC.data[i];
         if (set) {
-            for (int j = 0; j < set->count; j++) {
-                MatPlacer* m = set->data[j];
+            ObjectPlacer* p;
+            int j;
+            MatPlacer* m;
+            int k;
+            for (j = 0; j < set->count; j++) {
+                m = set->data[j];
                 if (m) {
-                    for (int k = 0; k < m->placers.count; k++) {
-                        ObjectPlacer* p = m->placers.data[k];
+                    for (k = 0; k < m->placers.count; k++) {
+                        p = m->placers.data[k];
                         if (p) {
                             SafeDelete(p->model);
                             delete p;

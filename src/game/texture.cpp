@@ -751,6 +751,7 @@ void TexCopy(void) { fn_802E317C("gxCopyTexture not supported"); }
 s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
     u16 z = lbl_8055FCAA;
     const char* name = "rtarg";
+    u8 fmt;
     u16 wrap = 3;
     if (flags & 0x20) {
         wrap = 2;
@@ -758,7 +759,7 @@ s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
     if (flags & 0x40) {
         wrap &= ~2;
     }
-    u8 fmt = 2;
+    fmt = 2;
     if (flags & 1) {
         fmt = 3;
     }

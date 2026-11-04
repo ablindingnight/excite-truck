@@ -302,10 +302,13 @@ extern "C" {
 void fn_8001B7BC(TrackMap* map);
 
 void fn_80019BBC(void) {
-    f32 a = 0.0f;
+    f32 step;
+    f32 z;
+    f32 a;
+    a = 0.0f;
     int i;
-    f32 z = a;
-    f32 step = 0.31415927f;
+    z = a;
+    step = 0.31415927f;
     for (i = 0; i < 20; i++) {
         lbl_803582C0[i].x = cos(a);
         lbl_803582C0[i].y = sin(a);

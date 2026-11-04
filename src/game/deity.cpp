@@ -406,13 +406,16 @@ u32 fn_801B08E8(u32 a, u32 b, u32 n) {
 }
 
 void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
+    s32 idx;
+    u32 n1;
+    u32 n2;
     IdealPoint* from = c->Ideal()->il.seg;
     c->Car()->Teleport(t);
     fn_8018A08C(c->Car());
     IdealPoint* to = c->Ideal()->il.seg;
-    s32 idx = c->index;
-    u32 n1 = c->Ideal()->line->total;
-    u32 n2 = c->Ideal()->line->total;
+    idx = c->index;
+    n1 = c->Ideal()->line->total;
+    n2 = c->Ideal()->line->total;
     u32 fwd = fn_801B08E8(from->ilpos, to->ilpos, n1);
     u32 back = fn_801B08E8(to->ilpos, from->ilpos, n2);
     if (back < fwd) {

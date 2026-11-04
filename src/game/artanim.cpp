@@ -301,8 +301,8 @@ static inline ValPoint MakePoint(f32 x, f32 y) {
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
-    ValueNode* paths[64];
     ValueNode* elems[64];
+    ValueNode* paths[64];
     ValueNode* frames[128];
     ArtAnim* a = new ("artanim") ArtAnim;
     memset(a, 0, sizeof(ArtAnim));
@@ -310,8 +310,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     CopyName(name, 0x18, a->name);
     ValueTable* t = fn_80131808(name);
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
-    int nElems = 0;
     int nPaths = 0;
+    int nElems = 0;
     int i;
     ValueNode* n;
     for (i = 0; (n = t->GetChild(i)) != 0; i++) {
@@ -424,8 +424,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
                 if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
                     f32 len = sqrt(d);
+                    f32 s;
                     f32 half = 0.5f * len;
-                    f32 s = sin(half);
+                    s = sin(half);
                     f32 w = cos(half);
                     f32 k2 = s / len;
                     key->q[0] = axis.x * k2;
@@ -448,7 +449,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 ValPoint v;
             v = f->GetPoint("xy");
                 v.x = v.x + pxy.x;
-                v.y = v.y + pxy.y;
+                v.y = pxy.y + v.y;
                 key->pos[0] = v.x - 320.0f;
                 key->pos[1] = 240.0f - v.y;
                 key->pos[2] = 0.0f;

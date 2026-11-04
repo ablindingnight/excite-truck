@@ -491,7 +491,11 @@ void fn_80168104(void) {
     c.x = cam->x;
     c.z = cam->z;
     for (i = 0; i < lbl_8055E354->groups.count; i++) {
-        PickupGroup* g = &lbl_8055E354->groups.data[i];
+        PickupGroup* g;
+        Pickup* p;
+        u32 col;
+        int o1;
+        g = &lbl_8055E354->groups.data[i];
         if (g->enabled) {
             if (g->hasBound) {
                 V2 d;
@@ -504,10 +508,10 @@ void fn_80168104(void) {
             {
                 int j;
                 for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
-                    Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
+                    p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
                     if (p->type && p->type->handle && !p->taken) {
-                        u32 col = p->type ? p->type->color : 0xFFFFFFFF;
-                        int o1 = fn_802C9994(col);
+                        col = p->type ? p->type->color : 0xFFFFFFFF;
+                        o1 = fn_802C9994(col);
                         u32 o2 = fn_802C9950(((col >> 1) & 0x7F000000) | ((col >> 1) & 0x7F0000) |
                                              ((col >> 1) & 0x7F00) | ((col >> 1) & 0x7F));
                         SpinXform* x;

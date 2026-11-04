@@ -162,12 +162,13 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 s16 flags = t->flags;
                 PVec3 cp = proj;
                 if (outside == 1) {
+                    int k1;
                     u32 k0 = outIdx[0];
                     f32 s = -ed[k0];
                     cp.x = proj.x + t->edge[k0].x * s;
                     cp.y = proj.y + t->edge[k0].y * s;
                     cp.z = proj.z + t->edge[k0].z * s;
-                    int k1 = (k0 + 1) % 3;
+                    k1 = (k0 + 1) % 3;
                     PVec3 a = tv[k0];
                     PVec3 b = tv[k1];
                     f32 dab = PSVECSquareDistance(&a, &b);

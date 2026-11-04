@@ -1597,7 +1597,7 @@ void fn_802D14D8(void) {
     f32 fovy = 2.0f * (f32)atan((f32)tan(0.5f * lbl_804C9778.fovy) / aspect);
     f32 m[4][4];
     C_MTXPerspective(m, 2.0f * fovy / 0.017453292f, aspect, lbl_804C9778.nearZ, lbl_804C9778.farZ);
-    if (lbl_8055FE24 == 0 && lbl_8055D0B8 >= 0 && lbl_8055D0B8 < lbl_8055D0BC * lbl_8055D0C0) {
+    if (lbl_8055FE24 == 0 && lbl_8055D0B8 >= 0 && lbl_8055D0B8 < lbl_8055D0C0 * lbl_8055D0BC) {
         int ty = lbl_8055D0B8 / lbl_8055D0BC;
         int tx = lbl_8055D0B8 - ty * lbl_8055D0BC;
         f32 sx = 1.0f / lbl_8055D0BC;

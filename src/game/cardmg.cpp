@@ -997,8 +997,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * lbl_80562018;
             f32 dd = PSVECSquareDistance(&cand.x, da.v);
             if (dd < lbl_8056201C && dd < bestD) {
-                bestD = dd;
                 best = d;
+                bestD = dd;
             }
         }
     }
@@ -1017,7 +1017,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         gb = (DentVec*)(p + 0x5FC) + best->goal;
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
-        c0.z = gb->z + best->pos.z;
+        c0.z = best->pos.z + gb->z;
         int count = S32(p, 0x5F8);
         for (int i = 1; i < count; i++) {
             DentPoint* q = (DentPoint*)PTR(p, 0x26C) + i;

@@ -603,9 +603,10 @@ void fn_802B6AC0(void) {
     }
     lbl_8055FA18.Reset();
     lbl_804BE7D8.count = 0;
+    int h;
     const char* dir = fn_802B6A70(lbl_8055FA38);
     fn_801345D8(pat, 0x40, "%s*.tga", dir);
-    int h = fn_802E3BB4(pat, name, 0x20);
+    h = fn_802E3BB4(pat, name, 0x20);
     if (h == -1) {
         return;
     }

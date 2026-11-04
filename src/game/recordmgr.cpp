@@ -462,13 +462,14 @@ void fn_801AF65C(void) {
 void fn_801AF6FC(void) {
     RaceState* st = (RaceState*)lbl_80435740;
     RaceEntries* t = &st->entries;
+    int i;
     int mode = fn_801769B8();
     int notRace = mode != 2;
     if (!notRace) {
         fn_801AE928();
     }
     fn_801AF65C();
-    for (int i = 0; i < lbl_8055E620->n; i++) {
+    for (i = 0; i < lbl_8055E620->n; i++) {
         LapResultTable* t = lbl_8055E620->t[i];
         if (t) {
             lbl_8055E628->Laps(t->laps, t->n);
@@ -478,8 +479,9 @@ void fn_801AF6FC(void) {
         lbl_8055E628->Results(lbl_8055E624->r, lbl_8055E624->n);
     }
     if (mode == 1) {
+        int i;
         int count = t->n;
-        for (int i = 0; i < count; i++) {
+        for (i = 0; i < count; i++) {
             st->best[i].a = fn_801AE9E0(i, &st->best[i].b);
         }
     }

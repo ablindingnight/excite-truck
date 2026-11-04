@@ -369,15 +369,16 @@ void fn_80231780(const UIXform* m) {
 void fn_80231ADC(void) { lbl_8049846C.count = 0; }
 
 void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+    const char* p = s;
     EscSeq* e;
-    strlen(s);
-    while (*s) {
+    strlen(p);
+    while (*p) {
         f32 adv = h;
         int skip;
-        if (*s == '\\') {
+        if (*p == '\\') {
             for (int i = 0; i < lbl_80497F14.count; i++) {
                 const char* name = lbl_80497F14.data[i].name;
-                if (strncasecmp(s + 1, name, strlen(name)) == 0) {
+                if (strncasecmp(p + 1, name, strlen(name)) == 0) {
                     e = &lbl_80497F14.data[i];
                     if (e->art) {
                         f32 k = h / fn_80235F64(e->art, e->artIdx);
@@ -393,15 +394,15 @@ void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
         skip = 0;
     found:
         if (skip > 0) {
-            s += skip;
+            p += skip;
             x += adv;
             continue;
         }
         const char* next;
-        u16 c = DecodeUTF8(s, &next);
+        u16 c = DecodeUTF8(p, &next);
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
-        s += next - s;
+        p += next - p;
         f32 tx, ty;
         if (lbl_8055F074) {
             lbl_8055F070(x - 2.0f, 2.0f + y, &tx, &ty);

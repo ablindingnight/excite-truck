@@ -695,22 +695,26 @@ void SkyTMH::Swap(TObj* o) {
 void SkyTMH::Init(TObj* o) { obj = o; }
 
 void SkyTMH::Draw(TObj* list) {
+    TCam* cam;
+    f32* c;
+    f32* cone;
+    f32 d;
     visible = 0;
     if (obj && mode) {
-        TCam* cam = fn_802C86DC();
+        cam = fn_802C86DC();
         u32 mask;
         mtx.t[0] = cam->pos[0];
         mtx.t[1] = cam->pos[1];
         mtx.t[2] = cam->pos[2];
         if (mode == 1) {
-            f32* cone = (f32*)&obj->d2C;
-            f32* c = cone;
+            cone = (f32*)&obj->d2C;
+            c = cone;
             f32 half;
             u32 i;
             half = 0.5f * (1.25f * fn_801E8738(-1));
             mask = 1;
             for (i = 0; i < 32; i++, cone += 4, c += 4) {
-                f32 d = PSVECDotProduct(cam->dir, cone);
+                d = PSVECDotProduct(cam->dir, cone);
                 if (d > (f32)cos(half + c[3])) {
                     mask |= 1 << i;
                     visible++;
@@ -1183,13 +1187,13 @@ void ScrollList::Draw2(void* ctx) {
     m[2][2] = 1.0f;
     m[2][3] = 0.0f;
     for (i = 0; i < count; i++) {
-        Scroll* s = &scrolls[i];
-        if (fn_802CDB20(ctx, s->id)) {
-            f32 u = s->u * t;
-            f32 v = s->v * t;
-            f32 fv = fmod(v, 1.0);
+        if (fn_802CDB20(ctx, scrolls[i].id)) {
+            f32 fv;
+            f32 u = scrolls[i].u * t;
+            f32 v = scrolls[i].v * t;
+            fv = fmod(v, 1.0);
             f32 fu = fmod(u, 1.0);
-            fn_802C70AC(s->model, m, (s32)fn_802C7A3C(fu, fv, 100000.0f), -1);
+            fn_802C70AC(scrolls[i].model, m, (s32)fn_802C7A3C(fu, fv, 100000.0f), -1);
         }
     }
 }
