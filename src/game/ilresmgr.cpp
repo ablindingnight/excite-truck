@@ -225,6 +225,8 @@ public:
     IdealLineRes* line;  // offset 0x4
 };
 
+enum LineSide { kLeft, kRight, kEither };
+
 struct LineEntry {
     IdealLineRes* line;  // offset 0x0
     s32 side;            // offset 0x4 (0 left, 1 right, 2 either)
@@ -328,11 +330,11 @@ public:
         int i;
         for (i = 0; i < n; i++) {
             FixedList<IdealLineRes*, 8> cand;
-            bool right;
+            LineSide right;
             if (fn_801B2ED0(i)->GetInfo()->side > 0.0f) {
-                right = 1;
+                right = kRight;
             } else {
-                right = 0;
+                right = kLeft;
             }
             int j;
             for (j = 0; j < lines.a.count && !cand.a.Full(); j++) {
