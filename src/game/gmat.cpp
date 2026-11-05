@@ -143,6 +143,7 @@ struct VecBase {
         cap = n;
         count = 0;
     }
+    bool Fits(int n) const { return count + n <= cap; }
     ~VecBase(void) {
         data = 0;
         count = 0;
@@ -202,6 +203,7 @@ struct GLayer {
 };
 
 struct GVerts {
+    bool Fits(int n) const { return count + n <= cap; }
     GVerts(void) {
         data = 0;
         cap = 0;
@@ -413,7 +415,7 @@ inline GMat::GMat(ValueNode* node, ValueNode* tune) {
 }
 
 void fn_802B0B20(ValueNode* node, ValueNode* tune) {
-    if (lbl_804BE104.count + 1 > lbl_804BE104.cap) {
+    if (!lbl_804BE104.Fits(1)) {
         return;
     }
     GMat* g = new ("umat-gmaterial") GMat(node, tune);
@@ -438,8 +440,9 @@ extern "C" {
 GMat* fn_802B1138(const char* name) {
     GMat* g = 0;
     for (int i = 0; i < lbl_804BE104.count; i++) {
-        if (strcasecmp(name, lbl_804BE104.data[i]->name) == 0) {
-            g = lbl_804BE104.data[i];
+        GMat* m = lbl_804BE104.data[i];
+        if (strcasecmp(name, m->name) == 0) {
+            g = m;
             break;
         }
     }
@@ -470,7 +473,7 @@ u16 fn_802B127C(GMat* g, const GVec* v) {
     if (!g) {
         return 0;
     }
-    if (g->verts.count + 1 <= g->verts.cap) {
+    if (g->verts.Fits(1)) {
         g->verts.data[g->verts.count++] = *v;
     }
     return g->verts.count - 1;
@@ -523,7 +526,7 @@ void fn_802B13F8(GMat* g, void* ctx, GBatch* b, int layer, f32 alpha) {
     g->pending = 0;
     int fade = layer == 4 && alpha < 1.0f;
     if (fade) {
-        if (g->strips.count + 1 <= g->strips.cap) {
+        if (g->strips.Fits(1)) {
             f32 a = 1.0f - alpha;
             GStrip* s = &g->strips.data[g->strips.count++];
             s->alpha = a;
