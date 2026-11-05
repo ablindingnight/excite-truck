@@ -262,7 +262,17 @@ public:
 
 class ValueFile : public ValueTable {
 public:
-    ValueFile(void) { nodes = (ValueFileNode*)data; }
+    ValueFile(void) {
+        int i;
+        nodes = (ValueFileNode*)data;
+        Swap4((u8*)&count);
+        Swap4((u8*)&unk8);
+        for (i = 0; i < count; i++) {
+            new (&nodes[i]) ValueFileNode(this);
+            nodes[i].file = this;
+        }
+        ResolveParents();
+    }
     virtual ValueNode* GetChild(int index) {
         if (index < unk8) {
             return &nodes[index];
@@ -342,15 +352,7 @@ ValueTable* fn_80131588(const char* name, int quiet) {
     if (f) {
         if (version == 11) {
             if (swap) {
-                int i;
                 new (f) ValueFile;
-                Swap4((u8*)&f->count);
-                Swap4((u8*)&f->unk8);
-                for (i = 0; i < f->count; i++) {
-                    new (&f->nodes[i]) ValueFileNode(f);
-                    f->nodes[i].file = f;
-                }
-                f->ResolveParents();
             }
         } else {
             fn_802E317C("valtable: mismatched version on %s", name);
