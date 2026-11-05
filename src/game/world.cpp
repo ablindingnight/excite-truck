@@ -1312,9 +1312,9 @@ void fn_801E96D8(RaceSetup* s) {
                         cur.z = p.y;
                         cur.y = fn_801DCF48(0, p.x, p.y);
                         c.x = cur.x + 0.5f * (prev.x - cur.x);
+                        c.z = cur.z + 0.5f * (prev.z - cur.z);
                         f32 yv = cur.y;
                         c.y = yv + 0.5f * (prev.y - yv);
-                        c.z = cur.z + 0.5f * (prev.z - cur.z);
                         mtx.z.x = cur.x - prev.x;
                         mtx.z.y = 0.0f;
                         mtx.z.z = cur.z - prev.z;

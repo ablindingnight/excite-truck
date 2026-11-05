@@ -1228,8 +1228,8 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         }
         for (c = d; c; c = c->sibling) {
             PlacedObj p;
-            fn_801BFD34(&p.frame.pos, &c->frame.pos, &parent->frame);
             p.flags = f;
+            fn_801BFD34(&p.frame.pos, &c->frame.pos, &parent->frame);
             Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.node = parent->node;
             c->Create(&p);

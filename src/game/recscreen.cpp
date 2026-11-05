@@ -360,8 +360,8 @@ void fn_8025C204(int event, int difficulty) {
         MenuItem(lbl_8055B860, 6, 0, -2, 27),
         MenuItem(lbl_80498EB8),
     };
-    s32 music = fn_802168E4();
     MenuDesc desc = {"ep_records.lyt", items, NULL, 0, 0};
+    s32 music = fn_802168E4();
     if (music) {
         fn_80214A9C(0x1F);
     }

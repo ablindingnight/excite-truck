@@ -7050,8 +7050,8 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
             s32 a3 = ((2896 * (d2 - d6)) >> 11) - a2;
             s32 e0 = a0 + a2;
             s32 e1 = a1 + a3;
-            s32 e3 = a0 - a2;
             s32 e2 = a1 - a3;
+            s32 e3 = a0 - a2;
             s32 d1 = (s1 * quant[8]) >> 11;
             s32 d3 = (quant[24] * s3) >> 11;
             s32 d5 = (s5 * quant[40]) >> 11;

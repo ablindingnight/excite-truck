@@ -611,8 +611,8 @@ void* fn_802EAB28(void* arg) {
             if (left < 0x780) {
                 fn_802E30C8("mp3: perhaps not enough bytes left?");
             }
-            int done = 1;
             int n = lbl_805600AC < left ? lbl_805600AC : left;
+            int done = 1;
             if (pos >= size) {
                 fn_802E30C8("mp3: at end of file");
                 done = 1;

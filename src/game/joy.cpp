@@ -70,9 +70,9 @@ void fn_80129400(void) {
 void fn_80129458(void) {
     lbl_80422380.enabled = 1;
     lbl_804223A0.enabled = 1;
+    lbl_80422380.ownerOnly = 0;
     lbl_80422380.keys[1] = 'X';
     lbl_80422380.keys[0] = 'T';
-    lbl_80422380.ownerOnly = 0;
     lbl_80422380.keys[4] = 0x1B;
     lbl_80422380.keys[2] = 'C';
     lbl_80422380.keys[3] = 'S';

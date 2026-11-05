@@ -781,9 +781,9 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
+        f32 mu = lbl_805622E8 * (F32(p, 0x14) + F32(q, 0x14));
         tv.x = rel.x + n->x * -vn;
         tv.y = rel.y + n->y * -vn;
-        f32 mu = lbl_805622E8 * (F32(p, 0x14) + F32(q, 0x14));
         tv.z = rel.z + n->z * -vn;
         f32 tl = PSVECMag(&tv.x);
         if (tl > lbl_80562308) {
@@ -1326,9 +1326,9 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RigidBody* pb = (RigidBody*)PTR(p, 0x4);
     RigidBody* qb = (RigidBody*)PTR(q, 0x4);
     u32 caps;
+    c.y = F32(p, 0x38);
     u32 in = 0;
     c.x = F32(p, 0x34);
-    c.y = F32(p, 0x38);
     c.z = F32(p, 0x3C);
     ToBoxSpace(&l, &c, &f);
     if (!dir || l.x * dir->x > lbl_805622D0 || (f32)__fabs(dir->y) > F32(q, 0x28)) {
@@ -1741,9 +1741,9 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         f32 xv = ca.x;
         mid.x = (xv + cb.x) / 2.0f;
         f32 yv = ca.y;
-        mid.y = (yv + cb.y) / 2.0f;
         zv = cb.z;
         mid.z = (ca.z + zv) / 2.0f;
+        mid.y = (yv + cb.y) / 2.0f;
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
         w.z = mid.z - ca.z;
@@ -1860,8 +1860,8 @@ int fn_8019DC04(u8* p, u8* q) {
         axis = *(PVec3*)(m + 0x18);
         org = *(PVec3*)(m + 0x24);
         f32 rad = F32(p, 0x24);
-        MulAdd(a.v, org.v, axis.v, h);
         MulAdd(b.v, org.v, axis.v, -h);
+        MulAdd(a.v, org.v, axis.v, h);
         hit |= fn_8019CCCC(p, (u8*)a.v, q, rad);
         if (hit) {
             return 1;
@@ -1982,8 +1982,8 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     f32 dz = from->z - m->t.z;
     f32 mm = m->m[0];
     lp.x = Dot3(dx, mm, dy, m->m[1], dz, m->m[2]);
-    lp.y = Dot3(dx, m->m[3], dy, m->m[4], dz, m->m[5]);
     lp.z = Dot3(dx, m->m[6], dy, m->m[7], dz, m->m[8]);
+    lp.y = Dot3(dx, m->m[3], dy, m->m[4], dz, m->m[5]);
     MulVec(&ld, dir, m);
     tmin = -1e8f;
     tmax = 1e8f;
@@ -2091,8 +2091,8 @@ int fn_8019E500(u8* p, u8* q) {
     ax[0].ext = F32(q, 0x24);
     ax[1].dir = *(PVec3*)&fr.m[3];
     ax[1].ext = F32(q, 0x28);
-    ax[2].dir = *(PVec3*)&fr.m[6];
     ax[2].ext = F32(q, 0x2C);
+    ax[2].dir = *(PVec3*)&fr.m[6];
     bool hit = false;
     f32 r = 0.75f;
     return Loop2_fn_8019E500(ax, r, fr, q, hit, p);
@@ -2394,9 +2394,9 @@ void fn_8019F414(u8* p) {
     t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
     t.v[2] = t.v[2] - F32(o, 0x38);
+    F32(p, 0x30) = t.v[2];
     F32(p, 0x28) = t.v[0];
     F32(p, 0x2C) = t.v[1];
-    F32(p, 0x30) = t.v[2];
     if (o) {
         fn_8019EECC(o, (RVec3*)(p + 0x28));
     }
@@ -2655,9 +2655,9 @@ void fn_8019F780(u8* p) {
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = lbl_805623B0 + lbl_8056232C * sub;
             sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
+            up.y = lbl_805623B4 * (lift * (sub * vol));
             up.x = lbl_805622D0;
             up.z = lbl_805622D0;
-            up.y = lbl_805623B4 * (lift * (sub * vol));
             rb->AddForceAt(&up, (RVec3*)(p + 0x34));
         } else {
             U8(p, 0x4C) = 0;
@@ -3236,8 +3236,8 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
     f32 k = F32(p, 0x24);
     org = *(PVec3*)(m + 0x24);
     axis = *(PVec3*)(m + 0x18);
-    MulAdd(&b.x, org.v, axis.v, -k);
     MulAdd(&a.x, org.v, axis.v, k);
+    MulAdd(&b.x, org.v, axis.v, -k);
     {
         RVec3 mn;
         RVec3 la;

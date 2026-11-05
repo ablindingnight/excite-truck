@@ -624,8 +624,8 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     u.y = 0.0f;
     u.z = g->up.y;
     Vec c;
-    c.x = g->origin.x + r.x * 0.5f + u.x * 0.5f;
     c.y = g->origin.y + r.y * 0.5f + u.y * 0.5f;
+    c.x = g->origin.x + r.x * 0.5f + u.x * 0.5f;
     c.z = g->origin.z + r.z * 0.5f + u.z * 0.5f;
     fn_8014E740(&c, radius);
 }

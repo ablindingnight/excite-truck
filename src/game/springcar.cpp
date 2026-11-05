@@ -420,9 +420,9 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 extra = Lerp(0.0f, 6.6666665f + -d, u);
             }
             total = extra + pen;
-            f.x = n.x * total;
             f32 yv = n.y;
             f.y = yv * total;
+            f.x = n.x * total;
             f.z = n.z * total;
             acc->x = acc->x + f.x;
             acc->y = acc->y + f.y;

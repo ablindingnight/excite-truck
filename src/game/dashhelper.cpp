@@ -1349,9 +1349,9 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
     }
     fn_802C8B98(tex, fn_8022EDC4());
     fn_801E4F20(segs * 4);
-    d.y = sin(start);
     d.x = cos(start);
     ratio = h / w;
+    d.y = sin(start);
     p.y = d.y * w;
     p.x = d.x * w;
     fn_801E4F3C(color, 0, x + p.x, y + p.y, 0.0f, Lerp(u0, u1, ArcU(d.x)),

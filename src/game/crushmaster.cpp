@@ -1902,9 +1902,9 @@ inline void CrushSubTaskMgr::vf20(void) {
             f32 r = 75.0f;
             pos.x = rec->mtx.origin.x;
             pos.y = rec->mtx.origin.z;
+            d.y = pos.y - t->y;
             f32 tx = t->x;
             d.x = pos.x - tx;
-            d.y = pos.y - t->y;
             if (d.x * d.x + d.y * d.y < r * r || lbl_8055E3C8 > t->until) {
                 V2 here;
                 rec = fn_8017960C(i);

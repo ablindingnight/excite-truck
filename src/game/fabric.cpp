@@ -627,9 +627,9 @@ void fn_801F64E4(Fabric* f, const PVec* forces, f32 drag) {
     for (i = 0; i < f->count; i++, forces++) {
         TVec* p;
         TVec* c = &f->cur[i];
+        t.y = c->y * k1;
         p = &f->prev[i];
         t.x = c->x * k1;
-        t.y = c->y * k1;
         t.x = t.x + p->x * k2;
         t.z = c->z * k1;
         t.y = t.y + p->y * k2;

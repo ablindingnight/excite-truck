@@ -529,8 +529,8 @@ ObjectPlacer::ObjectPlacer(ValueNode* node) {
     minScale = node->GetFloat("min_scale", 1.0f);
     maxScale = node->GetFloat("max_scale", 1.0f);
     facing = node->GetBool("axis_facing", 0);
-    Spin();
     respin = 0;
+    Spin();
 }
 
 extern "C" {

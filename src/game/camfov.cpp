@@ -252,9 +252,9 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     u8* car = PTR(cam, 0x140);
     CamRect* r = &lbl_8049A218[*cam];
     if (!fn_801769F8()) {
-        CVec3 c = *(CVec3*)(car + 0x60);
         const s16* hint = (const s16*)(car + 0x6C);
         bool onGround = S32(car, 0x2620) > 0;
+        CVec3 c = *(CVec3*)(car + 0x60);
         f32 y = c.y;
         f32 z = c.z;
         f32 h0 = fn_801E9FDC(hint, c.x + lbl_80563E84, lbl_80563E84 + z);

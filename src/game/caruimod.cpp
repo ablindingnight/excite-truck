@@ -1083,9 +1083,9 @@ void CarUIScreen::LoadView(const char* view) {
             zero.z = 0.0f;
             v = n->GetVec3Or("camera_offset", zero);
             camOffset.x = v.x;
-            camOffset.y = v.y;
             camOffset.z = v.z;
             ValueNodeV* w = (ValueNodeV*)((ValueNode*)n)->FindChild("wheels");
+            camOffset.y = v.y;
             if (w) {
                 lbl_80344890[0].hit = w->GetFloat("lf_hit", 0.0f);
                 lbl_80344890[0].angle = w->GetFloat("lf_angle", 0.0f);
@@ -1482,9 +1482,9 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         f32 z1 = 5.0f * s;
         v[1 + i * 2].pos.x = x0;
         v[1 + i * 2].pos.y = y;
-        v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].pos.z = z0;
         v[1 + i * 2].s = 1.333f * x0;
+        v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].t = 1.333f * z0;
         v[2 + i * 2].pos.x = x1;
         v[2 + i * 2].pos.y = y;

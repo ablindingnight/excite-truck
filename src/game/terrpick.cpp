@@ -65,8 +65,8 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam,
     f32 ay = cam->basis[2].y * depth;
     f32 dx = sx - halfW;
     f32 bx = cam->basis[0].x * dx;
-    f32 by = cam->basis[0].y * dx;
     f32 bz = cam->basis[0].z * dx;
+    f32 by = cam->basis[0].y * dx;
     f32 dy = -(f32)(sy - lbl_8055CFF4 / 2);
     dir.x = ax + bx + cam->basis[1].x * dy;
     dir.y = ay + by + cam->basis[1].y * dy;

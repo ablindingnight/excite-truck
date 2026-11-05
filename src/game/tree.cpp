@@ -821,9 +821,9 @@ void fn_802BD814(void) {
                                 m.rot[0].z = cam.rot[0].z * s;
                                 m.rot[1].x = cam.rot[1].x * s;
                                 yv = cam.rot[1].y;
-                                m.rot[1].y = yv * s;
                                 m.rot[1].z = cam.rot[1].z * s;
                                 m.rot[2].x = cam.rot[2].x * s;
+                                m.rot[1].y = yv * s;
                                 m.rot[2].y = cam.rot[2].y * s;
                                 m.rot[2].z = cam.rot[2].z * s;
                                 m.pos = tr->mtx.pos;

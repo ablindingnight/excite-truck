@@ -2102,8 +2102,8 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
                 lf.SetLine(fn_80156A40()->Get(0));
                 ILPos pos;
                 pos.pt = 0;
-                pos.t = 0.0f;
                 pos.f8 = 10000;
+                pos.t = 0.0f;
                 lf.Locate(&mid, 0, &pos, 0);
                 mid.x = PathLerp(pos.pt->x, pos.pt->next->x, pos.t);
                 mid.y = PathLerp(pos.pt->z, pos.pt->next->z, pos.t);

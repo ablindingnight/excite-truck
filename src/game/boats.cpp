@@ -129,9 +129,9 @@ void fn_802C2488(void) {
         fn_80015A20(&rot, &ang);
         Mat3Mul((Mat3*)&m, (const Mat3*)&rot, (const Mat3*)&m);
         off.x = 0.0f;
+        m.origin.x += b.pos.x;
         off.y = 0.5f + bobHeight * bob;
         off.z = 0.0f;
-        m.origin.x += b.pos.x;
         m.origin.y += b.pos.y;
         m.origin.z += b.pos.z;
         m.origin.x += off.x;

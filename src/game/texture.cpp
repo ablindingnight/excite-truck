@@ -1134,9 +1134,9 @@ inline void* SimpleHeap::Alloc(s32 n) {
         HeapBlock* split = 0;
         if (rest > ((align + 0x10) & ~align) + 0x20) {
             split = (HeapBlock*)((u8*)b + align + n + 1);
+            split->owner = this;
             split->magic = 0xABCFEED0;
             split->next = 0;
-            split->owner = this;
             split->size = rest - ((align + 0x10) & ~align);
             b->size = n;
         }

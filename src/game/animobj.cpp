@@ -92,8 +92,8 @@ public:
 
 AnimObj::AnimObj(void) {
     frame.axes[0].x = 1.0f;
-    frame.axes[0].x = 1.0f;
     frame.axes[0].y = 0.0f;
+    frame.axes[0].x = 1.0f;
     frame.axes[0].z = 0.0f;
     frame.axes[1].x = 0.0f;
     frame.axes[1].y = 1.0f;

@@ -1199,8 +1199,8 @@ void fn_80161F10(int n) {
     ev = (int)fn_80161E40(n);
     e = GetEvent(ev);
     fn_80137C78(1);
-    fn_80137C84(fn_802E4A10(), 0);
     driver = GetDriver(0)->id;
+    fn_80137C84(fn_802E4A10(), 0);
     vehicle = GetDriverVehicle(driver)->id;
     if (e->vals->Has("player_car")) {
         vehicle = FindVehicleNamed(e->vals->GetValue("player_car"), 0)->id;
@@ -1848,9 +1848,9 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             {
                 Delta2 d;
                 f32 len;
+                d.z = pts[2].z - pts[0].z;
                 f32 xv = pts[0].x;
                 d.x = pts[2].x - xv;
-                d.z = pts[2].z - pts[0].z;
                 best = 2;
                 max = d.x * d.x + d.z * d.z;
                 d.x = pts[0].x - pts[1].x;

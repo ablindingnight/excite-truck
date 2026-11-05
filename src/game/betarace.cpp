@@ -2901,8 +2901,8 @@ inline void BetaMaster::vfF4(void) {
                 ValPoint pt = n->GetPoint(buf);
                 pts[k].y = pt.y;
                 pts[k].x = pt.x;
-                c.x += pt.x;
                 c.y += pt.y;
+                c.x += pt.x;
             }
             c.x *= 1.0f / k;
             c.y *= 1.0f / k;
@@ -3201,9 +3201,9 @@ inline Pickup::Pickup(ValueNode* n) {
             f32 z1 = s0->next->z;
             dir[1] = z0 + ts.t * (z1 - s0->z);
             len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
+            dir[0] *= 1.0f / len;
             fwd[0] = m[6];
             fwd[1] = m[8];
-            dir[0] *= 1.0f / len;
             dir[1] *= 1.0f / len;
         }
         a[0] = dir[0];

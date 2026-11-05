@@ -1463,9 +1463,9 @@ void fn_80195B28(u8* d, f32 v) {
         if (!one) {
             w->next *= lbl_8055E56C;
         }
+        w->dur = tbl[2];
         w->start = w->cur;
         w->next += w->now;
-        w->dur = tbl[2];
         if (one) {
             w->tgt = fn_80129DC4(3, -0.5f, 0.5f);
         } else {
@@ -2120,9 +2120,9 @@ void fn_801971AC(u8* d, V2* io) {
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * off;
         V2 r;
         f32 xv = io->x;
-        r.x = xv + k * (tgt.x - xv);
         f32 yv = io->y;
         r.y = yv + k * (tgt.y - yv);
+        r.x = xv + k * (tgt.x - xv);
         V2 c = r;
         io->x = c.x;
         io->y = c.y;
@@ -2432,8 +2432,8 @@ void fn_80197BD0(u8* d, u8* out) {
         f32 at = F32(d, 0xF4);
         U8(d, 0x250) = 1;
         V2 tgt;
-        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
+        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
         V2 c = LerpV2(*(V2*)out, tgt, k);
         ((V2*)out)->x = c.x;
         ((V2*)out)->y = c.y;
@@ -2466,9 +2466,9 @@ int fn_80197FE4(u8* d, const u8* p) {
             b = 0;
         }
         f32 k = b ? 0.5f : 1.0f;
+        f32 z = F32(p, 0x4) + k * F32(p, 0xC);
         F32(d, 0x134) = k;
         f32 x = F32(p, 0x8) + k * F32(p, 0x10);
-        f32 z = F32(p, 0x4) + k * F32(p, 0xC);
         int c1 = F32(p, 0x8) > 0.5f * lbl_8055A48C;
         int c2 = 0;
         int c3 = 0;

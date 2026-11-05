@@ -604,9 +604,9 @@ void fn_802B1758(GMat* g) {
     if (g->lists[0].head && g->worldmap != -2) {
         s32 tex = g->worldmap;
         BVec m;
+        m.z = 1.0f;
         m.x = 1.0f / (1024.0f * kWorldScale);
         m.y = 0.0f;
-        m.z = 1.0f;
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);

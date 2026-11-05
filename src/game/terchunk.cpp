@@ -277,8 +277,8 @@ void fn_80202718(void) {
     f32 dz = next->pos.z - cam->pos.z;
     ValVec3 v;
     v.x = Dot3YX(dy, cam->m[0][1], dx, cam->m[0][0], dz, cam->m[0][2]);
-    v.z = Dot3YX(dy, cam->m[2][1], dx, cam->m[2][0], dz, cam->m[2][2]);
     v.y = Dot3YX(dy, cam->m[1][1], dx, cam->m[1][0], dz, cam->m[1][2]);
+    v.z = Dot3YX(dy, cam->m[2][1], dx, cam->m[2][0], dz, cam->m[2][2]);
     int dir = 1;
     if (v.z < 0.0f) {
         dir = -1;

@@ -668,9 +668,9 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
     m.y.y = 1.0f;
     m.y.z = 0.0f;
     m.z.x = 0.0f;
+    m.pos = view->pos;
     m.z.y = 0.0f;
     m.z.z = 1.0f;
-    m.pos = view->pos;
     PVec a;
     a.x = -0.5235988f;
     a.y = 0.0f;

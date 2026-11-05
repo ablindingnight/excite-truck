@@ -690,9 +690,9 @@ void fn_8026C014(int player) {
         speed = lbl_80563DF8 * (lbl_80563DFC * dt);
         turn = dt * lbl_80563DF0;
         fovRate = dt * lbl_80563E00;
+        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
         lo = lbl_80563DE0;
         hi = lbl_80563DE4;
-        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
         boost = lbl_80563D94;
         if (pad.keys[6]) {
             boost = lbl_80563DF4;

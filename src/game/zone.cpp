@@ -1633,8 +1633,8 @@ void Gate::Scale(f32 f) {
 #define s (f / d)
     {
         Vec3 mid(a.x + (b.x - a.x) * 0.5f, a.y + (b.y - a.y) * 0.5f, a.z + (b.z - a.z) * 0.5f);
-        a = Vec3(mid.x + s * (a.x - mid.x), mid.y + s * (a.y - mid.y), mid.z + s * (a.z - mid.z));
         b = Vec3(mid.x + s * (b.x - mid.x), mid.y + s * (b.y - mid.y), mid.z + s * (b.z - mid.z));
+        a = Vec3(mid.x + s * (a.x - mid.x), mid.y + s * (a.y - mid.y), mid.z + s * (a.z - mid.z));
     }
 #undef s
 }

@@ -100,9 +100,9 @@ PathFile* fn_801D9CC4(const char* name) {
         return 0;
     }
     if (swapped) {
-        int i;
         Path* p;
         PathKey* k;
+        int i;
         int j;
         Swap32(&f->count);
         for (i = 0; i < f->count; i++) {
@@ -297,9 +297,9 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         ToMatrix(m, q);
         f32 rate = 1.0f / MaxF(b->t - a->t, 0.00001f);
         V3 d;
-        d.x = b->pos.x - a->pos.x;
         d.y = b->pos.y - a->pos.y;
         d.z = b->pos.z - a->pos.z;
+        d.x = b->pos.x - a->pos.x;
         vel->x = d.x * rate;
         vel->y = d.y * rate;
         vel->z = d.z * rate;

@@ -541,8 +541,8 @@ struct View {
         inv = 1.0f / MAX(0.01f, len);
         at.x = f.origin.x;
         at.y = f.origin.z;
-        fwd.x *= inv;
         fwd.y *= inv;
+        fwd.x *= inv;
         right.x = fwd.y;
         right.y = -fwd.x;
     }

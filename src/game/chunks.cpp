@@ -849,8 +849,8 @@ void WoodChunks::Step(void) {
         f32 velY = in->vel.y;
         v.y = velY * drag - 9.81f * dt * grav;
         out->pos.x = in->pos.x + v.x * dt;
-        out->pos.y = in->pos.y + v.y * dt;
         out->pos.z = in->pos.z + v.z * dt;
+        out->pos.y = in->pos.y + v.y * dt;
         out->rot = lbl_804B4030[in->spin].rot;
         out->vel = v;
         out->age = in->age + dt;

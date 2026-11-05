@@ -418,9 +418,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
             if (f->Has("spin")) {
                 ValVec3 axis;
+                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
                 axis.x = 0.0f;
                 axis.y = 0.0f;
-                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
                 if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
                     f32 len = sqrt(d);

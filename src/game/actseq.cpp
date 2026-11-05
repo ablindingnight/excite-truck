@@ -1632,9 +1632,9 @@ int Obstacle_ASE::Load(ValueNode* t) {
         dir2 = ((ValueNodeV*)t)->GetVec3Or("dir2", *(V3*)&dir1);
         throwPt = ((ValueNodeV*)t)->GetVec3Or("throw_pt", V3(0.0f, 0.0f, 0.0f));
         resetTimeout = (int)(59.94f * t->GetFloat("reset_timeout", -1.0f));
+        ok = 1;
         fn_801D0800(this);
         state = 1;
-        ok = 1;
     } else {
         fn_802E30C8("ObstacleActionSequenceEvent: required value \"group_id\" was negative or not present");
     }

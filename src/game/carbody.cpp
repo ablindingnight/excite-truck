@@ -633,9 +633,9 @@ void CarBody_vf08(u8* p, u8* desc) {
     head = chassis->GetVec3("head_pos");
     F32(p, 0x5C4) = head.x;
     F32(p, 0x5C8) = head.y;
-    back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
     F32(p, 0x5D0) = 0.2f * head.x;
     F32(p, 0x5D4) = head.y + 3.0f;
+    back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
     F32(p, 0x5CC) = head.z;
     F32(p, 0x5D8) = head.z;
     F32(p, 0x5D0) = back.x;
@@ -2975,8 +2975,8 @@ void fn_80188A80(u8* p) {
     SwayRotate(&a, (BVec*)(p + 0x16C), (f32*)(p + 0x3C));
     Scale(&a, &a, lbl_80561DE4);
     AddScaled(&f, &a, acc, lbl_80561E5C);
-    AddScaled(&f, &f, vel, lbl_80561D90);
     AddScaled(&f, &f, ang, lbl_80561EE4);
+    AddScaled(&f, &f, vel, lbl_80561D90);
     AddScaled(vel, vel, &f, lbl_80561D9C);
     AddScaled(ang, ang, vel, lbl_80561D9C);
     Scale(acc, acc, lbl_80561EE8);

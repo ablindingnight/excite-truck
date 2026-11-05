@@ -759,9 +759,9 @@ void fn_802CF10C(u32 count) {
                 k += w;
             }
         } else {
-            int w = lbl_804C5710.w;
             int y;
             u16 c = lbl_804C5710.data[0];
+            int w = lbl_804C5710.w;
             for (y = 0; y < lbl_804C5710.h; y++) {
                 int x;
                 u16* d = &dst[lbl_804C9760.w * (lbl_804C5710.y + y) + lbl_804C5710.x];

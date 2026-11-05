@@ -951,8 +951,8 @@ void fn_801C4BAC(void) {
     m[11] = 0.0f;
     *(f32*)(s + 0x98) = 1.5707964f;
     Message* msg = (Message*)(s + 0x9C);
-    msg->time = -999.0f;
     msg->title = 0;
+    msg->time = -999.0f;
     if (lbl_8055E7F0 == 0) {
         lbl_8055E7E2 = 0;
     } else {
@@ -1326,9 +1326,9 @@ void debug_event(void) {
         }
         case 7: {
             TextEvent* tx = (TextEvent*)e;
+            msg->time = lbl_8055E3C8;
             msg->title = tx->text;
             msg->text = tx->title;
-            msg->time = lbl_8055E3C8;
             break;
         }
         default:
@@ -1576,8 +1576,8 @@ int fn_801C5B68(CamView* v, int idx) {
     if (p->target >= 0) {
         car = p->target;
     }
-    ICar* c = (ICar*)fn_8017960C(car);
     v->flags |= 5;
+    ICar* c = (ICar*)fn_8017960C(car);
     f32 dt;
     if (fn_801C3B6C() > p->end) {
         dt = p->end - p->start;

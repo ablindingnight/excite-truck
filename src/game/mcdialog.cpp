@@ -148,8 +148,8 @@ void fn_8023E7A8(int status) {
     }
     lbl_8055F1AC[0] = 0;
     lbl_8055F1AC[2] = 0;
-    int circle1 = 1;
     lbl_8055F1AC[1] = 0;
+    int circle1 = 1;
     int circle2 = 0;
     int circle3 = 0;
     switch (status) {

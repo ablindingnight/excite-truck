@@ -132,9 +132,9 @@ RoadSound::~RoadSound(void) {
 }
 
 void RoadSound::Update(void) {
-    int i = 0;
     char* c = car;
     int surface = 0;
+    int i = 0;
     for (int w = 0; w < 4; w++) {
         s32 s = *(s32*)(c + 0x2410 + w * 0x74);
         if (s > surface) {

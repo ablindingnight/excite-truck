@@ -1044,8 +1044,8 @@ void CamRegion::Prepare(u8* line) {
     do {
         int n = 0;
         s.x = F32(seg, 0x0) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
-        s.y = F32(seg, 0x4) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
         e.x = F32(seg, 0x0) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
+        s.y = F32(seg, 0x4) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
         e.y = F32(seg, 0x4) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
@@ -1236,8 +1236,8 @@ int TvCamera::Load(ValueNode* t) {
             type = 2;
             break;
         case 15:
-            flags |= 2;
             type = 3;
+            flags |= 2;
             break;
         case 12:
             type = 0;
@@ -1427,9 +1427,9 @@ void camera_car(u8* p, int ci) {
         f32 w[3];
         w[0] = lbl_80563F4C * v->rot[0];
         w[1] = v->rot[1] * lbl_80563F4C;
-        w[2] = v->rot[2] * lbl_80563F4C;
         f32 off[3];
         off[0] = v->off[0];
+        w[2] = v->rot[2] * lbl_80563F4C;
         off[1] = v->off[1];
         off[2] = v->off[2];
         Mat3 rot;
