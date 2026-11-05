@@ -212,13 +212,13 @@ inline void TechDemoMaster::a1(void) {
 }
 
 inline void ActZone::Load(ValueNode* n) {
+    f32* p;
+    int k;
     Bound* b;
     int start;
     f32 best;
     V2 d;
     s16 h[4];
-    int k;
-    f32* p;
     seq = fn_801D4888(n->GetValue("act_seq"));
     draw = n->GetBool("should_draw", 1);
     lap = n->GetInt("lap", 0);

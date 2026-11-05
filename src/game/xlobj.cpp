@@ -564,8 +564,8 @@ void fn_802B9108(s16 size) {
         Loop1_fn_802B9108(sz, g);
     }
     for (int x = size - 0x200; x < 0x200; x += d) {
+        int start;
         for (int y = size - 0x200; y < 0x200; y += d) {
-            int start;
             GroundCell* cell = fn_802BE844(x, y, size);
             start = lbl_8055FA80->count;
             int dd;

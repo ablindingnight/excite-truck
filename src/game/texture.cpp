@@ -1251,8 +1251,8 @@ static inline void Rank(TexCache* c, MipSlot* s, f32 score) {
         c->best = s;
     }
     if (s->state == 2) {
-        MipSlot** pp = &c->resident;
         MipSlot* q;
+        MipSlot** pp = &c->resident;
         while ((q = *pp) != 0) {
             if (ScoreLess(q, s)) {
                 break;

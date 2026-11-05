@@ -186,8 +186,9 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
 
 static inline f32 Spline(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3) {
     f32 m1 = 0.5f * (p2 - p0);
+    f32 d;
     f32 m2 = 0.5f * (p3 - p1);
-    f32 d = p2 - p1;
+    d = p2 - p1;
     f32 c2 = 3.0f * d - 2.0f * m1 - m2;
     f32 c3 = m1 + m2 - 2.0f * d;
     return p1 + (m1 * t + (c3 * t3 + c2 * t2));

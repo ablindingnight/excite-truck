@@ -1452,8 +1452,9 @@ int sprintf(char* buf, const char* fmt, ...);
 
 namespace {
 inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
+    CarHud* h;
     s32 tx = c->tex[2];
-    CarHud* h = c->hud;
+    h = c->hud;
     int pal;
     StuntEvent* cur;
     l->FindBox("stunt_column_info");

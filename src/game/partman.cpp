@@ -824,11 +824,11 @@ static inline u8 Byte(f32 x) {
 static inline f32 Sq(f32 x) { return x * x; }
 
 void PartSys::DrawSprites(Particle* p, int n) {
+    f32 t0;
     CamMtx* cam;
     f32 age;
     CamMtx m;
     f32 size;
-    f32 t0;
     cam = fn_802C86DC();
     int i;
     t0 = lbl_8055F738;

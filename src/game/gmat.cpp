@@ -616,8 +616,9 @@ void fn_802B1758(GMat* g) {
         for (GBlock* b = g->lists[0].head; b; b = b->next) {
             fn_802DC464(verts, n, (u16*)b->data, b->count);
         }
+        GStrip* s;
         for (int k = 0; k < g->strips.count; k++) {
-            GStrip* s = &g->strips.data[k];
+            s = &g->strips.data[k];
             m.z = s->alpha;
             fn_802DAA18(fn_802DA704(1, &m, 1));
             fn_802DC464(verts, n, s->idx, s->idx[0] + 1);

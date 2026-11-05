@@ -1217,6 +1217,7 @@ void CarUIScreen::Deactivate(void) {
 }
 
 void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
+    Vec t;
     u32 a;
     lbl_8055F334 = dt;
     if (fn_802D3EBC()) {
@@ -1305,7 +1306,6 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                     off.z = 0.0f;
                     if (mode == 0) {
                         CarPose p;
-                        Vec t;
                         if (lbl_8055F330) {
                             fn_80253004(i, &p);
                         } else {

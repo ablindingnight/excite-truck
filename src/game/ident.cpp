@@ -228,13 +228,13 @@ static inline void Loop1_IdentResetAll(char* dst, const char* src, int n) {
 void IdentResetAll(void) {
     int n;
     const char* src;
+    char* dst;
     int i;
 
     lbl_8055D46C->current = 0;
     for (i = 0; i < NUM_SLOTS; i++) {
         src = "";
         n = NAME_LEN;
-        char* dst;
 
         lbl_8055D46C->slots[i].state = 0;
         dst = lbl_8055D46C->slots[i].name;

@@ -592,9 +592,11 @@ inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
 
 void WaterEnvMap::Render(void* cam, f32 fov) {
     scale = (fn_801E85A4() == 2) ? 1.5f : 1.0f;
+    Frame m;
+    int i;
     Skybox* s = sky;
     if (!s->drawn) {
-        for (int i = 0; i < 6; i++) {
+        for (i = 0; i < 6; i++) {
             fn_802CB274(s->faces[i]);
             fn_802C9294(s->faces[i], 0);
             Perspective p(1.0f, 2000.0f, 1.5707964f);
@@ -617,7 +619,6 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
-    Frame m;
     Mirror(&m, (const Frame*)cam, &up);
     f32 h = 2.0f * (f32)atan(scale * (f32)tan(0.5f * fov));
     Viewport vp;

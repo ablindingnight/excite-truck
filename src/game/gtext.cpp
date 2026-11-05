@@ -757,6 +757,7 @@ static inline f32 Loop1_fn_80232DF4(f32 x0, int& i, u32& cc, u32 c) {
 }
 
 void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
+    int i;
     u32 c;
     f32 py;
     f32 px = x;
@@ -771,7 +772,6 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         f32 x0 = px;
         strlen(text);
         for (passes = (f->outline != NULL) + 1; passes > 0; passes--) {
-            int i;
             GTextFont* ff;
             u32 cc;
             px = Loop1_fn_80232DF4(x0, i, cc, c);

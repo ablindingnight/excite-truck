@@ -651,13 +651,14 @@ void HermiteDrone::Draw(void) {
 }
 
 static inline void QuatToFrame(OFrame* f, const Quat* q) {
+    f32 yy;
     f32 wx;
     f32 x2 = q->x + q->x;
     f32 y2 = q->y + q->y;
     f32 z2 = q->z + q->z;
     f32 yz;
     f32 xx = q->x * x2;
-    f32 yy = q->y * y2;
+    yy = q->y * y2;
     f32 zz = q->z * z2;
     wx = q->w * x2;
     yz = q->y * z2;

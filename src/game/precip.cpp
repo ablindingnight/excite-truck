@@ -1079,6 +1079,7 @@ void Mist::Reset(void) {
 }
 
 void Mist::Update(void) {
+    f32 z;
     f32 d2 = PSVECSquareDistance(&fn_801E8718(0)->pos, &center);
     f32 a;
     if (d2 > rad * rad) {
@@ -1105,7 +1106,6 @@ void Mist::Update(void) {
                 p->z = p->z + dv.z;
             } else {
                 f32 r = fn_80287BC8(-0.75f, 0.75f);
-                f32 z;
                 f32 s = 1.0f - r * r;
                 z = center.z + side.y * r + back.y * s;
                 f32 y = center.y + fn_80287BC8(0.0f, hit);

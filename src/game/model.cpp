@@ -394,13 +394,15 @@ void fn_802C5720(int pri) {
 MPrim* fn_802C57B0(MPrim* p) { return p; }
 
 void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
+    int e;
     ModelNode* slot = fn_802C5390(i);
     ModelInfo* info = slot->info;
     if (!lbl_8055FC20) {
         fn_802C543C();
     }
+    int j;
     s32 inst = slot->inst;
-    for (int e = 0; e < info->nElems; e++) {
+    for (e = 0; e < info->nElems; e++) {
         MElem* el = &info->elems[e];
         if (lbl_8055D008 & (1 << el->bit)) {
             u8 c = clip;
@@ -409,7 +411,7 @@ void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
             }
             u8 cl = c;
             MSurfList* sl = el->list;
-            for (int j = 0; j < sl->n; j++) {
+            for (j = 0; j < sl->n; j++) {
                 MSurf* s = sl->surfs[j];
                 if (IsQueued(s->type)) {
                     TexNode* t = s->tex[inst];
@@ -841,10 +843,10 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
 }
 
 void fn_802C729C(s32 i, f32 range) {
+    MSurfList* sl;
     MElem* el;
     void* mtx;
     int j;
-    MSurfList* sl;
     ModelInfo* m;
     MSphere* sp;
     int e;

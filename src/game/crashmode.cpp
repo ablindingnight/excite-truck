@@ -563,8 +563,8 @@ inline int CrashMode::Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 w
 }
 
 void CrashMode::vf14(void) {
-    RaceCarRec* rc;
     int i;
+    RaceCarRec* rc;
     int done;
     CrashState* s;
     if (fn_801769CC()->flags & 0x4000) {

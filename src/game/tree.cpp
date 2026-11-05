@@ -897,13 +897,14 @@ void fn_802BDD58(void) {
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
     if (t->set) {
+        f32 r2;
         TArray<TCell>* near = t->set->near;
         TArray<TreeRec>* list = t->set->list;
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->farId, t->farTex);
             f32 span;
-            f32 r2 = range * range;
+            r2 = range * range;
             f32 in = range - 50.0f;
             span = r2 - in * in;
             TMtx cam;
@@ -912,8 +913,9 @@ static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
             for (int j = 0; j < near->n; j++) {
                 TCell* c = &near->data[j];
                 if (Live(c)) {
+                    int n;
                     s32 id = t->farId;
-                    for (int n = c->first; n < c->first + c->count; n++) {
+                    for (n = c->first; n < c->first + c->count; n++) {
                         TreeRec* tr = &list->data[n];
                         f32 d = PSVECSquareDistance(&tr->mtx.pos, eye);
                         if (d <= r2) {

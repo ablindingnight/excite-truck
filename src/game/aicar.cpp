@@ -353,8 +353,8 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
 }
 
 void fn_8019330C(V2* out, const V2* in, const u8* m) {
-    V2 org;
     V2 side;
+    V2 org;
     V2 dir;
     V2 rel;
     dir.x = F32(m, 0x18);
