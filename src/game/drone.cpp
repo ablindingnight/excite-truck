@@ -250,20 +250,6 @@ struct HermitePools {
     s32 count;             // offset 0x2C0
 };
 
-class LinearDroneMan : public TrackInst {
-public:
-    LinearDroneMan(void) : count(0) {}
-    virtual ~LinearDroneMan(void);
-    virtual void Update(void* ctx);
-    virtual int Kind(void);
-    virtual void Draw2(void* ctx);
-    void AddDrone(TObj* o, LinearPathData* d);
-
-    LinearDrone drones[64];  // offset 0x4
-    s32 count;               // offset 0x1004
-    LinearPools pools;       // offset 0x1008
-};
-
 class HermiteDroneMan : public TrackInst {
 public:
     HermiteDroneMan(void) : count(0) {}
@@ -276,6 +262,20 @@ public:
     HermiteDrone drones[32];  // offset 0x4
     s32 count;                // offset 0xE04
     HermitePools pools;       // offset 0xE08
+};
+
+class LinearDroneMan : public TrackInst {
+public:
+    LinearDroneMan(void) : count(0) {}
+    virtual ~LinearDroneMan(void);
+    virtual void Update(void* ctx);
+    virtual int Kind(void);
+    virtual void Draw2(void* ctx);
+    void AddDrone(TObj* o, LinearPathData* d);
+
+    LinearDrone drones[64];  // offset 0x4
+    s32 count;               // offset 0x1004
+    LinearPools pools;       // offset 0x1008
 };
 
 struct LinearPathSlot {
@@ -296,19 +296,6 @@ public:
     s32 count;                // offset 0x34
 };
 
-class LinearDroneTMH : public TrackMod {
-public:
-    LinearDroneTMH(void) { man = 0; }
-    virtual ~LinearDroneTMH(void);
-    virtual void Swap(TObj* o);
-    virtual void Init(TObj* o);
-    virtual void Unk1C(void);
-    virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
-
-    LinearDroneMan* man;  // offset 0x4
-};
-
 class HermitePathTMH : public TrackMod {
 public:
     HermitePathTMH(void);
@@ -321,6 +308,19 @@ public:
 
     HermiteEntry paths[4];  // offset 0x4
     s32 count;              // offset 0x94
+};
+
+class LinearDroneTMH : public TrackMod {
+public:
+    LinearDroneTMH(void) { man = 0; }
+    virtual ~LinearDroneTMH(void);
+    virtual void Swap(TObj* o);
+    virtual void Init(TObj* o);
+    virtual void Unk1C(void);
+    virtual void Draw(TObj* list);
+    virtual void Add(void* scene, TObj* o, s32 id);
+
+    LinearDroneMan* man;  // offset 0x4
 };
 
 class HermiteDroneTMH : public TrackMod {

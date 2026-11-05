@@ -210,7 +210,7 @@ inline ValuePair* ValueNodeImpl::Loop2_GetValue(ValuePair* p, const char* key) {
     return p;
 }
 
-const char* ValueNodeImpl::GetValue(const char* key) {
+inline const char* ValueNodeImpl::GetValue(const char* key) {
     ValuePair* p = FindPair(key);
     p = Loop2_GetValue(p, key);
     if (!p) {
@@ -240,19 +240,6 @@ inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
     return r;
 }
 
-class ValueNodeStatic : public ValueNodeImpl {
-public:
-    ValueNodeStatic(void) {
-        name = "";
-        parentName = "";
-        count = 0;
-        pairs = 0;
-        parent = 0;
-        file = 0;
-    }
-    virtual ~ValueNodeStatic(void) {}
-};
-
 class ValueFileNode : public ValueNodeImpl {
 public:
     ValueFileNode(ValueFile* base);
@@ -275,6 +262,19 @@ public:
     }
 };
 
+class ValueNodeStatic : public ValueNodeImpl {
+public:
+    ValueNodeStatic(void) {
+        name = "";
+        parentName = "";
+        count = 0;
+        pairs = 0;
+        parent = 0;
+        file = 0;
+    }
+    virtual ~ValueNodeStatic(void) {}
+};
+
 class ValueFile : public ValueTable {
 public:
     ValueFile(void) {
@@ -293,6 +293,31 @@ public:
             return &nodes[index];
         }
         return 0;
+    }
+    void ResolveParents(void) {
+        int i;
+        for (i = 0; i < count; i++) {
+            const char* pn = nodes[i].parentName;
+            if (pn && *pn) {
+                int found = 0;
+                int j;
+                for (j = 0; j < count; j++) {
+                    if (!strcasecmp(pn, nodes[j].name)) {
+                        if (i == j) {
+                            fn_802E317C("valtab: table \"%s\" parented to self!", pn);
+                        }
+                        if (found) {
+                            fn_802E317C("valtab: table \"%s\" has ambiguous parent \"%s\"", nodes[i].GetName(), pn);
+                        }
+                        found = 1;
+                        nodes[i].parent = &nodes[j];
+                    }
+                }
+                if (!found) {
+                    fn_802E317C("valtab: table \"%s\" has missing parent \"%s\"", nodes[i].GetName(), pn);
+                }
+            }
+        }
     }
     virtual ValueNode* FindChild(const char* name) {
         int i;
@@ -324,31 +349,6 @@ public:
     }
     virtual ~ValueFile(void) {}
 
-    void ResolveParents(void) {
-        int i;
-        for (i = 0; i < count; i++) {
-            const char* pn = nodes[i].parentName;
-            if (pn && *pn) {
-                int found = 0;
-                int j;
-                for (j = 0; j < count; j++) {
-                    if (!strcasecmp(pn, nodes[j].name)) {
-                        if (i == j) {
-                            fn_802E317C("valtab: table \"%s\" parented to self!", pn);
-                        }
-                        if (found) {
-                            fn_802E317C("valtab: table \"%s\" has ambiguous parent \"%s\"", nodes[i].GetName(), pn);
-                        }
-                        found = 1;
-                        nodes[i].parent = &nodes[j];
-                    }
-                }
-                if (!found) {
-                    fn_802E317C("valtab: table \"%s\" has missing parent \"%s\"", nodes[i].GetName(), pn);
-                }
-            }
-        }
-    }
 
     s32 count;              // offset 0x4
     s32 unk8;
