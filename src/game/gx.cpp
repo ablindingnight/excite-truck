@@ -474,7 +474,6 @@ s32 lbl_8055FDC0;
 s32 lbl_8055FDC4;   // screenshot start
 s32 lbl_8055FDC8;   // point lights
 s32 lbl_8055FDCC;
-s32 lbl_8055FDD0;   // fifo overflows
 
 f32 lbl_8055D0B0 = 99.0f;
 f32 lbl_8055D0B4 = 99.0f;
@@ -2374,10 +2373,11 @@ void fn_802D3D80(void) { lbl_804C5700.lmap = 0; }
 void fn_802D3D94(int i, const f32 m[2][4]) { GXLoadTexMtxImm(m, i * 3 + 0x1E, 1); }
 
 void fn_802D3DAC(void) {
-    if ((lbl_8055FDD0 & 0x3F) == 0) {
-        OSReport(" gx: overflowed GX FIFO! (%d)\n", lbl_8055FDD0);
+    static s32 overflows;
+    if ((overflows & 0x3F) == 0) {
+        OSReport(" gx: overflowed GX FIFO! (%d)\n", overflows);
     }
-    lbl_8055FDD0++;
+    overflows++;
     GXResetOverflowCount();
     GXDisableBreakPt();
 }
