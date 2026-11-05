@@ -481,6 +481,8 @@ struct ObjTeleport {
     f32 radius;     // offset 0x34
 };
 
+struct Race;
+
 namespace {
 struct ObjSet {
     ObjSet(void) {
@@ -843,6 +845,7 @@ public:
 namespace {
 class RingChalMaster : public GameMode {
 public:
+    RingChalMaster(Race* race);
     virtual ~RingChalMaster(void);
     virtual void vf10(void);
     virtual int vf20(int car);
@@ -976,24 +979,24 @@ void RingResults::Update(int score, int rings, int bonus) {
     }
 }
 
-extern "C" RingChalMaster* fn_8016BE60(Race* race) {
-    RingChalMaster* m = new ("ringchalmaster") RingChalMaster;
+inline RingChalMaster::RingChalMaster(Race* race) {
     int i;
-    lbl_8055E378 = m;
-    m->players.Clear();
+    lbl_8055E378 = this;
+    players.Clear();
     for (i = 0; i < race->nCars; i++) {
         PlayerData* p = new ("playerdata") PlayerData(i);
-        m->players.Push(p);
+        players.Push(p);
     }
     fn_8016A0B0();
-    m->arena.Init();
-    m->layout = 0;
-    m->b9C = 1;
-    m->fA0 = -100.0f;
-    m->sPreRace = fn_80207848("chal_prerace.sfx", 1);
-    m->bA8 = 0;
-    return m;
+    arena.Init();
+    layout = 0;
+    b9C = 1;
+    fA0 = -100.0f;
+    sPreRace = fn_80207848("chal_prerace.sfx", 1);
+    bA8 = 0;
 }
+
+extern "C" RingChalMaster* fn_8016BE60(Race* race) { return new ("ringchalmaster") RingChalMaster(race); }
 
 
 inline Arena::~Arena(void) {

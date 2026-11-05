@@ -1704,10 +1704,10 @@ extern "C" void fn_80214D50(s32 arg0) {
         if (value != *(float *)((char *)obj + 8)) {
             *((u8 *)obj + 0x4D) = 1;
             *(float *)((char *)obj + 8) = value;
-            *((u8 *)obj + 0x49) = 1;
-            *((u8 *)obj + 0x4B) = 0;
-            *((u8 *)obj + 0x4A) = 0;
         }
+        *((u8 *)obj + 0x49) = 1;
+        *((u8 *)obj + 0x4B) = 0;
+        *((u8 *)obj + 0x4A) = 0;
     }
 }
 

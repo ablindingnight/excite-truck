@@ -553,15 +553,16 @@ extern "C" {
 int fn_801B0DF0(int i) { return lbl_8055E684[i].Car()->type == 'PCAR'; }
 
 int fn_801B0E40(int i, s32* place) {
-    int p = lbl_8055E684[i].State()->place;
     int k;
+    int p = lbl_8055E684[i].State()->place;
     for (k = p; k <= lbl_8055E678; k++) {
         if (fn_801B0DF0(fn_801B2F40(k - 1))) {
             return 0;
         }
     }
+    k = p - 1;
     int lo = *place > 1 ? *place : 1;
-    for (k = p - 1; k >= lo; k--) {
+    for (; k >= lo; k--) {
         if (fn_801B0DF0(fn_801B2F40(k - 1))) {
             *place = k + 1;
             break;
