@@ -323,9 +323,10 @@ int fn_802B5D94(const char* s) { return fn_802B5D2C("object", s); }
 int fn_802B5DA0(const char* s) { return fn_802B5D94(s) != -1; }
 
 int fn_802B5DD0(const char* s) {
-    int r = 0;
     int i = fn_802B5D2C("layer", s);
-    if (i != -1 && i != fn_802B05DC()) {
+    int cur = fn_802B05DC();
+    int r = 0;
+    if (i != -1 && i != cur) {
         r = 1;
     }
     return r;
