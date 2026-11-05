@@ -37,11 +37,7 @@ struct AchLevel {
 class ValueNode;
 class AchSchedule {
 public:
-    AchSchedule(void) {
-        levels = NULL;
-        count = 0;
-    }
-    void Load(ValueNode* node);
+    AchSchedule(ValueNode* node);
     ~AchSchedule(void) {
         if (levels != NULL) {
             delete[] levels;
@@ -189,7 +185,9 @@ void AchievementsShutdown(void) {
 
 int AchFindCategory(const char* name);
 
-inline void AchSchedule::Load(ValueNode* node) {
+inline AchSchedule::AchSchedule(ValueNode* node) {
+    levels = NULL;
+    count = 0;
     ValueNode* child;
     int j;
     for (j = 0; (child = node->GetChildAt(j)) != NULL; j++) {
@@ -237,14 +235,11 @@ void AchLoad(void) {
         idx = AchFindCategory(node->GetValue("name"));
         if (idx >= 0 && idx < NUM_CATEGORIES) {
             if ((u32)idx < NUM_CATEGORIES) {
-                sched = new ("AchievementSchedule") AchSchedule;
-                sched->Load(node);
+                sched = new ("AchievementSchedule") AchSchedule(node);
                 lbl_802FDF30[idx].schedule = sched;
             }
         } else {
-            const char* name = node->GetValue("name");
-
-            fn_802E30C8("Achievements: table %s has invalid category name %s", node->GetName(), name);
+            fn_802E30C8("Achievements: table %s has invalid category name %s", node->GetName(), node->GetValue("name"));
         }
     }
 }
