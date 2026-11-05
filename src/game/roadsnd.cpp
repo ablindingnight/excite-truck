@@ -7,6 +7,22 @@ extern "C" int strcmp(const char* a, const char* b);
 
 class RoadSoundVoice {
 public:
+    void SetVolume(f32 x) {
+        if (x != volume) {
+            volumeChanged = 1;
+            volume = x;
+        }
+    }
+    void SetPitch(f32 x) {
+        if (x != pitch) {
+            pitchChanged = 1;
+            pitch = x;
+        }
+    }
+    void Silence(void) {
+        unk4A = 1;
+        unk4C = 0;
+    }
     virtual ~RoadSoundVoice(void);
 
     f32 pitch;   // offset 0x4
@@ -116,8 +132,9 @@ RoadSound::~RoadSound(void) {
 }
 
 void RoadSound::Update(void) {
-    int surface = 0;
+    int i = 0;
     char* c = car;
+    int surface = 0;
     for (int w = 0; w < 4; w++) {
         s32 s = *(s32*)(c + 0x2410 + w * 0x74);
         if (s > surface) {
@@ -126,8 +143,8 @@ void RoadSound::Update(void) {
     }
     f32 gain = 0.25f * *(s32*)(c + 0x2620);
     f32 speed = *(f32*)(c + 0x25D4);
-    for (int i = 0; i < count; i++) {
-        if (fn_801D04A8(surface)->type == entries[i].surface) {
+    for (; i < count; i++) {
+        if (entries[i].surface == fn_801D04A8(surface)->type) {
             RoadSoundVoice* v = entries[i].voice;
             if (v) {
                 f32 vol;
@@ -141,18 +158,11 @@ void RoadSound::Update(void) {
                 v->unk4B = 1;
                 v->unk49 = 1;
                 vol = gain * vol;
-                if (vol != entries[i].voice->volume) {
-                    entries[i].voice->volumeChanged = 1;
-                    entries[i].voice->volume = vol;
-                }
-                if (pitch != entries[i].voice->pitch) {
-                    entries[i].voice->pitchChanged = 1;
-                    entries[i].voice->pitch = pitch;
-                }
+                entries[i].voice->SetVolume(vol);
+                entries[i].voice->SetPitch(pitch);
             }
         } else if (entries[i].voice) {
-            entries[i].voice->unk4A = 1;
-            entries[i].voice->unk4C = 0;
+            entries[i].voice->Silence();
         }
     }
 }
