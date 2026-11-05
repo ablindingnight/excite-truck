@@ -191,6 +191,7 @@ CarLayout* fn_80279004(const char* car, int unused) {
     CarLayout* l;
     ValueTable* mods;
     ValueTable* bones;
+    ValueNode* node;
     int i;
     char path[0x80];
     char modPath[0x80];
@@ -212,7 +213,6 @@ CarLayout* fn_80279004(const char* car, int unused) {
     fn_80278A64(l, bones, mods, car);
     memset(l->bounds, 0, sizeof(l->bounds));
     if (bones->HasChild("bounds")) {
-        ValueNode* node;
         node = (ValueNode*)bones->FindChild("bounds");
         for (i = 0; i < 32; i++) {
             sprintf(key, "min_%d", i);
