@@ -541,6 +541,11 @@ struct CarResult {
     void Finish(const BetaCar* c);
     void Compute(const BetaCar* c);
     f32 SinceFinish(const BetaCar* c);
+    void SetFinish(f32 t) {
+        if (finishTime < 0.0f) {
+            finishTime = t;
+        }
+    }
 
     s32 score;         // offset 0x0
     s32 place;         // offset 0x4
@@ -1207,7 +1212,15 @@ struct RaceTimer {
     Sound* timeout;     // offset 0x18
     u8 b1C;             // offset 0x1C
 
-    int Finishing(void) { return limit - now < finishTimeout; }
+    int Finishing(void) const { return limit - now < finishTimeout; }
+    int Expired(void) const { return now > limit; }
+    int Extend(void) {
+        if (!Finishing()) {
+            limit = now + finishTimeout;
+            return 1;
+        }
+        return 0;
+    }
 };
 
 static inline void InitTimer(RaceTimer* t) {
@@ -3353,6 +3366,39 @@ double cos(double x);
 extern s32 lbl_8055E4D0;  // cars in the race
 extern f32 lbl_80559EC8;  // spin trigger wobble speed
 
+static inline void Rest(Token* b, const f32* m) {
+    f32 vel[3];
+    f32 spin[3];
+    spin[0] = 0.0f;
+    spin[1] = 0.0f;
+    spin[2] = 0.0f;
+    vel[0] = 0.0f;
+    vel[1] = 0.0f;
+    vel[2] = 0.0f;
+    b->body->SetState(m, vel, spin);
+}
+
+static inline void LaunchBump(Token* b) {
+    f32 m[12];
+    b->active = 1;
+    m[0] = 1.0f;
+    m[1] = 0.0f;
+    m[2] = 0.0f;
+    m[3] = 0.0f;
+    m[4] = 1.0f;
+    m[5] = 0.0f;
+    m[6] = 0.0f;
+    m[7] = 0.0f;
+    m[8] = 1.0f;
+    m[9] = 0.0f;
+    m[10] = 0.0f;
+    m[11] = 0.0f;
+    m[9] = b->pos[0];
+    m[10] = b->pos[1];
+    m[11] = b->pos[2];
+    Rest(b, m);
+}
+
 static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
     int i;
     for (i = 0; i < l->a.count; i++) {
@@ -3404,32 +3450,7 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
             vel[2] = 0.0f;
             b->body->SetState(m, vel, spin);
         } else if (b->Ready() && lbl_8055E3C8 > b->start) {
-            f32 m[12];
-            f32 vel[3];
-            f32 spin[3];
-            b->active = 1;
-            m[0] = 1.0f;
-            m[1] = 0.0f;
-            m[2] = 0.0f;
-            m[3] = 0.0f;
-            m[4] = 1.0f;
-            m[5] = 0.0f;
-            m[6] = 0.0f;
-            m[7] = 0.0f;
-            m[8] = 1.0f;
-            m[9] = 0.0f;
-            m[10] = 0.0f;
-            m[11] = 0.0f;
-            m[9] = b->pos[0];
-            m[10] = b->pos[1];
-            m[11] = b->pos[2];
-            spin[0] = 0.0f;
-            spin[1] = 0.0f;
-            spin[2] = 0.0f;
-            vel[0] = 0.0f;
-            vel[1] = 0.0f;
-            vel[2] = 0.0f;
-            b->body->SetState(m, vel, spin);
+            LaunchBump(b);
         }
     }
 }
@@ -3527,27 +3548,12 @@ inline void BetaMaster::vf0C(void) {
                         c->Results(&anims[j]);
                     }
                     if (anims[j].state == 2 && fn_80179650() > 1) {
-                        int ext;
-                        f32 nowv = timer.now;
-                        int soon = timer.limit - nowv < timer.finishTimeout;
-                        if (!soon) {
-                            timer.limit = timer.now + timer.finishTimeout;
-                            ext = 1;
-                        } else {
-                            ext = 0;
-                        }
-                        if (ext) {
-                            if (c->result.finishTime < 0.0f) {
-                                c->result.finishTime = timer.now;
-                            }
+                        if (timer.Extend()) {
+                            c->result.SetFinish(timer.now);
                         } else {
                             f32 left = timer.limit - timer.now;
-                            f32 t;
                             left = 0.0f > left ? 0.0f : left;
-                            t = timer.limit - ((f32)floor(left) - 0.1f);
-                            if (c->result.finishTime < 0.0f) {
-                                c->result.finishTime = t;
-                            }
+                            c->result.SetFinish(timer.limit - ((f32)floor(left) - 0.1f));
                         }
                     }
                 }
@@ -3567,16 +3573,17 @@ inline void BetaMaster::vf0C(void) {
     }
     if (timer.b10) {
         timer.now += 0.016683351f;
-        if (timer.now > timer.limit) {
+        if (timer.Expired()) {
             StopSound(timer.tick);
             if (timer.timeout && !timer.b1C) {
                 timer.timeout->Play();
                 timer.b1C = 1;
             }
-        } else if (timer.tick && timer.limit - timer.now < timer.finishTimeout && !timer.tick->active) {
-            timer.tick->b4A = 0;
-            timer.tick->b4B = 1;
-            timer.tick->play = 1;
+        } else if (timer.tick && timer.Finishing() && !timer.tick->active) {
+            Sound* tick = timer.tick;
+            tick->b4A = 0;
+            tick->b4B = 1;
+            tick->play = 1;
         }
     }
     if (found) {
