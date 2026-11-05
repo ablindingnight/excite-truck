@@ -85,10 +85,12 @@ struct ObjBlock {
 template <class T>
 struct DynVec {
     DynVec(int n, const char* tag = "dsa_buf") {
-        data = new (tag) T[n];
-        cap = n;
-        count = 0;
-        buf = data;
+        // MATCHING-AID: the pointer local moves this down the register order (selfloop.py). The real form is unknown.
+        DynVec* self = this;
+        self->data = new (tag) T[n];
+        self->cap = n;
+        self->count = 0;
+        self->buf = self->data;
     }
     ~DynVec(void) {
         delete[] buf;
