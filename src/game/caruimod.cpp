@@ -887,8 +887,7 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         PSVECNormalize(&p->frame.b.v[1], &p->frame.b.v[1]);
         PSVECNormalize(&p->frame.b.v[2], &p->frame.b.v[2]);
         f32 back = -1.5566f;
-        f32 xv = mid.x;
-        lbl_80498E18.x = xv + p->frame.b.v[2].x * back;
+        lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
         lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
         lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;
         lbl_80498E18.x = lbl_80498E18.x + p->frame.b.v[1].x * 1.2283f;
@@ -978,7 +977,6 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         }
         nd = -d;
         f32 nx = -offX;
-        f32 floor = 2.0f * aspect;
         f32 ny = -offY;
         Mtx33* m = (Mtx33*)&cam;
         for (int i = 0; i < 400; i++) {
@@ -1013,7 +1011,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             cam.pos.y = yv + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
             f32 zv = cam.pos.z;
             cam.pos.z = zv + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
-            if (!lbl_8055F330 || floor + fn_801DCF48(0) < cam.pos.y) {
+            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0) < cam.pos.y) {
                 break;
             }
             pitch += 1.5707964f / 800.0f;

@@ -2503,8 +2503,7 @@ inline void RingChalMaster::vf0C(void) {
             if (arena.f34 < arena.f30 && arena.stats->data[k].done) {
                 SetStat* st = &arena.stats->data[k];
                 f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (arena.f30 - arena.f34));
-                f32 hi = 0.25f + lo;
-                f32 u = (lbl_8055E3C8 - st->time - lo) / (hi - lo);
+                f32 u = (lbl_8055E3C8 - st->time - lo) / ((0.25f + lo) - lo);
                 CLAMP01(u);
                 f32 from = 0.0f;
                 f32 to = 1.0f;

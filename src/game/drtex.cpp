@@ -688,8 +688,7 @@ void fn_802D9418(void) {
 GXTex* fn_802D94DC(void) { return lbl_8055FE18; }
 
 void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
-    int w = GXGetTexObjWidth(&dst->obj);
-    int n = GXGetTexObjHeight(&dst->obj) * w * 16 / 32;
+    int n = GXGetTexObjHeight(&dst->obj) * GXGetTexObjWidth(&dst->obj) * 16 / 32;
     u32* pd = (u32*)((u8*)GXGetTexObjData(&dst->obj) - 0x40000000);
     u32* pa = (u32*)((u8*)GXGetTexObjData(&a->obj) - 0x40000000);
     u32* pb = (u32*)((u8*)GXGetTexObjData(&b->obj) - 0x40000000);

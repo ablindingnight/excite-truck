@@ -694,9 +694,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     cnt = 32;
     d->body = m;
     MulVec(&off, &d->butt, &d->body);
-    f32 x_ = d->body.pos.x;
     f32 x2 = off.x;
-    d->body.pos.x = x2 + x_;
+    d->body.pos.x = x2 + d->body.pos.x;
     d->body.pos.y = d->body.pos.y + off.y;
     d->body.pos.z = d->body.pos.z + off.z;
     f32 roll = -F32(car, 0x238);

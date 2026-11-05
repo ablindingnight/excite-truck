@@ -1253,12 +1253,11 @@ extern "C" {
 void fn_801ACA48(u8* p) {
     fn_801ABC28(p);
     if (U8(p, 0x220)) {
-        f32 b = 0.9f * F32(p, 0x128);
         F32(p, 0x118) = 0.0f;
         F32(p, 0x11C) = 0.0f;
         F32(p, 0x120) = 0.0f;
         F32(p, 0x124) = (0.9f * F32(p, 0x124));
-        F32(p, 0x128) = b;
+        F32(p, 0x128) = (0.9f * F32(p, 0x128));
         F32(p, 0x12C) = 0.9f * F32(p, 0x12C);
         ObVec3 c;
         PSVECCrossProduct((f32*)(p + 0x48), (f32*)(p + 0x1F8), &c.x);

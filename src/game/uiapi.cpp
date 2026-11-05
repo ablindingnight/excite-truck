@@ -2177,9 +2177,8 @@ extern "C" void fn_80215A2C(void *arg0) {
 }
 
 extern "C" void fn_80215A48(void *arg0) {
-    u8 value = *((u8 *)arg0 + 0x1A);
     *((u8 *)arg0 + 0x19) = 1;
-    if (value != 0) *((u8 *)arg0 + 0x234) = 1;
+    if ((*((u8 *)arg0 + 0x1A)) != 0) *((u8 *)arg0 + 0x234) = 1;
     void *obj = *(void **)((u8 *)arg0 + 0x244);
     void **vt = *(void ***)obj;
     ((void (*)(void *))*(void **)((u8 *)vt + 0x4C))(obj);

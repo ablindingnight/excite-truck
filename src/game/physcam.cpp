@@ -681,8 +681,7 @@ void fn_80271624(int mode, u8* p) {
                 F32(p, 0x54) = F32(p, 0xEC);
             }
             if (tv->flags & 1) {
-                int a = fn_801769F8();
-                fn_80266170(p + 0x178, fn_802E2C20(), a, fresh, F32(p, 0xBC));
+                fn_80266170(p + 0x178, fn_802E2C20(), fn_801769F8(), fresh, F32(p, 0xBC));
                 f32 fov = F32(p, 0x180) + F32(p, 0x184) * (F32(p, 0xBC) - F32(p, 0x180));
                 F32(p, 0x194) = fov;
                 F32(p, 0xBC) = fov;
@@ -1055,8 +1054,7 @@ void CamRegion::Prepare(u8* line) {
         f32 yv = center.y;
         rel.y = s.y - yv;
         f32 b = lbl_80563F8C * (dir.x * rel.x + rel.y * dir.y);
-        f32 c = rel.x * rel.x + rel.y * rel.y - r2;
-        f32 disc = b * b - lbl_80563F90 * a * c;
+        f32 disc = b * b - lbl_80563F90 * a * (rel.x * rel.x + rel.y * rel.y - r2);
         if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
             f32 q = (f32)sqrt(disc);
             n = 2;

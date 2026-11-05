@@ -124,8 +124,7 @@ inline void CarElem::Loop1_Compute(f32 x, f32 k) {
 
 void CarElem::Compute(int car) {
     RaceCar* c = lbl_804348E8[car];
-    f32 k = c->load;
-    Loop1_Compute(c->rpm, k);
+    Loop1_Compute(c->rpm, c->load);
 }
 
 CarElemMgr::~CarElemMgr(void) {}

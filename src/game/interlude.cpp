@@ -1267,8 +1267,7 @@ void debug_event(void) {
                         fn_801B8100(&pose, i, car->player);
                         place = pose.place;
                     } else if (fn_801769CC()->type & 0x100) {
-                        f32 w = fn_80139048();
-                        f32 spacing = 0.61f + (fn_80137C54(-1)->len + w);
+                        f32 spacing = 0.61f + (fn_80137C54(-1)->len + fn_80139048());
                         fn_801B8048(&place, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
                     } else {
                         CamPose f;
