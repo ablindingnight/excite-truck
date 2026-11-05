@@ -3242,9 +3242,9 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         RVec3 mn;
         RVec3 la;
         RVec3 lb;
+        lb.z = b.z - k;
         lb.x = b.x - k;
         lb.y = b.y - k;
-        lb.z = b.z - k;
         la.x = a.x - k;
         la.y = a.y - k;
         la.z = a.z - k;

@@ -293,8 +293,8 @@ void fn_8025C204(int event, int difficulty) {
     icons[4].visible = 0;
     for (int i = 0; i < 5; i++) {
         CopyName("", 20, rows[i].score);
-        rows[i].grade = "";
         f32 time = -lbl_80558DC0[0];
+        rows[i].grade = "";
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
         if (hs) {
             fn_801308F4(rows[i].score, 20, hs->score);

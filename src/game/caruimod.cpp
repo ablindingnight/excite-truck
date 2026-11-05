@@ -1484,9 +1484,9 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         v[1 + i * 2].pos.y = y;
         v[1 + i * 2].pos.z = z0;
         v[1 + i * 2].s = 1.333f * x0;
+        v[2 + i * 2].pos.x = x1;
         v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].t = 1.333f * z0;
-        v[2 + i * 2].pos.x = x1;
         v[2 + i * 2].pos.y = y;
         v[2 + i * 2].pos.z = z1;
         v[2 + i * 2].color = 0x00FFFFFF;

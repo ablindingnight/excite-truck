@@ -1478,8 +1478,8 @@ void fn_80195B28(u8* d, f32 v) {
         f32 t = w->now;
         w->next = t;
         w->start = 0.0f;
-        w->tgt = 0.0f;
         w->t0 = t;
+        w->tgt = 0.0f;
         w->dur = t;
     }
 }

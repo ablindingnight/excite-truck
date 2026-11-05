@@ -2868,8 +2868,8 @@ inline void BetaMaster::vfF4(void) {
         loaded = 0;
     }
     if (!loaded) {
-        ValueNode* n;
         ValueNode* ev = GetEvent(fn_801769CC()->event)->vals;
+        ValueNode* n;
         for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
             if (n->Has("bound0")) {
                 Pickup* p = new ("trigger") Pickup(n);
@@ -3202,9 +3202,9 @@ inline Pickup::Pickup(ValueNode* n) {
             dir[1] = z0 + ts.t * (z1 - s0->z);
             len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
             dir[0] *= 1.0f / len;
+            dir[1] *= 1.0f / len;
             fwd[0] = m[6];
             fwd[1] = m[8];
-            dir[1] *= 1.0f / len;
         }
         a[0] = dir[0];
         a[1] = 0.0f;
