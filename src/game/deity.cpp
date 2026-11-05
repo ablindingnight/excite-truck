@@ -268,6 +268,11 @@ struct CrossQueue {
     s32 n;          // offset 0x40
 };
 
+// A position copied as words (array member).
+struct WV3 {
+    f32 v[3];
+};
+
 struct TeleportInfo {
     u8 pad0[0x18];
     f32 dir[3];    // offset 0x18
@@ -374,6 +379,11 @@ int fn_801B06D8(const V2* pos, const V2* dir) {
     return 0;
 }
 
+static inline void ScaleF3(f32* out, const f32* in, f32 s) {
+    out[0] = in[0] * s;
+    out[1] = in[1] * s;
+    out[2] = in[2] * s;
+}
 void fn_801B07B4(TeleportInfo* t, const ILPos* at) {
     ILPos p;
     p = *at;
@@ -382,22 +392,17 @@ void fn_801B07B4(TeleportInfo* t, const ILPos* at) {
     }
     fn_801B8040(t, &p, 0.0f);
     t->a3C = 0;
-    t->vel[0] = t->dir[0] * 26.666666f;
-    t->vel[1] = t->dir[1] * 26.666666f;
-    t->vel[2] = t->dir[2] * 26.666666f;
-    f32 v[3];
-    v[0] = t->pos[0];
-    v[1] = t->pos[1];
-    v[2] = t->pos[2];
-    if (lbl_8055E670 && fn_80139EC4(lbl_8055E670, v[0], v[2])) {
-        v[1] += 200.0f;
+    ScaleF3(t->vel, t->dir, 26.666666f);
+    WV3 v = *(const WV3*)t->pos;
+    if (lbl_8055E670 && fn_80139EC4(lbl_8055E670, v.v[0], v.v[2])) {
+        v.v[1] += 200.0f;
         f32 h;
-        if (fn_801784DC(v, &h, 0, 0, 0)) {
+        if (fn_801784DC(v.v, &h, 0, 0, 0)) {
             t->pos[1] = 0.6286f + h;
-            t->pos[1] += 7.625f;
-            t->vel[1] = -4.905f;
         }
     }
+    t->pos[1] += 7.625f;
+    t->vel[1] = -4.905f;
 }
 
 u32 fn_801B08E8(u32 a, u32 b, u32 n) {
