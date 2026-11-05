@@ -25,7 +25,7 @@ int fn_802C9C58(int mode);
 f32 PSVECSquareDistance(const ValVec3* a, const ValVec3* b);
 int fn_801E85A4(void);
 int fn_801E85B4(void);
-void fn_801E86F8(int a);
+int fn_801E86F8(int a);
 f32 fn_801E7E18(void);
 void fn_801DCEF0(int a);
 }
@@ -70,7 +70,7 @@ struct TrackInfo {
 extern "C" {
 DebugFlags* fn_801E87A8(void);
 ViewCam* fn_802C86DC(void);
-TrackInfo* fn_801EA9A0(void);
+TrackInfo* fn_801EA9A0(int i);
 }
 
 struct ChunkPos : ValVec3 {
@@ -258,8 +258,7 @@ void fn_8020268C(void) {
 void fn_80202718(void) {
     lbl_804888E0.count = 0;
     if (lbl_8055ECD8) {
-        fn_801E86F8(-1);
-        int lap = fn_801EA9A0()->state->unk30;
+        int lap = fn_801EA9A0(fn_801E86F8(-1))->state->unk30;
         if (lap >= 0) {
             fn_801DCEF0(lap);
         }

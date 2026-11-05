@@ -95,7 +95,7 @@ int fn_80276068(int mode) {
 }
 
 extern "C" f32 PSVECSquareDistance(const void* a, const void* b);
-extern "C" void fn_8026A49C(int slot, CamPose* pose, f32* fov);
+extern "C" void fn_8026A49C(int slot, int type, CamPose* pose, f32* fov);
 extern "C" void fn_8012F57C(f32* out, const f32* a, const f32* b, f32 t);  // slerp
 extern "C" void fn_802E30C8(const char* fmt, ...);  // debug print
 extern "C" f32 fn_80277704(int i);
@@ -225,10 +225,11 @@ static inline f32 Ease(f32 t) {
 // is to a fixed camera (kind 0x22), and ends the transition once it is complete.
 void fn_8027656C(CamPose* out, f32* fov, int slot) {
     f32 t = fn_80277704(slot);
-    if (lbl_8049FD58[slot].kind != 0x22) {
+    int kind = lbl_8049FD58[slot].kind;
+    if (kind != 0x22) {
         CamPose p;
         f32 f;
-        fn_8026A49C(slot, &p, &f);
+        fn_8026A49C(slot, kind, &p, &f);
         PoseToQuat(&p, lbl_8049FD58[slot].q1);
         lbl_8049FD58[slot].p1.v[0] = p.pos.v[0];
         lbl_8049FD58[slot].p1.v[1] = p.pos.v[1];
