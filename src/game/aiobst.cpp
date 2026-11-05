@@ -267,6 +267,7 @@ void fn_8015EE14(ValueNode* list, Track* trk) {
 }
 
 template <class T>
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }

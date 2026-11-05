@@ -1310,6 +1310,7 @@ extern "C" {
 
 // Selects the next event that has an unlock condition and shows its title, description and best time.
 template <class T>
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T& AtR(T* p, int i) {
     return p[i];
 }

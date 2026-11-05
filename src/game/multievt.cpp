@@ -1008,6 +1008,7 @@ extern void* lbl_80343BD0[];
 void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 
 template <class T>
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }

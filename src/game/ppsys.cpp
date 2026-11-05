@@ -514,6 +514,7 @@ static inline s32 Expr1_fn_801C2694(PSys* s) {
 }
 
 template <class T>
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
