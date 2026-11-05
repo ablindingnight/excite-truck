@@ -620,7 +620,6 @@ void MultiFacingTMH::Draw(TObj* list) {
         TVtx base;
         TMtx m;
         TVtx v[4];
-        u16 idx[6];
         TVec dir;
         int seg;
         f32 u0;
@@ -646,12 +645,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         fn_801F3124(&v[1], &base);
         fn_801F3124(&v[2], &base);
         fn_801F3124(&v[3], &base);
-        idx[0] = lbl_802F9B20[0];
-        idx[1] = lbl_802F9B20[1];
-        idx[2] = lbl_802F9B20[2];
-        idx[3] = lbl_802F9B20[3];
-        idx[4] = lbl_802F9B20[4];
-        idx[5] = lbl_802F9B20[5];
+        u16 idx[6] = {0, 1, 2, 2, 1, 3};
         v[3].u = u1;
         v[1].u = u1;
         v[3].v = v1;

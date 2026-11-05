@@ -432,7 +432,8 @@ void fn_8000E3B4(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80350F88.art, fn_8000DFA8(0))) + top - 50.0f;
+    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80350F88.art, fn_8000DFA8(0)));
+    y = y + top - 50.0f;
     if (player < 0) {
         right = fn_80011E34();
     } else {
@@ -441,7 +442,7 @@ void fn_8000E3B4(int player) {
     pad = lbl_80350F88.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
     for (i = 0, row = lbl_80350F88.rows; i < lbl_80350F88.count; row++, i++) {
-        char buf[20];
+        char buf[16];
         int part2 = fn_8000DFC0(row->type);
         int part = fn_8000DFA8(row->type);
         f32 w = pad + fn_80235EF0(lbl_80350F88.art, part);
