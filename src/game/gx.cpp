@@ -314,6 +314,11 @@ struct Fog {
     u8 pad1D[3];
 };
 
+// A direction copied as words (array member).
+struct LightDir {
+    f32 v[3];
+};
+
 struct Light {
     GXColor amb;    // offset 0x0
     GXColor color;  // offset 0x4
@@ -1219,7 +1224,7 @@ s32 fn_802D0514(const RMtx* view) {
     s->amb = lbl_804C97D0.amb;
     s->col = lbl_804C97D0.color;
     s->alpha = lbl_804C97D0.alpha;
-    s->dir = lbl_804C97D0.dir;
+    *(LightDir*)&s->dir = *(const LightDir*)&lbl_804C97D0.dir;
     s->scale = lbl_804C97D0.scale;
     return n + 1;
 }
@@ -1235,7 +1240,7 @@ void fn_802D0610(s32 set) {
         lbl_804C97D0.amb = s->amb;
         lbl_804C97D0.color = s->col;
         lbl_804C97D0.alpha = s->alpha;
-        lbl_804C97D0.dir = s->dir;
+        *(LightDir*)&lbl_804C97D0.dir = *(const LightDir*)&s->dir;
         lbl_804C97D0.scale = s->scale;
         lbl_804C97D0.dirty = 1;
     } else {
