@@ -70,7 +70,7 @@ struct IdxBlock {
     }
     T* At(int i);
     int Count(void);
-    bool Fits(int n) { return count + n <= cap; }
+    bool Fits(int n) const { return count + n <= cap; }
     T* Take(int n) {
         T* p = &data[count];
         count += n;
@@ -84,7 +84,7 @@ struct IdxBlock {
 
 template <class T>
 struct DynVec {
-    bool Room(void) { return count + 1 <= cap; }
+    bool Room(void) const { return count + 1 <= cap; }
     T* Next(void) { return &data[count++]; }
     DynVec(int n, const char* tag = "dsa_buf") {
         data = new (tag) T[n];
