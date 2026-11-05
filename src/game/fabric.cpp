@@ -1000,13 +1000,8 @@ static inline void Swap32(u8* p) {
     p[2] = t;
 }
 
-void FabricTMH::Swap(TObj* o) {
-    u8* d = (u8*)o;
-    u8* p;
-    int i;
-    SwapN(d + 0x2C, 16);
-    p = d + 0x3C;
-    for (i = 0; i < 3; i++, p += 0x18) {
+static inline void SwapKeys(u8* p, int n) {
+    for (int i = 0; i < n; i++, p += 0x18) {
         Swap32(p);
         Swap32(p + 4);
         Swap32(p + 8);
@@ -1014,6 +1009,12 @@ void FabricTMH::Swap(TObj* o) {
         Swap32(p + 16);
         Swap32(p + 20);
     }
+}
+
+void FabricTMH::Swap(TObj* o) {
+    u8* d = (u8*)o;
+    SwapN(d + 0x2C, 16);
+    SwapKeys(d + 0x3C, 3);
     SwapN(d + 0x84, 12);
 }
 

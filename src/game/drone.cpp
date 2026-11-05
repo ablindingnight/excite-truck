@@ -490,6 +490,19 @@ static inline void Swap32(u8* p) {
     p[2] = t;
 }
 
+// Byte-swaps n vectors (two PVecs of 12 bytes each per step).
+static inline void SwapKeys(u8* p, int n) {
+    for (int i = 0; i < n; i++) {
+        Swap32(p);
+        Swap32(p + 4);
+        Swap32(p + 8);
+        Swap32(p + 12);
+        Swap32(p + 16);
+        Swap32(p + 20);
+        p += 0x18;
+    }
+}
+
 extern "C" TrackMod* fn_801FC914(void) { return new ("LinearPathTMH") LinearPathTMH; }
 
 extern "C" TrackMod* fn_801FC94C(void) { return new ("LinearDroneTMH") LinearDroneTMH; }
@@ -821,16 +834,7 @@ LinearPathTMH::LinearPathTMH(void) {
 void LinearPathTMH::Swap(TObj* o) {
     LinearPathData* d = (LinearPathData*)o->data;
     SwapName((u8*)d->name);
-    u8* p = (u8*)d->keys;
-    for (int i = 0; i < 32; i++) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
-        Swap32(p + 12);
-        Swap32(p + 16);
-        Swap32(p + 20);
-        p += 0x18;
-    }
+    SwapKeys((u8*)d->keys, 32);
     Swap32((u8*)&d->count);
     Swap32((u8*)&d->intervalMin);
     Swap32((u8*)&d->intervalMax);
@@ -875,16 +879,7 @@ HermitePathTMH::HermitePathTMH(void) { count = 0; }
 void HermitePathTMH::Swap(TObj* o) {
     HermitePathData* d = (HermitePathData*)o->data;
     SwapName((u8*)d->name);
-    u8* p = (u8*)d->keys;
-    for (int i = 0; i < 72; i++) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
-        Swap32(p + 12);
-        Swap32(p + 16);
-        Swap32(p + 20);
-        p += 0x18;
-    }
+    SwapKeys((u8*)d->keys, 72);
     Swap32((u8*)&d->count);
 }
 
