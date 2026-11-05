@@ -174,6 +174,16 @@ struct VecBase {
         count = 0;
         cap = 0;
     }
+    T& Next(void) { return data[count++]; }
+    int CanAdd(void) const { return count + 1 <= cap; }
+    int Find(const T& v) const {
+        for (int j = 0; j < count; j++) {
+            if (v == data[j]) {
+                return j;
+            }
+        }
+        return -1;
+    }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
@@ -242,8 +252,8 @@ struct Pool {
     ~Pool(void) { SafeDeleteArray(buf); }
     Chunk<T>* Alloc(void) {
         Chunk<T>* c = 0;
-        if (arr.count + 1 <= arr.cap) {
-            c = &arr.data[arr.count++];
+        if (arr.CanAdd()) {
+            c = &arr.Next();
             c->Reset();
         }
         return c;
@@ -258,7 +268,7 @@ struct Cell {
     void Clear(void) { head = tail = 0; }
     T* Alloc(Pool<T>* pool) {
         T* slot = 0;
-        if (tail == 0 || tail->count + 1 > tail->cap) {
+        if (tail == 0 || !tail->CanAdd()) {
             Chunk<T>* c = pool->Alloc();
             if (c) {
                 if (!head) {
@@ -269,10 +279,10 @@ struct Cell {
                 }
                 tail = c;
                 c->next = 0;
-                slot = &tail->data[tail->count++];
+                slot = &tail->Next();
             }
         } else {
-            slot = &tail->data[tail->count++];
+            slot = &tail->Next();
         }
         return slot;
     }
@@ -367,6 +377,19 @@ struct TexEntry {
 };
 
 struct Grid {
+    Grid(s16 s) {
+        int d = s * 2;
+        size = s;
+        int k = 0x400 / d;
+        int cnt = k * k;
+        n = cnt;
+        cells = new ("tmp") Cell<Item*>[cnt];
+        pool = new ("tmpalloc") Pool<Item*>(cnt * 6 / 4);
+    }
+    ~Grid(void) {
+        delete pool;
+        delete[] cells;
+    }
     void Add(Item* it, int x, int y);
     void Put(Item* it, int x, int y) {
         int d = size * 2;
@@ -381,6 +404,8 @@ struct Grid {
     s32 n;                  // offset 0x8
     Pool<Item*>* pool;      // offset 0xC
 };
+
+extern const f32 lbl_80564CB0;
 
 ModuleTag lbl_8055FA60;
 static inline u32 XLWord(u32 v) { return v; }
@@ -486,13 +511,7 @@ static inline void BinShadows(Grid& g, TexEntry* te, f32 s) {
 
 void fn_802B9108(s16 size) {
     int d = size * 2;
-    Grid g;
-    g.size = size;
-    int k = 0x400 / d;
-    int n = k * k;
-    g.n = n;
-    g.cells = new ("tmp") Cell<Item*>[n];
-    g.pool = new ("tmpalloc") Pool<Item*>(n * 6 / 4);
+    Grid g(size);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
         TexEntry* te;
         Obj* o;
@@ -502,8 +521,7 @@ void fn_802B9108(s16 size) {
         case 0:
         case 1:
             if (g.size == 4) {
-                f32 scale = 2.0f;
-                BinShadows(g, te, scale);
+                BinShadows(g, te, lbl_80564CB0);
             }
             break;
         case 2:
@@ -525,19 +543,9 @@ void fn_802B9108(s16 size) {
                     for (Item** pp = fn_802B8EB8(x, y, sz, k)->list; *pp; pp++) {
                         u32 t = (*pp)->type;
                         if (t <= 1) {
-                            int idx;
-                            int j;
-                            for (j = 0; j < near.count; j++) {
-                                if (near.data[j] == *pp) {
-                                    idx = j;
-                                    goto found;
-                                }
-                            }
-                            idx = -1;
-                        found:
-                            if (idx == -1 && near.count + 1 <= near.cap) {
+                            if (near.Find(*pp) == -1 && near.CanAdd()) {
                                 if (t != 1 || g.size <= 4) {
-                                    near.data[near.count++] = *pp;
+                                    near.Next() = *pp;
                                 }
                             }
                         }
@@ -556,7 +564,8 @@ void fn_802B9108(s16 size) {
             int dd;
             int s = g.size;
             dd = s * 2;
-            for (Chunk<Item*>* c = g.cells[(y - s + 0x200) / dd * (0x400 / dd) + (x - s + 0x200) / dd].head; c;
+            int row = (y - s + 0x200) / dd;
+            for (Chunk<Item*>* c = g.cells[row * (0x400 / dd) + (x - s + 0x200) / dd].head; c;
                  c = c->next) {
                 int cnt = c->count;
                 for (int j = 0; j < cnt; j++) {
@@ -564,7 +573,7 @@ void fn_802B9108(s16 size) {
                     if (it->type == 2 && fn_802B9100(cell)) {
                         continue;
                     }
-                    lbl_8055FA80->data[lbl_8055FA80->count++] = it;
+                    lbl_8055FA80->Next() = it;
                     int inhibit = 0;
                     if (it->type == 2 && fn_802B59CC()->GetBool("road_inhibits_skags", 1)) {
                         inhibit = 1;
@@ -577,12 +586,10 @@ void fn_802B9108(s16 size) {
                     }
                 }
             }
-            lbl_8055FA80->data[lbl_8055FA80->count++] = 0;
+            lbl_8055FA80->Next() = 0;
             cell->list = &lbl_8055FA80->data[start];
         }
     }
-    delete g.pool;
-    delete[] g.cells;
 }
 
 inline s16 Obj::Y(void) { return y; }
@@ -1052,3 +1059,5 @@ void fn_802BB674(const char* name, int slot) {
 }
 
 }  // extern "C"
+
+const f32 lbl_80564CB0 = 2.0f;
