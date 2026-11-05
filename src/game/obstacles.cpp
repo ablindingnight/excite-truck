@@ -668,11 +668,11 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         m[6] = sn;
         m[7] = lbl_8056247C;
         m[8] = cs;
-        ObRotate(&v, m, &v);
+        ObRotate(&v, &m[0], &v);
         AddCornerV(p, v, spring);
-        ObRotate(&v, m, &v);
+        ObRotate(&v, &m[0], &v);
         AddCornerV(p, v, spring);
-        ObRotate(&v, m, &v);
+        ObRotate(&v, &m[0], &v);
         AddCornerV(p, v, spring);
         AddCornerV(p, RVec3(-w, h * lbl_80562478, -w), spring);
         AddCornerV(p, RVec3(w, h * lbl_80562478, -w), spring);
