@@ -246,7 +246,7 @@ public:
     IdealFollower* follower;  // offset 0x58
     DCar* car;             // offset 0x5C
     s32 index;             // offset 0x60
-    s32 stuck;             // offset 0x64
+    u32 stuck;             // offset 0x64
     s32 finishLap;         // offset 0x68
     s32 start;             // offset 0x6C
     f32 finishTime;        // offset 0x70

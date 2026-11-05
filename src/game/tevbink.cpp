@@ -611,7 +611,7 @@ struct SimpleHeap {
         }
     }
     u8 active;        // offset 0x0
-    s32 align;        // offset 0x4
+    u32 align;        // offset 0x4
     HeapBlock* free;  // offset 0x8
     HeapBlock* used;  // offset 0xC
 };

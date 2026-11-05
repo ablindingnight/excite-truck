@@ -681,7 +681,7 @@ struct ZoneHud {
     void Reset(void);
     void Init(void);
 
-    s32 state;  // offset 0x0 (0x134)
+    u32 state;  // offset 0x0 (0x134)
     f32 t;      // offset 0x4
     u8 b8;      // offset 0x8
     u8 b9;      // offset 0x9
@@ -910,7 +910,7 @@ public:
 
     int IsRacing(int car);  // 0x801B8514
 
-    u32 unk4;  // offset 0x4
+    s32 unk4;  // offset 0x4
 
 };
 

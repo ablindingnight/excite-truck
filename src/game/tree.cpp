@@ -191,7 +191,7 @@ struct TreeType {
     s32 farTris;       // offset 0x24
     s32 cls;           // offset 0x28
     s32 surf;          // offset 0x2C
-    u8 run;            // offset 0x30
+    s8 run;            // offset 0x30
     TCyl cyl;          // offset 0x34
     f32 baseRad;       // offset 0x54
     TreeSet* set;      // offset 0x58

@@ -84,7 +84,7 @@ struct Particle {
     V3 pos;      // offset 0x0
     V3 vel;      // offset 0xC
     f32 birth;   // offset 0x18
-    u8 rot;      // offset 0x1C
+    s8 rot;      // offset 0x1C
     u8 frame;    // offset 0x1D
     u8 spin;     // offset 0x1E
     f32 angVel;  // offset 0x20
