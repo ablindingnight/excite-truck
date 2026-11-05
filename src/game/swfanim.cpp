@@ -150,10 +150,10 @@ void SwfAnim::DrawItem(const Sw2Item* it) {
         pts[i].y = -(pts[i].y - 240.0f);
     }
     u32 c = sh->color;
-    u8 ca = (c >> 24) & 0xFF;
-    u8 cr = (c >> 16) & 0xFF;
-    u8 cg = (c >> 8) & 0xFF;
-    u8 cb = c & 0xFF;
+    int ca = (u8)(c >> 24);
+    int cr = (u8)(c >> 16);
+    int cg = (u8)(c >> 8);
+    int cb = (u8)c;
     int a = SwfChannel(ca << 1, cx->mul[3], cx->add[3]);
     int r = SwfChannel(cr << 1, cx->mul[0], cx->add[0]);
     int g = SwfChannel(cg << 1, cx->mul[1], cx->add[1]);

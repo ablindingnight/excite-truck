@@ -3365,17 +3365,23 @@ void fn_801A1F44(RVec3* out, u8* q) {
 }
 
 // Axis-aligned bounds of the box: its 8 corners (+-hx, +-hy, +-hz) through the volume's frame.
-void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
-    f32 hx = F32(p, 0x24);
-    f32 hy = F32(p, 0x28);
-    f32 hz = F32(p, 0x2C);
-    f32 nx = -hx;
-    f32 ny = -hy;
+static inline void BoxCorners(RVec3* c, f32 hx, f32 hy, f32 hz) {
     f32 nz = -hz;
-    RVec3 c[8] = {
-        {hx, hy, hz},   {nx, hy, hz},   {hx, ny, hz},   {nx, ny, hz},
-        {hx, hy, nz},   {nx, hy, nz},   {hx, ny, nz},   {nx, ny, nz},
-    };
+    f32 ny = -hy;
+    f32 nx = -hx;
+    c[0].y = hy; c[0].x = hx; c[0].z = hz;
+    c[1].x = nx; c[1].y = hy; c[1].z = hz;
+    c[2].x = hx; c[2].y = ny; c[2].z = hz;
+    c[3].x = nx; c[3].y = ny; c[3].z = hz;
+    c[4].x = hx; c[4].y = hy; c[4].z = nz;
+    c[5].x = nx; c[5].y = hy; c[5].z = nz;
+    c[6].x = hx; c[6].y = ny; c[6].z = nz;
+    c[7].x = nx; c[7].y = ny; c[7].z = nz;
+}
+
+void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
+    RVec3 c[8];
+    BoxCorners(c, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
     RVec3 w;
     *lo = ((CFrame*)VE(p)->v50())->t;
     *hi = ((CFrame*)VE(p)->v50())->t;
@@ -3388,7 +3394,7 @@ void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
         lo->x = lo->x < w.x ? lo->x : w.x;
         lo->y = lo->y < w.y ? lo->y : w.y;
         lo->z = lo->z < w.z ? lo->z : w.z;
-        hi->x = w.x < hi->x ? hi->x : w.x;
+        hi->x = MaxF(hi->x, w.x);
         hi->y = hi->y > w.y ? hi->y : w.y;
         hi->z = hi->z > w.z ? hi->z : w.z;
     }
