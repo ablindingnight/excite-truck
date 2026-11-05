@@ -1089,11 +1089,11 @@ void Arena::Init(void) {
 int Arena::CountRingSets(void) {
     ValueNode* cfg = fn_8000AC38()->vals;
     const char* key = (const char*)fn_80204EA0("ring_file_key");
+    int found;
     int n = 0;
     if (cfg->Has(key)) {
         ValueTable* t = fn_80131810(cfg->GetValue(key));
         if (t) {
-            int found;
             do {
                 char prefix[0x1E];
                 int i;
