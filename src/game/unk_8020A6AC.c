@@ -10,7 +10,8 @@ extern float fn_80209028(void), fn_802091CC(void);
 extern int fn_802090CC(void), fn_802E2C20(void);
 extern void fn_802E625C(int);
 extern void fn_802E61EC(void *, float), fn_802E620C(void *, float), fn_802E6234(void *, float), fn_802E6238(void *, float), fn_802E623C(void *, float), fn_802E622C(void *, float), fn_802E6240(void *, int);
-extern float lbl_8055B590, lbl_8055B594, lbl_80558DC4;
+extern float lbl_8055B590, lbl_8055B594;
+extern float lbl_80558DC4[];
 extern int lbl_8055EDF8;
 extern unsigned int lbl_8055EE00;
 
@@ -274,36 +275,50 @@ void VoiceSoundMixer_vf38(void) {
 
 #pragma push
 #pragma processor 750
-void VoiceSoundMixer_vf20(void *arg0) {
- int i,j,mode,now; void *p,*handle; float volume,x,v,high,low;
+#pragma push
+#pragma cplusplus on
+// The slots of the voice's vtable that the mixer update calls.
+class MixerVoiceSlots {
+public:
+    virtual ~MixerVoiceSlots(void);
+    virtual void vf0C(void);
+    virtual int vf10(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void Expire(void);  // 0x20
+};
+
+extern "C" void VoiceSoundMixer_vf20(void *arg0) {
+ void *p; int i,now; void *handle; float volume,x,v;
  lbl_8055B590=fn_80209028();
  lbl_8055B594=fn_802091CC();
  lbl_8055EDF8++;
  now=fn_802E2C20();
  lbl_8055EE00=now-(*(int *)((char *)(arg0)+(8)));
  if(lbl_8055EE00>200U) lbl_8055EE00=200;
- high=1.0f; low=0.0f;
  (*(int *)((char *)(arg0)+(8)))=now;
  for(i=0;i<512;i++) {
  p=(*(void ** *)((char *)(arg0)+(4)))[i];
  if(p) {
- mode=1;
+ int mode=1;
  switch(fn_802090CC()) {case 0: mode=0;break;case 1:break;case 2:mode=2;break;}
  fn_802E625C(mode);
  handle=(*(void * *)((char *)(p)+(8)));
  if(handle) {
+ int j;
  v=(*(float *)((char *)(p)+(0x1c)))*(*(float *)((char *)((*(void * *)((char *)(p)+(0x18))))+(0x20)));
  if((*(unsigned char *)((char *)(p)+(0x3e)))) volume=0.0f;
- else {if(!(*(unsigned char *)((char *)(p)+(0x3c)))) v*=lbl_8055B590;volume=lbl_8055B598*v;}
+ else {float w; if((*(unsigned char *)((char *)(p)+(0x3c)))) w=v; else w=v*lbl_8055B590;volume=lbl_8055B598*w;}
  if((*(void * *)((char *)(p)+(0xc)))) {
- x=high+-(*(float *)((char *)(p)+(0x20)));
- if(high<x)x=high;
- x=x>low?x:low;
+ x=1.0f+-(*(float *)((char *)(p)+(0x20)));
+ if(1.0f<x)x=1.0f;
+ x=x>0.0f?x:0.0f;
  ((void (*)(void *,float))fn_802E61E4)(handle,volume*x);
  fn_802E61EC((*(void * *)((char *)(p)+(8))),(-1.0f));
- x=high+(*(float *)((char *)(p)+(0x20)));
- if(high<x)x=high;
- x=x>low?x:low;
+ x=1.0f+(*(float *)((char *)(p)+(0x20)));
+ if(1.0f<x)x=1.0f;
+ x=x>0.0f?x:0.0f;
  ((void (*)(void *,float))fn_802E61E4)((*(void * *)((char *)(p)+(0xc))),volume*x);
  fn_802E61EC((*(void * *)((char *)(p)+(0xc))),1.0f);
  }else{
@@ -311,26 +326,28 @@ void VoiceSoundMixer_vf20(void *arg0) {
  fn_802E61EC((*(void * *)((char *)(p)+(8))),(*(float *)((char *)(p)+(0x20))));
  }
  for(j=0;j<2;j++){
- if(j==0)handle=(*(void * *)((char *)(p)+(8)));else handle=(*(void * *)((char *)(p)+(0xc)));
- if(handle) {
- fn_802E620C(handle,(*(float *)((char *)(p)+(0x28))));
- fn_802E6234(handle,(*(float *)((char *)(p)+(0x2c))));
- fn_802E6238(handle,(*(float *)((char *)(p)+(0x30))));
- fn_802E623C(handle,(*(float *)((char *)(p)+(0x34))));
- fn_802E622C(handle,(*(float *)((char *)(p)+(0x24))));
- fn_802E6240(handle,(*(int *)((char *)(p)+(0x38))));
+ void *h;
+ if(j==0)h=(*(void * *)((char *)(p)+(8)));else h=(*(void * *)((char *)(p)+(0xc)));
+ if(h) {
+ fn_802E620C(h,(*(float *)((char *)(p)+(0x28))));
+ fn_802E6234(h,(*(float *)((char *)(p)+(0x2c))));
+ fn_802E6238(h,(*(float *)((char *)(p)+(0x30))));
+ fn_802E623C(h,(*(float *)((char *)(p)+(0x34))));
+ fn_802E622C(h,(*(float *)((char *)(p)+(0x24))));
+ fn_802E6240(h,(*(int *)((char *)(p)+(0x38))));
  }}
  }
  if((*(int *)((char *)(p)+(4)))==1) {
  (*(int *)((char *)(p)+(0x44)))++;
- if(!(*(unsigned char *)((char *)(p)+(0x3e))) && !((float)__fabs((*(float *)((char *)(p)+(0x24))))<=lbl_80558DC4)) (*(unsigned int *)((char *)(p)+(0x50)))+=lbl_8055EE00;
+ if(!(*(unsigned char *)((char *)(p)+(0x3e))) && !((float)__fabs((*(float *)((char *)(p)+(0x24))))<=lbl_80558DC4[0])) (*(unsigned int *)((char *)(p)+(0x50)))+=lbl_8055EE00;
  if(!(*(unsigned char *)((char *)(p)+(0x3d))) && (*(unsigned int *)((char *)(p)+(0x50)))>(*(unsigned int *)((char *)(p)+(0x4c))))
- ((void (*)(void *))(*(void ***)p)[8])(p);
+ ((MixerVoiceSlots *)p)->Expire();
  }else (*(unsigned int *)((char *)(p)+(0x50)))=0;
  }
  }
  fn_802E6264();
 }
+#pragma pop
 #pragma pop
 
 extern char lbl_8033C3F4[];
