@@ -2918,21 +2918,20 @@ void fn_801CA67C(void) {
         f32 dur = lbl_8055A958 > 0.01f ? lbl_8055A958 : 0.01f;
         f32 scale = 250.0f / dur;
         for (int i = 0; i < lbl_8055E7F0; i++) {
-            int color = fn_801C34CC(lbl_8055E7F8[i].time, lbl_8055E7F8[lbl_8055E828].time) ? -1 : 0xFF000000;
-            f32 timev = lbl_8055E7F8[i].time;
+            Event* ev = lbl_8055E7F8;
+            int color = fn_801C34CC(ev[i].time, ev[lbl_8055E828].time) ? -1 : 0xFF000000;
+            f32 timev = ev[i].time;
             int x = (int)(0.5f + timev * scale) + 10;
             x = x <= 260 ? x : 260;
             fn_80238B44(x, 90, x + 1, 105, color);
         }
-        int x = (int)(0.5f + t * scale) + 10;
-        if (x > 260) {
-            x = 260;
-        }
+        int x = (int)(0.5f + t * scale) + 10 > 260 ? 260 : (int)(0.5f + t * scale) + 10;
         fn_80238B44(x, 90, x + 1, 105, 0xFFFFFF00);
     }
     int y;
     Menu* m = &lbl_8055E86C[lbl_8055E81C];
-    fn_801C94BC(398, 8, 600, lineH * (m->count + 1) + 10, bg);
+    int hgt = lineH * (m->count + 1) + 10;
+    fn_801C94BC(398, 8, 600, hgt, bg);
     fn_801C94BC(398, 8, 600, h + 10, 0x32000000);
     fn_801C94B8(400, 10, m->title, -1);
     y = lineH + 10;
@@ -2982,19 +2981,18 @@ void fn_801CA67C(void) {
         yy += h;
         sprintf(buf, "%c - Save", 'l');
         fn_801C94B8(270, yy, buf, -1);
+        yy += h;
         sprintf(buf, "%c - Hide", 'h');
-        fn_801C94B8(270, yy + h, buf, -1);
+        fn_801C94B8(270, yy, buf, -1);
     }
     if (lbl_8055E839) {
-        fn_801C94BC(10, 125, 260, h * 14 + 125, bg);
+        int yy = h * 2;
+        fn_801C94BC(10, 125, 260, h * 4 + h * 10 + 125, bg);
         fn_801C94B8(10, 125, "[ and ] Scroll", 0xE6969696);
-        int yy = h * 2 + 125;
+        yy += 125;
         int first = lbl_8055E82C * 10;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10 && first + i < lbl_8055E7F0; i++) {
             int k = first + i;
-            if (k >= lbl_8055E7F0) {
-                break;
-            }
             Event* e = &lbl_8055E7F8[k];
             sprintf(buf, "%5.2f   %4d   %s", e->time, e->order, fn_801C98F4(lbl_80562950, e->type));
             fn_801C94B8(10, yy, buf, k == lbl_8055E828 ? 0xFFFFFF00 : -1);
@@ -3002,7 +3000,8 @@ void fn_801CA67C(void) {
         }
         if (first < lbl_8055E7F0 - 10) {
             fn_801C94B8(10, yy, "  v", -1);
-            fn_801C94B8(10, yy + h - 10, "  v", -1);
+            yy += h;
+            fn_801C94B8(10, yy - 10, "  v", -1);
         }
         fn_801CA5A8();
     }
@@ -3024,10 +3023,12 @@ void fn_801CA67C(void) {
                 s16 hint;
                 fn_801E9DC4(&hint);
                 IVec3 p;
-                p.x = tp->pt.x;
+                f32 z = tp->pt.y;
+                f32 x = tp->pt.x;
+                p.x = x;
                 p.y = 0.0f;
-                p.z = tp->pt.y;
-                p.y = fn_801E9DDC(&hint, tp->pt.x, tp->pt.y);
+                p.z = z;
+                p.y = fn_801E9DDC(&hint, x, z);
                 fn_801E3FC8(&p, 2.0f, 0xFF0000FF);
             }
             break;
@@ -3038,10 +3039,12 @@ void fn_801CA67C(void) {
                 s16 hint;
                 fn_801E9DC4(&hint);
                 IVec3 p;
-                p.x = th->x;
+                f32 z = th->z;
+                f32 x = th->x;
+                p.x = x;
                 p.y = 0.0f;
-                p.z = th->z;
-                p.y = fn_801E9DDC(&hint, th->x, th->z);
+                p.z = z;
+                p.y = fn_801E9DDC(&hint, x, z);
                 fn_801E3FC8(&p, 2.0f, 0xFF00FF00);
             }
             break;
