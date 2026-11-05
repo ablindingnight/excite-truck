@@ -1365,7 +1365,7 @@ StatePacket* fn_80179824(void) {
     return p;
 }
 
-void fn_80179AF4(Phob* v, u8* buf) {
+void fn_80179AF4(const Phob* v, u8* buf) {
     u8* o = buf + v->a8;
     PMtx* out = (PMtx*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {

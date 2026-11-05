@@ -315,7 +315,7 @@ extern "C" {
 
 // Builds the engine torque curve from v = {hp, hp rpm, peak torque, torque rpm, redline rpm, idle torque}: a
 // parabola through the torque peak and the hp point below it, another from the peak down to 30% at redline.
-void fn_8018185C(u8* p, f32* v) {
+void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
     F32(p, 0x28) = v[3];
     f32 vv = v[5];

@@ -704,7 +704,7 @@ void fn_802D5ACC(Surf* s) {
 }
 
 
-void fn_802D5B8C(Surf* s) {
+void fn_802D5B8C(const Surf* s) {
     u32* col;
     f32* uv;
     int n = s->nverts;
@@ -1101,7 +1101,7 @@ struct ColVtx {
     f32 u, v;     // offset 0x10
 };
 
-void fn_802D68C4(ColVtx* verts, int unused, const u16* idx, int n) {
+void fn_802D68C4(const ColVtx* verts, int unused, u16* idx, int n) {
     lbl_8055FD25 = 0;
     lbl_804C5700.b9 = 0;
     lbl_804C5700.mode = 0;
