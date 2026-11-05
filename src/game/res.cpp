@@ -1563,6 +1563,8 @@ QueueNode* NodePool::Alloc(void) {
 
 QueueNode* NodeList::First(void) { return head; }
 
+#pragma push
+#pragma opt_propagation off
 extern "C" void fn_8012E498(const char* name) {
     ResourceSet* set;
     fn_8012E81C(name);
@@ -1598,6 +1600,7 @@ extern "C" void fn_8012E498(const char* name) {
         fn_8012BB20(&lbl_8055E000, set);
     }
 }
+#pragma pop
 
 void NodePool::Free(QueueNode* n) {
     int found = 0;
