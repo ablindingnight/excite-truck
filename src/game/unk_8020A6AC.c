@@ -368,7 +368,7 @@ extern char lbl_8055B5B8[8];
 extern char lbl_8055B5C0[5];
 extern void *fn_802E5AE8(void *);
 extern void *fn_8020A6AC(void *);
-extern double fn_802E6040(void *);
+extern float fn_802E6040(void *);
 extern char *strchr(const char *, int);
 extern int strcasecmp(const char *, const char *);
 extern void fn_802E30C8(const char *, ...);
@@ -387,13 +387,12 @@ public:
 // right stream (name with its extension replaced), then initialises it.
 // Sets up a new voice: the left stream is the named file, the right stream the same name
 // with its extension replaced.
-static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int slot, unsigned char unscaled) {
+static inline MixerVoiceData *MixerVoice_Construct(MixerVoiceData *voice, char *name, int slot, unsigned char unscaled) {
     char buf[0x40];
     char *dest;
     int left;
     const char *src;
     char *ext;
-    float length;
 
     voice->vtable = (void **)lbl_8033C3F4;
     *(float *)((char *)voice + 0x48) = 0.0f;
@@ -409,7 +408,7 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
     voice->unscaled = unscaled;
     voice->stream0 = fn_802E5AE8(name);
     if (voice->stream0 == 0) {
-        return;
+        return voice;
     }
     left = 0x40;
     src = name;
@@ -426,18 +425,20 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
             fn_802E317C(lbl_8033C4C8, name);
         }
         *ext = 0;
-        left = 0x40;
-        dest = buf;
-        while (*dest != 0) {
-            left--;
-            dest++;
-        }
-        if (left > 0) {
-            src = lbl_8055B5B8;
-            while ((*dest++ = *src++) != 0) {
-                if (--left <= 0) {
-                    dest[-1] = 0;
-                    break;
+        {
+            char *d = buf;
+            int n = 0x40;
+            while (*d != 0) {
+                n--;
+                d++;
+            }
+            if (n > 0) {
+                const char *s = lbl_8055B5B8;
+                while ((*d++ = *s++) != 0) {
+                    if (--n <= 0) {
+                        d[-1] = 0;
+                        break;
+                    }
                 }
             }
         }
@@ -446,9 +447,8 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
     }
     voice->stream1 = fn_802E5AE8(buf);
     voice->sample = (char *)fn_8020A6AC(name);
-    length = fn_802E6040(voice->stream0);
-    *(float *)((char *)voice + 0x48) = length;
-    *(unsigned long *)((char *)voice + 0x4C) = 1000.0f * (0.1f + 1.02f * length);
+    *(float *)((char *)voice + 0x48) = fn_802E6040(voice->stream0);
+    *(unsigned long *)((char *)voice + 0x4C) = 1000.0f * (0.1f + 1.02f * *(float *)((char *)voice + 0x48));
     voice->pan = 0.0f;
     voice->volume = 0.0f;
     voice->param24 = 1.0f;
@@ -457,6 +457,7 @@ static inline void MixerVoice_Construct(MixerVoiceData *voice, char *name, int s
     voice->param30 = 0.0f;
     voice->param34 = 0.0f;
     voice->param38 = 0;
+    return voice;
 }
 
 // Creates a voice in the first free slot and initialises it.
@@ -467,7 +468,7 @@ extern "C" MixerVoiceObj *VoiceSoundMixer_vf1C(VoiceSoundMixer *self, char *name
         if (self->m_voices[i] == 0) {
             voice = (MixerVoiceData *)fn_8020A788(0x54, lbl_8033C3D8);
             if (voice != 0) {
-                MixerVoice_Construct(voice, name, i, unscaled);
+                voice = MixerVoice_Construct(voice, name, i, unscaled);
             }
             if (!((MixerVoiceObj *)voice)->Init()) {
                 delete (MixerVoiceObj *)voice;
