@@ -393,7 +393,7 @@ extern const f32 lbl_8055EC04 = Angle(0.7853982f);  // lowest sun elevation
 extern "C" {
 void fn_801C0E60(TVec* out, const f32* a, const f32* b);
 void fn_80144B54(TMtx* m, TCam* c);
-f32* fn_80144B44(TVec* v, f32 x, f32 y, f32 z);
+f32* fn_80144B44(PVec* v, f32 x, f32 y, f32 z);
 u32 fn_80144C68(int r, int g, int b, int a);
 void fn_80144DAC(f32* dst, const f32* src);
 void fn_80144DC8(TMat3* m);
@@ -610,22 +610,23 @@ struct TVtx {
 void MultiFacingTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TCam* cam = fn_802C86DC();
-        TVec dir;
-        TVec c0;
-        TVec c2;
-        TVec c1;
-        TVec c3;
-        TVec c4;
+        PVec c0;
+        PVec c2;
+        PVec c1;
+        PVec c3;
+        PVec c4;
         TVtx base;
         TMtx m;
         TVtx v[4];
         u16 idx[6];
+        TVec dir;
         int seg;
         f32 u0;
         f32 v0;
         f32 u1;
         f32 v1;
-        fn_801C0E60(&dir, list->pos, cam->pos);
+        f32* pos = list->pos;
+        fn_801C0E60(&dir, pos, cam->pos);
         fn_801F3198(&dir);
         seg = (int)(32.0f * (-fn_801F3174(dir.x, dir.z) / 6.2831855f));
         if (seg < 0) {
@@ -654,7 +655,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         v[3].v = v1;
         v[2].v = v1;
         fn_80144B54(&m, cam);
-        fn_80144DAC(m.t, list->pos);
+        fn_80144DAC(m.t, pos);
         fn_801BFD34(&v[0], fn_80144B44(&c1, -0.5f, 1.0f, 0.0f), &m);
         fn_801BFD34(&v[1], fn_80144B44(&c2, 0.5f, 1.0f, 0.0f), &m);
         fn_801BFD34(&v[2], fn_80144B44(&c3, -0.5f, -1.0f, 0.0f), &m);
