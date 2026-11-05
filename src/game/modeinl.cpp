@@ -266,13 +266,14 @@ static inline void MtxMul(Mtx33* dp, const Mtx33* ap, const Mtx33* bp) {
 }
 
 void Mtx33::SetEuler(f32 y, f32 x, f32 z) {
-    Mtx33 t;
+    f32 t[9];
     SetRotY(y);
-    Mtx33* r = &t;
-    r->SetRotX(x);
-    MtxMul(this, r, this);
-    r->SetRotZ(z);
-    MtxMul(this, r, this);
+    Mtx33* rx = (Mtx33*)t;
+    rx->SetRotX(x);
+    MtxMul(this, rx, this);
+    Mtx33* rz = (Mtx33*)t;
+    rz->SetRotZ(z);
+    MtxMul(this, rz, this);
 }
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
