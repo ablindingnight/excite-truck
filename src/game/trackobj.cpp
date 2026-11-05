@@ -360,16 +360,22 @@ struct RVec3 {
 
 extern "C" void fn_8019EECC(void* v, RVec3* c);
 
-class TubeVol : public CollShape {
+// The size fields sit in a base of their own: the derived vptr store comes after them.
+class TubeBase : public CollShape {
 public:
-    TubeVol(f32 k, f32 s, f32 r, f32 h) : CollShape(0, 0, 'TUBE', k, s) {
+    TubeBase(f32 k, f32 s, f32 r, f32 h) : CollShape(0, 0, 'TUBE', k, s) {
         rad = r;
         half = h;
     }
-    virtual ~TubeVol(void);
-    virtual void vf38(void);
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28
+};
+
+class TubeVol : public TubeBase {
+public:
+    TubeVol(f32 k, f32 s, f32 r, f32 h) : TubeBase(k, s, r, h) {}
+    virtual ~TubeVol(void);
+    virtual void vf38(void);
 };
 
 class RingVol : public CollShape {

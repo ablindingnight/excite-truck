@@ -277,16 +277,22 @@ public:
     s32 a20;           // offset 0x20
 };
 
-class TubeShape : public CollShape {
+// The size fields sit in a base of their own: the derived vptr store comes after them.
+class TubeBase : public CollShape {
 public:
-    TubeShape(f32 r, f32 h) : CollShape('TUBE', 50000.0f, 0.2f) {
+    TubeBase(f32 k, f32 r, f32 h) : CollShape('TUBE', k, 0.2f) {
         rad = r;
         half = h;
     }
-    virtual ~TubeShape(void);
-    virtual void vf38(void);
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28
+};
+
+class TubeShape : public TubeBase {
+public:
+    TubeShape(f32 k, f32 r, f32 h) : TubeBase(k, r, h) {}
+    virtual ~TubeShape(void);
+    virtual void vf38(void);
 };
 
 extern "C" TreeVol* fn_801FA8E0(CollShape* s, const TMtx* m, u8* hit);
@@ -472,9 +478,10 @@ void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeTy
 }
 
 CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
-    f32 h = c->half * scale;
+    f32 k = 50000.0f;
     f32 r = c->rad * scale;
-    TubeShape* s = new ("tree-volume") TubeShape(r, h);
+    f32 h = c->half * scale;
+    TubeShape* s = new ("tree-volume") TubeShape(k, r, h);
     s->SetId(id);
     return s;
 }
