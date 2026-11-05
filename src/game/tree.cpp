@@ -992,10 +992,12 @@ TreeType* fn_802BE008(TCell* c) {
 
 typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f32 h);
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802BE07C(s16 bx, u16 bz, TreeQuery& cb) {
-    int i;
-    for (i = -0x80; i <= 0x80; i += 0x80) {
+void fn_802BE07C(const TVec* pos, TreeQuery cb) {
+    f32 x = pos->x;
+    f32 size = 2.0f;
+    s16 bx = ((s16)(int)(x / size) / 128) * 128 + 0x40;
+    s16 bz = ((s16)(int)(pos->z / size) / 128) * 128 + 0x40;
+    for (int i = -0x80; i <= 0x80; i += 0x80) {
         for (int j = -0x80; j <= 0x80; j += 0x80) {
             FanCell* f = fn_802BE844(bx + i, bz + j, 0x40);
             for (TCell* c = f->head; c; c = c->next) {
@@ -1003,19 +1005,13 @@ static inline void Loop1_fn_802BE07C(s16 bx, u16 bz, TreeQuery& cb) {
                 if (t->set && t->farTris <= 10) {
                     TreeRec* tr = &t->set->list->data[c->first];
                     TModel* m = t->far;
-                    cb(t->farTex, &tr->mtx.pos, sizeof(TreeRec), c->count, (m->x1 - m->x0) * 0.5f, m->y1 - m->y0);
+                    f32 w = m->x1 - m->x0;
+                    f32 h = m->y1 - m->y0;
+                    cb(t->farTex, &tr->mtx.pos, sizeof(TreeRec), c->count, w / 2.0f, h);
                 }
             }
         }
     }
-}
-
-void fn_802BE07C(const TVec* pos, TreeQuery cb) {
-    s16 cz = (s16)(int)(pos->z / 2.0f);
-    u16 cx = (s16)(int)(pos->x / 2.0f);
-    s16 bx = (cx / 128) * 128 + 0x40;
-    int i;
-    Loop1_fn_802BE07C(bx, (cz / 128) * 128 + 0x40, cb);
 }
 
 }  // extern "C"
