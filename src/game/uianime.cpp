@@ -48,8 +48,12 @@ void fn_802E317C(const char* fmt, ...);
 
 char lbl_80498664[100];  // anim file for the next push
 
-struct UiAnimKey {
-    UiAnimKey(void);
+// Its empty ctor makes UiAnimKey's implicit ctor non-trivial: the array new passes a real (weak) ctor, `def` inlines it.
+struct KeyBase {
+    KeyBase(void) {}
+};
+
+struct UiAnimKey : KeyBase {
     f32 t;        // offset 0x0
     f32 alpha;    // offset 0x4
     f32 scale;    // offset 0x8
@@ -146,7 +150,7 @@ static inline void StrCat(char* d, const char* s, int n) {
     }
 }
 
-static inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
+inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
     if (sub) {
         int j;
         ValueNode* f;
@@ -204,8 +208,9 @@ inline UiAnimList::UiAnimList(ValueTable* t, const char* key) {
             for (i = 0; (c = t->GetChild(i)) != 0; i++) {
                 if (!strcasecmp(c->GetName(), "anim") && HasNode(c, key)) {
                     ValueNode* sub = c->FindChild(key);
+                    int id = c->GetIntValue("anim_index");
                     UiAnimTrack* tr = &tracks[n];
-                    tr->id = c->GetIntValue("anim_index");
+                    tr->id = id;
                     tr->n = 0;
                     LoadTrack(tr, sub);
                     f32 last = LastTime(&tracks[n]);
@@ -640,4 +645,3 @@ int fn_80237EFC(const char* name) { return lbl_8055F0C0->special->State(name); }
 
 }  // extern "C"
 
-inline UiAnimKey::UiAnimKey(void) {}
