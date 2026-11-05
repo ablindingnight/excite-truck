@@ -114,10 +114,9 @@ struct QuadBatch {
             fn_802C8DB8(v, n * 4, idx, n * 6);
             n = 0;
         }
-        v[n * 4 + 0] = q[0];
-        v[n * 4 + 1] = q[1];
-        v[n * 4 + 2] = q[2];
-        v[n * 4 + 3] = q[3];
+        for (int i = 0; i < 4; i++) {
+            v[n * 4 + i] = q[i];
+        }
         n++;
     }
     void Flush(void) {
