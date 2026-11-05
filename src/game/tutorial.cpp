@@ -1687,6 +1687,61 @@ void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
 
 static u8 lbl_8055E308;  // warned about the elems
 
+static inline void DrawEntry(ChalList* list, TextElem* el, int i, TextElem* e1, TextElem* e2, GartElem* but, GartElem* star) {
+    TextElem te = *el;
+    GartElem b;
+    f32 dx = te.pos.x - e1->pos.x;
+    f32 dy = te.pos.y - e1->pos.y;
+    b = *but;
+    int off = i != list->sel;
+    u8 alpha;
+    f32 pulse;
+    if (i > fn_80160CE4() && i != lbl_8042FDEC.count) {
+        b.color = 0x55FFFFFF;
+    }
+    b.pos.y += dy;
+    b.pos.x += dx;
+    fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
+    if (i > fn_80160CE4() && i < lbl_8042FDEC.count) {
+        te.color = e2->color;
+    } else {
+        te.color = e1->color;
+    }
+    alpha = 0xFF;
+    pulse = 0.0f;
+    if (i == list->sel) {
+        fn_80230F78(&alpha, &pulse, &te.color, 1);
+        b.pos.x -= 0.5f * b.w * pulse;
+        b.pos.y -= 0.5f * b.h * pulse;
+        b.w *= 1.0f + pulse;
+        b.h *= 1.0f + pulse;
+        b.color = (b.color & 0xFF0000) | (alpha << 24) | (b.color & 0xFFFF);
+        fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
+    }
+    if (i != lbl_8042FDEC.count) {
+        if (i < fn_80160CE4()) {
+            GartElem d = *star;
+            d.pos.y += dy;
+            d.pos.x += dx;
+            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 2);
+        } else {
+            int done = i <= fn_80160CE4();
+            GartElem d = *star;
+            d.pos.y += dy;
+            d.pos.x += dx;
+            if (!done) {
+                d.color = 0x55FFFFFF;
+            }
+            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 3);
+        }
+    }
+    if (i < lbl_8042FDEC.count) {
+        fn_80147230(&te, "%s", lbl_8042FDEC.data[i]->Title());
+    } else {
+        fn_80147230(&te, "%s", fn_80131234("Tutorial:EXIT_HEAD"));
+    }
+}
+
 inline int ChalList::Draw(int a) {
     if (exit) {
         fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), fn_80131234("Tutorial:EXIT_BODY"));
@@ -1716,59 +1771,7 @@ inline int ChalList::Draw(int a) {
                 fn_801345D8(name, sizeof(name), "elem%d", i);
                 el = (TextElem*)lbl_8055E2E0->Find(name);
                 if (el) {
-                    GartElem b;
-                    TextElem te = *el;
-                    f32 dy;
-                    f32 dx = te.pos.x - e1->pos.x;
-                    dy = te.pos.y - e1->pos.y;
-                    b = *but;
-                    int off = i != sel;
-                    u8 alpha;
-                    f32 pulse;
-                    if (i > fn_80160CE4() && i != lbl_8042FDEC.count) {
-                        b.color = 0x55FFFFFF;
-                    }
-                    b.pos.y += dy;
-                    b.pos.x += dx;
-                    fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
-                    if (i > fn_80160CE4() && i < lbl_8042FDEC.count) {
-                        te.color = e2->color;
-                    } else {
-                        te.color = e1->color;
-                    }
-                    alpha = 0xFF;
-                    pulse = 0.0f;
-                    if (i == sel) {
-                        fn_80230F78(&alpha, &pulse, &te.color, 1);
-                        b.pos.x -= 0.5f * b.w * pulse;
-                        b.pos.y -= 0.5f * b.h * pulse;
-                        b.w *= 1.0f + pulse;
-                        b.h *= 1.0f + pulse;
-                        b.color = (alpha << 24) | (b.color & 0xFFFFFF);
-                        fn_80147940(lbl_8055E2E0, &b, "tutbutton_art", off);
-                    }
-                    if (i != lbl_8042FDEC.count) {
-                        if (i < fn_80160CE4()) {
-                            GartElem d = *star;
-                            d.pos.x += dx;
-                            d.pos.y += dy;
-                            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 2);
-                        } else {
-                            int done = i <= fn_80160CE4();
-                            GartElem d = *star;
-                            d.pos.x += dx;
-                            d.pos.y += dy;
-                            if (!done) {
-                                d.color = 0x55FFFFFF;
-                            }
-                            fn_80147940(lbl_8055E2E0, &d, "pass_dot_art", 3);
-                        }
-                    }
-                    if (i < lbl_8042FDEC.count) {
-                        fn_80147230(&te, "%s", lbl_8042FDEC.data[i]->Title());
-                    } else {
-                        fn_80147230(&te, "%s", fn_80131234("Tutorial:EXIT_HEAD"));
-                    }
+                    DrawEntry(this, el, i, e1, e2, but, star);
                 } else if (!lbl_8055E308) {
                     lbl_8055E308 = 1;
                     fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
