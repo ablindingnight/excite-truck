@@ -410,7 +410,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     int wide = fn_80178CA4() > 1;
     f32 off = BackOffset(mode, wide);
     int seven = mode == 7;
-    f32 dist = F32(c->car, 0x5B4) + off;
+    f32 dist = off + F32(c->car, 0x5B4);
     f32 lift = F32(c->car, 0x5B8);
     int air = F32(c->car, 0x2688) > lbl_80563E78;
     if (c->reset || air) {

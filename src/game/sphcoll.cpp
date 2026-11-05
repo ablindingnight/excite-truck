@@ -1417,7 +1417,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
                 f32 fr = lbl_8055A4C0;
                 f32 t = lbl_80562344 * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
-                fr = fr * MaxF(MinF(lbl_805622E0, t), lbl_805622D0);
+                fr *= MaxF(MinF(lbl_805622E0, t), lbl_805622D0);
                 if (pa) {
                     fp = fr;
                 }

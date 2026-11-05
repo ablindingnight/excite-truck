@@ -560,8 +560,9 @@ void fn_802B9108(s16 size) {
     }
     for (int x = size - 0x200; x < 0x200; x += d) {
         for (int y = size - 0x200; y < 0x200; y += d) {
+            int start;
             GroundCell* cell = fn_802BE844(x, y, size);
-            int start = lbl_8055FA80->count;
+            start = lbl_8055FA80->count;
             int dd;
             int s = g.size;
             dd = s * 2;

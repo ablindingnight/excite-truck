@@ -2993,8 +2993,7 @@ void fn_801CA67C(void) {
         int first = lbl_8055E82C * 10;
         for (int i = 0; i < 10 && first + i < lbl_8055E7F0; i++) {
             int k = first + i;
-            Event* e = &lbl_8055E7F8[k];
-            sprintf(buf, "%5.2f   %4d   %s", e->time, e->order, fn_801C98F4(lbl_80562950, e->type));
+            sprintf(buf, "%5.2f   %4d   %s", lbl_8055E7F8[k].time, lbl_8055E7F8[k].order, fn_801C98F4(lbl_80562950, lbl_8055E7F8[k].type));
             fn_801C94B8(10, yy, buf, k == lbl_8055E828 ? 0xFFFFFF00 : -1);
             yy += h;
         }

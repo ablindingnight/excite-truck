@@ -870,8 +870,8 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         fn_80254568((Vec3a*)&c, model, "rear_c");
         Vec mid;
         mid.x = l.x + 0.5f * (r.x - l.x);
-        f32 ly = l.y;
         f32 yv = r.y;
+        f32 ly = l.y;
         mid.y = ly + 0.5f * (yv - l.y);
         f32 zv = r.z;
         mid.z = l.z + 0.5f * (zv - l.z);

@@ -1230,11 +1230,7 @@ void fn_80268358(CamRec* c) {
     f32 ka;
     ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
-    if (lbl_803467E8[lbl_8055F4A0].on) {
-        kb = ShakeEase(t / lbl_8055C4F4);
-    } else {
-        kb = t / lbl_8055C4F4;
-    }
+    kb = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F4) : t / lbl_8055C4F4;
     KV3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
     KV3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
     KV3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
