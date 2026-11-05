@@ -1006,10 +1006,13 @@ public:
 
     Gate* NextGate(Gate* g) const {
         ZoneLevel* l = &levels->levels[level];
-        if (g == l->gates + l->n - 1) {
-            return l->gates;
+        Gate* first = l->gates;
+        if (g == first + l->n - 1) {
+            g = first;
+        } else {
+            g++;
         }
-        return g + 1;
+        return g;
     }
     void DrawNextGate(void);
     void DrawBonus(int p, CarState* c);
