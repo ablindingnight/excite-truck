@@ -367,7 +367,7 @@ void fn_8029F658(ValueNode* node) {
     d->ptM = node->GetPointOr("pt_m", ValPoint(zero2));
     d->vK = node->GetPointOr("v_k", ValPoint(zero2));
     d->vM = node->GetPointOr("v_m", ValPoint(zero2));
-    const ValVec3& off = node->GetVec3Or("offset", ValVec3(zero3));
+    const ValVec3& off = node->GetVec3Or("offset", zero3);
     d->offset.x = off.x;
     d->offset.y = off.y;
     d->offset.z = off.z;
@@ -378,10 +378,10 @@ void fn_8029F658(ValueNode* node) {
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
-    fc = node->GetVec3Or("fog_color", ValVec3(white));
+    fc = node->GetVec3Or("fog_color", white);
     d->fogColor = FogColor((int)(255.0f * fc.x), (int)(255.0f * fc.y), (int)(255.0f * fc.z));
     d->repeat = node->GetInt("repeat", 1);
-    const ValVec3& dp = node->GetVec3Or("dpos", ValVec3(zero3));
+    const ValVec3& dp = node->GetVec3Or("dpos", zero3);
     d->dpos.x = dp.x;
     d->dpos.y = dp.y;
     d->dpos.z = dp.z;

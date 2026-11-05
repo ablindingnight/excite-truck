@@ -376,12 +376,10 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
     p->spewRate = vn->GetFloat("Spew_rate");
     f32 xz = vn->GetFloat("Random_spread_(xz)", 0.0f);
     f32 y = vn->GetFloat("Random_spread_(y)", 0.0f);
-    V3c spread(xz, y, xz);
-    p->spread = spread;
+    p->spread = V3c(xz, y, xz);
     xz = vn->GetFloat("Velocity_scale_(xz)", 0.0f);
     y = vn->GetFloat("Velocity_scale_(y)", 0.0f);
-    V3c vs(xz, y, xz);
-    p->velScale = vs;
+    p->velScale = V3c(xz, y, xz);
     p->upKick = vn->GetFloat("Upwards_kick", 0.0f);
     p->angSpread = vn->GetFloat("Angular_spread", 0.0f);
     p->priority = vn->GetInt("Priority", 5);
@@ -399,8 +397,8 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
     p->farDist = vn->GetFloat("Far_distance", 1.0f);
     p->nearAlpha = vn->GetFloat("Near_alpha", 0.0f);
     if (vn->Has("Bright_ramp") || vn->Has("Bright_constant")) {
-        p->blueRamp = p->greenRamp = p->redRamp = vn->GetFloat("Bright_ramp", 0.0f);
-        p->blueConst = p->greenConst = p->redConst = vn->GetFloat("Bright_constant", 0.0f);
+        p->redRamp = p->greenRamp = p->blueRamp = vn->GetFloat("Bright_ramp", 0.0f);
+        p->redConst = p->greenConst = p->blueConst = vn->GetFloat("Bright_constant", 0.0f);
     } else if (vn->Has("Start_color") || vn->Has("End_color")) {
         ValVec3 start = vn->GetVec3Or("Start_color", V3c(0.0f, 0.0f, 0.0f));
         ValVec3 end = vn->GetVec3Or("End_color", V3c(0.0f, 0.0f, 0.0f));
@@ -408,8 +406,7 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
         p->redConst = start.x;
         p->greenRamp = end.y - start.y;
         p->greenConst = start.y;
-        f32 zv = end.z;
-        p->blueRamp = zv - start.z;
+        p->blueRamp = end.z - start.z;
         p->blueConst = start.z;
     } else {
         p->redRamp = vn->GetFloat("Red_ramp", 0.0f);

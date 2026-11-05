@@ -100,12 +100,6 @@ struct BlendFlag {
     const char* name;
 };
 
-static inline ValVec3 Vec3Or(ValueNode* n, const char* k, ValVec3 d) { return n->GetVec3Or(k, d); }
-static inline ValVec3 Vec3Or2(ValueNode* n, const char* k, const ValVec3& def) {
-    ValVec3 d = def;
-    return n->GetVec3Or(k, d);
-}
-
 static inline f32 Neg1(void) { return -1.0f; }
 
 ModuleTag lbl_8055F780;
@@ -228,7 +222,7 @@ int fn_802964EC(FlipFrame* f, ValueNode* n, const FlipFrame* def) {
     } else {
         f->size = def->size;
     }
-    (ValVec3&)f->offset = Vec3Or(n, "offset", def->offset);
+    (ValVec3&)f->offset = n->GetVec3Or("offset", def->offset);
     f->blend = fn_802963F0(n, def->blend);
     return 1;
 }
