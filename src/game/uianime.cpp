@@ -152,6 +152,7 @@ static inline void StrCat(char* d, const char* s, int n) {
 
 inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
     if (sub) {
+        UiAnimKey* k;
         ValueNode* f;
         for (int j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
             if (!strcasecmp(f->GetName(), "frame")) {
@@ -170,7 +171,7 @@ inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
             for (int j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
                 if (!strcasecmp(f->GetName(), "frame")) {
                     UiAnimKey* prev = j > 0 ? &tr->keys[j - 1] : &def;
-                    UiAnimKey* k = &tr->keys[tr->n++];
+                    k = &tr->keys[tr->n++];
                     k->t = f->GetFloat("t");
                     k->scale = f->GetFloat("scale", prev->scale);
                     k->alpha = f->GetFloat("alpha", prev->alpha);
@@ -234,8 +235,8 @@ inline UiSpecialList::UiSpecialList(ValueTable* t) {
     items = 0;
     n = 0;
     if (t) {
-        int i;
         ValueNode* c;
+        int i;
         for (i = 0; (c = t->GetChild(i)) != 0; i++) {
             if (!strcasecmp(c->GetName(), "anim")) {
                 ValueNode* s;
