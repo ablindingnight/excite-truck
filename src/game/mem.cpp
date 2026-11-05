@@ -432,8 +432,10 @@ void StackHeap::Dump(int flags) {
         off = 0;
         wasted = 0;
         count = 0;
-        while (off < used) {
-            StackBlock* b = (StackBlock*)(base + off);
+        // MATCHING-AID: the pointer local moves this down the register order (selfloop.py). The real form is unknown.
+        StackHeap* self = this;
+        while (off < self->used) {
+            StackBlock* b = (StackBlock*)(self->base + off);
             bool internal;
             if (b->cookie != STACK_COOKIE) {
                 fn_802E317C("MemDump fails %x", b);

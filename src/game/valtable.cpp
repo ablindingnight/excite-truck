@@ -155,9 +155,11 @@ public:
     }
     virtual ValueNode* GetChildAt(int index) {
         int i;
-        for (i = 0; i < count; i++) {
-            if (pairs[i].key[0] == '@' && index-- == 0) {
-                return ((ValueTable*)file)->FindChild(pairs[i].value);
+        // MATCHING-AID: the pointer local moves this down the register order (selfloop.py). The real form is unknown.
+        ValueNodeImpl* self = this;
+        for (i = 0; i < self->count; i++) {
+            if (self->pairs[i].key[0] == '@' && index-- == 0) {
+                return ((ValueTable*)self->file)->FindChild(self->pairs[i].value);
             }
         }
         if (parent) {
