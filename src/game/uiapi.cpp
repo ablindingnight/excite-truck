@@ -77,7 +77,7 @@ extern "C" void fn_80221E7C(void);
 extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
-extern "C" s32 fn_80211678(void);
+s32 fn_80211678(u8* arg0);
 extern "C" char lbl_8055B750[];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
@@ -533,7 +533,6 @@ extern "C" float fn_80212248(s32 arg0) {
 
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
-extern "C" s32 fn_80211678(void);
 extern "C" char lbl_8055B750[];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
@@ -564,8 +563,9 @@ extern "C" void fn_80212340(const void *arg0) {
         fn_8022E4BC(first);
         p[4] = 0;
     }
-    if (*(s32 *)arg0 != 0) {
-        if (fn_80211678() == 0) {
+    u8 *name = *(u8 **)arg0;
+    if (name != 0) {
+        if (fn_80211678(name) == 0) {
             fn_8022E4BC(p[3]);
         } else {
             fn_8022E960(p[3]);
