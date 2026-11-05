@@ -1373,26 +1373,7 @@ static inline ObjSet* Expr1_fn_8016D294(Arena* ar) {
     return &ar->sets->data[ar->curSet];
 }
 
-extern "C" void fn_8016D294(int a, int b, int set) {
-    RingChalMaster* m = lbl_8055E378;
-    if (!m || b != 0) {
-        return;
-    }
-    Arena* ar = &m->arena;
-    ar->curSet = set;
-    if (ar->curSet < ar->nFiles) {
-        ObjSet* os = Expr1_fn_8016D294(ar);
-        int i;
-        os->active = 1;
-        os->time = lbl_8055E3C8;
-        os->f10 = 0;
-        Loop1_fn_8016D294(os);
-    }
-    {
-        char name[0x1E];
-        SET_NAME(ar, name, 0x1E);
-        fn_8016A15C(name);
-    }
+static inline void LoadGemArt(Arena* ar) {
     {
         char name[0x1E];
         if (ar->f24 != -1) {
@@ -1423,6 +1404,29 @@ extern "C" void fn_8016D294(int a, int b, int set) {
             break;
         }
     }
+}
+
+extern "C" void fn_8016D294(int a, int b, int set) {
+    RingChalMaster* m = lbl_8055E378;
+    if (!m || b != 0) {
+        return;
+    }
+    Arena* ar = &m->arena;
+    ar->curSet = set;
+    if (ar->curSet < ar->nFiles) {
+        ObjSet* os = Expr1_fn_8016D294(ar);
+        int i;
+        os->active = 1;
+        os->time = lbl_8055E3C8;
+        os->f10 = 0;
+        Loop1_fn_8016D294(os);
+    }
+    {
+        char name[0x1E];
+        SET_NAME(ar, name, 0x1E);
+        fn_8016A15C(name);
+    }
+    LoadGemArt(ar);
 }
 
 inline RingChalMaster::~RingChalMaster(void) {

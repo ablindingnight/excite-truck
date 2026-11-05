@@ -455,6 +455,8 @@ struct BackfireEvt {
 
 class BackfireMan {
 public:
+    void Fire(const BackfireEvt* ev);
+public:
     BackfireMan(void);
     ~BackfireMan(void);
     void Reset(void);
@@ -1565,7 +1567,8 @@ void BackfireMan::Reset(void) {
 
 void BackfireMan::Draw(void) { torch->Draw(); }
 
-void BackfireMan::Event(const BackfireEvt* ev) {
+// MATCHING-AID: whole body as an inline (early returns join at the end); raises 78.86 to 89.06, unproven.
+inline void BackfireMan::Fire(const BackfireEvt* ev) {
     if (ev->car < 0 || ev->car >= fn_80287B14()) {
         return;
     }
@@ -1589,6 +1592,10 @@ void BackfireMan::Event(const BackfireEvt* ev) {
         e->c = 0;
         e->d = fn_80288060(model, ev->mode % n);
     }
+}
+
+void BackfireMan::Event(const BackfireEvt* ev) {
+    Fire(ev);
 }
 
 void BackfireMan::Tick(int i, int on) {

@@ -671,7 +671,8 @@ static inline int EscWidth(const s8* s, f32& h, double& adv) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_8023293C(f32 w, f32& gaps, int& i) {
+static inline f32 Loop2_fn_8023293C(f32& gaps, int& i) {
+    f32 w;
     w = 0.0f;
     gaps = 0.0f;
     i = 0;
@@ -687,7 +688,7 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
         return 0.0f;
     }
     int i;
-    w = Loop2_fn_8023293C(w, gaps, i);
+    w = Loop2_fn_8023293C(gaps, i);
     strlen(s);
     while (s[i]) {
         adv = (f32)f->height;
@@ -747,7 +748,8 @@ void fn_80232D3C(const char* text, GTextFont* f, u32 color, int align, const UIX
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop1_fn_80232DF4(f32 px, f32 x0, int& i, u32& cc, u32 c) {
+static inline f32 Loop1_fn_80232DF4(f32 x0, int& i, u32& cc, u32 c) {
+    f32 px;
     px = x0;
     i = 0;
     cc = c;
@@ -772,7 +774,7 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
             int i;
             GTextFont* ff;
             u32 cc;
-            px = Loop1_fn_80232DF4(px, x0, i, cc, c);
+            px = Loop1_fn_80232DF4(x0, i, cc, c);
             ff = f;
             if (passes == 2) {
                 ff = f->outline;
