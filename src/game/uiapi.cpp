@@ -2187,16 +2187,12 @@ extern "C" void fn_80215A48(void *arg0) {
 #pragma dont_inline reset
 extern "C" void fn_80215A74(void *arg0) {
     u8 *self = (u8 *)arg0;
-    s8 enabled = self[0x1A];
+    u8 enabled = self[0x1A];
     self[0x19] = 0;
-    if (enabled == 0) goto done;
-    self[0x234] = 1;
-    {
-        void *obj = *(void **)(self + 0x244);
-        ((void (*)(void *))(*(void ***)obj)[20])(obj);
+    if (enabled) {
+        self[0x234] = 1;
     }
-done:
-    return;
+    (*(MenuState **)(self + 0x244))->Unk50();
 }
 extern "C" s32 fn_80215AA4(void *arg0, s32 arg1) {
     class Callback {
