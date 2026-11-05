@@ -799,7 +799,12 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 2: {
         UIStyle* button = FindStyle(styles, d->style, 0);
         UIStyle* text = d->name[0] == '#' ? FindStyle(styles, d->name + 1, 3) : 0;
-        void* image = button ? button->arg1 : 0;
+        void* image;
+        if (button) {
+            image = button->arg1;
+        } else {
+            image = 0;
+        }
         const char* label = text ? (const char*)text->value : d->name;
         void* handler = button ? button->value : (void*)fn_80212338;
         UIImageRef* ref = new ("StyleImage") UIImageRef(label, d->flags);
@@ -817,8 +822,18 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 42: {
         UIStyle* button = FindStyle(styles, d->style, 0);
         UIStyle* value = FindStyle(styles, d->style, 2);
-        void* image = button ? button->arg1 : 0;
-        void* handler = button ? button->value : (void*)fn_80212338;
+        void* image;
+        if (button) {
+            image = button->arg1;
+        } else {
+            image = 0;
+        }
+        void* handler;
+        if (button) {
+            handler = button->value;
+        } else {
+            handler = (void*)fn_80212338;
+        }
         void* watched = value ? value->value : 0;
         p = (WidgetFragment*)operator new(0x28c, "FadeButton");
         if (p) p = fn_8022435C(p, image, d, handler, watched);
@@ -1110,13 +1125,23 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
-            void* state = view ? view->value : (void*)sDefaultView;
+            void* state;
+            if (view) {
+                state = view->value;
+            } else {
+                state = (void*)sDefaultView;
+            }
             p = fn_8021B1C4(p, d->x, d->y, state, -1, fn_80215270(2, 0));
         }
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
-            void* state = view ? view->value : (void*)sDefaultView;
+            void* state;
+            if (view) {
+                state = view->value;
+            } else {
+                state = (void*)sDefaultView;
+            }
             p = fn_8021B1C4(p, d->x, d->y + d->dy - 18, state, 1, fn_80215270(3, 0));
         }
         widgets[count++] = p;
@@ -1130,13 +1155,23 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
-            void* state = view ? view->value : (void*)sDefaultView;
+            void* state;
+            if (view) {
+                state = view->value;
+            } else {
+                state = (void*)sDefaultView;
+            }
             p = fn_8021B1C4(p, d->x, d->y + 3, state, -1, fn_80215270(0, 0));
         }
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
-            void* state = view ? view->value : (void*)sDefaultView;
+            void* state;
+            if (view) {
+                state = view->value;
+            } else {
+                state = (void*)sDefaultView;
+            }
             p = fn_8021B1C4(p, d->x + d->dx - 18, d->y + 3, state, 1, fn_80215270(1, 0));
         }
         widgets[count++] = p;
