@@ -223,24 +223,18 @@ static inline void Scale(RVec3* out, const RVec3* v, f32 k) {
 
 static inline void AddPart(PSys* s, const RVec3* p, f32 b, f32 a) {
     int i = s->nPart++;
-    s->pos[i].x = p->x;
-    s->pos[i].y = p->y;
-    s->pos[i].z = p->z;
-    s->old[i].x = p->x;
-    s->old[i].y = p->y;
-    s->old[i].z = p->z;
-    s->acc[i].x = 0.0f;
-    s->acc[i].y = 0.0f;
-    s->acc[i].z = 0.0f;
+    Set(&s->pos[i], p);
+    Set(&s->old[i], p);
+    RVec3* q = &s->acc[i];
+    q->x = 0.0f;
+    q->y = 0.0f;
+    q->z = 0.0f;
     s->w30[i] = a;
     s->w34[i] = b;
     s->free[i] = 1;
 }
 
 static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
-    if ((f32)__fabs(stiff) <= lbl_80558DC4[0]) {
-        stiff = 1.0f;
-    }
     PStick* k = &s->sticks[s->nStick++];
     k->a = a;
     k->b = b;
@@ -249,19 +243,45 @@ static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
     k->slack = stiff < -0.001f;
 }
 
+// Reconstructed from the target: the name and the split into a helper are unproven.
+// dst = transpose of m's rotation applied to src (src may be dst).
+static inline void MulRotT(RVec3* dst, const RVec3& src, const RMtx* m) {
+    f32 x = src.x * m->rot[0].x + src.y * m->rot[0].y + src.z * m->rot[0].z;
+    f32 y = src.x * m->rot[1].x + src.y * m->rot[1].y + src.z * m->rot[1].z;
+    f32 z = src.x * m->rot[2].x + src.y * m->rot[2].y + src.z * m->rot[2].z;
+    dst->x = x;
+    dst->y = y;
+    dst->z = z;
+}
+
 static inline void AddAnchor(PSys* s, s32 idx, const RMtx* m, const RVec3* at) {
-    RVec3 d;
-    d.x = at->x - m->pos.x;
-    d.y = at->y - m->pos.y;
-    d.z = at->z - m->pos.z;
     PAnchor* a = &s->anchors[s->nAnchor++];
     a->on = 1;
     a->idx = idx;
     a->mtx = m;
-    a->local.x = d.x * m->rot[0].x + d.y * m->rot[0].y + d.z * m->rot[0].z;
-    a->local.y = d.x * m->rot[1].x + d.y * m->rot[1].y + d.z * m->rot[1].z;
-    a->local.z = d.x * m->rot[2].x + d.y * m->rot[2].y + d.z * m->rot[2].z;
+    Set(&a->local, at);
     s->free[idx] = 0;
+}
+
+// Reconstructed from the target: the name and the split into a helper are unproven.
+static inline void AddLink(PSys* s, s32 a, s32 b, f32 c, const RVec3* axis, void* g) {
+    PLink* k = &s->links[s->nLink++];
+    k->a = a;
+    k->b = b;
+    k->c = c;
+    k->d = axis->x;
+    k->e = axis->y;
+    k->f = axis->z;
+    k->g = g;
+}
+
+// Reconstructed from the target: the name and the split into a helper are unproven.
+// Anchors particle idx to frame m where it now is (at, in world space).
+static inline void AddAnchorAt(PSys* s, s32 idx, const RMtx* m, const RVec3* at) {
+    RVec3 d;
+    Sub(&d, at, &m->pos);
+    MulRotT(&d, d, m);
+    AddAnchor(s, idx, m, &d);
 }
 
 extern "C" {
@@ -429,15 +449,6 @@ PSysObj* fn_801C1C1C(const PSysDesc* d) { return new ("ppsys") PSysObj(d->nVerts
 
 void fn_801C1C7C(PSysObj* s) { delete s; }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop1_fn_801C1CBC(int ne, const PEdgeDesc* e, PSys* s) {
-    int i;
-    for (i = 0; i < ne; i++, e++) {
-        AddStick(s, e->a, e->b, e->extra, e->stiff);
-    }
-    return i;
-}
-
 void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e, int np, const PPinDesc* p) {
     int i;
     s->nPart = 0;
@@ -447,9 +458,19 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     for (i = 0; i < nv; i++, v++) {
         AddPart(s, &v->pos, v->w34, v->w30);
     }
-    i = Loop1_fn_801C1CBC(ne, e, s);
+    for (i = 0; i < ne; i++) {
+        f32 stiff = e[i].stiff;
+        if ((f32)__fabs(stiff) <= lbl_80558DC4[0]) {
+            stiff = 1.0f;
+        }
+        AddStick(s, e[i].a, e[i].b, e[i].extra, stiff);
+    }
     for (i = 0; i < np; i++, p++) {
-        AddAnchor(s, p->idx, p->mtx, p->at ? p->at : &s->pos[p->idx]);
+        if (p->at) {
+            AddAnchorAt(s, p->idx, p->mtx, p->at);
+        } else {
+            AddAnchorAt(s, p->idx, p->mtx, &s->pos[p->idx]);
+        }
     }
 }
 
@@ -460,34 +481,20 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
     s->nAnchor = 0;
     s->nLink = 0;
     for (i = 0; i < d->nVerts; i++) {
-        AddPart(s, &d->verts[i].pos, d->verts[i].w34, d->verts[i].w30);
+        RVec3 p;
+        Transform(&p, d->verts[i].pos, (const RMtx*)owner);
+        AddPart(s, &p, d->verts[i].w34, d->verts[i].w30);
     }
     for (i = 0; i < d->nEdges; i++) {
         const PEdgeDesc* e = &d->edges[i];
         AddStick(s, e->a, e->b, e->extra, e->stiff);
     }
     for (i = 0; i < d->nPins; i++) {
-        PAnchor* a = &s->anchors[s->nAnchor++];
-        const PPinDesc* p = &d->pins[i];
-        a->on = 1;
-        a->idx = p->idx;
-        a->mtx = (const RMtx*)owner;
-        a->local.x = p->at->x;
-        a->local.y = p->at->y;
-        a->local.z = p->at->z;
-        s->free[p->idx] = 0;
+        AddAnchor(s, d->pins[i].idx, (const RMtx*)owner, d->pins[i].at);
     }
     for (i = 0; i < d->nLinks; i++) {
         const PLink* l = &d->links[i];
-        s32 nLinkv = s->nLink;
-        PLink* k = &s->links[nLinkv++];
-        k->a = l->a;
-        k->b = l->b;
-        k->c = l->c;
-        k->d = l->d;
-        k->e = l->e;
-        k->f = l->f;
-        k->g = owner;
+        AddLink(s, l->a, l->b, l->c, (const RVec3*)&l->d, owner);
     }
 }
 
