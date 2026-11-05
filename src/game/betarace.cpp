@@ -2638,6 +2638,7 @@ void fn_8016A68C(void);
 
 inline BetaMaster::~BetaMaster(void) {
     int i;
+    int i2;
     fn_802328D4(lbl_8055E250);
     lbl_8055E250 = 0;
     delete lbl_8055E238;
@@ -2671,8 +2672,8 @@ inline BetaMaster::~BetaMaster(void) {
     for (i = 0; i < puddles.a.count; i++) {
         delete puddles.a.data[i];
     }
-    for (i = 0; i < bumps.a.count; i++) {
-        delete bumps.a.data[i];
+    for (i2 = 0; i2 < bumps.a.count; i2++) {
+        delete bumps.a.data[i2];
     }
     for (i = 0; i < bumps2.a.count; i++) {
         delete bumps2.a.data[i];
