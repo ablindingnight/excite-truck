@@ -578,7 +578,7 @@ void fn_802BD0F4(TreeType* t) {
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;
-            tr->hit = fn_802BA580(t->shadow, &p, tr->mtx.rot[2].y);
+            tr->hit = fn_802BA580(t->shadow, &p, tr->mtx.rot[1].y);
         }
     }
 }
@@ -783,7 +783,7 @@ void fn_802BD814(void) {
                                 Settle(tr);
                                 TMtx m;
                                 f32 yv;
-                                f32 s = tr->mtx.rot[2].y;
+                                f32 s = tr->mtx.rot[1].y;
                                 m.rot[0].x = cam.rot[0].x * s;
                                 m.rot[0].y = cam.rot[0].y * s;
                                 m.rot[0].z = cam.rot[0].z * s;
@@ -893,7 +893,7 @@ void fn_802BDD8C(f32 range) {
                                     f32 a = (r2 - d) / span;
                                     a = (1.0f < a) ? 1.0f : a;
                                     TMtx m;
-                                    f32 s = tr->mtx.rot[2].y;
+                                    f32 s = tr->mtx.rot[1].y;
                                     m.rot[0].x = cam.rot[0].x * s;
                                     m.rot[0].y = cam.rot[0].y * s;
                                     m.rot[0].z = cam.rot[0].z * s;
