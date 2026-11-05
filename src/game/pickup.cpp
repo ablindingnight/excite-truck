@@ -467,6 +467,13 @@ extern "C" {
 
 void fn_80167EEC(void) { delete lbl_8055E354; }
 
+static inline int Loop2_fn_80168020(int i, PickupObjMan* m) {
+    for (i = 0; i < m->groups.count; i++) {
+        m->groups.data[i].done = 0;
+    }
+    return i;
+}
+
 void fn_80168020(void) {
     PickupObjMan* m;
     Pickup* p;
@@ -478,9 +485,7 @@ void fn_80168020(void) {
         p->pos[1] = p->hover + (p->pos[1] + p->type->yoff);
         p->taken = 0;
     }
-    for (i = 0; i < m->groups.count; i++) {
-        m->groups.data[i].done = 0;
-    }
+    i = Loop2_fn_80168020(i, m);
     for (i = 0; i < 8; i++) {
         lbl_80430260[i].frame = -1;
     }
@@ -554,6 +559,31 @@ void fn_80168328(void) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+static inline void Loop1_fn_801683F4(PickupGroup* g, int i, RaceCarRec* rec, V2& lo, V2& hi, PickupCounts& res) {
+    int j;
+    for (j = 0; j < g->count; j++) {
+        Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
+        if (p->Live()) {
+            f32 l[3];
+            f32 dx = p->pos[0] - rec->pos[0];
+            f32 rz;
+            f32 dy = p->pos[1] - rec->pos[1];
+            f32 dz = p->pos[2] - rec->pos[2];
+            f32 rad;
+            l[0] = dx * rec->rot[0] + dy * rec->rot[1] + rec->rot[2] * dz;
+            l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];
+            rz = rec->rot[8];
+            l[2] = dx * rec->rot[6] + dy * rec->rot[7] + dz * rz;
+            rad = p->type ? p->type->radius : 0.0f;
+            if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
+                p->taken = 1;
+                res.n[p->type ? p->type->type : 6]++;
+                break;
+            }
+        }
+    }
+}
+
 void fn_801683F4(PickupCounts* out, int player) {
     PickupCounts res;
     RaceCarRec* rec;
@@ -604,27 +634,7 @@ void fn_801683F4(PickupCounts* out, int player) {
                         continue;
                     }
                 }
-                for (j = 0; j < g->count; j++) {
-                    Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
-                    if (p->Live()) {
-                        f32 l[3];
-                        f32 dx = p->pos[0] - rec->pos[0];
-                        f32 rz;
-                        f32 dy = p->pos[1] - rec->pos[1];
-                        f32 dz = p->pos[2] - rec->pos[2];
-                        f32 rad;
-                        l[0] = dx * rec->rot[0] + dy * rec->rot[1] + rec->rot[2] * dz;
-                        l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];
-                        rz = rec->rot[8];
-                        l[2] = dx * rec->rot[6] + dy * rec->rot[7] + dz * rz;
-                        rad = p->type ? p->type->radius : 0.0f;
-                        if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
-                            p->taken = 1;
-                            res.n[p->type ? p->type->type : 6]++;
-                            break;
-                        }
-                    }
-                }
+                Loop1_fn_801683F4(g, i, rec, lo, hi, res);
             }
         }
         res.done = done;

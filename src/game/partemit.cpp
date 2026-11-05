@@ -239,14 +239,7 @@ void fn_8029F124(void) {
     }
 }
 
-void fn_8029F188(void) {
-    if (lbl_8055F73C != 1) {
-        if (lbl_8055F824 == 0) {
-            fn_802E30C8("allow_particle_add is false!!");
-        }
-        lbl_8055F824 = (lbl_8055F824 + 1) % 5;
-    }
-    EmitterInst* in;
+static inline void Loop1_fn_8029F188(EmitterInst* in) {
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         in = &lbl_804B9B7C.data[i];
         Obj* o = in->obj;
@@ -267,6 +260,17 @@ void fn_8029F188(void) {
             fn_802A0794(in);
         }
     }
+}
+
+void fn_8029F188(void) {
+    if (lbl_8055F73C != 1) {
+        if (lbl_8055F824 == 0) {
+            fn_802E30C8("allow_particle_add is false!!");
+        }
+        lbl_8055F824 = (lbl_8055F824 + 1) % 5;
+    }
+    EmitterInst* in;
+    Loop1_fn_8029F188(in);
 }
 
 void fn_8029F300(void) {

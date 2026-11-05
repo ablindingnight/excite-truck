@@ -1403,19 +1403,24 @@ static inline int TocHas(ResToc* toc, const char* name) {
     return in;
 }
 
+static inline QueueNode* Loop1_fn_8012D908(QueueNode* n, QueueNode* found, const char* name) {
+    while (n && !found) {
+        ResToc* toc = GetToc(n->name);
+        if (TocHas(toc, name)) {
+            found = n;
+        }
+        fn_8012C4D8(toc);
+        n = n->next;
+    }
+    return found;
+}
+
 extern "C" void fn_8012D908(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
         QueueNode* found = 0;
         QueueNode* n = q->pending.head;
-        while (n && !found) {
-            ResToc* toc = GetToc(n->name);
-            if (TocHas(toc, name)) {
-                found = n;
-            }
-            fn_8012C4D8(toc);
-            n = n->next;
-        }
+        found = Loop1_fn_8012D908(n, found, name);
         if (found) {
             fn_802E317C("res-CRIP(%s/%s): Get-Before-Wait error! Must wait for set.", found->name, name);
         }

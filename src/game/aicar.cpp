@@ -2771,15 +2771,19 @@ void fn_80198530(u8* d) {
     }
 }
 
+static inline void Loop1_fn_80198DD0(u8* d) {
+    for (int i = 0; i < lbl_804349E0.count; i++) {
+        if (lbl_804349E0.items[i] == d) {
+            lbl_804349E0.items[i] = lbl_804349E0.items[--lbl_804349E0.count];
+            break;
+        }
+    }
+}
+
 u8* fn_80198DD0(u8* d, int del) {
     if (d) {
         *(void***)d = lbl_80333390;
-        for (int i = 0; i < lbl_804349E0.count; i++) {
-            if (lbl_804349E0.items[i] == d) {
-                lbl_804349E0.items[i] = lbl_804349E0.items[--lbl_804349E0.count];
-                break;
-            }
-        }
+        Loop1_fn_80198DD0(d);
         if (del > 0) {
             operator delete(d);
         }

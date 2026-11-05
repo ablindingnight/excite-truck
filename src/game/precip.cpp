@@ -565,6 +565,23 @@ void fn_802A5384(WeatherCfg* c) {
     }
 }
 
+static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel) {
+    for (int k2 = 0; k2 < m; k2++) {
+        f32 a = fn_80287BC8(0.0f, 1.0f);
+        f32 b = fn_80287BC8(0.0f, 1.0f);
+        ValVec3 p;
+        p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
+        p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
+        f32 originZ = d->origin.z;
+        p.z = originZ + d->sv.z * a + d->tv.z * b;
+        Mul(&o->frame, &p, &p);
+        p.x = p.x + o->frame.pos.x;
+        p.y = p.y + o->frame.pos.y;
+        p.z = p.z + o->frame.pos.z;
+        fn_8028E584(lbl_8055F894, (const PVec*)&p, &vel);
+    }
+}
+
 void fn_802A53B0(DropHit* hits, int n) {
     if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0] || !lbl_8055F894) {
         return;
@@ -600,21 +617,7 @@ void fn_802A53B0(DropHit* hits, int n) {
             vel.x = o->vel.x + vel.x * 3.0f;
             vel.y = o->vel.y + vel.y * 3.0f;
             vel.z = o->vel.z + vel.z * 3.0f;
-            int m = fn_80287B5C(cnt) + 1;
-            for (int k2 = 0; k2 < m; k2++) {
-                f32 a = fn_80287BC8(0.0f, 1.0f);
-                f32 b = fn_80287BC8(0.0f, 1.0f);
-                ValVec3 p;
-                p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
-                p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
-                f32 originZ = d->origin.z;
-                p.z = originZ + d->sv.z * a + d->tv.z * b;
-                Mul(&o->frame, &p, &p);
-                p.x = p.x + o->frame.pos.x;
-                p.y = p.y + o->frame.pos.y;
-                p.z = p.z + o->frame.pos.z;
-                fn_8028E584(lbl_8055F894, (const PVec*)&p, &vel);
-            }
+            Loop1_fn_802A53B0(fn_80287B5C(cnt) + 1, d, o, vel);
         }
     }
 }

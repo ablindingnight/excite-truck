@@ -995,13 +995,17 @@ void fn_802D657C(u32* p, u32 base) {
     }
 }
 
-void fn_802D6594(u8* s) {
-    Swap32(s + 0x34);
-    u8* p = s + 0x38;
+static inline void Loop1_fn_802D6594(u8* s, u8* p) {
     for (int i = 0; i < *(s32*)(s + 0x34); i++) {
         Swap32(p);
         p += 4;
     }
+}
+
+void fn_802D6594(u8* s) {
+    Swap32(s + 0x34);
+    u8* p = s + 0x38;
+    Loop1_fn_802D6594(s, p);
 }
 
 // Vertex format 0x1A: colour-facing surfaces (0x13 ones are converted to it below).

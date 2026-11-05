@@ -470,6 +470,16 @@ static inline s32 AchSumModel(AchStats* stats, int category, const char* name) {
     return total;
 }
 
+static inline s32 Loop1_AchGetModelStat(const char* name, s32 total, int category) {
+    u32 i;
+    for (i = 0; i < NUM_MODELS; i++) {
+        if (strcasecmp(s_race.models[i].name, name) == 0) {
+            total += s_race.models[i].values[category];
+        }
+    }
+    return total;
+}
+
 s32 AchGetModelStat(int category, const char* model) {
     const char* name = GetBaseChassisName(model);
     s32 total = 0;
@@ -486,12 +496,7 @@ s32 AchGetModelStat(int category, const char* model) {
             total += s_session.models[i].values[category];
         }
     }
-    for (i = 0; i < NUM_MODELS; i++) {
-        if (strcasecmp(s_race.models[i].name, name) == 0) {
-            total += s_race.models[i].values[category];
-        }
-    }
-    return total;
+    return Loop1_AchGetModelStat(name, total, category);
 }
 
 void AchAddModelStat(int category, const char* model, s32 value) {

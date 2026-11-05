@@ -545,6 +545,10 @@ public:
 namespace {
 class Arena : public Preloader {
 public:
+    int Loop3_CountDynos(int c, int n);
+public:
+    void Loop2_Spawn(void);
+public:
     Arena(void);
     virtual int CountDynos(void);  // 0x8
     virtual void Spawn(void);      // 0xC
@@ -1290,10 +1294,7 @@ Arena::Arena(void) {
 
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
-int Arena::CountDynos(void) {
-    int n;
-    int c;
-    n = 0;
+inline int Arena::Loop3_CountDynos(int c, int n) {
     int i;
     for (i = 0; i < sets->count; i++) {
         c = 0;
@@ -1308,7 +1309,15 @@ int Arena::CountDynos(void) {
     return n;
 }
 
-void Arena::Spawn(void) {
+int Arena::CountDynos(void) {
+    int n;
+    int c;
+    n = 0;
+    int i;
+    return Loop3_CountDynos(c, n);
+}
+
+inline void Arena::Loop2_Spawn(void) {
     int i;
     for (i = 0; i < sets->count; i++) {
         int j;
@@ -1319,6 +1328,11 @@ void Arena::Spawn(void) {
             }
         }
     }
+}
+
+void Arena::Spawn(void) {
+    int i;
+    Loop2_Spawn();
 }
 
 #define SET_NAME(a, buf, n)                                               \
@@ -1342,6 +1356,15 @@ void Arena::Spawn(void) {
 
 
 
+static inline void Loop1_fn_8016D294(ObjSet* os) {
+    int i;
+    for (i = 0; i < os->infos->count; i++) {
+        if (os->infos->data[i].obj) {
+            fn_802BAF98(os->infos->data[i].obj, 1);
+        }
+    }
+}
+
 extern "C" void fn_8016D294(int a, int b, int set) {
     RingChalMaster* m = lbl_8055E378;
     if (!m || b != 0) {
@@ -1355,11 +1378,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
         os->active = 1;
         os->time = lbl_8055E3C8;
         os->f10 = 0;
-        for (i = 0; i < os->infos->count; i++) {
-            if (os->infos->data[i].obj) {
-                fn_802BAF98(os->infos->data[i].obj, 1);
-            }
-        }
+        Loop1_fn_8016D294(os);
     }
     {
         char name[0x1E];

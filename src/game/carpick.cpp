@@ -491,6 +491,18 @@ extern "C" {
 void fn_80214AF0(s32 s);
 
 // Greys out the grid buttons of cars nobody can pick and highlights each column's selection.
+static inline void Loop1_fn_8025F274(CarPickScreen* s) {
+    for (int k = 0; k < 5; k++) {
+        for (int j = 0; j < 3; j++) {
+            if (j == s->rows[k].best) {
+                fn_80214AF0(k + 1 + j * 10);
+            } else {
+                fn_80214A9C(k + 1 + j * 10);
+            }
+        }
+    }
+}
+
 void fn_8025F274(u8* p) {
     for (int i = 0; i < lbl_8055F3D4->all->Count(); i++) {
         if (!AnyShown(i)) {
@@ -501,15 +513,7 @@ void fn_8025F274(u8* p) {
         }
     }
     CarPickScreen* s = lbl_8055F3D4;
-    for (int k = 0; k < 5; k++) {
-        for (int j = 0; j < 3; j++) {
-            if (j == s->rows[k].best) {
-                fn_80214AF0(k + 1 + j * 10);
-            } else {
-                fn_80214A9C(k + 1 + j * 10);
-            }
-        }
-    }
+    Loop1_fn_8025F274(s);
 }
 
 

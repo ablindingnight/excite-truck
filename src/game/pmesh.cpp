@@ -289,6 +289,24 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
     return hit;
 }
 
+static inline void Loop1_fn_801CFA48(PMesh* m) {
+    int i;
+    for (i = 0; i < m->numTris; i++) {
+        PTri* t = &m->tris[i];
+        PSwap16(&t->flags);
+        for (int k = 0; k < 3; k++) {
+            PSwap16(&t->v[k]);
+            PSwap32(&t->edge[k].x);
+            PSwap32(&t->edge[k].y);
+            PSwap32(&t->edge[k].z);
+        }
+        PSwap32(&t->n.x);
+        PSwap32(&t->n.y);
+        PSwap32(&t->n.z);
+        PSwap32(&t->d);
+    }
+}
+
 void fn_801CFA48(PMesh* m) {
     PSwap32(&m->cells);
     PSwap32(&m->numCells);
@@ -319,20 +337,7 @@ void fn_801CFA48(PMesh* m) {
         PSwap32(&v->y);
         PSwap32(&v->z);
     }
-    for (i = 0; i < m->numTris; i++) {
-        PTri* t = &m->tris[i];
-        PSwap16(&t->flags);
-        for (int k = 0; k < 3; k++) {
-            PSwap16(&t->v[k]);
-            PSwap32(&t->edge[k].x);
-            PSwap32(&t->edge[k].y);
-            PSwap32(&t->edge[k].z);
-        }
-        PSwap32(&t->n.x);
-        PSwap32(&t->n.y);
-        PSwap32(&t->n.z);
-        PSwap32(&t->d);
-    }
+    Loop1_fn_801CFA48(m);
 }
 
 PMesh* fn_801CFEAC(const char* name) {

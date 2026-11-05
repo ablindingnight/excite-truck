@@ -887,6 +887,29 @@ void fn_802CB6B4(void) {
     lbl_8055FCBC = 0;
 }
 
+static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
+    for (MipLoad* l = c->loads; l; l = l->next) {
+        if (l->tex == id) {
+            for (MipDiscard* d = c->discards; d; d = d->next) {
+                if (d->load == l) {
+                    d->load = 0;
+                }
+            }
+            if (l->wait == -1) {
+                l->res->Cancel();
+            }
+            fn_8012C958(l->res);
+            l->res = 0;
+            fn_802D915C(l->gx);
+            l->gx = 0;
+            c->heapRef->heap->Free(l->mem);
+            l->mem = 0;
+            fn_802CBB9C(&c->freeLoads, &c->loads, l);
+            break;
+        }
+    }
+}
+
 void fn_802CB82C(s32 id) {
     TexCache* c = lbl_8055FCBC;
     MipSlot* s = &c->slots[id];
@@ -898,26 +921,7 @@ void fn_802CB82C(s32 id) {
         t->mip0Mem = 0;
         fn_802CB3F8(t->name, "quick-unload");
     } else if (s->state == 1) {
-        for (MipLoad* l = c->loads; l; l = l->next) {
-            if (l->tex == id) {
-                for (MipDiscard* d = c->discards; d; d = d->next) {
-                    if (d->load == l) {
-                        d->load = 0;
-                    }
-                }
-                if (l->wait == -1) {
-                    l->res->Cancel();
-                }
-                fn_8012C958(l->res);
-                l->res = 0;
-                fn_802D915C(l->gx);
-                l->gx = 0;
-                c->heapRef->heap->Free(l->mem);
-                l->mem = 0;
-                fn_802CBB9C(&c->freeLoads, &c->loads, l);
-                break;
-            }
-        }
+        Loop2_fn_802CB82C(c, id);
     }
     s->state = 0;
 }
@@ -1258,7 +1262,7 @@ static inline void Rank(TexCache* c, MipSlot* s, f32 score) {
     }
 }
 
-void fn_802CC770(void) {
+static inline void Loop1_fn_802CC770(void) {
     for (int i = 0; i < 512; i++) {
         TexEntry* t = &lbl_8055FCB0[i];
         int stream = t->mip0Bytes != 0;
@@ -1282,16 +1286,24 @@ void fn_802CC770(void) {
             }
         }
     }
+}
+
+static inline void Loop3_fn_802CC770(TexCache* c) {
+    for (MipSlot* s = c->resident; s; s = s->next) {
+        if (s->state == 2) {
+            if (fn_802CC10C(c, s->tex, s->frame + 2, 0)) {
+                s->state = 0;
+            }
+            break;
+        }
+    }
+}
+
+void fn_802CC770(void) {
+    Loop1_fn_802CC770();
     if (!lbl_8055D07D) {
         TexCache* c = lbl_8055FCBC;
-        for (MipSlot* s = c->resident; s; s = s->next) {
-            if (s->state == 2) {
-                if (fn_802CC10C(c, s->tex, s->frame + 2, 0)) {
-                    s->state = 0;
-                }
-                break;
-            }
-        }
+        Loop3_fn_802CC770(c);
     }
     TexCache* c = lbl_8055FCBC;
     fn_802CC410(c);

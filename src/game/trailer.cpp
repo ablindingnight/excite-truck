@@ -338,20 +338,24 @@ struct RaceEntries {
 };
 
 // Points each racer entry's trailer fields at its trailer body.
+static inline void Loop1_fn_801B916C(RaceEntries* r) {
+    for (int i = 0; i < r->count; i++) {
+        RaceEntry* e = &r->entries[i];
+        Trailer* t;
+        if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
+            t = lbl_80436D28[e->trailer];
+        } else {
+            t = 0;
+        }
+        if (t) {
+            e->Attach(t);
+        }
+    }
+}
+
 void fn_801B916C(RaceEntries* r) {
     if (fn_801769CC()->flags & 0x400) {
-        for (int i = 0; i < r->count; i++) {
-            RaceEntry* e = &r->entries[i];
-            Trailer* t;
-            if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
-                t = lbl_80436D28[e->trailer];
-            } else {
-                t = 0;
-            }
-            if (t) {
-                e->Attach(t);
-            }
-        }
+        Loop1_fn_801B916C(r);
     }
 }
 

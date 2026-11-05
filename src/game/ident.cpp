@@ -215,6 +215,15 @@ void IdentSaveEvent(int event) {
     }
 }
 
+static inline void Loop1_IdentResetAll(char* dst, const char* src, int n) {
+    while ((*dst++ = *src++) != '\0') {
+        if (--n <= 0) {
+            dst[-1] = '\0';
+            break;
+        }
+    }
+}
+
 void IdentResetAll(void) {
     int n;
     const char* src;
@@ -244,12 +253,7 @@ void IdentResetAll(void) {
         src = fn_80131234(lbl_8055D46C->default_names[i]);
         n = NAME_LEN;
         dst = lbl_8055D46C->default_names[i];
-        while ((*dst++ = *src++) != '\0') {
-            if (--n <= 0) {
-                dst[-1] = '\0';
-                break;
-            }
-        }
+        Loop1_IdentResetAll(dst, src, n);
         lbl_8055D46C->unkAC[i] = -1;
     }
 }

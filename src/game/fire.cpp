@@ -409,6 +409,8 @@ struct TorchEntry {
 
 class ExhaustTorchMan {
 public:
+    void Loop1_DrawEdges(const Vec* right, const Vec* up);
+public:
     ExhaustTorchMan(void);
     ~ExhaustTorchMan(void);
     void Reset(void);
@@ -1475,9 +1477,7 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
 }
 
-void ExhaustTorchMan::DrawEdges(void) {
-    const Vec* right = fn_802C86DC()->rot;
-    const Vec* up = &fn_802C86DC()->rot[1];
+inline void ExhaustTorchMan::Loop1_DrawEdges(const Vec* right, const Vec* up) {
     for (int i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {
             FireModel* model = fn_80288208(i);
@@ -1495,6 +1495,12 @@ void ExhaustTorchMan::DrawEdges(void) {
             }
         }
     }
+}
+
+void ExhaustTorchMan::DrawEdges(void) {
+    const Vec* right = fn_802C86DC()->rot;
+    const Vec* up = &fn_802C86DC()->rot[1];
+    Loop1_DrawEdges(right, up);
 }
 
 void ExhaustTorchMan::DrawFaces(void) {

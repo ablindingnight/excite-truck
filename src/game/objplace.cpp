@@ -331,6 +331,26 @@ ObjLoc::ObjLoc(void) {}
 
 extern "C" {
 
+static inline void Loop1_fn_802B1FD4(SetPlacer* set, MatPlacer* m, ObjectPlacer* p) {
+    int j;
+    int k;
+    for (j = 0; j < set->count; j++) {
+        m = set->data[j];
+        if (m) {
+            for (k = 0; k < m->placers.count; k++) {
+                p = m->placers.data[k];
+                if (p) {
+                    SafeDelete(p->model);
+                    delete p;
+                }
+            }
+            m->placers.count = 0;
+            m->placers.~InlineVec();
+            operator delete(m);
+        }
+    }
+}
+
 void fn_802B1FD4(void) {
     SafeDelete(lbl_8055F9BC);
     for (int i = 0; i < lbl_804BE1FC.count; i++) {
@@ -340,21 +360,7 @@ void fn_802B1FD4(void) {
             int j;
             MatPlacer* m;
             int k;
-            for (j = 0; j < set->count; j++) {
-                m = set->data[j];
-                if (m) {
-                    for (k = 0; k < m->placers.count; k++) {
-                        p = m->placers.data[k];
-                        if (p) {
-                            SafeDelete(p->model);
-                            delete p;
-                        }
-                    }
-                    m->placers.count = 0;
-                    m->placers.~InlineVec();
-                    operator delete(m);
-                }
-            }
+            Loop1_fn_802B1FD4(set, m, p);
             set->count = 0;
             delete set;
         }
@@ -539,7 +545,7 @@ SetPlacer* fn_802B2C98(const char* name) {
     return set;
 }
 
-void fn_802B2D24(SetPlacer* set) {
+static inline void Loop2_fn_802B2D24(SetPlacer* set) {
     for (int i = 0; i < set->count; i++) {
         MatPlacer* m = set->data[i];
         lbl_8055F9BC->blocks.count = 0;
@@ -549,6 +555,10 @@ void fn_802B2D24(SetPlacer* set) {
             p->list.head = 0;
         }
     }
+}
+
+void fn_802B2D24(SetPlacer* set) {
+    Loop2_fn_802B2D24(set);
     lbl_8055F9B8 = 0;
 }
 

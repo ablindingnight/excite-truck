@@ -281,6 +281,22 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
     return fn_801DB74C((int)ix, (int)iz, out, mat, unused, normal, fx - ix, fz - iz);
 }
 
+static inline int Loop1_fn_801DC32C(int i, GroundHeader* g) {
+    for (i = 0; i < g->numLayers; i++) {
+        GLayer* l = &g->layers[i];
+        Swap32(&l->base);
+        Swap32(&l->scale);
+        for (int a = 0; a < 32; a++) {
+            for (int b = 0; b < 32; b++) {
+                Swap16(&l->h[b][a]);
+            }
+        }
+        Swap32(&l->weight);
+        Swap32(&l->next);
+    }
+    return i;
+}
+
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;
     for (int k = 0; k < 13; k++) {
@@ -336,18 +352,7 @@ void fn_801DC32C(GroundHeader* g) {
         }
         lbl_80442708[t->x - lbl_8055E99C][t->z - lbl_8055E9A0] = i;
     }
-    for (i = 0; i < g->numLayers; i++) {
-        GLayer* l = &g->layers[i];
-        Swap32(&l->base);
-        Swap32(&l->scale);
-        for (int a = 0; a < 32; a++) {
-            for (int b = 0; b < 32; b++) {
-                Swap16(&l->h[b][a]);
-            }
-        }
-        Swap32(&l->weight);
-        Swap32(&l->next);
-    }
+    i = Loop1_fn_801DC32C(i, g);
     for (i = 0; i < g->numItems; i++) {
         GItem* it = &g->items[i];
         for (int k = 0; k < 4; k++) {
@@ -490,6 +495,14 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 
 static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
+static inline f32 Loop2_fn_801DCF48(GTile* t, f32 h, int lx, int lz) {
+    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
+        f32 basev = l->base;
+        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
+    }
+    return h;
+}
+
 f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 h;
@@ -545,11 +558,7 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
         return h;
     }
     h = t->base + t->scale * t->h[lx][lz];
-    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-        f32 basev = l->base;
-        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
-    }
-    return h;
+    return Loop2_fn_801DCF48(t, h, lx, lz);
 }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }

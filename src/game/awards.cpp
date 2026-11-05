@@ -953,14 +953,18 @@ void fn_801CCBA4(void) { lbl_8055E884->paused = 1; }
 
 void fn_801CCBB4(void) { lbl_8055E884->paused = 0; }
 
+static inline void Loop1_fn_801CCBC4(AwardsMgr* m) {
+    for (int i = 0; i < m->handlers.n; i++) {
+        if (m->handlers.data[i]) {
+            m->handlers.data[i]->stat->Commit();
+        }
+    }
+}
+
 void fn_801CCBC4(void) {
     AwardsMgr* m = lbl_8055E884;
     if (!m->paused) {
-        for (int i = 0; i < m->handlers.n; i++) {
-            if (m->handlers.data[i]) {
-                m->handlers.data[i]->stat->Commit();
-            }
-        }
+        Loop1_fn_801CCBC4(m);
         if (!fn_801CE898() && m->score != 0) {
             for (int i = 0; i < fn_801EA994(); i++) {
                 CarInfo* c = fn_801EA9A0(i);

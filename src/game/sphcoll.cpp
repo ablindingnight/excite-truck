@@ -2043,17 +2043,7 @@ struct TubeVol {
 
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
-int fn_8019E500(u8* p, u8* q) {
-    CFrame fr = *(CFrame*)VE(q)->v50();
-    BoxAxis ax[3] = {0};
-    ax[0].dir = *(PVec3*)&fr.m[0];
-    ax[0].ext = F32(q, 0x24);
-    ax[1].dir = *(PVec3*)&fr.m[3];
-    ax[1].ext = F32(q, 0x28);
-    ax[2].dir = *(PVec3*)&fr.m[6];
-    ax[2].ext = F32(q, 0x2C);
-    bool hit = false;
-    f32 r = 0.75f;
+static inline int Loop2_fn_8019E500(BoxAxis* ax, f32 r, CFrame& fr, u8* q, bool hit, u8* p) {
     for (int i = 0; i < 3; i++) {
         if (i == 1) {
             continue;
@@ -2091,6 +2081,20 @@ int fn_8019E500(u8* p, u8* q) {
         }
     }
     return hit;
+}
+
+int fn_8019E500(u8* p, u8* q) {
+    CFrame fr = *(CFrame*)VE(q)->v50();
+    BoxAxis ax[3] = {0};
+    ax[0].dir = *(PVec3*)&fr.m[0];
+    ax[0].ext = F32(q, 0x24);
+    ax[1].dir = *(PVec3*)&fr.m[3];
+    ax[1].ext = F32(q, 0x28);
+    ax[2].dir = *(PVec3*)&fr.m[6];
+    ax[2].ext = F32(q, 0x2C);
+    bool hit = false;
+    f32 r = 0.75f;
+    return Loop2_fn_8019E500(ax, r, fr, q, hit, p);
 }
 
 u8* fn_8019E834(u8* p, int del) {
@@ -2830,6 +2834,38 @@ static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
 // Collides sphere group p against volume q by q's type tag: groups (the heavier side drives), boxes (each member
 // in box space, then the owning car's wheels clamped onto the box), spheres, tubes, rings, ragdolls, polygon
 // volumes and polygon meshes (each member, then the car's wheels against the volume or mesh).
+static inline void Loop1_fn_801A0464(int id, u8* car, u8* q) {
+    for (int w = 0; w < 4; w++) {
+        RVec3* h;
+        RVec3 hits[64];
+        PVec3 wp;
+        PVec3 c;
+        PVec3 d;
+        int n;
+        fn_801BEAEC(id, w, &wp);
+        c = wp;
+        c.v[0] = c.v[0] + F32(car, 0x48) * lbl_805623BC;
+        c.v[1] = c.v[1] + F32(car, 0x4C) * lbl_805623BC;
+        c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805623BC;
+        n = 64;
+        fn_801CF080(PTR(q, 0x24), (RVec3*)c.v, hits, &n, U32(q, 0xC), lbl_8056234C);
+        h = hits;
+        for (int k = 0; k < n; h++, k++) {
+            d.v[0] = c.v[0] - h->x;
+            d.v[1] = c.v[1] - h->y;
+            d.v[2] = c.v[2] - h->z;
+            f32 len = PSVECMag(d.v);
+            if (len > lbl_805622D4) {
+                f32 inv = lbl_805622E0 / len;
+                d.v[0] *= inv;
+                d.v[1] *= inv;
+                d.v[2] *= inv;
+                fn_801BEB44(id, w, h, &d);
+            }
+        }
+    }
+}
+
 void fn_801A0464(u8* p, u8* q) {
     s32 type = S32(q, 0x18);
     if (type == 'GRUP') {
@@ -2966,35 +3002,7 @@ void fn_801A0464(u8* p, u8* q) {
         u8* car = PTR(p, 0x4);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
-            for (int w = 0; w < 4; w++) {
-                RVec3* h;
-                RVec3 hits[64];
-                PVec3 wp;
-                PVec3 c;
-                PVec3 d;
-                int n;
-                fn_801BEAEC(id, w, &wp);
-                c = wp;
-                c.v[0] = c.v[0] + F32(car, 0x48) * lbl_805623BC;
-                c.v[1] = c.v[1] + F32(car, 0x4C) * lbl_805623BC;
-                c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805623BC;
-                n = 64;
-                fn_801CF080(PTR(q, 0x24), (RVec3*)c.v, hits, &n, U32(q, 0xC), lbl_8056234C);
-                h = hits;
-                for (int k = 0; k < n; h++, k++) {
-                    d.v[0] = c.v[0] - h->x;
-                    d.v[1] = c.v[1] - h->y;
-                    d.v[2] = c.v[2] - h->z;
-                    f32 len = PSVECMag(d.v);
-                    if (len > lbl_805622D4) {
-                        f32 inv = lbl_805622E0 / len;
-                        d.v[0] *= inv;
-                        d.v[1] *= inv;
-                        d.v[2] *= inv;
-                        fn_801BEB44(id, w, h, &d);
-                    }
-                }
-            }
+            Loop1_fn_801A0464(id, car, q);
         }
     }
 }

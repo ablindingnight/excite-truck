@@ -509,6 +509,30 @@ static inline void BinShadows(Grid& g, TexEntry* te, f32 s) {
     }
 }
 
+static inline void Loop1_fn_802B9108(s16 sz, Grid& g) {
+    for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
+        int y = sz;
+        for (y -= 0x200; y < 0x200; y += sz * 2) {
+            InlineVec<Item*, 64> near;
+            for (int k = 0; k < 4; k++) {
+                for (Item** pp = fn_802B8EB8(x, y, sz, k)->list; *pp; pp++) {
+                    u32 t = (*pp)->type;
+                    if (t <= 1) {
+                        if (near.Find(*pp) == -1 && near.CanAdd()) {
+                            if (t != 1 || g.size <= 4) {
+                                near.Next() = *pp;
+                            }
+                        }
+                    }
+                }
+            }
+            for (int j = 0; j < near.count; j++) {
+                g.Put(near.data[j], x, y);
+            }
+        }
+    }
+}
+
 void fn_802B9108(s16 size) {
     int d = size * 2;
     Grid g(size);
@@ -536,27 +560,7 @@ void fn_802B9108(s16 size) {
     }
     s16 sz = g.size;
     if (sz > 4 && sz <= 8) {
-        for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
-            int y = sz;
-            for (y -= 0x200; y < 0x200; y += sz * 2) {
-                InlineVec<Item*, 64> near;
-                for (int k = 0; k < 4; k++) {
-                    for (Item** pp = fn_802B8EB8(x, y, sz, k)->list; *pp; pp++) {
-                        u32 t = (*pp)->type;
-                        if (t <= 1) {
-                            if (near.Find(*pp) == -1 && near.CanAdd()) {
-                                if (t != 1 || g.size <= 4) {
-                                    near.Next() = *pp;
-                                }
-                            }
-                        }
-                    }
-                }
-                for (int j = 0; j < near.count; j++) {
-                    g.Put(near.data[j], x, y);
-                }
-            }
-        }
+        Loop1_fn_802B9108(sz, g);
     }
     for (int x = size - 0x200; x < 0x200; x += d) {
         for (int y = size - 0x200; y < 0x200; y += d) {
@@ -897,6 +901,25 @@ void fn_802BAFF8(GroundCell* cell, u16** strip) {
 
 static inline int Tris(int n) { return n < 0 ? 0 : n; }
 
+static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, u16* st, void* verts, int nverts) {
+    int j;
+    for (it = te->head; it; it = it->next) {
+        if (!it->head) {
+            continue;
+        }
+        fn_802D3D94(0, ((Obj*)it)->mtx);
+        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+            for (j = 0; j < c->count; j++) {
+                st = c->data[j];
+                fn_802DC280(verts, nverts, st, st[0] + 1);
+                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+            }
+        }
+        it->Clear();
+    }
+    return it;
+}
+
 void fn_802BB0FC(void* verts, int nverts) {
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
         TexEntry* te = lbl_804BFFF4.data[i];
@@ -944,20 +967,7 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                for (it = te->head; it; it = it->next) {
-                    if (!it->head) {
-                        continue;
-                    }
-                    fn_802D3D94(0, ((Obj*)it)->mtx);
-                    for (Chunk<u16*>* c = it->head; c; c = c->next) {
-                        for (j = 0; j < c->count; j++) {
-                            st = c->data[j];
-                            fn_802DC280(verts, nverts, st, st[0] + 1);
-                            lbl_8055FA6C += Tris(c->data[j][0] - 1);
-                        }
-                    }
-                    it->Clear();
-                }
+                it = Loop2_fn_802BB0FC(it, te, st, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();
@@ -971,6 +981,25 @@ void fn_802BB0FC(void* verts, int nverts) {
             }
         }
     }
+}
+
+static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, u16* st, void* verts, int nverts) {
+    int j;
+    for (it = te->head; it; it = it->next) {
+        if (!it->head) {
+            continue;
+        }
+        fn_802D3D94(0, ((Obj*)it)->mtx);
+        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+            for (j = 0; j < c->count; j++) {
+                st = c->data[j];
+                fn_802DC280(verts, nverts, st, st[0] + 1);
+                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+            }
+        }
+        it->Clear();
+    }
+    return it;
 }
 
 void fn_802BB3B8(void* verts, int nverts) {
@@ -1021,20 +1050,7 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                for (it = te->head; it; it = it->next) {
-                    if (!it->head) {
-                        continue;
-                    }
-                    fn_802D3D94(0, ((Obj*)it)->mtx);
-                    for (Chunk<u16*>* c = it->head; c; c = c->next) {
-                        for (j = 0; j < c->count; j++) {
-                            st = c->data[j];
-                            fn_802DC280(verts, nverts, st, st[0] + 1);
-                            lbl_8055FA6C += Tris(c->data[j][0] - 1);
-                        }
-                    }
-                    it->Clear();
-                }
+                it = Loop3_fn_802BB3B8(it, te, st, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();

@@ -122,6 +122,13 @@ Group* lbl_8055EA40;  // game-supplied
 
 extern "C" {
 
+static inline void Loop2_fn_801E1F8C(Phob* a, Shape* s) {
+    int j;
+    for (j = 0; j < a->count; j++) {
+        a->shapes[j]->Collide(s);
+    }
+}
+
 void fn_801E1F8C(Phob* a, Phob* b) {
     Shape* s;
     int j;
@@ -130,17 +137,18 @@ void fn_801E1F8C(Phob* a, Phob* b) {
         return;
     }
     for (i = 0; i < b->count; i++) {
-        s = b->Get(i);
-        for (j = 0; j < a->count; j++) {
-            a->shapes[j]->Collide(s);
-        }
+        Loop2_fn_801E1F8C(a, b->Get(i));
+    }
+}
+
+static inline void Loop1_fn_801E2084(Phob* p, Shape* s) {
+    for (int i = 0; i < p->count; i++) {
+        p->shapes[i]->Collide(s);
     }
 }
 
 void fn_801E2084(Shape* s, Phob* p) {
-    for (int i = 0; i < p->count; i++) {
-        p->shapes[i]->Collide(s);
-    }
+    Loop1_fn_801E2084(p, s);
 }
 
 void fn_801E2100(Shape* s, RayQuery* q) {

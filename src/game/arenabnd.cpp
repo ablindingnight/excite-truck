@@ -212,6 +212,16 @@ int fn_80139B70(Bound* b, f32 x, f32 y) {
     return c & 1;
 }
 
+static inline void Loop1_fn_80139C5C(int limit, BoundPt* p, V2& lo, V2& hi) {
+    int i;
+    for (i = 1; i < limit; i++, p++) {
+        lo.x = MinF(p->x, lo.x);
+        lo.y = MinF(p->y, lo.y);
+        hi.x = MaxF(p->x, hi.x);
+        hi.y = MaxF(p->y, hi.y);
+    }
+}
+
 V2 fn_80139C5C(Bound* b) {
     V2 lo;
     V2 hi;
@@ -223,12 +233,7 @@ V2 fn_80139C5C(Bound* b) {
     lo.x = b->pts[0].x;
     lo.y = b->pts[0].y;
     int limit = b->n;
-    for (i = 1; i < limit; i++, p++) {
-        lo.x = MinF(p->x, lo.x);
-        lo.y = MinF(p->y, lo.y);
-        hi.x = MaxF(p->x, hi.x);
-        hi.y = MaxF(p->y, hi.y);
-    }
+    Loop1_fn_80139C5C(limit, p, lo, hi);
     r.y = lo.y + 0.5f * (hi.y - lo.y);
     f32 loX = lo.x;
     r.x = loX + 0.5f * (hi.x - lo.x);
@@ -246,7 +251,7 @@ BoundSet* fn_80139D4C(const char* name) {
 
 void fn_80139E18(BoundSet* s) { delete s; }
 
-int fn_80139EC4(BoundSet* s, f32 x, f32 y) {
+static inline int Loop2_fn_80139EC4(BoundSet* s, f32 x, f32 y) {
     int i;
     for (i = 0; i < s->bounds.a.count; i++) {
         if (fn_80139B70(s->bounds.a.data[i], x, y)) {
@@ -254,6 +259,11 @@ int fn_80139EC4(BoundSet* s, f32 x, f32 y) {
         }
     }
     return 0;
+}
+
+int fn_80139EC4(BoundSet* s, f32 x, f32 y) {
+    int i;
+    return Loop2_fn_80139EC4(s, x, y);
 }
 
 void fn_80139F5C(EventInfo* ev) {

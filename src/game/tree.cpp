@@ -542,8 +542,7 @@ void fn_802BCBDC(void) {
     }
 }
 
-void fn_802BCF04(void) {
-    TreeType* t;
+static inline void Loop3_fn_802BCF04(TreeType* t) {
     for (int i = 0; i < lbl_804C00D4.n; i++) {
         t = &lbl_804C00D4.data[i];
         SafeDelete(t->set);
@@ -554,6 +553,11 @@ void fn_802BCF04(void) {
         fn_802C6C20(t->near);
         t->near = 0;
     }
+}
+
+void fn_802BCF04(void) {
+    TreeType* t;
+    Loop3_fn_802BCF04(t);
     lbl_804C00D4.n = 0;
     if (lbl_8055FAB4) {
         fn_80131818(lbl_8055FAB4);
@@ -685,11 +689,7 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base) { return (TListEntry*)((u8*)o
 
 TCell* fn_802BD694(TCell* off, u8* base);
 
-void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
-    TCell* c;
-    Swap32(&a->n);
-    Swap32(&a->data);
-    a->data = fn_802BD694(a->data, base);
+static inline void Loop2_fn_802BD5B0(TFileArray<TCell>* a, TCell* c) {
     for (u32 i = 0; i < a->n; i++) {
         c = &a->data[i];
         Swap16(&c->x);
@@ -698,6 +698,14 @@ void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
         Swap16(&c->first);
         c->fade = -1.0f;
     }
+}
+
+void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
+    TCell* c;
+    Swap32(&a->n);
+    Swap32(&a->data);
+    a->data = fn_802BD694(a->data, base);
+    Loop2_fn_802BD5B0(a, c);
 }
 
 TCell* fn_802BD694(TCell* off, u8* base) { return (TCell*)((u8*)off + (u32)base); }
@@ -959,12 +967,8 @@ TreeType* fn_802BE008(TCell* c) {
 
 typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f32 h);
 
-void fn_802BE07C(const TVec* pos, TreeQuery cb) {
-    s16 cz = (s16)(int)(pos->z / 2.0f);
-    u16 cx = (s16)(int)(pos->x / 2.0f);
-    s16 bx = (cx / 128) * 128 + 0x40;
+static inline void Loop1_fn_802BE07C(s16 bx, u16 bz, TreeQuery& cb) {
     int i;
-    u16 bz = (cz / 128) * 128 + 0x40;
     for (i = -0x80; i <= 0x80; i += 0x80) {
         for (int j = -0x80; j <= 0x80; j += 0x80) {
             FanCell* f = fn_802BE844(bx + i, bz + j, 0x40);
@@ -978,6 +982,14 @@ void fn_802BE07C(const TVec* pos, TreeQuery cb) {
             }
         }
     }
+}
+
+void fn_802BE07C(const TVec* pos, TreeQuery cb) {
+    s16 cz = (s16)(int)(pos->z / 2.0f);
+    u16 cx = (s16)(int)(pos->x / 2.0f);
+    s16 bx = (cx / 128) * 128 + 0x40;
+    int i;
+    Loop1_fn_802BE07C(bx, (cz / 128) * 128 + 0x40, cb);
 }
 
 }  // extern "C"

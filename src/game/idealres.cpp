@@ -158,6 +158,16 @@ void fn_80137F74(u32* v) {
     Swap4(&v[2]);
 }
 
+static inline void Loop1_fn_80137FF0(ResExt* e, u8* p) {
+    int i;
+    for (i = 0; i < (s32)e->data[0]; i++) {
+        Swap2(p);
+        Swap2(p + 2);
+        Swap4(p + 4);
+        p += 8;
+    }
+}
+
 void fn_80137FF0(ResExt* e) {
     u8* p;
     int i;
@@ -165,12 +175,7 @@ void fn_80137FF0(ResExt* e) {
     Swap4(&e->data[1]);
     Swap4(&e->data[2]);
     p = (u8*)&e->data[3];
-    for (i = 0; i < (s32)e->data[0]; i++) {
-        Swap2(p);
-        Swap2(p + 2);
-        Swap4(p + 4);
-        p += 8;
-    }
+    Loop1_fn_80137FF0(e, p);
 }
 
 void fn_801380DC(ResExt* e) {

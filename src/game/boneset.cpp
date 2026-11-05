@@ -233,14 +233,7 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     return fn_802C7A38(0, skin, nd);
 }
 
-s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
-    const BFrame* p = world;
-    BFrame skin[32];
-    if (root) {
-        *root = p[0];
-    }
-    Bone* b = set->bones;
-    s32 nd = set->numDest;
+static inline s32 Loop1_fn_801E65BC(int n, Bone* b, const BFrame* p, BFrame* skin, s32 nd) {
     for (int i = 0; i < n; i++, b++, p++) {
         if (b->dest >= 0) {
             BFrame w = *p;
@@ -257,6 +250,17 @@ s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
         }
     }
     return fn_802C7A38(0, skin, nd);
+}
+
+s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
+    const BFrame* p = world;
+    BFrame skin[32];
+    if (root) {
+        *root = p[0];
+    }
+    Bone* b = set->bones;
+    s32 nd = set->numDest;
+    return Loop1_fn_801E65BC(n, b, p, skin, nd);
 }
 
 void fn_801E67B4(BVec* out, const BVec* in, const BFrame* m) {

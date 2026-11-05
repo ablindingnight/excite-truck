@@ -199,6 +199,12 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     fn_8029F458(name, obj);
 }
 
+static inline void Loop1_fn_801DA8C8(int n, PathGroup* g, PathClient** found) {
+    for (int j = 0; j < n; j++) {
+        g->Add(found[j]);
+    }
+}
+
 PathMover* fn_801DA8C8(const char* object, const char* path) {
     int i;
     PathMan* m = lbl_8055E984;
@@ -214,9 +220,7 @@ PathMover* fn_801DA8C8(const char* object, const char* path) {
     PathGroup* g = 0;
     if (n > 0) {
         g = new ("pathmanpath") PathGroup(path, n);
-        for (int j = 0; j < n; j++) {
-            g->Add(found[j]);
-        }
+        Loop1_fn_801DA8C8(n, g, found);
     }
     return g;
 }

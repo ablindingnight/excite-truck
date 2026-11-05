@@ -78,22 +78,37 @@ static inline void Fix(void** p, u32 base) {
 
 extern "C" {
 
+static inline int Loop1_fn_801D1C68(int i, MeshHeader* m) {
+    for (i = 0; i < m->numVerts; i++) {
+        m->verts[i].Swap();
+    }
+    return i;
+}
+
+static inline int Loop2_fn_801D1C68(int i, MeshHeader* m) {
+    for (i = 0; i < m->numFaces; i++) {
+        m->faces[i].Swap();
+    }
+    return i;
+}
+
+static inline int Loop3_fn_801D1C68(int i, MeshHeader* m) {
+    for (i = 0; i < m->numStrips; i++) {
+        m->strips[i].Swap();
+        m->strips[i].vert = &m->verts[(u32)m->strips[i].vert];
+    }
+    return i;
+}
+
 void fn_801D1C68(MeshHeader* m, u32 base) {
     Fix((void**)&m->verts, base);
     Fix((void**)&m->faces, base);
     Fix((void**)&m->strips, base);
     Fix((void**)&m->bones, base);
     int i;
-    for (i = 0; i < m->numVerts; i++) {
-        m->verts[i].Swap();
-    }
-    for (i = 0; i < m->numFaces; i++) {
-        m->faces[i].Swap();
-    }
-    for (i = 0; i < m->numStrips; i++) {
-        m->strips[i].Swap();
-        m->strips[i].vert = &m->verts[(u32)m->strips[i].vert];
-    }
+    i = Loop1_fn_801D1C68(i, m);
+    i = Loop2_fn_801D1C68(i, m);
+    i = Loop3_fn_801D1C68(i, m);
     for (i = 0; i < m->numBones; i++) {
         m->bones[i].Swap();
     }

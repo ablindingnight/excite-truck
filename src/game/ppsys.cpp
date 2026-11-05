@@ -429,6 +429,13 @@ PSysObj* fn_801C1C1C(const PSysDesc* d) { return new ("ppsys") PSysObj(d->nVerts
 
 void fn_801C1C7C(PSysObj* s) { delete s; }
 
+static inline int Loop1_fn_801C1CBC(int i, int ne, const PEdgeDesc* e, PSys* s) {
+    for (i = 0; i < ne; i++, e++) {
+        AddStick(s, e->a, e->b, e->extra, e->stiff);
+    }
+    return i;
+}
+
 void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e, int np, const PPinDesc* p) {
     int i;
     s->nPart = 0;
@@ -438,9 +445,7 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     for (i = 0; i < nv; i++, v++) {
         AddPart(s, &v->pos, v->w34, v->w30);
     }
-    for (i = 0; i < ne; i++, e++) {
-        AddStick(s, e->a, e->b, e->extra, e->stiff);
-    }
+    i = Loop1_fn_801C1CBC(i, ne, e, s);
     for (i = 0; i < np; i++, p++) {
         AddAnchor(s, p->idx, p->mtx, p->at ? p->at : &s->pos[p->idx]);
     }
@@ -485,7 +490,7 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
 }
 
 // Gives every particle the velocity of a body moving with 'vel' and spinning with 'avel' about 'at'.
-void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
+static inline void Loop2_fn_801C256C(PSys* s, const RVec3* at, const RVec3* avel, const RVec3* vel) {
     for (int i = 0; i < s->nPart; i++) {
         RVec3 v;
         RVec3 r;
@@ -494,6 +499,10 @@ void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) 
         AddTo(&v, vel);
         AddScaled(&s->old[i], &s->pos[i], &v, -(1.0f / 60.0f));
     }
+}
+
+void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
+    Loop2_fn_801C256C(s, at, avel, vel);
 }
 
 void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
