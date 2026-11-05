@@ -658,13 +658,14 @@ void fn_802D5838(Surf* s) {
     int n = s->nverts;
     V3* p = (V3*)s->verts;
     V3* nrm = (V3*)s->attr;
+    V3* o;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
         V3 l;
         const V3* dir = fn_802D2D04();
         const Mat3* rot = &lbl_804C5690.rot;
         MulVecR(&l, dir, rot);
-        V3* o = out;
+        o = out;
         for (int i = 0; i < n; i++) {
             if (PSVECDotProduct(nrm, &l) < 0.0f) {
                 f32 e = lbl_8055FDE0;

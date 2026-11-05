@@ -452,12 +452,12 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
         Node* head;
     };
     List* lists[5];
+    Node* nd;
     int n = 5;
     int i;
     void fn_801B619C(List** out, int* n, const BVec3* c);
     fn_801B619C(lists, &n, c);
     for (i = 0; i < n; i++) {
-        Node* nd;
         for (nd = lists[i]->head; nd; nd = nd->next) {
             RigidBody* b = nd->obj->vf40() ? (RigidBody*)nd->obj : 0;
             if (b) {
