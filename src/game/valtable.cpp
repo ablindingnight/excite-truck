@@ -56,9 +56,9 @@ public:
             const char* key;
             s32 unk;
         } k = {key, 0};
-        int i = 0;
         ValuePair* r = 0;
-        for (;  i < count; i++) {
+        int i;
+        for (i = 0; i < count; i++) {
             if (!strcasecmp(key, pairs[i].key)) {
                 r = &pairs[i];
                 break;
