@@ -226,16 +226,10 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     return Spline(col[0], col[1], col[2], col[3], fz, s2, s2 * fz);
 }
 
-f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
-    f32 t2 = fx * fx;
-    f32 t3 = t2 * fx;
-    f32 col[4];
-    f32 dcol[4];
-    for (int i = 0; i < 4; i++) {
-        col[i] = SplineD(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3, &dcol[i]);
-    }
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline f32 Loop2_fn_801DB514(f32 s2, f32 fz, f32* col, f32* dcol) {
+    GVec*normal;
     f32 s3;
-    f32 s2 = fz * fz;
     s3 = s2 * fz;
     f32 dz;
     f32 h = SplineD(col[0], col[1], col[2], col[3], fz, s2, s3, &dz);
@@ -246,6 +240,17 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     PSVECNormalize(&n, &n);
     *normal = n;
     return h;
+}
+
+f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
+    f32 t2 = fx * fx;
+    f32 t3 = t2 * fx;
+    f32 col[4];
+    f32 dcol[4];
+    for (int i = 0; i < 4; i++) {
+        col[i] = SplineD(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3, &dcol[i]);
+    }
+    return Loop2_fn_801DB514(fz * fz, fz, col, dcol);
 }
 
 int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32 fx, f32 fz) {
@@ -506,29 +511,8 @@ static inline f32 Loop2_fn_801DCF48(GTile* t, f32 h, int lx, int lz) {
     return h;
 }
 
-f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
-    GroundHeader* g = lbl_8055E990;
-    f32 h;
-    if (!g->tiled) {
-        h = 0.0f;
-        if (!fn_801DC258(&h, 0, 0, normal, x, z)) {
-            h = 0.0f;
-            if (normal) {
-                normal->x = h;
-                normal->y = 1.0f;
-                normal->z = h;
-            }
-        }
-        return h;
-    }
-    f32 fx = g->scaleX * (x + g->offX);
-    f32 fz = g->scaleZ * (z + g->offZ);
-    int ix = Round(fx);
-    int iz = Round(fz);
-    int tx = ix / 32;
-    int tz = iz / 32;
-    int lz = iz - tz * 32;
-    int lx = ix - tx * 32;
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* normal, int lx, int lz, f32 h) {
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         if (normal) {
@@ -562,6 +546,32 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     }
     h = t->base + t->scale * t->h[lx][lz];
     return Loop2_fn_801DCF48(t, h, lx, lz);
+}
+
+f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
+    GroundHeader* g = lbl_8055E990;
+    f32 h;
+    if (!g->tiled) {
+        h = 0.0f;
+        if (!fn_801DC258(&h, 0, 0, normal, x, z)) {
+            h = 0.0f;
+            if (normal) {
+                normal->x = h;
+                normal->y = 1.0f;
+                normal->z = h;
+            }
+        }
+        return h;
+    }
+    f32 fx = g->scaleX * (x + g->offX);
+    f32 fz = g->scaleZ * (z + g->offZ);
+    int ix = Round(fx);
+    int iz = Round(fz);
+    int tx = ix / 32;
+    int tz = iz / 32;
+    int lz = iz - tz * 32;
+    int lx = ix - tx * 32;
+    return Loop1_fn_801DCF48(g, tx, tz, normal, lx, lz, h);
 }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }

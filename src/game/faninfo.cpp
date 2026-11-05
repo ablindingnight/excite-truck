@@ -136,15 +136,19 @@ int fn_802BE7C4(int x, int z, int size) {
 
 void fn_802BE7F4(void) {}
 
-void fn_802BE7F8(void) {
-    fn_802BE694();
-    FanCell* def = (FanCell*)lbl_804C07E4;
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_802BE7F8(FanCell* def) {
     def->a = (u32)&lbl_8055FAC8;
     u32 b = 0x200;
     b |= 0x84;
     b |= 0x800000;
     def->bits = b;
     def->b = 0;
+}
+
+void fn_802BE7F8(void) {
+    fn_802BE694();
+    Loop1_fn_802BE7F8((FanCell*)lbl_804C07E4);
 }
 
 void fn_802BE840(void) { fn_802BE72C(); }

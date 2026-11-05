@@ -118,29 +118,8 @@ bool fn_802A9048(void) {
     return r;
 }
 
-void fn_802A9090(const ZV2* pos, const ZV2* dir) {
-    ZV2 n = *dir;
-    Perp(&n);
-    f32 half;
-    if (lbl_804BD740[0].model != -1) {
-        f32 box[6];
-        fn_802C77F0(lbl_804BD740[0].model, box);
-        half = box[1] - box[0];
-    } else {
-        half = 20.0f;
-    }
-    ZV2 a;
-    ZV2 b;
-    a.x = pos->x + n.x * -half;
-    a.y = pos->y + n.y * -half;
-    b.x = pos->x + n.x * half;
-    b.y = pos->y + n.y * half;
-    ZVec va;
-    fn_802A8FEC(&va, &a);
-    lbl_804BD6F8[0] = va;
-    ZVec vb;
-    fn_802A8FEC(&vb, &b);
-    ZFrame* f = &lbl_804BD760;
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_802A9090(ZVec& vb, ZFrame* f) {
     f32 xv = vb.x;
     f->pos.x = lbl_804BD6F8[0].x + xv;
     f32 yv = vb.y;
@@ -171,6 +150,31 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
         f->rot[0].y *= -1.0f;
         f->rot[0].z *= -1.0f;
     }
+}
+
+void fn_802A9090(const ZV2* pos, const ZV2* dir) {
+    ZV2 n = *dir;
+    Perp(&n);
+    f32 half;
+    if (lbl_804BD740[0].model != -1) {
+        f32 box[6];
+        fn_802C77F0(lbl_804BD740[0].model, box);
+        half = box[1] - box[0];
+    } else {
+        half = 20.0f;
+    }
+    ZV2 a;
+    ZV2 b;
+    a.x = pos->x + n.x * -half;
+    a.y = pos->y + n.y * -half;
+    b.x = pos->x + n.x * half;
+    b.y = pos->y + n.y * half;
+    ZVec va;
+    fn_802A8FEC(&va, &a);
+    lbl_804BD6F8[0] = va;
+    ZVec vb;
+    fn_802A8FEC(&vb, &b);
+    Loop1_fn_802A9090(vb, &lbl_804BD760);
 }
 
 void fn_802A92CC(void) {

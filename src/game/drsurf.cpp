@@ -976,15 +976,18 @@ void fn_802D62FC(Surf* s, void** dl, u32* size) {
 
 void fn_802D657C(u32* p, u32 base);
 
-void fn_802D63FC(Surf* s, u32 base) {
-    u8* b = (u8*)s;
-    Swap32(b + 0x18);
-    Swap32(b + 0xC);
-    Swap32(b + 0x10);
+static inline void SwapHeader(u8* b) {
     Swap32(b + 0x1C);
     Swap32(b + 0x20);
     Swap32(b + 0x24);
     Swap32(b + 0x28);
+    Swap32(b + 0x18);
+    Swap32(b + 0xC);
+    Swap32(b + 0x10);
+}
+
+void fn_802D63FC(Surf* s, u32 base) {
+    SwapHeader((u8*)s);
     fn_802D657C((u32*)&s->verts, base);
     fn_802D657C((u32*)&s->attr, base);
     fn_802D657C((u32*)&s->uv, base);
