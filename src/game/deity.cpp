@@ -1263,22 +1263,24 @@ extern "C" {
 
 void fn_801B2C6C(void) {}
 
+struct DeitySnapCar {
+    s32 a0;
+    s32 place;
+    s32 a8;
+    s32 aC;
+    u8 b10;
+    u8 pad11[3];
+};
+
 struct DeitySnap {
     s32 cars;     // offset 0x0
     s32 players;  // offset 0x4
     u8 pad8[4];
     u8 bC;
     u8 leaderDone;  // offset 0xD
-    u8 allDone;     // offset 0xE
+    u8 anyRacing;   // offset 0xE
     u8 padF;
-    struct {
-        s32 a0;
-        s32 place;
-        s32 a8;
-        s32 aC;
-        u8 b10;
-        u8 pad11[3];
-    } car[8];  // offset 0x10
+    DeitySnapCar car[8];  // offset 0x10
 };
 
 int fn_801B2C70(DeitySnap* s) {
@@ -1287,11 +1289,12 @@ int fn_801B2C70(DeitySnap* s) {
     s->players = lbl_8055E67C;
     s->bC = 0;
     s->leaderDone = lbl_8055E698;
-    s->allDone = lbl_8055E67C <= lbl_8055E69C;
+    s->anyRacing = lbl_8055E69C < lbl_8055E67C;
     for (int i = 0; i < lbl_8055E678; i++) {
-        s->car[i].place = *(s32*)((u8*)&lbl_8055E684[i] + 0x8);
-        s->car[i].a8 = 0;
-        s->car[i].b10 = 0;
+        DeitySnapCar* c = &s->car[i];
+        c->place = *(s32*)((u8*)&lbl_8055E684[i] + 0x8);
+        c->a8 = 0;
+        c->b10 = 0;
     }
     return 1;
 }
