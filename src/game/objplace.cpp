@@ -120,6 +120,7 @@ struct InlineVec {
         }
     }
     inline T* Push(const T& v);
+    T& Next(void) { return data[count++]; }
     inline int Count(void);
     inline T* At(int i);
     T* data;    // offset 0x0
@@ -271,6 +272,11 @@ struct SetPlacer : InlineVec<MatPlacer*, 6> {
     const char* name;  // offset 0x24
 };
 
+// A SetPlacer read from a node's mat1, mat2, ... children; the base constructor stays out of line.
+struct NodeSetPlacer : SetPlacer {
+    NodeSetPlacer(ValueNode* node);
+};
+
 struct ObjTweak {
     const char* name;      // offset 0x0
     ObjectPlacer* placer;  // offset 0x4
@@ -369,24 +375,25 @@ void fn_802B1FD4(void) {
     lbl_804BE1FC.count = 0;
 }
 
+inline NodeSetPlacer::NodeSetPlacer(ValueNode* node) {
+    for (int i = 1;; i++) {
+        char name[16];
+        fn_801345D8(name, 16, "mat%d", i);
+        if (!fn_802B2C44(node, name)) {
+            break;
+        }
+        MatPlacer* m = new ("ObjectSetPlacer") MatPlacer(node->FindChild(name), i - 1);
+        Push(m);
+    }
+    this->name = node->GetValue("name");
+}
+
 void fn_802B224C(ValueNode* node) {
     if (lbl_804BE1FC.count + 1 > lbl_804BE1FC.cap) {
         return;
     }
-    SetPlacer* set = new ("umat-DLO-SetPlacer") SetPlacer;
-    if (set) {
-        for (int i = 1;; i++) {
-            char name[16];
-            fn_801345D8(name, 16, "mat%d", i);
-            if (!fn_802B2C44(node, name)) {
-                break;
-            }
-            MatPlacer* m = new ("ObjectSetPlacer") MatPlacer(node->FindChild(name), i - 1);
-            set->Push(m);
-        }
-        set->name = node->GetValue("name");
-    }
-    lbl_804BE1FC.data[lbl_804BE1FC.count++] = set;
+    SetPlacer* set = new ("umat-DLO-SetPlacer") NodeSetPlacer(node);
+    lbl_804BE1FC.Next() = set;
 }
 
 }  // extern "C"
