@@ -368,6 +368,37 @@ void fn_80231780(const UIXform* m) {
 
 void fn_80231ADC(void) { lbl_8049846C.count = 0; }
 
+static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, f32* adv) {
+    if (*s == '\\') {
+        for (int i = 0; i < lbl_80497F14.count; i++) {
+            EscSeq* e = &lbl_80497F14.data[i];
+            if (strncasecmp(s + 1, e->name, strlen(e->name)) == 0) {
+                ArtItem* it = &lbl_8049846C.data[lbl_8049846C.count++];
+                f32 post = 0.0f;
+                it->esc = i;
+                if (e->art) {
+                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    it->h = h * e->scale;
+                    it->w = (k * e->scale) * fn_80235EF0(e->art, e->artIdx);
+                    post = e->scale * (e->postspace * k);
+                } else {
+                    it->w = h * e->scale;
+                    it->h = h * e->scale;
+                }
+                it->x = x;
+                it->y = (y + h) + 0.5f * (it->h - h);
+                it->z = z;
+                it->color = color;
+                if (adv) {
+                    *adv = it->w + post;
+                }
+                return strlen(e->name) + 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     const char* p = s;
     EscSeq* e;
@@ -420,41 +451,8 @@ void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
 void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     strlen(s);
     while (*s) {
-        f32 adv;
-        f32* advp = &adv;
-        adv = h;
-        u32 color = lbl_8055F050;
-        int skip;
-        if (*s == '\\') {
-            for (int i = 0; i < lbl_80497F14.count; i++) {
-                EscSeq* e = &lbl_80497F14.data[i];
-                if (strncasecmp(s + 1, e->name, strlen(e->name)) == 0) {
-                    ArtItem* it = &lbl_8049846C.data[lbl_8049846C.count++];
-                    f32 post = 0.0f;
-                    it->esc = i;
-                    if (e->art) {
-                        f32 k = h / fn_80235F64(e->art, e->artIdx);
-                        it->h = h * e->scale;
-                        it->w = (k * e->scale) * fn_80235EF0(e->art, e->artIdx);
-                        post = e->scale * (e->postspace * k);
-                    } else {
-                        it->w = h * e->scale;
-                        it->h = h * e->scale;
-                    }
-                    it->x = x;
-                    it->y = (y + h) + 0.5f * (it->h - h);
-                    it->z = z;
-                    it->color = color;
-                    if (advp) {
-                        *advp = it->w + post;
-                    }
-                    skip = strlen(e->name) + 1;
-                    goto found;
-                }
-            }
-        }
-        skip = 0;
-    found:
+        f32 adv = h;
+        int skip = EscDraw(s, x, y, z, h, lbl_8055F050, &adv);
         if (skip > 0) {
             s += skip;
             x += adv;
@@ -1146,42 +1144,8 @@ void fn_802346C8(void) {
                 strlen(lbl_8055F06C[i].text);
                 j = 0;
                 while (lbl_8055F06C[i].text[j]) {
-                    const char* s = lbl_8055F06C[i].text;
-                    f32 adv;
-                    f32* advp = &adv;
-                    adv = h;
-                    u32 color = *cp;
-                    int skip;
-                    if (s[j] == '\\') {
-                        for (int k = 0; k < lbl_80497F14.count; k++) {
-                            EscSeq* e = &lbl_80497F14.data[k];
-                            if (strncasecmp(s + j + 1, e->name, strlen(e->name)) == 0) {
-                                ArtItem* a = &lbl_8049846C.data[lbl_8049846C.count++];
-                                f32 post = 0.0f;
-                                a->esc = k;
-                                if (e->art) {
-                                    f32 q = h / fn_80235F64(e->art, e->artIdx);
-                                    a->h = h * e->scale;
-                                    a->w = (q * e->scale) * fn_80235EF0(e->art, e->artIdx);
-                                    post = e->scale * (e->postspace * q);
-                                } else {
-                                    a->w = h * e->scale;
-                                    a->h = h * e->scale;
-                                }
-                                a->x = x;
-                                a->y = y1 + 0.5f * (a->h - h);
-                                a->z = 0.0f;
-                                a->color = color;
-                                if (advp) {
-                                    *advp = a->w + post;
-                                }
-                                skip = strlen(e->name) + 1;
-                                goto found;
-                            }
-                        }
-                    }
-                    skip = 0;
-                found:
+                    f32 adv = h;
+                    int skip = EscDraw(lbl_8055F06C[i].text + j, x, y0, 0.0f, h, *cp, &adv);
                     if (skip > 0) {
                         j += skip;
                         x += adv;
@@ -1189,7 +1153,7 @@ void fn_802346C8(void) {
                     }
                     const char* next;
                     f32 xsv = lbl_8055F06C[i].xs;
-                    u16 c = DecodeUTF8(s + j, &next);
+                    u16 c = DecodeUTF8(lbl_8055F06C[i].text + j, &next);
                     x += xsv * f->glyphs[c].pre;
                     f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
                     if (c != ' ') {
@@ -1198,7 +1162,7 @@ void fn_802346C8(void) {
                         fn_802C8E00(*cp, 1, x, y0, 0.0f, f->glyphs[c].u0, f->glyphs[c].v1);
                         fn_802C8E00(*cp, 1, x1, y0, 0.0f, f->glyphs[c].u1, f->glyphs[c].v1);
                     }
-                    j += next - (s + j);
+                    j += next - (lbl_8055F06C[i].text + j);
                     x += f->glyphs[c].width * lbl_8055F06C[i].scale;
                     x += lbl_8055F06C[i].xs * f->glyphs[c].post;
                 }
