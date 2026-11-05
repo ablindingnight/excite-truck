@@ -508,6 +508,11 @@ void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) 
     Loop2_fn_801C256C(s, at, avel, vel);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline s32 Expr1_fn_801C2694(PSys* s) {
+    return s->nPart;
+}
+
 void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
     RVec3* p = out;
     s->org = *org;
@@ -518,7 +523,7 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
         AddTo(&s->acc[i], &a);
     }
     fn_801C1B60(s);
-    s32 k = s->nPart;
+    s32 k = Expr1_fn_801C2694(s);
     for (int j = 0; j < s->nPart; j++) {
         Set(p, &s->pos[j]);
         p++;

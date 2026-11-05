@@ -387,6 +387,8 @@ struct BoostEntry {
 
 class BoostFireMan {
 public:
+    BoostEntry* Expr1_Update(int i);
+public:
     void Loop1_Update(Vec& off, const Vec* vel, f32 f);
 public:
     BoostFireMan(void);
@@ -1309,8 +1311,13 @@ inline void BoostFireMan::Loop1_Update(Vec& off, const Vec* vel, f32 f) {
     off.x = velX * f;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+inline BoostEntry* BoostFireMan::Expr1_Update(int i) {
+    return &entries[i];
+}
+
 void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
-    BoostEntry* e = &entries[i];
+    BoostEntry* e = Expr1_Update(i);
     if (!((f32)__fabs(car->boost) <= lbl_80558DC4[0])) {
         e->active = 0;
         e->t = 0.0f;

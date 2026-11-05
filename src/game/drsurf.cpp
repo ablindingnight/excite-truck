@@ -944,8 +944,13 @@ Surf* fn_802D62E4(Surf* s) {
     return 0;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline u32 Expr1_fn_802D62FC(Surf* s) {
+    return s->vfmt;
+}
+
 void fn_802D62FC(Surf* s, void** dl, u32* size) {
-    u32 key = s->vfmt;
+    u32 key = Expr1_fn_802D62FC(s);
     DLEntry* e = lbl_804CA438;
     u8 b = s->b9;
     for (int i = lbl_8055FDF0; i > 0; i--) {

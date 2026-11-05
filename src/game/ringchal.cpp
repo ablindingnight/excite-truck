@@ -1368,6 +1368,11 @@ static inline void Loop1_fn_8016D294(ObjSet* os) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline ObjSet* Expr1_fn_8016D294(Arena* ar) {
+    return &ar->sets->data[ar->curSet];
+}
+
 extern "C" void fn_8016D294(int a, int b, int set) {
     RingChalMaster* m = lbl_8055E378;
     if (!m || b != 0) {
@@ -1376,7 +1381,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
     Arena* ar = &m->arena;
     ar->curSet = set;
     if (ar->curSet < ar->nFiles) {
-        ObjSet* os = &ar->sets->data[ar->curSet];
+        ObjSet* os = Expr1_fn_8016D294(ar);
         int i;
         os->active = 1;
         os->time = lbl_8055E3C8;

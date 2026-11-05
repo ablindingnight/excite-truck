@@ -63,6 +63,8 @@ struct Lift {
 };
 
 struct SpringWall {
+public:
+    int Expr1_Apply(void);
     void Apply(SpringCar* car, TVec* acc);
     bool Free(void) const { return owner == 0; }
     void Set(WallObj* w, SpringCar* car, const TVec* other);
@@ -374,6 +376,10 @@ void SpringCar::vf14(void) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+inline int SpringWall::Expr1_Apply(void) {
+    return this->dist < 0.0f, time < ramp;
+}
+
 void SpringWall::Apply(SpringCar* car, TVec* acc) {
     if (owner) {
         TVec v;
@@ -396,7 +402,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         p.z = car->pos.z + v.z * 0.016683351f;
         dist = PlaneDist(&n, &p, &owner->plane->origin);
         target = vel + t * (depth - vel);
-        ramping = this->dist < 0.0f, time < ramp;
+        ramping = Expr1_Apply();
         if (ramping) {
             f32 pen = target - d;
             f32 extra;

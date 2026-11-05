@@ -530,6 +530,11 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
 
 extern "C" {
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline int Expr1_fn_801F602C(f32 d, f32 w) {
+    return d > w;
+}
+
 void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     f32 w = PSVECDistance(&q->c[2].pos, &q->c[3].pos);
     f32 h;
@@ -540,7 +545,7 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     f32 vmax;
     f32 span;
     d = PSVECDistance(&q->c[0].pos, &q->c[1].pos);
-    if (d > w) {
+    if (Expr1_fn_801F602C(d, w)) {
         w = d;
     }
     h = PSVECDistance(&q->c[1].pos, &q->c[3].pos);

@@ -807,6 +807,11 @@ void fn_801942F0(u8* d, int on) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline int Expr1_fn_80194324(f32 dt) {
+    return dt < 1.5f;
+}
+
 void fn_80194324(u8* d) {
     if (IsLoadingActive()) {
         S32(d, 0x2D0) |= 0x10;
@@ -819,7 +824,7 @@ void fn_80194324(u8* d) {
         if (ok) {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1D0);
             f32 v;
-            if (dt < 1.5f) {
+            if (Expr1_fn_80194324(dt)) {
                 f32 a = F32(d, 0x1B0) * F32(d, 0x1B4) + -F32(d, 0x1AC) * F32(d, 0x1B8);
                 f32 b = F32(d, 0x17C) * F32(d, 0x180) + -F32(d, 0x178) * F32(d, 0x184);
                 v = b + (dt / 1.5f) * (a - b);

@@ -1334,6 +1334,8 @@ struct TocSizer {
 
 class AsyncSetQueue : public BgObject {
 public:
+    ResToc* NodeToc(QueueNode* n);
+public:
     AsyncSetQueue(void) {
         int i;
         pool.cap = 32;
@@ -1743,11 +1745,15 @@ extern "C" void fn_8012E96C(const char* name) {
 }
 #pragma pop
 
+inline ResToc* AsyncSetQueue::NodeToc(QueueNode* n) {
+    return GetToc(n->name);
+}
+
 QueueNode* AsyncSetQueue::FindNodeFor(const char* name) {
     QueueNode* found = 0;
     QueueNode* n = pending.head;
     while (n && !found) {
-        ResToc* toc = GetToc(n->name);
+        ResToc* toc = NodeToc(n);
         if (TocHas(toc, name)) {
             found = n;
         }

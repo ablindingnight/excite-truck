@@ -522,6 +522,10 @@ void fn_80166814(void) {
     lbl_8055E32C = 0;
 }
 
+static inline Role* Expr1_fn_80166898(int i) {
+    return &lbl_8042FEB0.data[i];
+}
+
 void fn_80166898(void) {
     int i;
     lbl_8055E32B = 0;
@@ -532,7 +536,7 @@ void fn_80166898(void) {
         lbl_8055E32C->At(i)->Reset();
     }
     for (i = 0; i < lbl_8042FEB0.count; i++) {
-        Role* r = &lbl_8042FEB0.data[i];
+        Role* r = Expr1_fn_80166898(i);
         r->owner = -1;
         r->start = lbl_8055E318 - fn_80129DC4(3, 0.0f, 2.0f * r->half);
     }

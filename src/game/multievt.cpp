@@ -959,6 +959,10 @@ struct CourseSlot {
 
 const char* fn_80131234(const char* key);
 
+static inline EvEntry* EventAt(u8* p, int i) {
+    return &((EvList*)PTR(p, 0x74))->items[i];
+}
+
 void fn_8024B260(u8* p) {
     EvEntry* e;
     const char* group;
@@ -971,7 +975,7 @@ void fn_8024B260(u8* p) {
         ((CourseSlot*)(p + 0x78))[k].open = 1;
     }
     for (i = 0; i < ((EvList*)PTR(p, 0x74))->count; i++) {
-        e = &((EvList*)PTR(p, 0x74))->items[i];
+        e = EventAt(p, i);
         if (!strcasecmp(group, e->group)) {
             CourseSlot* c = &((CourseSlot*)(p + 0x78))[e->slot];
             CopyName(e->name, 50, c->name);
