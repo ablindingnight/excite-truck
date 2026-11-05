@@ -37,7 +37,8 @@ struct IdealPoint {
 };
 
 struct CenterLine {
-    u8 pad0[0x18];
+    u8 pad0[0x8];
+    f32 len[4];          // offset 0x8
     u32 total;           // offset 0x18 (16.16)
     IdealPoint* points;  // offset 0x1C
 };
@@ -486,7 +487,7 @@ void fn_801B0BB0(LinePlace* out, const LineFollower* f) {
     out->seg = seg;
     out->t = f->il.t;
     out->mode = f->il.mode;
-    f32 lim = f->line->points->dist - 100.0f;
+    f32 lim = f->line->len[0] - 100.0f;
     if (seg->dist > lim) {
         fn_802E30C8("deity: would have teleported too close to sfline, rewinding");
         IdealPoint* p = f->line->points;
@@ -494,7 +495,7 @@ void fn_801B0BB0(LinePlace* out, const LineFollower* f) {
         int i = 0;
         while (p->dist < lim) {
             found = p;
-            if (++i > 3000) {
+            if (i++ > 3000) {
                 found = 0;
                 break;
             }
