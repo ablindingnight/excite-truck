@@ -200,6 +200,7 @@ public:
 
 struct PromptTimes {
     u8 visible;  // offset 0x0
+    s32 SinceShown(s32 now) const { return now - shown; }
     s32 shown;   // offset 0x4
     s32 touched; // offset 0x8
 };
@@ -667,7 +668,7 @@ void fn_80008F98(void) {
 static inline void TouchPrompts(void) {
     int now = lbl_8055D380.time;
     if (now - lbl_8034F44C.touched >= 3000) {
-        if (now - lbl_8034F44C.shown >= 600) {
+        if (lbl_8034F44C.SinceShown(now) >= 600) {
             lbl_8034F44C.shown = now;
         } else {
             lbl_8034F44C.shown = 2 * now - lbl_8034F44C.shown - 600;
@@ -695,7 +696,7 @@ void fn_80009534(void) {
     int savedCam;
     int locked;
     int selection;
-    u32 key;
+    int key;
     int handled;
     int camera;
     int now;
@@ -817,7 +818,7 @@ void fn_80009534(void) {
                         key = 0;
                     }
                 }
-                if (locked && key - 2 <= 3) {
+                if (locked && (u32)(key - 2) <= 3) {
                     key = 0;
                 }
                 if (key == 0x12) {
