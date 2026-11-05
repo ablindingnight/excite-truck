@@ -2064,7 +2064,7 @@ struct Hit {
     s32 id;
 };
 
-int fn_8019703C(const u8* d, const u8* p) {
+static inline int Loop3_fn_8019703C(const u8* p, const u8* d) {
     int any = 0;
     f32 z = F32(p, 0x8);
     f32 x = F32(p, 0x4);
@@ -2100,6 +2100,10 @@ int fn_8019703C(const u8* d, const u8* p) {
         }
     }
     return 0;
+}
+
+int fn_8019703C(const u8* d, const u8* p) {
+    return Loop3_fn_8019703C(p, d);
 }
 
 void fn_801971AC(u8* d, V2* io) {
@@ -2298,14 +2302,7 @@ void fn_8019743C(u8* d, u8* out) {
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c);
 
-int fn_8019799C(u8* d, u8* p) {
-    int r = 0;
-    if (S32(d, 0x2D0) & 2) {
-        return 0;
-    }
-    int ok = 1;
-    f32 v = -F32(p, 0x10);
-    s32 id = S32(p, 0x18);
+static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, int ok, u8* p, int r) {
     if (!(v > 4.4444447f)) {
         int same = 0;
         if (id == S32(d, 0x114) && v > 2.2222223f) {
@@ -2327,6 +2324,16 @@ int fn_8019799C(u8* d, u8* p) {
         }
     }
     return r;
+}
+
+int fn_8019799C(u8* d, u8* p) {
+    int r = 0;
+    if (S32(d, 0x2D0) & 2) {
+        return 0;
+    }
+    int ok = 1;
+    f32 v = -F32(p, 0x10);
+    return Loop4_fn_8019799C(v, S32(p, 0x18), d, ok, p, r);
 }
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
@@ -2433,6 +2440,14 @@ void fn_80197BD0(u8* d, u8* out) {
 
 void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
+static inline int Loop2_fn_80197FE4(const u8* p, int c5) {
+    u8* o = lbl_804349C0[S32(p, 0x18)];
+    if (o && U8(o, 0x2A5)) {
+        c5 = 0;
+    }
+    return c5;
+}
+
 int fn_80197FE4(u8* d, const u8* p) {
     int r = 0;
     if (!(S32(d, 0x2D0) & 4)) {
@@ -2459,10 +2474,7 @@ int fn_80197FE4(u8* d, const u8* p) {
         }
         int c4 = (f32)__fabs(z) < hi;
         int c5 = 1;
-        u8* o = lbl_804349C0[S32(p, 0x18)];
-        if (o && U8(o, 0x2A5)) {
-            c5 = 0;
-        }
+        c5 = Loop2_fn_80197FE4(p, c5);
         if (c5 && c2 && c4) {
             fn_8019813C(d, p, F32(p, 0x8), x);
             r = 1;
@@ -2491,6 +2503,35 @@ extern "C" const f32 lbl_8056217C;  // 10.0
 
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
+static inline void Loop1_fn_801981A0(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
+    f32 y = F32(t, 0xC);
+    F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+    if (U8(d, 0x9C)) {
+        S32(d, 0x140) = 30;
+    }
+    if (S32(d, 0x140) == 0 && S32(d, 0x268) != 3) {
+        f32 span = lbl_8056217C - lbl_80562140;
+        f32 lim = 4.0f * lbl_8055A488 * lbl_8055E564;
+        f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
+        r = span < r ? span : r;
+        r = r > 0.0f ? r : 0.0f;
+        r = 1.0f + r;
+        int go = 0;
+        if (F32(d, 0x150) < 0.0f || F32(d, 0x26C) > F32(d, 0x150)) {
+            go = 1;
+        }
+        if (go) {
+            F32(d, 0x150) = -1.0f;
+            f32 side = S32(d, 0x18) == 1 ? -1.0f : 1.0f;
+            f32 sgn = F32(d, 0x12C) - 0.305f * (2.0f * side) > 0.0f ? 1.0f : -1.0f;
+            f32 p = F32(d, 0x144) + 0.08f * r * -sgn;
+            p = lim < p ? lim : p;
+            p = p > -lim ? p : -lim;
+            F32(d, 0x144) = p;
+        }
+    }
+}
+
 void fn_801981A0(u8* d, u8* t) {
     f32 a;
     if (S32(d, 0x140) > 0) {
@@ -2511,33 +2552,7 @@ void fn_801981A0(u8* d, u8* t) {
             f32 x = F32(t, 0x8);
             a = F32(d, 0x130);
             F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
-            f32 b = F32(d, 0x134);
-            f32 y = F32(t, 0xC);
-            F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
-            if (U8(d, 0x9C)) {
-                S32(d, 0x140) = 30;
-            }
-            if (S32(d, 0x140) == 0 && S32(d, 0x268) != 3) {
-                f32 span = lbl_8056217C - lbl_80562140;
-                f32 lim = 4.0f * lbl_8055A488 * lbl_8055E564;
-                f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
-                r = span < r ? span : r;
-                r = r > 0.0f ? r : 0.0f;
-                r = 1.0f + r;
-                int go = 0;
-                if (F32(d, 0x150) < 0.0f || F32(d, 0x26C) > F32(d, 0x150)) {
-                    go = 1;
-                }
-                if (go) {
-                    F32(d, 0x150) = -1.0f;
-                    f32 side = S32(d, 0x18) == 1 ? -1.0f : 1.0f;
-                    f32 sgn = F32(d, 0x12C) - 0.305f * (2.0f * side) > 0.0f ? 1.0f : -1.0f;
-                    f32 p = F32(d, 0x144) + 0.08f * r * -sgn;
-                    p = lim < p ? lim : p;
-                    p = p > -lim ? p : -lim;
-                    F32(d, 0x144) = p;
-                }
-            }
+            Loop1_fn_801981A0(t, F32(d, 0x134), d, lo, hi, x);
         }
     }
     U8(d, 0x154) = 0;

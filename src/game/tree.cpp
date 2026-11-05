@@ -676,16 +676,19 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base);
 void fn_802BD5B0(TFileArray<TCell>* a, u8* base);
 void fn_802BD69C(TFileArray<TreeRec>* a, u8* base);
 
+static inline void Loop1_fn_802BD4DC(TListEntry* e, u8* base) {
+    fn_802BD69C(&e->list, base);
+    fn_802BD5B0(&e->frames, base);
+    fn_802BD5B0(&e->near, base);
+}
+
 void fn_802BD4DC(TListFile* f, u8* base) {
     TListEntry* e;
     Swap32(&f->n);
     Swap32(&f->entries);
     f->entries = fn_802BD5A8(f->entries, base);
     for (u32 i = 0; i < f->n; i++) {
-        e = &f->entries[i];
-        fn_802BD69C(&e->list, base);
-        fn_802BD5B0(&e->frames, base);
-        fn_802BD5B0(&e->near, base);
+        Loop1_fn_802BD4DC(&f->entries[i], base);
     }
 }
 

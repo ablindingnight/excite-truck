@@ -407,6 +407,42 @@ int fn_8016A30C(int player) {
     return 0;
 }
 
+static inline void Loop1_fn_8016A438(int k, RingSet* s, Ring* r, f32 now) {
+    k = s->count;
+    while (k-- > 0) {
+        r = &lbl_80430318.data[s->first + k];
+        if (r->valid) {
+            now = fn_801E7E18();
+            f32 a = Lerp(0.0f, 1.0f, Unlerp(0.0f, 0.25f, now - r->fadeTime));
+            a = r->active ? a : 1.0f - a;
+            if (a > 0.01f) {
+                ValMatrix m;
+                fn_802C9900(a);
+                m = r->frame;
+                m.basis[0].x *= a;
+                m.basis[0].y *= a;
+                m.basis[0].z *= a;
+                m.basis[1].x *= a;
+                m.basis[1].y *= a;
+                m.basis[1].z *= a;
+                m.basis[2].x *= a;
+                m.basis[2].y *= a;
+                m.basis[2].z *= a;
+                if (r->passed) {
+                    fn_802C70AC(r->type->model, &m, -1, 4);
+                    if (now - r->passTime > 0.5f && r->active) {
+                        r->active = 0;
+                        r->fadeTime = lbl_8055E3C8;
+                    }
+                } else {
+                    fn_802C70AC(r->type->model, &m, -1, 2);
+                }
+                fn_802C9904();
+            }
+        }
+    }
+}
+
 void fn_8016A438(void) {
     RingSet* s;
     Ring* r;
@@ -414,40 +450,7 @@ void fn_8016A438(void) {
     int i;
     f32 now;
     for (i = 0; i < lbl_80430340.count; i++) {
-        s = &lbl_80430340.data[i];
-        k = s->count;
-        while (k-- > 0) {
-            r = &lbl_80430318.data[s->first + k];
-            if (r->valid) {
-                now = fn_801E7E18();
-                f32 a = Lerp(0.0f, 1.0f, Unlerp(0.0f, 0.25f, now - r->fadeTime));
-                a = r->active ? a : 1.0f - a;
-                if (a > 0.01f) {
-                    ValMatrix m;
-                    fn_802C9900(a);
-                    m = r->frame;
-                    m.basis[0].x *= a;
-                    m.basis[0].y *= a;
-                    m.basis[0].z *= a;
-                    m.basis[1].x *= a;
-                    m.basis[1].y *= a;
-                    m.basis[1].z *= a;
-                    m.basis[2].x *= a;
-                    m.basis[2].y *= a;
-                    m.basis[2].z *= a;
-                    if (r->passed) {
-                        fn_802C70AC(r->type->model, &m, -1, 4);
-                        if (now - r->passTime > 0.5f && r->active) {
-                            r->active = 0;
-                            r->fadeTime = lbl_8055E3C8;
-                        }
-                    } else {
-                        fn_802C70AC(r->type->model, &m, -1, 2);
-                    }
-                    fn_802C9904();
-                }
-            }
-        }
+        Loop1_fn_8016A438(k, &lbl_80430340.data[i], r, now);
     }
 }
 

@@ -1061,6 +1061,8 @@ extern s32 lbl_80559EC0;
 // What the race keeps about one car (0xC0, eight of them in BetaMaster).
 class BetaCar {
 public:
+    void Loop1_Finish(const RaceCarRec* rc);
+public:
     void Update(PickupList* stars, PuddleList* puddles);
     void DrawHud(ILayout* l, int view);
     void DrawResults(ILayout* l, int view);
@@ -2429,7 +2431,7 @@ void BetaCar::Retire(void) {
     fn_801CB648(id, master->timer.limit - left, 0);
 }
 
-void BetaCar::Finish(const RaceCarRec* rc) {
+inline void BetaCar::Loop1_Finish(const RaceCarRec* rc) {
     f32 add;
     CarHud* h;
     meterObj->Stop(rc);
@@ -2453,6 +2455,10 @@ void BetaCar::Finish(const RaceCarRec* rc) {
         }
     }
     score += add;
+}
+
+void BetaCar::Finish(const RaceCarRec* rc) {
+    Loop1_Finish(rc);
     overtime = lbl_8055E3C8;
     result.Finish(this);
     if (!result.dnf) {

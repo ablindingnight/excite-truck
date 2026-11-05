@@ -344,6 +344,13 @@ static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
     fn_801476D8(&e, -1, m->boostTex);
 }
 
+static inline void Loop1_fn_801DF93C(TextElem* b, CrashMode* m, TextElem* a, f32 k) {
+    b = m->layout->Find("boost_out");
+    if (a && b) {
+        fn_801479A8(a, b, fn_80131234("Crash:BOOST"), k);
+    }
+}
+
 int fn_801DF93C(int view) {
     ArtElem* fl;
     ArtElem* fr;
@@ -420,11 +427,7 @@ int fn_801DF93C(int view) {
     if (!fn_80141F7C(left) && s->boosted) {
         f32 d = lbl_8055AE40 / fn_80176A2C();
         f32 k = fn_80144BD8(fn_8014C8B4(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
-        a = m->layout->Find("boost_text");
-        b = m->layout->Find("boost_out");
-        if (a && b) {
-            fn_801479A8(a, b, fn_80131234("Crash:BOOST"), k);
-        }
+        Loop1_fn_801DF93C(b, m, m->layout->Find("boost_text"), k);
     }
     fn_801769CC();
     return 1;

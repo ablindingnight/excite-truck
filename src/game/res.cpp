@@ -1075,6 +1075,8 @@ extern "C" void fn_8012C958(AsyncResource* r) {
 
 class AsyncResourceSet {
 public:
+    void Loop1_Update(void);
+public:
     AsyncResourceSet(s32 size, const char* name) {
         state = 1;
         handle = -1;
@@ -1243,6 +1245,12 @@ void AsyncResourceSet::Finish(void) {
     Reset();
 }
 
+inline void AsyncResourceSet::Loop1_Update(void) {
+    fn_8012B324(set.path);
+    tries++;
+    Begin(set.name);
+}
+
 void AsyncResourceSet::Update(void) {
     if (state == 2 && fn_802E7544(handle)) {
         int ok;
@@ -1268,9 +1276,7 @@ void AsyncResourceSet::Update(void) {
             state = 3;
         } else {
             Stop();
-            fn_8012B324(set.path);
-            tries++;
-            Begin(set.name);
+            Loop1_Update();
         }
     }
 }

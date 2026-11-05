@@ -309,6 +309,13 @@ void fn_80145670(GartSet* s, ValueNode* n) {
     s->handle = fn_8023512C(s->resource);
 }
 
+static inline void Loop1_fn_801456E8(const char* dt, char* q, TextElem* e, const char* js, char* just, void* f) {
+    dt = fn_8013126C(q, e->defText);
+    js = fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
+    fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
+                e->scale, js, e->name, dt);
+}
+
 void fn_801456E8(ElemList<TextElem>* l, void* f) {
     const char* js;
     char q[0x130];
@@ -319,11 +326,7 @@ void fn_801456E8(ElemList<TextElem>* l, void* f) {
     fn_802E3AD0(f, "tabular text\r\n");
     fn_802E3AD0(f, "\tx y elem_just color scale just name default_text\r\n");
     for (i = 0; i < l->count; i++) {
-        e = &l->data[i];
-        dt = fn_8013126C(q, e->defText);
-        js = fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
-        fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
-                    e->scale, js, e->name, dt);
+        Loop1_fn_801456E8(dt, q, &l->data[i], js, just, f);
     }
     fn_802E3AD0(f, "end\r\n");
 }

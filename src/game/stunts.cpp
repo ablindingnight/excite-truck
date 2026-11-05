@@ -1340,6 +1340,8 @@ struct ThrowTarget {
 // Throwing another car with a tree/object.
 class ThrowTracker : public CountTracker {
 public:
+    void Loop1_Rate(int i, int alive);
+public:
     ThrowTracker(StuntHud* h, int c);
     virtual ~ThrowTracker(void) {}
     virtual void Init(void) {
@@ -1560,6 +1562,72 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     return r;
 }
 
+inline void ThrowTracker::Loop1_Rate(int i, int alive) {
+    s32 h = handle;
+    int hit;
+    targets[i].prev = targets[i].state;
+    if (targets[i].state == 0) {
+        hit = 0;
+    } else {
+        RaceCarRec* o = fn_8017960C(targets[i].car);
+        if (!o) {
+            hit = 0;
+        } else {
+            int air = o->air > 0;
+            switch (targets[i].state) {
+            case 1:
+                if (o) {
+                    int st = 2;
+                    if (air) {
+                        st = 3;
+                    }
+                    targets[i].state = st;
+                } else {
+                    targets[i].state = 0;
+                }
+                break;
+            case 2:
+                if (air) {
+                    targets[i].state = 3;
+                }
+                break;
+            case 3:
+                if (!air) {
+                    u8 q[8];
+                    f32 at[7];
+                    targets[i].state = 2;
+                    fn_801E9DC4(q);
+                    {
+                        f32 g = fn_801DDC8C(q, o->pos[0], o->pos[2]);
+                        if (g > 4.4444447f && o->f118.y - g > 0.44444445f) {
+                            int n;
+                            fn_801E9DC4(q);
+                            n = fn_801DDA84(q, o->pos[0], o->pos[2], at, 1e-7f, 10);
+                            if (fn_801D4908(h, at, n)) {
+                                targets[i].state = 4;
+                                targets[i].timer = 1.0f;
+                            }
+                        }
+                    }
+                }
+                break;
+            case 4:
+                targets[i].timer -= 0.016683351f;
+                if (targets[i].timer < 0.0f) {
+                    targets[i].state = 5;
+                } else if (air) {
+                    targets[i].state = 3;
+                }
+                break;
+            case 5:
+                break;
+            }
+            hit = alive || targets[i].state == 4;
+        }
+    }
+    active = (active | hit) != 0;
+}
+
 f32 ThrowTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
@@ -1568,69 +1636,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
         int alive = fn_801D48FC(handle);
         active = alive;
         for (i = 0; i < 8; i++) {
-            s32 h = handle;
-            int hit;
-            targets[i].prev = targets[i].state;
-            if (targets[i].state == 0) {
-                hit = 0;
-            } else {
-                RaceCarRec* o = fn_8017960C(targets[i].car);
-                if (!o) {
-                    hit = 0;
-                } else {
-                    int air = o->air > 0;
-                    switch (targets[i].state) {
-                    case 1:
-                        if (o) {
-                            int st = 2;
-                            if (air) {
-                                st = 3;
-                            }
-                            targets[i].state = st;
-                        } else {
-                            targets[i].state = 0;
-                        }
-                        break;
-                    case 2:
-                        if (air) {
-                            targets[i].state = 3;
-                        }
-                        break;
-                    case 3:
-                        if (!air) {
-                            u8 q[8];
-                            f32 at[7];
-                            targets[i].state = 2;
-                            fn_801E9DC4(q);
-                            {
-                                f32 g = fn_801DDC8C(q, o->pos[0], o->pos[2]);
-                                if (g > 4.4444447f && o->f118.y - g > 0.44444445f) {
-                                    int n;
-                                    fn_801E9DC4(q);
-                                    n = fn_801DDA84(q, o->pos[0], o->pos[2], at, 1e-7f, 10);
-                                    if (fn_801D4908(h, at, n)) {
-                                        targets[i].state = 4;
-                                        targets[i].timer = 1.0f;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 4:
-                        targets[i].timer -= 0.016683351f;
-                        if (targets[i].timer < 0.0f) {
-                            targets[i].state = 5;
-                        } else if (air) {
-                            targets[i].state = 3;
-                        }
-                        break;
-                    case 5:
-                        break;
-                    }
-                    hit = alive || targets[i].state == 4;
-                }
-            }
-            active = (active | hit) != 0;
+            Loop1_Rate(i, alive);
             int fire = targets[i].state == 5 && targets[i].prev != 5;
             if (fire) {
                 count++;

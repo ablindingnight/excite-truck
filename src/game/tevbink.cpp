@@ -739,10 +739,7 @@ void fn_802E1058(void) {
     lbl_8055FEEC = 0;
 }
 
-BinkMovie* fn_802E11A4(const char* name, u8 loop) {
-    BinkMovie* r = fn_802E0BA8();
-    BinkMovie* m = fn_802E0BA4(r);
-    m->bink = 0;
+static inline void Loop1_fn_802E11A4(BinkMovie* m, u8 loop, const char* name) {
     m->loop = loop;
     fn_801345D8(m->name, 0x40, "video/%s", name);
     char* dot = strrchr(m->name, '.');
@@ -764,6 +761,13 @@ BinkMovie* fn_802E11A4(const char* name, u8 loop) {
             }
         }
     }
+}
+
+BinkMovie* fn_802E11A4(const char* name, u8 loop) {
+    BinkMovie* r = fn_802E0BA8();
+    BinkMovie* m = fn_802E0BA4(r);
+    m->bink = 0;
+    Loop1_fn_802E11A4(m, loop, name);
     fn_802E0EAC(m);
     return r;
 }

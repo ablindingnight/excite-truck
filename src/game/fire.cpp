@@ -387,6 +387,8 @@ struct BoostEntry {
 
 class BoostFireMan {
 public:
+    void Loop1_Update(Vec& off, const Vec* vel, f32 f);
+public:
     BoostFireMan(void);
     ~BoostFireMan(void);
     void SetT(int i);
@@ -1300,6 +1302,12 @@ void BoostFireMan::Reset(void) {
     }
 }
 
+inline void BoostFireMan::Loop1_Update(Vec& off, const Vec* vel, f32 f) {
+    off.z = vel->z * f;
+    f32 velX = vel->x;
+    off.x = velX * f;
+}
+
 void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
     BoostEntry* e = &entries[i];
     if (!((f32)__fabs(car->boost) <= lbl_80558DC4[0])) {
@@ -1317,9 +1325,7 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
             for (int k = 0; k < n; k++) {
                 f32 f = -k * step;
                 Vec off;
-                off.z = vel->z * f;
-                f32 velX = vel->x;
-                off.x = velX * f;
+                Loop1_Update(off, vel, f);
                 off.y = vel->y * f + -0.5f * (f * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;

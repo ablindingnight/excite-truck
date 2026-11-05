@@ -508,11 +508,15 @@ static inline void Fix(u8** p, TexImage* img) {
     }
 }
 
-void fn_802D8DCC(GXTexDesc* d) {
+static inline void Loop1_fn_802D8DCC(GXTexDesc* d) {
     TexImage* img = d->data;
     Fix((u8**)&img->pal, img);
     Fix(&img->tex, img);
     Fix(&img->alpha, img);
+}
+
+void fn_802D8DCC(GXTexDesc* d) {
+    Loop1_fn_802D8DCC(d);
     u32 fmt = d->format;
     if (fmt == 0x40 || fmt == 0) {
         fn_802D81C4(d);
