@@ -370,7 +370,7 @@ void fn_802B1FD4(void) {
             int k;
             Loop1_fn_802B1FD4(set);
             set->count = 0;
-            delete set;
+            delete (InlineVec<MatPlacer*, 6>*)set;
         }
     }
     lbl_804BE1FC.count = 0;
