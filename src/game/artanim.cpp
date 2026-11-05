@@ -822,18 +822,12 @@ int ArtPlayer::Add(const char* name, int map) {
     ArtAnim* anim = fn_802AC4A8(name, (ArtMap*)map);
     if (anim) {
         int k;
-        char c;
         char* d;
         ArtItem* item;
         item = &list->items[list->count++];
         d = item->name;
         k = 100;
-        for (;;) {
-            c = *name++;
-            *d++ = c;
-            if (!c) {
-                break;
-            }
+        while ((*d++ = *name++) != 0) {
             if (--k <= 0) {
                 d[-1] = 0;
                 break;
