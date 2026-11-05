@@ -1007,27 +1007,23 @@ int fn_802B825C(int d, const char* s) {
     return changed;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop1_fn_802B8310(ObjItem& it, int d, f32 v, int changed) {
-    ObjScale* sc = it.scale;
-    f32 lo = sc->min;
-    f32 n = sc->max + fn_802B822C(d);
-    v = v < n ? v : n;
-    v = lo < v ? v : lo;
-    if (v != sc->max) {
-        sc->max = v;
-        it.scale->dirty = 1;
-        changed = 1;
-    }
-    return changed;
-}
-
 int fn_802B8310(int d, const char* s) {
+    ObjScale* sc;
+    f32 lo;
     int changed = 0;
     f32 v = 10.0f;
     ObjItem it;
     if (fn_802B5B74(&it)) {
-        changed = Loop1_fn_802B8310(it, d, v, changed);
+        sc = it.scale;
+        lo = sc->min;
+        f32 n = sc->max + fn_802B822C(d);
+        v = v < n ? v : n;
+        v = v > lo ? v : lo;
+        if (v != sc->max) {
+            sc->max = v;
+            it.scale->dirty = 1;
+            changed = 1;
+        }
     }
     return changed;
 }
