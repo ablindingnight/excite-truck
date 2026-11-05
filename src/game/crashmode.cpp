@@ -328,6 +328,20 @@ extern "C" {
 
 void fn_801DF6FC(void) { new ("crashmode") CrashMode(); }
 
+static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
+    f32 split = fl->w / (fl->w + fr->w);
+    f32 a = fn_8014C8B4(0.0f, split, 0.0f, 1.0f, fill);
+    f32 b = fn_8014C8B4(split, 1.0f, 0.0f, 1.0f, fill);
+    ArtElem e(*fl);
+    e.w *= a;
+    e.u1 *= a;
+    fn_801476D8(&e, -1, m->boostTex);
+    fn_8014C7B4(&e, fr);
+    e.w *= b;
+    e.u1 *= b;
+    fn_801476D8(&e, -1, m->boostTex);
+}
+
 int fn_801DF93C(int view) {
     ArtElem* fl;
     ArtElem* fr;
@@ -367,17 +381,7 @@ int fn_801DF93C(int view) {
         fl = m->layout->FindArt("bar_fill_left");
         fr = m->layout->FindArt("bar_fill_right");
         if (fl && fr) {
-            f32 split = fl->w / (fl->w + fr->w);
-            f32 a = fn_8014C8B4(0.0f, split, 0.0f, 1.0f, fill);
-            f32 b = fn_8014C8B4(split, 1.0f, 0.0f, 1.0f, fill);
-            ArtElem e(*fl);
-            e.w *= a;
-            e.u1 *= a;
-            fn_801476D8(&e, -1, m->boostTex);
-            fn_8014C7B4(&e, fr);
-            e.w *= b;
-            e.u1 *= b;
-            fn_801476D8(&e, -1, m->boostTex);
+            DrawFill(m, fl, fr, fill);
         }
         fn_80144C68(255.0f * fill, 0xFF, 0xFF, 0xFF);
         if (!s->boosted) {
