@@ -2911,7 +2911,18 @@ inline void BetaMaster::vfF4(void) {
             h = fn_801EA0E8(c.x, c.y);
             pos[1] = h;
             pos[2] = c.y;
-            puddles.Push(new ("puddle") Puddle(pos, r, 1));
+            // Puddle's constructor and Push are written out: the original inlines them here, and the dont_inline
+            // around this function (which keeps Pickup's constructor a call) would stop them.
+            Puddle* q = (Puddle*)operator new(sizeof(Puddle), "puddle");
+            if (q) {
+                q->x = pos[0];
+                q->y = pos[1];
+                q->z = pos[2];
+                q->r = r;
+                q->b10 = 1;
+            }
+            Puddle** slot = &puddles.a.data[puddles.a.count++];
+            *slot = q;
         }
         fn_80131818(t);
     }
