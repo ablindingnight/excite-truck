@@ -581,11 +581,12 @@ void* fn_802EAB28(void* arg) {
             errs = 0;
             if (r && r->Seek(r->Size() - 0x80) && r->Read(lbl_805587E0, 0x80) &&
                 strncmp((char*)lbl_805587E0, "TAG", 3) == 0) {
-                strncpy(lbl_80507640.title, (char*)lbl_805587E0 + 3, 0x1E);
+                char* tag = (char*)lbl_805587E0;
+                strncpy(lbl_80507640.title, tag + 3, 0x1E);
                 lbl_80507640.title[0x1E] = 0;
-                strncpy(lbl_80507640.artist, (char*)lbl_805587E0 + 0x21, 0x1E);
+                strncpy(lbl_80507640.artist, tag + 0x21, 0x1E);
                 lbl_80507640.artist[0x1E] = 0;
-                strncpy(lbl_80507640.album, (char*)lbl_805587E0 + 0x3F, 0x1E);
+                strncpy(lbl_80507640.album, tag + 0x3F, 0x1E);
                 lbl_80507640.album[0x1E] = 0;
             }
             lbl_80560078 = -1;
@@ -614,11 +615,8 @@ void* fn_802EAB28(void* arg) {
             if (pos >= size) {
                 fn_802E30C8("mp3: at end of file");
                 done = 1;
-            } else if (!r->Seek(pos)) {
-                fn_802E30C8("mp3: FAFseek fails");
-            } else if (!r->Read(lbl_805600A8, n)) {
-                fn_802E30C8("mp3: FAFread fails");
-            } else {
+            } else if (r->Seek(pos)) {
+                if (r->Read(lbl_805600A8, n)) {
                 done = 0;
                 int off = 0;
                 int hdr = 0;
@@ -824,6 +822,11 @@ void* fn_802EAB28(void* arg) {
                 } else {
                     lbl_805600BC = 0;
                 }
+                } else {
+                    fn_802E30C8("mp3: FAFread fails");
+                }
+            } else {
+                fn_802E30C8("mp3: FAFseek fails");
             }
             if (pos >= size) {
                 fn_802E30C8("mp3: done with current file!");
