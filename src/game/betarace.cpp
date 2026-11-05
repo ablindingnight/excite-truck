@@ -1272,8 +1272,6 @@ public:
     virtual int vfDC(void);
     virtual void vfA8(int a, int b);
     virtual void vf40(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
     virtual void a4(void);
     virtual void a3(void);
     virtual void a2(void);
@@ -4301,9 +4299,9 @@ inline void BetaMaster::vf40(void) {
 
 inline int GameMode::vfA0(int a, int b, int c) { return 0; }
 
-inline void BetaMaster::vfC0(void) {}
+inline void GameMode::vfC0(void) {}
 
-inline void BetaMaster::vfC4(void) {}
+inline void GameMode::vfC4(void) {}
 
 inline void BetaMaster::a4(void) {}
 
