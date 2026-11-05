@@ -509,6 +509,7 @@ static inline void BinShadows(Grid& g, TexEntry* te, f32 s) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802B9108(s16 sz, Grid& g) {
     for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
         int y = sz;
@@ -646,7 +647,7 @@ void fn_802B9B68(void) {
     lbl_8055FA78 = 0;
 }
 
-static inline void Loop1_fn_802B9D08(TexEntry* e) {
+static inline void FreeTexEntry(TexEntry* e) {
     if (e) {
         e->head = 0;
         if (e->tex != -2) {
@@ -661,7 +662,7 @@ void fn_802B9D08(void) {
     SafeDelete(lbl_8055FA7C);
     SafeDelete(lbl_8055FA78);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        Loop1_fn_802B9D08(lbl_804BFFF4.data[i]);
+        FreeTexEntry(lbl_804BFFF4.data[i]);
     }
     lbl_804BFFF4.count = 0;
     lbl_804C004C.count = 0;
@@ -904,7 +905,9 @@ void fn_802BAFF8(GroundCell* cell, u16** strip) {
 
 static inline int Tris(int n) { return n < 0 ? 0 : n; }
 
-static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, u16* st, void* verts, int nverts) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, void* verts, int nverts) {
+    u16*st;
     int j;
     for (it = te->head; it; it = it->next) {
         if (!it->head) {
@@ -970,7 +973,7 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                it = Loop2_fn_802BB0FC(it, te, st, verts, nverts);
+                it = Loop2_fn_802BB0FC(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();
@@ -986,7 +989,9 @@ void fn_802BB0FC(void* verts, int nverts) {
     }
 }
 
-static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, u16* st, void* verts, int nverts) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, void* verts, int nverts) {
+    u16*st;
     int j;
     for (it = te->head; it; it = it->next) {
         if (!it->head) {
@@ -1053,7 +1058,7 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                it = Loop3_fn_802BB3B8(it, te, st, verts, nverts);
+                it = Loop3_fn_802BB3B8(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();

@@ -524,6 +524,7 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // Fills the model's damage pose: eases the wheel offsets toward their targets, bends the body points by the
 // lean/twist (when the deformation is on), hides the parts that are gone and lists the flying ones with their
 // frame interpolated to the tick.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
     if (s->state == 3) {
         U32(m, 0x29C) &= ~(1 << tp->bit);

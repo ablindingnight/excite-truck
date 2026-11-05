@@ -1302,6 +1302,7 @@ void BoostFireMan::Reset(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void BoostFireMan::Loop1_Update(Vec& off, const Vec* vel, f32 f) {
     off.z = vel->z * f;
     f32 velX = vel->x;
@@ -1483,6 +1484,7 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void ExhaustTorchMan::Loop1_DrawEdges(const Vec* right, const Vec* up) {
     for (int i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {

@@ -14,7 +14,7 @@ Records* lbl_8055E1EC;
 
 extern "C" {
 
-static inline s32 Loop1_fn_80144E38(u8* best, int level, int i) {
+static inline s32 ScoreIsBest(u8* best, int level, int i) {
     Records* r = lbl_8055E1EC;
     if (best) {
         *best = 1;
@@ -32,7 +32,7 @@ static inline s32 Loop1_fn_80144E38(u8* best, int level, int i) {
 }
 
 s32 fn_80144E38(int i, int level, u8* best) {
-    return Loop1_fn_80144E38(best, level, i);
+    return ScoreIsBest(best, level, i);
 }
 
 u8 fn_80144F2C(void) { return lbl_8055E1E8; }

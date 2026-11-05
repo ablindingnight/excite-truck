@@ -994,6 +994,7 @@ int fn_802B825C(int d, const char* s) {
     return changed;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop1_fn_802B8310(ObjItem& it, int d, f32 v, int changed) {
     ObjScale* sc = it.scale;
     f32 lo = sc->min;

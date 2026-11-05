@@ -296,7 +296,7 @@ struct Shard {
 
 class ShardSys {
 public:
-    u32 Loop1_Draw(Mat3& r, Vec& light, u32 color);
+    u32 Loop1_Draw(Mat3& r, Vec& light);
 public:
     ShardSys(int n);
     ~ShardSys(void);
@@ -900,7 +900,9 @@ void ShardSys::Step(void) {
     count = out - pts;
 }
 
-inline u32 ShardSys::Loop1_Draw(Mat3& r, Vec& light, u32 color) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+inline u32 ShardSys::Loop1_Draw(Mat3& r, Vec& light) {
+    u32 color;
     f32 d = PSVECDotProduct((const Vec*)r.m[1], &light);
     int al = (int)(192.0f * (d * d));
     al = MAX(al, 0);
@@ -954,7 +956,7 @@ void ShardSys::Draw(void) {
                 r.m[2][1] = 0.0f;
                 r.m[2][2] = 1.0f;
             }
-            color = Loop1_Draw(r, light, color);
+            color = Loop1_Draw(r, light);
             Vec p;
             fn_802C8E00(color, 0, s->pos.x, s->pos.y, s->pos.z, 0.0f, 1.0f);
             AddScaled(&p, &s->pos, (const Vec*)r.m[0], 0.1f);

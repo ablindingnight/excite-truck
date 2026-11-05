@@ -433,6 +433,7 @@ BVec3 Home(int car) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8017D404(BVec3& d, BVec3& imp, f32 k) {
     d.y -= 0.15f;
     imp.x = d.x * k;
@@ -733,6 +734,7 @@ extern "C" void fn_8017E388(BMtx* m) {
     m->pos.z = 0.0f;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void Ball::Loop2_PickDrop(BVec3& p, RigidBody* b, f32 k) {
     p.x = b->mtx.pos.x + b->vel.x * k;
     p.y = b->mtx.pos.y + b->vel.y * k;

@@ -575,6 +575,7 @@ void fn_80177EE4(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_80177F40(int net, u8 paused) {
     if (net || !paused) {
         int i;

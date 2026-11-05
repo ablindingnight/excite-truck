@@ -811,6 +811,7 @@ static inline void ShowCar(u8* g, s32 sel) {
 }
 
 // Picks a random car for the garage and shows it.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop1_fn_8024ECD4(void) {
     s32 sel = fn_80129D18(1, S32(lbl_8055F2EC, 0x1C) - 1);
     u8* g = lbl_8055F2EC;

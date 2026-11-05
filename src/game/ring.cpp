@@ -407,7 +407,10 @@ int fn_8016A30C(int player) {
     return 0;
 }
 
-static inline void Loop1_fn_8016A438(int k, RingSet* s, Ring* r, f32 now) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_8016A438(int k, RingSet* s) {
+    f32 now;
+    Ring*r;
     k = s->count;
     while (k-- > 0) {
         r = &lbl_80430318.data[s->first + k];
@@ -445,12 +448,10 @@ static inline void Loop1_fn_8016A438(int k, RingSet* s, Ring* r, f32 now) {
 
 void fn_8016A438(void) {
     RingSet* s;
-    Ring* r;
     int k;
     int i;
-    f32 now;
     for (i = 0; i < lbl_80430340.count; i++) {
-        Loop1_fn_8016A438(k, &lbl_80430340.data[i], r, now);
+        Loop1_fn_8016A438(k, &lbl_80430340.data[i]);
     }
 }
 

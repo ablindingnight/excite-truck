@@ -2043,6 +2043,7 @@ struct TubeVol {
 
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop2_fn_8019E500(BoxAxis* ax, f32 r, CFrame& fr, u8* q, bool hit, u8* p) {
     for (int i = 0; i < 3; i++) {
         if (i == 1) {
@@ -2834,6 +2835,7 @@ static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
 // Collides sphere group p against volume q by q's type tag: groups (the heavier side drives), boxes (each member
 // in box space, then the owning car's wheels clamped onto the box), spheres, tubes, rings, ragdolls, polygon
 // volumes and polygon meshes (each member, then the car's wheels against the volume or mesh).
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801A0464(int id, u8* car, u8* q) {
     for (int w = 0; w < 4; w++) {
         RVec3* h;

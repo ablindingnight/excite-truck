@@ -247,7 +247,9 @@ void fn_802BBFA4(u8* w, int layer, int keep) {
     }
 }
 
-static inline int Loop1_fn_802BC09C(int i, u8* cur, short x, short z) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop1_fn_802BC09C(u8* cur, short x, short z) {
+    int i;
     for (i = 0; i < 6; i++) {
         cur[i] = fn_802BBD38(x, z, i);
     }
@@ -270,7 +272,7 @@ int fn_802BC09C(short x, short z, int layer, u8 value, f32 strength) {
         }
         if (!out) {
             u8 cur[6];
-            i = Loop1_fn_802BC09C(i, cur, x, z);
+            i = Loop1_fn_802BC09C(cur, x, z);
             if (locked == -1 || cur[locked] < 0x80) {
                 keepVal = (locked == -1) ? 0 : cur[locked];
                 u8 next[6];

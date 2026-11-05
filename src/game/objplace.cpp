@@ -331,7 +331,10 @@ ObjLoc::ObjLoc(void) {}
 
 extern "C" {
 
-static inline void Loop1_fn_802B1FD4(SetPlacer* set, MatPlacer* m, ObjectPlacer* p) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_802B1FD4(SetPlacer* set) {
+    ObjectPlacer*p;
+    MatPlacer*m;
     int j;
     int k;
     for (j = 0; j < set->count; j++) {
@@ -356,11 +359,9 @@ void fn_802B1FD4(void) {
     for (int i = 0; i < lbl_804BE1FC.count; i++) {
         SetPlacer* set = lbl_804BE1FC.data[i];
         if (set) {
-            ObjectPlacer* p;
             int j;
-            MatPlacer* m;
             int k;
-            Loop1_fn_802B1FD4(set, m, p);
+            Loop1_fn_802B1FD4(set);
             set->count = 0;
             delete set;
         }
@@ -545,6 +546,7 @@ SetPlacer* fn_802B2C98(const char* name) {
     return set;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_802B2D24(SetPlacer* set) {
     for (int i = 0; i < set->count; i++) {
         MatPlacer* m = set->data[i];

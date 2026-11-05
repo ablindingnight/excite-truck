@@ -542,6 +542,7 @@ void fn_802BCBDC(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop3_fn_802BCF04(TreeType* t) {
     for (int i = 0; i < lbl_804C00D4.n; i++) {
         t = &lbl_804C00D4.data[i];
@@ -606,7 +607,9 @@ TArray<TCell>* fn_802BD478(const char* tag, TFileArray<TCell>* f);
 void fn_802BD4DC(TListFile* f, u8* base);
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
-static inline void Loop2_fn_802BD210(TListEntry* e, TreeRec* tr, TreeType* t) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline void Loop2_fn_802BD210(TListEntry* e, TreeType* t) {
+    TreeRec*tr;
     if (e) {
         TreeSet* s = new ("treelist") TreeSet;
         if (s) {
@@ -640,7 +643,6 @@ static inline void Loop2_fn_802BD210(TListEntry* e, TreeRec* tr, TreeType* t) {
 }
 
 void fn_802BD210(void) {
-    TreeRec* tr;
     u32 version = 0;
     u8 swapped;
     lbl_8055FAB8 = (TListFile*)fn_8012C370("treelist.trl", 'TLST', &version, 0, 0, &swapped);
@@ -652,7 +654,7 @@ void fn_802BD210(void) {
             for (int i = 0; i < lbl_804C00D4.n; i++) {
                 TreeType* t = &lbl_804C00D4.data[i];
                 TListEntry* e = fn_802BD194(lbl_8055FAB8, t->name);
-                Loop2_fn_802BD210(e, tr, t);
+                Loop2_fn_802BD210(e, t);
             }
         } else {
             fn_802E317C("tree: bad treelist version %d", version);
@@ -676,7 +678,7 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base);
 void fn_802BD5B0(TFileArray<TCell>* a, u8* base);
 void fn_802BD69C(TFileArray<TreeRec>* a, u8* base);
 
-static inline void Loop1_fn_802BD4DC(TListEntry* e, u8* base) {
+static inline void FixEntry(TListEntry* e, u8* base) {
     fn_802BD69C(&e->list, base);
     fn_802BD5B0(&e->frames, base);
     fn_802BD5B0(&e->near, base);
@@ -688,7 +690,7 @@ void fn_802BD4DC(TListFile* f, u8* base) {
     Swap32(&f->entries);
     f->entries = fn_802BD5A8(f->entries, base);
     for (u32 i = 0; i < f->n; i++) {
-        Loop1_fn_802BD4DC(&f->entries[i], base);
+        FixEntry(&f->entries[i], base);
     }
 }
 
@@ -696,6 +698,7 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base) { return (TListEntry*)((u8*)o
 
 TCell* fn_802BD694(TCell* off, u8* base);
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_802BD5B0(TFileArray<TCell>* a, TCell* c) {
     for (u32 i = 0; i < a->n; i++) {
         c = &a->data[i];
@@ -877,6 +880,7 @@ void fn_802BDD58(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
     if (t->set) {
         TArray<TCell>* near = t->set->near;
@@ -957,6 +961,7 @@ void fn_802BDFF4(TMtx* m) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop3_fn_802BE008(TCell* c, TCell* d, TArray<TCell>* a, int in) {
     if (c >= d && c < d + a->n) {
         in = 1;
@@ -981,6 +986,7 @@ TreeType* fn_802BE008(TCell* c) {
 
 typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f32 h);
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802BE07C(s16 bx, u16 bz, TreeQuery& cb) {
     int i;
     for (i = -0x80; i <= 0x80; i += 0x80) {

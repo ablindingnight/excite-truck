@@ -572,6 +572,7 @@ extern "C" void fn_802C00A0(f32* fov);
 extern "C" void fn_802C0054(Mat3* out, const Mat3* in);
 extern "C" void fn_802BFE48(Skybox* s, const Frame* view, f32 scale);
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
     f32 hf = h;
     Skybox* k = sky;

@@ -1014,6 +1014,7 @@ extern const f32 lbl_80563F90;  // 4.0
 
 // Works out this region's heading windows on `line`: where the sphere's circle crosses the line
 // (two crossings = one window, four = two), falling back to the nearest line point +- radius.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void CamRegion::Loop1_Prepare(u8* line) {
     fn_8027264C("start_long_2", line, (&lo1)[2]);
     fn_8027264C("end_long_2", line, (&lo1)[3]);

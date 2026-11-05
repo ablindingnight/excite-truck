@@ -986,7 +986,9 @@ void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
     out->z = a->z + t * (b->z - a->z);
 }
 
-static inline f32 Loop2_fn_80194B60(f32 t, f32 s, f32 a, f32 b) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline f32 Loop2_fn_80194B60(f32 t, f32 a, f32 b) {
+    f32 s;
     if (t < -1.0f) {
         s = -1.0f;
     } else if (t > 1.0f) {
@@ -1005,8 +1007,7 @@ f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
         m = p - m;
     }
     f32 t = m / (p / 2.0f);
-    f32 s;
-    return Loop2_fn_80194B60(t, s, a, b);
+    return Loop2_fn_80194B60(t, a, b);
 }
 
 // Another racer, as seen through its controller (fn_801B2EC0).
@@ -1636,6 +1637,7 @@ void fn_801961FC(u8* d) {
 
 static inline double AbsD(double v) { return __fabs(v); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_80196250(f32 b, f32 x, f32* outA, f32* outB) {
     if (AbsF(b) < 0.44444445f || (*(s32*)&b & (s32)0x80000000) == (*(s32*)&x & (s32)0x80000000)) {
         *outA = AbsF(x) / 4.905f;
@@ -2064,6 +2066,7 @@ struct Hit {
     s32 id;
 };
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop3_fn_8019703C(const u8* p, const u8* d) {
     int any = 0;
     f32 z = F32(p, 0x8);
@@ -2302,7 +2305,9 @@ void fn_8019743C(u8* d, u8* out) {
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c);
 
-static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, int ok, u8* p, int r) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, u8* p, int r) {
+    int ok;
     if (!(v > 4.4444447f)) {
         int same = 0;
         if (id == S32(d, 0x114) && v > 2.2222223f) {
@@ -2333,7 +2338,7 @@ int fn_8019799C(u8* d, u8* p) {
     }
     int ok = 1;
     f32 v = -F32(p, 0x10);
-    return Loop4_fn_8019799C(v, S32(p, 0x18), d, ok, p, r);
+    return Loop4_fn_8019799C(v, S32(p, 0x18), d, p, r);
 }
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
@@ -2440,6 +2445,7 @@ void fn_80197BD0(u8* d, u8* out) {
 
 void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop2_fn_80197FE4(const u8* p, int c5) {
     u8* o = lbl_804349C0[S32(p, 0x18)];
     if (o && U8(o, 0x2A5)) {
@@ -2503,6 +2509,7 @@ extern "C" const f32 lbl_8056217C;  // 10.0
 
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801981A0(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
     f32 y = F32(t, 0xC);
     F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
@@ -2794,7 +2801,7 @@ void fn_80198530(u8* d) {
     }
 }
 
-static inline void Loop1_fn_80198DD0(u8* d) {
+static inline void RemoveFromList(u8* d) {
     for (int i = 0; i < lbl_804349E0.count; i++) {
         if (lbl_804349E0.items[i] == d) {
             lbl_804349E0.items[i] = lbl_804349E0.items[--lbl_804349E0.count];
@@ -2806,7 +2813,7 @@ static inline void Loop1_fn_80198DD0(u8* d) {
 u8* fn_80198DD0(u8* d, int del) {
     if (d) {
         *(void***)d = lbl_80333390;
-        Loop1_fn_80198DD0(d);
+        RemoveFromList(d);
         if (del > 0) {
             operator delete(d);
         }

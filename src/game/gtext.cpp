@@ -994,7 +994,9 @@ void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f3
     }
 }
 
-static inline f32 Loop1_fn_8023400C(EscSeq* e, f32 h, f32 adv) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline f32 Loop1_fn_8023400C(EscSeq* e, f32 h) {
+    f32 adv;
     if (e->art) {
         h = h / fn_80235F64(e->art, e->artIdx);
         adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
@@ -1024,7 +1026,7 @@ f32 fn_8023400C(int idx) {
             for (j = 0; j < lbl_80497F14.count; j++) {
                 name = lbl_80497F14.data[j].name;
                 if (strncasecmp(p, name, strlen(name)) == 0) {
-                    adv = Loop1_fn_8023400C(&lbl_80497F14.data[j], h, adv);
+                    adv = Loop1_fn_8023400C(&lbl_80497F14.data[j], h);
                     skip = strlen(lbl_80497F14.data[j].name) + 1;
                     goto found;
                 }

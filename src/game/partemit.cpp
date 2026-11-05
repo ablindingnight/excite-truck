@@ -239,6 +239,7 @@ void fn_8029F124(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8029F188(EmitterInst* in) {
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         in = &lbl_804B9B7C.data[i];

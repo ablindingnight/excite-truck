@@ -189,6 +189,7 @@ public:
     ValueFile* file;           // offset 0x18
 };
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline int ValueNodeImpl::Loop1_Has(ValuePair* p, const char* key) {
     if (!p && parent) {
         p = parent->FindPairInherited(key);
@@ -201,6 +202,7 @@ int ValueNodeImpl::Has(const char* key) {
     return Loop1_Has(p, key);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline ValuePair* ValueNodeImpl::Loop2_GetValue(ValuePair* p, const char* key) {
     if (!p && parent) {
         p = parent->FindPairInherited(key);

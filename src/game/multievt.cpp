@@ -343,6 +343,7 @@ void fn_80249744(void) { fn_80214CB4(lbl_8055BF34); }
 // The multiplayer event menu: location, course, event count and AI strength, with the course picture,
 // preview movie and stats. Starts from the remembered choices and remembers the new ones; returns 0 when
 // backed out. In testing mode only the unlocked multiplayer events are offered.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8024974C(EvPairs* pairs) {
     int n = GetNumEvents();
     EvPair* b = new ("dsa_buf") EvPair[n];
@@ -352,6 +353,7 @@ static inline void Loop1_fn_8024974C(EvPairs* pairs) {
     pairs->alloc = b;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_8024974C(EvPairs* pairs) {
     if (pairs->count < pairs->cap) {
         fn_801286A0(pairs->alloc, (pairs->cap - pairs->count) * sizeof(EvPair));
@@ -562,7 +564,7 @@ u8* fn_8024A1AC(u8* p, int del) {
     return p;
 }
 
-static inline void Loop4_fn_8024A204(u8* m, u8* p) {
+static inline void ClearMaybe(u8* m, u8* p) {
     if (m) {
         if (m) {
             U32(p, 0x10) = 0;
@@ -575,7 +577,7 @@ static inline void Loop4_fn_8024A204(u8* m, u8* p) {
 u8* fn_8024A204(u8* p, int del) {
     if (p) {
         U32(p, 0x11C) = 0;
-        Loop4_fn_8024A204(p + 0x10, p);
+        ClearMaybe(p + 0x10, p);
         if (del > 0) {
             operator delete(p);
         }
@@ -1097,7 +1099,7 @@ struct PtrVec {
 void __ct__7DynoTexFiUc(void* p, int n, u8 f);
 void Add__7DynoTexFiPCc(void* p, int id, const char* name);
 
-static inline void Loop3_fn_8024B73C(const char* name, EvEntry* e, u8* p) {
+static inline void AddIfInGroup(const char* name, EvEntry* e, u8* p) {
     if (!strcasecmp(name, e->group)) {
         ((PtrVec*)(p + 0x18))->Push(e);
         Add__7DynoTexFiPCc(p + 0x4C, e->id, fn_8024B178(e->id));
@@ -1114,7 +1116,7 @@ u8* fn_8024B73C(u8* p, const char* name, EvList* list) {
     S32(p, 0x1C) = 0;
     __ct__7DynoTexFiUc(p + 0x4C, 10, 0);
     for (i = 0; i < list->count; i++) {
-        Loop3_fn_8024B73C(name, &list->items[i], p);
+        AddIfInGroup(name, &list->items[i], p);
     }
     U8(p, 0x64) = 0;
     S32(p, 0x98) = -1;

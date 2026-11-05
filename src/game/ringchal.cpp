@@ -545,7 +545,7 @@ public:
 namespace {
 class Arena : public Preloader {
 public:
-    int Loop3_CountDynos(int c, int n);
+    int Loop3_CountDynos(int n);
 public:
     void Loop2_Spawn(void);
 public:
@@ -1294,7 +1294,9 @@ Arena::Arena(void) {
 
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
-inline int Arena::Loop3_CountDynos(int c, int n) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+inline int Arena::Loop3_CountDynos(int n) {
+    int c;
     int i;
     for (i = 0; i < sets->count; i++) {
         c = 0;
@@ -1311,12 +1313,12 @@ inline int Arena::Loop3_CountDynos(int c, int n) {
 
 int Arena::CountDynos(void) {
     int n;
-    int c;
     n = 0;
     int i;
-    return Loop3_CountDynos(c, n);
+    return Loop3_CountDynos(n);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void Arena::Loop2_Spawn(void) {
     int i;
     for (i = 0; i < sets->count; i++) {
@@ -1356,6 +1358,7 @@ void Arena::Spawn(void) {
 
 
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8016D294(ObjSet* os) {
     int i;
     for (i = 0; i < os->infos->count; i++) {

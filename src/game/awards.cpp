@@ -953,7 +953,7 @@ void fn_801CCBA4(void) { lbl_8055E884->paused = 1; }
 
 void fn_801CCBB4(void) { lbl_8055E884->paused = 0; }
 
-static inline void Loop1_fn_801CCBC4(AwardsMgr* m) {
+static inline void CommitHandlers(AwardsMgr* m) {
     for (int i = 0; i < m->handlers.n; i++) {
         if (m->handlers.data[i]) {
             m->handlers.data[i]->stat->Commit();
@@ -961,8 +961,8 @@ static inline void Loop1_fn_801CCBC4(AwardsMgr* m) {
     }
 }
 
-static inline void Loop3_fn_801CCBC4(AwardsMgr* m) {
-    Loop1_fn_801CCBC4(m);
+static inline void CommitAndRecordScore(AwardsMgr* m) {
+    CommitHandlers(m);
     if (!fn_801CE898() && m->score != 0) {
         for (int i = 0; i < fn_801EA994(); i++) {
             CarInfo* c = fn_801EA9A0(i);
@@ -978,7 +978,7 @@ static inline void Loop3_fn_801CCBC4(AwardsMgr* m) {
 void fn_801CCBC4(void) {
     AwardsMgr* m = lbl_8055E884;
     if (!m->paused) {
-        Loop3_fn_801CCBC4(m);
+        CommitAndRecordScore(m);
     }
 }
 
@@ -1068,6 +1068,7 @@ static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801CCDAC(StatHandler* h, long v, AwardsMgr* m) {
     if (h && h->PushInt(v)) {
         ShowPopup(m, h);
@@ -1097,6 +1098,7 @@ int StatHandler::PushInt(long v) {
 
 extern "C" {
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_801CD130(StatHandler* h, f32 v, AwardsMgr* m) {
     if (h && h->PushReal(v)) {
         ShowPopup(m, h);

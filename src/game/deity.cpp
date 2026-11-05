@@ -1206,6 +1206,7 @@ void fn_801B234C(f32 t);
 // alone), each car following the one ahead in its column.
 extern const f32 lbl_805625B8;  // 5.0f: lane offset
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801B2910(void) {
     for (int i = 0; i < lbl_8055E678; i++) {
         lbl_80435C30[(u32)(DS((u8*)&lbl_8055E684[i] + 0x4)->place - 1)] = i;

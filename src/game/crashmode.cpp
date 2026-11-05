@@ -344,7 +344,8 @@ static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
     fn_801476D8(&e, -1, m->boostTex);
 }
 
-static inline void Loop1_fn_801DF93C(TextElem* b, CrashMode* m, TextElem* a, f32 k) {
+// MATCHING-AID: inline helper with a parameter assigned before it is read: the value only shapes the register allocation.
+static inline void LayoutBoost(TextElem* b, CrashMode* m, TextElem* a, f32 k) {
     b = m->layout->Find("boost_out");
     if (a && b) {
         fn_801479A8(a, b, fn_80131234("Crash:BOOST"), k);
@@ -427,7 +428,7 @@ int fn_801DF93C(int view) {
     if (!fn_80141F7C(left) && s->boosted) {
         f32 d = lbl_8055AE40 / fn_80176A2C();
         f32 k = fn_80144BD8(fn_8014C8B4(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
-        Loop1_fn_801DF93C(b, m, m->layout->Find("boost_text"), k);
+        LayoutBoost(b, m, m->layout->Find("boost_text"), k);
     }
     fn_801769CC();
     return 1;
@@ -521,6 +522,7 @@ void CrashMode::vf10(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline int CrashMode::Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done) {
     if (s->time < 0.0f && !s->boosted) {
         if (rc->shaking && since < window && fn_80179650() == 1) {

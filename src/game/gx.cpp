@@ -1333,7 +1333,8 @@ void fn_802D08CC(int mode) {
 // Writes one screenshot tile (x, y in the full w x h image); empty in this build.
 void fn_802D0910(s32 fd, int x, int y, int w, int h) {}
 
-static inline u8 Loop2_fn_802D0914(u8* hdr, u8 t) {
+static inline u8 TgaHeader(u8* hdr) {
+    u8 t;
     hdr[0] = 0;
     hdr[1] = 0;
     hdr[2] = 2;
@@ -1343,7 +1344,7 @@ static inline u8 Loop2_fn_802D0914(u8* hdr, u8 t) {
     return t;
 }
 
-static inline u8 Loop3_fn_802D0914(u8* hdr, u8 t) {
+static inline u8 TgaSwapDims(u8* hdr, u8 t) {
     hdr[8] = hdr[9];
     hdr[9] = t;
     t = hdr[10];
@@ -1361,8 +1362,8 @@ void fn_802D0914(s32 fd, int w, int h) {
     *(u16*)(hdr + 12) = w;
     *(u16*)(hdr + 14) = h;
     u8 t;
-    t = Loop2_fn_802D0914(hdr, t);
-    t = Loop3_fn_802D0914(hdr, t);
+    t = TgaHeader(hdr);
+    t = TgaSwapDims(hdr, t);
     hdr[12] = hdr[13];
     hdr[13] = t;
     t = hdr[14];
@@ -1615,6 +1616,7 @@ void fn_802D0EEC(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802D14D8(f32 k) {
     f32 aspect = lbl_804C9778.aspect * (k / lbl_804C9778.zoom);
     f32 fovy = 2.0f * (f32)atan((f32)tan(0.5f * lbl_804C9778.fovy) / aspect);

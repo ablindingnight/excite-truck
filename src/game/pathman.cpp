@@ -199,6 +199,7 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     fn_8029F458(name, obj);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801DA8C8(int n, PathGroup* g, PathClient** found) {
     for (int j = 0; j < n; j++) {
         g->Add(found[j]);

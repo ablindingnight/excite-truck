@@ -281,7 +281,9 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
     return fn_801DB74C((int)ix, (int)iz, out, mat, unused, normal, fx - ix, fz - iz);
 }
 
-static inline int Loop1_fn_801DC32C(int i, GroundHeader* g) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop1_fn_801DC32C(GroundHeader* g) {
+    int i;
     for (i = 0; i < g->numLayers; i++) {
         GLayer* l = &g->layers[i];
         Swap32(&l->base);
@@ -352,7 +354,7 @@ void fn_801DC32C(GroundHeader* g) {
         }
         lbl_80442708[t->x - lbl_8055E99C][t->z - lbl_8055E9A0] = i;
     }
-    i = Loop1_fn_801DC32C(i, g);
+    i = Loop1_fn_801DC32C(g);
     for (i = 0; i < g->numItems; i++) {
         GItem* it = &g->items[i];
         for (int k = 0; k < 4; k++) {
@@ -495,6 +497,7 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 
 static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline f32 Loop2_fn_801DCF48(GTile* t, f32 h, int lx, int lz) {
     for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
         f32 basev = l->base;

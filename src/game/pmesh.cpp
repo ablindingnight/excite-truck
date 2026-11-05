@@ -289,6 +289,7 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
     return hit;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801CFA48(PMesh* m) {
     int i;
     for (i = 0; i < m->numTris; i++) {

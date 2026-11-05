@@ -2431,6 +2431,7 @@ void BetaCar::Retire(void) {
     fn_801CB648(id, master->timer.limit - left, 0);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void BetaCar::Loop1_Finish(const RaceCarRec* rc) {
     f32 add;
     CarHud* h;

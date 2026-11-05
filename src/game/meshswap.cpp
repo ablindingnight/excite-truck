@@ -78,21 +78,27 @@ static inline void Fix(void** p, u32 base) {
 
 extern "C" {
 
-static inline int Loop1_fn_801D1C68(int i, MeshHeader* m) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop1_fn_801D1C68(MeshHeader* m) {
+    int i;
     for (i = 0; i < m->numVerts; i++) {
         m->verts[i].Swap();
     }
     return i;
 }
 
-static inline int Loop2_fn_801D1C68(int i, MeshHeader* m) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop2_fn_801D1C68(MeshHeader* m) {
+    int i;
     for (i = 0; i < m->numFaces; i++) {
         m->faces[i].Swap();
     }
     return i;
 }
 
-static inline int Loop3_fn_801D1C68(int i, MeshHeader* m) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop3_fn_801D1C68(MeshHeader* m) {
+    int i;
     for (i = 0; i < m->numStrips; i++) {
         m->strips[i].Swap();
         m->strips[i].vert = &m->verts[(u32)m->strips[i].vert];
@@ -106,9 +112,9 @@ void fn_801D1C68(MeshHeader* m, u32 base) {
     Fix((void**)&m->strips, base);
     Fix((void**)&m->bones, base);
     int i;
-    i = Loop1_fn_801D1C68(i, m);
-    i = Loop2_fn_801D1C68(i, m);
-    i = Loop3_fn_801D1C68(i, m);
+    i = Loop1_fn_801D1C68(m);
+    i = Loop2_fn_801D1C68(m);
+    i = Loop3_fn_801D1C68(m);
     for (i = 0; i < m->numBones; i++) {
         m->bones[i].Swap();
     }

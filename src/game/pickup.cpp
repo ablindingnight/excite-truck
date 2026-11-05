@@ -467,7 +467,9 @@ extern "C" {
 
 void fn_80167EEC(void) { delete lbl_8055E354; }
 
-static inline int Loop2_fn_80168020(int i, PickupObjMan* m) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop2_fn_80168020(PickupObjMan* m) {
+    int i;
     for (i = 0; i < m->groups.count; i++) {
         m->groups.data[i].done = 0;
     }
@@ -485,7 +487,7 @@ void fn_80168020(void) {
         p->pos[1] = p->hover + (p->pos[1] + p->type->yoff);
         p->taken = 0;
     }
-    i = Loop2_fn_80168020(i, m);
+    i = Loop2_fn_80168020(m);
     for (i = 0; i < 8; i++) {
         lbl_80430260[i].frame = -1;
     }
@@ -559,6 +561,7 @@ void fn_80168328(void) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801683F4(PickupGroup* g, int i, RaceCarRec* rec, V2& lo, V2& hi, PickupCounts& res) {
     int j;
     for (j = 0; j < g->count; j++) {

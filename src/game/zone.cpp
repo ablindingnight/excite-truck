@@ -1170,6 +1170,7 @@ void fn_8013CB90(LayoutArt* a) {
 }
 
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     Vec3 mid;
     Vec3 at;
@@ -1788,6 +1789,7 @@ void ZoneMaster::DrawNextGate(void) {
 }
 
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void ZoneMaster::Loop2_vf44(FixedArray<GateHit, 8>& hits) {
     Gate* gg;
     Vec3* p;

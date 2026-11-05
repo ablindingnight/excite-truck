@@ -158,6 +158,7 @@ void fn_80137F74(u32* v) {
     Swap4(&v[2]);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_80137FF0(ResExt* e, u8* p) {
     int i;
     for (i = 0; i < (s32)e->data[0]; i++) {

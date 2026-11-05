@@ -1245,6 +1245,7 @@ void AsyncResourceSet::Finish(void) {
     Reset();
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void AsyncResourceSet::Loop1_Update(void) {
     fn_8012B324(set.path);
     tries++;
@@ -1409,6 +1410,7 @@ static inline int TocHas(ResToc* toc, const char* name) {
     return in;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline QueueNode* Loop1_fn_8012D908(QueueNode* n, QueueNode* found, const char* name) {
     while (n && !found) {
         ResToc* toc = GetToc(n->name);

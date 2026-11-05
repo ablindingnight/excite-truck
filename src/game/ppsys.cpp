@@ -429,7 +429,9 @@ PSysObj* fn_801C1C1C(const PSysDesc* d) { return new ("ppsys") PSysObj(d->nVerts
 
 void fn_801C1C7C(PSysObj* s) { delete s; }
 
-static inline int Loop1_fn_801C1CBC(int i, int ne, const PEdgeDesc* e, PSys* s) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline int Loop1_fn_801C1CBC(int ne, const PEdgeDesc* e, PSys* s) {
+    int i;
     for (i = 0; i < ne; i++, e++) {
         AddStick(s, e->a, e->b, e->extra, e->stiff);
     }
@@ -445,7 +447,7 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     for (i = 0; i < nv; i++, v++) {
         AddPart(s, &v->pos, v->w34, v->w30);
     }
-    i = Loop1_fn_801C1CBC(i, ne, e, s);
+    i = Loop1_fn_801C1CBC(ne, e, s);
     for (i = 0; i < np; i++, p++) {
         AddAnchor(s, p->idx, p->mtx, p->at ? p->at : &s->pos[p->idx]);
     }
@@ -490,6 +492,7 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
 }
 
 // Gives every particle the velocity of a body moving with 'vel' and spinning with 'avel' about 'at'.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_801C256C(PSys* s, const RVec3* at, const RVec3* avel, const RVec3* vel) {
     for (int i = 0; i < s->nPart; i++) {
         RVec3 v;
@@ -537,7 +540,7 @@ void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f) {
 // Keeps particles [first, last) out of a box (frame m, half extents half): a particle that ends the step inside
 // is pushed back out through the face it came in by. Optionally returns the weighted mean of the pushed
 // particles (center) and their accumulated push (push).
-static inline int Loop1_fn_801C28A8(int n, PSys* s) {
+static inline int CountOrAll(int n, PSys* s) {
     if (n < 0) {
         n = s->nPart;
     }
@@ -555,7 +558,7 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     RVec3 force;
     RVec3 sum;
     int n = last;
-    n = Loop1_fn_801C28A8(n, s);
+    n = CountOrAll(n, s);
     fn_80144B44(&sum, 0.0f, 0.0f, 0.0f);
     fn_80144B44(&force, 0.0f, 0.0f, 0.0f);
     f32 total = 0.0f;

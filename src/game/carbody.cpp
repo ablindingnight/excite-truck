@@ -3644,6 +3644,7 @@ void fn_801C2170(u8* sys, u8* desc, void* owner);
 extern "C" {
 
 // Builds the body's spring system: per attachment point a pinned particle and a free one, joined by an edge.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8018A750(u8* p, SprVert* verts, SprEdge* edges, SprPin* pins) {
     for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
         SprVert* v = &verts[i * 2];

@@ -733,6 +733,7 @@ void HermiteDrone::Turn(f32 u) {
     QuatToFrame(&frame, &q);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void HermiteDrone::Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt) {
     f32 u = k->rate * nt;
     if (u < 1.0f) {

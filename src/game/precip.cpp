@@ -565,6 +565,7 @@ void fn_802A5384(WeatherCfg* c) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel) {
     for (int k2 = 0; k2 < m; k2++) {
         f32 a = fn_80287BC8(0.0f, 1.0f);

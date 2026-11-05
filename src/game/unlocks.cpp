@@ -144,7 +144,10 @@ static inline UnlockReq* FindUnlockReq(const char* name) {
     return i < 0 ? NULL : &lbl_803580A4.inner.list.data[i].req;
 }
 
-static inline void Loop1_LoadChassisUnlocks(const char* base, ValueNode* node, int idx, ChassisUnlock* c) {
+static inline void LoadChassisReq(ValueNode* node) {
+    ChassisUnlock*c;
+    int idx;
+    const char*base;
     base = node->GetValue("base_chassis");
     idx = FindChassisUnlock(base);
     if (idx < 0) {
@@ -158,15 +161,12 @@ static inline void Loop1_LoadChassisUnlocks(const char* base, ValueNode* node, i
 }
 
 void LoadChassisUnlocks(void) {
-    ChassisUnlock* c;
-    int idx;
-    const char* base;
     ValueNode* node;
     int i;
 
     for (i = 0; (node = lbl_8055D58C->GetChild(i)) != NULL; i++) {
         if (strcasecmp(node->GetName(), "special_chassis") == 0) {
-            Loop1_LoadChassisUnlocks(base, node, idx, c);
+            LoadChassisReq(node);
         }
     }
 }

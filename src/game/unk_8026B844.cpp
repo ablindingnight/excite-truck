@@ -140,6 +140,7 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 
 // The free (debug) camera: stick yaw/pitch and movement, trigger boost, keys up/down, the pointer at a screen
 // edge pans (faster the higher the camera is), and the camera keeps its height above the ground.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& move) {
     f32 turn = lbl_80563D90;
     f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
@@ -454,6 +455,7 @@ static __inline void CamFly(CamFrame* f, const FreePad* pad, f32 turn, f32 roll,
 
 // The debug camera, once a frame: the mode button cycles keyboard / pad / free camera control of the saved
 // frame (the pad modes move whichever camera is current), then the replay cameras follow their car.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline f32 Loop2_fn_8026C014(FreePad& pad, f32 z, f32 speed) {
     if (pad.w40 & 1) {
         z = speed;

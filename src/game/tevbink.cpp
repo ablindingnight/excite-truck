@@ -739,6 +739,7 @@ void fn_802E1058(void) {
     lbl_8055FEEC = 0;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802E11A4(BinkMovie* m, u8 loop, const char* name) {
     m->loop = loop;
     fn_801345D8(m->name, 0x40, "video/%s", name);

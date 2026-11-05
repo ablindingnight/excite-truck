@@ -470,6 +470,7 @@ static inline s32 AchSumModel(AchStats* stats, int category, const char* name) {
     return total;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline s32 Loop1_AchGetModelStat(const char* name, s32 total, int category) {
     u32 i;
     for (i = 0; i < NUM_MODELS; i++) {
@@ -499,7 +500,7 @@ s32 AchGetModelStat(int category, const char* model) {
     return Loop1_AchGetModelStat(name, total, category);
 }
 
-static inline void Loop1_AchAddModelStat(int found, int empty, const char* name, int category, s32 value) {
+static inline void StoreModelStat(int found, int empty, const char* name, int category, s32 value) {
     if (found < 0) {
         char* dst;
         int n;
@@ -537,7 +538,7 @@ void AchAddModelStat(int category, const char* model, s32 value) {
             found = i;
         }
     }
-    Loop1_AchAddModelStat(found, empty, name, category, value);
+    StoreModelStat(found, empty, name, category, value);
 }
 
 BOOL AchIsRecording(void) {

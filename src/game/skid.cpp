@@ -357,7 +357,10 @@ static inline void FillPoint(SkidPt* p, const SkidCar* car, const SkidWheel* w, 
     p->alpha = MIN(a, 0xFFFF);
 }
 
-static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidStrip* s, SkidType* t, int idx, SkidPt* p, SkidCar* car, SkidWheel* w, SkidPt* q) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidType* t, int idx, SkidPt* p, SkidCar* car, SkidWheel* w) {
+    SkidPt*q;
+    SkidStrip*s;
     if (slot->type == type) {
         if (now > 0.2f + slot->time) {
             s = &t->strips[idx];
@@ -396,8 +399,6 @@ static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidStri
 
 void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
-    SkidStrip* s;
-    SkidPt* q;
     SkidPt* p;
     int type;
     SkidSlot* slot;
@@ -413,7 +414,7 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
             skid = 1;
         }
         if (skid) {
-            Loop1_fn_8028D89C(slot, type, now, s, t, idx, p, car, w, q);
+            Loop1_fn_8028D89C(slot, type, now, t, idx, p, car, w);
             slot->type = type;
         } else {
             slot->type = -1;

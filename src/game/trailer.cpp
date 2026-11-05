@@ -338,6 +338,7 @@ struct RaceEntries {
 };
 
 // Points each racer entry's trailer fields at its trailer body.
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801B916C(RaceEntries* r) {
     for (int i = 0; i < r->count; i++) {
         RaceEntry* e = &r->entries[i];

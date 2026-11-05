@@ -215,6 +215,7 @@ void IdentSaveEvent(int event) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_IdentResetAll(char* dst, const char* src, int n) {
     while ((*dst++ = *src++) != '\0') {
         if (--n <= 0) {

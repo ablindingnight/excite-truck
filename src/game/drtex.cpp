@@ -508,6 +508,7 @@ static inline void Fix(u8** p, TexImage* img) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802D8DCC(GXTexDesc* d) {
     TexImage* img = d->data;
     Fix((u8**)&img->pal, img);

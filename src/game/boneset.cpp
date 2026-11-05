@@ -233,6 +233,7 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     return fn_802C7A38(0, skin, nd);
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline s32 Loop1_fn_801E65BC(int n, Bone* b, const BFrame* p, BFrame* skin, s32 nd) {
     for (int i = 0; i < n; i++, b++, p++) {
         if (b->dest >= 0) {

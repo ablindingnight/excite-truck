@@ -229,7 +229,7 @@ BoneCmd* fn_802DA918(f32 a, f32 b, f32 c) {
     return m->NewCmd(1, v, 1, sizeof(v), 0, 0);
 }
 
-static inline BoneCmd* Loop1_fn_802DAA18(BoneCmd* c, BoneMgr* m) {
+static inline BoneCmd* CmdOrRest(BoneCmd* c, BoneMgr* m) {
     if (!c) {
         if (m->rest == (BoneCmd*)-1) {
             f32 zero[80][3];
@@ -245,7 +245,7 @@ static inline BoneCmd* Loop1_fn_802DAA18(BoneCmd* c, BoneMgr* m) {
 void fn_802DAA18(BoneCmd* c) {
     lbl_8055FE60 = c;
     BoneMgr* m = lbl_8055FE5C;
-    c = Loop1_fn_802DAA18(c, m);
+    c = CmdOrRest(c, m);
     if (c->mtx == 0) {
         m->copyVec(c->start, c->Data(), c->count);
     } else {

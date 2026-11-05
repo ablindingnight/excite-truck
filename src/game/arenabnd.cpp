@@ -212,6 +212,7 @@ int fn_80139B70(Bound* b, f32 x, f32 y) {
     return c & 1;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_80139C5C(int limit, BoundPt* p, V2& lo, V2& hi) {
     int i;
     for (i = 1; i < limit; i++, p++) {
@@ -251,7 +252,7 @@ BoundSet* fn_80139D4C(const char* name) {
 
 void fn_80139E18(BoundSet* s) { delete s; }
 
-static inline int Loop2_fn_80139EC4(BoundSet* s, f32 x, f32 y) {
+static inline int AnyBoundHit(BoundSet* s, f32 x, f32 y) {
     int i;
     for (i = 0; i < s->bounds.a.count; i++) {
         if (fn_80139B70(s->bounds.a.data[i], x, y)) {
@@ -263,7 +264,7 @@ static inline int Loop2_fn_80139EC4(BoundSet* s, f32 x, f32 y) {
 
 int fn_80139EC4(BoundSet* s, f32 x, f32 y) {
     int i;
-    return Loop2_fn_80139EC4(s, x, y);
+    return AnyBoundHit(s, x, y);
 }
 
 void fn_80139F5C(EventInfo* ev) {

@@ -1562,6 +1562,7 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     return r;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void ThrowTracker::Loop1_Rate(int i, int alive) {
     s32 h = handle;
     int hit;

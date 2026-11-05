@@ -91,7 +91,7 @@ struct CarColor {
 
 class CarChunks : public Chunks {
 public:
-    void Loop1_InitColors(u32 c, u32 i);
+    void Loop1_InitColors(u32 i);
 public:
     CarChunks(ValueNode* vn, const char* base);
     virtual ~CarChunks(void);
@@ -530,17 +530,18 @@ static inline u32 DimColor(u8 r, u8 g, u8 b) { return 0xFF000000 | r << 16 | g <
 
 static inline CarInfo* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
-inline void CarChunks::Loop1_InitColors(u32 c, u32 i) {
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+inline void CarChunks::Loop1_InitColors(u32 i) {
+    u32 c;
     c = CarAt(i)->color;
     colors[i].dim = DimColor(Dim(c >> 16), Dim(c >> 8), Dim(c));
     colors[i].full = c;
 }
 
 void CarChunks::InitColors(void) {
-    u32 c;
     u32 i;
     for (i = 0; CarAt(i) != 0; i++) {
-        Loop1_InitColors(c, i);
+        Loop1_InitColors(i);
     }
 }
 

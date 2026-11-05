@@ -491,7 +491,7 @@ extern "C" {
 void fn_80214AF0(s32 s);
 
 // Greys out the grid buttons of cars nobody can pick and highlights each column's selection.
-static inline void Loop1_fn_8025F274(CarPickScreen* s) {
+static inline void ShowBestRows(CarPickScreen* s) {
     for (int k = 0; k < 5; k++) {
         for (int j = 0; j < 3; j++) {
             if (j == s->rows[k].best) {
@@ -513,7 +513,7 @@ void fn_8025F274(u8* p) {
         }
     }
     CarPickScreen* s = lbl_8055F3D4;
-    Loop1_fn_8025F274(s);
+    ShowBestRows(s);
 }
 
 

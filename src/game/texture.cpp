@@ -887,6 +887,7 @@ void fn_802CB6B4(void) {
     lbl_8055FCBC = 0;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
     for (MipLoad* l = c->loads; l; l = l->next) {
         if (l->tex == id) {
@@ -1262,6 +1263,7 @@ static inline void Rank(TexCache* c, MipSlot* s, f32 score) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802CC770(void) {
     for (int i = 0; i < 512; i++) {
         TexEntry* t = &lbl_8055FCB0[i];
@@ -1288,6 +1290,7 @@ static inline void Loop1_fn_802CC770(void) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop3_fn_802CC770(TexCache* c) {
     for (MipSlot* s = c->resident; s; s = s->next) {
         if (s->state == 2) {

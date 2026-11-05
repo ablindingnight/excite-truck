@@ -280,7 +280,7 @@ struct XFade {
 
 class XFadeList : public TrackInst {
 public:
-    void Loop1_Draw2(XFade** vis, int i);
+    void DrawFade(XFade** vis, int i);
 public:
     XFadeList(void) { count = 0; }
     virtual ~XFadeList(void);
@@ -1153,7 +1153,7 @@ void RotList::Draw(void* ctx) {
 }
 void XFadeList::Draw(void* ctx) {}
 
-inline void XFadeList::Loop1_Draw2(XFade** vis, int i) {
+inline void XFadeList::DrawFade(XFade** vis, int i) {
     XFade* f = vis[i];
     f32 d = fn_802C88D4(f);
     if (d > f->start) {
@@ -1173,7 +1173,7 @@ void XFadeList::Draw2(void* ctx) {
         }
     }
     for (i = 0; i < n; i++) {
-        Loop1_Draw2(vis, i);
+        DrawFade(vis, i);
     }
 }
 

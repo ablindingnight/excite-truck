@@ -995,6 +995,7 @@ void fn_802D657C(u32* p, u32 base) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802D6594(u8* s, u8* p) {
     for (int i = 0; i < *(s32*)(s + 0x34); i++) {
         Swap32(p);
