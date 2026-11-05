@@ -1422,39 +1422,56 @@ void fn_801959AC(u8* d) {
 
 f32 lbl_80333308[9] = {5.0f, 15.0f, 4.0f, 1.0f, 1.5f, 0.9f, 0.3f, 0.8f, 0.4f};
 
+struct LaneWander {
+    u8 pad0[0x220];
+    f32 cur;    // offset 0x220
+    f32 tgt;    // offset 0x224
+    f32 start;  // offset 0x228
+    f32 t0;     // offset 0x22C
+    f32 dur;    // offset 0x230
+    f32 next;   // offset 0x234
+    u8 pad238[0x268 - 0x238];
+    s32 mode;   // offset 0x268
+    f32 now;    // offset 0x26C
+};
+
+static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
+
 void fn_80195B28(u8* d, f32 v) {
-    if (!(F32(d, 0x234) < F32(d, 0x26C)) && v == 0.0f) {
+    LaneWander* w = (LaneWander*)d;
+    if (!(w->next < w->now) && v == 0.0f) {
         return;
     }
-    if (S32(fn_801769CC(), 4) != 0x180201) {
-        int one = S32(d, 0x268) == 1;
+    bool on = S32(fn_801769CC(), 4) != 0x180201;
+    if (on) {
+        int one = w->mode == 1;
         f32* tbl = lbl_80333308;
         if (one) {
             tbl += 3;
         }
-        F32(d, 0x22C) = F32(d, 0x26C);
-        F32(d, 0x234) = fn_80129DC4(3, tbl[0], tbl[1]);
+        w->t0 = w->now;
+        w->next = fn_80129DC4(3, tbl[0], tbl[1]);
         if (!one) {
-            F32(d, 0x234) *= lbl_8055E56C;
+            w->next *= lbl_8055E56C;
         }
-        F32(d, 0x228) = F32(d, 0x220);
-        F32(d, 0x234) += F32(d, 0x26C);
-        F32(d, 0x230) = tbl[2];
+        w->start = w->cur;
+        w->next += w->now;
+        w->dur = tbl[2];
         if (one) {
-            F32(d, 0x224) = fn_80129DC4(3, -0.5f, 0.5f);
+            w->tgt = fn_80129DC4(3, -0.5f, 0.5f);
         } else {
-            F32(d, 0x224) = fn_80129DC4(3, -1.0f, 1.0f);
+            w->tgt = fn_80129DC4(3, -1.0f, 1.0f);
         }
         if (v != 0.0f) {
-            F32(d, 0x224) = (v > 0.0f ? 1.0f : -1.0f) * (f32)__fabs(F32(d, 0x224));
+            w->tgt = (v > 0.0f ? 1.0f : -1.0f) * AbsF(w->tgt);
         }
     } else {
-        f32 t = F32(d, 0x26C);
-        F32(d, 0x234) = t;
-        F32(d, 0x228) = 0.0f;
-        F32(d, 0x224) = 0.0f;
-        F32(d, 0x22C) = t;
-        F32(d, 0x230) = t;
+        f32 t = w->now;
+        w->next = t;
+        w->start = 0.0f;
+        w->tgt = 0.0f;
+        w->t0 = t;
+        w->dur = t;
     }
 }
 
@@ -1613,7 +1630,6 @@ void fn_801961FC(u8* d) {
     }
 }
 
-static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 static inline double AbsD(double v) { return __fabs(v); }
 
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
