@@ -293,12 +293,14 @@ void ShowUnlockReason(const char* name) {
         bool grades = AchievementsGetModelStat(1, name) >= req->aaas;
         if (grades) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_S_GRADES");
-        } else if (races) {
+            return;
+        }
+        if (races) {
             fn_80131234("EventPath:CAR_UNLOCK_REASON_RACES_RUN");
-        } else {
-            fn_80131234("EventPath:CONGRATULATIONS");
+            return;
         }
     }
+    fn_80131234("EventPath:CONGRATULATIONS");
 }
 
 extern "C" BOOL fn_80019430(void) {

@@ -584,8 +584,8 @@ inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
 inline void Ball::Drop(void) {
     s16 h;
     f32 xz[2];
-    BVec3 v;
     BMtx m;
+    BVec3 v;
     f32 up;
     fn_801602B0(xz);
     PickDrop(xz, &h);
