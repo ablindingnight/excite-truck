@@ -1016,10 +1016,11 @@ void fn_802CBDD0(TexCache* c) {
         s32 id = c->best->tex;
         int started = 0;
         MipSlot* victim = c->resident;
+        TexEntry* t;
         MipLoad* l = c->freeLoads;
         if (l) {
             if (fn_802D9068()) {
-                TexEntry* t = &lbl_8055FCB0[id];
+                t = &lbl_8055FCB0[id];
                 l->wait = 0;
                 for (;;) {
                     l->mem = fn_802CC404(c)->Alloc(t->mip0Bytes);
