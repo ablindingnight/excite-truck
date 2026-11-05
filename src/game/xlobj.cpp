@@ -537,7 +537,8 @@ void fn_802B9108(s16 size) {
     s16 sz = g.size;
     if (sz > 4 && sz <= 8) {
         for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
-            for (int y = sz - 0x200; y < 0x200; y += sz * 2) {
+            int y = sz;
+            for (y -= 0x200; y < 0x200; y += sz * 2) {
                 InlineVec<Item*, 64> near;
                 for (int k = 0; k < 4; k++) {
                     for (Item** pp = fn_802B8EB8(x, y, sz, k)->list; *pp; pp++) {
