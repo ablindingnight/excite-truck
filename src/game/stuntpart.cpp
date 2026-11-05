@@ -443,6 +443,18 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     }
 }
 
+struct WV3 {
+    f32 v[3];
+};
+
+static inline void BoxPoint(Vec* pos, const StuntCar* car, f32 ang, f32 hx, f32 hz) {
+    Vec x = *(const Vec*)&car->axes[0];
+    Vec z = *(const Vec*)&car->axes[2];
+    *(WV3*)pos = *(const WV3*)&car->pos;
+    AddScaled(pos, pos, &x, hx * (f32)cos(ang));
+    AddScaled(pos, pos, &z, hz * (f32)sin(ang));
+}
+
 void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
     f32 hx = 0.5f * p->sizeX;
     f32 hz = 0.5f * p->sizeZ;
@@ -458,16 +470,13 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
     }
     if (fn_80287BC8(0.0f, 1.0f) < p->reentryAmt) {
         f32 ang = fn_80287BC8(-3.1415927f, 3.1415927f);
-        Vec x = *(const Vec*)&car->axes[0];
-        Vec z = *(const Vec*)&car->axes[2];
-        ValVec3 vel;
-        Vec pos = car->pos;
-        AddScaled(&pos, &pos, &x, hx * (f32)cos(ang));
-        AddScaled(&pos, &pos, &z, hz * (f32)sin(ang));
+        Vec pos;
+        WV3 vel;
+        BoxPoint(&pos, car, ang, hx, hz);
         AddScaled(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
-        vel = car->vel;
+        vel = *(const WV3*)&car->vel;
         if (car->height >= 1.5f - lbl_80558DC4[0]) {
-            fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, vel, 1.0f);
+            fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *(ValVec3*)&vel, 1.0f);
         }
     }
 }
