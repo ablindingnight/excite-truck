@@ -2101,11 +2101,11 @@ static inline int Loop3_fn_8019703C(const u8* p, const u8* d) {
         F32(d, 0xCC) = x;
         F32(d, 0xD8) = z;
         S32(d, 0xDC) = S32(p, 0x18);
-        if (x > 0.0f) {
-            S32(d, 0xC0)++;
-        } else {
-            S32(d, 0x98)++;
-        }
+    }
+    if (x > 0.0f) {
+        S32(d, 0xC0)++;
+    } else {
+        S32(d, 0x98)++;
     }
     return 0;
 }

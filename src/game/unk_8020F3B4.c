@@ -537,6 +537,8 @@ void fn_80210510(float volume) {
 
 void fn_80210514(long arg0) {
     switch (arg0) {
+    default:
+        break;
     case 0:
         fn_8020F608(0, IdentGetCurrentSlot());
         break;
