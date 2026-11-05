@@ -462,8 +462,8 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     }
     if (!(fn_801769CC()->flags & 0x4000)) {
         fn_8018AF04(c->Car());
+        c->Release();
     }
-    c->Release();
     c->stuck = 0;
     *(u32*)((u8*)c + 0x4) &= ~4;
 }
