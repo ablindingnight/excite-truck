@@ -755,24 +755,26 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
         fn_8020404C();
     }
 }
-const f32 kWorldScale = 2.0f;
-
+// Centre of cell c in world units.
+static inline f32 CellCentre(int c, f32 scale) { return kWorldScale + (f32)c * scale; }
 
 void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
     V3 p;
-    p.x = 2.0f + (f32)x * 2.0f;
+    p.x = CellCentre(x, 2.0f);
     p.y = 0.0f;
-    p.z = 2.0f + (f32)z * 2.0f;
+    p.z = CellCentre(z, 2.0f);
     p.y = 0.5f + fn_801DCF48(0, p.x, p.z);
     V3 q = p;
     p.y += h;
-    f32 w = 2.0f * (f32)(s16)fn_802B6E30();
+    f32 w = kWorldScale * (f32)(s16)fn_802B6E30();
     if (v == 0) {
         color = 0xFF000000;
-        color = (0x20 << 24) | (color & 0xFFFFFF);
-        fn_801E41D8(&p, &q, color, w);
+        v = 0x20;
     }
+    fn_801E41D8(&p, &q, (color & 0xFFFFFF) | (v << 24), w);
 }
+
+const f32 kWorldScale = 2.0f;
 
 void fn_802B7420(s16 x, s16 z, int v) { fn_802B7300(x, z, v, 0xFFFFFFFF, 0.2f); }
 
