@@ -777,7 +777,73 @@ public:
     s32 glow;  // offset 0x4
 };
 
-class GameMode {
+class GameUI {
+public:
+    virtual ~GameUI(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(void);
+    virtual void vf14(int p);
+    virtual void vf18(void);
+    virtual int vf1C(int car);
+    virtual int vf20(int car);
+    virtual int vf24(void);
+    virtual int Started1C(int car);
+    virtual int Started20(int car);
+    virtual int vf30(void);
+    virtual int vf34(void);
+    virtual f32 vf38(void);
+    virtual int vf3C(int p);
+    virtual void vf40(void);
+    virtual void vf44(void);
+    virtual void vf48(void);
+    virtual void vf4C(int p);
+    virtual void vf50(int p);
+    virtual int vf54(void);
+    virtual int vf58(void);
+    virtual int vf5C(int p);
+    virtual void vf60(int view);
+    virtual int vf64(void);
+    virtual int vf68(void);
+    virtual void vf6C(void);
+    virtual void vf70(void);
+    virtual void vf74(void);
+    virtual void vf78(void);
+    virtual int vf7C(int p);
+    virtual int vf80(void);
+    virtual int vf84(void);
+    virtual int vf88(void);
+    virtual int vf8C(int p, int key);
+    virtual void vf90(int a, int b, int c, int d);
+    virtual void vf94(int p);
+    virtual int Collide(int a, int b);
+    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
+    virtual int vfA0(struct Cam* cam);
+    virtual void vfA4(int p);
+    virtual void vfA8(int car);
+    virtual void vfAC(int car);
+    virtual int vfB0(int a, int b, int c);
+    virtual void vfB4(int car, struct Damage* d);
+    virtual void vfB8(struct ZoneResults* r);
+    virtual int vfBC(void);
+    virtual void vfC0(void);
+    virtual void vfC4(void);
+    virtual void vfC8(void);
+    virtual int vfCC(void);
+    virtual int vfD0(void);
+    virtual int vfD4(int car);
+    virtual int vfD8(void);
+    virtual int vfDC(void);
+    virtual int vfE0(void);
+    virtual int vfE4(void);
+    virtual CSubTaskMgr* vfE8(void);
+    virtual int vfEC(void);
+    virtual int vfF0(void);
+    virtual void vfF4(void);
+    virtual void vfF8(void);
+    virtual void vfFC(void);
+};
+
+class GameMode : public GameUI {
 public:
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
@@ -787,8 +853,8 @@ public:
     virtual int vf1C(int car) { return vf20(car); }
     virtual int vf20(int car) = 0;
     virtual int vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
+    virtual int Started1C(int car);
+    virtual int Started20(int car);
     virtual int vf30(void) { return 0; }
     virtual int vf34(void) { return 0; }
     virtual f32 vf38(void);
@@ -799,11 +865,6 @@ public:
     virtual void vf4C(int p);
     virtual void vf50(int p);
     virtual int vf54(void);
-    virtual void vf58(void);
-    virtual int vf5C(int p);
-    virtual void vf60(void);
-    virtual int vf64(void);
-    virtual int vf68(void);
     virtual void vf6C(void) {}
     virtual void vf70(void) {}
     virtual void vf74(void) {}
@@ -815,7 +876,7 @@ public:
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d) {}
     virtual void vf94(int p) {}
-    virtual void vf98(void);
+    virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
     virtual int vfA0(struct Cam* cam);
     virtual void vfA4(int p) {}
@@ -845,12 +906,12 @@ public:
     virtual int vfEC(void);
     virtual int vfF0(void) { return 0; }
     virtual void vfF4(void) {}
-    virtual void vfF8(void);
-    virtual void vfFC(void);
+
 
     int IsRacing(int car);  // 0x801B8514
 
     u32 unk4;  // offset 0x4
+
 };
 
 extern "C" Gate* fn_8013D148(ZoneLevel* l, f32 x);
