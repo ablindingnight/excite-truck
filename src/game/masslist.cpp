@@ -250,14 +250,17 @@ void fn_801BDA74(int car, CarSetup* s) {
     lbl_8055E7A0[car] = 0;
     m->mass = mass;
     m->invMass = inv;
-    x->row[4] = MVec4(0.044f, 0.044f, 0.044f, 0.044f);
-    x->row[5] = MVec4(0.189f, 0.189f, 0.189f, 0.189f);
+    x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
+    x->row[5] = MVec4(0.189215347f, 0.189215347f, 0.189215347f, 0.189215347f);
     for (i = 0; i < 4; i++) {
         x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
-                          1.371f * ((i & 2) ? -1.0f : 1.0f));
+                          54.0f * 0.0254f * ((i & 2) ? -1.0f : 1.0f));
     }
-    x->row[18] = MVec4(sin(s->wheelLock), sin(s->wheelLock), 0.0f, 0.0f);
-    x->row[19] = MVec4(DEG(-0.1), -DEG(-0.1), DEG(0.1), -DEG(0.1));
+    f32 lock = sin(s->wheelLock);
+    x->row[18] = MVec4(lock, lock, 0.0f, 0.0f);
+    f32 a = DEG(-0.1);
+    f32 b = DEG(0.1);
+    x->row[19] = MVec4(a, -a, b, -b);
     x->row[20] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     x->row[21] = MVec4(0.0f, 0.0f, 0.5f, 0.5f);
     x->row[6] = MVec4(0.5f * s->airDrag * 1.29f, 0.0f, 0.0f, s->collideCmHeight - s->cmHeight);
@@ -265,18 +268,16 @@ void fn_801BDA74(int car, CarSetup* s) {
                        s->brake * (1.0f - s->unk11C));
     {
         f32 g = 0.9f * s->grip;
-        f32 sl = 0.25f * s->slip;
-        f32 x0 = 3559.99f * s->loadFactor;
         f32 a0 = 1.46f * g;
-        f32 x1 = 8900.0f * s->loadFactor;
-        f32 b0 = 104857.3f * g * sl;
-        f32 b1 = 648575.7f * g * sl;
         f32 a1 = 1.25f * g;
+        f32 x0 = 3559.99976f * s->loadFactor;
+        f32 x1 = 8900.0f * s->loadFactor;
+        f32 sl = 0.25f * s->slip;
+        f32 b0 = 104856.312f * g * sl;
+        f32 b1 = 161887.922f * g * sl;
         f32 kb = (b1 - b0) / (x1 - x0);
         f32 ka = (a1 - a0) / (x1 - x0);
-        MVec4 fit(a0 - ka * x0, ka, b0 - kb * x0, kb);
-        x->row[10] = fit;
-        x->row[11] = fit;
+        x->row[11] = x->row[10] = MVec4(a0 - ka * x0, ka, b0 - kb * x0, kb);
     }
     for (i = 0; i < 4; i++) {
         WheelSetup* w = &s->wheels[i];
@@ -301,7 +302,7 @@ void fn_801BDA74(int car, CarSetup* s) {
     x->row[7] = MVec4(s->wheels[0].unk18, s->wheels[1].unk18, s->wheels[2].unk18, s->wheels[3].unk18);
     x->row[21] = MVec4(0.5f * (1.0f - s->torqueBalance), 0.5f * (1.0f - s->torqueBalance), 0.5f * s->torqueBalance,
                        0.5f * s->torqueBalance);
-    x->row[23] = MVec4(1.296f, 0.0f, 0.0f, 0.216f);
+    x->row[23] = MVec4(1.29607821f, 0.0f, 0.0f, 0.216013029f);
 }
 
 // Sets a car's body from a matrix (rows + origin) and its linear/angular velocities: the rotation is
