@@ -412,6 +412,7 @@ void fn_801679F0(void) {
     lbl_8055E354 = new ("PickupObjMan") PickupObjMan;
     if (vals->Has("coin_file")) {
         f32 params[3] = {4.0f, 30.0f, 10.0f};
+        ValueNode* n;
         ValueTable* t;
         bool has = vals->FindChild("coin_params") != 0;
         if (has) {
@@ -422,7 +423,6 @@ void fn_801679F0(void) {
         }
         t = fn_80131810(vals->GetValue("coin_file"));
         if (t) {
-            ValueNode* n;
             int i;
             for (i = 0; (n = t->GetChild(i)) != 0; i++) {
                 PickupMaker** m;
