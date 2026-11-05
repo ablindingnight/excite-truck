@@ -85,6 +85,14 @@ struct ResEntry {
     void* mem;        // offset 0x40
 };
 
+struct ResTocHeader {
+    u32 version;     // offset 0x0
+    u32 size;        // offset 0x4
+    u32 createTime;  // offset 0x8
+    u32 count;       // offset 0xC
+    u32 loadSize;    // offset 0x10
+};
+
 struct ResToc {
     u32 version;          // offset 0x0
     u32 size;             // offset 0x4
@@ -268,6 +276,7 @@ void fn_8012BF24(const char* name);
 class TocLib {
 public:
     TocLib(void) { fn_8012BEF0("tocres.res"); }
+    void Reload(void);
     ~TocLib(void) { fn_8012BF24("tocres.res"); }
 };
 
@@ -866,52 +875,56 @@ void fn_8012BEF0(const char* name) {
 
 void fn_8012BF24(const char* name) { fn_8012E498(name); }
 
+inline void TocLib::Reload(void) {
+    const char* patterns[] = {"*.res", "*.trk", "*.car"};
+    u32 k;
+    for (k = 0; k < sizeof(patterns) / sizeof(patterns[0]); k++) {
+        char name[0x80];
+        u32 h = fn_802E3BB4(patterns[k], name, sizeof(name));
+        if (h != -1) {
+            do {
+                int fd;
+                ResTocHeader th;
+                *strrchr(name, '.') = 0;
+                StrNCat(name, ".toc", sizeof(name));
+                fd = fn_802E36D8(name);
+                if (fd != -1) {
+                    fn_802E3A14(fd, 0x14);
+                    fn_802E3804(fd, &th, 0x14);
+                    if (th.version == 0) {
+                        ResToc* toc = GetToc(name);
+                        if (toc) {
+                            if (th.createTime != toc->createTime) {
+                                if (toc->count == th.count) {
+                                    fn_802E30C8("res(%s): reloading TOC! ", name);
+                                    toc->createTime = th.createTime;
+                                    toc->loadSize = th.loadSize;
+                                    fn_802E3804(fd, toc->entries, th.count * sizeof(ResEntry));
+                                } else {
+                                    fn_802E30C8("res(%s): Can't reload TOC, res_count mismatch! (new %d old %d)",
+                                                name, th.count, toc->count);
+                                }
+                            }
+                            fn_8012C4D8(toc);
+                        } else {
+                            fn_802E30C8("reload: no eth for %s", name);
+                        }
+                    } else {
+                        fn_802E30C8("reload: not a set, afaict %s", name);
+                    }
+                    fn_802E3734(&fd);
+                } else {
+                    fn_802E30C8("reload: failed even to open %s", name);
+                }
+            } while (FileFindNext(h, name, sizeof(name)));
+            FileFindClose(h);
+        }
+    }
+}
+
 void fn_8012BF28(void) {
     if (lbl_8055DFFC) {
-        const char* patterns[] = {"*.res", "*.trk", "*.car"};
-        u32 k;
-        for (k = 0; k < sizeof(patterns) / sizeof(patterns[0]); k++) {
-            char name[0x80];
-            int h = fn_802E3BB4(patterns[k], name, sizeof(name));
-            if (h != -1) {
-                do {
-                    int fd;
-                    ResToc th;
-                    *strrchr(name, '.') = 0;
-                    StrNCat(name, ".toc", sizeof(name));
-                    fd = fn_802E36D8(name);
-                    if (fd != -1) {
-                        fn_802E3A14(fd, 0x14);
-                        fn_802E3804(fd, &th, 0x14);
-                        if (th.version == 0) {
-                            ResToc* toc = GetToc(name);
-                            if (toc) {
-                                if (th.createTime != toc->createTime) {
-                                    if (toc->count == th.count) {
-                                        fn_802E30C8("res(%s): reloading TOC! ", name);
-                                        toc->createTime = th.createTime;
-                                        toc->loadSize = th.loadSize;
-                                        fn_802E3804(fd, toc->entries, th.count * sizeof(ResEntry));
-                                    } else {
-                                        fn_802E30C8("res(%s): Can't reload TOC, res_count mismatch! (new %d old %d)",
-                                                    name, th.count, toc->count);
-                                    }
-                                }
-                                fn_8012C4D8(toc);
-                            } else {
-                                fn_802E30C8("reload: no eth for %s", name);
-                            }
-                        } else {
-                            fn_802E30C8("reload: not a set, afaict %s", name);
-                        }
-                        fn_802E3734(&fd);
-                    } else {
-                        fn_802E30C8("reload: failed even to open %s", name);
-                    }
-                } while (FileFindNext(h, name, sizeof(name)));
-                FileFindClose(h);
-            }
-        }
+        lbl_8055DFFC->Reload();
     }
 }
 
