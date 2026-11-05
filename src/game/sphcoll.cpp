@@ -783,8 +783,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         J.z = n->z * j;
         tv.x = rel.x + n->x * -vn;
         tv.y = rel.y + n->y * -vn;
-        tv.z = rel.z + n->z * -vn;
         f32 mu = lbl_805622E8 * (F32(p, 0x14) + F32(q, 0x14));
+        tv.z = rel.z + n->z * -vn;
         f32 tl = PSVECMag(&tv.x);
         if (tl > lbl_80562308) {
             f32 inv = lbl_805622E0 / MaxF(tl, lbl_80562308);

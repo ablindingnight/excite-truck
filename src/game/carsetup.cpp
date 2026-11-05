@@ -131,8 +131,8 @@ void fn_80279D40(CarSetup* s) {
     memset(s, 0, sizeof(CarSetup));
     s->mass = 1477.125f;
     s->mx = 2705.9114f;
-    s->my = 2705.9114f;
     s->mz = 422.79865f;
+    s->my = 2705.9114f;
     s->ftrack = 0.0254f * 60.0f;  // 60 inches
     s->rtrack = 0.0254f * 60.0f;
     s->wheelbase = 2.7432f;

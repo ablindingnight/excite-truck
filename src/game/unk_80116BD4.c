@@ -1290,8 +1290,8 @@ s32 fn_801186B8(StreamPlayer *p) {
     p->hist12C[p->histPos] = p->unk12C;
     if (p->unk25C == 0) {
         p->histFrameStart[old] = p->frameStart - fn_80116BD4(1000, p->rateDen, p->rateNum);
-        p->unk12C = 0;
         p->unk25C = p->frameStart;
+        p->unk12C = 0;
         p->unk128 = 0;
     } else if (p->numTracks != 0) {
         fn_80117074(p);
@@ -2019,8 +2019,8 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     }
     buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
     t->bufL = (s16 *)buf;
-    t->bufR = (s16 *)(buf + t->voiceSize);
     t->physL = (u32)buf - 0x80000000;
+    t->bufR = (s16 *)(buf + t->voiceSize);
     t->physR = (u32)buf - 0x80000000 + t->voiceSize;
     t->minimum = t->chunk;
     t->volume = 0x7FFF;

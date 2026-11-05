@@ -496,8 +496,8 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
         if (t->run && t->surf != 0x74) {
             TCyl c;
             c = t->cyl;
-            c.half = t->cyl.half + 2.5f;
             c.rad = t->cyl.rad + 7.5f;
+            c.half = t->cyl.half + 2.5f;
             fn_801FA8E0(fn_802BC9B0(&c, 1003, r->scale), &m, hit);
         }
     } else {
@@ -532,8 +532,8 @@ void fn_802BCBDC(void) {
                 ValVec3 p1 = n->GetVec3("cyl_p1");
                 ValVec3 p2 = n->GetVec3("cyl_p2");
                 TVec c;
-                c.y = p1.y + 0.5f * (p2.y - p1.y);
                 c.z = p1.z + 0.5f * (p2.z - p1.z);
+                c.y = p1.y + 0.5f * (p2.y - p1.y);
                 c.x = p1.x + 0.5f * (p2.x - p1.x);
                 t->cyl.center = c;
                 t->cyl.axis.x = p1.x - p2.x;

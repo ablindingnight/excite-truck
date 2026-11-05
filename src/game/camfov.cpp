@@ -679,8 +679,8 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         } else {
             f32 z2 = c->tf.axes.fwd.z;
             f32 sideZ = -c->tf.axes.fwd.x;
-            side.x = z2;
             side.y = c->tf.axes.fwd.y;
+            side.x = z2;
             side.z = sideZ;
             f32 kk = lbl_80563EA8 * (PSVECDotProduct(&side.x, f.v) > lbl_80563E78 ? lbl_80563E30 : lbl_80563E6C);
             c->tf.axes.fwd.x = c->tf.axes.fwd.x + side.x * kk;

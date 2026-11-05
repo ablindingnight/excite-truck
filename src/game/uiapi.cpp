@@ -1390,8 +1390,8 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         } else {
             layout = fn_8022E0EC(map->name);
         }
-        map->layout = layout;
         lbl_8055EF44 = map->name;
+        map->layout = layout;
     } else {
         layout = map->layout;
     }

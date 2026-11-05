@@ -643,8 +643,8 @@ void fn_80277A14(CamRec* c, int slot) {
     swing.z = 0.0f;
     Mat3FromEuler(&swingRot, &swing);
     Mat3Mul(rot, &swingRot, rot);
-    tilt.y = 0.0f;
     tilt.x = 0.2617994f;
+    tilt.y = 0.0f;
     tilt.z = 0.0f;
     Mat3FromEuler(&tiltRot, &tilt);
     Mat3Mul(rot, &tiltRot, rot);

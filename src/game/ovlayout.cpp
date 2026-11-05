@@ -526,8 +526,8 @@ public:
     virtual void Drag(const V2* d, void* target) {
         ArtElem* e = (ArtElem*)target;
         e->pos.x += d->x;
-        e->w -= d->x;
         e->pos.y += d->y;
+        e->w -= d->x;
         e->h -= d->y;
     }
     virtual u32 Color(void) { return 0xFF0000FF; }

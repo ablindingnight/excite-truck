@@ -532,8 +532,8 @@ public:
         crashed = 0;
         ready = 1;
         for (i = 0; i < tokens.count; i++) {
-            Token* t = &tokens.data[i];
             int j;
+            Token* t = &tokens.data[i];
             fn_801EA140(t);
             t->pos.y += t->bob;
             if (t->path) {

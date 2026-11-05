@@ -3097,8 +3097,8 @@ void fn_80188E2C(u8* p, u8* buf) {
         b.y = b.y + F32(w, 0x1C);
         HVec c;
         f32 xv = b.x;
-        c.x = xv + lbl_8055E460 * (a.x - xv);
         c.y = b.y + lbl_8055E460 * (a.y - b.y);
+        c.x = xv + lbl_8055E460 * (a.x - xv);
         f32 zv = b.z;
         c.z = zv + lbl_8055E460 * (a.z - zv);
         F32(o, 0x0) = c.x;

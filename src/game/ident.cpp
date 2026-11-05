@@ -227,8 +227,8 @@ static inline void Loop1_IdentResetAll(char* dst, const char* src, int n) {
 
 void IdentResetAll(void) {
     int n;
-    const char* src;
     char* dst;
+    const char* src;
     int i;
 
     lbl_8055D46C->current = 0;

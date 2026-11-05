@@ -1240,8 +1240,8 @@ int TvCamera::Load(ValueNode* t) {
             type = 3;
             break;
         case 12:
-            flags |= 4;
             type = 0;
+            flags |= 4;
             break;
         }
         if (t->Has("x_a") && t->Has("y_a") && t->Has("z_a")) {

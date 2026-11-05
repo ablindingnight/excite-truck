@@ -561,8 +561,8 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         v.z = car->vel.z + car->axes[0].z * kick;
         up = 5.0f < up ? 5.0f : up;
         ValPoint flat;
-        flat.x = car->vel.x;
         flat.y = car->vel.z;
+        flat.x = car->vel.x;
         v.y = v.y + car->axes[1].y * up;
         v.x = v.x + car->axes[1].x * up;
         v.z = v.z + car->axes[1].z * up;
@@ -846,8 +846,8 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     if (at->y - r > p->origin.y - 0.1f) {
         return;
     }
-    v.x = vel->x;
     v.y = vel->z;
+    v.x = vel->x;
     d.x = at->x - p->origin.x;
     d.y = at->z - p->origin.z;
     f32 s2 = v.x * v.x + v.y * v.y;

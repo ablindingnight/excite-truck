@@ -574,8 +574,8 @@ void fn_8018DA5C(u8* p, u8* m) {
             v.z = 0.0f;
             f32 z = F32(pt, 0x28);
             f32 az = (f32)__fabs(z);
-            v.z += -0.5f * z * roll;
             v.x += roll * (-0.3f * (F32(pt, 0x20) * (az - 0.7f)));
+            v.z += -0.5f * z * roll;
             v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
             f32 w = DmgMax(0.0f, 3.0f - az);
             v.y += 0.5f * lean * (F32(pt, 0x24) * w);
@@ -684,8 +684,8 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 op.y = py;
                 op.z = o->pos.z + go->z;
                 DentVec dir;
-                dir.x = op.x - at.x;
                 dir.y = op.y - at.y;
+                dir.x = op.x - at.x;
                 dir.z = op.z - at.z;
                 f32 len = PSVECMag(&dir.x);
                 DentVec f;

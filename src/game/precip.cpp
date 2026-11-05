@@ -818,8 +818,8 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
         PVec* w = &wob[i % 8];
         PVec v;
         v.x = p->x + wind.x + w->x * dt;
-        v.y = p->y + wind.y + w->y * dt;
         v.z = p->z + wind.z + w->z * dt;
+        v.y = p->y + wind.y + w->y * dt;
         v.x += turn * v.z;
         if (v.z > near && v.z < far && v.x * v.x < (v.z * tx) * (v.z * tx) && v.y * v.y < (v.z * ty) * (v.z * ty)) {
             out->x = v.x;
@@ -972,8 +972,8 @@ void RainSystem::Move(const PVec* d) {
         WPt* p = &pts[i];
         PVec v;
         v.x = p->x + m.x;
-        v.y = p->y + m.y;
         v.z = p->z + m.z;
+        v.y = p->y + m.y;
         if (v.z > near && v.z < far && v.x * v.x < (0.25f + v.z * tx) * (0.25f + v.z * tx) &&
             v.y * v.y < (0.25f + v.z * ty) * (0.25f + v.z * ty)) {
             out->x = v.x;
