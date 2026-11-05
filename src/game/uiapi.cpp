@@ -471,8 +471,8 @@ extern "C" void *fn_802226D4(void *, const char *);
 extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     extern int lbl_8033D528[];
     extern char lbl_8033D504[];
-    extern const char lbl_8055B724[], lbl_8055B728[], lbl_8055B720[], lbl_8055B730[];
-    extern const char lbl_8055B738[], lbl_8055B73C[], lbl_8055B744[], lbl_8055B748[];
+    extern const char lbl_8055B720[4], lbl_8055B724[4], lbl_8055B728[5], lbl_8055B730[5];
+    extern const char lbl_8055B738[4], lbl_8055B73C[5], lbl_8055B744[4], lbl_8055B748[5];
     struct ObjA { void *vtable; void *value; };
     struct ObjB { void *vtable; void *value; s32 count; s32 divisor; };
     char *name = (char *)fn_80029004(arg0, 0x2e);
