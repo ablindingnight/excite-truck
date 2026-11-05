@@ -168,7 +168,7 @@ extern int strncasecmp(const char *, const char *, unsigned long);
 long fn_8020F9F4(void) {
     char *e = (char *)fn_8020F5F0(IdentGetCurrentSlot());
     long i;
-    for (i = 0; i < 64; i++, e += 100) {
+    for (i = 0; i < 64; e += 100, i++) {
         if (e[4] == 0) {
             return i;
         }
@@ -180,7 +180,7 @@ void *fn_8020FAF0(const char *name) {
     char *base = (char *)fn_8020F5F0(IdentGetCurrentSlot());
     char *e = base;
     long i;
-    for (i = 0; i < 64; i++, e += 100) {
+    for (i = 0; i < 64; e += 100, i++) {
         if (strcasecmp(e + 4, name) == 0) {
             return base + i * 100;
         }
@@ -550,7 +550,7 @@ long fn_80210570(void) {
     long mode = 3;
     long *e = (long *)fn_8020F5F0(IdentGetCurrentSlot());
     long i;
-    for (i = 0; i < 64; i++, e = (long *)((char *)e + 100)) {
+    for (i = 0; i < 64; e = (long *)((char *)e + 100), i++) {
         if (mode == 3) {
             mode = e[0];
         } else if (e[0] != mode) {
