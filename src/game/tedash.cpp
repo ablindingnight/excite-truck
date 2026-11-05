@@ -289,11 +289,9 @@ int fn_802B5B74(ObjItem* out) {
 }
 
 void fn_802B5C24(int d) {
-    s32 l;
     do {
-        l = (lbl_8055FA40 + d + 7) % 7;
-        lbl_8055FA40 = l;
-    } while (l >= fn_802B3F0C(fn_802B5B6C()->objs) && l != 6);
+        lbl_8055FA40 = (lbl_8055FA40 + d + 7) % 7;
+    } while (lbl_8055FA40 >= fn_802B3F0C(fn_802B5B6C()->objs) && lbl_8055FA40 != 6);
 }
 
 void fn_802B5CAC(const char* name) { fn_802B5C24(1); }

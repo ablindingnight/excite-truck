@@ -596,7 +596,8 @@ void fn_802BD0F4(TreeType* t) {
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;
-            tr->hit = fn_802BA580(t->shadow, &p, tr->mtx.rot[1].y);
+            f32 s = tr->mtx.rot[1].y;
+            tr->hit = fn_802BA580(t->shadow, &p, s);
         }
     }
 }
