@@ -729,6 +729,7 @@ struct EventRing {
     ~EventRing(void) { data = 0; }
     struct Entry {
         int Expired(f32 now) { return now - time >= 1.0f; }
+        f32 Age(f32 now, f32 life) { return (now - time) / life; }
         f32 time;   // offset 0x0
         f32 bonus;  // offset 0x4
         Gate* gate;  // offset 0x8
@@ -2027,6 +2028,13 @@ static inline f32 Ease(f32 x) {
     return x * (x * -2.0f * x) - x * 3.0f * x;
 }
 
+static inline void DrawClock(ZoneMaster* z, f32 t) {
+    char buf[0x14];
+    fn_80130980(buf, 0x14, 3, t);
+    fn_801475D0(z->mainLyt, "big_timer", "%s", buf);
+    fn_8014784C(z->mainLyt, "stop_watch_art", "stop_watch_artset", 0);
+}
+
 void ZoneMaster::DrawTimer(int p, CarState* c) {
     f32 age;
     if (lbl_8055E1BC) {
@@ -2059,13 +2067,10 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
         }
         fn_802C8D74();
     } else {
-        char buf[0x14];
         int i;
         f32 now;
         EventRing::Entry* e;
-        fn_80130980(buf, 0x14, 3, c->clock);
-        fn_801475D0(mainLyt, "big_timer", "%s", buf);
-        fn_8014784C(mainLyt, "stop_watch_art", "stop_watch_artset", 0);
+        DrawClock(this, c->clock);
         if (t7C.Active()) {
             f32 t = Ease(t7C.Frac());
             LayoutItem* a = mainLyt->Find("timer_increase_0");
@@ -2082,29 +2087,24 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
         }
         now = fn_8013CB3C();
         for (i = 0; events.a.Get(i); i++) {
-            age = (now - events.a.Get(i)->time) / 1.0f;
+            age = events.a.Get(i)->Age(now, 1.0f);
             LayoutArt* s0 = mainLyt->FindArt("ring_bonus_star_0");
             LayoutArt* s1 = mainLyt->FindArt("ring_bonus_star_1");
             LayoutArt* s2 = mainLyt->FindArt("score_star_art");
-            f32 keys[3] = {0.0f, 0.7f, 1.0f};
             LayoutArt* arts[3];
-            u32 col = -1;
-            int k;
-            f32 u;
             arts[0] = s0;
             arts[1] = s1;
             arts[2] = s2;
+            f32 keys[3] = {0.0f, 0.7f, 1.0f};
+            u32 col = -1;
+            u32 k;
+            f32 u;
             for (k = 1; age > keys[k] && k < 2; k++) {
             }
             if (k == 2) {
                 col = 0xFFFFFF;
             }
-            u = (age - keys[k - 1]) / (keys[k] - keys[k - 1]);
-            if (1.0f < u) {
-                u = 1.0f;
-            }
-            u = u > 0.0f ? u : 0.0f;
-            fn_80147BD0(arts[k - 1], arts[k], -1, col, tex[3], Ease(Lerp(0.0f, 1.0f, u)));
+            fn_80147BD0(arts[k - 1], arts[k], -1, col, tex[3], Ease(Lerp(0.0f, 1.0f, Clamp01(InvLerp(keys[k - 1], keys[k], age)))));
         }
     }
 }
