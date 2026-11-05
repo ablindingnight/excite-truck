@@ -823,6 +823,8 @@ static inline u8 Byte(f32 x) {
     return v < 0xFF ? v : 0xFF;
 }
 
+static inline f32 Sq(f32 x) { return x * x; }
+
 void PartSys::DrawSprites(Particle* p, int n) {
     CamMtx* cam;
     f32 age;
@@ -849,7 +851,7 @@ void PartSys::DrawSprites(Particle* p, int n) {
         u8 g;
         f32 d1X;
         t = age * invLife;
-        size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
+        size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         V3 pos;
         Integrate(&pos, p, age);
         f32 fade;
@@ -909,7 +911,7 @@ void PartSys::DrawAnimated(Particle* p, int n) {
     for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
-        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
+        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         int frame = (p->frame + (int)(t * ((f32)frames * animRamp))) % frames;
         V3 pos;
         Integrate(&pos, p, age);
@@ -958,7 +960,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         f32 age = t0 - p->birth;
         f32 t = age * invLife;
         f32 inv;
-        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * (age * age));
+        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         size = size > 0.001f ? size : 0.001f;
         inv = 1.0f / (1.414f * size);
         f32 ang = (f32)fmod(6.2831855f * (f32)p->spin * 0.00390625f + p->angVel * age * (angConst + angRamp * t),
