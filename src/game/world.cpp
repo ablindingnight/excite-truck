@@ -88,7 +88,8 @@ struct EventCfg {
 struct CarDef {
     CarDef(void);
     s32 type;      // offset 0x0
-    u8 b4[0x60];   // offset 0x4
+    u8 b4[0x40];   // offset 0x4
+    char name[0x20]; // offset 0x44
     s32 f64;       // offset 0x64
     s32 f68;       // offset 0x68
     s32 f6C;       // offset 0x6C
@@ -1193,7 +1194,8 @@ void fn_801E8F10(RaceSetup* s) {
         fn_80127464();
         LoadTimerMark(lbl_804881E8, 500.0f);
         {
-            Racer r(*d, i);
+            CarDef def = *d;
+            Racer r(def, i);
             switch (d->type) {
             case 'S':
                 m = new ("GhostCarObject") PlayerCarModel(&r, d);
