@@ -3506,6 +3506,17 @@ static inline void Shift(Xform* x, const RVec3* c) {
 
 // Particle sphere against an object: a group collides its box-shaped body (moving with the car, if any), a
 // box itself; the particle system resolves the contact and a hard push plays the hit sound.
+struct RVec3C : RVec3 {
+    RVec3C(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+};
+
+static inline f32 BoxRad(u8* o) { return F32(o, 0x30); }
+
+
 void fn_801A26FC(u8* p, u8* o) {
     if (S32(o, 0x18) == 'GRUP') {
         f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)PTR(o, 0xC))->t);
@@ -3534,20 +3545,14 @@ void fn_801A26FC(u8* p, u8* o) {
             Shift(&x, &c);
             RVec3 at;
             RVec3 push;
-            RVec3 ext;
-            SetV(&ext, F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C));
-            fn_801C28A8(S32(p, 0x30), &x, &ext, &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
+            fn_801C28A8(S32(p, 0x30), &x, &RVec3C(F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C)), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
-                RVec3 up;
-                up.x = lbl_805622D0;
-                up.y = lbl_805622E0;
-                up.z = lbl_805622D0;
-                fn_801B34DC(o, 0, &at, &push, &up.x, U32(p, 0x20));
+                fn_801B34DC(o, 0, &at, &push, &RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0).x, U32(p, 0x20));
             }
         }
     } else if (S32(o, 0x18) == 'BOX ') {
         f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)VE(o)->v50())->t);
-        f32 r = F32(o, 0x30) + F32(p, 0x24);
+        f32 r = F32(p, 0x24) + BoxRad(o);
         if (dd < r * r) {
             RVec3 vel;
             vel.x = lbl_805622D0;
@@ -3562,9 +3567,7 @@ void fn_801A26FC(u8* p, u8* o) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
-            RVec3 ext;
-            SetV(&ext, F32(o, 0x24), F32(o, 0x28), F32(o, 0x2C));
-            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &ext, &vel, &spin, 0, -1, 0, 0);
+            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &RVec3C(F32(o, 0x24), F32(o, 0x28), F32(o, 0x2C)), &vel, &spin, 0, -1, 0, 0);
         }
     } else if (S32(o, 0x18) == 'POLY') {
         s32 n = 0;
@@ -3572,14 +3575,10 @@ void fn_801A26FC(u8* p, u8* o) {
         s32 stride;
         fn_801C2BDC(S32(p, 0x30), &n, &pts, &stride);
         for (int i = 0; i < n; i++) {
-            RVec3 vel;
-            vel.x = lbl_805622D0;
-            vel.y = lbl_805622D0;
-            vel.z = lbl_805622D0;
             RVec3 hit;
             f32 depth;
             RVec3 dir;
-            if (fn_80198F64(&pts[i].x, (u32)o, &hit.x, &depth, &dir.x, &vel.x, 0.25f)) {
+            if (fn_80198F64(&pts[i].x, (u32)o, &hit.x, &depth, &dir.x, &RVec3C(lbl_805622D0, lbl_805622D0, lbl_805622D0).x, 0.25f)) {
                 MulAdd(&pts[i].x, &pts[i].x, &dir.x, depth);
             }
         }
