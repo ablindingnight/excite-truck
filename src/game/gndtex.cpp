@@ -553,7 +553,11 @@ void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
     fn_802DBBE4(verts, nverts);
     u8 a = PMin(PMax(Round(255.0f * lbl_804DB068[1].z), 0), 0xFF);
     if (a != lbl_8055FEA0) {
-        GXColor c = Rgba(0xFF, 0xFF, 0xFF, a);
+        GXColor c;
+        c.a = a;
+        c.b = 0xFF;
+        c.g = 0xFF;
+        c.r = 0xFF;
         lbl_8055FEA0 = a;
         GXSetTevColor(1, c);
     }
@@ -762,7 +766,11 @@ void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
     GXSetVtxAttrFmt(0, 9, 1, 4, 0);
     GXSetVtxAttrFmt(0, 0xB, 1, 5, 0);
     GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
-    GXColor c = Rgba(0xC0, 0xC0, 0xC0, 0x14);
+    GXColor c;
+    c.r = 0xC0;
+    c.g = 0xC0;
+    c.b = 0xC0;
+    c.a = 0x14;
     GXSetTevColor(2, c);
 }
 
