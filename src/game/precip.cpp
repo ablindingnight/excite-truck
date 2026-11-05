@@ -785,7 +785,7 @@ void SnowSystem::Frustum(void) {
     tanHalf = t;
     f32 s = f + n;
     f32 b = -0.1f * s - 2.0f * f * n;
-    f32 c = n * (f * 0.005f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
+    f32 c = n * (f * 0.0050000004f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     near = 0.3f + n;
     far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
 }

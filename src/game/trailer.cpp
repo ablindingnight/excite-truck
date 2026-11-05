@@ -415,7 +415,7 @@ void Trailer::Update(void) {
     dav.x = avel.x - car->avel.x;
     dav.z = avel.z - car->avel.z;
     dav.y = avel.y - car->avel.y;
-    torque.y = Mul(dav.y, -4071.75f);
+    torque.y = Mul(dav.y, -4071.7498f);
     torque.z = 0.0f;
     torque.x = 0.0f;
     AddTorque(&torque);

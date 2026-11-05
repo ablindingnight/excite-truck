@@ -666,9 +666,9 @@ void PanelVol::vf1C(void) {
     p.x += xv * 0.127f;
     p.y += nrm.y * 0.127f;
     p.z += nrm.z * 0.127f;
-    nrm.x *= 0.1f;
-    nrm.y *= 0.1f;
-    nrm.z *= 0.1f;
+    nrm.x *= 0.100000024f;
+    nrm.y *= 0.100000024f;
+    nrm.z *= 0.100000024f;
     nrm.x += dir.x * 0.9f;
     nrm.y += dir.y * 0.9f;
     nrm.z += dir.z * 0.9f;

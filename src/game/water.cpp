@@ -824,7 +824,7 @@ void WaterSystem::Draw(void) {
     }
     fn_802DBE4C();
     TexMtx m = sShimMtx;
-    m.m[0][3] = fmod(0.4f * fn_801E7E18(), 1.0);
+    m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
     f32 sh = FMax(0.25f * cam.pos.y, 1.0f);
     u32 deepCol = fn_80147C50(1.0f / sh, 0, lbl_8055FAEC);

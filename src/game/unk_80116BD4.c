@@ -2042,7 +2042,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
         src.last_samples[3] = 0;
         AXSetVoiceSrcType(t->voices[i], 1);
         AXSetVoiceSrc(t->voices[i], &src);
-        AXSetVoiceSrcRatio(t->voices[i], t->rate / 32000.0);
+        AXSetVoiceSrcRatio(t->voices[i], t->rate / 32028.666666666668);
         AXSetVoiceAdpcm(t->voices[i], &adpcm);
     }
     fn_80119300(t->voices, 0, t->bufSize);

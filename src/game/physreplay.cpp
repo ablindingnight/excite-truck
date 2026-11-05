@@ -304,7 +304,7 @@ void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t)
     s32 u4 = a->unk4;
     h->unk4 = u4;
     h->x = Lerp(Unpack(a->x, -300.0f, 300.0f), Unpack(b->x, -300.0f, 300.0f), t);
-    h->y = Lerp(Unpack(a->y, -300.0f, 300.0f), Unpack(b->y, -300.0f, 300.0f), t);
+    h->y = Lerp(Unpack(a->y, -4.0f, 4.0f), Unpack(b->y, -4.0f, 4.0f), t);
     h->z = Lerp(Unpack(a->z, -4.0f, 4.0f), Unpack(b->z, -4.0f, 4.0f), t);
 }
 

@@ -781,8 +781,8 @@ void HermiteDrone::UpdateReverse(f32 dt) {
             BMtx33 m;
             BMtx33 r;
             QuatToMtx(&m, &q1);
-            f32 c = cos(3.141592653589793);
-            f32 s = sin(3.141592653589793);
+            f32 c = cos(3.1415927f);
+            f32 s = sin(3.1415927f);
             r.xx = c;
             r.xy = 0.0f;
             r.xz = -s;

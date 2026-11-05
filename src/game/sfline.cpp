@@ -211,12 +211,12 @@ void fn_802A1290(void) {
         s16 h;
         f32 t;
         lbl_8055F844 = fn_802CAC28("sfsquare.tex", 0);
-        f32 len = 90.0f;
+        f32 len = 45.0f;
         f32 sz = 1.5f;
         n = (int)(len / sz) | 1;
         width = sz * n;
         lbl_8055F840 = fn_802CA04C(n * 12 / 2);
-        lbl_8055F848 = log2(0.3333333333333333);
+        lbl_8055F848 = log2(0.33333334f);
         fn_802A1120(&lbl_8055F850, &lbl_8055F858);
         lbl_8055F860 = lbl_8055F858;
         t = lbl_8055F860.x;

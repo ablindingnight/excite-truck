@@ -173,7 +173,7 @@ void fn_802A7EEC(void) {
                 a = MIN(1.0f, a);
                 a = MAX(a, 0.0f);
                 color = (int)(255.0f * (1.0f + a * -1.0f)) << 24 | 0xFFFFFF;
-                fn_802339A8(lbl_8055F8BC, color, 0x44, "%s", scr.x, scr.y, 0.0f, 0.42f, 1.0f,
+                fn_802339A8(lbl_8055F8BC, color, 0x44, "%s", scr.x, scr.y, 0.0f, 0.42000002f, 1.0f,
                             fn_800122B4(c->place, buf));
             }
         }

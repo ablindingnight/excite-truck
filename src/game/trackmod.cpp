@@ -787,8 +787,8 @@ inline void SunTMH::Apply(void) {
         d.y = -(f32)sin(lbl_8055EC04);
         d.z *= (f32)cos(lbl_8055EC04) / h;
     }
-    fn_802E30C8("suntmh: sun envmap coords are %.3f %.3f", 0.5f + 0.28902f * -d.x / (1.0f + -d.y),
-                0.5f + 0.28902f * -d.z / (1.0f + -d.y));
+    fn_802E30C8("suntmh: sun envmap coords are %.3f %.3f", 0.5f + 0.28901735f * -d.x / (1.0f + -d.y),
+                0.5f + 0.28901735f * -d.z / (1.0f + -d.y));
     fn_802C9A1C((TVec*)&d);
 }
 

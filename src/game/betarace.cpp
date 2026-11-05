@@ -3443,7 +3443,7 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
             m[9] = b->pos[0];
             m[10] = b->pos[1];
             m[11] = b->pos[2];
-            a = fmod(3.1415927f * lbl_8055E3C8, 2.3926990816987);
+            a = fmod(3.1415927f * lbl_8055E3C8, 6.2831855f);
             c = cos(a);
             s = sin(a);
             m[0] = c;

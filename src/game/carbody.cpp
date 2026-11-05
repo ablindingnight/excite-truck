@@ -822,11 +822,11 @@ void fn_80182DF4(u8* p) {
     BVec rear(0.7f, 0.1f, 1.0f);
     BVec mid(0.7f, 0.1f, 1.0f);
     BVec front(0.7f, 0.1f, 1.0f);
-    f32 a = maxX - 0.45f;
+    f32 a = maxX - 0.45000002f;
     f32 b = 0.8f * a;
     f32 yRear = 0.36f + minY;
-    f32 yMid = 0.45f + minY;
-    zRear = maxZ - 0.45f;
+    f32 yMid = 0.45000002f + minY;
+    zRear = maxZ - 0.45000002f;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);
     zFront = 0.44999998f + minZ;
@@ -839,8 +839,8 @@ void fn_80182DF4(u8* p) {
     AddBodySphere(p, PTR(p, 0x268), -b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), -a, 0.254f + yMid, zRearMid, &mid, 0.45f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), a, 0.254f + yMid, zRearMid, &mid, 0.45f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), -a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
+    AddBodySphere(p, PTR(p, 0x268), a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), 0.8f * -xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), 0.8f * xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), -xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
