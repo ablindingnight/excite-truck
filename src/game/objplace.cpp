@@ -556,10 +556,11 @@ SetPlacer* fn_802B2C98(const char* name) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_802B2D24(SetPlacer* set) {
+    int k;
     for (int i = 0; i < set->count; i++) {
         MatPlacer* m = set->data[i];
         lbl_8055F9BC->blocks.count = 0;
-        for (int k = 0; k < m->placers.count; k++) {
+        for (k = 0; k < m->placers.count; k++) {
             ObjectPlacer* p = m->placers.data[k];
             p->list.tail = 0;
             p->list.head = 0;

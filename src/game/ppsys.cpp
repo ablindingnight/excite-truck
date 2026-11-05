@@ -494,9 +494,9 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
 // Gives every particle the velocity of a body moving with 'vel' and spinning with 'avel' about 'at'.
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop2_fn_801C256C(PSys* s, const RVec3* at, const RVec3* avel, const RVec3* vel) {
+    RVec3 r;
     for (int i = 0; i < s->nPart; i++) {
         RVec3 v;
-        RVec3 r;
         Sub(&r, &s->pos[i], at);
         PSVECCrossProduct(avel, &r, &v);
         AddTo(&v, vel);
