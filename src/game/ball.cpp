@@ -357,6 +357,8 @@ public:
 
 class Ball : public RigidBody, public IBallListener {
 public:
+    void Loop2_PickDrop(BVec3& p, RigidBody* b, f32 k);
+public:
     Ball(void) {}
     virtual void Init(BallDesc* d);
     virtual ~Ball(void);
@@ -431,6 +433,14 @@ BVec3 Home(int car) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+static inline void Loop1_fn_8017D404(BVec3& d, BVec3& imp, f32 k) {
+    d.y -= 0.15f;
+    imp.x = d.x * k;
+    f32 yv = d.y;
+    imp.y = k * yv;
+    imp.z = d.z * k;
+}
+
 extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
     BCarRec* by = fn_8017960C(car);
     struct Node {
@@ -479,12 +489,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     at.x += b->mtx.rot[2].x * rnd;
                     at.y += b->mtx.rot[2].y * rnd;
                     at.z += b->mtx.rot[2].z * rnd;
-                    k = -fall * force;
-                    d.y -= 0.15f;
-                    imp.x = d.x * k;
-                    f32 yv = d.y;
-                    imp.y = k * yv;
-                    imp.z = d.z * k;
+                    Loop1_fn_8017D404(d, imp, -fall * force);
                     b->Push(0, 0, &imp, &at, 1001, 0, by, 1.0f);
                 }
             }
@@ -728,15 +733,18 @@ extern "C" void fn_8017E388(BMtx* m) {
     m->pos.z = 0.0f;
 }
 
+inline void Ball::Loop2_PickDrop(BVec3& p, RigidBody* b, f32 k) {
+    p.x = b->mtx.pos.x + b->vel.x * k;
+    p.y = b->mtx.pos.y + b->vel.y * k;
+    p.z = b->mtx.pos.z + b->vel.z * k;
+}
+
 void Ball::PickDrop(f32* xz, s16* h) {
     if (*(u32*)((u8*)fn_801769CC() + 4) & 0x10000) {
         RigidBody* b = (RigidBody*)fn_8017960C(car);
         BVec3 p;
         f32 c;
-        f32 k = 2.0f;
-        p.x = b->mtx.pos.x + b->vel.x * k;
-        p.y = b->mtx.pos.y + b->vel.y * k;
-        p.z = b->mtx.pos.z + b->vel.z * k;
+        Loop2_PickDrop(p, b, 2.0f);
         c = 10.0f;
         p += BVec3(fn_80129DC4(4, -c, c), 0.0f, fn_80129DC4(4, -c, c));
         xz[0] = p.x;

@@ -156,6 +156,8 @@ struct LinearDrone {
 
 // A drone moving along a Hermite path (0x70).
 struct HermiteDrone {
+public:
+    void Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt);
     HermiteDrone(void) {
         name = 0;
         entry = 0;
@@ -731,9 +733,7 @@ void HermiteDrone::Turn(f32 u) {
     QuatToFrame(&frame, &q);
 }
 
-void HermiteDrone::UpdateLoop(f32 dt) {
-    f32 nt = t + dt;
-    HermiteKey* k = entry->data->Loop(seg);
+inline void HermiteDrone::Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt) {
     f32 u = k->rate * nt;
     if (u < 1.0f) {
         t = nt;
@@ -751,6 +751,12 @@ void HermiteDrone::UpdateLoop(f32 dt) {
     Curve(d->Loop(seg - 1), k, d->Loop(seg + 1), d->Loop(seg + 2), u);
     Turn(u);
     v = v0 + u * (v1 - v0);
+}
+
+void HermiteDrone::UpdateLoop(f32 dt) {
+    f32 nt = t + dt;
+    HermiteKey* k = entry->data->Loop(seg);
+    Loop1_UpdateLoop(k, nt, dt);
 }
 
 void HermiteDrone::UpdateReverse(f32 dt) {

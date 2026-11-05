@@ -1333,6 +1333,26 @@ void fn_802D08CC(int mode) {
 // Writes one screenshot tile (x, y in the full w x h image); empty in this build.
 void fn_802D0910(s32 fd, int x, int y, int w, int h) {}
 
+static inline u8 Loop2_fn_802D0914(u8* hdr, u8 t) {
+    hdr[0] = 0;
+    hdr[1] = 0;
+    hdr[2] = 2;
+    hdr[0x10] = 0x18;
+    hdr[0x11] = 0;
+    t = hdr[8];
+    return t;
+}
+
+static inline u8 Loop3_fn_802D0914(u8* hdr, u8 t) {
+    hdr[8] = hdr[9];
+    hdr[9] = t;
+    t = hdr[10];
+    hdr[10] = hdr[11];
+    hdr[11] = t;
+    t = hdr[12];
+    return t;
+}
+
 void fn_802D0914(s32 fd, int w, int h) {
     u8 hdr[0x12];
     memset(hdr, 0, sizeof(hdr));
@@ -1341,18 +1361,8 @@ void fn_802D0914(s32 fd, int w, int h) {
     *(u16*)(hdr + 12) = w;
     *(u16*)(hdr + 14) = h;
     u8 t;
-    hdr[0] = 0;
-    hdr[1] = 0;
-    hdr[2] = 2;
-    hdr[0x10] = 0x18;
-    hdr[0x11] = 0;
-    t = hdr[8];
-    hdr[8] = hdr[9];
-    hdr[9] = t;
-    t = hdr[10];
-    hdr[10] = hdr[11];
-    hdr[11] = t;
-    t = hdr[12];
+    t = Loop2_fn_802D0914(hdr, t);
+    t = Loop3_fn_802D0914(hdr, t);
     hdr[12] = hdr[13];
     hdr[13] = t;
     t = hdr[14];
@@ -1605,12 +1615,7 @@ void fn_802D0EEC(void) {
     }
 }
 
-void fn_802D14D8(void) {
-    if (!lbl_804C9778.dirty) {
-        return;
-    }
-    lbl_804C9778.dirty = 0;
-    f32 k = lbl_8055FE24 ? 1.0f : 0.93333334f;
+static inline void Loop1_fn_802D14D8(f32 k) {
     f32 aspect = lbl_804C9778.aspect * (k / lbl_804C9778.zoom);
     f32 fovy = 2.0f * (f32)atan((f32)tan(0.5f * lbl_804C9778.fovy) / aspect);
     f32 m[4][4];
@@ -1626,6 +1631,15 @@ void fn_802D14D8(void) {
         m[1][2] = m[1][2] - (f32)(ty * 2 - lbl_8055D0C0 + 1);
     }
     GXSetProjection(m, 0);
+}
+
+void fn_802D14D8(void) {
+    if (!lbl_804C9778.dirty) {
+        return;
+    }
+    lbl_804C9778.dirty = 0;
+    f32 k = lbl_8055FE24 ? 1.0f : 0.93333334f;
+    Loop1_fn_802D14D8(k);
 }
 
 void fn_802D1678(void) {
