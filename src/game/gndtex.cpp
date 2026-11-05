@@ -735,6 +735,8 @@ void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
 
 static inline f32 Log2(f32 x) { return log2(x); }
 
+#pragma push
+#pragma opt_lifetimes off
 void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
     lbl_8055D148 = uvScale;
     fn_802DBD88();
@@ -774,6 +776,7 @@ void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
     c.a = 0x14;
     GXSetTevColor(2, c);
 }
+#pragma pop
 
 void fn_802DD228(void) {
     if (lbl_8055FEC0) {
