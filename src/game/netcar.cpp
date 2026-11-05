@@ -34,6 +34,7 @@ struct ZVec {
     f32 x, y, z;
 };
 
+#pragma pack(push, 1)
 struct PVec {
     PVec(void) {}
     f32 v[3];
@@ -44,7 +45,6 @@ struct PQuat {
     f32 v[4];
 };
 
-#pragma pack(push, 1)
 // One position packet (0x4D, packed).
 struct Packet {
     s32 sent;     // offset 0x0

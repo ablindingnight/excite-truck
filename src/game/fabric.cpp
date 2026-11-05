@@ -467,6 +467,30 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline u8 LerpB(u8 a, u8 b, f32 t) { return (u8)(int)((f32)b + t * ((f32)a - (f32)b)); }
 
+static inline u32 LerpColor(u32 a, u32 b, f32 t) {
+    u32 c;
+    u8* pa = (u8*)&a;
+    u8* pb = (u8*)&b;
+    u8* pc = (u8*)&c;
+    pc[0] = LerpB(pb[0], pa[0], t);
+    pc[1] = LerpB(pb[1], pa[1], t);
+    pc[2] = LerpB(pb[2], pa[2], t);
+    pc[3] = LerpB(pb[3], pa[3], t);
+    return c;
+}
+
+static inline void LerpPos(PVec* out, const PVec* a, const PVec* b, f32 t) {
+    out->x = Lerp(a->x, b->x, t);
+    out->y = Lerp(a->y, b->y, t);
+    out->z = Lerp(a->z, b->z, t);
+}
+
+static inline void LerpVert(DrawVert* out, Corner a, Corner b, f32 t) {
+    out->u = Lerp(a.u, b.u, t);
+    out->v = Lerp(a.v, b.v, t);
+    out->color = LerpColor(a.color, b.color, t);
+}
+
 extern "C" void fn_801F5970(Fabric* f, Quad* q) {
     int n = f->rows * f->cols;
     int r;
@@ -475,55 +499,27 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
     f->prev = f->verts + n;
     f->draw = (DrawVert*)new ("fabric draw tab") u8[n * sizeof(DrawVert)];
     f->count = n;
-    int limit = f->rows;
-    for (r = 0; r < limit; r++) {
+    for (r = 0; r < f->rows; r++) {
         f32 t = (f32)r / (f32)(f->rows - 1);
-        Corner l;
-        Corner rr;
+        PVec lp;
+        PVec rp;
+        DrawVert ld;
+        DrawVert rd;
         int c;
-        l.pos.x = Lerp(q->c[0].pos.x, q->c[2].pos.x, t);
-        l.pos.y = Lerp(q->c[0].pos.y, q->c[2].pos.y, t);
-        l.pos.z = Lerp(q->c[0].pos.z, q->c[2].pos.z, t);
-        l.u = Lerp(q->c[0].u, q->c[2].u, t);
-        l.v = Lerp(q->c[0].v, q->c[2].v, t);
-        rr.pos.x = Lerp(q->c[1].pos.x, q->c[3].pos.x, t);
-        rr.pos.y = Lerp(q->c[1].pos.y, q->c[3].pos.y, t);
-        rr.pos.z = Lerp(q->c[1].pos.z, q->c[3].pos.z, t);
-        rr.u = Lerp(q->c[1].u, q->c[3].u, t);
-        rr.v = Lerp(q->c[1].v, q->c[3].v, t);
-        {
-            u8* a = (u8*)&q->c[0].color;
-            u8* b = (u8*)&q->c[2].color;
-            u8* lc = (u8*)&l.color;
-            lc[0] = LerpB(b[0], a[0], t);
-            lc[1] = LerpB(b[1], a[1], t);
-            lc[2] = LerpB(b[2], a[2], t);
-            lc[3] = LerpB(b[3], a[3], t);
-            a = (u8*)&q->c[1].color;
-            b = (u8*)&q->c[3].color;
-            lc = (u8*)&rr.color;
-            lc[0] = LerpB(b[0], a[0], t);
-            lc[1] = LerpB(b[1], a[1], t);
-            lc[2] = LerpB(b[2], a[2], t);
-            lc[3] = LerpB(b[3], a[3], t);
-        }
+        LerpPos(&lp, &q->c[0].pos, &q->c[2].pos, t);
+        LerpPos(&rp, &q->c[1].pos, &q->c[3].pos, t);
+        LerpVert(&ld, q->c[0], q->c[2], t);
+        LerpVert(&rd, q->c[1], q->c[3], t);
         for (c = 0; c < f->cols; c++) {
             f32 s = (f32)c / (f32)(f->cols - 1);
             int i = r * f->cols + c;
-            TVec* p = &f->cur[i];
-            u8* a = (u8*)&l.color;
-            u8* b = (u8*)&rr.color;
-            u8* dc = (u8*)&f->draw[i].color;
-            p->x = Lerp(l.pos.x, rr.pos.x, s);
-            p->y = Lerp(l.pos.y, rr.pos.y, s);
-            p->z = Lerp(l.pos.z, rr.pos.z, s);
-            f->prev[i] = *p;
-            f->draw[i].u = Lerp(l.u, rr.u, s);
-            f->draw[i].v = Lerp(l.v, rr.v, s);
-            dc[0] = LerpB(b[0], a[0], s);
-            dc[1] = LerpB(b[1], a[1], s);
-            dc[2] = LerpB(b[2], a[2], s);
-            dc[3] = LerpB(b[3], a[3], s);
+            PVec p;
+            LerpPos(&p, &lp, &rp, s);
+            *(PVec*)&f->cur[i] = p;
+            f->prev[i] = f->cur[i];
+            f->draw[i].u = Lerp(ld.u, rd.u, s);
+            f->draw[i].v = Lerp(ld.v, rd.v, s);
+            f->draw[i].color = LerpColor(ld.color, rd.color, s);
         }
     }
 }
