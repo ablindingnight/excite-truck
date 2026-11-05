@@ -56,6 +56,7 @@ public:
 class LightStack : public Allocator {
 public:
     u8* Expr1_Collapse(void);
+    s32 Used(void) const { return used; }
 public:
     virtual void Init(void* base, u32 size);
     virtual void Shutdown(void);
@@ -535,7 +536,7 @@ inline u8* LightStack::Expr1_Collapse(void) {
 }
 
 void LightStack::Collapse(void) {
-    while (used > 0) {
+    while (Used() > 0) {
         u8* blk = Expr1_Collapse();
         blk = blk - 0x20 - *(u32*)(blk - 0xC);
         if (*(u32*)blk == 0xAAAA5555) {

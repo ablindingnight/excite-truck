@@ -133,7 +133,7 @@ void fn_80287B38(void (*cb)(SparkEntry* e, int n));
 int fn_80287B5C(int n);
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
-void fn_80288A70(const void* ev, const Vec* v);
+void fn_80288A70(const void* ev, const Vec* v, f32 x);
 void* fn_8028E2F8(SparkDesc* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const void* p, const void* v);
@@ -686,7 +686,7 @@ int fn_8028BA44(const void* evp) {
     v.x = 0.0f;
     v.y = 0.0f;
     v.z = 0.0f;
-    fn_80288A70(ev, &v);
+    fn_80288A70(ev, &v, ev->pos.x);
     fn_8028AA6C(&ev->vel, lbl_8055F700, ev->pos.x);
     return 0x14;
 }
