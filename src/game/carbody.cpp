@@ -318,8 +318,7 @@ extern "C" {
 void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
     F32(p, 0x28) = v[3];
-    f32 vv = v[5];
-    F32(p, 0x18) = lbl_80561CA0 * vv;
+    F32(p, 0x18) = lbl_80561CA0 * (v[5]);
     f32 hp = lbl_80561CA0 * (lbl_80561CA8 * v[0] / FMax(v[1], lbl_80561CA4));
     F32(p, 0x24) = lbl_80561CAC;
     f32 peak = v[2] * lbl_80561CA0;

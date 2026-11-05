@@ -949,8 +949,7 @@ void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     q->c[0] = *c0;
     q->c[1] = *c1;
     q->c[2] = *c2;
-    f32 xv = q->c[0].pos.x;
-    q->c[3].pos.x = q->c[1].pos.x + q->c[2].pos.x - xv;
+    q->c[3].pos.x = q->c[1].pos.x + q->c[2].pos.x - (q->c[0].pos.x);
     f32 yv = q->c[1].pos.y;
     q->c[3].pos.y = yv + q->c[2].pos.y - q->c[0].pos.y;
     f32 zv = q->c[1].pos.z;

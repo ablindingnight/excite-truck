@@ -868,8 +868,7 @@ void WaterSystem::Draw(void) {
     IdxTable qi = sShimQuad;
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
-        PVec* b = (i & 1) ? &e1 : &e0;
-        sv[i].pos = *b;
+        sv[i].pos = *((i & 1) ? &e1 : &e0);
         f32 o = (i & 2) ? -10.0f : 0.0f;
         sv[i].pos.x += cam2.y.x * o;
         sv[i].pos.y += cam2.y.y * o;
