@@ -1888,10 +1888,25 @@ void* operator new(size_t size, const char* tag);
 namespace {
 class TrackerArray : public Meter {
 public:
-    TrackerArray(f32* hispeed) { Unused2(&hispeed); }
-    void Add(Tracker* t) { list.Push(t); }
-    int Num(void) { return list.Count(); }
-    Tracker* Get(int i) { return *list.At(i); }
+    TrackerArray(StuntHud* hud, int c, f32* hispeed) {
+        int i;
+        Unused2(&hispeed);
+        cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", c);
+        list.Push(new ("airtracker") AirTracker(hud, c, cnt));
+        list.Push(new ("drifttracker") DriftTracker(hud, c, cnt));
+        list.Push(new ("ccalltracker") CloseCallTracker(hud, c, cnt));
+        list.Push(new ("360tracker") SpinTracker(hud, c));
+        list.Push(new ("throwtracker") ThrowTracker(hud, c));
+        list.Push(new ("jmpcmbtracker") JumpComboTracker(hud, c));
+        list.Push(new ("carhittracker") CarHitTracker(hud, c));
+        list.Push(new ("crashtracker") CrashTracker(hud, c));
+        list.Push(new ("ringtracker") RingTracker(hud, c));
+        for (i = 0; i < list.Count(); i++) {
+            fn_80157560(*list.At(i));
+        }
+        active = 1;
+        car = c;
+    }
     virtual ~TrackerArray(void) {
         int i;
         for (i = 0; i < list.a.count; i++) {
@@ -2034,28 +2049,8 @@ void fn_80157560(Tracker* t);
 
 #pragma inline_depth(1)
 Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
-    TrackerArray* m;
     lbl_8042FD08[car] = 1.0f;
-    m = new ("arraytracker") TrackerArray(hispeed);
-    {
-        int i;
-        m->cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", car);
-        m->Add(new ("airtracker") AirTracker(hud, car, m->cnt));
-        m->Add(new ("drifttracker") DriftTracker(hud, car, m->cnt));
-        m->Add(new ("ccalltracker") CloseCallTracker(hud, car, m->cnt));
-        m->Add(new ("360tracker") SpinTracker(hud, car));
-        m->Add(new ("throwtracker") ThrowTracker(hud, car));
-        m->Add(new ("jmpcmbtracker") JumpComboTracker(hud, car));
-        m->Add(new ("carhittracker") CarHitTracker(hud, car));
-        m->Add(new ("crashtracker") CrashTracker(hud, car));
-        m->Add(new ("ringtracker") RingTracker(hud, car));
-        for (i = 0; i < m->Num(); i++) {
-            fn_80157560(m->Get(i));
-        }
-        m->active = 1;
-        m->car = car;
-    }
-    return m;
+    return new ("arraytracker") TrackerArray(hud, car, hispeed);
 }
 #pragma inline_depth(smart)
 
