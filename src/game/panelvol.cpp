@@ -646,10 +646,13 @@ void PanelVol::Reset(void) {
 
 int PanelVol::vf44(void) { return owner != 0; }
 
-static inline void DbgLine(const RVec3& a, const RVec3& b) {}
+static inline void DbgLine(RVec3 a, RVec3 b) {}
 
 void PanelVol::vf1C(void) {
-    if (!owner || !strip) {
+    if (!owner) {
+        return;
+    }
+    if (!strip) {
         return;
     }
     RVec3 f;
@@ -679,12 +682,12 @@ void PanelVol::vf1C(void) {
     fn_801C2694(strip, pts, &n, &p, &nrm, &f, &t);
     int i;
     for (i = 0; i < n; i++) {
-        RVec3 b;
         RVec3 a = pts[i];
-        b = a;
+        RVec3 b = a;
         b.y += 0.2f;
         DbgLine(a, b);
     }
+    RMtx w;
     RMtx m;
     fn_80144DC8(&m);
     fn_80144DAC(&m.pos, &pts[org]);
@@ -697,7 +700,6 @@ void PanelVol::vf1C(void) {
     } else {
         fn_801C0D3C((Mat3*)m.rot);
     }
-    RMtx w;
     fn_801C092C(&w, &rest, &m);
     mtx = w;
     Update();
