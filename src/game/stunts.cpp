@@ -370,18 +370,16 @@ public:
         }
         return 0.0f;
     }
-    virtual int FindRank(s32 v) const {  // 0x54
-        int i;
-        for (i = 0; i < ranks.a.count; i++) {
+    int Find(s32 v) const {
+        for (int i = 0; i < ranks.a.count; i++) {
             s32 t = ranks.a.data[i].thresh;
             if (v < t || t < 0) {
-                goto done;
+                return i;
             }
         }
-        i = 0;
-    done:
-        return i;
+        return 0;
     }
+    virtual int FindRank(s32 v) const { return Find(v); }  // 0x54
     virtual s32 Value(void) const = 0;                          // 0x58
     virtual int Rank(void) const { return FindRank(Value()); }  // 0x5C
     virtual f32 Progress(void) const {                          // 0x60

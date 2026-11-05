@@ -253,12 +253,13 @@ void fn_802C32B8(int x, int y, u32 color) {
     if (c->flags & 4) {
         return;
     }
-    if (gxIs16(c->fmt)) {
+    s8 fmt = c->fmt;
+    if (gxIs16(fmt)) {
         fn_802C3320(x, y, color);
-    } else if (c->fmt == 5) {
+    } else if (fmt == 5) {
         fn_802C33A8(x, y, color);
     } else {
-        fn_802E317C("gxPoint: bad format %d", c->fmt);
+        fn_802E317C("gxPoint: bad format %d", gxFmt(c));
     }
 }
 
