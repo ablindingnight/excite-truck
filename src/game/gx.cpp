@@ -319,6 +319,13 @@ struct LightDir {
     f32 v[3];
 };
 
+// Byte-aligned, so it copies as nine bytes through one pointer (lbzu/stbu on the first).
+struct LightColors {
+    GXColor amb;
+    GXColor color;
+    u8 alpha;
+};
+
 struct Light {
     GXColor amb;    // offset 0x0
     GXColor color;  // offset 0x4
@@ -861,7 +868,7 @@ void fn_802D01B0(const V3* dir, f32 scale);
 void fn_802D01E0(s32 x, s32 y, s32 w, s32 h);
 void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom);
 void fn_802D03F4(const RMtx* cam);
-void fn_802D0610(s32 set);
+void fn_802D0610(u32 set);
 
 void fn_802CF850(void) {
     fn_802CF104();
@@ -1220,15 +1227,13 @@ s32 fn_802D0514(const RMtx* view) {
     GXLightSet* s = &lbl_8055FDB0[n];
     lbl_8055FDAC = n + 1;
     s->view = *view;
-    s->amb = lbl_804C97D0.amb;
-    s->col = lbl_804C97D0.color;
-    s->alpha = lbl_804C97D0.alpha;
+    *(LightColors*)&s->amb = *(const LightColors*)&lbl_804C97D0.amb;
     *(LightDir*)&s->dir = *(const LightDir*)&lbl_804C97D0.dir;
     s->scale = lbl_804C97D0.scale;
     return n + 1;
 }
 
-void fn_802D0610(s32 set) {
+void fn_802D0610(u32 set) {
     if (set == lbl_8055FD8C) {
         return;
     }
@@ -1236,9 +1241,7 @@ void fn_802D0610(s32 set) {
         GXLightSet* s = &lbl_8055FDB0[set - 1];
         lbl_804C5690 = s->view;
         lbl_8055FD70 = 1;
-        lbl_804C97D0.amb = s->amb;
-        lbl_804C97D0.color = s->col;
-        lbl_804C97D0.alpha = s->alpha;
+        *(LightColors*)&lbl_804C97D0.amb = *(const LightColors*)&s->amb;
         *(LightDir*)&lbl_804C97D0.dir = *(const LightDir*)&s->dir;
         lbl_804C97D0.scale = s->scale;
         lbl_804C97D0.dirty = 1;
