@@ -203,15 +203,17 @@ inline UiAnimList::UiAnimList(ValueTable* t, const char* key) {
             }
         }
         if (n > 0) {
+            ValueNode* sub;
+            UiAnimTrack* tr;
             tracks = new ("ui_anim") UiAnimTrack[n];
             n = 0;
             ValueNode* c;
             int i;
             for (i = 0; (c = t->GetChild(i)) != 0; i++) {
                 if (!strcasecmp(c->GetName(), "anim") && HasNode(c, key)) {
-                    ValueNode* sub = c->FindChild(key);
+                    sub = c->FindChild(key);
                     int id = c->GetIntValue("anim_index");
-                    UiAnimTrack* tr = &tracks[n];
+                    tr = &tracks[n];
                     tr->id = id;
                     tr->n = 0;
                     LoadTrack(tr, sub);
