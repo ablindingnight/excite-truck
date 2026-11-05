@@ -886,9 +886,11 @@ static inline int InWorld(const Vec* p) {
     return in;
 }
 
+// World position to grid cell; the name is ours.
+static inline int Grid(f32 v) { return v / lbl_80564AF0; }
 static inline GroundCell* CellAt(const Vec* p) {
-    int x = p->x / lbl_80564AF0;
-    int z = p->z / lbl_80564AF0;
+    int x = Grid(p->x);
+    int z = Grid(p->z);
     return fn_802BE844((s16)(x & ~7) + 4, (s16)(z & ~7) + 4, 4);
 }
 
