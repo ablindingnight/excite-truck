@@ -1284,8 +1284,13 @@ void fn_8019743C(u8* d, u8* out);
 void fn_80197BD0(u8* d, u8* out);
 void fn_8019724C(u8* d, V2* io);
 
+// A 2D point copied as words (array member).
+struct PVec2 {
+    f32 v[2];
+};
+
 struct Pos4 {
-    V2 p;
+    PVec2 p;
     f32 c;
     f32 d;
 };
@@ -1294,18 +1299,19 @@ void fn_80195654(u8* d, u8* out) {
     S32(d, 0x2D0) = 0;
     f32 dt = F32(d, 0x26C) - F32(d, 0x1D0);
     f32 t;
-    if (dt < 1.5f) {
+    bool blend = dt < 1.5f;
+    if (blend) {
+        f32 k = dt / 1.5f;
         u8* a = PTR(d, 0x1A0);
         u8* b = PTR(d, 0x16C);
         u8* an = PTR(a, 0x14);
         u8* bn = PTR(b, 0x14);
-        f32 vb;
-        f32 va = F32(a, 0x24) + F32(d, 0x1A4) * (F32(an, 0x24) - F32(a, 0x24));
-        vb = F32(b, 0x24) + F32(d, 0x170) * (F32(bn, 0x24) - F32(b, 0x24));
-        t = vb + (dt / 1.5f) * (va - vb);
+        f32 va = LerpF(F32(a, 0x24), F32(an, 0x24), F32(d, 0x1A4));
+        f32 vb = LerpF(F32(b, 0x24), F32(bn, 0x24), F32(d, 0x170));
+        t = LerpF(vb, va, k);
     } else {
         u8* a = PTR(d, 0x1A0);
-        t = F32(a, 0x24) + F32(d, 0x1A4) * (F32(PTR(a, 0x14), 0x24) - F32(a, 0x24));
+        t = LerpF(F32(a, 0x24), F32(PTR(a, 0x14), 0x24), F32(d, 0x1A4));
     }
     if (S32(d, 0x268) == 1) {
         fn_80194C4C(d, out, t);
@@ -1313,7 +1319,7 @@ void fn_80195654(u8* d, u8* out) {
         fn_80194FD0(d, out, t);
         if (F32(d, 0x26C) - F32(d, 0x1E4) < F32(d, 0x2BC)) {
             Pos4 tmp;
-            tmp.p = *(V2*)out;
+            tmp.p = *(PVec2*)out;
             tmp.c = F32(out, 0x8);
             tmp.d = F32(out, 0xC);
             fn_801955F0(d, (u8*)&tmp, t);
