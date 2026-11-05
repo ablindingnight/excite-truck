@@ -361,6 +361,9 @@ public:
     virtual void Init(BallDesc* d);
     virtual ~Ball(void);
     virtual void Reset(void);
+    void Rehome(void);
+    void CheckBounds(void);
+    void Drop(void);
     virtual void Update(void);
     virtual void vf28(u8* buf);
     virtual void vf48(int a, int b, int kind, RigidBody* other);
@@ -572,11 +575,42 @@ inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
     RigidBody::vf48(a, b, kind, other);
 }
 
+inline void Ball::Drop(void) {
+    s16 h;
+    f32 xz[2];
+    BVec3 v;
+    BMtx m;
+    f32 up;
+    fn_801602B0(xz);
+    PickDrop(xz, &h);
+    fn_80144DC8(&m);
+    fn_8017E388(&m);
+    fn_80160230(&m.pos, xz);
+    up = DropHeight();
+    f32 base = fn_801602B4(fn_8017960C(car))->y;
+    m.pos.y = base + up;
+    fn_80144B44(&v, 0.0f, 0.0f, 0.0f);
+    Launch(&m, &v, h, 0.0f);
+}
+
+inline void Ball::CheckBounds(void) {
+    struct P {
+        f32 v[3];
+    } p = *(P*)&mtx.pos;
+    if (!fn_801E9E30(hint, p.v)) {
+        resetPending = 1;
+    }
+}
+
+inline void Ball::Rehome(void) {
+    mtx.pos = Home(car);
+    Xform();
+}
+
 inline void Ball::Update(void) {
     if (resetPending) {
         RigidBody::Reset();
-        mtx.pos = Home(car);
-        Xform();
+        Rehome();
         b1E9 = 0;
         resetPending = 0;
     }
@@ -597,30 +631,10 @@ inline void Ball::Update(void) {
     }
     if (!active && DbgFlag(0x80)) {
         if (fn_801B2EC0(car)->vf10()->f24 == 0) {
-            s16 h;
-            f32 xz[2];
-            BVec3 v;
-            BMtx m;
-            f32 up;
-            fn_801602B0(xz);
-            PickDrop(xz, &h);
-            fn_80144DC8(&m);
-            fn_8017E388(&m);
-            fn_80160230(&m.pos, xz);
-            up = DropHeight();
-            m.pos.y = fn_801602B4(fn_8017960C(car))->y + up;
-            fn_80144B44(&v, 0.0f, 0.0f, 0.0f);
-            Launch(&m, &v, h, 0.0f);
+            Drop();
         }
     }
-    {
-        struct P {
-            f32 v[3];
-        } p = *(P*)&mtx.pos;
-        if (!fn_801E9E30(hint, p.v)) {
-            resetPending = 1;
-        }
-    }
+    CheckBounds();
     RigidBody::Update();
 }
 
