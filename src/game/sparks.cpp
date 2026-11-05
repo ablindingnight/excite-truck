@@ -668,7 +668,7 @@ int fn_8028B93C(const void* evp) {
     f32 s;
     int i;
     Scale(&v, &ev->vel, 0.5f);
-    s = 0.05f * PSVECMag(&v);
+    s = 0.05f * PSVECMag(&ev->vel);
     for (i = 0; i < 2; i++) {
         SetVec(&p, ev->pos.x + fn_80287BC8(-0.15f, 0.15f), ev->pos.y + fn_80287BC8(-0.15f, 0.15f),
                ev->pos.z + fn_80287BC8(-0.15f, 0.15f));
