@@ -192,7 +192,8 @@ void fn_802A81F0(void) {
                     for (int j = 0; j < nb; j++) {
                         f->birds.n++;
                     }
-                    ValPoint p = n->GetPoint("pt");
+                    const ValPoint& r = n->GetPoint("pt");
+                    ValPoint p = r;
                     f->pt.x = p.x;
                     f->pt.y = 0.0f;
                     f->pt.z = p.y;
