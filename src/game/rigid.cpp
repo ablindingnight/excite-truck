@@ -600,6 +600,10 @@ void RigidBody::OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, vo
 extern "C" void fn_8017C7C4(void) {}
 
 void RigidBody::Flush(RVec3* f, RVec3* t) {
+    RMat33 rt;
+    RMat33* rr;
+    RMat33* ii;
+    RMat33* wi;
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
@@ -650,15 +654,15 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     torque.z = 0.0f;
     {
         RMat33 tmp;
-        RMat33 rt = mtx.rot;
+        rt = mtx.rot;
         rt.Transpose();
         {
-            RMat33* ii = &invI;
+            ii = &invI;
             Mul(&tmp, &rt, ii);
         }
         {
-            RMat33* wi = &worldInvI;
-            RMat33* rr = &mtx.rot;
+            wi = &worldInvI;
+            rr = &mtx.rot;
             Mul(wi, &tmp, rr);
         }
     }

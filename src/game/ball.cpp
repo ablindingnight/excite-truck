@@ -501,9 +501,9 @@ inline void Ball::Init(BallDesc* d) {
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 skin = d->skin;
     f32 radius = 0.0254f * d->radius;
+    f32 stiff = k * (kk * kk);
     BVec3 c(0.0f, 0.0f, 0.0f);
     car = d->car;
-    f32 stiff = k * (kk * kk);
     mtx.pos = Home(car);
     Xform();
     explodable = d->explodable;
@@ -659,12 +659,12 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     BMtx m;
     BVec3 p;
     fn_8017D378();
-    m = *in;
     avel.x = 0.0f;
-    avel.z = 0.0f;
     avel.y = 0.0f;
+    avel.z = 0.0f;
     hint[0] = h;
     b1E9 = 1;
+    m = *in;
     Rotate(&p, &m, &launch);
     p += m.pos;
     m.pos = p;
