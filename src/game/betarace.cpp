@@ -1507,7 +1507,8 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                                 if (NearEq(f, 1.0f)) {
                                     u32 col = l->Find("star_color_1")->color;
                                     if (pal) {
-                                        col = (col & 0xFFFFFF) | 0x70000000;
+                                        col &= 0xFFFFFF;
+                                        col |= 0x70000000;
                                     }
                                     fn_801476D8(&s, col, tx);
                                     e.pos.x += e.w;
@@ -2201,8 +2202,9 @@ void BetaCar::DrawHud(ILayout* l, int view) {
     if (!fn_80161C38() && lbl_8055E4D0 > 1 && pts > shownInt && grade <= fn_80160A74() && grade >= 0) {
         TextElem* t = l->Find("high_score_title");
         if (t) {
+            f32 phase = 6.2831855f * countUp / 0.5f;
             TextElem e = *t;
-            e.color = fn_80147C50(0xFFFFFF00, 0xFF00FF00, 0.5f + 0.5f * (f32)sin(6.2831855f * countUp / 0.5f));
+            e.color = fn_80147C50(0xFFFFFF00, 0xFF00FF00, 0.5f + 0.5f * (f32)sin(phase));
             fn_801476C4(&e);
         }
     }
