@@ -709,13 +709,13 @@ void SkyTMH::Draw(TObj* list) {
         mtx.t[0] = cam->pos[0];
         mtx.t[1] = cam->pos[1];
         mtx.t[2] = cam->pos[2];
+        cone = (f32*)&obj->d2C;
         if (mode == 1) {
-            cone = (f32*)&obj->d2C;
-            c = cone;
             f32 half;
             u32 i;
-            half = 0.5f * (1.25f * fn_801E8738(-1));
             mask = 1;
+            half = 0.5f * (1.25f * fn_801E8738(-1));
+            c = cone;
             for (i = 0; i < 32; i++, cone += 4, c += 4) {
                 d = PSVECDotProduct(cam->dir, cone);
                 if (d > (f32)cos(half + c[3])) {
