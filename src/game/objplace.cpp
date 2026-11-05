@@ -203,6 +203,7 @@ typedef BlockAlloc<ObjLoc, 0x40> ObjAllocator;
 
 struct ObjModel {
     ObjModel(void) { tex = -2; }
+    ObjModel(const char* file);
     ~ObjModel(void) {
         if (tex != -2) {
             gxForgetTexture(tex);
@@ -488,36 +489,36 @@ inline void ObjectPlacer::Spin(void) {
     }
 }
 
-ObjectPlacer::ObjectPlacer(ValueNode* node) {
-    ObjModel* m = new ("GroundObject") ObjModel;
-    if (m) {
-        const char* file = node->GetValue("model");
-        if (strcasecmp(file, "nul") == 0) {
-            m->model = 0;
-        } else {
-            m->model = fn_802B2C34(fn_802C6B44, file);
-            if (m->model) {
-                void* info = ((void**)m->model)[1];
-                const char* tex = fn_802C9C24(info);
-                void* surf = ((void**)info)[3];
-                bool ok = false;
-                if (surf) {
-                    m->tex = fn_802B110C(fn_802B1D38, tex);
-                    if (m->tex == -2) {
-                        fn_802E317C("gobject: Can't find texture %s", tex);
-                    }
-                    m->info = surf;
-                    ok = true;
+inline ObjModel::ObjModel(const char* file) {
+    tex = -2;
+    if (strcasecmp(file, "nul") == 0) {
+        model = 0;
+    } else {
+        model = fn_802B2C34(fn_802C6B44, file);
+        if (model) {
+            void* info = ((void**)model)[1];
+            const char* tex = fn_802C9C24(info);
+            void* surf = ((void**)info)[3];
+            bool ok = false;
+            if (surf) {
+                this->tex = fn_802B110C(fn_802B1D38, tex);
+                if (this->tex == -2) {
+                    fn_802E317C("gobject: Can't find texture %s", tex);
                 }
-                if (!ok) {
-                    fn_802E317C("gobject: model %s provides neither color nor normal IndexedSurface.", file);
-                }
-            } else {
-                fn_802E317C("gobject: Can't load model %s", file);
+                this->info = surf;
+                ok = true;
             }
+            if (!ok) {
+                fn_802E317C("gobject: model %s provides neither color nor normal IndexedSurface.", file);
+            }
+        } else {
+            fn_802E317C("gobject: Can't load model %s", file);
         }
     }
-    model = m;
+}
+
+ObjectPlacer::ObjectPlacer(ValueNode* node) {
+    model = new ("GroundObject") ObjModel(node->GetValue("model"));
     list.tail = 0;
     list.head = 0;
     weight = node->GetInt("weight", 1);
