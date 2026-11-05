@@ -1909,8 +1909,10 @@ void fn_802D2640(void) {
 #pragma opt_strength_reduction off
 void fn_802D2684(void) {
     u8 env = lbl_804C5700.env;
-    u8 envA = lbl_804C5700.envA;
-    u8 base2 = lbl_804C5700.base2;
+    u8 envA;
+    u8 base2;
+    base2 = lbl_804C5700.base2;
+    envA = lbl_804C5700.envA;
     int stage = 0;
     int alphaOnly = (lbl_8055FD1C >> 6) & 1;
     int coord = 0;
