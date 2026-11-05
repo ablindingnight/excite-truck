@@ -246,7 +246,7 @@ public:
     IdealFollower* follower;  // offset 0x58
     DCar* car;             // offset 0x5C
     s32 index;             // offset 0x60
-    u32 stuck;             // offset 0x64
+    s32 stuck;             // offset 0x64
     s32 finishLap;         // offset 0x68
     s32 start;             // offset 0x6C
     f32 finishTime;        // offset 0x70
@@ -729,7 +729,8 @@ void fn_801B14E4(DeityCar* c) {
     } else {
         c->stuck = 0;
     }
-    fn_801B14BC((u32*)((u8*)c + 0x4), 4, (f32)c->stuck > 29.97f);
+    bool over = (f32)c->stuck > 29.97f;
+    fn_801B14BC((u32*)((u8*)c + 0x4), 4, over);
 }
 
 }  // extern "C"

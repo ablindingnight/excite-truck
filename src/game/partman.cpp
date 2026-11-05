@@ -640,11 +640,12 @@ extern "C" void fn_8028F608(V3* a, V3* b, f32 angle, const CamMtx* m) {
     b->z = c * m->up.z - s * m->right.z;
 }
 
+static inline Particle* AllocParts(s32 n) { return new ("particles") Particle[n]; }
+
 PartSys::PartSys(const PartParams* p, const char* tex) {
     SetParams(p);
-    s32 n = p->maxParticles;
-    parts = new ("particles") Particle[n];
-    cap = n;
+    parts = AllocParts(p->maxParticles);
+    cap = p->maxParticles;
     this->tex = fn_802CAC28(tex, 0);
 }
 
