@@ -1226,6 +1226,7 @@ config.libs.append(
             Object(Matching, "game/carrival.cpp"),
             Object(Matching, "game/carreg.cpp"),
             Object(Matching, "game/eventpath.cpp"),
+            Object(NonMatching, "game/pathclass.cpp"),
             Object(NonMatching, "game/pathcareer.cpp"),
             Object(NonMatching, "game/evpath.cpp"),
             Object(NonMatching, "game/efxman.cpp"),

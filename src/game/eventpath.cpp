@@ -114,6 +114,9 @@ public:
     virtual int v44(void);
     virtual int v48(void);
     virtual int MaxScore(void);  // 0x4C
+    int Unlocked(void);  // vtable slot 0x40 in pathclass.cpp's Contest
+    int Open(void);      // 0x44
+    int Done(void);      // 0x48
     u8 valid;          // offset 0x4
     ValueNode* node;   // offset 0x8
     s32 event;         // offset 0xC
@@ -334,9 +337,9 @@ int fn_8027AD4C(Contest* c, ValueNode* n) {
     return c->valid;
 }
 
-u8 Contest_vf44(Contest* c) { return c->open; }
+int Contest::Open(void) { return open; }
 
-u8 Contest_vf40(Contest* c) { return c->unlocked; }
+int Contest::Unlocked(void) { return unlocked; }
 
 void fn_8027AF94(Contest* c) { c->valid = 0; }
 
@@ -383,7 +386,7 @@ int fn_8027AFA0(Bracket* b, ValueNode* n) {
     return b->valid;
 }
 
-u8 Contest_vf48(Contest* c) { return c->done; }
+int Contest::Done(void) { return done; }
 
 void fn_8027B288(Bracket* b) {
     for (int i = 0; i < b->contests.n; i++) {
