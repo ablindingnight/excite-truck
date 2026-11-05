@@ -158,6 +158,7 @@ struct InlineVec : VecBase<T> {
     InlineVec(void) : VecBase<T>(buf, N) {}
     int Count(void);
     T* At(int i);
+    T* Next(void) { return &this->data[this->count++]; }
     T buf[N];  // offset 0xC
 };
 
@@ -182,6 +183,11 @@ struct GTex {
     f32 u;      // offset 0x4
     f32 v;      // offset 0x8
     s32 index;  // offset 0xC
+    void Set(f32 nu, f32 nv, int i) {
+        u = nu;
+        v = nv;
+        index = i;
+    }
 };
 
 struct GLayer {
@@ -222,11 +228,16 @@ struct GStrip {
 };
 
 // Index blocks of one layer mask, newest first.
-struct GList {
+// The array in GMat is filled by the inline ctor; the reset in fn_802B11BC assigns a zeroed plain base.
+struct GListData {
+    GBlock* head;  // offset 0x0
+};
+
+struct GList : GListData {
+    GList(void) { head = 0; }
     void Clear(void) { head = 0; }
     bool Empty(void);
     GBlock* Head(void);
-    GBlock* head;  // offset 0x0
 };
 
 struct GBatch {
@@ -357,10 +368,8 @@ inline void GLayer::Load(ValueNode* ground, const char* mname, ValueNode* tune) 
             break;
         }
         const char* file = ground->GetValue(tname);
-        GTex* t = &texs.data[texs.count++];
-        t->u = u[k - 1];
-        t->v = v[k - 1];
-        t->index = k - 1;
+        GTex* t = texs.Next();
+        t->Set(u[k - 1], v[k - 1], k - 1);
         t->tex = fn_802B110C(fn_802B0628, file);
         if (t->tex == -2) {
             fn_802E317C("gmat: Texture %s does not exist.", file);
@@ -376,12 +385,8 @@ inline void GLayer::Load(ValueNode* ground, const char* mname, ValueNode* tune) 
 }
 
 inline GMat::GMat(ValueNode* node, ValueNode* tune) {
-    lists[0].head = 0;
-    GList* end = &lists[65];
-    for (GList* p = &lists[1]; p < end; p++) {
-        p->head = 0;
-    }
     crystal = !fn_802B05E4() && !fn_802B06D4();
+    ValueNode* ground;
     for (int i = 1;; i++) {
         char mat[16];
         fn_801345D8(mat, 16, "mat%d", i);
@@ -389,9 +394,9 @@ inline GMat::GMat(ValueNode* node, ValueNode* tune) {
             break;
         }
         if (HasChild(node->FindChild(mat), "ground")) {
-            ValueNode* ground = node->FindChild(mat)->FindChild("ground");
+            ground = node->FindChild(mat)->FindChild("ground");
             const char* mname = node->FindChild(mat)->GetName();
-            layers.data[layers.count++].Load(ground, mname, tune);
+            layers.Next()->Load(ground, mname, tune);
         } else {
             fn_802E317C("gmat: umat table: %s does not contain ground subtable", mat);
         }
@@ -412,7 +417,7 @@ void fn_802B0B20(ValueNode* node, ValueNode* tune) {
         return;
     }
     GMat* g = new ("umat-gmaterial") GMat(node, tune);
-    lbl_804BE104.data[lbl_804BE104.count++] = g;
+    *lbl_804BE104.Next() = g;
 }
 
 // Only their strings survive in the game.
@@ -450,7 +455,7 @@ void fn_802B11BC(GMat* g) {
     fn_802BAFA0();
     fn_802B0904();
     for (int i = 0; i < 65; i++) {
-        g->lists[i] = GList();
+        (GListData&)g->lists[i] = GListData();
     }
     bool merged = false;
     g->pending = 0;
