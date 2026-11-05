@@ -1097,18 +1097,20 @@ void fn_801B24B8(void) {
     if (fn_801769F8()) {
         return;
     }
-    Crossing* e;
     CrossQueue* q = &lbl_80435BE8;
-    e = q->e;
-    for (int i = 0; i < q->n; i++, e++) {
-        if (!lbl_8055E684[e->car].locked) {
-            lbl_8055E684[e->car].rank = lbl_8055E688 - i + 9;
+    Crossing* e = q->e;
+    for (int i = 0; i < q->n; i++) {
+        Crossing* p = &e[i];
+        DeityCar* c = &lbl_8055E684[p->car];
+        int rank = lbl_8055E688 - i + 9;
+        if (!c->locked) {
+            c->rank = rank;
         }
     }
     fn_801B1318();
-    e = lbl_80435BE8.e;
-    for (int i = 0; i < lbl_80435BE8.n; e++, i++) {
-        fn_801B15A8(&lbl_8055E684[e->car], e->time);
+    for (int i = 0; i < lbl_80435BE8.n; i++) {
+        Crossing* p = &e[i];
+        fn_801B15A8(&lbl_8055E684[p->car], p->time);
     }
     lbl_80435BE8.n = 0;
     if (lbl_8055E68C) {
