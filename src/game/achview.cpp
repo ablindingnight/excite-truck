@@ -570,7 +570,7 @@ public:
     char valueText[20];  // offset 0x2C
     NameBuffer<20> nextText;   // offset 0x40
     f32 tallyRate;       // offset 0x54
-    u8 started;          // offset 0x58
+    bool started;        // offset 0x58
     u8 pad59[0x7];
     NameBuffer<50> modelName;  // offset 0x60
     NameBuffer<50> previousModelName;
@@ -649,6 +649,179 @@ void MenuDoAchievementsViewer(void) {
     fn_802591D8();
 }
 
+}  // extern "C"
+
+// The four vtables, written out as tables until these widgets become real classes. In the original they are flushed here,
+// between MenuDoAchievementsViewer and the deferred inline methods below, so every later string sits after them in .data.
+extern "C" {
+u8* AchievementTrophyModel_vf08(u8* p, int del);
+void AchievementTrophyModel_vf0C(u8* p, const char* name);
+void AchievementTrophyModel_vf10(u8* p);
+void AchievementTrophyModel_vf14(u8* p, f32 dt);
+void AchievementTrophyModel_vf1C(u8* p);
+void AchievementTrophyModel_vf24(u8* p);
+void Draw__9MenuStateFv();
+void Exit__9MenuStateFv();
+void Key__9MenuStateFi();
+void Unk14__9MenuStateFv();
+void Unk18__9MenuStateFv();
+void Unk20__9MenuStateFv();
+void Unk24__9MenuStateFv();
+void Unk2C__9MenuStateFv();
+void Unk30__9MenuStateFv();
+void Unk34__9MenuStateFv();
+void Unk38__9MenuStateFv();
+void Unk3C__9MenuStateFv();
+void Unk40__9MenuStateFv();
+void Unk44__9MenuStateFv();
+void Unk48__9MenuStateFv();
+void Unk4C__9MenuStateFv();
+void Unk50__9MenuStateFv();
+void Unk54__9MenuStateFv();
+void Unk5C__9MenuStateFv();
+void fn_80228A80();
+void fn_80228DA4();
+u8* fn_80259700(u8* p, int del);
+u8* fn_8025A1C4(u8* p, int del);
+u8* fn_8025A4CC(u8* p, int del);
+void fn_8025B138(u8* p);
+void fn_8025B22C(u8* p);
+int fn_8025B2BC(u8* p, int key);
+void fn_8025B520(u8* p);
+void fn_8025B784(u8* p);
+void fn_8025B788(u8* p);
+int fn_8025BBFC(u8* p, int key);
+void fn_8025BE0C(u8* p);
+void fn_8025BED0(u8* p);
+}
+void* lbl_80345038[] = {
+    0,
+    0,
+    (void*)fn_8025A1C4,
+    (void*)fn_8025BE0C,
+    (void*)Exit__9MenuStateFv,
+    (void*)Unk14__9MenuStateFv,
+    (void*)Unk18__9MenuStateFv,
+    (void*)fn_8025BED0,
+    (void*)Unk20__9MenuStateFv,
+    (void*)Unk24__9MenuStateFv,
+    (void*)Draw__9MenuStateFv,
+    (void*)Unk2C__9MenuStateFv,
+    (void*)Unk30__9MenuStateFv,
+    (void*)Unk34__9MenuStateFv,
+    (void*)Unk38__9MenuStateFv,
+    (void*)Unk3C__9MenuStateFv,
+    (void*)Unk40__9MenuStateFv,
+    (void*)Unk44__9MenuStateFv,
+    (void*)Unk48__9MenuStateFv,
+    (void*)Unk4C__9MenuStateFv,
+    (void*)Unk50__9MenuStateFv,
+    (void*)Unk54__9MenuStateFv,
+    (void*)Key__9MenuStateFi,
+    (void*)Unk5C__9MenuStateFv,
+};
+void* lbl_80345098[] = {
+    0,
+    0,
+    (void*)fn_8025A4CC,
+    (void*)fn_8025B520,
+    (void*)fn_8025B784,
+    (void*)Unk14__9MenuStateFv,
+    (void*)Unk18__9MenuStateFv,
+    (void*)fn_8025B788,
+    (void*)Unk20__9MenuStateFv,
+    (void*)Unk24__9MenuStateFv,
+    (void*)Draw__9MenuStateFv,
+    (void*)Unk2C__9MenuStateFv,
+    (void*)Unk30__9MenuStateFv,
+    (void*)Unk34__9MenuStateFv,
+    (void*)Unk38__9MenuStateFv,
+    (void*)Unk3C__9MenuStateFv,
+    (void*)Unk40__9MenuStateFv,
+    (void*)Unk44__9MenuStateFv,
+    (void*)Unk48__9MenuStateFv,
+    (void*)Unk4C__9MenuStateFv,
+    (void*)Unk50__9MenuStateFv,
+    (void*)Unk54__9MenuStateFv,
+    (void*)fn_8025BBFC,
+    (void*)Unk5C__9MenuStateFv,
+};
+void* lbl_803450F8[] = {
+    0,
+    0,
+    (void*)fn_80259700,
+    (void*)fn_8025B138,
+    (void*)Exit__9MenuStateFv,
+    (void*)Unk14__9MenuStateFv,
+    (void*)Unk18__9MenuStateFv,
+    (void*)fn_8025B22C,
+    (void*)Unk20__9MenuStateFv,
+    (void*)Unk24__9MenuStateFv,
+    (void*)Draw__9MenuStateFv,
+    (void*)Unk2C__9MenuStateFv,
+    (void*)Unk30__9MenuStateFv,
+    (void*)Unk34__9MenuStateFv,
+    (void*)Unk38__9MenuStateFv,
+    (void*)Unk3C__9MenuStateFv,
+    (void*)Unk40__9MenuStateFv,
+    (void*)Unk44__9MenuStateFv,
+    (void*)Unk48__9MenuStateFv,
+    (void*)Unk4C__9MenuStateFv,
+    (void*)Unk50__9MenuStateFv,
+    (void*)Unk54__9MenuStateFv,
+    (void*)fn_8025B2BC,
+    (void*)Unk5C__9MenuStateFv,
+};
+void* lbl_80345158[] = {
+    0,
+    0,
+    (void*)AchievementTrophyModel_vf08,
+    (void*)AchievementTrophyModel_vf0C,
+    (void*)AchievementTrophyModel_vf10,
+    (void*)AchievementTrophyModel_vf14,
+    (void*)fn_80228A80,
+    (void*)AchievementTrophyModel_vf1C,
+    (void*)fn_80228DA4,
+    (void*)AchievementTrophyModel_vf24,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+};
+char lbl_80345208[] = "*uiaction.res/";
+
+extern "C" {
+
 void AchievementTrophyModel_vf10(u8* p) {
     F32(p, 0x84) = 1.0f;
     F32(p, 0x88) = 0.0f;
@@ -689,7 +862,6 @@ static inline void CatName(const char* s, int n, char* d) {
     }
 }
 
-extern char lbl_80345208[];  // "*uiaction.res/"
 
 extern "C" {
 char* strrchr(const char* s, int c);
