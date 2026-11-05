@@ -1309,6 +1309,11 @@ int fn_80283AC8(void) {
 extern "C" {
 
 // Selects the next event that has an unlock condition and shows its title, description and best time.
+template <class T>
+static inline T& AtR(T* p, int i) {
+    return p[i];
+}
+
 int fn_80283B58(void) {
     int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (cur >= 0) {
@@ -1317,7 +1322,7 @@ int fn_80283B58(void) {
             if (++i >= lbl_804B30D8.Count()) {
                 i = 0;
             }
-        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && cur != i);
+        } while (!PTR((u8*)AtR(lbl_804B30D8.data, i), 0x60) && cur != i);
         SelectBar(i);
     } else {
         fn_80216D28();
@@ -1334,7 +1339,7 @@ int fn_80283E28(void) {
             if (--i < 0) {
                 i += lbl_804B30D8.Count();
             }
-        } while (!PTR((u8*)lbl_804B30D8.data[i], 0x60) && cur != i);
+        } while (!PTR((u8*)AtR(lbl_804B30D8.data, i), 0x60) && cur != i);
         SelectBar(i);
     } else {
         fn_80216D28();

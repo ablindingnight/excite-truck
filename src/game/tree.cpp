@@ -574,12 +574,17 @@ s32 fn_802BD0C8(TreeType* t) {
     return n;
 }
 
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_802BD0F4(TreeType* t) {
     TreeRec* tr;
     if (t->shadow && t->set) {
         int n = t->set->list->n;
         for (int i = 0; i < n; i++) {
-            tr = &t->set->list->data[i];
+            tr = AtP(t->set->list->data, i);
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;

@@ -513,6 +513,11 @@ static inline s32 Expr1_fn_801C2694(PSys* s) {
     return s->nPart;
 }
 
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
     RVec3* p = out;
     s->org = *org;
@@ -525,7 +530,7 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     fn_801C1B60(s);
     s32 k = Expr1_fn_801C2694(s);
     for (int j = 0; j < s->nPart; j++) {
-        Set(p, &s->pos[j]);
+        Set(p, AtP(s->pos, j));
         p++;
     }
     *n = k;

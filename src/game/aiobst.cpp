@@ -266,6 +266,11 @@ void fn_8015EE14(ValueNode* list, Track* trk) {
     }
 }
 
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_8015EF84(ValueNode* list) {
     int erased = 0;
     if (list) {
@@ -282,7 +287,7 @@ void fn_8015EF84(ValueNode* list) {
                 r2 = r2 * r2;
                 j = 0;
                 while (j < lbl_8055E29C->a.count) {
-                    Obst* o = &lbl_8055E29C->a.data[j];
+                    Obst* o = AtP(lbl_8055E29C->a.data, j);
                     Vec2 d(p.x - o->pos.v.x, p.y - o->pos.v.y);
                     if (d.v.x * d.v.x + d.v.y * d.v.y < r2) {
                         lbl_8055E29C->Remove(j);

@@ -1007,6 +1007,11 @@ struct GroupVec {
 extern void* lbl_80343BD0[];
 void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 u8* fn_8024B3E8(u8* p, EvList* list) {
     PTR(p, 0x74) = (u8*)list;
     S32(p, 0x14) = 0;
@@ -1016,7 +1021,7 @@ u8* fn_8024B3E8(u8* p, EvList* list) {
     S32(p, 0x1C) = 0;
     U8(p, 0x284) = 0;
     for (int i = 0; i < list->count; i++) {
-        EvEntry* e = &list->items[i];
+        EvEntry* e = AtP(list->items, i);
         int isNew = 1;
         int j;
         int count = S32(p, 0x1C);

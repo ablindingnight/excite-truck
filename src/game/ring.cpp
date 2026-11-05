@@ -392,13 +392,18 @@ void fn_8016A240(const char* name) {
     }
 }
 
+template <class T>
+static inline T& AtR(T* p, int i) {
+    return p[i];
+}
+
 int fn_8016A30C(int player) {
     RaceCarRec* rec = fn_8017960C(player);
     if (rec) {
         int n = 0;
         int i;
         for (i = 0; i < lbl_80430318.count; i++) {
-            if (lbl_80430318.data[i].Check(rec)) {
+            if (AtR(lbl_80430318.data, i).Check(rec)) {
                 n++;
             }
         }

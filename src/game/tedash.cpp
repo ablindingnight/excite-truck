@@ -557,6 +557,11 @@ void fn_802B67C8(const char* name) {
     fn_80147FF0(b, b->color);
 }
 
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_802B6804(void) {
     Stat* s;
     fn_802B67C8("stats_box");
@@ -564,7 +569,7 @@ void fn_802B6804(void) {
     TextElem* name = lbl_8055FA48->Find("stats_colname");
     f32 row = lbl_8055FA48->FindBox("stats_col")->h;
     for (int i = 0; i < lbl_804BFA70.count; i++) {
-        s = &lbl_804BFA70.data[i];
+        s = AtP(lbl_804BFA70.data, i);
         if (s->peak < *s->value) {
             s->peak = *s->value;
         }
