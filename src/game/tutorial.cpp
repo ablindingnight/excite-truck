@@ -844,17 +844,18 @@ static inline void SetupChallenge(Challenge* c, ValueNode* n) {
 }
 
 static inline void SetupStunt(StuntChallenge* c, ValueNode* n) {
+    StuntReq* r;
+    const char* type;
+    int k;
     int i;
     ValueNode* s;
     c->onlyStunts = n->GetBool("only_stunts", 0);
     i = 0;
     for (s = n->GetChildAt(0); s; s = n->GetChildAt(++i)) {
         if (strcasecmp(s->GetName(), "stunt") == 0) {
-            int k0 = c->stunts.count++;
-            StuntReq* r = &c->stunts.data[k0];
             const char* names[4] = {"nice_landing", "turbo_jump", "pow_item", "morph_trigger"};
-            const char* type = s->GetValue("type");
-            int k;
+            r = &c->stunts.data[c->stunts.count++];
+            type = s->GetValue("type");
             r->type = -1;
             for (k = 0; k < 4; k++) {
                 if (strcasecmp(type, names[k]) == 0) {
@@ -868,13 +869,13 @@ static inline void SetupStunt(StuntChallenge* c, ValueNode* n) {
         }
     }
     c->finishDelay = n->GetFloat("finish_delay", 1.0f);
-    fn_80158558(c ? (StuntWatcher*)c : 0);
+    fn_80158558((StuntWatcher*)c);
 
 }
 
 static inline void SetupFreestyle(FreestyleChallenge* c, ValueNode* n) {
-    int i;
     ValueNode* s;
+    int i;
     c->threshold = 0;
     for (i = 0; (s = n->GetChildAt(i)) != 0; i++) {
         if (strcasecmp(s->GetName(), "stunt") == 0) {
@@ -891,12 +892,13 @@ extern "C" {
 int fn_80160CE4(void) { return lbl_8055A0B8 - lbl_8055A0C0; }
 
 void fn_80160CF4(void) {
-    int i = 1;
+    int i;
     Event* e = GetEvent(fn_801769CC()->event);
     ValueNode* n;
     lbl_8055E300 = 0;
     lbl_8042FDEC.Push(new ("ChalList") ChalList);
-    for (n = e->vals->GetChildAt(0); n; n = e->vals->GetChildAt(i++)) {
+    i = 0;
+    for (n = e->vals->GetChildAt(i++); n; n = e->vals->GetChildAt(i++)) {
         if (strcasecmp(n->GetName(), "challenge") == 0) {
             const char* type = n->GetValue("type");
             if (strcasecmp(type, "stunt") == 0) {
