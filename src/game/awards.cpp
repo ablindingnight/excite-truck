@@ -151,10 +151,7 @@ public:
 
 class IntStatHandler : public StatHandler {
 public:
-    IntStatHandler(IntStatistic* s) : StatHandler(s) {
-        best = 0;
-        best2 = 0;
-    }
+    IntStatHandler(u32 type, const struct StatDesc* d);
     virtual ~IntStatHandler(void) {
         SafeDelete(best);
         SafeDelete(best2);
@@ -177,10 +174,7 @@ public:
 
 class RealStatHandler : public StatHandler {
 public:
-    RealStatHandler(RealStatistic* s) : StatHandler(s) {
-        best = 0;
-        best2 = 0;
-    }
+    RealStatHandler(u32 type, const struct StatDesc* d);
     virtual ~RealStatHandler(void) {
         SafeDelete(best);
         SafeDelete(best2);
@@ -577,80 +571,94 @@ int fn_801CB900(StatHandler* h, int type) {
     return r;
 }
 
+static inline IntStatistic* NewIntStatAt(u32 type, int ev, int diff) {
+    return new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, ev, diff);
+}
+
+static inline IntStatistic* NewIntStat(u32 type, const StatDesc* d) {
+    return new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty);
+}
+
+inline IntStatHandler::IntStatHandler(u32 type, const StatDesc* d)
+    : StatHandler(NewIntStat(type, d)) {
+    int bestEv = -1;
+    int bestD = -1;
+    int diff;
+    int ev;
+    best = 0;
+    best2 = 0;
+    for (diff = 0; diff < 3; diff++) {
+        for (ev = 0; ev < GetNumEvents(); ev++) {
+            if (ev != d->event || diff != d->difficulty) {
+                Statistic s(IdentGetCurrentSlot(), type, ev, diff);
+                if (s.HasValue()) {
+                    if (bestEv < 0) {
+                        bestEv = ev;
+                        bestD = diff;
+                    } else {
+                        Statistic b(IdentGetCurrentSlot(), type, bestEv, bestD);
+                        if (s.IsBetterThan(&b)) {
+                            bestEv = ev;
+                            bestD = diff;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (bestEv >= 0) {
+        best = NewIntStatAt(type, bestEv, bestD);
+    }
+}
+
+static inline RealStatistic* NewRealStatAt(u32 type, int ev, int diff) {
+    return new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, ev, diff);
+}
+
+static inline RealStatistic* NewRealStat(u32 type, const StatDesc* d) {
+    return new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty);
+}
+
+inline RealStatHandler::RealStatHandler(u32 type, const StatDesc* d)
+    : StatHandler(NewRealStat(type, d)) {
+    int bestEv = -1;
+    int bestD = -1;
+    int diff;
+    int ev;
+    best = 0;
+    best2 = 0;
+    for (diff = 0; diff < 3; diff++) {
+        for (ev = 0; ev < GetNumEvents(); ev++) {
+            if (ev != d->event || diff != d->difficulty) {
+                Statistic s(IdentGetCurrentSlot(), type, ev, diff);
+                if (s.HasValue()) {
+                    if (bestEv < 0) {
+                        bestEv = ev;
+                        bestD = diff;
+                    } else {
+                        Statistic b(IdentGetCurrentSlot(), type, bestEv, bestD);
+                        if (s.IsBetterThan(&b)) {
+                            bestEv = ev;
+                            bestD = diff;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (bestEv >= 0) {
+        best = NewRealStatAt(type, bestEv, bestD);
+    }
+}
+
 StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
     switch (type & 0x300) {
     default:
         fn_802E317C("StatHandler::Create: stat type %x has invalid data type flag %x", type, type & 0x300);
-    case 0x200: {
-        int ev;
-        int diff;
-        int bestD;
-        int bestEv;
-        IntStatHandler* h =
-            new ("award_int") IntStatHandler(new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty));
-        if (h) {
-            bestEv = -1;
-            bestD = -1;
-            for (diff = 0; diff < 3; diff++) {
-                for (ev = 0; ev < GetNumEvents(); ev++) {
-                    if (ev != d->event || diff != d->difficulty) {
-                        Statistic s(IdentGetCurrentSlot(), type, ev, diff);
-                        if (s.HasValue()) {
-                            if (bestEv < 0) {
-                                bestEv = ev;
-                                bestD = diff;
-                            } else {
-                                Statistic b(IdentGetCurrentSlot(), type, bestEv, bestD);
-                                if (s.IsBetterThan(&b)) {
-                                    bestEv = ev;
-                                    bestD = diff;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (bestEv >= 0) {
-                h->best = new ("int_stat") IntStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
-            }
-        }
-        return h;
-    }
-    case 0x100: {
-        int bestD;
-        int ev;
-        int diff;
-        int bestEv;
-        RealStatHandler* h = new ("award_real")
-            RealStatHandler(new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, d->event, d->difficulty));
-        if (h) {
-            bestEv = -1;
-            bestD = -1;
-            for (diff = 0; diff < 3; diff++) {
-                for (ev = 0; ev < GetNumEvents(); ev++) {
-                    if (ev != d->event || diff != d->difficulty) {
-                        Statistic s(IdentGetCurrentSlot(), type, ev, diff);
-                        if (s.HasValue()) {
-                            if (bestEv < 0) {
-                                bestEv = ev;
-                                bestD = diff;
-                            } else {
-                                Statistic b(IdentGetCurrentSlot(), type, bestEv, bestD);
-                                if (s.IsBetterThan(&b)) {
-                                    bestEv = ev;
-                                    bestD = diff;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (bestEv >= 0) {
-                h->best = new ("real_stat") RealStatistic(IdentGetCurrentSlot(), type, bestEv, bestD);
-            }
-        }
-        return h;
-    }
+    case 0x200:
+        return new ("award_int") IntStatHandler(type, d);
+    case 0x100:
+        return new ("award_real") RealStatHandler(type, d);
     }
 }
 
