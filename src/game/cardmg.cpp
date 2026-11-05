@@ -599,6 +599,11 @@ void fn_8018DA5C(u8* p, u8* m) {
 
 // A deformable point of the car body (0x34 bytes, from the model at car + 0x26C).
 struct DentVec {
+    void AddScaled(const DentVec& v, f32 s) {
+        x += v.x * s;
+        y += v.y * s;
+        z += v.z * s;
+    }
     f32 x, y, z;
 };
 
@@ -643,9 +648,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
     d.z = push->z * k;
     d.y = d.y < 0.0f ? d.y : 0.0f;
     DentVec* g = (DentVec*)(p + 0x5FC) + pt->goal;
-    g->x += d.x * 2.0f;
-    g->y += d.y * 2.0f;
-    g->z += d.z * 2.0f;
+    g->AddScaled(d, 2.0f);
     if (PSVECDotProduct(&g->x, &pt->pos.x) > 0.0f) {
         DentVec n = pt->pos;
         PSVECNormalize(&n.x, &n.x);
@@ -658,13 +661,13 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
     g->y = DentClamp(g->y, pt->lo.y, pt->hi.y);
     g->z = DentClamp(g->z, pt->lo.z, pt->hi.z);
     if (depth <= 2) {
+        int other;
         DentVec* gi = (DentVec*)(p + 0x5FC) + i;
         DentVec at;
         at.x = pt->pos.x + gi->x;
         at.y = pt->pos.y + gi->y;
         at.z = pt->pos.z + gi->z;
         for (int n = 0; n < S32(PTR(p, 0x26C), 0x20F0); n++) {
-            int other;
             DentLink* l = (DentLink*)PTR(PTR(p, 0x26C), 0x20EC) + n;
             other = l->a;
             if ((other == i && l->b != from) || (l->b == i && other != from)) {
