@@ -1038,7 +1038,7 @@ public:
 // A list of text/gart/box draw commands against a layout, read from a .val node.
 class OverlayCmd : public IOverlayCmd {
 public:
-    BoxCmd* Expr1_Draw(int i);
+    BoxCmd* BoxAt(int i);
 public:
     OverlayCmd(ILayout* l, ValueNode* n);
     virtual ~OverlayCmd(void) {
@@ -1423,7 +1423,7 @@ LayoutOffset::~LayoutOffset(void) {
 
 extern "C" void fn_80148218(void) {}
 
-inline BoxCmd* OverlayCmd::Expr1_Draw(int i) {
+inline BoxCmd* OverlayCmd::BoxAt(int i) {
     return &boxes->a.data[i];
 }
 
@@ -1434,7 +1434,7 @@ void OverlayCmd::Draw(void) {
         return;
     }
     for (i = 0; i < boxes->a.count; i++) {
-        c = Expr1_Draw(i);
+        c = BoxAt(i);
         int art = layout->FindSet(c->art);
         GartElem* b = layout->FindBox(c->elem);
         if (b && art) {

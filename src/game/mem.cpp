@@ -529,6 +529,7 @@ void* LightStack::Alloc(s32 s, const char* name, int type) {
     return data;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 inline u8* LightStack::Expr1_Collapse(void) {
     return base + used;
 }

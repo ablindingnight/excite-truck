@@ -522,6 +522,7 @@ void fn_80166814(void) {
     lbl_8055E32C = 0;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline Role* Expr1_fn_80166898(int i) {
     return &lbl_8042FEB0.data[i];
 }

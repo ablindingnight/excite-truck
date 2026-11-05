@@ -424,7 +424,7 @@ void fn_802C1928(void) {
 
 void fn_802C1A08(void) {}
 
-static inline int Expr1_fn_802C1A0C(TreeObj* o) {
+static inline int ObjId(TreeObj* o) {
     return o->Handle() - (u8*)lbl_8055CFA0;
 }
 
@@ -436,7 +436,7 @@ void fn_802C1A0C(TreeObj* o, int car) {
             fn_802C1180(s);
         }
     }
-    int id = Expr1_fn_802C1A0C(o);
+    int id = ObjId(o);
     if (id >= 0 && id < lbl_8055FB2C) {
         TreeClass* c = fn_802C110C(id);
         TMtx** tbl = lbl_8055FB30;

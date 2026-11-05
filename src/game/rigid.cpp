@@ -428,10 +428,12 @@ static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 inline RMat33* RigidBody::Expr1_Update(void) {
     return &mtx.rot;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 inline RMat33* RigidBody::Expr2_Update(void) {
     return &invI;
 }

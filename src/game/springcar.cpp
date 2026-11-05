@@ -376,6 +376,7 @@ void SpringCar::vf14(void) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 inline int SpringWall::Expr1_Apply(void) {
     return this->dist < 0.0f, time < ramp;
 }
