@@ -535,16 +535,15 @@ static inline Role* Expr1_fn_80166898(int i) {
 }
 
 void fn_80166898(void) {
-    int i;
     lbl_8055E32B = 0;
     lbl_8055E318 = 0.0f;
     lbl_8055E320 = 0.0f;
     lbl_8055E31C = 0.0f;
-    for (i = 0; i < lbl_8055E32C->Count(); i++) {
-        lbl_8055E32C->At(i)->Reset();
+    for (int j = 0; j < lbl_8055E32C->Count(); j++) {
+        lbl_8055E32C->At(j)->Reset();
     }
-    for (i = 0; i < lbl_8042FEB0.count; i++) {
-        Role* r = Expr1_fn_80166898(i);
+    for (int k = 0; k < lbl_8042FEB0.count; k++) {
+        Role* r = Expr1_fn_80166898(k);
         r->owner = -1;
         r->start = lbl_8055E318 - fn_80129DC4(3, 0.0f, 2.0f * r->half);
     }
