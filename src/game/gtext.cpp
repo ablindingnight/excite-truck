@@ -372,7 +372,7 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
     if (*s == '\\') {
         for (int i = 0; i < lbl_80497F14.count; i++) {
             EscSeq* e = &lbl_80497F14.data[i];
-            if (strncasecmp(s + 1, e->name, strlen(e->name)) == 0) {
+            if (strncasecmp(s + 1, e->name, strlen(lbl_80497F14.data[i].name)) == 0) {
                 ArtItem* it = &lbl_8049846C.data[lbl_8049846C.count++];
                 f32 post = 0.0f;
                 it->esc = i;
