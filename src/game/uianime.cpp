@@ -152,9 +152,8 @@ static inline void StrCat(char* d, const char* s, int n) {
 
 inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
     if (sub) {
-        int j;
         ValueNode* f;
-        for (j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
+        for (int j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
             if (!strcasecmp(f->GetName(), "frame")) {
                 tr->n++;
             }
@@ -168,7 +167,7 @@ inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
             def.p.x = 0.0f;
             def.p.y = 0.0f;
             tr->n = 0;
-            for (j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
+            for (int j = 0; (f = sub->GetChildAt(j)) != 0; j++) {
                 if (!strcasecmp(f->GetName(), "frame")) {
                     UiAnimKey* prev = j > 0 ? &tr->keys[j - 1] : &def;
                     UiAnimKey* k = &tr->keys[tr->n++];
@@ -195,16 +194,19 @@ inline UiAnimList::UiAnimList(ValueTable* t, const char* key) {
     n = 0;
     len = 0.0f;
     if (t) {
-        int i;
-        ValueNode* c;
-        for (i = 0; (c = t->GetChild(i)) != 0; i++) {
-            if (!strcasecmp(c->GetName(), "anim")) {
-                n++;
+        {
+            ValueNode* c;
+            for (int i = 0; (c = t->GetChild(i)) != 0; i++) {
+                if (!strcasecmp(c->GetName(), "anim")) {
+                    n++;
+                }
             }
         }
         if (n > 0) {
             tracks = new ("ui_anim") UiAnimTrack[n];
             n = 0;
+            ValueNode* c;
+            int i;
             for (i = 0; (c = t->GetChild(i)) != 0; i++) {
                 if (!strcasecmp(c->GetName(), "anim") && HasNode(c, key)) {
                     ValueNode* sub = c->FindChild(key);
