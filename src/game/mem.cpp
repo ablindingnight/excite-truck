@@ -386,7 +386,7 @@ void StackHeap::Free(void* p, int type) {
     if (b->cookie != STACK_COOKIE) {
         fn_802E317C("MemFree: bad cookie at %x", b);
     }
-    if (*(u32*)((u8*)p + AlignUp(b->request, 4)) != STACK_COOKIE) {
+    if (*(u32*)((u8*)p + AlignUp(((StackBlock*)p - 1)->request, 4)) != STACK_COOKIE) {
         fn_802E317C("MemFree: overrun: footer cookie corruption in %s", b->name);
     }
     for (q = (u8*)p + b->request; q < (u8*)p + AlignUp(b->request, 4); q++) {
@@ -405,13 +405,16 @@ void StackHeap::Free(void* p, int type) {
         fn_802E317C("MemFree: %s was allocated %s, freed %s", b->name, fn_801281A0(b->type), fn_801281A0(type));
     }
     b->inUse = 0;
-    while (top && !top->inUse) {
+    while (top) {
+        if (top->inUse) {
+            break;
+        }
         StackBlock* t = top;
         top = t->prev;
         t->prev = 0;
     }
     if (top) {
-        used = (u8*)top - base + top->size + 64;
+        used = ((u8*)top - base) + (top->size + 64);
     } else {
         used = 0;
     }
