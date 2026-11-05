@@ -205,7 +205,7 @@ LineInfo* fn_8013BFE8(const char* full) {
     return Loop1_fn_8013BFE8(found, name);
 }
 
-void fn_8013C428(LineInfo* li) {
+static inline void ReleaseLine(LineInfo* li) {
     int i;
     for (i = 0; i < lbl_8042F8C8.count; i++) {
         if (lbl_8042F8C8.e[i].info == li) {
@@ -219,6 +219,10 @@ void fn_8013C428(LineInfo* li) {
             return;
         }
     }
+}
+
+void fn_8013C428(LineInfo* li) {
+    ReleaseLine(li);
 }
 
 }  // extern "C"
