@@ -1378,6 +1378,7 @@ public:
     void Process(void);
     void Flush(void);
     void Wait(const char* name);
+    void WaitFirst(const char* name);
     QueueNode* FindNodeFor(const char* name);
 
     TocSizer sizer;          // offset 0x4
@@ -1641,7 +1642,7 @@ void QueueNode::Free(void) {
 
 QueueNode* NodePool::Used(void) { return used; }
 
-void AsyncSetQueue::Wait(const char* name) {
+inline void AsyncSetQueue::Wait(const char* name) {
     QueueNode* n;
     ResourceSet* set;
     for (n = pending.head; n; n = n->next) {
@@ -1671,41 +1672,47 @@ void AsyncSetQueue::Wait(const char* name) {
     }
 }
 
+inline void AsyncSetQueue::WaitFirst(const char* name) {
+    QueueNode* n;
+    ResourceSet* set;
+    for (n = pending.First(); n; n = n->next) {
+        if (!strcasecmp(name, n->name)) {
+            s32 start = fn_802E2C20();
+            s32 next = start + 2000;
+            while (n->async->Status() != 2) {
+                s32 now;
+                fn_80127464();
+                fn_802E2D74(10);
+                now = fn_802E2C20();
+                if (now > next) {
+                    fn_802E30C8("res: waiting for %s...", n->name);
+                    next = now + 2000;
+                }
+            }
+            Process();
+            fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
+            break;
+        }
+    }
+    set = fn_8012BD3C(lbl_8055E000, name);
+    if (set) {
+        set->pending = 0;
+    } else {
+        fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
+    }
+}
+
 extern "C" void fn_8012E81C(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
-        QueueNode* n;
-        ResourceSet* set;
-        for (n = q->pending.First(); n; n = n->next) {
-            if (!strcasecmp(name, n->name)) {
-                s32 start = fn_802E2C20();
-                s32 next = start + 2000;
-                while (n->async->Status() != 2) {
-                    s32 now;
-                    fn_80127464();
-                    fn_802E2D74(10);
-                    now = fn_802E2C20();
-                    if (now > next) {
-                        fn_802E30C8("res: waiting for %s...", n->name);
-                        next = now + 2000;
-                    }
-                }
-                q->Process();
-                fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
-                break;
-            }
-        }
-        set = fn_8012BD3C(lbl_8055E000, name);
-        if (set) {
-            set->pending = 0;
-        } else {
-            fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
-        }
+        q->WaitFirst(name);
     }
 }
 
 extern "C" int fn_8012E938(const char* name) { return fn_8012BD3C(lbl_8055E000, name) != 0; }
 
+#pragma push
+#pragma dont_inline on
 extern "C" void fn_8012E96C(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
@@ -1721,6 +1728,7 @@ extern "C" void fn_8012E96C(const char* name) {
         }
     }
 }
+#pragma pop
 
 QueueNode* AsyncSetQueue::FindNodeFor(const char* name) {
     QueueNode* found = 0;
