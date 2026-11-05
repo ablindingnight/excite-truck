@@ -563,7 +563,7 @@ void fn_802ABC2C(void);
 void fn_802ABC80(const Frame* f, const Vec* off, f32 a, f32 b, f32 c);
 void fn_802ABE50(void);
 void fn_802ABE58(f32* p, f32* a, u32* b, f32 dt);
-void fn_802ABFF8(u32 a, f32 b);
+void fn_802ABFF8(f32 b, u32 a);
 void fn_802AC070(void);
 void fn_802AE9D0(void);
 void fn_802AEB3C(const Frame* f);
@@ -677,7 +677,7 @@ public:
     void SetAnim(u32 a);
     void SetShine(u8 a);
     void DrawLights(void);
-    void DrawFloor(u32 color, f32 a);
+    void DrawFloor(f32 a, u32 color);
 
     s32 index;            // offset 0x4
     CarUIModel* model;    // offset 0x8
@@ -1429,7 +1429,7 @@ struct FloorVtx {
     f32 t;      // offset 0x14
 };
 
-void CarUIScreen::DrawFloor(u32 color, f32 a) {
+void CarUIScreen::DrawFloor(f32 a, u32 color) {
     f32 z0;
     fn_802C942C(-1);
     Frame saved = *fn_802C86DC();
@@ -1447,7 +1447,7 @@ void CarUIScreen::DrawFloor(u32 color, f32 a) {
     fn_802C8638(&f);
     if (model->loaded) {
         if (shine) {
-            fn_802ABFF8(color, a);
+            fn_802ABFF8(a, color);
         }
         model->Draw();
         if (shine) {
@@ -1531,14 +1531,9 @@ void CarUIScreen::Draw(void) {
     CarPose p;
     if (lbl_8055F330) {
         fn_80253004(index, &p);
-        p.wheelY[0] = -0.3048f > p.wheelY[0] ? p.wheelY[0] : -0.3048f;
-        if (p.wheelY[1] < -0.3048f) {
-            p.wheelY[1] = p.wheelY[1];
-        } else {
-            p.wheelY[1] = -0.3048f;
+        for (int i = 0; i < 4; i++) {
+            p.wheelY[i] = p.wheelY[i] < -0.3048f ? p.wheelY[i] : -0.3048f;
         }
-        p.wheelY[2] = p.wheelY[2] < -0.3048f ? p.wheelY[2] : -0.3048f;
-        p.wheelY[3] = p.wheelY[3] < -0.3048f ? p.wheelY[3] : -0.3048f;
     } else {
         fn_802545C4(&p, bg, model);
     }
@@ -1562,18 +1557,19 @@ void CarUIScreen::Draw(void) {
         model->SetPose(&p.frame, p.wheelY, p.steer);
     }
     if (mode == 1) {
-        DrawFloor(reflColor, refl);
+        DrawFloor(refl, reflColor);
     }
     if (bg != -1) {
         Frame id;
         Identity(&id);
+        Frame* f = &id;
         if (lbl_8055F330) {
             id.pos.x = cam.pos.x;
             id.pos.y = cam.pos.y;
             id.pos.z = cam.pos.z;
-            fn_802C744C(bg, &id);
+            fn_802C744C(bg, f);
         } else {
-            fn_802C70AC(bg, &id, 0, 1);
+            fn_802C70AC(bg, f, 0, 1);
         }
     }
     if (lbl_8055F330) {
@@ -1599,7 +1595,7 @@ void CarUIScreen::Draw(void) {
         memset(&st, 0, 0x14);
     }
     if (shine && !tint) {
-        fn_802ABFF8(reflColor, refl);
+        fn_802ABFF8(refl, reflColor);
     }
     if (model->loaded) {
         model->Draw();

@@ -747,7 +747,7 @@ void fn_802ABE58(f32* t, f32* out, u32* color, f32 dt) {
     *out = z;
 }
 
-void fn_802ABFF8(u32 color, f32 z) {
+void fn_802ABFF8(f32 z, u32 color) {
     lbl_8055F92D = fn_802C2C00(1);
     lbl_804BD7B0.color = fn_802C990C(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
