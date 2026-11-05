@@ -34,12 +34,14 @@ struct AchLevel {
     const char* model;
 };
 
+class ValueNode;
 class AchSchedule {
 public:
     AchSchedule(void) {
         levels = NULL;
         count = 0;
     }
+    void Load(ValueNode* node);
     ~AchSchedule(void) {
         if (levels != NULL) {
             delete[] levels;
@@ -187,17 +189,40 @@ void AchievementsShutdown(void) {
 
 int AchFindCategory(const char* name);
 
-void AchLoad(void) {
-    AchCategory* cat;
-    ValueNode* node;
+inline void AchSchedule::Load(ValueNode* node) {
     ValueNode* child;
+    int j;
+    for (j = 0; (child = node->GetChildAt(j)) != NULL; j++) {
+        if (strcasecmp(child->GetName(), "level") == 0) {
+            count++;
+        }
+    }
+    if (count == 0) {
+        fn_802E317C("Achievements: achievements table %s has no \"level\" tables!", node->GetName());
+    }
+    levels = new ("schedule_item") AchLevel[count];
+    count = 0;
+    for (j = 0; (child = node->GetChildAt(j)) != NULL; j++) {
+        if (strcasecmp(child->GetName(), "level") == 0) {
+            levels[count].threshold = child->GetIntValue("threshhold");
+            levels[count].model = child->GetValue("model_name");
+            count++;
+        }
+    }
+}
+
+void AchLoad(void) {
+    ValueNode* node;
     AchSchedule* sched;
     u32 i;
-    int j;
     int idx;
 
-    for (i = 0, cat = lbl_802FDF30; i < NUM_CATEGORIES; i++, cat++) {
-        cat->loc_name = fn_80131234(cat->loc_key);
+    {
+        u32 n;
+        AchCategory* cat;
+        for (n = 0, cat = lbl_802FDF30; n < NUM_CATEGORIES; n++, cat++) {
+            cat->loc_name = fn_80131234(cat->loc_key);
+        }
     }
 
     lbl_8055D610 = fn_80131810("achievements.val");
@@ -213,23 +238,7 @@ void AchLoad(void) {
         if (idx >= 0 && idx < NUM_CATEGORIES) {
             if ((u32)idx < NUM_CATEGORIES) {
                 sched = new ("AchievementSchedule") AchSchedule;
-                for (j = 0; (child = node->GetChildAt(j)) != NULL; j++) {
-                    if (strcasecmp(child->GetName(), "level") == 0) {
-                        sched->count++;
-                    }
-                }
-                if (sched->count == 0) {
-                    fn_802E317C("Achievements: achievements table %s has no \"level\" tables!", node->GetName());
-                }
-                sched->levels = new ("schedule_item") AchLevel[sched->count];
-                sched->count = 0;
-                for (j = 0; (child = node->GetChildAt(j)) != NULL; j++) {
-                    if (strcasecmp(child->GetName(), "level") == 0) {
-                        sched->levels[sched->count].threshold = child->GetIntValue("threshhold");
-                        sched->levels[sched->count].model = child->GetValue("model_name");
-                        sched->count++;
-                    }
-                }
+                sched->Load(node);
                 lbl_802FDF30[idx].schedule = sched;
             }
         } else {
