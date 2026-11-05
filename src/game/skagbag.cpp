@@ -357,18 +357,20 @@ void fn_802B4E30(void) { lbl_8055F9C8 = -1; }
 void fn_802B4E3C(s32 owner) { lbl_8055F9C8 = owner; }
 
 static inline void ResolveBag(SkagBag* bag, void* ctx) {
+    int s;
     for (int i = 0; i < bag->count; i++) {
         SkagPoint* p = &bag->data[i];
-        for (int s = 0; s < 6; s++) {
+        for (s = 0; s < 6; s++) {
             p->slots[s] = fn_802B3DA4(ctx, p->id, s);
         }
     }
 }
 
 static inline void ResolveGrid(SkagGrid* g, void* ctx) {
+    SkagBag* bag;
     SkagCell* c = g->cells[0];
     for (u32 k = 0; k < 1024; k++, c++) {
-        SkagBag* bag = c->bag;
+        bag = c->bag;
         if (bag) {
             ResolveBag(bag, ctx);
         }

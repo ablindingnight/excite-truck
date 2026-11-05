@@ -339,8 +339,9 @@ void PathMan::vf14(void) {
 }
 
 static inline int Trigger(PathMan* m, const char* object, const char* path) {
+    bool any;
     int found = 0;
-    bool any = strcmp(object, "*") == 0;
+    any = strcmp(object, "*") == 0;
     for (int i = 0; i < m->count; i++) {
         PathClient* c = &m->clients[i];
         if ((any || strcmp(c->name, object) == 0) && fn_801DA064(c->follower, path)) {

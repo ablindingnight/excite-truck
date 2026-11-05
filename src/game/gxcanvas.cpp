@@ -794,8 +794,8 @@ void fn_802C4C80(gxStamp* st) {
 static inline void Loop1_fn_802C4C90(int colEnd, u8* run, int colStart, u16* d, u16* lut) {
     int col = 0;
     while (col < colEnd) {
-        int n = *run++;
         int opaque;
+        int n = *run++;
         if (n & 0x80) {
             n &= ~0x80;
             opaque = 1;
