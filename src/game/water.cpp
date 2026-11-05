@@ -832,7 +832,7 @@ void WaterSystem::Draw(void) {
     f32 nz;
     f32 dummy;
     fn_802C98DC(&dummy, &nz, &dummy, &dummy);
-    nz = nz + 0.001f;
+    nz += 0.001f;
     PVec c;
     c.x = cam2.pos.x + cam2.z.x * nz;
     c.y = cam2.pos.y + cam2.z.y * nz;

@@ -686,7 +686,7 @@ void fn_8026C014(int player) {
         if (pad.keys[6]) {
             boost = lbl_80563DF4;
         }
-        speed *= boost * (lbl_80563D94 + t * lbl_80563DA0);
+        speed = speed * boost * (lbl_80563D94 + t * lbl_80563DA0);
         roll = lbl_80563D78;
         if (pad.w40 & 8) {
             roll = speed;

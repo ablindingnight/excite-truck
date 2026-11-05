@@ -3092,7 +3092,7 @@ inline Pickup::Pickup(ValueNode* n) {
             c[1] += p.y;
         }
     }
-    c[0] *= 1.0f / k;
+    c[0] = c[0] * 1.0f / k;
     pos[1] = 0.0f;
     pos[0] = c[0];
     c[1] *= 1.0f / k;

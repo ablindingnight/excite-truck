@@ -161,7 +161,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
         }
-        y -= 40.0f;
+        y = y - 40.0f;
         strcpy(text, msg);
         char* p = text;
         while (strlen(p)) {
