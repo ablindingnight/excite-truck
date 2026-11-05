@@ -652,8 +652,27 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
+static inline int EscWidth(const s8* s, f32& h, double& adv) {
+    if (*s == '\\') {
+        for (int j = 0; j < lbl_80497F14.count; j++) {
+            const char* name = lbl_80497F14.data[j].name;
+            if (strncasecmp((const char*)s + 1, name, strlen(name)) == 0) {
+                EscSeq* e = &lbl_80497F14.data[j];
+                if (e->art) {
+                    h /= (fn_80235F64(e->art, e->artIdx));
+                    adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
+                } else {
+                    adv = h * e->scale;
+                }
+                return strlen(lbl_80497F14.data[j].name) + 1;
+            }
+        }
+    }
+    return 0;
+}
+
 f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
-    f32 adv;
+    double adv;
     f32 h;
     f32 gaps;
     f32 w;
@@ -666,42 +685,17 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     i = 0;
     strlen(s);
     while (s[i]) {
-        adv = f->height;
+        adv = (f32)f->height;
         h = f->height;
-        int skip;
-        u16 c;
-        Glyph* g;
-        if (s[i] == '\\') {
-            const char* p;
-            const char* name;
-            int j;
-            EscSeq* e;
-            p = s + i + 1;
-            for (j = 0; j < lbl_80497F14.count; j++) {
-                name = lbl_80497F14.data[j].name;
-                if (strncasecmp(p, name, strlen(name)) == 0) {
-                    e = &lbl_80497F14.data[j];
-                    if (e->art) {
-                        h /= (fn_80235F64(e->art, e->artIdx));
-                        adv = (h * fn_80235EF0(e->art, e->artIdx)) * e->scale + e->scale * (e->postspace * h);
-                    } else {
-                        adv = h * e->scale;
-                    }
-                    skip = strlen(lbl_80497F14.data[j].name) + 1;
-                    goto found;
-                }
-            }
-        }
-        skip = 0;
-    found:
+        int skip = EscWidth((const s8*)s + i, h, adv);
         if (skip) {
             i += skip;
-            w += adv;
+            w += (f32)adv;
             continue;
         }
         const char* next;
-        c = DecodeUTF8(s + i, &next);
-        g = &f->glyphs[c];
+        u16 c = DecodeUTF8(s + i, &next);
+        Glyph* g = &f->glyphs[c];
         w += g->width;
         i += next - (s + i);
         gaps = (g->pre + g->post) + gaps;
@@ -1037,7 +1031,7 @@ f32 fn_8023400C(int idx) {
     found:
         if (skip) {
             i += skip;
-            w += adv;
+            w += (f32)adv;
             continue;
         }
         const char* next;
