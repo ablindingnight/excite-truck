@@ -748,10 +748,11 @@ void fn_802DCFCC(void* ctx, s32 ind, s32 tex, f32 scale, f32 uvScale) {
         f32 l = Log2(scale);
         f32 d = Log2(128.0f) - l;
         f32 e = ceil(0.1f + (f32)__fabs(d));
-        int s = (d > 0.0f ? 1.0f : -1.0f) * e;
+        f32 sign = d > 0.0f ? 1.0f : -1.0f;
+        int s = sign * e;
         s = PMin(PMax(s, -46), 17);
         f32 p = pow(2.0, (f32)s);
-        scale = (scale * 0.0078125f) / p;
+        scale = (scale / 128.0f) / p;
         fn_802D3DF8(fn_802CA294(ind), scale, scale, s);
         GXSetNumIndStages(1);
         GXSetTevIndirect(0, 0, 0, 3, 1, 0, 0, 0, 0, 0);
