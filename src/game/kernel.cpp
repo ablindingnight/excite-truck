@@ -218,7 +218,7 @@ void fn_802E1728(Video* v) {
 u32 fn_802E176C(u32 x) { return 1 << (32 - __cntlzw(x)); }
 
 // A colour ramp: column k holds (k - 128, row - 128) in its two channels.
-void fn_802E1780(u8* dst, u32 w, int pitch) {
+void fn_802E1780(u8* dst, u32 w, u32 pitch) {
     u8* p;
     int a;
     int b;

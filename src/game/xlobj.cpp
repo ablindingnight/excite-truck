@@ -421,7 +421,7 @@ InlineVec<TexEntry*, 16> lbl_804BFFF4;
 InlineVec<XScale, 4> lbl_804C004C;
 TexEntry* lbl_804C0088[4];
 
-static inline TexEntry* FindTex(const char* name, int prio) {
+static inline TexEntry* FindTex(const char* name, s16 prio) {
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
         TexEntry* e = lbl_804BFFF4.data[i];
         if (strcasecmp(e->name, name) == 0) {

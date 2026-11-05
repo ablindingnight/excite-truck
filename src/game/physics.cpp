@@ -275,7 +275,7 @@ void fn_8017677C(int mode, u32 flags) {
     const char* flagNames[] = {"", "Restart Weekend", "Interlude", "No Pause", "Fade From Black", "PRACTICE"};
 }
 
-void fn_80176780(u32 req, const u8* extra) {
+void fn_80176780(u8 req, const u8* extra) {
     u32 flags;
     int mode;
     mode = req & 0xFF;
