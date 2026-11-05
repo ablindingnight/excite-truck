@@ -449,20 +449,21 @@ void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
 }
 
 void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
-    strlen(s);
-    while (*s) {
+    const char* p = s;
+    strlen(p);
+    while (*p) {
         f32 adv = h;
-        int skip = EscDraw(s, x, y, z, h, lbl_8055F050, &adv);
+        int skip = EscDraw(p, x, y, z, h, lbl_8055F050, &adv);
         if (skip > 0) {
-            s += skip;
+            p += skip;
             x += adv;
             continue;
         }
         const char* next;
-        u16 c = DecodeUTF8(s, &next);
+        u16 c = DecodeUTF8(p, &next);
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
-        s += next - s;
+        p += next - p;
         fn_80233AA4(f, c, x, y + h, x + scale * g->width, y, z);
         x += scale * f->glyphs[c].width;
         x += spacing + xs * (scale * f->glyphs[c].post);
