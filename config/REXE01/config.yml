@@ -18,3 +18,17 @@ block_relocations:
 # __OSDBJump's `bl +0x60` is copied to the debugger jump point at run time; its target only looks like a
 # branch into OSExceptionVector.
 - source: 0x8004B358
+# Data words that only look like addresses (found by comparing our raw bytes with the DOL; all four units are
+# 100% code): WPADEncrypt key table, mp3layer3 0x80008000 bit masks, db_directPrint font bitmap, crc table.
+- source: 0x8031286C
+- source: 0x8031C320
+- source: 0x8031C324
+- source: 0x8031C328
+- source: 0x8031C32C
+- source: 0x8031C330
+- source: 0x8031C334
+- source: 0x8031C338
+- source: 0x8031C33C
+- source: 0x802F4930
+- source: 0x802F4A50
+- source: 0x802F92D0
