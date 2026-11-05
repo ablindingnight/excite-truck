@@ -157,7 +157,6 @@ struct LinearDrone {
 // A drone moving along a Hermite path (0x70).
 struct HermiteDrone {
 public:
-    void Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt);
     HermiteDrone(void) {
         name = 0;
         entry = 0;
@@ -733,15 +732,17 @@ void HermiteDrone::Turn(f32 u) {
     QuatToFrame(&frame, &q);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void HermiteDrone::Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt) {
+void HermiteDrone::UpdateLoop(f32 dt) {
+    HermitePathData* data = entry->data;
+    HermiteKey* k = data->Loop(seg);
+    f32 nt = t + dt;
     f32 u = k->rate * nt;
     if (u < 1.0f) {
         t = nt;
     } else {
         t = t + (dt - 1.0f / k->rate);
         u = u - 1.0f;
-        seg = (seg + 1) % entry->data->count;
+        seg = (seg + 1) % data->count;
         k = entry->data->Loop(seg);
         q0 = q1;
         v0 = v1;
@@ -749,15 +750,12 @@ inline void HermiteDrone::Loop1_UpdateLoop(HermiteKey* k, f32 nt, f32 dt) {
         v1 = entry->data->Loop(seg + 1)->v;
     }
     HermitePathData* d = entry->data;
-    Curve(d->Loop(seg - 1), k, d->Loop(seg + 1), d->Loop(seg + 2), u);
+    HermiteKey* keys = d->keys;
+    int count = d->count;
+    int n = count + seg;
+    Curve(&keys[(n - 1) % count], k, &keys[(n + 1) % count], &keys[(n + 2) % count], u);
     Turn(u);
     v = v0 + u * (v1 - v0);
-}
-
-void HermiteDrone::UpdateLoop(f32 dt) {
-    f32 nt = t + dt;
-    HermiteKey* k = entry->data->Loop(seg);
-    Loop1_UpdateLoop(k, nt, dt);
 }
 
 void HermiteDrone::UpdateReverse(f32 dt) {
