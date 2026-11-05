@@ -196,9 +196,11 @@ public:
         lines = fn_802CAC28("bstrlines.tex", 0);
         arrows = fn_802CAC28("bstrarrows.tex", 0);
         fn_801E0890(this);
+        // MATCHING-AID: through a pointer local the loop seeds pointers from the base; through this it indexes. The real form is unknown.
+        BoostMan* m = this;
         for (i = 0; i < 4; i++) {
-            cars[i] = -1;
-            players[i].Reset();
+            m->cars[i] = -1;
+            m->players[i].Reset();
         }
         fn_801777CC(this);
     }
