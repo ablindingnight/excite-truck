@@ -287,8 +287,10 @@ static inline void AddAnchorAt(PSys* s, s32 idx, const RMtx* m, const RVec3* at)
 extern "C" {
 
 void fn_801C1218(PSys* s) {
-    f32 damp = -0.995f;
-    f32 keep = 1.995f;
+    f32 damp;
+    f32 keep;
+    keep = 1.995f;
+    damp = -0.995f;
     for (int i = 0; i < s->nPart; i++) {
         RVec3* p = &s->pos[i];
         RVec3* o = &s->old[i];

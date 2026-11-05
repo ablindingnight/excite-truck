@@ -687,7 +687,9 @@ int fn_8028BA44(const void* evp) {
     v.y = 0.0f;
     v.z = 0.0f;
     fn_80288A70(ev, &v, ev->pos.x);
-    fn_8028AA6C(&ev->vel, lbl_8055F700, ev->pos.x);
+    // MATCHING-AID: single-use local; it sets the load order. The real form is unknown.
+    f32 x = ev->pos.x;
+    fn_8028AA6C(&ev->vel, lbl_8055F700, x);
     return 0x14;
 }
 

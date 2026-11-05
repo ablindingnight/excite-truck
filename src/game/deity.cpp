@@ -662,8 +662,10 @@ int fn_801B11DC(const void* pa, const void* pb) {
     ar = a->rank;
     s32 br = b->rank;
     if (aFin && bFin) {
-        f32 curFinishTime = b->finishTime;
-        if ((f32)__fabs(a->finishTime - curFinishTime) <= lbl_80558DC4[0]) {
+        // MATCHING-AID: single-use local; it sets the load order. The real form is unknown.
+        f32 ta = a->finishTime;
+        f32 tb = b->finishTime;
+        if ((f32)__fabs(ta - tb) <= lbl_80558DC4[0]) {
             return 0;
         }
         if (b->finishTime < a->finishTime) {
