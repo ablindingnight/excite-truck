@@ -874,6 +874,8 @@ extern const f32 lbl_80563C7C;  // shake decay per frame
 
 // Per-frame camera update for player idx: run the current camera type, blend from last frame's pose by the
 // tick alpha, and fill the view (pose, fov, rumble, flags). The shake levels decay unless paused.
+#pragma push
+#pragma optimization_level 3
 void fn_802678E8(u8* view, int idx) {
     fn_802670A0(view, idx);
     if (fn_801C5B68(view, idx)) {
@@ -917,9 +919,9 @@ void fn_802678E8(u8* view, int idx) {
     if (c->mode != 0x11) {
         CamPose blend;
         f32 k = lbl_8055E460;
+        f32* d = (f32*)&blend;
         const f32* a = (const f32*)&c->lastPose;
         const f32* b = (const f32*)&c->pose;
-        f32* d = (f32*)&blend;
         for (int i = 0; i < 12; i++) {
             f32 y = b[i];
             f32 x = a[i];
@@ -979,6 +981,7 @@ done:
     fn_80267130(view);
     fn_802671CC(view);
 }
+#pragma pop
 
 void fn_80267E40(u32 id, f32 strength) {
     f32 now = lbl_8055E3C8;

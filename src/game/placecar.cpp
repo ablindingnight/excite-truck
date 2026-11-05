@@ -212,6 +212,10 @@ f32 fn_801B79AC(void) { return fn_80137C54(-1)->carLen; }
 
 extern const f32 lbl_80562700;  // 5.0f: lane offset of the grid columns
 
+#pragma push
+#pragma opt_lifetimes off
+#pragma push
+#pragma opt_lifetimes off
 void fn_801B79D4(Respawn* r, int car, int mode) {
     LineFollower* f = fn_801B2ED0(car)->Follower();
     f32 row = fn_80139048();
@@ -226,7 +230,7 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
     } else {
         side = -lbl_80562700;
     }
-    row = 0.5f * -fn_801B79AC() - (f32)(car / 2) * row;
+    row = -fn_801B79AC() / 2.0f - (f32)(car / 2) * row;
     f32 back = 100.0f;
     IdealPoint* first = fn_80156A40()->GetLine(0)->points;
     IdealPoint* p = first;
@@ -251,6 +255,8 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
         r->vel.z = 0.0f;
     }
 }
+#pragma pop
+#pragma pop
 
 void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
     V3 u;
