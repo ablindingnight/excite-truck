@@ -1291,7 +1291,8 @@ extern "C" {
 
 // Writes this obstacle's draw state into the frame buffer: its pose (blended from the previous one when the
 // draw falls between physics steps) and part id; links also work out both anchor points.
-void fn_801ACB30(u8* p, u8* buf) {
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_801ACB30(u8* buf, u8* p) {
     f32 f = lbl_8055E460;
     u8* out = buf + S32(p, 0x8);
     if ((f32)__fabs(f - lbl_805624AC) <= lbl_80558DC4[0]) {
@@ -1307,6 +1308,10 @@ void fn_801ACB30(u8* p, u8* buf) {
         *(ObPose*)out = t;
     }
     *(s16*)(out + 0x30) = *(s16*)(p + 0x6C);
+}
+
+void fn_801ACB30(u8* p, u8* buf) {
+    Loop1_fn_801ACB30(buf, p);
     if (PTR(p, 0x23C)) {
         ObVec3 a;
         ObRotate(&a, (f32*)(p + 0x3C), (ObVec3*)(p + 0x244));
