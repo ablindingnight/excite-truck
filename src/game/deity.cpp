@@ -487,7 +487,7 @@ struct LinePlace {
     s32 mode;
 };
 
-void fn_801B0BB0(LinePlace* out, const LineFollower* f) {
+void fn_801B0BB0(LinePlace* out, LineFollower* f) {
     IdealPoint* seg = f->il.seg;
     out->seg = seg;
     out->t = f->il.t;

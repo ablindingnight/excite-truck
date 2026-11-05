@@ -291,7 +291,7 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline f32 RampValue(Ramp* r) {
+static inline f32 RampValue(const Ramp* r) {
     f32 t1 = r->t1;
     f32 t0 = r->t0;
     if (NearEq(t0, t1)) {

@@ -45,7 +45,7 @@ static inline f32 atan2f(f32 y, f32 x) { return atan2(y, x); }
 
 ModuleTag lbl_8055E028;
 
-extern "C" void fn_8012F57C(Quat* out, Quat* a, Quat* b, f32 t) {
+extern "C" void fn_8012F57C(Quat* out, Quat* a, const Quat* b, f32 t) {
     f32 zv = b->z;
     f32 cosom = a->w * b->w + a->x * b->x + a->y * b->y + a->z * zv;
     f32 sinom;

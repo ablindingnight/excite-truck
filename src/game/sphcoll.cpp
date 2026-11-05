@@ -3227,7 +3227,7 @@ u8* fn_801A1898(u8* p, u32 a, u32 swap) {
 }
 
 // Axis-aligned bounds of the volume: both axis end points (org +- axis * k), widened by k.
-void fn_801A18D4(u8* p, RVec3* lo, RVec3* hi) {
+void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
     PVec3 org;
     PVec3 axis;
     RVec3 a;
@@ -3389,7 +3389,7 @@ static inline void BoxCorners(RVec3* c, f32 hx, f32 hy, f32 hz) {
     c[7].x = nx; c[7].y = ny; c[7].z = nz;
 }
 
-void fn_801A1F98(u8* p, RVec3* lo, RVec3* hi) {
+void fn_801A1F98(const u8* p, RVec3* lo, RVec3* hi) {
     RVec3 c[8];
     BoxCorners(c, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
     RVec3 w;

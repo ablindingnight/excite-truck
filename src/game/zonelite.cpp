@@ -119,7 +119,7 @@ bool fn_802A9048(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802A9090(ZVec& vb, ZFrame* f) {
+static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     f32 xv = vb.x;
     f->pos.x = lbl_804BD6F8[0].x + xv;
     f32 yv = vb.y;

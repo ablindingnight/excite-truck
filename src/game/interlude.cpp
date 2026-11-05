@@ -1529,7 +1529,7 @@ static inline void MulM(Mat3* out, const Mat3* a, const Mat3* b) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(IVec3* out, const IVec3* in, const Mat3* m) {
+static inline void MulVec(IVec3* out, const IVec3* in, Mat3* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
         f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);

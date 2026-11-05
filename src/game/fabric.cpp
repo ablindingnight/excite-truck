@@ -711,7 +711,7 @@ void fn_801F6778(PVec* out, int n, f32 gravity, f32 wind, const PVec* random) {
     }
 }
 
-void fn_801F6880(Fabric* f) {
+void fn_801F6880(const Fabric* f) {
     f32 old = fn_802C9A4C(f->lod);
     fn_802C8BD0(f->tex);
     if (fn_802C8DBC((f->rows - 1) * (f->cols * 2))) {

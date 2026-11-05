@@ -409,7 +409,7 @@ void AchQueryValue(AchQuery* q) {
 }
 
 int AchGetLevel(int category, s32 value) {
-    AchSchedule* sched;
+    const AchSchedule* sched;
     int i;
 
     if (category >= 0 && (u32)category < NUM_CATEGORIES) {

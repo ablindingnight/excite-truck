@@ -510,7 +510,8 @@ Mp3Reader* fn_802EA834(int idx, s32* size) {
 
 void fn_802EAA08(void) {
     if (lbl_805600B8 >= lbl_805600A4) {
-        memcpy(lbl_805600A0, lbl_805600A0 + lbl_805600A4, lbl_805600B8 - lbl_805600A4);
+        int n = lbl_805600B8 - lbl_805600A4;
+        memcpy(lbl_805600A0, lbl_805600A0 + lbl_805600A4, n);
         lbl_805600B8 -= lbl_805600A4;
     }
 }
