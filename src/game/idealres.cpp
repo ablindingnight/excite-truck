@@ -369,6 +369,29 @@ static inline void Perp(V2* v) {
     v->y = -t;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline IdealPoint* Loop1_fn_801386D0(IdealPoint* p, f32 lap, f32 amount, f32 radius, f32 step, IdealPoint* q, IdealPoint*& end, IdealLineRes* line, f32& acc) {
+    do {
+        f32 w = fn_801385F0(p->dist, lap, amount, radius);
+        if (w > 0.0f) {
+            f32 k = w * step;
+            V2 m = MakeV2(q->dir.y + 0.5f * (p->dir.y - q->dir.y), q->dir.x + 0.5f * (p->dir.x - q->dir.x));
+            p->lat += k;
+            {
+                V2 n = m;
+                Perp(&n);
+                p->pos.x += n.x * k;
+                p->pos.y += n.y * k;
+            }
+        }
+        end = line->points;
+        q = p;
+        p = p->next;
+    } while (q != end);
+    acc = 0.0f;
+    return q;
+}
+
 int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
     f32 t = 0.0f;
     int fail = 0;
@@ -380,24 +403,7 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
         p = q->next;
         IdealPoint* end;
         f32 acc;
-        do {
-            f32 w = fn_801385F0(p->dist, lap, amount, radius);
-            if (w > 0.0f) {
-                f32 k = w * step;
-                V2 m = MakeV2(q->dir.y + 0.5f * (p->dir.y - q->dir.y), q->dir.x + 0.5f * (p->dir.x - q->dir.x));
-                p->lat += k;
-                {
-                    V2 n = m;
-                    Perp(&n);
-                    p->pos.x += n.x * k;
-                    p->pos.y += n.y * k;
-                }
-            }
-            end = line->points;
-            q = p;
-            p = p->next;
-        } while (q != end);
-        acc = 0.0f;
+        q = Loop1_fn_801386D0(p, lap, amount, radius, step, q, end, line, acc);
         q = end;
         do {
             IdealPoint* nx = q->next;

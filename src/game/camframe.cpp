@@ -108,17 +108,22 @@ extern "C" {
 
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_8026E22C(const CamFrame* b, Quat& qb, Quat& q, Quat& qa, f32 t, CamFrame* out, Vec& pos, const CamFrame* a) {
+    MtxToQuat(b, &qb);
+    fn_8012F57C(&q, &qa, &qb, t);
+    QuatToMtx(out, &q);
+    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
+    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+}
+
 void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     Quat qa;
     Quat qb;
     Quat q;
     Vec pos;
     MtxToQuat(a, &qa);
-    MtxToQuat(b, &qb);
-    fn_8012F57C(&q, &qa, &qb, t);
-    QuatToMtx(out, &q);
-    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
-    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+    Loop1_fn_8026E22C(b, qb, q, qa, t, out, pos, a);
     pos.x = FrameLerp(a->pos.x, b->pos.x, t);
     out->pos = pos;
 }

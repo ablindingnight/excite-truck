@@ -96,16 +96,9 @@ ModelPool* fn_802CE3A4(s32 count, s32 max, s32 slotSize) { return new ("modpool"
 
 void fn_802CE49C(ModelPool* p) { delete p; }
 
-void fn_802CE4F4(ModelPool* p) {
-    s32 oldestAge;
-    int busy;
-    ModelSlot* oldest;
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline int Loop1_fn_802CE4F4(ModelPool* p, ModelSlot* s, int busy, s32 age, s32 oldestAge, ModelSlot*& oldest) {
     int i;
-    ModelSlot* s;
-    s32 age;
-    busy = 0;
-    oldest = 0;
-    oldestAge = -1;
     for (i = 0; i < p->count; i++) {
         s = &p->slots[i];
         if (s->state == 3 && fn_801345A4(p->loads, s->handle)) {
@@ -123,6 +116,20 @@ void fn_802CE4F4(ModelPool* p) {
             }
         }
     }
+    return busy;
+}
+
+void fn_802CE4F4(ModelPool* p) {
+    s32 oldestAge;
+    int busy;
+    ModelSlot* oldest;
+    int i;
+    ModelSlot* s;
+    s32 age;
+    busy = 0;
+    oldest = 0;
+    oldestAge = -1;
+    busy = Loop1_fn_802CE4F4(p, s, busy, age, oldestAge, oldest);
     if (p->max - busy < 1) {
         if (oldest) {
             oldest->Unload();

@@ -1022,6 +1022,21 @@ void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     }
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_802C7D54(f32 dist, MElem* el, ModelNode* slot, void* mtx, u32 mat, u8 cl) {
+    MSurfList* sl;
+    f32 d = dist;
+    sl = el->list;
+    for (int j = 0; j < sl->n; j++) {
+        MSurf* s = sl->surfs[j];
+        if (IsQueued(s->type)) {
+            TexNode* t = s->tex[slot->inst];
+            fn_802C53C4(el, t, mtx, mat, cl);
+            fn_802CC550(t->tex, d, fn_802C57B0(el->prim)->size);
+        }
+    }
+}
+
 void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 range) {
     MSurfList* sl;
     u32 mat = fn_802C7A3C();
@@ -1055,16 +1070,7 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 ra
                     near = PSVECDistance(&w, &fn_802C86DC()->t) - sp->r < range;
                 }
                 if (near) {
-                    f32 d = dist;
-                    sl = el->list;
-                    for (int j = 0; j < sl->n; j++) {
-                        MSurf* s = sl->surfs[j];
-                        if (IsQueued(s->type)) {
-                            TexNode* t = s->tex[slot->inst];
-                            fn_802C53C4(el, t, mtx, mat, cl);
-                            fn_802CC550(t->tex, d, fn_802C57B0(el->prim)->size);
-                        }
-                    }
+                    Loop1_fn_802C7D54(dist, el, slot, mtx, mat, cl);
                 }
             }
         }

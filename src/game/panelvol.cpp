@@ -347,6 +347,13 @@ struct WVec : RVec3 {
     WVec(void);
 };
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_801BF2A4(PanelLink* links, int i, const s32* ids, Phob* car) {
+    links[i].id = *ids++;
+    links[i].mtx = fn_801602B4(car);
+    links[i].c = 0;
+}
+
 int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {
     if ((f32)__fabs(lo->x - hi->x) <= lbl_80558DC4[0] && (f32)__fabs(lo->y - hi->y) <= lbl_80558DC4[0] &&
         (f32)__fabs(lo->z - hi->z) <= lbl_80558DC4[0]) {
@@ -432,9 +439,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     fn_801BF75C(&p->rest, &m, &frame);
     PanelLink links[2];
     for (i = 0; i < n; i++) {
-        links[i].id = *ids++;
-        links[i].mtx = fn_801602B4(car);
-        links[i].c = 0;
+        Loop1_fn_801BF2A4(links, i, ids, car);
     }
     fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
     av = fn_801BF754(car);

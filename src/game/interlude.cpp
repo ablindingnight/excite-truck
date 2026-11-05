@@ -472,17 +472,22 @@ f32 fn_801C2F58(int n, f32 x) {
 // Blends two camera frames: orientation through quaternion slerp, position linearly.
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_801C2FF4(const IFrame* b, IQuat& qb, IQuat& q, IQuat& qa, f32 t, IFrame* out, IVec3& pos, const IFrame* a) {
+    FrameToQuat(b, &qb);
+    fn_8012F57C(&q, &qa, &qb, t);
+    QuatToFrame(out, &q);
+    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
+    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+}
+
 void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     IQuat qa;
     IQuat qb;
     IQuat q;
     IVec3 pos;
     FrameToQuat(a, &qa);
-    FrameToQuat(b, &qb);
-    fn_8012F57C(&q, &qa, &qb, t);
-    QuatToFrame(out, &q);
-    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
-    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+    Loop1_fn_801C2FF4(b, qb, q, qa, t, out, pos, a);
     pos.x = FrameLerp(a->pos.x, b->pos.x, t);
     out->pos = pos;
 }
@@ -1776,6 +1781,15 @@ static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
 
 // Add camera: a move from the current editor camera to the destination one over the transition time,
 // stored as linear and angular velocities in the current camera's frame.
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop2_fn_801C6E40(CamPose* cur, Mat3& inv, Mat3& d, CamPose* dst, IVec3& dp) {
+    Mat3 rotv = cur->rot;
+    inv = rotv;
+    fn_801C7254(&inv);
+    Mat3Mul(&d, &dst->rot, &inv);
+    fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
+}
+
 void fn_801C6E40(void) {
     u8* s = lbl_80437D88;
     lbl_8055E830 = atof((char*)(s + 0x368));
@@ -1793,12 +1807,7 @@ void fn_801C6E40(void) {
         IVec3 dp;
         Mat3 d;
         Mat3 inv;
-        CamPose* dst = (CamPose*)(s + 0x498);
-        Mat3 rotv = cur->rot;
-        inv = rotv;
-        fn_801C7254(&inv);
-        Mat3Mul(&d, &dst->rot, &inv);
-        fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
+        Loop2_fn_801C6E40(cur, inv, d, (CamPose*)(s + 0x498), dp);
         RotToAxisAngle(&d, &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;

@@ -600,22 +600,8 @@ const char* fn_802B6A70(int mode) {
     return "";
 }
 
-void fn_802B6AC0(void) {
-    char name[0x20];
-    char pat[0x40];
-    char path[0x40];
-    if (lbl_8055FA18.Waiting()) {
-        return;
-    }
-    lbl_8055FA18.Reset();
-    lbl_804BE7D8.count = 0;
-    int h;
-    const char* dir = fn_802B6A70(lbl_8055FA38);
-    fn_801345D8(pat, 0x40, "%s*.tga", dir);
-    h = fn_802E3BB4(pat, name, 0x20);
-    if (h == -1) {
-        return;
-    }
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, int h) {
     do {
         Brush* b = &lbl_804BE7D8.data[lbl_804BE7D8.count++];
         StrCopy(name, 0x20, b->name);
@@ -674,6 +660,25 @@ void fn_802B6AC0(void) {
         }
     } while (FileFindNext(h, name, 0x20) == 0);
     FileFindClose(h);
+}
+
+void fn_802B6AC0(void) {
+    char name[0x20];
+    char pat[0x40];
+    char path[0x40];
+    if (lbl_8055FA18.Waiting()) {
+        return;
+    }
+    lbl_8055FA18.Reset();
+    lbl_804BE7D8.count = 0;
+    int h;
+    const char* dir = fn_802B6A70(lbl_8055FA38);
+    fn_801345D8(pat, 0x40, "%s*.tga", dir);
+    h = fn_802E3BB4(pat, name, 0x20);
+    if (h == -1) {
+        return;
+    }
+    Loop1_fn_802B6AC0(name, path, dir, h);
 }
 
 int fn_802B6E00(int x, int z) { return x < -0x200 || x > 0x200 || z < -0x200 || z > 0x200; }

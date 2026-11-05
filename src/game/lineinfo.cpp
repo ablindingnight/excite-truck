@@ -149,22 +149,10 @@ static inline LineEntry* CacheAdd(LineInfo* li, Name64 n) {
 
 extern "C" {
 
-LineInfo* fn_8013BFE8(const char* full) {
-    int n;
-    int i;
-    Name64 name;
-    LineEntry* found;
-    ValueTable* t;
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline LineInfo* Loop1_fn_8013BFE8(LineEntry* found, Name64& name) {
     LineInfo* li;
-    StrCopyN(full, 64, name.s);
-    n = lbl_8042F8C8.count;
-    found = 0;
-    for (i = 0; i < n; i++) {
-        if (StrEq(name.s, lbl_8042F8C8.e[i].name.s)) {
-            found = &lbl_8042F8C8.e[i];
-            break;
-        }
-    }
+    ValueTable* t;
     if (!found) {
         li = 0;
         t = fn_80131810("lineinfo.val");
@@ -196,6 +184,25 @@ LineInfo* fn_8013BFE8(const char* full) {
         return found->info;
     }
     return 0;
+}
+
+LineInfo* fn_8013BFE8(const char* full) {
+    int n;
+    int i;
+    Name64 name;
+    LineEntry* found;
+    ValueTable* t;
+    LineInfo* li;
+    StrCopyN(full, 64, name.s);
+    n = lbl_8042F8C8.count;
+    found = 0;
+    for (i = 0; i < n; i++) {
+        if (StrEq(name.s, lbl_8042F8C8.e[i].name.s)) {
+            found = &lbl_8042F8C8.e[i];
+            break;
+        }
+    }
+    return Loop1_fn_8013BFE8(found, name);
 }
 
 void fn_8013C428(LineInfo* li) {

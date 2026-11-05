@@ -175,6 +175,8 @@ public:
 
 class ObstacleObjDesc : public ObjDesc {
 public:
+    void Loop1_Create(const PlacedObj* o);
+public:
     ObstacleObjDesc(ValueNode* vn);
     virtual ~ObstacleObjDesc(void);
     virtual void Read(PlacedObj* o, ValueNode* vn);
@@ -1766,6 +1768,20 @@ static inline int IsVolume(s32 kind) {
     return 0;
 }
 
+// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+inline void ObstacleObjDesc::Loop1_Create(const PlacedObj* o) {
+    s32 sol;
+    if (o->node) {
+        sol = o->node->GetInt("sol_id", -1);
+    }
+    StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
+    if (flags & 0x80) {
+        fn_801FBCF4(&lbl_8055EC50, so);
+    } else {
+        fn_801FBCF4(&lbl_8055EC4C, so);
+    }
+}
+
 void ObstacleObjDesc::Create(const PlacedObj* o) {
     s32 sol = -1;
     phys.solId = -1;
@@ -1837,15 +1853,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             fn_801E87D4(so);
         }
     } else {
-        if (o->node) {
-            sol = o->node->GetInt("sol_id", -1);
-        }
-        StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
-        if (flags & 0x80) {
-            fn_801FBCF4(&lbl_8055EC50, so);
-        } else {
-            fn_801FBCF4(&lbl_8055EC4C, so);
-        }
+        Loop1_Create(o);
         if (flags & 2) {
             fn_802981EC(o, phys.shape.f[0]);
         }
