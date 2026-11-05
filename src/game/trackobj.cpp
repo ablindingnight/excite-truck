@@ -175,7 +175,7 @@ public:
 
 class ObstacleObjDesc : public ObjDesc {
 public:
-    void Loop1_Create(const PlacedObj* o);
+    void Loop1_Create(const PlacedObj* o, s32 sol);
 public:
     ObstacleObjDesc(ValueNode* vn);
     virtual ~ObstacleObjDesc(void);
@@ -1769,8 +1769,7 @@ static inline int IsVolume(s32 kind) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline void ObstacleObjDesc::Loop1_Create(const PlacedObj* o) {
-    s32 sol;
+inline void ObstacleObjDesc::Loop1_Create(const PlacedObj* o, s32 sol) {
     if (o->node) {
         sol = o->node->GetInt("sol_id", -1);
     }
@@ -1853,7 +1852,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             fn_801E87D4(so);
         }
     } else {
-        Loop1_Create(o);
+        Loop1_Create(o, sol);
         if (flags & 2) {
             fn_802981EC(o, phys.shape.f[0]);
         }

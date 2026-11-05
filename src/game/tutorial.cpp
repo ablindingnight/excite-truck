@@ -1186,22 +1186,6 @@ int fn_80161ECC(void) {
     return n;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80161F10(Event* e, s32 driver) {
-    s32 vehicle;
-    u32 color;
-    if (e->vals->Has("player_car")) {
-        vehicle = FindVehicleNamed(e->vals->GetValue("player_car"), 0)->id;
-    }
-    color = GetDriver(driver)->color;
-    if (e->vals->Has("player_color")) {
-        s32 c = e->vals->GetIntValue("player_color");
-        color = FindVehicle(vehicle)->colors[c];
-    }
-    SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
-    SetPlayer(0, driver, vehicle, color);
-}
-
 void fn_80161F10(int n) {
     Event* e;
     u32 color;
@@ -1216,7 +1200,16 @@ void fn_80161F10(int n) {
     fn_80137C84(fn_802E4A10(), 0);
     driver = GetDriver(0)->id;
     vehicle = GetDriverVehicle(driver)->id;
-    Loop1_fn_80161F10(e, driver);
+    if (e->vals->Has("player_car")) {
+        vehicle = FindVehicleNamed(e->vals->GetValue("player_car"), 0)->id;
+    }
+    color = GetDriver(driver)->color;
+    if (e->vals->Has("player_color")) {
+        s32 c = e->vals->GetIntValue("player_color");
+        color = FindVehicle(vehicle)->colors[c];
+    }
+    SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
+    SetPlayer(0, driver, vehicle, color);
     lbl_8055A0BC = n;
     lbl_8055A0C0 = fn_801615B4(n);
     fn_8023BEC4(ev, buf);

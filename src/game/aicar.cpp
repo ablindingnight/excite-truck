@@ -2311,8 +2311,7 @@ void fn_8019743C(u8* d, u8* out) {
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c);
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, u8* p, int r) {
-    int ok;
+static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, u8* p, int r, int ok) {
     if (!(v > 4.4444447f)) {
         int same = 0;
         if (id == S32(d, 0x114) && v > 2.2222223f) {
@@ -2343,7 +2342,7 @@ int fn_8019799C(u8* d, u8* p) {
     }
     int ok = 1;
     f32 v = -F32(p, 0x10);
-    return Loop4_fn_8019799C(v, S32(p, 0x18), d, p, r);
+    return Loop4_fn_8019799C(v, S32(p, 0x18), d, p, r, ok);
 }
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
