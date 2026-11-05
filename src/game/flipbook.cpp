@@ -387,6 +387,17 @@ static inline f32 Ease(f32 s) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+static inline const ValVec3* Loop1_fn_80296D2C(u32 flags, FlipFrame** fr, f32 k, const ValVec3* o) {
+    if (flags & 8) {
+        FVec off(Lerp(fr[0]->offset.x, fr[1]->offset.x, k), Lerp(fr[0]->offset.y, fr[1]->offset.y, k),
+                 Lerp(fr[0]->offset.z, fr[1]->offset.z, k));
+        o = &off;
+    } else {
+        o = &fr[0]->offset;
+    }
+    return o;
+}
+
 int fn_80296D2C(FlipBook* b, f32 t, const ValVec3* pos) {
     FlipFrame* fr[2] = {0, 0};
     f32 start = 0.0f;
@@ -414,13 +425,7 @@ int fn_80296D2C(FlipBook* b, f32 t, const ValVec3* pos) {
     ValVec3 d;
     V3 p;
     const ValVec3* o;
-    if (flags & 8) {
-        FVec off(Lerp(fr[0]->offset.x, fr[1]->offset.x, k), Lerp(fr[0]->offset.y, fr[1]->offset.y, k),
-                 Lerp(fr[0]->offset.z, fr[1]->offset.z, k));
-        o = &off;
-    } else {
-        o = &fr[0]->offset;
-    }
+    o = Loop1_fn_80296D2C(flags, fr, k, o);
     *(GVec*)&d = *(const GVec*)o;
     p.x = d.x + pos->x;
     p.y = d.y + pos->y;

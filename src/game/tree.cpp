@@ -606,6 +606,39 @@ TArray<TCell>* fn_802BD478(const char* tag, TFileArray<TCell>* f);
 void fn_802BD4DC(TListFile* f, u8* base);
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
+static inline void Loop2_fn_802BD210(TListEntry* e, TreeRec* tr, TreeType* t) {
+    if (e) {
+        TreeSet* s = new ("treelist") TreeSet;
+        if (s) {
+            s->list = fn_802BD414("tree:frame_list", &e->list);
+            s->frames = fn_802BD478("tree:near_list", &e->frames);
+            s->near = fn_802BD478("tree:near_list", &e->near);
+            int n = s->list->n;
+            for (int j = 0; j < n; j++) {
+                tr = &s->list->data[j];
+                TRot r;
+                r.x = tr->mtx.pos.x;
+                r.z = tr->mtx.pos.z;
+                r.scale = PSVECMag(&tr->mtx.rot[2]);
+                r.dx = tr->mtx.rot[2].x;
+                r.dz = tr->mtx.rot[2].z;
+                f32 inv = 1.0f / (f32)sqrt(r.dx * r.dx + r.dz * r.dz);
+                r.dx *= inv;
+                r.dz *= inv;
+                fn_802BCA8C(&s->list->data[j], &r, t);
+                if ((j & 0x3F) == 0) {
+                    fn_80127464();
+                }
+            }
+            fn_802BC44C(s->frames);
+            fn_802BC44C(s->near);
+        }
+        t->set = s;
+    } else {
+        t->set = 0;
+    }
+}
+
 void fn_802BD210(void) {
     TreeRec* tr;
     u32 version = 0;
@@ -619,36 +652,7 @@ void fn_802BD210(void) {
             for (int i = 0; i < lbl_804C00D4.n; i++) {
                 TreeType* t = &lbl_804C00D4.data[i];
                 TListEntry* e = fn_802BD194(lbl_8055FAB8, t->name);
-                if (e) {
-                    TreeSet* s = new ("treelist") TreeSet;
-                    if (s) {
-                        s->list = fn_802BD414("tree:frame_list", &e->list);
-                        s->frames = fn_802BD478("tree:near_list", &e->frames);
-                        s->near = fn_802BD478("tree:near_list", &e->near);
-                        int n = s->list->n;
-                        for (int j = 0; j < n; j++) {
-                            tr = &s->list->data[j];
-                            TRot r;
-                            r.x = tr->mtx.pos.x;
-                            r.z = tr->mtx.pos.z;
-                            r.scale = PSVECMag(&tr->mtx.rot[2]);
-                            r.dx = tr->mtx.rot[2].x;
-                            r.dz = tr->mtx.rot[2].z;
-                            f32 inv = 1.0f / (f32)sqrt(r.dx * r.dx + r.dz * r.dz);
-                            r.dx *= inv;
-                            r.dz *= inv;
-                            fn_802BCA8C(&s->list->data[j], &r, t);
-                            if ((j & 0x3F) == 0) {
-                                fn_80127464();
-                            }
-                        }
-                        fn_802BC44C(s->frames);
-                        fn_802BC44C(s->near);
-                    }
-                    t->set = s;
-                } else {
-                    t->set = 0;
-                }
+                Loop2_fn_802BD210(e, tr, t);
             }
         } else {
             fn_802E317C("tree: bad treelist version %d", version);
@@ -870,57 +874,60 @@ void fn_802BDD58(void) {
     }
 }
 
+static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
+    if (t->set) {
+        TArray<TCell>* near = t->set->near;
+        TArray<TreeRec>* list = t->set->list;
+        if (t->farTris <= 10) {
+            fn_802C8BD0(fn_802C28C0());
+            fn_802DC71C(t->farId, t->farTex);
+            f32 span;
+            f32 r2 = range * range;
+            f32 in = range - 50.0f;
+            span = r2 - in * in;
+            TMtx cam;
+            fn_801F1C24(&cam);
+            const TVec* eye = (const TVec*)(fn_801E8718(-1) + 0x24);
+            for (int j = 0; j < near->n; j++) {
+                TCell* c = &near->data[j];
+                if (Live(c)) {
+                    s32 id = t->farId;
+                    for (int n = c->first; n < c->first + c->count; n++) {
+                        TreeRec* tr = &list->data[n];
+                        f32 d = PSVECSquareDistance(&tr->mtx.pos, eye);
+                        if (d <= r2) {
+                            f32 a = (r2 - d) / span;
+                            a = (1.0f < a) ? 1.0f : a;
+                            TMtx m;
+                            f32 s = tr->mtx.rot[1].y;
+                            m.rot[0].x = cam.rot[0].x * s;
+                            m.rot[0].y = cam.rot[0].y * s;
+                            m.rot[0].z = cam.rot[0].z * s;
+                            m.rot[1].x = cam.rot[1].x * s;
+                            m.rot[1].y = cam.rot[1].y * s;
+                            m.rot[1].z = cam.rot[1].z * s;
+                            m.rot[2].x = cam.rot[2].x * s;
+                            m.rot[2].y = cam.rot[2].y * s;
+                            m.rot[2].z = cam.rot[2].z * s;
+                            m.pos = tr->mtx.pos;
+                            fn_802DCAE4(id, &m, a);
+                        }
+                    }
+                }
+            }
+            fn_802DC8B4();
+            fn_802C8D74();
+        }
+    }
+}
+
 void fn_802BDD8C(f32 range) {
     fn_802DBE4C();
     if (fn_8020403C()) {
         lbl_8055FAAC = 0;
         lbl_8055FAA8 = 0;
         for (int i = 0; i < lbl_804C00D4.n; i++) {
-            TreeType* t = &lbl_804C00D4.data[i];
-            if (t->set) {
-                TArray<TCell>* near = t->set->near;
-                TArray<TreeRec>* list = t->set->list;
-                if (t->farTris <= 10) {
-                    fn_802C8BD0(fn_802C28C0());
-                    fn_802DC71C(t->farId, t->farTex);
-                    f32 span;
-                    f32 r2 = range * range;
-                    f32 in = range - 50.0f;
-                    span = r2 - in * in;
-                    TMtx cam;
-                    fn_801F1C24(&cam);
-                    const TVec* eye = (const TVec*)(fn_801E8718(-1) + 0x24);
-                    for (int j = 0; j < near->n; j++) {
-                        TCell* c = &near->data[j];
-                        if (Live(c)) {
-                            s32 id = t->farId;
-                            for (int n = c->first; n < c->first + c->count; n++) {
-                                TreeRec* tr = &list->data[n];
-                                f32 d = PSVECSquareDistance(&tr->mtx.pos, eye);
-                                if (d <= r2) {
-                                    f32 a = (r2 - d) / span;
-                                    a = (1.0f < a) ? 1.0f : a;
-                                    TMtx m;
-                                    f32 s = tr->mtx.rot[1].y;
-                                    m.rot[0].x = cam.rot[0].x * s;
-                                    m.rot[0].y = cam.rot[0].y * s;
-                                    m.rot[0].z = cam.rot[0].z * s;
-                                    m.rot[1].x = cam.rot[1].x * s;
-                                    m.rot[1].y = cam.rot[1].y * s;
-                                    m.rot[1].z = cam.rot[1].z * s;
-                                    m.rot[2].x = cam.rot[2].x * s;
-                                    m.rot[2].y = cam.rot[2].y * s;
-                                    m.rot[2].z = cam.rot[2].z * s;
-                                    m.pos = tr->mtx.pos;
-                                    fn_802DCAE4(id, &m, a);
-                                }
-                            }
-                        }
-                    }
-                    fn_802DC8B4();
-                    fn_802C8D74();
-                }
-            }
+            Loop1_fn_802BDD8C(&lbl_804C00D4.data[i], range);
         }
     }
     fn_802DBECC();
@@ -947,16 +954,20 @@ void fn_802BDFF4(TMtx* m) {
     }
 }
 
+static inline int Loop3_fn_802BE008(TCell* c, TCell* d, TArray<TCell>* a, int in) {
+    if (c >= d && c < d + a->n) {
+        in = 1;
+    }
+    return in;
+}
+
 TreeType* fn_802BE008(TCell* c) {
     TreeType* t = lbl_804C00D4.data;
     for (int i = 0; i < lbl_804C00D4.n; i++, t++) {
         if (t->set) {
             TArray<TCell>* a = t->set->near;
             int in = 0;
-            TCell* d = a->data;
-            if (c >= d && c < d + a->n) {
-                in = 1;
-            }
+            in = Loop3_fn_802BE008(c, a->data, a, in);
             if (in) {
                 return t;
             }

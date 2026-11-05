@@ -357,6 +357,43 @@ static inline void FillPoint(SkidPt* p, const SkidCar* car, const SkidWheel* w, 
     p->alpha = MIN(a, 0xFFFF);
 }
 
+static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidStrip* s, SkidType* t, int idx, SkidPt* p, SkidCar* car, SkidWheel* w, SkidPt* q) {
+    if (slot->type == type) {
+        if (now > 0.2f + slot->time) {
+            s = &t->strips[idx];
+            p = &s->pts[s->n];
+            FillPoint(p, car, w, t);
+            p->on = 1;
+            s->n++;
+            t->total++;
+            slot->time = now;
+        } else {
+            s = &t->strips[idx];
+            p = &s->pts[s->n - 1];
+            FillPoint(p, car, w, t);
+        }
+    } else {
+        s = &t->strips[idx];
+        p = &s->pts[s->n];
+        q = &s->pts[s->n + 1];
+        FillPoint(p, car, w, t);
+        p->on = 0;
+        q->pos.x = p->pos.x;
+        q->pos.y = p->pos.y;
+        q->pos.z = p->pos.z;
+        q->d2.x = p->d2.x;
+        q->d2.y = p->d2.y;
+        q->d2.z = p->d2.z;
+        q->d1.x = p->d1.x;
+        q->d1.y = p->d1.y;
+        q->d1.z = p->d1.z;
+        q->alpha = p->alpha;
+        q->on = 1;
+        s->n += 2;
+        t->total += 2;
+    }
+}
+
 void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
     SkidStrip* s;
@@ -376,40 +413,7 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
             skid = 1;
         }
         if (skid) {
-            if (slot->type == type) {
-                if (now > 0.2f + slot->time) {
-                    s = &t->strips[idx];
-                    p = &s->pts[s->n];
-                    FillPoint(p, car, w, t);
-                    p->on = 1;
-                    s->n++;
-                    t->total++;
-                    slot->time = now;
-                } else {
-                    s = &t->strips[idx];
-                    p = &s->pts[s->n - 1];
-                    FillPoint(p, car, w, t);
-                }
-            } else {
-                s = &t->strips[idx];
-                p = &s->pts[s->n];
-                q = &s->pts[s->n + 1];
-                FillPoint(p, car, w, t);
-                p->on = 0;
-                q->pos.x = p->pos.x;
-                q->pos.y = p->pos.y;
-                q->pos.z = p->pos.z;
-                q->d2.x = p->d2.x;
-                q->d2.y = p->d2.y;
-                q->d2.z = p->d2.z;
-                q->d1.x = p->d1.x;
-                q->d1.y = p->d1.y;
-                q->d1.z = p->d1.z;
-                q->alpha = p->alpha;
-                q->on = 1;
-                s->n += 2;
-                t->total += 2;
-            }
+            Loop1_fn_8028D89C(slot, type, now, s, t, idx, p, car, w, q);
             slot->type = type;
         } else {
             slot->type = -1;

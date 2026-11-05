@@ -986,13 +986,7 @@ void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
     out->z = a->z + t * (b->z - a->z);
 }
 
-f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
-    f32 m = (f32)fmod(x, p);
-    if (m > p / 2.0f) {
-        m = p - m;
-    }
-    f32 t = m / (p / 2.0f);
-    f32 s;
+static inline f32 Loop2_fn_80194B60(f32 t, f32 s, f32 a, f32 b) {
     if (t < -1.0f) {
         s = -1.0f;
     } else if (t > 1.0f) {
@@ -1003,6 +997,16 @@ f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
         s = -2.0f * t * t * t - 3.0f * t * t;
     }
     return a + s * (b - a);
+}
+
+f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
+    f32 m = (f32)fmod(x, p);
+    if (m > p / 2.0f) {
+        m = p - m;
+    }
+    f32 t = m / (p / 2.0f);
+    f32 s;
+    return Loop2_fn_80194B60(t, s, a, b);
 }
 
 // Another racer, as seen through its controller (fn_801B2EC0).
@@ -1632,6 +1636,16 @@ void fn_801961FC(u8* d) {
 
 static inline double AbsD(double v) { return __fabs(v); }
 
+static inline void Loop1_fn_80196250(f32 b, f32 x, f32* outA, f32* outB) {
+    if (AbsF(b) < 0.44444445f || (*(s32*)&b & (s32)0x80000000) == (*(s32*)&x & (s32)0x80000000)) {
+        *outA = AbsF(x) / 4.905f;
+        *outB = 0.0f;
+    } else {
+        *outA = 0.0f;
+        *outB = AbsF(x) / 11.772001f;
+    }
+}
+
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
     f32 x = (1.3333334f + (a - b)) / c;
     if (AbsF(a) < 0.1f) {
@@ -1640,13 +1654,7 @@ void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
         *sign = 0;
         return;
     }
-    if (AbsF(b) < 0.44444445f || (*(s32*)&b & (s32)0x80000000) == (*(s32*)&x & (s32)0x80000000)) {
-        *outA = AbsF(x) / 4.905f;
-        *outB = 0.0f;
-    } else {
-        *outA = 0.0f;
-        *outB = AbsF(x) / 11.772001f;
-    }
+    Loop1_fn_80196250(b, x, outA, outB);
     *sign = a > 0.0f ? 1 : -1;
 }
 

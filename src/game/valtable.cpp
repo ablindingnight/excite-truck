@@ -37,6 +37,10 @@ class ValueFile;
 
 class ValueNodeImpl : public ValueNode {
 public:
+    ValuePair* Loop2_GetValue(ValuePair* p, const char* key);
+public:
+    int Loop1_Has(ValuePair* p, const char* key);
+public:
     ValueNodeImpl(void) { parent = 0; }
     virtual const char* GetName(void) {
         const char* n = name;
@@ -185,19 +189,28 @@ public:
     ValueFile* file;           // offset 0x18
 };
 
-int ValueNodeImpl::Has(const char* key) {
-    ValuePair* p = FindPair(key);
+inline int ValueNodeImpl::Loop1_Has(ValuePair* p, const char* key) {
     if (!p && parent) {
         p = parent->FindPairInherited(key);
     }
     return p != 0;
 }
 
-const char* ValueNodeImpl::GetValue(const char* key) {
+int ValueNodeImpl::Has(const char* key) {
     ValuePair* p = FindPair(key);
+    return Loop1_Has(p, key);
+}
+
+inline ValuePair* ValueNodeImpl::Loop2_GetValue(ValuePair* p, const char* key) {
     if (!p && parent) {
         p = parent->FindPairInherited(key);
     }
+    return p;
+}
+
+const char* ValueNodeImpl::GetValue(const char* key) {
+    ValuePair* p = FindPair(key);
+    p = Loop2_GetValue(p, key);
     if (!p) {
         fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
     }

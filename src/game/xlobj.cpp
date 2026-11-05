@@ -646,19 +646,22 @@ void fn_802B9B68(void) {
     lbl_8055FA78 = 0;
 }
 
+static inline void Loop1_fn_802B9D08(TexEntry* e) {
+    if (e) {
+        e->head = 0;
+        if (e->tex != -2) {
+            gxForgetTexture(e->tex);
+        }
+        delete e;
+    }
+}
+
 void fn_802B9D08(void) {
     TexEntry* e;
     SafeDelete(lbl_8055FA7C);
     SafeDelete(lbl_8055FA78);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        e = lbl_804BFFF4.data[i];
-        if (e) {
-            e->head = 0;
-            if (e->tex != -2) {
-                gxForgetTexture(e->tex);
-            }
-            delete e;
-        }
+        Loop1_fn_802B9D08(lbl_804BFFF4.data[i]);
     }
     lbl_804BFFF4.count = 0;
     lbl_804C004C.count = 0;

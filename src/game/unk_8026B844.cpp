@@ -140,6 +140,31 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 
 // The free (debug) camera: stick yaw/pitch and movement, trigger boost, keys up/down, the pointer at a screen
 // edge pans (faster the higher the camera is), and the camera keeps its height above the ground.
+static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& move) {
+    f32 turn = lbl_80563D90;
+    f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
+    f32 speed = lbl_80563D94 * (lbl_80563DA4 * (lbl_80563D94 + t * lbl_80563DA0));
+    f32 x;
+    f32 z;
+    lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.x0));
+    if (lbl_8055F4F4 > lbl_80563DA8) {
+        lbl_8055F4F4 -= lbl_80563DA8;
+    } else if (lbl_8055F4F4 < lbl_80563DAC) {
+        lbl_8055F4F4 += lbl_80563DA8;
+    }
+    lbl_8055F4F8 = CamMax(CamMin(lbl_80563DB0, lbl_8055F4F8 + turn * (dt * fn_8026B844(pad.y0))), lbl_80563DB4);
+    z = speed * (dt * -fn_8026B844(pad.x1));
+    x = speed * (dt * fn_8026B844(pad.y1));
+    in.x = x;
+    in.y = lbl_80563D78;
+    in.z = z;
+    const CamRot* rot = &lbl_80499050.rot;
+    CamMulVec(&move, &in, rot);
+    lbl_80499050.pos.x += move.x;
+    lbl_80499050.pos.y += move.y;
+    lbl_80499050.pos.z += move.z;
+}
+
 void fn_8026B8A0(void) {
     FreePad pad;
     CamRot yawM;
@@ -173,28 +198,7 @@ void fn_8026B8A0(void) {
     fwd = lbl_80499050.rot.axes[2];
     fwd.y = lbl_80563D78;
     if (fn_801298E8(&pad, 0)) {
-        f32 turn = lbl_80563D90;
-        f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
-        f32 speed = lbl_80563D94 * (lbl_80563DA4 * (lbl_80563D94 + t * lbl_80563DA0));
-        f32 x;
-        f32 z;
-        lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.x0));
-        if (lbl_8055F4F4 > lbl_80563DA8) {
-            lbl_8055F4F4 -= lbl_80563DA8;
-        } else if (lbl_8055F4F4 < lbl_80563DAC) {
-            lbl_8055F4F4 += lbl_80563DA8;
-        }
-        lbl_8055F4F8 = CamMax(CamMin(lbl_80563DB0, lbl_8055F4F8 + turn * (dt * fn_8026B844(pad.y0))), lbl_80563DB4);
-        z = speed * (dt * -fn_8026B844(pad.x1));
-        x = speed * (dt * fn_8026B844(pad.y1));
-        in.x = x;
-        in.y = lbl_80563D78;
-        in.z = z;
-        const CamRot* rot = &lbl_80499050.rot;
-        CamMulVec(&move, &in, rot);
-        lbl_80499050.pos.x += move.x;
-        lbl_80499050.pos.y += move.y;
-        lbl_80499050.pos.z += move.z;
+        Loop1_fn_8026B8A0(pad, dt, in, move);
     }
     {
         f32 rate = lbl_80563DA4;
@@ -450,6 +454,15 @@ static __inline void CamFly(CamFrame* f, const FreePad* pad, f32 turn, f32 roll,
 
 // The debug camera, once a frame: the mode button cycles keyboard / pad / free camera control of the saved
 // frame (the pad modes move whichever camera is current), then the replay cameras follow their car.
+static inline f32 Loop2_fn_8026C014(FreePad& pad, f32 z, f32 speed) {
+    if (pad.w40 & 1) {
+        z = speed;
+    } else if (pad.w40 & 4) {
+        z = -speed;
+    }
+    return z;
+}
+
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -649,11 +662,7 @@ void fn_8026C014(int player) {
         Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &pitchM, &lbl_80499050.rot);
         z = lbl_80563D78;
         x = z;
-        if (pad.w40 & 1) {
-            z = speed;
-        } else if (pad.w40 & 4) {
-            z = -speed;
-        }
+        z = Loop2_fn_8026C014(pad, z, speed);
         if (pad.w40 & 8) {
             x = -speed;
         } else if (pad.w40 & 2) {

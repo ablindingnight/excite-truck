@@ -976,6 +976,8 @@ static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
 namespace {
 class ZoneMaster : public GameMode {
 public:
+    void Loop2_vf44(FixedArray<GateHit, 8>& hits);
+public:
     ZoneMaster(Race* race);
     virtual ~ZoneMaster(void);
     virtual int vf20(int car);
@@ -1168,6 +1170,31 @@ void fn_8013CB90(LayoutArt* a) {
 }
 
 
+static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
+    Vec3 mid;
+    Vec3 at;
+    Vec3 ring;
+    f32 half;
+    mid.x = g->a.x + (g->b.x - g->a.x) * 0.5f;
+    mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
+    mid.z = g->a.z + (g->b.z - g->a.z) * 0.5f;
+    half = PSVECDistance(&g->a, &g->b) / 2.0f;
+    ring.x = mid.x;
+    ring.y = g->ringY;
+    f32 zv = mid.z;
+    ring.z = zv;
+    f32 dtv = t->dt;
+    at.x = t->pos.x + t->vel.x * dtv;
+    f32 dt2 = t->dt;
+    at.y = t->pos.y + t->vel.y * dt2;
+    f32 dt_ = t->dt;
+    at.z = t->pos.z + t->vel.z * dt_;
+    if (PSVECSquareDistance(&at, &ring) > half * half) {
+        r = 1;
+    }
+    return r;
+}
+
 int fn_8013CBC0(CarState* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
@@ -1245,27 +1272,7 @@ int fn_8013CBC0(CarState* zm, int car) {
         }
     }
     if (r == 2 && g->ring) {
-        Vec3 mid;
-        Vec3 at;
-        Vec3 ring;
-        f32 half;
-        mid.x = g->a.x + (g->b.x - g->a.x) * 0.5f;
-        mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
-        mid.z = g->a.z + (g->b.z - g->a.z) * 0.5f;
-        half = PSVECDistance(&g->a, &g->b) / 2.0f;
-        ring.x = mid.x;
-        ring.y = g->ringY;
-        f32 zv = mid.z;
-        ring.z = zv;
-        f32 dtv = t->dt;
-        at.x = t->pos.x + t->vel.x * dtv;
-        f32 dt2 = t->dt;
-        at.y = t->pos.y + t->vel.y * dt2;
-        f32 dt_ = t->dt;
-        at.z = t->pos.z + t->vel.z * dt_;
-        if (PSVECSquareDistance(&at, &ring) > half * half) {
-            r = 1;
-        }
+        r = Loop1_fn_8013CBC0(g, t, r);
     }
     return r;
 }
@@ -1781,6 +1788,26 @@ void ZoneMaster::DrawNextGate(void) {
 }
 
 
+inline void ZoneMaster::Loop2_vf44(FixedArray<GateHit, 8>& hits) {
+    Gate* gg;
+    Vec3* p;
+    if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
+        int i;
+        for (i = 0; i < hits.count; i++) {
+            gg = hits.data[i].gate;
+            if (!gg->ring) {
+                p = &gg->a;
+                u32 k;
+                for (k = 0; k < 2; k++) {
+                    fn_802981F8(p);
+                    p++;
+                }
+            }
+        }
+    }
+    DrawHits(&hits);
+}
+
 void ZoneMaster::vf44(void) {
     GateHit* h;
     FixedArray<GateHit, 8> hits;
@@ -1826,23 +1853,7 @@ void ZoneMaster::vf44(void) {
         }
     }
     if (hits.count > 0) {
-        Gate* gg;
-        Vec3* p;
-        if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
-            int i;
-            for (i = 0; i < hits.count; i++) {
-                gg = hits.data[i].gate;
-                if (!gg->ring) {
-                    p = &gg->a;
-                    u32 k;
-                    for (k = 0; k < 2; k++) {
-                        fn_802981F8(p);
-                        p++;
-                    }
-                }
-            }
-        }
-        DrawHits(&hits);
+        Loop2_vf44(hits);
     }
 }
 

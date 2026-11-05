@@ -499,6 +499,25 @@ s32 AchGetModelStat(int category, const char* model) {
     return Loop1_AchGetModelStat(name, total, category);
 }
 
+static inline void Loop1_AchAddModelStat(int found, int empty, const char* name, int category, s32 value) {
+    if (found < 0) {
+        char* dst;
+        int n;
+        dst = s_race.models[empty].name;
+        n = sizeof(s_race.models[empty].name);
+
+        while ((*dst++ = *name++) != '\0') {
+            if (--n <= 0) {
+                dst[-1] = '\0';
+                break;
+            }
+        }
+        s_race.models[empty].values[category] = value;
+    } else {
+        s_race.models[found].values[category] += value;
+    }
+}
+
 void AchAddModelStat(int category, const char* model, s32 value) {
     const char* name;
     int found;
@@ -518,22 +537,7 @@ void AchAddModelStat(int category, const char* model, s32 value) {
             found = i;
         }
     }
-    if (found < 0) {
-        char* dst;
-        int n;
-        dst = s_race.models[empty].name;
-        n = sizeof(s_race.models[empty].name);
-
-        while ((*dst++ = *name++) != '\0') {
-            if (--n <= 0) {
-                dst[-1] = '\0';
-                break;
-            }
-        }
-        s_race.models[empty].values[category] = value;
-    } else {
-        s_race.models[found].values[category] += value;
-    }
+    Loop1_AchAddModelStat(found, empty, name, category, value);
 }
 
 BOOL AchIsRecording(void) {

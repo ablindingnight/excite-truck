@@ -537,6 +537,13 @@ void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f) {
 // Keeps particles [first, last) out of a box (frame m, half extents half): a particle that ends the step inside
 // is pushed back out through the face it came in by. Optionally returns the weighted mean of the pushed
 // particles (center) and their accumulated push (push).
+static inline int Loop1_fn_801C28A8(int n, PSys* s) {
+    if (n < 0) {
+        n = s->nPart;
+    }
+    return n;
+}
+
 void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, const RVec3* spin, int first, int last,
                  RVec3* center, RVec3* push) {
     RVec3 d;
@@ -548,9 +555,7 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     RVec3 force;
     RVec3 sum;
     int n = last;
-    if (n < 0) {
-        n = s->nPart;
-    }
+    n = Loop1_fn_801C28A8(n, s);
     fn_80144B44(&sum, 0.0f, 0.0f, 0.0f);
     fn_80144B44(&force, 0.0f, 0.0f, 0.0f);
     f32 total = 0.0f;

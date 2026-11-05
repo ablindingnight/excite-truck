@@ -524,6 +524,28 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // Fills the model's damage pose: eases the wheel offsets toward their targets, bends the body points by the
 // lean/twist (when the deformation is on), hides the parts that are gone and lists the flying ones with their
 // frame interpolated to the tick.
+static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
+    if (s->state == 3) {
+        U32(m, 0x29C) &= ~(1 << tp->bit);
+    }
+    if (s->state == 2 || s->state == 4) {
+        DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
+        if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+            d->frame = s->cur;
+        } else {
+            DFrame f;
+            f32* o = (f32*)&f;
+            f32* a = (f32*)&s->prev;
+            f32* b = (f32*)&s->cur;
+            for (int j = 0; j < 12; j++) {
+                *o++ = LerpF(*a++, *b++, t);
+            }
+            d->frame = f;
+        }
+        d->mask = 1 << tp->bit;
+    }
+}
+
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
     DmgPose* mdl = (DmgPose*)m;
@@ -567,25 +589,7 @@ void fn_8018DA5C(u8* p, u8* m) {
     S32(m, 0xA78) = 0;
     for (int i = 0; i < 17; i++) {
         if (s->on && s->state != 0 && s->state != 1) {
-            if (s->state == 3) {
-                U32(m, 0x29C) &= ~(1 << tp->bit);
-            }
-            if (s->state == 2 || s->state == 4) {
-                DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
-                if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
-                    d->frame = s->cur;
-                } else {
-                    DFrame f;
-                    f32* o = (f32*)&f;
-                    f32* a = (f32*)&s->prev;
-                    f32* b = (f32*)&s->cur;
-                    for (int j = 0; j < 12; j++) {
-                        *o++ = LerpF(*a++, *b++, t);
-                    }
-                    d->frame = f;
-                }
-                d->mask = 1 << tp->bit;
-            }
+            Loop1_fn_8018DA5C(s, m, tp, t);
         }
         tp++;
         s++;

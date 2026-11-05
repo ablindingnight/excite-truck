@@ -193,6 +193,8 @@ public:
 
 class WaterEnvMap : public EnvBase {
 public:
+    void Loop1_Render(f32 h, Frame& m);
+public:
     WaterEnvMap(void);
     virtual ~WaterEnvMap(void);
     virtual void Render(void* cam, f32 fov);
@@ -570,6 +572,23 @@ extern "C" void fn_802C00A0(f32* fov);
 extern "C" void fn_802C0054(Mat3* out, const Mat3* in);
 extern "C" void fn_802BFE48(Skybox* s, const Frame* view, f32 scale);
 
+inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
+    f32 hf = h;
+    Skybox* k = sky;
+    fn_802C00A0(&hf);
+    Perspective ps(0.1f, 2.0f, hf);
+    for (int i = 0; i < 6; i++) {
+        Frame f;
+        fn_80144DC8(&f);
+        fn_802C0054((Mat3*)&f, (const Mat3*)&k->frames[i]);
+        fn_80144DAC(&f.pos, &m.pos);
+        fn_802C8B98(k->faces[i], &f);
+        fn_802C8DB8(k->quad, 4, k->idx, 6);
+        fn_802C8D74();
+    }
+    fn_802BFE48(k, &m, 1.0f);
+}
+
 void WaterEnvMap::Render(void* cam, f32 fov) {
     scale = (fn_801E85A4() == 2) ? 1.5f : 1.0f;
     Skybox* s = sky;
@@ -608,20 +627,7 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     fn_802C8638(&m);
     fn_802C88BC(2);
     if (sky) {
-        f32 hf = h;
-        Skybox* k = sky;
-        fn_802C00A0(&hf);
-        Perspective ps(0.1f, 2.0f, hf);
-        for (int i = 0; i < 6; i++) {
-            Frame f;
-            fn_80144DC8(&f);
-            fn_802C0054((Mat3*)&f, (const Mat3*)&k->frames[i]);
-            fn_80144DAC(&f.pos, &m.pos);
-            fn_802C8B98(k->faces[i], &f);
-            fn_802C8DB8(k->quad, 4, k->idx, 6);
-            fn_802C8D74();
-        }
-        fn_802BFE48(k, &m, 1.0f);
+        Loop1_Render(h, m);
     }
     fn_802C7040(world);
     if (fn_801E85A4() == 1) {

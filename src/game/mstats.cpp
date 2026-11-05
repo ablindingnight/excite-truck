@@ -107,6 +107,7 @@ public:
 
 class RecordsState : public MenuState {
 public:
+public:
     RecordsState(void);
     virtual ~RecordsState(void);
     virtual void Enter(void);
@@ -243,6 +244,15 @@ void RecordsState::Enter(void) {
     tracksDirty = 1;
 }
 
+static inline void AddEventRow(RecordsState* s, Event* ev, const char* env, int row) {
+    if (strcasecmp(GetTrackEnviron(ev->node->GetString("track", GetTrack(ev->track)->track)), env) == 0) {
+        row = s->events.rows;
+        s->events.SetCell(row, 0, GetEventTypeDisplayName(ev->type), 0);
+        s->events.SetCell(row, 1, GetEventTypeName(ev->type), 0);
+        s->eventIds[row] = ev->index;
+    }
+}
+
 void RecordsState::Update(void) {
     Event* ev;
     int row;
@@ -254,12 +264,7 @@ void RecordsState::Update(void) {
         for (i = 0; i < GetNumEvents(); i++) {
             ev = GetEvent(i);
             if (ev->node->Has("name")) {
-                if (strcasecmp(GetTrackEnviron(ev->node->GetString("track", GetTrack(ev->track)->track)), env) == 0) {
-                    row = events.rows;
-                    events.SetCell(row, 0, GetEventTypeDisplayName(ev->type), 0);
-                    events.SetCell(row, 1, GetEventTypeName(ev->type), 0);
-                    eventIds[row] = ev->index;
-                }
+                AddEventRow(this, ev, env, row);
             }
         }
         eventSel = 0;

@@ -961,20 +961,24 @@ static inline void Loop1_fn_801CCBC4(AwardsMgr* m) {
     }
 }
 
+static inline void Loop3_fn_801CCBC4(AwardsMgr* m) {
+    Loop1_fn_801CCBC4(m);
+    if (!fn_801CE898() && m->score != 0) {
+        for (int i = 0; i < fn_801EA994(); i++) {
+            CarInfo* c = fn_801EA9A0(i);
+            if (c->kind == 0x50) {
+                StatsAddHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, c->name, m->score, m->grade,
+                                  m->time);
+                break;
+            }
+        }
+    }
+}
+
 void fn_801CCBC4(void) {
     AwardsMgr* m = lbl_8055E884;
     if (!m->paused) {
-        Loop1_fn_801CCBC4(m);
-        if (!fn_801CE898() && m->score != 0) {
-            for (int i = 0; i < fn_801EA994(); i++) {
-                CarInfo* c = fn_801EA9A0(i);
-                if (c->kind == 0x50) {
-                    StatsAddHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, c->name, m->score, m->grade,
-                                      m->time);
-                    break;
-                }
-            }
-        }
+        Loop3_fn_801CCBC4(m);
     }
 }
 
@@ -1064,6 +1068,12 @@ static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
     }
 }
 
+static inline void Loop1_fn_801CCDAC(StatHandler* h, long v, AwardsMgr* m) {
+    if (h && h->PushInt(v)) {
+        ShowPopup(m, h);
+    }
+}
+
 void fn_801CCDAC(u32 type, int car, long v) {
     if (fn_801CE898()) {
         return;
@@ -1075,10 +1085,7 @@ void fn_801CCDAC(u32 type, int car, long v) {
     if (CarOff(m, car)) {
         return;
     }
-    StatHandler* h = m->handlers.data[FindHandler(m, type)];
-    if (h && h->PushInt(v)) {
-        ShowPopup(m, h);
-    }
+    Loop1_fn_801CCDAC(m->handlers.data[FindHandler(m, type)], v, m);
 }
 
 }  // extern "C"
@@ -1089,6 +1096,12 @@ int StatHandler::PushInt(long v) {
 }
 
 extern "C" {
+
+static inline void Loop2_fn_801CD130(StatHandler* h, f32 v, AwardsMgr* m) {
+    if (h && h->PushReal(v)) {
+        ShowPopup(m, h);
+    }
+}
 
 void fn_801CD130(u32 type, int car, f32 v) {
     if (fn_801CE898()) {
@@ -1101,10 +1114,7 @@ void fn_801CD130(u32 type, int car, f32 v) {
     if (CarOff(m, car)) {
         return;
     }
-    StatHandler* h = m->handlers.data[FindHandler(m, type)];
-    if (h && h->PushReal(v)) {
-        ShowPopup(m, h);
-    }
+    Loop2_fn_801CD130(m->handlers.data[FindHandler(m, type)], v, m);
 }
 
 }  // extern "C"

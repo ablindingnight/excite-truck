@@ -144,6 +144,19 @@ static inline UnlockReq* FindUnlockReq(const char* name) {
     return i < 0 ? NULL : &lbl_803580A4.inner.list.data[i].req;
 }
 
+static inline void Loop1_LoadChassisUnlocks(const char* base, ValueNode* node, int idx, ChassisUnlock* c) {
+    base = node->GetValue("base_chassis");
+    idx = FindChassisUnlock(base);
+    if (idx < 0) {
+        idx = lbl_803580A4.inner.list.Size();
+        lbl_803580A4.inner.list.Add()->name = base;
+    }
+    c = &lbl_803580A4.inner.list.data[idx];
+    c->req.races_run = node->GetIntValue("races_run");
+    c->req.aaas = node->GetIntValue("AAAs");
+    c->req.special = node->GetValue("special_chassis");
+}
+
 void LoadChassisUnlocks(void) {
     ChassisUnlock* c;
     int idx;
@@ -153,16 +166,7 @@ void LoadChassisUnlocks(void) {
 
     for (i = 0; (node = lbl_8055D58C->GetChild(i)) != NULL; i++) {
         if (strcasecmp(node->GetName(), "special_chassis") == 0) {
-            base = node->GetValue("base_chassis");
-            idx = FindChassisUnlock(base);
-            if (idx < 0) {
-                idx = lbl_803580A4.inner.list.Size();
-                lbl_803580A4.inner.list.Add()->name = base;
-            }
-            c = &lbl_803580A4.inner.list.data[idx];
-            c->req.races_run = node->GetIntValue("races_run");
-            c->req.aaas = node->GetIntValue("AAAs");
-            c->req.special = node->GetValue("special_chassis");
+            Loop1_LoadChassisUnlocks(base, node, idx, c);
         }
     }
 }

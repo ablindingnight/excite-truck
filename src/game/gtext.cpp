@@ -994,6 +994,16 @@ void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f3
     }
 }
 
+static inline f32 Loop1_fn_8023400C(EscSeq* e, f32 h, f32 adv) {
+    if (e->art) {
+        h = h / fn_80235F64(e->art, e->artIdx);
+        adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
+    } else {
+        adv = h * e->scale;
+    }
+    return adv;
+}
+
 f32 fn_8023400C(int idx) {
     f32 w = 0.0f;
     f32 gaps = 0.0f;
@@ -1014,13 +1024,7 @@ f32 fn_8023400C(int idx) {
             for (j = 0; j < lbl_80497F14.count; j++) {
                 name = lbl_80497F14.data[j].name;
                 if (strncasecmp(p, name, strlen(name)) == 0) {
-                    e = &lbl_80497F14.data[j];
-                    if (e->art) {
-                        h = h / fn_80235F64(e->art, e->artIdx);
-                        adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
-                    } else {
-                        adv = h * e->scale;
-                    }
+                    adv = Loop1_fn_8023400C(&lbl_80497F14.data[j], h, adv);
                     skip = strlen(lbl_80497F14.data[j].name) + 1;
                     goto found;
                 }

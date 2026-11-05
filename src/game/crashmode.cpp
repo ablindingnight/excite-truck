@@ -243,6 +243,8 @@ static inline void StrCopy(char* d, const char* s, int n) {
 namespace {
 class CrashMode : public Updatable {
 public:
+    int Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done);
+public:
     CrashMode(void) {
         lbl_8055EA04 = this;
         layout = fn_80145E70("crashlyt.val");
@@ -516,6 +518,45 @@ void CrashMode::vf10(void) {
     }
 }
 
+inline int CrashMode::Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done) {
+    if (s->time < 0.0f && !s->boosted) {
+        if (rc->shaking && since < window && fn_80179650() == 1) {
+            s->pump += 0.1f;
+            if (pumpSnd[pumpIdx] && rc->surface == 0x50 && !fn_80009C84()) {
+                pumpSnd[pumpIdx]->Play();
+                pumpIdx = (pumpIdx + 1) % 3;
+            }
+        }
+        if (s->pump >= 0.9f) {
+            s->pump = 1.0f;
+            s->boosted = 1;
+            s->time = now;
+            if (boostSnd && rc->surface == 0x50 && !fn_80009C84()) {
+                boostSnd->Play();
+            }
+        } else if (since >= window) {
+            s->time = now;
+            if (failSnd && rc->surface == 0x50 && !fn_80009C84()) {
+                failSnd->Play();
+            }
+        } else {
+            s->pump = Max1(s->pump - 0.0027805585f, 0.15f);
+        }
+    } else {
+        if (!s->boosted) {
+            s->pump = Max1(s->pump - 0.011122234f, 0.0f);
+        }
+        if (now - s->time > lbl_8055AE40 / 3.0f) {
+            done = 1;
+            if (s->boosted) {
+                rc->boost = 4.5f;
+                rc->boosting = 0;
+            }
+        }
+    }
+    return done;
+}
+
 void CrashMode::vf14(void) {
     RaceCarRec* rc;
     int i;
@@ -555,41 +596,7 @@ void CrashMode::vf14(void) {
             window *= 1.5f;
         }
         done = 0;
-        if (s->time < 0.0f && !s->boosted) {
-            if (rc->shaking && since < window && fn_80179650() == 1) {
-                s->pump += 0.1f;
-                if (pumpSnd[pumpIdx] && rc->surface == 0x50 && !fn_80009C84()) {
-                    pumpSnd[pumpIdx]->Play();
-                    pumpIdx = (pumpIdx + 1) % 3;
-                }
-            }
-            if (s->pump >= 0.9f) {
-                s->pump = 1.0f;
-                s->boosted = 1;
-                s->time = now;
-                if (boostSnd && rc->surface == 0x50 && !fn_80009C84()) {
-                    boostSnd->Play();
-                }
-            } else if (since >= window) {
-                s->time = now;
-                if (failSnd && rc->surface == 0x50 && !fn_80009C84()) {
-                    failSnd->Play();
-                }
-            } else {
-                s->pump = Max1(s->pump - 0.0027805585f, 0.15f);
-            }
-        } else {
-            if (!s->boosted) {
-                s->pump = Max1(s->pump - 0.011122234f, 0.0f);
-            }
-            if (now - s->time > lbl_8055AE40 / 3.0f) {
-                done = 1;
-                if (s->boosted) {
-                    rc->boost = 4.5f;
-                    rc->boosting = 0;
-                }
-            }
-        }
+        done = Loop1_vf14(s, rc, since, window, now, done);
         if (done) {
             fn_801B83A0()->vfA8(i, rc->f26A4);
         }
