@@ -367,7 +367,9 @@ char* fn_8013072C(char* buf, s32 size, s32 value) {
     } else {
         lead = n < 100 ? 2 : 3;
     }
-    p = &buf[groups * 4 + lead + neg];
+    int len = groups * 4 + lead;
+    len += neg;
+    p = &buf[len];
     p[1] = 0;
     if (value == 0) {
         *p-- = '0';
