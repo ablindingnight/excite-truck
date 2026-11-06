@@ -537,6 +537,22 @@ extern "C" void fn_8029CD14(void) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void AddScaledV3(void* o_, const void* a_, f32 s) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    o[0] += a[0] * s;
+    o[1] += a[1] * s;
+    o[2] += a[2] * s;
+}
+static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] + b[0] * s;
+    o[1] = a[1] + b[1] * s;
+    o[2] = a[2] + b[2] * s;
+}
 extern "C" void fn_8029CD48(WaterCar* car) {
     for (int i = 0; i < 4; i++) {
         if (car->wheels[i].flags & 8) {
@@ -563,9 +579,7 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         ValPoint flat;
         flat.y = car->vel.z;
         flat.x = car->vel.x;
-        v.y = v.y + car->axes[1].y * up;
-        v.x = v.x + car->axes[1].x * up;
-        v.z = v.z + car->axes[1].z * up;
+        MadV3(&v.x, &v.x, &car->axes[1].x, up);
         f32 s = SqrtF(flat.x * flat.x + flat.y * flat.y);
         int n = (int)(0.25f * s) < 6 ? (int)(0.25f * s) : 6;
         f32 spread = 0.125f * s;
@@ -624,9 +638,8 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     u.y = 0.0f;
     u.z = g->up.y;
     Vec c;
-    c.y = g->origin.y + r.y * 0.5f + u.y * 0.5f;
-    c.x = g->origin.x + r.x * 0.5f + u.x * 0.5f;
-    c.z = g->origin.z + r.z * 0.5f + u.z * 0.5f;
+    MadV3(&c.x, &g->origin.x, &r.x, 0.5f);
+    AddScaledV3(&c.x, &u.x, 0.5f);
     fn_8014E740(&c, radius);
 }
 

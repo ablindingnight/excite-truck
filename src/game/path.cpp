@@ -267,6 +267,23 @@ int fn_801DA1F8(PathFollower* p, PathKey** a, PathKey** b, f32* frac) {
     return 0;
 }
 
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void AddV3(void* o_, const void* a_, const void* b_) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] + b[0];
+    o[1] = a[1] + b[1];
+    o[2] = a[2] + b[2];
+}
+static inline void SubV3(void* o_, const void* a_, const void* b_) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] - b[0];
+    o[1] = a[1] - b[1];
+    o[2] = a[2] - b[2];
+}
 int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
     PathKey* a = 0;
     PathKey* b = 0;
@@ -298,9 +315,7 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         ToMatrix(m, q);
         f32 rate = 1.0f / MaxF(b->t - a->t, 0.00001f);
         V3 d;
-        d.y = b->pos.y - a->pos.y;
-        d.z = b->pos.z - a->pos.z;
-        d.x = b->pos.x - a->pos.x;
+        SubV3(&d.x, &b->pos.x, &a->pos.x);
         vel->x = d.x * rate;
         vel->y = d.y * rate;
         vel->z = d.z * rate;
@@ -313,9 +328,7 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         na.z = a->rot.z * -1.0f;
         na.w = a->rot.w * -1.0f;
         Quat dq;
-        dq.x = b->rot.x + na.x;
-        dq.y = b->rot.y + na.y;
-        dq.z = b->rot.z + na.z;
+        AddV3(&dq.x, &b->rot.x, &na.x);
         dq.w = b->rot.w + na.w;
         f32 ang = acos(dq.w);
         f32 s = sin(ang);
