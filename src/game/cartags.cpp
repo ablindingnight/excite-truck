@@ -169,22 +169,15 @@ void fn_802A7EEC(void) {
             d = PSVECSquareDistance(&p, &fn_802678C0(fn_801E85B4())->pos);
             if (fn_802C8FF4(&scr, 0.0f)) {
                 char buf[8];
-                f32 a = (d - nearDist) / (farDist - nearDist);
-                u32 color;
-                a = MIN(1.0f, a);
-                a = MAX(a, 0.0f);
-                color = (int)(255.0f * (1.0f + a * -1.0f)) << 24 | 0xFFFFFF;
+                u32 color = (int)(255.0f * Ramp(d, nearDist, farDist, 1.0f, 0.0f)) << 24 | 0xFFFFFF;
                 fn_802339A8(lbl_8055F8BC, color, 0x44, "%s", scr.x, scr.y, 0.0f, 0.42000002f, 1.0f,
                             fn_800122B4(c->place, buf));
             }
         }
         if (fn_8027AA48()) {
-            f32 b = (d - farDist) / (3.0f * farDist - farDist);
+            f32 b = Ramp(d, farDist, 3.0f * farDist, 1.0f, 0.0f);
             s32 id;
             s32 me;
-            b = MIN(1.0f, b);
-            b = MAX(b, 0.0f);
-            b = 1.0f + b * -1.0f;
             id = c->regId;
             me = fn_801EA9A0(fn_801E866C(-1))->regId;
             if (fn_8027AC50(fn_8027ABF8(me))) {
