@@ -1056,18 +1056,17 @@ void Arena::Init(void) {
     sets = new ("rc_object_sets") RArray<ObjSet>(CountFiles(cfg), "rc_object_files");
     while (cfg->Has(name)) {
         ValueTable* t = fn_80131810(cfg->GetValue(name));
-        if (!t) {
-            fn_802E30C8("FreestyleArenaMaster: can't load object file '%s'. Object load ceased.", name);
-            return;
-        }
-        {
+        if (t) {
             int i;
             ValueNode* n;
             for (i = 0; (n = t->GetChild(i)) != 0; i++) {
                 sets->Add()->Load(n, &dynos.t);
             }
+            fn_80131818(t);
+        } else {
+            fn_802E30C8("FreestyleArenaMaster: can't load object file '%s'. Object load ceased.", name);
+            return;
         }
-        fn_80131818(t);
         fn_801345D8(name, 0x1E, "object_file_%d", ++nFiles);
     }
     nFiles = sets->Count();

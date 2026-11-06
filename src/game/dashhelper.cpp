@@ -619,8 +619,10 @@ void fn_8000E874(int player) {
         y -= h - 1.0f;
     }
     {
-        int part2 = fn_8000DFC0(0);
-        int part = fn_8000DFA8(0);
+        int part2;
+        int part;
+        part = fn_8000DFA8(0);
+        part2 = fn_8000DFC0(0);
         fn_80235EF0(lbl_80351214.art, part);
         fn_80235EF0(lbl_80351214.art, part2);
         fn_80235F64(lbl_80351214.art, part);
