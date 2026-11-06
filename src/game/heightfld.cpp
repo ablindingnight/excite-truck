@@ -412,6 +412,7 @@ GroundHeader* fn_801DCA60(void) {
         int dz = z - 128;
         for (int x = 0; x < lbl_80446F08.h; x++) {
             int dx = x - 128;
+            // Stand-in: the sum lives in some local struct's field (frsp on its first forwarded read); the real struct is unknown.
             struct { f32 v; } h;
             h.v = 0.0f;
             f32 k = 1.0f;
