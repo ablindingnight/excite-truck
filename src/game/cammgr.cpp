@@ -1150,6 +1150,9 @@ static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
     o[2] = z;
 }
 
+// Helper name unproven: lerp with the fraction first.
+static inline f32 LerpK(f32 k, f32 a, f32 b) { return a + k * (b - a); }
+
 void fn_80268358(CamRec* c) {
     KV3 mv[4] = {KV3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), KV3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), KV3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), KV3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
     f32 (*m)[6] = (f32(*)[6])mv;
@@ -1183,8 +1186,8 @@ void fn_80268358(CamRec* c) {
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
             p0 = (f32*)f.seg;
             p1 = *(f32**)(f.seg + 0x14);
-            x = CamLerp(p0[0], p1[0], f.t);
-            z = CamLerp(p0[1], p1[1], f.t);
+            x = LerpK(f.t, p0[0], p1[0]);
+            z = LerpK(f.t, p0[1], p1[1]);
             KVec3 v;
             CamXZ xz(x, z);
             v.x = xz.x;
