@@ -43,9 +43,9 @@ struct LayoutArtItem {
 class LayoutArt;
 
 // Its vtable (0x8032D260) lives in the layout unit; only the inline dtor is emitted here.
-class Layout {
+class ILayout {
 public:
-    virtual ~Layout(void) {}
+    virtual ~ILayout(void) {}
     virtual LayoutItem* Find(const char* name) = 0;            // 0xC
     virtual LayoutArt* FindArt(const char* name) = 0;          // 0x10
     virtual LayoutArtItem* FindArtItem(const char* name) = 0;  // 0x14
@@ -258,7 +258,7 @@ void fn_80176780(int a, int b);
 int fn_801B8900(void);
 int fn_8023512C(const char* name);
 void fn_80235380(int art);
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 void fn_801769E0(void);
 void fn_8017691C(void);
 GameUI* fn_801B83A0(void);
@@ -279,9 +279,9 @@ int fn_801CB880(void);
 void fn_80011E70(void);
 void fn_80011E90(void);
 void fn_800109E4(f32 x, f32 y, f32 w, f32 h, u32 color);
-void fn_8014784C(Layout* layout, const char* name, const char* set, int index);
+void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
 void fn_80230F78(u8* alpha, f32* scale, u32* color, int unk);
-void fn_80147940(Layout* layout, LayoutArtItem* item, const char* set, int index);
+void fn_80147940(ILayout* layout, LayoutArtItem* item, const char* set, int index);
 void fn_801476C4(LayoutItem* item);
 }  // extern "C"
 void UpdateContinueOverlay(void);
@@ -471,7 +471,7 @@ public:
     s32 selection;   // offset 0x10
     s32 art;         // offset 0x14
     s32 popup;       // offset 0x18
-    Layout* layout;  // offset 0x1C
+    ILayout* layout;  // offset 0x1C
 };
 
 class ReplayOverlay : public GameOverlay {
