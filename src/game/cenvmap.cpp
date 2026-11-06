@@ -332,6 +332,7 @@ void fn_80203380(EFrame* m) {
 }
 
 // Object silhouettes: a camera-facing w x h quad over each of the n points.
+#pragma opt_strength_reduction off
 void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;
@@ -342,10 +343,11 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (fn_802C8DBC(n * 8)) {
         for (int i = 0; i < n; i++) {
             EVec3* p = (EVec3*)((u8*)pts + i * stride);
+            EVec3 q;
             EVec3 d;
             d.x = p->x - (&lbl_80488B88)->pos.x;
-            d.y = p->y - (&lbl_80488B88)->pos.y;
             d.z = p->z - (&lbl_80488B88)->pos.z;
+            d.y = p->y - (&lbl_80488B88)->pos.y;
             EVec2 side;
             side.x = d.z;
             side.y = -d.x;
@@ -355,7 +357,6 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                 side.x *= s;
                 side.y *= s;
                 for (int k = 0; k < 4; k++) {
-                    EVec3 q;
                     q = *p;
                     f32 sx, sy;
                     if (k & 1) {
@@ -377,6 +378,7 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
         fn_802C8E48();
     }
 }
+#pragma opt_strength_reduction reset
 
 void fn_802039CC(const EFrame* cam, const EFrame* m) {
     lbl_8055ED1C = -1;
