@@ -658,7 +658,8 @@ void fn_80166E68(Ramp* r, f32 v) {
         r->to = v;
         r->from = cur;
         r->t0 = lbl_8055E318;
-        r->t1 = lbl_8055E318 + (f32)__fabs((f32)(double)cur - (f32)(double)v) / r->rate;  // FIXME: double operands?
+        f32 d = r->from - r->to;
+        r->t1 = lbl_8055E318 + (f32)__fabs(d) / r->rate;
     }
 }
 

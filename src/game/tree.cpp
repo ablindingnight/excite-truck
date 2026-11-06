@@ -191,7 +191,7 @@ struct TreeType {
     s32 farTris;       // offset 0x24
     s32 cls;           // offset 0x28
     s32 surf;          // offset 0x2C
-    s8 run;            // offset 0x30
+    u8 run;            // offset 0x30
     TCyl cyl;          // offset 0x34
     f32 baseRad;       // offset 0x54
     TreeSet* set;      // offset 0x58
@@ -491,13 +491,14 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
     fn_802BC588(&tr->mtx, &m, (TVec*)tr, r, t);
     u8* hit = fn_802C1500(&tr->mtx, t->cls);
     if (lbl_8055FAB0) {
-        tr->vol = fn_801FA8E0(fn_802BC9B0(&t->cyl, t->surf, r->scale), &m, hit);
+        f32 s = r->scale;
+        tr->vol = fn_801FA8E0(fn_802BC9B0(&t->cyl, t->surf, s), &m, hit);
         tr->drop = tr->mtx.pos.y - tr->vol->y;
         if (t->run && t->surf != 0x74) {
             TCyl c;
             c = t->cyl;
-            c.rad = t->cyl.rad + 7.5f;
-            c.half = t->cyl.half + 2.5f;
+            c.rad += 7.5f;
+            c.half += 2.5f;
             fn_801FA8E0(fn_802BC9B0(&c, 1003, r->scale), &m, hit);
         }
     } else {
