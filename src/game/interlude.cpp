@@ -2003,10 +2003,9 @@ void fn_801C7944(void) {
 void fn_801C7964(void) { lbl_80438250 = lbl_80438268; }
 
 void fn_801C7990(void) {
-    IVec3* c = (IVec3*)&lbl_80438268;
-    lbl_80438480 = *c;
+    lbl_80438480 = lbl_80438268;
     lbl_8055E83B = 1;
-    lbl_8043825C = *c;
+    lbl_8043825C = lbl_80438268;
     lbl_8055E868 = fn_801C7964;
 }
 
@@ -2114,8 +2113,7 @@ void fn_801C7C04(void) {
         fn_802E317C("Interlude Editor: I'm not set up to handle where type %d", e->where);
         break;
     }
-    IVec3* p = (IVec3*)&lbl_80438480;
-    sprintf(lbl_80437FC0, "Added teleport to (%.2f, %.2f) at %.2f", p->x, p->z, e->time);
+    sprintf(lbl_80437FC0, "Added teleport to (%.2f, %.2f) at %.2f", lbl_80438480.x, lbl_80438480.z, e->time);
     fn_801C7BA0();
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
 }
