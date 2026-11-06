@@ -2473,6 +2473,7 @@ struct ILPos {
         f32 base;   // offset 0x1C
     }* seg;     // offset 0x0
     f32 t;      // offset 0x4
+    f32 Dist(void) const { return seg->base + seg->scale * t; }
     s32 mode;   // offset 0x8
 };
 extern "C" ILPos fn_80136594(void* f, V2* p);
@@ -2686,12 +2687,10 @@ inline void ZoneMaster::vf10(void) {
             {
                 Vec3 mid = g->Center();
                 V2 q;
-                ILPos pos;
-                q.x = mid.x;
+                void* tr = fn_80178C9C();
                 q.y = mid.z;
-                pos = fn_80136594(fn_80178C9C(), &q);
-                f32 curScale = pos.seg->scale;
-                g->t = pos.seg->base + curScale * pos.t;
+                q.x = mid.x;
+                g->t = fn_80136594(tr, &q).Dist();
             }
         }
         qsort(l->gates, l->n, sizeof(Gate), (int (*)(const void*, const void*))fn_8013D27C);
