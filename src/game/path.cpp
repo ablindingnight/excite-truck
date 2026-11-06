@@ -12,7 +12,7 @@ int strcmp(const char* a, const char* b);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_8012C370(const char* name, u32 magic, s32* version, int a, int b, u8* swapped);  // load resource
 void fn_8012C4D8(void* p);                                                               // free resource
-extern f32 lbl_80558DC4[];
+extern f32 lbl_80558DC4[1];
 }
 
 struct V3 {

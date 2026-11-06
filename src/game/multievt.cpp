@@ -291,9 +291,9 @@ extern void* lbl_80343C30[];
 extern void* lbl_80343CA8[];
 extern u8 lbl_8055F291;
 extern char lbl_8055B860[8];
-extern char lbl_8055BAC0[];
-extern char lbl_8055BABC[];
-extern char lbl_8055BAB8[];
+extern char lbl_8055BAC0[8];
+extern char lbl_8055BABC[4];
+extern char lbl_8055BAB8[4];
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
