@@ -843,10 +843,14 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
 }
 
 void fn_802C729C(s32 i, f32 range) {
-    MSurfList* sl;
     MElem* el;
     void* mtx;
     int j;
+    MSurfList* sl;
+    int off;  // MATCHING-AID: off, sa, sb and jo are named walkers, needed for the loop registers
+    MSphere* sa;
+    MSphere* sb;
+    int jo;
     ModelInfo* m;
     MSphere* sp;
     int e;
@@ -856,17 +860,21 @@ void fn_802C729C(s32 i, f32 range) {
         if (m->nElems > 0) {
             radius = 1000.0f;
             sp = fn_802C5E7C(m);
-            for (e = 0; e < m->nElems; e++) {
-                if (m->elems[e].bit == 2) {
-                    if (sp && !(PSVECSquareDistance(&lbl_804C13C0.pos, &sp[e].c) <
-                                (range + sp[e].r) * (range + sp[e].r))) {
+            sa = sp;
+            sb = sp;
+            for (e = 0, off = 0; e < m->nElems; off += sizeof(MElem), sa++, sb++, e++) {
+                if (((MElem*)((u8*)m->elems + off))->bit == 2) {
+                    if (sp && !(PSVECSquareDistance(&lbl_804C13C0.pos, &sa->c) <
+                                (range + sb->r) * (range + sb->r))) {
                         continue;
                     }
-                    el = &m->elems[e];
-                    sl = el->list;
+                    j = 0;
                     mtx = (void*)lbl_804C13C0.mtx;
-                    for (j = 0; j < sl->n; j++) {
-                        MSurf* s = sl->surfs[j];
+                    jo = 0;
+                    el = (MElem*)((u8*)m->elems + off);
+                    sl = el->list;
+                    for (; j < sl->n; jo += 4, j++) {
+                        MSurf* s = *(MSurf**)((u8*)sl->surfs + jo);
                         if (IsQueued(s->type)) {
                             TexNode* t = s->tex[0];
                             fn_802C53C4(el, t, mtx, 0xFFFFFFFF, 0);
