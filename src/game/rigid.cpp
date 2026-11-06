@@ -512,18 +512,10 @@ void RigidBody::Update(void) {
         impT.y = 0.0f;
         impT.z = 0.0f;
     }
-    {
-        f32 k = 0.0166833512f * invMass;
-        vel.x += force.x * k;
-        vel.y += force.y * k;
-        accel.x = force.x * invMass;
-        f32 zv = force.z;
-        vel.z += zv * k;
-        accel.y = force.y * invMass;
-        accel.z = force.z * invMass;
-    }
-    nImp = 0;
     impW = 0.0f;
+    AddScaled(&vel, &force, 0.0166833512f * invMass);
+    Scaled(&accel, &force, invMass);
+    nImp = 0;
     if (PSVECDotProduct(&vel, &vel) > 90000.0f) {
         PSVECNormalize(&vel, &vel);
         vel.x *= 300.0f;
