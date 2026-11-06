@@ -236,9 +236,14 @@ struct CVec3 {
     f32 x, y, z;
 };
 
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 // Raises a ground height to any obstacle top found at (x, z).
 static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
-    CsVec q(x, y, z);
+    CsVec q;
+    q.y = y;
+    q.z = z;
+    q.x = x;
     f32 top;
     if (fn_801784DC(&q.x, &top, 0, 0, fn_8026F408)) {
         h = h > top ? h : top;
@@ -297,7 +302,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
             r->v[3] = v > lbl_80563E78 ? v : lbl_80563E78;
         }
     }
-    f32 lift = r->v[1] < lbl_80563E78 ? lbl_80563E78 : r->v[1];
+    f32 lift = MaxF(lbl_80563E78, r->v[1]);
     f32 top = lbl_8049A208[3];
     f32 m = lbl_80563EA8 + lbl_8049A208[2];
     top = top > m ? top : m;
@@ -307,7 +312,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     k = lbl_80563E78 + k * lbl_80563E30;
     pos[1] = pos[1] + lbl_8049A208[0] * k;
     target[1] = target[1] + lbl_8049A208[1] * k;
-    fn_8026ED64(cam, lbl_80563E30 < lbl_80563E4C ? lbl_80563E30 : lbl_80563E4C, pos, target);
+    fn_8026ED64(cam, MinF(lbl_80563E30, lbl_80563E4C * k), pos, target);
 }
 
 int fn_8026F408(int n) { return n <= 8; }
