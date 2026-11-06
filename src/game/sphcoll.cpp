@@ -629,6 +629,8 @@ extern const f32 lbl_80562310;  // 6.6666665
 // volumes tagged 1000+ only report the touch; otherwise a spring push at heights clamped to +-5 ft, and while
 // closing, the restitution and clamped friction impulses through both bodies' inverse inertia, plus a car-hit
 // event for hard enough player crashes.
+static inline f32 InvMass(f32 m) { return lbl_805622E0 / m; }
+
 void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
     RVec3 pa;
     RVec3 pq;
@@ -659,12 +661,14 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     RVec3 z2;
     RVec3 z3;
     RVec3 z4;
-    s32 qk = S32(q, 0x20);
-    s32 pk = S32(p, 0x20);
+    CFrame* fp;
+    CFrame* fq;
     RigidBody* pb;
     RigidBody* qb;
-    CFrame* fp = (CFrame*)PTR(p, 0xC);
-    CFrame* fq = (CFrame*)PTR(q, 0xC);
+    s32 pk = S32(p, 0x20);
+    s32 qk = S32(q, 0x20);
+    fp = (CFrame*)PTR(p, 0xC);
+    fq = (CFrame*)PTR(q, 0xC);
     pb = (RigidBody*)PTR(p, 0x4);
     qb = (RigidBody*)PTR(q, 0x4);
     if (qk == 0x3EA) {
@@ -739,6 +743,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     fr.y = lbl_805622D0;
     fr.z = lbl_805622D0;
     fn_801996BC(&fr, pt, n, p, q, k);
+    RVec3* rp = &rel;
     imp.x += fr.x;
     imp.y += fr.y;
     imp.z += fr.z;
@@ -770,18 +775,20 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         tt.x = ta.x + tb.x;
         tt.y = ta.y + tb.y;
         tt.z = ta.z + tb.z;
-        f32 ima = pb ? lbl_805622E0 / F32(pb, 0xD4) : lbl_805622D0;
-        f32 imb = qb ? lbl_805622E0 / F32(qb, 0xD4) : lbl_805622D0;
+        f32 ima = pb ? InvMass(F32(pb, 0xD4)) : lbl_805622D0;
+        f32 imb = qb ? InvMass(F32(qb, 0xD4)) : lbl_805622D0;
         f32 e = lbl_805622D0;
         if (-vn < lbl_80562304) {
             e = lbl_80562300;
         }
         f32 dt = PSVECDotProduct(n, &tt);
-        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(&rel, n) / (ima + imb + dt);
+        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(rp, n) / (ima + imb + dt);
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
-        f32 mu = lbl_805622E8 * (F32(p, 0x14) + F32(q, 0x14));
+        f32 fq2 = F32(q, 0x14);
+        f32 fp2 = F32(p, 0x14);
+        f32 mu = lbl_805622E8 * (fp2 + fq2);
         tv.x = rel.x + n->x * -vn;
         tv.y = rel.y + n->y * -vn;
         tv.z = rel.z + n->z * -vn;
@@ -813,7 +820,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             tt2.y = ta2.y + tb2.y;
             tt2.z = ta2.z + tb2.z;
             f32 dt2 = PSVECDotProduct(&tv, &tt2);
-            f32 jt = lbl_805622DC * PSVECDotProduct(&rel, &tv) / (ima + imb + dt2);
+            f32 jt = lbl_805622DC * PSVECDotProduct(rp, &tv) / (ima + imb + dt2);
             jt = ClampExt(jt, (f32)__fabs(j * mu));
             J.x = J.x + tv.x * jt;
             J.y = J.y + tv.y * jt;
@@ -823,7 +830,10 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         if (pb && IsCarObj((u8*)pb) && (u32)(qk - 0x73) <= 1) {
             int fast = 1;
             if (!U8(pb, 0x25C8)) {
-                fast = F32(pb, 0x25BC) > lbl_80558DC4[0];
+                bool big = F32(pb, 0x25BC) > lbl_80558DC4[0];
+                if (!big) {
+                    fast = 0;
+                }
             }
             if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= lbl_8056230C &&
                 F32(pb, 0x25D4) > lbl_80562310 && VE(q)->v30()) {
