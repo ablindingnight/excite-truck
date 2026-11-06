@@ -434,7 +434,7 @@ static inline TexEntry* FindTex(const char* name, s16 prio) {
     return lbl_804BFFF4.data[lbl_804BFFF4.count++] = new ("xlte") TexEntry(name, prio);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return LerpT(t, a, b); }
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
