@@ -1111,9 +1111,8 @@ void fn_801B24B8(void) {
     for (int i = 0; i < q->n; i++) {
         Crossing* p = &e[i];
         int rank = lbl_8055E688 - i + 9;
-        DeityCar* c = &lbl_8055E684[p->car];
-        if (!c->locked) {
-            c->rank = rank;
+        if (!lbl_8055E684[p->car].locked) {
+            lbl_8055E684[p->car].rank = rank;
         }
     }
     fn_801B1318();

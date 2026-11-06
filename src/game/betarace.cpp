@@ -3700,11 +3700,10 @@ inline int BetaMaster::vf8C(int p, int key) {
 }
 
 inline void BetaMaster::vf48(void) {
-    BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
     int i;
     u32 col;
-    if (c && c->mode != 0) {
-        if (c->mode == 1) {
+    if (&cars[fn_801E866C(fn_801E85B4())] && cars[fn_801E866C(fn_801E85B4())].mode != 0) {
+        if (cars[fn_801E866C(fn_801E85B4())].mode == 1) {
         }
     }
     col = lbl_8055E230.value;
