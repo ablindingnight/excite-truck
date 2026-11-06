@@ -177,9 +177,12 @@ static inline void StrCopy(char* d, int n, const char* s) {
 }
 
 static inline void ScaleAdd(PVec* v, f32 k, const PVec* a) {
-    v->x = v->x * k + a->x;
-    v->y = v->y * k + a->y;
-    v->z = v->z * k + a->z;
+    v->x *= k;
+    v->y *= k;
+    v->z *= k;
+    v->x += a->x;
+    v->y += a->y;
+    v->z += a->z;
 }
 
 static inline u32 FogColor(u8 r, u8 g, u8 b) { return 0xFF000000 | (r << 16) | (g << 8) | b; }
@@ -241,8 +244,9 @@ void fn_8029F124(void) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8029F188(void) {
-    for (int i = 0; i < lbl_804B9B7C.n; i++) {
-        EmitterInst* in = &lbl_804B9B7C.data[i];
+    int i = 0;
+    for (int off = 0; i < lbl_804B9B7C.n; off += sizeof(EmitterInst), i++) {
+        EmitterInst* in = (EmitterInst*)((u8*)lbl_804B9B7C.data + off);
         Obj* o = in->obj;
         if (o) {
             in->vel.x = o->pos.x - in->pos.x;
