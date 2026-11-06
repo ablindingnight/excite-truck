@@ -3022,15 +3022,15 @@ static inline f32 Len2(f32 x, f32 z) { return sqrt(x * x + z * z); }
 void fn_80188E2C(u8* p, u8* buf) {
     SnapPose tmp;
     u8* m = buf + S32(p, 0x8);
-    f32 t = lbl_8055E460;
     memset(m, 0, 0xFA8);
+    f32 t = lbl_8055E460;
     SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
     if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
         *pose = *(SnapPose*)(p + 0x70);
     } else {
-        f32* o = (f32*)&tmp;
-        const f32* prev = (const f32*)(p + 0xA0);
         const f32* cur = (const f32*)(p + 0x70);
+        const f32* prev = (const f32*)(p + 0xA0);
+        f32* o = (f32*)&tmp;
         for (int i = 0; i < 12; i++) {
             o[i] = prev[i] + t * (cur[i] - prev[i]);
         }
@@ -3121,9 +3121,9 @@ void fn_80188E2C(u8* p, u8* buf) {
         F32(o, 0x40) = F32(w, 0x48);
         F32(o, 0x44) = F32(w, 0x10);
         F32(o, 0x48) = 0.0f;
-        F32(o, 0x4C) = 0.0f;
-        F32(o, 0x50) = 0.0f;
         F32(o, 0x54) = 0.0f;
+        F32(o, 0x50) = 0.0f;
+        F32(o, 0x4C) = 0.0f;
         F32(o, 0x58) = 0.0f;
         F32(o, 0x5C) = 0.0f;
         S32(o, 0x60) = S32(w, 0x70);
