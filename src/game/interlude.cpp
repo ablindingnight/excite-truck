@@ -713,6 +713,22 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
 
 // Loads the interlude for this event (or the override name) from the .val file: its duration and its
 // "action" tables.
+// Default vector, a temporary built in place.
+struct XV3 : ValVec3 {
+    XV3(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+};
+
+// Helper name unproven: copies a vector read from the table.
+static inline void CopyV(IVec3* d, const ValVec3& s) {
+    d->x = s.x;
+    d->y = s.y;
+    d->z = s.z;
+}
+
 void fn_801C3D88(const char* name) {
     memset(lbl_8055E7F8, 0, 64 * sizeof(Event));
     for (int i = 0; i < 64; i++) {
@@ -771,19 +787,11 @@ void fn_801C3D88(const char* name) {
         case 1: {
             CamEvent* c = (CamEvent*)e;
             c->fov = 0.017453292f * n->GetFloat("fov", 90.0f);
-            const ValVec3& o = n->GetVec3("origin");
-            c->origin.x = o.x;
-            c->origin.y = o.y;
-            c->origin.z = o.z;
-            AxisAngleToRot(&c->rot, n->GetVec3("dir"));
-            const ValVec3& v = n->GetVec3Or("v", ZeroVec3());
-            c->v.x = v.x;
-            c->v.y = v.y;
-            c->v.z = v.z;
-            const ValVec3& av = n->GetVec3Or("av", ZeroVec3());
-            c->av.x = av.x;
-            c->av.y = av.y;
-            c->av.z = av.z;
+            CopyV(&c->origin, n->GetVec3("origin"));
+            const ValVec3& dir = n->GetVec3("dir");
+            AxisAngleToRot(&c->rot, dir);
+            CopyV(&c->v, n->GetVec3Or("v", XV3(0.0f, 0.0f, 0.0f)));
+            CopyV(&c->av, n->GetVec3Or("av", XV3(0.0f, 0.0f, 0.0f)));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
             c->accel = n->GetBool("accel", 1);
             c->target = fn_801C3A00(fn_801C3954(n->GetString("who", "nobody")));
