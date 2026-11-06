@@ -144,13 +144,13 @@ f32 FXSequence::GetLength(void) {
 
 FXSequence* FXSequence::Load(const char* name) {
     int n;
-    ValueTable* table;
-    int total;
     FXSequence* seq;
-    int i;
-    int ok;
+    ValueTable* table;
     ValueNode* node;
+    int total;
     int k;
+    int ok;
+    int i;
     seq = NULL;
     if (fn_8012C33C(name)) {
         table = fn_80131808(name);
@@ -173,9 +173,9 @@ FXSequence* FXSequence::Load(const char* name) {
             k = 0;
             ok = 1;
             for (i = 0; i < total; i++) {
-                node = table->GetChild(i);
-                if (IsSeqNode(node)) {
-                    if (!seq->nodes[k++].Init(node)) {
+                ValueNode* e = table->GetChild(i);
+                if (IsSeqNode(e)) {
+                    if (!seq->nodes[k++].Init(e)) {
                         ok = 0;
                         break;
                     }
