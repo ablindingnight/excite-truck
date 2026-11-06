@@ -223,8 +223,7 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     for (int i = 0; i < 4; i++) {
         col[i] = Spline(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3);
     }
-    f32 s2 = fz * fz;
-    return Spline(col[0], col[1], col[2], col[3], fz, s2, s2 * fz);
+    return Spline(col[0], col[1], col[2], col[3], fz, (fz * fz), (fz * fz) * fz);
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.

@@ -226,10 +226,9 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         Flatten(&m.z, &d, -1.0f);
         f32 len = PSVECMag(&m.z);
         len = 0.001f > len ? 0.001f : len;
-        f32 s = 1.0f / len;
-        m.z.x *= s;
-        m.z.y *= s;
-        m.z.z *= s;
+        m.z.x *= (1.0f / len);
+        m.z.y *= (1.0f / len);
+        m.z.z *= (1.0f / len);
         m.y.x = 0.0f;
         m.y.y = 1.0f;
         m.y.z = 0.0f;

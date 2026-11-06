@@ -349,11 +349,10 @@ void fn_802BF160(void) {
         w = 1.0f - rings.r[i].scale;
         f32 s = FMax(FMin((c - -1.0f) * 0.5f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
-        f32 inv = 1.0f / rings.r[i].scale;
         TexMtx m = sRingMtx;
-        f32 off = -inv * h;
+        f32 off = -(1.0f / rings.r[i].scale) * h;
         m.m[0][3] = rings.r[i].y;
-        m.m[1][1] = (1.0f + inv * (1.0f - (h + rings.r[i].scale))) - off;
+        m.m[1][1] = (1.0f + (1.0f / rings.r[i].scale) * (1.0f - (h + rings.r[i].scale))) - off;
         m.m[1][3] = off;
         fn_802C9900(fn_802BF02C(a));
         fn_802D3D94(0, &m);
@@ -877,10 +876,9 @@ void WaterSystem::Draw(void) {
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
         sv[i].pos = *((i & 1) ? &e1 : &e0);
-        f32 o = (i & 2) ? -10.0f : 0.0f;
-        sv[i].pos.x += cam2.y.x * o;
-        sv[i].pos.y += cam2.y.y * o;
-        sv[i].pos.z += cam2.y.z * o;
+        sv[i].pos.x += cam2.y.x * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.y += cam2.y.y * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.z += cam2.y.z * ((i & 2) ? -10.0f : 0.0f);
         sv[i].v = 0.0f;
         sv[i].u = 0.0f;
         sv[i].color = lbl_8055FAF0;

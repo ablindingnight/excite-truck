@@ -1288,13 +1288,12 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
     IconEntry* ic = &((IconPool*)PTR(p, 0xC8))->entries[e->icon[k]];
     f32 u1 = ic->u1;
     f32 v1 = ic->v1;
-    f32 u2 = ic->u2;
     f32 v2 = ic->v2;
     fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
-                lbl_80563988 * w, lbl_80563988 * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, u2, v2);
+                lbl_80563988 * w, lbl_80563988 * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
     fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
                 lbl_80563988 * w, lbl_80563988 * h, ic->texE, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
-                u2, v2);
+                ic->u2, v2);
 }
 
 void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {

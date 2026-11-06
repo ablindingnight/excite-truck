@@ -1474,7 +1474,6 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         f32 s = 1.333f * (f32)sin(fi * step);
         z0 = 2.5f * s;
         f32 x1 = 5.0f * c;
-        f32 z1 = 5.0f * s;
         v[1 + i * 2].pos.x = (2.5f * c);
         v[1 + i * 2].pos.y = y;
         v[1 + i * 2].pos.z = z0;
@@ -1483,10 +1482,10 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].t = 1.333f * z0;
         v[2 + i * 2].pos.y = y;
-        v[2 + i * 2].pos.z = z1;
+        v[2 + i * 2].pos.z = (5.0f * s);
         v[2 + i * 2].color = 0x00FFFFFF;
         v[2 + i * 2].s = 1.333f * x1;
-        v[2 + i * 2].t = 1.333f * z1;
+        v[2 + i * 2].t = 1.333f * (5.0f * s);
     }
     int n = 1;
     for (i = 0; i < 150; i++, n += 2) {

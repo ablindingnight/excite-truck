@@ -1978,12 +1978,11 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     RVec3 ld;
     f32 tmin;
     f32 tmax;
-    f32 dx = from->x - m->t.x;
     f32 dy = from->y - m->t.y;
     f32 mm = m->m[0];
-    lp.x = Dot3(dx, mm, dy, m->m[1], (from->z - m->t.z), m->m[2]);
-    lp.z = Dot3(dx, m->m[6], dy, m->m[7], (from->z - m->t.z), m->m[8]);
-    lp.y = Dot3(dx, m->m[3], dy, m->m[4], (from->z - m->t.z), m->m[5]);
+    lp.x = Dot3((from->x - m->t.x), mm, dy, m->m[1], (from->z - m->t.z), m->m[2]);
+    lp.z = Dot3((from->x - m->t.x), m->m[6], dy, m->m[7], (from->z - m->t.z), m->m[8]);
+    lp.y = Dot3((from->x - m->t.x), m->m[3], dy, m->m[4], (from->z - m->t.z), m->m[5]);
     MulVec(&ld, dir, m);
     tmin = -1e8f;
     tmax = 1e8f;

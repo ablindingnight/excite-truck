@@ -280,10 +280,9 @@ World* fn_802B5B6C(void) { return fn_802B59A4(lbl_8055FA3C); }
 int fn_802B5B74(ObjItem* out) {
     InlineVec<ObjItem, 16> list;
     fn_802B321C(&list, 0, fn_802B5B6C()->objs, lbl_8055FA40);
-    u32 i = lbl_8055FA44;
-    int ok = i >= 0 && i < list.count;
+    int ok = lbl_8055FA44 >= 0 && lbl_8055FA44 < list.count;
     if (ok) {
-        *out = list.data[i];
+        *out = list.data[lbl_8055FA44];
     }
     return ok;
 }
@@ -1067,8 +1066,7 @@ void fn_802B8510(int op) {
     Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
     Brush tmp = *b;
     u32 tw;
-    u32 th = tmp.h;
-    b->w = th;
+    b->w = tmp.h;
     tw = tmp.w;
     b->h = tw;
     for (unsigned int x = 0; x < b->w; x++) {
@@ -1076,7 +1074,7 @@ void fn_802B8510(int op) {
             if (op == 6) {
                 b->data[x + y * b->w] = tmp.data[tw * (x + 1) - 1 - y];
             } else {
-                b->data[x + y * b->w] = tmp.data[y + (th - x - 1) * tw];
+                b->data[x + y * b->w] = tmp.data[y + (tmp.h - x - 1) * tw];
             }
         }
     }

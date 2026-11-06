@@ -457,9 +457,8 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_802C98DC(&lbl_8055FCD4, &lbl_8055D0A0, &lbl_8055D0A4, &aspect);
     f32 zn = lbl_8055D0A0;
     f32 zf = lbl_8055D0A4;
-    f32 q = (zf + zn) / (zf - zn);
-    fn_802CCBC0(&rt, F4(F2(1.0f / lbl_8055FCD4, 1.0f / lbl_8055FCD4), F2(q)),
-                F4(F2(0.0f, 0.0f), F2(zf * (1.0f - q))), F4(F2(0.0f, 0.0f), F2(1.0f / aspect)));
+    fn_802CCBC0(&rt, F4(F2(1.0f / lbl_8055FCD4, 1.0f / lbl_8055FCD4), F2(((zf + zn) / (zf - zn)))),
+                F4(F2(0.0f, 0.0f), F2(zf * (1.0f - ((zf + zn) / (zf - zn))))), F4(F2(0.0f, 0.0f), F2(1.0f / aspect)));
     u8* vis = ctx->vis;
     vis[0] = 0x81;
     const MLSphere* sp;
