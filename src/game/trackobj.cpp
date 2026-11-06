@@ -705,11 +705,11 @@ static inline void Lift(OFrame* f, f32 h) {
 }
 
 static inline int IsSkipType(ValueNode* vn) {
-    const char** p;
+    int i;
     SkipList skip = sSkip;
     const char* type = vn->GetValue("type");
-    for (p = skip.names; *p; p++) {
-        if (strcasecmp(*p, type) == 0) {
+    for (i = 0; skip.names[i]; i++) {
+        if (strcasecmp(skip.names[i], type) == 0) {
             return 1;
         }
     }
@@ -977,10 +977,9 @@ int fn_801F88F4(ValueNode* vn) {
 }
 
 static inline void ReadShape(ObstacleDesc* d, ValueNode* vn) {
-    u32 i;
     TypeList names = sTypes;
     const char* type = vn->GetValue("type");
-    i = 0;
+    u32 i = 0;
     while (strcasecmp(names.names[i], type) != 0) {
         if (++i == 24) {
             fn_802E317C("Unknown obj type: \"%s\"", type);
