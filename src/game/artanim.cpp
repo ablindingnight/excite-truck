@@ -807,8 +807,9 @@ ArtPlayer::ArtPlayer(int n) {
 
 ArtPlayer::~ArtPlayer(void) {
     int i = list->count;
-    while (i-- > 0) {
-        fn_802AD30C(list->items[i].anim);
+    int off = i * sizeof(list->items[0]);  // MATCHING-AID: byte offset walker and the comma test, needed for the loop registers
+    while (off -= sizeof(list->items[0]), i-- > 0) {
+        fn_802AD30C(((ArtItem*)((u8*)list->items + off))->anim);
     }
     list->count = 0;
     ArtList* l = list;
