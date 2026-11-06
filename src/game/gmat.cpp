@@ -541,11 +541,20 @@ void fn_802B1758(GMat* g);
 void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
+    int c;
+    u32 m;
+    bool first;
+    GList* lp;
+    int bit;
+    int n;
+    GVec* verts;
+    int k;
+    s32 old;
     int i;
     fn_802B1BEC();
     if (g->verts.Count() > 0) {
         fn_802B1B60(g);
-        s32 old = fn_802C2C00(0);
+        old = fn_802C2C00(0);
         if (lbl_8055FA59) {
             fn_802C8BD0(g->worldmap);
         } else {
@@ -559,20 +568,20 @@ void fn_802B14B4(GMat* g) {
                 fn_802CADD0(g->layers.At(i)->detail, 1);
                 fn_802CADD0(fn_802BC30C(i), 2);
             } else {
-                for (int k = 0; k < texs->Count(); k++) {
+                for (k = 0; k < texs->Count(); k++) {
                     fn_802CADD0(texs->At(k)->tex, k + 1);
                 }
                 fn_802CADD0(fn_802BC30C(i), 3);
             }
-            GVec* verts = g->verts.At(0);
-            int n = g->verts.Count();
-            int bit = 1 << i;
-            GList* lp = &g->lists[bit];
-            for (u32 m = bit; m < 65; lp++, m++) {
+            verts = g->verts.At(0);
+            n = g->verts.Count();
+            bit = 1 << i;
+            lp = &g->lists[bit];
+            for (m = bit; m < 65; lp++, m++) {
                 if ((m & bit) && !lp->Empty()) {
-                    bool first = ((bit - 1) & m) == 0;
+                    first = ((bit - 1) & m) == 0;
                     for (GBlock* b = lp->Head(); b; b = b->next) {
-                        int c = b->Count();
+                        c = b->Count();
                         if (c > 0) {
                             fn_802DC078(verts, n, (u16*)b->At(0), c, first, i);
                         }
@@ -583,7 +592,7 @@ void fn_802B14B4(GMat* g) {
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
             } else {
-                for (int k = 0; k < texs->Count(); k++) {
+                for (k = 0; k < texs->Count(); k++) {
                     fn_802CADD0(-1, k + 1);
                 }
                 fn_802CADD0(-1, 3);
@@ -592,7 +601,7 @@ void fn_802B14B4(GMat* g) {
         fn_802DBF30();
         fn_802C8D74();
         fn_802C2C00(old);
-        int n = g->verts.Count();
+        n = g->verts.Count();
         fn_802BB0FC(g->verts.At(0), n);
         fn_802B1758(g);
         n = g->verts.Count();
