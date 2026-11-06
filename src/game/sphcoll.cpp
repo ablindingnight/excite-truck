@@ -395,7 +395,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     PolyPush push[9];
     PolyCurve* cv;
     PolyPlane* pl = ((PolyVol*)o)->planes;
-    for (int i = 0; i < S32(o, 0xBC); i++, pl++) {
+    for (int i = 0; i < S32(o, 0xBC); pl++, i++) {
         f32 a = (f32)__fabs(PSVECDotProduct(&lv, &pl->n));
         f32 d = (PSVECDotProduct(&lc, &pl->n) - pl->d) + a;
         if (d >= lbl_805622D4) {
@@ -406,7 +406,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         }
     }
     cv = (PolyCurve*)(o + 0xC0);
-    for (int i = 0; i < S32(o, 0xDC); i++, cv++) {
+    for (int i = 0; i < S32(o, 0xDC); cv++, i++) {
         RVec3 dd;
         dd.x = lc.x - cv->center.x;
         dd.y = lc.y - cv->center.y;
