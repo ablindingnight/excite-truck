@@ -980,7 +980,12 @@ void XFaderTMH::Draw(TObj* list) {
     }
 }
 
-void XFaderTMH::Add(void* scene, TObj* o, s32 id) {
+static inline f32 MidOf(f32 lo, f32 hi, f32 s) {
+    f32 d = hi - lo;
+    return lo + d * s;
+}
+
+void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     XFadeList* l;
     XFade* f;
     f32 b[6];
@@ -995,9 +1000,9 @@ void XFaderTMH::Add(void* scene, TObj* o, s32 id) {
     }
     f = &l->fades[l->count];
     fn_802C77F0(o->model, b);
-    f->pos[0] = o->pos[0] + (b[0] + 0.5f * (b[1] - b[0]));
-    f->pos[1] = o->pos[1] + (b[2] + 0.5f * (b[3] - b[2]));
-    f->pos[2] = o->pos[2] + (b[4] + 0.5f * (b[5] - b[4]));
+    f->pos[0] = o->pos[0] + MidOf(b[0], b[1], 0.5f);
+    f->pos[1] = o->pos[1] + MidOf(b[2], b[3], 0.5f);
+    f->pos[2] = o->pos[2] + MidOf(b[4], b[5], 0.5f);
     f->model = o->model;
     f->scale = 1.0f / (*(f32*)&o->d2C - o->d30);
     f->start = o->d30;
