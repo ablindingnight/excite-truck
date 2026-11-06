@@ -1619,16 +1619,19 @@ void fn_802D0EEC(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+static inline f32 FovFit(f32 half, f32 a) { return 2.0f * (f32)atan((f32)tan(half) / a); }
+
 static inline void Loop1_fn_802D14D8(f32 k) {
     f32 aspect = lbl_804C9778.aspect * (k / lbl_804C9778.zoom);
-    f32 fovy = 2.0f * (f32)atan((f32)tan(0.5f * lbl_804C9778.fovy) / aspect);
+    f32 fovy = FovFit(0.5f * lbl_804C9778.fovy, aspect);
     f32 m[4][4];
-    C_MTXPerspective(m, 2.0f * fovy / 0.017453292f, aspect, lbl_804C9778.nearZ, lbl_804C9778.farZ);
-    if (lbl_8055FE24 == 0 && lbl_8055D0B8 >= 0 && lbl_8055D0B8 < lbl_8055D0C0 * lbl_8055D0BC) {
+    C_MTXPerspective(m, fovy / 0.017453292f, aspect, lbl_804C9778.nearZ, lbl_804C9778.farZ);
+    if (lbl_8055FE24 == 0 && lbl_8055D0B8 >= 0 && lbl_8055D0B8 < lbl_8055D0BC * lbl_8055D0C0) {
         int ty = lbl_8055D0B8 / lbl_8055D0BC;
         int tx = lbl_8055D0B8 - ty * lbl_8055D0BC;
-        f32 sx = 1.0f / lbl_8055D0BC;
-        f32 sy = 1.0f / lbl_8055D0C0;
+        f32 sy, sx;
+        sx = 1.0f / lbl_8055D0BC;
+        sy = 1.0f / lbl_8055D0C0;
         m[0][0] = m[0][0] / sx;
         m[1][1] = m[1][1] / sy;
         m[0][2] = m[0][2] + (f32)(tx * 2 - lbl_8055D0BC + 1);
