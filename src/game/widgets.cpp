@@ -567,7 +567,7 @@ void fn_80222CFC(WidgetFragment *source);
 
 }
 
-WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* list,int* selected);  // placeholder (356 bytes)
+WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,const void* list,int* selected);  // placeholder (356 bytes)
 extern "C" {u32 fn_802236C8(WidgetFragment*,int);extern int lbl_8055FB9C,lbl_8055FBA0;}
 struct SelectionDrawFieldsNew {char base[0x244];const char* labels[33];int count;int* selected;unsigned char available[33];char pad2f1[3];float widths[33];int icons[33];GTextFont* resource;float spacing,scale,scrollX,first,second,pulse;};
 extern "C" {extern const float lbl_805634EC,lbl_805634F4,lbl_80563534;}
@@ -2767,14 +2767,15 @@ void fn_8022375C(WidgetFragment*);extern const char lbl_8033DA84[];extern u32 lb
 struct SelectionConstructBaseObservedNew {char storage[0x244];inline SelectionConstructBaseObservedNew(int x,int y){fn_80218F34((WidgetFragment*)this,x,y,0,0,0);}};
 struct SelectionFullPrefix:SelectionConstructBaseObservedNew {const char* labels[33];int count;int* selected;unsigned char available[33];char padding2f1[3];float widths[33];int icons[33];GTextFont* resource;float period,scale,speed,first,second,pulse;char gap418[4];bool locked;};
 typedef char Selection391FullSize420[sizeof(SelectionFullPrefix)==0x420?1:-1];
-WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,void* rawList,int* selectedInput){SelectionFullPrefix* instance=(SelectionFullPrefix*)self;fn_80218F34(self,x,y,0,0,0);
+WidgetFragment* fn_802230A4(WidgetFragment* self,int x,int y,const void* rawList,int* selectedInput){SelectionFullPrefix* instance=(SelectionFullPrefix*)self;fn_80218F34(self,x,y,0,0,0);
   StringList *list = (StringList *) rawList;
 
   int count = list->used;
   SelectionFullPrefix *f = (SelectionFullPrefix *) self;
 
+  f->selected=selectedInput;
   self->vtable = lbl_8033E4DC;
-  f->selected=selectedInput;f->count=count;
+  f->count=count;
 
 
   f->resource = fn_80232578(lbl_8033DA84);
