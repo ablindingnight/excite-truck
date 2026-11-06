@@ -1401,20 +1401,18 @@ static inline double AbsD(double v) { return __fabs(v); }
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
 void fn_80251B04(u8* p) {
-    f32 fade;
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
     f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
     fn_80231220(-0.5f * w, 225.0f, w, 66.0f, PTR(p, 0x20), -1, 0.0f, 0.0f, 10.0f, 1.0f);
-    fade = fn_80216CB4();
+    f32 fade = fn_80216CB4();
     for (int i = 0; i < S32(p, 0x1C); i++) {
         SlotAnim* e = &((SlotAnim*)PTR(p, 0x18))[i];
-        f32 h;
         f32 s = 1.0f - (f32)__fabs(e->t);
         s = s < fade ? s : fade;
-        h = 48.0f * s;
-        f32 d = (f32)AbsD(F32(p, 0x28) - i);
-        f32 y = top - 0.5f * (48.0f * (1.0f - s));
+        f32 h = 48.0f * s;
         f32 x = 82.5f * (i - F32(p, 0x28)) - 41.25f;
+        f32 y = top - 0.5f * (48.0f * (1.0f - s));
+        f32 d = (f32)AbsD(F32(p, 0x28) - i);
         if (1.0f < d) {
             d = 1.0f;
         }
