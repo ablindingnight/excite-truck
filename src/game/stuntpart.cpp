@@ -358,6 +358,13 @@ void fn_802AA1D0(int idx) {
 
 static inline double AbsD(double v) { return __fabs(v); }
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
@@ -430,9 +437,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
-                    q.x = Lerp(p->pts[i * 2].x, p->pts[i * 2 + 1].x, r);
-                    q.y = Lerp(p->pts[i * 2].y, p->pts[i * 2 + 1].y, r);
-                    q.z = Lerp(p->pts[i * 2].z, p->pts[i * 2 + 1].z, r);
+                    SetV3(&q, Lerp(p->pts[i * 2].x, p->pts[i * 2 + 1].x, r), Lerp(p->pts[i * 2].y, p->pts[i * 2 + 1].y, r), Lerp(p->pts[i * 2].z, p->pts[i * 2 + 1].z, r));
                     AddScaled(&q, &q, &car->axes[1], -1.0f);
                     fn_8028E584(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
                 }

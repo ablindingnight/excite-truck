@@ -300,6 +300,13 @@ static inline ValPoint MakePoint(f32 x, f32 y) {
 
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* elems[64];
     ValueNode* paths[64];
@@ -418,9 +425,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
             if (f->Has("spin")) {
                 ValVec3 axis;
-                axis.z = -(0.017453292f * f->GetFloat("spin", 0.0f));
-                axis.x = 0.0f;
-                axis.y = 0.0f;
+                SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
                 if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
                     f32 len = sqrt(d);

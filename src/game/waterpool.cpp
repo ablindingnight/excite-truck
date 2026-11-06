@@ -603,6 +603,13 @@ extern "C" void fn_8029CD48(WaterCar* car) {
     }
 }
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) {
     memset(&desc, 0, sizeof(desc));
     f32 rightY = g->right.y;
@@ -627,9 +634,7 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     dxz = g->right.y * ix;
     dyx = g->up.x * iy;
     dyz = g->up.y * iy;
-    center.x = g->origin.x + 0.5f * (g->right.x + g->up.x);
-    center.y = g->origin.y;
-    center.z = g->origin.z + 0.5f * (g->right.y + g->up.y);
+    SetV3(&center, g->origin.x + 0.5f * (g->right.x + g->up.x), g->origin.y, g->origin.z + 0.5f * (g->right.y + g->up.y));
     radius = PSVECDistance(&center, &origin);
     verts = new ("water vcache") PoolVtx[nx * 2];
     tex = fn_802CAC28(texName, 0);

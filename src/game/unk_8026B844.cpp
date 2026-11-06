@@ -166,6 +166,13 @@ static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& m
     lbl_80499050.pos.z += move.z;
 }
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 void fn_8026B8A0(void) {
     FreePad pad;
     CamRot yawM;
@@ -255,9 +262,7 @@ void fn_8026B8A0(void) {
     lbl_80499050.rot.axes[2].x = lbl_80563D78;
     lbl_80499050.rot.axes[2].y = lbl_80563D78;
     lbl_80499050.rot.axes[2].z = lbl_80563D94;
-    yawE.x = lbl_80563D78;
-    yawE.y = lbl_8055F4F4;
-    yawE.z = lbl_80563D78;
+    SetV3(&yawE, lbl_80563D78, lbl_8055F4F4, lbl_80563D78);
     Mat3FromEuler__FP4Mat3PC4Vec3(&yawM, &yawE);
     Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &yawM, &lbl_80499050.rot);
     pitchE.x = -lbl_8055F4F8;

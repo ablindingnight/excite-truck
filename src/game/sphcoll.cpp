@@ -3220,6 +3220,13 @@ u8* fn_801A1898(u8* p, u32 a, u32 swap) {
 }
 
 // Axis-aligned bounds of the volume: both axis end points (org +- axis * k), widened by k.
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
     PVec3 org;
     PVec3 axis;
@@ -3235,9 +3242,7 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         RVec3 mn;
         RVec3 la;
         RVec3 lb;
-        lb.z = b.z - k;
-        lb.x = b.x - k;
-        lb.y = b.y - k;
+        SetV3(&lb, b.x - k, b.y - k, b.z - k);
         la.x = a.x - k;
         la.y = a.y - k;
         la.z = a.z - k;
@@ -3248,12 +3253,8 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         RVec3 mx;
         RVec3 ha;
         RVec3 hb;
-        hb.x = b.x + k;
-        hb.y = b.y + k;
-        hb.z = b.z + k;
-        ha.x = a.x + k;
-        ha.y = a.y + k;
-        ha.z = a.z + k;
+        SetV3(&hb, b.x + k, b.y + k, b.z + k);
+        SetV3(&ha, a.x + k, a.y + k, a.z + k);
         SetV(&mx, MaxF(ha.x, hb.x), MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
         *hi = mx;
     }

@@ -344,6 +344,13 @@ u8* fn_802C1500(TMtx* t, int cls) {
     return (u8*)lbl_8055CFA0 + id;
 }
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 void fn_802C1550(void) {
     int i;
     TreeClass* c = lbl_804C0810;
@@ -372,9 +379,7 @@ void fn_802C1550(void) {
                 m.rot[2][0] = 0.0f;
                 m.rot[2][1] = 0.0f;
                 m.rot[2][2] = 1.0f;
-                m.pos.x = 0.0f;
-                m.pos.z = 0.0f;
-                m.pos.y = -1000.0f;
+                SetV3(&m.pos, 0.0f, -1000.0f, 0.0f);
                 fn_801FA7F4(model, &m, c->cfg);
             }
             }

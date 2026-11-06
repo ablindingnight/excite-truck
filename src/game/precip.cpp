@@ -596,6 +596,13 @@ static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel
     }
 }
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
+    f32* o = (f32*)o_;
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
 void fn_802A53B0(DropHit* hits, int n) {
     if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0] || !lbl_8055F894) {
         return;
@@ -626,9 +633,7 @@ void fn_802A53B0(DropHit* hits, int n) {
             }
             f32 k = -2.0f * dot;
             ValVec3 vel;
-            vel.x = dir.x + nrm.x * k;
-            vel.y = dir.y + nrm.y * k;
-            vel.z = dir.z + nrm.z * k;
+            SetV3(&vel, dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
             vel.x = o->vel.x + vel.x * 3.0f;
             vel.y = o->vel.y + vel.y * 3.0f;
             vel.z = o->vel.z + vel.z * 3.0f;
@@ -1125,9 +1130,7 @@ void Mist::Update(void) {
         back.x = v.x;
         back.y = v.z;
         ValVec3 dv;
-        dv.x = v.x * dt;
-        dv.y = v.y * dt;
-        dv.z = v.z * dt;
+        SetV3(&dv, v.x * dt, v.y * dt, v.z * dt);
         f32 k = -rad * (1.0f / (f32)sqrt(back.x * back.x + back.y * back.y));
         back.x *= k;
         back.y *= k;
