@@ -1805,9 +1805,19 @@ void fn_8018F9B4(RaceCarRec* car);
 
 static inline int Round(f32 v) { return v < 0.0f ? v - 0.5f : 0.5f + v; }
 
-static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
-    f32 speed = fn_801725C8(lbl_8055E3C8);
+// Helper name unproven: degrees to radians.
+static inline f32 ToRad(f32 d) {
+    return 0.017453292f * d;
+}
+
+// Helper name unproven: float absolute value.
+static inline f32 FAbs(f32 x) {
+    return (f32)__fabs(x);
+}
+
+static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0) {
     f32 dur = 10.0f;
+    f32 speed = base;
     f32 dist = 220.0f;
     V2 tgt;
     int tries = 19;
@@ -1821,13 +1831,13 @@ static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
         dir.y = rec->mtx.basis[2].z;
         {
             f32 len = sqrt(dir.x * dir.x + dir.y * dir.y);
-            if (!((f32)__fabs(len) <= lbl_80558DC4[0])) {
+            if (!(FAbs(len) <= lbl_80558DC4[0])) {
                 f32 k = dist / len;
                 dir.x *= k;
                 dir.y *= k;
             }
         }
-        Rotate(&dir, fn_80129DC4(3, 0.017453292f * a0, 0.017453292f * a1));
+        Rotate(&dir, fn_80129DC4(3, ToRad(a0), ToRad(a1)));
         tgt.x = rec->mtx.origin.x;
         tgt.y = rec->mtx.origin.z;
         tgt.x += dir.x;
@@ -1835,9 +1845,9 @@ static inline void PickTarget(CrushTarget* t, int car, f32 a0, f32 a1) {
         if (fn_80171EF8(&pos, &tgt)) {
             break;
         }
-        dur = 0.7f * dur;
         a0 -= 10.0f;
         a1 += 10.0f;
+        dur = 0.7f * dur;
         dur = MAX(dur, 2.0f);
         speed = 0.7f * speed;
         speed = MAX(speed, 17.777779f);
@@ -1885,10 +1895,22 @@ inline void CrushSubTaskMgr::vf24(void) {
             a0 = 0.0f;
             a1 = 20.0f;
         }
-        PickTarget(&targets[i], i, a0, a1);
+        PickTarget(&targets[i], i, fn_801725C8(lbl_8055E3C8), a1, a0);
         targets[i].b0 = 0;
         targets[i].f10 = -1;
     }
+}
+
+// Helper name unproven: arrival radius squared.
+static inline f32 RadSq(void) {
+    f32 r = 75.0f;
+    return r * r;
+}
+
+// Helper name unproven: arguments read right to left, stores go x, y.
+static inline void SetD(V2* o, f32 x, f32 y) {
+    o->x = x;
+    o->y = y;
 }
 
 inline void CrushSubTaskMgr::vf20(void) {
@@ -1899,19 +1921,16 @@ inline void CrushSubTaskMgr::vf20(void) {
             RaceCarRec* rec = fn_8017960C(i);
             V2 pos;
             V2 d;
-            f32 r = 75.0f;
             pos.x = rec->mtx.origin.x;
             pos.y = rec->mtx.origin.z;
-            d.y = pos.y - t->y;
-            f32 tx = t->x;
-            d.x = pos.x - tx;
-            if (d.x * d.x + d.y * d.y < r * r || lbl_8055E3C8 > t->until) {
+            SetD(&d, pos.x - t->x, pos.y - t->y);
+            if (d.x * d.x + d.y * d.y < RadSq() || lbl_8055E3C8 > t->until) {
                 V2 here;
                 rec = fn_8017960C(i);
                 here.x = rec->mtx.origin.x;
                 here.y = rec->mtx.origin.z;
                 if (fn_80171E3C(here)) {
-                    PickTarget(t, i, -20.0f, 20.0f);
+                    PickTarget(t, i, fn_801725C8(lbl_8055E3C8), 20.0f, -20.0f);
                 } else {
                     V2 p = fn_80171FF0(&here, 10, 5.0f, 5.0f);
                     t->x = p.x;
