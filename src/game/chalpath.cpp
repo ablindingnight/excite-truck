@@ -62,8 +62,9 @@ int lbl_80345B40[3] = {10, 6, 8};
 struct BarArt {
     const char* art[3];
 };
-extern const BarArt lbl_802FA6A8 = {{"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"}};
-extern const BarArt lbl_802FA6B4 = {{"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"}};
+// MATCHING-AID: never used, keeps these strings ahead of the others in the pool; the tables in .rodata come from the initialisers in fn_80261948 and fn_802619A0.
+static const BarArt sBarBot = {{"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"}};
+static const BarArt sBarTop = {{"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"}};
 extern const MenuDesc lbl_802FA6C0 = {"challengemode.lyt", 0, 0, 0, 0};
 extern const MenuDesc lbl_802FA6D4 = {"newmode1.lyt", 0, 0, 0, 0};
 
@@ -841,8 +842,8 @@ int fn_802616A8(void) {
 }
 
 const char* fn_80261948(s32* p) {
-    BarArt t = lbl_802FA6A8;
-    return t.art[*p];
+    const char* t[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
+    return t[*p];
 }
 
 void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
@@ -854,8 +855,8 @@ void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
 }
 
 const char* fn_802619A0(s32* p) {
-    BarArt t = lbl_802FA6B4;
-    return t.art[*p];
+    const char* t[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
+    return t[*p];
 }
 
 u8* fn_802619D8(u8* p, int i) { return PTR(p, 0x0) + i * 4; }

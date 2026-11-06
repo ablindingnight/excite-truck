@@ -227,7 +227,6 @@ extern CarInfo* lbl_80488648[8];
 const char* lbl_8055C958 = "Andrew";
 const char* lbl_8055C964 = "chunk";
 
-static const TypeTable sTypes = {{{"car", 1}, {"terrain", 2}, {"wood", 3}}};
 
 ModuleTag lbl_8055F760;
 Spin lbl_804B4030[6];
@@ -405,10 +404,10 @@ void fn_80292CD8(const char* model, int id, const char* tex) {
 }
 
 int fn_80292DE8(const char* name) {
-    TypeTable t = sTypes;
+    TypeName t[3] = {{"car", 1}, {"terrain", 2}, {"wood", 3}};
     for (u32 i = 0; i < 3; i++) {
-        if (strcmp(name, t.t[i].name) == 0) {
-            return t.t[i].type;
+        if (strcmp(name, t[i].name) == 0) {
+            return t[i].type;
         }
     }
     fn_802E317C("chunk: invalid type '%s'", name);
