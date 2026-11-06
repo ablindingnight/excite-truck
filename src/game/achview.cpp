@@ -842,11 +842,16 @@ struct LightDir {
     f32 x, y, z;
 };
 
+static inline f32 DegToRad(f32 d) { return d * 3.1415927f / 180.0f; }
 ModuleTag lbl_8055F388;
 UnkStatic123s lbl_80498E98;
 UnkStatic7F lbl_8055F390;
-extern const f32 lbl_80563B38;
-extern const f32 lbl_8055F39C = lbl_80563B38;  // trophy view field of view
+UIObjects* lbl_8055F394;
+f32 lbl_8055F398;
+extern const f32 lbl_8055F39C = DegToRad(15.0f);  // trophy view field of view
+bool lbl_8055F3A0;
+f32 lbl_8055F3A4;
+f32 lbl_80498EAC[3];
 
 extern "C" {
 u8* fn_8025B134(u8* p);
