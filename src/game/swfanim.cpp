@@ -196,8 +196,10 @@ void SwfAnim::Reset() {
 }
 
 void SwfAnim::LoadFile(const char* name) {
+    int k;
+    Sw2Frame* f;
+    int j;
     Sw2Item* it;
-    u8* base;
     u32 size = 0;
     u8 firstLoad = 0;
     u8 swapped = 0;
@@ -215,7 +217,6 @@ void SwfAnim::LoadFile(const char* name) {
         return;
     }
     SwfSwap32(&data->fps);
-    base = (u8*)data;
     SwfSwap32(&data->numFrames);
     SwfSwap32(&data->numTextures);
     SwfSwap32(&data->numShapes);
@@ -225,6 +226,7 @@ void SwfAnim::LoadFile(const char* name) {
     SwfSwap32(&data->shapes);
     SwfSwap32(&data->cxforms);
     SwfSwap32(&data->frames);
+    u8* base = (u8*)data;
     data->textures = (Sw2Texture*)(base + (u32)data->textures);
     data->shapes = (Sw2Shape*)(base + (u32)data->shapes);
     data->cxforms = (Sw2Cxform*)(base + (u32)data->cxforms);
@@ -244,21 +246,20 @@ void SwfAnim::LoadFile(const char* name) {
         for (; i < data->numShapes; i++) {
             SwfSwap16(&data->shapes[i].tex);
             SwfSwap32(&data->shapes[i].color);
-            for (int j = 0; j < 4; j++) {
+            for (j = 0; j < 4; j++) {
                 SwfSwap32(&data->shapes[i].pts[j][0]);
                 SwfSwap32(&data->shapes[i].pts[j][1]);
             }
         }
     }
     for (i = 0; i < data->numFrames; i++) {
-        int j;
-        Sw2Frame* f = &data->frames[i];
+        f = &data->frames[i];
         SwfSwap16(&f->count);
         for (j = 0; j < f->count; j++) {
             it = &f->items[j];
             SwfSwap16(&it->shape);
             SwfSwap16(&it->cxform);
-            for (int k = 0; k < 6; k++) {
+            for (k = 0; k < 6; k++) {
                 SwfSwap32(&it->m[k]);
             }
         }
