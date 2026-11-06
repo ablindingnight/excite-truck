@@ -1221,16 +1221,17 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         u32 f;
         ObjDesc* c;
         f = d->sibling != 0;
-        lbl_8055EC7C = !lbl_8055EC7C;
-        if (lbl_8055EC7C) {
+        bool odd = !lbl_8055EC7C;
+        lbl_8055EC7C = odd;
+        if (odd) {
             f |= 2;
         }
         for (c = d; c; c = c->sibling) {
             PlacedObj p;
-            p.flags = f;
             fn_801BFD34(&p.frame.pos, &c->frame.pos, &parent->frame);
             Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.node = parent->node;
+            p.flags = f;
             c->Create(&p);
         }
     }
