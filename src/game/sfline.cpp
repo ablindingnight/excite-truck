@@ -102,7 +102,7 @@ SFVec2 lbl_8055F860;  // across the track
 extern "C" {
 
 // NonMatching: the p.y = 0 store is scheduled one slot later than in the target.
-void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* b, f32 size, f32 alpha, int white) {
+void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f32 alpha, int white) {
     int i;
     int al;
     u32 c;

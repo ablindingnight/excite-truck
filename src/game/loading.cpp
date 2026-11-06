@@ -689,7 +689,7 @@ int LoadingHandleKey(int key) {
 
 s32 lbl_80558DA4 = -1;  // last tip shown
 
-void LoadingBegin(EventInfo* info, s32 difficulty) {
+void LoadingBegin(EventInfo* __restrict info, s32 difficulty) {
     static char s_key[0x40];
     s32 type;
     EventInfo* ev;

@@ -293,7 +293,7 @@ struct XrayWheel {
     ValMatrix mtx;  // offset 0x18
 };
 
-extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** wheels) {
+extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** __restrict wheels) {
     XrayContext*& ctx = x->ctx;
     const XrayCar* car = (const XrayCar*)carMtx;
     f32 back = car->wheelbase - 1.397f;
