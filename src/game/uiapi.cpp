@@ -2187,9 +2187,8 @@ extern "C" void fn_80215A48(void *arg0) {
 #pragma dont_inline reset
 extern "C" void fn_80215A74(void *arg0) {
     u8 *self = (u8 *)arg0;
-    u8 enabled = self[0x1A];
     self[0x19] = 0;
-    if (enabled) {
+    if (self[0x1A]) {
         self[0x234] = 1;
     }
     (*(MenuState **)(self + 0x244))->Unk50();

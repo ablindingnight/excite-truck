@@ -2507,16 +2507,18 @@ inline void ZoneMaster::vf0C(void) {
         }
     }
     if (!vf24()) {
+        int finished;
+        CarState* c;
         int i;
         for (i = 0; i < nCars; i++) {
-            CarState* c = GetCar(i);
+            c = GetCar(i);
             f32 now = fn_8013CB3C();
             if (c->human && c->done != 1 && fn_801B306C() <= 0.0f) {
-                int finished = 0;
                 if (!Paused(now) && !c->gate && fn_8013D1F0(i) > 0) {
                     c->gate = FirstGate(i);
                     c->SetWidth(fn_8017960C(i));
                 }
+                finished = 0;
                 if (c->gate) {
                     if (c->bonusT < 0.0f) {
                         c->bonusT = now;
