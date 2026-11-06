@@ -145,9 +145,9 @@ public:
     }
     virtual ~PathMan(void);
     virtual void vf0C(void);
+    virtual void vf18(void);
     virtual void vf10(void);
     virtual void vf14(void);
-    virtual void vf18(void);
     virtual int Run(const char* args);
 
     PathClient clients[0x200];  // offset 0x8
@@ -228,11 +228,11 @@ PathMover* fn_801DA8C8(const char* object, const char* path) {
 
 }  // extern "C"
 
-PathGroup::~PathGroup(void) { delete[] data; }
+inline PathGroup::~PathGroup(void) { delete[] data; }
 
 static inline f32 MaxF(f32 a, f32 b) { return (a > b) ? a : b; }
 
-f32 PathGroup::Length(void) {
+inline f32 PathGroup::Length(void) {
     f32 r = 0.0f;
     for (int i = 0; i < count; i++) {
         r = MaxF(r, fn_801DA6B8(data[i]->follower));
@@ -240,7 +240,7 @@ f32 PathGroup::Length(void) {
     return r;
 }
 
-f32 PathGroup::Time(void) {
+inline f32 PathGroup::Time(void) {
     f32 r = 0.0f;
     for (int i = 0; i < count; i++) {
         r = MaxF(r, data[i]->follower->t);
@@ -248,7 +248,7 @@ f32 PathGroup::Time(void) {
     return r;
 }
 
-void PathGroup::Start(f32 speed) {
+inline void PathGroup::Start(f32 speed) {
     f32 t = (speed >= 0.0f) ? 0.0f : Length();
     for (int i = 0; i < count; i++) {
         PathClient* c = data[i];
@@ -262,7 +262,7 @@ void PathGroup::Start(f32 speed) {
     }
 }
 
-int PathGroup::Done(void) {
+inline int PathGroup::Done(void) {
     for (int i = 0; i < count; i++) {
         if (data[i]->active) {
             return 0;
@@ -271,13 +271,13 @@ int PathGroup::Done(void) {
     return 1;
 }
 
-void PathGroup::Reset(void) {
+inline void PathGroup::Reset(void) {
     for (int i = 0; i < count; i++) {
         fn_801DA198(data[i]->follower, 0.0f);
     }
 }
 
-PathMan::~PathMan(void) {
+inline PathMan::~PathMan(void) {
     lbl_8055E984 = 0;
     for (int i = 0; i < count; i++) {
         PathClient* c = &clients[i];
@@ -286,11 +286,11 @@ PathMan::~PathMan(void) {
     }
 }
 
-void PathMan::vf0C(void) {}
+inline void PathMan::vf0C(void) {}
 
-void PathMan::vf18(void) {}
+inline void PathMan::vf18(void) {}
 
-void PathMan::vf10(void) {
+inline void PathMan::vf10(void) {
     for (int i = 0; i < count; i++) {
         PathClient* c = &clients[i];
         c->active = c->loop;
@@ -298,7 +298,7 @@ void PathMan::vf10(void) {
     }
 }
 
-void PathMan::vf14(void) {
+inline void PathMan::vf14(void) {
     for (int i = 0; i < count; i++) {
         PathClient* c = &clients[i];
         if (c->active || c->grounded) {
@@ -354,7 +354,7 @@ static inline int Trigger(PathMan* m, const char* object, const char* path) {
     return found;
 }
 
-int PathMan::Run(const char* args) {
+inline int PathMan::Run(const char* args) {
     char object[0x40];
     char path[0x40];
     if (sscanf(args, "%s %s", object, path) == 2) {
