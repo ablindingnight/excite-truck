@@ -683,9 +683,12 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
     f32 ang = PSVECMag(&v);
     if (ang > 0.0001f) {
         f32 inv = 1.0f / ang;
-        f32 x = inv * v.x;
-        f32 y = inv * v.y;
-        f32 z = inv * v.z;
+        f32 y;
+        f32 z;
+        f32 x;
+        x = inv * v.x;
+        y = inv * v.y;
+        z = inv * v.z;
         f32 s = sin(ang);
         f32 c = cos(ang);
         f32 t = 1.0f - c;
@@ -787,7 +790,10 @@ void fn_801C3D88(const char* name) {
         case 1: {
             CamEvent* c = (CamEvent*)e;
             c->fov = 0.017453292f * n->GetFloat("fov", 90.0f);
-            CopyV(&c->origin, n->GetVec3("origin"));
+            const ValVec3& o = n->GetVec3("origin");
+            c->origin.x = o.x;
+            c->origin.y = o.y;
+            c->origin.z = o.z;
             const ValVec3& dir = n->GetVec3("dir");
             AxisAngleToRot(&c->rot, dir);
             CopyV(&c->v, n->GetVec3Or("v", XV3(0.0f, 0.0f, 0.0f)));
@@ -857,7 +863,8 @@ void fn_801C3D88(const char* name) {
             t->z = n->GetFloat("lon", 0.0f);
             t->param = n->GetInt("param", 0);
             if (t->kind == 2) {
-                const ValPoint& p = n->GetPoint("pt");
+                ValPoint r = n->GetPoint("pt");
+                ValPoint p = r;
                 t->x = p.x;
                 t->z = p.y;
             }
