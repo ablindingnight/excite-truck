@@ -92,16 +92,15 @@ void fn_802A0B54(void) {
             f32 len = 1.0f + (f->type * 6);
             int j;
             for (j = 0; j < f->count; j++) {
-                FenceVtx* p = &v[j * 2];
-                p[0].pos.x = f->posts[j].x;
-                p[0].pos.y = f->posts[j].y;
-                p[0].pos.z = f->posts[j].z;
-                p[0].u = (j / 5.0f) * len;
-                p[0].v = v0;
-                p[0].color = 0xFFFFFFFF;
-                p[1] = p[0];
-                p[1].pos.y += 0.15f;
-                p[1].v = (0.25f + v0);
+                v[j * 2].pos.x = f->posts[j].x;
+                v[j * 2].pos.y = f->posts[j].y;
+                v[j * 2].pos.z = f->posts[j].z;
+                v[j * 2].u = (j / 5.0f) * len;
+                v[j * 2].v = v0;
+                v[j * 2].color = 0xFFFFFFFF;
+                v[j * 2 + 1] = v[j * 2];
+                v[j * 2 + 1].pos.y += 0.15f;
+                v[j * 2 + 1].v = (0.25f + v0);
                 if (j > 0) {
                     u16* q = &idx[(j - 1) * 6];
                     int b = (j - 1) * 2;
