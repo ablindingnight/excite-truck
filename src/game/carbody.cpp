@@ -3017,7 +3017,7 @@ void fn_8018DA5C(u8* p, u8* m);
 u32 fn_8018B06C(u8* p);
 void fn_8018A9F0(u8* p, u8* m);
 double sqrt(double);
-static inline f32 Len2(f32 x, f32 z) { return sqrt(x * x + z * z); }
+static inline f32 Len2( f32 z,f32 x) { return sqrt(x * x + z * z); }
 
 // Fills this car's render snapshot (0xFA8 bytes at buf + 0x8): the body pose interpolated between the last
 // two physics steps, state flags and gauges, and the four wheels (interpolated hub positions, suspension and
@@ -3048,7 +3048,7 @@ void fn_80188E2C(u8* p, u8* buf) {
         flags |= 0x20;
     }
     F32(m, 0x34) = F32(p, 0x25D0);
-    F32(m, 0x4C) = Len2(F32(p, 0x118), F32(p, 0x120));
+    F32(m, 0x4C) = Len2( F32(p, 0x120),F32(p, 0x118));
     F32(m, 0x3C) = F32(p, 0x25F0);
     F32(m, 0x38) = F32(p, 0x25F4);
     F32(m, 0x40) = F32(p, 0x25E4);

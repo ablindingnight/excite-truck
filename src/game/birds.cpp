@@ -291,7 +291,7 @@ s32 fn_802A8A34(BoidVec* v) { return v->n; }
 
 Boid* fn_802A8A3C(BoidVec* v, int i) { return &v->data[i]; }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Lerp( f32 t, f32 b,f32 a) { return a + t * (b - a); }
 static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
@@ -344,7 +344,7 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
     }
-    steer = lbl_8055F8D4 * (Lerp(0.0f, steer, Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius)))) * (0.017453292f * b->turn));
+    steer = lbl_8055F8D4 * (Lerp( Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius))), steer,0.0f) * (0.017453292f * b->turn));
     f32 c = cos(steer);
     f32 s = sin(steer);
     f32 m[9];
@@ -359,7 +359,7 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     m[8] = c;
     MulM(m, &b->vel, &b->vel);
     PSVECNormalize(&b->vel, &b->vel);
-    f32 spd = Lerp(b->speedMin, b->speedMax, Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))));
+    f32 spd = Lerp( Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))), b->speedMax,b->speedMin);
     b->vel.x *= spd;
     b->vel.y *= spd;
     b->vel.z *= spd;

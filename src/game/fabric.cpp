@@ -461,7 +461,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline u8 LerpB(u8 a, u8 b, f32 t) { return (u8)(int)((f32)b + t * ((f32)a - (f32)b)); }
 
-static inline u32 LerpColor(u32 a, u32 b, f32 t) {
+static inline u32 LerpColor( u32 b,u32 a, f32 t) {
     u32 c;
     u8* pa = (u8*)&a;
     u8* pb = (u8*)&b;
@@ -482,7 +482,7 @@ static inline void LerpPos(PVec* out, const PVec* a, const PVec* b, f32 t) {
 static inline void LerpVert(DrawVert* out, Corner a, Corner b, f32 t) {
     out->u = Lerp(a.u, b.u, t);
     out->v = Lerp(a.v, b.v, t);
-    out->color = LerpColor(a.color, b.color, t);
+    out->color = LerpColor( b.color,a.color, t);
 }
 
 extern "C" void fn_801F5970(Fabric* f, Quad* q) {
@@ -513,7 +513,7 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
             f->prev[i] = f->cur[i];
             f->draw[i].u = Lerp(ld.u, rd.u, s);
             f->draw[i].v = Lerp(ld.v, rd.v, s);
-            f->draw[i].color = LerpColor(ld.color, rd.color, s);
+            f->draw[i].color = LerpColor( rd.color,ld.color, s);
         }
     }
 }

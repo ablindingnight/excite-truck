@@ -355,7 +355,7 @@ f32 fn_801385F0(f32 a, f32 lap, f32 b, f32 radius) {
     return x * (-2.0f * x * x) - 3.0f * x * x;
 }
 
-static inline V2 MakeV2(f32 y, f32 x) {
+static inline V2 MakeV2( f32 x,f32 y) {
     V2 r;
     r.x = x;
     r.y = y;
@@ -382,7 +382,7 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
         do {
             f32 w = fn_801385F0(p->dist, lap, amount, radius);
             if (w > 0.0f) {
-                V2 m = MakeV2(q->dir.y + 0.5f * (p->dir.y - q->dir.y), q->dir.x + 0.5f * (p->dir.x - q->dir.x));
+                V2 m = MakeV2( q->dir.x + 0.5f * (p->dir.x - q->dir.x),q->dir.y + 0.5f * (p->dir.y - q->dir.y));
                 p->lat += (w * step);
                 V2 n = m;
                 Perp(&n);
