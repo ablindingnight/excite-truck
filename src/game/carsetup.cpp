@@ -177,6 +177,15 @@ static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
     o->y += v->y * s;
     o->z += v->z * s;
 }
+static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
+// MATCHING-AID: keeps the literal on the right of the product; the real form is unknown.
+static inline f32 Mul(f32 a, f32 b) { return a * b; }
+
 void fn_80279F58(CarSetup* s, ValueTable* t) {
     fn_80279D40(s);
     ValueNode* c = t->FindChild("Chassis");
@@ -190,7 +199,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->balance = 0.5f;
     s->cmHeight = In(c->GetFloat("cm_height"));
     s->collideCmHeight = In(c->GetFloat("collide_cm_height", 29.999998f));
-    s->airDrag = c->GetFloat("air_drag", 6.0f) * 0.093025006f;
+    s->airDrag = Mul(c->GetFloat("air_drag", 6.0f), 0.093025006f);
 
     ValueNode* tr = t->FindChild("Transmission");
     s->torqueBalance = tr->GetFloat("torque_balance");
@@ -220,10 +229,8 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->fsway = Lbf(c->GetFloat("fsway", 120.0f)) / 0.0254f;
     s->rsway = Lbf(c->GetFloat("rsway", 60.0f)) / 0.0254f;
     f32 rh = c->GetFloat("ride_height", 5.0f);
-    s->modelOffset.x = 0.0f;
     f32 ride = In(rh);
-    s->modelOffset.z = -(s->balance - 0.5f) * s->wheelbase;
-    s->modelOffset.y = -s->collideCmHeight;
+    SetV(&s->modelOffset, 0.0f, -s->collideCmHeight, -(s->balance - 0.5f) * s->wheelbase);
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
         AddScaled(&s->modelOffset, &o, 0.0254f);
