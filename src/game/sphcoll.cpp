@@ -2808,8 +2808,8 @@ extern const f32 lbl_805623BC;  // 1.1
 // Squared distance between the frame centres of p and q.
 static inline f32 CentreDist2(u8* p, u8* q) {
     RVec3 d;
-    CFrame* fp = (CFrame*)PTR(p, 0xC);
     CFrame* fq = (CFrame*)PTR(q, 0xC);
+    CFrame* fp = (CFrame*)PTR(p, 0xC);
     d.x = fp->t.x - fq->t.x;
     d.y = fp->t.y - fq->t.y;
     d.z = fp->t.z - fq->t.z;
@@ -2829,29 +2829,34 @@ static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
 // Collides sphere group p against volume q by q's type tag: groups (the heavier side drives), boxes (each member
 // in box space, then the owning car's wheels clamped onto the box), spheres, tubes, rings, ragdolls, polygon
 // volumes and polygon meshes (each member, then the car's wheels against the volume or mesh).
+
+static inline void HitGroup(u8* p, u8* q) {
+    u8* pb;
+    u8* qb = PTR(q, 0x4);
+    if (qb && (pb = PTR(p, 0x4)) != 0 && F32(pb, 0xD4) < F32(qb, 0xD4)) {
+        ((VGroup*)q)->v10(p);
+        return;
+    }
+    f32 dd = CentreDist2(p, q);
+    f32 r = F32(p, 0x178) + F32(q, 0x178);
+    if (dd < r * r) {
+        fn_801A0160(q);
+        for (int i = 0; i < S32(q, 0x174); i++) {
+            fn_8019BD54((u8*)((SphGroup*)q)->vols[i], PTR(p, 0x17C), 0, 0);
+        }
+    }
+}
+
 void fn_801A0464(u8* p, u8* q) {
     RVec3* h;
     s32 type = S32(q, 0x18);
     if (type == 'GRUP') {
-        u8* qb = PTR(q, 0x4);
-        u8* pb;
-        if (qb && (pb = PTR(p, 0x4)) != 0 && F32(qb, 0xD4) > F32(pb, 0xD4)) {
-            ((VGroup*)q)->v10(p);
-            return;
-        }
-        f32 dd = CentreDist2(p, q);
-        f32 r = F32(q, 0x178) + F32(p, 0x178);
-        if (dd < r * r) {
-            fn_801A0160(q);
-            for (int i = 0; i < S32(q, 0x174); i++) {
-                fn_8019BD54((u8*)((SphGroup*)q)->vols[i], PTR(p, 0x17C), 0, 0);
-            }
-        }
+        HitGroup(p, q);
     } else if (type == 'BOX ') {
         RVec3 d;
         FromBoxCentre(&d, p, q);
-        if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(p, 0x178) + F32(q, 0x24) &&
-            (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(p, 0x178) + F32(q, 0x2C)) {
+        if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(q, 0x24) + F32(p, 0x178) &&
+            (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(q, 0x2C) + F32(p, 0x178)) {
             u8* pb;
             CFrame* f = (CFrame*)PTR(q, 0xC);
             pb = PTR(p, 0x4);
@@ -2936,13 +2941,15 @@ void fn_801A0464(u8* p, u8* q) {
     } else if (type == 'RAGD') {
         ((VGroup*)q)->v10(p);
     } else if (type == 'POLY') {
+        int id;
+        u8* car;
         fn_801A0160(p);
         for (int i = 0; i < S32(p, 0x174); i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
-        u8* car = PTR(p, 0x4);
+        car = PTR(p, 0x4);
         if (IsCarObj(car)) {
-            int id = S32(car, 0x1EC);
+            id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
                 PVec3 wp;
                 RVec3 n;
@@ -2959,11 +2966,12 @@ void fn_801A0464(u8* p, u8* q) {
             }
         }
     } else if (type == 'PMSH') {
+        u8* car;
         fn_801A0160(p);
         for (int i = 0; i < S32(p, 0x174); i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
-        u8* car = PTR(p, 0x4);
+        car = PTR(p, 0x4);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
