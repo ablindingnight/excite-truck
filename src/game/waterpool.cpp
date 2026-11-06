@@ -609,11 +609,18 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+static inline void MadT(Vec* o, const Vec* a, const Vec* b, f32 s) {
+    o->x = a->x + b->x * s;
+    o->y = a->y + b->y * s;
+    o->z = a->z + b->z * s;
+}
+
 WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) {
     memset(&desc, 0, sizeof(desc));
     f32 rightY = g->right.y;
     nx = 1.333f * (f32)sqrt(g->right.x * g->right.x + rightY * g->right.y);
-    ny = 1.333f * (f32)sqrt(g->up.x * g->up.x + g->up.y * g->up.y);
+    f32 upY = g->up.y;
+    ny = 1.333f * (f32)sqrt(g->up.x * g->up.x + upY * g->up.y);
     if (nx < 3 || ny < 3 || nx * ny > 0x200) {
         fn_802E317C("water: too small or too big (%dx%d)", nx, ny);
     }
@@ -637,17 +644,17 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     radius = PSVECDistance(&center, &origin);
     verts = new ("water vcache") PoolVtx[nx * 2];
     tex = fn_802CAC28(texName, 0);
+    Vec c;
     Vec r;
+    Vec u;
     r.x = g->right.x;
     r.y = 0.0f;
     r.z = g->right.y;
-    Vec u;
     u.x = g->up.x;
     u.y = 0.0f;
     u.z = g->up.y;
-    Vec c;
-    MadV3(&c.x, &g->origin.x, &r.x, 0.5f);
-    AddScaledV3(&c.x, &u.x, 0.5f);
+    MadT(&c, (const Vec*)&g->origin, &r, 0.5f);
+    MadT(&c, &c, &u, 0.5f);
     fn_8014E740(&c, radius);
 }
 
