@@ -307,9 +307,12 @@ void fn_8029F458(const char* name, Obj* obj) {
     }
     StrCopy(buf, 32, name);
     s32 fx = fn_8029F3BC(buf);
-    for (int i = 0; i < lbl_804B9B7C.n; i++) {
-        if (lbl_804B9B7C.data[i].fx == fx) {
-            lbl_804B9B7C.data[i].obj = obj;
+    int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
+    int i;
+    for (i = 0, off = 0; i < lbl_804B9B7C.n; off += sizeof(EmitterInst), i++) {
+        s32 f = ((EmitterInst*)((u8*)lbl_804B9B7C.data + off))->fx;
+        if (f == fx) {
+            ((EmitterInst*)((u8*)lbl_804B9B7C.data + off))->obj = obj;
         }
     }
 }
