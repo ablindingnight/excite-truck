@@ -183,40 +183,9 @@ struct StuntPart {
 };
 
 struct StuntEmitters {
-    StuntEmitters(void) {
+    // Helper names unproven: the stack order shows each descriptor sits in its own inline.
+    void MakeTrail(void) {
         StuntDesc r;
-        StuntDesc e;
-        fn_8028E61C(&e);
-        f32 t2;
-        f32 t = 0.3f;
-        t2 = t * t;
-        e.max = 300;
-        e.size0 = t;
-        e.size1 = 1.0f;
-        e.kind = 2;
-        e.shading = 0.5f;
-        e.frames = 5;
-        e.c0 = SColor(0.0f, 1.0f, 0.0f);
-        e.c1 = SColor(1.05f, 1.0f, 1.05f);
-        e.gravity = 0.0f;
-        e.unk2C = 4.0f;
-        e.life = 0.0f;
-        e.drag = 0.1f;
-        e.a60 = -0.2f;
-        e.a68 = -0.2f;
-        e.a70 = -0.2f;
-        e.a64 = 1.0f;
-        e.a6C = 1.0f;
-        e.a74 = 1.0f;
-        e.a58 = 0.0f;
-        e.a5C = 3.9f;
-        f32 g = -1.499f * (4.0f / t2);
-        e.a4C = g;
-        e.a50 = (-0.001f - 0.5f * g * t2) / t;
-        e.a54 = 0.001f;
-        e.a78 = 0.0f;
-        e.a7C = 2.0f;
-        e0 = fn_8028E2F8(&e, "invcblespark", "spark.tex");
         fn_8028E61C(&r);
         r.max = 0x60;
         r.size0 = 0.5f;
@@ -243,6 +212,46 @@ struct StuntEmitters {
         r.a78 = 0.8f;
         r.a7C = 1.0f;
         e1 = fn_8028E2F8(&r, "reentry", "entrypuff.tex");
+    }
+    void MakeSpark(void) {
+        StuntDesc e;
+        fn_8028E61C(&e);
+        f32 t2;
+        f32 g;
+        f32 t;
+        t = 0.3f;
+        t2 = t * t;
+        e.max = 300;
+        e.size0 = t;
+        e.size1 = 1.0f;
+        e.kind = 2;
+        e.shading = 0.5f;
+        e.frames = 5;
+        e.c0 = SColor(0.0f, 1.0f, 0.0f);
+        e.c1 = SColor(1.05f, 1.0f, 1.05f);
+        e.gravity = 0.0f;
+        e.unk2C = 4.0f;
+        e.life = 0.0f;
+        e.drag = 0.1f;
+        e.a60 = -0.2f;
+        e.a68 = -0.2f;
+        e.a70 = -0.2f;
+        e.a64 = 1.0f;
+        e.a6C = 1.0f;
+        e.a74 = 1.0f;
+        e.a58 = 0.0f;
+        e.a5C = 3.9f;
+        g = -1.499f * (4.0f / t2);
+        e.a4C = g;
+        e.a50 = (-0.001f - 0.5f * g * t2) / t;
+        e.a54 = 0.001f;
+        e.a78 = 0.0f;
+        e.a7C = 2.0f;
+        e0 = fn_8028E2F8(&e, "invcblespark", "spark.tex");
+    }
+    StuntEmitters(void) {
+        MakeSpark();
+        MakeTrail();
     }
     ~StuntEmitters(void) {
         fn_8028E398(e0);
