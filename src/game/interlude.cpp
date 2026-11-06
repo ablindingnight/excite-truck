@@ -2148,20 +2148,18 @@ void fn_801C7F64(void) {
 }
 
 void fn_801C7FE4(void) {
-    u8* s = lbl_80437D88;
     lbl_8055E83A = 0;
     WaitEvent* e = (WaitEvent*)fn_801C3C80();
     e->type = 6;
     e->kind = lbl_8055E850;
-    strcpy(e->who, (char*)(s + 0x4F8));
-    strcpy(e->except, (char*)(s + 0x5F8));
+    strcpy(e->who, lbl_80438280);
+    strcpy(e->except, lbl_80438380);
     e->mask = fn_801C3954(e->who);
     e->mask &= ~fn_801C3954(e->except);
-    IVec3* c = (IVec3*)(s + 0x4E0);
-    e->pt.x = c->x;
-    e->pt.y = c->y;
-    e->pt.z = c->z;
-    sprintf((char*)(s + 0x238), "Added wait at %.2f", e->time);
+    e->pt.x = lbl_80438268.x;
+    e->pt.y = lbl_80438268.y;
+    e->pt.z = lbl_80438268.z;
+    sprintf(lbl_80437FC0, "Added wait at %.2f", e->time);
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
 }
 
