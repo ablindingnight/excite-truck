@@ -612,7 +612,7 @@ void fn_802D5270(Surf* s) {
         for (i = n; i > 0; i--) {
             f32 w0;
             f32 w1;
-            V3 a, b;
+            V3 b, a;
             const SkinMtx* mb;
             ma = &lbl_804DAC48[v->b0 >> 2];
             mb = &lbl_804DAC48[v->b1 >> 2];
