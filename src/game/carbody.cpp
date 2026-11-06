@@ -5,6 +5,9 @@
 #include "game/common.h"
 #include <string.h>
 
+// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -1570,7 +1573,7 @@ void fn_80183E7C(u8* p) {
             fn_801796CC(4, &ev, sizeof(ev));
         }
     }
-    F32(p, 0x2608) = F32(p, 0x25E0) + lbl_80561DB0 * (F32(p, 0x2608) - F32(p, 0x25E0));
+    F32(p, 0x2608) = LerpT(lbl_80561DB0, F32(p, 0x25E0), F32(p, 0x2608));
     int still;
     if (!(U32(fn_801769CC(), 4) & 0x4000)) {
         still = (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0];
@@ -1650,9 +1653,9 @@ void fn_80183E7C(u8* p) {
     b.y = F32(p, 0x2470) - F32(p, 0x24E4);
     b.z = F32(p, 0x2474) - F32(p, 0x24E8);
     PSVECCrossProduct(&a, &b, &up);
-    f32 nz = F32(p, 0x25AC) + lbl_80561D0C * (up.z - F32(p, 0x25AC));
-    f32 ny = F32(p, 0x25A8) + lbl_80561D0C * (up.y - F32(p, 0x25A8));
-    f32 nx = F32(p, 0x25A4) + lbl_80561D0C * (up.x - F32(p, 0x25A4));
+    f32 nz = LerpT(lbl_80561D0C, F32(p, 0x25AC), up.z);
+    f32 ny = LerpT(lbl_80561D0C, F32(p, 0x25A8), up.y);
+    f32 nx = LerpT(lbl_80561D0C, F32(p, 0x25A4), up.x);
     F32(p, 0x25A8) = ny;
     F32(p, 0x25A4) = nx;
     f32 len = PSVECMag(p + 0x25A4);
@@ -1686,7 +1689,7 @@ void fn_80183E7C(u8* p) {
     }
     if (stunts && S32(p, 0x2620) && F32(p, 0x2618) > lbl_80561DB4) {
         f32 sink = -PSVECDotProduct(p + 0x25A4, p + 0x118);
-        f32 lim = landingTune.v[5] + Clamp01((F32(p, 0x2618) - lbl_80561DC4) / lbl_80561DC8) * (landingTune.v[4] - landingTune.v[5]);
+        f32 lim = LerpT(Clamp01((F32(p, 0x2618) - lbl_80561DC4) / lbl_80561DC8), landingTune.v[5], landingTune.v[4]);
         if (jump) {
             lim = driveTune.v[4];
         }
@@ -1914,10 +1917,10 @@ void fn_80183E7C(u8* p) {
             if (lbl_80561DF8 * F32(p, 0x261C) < top) {
                 top = lbl_80561DF8 * F32(p, 0x261C);
             }
-            target = F32(p, 0x261C) + Clamp01((lean - lbl_80561CAC) / lbl_80561DB4) * (top - F32(p, 0x261C));
+            target = LerpT(Clamp01((lean - lbl_80561CAC) / lbl_80561DB4), F32(p, 0x261C), top);
         } else {
             f32 t = Clamp01((lean - lbl_80561CAC) / lbl_80561DF4);
-            target = F32(p, 0x261C) + t * (lbl_80561DD0 * F32(p, 0x261C) - F32(p, 0x261C));
+            target = LerpT(t, F32(p, 0x261C), lbl_80561DD0 * F32(p, 0x261C));
             airLift = airLift + lbl_8055A3B0 * -lean;
         }
         BVec dir;
@@ -2189,7 +2192,7 @@ void fn_80183E7C(u8* p) {
             f32 st = F32(p, 0x25F0) * g;
             f32 lat = PSVECDotProduct(&side, p + 0x48);
             f32 t = Clamp01((F32(p, 0x25D4) - lbl_80561E24) / lbl_80561E28);
-            yaw = yaw + t * (lbl_80561D44 * lbl_80561DEC * (lbl_80561D38 * st - lat) - yaw);
+            yaw = LerpT(t, yaw, lbl_80561D44 * lbl_80561DEC * (lbl_80561D38 * st - lat));
         }
         f32 now = lbl_8055E3C8;
         if (S32(p, 0x2638) == 0 && S32(p, 0x2644) > 0 &&
@@ -2305,15 +2308,15 @@ void fn_80183E7C(u8* p) {
         if (S32(p, 0x2620) == 0) {
             f32 pitch = F32(p, 0x2600);
             if (pitch < lbl_80561E44) {
-                grav = grav + __fabsf(pitch) * (lbl_80561CDC * grav - grav);
+                grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC * grav);
                 gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC * gravUp - gravUp);
             } else if (pitch > lbl_80561CCC) {
-                grav = grav + __fabsf(pitch) * (lbl_80561CDC + grav - grav);
+                grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC + grav);
                 gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC + gravUp - gravUp);
             }
         }
         if (!U8(p, 0x2625) && F32(p, 0x2618) >= lbl_80561CB8) {
-            f32 s = lbl_80561CD0 + F32(p, 0x5F0) * (lbl_8055E4D8 - lbl_80561CD0);
+            f32 s = LerpT(F32(p, 0x5F0), lbl_80561CD0, lbl_8055E4D8);
             grav = grav * s;
             gravUp = gravUp * s;
         }
@@ -2331,7 +2334,7 @@ void fn_80183E7C(u8* p) {
     f32 depth = fn_801DCEC0();
     F32(p, 0x26D0) = depth;
     int fast = F32(p, 0x25D4) >= lbl_80561CDC;
-    F32(p, 0x26CC) = F32(p, 0x26CC) + lbl_80561D00 * (depth - F32(p, 0x26CC));
+    F32(p, 0x26CC) = LerpT(lbl_80561D00, F32(p, 0x26CC), depth);
     if (fast || F32(p, 0x25F4) >= lbl_80561D00 || F32(p, 0x25E4) <= lbl_80561DD0) {
         F32(p, 0x26A8) = lbl_80561CAC;
     } else {
@@ -2573,7 +2576,7 @@ void fn_80186DE8(u8* p) {
                 f32 t = (F32(car, 0x25D4) - lbl_80561E64) / lbl_80561E68;
                 f32 boost = (heatTune.v[5] * F32(car, 0x2D8) * F32(car, 0x39C)) * lbl_80561D98;
                 f32 lo = lbl_80561E60 * boost;
-                k = (lo + Clamp01(t) * (lbl_80561D38 * boost - lo)) * F32(car, 0x25E0) * F32(car, 0xD4);
+                k = (LerpT(Clamp01(t), lo, lbl_80561D38 * boost)) * F32(car, 0x25E0) * F32(car, 0xD4);
                 AddScaled(force, car + 0x54, k);
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
@@ -2780,7 +2783,7 @@ void fn_80186DE8(u8* p) {
             if (sp > lbl_80561EA0) {
                 cl = sp;
                 cl = cl <= lbl_80561EA4 ? cl : lbl_80561EA4;
-                steerK = steerK * (lbl_80561CD0 + F32(car, 0x450) * (lbl_80561EA8 + lbl_80561EAC * cl - lbl_80561CD0));
+                steerK = steerK * (LerpT(F32(car, 0x450), lbl_80561CD0, lbl_80561EA8 + lbl_80561EAC * cl));
             }
             if (sp > lbl_80561CAC) {
                 t = Clamp01((sp / lbl_80561DEC) * lbl_80561D60);
@@ -2866,7 +2869,7 @@ void fn_80186DE8(u8* p) {
                 boosting = 0;
             }
             if (!boosting) {
-                out = out + Clamp01(lbl_80561CD0 + F32(car, 0x258C)) * (throttle - out);
+                out = LerpT(Clamp01(lbl_80561CD0 + F32(car, 0x258C)), out, throttle);
             }
         }
         F32(car, 0x25F4) = out;
@@ -3032,7 +3035,7 @@ void fn_80188E2C(u8* p, u8* buf) {
         const f32* prev = (const f32*)(p + 0xA0);
         f32* o = (f32*)&tmp;
         for (int i = 0; i < 12; i++) {
-            o[i] = prev[i] + t * (cur[i] - prev[i]);
+            o[i] = LerpT(t, prev[i], cur[i]);
         }
         *pose = tmp;
     }
@@ -3097,10 +3100,10 @@ void fn_80188E2C(u8* p, u8* buf) {
         b.y = b.y + F32(w, 0x1C);
         HVec c;
         f32 xv = b.x;
-        c.y = b.y + lbl_8055E460 * (a.y - b.y);
-        c.x = xv + lbl_8055E460 * (a.x - xv);
+        c.y = LerpT(lbl_8055E460, b.y, a.y);
+        c.x = LerpT(lbl_8055E460, xv, a.x);
         f32 zv = b.z;
-        c.z = zv + lbl_8055E460 * (a.z - zv);
+        c.z = LerpT(lbl_8055E460, zv, a.z);
         F32(o, 0x0) = c.x;
         F32(o, 0x4) = c.y;
         F32(o, 0x8) = c.z;
@@ -3448,7 +3451,7 @@ void fn_8018A08C(u8* p) { F32(p, 0x26D8) = lbl_8055E3C8; }
 void fn_8018A098(u8* p, f32 t) {
     U8(p, 0x259D) = 1;
     f32 m = F32(p, 0x2CC) * fn_80181AEC();
-    F32(p, 0x258C) = F32(p, 0x3A0) * (m + t * (driveTune.v[0] - m));
+    F32(p, 0x258C) = F32(p, 0x3A0) * (LerpT(t, m, driveTune.v[0]));
 }
 
 int fn_8018A100(u8* p) { return F32(p, 0x2618) > driveTune.v[1]; }
@@ -3936,10 +3939,10 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     F32(p, 0x25D8) = F32(p, 0x25CC) = F32(p, 0x25D4) = PSVECMag(p + 0x118);
     f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
     f32 v1 = PkUnpack(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
-    F32(p, 0x25D0) = v1 + t * (v0 - v1);
+    F32(p, 0x25D0) = LerpT(t, v1, v0);
     v0 = PkUnpack(prev->steer, 255.0f, -1.2f, 2.4f);
     v1 = PkUnpack(cur->steer, 255.0f, -1.2f, 2.4f);
-    F32(p, 0x25DC) = F32(p, 0x25F0) = v1 + t * (v0 - v1);
+    F32(p, 0x25DC) = F32(p, 0x25F0) = LerpT(t, v1, v0);
     if (cur->boost) {
         f32 boost;
         if (teleport) {
@@ -3956,10 +3959,10 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
     F32(p, 0x25E8) = 1.0f;
-    fn_8018ADB4(p, v1 + t * (v0 - v1));
+    fn_8018ADB4(p, LerpT(t, v1, v0));
     v0 = PkUnpack(prev->brake, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->brake, 255.0f, 0.0f, 1.0f);
-    fn_8018ADBC(p, v1 + t * (v0 - v1));
+    fn_8018ADBC(p, LerpT(t, v1, v0));
     U32(p, 0x4) = cur->flags | prev->flags;
     U8(p, 0x260D) = (cur->flags >> 8) & 1;
     u8* w = p + 0x23AC;
@@ -3968,7 +3971,7 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
     for (int i = 0; i < 4; i++) {
         f32 s0 = PkUnpack(q[2], 255.0f, 0.0f, 2.0f);
         f32 s1 = PkUnpack(c[2], 255.0f, 0.0f, 2.0f);
-        F32(w, 0x1C) = F32(w, 0xC) = s1 + t * (s0 - s1);
+        F32(w, 0x1C) = F32(w, 0xC) = LerpT(t, s1, s0);
         f32 a0;
         f32 a1 = PkUnpack(c[0], 255.0f, -6.2831855f, 12.566371f);
         a0 = PkUnpack(q[0], 255.0f, -6.2831855f, 12.566371f);
@@ -3979,15 +3982,15 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, CbPacket* prev, s32* na, s32* nb) 
         } else if (a1 - a0 > 3.1415927f) {
             a0 += 6.2831855f;
         }
-        F32(w, 0x8) = a1 + t * (a0 - a1);
+        F32(w, 0x8) = LerpT(t, a1, a0);
         f32 l1;
         f32 l0 = PkUnpack(q[1], 255.0f, -100.0f, 200.0f);
         l1 = PkUnpack(c[1], 255.0f, -100.0f, 200.0f);
-        F32(w, 0x0) = l1 + t * (l0 - l1);
+        F32(w, 0x0) = LerpT(t, l1, l0);
         f32 k0 = PkUnpack(q[3], 255.0f, 0.0f, 10.0f);
         f32 k1 = PkUnpack(c[3], 255.0f, 0.0f, 10.0f);
         u8 f = c[4];
-        F32(w, 0x68) = k1 + t * (k0 - k1);
+        F32(w, 0x68) = LerpT(t, k1, k0);
         S32(w, 0x70) = f;
         U8(w, 0x6C) = 1;
         U8(w, 0x20) = f & 1;
