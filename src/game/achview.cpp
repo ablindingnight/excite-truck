@@ -481,10 +481,10 @@ int fn_8025978C(u8* p) {
     TROPHY_VIEW_SHOW(back, p);
     char toNext[0x20];
     fn_801345D8(toNext, 0x20, "%d %s", S32(p, 0x20) - S32(p, 0x1C), fn_80131234("Achievements:UP") + 1);
-    s32* vals[7];
-    s32 barColor[7];
     s32 iconColor[7];
+    s32 barColor[7];
     s32 levels[7];
+    s32* vals[7];
     for (u32 i = 0; i < 7; i++) {
         cat = lbl_80344EA0[i].category;
         if (cat == S32(p, 0x18)) {
