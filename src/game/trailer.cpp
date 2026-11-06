@@ -409,13 +409,18 @@ struct HitchMsg {
     u8 pad24[0x54 - 0x24];
 };
 
+// Helper name unproven.
+static inline void SubR(RVec3* o, const RVec3* a, const RVec3* b) {
+    o->x = a->x - b->x;
+    o->y = a->y - b->y;
+    o->z = a->z - b->z;
+}
 void Trailer::Update(void) {
     RVec3 torque;
     RVec3 dav;
-    dav.x = avel.x - car->avel.x;
-    dav.z = avel.z - car->avel.z;
-    dav.y = avel.y - car->avel.y;
-    torque.y = Mul(dav.y, -4071.7498f);
+    SubR(&dav, &avel, &car->avel);
+    torque.y = dav.y;
+    torque.y *= -4071.7498f;
     torque.z = 0.0f;
     torque.x = 0.0f;
     AddTorque(&torque);
