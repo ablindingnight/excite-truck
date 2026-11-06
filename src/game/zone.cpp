@@ -1574,7 +1574,7 @@ void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
         V2 pb;
         V2 d;
         V2 r;
-        V2 pp;
+        V2 e;
         f32 len;
         f32 inv;
         f32 t;
@@ -1586,11 +1586,13 @@ void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
         d.y = pb.y - pa.y;
         len = sqrt(d.x * d.x + d.y * d.y);
         inv = 1.0f / len;
-        pp.x = p->x;
-        pp.y = p->z;
         d.x *= inv;
         d.y *= inv;
-        t = d.x * (pp.x - pa.x) + d.y * (pp.y - pa.y);
+        r.x = p->x;
+        r.y = p->z;
+        e.x = r.x - pa.x;
+        e.y = r.y - pa.y;
+        t = d.x * e.x + d.y * e.y;
         r.x = pa.x + d.x * t;
         r.y = pa.y + d.y * t;
         p->x = r.x;
@@ -1953,8 +1955,9 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
     V2 c;
     V2 d1;
     V2 d2;
+    f32 y = Lerp(0.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t * t)));
     c.x = 0.0f;
-    c.y = Lerp(0.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t * t)));
+    c.y = y;
     d1.x = -s;
     d1.y = h;
     d2.x = s;
@@ -1962,7 +1965,7 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
     a->x = c.x + d1.x;
     a->y = c.y + d1.y;
     b->x = c.x + d2.x;
-    b->y = d2.y + c.y;
+    b->y = c.y + d2.y;
 }
 
 // Stripped by the linker; keeps its literals in place.

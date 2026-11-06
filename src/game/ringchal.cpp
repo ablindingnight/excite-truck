@@ -2575,11 +2575,12 @@ inline void RingChalMaster::vf0C(void) {
 #pragma dont_inline reset
 
 inline void ObjSet::CheckTeleport(Phob* car) {
+    ObjTeleport* data;
     ObjTeleport* t;
     int cur = f10;
     int next = cur + 1;
     if (next < teles->count) {
-        ObjTeleport* data = teles->data;
+        data = teles->data;
         t = &data[next];
         V2 a;
         V2 b;
@@ -2593,7 +2594,7 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
             data[cur].b30 = 0;
             f10 = next;
-            teles->data[next].b30 = 1;
+            teles->data[f10].b30 = 1;
         }
     }
 }

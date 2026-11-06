@@ -11,7 +11,7 @@
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
-extern "C" s32 fn_80214934(const void *, s32, void *, s32);
+extern "C" void fn_80214934(const void *, s32, void *, s32);
 extern "C" s32 fn_80029004(const char *, s32);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
@@ -1568,13 +1568,12 @@ extern "C" void fn_8021481C(const char* movie) {
     }
 }
 
-extern "C" s32 fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
+extern "C" void fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
     s32 end = fn_80029004((const char *)arg1, 0x2e);
     if (end == 0) {
         end = (s32)((const char *)arg1 + strlen((const char *)arg1));
     }
     fn_801345D8(arg2, arg3, lbl_8055B808, (s32)arg0, end - arg1, (const char *)arg1);
-    return 0;
 }
 
 extern "C" void fn_802149C4(s32 arg0) {
@@ -1583,7 +1582,7 @@ extern "C" void fn_802149C4(s32 arg0) {
     fn_8021481C(sp8);
 }
 extern "C" s32 fn_80218C14(s32, s32, s32);
-extern "C" s32 fn_80214934(const void*, s32, void*, s32);
+extern "C" void fn_80214934(const void*, s32, void*, s32);
 extern "C" char lbl_8033D388[];
 extern "C" char lbl_8033D268[];
 extern "C" char lbl_8055B810[];
