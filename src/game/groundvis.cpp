@@ -383,7 +383,7 @@ static inline int MaskLevel(int n) {
 void fn_802AFE64(GroundStack* s, s16 x, s16 y, s16 size, s16 unk6, f32 scale, u16* e0, u16* e1, u16* e3, u16* e2);
 void fn_802AFEA4(GroundStack* s, s16 size);
 u16* fn_802AFEC0(int n);
-u32 fn_802AFF54(GroundList* l);
+int fn_802AFF54(GroundList* l);
 void* fn_802AFF5C(GroundList* l, int i);
 void fn_802AFF6C(GroundBuf* b);
 void fn_802AFF80(GroundBuf* b, u16 v);
@@ -426,8 +426,9 @@ extern "C" {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+
 // Is the distance of a node from the view plane through this axis inside the view cone?
-static inline int InCone(f32 a, f32 depth, f32 tanA, f32 secA, f32 pad, f32 radius, f32 k) {
+static inline int InCone(f32 a, f32 depth, f32 tanA, const f32& secA, f32 pad, f32 radius, f32 k) {
     f32 t = depth * tanA;
     if (0.0f > t) {
         t = 0.0f;
@@ -454,6 +455,180 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
         }
     }
     return 0;
+}
+
+// Builds the triangle fan of one visible node and places its scattered objects.
+static inline void DrawNode(GroundNode* n, GroundCell* cell) {
+    GroundBuf buf;
+    if (!fn_802B12E0(lbl_8055F974, &buf, cell, fn_802B0130(n))) {
+        return;
+    }
+    // Corner offsets of each side, in half-node steps: start, middle and end.
+    s16 endY[4] = {1, -1, -1, 1};
+    s16 endX[4] = {-1, -1, 1, 1};
+    s16 midY[4] = {1, 0, -1, 0};
+    s16 midX[4] = {0, -1, 0, 1};
+    s16 startY[4] = {1, 1, -1, -1};
+    s16 startX[4] = {1, -1, -1, 1};
+    s16 step = fn_802B0130(n);
+    if (fn_802B0130(n) >= 4) {
+        fn_802BDFBC(cell, fn_802B0130(n), n->scale);
+    }
+    s32 used = 0;
+    int i;
+    GroundList* bag = 0;
+    if (!fn_802B0124(cell)) {
+        s16 bx = n->x - step;
+                s16 by = n->y - step;
+                bag = fn_802B4F10(&used, bx, by, step * 2, fn_802B0118(cell));
+    }
+    f32 alpha = Remap(0.0f, 0.6f, 0.0f, 1.0f, n->scale);
+    Vec corner[5];
+    fn_802B0114(&corner[0]);
+    fn_802B0114(&corner[1]);
+    fn_802B0114(&corner[2]);
+    fn_802B0114(&corner[3]);
+    fn_802B0114(&corner[4]);
+    Vec* centerp = bag ? &corner[4] : 0;
+
+    Vec here;
+    StatsUpdate__Fv(&here);
+    fn_802B009C(&here, 0, n->x, n->y);
+    if (centerp) {
+        fn_80144DAC(centerp, &here);
+    }
+    u16 id;
+    if (1.0f != alpha) {
+        Vec from;
+        StatsUpdate__Fv(&from);
+        u16* e = n->edge[n->unk6];
+        u16 at = n->unk6 < 2 ? 0 : n->size;
+        if (e[at] > 0xFFFD) {
+            s16 px[4] = {-1, 1, 1, -1};
+            s16 py[4] = {-1, -1, 1, 1};
+            s16 fx = n->x + px[n->unk6] * fn_802B0130(n);
+                s16 fy = n->y + py[n->unk6] * fn_802B0130(n);
+                fn_802B009C(&from, 0, fx, fy);
+        } else {
+            fn_802B1BF0(lbl_8055F974, &from, e[at]);
+        }
+        Vec mixed;
+        fn_8025AD3C(&mixed, &from, &here, alpha);
+        id = fn_802B0070(&mixed);
+    } else {
+        id = fn_802B0070(&here);
+    }
+    fn_802B0024(&buf, id);
+
+    u16 prev = n->edge[3][0];
+    for (i = 0; i < 4; i++) {
+        u16* e = n->edge[i];
+        u16* first = i < 2 ? e : e + n->size;
+        u16* last = i >= 2 ? e : e + n->size;
+        u16* em = e + n->size / 2;
+        if (*first == 0xFFFF) {
+            if (prev < 0xFFFD) {
+                *first = prev;
+            } else {
+                *first = fn_802AFFA8(n->x + step * startX[i], n->y + step * startY[i]);
+            }
+        }
+        if (bag) {
+            if (*first == 0xFFFE) {
+                bag = 0;
+            } else {
+                fn_802B1BF0(lbl_8055F974, &corner[i], *first);
+                corner[i].x = lbl_80564AF0 * (f32)(n->x + (s16)step * startX[i]);
+                corner[i].z = lbl_80564AF0 * (f32)(n->y + (s16)step * startY[i]);
+                fn_801C0E60(&corner[i], &corner[i], &corner[4]);
+            }
+        }
+        if (*em == 0xFFFF) {
+            s16 mx = n->x + step * midX[i];
+            s16 my = n->y + step * midY[i];
+            if (1.0f == alpha) {
+                *em = fn_802AFFA8(mx, my);
+            } else {
+                Vec a;
+                StatsUpdate__Fv(&a);
+                if (*first > 0xFFFD) {
+                    fn_802B1BF0(lbl_8055F974, &a, *first);
+                } else {
+                    fn_802B009C(&a, 0, n->x + step * startX[i], n->y + step * startY[i]);
+                }
+                Vec b;
+                StatsUpdate__Fv(&b);
+                fn_802B009C(&b, 0, mx, my);
+                Vec m;
+                fn_8025AD3C(&m, &a, &b, alpha);
+                *em = fn_802B0070(&m);
+            }
+        }
+        if (*last == 0xFFFF) {
+            u16 v = 0;
+            switch (i) {
+            case 0:
+                v = n->edge[1][0];
+                break;
+            case 1:
+                v = n->edge[2][n->size];
+                break;
+            case 2:
+                v = n->edge[3][n->size];
+                break;
+            case 3:
+                v = n->edge[0][0];
+                break;
+            }
+            if (v < 0xFFFD) {
+                *last = v;
+            } else {
+                *last = fn_802AFFA8(n->x + step * endX[i], n->y + step * endY[i]);
+            }
+        }
+        if (i < 2) {
+            for (int j = 0; j < n->size; j++) {
+                if (*e == 0xFFFF) {
+                    *e = 0xFFFE;
+                } else if (*e != 0xFFFE) {
+                    fn_802AFF80(&buf, *e);
+                }
+                e++;
+            }
+        } else {
+            int j = n->size;
+            for (e += j; j > 0; j--) {
+                if (*e == 0xFFFF) {
+                    *e = 0xFFFE;
+                } else if (*e != 0xFFFE) {
+                    fn_802AFF80(&buf, *e);
+                }
+                e--;
+            }
+        }
+        prev = *last;
+    }
+    fn_802AFF80(&buf, prev);
+    fn_802AFF6C(&buf);
+    fn_802B13F8(lbl_8055F974, cell, &buf, fn_802B0130(n), alpha);
+
+    if (bag && (fn_802B0130(n) < 8 || (fn_802B0130(n) == 8 && n->scale > 0.5f))) {
+        int lod = fn_802B0118(cell);
+        for (int j = 0; j < fn_802AFF54(bag); j++) {
+            GroundItem* it = (GroundItem*)fn_802AFF5C(bag, j);
+            if (it->lists[lod]) {
+                Vec pos;
+                StatsUpdate__Fv(&pos);
+                fn_801C2B9C(&pos, &corner[4], &corner[it->corner], it->t0);
+                fn_801C2B9C(&pos, &pos, &corner[(it->corner + 1) & 3], it->t1);
+                if (j < used) {
+                    fn_802B3E00(it->lists[lod], &pos, it->kind, 1.0f);
+                } else {
+                    fn_802B3E00(it->lists[lod], &pos, it->kind, alpha);
+                }
+            }
+        }
+    }
 }
 
 // Walks the terrain quadtree from the camera, building the visible cell batches and their scattered objects.
@@ -512,12 +687,13 @@ void fn_802AEB3C(const GroundFrame* cam) {
             c.y = fn_801DCF48(0, c.x, c.z);
             k = 2.1213f;
         } else {
+            int h = n->size / 2;
             c.x = n->x * lbl_80564AF0;
             c.z = n->y * lbl_80564AF0;
             c.y = -12.0f + (f32)((cell->flags >> 14) & 0x1FF);
             k = (f32)(((cell->flags >> 10) & 0xF) + 1) * 1.5f;
-            if (half < 4) {
-                k *= (f32)(4 / half);
+            if (h < 4) {
+                k *= (f32)(4 / h);
             }
         }
         if (!NodeVisible(&c, radius, k, &dist)) {
@@ -547,174 +723,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
         }
 
         if (draw) {
-            GroundBuf buf;
-            if (!fn_802B12E0(lbl_8055F974, &buf, cell, fn_802B0130(n))) {
-                continue;
-            }
-            // Corner offsets of each side, in half-node steps: start, middle and end.
-            s16 endY[4] = {1, -1, -1, 1};
-            s16 endX[4] = {-1, -1, 1, 1};
-            s16 midY[4] = {1, 0, -1, 0};
-            s16 midX[4] = {0, -1, 0, 1};
-            s16 startY[4] = {1, 1, -1, -1};
-            s16 startX[4] = {1, -1, -1, 1};
-            s16 step = fn_802B0130(n);
-            if (fn_802B0130(n) >= 4) {
-                fn_802BDFBC(cell, fn_802B0130(n), n->scale);
-            }
-            s32 used = 0;
-            int i;
-            GroundList* bag = 0;
-            if (!fn_802B0124(cell)) {
-                bag = fn_802B4F10(&used, n->x - step, n->y - step, step * 2, fn_802B0118(cell));
-            }
-            f32 alpha = Remap(0.0f, 0.6f, 0.0f, 1.0f, n->scale);
-            Vec corner[4];
-            Vec center;
-            fn_802B0114(&corner[0]);
-            fn_802B0114(&corner[1]);
-            fn_802B0114(&corner[2]);
-            fn_802B0114(&corner[3]);
-            fn_802B0114(&center);
-            Vec* centerp = bag ? &center : 0;
-
-            Vec here;
-            StatsUpdate__Fv(&here);
-            fn_802B009C(&here, 0, n->x, n->y);
-            if (centerp) {
-                fn_80144DAC(centerp, &here);
-            }
-            u16 id;
-            if (1.0f != alpha) {
-                Vec from;
-                StatsUpdate__Fv(&from);
-                u16* e = n->edge[n->unk6];
-                u16 at = n->unk6 < 2 ? 0 : n->size;
-                if (e[at] > 0xFFFD) {
-                    s16 px[4] = {-1, 1, 1, -1};
-                    s16 py[4] = {-1, -1, 1, 1};
-                    fn_802B009C(&from, 0, n->x + px[n->unk6] * fn_802B0130(n), n->y + py[n->unk6] * fn_802B0130(n));
-                } else {
-                    fn_802B1BF0(lbl_8055F974, &from, e[at]);
-                }
-                Vec mixed;
-                fn_8025AD3C(&mixed, &from, &here, alpha);
-                id = fn_802B0070(&mixed);
-            } else {
-                id = fn_802B0070(&here);
-            }
-            fn_802B0024(&buf, id);
-
-            u16 prev = n->edge[3][0];
-            for (i = 0; i < 4; i++) {
-                u16* e = n->edge[i];
-                u16* first = i < 2 ? e : e + n->size;
-                u16* last = i >= 2 ? e : e + n->size;
-                int mid = n->size / 2;
-                if (*first == 0xFFFF) {
-                    if (prev < 0xFFFD) {
-                        *first = prev;
-                    } else {
-                        *first = fn_802AFFA8(n->x + step * startX[i], n->y + step * startY[i]);
-                    }
-                }
-                if (bag) {
-                    if (*first == 0xFFFE) {
-                        bag = 0;
-                    } else {
-                        fn_802B1BF0(lbl_8055F974, &corner[i], *first);
-                        corner[i].x = lbl_80564AF0 * (f32)(n->x + (s16)step * startX[i]);
-                        corner[i].z = lbl_80564AF0 * (f32)(n->y + (s16)step * startY[i]);
-                        fn_801C0E60(&corner[i], &corner[i], &center);
-                    }
-                }
-                if (e[mid] == 0xFFFF) {
-                    s16 my;
-                    s16 mx = n->x + step * midX[i];
-                    my = n->y + step * midY[i];
-                    if (1.0f == alpha) {
-                        e[mid] = fn_802AFFA8(mx, my);
-                    } else {
-                        Vec a;
-                        StatsUpdate__Fv(&a);
-                        if (*first > 0xFFFD) {
-                            fn_802B1BF0(lbl_8055F974, &a, *first);
-                        } else {
-                            fn_802B009C(&a, 0, n->x + step * startX[i], n->y + step * startY[i]);
-                        }
-                        Vec b;
-                        StatsUpdate__Fv(&b);
-                        fn_802B009C(&b, 0, mx, my);
-                        Vec m;
-                        fn_8025AD3C(&m, &a, &b, alpha);
-                        e[mid] = fn_802B0070(&m);
-                    }
-                }
-                if (*last == 0xFFFF) {
-                    u16 v = 0;
-                    switch (i) {
-                    case 0:
-                        v = n->edge[1][0];
-                        break;
-                    case 1:
-                        v = n->edge[2][n->size];
-                        break;
-                    case 2:
-                        v = n->edge[3][n->size];
-                        break;
-                    case 3:
-                        v = n->edge[0][0];
-                        break;
-                    }
-                    if (v < 0xFFFD) {
-                        *last = v;
-                    } else {
-                        *last = fn_802AFFA8(n->x + step * endX[i], n->y + step * endY[i]);
-                    }
-                }
-                if (i < 2) {
-                    for (int j = 0; j < n->size; j++) {
-                        if (*e == 0xFFFF) {
-                            *e = 0xFFFE;
-                        } else if (*e != 0xFFFE) {
-                            fn_802AFF80(&buf, *e);
-                        }
-                        e++;
-                    }
-                } else {
-                    int j = n->size;
-                    for (e += j; j > 0; j--) {
-                        if (*e == 0xFFFF) {
-                            *e = 0xFFFE;
-                        } else if (*e != 0xFFFE) {
-                            fn_802AFF80(&buf, *e);
-                        }
-                        e--;
-                    }
-                }
-                prev = *last;
-            }
-            fn_802AFF80(&buf, prev);
-            fn_802AFF6C(&buf);
-            fn_802B13F8(lbl_8055F974, cell, &buf, fn_802B0130(n), alpha);
-
-            if (bag && (fn_802B0130(n) < 8 || (fn_802B0130(n) == 8 && n->scale > 0.5f))) {
-                int lod = fn_802B0118(cell);
-                for (int j = 0; j < fn_802AFF54(bag); j++) {
-                    GroundItem* it = (GroundItem*)fn_802AFF5C(bag, j);
-                    if (it->lists[lod]) {
-                        Vec pos;
-                        StatsUpdate__Fv(&pos);
-                        fn_801C2B9C(&pos, &center, &corner[it->corner], it->t0);
-                        fn_801C2B9C(&pos, &pos, &corner[(it->corner + 1) & 3], it->t1);
-                        if (j < used) {
-                            fn_802B3E00(it->lists[lod], &pos, it->kind, 1.0f);
-                        } else {
-                            fn_802B3E00(it->lists[lod], &pos, it->kind, alpha);
-                        }
-                    }
-                }
-            }
+            DrawNode(n, cell);
         } else {
             GroundNode cur;
             int h = n->size / 2;
@@ -728,9 +737,10 @@ void fn_802AEB3C(const GroundFrame* cam) {
             u16* m2;
             int o = q / 2;
             p = fn_802AFEC0(q);
-            m1 = p + (q + 1);
-            m2 = p + (q + 1) * 2;
-            u16* m3 = p + (q + 1) * 3;
+            int s = q + 1;
+            m1 = p + s;
+            m2 = p + s * 2;
+            u16* m3 = p + s * 3;
             fn_802AFEA4(&lbl_804BD8E8, -q);
             // Children go on the stack far-to-near for the view quadrant.
             switch (lbl_8055F988) {
@@ -787,7 +797,7 @@ u16* fn_802AFEC0(int n) {
     return p;
 }
 
-u32 fn_802AFF54(GroundList* l) { return l->count; }
+int fn_802AFF54(GroundList* l) { return l->count; }
 
 void* fn_802AFF5C(GroundList* l, int i) { return (u8*)l->items + i * 0x24; }
 
