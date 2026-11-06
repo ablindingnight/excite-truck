@@ -368,6 +368,13 @@ static inline void Perp(V2* v) {
     v->y = -t;
 }
 
+static inline f32 NextDist(const IdealPoint* q) {
+    V2 d;
+    d.y = q->pos.y - q->next->pos.y;
+    d.x = q->pos.x - q->next->pos.x;
+    return sqrt(d.x * d.x + d.y * d.y);
+}
+
 int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
     IdealPoint* p;
     f32 t = 0.0f;
@@ -399,7 +406,6 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
             IdealPoint* nx = q->next;
             f32 len;
             f32 inv;
-            V2 d;
             q->dir.x = nx->pos.x - q->pos.x;
             q->dir.y = nx->pos.y - q->pos.y;
             len = sqrt(q->dir.x * q->dir.x + q->dir.y * q->dir.y);
@@ -410,9 +416,7 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
             q->dir.x *= inv;
             q->dir.y *= inv;
             q->dist = acc;
-            d.y = q->pos.y - q->next->pos.y;
-            d.x = q->pos.x - q->next->pos.x;
-            q->len = sqrt(d.x * d.x + d.y * d.y);
+            q->len = NextDist(q);
             if (q->len < 0.5f) {
                 fail = 1;
             }
