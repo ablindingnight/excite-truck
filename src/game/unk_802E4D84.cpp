@@ -288,7 +288,6 @@ extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
 void fn_802E4F98(void) {
     unsigned int pos;
     int muted;
-    int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
     int level;
     int i;
     SpuVoice *v;
@@ -302,9 +301,8 @@ void fn_802E4F98(void) {
         muted = fn_802D9BF0();
         lbl_8055FFB4 = 1;
         i = 0;
-        off = 0;
-        for (; i < 0x20; off += sizeof(SpuVoice), i++) {
-            v = (SpuVoice*)((u8*)SPU_VOICE_TABLE + off);
+        for (; i < 0x20; i++) {
+            v = (SpuVoice*)((char*)SPU_VOICE_TABLE + i * (int)sizeof(SPU_VOICE_TABLE[0]));
             s = v->sample;
             if (v->active && s != 0 && s->locked == 1 && !v->start) {
                 pos = *(unsigned int *)((char *)v->vpb + 0x1BC);  // CLEANUP: AXVPB current address
