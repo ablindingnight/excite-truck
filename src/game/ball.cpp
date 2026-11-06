@@ -117,6 +117,7 @@ struct BVec2 {
     f32 z;
 };
 
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 struct BPathPos {
     BPathPos(const BPathPos& o) {
         pt = o.pt;
@@ -136,10 +137,10 @@ struct BPathPos {
     void Place(f32* xz, f32 off) const {
         BVec2 dir;
         f32 inv;
-        xz[0] = pt->x + t * (pt->next->x - pt->x);
-        xz[1] = pt->z + t * (pt->next->z - pt->z);
-        dir.x = pt->dx + t * (pt->next->dx - pt->dx);
-        dir.z = pt->dz + t * (pt->next->dz - pt->dz);
+        xz[0] = LerpT(t, pt->x, pt->next->x);
+        xz[1] = LerpT(t, pt->z, pt->next->z);
+        dir.x = LerpT(t, pt->dx, pt->next->dx);
+        dir.z = LerpT(t, pt->dz, pt->next->dz);
         inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
         dir.x *= inv;
         dir.z *= inv;
