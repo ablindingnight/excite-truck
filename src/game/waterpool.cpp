@@ -553,6 +553,11 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
     o[1] = a[1] + b[1] * s;
     o[2] = a[2] + b[2] * s;
 }
+// Helper name unproven: arguments read right to left, stores left to right.
+static inline void SetVP(ValPoint* p, f32 x, f32 y) {
+    p->x = x;
+    p->y = y;
+}
 extern "C" void fn_8029CD48(WaterCar* car) {
     for (int i = 0; i < 4; i++) {
         if (car->wheels[i].flags & 8) {
@@ -577,8 +582,7 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         v.z = car->vel.z + car->axes[0].z * kick;
         up = 5.0f < up ? 5.0f : up;
         ValPoint flat;
-        flat.y = car->vel.z;
-        flat.x = car->vel.x;
+        SetVP(&flat, car->vel.x, car->vel.z);
         MadV3(&v.x, &v.x, &car->axes[1].x, up);
         f32 s = SqrtF(flat.x * flat.x + flat.y * flat.y);
         int n = (int)(0.25f * s) < 6 ? (int)(0.25f * s) : 6;
