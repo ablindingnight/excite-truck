@@ -560,13 +560,10 @@ void *VoiceSoundMixer_vf0C(void) {
 }
 
 void VoiceSoundMixer_vf10(void) {
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    volatile unsigned char *p = lbl_80489BD0;
+    unsigned char *p = lbl_80489BD0;
     p[0] = 0;
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    *(volatile int *)(p + 4) = 0;
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    *(volatile int *)(p + 8) = 0x20;
+    *(int *)(p + 4) = 0;
+    *(int *)(p + 8) = 0x20;
 }
 
 void VoiceSoundMixer_vf40(void) {

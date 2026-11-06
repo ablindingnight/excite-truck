@@ -977,21 +977,16 @@ void fn_802BDFF4(TMtx* m) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop3_fn_802BE008(TCell* c, TCell* d, TArray<TCell>* a, int in) {
-    if (c >= d && c < d + a->n) {
-        in = 1;
-    }
-    return in;
-}
-
 TreeType* fn_802BE008(TCell* c) {
+    int in;
     TreeType* t = lbl_804C00D4.data;
     for (int i = 0; i < lbl_804C00D4.n; i++, t++) {
         if (t->set) {
             TArray<TCell>* a = t->set->near;
-            int in = 0;
-            in = Loop3_fn_802BE008(c, a->data, a, in);
+            in = 0;
+            if (c >= a->data && c < a->data + a->n) {
+                in = 1;
+            }
             if (in) {
                 return t;
             }
