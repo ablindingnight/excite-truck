@@ -631,6 +631,8 @@ extern const f32 lbl_80562310;  // 6.6666665
 // event for hard enough player crashes.
 static inline f32 InvMass(f32 m) { return lbl_805622E0 / m; }
 
+static inline f32 VDot(const RVec3* a, const RVec3* b) { return PSVECDotProduct(a, b); }
+
 void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
     RVec3 pa;
     RVec3 pq;
@@ -781,8 +783,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         if (-vn < lbl_80562304) {
             e = lbl_80562300;
         }
-        f32 dt = PSVECDotProduct(n, &tt);
-        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(rp, n) / (ima + imb + dt);
+        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(rp, n) / (ima + imb + VDot(n, &tt));
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
@@ -819,8 +820,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             tt2.x = ta2.x + tb2.x;
             tt2.y = ta2.y + tb2.y;
             tt2.z = ta2.z + tb2.z;
-            f32 dt2 = PSVECDotProduct(&tv, &tt2);
-            f32 jt = lbl_805622DC * PSVECDotProduct(rp, &tv) / (ima + imb + dt2);
+            f32 jt = lbl_805622DC * PSVECDotProduct(rp, &tv) / (ima + imb + VDot(&tv, &tt2));
             jt = ClampExt(jt, (f32)__fabs(j * mu));
             J.x = J.x + tv.x * jt;
             J.y = J.y + tv.y * jt;
@@ -1297,6 +1297,16 @@ extern const f32 lbl_80562344;     // 2.8
 // optionally offset by `off` in its own frame. Clamps the sphere centre into the box (`dir`, a direction in box
 // space, keeps the x face open when moving away from it); a centre fully inside is backed out along the
 // relative velocity. Cars touching cars scrape with a friction scaled by how aligned they are.
+static inline void Clip(f32* v, f32 e, u32* in, u32 bit) {
+    if (*v > e) {
+        *v = e;
+    } else if (*v < -e) {
+        *v = -e;
+    } else {
+        *in |= bit;
+    }
+}
+
 int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     CFrame f;
     RVec3 w;
@@ -1336,41 +1346,23 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RigidBody* pb = (RigidBody*)PTR(p, 0x4);
     RigidBody* qb = (RigidBody*)PTR(q, 0x4);
     u32 caps;
-    c.y = F32(p, 0x38);
     u32 in = 0;
+    c.y = F32(p, 0x38);
     c.x = F32(p, 0x34);
     c.z = F32(p, 0x3C);
     ToBoxSpace(&l, &c, &f);
     if (!dir || l.x * dir->x > lbl_805622D0 || (f32)__fabs(dir->y) > F32(q, 0x28)) {
-        if (F32(q, 0x24) < l.x) {
-            l.x = F32(q, 0x24);
-        } else if (l.x < -F32(q, 0x24)) {
-            l.x = -F32(q, 0x24);
-        } else {
-            in |= 1;
-        }
+        Clip(&l.x, F32(q, 0x24), &in, 1);
     }
-    if (F32(q, 0x28) < l.y) {
-        l.y = F32(q, 0x28);
-    } else if (l.y < -F32(q, 0x28)) {
-        l.y = -F32(q, 0x28);
-    } else {
-        in |= 2;
-    }
+    Clip(&l.y, F32(q, 0x28), &in, 2);
     caps = U32(q, 0x34);
-    if ((caps & 1) && F32(q, 0x2C) < l.z) {
+    if ((caps & 1) && l.z > F32(q, 0x2C)) {
         return 0;
     }
     if ((caps & 2) && l.z < -F32(q, 0x2C)) {
         return 0;
     }
-    if (F32(q, 0x2C) < l.z) {
-        l.z = F32(q, 0x2C);
-    } else if (l.z < -F32(q, 0x2C)) {
-        l.z = -F32(q, 0x2C);
-    } else {
-        in |= 4;
-    }
+    Clip(&l.z, F32(q, 0x2C), &in, 4);
     if (in == 7) {
         if (pb) {
             pb->VelAt(&va, &c);
@@ -1412,7 +1404,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     f32 comp = lbl_80562300 + (-len + F32(p, 0x24));
     f32 fq = lbl_805622D0;
-    if (fq < comp) {
+    if (comp > fq) {
         f32 fp = fq;
         f32 k = lbl_805622DC / len;
         n.x = d.x * k;
