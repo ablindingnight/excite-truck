@@ -547,18 +547,21 @@ static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
     }
 }
 
+static inline void EaseV(EVec* e, const EVec* g, f32 a, f32 b) {
+    f32 x = e->x * a;
+    f32 y = e->y * a;
+    f32 z = e->z * a;
+    e->x = x + g->x * b;
+    e->y = y + g->y * b;
+    e->z = z + g->z * b;
+}
+
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
     DmgPose* mdl = (DmgPose*)m;
     EVec* e = car->ease;
     for (int i = 0; i < car->nPoints; i++) {
-        f32 x = car->ease[i].x * 0.8f;
-        f32 yv = car->ease[i].y;
-        f32 y = yv * 0.8f;
-        f32 z = car->ease[i].z * 0.8f;
-        car->ease[i].x = x + car->goal[i].x * (1.0f - 0.8f);
-        car->ease[i].y = y + car->goal[i].y * (1.0f - 0.8f);
-        car->ease[i].z = z + car->goal[i].z * (1.0f - 0.8f);
+        EaseV(&car->ease[i], &car->goal[i], 0.8f, 1.0f - 0.8f);
         SetE(&mdl->pt[i], e + i);
     }
     if (U8(p, 0x26E0)) {
