@@ -2174,8 +2174,7 @@ u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
 
 void fn_8011A45C(void *arg0, s32 arg1, s32 arg2) {
     s32 temp_r0, temp_r31, temp_r3, temp_r3_2, temp_r4, var_r31;
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-    volatile s32 *counter = (volatile s32 *)((u8 *)arg0 + 0xC0);
+    s32 *counter = (s32 *)((u8 *)arg0 + 0xC0);
     temp_r31 = fn_80116BD4(arg1, 0x3E8, *(s32 *)((u8 *)arg0 + 0xBC));
     temp_r3 = fn_80116D30();
     var_r31 = temp_r3;

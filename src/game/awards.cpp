@@ -1077,13 +1077,6 @@ static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801CCDAC(StatHandler* h, long v, AwardsMgr* m) {
-    if (h && h->PushInt(v)) {
-        ShowPopup(m, h);
-    }
-}
-
 void fn_801CCDAC(u32 type, int car, long v) {
     if (fn_801CE898()) {
         return;
@@ -1095,7 +1088,10 @@ void fn_801CCDAC(u32 type, int car, long v) {
     if (CarOff(m, car)) {
         return;
     }
-    Loop1_fn_801CCDAC(m->handlers.data[FindHandler(m, type)], v, m);
+    StatHandler* h = m->handlers.data[FindHandler(m, type)];
+    if (h && h->PushInt(v)) {
+        ShowPopup(m, h);
+    }
 }
 
 }  // extern "C"
@@ -1106,13 +1102,6 @@ int StatHandler::PushInt(long v) {
 }
 
 extern "C" {
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_801CD130(StatHandler* h, f32 v, AwardsMgr* m) {
-    if (h && h->PushReal(v)) {
-        ShowPopup(m, h);
-    }
-}
 
 void fn_801CD130(u32 type, int car, f32 v) {
     if (fn_801CE898()) {
@@ -1125,7 +1114,10 @@ void fn_801CD130(u32 type, int car, f32 v) {
     if (CarOff(m, car)) {
         return;
     }
-    Loop2_fn_801CD130(m->handlers.data[FindHandler(m, type)], v, m);
+    StatHandler* h = m->handlers.data[FindHandler(m, type)];
+    if (h && h->PushReal(v)) {
+        ShowPopup(m, h);
+    }
 }
 
 }  // extern "C"

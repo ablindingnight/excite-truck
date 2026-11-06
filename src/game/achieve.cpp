@@ -470,17 +470,6 @@ static inline s32 AchSumModel(AchStats* stats, int category, const char* name) {
     return total;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline s32 Loop1_AchGetModelStat(const char* name, s32 total, int category) {
-    u32 i;
-    for (i = 0; i < NUM_MODELS; i++) {
-        if (strcasecmp(s_race.models[i].name, name) == 0) {
-            total += s_race.models[i].values[category];
-        }
-    }
-    return total;
-}
-
 s32 AchGetModelStat(int category, const char* model) {
     const char* name = GetBaseChassisName(model);
     s32 total = 0;
@@ -497,7 +486,12 @@ s32 AchGetModelStat(int category, const char* model) {
             total += s_session.models[i].values[category];
         }
     }
-    return Loop1_AchGetModelStat(name, total, category);
+    for (u32 j = 0; j < NUM_MODELS; j++) {
+        if (strcasecmp(s_race.models[j].name, name) == 0) {
+            total += s_race.models[j].values[category];
+        }
+    }
+    return total;
 }
 
 static inline void StoreModelStat(int found, int empty, const char* name, int category, s32 value) {

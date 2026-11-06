@@ -346,8 +346,7 @@ void fn_8020FFE4(long arg0) {
         if (old == -2) { if (arg0 == 1) lbl_8055EEE0 = 0; }
         else if (old == -1) { if (arg0 == 1) lbl_8055EEE0 = 0; }
         else {
-// MATCHING-AID?: volatile from upstream (check: hardware or trick); revisit.
-            lbl_8055EEE0 = (*(volatile long *)&lbl_8055EEE0) + arg0;
+            lbl_8055EEE0 += arg0;
             if (lbl_8055EEE0 < 0) lbl_8055EEE0 = -2;
             if (lbl_8055EEE0 > digit) lbl_8055EEE0 = digit;
         }

@@ -433,15 +433,6 @@ BVec3 Home(int car) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8017D404(BVec3& d, BVec3& imp, f32 k) {
-    d.y -= 0.15f;
-    imp.x = d.x * k;
-    f32 yv = d.y;
-    imp.y = k * yv;
-    imp.z = d.z * k;
-}
-
 extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
     BCarRec* by = fn_8017960C(car);
     struct Node {
@@ -490,7 +481,11 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     at.x += b->mtx.rot[2].x * rnd;
                     at.y += b->mtx.rot[2].y * rnd;
                     at.z += b->mtx.rot[2].z * rnd;
-                    Loop1_fn_8017D404(d, imp, -fall * force);
+                    d.y -= 0.15f;
+                    imp.x = d.x * (-fall * force);
+                    f32 yv = d.y;
+                    imp.y = (-fall * force) * yv;
+                    imp.z = d.z * (-fall * force);
                     b->Push(0, 0, &imp, &at, 1001, 0, by, 1.0f);
                 }
             }

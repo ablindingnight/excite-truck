@@ -80,11 +80,6 @@ void fn_802A0B50(void) {}
 
 // NonMatching: the hoisted float constants get different callee-saved registers (1.0 lands in f27
 // in the target).
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline FenceVtx* Expr1_fn_802A0B54(FenceVtx* v, int j) {
-    return &v[j * 2];
-}
-
 void fn_802A0B54(void) {
     int i;
     fn_802C8BD0(lbl_8055CB68);
@@ -97,7 +92,7 @@ void fn_802A0B54(void) {
             f32 len = 1.0f + (f->type * 6);
             int j;
             for (j = 0; j < f->count; j++) {
-                FenceVtx* p = Expr1_fn_802A0B54(v, j);
+                FenceVtx* p = &v[j * 2];
                 p[0].pos.x = f->posts[j].x;
                 p[0].pos.y = f->posts[j].y;
                 p[0].pos.z = f->posts[j].z;

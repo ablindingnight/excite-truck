@@ -503,15 +503,6 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 
 static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_801DCF48(GTile* t, f32 h, int lx, int lz) {
-    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-        f32 basev = l->base;
-        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
-    }
-    return h;
-}
-
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* normal, int lx, int lz, f32 h) {
     GTile* t = TileAt(g, tx, tz);
@@ -546,7 +537,11 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         return h;
     }
     h = t->base + t->scale * t->h[lx][lz];
-    return Loop2_fn_801DCF48(t, h, lx, lz);
+    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
+        f32 basev = l->base;
+        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
+    }
+    return h;
 }
 
 f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {

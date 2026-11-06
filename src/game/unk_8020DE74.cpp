@@ -559,8 +559,7 @@ void fn_8020F21C(void *arg0) {
 }
 
 void fn_8020F240(void *arg0) {
-// MATCHING-AID: register pinning from upstream; revisit.
-    register void *p;
+    void *p;
     float value;
     p = *(void **)((char *)arg0 + 8);
     if (p != 0) {
