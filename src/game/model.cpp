@@ -1076,7 +1076,8 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 ra
                     MSphere* sp = &slot->spheres[e];
                     MVec3 w;
                     Transform(&w, &sp->c, f);
-                    near = PSVECDistance(&w, &fn_802C86DC()->t) - sp->r < range;
+                    const MVec3* eye = &fn_802C86DC()->t;
+                    near = PSVECDistance(&w, eye) - sp->r < range;
                 }
                 if (near) {
                     Loop1_fn_802C7D54(dist, el, inst, mtx, mat, cl);
