@@ -601,6 +601,8 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 // Camera for slot `slot` in the chase modes: behind and above the car, swinging round with the
 // transition and pitched by the car's climb, blended from the slot's camera; the tips camera once the
 // race is over.
+// Helper name unproven: scale with the value on the left.
+static inline f32 MulK(f32 v, f32 k) { return v * k; }
 void fn_80277A14(CamRec* c, int slot) {
     CamPose blend;
     CamPose frame;
@@ -639,7 +641,7 @@ void fn_80277A14(CamRec* c, int slot) {
     frame.rot.m[7] = 0.0f;
     frame.rot.m[8] = cy;
     swing.x = 0.0f;
-    swing.y = e * 2.6179938f;
+    swing.y = MulK(e, 2.6179938f);
     swing.z = 0.0f;
     Mat3FromEuler(&swingRot, &swing);
     Mat3Mul(rot, &swingRot, rot);
@@ -670,9 +672,9 @@ void fn_80277A14(CamRec* c, int slot) {
     up.v[1] = 1.0f;
     up.v[2] = 0.0f;
     fn_8026E688(&frame, &frame.pos, &c->carFrame.pos, &up);
+    f32 tf = 1.0471976f;
     fn_8026E22C(&blend, &lbl_804A0C60[slot].pose, &frame, e);
-    f32 fov = lbl_804A0C60[slot].fov;
-    fov = Lerp(fov, 1.0471976f, e);
+    f32 fov = Lerp(lbl_804A0C60[slot].fov, tf, e);
     if (fn_80178CA4() == 2) {
         fov = 2.0f * (f32)atan(Lerp(1.0f, 0.65f, e) * (f32)tan(fov * 0.5f));
     }
