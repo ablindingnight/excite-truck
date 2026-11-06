@@ -575,6 +575,13 @@ extern const f32 lbl_80563F10;  // -0.95
 
 // The physics camera (mode 4 on a split screen or the TV output): trails the car like the chase camera
 // but swings the trailing frame round when the car drives backwards; other modes use fn_8026F420.
+// Helper name unproven: the arguments evaluate z first, the stores keep this order.
+static inline void SetZXY(CVec3* v, f32 x, f32 y, f32 z) {
+    v->z = z;
+    v->x = x;
+    v->y = y;
+}
+
 void fn_8026FCFC(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     PVec3 target;
@@ -589,14 +596,13 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
     if ((fn_80178CA4() <= 4 && !tv) || mode != 4) {
         fn_8026F420(mode, prev, p);
     } else {
-        f32 k;
-        f32 sf = c->speedFrac;
+        f32 k = c->speedFrac;
         switch (mode) {
         case 8:
-            k = lbl_80563E30 - lbl_80563E68 * sf;
+            k = lbl_80563E30 - lbl_80563E68 * k;
             break;
         default:
-            k = lbl_80563E30 - lbl_80563ED0 * sf;
+            k = lbl_80563E30 - lbl_80563ED0 * k;
             break;
         }
         f32 dist = lbl_80563EEC + k * F32(c->car, 0x5B4);
@@ -671,17 +677,15 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[2] *= inv2;
         if (PSVECDotProduct(f.v, &c->tf.axes.fwd.x) > lbl_80563F10) {
             f32 w = s + lbl_80563F14 * (lbl_80563E30 - s);
-            r.z = LerpF(w, f.v[2], c->tf.axes.fwd.z);
-            r.y = LerpF(w, f.v[1], c->tf.axes.fwd.y);
-            r.x = LerpF(w, f.v[0], c->tf.axes.fwd.x);
+            SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
         } else {
-            f32 z2 = c->tf.axes.fwd.z;
+            f32 y2 = c->tf.axes.fwd.y;
             f32 sideZ = -c->tf.axes.fwd.x;
-            side.y = c->tf.axes.fwd.y;
-            side.x = z2;
+            side.x = c->tf.axes.fwd.z;
+            side.y = y2;
             side.z = sideZ;
             f32 kk = lbl_80563EA8 * (PSVECDotProduct(&side.x, f.v) > lbl_80563E78 ? lbl_80563E30 : lbl_80563E6C);
             c->tf.axes.fwd.x = c->tf.axes.fwd.x + side.x * kk;
@@ -805,9 +809,7 @@ void fn_802704E4(u8* p) {
         f.v[1] *= inv2;
         f.v[2] *= inv2;
         f32 w = s + lbl_80563F14 * (lbl_80563E30 - s);
-        r.z = f.v[2] + w * (c->tf.axes.fwd.z - f.v[2]);
-        r.y = f.v[1] + w * (c->tf.axes.fwd.y - f.v[1]);
-        r.x = f.v[0] + w * (c->tf.axes.fwd.x - f.v[0]);
+        SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
         c->tf.axes.fwd.x = r.x;
         c->tf.axes.fwd.y = r.y;
         c->tf.axes.fwd.z = r.z;
@@ -816,18 +818,18 @@ void fn_802704E4(u8* p) {
         c->tf.axes.fwd.y *= lbl_80563E6C;
         c->tf.axes.fwd.z *= lbl_80563E6C;
     }
-    f32 back = F32(c->car, 0x5E4) * lbl_80563F18;
+    f32 back = MulF(lbl_80563F18, F32(c->car, 0x5E4));
     c->tf.pos.v[0] = target.v[0] + c->tf.axes.fwd.x * back;
     c->tf.pos.v[1] = target.v[1] + c->tf.axes.fwd.y * back;
     c->tf.pos.v[2] = target.v[2] + c->tf.axes.fwd.z * back;
-    f32 out = F32(c->car, 0x5E4) * -dist;
+    f32 out = MulF(-dist, F32(c->car, 0x5E4));
     c->view.pos.v[0] = c->pos.v[0] + c->tf.axes.fwd.x * out;
     c->view.pos.v[1] = c->pos.v[1] + c->tf.axes.fwd.y * out;
     c->view.pos.v[2] = c->pos.v[2] + c->tf.axes.fwd.z * out;
     c->view.pos.v[1] = c->view.pos.v[1] + lift * F32(c->car, 0x5E4);
     eye = c->view.pos;
     if (fn_801EA03C((const s16*)(c->car + 0x6C), eye.v)) {
-        f32 g = (lbl_80563E50 + eye.v[1]) * F32(c->car, 0x5E4);
+        f32 g = MulF(lbl_80563E50 + eye.v[1], F32(c->car, 0x5E4));
         eye.v[1] = c->view.pos.v[1] > g ? c->view.pos.v[1] : g;
     } else {
         eye.v[0] = c->view.pos.v[0];
