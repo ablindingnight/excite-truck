@@ -367,8 +367,7 @@ void fn_802C1550(void) {
             memset(c->drops, 0, c->maxDrops * 4);
             const char* name = c->cfg->GetValue("name");
             StrCopy(c->name, name, 0x20);
-            if (n > 0) {
-                for (int j = 0; j < n; j++) {
+            for (int j = 0; j < n; j++) {
                 TMtx m;
                 m.rot[0][0] = 1.0f;
                 m.rot[0][1] = 0.0f;
@@ -381,7 +380,6 @@ void fn_802C1550(void) {
                 m.rot[2][2] = 1.0f;
                 SetV3(&m.pos, 0.0f, -1000.0f, 0.0f);
                 fn_801FA7F4(model, &m, c->cfg);
-            }
             }
         }
     }
