@@ -1045,6 +1045,9 @@ T* RArray<T>::Add(void) {
 }
 
 void Arena::Init(void) {
+    int i;
+    ValueNode* n;
+    ValueTable* t;
     ValueNode* cfg = fn_8000AC38()->vals;
     char name[0x1E];
     if (cfg->Has("time_limit")) {
@@ -1055,10 +1058,8 @@ void Arena::Init(void) {
     fn_801345D8(name, 0x1E, "object_file_0");
     sets = new ("rc_object_sets") RArray<ObjSet>(CountFiles(cfg), "rc_object_files");
     while (cfg->Has(name)) {
-        ValueTable* t = fn_80131810(cfg->GetValue(name));
+        t = fn_80131810(cfg->GetValue(name));
         if (t) {
-            int i;
-            ValueNode* n;
             for (i = 0; (n = t->GetChild(i)) != 0; i++) {
                 sets->Add()->Load(n, &dynos.t);
             }
@@ -1072,16 +1073,13 @@ void Arena::Init(void) {
     nFiles = sets->Count();
     nSets = CountRingSets();
     stats = new ("rc_ringsetstats") RArray<SetStat>(nSets, "rc_ringsetstats");
-    {
-        int i;
-        for (i = 0; i < nSets; i++) {
-            SetStat st;
-            st.done = 0;
-            st.best = -1;
-            st.time = -100.0f;
-            st.score = -100.0f;
-            stats->Push(st);
-        }
+    for (i = 0; i < nSets; i++) {
+        SetStat st;
+        st.done = 0;
+        st.best = -1;
+        st.time = -100.0f;
+        st.score = -100.0f;
+        stats->Push(st);
     }
 }
 
