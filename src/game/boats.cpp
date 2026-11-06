@@ -95,13 +95,11 @@ void fn_802C2410(void) {
 // NonMatching: the target hoists the float constants with 0.6 in f25 (ours: f31) and puts
 // `i = 0` before the zero-trip guard; this explicit guard is the closest form found so far.
 void fn_802C2488(void) {
-    f32 bobHeight;
     int i;
     i = 0;
     if (i < lbl_804C109C.count) {
     for (; i < lbl_804C109C.count; i++) {
         Boat b = lbl_804C109C.data[i];
-        bobHeight = 0.6f;
         ValMatrix m;
         Mtx33 rot;
         ValVec3 ang;
@@ -130,7 +128,7 @@ void fn_802C2488(void) {
         Mat3Mul((Mat3*)&m, (const Mat3*)&rot, (const Mat3*)&m);
         off.x = 0.0f;
         m.origin.x += b.pos.x;
-        off.y = 0.5f + bobHeight * bob;
+        off.y = 0.5f + 0.6f * bob;
         off.z = 0.0f;
         m.origin.y += b.pos.y;
         m.origin.z += b.pos.z;
