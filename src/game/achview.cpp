@@ -653,6 +653,9 @@ void MenuDoAchievementsViewer(void) {
 
 // The four vtables, written out as tables until these widgets become real classes. In the original they are flushed here,
 // between MenuDoAchievementsViewer and the deferred inline methods below, so every later string sits after them in .data.
+// The last table is longer than its vtable: 0x28 real bytes, then 0x88 zeros that stand in for two all-pure base
+// vtables (IMenuState 0x60 and a 0x28 interface). Ours also emits the weak IMenuState one at the end of .data, 96 B
+// too many, until these become real classes.
 extern "C" {
 u8* AchievementTrophyModel_vf08(u8* p, int del);
 void AchievementTrophyModel_vf0C(u8* p, const char* name);
