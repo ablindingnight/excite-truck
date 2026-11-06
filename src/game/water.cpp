@@ -645,7 +645,7 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
 
 extern "C" {
 
-void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
+void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
     if (s->sun == -2) {
         return;
     }

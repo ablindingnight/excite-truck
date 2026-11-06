@@ -922,8 +922,8 @@ static inline void MulVec(Vec3* out, const Vec3* in, const Mat3* m) {
         f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
         f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
         f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
-        out->x = x;
         out->y = y;
+        out->x = x;
         out->z = z;
     } else {
         out->x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];

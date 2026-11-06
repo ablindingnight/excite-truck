@@ -1338,8 +1338,8 @@ void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
 static inline void Rotate(Vec2* v, f32 angle) {
     f32 c = cos(angle);
     f32 s = sin(angle);
-    f32 x = v->x;
     f32 y = v->y;
+    f32 x = v->x;
     v->y = x * s + y * c;
     v->x = x * c - y * s;
 }
