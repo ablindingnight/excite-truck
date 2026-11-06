@@ -474,14 +474,13 @@ s32 AchGetModelStat(int category, const char* model) {
     const char* name = GetBaseChassisName(model);
     s32 total = 0;
     AchStats* p = &s_profiles[IdentGetCurrentSlot()];
-    u32 i;
 
-    for (i = 0; i < NUM_MODELS; i++) {
+    for (u32 i = 0; i < NUM_MODELS; i++) {
         if (strcasecmp(p->models[i].name, name) == 0) {
             total += p->models[i].values[category];
         }
     }
-    for (i = 0; i < NUM_MODELS; i++) {
+    for (u32 i = 0; i < NUM_MODELS; i++) {
         if (strcasecmp(s_session.models[i].name, name) == 0) {
             total += s_session.models[i].values[category];
         }

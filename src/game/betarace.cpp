@@ -3477,9 +3477,8 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
 
 inline void BetaMaster::vf0C(void) {
     int found;
-    int i;
     f32 lead;
-    for (i = 0; i < stars.a.count; i++) {
+    for (int i = 0; i < stars.a.count; i++) {
         Pickup* t = stars.a.data[i];
         SpinBody* body = (SpinBody*)t->hB8;
         if (body) {
@@ -3536,7 +3535,7 @@ inline void BetaMaster::vf0C(void) {
     if (coins.enabled) {
         fn_80168328();
     }
-    for (i = 0; i < lbl_8055E4D0; i++) {
+    for (int i = 0; i < lbl_8055E4D0; i++) {
         BetaCar* c = &cars[i];
         c->Update((PickupList*)&stars.a, (PuddleList*)&puddles.a);
         if (!fn_801B2F2C(i)) {

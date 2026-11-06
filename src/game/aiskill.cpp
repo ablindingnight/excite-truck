@@ -214,7 +214,6 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     int num;
     int nd;
     int i;
-    int j;
     f32 span;
     fn_801E879C();
     if (!ovr) {
@@ -237,7 +236,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
         e->idx = i;
         e->driver = cars[i];
         e->score = fn_80129D90(3, -2, 2);
-        for (j = 0; j < nd; j++) {
+        for (int j = 0; j < nd; j++) {
             if (e->driver == bonus[j].id) {
                 e->score += bonus[j].bonus;
                 break;
@@ -264,7 +263,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
         u8* d = 0;
         int idx;
         int hasStart;
-        for (j = 0; j < nd; j++) {
+        for (int j = 0; j < nd; j++) {
             if (e->driver == bonus[j].id) {
                 d = (u8*)GetDriver(j);
             }
