@@ -353,10 +353,10 @@ static inline void StrCopyN(char* dst, const char* src, int len) {
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
+static inline f32 MinI(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxI(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Unlerp(f32 a, f32 b, f32 x) {
-    f32 t = (x - a) / (b - a);
-    CLAMP01(t);
-    return t;
+    return MaxI(MinI(1.0f, (x - a) / (b - a)), 0.0f);
 }
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
