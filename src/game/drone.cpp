@@ -552,10 +552,20 @@ void LinearDrone::Start(LinearPathData* d) {
 
 extern "C" void fn_801FEA28(LinearDrone* d);
 
+static inline void SetXYZ(PVec* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
+static inline f32 LerpU(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 void LinearDrone::Advance(f32 dt) {
     const LinearKey* k = &path->keys[seg];
-    const PVec* p0 = &k[0].pos;
-    const PVec* p1 = &k[1].pos;
+    const PVec* p0;
+    const PVec* p1;
+    p0 = &k->pos;
+    p1 = &(&path->keys[seg])[1].pos;
     PVec d;
     d.x = p1->x - p0->x;
     d.y = p1->y - p0->y;
@@ -579,7 +589,8 @@ void LinearDrone::Advance(f32 dt) {
             return;
         }
         p0 = p1;
-        p1 = &path->keys[seg + 1].pos;
+        k = &path->keys[seg];
+        p1 = &k[1].pos;
         d.x = p1->x - p0->x;
         d.y = p1->y - p0->y;
         d.z = p1->z - p0->z;
@@ -599,16 +610,12 @@ void LinearDrone::Advance(f32 dt) {
         d2.z = p2->z - p1->z;
         f32 u = inv * PSVECDistance(&frame.pos, p0);
         PVec up;
-        up.x = ((const LinearKey*)p0)->up.x + u * (((const LinearKey*)p1)->up.x - ((const LinearKey*)p0)->up.x);
-        up.y = ((const LinearKey*)p0)->up.y + u * (((const LinearKey*)p1)->up.y - ((const LinearKey*)p0)->up.y);
-        up.z = ((const LinearKey*)p0)->up.z + u * (((const LinearKey*)p1)->up.z - ((const LinearKey*)p0)->up.z);
+        SetXYZ(&up, LerpU(u, ((const LinearKey*)p0)->up.x, ((const LinearKey*)p1)->up.x),
+               LerpU(u, ((const LinearKey*)p0)->up.y, ((const LinearKey*)p1)->up.y),
+               LerpU(u, ((const LinearKey*)p0)->up.z, ((const LinearKey*)p1)->up.z));
         frame.x = up;
         PVec dir;
-        dir.x = d.x + u * (d2.x - d.x);
-        f32 yv = d.y;
-        dir.y = yv + u * (d2.y - yv);
-        f32 zv = d.z;
-        dir.z = zv + u * (d2.z - zv);
+        SetXYZ(&dir, LerpU(u, d.x, d2.x), LerpU(u, d.y, d2.y), LerpU(u, d.z, d2.z));
         frame.z = dir;
         PSVECNormalize(&frame.z, &frame.z);
     } else {

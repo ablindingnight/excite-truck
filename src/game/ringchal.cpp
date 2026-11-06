@@ -549,7 +549,6 @@ class Arena : public Preloader {
 public:
     int Loop3_CountDynos(int n);
 public:
-    void Loop2_Spawn(void);
 public:
     Arena(void);
     virtual int CountDynos(void);  // 0x8
@@ -1320,23 +1319,18 @@ int Arena::CountDynos(void) {
     return Loop3_CountDynos(n);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void Arena::Loop2_Spawn(void) {
-    int i;
-    for (i = 0; i < sets->count; i++) {
+void Arena::Spawn(void) {
+    for (int i = 0; i < sets->count; i++) {
+        ObjSet* d = sets->data;
         int j;
-        for (j = 0; j < sets->data[i].infos->count; j++) {
-            ObjInfo* o = &sets->data[i].infos->data[j];
+        ObjInfo* o;
+        for (j = 0; j < d[i].infos->count; j++) {
+            o = &d[i].infos->data[j];
             if (o->type == 0) {
                 o->obj = fn_802BAA68(o->xlo, &o->mtx);
             }
         }
     }
-}
-
-void Arena::Spawn(void) {
-    int i;
-    Loop2_Spawn();
 }
 
 #define SET_NAME(a, buf, n)                                               \
