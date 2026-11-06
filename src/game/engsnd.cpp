@@ -246,6 +246,7 @@ EngineSound::~EngineSound(void) {
     }
 }
 
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void EngineSound::Update(int muted) {
     f32 r;
     f32 t;
@@ -256,7 +257,7 @@ void EngineSound::Update(int muted) {
     int i;
     f32 rpmv = car->rpm;
     rpm = rpmFactor * rpmv;
-    fadeIn = fadeIn + 0.05f * (1.0f - fadeIn);
+    fadeIn = LerpT(0.05f, fadeIn, 1.0f);
     r = rpm;
     t = car->throttle;
     local = 0;
@@ -297,7 +298,7 @@ void EngineSound::Update(int muted) {
         f32 curInvRpm = e->invRpm;
         e->snd->SetPitch(r * curInvRpm);
         f32 d = level - e->level;
-        if (d > 0.2f) {
+        if (0.2f < d) {
             d = 0.2f;
         }
         d = (d > -0.2f) ? d : -0.2f;
