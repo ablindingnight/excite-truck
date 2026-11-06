@@ -646,6 +646,7 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
 extern "C" {
 
 void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
+    Mat3* mp;
     if (s->sun == -2) {
         return;
     }
@@ -661,7 +662,7 @@ void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
         v[i].color = 0xFFFFFFFF;
     }
     Frame m;
-    Mat3* mp = (Mat3*)&m;
+    mp = (Mat3*)&m;
     m.pos = view->pos;
     m.x.x = 1.0f;
     m.x.y = 0.0f;

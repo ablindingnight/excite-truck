@@ -666,9 +666,10 @@ void PanelVol::vf1C(void) {
         return;
     }
     f32 xv = nrm.x;
-    p.x += xv * 0.127f;
-    p.y += nrm.y * 0.127f;
-    p.z += nrm.z * 0.127f;
+    f32 k = 0.127f;
+    p.x += xv * k;
+    p.y += nrm.y * k;
+    p.z += nrm.z * k;
     nrm.x *= 0.100000024f;
     nrm.y *= 0.100000024f;
     nrm.z *= 0.100000024f;
