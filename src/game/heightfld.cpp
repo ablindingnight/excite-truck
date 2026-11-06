@@ -227,8 +227,7 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_801DB514(f32 s2, f32 fz, f32* col, f32* dcol) {
-    GVec*normal;
+static inline f32 Loop2_fn_801DB514(f32 s2, f32 fz, f32* col, f32* dcol, GVec* normal) {
     f32 s3;
     s3 = s2 * fz;
     f32 dz;
@@ -250,7 +249,7 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     for (int i = 0; i < 4; i++) {
         col[i] = SplineD(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3, &dcol[i]);
     }
-    return Loop2_fn_801DB514(fz * fz, fz, col, dcol);
+    return Loop2_fn_801DB514(fz * fz, fz, col, dcol, normal);
 }
 
 int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32 fx, f32 fz) {
