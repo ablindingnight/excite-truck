@@ -130,8 +130,8 @@ void fn_80009DC8(RaceSetup* rs) {
     RacerSlot tmp;
     int i;
     DriverInfo* d;
-    int n = rs->racers.count;
     RacerList* list = &rs->racers;
+    int n = list->count;
     VehicleInfo* v;
 
     for (i = 0, s = list->slots; i < n; s++, i++) {
