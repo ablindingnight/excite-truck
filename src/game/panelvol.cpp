@@ -399,16 +399,16 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
         verts[i].v = 0.127f;
     }
     WVec pts[4];
-    for (i = 0; i < 4; i++) {
-        fn_80144DAC(&pts[i], &verts[i].p);
+    for (int k = 0; k < 4; k++) {
+        fn_80144DAC(&pts[k], &verts[k].p);
     }
     RMtx frame;
     fn_80144DC8(&frame);
     fn_801BFB2C(p, &frame, pts);
     fn_801BF75C(&p->rest, &m, &frame);
     PanelLink links[2];
-    for (i = 0; i < n; i++) {
-        links[i].id = *ids++;
+    for (i = 0; i < n; ids++, i++) {
+        links[i].id = *ids;
         links[i].mtx = fn_801602B4(car);
         links[i].c = 0;
     }
