@@ -113,12 +113,14 @@ int fn_8020BDB8(int key) {
     return 0;
 }
 
-// NonMatching: the target recomputes `i / 2` for the row after the sample call (our build CSEs it).
+// The target computes `i / 2` again for the row after the sample call.
+#pragma push
+#pragma opt_common_subs off
 void fn_8020BF58(void) {
     fn_8023895C();
     fn_80238A74(12, 12, "SOUND DASH", 0xFF2D2DC8);
+    int i;
     if (lbl_8055EE24 == 1) {
-        int i;
         fn_80238B44(7, 7, 350, 448, 0x8C000000);
         for (i = 0; i < 32; i++) {
             char buf[0x110];
@@ -132,15 +134,15 @@ void fn_8020BF58(void) {
             }
         }
     } else if (lbl_8055EE24 == 0) {
-        int i;
-        int n;
+        int k;
         fn_80238B44(7, 7, 300, 448, 0x8C000000);
-        n = fn_8020A76C() * 2;
-        for (i = 0; i < n; i++) {
+        i = fn_8020A76C() * 2;
+        for (k = 0; k < i; k++) {
             char buf[64];
-            SoundSample* s = fn_8020A774(i / 2);
-            int col = i % 2;
-            int row = i / 2;
+            SoundSample* s = fn_8020A774(k / 2);
+            int row;
+            int col = k % 2;
+            row = k / 2;
             u32 color;
             if (col == 0) {
                 StrCopyN(buf, s->name, sizeof(buf));
@@ -156,5 +158,6 @@ void fn_8020BF58(void) {
     }
     fn_802389E4();
 }
+#pragma pop
 
 }  // extern "C"
