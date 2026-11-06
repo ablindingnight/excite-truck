@@ -167,6 +167,8 @@ struct DynArray {
         *p = v;
     }
     int Count(void) { return a.count; }
+    // const reader: it forces count to be read again at each use. The name is ours.
+    int Size(void) const { return a.count; }
     T* At(int i) { return &a.data[i]; }
     void Remove(int k) {
         if (k >= 0 && k < a.count) {
@@ -365,19 +367,19 @@ void fn_8015F320(Group** groups, int n, Track* trk) {
 int fn_8015F3EC(const void* a, const void* b) { return ((const Obst*)a)->seg - ((const Obst*)b)->seg; }
 
 void fn_8015F3FC(Track* trk) {
-    if (lbl_8055E29C->a.count > 0) {
+    if (lbl_8055E29C->Size() > 0) {
         int nseg;
-        int s;
         int j;
+        int s;
         fn_80265DCC(lbl_8055E29C->a.data, lbl_8055E29C->a.count, sizeof(Obst), fn_8015F3EC);
         nseg = trk->path->count;
         lbl_8055E2A0 = new ("ai-obsindex") DynArray<Obst*>(nseg);
         j = 0;
         for (s = 0; s < nseg; s++) {
-            while (j < lbl_8055E29C->a.count - 1 && lbl_8055E29C->a.data[j].seg < s) {
+            while (j < lbl_8055E29C->Size() - 1 && lbl_8055E29C->a.data[j].seg < s) {
                 j++;
             }
-            if (j == lbl_8055E29C->a.count - 1 && lbl_8055E29C->a.data[j].seg < s) {
+            if (j == lbl_8055E29C->Size() - 1 && lbl_8055E29C->a.data[j].seg < s) {
                 lbl_8055E2A0->Push(lbl_8055E29C->a.data);
             } else {
                 lbl_8055E2A0->Push(&lbl_8055E29C->a.data[j]);
