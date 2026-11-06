@@ -727,7 +727,8 @@ void fn_802BA348(void) {
     int i = 0;
     while (lines.count + 1 <= lines.cap && i < 3) {
         if (l) {
-            lines.data[lines.count++] = l;
+            void*& slot = lines.data[lines.count++];
+            slot = l;
         }
         i++;
         l = fn_80156A40()->Get(i);
@@ -738,8 +739,12 @@ void fn_802BA348(void) {
     int total = 0;
     for (int j = 0; j < lines.count; j++) {
         void* ln = lines.data[j];
-        for (XSeg* s = fn_80138B4C(ln, 0); s; s = fn_80138B4C(ln, s)) {
-            total += s->count;
+        XSeg* s = fn_80138B4C(ln, 0);
+        if (s) {
+            do {
+                total += s->count;
+                s = fn_80138B4C(ln, s);
+            } while (s);
         }
     }
     lbl_8055FA78 = new ("roadobject[]") Arr<Obj>(total, "roadobject[]");
