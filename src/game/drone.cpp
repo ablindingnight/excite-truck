@@ -514,10 +514,10 @@ extern "C" TrackMod* fn_801FC9CC(void) { return new ("HermiteDroneTMH") HermiteD
 
 LinearDrone::~LinearDrone(void) {}
 
-void LinearDrone::Init(TObj* o, LinearPathData* d) {
+void LinearDrone::Init(TObj* __restrict o, LinearPathData* d) {
     name = d->name;
-    model = o->model;
     path = 0;
+    model = o->model;
     SetIdentity(&frame);
     seg = -1;
 }
@@ -613,10 +613,10 @@ void LinearDrone::Advance(f32 dt) {
 
 HermiteDrone::~HermiteDrone(void) {}
 
-void HermiteDrone::Init(TObj* o, HermitePathData* d) {
+void HermiteDrone::Init(TObj* __restrict o, HermitePathData* d) {
     name = d->name;
-    model = o->model;
     entry = 0;
+    model = o->model;
     SetIdentity(&frame);
     seg = -1;
     t = 0.0f;
