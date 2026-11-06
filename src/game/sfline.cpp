@@ -232,8 +232,9 @@ void fn_802A1290(void) {
                 SFVec2 d;
                 f32 a;
                 SFCorner(&q, &lbl_8055F850, &lbl_8055F858, &lbl_8055F860, 1.5f * j, 1.5f * i - half);
-                d.y = q.y - lbl_8055F850.y;
+                f32 dy = q.y - lbl_8055F850.y;
                 d.x = q.x - lbl_8055F850.x;
+                d.y = dy;
                 a = ((f32)sqrt(d.x * d.x + d.y * d.y) - inner) / range;
                 if (1.0f < a) {
                     a = 1.0f;
