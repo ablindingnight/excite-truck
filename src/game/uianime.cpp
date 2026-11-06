@@ -299,6 +299,12 @@ static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
     return r;
 }
 
+static inline void* MakeObj(const UiPose& p, f32 s, f32 a) {
+    void* o = fn_8022EDE4(&p, a);
+    *(f32*)((u8*)o + 0x38) = s;
+    return o;
+}
+
 static inline void* EvalTrack(const UiAnimTrack* tr, f32 time) {
     void* obj;
     if (tr->n > 0) {
@@ -310,26 +316,16 @@ static inline void* EvalTrack(const UiAnimTrack* tr, f32 time) {
         }
         if (k == -1) {
             UiAnimKey* a = &tr->keys[0];
-            UiPose p(a->p);
-            f32 s = a->scale;
-            obj = fn_8022EDE4(&p, a->alpha);
-            *(f32*)((u8*)obj + 0x38) = s;
+            obj = MakeObj(UiPose(a->p), a->scale, a->alpha);
         } else if (k == tr->n - 1) {
-            UiAnimKey* a = &tr->keys[tr->n - 1];
-            UiPose p(a->p);
-            f32 s = a->scale;
-            obj = fn_8022EDE4(&p, a->alpha);
-            *(f32*)((u8*)obj + 0x38) = s;
+            obj = MakeObj(UiPose(tr->keys[tr->n - 1].p), tr->keys[tr->n - 1].scale, tr->keys[tr->n - 1].alpha);
         } else {
             UiAnimKey* a = &tr->keys[k];
             UiAnimKey* b = &tr->keys[k + 1];
             f32 dt = b->t - a->t;
             dt = dt > 0.0001f ? dt : 0.0001f;
             f32 f = (time - a->t) / dt;
-            UiPose p(Lerp2(a->p, b->p, f));
-            f32 s = LerpT(f, a->scale, b->scale);
-            obj = fn_8022EDE4(&p, LerpT(f, a->alpha, b->alpha));
-            *(f32*)((u8*)obj + 0x38) = s;
+            obj = MakeObj(UiPose(Lerp2(a->p, b->p, f)), LerpT(f, a->scale, b->scale), LerpT(f, a->alpha, b->alpha));
         }
     } else {
         obj = fn_8022EE9C();
