@@ -1029,25 +1029,25 @@ static inline int FindHandler(AwardsMgr* m, u32 type) {
 }
 
 static inline Popup* PopQueue(AwardsMgr* m) {
-    Popup* p = m->q.head;
-    if (p) {
-        m->q.head = p->next;
+    Popup* r = 0;
+    if (m->q.head) {
+        r = m->q.head;
+        m->q.head = r->next;
         if (!m->q.head) {
             m->q.tail = &m->q.head;
         }
-        p->next = 0;
+        r->next = 0;
     }
-    return p;
+    return r;
 }
 
 static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
     Popup* found = 0;
     Popup* free = 0;
     for (int i = 0; i < 30; i++) {
-        Popup* p = &m->popups[i];
-        if (!p->used) {
-            free = p;
-        } else if (p->h == h) {
+        if (!m->popups[i].used) {
+            free = &m->popups[i];
+        } else if (m->popups[i].h == h) {
             found = &m->popups[i];
             break;
         }
@@ -1065,10 +1065,11 @@ static inline void ShowPopup(AwardsMgr* m, StatHandler* h) {
         free->shown = 0;
         free->time = 3.0f;
         free->h = h;
-        if (m->sfx) {
-            m->sfx->b49 = 1;
-            m->sfx->b4B = 0;
-            m->sfx->b4A = 0;
+        LayoutObj* fx = m->sfx;
+        if (fx) {
+            fx->b49 = 1;
+            fx->b4B = 0;
+            fx->b4A = 0;
         }
         *m->q.tail = free;
         m->q.tail = &free->next;
