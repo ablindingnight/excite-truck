@@ -1279,8 +1279,7 @@ void fn_801CD970(int car) {
     if (!p) {
         return;
     }
-    AwLayout* l = (AwLayout*)m->layout;
-    AwBox* box = l->FindBox("live_update_box");
+    AwBox* box = ((AwLayout*)m->layout)->FindBox("live_update_box");
     if (!box) {
         return;
     }
@@ -1296,9 +1295,9 @@ void fn_801CD970(int car) {
         b.pos.x += slide;
         fn_80148070(&b, -1, m->art);
     }
-    AwText* msg = l->Find("live_update_message");
-    AwText* val = l->Find(lbl_802F9930[fn_80204CF0()]);
-    AwText* title = l->Find("live_update_title");
+    AwText* msg = ((AwLayout*)m->layout)->Find("live_update_message");
+    AwText* val = ((AwLayout*)m->layout)->Find(lbl_802F9930[fn_80204CF0()]);
+    AwText* title = ((AwLayout*)m->layout)->Find("live_update_title");
     if (msg && val && title) {
         AwText e;
         char num[0x14];

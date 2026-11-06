@@ -935,18 +935,17 @@ void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     s32* idx = (s32*)(data + 0x58);
     const Corner* c1 = (Corner*)(data + 0x10) + idx[1];
     const Corner* c0 = (Corner*)(data + 0x10) + idx[0];
-    const Corner* c2 = (Corner*)(data + 0x10) + idx[2];
     q->c[0] = *c0;
     q->c[1] = *c1;
-    q->c[2] = *c2;
+    q->c[2] = *((Corner*)(data + 0x10) + idx[2]);
     q->c[3].pos.x = q->c[1].pos.x + q->c[2].pos.x - (q->c[0].pos.x);
     f32 yv = q->c[1].pos.y;
     q->c[3].pos.y = yv + q->c[2].pos.y - q->c[0].pos.y;
     f32 zv = q->c[1].pos.z;
     q->c[3].pos.z = zv + q->c[2].pos.z - q->c[0].pos.z;
     q->c[3].color = c1->color;
-    q->c[3].u = c1->u + c2->u - c0->u;
-    q->c[3].v = c1->v + c2->v - c0->v;
+    q->c[3].u = c1->u + ((Corner*)(data + 0x10) + idx[2])->u - c0->u;
+    q->c[3].v = c1->v + ((Corner*)(data + 0x10) + idx[2])->v - c0->v;
     if (!fn_801F52BC(vn, "col_density", &q->colDensity, 4)) {
         q->colDensity = 0.6f;
     }

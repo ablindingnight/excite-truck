@@ -340,13 +340,12 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
         fn_802D3ECC(lbl_8055ECF0);
     }
     if (fn_802C8DBC(n * 8)) {
-        EFrame* m = &lbl_80488B88;
         for (int i = 0; i < n; i++) {
             EVec3* p = (EVec3*)((u8*)pts + i * stride);
             EVec3 d;
-            d.x = p->x - m->pos.x;
-            d.y = p->y - m->pos.y;
-            d.z = p->z - m->pos.z;
+            d.x = p->x - (&lbl_80488B88)->pos.x;
+            d.y = p->y - (&lbl_80488B88)->pos.y;
+            d.z = p->z - (&lbl_80488B88)->pos.z;
             EVec2 side;
             side.x = d.z;
             side.y = -d.x;
@@ -370,7 +369,7 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                         q.y += h;
                     }
                     EVec3 e;
-                    ENV_PROJECT(m, q, e, sx, sy);
+                    ENV_PROJECT((&lbl_80488B88), q, e, sx, sy);
                     fn_802C8E00(0xFF404040, k >= 2, sx, 0.0f, sy, (k & 2) ? 1.0f : 0.0f, (k & 1) ? 1.0f : 0.0f);
                 }
             }
