@@ -241,7 +241,7 @@ public:
 
     char model[50];    // offset 0x4
     char level[20];    // offset 0x36
-    u8 shown;          // offset 0x4A
+    bool shown;        // offset 0x4A
     s32 levelNum;      // offset 0x4C
     s32 handle;        // offset 0x50
     f32 xform[12];     // offset 0x54
@@ -889,6 +889,8 @@ static inline void TrophyCenterOffset(AchievementTrophyModel* p, f32* bounds, u8
     fn_801BFE7C(&p->xform[9], &p->xform[9], (f32*)(cam + 0x24));
 }
 
+// Draw inlines its helper but calls the four small functions above. In the target those four sit right after Draw, the
+// way deferred inlines do; as plain functions here they come before Reset. Their real form is still open.
 inline void AchievementTrophyModel::Draw(void) {
     Mat3 scale;
     TrophySizes sizes;
