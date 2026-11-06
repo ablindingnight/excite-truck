@@ -1459,8 +1459,8 @@ void fn_80195B28(u8* d, f32 v) {
             w->next *= lbl_8055E56C;
         }
         w->dur = tbl[2];
-        w->start = w->cur;
         w->next += w->now;
+        w->start = w->cur;
         if (one) {
             w->tgt = fn_80129DC4(3, -0.5f, 0.5f);
         } else {
