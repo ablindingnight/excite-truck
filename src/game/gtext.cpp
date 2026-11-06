@@ -401,34 +401,34 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
     return 0;
 }
 
-void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
-    const char* p = s;
-    EscSeq* e;
-    strlen(p);
-    while (*p) {
-        f32 adv = h;
-        int skip;
-        if (*p == '\\') {
-            for (int i = 0; i < lbl_80497F14.count; i++) {
-                const char* name = lbl_80497F14.data[i].name;
-                if (strncasecmp(p + 1, name, strlen(name)) == 0) {
-                    e = &lbl_80497F14.data[i];
-                    if (e->art) {
-                        f32 k = h / fn_80235F64(e->art, e->artIdx);
-                        adv = e->scale * (k * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * k);
-                    } else {
-                        adv = h * e->scale;
-                    }
-                    skip = strlen(lbl_80497F14.data[i].name) + 1;
-                    goto found;
+static inline int EscAdv(const char* s, f32 h, double& adv) {
+    if (*s == '\\') {
+        for (int i = 0; i < lbl_80497F14.count; i++) {
+            const char* name = lbl_80497F14.data[i].name;
+            if (strncasecmp(s + 1, name, strlen(name)) == 0) {
+                EscSeq* e = &lbl_80497F14.data[i];
+                if (e->art) {
+                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    adv = e->scale * (k * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * k);
+                } else {
+                    adv = h * e->scale;
                 }
+                return strlen(lbl_80497F14.data[i].name) + 1;
             }
         }
-        skip = 0;
-    found:
+    }
+    return 0;
+}
+
+void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+    const char* p = s;
+    strlen(p);
+    while (*p) {
+        double adv = h;
+        int skip = EscAdv(p, h, adv);
         if (skip > 0) {
             p += skip;
-            x += adv;
+            x += (f32)adv;
             continue;
         }
         const char* next;
