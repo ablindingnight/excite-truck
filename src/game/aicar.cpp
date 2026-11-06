@@ -990,9 +990,13 @@ void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
     out->z = a->z + t * (b->z - a->z);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_80194B60(f32 t, f32 a, f32 b) {
+f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
     f32 s;
+    f32 m = (f32)fmod(x, p);
+    if (m > p / 2.0f) {
+        m = p - m;
+    }
+    f32 t = m / (p / 2.0f);
     if (t < -1.0f) {
         s = -1.0f;
     } else if (t > 1.0f) {
@@ -1003,15 +1007,6 @@ static inline f32 Loop2_fn_80194B60(f32 t, f32 a, f32 b) {
         s = -2.0f * t * t * t - 3.0f * t * t;
     }
     return a + s * (b - a);
-}
-
-f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
-    f32 m = (f32)fmod(x, p);
-    if (m > p / 2.0f) {
-        m = p - m;
-    }
-    f32 t = m / (p / 2.0f);
-    return Loop2_fn_80194B60(t, a, b);
 }
 
 // Another racer, as seen through its controller (fn_801B2EC0).
@@ -2067,11 +2062,11 @@ struct Hit {
     s32 id;
 };
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop3_fn_8019703C(const u8* p, const u8* d) {
+int fn_8019703C(const u8* d, const u8* p) {
+    f32 x;
     int any = 0;
     f32 z = F32(p, 0x8);
-    f32 x = F32(p, 0x4);
+    x = F32(p, 0x4);
     int fast = F32(d, 0x270) > 2.2222223f;
     bool near = (f32)__fabs(x) < lbl_8055A488 + 1.1f * lbl_8055A488;
     if (!(S32(d, 0x2D0) & 1) && fast && near) {
@@ -2104,10 +2099,6 @@ static inline int Loop3_fn_8019703C(const u8* p, const u8* d) {
         S32(d, 0x98)++;
     }
     return 0;
-}
-
-int fn_8019703C(const u8* d, const u8* p) {
-    return Loop3_fn_8019703C(p, d);
 }
 
 void fn_801971AC(u8* d, V2* io) {

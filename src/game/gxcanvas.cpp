@@ -791,44 +791,10 @@ void fn_802C4C80(gxStamp* st) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802C4C90(int colEnd, u8* run, int colStart, u16* d, u16* lut) {
-    int col = 0;
-    while (col < colEnd) {
-        int opaque;
-        int n = *run++;
-        if (n & 0x80) {
-            n &= ~0x80;
-            opaque = 1;
-        } else {
-            opaque = 0;
-        }
-        if (colEnd - col < n) {
-            n = colEnd - col;
-        }
-        if (opaque && col < colStart) {
-            int skip = colStart - col;
-            if (n < skip) {
-                skip = n;
-            }
-            n -= skip;
-            run += skip;
-            d += skip;
-            col += skip;
-        }
-        if (opaque) {
-            for (u8 k = n; k != 0; k--) {
-                *d++ = lut[*run++];
-                col++;
-            }
-        } else {
-            col += n;
-            d += n;
-        }
-    }
-}
-
 void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
+    int skip;
+    int n;
+    int opaque;
     gxCanvas* c = lbl_8055FC00;
     if (c->flags & 4) {
         return;
@@ -860,7 +826,38 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
     for (; row < rowEnd; row++) {
         u8* run = st->rows[st->h * frame + row];
         u16* d = fn_802C3044(lbl_8055FC00, ox, row + oy);
-        Loop1_fn_802C4C90(colEnd, run, colStart, d, lut);
+    int col = 0;
+    while (col < colEnd) {
+        n = *run++;
+        if (n & 0x80) {
+            n &= ~0x80;
+            opaque = 1;
+        } else {
+            opaque = 0;
+        }
+        if (colEnd - col < n) {
+            n = colEnd - col;
+        }
+        if (opaque && col < colStart) {
+            skip = colStart - col;
+            if (n < skip) {
+                skip = n;
+            }
+            n -= skip;
+            run += skip;
+            d += skip;
+            col += skip;
+        }
+        if (opaque) {
+            for (u8 k = n; k != 0; k--) {
+                *d++ = lut[*run++];
+                col++;
+            }
+        } else {
+            col += n;
+            d += n;
+        }
+    }
     }
 }
 
