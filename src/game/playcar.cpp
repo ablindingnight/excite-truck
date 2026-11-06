@@ -1603,7 +1603,8 @@ f32 fn_80192D98(u8* p) {
 int fn_80192E20(u8* p) { return PF(PTR(p, 0x8))->b0 != 0; }
 
 f32 fn_80192E3C(u8* p) {
-    f32 t = CMIN(kOne, ((f32)LoNibble8(PTR(p, 0x8) + 0x6) - kZero) / k255);
+    u8 b = *(PTR(p, 0x8) + 0x6);
+    f32 t = CMIN(kOne, ((f32)(u8)(((b << 4) & 0xF0) | (b & 0xF)) - kZero) / k255);
     t = CMAX(t, kZero);
     return kZero + t * kOne;
 }
