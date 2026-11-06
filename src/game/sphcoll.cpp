@@ -3534,6 +3534,18 @@ static inline f32 BoxRad(u8* o) { return F32(o, 0x30); }
 
 
 void fn_801A26FC(u8* p, u8* o) {
+    // Reads the box half extents z first. The helper and its name are reconstructed from the load order.
+    struct HalfExtents {
+        static RVec3C Read(u8* shape) {
+            f32 x;
+            f32 y;
+            f32 z;
+            z = F32(shape, 0x2C);
+            y = F32(shape, 0x28);
+            x = F32(shape, 0x24);
+            return RVec3C(x, y, z);
+        }
+    };
     if (S32(o, 0x18) == 'GRUP') {
         f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)PTR(o, 0xC))->t);
         f32 r = F32(p, 0x24) + VE(o)->v3C();
@@ -3561,7 +3573,7 @@ void fn_801A26FC(u8* p, u8* o) {
             Shift(&x, &c);
             RVec3 at;
             RVec3 push;
-            fn_801C28A8(S32(p, 0x30), &x, &RVec3C(F32(box, 0x24), F32(box, 0x28), F32(box, 0x2C)), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
+            fn_801C28A8(S32(p, 0x30), &x, &HalfExtents::Read(box), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
                 fn_801B34DC(o, 0, &at, &push, &RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0).x, U32(p, 0x20));
             }
@@ -3583,7 +3595,7 @@ void fn_801A26FC(u8* p, u8* o) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
-            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &RVec3C(F32(o, 0x24), F32(o, 0x28), F32(o, 0x2C)), &vel, &spin, 0, -1, 0, 0);
+            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
         }
     } else if (S32(o, 0x18) == 'POLY') {
         s32 n = 0;
