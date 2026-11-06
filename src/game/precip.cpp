@@ -1038,6 +1038,7 @@ void RainSystem::Fill(void) {
     }
 }
 
+static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void RainSystem::Spawn(void) {
     f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
@@ -1063,7 +1064,7 @@ void RainSystem::Spawn(void) {
     } else {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
-            f32 z = near + (far - near) * (r + -(r * r - r) * vel.z);
+            f32 z = LerpF(r + -vel.z * (r * r - r), near, far);
             f32 a = fn_80287BC8(-z, z);
             f32 b = fn_80287BC8(-z, z);
             PVec p;
