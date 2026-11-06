@@ -194,6 +194,7 @@ public:
 class WaterEnvMap : public EnvBase {
 public:
     void Loop1_Render(f32 h, Frame& m);
+    void RenderBody(void* cam, f32 fov);
 public:
     WaterEnvMap(void);
     virtual ~WaterEnvMap(void);
@@ -573,11 +574,12 @@ extern "C" void fn_802BFE48(Skybox* s, const Frame* view, f32 scale);
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
+    int i;
     f32 hf = h;
     Skybox* k = sky;
     fn_802C00A0(&hf);
     Perspective ps(0.1f, 2.0f, hf);
-    for (int i = 0; i < 6; i++) {
+    for (i = 0; i < 6; i++) {
         Frame f;
         fn_80144DC8(&f);
         fn_802C0054((Mat3*)&f, (const Mat3*)&k->frames[i]);
@@ -589,9 +591,8 @@ inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
     fn_802BFE48(k, &m, 1.0f);
 }
 
-void WaterEnvMap::Render(void* cam, f32 fov) {
+inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     scale = (fn_801E85A4() == 2) ? 1.5f : 1.0f;
-    Frame m;
     int i;
     Skybox* s = sky;
     if (!s->drawn) {
@@ -615,6 +616,8 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     fn_802CB274(target);
     fn_802C9294(target, 1);
     PVec up;
+    Frame save;
+    Frame m;
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
@@ -623,7 +626,6 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     Viewport vp;
     Perspective p(1.0f, 3000.0f, h);
     fn_802C86F0(&vp, 0, 0, 0x100, 0x100);
-    Frame save;
     fn_802C8B08(&save);
     fn_802C8638(&m);
     fn_802C88BC(2);
@@ -641,6 +643,8 @@ void WaterEnvMap::Render(void* cam, f32 fov) {
     fn_802C8638(&save);
     fn_802C8750(&vp, -1);
 }
+
+void WaterEnvMap::Render(void* cam, f32 fov) { RenderBody(cam, fov); }
 
 extern "C" {
 
