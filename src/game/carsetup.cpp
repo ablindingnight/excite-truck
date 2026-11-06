@@ -45,10 +45,13 @@ struct WheelSetup {
 };
 
 static inline void WheelDefaults(WheelSetup* w, int front) {
+    f32 reb;
+    f32 bmp = 1896.7213f;
+    reb = 6127.868f;
     w->rideHeight = 0.127f;
     w->spring = front ? 70078.734f : 43799.215f;
-    w->bump = 1896.7213f;
-    w->rebound = 6127.868f;
+    w->bump = bmp;
+    w->rebound = reb;
     w->bumpstopHeight = 0.2794f;
     w->bumpstopRate = 105118.11f;
     w->unk1C = 350393.72f;
