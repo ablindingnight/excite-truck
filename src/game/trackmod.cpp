@@ -493,11 +493,14 @@ u8* fn_801F1CE8(TObj* o) { return (u8*)&o->d2C; }
 
 // Whether the data's normal faces away from the camera.
 int fn_801F1CF0(u8* d) {
-    TVec v;
+    PVec v;
     TCam* cam = fn_802C86DC();
-    v.x = ((f32*)d)[9] - cam->pos[0];
-    v.y = ((f32*)d)[10] - cam->pos[1];
-    v.z = ((f32*)d)[11] - cam->pos[2];
+    f32 x = ((f32*)d)[9];
+    f32 y = ((f32*)d)[10];
+    f32 z = ((f32*)d)[11];
+    v.x = x - cam->pos[0];
+    v.y = y - cam->pos[1];
+    v.z = z - cam->pos[2];
     return PSVECDotProduct(&v, d + 0x18) < 0.0f;
 }
 
