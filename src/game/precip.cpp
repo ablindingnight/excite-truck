@@ -39,9 +39,11 @@ struct WPt {
 
 // Axes (rows) and the origin.
 struct WFrame {
-    ValVec3 x;    // offset 0x0
-    ValVec3 y;    // offset 0xC
-    ValVec3 z;    // offset 0x18
+    struct {
+        ValVec3 x;    // offset 0x0
+        ValVec3 y;    // offset 0xC
+        ValVec3 z;    // offset 0x18
+    };
     ValVec3 pos;  // offset 0x24
 };
 
@@ -314,6 +316,16 @@ static inline void MulT(const WFrame* m, const ValVec3* v, ValVec3* out) {
         out->y = Dot3(v->x, m->y.x, v->y, m->y.y, v->z, m->y.z);
         out->z = Dot3(v->x, m->z.x, v->y, m->z.y, v->z, m->z.z);
     }
+}
+
+// In place, with no alias test.
+static inline void MulTSelf(const WFrame* m, ValVec3* v) {
+    f32 x = Dot3(v->x, m->x.x, v->y, m->x.y, v->z, m->x.z);
+    f32 y = Dot3(v->x, m->y.x, v->y, m->y.y, v->z, m->y.z);
+    f32 z = Dot3(v->x, m->z.x, v->y, m->z.y, v->z, m->z.z);
+    v->x = x;
+    v->y = y;
+    v->z = z;
 }
 
 // The vector out of the frame's axes.
@@ -706,6 +718,17 @@ void SnowSystem::Reset(void) {
     Fill();
 }
 
+// Helper names unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
+static inline void Scaled(ValVec3* o, const ValVec3* v, f32 s) {
+    o->x = v->x * s;
+    o->y = v->y * s;
+    o->z = v->z * s;
+}
+static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
+    o->x += v->x * s;
+    o->y += v->y * s;
+    o->z += v->z * s;
+}
 void SnowSystem::Update(void) {
     WFrame cam;
     cam = *fn_801E8718(view);
@@ -715,19 +738,14 @@ void SnowSystem::Update(void) {
     g.y = -1.0f;
     g.z = 0.0f;
     MulT(&cam, &g, &grav);
-    vel.x = grav.x * 0.05f;
-    vel.y = grav.y * 0.05f;
-    vel.z = grav.z * 0.05f;
+    Scaled(&vel, &grav, 0.05f);
     if (!fn_801E8758(view)) {
         ValVec3 d;
         d.x = lastPos.x - cam.pos.x;
         d.y = lastPos.y - cam.pos.y;
         d.z = lastPos.z - cam.pos.z;
-        MulT(&cam, &d, &d);
-        f32 xv = d.x;
-        vel.x = vel.x + xv * 0.2f;
-        vel.y = vel.y + d.y * 0.2f;
-        vel.z = vel.z + d.z * 0.2f;
+        MulTSelf(&cam, &d);
+        AddScaled(&vel, &d, 0.2f);
         PVec c;
         PSVECCrossProduct(&cam.z, &lastDir, &c);
         Move(PSVECDotProduct(&cam.y, &c), &cam, (const PVec*)&d);
@@ -909,7 +927,7 @@ void RainSystem::Update(void) {
         d.x = lastPos.x - cam->pos.x;
         d.y = lastPos.y - cam->pos.y;
         d.z = lastPos.z - cam->pos.z;
-        MulT(cam, &d, &d);
+        MulTSelf(cam, &d);
         vel.x = dir.x + d.x * -1.5f;
         vel.y = dir.y + d.y * -1.5f;
         vel.z = dir.z + d.z * -1.5f;
