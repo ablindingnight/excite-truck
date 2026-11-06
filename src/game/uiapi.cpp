@@ -15,7 +15,7 @@ extern "C" s32 fn_80214934(const void *, s32, void *, s32);
 extern "C" s32 fn_80029004(const char *, s32);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" char lbl_8055B808[];
+extern "C" char lbl_8055B808[8];
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 extern "C" void fn_8021481C(const char*);
@@ -78,7 +78,7 @@ extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
 s32 fn_80211678(u8* arg0);
-extern "C" char lbl_8055B750[];
+extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *memcpy(void *, const void *, unsigned long);
@@ -533,7 +533,7 @@ extern "C" float fn_80212248(s32 arg0) {
 
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
-extern "C" char lbl_8055B750[];
+extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *fn_8021227C(void *arg0, char *arg1, s32 arg2) {
@@ -2005,7 +2005,7 @@ extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
 extern "C" s32 fn_80029004(const char *, s32);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" char lbl_8055B808[];
+extern "C" char lbl_8055B808[8];
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 extern "C" void fn_80215618(void *arg0, s32 arg1, s32 arg2, s32 arg3) {

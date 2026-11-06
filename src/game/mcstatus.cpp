@@ -367,7 +367,7 @@ extern void* lbl_80343148[];
 extern UnkStatic123s lbl_80498890;
 extern "C" void fn_80216CA8(void);
 extern const MenuDesc lbl_802FA364;
-extern const char lbl_8055BAC0[];  // ""
+extern const char lbl_8055BAC0[8];  // ""
 extern "C" void fn_80246210(void);
 
 // Runs a memory card choice dialog (up to four options) on the layout, or on the plain background.
