@@ -2639,8 +2639,6 @@ void fn_8016A68C(void);
 }
 
 inline BetaMaster::~BetaMaster(void) {
-    int i;
-    int i2;
     fn_802328D4(lbl_8055E250);
     lbl_8055E250 = 0;
     delete lbl_8055E238;
@@ -2653,7 +2651,7 @@ inline BetaMaster::~BetaMaster(void) {
     lbl_8055E244 = 0;
     delete lbl_8055E248;
     lbl_8055E248 = 0;
-    for (i = 0; i < nCars; i++) {
+    for (int i = 0; i < nCars; i++) {
         delete cars[i].meterObj;
         if (cars[i].starSnd) {
             delete cars[i].starSnd;
@@ -2668,16 +2666,16 @@ inline BetaMaster::~BetaMaster(void) {
         delete cars[i].hud;
         cars[i].hud = 0;
     }
-    for (i = 0; i < stars.a.count; i++) {
+    for (int i = 0; i < stars.a.count; i++) {
         delete stars.a.data[i];
     }
-    for (i = 0; i < puddles.a.count; i++) {
+    for (int i = 0; i < puddles.a.count; i++) {
         delete puddles.a.data[i];
     }
-    for (i2 = 0; i2 < bumps.a.count; i2++) {
-        delete bumps.a.data[i2];
+    for (int i = 0; i < bumps.a.count; i++) {
+        delete bumps.a.data[i];
     }
-    for (i = 0; i < bumps2.a.count; i++) {
+    for (int i = 0; i < bumps2.a.count; i++) {
         delete bumps2.a.data[i];
     }
     if (preraceSnd) {
