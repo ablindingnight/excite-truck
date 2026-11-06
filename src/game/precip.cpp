@@ -921,23 +921,27 @@ void RainSystem::Reset(void) {
     Fill();
 }
 
+// Helper name unproven.
+static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
+    o->x = a->x + b->x * s;
+    o->y = a->y + b->y * s;
+    o->z = a->z + b->z * s;
+}
 void RainSystem::Update(void) {
     const WFrame* cam = fn_801E8718(view);
     Frustum();
+    ValVec3 d;
     ValVec3 g;
     g.x = 0.0f;
     g.y = 1.0f;
     g.z = 0.0f;
     MulT(cam, &g, &dir);
     if (!fn_801E8758(view)) {
-        ValVec3 d;
         d.x = lastPos.x - cam->pos.x;
         d.y = lastPos.y - cam->pos.y;
         d.z = lastPos.z - cam->pos.z;
         MulTSelf(cam, &d);
-        vel.x = dir.x + d.x * -1.5f;
-        vel.y = dir.y + d.y * -1.5f;
-        vel.z = dir.z + d.z * -1.5f;
+        MadV(&vel, &dir, &d, -1.5f);
         f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct(&vel, &vel));
         vel.x = vel.x * (0.25f * inv);
         vel.y = vel.y * (0.25f * inv);
