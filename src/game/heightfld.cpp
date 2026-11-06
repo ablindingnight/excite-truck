@@ -388,41 +388,50 @@ GroundHeader* fn_801DC9B0(void) {
 
 void fn_801DCA5C(void* p) { fn_8012C4D8(p); }
 
+static inline f32 Unit(f32 t) {
+    t = 1.0f < t ? 1.0f : t;
+    return t > 0.0f ? t : 0.0f;
+}
+static inline f32 LerpK(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
+static inline f32 SqI(int a) { return (f32)a * (f32)a; }
+
 GroundHeader* fn_801DCA60(void) {
     lbl_80446F08.h = 256;
     lbl_80446F08.w = 256;
-    int z;
+    int w;
     GroundHeader* g = (GroundHeader*)operator new(sizeof(GroundHeader), "fake-GroundHeader");
     memset(g, 0, sizeof(GroundHeader));
-    f32 tile = 1024.0f;
-    f32 size = tile * 2.0f;
+    int z;
+    f32 size = 1024.0f;
+    size *= 2.0f;
     g->offZ = g->offX = size / 2.0f;
-    g->scaleZ = g->scaleX = lbl_80446F08.w / size;
+    g->scaleX = g->scaleZ = lbl_80446F08.w / size;
     lbl_80446F08.data = new ("heightfield") f32[lbl_80446F08.w * lbl_80446F08.h];
     for (z = 0; z < lbl_80446F08.w; z++) {
         int dz = z - 128;
         for (int x = 0; x < lbl_80446F08.h; x++) {
             int dx = x - 128;
+            struct { f32 v; } h;
+            h.v = 0.0f;
             f32 k = 1.0f;
-            f32 r2 = (f32)dz * (f32)dz + (f32)dx * (f32)dx;
+            f32 r2 = SqI(dz) + SqI(dx);
             if (r2 > 1314.0625f && r2 < 2025.0f) {
                 f32 r = sqrt(r2);
                 if (r > 40.625f) {
                     r = 40.625f - (r - 40.625f);
                 }
-                r = (r - 36.25f) / 1.875f;
-                r = 1.0f < r ? 1.0f : r;
-                r = r > 0.0f ? r : 0.0f;
-                k = 1.0f + r * -0.19999999f;
+                k = LerpK(Unit((r - 36.25f) / 1.875f), 1.0f, 0.8f);
             }
-            f32 h = 0.0f;
+
             f32 a = 15.0f;
-            for (int n = lbl_80446F08.w / 2; n > 16; n /= 2) {
-                h = h + a * (1.0f + (f32)sin(6.2831855f * ((f32)(z * 2) / n)));
-                h = h + a * (1.0f + (f32)cos(6.2831855f * ((f32)(x * 2) / n)));
+            w = lbl_80446F08.w;
+            for (int n = w / 2; n > 16; n /= 2) {
+                h.v = h.v + a * (1.0f + (f32)sin(6.2831855f * ((f32)(z * 2) / n)));
+                h.v = h.v + a * (1.0f + (f32)cos(6.2831855f * ((f32)(x * 2) / n)));
                 a = a * (0.6f * k);
             }
-            lbl_80446F08.data[x * lbl_80446F08.w + z] = h;
+            lbl_80446F08.data[w * x + z] = h.v;
         }
     }
     return g;
