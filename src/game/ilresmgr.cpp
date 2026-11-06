@@ -244,9 +244,10 @@ class LineSet : public LineSource {
 public:
     LineSet(ValueNode* set, LineSource* center) { InitSet(this, set, center); }
     virtual ~LineSet(void) {
+        int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
         int i;
-        for (i = 0; i < lines.a.count; i++) {
-            fn_80138AD8(&lines.a.data[i].line);
+        for (i = 0, off = 0; i < lines.a.count; off += sizeof(lines.a.data[0]), i++) {
+            fn_80138AD8(&((LineEntry*)((u8*)lines.a.data + off))->line);
         }
         lines.a.count = 0;
         for (i = 0; i < regions.a.count; i++) {
