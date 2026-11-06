@@ -126,12 +126,12 @@ void fn_802C2488(void) {
         ang.z = roll;
         fn_80015A20(&rot, &ang);
         Mat3Mul((Mat3*)&m, (const Mat3*)&rot, (const Mat3*)&m);
-        off.x = 0.0f;
         m.origin.x += b.pos.x;
-        off.y = 0.5f + 0.6f * bob;
-        off.z = 0.0f;
         m.origin.y += b.pos.y;
         m.origin.z += b.pos.z;
+        off.x = 0.0f;
+        off.y = 0.5f + 0.6f * bob;
+        off.z = 0.0f;
         m.origin.x += off.x;
         m.origin.y += off.y;
         m.origin.z += off.z;
