@@ -415,7 +415,9 @@ static inline void RotToQuat(const Mat3* r, IQuat* q) {
         q->y = (m[2][0] - m[0][2]) * s;
         q->z = (m[0][1] - m[1][0]) * s;
     } else {
-        FrameToQuatAxis((f32(*)[3])m, q);
+        // MATCHING-AID: one-use copy of q; it ranks the register above m. The real form is unknown.
+        IQuat* p = q;
+        FrameToQuatAxis((f32(*)[3])m, p);
     }
 }
 
