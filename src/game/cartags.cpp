@@ -93,6 +93,13 @@ void fn_802A7C68(void) {
     }
 }
 
+// Helper name unproven.
+static inline f32 Ramp(f32 v, f32 x0, f32 x1, f32 y0, f32 y1) {
+    f32 a = (v - x0) / (x1 - x0);
+    a = MIN(1.0f, a);
+    a = MAX(a, 0.0f);
+    return y0 + a * (y1 - y0);
+}
 void fn_802A7CA8(int car, int gem, f32 t) {
     TagObj* o = fn_801EA9A0(car)->obj;
     ValVec3 p = o->pos;
@@ -102,14 +109,8 @@ void fn_802A7CA8(int car, int gem, f32 t) {
     f32 size;
     p.y += 2.5f;
     fn_802C8E70(&p, &scr);
-    a = (t - 1.0f) / -1.0f;
-    a = MIN(1.0f, a);
-    a = MAX(a, 0.0f);
-    color = (int)(255.0f * (1.0f + a * -1.0f)) << 24 | 0xFFFFFF;
-    a = (t - 1.0f) / -1.0f;
-    a = MIN(1.0f, a);
-    a = MAX(a, 0.0f);
-    size = 24.0f + a * -10.0f;
+    color = (int)(255.0f * Ramp(t, 1.0f, 0.0f, 1.0f, 0.0f)) << 24 | 0xFFFFFF;
+    size = Ramp(t, 1.0f, 0.0f, 24.0f, 14.0f);
     if (fn_802C8FF4(&scr, 0.0f)) {
         fn_80235CBC(lbl_8055F8C0, gem, color, scr.x - 0.5f * size, scr.y - 0.5f * size, 0.0f, size, size);
     }

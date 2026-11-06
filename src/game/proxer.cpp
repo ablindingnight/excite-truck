@@ -479,11 +479,13 @@ void Pair::UpdateDist(void) { dist2 = Len2(dpos.x, dpos.y); }
 
 extern "C" {
 
+// MATCHING-AID: the scale copied to a local fixes the register order; exact in both callers, real form unproven.
 static inline void ScaleV(V2* o, const V2& v, f32 s) {
     f32 x = v.x;
+    f32 k = s;
     f32 y = v.y;
-    o->x = x * s;
-    o->y = y * s;
+    o->x = x * k;
+    o->y = y * k;
 }
 static inline void CopyV(V2* o, const V2& v) {
     f32 x = v.x;
