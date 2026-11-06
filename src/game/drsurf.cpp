@@ -1096,13 +1096,16 @@ void fn_802D6860(void) {
     fn_802E30C8("total ymorph verts = %d", lbl_8055FE00);
 }
 
+struct ColPos {
+    f32 x, y, z;
+};
 struct ColVtx {
-    f32 x, y, z;  // offset 0x0
+    ColPos pos;  // offset 0x0
     u32 color;    // offset 0xC
     f32 u, v;     // offset 0x10
 };
 
-void fn_802D68C4(const ColVtx* verts, int unused, u16* idx, int n) {
+void fn_802D68C4(ColVtx* __restrict verts, int unused, u16* __restrict idx, int n) {
     lbl_8055FD25 = 0;
     lbl_804C5700.b9 = 0;
     lbl_804C5700.mode = 0;
@@ -1116,12 +1119,18 @@ void fn_802D68C4(const ColVtx* verts, int unused, u16* idx, int n) {
     GXSetVtxAttrFmt(0, 0xB, 1, 5, 0);
     GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
     GXBegin(0x90, 0, n);
-    for (; n > 0; n--) {
+    for (int i = 0; i < n; i++) {
         ColVtx v;
-        v = verts[*idx++];
-        WGPIPE.f = v.x;
-        WGPIPE.f = v.y;
-        WGPIPE.f = v.z;
+        f32 x;
+        f32 y;
+        f32 z;
+        v = verts[idx[i]];
+        x = v.pos.x;
+        y = v.pos.y;
+        z = v.pos.z;
+        WGPIPE.f = x;
+        WGPIPE.f = y;
+        WGPIPE.f = z;
         WGPIPE.u = (v.color << 8) | (v.color >> 24);
         WGPIPE.f = v.u;
         WGPIPE.f = v.v;
