@@ -351,10 +351,9 @@ void fn_8020C920(const char* track) {
     fn_8012DDA8(lbl_80489C50);
     fn_8012DDA8(lbl_8055B5D0);
     fn_8012DDA8(lbl_8055B5D4);
-    // A one-pass loop over the alternate track mixes (only the first is used).
-    for (alt = 0; alt < 1; alt++) {
-        t = lbl_80489BE0;
-        for (i = 0; i < 3; i++, t++) {
+    t = lbl_80489BE0;
+    for (i = 0; i < 3; i++, t++) {
+        for (alt = 0; alt < 1; alt++) {
             switch (i) {
             case 0:
                 fn_801345D8(t->name, 0x20, "mus_%s%s.sfx", name, alt == 1 ? ".2" : "");
