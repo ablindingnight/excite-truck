@@ -1312,9 +1312,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                             fn_80253004(i, &p);
                         } else {
                             fn_802545C4(&p, bg, model);
-                            t.x = p.frame.b.v[2].x * -13.333333f;
-                            t.y = p.frame.b.v[2].y * -13.333333f;
-                            t.z = p.frame.b.v[2].z * -13.333333f;
+                            Scale(&t, &p.frame.b.v[2], -13.333333f);
                         }
                         off = t;
                     }
