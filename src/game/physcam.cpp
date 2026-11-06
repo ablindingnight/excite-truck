@@ -902,6 +902,9 @@ static inline double AbsD(double v) { return __fabs(v); }
 
 // Finds where the looping path `track` crosses the circle of squared radius `r2` around `c`, between
 // path positions a and b (b may have wrapped past the loop end), by bisection.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+static inline f32 Half(f32 v) { return v * lbl_80563F40; }
+
 f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     PathPos pa;
     PathPos pb;
@@ -922,9 +925,8 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
         }
     }
     fn_80136468(&pa, track, a);
-    f32 paT = pa.t;
-    qa.x = F32(pa.seg, 0x0) + paT * (F32(PTR(pa.seg, 0x14), 0x0) - F32(pa.seg, 0x0));
-    qa.y = F32(pa.seg, 0x4) + pa.t * (F32(PTR(pa.seg, 0x14), 0x4) - F32(pa.seg, 0x4));
+    qa.x = LerpT(pa.t, F32(pa.seg, 0x0), F32(PTR(pa.seg, 0x14), 0x0));
+    qa.y = LerpT(pa.t, F32(pa.seg, 0x4), F32(PTR(pa.seg, 0x14), 0x4));
     da.y = qa.y - c[1];
     da.x = qa.x - c[0];
     f32 ea = (f32)AbsD(r2 - (da.x * da.x + da.y * da.y));
@@ -932,9 +934,8 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
         return a;
     }
     fn_80136468(&pb, track, b);
-    f32 pbT = pb.t;
-    qb.x = F32(pb.seg, 0x0) + pbT * (F32(PTR(pb.seg, 0x14), 0x0) - F32(pb.seg, 0x0));
-    qb.y = F32(pb.seg, 0x4) + pb.t * (F32(PTR(pb.seg, 0x14), 0x4) - F32(pb.seg, 0x4));
+    qb.x = LerpT(pb.t, F32(pb.seg, 0x0), F32(PTR(pb.seg, 0x14), 0x0));
+    qb.y = LerpT(pb.t, F32(pb.seg, 0x4), F32(PTR(pb.seg, 0x14), 0x4));
     db.y = qb.y - c[1];
     db.x = qb.x - c[0];
     f32 eb = (f32)AbsD(r2 - (db.x * db.x + db.y * db.y));
@@ -943,12 +944,12 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     }
     f32 mid;
     if (a > b) {
-        mid = (b + (a - wrap)) * lbl_80563F40;
+        mid = Half(b + (a - wrap));
         if (mid < lbl_80563F48) {
             mid += wrap;
         }
     } else {
-        mid = (a + b) * lbl_80563F40;
+        mid = Half(a + b);
     }
     if (ea < eb) {
         return fn_80272428(track, c, a, mid, r2);
