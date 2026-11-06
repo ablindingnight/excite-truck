@@ -214,7 +214,7 @@ int fn_801DA064(PathFollower* p, const char* name) {
     int n = f->count;
     Path* paths = f->paths;
     for (int i = 0; i < n; i++) {
-        if (strcmp(paths[i].name, name) == 0) {
+        if (strcmp((char*)paths + i * (int)sizeof(Path), name) == 0) {  // signed stride: a plain paths[i] walks a pointer instead of an offset
             p->path = &paths[i];
             return 1;
         }
