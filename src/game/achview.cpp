@@ -122,8 +122,8 @@ AchCategoryRef lbl_80344EA0[7] = {
 };
 
 void* operator new(unsigned long n, const char* tag);
-extern const char lbl_8055BAB8[];  // ""
-extern const char lbl_8055B860[];  // ""
+extern const char lbl_8055BAB8[4];  // ""
+extern const char lbl_8055B860[8];  // ""
 s32 AchievementsGetLevelThreshold(int category, int level);
 extern "C" {
 u8* fn_802CAC28(const char* name, int a);
