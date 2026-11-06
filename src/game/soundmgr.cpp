@@ -348,8 +348,8 @@ void SoundManager::Allocate(void) {
             }
         }
     } while (!done && avail > 0);
-    SoundList* l = classes;
-    for (int c = 0; c < 9; c++, l++) {
+    for (int c = 0; c < 9; c++) {
+        SoundList* l = &classes[c];
         int n = l->count;
         for (k = 0; k < n; k++) {
             GameSound* s = l->first[k];
