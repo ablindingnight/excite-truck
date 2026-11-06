@@ -358,9 +358,39 @@ void IntValue::GetPtr(void** p, int* size) {
     *size = 4;
 }
 
-void IntValue::Inc(void) { *value = ClampI(*value + 1, min, max); }
+void IntValue::Inc(void) {
+    int cur;
+    int hi;
+    s32* p;
+    int v;
+    int lo;
+    p = value;
+    hi = max;
+    cur = *p;
+    v = hi < cur + 1 ? hi : cur + 1;
+    lo = min;
+    if (v > lo) {
+        lo = v;
+    }
+    *p = lo;
+}
 
-void IntValue::Dec(void) { *value = ClampI(*value - 1, min, max); }
+void IntValue::Dec(void) {
+    int cur;
+    int hi;
+    s32* p;
+    int v;
+    int lo;
+    p = value;
+    hi = max;
+    cur = *p;
+    v = hi < cur - 1 ? hi : cur - 1;
+    lo = min;
+    if (v > lo) {
+        lo = v;
+    }
+    *p = lo;
+}
 
 int IntValue::CanInc(void) { return max != *value; }
 
