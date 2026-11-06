@@ -267,19 +267,18 @@ extern "C" void fn_8020FCC4(void) {
 
 extern char *strncpy(char *, const char *, unsigned long);
 void fn_8020FDE4(long arg0, const char *label, const char *name) {
+    int left;
     long *e = (long *)fn_8020FAF0(name);
     char *dest;
     memset(e, 0, 4);
     e[0] = arg0;
     strncpy((char *)e + 0x24, label, 0x3F);
     dest = (char *)e + 4;
-    {
-        int left = 0x20;
-        while ((*dest++ = *name++) != 0) {
-            if (--left <= 0) {
-                dest[-1] = 0;
-                break;
-            }
+    left = 0x20;
+    while ((*dest++ = *name++) != 0) {
+        if (--left <= 0) {
+            dest[-1] = 0;
+            break;
         }
     }
 }
