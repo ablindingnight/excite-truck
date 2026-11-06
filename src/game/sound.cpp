@@ -593,10 +593,13 @@ SoundDash::SoundDash(const char* name, int cls, s32 player, int on) : Sound2D(na
     fn_80206750(this, player, on);
 }
 
-void SoundDash::PreUpdate(Listener* l, int n) {
+void SoundDash::PreUpdate(Listener* __restrict l, int n) {
     heard = false;
-    for (int i = 0; i < n; i++) {
-        heard = heard | (l[i].id == player);
+    int i = 0;
+    if (n > 0) {
+        for (; i < n; i++) {
+            heard = heard | (l[i].id == player);
+        }
     }
     active = (active & heard) != 0;
 }
