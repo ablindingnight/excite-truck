@@ -772,6 +772,10 @@ void SnowSystem::Update(void) {
     lastDir = cam.z;
 }
 
+static inline int GridYLimit(const s32& height, int edge) {
+    return height < edge ? height : edge;
+}
+
 void SnowSystem::Draw(void) {
     if (count < 1) {
         return;
@@ -793,7 +797,7 @@ void SnowSystem::Draw(void) {
     for (int gx = 0; gx < lbl_8055CFF0 / 64 + 1; gx++) {
         for (int gy = 0; gy < lbl_8055CFF4 / 64 + 1; gy++) {
             int y1 = (gy + 1) * 64;
-            fn_802C9124(gx * 64, gy * 64, lbl_8055CFF0 < ((gx + 1) * 64) ? lbl_8055CFF0 : ((gx + 1) * 64), lbl_8055CFF4 < y1 ? lbl_8055CFF4 : y1,
+            fn_802C9124(gx * 64, gy * 64, lbl_8055CFF0 < ((gx + 1) * 64) ? lbl_8055CFF0 : ((gx + 1) * 64), GridYLimit(lbl_8055CFF4, y1),
                         driftX + (f32)(gx * 7) / 3.0f, driftY + (f32)(gy * 7) / 5.0f, (1.0f + driftX) + (f32)(gx * 7) / 3.0f, (1.0f + driftY) + (f32)(gy * 7) / 5.0f, 0x6EFFFFFF);
         }
     }
