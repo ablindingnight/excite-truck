@@ -927,13 +927,16 @@ static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, void* verts, int n
             continue;
         }
         fn_802D3D94(0, ((Obj*)it)->mtx);
-        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+        Chunk<u16*>* c = it->head;
+        do {
             for (j = 0; j < c->count; j++) {
-                st = c->data[j];
+                u16** d = c->data;
+                st = d[j];
                 fn_802DC280(verts, nverts, st, st[0] + 1);
-                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+                lbl_8055FA6C += Tris(d[j][0] - 1);
             }
-        }
+            c = c->next;
+        } while (c);
         it->Clear();
     }
     return it;
@@ -963,13 +966,16 @@ void fn_802BB0FC(void* verts, int nverts) {
                     }
                     if (it->on) {
                         fn_802D3D94(0, ((Shadow*)it)->mtx);
-                        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+                        Chunk<u16*>* c = it->head;
+                        do {
                             for (j = 0; j < c->count; j++) {
-                                st = c->data[j];
+                                u16** d = c->data;
+                                st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+                                lbl_8055FA6C += Tris(d[j][0] - 1);
                             }
-                        }
+                            c = c->next;
+                        } while (c);
                     }
                     it->Clear();
                 }
@@ -1011,13 +1017,16 @@ static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, void* verts, int n
             continue;
         }
         fn_802D3D94(0, ((Obj*)it)->mtx);
-        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+        Chunk<u16*>* c = it->head;
+        do {
             for (j = 0; j < c->count; j++) {
-                st = c->data[j];
+                u16** d = c->data;
+                st = d[j];
                 fn_802DC280(verts, nverts, st, st[0] + 1);
-                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+                lbl_8055FA6C += Tris(d[j][0] - 1);
             }
-        }
+            c = c->next;
+        } while (c);
         it->Clear();
     }
     return it;
@@ -1048,13 +1057,16 @@ void fn_802BB3B8(void* verts, int nverts) {
                     }
                     if (it->on) {
                         fn_802D3D94(0, ((Shadow*)it)->mtx);
-                        for (Chunk<u16*>* c = it->head; c; c = c->next) {
+                        Chunk<u16*>* c = it->head;
+                        do {
                             for (j = 0; j < c->count; j++) {
-                                st = c->data[j];
+                                u16** d = c->data;
+                                st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                lbl_8055FA6C += Tris(c->data[j][0] - 1);
+                                lbl_8055FA6C += Tris(d[j][0] - 1);
                             }
-                        }
+                            c = c->next;
+                        } while (c);
                     }
                     it->Clear();
                 }
