@@ -268,9 +268,9 @@ SoEvent lbl_80438958[32];
 
 // Starts holding effect 'e' until 't' at world point 'p', kept in the car's frame.
 inline void HeldEffect::Start(s32 e, f32 t, const Vec* p, const Car* car) {
-    active = 1;
     effect = e;
     time = t;
+    active = 1;
     pos.x = p->x - car->origin.x;
     pos.y = p->y - car->origin.y;
     pos.z = p->z - car->origin.z;

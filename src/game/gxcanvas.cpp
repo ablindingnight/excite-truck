@@ -822,8 +822,8 @@ static inline void Loop1_fn_802C4C90(int colEnd, u8* run, int colStart, u16* d, 
                 col++;
             }
         } else {
-            d += n;
             col += n;
+            d += n;
         }
     }
 }

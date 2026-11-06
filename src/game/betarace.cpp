@@ -1600,8 +1600,8 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                     } else {
                         st.w = st.w * sc;
                         st.h = st.h * sc;
-                        st.pos.y = st.pos.y - 0.5f * st.h;
                         st.pos.x = st.pos.x - 0.5f * st.w * n;
+                        st.pos.y = st.pos.y - 0.5f * st.h;
                     }
                 } else {
                     ArtElem* sa = l->FindArt("score_star_art");
