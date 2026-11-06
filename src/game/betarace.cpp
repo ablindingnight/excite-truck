@@ -2332,7 +2332,9 @@ void BetaCar::StopBonus(void) {
 int BetaCar::Results(FinishAnimation* a) {
     stunts->lines.a.count = 0;
     meterObj->Fill(stunts);
-    return a->Update(&result, stunts, master->coins.Count(id));
+    int i = id;
+    Coins* c = &master->coins;  // MATCHING-AID: i and c stand in for the inlined count read, needed for the registers
+    return a->Update(&result, stunts, c->enabled ? c->cars[i].count : 0);
 }
 
 void BetaCar::SetResultsView(FinishAnimation* a) {
