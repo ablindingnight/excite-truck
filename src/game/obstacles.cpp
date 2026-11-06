@@ -1550,18 +1550,19 @@ extern "C" {
 extern const f32 lbl_805624F4;  // 5.0
 extern const f32 lbl_8056249C;  // 0.8
 
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+}
 void fn_801AD5F4(u8* p, ObstacleSink* q) {
     f32 push[3];
     push[0] = F32(p, 0x4) * lbl_805624F4;
     push[1] = F32(p, 0x8) * lbl_805624F4;
     push[2] = F32(p, 0xC) * lbl_805624F4;
     f32 at[3];
-    f32 c2 = F32(p, 0x18) + lbl_8056249C * (F32((u8*)q, 0x68) - F32(p, 0x18));
-    f32 c1 = F32(p, 0x14) + lbl_8056249C * (F32((u8*)q, 0x64) - F32(p, 0x14));
-    f32 c0 = F32(p, 0x10) + lbl_8056249C * (F32((u8*)q, 0x60) - F32(p, 0x10));
-    at[0] = c0;
-    at[1] = c1;
-    at[2] = c2;
+    Set3(at, LerpT(lbl_8056249C, F32(p, 0x10), F32((u8*)q, 0x60)), LerpT(lbl_8056249C, F32(p, 0x14), F32((u8*)q, 0x64)), LerpT(lbl_8056249C, F32(p, 0x18), F32((u8*)q, 0x68)));
 
     q->Hit(push, at, U32(p, 0x1C), U32(p, 0x20));
 }
