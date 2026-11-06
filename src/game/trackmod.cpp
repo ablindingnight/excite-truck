@@ -612,30 +612,38 @@ struct TVtx {
     f32 v;       // offset 0x14
 };
 
+// Which of the 32 facings of the billboard atlas looks at the camera.
+static inline int FaceSeg(TObj* o, f32*& pos, TCam* cam) {
+    TVec dir;
+    int seg;
+    pos = o->pos;
+    fn_801C0E60(&dir, pos, cam->pos);
+    fn_801F3198(&dir);
+    seg = (int)(32.0f * (-fn_801F3174(dir.x, dir.z) / 6.2831855f));
+    if (seg < 0) {
+        seg += 32;
+    }
+    return seg;
+}
+
 void MultiFacingTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TCam* cam = fn_802C86DC();
-        PVec c0;
+        PVec c4;
         PVec c3;
         PVec c2;
         PVec c1;
-        PVec c4;
+        PVec c0;
         TVtx base;
         TMtx m;
         TVtx v[4];
-        TVec dir;
         int seg;
-        f32 u0;
+        f32 v1;
         f32 v0;
         f32 u1;
-        f32 v1;
-        f32* pos = list->pos;
-        fn_801C0E60(&dir, pos, cam->pos);
-        fn_801F3198(&dir);
-        seg = (int)(32.0f * (-fn_801F3174(dir.x, dir.z) / 6.2831855f));
-        if (seg < 0) {
-            seg += 32;
-        }
+        f32 u0;
+        f32* pos;
+        seg = FaceSeg(list, pos, cam);
         u0 = 0.125f * (seg % 8);
         v0 = 0.25f * (seg / 8);
         u1 = 0.125f + u0;
