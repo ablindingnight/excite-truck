@@ -1374,10 +1374,9 @@ struct LightDirs {
     Vec d[3];
 };
 
-static const LightDirs lbl_802FA5B8 = {{{0.7f, -0.7f, 0.0f}, {0.0f, -0.7f, 0.7f}, {-0.7f, -0.7f, 0.0f}}};
 
 void CarUIScreen::DrawLights(void) {
-    LightDirs dirs;
+    LightDirs dirs = {{{0.7f, -0.7f, 0.0f}, {0.0f, -0.7f, 0.7f}, {-0.7f, -0.7f, 0.0f}}};
     Frame f;
     Vec l;
     Vec up;
@@ -1385,7 +1384,6 @@ void CarUIScreen::DrawLights(void) {
     Vec y;
     Vec x;
     int i = 0;
-    dirs = lbl_802FA5B8;
     for (; i < 4u; i++) {
         f = *fn_802C86DC();
         f.b.v[1].y = 1.0f;
