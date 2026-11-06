@@ -582,17 +582,16 @@ extern "C" void fn_8029CD48(WaterCar* car) {
         v.z = car->vel.z + car->axes[0].z * kick;
         up = 5.0f < up ? 5.0f : up;
         ValPoint flat;
-        SetVP(&flat, car->vel.x, car->vel.z);
         MadV3(&v.x, &v.x, &car->axes[1].x, up);
+        SetVP(&flat, car->vel.x, car->vel.z);
         f32 s = SqrtF(flat.x * flat.x + flat.y * flat.y);
         int n = (int)(0.25f * s) < 6 ? (int)(0.25f * s) : 6;
-        f32 spread = 0.125f * s;
         for (int k = 0; k < n; k++) {
             Vec q = p;
             q.x = q.x + fn_80287BC8(-0.5f, 0.5f);
             q.z = q.z + fn_80287BC8(-0.5f, 0.5f);
             q.y = fn_802BF590();
-            f32 a = 2.0f < spread ? 2.0f : spread;
+            f32 a = 2.0f < 0.125f * s ? 2.0f : 0.125f * s;
             Vec w = v;
             w.x = w.x + fn_80287BC8(-a, a);
             w.y = 2.0f * fn_80287BC8(0.0f, a);
