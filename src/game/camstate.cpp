@@ -130,6 +130,17 @@ extern const f32 lbl_80563FE0;
 
 // Chase camera: follows the car's camera mount (the second one when the car is flipped), levels the
 // up vector like fn_802749FC, and adds the car's bounce unless snapping.
+// Helper names unproven: the frame row is a scale then an added scale, as in the target.
+static inline void ScV(f32* o, const f32* a, f32 s) {
+    o[0] = a[0] * s;
+    o[1] = a[1] * s;
+    o[2] = a[2] * s;
+}
+static inline void AddSV(f32* o, const f32* a, f32 s) {
+    o[0] += a[0] * s;
+    o[1] += a[1] * s;
+    o[2] += a[2] * s;
+}
 void fn_80273BD0(u8* p) {
     CamState* c = (CamState*)p;
     Mat3 rot;
@@ -177,9 +188,8 @@ void fn_80273BD0(u8* p) {
     c->up.x = c->up.x + n.x * (lbl_80563FAC - k);
     c->up.y = c->up.y + n.y * (lbl_80563FAC - k);
     c->up.z = c->up.z + n.z * (lbl_80563FAC - k);
-    c->frame.m[3] = c->up.x * lbl_80563FC4 + c->carFrame.m[3] * lbl_80563FC4;
-    c->frame.m[4] = c->up.y * lbl_80563FC4 + c->carFrame.m[4] * lbl_80563FC4;
-    c->frame.m[5] = c->up.z * lbl_80563FC4 + c->carFrame.m[5] * lbl_80563FC4;
+    ScV(&c->frame.m[3], &c->up.x, lbl_80563FC4);
+    AddSV(&c->frame.m[3], &c->carFrame.m[3], lbl_80563FC4);
     PSVECCrossProduct(&c->frame.m[3], &c->frame.m[6], &c->frame.m[0]);
     PSVECCrossProduct(&c->frame.m[0], &c->frame.m[3], &c->frame.m[6]);
     Orthonormalize(p);
@@ -410,9 +420,8 @@ void fn_802749FC(u8* p, const CVec3* move) {
     c->up.x = c->up.x + n.x * (lbl_80563FAC - k);
     c->up.y = c->up.y + n.y * (lbl_80563FAC - k);
     c->up.z = c->up.z + n.z * (lbl_80563FAC - k);
-    c->frame.m[3] = c->up.x * lbl_80563FC4 + c->carFrame.m[3] * lbl_80563FC4;
-    c->frame.m[4] = c->up.y * lbl_80563FC4 + c->carFrame.m[4] * lbl_80563FC4;
-    c->frame.m[5] = c->up.z * lbl_80563FC4 + c->carFrame.m[5] * lbl_80563FC4;
+    ScV(&c->frame.m[3], &c->up.x, lbl_80563FC4);
+    AddSV(&c->frame.m[3], &c->carFrame.m[3], lbl_80563FC4);
     PSVECCrossProduct(&c->frame.m[3], &c->frame.m[6], &c->frame.m[0]);
     PSVECCrossProduct(&c->frame.m[0], &c->frame.m[3], &c->frame.m[6]);
     Orthonormalize(p);
