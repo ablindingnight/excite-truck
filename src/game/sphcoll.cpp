@@ -1817,7 +1817,8 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
 
 // Tube p vs q: the cylinder first, then both end caps as spheres.
 int fn_8019DAB0(u8* p, u8* q) {
-    bool hit = fn_8019D618(p, q, 0, 0);
+    bool hit = false;
+    hit |= fn_8019D618(p, q, 0, 0);
     if (hit) {
         return 1;
     }
@@ -1826,9 +1827,9 @@ int fn_8019DAB0(u8* p, u8* q) {
     PVec3 dir = *(PVec3*)(PTR(p, 0xC) + 0x18);
     PVec3 mid = *(PVec3*)(PTR(p, 0xC) + 0x24);
     f32 h = F32(p, 0x28);
+    f32 r = F32(p, 0x24);
     MulAdd(a.v, mid.v, dir.v, h);
     MulAdd(b.v, mid.v, dir.v, -h);
-    f32 r = F32(p, 0x24);
     hit |= fn_8019B08C(p, a.v, q, r);
     hit |= fn_8019B08C(p, b.v, q, r);
     return hit;
