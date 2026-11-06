@@ -1056,8 +1056,8 @@ void RainSystem::Spawn(void) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
             f32 k = 0.5f - 0.5f * r;
             PVec2 g;
-            g.x = dir.x * k;
             g.y = dir.y * k;
+            g.x = dir.x * k;
             f32 ax = 1.0f - AbsF(g.x);
             f32 ay = 1.0f - AbsF(g.y);
             f32 rx = fn_80287BC8(-ax, ax);

@@ -3025,8 +3025,8 @@ static inline f32 Len2(f32 x, f32 z) { return sqrt(x * x + z * z); }
 void fn_80188E2C(u8* p, u8* buf) {
     SnapPose tmp;
     u8* m = buf + S32(p, 0x8);
-    memset(m, 0, 0xFA8);
     f32 t = lbl_8055E460;
+    memset(m, 0, 0xFA8);
     SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
     if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
         *pose = *(SnapPose*)(p + 0x70);

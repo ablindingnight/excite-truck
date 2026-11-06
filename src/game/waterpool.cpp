@@ -629,8 +629,8 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     origin.z = g->origin.z;
     f32 ix = 1.0f / (nx - 1);
     dxx = g->right.x * ix;
-    f32 iy = 1.0f / (ny - 1);
     dxz = g->right.y * ix;
+    f32 iy = 1.0f / (ny - 1);
     dyx = g->up.x * iy;
     dyz = g->up.y * iy;
     SetV3(&center, g->origin.x + 0.5f * (g->right.x + g->up.x), g->origin.y, g->origin.z + 0.5f * (g->right.y + g->up.y));

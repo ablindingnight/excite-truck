@@ -1231,8 +1231,8 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
             fn_801BFD34(&p.frame.pos, &c->frame.pos, &parent->frame);
             Mat3Mul((Mat3*)&p.frame, (const Mat3*)&c->frame, (const Mat3*)parent);
             p.node = parent->node;
-            p.flags = f;
             c->Create(&p);
+            p.flags = f;
         }
     }
     if (flags & 1) {
