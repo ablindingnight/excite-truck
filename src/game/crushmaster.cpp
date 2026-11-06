@@ -1417,6 +1417,14 @@ static inline void NormV2(V2* d) {
 }
 
 inline void CrushMaster::vfA8(int car) {
+    f32 basisX;
+    f32 zv;
+    f32 xv;
+    f32 t;
+    f32 k;
+    int jump;
+    RaceCarRec* rec;
+    ValVec3* pos;
     if (cars[car].active) {
         Respawn r;
         ValVec3 dst;
@@ -1425,8 +1433,7 @@ inline void CrushMaster::vfA8(int car) {
         V2 to;
         V2 d;
         V2 fwd;
-        ValVec3* pos;
-        RaceCarRec* rec = fn_8017960C(car);
+        rec = fn_8017960C(car);
         fn_8018AF04(rec);
         r.path = -1;
         fn_801E9DC4(&r.path);
@@ -1439,7 +1446,6 @@ inline void CrushMaster::vfA8(int car) {
         at.x = rec->mtx.origin.x;
         at.y = rec->mtx.origin.z;
         if (fn_802B04D4(pos) || !fn_80171E3C(at)) {
-            int jump;
             {
                 V2 np = FindSpot(pos);
                 dst.x = np.x;
@@ -1452,16 +1458,15 @@ inline void CrushMaster::vfA8(int car) {
                 jump = 1;
             }
             if (jump) {
-                f32 k;
-                f32 t = 4.0f;
+                t = 4.0f;
                 k = 1.0f / t;
                 v.x = (dst.x - pos->x) * k;
                 v.y = (dst.y - pos->y) * k + 9.81f * t;
                 v.z = (dst.z - pos->z) * k;
-                f32 xv = rec->mtx.origin.x;
+                xv = rec->mtx.origin.x;
                 r.m.origin.x = xv;
                 r.m.origin.y = rec->mtx.origin.y;
-                f32 zv = rec->mtx.origin.z;
+                zv = rec->mtx.origin.z;
                 r.m.origin.z = zv;
                 r.m.basis[1].x = 0.0f;
                 r.m.basis[1].y = 1.0f;
@@ -1482,7 +1487,7 @@ inline void CrushMaster::vfA8(int car) {
                 NormV2(&d);
                 fn_801B7C8C(&r, &to, &d);
                 r.m.origin.y += 3.0f;
-                f32 basisX = r.m.basis[2].x;
+                basisX = r.m.basis[2].x;
                 r.vel.x = basisX * 8.888889f;
                 r.vel.y = r.m.basis[2].y * 8.888889f;
                 r.vel.z = r.m.basis[2].z * 8.888889f;

@@ -2667,18 +2667,23 @@ inline void ZoneMaster::vf0C(void) {
 #pragma dont_inline reset
 
 inline void ZoneMaster::vf10(void) {
+    CarState* c;
+    void* tr;
+    u32 k;
+    Vec3* p;
+    Gate* g;
+    ZoneLevel* l;
+    int j;
     int lv;
     int i;
     lbl_8055E1BC = 0;
     b294 = 0;
     nextGate = 0;
     for (lv = 0; lv < levels->n; lv++) {
-        ZoneLevel* l = &levels->levels[lv];
-        int j;
+        l = &levels->levels[lv];
         for (j = 0; j < l->n; j++) {
-            Gate* g = &l->gates[j];
-            Vec3* p = &g->a;
-            u32 k;
+            g = &l->gates[j];
+            p = &g->a;
             for (k = 0; k < 2; k++) {
                 fn_801E9E30(&g->h, p);
                 p->y += 0.5f;
@@ -2687,7 +2692,7 @@ inline void ZoneMaster::vf10(void) {
             {
                 Vec3 mid = g->Center();
                 V2 q;
-                void* tr = fn_80178C9C();
+                tr = fn_80178C9C();
                 q.y = mid.z;
                 q.x = mid.x;
                 g->t = fn_80136594(tr, &q).Dist();
@@ -2703,7 +2708,7 @@ inline void ZoneMaster::vf10(void) {
     t8C.start = -999.0f;
     i288 = fn_8013D18C(0);
     for (i = 0; i < nCars; i++) {
-        CarState* c = &cars[i];
+        c = &cars[i];
         memset(c->hits, 0, sizeof(c->hits));
         c->tC0.start = -999.0f;
         c->rating = 1;

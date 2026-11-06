@@ -522,6 +522,8 @@ public:
         Collect();
     }
     virtual void Start(void) {
+        Token* t;
+        int j;
         int i;
         ChallengeBase::Start();
         got = 0;
@@ -532,8 +534,7 @@ public:
         crashed = 0;
         ready = 1;
         for (i = 0; i < tokens.count; i++) {
-            int j;
-            Token* t = &tokens.data[i];
+            t = &tokens.data[i];
             fn_801EA140(t);
             t->pos.y += t->bob;
             if (t->path) {

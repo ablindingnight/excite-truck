@@ -1319,10 +1319,12 @@ int Arena::CountDynos(void) {
 }
 
 void Arena::Spawn(void) {
-    for (int i = 0; i < sets->count; i++) {
-        ObjSet* d = sets->data;
-        int j;
-        ObjInfo* o;
+    ObjInfo* o;
+    int j;
+    ObjSet* d;
+    int i;
+    for (i = 0; i < sets->count; i++) {
+        d = sets->data;
         for (j = 0; j < d[i].infos->count; j++) {
             o = &d[i].infos->data[j];
             if (o->type == 0) {
