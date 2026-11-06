@@ -2983,8 +2983,8 @@ void fn_801A0464(u8* p, u8* q) {
                 c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805623BC;
                 n = 64;
                 fn_801CF080(PTR(q, 0x24), (RVec3*)c.v, hits, &n, U32(q, 0xC), lbl_8056234C);
-                h = hits;
-                for (int k = 0; k < n; h++, k++) {
+                for (int k = 0; k < n; k++) {
+                    h = &hits[k];
                     d.v[0] = c.v[0] - h->x;
                     d.v[1] = c.v[1] - h->y;
                     d.v[2] = c.v[2] - h->z;

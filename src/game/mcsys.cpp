@@ -90,13 +90,13 @@ int fn_802E721C(u32 cookie, u32 version, s32 size);
 int fn_802E6FBC(void);
 
 int MemCardSystemLoad(void) {
-    u8* p;
+    u32 total;
+    int i;
     MemCardHeader* h;
     int ok;
     int failed;
-    int i;
     s32 dataSize;
-    u32 total;
+    u8* p;
     u8 loaded[10];
     total = fn_802E7130();
     dataSize = total - 0x20D0;
@@ -123,17 +123,18 @@ int MemCardSystemLoad(void) {
         if (sum != h->checksum) {
             fn_802E30C8("Memcard: bad checksum (%x != %x)", sum, h->checksum);
         } else {
-            ChunkHeader* ch = h->chunks;
             p = h->data;
             ok = 1;
-            ChunkHeader* c = ch;
-            for (i = 0; i < h->count; c++, i++) {
+            for (i = 0; i < h->count; i++) {
+                ChunkHeader* c = &h->chunks[i];
                 if (fn_802E721C(c->cookie, c->version, c->size) < 0) {
                     ok = 0;
                 }
             }
             if (ok) {
-                for (i = 0; i < h->count; i++, ch++) {
+                int j;
+                for (j = 0; j < h->count; j++) {
+                    ChunkHeader* ch = &h->chunks[j];
                     int idx = fn_802E721C(ch->cookie, ch->version, ch->size);
                     if (idx >= 0) {
                         loaded[idx] = 1;

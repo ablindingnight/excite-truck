@@ -734,9 +734,9 @@ void fn_801ECFE0(CarModel* m) {
     s32 tint;
     BoneSurf* bs;
     int mirror = (fn_801E87A8()->flags >> 1) & 1;
-    bs = m->boneSurfs;
     tint = lbl_8055EBC0;
-    for (int i = 0; i < m->numBoneSurfs; bs++, i++) {
+    for (int i = 0; i < m->numBoneSurfs; i++) {
+        bs = &m->boneSurfs[i];
         u32 mask = m->car->groupMask & bs->mask;
         BoneArg arg;
         arg.a = m->color;
