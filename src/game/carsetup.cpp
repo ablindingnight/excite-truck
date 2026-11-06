@@ -172,6 +172,11 @@ void fn_80279D40(CarSetup* s) {
     s->wheelLock = 0.5235988f;
 }
 
+static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
+    o->x += v->x * s;
+    o->y += v->y * s;
+    o->z += v->z * s;
+}
 void fn_80279F58(CarSetup* s, ValueTable* t) {
     fn_80279D40(s);
     ValueNode* c = t->FindChild("Chassis");
@@ -214,16 +219,14 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->brake *= c->GetFloat("brake_factor", 1.0f);
     s->fsway = Lbf(c->GetFloat("fsway", 120.0f)) / 0.0254f;
     s->rsway = Lbf(c->GetFloat("rsway", 60.0f)) / 0.0254f;
-    f32 ride = In(c->GetFloat("ride_height", 5.0f));
+    f32 rh = c->GetFloat("ride_height", 5.0f);
     s->modelOffset.x = 0.0f;
+    f32 ride = In(rh);
     s->modelOffset.z = -(s->balance - 0.5f) * s->wheelbase;
     s->modelOffset.y = -s->collideCmHeight;
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
-        f32 ox = o.x;
-        s->modelOffset.x += ox * 0.0254f;
-        s->modelOffset.y += o.y * 0.0254f;
-        s->modelOffset.z += o.z * 0.0254f;
+        AddScaled(&s->modelOffset, &o, 0.0254f);
     }
 
     t->FindChild("Front");
