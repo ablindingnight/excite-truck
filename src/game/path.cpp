@@ -284,23 +284,26 @@ static inline void SubV3(void* o_, const void* a_, const void* b_) {
     o[1] = a[1] - b[1];
     o[2] = a[2] - b[2];
 }
+static inline void LerpPos(PathMtx* m, const PathKey* a, const PathKey* b, f32 f) {
+    V3 pos;
+    pos.z = a->pos.z + f * (b->pos.z - a->pos.z);
+    f32 y2 = b->pos.y;
+    f32 xv;
+    f32 y_ = a->pos.y;
+    pos.y = y_ + f * (y2 - y_);
+    f32 x_ = a->pos.x;
+    xv = b->pos.x;
+    pos.x = x_ + f * (xv - x_);
+    m->pos.z = pos.z;
+    m->pos.y = pos.y;
+    m->pos.x = pos.x;
+}
 int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
     PathKey* a = 0;
     PathKey* b = 0;
     f32 f = 0.0f;
     if (fn_801DA1F8(p, &a, &b, &f)) {
-        V3 pos;
-        pos.z = a->pos.z + f * (b->pos.z - a->pos.z);
-        f32 y2 = b->pos.y;
-        f32 xv;
-        f32 y_ = a->pos.y;
-        pos.y = y_ + f * (y2 - y_);
-        f32 x_ = a->pos.x;
-        xv = b->pos.x;
-        pos.x = x_ + f * (xv - x_);
-        m->pos.z = pos.z;
-        m->pos.y = pos.y;
-        m->pos.x = pos.x;
+        LerpPos(m, a, b, f);
         f32 g = 1.0f - f;
         Quat q;
         q.w = a->rot.w * g + b->rot.w * f;
