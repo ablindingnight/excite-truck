@@ -1349,17 +1349,17 @@ void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
     out->color = fn_80147C50(a->color, b->color, t);
 }
 
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
     V2 p = LerpV2(a->pos, b->pos, t);
     *out = *a;
     out->pos = p;
-    out->u0 = a->u0 + t * (b->u0 - a->u0);
-    out->u1 = a->u1 + t * (b->u1 - a->u1);
-    out->v0 = a->v0 + t * (b->v0 - a->v0);
-    out->v1 = a->v1 + t * (b->v1 - a->v1);
-    f32 wv = b->w;
-    out->w = a->w + t * (wv - a->w);
-    out->h = a->h + t * (b->h - a->h);
+    out->u0 = LerpT(t, a->u0, b->u0);
+    out->u1 = LerpT(t, a->u1, b->u1);
+    out->v0 = LerpT(t, a->v0, b->v0);
+    out->v1 = LerpT(t, a->v1, b->v1);
+    out->w = LerpT(t, a->w, b->w);
+    out->h = LerpT(t, a->h, b->h);
 }
 
 void fn_80147EE0(ArtElem* e, f32 s) {

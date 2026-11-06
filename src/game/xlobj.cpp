@@ -6,6 +6,9 @@
 // strings.
 #include "game/common.h"
 
+// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 extern "C" {
 void* memset(void* dst, int c, size_t n);
 int strcasecmp(const char* a, const char* b);
@@ -113,14 +116,14 @@ struct XSample {
     void Pos(V2* out) {
         XNode* n = node;
         f32 u = t;
-        out->x = n->x + u * (n->next->x - n->x);
-        out->y = n->y + u * (n->next->y - n->y);
+        out->x = LerpT(u, n->x, n->next->x);
+        out->y = LerpT(u, n->y, n->next->y);
     }
     void Dir(V2* out) {
         XNode* n = node;
         f32 u = t;
-        out->x = n->dx + u * (n->next->dx - n->dx);
-        out->y = n->dz + u * (n->next->dz - n->dz);
+        out->x = LerpT(u, n->dx, n->next->dx);
+        out->y = LerpT(u, n->dz, n->next->dz);
     }
     XNode* node;  // offset 0x0
     f32 t;        // offset 0x4
@@ -431,7 +434,7 @@ static inline TexEntry* FindTex(const char* name, s16 prio) {
     return lbl_804BFFF4.data[lbl_804BFFF4.count++] = new ("xlte") TexEntry(name, prio);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return LerpT(t, a, b); }
 
 static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
