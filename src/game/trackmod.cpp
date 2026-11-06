@@ -678,6 +678,8 @@ void fn_801F3198(TVec* v) { PSVECNormalize(v, v); }
 
 SkyTMH::~SkyTMH(void) { obj = 0; }
 
+#pragma push
+#pragma ppc_unroll_instructions_limit 60
 void SkyTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     int i;
@@ -688,6 +690,7 @@ void SkyTMH::Swap(TObj* o) {
         Swap32(p + 12);
     }
 }
+#pragma pop
 
 void SkyTMH::Init(TObj* o) { obj = o; }
 
