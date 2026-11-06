@@ -393,12 +393,18 @@ void fn_8029F658(ValueNode* node) {
 // Reads one placed "emitter".
 void fn_8029FB00(ValueNode* node) {
     EmitterInst* in;
+    NameEntry* a;
+    NameEntry* b;  // MATCHING-AID: second walker over the same table, needed for the loop registers
     s32 fx = lbl_8055F818;
+    a = lbl_804B7770;
     in = &lbl_804B9B7C.data[lbl_804B9B7C.n++];
+    b = a;
     for (int i = 0; i < lbl_8055F818; i++) {
-        if (strcmp(lbl_804B7770[i].name, node->GetValue("name")) == 0) {
-            fx = lbl_804B7770[i].id;
+        if (strcmp(a->name, node->GetValue("name")) == 0) {
+            fx = b->id;
         }
+        a++;
+        b++;
     }
     in->fx = fx;
     in->alwaysOn = node->GetBool("always_on", 0);
