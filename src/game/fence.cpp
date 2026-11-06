@@ -92,10 +92,11 @@ void fn_802A0B54(void) {
             f32 len = 1.0f + (f->type * 6);
             int j;
             for (j = 0; j < f->count; j++) {
+                f32 tu = j / 5.0f;
                 v[j * 2].pos.x = f->posts[j].x;
                 v[j * 2].pos.y = f->posts[j].y;
                 v[j * 2].pos.z = f->posts[j].z;
-                v[j * 2].u = (j / 5.0f) * len;
+                v[j * 2].u = tu * len;
                 v[j * 2].v = v0;
                 v[j * 2].color = 0xFFFFFFFF;
                 v[j * 2 + 1] = v[j * 2];
