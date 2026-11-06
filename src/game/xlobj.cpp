@@ -178,6 +178,7 @@ struct VecBase {
         cap = 0;
     }
     T& Next(void) { return data[count++]; }
+    int Size(void) const { return count; }
     int CanAdd(void) const { return count + 1 <= cap; }
     int Find(const T& v) const {
         for (int j = 0; j < count; j++) {
@@ -424,14 +425,15 @@ InlineVec<TexEntry*, 16> lbl_804BFFF4;
 InlineVec<XScale, 4> lbl_804C004C;
 TexEntry* lbl_804C0088[4];
 
-static inline TexEntry* FindTex(const char* name, s16 prio) {
-    for (int i = 0; i < lbl_804BFFF4.count; i++) {
+static inline TexEntry* FindTex(const char* name, int prio) {
+    for (int i = 0; i < lbl_804BFFF4.Size(); i++) {
         TexEntry* e = lbl_804BFFF4.data[i];
         if (strcasecmp(e->name, name) == 0) {
             return e;
         }
     }
-    return lbl_804BFFF4.data[lbl_804BFFF4.count++] = new ("xlte") TexEntry(name, prio);
+    TexEntry** d = lbl_804BFFF4.data + lbl_804BFFF4.count++;
+    return *d = new ("xlte") TexEntry(name, prio);
 }
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
@@ -756,8 +758,9 @@ void fn_802BA348(void) {
 void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a);
 void fn_802BAA50(V2* v);
 
-Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
-    Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
+static inline const V2& PtV2(const ValPoint& p) { return *(const V2*)&p; }
+
+static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     Vec2 org;
     fn_801602B0(&org);
     Vec2 along;
@@ -766,8 +769,7 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     fn_801602B0(&side);
     Vec2 size;
     fn_801602B0(&size);
-    ValPoint p = node->GetPoint("size");
-    fn_80160BA0(&size, (V2*)&p, scale);
+    fn_80160BA0(&size, &PtV2(node->GetPoint("size")), scale);
     Vec3 sun;
     fn_80144D64(&sun, fn_802C9A40());
     Vec2 dir;
@@ -795,6 +797,11 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     TexEntry* te = FindTex(node->GetValue("texture"), 999);
     s->next = te->head;
     te->head = s;
+}
+
+Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
+    Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
+    FillB(s, node, pos, scale);
     lbl_8055FA84++;
     return s;
 }
@@ -833,8 +840,7 @@ void fn_802BAA50(V2* v) {
 void fn_802BAD0C(V2* v, f32 a);
 f32 fn_802BAD90(f32 deg);
 
-Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
-    Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
+static inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     Vec2 org;
     fn_801602B0(&org);
     Vec2 along;
@@ -846,11 +852,11 @@ Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
     side.SetXZ(*(const Vec3*)&m->basis[0]);
     fn_80160B18(&side);
     org.SetXZ(*(const Vec3*)&m->origin);
-    ValPoint p = node->GetPoint("size");
-    Vec2 size = *(V2*)&p;
+    Vec2 size = PtV2(node->GetPoint("size"));
     fn_80160BA0(&along, &along, size.y);
     fn_80160BA0(&side, &side, size.y);
-    f32 rot = fn_802BAD90(-1.0f * node->GetFloat("rot", 0.0f));
+    f32 k = -1.0f;
+    f32 rot = fn_802BAD90(k * node->GetFloat("rot", 0.0f));
     fn_802BAD0C(&along, rot);
     fn_802BAD0C(&side, rot);
     AddScaled(&org, &org, -0.5f, &side);
@@ -861,6 +867,11 @@ Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
     TexEntry* te = FindTex(tex, node->GetInt("prio", 888));
     s->next = te->head;
     te->head = s;
+}
+
+Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
+    Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
+    FillA(s, node, m);
     lbl_8055FA84++;
     return s;
 }
