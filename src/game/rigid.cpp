@@ -558,15 +558,15 @@ void RigidBody::Update(void) {
             f32 t = 1.0f - co;
             tx = t * ax;
             f32 ty = t * ay;
-            r.rot.m[0][0] = co + t * (ax * ax);
             r.rot.m[0][1] = ay * tx + s * az;
+            r.rot.m[0][0] = co + t * (ax * ax);
             r.rot.m[0][2] = az * tx - s * ay;
             r.rot.m[1][0] = ay * tx - s * az;
             r.rot.m[1][1] = co + t * (ay * ay);
             r.rot.m[1][2] = az * ty + s * ax;
+            r.rot.m[2][2] = co + t * (az * az);
             r.rot.m[2][0] = az * tx + s * ay;
             r.rot.m[2][1] = az * ty - s * ax;
-            r.rot.m[2][2] = co + t * (az * az);
         } else {
             r.rot.m[0][0] = 1.0f;
             r.rot.m[0][1] = 0.0f;
