@@ -2653,7 +2653,8 @@ inline void ZoneMaster::vf0C(void) {
         f32 t = f250 - 0.016683351f;
         f250 = 0.0f > t ? 0.0f : t;
         if ((f32)__fabs(f250) <= lbl_80558DC4[0]) {
-            hud.Update(&cars[fn_80179630(0)]);
+            int car = fn_80179630(0);
+            hud.Update(&cars[car]);
         }
     }
 }
