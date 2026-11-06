@@ -976,7 +976,6 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             fn_802545C4(&pose, bg, model);
         }
         nd = -d;
-        f32 nx = -offX;
         f32 ny = -offY;
         Mtx33* m = (Mtx33*)&cam;
         for (int i = 0; i < 400; i++) {
@@ -1006,11 +1005,11 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             MulM(m, &rx, m);
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
             f32 vx = cam.b.v[0].x;
-            cam.pos.x = cam.pos.x + vx * nx + cam.b.v[1].x * ny;
+            cam.pos.x = cam.pos.x + vx * -offX + cam.b.v[1].x * ny;
             f32 yv = cam.pos.y;
-            cam.pos.y = yv + cam.b.v[0].y * nx + cam.b.v[1].y * ny;
+            cam.pos.y = yv + cam.b.v[0].y * -offX + cam.b.v[1].y * ny;
             f32 zv = cam.pos.z;
-            cam.pos.z = zv + cam.b.v[0].z * nx + cam.b.v[1].z * ny;
+            cam.pos.z = zv + cam.b.v[0].z * -offX + cam.b.v[1].z * ny;
             if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0) < cam.pos.y) {
                 break;
             }
@@ -1293,8 +1292,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         f32 dy;
         f32 dx = box[1] - box[0];
         dy = box[3] - box[2];
-        f32 dz = box[5] - box[4];
-        sqrt(dx * dx + dy * dy + dz * dz);
+        sqrt(dx * dx + dy * dy + (box[5] - box[4]) * (box[5] - box[4]));
         sqrt(2.0);
         if (index == 0) {
             fn_802AB9E0(lbl_8055F338);
@@ -1474,14 +1472,13 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         f32 fi = i;
         f32 c = 1.333f * (f32)cos(fi * step);
         f32 s = 1.333f * (f32)sin(fi * step);
-        f32 x0 = 2.5f * c;
         z0 = 2.5f * s;
         f32 x1 = 5.0f * c;
         f32 z1 = 5.0f * s;
-        v[1 + i * 2].pos.x = x0;
+        v[1 + i * 2].pos.x = (2.5f * c);
         v[1 + i * 2].pos.y = y;
         v[1 + i * 2].pos.z = z0;
-        v[1 + i * 2].s = 1.333f * x0;
+        v[1 + i * 2].s = 1.333f * (2.5f * c);
         v[2 + i * 2].pos.x = x1;
         v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].t = 1.333f * z0;

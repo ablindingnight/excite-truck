@@ -902,10 +902,9 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     f32 a = 0.125f * speed;
     a = 2.0f < a ? 2.0f : a;
     int n = (int)(0.25f * speed) < 10 ? (int)(0.25f * speed) : 10;
-    f32 lift = 0.1f * speed;
     for (int k = 0; k < n; k++) {
         SetVec(&pos, base.x + dir.x * fn_80287BC8(-0.5f, 0.5f), base.y, base.z + dir.y * fn_80287BC8(-0.5f, 0.5f));
-        SetVec(&w, v.x + dir.x * (4.0f * fn_80287BC8(-a, a)), (3.0f < lift ? 3.0f : lift) + 2.0f * fn_80287BC8(0.0f, a),
+        SetVec(&w, v.x + dir.x * (4.0f * fn_80287BC8(-a, a)), (3.0f < (0.1f * speed) ? 3.0f : (0.1f * speed)) + 2.0f * fn_80287BC8(0.0f, a),
                v.y + dir.y * (4.0f * fn_80287BC8(-a, a)));
         fn_8028E584(lbl_8055F7F8, &pos, &w);
     }

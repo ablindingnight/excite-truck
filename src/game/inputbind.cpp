@@ -252,12 +252,11 @@ void fn_801A7844(int reset) {
     fn_80127A84(&x, &y, &buttons);
     {
         s32 w = lbl_8055CFF0 / 2;
-        s32 h = lbl_8055CFF4 / 2;
         lbl_80435370[0].b0 = buttons & 1;
         lbl_80435370[0].b1 = (buttons >> 1) & 1;
         lbl_80435370[0].b2 = (buttons >> 2) & 1;
         lbl_80435370[0].x = (f32)(x - w) / (f32)w;
-        lbl_80435370[0].y = (f32)(y - h) / (f32)h;
+        lbl_80435370[0].y = (f32)(y - (lbl_8055CFF4 / 2)) / (f32)(lbl_8055CFF4 / 2);
     }
 }
 

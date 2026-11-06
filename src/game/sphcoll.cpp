@@ -418,12 +418,11 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         f32 m = PSVECMag(&dd.x);
         f32 pen = cv->radius - m;
         if (m > lbl_805622D8 && pen > lbl_805622D4) {
-            f32 k = lbl_805622DC / m;
             PolyPush* q = &push[count++];
             sum += pen * pen;
-            q->n.x = dd.x * k;
-            q->n.y = dd.y * k;
-            q->n.z = dd.z * k;
+            q->n.x = dd.x * (lbl_805622DC / m);
+            q->n.y = dd.y * (lbl_805622DC / m);
+            q->n.z = dd.z * (lbl_805622DC / m);
             q->d = pen;
         }
     }
@@ -1981,11 +1980,10 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     f32 tmax;
     f32 dx = from->x - m->t.x;
     f32 dy = from->y - m->t.y;
-    f32 dz = from->z - m->t.z;
     f32 mm = m->m[0];
-    lp.x = Dot3(dx, mm, dy, m->m[1], dz, m->m[2]);
-    lp.z = Dot3(dx, m->m[6], dy, m->m[7], dz, m->m[8]);
-    lp.y = Dot3(dx, m->m[3], dy, m->m[4], dz, m->m[5]);
+    lp.x = Dot3(dx, mm, dy, m->m[1], (from->z - m->t.z), m->m[2]);
+    lp.z = Dot3(dx, m->m[6], dy, m->m[7], (from->z - m->t.z), m->m[8]);
+    lp.y = Dot3(dx, m->m[3], dy, m->m[4], (from->z - m->t.z), m->m[5]);
     MulVec(&ld, dir, m);
     tmin = -1e8f;
     tmax = 1e8f;
@@ -2616,8 +2614,7 @@ void fn_8019F780(u8* p) {
                         fr.x = nrm.x * b;
                         fr.y = nrm.y * b;
                         fr.z = nrm.z * b;
-                        f32 lo = lbl_805622D4;
-                        f32 ww = lo > depth ? lo : depth;
+                        f32 ww = lbl_805622D4 > depth ? lbl_805622D4 : depth;
                         VE(p)->v20(0, &fr, &w, surf, 0, 0, ww);
                     }
                 } else {
@@ -2643,9 +2640,8 @@ void fn_8019F780(u8* p) {
         sub += lbl_80562398 * (lbl_805622E0 + s);
         if (sub > lbl_805622D0) {
             f32 r = F32(p, 0x24);
-            f32 r2 = r * r;
-            f32 area = lbl_8056239C * r2;
-            f32 vol = lbl_805623A0 * (lbl_805623A4 * r * r2);
+            f32 area = lbl_8056239C * (r * r);
+            f32 vol = lbl_805623A0 * (lbl_805623A4 * r * (r * r));
             f32 dk = -area * (lbl_805623A8 + lbl_805623AC * PSVECMag(&bv.x));
             drag.x = bv.x * dk;
             drag.y = bv.y * dk;

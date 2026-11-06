@@ -826,18 +826,17 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
     m.m[1][2] = m.m[2][1];
     m.m[2][1] = t;
     MulMat(&m, &m, (const Mat3*)cam);
-    f32 back = 5.0f * -dt;
     for (int i = 0; i < count; i++) {
         u32 color;
         Spark* s = &pts[i];
         Vec d;
         Vec p;
         f32 yv = s->pos.y;
-        p.x = s->pos.x + s->vel.x * back - prev->pos.x;
-        p.y = yv + s->vel.y * back - prev->pos.y;
+        p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->pos.x;
+        p.y = yv + s->vel.y * (5.0f * -dt) - prev->pos.y;
         f32 a = invLife * (now - s->t);
         color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
-        p.z = s->pos.z + s->vel.z * back - prev->pos.z;
+        p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->pos.z;
         MulVec(&p, &p, (const Vec*)&m);
         p.x = p.x + cam->pos.x;
         p.y = p.y + cam->pos.y;

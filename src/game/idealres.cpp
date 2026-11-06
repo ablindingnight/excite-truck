@@ -382,13 +382,12 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
         do {
             f32 w = fn_801385F0(p->dist, lap, amount, radius);
             if (w > 0.0f) {
-                f32 k = w * step;
                 V2 m = MakeV2(q->dir.y + 0.5f * (p->dir.y - q->dir.y), q->dir.x + 0.5f * (p->dir.x - q->dir.x));
-                p->lat += k;
+                p->lat += (w * step);
                 V2 n = m;
                 Perp(&n);
-                p->pos.x += n.x * k;
-                p->pos.y += n.y * k;
+                p->pos.x += n.x * (w * step);
+                p->pos.y += n.y * (w * step);
             }
             end = line->points;
             q = p;

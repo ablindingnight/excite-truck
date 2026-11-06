@@ -2454,10 +2454,9 @@ int fn_80197FE4(u8* d, const u8* p) {
     int r = 0;
     if (!(S32(d, 0x2D0) & 4)) {
         int b = 1;
-        f32 lo = lbl_8055A48C;
         s32 st = S32(d, 0x268);
         f32 hi = 1.2f * lbl_8055A488;
-        f32 lim = lo + 5.0f * lo;
+        f32 lim = lbl_8055A48C + 5.0f * lbl_8055A48C;
         if (st != 0 && st != 3) {
             b = 0;
         }
