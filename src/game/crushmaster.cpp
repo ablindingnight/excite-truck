@@ -1923,6 +1923,23 @@ static inline void SetD(V2* o, f32 x, f32 y) {
     o->y = y;
 }
 
+static inline void Retarget(CrushTarget* t, int i) {
+    V2 here;
+    RaceCarRec* rec = fn_8017960C(i);
+    here.x = rec->mtx.origin.x;
+    here.y = rec->mtx.origin.z;
+    if (fn_80171E3C(here)) {
+        f32 now = lbl_8055E3C8;
+        PickTarget(t, i, fn_801725C8(now), 20.0f, -20.0f);
+    } else {
+        V2 p = fn_80171FF0(&here, 10, 5.0f, 5.0f);
+        t->x = p.x;
+        t->y = p.y;
+        t->speed = 17.777779f;
+        t->until = 5.0f + lbl_8055E3C8;
+    }
+}
+
 inline void CrushSubTaskMgr::vf20(void) {
     int i;
     for (i = 0; i < nCars; i++) {
@@ -1935,19 +1952,7 @@ inline void CrushSubTaskMgr::vf20(void) {
             pos.y = rec->mtx.origin.z;
             SetD(&d, pos.x - t->x, pos.y - t->y);
             if (d.x * d.x + d.y * d.y < RadSq() || lbl_8055E3C8 > t->until) {
-                V2 here;
-                rec = fn_8017960C(i);
-                here.x = rec->mtx.origin.x;
-                here.y = rec->mtx.origin.z;
-                if (fn_80171E3C(here)) {
-                    PickTarget(t, i, fn_801725C8(lbl_8055E3C8), 20.0f, -20.0f);
-                } else {
-                    V2 p = fn_80171FF0(&here, 10, 5.0f, 5.0f);
-                    t->x = p.x;
-                    t->y = p.y;
-                    t->speed = 17.777779f;
-                    t->until = 5.0f + lbl_8055E3C8;
-                }
+                Retarget(t, i);
             }
         }
     }
