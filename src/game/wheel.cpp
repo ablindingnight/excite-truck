@@ -431,7 +431,7 @@ s32 Wheel::vf34(RPacket* p) {
     return 1;
 }
 
-void Wheel::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb) {
+void Wheel::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* __restrict nb) {
     *na = vf2C(a);
     *nb = vf2C(b);
     if (*(u8*)a && *(u8*)b) {
