@@ -922,12 +922,10 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
         f32 fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         u8 b = Byte(255.0f * (blueConst + blueRamp * t));
-        u8 r = Byte(255.0f * (redConst + redRamp * t));
         u8 g = Byte(255.0f * (greenConst + greenRamp * t));
+        u8 r = Byte(255.0f * (redConst + redRamp * t));
         u8 a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
         u32 color = (a << 24) | (r << 16) | (g << 8) | b;
-        int col = frame % grid;
-        int row = frame / grid;
         PVtx q[4];
         q[0].pos.x = pos.x + d1.x * size;
         q[0].pos.y = pos.y + d1.y * size;
@@ -942,10 +940,10 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         q[3].pos.y = pos.y + d2.y * -size;
         q[3].pos.z = pos.z + d2.z * -size;
         q[0].color = q[1].color = q[2].color = q[3].color = color;
-        q[0].u = q[3].u = (f32)col * cell;
-        q[1].u = q[2].u = (f32)(col + 1) * cell;
-        q[0].v = q[1].v = (f32)row * cell;
-        q[2].v = q[3].v = (f32)(row + 1) * cell;
+        q[0].u = q[3].u = (f32)(frame % grid) * cell;
+        q[1].u = q[2].u = (f32)(frame % grid + 1) * cell;
+        q[0].v = q[1].v = (f32)(frame / grid) * cell;
+        q[2].v = q[3].v = (f32)(frame / grid + 1) * cell;
         batch.Add(q);
     }
     batch.Flush();
