@@ -661,6 +661,8 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
         v[i].color = 0xFFFFFFFF;
     }
     Frame m;
+    Mat3* mp = (Mat3*)&m;
+    m.pos = view->pos;
     m.x.x = 1.0f;
     m.x.y = 0.0f;
     m.x.z = 0.0f;
@@ -668,7 +670,6 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
     m.y.y = 1.0f;
     m.y.z = 0.0f;
     m.z.x = 0.0f;
-    m.pos = view->pos;
     m.z.y = 0.0f;
     m.z.z = 1.0f;
     PVec a;
@@ -677,7 +678,7 @@ void fn_802BFE48(Skybox* s, const Frame* view, f32 scale) {
     a.z = 0.0f;
     Mat3 r30;
     fn_80015A20(&r30, &a);
-    Mat3Mul((Mat3*)&m, &r30, (Mat3*)&m);
+    Mat3Mul(mp, &r30, mp);
     fn_802C8B98(s->sun, &m);
     fn_802C8DB8(v, 4, idx.i, 6);
     fn_802C8D74();
