@@ -3320,7 +3320,8 @@ game/roadsnd.cpp:
 	.sdata2     start:0x80563300 end:0x80563318
 
 game/unk_8020CF68.c:
-	.text       start:0x8020CF68 end:0x8020DE24
+	.text       start:0x8020CF68 end:0x8020DE74
+	.ctors      start:0x802ED3A0 end:0x802ED3A4
 	.sdata2     start:0x80563318 end:0x80563368
 
 game/unk_8020DE74.cpp:

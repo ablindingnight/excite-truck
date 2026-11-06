@@ -474,3 +474,33 @@ char fn_8020DE1C(void) {
     return lbl_8055EE94;
 }
 
+// The module's statics, the same trio as achview and others: tag, list terminator, marker.
+#pragma cplusplus on
+class ModuleTag;
+void RegisterModuleTag(ModuleTag* tag);
+class ModuleTag {
+public:
+    ModuleTag(void) { RegisterModuleTag(this); }
+    unsigned char flag;
+    ModuleTag* next;
+};
+class UnkStatic123s {
+public:
+    UnkStatic123s(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    unsigned long unk0, unk4, unk8, unkC, unk10;
+};
+class UnkStatic7F {
+public:
+    UnkStatic7F(void) { value = 0x7F000000; }
+    unsigned long value;
+};
+ModuleTag lbl_8055EE68;
+UnkStatic123s lbl_80489C70;
+UnkStatic7F lbl_8055EE70;
+#pragma cplusplus off
