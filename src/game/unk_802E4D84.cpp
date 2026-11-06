@@ -25,13 +25,13 @@ unsigned char lbl_8055FF94[4];  // holds the voice table pointer
 int lbl_8055FF98;
 struct SpuSample** lbl_8055FF9C;
 int lbl_8055FFA0;
-unsigned char lbl_8055FFA4;
+volatile unsigned char lbl_8055FFA4;
 unsigned char lbl_8055FFA5;
 unsigned char lbl_8055FFA6;
 int lbl_8055FFA8;
 int lbl_8055FFAC;
 void* lbl_8055FFB0;
-unsigned char lbl_8055FFB4;
+volatile unsigned char lbl_8055FFB4;
 char lbl_8055FFB5;
 
 #pragma cplusplus on
@@ -277,9 +277,9 @@ typedef struct SpuAdpcmLoop {
     unsigned short yn2;
 } SpuAdpcmLoop;
 
-extern unsigned char lbl_8055FFA4;
+extern volatile unsigned char lbl_8055FFA4;
 extern unsigned char lbl_8055FFA6;
-extern unsigned char lbl_8055FFB4;
+extern volatile unsigned char lbl_8055FFB4;
 extern int fn_802D9BF0(void);
 extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
 
@@ -287,8 +287,9 @@ extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
 // left (with silence while muted) and flushes it for the DSP.
 void fn_802E4F98(void) {
     unsigned int pos;
-    int level;
     int muted;
+    int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
+    int level;
     int i;
     SpuVoice *v;
     SpuSample *s;
@@ -300,13 +301,17 @@ void fn_802E4F98(void) {
         level = OSEnableInterrupts();
         muted = fn_802D9BF0();
         lbl_8055FFB4 = 1;
-        for (i = 0; i < 0x20; i++) {
-            v = &SPU_VOICE_TABLE[i];
+        i = 0;
+        off = 0;
+        for (; i < 0x20; off += sizeof(SpuVoice), i++) {
+            v = (SpuVoice*)((u8*)SPU_VOICE_TABLE + off);
             s = v->sample;
             if (v->active && s != 0 && s->locked == 1 && !v->start) {
-                pos = *(unsigned int *)((char *)v->vpb + 0x1BC) << 1;  // CLEANUP: AXVPB current address
+                pos = *(unsigned int *)((char *)v->vpb + 0x1BC);  // CLEANUP: AXVPB current address
                 if (s->adpcm) {
-                    pos = *(unsigned int *)((char *)v->vpb + 0x1BC) >> 1;
+                    pos >>= 1;
+                } else {
+                    pos <<= 1;
                 }
                 half = s->size >> 1;
                 mid = s->addr + half;
