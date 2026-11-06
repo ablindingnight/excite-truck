@@ -2306,10 +2306,24 @@ void fn_8019743C(u8* d, u8* out) {
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c);
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, u8* p, int r, int ok) {
+int fn_8019799C(u8* d, u8* p) {
+    int id;
+    int r = 0;
+    int same;
+    int ok;
+    double ax;
+    f32 v;
+    f32 dist;
+    f32 lim;
+    f32 w;
+    if (S32(d, 0x2D0) & 2) {
+        return 0;
+    }
+    ok = 1;
+    v = -F32(p, 0x10);
+    id = S32(p, 0x18);
     if (!(v > 4.4444447f)) {
-        int same = 0;
+        same = 0;
         if (id == S32(d, 0x114) && v > 2.2222223f) {
             same = 1;
         }
@@ -2318,27 +2332,18 @@ static inline int Loop4_fn_8019799C(f32 v, s32 id, u8* d, u8* p, int r, int ok) 
         }
     }
     if (ok && id != S32(d, 0x2C4)) {
-        f32 x = fn_80137850(p);
-        f32 lim = F32(d, 0x278) + F32(p, 0x4);
-        f32 ax = (f32)__fabs(x);
-        f32 w = 5.0f + F32(d, 0x274);
-        ax = ax < lim ? ax : lim;
-        if (ax < w) {
-            fn_80197AB8(d, id, F32(PTR(p, 0x0), 0x4), x, F32(p, 0x10));
+        v = fn_80137850(p);
+        ax = __fabs(v);
+        lim = F32(d, 0x278) + F32(p, 0x4);
+        dist = (f32)ax;
+        w = 5.0f + F32(d, 0x274);
+        dist = dist < lim ? dist : lim;
+        if (dist < w) {
+            fn_80197AB8(d, id, F32(PTR(p, 0x0), 0x4), v, F32(p, 0x10));
             r = 1;
         }
     }
     return r;
-}
-
-int fn_8019799C(u8* d, u8* p) {
-    int r = 0;
-    if (S32(d, 0x2D0) & 2) {
-        return 0;
-    }
-    int ok = 1;
-    f32 v = -F32(p, 0x10);
-    return Loop4_fn_8019799C(v, S32(p, 0x18), d, p, r, ok);
 }
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
