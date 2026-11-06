@@ -773,10 +773,10 @@ void fn_80228990(WidgetFragment*);
 void fn_80228994(WidgetFragment* self);
 void fn_80228A38(WidgetFragment* self);
 int fn_80228A6C(WidgetFragment* self);
-void fn_80228A80(WidgetFragment*);
+void Unk18__14MenuCustomViewFv(WidgetFragment*);
 void fn_80228A84(WidgetFragment* self);
 int fn_80228D90(WidgetFragment* self,int);
-int fn_80228DA4(WidgetFragment*);
+int Unk20__14MenuCustomViewFv(WidgetFragment*);
 int fn_80228DAC(WidgetFragment* self);
 void fn_80228DC0(WidgetFragment*);
 }
@@ -3379,7 +3379,7 @@ void fn_80228994(WidgetFragment* self){
 }
 void fn_80228A38(WidgetFragment* self){fn_80228AEC(self,fn_80214D48());}
 int fn_80228A6C(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Leave();}
-void fn_80228A80(WidgetFragment*){}
+void Unk18__14MenuCustomViewFv(WidgetFragment*){}
 void fn_80228A84(WidgetFragment* self){
  AdapterPrefix* fields=(AdapterPrefix*)self;ObservedClipRect saved;
  fn_802C86F0(&saved,fields->left,fields->top,fields->right,fields->bottom);
@@ -3421,7 +3421,7 @@ int boundWidth=displayWidth-viewport->x;int resultWidth=(int)roundedWidth;if(res
     ((MapRendererDispatchCppNew*)renderer)->Draw( viewport->x, viewport->y, viewport->width, clippedHeight, opacity);
 }
 int fn_80228D90(WidgetFragment* self,int){return ((AdapterPrefix*)self)->target->Flags();}
-int fn_80228DA4(WidgetFragment*){return 0;}
+int Unk20__14MenuCustomViewFv(WidgetFragment*){return 0;}
 int fn_80228DAC(WidgetFragment* self){return ((AdapterPrefix*)self)->target->State();}
 void fn_80228DC0(WidgetFragment*){}
 void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
