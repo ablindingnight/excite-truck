@@ -508,6 +508,26 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
     tr->hit = 0;
 }
 
+static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }
+
+static inline void SetV(TVec& v, f32 x, f32 y, f32 z) {
+    v.x = x;
+    v.y = y;
+    v.z = z;
+}
+
+static inline void ReadCyl(TreeType* t, ValueNode* n, TVec& c) {
+    ValVec3 p1 = n->GetVec3("cyl_p1");
+    ValVec3 p2 = n->GetVec3("cyl_p2");
+    SetV(c, MidF(p1.x, p2.x), MidF(p1.y, p2.y), MidF(p1.z, p2.z));
+    t->cyl.center = c;
+    t->cyl.axis.x = p1.x - p2.x;
+    t->cyl.axis.y = p1.y - p2.y;
+    t->cyl.axis.z = p1.z - p2.z;
+    t->cyl.half = PSVECMag(&t->cyl.axis) / 2.0f;
+    PSVECNormalize(&t->cyl.axis, &t->cyl.axis);
+}
+
 void fn_802BCBDC(void) {
     TreeType* t;
     lbl_8055FAB4 = fn_802B561C(fn_80131810, "treeclass.val");
@@ -530,18 +550,8 @@ void fn_802BCBDC(void) {
                 t->run = n->GetBool("tree_run", 1);
                 t->surf = fn_801D04D0(n->GetString("surf_type", "tree"));
                 t->cls = fn_802C143C(n);
-                ValVec3 p1 = n->GetVec3("cyl_p1");
-                ValVec3 p2 = n->GetVec3("cyl_p2");
                 TVec c;
-                c.z = p1.z + 0.5f * (p2.z - p1.z);
-                c.y = p1.y + 0.5f * (p2.y - p1.y);
-                c.x = p1.x + 0.5f * (p2.x - p1.x);
-                t->cyl.center = c;
-                t->cyl.axis.x = p1.x - p2.x;
-                t->cyl.axis.y = p1.y - p2.y;
-                t->cyl.axis.z = p1.z - p2.z;
-                t->cyl.half = PSVECMag(&t->cyl.axis) / 2.0f;
-                PSVECNormalize(&t->cyl.axis, &t->cyl.axis);
+                ReadCyl(t, n, c);
                 t->cyl.rad = n->GetFloat("rad");
                 t->baseRad = n->GetFloat("base_rad");
                 t->set = 0;
