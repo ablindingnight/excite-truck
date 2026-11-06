@@ -1280,6 +1280,7 @@ public:
     virtual void a1(void);
     virtual void a0(void);
     virtual void b2(StuntEvt* e, int car);
+    void b2Body(StuntEvt* e, int car);
     virtual void b1(void);
     virtual void b0(void);
     virtual void c3(void);
@@ -4613,7 +4614,7 @@ inline void BetaMaster::a1(void) {
     }
 }
 
-inline void BetaMaster::b2(StuntEvt* e, int car) {
+inline void BetaMaster::b2Body(StuntEvt* e, int car) {
     BetaCar* c;
     Pickup* t;
     bool turbo;
@@ -4656,6 +4657,8 @@ inline void BetaMaster::b2(StuntEvt* e, int car) {
         cars[car].meterObj->Land(lbl_804348E8[bc->id]);
     }
 }
+
+inline void BetaMaster::b2(StuntEvt* e, int car) { b2Body(e, car); }
 
 inline void BetaMaster::c2(Body* b, int car) {
     Token* t;
