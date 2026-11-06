@@ -366,6 +366,7 @@ public:
     virtual void Reset(void);
     void Rehome(void);
     void CheckBounds(void);
+    void TryDrop(void);
     void Drop(void);
     virtual void Update(void);
     virtual void vf28(u8* buf);
@@ -595,6 +596,14 @@ inline void Ball::Drop(void) {
     Launch(&m, &v, h, 0.0f);
 }
 
+inline void Ball::TryDrop(void) {
+    if (!active && DbgFlag(0x80)) {
+        if (fn_801B2EC0(car)->vf10()->f24 == 0) {
+            Drop();
+        }
+    }
+}
+
 inline void Ball::CheckBounds(void) {
     struct P {
         f32 v[3];
@@ -631,11 +640,7 @@ inline void Ball::Update(void) {
         vel.y = 0.0f;
         vel.z = 0.0f;
     }
-    if (!active && DbgFlag(0x80)) {
-        if (fn_801B2EC0(car)->vf10()->f24 == 0) {
-            Drop();
-        }
-    }
+    TryDrop();
     CheckBounds();
     RigidBody::Update();
 }
