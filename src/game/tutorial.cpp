@@ -1358,10 +1358,10 @@ inline void Challenge::Init(void) {
         if (n && HasNode(n, "end")) {
             Token* t = &tokens.data[tokens.count++];
             TPath* p;
-            int best = -1;
-            f32 max = -999.0f;
             int i;
             t->path = p = fn_801399FC(n->FindChild("end"));
+            int best = -1;
+            f32 max = -999.0f;
             for (i = 1; i <= p->count; i++) {
                 TVec2* c = &p->pts[i % p->count];
                 TVec2* b = &p->pts[(i - 1) % p->count];
@@ -1374,35 +1374,41 @@ inline void Challenge::Init(void) {
                 }
             }
             {
-                TVec2* a = &t->path->pts[(best - 1) % t->path->count];
-                TVec2* b = &t->path->pts[best % t->path->count];
+                TVec2 a = t->path->pts[(best - 1) % t->path->count];
+                TVec2 b = t->path->pts[best % t->path->count];
                 TVec2* c = &t->path->pts[(best + 1) % t->path->count];
                 TVec3 e1;
                 TVec3 e2;
                 TVec3 n3;
-                t->ends[0].x = a->x;
+                t->ends[0].x = a.x;
                 t->ends[0].y = 0.0f;
-                t->ends[0].z = a->z;
-                t->ends[1].x = b->x;
+                t->ends[0].z = a.z;
+                t->ends[1].x = b.x;
                 t->ends[1].y = 0.0f;
-                t->ends[1].z = b->z;
-                t->mid.x = (a->x + b->x) * 0.5f;
-                t->mid.z = (a->z + b->z) * 0.5f;
-                e1.x = c->x - b->x;
+                t->ends[1].z = b.z;
+                t->mid.x = (a.x + b.x) * 0.5f;
+                t->mid.z = (a.z + b.z) * 0.5f;
+                Delta2 d1;
+                d1.x = c->x - b.x;
+                d1.z = c->z - b.z;
+                Delta2 d2;
+                d2.x = a.x - b.x;
+                d2.z = a.z - b.z;
+                e1.x = d1.x;
                 e1.y = 0.0f;
-                e1.z = c->z - b->z;
-                e2.x = a->x - b->x;
+                e1.z = d1.z;
+                e2.x = d2.x;
                 e2.y = 0.0f;
-                e2.z = a->z - b->z;
+                e2.z = d2.z;
                 PSVECNormalize(&e1, &e1);
                 PSVECNormalize(&e2, &e2);
                 PSVECCrossProduct(&e1, &e2, &n3);
                 if (n3.y > 0.0f) {
-                    t->dir.x = a->x - t->mid.x;
-                    t->dir.z = a->z - t->mid.z;
+                    t->dir.x = a.x - t->mid.x;
+                    t->dir.z = a.z - t->mid.z;
                 } else {
-                    t->dir.x = b->x - t->mid.x;
-                    t->dir.z = b->z - t->mid.z;
+                    t->dir.x = b.x - t->mid.x;
+                    t->dir.z = b.z - t->mid.z;
                 }
             }
             {
