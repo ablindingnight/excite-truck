@@ -999,6 +999,8 @@ struct GroupEntry {
 };
 
 struct GroupVec {
+    int Size() const { return count; }
+    GroupEntry* Next() { return &data[count++]; }
     GroupEntry* data;  // offset 0x0
     s32 count;         // offset 0x4
     s32 cap;           // offset 0x8
@@ -1025,14 +1027,13 @@ u8* fn_8024B3E8(u8* p, EvList* list) {
         EvEntry* e = AtP(list->items, i);
         int isNew = 1;
         int j;
-        int count = S32(p, 0x1C);
-        for (j = 0; j < count; j++) {
+        for (j = 0; j < ((GroupVec*)(p + 0x18))->Size(); j++) {
             if (!e->unlocked || !strcasecmp(((GroupEntry*)PTR(p, 0x18))[j].name, e->group)) {
                 isNew = 0;
             }
         }
         if (isNew) {
-            GroupEntry* g = &((GroupVec*)(p + 0x18))->data[((GroupVec*)(p + 0x18))->count++];
+            GroupEntry* g = ((GroupVec*)(p + 0x18))->Next();
             g->name = e->group;
             g->flag = e->flag;
         }
