@@ -2283,7 +2283,7 @@ void BetaCar::DrawHud(ILayout* l, int view) {
     {
         f32 timeout = master->timer.finishTimeout;
         f32 lo = 0.6f + timeout;
-        f32 k = Lerp(0.0f, 1.0f, Clamp01(((0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now) - lo) / (master->timer.finishTimeout - lo)));
+        f32 k = Lerp(0.0f, 1.0f, Clamp01(((0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now) - lo) / (timeout - lo)));
         f32 limit = master->timer.limit;
         f32 elapsed = limit - (0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now);
         int art;
