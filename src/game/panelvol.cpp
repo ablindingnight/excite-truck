@@ -377,75 +377,75 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
             }
         }
     }
-    if (!p) {
-        return 0;
+    if (p) {
+        p->lastUsed = fn_801C0178();
+        p->owner = car;
+        p->model = fn_801C0170(car);
+        p->part = part;
+        p->car = fn_801C0168(p->owner);
+        fn_801C014C(p, off);
+        WVec neg;
+        fn_801C0124(&neg, off, -1.0f);
+        CollShape* s = fn_801C00F8(p, 0);
+        if (s && fn_801C00F0(s) == 'SPHR') {
+            fn_801C00B8(s, &neg);
+        }
+        RMtx m;
+        fn_80144B54(&m, car->World());
+        fn_801BFF64(&m, &neg);
+        fn_801BFECC(p, &m);
+        fn_801BFEBC(&p->vel, 0.0f, 0.0f, 0.0f);
+        fn_801BFEBC(&p->avel, 0.0f, 0.0f, 0.0f);
+        fn_801E9DC4(fn_801BFEB4(p));
+        PanelVert verts[4];
+        PanelEdge edges[6] = {
+            {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
+        };
+        WVec b;
+        WVec a;
+        fn_801BFE7C(&a, lo, off);
+        fn_801BFE7C(&b, hi, off);
+        p->org = 0;
+        p->e0a = 0;
+        p->e0b = 1;
+        p->e1a = 0;
+        p->e1b = 2;
+        fn_8017E388(&p->rest);
+        int xb = 1;
+        int yb = 4;
+        const RVec3* av;
+        int zb = 2;
+        if (b.y - a.y > b.x - a.x) {
+            yb = 1;
+            zb = 2;
+            xb = 4;
+        }
+        for (i = 0; i < 4; i++) {
+            RVec3 c;
+            fn_80144B44(&c, (i & xb) ? a.x : b.x, (yb & i) ? a.y : b.y, (i & zb) ? a.z : b.z);
+            fn_801BFD34(&verts[i].p, &c, &m);
+            verts[i].u = 4.545f;
+            verts[i].v = 0.127f;
+        }
+        WVec pts[4];
+        for (i = 0; i < 4; i++) {
+            fn_80144DAC(&pts[i], &verts[i].p);
+        }
+        RMtx frame;
+        fn_80144DC8(&frame);
+        fn_801BFB2C(p, &frame, pts);
+        fn_801BF75C(&p->rest, &m, &frame);
+        PanelLink links[2];
+        for (i = 0; i < n; i++) {
+            Loop1_fn_801BF2A4(links, i, ids, car);
+        }
+        fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
+        av = fn_801BF754(car);
+        const RMtx* cm = fn_801602B4(car);
+        fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
+        return 1;
     }
-    p->lastUsed = fn_801C0178();
-    p->owner = car;
-    p->model = fn_801C0170(car);
-    p->part = part;
-    p->car = fn_801C0168(p->owner);
-    fn_801C014C(p, off);
-    WVec neg;
-    fn_801C0124(&neg, off, -1.0f);
-    CollShape* s = fn_801C00F8(p, 0);
-    if (s && fn_801C00F0(s) == 'SPHR') {
-        fn_801C00B8(s, &neg);
-    }
-    RMtx m;
-    fn_80144B54(&m, car->World());
-    fn_801BFF64(&m, &neg);
-    fn_801BFECC(p, &m);
-    fn_801BFEBC(&p->vel, 0.0f, 0.0f, 0.0f);
-    fn_801BFEBC(&p->avel, 0.0f, 0.0f, 0.0f);
-    fn_801E9DC4(fn_801BFEB4(p));
-    PanelVert verts[4];
-    PanelEdge edges[6] = {
-        {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
-    };
-    WVec b;
-    WVec a;
-    fn_801BFE7C(&a, lo, off);
-    fn_801BFE7C(&b, hi, off);
-    p->org = 0;
-    p->e0a = 0;
-    p->e0b = 1;
-    p->e1a = 0;
-    p->e1b = 2;
-    fn_8017E388(&p->rest);
-    int xb = 1;
-    int yb = 4;
-    const RVec3* av;
-    int zb = 2;
-    if (b.y - a.y > b.x - a.x) {
-        yb = 1;
-        zb = 2;
-        xb = 4;
-    }
-    for (i = 0; i < 4; i++) {
-        RVec3 c;
-        fn_80144B44(&c, (i & xb) ? a.x : b.x, (yb & i) ? a.y : b.y, (i & zb) ? a.z : b.z);
-        fn_801BFD34(&verts[i].p, &c, &m);
-        verts[i].u = 4.545f;
-        verts[i].v = 0.127f;
-    }
-    WVec pts[4];
-    for (i = 0; i < 4; i++) {
-        fn_80144DAC(&pts[i], &verts[i].p);
-    }
-    RMtx frame;
-    fn_80144DC8(&frame);
-    fn_801BFB2C(p, &frame, pts);
-    fn_801BF75C(&p->rest, &m, &frame);
-    PanelLink links[2];
-    for (i = 0; i < n; i++) {
-        Loop1_fn_801BF2A4(links, i, ids, car);
-    }
-    fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
-    av = fn_801BF754(car);
-    const RMtx* cm = fn_801602B4(car);
-    fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
-    return 1;
+    return 0;
 }
 
 const RVec3* fn_801BF754(Phob* car) { return (const RVec3*)((u8*)car + 0x124); }
