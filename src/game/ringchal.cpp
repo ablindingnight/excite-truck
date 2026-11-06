@@ -869,6 +869,7 @@ public:
     virtual void vfA8(int car);
     virtual int vfB0(int car, struct Respawn* r);
     virtual int vfE0(int car, u8* out);
+    void DrawRings(ILayout* l);
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
     ILayout* layout;          // offset 0x98
@@ -2123,21 +2124,14 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
 
 #define ALPHA(c, v) ((c).all = ((int)(255.0f * (v)) << 24) | ((c).all & 0xFFFFFF))
 
+// The set list and the ring graphics. Everything but the score overlay; the stack puts its locals in rising order.
 #pragma dont_inline on
-inline void RingChalMaster::vf4C(int view) {
-    ILayout* l;
+inline void RingChalMaster::DrawRings(ILayout* l) {
     TextElem* setScore;
     Box* setIcon;
     Box* starScore;
     Box* arrowIcon;
     int i;
-    {
-        PlayerData* p = players.data[fn_801E866C(view)];
-        if (p) {
-            UpdateScoreOverlays(p->index, p->score);
-        }
-    }
-    l = layout;
     arena.timer.Draw(l);
     setScore = l->Find("ring_set_score");
     setIcon = l->FindBox("ring_set_icon");
@@ -2145,13 +2139,15 @@ inline void RingChalMaster::vf4C(int view) {
     starScore = l->FindBox("star_score");
     for (i = 0; i < arena.nSets; i++) {
         Box icon;
+        icon = *setIcon;
         TextElem txt = *setScore;
         f32 dt;
-        icon = *setIcon;
+        int cur;
         dt = Time() - arena.stats->At(i)->time;
+        cur = arena.curSet;
         icon.pos.y += i * 40;
         txt.pos.y += i * 40;
-        if (i > arena.curSet) {
+        if (i > cur) {
             icon.color.all = 0x66FFFFFF;
         }
         fn_80147940(l, &icon, "star_art", 0);
@@ -2266,8 +2262,8 @@ inline void RingChalMaster::vf4C(int view) {
         Box arrow;
         arrow = *arrowIcon;
         if (arena.curSet > 0) {
-            int s = arena.curSet;
             f32 k = Remap(0.0f, 0.1f, 0.0f, 1.0f, Time() - arena.stats->At(arena.curSet - 1)->time);
+            int s = arena.curSet;
             arrow.pos.y = fn_80144C80(arrowIcon->pos.y + (s - 1) * 40, arrowIcon->pos.y + s * 40, fn_80144BD8(k));
         }
         fn_80147940(l, &arrow, "arrow_art", 0);
@@ -2346,6 +2342,20 @@ inline void RingChalMaster::vf4C(int view) {
         }
     }
 }
+#pragma dont_inline reset
+
+inline void RingChalMaster::vf4C(int view) {
+    ILayout* l;
+    {
+        PlayerData* p = players.data[fn_801E866C(view)];
+        if (p) {
+            UpdateScoreOverlays(p->index, p->score);
+        }
+    }
+    l = layout;
+    DrawRings(l);
+}
+#pragma dont_inline on
 #pragma dont_inline reset
 
 inline Box& Box::operator=(const Box& o) {
