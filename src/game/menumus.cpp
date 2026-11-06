@@ -127,6 +127,8 @@ const char* lbl_8055B5D4 = "mus_postrace.sng";
 
 extern "C" {
 
+#pragma push
+#pragma ppc_unroll_instructions_limit 40
 void fn_8020C140(void) {
     f32 v = lbl_8055EE48 * lbl_8055EE4C;
     if (lbl_8055EE58) {
@@ -152,6 +154,7 @@ void fn_8020C140(void) {
         }
     }
 }
+#pragma pop
 
 void fn_8020C2AC(void) {
     lbl_8055EE40 = 0;
