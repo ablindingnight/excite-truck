@@ -756,6 +756,15 @@ void DustTrail::Emit(const TRacer* r, int wheel) {
     }
 }
 
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] + b[0] * s;
+    o[1] = a[1] + b[1] * s;
+    o[2] = a[2] + b[2] * s;
+}
 void DustTrail::Impact(const TrailEvent* e) {
     f32 now = fn_801E7E18();
     int n = 4;
@@ -796,15 +805,9 @@ void DustTrail::Impact(const TrailEvent* e) {
             TVec v1;
             TVec v2;
             TVec q;
-            v1.x = v.x + m.x.x * h;
-            v1.y = v.y + m.x.y * h;
-            v1.z = v.z + m.x.z * h;
-            v2.x = v.x + m.x.x * -h;
-            v2.y = v.y + m.x.y * -h;
-            v2.z = v.z + m.x.z * -h;
-            q.x = c.x + m.x.x * 0.15f;
-            q.y = c.y + m.x.y * 0.15f;
-            q.z = c.z + m.x.z * 0.15f;
+            MadV3(&v1.x, &v.x, &m.x.x, h);
+            MadV3(&v2.x, &v.x, &m.x.x, - h);
+            MadV3(&q.x, &c.x, &m.x.x, 0.15f);
             fn_8028E584(event, &q, &v1);
             q.x = c.x + m.x.x / 2.0f;
             q.y = c.y + m.x.y / 2.0f;
@@ -814,9 +817,7 @@ void DustTrail::Impact(const TrailEvent* e) {
             q.y = c.y + m.x.y * -0.15f;
             q.z = c.z + m.x.z * -0.15f;
             fn_8028E584(event, &q, &v2);
-            q.x = c.x + m.x.x * -0.5f;
-            q.y = c.y + m.x.y * -0.5f;
-            q.z = c.z + m.x.z * -0.5f;
+            MadV3(&q.x, &c.x, &m.x.x, - 0.5f);
             fn_8028E584(event, &q, &v2);
             MulBasis(&m, &rot, &m);
         }

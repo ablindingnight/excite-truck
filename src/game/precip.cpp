@@ -731,10 +731,21 @@ static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
     o->y += v->y * s;
     o->z += v->z * s;
 }
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void SubV3(void* o_, const void* a_, const void* b_) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] - b[0];
+    o[1] = a[1] - b[1];
+    o[2] = a[2] - b[2];
+}
 void SnowSystem::Update(void) {
     WFrame cam;
     cam = *fn_801E8718(view);
     Frustum();
+    ValVec3 d;
+    PVec c;
     ValVec3 g;
     g.x = 0.0f;
     g.y = -1.0f;
@@ -742,13 +753,9 @@ void SnowSystem::Update(void) {
     MulT(&cam, &g, &grav);
     Scaled(&vel, &grav, 0.05f);
     if (!fn_801E8758(view)) {
-        ValVec3 d;
-        d.x = lastPos.x - cam.pos.x;
-        d.y = lastPos.y - cam.pos.y;
-        d.z = lastPos.z - cam.pos.z;
+        SubV3(&d.x, &lastPos.x, &cam.pos.x);
         MulTSelf(&cam, &d);
         AddScaled(&vel, &d, 0.2f);
-        PVec c;
         PSVECCrossProduct(&cam.z, &lastDir, &c);
         Move(PSVECDotProduct(&cam.y, &c), &cam, (const PVec*)&d);
         Spawn();

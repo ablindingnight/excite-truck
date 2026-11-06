@@ -754,6 +754,15 @@ extern "C" u32 fn_802C03E0(u32 c) {
     return (c & 0xFFFF) << 8 | (c & 0xFF0000) << 8 | (c >> 24 & 0xFF);
 }
 
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    const f32* b = (const f32*)b_;
+    o[0] = a[0] + b[0] * s;
+    o[1] = a[1] + b[1] * s;
+    o[2] = a[2] + b[2] * s;
+}
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -844,14 +853,10 @@ void WaterSystem::Draw(void) {
     fn_802C98DC(&dummy, &nz, &dummy, &dummy);
     nz += 0.001f;
     PVec c;
-    c.x = cam2.pos.x + cam2.z.x * nz;
-    c.y = cam2.pos.y + cam2.z.y * nz;
-    c.z = cam2.pos.z + cam2.z.z * nz;
+    MadV3(&c.x, &cam2.pos.x, &cam2.z.x, nz);
     f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.z.y);
     PVec q;
-    q.x = c.x + cam2.y.x * sc;
-    q.y = c.y + cam2.y.y * sc;
-    q.z = c.z + cam2.y.z * sc;
+    MadV3(&q.x, &c.x, &cam2.y.x, sc);
     PVec ax = cam2.x;
     ax.y = 0.0f;
     PVec upv;

@@ -258,14 +258,18 @@ void fn_802DAA18(BoneCmd* c) {
     m->flag = c->flag;
 }
 
+// Helper names unproven: vector steps as the target evaluates them.
+static inline void ScaleV3(void* o_, const void* a_, f32 s) {
+    f32* o = (f32*)o_;
+    const f32* a = (const f32*)a_;
+    o[0] = a[0] * s;
+    o[1] = a[1] * s;
+    o[2] = a[2] * s;
+}
 void fn_802DABA4(const f32* p) {
     f32 v[12];
-    v[0] = p[0] * 10.0f;
-    v[1] = p[1] * 10.0f;
-    v[2] = p[2] * 10.0f;
-    v[3] = p[0] * -10.0f;
-    v[4] = p[1] * -10.0f;
-    v[5] = p[2] * -10.0f;
+    ScaleV3(&v[0], &p[0], 10.0f);
+    ScaleV3(&v[3], &p[0], - 10.0f);
     v[6] = p[3] * 10.0f;
     v[7] = p[4] * 10.0f;
     v[8] = p[5] * 10.0f;
