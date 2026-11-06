@@ -132,7 +132,7 @@ extern "C" void fn_8022D350(StringList* sl, const char* s, char flag) {
     }
 }
 
-char* StringList::Get(int i, int* flag) {
+char* StringList::Get(int i, int* flag) const {
     if (i >= 0 && i < used) {
         if (flag) {
             *flag = items[i][len];

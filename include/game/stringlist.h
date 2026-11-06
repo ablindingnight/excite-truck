@@ -4,7 +4,7 @@
 // added+12 keeps the existing producer name; no new initialization guarantee.
 class StringList {
 public:
-    char* Get(int i, int* flag);
+    char* Get(int i, int* flag) const;
 
     signed long count;     // offset 0x0
     signed long len;       // offset 0x4
