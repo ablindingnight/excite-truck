@@ -1143,6 +1143,13 @@ struct KV3 {
     f32 x, y, z;
 };
 
+// Helper name unproven: arguments read right to left, stores go x, y, z.
+static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
+
 void fn_80268358(CamRec* c) {
     KV3 mv[4] = {KV3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), KV3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), KV3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), KV3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
     f32 (*m)[6] = (f32(*)[6])mv;
@@ -1187,9 +1194,7 @@ void fn_80268358(CamRec* c) {
             hit = 0;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
-            r->m[6] = f.dir[0];
-            r->m[7] = lbl_80563C20;
-            r->m[8] = f.dir[1];
+            SetM3(&r->m[6], f.dir[0], lbl_80563C20, f.dir[1]);
             PSVECNormalize(&r->m[6], &r->m[6]);
             PSVECCrossProduct(&n.x, &r->m[6], &r->m[0]);
             PSVECNormalize(&r->m[0], &r->m[0]);
