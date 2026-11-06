@@ -1095,8 +1095,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         sl->valid = 0;
                     }
                     if (sl->state == 3) {
-                        s32 bone = t->bit;
-                        DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[bone].lo;
+                        DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[t->bit].lo;
                         DVec* hi = lo + 1;
                         c.x = lo->x + (lo + 1)->x;
                         c.y = lo->y + hi->y;
@@ -1104,7 +1103,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         c.x *= lbl_80561FE4;
                         c.y *= lbl_80561FE4;
                         c.z *= lbl_80561FE4;
-                        fn_801BF2A4(p, 1 << bone, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
+                        fn_801BF2A4(p, 1 << t->bit, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
                     }
                 }
             }
