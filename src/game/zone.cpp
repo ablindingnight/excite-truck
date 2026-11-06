@@ -1095,6 +1095,8 @@ public:
     void DrawHits(FixedArray<GateHit, 8>* hits);
 
     Wrap<Wrap<FixedArray<Layout*, 16> > > layouts;  // offset 0x8
+    void LayoutsVf28(void);
+    void LayoutsVf20(void);
     Layout* mainLyt;     // offset 0x54
     Layout* closureLyt;  // offset 0x58
     Layout* resultLyt;   // offset 0x5C
@@ -2807,16 +2809,23 @@ inline void ZoneMaster::vfAC(int car) {
 
 inline void ZoneMaster::vfA8(int car) { vfAC(car); }
 
+inline void ZoneMaster::LayoutsVf28(void) {
+    for (int i = 0; i < layouts.a.a.count; i++) {
+        layouts.a.a.data[i]->vf28();
+    }
+}
+
+inline void ZoneMaster::LayoutsVf20(void) {
+    for (int i = 0; i < layouts.a.a.count; i++) {
+        layouts.a.a.data[i]->vf20();
+    }
+}
+
 inline int ZoneMaster::vf8C(int p, int key) {
-    int i;
     if (key == 's') {
-        for (i = 0; i < layouts.a.a.count; i++) {
-            layouts.a.a.data[i]->vf28();
-        }
+        LayoutsVf28();
     } else if (key == 'e') {
-        for (i = 0; i < layouts.a.a.count; i++) {
-            layouts.a.a.data[i]->vf20();
-        }
+        LayoutsVf20();
     } else if (key == 9) {
         unk4 = (unk4 + 1) % 2;
     }
@@ -2837,7 +2846,8 @@ inline int ZoneMaster::vf8C(int p, int key) {
         half = PSVECDistance(&levels->levels->gates->a, &levels->levels->gates->b) * 0.5f;
         f32 tanY = tan.y;
         len = sqrt(tan.x * tan.x + tanY * tan.y);
-        if (!((f32)__fabs(len) <= lbl_80558DC4[0])) {
+        f32 mag = (f32)__fabs(len);
+        if (!(mag <= lbl_80558DC4[0])) {
             tan.x *= half / len;
             tan.y *= half / len;
         }
@@ -2860,8 +2870,8 @@ inline int ZoneMaster::vf8C(int p, int key) {
                 StopSound(hud.noTimeBonusAnim);
                 StopSound(hud.complete1);
                 StopSound(hud.complete2);
+                hud.t = lbl_8055E3C8 - 1.0f;
                 hud.b8 = 0;
-                hud.t = now - 1.0f;
             }
         }
     }
