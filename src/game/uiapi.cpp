@@ -536,7 +536,7 @@ extern "C" void fn_8022E960(s32);
 extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
-extern "C" void *fn_8021227C(void *entry, char *name, s32 arg2) {
+extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
     char buf[0x100];
     if (*name == '#') {
         name = name + 1;

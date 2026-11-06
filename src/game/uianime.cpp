@@ -305,7 +305,7 @@ static inline void* MakeObj(const UiPose& p, f32 s, f32 a) {
     return o;
 }
 
-static inline void* EvalTrack(const UiAnimTrack* tr, f32 time) {
+static inline void* EvalTrack(UiAnimTrack* tr, f32 time) {
     void* obj;
     if (tr->n > 0) {
         int k = -1;

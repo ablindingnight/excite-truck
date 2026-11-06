@@ -451,7 +451,7 @@ PSysObj* fn_801C1C1C(const PSysDesc* d) { return new ("ppsys") PSysObj(d->nVerts
 
 void fn_801C1C7C(PSysObj* s) { delete s; }
 
-void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e, int np, const PPinDesc* p) {
+void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e, int np, PPinDesc* p) {
     int i;
     s->nPart = 0;
     s->nStick = 0;
