@@ -1005,6 +1005,9 @@ extern const f32 lbl_80563794;  // 4.0 arrow gap
 
 // Colour chooser: a sliding strip of colour swatches (faded and clipped at the edges) with arrows that
 // flash when stepped; without a car (or hidden) it shows its label instead.
+// Helper name unproven: half of a size, the value stays the left operand.
+static inline f32 HalfF(f32 v) { return v * lbl_80563784; }
+
 void fn_80241820(ColorPick* c) {
     if (c->vehicle && c->IsShown()) {
         f32 x;
@@ -1028,9 +1031,7 @@ void fn_80241820(ColorPick* c) {
                 if (d > w * lbl_80563784) {
                     d = w - d;
                 }
-                f32 a = (d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758);
-                a = lbl_80563764 < a ? lbl_80563764 : a;
-                a = a > lbl_80563758 ? a : lbl_80563758;
+                f32 a = Clamp01((d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758));
                 u8 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
                 tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
                 frame = (alpha << 24) | 0xFFFFFF;
@@ -1054,13 +1055,14 @@ void fn_80241820(ColorPick* c) {
             if (c->color > 0) {
                 u8* art = fn_80211660(0);
                 f32 ah = fn_80235F64(art, 1);
-                f32 ay = y - (h - ah) * lbl_80563784;
+                f32 ay = y - HalfF(h - ah);
                 f32 gap = lbl_80563794 + c->leftFlash;
                 fn_802353F4(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
             }
             if (c->color < c->vehicle->num_colors - 1) {
                 u8* art = fn_80211660(1);
-                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), y - (h - (fn_80235F64(art, 1))) * lbl_80563784,
+                f32 ay = y - HalfF(h - fn_80235F64(art, 1));
+                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), ay,
                             lbl_80563758);
             }
             f32 l = c->leftFlash - lbl_80563764;
