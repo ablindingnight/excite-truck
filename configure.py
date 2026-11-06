@@ -984,7 +984,7 @@ config.libs.append(
             Object(NonMatching, "game/prof.cpp"),
             Object(Matching, "game/eventq.cpp"),
             Object(Matching, "game/bg.cpp"),
-            Object(NonMatching, "game/mem.cpp", extra_cflags=["-opt nopropagation"]),
+            Object(Matching, "game/mem.cpp", extra_cflags=["-opt nopropagation"]),
             Object(Matching, "game/spubank.cpp"),
             Object(Matching, "game/sndrate.cpp"),
             Object(Matching, "game/scratch.cpp"),
