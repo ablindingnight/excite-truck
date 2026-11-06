@@ -682,6 +682,8 @@ struct ZoneHud {
     void Init(void);
 
     u32 state;  // offset 0x0 (0x134)
+    // const reader returning int: state is re-read and compared signed here. The name is ours.
+    int State(void) const { return state; }
     f32 t;      // offset 0x4
     u8 b8;      // offset 0x8
     u8 b9;      // offset 0x9
@@ -2838,12 +2840,12 @@ inline int ZoneMaster::vf8C(int p, int key) {
     }
     if (key == 'X') {
         if (vf68()) {
-            if (hud.state == 2) {
+            if (hud.State() == 2) {
                 hud.b9 = 1;
             }
         } else if (hud.state != 0) {
             f32 now = lbl_8055E3C8;
-            if (hud.state == 1 && !hud.noBonus && hud.t > 0.0f && now - hud.t < 1.0f) {
+            if (hud.State() == 1 && !hud.noBonus && hud.t > 0.0f && now - hud.t < 1.0f) {
                 hud.noBonus = 1;
                 if (hud.anim) {
                     fn_802AE118(hud.anim);
