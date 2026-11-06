@@ -4,6 +4,9 @@
 // from the strings.
 #include "game/common.h"
 
+// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 struct MVec3 {
     f32 x;
     f32 y;
@@ -474,21 +477,21 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
     CVec3 nn;
-    nn.z = n->z + k * (nrm.z - n->z);
+    nn.z = LerpT(k, n->z, nrm.z);
     f32 yv = nrm.y;
     f32 xv;
     f32 y2 = n->y;
-    nn.y = y2 + k * (yv - y2);
+    nn.y = LerpT(k, y2, yv);
     xv = nrm.x;
     f32 x2 = n->x;
-    nn.x = x2 + k * (xv - x2);
+    nn.x = LerpT(k, x2, xv);
     nrm = nn;
     PSVECNormalize(&nrm, &nrm);
     CVec3 r;
-    r.x = pt->x + k * (ref.x - pt->x);
-    r.y = pt->y + k * (ref.y - pt->y);
+    r.x = LerpT(k, pt->x, ref.x);
+    r.y = LerpT(k, pt->y, ref.y);
     f32 zv = pt->z;
-    r.z = zv + k * (ref.z - zv);
+    r.z = LerpT(k, zv, ref.z);
     ref = r;
     *(MVec4*)&cs->ref[i] = MVec4(ref.x, ref.y, ref.z);
     *(MVec4*)&cs->nrm[i] = MVec4(nrm.x, nrm.y, nrm.z);

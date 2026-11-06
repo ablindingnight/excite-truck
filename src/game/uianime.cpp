@@ -4,6 +4,9 @@
 // objects by anim_index as the screen transitions in or out. Names are guesses apart from the strings.
 #include "game/common.h"
 
+// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 int strncasecmp(const char* a, const char* b, u32 n);
@@ -291,8 +294,8 @@ u8 lbl_8055F0C7;
 
 static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
     ValPoint r;
-    r.x = a.x + f * (b.x - a.x);
-    r.y = a.y + f * (b.y - a.y);
+    r.x = LerpT(f, a.x, b.x);
+    r.y = LerpT(f, a.y, b.y);
     return r;
 }
 
@@ -324,8 +327,8 @@ static inline void* EvalTrack(const UiAnimTrack* tr, f32 time) {
             dt = dt > 0.0001f ? dt : 0.0001f;
             f32 f = (time - a->t) / dt;
             UiPose p(Lerp2(a->p, b->p, f));
-            f32 s = a->scale + f * (b->scale - a->scale);
-            obj = fn_8022EDE4(&p, a->alpha + f * (b->alpha - a->alpha));
+            f32 s = LerpT(f, a->scale, b->scale);
+            obj = fn_8022EDE4(&p, LerpT(f, a->alpha, b->alpha));
             *(f32*)((u8*)obj + 0x38) = s;
         }
     } else {

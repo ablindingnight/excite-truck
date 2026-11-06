@@ -3,6 +3,9 @@
 // to make the bloom/glare streaks. Names are guesses apart from the strings.
 #include "game/common.h"
 
+// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
+static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 struct GXTexObj {
     u32 dummy[8];
 };
@@ -219,15 +222,15 @@ void fn_802DD754(void) {
 // with the texture inset by (du, dv).
 static inline void GlareVtx(GVtx* buf, int* n, const Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
     GVtx* v = &buf[(*n)++];
-    v->x = s->x0 + fx * (s->x1 - s->x0);
-    v->y = s->y0 + fy * (s->y1 - s->y0);
+    v->x = LerpT(fx, s->x0, s->x1);
+    v->y = LerpT(fy, s->y0, s->y1);
     v->z = 0.5f;
     f32 u1 = s->u1 - du;
     f32 u0 = s->u0 + du;
-    v->u = u0 + fx * (u1 - u0);
+    v->u = LerpT(fx, u0, u1);
     f32 v1 = s->v1 - dv;
     f32 v0 = s->v0 + dv;
-    v->v = v0 + fy * (v1 - v0);
+    v->v = LerpT(fy, v0, v1);
     v->color = color;
 }
 
