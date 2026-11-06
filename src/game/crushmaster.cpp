@@ -1883,19 +1883,24 @@ inline int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags
     return 1;
 }
 
+// Helper name unproven: picks the left or right angle range for this car.
+static inline void PickSide(CrushTarget* t, int i) {
+    f32 a0;
+    f32 a1;
+    if (fn_801B3050(i) & 1) {
+        a0 = -20.0f;
+        a1 = 0.0f;
+    } else {
+        a0 = 0.0f;
+        a1 = 20.0f;
+    }
+    PickTarget(t, i, fn_801725C8(lbl_8055E3C8), a1, a0);
+}
+
 inline void CrushSubTaskMgr::vf24(void) {
     int i;
     for (i = 0; i < nCars; i++) {
-        f32 a0;
-        f32 a1;
-        if (fn_801B3050(i) & 1) {
-            a0 = -20.0f;
-            a1 = 0.0f;
-        } else {
-            a0 = 0.0f;
-            a1 = 20.0f;
-        }
-        PickTarget(&targets[i], i, fn_801725C8(lbl_8055E3C8), a1, a0);
+        PickSide(&targets[i], i);
         targets[i].b0 = 0;
         targets[i].f10 = -1;
     }
