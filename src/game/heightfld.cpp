@@ -667,7 +667,7 @@ f32 fn_801DD88C(f32 x, f32 z) {
     return h;
 }
 
-int fn_801DDA84(f32 x, f32 z, s32* out, int max, f32 thr) {
+int fn_801DDA84(void* q, f32 x, f32 z, s32* out, f32 thr, int max) {
     GroundHeader* g = lbl_8055E990;
     if (!g->tiled) {
         return 0;
