@@ -438,6 +438,17 @@ inline RMat33* RigidBody::Expr2_Update(void) {
     return &invI;
 }
 
+// Helper names unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
+static inline void AddScaled(RVec3* o, const RVec3* v, f32 s) {
+    o->x += v->x * s;
+    o->y += v->y * s;
+    o->z += v->z * s;
+}
+static inline void Scaled(RVec3* o, const RVec3* v, f32 s) {
+    o->x = v->x * s;
+    o->y = v->y * s;
+    o->z = v->z * s;
+}
 void RigidBody::Update(void) {
     RVec3 g;
     RVec3 dr;
@@ -461,12 +472,8 @@ void RigidBody::Update(void) {
         impT.x *= inv;
         impT.y *= inv;
         impT.z *= inv;
-        force.x += impF.x * 59.94f;
-        force.y += impF.y * 59.94f;
-        force.z += impF.z * 59.94f;
-        torque.x += impT.x * 59.94f;
-        torque.y += impT.y * 59.94f;
-        torque.z += impT.z * 59.94f;
+        AddScaled(&force, &impF, 59.94f);
+        AddScaled(&torque, &impT, 59.94f);
         for (i = 0; i < nImp; i++) {
             ImpRec* p = imps[i];
             if (p->by) {
@@ -523,15 +530,9 @@ void RigidBody::Update(void) {
         vel.y *= 300.0f;
         vel.z *= 300.0f;
     }
-    f32 velX = vel.x;
-    mtx.pos.x += velX * 0.0166833512f;
-    mtx.pos.y += vel.y * 0.0166833512f;
-    mtx.pos.z += vel.z * 0.0166833512f;
+    AddScaled(&mtx.pos, &vel, 0.0166833512f);
     MulVec(&aaccel, &torque, &worldInvI);
-    f32 aaccelX = aaccel.x;
-    avel.x += aaccelX * 0.0166833512f;
-    avel.y += aaccel.y * 0.0166833512f;
-    avel.z += aaccel.z * 0.0166833512f;
+    AddScaled(&avel, &aaccel, 0.0166833512f);
     if (PSVECDotProduct(&avel, &avel) > 100.0f) {
         PSVECNormalize(&avel, &avel);
         avel.x *= 10.0f;
@@ -541,10 +542,7 @@ void RigidBody::Update(void) {
     {
         RMtx r;
         f32 ang;
-        f32 xv = avel.x;
-        dr.x = xv * 0.0166833512f;
-        dr.y = avel.y * 0.0166833512f;
-        dr.z = avel.z * 0.0166833512f;
+        Scaled(&dr, &avel, 0.0166833512f);
         ang = PSVECMag(&dr);
         if (ang > 0.0001f) {
             f32 inv = 1.0f / ang;
@@ -630,12 +628,8 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
         impT.x *= inv;
         impT.y *= inv;
         impT.z *= inv;
-        force.x += impF.x * 59.94f;
-        force.y += impF.y * 59.94f;
-        force.z += impF.z * 59.94f;
-        torque.x += impT.x * 59.94f;
-        torque.y += impT.y * 59.94f;
-        torque.z += impT.z * 59.94f;
+        AddScaled(&force, &impF, 59.94f);
+        AddScaled(&torque, &impT, 59.94f);
         for (i = 0; i < nImp; i++) {
             ImpRec* p = imps[i];
             f32 k = 1.0f / impW;
