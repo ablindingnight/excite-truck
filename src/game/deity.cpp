@@ -1106,10 +1106,9 @@ void fn_801B24B8(void) {
     if (fn_801769F8()) {
         return;
     }
-    CrossQueue* q = &lbl_80435BE8;
-    Crossing* e = q->e;
-    for (int i = 0; i < q->n; i++) {
-        Crossing* p = &e[i];
+    Crossing* p = lbl_80435BE8.e;
+    CrossQueue* q = (CrossQueue*)p;  // MATCHING-AID: same address through the walker, needed for the load order
+    for (int i = 0; i < q->n; p++, i++) {
         int rank = lbl_8055E688 - i + 9;
         if (!lbl_8055E684[p->car].locked) {
             lbl_8055E684[p->car].rank = rank;
@@ -1117,7 +1116,7 @@ void fn_801B24B8(void) {
     }
     fn_801B1318();
     for (int i = 0; i < lbl_80435BE8.n; i++) {
-        Crossing* p = &e[i];
+        Crossing* p = &q->e[i];
         fn_801B15A8(&lbl_8055E684[p->car], p->time);
     }
     lbl_80435BE8.n = 0;
