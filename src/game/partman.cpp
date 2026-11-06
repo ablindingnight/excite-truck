@@ -523,6 +523,7 @@ s32 fn_8028F0C0(SysList* buckets, int i, s32 tex) {
 }
 
 void fn_8028F114(SysList* l, s32 first, s32 last) {
+    s32 t;
     PartSys* out[64];
     int nFirst = 0;
     int nMid = 0;
@@ -549,20 +550,19 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
     PartSys** mid = out + nFirst;
     for (int j = 0; j < l->count; j++) {
         PartSys* s = l->items[j];
-        s32 t = s->tex;
+        t = s->tex;
         if (t != first && t != last) {
             int found = 0;
-            for (int k = 0; k < nMid; k++) {
+            for (int k = 0; !found && k < nMid; k++) {
                 found = mid[k]->tex == t;
-                if (found) {
-                    break;
-                }
             }
             if (!found) {
                 mid[nMid++] = s;
+                PartSys** m = &mid[nMid];
                 for (int k = j + 1; k < l->count; k++) {
                     if (l->items[k]->tex == t) {
-                        mid[nMid++] = l->items[k];
+                        *m++ = l->items[k];
+                        nMid++;
                     }
                 }
             }

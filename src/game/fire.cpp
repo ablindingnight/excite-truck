@@ -1318,6 +1318,17 @@ inline BoostEntry* BoostFireMan::Expr1_Update(int i) {
     return &entries[i];
 }
 
+// Helper names unproven.
+static inline void AddV(Vec* o, const Vec* a, const Vec* b) {
+    o->x = a->x + b->x;
+    o->y = a->y + b->y;
+    o->z = a->z + b->z;
+}
+static inline void AddR(Vec* o, const Vec& a, const Vec& b) {
+    o->x = a.x + b.x;
+    o->y = a.y + b.y;
+    o->z = a.z + b.z;
+}
 void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
     BoostEntry* e = Expr1_Update(i);
     if (!((f32)__fabs(car->boost) <= lbl_80558DC4[0])) {
@@ -1339,9 +1350,7 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
                 off.y = vel->y * f + -0.5f * (f * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;
-                    p.x = off.x + e->pts[j].x;
-                    p.y = off.y + e->pts[j].y;
-                    p.z = off.z + e->pts[j].z;
+                    AddV(&p, &e->pts[j], &off);
                     fn_8028E584(emitter, &p, vel);
                 }
             }

@@ -666,15 +666,24 @@ static inline void QuatToFrame(OFrame* f, const Quat* q) {
     f32 xz = q->x * z2;
     f32 wz = q->w * z2;
     f32 xy = q->x * y2;
-    f->x.x = 1.0f - (yy + zz);
-    f->y.y = 1.0f - (xx + zz);
-    f->z.z = 1.0f - (xx + yy);
-    f->z.y = yz - wx;
-    f->y.z = yz + wx;
-    f->z.x = xz + wy;
-    f->x.z = xz - wy;
-    f->y.x = xy - wz;
-    f->x.y = xy + wz;
+    f32 xx1 = 1.0f - (yy + zz);
+    f32 yy1 = 1.0f - (xx + zz);
+    f32 zz1 = 1.0f - (xx + yy);
+    f32 zy = yz - wx;
+    f32 yz1 = yz + wx;
+    f32 zx = xz + wy;
+    f32 xz1 = xz - wy;
+    f32 yx = xy - wz;
+    f32 xy1 = xy + wz;
+    f->x.x = xx1;
+    f->y.y = yy1;
+    f->z.y = zy;
+    f->z.x = zx;
+    f->y.x = yx;
+    f->x.y = xy1;
+    f->x.z = xz1;
+    f->y.z = yz1;
+    f->z.z = zz1;
 }
 
 void HermiteDrone::Start(HermiteEntry* e) {
