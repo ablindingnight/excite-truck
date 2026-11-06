@@ -579,7 +579,8 @@ void fn_802A5384(WeatherCfg* c) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel) {
-    for (int k2 = 0; k2 < m; k2++) {
+    int k2 = 0;
+    if (m > 0) for (; k2 < m; k2++) {
         f32 a = fn_80287BC8(0.0f, 1.0f);
         f32 b = fn_80287BC8(0.0f, 1.0f);
         ValVec3 p;
@@ -612,7 +613,8 @@ void fn_802A53B0(DropHit* hits, int n) {
         }
         Droplet* d = s->drops;
         DropObj* o = hits->obj;
-        for (int j = 0; j < s->count; d++, j++) {
+        int j = 0;
+        if (s->count > 0) for (; j < s->count; d++, j++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
             f32 dot = PSVECDotProduct(&dir, &nrm);
@@ -870,15 +872,16 @@ struct PVec2 {
     f32 x, y;
 };
 void SnowSystem::Spawn(void) {
+    f32 tx;
     f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
-    f32 tx = ty / asp;
+    tx = ty / asp;
     while (count < max) {
         f32 r = fn_80287BC8(0.0f, 1.0f);
         f32 k = 0.5f - 0.5f * r;
         PVec2 g;
-        g.x = grav.x * k;
         g.y = grav.y * k;
+        g.x = grav.x * k;
         f32 ax = 1.0f - AbsF(g.x);
         f32 ay = 1.0f - AbsF(g.y);
         f32 rx = fn_80287BC8(-ax, ax);
