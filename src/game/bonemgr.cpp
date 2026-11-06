@@ -269,13 +269,9 @@ static inline void ScaleV3(void* o_, const void* a_, f32 s) {
 void fn_802DABA4(const f32* p) {
     f32 v[12];
     ScaleV3(&v[0], &p[0], 10.0f);
-    ScaleV3(&v[3], &p[0], - 10.0f);
-    v[6] = p[3] * 10.0f;
-    v[7] = p[4] * 10.0f;
-    v[8] = p[5] * 10.0f;
-    v[9] = p[3] * -10.0f;
-    v[10] = p[4] * -10.0f;
-    v[11] = p[5] * -10.0f;
+    ScaleV3(&v[3], &p[0], -10.0f);
+    ScaleV3(&v[6], &p[3], 10.0f);
+    ScaleV3(&v[9], &p[3], -10.0f);
     fn_802DAA18(fn_802DA704(0x4C, (const BVec*)v, 4));
 }
 
