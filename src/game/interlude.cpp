@@ -952,7 +952,7 @@ void fn_801C4BAC(void) {
     m[10] = 0.0f;
     m[11] = 0.0f;
     *(f32*)(s + 0x98) = 1.5707964f;
-    Message* msg = (Message*)(s + 0x9C);
+    Message* msg = (Message*)&lbl_80437E24;
     msg->title = 0;
     msg->time = -999.0f;
     if (lbl_8055E7F0 == 0) {
@@ -1142,7 +1142,7 @@ void debug_event(void) {
         lbl_8055E7E4 = -lbl_8055E3C8;
     }
     u8* s = lbl_80437D88;
-    Message* msg = (Message*)(s + 0x9C);
+    Message* msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
         Event* e = &lbl_8055E7F8[lbl_8055E7F4];
         if (!(t >= e->time)) {
@@ -1792,11 +1792,10 @@ static inline void Loop2_fn_801C6E40(CamPose* cur, Mat3& inv, Mat3& d, CamPose* 
 }
 
 void fn_801C6E40(void) {
-    u8* s = lbl_80437D88;
-    lbl_8055E830 = atof((char*)(s + 0x368));
+    lbl_8055E830 = atof(lbl_804380F0);
     CamEvent* e = (CamEvent*)fn_801C3C80();
     e->type = 1;
-    CamPose* cur = (CamPose*)(s + 0x468);
+    CamPose* cur = (CamPose*)&lbl_804381F0;
     e->fov = lbl_8055E834;
     e->origin.x = cur->pos.x;
     e->origin.y = cur->pos.y;
@@ -1808,7 +1807,7 @@ void fn_801C6E40(void) {
         IVec3 dp;
         Mat3 d;
         Mat3 inv;
-        Loop2_fn_801C6E40(cur, inv, d, (CamPose*)(s + 0x498), dp);
+        Loop2_fn_801C6E40(cur, inv, d, (CamPose*)&lbl_80438220, dp);
         RotToAxisAngle(&d, &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;
@@ -1826,7 +1825,7 @@ void fn_801C6E40(void) {
         e->v.y = 0.0f;
         e->v.z = 0.0f;
     }
-    sprintf((char*)(s + 0x238), "Camera added at %.2f seconds", e->time);
+    sprintf(lbl_80437FC0, "Camera added at %.2f seconds", e->time);
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
     fn_801C957C(0);
 }
@@ -2004,11 +2003,10 @@ void fn_801C7944(void) {
 void fn_801C7964(void) { lbl_80438250 = lbl_80438268; }
 
 void fn_801C7990(void) {
-    u8* s = lbl_80437D88;
-    IVec3* c = (IVec3*)(s + 0x4E0);
-    *(IVec3*)(s + 0x6F8) = *c;
+    IVec3* c = (IVec3*)&lbl_80438268;
+    lbl_80438480 = *c;
     lbl_8055E83B = 1;
-    *(IVec3*)(s + 0x4D4) = *c;
+    lbl_8043825C = *c;
     lbl_8055E868 = fn_801C7964;
 }
 
@@ -2091,34 +2089,33 @@ static inline f32 Angle(const V2& b, const V2& a) {
 
 // Add teleport: who/except, where (0 = world point facing a direction, 2 = starting positions) and speed.
 void fn_801C7C04(void) {
-    u8* s = lbl_80437D88;
-    lbl_8055E84C = 0.44444445f * (f32)atof((char*)(s + 0x368));
+    lbl_8055E84C = 0.44444445f * (f32)atof(lbl_804380F0);
     fn_801C957C(0);
     TeleportEvent* e = (TeleportEvent*)fn_801C3C80();
     e->type = 4;
     e->where = lbl_8055E848;
-    strcpy(e->who, (char*)(s + 0x4F8));
-    strcpy(e->except, (char*)(s + 0x5F8));
+    strcpy(e->who, lbl_80438280);
+    strcpy(e->except, lbl_80438380);
     e->mask = fn_801C3954(e->who);
     e->mask &= ~fn_801C3954(e->except);
     e->speed = lbl_8055E84C;
     switch (e->where) {
     case 2:
         e->yaw = 0.0f;
-        e->pt = XZ(*(IVec3*)(s + 0x710));
+        e->pt = XZ(lbl_80438498);
         break;
     case 0:
-        e->pt = XZ(*(IVec3*)(s + 0x6F8));
-        e->offset = XZ(*(IVec3*)(s + 0x710)) - e->pt;
-        e->yaw = Angle(V2(0.0f, 1.0f), XZ(*(IVec3*)(s + 0x704)) - XZ(*(IVec3*)(s + 0x6F8)));
+        e->pt = XZ(lbl_80438480);
+        e->offset = XZ(lbl_80438498) - e->pt;
+        e->yaw = Angle(V2(0.0f, 1.0f), XZ(lbl_8043848C) - XZ(lbl_80438480));
         break;
     case 1:
     default:
         fn_802E317C("Interlude Editor: I'm not set up to handle where type %d", e->where);
         break;
     }
-    IVec3* p = (IVec3*)(s + 0x6F8);
-    sprintf((char*)(s + 0x238), "Added teleport to (%.2f, %.2f) at %.2f", p->x, p->z, e->time);
+    IVec3* p = (IVec3*)&lbl_80438480;
+    sprintf(lbl_80437FC0, "Added teleport to (%.2f, %.2f) at %.2f", p->x, p->z, e->time);
     fn_801C7BA0();
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
 }
@@ -2235,20 +2232,19 @@ void fn_801C8298(void) {
 }
 
 void fn_801C82E0(void) {
-    u8* s = lbl_80437D88;
-    lbl_8055E858 = 0.44444445f * (f32)atof((char*)(s + 0x368));
+    lbl_8055E858 = 0.44444445f * (f32)atof(lbl_804380F0);
     ThinkEvent* e = (ThinkEvent*)fn_801C3C80();
     e->type = 5;
     e->kind = lbl_8055E854;
-    strcpy(e->who, (char*)(s + 0x720));
-    strcpy(e->except, (char*)(s + 0x820));
+    strcpy(e->who, lbl_804384A8);
+    strcpy(e->except, lbl_804385A8);
     e->mask = fn_801C3954(e->who);
     e->mask &= ~fn_801C3954(e->except);
     e->x = lbl_8055E85C;
     e->z = lbl_8055E860;
     e->speed = lbl_8055E858;
     e->param = lbl_8055E864;
-    sprintf((char*)(s + 0x238), "Added AI Think at %.2f", e->time);
+    sprintf(lbl_80437FC0, "Added AI Think at %.2f", e->time);
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
     fn_801C8298();
 }
