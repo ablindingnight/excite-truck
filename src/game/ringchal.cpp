@@ -1633,13 +1633,17 @@ inline void Arena::Deactivate(int i) {
     SET_NAME(this, name, 0x1E);
     fn_8016A240(name);
     if (i < nFiles) {
-        ObjSet* s = &sets->data[i];
         int j;
+        ObjSet* s = &sets->data[i];
+        int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
         s->active = 0;
+        j = 0;
+        off = 0;
         s->time = lbl_8055E3C8;
-        for (j = 0; j < s->infos->count; j++) {
-            if (s->infos->data[j].obj) {
-                fn_802BAF98(s->infos->data[j].obj, 0);
+        for (; j < s->infos->count; off += sizeof(s->infos->data[0]), j++) {
+            void* h = ((ObjInfo*)((u8*)s->infos->data + off))->obj;
+            if (h) {
+                fn_802BAF98(h, 0);
             }
         }
     }
