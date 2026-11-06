@@ -1250,22 +1250,25 @@ void fn_801AC544(u8* p) {
 
 extern "C" {
 
+// Helper name unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
+static inline void AddScaled(ObVec3* o, const ObVec3* v, f32 s) {
+    o->x += v->x * s;
+    o->y += v->y * s;
+    o->z += v->z * s;
+}
 void fn_801ACA48(u8* p) {
     fn_801ABC28(p);
     if (U8(p, 0x220)) {
         F32(p, 0x118) = 0.0f;
         F32(p, 0x11C) = 0.0f;
         F32(p, 0x120) = 0.0f;
-        F32(p, 0x124) = (0.9f * F32(p, 0x124));
-        F32(p, 0x128) = (0.9f * F32(p, 0x128));
-        F32(p, 0x12C) = 0.9f * F32(p, 0x12C);
+        F32(p, 0x124) *= 0.9f;
+        F32(p, 0x128) *= 0.9f;
+        F32(p, 0x12C) *= 0.9f;
         ObVec3 c;
         PSVECCrossProduct((f32*)(p + 0x48), (f32*)(p + 0x1F8), &c.x);
         if (F32(p, 0x4C) < 0.92f) {
-            f32 cx = c.x;
-            F32(p, 0x124) = F32(p, 0x124) + 0.1f * cx;
-            F32(p, 0x128) = F32(p, 0x128) + 0.1f * c.y;
-            F32(p, 0x12C) = F32(p, 0x12C) + 0.1f * c.z;
+            AddScaled((ObVec3*)(p + 0x124), &c, 0.1f);
         }
         F32(p, 0x60) = F32(p, 0x210);
         F32(p, 0x64) = F32(p, 0x214);
