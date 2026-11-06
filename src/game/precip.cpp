@@ -866,24 +866,28 @@ void SnowSystem::Fill(void) {
     }
 }
 
+struct PVec2 {
+    f32 x, y;
+};
 void SnowSystem::Spawn(void) {
+    f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
-    f32 tx = ty / fn_802C9A50();
+    f32 tx = ty / asp;
     while (count < max) {
         f32 r = fn_80287BC8(0.0f, 1.0f);
         f32 k = 0.5f - 0.5f * r;
-        f32 ay;
-        f32 gy = grav.y * k;
-        f32 gx = grav.x * k;
-        f32 ax = 1.0f - AbsF(gx);
-        ay = 1.0f - AbsF(gy);
+        PVec2 g;
+        g.x = grav.x * k;
+        g.y = grav.y * k;
+        f32 ax = 1.0f - AbsF(g.x);
+        f32 ay = 1.0f - AbsF(g.y);
         f32 rx = fn_80287BC8(-ax, ax);
         f32 ry = fn_80287BC8(-ay, ay);
         f32 z = near + r * (far - near);
         PVec p;
         p.z = z;
-        p.y = ty * z * (gy + ry);
-        p.x = tx * z * (gx + rx);
+        p.y = ty * z * (g.y + ry);
+        p.x = tx * z * (g.x + rx);
         Add(&p);
     }
 }
@@ -1021,25 +1025,25 @@ void RainSystem::Fill(void) {
 }
 
 void RainSystem::Spawn(void) {
-    f32 tx;
+    f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
-    tx = ty / fn_802C9A50();
+    f32 tx = ty / asp;
     if (vel.z >= -0.01f) {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
             f32 k = 0.5f - 0.5f * r;
-            f32 ay;
-            f32 gy = dir.y * k;
-            f32 gx = dir.x * k;
-            f32 ax = 1.0f - (f32)__fabs(gx);
-            ay = 1.0f - __fabsf(gy);
+            PVec2 g;
+            g.x = dir.x * k;
+            g.y = dir.y * k;
+            f32 ax = 1.0f - AbsF(g.x);
+            f32 ay = 1.0f - AbsF(g.y);
             f32 rx = fn_80287BC8(-ax, ax);
             f32 ry = fn_80287BC8(-ay, ay);
             f32 z = near + r * (far - near);
             PVec p;
             p.z = z;
-            p.y = ty * z * (gy + ry);
-            p.x = tx * z * (gx + rx);
+            p.y = ty * z * (g.y + ry);
+            p.x = tx * z * (g.x + rx);
             Add(&p);
         }
     } else {
