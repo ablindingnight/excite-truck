@@ -252,6 +252,16 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
+// In place, with no alias test.
+static inline void MulVecSelf(V3* v, const Mat3* m) {
+    f32 x = Dot3(v->x, m->m[0][0], v->y, m->m[1][0], v->z, m->m[2][0]);
+    f32 y = Dot3(v->x, m->m[0][1], v->y, m->m[1][1], v->z, m->m[2][1]);
+    f32 z = Dot3(v->x, m->m[0][2], v->y, m->m[1][2], v->z, m->m[2][2]);
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 static inline void MulVecR(V3* out, const V3* in, const Mat3* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
@@ -723,10 +733,13 @@ void fn_802D5B8C(const Surf* s) {
     d.x = lbl_804C56C0.pos.x - lbl_804C5690.pos.x;
     d.y = lbl_804C56C0.pos.y - lbl_804C5690.pos.y;
     d.z = lbl_804C56C0.pos.z - lbl_804C5690.pos.z;
-    MulVec(&d, &d, &lbl_804C5690.rot);
-    f32 v0 = lbl_804DB068[1].y;
-    f32 u0 = lbl_804DB068[1].x;
+    MulVecSelf(&d, &lbl_804C5690.rot);
+    f32 off[2];
+    off[0] = lbl_804DB068[1].x;
+    off[1] = lbl_804DB068[1].y;
     f32 k = lbl_804DB068[1].z;
+    f32 u0 = off[0];
+    f32 v0 = off[1];
     c = col;
     f32* t = uv;
     for (i = 0; i < n; i++) {

@@ -805,10 +805,11 @@ void PartSys::Integrate(V3* out, const Particle* p, f32 age) {
     damp = 1.0f + (a * 0.33f - 1.0f) * (drag * a);
     f32 fall;
     V3 v;
-    v.x = p->vel.x * damp;
     fall = 0.5f * age * (1.0f + (1.5f * drag * a) * (a * 0.33f - 0.8888889f));
-    v.y = p->vel.y * damp - 9.81f * gravity * fall;
+    v.x = p->vel.x * damp;
+    v.y = p->vel.y * damp;
     v.z = p->vel.z * damp;
+    v.y -= 9.81f * gravity * fall;
     out->x = p->pos.x + v.x * age;
     out->y = p->pos.y + v.y * age;
     out->z = p->pos.z + v.z * age;

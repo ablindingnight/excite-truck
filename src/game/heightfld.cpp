@@ -296,7 +296,8 @@ static inline int Loop1_fn_801DC32C(GroundHeader* g) {
         Swap32(&l->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&l->h[b][a]);
+                u16* row = l->h[b];
+                Swap16(&row[a]);
             }
         }
         Swap32(&l->weight);
@@ -333,7 +334,8 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&t->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&t->h[b][a]);
+                u16* row = t->h[b];
+                Swap16(&row[a]);
             }
         }
         Swap32(&t->x);

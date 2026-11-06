@@ -656,6 +656,22 @@ inline void Rotate(BVec3* out, const BMtx* m, const BVec3* v) {
     }
 }
 
+// Helper names unproven: vector operations written as inlines, as the target evaluates them.
+static inline void AddSB(BVec3* o, const BVec3* a, f32 s) {
+    o->x += a->x * s;
+    o->y += a->y * s;
+    o->z += a->z * s;
+}
+static inline void ScaleB(BVec3* o, const BVec3* a, f32 s) {
+    o->x = a->x * s;
+    o->y = a->y * s;
+    o->z = a->z * s;
+}
+static inline void AccB(BVec3* o, const BVec3* a) {
+    o->x += a->x;
+    o->y += a->y;
+    o->z += a->z;
+}
 void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     BMtx m;
     BVec3 p;
@@ -677,18 +693,10 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
         vel.z = 0.0f;
     } else if (DbgFlag(0x10)) {
         BVec3 d;
-        f32 s;
-        d.x = m.rot[2].x * 0.707f + m.rot[1].x * (0.707f * 0.7f);
-        f32 rotY = m.rot[2].y;
-        d.y = rotY * 0.707f + m.rot[1].y * (0.707f * 0.7f);
-        s = (128.0f / 3.6f) * k;  // 128 km/h in m/s
-        d.z = m.rot[2].z * 0.707f + m.rot[1].z * (0.707f * 0.7f);
-        vel.x = d.x * s;
-        vel.y = d.y * s;
-        vel.z = d.z * s;
-        vel.x += v->x;
-        vel.y += v->y;
-        vel.z += v->z;
+        ScaleB(&d, &m.rot[2], 0.707f);
+        AddSB(&d, &m.rot[1], 0.707f * 0.7f);
+        ScaleB(&vel, &d, (128.0f / 3.6f) * k);
+        AccB(&vel, v);
     } else {
         f32 s = 40.0f * k;
         vel.x = v->x + mtx.rot[2].x * s;

@@ -159,6 +159,7 @@ UnkStaticFFFF lbl_8055E600;
 CornerPool* lbl_8055E604;
 
 void Corner::Hit(RigidBody* b) {
+    const RVec3& c = pos;
     RVec3 hit;
     RVec3 n;
     RVec3 p;
@@ -169,7 +170,7 @@ void Corner::Hit(RigidBody* b) {
     RVec3 fr;
     RVec3 ji;
     u32 flags;
-    if (Dot3(pos.x, b->mtx.rot.m[0][1], pos.y, b->mtx.rot.m[1][1], pos.z, b->mtx.rot.m[2][1]) > 0.0f) {
+    if (Dot3(c.x, b->mtx.rot.m[0][1], c.y, b->mtx.rot.m[1][1], c.z, b->mtx.rot.m[2][1]) > 0.0f) {
         return;
     }
     MulVec(&p, &pos, &b->mtx.rot);

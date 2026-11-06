@@ -131,10 +131,9 @@ enum { FALSE_, TRUE_ };
 extern "C" {
 
 void fn_80137D58(IdealPoint* p, IdealLineRes* res) {
-    Swap4(&p->pos.x);
-    Swap4(&p->pos.y);
-    Swap4(&p->dir.x);
-    Swap4(&p->dir.y);
+    for (int i = 0; i < 2; i++) {
+        (&p->pos)[i].Swap();
+    }
     Swap4(&p->ilpos);
     Swap4(&p->len);
     Swap4(&p->dist);

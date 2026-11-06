@@ -156,6 +156,12 @@ extern "C" {
 
 // Builds the driver model on skeleton skel: finds the wheel/hand helpers, poses the model and turns its hips,
 // knees and feet (relative to the seat) into a 7-point ragdoll pinned to the bike.
+// Helper names unproven: vector operations written as inlines, as the target evaluates them.
+static inline void CopyD(DVec3* o, const DVec3* v) {
+    o->x = v->x;
+    o->y = v->y;
+    o->z = v->z;
+}
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -190,9 +196,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     if (!fn_801E2CCC(skel, "butt", &butt)) {
         fn_802E317C("drivmod: can't get butt helper from %s", name);
     }
-    d->butt.x = ((DMtx*)butt)->pos.x;
-    d->butt.y = ((DMtx*)butt)->pos.y;
-    d->butt.z = ((DMtx*)butt)->pos.z;
+    CopyD(&d->butt, &((DMtx*)butt)->pos);
     d->yaw = atan2(((DMtx*)butt)->row[1].z, ((DMtx*)butt)->row[1].y);
     d->butt.x = d->butt.x - bones[0].m.pos.x;
     d->butt.y = d->butt.y - bones[0].m.pos.y;

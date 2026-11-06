@@ -857,13 +857,19 @@ struct P2 {
         a = x;
         ib = y;
     }
+    // The target copies these with lfd/stfd, so the class holds a double.
     union {
-        f32 a;
-        u32 ia;
-    };
-    union {
-        f32 b;
-        u32 ib;
+        f64 d;
+        struct {
+            union {
+                f32 a;
+                u32 ia;
+            };
+            union {
+                f32 b;
+                u32 ib;
+            };
+        };
     };
 };
 
@@ -882,10 +888,13 @@ void fn_801ED718(CarModel* m) {
     if (tex != -1) {
         Frame f;
         P2 v[12];
-        for (int i = 0; i < 12; i++) {
-            v[i].ia = 0;
-            v[i].ib = 0;
-        }
+        int i = 12;
+        P2* p = v;
+        do {
+            p->ia = 0;
+            p->ib = 0;
+            p++;
+        } while (--i);
         SetVtx(&v[0], -0.09f, -0.0225f, 0.0f, 0.25f);
         SetVtx(&v[3], 0.09f, -0.0225f, 1.0f, 0.25f);
         SetVtx(&v[6], 0.09f, 0.0225f, 1.0f, 0.0f);
@@ -932,6 +941,8 @@ void fn_801ED718(CarModel* m) {
         b[3].y = k.y * s;
         b[3].z = k.z * s;
         b[20] = b[1];
+        b[21] = b[21];  // the target loads and rewrites both
+        b[22] = b[22];
         fn_801EC714(&m->speedoSlider, &b[4].y, &b[5].x);
         fn_802C70AC(m->chassis, &m->frame, fn_802C7A34(1, &b[1], 22), 0xFFFFFFFF);
         fn_802C70AC(m->models[1], &m->frame, 0, m->car->groupMask & 0xFFFDFF9F);

@@ -299,6 +299,22 @@ static inline f32 Clamp01(f32 x) {
     return r;
 }
 
+// Helper names unproven: vector operations written as inlines, as the target evaluates them.
+static inline void MulM(const f32* m, const BVec* v, BVec* out) {
+    if (out == v) {
+        f32 x = v->x * m[0] + v->y * m[3] + v->z * m[6];
+        f32 y = v->x * m[1] + v->y * m[4] + v->z * m[7];
+        f32 z = v->x * m[2] + v->y * m[5] + v->z * m[8];
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = v->x * m[0] + v->y * m[3] + v->z * m[6];
+        out->y = v->x * m[1] + v->y * m[4] + v->z * m[7];
+        out->z = v->x * m[2] + v->y * m[5] + v->z * m[8];
+    }
+}
+static inline f32 Sq(f32 x) { return x * x; }
 void fn_802A8A4C(Boid* b, const BVec* target) {
     f32 dir[2];
     dir[0] = b->vel.x;
@@ -307,11 +323,14 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     dir[0] *= inv;
     dir[1] *= inv;
     f32 to[2];
-    f32 x2 = b->pos.x;
-    f32 x_ = target->x;
-    to[0] = x_ - x2;
-    f32 zv = b->pos.z;
-    to[1] = target->z - zv;
+    f32 p[2];
+    f32 g[2];
+    p[0] = b->pos.x;
+    p[1] = b->pos.z;
+    g[0] = target->x;
+    g[1] = target->z;
+    to[0] = g[0] - p[0];
+    to[1] = g[1] - p[1];
     f32 d2 = to[0] * to[0] + to[1] * to[1];
     if (!((f32)__fabs(d2) <= lbl_80558DC4[0])) {
         f32 k = 1.0f / (f32)sqrt(d2);
@@ -325,14 +344,9 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
     }
-    f32 r = b->radius;
-    f32 third = r / 3.0f;
-    third *= third;
-    f32 t = Clamp01(Unlerp(d2, third, r * r));
-    f32 turnv = b->turn;
-    f32 ang = lbl_8055F8D4 * (Lerp(0.0f, steer, t) * (0.017453292f * turnv));
-    f32 c = cos(ang);
-    f32 s = sin(ang);
+    steer = lbl_8055F8D4 * (Lerp(0.0f, steer, Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius)))) * (0.017453292f * b->turn));
+    f32 c = cos(steer);
+    f32 s = sin(steer);
     f32 m[9];
     m[0] = c;
     m[1] = 0.0f;
@@ -343,17 +357,9 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     m[6] = s;
     m[7] = 0.0f;
     m[8] = c;
-    BVec* v = &b->vel;
-    f32 xv = v->x;
-    f32 x = xv * m[0] + v->y * m[3] + v->z * m[6];
-    f32 y = v->x * m[1] + v->y * m[4] + v->z * m[7];
-    f32 z = v->x * m[2] + v->y * m[5] + v->z * m[8];
-    v->x = x;
-    v->y = y;
-    v->z = z;
+    MulM(m, &b->vel, &b->vel);
     PSVECNormalize(&b->vel, &b->vel);
-    f32 u = Clamp01(Unlerp(d2, 0.0f, r * r));
-    f32 spd = Lerp(b->speedMin, b->speedMax, u);
+    f32 spd = Lerp(b->speedMin, b->speedMax, Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))));
     b->vel.x *= spd;
     b->vel.y *= spd;
     b->vel.z *= spd;
