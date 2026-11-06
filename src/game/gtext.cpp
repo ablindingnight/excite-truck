@@ -651,11 +651,11 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
-static inline int EscWidth(const s8* s, f32& h, double& adv) {
-    if (*s == '\\') {
+static inline int EscWidth(const char* s, int i, f32& h, double& adv) {
+    if ((s8)s[i] == '\\') {
         for (int j = 0; j < lbl_80497F14.count; j++) {
             const char* name = lbl_80497F14.data[j].name;
-            if (strncasecmp((const char*)s + 1, name, strlen(name)) == 0) {
+            if (strncasecmp(s + i + 1, name, strlen(name)) == 0) {
                 EscSeq* e = &lbl_80497F14.data[j];
                 if (e->art) {
                     h /= (fn_80235F64(e->art, e->artIdx));
@@ -693,7 +693,7 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     while (s[i]) {
         adv = (f32)f->height;
         h = f->height;
-        int skip = EscWidth((const s8*)s + i, h, adv);
+        int skip = EscWidth(s, i, h, adv);
         if (skip) {
             i += skip;
             w += (f32)adv;

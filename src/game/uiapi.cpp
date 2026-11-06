@@ -536,22 +536,19 @@ extern "C" void fn_8022E960(s32);
 extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
-extern "C" void *fn_8021227C(void *arg0, char *arg1, s32 arg2) {
+extern "C" void *fn_8021227C(void *entry, char *name, s32 arg2) {
     char buf[0x100];
-    void *entry = arg0;
-    char *name = arg1;
-    if (*arg1 == '#') {
-        name = arg1 + 1;
+    if (*name == '#') {
+        name = name + 1;
         sprintf(buf, lbl_8055B750, name);
     }
-    for (;;) {
-        s32 id = *(s32 *)((char *)entry + 4);
-        if (id == 0x7B) return 0;
-        if (id == arg2 && *(char **)entry != 0 &&
+    while (*(s32 *)((char *)entry + 4) != 0x7B) {
+        if (*(s32 *)((char *)entry + 4) == arg2 && *(char **)entry != 0 &&
             (stricmp(*(char **)entry, name) == 0 ||
              stricmp(*(char **)entry, buf) == 0)) return entry;
         entry = (char *)entry + 0x14;
     }
+    return 0;
 }
 
 extern "C" s32 fn_80212338(void) { return 0; }

@@ -1014,7 +1014,7 @@ extern const f32 lbl_80563B90;  // 0.0f
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 void fn_802621F0(u8* p) {
-    static f32 sTextY = 0.5f * -(f32)S32(p, 0x10);
+    static f32 sTextY = -(f32)S32(p, 0x10) * 0.5f;
     char line[30];
     char target[30];
     f32 x;
@@ -1023,7 +1023,7 @@ void fn_802621F0(u8* p) {
     f32 grow;
     u8 alpha;
     u32 gradeColor;
-    u8 tile;
+    u32 tile;
     int part;
     fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
     color = 0xFFFFFFFF;
@@ -1043,7 +1043,7 @@ void fn_802621F0(u8* p) {
     fn_802354A0(PTR(p, 0x20), part, x, y, lbl_80563B90, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
     if (U8(p, 0x1C) && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
-        u32 c = (alpha << 24) | (tile & 0xFFFFFF);
+        u32 c = (alpha << 24) | (tile & 0xFF0000) | (tile & 0xFFFF);
         f32 hw = 0.5f * (f32)S32(p, 0xC);
         f32 hh = 0.5f * (f32)S32(p, 0x10);
         fn_802354A0(PTR(p, 0x20), part, x - grow * hw, y + grow * hh, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),

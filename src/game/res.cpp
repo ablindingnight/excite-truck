@@ -1860,10 +1860,10 @@ extern "C" void fn_8012EE80(StreamBuf* b) {
             s->pos = end;
             start = end;
             n = b->size;
+            end += n;
             if (start + n > b->total) {
                 n = b->total - start;
             }
-            end += b->size;
             if (n > 0) {
                 s->res->Load(s->buf, n, start);
                 s->state = 1;
