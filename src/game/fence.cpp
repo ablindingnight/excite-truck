@@ -92,16 +92,17 @@ void fn_802A0B54(void) {
             f32 len = 1.0f + (f->type * 6);
             int j;
             for (j = 0; j < f->count; j++) {
+                int vertex = j * 2;
                 f32 tu = j / 5.0f;
-                v[j * 2].pos.x = f->posts[j].x;
-                v[j * 2].pos.y = f->posts[j].y;
-                v[j * 2].pos.z = f->posts[j].z;
-                v[j * 2].u = tu * len;
-                v[j * 2].v = v0;
-                v[j * 2].color = 0xFFFFFFFF;
-                v[j * 2 + 1] = v[j * 2];
-                v[j * 2 + 1].pos.y += 0.15f;
-                v[j * 2 + 1].v = (0.25f + v0);
+                v[vertex].pos.x = f->posts[j].x;
+                v[vertex].pos.y = f->posts[j].y;
+                v[vertex].pos.z = f->posts[j].z;
+                v[vertex].u = tu * len;
+                v[vertex].v = v0;
+                v[vertex].color = 0xFFFFFFFF;
+                v[vertex + 1] = v[vertex];
+                v[vertex + 1].pos.y += 0.15f;
+                v[vertex + 1].v = (0.25f + v0);
                 if (j > 0) {
                     u16* q = &idx[(j - 1) * 6];
                     int b = (j - 1) * 2;
