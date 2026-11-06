@@ -859,7 +859,8 @@ void HermiteDrone::UpdateRestock(f32 dt) {
         return;
     }
     HermitePathData* d = entry->data;
-    Curve(d->Clamp(seg - 1), k, d->Clamp(seg + 1), d->Clamp(seg + 2), u);
+    int currentSegment = seg;
+    Curve(d->Clamp(currentSegment - 1), k, d->Clamp(currentSegment + 1), d->Clamp(currentSegment + 2), u);
     Turn(u);
     v = v0 + u * (v1 - v0);
 }
