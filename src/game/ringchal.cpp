@@ -869,7 +869,7 @@ public:
     virtual void vfA8(int car);
     virtual int vfB0(int car, struct Respawn* r);
     virtual int vfE0(int car, u8* out);
-    void DrawRings(ILayout* l);
+    void DrawRings(void);
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
     ILayout* layout;          // offset 0x98
@@ -2126,12 +2126,20 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
 
 // The set list and the ring graphics. Everything but the score overlay; the stack puts its locals in rising order.
 #pragma dont_inline on
-inline void RingChalMaster::DrawRings(ILayout* l) {
+inline void RingChalMaster::DrawRings(void) {
     TextElem* setScore;
     Box* setIcon;
-    Box* starScore;
     Box* arrowIcon;
+    Box* starScore;
+    Box* target;
+    Box* next;
+    int s;
     int i;
+    int n;
+    int j;
+    TextElem* nr;
+    ILayout* l;
+    l = layout;
     arena.timer.Draw(l);
     setScore = l->Find("ring_set_score");
     setIcon = l->FindBox("ring_set_icon");
@@ -2152,7 +2160,7 @@ inline void RingChalMaster::DrawRings(ILayout* l) {
         }
         fn_80147940(l, &icon, "star_art", 0);
         if (i < arena.curSet || arena.b48) {
-            int n = 0;
+            n = 0;
             if (arena.stats->At(i)->done) {
                 f32 a;
                 f32 b;
@@ -2169,7 +2177,6 @@ inline void RingChalMaster::DrawRings(ILayout* l) {
                     f32 y0 = starScore->pos.y;
                     f32 cx = l->Find("score_counter")->pos.x;
                     f32 cy = l->Find("score_counter")->pos.y;
-                    int j;
                     for (j = 0; j < arena.stats->At(i)->best; j++) {
                         Box star;
                         star = *starScore;
@@ -2215,7 +2222,7 @@ inline void RingChalMaster::DrawRings(ILayout* l) {
             fn_80147940(l, &hl, "star_art", 0);
         }
         if (dt < 3.4f) {
-            TextElem* nr = l->Find("next_ring");
+            nr = l->Find("next_ring");
             TextElem* msg;
             if (arena.stats->At(i)->done) {
                 msg = l->Find("ring_hit");
@@ -2269,10 +2276,7 @@ inline void RingChalMaster::DrawRings(ILayout* l) {
         fn_80147940(l, &arrow, "arrow_art", 0);
     }
     {
-        Box* target;
         Box tr;
-        int s;
-        Box* next;
         if (fn_802C9A58()) {
             target = l->FindBox("target_ring_ws");
         } else {
@@ -2345,15 +2349,13 @@ inline void RingChalMaster::DrawRings(ILayout* l) {
 #pragma dont_inline reset
 
 inline void RingChalMaster::vf4C(int view) {
-    ILayout* l;
     {
         PlayerData* p = players.data[fn_801E866C(view)];
         if (p) {
             UpdateScoreOverlays(p->index, p->score);
         }
     }
-    l = layout;
-    DrawRings(l);
+    DrawRings();
 }
 #pragma dont_inline on
 #pragma dont_inline reset
