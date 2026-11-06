@@ -976,7 +976,7 @@ int fn_801F88F4(ValueNode* vn) {
 }
 }
 
-static inline void ReadShape(ObstacleDesc* d, ValueNode* vn) {
+static inline u32 FindShape(ValueNode* vn) {
     TypeList names = sTypes;
     const char* type = vn->GetValue("type");
     u32 i = 0;
@@ -985,6 +985,11 @@ static inline void ReadShape(ObstacleDesc* d, ValueNode* vn) {
             fn_802E317C("Unknown obj type: \"%s\"", type);
         }
     }
+    return i;
+}
+
+static inline void ReadShape(ObstacleDesc* d, ValueNode* vn) {
+    u32 i = FindShape(vn);
     d->kind = i;
     switch (i) {
     case 0:
@@ -1657,7 +1662,104 @@ void fn_801FA9AC(void) {
     }
 }
 
-void fn_801FAAC4(ObstacleDesc* d, ValueNode* vn) { ReadShape(d, vn); }
+// Same body as ReadShape, not a call to it: an inline's temporaries ascend on the stack, these descend, so this copy was
+// the plain function the compiler also inlined into fn_801F8988 (-inline auto). Source order forces the second copy here.
+void fn_801FAAC4(ObstacleDesc* d, ValueNode* vn) {
+    u32 i = FindShape(vn);
+    d->kind = i;
+    switch (i) {
+    case 0:
+    case 14:
+    case 17:
+    case 19:
+        d->shape.f[0] = vn->GetFloat("rad");
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 6:
+    case 15:
+        d->shape.f[0] = vn->GetFloat("dx");
+        d->shape.f[1] = vn->GetFloat("dy");
+        d->shape.f[2] = vn->GetFloat("dz");
+        break;
+    case 4:
+        d->shape.f[0] = vn->GetFloat("bottom_rad");
+        d->shape.f[1] = vn->GetFloat("top_rad");
+        d->shape.f[2] = vn->GetFloat("hit");
+        break;
+    case 8:
+        d->shape.f[0] = vn->GetFloat("hit");
+        d->shape.f[1] = vn->GetFloat("wid");
+        d->shape.f[2] = vn->GetFloat("len");
+        break;
+    case 5:
+    case 7:
+        d->shape.f[0] = vn->GetFloat("rad");
+        d->shape.f[1] = vn->GetFloat("hit");
+        break;
+    case 9:
+        d->shape.f[0] = vn->GetFloat("inner_rad");
+        d->shape.f[1] = vn->GetFloat("ring_rad");
+        break;
+    case 10:
+        StrNCopy(d->shape.name, vn->GetString("phys_model", ""), 16);
+        if (!d->shape.name[0]) {
+            char* dot;
+            StrNCopy(d->shape.name, vn->GetString("model", ""), 16);
+            dot = strrchr(d->shape.name, '.');
+            if (dot) {
+                *dot = 0;
+                StrNCat(d->shape.name, ".pln", 16);
+            }
+        }
+        break;
+    case 20:
+        StrNCopy(d->shape.name, vn->GetString("phys_model", ""), 16);
+        if (!d->shape.name[0]) {
+            char* dot;
+            StrNCopy(d->shape.name, vn->GetString("model", ""), 16);
+            dot = strrchr(d->shape.name, '.');
+            if (dot) {
+                *dot = 0;
+                StrNCat(d->shape.name, ".msh", 16);
+            }
+        }
+        break;
+    case 11: {
+        u8* m = (u8*)fn_802C6B44(vn->GetValue("model"));
+        memcpy(&d->shape, m + 0x2C, 0x1C);
+        d->shape.f[6] = vn->GetFloat("front_top_z_adjust", 0.0f);
+        fn_802C6C20(m);
+        break;
+    }
+    case 12:
+        d->shape.f[0] = vn->GetFloat("rad");
+        d->shape.f[1] = vn->GetFloat("hit");
+        break;
+    case 13:
+    case 18:
+    case 22:
+        d->shape.f[0] = vn->GetFloat("rad");
+        d->shape.f[1] = vn->GetFloat("len");
+        d->shape.f[2] = 9.81f * vn->GetFloat("rolling_linear_decel_g", 0.0f);
+        break;
+    case 16: {
+        d->shape.f[0] = vn->GetFloat("dx");
+        d->shape.f[1] = vn->GetFloat("dy");
+        d->shape.f[2] = vn->GetFloat("dz");
+        ((PVec*)&d->shape.f[3])->Set(vn->GetVec3("fire_offset"));
+        break;
+    }
+    case 21: {
+        StrNCopy(&d->shape.name[0x14], vn->GetValue("model"), 16);
+        d->shape.f[0] = vn->GetFloat("rad");
+        d->shape.f[1] = vn->GetFloat("y_rad", d->shape.f[0]);
+        ((PVec*)&d->shape.f[2])->Set(vn->GetVec3("offset"));
+        break;
+    }
+    }
+}
 
 s32 fn_801FB1F4(s32 n) { return lbl_8055B1C8 -= n; }
 }
