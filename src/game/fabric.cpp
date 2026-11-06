@@ -356,20 +356,6 @@ void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801F5508(Fabric* f, int c, Stick* s, int k) {
-    int r;
-    for (r = 1; r < f->rows; r++) {
-        int b;
-        int a = c + (r - 1) * f->cols;
-        b = c + r * f->cols;
-        s[k].a = a;
-        s[k].b = b;
-        s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
-        k++;
-    }
-}
-
 void fn_801F5508(Fabric* f) {
     Stick* s;
     int n;
@@ -384,14 +370,22 @@ void fn_801F5508(Fabric* f) {
             int b;
             b = r * f->cols + c;
             int a = b - 1;
-            s[k].a = a;
             s[k].b = b;
+            s[k].a = a;
             s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
             k++;
         }
     }
     for (c = 0; c < f->cols; c++) {
-        Loop1_fn_801F5508(f, c, s, k);
+        for (r = 1; r < f->rows; r++) {
+            int b;
+            int a = c + (r - 1) * f->cols;
+            b = c + r * f->cols;
+            s[k].a = a;
+            s[k].b = b;
+            s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
+            k++;
+        }
     }
     f->sticks = s;
     f->numSticks = n;
