@@ -411,21 +411,30 @@ static inline void QuatToMtx(BMtx33* m, const Quat* q) {
     f32 xx = q->x * x2;
     f32 yy = q->y * y2;
     f32 zz = q->z * z2;
-    f32 xy = q->x * y2;
-    f32 xz = q->x * z2;
-    f32 yz = q->y * z2;
     f32 wx = q->w * x2;
+    f32 yz = q->y * z2;
     f32 wy = q->w * y2;
+    f32 xz = q->x * z2;
     f32 wz = q->w * z2;
-    m->xx = 1.0f - (yy + zz);
-    m->yx = xy - wz;
-    m->zx = xz + wy;
-    m->xy = xy + wz;
-    m->yy = 1.0f - (xx + zz);
-    m->zy = yz - wx;
-    m->xz = xz - wy;
-    m->yz = yz + wx;
-    m->zz = 1.0f - (xx + yy);
+    f32 xy = q->x * y2;
+    f32 m00 = 1.0f - (yy + zz);
+    f32 m11 = 1.0f - (xx + zz);
+    f32 m22 = 1.0f - (xx + yy);
+    f32 zy = yz - wx;
+    f32 yz1 = yz + wx;
+    f32 zx = xz + wy;
+    f32 xz1 = xz - wy;
+    f32 yx = xy - wz;
+    f32 xy1 = xy + wz;
+    m->xx = m00;
+    m->yy = m11;
+    m->zy = zy;
+    m->zx = zx;
+    m->yx = yx;
+    m->xy = xy1;
+    m->xz = xz1;
+    m->yz = yz1;
+    m->zz = m22;
 }
 
 static inline void MtxToQuatAxis(f32 (*m)[3], Quat* q) {
@@ -701,6 +710,16 @@ void HermiteDrone::Start(HermiteEntry* e) {
     QuatToFrame(&frame, &d->keys[0].rot);
 }
 
+template <class O, class A> static inline void Sc(O* o, const A* a, f32 s) {
+    o->x = a->x * s;
+    o->y = a->y * s;
+    o->z = a->z * s;
+}
+template <class O, class A> static inline void AS(O* o, const A* a, f32 s) {
+    o->x += a->x * s;
+    o->y += a->y * s;
+    o->z += a->z * s;
+}
 void HermiteDrone::Curve(const HermiteKey* k0, const HermiteKey* k1, const HermiteKey* k2, const HermiteKey* k3,
                          f32 u) {
     PVec m0;
@@ -730,10 +749,10 @@ void HermiteDrone::Curve(const HermiteKey* k0, const HermiteKey* k1, const Hermi
     f32 h10 = 0.5f * (u + (u3 - 2.0f * u2));
     f32 h11 = 0.5f * (u3 - u2);
     PVec a;
-    a.x = k1->pos.x * h00 + m0.x * h10 + m1.x * h11;
-    a.y = k1->pos.y * h00 + m0.y * h10 + m1.y * h11;
-    a.z = k1->pos.z * h00 + m0.z * h10 + m1.z * h11;
-    frame.pos.x = a.x + h01 * k2->pos.x;
+    Sc(&a, &k1->pos, h00);
+    AS(&a, &m0, h10);
+    AS(&a, &m1, h11);
+    frame.pos.x = a.x + k2->pos.x * h01;
     frame.pos.y = a.y + k2->pos.y * h01;
     frame.pos.z = a.z + k2->pos.z * h01;
 }
@@ -790,7 +809,9 @@ void HermiteDrone::UpdateReverse(f32 dt) {
         if (next >= d->count && next < d->count * 2) {
             BMtx33 m;
             BMtx33 r;
-            QuatToMtx(&m, &q1);
+            BMtx33* mp = &m;
+            BMtx33* rp = &r;
+            QuatToMtx(mp, &q1);
             f32 c = cos(3.1415927f);
             f32 s = sin(3.1415927f);
             r.xx = c;
@@ -802,8 +823,8 @@ void HermiteDrone::UpdateReverse(f32 dt) {
             r.zx = s;
             r.zy = 0.0f;
             r.zz = c;
-            MtxMul(&m, &r, &m);
-            MtxToQuat(&m, &q1);
+            MtxMul(mp, rp, mp);
+            MtxToQuat(mp, &q1);
         }
     }
     if (d->count - 1 != seg % d->count) {
@@ -822,23 +843,23 @@ void HermiteDrone::UpdateRestock(f32 dt) {
     f32 u = k->rate * nt;
     if (u < 1.0f) {
         t = nt;
-    } else {
-        if (seg + 2 >= entry->data->count) {
-            fn_801FEC74(this);
-            entry = 0;
-            seg = -1;
-            return;
-        }
+    } else if (seg + 2 < entry->data->count) {
         t = t + (dt - 1.0f / k->rate);
         u = u - 1.0f;
-        q0 = q1;
         seg++;
+        k = entry->data->Clamp(seg);
+        q0 = q1;
         v0 = v1;
         q1 = entry->data->Clamp(seg + 1)->rot;
         v1 = entry->data->Clamp(seg + 1)->v;
+    } else {
+        fn_801FEC74(this);
+        entry = 0;
+        seg = -1;
+        return;
     }
     HermitePathData* d = entry->data;
-    Curve(d->Clamp(seg - 1), d->Clamp(seg), d->Clamp(seg + 1), d->Clamp(seg + 2), u);
+    Curve(d->Clamp(seg - 1), k, d->Clamp(seg + 1), d->Clamp(seg + 2), u);
     Turn(u);
     v = v0 + u * (v1 - v0);
 }
