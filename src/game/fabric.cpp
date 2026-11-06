@@ -520,11 +520,6 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
 
 extern "C" {
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline int Expr1_fn_801F602C(f32 d, f32 w) {
-    return d > w;
-}
-
 void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     f32 w = PSVECDistance(&q->c[2].pos, &q->c[3].pos);
     f32 h;
@@ -535,7 +530,7 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     f32 vmax;
     f32 span;
     d = PSVECDistance(&q->c[0].pos, &q->c[1].pos);
-    if (Expr1_fn_801F602C(d, w)) {
+    if (d > w) {
         w = d;
     }
     h = PSVECDistance(&q->c[1].pos, &q->c[3].pos);
@@ -558,7 +553,9 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     vmin = FMin(q->c[0].v, FMin(q->c[1].v, FMin(q->c[2].v, q->c[3].v)));
     vmax = FMax(q->c[0].v, FMax(q->c[1].v, FMax(q->c[2].v, q->c[3].v)));
     f->tex = fn_802CAC28(tex, 0);
-    span = FMax((f32)__fabs(umax - umin), (f32)__fabs(vmax - vmin));
+    f32 du = (f32)__fabs(umax - umin);
+    f32 dv = (f32)__fabs(vmax - vmin);
+    span = FMax(du, dv);
     f->lod = log2(span / FMax(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
