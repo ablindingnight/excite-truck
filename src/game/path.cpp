@@ -190,11 +190,12 @@ void fn_801D9F84(PathFollower* p, PathFile* f) {
 }
 
 int fn_801D9FC4(PathFollower* p, const char* name) {
+    int n;
     PathFile* f = p->file;
     int i;
-    int n = f->count;
+    n = f->count;
     for (i = 0; i < n; i++) {
-        if (strcmp(f->paths[i].name, name) == 0) {
+        if (strcmp((char*)f + i * (int)sizeof(Path) + 4, name) == 0) {  // signed stride from the file, then the header
             return 1;
         }
     }
