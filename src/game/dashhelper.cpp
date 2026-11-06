@@ -414,6 +414,8 @@ u32 fn_8000E338(int value) {
     return value <= 70 ? 0xFFE5A703 : 0xFF278F27;
 }
 
+// Helper name unproven: value left of the literal in the fmuls.
+static inline f32 MulQ(f32 a, f32 b) { return a * b; }
 void fn_8000E3B4(int player) {
     DashRowList* list = &lbl_80350F88;
     f32 top;
@@ -422,6 +424,7 @@ void fn_8000E3B4(int player) {
     f32 pad;
     f32 maxSlide;
     DashRow* row;
+    u32 barColor;
     int i;
 
     if (list->count < 1) {
@@ -441,10 +444,11 @@ void fn_8000E3B4(int player) {
     }
     pad = lbl_80350F88.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
+    barColor = lbl_8055D48C.value;
     for (i = 0, row = lbl_80350F88.rows; i < lbl_80350F88.count; row++, i++) {
         char buf[16];
-        int part2;
         int part;
+        int part2;
         part = fn_8000DFA8(row->type);
         part2 = fn_8000DFC0(row->type);
         f32 w = pad + fn_80235EF0(lbl_80350F88.art, part);
@@ -458,7 +462,7 @@ void fn_8000E3B4(int player) {
         x5 = 5.0f + x;
         xr = x + w - 5.0f;
         x10 = 5.0f + x5;
-        ty = 1.0f + (y - h * 0.5f);
+        ty = 1.0f + (y - MulQ(h, 0.5f));
         switch (row->type) {
         case 1:
             fn_80010074(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
@@ -498,8 +502,8 @@ void fn_8000E3B4(int player) {
             {
                 f32 bx = x5 + pad;
                 f32 bh = 17.0f;
-                f32 fill = bx + row->c * 89.0f / 100.0f;
-                fn_800109E4(lbl_8055D48C.value, fill, ty + bh * 0.5f, 89.0f + bx - fill, bh);
+                f32 fill = bx + MulQ(row->c, 89.0f) / 100.0f;
+                fn_800109E4(barColor, fill, ty + bh * 0.5f, 89.0f + bx - fill, bh);
             }
             break;
         case 8:
