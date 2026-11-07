@@ -2376,7 +2376,7 @@ void fn_80197BD0(u8* d, u8* out) {
     if (U8(d, 0xFC)) {
         if (F32(d, 0xEC) < 4.0f || S32(d, 0x100) > 1) {
             fn_8019315C(d, S32(d, 0x114));
-            f32 w = lo + (f32)__fabs(F32(d, 0x104)) * (hi - lo);
+            f32 w = lo + AbsFlt(F32(d, 0x104)) * (hi - lo);
             int mine = 0;
             u8* o = lbl_804349C0[S32(d, 0x114)];
             if (o && S32(d, 0x290) == S32(o, 0x114)) {
@@ -2384,7 +2384,7 @@ void fn_80197BD0(u8* d, u8* out) {
             }
             f32 side = F32(d, 0xF8);
             f32 off = side - F32(d, 0x108);
-            int wide = (f32)__fabs(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
+            int wide = AbsFlt(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
             if (wide && SignDiffers(off, side) && !mine) {
                 off = side > 0.0f ? 1.0f : -1.0f;
             }
@@ -2396,7 +2396,7 @@ void fn_80197BD0(u8* d, u8* out) {
                 F32(d, 0x10C) = off;
             }
             f32 gap = 0.915f + 0.5f * (w + lbl_8055A488);
-            if ((f32)__fabs(off) < gap) {
+            if (AbsFlt(off) < gap) {
                 int busy = 0;
                 if (U8(d, 0x9C) || U8(d, 0x74)) {
                     busy = 1;
