@@ -575,21 +575,23 @@ void fn_801F639C(Fabric* f) {
 }
 
 // Verlet step with one force for every particle.
+// Helper name unproven: scales the force by the 1/60 step squared.
+static inline void ScaleP(PVec* o, const PVec* v, f32 k) {
+    o->x = v->x * k;
+    o->y = v->y * k;
+    o->z = v->z * k;
+}
 void fn_801F63F0(Fabric* f, const PVec* force, f32 drag) {
     f32 k1;
-    f32 keep;
     PVec a;
     TVec* c;
     TVec* p;
     PVec t;
     f32 k2;
     int i;
-    a.x = force->x * 0.0002777778f;
-    a.y = force->y * 0.0002777778f;
-    keep = 1.0f - drag;
-    k2 = -keep;
+    k2 = -(1.0f - drag);
     k1 = 2.0f - drag;
-    a.z = 0.0002777778f * force->z;
+    ScaleP(&a, force, 0.0002777778f);
     for (i = 0; i < f->count; i++) {
         TVec* c;
         c = &f->cur[i];
