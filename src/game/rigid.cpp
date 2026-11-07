@@ -513,9 +513,9 @@ void RigidBody::Update(void) {
         impT.z = 0.0f;
     }
     impW = 0.0f;
+    nImp = 0;
     AddScaled(&vel, &force, 0.0166833512f * invMass);
     Scaled(&accel, &force, invMass);
-    nImp = 0;
     if (PSVECDotProduct(&vel, &vel) > 90000.0f) {
         PSVECNormalize(&vel, &vel);
         vel.x *= 300.0f;
