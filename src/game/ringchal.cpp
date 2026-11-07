@@ -2286,7 +2286,9 @@ inline void RingChalMaster::DrawRings(void) {
         tr = *target;
         s = arena.curSet;
         if (s > 0 && !arena.b49) {
-            f32 d = Time() - arena.stats->At(s - 1)->time - (1.7f + 0.2f);
+            f32 k = 1.7f + 0.2f;
+            f32 a = Time() - arena.stats->At(s - 1)->time;
+            f32 d = a - k;
             if (Time() - arena.stats->At(s - 1)->time > 0.0f && d <= 2.2f) {
                 s = s - 1;
             }
