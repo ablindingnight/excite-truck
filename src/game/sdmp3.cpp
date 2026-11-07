@@ -954,9 +954,9 @@ void fn_802EBE2C(void) {
     lbl_8056009C = new ("mp3_heap") u8[0x10000 - 0x1280];
     lbl_805600A4 = 0x47FC0;
     fn_802E30C8("mp3: pcm_buf_size = %dK", lbl_805600A4 / 1024);
-    lbl_805600A0 = new ("pcm_buf") u8[(lbl_805600A4 + 0x1200) * 2 - (lbl_805600A4 + 0x1200)];
+    lbl_805600A0 = new ("pcm_buf") u8[lbl_805600A4 + 0x1200];
     lbl_805600AC = 0x1E000;
-    lbl_805600A8 = new ("mp3_buf") u8[lbl_805600AC * 2 - lbl_805600AC];
+    lbl_805600A8 = new ("mp3_buf") u8[lbl_805600AC];
     lbl_805600B8 = 0x2400;
     for (int i = 0; i < 2; i++) {
         lbl_805600B0[i] = 0;
