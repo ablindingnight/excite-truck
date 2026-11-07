@@ -643,22 +643,22 @@ void fn_802B321C(InlineVec<ObjTweak, 1>* out, u8** clumpy, InlineVec<MatPlacer*,
     int k;
     MatPlacer* m;
     ObjTweak* t;
-    if (layer < 0 || layer >= set->count) {
-        fn_802E30C8("GetTweakers(%d): This layer index is out of range (%d->%d)", layer, 0, set->count);
-        return;
-    }
-    m = set->data[layer];
-    if (out) {
-        for (k = 0; k < m->placers.count && out->count + 1 <= out->cap; k++) {
-            p = m->placers.data[k];
-            t = &out->data[out->count++];
-            t->name = p->name;
-            t->placer = p;
-            t->scales = &p->minScale;
+    if (layer >= 0 && layer < set->count) {
+        m = set->data[layer];
+        if (out) {
+            for (k = 0; k < m->placers.count && out->count + 1 <= out->cap; k++) {
+                p = m->placers.data[k];
+                t = &out->data[out->count++];
+                t->name = p->name;
+                t->placer = p;
+                t->scales = &p->minScale;
+            }
         }
-    }
-    if (clumpy) {
-        *clumpy = &m->clumpy;
+        if (clumpy) {
+            *clumpy = &m->clumpy;
+        }
+    } else {
+        fn_802E30C8("GetTweakers(%d): This layer index is out of range (%d->%d)", layer, 0, set->count);
     }
 }
 
