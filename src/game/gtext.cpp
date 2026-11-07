@@ -128,7 +128,7 @@ u32 fn_80230B9C(u32 color);
 void fn_80231380(UIVert* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 
 
-void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_802354A0(gArtSet* s, f32 x, f32 y, f32 z, int idx, u32 color, f32 w, f32 h);
   // width
   // height
 void fn_802C8B98(s32 tex, const void* m);
@@ -360,8 +360,7 @@ void fn_80231780(const UIXform* m) {
             f32 s = fn_8022EDC4()->scale;
             s = (s > 0.001f) ? s : 0.001f;
             f32 k = 1.0f / s;
-            fn_802354A0(e->art, e->artIdx, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z,
-                        k * it->w, k * it->h, color);
+            fn_802354A0(e->art, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z, e->artIdx, color, k * it->w, k * it->h);
         } else {
             if (!m) {
                 fn_802C8B98(lbl_80497F14.data[it->esc].tex, fn_8022EDC4());

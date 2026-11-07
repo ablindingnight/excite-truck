@@ -121,7 +121,7 @@ void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f3
                  f32 scale, f32 a, f32 b);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 void fn_802354A0(void* image, int idx, f32 x, f32 y, f32 z, f32 width, f32 height, int color);
-void fn_80011280(u32 color, void* image, f32 x, f32 y, f32 width);
+void fn_80011280(u32 color, f32 x, f32 y, f32 width, void* image);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int fn_80277960(const char* name, CamFrame* frame, f32* fov);
 void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t);
@@ -545,7 +545,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
         f32 box_x = lbl_8055CFF0 * slide - 225.0f;
         f32 box_y = 0.5f * box_h - 80.0f;
 
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, lbl_8055D658, box_x, box_y, 450.0f);
+        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, box_x, box_y, 450.0f, lbl_8055D658);
         static LocString s_title("Tips:TITLE");
         fn_8023293C(lbl_8055D64C, s_title.Get(), 1.0f);
         fn_80233010(lbl_8055D65C, lbl_8055D64C, -1, 0x11, 0, 20.0f + box_x, box_y - 50.0f, 410.0f, 0.51333332f,
@@ -556,7 +556,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
         f32 panel_x = lbl_8055CFF0 * slide - 160.0f;
         int i;
 
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, lbl_8055D658, panel_x, 40.0f, 320.0f);
+        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, lbl_8055D658);
         int rows[3] = {10, 8, 9};
         for (i = 0; i < sizeof(rows) / sizeof(rows[0]); i++) {
             int kind = rows[i];
