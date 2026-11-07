@@ -256,10 +256,13 @@ void fn_801E22D0(Phob** list, int n) {
             int nc = 5;
             PhobCell* cells[5];
             fn_801B619C(cells, &nc, &p->pos);
-            PhobNode* nd;
+            // MATCHING-AID: named cell walker, declared in register order.
             Phob* o;
-            for (int k = 0; k < nc; k++) {
-                for (nd = cells[k]->head; nd; nd = nd->next) {
+            PhobNode* nd;
+            PhobCell** w;
+            int k;
+            for (k = 0, w = cells; k < nc; w++, k++) {
+                for (nd = (*w)->head; nd; nd = nd->next) {
                     o = nd->phob;
                     if (p < o || !o->Solid()) {
                         fn_801E1F8C(p, o);
