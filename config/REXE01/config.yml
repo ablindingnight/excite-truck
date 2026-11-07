@@ -40,3 +40,5 @@ block_relocations:
 - source: 0x802F1FE8
 - source: 0x802F1FEC
 - source: 0x802F1FF0
+# falsereloc.py 2026-11-07: vi3in1 data word that only looks like an address.
+- source: 0x80311CC0
