@@ -237,6 +237,8 @@ struct FunkyFov {
     f32 t;       // offset 0xC
 };
 
+// Helper name unproven: the clamped value arrives as a parameter, so it stays the left operand of the multiply.
+static inline f32 FovRemap(f32 t) { return lbl_80563C20 + t * lbl_80563C2C; }
 void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     if (fresh) {
         f->last = now;
@@ -254,7 +256,7 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     e = lbl_8055C4B8;
     f32 st = lbl_8055C4B4;
     f32 x = (a - st) / (e - st);
-    f->t = ShakeEase(lbl_80563C20 + ClampF(x) * lbl_80563C2C);
+    f->t = ShakeEase(FovRemap(ClampF(x)));
 }
 
 f32 PSVECDistance(const f32* a, const f32* b);
