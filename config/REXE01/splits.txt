@@ -3382,7 +3382,7 @@ game/widgets.cpp:
 	.rodata     start:0x802F9EE0 end:0x802F9F54
 	.data       start:0x8033D878 end:0x8033FBE8
 	.bss        start:0x80490920 end:0x80490950
-	.sdata      start:0x8055B878 end:0x8055B8B0
+	.sdata      start:0x8055B878 end:0x8055B8AB
 	.sbss       start:0x8055EFB0 end:0x8055EFC0
 	.sdata2     start:0x805634A0 end:0x80563588
 
