@@ -170,6 +170,7 @@ struct EvPair {
 
 // The event/track pairs the pickers choose from.
 struct EvPairs {
+    EvPairs();
     EvPair* items;  // offset 0x0
     s32 count;      // offset 0x4
     s32 cap;        // offset 0x8
@@ -343,14 +344,13 @@ void fn_80249744(void) { fn_80214CB4(lbl_8055BF34); }
 // The multiplayer event menu: location, course, event count and AI strength, with the course picture,
 // preview movie and stats. Starts from the remembered choices and remembers the new ones; returns 0 when
 // backed out. In testing mode only the unlocked multiplayer events are offered.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8024974C(EvPairs* pairs) {
+inline EvPairs::EvPairs() {
     int n = GetNumEvents();
     EvPair* b = new ("dsa_buf") EvPair[n];
-    pairs->items = b;
-    pairs->cap = n;
-    pairs->count = 0;
-    pairs->alloc = b;
+    items = b;
+    cap = n;
+    count = 0;
+    alloc = b;
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
@@ -374,10 +374,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     *diff = 0;
     fn_801332D0(0, lbl_8055BF10, eve);
     fn_801332D0(0, lbl_8055BF14, track);
-    EvPairs* pairs = (EvPairs*)operator new(sizeof(EvPairs), "ci-list");
-    if (pairs) {
-        Loop1_fn_8024974C(pairs);
-    }
+    EvPairs* pairs = new ("ci-list") EvPairs;
     int i;
     for (i = 0; i < GetNumEvents(); i++) {
         u8* ev = GetEvent(i);
