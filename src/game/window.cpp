@@ -542,8 +542,8 @@ void fn_80217D84(Window* win) {
 void fn_80217EC0(Window* win, int horizontal, int negative) {
     s32 cx;
     int n;
-    Widget *wd;
-    Widget *cw;
+    Widget* wd;
+    Widget* cw;
     s32 cy;
     int cur;
     int best;
@@ -554,10 +554,6 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
     int i;
 
     n = win->menuCount;
-
-
-
-
 
     if (n < 1) {
         return;
@@ -574,9 +570,6 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
     cy = cw->y;
     bestScore = 100000;
     for (i = 0; i < n; i++) {
-
-
-
 
         if (i == cur) {
             continue;

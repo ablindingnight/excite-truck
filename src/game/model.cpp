@@ -394,17 +394,17 @@ void fn_802C5720(int pri) {
 MPrim* fn_802C57B0(MPrim* p) { return p; }
 
 void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
-    MSurf *s;
-    ModelNode *slot;
+    MSurf* s;
+    ModelNode* slot;
     int e;
     u8 cl;
     s32 inst;
     int j;
     u8 c;
-    ModelInfo *info;
-    MSurfList *sl;
-    MElem *el;
-    TexNode *t;
+    ModelInfo* info;
+    MSurfList* sl;
+    MElem* el;
+    TexNode* t;
 
     slot = fn_802C5390(i);
     info = slot->info;

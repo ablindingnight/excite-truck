@@ -1376,15 +1376,12 @@ extern Tune lbl_8042FB3C;
 extern "C" void fn_8013E3A8(Tune* t, ValueNode* n);
 
 ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
-    ValueTable *conf;
+    ValueTable* conf;
     int i;
     int n;
-    ValueNode *node;
-    ValueTable *t;
-    const char *file;
-
-
-
+    ValueNode* node;
+    ValueTable* t;
+    const char* file;
 
     char buf[0x100];
     mainLyt = fn_80145E70("zlmain.val");
