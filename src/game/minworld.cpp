@@ -153,6 +153,8 @@ void fn_802526E0(MWMtx* m) {
     PSVECCrossProduct(&m->z, &m->x, &m->y);
 }
 
+static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
+
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p = b->pos;
     MWVec2 d(p.x, p.z);
@@ -174,7 +176,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
     b->pos = MWVec4(p.x, p.y, p.z);
     e = d;
     {
-        f32 k = 1.0f / (f32)sqrt(e.x * e.x + e.y * e.y);
+        f32 k = 1.0f / SqrtF(e.x * e.x + e.y * e.y);
         e.x = e.x * k;
         e.y = e.y * k;
     }
