@@ -31,7 +31,7 @@ public:
         size = s;
     }
     virtual ~StackAlloc(void) { delete[] buf; }
-    void* Alloc(s32 n) {
+    void* Alloc(const s32& n) {
         s32 a = (n + 3) & ~3;
         if (a + used + 8 > size) {
             fn_802E317C("StackAlloc(%s:%d)::insufficient memory (max %dK)", name, n, size / 1024);
