@@ -317,6 +317,8 @@ static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
 }
 
 // Per-frame HUD update: start prompt, boost glow, hit flashes, speed lines, air and water effects, drift meter.
+static inline float AbsFlt(float v) { return (float)__fabs(v); }
+
 extern "C" void fn_8020E598(Hud *h) {
     unsigned char *v;
     int underwater;
@@ -497,10 +499,10 @@ extern "C" void fn_8020E598(Hud *h) {
         float spd;
         v = h->vehicle;
         spd = VF32(v, 0x25D4);
-        if ((float)__fabs(VF32(v, 0x2690)) <= lbl_80558DC4 && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
+        if (AbsFlt(VF32(v, 0x2690)) <= lbl_80558DC4 && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
             !underwater) {
-            float dot = (float)__fabs(PSVECDotProduct((HudVec *)(v + 0x118), (HudVec *)(v + 0x3C)));
-            float lim = spd * ((float)__fabs(h->driftTime) <= lbl_80558DC4 ? lbl_805633E0 : lbl_805633E4);
+            float dot = AbsFlt(PSVECDotProduct((HudVec *)(v + 0x118), (HudVec *)(v + 0x3C)));
+            float lim = spd * (AbsFlt(h->driftTime) <= lbl_80558DC4 ? lbl_805633E0 : lbl_805633E4);
             shown = dot > lim;
             if (shown) {
                 float t = HudClamp01(lbl_805633DC * (dot / lim - lbl_80563368));
