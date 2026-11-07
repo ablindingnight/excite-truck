@@ -598,6 +598,19 @@ const char* fn_802B6A70(int mode) {
     return "";
 }
 
+/* Helper name unproven: appends src after dst's text, never writing past size bytes. */
+static inline void StrAppend(char* dst, int size, const char* src) {
+    char* p = dst;
+    int n = size;
+    while (*p) {
+        n--;
+        p++;
+    }
+    if (n > 0) {
+        StrCopy(src, n, p);
+    }
+}
+
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, int h) {
     do {
@@ -643,15 +656,7 @@ static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, in
             fn_80128678();
         }
         if (b->w == 0) {
-            char* p = b->name;
-            int n = 0x20;
-            while (*p) {
-                n--;
-                p++;
-            }
-            if (n > 0) {
-                StrCopy("-BAD", n, p);
-            }
+            StrAppend(b->name, 0x20, "-BAD");
         }
         if (lbl_804BE7D8.count + 1 > lbl_804BE7D8.cap) {
             break;
