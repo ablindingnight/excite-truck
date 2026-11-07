@@ -4620,15 +4620,13 @@ inline void BetaMaster::a1(void) {
 }
 
 inline void BetaMaster::b2Body(StuntEvt* e, int car) {
-    BetaCar* c;
+    int i;
     Pickup* t;
     bool turbo;
     BetaCar* bc;
     u8* f;
     s32 h;
-    c = &cars[car];
-    if (c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0]) {
-        int i;
+    if (cars[car].mode == 0 ? 0 : cars[car].mode == 1 ? 1 : (f32)__fabs(cars[car].meter - 1.0f) <= lbl_80558DC4[0]) {
         for (i = 0; i < stars.a.count; i++) {
             h = stars.a.data[i]->hC0;
             if (h == e->Id()) {
