@@ -760,7 +760,7 @@ public:
         c = 0;
     }
     u32 a, b, c;
-    u32 pad[2];
+    u32 pad[5];
 };
 
 ModuleTag lbl_8055EEF8;
@@ -779,7 +779,7 @@ static FloatValue sDefaultSpin((f32*)&lbl_8055EF50, 0.0f, 100.0f, 1.0f, 0.0f, 1.
 static OptionPair sDefaultMulti;
 static char sDefaultInput[0x40];
 static UIBox sDefaultControl;
-static UICustomHandler sCustomHandlers[16];
+UICustomHandler lbl_80490710[16];
 static UITriple sDefaultView;
 
 static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
@@ -1153,7 +1153,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             lbl_8055EF58 = (lbl_8055EF58 + 1) & 0xF;
             widgets[count++] = (WidgetFragment*)new ("Custom")
                 UICustom(d->x, d->y, d->dx, d->dy, d->kind,
-                         &sCustomHandlers[lbl_8055EF58]);
+                         &lbl_80490710[lbl_8055EF58]);
         }
         break;
     }

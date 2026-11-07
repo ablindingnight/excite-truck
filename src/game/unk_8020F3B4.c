@@ -1044,7 +1044,7 @@ public:
         unkC = 0;
         unk10 = 0;
     }
-    unsigned long unk0, unk4, unk8, unkC, unk10;
+    unsigned long unk0, unk4, unk8, unkC, unk10, unk14;
 };
 class UnkStatic7F {
 public:
@@ -1057,4 +1057,5 @@ UnkStatic7F lbl_8055EEB8;
 char lbl_80489CA0[0x6400];
 Unk_804900AC lbl_804900AC;
 Unk_804902C4 lbl_804902C4;
+char lbl_804904D0[0x40];
 #pragma cplusplus off

@@ -3326,6 +3326,7 @@ game/roadsnd.cpp:
 game/unk_8020CF68.c:
 	.text       start:0x8020CF68 end:0x8020DE74
 	.ctors      start:0x802ED3A0 end:0x802ED3A4
+	.bss        start:0x80489C70 end:0x80489C88
 	.sdata2     start:0x80563318 end:0x80563368
 
 game/unk_8020DE74.cpp:
@@ -3336,11 +3337,13 @@ game/unk_8020DE74.cpp:
 game/unk_8020F3B4.c:
 	.text       start:0x8020F3B4 end:0x8021165C
 	.ctors      start:0x802ED3A8 end:0x802ED3AC
+	.bss        start:0x80489C88 end:0x80490510
 	.sdata2     start:0x80563400 end:0x80563430
 
 game/uiapi.cpp:
 	.text       start:0x8021165C end:0x80215E68
 	.ctors      start:0x802ED3AC end:0x802ED3B0
+	.bss        start:0x80490510 end:0x804908B0
 	.sdata2     start:0x80563430 end:0x80563458
 
 game/unk_80215E68.c:

@@ -493,7 +493,7 @@ public:
         unkC = 0;
         unk10 = 0;
     }
-    unsigned long unk0, unk4, unk8, unkC, unk10;
+    unsigned long unk0, unk4, unk8, unkC, unk10, unk14;
 };
 class UnkStatic7F {
 public:
