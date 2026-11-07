@@ -106,17 +106,19 @@ void CarElem::Fetch(int car) {
 
 void CarElem::Clear(int car) { f0 = 0.0f; }
 
+// Helper name unproven: a square through an inline.
+static inline f32 Sq(f32 v) { return v * v; }
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void CarElem::Loop1_Compute(f32 x, f32 k) {
     f32 t;
     if (x > f2C) {
         t = x - f20;
         t = 0.0f > t ? 0.0f : t;
-        f32 sq = x * x;
+        f32 sq = Sq(x);
         t = fC + (f8 * x + f4 * sq) - f24 * t;
         t = f28 > t ? f28 : t;
     } else {
-        f32 sq = x * x;
+        f32 sq = Sq(x);
         t = f18 + (f14 * x + f10 * sq);
     }
     f0 = k * t - x * f1C;

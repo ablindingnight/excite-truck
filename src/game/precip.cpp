@@ -297,6 +297,8 @@ DropSource lbl_804BCFB8[8];
 
 
 
+// Helper name unproven: a square through an inline.
+static inline f32 Sq(f32 v) { return v * v; }
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -822,7 +824,7 @@ void SnowSystem::Frustum(void) {
     f32 b = -0.1f * s - 2.0f * f * n;
     f32 c = n * (f * 0.0050000004f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     near = 0.3f + n;
-    far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
+    far = (-b + (f32)sqrt(Sq(b) - 4.0f * s * c)) / (2.0f * s);
 }
 
 void SnowSystem::Drift(void) {
@@ -1000,7 +1002,7 @@ void RainSystem::Frustum(void) {
     f32 b = -0.5f * s - 2.0f * f * n;
     f32 c = n * (f * 0.125f) - 0.015f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     near = 1.0f + n;
-    far = (-b + (f32)sqrt(b * b - 4.0f * s * c)) / (2.0f * s);
+    far = (-b + (f32)sqrt(Sq(b) - 4.0f * s * c)) / (2.0f * s);
 }
 
 void RainSystem::Move(const PVec* d) {
@@ -1019,7 +1021,7 @@ void RainSystem::Move(const PVec* d) {
         v.z = p->z + m.z;
         v.y = p->y + m.y;
         if (v.z > near && v.z < far && v.x * v.x < (0.25f + v.z * tx) * (0.25f + v.z * tx) &&
-            v.y * v.y < (0.25f + v.z * ty) * (0.25f + v.z * ty)) {
+            Sq(v.y) < (0.25f + v.z * ty) * (0.25f + v.z * ty)) {
             out->x = v.x;
             out->y = v.y;
             out->z = v.z;
@@ -1072,7 +1074,7 @@ void RainSystem::Spawn(void) {
     } else {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
-            f32 z = LerpF(r + -vel.z * (r * r - r), near, far);
+            f32 z = LerpF(r + -vel.z * (Sq(r) - r), near, far);
             f32 a = fn_80287BC8(-z, z);
             f32 b = fn_80287BC8(-z, z);
             PVec p;
@@ -1174,7 +1176,7 @@ void Mist::Draw(void) {
         f32 old = fn_802C9A4C(pointScale);
         fn_802C8BD0(tex);
         if (fn_802CE860(count)) {
-            f32 k = (f32)a / (rad * rad);
+            f32 k = (f32)a / Sq(rad);
             for (int i = 0; i < count; i++) {
                 WPt* p = &pts[i];
                 int b = (int)((f32)a - k * PSVECSquareDistance(p, &center));
