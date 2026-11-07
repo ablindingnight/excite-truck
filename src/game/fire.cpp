@@ -1129,6 +1129,17 @@ void BigRingMan::Free(BigRing* r) {
     r->emitter = 0;
 }
 
+// Helper names unproven: a point between two others; the setter loads z first.
+static inline f32 MixF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+static inline void SetVec(Vec* o, f32 x, f32 y, f32 z) {
+    o->x = x;
+    o->y = y;
+    o->z = z;
+}
+static inline void MixVec(Vec* o, const Vec* a, const Vec* b, f32 t) {
+    SetVec(o, MixF(t, a->x, b->x), MixF(t, a->y, b->y), MixF(t, a->z, b->z));
+}
+
 void BigRingMan::Tick(BigRing* r, f32 now) {
     if (r->t > 1.0f - lbl_80558DC4[0]) {
         Vec v;
@@ -1137,12 +1148,8 @@ void BigRingMan::Tick(BigRing* r, f32 now) {
         v.z = 0.0f;
         for (int i = 0; i < r->count; i++) {
             f32 f = fn_80129DC4(0, 0.0f, 1.0f);
-            const Vec* b = &r->pts[(i + 1) % r->count];
             Vec p;
-            p.x = r->pts[i].x + f * (b->x - r->pts[i].x);
-            f32 yv = r->pts[i].y;
-            p.y = yv + f * (b->y - yv);
-            p.z = r->pts[i].z + f * (b->z - r->pts[i].z);
+            MixVec(&p, &r->pts[i], &r->pts[(i + 1) % r->count], f);
             fn_8028E584(r->emitter, &p, &v);
             fn_80288A58(&p, &v);
         }

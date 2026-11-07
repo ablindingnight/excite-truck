@@ -719,9 +719,11 @@ static inline void SaveColor(u8* p, s32 c) {
 static inline void ShowSelColor(u8* p) {
     VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
     if (lbl_80498C48.alt) {
-        GetVehicleColor(v, 0)[0] = S32(p, 0x2C);
+        s32 c = S32(p, 0x2C);
+        GetVehicleColor(v, 0)[0] = c;
     } else {
-        GetVehicleColor(v, 0)[1] = S32(p, 0x2C);
+        s32 c = S32(p, 0x2C);
+        GetVehicleColor(v, 0)[1] = c;
     }
     *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
     ShowCarColor(p);
