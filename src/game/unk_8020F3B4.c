@@ -576,6 +576,8 @@ void fn_80210514(long arg0) {
     case 1:
         fn_8020F608(1, IdentGetCurrentSlot());
         break;
+    case 2:  /* an empty label: its jump to the end is the target's dead second b (which value is a guess) */
+        break;
     }
 }
 
