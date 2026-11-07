@@ -2084,10 +2084,20 @@ void *fn_8011A168(StreamAllocator *allocator) {
     return (void *)fn_80119DD0;
 }
 
+/* Helper name unproven. The byte-reversed load is inline asm with the zero index in a register, as in the GameCube
+ * Bink's intelendian (cross-checked against n100f, reference only): the __lwbrx intrinsic blocks the x8 unroll. */
+static inline u32 Swap32(register u32 *p) {
+    register u32 v;
+    register u32 z = 0;
+    asm { lwbrx v, z, p }
+    return v;
+}
+
+// intelendian: byte-swaps `size` bytes (rounded up to words) in place.
 void fn_8011A1A0(u32 *data, u32 size) {
     u32 count = (size + 3) >> 2;
     while (count--) {
-        *data = __lwbrx(data, 0);
+        *data = Swap32(data);
         data++;
     }
 }
