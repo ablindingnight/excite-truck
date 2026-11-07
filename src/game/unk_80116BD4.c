@@ -2738,48 +2738,46 @@ decode:
         var_r8 = arg3 + var_r28;
         temp_r9 = -1U >> (0x20 - var_r0_3);
         temp_r18 = var_r29 - var_r3;
-        if (var_r3 < var_r29) {
-            for (var_ctr = 0; var_ctr < temp_r18; var_ctr++) {
-                if (var_r3 == (u32)(*var_r7 * 2)) {
-                    var_f29 = *var_r8;
-                    var_r8++;
-                    var_r7++;
-                    var_r28++;
-                    var_f28 = -var_f29;
-                }
-                if ((u32)var_r24 < var_r0_3) {
-                    temp_r10 = *var_r26;
-                    var_r26++;
-                    temp_r6_2 = var_r25 | (temp_r10 << var_r24);
-                    var_r25 = temp_r10 >> (var_r0_3 - var_r24);
-                    var_r5_3 = temp_r9 & temp_r6_2;
-                    var_r24 = var_r24 + 0x20 - var_r0_3;
-                } else {
-                    var_r5_3 = var_r25 & temp_r9;
-                    var_r25 = var_r25 >> var_r0_3;
-                    var_r24 -= var_r0_3;
-                }
-                if (var_r5_3 != 0) {
-                    if (var_r24 == 0) {
-                        var_r4_3 = *var_r26;
-                        var_r24 = 0x1F;
-                        var_r26++;
-                        var_r25 = var_r4_3 >> 1U;
-                    } else {
-                        var_r4_3 = var_r25;
-                        var_r25 = var_r25 >> 1U;
-                        var_r24--;
-                    }
-                    if (var_r4_3 & 1) var_f1 = var_f28;
-                    else var_f1 = var_f29;
-                    *var_r27 = (f32)var_r5_3 * var_f1;
-                    var_r27++;
-                } else {
-                    *var_r27 = temp_f31;
-                    var_r27++;
-                }
-                var_r3++;
+        while (var_r3 < var_r29) {
+            if (var_r3 == (u32)(*var_r7 * 2)) {
+                var_f29 = *var_r8;
+                var_r8++;
+                var_r7++;
+                var_r28++;
+                var_f28 = -var_f29;
             }
+            if ((u32)var_r24 < var_r0_3) {
+                temp_r10 = *var_r26;
+                var_r26++;
+                temp_r6_2 = var_r25 | (temp_r10 << var_r24);
+                var_r25 = temp_r10 >> (var_r0_3 - var_r24);
+                var_r5_3 = temp_r9 & temp_r6_2;
+                var_r24 = var_r24 + 0x20 - var_r0_3;
+            } else {
+                var_r5_3 = var_r25 & temp_r9;
+                var_r25 = var_r25 >> var_r0_3;
+                var_r24 -= var_r0_3;
+            }
+            if (var_r5_3 != 0) {
+                if (var_r24 == 0) {
+                    var_r4_3 = *var_r26;
+                    var_r24 = 0x1F;
+                    var_r26++;
+                    var_r25 = var_r4_3 >> 1U;
+                } else {
+                    var_r4_3 = var_r25;
+                    var_r25 = var_r25 >> 1U;
+                    var_r24--;
+                }
+                if (var_r4_3 & 1) var_f1 = var_f28;
+                else var_f1 = var_f29;
+                *var_r27 = (f32)var_r5_3 * var_f1;
+                var_r27++;
+            } else {
+                *var_r27 = temp_f31;
+                var_r27++;
+            }
+            var_r3++;
         }
     }
     goto outer_test;
