@@ -610,37 +610,48 @@ void fn_800C1C1C(s32* in, s32* out) {
 #undef MP3_Q20
 
 /* 6-tap Q20 dot product over four 6-sample groups; outputs at word offsets 0, 2, 6, 8 (strides 2 and 4).
- * From DeepSeek's draft (accumulator starting at 0, ChatGPT's variant B). NonMatching: same opcodes and size,
- * but the original adds each low product word (addc) before computing its high word (mulhw). */
-void fn_800C1E88(s32* coeff, s32* input, s32* output) {
-    s32 c3;
-    s32 c2;
+ * d is the sample data, t the window table (callers pass the table second).
+ * MATCHING-AID: every product operand is a named local and the declaration order comes from esclimb.
+ * The named reads are what give the original register order; the real names and grouping are unknown. */
+void fn_800C1E88(s32* d, s32* t, s32* out) {
+    s32 a5;
+    s32 a3;
+    s32 a4;
+    s64 acc;
+    s32 i;
     s32 c0;
-    s32 n;
+    s32 a0;
+    s32 a2;
     s32 c1;
-    c1 = coeff[1];
-    c0 = coeff[0];
-    c2 = coeff[2];
-    c3 = coeff[3];
+    s32 a1;
+    s32 c2;
+    s32 c3;
 
-    for (n = 0; n < 4; n++) {
-        s64 acc;
+    c0 = d[0];
+    c1 = d[1];
+    c2 = d[2];
+    c3 = d[3];
 
+    for (i = 0; i < 4; i++) {
+        a0 = t[0];
+        a1 = t[1];
+        a2 = t[2];
+        a3 = t[3];
+        a4 = t[4];
+        a5 = t[5];
+        t += 6;
         acc = 0;
-        acc += (s64)input[0] * c0;
-        acc += (s64)input[1] * c1;
-        acc += (s64)input[2] * c2;
-        acc = acc + (s64)input[3] * c3;
-        acc += (s64)input[4] * coeff[4];
-        acc += (s64)input[5] * coeff[5];
-
-        *output = (s32)(acc >> 20);
-
-        input += 6;
-        if (n & 1) {
-            output += 4;
+        acc += (s64)c0 * a0;
+        acc += (s64)c1 * a1;
+        acc += (s64)c2 * a2;
+        acc += (s64)c3 * a3;
+        acc += (s64)d[4] * a4;
+        acc += (s64)d[5] * a5;
+        *out = (s32)(acc >> 20);
+        if (i & 1) {
+            out += 4;
         } else {
-            output += 2;
+            out += 2;
         }
     }
 }
