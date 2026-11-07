@@ -645,10 +645,10 @@ extern "C" WidgetFragment* fn_80219870(WidgetFragment*, int, int, const char*, v
 extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_8021F678(WidgetFragment*, int, int, int, int, float, float, void*, int);
+extern "C" WidgetFragment* fn_8021F678(WidgetFragment*, int, int, int, int, void*, float, int, float);
 extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 extern "C" WidgetFragment* fn_8021BD98(WidgetFragment*, int, int, void*, const char*, int, float, float);
-extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, const char*, int, float, float);
+extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, float, const char*, float, int);
 extern "C" WidgetFragment* fn_8021BEC0(WidgetFragment*, int, int, void*, int, int, int, int);
 extern "C" WidgetFragment* fn_8021CA0C(WidgetFragment*, int, int, int, int, void*);
 extern "C" WidgetFragment* fn_8021C97C(WidgetFragment*, int, int, void*, int, void*);
@@ -945,8 +945,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         }
         if (d->dx - 37 > 10) {
             p = (WidgetFragment*)operator new(0x27c, "Slider");
-            if (p) p = fn_8021F678(p, d->x + 21, d->y, d->dx - 37, d->dy, low, high,
-                                   range ? range->value : &lbl_8055EF50, d->field9c);
+            if (p) p = fn_8021F678(p, d->x + 21, d->y, d->dx - 37, d->dy,
+                                   range ? range->value : &lbl_8055EF50, low, d->field9c, high);
             widgets[count++] = p;
         }
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
@@ -973,7 +973,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 7: {
         value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x2b4, "IntNumeric");
-        if (p) p = fn_8021CEEC(p, d->x, d->y, value ? value->value : &lbl_8055EF4C, d->name, d->flags, 1.0f, 0.0f);
+        if (p) p = fn_8021CEEC(p, d->x, d->y, value ? value->value : &lbl_8055EF4C, 1.0f, d->name, 0.0f, d->flags);
         widgets[count++] = p;
         break;
     }
