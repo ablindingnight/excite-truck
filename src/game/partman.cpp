@@ -141,6 +141,7 @@ struct PartSys : PartParams {
     void Integrate(V3* out, const Particle* p, f32 age);
     void DrawSprites(Particle* p, int n);
     void DrawAnimated(Particle* p, int n);
+    f32 CellOf(int n) { return (f32)n * cell; }
     void DrawRotating(Particle* p, int n);
     int CanEmit(void) { return accum >= 1.0f - lbl_80558DC4[0] && head != tail; }
     Particle* parts;  // offset 0x8C
@@ -940,10 +941,10 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         q[3].pos.y = pos.y + d2.y * -size;
         q[3].pos.z = pos.z + d2.z * -size;
         q[0].color = q[1].color = q[2].color = q[3].color = color;
-        q[0].u = q[3].u = (f32)(frame % grid) * cell;
-        q[1].u = q[2].u = (f32)(frame % grid + 1) * cell;
-        q[0].v = q[1].v = (f32)(frame / grid) * cell;
-        q[2].v = q[3].v = (f32)(frame / grid + 1) * cell;
+        q[0].u = q[3].u = CellOf(frame % grid);
+        q[1].u = q[2].u = CellOf(frame % grid + 1);
+        q[0].v = q[1].v = CellOf(frame / grid);
+        q[2].v = q[3].v = CellOf(frame / grid + 1);
         batch.Add(q);
     }
     batch.Flush();
