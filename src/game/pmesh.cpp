@@ -291,23 +291,29 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
     return hit;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801CFA48(PMesh* m) {
-    int i;
-    for (i = 0; i < m->numTris; i++) {
-        PTri* t = &m->tris[i];
-        PSwap16(&t->flags);
-        for (int k = 0; k < 3; k++) {
-            PSwap16(&t->v[k]);
-            PSwap32(&t->edge[k].x);
-            PSwap32(&t->edge[k].y);
-            PSwap32(&t->edge[k].z);
-        }
-        PSwap32(&t->n.x);
-        PSwap32(&t->n.y);
-        PSwap32(&t->n.z);
-        PSwap32(&t->d);
+
+/* Helper names unproven: per-element byte swaps. */
+static inline void SwapVec(PVec3* v) {
+    PSwap32(&v->x);
+    PSwap32(&v->y);
+    PSwap32(&v->z);
+}
+
+static inline void SwapCell(PCell* c) {
+    SwapVec(&c->center);
+    PSwap32(&c->radius);
+    PSwap32(&c->first);
+    PSwap32(&c->end);
+}
+
+static inline void SwapTri(PTri* t) {
+    PSwap16(&t->flags);
+    for (int k = 0; k < 3; k++) {
+        PSwap16(&t->v[k]);
+        SwapVec(&t->edge[k]);
     }
+    SwapVec(&t->n);
+    PSwap32(&t->d);
 }
 
 void fn_801CFA48(PMesh* m) {
@@ -325,22 +331,15 @@ void fn_801CFA48(PMesh* m) {
     m->tris = (PTri*)p;
     int i;
     for (i = 0; i < m->numCells; i++) {
-        PCell* c = &m->cells[i];
-        PSwap32(&c->center.x);
-        PSwap32(&c->center.y);
-        PSwap32(&c->center.z);
-        PSwap32(&c->radius);
-        PSwap32(&c->first);
-        PSwap32(&c->end);
+        SwapCell(&m->cells[i]);
     }
     int count = m->numVerts;
     for (i = 0; i < count; i++) {
-        PVec3* v = &m->verts[i];
-        PSwap32(&v->x);
-        PSwap32(&v->y);
-        PSwap32(&v->z);
+        SwapVec(&m->verts[i]);
     }
-    Loop1_fn_801CFA48(m);
+    for (i = 0; i < m->numTris; i++) {
+        SwapTri(&m->tris[i]);
+    }
 }
 
 PMesh* fn_801CFEAC(const char* name) {
