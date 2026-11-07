@@ -254,59 +254,83 @@ static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
 void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
-    u8* car = PTR(cam, 0x140);
-    CamRect* r = &lbl_8049A218[*cam];
+    f32 avg;
+    f32 lo;
+    f32 v;
+    f32 h;
+    u8 *car;
+    f32 y;
+    f32 z;
+    bool onGround;
+    const s16 *hint;
+    f32 lift;
+    f32 hi;
+    f32 down;
+    f32 h2;
+    f32 up;
+    f32 h0;
+    f32 h1;
+    f32 zoom;
+    f32 k;
+    f32 h3;
+    f32 t;
+    f32 m;
+    f32 top;
+    f32 rv;
+    CamRect *r;
+    car = PTR(cam, 0x140);
+    r = &lbl_8049A218[*cam];
     if (!fn_801769F8()) {
-        const s16* hint = (const s16*)(car + 0x6C);
-        bool onGround = S32(car, 0x2620) > 0;
+        hint = (const s16*)(car + 0x6C);
+        onGround = S32(car, 0x2620) > 0;
         CVec3 c = *(CVec3*)(car + 0x60);
-        f32 y = c.y;
-        f32 z = c.z;
-        f32 h0 = fn_801E9FDC(hint, c.x + lbl_80563E84, lbl_80563E84 + z);
+        y = c.y;
+        z = c.z;
+        h0 = fn_801E9FDC(hint, c.x + lbl_80563E84, lbl_80563E84 + z);
         h0 = OverObstacle(h0, lbl_80563E84 + c.x, y, lbl_80563E84 + z);
-        f32 h1 = fn_801E9FDC(hint, c.x - lbl_80563E84, lbl_80563E84 + z);
+        h1 = fn_801E9FDC(hint, c.x - lbl_80563E84, lbl_80563E84 + z);
         h1 = OverObstacle(h1, c.x - lbl_80563E84, y, lbl_80563E84 + z);
-        f32 h2 = fn_801E9FDC(hint, c.x - lbl_80563E84, z - lbl_80563E84);
+        h2 = fn_801E9FDC(hint, c.x - lbl_80563E84, z - lbl_80563E84);
         h2 = OverObstacle(h2, c.x - lbl_80563E84, y, z - lbl_80563E84);
-        f32 h3 = fn_801E9FDC(hint, c.x + lbl_80563E84, z - lbl_80563E84);
+        h3 = fn_801E9FDC(hint, c.x + lbl_80563E84, z - lbl_80563E84);
         h3 = OverObstacle(h3, lbl_80563E84 + c.x, y, z - lbl_80563E84);
-        f32 avg = lbl_80563E68 * (h0 + (h1 + (h2 + h3)));
+        avg = lbl_80563E68 * (h0 + (h1 + (h2 + h3)));
         if (onGround) {
             r->v[0] = avg - c.y;
             r->v[2] = lbl_80563E78;
         } else {
             r->v[2] = r->v[2] + lbl_80563E88;
         }
-        f32 h = r->v[0] + (c.y - avg);
-        f32 rv = r->v[2];
-        f32 t = (rv - lbl_80563E78) / lbl_80563E30;
+        h = r->v[0] + (c.y - avg);
+        rv = r->v[2];
+        t = (rv - lbl_80563E78) / lbl_80563E30;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
-        f32 up = lbl_80563E88 * (lbl_80563E8C + t * lbl_80563E90);
-        f32 down = onGround ? lbl_80563E94 : lbl_80563E98;
+        up = lbl_80563E88 * (lbl_80563E8C + t * lbl_80563E90);
+        down = onGround ? lbl_80563E94 : lbl_80563E98;
         if (h < r->v[1]) {
-            f32 lo = r->v[1] - down;
+            lo = r->v[1] - down;
             h = h > lo ? h : lo;
             r->v[1] = h;
         } else {
-            f32 hi = r->v[1] + up;
+            hi = r->v[1] + up;
             h = h < hi ? h : hi;
             r->v[1] = h;
         }
-        f32 zoom = fn_8026A520(S32(car, 0x1EC)) > lbl_80563E78;
+        zoom = fn_8026A520(S32(car, 0x1EC)) > lbl_80563E78;
         if (zoom != lbl_80563E78) {
-            f32 v = lbl_80563E9C + r->v[3];
+            v = lbl_80563E9C + r->v[3];
             r->v[3] = v < lbl_80563E30 ? v : lbl_80563E30;
         } else {
-            f32 v = r->v[3] - lbl_80563EA0;
+            v = r->v[3] - lbl_80563EA0;
             r->v[3] = v > lbl_80563E78 ? v : lbl_80563E78;
         }
     }
-    f32 lift = MaxF(lbl_80563E78, r->v[1]);
-    f32 top = lbl_8049A208[3];
-    f32 m = lbl_80563EA8 + lbl_8049A208[2];
+    lift = MaxF(lbl_80563E78, r->v[1]);
+    top = lbl_8049A208[3];
+    m = lbl_80563EA8 + lbl_8049A208[2];
     top = top > m ? top : m;
-    f32 k = (lift - lbl_8049A208[2]) / (top - lbl_8049A208[2]);
+    k = (lift - lbl_8049A208[2]) / (top - lbl_8049A208[2]);
     k = lbl_80563E30 < k ? lbl_80563E30 : k;
     k = k > lbl_80563E78 ? k : lbl_80563E78;
     k = lbl_80563E78 + k * lbl_80563E30;

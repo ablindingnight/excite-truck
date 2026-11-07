@@ -359,21 +359,28 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
 }
 void fn_802C1550(void) {
     int i;
-    TreeClass* c = lbl_804C0810;
+    int j;
+    int n;
+    const char *model;
+    const char *name;
+    TreeClass *c;
+    ValueNode *d;
+
+    c = lbl_804C0810;
     for (i = 0; i < lbl_8055FB28; c++, i++) {
         c->wobble = !c->cfg->GetBool("no_wobble", 0);
-        ValueNode* d = c->cfg->FindChild("drop_model");
+        d = c->cfg->FindChild("drop_model");
         if (d) {
             c->dropHit = d->GetFloat("drop_hit");
-            const char* model = d->GetValue("model");
-            int n = d->GetIntValue("count");
+            model = d->GetValue("model");
+            n = d->GetIntValue("count");
             c->maxDrops = n;
             c->nDrops = 0;
             c->drops = new ("tc_obst") TreeObj*[n];
             memset(c->drops, 0, c->maxDrops * 4);
-            const char* name = c->cfg->GetValue("name");
+            name = c->cfg->GetValue("name");
             StrCopy(c->name, name, 0x20);
-            for (int j = 0; j < n; j++) {
+            for (j = 0; j < n; j++) {
                 TMtx m;
                 m.rot[0][0] = 1.0f;
                 m.rot[0][1] = 0.0f;

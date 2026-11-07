@@ -173,9 +173,12 @@ void fn_80009DC8(RaceSetup* rs) {
 }
 
 void fn_8000A644(RaceSetup* rs, DAVMap* map) {
-    RacerList* list = &rs->racers;
-    RacerSlot* s = list->slots;
     int i;
+    RacerSlot *s;
+    RacerList *list;
+    list = &rs->racers;
+    s = list->slots;
+
     rs->racers.count = map->num_vehicles;
     for (i = 0; i < list->count; i++, s++) {
         s->driver = map->drivers[i];
