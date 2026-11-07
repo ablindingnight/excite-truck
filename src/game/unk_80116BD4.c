@@ -3937,6 +3937,7 @@ void fn_8011D9E4(void* arg0, void* arg1) {
     u8* dst;
     u8* table;
     u32 symbol;
+    u32 bit;
     if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
         return;
     }
@@ -3959,18 +3960,22 @@ void fn_8011D9E4(void* arg0, void* arg1) {
         *((u8 **) arg0) = dst;
         *((u8 **) (((u8 *) arg0) + 4)) = dst + count;
         if (bitCount == 0) {
-            value = (*(bits++)) >> 1;
+            bit = *(bits++);
             bitCount = 31;
+            value = bit >> 1;
         } else {
-            bitCount--;
+            bit = value;
             value >>= 1;
+            bitCount--;
         }
-        if ((value & 1) == 0) {
+        if ((bit & 1) == 0) {
+            dst = *((u8 **) (((u8 *) arg0) + 0x2C));
             table = ((u8 *) arg0) + 0x10;
             lookup = *((u8 **) (((u8 *) arg0) + 0x24));
             available = *((u32 *) (((u8 *) arg0) + 0x20));
             mask = 0xFFFFFFFFU >> (32 - available);
-            for (i = 0; i < count; i++) {
+            do {
+                count--;
                 if (bitCount >= available) {
                     code = value & mask;
                     symbol = lookup[code];
@@ -3981,9 +3986,9 @@ void fn_8011D9E4(void* arg0, void* arg1) {
                 } else {
                     u32 next = *bits;
                     code = (value | (next << bitCount)) & mask;
-                    symbol = lookup[code];
-                    len = symbol >> 4;
-                    symbol = table[symbol & 15];
+                    len = lookup[code];
+                    symbol = table[len & 15];
+                    len >>= 4;
                     if (bitCount >= len) {
                         value >>= len;
                         bitCount -= len;
@@ -3995,18 +4000,20 @@ void fn_8011D9E4(void* arg0, void* arg1) {
                 }
                 if (symbol != 0) {
                     if (bitCount == 0) {
-                        value = (*(bits++)) >> 1;
+                        bit = *(bits++);
                         bitCount = 31;
+                        value = bit >> 1;
                     } else {
-                        bitCount--;
+                        bit = value;
                         value >>= 1;
+                        bitCount--;
                     }
-                    if (value & 1) {
+                    if (bit & 1) {
                         symbol = -symbol;
                     }
                 }
                 *(dst++) = symbol;
-            }
+            } while (count != 0);
 
         } else {
             if (bitCount < 4) {
@@ -4021,13 +4028,15 @@ void fn_8011D9E4(void* arg0, void* arg1) {
             }
             if (code != 0) {
                 if (bitCount == 0) {
-                    value = (*(bits++)) >> 1;
+                    bit = *(bits++);
                     bitCount = 31;
+                    value = bit >> 1;
                 } else {
-                    bitCount--;
+                    bit = value;
                     value >>= 1;
+                    bitCount--;
                 }
-                if (value & 1) {
+                if (bit & 1) {
                     code = -code;
                 }
             }
