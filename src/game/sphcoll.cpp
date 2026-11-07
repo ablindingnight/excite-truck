@@ -368,16 +368,37 @@ extern "C" {
 // collects every face the sphere reaches (allowing for its motion) and every rounded edge it cuts into,
 // pushes the centre out by their depth-weighted average and returns the contact point, depth and normal.
 int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32* vel, f32 r) {
-    u8* o = (u8*)world;
-    CFrame* f = (CFrame*)PTR(o, 0xC);
+    f32 d;
+    f32 x;
+    f32 m;
+    f32 dep;
+    PolyPlane *pl;
+    PolyCurve *cv;
+    PolyPush *q;
+    f32 t;
+    int i;
+    f32 sum;
+    CFrame *g;
+    f32 y;
+    u8 *o;
+    f32 k;
+    f32 a;
+    CFrame *f;
+    int count;
+    f32 pen;
+    f32 z;
+    f32 yv;
+    f32 inv;
+    o = (u8*)world;
+    f = (CFrame*)PTR(o, 0xC);
     RVec3 lc;
     lc.x = c[0] - f->t.x;
     lc.y = c[1] - f->t.y;
     lc.z = c[2] - f->t.z;
     {
-        f32 x = Dot3(lc.x, f->m[0], lc.y, f->m[1], lc.z, f->m[2]);
-        f32 y = Dot3(lc.x, f->m[3], lc.y, f->m[4], lc.z, f->m[5]);
-        f32 z = Dot3(lc.x, f->m[6], lc.y, f->m[7], lc.z, f->m[8]);
+        x = Dot3(lc.x, f->m[0], lc.y, f->m[1], lc.z, f->m[2]);
+        y = Dot3(lc.x, f->m[3], lc.y, f->m[4], lc.z, f->m[5]);
+        z = Dot3(lc.x, f->m[6], lc.y, f->m[7], lc.z, f->m[8]);
         lc.x = x;
         lc.y = y;
         lc.z = z;
@@ -390,35 +411,35 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     }
     RVec3 lv;
     MulVecT(&lv, (const RVec3*)vel, (CFrame*)PTR(o, 0xC));
-    f32 sum = lbl_805622D0;
-    int count = 0;
+    sum = lbl_805622D0;
+    count = 0;
     PolyPush push[9];
-    PolyCurve* cv;
-    PolyPlane* pl = ((PolyVol*)o)->planes;
-    for (int i = 0; i < S32(o, 0xBC); pl++, i++) {
-        f32 a = (f32)__fabs(PSVECDotProduct(&lv, &pl->n));
-        f32 d = (PSVECDotProduct(&lc, &pl->n) - pl->d) + a;
+
+    pl = ((PolyVol*)o)->planes;
+    for (i = 0; i < S32(o, 0xBC); pl++, i++) {
+        a = (f32)__fabs(PSVECDotProduct(&lv, &pl->n));
+        d = (PSVECDotProduct(&lc, &pl->n) - pl->d) + a;
         if (d >= lbl_805622D4) {
             sum += d * d;
-            PolyPush* q = &push[count++];
+            q = &push[count++];
             q->n = *(RVec3*)&pl->n;
             q->d = d;
         }
     }
     cv = (PolyCurve*)(o + 0xC0);
-    for (int i = 0; i < S32(o, 0xDC); cv++, i++) {
+    for (i = 0; i < S32(o, 0xDC); cv++, i++) {
         RVec3 dd;
         dd.x = lc.x - cv->center.x;
         dd.y = lc.y - cv->center.y;
         dd.z = lc.z - cv->center.z;
-        f32 t = -PSVECDotProduct(&dd, &cv->axis);
+        t = -PSVECDotProduct(&dd, &cv->axis);
         dd.x += cv->axis.x * t;
         dd.y += cv->axis.y * t;
         dd.z += cv->axis.z * t;
-        f32 m = PSVECMag(&dd.x);
-        f32 pen = cv->radius - m;
+        m = PSVECMag(&dd.x);
+        pen = cv->radius - m;
         if (m > lbl_805622D8 && pen > lbl_805622D4) {
-            PolyPush* q = &push[count++];
+            q = &push[count++];
             sum += pen * pen;
             q->n.x = dd.x * (lbl_805622DC / m);
             q->n.y = dd.y * (lbl_805622DC / m);
@@ -429,18 +450,18 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     if (count == 0) {
         return 0;
     }
-    f32 inv = lbl_805622E0 / sum;
+    inv = lbl_805622E0 / sum;
     RVec3 pc = lc;
-    PolyPush* q = push;
+    q = push;
     for (; count > 0; count--, q++) {
-        f32 k = -q->d * (inv * (q->d * q->d));
+        k = -q->d * (inv * (q->d * q->d));
         pc.x += q->n.x * k;
-        f32 yv = q->n.y;
+        yv = q->n.y;
         pc.y += yv * k;
         pc.z += q->n.z * k;
     }
     RVec3 w;
-    CFrame* g = (CFrame*)PTR(o, 0xC);
+    g = (CFrame*)PTR(o, 0xC);
     MulVec(&w, &pc, g);
     w.x += g->t.x;
     w.y += g->t.y;
@@ -449,11 +470,11 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     dv.x = w.x - c[0];
     dv.y = w.y - c[1];
     dv.z = w.z - c[2];
-    f32 m = PSVECMag(&dv.x);
-    f32 dep = r - m;
+    m = PSVECMag(&dv.x);
+    dep = r - m;
     *depth = dep;
     if (dep > lbl_805622D0) {
-        f32 k;
+
         hit[0] = w.x;
         hit[1] = w.y;
         k = lbl_805622DC / m;

@@ -450,9 +450,31 @@ static inline void Scaled(RVec3* o, const RVec3* v, f32 s) {
     o->z = v->z * s;
 }
 void RigidBody::Update(void) {
+    int i;
+    ImpRec *p;
+    f32 az;
+    f32 ax;
+    RMat33 *wi;
+    f32 k;
+    f32 ay;
+    f32 ang;
+    RMat33 *ii;
+    f32 tx;
+    f32 co;
+    Contact *c;
+    f32 t;
+    int j;
+    f32 yy;
+    f32 ty;
+    f32 zz;
+    RMat33 *rr;
+    f32 inv;
+    f32 s;
+    f32 xx;
+    ImpRec *q;
     RVec3 g;
     RVec3 dr;
-    Contact* c;
+
     SetV(&g, 0.0f, 9.81f * -mass, 0.0f);
     force.x += g.x;
     force.y += g.y;
@@ -464,8 +486,8 @@ void RigidBody::Update(void) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
     if (!(AbsF(impW) <= lbl_80558DC4[0])) {
-        int i;
-        f32 inv = 1.0f / impW;
+
+        inv = 1.0f / impW;
         impF.x *= inv;
         impF.y *= inv;
         impF.z *= inv;
@@ -475,11 +497,11 @@ void RigidBody::Update(void) {
         AddScaled(&force, &impF, 59.94f);
         AddScaled(&torque, &impT, 59.94f);
         for (i = 0; i < nImp; i++) {
-            ImpRec* p = imps[i];
+            p = imps[i];
             if (p->by) {
-                int j;
+
                 for (j = i + 1; j < nImp; j++) {
-                    ImpRec* q = imps[j];
+                    q = imps[j];
                     if (p->by == q->by) {
                         RVec3 mid;
                         p->v.x += q->v.x;
@@ -493,8 +515,8 @@ void RigidBody::Update(void) {
             }
         }
         for (i = 0; i < nImp; i++) {
-            ImpRec* p = imps[i];
-            f32 k = 1.0f / impW;
+            p = imps[i];
+            k = 1.0f / impW;
             p->v.x *= k;
             p->v.y *= k;
             p->v.z *= k;
@@ -533,24 +555,24 @@ void RigidBody::Update(void) {
     }
     {
         RMtx r;
-        f32 ang;
+
         Scaled(&dr, &avel, 0.0166833512f);
         ang = PSVECMag(&dr);
         if (ang > 0.0001f) {
-            f32 inv = 1.0f / ang;
-            f32 ax = inv * dr.x;
-            f32 ay = inv * dr.y;
-            f32 az = inv * dr.z;
-            f32 s;
+            inv = 1.0f / ang;
+            ax = inv * dr.x;
+            ay = inv * dr.y;
+            az = inv * dr.z;
+
             s = sin(ang);
-            f32 tx;
-            f32 co = cos(ang);
-            f32 yy = ay * ay;
-            f32 xx = ax * ax;
-            f32 t = 1.0f - co;
-            f32 zz = az * az;
+
+            co = cos(ang);
+            yy = ay * ay;
+            xx = ax * ax;
+            t = 1.0f - co;
+            zz = az * az;
             tx = t * ax;
-            f32 ty = t * ay;
+            ty = t * ay;
             r.rot.m[0][0] = co + t * xx;
             r.rot.m[0][1] = (s * az) + (ay * tx);
             r.rot.m[0][2] = az * tx - s * ay;
@@ -572,7 +594,7 @@ void RigidBody::Update(void) {
             r.rot.m[2][2] = 1.0f;
         }
         {
-            RMat33* rr = Expr1_Update();
+            rr = Expr1_Update();
             Mul(rr, rr, &r.rot);
         }
     }
@@ -581,12 +603,12 @@ void RigidBody::Update(void) {
         RMat33 rt = mtx.rot;
         rt.Transpose();
         {
-            RMat33* ii = Expr2_Update();
+            ii = Expr2_Update();
             Mul(&tmp, &rt, ii);
         }
         {
-            RMat33* wi = &worldInvI;
-            RMat33* rr = &mtx.rot;
+            wi = &worldInvI;
+            rr = &mtx.rot;
             Mul(wi, &tmp, rr);
         }
     }

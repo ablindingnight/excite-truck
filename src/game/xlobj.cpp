@@ -955,12 +955,20 @@ static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, void* verts, int n
 }
 
 void fn_802BB0FC(void* verts, int nverts) {
-    for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        TexEntry* te = lbl_804BFFF4.data[i];
+    u16 **d;
+    Chunk<u16*> *c;
+    Item *head;
+    Item *it;
+    int i;
+    TexEntry *te;
+    u16 *st;
+    int j;
+    for (i = 0; i < lbl_804BFFF4.count; i++) {
+        te = lbl_804BFFF4.data[i];
         if (te->prio != 999) {
             continue;
         }
-        Item* head = te->head;
+        head = te->head;
         if (!head) {
             continue;
         }
@@ -971,17 +979,17 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802C8BD0(te->tex);
                 fn_802DC130();
                 for (Item* it = te->head; it; it = it->next) {
-                    int j;
-                    u16* st;
+
+
                     if (!it->head) {
                         continue;
                     }
                     if (it->on) {
                         fn_802D3D94(0, ((Shadow*)it)->mtx);
-                        Chunk<u16*>* c = it->head;
+                        c = it->head;
                         do {
                             for (j = 0; j < c->count; j++) {
-                                u16** d = c->data;
+                                d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
                                 lbl_8055FA6C += Tris(d[j][0] - 1);
@@ -995,9 +1003,9 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802C8D74();
                 break;
             case 2: {
-                Item* it;
-                int j;
-                u16* st;
+
+
+
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC278();
                 fn_802CADD0(te->tex, 1);
@@ -1045,20 +1053,28 @@ static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, void* verts, int n
 }
 
 void fn_802BB3B8(void* verts, int nverts) {
-    for (int i = 0; i < lbl_804BFFF4.count; i++) {
-        TexEntry* te = lbl_804BFFF4.data[i];
+    Item *head;
+    Chunk<u16*> *c;
+    u16 *st;
+    int i;
+    int j;
+    u16 **d;
+    Item *it;
+    TexEntry *te;
+    for (i = 0; i < lbl_804BFFF4.count; i++) {
+        te = lbl_804BFFF4.data[i];
         if (te->prio == 999) {
             continue;
         }
-        Item* head = te->head;
+        head = te->head;
         if (!head) {
             continue;
         }
         if (te->tex != -2) {
             switch (head->type) {
-            Item* it;
-            int j;
-            u16* st;
+
+
+
             case 0:
             case 1:
                 fn_802C8BD0(te->tex);
@@ -1069,10 +1085,10 @@ void fn_802BB3B8(void* verts, int nverts) {
                     }
                     if (it->on) {
                         fn_802D3D94(0, ((Shadow*)it)->mtx);
-                        Chunk<u16*>* c = it->head;
+                        c = it->head;
                         do {
                             for (j = 0; j < c->count; j++) {
-                                u16** d = c->data;
+                                d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
                                 lbl_8055FA6C += Tris(d[j][0] - 1);
@@ -1086,9 +1102,9 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802C8D74();
                 break;
             case 2: {
-                Item* it;
-                int j;
-                u16* st;
+
+
+
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC278();
                 fn_802CADD0(te->tex, 1);

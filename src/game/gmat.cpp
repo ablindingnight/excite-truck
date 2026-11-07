@@ -542,15 +542,26 @@ void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
     int c;
-    u32 m;
+    GList *lp;
     bool first;
-    GList* lp;
+    u32 m;
     int bit;
     int n;
-    GVec* verts;
-    int k;
+    GVec *verts;
     s32 old;
     int i;
+    InlineVec<GTex, 6> *texs;
+    int k;
+
+
+
+
+
+
+
+
+
+
     fn_802B1BEC();
     if (g->verts.Count() > 0) {
         fn_802B1B60(g);
@@ -563,7 +574,7 @@ void fn_802B14B4(GMat* g) {
         fn_802B05EC();
         fn_802DBF00();
         for (i = 0; i < g->layers.Count(); i++) {
-            InlineVec<GTex, 6>* texs = &g->layers.At(i)->texs;
+            texs = &g->layers.At(i)->texs;
             if (lbl_8055FA59) {
                 fn_802CADD0(g->layers.At(i)->detail, 1);
                 fn_802CADD0(fn_802BC30C(i), 2);
