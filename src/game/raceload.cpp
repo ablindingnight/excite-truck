@@ -111,10 +111,9 @@ u8 lbl_8055D3B4;               // resource track used
 u8 lbl_8055D3B5;               // weather track used
 Event* lbl_8055D3B8;
 
-static inline void CopyString(const char* src, int size, char* dst) {
+static inline void CopyString(const char* s, int size, char* dst) {
     char* d = dst;
     int n = size;
-    const char* s = src;
     while ((*d++ = *s++) != 0) {
         if (--n <= 0) {
             d[-1] = 0;
@@ -163,7 +162,7 @@ void fn_80009DC8(RaceSetup* rs) {
         tmp.vehicle = -31;
         tmp.flags = 0;
         tmp.unk74 = 0;
-        for (i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             RacerSlot* trailer = &list->slots[list->count++];
             vehicle = FindVehicleByFlags(1, i)->id;
             *trailer = tmp;

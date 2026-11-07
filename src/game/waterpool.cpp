@@ -615,12 +615,12 @@ static inline void MadT(Vec* o, const Vec* a, const Vec* b, f32 s) {
     o->z = a->z + b->z * s;
 }
 
+static inline f32 Mag2(f32 x, f32 y) { return (f32)sqrt(x * x + y * y); }
+
 WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) {
     memset(&desc, 0, sizeof(desc));
-    f32 rightY = g->right.y;
-    nx = 1.333f * (f32)sqrt(g->right.x * g->right.x + rightY * g->right.y);
-    f32 upY = g->up.y;
-    ny = 1.333f * (f32)sqrt(g->up.x * g->up.x + upY * g->up.y);
+    nx = 1.333f * Mag2(g->right.x, g->right.y);
+    ny = 1.333f * Mag2(g->up.x, g->up.y);
     if (nx < 3 || ny < 3 || nx * ny > 0x200) {
         fn_802E317C("water: too small or too big (%dx%d)", nx, ny);
     }
