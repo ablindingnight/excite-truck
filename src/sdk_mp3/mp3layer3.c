@@ -2040,22 +2040,20 @@ void fn_800C51BC(s32* dst, s32* src, s32* c) {
 
 }
 
-/* Q24 butterfly stage: two 16-word blocks, coefficients c[0..7] reused for both.
- * Each step forms u = d + s and t = d - s, then t * c[k]. NonMatching: 102/102, same instructions; step 6
- * takes the last step's registers (diff 18 lines). */
+/* Q24 butterfly stage: two 16-word blocks, coefficients c[0..7] reused for both. Each step forms u = d + s
+ * and t = d - s, then t * c[k]; the coefficient goes through u, except step 6 where it goes through s. */
 void fn_800C5298(s32* dst, s32* src, s32* c) {
     s32 i;
     s32 s, d, u, t;
-
     for (i = 0; i < 2; i++) {
-        s = src[0]; d = dst[0]; u = d + s; t = d - s; dst[0] = u; src[0] = (s32)(((s64)t * c[0]) >> 24);
-        s = src[1]; d = dst[1]; u = d + s; t = d - s; dst[1] = u; src[1] = (s32)(((s64)t * c[1]) >> 24);
-        s = src[2]; d = dst[2]; u = d + s; t = d - s; dst[2] = u; src[2] = (s32)(((s64)t * c[2]) >> 24);
-        s = src[3]; d = dst[3]; u = d + s; t = d - s; dst[3] = u; src[3] = (s32)(((s64)t * c[3]) >> 24);
-        s = src[4]; d = dst[4]; u = d + s; t = d - s; dst[4] = u; src[4] = (s32)(((s64)t * c[4]) >> 24);
-        s = src[5]; d = dst[5]; u = d + s; t = d - s; dst[5] = u; src[5] = (s32)(((s64)t * c[5]) >> 24);
-        s = src[6]; d = dst[6]; u = d + s; t = d - s; dst[6] = u; src[6] = (s32)(((s64)t * c[6]) >> 24);
-        s = src[7]; d = dst[7]; u = d + s; t = d - s; dst[7] = u; src[7] = (s32)(((s64)t * c[7]) >> 24);
+        s = src[0]; d = dst[0]; u = d + s; dst[0] = u; t = d - s; u = c[0]; src[0] = (s32)(((s64)t * u) >> 24);
+        s = src[1]; d = dst[1]; u = d + s; dst[1] = u; t = d - s; u = c[1]; src[1] = (s32)(((s64)t * u) >> 24);
+        s = src[2]; d = dst[2]; u = d + s; dst[2] = u; t = d - s; u = c[2]; src[2] = (s32)(((s64)t * u) >> 24);
+        s = src[3]; d = dst[3]; u = d + s; dst[3] = u; t = d - s; u = c[3]; src[3] = (s32)(((s64)t * u) >> 24);
+        s = src[4]; d = dst[4]; u = d + s; dst[4] = u; t = d - s; u = c[4]; src[4] = (s32)(((s64)t * u) >> 24);
+        s = src[5]; d = dst[5]; u = d + s; dst[5] = u; t = d - s; u = c[5]; src[5] = (s32)(((s64)t * u) >> 24);
+        s = src[6]; d = dst[6]; u = d + s; dst[6] = u; t = d - s; s = c[6]; src[6] = (s32)(((s64)t * s) >> 24);
+        s = src[7]; d = dst[7]; u = d + s; dst[7] = u; t = d - s; u = c[7]; src[7] = (s32)(((s64)t * u) >> 24);
         dst += 16;
         src += 16;
     }
