@@ -4306,8 +4306,14 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
         for (x = width; x != 0; x -= 8, dst += 8, prev += 8, idx += step) {
             switch (*types.cur++) {
             case 0:  // skip: keep the previous frame's block
-                for (i = 0; i < 8; i++) {
-                    *(f64 *)(dst + i * pitch) = *(f64 *)(prev + i * pitch);
+                {
+                    u8 *wd0 = dst;
+                    u8 *wp0 = prev;
+                    for (i = 0; i < 8; i++) {
+                        *(f64 *)wd0 = *(f64 *)wp0;
+                        wd0 += pitch;
+                        wp0 += pitch;
+                    }
                 }
                 if (blockMap[idx >> 1] == 0) {
                     skipCount++;
@@ -4490,13 +4496,25 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 src = prev + *(s8 *)yOff.cur++ * pitch;
                 src += *(s8 *)xOff.cur++;
                 if ((((u32)dst | (u32)src) & 7) == 0) {
-                    for (i = 0; i < 8; i++) {
-                        *(f64 *)(dst + i * pitch) = *(f64 *)(src + i * pitch);
+                    {
+                        u8 *wd1 = dst;
+                        u8 *ws1 = src;
+                        for (i = 0; i < 8; i++) {
+                            *(f64 *)wd1 = *(f64 *)ws1;
+                            wd1 += pitch;
+                            ws1 += pitch;
+                        }
                     }
                 } else if ((((u32)dst | (u32)src) & 3) == 0) {
-                    for (i = 0; i < 8; i++) {
-                        ((u32 *)(dst + i * pitch))[0] = ((u32 *)(src + i * pitch))[0];
-                        ((u32 *)(dst + i * pitch))[1] = ((u32 *)(src + i * pitch))[1];
+                    {
+                        u8 *wd2 = dst;
+                        u8 *ws2 = src;
+                        for (i = 0; i < 8; i++) {
+                            ((u32 *)wd2)[0] = ((u32 *)ws2)[0];
+                            ((u32 *)wd2)[1] = ((u32 *)ws2)[1];
+                            wd2 += pitch;
+                            ws2 += pitch;
+                        }
                     }
                 } else {
                     u8 *d = dst;
@@ -4609,8 +4627,12 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 if (i == 63) {
                     tmp[scan[63]] = *colors.cur++;
                 }
-                for (i = 0; i < 8; i++) {
-                    *(f64 *)(dst + i * pitch) = ((f64 *)tmp)[i];
+                {
+                    u8 *wd3 = dst;
+                    for (i = 0; i < 8; i++) {
+                        *(f64 *)wd3 = ((f64 *)tmp)[i];
+                        wd3 += pitch;
+                    }
                 }
                 bits.next = next;
                 bits.value = value;
@@ -4641,9 +4663,13 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 c |= c << 8;
                 blockMap[idx >> 1] = 1;
                 c |= c << 16;
-                for (i = 0; i < 8; i++) {
-                    ((u32 *)(dst + i * pitch))[0] = c;
-                    ((u32 *)(dst + i * pitch))[1] = c;
+                {
+                    u8 *wd4 = dst;
+                    for (i = 0; i < 8; i++) {
+                        ((u32 *)wd4)[0] = c;
+                        ((u32 *)wd4)[1] = c;
+                        wd4 += pitch;
+                    }
                 }
                 break;
             }
