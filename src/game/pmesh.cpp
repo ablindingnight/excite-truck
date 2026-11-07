@@ -316,6 +316,12 @@ static inline void SwapTri(PTri* t) {
     PSwap32(&t->d);
 }
 
+/* The target unrolls the 3-edge loop and never hoists a byte load above an
+   earlier byte store; scheduling off reproduces that (281/281 instrs) but the
+   target is otherwise scheduled, so the real cause is still unknown. */
+#pragma push
+#pragma ppc_unroll_instructions_limit 100
+#pragma scheduling off
 void fn_801CFA48(PMesh* m) {
     PSwap32(&m->cells);
     PSwap32(&m->numCells);
@@ -333,14 +339,14 @@ void fn_801CFA48(PMesh* m) {
     for (i = 0; i < m->numCells; i++) {
         SwapCell(&m->cells[i]);
     }
-    int count = m->numVerts;
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < m->numVerts; i++) {
         SwapVec(&m->verts[i]);
     }
     for (i = 0; i < m->numTris; i++) {
         SwapTri(&m->tris[i]);
     }
 }
+#pragma pop
 
 PMesh* fn_801CFEAC(const char* name) {
     u32 ver = 1;
