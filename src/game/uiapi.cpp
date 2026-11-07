@@ -540,8 +540,8 @@ extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
     char buf[0x100];
     if (*name == '#') {
         name = name + 1;
-        sprintf(buf, lbl_8055B750, name);
     }
+    sprintf(buf, lbl_8055B750, name);
     while (*(s32 *)((char *)entry + 4) != 0x7B) {
         if (*(s32 *)((char *)entry + 4) == arg2 && *(char **)entry != 0 &&
             (stricmp(*(char **)entry, name) == 0 ||
