@@ -3858,7 +3858,7 @@ game/jumpcam.cpp:
 game/unk_8026B844.cpp:
 	.text       start:0x8026B844 end:0x8026E22C
 	.ctors      start:0x802ED490 end:0x802ED494
-	.data       start:0x80346A50 end:0x80346AE0
+	.data       start:0x80346A50 end:0x80346A90
 	.bss        start:0x8049A168 end:0x8049A208
 	.sbss       start:0x8055F4D8 end:0x8055F4E0
 	.sdata2     start:0x80563D78 end:0x80563E20
@@ -3872,7 +3872,7 @@ game/camframe.cpp:
 game/camfov.cpp:
 	.text       start:0x8026E870 end:0x80270AE8
 	.ctors      start:0x802ED498 end:0x802ED49C
-	.data       start:0x80346AE0 end:0x80346AFC
+	.data       start:0x80346A90 end:0x80346AFC
 	.bss        start:0x8049A208 end:0x8049A258
 	.sbss       start:0x8055F520 end:0x8055F538
 	.sdata2     start:0x80563E30 end:0x80563F40

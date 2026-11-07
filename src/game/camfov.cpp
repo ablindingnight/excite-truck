@@ -86,7 +86,13 @@ f32 fn_8026EA44(int mode) {
 
 // Camera pitch offset by mode. Draft: the original compiles to a jump table over 4..23.
 f32 fn_8026EA8C(int mode, f32 t) {
+    // The target's jump table covers modes 4-23, so mode 4 and at least one more mode in 8-22 had their own
+    // labels on the default value (MWCC builds a table from six labels on); which one besides 4 is unknown.
     switch (mode) {
+    case 4:
+    case 8:
+    default:
+        return -5.5f;
     case 5:
     case 7:
         return -10.0f;
@@ -100,7 +106,6 @@ f32 fn_8026EA8C(int mode, f32 t) {
         return -5.5f;
     }
     }
-    return -5.5f;
 }
 
 f32 fn_8026EAEC(f32 fov) {
