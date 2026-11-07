@@ -226,17 +226,17 @@ void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l) {
  * block-type field the butterflies run on every subband boundary below sblim and the spectrum from
  * start up to sblim*18 is cleared; otherwise only the boundary between subbands 0 and 1 is processed. */
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g) {
-    s8 ch;
-    s8 sb;
-    s32 i;
     s32 j;
-    s16 idx;
-    s32* lo;
-    s32* hi;
-    s32 bu;
     s32 bd;
-    s32 cs;
+    s32* hi;
+    s32* lo;
+    s32 i;
+    s16 idx;
+    s8 sb;
     s32 ca;
+    s32 cs;
+    s8 ch;
+    s32 bu;
 
     if (mixed & 7) {
         for (ch = 0; ch < channels; ch++, g++) {
