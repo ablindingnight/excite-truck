@@ -1244,17 +1244,9 @@ void fn_801CD7BC(int car, int valid, f32 t) {
 static inline f32 AwLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 AwUnlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
-void fn_801CD970(int car) {
-    if (fn_801CE898()) {
-        return;
-    }
-    AwardsMgr* m = lbl_8055E884;
-    if (!m->layout || !m->q.head) {
-        return;
-    }
-    f32 dt = fn_801E7E24();
-    Popup* p;
-    while ((p = m->q.head) != 0) {
+static inline Popup* NextPopup(AwardsMgr* m, int car, f32 dt) {
+    while (m->q.head) {
+        Popup* p = m->q.head;
         if (fn_8026B0C0(car)) {
             if (p->shown) {
                 if (p->time < 0.25f) {
@@ -1265,17 +1257,33 @@ void fn_801CD970(int car) {
                     p->time = 2.75f;
                 }
             }
-            p = 0;
-            break;
+            return 0;
         }
         p->shown = 1;
         p->time -= dt;
-        if (!(p->time < 0.0f)) {
-            break;
+        if (p->time < 0.0f) {
+            PopQueue(m);
+            p->used = 0;
+        } else {
+            return p;
         }
-        PopQueue(m);
-        p->used = 0;
     }
+    return 0;
+}
+
+void fn_801CD970(int car) {
+    if (fn_801CE898()) {
+        return;
+    }
+    AwardsMgr* m = lbl_8055E884;
+    if (!m->layout) {
+        return;
+    }
+    if (!m->q.head) {
+        return;
+    }
+    f32 dt = fn_801E7E24();
+    Popup* p = NextPopup(m, car, dt);
     if (!p) {
         return;
     }
