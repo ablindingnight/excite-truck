@@ -976,7 +976,6 @@ void CarModel::Set(const AnimSlot* s) {
     f32 zy;
     int i;
 
-
     AnimObj::Set((const AnimSlot*)car);
     k = ((const CarState*)s)->scale;
     scale = k;
@@ -984,10 +983,7 @@ void CarModel::Set(const AnimSlot* s) {
         scaled = frame;
     } else {
 
-
-
         xx = frame.axes[0].x * k;
-
 
         xy = frame.axes[0].y * k;
 
