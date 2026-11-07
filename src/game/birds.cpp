@@ -94,8 +94,16 @@ struct BoidVec {
     s32 cap;     // offset 0x8
 };
 
+namespace {
 struct Flock {
+    Flock(ValueNode* n);
     ~Flock(void);
+    void SetXZ(const ValPoint& r) {
+        ValPoint p = r;
+        pt.x = p.x;
+        pt.y = 0.0f;
+        pt.z = p.y;
+    }
     Boid lead;           // offset 0x0
     ModelVec models;     // offset 0x28
     void* modelBuf[4];   // offset 0x34
@@ -110,6 +118,7 @@ struct Flock {
     BoidVec birds;       // offset 0x6C
     Boid birdBuf[32];    // offset 0x78
 };
+}
 
 struct FlockList {
     FlockList(void) {
@@ -161,6 +170,41 @@ void fn_802A8A4C(Boid* b, const BVec* target);
 s32 fn_802A8A34(BoidVec* v);
 Boid* fn_802A8A3C(BoidVec* v, int i);
 
+inline Flock::Flock(ValueNode* n) {
+    int i;
+    models.data = modelBuf;
+    models.cap = 4;
+    birds.data = birdBuf;
+    birds.cap = 32;
+    birds.n = 0;
+    models.n = 0;
+    for (i = 0; i < models.cap; i++) {
+        char key[64];
+        fn_801345D8(key, 64, "model%d", i);
+        if (n->Has(key)) {
+            models.data[models.n++] = fn_802C6FC0(n->GetValue(key), 0, 0);
+        }
+    }
+    birds.n = 0;
+    int nb = n->GetIntValue("birds");
+    for (i = 0; i < nb; i++) {
+        birds.n++;
+    }
+    SetXZ(n->GetPoint("pt"));
+    f32 hit = n->GetFloat("hit");
+    s16 h[2];
+    fn_801E9DC4(h);
+    fn_801E9E30(h, &pt);
+    pt.y = pt.y + hit;
+    flockRad = n->GetFloat("flock_rad", 100.0f);
+    birdRad = n->GetFloat("bird_rad", 30.0f);
+    flockSpeed = n->GetFloat("flock_speed", 20.0f);
+    birdSpeedMin = n->GetFloat("bird_speed_min", 30.0f);
+    birdSpeedMax = n->GetFloat("bird_speed_max", 70.0f);
+    flockTurn = n->GetFloat("flock_turn", 45.0f);
+    birdTurn = n->GetFloat("bird_turn", 180.0f);
+}
+
 void fn_802A81F0(void) {
     int i;
     lbl_804BD6C4.n = 0;
@@ -172,48 +216,11 @@ void fn_802A81F0(void) {
         while (n) {
             if (!strcasecmp(n->GetName(), "flock")) {
                 Flock** slot = &lbl_804BD6C4.data[lbl_804BD6C4.n++];
-                Flock* f = (Flock*)operator new(sizeof(Flock), "flock");
-                if (f) {
-                    f->models.data = f->modelBuf;
-                    f->models.cap = 4;
-                    f->birds.data = f->birdBuf;
-                    f->birds.cap = 32;
-                    f->birds.n = 0;
-                    f->models.n = 0;
-                    for (i = 0; i < f->models.cap; i++) {
-                        char key[64];
-                        fn_801345D8(key, 64, "model%d", i);
-                        if (n->Has(key)) {
-                            f->models.data[f->models.n++] = fn_802C6FC0(n->GetValue(key), 0, 0);
-                        }
-                    }
-                    f->birds.n = 0;
-                    int nb = n->GetIntValue("birds");
-                    for (int j = 0; j < nb; j++) {
-                        f->birds.n++;
-                    }
-                    const ValPoint& r = n->GetPoint("pt");
-                    ValPoint p = r;
-                    f->pt.x = p.x;
-                    f->pt.y = 0.0f;
-                    f->pt.z = p.y;
-                    f32 hit = n->GetFloat("hit");
-                    s16 h[2];
-                    fn_801E9DC4(h);
-                    fn_801E9E30(h, &f->pt);
-                    f->pt.y = f->pt.y + hit;
-                    f->flockRad = n->GetFloat("flock_rad", 100.0f);
-                    f->birdRad = n->GetFloat("bird_rad", 30.0f);
-                    f->flockSpeed = n->GetFloat("flock_speed", 20.0f);
-                    f->birdSpeedMin = n->GetFloat("bird_speed_min", 30.0f);
-                    f->birdSpeedMax = n->GetFloat("bird_speed_max", 70.0f);
-                    f->flockTurn = n->GetFloat("flock_turn", 45.0f);
-                    f->birdTurn = n->GetFloat("bird_turn", 180.0f);
-                }
-                *slot = f;
+                *slot = new ("flock") Flock(n);
                 count++;
             }
-            n = t->GetChild(next++);
+            n = t->GetChild(next);
+            next++;
         }
         fn_802E30C8("Birds: loaded %d flocks", count);
         fn_80131818(t);
