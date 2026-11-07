@@ -649,7 +649,7 @@ public:
 
 // A named async resource set shared between car views.
 struct ResourceLoader {
-    ResourceLoader(const char* name) { set = fn_8012CAA0(0x16E360, name); }
+    ResourceLoader(const char* const& name) { set = fn_8012CAA0(0x16E360, name); }
     int IsIdle(void) { return set->Status() == 0; }
     char name[0x20];        // offset 0x0
     AsyncResourceSet* set;  // offset 0x20
