@@ -401,7 +401,8 @@ static inline void SetAnchor(Anchor* a, const TVec* v, int i) {
 
 void fn_801F5664(Fabric* f, int style) {
     int rows = f->rows;
-    int n = f->cols;
+    int cols = f->cols;
+    int n;
     Anchor* a;
     int k;
     int i;
@@ -414,6 +415,7 @@ void fn_801F5664(Fabric* f, int style) {
         n = 4;
         break;
     case 3:
+        n = cols;
         break;
     case 5:
         n = rows;
