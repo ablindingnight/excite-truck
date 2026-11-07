@@ -215,11 +215,13 @@ void IdentSaveEvent(int event) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_IdentResetAll(char* dst, const char* src, int n) {
-    while ((*dst++ = *src++) != '\0') {
-        if (--n <= 0) {
-            dst[-1] = '\0';
+/* Helper name unproven: bounded string copy, the same inline as betarace/awards StrCopyN. */
+static inline void StrCopyN(char* d, int n, const char* s) {
+    char* p = d;
+    int k = n;
+    while ((*p++ = *s++) != 0) {
+        if (--k <= 0) {
+            p[-1] = 0;
             break;
         }
     }
@@ -254,7 +256,7 @@ void IdentResetAll(void) {
         src = fn_80131234(lbl_8055D46C->default_names[i]);
         n = NAME_LEN;
         dst = lbl_8055D46C->default_names[i];
-        Loop1_IdentResetAll(dst, src, n);
+        StrCopyN(dst, n, src);
         lbl_8055D46C->unkAC[i] = -1;
     }
 }
