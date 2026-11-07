@@ -370,7 +370,7 @@ HermitePools* lbl_8055EC98;
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return fn_80144514(a, b, c, d, e, f); }
 
 // d = a * b
-static inline void MtxMul(BMtx33* d, const BMtx33* a, const BMtx33* b) {
+static inline void MtxMul(BMtx33* d, const BMtx33* const& a, const BMtx33* b) {
     if (d == a || d == b) {
         f32 t00 = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
         f32 t10 = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
