@@ -117,6 +117,21 @@ struct PaintDesc {
     f32 alphaMid;   // offset 0x4C
 };
 
+// Two slopes meeting at mid: a over [0, mid], b past it, from v0.
+struct PaintCurve {
+    f32 At(f32 age) const {
+        f32 hi = age - mid;
+        f32 lo;
+        hi = 0.0f > hi ? 0.0f : hi;
+        lo = mid < age ? mid : age;
+        return v0 + a * lo + b * hi;
+    }
+    f32 v0;   // offset 0x0
+    f32 a;    // offset 0x4
+    f32 b;    // offset 0x8
+    f32 mid;  // offset 0xC
+};
+
 struct Mark {
     Mark(void) {}
     TVec pos;  // offset 0x0
@@ -145,14 +160,8 @@ struct Paint {
     f32 lift;        // offset 0x34
     f32 gravity;     // offset 0x38
     f32 drag;        // offset 0x3C
-    f32 size0;       // offset 0x40
-    f32 sizeA;       // offset 0x44
-    f32 sizeB;       // offset 0x48
-    f32 sizeMid;     // offset 0x4C
-    f32 alpha0;      // offset 0x50
-    f32 alphaA;      // offset 0x54
-    f32 alphaB;      // offset 0x58
-    f32 alphaMid;    // offset 0x5C
+    PaintCurve sizeCurve;   // offset 0x40
+    PaintCurve alphaCurve;  // offset 0x50
     s32 tex;         // offset 0x60
     f32 pointSize;   // offset 0x64
 };
@@ -1267,22 +1276,16 @@ Paint::Paint(const PaintDesc* d, const char* name) {
     lift = d->lift;
     gravity = 9.81f * d->gravity;
     drag = d->drag;
-    size0 = d->size0;
-    sizeA = (d->size1 - d->size0) / d->sizeMid;
-    sizeB = (d->size2 - d->size1) / (1.0f - d->sizeMid);
-    sizeMid = d->sizeMid;
-    alpha0 = d->alpha0;
-    alphaA = (d->alpha1 - d->alpha0) / d->alphaMid;
-    alphaB = (d->alpha2 - d->alpha1) / (1.0f - d->alphaMid);
-    alphaMid = d->alphaMid;
+    sizeCurve.v0 = d->size0;
+    sizeCurve.a = (d->size1 - d->size0) / d->sizeMid;
+    sizeCurve.b = (d->size2 - d->size1) / (1.0f - d->sizeMid);
+    sizeCurve.mid = d->sizeMid;
+    alphaCurve.v0 = d->alpha0;
+    alphaCurve.a = (d->alpha1 - d->alpha0) / d->alphaMid;
+    alphaCurve.b = (d->alpha2 - d->alpha1) / (1.0f - d->alphaMid);
+    alphaCurve.mid = d->alphaMid;
     tex = fn_802CAC28(name, 0);
-    {
-        f32 hi = 0.5f - sizeMid;
-        f32 lo;
-        hi = 0.0f > hi ? 0.0f : hi;
-        lo = sizeMid < 0.5f ? sizeMid : 0.5f;
-        pointSize = log2(2.0f / (size0 + sizeA * lo + sizeB * hi));
-    }
+    pointSize = log2(2.0f / sizeCurve.At(0.5f));
     Reset();
 }
 
@@ -1349,20 +1352,13 @@ void Paint::Draw(void) {
             for (i = 0; i < n; i++) {
                 Mark* m = &marks[i];
                 f32 age = invLife * (now - m->born);
-                f32 hi = age - alphaMid;
-                f32 lo;
                 int a;
                 u32 color;
-                hi = 0.0f > hi ? 0.0f : hi;
-                lo = alphaMid < age ? alphaMid : age;
-                a = 255.0f * (m->alpha * (alpha0 + alphaA * lo + alphaB * hi));
+                a = 255.0f * (m->alpha * alphaCurve.At(age));
                 a = a > 0 ? a : 0;
                 a = a < 255 ? a : 255;
                 color = (a << 24) | 0xFFFFFF;
-                hi = age - sizeMid;
-                hi = 0.0f > hi ? 0.0f : hi;
-                lo = sizeMid < age ? sizeMid : age;
-                fn_802CE86C(color, 0, size0 + sizeA * lo + sizeB * hi, m->pos.x, m->pos.y, m->pos.z);
+                fn_802CE86C(color, 0, sizeCurve.At(age), m->pos.x, m->pos.y, m->pos.z);
             }
             fn_802CE868();
         }
