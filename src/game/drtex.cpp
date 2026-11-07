@@ -508,16 +508,15 @@ static inline void Fix(u8** p, TexImage* img) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802D8DCC(GXTexDesc* d) {
-    TexImage* img = d->data;
+/* Helper name unproven: turns one texture image's offsets into pointers. */
+static inline void FixTexImage(TexImage* img) {
     Fix((u8**)&img->pal, img);
     Fix(&img->tex, img);
     Fix(&img->alpha, img);
 }
 
 void fn_802D8DCC(GXTexDesc* d) {
-    Loop1_fn_802D8DCC(d);
+    FixTexImage(d->data);
     u32 fmt = d->format;
     if (fmt == 0x40 || fmt == 0) {
         fn_802D81C4(d);
