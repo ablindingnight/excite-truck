@@ -426,7 +426,7 @@ extern s32 lbl_80558DC4[];  // FLT_EPSILON
 
 ModuleTag lbl_8055FD00;
 static inline u16 BlendKey(int v) { return v; }
-u16 lbl_8055FD08 = BlendKey(0x100);
+extern const u16 lbl_8055FD08 = BlendKey(0x100);
 u16 lbl_8055FD0A = BlendKey(0x405);
 u16 lbl_8055FD0C = BlendKey(0x401);
 s64 lbl_8055FD10;   // draw sync time
