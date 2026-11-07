@@ -1635,6 +1635,7 @@ void fn_801961FC(u8* d) {
 }
 
 static inline double AbsD(double v) { return __fabs(v); }
+static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_80196250(f32 b, f32 x, f32* outA, f32* outB) {
@@ -2650,7 +2651,7 @@ void fn_80198530(u8* d) {
         f32 lo = 1.3333334f + F32(d, 0x28);
         f32 t = Clamp01((speed - lo) / (hi - lo));
         grip = LerpF(0.0f, 1.0f, t);
-        if ((f32)__fabs(F32(d, 0x28)) <= lbl_80558DC4[0]) {
+        if (AbsFlt(F32(d, 0x28)) <= lbl_80558DC4[0]) {
             brake = 1.0f;
         }
     }
