@@ -92,6 +92,7 @@ struct TCell {
     s16 count;    // offset 0x8
     s16 first;    // offset 0xA
     f32 fade;     // offset 0xC
+    void Swap();
 };
 
 struct FanCell {
@@ -560,23 +561,21 @@ void fn_802BCBDC(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop3_fn_802BCF04(TreeType* t) {
-    for (int i = 0; i < lbl_804C00D4.n; i++) {
-        t = &lbl_804C00D4.data[i];
-        SafeDelete(t->set);
-        gxForgetTexture(t->farTex);
-        fn_802C6C20(t->far);
-        t->far = 0;
-        gxForgetTexture(t->nearTex);
-        fn_802C6C20(t->near);
-        t->near = 0;
-    }
+/* Helper name unproven: releases one tree type's set, textures and models. */
+static inline void FreeTreeType(TreeType* t) {
+    SafeDelete(t->set);
+    gxForgetTexture(t->farTex);
+    fn_802C6C20(t->far);
+    t->far = 0;
+    gxForgetTexture(t->nearTex);
+    fn_802C6C20(t->near);
+    t->near = 0;
 }
 
 void fn_802BCF04(void) {
-    TreeType* t;
-    Loop3_fn_802BCF04(t);
+    for (int i = 0; i < lbl_804C00D4.n; i++) {
+        FreeTreeType(&lbl_804C00D4.data[i]);
+    }
     lbl_804C00D4.n = 0;
     if (lbl_8055FAB4) {
         fn_80131818(lbl_8055FAB4);
@@ -719,28 +718,28 @@ void fn_802BD4DC(TListFile* f, u8* base) {
     }
 }
 
+/* Helper name unproven: byte-swaps one cell read from the file and clears its fade. */
+inline void TCell::Swap() {
+    Swap16(&x);
+    Swap16(&z);
+    Swap16(&count);
+    Swap16(&first);
+    fade = -1.0f;
+}
+
+
 TListEntry* fn_802BD5A8(TListEntry* off, u8* base) { return (TListEntry*)((u8*)off + (u32)base); }
 
 TCell* fn_802BD694(TCell* off, u8* base);
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_802BD5B0(TFileArray<TCell>* a, TCell* c) {
-    for (u32 i = 0; i < a->n; i++) {
-        c = &a->data[i];
-        Swap16(&c->x);
-        Swap16(&c->z);
-        Swap16(&c->count);
-        Swap16(&c->first);
-        c->fade = -1.0f;
-    }
-}
 
 void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
     TCell* c;
     Swap32(&a->n);
     Swap32(&a->data);
     a->data = fn_802BD694(a->data, base);
-    Loop2_fn_802BD5B0(a, c);
+    for (u32 i = 0; i < a->n; i++) {
+        a->data[i].Swap();
+    }
 }
 
 TCell* fn_802BD694(TCell* off, u8* base) { return (TCell*)((u8*)off + (u32)base); }
