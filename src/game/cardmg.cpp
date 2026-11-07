@@ -680,15 +680,15 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 DentPoint* o = (DentPoint*)PTR(p, 0x26C) + other;
                 DentVec* go = (DentVec*)(p + 0x5FC) + other;
                 DentVec op;
-                op.x = o->pos.x + go->x;
+                // MATCHING-AID: y read ahead of x (single-use reads); the target adds y first but stores x first.
                 f32 yv = go->y;
                 f32 y2 = o->pos.y;
-                f32 py = y2 + yv;
-                op.y = py;
+                op.x = o->pos.x + go->x;
+                op.y = y2 + yv;
                 op.z = o->pos.z + go->z;
                 DentVec dir;
-                dir.y = op.y - at.y;
                 dir.x = op.x - at.x;
+                dir.y = op.y - at.y;
                 dir.z = op.z - at.z;
                 f32 len = PSVECMag(&dir.x);
                 DentVec f;
