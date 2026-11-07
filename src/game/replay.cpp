@@ -286,13 +286,14 @@ static inline f32 Clamp01(f32 x) {
 }
 
 void fn_80008684(int camera) {
+    s32 action;
     ActionPrompt* prompt;
+    int wk;
     int dt;
     DrawOffset off;
     f32 t;
     f32 x;
     int now;
-    s32 action;
     int n;
     u32 i;
     int j;
@@ -338,8 +339,9 @@ void fn_80008684(int camera) {
         n = 0;
         for (i = 0, prompt = lbl_802FB8F0; i < 7; i++, prompt++) {
             action = prompt->action;
-            for (j = 0; j < lbl_8034F3D0.list.count; j++) {
-                if (action == lbl_8034F3D0.list.data[j]) {
+            // MATCHING-AID: named offset walker; the compiler walker ranks above action.
+            for (j = 0, wk = 0; j < lbl_8034F3D0.list.count; wk += 4, j++) {
+                if (action == *(s32*)((u8*)lbl_8034F3D0.list.data + wk)) {
                     fn_801345D8(name, sizeof(name), "prompt%d", n);
                     fn_801345D8(label, sizeof(label), "label%d", n);
                     if (lbl_8055D374) {
