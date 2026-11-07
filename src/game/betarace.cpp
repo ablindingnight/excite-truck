@@ -111,8 +111,7 @@ static inline void SafeDelete(T*& p) {
 static inline void StrCopyN(char* d, int n, const char* s) {
     char* p = d;
     int k = n;
-    const char* q = s;
-    while ((*p++ = *q++) != 0) {
+    while ((*p++ = *s++) != 0) {
         if (--k <= 0) {
             p[-1] = 0;
             break;
