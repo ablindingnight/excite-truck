@@ -2786,7 +2786,7 @@ game/ppsys.cpp:
 	.data       start:0x80336AF0 end:0x80336AF9
 	.sdata      start:0x8055A950 end:0x8055A958
 	.sbss       start:0x8055E7C0 end:0x8055E7CC
-	.sdata2     start:0x80562900 end:0x80562950
+	.sdata2     start:0x80562900 end:0x8056294C
 
 game/interlude.cpp:
 	.text       start:0x801C2F58 end:0x801CB2D8
@@ -3148,7 +3148,7 @@ game/wheelmod.cpp:
 game/trackmod.cpp:
 	.text       start:0x801F1C24 end:0x801F4CD8
 	.ctors      start:0x802ED348 end:0x802ED34C
-	.rodata     start:0x802F9B20 end:0x802F9B30
+	.rodata     start:0x802F9B20 end:0x802F9B2C
 	.data       start:0x8033A610 end:0x8033AC68
 	.sdata      start:0x8055B118 end:0x8055B160
 	.sbss       start:0x8055EBF8 end:0x8055EC08
@@ -3160,7 +3160,7 @@ game/fabric.cpp:
 	.data       start:0x8033AC68 end:0x8033AF80
 	.sdata      start:0x8055B160 end:0x8055B1C8
 	.sbss       start:0x8055EC08 end:0x8055EC24
-	.sdata2     start:0x80562FB0 end:0x80562FF0
+	.sdata2     start:0x80562FB0 end:0x80562FEC
 
 game/trackobj.cpp:
 	.text       start:0x801F7A0C end:0x801FC8A8
@@ -3480,7 +3480,7 @@ game/uianime.cpp:
 	.ctors      start:0x802ED3E4 end:0x802ED3E8
 	.data       start:0x80340910 end:0x80340AB8
 	.bss        start:0x80498650 end:0x804986C8
-	.sdata      start:0x8055BA08 end:0x8055BAB8
+	.sdata      start:0x8055BA08 end:0x8055BAB2
 	.sbss       start:0x8055F0A8 end:0x8055F0C8
 	.sdata2     start:0x805636E0 end:0x805636EC
 
@@ -3760,7 +3760,7 @@ game/achview.cpp:
 	.bss        start:0x80498E98 end:0x80498EB8
 	.sdata      start:0x8055C260 end:0x8055C390
 	.sbss       start:0x8055F388 end:0x8055F3A8
-	.sdata2     start:0x80563AE0 end:0x80563B40
+	.sdata2     start:0x80563AE0 end:0x80563B3C
 
 game/recscreen.cpp:
 	.text       start:0x8025C028 end:0x8025CE78
@@ -4063,7 +4063,7 @@ game/chunks.cpp:
 	.ctors      start:0x802ED4F4 end:0x802ED4F8
 	.data       start:0x80349170 end:0x803492CC
 	.bss        start:0x804B4030 end:0x804B42EC
-	.sdata      start:0x8055C950 end:0x8055C990
+	.sdata      start:0x8055C950 end:0x8055C98F
 	.sbss       start:0x8055F760 end:0x8055F768
 	.sdata2     start:0x805644D0 end:0x80564514
 
@@ -4187,7 +4187,7 @@ game/cartags.cpp:
 	.bss        start:0x804BD5D8 end:0x804BD6B8
 	.sdata      start:0x8055CC30 end:0x8055CC33
 	.sbss       start:0x8055F8B0 end:0x8055F8C4
-	.sdata2     start:0x805648F0 end:0x80564928
+	.sdata2     start:0x805648F0 end:0x80564924
 
 game/birds.cpp:
 	.text       start:0x802A81F0 end:0x802A8FEC
