@@ -509,27 +509,32 @@ inline void GradeOverlay::Reset(void) {
 inline LapTitleOverlay::~LapTitleOverlay(void) {}
 
 inline void LapTitleOverlay::Update(int player, int unused) {
-    const char* str;
     char name[32];
-    Racer* racer = fn_801EA9A0(player);
-    f32 now = fn_801E7E18();
-    f32 t;
-    LapInfo* info;
     char leftText[32];
-    LayoutItem** items;
     char rightText[32];
-    int seg;
-    int i;
     char key[30];
+    LayoutItem** items;
+    Layout* layout;
+    int seg;
+    f32 now;
+    LapInfo* info;
     int side;
-    LapState* s = &state[player];
+    f32 t;
+    LapState* s;
+    const char* str;
+    Racer* racer;
+    f32 elapsed;
+    int i;
+    racer = fn_801EA9A0(player);
+    now = fn_801E7E18();
+    s = &state[player];
 
     if (racer->lap > s->lap) {
         s->start = now;
         s->lap = racer->lap;
     }
-    Layout* layout = lbl_8055D604;
-    f32 elapsed = now - state[player].start;
+    layout = lbl_8055D604;
+    elapsed = now - state[player].start;
     f32 keys[4] = {0.0f, 0.15f, 0.65f, 0.8f};
     if (layout && elapsed < keys[3]) {
         LayoutItem* left[4];
