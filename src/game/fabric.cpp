@@ -393,9 +393,9 @@ void fn_801F5508(Fabric* f) {
     f->numSticks = n;
 }
 
-static inline void SetAnchor(Fabric* f, Anchor* a, int i) {
+static inline void SetAnchor(Anchor* a, const TVec* v, int i) {
     a->index = i;
-    a->pos = *(PVec*)&f->cur[i];
+    a->pos = *(const PVec*)&v[i];
 }
 
 void fn_801F5664(Fabric* f, int style) {
@@ -426,26 +426,26 @@ void fn_801F5664(Fabric* f, int style) {
     k = 0;
     switch (style) {
     case 2:
-        SetAnchor(f, &a[0], (f->rows - 1) * f->cols);
-        SetAnchor(f, &a[1], f->cols * f->rows - 1);
+        SetAnchor(&a[0], f->cur, (f->rows - 1) * f->cols);
+        SetAnchor(&a[1], f->cur, f->cols * f->rows - 1);
         k = 2;
     case 1:
-        SetAnchor(f, &a[k], 0);
+        SetAnchor(&a[k], f->cur, 0);
         k++;
-        SetAnchor(f, &a[k], f->cols - 1);
+        SetAnchor(&a[k], f->cur, f->cols - 1);
         break;
     case 3:
         for (i = 0; i < f->cols; i++) {
-            SetAnchor(f, &a[i], i);
+            SetAnchor(&a[i], f->cur, i);
         }
         break;
     case 4:
-        SetAnchor(f, &a[0], 0);
-        SetAnchor(f, &a[1], (f->rows - 1) * f->cols);
+        SetAnchor(&a[0], f->cur, 0);
+        SetAnchor(&a[1], f->cur, (f->rows - 1) * f->cols);
         break;
     case 5:
         for (i = 0; i < f->rows; i++) {
-            SetAnchor(f, &a[i], f->cols * i);
+            SetAnchor(&a[i], f->cur, f->cols * i);
         }
         break;
     default:
