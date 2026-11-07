@@ -1804,12 +1804,14 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     int boosting;
     int over;
     RaceCarRec* rc;
-    PickupEvent ev;
     V3 lastPos;
+    f32 cur = shown > 0.0f ? shown : 0.0f;
     Coins* co = &master->coins;
-    if (co->enabled && co->cars[id].active) {
-        CoinCar* cc = &co->cars[id];
-        CoinFrame f = fn_801683F4(id);
+    int me = id;
+    if (co->enabled && co->cars[me].active) {
+        CoinCar* cc = &co->cars[me];
+        const CoinFrame& r = fn_801683F4(me);
+        CoinFrame f = r;
         int i;
         for (i = 0; i < 4; i++) {
             if (cc->flash[i] > 0.0f) {
@@ -1978,6 +1980,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 u8* mine;
                 if ((f32)__fabs(e->respawn) <= lbl_80558DC4[0] && (mine = &e->hit[rc->index])[0]) {
                     if (e->big) {
+                        PickupEvent ev;
                         ev.pos[0] = e->pos[0];
                         ev.pos[1] = e->pos[1];
                         ev.pos[2] = e->pos[2];
