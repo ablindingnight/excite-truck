@@ -1760,9 +1760,10 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 lb = F32(q, 0x28);
     if (nn < lbl_8056232C) {
         f32 zv;
+        f32 yv;
         f32 xv = ca.x;
         mid.x = (xv + cb.x) / 2.0f;
-        f32 yv = ca.y;
+        yv = ca.y;
         zv = cb.z;
         mid.z = (ca.z + zv) / 2.0f;
         mid.y = (yv + cb.y) / 2.0f;
@@ -1859,8 +1860,8 @@ int fn_8019DAB0(u8* p, u8* q) {
 // Capsule p against capsule q: bounding spheres, then the axis segments, then p's end spheres.
 int fn_8019DC04(u8* p, u8* q) {
     PVec3 d;
-    PVec3 a;
     PVec3 b;
+    PVec3 a;
     PVec3 axis;
     PVec3 org;
     u8* fq = PTR(q, 0xC);
