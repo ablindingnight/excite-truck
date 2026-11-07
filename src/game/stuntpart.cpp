@@ -652,19 +652,32 @@ static inline u32 FogColor(void) {
 }
 
 void fn_802AB770(int idx) {
-    const StuntCar* car;
-    StuntPart* p = &lbl_8055F928[idx];
-    car = fn_80287B24(idx);
+    int low;
+    int up;
+    u8 b;
     u32 color;
-    f32 dt = fn_801E7E24();
+    f32 jump;
+    u8 g;
+    f32 z;
+    u8 r;
+    f32 h;
+    f32 dt;
+    int on;
+    StuntPart* p;
+    const StuntCar* car;
+
+    p = &lbl_8055F928[idx];
+    car = fn_80287B24(idx);
+
+    dt = fn_801E7E24();
     if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
-        u8 g;
-        u8 r = fn_80129D90(0, 140, 255);
+
+        r = fn_80129D90(0, 140, 255);
         g = fn_80129D90(0, 250, 255);
-        u8 b = fn_80129D90(0, 240, 255);
+        b = fn_80129D90(0, 240, 255);
         p->fogColor = MakeFog(b, g, r);
     }
-    f32 h = car->height;
+    h = car->height;
     if (lbl_8055F92C) {
         h = 10.0f;
     }
@@ -673,19 +686,19 @@ void fn_802AB770(int idx) {
     } else {
         p->fogT = p->fogT + 0.25f * dt;
     }
-    f32 jump = 0.0f;
+    jump = 0.0f;
     if (!IsZero(dt)) {
         jump = 500.0f * (int)fn_80287BC8(0.0f, 1.0f);
     }
-    int low = h < 3.0f;
-    int on = 1;
+    low = h < 3.0f;
+    on = 1;
     if (low) {
-        int up = (f32)fmod(h, 0.5) > 0.25f;
+        up = (f32)fmod(h, 0.5) > 0.25f;
         if (!up) {
             on = 0;
         }
     }
-    f32 z = 0.0f;
+    z = 0.0f;
     if (on) {
         z = -1000.0f * p->fogT - jump;
     }
