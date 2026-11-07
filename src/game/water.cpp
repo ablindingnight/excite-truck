@@ -766,6 +766,8 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
     o[1] = a[1] + b[1] * s;
     o[2] = a[2] + b[2] * s;
 }
+static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
+
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -787,7 +789,7 @@ void WaterSystem::Draw(void) {
     f32 vh = fn_802C9C48();
     k = 640.0f / (vh * env->Scale());
     PVec fwd;
-    if ((f32)__fabs(cam.z.y) < 0.99f) {
+    if (AbsFlt(cam.z.y) < 0.99f) {
         fwd = cam.z;
     } else {
         fwd = cam.y;

@@ -920,6 +920,8 @@ static inline int HitCorner(const AVec* at) {
 // surface kind `kind`: accumulates the impulse, decides whether the hit is hard enough to crash the car, dents
 // the nearest body point and spreads the dent, breaks off parts and lights pushed past their limits, and
 // raises the car's impairment.
+static inline double AbsDbl(double v) { return __fabs(v); }
+
 void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind) {
     GlassMsg msg;
     AVec di;
@@ -1026,7 +1028,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         dg.x = g0.v[0] - gb->x;
         dg.y = g0.v[1] - gb->y;
         dg.z = g0.v[2] - gb->z;
-        f32 moved = (f32)__fabs(PSVECDotProduct(&nd.x, &dg.x));
+        f32 moved = (f32)AbsDbl(PSVECDotProduct(&nd.x, &dg.x));
         gb = (DentVec*)(p + 0x5FC) + best->goal;
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;

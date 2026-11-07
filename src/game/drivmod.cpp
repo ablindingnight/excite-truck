@@ -617,6 +617,8 @@ void fn_802C70AC(s32 model, const DMtx* m, s32 a, int b);
 // Per-frame rider update for car state `car`: steering lean, seat frame, the body twist from yaw and roll,
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
+static inline double AbsDbl(double v) { return __fabs(v); }
+
 void fn_80201018(DriverModel* d, const u8* car, int show) {
     BonePose pose[32];
     DBone bones[32];
@@ -686,7 +688,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     }
     f32 ny = d->fCC;
     d->fCC = lbl_80563050 * ny + lbl_80563050 * oldy;
-    if ((f32)__fabs(d->fCC) < lbl_80563074 || ny * oldy > lbl_8056305C) {
+    if ((f32)AbsDbl(d->fCC) < lbl_80563074 || ny * oldy > lbl_8056305C) {
         if (S32(car, 0x48) == 0) {
             d->fC8 = lbl_80563078 * oldx;
         }
