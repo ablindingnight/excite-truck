@@ -805,11 +805,11 @@ void DustTrail::Impact(const TrailEvent* e) {
         rot.z.x = sn;
         rot.z.y = 0.0f;
         rot.z.z = cs;
-        v.x = 0.5f * e->vel.x;
         TPos c = e->pos;
+        v.z = 0.5f * e->vel.z;
+        v.x = 0.5f * e->vel.x;
         c.y += 0.35f;
         v.y = 0.0f;
-        v.z = 0.5f * e->vel.z;
         for (i = 0; i < n; i++) {
             TVec v1;
             TVec v2;
@@ -818,13 +818,9 @@ void DustTrail::Impact(const TrailEvent* e) {
             MadV3(&v2.x, &v.x, &m.x.x, - h);
             MadV3(&q.x, &c.x, &m.x.x, 0.15f);
             fn_8028E584(event, &q, &v1);
-            q.x = c.x + m.x.x / 2.0f;
-            q.y = c.y + m.x.y / 2.0f;
-            q.z = c.z + m.x.z / 2.0f;
+            MadV3(&q.x, &c.x, &m.x.x, 0.5f);
             fn_8028E584(event, &q, &v1);
-            q.x = c.x + m.x.x * -0.15f;
-            q.y = c.y + m.x.y * -0.15f;
-            q.z = c.z + m.x.z * -0.15f;
+            MadV3(&q.x, &c.x, &m.x.x, -0.15f);
             fn_8028E584(event, &q, &v2);
             MadV3(&q.x, &c.x, &m.x.x, - 0.5f);
             fn_8028E584(event, &q, &v2);
