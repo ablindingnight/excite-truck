@@ -171,6 +171,7 @@ struct EvPair {
 // The event/track pairs the pickers choose from.
 struct EvPairs {
     EvPairs();
+    void Trim();
     EvPair* items;  // offset 0x0
     s32 count;      // offset 0x4
     s32 cap;        // offset 0x8
@@ -353,11 +354,10 @@ inline EvPairs::EvPairs() {
     alloc = b;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_8024974C(EvPairs* pairs) {
-    if (pairs->count < pairs->cap) {
-        fn_801286A0(pairs->alloc, (pairs->cap - pairs->count) * sizeof(EvPair));
-        pairs->cap = pairs->count;
+inline void EvPairs::Trim() {
+    if (count < cap) {
+        fn_801286A0(alloc, (cap - count) * sizeof(EvPair));
+        cap = count;
     }
 }
 
@@ -387,7 +387,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
             d[k].track = name;
         }
     }
-    Loop2_fn_8024974C(pairs);
+    pairs->Trim();
     EvPicker events;
     events.head.b0 = 0;
     events.head.vt = lbl_80343D78;
