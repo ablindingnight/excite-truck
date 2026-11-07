@@ -767,8 +767,8 @@ static inline void NegInto(PVec* o, const f32* v, f32 k) {
 
 inline void SunTMH::Apply(void) {
     PVec d;
-    f32 h;
     f32 ny;
+    f32 h;
     if (color == 0) {
         color = 0xFDFEE7;
         dir[0] = 0.0f;
@@ -787,7 +787,8 @@ inline void SunTMH::Apply(void) {
     NegInto(&d, dir, -1.0f);
     PSVECNormalize(&d, &d);
     h = sqrt(Sq(d.x) + Sq(d.z));
-    ny = -d.y;
+    f32 yy = d.y;
+    ny = -yy;
     if ((f32)atan(ny / h) < lbl_8055EC04) {
         fn_802E30C8("trackmod: bad sun direction (%.0f < %.0f degrees); adjusting", 180.0f * (f32)atan(ny / h) / 3.1415927f,
                     180.0f * lbl_8055EC04 / 3.1415927f);
@@ -795,8 +796,9 @@ inline void SunTMH::Apply(void) {
         d.y = -(f32)sin(lbl_8055EC04);
         d.z *= (f32)cos(lbl_8055EC04) / h;
     }
-    fn_802E30C8("suntmh: sun envmap coords are %.3f %.3f", 0.5f + 0.28901735f * -d.x / (1.0f + -d.y),
-                0.5f + 0.28901735f * -d.z / (1.0f + -d.y));
+    ny = -d.y;
+    fn_802E30C8("suntmh: sun envmap coords are %.3f %.3f", 0.5f + 0.28901735f * -d.x / (1.0f + ny),
+                0.5f + 0.28901735f * -d.z / (1.0f + ny));
     fn_802C9A1C((TVec*)&d);
 }
 
