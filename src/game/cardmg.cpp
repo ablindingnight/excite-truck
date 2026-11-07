@@ -548,12 +548,12 @@ static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
 }
 
 static inline void EaseV(EVec* e, const EVec* g, f32 a, f32 b) {
-    f32 x = e->x * a;
-    f32 y = e->y * a;
-    f32 z = e->z * a;
-    e->x = x + g->x * b;
-    e->y = y + g->y * b;
-    e->z = z + g->z * b;
+    e->x *= a;
+    e->y *= a;
+    e->z *= a;
+    e->x += g->x * b;
+    e->y += g->y * b;
+    e->z += g->z * b;
 }
 
 void fn_8018DA5C(u8* p, u8* m) {
