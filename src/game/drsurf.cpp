@@ -289,7 +289,7 @@ static inline int Queue(DeformQueue* q, int n, void* src, void* dst) {
     return 0;
 }
 
-static inline void Swap32(u8* p) {
+static inline void Swap32(u8* const& p) {
     u8 t = p[0];
     p[0] = p[3];
     p[3] = t;
@@ -990,7 +990,7 @@ void fn_802D62FC(Surf* s, void** dl, u32* size) {
 
 void fn_802D657C(u32* p, u32 base);
 
-static inline void SwapHeader(u8* b) {
+static inline void SwapHeader(u8* const& b) {
     Swap32(b + 0x1C);
     Swap32(b + 0x20);
     Swap32(b + 0x24);
@@ -1166,6 +1166,17 @@ void fn_802D6B78(Surf* s) { fn_802D5FE4(s); }
 
 void fn_802D6B7C(Surf* s) { fn_802D6170(s); }
 
+// By-value byte swap for the 4-character type tag in the error message: Swap32's by-reference pointer
+// changes this function's registers, so the original had a separate value-parameter swap here.
+static inline void SwapBytes(char* p) {
+    char t = p[0];
+    p[0] = p[3];
+    p[3] = t;
+    t = p[1];
+    p[1] = p[2];
+    p[2] = t;
+}
+
 void fn_802D6B80(Surf* s, u32 base, const char* name) {
     Swap32((u8*)s);
     Surf* t = fn_802D62E4(s);
@@ -1174,7 +1185,7 @@ void fn_802D6B80(Surf* s, u32 base, const char* name) {
     } else {
         char type[5];
         *(u32*)type = s->magic;
-        Swap32((u8*)type);
+        SwapBytes(type);
         type[4] = 0;
         fn_802E317C("gx: %s has bad surf type %s", name, type);
     }
