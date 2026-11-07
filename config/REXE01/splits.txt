@@ -2668,6 +2668,7 @@ game/deity.cpp:
 game/collisionsound.cpp:
 	.text       start:0x801B32C8 end:0x801B45E0
 	.ctors      start:0x802ED258 end:0x802ED25C
+	.rodata     start:0x802F9630 end:0x802F98D0
 	.data       start:0x80335C80 end:0x80335DB8
 	.bss        start:0x80435C50 end:0x80435C70
 	.sbss       start:0x8055E6B8 end:0x8055E6C4
