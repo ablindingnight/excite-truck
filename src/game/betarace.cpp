@@ -2393,6 +2393,9 @@ void fn_801CB648(int id, f32 t, int done);
 void fn_801CB5DC(int id, s32 total, s32 grade);
 }
 
+// Helper name unproven: the square that keeps 1.0f in the lower register.
+static inline f32 Sq(f32 v) { return v * v; }
+
 void BetaCar::DrawBonusStar(ILayout* l, int n) {
     f32 left = master->timer.limit - master->timer.now;
     left = 0.0f > left ? 0.0f : left;
@@ -2415,7 +2418,7 @@ void BetaCar::DrawBonusStar(ILayout* l, int n) {
             } else {
                 f32 f = 2.0f * ph - 1.0f;
                 f32 q = f * f;
-                f32 s = 1.0f - (1.0f - f) * (1.0f - f);
+                f32 s = 1.0f - Sq(1.0f - f);
                 e = *a;
                 e.pos.x = a->pos.x + s * (b->pos.x - a->pos.x);
                 e.pos.y = a->pos.y + q * (b->pos.y - a->pos.y);
