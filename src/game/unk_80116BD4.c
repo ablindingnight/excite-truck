@@ -3423,11 +3423,11 @@ void fn_8011CD90(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     trees->last = 0;
 }
 
-extern u8 lbl_80561208[];
+extern const u8 lbl_80561208[8];
 void fn_8011CE18(void *arg0, void *arg1) {
     u32 *bits;
     u32 value, bitCount, available, mask, count, code, len, s, w;
-    u8 fill;
+    u32 fill;
     u8 *dst, *table, *lookup;
     u32 sym, runlen, j;
     if (*(u32 *)arg0 != *(u32 *)((u8 *)arg0 + 4)) return;
@@ -3452,6 +3452,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
         if (bitCount == 0) { w = *bits++; bitCount = 31; value = w >> 1; }
         else { w = value; value >>= 1; bitCount--; }
         if ((w & 1) == 0) {
+            dst = *(u8 **)((u8 *)arg0 + 0x2C);
             fill = 0;
             table = (u8 *)arg0 + 0x10;
             lookup = *(u8 **)((u8 *)arg0 + 0x24);
@@ -3469,18 +3470,37 @@ void fn_8011CE18(void *arg0, void *arg1) {
                 } else {
                     u32 next = *bits;
                     code = (value | (next << bitCount)) & mask;
-                    s = lookup[code];
-                    code = s & 15;
-                    len = s >> 4;
-                    sym = table[code];
+                    len = lookup[code];
+                    sym = table[len & 15];
+                    len >>= 4;
                     if (bitCount >= len) { value >>= len; bitCount -= len; }
                     else { value = next >> (len - bitCount); bits++; bitCount = bitCount + 32 - len; }
                 }
                 if (sym >= 12) {
-                    runlen = lbl_80561208[sym - 12];
-                    count -= runlen;
-                    for (j = 0; j < runlen; j++) {
-                        *dst++ = fill;
+                    u8 rl = lbl_80561208[sym - 12];
+                    u32 w = fill | (fill << 8);
+                    count -= rl;
+                    w |= w << 16;
+                    /* Run fill as the target has it: a byte loop over the whole run when dst is unaligned (the word and
+                     * tail loops after it never run), whole words when aligned (runs are multiples of 4 bytes). */
+                    if ((u32)dst & 3) {
+                        do {
+                            *dst++ = w;
+                        } while (--rl);
+                        while (rl >= 4) {
+                            *(u32 *)dst = w;
+                            dst += 4;
+                            rl -= 4;
+                        }
+                        for (; rl != 0; rl--) {
+                            *dst++ = w;
+                        }
+                    } else {
+                        do {
+                            rl -= 4;
+                            *(u32 *)dst = w;
+                            dst += 4;
+                        } while (rl);
                     }
                 } else {
                     *dst++ = sym;
