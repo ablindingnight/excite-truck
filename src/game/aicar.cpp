@@ -2268,7 +2268,7 @@ void fn_8019743C(u8* d, u8* out) {
             }
             F32(d, 0xE4) = F32(d, 0x278) + diff;
             F32(d, 0xE8) = 0.0f;
-            f32 t = (f32)__fabs(diff) / 0.61f;
+            f32 t = AbsFlt(diff) / 0.61f;
             t = Clamp01(t);
             f32 cur = F32(d, 0xE0);
             if (cur < t) {

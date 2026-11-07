@@ -556,6 +556,8 @@ static inline void EaseV(EVec* e, const EVec* g, f32 a, f32 b) {
     e->z += g->z * b;
 }
 
+static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
+
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
     DmgPose* mdl = (DmgPose*)m;
@@ -582,7 +584,7 @@ void fn_8018DA5C(u8* p, u8* m) {
             v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
             f32 w = DmgMax(0.0f, 3.0f - az);
             v.y += 0.5f * lean * (F32(pt, 0x24) * w);
-            v.x += twist * DmgMax(0.0f, 3.0f - (f32)__fabs(F32(pt, 0x28)));
+            v.x += twist * DmgMax(0.0f, 3.0f - AbsFlt(F32(pt, 0x28)));
             mdl->pt[i] = v;
         }
     }
