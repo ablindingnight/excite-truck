@@ -577,6 +577,13 @@ RVL_SDK/ax/AXVPB.c:
 	.sbss       start:0x8055D7E0 end:0x8055D7EC
 	.sdata2     start:0x80560AE8 end:0x80560B08
 
+RVL_SDK/ax/AXComp.c:
+	.data       start:0x802FEDA0 end:0x802FFD60
+
+RVL_SDK/ax/DSPCode.c:
+	.data       start:0x802FFD60 end:0x80301D60
+	.sdata      start:0x80558DE0 end:0x80558DE6
+
 revolution/AX/AXProf.c:
 	.text       start:0x80033EB4 end:0x80033EF4
 	.sbss       start:0x8055D7F0 end:0x8055D800
