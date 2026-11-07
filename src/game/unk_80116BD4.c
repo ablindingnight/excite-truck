@@ -769,7 +769,7 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
 s32 fn_80117598(s32 arg0, s32 arg1) {
     StreamPlayer *p = (StreamPlayer *)((u8 *)arg0 - ((u8 *)((StreamPlayer *)arg0)->queue - (u8 *)arg0));
     s32 v = p->tick;
-    return ~v & ((v - arg1 | arg1 - v) >> 31);
+    return v != arg1 ? -1 - v : 0;
 }
 
 // Queue callback: `arg0` is the player's queue entry; feeds the player's tracks and stores the tick.
