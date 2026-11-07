@@ -739,22 +739,16 @@ void fn_802E1058(void) {
     lbl_8055FEEC = 0;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802E11A4(BinkMovie* m, u8 loop, const char* name) {
-    m->loop = loop;
-    fn_801345D8(m->name, 0x40, "video/%s", name);
-    char* dot = strrchr(m->name, '.');
-    if (dot) {
-        *dot = 0;
-    }
-    char* d = m->name;
-    int n = 0x40;
+/* Helper name unproven: appends src to dst without letting dst exceed max bytes. */
+static inline void StrCatMax(char* dst, const char* src, int max) {
+    char* d = dst;
+    int n = max;
     while (*d) {
         n--;
         d++;
     }
     if (n > 0) {
-        const char* s = ".bik";
+        const char* s = src;
         while ((*d++ = *s++) != 0) {
             if (--n <= 0) {
                 d[-1] = 0;
@@ -768,7 +762,13 @@ BinkMovie* fn_802E11A4(const char* name, u8 loop) {
     BinkMovie* r = fn_802E0BA8();
     BinkMovie* m = fn_802E0BA4(r);
     m->bink = 0;
-    Loop1_fn_802E11A4(m, loop, name);
+    m->loop = loop;
+    fn_801345D8(m->name, 0x40, "video/%s", name);
+    char* dot = strrchr(m->name, '.');
+    if (dot) {
+        *dot = 0;
+    }
+    StrCatMax(m->name, ".bik", 0x40);
     fn_802E0EAC(m);
     return r;
 }
