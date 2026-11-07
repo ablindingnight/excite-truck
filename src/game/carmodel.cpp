@@ -965,25 +965,35 @@ void fn_801EDD68(CarModel* m) { fn_801EFC90(m->tire, m->car, m->wheels); }
 }  // extern "C"
 
 void CarModel::Set(const AnimSlot* s) {
+    f32 yy;
+    f32 yx;
+    f32 xz;
+    f32 xy;
+    f32 xx;
     f32 k;
+    f32 yz;
+    f32 zx;
+    f32 zy;
     int i;
+
+
     AnimObj::Set((const AnimSlot*)car);
     k = ((const CarState*)s)->scale;
     scale = k;
     if (Abs(k - 1.0f) <= lbl_80558DC4[0]) {
         scaled = frame;
     } else {
-        f32 yy;
-        f32 xz;
-        f32 yx;
-        f32 xx = frame.axes[0].x * k;
-        f32 zx;
-        f32 xy;
+
+
+
+        xx = frame.axes[0].x * k;
+
+
         xy = frame.axes[0].y * k;
-        f32 yz;
+
         xz = frame.axes[0].z * k;
         yx = frame.axes[1].x * k;
-        f32 zy;
+
         yy = frame.axes[1].y * k;
         yz = k * frame.axes[1].z;
         zx = frame.axes[2].x * k;

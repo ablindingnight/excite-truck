@@ -494,13 +494,19 @@ void fn_8028EFC4(SysList* buckets, SysList* l) {
 }
 
 s32 fn_8028F040(SysList* a, SysList* b, s32 tex) {
-    for (int i = 0; i < a->count; i++) {
-        s32 t = a->items[i]->tex;
+    int n;
+    int found;
+    int j;
+    int i;
+    s32 t;
+    PartSys **q;
+    for (i = 0; i < a->count; i++) {
+        t = a->items[i]->tex;
         if (t != tex) {
-            int found = 0;
-            int j = 0;
-            int n = b->count;
-            PartSys** q = b->items;
+            found = 0;
+            j = 0;
+            n = b->count;
+            q = b->items;
             while (!found && j < n) {
                 found = t == (*q)->tex;
                 q++;
