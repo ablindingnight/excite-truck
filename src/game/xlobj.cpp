@@ -957,11 +957,11 @@ static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, void* verts, int n
 void fn_802BB0FC(void* verts, int nverts) {
     u16 **d;
     Chunk<u16*> *c;
-    Item *head;
-    Item *it;
+    Item* head;
+    Item* it;
     int i;
-    TexEntry *te;
-    u16 *st;
+    TexEntry* te;
+    u16* st;
     int j;
     for (i = 0; i < lbl_804BFFF4.count; i++) {
         te = lbl_804BFFF4.data[i];
@@ -979,7 +979,6 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802C8BD0(te->tex);
                 fn_802DC130();
                 for (Item* it = te->head; it; it = it->next) {
-
 
                     if (!it->head) {
                         continue;
@@ -1003,8 +1002,6 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802C8D74();
                 break;
             case 2: {
-
-
 
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC278();
@@ -1053,14 +1050,14 @@ static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, void* verts, int n
 }
 
 void fn_802BB3B8(void* verts, int nverts) {
-    Item *head;
+    Item* head;
     Chunk<u16*> *c;
-    u16 *st;
+    u16* st;
     int i;
     int j;
     u16 **d;
-    Item *it;
-    TexEntry *te;
+    Item* it;
+    TexEntry* te;
     for (i = 0; i < lbl_804BFFF4.count; i++) {
         te = lbl_804BFFF4.data[i];
         if (te->prio == 999) {
@@ -1072,8 +1069,6 @@ void fn_802BB3B8(void* verts, int nverts) {
         }
         if (te->tex != -2) {
             switch (head->type) {
-
-
 
             case 0:
             case 1:
@@ -1102,8 +1097,6 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802C8D74();
                 break;
             case 2: {
-
-
 
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC278();

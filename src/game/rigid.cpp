@@ -451,27 +451,27 @@ static inline void Scaled(RVec3* o, const RVec3* v, f32 s) {
 }
 void RigidBody::Update(void) {
     int i;
-    ImpRec *p;
+    ImpRec* p;
     f32 az;
     f32 ax;
-    RMat33 *wi;
+    RMat33* wi;
     f32 k;
     f32 ay;
     f32 ang;
-    RMat33 *ii;
+    RMat33* ii;
     f32 tx;
     f32 co;
-    Contact *c;
+    Contact* c;
     f32 t;
     int j;
     f32 yy;
     f32 ty;
     f32 zz;
-    RMat33 *rr;
+    RMat33* rr;
     f32 inv;
     f32 s;
     f32 xx;
-    ImpRec *q;
+    ImpRec* q;
     RVec3 g;
     RVec3 dr;
 
