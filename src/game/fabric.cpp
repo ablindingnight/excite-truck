@@ -227,7 +227,13 @@ static inline int ClampI(int v, int lo, int hi) {
 
 static inline int ToByte(f32 x) {
     int v = (int)(255.0f * x);
-    v = v < 0 ? 0 : v;
+    v = v > 0 ? v : 0;
+    return v < 0xFF ? v : 0xFF;
+}
+// Helper names unproven: MaxI re-evaluates its argument; only the last channel of the colour does that.
+static inline int MaxI(int a, int b) { return a > b ? a : b; }
+static inline int ToByte2(f32 x) {
+    int v = MaxI((int)(255.0f * x), 0);
     return v < 0xFF ? v : 0xFF;
 }
 
@@ -292,33 +298,34 @@ u32 fn_801F4ECC(ValueNode* vn) {
     return flags;
 }
 
+// Helper names unproven: frame transform with the alias test.
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+static inline void MulVec(PVec* out, const PVec* in, const TMtx* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+    }
+}
 void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
-    ValVec3 off;
-    off = vn->GetVec3("offset");
-    PVec p;
-    ValPoint uv;
-    ValVec3 c;
+    const ValVec3& offr = vn->GetVec3("offset");
+    PVec p = *(const PVec*)&offr;
+    const ValPoint& uvr = vn->GetPoint("uv");
+    ValPoint uv = uvr;
     ValVec3 white;
-    p.x = off.x;
-    p.y = off.y;
-    p.z = off.z;
-    uv = vn->GetPoint("uv");
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
-    c = vn->GetVec3Or("color", white);
-    if ((PVec*)out == &p) {
-        PVec t;
-        t.x = p.z * m->m[2][0] + (m->m[0][0] * p.x + p.y * m->m[1][0]);
-        t.y = p.z * m->m[2][1] + (p.x * m->m[0][1] + p.y * m->m[1][1]);
-        t.z = p.z * m->m[2][2] + (p.x * m->m[0][2] + p.y * m->m[1][2]);
-        out->pos = t;
-    } else {
-        f32 yv = p.y;
-        out->pos.x = m->m[2][0] * p.z + (m->m[0][0] * p.x + m->m[1][0] * yv);
-        out->pos.y = p.z * m->m[2][1] + (p.x * m->m[0][1] + m->m[1][1] * p.y);
-        out->pos.z = m->m[2][2] * p.z + (m->m[0][2] * p.x + m->m[1][2] * p.y);
-    }
+    const ValVec3& cr = vn->GetVec3Or("color", white);
+    ValVec3 c = cr;
+    MulVec(&out->pos, &p, m);
     out->pos.x += m->t[0];
     out->pos.y += m->t[1];
     out->pos.z += m->t[2];
@@ -326,9 +333,8 @@ void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
     out->v = uv.y;
     {
         u8 b = ToByte(c.z);
-        int g = ToByte(c.y);
-        int r = ToByte(c.x);
-        out->color = 0xFF000000 | ((u8)r << 16) | ((u8)g << 8) | (u8)b;
+        u8 g = ToByte(c.y);
+        out->color = 0xFF000000 | ((u8)ToByte2(c.x) << 16) | (g << 8) | b;
     }
 }
 
