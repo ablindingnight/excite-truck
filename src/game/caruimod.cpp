@@ -358,11 +358,7 @@ void CarUIModel::LoadEfx(const char* path) {
             facingPos = n->GetIntValue("facing_pos");
             facingNeg = n->GetIntValue("facing_neg");
             numBones = n->GetIntValue("num_bones");
-            if (n->Has("group_mask")) {
-                groupMask = fn_802C7830(n->GetValue("group_mask"));
-            } else {
-                groupMask = -1;
-            }
+            groupMask = n->Has("group_mask") ? fn_802C7830(n->GetValue("group_mask")) : -1;
         } else {
             fn_802E317C("carmodelview: %s has no boneset table", file);
         }
@@ -929,9 +925,9 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         f32 d = dist;
         int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hh = 0.5f * (f32)h;
+        f32 nd;
         f32 hw = 0.5f * (f32)w2;
         f32 cx;
-        f32 nd;
         f32 cy = (f32)y + hh;
         x -= (w2 - w) / 2;
         cx = (f32)x + hw;

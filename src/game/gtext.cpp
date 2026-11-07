@@ -362,10 +362,10 @@ void fn_80231780(const UIXform* m) {
             f32 k = 1.0f / s;
             fn_802354A0(e->art, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z, e->artIdx, color, k * it->w, k * it->h);
         } else {
-            if (!m) {
-                fn_802C8B98(lbl_80497F14.data[it->esc].tex, fn_8022EDC4());
-            } else {
+            if (m) {
                 fn_802C8B98(lbl_80497F14.data[it->esc].tex, m);
+            } else {
+                fn_802C8B98(lbl_80497F14.data[it->esc].tex, fn_8022EDC4());
             }
             fn_802C8DBC(4);
             f32 x0 = it->x;
@@ -912,8 +912,8 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
                 fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
-                y -= scale * (ff->glyphs[ch].width + ff->glyphs[ch].post);
                 i += nx - (text + i);
+                y -= scale * (ff->glyphs[ch].width + ff->glyphs[ch].post);
             }
             fn_80233EBC();
         }

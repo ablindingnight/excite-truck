@@ -384,8 +384,9 @@ void fn_801F5508(Fabric* f) {
     }
     for (int c = 0; c < f->cols; c++) {
         for (int r = 1; r < f->rows; r++) {
-            int a = c + (r - 1) * f->cols;
+            int a;
             int b = c + r * f->cols;
+            a = c + (r - 1) * f->cols;
             SetStick(&s[k++], f->cur, a, b);
         }
     }

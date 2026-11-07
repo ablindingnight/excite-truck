@@ -620,11 +620,12 @@ void fn_802A53B0(DropHit* hits, int n) {
     dir.y = r->vel.y * inv;
     dir.z = r->vel.z * inv;
     for (int i = 0; i < n; hits++, i++) {
+        Droplet* d;
         DropSource* s = &lbl_804BCFB8[hits->source];
         if (hits->dist > 56.25f || !hits->enabled || s->count < 1) {
             continue;
         }
-        Droplet* d = s->drops;
+        d = s->drops;
         DropObj* o = hits->obj;
         int j = 0;
         if (s->count > 0) for (; j < s->count; d++, j++) {
@@ -1023,7 +1024,7 @@ void RainSystem::Move(const PVec* d) {
         PVec v;
         v.x = p->x + m.x;
         v.z = p->z + m.z;
-        v.y = p->y + m.y;
+        v.y = m.y + p->y;
         if (v.z > near && v.z < far && v.x * v.x < (0.25f + v.z * tx) * (0.25f + v.z * tx) &&
             Sq(v.y) < (0.25f + v.z * ty) * (0.25f + v.z * ty)) {
             out->x = v.x;
@@ -1055,8 +1056,9 @@ void RainSystem::Fill(void) {
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void RainSystem::Spawn(void) {
     f32 asp = fn_802C9A50();
+    f32 tx;
     f32 ty = tanHalf;
-    f32 tx = ty / asp;
+    tx = ty / asp;
     if (vel.z >= -0.01f) {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);

@@ -63,7 +63,7 @@ extern "C" void fn_8012F57C(Quat* out, Quat* a, const Quat* b, f32 t) {
         f32 omega = atan2f(sinom, cosom);
         f32 inv = 1.0f / sinom;
         f32 s0 = inv * sinf((1.0f - t) * omega);
-        f32 s1 = inv * sinf(t * omega);
+        f32 s1 = inv * sinf(omega * t);
         f32 len;
         Quat t0;
         Quat t1;

@@ -885,8 +885,8 @@ void fn_801ED718(CarModel* m) {
     if (tex != -1) {
         Frame f;
         P2 v[12];
-        int i = 12;
         P2* p = v;
+        int i = 12;
         do {
             p->ia = 0;
             p->ib = 0;

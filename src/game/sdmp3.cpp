@@ -550,8 +550,8 @@ void* fn_802EAB28(void* arg) {
     Mp3Reader* r = 0;
     s32 size = 0;
     pos = 0;
-    decoded = 0;
     errs = 0;
+    decoded = 0;
     MP3Info info;
     s32 used;
     while (lbl_80560062) {
@@ -614,13 +614,13 @@ void* fn_802EAB28(void* arg) {
             int n = lbl_805600AC < left ? lbl_805600AC : left;
             int done = 1;
             if (pos >= size) {
-                fn_802E30C8("mp3: at end of file");
                 done = 1;
+                fn_802E30C8("mp3: at end of file");
             } else if (r->Seek(pos)) {
                 if (r->Read(lbl_805600A8, n)) {
                 done = 0;
-                int off = 0;
                 int hdr = 0;
+                int off = 0;
                 if (!lbl_80560098 && strncmp((char*)lbl_805600A8, "ID3", 3) == 0) {
                     u8* b = lbl_805600A8;
                     int tagSize = (b[6] << 21) + (b[7] << 14) + (b[8] << 7) + b[9] + 10;
@@ -749,6 +749,7 @@ void* fn_802EAB28(void* arg) {
                 if (lbl_80560098) {
                     lbl_8055D25C = info.sampleRate;
                     lbl_8055D268 = info.channels;
+                    int need;
                     s32 pcm = info.pcmBytes;
                     if (lbl_8055D25C != lbl_8055D260 || lbl_8055D268 != lbl_8055D26C || lbl_805600C9) {
                         fn_802E30C8("mp3: waiting for channel to starve");
@@ -766,15 +767,15 @@ void* fn_802EAB28(void* arg) {
                         lbl_805600C9 = 0;
                     }
                     used = 0;
-                    int need = pcm * 2;
+                    need = pcm * 2;
                     s32 rp = lbl_805600B0[0];
                     while (off + 1 <= n) {
                         int space = lbl_805600B8 < rp ? rp - lbl_805600B8 : lbl_805600A4 - (lbl_805600B8 - rp);
                         if (space < need) {
                             break;
                         }
-                        int i;
                         int skip = -1;
+                        int i;
                         for (i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
                             if (SyncAt(lbl_805600A8 + off + i)) {
                                 if (i) {
@@ -814,10 +815,10 @@ void* fn_802EAB28(void* arg) {
                         decoded = 1;
                         fn_802EAA08();
                     }
-                    if (lbl_805600B8 > rp) {
-                        lbl_805600BC = lbl_805600B8 - rp;
-                    } else {
+                    if (lbl_805600B8 <= rp) {
                         lbl_805600BC = lbl_805600A4 - (rp - lbl_805600B8);
+                    } else {
+                        lbl_805600BC = lbl_805600B8 - rp;
                     }
                 } else {
                     lbl_805600BC = 0;

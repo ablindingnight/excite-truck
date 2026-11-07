@@ -485,8 +485,9 @@ int fn_8025978C(u8* p) {
     s32 barColor[7];
     s32 levels[7];
     s32* vals[7];
+    u32 i;
     s32* lp = levels;
-    for (u32 i = 0; i < 7; i++, lp++) {
+    for (i = 0; i < 7; i++, lp++) {
         cat = lbl_80344EA0[i].category;
         if (cat == S32(p, 0x18)) {
             iconColor[i] = 9;

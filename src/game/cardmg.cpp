@@ -1059,6 +1059,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                 g->z = DentClamp(g->z, q->lo.z, q->hi.z);
             }
         }
+        LightPart* l;
         DmgSlot* sl = (DmgSlot*)(p + 0x152C);
         DamagePart* t = lbl_80332840;
         for (int i = 0; i < 17; i++) {
@@ -1113,7 +1114,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             sl++;
             t++;
         }
-        LightPart* l = lbl_80332D08;
+        l = lbl_80332D08;
         for (int i = 0; i < 13; i++) {
             int idx = l->index;
             u32 bit = 1 << idx;

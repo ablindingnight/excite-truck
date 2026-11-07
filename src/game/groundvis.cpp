@@ -687,8 +687,8 @@ void fn_802AEB3C(const GroundFrame* cam) {
             c.y = fn_801DCF48(0, c.x, c.z);
             k = 2.1213f;
         } else {
-            int h = n->size / 2;
             c.x = n->x * lbl_80564AF0;
+            int h = n->size / 2;
             c.z = n->y * lbl_80564AF0;
             c.y = -12.0f + (f32)((cell->flags >> 14) & 0x1FF);
             k = (f32)(((cell->flags >> 10) & 0xF) + 1) * 1.5f;
@@ -733,14 +733,15 @@ void fn_802AEB3C(const GroundFrame* cam) {
             cur = *n;
             u16* p;
             u16* m1;
-            s32 q = cur.size / 2;
             u16* m2;
+            u16* m3;
+            s32 q = cur.size / 2;
             int o = q / 2;
             p = fn_802AFEC0(q);
             int s = q + 1;
             m1 = p + s;
             m2 = p + s * 2;
-            u16* m3 = p + s * 3;
+            m3 = p + s * 3;
             fn_802AFEA4(&lbl_804BD8E8, -q);
             // Children go on the stack far-to-near for the view quadrant.
             switch (lbl_8055F988) {
@@ -752,7 +753,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
                 break;
             case 2:
                 fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+                fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
                 fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
                 fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
                 break;
@@ -763,7 +764,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
                 fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
                 break;
             case 0:
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+                fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
                 fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
                 fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
                 fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);

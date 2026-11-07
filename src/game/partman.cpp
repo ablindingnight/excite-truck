@@ -952,8 +952,8 @@ void PartSys::DrawAnimated(Particle* p, int n) {
 
 void PartSys::DrawRotating(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
-    f32 shade = 0.5f * shading;
     f32 now = lbl_8055F738;
+    f32 shade = 0.5f * shading;
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = now - p->birth;

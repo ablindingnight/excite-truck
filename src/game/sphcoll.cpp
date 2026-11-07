@@ -1355,7 +1355,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     Clip(&l.y, F32(q, 0x28), &in, 2);
     caps = U32(q, 0x34);
-    if ((caps & 1) && l.z > F32(q, 0x2C)) {
+    if ((caps & 1) && F32(q, 0x2C) < l.z) {
         return 0;
     }
     if ((caps & 2) && l.z < -F32(q, 0x2C)) {
@@ -1403,7 +1403,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     f32 comp = lbl_80562300 + (-len + F32(p, 0x24));
     f32 fq = lbl_805622D0;
-    if (comp > fq) {
+    if (fq < comp) {
         f32 fp = fq;
         f32 k = lbl_805622DC / len;
         n.x = d.x * k;
@@ -2053,9 +2053,10 @@ int fn_8019E500(u8* p, u8* q) {
     ax[1].ext = F32(q, 0x28);
     ax[2].ext = F32(q, 0x2C);
     ax[2].dir = *(PVec3*)&fr.m[6];
+    int i;
     bool hit = false;
     f32 r = 0.75f;
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         if (i == 1) {
             continue;
         }
@@ -2649,7 +2650,7 @@ void fn_8019F780(u8* p) {
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = lbl_805623B0 + lbl_8056232C * sub;
             sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
-            up.y = lbl_805623B4 * (lift * (sub * vol));
+            up.y = lbl_805623B4 * (lift * (vol * sub));
             up.x = lbl_805622D0;
             up.z = lbl_805622D0;
             rb->AddForceAt(&up, (RVec3*)(p + 0x34));
@@ -3784,7 +3785,7 @@ void fn_801A34D0(u8* p, RVec3* lo, RVec3* hi) {
     lo->x = lx < b.x ? lx : b.x;
     lo->y = lo->y < b.y ? lo->y : b.y;
     lo->z = lo->z < b.z ? lo->z : b.z;
-    hi->x = hi->x > b.x ? hi->x : b.x;
+    hi->x = b.x < hi->x ? hi->x : b.x;
     hi->y = hi->y > b.y ? hi->y : b.y;
     hi->z = hi->z > b.z ? hi->z : b.z;
     hi->x += 1.5f;

@@ -539,19 +539,20 @@ void RigidBody::Update(void) {
         if (ang > 0.0001f) {
             f32 inv = 1.0f / ang;
             f32 ax = inv * dr.x;
-            f32 s;
             f32 ay = inv * dr.y;
             f32 az = inv * dr.z;
+            f32 s;
             s = sin(ang);
+            f32 tx;
             f32 co = cos(ang);
-            f32 xx = ax * ax;
             f32 yy = ay * ay;
+            f32 xx = ax * ax;
             f32 t = 1.0f - co;
             f32 zz = az * az;
-            f32 tx = t * ax;
+            tx = t * ax;
             f32 ty = t * ay;
             r.rot.m[0][0] = co + t * xx;
-            r.rot.m[0][1] = (ay * tx) + (s * az);
+            r.rot.m[0][1] = (s * az) + (ay * tx);
             r.rot.m[0][2] = az * tx - s * ay;
             r.rot.m[1][0] = (ay * tx) - (s * az);
             r.rot.m[1][1] = co + t * yy;

@@ -1304,7 +1304,7 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
     d.x = yv * inv;
     d.y = -nx;
     off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
-    pt.x = pos.x + d.x * off;
+    pt.x = pos.x + off * d.x;
     pt.y = pos.y + d.y * off;
     F32(rec, 0x24) = pt.x;
     F32(rec, 0x2C) = pt.y;
