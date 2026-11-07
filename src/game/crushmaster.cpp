@@ -1359,7 +1359,8 @@ inline void CrushMaster::vf0C(void) {
         }
     } else if (!t17C.Running()) {
         CrushCar* c = &cars[fn_80179630(0)];
-        results.Update(c->Score(), lbl_8043038C.pointsPerKill * (c->f8 + c->fC), c->bonus);
+        int kills = c->f8 + c->fC;
+        results.Update(c->Score(), lbl_8043038C.pointsPerKill * kills, c->bonus);
     }
 }
 
