@@ -3677,7 +3677,9 @@ void fn_8018A750(u8* p) {
         SprEdge edges[4];
         SprPin pins[4];
         int n = S32(PTR(p, 0x26C0), 0xC8);
-        Loop1_fn_8018A750(p, verts, edges, pins);
+        if (n > 0) {
+            Loop1_fn_8018A750(p, verts, edges, pins);
+        }
         fn_801C1CBC(PTR(p, 0x26C8), n * 2, verts, n, edges, n, pins);
     }
 }
