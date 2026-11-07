@@ -215,7 +215,10 @@ public:
     f32 fadeIn;               // offset 0x154
 };
 
-static inline f32 Smooth(f32 a) { return (3.0f - 2.0f * a) * (a * a); }
+static inline f32 Smooth(f32 a) {
+    f32 aa = a * a;
+    return (3.0f - 2.0f * a) * aa;
+}
 
 extern "C" {
 
