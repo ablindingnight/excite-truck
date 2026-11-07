@@ -415,7 +415,9 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
     return 0;
 }
 
-static inline int EscAdv(const char* s, f32 h, double& adv) {
+static inline const char* EscName(const int& i) { return lbl_80497F14.data[i].name; }
+
+static inline int EscAdv(const char* const& s, f32 h, double& adv) {
     if (*s == '\\') {
         for (int i = 0; i < lbl_80497F14.count; i++) {
             const char* name = lbl_80497F14.data[i].name;
@@ -427,7 +429,7 @@ static inline int EscAdv(const char* s, f32 h, double& adv) {
                 } else {
                     adv = h * e->scale;
                 }
-                return strlen(lbl_80497F14.data[i].name) + 1;
+                return strlen(EscName(i)) + 1;
             }
         }
     }
