@@ -664,11 +664,6 @@ StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
 
 }  // extern "C"
 
-static const char* const lbl_802F9930[] = {
-    "live_update_value_excite",
-    "live_update_value_super",
-    "live_update_value_mirror",
-};
 
 // Layout elements as the awards layouts return them (see betarace's TextElem/GartElem).
 struct AwPos {
@@ -711,6 +706,17 @@ int fn_80204CF0(void);
 void fn_80148070(AwBox* box, u32 color, void* art);
 void fn_80147230(AwText* e, const char* fmt, ...);
 void fn_801476C4(AwText* e);
+}
+
+// The live update element for the current difficulty.
+static inline const char* LiveValueName(void) {
+    const char* names[3] = {
+        "live_update_value_excite",
+        "live_update_value_super",
+        "live_update_value_mirror",
+    };
+    int mode = fn_80204CF0();
+    return names[mode];
 }
 
 
@@ -1287,6 +1293,7 @@ void fn_801CD970(int car) {
     if (!p) {
         return;
     }
+    AwText e;
     AwBox* box = ((AwLayout*)m->layout)->FindBox("live_update_box");
     if (!box) {
         return;
@@ -1304,18 +1311,17 @@ void fn_801CD970(int car) {
         fn_80148070(&b, -1, m->art);
     }
     AwText* msg = ((AwLayout*)m->layout)->Find("live_update_message");
-    AwText* val = ((AwLayout*)m->layout)->Find(lbl_802F9930[fn_80204CF0()]);
+    AwText* val = ((AwLayout*)m->layout)->Find(LiveValueName());
     AwText* title = ((AwLayout*)m->layout)->Find("live_update_title");
     if (msg && val && title) {
-        AwText e;
         char num[0x14];
         char label[0x40];
         char value[0x10];
         e = *msg;
         e.pos.x += slide;
-        Statistic* s = p->h->stat;
-        s->Format(num, sizeof(num));
-        fn_801345D8(label, sizeof(label), "%s", StatsGetLabel(s->GetType()));
+        StatHandler* h = p->h;
+        h->stat->Format(num, sizeof(num));
+        fn_801345D8(label, sizeof(label), "%s", StatsGetLabel(h->stat->GetType()));
         fn_801345D8(value, sizeof(value), "%s", num);
         fn_80147230(&e, "%s", label);
         e = *val;
