@@ -1024,7 +1024,10 @@ void fn_80241820(ColorPick* c) {
         f32 start = x + w * lbl_80563784 - cell * lbl_80563784 - cell * cur;
         u32 frame;
         u32 tint;
-        for (int i = 0; i < c->vehicle->num_colors; i++) {
+        // MATCHING-AID: named offset walker; the compiler walker ranks below frame.
+        int wk;
+        int i;
+        for (i = 0, wk = 0; i < c->vehicle->num_colors; wk += 4, i++) {
             f32 sx = start + (f32)i * cell;
             if (sx + cell > x && sx < x + w) {
                 f32 d = sx + cell * lbl_80563784 - x;
@@ -1033,7 +1036,7 @@ void fn_80241820(ColorPick* c) {
                 }
                 f32 a = Clamp01((d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758));
                 u8 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
-                tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
+                tint = (*(u32*)((u8*)c->vehicle->colors + wk) & 0xFFFFFF) | (alpha << 24);
                 frame = (alpha << 24) | 0xFFFFFF;
                 if (sx > x && sx + cell < x + w) {
                     fn_802354A0(c->art, 3, sx, y, lbl_80563758, cell, h, tint);
