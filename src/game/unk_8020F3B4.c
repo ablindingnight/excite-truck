@@ -3,19 +3,54 @@
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
   
-extern struct Unk_804900AC { long *m_entries; long m_count; long m_capacity; } lbl_804900AC;
+#pragma cplusplus on
+// Fixed list with its storage inline: two instances, each its own class (their weak dtors are distinct).
+struct Unk_804900AC {
+    Unk_804900AC(void) {
+        m_entries = m_storage;
+        m_capacity = 0x80;
+        m_count = 0;
+    }
+    ~Unk_804900AC(void) {
+        if (this != 0) {
+            m_entries = 0;
+            m_count = 0;
+            m_capacity = 0;
+        }
+    }
+    long *m_entries;
+    long m_count;
+    long m_capacity;
+    long m_storage[0x80];
+};
+struct Unk_804902C4 {
+    Unk_804902C4(void) {
+        m_entries = m_storage;
+        m_capacity = 0x80;
+        m_count = 0;
+    }
+    ~Unk_804902C4(void) {
+        if (this != 0) {
+            m_entries = 0;
+            m_count = 0;
+            m_capacity = 0;
+        }
+    }
+    long *m_entries;
+    long m_count;
+    long m_capacity;
+    long m_storage[0x80];
+};
+#pragma cplusplus off
+extern struct Unk_804900AC lbl_804900AC;
 extern void fn_801345D8(void *, ...);
 extern long lbl_8055B664;
 extern unsigned char lbl_8055EEF4;
 extern unsigned char lbl_8055EEF5;
 extern unsigned char lbl_8055EEF6;
-extern char lbl_80489CA0[16];
+extern char lbl_80489CA0[0x6400];
 extern long fn_8020F608(long, long);
-extern struct Unk_804902C4 {
-    long *m_entries;
-    long m_count;
-    long m_pad;
-} lbl_804902C4;
+extern struct Unk_804902C4 lbl_804902C4;
 extern long lbl_8055EEC4;
 extern long lbl_8055EED0;
 extern long lbl_8055EED4;
@@ -988,3 +1023,38 @@ extern void fn_8020F730(void);
 extern long fn_8020F9F4(void);
 extern int stricmp(const char *, const char *);
 extern int fn_8002B1D8(const char *, const char *, int);
+
+// The module's statics: tag, list terminator, marker, then the two lists. fn_802114F4 is the __sinit of
+// this unit and the two weak list dtors follow it (they sat at the head of uiapi's split).
+#pragma cplusplus on
+class ModuleTag;
+void RegisterModuleTag(ModuleTag* tag);
+class ModuleTag {
+public:
+    ModuleTag(void) { RegisterModuleTag(this); }
+    unsigned char flag;
+    ModuleTag* next;
+};
+class UnkStatic123s {
+public:
+    UnkStatic123s(void) {
+        unk4 = 123;
+        unk0 = 0;
+        unk8 = 0;
+        unkC = 0;
+        unk10 = 0;
+    }
+    unsigned long unk0, unk4, unk8, unkC, unk10;
+};
+class UnkStatic7F {
+public:
+    UnkStatic7F(void) { value = 0x7F000000; }
+    unsigned long value;
+};
+ModuleTag lbl_8055EEB0;
+UnkStatic123s lbl_80489C88;
+UnkStatic7F lbl_8055EEB8;
+char lbl_80489CA0[0x6400];
+Unk_804900AC lbl_804900AC;
+Unk_804902C4 lbl_804902C4;
+#pragma cplusplus off
