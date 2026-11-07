@@ -484,7 +484,8 @@ void fn_80168020(void) {
     for (i = 0; i < m->objs.count; i++) {
         p = &m->objs.data[i];
         fn_801E9E30(0, p->pos);
-        p->pos[1] = p->hover + (p->pos[1] + p->type->yoff);
+        p->pos[1] += p->type->yoff;
+        p->pos[1] += p->hover;
         p->taken = 0;
     }
     i = Loop2_fn_80168020(m);
