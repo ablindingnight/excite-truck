@@ -235,6 +235,8 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
     s32* hi;
     s32 bu;
     s32 bd;
+    s32 cs;
+    s32 ca;
 
     if (mixed & 7) {
         for (ch = 0; ch < channels; ch++, g++) {
@@ -258,10 +260,12 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
             hi = &g->xr[18];
             lo = &g->xr[17];
             for (i = 0; i < 8; i++) {
-                bd = hi[i];
                 bu = *lo;
-                *lo-- = (s32)(((s64)bu * lbl_802F33C8[i]) >> 24) - (s32)(((s64)bd * lbl_802F33E8[i]) >> 24);
-                hi[i] = (s32)(((s64)bd * lbl_802F33C8[i]) >> 24) + (s32)(((s64)bu * lbl_802F33E8[i]) >> 24);
+                bd = hi[i];
+                cs = lbl_802F33C8[i];
+                ca = lbl_802F33E8[i];
+                *lo-- = (s32)(((s64)bu * cs) >> 24) - (s32)(((s64)bd * ca) >> 24);
+                hi[i] = (s32)(((s64)bd * cs) >> 24) + (s32)(((s64)bu * ca) >> 24);
             }
         }
     }
