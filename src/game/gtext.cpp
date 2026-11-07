@@ -142,17 +142,21 @@ void fn_802C8E48(void);
 }
 
 static inline u16 DecodeUTF8(const char* s, const char** next) {
+    u16 r;
     u8 b = s[0];
+    const char* n;
     if ((b & 0xF0) == 0xE0) {
-        *next = s + 3;
-        return ((b & 0xF) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
+        r = ((b & 0xF) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
+        n = s + 3;
+    } else if ((b & 0xE0) == 0xC0) {
+        n = s + 2;
+        r = ((b & 0x1F) << 6) | ((u8)s[1] & ~0xC0);
+    } else {
+        r = b & 0x7F;
+        n = s + 1;
     }
-    if ((b & 0xE0) == 0xC0) {
-        *next = s + 2;
-        return ((b & 0x1F) << 6) | ((u8)s[1] & ~0xC0);
-    }
-    *next = s + 1;
-    return b & 0x7F;
+    *next = n;
+    return r;
 }
 
 static inline const char* ReadUTF8(const char* s, u16* c) {
@@ -669,7 +673,7 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
-static inline int EscWidth(const char* s, int i, f32& h, double& adv) {
+static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
     if ((s8)s[i] == '\\') {
         for (int j = 0; j < lbl_80497F14.count; j++) {
             const char* name = lbl_80497F14.data[j].name;
@@ -681,7 +685,7 @@ static inline int EscWidth(const char* s, int i, f32& h, double& adv) {
                 } else {
                     adv = h * e->scale;
                 }
-                return strlen(lbl_80497F14.data[j].name) + 1;
+                return strlen(EscName(j)) + 1;
             }
         }
     }
