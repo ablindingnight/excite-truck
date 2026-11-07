@@ -32,3 +32,11 @@ block_relocations:
 - source: 0x802F4930
 - source: 0x802F4A50
 - source: 0x802F92D0
+# pf_cp932 cp932_to_unicode table entries that only look like addresses (VF font table, 2026-11-07).
+- source: 0x802F0CE4
+- source: 0x802F1FDC
+- source: 0x802F1FE0
+- source: 0x802F1FE4
+- source: 0x802F1FE8
+- source: 0x802F1FEC
+- source: 0x802F1FF0

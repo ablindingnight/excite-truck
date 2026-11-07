@@ -1463,7 +1463,7 @@ RVL_SDK/vf/pf_volume.c:
 
 revolution/VF/pf_cp932.c:
 	.text       start:0x800B6DDC end:0x800B72EC
-	.rodata     start:0x802EEF80 end:0x802F31F4
+	.rodata     start:0x802EEF80 end:0x802F31F2
 
 RVL_SDK/vf/pf_api_util.c:
 	.text       start:0x800B72EC end:0x800B7408
