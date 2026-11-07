@@ -113,33 +113,46 @@ void fn_8020449C(void) {
 }
 
 int fn_802044E8(void) {
+    TextElem *v1;
+    TextElem *n1;
+    TuneItem *it;
+    int end;
+    int active;
+    int rows;
+    u32 normal;
+    f32 rowH;
+    TextElem *n2;
+    Box *list;
+    u32 selected;
+    int first;
+    int i;
     Camera cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4396f);
     lbl_8055ED44->Edit();
-    int active = fn_8020437C();
+    active = fn_8020437C();
     if (active) {
         if (lbl_8055ED40 >= 0 && lbl_8055ED40 < lbl_8055ED3C) {
-            TextElem* n1 = lbl_8055ED44->Find("name1");
-            TextElem* n2 = lbl_8055ED44->Find("name2");
-            TextElem* v1 = lbl_8055ED44->Find("value1");
-            Box* list = lbl_8055ED44->FindBox("listbox");
+            n1 = lbl_8055ED44->Find("name1");
+            n2 = lbl_8055ED44->Find("name2");
+            v1 = lbl_8055ED44->Find("value1");
+            list = lbl_8055ED44->FindBox("listbox");
             if (n1 && n2 && v1 && list) {
-                u32 normal = n1->color;
-                u32 selected = n2->color;
+                normal = n1->color;
+                selected = n2->color;
                 fn_802043B0(&normal);
                 fn_802043B0(&selected);
-                f32 rowH = n2->pos.y - n1->pos.y;
-                int end;
-                TuneItem* it;
-                int rows = (int)(list->h / rowH);
-                int first = lbl_8055ED40 - lbl_8055ED40 % rows;
+                rowH = n2->pos.y - n1->pos.y;
+
+
+                rows = (int)(list->h / rowH);
+                first = lbl_8055ED40 - lbl_8055ED40 % rows;
                 TextElem name = *n1;
                 TextElem value = *v1;
                 end = first + rows;
                 it = &lbl_80488BD0[first];
-                for (int i = first; i < end && i < lbl_8055ED3C; it++, i++) {
+                for (i = first; i < end && i < lbl_8055ED3C; it++, i++) {
                     if (i == lbl_8055ED40) {
                         name.color = value.color = selected;
                     } else {
