@@ -124,7 +124,7 @@ static inline void SwfSwap32(void* p) {
     ((u8*)p)[2] = t;
 }
 
-static inline int SwfChannel(int c, s8 mul, s8 add) {
+static inline int SwfChannel(int c, const s8& mul, const s8& add) {
     int v = mul * c / 255 + add * 2;
     v = v > 0 ? v : 0;
     v = v < 255 ? v : 255;
