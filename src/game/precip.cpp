@@ -846,11 +846,11 @@ void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
     ValVec3 wind;
     fn_801E8C84((PVec*)&wind);
     wind.x = wind.x * (0.1f * dt);
+    wind.y = wind.y * (0.1f * dt);
     wind.z = wind.z * (0.1f * dt);
-    wind.y = wind.y * (0.1f * dt) - 1.2f * dt;
+    wind.y -= 1.2f * dt;
     MulT(cam, &wind, &wind);
-    f32 dx = d->x;
-    wind.x = wind.x + dx / 4.0f;
+    wind.x = wind.x + d->x / 4.0f;
     wind.y = wind.y + d->y / 4.0f;
     wind.z = wind.z + d->z / 4.0f;
     WPt* out = pts;
