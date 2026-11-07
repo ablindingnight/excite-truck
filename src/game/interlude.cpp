@@ -1802,15 +1802,6 @@ static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
 
 // Add camera: a move from the current editor camera to the destination one over the transition time,
 // stored as linear and angular velocities in the current camera's frame.
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_801C6E40(CamPose* cur, Mat3& inv, Mat3& d, CamPose* dst, IVec3& dp) {
-    Mat3 rotv = cur->rot;
-    inv = rotv;
-    fn_801C7254(&inv);
-    Mat3Mul(&d, &dst->rot, &inv);
-    fn_80144CD0(&dp, &dst->pos, (const f32*)cur);
-}
-
 void fn_801C6E40(void) {
     lbl_8055E830 = atof(lbl_804380F0);
     CamEvent* e = (CamEvent*)fn_801C3C80();
@@ -1827,7 +1818,10 @@ void fn_801C6E40(void) {
         IVec3 dp;
         Mat3 d;
         Mat3 inv;
-        Loop2_fn_801C6E40(cur, inv, d, (CamPose*)&lbl_80438220, dp);
+        inv = cur->rot;
+        fn_801C7254(&inv);
+        Mat3Mul(&d, &((CamPose*)&lbl_80438220)->rot, &inv);
+        fn_80144CD0(&dp, &((CamPose*)&lbl_80438220)->pos, (const f32*)cur);
         RotToAxisAngle(&d, &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;

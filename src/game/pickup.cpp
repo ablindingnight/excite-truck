@@ -467,13 +467,11 @@ extern "C" {
 
 void fn_80167EEC(void) { delete lbl_8055E354; }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop2_fn_80168020(PickupObjMan* m) {
-    int i;
-    for (i = 0; i < m->groups.count; i++) {
+/* Helper name unproven: clears every group's done flag. */
+static inline void ResetGroups(PickupObjMan* m) {
+    for (int i = 0; i < m->groups.count; i++) {
         m->groups.data[i].done = 0;
     }
-    return i;
 }
 
 void fn_80168020(void) {
@@ -488,7 +486,7 @@ void fn_80168020(void) {
         p->pos[1] += p->hover;
         p->taken = 0;
     }
-    i = Loop2_fn_80168020(m);
+    ResetGroups(m);
     for (i = 0; i < 8; i++) {
         lbl_80430260[i].frame = -1;
     }

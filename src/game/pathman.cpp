@@ -199,8 +199,8 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     fn_8029F458(name, obj);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801DA8C8(int n, PathGroup* g, PathClient** found) {
+/* Helper name unproven: adds each found client to a new group. */
+static inline void AddAll(PathGroup* g, PathClient** found, int n) {
     for (int j = 0; j < n; j++) {
         g->Add(found[j]);
     }
@@ -221,7 +221,7 @@ PathMover* fn_801DA8C8(const char* object, const char* path) {
     PathGroup* g = 0;
     if (n > 0) {
         g = new ("pathmanpath") PathGroup(path, n);
-        Loop1_fn_801DA8C8(n, g, found);
+        AddAll(g, found, n);
     }
     return g;
 }
