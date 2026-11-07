@@ -348,7 +348,7 @@ extern const u32 lbl_8055EBB0 = MakeILPos(0xFFFF, 0);
 extern const f32 lbl_8055EBB4 = Angle(0.7853982f);
 extern const u32 lbl_8055EBB8 = MakeILPos(0x7F00, 0);
 extern const f32 lbl_8055EBBC = Angle(1.0471976f);  // wheel turn scale
-s32 lbl_8055EBC0 = Mask(-0x100);
+extern const s32 lbl_8055EBC0 = Mask(-0x100);
 u8 lbl_8055EBC4;
 CarModel* lbl_8055EBC8;  // the player's own car
 
@@ -730,16 +730,14 @@ void fn_801ECFE0(CarModel* m) {
         return;
     }
     fn_801ECC70(m);
-    s32 tint;
     BoneSurf* bs;
     int mirror = (fn_801E87A8()->flags >> 1) & 1;
-    tint = lbl_8055EBC0;
     for (int i = 0; i < m->numBoneSurfs; i++) {
         bs = &m->boneSurfs[i];
         u32 mask = m->car->groupMask & bs->mask;
         BoneArg arg;
         arg.a = m->color;
-        arg.b = tint;
+        arg.b = lbl_8055EBC0;
         if (Abs(m->car->x28C) <= lbl_80558DC4[0]) {
             fn_802DAC54();
         }
