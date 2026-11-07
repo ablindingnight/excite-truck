@@ -299,6 +299,8 @@ DropSource lbl_804BCFB8[8];
 
 // Helper name unproven: a square through an inline.
 static inline f32 Sq(f32 v) { return v * v; }
+// Helper name unproven: the near*far term of the frustum quadratic.
+static inline f32 Term(f32 n, f32 f, f32 k) { return n * (f * k); }
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -822,7 +824,7 @@ void SnowSystem::Frustum(void) {
     tanHalf = t;
     f32 s = f + n;
     f32 b = -0.1f * s - 2.0f * f * n;
-    f32 c = n * (f * 0.0050000004f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
+    f32 c = Term(n, f, 0.0050000004f) - 0.05f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     near = 0.3f + n;
     far = (-b + (f32)sqrt(Sq(b) - 4.0f * s * c)) / (2.0f * s);
 }
@@ -1000,7 +1002,7 @@ void RainSystem::Frustum(void) {
     tanHalf = t;
     f32 s = f + n;
     f32 b = -0.5f * s - 2.0f * f * n;
-    f32 c = n * (f * 0.125f) - 0.015f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
+    f32 c = Term(n, f, 0.125f) - 0.015f * ((f32)w * (4.0f * n)) * (f - n) / (2.0f * t);
     near = 1.0f + n;
     far = (-b + (f32)sqrt(Sq(b) - 4.0f * s * c)) / (2.0f * s);
 }
