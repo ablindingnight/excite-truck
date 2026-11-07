@@ -155,6 +155,20 @@ static inline u16 DecodeUTF8(const char* s, const char** next) {
     return b & 0x7F;
 }
 
+static inline const char* ReadUTF8(const char* s, u16* c) {
+    u8 b = s[0];
+    if ((b & 0xF0) == 0xE0) {
+        *c = ((b & 0xF) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
+        return s + 3;
+    }
+    if ((b & 0xE0) == 0xC0) {
+        *c = ((b & 0x1F) << 6) | ((u8)s[1] & ~0xC0);
+        return s + 2;
+    }
+    *c = b & 0x7F;
+    return s + 1;
+}
+
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
 static inline void Swap16(void* p) {
@@ -787,7 +801,7 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
                 u16 ch;
                 const char* next;
                 Glyph* g;
-                ch = DecodeUTF8(text + i, &next);
+                next = ReadUTF8(text + i, &ch);
                 g = &ff->glyphs[ch];
                 px += (scale * g->pre) * xs;
                 fn_80233AA4(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
