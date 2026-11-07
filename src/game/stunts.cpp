@@ -161,6 +161,9 @@ void AchievementsAdd(int category, s32 value);
 
 extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
 #define NearZero(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+// SpinTracker::Rate tests its angle through a float abs inline (the call copy gives fabs its own register);
+// the other trackers use the macro above. Exact original spelling unknown.
+static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
 inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     return r > 0.0f ? r : 0.0f;
@@ -1726,7 +1729,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
 f32 SpinTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
-    if (!NearZero(angle)) {
+    if (!(AbsF(angle) <= lbl_80558DC4[0])) {
         spins += rolls;
         if (Round(angle) > 0) {
             int add = rolls ? 0 : Round(angle);
