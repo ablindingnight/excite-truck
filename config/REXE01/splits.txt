@@ -1785,6 +1785,10 @@ RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp:
 RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp:
 	.text       start:0x800ED058 end:0x800ED0F4
 
+RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqTrack.cpp:
+	.text       start:0x800ED0F4 end:0x800ED134
+	.data       start:0x80323258 end:0x80323268
+
 RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp:
 	.text       start:0x800ED134 end:0x800EE268
 	.data       start:0x80323268 end:0x80323760

@@ -713,6 +713,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Lfo.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MemorySoundArchive.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqPlayer.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MidiSeqTrack.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlParser.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrackAllocator.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_MmlSeqTrack.cpp"),
