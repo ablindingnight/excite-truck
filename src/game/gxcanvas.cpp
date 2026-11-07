@@ -661,7 +661,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         do {
             int n = w;
             do {
-                s32 p = *s++;
+                u32 p = *s++;
                 u8 qb = ((*d & 0x1F) << 3) + 1;
                 u8 qr = ((*d >> 8) & 0xF8) + 1;
                 u8 qg = ((*d >> 3) & 0xFC) + 1;
@@ -670,7 +670,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
                 u32 b = ((ia * qb + a * (p & 0xFF)) * 0x10101) >> 24;
                 u32 r = ((ia * qr + a * ((p >> 16) & 0xFF)) * 0x10101) >> 24;
                 u32 g = ((ia * qg + a * ((p >> 8) & 0xFF)) * 0x10101) >> 24;
-                *d++ = gxPack565(r, g, b);
+                *d++ = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
             } while (--n > 0);
             s += sskip;
             d += dskip;
