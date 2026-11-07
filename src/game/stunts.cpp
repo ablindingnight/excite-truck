@@ -460,11 +460,8 @@ public:
     int scored;
     int count;
     f32 total;
-    struct Rank *r;
+    struct Rank* r;
     int i;
-
-
-
 
         fn_802E30C8("\n%s:", Label());
         fn_802E30C8("   Rank         Count   Unscored   Natural   Score");

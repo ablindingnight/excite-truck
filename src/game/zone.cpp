@@ -1822,23 +1822,22 @@ inline void ZoneMaster::Loop2_vf44(FixedArray<GateHit, 8>& hits) {
 }
 
 void ZoneMaster::vf44(void) {
-    CarState *c;
+    CarState* c;
     u32 k;
     int i;
     f32 d2;
-    Watcher *w;
+    Watcher* w;
     int nRing;
     int ok;
-    GateHit *h;
+    GateHit* h;
     int nPlain;
-    Vec3 *p;
-    Gate *g;
+    Vec3* p;
+    Gate* g;
 
     FixedArray<GateHit, 8> hits;
     c = &cars[fn_801E866C(-1)];
     g = c->gate;
     if (c->human && g) {
-
 
         nPlain = 0;
         nRing = 0;
