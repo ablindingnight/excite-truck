@@ -691,15 +691,6 @@ static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
     return 0;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_8023293C(f32& gaps, int& i) {
-    f32 w;
-    w = 0.0f;
-    gaps = 0.0f;
-    i = 0;
-    return w;
-}
-
 f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     double adv;
     f32 h;
@@ -709,7 +700,9 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
         return 0.0f;
     }
     int i;
-    w = Loop2_fn_8023293C(gaps, i);
+    w = 0.0f;
+    gaps = 0.0f;
+    i = 0;
     strlen(s);
     while (s[i]) {
         adv = (f32)f->height;

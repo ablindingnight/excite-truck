@@ -1637,17 +1637,6 @@ void fn_801961FC(u8* d) {
 static inline double AbsD(double v) { return __fabs(v); }
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80196250(f32 b, f32 x, f32* outA, f32* outB) {
-    if (AbsF(b) < 0.44444445f || SignBit(x) == SignBit(b)) {
-        *outA = AbsF(x) / 4.905f;
-        *outB = 0.0f;
-    } else {
-        *outA = 0.0f;
-        *outB = AbsF(x) / 11.772001f;
-    }
-}
-
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
     f32 x = (1.3333334f + (a - b)) / c;
     if ((f32)AbsD(a) < 0.1f) {
@@ -1656,7 +1645,13 @@ void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
         *sign = 0;
         return;
     }
-    Loop1_fn_80196250(b, x, outA, outB);
+    if (AbsF(b) < 0.44444445f || SignBit(x) == SignBit(b)) {
+        *outA = AbsF(x) / 4.905f;
+        *outB = 0.0f;
+    } else {
+        *outA = 0.0f;
+        *outB = AbsF(x) / 11.772001f;
+    }
     *sign = a > 0.0f ? 1 : -1;
 }
 
