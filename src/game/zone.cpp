@@ -1376,10 +1376,16 @@ extern Tune lbl_8042FB3C;
 extern "C" void fn_8013E3A8(Tune* t, ValueNode* n);
 
 ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
+    ValueTable *conf;
     int i;
     int n;
-    ValueTable* t;
-    ValueTable* conf;
+    ValueNode *node;
+    ValueTable *t;
+    const char *file;
+
+
+
+
     char buf[0x100];
     mainLyt = fn_80145E70("zlmain.val");
     layouts.a.a.Add(mainLyt);
@@ -1408,13 +1414,13 @@ ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f),
         triggers = (Deletable*)fn_80171698();
     }
     {
-        const char* file = ((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetString("zonefile", "zones");
+        file = ((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetString("zonefile", "zones");
         fn_801345D8(buf, sizeof(buf), "*%s/%s.va0", fn_8000AC2C(), file);
     }
     t = fn_80131810(buf);
     conf = fn_80131810("zoneconf.val");
     if (t) {
-        ValueNode* node = 0;
+        node = 0;
         if (conf && conf->HasChild("config")) {
             node = conf->FindChild("config");
         }
