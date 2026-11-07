@@ -1218,6 +1218,8 @@ static inline BOOL OptRumble(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 
 // The player driver's frame: reads the controller into steering, throttle, brake and clutch, applies the
 // arcade assists (in-air pitch and roll control, a nose-down push while boosting) and the replay/rumble hooks,
 // then works out the force-feedback wobble from the wheels and the car's spin.
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
     f32 cl;
@@ -1299,7 +1301,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 slow;
         rx.z *= k;
         slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / lbl_805620A8), kZero);
-        g = slow * (lbl_805620E8 * (steer * (f32)__fabs(steer)));
+        g = slow * (lbl_805620E8 * (steer * AbsF(steer)));
         rx.x += g * F32(car, 0x3C);
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
