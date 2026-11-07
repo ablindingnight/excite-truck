@@ -8,6 +8,7 @@
 #include "game/menustate.h"
 #include "game/uilists.h"
 #include "game/menu.h"
+#include "game/menuwidget.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
@@ -666,11 +667,12 @@ struct UIImageRef {
     }
 };
 
-// Handler object a "Custom" widget reports its rectangle to.
-struct UICustomHandler {
-    void* vtable;
-    int x, y, dx, dy;
-    void* owner;        // 0x14
+// Handler state a "Custom" widget reports its rectangle to: x, y, w, h, with the widget in unk14.
+class UICustomHandler : public MenuState {
+public:
+    UICustomHandler(void) {}
+    virtual ~UICustomHandler(void) {}
+    virtual void Unk24(void);
 };
 struct UICustom {
     u8 base[0x244];
@@ -679,21 +681,106 @@ struct UICustom {
         fn_80218F34((WidgetFragment*)this, x, y, x + dx, y + dy, kind);
         *(void**)this = lbl_8033D480;
         handler = h;
-        h->owner = this;
+        h->unk14 = (int)this;
         h->x = x;
         h->y = y;
-        h->dx = dx;
-        h->dy = dy;
+        h->w = dx;
+        h->h = dy;
     }
 };
 
-static u8 sUiBss0[0x160];
-static u8 sDefaultSpin[0x2c];
-static u8 sDefaultMulti[0x14];
+// This unit's statics, in address order. __sinit_uiapi_cpp builds them; the weak dtors after it follow.
+class LocString {
+public:
+    LocString(const char* key);
+    u32 version;
+    const char* text;
+    const char* key;
+};
+
+class OptionValue {
+public:
+    virtual ~OptionValue(void) {}
+    virtual void GetPtr(void** p, int* size) = 0;
+    virtual void Format(char* buf) = 0;
+    virtual void Inc(void) = 0;
+    virtual void Dec(void) = 0;
+    virtual int CanInc(void) = 0;
+    virtual int CanDec(void) = 0;
+    virtual f32 GetFrac(void) = 0;
+    virtual void SetFrac(f32 f) = 0;
+};
+
+class FloatValue : public OptionValue {
+public:
+    FloatValue(f32* v, f32 lo, f32 hi, f32 step, f32 min, f32 max);
+    virtual ~FloatValue(void) {}
+    virtual void GetPtr(void** p, int* size);
+    virtual void Format(char* buf);
+    virtual void Inc(void);
+    virtual void Dec(void);
+    virtual int CanInc(void);
+    virtual int CanDec(void);
+    virtual f32 GetFrac(void);
+    virtual void SetFrac(f32 f);
+
+    f32 lo, hi, min, max, step;
+    f32* value;
+    s32 decimals;
+};
+
+// The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
+class OptionPair : public MenuWidget {
+public:
+    OptionPair(void) { value = 0; }
+    virtual ~OptionPair(void) {}
+    virtual const char* Current(void);
+    virtual void Prev(void);
+    virtual void Next(void);
+    u32 value;  // offset 0x10
+};
+
+class UIBox {
+public:
+    UIBox(void) {
+        unk4 = 0;
+        unkC = 0;
+    }
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+    u8 unkC;
+};
+
+class UITriple {
+public:
+    UITriple(void) {
+        a = 0;
+        b = 0;
+        c = 0;
+    }
+    u32 a, b, c;
+    u32 pad[2];
+};
+
+ModuleTag lbl_8055EEF8;
+UnkStaticFFFF lbl_8055EF00;
+UnkStatic123 lbl_80490510;
+UnkStatic7F lbl_8055EF04;
+void* lbl_80490528[3][4];
+UISoundSlot lbl_80490558[8];
+LocString sOk("UI:Ok");
+LocString sCancel("UI:Cancel");
+LocString sYes("UI:Yes");
+LocString sNo("UI:No");
+LocString sDrat("UI:Drat");
+LocString sReturn("UI:Return");
+static FloatValue sDefaultSpin((f32*)&lbl_8055EF50, 0.0f, 100.0f, 1.0f, 0.0f, 1.0f);
+static OptionPair sDefaultMulti;
 static char sDefaultInput[0x40];
-static u8 sDefaultControl[0x20];
+static UIBox sDefaultControl;
 static UICustomHandler sCustomHandlers[16];
-static u8 sDefaultView[0x20];
+static UITriple sDefaultView;
 
 static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
     return (UIStyle*)fn_8021227C(styles, (char*)name, kind);
@@ -953,7 +1040,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 9: {
         UIStyle* spin = FindStyle(styles, d->style, 0xc);
-        void* target = spin ? spin->value : (void*)sDefaultSpin;
+        void* target = spin ? spin->value : (void*)&sDefaultSpin;
         s32 left, x, right, line;
         switch (d->flags) {
         case 0:
@@ -995,7 +1082,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
         p = (WidgetFragment*)operator new(0x26c, "MutableMulti");
         if (p) p = fn_8021D7C8(p, d->x, d->y, d->dx, d->dy, d->flags,
-                               list ? list->arg1 : (void*)sDefaultMulti);
+                               list ? list->arg1 : (void*)&sDefaultMulti);
         widgets[count++] = p;
         break;
     }
@@ -1084,7 +1171,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x26c, "ListBox");
         if (p) p = fn_8021E0C0(p, d->x, d->y, d->dx, d->dy, list ? list->value : lbl_8055EF24,
                                selected ? selected->value : &lbl_8055EF4C,
-                               view ? view->value : (void*)sDefaultView);
+                               view ? view->value : (void*)&sDefaultView);
         widgets[count++] = p;
         break;
     }
@@ -1092,7 +1179,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* view = FindStyle(styles, d->style, 0xb);
         p = (WidgetFragment*)operator new(0x260, "VScrollBar");
         if (p) p = fn_80220E48(p, d->x - 3, d->y + 21, d->dx, d->dy - 40,
-                               view ? view->value : (void*)sDefaultView, 0);
+                               view ? view->value : (void*)&sDefaultView, 0);
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
@@ -1100,7 +1187,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             if (view) {
                 state = view->value;
             } else {
-                state = (void*)sDefaultView;
+                state = (void*)&sDefaultView;
             }
             p = fn_8021B1C4(p, d->x, d->y, state, -1, fn_80215270(2, 0));
         }
@@ -1111,7 +1198,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             if (view) {
                 state = view->value;
             } else {
-                state = (void*)sDefaultView;
+                state = (void*)&sDefaultView;
             }
             p = fn_8021B1C4(p, d->x, d->y + d->dy - 18, state, 1, fn_80215270(3, 0));
         }
@@ -1122,7 +1209,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* view = FindStyle(styles, d->style, 0xb);
         p = (WidgetFragment*)operator new(0x260, "HScrollBar");
         if (p) p = fn_80220E48(p, d->x + 21, d->y, d->dx - 40, d->dy,
-                               view ? view->value : (void*)sDefaultView, 1);
+                               view ? view->value : (void*)&sDefaultView, 1);
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
         if (p) {
@@ -1130,7 +1217,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             if (view) {
                 state = view->value;
             } else {
-                state = (void*)sDefaultView;
+                state = (void*)&sDefaultView;
             }
             p = fn_8021B1C4(p, d->x, d->y + 3, state, -1, fn_80215270(0, 0));
         }
@@ -1141,7 +1228,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             if (view) {
                 state = view->value;
             } else {
-                state = (void*)sDefaultView;
+                state = (void*)&sDefaultView;
             }
             p = fn_8021B1C4(p, d->x + d->dx - 18, d->y + 3, state, 1, fn_80215270(1, 0));
         }
@@ -1152,7 +1239,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* control = FindStyle(styles, d->style, 4);
         p = (WidgetFragment*)operator new(0x274, "CDetect");
         if (p) p = fn_8021F394(p, d->x, d->y, control ? (const char*)control->arg1 : "Unmapped control",
-                               control ? control->value : (void*)sDefaultControl, 6);
+                               control ? control->value : (void*)&sDefaultControl, 6);
         widgets[count++] = p;
         break;
     }
@@ -2341,4 +2428,3 @@ int MenuState::Unk5C(void) {
 void MenuState::Unk34(void) {
 
 }
-
