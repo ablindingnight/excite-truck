@@ -1978,6 +1978,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     u32 bps;
     u32 total;
     u32 n;
+    void **voice;
     u32 i;
     u8 *buf;
 
@@ -2028,6 +2029,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     t->panR = 0x67F8;
     fn_80119288(t);
     fn_801199A4(t->voices, 1);
+    voice = t->voices;
     for (i = 0; i < t->channels; i++) {
         AXPBADPCM adpcm;
         AXPBSRC src;
@@ -2040,10 +2042,10 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
         src.last_samples[1] = 0;
         src.last_samples[2] = 0;
         src.last_samples[3] = 0;
-        AXSetVoiceSrcType(t->voices[i], 1);
-        AXSetVoiceSrc(t->voices[i], &src);
-        AXSetVoiceSrcRatio(t->voices[i], t->rate / 32028.666666666668);
-        AXSetVoiceAdpcm(t->voices[i], &adpcm);
+        AXSetVoiceSrcType(voice[i], 1);
+        AXSetVoiceSrc(voice[i], &src);
+        AXSetVoiceSrcRatio(voice[i], t->rate / 32028.666666666668);
+        AXSetVoiceAdpcm(voice[i], &adpcm);
     }
     fn_80119300(t->voices, 0, t->bufSize);
     n = t->bufSize;
