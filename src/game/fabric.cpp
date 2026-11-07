@@ -356,35 +356,31 @@ void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
     }
 }
 
+// Helper name unproven: one distance constraint between two particles.
+static inline void SetStick(Stick* s, const TVec* v, int a, int b) {
+    s->a = a;
+    s->b = b;
+    s->rest = PSVECSquareDistance(&v[a], &v[b]);
+}
 void fn_801F5508(Fabric* f) {
     Stick* s;
     int n;
     n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
     s = new ("fabric sticks") Stick[n];
-    int c;
-    int r;
-    int k;
-    k = 0;
-    for (r = 0; r < f->rows; r++) {
-        for (c = 1; c < f->cols; c++) {
-            int b;
-            b = r * f->cols + c;
+    int k = 0;
+    for (int r = 0; r < f->rows; r++) {
+        int row = r * f->cols;
+        for (int c = 1; c < f->cols; c++) {
+            int b = row + c;
             int a = b - 1;
-            s[k].b = b;
-            s[k].a = a;
-            s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
-            k++;
+            SetStick(&s[k++], f->cur, a, b);
         }
     }
-    for (c = 0; c < f->cols; c++) {
-        for (r = 1; r < f->rows; r++) {
-            int b;
+    for (int c = 0; c < f->cols; c++) {
+        for (int r = 1; r < f->rows; r++) {
             int a = c + (r - 1) * f->cols;
-            b = c + r * f->cols;
-            s[k].a = a;
-            s[k].b = b;
-            s[k].rest = PSVECSquareDistance(&f->cur[a], &f->cur[b]);
-            k++;
+            int b = c + r * f->cols;
+            SetStick(&s[k++], f->cur, a, b);
         }
     }
     f->sticks = s;
