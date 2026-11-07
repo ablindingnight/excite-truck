@@ -3499,7 +3499,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
                         }
                     } else {
                         do {
-                            rl -= 4;
+                            rl = rl - 4;
                             *(u32 *)dst = w;
                             dst += 4;
                         } while (rl);
