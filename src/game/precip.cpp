@@ -470,7 +470,9 @@ void fn_802A4D08(void) {
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_802A4E08(void) {
-    ScreenFx* s = &fn_801E7E34()[fn_801E85B4()];
+    // MATCHING-AID: one variable holds the byte offset, then the pointer; plain &a[i] keeps the offset in its own register.
+    ScreenFx* s = (ScreenFx*)(fn_801E85B4() * (int)sizeof(ScreenFx));
+    s = (ScreenFx*)((u8*)fn_801E7E34() + (int)s);
     if (!(AbsF(s->flash) <= lbl_80558DC4[0])) {
         int a = Alpha(255.0f * s->flash);
         fn_802C90F0(lbl_8055F89C);
