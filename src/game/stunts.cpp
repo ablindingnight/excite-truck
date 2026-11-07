@@ -457,10 +457,15 @@ public:
         }
     }
     void Dump(void) {
-        int scored;
-        f32 total;
-        int count;
-        int i;
+    int scored;
+    int count;
+    f32 total;
+    struct Rank *r;
+    int i;
+
+
+
+
         fn_802E30C8("\n%s:", Label());
         fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
         fn_802E30C8("--------------------------------------------------");
@@ -468,7 +473,7 @@ public:
         count = 0;
         scored = 0;
         for (i = 0; i < ranks.a.count; i++) {
-            struct Rank* r = &ranks.a.data[i];
+            r = &ranks.a.data[i];
             fn_802E30C8("%d: %-12.12s %3d     %4d       %3d       %10.0f", i, r->adj, r->count, r->count - r->scored,
                         r->natural, r->total);
             total += r->total;

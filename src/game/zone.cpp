@@ -1822,20 +1822,31 @@ inline void ZoneMaster::Loop2_vf44(FixedArray<GateHit, 8>& hits) {
 }
 
 void ZoneMaster::vf44(void) {
-    GateHit* h;
+    CarState *c;
+    u32 k;
+    int i;
+    f32 d2;
+    Watcher *w;
+    int nRing;
+    int ok;
+    GateHit *h;
+    int nPlain;
+    Vec3 *p;
+    Gate *g;
+
     FixedArray<GateHit, 8> hits;
-    CarState* c = &cars[fn_801E866C(-1)];
-    Gate* g = c->gate;
+    c = &cars[fn_801E866C(-1)];
+    g = c->gate;
     if (c->human && g) {
-        Watcher* w;
-        int nRing;
-        int nPlain = 0;
+
+
+        nPlain = 0;
         nRing = 0;
         w = fn_802C86DC();
-        int i;
+
         for (i = 0; i < 10; i++) {
-            int ok = 1;
-            f32 d2;
+            ok = 1;
+
             if (g->ring && nRing < 5) {
                 nRing++;
             } else if (!g->ring && nPlain < 2) {
@@ -1848,8 +1859,8 @@ void ZoneMaster::vf44(void) {
                     break;
                 }
                 {
-                    u32 k;
-                    Vec3* p = &g->a;
+
+                    p = &g->a;
                     for (k = 0; k < 2; k++) {
                         fn_801E9E30(&g->h, p);
                         p->y += 0.5f;
