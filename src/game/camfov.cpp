@@ -258,11 +258,11 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 lo;
     f32 v;
     f32 h;
-    u8 *car;
+    u8* car;
     f32 y;
     f32 z;
     bool onGround;
-    const s16 *hint;
+    const s16* hint;
     f32 lift;
     f32 hi;
     f32 down;
@@ -277,7 +277,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 m;
     f32 top;
     f32 rv;
-    CamRect *r;
+    CamRect* r;
     car = PTR(cam, 0x140);
     r = &lbl_8049A218[*cam];
     if (!fn_801769F8()) {

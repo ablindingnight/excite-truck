@@ -174,8 +174,8 @@ void fn_80009DC8(RaceSetup* rs) {
 
 void fn_8000A644(RaceSetup* rs, DAVMap* map) {
     int i;
-    RacerSlot *s;
-    RacerList *list;
+    RacerSlot* s;
+    RacerList* list;
     list = &rs->racers;
     s = list->slots;
 

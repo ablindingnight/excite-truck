@@ -361,10 +361,10 @@ void fn_802C1550(void) {
     int i;
     int j;
     int n;
-    const char *model;
-    const char *name;
-    TreeClass *c;
-    ValueNode *d;
+    const char* model;
+    const char* name;
+    TreeClass* c;
+    ValueNode* d;
 
     c = lbl_804C0810;
     for (i = 0; i < lbl_8055FB28; c++, i++) {
