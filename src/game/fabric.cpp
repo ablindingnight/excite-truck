@@ -611,25 +611,30 @@ void fn_801F63F0(Fabric* f, const PVec* force, f32 drag) {
 }
 
 // Verlet step with a force per particle.
+// Helper names unproven: scale-and-add steps of the Verlet integrator.
+static inline void AddS(PVec* o, const PVec* v, f32 k) {
+    o->x += v->x * k;
+    o->y += v->y * k;
+    o->z += v->z * k;
+}
+static inline void AddS2(PVec* o, const PVec* a, const PVec* v, f32 k) {
+    o->x = a->x + v->x * k;
+    o->y = a->y + v->y * k;
+    o->z = a->z + v->z * k;
+}
 void fn_801F64E4(Fabric* f, const PVec* forces, f32 drag) {
-    f32 k2;
     f32 k1 = 2.0f - drag;
-    k2 = -(1.0f - drag);
+    f32 k2 = -(1.0f - drag);
+    f32 step = 0.0002777778f;
     PVec t;
     int i;
     for (i = 0; i < f->count; i++, forces++) {
         TVec* p;
         TVec* c = &f->cur[i];
-        t.y = c->y * k1;
         p = &f->prev[i];
-        t.x = c->x * k1;
-        t.x = t.x + p->x * k2;
-        t.z = c->z * k1;
-        t.y = t.y + p->y * k2;
-        t.z = t.z + p->z * k2;
-        p->x = t.x + forces->x * 0.0002777778f;
-        p->y = t.y + forces->y * 0.0002777778f;
-        p->z = t.z + forces->z * 0.0002777778f;
+        ScaleP(&t, (const PVec*)c, k1);
+        AddS(&t, (const PVec*)p, k2);
+        AddS2((PVec*)p, &t, forces, step);
     }
     {
         TVec* c = f->cur;
