@@ -196,8 +196,13 @@ public:
                             s->axis = TVec(1.0f, 0.0f, 0.0f);
                         }
                         if (c->nDrops > 0) {
-                            for (int i = 0; i < c->nDrops; i++) {
-                                TreeObj* d = c->drops[i];
+                            // MATCHING-AID: named offset walker and the repeated guard; the natural loop form is unknown.
+                            int off;
+                            int i = 0;
+                            if (i < c->nDrops) {
+                                off = 0;
+                                for (; i < c->nDrops; off += 4, i++) {
+                                TreeObj* d = *(TreeObj**)((u8*)c->drops + off);
                                 TMtx m;
                                 m.pos = t->pos;
                                 m.pos.x += fn_80129DC4(4, -2.0f, 2.0f);
@@ -217,6 +222,7 @@ public:
                                 TVec spin(fn_80129DC4(4, -7.0f, 7.0f), fn_80129DC4(4, -7.0f, 7.0f),
                                           fn_80129DC4(4, -7.0f, 7.0f));
                                 d->Throw(&m, &vel, &spin);
+                            }
                             }
                         }
                     }
