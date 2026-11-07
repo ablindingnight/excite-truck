@@ -608,7 +608,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     for (i = 0; i < 75; i++) {
         lbl_804424B0[i] = 1.0f;
         f32 dh = fn_801DCF0C(x, z) - h0;
-        if (!((float)__fabs(dh) <= lbl_80558DC4[0])) {
+        if (!(AbsF(dh) <= lbl_80558DC4[0])) {
             if (n >= 3) {
                 int k = -1;
                 f32 m = 0.0f;
