@@ -795,8 +795,9 @@ void SparkSys::Step(void) {
         if (s->t > age) {
             Vec v;
             v.x = s->vel.x * drag;
-            v.y = s->vel.y * drag - down;
+            v.y = s->vel.y * drag;
             v.z = s->vel.z * drag;
+            v.y -= down;
             out->pos.x = s->pos.x + v.x * dt;
             out->pos.y = s->pos.y + v.y * dt;
             out->pos.z = s->pos.z + v.z * dt;
@@ -887,8 +888,9 @@ void ShardSys::Step(void) {
         if (s->t > age) {
             Vec v;
             v.x = s->vel.x * drag;
-            v.y = s->vel.y * drag - down;
+            v.y = s->vel.y * drag;
             v.z = s->vel.z * drag;
+            v.y -= down;
             out->pos.x = s->pos.x + v.x * dt;
             out->pos.y = s->pos.y + v.y * dt;
             out->pos.z = s->pos.z + v.z * dt;
