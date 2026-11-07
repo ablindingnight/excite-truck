@@ -1649,7 +1649,7 @@ static inline void Loop1_fn_80196250(f32 b, f32 x, f32* outA, f32* outB) {
 
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
     f32 x = (1.3333334f + (a - b)) / c;
-    if ((f32)__fabs(a) < 0.1f) {
+    if ((f32)AbsD(a) < 0.1f) {
         *outB = 1.0f;
         *outA = 0.0f;
         *sign = 0;
