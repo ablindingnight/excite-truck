@@ -647,8 +647,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     if (!d) {
         return;
     }
-    f32 oldx = d->fC8;
     m = *(DMtx*)car;
+    f32 oldx = d->fC8;
     f32 oldy = d->fCC;
     d->fC8 = lbl_8056305C;
     d->fCC = lbl_8056305C;

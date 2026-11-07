@@ -1269,7 +1269,7 @@ void PlayerDriver_vf48(u8* p) {
     f32 mag;
     u8* c4;
     st = ((Gearbox*)PTR(p, 0x38))->Steer(sp);
-    fn_8018ADA4(PTR(p, 0x34), dir * (st + kZero));
+    fn_8018ADA4(PTR(p, 0x34), dir * (kZero + st));
     if (((Gearbox*)PTR(p, 0x38))->Clutch() < lbl_805620D0) {
         fn_8018ADB4(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Throttle());
     } else {
@@ -1302,7 +1302,7 @@ void PlayerDriver_vf48(u8* p) {
         rx.z *= k;
         slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / lbl_805620A8), kZero);
         g = slow * (lbl_805620E8 * (steer * AbsF(steer)));
-        rx.x += g * F32(car, 0x3C);
+        rx.x += F32(car, 0x3C) * g;
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
         m = lbl_805620EC * air * F32(PTR(p, 0x34), 0x25F8);

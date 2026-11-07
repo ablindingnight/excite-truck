@@ -585,8 +585,8 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     Deform* d = &lbl_80446F18[lbl_8055E9A8[0]++];
     d->out = out;
-    f32 h0;
     f32 base = fn_801DCF0C(x, z);
+    f32 h0;
     f32 saved[75];
     int i;
     for (i = 0; i < 75; i++) {

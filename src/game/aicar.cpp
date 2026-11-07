@@ -2382,8 +2382,9 @@ void fn_80197BD0(u8* d, u8* out) {
             if (o && S32(d, 0x290) == S32(o, 0x114)) {
                 mine = 1;
             }
+            f32 off;
             f32 side = F32(d, 0xF8);
-            f32 off = side - F32(d, 0x108);
+            off = side - F32(d, 0x108);
             int wide = AbsFlt(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
             if (wide && SignDiffers(off, side) && !mine) {
                 off = side > 0.0f ? 1.0f : -1.0f;
