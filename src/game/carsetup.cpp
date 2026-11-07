@@ -321,3 +321,14 @@ void fn_8027A8B4(CarSetup* s, const TweakMul* m) {
 }
 
 }  // extern "C"
+
+// The rival registry table: its weak dtor sits right after this unit's __sinit (rule: address-only use is
+// deferred to the end of the unit). The function that used it was stripped from the shipped game.
+struct RegTable {
+    RegTable(void) { count = 0; }
+    ~RegTable(void) {}
+    void* items[12];
+    s32 count;
+};
+
+void fn_RegTableUser(void) { static RegTable t; }
