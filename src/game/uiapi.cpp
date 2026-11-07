@@ -726,6 +726,7 @@ static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
 }
 
 extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
+    UIStyle* value = 0;
     int count = 0;
     WidgetFragment* widgets[4] = {0, 0, 0, 0};
     WidgetFragment* p;
@@ -734,7 +735,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 5: {
         UIStyle* text = FindStyle(styles, d->style, 3);
         if (text) {
-            UIStyle* value = FindStyle(styles, d->style, 2);
+            value = FindStyle(styles, d->style, 2);
             p = (WidgetFragment*)operator new(0x368, "StaticText");
             if (p) p = fn_8021B2B0(p, d->x, d->y, (const char*)text->value, d->flags, value ? value->value : 0, 0);
             widgets[count++] = p;
@@ -747,14 +748,13 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             widgets[count++] = p;
             break;
         }
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x368, "StaticText");
         if (p) p = fn_8021B2B0(p, d->x, d->y, d->name, d->flags, value ? value->value : 0, 0);
         widgets[count++] = p;
         break;
     }
     case 28: {
-        UIStyle* value;
         UIStyle* text;
         if (d->name[0] == '#') {
             text = FindStyle(styles, d->name + 1, 3);
@@ -818,7 +818,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 42: {
         UIStyle* button = FindStyle(styles, d->style, 0);
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         void* image;
         if (button) {
             image = button->arg1;
@@ -849,7 +849,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         fn_802E30C8("Stamprolls are not supported anymore, talk to Chris if you think you want one.");
     case 33: {
         int useStyle = d->flags == 2 || d->flags == 4 || d->flags == 5;
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         UIStyle* text = FindStyle(styles, d->style, 3);
         const char* path = text ? (const char*)text->value : d->name;
         void* watched = useStyle ? (void*)d->style : (value ? value->value : 0);
@@ -876,7 +876,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 14: {
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "RadioButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF4C;
@@ -886,7 +886,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 15: {
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "BRadioButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF4C;
@@ -964,14 +964,14 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 6: {
-        UIStyle* value = FindStyle(styles, d->style, 9);
+        value = FindStyle(styles, d->style, 9);
         p = (WidgetFragment*)operator new(0x2b4, "Numeric");
         if (p) p = fn_8021BD98(p, d->x, d->y, value ? value->value : &lbl_8055EF50, d->name, d->flags, 100.0f, 0.0f);
         widgets[count++] = p;
         break;
     }
     case 7: {
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x2b4, "IntNumeric");
         if (p) p = fn_8021CEEC(p, d->x, d->y, value ? value->value : &lbl_8055EF4C, d->name, d->flags, 1.0f, 0.0f);
         widgets[count++] = p;
@@ -1051,7 +1051,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 16: {
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "TabButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF54;
@@ -1061,7 +1061,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 27: {
-        UIStyle* value = FindStyle(styles, d->style, 2);
+        value = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "BTabButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF54;
