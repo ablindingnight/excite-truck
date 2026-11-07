@@ -102,7 +102,7 @@ float PSVECMag(const V3*);
 void fn_801B5360(int,const void*,int);
 void fn_801B85E0(Body*,Body*,const V3*,const V3*);
 void fn_801B3084(Body*,Body*,const V3*,const V3*);
-inline void ScaleVInto(const V3& p,float f,V3& result){result.x=p.x*f;result.y=p.y*f;result.z=p.z*f;}
+inline void ScaleVInto(const V3& p,const float& f,V3& result){result.x=p.x*f;result.y=p.y*f;result.z=p.z*f;}
 
 
 inline bool CollisionAbove(float value,float threshold){return value>threshold;}

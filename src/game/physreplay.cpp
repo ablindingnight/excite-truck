@@ -112,7 +112,7 @@ extern s32 lbl_8055E3C4;  // game time
 #define RP_MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 static inline f32 Norm(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
-static inline f32 Unpack(u16 v, f32 lo, f32 hi) {
+static inline f32 Unpack(const u16& v, f32 lo, f32 hi) {
     f32 f = RP_MIN(1.0f, Norm(v, 0.0f, 65535.0f));
     f = (f > 0.0f) ? f : 0.0f;
     return lo + f * (hi - lo);
@@ -299,10 +299,8 @@ u32 fn_801B4C9C(Replay* r, s32 time) {
 f32 fn_801B4D10(Replay* r, s32 time) { return (f32)((time - fn_801B4B9C(r)) % 6) / 6.0f; }
 
 void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t) {
-    s32 u0 = a->unk0;
-    s32 u4 = a->unk4;
-    h->unk4 = u4;
-    h->unk0 = u0;
+    h->unk0 = a->unk0;
+    h->unk4 = a->unk4;
     h->x = Lerp(Unpack(a->x, -300.0f, 300.0f), Unpack(b->x, -300.0f, 300.0f), t);
     h->y = Lerp(Unpack(a->y, -4.0f, 4.0f), Unpack(b->y, -4.0f, 4.0f), t);
     h->z = Lerp(Unpack(a->z, -4.0f, 4.0f), Unpack(b->z, -4.0f, 4.0f), t);
