@@ -1043,22 +1043,19 @@ void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802C7D54(f32 dist, MElem* el, int inst, void* mtx, u32 mat, u8 cl) {
-    MSurfList* sl;
-    f32 d = dist;
-    sl = el->list;
+/* Helper name unproven: draws the queued surfaces of one element. */
+static inline void DrawElemSurfs(MElem* el, int inst, void* mtx, u32 mat, u8 cl, f32 dist) {
+    MSurfList* sl = el->list;
     for (int j = 0; j < sl->n; j++) {
         if (IsQueued(sl->surfs[j]->type)) {
             TexNode* t = sl->surfs[j]->tex[inst];
             fn_802C53C4(el, t, mtx, mat, cl);
-            fn_802CC550(t->tex, d, fn_802C57B0(el->prim)->size);
+            fn_802CC550(t->tex, dist, fn_802C57B0(el->prim)->size);
         }
     }
 }
 
 void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 range) {
-    MSurfList* sl;
     u32 mat = fn_802C7A3C();
     s32 saved = fn_802C9C58(v);
     u32 old = lbl_8055D008;
@@ -1091,7 +1088,7 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 ra
                     near = PSVECDistance(&w, eye) - sp->r < range;
                 }
                 if (near) {
-                    Loop1_fn_802C7D54(dist, el, inst, mtx, mat, cl);
+                    DrawElemSurfs(el, inst, mtx, mat, cl, dist);
                 }
             }
         }
