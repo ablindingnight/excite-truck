@@ -1193,68 +1193,101 @@ void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
 
 /* Polyphase synthesis: samples 1..15 and their mirrors 31..17 for one channel. 16 Q25 MACs per sample
  * over the 1024-entry ring v (positions pos + off and pos + 0x3E0 - off), clamped to 16 bits. Math verified
- * against a simulation of the original (60/60). Plain uniform MAC order per group (lo*w[k], lo*w[k+8], hi*+-w[k+8], hi*-+w[k]), hi read first, j declared last (2026-11-08, 58 -> 66).
- * NonMatching: 251/251, scheduling (target loads w[9] before w[8], negates early). */
+ * against a simulation of the original (60/60). Each group reads the hi sample, the lo sample, then w[k] and
+ * w[k+8] into locals, then the four MACs in order (fn_800C3960 style); z declared before x (2026-11-08, 66 -> 79).
+ * NonMatching: 251/251, scheduling and colouring. */
 /* Helper name unproven: the 64-bit product of the synthesis windows, through an inline. */
 static inline s64 Mul64(s32 a, s32 b) { return (s64)a * b; }
 
 void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
     s64 a, b;
     s32 sa, sb;
-    s32 lo, hi;
+    s32 i, z, x, y, u;
     s32 j;
 
     for (j = 0; j < 15; j++) {
         b = 0;
         a = 0;
-        hi = v[(pos + 0x3e0) & 0x3ff];
-        lo = v[pos & 0x3ff];
-        a += Mul64(lo, w[0]);
-        b += Mul64(lo, w[8]);
-        a += Mul64(hi, w[8]);
-        b += Mul64(hi, -w[0]);
-        hi = v[(pos + 0x380) & 0x3ff];
-        lo = v[(pos + 0x60) & 0x3ff];
-        a += Mul64(lo, w[1]);
-        b += Mul64(lo, w[9]);
-        a += Mul64(hi, -w[9]);
-        b += Mul64(hi, w[1]);
-        hi = v[(pos + 0x360) & 0x3ff];
-        lo = v[(pos + 0x80) & 0x3ff];
-        a += Mul64(lo, w[2]);
-        b += Mul64(lo, w[10]);
-        a += Mul64(hi, w[10]);
-        b += Mul64(hi, -w[2]);
-        hi = v[(pos + 0x300) & 0x3ff];
-        lo = v[(pos + 0xe0) & 0x3ff];
-        a += Mul64(lo, w[3]);
-        b += Mul64(lo, w[11]);
-        a += Mul64(hi, -w[11]);
-        b += Mul64(hi, w[3]);
-        hi = v[(pos + 0x2e0) & 0x3ff];
-        lo = v[(pos + 0x100) & 0x3ff];
-        a += Mul64(lo, w[4]);
-        b += Mul64(lo, w[12]);
-        a += Mul64(hi, w[12]);
-        b += Mul64(hi, -w[4]);
-        hi = v[(pos + 0x280) & 0x3ff];
-        lo = v[(pos + 0x160) & 0x3ff];
-        a += Mul64(lo, w[5]);
-        b += Mul64(lo, w[13]);
-        a += Mul64(hi, -w[13]);
-        b += Mul64(hi, w[5]);
-        hi = v[(pos + 0x260) & 0x3ff];
-        lo = v[(pos + 0x180) & 0x3ff];
-        a += Mul64(lo, w[6]);
-        b += Mul64(lo, w[14]);
-        a += Mul64(hi, w[14]);
-        b += Mul64(hi, -w[6]);
-        hi = v[(pos + 0x200) & 0x3ff];
-        lo = v[(pos + 0x1e0) & 0x3ff];
-        a += Mul64(lo, w[7]);
-        b += Mul64(lo, w[15]);
-        a += Mul64(hi, -w[15]);
-        b += Mul64(hi, w[7]);
+        i = (pos + 0x3e0) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x0) & 0x3ff;
+        x = v[i];
+        y = w[0];
+        u = w[8];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, u);
+        b += Mul64(z, -y);
+        i = (pos + 0x380) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x60) & 0x3ff;
+        x = v[i];
+        y = w[1];
+        u = w[9];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, -u);
+        b += Mul64(z, y);
+        i = (pos + 0x360) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x80) & 0x3ff;
+        x = v[i];
+        y = w[2];
+        u = w[10];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, u);
+        b += Mul64(z, -y);
+        i = (pos + 0x300) & 0x3ff;
+        z = v[i];
+        i = (pos + 0xe0) & 0x3ff;
+        x = v[i];
+        y = w[3];
+        u = w[11];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, -u);
+        b += Mul64(z, y);
+        i = (pos + 0x2e0) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x100) & 0x3ff;
+        x = v[i];
+        y = w[4];
+        u = w[12];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, u);
+        b += Mul64(z, -y);
+        i = (pos + 0x280) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x160) & 0x3ff;
+        x = v[i];
+        y = w[5];
+        u = w[13];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, -u);
+        b += Mul64(z, y);
+        i = (pos + 0x260) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x180) & 0x3ff;
+        x = v[i];
+        y = w[6];
+        u = w[14];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, u);
+        b += Mul64(z, -y);
+        i = (pos + 0x200) & 0x3ff;
+        z = v[i];
+        i = (pos + 0x1e0) & 0x3ff;
+        x = v[i];
+        y = w[7];
+        u = w[15];
+        a += Mul64(x, y);
+        b += Mul64(x, u);
+        a += Mul64(z, -u);
+        b += Mul64(z, y);
         sa = (s32)(a >> 25);
         sb = (s32)(b >> 25);
         if ((sa >> 31) != (sa >> 15)) sa = (sa >> 31) ^ 0x7FFF;
