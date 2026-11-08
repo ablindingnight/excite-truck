@@ -80,11 +80,14 @@ struct MenuRange {
     f32 lo, hi;
 };
 
+// The slider range lives in the item's two int argument words: the float bits are copied as ints (the target
+// builds the range on the stack and reads it back with lwz, 2026-11-08).
 inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     name = n;
     type = 9;
     data = v;
-    *(MenuRange*)&arg0 = r;
+    arg0 = *(const int*)&r.lo;
+    arg1 = *(const int*)&r.hi;
 }
 
 // A slider: the range is stored in the item's argument words.
