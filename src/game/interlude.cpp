@@ -971,9 +971,8 @@ void fn_801C4BAC(void) {
     m[10] = 0.0f;
     m[11] = 0.0f;
     *(f32*)(s + 0x98) = 1.5707964f;
-    Message* msg = (Message*)&lbl_80437E24;
-    msg->title = 0;
-    msg->time = -999.0f;
+    lbl_80437E24.time = -999.0f;
+    lbl_80437E24.title = 0;
     if (lbl_8055E7F0 == 0) {
         lbl_8055E7E2 = 0;
     } else {
@@ -983,7 +982,7 @@ void fn_801C4BAC(void) {
             lbl_8055E7E9 = 0;
         }
         if ((lbl_8055E7E2 = (fn_801769A8() >> 14) & 1) != 0) {
-            memset(s + 0xA8, 0, 0xA0);
+            memset(lbl_80437E30, 0, 0xA0);
             fn_8017960C(fn_80179630(0));
         }
     }
