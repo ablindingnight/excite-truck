@@ -330,7 +330,7 @@ public:
         count = 0;
         max = 0;
     }
-    void Add(T v) {
+    void Add(const T& v) {
         T* p = &data[count++];
         *p = v;
     }
@@ -2311,28 +2311,29 @@ void ZoneMaster::DrawRing(Gate* g, int c) {
 
 void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
     DrawNextGate();
+    int i = hits->count - 1;
     FixedArray<Vec3, 32> pts;
-    int i;
-    for (i = hits->count - 1; i >= 0; i--) {
+    for (; i >= 0; i--) {
+        GateHit* data = hits->data;
         Gate* g;
-        g = hits->data[i].gate;
+        g = data[i].gate;
         if (g->ring) {
             if (pts.count > 0) {
                 glow.Draw(pts.data, pts.count, i288);
                 pts.count = 0;
             }
-            DrawRing(hits->data[i].gate, 2);
+            DrawRing(data[i].gate, 2);
         } else {
             pts.Add(g->a);
-            pts.Add(hits->data[i].gate->b);
+            pts.Add(data[i].gate->b);
         }
     }
     if (pts.count > 0) {
         glow.Draw(pts.data, pts.count, i288);
         pts.count = 0;
     }
-    for (i = 0; events.a.Get(i); i++) {
-        DrawRing(events.a.Get(i)->gate, 4);
+    for (int j = 0; events.a.Get(j); j++) {
+        DrawRing(events.a.Get(j)->gate, 4);
     }
 }
 
