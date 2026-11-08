@@ -392,7 +392,8 @@ void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
             } else {
                 k->mask = -1;
             }
-            if (c->FindChild("phob_config") != 0) {
+            bool own = c->FindChild("phob_config") != 0;
+            if (own) {
                 fn_801D334C(&k->config, c->FindChild("phob_config"));
                 k->ownConfig = 1;
             } else {
