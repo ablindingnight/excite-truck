@@ -21,7 +21,7 @@ extern void *lbl_8055EE10;
 extern char lbl_8033C35C[];
 extern char lbl_8033C368[];
 extern char lbl_804892D0[];
-extern int fn_801284F8(int, void *);
+extern int __nw__FUlPCc(int, void *);
 extern void *fn_8012A13C(void *, int, int);
 extern int fn_8012A2D8(void *);
 extern int fn_8012A364(void *, void *);
@@ -35,7 +35,7 @@ extern char lbl_8033C37C[];
 extern void *lbl_8055EE08;
 extern unsigned char lbl_8033C520[];
 extern unsigned char lbl_80489BD0[];
-extern int fn_80128668(void);
+extern int __dl__FPv(void);
 extern char lbl_8033C458[];
 typedef struct { char *name; int state; } UnkStruct_8020A860;
 extern char lbl_8033C338[];
@@ -55,7 +55,7 @@ void *fn_8020A6AC(void *name) {
 }
 
 void fn_8020A72C(void) {
-    void *m = (void *)fn_801284F8(0xC, lbl_8033C35C);
+    void *m = (void *)__nw__FUlPCc(0xC, lbl_8033C35C);
     if (m != 0) {
         m = fn_8020A860(m);
     }
@@ -113,9 +113,9 @@ void *fn_8020A860(UnkStruct_8020A860 *arg0) {
 }
 #pragma scheduling on
 
-extern int fn_80019B60(void);
-extern void *fn_8012850C(unsigned int, void *);
-extern int fn_80128670(void *);
+extern int OptNoSound__Fv(void);
+extern void *__nwa__FUlPCc(unsigned int, void *);
+extern void __dla__FPv(void *);
 extern void *memset(void *, int, unsigned int);
 extern void fn_802E6B04(void);
 extern void fn_802E6B34(void);
@@ -128,9 +128,9 @@ typedef struct VoiceSoundMixer {
 } VoiceSoundMixer;
 
 int VoiceSoundMixer_vf18(VoiceSoundMixer *self) {
-    lbl_8055B598 = fn_80019B60() ? 0.0f : 1.0f;
+    lbl_8055B598 = OptNoSound__Fv() ? 0.0f : 1.0f;
     lbl_8055EE04 = self;
-    self->m_voices = (void **)fn_8012850C(0x800, lbl_8033C37C);
+    self->m_voices = (void **)__nwa__FUlPCc(0x800, lbl_8033C37C);
     memset(self->m_voices, 0, 0x800);
     fn_802E6B04();
     return 1;
@@ -144,7 +144,7 @@ void VoiceSoundMixer_vf24(VoiceSoundMixer *self) {
             fn_802E317C(lbl_8033C388, self->m_voices[i]);
         }
     }
-    fn_80128670(self->m_voices);
+    __dla__FPv(self->m_voices);
     self->m_voices = 0;
     lbl_8055EE04 = 0;
 }
@@ -547,10 +547,10 @@ void VoiceSoundMixer_vf3C(void) {
 
 extern unsigned char lbl_8033C520[];
 extern unsigned char lbl_80489BD0[];
-extern int fn_80128668(void);
+extern int __dl__FPv(void);
 int VoiceSoundMixer_vf08(int arg0, int arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        __dl__FPv();
     }
     return arg0;
 }
@@ -793,9 +793,9 @@ void fn_8020BCB4(void) {
 
 extern void fn_802E6264(void);
 extern void fn_802E6B34(void);
-extern int fn_80128670(void *);
-extern int fn_80019B60(void);
-extern void *fn_8012850C(unsigned int, void *);
+extern void __dla__FPv(void *);
+extern int OptNoSound__Fv(void);
+extern void *__nwa__FUlPCc(unsigned int, void *);
 extern void *memset(void *, int, unsigned int);
 extern char lbl_8033C388[];
 extern char lbl_8033C37C[];
@@ -804,7 +804,7 @@ extern void *lbl_8055EE04;
 extern int lbl_8055EE0C;
 extern void *lbl_8055EE10;
 extern int fn_8012A364(void *, void *);
-extern int fn_801284F8(int, void *);
+extern int __nw__FUlPCc(int, void *);
 extern void *fn_8012A13C(void *, int, int);
 extern int fn_8012A2D8(void *);
 extern char lbl_8033C368[];

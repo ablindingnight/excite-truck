@@ -50,10 +50,10 @@ const char* StatsGetLabel(u32 type);
 extern "C" int fn_80247624(void);  // career mode active
 
 // A text grid shown by a menu list element.
-class MenuTable {
+class UITable {
 public:
-    MenuTable(int rows, int cols, const int* widths);
-    ~MenuTable(void);
+    UITable(int rows, int cols, const int* widths);
+    ~UITable(void);
     void Clear(void);
     const char* GetCell(int row, int col, int unk);
     void SetCell(int row, int col, const char* text, int style);
@@ -64,7 +64,7 @@ public:
     u8 padC[0x24];
 };
 
-class StatsTable : public MenuTable {
+class StatsTable : public UITable {
 public:
     StatsTable(void);
     ~StatsTable(void) {}
@@ -115,10 +115,10 @@ public:
     virtual int HandleKey(u32 key);
 
     int focus;            // offset 0x18: 0 = tracks, 1 = events
-    MenuTable tracks;     // offset 0x1C
+    UITable tracks;     // offset 0x1C
     int trackSel;         // offset 0x4C
     u8 tracksDirty;       // offset 0x50
-    MenuTable events;     // offset 0x54
+    UITable events;     // offset 0x54
     int eventSel;         // offset 0x84
     u8 eventsDirty;       // offset 0x88
     s32 eventIds[0x40];   // offset 0x8C
@@ -337,7 +337,7 @@ void StatsTable::Refresh(void) {
     }
 }
 
-StatsTable::StatsTable(void) : MenuTable(7, 2, lbl_80563AB8) {}
+StatsTable::StatsTable(void) : UITable(7, 2, lbl_80563AB8) {}
 
 void StatsTable::Show(s32 event) {
     this->event = event;
