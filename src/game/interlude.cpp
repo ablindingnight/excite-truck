@@ -474,13 +474,11 @@ f32 fn_801C2F58(int n, f32 x) {
 // Blends two camera frames: orientation through quaternion slerp, position linearly.
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801C2FF4(const IFrame* b, IQuat& qb, IQuat& q, IQuat& qa, f32 t, IFrame* out, IVec3& pos, const IFrame* a) {
-    FrameToQuat(b, &qb);
-    fn_8012F57C(&q, &qa, &qb, t);
-    QuatToFrame(out, &q);
-    pos.y = FrameLerp(a->pos.y, b->pos.y, t);
-    pos.z = FrameLerp(a->pos.z, b->pos.z, t);
+/* Helper name unproven: sets all three components (arguments evaluate right to left). */
+static inline void SetV(IVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
 }
 
 void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
@@ -489,8 +487,10 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     IQuat q;
     IVec3 pos;
     FrameToQuat(a, &qa);
-    Loop1_fn_801C2FF4(b, qb, q, qa, t, out, pos, a);
-    pos.x = FrameLerp(a->pos.x, b->pos.x, t);
+    FrameToQuat(b, &qb);
+    fn_8012F57C(&q, &qa, &qb, t);
+    QuatToFrame(out, &q);
+    SetV(&pos, FrameLerp(a->pos.x, b->pos.x, t), FrameLerp(a->pos.y, b->pos.y, t), FrameLerp(a->pos.z, b->pos.z, t));
     out->pos = pos;
 }
 
