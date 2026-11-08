@@ -275,10 +275,10 @@ void Wheel::Init(BodyDesc* bd) {
     SphereShape* s;
     RigidBody::Init(bd);
     f32 kk = d->stiffK;
-    RVec3 c(0.0f, 0.0f, 0.0f);
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 r = 0.0254f * d->radius;
     f32 stiff = k * (kk * kk);
+    RVec3 c(0.0f, 0.0f, 0.0f);
     f32 skin = d->skin;
     mtx.pos = RVec3(0.0f, -200.0f, 0.0f);
     CollVolume::Update();
