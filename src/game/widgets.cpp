@@ -2587,7 +2587,7 @@ void fn_80221F9C(WidgetFragment* self, void* context) {
         list = (MenuEntryCountPrefix*)f->rows[col].handle;
         fn_802C4F58(x + 2, y + 2, (const char*)&f->rows[col] + 4, color);
         if (col == f->row) {
-            fn_802C3424(x, y + 10, x + 50, y + (list->count + 1) * 10, background);
+            fn_802C3424(x, y + 10, x + 50, y + 10 + list->count * 10, background);
             top = y + 11;
             ty = y + 12;
             i = 0;
