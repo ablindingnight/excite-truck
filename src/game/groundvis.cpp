@@ -417,7 +417,7 @@ void fn_80144DAC(Vec* dst, const Vec* src);
 void fn_8025AD3C(Vec* out, const Vec* a, const Vec* b, f32 t);
 void fn_801C0E60(Vec* out, const Vec* a, const Vec* b);
 void fn_801C2B9C(Vec* out, const Vec* a, const Vec* b, f32 t);
-void fn_802B3E00(void* list, const Vec* pos, u16 kind, f32 scale);
+void fn_802B3E00(void* list, const Vec* pos, f32 scale, u16 kind);
 }
 
 f32 Remap(f32 lo, f32 hi, f32 outLo, f32 outHi, f32 v);
@@ -622,9 +622,9 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
                 fn_801C2B9C(&pos, &corner[4], &corner[it->corner], it->t0);
                 fn_801C2B9C(&pos, &pos, &corner[(it->corner + 1) & 3], it->t1);
                 if (j < used) {
-                    fn_802B3E00(it->lists[lod], &pos, it->kind, 1.0f);
+                    fn_802B3E00(it->lists[lod], &pos, 1.0f, it->kind);
                 } else {
-                    fn_802B3E00(it->lists[lod], &pos, it->kind, alpha);
+                    fn_802B3E00(it->lists[lod], &pos, alpha, it->kind);
                 }
             }
         }
