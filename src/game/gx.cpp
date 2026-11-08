@@ -2346,8 +2346,7 @@ void fn_802D3BB4(VisTest* t, f32 r, const V3* c, const V3* a, const V3* b, u32 c
     v[0].pos.y = c->y + a->y * r;
     v[0].pos.z = c->z + a->z * r;
     v[1].pos.x = c->x + b->x * r;
-    f32 yv = b->y;
-    v[1].pos.y = c->y + yv * r;
+    v[1].pos.y = c->y + b->y * r;
     v[1].pos.z = c->z + b->z * r;
     v[2].pos.x = c->x + b->x * -r;
     v[2].pos.y = c->y + b->y * -r;
@@ -2355,18 +2354,11 @@ void fn_802D3BB4(VisTest* t, f32 r, const V3* c, const V3* a, const V3* b, u32 c
     v[3].pos.x = c->x + a->x * -r;
     v[3].pos.y = c->y + a->y * -r;
     v[3].pos.z = c->z + a->z * -r;
-    v[0].color = col;
-    v[1].color = col;
-    v[2].color = col;
-    v[3].color = col;
-    v[0].u = 0.0f;
-    v[0].v = 0.0f;
-    v[1].u = 1.0f;
-    v[1].v = 0.0f;
-    v[2].u = 0.0f;
-    v[2].v = 1.0f;
-    v[3].u = 1.0f;
-    v[3].v = 1.0f;
+    v[0].color = v[1].color = v[2].color = v[3].color = col;
+    v[0].u = v[2].u = 0.0f;
+    v[1].u = v[3].u = 1.0f;
+    v[0].v = v[1].v = 0.0f;
+    v[2].v = v[3].v = 1.0f;
     fn_802D68C4(v, 4, i, 6);
 }
 
