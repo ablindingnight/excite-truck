@@ -1165,7 +1165,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         s32 st = S32(p, 0x268C);
         if (st == 0) {
             if (mag > lbl_80562020) {
-                f32 cap = kind == 0x70 ? lbl_80562024 : lbl_80561FD4;
+                f32 cap = kind != 0x70 ? lbl_80561FD4 : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
                 f32 v = F32(p, 0x2690) += add;
@@ -1182,7 +1182,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             }
         } else if (st >= 1 && st <= 4) {
             if (mag > lbl_80562020) {
-                f32 cap = kind == 0x70 ? lbl_80562024 : lbl_80561FD4;
+                f32 cap = kind != 0x70 ? lbl_80561FD4 : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
                 f32 v = F32(p, 0x2690) += add;
