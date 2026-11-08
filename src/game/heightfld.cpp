@@ -236,8 +236,9 @@ static inline f32 Loop2_fn_801DB514(f32 s2, f32 fz, f32* col, f32* dcol, GVec* n
     n.y = 1.0f / lbl_8055E990->scaleX;
     n.z = -dz;
     n.x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, s2, s3);
-    PSVECNormalize(&n, &n);
-    *normal = n;
+    GVec r;
+    PSVECNormalize(&n, &r);
+    *normal = r;
     return h;
 }
 
