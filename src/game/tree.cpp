@@ -908,7 +908,7 @@ void fn_802BDD58(void) {
 static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
     if (t->set) {
         f32 r2;
-        TArray<TCell>* near = t->set->near;
+        TArray<TCell>* frames = t->set->frames;
         TArray<TreeRec>* list = t->set->list;
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
@@ -920,8 +920,8 @@ static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
             TMtx cam;
             fn_801F1C24(&cam);
             const TVec* eye = (const TVec*)(fn_801E8718(-1) + 0x24);
-            for (int j = 0; j < near->n; j++) {
-                TCell* c = &near->data[j];
+            for (int j = 0; j < frames->n; j++) {
+                TCell* c = &frames->data[j];
                 if (Live(c)) {
                     int n;
                     s32 id = t->farId;
