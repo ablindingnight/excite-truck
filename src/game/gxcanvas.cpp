@@ -659,6 +659,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         } while (--h > 0);
     } else if (dst->fmt == 4) {
         do {
+            u32 ia;
             int n = w;
             do {
                 u32 p = *s++;
@@ -666,7 +667,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
                 u8 qr = ((*d >> 8) & 0xF8) + 1;
                 u8 qg = ((*d >> 3) & 0xFC) + 1;
                 u32 a = p >> 24;
-                u32 ia = 0xFF - a;
+                ia = 0xFF - a;
                 u32 b = ((ia * qb + a * (p & 0xFF)) * 0x10101) >> 24;
                 u32 r = ((ia * qr + a * ((p >> 16) & 0xFF)) * 0x10101) >> 24;
                 u32 g = ((ia * qg + a * ((p >> 8) & 0xFF)) * 0x10101) >> 24;
