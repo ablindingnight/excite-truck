@@ -1474,9 +1474,7 @@ void fn_801C56AC(void) {
 int fn_801C5B60(void) { return lbl_8055E7E2; }
 
 // A camera view handed to the camera manager (0xE0 bytes).
-struct CamView {
-    Mat3 rot;        // offset 0x0
-    IVec3 pos;       // offset 0x24
+struct CamView : CamPose {  // rot at 0x0, pos at 0x24
     f32 fov;         // offset 0x30
     u8 pad34[0x58 - 0x34];
     s32 modeB;       // offset 0x58
@@ -1686,26 +1684,13 @@ int fn_801C5B68(CamView* v, int idx) {
         fn_801C2FF4((IFrame*)v, (IFrame*)prev, (IFrame*)v, u);
         p->fov = *prevFov + u * (p->fov - *prevFov);
     } else {
-        prev->rot.m[0] = v->rot.m[0];
-        prev->rot.m[1] = v->rot.m[1];
-        prev->rot.m[2] = v->rot.m[2];
-        prev->rot.m[3] = v->rot.m[3];
-        prev->rot.m[4] = v->rot.m[4];
-        prev->rot.m[5] = v->rot.m[5];
-        prev->rot.m[6] = v->rot.m[6];
-        prev->rot.m[7] = v->rot.m[7];
-        prev->rot.m[8] = v->rot.m[8];
-        prev->pos.x = v->pos.x;
-        prev->pos.y = v->pos.y;
-        prev->pos.z = v->pos.z;
+        *prev = *v;
         f32 fovv = p->fov;
         *prevFov = fovv;
     }
     v->fov = p->fov;
     CamPose* saved = (CamPose*)(s + 0x148) + idx;
-    saved->rot = v->rot;
-    IVec3 posv = v->pos;
-    saved->pos = posv;
+    *saved = *v;
     IVec3* heading = (IVec3*)(s + 0x208) + idx;
     *heading = c->heading;
     v->car = car;
