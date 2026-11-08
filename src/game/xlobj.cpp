@@ -247,7 +247,7 @@ struct Chunk : VecBase<T> {
 template <class T>
 struct Pool {
     Pool(int n) : arr(n) {
-        buf = new ("buffer_list[]") T[n * 4];
+        buf = new ("buffer_list[]") T[arr.cap * 4];
         for (int i = 0; i < arr.cap; i++) {
             arr.data[arr.count++].Init(buf + i * 4, 4);
         }
