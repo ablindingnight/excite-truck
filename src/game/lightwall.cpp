@@ -37,6 +37,7 @@ extern "C" LCam* fn_802C86DC(void);
 struct LSeg {
     LSeg(void) {}
     LSeg(const LVec* p, const LVec* q) : a(*p), b(*q) {}
+    f32 Length(void) const { return PSVECDistance(&a, &b); } /* Helper name unproven */
     void Set(const LVec* p, const LVec* q) {
         a = *p;
         b = *q;
@@ -179,7 +180,7 @@ void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, in
     seg.a.y = seg.b.y;
     f32 len = 16.0f;
     if (PSVECSquareDistance(&seg.a, &seg.b) < len * len) {
-        len -= PSVECDistance(&seg.a, &seg.b);
+        len -= seg.Length();
         LVec dir;
         dir.x = seg.a.x - seg.b.x;
         dir.y = seg.a.y - seg.b.y;
@@ -195,7 +196,7 @@ void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, in
     f32 fu1 = u1 / 256.0f;
     f32 fv0 = v0 / 256.0f;
     f32 fv1 = v1 / 256.0f;
-    f32 h = (v1 - v0) * (PSVECDistance(&seg.a, &seg.b) / 3.0f) / 72.0f;
+    f32 h = (v1 - v0) * (seg.Length() / 3.0f) / 72.0f;
     fn_802C8BD0(tex);
     fn_801E4F20(4);
     fn_801E4F3C(c, 0, seg.a.x, seg.a.y, seg.a.z, fu0, fv1);
