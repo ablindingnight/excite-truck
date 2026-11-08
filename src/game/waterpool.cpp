@@ -821,7 +821,8 @@ void fn_8029DDB8(WaterPool* p) {
             s16* h = p->cur;
             s16* o = p->prev;
             int sum = (h[i + 1] + h[i - 1]) + (h[x + (y + 1) * p->nx] + h[x + (y - 1) * p->nx]);
-            int v = MAX((int)(damp * (a * h[i] + c * sum - o[i])), -32768);
+            f32 f = damp * (a * h[i] + c * sum - o[i]);
+            int v = MAX((int)f, -32768);
             o[i] = MIN(v, 32767);
         }
     }
