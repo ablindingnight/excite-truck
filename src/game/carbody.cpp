@@ -293,6 +293,7 @@ u8 lbl_8055A3B4 = 1;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
 static inline int Positive(f32 x) { return x > lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 ModuleTag lbl_8055E4C0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
@@ -324,8 +325,9 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x18) = lbl_80561CA0 * (v[5]);
     f32 hp = lbl_80561CA0 * (lbl_80561CA8 * v[0] / FMax(v[1], lbl_80561CA4));
     F32(p, 0x24) = lbl_80561CAC;
+    f32 r0 = v[3];
     f32 peak = v[2] * lbl_80561CA0;
-    f32 d = F32(p, 0x1C) - v[3];
+    f32 d = F32(p, 0x1C) - r0;
     f32 a = (hp - peak) / FMax(d * d, lbl_80561CA4);
     f32 top = F32(p, 0x28);
     f32 red = v[4];
@@ -333,8 +335,8 @@ void fn_8018185C(const u8* p, f32* v) {
     f32 peak2 = lbl_80561CA0 * v[2];
     F32(p, 0x20) = hp / lbl_80561CB4;
     F32(p, 0x0) = a;
-    F32(p, 0x4) = F32(p, 0x18) + lbl_80561CB0 * a * v[3];
-    F32(p, 0x8) = peak + a * (v[3] * v[3]);
+    F32(p, 0x4) = F32(p, 0x18) + lbl_80561CB0 * a * r0;
+    F32(p, 0x8) = peak + a * (r0 * r0);
     d = red - top;
     f32 b = (low - peak2) / FMax(d * d, lbl_80561CBC);
     F32(p, 0xC) = b;
@@ -1292,6 +1294,7 @@ struct CbSolCx {
 
 // A wheel's per-step state in the car body (4 of them at 0x23AC).
 struct CbWheel {
+    CbWheel(void) {}
     f32 load;        // offset 0x0
     f32 loadN;       // offset 0x4
     f32 spin;        // offset 0x8
@@ -1301,7 +1304,6 @@ struct CbWheel {
     f32 v18;         // offset 0x18
     f32 prevSlip;    // offset 0x1C
     u8 grounded;     // offset 0x20
-    u8 pad21[0x3];
     f32 contact[3];  // offset 0x24
     f32 local[3];    // offset 0x30, body-space mount point
     f32 v3C;         // offset 0x3C
@@ -1313,7 +1315,6 @@ struct CbWheel {
     f32 groundH;     // offset 0x64
     f32 comp;        // offset 0x68
     s8 sound;        // offset 0x6C
-    u8 pad6D[0x3];
     u32 flags;       // offset 0x70
 };
 
@@ -1570,7 +1571,7 @@ void fn_80183E7C(u8* p) {
     f32 stun = F32(p, 0x2650) - lbl_80561D9C;
     stun = stun > lbl_80561CAC ? stun : lbl_80561CAC;
     F32(p, 0x2650) = stun;
-    if ((f32)__fabs(stun) > lbl_80558DC4[0]) {
+    if (!NearZero(stun)) {
         if (F32(p, 0x25D4) < lbl_80561DA0) {
             f32 s = lbl_80561CDC;
             s = s < stun ? s : stun;
@@ -1612,11 +1613,11 @@ void fn_80183E7C(u8* p) {
     F32(p, 0x2608) = LerpT(lbl_80561DB0, F32(p, 0x25E0), F32(p, 0x2608));
     int still;
     if (!(U32(fn_801769CC(), 4) & 0x4000)) {
-        still = (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0];
+        still = NearZero(F32(p, 0x2690));
     } else {
-        still = !((f32)__fabs(F32(p, 0x2690) - lbl_80561CD0) <= lbl_80558DC4[0]);
+        still = !(NearZero(F32(p, 0x2690) - lbl_80561CD0));
     }
-    if ((f32)__fabs(F32(p, 0x2650)) > lbl_80558DC4[0]) {
+    if (!NearZero(F32(p, 0x2650))) {
         still = 0;
     }
     if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
@@ -1674,7 +1675,7 @@ void fn_80183E7C(u8* p) {
         t.x = F32(p, 0x124) * lbl_80561DBC;
         t.y = F32(p, 0x128) * lbl_80561DBC;
         t.z = F32(p, 0x12C) * lbl_80561DBC;
-        if ((f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+        if (NearZero(F32(p, 0x2650))) {
             ((RigidBody*)p)->AddTorque((const RVec3*)&t);
         }
         S32(p, 0x2648) = S32(p, 0x2648) + 1;
@@ -1729,10 +1730,7 @@ void fn_80183E7C(u8* p) {
         if (jump) {
             lim = driveTune.v[4];
         }
-        BVec dir;
-        dir.x = F32(p, 0x118);
-        dir.y = F32(p, 0x11C);
-        dir.z = F32(p, 0x120);
+        HVec dir = *(HVec*)(p + 0x118);
         f32 sp = PSVECMag(p + 0x118);
         sp = sp > lbl_80561CD0 ? sp : lbl_80561CD0;
         f32 inv = lbl_80561CD0 / sp;
@@ -1782,7 +1780,7 @@ void fn_80183E7C(u8* p) {
                     }
                     F32(p, 0x2590) = lbl_8055E4F0;
                     fn_8014E61C(S32(p, 0x1EC), 2, lbl_80561DD0 - tilt);
-                } else if (bad && !((f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0])) {
+                } else if (bad && !(!NearZero(F32(p, 0x2690)))) {
                     U8(p, 0x259D) = 0;
                     f32 b2;
                     f32 boost = landingTune.v[0];
@@ -1822,10 +1820,7 @@ void fn_80183E7C(u8* p) {
         }
     }
     if (S32(p, 0x2620) && F32(p, 0x2618) > lbl_80561DB4) {
-        BVec right;
-        right.x = F32(p, 0x3C);
-        right.y = F32(p, 0x40);
-        right.z = F32(p, 0x44);
+        HVec right = *(HVec*)(p + 0x3C);
         f32 slide = -PSVECDotProduct(&right, p + 0x118);
         f32 t = Clamp01((F32(p, 0x2618) - lbl_80561DB4) / lbl_80561DD8);
         f32 d = lbl_80561CAC;
@@ -1847,16 +1842,14 @@ void fn_80183E7C(u8* p) {
         f.z = f.z + F32(p, 0x25AC) * n;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
     }
-    if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0] && F32(p, 0x2618) > lbl_80561DE0 &&
-        (f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+    if (NearZero(F32(p, 0x2690)) && F32(p, 0x2618) > lbl_80561DE0 &&
+        NearZero(F32(p, 0x2650))) {
         f32 stall = lbl_80561D34 * F32(p, 0x264C);
         stall = stall < lbl_80561CD0 ? stall : lbl_80561CD0;
         f32 pitch = F32(p, 0x2600) + lbl_80561D64 * stall * fn_80129DC4(4, lbl_80561DE4, lbl_80561CD0);
         f32 roll = F32(p, 0x2604);
-        BVec fl;
-        fl.x = F32(p, 0x118);
+        HVec fl = *(HVec*)(p + 0x118);
         fl.y = lbl_80561CAC;
-        fl.z = F32(p, 0x120);
         f32 m = PSVECMag(&fl);
         m = m > lbl_80561CD0 ? m : lbl_80561CD0;
         f32 inv = lbl_80561CD0 / m;
@@ -1910,7 +1903,7 @@ void fn_80183E7C(u8* p) {
             U8(p, 0x2624) = 1;
         }
         if (U8(p, 0x2624) && F32(p, 0x2618) >= lbl_80561CB8 && (U8(p, 0x2624) = 0, F32(p, 0x11C) > lbl_80561DDC) &&
-            (f32)__fabs(F32(p, 0x2588)) <= lbl_80558DC4[0] && (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+            (f32)__fabs(F32(p, 0x2588)) <= lbl_80558DC4[0] && NearZero(F32(p, 0x2690))) {
             s32 id = S32(p, 0x1EC);
             U8(p, 0x2625) = 1;
             fn_801796EC(13, &id, 4);
@@ -1959,10 +1952,8 @@ void fn_80183E7C(u8* p) {
             target = LerpT(t, F32(p, 0x261C), lbl_80561DD0 * F32(p, 0x261C));
             airLift = airLift + lbl_8055A3B0 * -lean;
         }
-        BVec dir;
-        dir.x = F32(p, 0x118);
+        HVec dir = *(HVec*)(p + 0x118);
         dir.y = lbl_80561CAC;
-        dir.z = F32(p, 0x120);
         f32 want = target - lbl_80561DA0 * F32(p, 0x25E4);
         f32 m = PSVECMag(&dir);
         m = m > lbl_80561CCC ? m : lbl_80561CCC;
@@ -1998,19 +1989,19 @@ void fn_80183E7C(u8* p) {
                 f.y = push * F32(p, 0xD4) / lbl_80561D9C;
                 ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
                 fn_802E30C8(lbl_803325AC, lbl_8055E3C4, push / lbl_80561D60, floor / lbl_80561D60);
-                if ((f32)__fabs(F32(p, 0x2688)) <= lbl_80558DC4[0]) {
+                if (NearZero(F32(p, 0x2688))) {
                     fn_8014E61C(S32(p, 0x1EC), 8, lbl_80561CAC);
                 }
                 F32(p, 0x2688) = lbl_80561CD0;
             }
-            if ((f32)__fabs(F32(p, 0x2688)) > lbl_80558DC4[0]) {
+            if (!NearZero(F32(p, 0x2688))) {
                 F32(p, 0x2688) = lbl_80561CD0;
             }
-        } else if ((f32)__fabs(t) > lbl_80558DC4[0]) {
+        } else if (!NearZero(t)) {
             if (F32(p, 0x11C) > lbl_80561E0C) {
                 F32(p, 0x2688) = lbl_80561CD0;
             }
-            if (S32(p, 0x2620) == 4 || (f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0]) {
+            if (S32(p, 0x2620) == 4 || !NearZero(F32(p, 0x2690))) {
                 F32(p, 0x2688) = lbl_80561CAC;
             }
         }
@@ -2086,9 +2077,9 @@ void fn_80183E7C(u8* p) {
         deep = 1;
     }
     if (F32(p, 0x25C4) > lbl_80561CCC || (S32(p, 0x2620) > 0 && fn_802B04D4(p + 0x60) && deep)) {
-        if ((f32)__fabs(F32(p, 0x25C4)) <= lbl_80558DC4[0]) {
+        if (NearZero(F32(p, 0x25C4))) {
             (*(CbFx**)(p + 0x2584))->v30();
-            if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+            if (NearZero(F32(p, 0x2690))) {
                 fn_8018E330(p);
             }
         }
@@ -2142,7 +2133,7 @@ void fn_80183E7C(u8* p) {
     F32(p, 0x25A0) = heat;
     U8(p, 0x259C) = 0;
     if (lbl_8055E4F4) {
-        if ((f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0] && U32(p, 0x10) == 'PCAR') {
+        if (!NearZero(F32(p, 0x2690)) && U32(p, 0x10) == 'PCAR') {
             f32 h = heatTune.v[7];
             if (heat < h) {
                 h = heat;
@@ -2151,7 +2142,7 @@ void fn_80183E7C(u8* p) {
         }
         if (F32(p, 0x258C) < lbl_80561D00 && U8(p, 0x260D) && F32(p, 0x2618) < lbl_80561D40 &&
             F32(p, 0x25A0) < lbl_80561E18 && F32(p, 0x2588) < lbl_80561DC0 &&
-            (f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0]) {
+            NearZero(F32(p, 0x2690))) {
             f32 h = F32(p, 0x25A0) + lbl_80561D9C * F32(p, 0x398) * heatTune.v[3] * F32(p, 0x2D4);
             h = h < lbl_80561CD0 ? h : lbl_80561CD0;
             F32(p, 0x25A0) = h;
@@ -2202,7 +2193,7 @@ void fn_80183E7C(u8* p) {
     }
     fn_801B8964(S32(p, 0x1EC), vol + dvc);
     int trick = 0;
-    if ((f32)__fabs(F32(p, 0x2690)) <= lbl_80558DC4[0] && (f32)__fabs(F32(p, 0x2650)) <= lbl_80558DC4[0]) {
+    if (NearZero(F32(p, 0x2690)) && NearZero(F32(p, 0x2650))) {
         f32 yaw = lbl_80561E20 * F32(p, 0x25D8) * F32(p, 0x25F0) * F32(p, 0x5B0);
         f32 sp = PSVECMag(p + 0x118);
         f32 m = lbl_80561CD0;
@@ -3020,7 +3011,6 @@ struct SnapPose {
     SnapPos pos;
 };
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 
 extern f32 lbl_8055E460;  // render interpolation factor between the last two physics steps
 extern u8 lbl_8055E4F5;
@@ -3654,28 +3644,6 @@ void fn_801C2170(u8* sys, u8* desc, void* owner);
 extern "C" {
 
 // Builds the body's spring system: per attachment point a pinned particle and a free one, joined by an edge.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8018A750(u8* p, SprVert* verts, SprEdge* edges, SprPin* pins) {
-    for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
-        SprVert* v = &verts[i * 2];
-        v->pos.v[0] = F32(p, 0x94);
-        v->pos.v[1] = F32(p, 0x98);
-        v->pos.v[2] = F32(p, 0x9C);
-        v->w34 = lbl_80561CD0;
-        v->w30 = lbl_80561CDC;
-        v[1].pos = v[0].pos;
-        v[1].w34 = v[0].w34;
-        v[1].w30 = v[0].w30;
-        edges[i].a = i * 2;
-        edges[i].b = i * 2 + 1;
-        edges[i].extra = lbl_80561CAC;
-        edges[i].stiff = lbl_80561CD0 - F32(PTR(p, 0x26C0) + i * 8, 0xA8);
-        pins[i].idx = i * 2;
-        pins[i].mtx = p + 0x70;
-        pins[i].at = 0;
-    }
-}
-
 void fn_8018A750(u8* p) {
     if (PTR(p, 0x26C4)) {
         fn_801C2170(PTR(p, 0x26C4), PTR(p, 0x26C0), p + 0x70);
@@ -3685,10 +3653,26 @@ void fn_8018A750(u8* p) {
         SprEdge edges[4];
         SprPin pins[4];
         int n = S32(PTR(p, 0x26C0), 0xC8);
+        int nv = n * 2;
         if (n > 0) {
-            Loop1_fn_8018A750(p, verts, edges, pins);
+            for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+                SprVert* v = &verts[i * 2];
+                v->pos.v[0] = F32(p, 0x94);
+                v->pos.v[1] = F32(p, 0x98);
+                v->pos.v[2] = F32(p, 0x9C);
+                v->w34 = lbl_80561CD0;
+                v->w30 = lbl_80561CDC;
+                v[1] = v[0];
+                edges[i].a = i * 2;
+                edges[i].b = i * 2 + 1;
+                edges[i].extra = lbl_80561CAC;
+                edges[i].stiff = lbl_80561CD0 - F32(PTR(p, 0x26C0) + i * 8, 0xA8);
+                pins[i].idx = i * 2;
+                pins[i].mtx = p + 0x70;
+                pins[i].at = 0;
+            }
         }
-        fn_801C1CBC(PTR(p, 0x26C8), n * 2, verts, n, edges, n, pins);
+        fn_801C1CBC(PTR(p, 0x26C8), nv, verts, n, edges, n, pins);
     }
 }
 
@@ -3738,46 +3722,38 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
 void fn_8018A9F0(u8* p, u8* m) {
     if (PTR(p, 0x26C4)) {
-        s32 n;
         BVec* pos = 0;
         BVec* old = 0;
-        n = 0;
+        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
-        for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
-            u8* d = PTR(p, 0x26C0);
-            ToBody(p, (BVec*)(m + 0xE24) + (S32(d, 0xA0) + i), &pos[((s32*)(d + 0x20))[i]]);
+        if (S32(PTR(p, 0x26C0), 0xA4) > 0) {
+            for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
+                u8* d = PTR(p, 0x26C0);
+                ToBody(p, (BVec*)(m + 0xE24) + (S32(d, 0xA0) + i), &pos[((s32*)(d + 0x20))[i]]);
+            }
         }
     }
     if (PTR(p, 0x26C8)) {
-        s32 n;
         BVec* pos = 0;
         BVec* old = 0;
-        n = 0;
+        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
-        for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
-            u8* d = PTR(p, 0x26C0);
-            ToBody(p, (BVec*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
+        if (S32(PTR(p, 0x26C0), 0xC8) > 0) {
+            for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+                u8* d = PTR(p, 0x26C0);
+                ToBody(p, (BVec*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
+            }
         }
     }
     u8* x = 0;
     fn_801BEB30(S32(p, 0x1EC), &x);
-    CVec4 h = *(CVec4*)(x + 0x70);
-    BVec* o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xCC);
-    o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (F32(m, 0x80) + h.x);
-    o->z = lbl_80561CAC;
-    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD0);
-    o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (h.y + F32(m, 0xEC));
-    o->z = lbl_80561CAC;
-    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD4);
-    o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (F32(m, 0x158) + h.z);
-    o->z = lbl_80561CAC;
-    o = (BVec*)(m + 0xE24) + S32(PTR(p, 0x26C0), 0xD8);
-    o->x = lbl_80561CAC;
-    o->y = F32(p, 0x5AC) + (h.w + F32(m, 0x1C4));
-    o->z = lbl_80561CAC;
+    CbVec4 h = *(CbSolVec*)(x + 0x70);
+    for (int i = 0; i < 4; i++) {
+        BVec* o = (BVec*)(m + 0xE24) + ((s32*)(PTR(p, 0x26C0) + 0xCC))[i];
+        o->x = lbl_80561CAC;
+        o->y = F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]);
+        o->z = lbl_80561CAC;
+    }
     S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
 }
 
