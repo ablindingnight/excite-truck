@@ -226,22 +226,6 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     return Spline(col[0], col[1], col[2], col[3], fz, (fz * fz), (fz * fz) * fz);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_801DB514(f32 s2, f32 fz, f32* col, f32* dcol, GVec* normal) {
-    f32 s3;
-    s3 = s2 * fz;
-    f32 dz;
-    f32 h = SplineD(col[0], col[1], col[2], col[3], fz, s2, s3, &dz);
-    GVec n;
-    n.y = 1.0f / lbl_8055E990->scaleX;
-    n.z = -dz;
-    n.x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, s2, s3);
-    GVec r;
-    PSVECNormalize(&n, &r);
-    *normal = r;
-    return h;
-}
-
 f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     f32 t2 = fx * fx;
     f32 t3 = t2 * fx;
@@ -250,7 +234,20 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     for (int i = 0; i < 4; i++) {
         col[i] = SplineD(g[0][i], g[1][i], g[2][i], g[3][i], fx, t2, t3, &dcol[i]);
     }
-    return Loop2_fn_801DB514(fz * fz, fz, col, dcol, normal);
+    {
+    f32 s3;
+    s3 = (fz * fz) * fz;
+    f32 dz;
+    f32 h = SplineD(col[0], col[1], col[2], col[3], fz, (fz * fz), s3, &dz);
+    GVec n;
+    n.y = 1.0f / lbl_8055E990->scaleX;
+    n.z = -dz;
+    n.x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, (fz * fz), s3);
+    GVec r;
+    PSVECNormalize(&n, &r);
+    *normal = r;
+        return h;
+    }
 }
 
 int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32 fx, f32 fz) {
