@@ -687,24 +687,8 @@ void fn_80271624(int mode, u8* p) {
                 F32(p, 0xBC) = fov;
             }
             switch (tv->type) {
-            case 0: {
-                f32 fov = fn_802715F0((u8*)tv);
-                f32 w[3];
-                fn_80274F74(p, w, fov);
-                fn_802715C4(w, (u8*)tv);
-                break;
-            }
             case 1:
                 fn_80274730(p, tv->fov * lbl_80563F4C, lbl_80563F44, lbl_80563F44, lbl_80563F48);
-                break;
-            case 2:
-                fn_80274E94(p);
-                break;
-            case 3:
-                fn_80274EA8(p);
-                break;
-            case 4:
-                fn_802704D4(4, p);
                 break;
             case 5: {
                 f32 move[3];
@@ -715,8 +699,34 @@ void fn_80271624(int mode, u8* p) {
                 fn_802749FC(p, move);
                 break;
             }
-            case 6:
-                fn_80275B9C(p, lbl_80563F60, lbl_80563F64, lbl_80563F50);
+            case 4:
+                fn_802704D4(4, p);
+                break;
+            case 2:
+                fn_80274E94(p);
+                break;
+            case 3:
+                fn_80274EA8(p);
+                break;
+            case 12: {
+                f32 fov = fn_802715F0((u8*)tv);
+                f32 w[3];
+                fn_802715C4(w, (u8*)tv);
+                fn_80266A0C(p, w, (u8*)tv, fov);
+                break;
+            }
+            case 0: {
+                f32 fov = fn_802715F0((u8*)tv);
+                f32 w[3];
+                fn_80274F74(p, w, fov);
+                fn_802715C4(w, (u8*)tv);
+                break;
+            }
+            case 17:
+                fn_802750C4(p, tv->ex[0], tv->ex[1]);
+                break;
+            case 16:
+                fn_802751AC(p);
                 break;
             case 7:
                 fn_80275410(p);
@@ -727,21 +737,11 @@ void fn_80271624(int mode, u8* p) {
             case 9:
                 fn_80275938(p);
                 break;
+            case 6:
+                fn_80275B9C(p, lbl_80563F60, lbl_80563F64, lbl_80563F50);
+                break;
             case 10:
                 fn_80275D0C(p);
-                break;
-            case 12: {
-                f32 fov = fn_802715F0((u8*)tv);
-                f32 w[3];
-                fn_802715C4(w, (u8*)tv);
-                fn_80266A0C(p, w, (u8*)tv, fov);
-                break;
-            }
-            case 16:
-                fn_802751AC(p);
-                break;
-            case 17:
-                fn_802750C4(p, tv->ex[0], tv->ex[1]);
                 break;
             default:
                 fn_802E317C("Unknown camera %d", tv->type);
