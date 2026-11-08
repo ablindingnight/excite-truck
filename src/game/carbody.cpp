@@ -2536,7 +2536,7 @@ void fn_80186DE8(u8* p) {
         st = fn_801D04A8(surf);
         f32 bk;
         wet = lbl_80561CD0;
-        if (__fabsf(F32(car, 0x2650)) > lbl_80558DC4[0]) {
+        if (!NearZero(F32(car, 0x2650))) {
             f32 d = (lbl_80561D2C - F32(car, 0x2650) - lbl_80561CFC) / lbl_80561CFC;
             if (lbl_80561CD0 < d) {
                 d = lbl_80561CD0;
@@ -2756,7 +2756,7 @@ void fn_80186DE8(u8* p) {
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
         throttle = Clamp01(F32(car, 0x25E0) + water[1]);
-        if (!(U32(fn_801769CC(), 4) & 0x4000) && (f32)__fabs(F32(car, 0x2690)) > lbl_80558DC4[0]) {
+        if (!(U32(fn_801769CC(), 4) & 0x4000) && !NearZero(F32(car, 0x2690))) {
             throttle = lbl_80561CAC;
             F32(car, 0x25E4) = lbl_80561CD0;
         }
@@ -2837,7 +2837,7 @@ void fn_80186DE8(u8* p) {
         if (F32(car, 0x25D4) > lbl_80561DA4 && lbl_80561DA4 + lbl_80561EC4 * F32(car, 0x25D4) < F32(car, 0x25CC)) {
             throttle = lbl_80561CAC;
         }
-        if ((f32)__fabs(F32(car, 0x2650)) > lbl_80558DC4[0]) {
+        if (!NearZero(F32(car, 0x2650))) {
             throttle = lbl_80561CAC;
         }
         if ((f32)!((f32)__fabs(water[6]) <= lbl_80558DC4[0]) != lbl_80561CAC) {  // a bool converted to float
@@ -2880,7 +2880,7 @@ void fn_80186DE8(u8* p) {
         F32(car, 0x25F8) = brake;
         a = CbVec4(x->pts[6]);
         a.w = F32(car, 0x34C) - F32(car, 0x350);
-        if ((f32)__fabs(F32(car, 0x2650)) > lbl_80558DC4[0]) {
+        if (!NearZero(F32(car, 0x2650))) {
             a.w = a.w * lbl_80561CAC;
         }
         x->pts[6] = a.Sol();
