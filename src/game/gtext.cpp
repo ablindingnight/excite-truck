@@ -673,10 +673,11 @@ void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
 static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
+    EscSeq* e;
     if ((s8)s[i] == '\\') {
         for (int j = 0; j < lbl_80497F14.count; j++) {
             if (strncasecmp(s + i + 1, lbl_80497F14.data[j].name, strlen(lbl_80497F14.data[j].name)) == 0) {
-                EscSeq* e = &lbl_80497F14.data[j];
+                e = &lbl_80497F14.data[j];
                 if (e->art) {
                     h /= (fn_80235F64(e->art, e->artIdx));
                     adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
@@ -689,6 +690,11 @@ static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
     }
     return 0;
 }
+
+/* Helper name unproven */
+struct GTextAdv {
+    double v;
+};
 
 f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     double adv;
@@ -1029,12 +1035,13 @@ f32 fn_8023400C(int idx) {
     const char* s = lbl_8055F06C[idx].text;
     strlen(s);
     while (s[i]) {
-        double adv = (f32)f->height;
+        GTextAdv adv;
+        adv.v = (f32)f->height;
         f32 h = f->height;
-        int skip = EscWidth(s, i, h, adv);
+        int skip = EscWidth(s, i, h, adv.v);
         if (skip) {
             i += skip;
-            w += (f32)adv;
+            w += (f32)adv.v;
             continue;
         }
         const char* next;
