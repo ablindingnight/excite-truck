@@ -1057,29 +1057,33 @@ void fn_802B84E4(CursorState* c) {
     c->y = c->y * 480 / lbl_8055CFF4;
 }
 
+#pragma push
+#pragma opt_strength_reduction off
 void fn_802B8510(int op) {
     if ((u32)(op - 6) > 1) {
         return;
     }
-    if (lbl_8055FA2C < 0 || lbl_8055FA2C >= lbl_804BE7D8.count) {
-        return;
-    }
-    Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
-    Brush tmp = *b;
-    u32 tw;
-    b->w = tmp.h;
-    tw = tmp.w;
-    b->h = tw;
-    for (unsigned int x = 0; x < b->w; x++) {
-        for (s32 y = 0; y < b->h; y++) {
-            if (op == 6) {
-                b->data[x + y * b->w] = tmp.data[tw * (x + 1) - 1 - y];
-            } else {
-                b->data[x + y * b->w] = tmp.data[y + (tmp.h - x - 1) * tw];
+    if (lbl_8055FA2C >= 0 && lbl_8055FA2C < lbl_804BE7D8.count) {
+        Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
+        Brush tmp = *b;
+        u32 w;
+        u32 h;
+        b->w = h = tmp.h;
+        b->h = w = tmp.w;
+        for (u32 x = 0; x < b->w; x++) {
+            int r = w * (x + 1) - 1;
+            int l = (h - x - 1) * w;
+            for (u32 y = 0; y < b->h; y++) {
+                if (op == 6) {
+                    b->data[x + y * b->w] = tmp.data[r - y];
+                } else {
+                    b->data[x + y * b->w] = tmp.data[y + l];
+                }
             }
         }
     }
 }
+#pragma pop
 
 void fn_802B8624(CursorState* in) {
     lbl_804BFF80.s.op = 8;
