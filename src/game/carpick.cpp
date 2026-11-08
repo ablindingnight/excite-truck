@@ -383,6 +383,8 @@ extern "C" {
 
 // Refills the records screen for the current car: the car name header and, per cup, the best time over
 // the three difficulties with the car/colour it was set with.
+#pragma push
+#pragma opt_unroll_loops off
 inline void fn_8025F46C(CarPickScreen* s) {
     memset(s->names, 0, sizeof(s->names));
     memset(s->rows, 0, sizeof(s->rows));
@@ -449,6 +451,7 @@ inline void fn_8025F46C(CarPickScreen* s) {
         }
     }
 }
+#pragma pop
 
 // Highlights each cup row's best difficulty.
 static inline void HighlightBest(void) {
@@ -465,6 +468,8 @@ static inline void HighlightBest(void) {
 }
 
 // "Next car" on the records screen: moves to the next car any list has unlocked.
+#pragma push
+#pragma opt_unroll_loops off
 int fn_8025E678(int* key) {
     if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
         lbl_8055F3D4->cur++;
@@ -473,8 +478,11 @@ int fn_8025E678(int* key) {
     }
     return 0;
 }
+#pragma pop
 
 // "Previous car" on the records screen.
+#pragma push
+#pragma opt_unroll_loops off
 int fn_8025ECBC(int* key) {
     if (lbl_8055F3D4->cur > 0) {
         lbl_8055F3D4->cur--;
@@ -483,6 +491,7 @@ int fn_8025ECBC(int* key) {
     }
     return 0;
 }
+#pragma pop
 
 
 }  // extern "C"
