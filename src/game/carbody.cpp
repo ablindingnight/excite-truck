@@ -685,9 +685,8 @@ void CarBody_vf08(u8* p, u8* desc) {
         lbl_8055E4F7 = 1;
         fn_802E30C8("%s", "CAR: Disabling speed limiter in zone mode.");
     }
-    f32 boost = chassis->GetFloat("gravity_boost", 0.0f);
-    F32(p, 0x5DC) = boost;
-    F32(p, 0x5E0) = chassis->GetFloat("down_gravity_boost", boost);
+    F32(p, 0x5DC) = chassis->GetFloat("gravity_boost", 0.0f);
+    F32(p, 0x5E0) = chassis->GetFloat("down_gravity_boost", F32(p, 0x5DC));
     U8(p, 0x26E0) = chassis->GetBool("squishy", 0);
     F32(p, 0x30) = setup.modelOffset.x;
     F32(p, 0x34) = setup.modelOffset.y;
