@@ -763,7 +763,7 @@ void fn_802BD69C(TFileArray<TreeRec>* a, u8* base) {
 
 TreeRec* fn_802BD80C(TreeRec* off, u8* base) { return (TreeRec*)((u8*)off + (u32)base); }
 
-static inline bool Live(const TCell* c) { return c->fade >= 0.0f; }
+static inline bool Live(TCell* c) { return c->fade >= 0.0f; }
 
 static inline void Settle(TreeRec* tr) {
     if (tr->vol && tr->mtx.pos.y > -2000.0f) {
@@ -808,6 +808,7 @@ void fn_802BD814(void) {
             if (t->farTris <= 10) {
                 fn_802C8BD0(fn_802C28C0());
                 fn_802DC71C(t->farId, t->farTex);
+                TMtx m;
                 TMtx cam;
                 fn_801F1C24(&cam);
                 for (int j = 0; j < near->n; j++) {
@@ -823,9 +824,9 @@ void fn_802BD814(void) {
                             for (int n = c->first; n < c->first + c->count; n++) {
                                 TreeRec* tr = &list2->data[n];
                                 Settle(tr);
-                                TMtx m;
                                 f32 yv;
                                 f32 s = tr->mtx.rot[1].y;
+                                m.pos = tr->mtx.pos;
                                 m.rot[0].x = cam.rot[0].x * s;
                                 m.rot[0].y = cam.rot[0].y * s;
                                 m.rot[0].z = cam.rot[0].z * s;
@@ -836,7 +837,7 @@ void fn_802BD814(void) {
                                 m.rot[1].y = yv * s;
                                 m.rot[2].y = cam.rot[2].y * s;
                                 m.rot[2].z = cam.rot[2].z * s;
-                                m.pos = tr->mtx.pos;
+
                                 fn_802DCAE4(id, &m, a);
                                 lbl_8055FAA8++;
                                 lbl_8055FAAC += tris;
