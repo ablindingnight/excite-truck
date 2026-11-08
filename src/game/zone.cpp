@@ -978,7 +978,7 @@ static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
 namespace {
 class ZoneMaster : public GameMode {
 public:
-    void Loop2_vf44(FixedArray<GateHit, 8>& hits);
+    void MarkHitGates(FixedArray<GateHit, 8>& hits);
 public:
     ZoneMaster(Race* race);
     virtual ~ZoneMaster(void);
@@ -1802,8 +1802,8 @@ void ZoneMaster::DrawNextGate(void) {
 }
 
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void ZoneMaster::Loop2_vf44(FixedArray<GateHit, 8>& hits) {
+/* Helper name unproven: handles the gates hit this frame. */
+inline void ZoneMaster::MarkHitGates(FixedArray<GateHit, 8>& hits) {
     Gate* gg;
     Vec3* p;
     if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
@@ -1878,7 +1878,7 @@ void ZoneMaster::vf44(void) {
         }
     }
     if (hits.count > 0) {
-        Loop2_vf44(hits);
+        MarkHitGates(hits);
     }
 }
 

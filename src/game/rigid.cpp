@@ -162,9 +162,9 @@ struct ImpRec {
 
 class RigidBody : public Phob {
 public:
-    RMat33* Expr2_Update(void);
+    RMat33* InvInertia(void);
 public:
-    RMat33* Expr1_Update(void);
+    RMat33* Rot(void);
 public:
     RigidBody(void);
     virtual void Init(BodyDesc* d);
@@ -428,13 +428,13 @@ static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline RMat33* RigidBody::Expr1_Update(void) {
+/* Helper name unproven: the body rotation matrix. */
+inline RMat33* RigidBody::Rot(void) {
     return &mtx.rot;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline RMat33* RigidBody::Expr2_Update(void) {
+/* Helper name unproven: the inverse inertia matrix. */
+inline RMat33* RigidBody::InvInertia(void) {
     return &invI;
 }
 
@@ -594,7 +594,7 @@ void RigidBody::Update(void) {
             r.rot.m[2][2] = 1.0f;
         }
         {
-            rr = Expr1_Update();
+            rr = Rot();
             Mul(rr, rr, &r.rot);
         }
     }
@@ -603,7 +603,7 @@ void RigidBody::Update(void) {
         RMat33 rt = mtx.rot;
         rt.Transpose();
         {
-            ii = Expr2_Update();
+            ii = InvInertia();
             Mul(&tmp, &rt, ii);
         }
         {

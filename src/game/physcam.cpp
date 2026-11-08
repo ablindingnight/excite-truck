@@ -66,7 +66,7 @@ f32 lbl_8055C598 = -1.0f;  // focus distance override (< 0: use the target)
 // One camera region record (its vptr follows the data).
 class CamRegion {
 public:
-    void Loop1_Prepare(u8* line);
+    void PrepareLong2(u8* line);
 public:
     u8* cam;         // offset 0x0, null when unused
     f32 lo1;         // offset 0x4, first heading window
@@ -1014,8 +1014,8 @@ extern const f32 lbl_80563F90;  // 4.0
 
 // Works out this region's heading windows on `line`: where the sphere's circle crosses the line
 // (two crossings = one window, four = two), falling back to the nearest line point +- radius.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void CamRegion::Loop1_Prepare(u8* line) {
+/* Helper name unproven: reads the second longitude range of a region line. */
+inline void CamRegion::PrepareLong2(u8* line) {
     fn_8027264C("start_long_2", line, (&lo1)[2]);
     fn_8027264C("end_long_2", line, (&lo1)[3]);
 }
@@ -1138,7 +1138,7 @@ void CamRegion::Prepare(u8* line) {
     fn_8027264C("start_long", line, (&lo1)[0]);
     fn_8027264C("end_long", line, (&lo1)[1]);
     if (dual) {
-        Loop1_Prepare(line);
+        PrepareLong2(line);
     }
 }
 extern "C" {

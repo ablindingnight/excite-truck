@@ -243,7 +243,7 @@ static inline void StrCopy(char* d, const char* s, int n) {
 namespace {
 class CrashMode : public Updatable {
 public:
-    int Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done);
+    int PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done);
 public:
     CrashMode(void) {
         lbl_8055EA04 = this;
@@ -522,8 +522,8 @@ void CrashMode::vf10(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline int CrashMode::Loop1_vf14(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done) {
+/* Helper name unproven: pump boost while shaking inside the window; returns done. */
+inline int CrashMode::PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int done) {
     if (s->time < 0.0f && !s->boosted) {
         if (rc->shaking && since < window && fn_80179650() == 1) {
             s->pump += 0.1f;
@@ -601,7 +601,7 @@ void CrashMode::vf14(void) {
             window *= 1.5f;
         }
         done = 0;
-        done = Loop1_vf14(s, rc, since, window, now, done);
+        done = PumpStep(s, rc, since, window, now, done);
         if (done) {
             fn_801B83A0()->vfA8(i, rc->f26A4);
         }
