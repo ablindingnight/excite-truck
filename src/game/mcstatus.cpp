@@ -262,10 +262,14 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-    f32 h = lbl_8055FBA0 + 1;
-    f32 w = lbl_8055FB9C + 1;
-    f32 x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
-    f32 y0 = 1.0f + lbl_8055FBA0 / 2.0f;
+    f32 h;
+    f32 w;
+    f32 x0;
+    f32 y0;
+    w = lbl_8055FB9C + 1;
+    h = lbl_8055FBA0 + 1;
+    x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
+    y0 = 1.0f + lbl_8055FBA0 / 2.0f;
     if (bg->image) {
         fn_802C5320(bg->image, 0, x0, y0, lbl_80563830, w, h);
     } else {
