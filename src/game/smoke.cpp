@@ -287,11 +287,10 @@ void fn_802889F0(void) {
 
 void fn_80288A1C(int mode) {}
 
-static inline void SmokeNop(f32 dt) {}
-
 void fn_80288A20(void) {
-    f32 dt = fn_801E7E24();
-    SmokeNop(dt);
+    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+        return;
+    }
 }
 
 void fn_80288A40(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->large, p, v); }
