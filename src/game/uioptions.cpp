@@ -702,30 +702,29 @@ int EraseButton::Armed(void) { return armed; }
 static const MenuDesc lbl_802FA054 = {"options_uni.lyt", 0, fn_80239EF0, 0, 0};
 
 extern "C" void fn_80239F74(void) {
-    OptState* st = &lbl_8049870C;
     int run;
     lbl_8049870C.cur.aspectOld = lbl_8049870C.cur.aspect = fn_802C83C4();
     {
-        VideoList aspect(&st->cur.aspect, fn_80131234("Display:STANDARD"), fn_80131234("Display:WIDESCREEN"), 0);
+        VideoList aspect(&lbl_8049870C.cur.aspect, fn_80131234("Display:STANDARD"), fn_80131234("Display:WIDESCREEN"), 0);
         lbl_8049870C.cur.audioOld = lbl_8049870C.cur.audio = fn_802090CC();
         {
-            ChoiceList audio(&st->cur.audio, fn_80131234("Audio:MONO"), fn_80131234("Audio:STEREO"),
+            ChoiceList audio(&lbl_8049870C.cur.audio, fn_80131234("Audio:MONO"), fn_80131234("Audio:STEREO"),
                              fn_80131234("Audio:DOLBY_PRO_LOGIC_II"), 0);
             lbl_8049870C.cur.trackOld = lbl_8049870C.cur.track = fn_80210570();
             {
-                ChoiceListVar track(&st->cur.track, fn_80131234("TrackMusic:DEFAULT_ALL"),
+                ChoiceListVar track(&lbl_8049870C.cur.track, fn_80131234("TrackMusic:DEFAULT_ALL"),
                                     fn_80131234("TrackMusic:RANDOM_ALL"), fn_80131234("TrackMusic:CUSTOMIZED"), 0);
                 lbl_8049870C.cur.music = 1.0f;
-                fn_801331C4(4, "music_volume", &st->cur.music);
+                fn_801331C4(4, "music_volume", &lbl_8049870C.cur.music);
                 lbl_8049870C.cur.sfx = 1.0f;
-                fn_801331C4(4, "effects_volume", &st->cur.sfx);
+                fn_801331C4(4, "effects_volume", &lbl_8049870C.cur.sfx);
                 {
                     EraseButton erase;
                     lbl_8055F10C = &erase;
                     lbl_8049870C.cur.icon = 0;
-                    fn_801332D0(IdentGetCurrentSlot() + 0xC, "icon_set", &st->cur.icon);
+                    fn_801332D0(IdentGetCurrentSlot() + 0xC, "icon_set", &lbl_8049870C.cur.icon);
                     {
-                        ChoiceList icons(&st->cur.icon, fn_80131234("IconSet:NORMAL"),
+                        ChoiceList icons(&lbl_8049870C.cur.icon, fn_80131234("IconSet:NORMAL"),
                                          fn_80131234("IconSet:SPECIAL1"), 0);
                         SfxCaption sfx;
                         MusicCaption music;
@@ -736,9 +735,9 @@ extern "C" void fn_80239F74(void) {
                         MenuItem items[] = {
                             MenuItem(0, 5, &sound, 0, 0),
                             MenuItem("cvideo", 5, &aspect, 0, 0),
-                            MenuItem("music_volume", &st->cur.music, MenuRange(0.0f, 1.0f)),
+                            MenuItem("music_volume", &lbl_8049870C.cur.music, MenuRange(0.0f, 1.0f)),
                             MenuItem("mvcustom", 5, &music, 0, 0),
-                            MenuItem("sfx_volume", &st->cur.sfx, MenuRange(0.0f, 1.0f)),
+                            MenuItem("sfx_volume", &lbl_8049870C.cur.sfx, MenuRange(0.0f, 1.0f)),
                             MenuItem("sfxcustom", 5, &sfx, 0, 0),
                             MenuItem("audio", 16, 0, (int)&track, 0),
                             MenuItem("ascustom", 5, &trackCap, 0, 0),
@@ -758,11 +757,11 @@ extern "C" void fn_80239F74(void) {
                             switch (fn_802146BC(&desc, -999, -999, 1)) {
                             case -2:
                             case -1:
-                                fn_8013323C(4, "music_volume", st->cur.music);
-                                fn_8013323C(4, "effects_volume", st->cur.sfx);
-                                fn_80133348(IdentGetCurrentSlot() + 0xC, "icon_set", st->cur.icon);
+                                fn_8013323C(4, "music_volume", lbl_8049870C.cur.music);
+                                fn_8013323C(4, "effects_volume", lbl_8049870C.cur.sfx);
+                                fn_80133348(IdentGetCurrentSlot() + 0xC, "icon_set", lbl_8049870C.cur.icon);
                                 if (fn_802104D0()) {
-                                    fn_80210514(st->cur.track);
+                                    fn_80210514(lbl_8049870C.cur.track);
                                 }
                                 if (fn_802E8D84()) {
                                     fn_802E6FBC();

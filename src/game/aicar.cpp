@@ -2419,14 +2419,13 @@ void fn_80197BD0(u8* d, u8* out) {
         S32(d, 0x114) = -1;
         S32(d, 0x118) = -1;
     }
-    f32 k = F32(d, 0xF0);
-    if (k > 0.05f) {
+    if (F32(d, 0xF0) > 0.05f) {
         f32 at = F32(d, 0xF4);
         U8(d, 0x250) = 1;
         V2 tgt;
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
         tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
-        V2 c = LerpV2(*(V2*)out, tgt, k);
+        V2 c = LerpV2(*(V2*)out, tgt, F32(d, 0xF0));
         ((V2*)out)->x = c.x;
         ((V2*)out)->y = c.y;
     }
