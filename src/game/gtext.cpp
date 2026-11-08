@@ -675,8 +675,7 @@ void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
     if ((s8)s[i] == '\\') {
         for (int j = 0; j < lbl_80497F14.count; j++) {
-            const char* name = lbl_80497F14.data[j].name;
-            if (strncasecmp(s + i + 1, name, strlen(name)) == 0) {
+            if (strncasecmp(s + i + 1, lbl_80497F14.data[j].name, strlen(lbl_80497F14.data[j].name)) == 0) {
                 EscSeq* e = &lbl_80497F14.data[j];
                 if (e->art) {
                     h /= (fn_80235F64(e->art, e->artIdx));
