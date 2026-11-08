@@ -1746,9 +1746,7 @@ void fn_80183E7C(u8* p) {
                     }
                     F32(p, 0x2590) = lbl_8055E4F0;
                     fn_8014E61C(S32(p, 0x1EC), 2, lbl_80561DD0 - tilt);
-                } else if (!bad || (f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0]) {
-                    (*(CbFx**)(p + 0x2584))->Land(sink);
-                } else {
+                } else if (bad && !((f32)__fabs(F32(p, 0x2690)) > lbl_80558DC4[0])) {
                     U8(p, 0x259D) = 0;
                     f32 b2;
                     f32 boost = landingTune.v[0];
@@ -1759,6 +1757,8 @@ void fn_80183E7C(u8* p) {
                     fn_8014E61C(S32(p, 0x1EC), 1, sink);
                     fn_80161A38(2, S32(p, 0x1EC), 0);
                     (*(CbFx**)(p + 0x2584))->v20();
+                } else {
+                    (*(CbFx**)(p + 0x2584))->Land(sink);
                 }
             }
             if (jump && fn_8018A100(p) && fn_801E1048(S32(p, 0x1EC))) {
