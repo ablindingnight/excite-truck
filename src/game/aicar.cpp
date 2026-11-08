@@ -1032,7 +1032,7 @@ public:
     virtual void v1C(void);
     virtual void v20(void);
     virtual void v24(void);
-    virtual void v28(void);
+    virtual void v28(u8* steer, u8* speed, u8* flags);  // 0x28, same arguments as Drive; name unknown
     virtual void Drive(u8* steer, u8* speed, u8* flags);  // 0x2C
 };
 
@@ -1272,7 +1272,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
             }
         }
     }
-    ((AISink*)PTR(d, 0x28C))->Drive(out, out + 0x8, d + 0x2D0);
+    ((AISink*)PTR(d, 0x28C))->v28(out, out + 0x8, d + 0x2D0);
 }
 
 void fn_801955F0(u8* d, u8* out, f32 t) {
