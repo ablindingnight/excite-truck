@@ -570,6 +570,9 @@ static inline void RotVec(f32* out, const f32* m, const f32* v) {
     out[2] = z;
 }
 
+// Helper names unproven: the size is an inline argument (target loads it before the compare).
+static inline f32 LoEdge(f32 v, f32 size) { return MIN(v, 0.0f) - 1.1f * size; }
+static inline f32 HiEdge(f32 v, f32 size) { return MAX(v, 0.0f) + 1.1f * size; }
 /* Helper name unproven: out = a - b. */
 static inline void SubVec(f32* out, const f32* a, const f32* b) {
     out[0] = a[0] - b[0];
@@ -623,10 +626,10 @@ void fn_801683F4(PickupCounts* out, int player) {
             SubVec(l, lbl_80430260[player].pos, rec->pos);
             RotVec(l, rec->rot, l);
             dims = car->dims;
-            lo.x = MIN(l[0], 0.0f) - 1.1f * dims->wid;
-            lo.z = MIN(l[2], 0.0f) - 1.1f * dims->len;
-            hi.x = MAX(l[0], 0.0f) + 1.1f * dims->wid;
-            hi.z = MAX(l[2], 0.0f) + 1.1f * dims->len;
+            lo.x = LoEdge(l[0], dims->wid);
+            lo.z = LoEdge(l[2], dims->len);
+            hi.x = HiEdge(l[0], dims->wid);
+            hi.z = HiEdge(l[2], dims->len);
             r = SqrtF(dims->wid * dims->wid + dims->len * dims->len);
         }
         for (i = 0; i < lbl_8055E354->groups.count; i++) {
