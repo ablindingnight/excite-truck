@@ -239,8 +239,9 @@ struct CarIconSet {
     }
     ~CarIconSet(void) {
         for (int i = 0; i < count; i++) {
-            gxForgetTexture(icons[i].tex);
-            gxForgetTexture(icons[i].overlay);
+            CarIcon* c = &icons[i];
+            gxForgetTexture(c->tex);
+            gxForgetTexture(c->overlay);
         }
         delete[] icons;
     }
