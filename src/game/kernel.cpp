@@ -375,7 +375,7 @@ fail:
 }
 
 void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha) {
-    int hasAlpha = 0;
+    int hasAlpha;
     int a;
     if (alpha >= 0.99f) {
         a = 0xFF;
@@ -384,8 +384,15 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     } else {
         a = (int)(0.5f + 255.0f * alpha);
     }
-    if (v->info.frames[0].a.buf) {
+    // The target branches (beq; li 1; b; li 0); every if/else or ?: form becomes branch-free (neg/or/srwi) here.
+    // A switch with default first reproduces it; the original may have switched on a related format value.
+    switch ((u32)v->info.frames[0].a.buf) {
+    default:
         hasAlpha = 1;
+        break;
+    case 0:
+        hasAlpha = 0;
+        break;
     }
     v->busy[v->info.cur] = 1;
     GXSetVtxAttrFmt(0, 9, 1, 3, 0);
