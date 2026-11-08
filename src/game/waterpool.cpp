@@ -726,15 +726,17 @@ void fn_8029D644(WaterPool* p) {
         rows[0] = p->verts;
         rows[1] = p->verts + p->nx;
         for (i = 0; i < p->nx; i++) {
-            fn_8029DB78(p, &rows[0][i], i, 0);
+            fn_8029DB78(p, (PoolVtx*)((u8*)rows[0] + i * (int)sizeof(PoolVtx)), i, 0);
         }
         for (int j = 1; j < p->ny; j++) {
             PoolVtx* a = rows[j & 1];
             PoolVtx* b = rows[1 - (j & 1)];
             for (i = 0; i < p->nx; i++) {
-                fn_8029DB78(p, &a[i], i, j);
-                fn_802C8E00(b[i].color, i > 0, b[i].pos.x, b[i].pos.y, b[i].pos.z, b[i].s, b[i].t);
-                fn_802C8E00(a[i].color, i > 0, a[i].pos.x, a[i].pos.y, a[i].pos.z, a[i].s, a[i].t);
+                PoolVtx* av = (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx));
+                PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
+                fn_8029DB78(p, av, i, j);
+                fn_802C8E00(bv->color, i > 0, bv->pos.x, bv->pos.y, bv->pos.z, bv->s, bv->t);
+                fn_802C8E00(av->color, i > 0, av->pos.x, av->pos.y, av->pos.z, av->s, av->t);
             }
         }
         fn_802C8E48();
