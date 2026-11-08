@@ -691,7 +691,7 @@ extern "C" {
 void fn_801B1318(void) {
     qsort(lbl_80435C30, lbl_8055E678, 4, fn_801B11DC);
     for (int i = 0; i < lbl_8055E678; i++) {
-        lbl_8055E684[lbl_80435C30[i]].State()->place = i + 1;
+        DS((u8*)&lbl_8055E684[lbl_80435C30[i]] + 0x4)->place = i + 1;
     }
 }
 
