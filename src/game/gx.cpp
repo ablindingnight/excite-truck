@@ -699,6 +699,7 @@ void fn_802CF048(int on) {
 void fn_802CF104(void) { fn_802CF048(1); }
 
 void fn_802CF10C(u32 count) {
+    Capture* cap = &lbl_804C5710;
     fn_802CEF90();
     if (lbl_8055FD44 == 4000) {
         OSReport("gx: hang? or perhaps the disk drive has powered down...\n");
@@ -708,19 +709,19 @@ void fn_802CF10C(u32 count) {
     if (lbl_8055FD4C < 5) {
         return;
     }
-    if (!lbl_8055FD50 && !lbl_804C5710.active) {
+    if (!lbl_8055FD50 && !cap->active) {
         return;
     }
-    if (lbl_804C5710.pending) {
-        lbl_804C5710.pending = 0;
+    if (cap->pending) {
+        cap->pending = 0;
         DCInvalidateRange(lbl_804C9760.cur, lbl_804C9760.w * lbl_804C9760.h * 2);
         u16* src = lbl_804C9760.cur;
-        for (int y = 0; y < lbl_804C5710.h; y++) {
-            memcpy(&lbl_804C5710.data[y * lbl_804C5710.w],
-                   &src[lbl_804C9760.w * (y + lbl_804C5710.y) + lbl_804C5710.x], lbl_804C5710.w * 2);
+        for (int y = 0; y < cap->h; y++) {
+            memcpy(&cap->data[y * cap->w],
+                   &src[lbl_804C9760.w * (y + cap->y) + cap->x], cap->w * 2);
         }
     }
-    if (lbl_804C5710.active) {
+    if (cap->active) {
         int m = lbl_8055FD4C % 60;
         if (m != 0 && m != 45) {
             return;
@@ -744,15 +745,15 @@ void fn_802CF10C(u32 count) {
             }
         }
     }
-    if (lbl_804C5710.active) {
+    if (cap->active) {
         u16* dst = lbl_804C9760.cur;
         if (lbl_8055FD4C % 60 < 30) {
-            int w = lbl_804C5710.w;
+            int w = cap->w;
             int y;
             int k = 0;
-            for (y = 0; y < lbl_804C5710.h; y++) {
-                u16* d = &dst[lbl_804C9760.w * (y + lbl_804C5710.y) + lbl_804C5710.x];
-                u16* s = &lbl_804C5710.data[k];
+            for (y = 0; y < cap->h; y++) {
+                u16* d = &dst[lbl_804C9760.w * (y + cap->y) + cap->x];
+                u16* s = &cap->data[k];
                 for (int x = 0; x < w; x++) {
                     d[x] = s[x];
                 }
@@ -761,11 +762,11 @@ void fn_802CF10C(u32 count) {
         } else {
             int w;
             int y;
-            u16 c = lbl_804C5710.data[0];
-            w = lbl_804C5710.w;
-            for (y = 0; y < lbl_804C5710.h; y++) {
+            u16 c = cap->data[0];
+            w = cap->w;
+            for (y = 0; y < cap->h; y++) {
                 int x;
-                u16* d = &dst[lbl_804C9760.w * (lbl_804C5710.y + y) + lbl_804C5710.x];
+                u16* d = &dst[lbl_804C9760.w * (cap->y + y) + cap->x];
                 for (x = 0; x < w; x++) {
                     d[x] = c;
                 }
