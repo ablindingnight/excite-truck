@@ -24,7 +24,7 @@ struct JoyInfo {
 };
 
 struct JoyStatus {
-    f32 axes[8];     // offset 0x0
+    f32 ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7;  // offset 0x0: separate members (struct copies use lfs/stfs; an array copies as words)
     u8 buttons[32];  // offset 0x20
     u32 dir;         // offset 0x40
     JoyInfo info;    // offset 0x44
@@ -92,8 +92,10 @@ BindEntry* lbl_8055E5CC;  // the bindable controls
 s32 lbl_8055E5D0;         // how many
 s8 lbl_8055E5D4;          // key codes filled in
 
-static JoyStatus lbl_80435050[8];  // current pads, then last frame's
-static Mouse lbl_80435370[2];      // current mouse, then last frame's
+static JoyStatus lbl_80435050[4];  // current pads
+static JoyStatus lbl_804351E0[4];  // last frame's
+static Mouse lbl_80435370;  // current mouse
+static Mouse lbl_8043537C;  // last frame's
 
 static LocString lbl_80435388(lbl_80333D18 + 0x126C);
 static LocString lbl_80435394(lbl_80333D18 + 0x1288);
@@ -252,11 +254,11 @@ void fn_801A7844(int reset) {
     fn_80127A84(&x, &y, &buttons);
     {
         s32 w = lbl_8055CFF0 / 2;
-        lbl_80435370[0].x = (f32)(x - w) / (f32)w;
-        lbl_80435370[0].y = (f32)(y - (lbl_8055CFF4 / 2)) / (f32)(lbl_8055CFF4 / 2);
-        lbl_80435370[0].b0 = buttons & 1;
-        lbl_80435370[0].b1 = (buttons >> 1) & 1;
-        lbl_80435370[0].b2 = (buttons >> 2) & 1;
+        lbl_80435370.x = (f32)(x - w) / (f32)w;
+        lbl_80435370.y = (f32)(y - (lbl_8055CFF4 / 2)) / (f32)(lbl_8055CFF4 / 2);
+        lbl_80435370.b0 = buttons & 1;
+        lbl_80435370.b1 = (buttons >> 1) & 1;
+        lbl_80435370.b2 = (buttons >> 2) & 1;
     }
 }
 
@@ -275,17 +277,17 @@ void fn_801A7A08(Binding* b, const char* key, int section) {
 
 void fn_801A7A5C(void) {
     int i;
-    lbl_80435370[0].x = 0.0f;
-    lbl_80435370[0].y = 0.0f;
-    lbl_80435370[0].b2 = 0;
-    lbl_80435370[0].b1 = 0;
-    lbl_80435370[0].b0 = 0;
+    lbl_80435370.x = 0.0f;
+    lbl_80435370.y = 0.0f;
+    lbl_80435370.b2 = 0;
+    lbl_80435370.b1 = 0;
+    lbl_80435370.b0 = 0;
     fn_801A7844(1);
     fn_801A7844(1);
     for (i = 0; i < 4; i++) {
-        lbl_80435050[4 + i] = lbl_80435050[i];
+        lbl_804351E0[i] = lbl_80435050[i];
     }
-    lbl_80435370[1] = lbl_80435370[0];
+    lbl_8043537C = lbl_80435370;
 }
 
 int fn_801A7C8C(Binding* out) {
@@ -351,69 +353,69 @@ f32 fn_801A7F98(Binding* b) {
     case 2:
         switch (b->code) {
         case 0:
-            return MaxZero(-p->axes[0]);
+            return MaxZero(-p->ax0);
         case 1:
-            return MaxZero(p->axes[0]);
+            return MaxZero(p->ax0);
         case 2:
-            return MaxZero(-p->axes[1]);
+            return MaxZero(-p->ax1);
         case 3:
-            return MaxZero(p->axes[1]);
+            return MaxZero(p->ax1);
         case 4:
-            return MaxZero(-p->axes[3]);
+            return MaxZero(-p->ax3);
         case 5:
-            return MaxZero(p->axes[3]);
+            return MaxZero(p->ax3);
         case 6:
-            return MaxZero(-p->axes[2]);
+            return MaxZero(-p->ax2);
         case 7:
-            return MaxZero(p->axes[2]);
+            return MaxZero(p->ax2);
         case 8:
-            return MaxZero(-p->axes[4]);
+            return MaxZero(-p->ax4);
         case 9:
-            return MaxZero(p->axes[4]);
+            return MaxZero(p->ax4);
         case 10:
-            return MaxZero(-p->axes[5]);
+            return MaxZero(-p->ax5);
         case 11:
-            return MaxZero(p->axes[5]);
+            return MaxZero(p->ax5);
         case 12:
-            return MaxZero(-p->axes[6]);
+            return MaxZero(-p->ax6);
         case 13:
-            return MaxZero(p->axes[6]);
+            return MaxZero(p->ax6);
         case 14:
-            return MaxZero(-p->axes[7]);
+            return MaxZero(-p->ax7);
         case 15:
-            return MaxZero(p->axes[7]);
+            return MaxZero(p->ax7);
         case 16:
-            return 0.5f * (1.0f - p->axes[0]);
+            return 0.5f * (1.0f - p->ax0);
         case 17:
-            return 0.5f * (1.0f - p->axes[1]);
+            return 0.5f * (1.0f - p->ax1);
         case 18:
-            return 0.5f * (1.0f - p->axes[3]);
+            return 0.5f * (1.0f - p->ax3);
         case 19:
-            return 0.5f * (1.0f - p->axes[2]);
+            return 0.5f * (1.0f - p->ax2);
         case 20:
-            return 0.5f * (1.0f - p->axes[4]);
+            return 0.5f * (1.0f - p->ax4);
         case 21:
-            return 0.5f * (1.0f - p->axes[5]);
+            return 0.5f * (1.0f - p->ax5);
         case 22:
-            return 0.5f * (1.0f - p->axes[6]);
+            return 0.5f * (1.0f - p->ax6);
         case 23:
-            return 0.5f * (1.0f - p->axes[7]);
+            return 0.5f * (1.0f - p->ax7);
         case 24:
-            return 0.5f * (1.0f + p->axes[0]);
+            return 0.5f * (1.0f + p->ax0);
         case 25:
-            return 0.5f * (1.0f + p->axes[1]);
+            return 0.5f * (1.0f + p->ax1);
         case 26:
-            return 0.5f * (1.0f + p->axes[3]);
+            return 0.5f * (1.0f + p->ax3);
         case 27:
-            return 0.5f * (1.0f + p->axes[2]);
+            return 0.5f * (1.0f + p->ax2);
         case 28:
-            return 0.5f * (1.0f + p->axes[4]);
+            return 0.5f * (1.0f + p->ax4);
         case 29:
-            return 0.5f * (1.0f + p->axes[5]);
+            return 0.5f * (1.0f + p->ax5);
         case 30:
-            return 0.5f * (1.0f + p->axes[6]);
+            return 0.5f * (1.0f + p->ax6);
         case 31:
-            return 0.5f * (1.0f + p->axes[7]);
+            return 0.5f * (1.0f + p->ax7);
         }
         break;
     case 3:
@@ -426,31 +428,31 @@ f32 fn_801A7F98(Binding* b) {
     case 5:
         switch (b->code) {
         case 0:
-            return MaxZero(-lbl_80435370[0].x);
+            return MaxZero(-lbl_80435370.x);
         case 1:
-            return MaxZero(lbl_80435370[0].x);
+            return MaxZero(lbl_80435370.x);
         case 2:
-            return MaxZero(-lbl_80435370[0].y);
+            return MaxZero(-lbl_80435370.y);
         case 3:
-            return MaxZero(lbl_80435370[0].y);
+            return MaxZero(lbl_80435370.y);
         case 4:
-            return 0.5f * (1.0f - lbl_80435370[0].x);
+            return 0.5f * (1.0f - lbl_80435370.x);
         case 6:
-            return 0.5f * (1.0f - lbl_80435370[0].y);
+            return 0.5f * (1.0f - lbl_80435370.y);
         case 5:
-            return 0.5f * (1.0f + lbl_80435370[0].x);
+            return 0.5f * (1.0f + lbl_80435370.x);
         case 7:
-            return 0.5f * (1.0f + lbl_80435370[0].y);
+            return 0.5f * (1.0f + lbl_80435370.y);
         }
         break;
     case 6:
         switch (b->code) {
         case 0:
-            return lbl_80435370[0].b0 ? 1.0f : 0.0f;
+            return lbl_80435370.b0 ? 1.0f : 0.0f;
         case 2:
-            return lbl_80435370[0].b1 ? 1.0f : 0.0f;
+            return lbl_80435370.b1 ? 1.0f : 0.0f;
         case 1:
-            return lbl_80435370[0].b2 ? 1.0f : 0.0f;
+            return lbl_80435370.b2 ? 1.0f : 0.0f;
         }
         break;
     case 1:
@@ -468,13 +470,13 @@ f32 fn_801A85E8(Binding* b) {
     } else {
         JoyStatus* cur = &lbl_80435050[b->pad];
         JoyStatus saved = *cur;
-        Mouse m = lbl_80435370[0];
+        Mouse m = lbl_80435370;
         f32 v;
-        *cur = lbl_80435050[4 + b->pad];
-        lbl_80435370[0] = lbl_80435370[1];
+        *cur = lbl_804351E0[b->pad];
+        lbl_80435370 = lbl_8043537C;
         v = fn_801A7F98(b);
         *cur = saved;
-        lbl_80435370[0] = m;
+        lbl_80435370 = m;
         return v;
     }
 }
@@ -485,13 +487,13 @@ int fn_801A8A10(Binding* b) {
     } else {
         JoyStatus* cur = &lbl_80435050[b->pad];
         JoyStatus saved = *cur;
-        Mouse m = lbl_80435370[0];
+        Mouse m = lbl_80435370;
         int v;
-        *cur = lbl_80435050[4 + b->pad];
-        lbl_80435370[0] = lbl_80435370[1];
+        *cur = lbl_804351E0[b->pad];
+        lbl_80435370 = lbl_8043537C;
         v = fn_801A8E38(b);
         *cur = saved;
-        lbl_80435370[0] = m;
+        lbl_80435370 = m;
         return v;
     }
 }
