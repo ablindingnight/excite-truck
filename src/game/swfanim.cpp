@@ -91,20 +91,10 @@ public:
     Sw2* data;     // offset 0x14
 };
 
-struct SwfState {
-    u32 a;
-    u32 b;
-    u32 c;
-    u32 d;
-    u32 e;
-    u32 f;
-    SwfState() : a(0), b(123), c(0), d(0), e(0) {}
-};
-
 static inline u32 SwfColor(u8 r, u8 g, u8 b, u8 a) { return (a << 24) | (r << 16) | (g << 8) | b; }
 
 ModuleTag lbl_8055F0E0;
-SwfState lbl_804986C8;
+static UnkStatic123 lbl_804986C8;
 u32 lbl_8055F0E8 = SwfColor(0, 0, 0, 0x7F);
 
 static inline void SwfSwap16(void* p) {
