@@ -369,13 +369,14 @@ static inline void SetStick(Stick* s, const TVec* v, int a, int b) {
     s->rest = PSVECSquareDistance(&v[a], &v[b]);
 }
 void fn_801F5508(Fabric* f) {
+    int row;
     Stick* s;
     int n;
     n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
     s = new ("fabric sticks") Stick[n];
     int k = 0;
     for (int r = 0; r < f->rows; r++) {
-        int row = r * f->cols;
+        row = r * f->cols;
         for (int c = 1; c < f->cols; c++) {
             int b = row + c;
             int a = b - 1;
