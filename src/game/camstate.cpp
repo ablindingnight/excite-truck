@@ -468,11 +468,11 @@ struct CamPreset {
     f32 fov;
 };
 
-extern const CamPreset lbl_802FA788;
-extern const CamPreset lbl_802FA7A4;
-extern const CamPreset lbl_802FA7C0;
-extern const CamPreset lbl_802FA7DC;
-extern const CamPreset lbl_802FA7F8;
+extern CamPreset lbl_802FA788;
+extern CamPreset lbl_802FA7A4;
+extern CamPreset lbl_802FA7C0;
+extern CamPreset lbl_802FA7DC;
+extern CamPreset lbl_802FA7F8;
 extern const f32 lbl_80564024;  // degrees to radians
 extern const f32 lbl_80564028;
 extern const f32 lbl_8056402C;
