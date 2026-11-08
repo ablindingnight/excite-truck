@@ -2896,18 +2896,20 @@ void fn_80224DDC(WidgetFragment* self,float x,float y,float z){ResourceTextPrefi
 extern "C" void fn_80232C50(const char*,GTextFont*,unsigned int,int,float,float,float,float,float,float);
 static inline const char* NextResourceTextGlyphNew(const char* p){const unsigned char* u=(const unsigned char*)p;if((*u&0xf0)==0xe0)return p+3;if((*u&0xe0)==0xc0)return p+2;return p+1;}
 // NonMatching: text origin uses F24 instead of the original F25 (four instruction words).
+/* Helper name unproven */
+struct ResourceOrigin{double y;};
 void fn_80224E74(WidgetFragment* self){
 
 
  ResourceTextPrefix* f=(ResourceTextPrefix*)self;char firstPass[512];char output[512];FullDrawStatePrefix scope;
  if(f->owned){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);}
  float width=(float)((WidgetDispatch*)self)->Slot78();int top=self->top;float height=(float)(self->bottom-top);const char* text=(const char*)f->context;strlen((const char*)text);
- float left=(float)self->left;double originY=(float)top;
+ float left=(float)self->left;ResourceOrigin origin;origin.y=(float)top;
  if(f->flags&16){int lines=0;while(*text){++lines;const char* begin=text;memset(firstPass,0,512);char* destination=firstPass;
   do{const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)*destination++=*text++;}while(f->scale*fn_8023293C(f->resource,firstPass,(1.0f))<width&&*text&&*text!='\n');
   const char* end=text;if(*text){while(*text!=' '&&*text!='\n'&&text>begin)--text;}if(text<=begin)text=end;if(*text==' '||*text=='\n')++text;
  }
- originY=(float)originY+(0.5f)*(float)(self->bottom-self->top);int lineHeight=fn_80232B70(f->resource);float fontHeight=(float)lineHeight;float scaledLineCount=((0.5f)*(float)(lines-1))*f->scale;originY=(float)originY-scaledLineCount*fontHeight;
+ origin.y=(float)origin.y+(0.5f)*(float)(self->bottom-self->top);int lineHeight=fn_80232B70(f->resource);float fontHeight=(float)lineHeight;float scaledLineCount=((0.5f)*(float)(lines-1))*f->scale;origin.y=(float)origin.y-scaledLineCount*fontHeight;
  }
  int line=0;text=(const char*)f->context;
  while(*text){const char* begin=text;memset(output,0,512);int size=0;
@@ -2916,7 +2918,7 @@ void fn_80224E74(WidgetFragment* self){
   }
   const char* end=text;int originalSize=size;if(*text){while(*text!=' '&&text!=begin&&*text!='\n'){--text;--size;}}if(text==begin){text=end;size=originalSize;}output[size]=0;if(*text==' '||*text=='\n')++text;
   for(int i=0;i<size;i++){if(output[i]=='^')output[i]=' ';}
-  int screenHeight=lbl_8055FBA0;float projectedX=(float)lbl_8055FB9C/(-2.0f);float x=projectedX+left;int h=fn_80232B70(f->resource);float metric=f->scale*(float)h;float y=(float)line++*metric;y=(float)originY+y;y=(((float)screenHeight/2.0f))-y;
+  int screenHeight=lbl_8055FBA0;float projectedX=(float)lbl_8055FB9C/(-2.0f);float x=projectedX+left;int h=fn_80232B70(f->resource);float metric=f->scale*(float)h;float y=(float)line++*metric;y=(float)origin.y+y;y=(((float)screenHeight/2.0f))-y;
   if(!f->localized&&y<((float)screenHeight/2.0f)-(height+(float)self->top)){fn_80232BA4(f->text,f->resource,x+width,y,f->style,10,f->scale-(0.1f),(0.0f),(1.0f));goto finish;}
   int flags=f->flags;if(flags&4)x+=(width/2.0f);
   if(flags&2)fn_80232C50(output,f->resource,f->style,9,x,y,f->scale,width,(0.0f),(1.0f));
