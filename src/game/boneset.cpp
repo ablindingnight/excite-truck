@@ -185,7 +185,6 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             Bone* b = &set->bones[i];
             BFrame local = b->rest;
             BFrame parent;
-            BMtx33 m;
             BMtx33 t;
             BMtx33 rot;
             BVec v;
@@ -207,7 +206,7 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
                 parent = world[b->parent];
             }
             QuatToMtx(&rot, &pose[i + 1]);
-            m = local.r;
+            BMtx33 m = local.r;
             Transpose(&m);
             MtxMul(t, m, rot);
             MulVec(&v, &local.t, &t);
