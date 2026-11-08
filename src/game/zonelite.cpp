@@ -220,7 +220,7 @@ void fn_802A9428(void) {
     int car = fn_801E866C(-1);
     s32 lap = fn_801EA9A0(car)->lap;
     s = &lbl_804BD790[view];
-    if (car == s->car && lap < s->lap) {
+    if (car != s->car || lap < s->lap) {
         lbl_804BD790[view].hold = 0.0f;
         s->car = car;
         lbl_804BD790[view].shown = lap;
@@ -235,9 +235,13 @@ void fn_802A9428(void) {
         s->hold -= fn_801E7E24();
     }
     shown = lbl_804BD790[view].shown;
-    RaceLaps* r = fn_801E7E3C();
+    s32 laps = fn_801E7E3C()->laps;
     if (!lbl_8055F8F1) {
-        which = shown < r->laps ? shown : 3;
+        if (shown >= laps) {
+            which = 3;
+        } else {
+            which = shown;
+        }
     } else if ((u32)(shown + 1) < 4) {
         which = shown;
     }
