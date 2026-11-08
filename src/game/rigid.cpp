@@ -285,8 +285,8 @@ void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
     inertia.x = FtToM(FtToM(LbToKg(ix)));
     inertia.y = FtToM(FtToM(LbToKg(iy)));
     inertia.z = FtToM(FtToM(LbToKg(iz)));
-    invMass = 1.0f / mass;
     invInertia.x = 1.0f / inertia.x;
+    invMass = 1.0f / mass;
     invInertia.y = 1.0f / inertia.y;
     invInertia.z = 1.0f / inertia.z;
     invI.m[0][0] = invInertia.x;
