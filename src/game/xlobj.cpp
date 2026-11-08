@@ -930,8 +930,8 @@ void fn_802BAFF8(GroundCell* cell, u16** strip) {
 
 static inline int Tris(int n) { return n < 0 ? 0 : n; }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline Item* Loop2_fn_802BB0FC(Item* it, TexEntry* te, void* verts, int nverts) {
+/* Helper name unproven: draws every item strip of one texture entry. */
+static inline Item* DrawEntryStrips(Item* it, TexEntry* te, void* verts, int nverts) {
     u16*st;
     int j;
     for (it = te->head; it; it = it->next) {
@@ -1009,7 +1009,7 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                it = Loop2_fn_802BB0FC(it, te, verts, nverts);
+                it = DrawEntryStrips(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();
@@ -1023,30 +1023,6 @@ void fn_802BB0FC(void* verts, int nverts) {
             }
         }
     }
-}
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline Item* Loop3_fn_802BB3B8(Item* it, TexEntry* te, void* verts, int nverts) {
-    u16*st;
-    int j;
-    for (it = te->head; it; it = it->next) {
-        if (!it->head) {
-            continue;
-        }
-        fn_802D3D94(0, ((Obj*)it)->mtx);
-        Chunk<u16*>* c = it->head;
-        do {
-            for (j = 0; j < c->count; j++) {
-                u16** d = c->data;
-                st = d[j];
-                fn_802DC280(verts, nverts, st, st[0] + 1);
-                lbl_8055FA6C += Tris(d[j][0] - 1);
-            }
-            c = c->next;
-        } while (c);
-        it->Clear();
-    }
-    return it;
 }
 
 void fn_802BB3B8(void* verts, int nverts) {
@@ -1104,7 +1080,7 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802CADD0(fn_802C21B8(), 2);
                 f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
                 fn_802D3D94(2, m);
-                it = Loop3_fn_802BB3B8(it, te, verts, nverts);
+                it = DrawEntryStrips(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
                 fn_802DC27C();
