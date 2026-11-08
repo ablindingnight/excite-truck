@@ -465,7 +465,7 @@ TexEntry* fn_802B8EF0(int slot, XScale* sc) {
     if (!lbl_804C0088[slot]) {
         TexEntry* e = new ("xlte") TexEntry("", sc->prio);
         lbl_804C0088[slot] = e;
-        lbl_804BFFF4.data[lbl_804BFFF4.count++] = e;
+        lbl_804BFFF4.Next() = e;
     }
     return lbl_804C0088[slot];
 }
