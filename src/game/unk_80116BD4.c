@@ -2621,14 +2621,14 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 var_r24;
     f32 *var_r4;
     f32 *var_r4_2;
-    f32 *var_r8;
+    u32 *var_r7;
     f32 temp_f31;
     f32 var_f1;
     f32 var_f29;
     f32 var_f28;
     u32 *var_r5;
     u32 *var_r5_2;
-    u32 *var_r7;
+    f32 *var_r8;
     s32 temp_r0;
     int temp_r18;
     s32 temp_r4;
@@ -2743,8 +2743,8 @@ decode:
         while (var_r3 < var_r29) {
             if (var_r3 == (u32)(*var_r7 * 2)) {
                 var_f29 = *var_r8;
-                var_r8++;
                 var_r7++;
+                var_r8++;
                 var_r28++;
                 var_f28 = -var_f29;
             }
@@ -3952,12 +3952,12 @@ void fn_8011D9E4(void* arg0, void* arg1) {
     u32 available;
     u32 mask;
     u32 count;
-    u8* lookup;
+    u8* table;
     u32 i;
     u32 code;
     u32 len;
     u8* dst;
-    u8* table;
+    u8* lookup;
     u32 symbol;
     u32 bit;
     if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
@@ -3992,8 +3992,8 @@ void fn_8011D9E4(void* arg0, void* arg1) {
         }
         if ((bit & 1) == 0) {
             dst = *((u8 **) (((u8 *) arg0) + 0x2C));
-            table = ((u8 *) arg0) + 0x10;
             lookup = *((u8 **) (((u8 *) arg0) + 0x24));
+            table = ((u8 *) arg0) + 0x10;
             available = *((u32 *) (((u8 *) arg0) + 0x20));
             mask = 0xFFFFFFFFU >> (32 - available);
             do {
