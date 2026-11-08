@@ -703,6 +703,8 @@ WaterBase* fn_802C00A4(void) {
 }
 
 WaterSystem::WaterSystem(void) {
+    const char* mskName = "watermsk.tex";
+    const char* deepName = "gen_waterd.tex";
     valid = 0;
     mask = -2;
     deep = -2;
@@ -711,12 +713,12 @@ WaterSystem::WaterSystem(void) {
     if (!fn_8012C33C("gen_water.tex")) {
         return;
     }
-    if (fn_8012C33C("watermsk.tex")) {
-        mask = fn_802CAC28("watermsk.tex", 0);
+    if (fn_8012C33C(mskName)) {
+        mask = fn_802CAC28(mskName, 0);
     }
     env = fn_802BF6AC();
-    if (fn_8012C33C("gen_waterd.tex")) {
-        deep = fn_802CAC28("gen_waterd.tex", 0);
+    if (fn_8012C33C(deepName)) {
+        deep = fn_802CAC28(deepName, 0);
     }
     u16* p = &idx[0][0][0];
     for (u32 r = 0; r < 63; r++) {
