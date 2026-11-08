@@ -166,7 +166,8 @@ void fn_8020F730(void) {
     lbl_804902C4.m_count = 0;
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            lbl_804902C4.m_entries[lbl_804902C4.m_count++] = i;
+            long *slot = &lbl_804902C4.m_entries[lbl_804902C4.m_count++];
+            *slot = i;
         }
         for (i = 0; i < lbl_804902C4.m_count; i++) {
             long index = fn_80129D18(6, lbl_804902C4.m_count);
