@@ -811,7 +811,8 @@ TTHeader* fn_802CB2FC(u16 w, u16 h, u8 fmt, u8 flags, u16 zhint, u8 wrapT) {
     return t;
 }
 
-void* fn_802CB38C(TTHeader* h, u32 data, s32 kind) {
+void* fn_802CB38C(void* res, u32 data, s32 kind) {
+    TTHeader* h = (TTHeader*)res;
     fn_802CA57C(h, "mip0", 0, kind);
     return fn_802CA4E0(h, lbl_8055D058, 0, data, kind);
 }
