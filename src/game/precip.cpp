@@ -602,6 +602,11 @@ static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel
     }
 }
 
+static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
+    o->x = a->x + b->x * s;
+    o->y = a->y + b->y * s;
+    o->z = a->z + b->z * s;
+}
 // Helper name unproven: arguments read right to left, stores go x, y, z.
 static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     f32* o = (f32*)o_;
@@ -641,9 +646,7 @@ void fn_802A53B0(DropHit* hits, int n) {
             f32 k = -2.0f * dot;
             ValVec3 vel;
             SetV3(&vel, dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
-            vel.x = o->vel.x + vel.x * 3.0f;
-            vel.y = o->vel.y + vel.y * 3.0f;
-            vel.z = o->vel.z + vel.z * 3.0f;
+            MadV(&vel, &hits->obj->vel, &vel, 3.0f);
             Loop1_fn_802A53B0(fn_80287B5C(cnt) + 1, d, o, vel);
         }
     }
@@ -944,11 +947,7 @@ void RainSystem::Reset(void) {
 }
 
 // Helper name unproven.
-static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
-    o->x = a->x + b->x * s;
-    o->y = a->y + b->y * s;
-    o->z = a->z + b->z * s;
-}
+
 void RainSystem::Update(void) {
     const WFrame* cam = fn_801E8718(view);
     Frustum();
