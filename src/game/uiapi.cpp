@@ -89,7 +89,7 @@ char lbl_8033CAE8[100] = "__OOPS_NO_LAST_LAYOUT__";
 extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*));
 extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo);
 extern "C" s32 fn_80206430(void);
-extern "C" s32 fn_8022BAD0(s32, s32, s32, s32, float);
+extern "C" void fn_8022BAD0(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const char* text, s32 color, f32 scale, s32 extra);
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
@@ -2036,7 +2036,7 @@ extern "C" void fn_80215500(void) {
 }
 
 extern "C" void fn_80215504(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), 0, *(s32 *)((char *)arg0 + 4), arg6, 1.0f);
+    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), arg1, arg2, 0, arg4, arg5, *(const char **)((char *)arg0 + 4), arg6, 1.0f, 0);
 }
 
 extern "C" void fn_80215544(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
