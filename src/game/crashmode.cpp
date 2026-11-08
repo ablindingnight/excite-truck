@@ -594,10 +594,11 @@ void CrashMode::vf14(void) {
                 s->scored = 1;
             }
         }
+        f32 speed = rc->f25D4;
         f32 now = lbl_8055E3C8;
         f32 since = now - rc->crashTime;
         f32 window = 1.5f;
-        if (rc->f25D4 > 3.5555556f || PSVECDotProduct(&rc->angvel, &rc->angvel) > 0.2f * 0.2f) {
+        if (speed > 3.5555556f || PSVECDotProduct(&rc->angvel, &rc->angvel) > 0.2f * 0.2f) {
             window *= 1.5f;
         }
         done = 0;
