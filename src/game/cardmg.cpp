@@ -1424,6 +1424,10 @@ void fn_8018F76C(u8* p, int i) {
     hub.z += zv * 0.3f;
     WVec3 vel;
     ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&hub);
+    f32 s = F32(w, 0x23AC);
+    if ((f32)__fabs(s) < lbl_80561F9C) {
+        s = s < lbl_80561F74 ? lbl_80561FA0 : lbl_80561F9C;
+    }
     f32 spin = F32(w, 0x23AC);
     WVec3 imp;
     imp.x = m.basis[0].x * spin + F32(p, 0x124);
