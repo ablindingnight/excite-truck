@@ -83,7 +83,7 @@ f32 fn_80138DF4(Motion* m) {
             f32 t;
             f32 miss;
             if (fn_80138C28(m, &t, &miss)) {
-                f32 n = m->v2 + t * m->a2 - m->v1;
+                f32 n = m->v2 + m->a2 * t - m->v1;
                 r = n / MaxF(t, 0.01f);
                 lbl_8055E100 = -5;
             } else {
