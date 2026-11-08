@@ -463,7 +463,8 @@ GroundCell* fn_802B8EB8(s16 x, s16 y, int size, int corner) {
 
 TexEntry* fn_802B8EF0(int slot, XScale* sc) {
     if (!lbl_804C0088[slot]) {
-        TexEntry* e = new ("xlte") TexEntry("", sc->prio);
+        const char* name = "";
+        TexEntry* e = new ("xlte") TexEntry(name, sc->prio);
         lbl_804C0088[slot] = e;
         lbl_804BFFF4.Next() = e;
     }
