@@ -649,7 +649,15 @@ void* fn_802E0C04(u32 size) { return lbl_8055FEE8->Alloc(size); }
 void fn_802E0D44(void* p) {
     SimpleHeap* h = lbl_8055FEE8;
     HeapBlock* b = (HeapBlock*)((u8*)p - (h->align + 1));
-    for (HeapBlock** l = &h->used; *l; l = &(*l)->next) {
+    HeapBlock** l;
+    HeapBlock* a;
+    HeapBlock** m;
+    int merged;
+    HeapBlock* c;
+    int adj;
+    u32 al;
+    HeapBlock** dst;
+    for (l = &h->used; *l; l = &(*l)->next) {
         if (*l == b) {
             *l = b->next;
             break;
@@ -657,21 +665,24 @@ void fn_802E0D44(void* p) {
     }
     b->next = h->free;
     h->free = b;
-    int merged;
+    l = &h->free;
     do {
         merged = 0;
-        for (HeapBlock** l = &h->free; *l; l = &(*l)->next) {
-            HeapBlock* a = *l;
-            for (HeapBlock** m = &h->free; *m; m = &(*m)->next) {
-                HeapBlock* c = *m;
-                if ((u8*)a + h->align + a->size + 1 == (u8*)c) {
-                    a->size += c->size + ((h->align + 0x10) & ~h->align);
-                    *m = c->next;
-                    merged = 1;
-                    break;
+        for (m = &h->free; *m; m = &(*m)->next) {
+            a = *l;
+            al = h->align;
+            c = *m;
+            adj = (u8*)a + al + a->size + 1 == (u8*)c || (u8*)c + al + c->size + 1 == (u8*)a;
+            if (adj) {
+                dst = l;
+                if ((u8*)c + al + c->size + 1 == (u8*)a) {
+                    dst = m;
+                    m = l;
                 }
-            }
-            if (merged) {
+                (*dst)->size = (*dst)->size + (*m)->size + ((al + 0x10) & ~al);
+                *m = (*m)->next;
+                l = dst;
+                merged = 1;
                 break;
             }
         }
