@@ -181,44 +181,44 @@ s32 fn_801E5E24(BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame skin[32];
     int i;
     if (n > 0) {
-    for (i = 0; i < n; i++) {
-        Bone* b = &set->bones[i];
-        BFrame local = b->rest;
-        BFrame parent;
-        BMtx33 m;
-        BMtx33 t;
-        BMtx33 rot;
-        BVec v;
-        BFrame a;
-        if (b->parent < 1) {
-            parent.r.xx = 1.0f;
-            parent.r.xy = 0.0f;
-            parent.r.xz = 0.0f;
-            parent.r.yx = 0.0f;
-            parent.r.yy = 1.0f;
-            parent.r.yz = 0.0f;
-            parent.r.zx = 0.0f;
-            parent.r.zy = 0.0f;
-            parent.r.zz = 1.0f;
-            parent.t.x = 0.0f;
-            parent.t.y = 0.0f;
-            parent.t.z = 0.0f;
-        } else {
-            parent = world[b->parent];
+        for (i = 0; i < n; i++) {
+            Bone* b = &set->bones[i];
+            BFrame local = b->rest;
+            BFrame parent;
+            BMtx33 m;
+            BMtx33 t;
+            BMtx33 rot;
+            BVec v;
+            BFrame a;
+            if (b->parent < 1) {
+                parent.r.xx = 1.0f;
+                parent.r.xy = 0.0f;
+                parent.r.xz = 0.0f;
+                parent.r.yx = 0.0f;
+                parent.r.yy = 1.0f;
+                parent.r.yz = 0.0f;
+                parent.r.zx = 0.0f;
+                parent.r.zy = 0.0f;
+                parent.r.zz = 1.0f;
+                parent.t.x = 0.0f;
+                parent.t.y = 0.0f;
+                parent.t.z = 0.0f;
+            } else {
+                parent = world[b->parent];
+            }
+            QuatToMtx(&rot, &pose[i + 1]);
+            m = local.r;
+            Transpose(&m);
+            MtxMul(t, m, rot);
+            MulVec(&v, &local.t, &t);
+            v.x *= -1.0f;
+            v.y *= -1.0f;
+            v.z *= -1.0f;
+            fn_801BFD34(&a.t, &v, &local);
+            Mat3Mul((Mat3*)&a, (const Mat3*)&t, (const Mat3*)&local);
+            fn_801BFD34(&world[i].t, &a.t, &parent);
+            Mat3Mul((Mat3*)&world[i], (const Mat3*)&a, (const Mat3*)&parent);
         }
-        QuatToMtx(&rot, &pose[i + 1]);
-        m = local.r;
-        Transpose(&m);
-        MtxMul(t, m, rot);
-        MulVec(&v, &local.t, &t);
-        v.x *= -1.0f;
-        v.y *= -1.0f;
-        v.z *= -1.0f;
-        fn_801BFD34(&a.t, &v, &local);
-        Mat3Mul((Mat3*)&a, (const Mat3*)&t, (const Mat3*)&local);
-        fn_801BFD34(&world[i].t, &a.t, &parent);
-        Mat3Mul((Mat3*)&world[i], (const Mat3*)&a, (const Mat3*)&parent);
-    }
     }
     world[0].t.x = pose[0].x;
     world[0].t.y = pose[0].y;
