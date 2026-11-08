@@ -2211,7 +2211,7 @@ int fn_8021F478(int* result){fn_801A7844(1);KeyDetect* file=&lbl_80490934;if(fn_
 struct CaptionContext {int value;inline CaptionContext(int v=0):value(v){}};
 struct WidgetMenuEntry {
  const char* name;int type;const void* data;int arg0,arg1;
- inline WidgetMenuEntry(const char* n,const char* t,CaptionContext context=CaptionContext()){type=3;name=n;data=t;arg0=context.value;arg1=0;}
+ inline WidgetMenuEntry(const char* n,const char* t,int context=0){data=t;arg0=context;name=n;type=3;arg1=0;}
  inline WidgetMenuEntry(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
  inline WidgetMenuEntry(const StartupSharedPrefixNew& end){name=(const char*)end.first;type=end.kind;data=(const void*)end.third;arg0=end.fourth;arg1=end.fifth;}
 };
@@ -2220,6 +2220,7 @@ struct WidgetMenuDesc {const char* layout;WidgetMenuEntry* items;int(*poll)(int*
 typedef char WidgetMenuEntrySize20[sizeof(WidgetMenuEntry)==20?1:-1];typedef char WidgetMenuDescSize20[sizeof(WidgetMenuDesc)==20?1:-1];typedef char CaptionContextSize4[sizeof(CaptionContext)==4?1:-1];typedef char WidgetKeyboardFieldsSize274[sizeof(WidgetKeyboardFields)==0x274?1:-1];
 extern "C" {extern WidgetMenuDesc lbl_802F9EE0;extern const char lbl_8033D9A4[],lbl_8055B890[6],lbl_8055B898[8],lbl_8055B8A0[3],lbl_8055B860[8];void fn_801A7A5C();int fn_802146BC(WidgetMenuDesc*,int,int,int);}
 extern "C" {extern const char lbl_8033D998[];int fn_8021F478(int*);}
+static char sKeyDetectTitle[] = "title";
 void fn_8021F4F0(WidgetFragment *self)
 {
   WidgetKeyboardFields *f = (WidgetKeyboardFields *) self;
@@ -2229,8 +2230,8 @@ void fn_8021F4F0(WidgetFragment *self)
   KeyDetect *file = &lbl_80490934;
   file->binding = f->binding;
   WidgetMenuEntry items[] = {
-    WidgetMenuEntry("title",lbl_8033D9A4,CaptionContext(128)),
-    WidgetMenuEntry("message",f->value,CaptionContext(128)),
+    WidgetMenuEntry(sKeyDetectTitle,lbl_8033D9A4,128),
+    WidgetMenuEntry("message",3,f->value,128,0),
     WidgetMenuEntry("no", 0, 0, -1, 0),
     WidgetMenuEntry(lbl_8055B860, 6, 0, -1, 27),
     WidgetMenuEntry(lbl_80490920)
