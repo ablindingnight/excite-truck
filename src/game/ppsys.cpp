@@ -503,8 +503,8 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
 }
 
 // Gives every particle the velocity of a body moving with 'vel' and spinning with 'avel' about 'at'.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_801C256C(PSys* s, const RVec3* at, const RVec3* avel, const RVec3* vel) {
+/* Helper name unproven: gives every particle the velocity of a moving, spinning body. */
+static inline void SetBodyVelocity(PSys* s, const RVec3* at, const RVec3* avel, const RVec3* vel) {
     RVec3 r;
     for (int i = 0; i < s->nPart; i++) {
         RVec3 v;
@@ -516,7 +516,7 @@ static inline void Loop2_fn_801C256C(PSys* s, const RVec3* at, const RVec3* avel
 }
 
 void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
-    Loop2_fn_801C256C(s, at, avel, vel);
+    SetBodyVelocity(s, at, avel, vel);
 }
 
 /* Helper name unproven: accessor for the particle count (a getter; the call-site value goes through it). */

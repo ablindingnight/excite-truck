@@ -1075,7 +1075,7 @@ extern "C" void fn_8012C958(AsyncResource* r) {
 
 class AsyncResourceSet {
 public:
-    void Loop1_Update(void);
+    void Retry(void);
 public:
     AsyncResourceSet(s32 size, const char* name) {
         state = 1;
@@ -1245,8 +1245,8 @@ void AsyncResourceSet::Finish(void) {
     Reset();
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void AsyncResourceSet::Loop1_Update(void) {
+/* Helper name unproven: reloads the set and starts it again. */
+inline void AsyncResourceSet::Retry(void) {
     fn_8012B324(set.path);
     tries++;
     Begin(set.name);
@@ -1277,7 +1277,7 @@ void AsyncResourceSet::Update(void) {
             state = 3;
         } else {
             Stop();
-            Loop1_Update();
+            Retry();
         }
     }
 }

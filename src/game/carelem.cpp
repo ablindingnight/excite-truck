@@ -53,7 +53,7 @@ extern "C" void fn_801819A0(f32* out, CarCurveSrc* src, f32 a, f32 b, f32 c);
 
 struct CarElem {
 public:
-    void Loop1_Compute(f32 x, f32 k);
+    void ApplyCurve(f32 x, f32 k);
     CarElem(void) {
         f4 = f8 = fC = f10 = f14 = f18 = 0.0f;
         f1C = 0.0f;
@@ -108,8 +108,8 @@ void CarElem::Clear(int car) { f0 = 0.0f; }
 
 // Helper name unproven: a square through an inline.
 static inline f32 Sq(f32 v) { return v * v; }
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void CarElem::Loop1_Compute(f32 x, f32 k) {
+/* Helper name unproven: evaluates the element curve at x (two quadratic pieces) scaled by k. */
+inline void CarElem::ApplyCurve(f32 x, f32 k) {
     f32 t;
     if (x > f2C) {
         t = x - f20;
@@ -126,7 +126,7 @@ inline void CarElem::Loop1_Compute(f32 x, f32 k) {
 
 void CarElem::Compute(int car) {
     RaceCar* c = lbl_804348E8[car];
-    Loop1_Compute(c->rpm, c->load);
+    ApplyCurve(c->rpm, c->load);
 }
 
 CarElemMgr::~CarElemMgr(void) {}

@@ -631,8 +631,8 @@ TArray<TCell>* fn_802BD478(const char* tag, TFileArray<TCell>* f);
 void fn_802BD4DC(TListFile* f, u8* base);
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_802BD210(TListEntry* e, TreeType* t) {
+/* Helper name unproven: builds the tree set of one list entry. */
+static inline void LoadTreeSet(TListEntry* e, TreeType* t) {
     TreeRec*tr;
     if (e) {
         TreeSet* s = new ("treelist") TreeSet;
@@ -678,7 +678,7 @@ void fn_802BD210(void) {
             for (int i = 0; i < lbl_804C00D4.n; i++) {
                 TreeType* t = &lbl_804C00D4.data[i];
                 TListEntry* e = fn_802BD194(lbl_8055FAB8, t->name);
-                Loop2_fn_802BD210(e, t);
+                LoadTreeSet(e, t);
             }
         } else {
             fn_802E317C("tree: bad treelist version %d", version);

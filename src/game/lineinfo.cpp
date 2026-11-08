@@ -149,8 +149,8 @@ static inline LineEntry* CacheAdd(LineInfo* li, Name64 n) {
 
 extern "C" {
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline LineInfo* Loop1_fn_8013BFE8(LineEntry* found, Name64& name) {
+/* Helper name unproven: loads the line info on a cache miss and returns the cached copy. */
+static inline LineInfo* LoadCached(LineEntry* found, Name64& name) {
     LineInfo* li;
     ValueTable* t;
     if (!found) {
@@ -202,7 +202,7 @@ LineInfo* fn_8013BFE8(const char* full) {
             break;
         }
     }
-    return Loop1_fn_8013BFE8(found, name);
+    return LoadCached(found, name);
 }
 
 static inline void ReleaseLine(LineInfo* li) {

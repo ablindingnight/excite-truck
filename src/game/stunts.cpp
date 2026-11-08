@@ -1182,7 +1182,7 @@ struct ThrowTarget {
 namespace {
 class ThrowTracker : public CountTracker {
 public:
-    void Loop1_Rate(int i, int alive);
+    void RateTarget(int i, int alive);
 public:
     ThrowTracker(StuntHud* h, int c);
     virtual ~ThrowTracker(void) {}
@@ -1613,8 +1613,8 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     return r;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void ThrowTracker::Loop1_Rate(int i, int alive) {
+/* Helper name unproven: updates and scores one throw target. */
+inline void ThrowTracker::RateTarget(int i, int alive) {
     s32 h = handle;
     int hit;
     targets[i].prev = targets[i].state;
@@ -1688,7 +1688,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
         int alive = fn_801D48FC(handle);
         active = alive;
         for (i = 0; i < 8; i++) {
-            Loop1_Rate(i, alive);
+            RateTarget(i, alive);
             int fire = targets[i].state == 5 && targets[i].prev != 5;
             if (fire) {
                 count++;

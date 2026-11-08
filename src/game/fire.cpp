@@ -387,9 +387,9 @@ struct BoostEntry {
 
 class BoostFireMan {
 public:
-    BoostEntry* Expr1_Update(int i);
+    BoostEntry* Entry(int i);
 public:
-    void Loop1_Update(Vec& off, const Vec* vel, f32 f);
+    void ScaleVelXZ(Vec& off, const Vec* vel, f32 f);
 public:
     BoostFireMan(void);
     ~BoostFireMan(void);
@@ -1316,15 +1316,15 @@ void BoostFireMan::Reset(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void BoostFireMan::Loop1_Update(Vec& off, const Vec* vel, f32 f) {
+/* Helper name unproven: off.x/off.z = vel * f. */
+inline void BoostFireMan::ScaleVelXZ(Vec& off, const Vec* vel, f32 f) {
     off.z = vel->z * f;
     f32 velX = vel->x;
     off.x = velX * f;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline BoostEntry* BoostFireMan::Expr1_Update(int i) {
+/* Helper name unproven: the i-th boost entry. */
+inline BoostEntry* BoostFireMan::Entry(int i) {
     return &entries[i];
 }
 
@@ -1340,7 +1340,7 @@ static inline void AddR(Vec* o, const Vec& a, const Vec& b) {
     o->z = a.z + b.z;
 }
 void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
-    BoostEntry* e = Expr1_Update(i);
+    BoostEntry* e = Entry(i);
     if (!((f32)__fabs(car->boost) <= lbl_80558DC4[0])) {
         e->active = 0;
         e->t = 0.0f;
@@ -1356,7 +1356,7 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
             for (int k = 0; k < n; k++) {
                 f32 f = -k * step;
                 Vec off;
-                Loop1_Update(off, vel, f);
+                ScaleVelXZ(off, vel, f);
                 off.y = vel->y * f + -0.5f * (f * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;

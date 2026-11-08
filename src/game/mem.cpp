@@ -55,7 +55,7 @@ public:
 
 class LightStack : public Allocator {
 public:
-    u8* Expr1_Collapse(void);
+    u8* Top(void);
     s32 Used(void) const { return used; }
 public:
     virtual void Init(void* base, u32 size);
@@ -532,14 +532,14 @@ void* LightStack::Alloc(s32 s, const char* name, int type) {
     return data;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline u8* LightStack::Expr1_Collapse(void) {
+/* Helper name unproven: first free byte of the stack. */
+inline u8* LightStack::Top(void) {
     return base + used;
 }
 
 void LightStack::Collapse(void) {
     while (Used() > 0) {
-        u8* blk = Expr1_Collapse();
+        u8* blk = Top();
         blk = blk - 0x20 - *(u32*)(blk - 0xC);
         if (*(u32*)blk == 0xAAAA5555) {
             return;

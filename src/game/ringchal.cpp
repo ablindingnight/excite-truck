@@ -1355,8 +1355,8 @@ void Arena::Spawn(void) {
 
 
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8016D294(ObjSet* os) {
+/* Helper name unproven: shows every object of a set. */
+static inline void ShowSetObjs(ObjSet* os) {
     int i;
     for (i = 0; i < os->infos->count; i++) {
         if (os->infos->data[i].obj) {
@@ -1365,8 +1365,8 @@ static inline void Loop1_fn_8016D294(ObjSet* os) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline ObjSet* Expr1_fn_8016D294(Arena* ar) {
+/* Helper name unproven: the arena set in use. */
+static inline ObjSet* CurrentSet(Arena* ar) {
     return &ar->sets->data[ar->curSet];
 }
 
@@ -1411,12 +1411,12 @@ extern "C" void fn_8016D294(int a, int b, int set) {
     Arena* ar = &m->arena;
     ar->curSet = set;
     if (ar->curSet < ar->nFiles) {
-        ObjSet* os = Expr1_fn_8016D294(ar);
+        ObjSet* os = CurrentSet(ar);
         int i;
         os->active = 1;
         os->time = lbl_8055E3C8;
         os->f10 = 0;
-        Loop1_fn_8016D294(os);
+        ShowSetObjs(os);
     }
     {
         char name[0x1E];

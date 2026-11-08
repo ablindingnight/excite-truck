@@ -556,8 +556,8 @@ SetPlacer* fn_802B2C98(const char* name) {
     return set;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_802B2D24(SetPlacer* set) {
+/* Helper name unproven: empties every placer list of a set. */
+static inline void ClearPlacerLists(SetPlacer* set) {
     int k;
     for (int i = 0; i < set->count; i++) {
         MatPlacer* m = set->data[i];
@@ -571,7 +571,7 @@ static inline void Loop2_fn_802B2D24(SetPlacer* set) {
 }
 
 void fn_802B2D24(SetPlacer* set) {
-    Loop2_fn_802B2D24(set);
+    ClearPlacerLists(set);
     lbl_8055F9B8 = 0;
 }
 

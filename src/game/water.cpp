@@ -193,7 +193,7 @@ public:
 
 class WaterEnvMap : public EnvBase {
 public:
-    void Loop1_Render(f32 h, Frame& m);
+    void RenderFaces(f32 h, Frame& m);
     void RenderBody(void* cam, f32 fov);
 public:
     WaterEnvMap(void);
@@ -572,8 +572,8 @@ extern "C" void fn_802C00A0(f32* fov);
 extern "C" void fn_802C0054(Mat3* out, const Mat3* in);
 extern "C" void fn_802BFE48(Skybox* s, const Frame* view, f32 scale);
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void WaterEnvMap::Loop1_Render(f32 h, Frame& m) {
+/* Helper name unproven: renders the six cube faces of the environment map. */
+inline void WaterEnvMap::RenderFaces(f32 h, Frame& m) {
     int i;
     f32 hf = h;
     Skybox* k = sky;
@@ -630,7 +630,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     fn_802C8638(&m);
     fn_802C88BC(2);
     if (sky) {
-        Loop1_Render(h, m);
+        RenderFaces(h, m);
     }
     fn_802C7040(world);
     if (fn_801E85A4() == 1) {

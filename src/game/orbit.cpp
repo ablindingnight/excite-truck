@@ -333,8 +333,8 @@ f32 fn_801659D0(const void* race) {
     return len * fn_800081F0(race);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80165A30(ValueNode* table) {
+/* Helper name unproven: reads the role entries of the orbit table. */
+static inline void ReadRoles(ValueNode* table) {
     int i;
     ValueNode* n;
     for (i = 0; (n = table->GetChildAt(i)) != 0; i++) {
@@ -355,7 +355,7 @@ void fn_80165A30(ValueNode* table) {
     int i;
     ValueNode* n;
     lbl_8042FEB0.count = 0;
-    Loop1_fn_80165A30(table);
+    ReadRoles(table);
 }
 
 void fn_80165B78(ValueNode* table) {
@@ -529,8 +529,8 @@ void fn_80166814(void) {
     lbl_8055E32C = 0;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline Role* Expr1_fn_80166898(int i) {
+/* Helper name unproven: the i-th role. */
+static inline Role* RoleAt(int i) {
     return &lbl_8042FEB0.data[i];
 }
 
@@ -543,7 +543,7 @@ void fn_80166898(void) {
         lbl_8055E32C->At(j)->Reset();
     }
     for (int k = 0; k < lbl_8042FEB0.count; k++) {
-        Role* r = Expr1_fn_80166898(k);
+        Role* r = RoleAt(k);
         r->owner = -1;
         r->start = lbl_8055E318 - fn_80129DC4(3, 0.0f, 2.0f * r->half);
     }

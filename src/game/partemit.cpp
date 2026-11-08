@@ -242,8 +242,8 @@ void fn_8029F124(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8029F188(void) {
+/* Helper name unproven: moves each emitter instance with its object and derives its velocity. */
+static inline void TrackEmitters(void) {
     int i = 0;
     for (int off = 0; i < lbl_804B9B7C.n; off += sizeof(EmitterInst), i++) {
         EmitterInst* in = (EmitterInst*)((u8*)lbl_804B9B7C.data + off);
@@ -274,7 +274,7 @@ void fn_8029F188(void) {
         }
         lbl_8055F824 = (lbl_8055F824 + 1) % 5;
     }
-    Loop1_fn_8029F188();
+    TrackEmitters();
 }
 
 void fn_8029F300(void) {

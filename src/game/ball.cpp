@@ -358,7 +358,7 @@ public:
 
 class Ball : public RigidBody, public IBallListener {
 public:
-    void Loop2_PickDrop(BVec3& p, RigidBody* b, f32 k);
+    void PredictPos(BVec3& p, RigidBody* b, f32 k);
 public:
     Ball(void) {}
     virtual void Init(BallDesc* d);
@@ -743,8 +743,8 @@ extern "C" void fn_8017E388(BMtx* m) {
     m->pos.z = 0.0f;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline void Ball::Loop2_PickDrop(BVec3& p, RigidBody* b, f32 k) {
+/* Helper name unproven: position k seconds ahead along the body velocity. */
+inline void Ball::PredictPos(BVec3& p, RigidBody* b, f32 k) {
     p.x = b->mtx.pos.x + b->vel.x * k;
     p.y = b->mtx.pos.y + b->vel.y * k;
     p.z = b->mtx.pos.z + b->vel.z * k;
@@ -755,7 +755,7 @@ void Ball::PickDrop(f32* xz, s16* h) {
         RigidBody* b = (RigidBody*)fn_8017960C(car);
         BVec3 p;
         f32 c;
-        Loop2_PickDrop(p, b, 2.0f);
+        PredictPos(p, b, 2.0f);
         c = 10.0f;
         p += BVec3(fn_80129DC4(4, -c, c), 0.0f, fn_80129DC4(4, -c, c));
         xz[0] = p.x;

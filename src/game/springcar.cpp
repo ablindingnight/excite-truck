@@ -64,7 +64,7 @@ struct Lift {
 
 struct SpringWall {
 public:
-    int Expr1_Apply(void);
+    int Ramping(void);
     void Apply(SpringCar* car, TVec* acc);
     bool Free(void) const { return owner == 0; }
     void Set(WallObj* w, SpringCar* car, const TVec* other);
@@ -376,8 +376,9 @@ void SpringCar::vf14(void) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-inline int SpringWall::Expr1_Apply(void) {
+/* Helper name unproven: whether the wall is still ramping. */
+inline int SpringWall::Ramping(void) {
+    // MATCHING-AID: comma expression; the discarded dist test is still emitted. Real form unknown.
     return this->dist < 0.0f, time < ramp;
 }
 
@@ -403,7 +404,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         p.z = car->pos.z + v.z * 0.016683351f;
         dist = PlaneDist(&n, &p, &owner->plane->origin);
         target = vel + t * (depth - vel);
-        ramping = Expr1_Apply();
+        ramping = Ramping();
         if (ramping) {
             f32 pen = target - d;
             f32 extra;

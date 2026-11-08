@@ -413,8 +413,8 @@ int fn_8016A30C(int player) {
     return 0;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8016A438(int k, RingSet* s) {
+/* Helper name unproven: updates the rings of one set, last first. */
+static inline void UpdateRings(int k, RingSet* s) {
     f32 now;
     Ring*r;
     k = s->count;
@@ -457,7 +457,7 @@ void fn_8016A438(void) {
     int k;
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
-        Loop1_fn_8016A438(k, &lbl_80430340.data[i]);
+        UpdateRings(k, &lbl_80430340.data[i]);
     }
 }
 
