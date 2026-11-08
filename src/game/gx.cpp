@@ -1877,9 +1877,9 @@ void fn_802D2218(void) {
         f32 p[3];
         p[0] = hw * (i & 1 ? -1 : 1);
         p[1] = hh * (i & 2 ? -1 : 1);
-        p[2] = 1.99999f;
         WGPIPE.f = p[0];
         WGPIPE.f = p[1];
+        p[2] = 1.99999f;
         WGPIPE.f = p[2];
     }
     GXSetNumTexGens(1);
