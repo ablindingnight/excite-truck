@@ -111,8 +111,9 @@ f32 fn_80138F38(Motion* m) {
         f32 stop = -m->v2 / a2v;
         if (stop <= t) {
             f32 r;
+            f32 p = m->p2 + stop * m->v2 + 0.5f * m->a2 * (stop * stop);
             Motion l = *m;
-            l.p2 = m->p2 + stop * m->v2 + 0.5f * m->a2 * (stop * stop);
+            l.p2 = p;
             l.a2 = 0.0f;
             l.v2 = 0.0f;
             r = fn_80138DF4(&l);
