@@ -622,7 +622,8 @@ extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, 
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_8021F678(WidgetFragment*, int, int, int, int, void*, float, int, float);
 extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
-extern "C" WidgetFragment* fn_8021BD98(WidgetFragment*, int, float, int, void*, const char*, float, int);
+// Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
+extern "C" WidgetFragment* fn_8021BD98(WidgetFragment* self, int x, int y, void* value, float scale, const char* format, float bias, int height);
 extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, float, const char*, float, int);
 extern "C" WidgetFragment* fn_8021BEC0(WidgetFragment*, int, int, void*, int, int, int, int);
 extern "C" WidgetFragment* fn_8021CA0C(WidgetFragment*, int, int, int, int, void*);
@@ -1027,7 +1028,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 6: {
         value = FindStyle(styles, d->style, 9);
         p = (WidgetFragment*)operator new(0x2b4, "Numeric");
-        if (p) p = fn_8021BD98(p, d->x, 100.0f, d->y, value ? value->value : &lbl_8055EF50, d->name, 0.0f, d->flags);
+        if (p) p = fn_8021BD98(p, d->x, d->y, value ? value->value : &lbl_8055EF50, 100.0f, d->name, 0.0f, d->flags);
         widgets[count++] = p;
         break;
     }
