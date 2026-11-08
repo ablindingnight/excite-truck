@@ -52,6 +52,7 @@ void fn_80204050(void) {}
 
 // Finds the terrain under screen point (sx, sy); returns 0 when there is none.
 int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam, int sx, int sy) {
+    f32 ay;
     ValVec3 dir;
     ValVec3 hit;
     ValVec3 normal;
@@ -60,9 +61,9 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam,
     s16 localHint[2];
     int halfW = lbl_8055CFF0 / 2;
     f32 depth = halfW / lbl_8055FC88;
+    f32 ax;
     f32 az = cam->basis[2].z * depth;
-    f32 ay;
-    f32 ax = cam->basis[2].x * depth;
+    ax = cam->basis[2].x * depth;
     ay = cam->basis[2].y * depth;
     f32 dx = sx - halfW;
     f32 bx = cam->basis[0].x * dx;
