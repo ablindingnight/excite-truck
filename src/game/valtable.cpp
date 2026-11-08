@@ -37,9 +37,7 @@ class ValueFile;
 
 class ValueNodeImpl : public ValueNode {
 public:
-    ValuePair* Loop2_GetValue(ValuePair* p, const char* key);
-public:
-    int Loop1_Has(ValuePair* p, const char* key);
+    ValuePair* OrInherited(ValuePair* p, const char* key);
 public:
     ValueNodeImpl(void) { parent = 0; }
     virtual const char* GetName(void) {
@@ -191,30 +189,22 @@ public:
     ValueFile* file;           // offset 0x18
 };
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline int ValueNodeImpl::Loop1_Has(ValuePair* p, const char* key) {
-    if (!p && parent) {
-        p = parent->FindPairInherited(key);
-    }
-    return p != 0;
-}
-
-int ValueNodeImpl::Has(const char* key) {
-    ValuePair* p = FindPair(key);
-    return Loop1_Has(p, key);
-}
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline ValuePair* ValueNodeImpl::Loop2_GetValue(ValuePair* p, const char* key) {
+/* Helper name unproven: falls back to the parent tables when this one has no entry. */
+inline ValuePair* ValueNodeImpl::OrInherited(ValuePair* p, const char* key) {
     if (!p && parent) {
         p = parent->FindPairInherited(key);
     }
     return p;
 }
 
+int ValueNodeImpl::Has(const char* key) {
+    ValuePair* p = FindPair(key);
+    return OrInherited(p, key) != 0;
+}
+
 inline const char* ValueNodeImpl::GetValue(const char* key) {
     ValuePair* p = FindPair(key);
-    p = Loop2_GetValue(p, key);
+    p = OrInherited(p, key);
     if (!p) {
         fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
     }
