@@ -85,12 +85,15 @@ struct IconTable {
 // One car icon on the pick screen: a menu state (menu items "car_icon_N" point at it) that draws the chosen car's
 // icon in a frame. Its vtable is lbl_80345A30 (__vt__13CarIconWidget), followed in .data by the zero-filled space
 // of this unit's weak IMenuState copy.
+struct StatChoice;
+class Statistic;
 class CarIconWidget : public MenuState {
 public:
     CarIconWidget(void);
     virtual ~CarIconWidget(void);
     virtual void Draw(void);
     void SetTable(IconTable* t);
+    void SetChoice(StatChoice c);
 
     IconTable* set;  // offset 0x18
     s32 index;       // offset 0x1C
@@ -379,6 +382,15 @@ void fn_8025E034(void) {
 
 CarIconWidget::~CarIconWidget(void) { fn_80235380(art); }
 
+// Shows the car and colour a record was set with (an inline member: its `this` ranks above the loop walkers).
+inline void CarIconWidget::SetChoice(StatChoice c) {
+    color = c.color;
+    valid = c.valid;
+    VehicleInfo* v = GetVehicle(c.vehicle);
+    index = FindIcon(set, v->chassis);
+    tint = v->colors[color];
+}
+
 extern "C" {
 
 // Refills the records screen for the current car: the car name header and, per cup, the best time over
@@ -398,13 +410,12 @@ inline void fn_8025F46C(CarPickScreen* s) {
             unlocked = 1;
         }
     }
-    int k;
-    for (k = 0; k < 6; k++) {
+    for (int k = 0; k < 6; k++) {
         s->icons[k]->visible = 0;
     }
     if (unlocked) {
         CarChoice* car = s->all->Get(s->cur);
-        for (k = 0; k < Min(car->CupCount(), 6); k++) {
+        for (int k = 0; k < Min(car->CupCount(), 6); k++) {
             CupChoice* cup = car->Cup(k);
             CopyName(s->rows[k].name, 0x20, cup->Name());
             CopyName(s->rows[k].course, 0x20, cup->Course());
@@ -440,13 +451,7 @@ inline void fn_8025F46C(CarPickScreen* s) {
                 } else if (s->rows[k].best == 2) {
                     best = &s2;
                 }
-                StatChoice c = best->GetChoice();
-                CarIconWidget* icon = s->icons[k];
-                icon->color = c.color;
-                icon->valid = c.valid;
-                VehicleInfo* v = GetVehicle(c.vehicle);
-                icon->index = FindIcon(icon->set, v->chassis);
-                icon->tint = v->colors[icon->color];
+                s->icons[k]->SetChoice(best->GetChoice());
             }
         }
     }
