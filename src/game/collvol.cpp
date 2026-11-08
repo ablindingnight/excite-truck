@@ -311,18 +311,20 @@ void CollVolume::vf1C(void) { Update(); }
 
 void CollVolume::vf20(void) {}
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void MulVec(const CMtx* m, const CVec3* in, CVec3* out) {
     if (out == in) {
-        f32 x = in->z * m->rot[2].x + (in->x * m->rot[0].x + in->y * m->rot[1].x);
-        f32 y = in->z * m->rot[2].y + (in->x * m->rot[0].y + in->y * m->rot[1].y);
-        f32 z = in->z * m->rot[2].z + (in->x * m->rot[0].z + in->y * m->rot[1].z);
+        f32 x = Dot3(in->x, m->rot[0].x, in->y, m->rot[1].x, in->z, m->rot[2].x);
+        f32 y = Dot3(in->x, m->rot[0].y, in->y, m->rot[1].y, in->z, m->rot[2].y);
+        f32 z = Dot3(in->x, m->rot[0].z, in->y, m->rot[1].z, in->z, m->rot[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->z * m->rot[2].x + (in->x * m->rot[0].x + in->y * m->rot[1].x);
-        out->y = in->z * m->rot[2].y + (in->x * m->rot[0].y + in->y * m->rot[1].y);
-        out->z = in->z * m->rot[2].z + (in->x * m->rot[0].z + in->y * m->rot[1].z);
+        out->x = Dot3(in->x, m->rot[0].x, in->y, m->rot[1].x, in->z, m->rot[2].x);
+        out->y = Dot3(in->x, m->rot[0].y, in->y, m->rot[1].y, in->z, m->rot[2].y);
+        out->z = Dot3(in->x, m->rot[0].z, in->y, m->rot[1].z, in->z, m->rot[2].z);
     }
 }
 
