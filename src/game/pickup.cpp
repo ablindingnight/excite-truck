@@ -560,6 +560,23 @@ void fn_80168328(void) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
+/* Helper name unproven: rotates v by the 3x3 matrix m (out may be v). */
+static inline void RotVec(f32* out, const f32* m, const f32* v) {
+    f32 x = v[0] * m[0] + v[1] * m[1] + v[2] * m[2];
+    f32 y = v[0] * m[3] + v[1] * m[4] + v[2] * m[5];
+    f32 z = v[0] * m[6] + v[1] * m[7] + v[2] * m[8];
+    out[0] = x;
+    out[1] = y;
+    out[2] = z;
+}
+
+/* Helper name unproven: out = a - b. */
+static inline void SubVec(f32* out, const f32* a, const f32* b) {
+    out[0] = a[0] - b[0];
+    out[1] = a[1] - b[1];
+    out[2] = a[2] - b[2];
+}
+
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801683F4(PickupGroup* g, int i, RaceCarRec* rec, V2& lo, V2& hi, PickupCounts& res) {
     int j;
@@ -567,15 +584,9 @@ static inline void Loop1_fn_801683F4(PickupGroup* g, int i, RaceCarRec* rec, V2&
         Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
         if (p->Live()) {
             f32 l[3];
-            f32 dx = p->pos[0] - rec->pos[0];
-            f32 rz;
-            f32 dy = p->pos[1] - rec->pos[1];
-            f32 dz = p->pos[2] - rec->pos[2];
             f32 rad;
-            l[0] = dx * rec->rot[0] + dy * rec->rot[1] + rec->rot[2] * dz;
-            l[1] = dx * rec->rot[3] + dy * rec->rot[4] + dz * rec->rot[5];
-            rz = rec->rot[8];
-            l[2] = dx * rec->rot[6] + dy * rec->rot[7] + dz * rz;
+            SubVec(l, p->pos, rec->pos);
+            RotVec(l, rec->rot, l);
             rad = p->type ? p->type->radius : 0.0f;
             if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
                 p->taken = 1;
@@ -608,13 +619,9 @@ void fn_801683F4(PickupCounts* out, int player) {
         car = rec->hasModel > 0 ? rec->model : 0;
         if (car) {
             f32 l[3];
-            f32 dz = lbl_80430260[player].pos[2] - rec->pos[2];
-            f32 dx = lbl_80430260[player].pos[0] - rec->pos[0];
-            f32 dy = lbl_80430260[player].pos[1] - rec->pos[1];
             CarDims* dims;
-            l[0] = dx * rec->rot[0] + dy * rec->rot[1] + dz * rec->rot[2];
-            l[1] = rec->rot[3] * dx + rec->rot[4] * dy + dz * rec->rot[5];
-            l[2] = dx * rec->rot[6] + dy * rec->rot[7] + rec->rot[8] * dz;
+            SubVec(l, lbl_80430260[player].pos, rec->pos);
+            RotVec(l, rec->rot, l);
             dims = car->dims;
             lo.x = MIN(l[0], 0.0f) - 1.1f * dims->wid;
             lo.z = MIN(l[2], 0.0f) - 1.1f * dims->len;
