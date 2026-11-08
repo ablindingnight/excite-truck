@@ -824,20 +824,17 @@ void fn_802BD814(void) {
                             for (int n = c->first; n < c->first + c->count; n++) {
                                 TreeRec* tr = &list2->data[n];
                                 Settle(tr);
-                                f32 yv;
                                 f32 s = tr->mtx.rot[1].y;
                                 m.pos = tr->mtx.pos;
                                 m.rot[0].x = cam.rot[0].x * s;
                                 m.rot[0].y = cam.rot[0].y * s;
                                 m.rot[0].z = cam.rot[0].z * s;
                                 m.rot[1].x = cam.rot[1].x * s;
-                                yv = cam.rot[1].y;
+                                m.rot[1].y = cam.rot[1].y * s;
                                 m.rot[1].z = cam.rot[1].z * s;
                                 m.rot[2].x = cam.rot[2].x * s;
-                                m.rot[1].y = yv * s;
                                 m.rot[2].y = cam.rot[2].y * s;
                                 m.rot[2].z = cam.rot[2].z * s;
-
                                 fn_802DCAE4(id, &m, a);
                                 lbl_8055FAA8++;
                                 lbl_8055FAAC += tris;
