@@ -2291,14 +2291,20 @@ void ZoneMaster::DrawRing(Gate* g, int c) {
         Vec3 mid = g->Center();
         m.pos = mid;
     }
-    m.x = Vec3(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
+    m.x.Set(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
     PSVECNormalize(&m.x, &m.x);
-    m.y = Vec3(0.0f, 1.0f, 0.0f);
+    m.y.Set(0.0f, 1.0f, 0.0f);
     PSVECCrossProduct(&m.x, &m.y, &m.z);
     s = PSVECDistance(&g->a, &g->b) / 20.0f;
-    m.x = m.x * s;
-    m.y = m.y * s;
-    m.z = m.z * s;
+    m.x.x *= s;
+    m.x.y *= s;
+    m.x.z *= s;
+    m.y.x *= s;
+    m.y.y *= s;
+    m.y.z *= s;
+    m.z.x *= s;
+    m.z.y *= s;
+    m.z.z *= s;
     m.pos.y = g->ringY;
     fn_802C70AC(ringModel, &m, -1, c);
 }
