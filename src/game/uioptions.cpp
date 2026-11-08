@@ -71,7 +71,8 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     name = n;
     type = 9;
     data = v;
-    *(MenuRange*)&arg0 = r;
+    arg0 = *(const int*)&r.lo;
+    arg1 = *(const int*)&r.hi;
 }
 
 // A slider: the range is stored in the item's argument words.
