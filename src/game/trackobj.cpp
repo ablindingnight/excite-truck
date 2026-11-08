@@ -175,7 +175,6 @@ public:
 
 class ObstacleObjDesc : public ObjDesc {
 public:
-    void CreateStatic(const PlacedObj* o, s32 sol);
 public:
     ObstacleObjDesc(ValueNode* vn);
     virtual ~ObstacleObjDesc(void);
@@ -1877,21 +1876,9 @@ static inline int IsVolume(s32 kind) {
 }
 
 /* Helper name unproven: creates the static obstacle for a placed object. */
-inline void ObstacleObjDesc::CreateStatic(const PlacedObj* o, s32 sol) {
-    if (o->node) {
-        sol = o->node->GetInt("sol_id", -1);
-    }
-    StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
-    if (flags & 0x80) {
-        fn_801FBCF4(&lbl_8055EC50, so);
-    } else {
-        fn_801FBCF4(&lbl_8055EC4C, so);
-    }
-}
-
 void ObstacleObjDesc::Create(const PlacedObj* o) {
     s32 sol = -1;
-    phys.solId = -1;
+    phys.solId = sol;
     if (flags & 4) {
         int vol;
         if (o->node && o->node->Has("path")) {
@@ -1960,7 +1947,15 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             fn_801E87D4(so);
         }
     } else {
-        CreateStatic(o, sol);
+        if (o->node) {
+            sol = o->node->GetInt("sol_id", -1);
+        }
+        StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
+        if (flags & 0x80) {
+            fn_801FBCF4(&lbl_8055EC50, so);
+        } else {
+            fn_801FBCF4(&lbl_8055EC4C, so);
+        }
         if (flags & 2) {
             fn_802981EC(o, phys.shape.f[0]);
         }
