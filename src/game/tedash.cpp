@@ -661,7 +661,7 @@ static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, in
         if (lbl_804BE7D8.count + 1 > lbl_804BE7D8.cap) {
             break;
         }
-    } while (FileFindNext(h, name, 0x20) == 0);
+    } while (FileFindNext(h, name, 0x20));
     FileFindClose(h);
 }
 
