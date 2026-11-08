@@ -82,7 +82,8 @@ ZV2 lbl_8055F900;  // line normal
 ZV2 lbl_8055F908;  // line direction
 s32 lbl_8055CC58 = -2;  // light texture
 
-static ZVec lbl_804BD6F8[2];
+static ZVec lbl_804BD6F8;
+static ZVec lbl_804BD704;
 static LapModel lbl_804BD740[4] = {
     LapModel("start.mod"),
     LapModel("lap2.mod"),
@@ -119,23 +120,27 @@ bool fn_802A9048(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
+static inline void ZSub(ZVec* d, const ZVec* a, const ZVec* b) {
+    d->x = a->x - b->x;
+    d->y = a->y - b->y;
+    d->z = a->z - b->z;
+}
+
+static inline f32 ZMax(const f32& a, const f32& b) { return a > b ? a : b; }
+
 static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     f32 xv = vb.x;
-    f->pos.x = lbl_804BD6F8[0].x + xv;
+    f->pos.x = lbl_804BD6F8.x + xv;
     f32 yv = vb.y;
-    f->pos.y = lbl_804BD6F8[0].y + yv;
+    f->pos.y = lbl_804BD6F8.y + yv;
     f32 zv = vb.z;
-    f->pos.z = lbl_804BD6F8[0].z + zv;
-    lbl_804BD6F8[1] = vb;
+    f->pos.z = lbl_804BD6F8.z + zv;
+    lbl_804BD704 = vb;
     f->pos.x *= 0.5f;
     f->pos.y *= 0.5f;
     f->pos.z *= 0.5f;
-    f32 y = lbl_804BD6F8[0].y;
-    y = y <= vb.y ? y : vb.y;
-    f->rot[0].x = lbl_804BD6F8[1].x - lbl_804BD6F8[0].x;
-    f32 y2 = lbl_804BD6F8[0].y;
-    f->rot[0].y = lbl_804BD6F8[1].y - y2;
-    f->rot[0].z = lbl_804BD6F8[1].z - lbl_804BD6F8[0].z;
+    f32 y = ZMax(lbl_804BD6F8.y, vb.y);
+    ZSub(&f->rot[0], &lbl_804BD704, &lbl_804BD6F8);
     f->pos.y = y;
     f->rot[0].y = 0.0f;
     f->rot[1].x = 0.0f;
@@ -171,7 +176,7 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     b.y = pos->y + n.y * half;
     ZVec va;
     fn_802A8FEC(&va, &a);
-    lbl_804BD6F8[0] = va;
+    lbl_804BD6F8 = va;
     ZVec vb;
     fn_802A8FEC(&vb, &b);
     Loop1_fn_802A9090(vb, &lbl_804BD760);
