@@ -3397,9 +3397,12 @@ void fn_801A1F44(RVec3* out, u8* q) {
 
 // Axis-aligned bounds of the box: its 8 corners (+-hx, +-hy, +-hz) through the volume's frame.
 static inline void BoxCorners(RVec3* c, f32 hx, f32 hy, f32 hz) {
-    f32 nz = -hz;
-    f32 ny = -hy;
-    f32 nx = -hx;
+    f32 nz;
+    f32 ny;
+    f32 nx;
+    ny = -hy;
+    nx = -hx;
+    nz = -hz;
     c[0].y = hy; c[0].x = hx; c[0].z = hz;
     c[1].x = nx; c[1].y = hy; c[1].z = hz;
     c[2].x = hx; c[2].y = ny; c[2].z = hz;
