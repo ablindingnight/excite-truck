@@ -630,7 +630,7 @@ static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, in
         if (img) {
             b->w = img->w;
             b->h = img->h;
-            if (img->w * img->h > 0x100) {
+            if (b->w * b->h > 0x100) {
                 b->w = b->w > 16 ? 16 : b->w;
                 b->h = b->h > 16 ? 16 : b->h;
             }
