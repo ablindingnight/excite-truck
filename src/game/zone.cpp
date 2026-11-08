@@ -2969,31 +2969,39 @@ inline void ZoneMaster::vfF8(void) {
 inline void ZoneHud::Reset(void) { ResetState(); }
 
 struct HudBinding {
-    HudBinding(s32 type, const char* name, void* ptr) : type(type), name(name), ptr(ptr) {}
     s32 type;
     const char* name;
     void* ptr;
 };
+// A HUD value binding for ArtPlayer::Add, built by value: the array is zero-filled and each entry copied in.
+/* Helper name unproven: the by-value builder is what the target shows (EXACT 2026-11-08); its name is a guess. */
+static inline HudBinding Bind(s32 type, const char* name, void* ptr) {
+    HudBinding b;
+    b.type = type;
+    b.name = name;
+    b.ptr = ptr;
+    return b;
+}
 extern const HudBinding lbl_802FAA40;  // list terminator
 
 inline void ZoneHud::Init(void) {
     HudBinding b[] = {
-        HudBinding(3, "time_left", &i10C),
-        HudBinding(3, "time_bonus", &i110),
-        HudBinding(3, "grade", &i114),
-        HudBinding(3, "final_score", &i118),
-        HudBinding(1, "gate_count", score),
-        HudBinding(1, "time_bonus", bonus),
-        HudBinding(1, "time_bonus_title_caps", bonusTitle),
-        HudBinding(1, "ring_bonus", finalText),
-        HudBinding(1, "final_score", totalText),
-        HudBinding(1, "grade", grade),
-        HudBinding(1, "final_score_no_time_bonus", noBonusText),
-        HudBinding(1, "time_left", timeLeft),
-        HudBinding(1, "challenge_complete_1", textC6),
-        HudBinding(1, "challenge_complete_2", textDA),
-        HudBinding(1, "out_of_time_message", failText),
-        HudBinding(2, "difficulty_level", &level),
+        Bind(3, "time_left", &i10C),
+        Bind(3, "time_bonus", &i110),
+        Bind(3, "grade", &i114),
+        Bind(3, "final_score", &i118),
+        Bind(1, "gate_count", score),
+        Bind(1, "time_bonus", bonus),
+        Bind(1, "time_bonus_title_caps", bonusTitle),
+        Bind(1, "ring_bonus", finalText),
+        Bind(1, "final_score", totalText),
+        Bind(1, "grade", grade),
+        Bind(1, "final_score_no_time_bonus", noBonusText),
+        Bind(1, "time_left", timeLeft),
+        Bind(1, "challenge_complete_1", textC6),
+        Bind(1, "challenge_complete_2", textDA),
+        Bind(1, "out_of_time_message", failText),
+        Bind(2, "difficulty_level", &level),
         lbl_802FAA40,
     };
     StrCopyN("100", 0x14, noBonusText);
