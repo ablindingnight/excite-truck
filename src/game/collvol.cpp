@@ -28,8 +28,16 @@ struct CVec3 {
     f32 z;
 };
 
+// The 3x3 rotation block: copied as one 36-byte struct (word copy), indexed like an array.
+/* Type shape from the target (one 9-word copy in CollVolume::Update, 2026-11-08); name and the conversion operator are guesses. */
+struct CRot {
+    operator CVec3*() { return r; }
+    operator const CVec3*() const { return r; }
+    CVec3 r[3];
+};
+
 struct CMtx {
-    CVec3 rot[3];  // offset 0x0
+    CRot rot;      // offset 0x0
     CVec3 pos;     // offset 0x24
 };
 
@@ -324,9 +332,7 @@ void CollVolume::Update(void) {
     world.pos.x += mtx.pos.x;
     world.pos.y += mtx.pos.y;
     world.pos.z += mtx.pos.z;
-    world.rot[0] = mtx.rot[0];
-    world.rot[1] = mtx.rot[1];
-    world.rot[2] = mtx.rot[2];
+    world.rot = mtx.rot;
     if (vf44() && vf40()) {
         int i;
         for (i = 0; i < nSub; i++) {
