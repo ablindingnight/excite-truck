@@ -515,23 +515,26 @@ void fn_802103B8(void) {
     fn_8020F5C8();
 }
 
-void fn_802103BC(void) {
-    struct VTable { void *pad[2]; void (*call)(void *, long); };
-    struct Object { struct VTable *vtable; };
+#pragma push
+#pragma cplusplus on
+/* Helper name unproven: the layouts held in lbl_8055EED4/lbl_8055EED0 are deleted through their virtual destructor (slot 8). */
+class LayoutObj {
+public:
+    virtual ~LayoutObj(void);
+};
+
+extern "C" void fn_802103BC(void) {
     fn_802EC1C0(0.0f);
     fn_802EC12C();
     fn_802EC1E4();
-    if (lbl_8055EED4 != 0) {
-        ((struct Object *)lbl_8055EED4)->vtable->call((struct Object *)lbl_8055EED4, 1);
-    }
+    delete (LayoutObj *)lbl_8055EED4;
     lbl_8055EED4 = 0;
     lbl_8055B658 = -1;
     fn_8020F5DC();
-    if (lbl_8055EED0 != 0) {
-        ((struct Object *)lbl_8055EED0)->vtable->call((struct Object *)lbl_8055EED0, 1);
-    }
+    delete (LayoutObj *)lbl_8055EED0;
     lbl_8055EED0 = 0;
 }
+#pragma pop
 #pragma dont_inline reset
 extern long fn_80009C84(void);
 extern int fn_801B85CC(void);
