@@ -86,7 +86,6 @@ struct TextElem {
 };
 
 struct Box {
-    Box& operator=(const Box& o);
     const char* name;  // offset 0x0
     V2 pos;            // offset 0x4
     s32 c;             // offset 0xC
@@ -2361,16 +2360,6 @@ inline void RingChalMaster::vf4C(int view) {
 }
 #pragma dont_inline on
 #pragma dont_inline reset
-
-inline Box& Box::operator=(const Box& o) {
-    name = o.name;
-    pos = o.pos;
-    c = o.c;
-    w = o.w;
-    h = o.h;
-    color = o.color;
-    return *this;
-}
 
 inline void ArenaTimer::Draw(ILayout* l) {
     char buf[0x20];
