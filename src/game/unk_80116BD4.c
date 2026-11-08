@@ -7414,16 +7414,8 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
     u8 *start;
     u8 *end;
     u8 list[128];
-    s16 tmp[64];
+    s16 tmp[64] = {0};
 
-    {
-        u32 *z = (u32 *)tmp;
-        for (i = 0; i < 16; i++) {
-            z[0] = 0;
-            z[1] = 0;
-            z += 2;
-        }
-    }
     avail = bits->count;
     next = bits->next;
     value = bits->value;
