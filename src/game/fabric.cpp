@@ -434,13 +434,12 @@ void fn_801F5664(Fabric* f, int style) {
         SetAnchor(&a[1], f->cur, f->cols * f->rows - 1);
         k = 2;
     case 1:
-        SetAnchor(&a[k], f->cur, 0);
-        k++;
-        SetAnchor(&a[k], f->cur, f->cols - 1);
+        SetAnchor(&a[k++], f->cur, 0);
+        SetAnchor(&a[k++], f->cur, f->cols - 1);
         break;
     case 3:
         for (i = 0; i < f->cols; i++) {
-            SetAnchor(&a[i], f->cur, i);
+            SetAnchor(&a[k++], f->cur, i);
         }
         break;
     case 4:
@@ -449,7 +448,7 @@ void fn_801F5664(Fabric* f, int style) {
         break;
     case 5:
         for (i = 0; i < f->rows; i++) {
-            SetAnchor(&a[i], f->cur, f->cols * i);
+            SetAnchor(&a[k++], f->cur, f->cols * i);
         }
         break;
     default:
