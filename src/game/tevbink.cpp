@@ -580,7 +580,8 @@ struct SimpleHeap {
             HeapBlock* split = 0;
             HeapBlock* next = b->next;
             s32 rest = b->size - n;
-            if (rest > ((align + 0x10) & ~align) + 0x20) {
+            s32 hdr = (align + 0x10) & ~align;
+            if (rest > hdr + 0x20) {
                 HeapBlock* s = (HeapBlock*)((u8*)b + align + n + 1);
                 s->magic = 0xABCFEED0;
                 s->next = 0;
