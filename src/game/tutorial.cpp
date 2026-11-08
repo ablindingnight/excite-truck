@@ -1200,8 +1200,8 @@ void fn_80161F10(int n) {
     ev = (int)fn_80161E40(n);
     e = GetEvent(ev);
     fn_80137C78(1);
-    driver = GetDriver(0)->id;
     fn_80137C84(fn_802E4A10(), 0);
+    driver = GetDriver(0)->id;
     vehicle = GetDriverVehicle(driver)->id;
     if (e->vals->Has("player_car")) {
         vehicle = FindVehicleNamed(e->vals->GetValue("player_car"), 0)->id;
