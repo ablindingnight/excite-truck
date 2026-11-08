@@ -484,9 +484,10 @@ void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
     s->nLink = 0;
     if (d->nVerts > 0) {
         for (i = 0; i < d->nVerts; i++) {
+            const PVertDesc* v = &d->verts[i];
             RVec3 p;
-            Transform(&p, d->verts[i].pos, (const RMtx*)owner);
-            AddPart(s, &p, d->verts[i].w34, d->verts[i].w30);
+            Transform(&p, v->pos, (const RMtx*)owner);
+            AddPart(s, &p, v->w34, v->w30);
         }
     }
     for (i = 0; i < d->nEdges; i++) {
