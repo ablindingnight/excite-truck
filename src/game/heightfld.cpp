@@ -285,25 +285,10 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
     return fn_801DB74C((int)ix, (int)iz, out, mat, unused, normal, fx - ix, fz - iz);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop1_fn_801DC32C(GroundHeader* g) {
-    int i;
-    for (i = 0; i < g->numLayers; i++) {
-        GLayer* l = &g->layers[i];
-        Swap32(&l->base);
-        Swap32(&l->scale);
-        for (int a = 0; a < 32; a++) {
-            for (int b = 0; b < 32; b++) {
-                u16* row = l->h[b];
-                Swap16(&row[a]);
-            }
-        }
-        Swap32(&l->weight);
-        Swap32(&l->next);
-    }
-    return i;
-}
-
+/* The target keeps the 32x32 height swaps as plain loops (no unrolled copies): opt_unroll_loops off
+   makes the structure exact; only the row pointer / address registers differ in the two inner loops. */
+#pragma push
+#pragma opt_unroll_loops off
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;
     for (int k = 0; k < 13; k++) {
@@ -332,8 +317,7 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&t->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                u16* row = t->h[b];
-                Swap16(&row[a]);
+                Swap16(&t->h[b][a]);
             }
         }
         Swap32(&t->x);
@@ -360,7 +344,18 @@ void fn_801DC32C(GroundHeader* g) {
         }
         lbl_80442708[t->x - lbl_8055E99C][t->z - lbl_8055E9A0] = i;
     }
-    i = Loop1_fn_801DC32C(g);
+    for (i = 0; i < g->numLayers; i++) {
+        GLayer* l = &g->layers[i];
+        Swap32(&l->base);
+        Swap32(&l->scale);
+        for (int a = 0; a < 32; a++) {
+            for (int b = 0; b < 32; b++) {
+                Swap16(&l->h[b][a]);
+            }
+        }
+        Swap32(&l->weight);
+        Swap32(&l->next);
+    }
     for (i = 0; i < g->numItems; i++) {
         GItem* it = &g->items[i];
         for (int k = 0; k < 4; k++) {
@@ -368,6 +363,7 @@ void fn_801DC32C(GroundHeader* g) {
         }
     }
 }
+#pragma pop
 
 GroundHeader* fn_801DC9B0(void) {
     u32 ver = 0;
