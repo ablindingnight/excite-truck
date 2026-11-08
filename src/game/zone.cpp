@@ -1464,7 +1464,8 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
     n = fn_8013DDD4(t, "ZoneLevel");
     levels = new ("ZoneLevel[]") ZoneLevel[n];
     lvl = 0;
-    for (i = 0; (child = t->GetChild(i)) != 0; i++) {
+    for (i = 0; t->GetChild(i) != 0; i++) {
+        child = t->GetChild(i);
         if (fn_8013CB44("ZoneLevel", child)) {
             ZoneLevel* prev = lvl > 0 ? levels : 0;
             ZoneLevel* l = &levels[lvl];
@@ -1491,7 +1492,8 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                 w = child->FindChild("config")->GetFloat("gate_scale", 1.0f);
                 w = fn_80204CFC("zone_gate_scale") * w;
                 k = 0;
-                for (j = 0; (g = child->GetChildAt(j)) != 0; j++) {
+                for (j = 0; child->GetChildAt(j) != 0; j++) {
+                    g = child->GetChildAt(j);
                     if (fn_8013CB44("Zone", g)) {
                         l->gates[k++].Init(g, w);
                     }
