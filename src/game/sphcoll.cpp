@@ -4045,12 +4045,13 @@ u8* fn_801A4548(const char* name) {
     bool swapped = 0;
     u8* l = (u8*)fn_8012C370(name, 'SOBL', &info, 0, 0, &swapped);
     if (l && swapped) {
+        u8* objs = l + 0x4;
         Swap32(l + 0x0);
         Swap32(l + 0x8);
-        Swap32(l + 0x4);
+        Swap32(objs);
         Swap32(l + 0xC);
         Swap32(l + 0x10);
-        fn_801A4768((s32*)(l + 0x4), (s32)l);
+        fn_801A4768((s32*)objs, (s32)l);
         fn_801A4780((s32*)(l + 0x10), (s32)l);
         fn_801A4798((s32*)(l + 0xC), (s32)l);
         int i;
@@ -4065,8 +4066,9 @@ u8* fn_801A4548(const char* name) {
         for (i = 0; i < S32(l, 0x0); i++) {
             u8* o = ((u8**)PTR(l, 0x4))[i];
             bool sw = swapped;
+            u8* vol = o + 0x4C;
             if (o) {
-                fn_801A4B5C(o, sw, o + 0x4C);
+                fn_801A4B5C(o, sw, vol);
             }
         }
         PTR(l, 0x14) = (u8*)fn_801A4538;
