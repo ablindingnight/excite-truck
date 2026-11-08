@@ -739,15 +739,17 @@ f32 fn_801DDC8C(f32 x, f32 z) {
         return 0.0f;
     }
     h = 0.0f;
-    if (t->layer >= 0) {
+    s32 li = t->layer;
+    if (li >= 0) {
         GLayer* l;
-        l = &g->layers[t->layer];
+        l = &lbl_8055E990->layers[li];
         for (;;) {
-            h += (l->base + l->h[lx][lz] * l->scale) * lbl_804425DC[l->weight];
+            f32 v = l->base + l->scale * l->h[lx][lz];
+            h += v * lbl_804425DC[l->weight];
             if (l->next < 0) {
                 break;
             }
-            l = &g->layers[l->next];
+            l = &lbl_8055E990->layers[l->next];
         }
     }
     return h;
