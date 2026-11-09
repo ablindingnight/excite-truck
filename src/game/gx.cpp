@@ -249,7 +249,6 @@ union WGPipe {
 
 struct TexState {
     u8 dirty;   // offset 0x0
-    u8 pad1[3];
     s32 mode;   // offset 0x4
     u8 base2;   // offset 0x8
     u8 env;     // offset 0x9
@@ -257,7 +256,6 @@ struct TexState {
     u8 bB;      // offset 0xB
     u8 lmap;    // offset 0xC
     u8 ind;     // offset 0xD
-    u8 padE[2];
 };
 
 struct Capture {
@@ -2011,8 +2009,10 @@ void fn_802D2AC4(void) {
     fn_802DFAF4();
 }
 
+static inline bool TexChanged(void) { return memcmp(&lbl_804C9930, &lbl_804C5700, sizeof(TexState)) != 0; }
+
 void fn_802D2B0C(void) {
-    if (!lbl_8055FDB4 && memcmp(&lbl_804C9930, &lbl_804C5700, sizeof(TexState)) != 0) {
+    if (!lbl_8055FDB4 && TexChanged()) {
         if (lbl_8055FD80) {
             lbl_8055FD80();
             lbl_8055FD80 = 0;
