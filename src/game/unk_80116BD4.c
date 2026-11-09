@@ -2622,7 +2622,6 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     f32 *var_r4;
     f32 *var_r4_2;
     u32 *var_r7;
-    f32 temp_f31;
     f32 var_f1;
     f32 var_f29;
     f32 var_f28;
@@ -2668,7 +2667,6 @@ init_test:
     var_r0 = (u32)*var_r5 << 1;
     if (var_r0 < 2U) goto init_body;
 
-    temp_f31 = 0.0f;
     var_r27 = (f32 *)((u8 *)arg0 + 8);
     var_r3 = 2U;
     goto outer_test;
@@ -2776,7 +2774,7 @@ decode:
                 *var_r27 = (f32)var_r5_3 * var_f1;
                 var_r27++;
             } else {
-                *var_r27 = temp_f31;
+                *var_r27 = 0.0f;
                 var_r27++;
             }
             var_r3++;
@@ -3806,7 +3804,8 @@ void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
         }
         if (!(bit & 1)) {
             width = b->maxBits;
-            mask = 0xFFFFFFFFU >> (32 - width);
+            mask = 0xFFFFFFFFU;
+            mask >>= 32 - width;
             dst = b->data;
             lookup = b->lookup;
             symbols = b->symbols;
