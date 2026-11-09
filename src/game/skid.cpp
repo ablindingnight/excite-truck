@@ -428,9 +428,10 @@ void fn_8028DDF0(SkidEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
         return;
     }
+    f32 maxd = 40000.0f;
     f32 now = fn_801E7E18();
     for (int i = 0; i < n; i++, e++) {
-        if (e->dist < 40000.0f && e->car->surface == lbl_804B3490[e->index] && e->active) {
+        if (e->dist < maxd && e->car->surface == lbl_804B3490[e->index] && e->active) {
             for (int w = 0; w < 4; w++) {
                 fn_8028D89C(e, w, now);
             }
