@@ -1744,6 +1744,23 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
+static inline void MulVecT(V3* out, const V3* in, const Mat3* m) {
+    if (out == in) {
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
+        f32 y = Dot3(in->x, m->m[1][0], in->y, m->m[1][1], in->z, m->m[1][2]);
+        f32 z = Dot3(in->x, m->m[2][0], in->y, m->m[2][1], in->z, m->m[2][2]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
+        out->y = Dot3(in->x, m->m[1][0], in->y, m->m[1][1], in->z, m->m[1][2]);
+        out->z = Dot3(in->x, m->m[2][0], in->y, m->m[2][1], in->z, m->m[2][2]);
+    }
+}
+
 static inline void Invert(RMtx* out, const RMtx* m) {
     out->rot = m->rot;
     f32 t = out->rot.m[0][1];
@@ -1755,7 +1772,7 @@ static inline void Invert(RMtx* out, const RMtx* m) {
     t = out->rot.m[1][2];
     out->rot.m[1][2] = out->rot.m[2][1];
     out->rot.m[2][1] = t;
-    MulVec(&out->pos, &m->pos, &out->rot);
+    MulVecT(&out->pos, &m->pos, &m->rot);
     out->pos.x *= -1.0f;
     out->pos.y *= -1.0f;
     out->pos.z *= -1.0f;
