@@ -520,8 +520,8 @@ void fn_80168104(void) {
                     if (p->type && p->type->handle && !p->taken) {
                         col = p->type ? p->type->color : 0xFFFFFFFF;
                         o1 = fn_802C9994(col);
-                        u32 o2 = fn_802C9950(((col >> 1) & 0x7F000000) | ((col >> 1) & 0x7F0000) |
-                                             ((col >> 1) & 0x7F00) | ((col >> 1) & 0x7F));
+                        u32 o2 = fn_802C9950(((col >> 24) >> 1) << 24 | (((col >> 16) & 0xFF) >> 1) << 16 |
+                                             (((col >> 8) & 0xFF) >> 1) << 8 | ((col & 0xFF) >> 1));
                         SpinXform* x;
                         fn_802C9900((f32)(col >> 24) / 255.0f);
                         x = &lbl_8042FF60[((s32)p->type / 12) & 15];
