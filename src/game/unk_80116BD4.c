@@ -2648,8 +2648,7 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 var_r3;
     u32 var_r4_3;
 
-    var_f28 = 0.0f;
-    var_f29 = var_f28;
+    var_f28 = var_f29 = 0.0f;
     var_r26 = ((BitReader8011 *)arg2)->next;
     var_r25 = ((BitReader8011 *)arg2)->value;
     var_r24 = ((BitReader8011 *)arg2)->count;
@@ -3765,29 +3764,35 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 
 // Refills an exhausted bundle of unsigned bytes: reads the count, then either that many Huffman-coded values or one
 // 4-bit value repeated.
+/* Helper name unproven */
+typedef struct BitWin8011 {
+    u32 width;
+    u32 mask;
+} BitWin8011;
+
 void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
     u32 *next;
     u32 value;
     u32 count;
-    u32 len, bit, mask, fill, e;
+    u32 len, bit, fill, e;
     u8 *dst, *lookup, *symbols;
-    u32 width;
+    BitWin8011 w;
 
     if (b->cur != b->end) return;
     count = bits->count;
-    width = b->countBits;
+    w.width = b->countBits;
     next = bits->next;
     value = bits->value;
-    if (count < width) {
+    if (count < w.width) {
         u32 word = *next;
-        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
-        value = word >> (width - count);
-        count = count + 32 - width;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - w.width));
+        value = word >> (w.width - count);
+        count = count + 32 - w.width;
         next++;
     } else {
-        len = value & (0xFFFFFFFFU >> (32 - width));
-        value >>= width;
-        count -= width;
+        len = value & (0xFFFFFFFFU >> (32 - w.width));
+        value >>= w.width;
+        count -= w.width;
     }
     if (len != 0) {
         b->cur = b->data;
@@ -3803,23 +3808,23 @@ void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
             count--;
         }
         if (!(bit & 1)) {
-            width = b->maxBits;
-            mask = 0xFFFFFFFFU;
-            mask >>= 32 - width;
+            w.width = b->maxBits;
+            w.mask = 0xFFFFFFFFU;
+            w.mask >>= 32 - w.width;
             dst = b->data;
             lookup = b->lookup;
             symbols = b->symbols;
             do {
                 len--;
-                if (count >= width) {
-                    e = lookup[value & mask];
+                if (count >= w.width) {
+                    e = lookup[value & w.mask];
                     *dst++ = symbols[e & 15];
                     e >>= 4;
                     value >>= e;
                     count -= e;
                 } else {
                     u32 word = *next;
-                    e = lookup[(value | (word << count)) & mask];
+                    e = lookup[(value | (word << count)) & w.mask];
                     *dst++ = symbols[e & 15];
                     e >>= 4;
                     if (count >= e) {
