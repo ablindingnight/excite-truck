@@ -1255,8 +1255,9 @@ void fn_801EECAC(CarModel* m, u8* data) {
 
 void fn_801EEE38(void) {
     u8* data = (u8*)fn_80179CB0();
-    for (u32 i = 0; CarAt(i); i++) {
-        fn_801EECAC(CarAt(i), data);
+    CarModel* m;
+    for (u32 i = 0; (m = CarAt(i)) != 0; i++) {
+        fn_801EECAC(m, data);
     }
 }
 
