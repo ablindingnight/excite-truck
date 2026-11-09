@@ -435,10 +435,11 @@ void fn_8028DDF0(SkidEntry* e, int n) {
                 fn_8028D89C(e, w, now);
             }
         } else {
-            lbl_8055F720[e->index * 4 + 0].type = -1;
-            lbl_8055F720[e->index * 4 + 1].type = -1;
-            lbl_8055F720[e->index * 4 + 2].type = -1;
-            lbl_8055F720[e->index * 4 + 3].type = -1;
+            int k = e->index;
+            lbl_8055F720[k * 4 + 0].type = -1;
+            lbl_8055F720[k * 4 + 1].type = -1;
+            lbl_8055F720[k * 4 + 2].type = -1;
+            lbl_8055F720[k * 4 + 3].type = -1;
         }
         lbl_804B3490[e->index] = e->car->surface;
     }
