@@ -119,11 +119,29 @@ u8 lbl_8055F310;   // timeout reported
 MWSlot lbl_80498D00[2];
 
 static inline void Rotate(MWVec2* v, f32 a) {
+    f32 x = v->x;
     f32 c = cos(a);
     f32 s = sin(a);
-    f32 x = v->x * c - v->y * s;
-    v->y = v->x * s + v->y * c;
-    v->x = x;
+    v->x = v->x * c - v->y * s;
+    v->y = x * s + v->y * c;
+}
+
+static inline void Perp(MWVec2* v) {
+    f32 t = v->x;
+    v->x = -v->y;
+    v->y = t;
+}
+
+static inline void XZ(MWVec3* o, const MWVec2* v) {
+    o->x = v->x;
+    o->y = 0.0f;
+    o->z = v->y;
+}
+
+static inline void Scale3(MWVec3* o, f32 k) {
+    o->x *= k;
+    o->y *= k;
+    o->z *= k;
 }
 
 extern "C" {
@@ -132,24 +150,12 @@ void fn_802526E0(MWMtx* m) {
     f32 a = fn_80129DC4(0, 0.0f, 6.2831855f);
     MWVec2 d(1.0f, 0.0f);
     Rotate(&d, a);
-    m->pos.x = d.x;
-    m->pos.y = 0.0f;
-    m->pos.z = d.y;
-    m->pos.x *= 325.0f;
-    m->pos.y = m->pos.y * 325.0f;
-    m->pos.z *= 325.0f;
+    XZ(&m->pos, &d);
+    Scale3(&m->pos, 325.0f);
     m->pos.y = 4.0f + fn_801DCF48(0, m->pos.x, m->pos.z);
-    m->x.x = d.x;
-    m->x.y = 0.0f;
-    m->x.z = d.y;
-    {
-        f32 t = d.x;
-        d.x = -d.y;
-        d.y = t;
-    }
-    m->z.x = d.x;
-    m->z.y = 0.0f;
-    m->z.z = d.y;
+    XZ(&m->x, &d);
+    Perp(&d);
+    XZ(&m->z, &d);
     PSVECCrossProduct(&m->z, &m->x, &m->y);
 }
 
