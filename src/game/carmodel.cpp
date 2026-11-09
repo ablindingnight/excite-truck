@@ -494,14 +494,13 @@ void fn_801EC59C(Slider* s, ValueNode* n, const char* name, const f32* src, f32 
     ValueNode* c = n->FindChild(name);
     if (c) {
         ValVec3 p0 = c->GetVec3("val1");
-        ValVec3 p1;
-        p1 = c->GetVec3("val2");
-        p1.x = p1.x * scale - offset;
+        ValVec3 p1 = c->GetVec3("val2");
         p0.x = p0.x * scale - offset;
-        p0.y = p0.y * 0.0254f;
-        p1.y = p1.y * 0.0254f;
-        p0.z = p0.z * 0.0254f;
-        p1.z = p1.z * 0.0254f;
+        p1.x = p1.x * scale - offset;
+        p0.y *= 0.0254f;
+        p1.y *= 0.0254f;
+        p0.z *= 0.0254f;
+        p1.z *= 0.0254f;
         s->ky = (p1.y - p0.y) / (p1.x - p0.x);
         s->kz = (p1.z - p0.z) / (p1.x - p0.x);
         s->by = p0.y - s->ky * p0.x;
