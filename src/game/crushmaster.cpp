@@ -1417,8 +1417,13 @@ static inline void NormV2(V2* d) {
     d->y *= 1.0f / len;
 }
 
+static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
+    o->x = a->x * k;
+    o->y = a->y * k;
+    o->z = a->z * k;
+}
+
 inline void CrushMaster::vfA8(int car) {
-    f32 basisX;
     f32 zv;
     f32 xv;
     f32 t;
@@ -1488,10 +1493,7 @@ inline void CrushMaster::vfA8(int car) {
                 NormV2(&d);
                 fn_801B7C8C(&r, &to, &d);
                 r.m.origin.y += 3.0f;
-                basisX = r.m.basis[2].x;
-                r.vel.x = basisX * 8.888889f;
-                r.vel.y = r.m.basis[2].y * 8.888889f;
-                r.vel.z = r.m.basis[2].z * 8.888889f;
+                ScaleV(&r.vel, &r.m.basis[2], 8.888889f);
             }
         } else if (rec->mtx.basis[1].y < 0.2f) {
             fwd.x = rec->mtx.basis[2].x;
