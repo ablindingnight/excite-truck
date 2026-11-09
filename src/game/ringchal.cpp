@@ -501,6 +501,13 @@ struct ObjSet {
     }
     u8 Load(ValueNode* set, ValueTable** dynos);
     void CheckTeleport(struct Phob* car);
+    ObjTeleport* Next(void) const {
+        int i = f10;
+        if (i + 1 < teles->count) {
+            return &teles->data[i + 1];
+        }
+        return &teles->data[i];
+    }
     IArray<ObjInfo>* infos;      // offset 0x0
     IArray<ObjTeleport>* teles;  // offset 0x4
     void Reset(void);
@@ -1922,6 +1929,12 @@ inline int RingChalMaster::vf28(void) { return !arena.b49; }
 
 inline void RingChalMaster::vfA8(int car) { fn_801B0C78(car); }
 
+static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
+    o->x = a->x * k;
+    o->y = a->y * k;
+    o->z = a->z * k;
+}
+
 inline int RingChalMaster::vfB0(int car, Respawn* r) {
     PlayerData* p = players.data[car];
     p->b8 = 0;
@@ -1929,17 +1942,10 @@ inline int RingChalMaster::vfB0(int car, Respawn* r) {
     if (arena.curSet < arena.nFiles) {
         ObjSet* s = &arena.sets->data[arena.curSet];
         if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
-            ObjTeleport* t;
-            if (s->f10 + 1 < s->teles->count) {
-                t = &s->teles->data[s->f10 + 1];
-            } else {
-                t = &s->teles->data[s->f10];
-            }
+            ObjTeleport* t = s->Next();
             fn_801B8060(r, t);
-            r->vel.x = t->mtx.basis[2].x * 26.666666f;
+            ScaleV(&r->vel, &t->mtx.basis[2], 26.666666f);
             r->pos.y += 7.625f;
-            r->vel.y = t->mtx.basis[2].y * 26.666666f;
-            r->vel.z = t->mtx.basis[2].z * 26.666666f;
             return 1;
         }
         return 0;
