@@ -242,10 +242,9 @@ void fn_802A9428(void) {
     shown = lbl_804BD790[view].shown;
     s32 laps = fn_801E7E3C()->laps;
     if (!lbl_8055F8F1) {
+        which = shown;
         if (shown >= laps) {
             which = 3;
-        } else {
-            which = shown;
         }
     } else if ((u32)(shown + 1) < 4) {
         which = shown;
