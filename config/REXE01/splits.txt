@@ -3963,7 +3963,7 @@ game/namedcam.cpp:
 	.data       start:0x80347378 end:0x80347580
 	.bss        start:0x8049FD58 end:0x804A15D0
 	.sdata      start:0x8055C638 end:0x8055C660
-	.sbss       start:0x8055F590 end:0x8055F5A8
+	.sbss       start:0x8055F590 end:0x8055F5A4
 	.sdata2     start:0x80564048 end:0x805640A0
 
 game/cscript.cpp:

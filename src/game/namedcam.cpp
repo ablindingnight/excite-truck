@@ -76,9 +76,9 @@ static CamFrame34 lbl_804A1500[4];
 
 extern f32 lbl_8055E3C8;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
-extern NamedCam* lbl_8055F598;
-extern NamedCam* lbl_8055F59C;
-extern s32 lbl_8055F5A0;
+NamedCam* lbl_8055F598;
+NamedCam* lbl_8055F59C;
+s32 lbl_8055F5A0;
 
 extern "C" {
 
