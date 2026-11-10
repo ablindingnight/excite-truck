@@ -66,3 +66,6 @@ extern void RegisterModuleTag__FP9ModuleTag(void *queue);
 void fn_801274C0(void) {
     RegisterModuleTag__FP9ModuleTag(lbl_8055DF00);
 }
+
+/* .bss owned by this unit (0x8041D728-0x8041D78C): callback lists -1..3. */
+CallbackList lbl_8041D728[5];

@@ -32,3 +32,7 @@ void fn_80116644(void) {
         lbl_8055DEBD = 1;
     }
 }
+
+/* .bss owned by this unit (0x8041D4F0-0x8041D508): storage of the two registered global objects. */
+char lbl_8041D4F0[0xC];
+char lbl_8041D4FC[0xC];
