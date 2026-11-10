@@ -1022,8 +1022,8 @@ void RainSystem::Move(const PVec* d) {
         WPt* p = &pts[i];
         PVec v;
         v.x = p->x + m.x;
+        v.y = p->y + m.y;
         v.z = p->z + m.z;
-        v.y = m.y + p->y;
         if (v.z > near && v.z < far && Sq(v.x) < Sq(0.25f + v.z * tx) &&
             Sq(v.y) < Sq(0.25f + v.z * ty)) {
             out->x = v.x;
