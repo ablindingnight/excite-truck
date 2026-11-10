@@ -3567,7 +3567,7 @@ game/uioptions.cpp:
 	.ctors      start:0x802ED3F4 end:0x802ED3F8
 	.rodata     start:0x802FA040 end:0x802FA068
 	.data       start:0x80340B58 end:0x803412D8
-	.bss        start:0x804986F8 end:0x80498758
+	.bss        start:0x804986F8 end:0x80498754
 	.sdata      start:0x8055BAB8 end:0x8055BB30
 	.sbss       start:0x8055F100 end:0x8055F114
 	.sdata2     start:0x80563730 end:0x80563738
