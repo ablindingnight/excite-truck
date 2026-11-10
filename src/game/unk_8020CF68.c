@@ -503,4 +503,16 @@ public:
 ModuleTag lbl_8055EE68;
 UnkStatic123s lbl_80489C70;
 UnkStatic7F lbl_8055EE70;
+int lbl_8055EE74;
+int lbl_8055EE78;
+void *lbl_8055EE7C;
+void *lbl_8055EE80;
+float lbl_8055EE84;
+float lbl_8055EE88;
+float lbl_8055EE8C;
+float lbl_8055EE90;
+char lbl_8055EE94;
+float lbl_8055EE98;
+float lbl_8055EE9C;
+int lbl_8055EEA0;
 #pragma cplusplus off
