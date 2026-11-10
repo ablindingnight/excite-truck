@@ -476,19 +476,21 @@ static inline void ResetGroups(PickupObjMan* m) {
 
 void fn_80168020(void) {
     PickupObjMan* m;
-    Pickup* p;
     int i;
+    Pickup* p;
+    int off;
     m = lbl_8055E354;
-    for (i = 0; i < m->objs.count; i++) {
-        p = &m->objs.data[i];
+    for (i = 0, off = 0; i < m->objs.count; i++, off += sizeof(Pickup)) {
+        p = (Pickup*)((u8*)m->objs.data + off);
         fn_801E9E30(0, p->pos);
         p->pos[1] += p->type->yoff;
         p->pos[1] += p->hover;
         p->taken = 0;
     }
     ResetGroups(m);
+    PickupTrack* e = lbl_80430260;
     for (i = 0; i < 8; i++) {
-        lbl_80430260[i].frame = -1;
+        (e++)->frame = -1;
     }
 }
 
