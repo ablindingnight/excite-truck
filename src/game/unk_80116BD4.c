@@ -3489,7 +3489,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
     u32 *bits;
     u32 fill;
     u32 value, bitCount, count, code, len, s, w;
-    u8 *dst, *table, *lookup;
+    u8 *dst, *lookup, *table;
     u32 sym, runlen, j;
     BitWin8011 win;
     if (*(u32 *)arg0 != *(u32 *)((u8 *)arg0 + 4)) return;
