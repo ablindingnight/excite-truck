@@ -276,17 +276,17 @@ void fn_8028E1D0(void) {
 }
 
 void fn_8028E240(void) {
-    s32 t;
+    struct { s32 t; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     if (lbl_8055F740) {
         f32 old = fn_802C9A4C(0.0f);
         s32 tex = lbl_8055F740->tex;
         fn_802C8BD0(tex);
         for (int i = 0; i < lbl_804B34B0.count; i++) {
-            t = lbl_804B34B0.items[i]->tex;
-            if (t != tex) {
+            sp_.t = lbl_804B34B0.items[i]->tex;
+            if (sp_.t != tex) {
                 fn_802C8D74();
-                fn_802C8BD0(t);
-                tex = t;
+                fn_802C8BD0(sp_.t);
+                tex = sp_.t;
             }
             lbl_804B34B0.items[i]->Draw();
         }
