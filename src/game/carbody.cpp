@@ -839,7 +839,9 @@ void fn_80182DF4(u8* p) {
     f32 zFrontMid = 0.5f * (zFront + zMid);
     f32 ySide = minY + h;
     f32 yFront = 0.44999998f + minY;
-    AddBodySphere(p, PTR(p, 0x268), -b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    f32 nb = -b;
+    f32 yr = 0.254f + yRear;
+    AddBodySphere(p, PTR(p, 0x268), nb, yr, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
     AddBodySphere(p, PTR(p, 0x268), -a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
