@@ -665,10 +665,10 @@ void fn_802D56D4(Surf* s) {
 }
 
 void fn_802D5838(Surf* s) {
-    int n = s->nverts;
+    V3* o;
     V3* p = (V3*)s->verts;
     V3* nrm = (V3*)s->attr;
-    V3* o;
+    int n = s->nverts;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
         V3 l;

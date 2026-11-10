@@ -1979,8 +1979,8 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
     d1.y = h;
     d2.x = s;
     a->x = c.x + d1.x;
-    d2.y = -h;
     a->y = c.y + d1.y;
+    d2.y = -h;
     b->x = c.x + d2.x;
     b->y = c.y + d2.y;
 }
