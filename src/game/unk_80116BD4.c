@@ -1376,8 +1376,11 @@ s32 fn_801186B8(StreamPlayer *p) {
                 p->readerFill(&p->readerRead);
             }
         }
-        p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
-                                     p->setIndex[p->curSet - 1] & 1, (s32)p->planeSizes, p->flags, p->videoFlags);
+        {
+            u32 set = p->curSet - 1;
+            p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
+                                         p->setIndex[set] & 1, (s32)p->planeSizes, p->flags, p->videoFlags);
+        }
     }
     if (p->numTracks != 0) {
         fn_80117074(p);
