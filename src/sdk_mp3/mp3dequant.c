@@ -110,10 +110,11 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     out->xr[i] = 0;
                 }
             } else {
-                for (i = 0; i < d->long_end; i++) {
+                int off = 0;
+                for (i = 0; i < d->long_end; off += sizeof(out->xr[0]), i++) {
                     v = in[i];
                     if (v == 0) {
-                        out->xr[i] = 0;
+                        *(s32*)((u8*)out->xr + off) = 0;
                         continue;
                     }
                     b = long_map[i];
@@ -178,9 +179,9 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                     if (v < 0) {
-                        out->xr[i] = -r;
+                        *(s32*)((u8*)out->xr + off) = -r;
                     } else {
-                        out->xr[i] = r;
+                        *(s32*)((u8*)out->xr + off) = r;
                     }
                 }
                 for (; i < 576; i++) {

@@ -323,10 +323,11 @@ void Wheel::vf28(u8* buf) {
         RVec3* d = (RVec3*)&m;
         const RVec3* a = (const RVec3*)&prev;
         const RVec3* b = (const RVec3*)&world;
-        for (int i = 0; i < 4; i++) {
-            d[i].x = Lerp(a[i].x, b[i].x, t);
-            d[i].y = Lerp(a[i].y, b[i].y, t);
-            d[i].z = Lerp(a[i].z, b[i].z, t);
+        RVec3* w = d;
+        for (int i = 0; i < 4; w++, i++) {
+            w->x = Lerp(a[i].x, b[i].x, t);
+            w->y = Lerp(a[i].y, b[i].y, t);
+            w->z = Lerp(a[i].z, b[i].z, t);
         }
         p->mtx = m;
     }

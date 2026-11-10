@@ -384,8 +384,9 @@ void CarUIModel::LoadEfx(const char* path) {
         if (t->HasChild("susp")) {
             int j;
             ValueNodeV* s = t->FindChild("susp");
-            for (j = 0; j < 4; j++) {
-                s->GetInt(susp[j], -1);
+            const char** name = susp;
+            for (j = 0; j < 4; name++, j++) {
+                s->GetInt(*name, -1);
             }
         }
         fn_80131818(t);

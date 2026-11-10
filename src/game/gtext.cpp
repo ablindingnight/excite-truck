@@ -342,8 +342,9 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
 }
 
 void fn_80231780(const UIXform* m) {
-    for (int i = 0; i < lbl_8049846C.count; i++) {
-        ArtItem* it = &lbl_8049846C.data[i];
+    int off = 0;
+    for (int i = 0; i < lbl_8049846C.count; i++, off += sizeof(lbl_8049846C.data[0])) {
+        ArtItem* it = (ArtItem*)((u8*)lbl_8049846C.data + off);
         EscSeq* e = &lbl_80497F14.data[it->esc];
         u32 color = e->takeColor ? it->color : fn_80230B9C((it->color & 0xFF000000) | 0xFFFFFF);
         if (e->art) {

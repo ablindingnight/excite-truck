@@ -806,17 +806,18 @@ extern "C" void fn_802991BC(EngineFireMan* m);
 EngineFireMan::EngineFireMan(void) {
     int n = fn_80287B14();
     cars = new ("EngineFireMan tab") EngineEntry[n];
-    for (int i = 0; i < n; i++) {
+    int off = 0;
+    for (int i = 0; i < n; off += sizeof(cars[0]), i++) {
         FireModel* model = fn_80288208(i);
         if (fn_80287E20(model, "engine")) {
-            cars[i].pos = fn_80287ED0(model, "engine", "arm");
-            cars[i].spread = fn_80287F90(model, "engine", "spread", V3(0.0f, 0.0f, 0.0f));
-            cars[i].has = 1;
+            ((EngineEntry*)((u8*)cars + off))->pos = fn_80287ED0(model, "engine", "arm");
+            ((EngineEntry*)((u8*)cars + off))->spread = fn_80287F90(model, "engine", "spread", V3(0.0f, 0.0f, 0.0f));
+            ((EngineEntry*)((u8*)cars + off))->has = 1;
         } else {
-            cars[i].has = 0;
+            ((EngineEntry*)((u8*)cars + off))->has = 0;
         }
-        cars[i].on = 0;
-        cars[i].t = -1.0f;
+        ((EngineEntry*)((u8*)cars + off))->on = 0;
+        ((EngineEntry*)((u8*)cars + off))->t = -1.0f;
     }
     fn_802991BC(this);
     seq = FXSequence::Load("expseq.val");
