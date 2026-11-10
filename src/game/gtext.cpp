@@ -1212,4 +1212,9 @@ void fn_80234AFC(TextStyle* st, const char* fmt, f32 x, f32 y, ...) {
     fn_80232BA4(buf, st->font, x, y, st->color, st->align, st->scale, 1.0f, st->xs);
 }
 
+// Unused (the canvas path was removed): MWCC drops the function and keeps its string.
+static void gTextPrintfIntoCanvas(void) {
+    fn_802E317C("gTextPrintfIntoCanvas: WTF is wrong with you? gxCanvas is so 1997.");
+}
+
 }  // extern "C"
