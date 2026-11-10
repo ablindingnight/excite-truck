@@ -2513,7 +2513,7 @@ inline void RingChalMaster::vf0C(void) {
                 CLAMP01(u);
                 f32 from = 0.0f;
                 f32 to = 1.0f;
-                int n = from + u * (to - from);
+                int n = Lerp(from, to, u);
                 if (n) {
                     arena.f34 += n;
                     RSound* tally = arena.sTally;
