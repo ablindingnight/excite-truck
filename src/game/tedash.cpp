@@ -814,9 +814,12 @@ void fn_802B7518(s16 x, s16 z, int v) {
     case 3:
         fn_802C21DC(x, z, v);
         break;
-    case 5:
-        fn_80204044(v, (f32)x * 2.0f, (f32)z * 2.0f);
+    case 5: {
+        f32 fx = GridToWorld(x, 2.0f);
+        f32 fz = GridToWorld(z, 2.0f);
+        fn_80204044(v, fx, fz);
         break;
+    }
     }
 }
 

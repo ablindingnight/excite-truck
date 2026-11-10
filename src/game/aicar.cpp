@@ -2107,8 +2107,8 @@ void fn_801971AC(u8* d, V2* io) {
         V2 r;
         f32 xv = io->x;
         f32 yv = io->y;
-        r.y = yv + k * (tgt.y - yv);
-        r.x = xv + k * (tgt.x - xv);
+        r.y = LerpT(k, yv, tgt.y);
+        r.x = LerpT(k, xv, tgt.x);
         V2 c = r;
         io->x = c.x;
         io->y = c.y;

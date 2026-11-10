@@ -69,8 +69,8 @@ struct RacerList {
 };
 
 struct RaceSetup {
-    char track[0x1C];  // offset 0x0
-    RacerList racers __attribute__((aligned(8)));  // offset 0x20
+    char track[0x20];  // offset 0x0
+    RacerList racers;  // offset 0x20
     s32 event;         // offset 0x3E4
     u32 flags;         // offset 0x3E8
     s32 unk3EC;        // offset 0x3EC

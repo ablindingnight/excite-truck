@@ -802,9 +802,9 @@ inline void Ball::vf28(u8* buf) {
             const BVec3* a = &world.rot[i];
             const BVec3* b = &prev.rot[i];
             BVec3* d = &t.rot[i];
-            d->x = b->x + k * (a->x - b->x);
-            d->y = b->y + k * (a->y - b->y);
-            d->z = b->z + k * (a->z - b->z);
+            d->x = LerpT(k, b->x, a->x);
+            d->y = LerpT(k, b->y, a->y);
+            d->z = LerpT(k, b->z, a->z);
         }
         *out = t;
     }
