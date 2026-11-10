@@ -226,7 +226,7 @@ bool lbl_8055E329;
 u8 lbl_8055E32A;   // enabled
 u8 lbl_8055E32B;   // turtle
 DynArray<OrbitCarState>* lbl_8055E32C;
-void* lbl_8055E334;  // boost bounds
+void* lbl_8055E330;  // boost bounds
 
 OrbitConfig lbl_8042FE38;
 FixedArr<Role, 8> lbl_8042FEB0;
@@ -503,7 +503,7 @@ void fn_801663C8(int n, const CarSetup* cars, const RaceDesc* race) {
     }
     lbl_8055E32A = race->type != 0x180304;
     lbl_8055E32B = 0;
-    lbl_8055E334 = 0;
+    lbl_8055E330 = 0;
 }
 
 }  // extern "C"
@@ -521,9 +521,9 @@ extern "C" {
 int fn_801667F0(void) { return lbl_8055E32A && !lbl_8055E32B; }
 
 void fn_80166814(void) {
-    if (lbl_8055E334) {
-        fn_80139E18(lbl_8055E334);
-        lbl_8055E334 = 0;
+    if (lbl_8055E330) {
+        fn_80139E18(lbl_8055E330);
+        lbl_8055E330 = 0;
     }
     delete lbl_8055E32C;
     lbl_8055E32C = 0;
@@ -704,9 +704,9 @@ f32 fn_801671FC(int i) {
         f32 behind = s->dist < lbl_8042FE38.boostLon;
         f32 boost = 0.0f;
         if (top && behind) {
-            if (lbl_8055E334) {
+            if (lbl_8055E330) {
                 CarRec* rec = fn_8017960C(i);
-                if (lbl_8055E334 && fn_80139EC4(lbl_8055E334, rec->x, rec->z)) {
+                if (lbl_8055E330 && fn_80139EC4(lbl_8055E330, rec->x, rec->z)) {
                     boost = 0.5f;
                 }
             } else {

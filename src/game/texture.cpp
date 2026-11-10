@@ -279,7 +279,7 @@ TexEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture
 s32 lbl_8055FCB8;     // bound texture
 TexCache* lbl_8055FCBC;
-f32 lbl_8055FCC4;     // size scale
+f32 lbl_8055FCC0;     // size scale
 
 const char* lbl_8055D038 = "null.tex";
 s32 lbl_8055D03C = -1;  // lightmap
@@ -1192,7 +1192,7 @@ void fn_802CC410(TexCache* c) {
     }
 }
 
-void fn_802CC518(int w, f32 fov) { lbl_8055FCC4 = 2.0f * fov / w; }
+void fn_802CC518(int w, f32 fov) { lbl_8055FCC0 = 2.0f * fov / w; }
 
 void fn_802CC550(s32 id, f32 dist, f32 scale) {
     if (id == -1) {
@@ -1206,7 +1206,7 @@ void fn_802CC550(s32 id, f32 dist, f32 scale) {
         return;
     }
     f32 d = 1.0f > dist ? 1.0f : dist;
-    f32 v = scale * (lbl_8055FCC4 * d);
+    f32 v = scale * (lbl_8055FCC0 * d);
     t->size = t->size < v ? t->size : v;
 }
 
