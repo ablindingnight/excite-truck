@@ -255,7 +255,7 @@ public:
 
 class BSphere : public BShape {
 public:
-    BSphere(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : BShape(o, m, 0x53504852, k, s) {
+    BSphere(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : BShape(o, m, 0x53504852, k, s), center(c) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
