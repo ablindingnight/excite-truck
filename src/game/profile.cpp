@@ -423,10 +423,11 @@ void ProfileKeyboardState::Draw(void) {
     // right/bottom are unused: the target still converts column+1 and row+1 (xoris/stw) but drops the float math.
     f32 right = x + cellWidth * (f32)(self->selectedColumn + 1);
     f32 bottom = y - cellHeight * (f32)(self->selectedRow + 1);
-    fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - 4.0f, 0.0f);
-    fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, 4.0f + (top - cellHeight), 0.0f);
-    fn_80230924(0xFFAF7F00, left, top, left + 4.0f, top - cellHeight, 0.0f);
-    fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - 4.0f, top - cellHeight, 0.0f);
+    f32 border = 4.0f;
+    fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
+    fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
+    fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
+    fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
     y = y - cellHeight * lbl_80563954;
     f32 startX = x + cellWidth * lbl_80563954;
     for (int row = 0; row < 4; row++) {
