@@ -898,7 +898,7 @@ struct Race {
 ModuleTag lbl_8055E368;
 UnkStaticFFFF lbl_8055E370;
 static UnkStatic123s lbl_80430358;
-RingChalMaster* lbl_8055E378;
+extern RingChalMaster* lbl_8055E378;
 
 void RingResults::Update(int score, int rings, int bonus) {
     if (layout) {
@@ -984,6 +984,8 @@ void RingResults::Update(int score, int rings, int bonus) {
         ((ArtPlayer*)(layout))->Update();
     }
 }
+
+RingChalMaster* lbl_8055E378;
 
 inline RingChalMaster::RingChalMaster(Race* race) {
     int i;

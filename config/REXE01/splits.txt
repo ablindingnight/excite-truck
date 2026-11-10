@@ -2518,7 +2518,7 @@ game/ringchal.cpp:
 	.data       start:0x803306D0 end:0x80330EC6
 	.bss        start:0x80430358 end:0x80430378
 	.sdata      start:0x8055A208 end:0x8055A27E
-	.sbss       start:0x8055E368 end:0x8055E380
+	.sbss       start:0x8055E368 end:0x8055E37C
 	.sdata2     start:0x80561980 end:0x80561A2C
 
 game/techdemo.cpp:
