@@ -3,6 +3,9 @@
 // and the list selection state. Written against raw field offsets; the large routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+
+// Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
+extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #include "game/menu.h"
 #include <string.h>
 
@@ -906,7 +909,6 @@ void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
-extern const s32 lbl_802FA300[3];  // stat level thresholds: 0, 4, 7
 extern const f32 lbl_80563758;     // 0.0
 extern const f32 lbl_8056375C;     // 0.43
 extern const f32 lbl_80563760;     // 0.37

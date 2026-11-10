@@ -3609,6 +3609,7 @@ game/nameent.cpp:
 game/uicar.cpp:
 	.text       start:0x8023FE20 end:0x80243460
 	.ctors      start:0x802ED418 end:0x802ED41C
+	.rodata     start:0x802FA300 end:0x802FA320
 	.data       start:0x803422C0 end:0x803428B0
 	.bss        start:0x80498810 end:0x80498848
 	.sdata      start:0x8055BD60 end:0x8055BD68
@@ -3887,6 +3888,7 @@ game/jumpcam.cpp:
 game/unk_8026B844.cpp:
 	.text       start:0x8026B844 end:0x8026E22C
 	.ctors      start:0x802ED490 end:0x802ED494
+	.rodata     start:0x802FA768 end:0x802FA788
 	.data       start:0x80346A50 end:0x80346A90
 	.bss        start:0x8049A168 end:0x8049A208
 	.sbss       start:0x8055F4D8 end:0x8055F518
@@ -4090,6 +4092,7 @@ game/sunflare.cpp:
 game/chunks.cpp:
 	.text       start:0x802924E8 end:0x80294970
 	.ctors      start:0x802ED4F4 end:0x802ED4F8
+	.rodata     start:0x802FA998 end:0x802FA9B0
 	.data       start:0x80349170 end:0x803492CC
 	.bss        start:0x804B4030 end:0x804B42EC
 	.sdata      start:0x8055C950 end:0x8055C98F
