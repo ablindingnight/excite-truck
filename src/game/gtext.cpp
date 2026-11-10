@@ -905,7 +905,8 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
             fn_80233DD8(ff, cc);
             while (text[i]) {
                 const char* nx;
-                s16 ch = DecodeUTF8(text + i, &nx);
+                const char* p = text + i;
+                s16 ch = DecodeUTF8(p, &nx);
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
                 fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
@@ -1164,7 +1165,8 @@ void fn_802346C8(void) {
                     }
                     const char* next;
                     f32 xsv = lbl_8055F06C[i].xs;
-                    u16 c = DecodeUTF8(lbl_8055F06C[i].text + j, &next);
+                    const char* p = lbl_8055F06C[i].text + j;
+                    u16 c = DecodeUTF8(p, &next);
                     x += xsv * f->glyphs[c].pre;
                     f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
                     if (c != ' ') {
