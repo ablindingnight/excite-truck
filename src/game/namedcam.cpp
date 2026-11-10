@@ -223,6 +223,9 @@ static inline f32 Ease(f32 t) {
 
 // The current pose and field of view of transition `slot`; follows a moving target unless the transition
 // is to a fixed camera (kind 0x22), and ends the transition once it is complete.
+// Name of the default named-camera set (also the format for generated default camera names).
+const char* lbl_8055C638 = "rddefault";
+
 void fn_8027656C(CamPose* out, f32* fov, int slot) {
     f32 t = fn_80277704(slot);
     int kind = lbl_8049FD58[slot].kind;
@@ -682,22 +685,38 @@ void fn_80277A14(CamRec* c, int slot) {
     c->fov = fov;
 }
 
-extern char lbl_80347378[];  // this unit's string pool ("rddefault", ...)
-#define POOL(o) (lbl_80347378 + (o))
+/* Helper name unproven: the camera-table writer is unused, so MWCC drops it but keeps its strings. */
+static void NamedCamWrite(const NamedCam* c) {
+    fn_802E30C8("table namedcam\r\n");
+    fn_802E30C8("\tname\t%s\r\n", c->name);
+    fn_802E30C8("\tlocation_x\t%1.3f\r\n", c->pose.pos.v[0]);
+    fn_802E30C8("\tlocation_y\t%1.3f\r\n", c->pose.pos.v[1]);
+    fn_802E30C8("\tlocation_z\t%1.3f\r\n", c->pose.pos.v[2]);
+    fn_802E30C8("\tbasis_x_x\t%1.3f\r\n", c->pose.rot.m[0]);
+    fn_802E30C8("\tbasis_x_y\t%1.3f\r\n", c->pose.rot.m[1]);
+    fn_802E30C8("\tbasis_x_z\t%1.3f\r\n", c->pose.rot.m[2]);
+    fn_802E30C8("\tbasis_y_x\t%1.3f\r\n", c->pose.rot.m[3]);
+    fn_802E30C8("\tbasis_y_y\t%1.3f\r\n", c->pose.rot.m[4]);
+    fn_802E30C8("\tbasis_y_z\t%1.3f\r\n", c->pose.rot.m[5]);
+    fn_802E30C8("\tbasis_z_x\t%1.3f\r\n", c->pose.rot.m[6]);
+    fn_802E30C8("\tbasis_z_y\t%1.3f\r\n", c->pose.rot.m[7]);
+    fn_802E30C8("\tbasis_z_z\t%1.3f\r\n", c->pose.rot.m[8]);
+    fn_802E30C8("\tfov\t%1.3f\r\n", c->fov);
+}
 
 void fn_80277F84(NamedCam* c, CamReader* r, int n) {
-    c->pose.pos.v[0] = r->GetFloat(POOL(0x178));   // "location_x"
-    c->pose.pos.v[1] = r->GetFloat(POOL(0x184));   // "location_y"
-    c->pose.pos.v[2] = r->GetFloat(POOL(0x190));   // "location_z"
-    c->pose.rot.m[0] = r->GetFloat(POOL(0x19C));   // "basis_x_x"
-    c->pose.rot.m[1] = r->GetFloat(POOL(0x1A8));   // "basis_x_y"
-    c->pose.rot.m[2] = r->GetFloat(POOL(0x1B4));   // "basis_x_z"
-    c->pose.rot.m[3] = r->GetFloat(POOL(0x1C0));   // "basis_y_x"
-    c->pose.rot.m[4] = r->GetFloat(POOL(0x1CC));   // "basis_y_y"
-    c->pose.rot.m[5] = r->GetFloat(POOL(0x1D8));   // "basis_y_z"
-    c->pose.rot.m[6] = r->GetFloat(POOL(0x1E4));   // "basis_z_x"
-    c->pose.rot.m[7] = r->GetFloat(POOL(0x1F0));   // "basis_z_y"
-    c->pose.rot.m[8] = r->GetFloat(POOL(0x1FC));   // "basis_z_z"
+    c->pose.pos.v[0] = r->GetFloat("location_x");
+    c->pose.pos.v[1] = r->GetFloat("location_y");
+    c->pose.pos.v[2] = r->GetFloat("location_z");
+    c->pose.rot.m[0] = r->GetFloat("basis_x_x");
+    c->pose.rot.m[1] = r->GetFloat("basis_x_y");
+    c->pose.rot.m[2] = r->GetFloat("basis_x_z");
+    c->pose.rot.m[3] = r->GetFloat("basis_y_x");
+    c->pose.rot.m[4] = r->GetFloat("basis_y_y");
+    c->pose.rot.m[5] = r->GetFloat("basis_y_z");
+    c->pose.rot.m[6] = r->GetFloat("basis_z_x");
+    c->pose.rot.m[7] = r->GetFloat("basis_z_y");
+    c->pose.rot.m[8] = r->GetFloat("basis_z_z");
     c->fov = r->GetFloat("fov");
     strncpy(c->name, r->GetString("name", ""), 0x10);
     c->valid = 1;
