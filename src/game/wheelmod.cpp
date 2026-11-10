@@ -692,13 +692,19 @@ struct AnimSlot {
     s16 flags;        // offset 0x30
 };
 
-class AnimObj {
+class WObj {
+public:
+    virtual ~WObj(void) {}
+    virtual void Update(void) {}    // 0xC
+    virtual void Draw(void) = 0;    // 0x10
+    virtual void PostDraw(void) {}  // 0x14
+};
+
+class AnimObj : public WObj {
 public:
     AnimObj(void);
     virtual ~AnimObj(void) {}
-    virtual void vf0C(void);
     virtual void Draw(void) = 0;
-    virtual void vf14(void);
     virtual f32 Depth(void);
     virtual void vf1C(void);
     virtual void Set(const AnimSlot* s);
