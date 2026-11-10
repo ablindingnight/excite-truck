@@ -242,12 +242,18 @@ void fn_802E1780(u8* dst, u32 w, u32 pitch) {
 // Swizzles linear rows into 4-row tiles of 8 bytes.
 // NonMatching: same instructions as the target, registers differ (56 rows).
 void fn_802E1804(u8* dst, const u8* src, int w, u32 h, int bpp) {
-    int out = 0;
-    u32 pitch = w * bpp;
-    for (u32 y = 0; y < (h >> 2); y++) {
-        u32 off = y * 4 * pitch;
-        for (u32 k = 0; k < (pitch >> 3); k++, off += 8) {
-            u32* d = (u32*)(dst + out);
+    u32 k;
+    u32 y;
+    u32 pitch;
+    u32* d;
+    u32 off;
+    int out;
+    out = 0;
+    pitch = w * bpp;
+    for (y = 0; y < (h >> 2); y++) {
+        off = y * 4 * pitch;
+        for (k = 0; k < (pitch >> 3); k++, off += 8) {
+            d = (u32*)(dst + out);
             for (int r = 0; r < 4; r++) {
                 d[r * 2] = *(const u32*)((src + off) + pitch * r);
                 d[r * 2 + 1] = *(const u32*)((src + off) + pitch * r + 4);
