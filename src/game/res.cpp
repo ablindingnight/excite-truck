@@ -1595,13 +1595,15 @@ QueueNode* NodeList::First(void) { return head; }
 #pragma push
 #pragma opt_propagation off
 extern "C" void fn_8012E498(const char* name) {
+    int found;
+    AsyncSetQueue* q;
     ResourceSet* set;
     fn_8012E81C(name);
     set = fn_8012BD3C(lbl_8055E000, name);
     if (set && --set->refs == 0) {
-        AsyncSetQueue* q = lbl_8055E014;
+        q = lbl_8055E014;
         if (q) {
-            int found = 0;
+            found = 0;
             QueueNode* n;
             for (n = q->pending.First(); n; n = n->next) {
                 if (!strcasecmp(n->name, name)) {
