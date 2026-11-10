@@ -977,7 +977,7 @@ RVL_SDK/vi/i2c.c:
 
 revolution/vi/vi3in1.c:
 	.text       start:0x8005BA48 end:0x8005D0DC
-	.data       start:0x80311B50 end:0x803120E0
+	.data       start:0x80311B50 end:0x803120DA
 	.bss        start:0x8038F490 end:0x8038F4AC
 	.sdata      start:0x80558FC0 end:0x80558FD1
 	.sbss       start:0x8055DBE0 end:0x8055DBF4
@@ -2126,7 +2126,7 @@ game/mem.cpp:
 	.text       start:0x801281A0 end:0x801292CC
 	.ctors      start:0x802ED12C end:0x802ED130
 	.rodata     start:0x802F8E40 end:0x802F8E50
-	.data       start:0x8032A000 end:0x8032A588
+	.data       start:0x8032A000 end:0x8032A584
 	.bss        start:0x8041E140 end:0x8041E180
 	.sdata      start:0x80559958 end:0x80559976
 	.sbss       start:0x8055DF78 end:0x8055DF9C
