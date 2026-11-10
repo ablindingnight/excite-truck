@@ -230,14 +230,11 @@ static inline void SwapUV(Glyph* g) {
 
 ModuleTag lbl_8055F038;
 
-struct TextVersion {
-    TextVersion(u16 v) { value = v; }
-    u16 value;
-};
+inline u16 TextShort(u16 v) { return v; }  /* Helper name unproven */
 
-TextVersion lbl_8055F040(0x100);
-TextVersion lbl_8055F042(0x405);
-TextVersion lbl_8055F044(0x401);
+u16 lbl_8055F040 = TextShort(0x100);
+u16 lbl_8055F042 = TextShort(0x405);
+u16 lbl_8055F044 = TextShort(0x401);
 UnkStatic7F lbl_8055F048;
 UnkStaticFF00 lbl_8055F04C;
 u32 lbl_8055F050;          // the current text colour
