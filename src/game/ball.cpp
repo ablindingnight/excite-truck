@@ -445,14 +445,14 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
         Node* head;
     };
     List* lists[5];
-    Node* nd;
+    struct { Node* nd; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     int n = 5;
     int i;
     void fn_801B619C(List** out, int* n, const BVec3* c);
     fn_801B619C(lists, &n, c);
     for (i = 0; i < n; i++) {
-        for (nd = lists[i]->head; nd; nd = nd->next) {
-            RigidBody* b = nd->obj->vf40() ? (RigidBody*)nd->obj : 0;
+        for (sp_.nd = lists[i]->head; sp_.nd; sp_.nd = sp_.nd->next) {
+            RigidBody* b = sp_.nd->obj->vf40() ? (RigidBody*)sp_.nd->obj : 0;
             if (b) {
                 BVec3 d;
                 f32 d2;
