@@ -532,6 +532,7 @@ config.libs.append(
             TpRevolution("ipc/ipcProfile.c", Matching),
             TpRevolution("wpad/WPAD.c", Matching),
             TpRevolution("wpad/WPADHIDParser.c", Matching),
+            TpRevolution("wpad/WPADMem.c", NonMatching),
             TpRevolution("mem/mem_expHeap.c", Matching),
             TpRevolution("mtx/mtx.c", Matching),
             TpRevolution("dsp/dsp_debug.c", Matching),
