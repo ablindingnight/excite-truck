@@ -2132,8 +2132,9 @@ void StaticObject::vf1C(void) {
     f32 a;
     if (d2 > shadow.cutoff * shadow.cutoff) {
         f32 d = (f32)sqrt(d2);
+        f32 e = shadow.extend;
         f32 t = FMax(FMin(Unlerp(d - shadow.cutoff, 0.0f, 5.0f), 1.0f), 0.0f);
-        a = Lerp(shadow.extend, 0.0f, t);
+        a = Lerp(e, 0.0f, t);
     } else {
         a = shadow.extend;
     }
