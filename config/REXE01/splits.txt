@@ -1049,6 +1049,19 @@ RVL_SDK/bte/uusb_ppc.c:
 	.sdata      start:0x80558FF0 end:0x8055900C
 	.sbss       start:0x8055DC50 end:0x8055DC68
 
+RVL_SDK/bte/bta_dm_cfg.c:
+	.rodata     start:0x802EE8F0 end:0x802EE980
+	.sdata      start:0x80559010 end:0x80559024
+	.sbss2      start:0x80565220 end:0x80565228
+
+RVL_SDK/bte/bta_hh_cfg.c:
+	.rodata     start:0x802EE980 end:0x802EE98C
+	.sdata      start:0x80559028 end:0x80559034
+
+RVL_SDK/bte/bta_sys_cfg.c:
+	.sdata      start:0x80559038 end:0x8055903C
+	.sdata2     start:0x80560D08 end:0x80560D10
+
 RVL_SDK/bte/bte_hcisu.c:
 	.text       start:0x8007079C end:0x80070854
 	.sbss       start:0x8055DC68 end:0x8055DC70

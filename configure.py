@@ -795,6 +795,9 @@ config.libs.append(
         "progress_category": "sdk",
         "objects": [
             Object(Matching, "RVL_SDK/bte/bd.c"),
+            Object(NonMatching, "RVL_SDK/bte/bta_dm_cfg.c"),
+            Object(NonMatching, "RVL_SDK/bte/bta_hh_cfg.c"),
+            Object(NonMatching, "RVL_SDK/bte/bta_sys_cfg.c"),
             Object(Matching, "RVL_SDK/bte/bta_dm_act.c"),
             Object(Matching, "RVL_SDK/bte/bta_dm_api.c"),
             Object(Matching, "RVL_SDK/bte/bta_dm_main.c"),
