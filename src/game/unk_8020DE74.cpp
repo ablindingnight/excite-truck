@@ -106,20 +106,20 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
         owner = *(void **)(vehicle + 0x1EC);
         isCar = *(long *)(vehicle + 0x10) == 0x50434152;
         if (isCar) {
-            hud->p28 = (HudPart *)fn_802077A4(names + 0x00, 5, res, res2);
-            hud->air = (HudPart *)fn_802077A4(names + 0x10, 8, res, res2);
+            hud->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
+            hud->air = (HudPart *)fn_802077A4("airtime.sfx", 8, res, res2);
         } else {
             hud->p28 = 0;
             hud->air = 0;
         }
-        hud->p08 = (HudPart *)fn_802077A4(names + 0x1C, 5, res, res2);
+        hud->p08 = (HudPart *)fn_802077A4("backfire.sfx", 5, res, res2);
         hud->flashCount = 0;
         memset(hud->flashes, 0, 8);
         hud->flash = 0;
         HudPart **slot = hud->flashes;
         for (i = 0; i < 2; slot++, i++) {
             HudPart *part;
-            fn_801345D8(buf, 0x20, names + 0x2C, i + 1);
+            fn_801345D8(buf, 0x20, "boost%d.sfx", i + 1);
             part = (HudPart *)fn_802077A4(buf, 5, res, res2);
             *slot = part;
             if (part == 0) break;
@@ -129,7 +129,7 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
             hud->flashCount++;
         }
         if (isCar) {
-            hud->speedLines = (HudPart *)fn_802077A4(names + 0x38, 5, res, res2);
+            hud->speedLines = (HudPart *)fn_802077A4("boost_manual.sfx", 5, res, res2);
         } else {
             hud->speedLines = 0;
         }
@@ -140,15 +140,15 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
         if (hud->p28 != 0) hud->p28->owner = owner;
         if (hud->air != 0) hud->air->owner = owner;
         if (isCar) {
-            hud->p1C = (HudPart *)fn_802077A4(names + 0x4C, 5, res, res2);
+            hud->p1C = (HudPart *)fn_802077A4("car_gnd1.sfx", 5, res, res2);
         } else {
             hud->p1C = 0;
         }
-        hud->p20 = (HudPart *)fn_802077A4(names + 0x5C, 5, res, res2);
-        hud->splash = (HudPart *)fn_802077A4(names + 0x68, 5, res, res2);
+        hud->p20 = (HudPart *)fn_802077A4("badland.sfx", 5, res, res2);
+        hud->splash = (HudPart *)fn_802077A4("waterdrive.sfx", 5, res, res2);
         if (isCar) {
-            hud->dive = (HudPart *)fn_802077A4(names + 0x78, 5, res, res2);
-            hud->surface = (HudPart *)fn_802077A4(names + 0x88, 5, res, res2);
+            hud->dive = (HudPart *)fn_802077A4("water_in.sfx", 5, res, res2);
+            hud->surface = (HudPart *)fn_802077A4("water_out.sfx", 5, res, res2);
         } else {
             hud->dive = 0;
             hud->surface = 0;
@@ -156,16 +156,16 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
         if (hud->splash != 0) hud->splash->owner = owner;
         if (hud->dive != 0) hud->dive->owner = owner;
         if (hud->surface != 0) hud->surface->owner = owner;
-        hud->drift = (HudPart *)fn_802077A4(names + 0x98, 5, res, res2);
+        hud->drift = (HudPart *)fn_802077A4("dirtskid.sfx", 5, res, res2);
         if (hud->drift != 0) hud->drift->owner = owner;
         if (isCar) {
-            hud->p24 = (HudPart *)fn_802077A4(names + 0xA8, 5, res, res2);
-            hud->p2C = (HudPart *)fn_802077A4(names + 0xB8, 5, res, res2);
-            hud->boost = (HudPart *)fn_802076A0(names + 0xCC, 1, owner, 2);
-            hud->tilt = (HudPart *)fn_802076A0(names + 0xDC, 1, owner, 2);
-            hud->p50 = (HudPart *)fn_802076A0(names + 0xEC, 1, owner, 2);
-            hud->p44 = (HudPart *)fn_802076A0(names + 0x100, 1, owner, 0);
-            hud->start = (HudPart *)fn_802076A0(names + 0x110, 1, owner, 0);
+            hud->p24 = (HudPart *)fn_802077A4("niceland.sfx", 5, res, res2);
+            hud->p2C = (HudPart *)fn_802077A4("boost_turbotap.sfx", 5, res, res2);
+            hud->boost = (HudPart *)fn_802076A0("heatbeep.sfx", 1, owner, 2);
+            hud->tilt = (HudPart *)fn_802076A0("overheat.sfx", 1, owner, 2);
+            hud->p50 = (HudPart *)fn_802076A0("overheat_start.sfx", 1, owner, 2);
+            hud->p44 = (HudPart *)fn_802076A0("watersink.sfx", 1, owner, 0);
+            hud->start = (HudPart *)fn_802076A0("invulnerable.sfx", 1, owner, 0);
         } else {
             hud->p24 = 0;
             hud->p2C = 0;
@@ -657,25 +657,7 @@ extern const float lbl_805633FC;
 // The Hud's .data (0x8033C7A0-0x8033C940): the sound/part name pool its constructor indexes, then the vtable
 // (two zero header words and the 13 methods), a second small table (fn_801837DC) and zero words.
 void fn_801837DC(void);
-char lbl_8033C7A0[0x124] =
-    "waterbounce.sfx\0"
-    "airtime.sfx\0"
-    "backfire.sfx\0\0\0\0"
-    "boost%d.sfx\0"
-    "boost_manual.sfx\0\0\0\0"
-    "car_gnd1.sfx\0\0\0\0"
-    "badland.sfx\0"
-    "waterdrive.sfx\0\0"
-    "water_in.sfx\0\0\0\0"
-    "water_out.sfx\0\0\0"
-    "dirtskid.sfx\0\0\0\0"
-    "niceland.sfx\0\0\0\0"
-    "boost_turbotap.sfx\0\0"
-    "heatbeep.sfx\0\0\0\0"
-    "overheat.sfx\0\0\0\0"
-    "overheat_start.sfx\0\0"
-    "watersink.sfx\0\0\0"
-    "invulnerable.sfx\0\0";
+
 void *lbl_8033C8C4[31] = {
     0, 0, (void *)fn_8020E288, (void *)fn_8020E598, (void *)fn_8020F15C, (void *)fn_8020F1F8, (void *)fn_8020F21C, (void *)fn_8020F240, (void *)fn_8020F30C, (void *)fn_8020F330, (void *)fn_8020F354, (void *)fn_8020F284, (void *)fn_8020F378, (void *)fn_8020F39C, (void *)fn_8020F3A0, 0, 0, (void *)fn_801837DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
