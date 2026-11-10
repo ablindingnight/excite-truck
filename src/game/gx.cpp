@@ -2439,3 +2439,88 @@ int fn_802D3EBC(void) { return lbl_8055D0B8 >= 0; }
 void fn_802D3ECC(u16 blend) { lbl_8055FD86 = blend; }
 
 }  // extern "C"
+
+
+struct HeapBlock {
+    u32 magic;        // offset 0x0
+    s32 size;         // offset 0x4
+    HeapBlock* next;  // offset 0x8
+    void* heap;       // offset 0xC
+};
+
+struct SimpleHeap {
+    ~SimpleHeap(void) {
+        if (used) {
+            Dump("~SimpleHeap");
+            fn_802E317C("SimpleHeap Destroyed with pending allocations");
+        }
+    }
+    void* Alloc(u32 size) {
+        s32 n = (size + align) & ~align;
+        HeapBlock** best = 0;
+        s32 bestSize = 0x7FFFFFFF;
+        void* res = 0;
+        for (HeapBlock** l = &free; *l; l = &(*l)->next) {
+            HeapBlock* b = *l;
+            if (b->size >= n && bestSize > b->size) {
+                best = l;
+                bestSize = b->size;
+            }
+        }
+        if (best) {
+            HeapBlock* b = *best;
+            HeapBlock* split = 0;
+            HeapBlock* next = b->next;
+            s32 rest = b->size - n;
+            s32 hdr = (align + 0x10) & ~align;
+            if (rest > hdr + 0x20) {
+                HeapBlock* s = (HeapBlock*)((u8*)b + align + n + 1);
+                s->magic = 0xABCFEED0;
+                s->next = 0;
+                s->size = rest - ((align + 0x10) & ~align);
+                s->heap = this;
+                b->size = n;
+                split = s;
+            }
+            if (split) {
+                split->next = next;
+                *best = split;
+            } else {
+                *best = next;
+            }
+            b->next = used;
+            used = b;
+            res = (u8*)b + align + 1;
+        }
+        if (!res && active) {
+            fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
+        }
+        return res;
+    }
+    void Dump(const char* who) {
+        fn_802E30C8("SimpleHeap dump: %s", who);
+        fn_802E30C8("Allocated:");
+        u32 total = 0;
+        for (HeapBlock* b = used; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            total += b->size;
+        }
+        fn_802E30C8("	%dK total", total >> 10);
+        u32 nfree = 0;
+        fn_802E30C8("Free:");
+        for (HeapBlock* b = free; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            nfree += b->size;
+        }
+        fn_802E30C8("	%dK total", nfree >> 10);
+    }
+    u8 active;        // offset 0x0
+    u32 align;        // offset 0x4
+    HeapBlock* free;  // offset 0x8
+    HeapBlock* used;  // offset 0xC
+};
+
+/* Helper names unproven. gx saw the SimpleHeap class (same as tevbink.cpp) and two unused static users: MWCC
+   drops the dead functions but keeps the strings of the inlined methods at the end of .data. */
+static void HeapDelete(SimpleHeap* h) { delete h; }
+static void* HeapAlloc(SimpleHeap* h, u32 n) { return h->Alloc(n); }
