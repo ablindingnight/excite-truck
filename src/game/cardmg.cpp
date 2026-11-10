@@ -560,6 +560,7 @@ static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
+    f32 roll;
     DmgPose* mdl = (DmgPose*)m;
     EVec* e = car->ease;
     for (int i = 0; i < car->nPoints; i++) {
@@ -569,7 +570,7 @@ void fn_8018DA5C(u8* p, u8* m) {
     if (U8(p, 0x26E0)) {
         f32 lean = F32(p, 0x26E8);
         f32 twist = 0.2f * F32(p, 0x26E4);
-        f32 roll = 0.1f * F32(p, 0x26EC);
+        roll = 0.1f * F32(p, 0x26EC);
         lean = lean > -0.25f ? lean : -0.25f;
         for (int i = 1; i < car->nPoints; i++) {
             u8* pt = PTR(p, 0x26C) + i * 0x34;
