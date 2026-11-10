@@ -975,8 +975,9 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
             if (pen > 0.0f) {
                 f32 inv = 1.0f / dist;
                 n.v[0] = dd.v[0] * inv;
-                n.v[1] = dd.v[1] * inv * 0.2f;
+                n.v[1] = dd.v[1] * inv;
                 n.v[2] = dd.v[2] * inv;
+                n.v[1] *= 0.2f;
                 PSVECNormalize(n.v, n.v);
                 f32 k = -0.5f * ((r + dist) - s);
                 at.v[0] = cv[0] + n.v[0] * k;
