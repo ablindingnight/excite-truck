@@ -1065,3 +1065,23 @@ Unk_804900AC lbl_804900AC;
 Unk_804902C4 lbl_804902C4;
 char lbl_804904D0[0x40];
 #pragma cplusplus off
+
+/* .sbss owned by this unit (0x8055EEB0-0x8055EEF7), defined in reverse address order: this C block is emitted last-defined-first. */
+unsigned char lbl_8055EEF6;
+unsigned char lbl_8055EEF5;
+unsigned char lbl_8055EEF4;
+long lbl_8055EEF0;
+unsigned char lbl_8055EEED;
+unsigned char lbl_8055EEEC;
+long lbl_8055EEE8;
+long lbl_8055EEE4;
+long lbl_8055EEE0;
+void * lbl_8055EEDC;
+void * lbl_8055EED8;
+long lbl_8055EED4;
+long lbl_8055EED0;
+long lbl_8055EECC;
+unsigned char lbl_8055EEC8;
+long lbl_8055EEC4;
+unsigned char lbl_8055EEC0;
+long lbl_8055EEBC;
