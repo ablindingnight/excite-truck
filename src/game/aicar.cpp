@@ -2181,7 +2181,7 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = 0.61f + lbl_8055A488 + F32(d, 0x278) + F32(d, 0x7C) + 0.5f * F32(d, 0x84);
+            f32 lo = 0.61f + lbl_8055A488 + F32(d, 0x278) + F32(d, 0x7C) + lbl_8056215C * F32(d, 0x84);
             F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
         }
         if (U8(d, 0x9C)) {

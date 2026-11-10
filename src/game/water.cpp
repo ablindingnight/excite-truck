@@ -770,6 +770,7 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 }
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
+extern const f32 lbl_80564E24;  // -10
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -874,9 +875,9 @@ void WaterSystem::Draw(void) {
     PSVECCrossProduct(&upv, &ax, &fw);
     PVec e0;
     PVec e1;
-    e0.x = q.x + fw.x * -10.0f;
-    e0.y = q.y + fw.y * -10.0f;
-    e0.z = q.z + fw.z * -10.0f;
+    e0.x = q.x + fw.x * lbl_80564E24;
+    e0.y = q.y + fw.y * lbl_80564E24;
+    e0.z = q.z + fw.z * lbl_80564E24;
     e1.x = q.x + fw.x * 10.0f;
     e1.y = q.y + fw.y * 10.0f;
     e1.z = q.z + fw.z * 10.0f;
@@ -884,9 +885,9 @@ void WaterSystem::Draw(void) {
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
         sv[i].pos = *((i & 1) ? &e1 : &e0);
-        sv[i].pos.x += cam2.y.x * ((i & 2) ? -10.0f : 0.0f);
-        sv[i].pos.y += cam2.y.y * ((i & 2) ? -10.0f : 0.0f);
-        sv[i].pos.z += cam2.y.z * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.x += cam2.y.x * ((i & 2) ? lbl_80564E24 : 0.0f);
+        sv[i].pos.y += cam2.y.y * ((i & 2) ? lbl_80564E24 : 0.0f);
+        sv[i].pos.z += cam2.y.z * ((i & 2) ? lbl_80564E24 : 0.0f);
         sv[i].v = 0.0f;
         sv[i].u = 0.0f;
         sv[i].color = lbl_8055FAF0;

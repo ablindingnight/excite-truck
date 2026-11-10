@@ -409,6 +409,7 @@ extern const char lbl_80344148[40];
 void fn_80234AFC(const void*, f32, f32, const char*, ...);
 }
 
+extern const f32 lbl_80563954;  // 0.5
 void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
@@ -426,8 +427,8 @@ void ProfileKeyboardState::Draw(void) {
     fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, 4.0f + (top - cellHeight), 0.0f);
     fn_80230924(0xFFAF7F00, left, top, left + 4.0f, top - cellHeight, 0.0f);
     fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - 4.0f, top - cellHeight, 0.0f);
-    y = y - cellHeight * 0.5f;
-    f32 startX = x + cellWidth * 0.5f;
+    y = y - cellHeight * lbl_80563954;
+    f32 startX = x + cellWidth * lbl_80563954;
     for (int row = 0; row < 4; row++) {
         x = startX;
         for (int column = 0; column < 10; column++) {
