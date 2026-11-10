@@ -212,7 +212,9 @@ int fn_801DB348(int x, int z, f32* out, s32* mat, u16* unused) {
     if (mat) {
         *mat = 0;
     }
-    *out = lbl_80446F08.data[(z & (lbl_80446F08.h - 1)) * lbl_80446F08.w + (x & (lbl_80446F08.w - 1))];
+    x &= lbl_80446F08.w - 1;
+    z &= lbl_80446F08.h - 1;
+    *out = lbl_80446F08.data[z * lbl_80446F08.w + x];
     return 1;
 }
 
