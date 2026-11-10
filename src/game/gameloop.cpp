@@ -191,9 +191,6 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
 void fn_80011A2C(void);
 void fn_802C9904(void);
 
-void fn_80007238(void);
-int fn_800074EC(int key);
-void fn_80007498(void);
 void fn_800070DC(void);
 int fn_800075A0(int player);
 int fn_80007554(int player, u32 type, int key);
@@ -204,11 +201,6 @@ void fn_8000CE60(void);
 void fn_8000CEF0(void);
 void fn_8000D000(int (*callback)(int), void (*draw)(void), int item);
 void fn_8000D048(int (*callback)(int), void (*draw)(void), int item);
-void fn_8000D070(void);
-void fn_8000D100(void);
-void fn_8000D19C(void);
-void fn_8000D1DC(void);
-int fn_8000D540(int key);
 int fn_8000D75C(void);
 int fn_8000D764(void);
 int fn_800074C4(void);
@@ -274,6 +266,15 @@ void fn_802112AC(void);
 void fn_802113D8(void);
 void fn_802114C4(void);
 }
+
+void fn_80007238(void);
+int fn_800074EC(int key);
+void fn_80007498(void);
+void fn_8000D070(void);
+void fn_8000D100(void);
+void fn_8000D19C(void);
+void fn_8000D1DC(void);
+int fn_8000D540(int key);
 int IsLoadingDone(void);
 int IsLoadingActive(void);
 void LoadingUpdate(void);
@@ -543,6 +544,9 @@ void gameloop_postrace(RaceResult* res) {
         }
     }
 }
+
+/* Helper name unproven: unused, so MWCC drops the function but keeps its string in .data */
+static const char* InterludeKey(void) { return "interlude_disabled"; }
 
 void fn_8000B210(void) {
     int saved;
