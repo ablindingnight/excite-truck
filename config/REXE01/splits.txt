@@ -3374,6 +3374,7 @@ game/unk_8020F3B4.c:
 game/uiapi.cpp:
 	.text       start:0x8021165C end:0x80215E68
 	.ctors      start:0x802ED3AC end:0x802ED3B0
+	.rodata     start:0x802F9E68 end:0x802F9EE0
 	.bss        start:0x80490510 end:0x804908B0
 	.sbss       start:0x8055EEF8 end:0x8055EF60
 	.sdata2     start:0x80563430 end:0x80563458
