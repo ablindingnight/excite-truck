@@ -286,7 +286,8 @@ void EngineSound::Update(int muted) {
             a = (r - e->rpm.hi) * e->rpm.invHi;
             a = 1.0f - ((1.0f < a) ? 1.0f : a);
         }
-        f32 ga = Smooth(a) * e->rpm.gain;
+        f32 sa = Smooth(a);
+        f32 ga = sa * e->rpm.gain;
         f32 b = 1.0f;
         if (t < e->throttle.lo) {
             b = (e->throttle.lo - t) * e->throttle.invLo;
@@ -295,7 +296,8 @@ void EngineSound::Update(int muted) {
             b = (t - e->throttle.hi) * e->throttle.invHi;
             b = 1.0f - ((1.0f < b) ? 1.0f : b);
         }
-        f32 gb = Smooth(b) * e->throttle.gain;
+        f32 sb = Smooth(b);
+        f32 gb = sb * e->throttle.gain;
         f32 level = lbl_8055EDB8 * ga * gb;
         e->snd->Play();
         e->snd->SetPitch(r * e->invRpm);

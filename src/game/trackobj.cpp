@@ -2127,7 +2127,8 @@ static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 void StaticObject::vf1C(void) {
     f32 s = fn_801E88F0(-1);
     f32 s2 = s * s;
-    f32 d2 = fn_802C88E8(&frame.pos) * s2;
+    f32 dd = fn_802C88E8(&frame.pos);
+    f32 d2 = dd * s2;
     f32 a;
     if (d2 > shadow.cutoff * shadow.cutoff) {
         f32 d = (f32)sqrt(d2);
