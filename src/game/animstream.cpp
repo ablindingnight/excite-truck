@@ -38,7 +38,7 @@ struct AnimRes {
     s32 numBones;         // offset 0x8
     f32 duration;         // offset 0xC
     char name[16];        // offset 0x10
-    PackedKey frames[1];  // offset 0x20
+    u64 frames[1];  // offset 0x20
 };
 
 struct AnimInst {
@@ -257,7 +257,7 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
         while (a->frame < r->numFrames) {
             AnimKey k;
             if (a->lastFrame != a->frame) {
-                PackedKey pk;
+                u64 pk;
                 if (a->frame < r->resident) {
                     pk = r->frames[a->frame];
                 } else if (!fn_8012EFB0(a->buf, &pk, 8)) {
@@ -269,8 +269,8 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                     }
                     break;
                 }
-                u64 v = ((u64)pk.hi << 32) | pk.lo;
-                u32 b6 = pk.lo & 0x3F;
+                u64 v = pk;
+                u32 b6 = (u32)v & 0x3F;
                 k.bone = b6 - 1;
                 u32 tv = ((u32)(v >> 6) & 0x3FF) << 6;
                 f32 c = AMIN(1.0f, Dequant(tv, 0.0f, 65535.0f));
@@ -278,9 +278,9 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                 k.t = Lerp(0.0f, 17.05f, c);
                 if (b6 != 0) {
                     u32 qx = ((u32)(v >> 16) & 0xFFF) << 4;
-                    u32 qz = (pk.hi >> 4) & 0xFFF0;
+                    u32 qz = ((u32)(v >> 32) >> 4) & 0xFFF0;
                     u32 qy = ((u32)(v >> 28) & 0xFFF) << 4;
-                    u32 qw = (pk.hi >> 16) & 0xFFF0;
+                    u32 qw = ((u32)(v >> 32) >> 16) & 0xFFF0;
                     c = AMIN(1.0f, Dequant(qx, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
                     k.q.x = Lerp(-1.0f, 2.0f, c);
@@ -294,9 +294,9 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                     c = c > 0.0f ? c : 0.0f;
                     k.q.w = Lerp(-1.0f, 2.0f, c);
                 } else {
-                    u32 pz = pk.hi >> 16;
+                    u32 pz = (u32)(v >> 32) >> 16;
                     u32 px = (u32)(v >> 16) & 0xFFFF;
-                    u32 py = pk.hi & 0xFFFF;
+                    u32 py = (u32)(v >> 32) & 0xFFFF;
                     c = AMIN(1.0f, Dequant(px, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
                     k.q.x = 20.0f * (Lerp(-1.0f, 2.0f, c));
