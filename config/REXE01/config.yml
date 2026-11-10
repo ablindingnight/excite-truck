@@ -12,6 +12,21 @@ detect_strings: true
 write_asm: true
 # dtk's pointer analysis mistakes OSInit's literal 0x80004000 (start of usable MEM1, the SDK writes
 # (void*)0x80004000) for a reference to memcpy, which happens to sit at that address.
+# mp3layer3 MP3_DecodeBigValues builds the linbits and Huffman table addresses with lis/subi pairs whose halves
+# meet through stack slots, so dtk finds no relocation and the target object carries raw 0x8032xxxx numbers.
+add_relocations:
+- source: .text:0x800C0510
+  type: ha
+  target: lbl_8031C298
+- source: .text:0x800C0548
+  type: l
+  target: lbl_8031C298
+- source: .text:0x800C0530
+  type: ha
+  target: lbl_8031D580
+- source: .text:0x800C0554
+  type: l
+  target: lbl_8031D580
 block_relocations:
 - source: 0x8004ADB0
 - source: 0x8004AE28
