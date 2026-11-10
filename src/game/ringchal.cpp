@@ -1832,8 +1832,9 @@ inline void RingChalMaster::vf40(void) {
                 if (a > 0.01f) {
                     int j;
                     fn_802C9900(a);
-                    for (j = 0; j < s->infos->count; j++) {
-                        ObjInfo* o = &s->infos->data[j];
+                    int off = 0;
+                    for (j = 0; j < s->infos->count; j++, off += sizeof(s->infos->data[0])) {
+                        ObjInfo* o = (ObjInfo*)((u8*)s->infos->data + off);
                         if (o->type == 1) {
                             fn_802C744C(o->model, &o->mtx);
                         }
@@ -2070,12 +2071,13 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
             mid.y = 0.0f;
             dir.x = 0.0f;
             dir.y = 0.0f;
-            for (i = 0; i < 3; i++) {
+            V2* w = pts;
+            for (i = 0; i < 3; i++, w++) {
                 char b[0x10];
                 fn_801345D8(b, 0x10, "bound%d", i);
                 ValPoint p = sp->GetPoint(b);
-                pts[i].x = p.x;
-                pts[i].y = p.y;
+                w->x = p.x;
+                w->y = p.y;
             }
             k = 2;
             {

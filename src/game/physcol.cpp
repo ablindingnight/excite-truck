@@ -343,9 +343,11 @@ int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal,
         PhobCell* cells[5];
         fn_801B619C(cells, &nc, from);
         PhobNode* nd;
+        PhobCell** w;
         Phob* p;
-        for (int k = 0; k < nc; k++) {
-            for (nd = cells[k]->head; nd; nd = nd->next) {
+        int k;
+        for (k = 0, w = cells; k < nc; w++, k++) {
+            for (nd = (*w)->head; nd; nd = nd->next) {
                 p = nd->phob;
                 if (p && p->Solid()) {
                     for (int j = 0; j < p->count; j++) {

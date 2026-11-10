@@ -288,8 +288,9 @@ void fn_80270EC4(u8* car, u32 id) {
                 f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
                 int i;
                 int last = n - 1;
-                for (i = 0; i < last; i++) {
-                    fn_80270DB0(&refs[i], &refs[i + 1], wrap);
+                AngleRef* ref = refs;
+                for (i = 0; i < last; ref++, i++) {
+                    fn_80270DB0(ref, &refs[i + 1], wrap);
                 }
                 fn_80270DB0(&refs[last], &refs[0], wrap);
             }

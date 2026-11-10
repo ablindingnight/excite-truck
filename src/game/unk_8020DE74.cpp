@@ -116,15 +116,16 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
         hud->flashCount = 0;
         memset(hud->flashes, 0, 8);
         hud->flash = 0;
-        for (i = 0; i < 2; i++) {
+        HudPart **slot = hud->flashes;
+        for (i = 0; i < 2; slot++, i++) {
             HudPart *part;
             fn_801345D8(buf, 0x20, names + 0x2C, i + 1);
             part = (HudPart *)fn_802077A4(buf, 5, res, res2);
-            hud->flashes[i] = part;
+            *slot = part;
             if (part == 0) break;
             part->owner = owner;
-            HudPart_SetLevel(hud->flashes[i], lbl_80563368);
-            hud->flash = hud->flashes[i];
+            HudPart_SetLevel(*slot, lbl_80563368);
+            hud->flash = *slot;
             hud->flashCount++;
         }
         if (isCar) {

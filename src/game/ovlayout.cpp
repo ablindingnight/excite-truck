@@ -827,8 +827,9 @@ public:
                     }
                 }
             }
-            for (i = 0; i < arts->a.count; i++) {
-                a = &arts->a.data[i];
+            int off = 0;
+            for (i = 0; i < arts->a.count; i++, off += sizeof(arts->a.data[0])) {
+                a = (ArtElem*)((u8*)arts->a.data + off);
                 c = ctx;
                 other = 1;
                 if (c->hover && a == c->hover->target) {

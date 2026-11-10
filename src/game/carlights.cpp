@@ -141,7 +141,8 @@ void fn_80294970(void) {
     lbl_8055C990 = fn_802CAC28("lights.tex", 0);
     lbl_8055C994 = fn_802CAC28("glowz.tex", 0);
     if (fn_801E1F44()->night || fn_801E1F44()->precip == 1) {
-        for (i = 0; i < fn_80287B14(); i++) {
+        s = lbl_804B42F0;
+        for (i = 0; i < fn_80287B14(); i++, s++) {
             ValVec3 white;
             SetVec((Vec*)&white, 1.0f, 1.0f, 1.0f);
             ValVec3 red;
@@ -155,15 +156,15 @@ void fn_80294970(void) {
             Vec up;
             SetVec(&up, 0.0f, 0.0f, 1.0f);
             s32 model = fn_80288208(i);
-            fn_80295CC4(&lbl_804B42F0[i], model, "left headlight", white, 0, front, 0.35f);
-            fn_80295CC4(&lbl_804B42F0[i], model, "right headlight", white, 0, front, 0.35f);
-            fn_80295CC4(&lbl_804B42F0[i], model, "left taillight", red, 0, back, 0.15f);
-            fn_80295CC4(&lbl_804B42F0[i], model, "right taillight", red, 0, back, 0.15f);
+            fn_80295CC4(s, model, "left headlight", white, 0, front, 0.35f);
+            fn_80295CC4(s, model, "right headlight", white, 0, front, 0.35f);
+            fn_80295CC4(s, model, "left taillight", red, 0, back, 0.15f);
+            fn_80295CC4(s, model, "right taillight", red, 0, back, 0.15f);
             const char* accFmt = "acc light %d";
             for (int j = 0; j < 8; j++) {
                 char buf[0x40];
                 fn_801345D8(buf, 0x40, accFmt, j + 1);
-                fn_80295CC4(&lbl_804B42F0[i], model, buf, acc, 0, up, 0.15f);
+                fn_80295CC4(s, model, buf, acc, 0, up, 0.15f);
             }
         }
     }

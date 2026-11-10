@@ -645,8 +645,9 @@ void mrModelFixup(ModelInfo* m, const char* name) {
             u8* p = (u8*)x + 0x2C;
             for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
-                for (int k = 0; k < 12; k++) {
-                    Swap32(&q[k]);
+                u32* w = q;
+                for (int k = 0; k < 12; w++, k++) {
+                    Swap32(w);
                 }
                 p += 0x50;
             }

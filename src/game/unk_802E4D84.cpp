@@ -1120,8 +1120,9 @@ void fn_802E6264(void) {
         if (lbl_8055FFAC >= 10) {
             lbl_8055FFAC = 0;
         }
-        for (i = 0; i < 10; i++) {
-            used |= lbl_804FC658[i];
+        int off = 0;
+        for (i = 0; i < 10; off += sizeof(lbl_804FC658[0]), i++) {
+            used |= *(unsigned int*)((u8*)lbl_804FC658 + off);
         }
         lbl_8055FFA8 = used;
         lbl_8055FFA6 = 0;

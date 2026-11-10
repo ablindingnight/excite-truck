@@ -558,8 +558,9 @@ void DrawLoadingScreen(int alpha, f32 t) {
 
         fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, lbl_8055D658);
         int rows[3] = {10, 8, 9};
-        for (i = 0; i < sizeof(rows) / sizeof(rows[0]); i++) {
-            int kind = rows[i];
+        int* row = rows;
+        for (i = 0; i < sizeof(rows) / sizeof(rows[0]); row++, i++) {
+            int kind = *row;
             const char* label = "";
             char value[0x40] = {0};
             f32 y;

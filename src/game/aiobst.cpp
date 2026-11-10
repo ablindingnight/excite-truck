@@ -696,8 +696,10 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
             int c;
             int mid;
             if (flatten) {
-                for (i = 0; i < 64; i++) {
-                    bins.bins[i].dist = bins.bins[i].dist >= range ? nearest : range;
+                int off = 0;
+                for (i = 0; i < 64; i++, off += sizeof(bins.bins[0])) {
+                    Bin* bn = (Bin*)((u8*)bins.bins + off);
+                    bn->dist = bn->dist >= range ? nearest : range;
                 }
             }
             {

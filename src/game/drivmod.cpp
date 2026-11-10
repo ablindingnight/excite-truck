@@ -748,12 +748,13 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
     n = 32;
     fn_801E5998(d->skel, bones, &n);
-    for (int k = 0; k < n; k++) {
+    DBone* bone = bones;
+    for (int k = 0; k < n; bone++, k++) {
         if (k) {
-            MulM(&pose[k].rot.r[0].x, &bones[k].m.row[0].x, &rot.r[0].x);
-            MulVec((DVec3*)&pose[k].pos, &bones[k].m.pos, (DMtx*)&rot);
+            MulM(&pose[k].rot.r[0].x, &bone->m.row[0].x, &rot.r[0].x);
+            MulVec((DVec3*)&pose[k].pos, &bone->m.pos, (DMtx*)&rot);
         } else {
-            pose[k] = *(BonePose*)&bones[k];
+            pose[k] = *(BonePose*)bone;
         }
         f32 xv = pose[k].pos.x;
         pose[k].pos.x = xv + d->butt.x;
