@@ -343,10 +343,10 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     f32 inv = 1.0f / len;
     dir.x *= inv;
     dir.y *= inv;
-    side.x = dir.y;
-    side.y = -dir.x;
     org.x = F32(m, 0x24);
     org.y = F32(m, 0x2C);
+    side.x = dir.y;
+    side.y = -dir.x;
     r.x = Dot4_hm(side.x, dir.x, in->x, in->y) + org.x;
     r.y = side.y * in->x + dir.y * in->y + org.y;
     out->x = r.x;
@@ -365,10 +365,10 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
     f32 inv = 1.0f / len;
     dir.y *= inv;
     dir.x *= inv;
-    side.x = dir.y;
-    side.y = -dir.x;
     org.x = F32(m, 0x24);
     org.y = F32(m, 0x2C);
+    side.x = dir.y;
+    side.y = -dir.x;
     rel.x = in->x - org.x;
     rel.y = in->y - org.y;
     out->x = rel.x * side.x + rel.y * side.y;
