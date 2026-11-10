@@ -660,8 +660,10 @@ void CarBody_vf08(u8* p, u8* desc) {
     F32(p, 0x5D4) = back.y * 0.0254f;
     F32(p, 0x5D8) = back.z * 0.0254f;
     F32(p, 0x5C0) = 0.0174f * chassis->GetFloat("head_pitch");
-    if (chassis->Has("treehit_class")) {
-        S32(p, 0x5E8) = chassis->GetEnum("treehit_class", "light");
+    const char* treeClasses = "light\0medium\0heavy\0\0";
+    const char* key = "treehit_class";
+    if (chassis->Has(key)) {
+        S32(p, 0x5E8) = chassis->GetEnum(key, treeClasses);
     } else {
         S32(p, 0x5E8) = 1;
     }
@@ -3495,6 +3497,11 @@ extern const f32 lbl_80561D58;
 extern const f32 lbl_80561CD0;
 
 // Re-applies the tuned body setup (mass, inertia, elements, gearing) after a change.
+/* Helper name unproven: unused, so MWCC drops it but keeps its string. */
+static void KickReport(int id, f32 mph, f32 terr) {
+    fn_802E30C8("%d: terrain morph pants-kick: %.2f MPH, terr %.2f MPH", id, mph, terr);
+}
+
 void fn_8018A180(u8* p) {
     if (PTR(p, 0x328)) {
         fn_80279B28(PTR(p, 0x328), p + 0x1E44);
