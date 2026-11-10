@@ -956,6 +956,7 @@ void PartSys::DrawAnimated(Particle* p, int n) {
     batch.Flush();
 }
 
+static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  /* Helper name unproven */
 void PartSys::DrawRotating(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
     f32 now = lbl_8055F738;
@@ -993,7 +994,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[1].pos.x = q[0].pos.x + a.x * two;
         q[1].pos.y = q[0].pos.y + a.y * two;
         q[1].pos.z = q[0].pos.z + two * a.z;
-        q[2].pos.x = q[1].pos.x + b.x * mtwo;
+        q[2].pos.x = Lerp_hm(q[1].pos.x, mtwo, b.x);
         q[2].pos.y = q[1].pos.y + b.y * mtwo;
         q[2].pos.z = q[1].pos.z + b.z * mtwo;
         q[3].pos.x = q[0].pos.x + b.x * mtwo;

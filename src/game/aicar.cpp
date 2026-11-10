@@ -330,6 +330,7 @@ f32 fn_801931EC(f32 t, f32 len) {
     return x > lo ? x : lo;
 }
 
+static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
 void fn_8019321C(V2* out, const V2* in, const u8* m) {
     V2 org;
     V2 side;
@@ -346,7 +347,7 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     side.y = -dir.x;
     org.x = F32(m, 0x24);
     org.y = F32(m, 0x2C);
-    r.x = side.x * in->x + dir.x * in->y + org.x;
+    r.x = Dot4_hm(side.x, dir.x, in->x, in->y) + org.x;
     r.y = side.y * in->x + dir.y * in->y + org.y;
     out->x = r.x;
     out->y = r.y;

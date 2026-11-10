@@ -807,6 +807,7 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     return s;
 }
 
+static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
 void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
     f32 i11;
     f32 det = c->x * b->y - b->x * c->y;
@@ -817,7 +818,7 @@ void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
     s->mtx[0][0] = i00;
     s->mtx[0][1] = 0.0f;
     s->mtx[0][2] = i01;
-    s->mtx[0][3] = -(i00 * a->x + i01 * a->y);
+    s->mtx[0][3] = -(Dot4_hm(i00, i01, a->x, a->y));
     s->mtx[1][0] = i10;
     s->mtx[1][1] = 0.0f;
     s->mtx[1][2] = i11;

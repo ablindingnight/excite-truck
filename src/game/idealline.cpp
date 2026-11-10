@@ -258,6 +258,7 @@ int fn_801355B8(LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return 0; }
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 static inline double AbsD(double v) { return __fabs(v); }
 
+static inline f32 LerpT_hm( f32 b, f32 a,f32 t) { return a + t * (b - a); }  /* Helper name unproven */
 void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
     out->mode = il.mode;
     if (fn_801355B8(this, p, &out->seg, &out->t)) {
@@ -282,7 +283,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
             f32 dirY = n->dir.y;
             dv.y = s->dir.y + t * (dirY - s->dir.y);
             pt.x = s->pos.x + t * (n->pos.x - s->pos.x);
-            pt.y = s->pos.y + t * (n->pos.y - s->pos.y);
+            pt.y = LerpT_hm(n->pos.y, s->pos.y, t);
             inv = 1.0f / (f32)sqrt(dv.x * dv.x + dv.y * dv.y);
             dv.x *= inv;
             dv.y *= inv;

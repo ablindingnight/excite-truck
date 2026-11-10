@@ -685,6 +685,7 @@ inline int CoinStripPickupMaker::Match(const char* name) {
     return strncasecmp(name, p, strlen(p)) == 0;
 }
 
+static inline f32 Len2_hm(f32 x, f32 y) { return x * x + y * y; }  /* Helper name unproven */
 inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     int rainbow;
     int count;
@@ -776,7 +777,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 f32 zv = perp.z;
                 perp.x = zv;
                 perp.z = -x;
-                inv = 1.0f / (f32)sqrt(perp.x * perp.x + perp.z * perp.z);
+                inv = 1.0f / (f32)sqrt(Len2_hm(perp.x, perp.z));
                 base.x = seg[0].x + dir.x * t;
                 f32 z2 = dir.z;
                 base.z = seg[0].z + z2 * t;

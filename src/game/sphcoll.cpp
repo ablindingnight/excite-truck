@@ -2539,6 +2539,7 @@ struct BoxSlip {
     RVec3 slip[8];  // offset 0x64
 };
 
+static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  /* Helper name unproven */
 // Box (half extents at 0x58) on the ground: each of the eight corners below the track height gets a spring
 // impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
 // the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
@@ -2616,7 +2617,7 @@ void fn_8019F780(u8* p) {
                     f.y = vt.y * c;
                     f.z = vt.z * c;
                     f32 g = lbl_80562388 * F32(rb, 0xD4);
-                    f.x = f.x + acc[0] * g;
+                    f.x = Lerp_hm(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
                     f32 fm = PSVECMag(&f.x);

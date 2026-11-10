@@ -618,6 +618,7 @@ void fn_802C70AC(s32 model, const DMtx* m, s32 a, int b);
 // bent by speed and pitch) drawn at the car.
 static inline double AbsDbl(double v) { return __fabs(v); }
 
+static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
 void fn_80201018(DriverModel* d, const u8* car, int show) {
     BonePose pose[32];
     DBone bones[32];
@@ -726,7 +727,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         rot.r[1].z = az * (t * ay) + sn * ax;
         rot.r[2].x = az * (t * ax) + sn * ay;
         rot.r[2].y = az * (t * ay) - sn * ax;
-        rot.r[2].z = cs + t * (az * az);
+        rot.r[2].z = cs + t * (Sq_hm(az));
     } else {
         SetIdentity(&rot.r[0].x);
     }

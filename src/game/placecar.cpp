@@ -284,6 +284,7 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
     m->basis[2].z = f.z;
 }
 
+static inline f32 AddMul_hm(f32 a, f32 b, f32 c) { return a + c * b; }  /* Helper name unproven */
 void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     V2 n = *dir;
     ValMatrix m;
@@ -302,7 +303,7 @@ void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     pts[0].y = 0.0f;
     pts[0].z = pos->y + dir->y * -0.5f;
     f32 ax = pos->x + dir->x * 0.5f + n.x * 0.5f;
-    f32 ay = pos->y + dir->y * 0.5f + n.y * 0.5f;
+    f32 ay = AddMul_hm(pos->y, 0.5f, dir->y) + n.y * 0.5f;
     pts[1].x = ax;
     pts[1].y = 0.0f;
     pts[1].z = ay;

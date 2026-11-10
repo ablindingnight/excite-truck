@@ -1272,6 +1272,7 @@ struct CamPt {
     f32 x, y;
 };
 
+static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
 // Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
 // (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
@@ -1287,7 +1288,7 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
     d.y = LerpK(t, F32(seg, 0xC), F32(next, 0xC));
     pos.x = LerpK(t, F32(seg, 0x0), F32(next, 0x0));
     pos.y = LerpK(t, F32(seg, 0x4), F32(next, 0x4));
-    inv = lbl_80563C2C / (f32)sqrt(d.x * d.x + d.y * d.y);
+    inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
     F32(rec, 0x28) = lbl_80563C20;
     f32 yv;
     nx = d.x * inv;

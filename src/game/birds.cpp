@@ -321,6 +321,7 @@ static inline void MulM(const f32* m, const BVec* v, BVec* out) {
     }
 }
 static inline f32 Sq(f32 x) { return x * x; }
+static inline f32 DegToRad_hm(f32 d) { return 0.017453292f * d; }  /* Helper name unproven */
 void fn_802A8A4C(Boid* b, const BVec* target) {
     f32 dir[2];
     dir[0] = b->vel.x;
@@ -350,7 +351,7 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
     }
-    steer = lbl_8055F8D4 * (Lerp( Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius))),0.0f, steer) * (0.017453292f * b->turn));
+    steer = lbl_8055F8D4 * (Lerp( Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius))),0.0f, steer) * (DegToRad_hm(b->turn)));
     f32 c = cos(steer);
     f32 s = sin(steer);
     f32 m[9];

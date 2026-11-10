@@ -581,6 +581,7 @@ static inline RaceInfo* GetRaceInfo(void) { return &lbl_8034EE84; }
 RaceInfo* lbl_8055D350 = GetRaceInfo();
 void* lbl_8055D354;
 
+static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
 static void fn_800053CC(void) {
     f32 v[28];
     f32 len;
@@ -591,7 +592,7 @@ static void fn_800053CC(void) {
         r = 10.0f;
         x = 300.0f * v[0];
         y = 200.0f * v[1];
-        len = sqrt(v[0] * v[0] + v[1] * v[1]);
+        len = sqrt(Dot4_hm(v[0], v[1], v[0], v[1]));
         fn_80010B80(x, y, r, r, 0x800000FF);
     }
 }

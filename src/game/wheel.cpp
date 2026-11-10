@@ -270,6 +270,7 @@ Wheel::Wheel(void) {
 
 Wheel::~Wheel(void) {}
 
+static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
 void Wheel::Init(BodyDesc* bd) {
     WheelDesc* d = (WheelDesc*)bd;
     SphereShape* s;
@@ -277,7 +278,7 @@ void Wheel::Init(BodyDesc* bd) {
     f32 kk = d->stiffK;
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 r = 0.0254f * d->radius;
-    f32 stiff = k * (kk * kk);
+    f32 stiff = k * (Sq_hm(kk));
     RVec3 c(0.0f, 0.0f, 0.0f);
     f32 skin = d->skin;
     mtx.pos = RVec3(0.0f, -200.0f, 0.0f);

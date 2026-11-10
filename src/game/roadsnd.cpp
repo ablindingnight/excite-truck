@@ -131,6 +131,7 @@ RoadSound::~RoadSound(void) {
     }
 }
 
+static inline f32 Ramp_hm(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }  /* Helper name unproven */
 void RoadSound::Update(void) {
     char* c = car;
     int surface = 0;
@@ -153,7 +154,7 @@ void RoadSound::Update(void) {
                 } else {
                     vol = Lerp(Clamp01((speed - entries[i].speed2) / (entries[i].speed3 - entries[i].speed2)), entries[i].vol2, entries[i].vol3);
                 }
-                f32 pitch = Lerp(Clamp01((speed - entries[i].speed1) / (entries[i].speed3 - entries[i].speed1)), entries[i].pitch1, entries[i].pitch3);
+                f32 pitch = Lerp(Ramp_hm(speed, entries[i].speed1, entries[i].speed3), entries[i].pitch1, entries[i].pitch3);
                 v->unk4A = 0;
                 v->unk4B = 1;
                 v->unk49 = 1;

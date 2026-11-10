@@ -270,6 +270,7 @@ void fn_80292628(void) {
 
 static inline f32 SinF(f32 v) { return (f32)sin(v); }
 
+static inline f32 Term_hm(f32 n, f32 f, f32 k) { return n * (f * k); }  /* Helper name unproven */
 void fn_80292698(void) {
     f32 t = fn_801E7E18();
     Spin* s = lbl_804B4030;
@@ -295,7 +296,7 @@ void fn_80292698(void) {
             s->rot.y.y = c + k * (y * y);
             s->rot.y.z = z * (k * y) + sn * x;
             s->rot.z.x = z * (k * x) + sn * y;
-            s->rot.z.z = c + k * (z * z);
+            s->rot.z.z = c + Term_hm(k, z, z);
             s->rot.z.y = z * (k * y) - sn * x;
         } else {
             s->rot.x.x = 1.0f;
