@@ -799,3 +799,6 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
 }
 
 }  // extern "C"
+
+// Rider bone links (bone, point, child), owned .rodata after the pose templates.
+extern const RiderLinks lbl_802F9D00 = {{{7, 0, 1}, {8, 1, 2}, {9, 2, -1}, {4, 3, 4}, {5, 4, 5}, {6, 5, -1}}};
