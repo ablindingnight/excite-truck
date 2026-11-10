@@ -904,8 +904,8 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     }
     p->cur[gx + gy * p->nx] = -32768;
     dir.x = v.y * inv;
-    dir.y = v.x * inv;
     base.x = q.x + p->origin.x;
+    dir.y = v.x * inv;
     base.y = 0.25f + p->origin.y;
     f32 zv = p->origin.z;
     base.z = zv + q.y;
