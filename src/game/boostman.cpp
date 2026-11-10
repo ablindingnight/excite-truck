@@ -64,7 +64,10 @@ struct BoostArea {
     }
     ~BoostArea(void) { Free(); }
     void Build(Bound* b);
-    BoostVtx* Vtx(int x, int y) { return &verts[x * ny + y]; }
+    BoostVtx* Vtx(int x, int y) {
+        int k = x * ny + y;
+        return &verts[k];
+    }
     void Free(void) {
         if (bound) {
             fn_80128658(bound);
