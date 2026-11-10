@@ -673,8 +673,7 @@ void fn_80271624(int mode, u8* p) {
                 fn_801E9DC4(p + 0x1EC);
             }
             if (tv->flags & 2) {
-                int a = fn_801769F8();
-                fn_80265EC4(p + 0x160, fn_802E2C20(), a);
+                fn_80265EC4(p + 0x160, fn_802E2C20(), fn_801769F8());
                 fn_80266070(p + 0x160, (f32*)(p + 0x4C), (f32*)(p + 0xE4), (f32*)(p + 0x12C));
             } else {
                 F32(p, 0x4C) = F32(p, 0xE4);
