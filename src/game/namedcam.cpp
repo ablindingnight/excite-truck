@@ -704,3 +704,6 @@ void fn_80277F84(NamedCam* c, CamReader* r, int n) {
 }
 
 }  // extern "C"
+
+// Named camera offset (.rodata), defined after its user.
+extern const CamOffset lbl_802FA818 = {{-3.2f, 3.5f, 9.1f}, {13.4f, 158.2f, -22.8f}, 42.3f};
