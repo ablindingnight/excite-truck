@@ -299,8 +299,13 @@ ModuleTag lbl_8055E4C0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E4C8 = MakeILPos(0x7F00, 0);
 CarHandle lbl_8055E4CC;
+s32 lbl_8055E4D0;
+s32 lbl_8055E4D4;
+f32 lbl_8055E4D8;
 F32Pair lbl_8055E4E0;
+f32 lbl_8055E4E8[2];
 f32 lbl_8055E4F0;
+u8 lbl_8055E4F4;
 u8 lbl_8055E4F5;
 
 extern "C" {
