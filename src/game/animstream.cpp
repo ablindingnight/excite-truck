@@ -317,8 +317,9 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
             }
             b->q0 = b->q1;
             b->q1 = k.q;
-            b->t0 = b->t1;
-            b->t1 = k.t + (b->t1 > 0.0f ? b->t1 : 0.0f);
+            f32 t1 = b->t1;
+            b->t0 = t1;
+            b->t1 = k.t + (t1 > 0.0f ? t1 : 0.0f);
             a->frame++;
         }
         a->time = time + dt;
