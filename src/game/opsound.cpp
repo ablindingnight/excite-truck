@@ -372,3 +372,6 @@ void SoundOptions::Changed(int item) {
         break;
     }
 }
+
+/* Helper name unproven: unused, so MWCC drops it but keeps its string */
+static const char* OpSoundLayout(void) { return "opsound.lyt"; }

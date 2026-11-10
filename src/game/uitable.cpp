@@ -401,3 +401,6 @@ f32 IntValue::GetFrac(void) { return (f32)(*value - min) / (f32)(max - min); }
 void IntValue::SetFrac(f32 f) { *value = min + (int)(f * (f32)(max - min)); }
 
 IntValue::~IntValue(void) {}
+
+/* Helper name unproven: unused, so MWCC drops it but keeps its string */
+static const char* SubmenuItemName(void) { return "submenu_item"; }
