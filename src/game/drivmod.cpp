@@ -147,7 +147,7 @@ static inline void MulVec(DVec3* out, const DVec3* in, const DMtx* m) {
 static inline DVec3 Mid(const DVec3& a, const DVec3& b) {
     DVec3 r;
     r.x = a.x + 0.5f * (b.x - a.x);
-    r.y = a.y + 0.5f * (b.y - a.y);
+    r.y = a.y + (b.y - a.y) / 2.0f;
     r.z = a.z + 0.5f * (b.z - a.z);
     return r;
 }
@@ -317,7 +317,7 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     fn_801E3488(&lh, d->lhand);
     DVec3 lmid;
     lmid.x = 0.5f * lh.x + 0.5f * ls.x;
-    lmid.y = 0.5f * lh.y + 0.5f * ls.y - 0.2032f;
+    lmid.y = lh.y / 2.0f + 0.5f * ls.y - 0.2032f;
     f32 z2 = ls.z;
     lmid.z = 0.5f * lh.z + 0.5f * z2;
     DVec3 rs = *(DVec3*)fn_801FFB08(skel, "rshoulder");
@@ -326,8 +326,8 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     DVec3 rmid;
     f32 xv = rs.x;
     rmid.x = 0.5f * rh.x + 0.5f * xv;
-    rmid.y = 0.5f * rh.y + 0.5f * rs.y - 0.2032f;
-    rmid.z = 0.5f * rh.z + 0.5f * rs.z;
+    rmid.y = rh.y / 2.0f + 0.5f * rs.y - 0.2032f;
+    rmid.z = rh.z / 2.0f + 0.5f * rs.z;
     DVec3 chest;
     chest.x = 0.5f * ls.x + 0.5f * rs.x;
     chest.y = 0.5f * ls.y + 0.5f * rs.y - 1.27f;

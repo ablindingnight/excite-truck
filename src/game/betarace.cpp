@@ -1593,7 +1593,7 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                         st.w = sc * fn_80144C80(s2.w, st.w, p);
                         st.h = sc * fn_80144C80(s2.h, st.h, p);
                         st.pos.y = st.pos.y - 0.5f * st.h;
-                        st.pos.x = st.pos.x - 0.5f * st.w * n;
+                        st.pos.x = st.pos.x - st.w / 2.0f * n;
                         SetV2(st.pos, LerpV2(s2.pos, st.pos, p));
                     } else {
                         st.w = st.w * sc;

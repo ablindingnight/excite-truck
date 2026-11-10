@@ -1871,7 +1871,7 @@ void fn_80183E7C(u8* p) {
         if (U8(p, 0x2680)) {
             gain = lbl_80561CD0;
         }
-        f32 lead = lbl_80561CF8 * (lbl_80561CAC + Clamp01((F32(p, 0x2618) - lbl_80561DE0) / lbl_80561DB4) * lbl_80561CDC);
+        f32 lead = lbl_80561CF8 * (lbl_80561CAC + Clamp01((F32(p, 0x2618) - lbl_80561DE0) / lbl_80561DB4) / 2.0f);
         if (!U8(p, 0x2680)) {
             lead = lbl_80561CAC;
         }

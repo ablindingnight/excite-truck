@@ -201,7 +201,7 @@ inline void SkagPoint::Place(const f32* pt, f32 size) {
 
 // Inverse of Place: back into a size x size square.
 inline void SkagPoint::Unplace(f32* out, f32 size) const {
-    f32 c = size * 0.5f;
+    f32 c = size / 2.0f;
     f32 sx = x * size;
     const f32* u = lbl_802FAAD0.axes[quad];
     const f32* v = lbl_802FAAD0.axes[(quad + 1) & 3];

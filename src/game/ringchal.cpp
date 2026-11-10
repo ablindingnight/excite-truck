@@ -2038,7 +2038,7 @@ static inline f32 LenSq(const V2& v) { return v.x * v.x + v.y * v.y; }
 
 static inline V2 MidPoint(const V2& a, const V2& b) {
     V2 m;
-    m.y = a.y + 0.5f * (b.y - a.y);
+    m.y = a.y + (b.y - a.y) / 2.0f;
     m.x = a.x + 0.5f * (b.x - a.x);
     return m;
 }
@@ -2221,7 +2221,7 @@ inline void RingChalMaster::DrawRings(void) {
             hl.w = fn_80144C80(icon.w, 2.5f * icon.w, k);
             hl.h = fn_80144C80(icon.h, 2.5f * icon.h, k);
             hl.pos.x = fn_80144C80(icon.pos.x, icon.pos.x - (2.5f * icon.w - icon.w) / 2.0f, k);
-            hl.pos.y = fn_80144C80(icon.pos.y, icon.pos.y - (2.5f * icon.h - icon.h) * 0.5f, k);
+            hl.pos.y = fn_80144C80(icon.pos.y, icon.pos.y - (2.5f * icon.h - icon.h) / 2.0f, k);
             ALPHA(hl.color, 1.0f - k);
             fn_80147940(l, &hl, "star_art", 0);
         }

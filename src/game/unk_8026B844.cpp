@@ -143,7 +143,7 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& move) {
     f32 turn = lbl_80563D90;
-    f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
+    f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
     f32 speed = lbl_80563D94 * (lbl_80563DA4 * (lbl_80563D94 + t * lbl_80563DA0));
     f32 x;
     f32 z;

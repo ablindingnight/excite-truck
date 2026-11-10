@@ -348,7 +348,7 @@ void fn_802BF160(void) {
         f32 w;
         f32 c = cos(a);
         w = 1.0f - rings.r[i].scale;
-        f32 s = FMax(FMin((c - -1.0f) * 0.5f, 1.0f), 0.0f);
+        f32 s = FMax(FMin((c - -1.0f) / 2.0f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
         TexMtx m = sRingMtx;
         f32 off = -(1.0f / rings.r[i].scale) * h;

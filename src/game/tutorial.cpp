@@ -1345,7 +1345,7 @@ inline void Challenge::Init(void) {
         m = w > m ? w : m;
         w = box[1] - box[0];
         m = w > m ? w : m;
-        radius = m * 0.5f;
+        radius = m / 2.0f;
     }
     tex = fn_802CAC28("zonelite.tex", 0);
     snd = fn_80207848("levelup.sfx", 1);
@@ -1388,7 +1388,7 @@ inline void Challenge::Init(void) {
                 t->ends[1].y = 0.0f;
                 t->ends[1].z = b.z;
                 t->mid.x = (a.x + b.x) * 0.5f;
-                t->mid.z = (a.z + b.z) * 0.5f;
+                t->mid.z = (a.z + b.z) / 2.0f;
                 Delta2 d1;
                 d1.x = c->x - b.x;
                 d1.z = c->z - b.z;
