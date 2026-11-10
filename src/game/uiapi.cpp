@@ -2434,3 +2434,29 @@ int MenuState::Unk5C(void) {
 void MenuState::Unk34(void) {
 
 }
+
+/* .sbss owned by this unit (0x8055EEF8-0x8055EF60), in address order. */
+extern "C" {
+int lbl_8055EF08;
+s32 (*lbl_8055EF0C)(s32 *);
+float lbl_8055EF10;
+int lbl_8055EF14;
+int lbl_8055EF18;
+s32 lbl_8055EF1C;
+s32 lbl_8055EF20;
+void* lbl_8055EF24;
+void* lbl_8055EF28;
+UITable* lbl_8055EF2C;
+CycleList* lbl_8055EF30;
+NameList* lbl_8055EF34;
+void * lbl_8055EF38;
+int lbl_8055EF3C;
+int lbl_8055EF40;
+const char* lbl_8055EF44;
+int lbl_8055EF48;
+int lbl_8055EF4C;
+int lbl_8055EF50;
+int lbl_8055EF54;
+int lbl_8055EF58;
+int lbl_8055EF5C;
+}
