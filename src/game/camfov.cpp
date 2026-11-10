@@ -889,4 +889,5 @@ f32 lbl_8055F528 = lbl_80563F2C;
 f32 lbl_8055F52C = lbl_80563F30;  // reference field of view
 f32 lbl_8055F530 = lbl_80563F34;
 f32 lbl_8055F534 = lbl_80563F38;
+f32 lbl_8049A208[4];  // lift terms
 CamRect lbl_8049A218[4];
