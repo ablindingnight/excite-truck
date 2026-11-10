@@ -67,11 +67,8 @@ struct ModelPool {
     ModelPool(s32 n, s32 m, s32 slotSize) {
         count = n;
         max = m;
-        void* lp = operator new(0x10, "loadpool");
-        if (lp) {
-            lp = fn_8013420C((LoadPool*)lp, max, slotSize);
-        }
-        loads = (LoadPool*)lp;
+        LoadPool* lp = (LoadPool*)operator new(0x10, "loadpool");
+        loads = lp ? fn_8013420C(lp, max, slotSize) : lp;
         slots = new ("modelpool") ModelSlot[count];
         time = 0;
     }
@@ -91,7 +88,7 @@ ModuleTag lbl_8055FCF0;
 
 extern "C" {
 
-// NonMatching: Create and Update differ only in callee-saved register numbering (22 instructions).
+// Create matches with the null-or-init ternary in the ctor; Update differs only in callee-saved register numbering.
 ModelPool* fn_802CE3A4(s32 count, s32 max, s32 slotSize) { return new ("modpool") ModelPool(count, max, slotSize); }
 
 void fn_802CE49C(ModelPool* p) { delete p; }
