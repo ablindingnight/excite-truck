@@ -27,6 +27,43 @@ add_relocations:
 - source: .text:0x800C0554
   type: l
   target: lbl_8031D580
+# Same pattern (hi half parked in a stack slot): TMCCMP3Decode table, carbody heatTune, garage slot vtables and callbacks (relochalf.py).
+- source: .text:0x800BDF58
+  type: ha
+  target: lbl_802F3418
+- source: .text:0x800BDF7C
+  type: l
+  target: lbl_802F3418
+- source: .text:0x80187080
+  type: ha
+  target: heatTune
+- source: .text:0x801870FC
+  type: l
+  target: heatTune
+- source: .text:0x8024DC60
+  type: ha
+  target: lbl_803444D8
+- source: .text:0x8024DCCC
+  type: l
+  target: lbl_803444D8
+- source: .text:0x8024DC68
+  type: ha
+  target: lbl_8034453C
+- source: .text:0x8024DCE4
+  type: l
+  target: lbl_8034453C
+- source: .text:0x8024DC98
+  type: ha
+  target: fn_8024ECD4
+- source: .text:0x8024DCFC
+  type: l
+  target: fn_8024ECD4
+- source: .text:0x8024DCA4
+  type: ha
+  target: fn_8024EC3C
+- source: .text:0x8024DD14
+  type: l
+  target: fn_8024EC3C
 block_relocations:
 - source: 0x8004ADB0
 - source: 0x8004AE28
