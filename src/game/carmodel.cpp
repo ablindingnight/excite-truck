@@ -849,15 +849,6 @@ void CarModel::vf14(void) {
 }
 
 struct P2 {
-    P2(void) {}
-    P2(f32 x, f32 y) {
-        a = x;
-        b = y;
-    }
-    P2(f32 x, u32 y, int) {
-        a = x;
-        ib = y;
-    }
     // The target copies these with lfd/stfd, so the class holds a double.
     union {
         f64 d;
@@ -874,10 +865,20 @@ struct P2 {
     };
 };
 
+// Each vertex is built in three named locals and copied into the zero-filled array.
 static inline void SetVtx(P2* v, f32 x, f32 y, f32 s, f32 t) {
-    v[0] = P2(x, y);
-    v[1] = P2(0.0f, 0xFFFFFFFF, 0);
-    v[2] = P2(s, t);
+    P2 a;
+    P2 b;
+    P2 c;
+    a.a = x;
+    a.b = y;
+    b.a = 0.0f;
+    b.ib = 0xFFFFFFFF;
+    c.a = s;
+    c.b = t;
+    v[0] = a;
+    v[1] = b;
+    v[2] = c;
 }
 
 extern "C" {
@@ -888,14 +889,7 @@ void fn_801ED718(CarModel* m) {
     s32 tex = fn_801E7E2C();
     if (tex != -1) {
         Frame f;
-        P2 v[12];
-        P2* p = v;
-        int i = 12;
-        do {
-            p->ia = 0;
-            p->ib = 0;
-            p++;
-        } while (--i);
+        P2 v[12] = {0};
         SetVtx(&v[0], -0.09f, -0.0225f, 0.0f, 0.25f);
         SetVtx(&v[3], 0.09f, -0.0225f, 1.0f, 0.25f);
         SetVtx(&v[6], 0.09f, 0.0225f, 1.0f, 0.0f);
