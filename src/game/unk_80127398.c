@@ -61,7 +61,7 @@ void fn_8012748C(s32 arg0) {
     fn_802E300C(arg0);
 }
 
-extern char lbl_8055DF00[4];
+extern char lbl_8055DF00[8];
 extern void RegisterModuleTag__FP9ModuleTag(void *queue);
 void fn_801274C0(void) {
     RegisterModuleTag__FP9ModuleTag(lbl_8055DF00);
@@ -69,3 +69,7 @@ void fn_801274C0(void) {
 
 /* .bss owned by this unit (0x8041D728-0x8041D78C): callback lists -1..3. */
 CallbackList lbl_8041D728[5];
+
+/* .sbss owned by this unit (0x8055DF00-0x8055DF09). */
+char lbl_8055DF00[8];
+char lbl_8055DF08;

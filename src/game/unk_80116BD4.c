@@ -1979,7 +1979,6 @@ s32 fn_80119CB0(void *arg0, s32 arg1) {
 }
 
 extern s32 lbl_8055DEE0[];
-extern s32 lbl_8055DEE4;
 extern s32 lbl_8055DEE8;
 struct BinkIO8011;
 extern void fn_8011A6A0(struct BinkIO8011 *);
@@ -8766,3 +8765,19 @@ u8 lbl_8041D508[0x100];
 s32 lbl_8041D608[8];
 u8 lbl_8041D628[0x80];
 u8 lbl_8041D6A8[0x80];
+
+/* .sbss owned by this unit (0x8055DEC0-0x8055DF00), in address order. */
+s64 lbl_8055DEC0;
+s32 (*lbl_8055DEC8)(s32);
+s32 lbl_8055DECC;
+s32 lbl_8055DED0;
+void *lbl_8055DED4;
+s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);
+s32 lbl_8055DEDC;
+s32 lbl_8055DEE0[2];
+s32 lbl_8055DEE8;
+s32 lbl_8055DEEC;  /* unreferenced (a gap in the target) */
+u32 lbl_8055DEF0;
+u32 lbl_8055DEF4;
+void *lbl_8055DEF8;
+void *lbl_8055DEFC;

@@ -36,3 +36,9 @@ void fn_80116644(void) {
 /* .bss owned by this unit (0x8041D4F0-0x8041D508): storage of the two registered global objects. */
 char lbl_8041D4F0[0xC];
 char lbl_8041D4FC[0xC];
+
+/* .sbss owned by this unit (0x8055DEB4-0x8055DEBE), in address order. */
+char lbl_8055DEB4[4];
+char lbl_8055DEB8[4];
+u8 lbl_8055DEBC;
+u8 lbl_8055DEBD;
