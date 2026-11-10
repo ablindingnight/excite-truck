@@ -144,7 +144,6 @@ struct AnimName {
 };
 
 ModuleTag lbl_8055F670;
-s32 lbl_8055F678;
 u8 lbl_8055F67C;
 UIObjects* lbl_8055F680;
 bool lbl_8055F684;
@@ -169,6 +168,7 @@ public:
 };
 
 static UnkStatic123s lbl_804B2FF8;            // this unit's end-of-menu tag
+UnkStatic7F lbl_8055F678;
 static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
 // Index of a cup bar in the current path's list (the bar is held as an s32 handle).
