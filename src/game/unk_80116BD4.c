@@ -3543,6 +3543,7 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
+    u32 ones;
 
     if (b->cur != b->end) return;
     count = bits->count;
@@ -3581,7 +3582,8 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
         if (bit & 1) {
             len = -20 - len;
         }
-        mask = 0xFFFFFFFFU >> (32 - width);
+        ones = 0xFFFFFFFFU;
+        mask = ones >> (32 - width);
         do {
             u32 w;
             u32 c;
@@ -3589,14 +3591,14 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
             len--;
             w = trees->maxBits[last];
             if (count >= w) {
-                e = trees->lookup[last][value & (0xFFFFFFFFU >> (32 - w))];
+                e = trees->lookup[last][value & (ones >> (32 - w))];
                 last = trees->symbols[last][e & 15];
                 e >>= 4;
                 value >>= e;
                 count -= e;
             } else {
                 u32 word = *next;
-                e = trees->lookup[last][(value | (word << count)) & (0xFFFFFFFFU >> (32 - w))];
+                e = trees->lookup[last][(value | (word << count)) & (ones >> (32 - w))];
                 last = trees->symbols[last][e & 15];
                 e >>= 4;
                 if (count >= e) {
@@ -3664,6 +3666,7 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
+    u32 ones;
 
     if (b->cur != b->end) return;
     count = bits->count;
@@ -3702,20 +3705,21 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
         if (bit & 1) {
             len = -20 - len;
         }
-        mask = 0xFFFFFFFFU >> (32 - width);
+        ones = 0xFFFFFFFFU;
+        mask = ones >> (32 - width);
         do {
             u32 w;
             len--;
             w = trees->maxBits[last];
             if (count >= w) {
-                e = trees->lookup[last][value & (0xFFFFFFFFU >> (32 - w))];
+                e = trees->lookup[last][value & (ones >> (32 - w))];
                 last = trees->symbols[last][e & 15];
                 e >>= 4;
                 value >>= e;
                 count -= e;
             } else {
                 u32 word = *next;
-                e = trees->lookup[last][(value | (word << count)) & (0xFFFFFFFFU >> (32 - w))];
+                e = trees->lookup[last][(value | (word << count)) & (ones >> (32 - w))];
                 last = trees->symbols[last][e & 15];
                 e >>= 4;
                 if (count >= e) {
