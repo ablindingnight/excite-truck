@@ -379,6 +379,9 @@ MSL/uart_console_io_gcn.c:
 	.text       start:0x8002AF88 end:0x8002B060
 	.sbss       start:0x8055D688 end:0x8055D68C
 
+MSL/abort_exit_ppc_eabi.c:
+	.sbss       start:0x8055D690 end:0x8055D694
+
 MSL/math_sun.c:
 	extab       start:0x800046A8 end:0x800046B0
 	extabindex  start:0x8000494C end:0x80004958
