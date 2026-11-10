@@ -302,9 +302,9 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
         flags = *block_flags;
         if (flags & 7) {
             if (flags & 1) {
-                pa = work[0];
-                pc2 = outbuf2;
                 pb = prev;
+                pc2 = outbuf2;
+                pa = work[0];
                 pc = outbuf;
                 for (sb = 0; sb < d->band_count; sb++) {
                     fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);

@@ -1613,10 +1613,10 @@ void fn_80195F6C(u8* d) {
         dir.y = s->dir.y + il.t * (s->next->dir.y - s->dir.y);
         dir.x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
         f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
-        F32(d, 0x48) = pos.x;
         dir.x *= inv;
-        F32(d, 0x4C) = pos.y;
         dir.y *= inv;
+        F32(d, 0x48) = pos.x;
+        F32(d, 0x4C) = pos.y;
         F32(d, 0x58) = dir.y;
         F32(d, 0x5C) = -dir.x;
         F32(d, 0x60) = dir.x;
