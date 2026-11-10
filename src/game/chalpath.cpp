@@ -716,19 +716,19 @@ void MenuDoChallengeMode(int arg) {
         MenuDesc desc = *(const MenuDesc*)&lbl_802FA6C0;
         desc.items = (MenuItem*)items;
         for (;;) {
-            r = fn_802146BC(&desc, -999, -999, 1);
-            if (r == -1) {
-                fn_80260DC4((u8*)&diff, -1);
-                r = -1;
-                break;
-            }
-            if (r == -2) {
+            switch (fn_802146BC(&desc, -999, -999, 1)) {
+            case -2:
                 fn_80260DC4((u8*)&diff, -1);
                 r = -2;
-                break;
+                goto done;
+            case -1:
+                fn_80260DC4((u8*)&diff, -1);
+                r = -1;
+                goto done;
             }
             fn_802E317C("MenuDoChallengeMode: invalid return value from dialog!");
         }
+    done:;
     } while (r != -1);
     }
     int now = GetEveMode();
