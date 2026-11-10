@@ -1233,6 +1233,12 @@ void fn_801EECAC(CarModel* m, u8* data) {
     fn_801EC214(&m->fuel, ch, m->chassis, "fuel_gauge", 1.0f, 0.0f, &m->car->fuel);
 }
 
+/* Helper name unproven: unused, so MWCC drops it but keeps its strings in .data */
+static void CarTexName(char* buf, const char* name, int i) {
+    fn_801345D8(buf, 64, "white.tex");
+    fn_801345D8(buf, 64, "%s%2.2d.tga", name, i);
+}
+
 void fn_801EEE38(void) {
     u8* data = (u8*)fn_80179CB0();
     CarModel* m;
