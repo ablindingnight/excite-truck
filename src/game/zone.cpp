@@ -1292,7 +1292,10 @@ struct Watcher {
 
 int fn_8013CFF0(const Gate* g, const Watcher* w, f32* out) {
     Vec3 mid = g->Center();
-    Vec3 d(mid.x - w->pos.x, mid.y - w->pos.y, mid.z - w->pos.z);
+    f32 dx = mid.x - w->pos.x;
+    f32 dy = mid.y - w->pos.y;
+    f32 dz = mid.z - w->pos.z;
+    Vec3 d(dx, dy, dz);
     f32 dist2 = PSVECDotProduct(&d, &d);
     int r = 0;
     if (dist2 < 275625.0f) {
@@ -2286,11 +2289,11 @@ struct RingMtx {
 void ZoneMaster::DrawRing(Gate* g, int c) {
     RingMtx m;
     f32 s;
+    m.x.Set(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
     {
         Vec3 mid = g->Center();
         m.pos = mid;
     }
-    m.x.Set(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
     PSVECNormalize(&m.x, &m.x);
     m.y.Set(0.0f, 1.0f, 0.0f);
     PSVECCrossProduct(&m.x, &m.y, &m.z);
