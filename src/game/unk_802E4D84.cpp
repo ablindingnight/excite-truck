@@ -636,8 +636,7 @@ extern SpuSampleRes *fn_802E4DC8(char *name);
 SpuSample *fn_802E5AE8(char *name) {
     char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
     char *base;
-    char *slash;
-    int i;
+    struct { char * slash; int i; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     int free;
     SpuSampleRes *res;
     SpuSample *s;
@@ -647,21 +646,21 @@ SpuSample *fn_802E5AE8(char *name) {
     unsigned int size;
     unsigned short magic;
 
-    slash = strrchr(name, '/');
-    if (slash != 0) {
-        base = slash + 1;
+    sp_.slash = strrchr(name, '/');
+    if (sp_.slash != 0) {
+        base = sp_.slash + 1;
     } else {
         base = name;
     }
     free = -1;
-    for (i = 0; i < 0x100; i++) {
-        if (SPU_SAMPLES[i].refs != 0) {
-            if (strcasecmp(base, SPU_SAMPLES[i].name) == 0 && SPU_SAMPLES[i].locked == 0) {
-                SPU_SAMPLES[i].refs++;
-                return &SPU_SAMPLES[i];
+    for (sp_.i = 0; sp_.i < 0x100; sp_.i++) {
+        if (SPU_SAMPLES[sp_.i].refs != 0) {
+            if (strcasecmp(base, SPU_SAMPLES[sp_.i].name) == 0 && SPU_SAMPLES[sp_.i].locked == 0) {
+                SPU_SAMPLES[sp_.i].refs++;
+                return &SPU_SAMPLES[sp_.i];
             }
         } else if (free < 0) {
-            free = i;
+            free = sp_.i;
         }
     }
     if (free < 0) {
