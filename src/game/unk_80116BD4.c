@@ -3521,6 +3521,9 @@ void fn_8011CE18(void *arg0, void *arg1) {
             win.width = *(u32 *)((u8 *)arg0 + 0x20);
             win.mask = 0xFFFFFFFFU >> (32 - win.width);
             while (count != 0) {
+                u8 rl;
+                u32 next;
+                u32 w;
                 if (bitCount >= win.width) {
                     code = value & win.mask;
                     s = lookup[code];
@@ -3530,7 +3533,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
                     value >>= len;
                     bitCount -= len;
                 } else {
-                    u32 next = *bits;
+                    next = *bits;
                     code = (value | (next << bitCount)) & win.mask;
                     len = lookup[code];
                     sym = table[len & 15];
@@ -3539,8 +3542,8 @@ void fn_8011CE18(void *arg0, void *arg1) {
                     else { value = next >> (len - bitCount); bits++; bitCount = bitCount + 32 - len; }
                 }
                 if (sym >= 12) {
-                    u8 rl = lbl_80561208[sym - 12];
-                    u32 w = fill | (fill << 8);
+                    rl = lbl_80561208[sym - 12];
+                    w = fill | (fill << 8);
                     count -= rl;
                     w |= w << 16;
                     /* Run fill as the target has it: a byte loop over the whole run when dst is unaligned (the word and
