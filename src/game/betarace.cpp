@@ -4618,16 +4618,17 @@ inline void BetaMaster::a1(void) {
 
 inline void BetaMaster::b2Body(StuntEvt* e, int car) {
     int i;
+    int off;
     Pickup* t;
     bool turbo;
     BetaCar* bc;
     u8* f;
     s32 h;
     if (cars[car].mode == 0 ? 0 : cars[car].mode == 1 ? 1 : (f32)__fabs(cars[car].meter - 1.0f) <= lbl_80558DC4[0]) {
-        for (i = 0; i < stars.a.count; i++) {
-            h = stars.a.data[i]->hC0;
+        for (i = 0, off = 0; i < stars.a.count; off += 4, i++) {
+            h = (*(Pickup**)((u8*)stars.a.data + off))->hC0;
             if (h == e->Id()) {
-                t = stars.a.data[i];
+                t = *(Pickup**)((u8*)stars.a.data + off);
                 if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
                     AbsF(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
                     t->hit[car] = 1;
@@ -4636,9 +4637,9 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
         }
     }
     if (e->Type() == 's') {
-        turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
         bc = &cars[car];
         f = &bc->bA8;
+        turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
         if (f[0]) {
             bc->meterObj->Crash(lbl_804348E8[bc->id]);
         }
