@@ -634,8 +634,6 @@ VD* fn_80207848(const char* file, int flags);  // load a sound
 void fn_801EEFDC(void* handler, int type);
 int fn_8026A554(s32* p);
 extern const f32 lbl_80563C54;  // default view angle
-extern char lbl_803467D0[];  // "crash_vol"
-extern char lbl_803467DC[];  // "cheer3.sfx"
 
 // Camera manager start-up: initialises the four camera records, the named/fixed cameras, the crash
 // volume handle and the cheer sound, then resets.
@@ -726,8 +724,8 @@ void fn_80267420(void) {
     fn_80278214();
     fn_80273354();
     fn_8027045C();
-    lbl_8055F494 = fn_802090D4(lbl_803467D0);
-    lbl_8055F490 = fn_80207848(lbl_803467DC, 0);
+    lbl_8055F494 = fn_802090D4("crash_vol");
+    lbl_8055F490 = fn_80207848("cheer3.sfx", 0);
     fn_801EEFDC((void*)fn_8026A554, 13);
     fn_80267680();
 }
@@ -1105,7 +1103,21 @@ struct CamMount {
     u8 on;       // offset 0x1C
 };
 
-extern CamMount lbl_803467E8[3];
+extern const f32 lbl_80563CF4;  // 82.5 deg
+extern const f32 lbl_80563CF8;  // 30 * 30
+ModuleTag lbl_8055F470;
+UnkStaticFFFF lbl_8055F478;
+f32 lbl_8055F47C = lbl_80563CF4;  // default field of view
+CamRec lbl_80499080[4];
+f32 lbl_8055F49C = lbl_80563CF8;
+extern const f32 lbl_80563CFC;  // 42.5 deg
+extern const f32 lbl_80563D00;  // 55 deg
+extern const f32 lbl_80563D04;  // 60 deg
+CamMount lbl_803467E8[3] = {
+    {{0.0f, 0.7f, 0.0f}, {0.0f, 0.8f, 9.0f}, lbl_80563CFC, 1},
+    {{0.0f, -0.5f, -30.5f}, {0.0f, 2.1f, 1.0f}, lbl_80563D00, 1},
+    {{0.1f, 1.1f, -0.2f}, {-9.5f, 2.5f, 4.2f}, lbl_80563D04, 0},
+};
 
 extern "C" {
 // Mount camera points averaged over the ideal-line frames: two points in the frame, and its up vector.
@@ -1731,22 +1743,7 @@ int fn_8026A554(s32* p) {
 }  // extern "C"
 
 // Folded degree/radian constants (the initialisers are dynamic in the original, so they load these).
-extern const f32 lbl_80563CF4;  // 82.5 deg
-extern const f32 lbl_80563CF8;  // 30 * 30
-extern const f32 lbl_80563CFC;  // 42.5 deg
-extern const f32 lbl_80563D00;  // 55 deg
-extern const f32 lbl_80563D04;  // 60 deg
 
-ModuleTag lbl_8055F470;
-UnkStaticFFFF lbl_8055F478;
-f32 lbl_8055F47C = lbl_80563CF4;  // default field of view
-CamRec lbl_80499080[4];
-f32 lbl_8055F49C = lbl_80563CF8;
-CamMount lbl_803467E8[3] = {
-    {{0.0f, 0.7f, 0.0f}, {0.0f, 0.8f, 9.0f}, lbl_80563CFC, 1},
-    {{0.0f, -0.5f, -30.5f}, {0.0f, 2.1f, 1.0f}, lbl_80563D00, 1},
-    {{0.1f, 1.1f, -0.2f}, {-9.5f, 2.5f, 4.2f}, lbl_80563D04, 0},
-};
 
 inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
