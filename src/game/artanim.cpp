@@ -511,9 +511,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         if (g->Has("xy")) {
             ValPoint v;
             v = g->GetPoint("xy");
-            off[2] = 0.0f;
             off[0] = v.x;
             off[1] = -v.y;
+            off[2] = 0.0f;
         } else if (g->Has("offset")) {
             const ValVec3& o = g->GetVec3("offset");
             off[0] = o.x;

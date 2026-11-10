@@ -1503,8 +1503,8 @@ void PlayerDriver_vf48(u8* p) {
             spin[7] = az * (ay * t) - sn * ax;
             spin[8] = cs + t * (az * az);
         } else {
-            spin[1] = kZero;
             spin[0] = kOne;
+            spin[1] = kZero;
             spin[2] = kZero;
             spin[3] = kZero;
             spin[4] = kOne;
