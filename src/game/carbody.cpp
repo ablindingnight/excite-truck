@@ -3529,68 +3529,42 @@ void DeityCar_vf78(u8* p) {}
 
 // Physics tuning sliders: a sink taking (label, value, units, min, max, step).
 struct TuneSink {
-    virtual void Add(void* name, void* value, int* units, float lo, float hi, float step);
+    virtual void Add(const char* name, void* value, const char* units, float lo, float hi, float step);
 };
 
-extern char lbl_803322B0[];  // carbody string pool ("Yaw Moment" at +0x350 ...)
-// Unit strings, each a small .sdata object.
-extern int lbl_8055A3F8;  // " m"
-extern int lbl_8055A3FC;  // " kg"
-extern int lbl_8055A400;  // " kg m2"
-extern int lbl_8055A408;  // " N/m"
-extern int lbl_8055A410;  // " N-s/m"
-extern int lbl_8055A418;  // "Mass"
-extern int lbl_8055A420;  // ""
-extern int lbl_8055A424;  // " m/s"
-extern int lbl_8055A42C;  // " G"
 extern const f32 lbl_80561CAC;
 extern const f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
     lbl_80561D00, lbl_80561D0C, lbl_80561D28, lbl_80561D34, lbl_80561D44, lbl_80561D68, lbl_80561DE4, lbl_80561EBC,
     lbl_80561F0C, lbl_80561F10, lbl_80561F14, lbl_80561F18;
 
-// Registers the body's tunables (mass, moments, power, geometry, springs, damping, tires) with a tuning
-// menu. Matched by the upstream project (orangedude27/excite-truck).
-// MATCHING-AID: register pinning, not original source. Revisit.
-// Natural form found 2026-10-27: string literals for the names, units held in locals
-// (const char* m = " m", kg = " kg", kgm2 = " kg m2", nm = " N/m", nsm = " N-s/m"; "Mass", "", " m/s", " G"
-// inline), u8* body = p + 0x32C, Add(const char*, void*, const char*, ...), no pragmas. That differs only in
-// the name pool offsets (literals start at +0x1F0 instead of +0x350) until the unit's earlier strings exist.
-#pragma push
-#pragma scheduling invalid_target
-#pragma opt_propagation off
+// Registers the body's tunables (mass, moments, power, geometry, springs, damping, tires) with a tuning menu.
 void fn_8018A2C0(u8* p, TuneSink* t) {
-    register char* base = (char*)p;
-    register char* names = lbl_803322B0;
-    register char* offset = base + 0x32C;
-    register int* m = &lbl_8055A3F8;
-    register int* kg = &lbl_8055A3FC;
-    register int* kgm2 = &lbl_8055A400;
-    register int* nm = &lbl_8055A408;
-    register int* nsm = &lbl_8055A410;
-    register int* mass = &lbl_8055A418;
-    register TuneSink* obj = t;
-
-    obj->Add(mass, offset, kg, lbl_80561CE4, lbl_80561F0C, lbl_80561F10);
-    obj->Add(names + 0x350, offset + 8, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);    // Yaw Moment
-    obj->Add(names + 0x35C, offset + 4, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);    // Pitch Moment
-    obj->Add(names + 0x36C, offset + 0xC, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);  // Roll Moment
-    obj->Add(names + 0x378, base + 0x2DC, &lbl_8055A420, lbl_80561D00, lbl_80561D44, lbl_80561D0C);  // Engine Power
-    obj->Add(names + 0x388, offset + 0x30, &lbl_8055A420, lbl_80561CDC, lbl_80561CEC, lbl_80561D0C);  // Final Drive
-    obj->Add(names + 0x394, base + 0x5A8, &lbl_8055A424, lbl_80561D34, lbl_80561D28, lbl_80561CD0);  // Speed Limiter
-    obj->Add(names + 0x3A4, offset + 0x18, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);    // Wheelbase
-    obj->Add(names + 0x3B0, offset + 0x10, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);    // Front Track
-    obj->Add(names + 0x3BC, offset + 0x14, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);    // Rear Track
-    obj->Add(names + 0x3C8, offset + 0x20, m, lbl_80561DE4, lbl_80561CD0, lbl_80561CCC);    // CG Height
-    obj->Add(names + 0x3D4, offset + 0x80, m, lbl_80561CAC, lbl_80561CD0, lbl_80561CCC);    // Front Height
-    obj->Add(names + 0x3E4, offset + 0xC8, m, lbl_80561CAC, lbl_80561CD0, lbl_80561CCC);    // Rear Height
-    obj->Add(names + 0x3F0, offset + 0x84, nm, lbl_80561EBC, lbl_80561D68, lbl_80561F14);   // Front Springs
-    obj->Add(names + 0x400, offset + 0xCC, nm, lbl_80561EBC, lbl_80561D68, lbl_80561F14);   // Rear Springs
-    obj->Add(names + 0x410, offset + 0x8C, nsm, lbl_80561F14, lbl_80561F18, lbl_80561F10);  // Front Damping
-    obj->Add(names + 0x420, offset + 0xD4, nsm, lbl_80561F14, lbl_80561F18, lbl_80561F10);  // Rear Damping
-    obj->Add(names + 0x430, offset + 0x110, &lbl_8055A42C, lbl_80561D00, lbl_80561D44, lbl_80561D00);  // Tire Grip
-    obj->Add(names + 0x43C, offset + 0x114, &lbl_8055A420, lbl_80561D00, lbl_80561CEC, lbl_80561D00);  // Tire Slip
+    u8* body = p + 0x32C;
+    const char* m = " m";
+    const char* kg = " kg";
+    const char* kgm2 = " kg m2";
+    const char* nm = " N/m";
+    const char* nsm = " N-s/m";
+    t->Add("Mass", body, kg, lbl_80561CE4, lbl_80561F0C, lbl_80561F10);
+    t->Add("Yaw Moment", body + 8, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);
+    t->Add("Pitch Moment", body + 4, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);
+    t->Add("Roll Moment", body + 0xC, kgm2, lbl_80561CE4, lbl_80561D68, lbl_80561F10);
+    t->Add("Engine Power", p + 0x2DC, "", lbl_80561D00, lbl_80561D44, lbl_80561D0C);
+    t->Add("Final Drive", body + 0x30, "", lbl_80561CDC, lbl_80561CEC, lbl_80561D0C);
+    t->Add("Speed Limiter", p + 0x5A8, " m/s", lbl_80561D34, lbl_80561D28, lbl_80561CD0);
+    t->Add("Wheelbase", body + 0x18, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);
+    t->Add("Front Track", body + 0x10, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);
+    t->Add("Rear Track", body + 0x14, m, lbl_80561D00, lbl_80561CF8, lbl_80561CCC);
+    t->Add("CG Height", body + 0x20, m, lbl_80561DE4, lbl_80561CD0, lbl_80561CCC);
+    t->Add("Front Height", body + 0x80, m, lbl_80561CAC, lbl_80561CD0, lbl_80561CCC);
+    t->Add("Rear Height", body + 0xC8, m, lbl_80561CAC, lbl_80561CD0, lbl_80561CCC);
+    t->Add("Front Springs", body + 0x84, nm, lbl_80561EBC, lbl_80561D68, lbl_80561F14);
+    t->Add("Rear Springs", body + 0xCC, nm, lbl_80561EBC, lbl_80561D68, lbl_80561F14);
+    t->Add("Front Damping", body + 0x8C, nsm, lbl_80561F14, lbl_80561F18, lbl_80561F10);
+    t->Add("Rear Damping", body + 0xD4, nsm, lbl_80561F14, lbl_80561F18, lbl_80561F10);
+    t->Add("Tire Grip", body + 0x110, " G", lbl_80561D00, lbl_80561D44, lbl_80561D00);
+    t->Add("Tire Slip", body + 0x114, "", lbl_80561D00, lbl_80561CEC, lbl_80561D00);
 }
-#pragma pop
 
 void fn_8018A654(u8* p, const u8* cfg) {
     if (*(s8*)(cfg + 0xEC)) {
