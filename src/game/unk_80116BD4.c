@@ -6,7 +6,63 @@
 #include <revolution/AX/AXPB.h>
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern f32 lbl_80329BC8[];
+/* .data tables owned by this unit (0x80329B50-0x80329DE8), in address order; the switch jump tables of */
+/* fn_8011E0B4 follow them. */
+extern const u32 lbl_802F65C0[];
+extern const u8 lbl_802F65D0[];
+extern const u8 lbl_802F65F0[];
+extern const u8 lbl_802F6610[];
+extern const u8 lbl_802F6630[];
+extern const u8 lbl_802F6650[];
+extern const u8 lbl_802F6670[];
+extern const u8 lbl_802F6690[];
+extern const u8 lbl_802F66D0[];
+extern const u8 lbl_802F6710[];
+extern const u8 lbl_802F6750[];
+extern const u8 lbl_802F6790[];
+extern const u8 lbl_802F67D0[];
+extern const u8 lbl_802F6810[];
+extern const u8 lbl_802F6890[];
+extern const u8 lbl_802F6910[];
+u8 lbl_80329B50[16] = {
+    2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64
+};
+u32 lbl_80329B60[26] = {
+    0, 100, 200, 300, 400, 510, 630, 770,
+    920, 1080, 1270, 1480, 1720, 2000, 2320, 2700,
+    3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000,
+    15500, 0
+};
+f32 lbl_80329BC8[96] = {
+    1.0f, 1.1651987f, 1.3576881f, 1.5819764f, 1.8433169f, 2.1478305f,
+    2.5026493f, 2.9160838f, 3.3978171f, 3.9591322f, 4.613176f, 5.3752666f,
+    6.2632537f, 7.297935f, 8.503545f, 9.908319f, 11.545161f, 13.452407f,
+    15.674727f, 18.264172f, 21.281391f, 24.797049f, 28.89349f, 33.666656f,
+    39.228348f, 45.70882f, 53.259857f, 62.05832f, 72.31027f, 84.25584f,
+    98.1748f, 114.39314f, 133.29074f, 155.31021f, 180.96725f, 210.86281f,
+    245.69708f, 286.28592f, 333.58f, 388.68698f, 452.89758f, 527.7157f,
+    614.8936f, 716.47327f, 834.83374f, 972.74725f, 1133.4438f, 1320.6873f,
+    1538.8632f, 1793.0814f, 2089.2961f, 2434.445f, 2836.6123f, 3305.2173f,
+    3851.2349f, 4487.454f, 5228.7754f, 6092.5625f, 7099.0464f, 8271.8f,
+    9638.29f, 11230.523f, 13085.792f, 15247.548f, 17766.424f, 20701.414f,
+    24121.26f, 28106.062f, 32749.148f, 38159.266f, 44463.125f, 51808.38f,
+    60367.055f, 70339.62f, 81959.63f, 95499.26f, 111275.62f, 129658.2f,
+    151077.58f, 176035.39f, 205116.22f, 239001.16f, 278483.84f, 324489.03f,
+    378094.2f, 440554.88f, 513333.97f, 598136.06f, 696947.4f, 812082.2f,
+    946237.2f, 1102554.4f, 1284694.9f, 1496924.9f, 1744214.9f, 2032357.0f
+};
+f32 lbl_80329D48[24] = {
+    1.1920929e-07f, 2.3841858e-07f, 4.7683716e-07f, 9.536743e-07f, 1.9073486e-06f, 3.8146973e-06f,
+    7.6293945e-06f, 1.5258789e-05f, 3.0517578e-05f, 6.1035156e-05f, 0.00012207031f, 0.00024414062f,
+    0.00048828125f, 0.0009765625f, 0.001953125f, 0.00390625f, 0.0078125f, 0.015625f,
+    0.03125f, 0.0625f, 0.125f, 0.25f, 0.5f, 1.0f
+};
+u8 *lbl_80329DA8[16] = {
+    (u8 *)lbl_802F65C0, (u8 *)lbl_802F65D0, (u8 *)lbl_802F65F0, (u8 *)lbl_802F6610,
+    (u8 *)lbl_802F6630, (u8 *)lbl_802F6650, (u8 *)lbl_802F6670, (u8 *)lbl_802F6690,
+    (u8 *)lbl_802F66D0, (u8 *)lbl_802F6710, (u8 *)lbl_802F6750, (u8 *)lbl_802F6790,
+    (u8 *)lbl_802F67D0, (u8 *)lbl_802F6810, (u8 *)lbl_802F6890, (u8 *)lbl_802F6910
+};
 
 
 extern void fn_8011AF94(f32 *, s32, void *, f32 *, s32);
@@ -2884,7 +2940,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
 
 
 void fn_8011FE20(void **slot, u32 amount);
-extern u32 lbl_80329B60[25];  // critical band frequencies (Hz)
+extern u32 lbl_80329B60[];  // critical band frequencies (Hz)
 
 // MSL's inline sqrtf: three Newton steps from the frsqrte estimate.
 static inline f32 Sqrtf8011(f32 x) {
@@ -3301,7 +3357,7 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
         BINK_SKIP(v);                                 \
     }
 
-extern u8 *const lbl_80329DA8[16];  // Bink Huffman lookup tables
+extern u8 *lbl_80329DA8[16];  // Bink Huffman lookup tables
 extern const u8 lbl_802F6990[];
 
 // Reads a Huffman tree: picks one of the 16 fixed code tables and reads the symbol order, either explicitly or as
