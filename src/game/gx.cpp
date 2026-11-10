@@ -1776,6 +1776,22 @@ static inline void Invert(RMtx* out, const RMtx* m) {
     out->pos.y *= -1.0f;
     out->pos.z *= -1.0f;
 }
+static inline void InvertR(RMtx* const& out, const RMtx* m) {  /* Helper name unproven: Invert with the destination by reference */
+    out->rot = m->rot;
+    f32 t = out->rot.m[0][1];
+    out->rot.m[0][1] = out->rot.m[1][0];
+    out->rot.m[1][0] = t;
+    t = out->rot.m[0][2];
+    out->rot.m[0][2] = out->rot.m[2][0];
+    out->rot.m[2][0] = t;
+    t = out->rot.m[1][2];
+    out->rot.m[1][2] = out->rot.m[2][1];
+    out->rot.m[2][1] = t;
+    MulVecT(&out->pos, &m->pos, &m->rot);
+    out->pos.x *= -1.0f;
+    out->pos.y *= -1.0f;
+    out->pos.z *= -1.0f;
+}
 
 void fn_802D1C04(void) {
     if (!lbl_8055FD70) {
@@ -2074,7 +2090,7 @@ V3* fn_802D2D04(void) { return &lbl_804C97D0.dir; }
 GXRenderModeObj* fn_802D2D14(void) { return lbl_8055FD64; }
 
 void fn_802D2D1C(void) {
-    Invert(&lbl_804CA2D8, &lbl_804C56C0);
+    InvertR(&lbl_804CA2D8, &lbl_804C56C0);
     GXSetCurrentMtx(0);
 }
 
