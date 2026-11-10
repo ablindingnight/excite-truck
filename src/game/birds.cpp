@@ -382,8 +382,9 @@ void fn_802A8DE8(void) {
     Boid* b;
     for (i = 0; i < lbl_804BD6C4.n; i++) {
         f = lbl_804BD6C4.data[i];
-        for (j = 0; j < f->birds.n; j++) {
-            b = &f->birds.data[j];
+        int off = 0;
+        for (j = 0; j < f->birds.n; off += sizeof(f->birds.data[0]), j++) {
+            b = (Boid*)((u8*)f->birds.data + off);
             BirdFrame m;
             m.pos.x = b->pos.x;
             m.pos.y = b->pos.y;

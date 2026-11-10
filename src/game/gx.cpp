@@ -752,8 +752,9 @@ void fn_802CF10C(u32 count) {
             for (y = 0; y < cap->h; y++) {
                 u16* d = &dst[lbl_804C9760.w * (y + cap->y) + cap->x];
                 u16* s = &cap->data[k];
-                for (int x = 0; x < w; x++) {
-                    d[x] = s[x];
+                u16* sp = s;
+                for (int x = 0; x < w; sp++, x++) {
+                    d[x] = *sp;
                 }
                 k += w;
             }

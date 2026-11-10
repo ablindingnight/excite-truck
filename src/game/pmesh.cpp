@@ -336,8 +336,9 @@ void fn_801CFA48(PMesh* m) {
     p += m->numVerts * sizeof(PVec3);
     m->tris = (PTri*)p;
     int i;
-    for (i = 0; i < m->numCells; i++) {
-        SwapCell(&m->cells[i]);
+    int off = 0;
+    for (i = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
+        SwapCell((PCell*)((u8*)m->cells + off));
     }
     for (i = 0; i < m->numVerts; i++) {
         SwapVec(&m->verts[i]);

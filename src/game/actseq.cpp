@@ -1370,8 +1370,9 @@ public:
                 if (now - start > delay) {
                     SurfEntry* e;
                     int i;
-                    for (i = 0; i < entries.count; i++) {
-                        e = &entries.data[i];
+                    int off = 0;
+                    for (i = 0; i < entries.count; i++, off += sizeof(entries.data[0])) {
+                        e = (SurfEntry*)((u8*)entries.data + off);
                         e->obj->SetSurface(surftype);
                         e->obj->SetMode(e->mode);
                     }
