@@ -1151,10 +1151,22 @@ f32 fn_801B88BC(void);
 f32 fn_8013B650(s32 car);  // AI qualifying time
 int fn_801B25B0(const s32* pa, const s32* pb);
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
+static inline int NearZero(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
 
 // Race start: the intro timer (short in test mode), cleared race counters, every car on its line, and the
 // starting order from the qualifying times.
+static inline void SetQual(DeityCar* c) { /* Helper name unproven */
+    f32 v = -1.0f;
+    if (*(s32*)((u8*)c->car + 0x1F0) == 0x51) {
+        v = fn_8013B650(c->index);
+    }
+    f32 q = *(f32*)((u8*)c->car + 0x254);
+    if (!NearZero(q)) {
+        v = q;
+    }
+    DS((u8*)c + 0x4)->qual = v;
+}
 void fn_801B265C(void) {
     DeityCar* c;
     static u8 warned;
@@ -1182,16 +1194,7 @@ void fn_801B265C(void) {
         fn_801B1A5C(&lbl_8055E684[i]);
     }
     for (int i = 0; i < lbl_8055E678; i++) {
-        f32 v = -1.0f;
-        c = &lbl_8055E684[i];
-        if (*(s32*)((u8*)c->car + 0x1F0) == 0x51) {
-            v = fn_8013B650(c->index);
-        }
-        f32 q = *(f32*)((u8*)c->car + 0x254);
-        if (!NearZero(q)) {
-            v = q;
-        }
-        DS((u8*)c + 0x4)->qual = v;
+        SetQual(&lbl_8055E684[i]);
     }
     for (int i = 0; i < lbl_8055E678; i++) {
         order[i] = i;
