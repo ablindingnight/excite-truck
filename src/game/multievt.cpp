@@ -86,7 +86,7 @@ void fn_8024B6AC(u8* p);
 void operator delete(void* p);
 
 extern const NameEntry lbl_802FA4B0[3];
-extern char lbl_804989AC[];
+char lbl_804989AC[0x24];
 
 // Per-car multiplayer unlock flags.
 struct UnlockEntry {

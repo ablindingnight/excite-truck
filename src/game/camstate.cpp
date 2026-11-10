@@ -609,7 +609,7 @@ double sin(double x);
 double cos(double x);
 int fn_801E9E30(u8* ground, f32* pos);
 extern f32 lbl_8055E3C8;         // game time
-extern f32 lbl_8055F588;         // last ground height
+f32 lbl_8055F588;         // last ground height
 extern const double lbl_80564038;  // 2 pi
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FC4;

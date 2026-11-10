@@ -115,7 +115,7 @@ struct CarPickScreen {
     CarIconWidget* icons[6];  // offset 0x300
 };
 
-extern CarPickScreen* lbl_8055F3D4;
+CarPickScreen* lbl_8055F3D4;
 
 static inline int AnyShown(int i) {
     for (int j = 0; j < 3; j++) {

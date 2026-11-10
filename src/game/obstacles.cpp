@@ -123,7 +123,7 @@ void* operator new(unsigned long n, const char* tag);
 
 extern void* lbl_8033585C[];
 extern void* lbl_80335808[];
-extern u8* lbl_80435628[];
+u8* lbl_80435628[64];
 
 // Cars, player cars, AI cars and network cars all carry a car tag.
 static inline int IsCar(u8* o) {

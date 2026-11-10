@@ -1478,7 +1478,7 @@ void fn_8018F9B4(u8* p) {
 
 class ModuleTag;
 void RegisterModuleTag(ModuleTag* tag);
-extern ModuleTag lbl_8055E500;  // this unit's module tag
+ModuleTag lbl_8055E500;  // this unit's module tag
 
 extern "C" {
 

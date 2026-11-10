@@ -31,7 +31,7 @@ static inline void CopyName(const char* src, int n, char* dst) {
         }
     }
 }
-extern s32 lbl_8055F3C4;
+s32 lbl_8055F3C4;
 
 ModuleTag lbl_8055F3B8;
 UnkStatic123s lbl_80498ED0;
