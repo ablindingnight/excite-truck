@@ -2607,8 +2607,7 @@ void fn_8019F780(u8* p) {
                         acc[1] *= s;
                         acc[2] *= s;
                     }
-                    f32 e = vn < lbl_805622D0 ? lbl_805622E0 : lbl_80562300;
-                    f32 k = depth * F32(p, 0x10) * e;
+                    f32 k = depth * F32(p, 0x10) * (vn < lbl_805622D0 ? lbl_805622E0 : lbl_80562300);
                     imp.x = nrm.x * k;
                     imp.y = nrm.y * k;
                     imp.z = nrm.z * k;

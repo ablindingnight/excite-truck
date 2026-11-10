@@ -1476,8 +1476,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                 l->gates = new ("zone[]") Gate[l->n];
                 {
                     ValPoint pt = child->FindChild("Zone")->GetPoint("tan");
-                    f32 scale = fn_80204CFC("zone_gate_scale");
-                    f32 w = fn_8013E300((V2*)&pt) * 2.0f * scale;
+                    f32 w = fn_8013E300((V2*)&pt) * 2.0f * fn_80204CFC("zone_gate_scale");
                     for (j = 0; j < l->n; j++) {
                         l->gates[j] = prev->gates[j];
                         l->gates[j].Scale(w);
