@@ -1346,9 +1346,6 @@ int fn_8013D1F0(int i) { return fn_801B2EC0(i)->GetInfo()->rank; }
 
 static inline f32 SignF(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 
-extern const f32 lbl_805614A4;  // 0.0
-extern const f32 lbl_805614AC;  // 1.0
-extern const f32 lbl_805614BC;  // -1.0
 
 // Compare two floats: 0 when (nearly) equal, else the sign of a - b.
 int fn_8013D224(f32 a, f32 b) {
@@ -1357,7 +1354,7 @@ int fn_8013D224(f32 a, f32 b) {
     if (m <= lbl_80558DC4[0]) {
         return 0;
     }
-    return d > lbl_805614A4 ? lbl_805614AC : lbl_805614BC;
+    return d > 0.0f ? 1.0f : -1.0f;
 }
 
 int fn_8013D27C(Gate* a, Gate* b) { return fn_8013D224(a->t, b->t); }
