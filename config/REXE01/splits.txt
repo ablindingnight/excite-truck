@@ -1050,7 +1050,7 @@ RVL_SDK/bte/uusb_ppc.c:
 	.sbss       start:0x8055DC50 end:0x8055DC68
 
 RVL_SDK/bte/bta_dm_cfg.c:
-	.rodata     start:0x802EE8F0 end:0x802EE980
+	.rodata     start:0x802EE8F0 end:0x802EE97C
 	.sdata      start:0x80559010 end:0x80559024
 	.sbss2      start:0x80565220 end:0x80565228
 
@@ -1060,7 +1060,7 @@ RVL_SDK/bte/bta_hh_cfg.c:
 
 RVL_SDK/bte/bta_sys_cfg.c:
 	.sdata      start:0x80559038 end:0x8055903C
-	.sdata2     start:0x80560D08 end:0x80560D10
+	.sdata2     start:0x80560D08 end:0x80560D0E
 
 RVL_SDK/bte/bte_hcisu.c:
 	.text       start:0x8007079C end:0x80070854
@@ -2084,8 +2084,8 @@ game/unk_80116644.c:
 
 RVL_SDK/arc/arc.c:
 	.text       start:0x801166C8 end:0x80116BD4
-	.data       start:0x80329B28 end:0x80329B50
-	.sdata      start:0x80559930 end:0x80559938
+	.data       start:0x80329B28 end:0x80329B4A
+	.sdata      start:0x80559930 end:0x80559936
 
 game/unk_80116BD4.c:
 	.text       start:0x80116BD4 end:0x80127398
@@ -3344,7 +3344,7 @@ game/musicplr.cpp:
 	.ctors      start:0x802ED38C end:0x802ED390
 	.data       start:0x8033C278 end:0x8033C338
 	.bss        start:0x804892C0 end:0x804892D0
-	.sdata      start:0x8055B550 end:0x8055B590
+	.sdata      start:0x8055B550 end:0x8055B58E
 	.sbss       start:0x8055EDC8 end:0x8055EDEC
 	.sdata2     start:0x80563290 end:0x805632B0
 
