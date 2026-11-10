@@ -1107,10 +1107,14 @@ extern const f32 lbl_80563CF4;  // 82.5 deg
 extern const f32 lbl_80563CF8;  // 30 * 30
 ModuleTag lbl_8055F470;
 UnkStaticFFFF lbl_8055F478;
-f32 lbl_8055F484;
-u8 lbl_8055F498;
-u8 lbl_8055F4A8[8];
 f32 lbl_8055F47C = lbl_80563CF4;  // default field of view
+u8 lbl_8055F480;
+f32 lbl_8055F484;
+u8 lbl_8055F488;
+f32 lbl_8055F48C;
+VD* lbl_8055F490;
+u32 lbl_8055F494;
+u8 lbl_8055F498;
 Mtx34 lbl_80499050;
 CamRec lbl_80499080[4];
 CamPose lbl_80499920;
@@ -1119,6 +1123,9 @@ f32 lbl_80499980[8];
 ShakeEntry lbl_804999A0[100];
 s32 lbl_80499E50[4];
 f32 lbl_8055F49C = lbl_80563CF8;
+s32 lbl_8055F4A0;
+s32 lbl_8055F4A4;
+u8 lbl_8055F4A8[8];
 extern const f32 lbl_80563CFC;  // 42.5 deg
 extern const f32 lbl_80563D00;  // 55 deg
 extern const f32 lbl_80563D04;  // 60 deg
