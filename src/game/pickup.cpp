@@ -515,7 +515,7 @@ void fn_80168104(void) {
             }
             {
                 int j;
-                for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
+                for (j = 0; j < g->count; j++) {
                     p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
                     if (p->type && p->type->handle && !p->taken) {
                         col = p->type ? p->type->color : 0xFFFFFFFF;
