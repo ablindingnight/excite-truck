@@ -517,10 +517,10 @@ void DrawLoadingScreen(int alpha, f32 t) {
     BOOL show_goals;
 
     offset = fn_802C9A58() ? -107.0f : 0.0f;
-    y0 = 0.5f * lbl_8055CFF4;
     x0 = -0.5f * lbl_8055CFF0 + offset;
-    y1 = y0 - 256.0f;
     x1 = 256.0f + x0;
+    y0 = 0.5f * lbl_8055CFF4;
+    y1 = y0 - 256.0f;
     y2 = y1 - 256.0f;
     color = (alpha << 24) | 0xFFFFFF;
     bar_colors[0] = 0xFF259327;
