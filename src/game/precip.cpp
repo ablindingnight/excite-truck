@@ -1186,7 +1186,11 @@ void Mist::Draw(void) {
                 WPt* p = &pts[i];
                 int b = (int)((f32)a - k * PSVECSquareDistance(p, &center));
                 b = b > 0 ? b : 0;
-                fn_802CE86C((b < a ? b : a) << 24 | 0xFFFFFF, i, 0.5f * size, p->x, p->y, p->z);
+                f32 s = 0.5f * size;
+                f32 x = p->x;
+                f32 y = p->y;
+                f32 z = p->z;
+                fn_802CE86C((b < a ? b : a) << 24 | 0xFFFFFF, i, s, x, y, z);
             }
             fn_802CE868();
         }
