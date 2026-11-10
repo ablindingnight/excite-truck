@@ -294,8 +294,8 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                     k.q.w = Lerp(-1.0f, 2.0f, c);
                 } else {
                     u32 pz = (u32)(v >> 32) >> 16;
-                    u32 px = (u32)(v >> 16) & 0xFFFF;
                     u32 py = (u32)(v >> 32) & 0xFFFF;
+                    u32 px = (u32)(v >> 16) & 0xFFFF;
                     c = AMIN(1.0f, Dequant(px, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
                     k.q.x = 20.0f * (Lerp(-1.0f, 2.0f, c));
@@ -330,8 +330,10 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
     for (int i = 0; i < a->numBones + 1; i++) {
         BoneKey* b = &a->bones[i];
         f32 t0 = b->t0;
-        t0 = t0 < b->t1 - 0.001f ? t0 : b->t1 - 0.001f;
-        f32 u = (time - t0) / (b->t1 - t0);
+        f32 t1 = b->t1;
+        t0 = t0 < t1 - 0.001f ? t0 : t1 - 0.001f;
+        f32 d = t1 - t0;
+        f32 u = (time - t0) / d;
         if (1.0f < u) {
             u = 1.0f;
         }
@@ -342,7 +344,7 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
             a->pose[i].y = b->q0.y * s + b->q1.y * u;
             a->pose[i].z = b->q0.z * s + b->q1.z * u;
             a->pose[i].w = b->q0.w * s + b->q1.w * u;
-            f32 n = 1.0f / (f32)sqrt(a->pose[i].x * a->pose[i].x + (a->pose[i].y * a->pose[i].y + (a->pose[i].z * a->pose[i].z + a->pose[i].w * a->pose[i].w)));
+            f32 n = 1.0f / (f32)sqrt(a->pose[i].x * a->pose[i].x + (a->pose[i].y * a->pose[i].y + (a->pose[i].w * a->pose[i].w + a->pose[i].z * a->pose[i].z)));
             a->pose[i].x *= n;
             a->pose[i].y *= n;
             a->pose[i].z *= n;
