@@ -681,7 +681,8 @@ static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
                 e = &lbl_80497F14.data[j];
                 if (e->art) {
                     h /= (fn_80235F64(e->art, e->artIdx));
-                    adv = e->scale * (h * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * h);
+                    f32 wd = fn_80235EF0(e->art, e->artIdx);
+                    adv = e->scale * (h * wd) + e->scale * (e->postspace * h);
                 } else {
                     adv = h * e->scale;
                 }
