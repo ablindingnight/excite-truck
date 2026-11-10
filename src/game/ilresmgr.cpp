@@ -310,17 +310,16 @@ public:
         }
     }
     virtual void Switch(int car) {
-        IdealLineRes* l;
-        IdealLineRes* cur;
+    struct { IdealLineRes* l; IdealLineRes* cur; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
         f32 now = lbl_8055E3C8;
-        cur = cars[car].line;
+        sp_.cur = cars[car].line;
         int k = fn_80129D90(4, 0, lines.a.count);
-        l = lines.a.data[k].line;
-        if (l == cur) {
-            l = lines.a.data[(k + 1) % lines.a.count].line;
+        sp_.l = lines.a.data[k].line;
+        if (sp_.l == sp_.cur) {
+            sp_.l = lines.a.data[(k + 1) % lines.a.count].line;
         }
         cars[car].next = now + fn_80129DC4(4, minT, maxT);
-        cars[car].line = l;
+        cars[car].line = sp_.l;
     }
     virtual void Assign(void) {
         int n;

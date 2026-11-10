@@ -3818,19 +3818,18 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
 
 #pragma dont_inline on
 inline void BetaMaster::vf44(void) {
-    int on;
+    struct { int on; Pickup* p; } st;  /* Struct unproven: on and p as fields of a small local (MWCC numbers struct fields as temps) */
     BetaCar* c;
-    Pickup* p;
     int car = fn_801E866C(fn_801E85B4());
     int i;
     if (vf20(car)) {
         c = &cars[car];
         if (c) {
-            on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0];
+            st.on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0];
             for (i = 0; i < stars.a.count; i++) {
-                p = stars.a.data[i];
-                if (fn_80141F7C(p->respawn) && on && p->big) {
-                    p->Draw(LerpColor(p->GetPalette()->c[1], p->GetPalette()->c[0], fn_80149650()));
+                st.p = stars.a.data[i];
+                if (fn_80141F7C(st.p->respawn) && st.on && st.p->big) {
+                    st.p->Draw(LerpColor(st.p->GetPalette()->c[1], st.p->GetPalette()->c[0], fn_80149650()));
                 }
             }
         }
@@ -3860,13 +3859,13 @@ inline void Pickup::Draw(Color col) {
         ot = fn_802C9994(0);
         V3 at;
         Xform m;
-        f32 ang;
+    struct { f32 ang; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
         SetV3(&p, pos[0], 1.25f + pos[1], pos[2]);
         at = p;
-        ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.0);
+        sp_.ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.0);
         Mat3* mr = (Mat3*)&m;
         m.t = at;
-        mr->SetRotY(ang);
+        mr->SetRotY(sp_.ang);
         fn_802C744C(lbl_80559ECC, &m);
         fn_802C9994(ot);
         fn_802C9950(oc);

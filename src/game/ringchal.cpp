@@ -1325,16 +1325,15 @@ int Arena::CountDynos(void) {
 }
 
 void Arena::Spawn(void) {
-    ObjInfo* o;
-    int j;
+    struct { ObjInfo* o; int j; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     ObjSet* d;
     int i;
     for (i = 0; i < sets->count; i++) {
         d = sets->data;
-        for (j = 0; j < d[i].infos->count; j++) {
-            o = &d[i].infos->data[j];
-            if (o->type == 0) {
-                o->obj = fn_802BAA68(o->xlo, &o->mtx);
+        for (sp_.j = 0; sp_.j < d[i].infos->count; sp_.j++) {
+            sp_.o = &d[i].infos->data[sp_.j];
+            if (sp_.o->type == 0) {
+                sp_.o->obj = fn_802BAA68(sp_.o->xlo, &sp_.o->mtx);
             }
         }
     }
