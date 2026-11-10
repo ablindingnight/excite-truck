@@ -662,4 +662,44 @@ void *lbl_8033C8C4[31] = {
     0, 0, (void *)fn_8020E288, (void *)fn_8020E598, (void *)fn_8020F15C, (void *)fn_8020F1F8, (void *)fn_8020F21C, (void *)fn_8020F240, (void *)fn_8020F30C, (void *)fn_8020F330, (void *)fn_8020F354, (void *)fn_8020F284, (void *)fn_8020F378, (void *)fn_8020F39C, (void *)fn_8020F3A0, 0, 0, (void *)fn_801837DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+// The Hud's .sdata2 constants (0x80563368-0x80563400), in address order.
+extern const float lbl_80563368 = 1.0f;
+extern const float lbl_8056336C = 2.0f;
+extern const float lbl_80563370 = 0.0f;
+extern const float lbl_80563374 = 0.75f;
+extern const float lbl_80563378 = 0.66f;
+extern const float lbl_8056337C = 0.05f;
+extern const float lbl_80563380 = 0.1f;
+extern const float lbl_80563384 = -0.1f;
+extern const float lbl_80563388 = 0.01f;
+extern const float lbl_8056338C = 0.001f;
+extern const float lbl_80563390 = 0.066733405f;
+extern const float lbl_80563394 = 0.25f;
+extern const float lbl_80563398 = 17.777779f;
+extern const float lbl_8056339C = 26.666668f;
+extern const float lbl_805633A0 = 2.75f;
+extern const float lbl_805633A4 = 75.0f;
+extern const float lbl_805633A8 = 1.35f;
+extern const float lbl_805633AC = -0.3f;
+extern const float lbl_805633B0 = 2.2f;
+extern const float lbl_805633B4 = 0.79999995f;
+extern const float lbl_805633B8 = -0.8f;
+extern const float lbl_805633BC = 0.5f;
+extern const float lbl_805633C0 = -0.5f;
+extern const float lbl_805633C4 = -1.0f;
+extern const float lbl_805633C8 = 0.44444445f;
+extern const float lbl_805633CC = 20.0f;
+extern const float lbl_805633D0 = 0.9f;
+extern const float lbl_805633D4 = 85.0f;
+extern const float lbl_805633D8 = 0.45000005f;
+extern const float lbl_805633DC = 5.0f;
+extern const float lbl_805633E0 = 0.35f;
+extern const float lbl_805633E4 = 0.15f;
+extern const float lbl_805633E8 = 3.0f;
+extern const float lbl_805633EC = 0.4f;
+extern const float lbl_805633F0 = 0.016683351f;
+extern const float lbl_805633F4 = 15.0f;
+extern const float lbl_805633F8 = 0.2f;
+extern const float lbl_805633FC = 0.6f;
+
 }  // extern "C"
