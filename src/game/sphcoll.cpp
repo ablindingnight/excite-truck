@@ -1765,7 +1765,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         mid.x = (xv + cb.x) / 2.0f;
         yv = ca.y;
         zv = cb.z;
-        mid.z = (ca.z + zv) / 2.0f;
+        mid.z = (ca.z + zv) * 0.5f;
         mid.y = (yv + cb.y) / 2.0f;
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
