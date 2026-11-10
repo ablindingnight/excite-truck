@@ -552,7 +552,8 @@ void fn_802751AC(u8* p) {
     CamPreset c = lbl_802FA788;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
-    CamVec off(c.off.x, c.off.y, c.off.z);
+    f32 z = c.off.z;
+    CamVec off(c.off.x, c.off.y, z);
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
@@ -594,7 +595,8 @@ void fn_80275938(u8* p) {
     CamPreset c = lbl_802FA7DC;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
-    CamVec off(c.off.x, c.off.y, c.off.z);
+    f32 z = c.off.z;
+    CamVec off(c.off.x, c.off.y, z);
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
@@ -666,7 +668,10 @@ void fn_80275D0C(u8* p) {
     PSVECCrossProduct(&f.m[3], &f.m[6], &f.m[0]);
     PSVECCrossProduct(&f.m[6], &f.m[0], &f.m[3]);
     Mat3 rot;
-    CamVec off(c.off.x, c.off.y, c.off.z);
+    f32 x = c.off.x;
+    f32 y = c.off.y;
+    f32 z = c.off.z;
+    CamVec off(x, y, z);
     RotFromVec(&rot, c.rot * lbl_80564024);
     fn_801BFD34(p + 0x7C, &off, (u8*)&f);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)&f);
