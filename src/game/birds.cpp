@@ -277,8 +277,7 @@ void fn_802A86A4(void) {
 }
 
 void fn_802A8978(void) {
-    int j;
-    Flock* f;
+    struct { int j; Flock* f; } cur;  /* Struct unproven: j and f as fields of a small local (MWCC numbers the fields as temps) */
     f32 now = lbl_8055E3C8;
     lbl_8055F8D4 = now - lbl_8055F8D8;
     if (now < lbl_8055F8D8) {
@@ -286,10 +285,10 @@ void fn_802A8978(void) {
     }
     lbl_8055F8D8 = now;
     for (int i = 0; i < lbl_804BD6C4.n; i++) {
-        f = lbl_804BD6C4.data[i];
-        fn_802A8A4C(&f->lead, &f->pt);
-        for (j = 0; j < fn_802A8A34(&f->birds); j++) {
-            fn_802A8A4C(fn_802A8A3C(&f->birds, j), &f->lead.pos);
+        cur.f = lbl_804BD6C4.data[i];
+        fn_802A8A4C(&cur.f->lead, &cur.f->pt);
+        for (cur.j = 0; cur.j < fn_802A8A34(&cur.f->birds); cur.j++) {
+            fn_802A8A4C(fn_802A8A3C(&cur.f->birds, cur.j), &cur.f->lead.pos);
         }
     }
 }
