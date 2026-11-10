@@ -456,8 +456,8 @@ void fn_8027EEE4(int level) {
         MenuItem(lbl_804B2FF8),
     };
     MenuDesc desc = {NewModeLayout(level - 1), 0, (int (*)(int*))fn_8027EE88, 0, 0};
-    desc.items = items;
     lbl_8055F684 = 0;
+    desc.items = items;
     lbl_8055F685 = 0;
     fn_802146BC(&desc, -999, -999, 1);
 }

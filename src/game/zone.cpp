@@ -1243,9 +1243,9 @@ int fn_8013CBC0(CarState* zm, int car) {
     ab.x = a.x - b.x;
     ab.y = a.y - b.y;
     bp.x = b.x - p.x;
-    bp.y = b.y - p.y;
     ap.x = a.x - p.x;
     ap.y = a.y - p.y;
+    bp.y = b.y - p.y;
     nearA = ap.x * ap.x + ap.y * ap.y < bp.x * bp.x + bp.y * bp.y;
     wa = nearA ? zm->gateWidth * 0.5f : 0.0f;
     wb = !nearA ? zm->gateWidth * 0.5f : 0.0f;

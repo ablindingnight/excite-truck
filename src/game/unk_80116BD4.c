@@ -7348,10 +7348,10 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         w3 |= w3 << 8;
         ((u32 *)dst)[0] = w0;
         ((u32 *)dst)[1] = w1;
+        ((u32 *)dst2)[0] = w0;
         ((u32 *)dst)[2] = w2;
         ((u32 *)dst)[3] = w3;
         dst += stride2;
-        ((u32 *)dst2)[0] = w0;
         ((u32 *)dst2)[1] = w1;
         ((u32 *)dst2)[2] = w2;
         ((u32 *)dst2)[3] = w3;
