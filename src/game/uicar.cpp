@@ -1218,4 +1218,23 @@ int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
     return 1;
 }
 
+// .sdata2 constants owned by this unit (0x80563750-0x80563798), in address order.
+extern const double lbl_80563750 = 4503601774854144.0;
+extern const float lbl_80563758 = 0.0f;
+extern const float lbl_8056375C = 0.43f;
+extern const float lbl_80563760 = 0.37f;
+extern const float lbl_80563764 = 1.0f;
+extern const float lbl_80563768 = 1000.0f;
+extern const float lbl_8056376C = 250.0f;
+extern const float lbl_80563770 = -1.0f;
+extern const float lbl_80563774 = -2.0f;
+extern const float lbl_80563778 = 3.0f;
+extern const float lbl_8056377C = 5.0f;
+extern const float lbl_80563780 = 3.5f;
+extern const float lbl_80563784 = 0.5f;
+extern const float lbl_80563788 = 0.3f;
+extern const float lbl_8056378C = 0.7f;
+extern const float lbl_80563790 = 255.0f;
+extern const float lbl_80563794 = 4.0f;
+
 }  // extern "C"

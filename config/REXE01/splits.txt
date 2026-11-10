@@ -3592,6 +3592,7 @@ game/uicar.cpp:
 	.bss        start:0x80498810 end:0x80498848
 	.sdata      start:0x8055BD60 end:0x8055BD68
 	.sbss       start:0x8055F1E8 end:0x8055F208
+	.sdata2     start:0x80563750 end:0x80563798
 
 game/unk_80243460.c:
 	.text       start:0x80243460 end:0x80243478
