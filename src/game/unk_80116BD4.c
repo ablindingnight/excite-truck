@@ -2619,8 +2619,6 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 *var_r26;
     u32 var_r25;
     u32 var_r24;
-    f32 *var_r4;
-    f32 *var_r4_2;
     u32 *var_r7;
     f32 var_f1;
     f32 var_f29;
@@ -2634,6 +2632,7 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     s32 temp_r4_2;
     s32 temp_r5_3;
     s32 temp_r6;
+    struct { f32 *b; f32 *a; } rd;  /* Struct unproven: the two float read cursors as fields of a small local */
     s32 temp_r6_2;
     s32 var_ctr;
     s32 var_r0_2;
@@ -2652,13 +2651,13 @@ void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     var_r26 = ((BitReader8011 *)arg2)->next;
     var_r25 = ((BitReader8011 *)arg2)->value;
     var_r24 = ((BitReader8011 *)arg2)->count;
-    var_r4 = arg3;
+    rd.a = arg3;
     var_r5 = (u32 *)arg4;
     var_r28 = 0;
     goto init_test;
 init_body:
-    var_f29 = *var_r4;
-    var_r4++;
+    var_f29 = *rd.a;
+    rd.a++;
     var_r5++;
     var_r28++;
     var_f28 = -var_f29;
@@ -2720,14 +2719,14 @@ decode:
     if (var_r0_3 == 0) {
         temp_r18 = var_r29 - var_r3;
         memset(var_r27, 0, temp_r18 * 4);
-        var_r4_2 = arg3 + var_r28;
+        rd.b = arg3 + var_r28;
         var_r3 = var_r29;
         var_r27 += temp_r18;
         var_r5_2 = (u32 *)arg4 + var_r28;
         while (var_r29 > (u32)(*var_r5_2 * 2)) {
-            var_f29 = *var_r4_2;
+            var_f29 = *rd.b;
+            rd.b++;
             var_r5_2++;
-            var_r4_2++;
             var_r28++;
             var_f28 = -var_f29;
         }
