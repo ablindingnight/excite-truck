@@ -426,9 +426,9 @@ public:
 class BoxVol : public CollShape {
 public:
     BoxVol(f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(0, 0, 'BOX ', k, s) {
-        hx = x / 2;
-        hy = y / 2;
-        hz = z / 2;
+        hy = y * 0.5f;
+        hx = x * 0.5f;
+        hz = z * 0.5f;
         f34 = 0;
         radius = 0.2f + (f32)sqrt(hx * hx + hy * hy + hz * hz);
     }
