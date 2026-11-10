@@ -3480,26 +3480,32 @@ void fn_8011CD90(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 }
 
 extern const u8 lbl_80561208[8];
+typedef struct BitWin8011 {
+    u32 width;
+    u32 mask;
+} BitWin8011;
+
 void fn_8011CE18(void *arg0, void *arg1) {
     u32 *bits;
     u32 fill;
-    u32 value, bitCount, available, mask, count, code, len, s, w;
+    u32 value, bitCount, count, code, len, s, w;
     u8 *dst, *table, *lookup;
     u32 sym, runlen, j;
+    BitWin8011 win;
     if (*(u32 *)arg0 != *(u32 *)((u8 *)arg0 + 4)) return;
     bitCount = *(u32 *)((u8 *)arg1 + 8);
-    available = *(u32 *)((u8 *)arg0 + 0x28);
+    win.width = *(u32 *)((u8 *)arg0 + 0x28);
     bits = *(u32 **)((u8 *)arg1 + 4);
     value = *(u32 *)arg1;
-    if (bitCount < available) {
+    if (bitCount < win.width) {
         u32 next = *bits++;
-        count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - available));
-        value = next >> (available - bitCount);
-        bitCount = bitCount + 32 - available;
+        count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - win.width));
+        value = next >> (win.width - bitCount);
+        bitCount = bitCount + 32 - win.width;
     } else {
-        count = value & (0xFFFFFFFFU >> (32 - available));
-        value >>= available;
-        bitCount -= available;
+        count = value & (0xFFFFFFFFU >> (32 - win.width));
+        value >>= win.width;
+        bitCount -= win.width;
     }
     if (count != 0) {
         dst = *(u8 **)((u8 *)arg0 + 0x2C);
@@ -3512,11 +3518,11 @@ void fn_8011CE18(void *arg0, void *arg1) {
             fill = 0;
             table = (u8 *)arg0 + 0x10;
             lookup = *(u8 **)((u8 *)arg0 + 0x24);
-            available = *(u32 *)((u8 *)arg0 + 0x20);
-            mask = 0xFFFFFFFFU >> (32 - available);
+            win.width = *(u32 *)((u8 *)arg0 + 0x20);
+            win.mask = 0xFFFFFFFFU >> (32 - win.width);
             while (count != 0) {
-                if (bitCount >= available) {
-                    code = value & mask;
+                if (bitCount >= win.width) {
+                    code = value & win.mask;
                     s = lookup[code];
                     code = s & 15;
                     len = s >> 4;
@@ -3525,7 +3531,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
                     bitCount -= len;
                 } else {
                     u32 next = *bits;
-                    code = (value | (next << bitCount)) & mask;
+                    code = (value | (next << bitCount)) & win.mask;
                     len = lookup[code];
                     sym = table[len & 15];
                     len >>= 4;
@@ -3828,10 +3834,6 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 // Refills an exhausted bundle of unsigned bytes: reads the count, then either that many Huffman-coded values or one
 // 4-bit value repeated.
 /* Helper name unproven */
-typedef struct BitWin8011 {
-    u32 width;
-    u32 mask;
-} BitWin8011;
 
 void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
     u32 *next;
