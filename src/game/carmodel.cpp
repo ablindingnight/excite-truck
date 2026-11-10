@@ -964,15 +964,7 @@ void fn_801EDD68(CarModel* m) { fn_801EFC90(m->tire, m->car, m->wheels); }
 }  // extern "C"
 
 void CarModel::Set(const AnimSlot* s) {
-    f32 yy;
-    f32 yx;
-    f32 xz;
-    f32 xy;
-    f32 xx;
     f32 k;
-    f32 yz;
-    f32 zx;
-    f32 zy;
     int i;
 
     AnimObj::Set((const AnimSlot*)car);
@@ -982,27 +974,16 @@ void CarModel::Set(const AnimSlot* s) {
         scaled = frame;
     } else {
 
-        xx = frame.axes[0].x * k;
-
-        xy = frame.axes[0].y * k;
-
-        xz = frame.axes[0].z * k;
-        yx = frame.axes[1].x * k;
-
-        yy = frame.axes[1].y * k;
-        yz = k * frame.axes[1].z;
-        zx = frame.axes[2].x * k;
-        zy = frame.axes[2].y * k;
         scaled.pos = frame.pos;
-        scaled.axes[0].x = xx;
-        scaled.axes[0].y = xy;
-        scaled.axes[0].z = xz;
-        scaled.axes[1].x = yx;
-        scaled.axes[1].y = yy;
-        scaled.axes[1].z = yz;
-        scaled.axes[2].x = zx;
-        scaled.axes[2].y = zy;
-        scaled.axes[2].z = (frame.axes[2].z * k);
+        scaled.axes[0].x = frame.axes[0].x * k;
+        scaled.axes[0].y = frame.axes[0].y * k;
+        scaled.axes[0].z = frame.axes[0].z * k;
+        scaled.axes[1].x = frame.axes[1].x * k;
+        scaled.axes[1].y = frame.axes[1].y * k;
+        scaled.axes[1].z = frame.axes[1].z * k;
+        scaled.axes[2].x = frame.axes[2].x * k;
+        scaled.axes[2].y = frame.axes[2].y * k;
+        scaled.axes[2].z = frame.axes[2].z * k;
     }
     for (i = 0; i < 4; i++) {
         fn_801F0F78(wheels[i], &car->wheels[i], &frame, scale);
