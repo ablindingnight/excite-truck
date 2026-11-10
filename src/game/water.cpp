@@ -757,7 +757,11 @@ void WaterSystem::Reflect(void* cam, f32 fov) {
 }
 
 extern "C" u32 fn_802C03E0(u32 c) {
-    return (c & 0xFFFF) << 8 | (c & 0xFF0000) << 8 | (c >> 24 & 0xFF);
+    u32 a = (c >> 24) & 0xFF;
+    u32 r = (c >> 16) & 0xFF;
+    u32 g = (c >> 8) & 0xFF;
+    u32 b = c & 0xFF;
+    return (g << 16 | b << 8) | (r << 24 | a);
 }
 
 // Helper names unproven: vector steps as the target evaluates them.
