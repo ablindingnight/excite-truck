@@ -218,7 +218,8 @@ void CarGear::Compute(int car) {
         f32 hi = c->f25D8;
         f32 lo = c->f25CC;
         f32 down = cur->down1 + load * (cur->down0 - cur->down1);
-        f32 speed = (lo + 0.15f * (1.12f * hi - lo)) / f24;
+        f32 top = 1.12f * hi;
+        f32 speed = (lo + 0.15f * (top - lo)) / f24;
         if (g > 0) {
             if (speed > cur->up) {
                 if (g < count) {
