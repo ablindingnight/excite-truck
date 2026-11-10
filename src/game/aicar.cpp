@@ -1608,11 +1608,10 @@ void fn_80195F6C(u8* d) {
         V2 pos;
         V2 dir;
         IdealPoint* s = il.seg;
-        f32 t = il.t;
-        dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
-        dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
-        pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
-        pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
+        pos.x = s->pos.x + il.t * (s->next->pos.x - s->pos.x);
+        pos.y = s->pos.y + il.t * (s->next->pos.y - s->pos.y);
+        dir.y = s->dir.y + il.t * (s->next->dir.y - s->dir.y);
+        dir.x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
         f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
         F32(d, 0x48) = pos.x;
         dir.x *= inv;
