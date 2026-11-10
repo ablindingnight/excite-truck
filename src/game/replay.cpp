@@ -231,10 +231,10 @@ Layout* lbl_8055D374;
 bool lbl_8055D378[2];  // restart / replay requested
 u8 lbl_8055D37A;     // results menu up
 ReplayClock lbl_8055D380;
-f32 lbl_8055D394;
-s32 lbl_8055D398;
-u8 lbl_8055D39C;
-u8 lbl_8055D39D;
+f32 lbl_8055D388;
+s32 lbl_8055D38C;
+u8 lbl_8055D390;
+u8 lbl_8055D391;
 
 bool lbl_805589B0 = 1;  // advanced overlay
 
@@ -412,15 +412,15 @@ int fn_80008C5C(void) {
         if (pad.dir - 1 <= 7 && ((1 << (pad.dir - 1)) & 0x8B)) {
             any = 1;
         }
-        if (!any && lbl_8055D394 > 1.0f && camMode != 4) {
+        if (!any && lbl_8055D388 > 1.0f && camMode != 4) {
             camMode = 4;
         }
-        if (camMode != prev && (lbl_8055D394 > 1.0f || prev == 4)) {
-            lbl_8055D394 = 0.0f;
+        if (camMode != prev && (lbl_8055D388 > 1.0f || prev == 4)) {
+            lbl_8055D388 = 0.0f;
         } else {
             camMode = prev;
         }
-        lbl_8055D394 += 0.016683351f;
+        lbl_8055D388 += 0.016683351f;
     }
     return camMode;
 }
@@ -593,7 +593,7 @@ void fn_80008F98(void) {
                 fn_801769E0();
                 fn_80176734();
                 if ((u16)key == '0') {
-                    sprintf(name, "m%d_", lbl_8055D398++);
+                    sprintf(name, "m%d_", lbl_8055D38C++);
                     fn_80278778(name);
                     fn_802E30C8("replay: recording movie %sXXXX.tga", name);
                 } else {
@@ -758,16 +758,16 @@ void fn_80009534(void) {
             }
         }
         q = fn_802ECC10();
-        if (q != lbl_8055D39C) {
-            lbl_8055D39C = q;
+        if (q != lbl_8055D390) {
+            lbl_8055D390 = q;
             if (q) {
                 if (!fn_801769F8()) {
-                    lbl_8055D39D = 1;
+                    lbl_8055D391 = 1;
                     fn_801769E0();
                 } else {
-                    lbl_8055D39D = 0;
+                    lbl_8055D391 = 0;
                 }
-            } else if (lbl_8055D39D) {
+            } else if (lbl_8055D391) {
                 fn_801769EC();
             }
         }
