@@ -469,9 +469,10 @@ int fn_8015F848(Bin* bins, f32 range) {
 }
 
 f32 fn_8015F92C(Bin* bins, f32 x) {
+    Bin* b;
     int i;
-    for (i = 0; i < lbl_8055E2A8 / 2 + 1; i++) {
-        x = MIN(x, bins[32 + i].dist);
+    for (i = 0, b = bins + 32; i < lbl_8055E2A8 / 2 + 1; b++, i++) {
+        x = MIN(x, b->dist);
         x = MIN(x, bins[32 - i].dist);
     }
     for (i = 0; i < 64; i++) {
