@@ -574,6 +574,7 @@ struct Bins {
     void Add(Obst* o, View* v, u8 side, f32 range) {
         Vec2* p = &o->pos;
         f32 d = v->Ahead(p, &v->at) - o->rad;
+        f32 firstBin = 0.0f;
         if (d > 0.0f && d < range) {
             f32 s = v->Side(p, &v->at);
             if (s + o->rad > -kWidth / 2.0f && s - o->rad < kWidth / 2.0f) {
@@ -584,24 +585,24 @@ struct Bins {
                 case 0: {
                     f32 t = (s - o->rad - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
-                    lo = LERP(0.0f, lbl_80561828, t);
+                    lo = LERP(firstBin, lbl_80561828, t);
                     t = (lbl_8055E2A4 + (s + o->rad) - -0.5f * kWidth) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
-                    hi = LERP(0.0f, lbl_80561828, t);
+                    hi = LERP(firstBin, lbl_80561828, t);
                     break;
                 }
                 case 2: {
                     f32 t = (s + lbl_8055E2A4 - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     lo = 0;
                     CLAMP01(t);
-                    hi = LERP(0.0f, lbl_80561828, t);
+                    hi = LERP(firstBin, lbl_80561828, t);
                     break;
                 }
                 case 1: {
                     f32 t = (s - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
                     hi = 64;
-                    lo = LERP(0.0f, lbl_80561828, t);
+                    lo = LERP(firstBin, lbl_80561828, t);
                     break;
                 }
                 default:
