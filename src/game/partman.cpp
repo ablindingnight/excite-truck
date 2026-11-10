@@ -969,9 +969,10 @@ void PartSys::DrawRotating(Particle* p, int n) {
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         size = size > 0.001f ? size : 0.001f;
         inv = 1.0f / (1.414f * size);
-        f32 ang = (f32)fmod(6.2831855f * (f32)p->spin / 256.0f + p->angVel * age * (angConst + angRamp * t),
-                            6.2831855f);
-        ang = 6.2831855f + ang;
+        f32 twoPi = 6.2831855f;
+        f32 ang = (f32)fmod(twoPi * (f32)p->spin / 256.0f + p->angVel * age * (angConst + angRamp * t),
+                            twoPi);
+        ang = twoPi + ang;
         V3 pos;
         Integrate(&pos, p, age);
         V3 a;

@@ -1942,9 +1942,10 @@ void ZoneMaster::DrawBonus(int p, CarState* c) {
         f32 y = pie->pos.y;
         int n = a * 360.0f;
         if (n > 0) {
-            fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, tex[4], 1.5707964f, 0.017453292f, 0.0f, 0.0f, 1.0f, 1.0f);
+            f32 degree = 0.017453292f;
+            fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, tex[4], 1.5707964f, degree, 0.0f, 0.0f, 1.0f, 1.0f);
             fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, tex[4], 1.5707964f, 0.06981317f, 0.0f, 0.0f, 1.0f, 1.0f);
-            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, tex[4], 1.5707964f + 0.017453292f * n, 0.06981317f, 0.0f,
+            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, tex[4], 1.5707964f + degree * n, 0.06981317f, 0.0f,
                         0.0f, 1.0f, 1.0f);
         }
         mainLyt->FindArt("score_star_art");
