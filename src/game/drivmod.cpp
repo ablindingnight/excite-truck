@@ -705,9 +705,9 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     d->body.pos.z = d->body.pos.z + off.z;
     f32 roll = -F32(car, 0x238);
     roll = MaxF(MinF(lbl_80563080, roll), -lbl_80563080);
-    v.z = roll;
-    v.y = lbl_8056305C;
     v.x = F32(car, 0x240) + d->yaw;
+    v.y = lbl_8056305C;
+    v.z = roll;
     f32 ang = PSVECMag(&v.x);
     if (ang > lbl_80563070) {
         f32 inv = lbl_80563058 / ang;

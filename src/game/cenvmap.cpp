@@ -246,8 +246,8 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         up.z = 1.0f;
         fn_80202D50(up);
         fn_802C8BD0(lbl_8055ED00);
-        out->x.y = 0.0f;
         out->x.x = 1.0f;
+        out->x.y = 0.0f;
         out->x.z = 0.0f;
         out->y.x = 0.0f;
         out->y.y = 1.0f;
@@ -311,9 +311,9 @@ void fn_80203380(EFrame* m) {
             Rotate(&p, a);
             p.x += m->pos.x;
             p.y = p.y + m->pos.z;
+            w.x = p.x;
             w.y = fn_801DCF48(0, p.x, p.y);
             w.z = p.y;
-            w.x = p.x;
             {
                 EVec3 d;
                 ENV_PROJECT(m, w, d, sx, sy);
