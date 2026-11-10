@@ -463,13 +463,9 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     }
     if (near) {
         f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
-        a = (lbl_80563C2C < a) ? lbl_80563C2C : a;
-        a = (a > lbl_80563C20) ? a : lbl_80563C20;
-        f32 ka = lbl_80563C20 + a * lbl_80563C2C;
+        f32 ka = FovRemap(ClampF(a));
         f32 b = (best - lbl_8055F49C) / (lbl_80563C20 - lbl_8055F49C);
-        b = (lbl_80563C2C < b) ? lbl_80563C2C : b;
-        b = (b > lbl_80563C20) ? b : lbl_80563C20;
-        f32 k = ka * (lbl_80563C20 + b * lbl_80563C2C);
+        f32 k = ka * FovRemap(ClampF(b));
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
         if (lbl_8055F498) {
@@ -526,13 +522,9 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
     }
     if (near) {
         f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
-        a = (lbl_80563C2C < a) ? lbl_80563C2C : a;
-        a = (a > lbl_80563C20) ? a : lbl_80563C20;
-        f32 ka = lbl_80563C20 + a * lbl_80563C2C;
+        f32 ka = FovRemap(ClampF(a));
         f32 b = (best - lbl_8055F49C) / (lbl_80563C20 - lbl_8055F49C);
-        b = (lbl_80563C2C < b) ? lbl_80563C2C : b;
-        b = (b > lbl_80563C20) ? b : lbl_80563C20;
-        f32 k = ka * (lbl_80563C20 + b * lbl_80563C2C);
+        f32 k = ka * FovRemap(ClampF(b));
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
         if (lbl_8055F498) {

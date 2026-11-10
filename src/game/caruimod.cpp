@@ -1286,7 +1286,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
     if (!model->loaded) {
         if (time > 2.0f) {
             yaw = yaw + (6.2831855f / 15.0f) * dt;
-            pitch = pitch + 0.02f * (0.197f - pitch);
+            pitch = Lerp(pitch, 0.197f, 0.02f);
         }
         Camera(x, y, w, h, yaw, pitch);
     } else {
@@ -1328,7 +1328,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         fn_802C98DC(&a, &b, &c, &d);
         if (time > 2.0f) {
             yaw = yaw + (6.2831855f / 15.0f) * dt;
-            pitch = pitch + 0.02f * (0.197f - pitch);
+            pitch = Lerp(pitch, 0.197f, 0.02f);
         }
         Camera(x, y, w, h, yaw, pitch);
     }
