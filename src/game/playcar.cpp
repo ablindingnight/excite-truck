@@ -1220,6 +1220,7 @@ static inline BOOL OptRumble(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 
 // then works out the force-feedback wobble from the wheels and the car's spin.
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
     f32 cl;
@@ -1521,15 +1522,15 @@ void PlayerDriver_vf48(u8* p) {
             f32 z;
             f32 y;
             x = spin[0] * v[0] + v[1] * spin[3] + spin[6] * v[2];
-            y = v[0] * spin[1] + v[1] * spin[4] + v[2] * spin[7];
+            y = Dot3(v[0], spin[1], v[1], spin[4], v[2], spin[7]);
             z = v[0] * spin[2] + spin[5] * v[1] + spin[8] * v[2];
             u.x = x;
             u.y = y;
             u.z = z;
         } else {
-            u.x = spin[0] * v[0] + spin[3] * v[1] + spin[6] * v[2];
+            u.x = Dot3(v[0], spin[0], v[1], spin[3], v[2], spin[6]);
             u.y = v[0] * spin[1] + spin[4] * v[1] + v[2] * spin[7];
-            u.z = spin[2] * v[0] + spin[5] * v[1] + spin[8] * v[2];
+            u.z = Dot3(v[0], spin[2], v[1], spin[5], v[2], spin[8]);
         }
         slip = MaxF(kZero, kOne - lbl_80562080 * (F32(c5, 0x2488) + F32(c5, 0x2414)));
         str *= slip;

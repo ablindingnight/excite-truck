@@ -493,6 +493,7 @@ static inline void SetIdentity(f32* m) {
 
 extern "C" {
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 // Poses the rider's bones on the skeleton points: each bone sits on its point (in the model's frame f)
 // and, when it has a child, is turned from its bind direction to aim at the child.
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
@@ -505,11 +506,9 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
         v.y = pts[p->point].y - f->pos.y;
         v.z = pts[p->point].z - f->pos.z;
         {
-            f32 zv;
-            f32 x = v.z * f->rot.r[0].z + (v.x * f->rot.r[0].x + v.y * f->rot.r[0].y);
-            f32 y = v.z * f->rot.r[1].z + (v.x * f->rot.r[1].x + v.y * f->rot.r[1].y);
-            zv = f->rot.r[2].z;
-            f32 z = v.z * zv + (v.x * f->rot.r[2].x + v.y * f->rot.r[2].y);
+            f32 x = Dot3(v.x, f->rot.r[0].x, v.y, f->rot.r[0].y, v.z, f->rot.r[0].z);
+            f32 y = Dot3(v.x, f->rot.r[1].x, v.y, f->rot.r[1].y, v.z, f->rot.r[1].z);
+            f32 z = Dot3(v.x, f->rot.r[2].x, v.y, f->rot.r[2].y, v.z, f->rot.r[2].z);
             v.x = x;
             v.y = y;
             v.z = z;
@@ -521,9 +520,9 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             c.y = pts[p->child].y - f->pos.y;
             c.z = pts[p->child].z - f->pos.z;
             {
-                f32 x = c.z * f->rot.r[0].z + (c.x * f->rot.r[0].x + c.y * f->rot.r[0].y);
-                f32 y = f->rot.r[1].z * c.z + (c.x * f->rot.r[1].x + c.y * f->rot.r[1].y);
-                f32 z = c.z * f->rot.r[2].z + (c.x * f->rot.r[2].x + c.y * f->rot.r[2].y);
+                f32 x = Dot3(c.x, f->rot.r[0].x, c.y, f->rot.r[0].y, c.z, f->rot.r[0].z);
+                f32 y = Dot3(c.x, f->rot.r[1].x, c.y, f->rot.r[1].y, c.z, f->rot.r[1].z);
+                f32 z = Dot3(c.x, f->rot.r[2].x, c.y, f->rot.r[2].y, c.z, f->rot.r[2].z);
                 c.x = x;
                 c.y = y;
                 c.z = z;
