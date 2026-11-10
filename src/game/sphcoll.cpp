@@ -2658,7 +2658,7 @@ void fn_8019F780(u8* p) {
         RVec3 up;
         f32 sub = F32(p, 0x50) - F32(p, 0x38) + F32(p, 0x24);
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
-        f32 ph = fmod(F32(p, 0x34) + lbl_8056238C * lbl_8055E3C8 * lbl_805622E8, lbl_80562390);
+        f32 ph = fmod(F32(p, 0x34) + lbl_8056238C * lbl_8055E3C8 / 2.0f, lbl_80562390);
         f32 s = sin(ph);
         sub += lbl_80562398 * (lbl_805622E0 + s);
         if (sub > lbl_805622D0) {

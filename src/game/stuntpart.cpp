@@ -553,7 +553,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                     ang *= -1.0f;
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) / 2.0f;
-                f32 sz = p->sizeZ * (f32)sin(ang) * 0.5f;
+                f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
                 Vec base;
                 base.x = m.pos.x + m.rot[0].x * cx + m.rot[2].x * sz;
                 base.y = m.pos.y + m.rot[0].y * cx + m.rot[2].y * sz;

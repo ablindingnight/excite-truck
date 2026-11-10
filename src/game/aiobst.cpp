@@ -455,7 +455,7 @@ int fn_8015F848(Bin* bins, f32 range) {
     for (i = 0; i < 64; i++) {
         d = bins[i].dist;
         if (d < range) {
-            if (last > 0 && (f32)__fabs(bins[last].dist - d) < range * 0.5f &&
+            if (last > 0 && (f32)__fabs(bins[last].dist - d) < range / 2.0f &&
                 bw * (f32)(i - last) < kGap) {
                 Bin* a = &bins[last];
                 Bin* b = &bins[i];

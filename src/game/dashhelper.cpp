@@ -560,7 +560,7 @@ void fn_8000E874(int player) {
         x9 = 9.0f + x;
         x5 = 5.0f + x;
         xr = x + w;
-        ty = 1.0f + (y - h * 0.5f);
+        ty = 1.0f + (y - h / 2.0f);
         switch (row->type) {
         f32 size;
         f32 bw;

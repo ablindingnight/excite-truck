@@ -1014,7 +1014,7 @@ extern const f32 lbl_80563B90;  // 0.0f
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 void fn_802621F0(u8* p) {
-    static f32 sTextY = -(f32)S32(p, 0x10) * 0.5f;
+    static f32 sTextY = -(f32)S32(p, 0x10) / 2.0f;
     char line[30];
     char target[30];
     int part;

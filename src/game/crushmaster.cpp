@@ -1609,9 +1609,9 @@ inline void CrushMaster::vf4C(int view) {
                 TextElem t = *col;
                 f32 yv;
                 f32 xv = b.pos.x;
-                t.pos.x = xv + b.w * 0.5f;
+                t.pos.x = xv + b.w / 2.0f;
                 yv = b.pos.y;
-                t.pos.y = yv + b.h * 0.5f;
+                t.pos.y = yv + b.h / 2.0f;
                 fn_80147230(&t, "%d", pts);
             }
         }

@@ -1318,7 +1318,7 @@ void fn_801E96D8(RaceSetup* s) {
                         mtx.z.y = 0.0f;
                         mtx.z.z = cur.z - prev.z;
                         mtx.pos = c;
-                        len = PSVECMag(&mtx.z) * 0.5f;
+                        len = PSVECMag(&mtx.z) / 2.0f;
                         PSVECNormalize(&mtx.z, &mtx.z);
                         up.x = 0.0f;
                         up.y = 1.0f;

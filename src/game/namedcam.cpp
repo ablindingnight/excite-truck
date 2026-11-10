@@ -676,7 +676,7 @@ void fn_80277A14(CamRec* c, int slot) {
     fn_8026E22C(&blend, &lbl_804A0C60[slot].pose, &frame, e);
     f32 fov = Lerp(lbl_804A0C60[slot].fov, tf, e);
     if (fn_80178CA4() == 2) {
-        fov = 2.0f * (f32)atan(Lerp(1.0f, 0.65f, e) * (f32)tan(fov * 0.5f));
+        fov = 2.0f * (f32)atan(Lerp(1.0f, 0.65f, e) * (f32)tan(fov / 2.0f));
     }
     c->pose = blend;
     c->fov = fov;

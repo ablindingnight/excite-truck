@@ -696,7 +696,7 @@ void fn_8026C014(int player) {
         turn = dt * lbl_80563DF0;
         speed = lbl_80563DF8 * (lbl_80563DFC * dt);
         fovRate = dt * lbl_80563E00;
-        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) * lbl_80563D9C), lbl_80563D78);
+        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
         lo = lbl_80563DE0;
         hi = lbl_80563DE4;
         boost = lbl_80563D94;
@@ -804,7 +804,7 @@ void fn_8026C014(int player) {
                 }
                 p.x = lbl_8049A168.pos.x + lbl_80563D9C * (car->frame.pos.x - lbl_8049A168.pos.x);
                 p.y = lbl_8049A168.pos.y + lbl_80563D9C * (car->frame.pos.y - lbl_8049A168.pos.y);
-                p.z = lbl_8049A168.pos.z + lbl_80563D9C * (car->frame.pos.z - lbl_8049A168.pos.z);
+                p.z = lbl_8049A168.pos.z + (car->frame.pos.z - lbl_8049A168.pos.z) / 2.0f;
                 lbl_8049A168.rot = qs;
                 tgt.pos = p;
                 lbl_8049A168.pos = p;

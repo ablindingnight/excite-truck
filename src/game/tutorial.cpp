@@ -1875,7 +1875,7 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             }
             {
                 f32 inv;
-                pos.x = pts[best].x + 0.5f * (pts[(best + 1) % 3].x - pts[best].x);
+                pos.x = pts[best].x + (pts[(best + 1) % 3].x - pts[best].x) / 2.0f;
                 f32 zv = pts[best].z;
                 pos.z = zv + 0.5f * (pts[(best + 1) % 3].z - zv);
                 dir.x = pts[(best + 2) % 3].x - pos.x;

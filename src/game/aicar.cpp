@@ -2185,7 +2185,7 @@ void fn_8019743C(u8* d, u8* out) {
             F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
         }
         if (U8(d, 0x9C)) {
-            f32 hi = (F32(d, 0x278) + F32(d, 0xA4) + 0.5f * F32(d, 0xAC)) - (0.61f + lbl_8055A488);
+            f32 hi = (F32(d, 0x278) + F32(d, 0xA4) + F32(d, 0xAC) / 2.0f) - (0.61f + lbl_8055A488);
             F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
         }
         f32 push = F32(d, 0xE8);

@@ -3222,8 +3222,8 @@ inline Pickup::Pickup(ValueNode* n) {
         } else {
             angle = -(f32)acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
         }
-        hx = 1.0f + 1.5f * (box[1] - box[0]) * 0.5f;
-        hz = 1.0f + 1.5f * (box[5] - box[4]) * 0.5f;
+        hx = 1.0f + 1.5f * (box[1] - box[0]) / 2.0f;
+        hz = 1.0f + 1.5f * (box[5] - box[4]) / 2.0f;
         hy = 1.0f + (box[3] - box[2]);
         vol = new ("spinvol") BoxShape(hx, hy, hx);
         vol->SetSurface(1000);
