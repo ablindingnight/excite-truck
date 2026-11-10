@@ -768,15 +768,10 @@ static inline void Swap32(u8* p) {
 
 void fn_801F7B10(OFrame* f, ValueNode* vn, const char* key) {
     if (fn_801F7A88(vn, key, f, sizeof(OFrame))) {
-        u8* p = (u8*)f;
-        for (int i = 0; i < 2; i++) {
-            Swap32(p);
-            Swap32(p + 4);
-            Swap32(p + 8);
-            Swap32(p + 12);
-            Swap32(p + 16);
-            Swap32(p + 20);
-            p += 0x18;
+        int i;
+        u32* w = (u32*)f;
+        for (i = 0; i < 12; i++) {
+            Swap32((u8*)&w[i]);
         }
     } else {
         f->x.Set(vn->GetVec3("basis_x"));
