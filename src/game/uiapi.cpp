@@ -105,6 +105,9 @@ extern "C" void* fn_8021165C(int dir, int set) {
 extern s32 lbl_8055EF1C;
 extern s32 lbl_8055EF20;
 // The lite-mode blinker art (0 = left, else right).
+// Plain two-return form: the target has no bnelr fold here, which only optimization_level 0 reproduces.
+#pragma push
+#pragma optimization_level 0
 s32 fn_80211660(s32 arg0) {
     if (arg0 == 0) {
         return lbl_8055EF1C;
@@ -112,6 +115,7 @@ s32 fn_80211660(s32 arg0) {
         return lbl_8055EF20;
     }
 }
+#pragma pop
 
 s32 fn_80211678(u8 *arg0) {
     return ((s8) *arg0 - 0x24) == 0;
