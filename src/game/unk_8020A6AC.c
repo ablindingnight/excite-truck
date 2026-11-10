@@ -815,3 +815,30 @@ extern int fn_80208E90(void *, int);
 /* .bss owned by this unit (0x804892D0-0x80489BE0), in address order. */
 char lbl_804892D0[0x900];
 unsigned char lbl_80489BD0[0x10];
+
+/* Module statics (.sbss 0x8055EDF0-0x8055EE18, in address order); their constructors are this unit's __sinit
+   (0x8020BCB8, formerly the separate unit unk_8020BCB8). */
+#pragma cplusplus on
+class ModuleTag;
+void RegisterModuleTag(ModuleTag* tag);
+class ModuleTag {
+public:
+    ModuleTag(void) { RegisterModuleTag(this); }
+    unsigned char flag;
+    ModuleTag* next;
+};
+class UnkStatic7F {
+public:
+    UnkStatic7F(void) { value = 0x7F000000; }
+    unsigned long value;
+};
+ModuleTag lbl_8055EDF0;
+int lbl_8055EDF8;
+int lbl_8055EDFC;
+unsigned int lbl_8055EE00;
+void *lbl_8055EE04;
+void *lbl_8055EE08;
+int lbl_8055EE0C;
+void *lbl_8055EE10;
+UnkStatic7F lbl_8055EE14;
+#pragma cplusplus reset

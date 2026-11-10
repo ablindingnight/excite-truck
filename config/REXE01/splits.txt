@@ -3333,14 +3333,12 @@ game/musicplr.cpp:
 	.sdata2     start:0x80563290 end:0x805632B0
 
 game/unk_8020A6AC.c:
-	.text       start:0x8020A6AC end:0x8020BCB8
+	.text       start:0x8020A6AC end:0x8020BCE4
+	.ctors      start:0x802ED390 end:0x802ED394
 	.bss        start:0x804892D0 end:0x80489BE0
 	.sdata      start:0x8055B590 end:0x8055B5C5
+	.sbss       start:0x8055EDF0 end:0x8055EE18
 	.sdata2     start:0x805632B0 end:0x805632C8
-
-game/unk_8020BCB8.c:
-	.text       start:0x8020BCB8 end:0x8020BCE4
-	.ctors      start:0x802ED390 end:0x802ED394
 
 game/sounddash.cpp:
 	.text       start:0x8020BCE4 end:0x8020C140
