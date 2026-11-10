@@ -1162,3 +1162,11 @@ void fn_802E6B44(int arg0, int arg1) {
 #pragma cplusplus reset
 
 }  // extern "C"
+
+// .bss owned by this unit (0x804FC558-0x804FC8B0), in address order.
+char lbl_804FC558[8][0x20];
+unsigned int lbl_804FC658[10];
+float lbl_804FC680[4];
+char lbl_804FC690[0x30];
+unsigned char lbl_804FC6C0[0x140];
+unsigned char lbl_804FC800[0xB0];
