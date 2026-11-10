@@ -2062,7 +2062,9 @@ void fn_801C7BA0(void) {
 // The signed angle from a to b (both normalised first unless already unit length).
 static inline f32 Angle(const V2& b, const V2& a) {
     const V2* pa = &a;
+    const V2* pb = &b;
     V2 na;
+    V2 nb;
     f32 la = a.x * a.x + a.y * a.y;
     if (!((f32)__fabs(la - 1.0f) <= lbl_80558DC4[0])) {
         na = a;
@@ -2071,8 +2073,6 @@ static inline f32 Angle(const V2& b, const V2& a) {
         na.y *= inv;
         pa = &na;
     }
-    const V2* pb = &b;
-    V2 nb;
     f32 lb = b.x * b.x + b.y * b.y;
     if (!((f32)__fabs(lb - 1.0f) <= lbl_80558DC4[0])) {
         nb = b;
