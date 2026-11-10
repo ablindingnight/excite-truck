@@ -77,7 +77,11 @@ f32 fn_80176A2C(void);
 int fn_80265D64(void);
 s64 __div2i(s64 a, s64 b);
 void fn_8026A248(int car, int view);
-void fn_801A5300(void* car, s32 x);
+class Controller;
+class SpringCar {
+public:
+    void SetController(Controller* c);
+};
 void fn_801EAA94(int car, s32 kind);
 void fn_80177990(void);
 void fn_801D0CF0(void);
@@ -972,17 +976,19 @@ void fn_80178CAC(int a, int b) {
     s32 mb;
     s32 xa;
     int i;
-    s32 kb;
+    s32 xb;
+    s32* slot;
     RaceCarRec* ra;
     RaceCarRec* rb;
     s32 ka;
-    s32 xb;
-    for (i = 0; i < 4; i++) {
-        if (a == lbl_80430590[i]) {
-            lbl_80430590[i] = b;
+    s32 kb;
+    slot = lbl_80430590;
+    for (i = 0; i < 4; i++, slot++) {
+        if (a == *slot) {
+            *slot = b;
             fn_8026A248(b, i);
-        } else if (b == lbl_80430590[i]) {
-            lbl_80430590[i] = a;
+        } else if (b == *slot) {
+            *slot = a;
             fn_8026A248(a, i);
         }
     }
@@ -994,10 +1000,10 @@ void fn_80178CAC(int a, int b) {
     mb = rb->model;
     xb = rb->f270C;
     xa = ra->f270C;
-    fn_801A5300(ra, 0);
-    fn_801A5300(rb, 0);
-    fn_801A5300(ra, xb);
-    fn_801A5300(rb, xa);
+    ((SpringCar*)ra)->SetController(0);
+    ((SpringCar*)rb)->SetController(0);
+    ((SpringCar*)ra)->SetController((Controller*)xb);
+    ((SpringCar*)rb)->SetController((Controller*)xa);
     ra->kind = kb;
     rb->kind = ka;
     ra->model = mb;
