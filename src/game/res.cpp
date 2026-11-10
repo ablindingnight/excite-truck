@@ -1842,8 +1842,12 @@ extern "C" s32 fn_8012EE78(StreamBuf* b) { return b->pos; }
 
 extern "C" void fn_8012EE80(StreamBuf* b) {
     int i;
-    StreamSlot* s = b->slots;
-    s32 end = b->pos;
+    StreamSlot* s;
+    s32 end;
+    StreamSlot* slots;
+    slots = b->slots;
+    s = slots;
+    end = b->pos;
     for (i = 0; i < 2; i++, s++) {
         if (s->state) {
             if (s->state == 1 && s->res->Poll(0)) {
@@ -1854,7 +1858,7 @@ extern "C" void fn_8012EE80(StreamBuf* b) {
             }
         }
     }
-    s = b->slots;
+    s = slots;
     for (i = 0; i < 2; i++, s++) {
         if ((s->state == 0 && s->res) || (s->state == 2 && s->pos + b->size < b->pos)) {
             s32 start;
