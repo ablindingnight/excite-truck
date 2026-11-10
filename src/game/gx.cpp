@@ -413,6 +413,13 @@ struct GPMetric {
     s32 kind;
 };
 
+f32 lbl_8055D0B0 = 99.0f;
+f32 lbl_8055D0B4 = 99.0f;
+s32 lbl_8055D0B8 = -1;  // screenshot tile
+s32 lbl_8055D0BC = 7;
+s32 lbl_8055D0C0 = 7;
+u8 lbl_8055D0C4 = 1;
+
 GPMetric lbl_8034BD40[6] = {
     {0x22, "Clocks", 0x10, "Vertex", 1},     {2, "Clip Clocks", 0x15, "Clock", 1},
     {3, "XF Wait In", 0x15, "Clock", 1},     {4, "XF Wait Out", 0x15, "Clock", 1},
@@ -480,15 +487,6 @@ s32 lbl_8055FDC4;   // screenshot start
 s32 lbl_8055FDC8;   // point lights
 s32 lbl_8055FDCC;
 
-f32 lbl_8055D0B0 = 99.0f;
-f32 lbl_8055D0B4 = 99.0f;
-s32 lbl_8055D0B8 = -1;  // screenshot tile
-s32 lbl_8055D0BC = 7;
-s32 lbl_8055D0C0 = 7;
-u8 lbl_8055D0C4 = 1;
-u16 lbl_8055D0F6 = 2;   // draw sync token
-u8 lbl_8055D0FF = 1;
-s32 lbl_8055D10C = -1;  // screenshot file
 
 extern "C" {
 
@@ -607,6 +605,8 @@ void fn_802CEC50(u16 token) {
         break;
     }
 }
+
+u16 lbl_8055D0F6 = 2;   // draw sync token
 
 void fn_802CECF4(u16 token) {
     do {
@@ -774,6 +774,8 @@ void fn_802CF10C(u32 count) {
     }
     DCFlushRange(lbl_804C9760.cur, lbl_804C9760.bpp * (lbl_804C9760.w * lbl_804C9760.h));
 }
+
+u8 lbl_8055D0FF = 1;
 
 void fn_802CF5A8(void) {
     if (lbl_8055D0FF) {
@@ -1376,6 +1378,8 @@ void fn_802D0914(s32 fd, int w, int h) {
 }
 
 void fn_802D09E4(void) {}
+
+s32 lbl_8055D10C = -1;  // screenshot file
 
 void fn_802D09E8(void) {
     if (!lbl_8055FD90) {
@@ -2507,7 +2511,6 @@ struct SimpleHeap {
         }
         fn_802E30C8("	%dK total", total >> 10);
         u32 nfree = 0;
-        fn_802E30C8("Free:");
         for (HeapBlock* b = free; b; b = b->next) {
             fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
             nfree += b->size;
