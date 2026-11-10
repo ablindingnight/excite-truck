@@ -1379,8 +1379,10 @@ public:
                     phase = 1;
                 }
             } else if (now - start - delay > length) {
-                for (int i = 0; i < entries.count; i++) {
-                    SurfEntry* e = &entries.data[i];
+                int i;
+                int off;
+                for (i = 0, off = 0; i < entries.count; off += sizeof(SurfEntry), i++) {
+                    SurfEntry* e = (SurfEntry*)((u8*)entries.data + off);
                     e->obj->SetSurface(e->surf);
                     e->obj->SetMode(-1);
                 }

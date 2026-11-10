@@ -537,8 +537,10 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     s->up = *up;
     RVec3 a;
     Scale(&a, f, 0.0110011f);
-    for (int i = 0; i < s->nPart; i++) {
-        AddTo(&s->acc[i], &a);
+    int i;
+    int off;
+    for (i = 0, off = 0; i < s->nPart; off += sizeof(RVec3), i++) {
+        AddTo((RVec3*)((u8*)s->acc + off), &a);
     }
     fn_801C1B60(s);
     s32 k = PSysCount(s);

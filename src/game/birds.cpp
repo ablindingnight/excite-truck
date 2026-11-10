@@ -381,8 +381,9 @@ void fn_802A8DE8(void) {
     int j;
     int i;
     Boid* b;
-    for (i = 0; i < lbl_804BD6C4.n; i++) {
-        f = lbl_804BD6C4.data[i];
+    int off;
+    for (i = 0, off = 0; i < lbl_804BD6C4.n; off += sizeof(Flock*), i++) {
+        f = *(Flock**)((u8*)lbl_804BD6C4.data + off);
         int off = 0;
         for (j = 0; j < f->birds.n; off += sizeof(f->birds.data[0]), j++) {
             b = (Boid*)((u8*)f->birds.data + off);

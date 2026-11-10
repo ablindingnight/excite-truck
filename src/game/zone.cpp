@@ -2700,8 +2700,9 @@ inline void ZoneMaster::vf10(void) {
     lbl_8055E1BC = 0;
     b294 = 0;
     nextGate = 0;
-    for (lv = 0; lv < levels->n; lv++) {
-        l = &levels->levels[lv];
+    int loff;
+    for (lv = 0, loff = 0; lv < levels->n; loff += sizeof(ZoneLevel), lv++) {
+        l = (ZoneLevel*)((u8*)levels->levels + loff);
         for (j = 0; j < l->n; j++) {
             g = &l->gates[j];
             p = &g->a;

@@ -1819,8 +1819,9 @@ inline void RingChalMaster::vf40(void) {
         ObjSet* s = &arena.sets->data[i];
         if (s->active) {
             int j;
-            for (j = 0; j < s->infos->count; j++) {
-                ObjInfo* o = &s->infos->data[j];
+            int off;
+            for (j = 0, off = 0; j < s->infos->count; off += sizeof(ObjInfo), j++) {
+                ObjInfo* o = (ObjInfo*)((u8*)s->infos->data + off);
                 if (o->type == 1) {
                     fn_802C744C(o->model, &o->mtx);
                 }
