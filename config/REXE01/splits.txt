@@ -250,6 +250,9 @@ MSL/alloc.c:
 	.bss        start:0x8035BB58 end:0x8035BB90
 	.sbss       start:0x8055D678 end:0x8055D67C
 
+MSL/errno.c:
+	.sbss       start:0x8055D680 end:0x8055D684
+
 MSL/ansi_files.c:
 	extab       start:0x80004558 end:0x80004568
 	extabindex  start:0x80004754 end:0x8000476C
@@ -329,6 +332,9 @@ MSL/printf.c:
 	.data       start:0x802FE898 end:0x802FEAE8
 	.sdata      start:0x80558DA8 end:0x80558DAC
 	.sdata2     start:0x805605C0 end:0x805605C8
+
+MSL/float.c:
+	.sdata      start:0x80558DB0 end:0x80558DC0
 
 MSL/qsort.c:
 	extab       start:0x80004658 end:0x80004660
