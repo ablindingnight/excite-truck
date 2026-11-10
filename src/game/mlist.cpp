@@ -522,33 +522,42 @@ int fn_802CDB20(MList* m, int i) {
 }
 
 void fn_802CDB5C(int pri) {
+    int j;
+    u8* dl;
+    MList* m;
+    int n;
+    int i;
+    int o;
+    void* cur;
+    s32 tex;
+    int open;
+    RenderCtx* ctx;
+    MLStrip* sp;
+    s32 cnt;
+    MLBatch* e;
+    void* id;
     fn_801293C8("mlist: flush");
     fn_801293E8(lbl_804C1480);
-    MList* m = lbl_8055FCD8;
+    m = lbl_8055FCD8;
     MLArray<MLStrip> da = m->d;
     MLRange r = m->ranges[pri];
     MLArray<MLBatch> ea = m->e;
     MCam ident;
     SetIdentity(&ident);
-    MLBatch* e;
-    int o;
-    void* id;
-    void* cur;
-    RenderCtx* ctx = lbl_8055DFC4;
+    ctx = lbl_8055DFC4;
     id = fn_802D0514(&ident);
     fn_802D0610(id);
     ctx->mtx[0] = id;
     e = &ea.p[r.lo];
     cur = 0;
-    for (int i = r.lo; i < r.hi; e++, i++) {
-        int open = 0;
-        s32 tex;
-        s32 cnt = 0;
-        u8* dl = 0;
+    for (i = r.lo; i < r.hi; e++, i++) {
+        open = 0;
+        cnt = 0;
+        dl = 0;
         tex = e->tex;
-        MLStrip* sp = &da.p[e->start];
-        int n = e->end - e->start;
-        for (int j = 0; j < n; j++) {
+        sp = &da.p[e->start];
+        n = e->end - e->start;
+        for (j = 0; j < n; j++) {
             MLStrip s = *sp++;
             if (s.flags == (ctx->vis[s.ref] & 0x7F)) {
                 if (!open) {
