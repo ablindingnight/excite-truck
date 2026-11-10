@@ -159,7 +159,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 continue;
             }
             {
-                s16 flags = t->flags;
+                u16 flags = t->flags;
                 PVec3 cp = proj;
                 if (outside == 1) {
                     int k1;
