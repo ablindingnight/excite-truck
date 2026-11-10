@@ -4684,8 +4684,9 @@ inline void BetaMaster::c2(Body* b, int car) {
                 c->score += pts;
             }
         }
-        for (i = 0; i < bumps2.a.count; i++) {
-            Token* t = bumps2.a.data[i];
+        int off = 0;
+        for (i = 0; i < bumps2.a.count; off += sizeof(bumps2.a.data[0]), i++) {
+            Token* t = *(Token**)((u8*)bumps2.a.data + off);
             int got;
             if (b == t->body && t->active) {
                 RaceCarRec* r2 = fn_8017960C(car);

@@ -105,8 +105,9 @@ PathFile* fn_801D9CC4(const char* name) {
         int i;
         int j;
         Swap32(&f->count);
-        for (i = 0; i < f->count; i++) {
-            p = &f->paths[i];
+        int off = 0;
+        for (i = 0; i < f->count; i++, off += sizeof(f->paths[0])) {
+            p = (Path*)((u8*)f->paths + off);
             Swap32(&p->count);
             Swap32(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
