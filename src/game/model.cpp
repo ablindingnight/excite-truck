@@ -195,7 +195,6 @@ f32 PSVECDistance(const MVec3* a, const MVec3* b);
 
 ModuleTag lbl_8055FC18;
 Pool<RNode> lbl_804C1338;
-u32 lbl_804C1344;
 Bin lbl_804C1348[9];
 Pool<TexNode*> lbl_804C1390;    // sorted texture nodes
 Pool<ModelNode> lbl_804C139C;   // model instances
