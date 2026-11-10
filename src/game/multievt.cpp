@@ -114,8 +114,8 @@ static inline int FindUnlock(u8* car) {
     return -1;
 }
 
-extern char* lbl_8055F294;
 extern u8 lbl_8055F290;
+extern char* lbl_8055F294;
 
 // Copies at most n characters, always terminating.
 static inline void CopyName(const char* s, int n, char* d) {
@@ -130,6 +130,11 @@ static inline void CopyName(const char* s, int n, char* d) {
 ModuleTag lbl_8055F280;
 UnkStatic123s lbl_80498998;
 UnkStatic7F lbl_8055F288;
+UnlockList* lbl_8055F28C;
+u8 lbl_8055F290;
+u8 lbl_8055F291;
+char* lbl_8055F294;
+u8 lbl_8055F298;
 s32 lbl_8055BF34 = -1;
 
 extern "C" {

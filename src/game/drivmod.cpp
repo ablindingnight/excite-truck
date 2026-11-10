@@ -32,9 +32,10 @@ struct ZeroPos {
     }
 };
 
-const char* lbl_8055ECA8;
+extern const char* lbl_8055ECA8;
 
 ModuleTag lbl_8055ECA0;
+const char* lbl_8055ECA8;
 ZeroPos lbl_804888A8;
 
 extern "C" {
