@@ -1568,11 +1568,11 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 // current camera move at the current time, relative to the world, the start line or a car, blended in
 // from the previous camera over the interpolation time. Returns 0 when not active.
 int fn_801C5B68(CamView* v, int idx) {
+    u8* s = lbl_80437D88;
+    CamPlay* p = (CamPlay*)s;
     if (idx == 0) {
         lbl_8055E800++;
     }
-    u8* s = lbl_80437D88;
-    CamPlay* p = (CamPlay*)s;
     if (fn_801C5B60() && !lbl_8055E80C) {
         CamPose* cam = (CamPose*)&lbl_80499050;
         cam->pos.x = p->origin.x;
