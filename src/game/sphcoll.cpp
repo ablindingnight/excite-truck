@@ -2085,7 +2085,7 @@ int fn_8019E500(u8* p, u8* q) {
         EdgeFrame e;
         BoxAxis* ab = &ax[(i + 2) % 3];
         BoxAxis* aa = &ax[(i + 1) % 3];
-        BoxAxis* ai = &ax[i];
+        BoxAxis* ai = (BoxAxis*)((char*)ax + i * (int)sizeof(BoxAxis));
         e.axis.x = ai->dir.v[0];
         e.axis.y = ai->dir.v[1];
         e.axis.z = ai->dir.v[2];
