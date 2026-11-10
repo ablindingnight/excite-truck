@@ -94,7 +94,7 @@ void* operator new[](unsigned long n, const char* tag);
 ModuleTag lbl_8055F2D8;
 static UnkStatic123 lbl_80498C30;
 UnkStatic7F lbl_8055F2E0;
-s32 lbl_8055F2E8;
+extern s32 lbl_8055F2E8;
 static GarageFlags lbl_80498C48;
 extern u8* lbl_8055F2EC;
 
@@ -197,7 +197,9 @@ static inline int FindIcon(IconPool* pool, const char* name) {
     return -1;
 }
 
-extern IconPool* lbl_8055F2E4;
+IconPool* lbl_8055F2E4;
+s32 lbl_8055F2E8;
+u8* lbl_8055F2EC;
 
 static inline void FreeIconPool(IconPool* pool) {
     if (pool) {
