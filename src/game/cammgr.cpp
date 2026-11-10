@@ -1107,6 +1107,9 @@ extern const f32 lbl_80563CF4;  // 82.5 deg
 extern const f32 lbl_80563CF8;  // 30 * 30
 ModuleTag lbl_8055F470;
 UnkStaticFFFF lbl_8055F478;
+f32 lbl_8055F484;
+u8 lbl_8055F498;
+u8 lbl_8055F4A8[8];
 f32 lbl_8055F47C = lbl_80563CF4;  // default field of view
 Mtx34 lbl_80499050;
 CamRec lbl_80499080[4];
