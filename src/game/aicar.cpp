@@ -212,7 +212,7 @@ struct AIVec : AIVecBase {
     u8 buf[0x600];
 };
 
-u8* lbl_804348E8[8];  // cars
+extern u8* lbl_804348E8[8];  // cars (defined in carbody.cpp, the owner of 0x804348E8)
 u8* lbl_804349C0[8];  // AI drivers by car
 struct DriverList {
     u8* items[8];
