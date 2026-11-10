@@ -309,11 +309,21 @@ DashRowType lbl_802FC2A8[11] = {
     {6, 2, 6}, {7, 2, 6}, {8, 2, 6}, {9, 2, 6}, {10, 1, 5},
 };
 
+}  // extern "C"
+
+// A colour set at static-init time (each value is stored by __sinit).
+class DashColor {
+public:
+    DashColor(u32 c) { value = c; }
+    u32 value;
+};
+
+extern "C" {
 ModuleTag lbl_8055D478;
 UnkStatic7F lbl_8055D480;
-UnkStatic7F lbl_8055D484;
-UnkStatic7F lbl_8055D488;
-UnkStatic7F lbl_8055D48C;
+DashColor lbl_8055D484(0x64FFFFFF);
+DashColor lbl_8055D488(0x64000000);
+DashColor lbl_8055D48C(0xFFA6B3B3);
 
 s32 lbl_80558A90 = -1;  // text line height
 s32 lbl_80558A94 = -1;  // help arrow model
