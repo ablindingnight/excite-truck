@@ -86,11 +86,8 @@ public:
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape(o, m, 0x53504852, k, s) {
+        : CollShape(o, m, 0x53504852, k, s), center(c) {
         radius = r;
-        center.x = c.x;
-        center.y = c.y;
-        center.z = c.z;
         f34 = 0.0f;
         f38 = 0.0f;
         f3C = 0.0f;
@@ -99,6 +96,9 @@ public:
         f48 = 0.0f;
         b4C = 0;
         f50 = 0.0f;
+        center.x = c.x;
+        center.y = c.y;
+        center.z = c.z;
         if (o) {
             fn_8019EECC(o, &center);
         }
