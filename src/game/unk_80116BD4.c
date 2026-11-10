@@ -3588,7 +3588,6 @@ void fn_8011CE18(void *arg0, void *arg1) {
 // means one color followed by a run of copies.
 void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 *next;
-    u32 word;
     u32 value;
     u32 count;
     s32 len;
@@ -3598,6 +3597,7 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u32 bit;
     u32 last;
     u32 lo;
+    u32 word;
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
@@ -3711,7 +3711,6 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 // Refills the colors bundle (older format): like fn_8011D0E8, with colors stored as plain bytes.
 void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 *next;
-    u32 word;
     u32 value;
     u32 count;
     s32 len;
@@ -3721,6 +3720,7 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u32 bit;
     u32 last;
     u32 lo;
+    u32 word;
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
