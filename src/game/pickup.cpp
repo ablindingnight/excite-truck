@@ -626,7 +626,9 @@ void fn_801683F4(PickupCounts* out, int player) {
             SubVec(l, lbl_80430260[player].pos, rec->pos);
             RotVec(l, rec->rot, l);
             dims = car->dims;
-            lo.x = LoEdge(l[0], dims->wid);
+            f32 x = l[0];
+            f32 w = dims->wid;
+            lo.x = LoEdge(x, w);
             lo.z = LoEdge(l[2], dims->len);
             hi.x = HiEdge(l[0], dims->wid);
             hi.z = HiEdge(l[2], dims->len);

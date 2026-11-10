@@ -495,7 +495,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     sf = lbl_8055D5B4;
     {
         Mtx34 m = *fn_801E8718(map->player);
-        sf->unk10 = atan2(m.m[1][2], m.m[2][0]);
+        f32 y = m.m[1][2];
+        f32 x = m.m[2][0];
+        sf->unk10 = atan2(y, x);
     }
     sf->lap = fn_801EA9A0(view)->lap;
     draw = map->trucks;
