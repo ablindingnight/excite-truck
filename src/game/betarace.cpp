@@ -1796,6 +1796,7 @@ f32 CarResult::SinceFinish(const BetaCar* c) {
 
 #pragma dont_inline on
 void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
+    f32* pos;
     s32 gain;
     f32 add;
     int wasFull;
@@ -1940,7 +1941,6 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     if (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= lbl_80558DC4[0]) {
         int j;
         int busy;
-        f32* pos;
         int i;
         if (!wasFull) {
             if (rc->kind == 0x50) {
