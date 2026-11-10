@@ -1825,19 +1825,19 @@ inline void ZoneMaster::MarkHitGates(FixedArray<GateHit, 8>& hits) {
 
 void ZoneMaster::vf44(void) {
     CarState* c;
-    u32 k;
+    struct { u32 k; int ok; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     int i;
     f32 d2;
     Watcher* w;
     int nRing;
-    int ok;
     GateHit* h;
     int nPlain;
     Vec3* p;
     Gate* g;
 
     FixedArray<GateHit, 8> hits;
-    c = &cars[fn_801E866C(-1)];
+    int ci = fn_801E866C(-1);
+    c = &cars[ci];
     g = c->gate;
     if (c->human && g) {
 
@@ -1846,23 +1846,23 @@ void ZoneMaster::vf44(void) {
         w = fn_802C86DC();
 
         for (i = 0; i < 10; i++) {
-            ok = 1;
+            sp_.ok = 1;
 
             if (g->ring && nRing < 5) {
                 nRing++;
             } else if (!g->ring && nPlain < 2) {
                 nPlain++;
             } else {
-                ok = 0;
+                sp_.ok = 0;
             }
-            if (ok && fn_8013CFF0(g, w, &d2)) {
+            if (sp_.ok && fn_8013CFF0(g, w, &d2)) {
                 if (hits.count + 1 > hits.max) {
                     break;
                 }
                 {
 
                     p = &g->a;
-                    for (k = 0; k < 2; k++) {
+                    for (sp_.k = 0; sp_.k < 2; sp_.k++) {
                         fn_801E9E30(&g->h, p);
                         p->y += 0.5f;
                         p++;
