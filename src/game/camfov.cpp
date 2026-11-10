@@ -439,6 +439,7 @@ static inline f32 BackOffset(int mode, int wide) {
 // Places a follow camera (mode, previous mode): resets the trailing frame on a mode change or in the air,
 // blends the target height and the eye distance between the two modes, side-steps the eye when the car
 // moves sideways, keeps it above the ground and aims it.
+static inline f32 CarHeight(u8* car) { return F32(car, 0x5B8); }  /* Helper name unproven */
 void fn_8026F420(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     int wide = fn_80178CA4() > 1;
@@ -640,7 +641,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             break;
         }
         f32 dist = lbl_80563EEC + k * F32(c->car, 0x5B4);
-        f32 lift = F32(c->car, 0x5B8) + lbl_80563EF0;
+        f32 lift = CarHeight(c->car) + lbl_80563EF0;
         c->fov = fn_8026ECE4(p, &dist);
         target = c->pos;
         target.v[1] += lbl_80563EF4;
@@ -794,7 +795,7 @@ void fn_802704E4(u8* p) {
     CVec3 r;
     int wide = fn_80178CA4() > 1;
     f32 dist = AddMul(wide ? lbl_80563ED8 : lbl_80563EC0, lbl_80563E30 - MulF(lbl_80563ED0, c->speedFrac), F32(c->car, 0x5B4));
-    lift = F32(c->car, 0x5B8) + lbl_80563F20;
+    lift = CarHeight(c->car) + lbl_80563F20;
     if (c->mode != 9) {
         c->tf.pos = c->pos;
         c->tf.axes = c->axes;

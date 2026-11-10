@@ -48,6 +48,17 @@ void fn_8026E22C(u8* out, SFrame* from, SFrame* to, f32 t);
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // dst = m * src (column-major rotation), with the aliasing guard of the inline.
+// Helper names unproven: scaled vector adds (the scale stays the right operand).
+static inline void AddScaledV(SVec* o, const SVec* v, f32 s) {
+    o->x += v->x * s;
+    o->y += v->y * s;
+    o->z += v->z * s;
+}
+static inline void SumScaledV(SVec* o, const SVec* a, const SVec* v, f32 s) {
+    o->x = a->x + v->x * s;
+    o->y = a->y + v->y * s;
+    o->z = a->z + v->z * s;
+}
 static inline void MulVec(const Mat3& m, const SVec& src, SVec* dst) {
     if (dst == &src) {
         f32 x = Dot3(src.x, m.m[0], src.y, m.m[3], src.z, m.m[6]);
@@ -185,12 +196,8 @@ int fn_8026A698(u8* p, int i) {
             u32 a;
             u32 b;
             MulVec(*(const Mat3*)(p + 0xC0), side, &dir);
-            from.x += dir.x * -0.5f;
-            from.y += dir.y * -0.5f;
-            from.z += dir.z * -0.5f;
-            to.x = from.x + dir.x * 5.0f;
-            to.y = from.y + dir.y * 5.0f;
-            to.z = from.z + dir.z * 5.0f;
+            AddScaledV(&from, &dir, -0.5f);
+            SumScaledV(&to, &from, &dir, 5.0f);
             if (fn_801784AC(&from, &to, &hit, &nrm, &a, &b, 0)) {
                 *r = fn_8026A63C(&hit.x, &from.x, &dir.x);
             }
@@ -231,9 +238,7 @@ int fn_8026A698(u8* p, int i) {
     s->t += 0.016683351f * (f32)(lbl_8055E3C4 - s->frameNo);
     if (lbl_8055E3C4 != s->frameNo) {
         SVec at = *(const SVec*)(p + 0xE4);
-        at.x += F32(p, 0xCC) * 0.7f;
-        at.y += F32(p, 0xD0) * 0.7f;
-        at.z += F32(p, 0xD4) * 0.7f;
+        AddScaledV(&at, (const SVec*)(p + 0xCC), 0.7f);
         s->target = at;
         SVec v;
         SVec d;
