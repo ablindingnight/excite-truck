@@ -649,7 +649,7 @@ void fn_80297988(StaticObject* o);
 void fn_802981EC(const PlacedObj* o, f32 a);
 void fn_801F4DD4(const char* table, const PlacedObj* o);
 CollShape* fn_801A324C(void* p, void* o, f32 k, f32 s, const char* file);
-Sound3D* fn_802077A4(const char* name, int cls, const PVec* vel, const PVec* pos);
+Sound3D* fn_802077A4(const char* name, int cls, const RVec3* vel, const PVec* pos);
 }
 
 // A new solid object, tagged for the allocator.
@@ -664,18 +664,11 @@ inline SolObj* NewSolObj(s32 id, s32 event, CollShape* s, const OFrame* f, Value
 extern f32 lbl_80558DC4[];
 
 ModuleTag lbl_8055EC28;
-PVec lbl_80488898 = {0.0f, 0.0f, 0.0f};
+RVec3 lbl_80488898(0.0f, 0.0f, 0.0f);
 
-struct EWLight {
-    EWLight(void) {
-        color = 0x7F000000;
-        angle = 0.7853982f;
-    }
-    u32 color;
-    f32 angle;
-};
-
-static EWLight lbl_8055EC30;
+static inline f32 QuarterPi(void) { return 0.7853982f; }
+static UnkStatic7F lbl_8055EC30;
+static f32 lbl_8055EC34 = QuarterPi();
 ObjDesc* lbl_8055EC38;
 u8 lbl_8055EC3C;
 EWState lbl_8055EC40;
