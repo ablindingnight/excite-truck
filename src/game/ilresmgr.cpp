@@ -355,7 +355,9 @@ public:
     int InRegion(RaceCarRec* rc) {
         int i;
         for (i = 0; i < regions.a.count; i++) {
-            if (fn_80139B70(regions.a.data[i], rc->pos[0], rc->pos[2])) {
+            f32 x = rc->pos[0];
+            f32 z = rc->pos[2];
+            if (fn_80139B70(regions.a.data[i], x, z)) {
                 return 1;
             }
         }
