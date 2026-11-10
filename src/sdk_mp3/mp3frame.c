@@ -287,19 +287,23 @@ s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos) {
 
 u32 MP3_GetBits(u32 unused, u8* buf, s16 n, s32* pos) {
     u16 result = 0;
-    s32 left = n;
     u32 avail;
     u32 take;
+    s32 left = n;
+    s32 idx;
+    s32 val;
 
-    buf += *pos >> 3;
+    idx = *pos >> 3;
     avail = 8 - (*pos & 7);
     while (left > 0) {
         if (avail == 0) {
             avail = 8;
-            buf++;
+            idx++;
         }
         take = left < avail ? left : avail;
-        result |= ((lbl_802F3408[avail] & *buf) >> (avail - take)) << (left - take);
+        val = lbl_802F3408[avail] & buf[idx];
+        val >>= avail - take;
+        result |= val << (left - take);
         avail -= take;
         left -= take;
     }
