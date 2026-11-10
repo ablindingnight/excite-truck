@@ -89,7 +89,8 @@ s32 fn_80215F1C(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-s32 fn_80215F5C(s32 arg0, s32 arg1) {
+// FloatValue::~FloatValue (deleting dtor; uitable.cpp's FloatValue vtable slot 2). C unit: real mangled name.
+s32 __dt__10FloatValueFv(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
         __dl__FPv();
     }
