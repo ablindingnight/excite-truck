@@ -997,3 +997,22 @@ extern const f32 lbl_80563D80;
 extern const f32 lbl_80563D84;
 
 }  // extern "C"
+
+// .sbss owned by this unit (0x8055F4E0-0x8055F518), in address order.
+void *lbl_8055F4E0;
+void *lbl_8055F4E4;
+void *lbl_8055F4E8;
+s32 lbl_8055F4EC;
+s32 lbl_8055F4F0;
+f32 lbl_8055F4F4;
+f32 lbl_8055F4F8;
+u32 lbl_8055F4FC;
+u8 lbl_8055F500;
+s8 lbl_8055F501;
+s8 lbl_8055F502;
+s8 lbl_8055F503;
+s32 lbl_8055F504;
+u32 lbl_8055F508;
+f32 lbl_8055F50C;
+f32 lbl_8055F510;
+u32 lbl_8055F514;
