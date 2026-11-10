@@ -812,3 +812,7 @@ extern char lbl_8033C35C[];
 extern char lbl_804892D0[];
 extern void *fn_8020A860();
 extern int fn_80208E90(void *, int);
+
+/* .bss owned by this unit (0x804892D0-0x80489BE0), in address order. */
+char lbl_804892D0[0x900];
+unsigned char lbl_80489BD0[0x10];
