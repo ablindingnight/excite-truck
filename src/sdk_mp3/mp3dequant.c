@@ -8,6 +8,12 @@
 #include "mp3dec.h"
 #include "mp3dequant_tables.inc"
 
+/* Helper name unproven: quadratic approximation of |x|^(4/3) from a 4-coefficient table row. */
+static inline s32 Pow43(s32 x, const s32* c) {
+    s32 q = (s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20);
+    return (q + c[2] >> 4) + c[3];
+}
+
 /* Dequantization of one granule for every channel (fn_800BF048). On first use, copies the scalefactor-band edges for
  * the stream's MPEG version and sample rate into the decoder; then per channel picks the long, short or mixed
  * path from the block flags, builds the line-to-band map on first use, and dequantizes each line:
@@ -159,7 +165,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     } else {
                         c = lbl_8031C098[x >> 8];
-                        p = ((s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20) + c[2] >> 4) + c[3];
+                        p = Pow43(x, c);
                         if (m == 1) {
                             r = p * g;
                             if (e > 20) {
@@ -257,7 +263,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = ((s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20) + c[2] >> 4) + c[3];
+                    p = Pow43(x, c);
                     if (m == 1) {
                         r = p * g;
                         if (e > 20) {
@@ -366,7 +372,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = ((s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20) + c[2] >> 4) + c[3];
+                    p = Pow43(x, c);
                     if (m == 1) {
                         r = p * g;
                         if (e > 20) {
@@ -443,7 +449,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = ((s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20) + c[2] >> 4) + c[3];
+                    p = Pow43(x, c);
                     if (m == 1) {
                         r = p * g;
                         if (e > 20) {
