@@ -276,8 +276,8 @@ void Wheel::Init(BodyDesc* bd) {
     SphereShape* s;
     RigidBody::Init(bd);
     f32 kk = d->stiffK;
-    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 r = 0.0254f * d->radius;
+    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 stiff = k * (Sq_hm(kk));
     RVec3 c(0.0f, 0.0f, 0.0f);
     f32 skin = d->skin;
