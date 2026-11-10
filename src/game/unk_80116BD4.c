@@ -4016,8 +4016,6 @@ void fn_8011D9E4(void* arg0, void* arg1) {
     u32* bits;
     u32 value;
     u32 bitCount;
-    u32 available;
-    u32 mask;
     u32 count;
     u8* table;
     u32 i;
@@ -4027,22 +4025,23 @@ void fn_8011D9E4(void* arg0, void* arg1) {
     u8* lookup;
     u32 symbol;
     u32 bit;
+    BitWin8011 w;
     if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
         return;
     }
     bitCount = *((u32 *) (((u8 *) arg1) + 8));
-    available = *((u32 *) (((u8 *) arg0) + 0x28));
+    w.width = *((u32 *) (((u8 *) arg0) + 0x28));
     bits = *((u32 **) (((u8 *) arg1) + 4));
     value = *((u32 *) arg1);
-    if (bitCount < available) {
+    if (bitCount < w.width) {
         u32 next = *(bits++);
-        count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - available));
-        value = next >> (available - bitCount);
-        bitCount = (bitCount + 32) - available;
+        count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - w.width));
+        value = next >> (w.width - bitCount);
+        bitCount = (bitCount + 32) - w.width;
     } else {
-        count = value & (0xFFFFFFFFU >> (32 - available));
-        value >>= available;
-        bitCount -= available;
+        count = value & (0xFFFFFFFFU >> (32 - w.width));
+        value >>= w.width;
+        bitCount -= w.width;
     }
     if (count != 0) {
         dst = *((u8 **) (((u8 *) arg0) + 0x2C));
@@ -4061,12 +4060,12 @@ void fn_8011D9E4(void* arg0, void* arg1) {
             dst = *((u8 **) (((u8 *) arg0) + 0x2C));
             lookup = *((u8 **) (((u8 *) arg0) + 0x24));
             table = ((u8 *) arg0) + 0x10;
-            available = *((u32 *) (((u8 *) arg0) + 0x20));
-            mask = 0xFFFFFFFFU >> (32 - available);
+            w.width = *((u32 *) (((u8 *) arg0) + 0x20));
+            w.mask = 0xFFFFFFFFU >> (32 - w.width);
             do {
                 count--;
-                if (bitCount >= available) {
-                    code = value & mask;
+                if (bitCount >= w.width) {
+                    code = value & w.mask;
                     symbol = lookup[code];
                     len = symbol >> 4;
                     symbol = table[symbol & 15];
@@ -4074,7 +4073,7 @@ void fn_8011D9E4(void* arg0, void* arg1) {
                     bitCount -= len;
                 } else {
                     u32 next = *bits;
-                    code = (value | (next << bitCount)) & mask;
+                    code = (value | (next << bitCount)) & w.mask;
                     len = lookup[code];
                     symbol = table[len & 15];
                     len >>= 4;
