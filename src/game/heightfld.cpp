@@ -616,9 +616,10 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                     k = 0;
                     m = d->terms[0].k;
                 }
-                if (k < 0 || (float)__fabs(d->terms[1].k) < (float)__fabs(m)) {
+                f32 t1 = d->terms[1].k;
+                if (k < 0 || (float)__fabs(t1) < (float)__fabs(m)) {
                     k = 1;
-                    m = d->terms[1].k;
+                    m = t1;
                 }
                 if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[2].k)) {
                     k = 2;
