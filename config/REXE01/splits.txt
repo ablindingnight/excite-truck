@@ -2389,7 +2389,7 @@ game/zone.cpp:
 	.ctors      start:0x802ED1B8 end:0x802ED1BC
 	.rodata     start:0x802F9398 end:0x802F93D0
 	.data       start:0x8032C530 end:0x8032CE98
-	.bss        start:0x8042FB28 end:0x8042FB88
+	.bss        start:0x8042FB28 end:0x8042FB84
 	.sdata      start:0x80559D18 end:0x80559DA0
 	.sbss       start:0x8055E1A8 end:0x8055E1D0
 	.sdata2     start:0x80561498 end:0x805615B8
@@ -2534,7 +2534,7 @@ game/crushmaster.cpp:
 	.ctors      start:0x802ED1FC end:0x802ED200
 	.rodata     start:0x802F9520 end:0x802F952C
 	.data       start:0x80330F48 end:0x8033159A
-	.bss        start:0x80430378 end:0x804303C8
+	.bss        start:0x80430378 end:0x804303C4
 	.sdata      start:0x8055A2A0 end:0x8055A2EF
 	.sbss       start:0x8055E390 end:0x8055E3AD
 	.sdata2     start:0x80561A38 end:0x80561B18
