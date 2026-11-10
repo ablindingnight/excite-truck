@@ -2096,20 +2096,25 @@ int fn_8019703C(const u8* d, const u8* p) {
     return 0;
 }
 
+/* Helper name unproven */
+static inline V2 LerpV2(f32 k, f32 xv, f32 yv, const V2& b) {
+    V2 r;
+    r.y = LerpT(k, yv, b.y);
+    r.x = LerpT(k, xv, b.x);
+    return r;
+}
+
 void fn_801971AC(u8* d, V2* io) {
     if (S32(d, 0x260) && S32(d, 0x268) != 1) {
-        f32 k = F32(d, 0x25C) + 0.008341676f;
+        F32(d, 0x25C) += 0.008341676f;
+        f32 k = F32(d, 0x25C);
         f32 off = F32(d, 0x264);
-        F32(d, 0x25C) = k;
         V2 tgt;
         tgt.x = F32(d, 0x48) + F32(d, 0x58) * off;
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * off;
-        V2 r;
         f32 xv = io->x;
         f32 yv = io->y;
-        r.y = LerpT(k, yv, tgt.y);
-        r.x = LerpT(k, xv, tgt.x);
-        V2 c = r;
+        V2 c = LerpV2(k, xv, yv, tgt);
         io->x = c.x;
         io->y = c.y;
     }
