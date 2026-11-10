@@ -3482,8 +3482,8 @@ void fn_8011CD90(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 extern const u8 lbl_80561208[8];
 void fn_8011CE18(void *arg0, void *arg1) {
     u32 *bits;
-    u32 value, bitCount, available, mask, count, code, len, s, w;
     u32 fill;
+    u32 value, bitCount, available, mask, count, code, len, s, w;
     u8 *dst, *table, *lookup;
     u32 sym, runlen, j;
     if (*(u32 *)arg0 != *(u32 *)((u8 *)arg0 + 4)) return;
