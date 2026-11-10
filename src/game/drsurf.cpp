@@ -441,10 +441,10 @@ void fn_802D479C(Surf* s) {
             a.y = (1.0f / 255) * v->a[1];
             a.z = (1.0f / 255) * v->a[2];
             V3 b;
+            o->x = v->x + a.x * wa;
             b.x = (1.0f / 255) * v->b[0];
             b.y = (1.0f / 255) * v->b[1];
             b.z = (1.0f / 255) * v->b[2];
-            o->x = v->x + a.x * wa;
             o->y = v->y + a.y * wa;
             o->z = v->z + a.z * wa;
             o->x = o->x + b.x * wb;
