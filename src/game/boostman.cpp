@@ -588,8 +588,8 @@ void BoostMan::a3(void) {
             }
             players[i].last = speed;
             if (players[i].timer > 0.0f) {
-                players[i].color1 = -1;
                 players[i].color0 = 0xFFFFFF00;
+                players[i].color1 = -1;
             } else if (players[i].flag) {
                 players[i].color1 = -1;
                 players[i].color0 = 0xFFFF0000;

@@ -883,8 +883,8 @@ void PartSys::DrawSprites(Particle* p, int n) {
         q[0].pos.x = pos.x + d1X * size;
         q[0].pos.y = pos.y + d1.y * size;
         q[0].pos.z = pos.z + d1.z * size;
-        q[1].pos.x = pos.x + d2.x * size;
         q[1].pos.y = pos.y + d2.y * size;
+        q[1].pos.x = pos.x + d2.x * size;
         q[1].pos.z = pos.z + d2.z * size;
         q[2].pos.x = pos.x + d1.x * -size;
         q[2].pos.y = pos.y + d1.y * -size;

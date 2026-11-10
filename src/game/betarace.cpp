@@ -4024,8 +4024,8 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     b.t.z += n.z;
     b.t.x += c.x;
     b.t.y += c.y;
-    b.t.z += c.z;
     b.t.y += lift;
+    b.t.z += c.z;
     a.t.y += lift;
     ScaleRot(&b.r, 1.0f);
     ScaleRot(&a.r, 1.0f);

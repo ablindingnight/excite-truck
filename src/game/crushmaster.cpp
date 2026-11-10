@@ -1467,8 +1467,8 @@ inline void CrushMaster::vfA8(int car) {
                 t = 4.0f;
                 k = 1.0f / t;
                 v.x = (dst.x - pos->x) * k;
-                v.y = (dst.y - pos->y) * k + 9.81f * t;
                 v.z = (dst.z - pos->z) * k;
+                v.y = (dst.y - pos->y) * k + 9.81f * t;
                 xv = rec->mtx.origin.x;
                 r.m.origin.x = xv;
                 r.m.origin.y = rec->mtx.origin.y;

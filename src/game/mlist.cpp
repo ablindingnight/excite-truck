@@ -533,8 +533,8 @@ void fn_802CDB5C(int pri) {
     int open;
     RenderCtx* ctx;
     MLStrip* sp;
-    s32 cnt;
     MLBatch* e;
+    s32 cnt;
     void* id;
     fn_801293C8("mlist: flush");
     fn_801293E8(lbl_804C1480);

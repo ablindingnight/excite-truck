@@ -1024,8 +1024,8 @@ void fn_802E6264(void) {
                         AXSetVoiceType(v->vpb, 1);
                         start = s->addr * 2 + 2;
                         memset(&addr, 0, sizeof(addr));
-                        addr.loopFlag = 1;
                         addr.format = 0;
+                        addr.loopFlag = 1;
                         addr.loopAddressHi = start >> 16;
                         addr.loopAddressLo = start;
                         end = start + s->size * 2 - 3;

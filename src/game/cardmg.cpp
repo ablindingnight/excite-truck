@@ -580,8 +580,8 @@ void fn_8018DA5C(u8* p, u8* m) {
             f32 z = F32(pt, 0x28);
             f32 az = (f32)__fabs(z);
             v.x += roll * (-0.3f * (F32(pt, 0x20) * (az - 0.7f)));
-            v.z += -0.5f * z * roll;
             v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
+            v.z += -0.5f * z * roll;
             f32 w = DmgMax(0.0f, 3.0f - az);
             v.y += 0.5f * lean * (F32(pt, 0x24) * w);
             v.x += twist * DmgMax(0.0f, 3.0f - AbsFlt(F32(pt, 0x28)));

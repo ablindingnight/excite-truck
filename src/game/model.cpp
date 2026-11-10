@@ -400,8 +400,8 @@ void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
     s32 inst;
     int j;
     u8 c;
-    ModelInfo* info;
     MSurfList* sl;
+    ModelInfo* info;
     int e;
     MElem* el;
     TexNode* t;
