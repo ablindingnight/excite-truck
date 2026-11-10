@@ -1809,3 +1809,23 @@ extern const float lbl_80563CFC = 0.7417649f;
 extern const float lbl_80563D00 = 0.9599311f;
 extern const float lbl_80563D04 = 1.0471976f;
 
+// .sdata constants owned by this unit (0x8055C4B0-0x8055C4F8), in address order.
+f32 lbl_8055C4B0 = 0.65f;
+s32 lbl_8055C4B4 = 1000;
+s32 lbl_8055C4B8 = 2500;
+f32 lbl_8055C4BC = 3.0f;
+f32 lbl_8055C4C0 = 130.0f;
+f32 lbl_8055C4C4 = 30.0f;
+u8 lbl_8055C4C8 = 1;
+f32 lbl_8055C4CC = 10.0f;
+f32 lbl_8055C4D0 = 45.0f;
+f32 lbl_8055C4D4 = 46.0f;
+f32 lbl_8055C4D8 = 0.02f;
+f32 lbl_8055C4DC = 0.002f;
+f32 lbl_8055C4E0 = 12.0f;
+f32 lbl_8055C4E4 = 4.0f;
+s32 lbl_8055C4E8 = 500;
+s32 lbl_8055C4EC = 1500;
+f32 lbl_8055C4F0 = 4.0f;
+f32 lbl_8055C4F4 = 4.0f;
+
