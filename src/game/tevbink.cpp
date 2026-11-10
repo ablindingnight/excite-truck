@@ -751,22 +751,24 @@ void fn_802E1058(void) {
     lbl_8055FEEC = 0;
 }
 
-/* Helper name unproven: appends src to dst without letting dst exceed max bytes. */
-static inline void StrCatMax(char* dst, const char* src, int max) {
-    char* d = dst;
-    int n = max;
+/* Bounded copy and append (n = buffer size), the same pair as carmodel's. */
+static inline void StrCopy(char* d, const char* s, int n) {
+    char* p = d;
+    while ((*p++ = *s++) != 0) {
+        if (--n <= 0) {
+            p[-1] = 0;
+            break;
+        }
+    }
+}
+
+static inline void StrCat(char* d, const char* s, int n) {
     while (*d) {
         n--;
         d++;
     }
     if (n > 0) {
-        const char* s = src;
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) {
-                d[-1] = 0;
-                break;
-            }
-        }
+        StrCopy(d, s, n);
     }
 }
 
@@ -780,7 +782,7 @@ BinkMovie* fn_802E11A4(const char* name, u8 loop) {
     if (dot) {
         *dot = 0;
     }
-    StrCatMax(m->name, ".bik", 0x40);
+    StrCat(m->name, ".bik", 0x40);
     fn_802E0EAC(m);
     return r;
 }
