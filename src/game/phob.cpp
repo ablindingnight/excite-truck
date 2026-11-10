@@ -1390,7 +1390,9 @@ void fn_80179AF4(const Phob* v, u8* buf) {
         f32 k = lbl_8055E460;
         for (i = 0; i < 2; i++) {
             d[0] = LerpT( a[0], b[0],k);
-            d[1] = LerpT( a[1], b[1],k);
+            f32 a1 = a[1];
+            f32 b1 = b[1];
+            d[1] = LerpT( a1, b1,k);
             d[2] = LerpT( a[2], b[2],k);
             d[3] = LerpT( a[3], b[3],k);
             d[4] = LerpT( a[4], b[4],k);

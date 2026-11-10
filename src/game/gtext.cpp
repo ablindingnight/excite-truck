@@ -1168,7 +1168,9 @@ void fn_802346C8(void) {
                     x += xsv * f->glyphs[c].pre;
                     f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
                     if (c != ' ') {
-                        fn_802C8E00(*cp, 0, x, y1, 0.0f, f->glyphs[c].u0, f->glyphs[c].v0);
+                        f32 u0 = f->glyphs[c].u0;
+                        f32 v0 = f->glyphs[c].v0;
+                        fn_802C8E00(*cp, 0, x, y1, 0.0f, u0, v0);
                         fn_802C8E00(*cp, 0, x1, y1, 0.0f, f->glyphs[c].u1, f->glyphs[c].v0);
                         fn_802C8E00(*cp, 1, x, y0, 0.0f, f->glyphs[c].u0, f->glyphs[c].v1);
                         fn_802C8E00(*cp, 1, x1, y0, 0.0f, f->glyphs[c].u1, f->glyphs[c].v1);
