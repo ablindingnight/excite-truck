@@ -13,7 +13,6 @@ extern int fn_802E2C20(void);
 extern void fn_80012158(void);
 extern void fn_8020CF6C(int);
 extern double fabs(double);
-extern char lbl_8033C6B0[], lbl_8033C6BC[];
 extern void fn_80209190(int, float);
 extern void fn_80206454(void);
 extern void fn_801769EC(void);
@@ -46,7 +45,6 @@ extern void fn_8000C730(void);
 extern void fn_8020D0CC(int);
 extern int lbl_8055EE78;
 extern float lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
-extern char lbl_8033C690[], lbl_8033C6A0[];
 extern void fn_8000C6E4(void);
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
@@ -87,8 +85,8 @@ void fn_8020D06C(void) {
     fn_8020A5F8(lbl_8055EE8C);
     fn_8020C908(lbl_8055EE8C);
     fn_80209030(lbl_8055EE90);
-    fn_8013323C(4, lbl_8033C690, lbl_8055EE8C);
-    fn_8013323C(4, lbl_8033C6A0, lbl_8055EE90);
+    fn_8013323C(4, "music_volume", lbl_8055EE8C);
+    fn_8013323C(4, "effects_volume", lbl_8055EE90);
     fn_800121F0();
 }
 
@@ -104,11 +102,11 @@ void fn_8020D0CC(int arg0) {
 }
 
 void fn_8020D178(void) {
-    lbl_8055EE74 = (int)fn_802090D4(lbl_8033C6B0);
+    lbl_8055EE74 = (int)fn_802090D4("volume-dash");
     fn_80209190(lbl_8055EE74, 1.0f);
     lbl_8055EE7C = 0;
     lbl_8055EE80 = 0;
-    lbl_8055EEA0 = (int)fn_80145E70(lbl_8033C6BC);
+    lbl_8055EEA0 = (int)fn_80145E70("vollyt.val");
 }
 
 #pragma cplusplus on
@@ -178,7 +176,7 @@ typedef struct LayoutPane {
     unsigned long color;
 } LayoutPane;
 
-extern const SoundMenuLabels lbl_802F9E58;
+const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
 extern char lbl_8055B630[6], lbl_8055B638[3], lbl_8055B63C[7];
 extern void fn_80230B5C(void *);
 extern void fn_802C8638(void *);
@@ -212,7 +210,6 @@ static inline unsigned long HalveAlpha(unsigned long color) {
 // Draws the sound menu: music volume, effects volume and the third item, the selection highlight,
 // and the left/right arrows that fade out at the ends of a slider.
 extern "C" void fn_8020D2D4(void) {
-    const char *pool = lbl_8033C690;
     float camera[12];
     float now;
     SoundMenuLabels labels;
@@ -227,7 +224,7 @@ extern "C" void fn_8020D2D4(void) {
     now = 0.001f * (float)fn_802E2C20();
     fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     if (lbl_8055EEA0 != 0) {
-        fn_801473F8(lbl_8055EEA0, lbl_8055B630, lbl_8055B638, fn_80131234(pool + 0x68));
+        fn_801473F8(lbl_8055EEA0, lbl_8055B630, lbl_8055B638, fn_80131234("Volume:TITLE"));
     }
     labels = lbl_802F9E58;
     if (lbl_8055EEA0 != 0) {
@@ -244,13 +241,13 @@ extern "C" void fn_8020D2D4(void) {
 
             switch (i) {
             case 0:
-                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(0.5f + 100.0f * lbl_8055EE8C));
+                fn_801345D8(value, 0x20, "%s: %-3d", text, (int)(0.5f + 100.0f * lbl_8055EE8C));
                 break;
             case 1:
-                fn_801345D8(value, 0x20, pool + 0x78, text, (int)(0.5f + 100.0f * lbl_8055EE90));
+                fn_801345D8(value, 0x20, "%s: %-3d", text, (int)(0.5f + 100.0f * lbl_8055EE90));
                 break;
             case 4:
-                fn_801345D8(value, 0x20, pool + 0x84, fn_8000C69C());
+                fn_801345D8(value, 0x20, "Edit: %s", fn_8000C69C());
                 break;
             default: {
                 int left = 0x20;
@@ -264,7 +261,7 @@ extern "C" void fn_8020D2D4(void) {
                 break;
             }
             }
-            fn_801345D8(paneName, 0x20, pool + 0x90, i);
+            fn_801345D8(paneName, 0x20, "item%d_button", i);
             fn_801345D8(textName, 0x20, lbl_8055B63C, i);
             selected = i == lbl_8055EE78;
             box = *((SoundMenuLayout *)lbl_8055EEA0)->FindText(textName);
@@ -279,7 +276,7 @@ extern "C" void fn_8020D2D4(void) {
                 if (i == 2 && fn_8020CF68() == 0) {
                     back.color = HalveAlpha(back.color);
                 }
-                fn_80147940(lbl_8055EEA0, &back, pool + 0xA0, selected ? 1 : 2);
+                fn_80147940(lbl_8055EEA0, &back, "menu_artset", selected ? 1 : 2);
                 if (selected) {
                     LayoutPane glow = *pane;
                     float grow = 1.0f + scale;
@@ -290,7 +287,7 @@ extern "C" void fn_8020D2D4(void) {
                     float yv = glow.pos.y;
                     glow.pos.y = yv - 0.5f * pane->h * scale;
                     glow.color = ((unsigned long)alpha << 24) | (pane->color & 0x00FFFFFF);
-                    fn_80147940(lbl_8055EEA0, &glow, pool + 0xA0, 1);
+                    fn_80147940(lbl_8055EEA0, &glow, "menu_artset", 1);
                 }
             }
             if (selected && i >= 0 && i < 5) {
@@ -330,7 +327,7 @@ extern "C" void fn_8020D2D4(void) {
                     t = t > 0.0f ? t : 0.0f;
                     rightColor = ((unsigned long)(int)(255.0f + t * (-255.0f)) << 24) | 0x00FFFFFF;
                 }
-                fn_801345D8(arrowName, 0x20, pool + 0xAC, textName);
+                fn_801345D8(arrowName, 0x20, "%s_left_arrow", textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
                     LayoutPane a = *arrow;
@@ -339,9 +336,9 @@ extern "C" void fn_8020D2D4(void) {
                     t = t > 0.0f ? t : 0.0f;
                     a.color = leftColor;
                     a.pos.x = a.pos.x - (0.0f + t * 10.0f);
-                    fn_80147940(lbl_8055EEA0, &a, pool + 0xBC, 1);
+                    fn_80147940(lbl_8055EEA0, &a, "left_arrow_art", 1);
                 }
-                fn_801345D8(arrowName, 0x20, pool + 0xCC, textName);
+                fn_801345D8(arrowName, 0x20, "%s_right_arrow", textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
                     LayoutPane a = *arrow;
@@ -350,7 +347,7 @@ extern "C" void fn_8020D2D4(void) {
                     t = t > 0.0f ? t : 0.0f;
                     a.color = rightColor;
                     a.pos.x = a.pos.x + (0.0f + t * 10.0f);
-                    fn_80147940(lbl_8055EEA0, &a, pool + 0xE0, 1);
+                    fn_80147940(lbl_8055EEA0, &a, "right_arrow_art", 1);
                 }
             }
             if (i == 2 && fn_8020CF68() == 0) {
@@ -358,9 +355,9 @@ extern "C" void fn_8020D2D4(void) {
             }
             fn_80147230(&box, lbl_8055B638, value);
         }
-        fn_801476C4(((SoundMenuLayout *)lbl_8055EEA0)->FindText(pool + 0xF0));
+        fn_801476C4(((SoundMenuLayout *)lbl_8055EEA0)->FindText("cancel_prompt"));
         if (lbl_8055EE78 == 2) {
-            fn_801476C4(((SoundMenuLayout *)lbl_8055EEA0)->FindText(pool + 0x100));
+            fn_801476C4(((SoundMenuLayout *)lbl_8055EEA0)->FindText("ok_prompt"));
         }
     }
     fn_80011A2C();
