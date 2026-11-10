@@ -62,6 +62,7 @@ extern u32 lbl_8055F200;
 
 ModuleTag lbl_8055F1E8;
 UnkStatic123s lbl_80498810;
+JoinSlot lbl_80498828[2];
 UnkStatic7F lbl_8055F1F0;
 s32 lbl_8055F1F4;
 s32 lbl_8055F1F8;
