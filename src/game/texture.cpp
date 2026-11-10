@@ -1115,31 +1115,32 @@ void TexZHint(s32 id) {
 
 }  // extern "C"
 
-inline void* SimpleHeap::Alloc(s32 n) {
-    void* ret = 0;
-    HeapBlock** pp = &free;
-    HeapBlock* b;
-    s32 bestSize = 0x7FFFFFFF;
+inline void* SimpleHeap::Alloc(s32 size) {
+    s32 n = (size + align) & ~align;
     HeapBlock** best = 0;
-    n = (n + align) & ~align;
-    for (; (b = *pp) != 0; pp = &b->next) {
+    s32 bestSize = 0x7FFFFFFF;
+    void* res = 0;
+    for (HeapBlock** l = &free; *l; l = &(*l)->next) {
+        HeapBlock* b = *l;
         if (b->size >= n && bestSize > b->size) {
-            best = pp;
+            best = l;
             bestSize = b->size;
         }
     }
     if (best) {
-        b = *best;
-        s32 rest = b->size - n;
-        HeapBlock* next = b->next;
+        HeapBlock* b = *best;
         HeapBlock* split = 0;
-        if (rest > ((align + 0x10) & ~align) + 0x20) {
-            split = (HeapBlock*)((u8*)b + align + n + 1);
-            split->owner = this;
-            split->magic = 0xABCFEED0;
-            split->next = 0;
-            split->size = rest - ((align + 0x10) & ~align);
+        HeapBlock* next = b->next;
+        s32 rest = b->size - n;
+        s32 hdr = (align + 0x10) & ~align;
+        if (rest > hdr + 0x20) {
+            HeapBlock* s = (HeapBlock*)((u8*)b + align + n + 1);
+            s->magic = 0xABCFEED0;
+            s->next = 0;
+            s->size = rest - ((align + 0x10) & ~align);
+            s->owner = this;
             b->size = n;
+            split = s;
         }
         if (split) {
             split->next = next;
@@ -1149,12 +1150,12 @@ inline void* SimpleHeap::Alloc(s32 n) {
         }
         b->next = used;
         used = b;
-        ret = (u8*)b + align + 1;
+        res = (u8*)b + align + 1;
     }
-    if (!ret && strict) {
+    if (!res && strict) {
         fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
     }
-    return ret;
+    return res;
 }
 
 extern "C" {
