@@ -2052,6 +2052,7 @@ RVL_SDK/arc/arc.c:
 
 game/unk_80116BD4.c:
 	.text       start:0x80116BD4 end:0x80127398
+	.sdata      start:0x80559938 end:0x80559954
 	.sdata2     start:0x80561170 end:0x80561238
 
 game/unk_80127398.c:

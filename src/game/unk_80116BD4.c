@@ -7984,3 +7984,14 @@ extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
 extern void fn_801199A4(void *, s32);
+
+/* .sdata owned by this unit (0x80559938-0x80559954), in address order. */
+extern u8 lbl_8041D628[0x80];
+extern u8 lbl_8041D6A8[0x80];
+s32 lbl_80559938 = -1;
+s32 lbl_8055993C = -1;
+s32 lbl_80559940 = -1;
+s32 lbl_80559944 = 1;
+void ***lbl_80559948 = (void ***)lbl_8041D6A8;
+u32 *lbl_8055994C = (u32 *)lbl_8041D628;
+u32 lbl_80559950 = 0x20;
