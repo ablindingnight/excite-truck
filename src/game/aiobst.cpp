@@ -282,9 +282,8 @@ void fn_8015EF84(ValueNode* list) {
         for (i = 0; (n = list->GetChildAt(i)) != 0; i++) {
             if (fn_8015ED54(n)) {
                 erased++;
-                ValPoint p;
                 ValPoint t = n->GetPoint("p");
-                p = t;
+                ValPoint p = t;
                 f32 r2 = n->GetFloat("rad");
                 s32 j;
                 r2 = r2 * r2;
