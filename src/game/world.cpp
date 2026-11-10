@@ -448,7 +448,6 @@ struct F4 {
 };
 
 extern PlayerObj* lbl_80488648[8];
-extern CarTypeMap lbl_80339CC0[];
 extern F4 lbl_802F99F8;
 
 static inline PlayerObj* GetPlayer(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
@@ -1146,6 +1145,13 @@ void fn_801E8D48(void) {
     fn_801E87D4(new ("wheel") WheelAnim((const char*)&w));
 }
 
+/* Helper names unproven: unused, so MWCC drops them but keeps their strings in .data */
+static void EwobPlacementFailed(f32 x, f32 z) {
+    fn_802E30C8("world: terrain failure at ewob placement (%0.2f, %0.2f)", x, z);
+}
+
+static const char* EwobTorchName(void) { return "tiki_torch"; }
+
 void fn_801E8DD4(void) {
     AnimSlot a;
     memset(&a, 0, sizeof(a));
@@ -1164,6 +1170,14 @@ void fn_801E8E38(void) {
     m.fC = 1000.0f;
     fn_801E87D4(new ("MutableWob") AnimPoint((const char*)&m));
 }
+
+CarTypeMap lbl_80339CC0[] = {
+    {'PCAR', 0x50, 0x11C},
+    {'ACAR', 0x51, 0x11C},
+    {'NCAR', 0x52, 0x11C},
+    {'TRLR', 0x54, 0x11C},
+    {0, 0, 0},
+};
 
 CarTypeMap* fn_801E8EA4(int type) {
     CarTypeMap* m = lbl_80339CC0;
@@ -1352,6 +1366,15 @@ void fn_801E96D8(RaceSetup* s) {
     file = ev->node->GetString("wall_model", 0);
     if (file) {
         lbl_8055AF10 = fn_802C6FC0(file, 0, 0);
+    }
+}
+
+static void FsBlendReport(const char* s, int a, int r, int g, int b, int n) {
+    fn_802E30C8(s, "%d %d %d %d");
+    if (n == 4) {
+        fn_802E30C8("fsblend: Set (%d,%d,%d,%d)", a, r, g, b);
+    } else {
+        fn_802E30C8("fsblend: Expected AAA RRR GGG BBB");
     }
 }
 
