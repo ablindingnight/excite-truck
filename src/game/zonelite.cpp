@@ -126,7 +126,7 @@ static inline void ZSub(ZVec* d, const ZVec* a, const ZVec* b) {
     d->z = a->z - b->z;
 }
 
-static inline f32 ZMax(const f32& a, const f32& b) { return a > b ? a : b; }
+static inline f32 ZMax(f32 a, const f32& b) { return a > b ? a : b; }
 
 static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     f32 xv = vb.x;
