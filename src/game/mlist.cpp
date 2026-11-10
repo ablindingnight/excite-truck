@@ -512,13 +512,17 @@ void fn_802CDAB4(MList* m, int i, const MMtx* mtx) {
     ctx->mtx[i] = fn_802D0514(mtx);
 }
 
-void fn_802CDAFC(MList* m, int i) { lbl_8055DFC4->vis[i + m->b.n + m->a.n + 1] = 0; }
+void fn_802CDAFC(MList* m, int i) {
+    int k = m->b.n + m->a.n + i + 1;
+    lbl_8055DFC4->vis[k] = 0;
+}
 
 int fn_802CDB20(MList* m, int i) {
     if (i < 0) {
         return 0;
     }
-    return lbl_8055DFC4->vis[i + m->b.n + m->a.n + 1] != 0;
+    int k = m->b.n + m->a.n + i + 1;
+    return lbl_8055DFC4->vis[k] != 0;
 }
 
 void fn_802CDB5C(int pri) {
