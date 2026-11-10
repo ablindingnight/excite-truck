@@ -1440,7 +1440,6 @@ void fn_80232930(void);
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 int fn_80144C90(f32 x);
-int fn_80141F7C(f32 x);
 void fn_80147EE0(ArtElem* e, f32 s);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 }  // extern "C"
@@ -1525,8 +1524,7 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
     cur = h->current;
     if (cur) {
         f32 now = fn_801E7E18();
-        f32 spd = fn_80176A1C() == 2 ? fn_80176A2C() : 1.0f;
-        f32 age = (now - cur->GetStart()) * spd;
+        f32 age = (now - cur->GetStart()) * (fn_80176A1C() == 2 ? fn_80176A2C() : 1.0f);
         f32 fadeIn = Remap(0.5f, 1.1f, 0.0f, 1.0f, age);
         f32 fadeOut = Remap(1.1f, 1.25f, 0.0f, 1.0f, age);
         s32 n = fn_80144C90(cur->Value());
@@ -1576,7 +1574,7 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
             stars = l->FindArt("hi_score_stars");
             if (stars) {
                 ArtElem st;
-                if (fn_80141F7C(fadeOut)) {
+                if (NearZero(fadeOut)) {
                     f32 p = Remap(0.0f, 0.2f, 0.0f, 1.0f, age);
                     ArtElem* sa = 0;
                     int i;
@@ -3828,7 +3826,7 @@ inline void BetaMaster::vf44(void) {
             st.on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0];
             for (i = 0; i < stars.a.count; i++) {
                 st.p = stars.a.data[i];
-                if (fn_80141F7C(st.p->respawn) && st.on && st.p->big) {
+                if (NearZero(st.p->respawn) && st.on && st.p->big) {
                     st.p->Draw(LerpColor(st.p->GetPalette()->c[1], st.p->GetPalette()->c[0], fn_80149650()));
                 }
             }
