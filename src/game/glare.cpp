@@ -220,7 +220,7 @@ void fn_802DD754(void) {
 
 // One vertex of a streak quad: position and texture coordinate at fraction (fx, fy) of the streak,
 // with the texture inset by (du, dv).
-static inline void GlareVtx(GVtx* buf, int* n, const Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
+static inline void GlareVtx(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
     GVtx* v = &buf[(*n)++];
     v->x = LerpT(fx, s->x0, s->x1);
     v->y = LerpT(fy, s->y0, s->y1);

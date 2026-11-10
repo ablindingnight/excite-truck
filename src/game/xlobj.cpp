@@ -461,7 +461,7 @@ GroundCell* fn_802B8EB8(s16 x, s16 y, int size, int corner) {
     return fn_802BE844(cx, cy, h);
 }
 
-TexEntry* fn_802B8EF0(int slot, XScale* sc) {
+TexEntry* fn_802B8EF0(int slot, const XScale* sc) {
     if (!lbl_804C0088[slot]) {
         const char* name = "";
         TexEntry* e = new ("xlte") TexEntry(name, sc->prio);
