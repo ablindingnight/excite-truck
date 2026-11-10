@@ -654,4 +654,30 @@ extern const float lbl_805633F4;
 extern const float lbl_805633F8;
 extern const float lbl_805633FC;
 
+// The Hud's .data (0x8033C7A0-0x8033C940): the sound/part name pool its constructor indexes, then the vtable
+// (two zero header words and the 13 methods), a second small table (fn_801837DC) and zero words.
+void fn_801837DC(void);
+char lbl_8033C7A0[0x124] =
+    "waterbounce.sfx\0"
+    "airtime.sfx\0"
+    "backfire.sfx\0\0\0\0"
+    "boost%d.sfx\0"
+    "boost_manual.sfx\0\0\0\0"
+    "car_gnd1.sfx\0\0\0\0"
+    "badland.sfx\0"
+    "waterdrive.sfx\0\0"
+    "water_in.sfx\0\0\0\0"
+    "water_out.sfx\0\0\0"
+    "dirtskid.sfx\0\0\0\0"
+    "niceland.sfx\0\0\0\0"
+    "boost_turbotap.sfx\0\0"
+    "heatbeep.sfx\0\0\0\0"
+    "overheat.sfx\0\0\0\0"
+    "overheat_start.sfx\0\0"
+    "watersink.sfx\0\0\0"
+    "invulnerable.sfx\0\0";
+void *lbl_8033C8C4[31] = {
+    0, 0, (void *)fn_8020E288, (void *)fn_8020E598, (void *)fn_8020F15C, (void *)fn_8020F1F8, (void *)fn_8020F21C, (void *)fn_8020F240, (void *)fn_8020F30C, (void *)fn_8020F330, (void *)fn_8020F354, (void *)fn_8020F284, (void *)fn_8020F378, (void *)fn_8020F39C, (void *)fn_8020F3A0, 0, 0, (void *)fn_801837DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
 }  // extern "C"
