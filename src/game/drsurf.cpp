@@ -1018,17 +1018,27 @@ void fn_802D657C(u32* p, u32 base) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802D6594(u8* s, u8* p) {
-    for (int i = 0; i < *(s32*)(s + 0x34); i++) {
-        Swap32(p);
+void fn_802D6594(u8* s) {
+    u8 a = s[0x34];
+    u8* p = s + 0x38;
+    u8 b = s[0x35];
+    int i;
+    u8 c;
+    s[0x34] = s[0x37];
+    s[0x37] = a;
+    s[0x35] = s[0x36];
+    s[0x36] = b;
+    for (i = 0; i < *(s32*)(s + 0x34); i++) {
+        a = p[0];
+        c = p[3];
+        p[0] = c;
+        p[3] = a;
+        a = p[1];
+        c = p[2];
+        p[1] = c;
+        p[2] = a;
         p += 4;
     }
-}
-
-void fn_802D6594(u8* s) {
-    Swap32(s + 0x34);
-    u8* p = s + 0x38;
-    Loop1_fn_802D6594(s, p);
 }
 
 // Vertex format 0x1A: colour-facing surfaces (0x13 ones are converted to it below).

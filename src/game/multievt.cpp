@@ -1185,10 +1185,13 @@ void fn_8024B988(u8* p) {
 
 void fn_8024B9AC(u8* p) { S32(p, 0x10) = (S32(p, 0x10) + 1) % S32(p, 0x14); }
 
-void fn_8024B9CC(u8* p, s32* a, s32* b) {
+s32 fn_8024B9CC(u8* p, s32* a, s32* b) {
     u8* q = p + S32(p, 0x10) * 0xC;
-    *a = S32(q, 0x20);
-    *b = S32(q, 0x24);
+    s32 v1 = S32(q, 0x20);
+    s32 v2 = S32(q, 0x24);
+    *a = v1;
+    *b = v2;
+    return v1;
 }
 
 u32 fn_8024B9EC(u8* p) { return ((u32*)PTR(p, 0x10))[S32(p, 0x11C) * 2]; }
