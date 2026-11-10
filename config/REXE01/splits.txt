@@ -2577,7 +2577,7 @@ game/ball.cpp:
 	.data       start:0x80331D18 end:0x80331DD0
 	.bss        start:0x804348C0 end:0x804348D8
 	.sdata      start:0x8055A310 end:0x8055A32F
-	.sbss       start:0x8055E498 end:0x8055E4B0
+	.sbss       start:0x8055E498 end:0x8055E4AC
 	.sdata2     start:0x80561BE0 end:0x80561C48
 
 game/physdriver.cpp:
