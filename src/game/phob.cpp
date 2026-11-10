@@ -421,8 +421,8 @@ u8 lbl_8055E45D;
 u8 lbl_8055E45E;
 u8 lbl_8055E45F;
 f32 lbl_8055E460;
-s32 lbl_8055E468;
-char lbl_8055E46C[4];
+s32 lbl_8055E464;
+char lbl_8055E468[4];
 
 s32 lbl_8055A300 = -1;
 
@@ -465,11 +465,11 @@ void fn_80177814(s32* out) {
 
 void fn_801778C0(void) {
     int i;
-    lbl_8055E468 = 0;
+    lbl_8055E464 = 0;
     for (i = 0; i < lbl_8055E438; i++) {
         Phob* p = lbl_8055E434[i];
         if (p->vf44() && p->vf40()) {
-            lbl_804340C0[lbl_8055E468++] = p;
+            lbl_804340C0[lbl_8055E464++] = p;
         }
     }
 }
@@ -555,14 +555,14 @@ void fn_80177E14(void) {
         fn_801AD5F0();
         fn_80186DE8();
         fn_801D0F38();
-        for (i = 0; i < lbl_8055E468; i++) {
+        for (i = 0; i < lbl_8055E464; i++) {
             lbl_804340C0[i]->vf1C();
         }
         fn_801B535C(lbl_8055E434, lbl_8055E438);
     } else {
         fn_801B50B4(lbl_8055E434, lbl_8055E438);
     }
-    for (i = 0; i < lbl_8055E468; i++) {
+    for (i = 0; i < lbl_8055E464; i++) {
         lbl_804340C0[i]->vf20();
     }
 }
@@ -617,7 +617,7 @@ static inline void Loop1_fn_80177F40(int net, u8 paused) {
         fn_8017FF4C(0.016683351f);
         fn_801778C0();
         if (!net) {
-            fn_801E22D0(lbl_804340C0, lbl_8055E468);
+            fn_801E22D0(lbl_804340C0, lbl_8055E464);
         }
         fn_80177E14();
         for (i = 0; i < lbl_8055E438; i++) {
@@ -691,10 +691,10 @@ int fn_801781C0(s32 x) {
 }
 
 char* fn_801781F4(u32 v) {
-    *(u32*)lbl_8055E46C = v;
-    Swap(lbl_8055E46C[0], lbl_8055E46C[3]);
-    Swap(lbl_8055E46C[1], lbl_8055E46C[2]);
-    return lbl_8055E46C;
+    *(u32*)lbl_8055E468 = v;
+    Swap(lbl_8055E468[0], lbl_8055E468[3]);
+    Swap(lbl_8055E468[1], lbl_8055E468[2]);
+    return lbl_8055E468;
 }
 
 Phob* fn_80178224(void) { return (Phob*)new ("NetCar") NetCar; }
@@ -763,7 +763,7 @@ Phob* fn_801783A8(PhobMsg* m, s32 pos) {
 }
 
 int fn_801784AC(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, s32 g) {
-    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E468, g);
+    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E464, g);
 }
 
 static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
