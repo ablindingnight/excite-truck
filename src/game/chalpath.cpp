@@ -959,7 +959,55 @@ extern void* lbl_80345E28[];
 extern "C" {
 
 void fn_80261C68(PathScreenBuf* s) {
-    BuildMap(s);
+    int i;
+    int j;
+    s->numEvents = 0;
+    s->numLevels = lbl_8055F3E4->NumLevels();
+    memset(s->evObjs, 0, sizeof(s->evObjs));
+    memset(s->lvObjs, 0, sizeof(s->lvObjs));
+    s->events.count = 0;
+    s->levels.count = 0;
+    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
+        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
+        u8* n = (u8*)operator new(0x2C, "pathcontrol");
+        if (n) {
+            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
+            S32(n, 0x14) = 0;
+            *(void**)n = lbl_80345E28;
+            S32(n, 0x20) = i;
+            PTR(n, 0x18) = (u8*)lv;
+            U8(n, 0x1C) = 0;
+            U8(n, 0x1D) = 1;
+            U8(n, 0x1E) = 0;
+            U8(n, 0x1F) = 0;
+            PTR(n, 0x24) = fn_8023512C("bar7.art");
+            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
+        }
+        s->levels.Push((PathNode*)n);
+        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
+            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
+            u8* e = (u8*)operator new(0x28, "eventcontrol");
+            if (e) {
+                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
+                S32(e, 0x14) = 0;
+                *(void**)e = lbl_80345EA0;
+                PTR(e, 0x18) = (u8*)ev;
+                U8(e, 0x1E) = 0;
+                U8(e, 0x1C) = 0;
+                U8(e, 0x1D) = 1;
+                PTR(e, 0x20) = fn_8023512C("bar7.art");
+                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
+            }
+            s->events.Push((PathNode*)e);
+            s->numEvents++;
+        }
+    }
+    s->sound = fn_80207848("a_levelup.sfx", 0);
+    if (s->sound) {
+        s->sound->SetVolume(lbl_80563B88);
+    } else {
+        fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
+    }
     RedrawNodes();
 }
 
