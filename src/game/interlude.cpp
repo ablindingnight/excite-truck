@@ -789,7 +789,8 @@ void fn_801C3D88(const char* name) {
             break;
         case 1: {
             CamEvent* c = (CamEvent*)e;
-            c->fov = 0.017453292f * n->GetFloat("fov", 90.0f);
+            f32 fov = n->GetFloat("fov", 90.0f);
+            c->fov = 0.017453292f * fov;
             const ValVec3& o = n->GetVec3("origin");
             c->origin.x = o.x;
             c->origin.y = o.y;
