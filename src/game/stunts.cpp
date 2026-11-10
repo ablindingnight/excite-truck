@@ -784,7 +784,8 @@ public:
     virtual void Stop(const RaceCarRec* rc);
     virtual void Start(const RaceCarRec* rc) {
         if (snd) {
-            if (!Sliding(rc, sliding, rc->speed)) {
+            u8 was = sliding;
+            if (!Sliding(rc, was, rc->speed)) {
                 snd->Stop();
             }
         }
