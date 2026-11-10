@@ -228,8 +228,8 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
         Mat3Mul((Mat3*)&hub, &r, (Mat3*)&hub);
     }
     fn_802C744C(s->hub, &hub);
-    Madd(&p, &w.origin, &w.basis[1], 0.3f);
     f32 quarter = 0.7853982f;
+    Madd(&p, &w.origin, &w.basis[1], 0.3f);
     fn_801E3440(&q, s->mountU, root);
     Sub(&d, &p, &q);
     PSVECNormalize(&d, &d);
