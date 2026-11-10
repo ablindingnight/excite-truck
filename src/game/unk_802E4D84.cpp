@@ -127,18 +127,16 @@ extern char lbl_8055FFB5;
 extern int lbl_8055FF8C;  // output mode: 0/1 stereo, 2 surround
 extern void fn_802E5264(int, int);
 extern float lbl_804FC680[];
-extern int lbl_8055D1EC;
-extern int lbl_8055D1F0;
 extern void fn_802E7770(void);
 extern int fn_802E7774(void (*arg0)(void));
-extern void fn_802E2E0C(void *arg0, void *arg1);
+extern void fn_802E2E0C(void *arg0, const char *name);
+int lbl_8055D1D0 = -1;  // output mode last applied
 extern int TRKReadBuffer_ui32(void);
 extern float fn_802E9A2C(void);
 extern void fn_80060CC0(int, int, void (*)());
 extern void fn_802E30C8(const char *fmt, ...);  // Spu report
 extern void fn_802E5248(int, int);
 void fn_802E51D0(int chan, int result);
-__declspec(section ".sdata") extern char lbl_8055D1D8[];
 extern char lbl_8034D39C[];
 extern char lbl_8034D3C0[];
 extern unsigned char lbl_804FC800[];
@@ -161,7 +159,6 @@ extern void fn_8012BEF0(const char *name);
 extern void fn_8012C41C(void (*)(void), int, const char *name);
 extern void fn_802E589C(char *name);
 extern int fn_802E582C(char *name);
-__declspec(section ".sdata") extern char lbl_8055D1E4[];
 extern int sprintf(char *, const char *, ...);
 extern char lbl_8034D490[];
 extern char lbl_8034D4A0[];
@@ -370,7 +367,7 @@ void fn_802E5248(int arg0, int arg1) {
 
 void fn_802E5264(int arg0, int arg1) {
     fn_802E30C8(lbl_8034D39C, arg0,
-                 arg1 < 0 ? lbl_8034D3C0 : lbl_8055D1D8);
+                 arg1 < 0 ? lbl_8034D3C0 : "connect");
     lbl_804FC800[arg0 * 0x2C] = 0;
     if (arg1 >= 0) fn_80060CC0(arg0, 1, (void (*)())fn_802E5248);
 }
@@ -433,7 +430,6 @@ void fn_802E5438(void) {
 extern void *lbl_8055FF7C;
 extern void *lbl_8055FF80;
 extern int lbl_8055FF88;  // ARAM address of the zero area
-__declspec(section ".sdata") extern char lbl_8055D1E0[];
 extern void *fn_801284E8(const char *tag, unsigned int size);
 extern void DCInvalidateRange(void *, unsigned int);
 extern void AIInit(void *);
@@ -503,7 +499,7 @@ void fn_802E5478(void) {
     for (i = 0; i < 4; i++) {
         *vol++ = 1.0f;
     }
-    fn_802E2E0C(fn_802E540C, lbl_8055D1E0);
+    fn_802E2E0C(fn_802E540C, "Spu");
     lbl_8055FFA5 = 1;
     fn_802E5438();
 }
@@ -595,10 +591,10 @@ void fn_802E58B8(char *name) {
     fn_8012C41C((void (*)())fn_802E589C, 0, name);
 }
 
-// Caches the sample named by format `lbl_8055D1E4` with (arg0, arg1).
+// Caches the sample named by format "*%s/%s" with (arg0, arg1).
 void fn_802E5950(int arg0, int arg1) {
     char name[0x100];
-    sprintf(name, lbl_8055D1E4, arg0, arg1);
+    sprintf(name, "*%s/%s", arg0, arg1);
     fn_802E30C8(lbl_8034D490, name);
     if (fn_802E582C(name) == 0) {
         fn_802E30C8(lbl_8034D4A0, name);
@@ -1129,8 +1125,8 @@ void fn_802E6264(void) {
     }
 }
 
-int* fn_802E6ABC(void) {
-    return &lbl_8055D1EC;
+const char* fn_802E6ABC(void) {
+    return "!!";
 }
 
 void fn_802E6AC4(void) {
@@ -1146,7 +1142,7 @@ int fn_802E6AD0(int arg0) {
 
 void fn_802E6B04(void) {
     fn_802E7770();
-    fn_802E2E0C(fn_802E6AD0, &lbl_8055D1F0);
+    fn_802E2E0C(fn_802E6AD0, "DTK");
 }
 void fn_802E6B34(void) {
 }

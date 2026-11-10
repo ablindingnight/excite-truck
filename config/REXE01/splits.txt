@@ -4624,6 +4624,7 @@ game/unk_802E4D84.cpp:
 	.text       start:0x802E4D84 end:0x802E6B50
 	.ctors      start:0x802ED604 end:0x802ED608
 	.bss        start:0x804FC558 end:0x804FC8B0
+	.sdata      start:0x8055D1D0 end:0x8055D1F4
 	.sbss       start:0x8055FF70 end:0x8055FFB8
 	.sdata2     start:0x80565128 end:0x80565160
 
