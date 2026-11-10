@@ -3753,10 +3753,11 @@ void fn_80131818(ValueTable* table);        // release it
 // Polyhedron volume ('POLY') from the named table: extents, then its "plane" (n, k) and
 // "curve" (center, axis, radius) entries.
 u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
-    int i;
+    u8* pl;
     ValueNode* n;
     ValueTable* t;
     ValueNode* ext;
+    int i;
     U32(p, 0xC) = id;
     U32(p, 0x4) = 0;
     U32(p, 0x8) = 0;
@@ -3774,7 +3775,6 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     *(ValVec3*)(p + 0x30) = ext->GetVec3("max");
     for (i = 0; (n = (ValueNode*)t->GetChild(i)) != 0; i++) {
         if (strcmp(n->GetName(), "plane") == 0) {
-            u8* pl;
             pl = p + S32(p, 0xBC)++ * 0x10;
             *(ValVec3*)(pl + 0x3C) = n->GetVec3("n");
             F32(pl, 0x48) = n->GetFloat("k");
