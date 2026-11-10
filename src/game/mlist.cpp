@@ -229,7 +229,8 @@ static inline u8 Cull(const MLSphere* sp) {
     c.x = s.x;
     c.y = s.y;
     c.z = s.z;
-    if (fn_802C94A0(&c, s.r, &clip, &lbl_8055FCE0)) {
+    f32 r = s.r;
+    if (fn_802C94A0(&c, r, &clip, &lbl_8055FCE0)) {
         lbl_8055FCDC = clip ? 0x81 : 1;
     } else {
         lbl_8055FCDC = 0;
