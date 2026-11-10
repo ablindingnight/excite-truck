@@ -10,7 +10,8 @@ extern float fn_80209028(void), fn_802091CC(void);
 extern int fn_802090CC(void), fn_802E2C20(void);
 extern void fn_802E625C(int);
 extern void fn_802E61EC(void *, float), fn_802E620C(void *, float), fn_802E6234(void *, float), fn_802E6238(void *, float), fn_802E623C(void *, float), fn_802E622C(void *, float), fn_802E6240(void *, int);
-extern float lbl_8055B590, lbl_8055B594;
+float lbl_8055B590 = 1.0f, lbl_8055B594 = 1.0f;
+float lbl_8055B598 = 1.0f;
 extern float lbl_80558DC4[];
 extern int lbl_8055EDF8;
 extern unsigned int lbl_8055EE00;
@@ -204,9 +205,6 @@ int fn_8020AA98(void *arg0) { volatile int *p = (volatile int *)((char *)arg0 + 
 
 extern const char lbl_8033C3B4[];
 extern const char lbl_8033C3C0[];
-extern const char lbl_8055B5A0[];
-extern const char lbl_8055B5A8[];
-extern const char lbl_8055B5B0[];
 extern void *fn_80131808(const char *);
 extern void fn_80131818(void *);
 extern void fn_802E58B8(int);
@@ -381,8 +379,6 @@ extern char lbl_8033C3D8[];
 extern char lbl_8033C3E4[];
 extern char lbl_8033C4A0[];
 extern char lbl_8033C4C8[];
-extern char lbl_8055B5B8[8];
-extern char lbl_8055B5C0[5];
 extern void *fn_802E5AE8(void *);
 extern void *fn_8020A6AC(void *);
 extern float fn_802E6040(void *);
@@ -404,6 +400,9 @@ public:
 // right stream (name with its extension replaced), then initialises it.
 // Sets up a new voice: the left stream is the named file, the right stream the same name
 // with its extension replaced.
+// The right stream's extension.
+char lbl_8055B5B8[] = ".2.sfx";
+
 static inline MixerVoiceData *MixerVoice_Construct(MixerVoiceData *voice, char *name, int slot, unsigned char unscaled) {
     char buf[0x40];
     char *dest;
@@ -438,7 +437,7 @@ static inline MixerVoiceData *MixerVoice_Construct(MixerVoiceData *voice, char *
     }
     ext = strchr(buf, '.');
     if (ext != 0) {
-        if (strcasecmp(ext, lbl_8055B5C0) != 0) {
+        if (strcasecmp(ext, ".sfx") != 0) {
             fn_802E317C(lbl_8033C4C8, name);
         }
         *ext = 0;
