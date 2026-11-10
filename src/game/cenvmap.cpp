@@ -392,10 +392,8 @@ void fn_80203A88(const EVec3* v, const EFrame* cam, EFrame* m) {
     if (fn_80202BE4() == 0) {
         fn_802D3050(1);
         fn_802D306C(90);
-        m->pos.x = v->x;
-        m->pos.z = v->z;
-        f32 vy = v->y;
-        m->pos.y = vy + 0.5f;
+        m->pos = *v;
+        m->pos.y += 0.5f;
         fn_802039CC(cam, m);
         fn_80203380(m);
         fn_802D306C(0);
