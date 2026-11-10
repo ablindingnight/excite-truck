@@ -620,7 +620,7 @@ void fn_8026C014(int player) {
         f32 x;
         f32 z;
         lbl_8055F508 = now;
-        speed = lbl_80563DF4 * (lbl_80563DF8 * (lbl_80563DFC * dt));
+        speed = lbl_80563DF4 * ((lbl_80563DFC * dt) / 4.0f);
         yawRate = dt * lbl_80563DF0;
         fovRate = dt * lbl_80563E00;
         lo = lbl_80563DE0;
