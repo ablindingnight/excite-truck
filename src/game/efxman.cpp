@@ -315,9 +315,10 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
 }
 
 ModuleTag lbl_8055F6A8;
-EfxShort lbl_8055F6B0(0x100);
-EfxShort lbl_8055F6B2(0x405);
-EfxShort lbl_8055F6B4(0x401);
+static inline s16 EfxS(s16 v) { return v; }  /* Helper name unproven */
+s16 lbl_8055F6B0 = EfxS(0x100);
+s16 lbl_8055F6B2 = EfxS(0x405);
+s16 lbl_8055F6B4 = EfxS(0x401);
 EfxFloat lbl_8055F6B8(0.7853982f);
 u8 lbl_8055F6BC;
 s32 lbl_8055F6C0;      // callback count
