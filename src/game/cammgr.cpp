@@ -1749,3 +1749,63 @@ CamMount lbl_803467E8[3] = {
 };
 
 inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
+
+// .sdata2 constants owned by this unit (0x80563C20-0x80563D08), in address order.
+extern const float lbl_80563C20 = 0.0f;
+extern const float lbl_80563C24 = 0.017453292f;
+extern const float lbl_80563C28 = -1.0f;
+extern const float lbl_80563C2C = 1.0f;
+extern const float lbl_80563C30 = -2.0f;
+extern const float lbl_80563C34 = 3.0f;
+extern const double lbl_80563C38 = 4503601774854144.0;
+extern const float lbl_80563C40 = 0.0001f;
+extern const float lbl_80563C44 = 0.3926991f;
+extern const float lbl_80563C48 = 0.7853981f;
+extern const float lbl_80563C4C = -2.5f;
+extern const float lbl_80563C50 = 0.8f;
+extern const float lbl_80563C54 = 1.1780972f;
+extern const float lbl_80563C58 = -100.0f;
+extern const float lbl_80563C5C = 1.5707964f;
+extern const float lbl_80563C60 = -1000.0f;
+extern const float lbl_80563C64 = -999.0f;
+extern const float lbl_80563C68 = 1.701696f;
+extern const float lbl_80563C6C = 0.5f;
+extern const float lbl_80563C70 = 0.97f;
+extern const float lbl_80563C74 = -0.100000024f;
+extern const float lbl_80563C78 = -0.5f;
+extern const float lbl_80563C7C = 0.016683351f;
+extern const float lbl_80563C80 = 0.001f;
+extern const float lbl_80563C84 = 2.5f;
+extern const float lbl_80563C88 = 360.0f;
+extern const float lbl_80563C8C = 0.3f;
+extern const float lbl_80563C90 = 0.305f;
+extern const float lbl_80563C94 = 2.0f;
+extern const float lbl_80563C98 = 2.088f;
+extern const float lbl_80563C9C = 4.176f;
+extern const float lbl_80563CA0 = 0.05f;
+extern const float lbl_80563CA4 = 9.0f;
+extern const float lbl_80563CA8 = 1.2f;
+extern const float lbl_80563CAC = 6.2831855f;
+extern const float lbl_80563CB0 = -0.05235988f;
+extern const float lbl_80563CB4 = 0.05235988f;
+extern const float lbl_80563CB8 = 0.12217305f;
+extern const float lbl_80563CBC = 0.030000001f;
+extern const float lbl_80563CC0 = 8.0f;
+extern const float lbl_80563CC4 = 1.6f;
+extern const float lbl_80563CC8 = 0.9f;
+extern const float lbl_80563CCC = 4.0f;
+extern const float lbl_80563CD0 = -3.0f;
+extern const float lbl_80563CD4 = 300.0f;
+extern const float lbl_80563CD8 = -295.0f;
+extern const float lbl_80563CDC = 20.0f;
+extern const float lbl_80563CE0 = -15.0f;
+extern const float lbl_80563CE4 = 2.6f;
+extern const float lbl_80563CE8 = 0.0014f;
+extern const float lbl_80563CEC = 0.25f;
+extern const float lbl_80563CF0 = 0.04f;
+extern const float lbl_80563CF4 = 1.4398966f;
+extern const float lbl_80563CF8 = 900.0f;
+extern const float lbl_80563CFC = 0.7417649f;
+extern const float lbl_80563D00 = 0.9599311f;
+extern const float lbl_80563D04 = 1.0471976f;
+
