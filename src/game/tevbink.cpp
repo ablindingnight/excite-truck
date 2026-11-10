@@ -546,22 +546,11 @@ struct HeapBlock {
 };
 
 struct SimpleHeap {
-    void Dump(const char* who) {
-        fn_802E30C8("SimpleHeap dump: %s", who);
-        fn_802E30C8("Allocated:");
-        u32 total = 0;
-        for (HeapBlock* b = used; b; b = b->next) {
-            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
-            total += b->size;
+    ~SimpleHeap(void) {
+        if (used) {
+            Dump("~SimpleHeap");
+            fn_802E317C("SimpleHeap Destroyed with pending allocations");
         }
-        fn_802E30C8("	%dK total", total >> 10);
-        u32 nfree = 0;
-        fn_802E30C8("Free:");
-        for (HeapBlock* b = free; b; b = b->next) {
-            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
-            nfree += b->size;
-        }
-        fn_802E30C8("	%dK total", nfree >> 10);
     }
     void* Alloc(u32 size) {
         s32 n = (size + align) & ~align;
@@ -605,11 +594,22 @@ struct SimpleHeap {
         }
         return res;
     }
-    ~SimpleHeap(void) {
-        if (used) {
-            Dump("~SimpleHeap");
-            fn_802E317C("SimpleHeap Destroyed with pending allocations");
+    void Dump(const char* who) {
+        fn_802E30C8("SimpleHeap dump: %s", who);
+        fn_802E30C8("Allocated:");
+        u32 total = 0;
+        for (HeapBlock* b = used; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            total += b->size;
         }
+        fn_802E30C8("	%dK total", total >> 10);
+        u32 nfree = 0;
+        fn_802E30C8("Free:");
+        for (HeapBlock* b = free; b; b = b->next) {
+            fn_802E30C8("	user ptr %8.8p: %d", b + 1, b->size);
+            nfree += b->size;
+        }
+        fn_802E30C8("	%dK total", nfree >> 10);
     }
     u8 active;        // offset 0x0
     u32 align;        // offset 0x4
