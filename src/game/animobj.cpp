@@ -91,9 +91,12 @@ public:
 };
 
 AnimObj::AnimObj(void) {
+    // MATCHING-AID: the target stores axes[0].x/y twice (once before the vtable pointer); the original source
+    // for that is unknown (a member or base initialiser?).
     frame.axes[0].x = 1.0f;
     frame.axes[0].y = 0.0f;
     frame.axes[0].x = 1.0f;
+    frame.axes[0].y = 0.0f;
     frame.axes[0].z = 0.0f;
     frame.axes[1].x = 0.0f;
     frame.axes[1].y = 1.0f;
@@ -170,7 +173,7 @@ f32 AnimObj::Depth(void) {
 
 ModuleTag lbl_8055EB80;
 
-// NonMatching: the AnimObj ctor stores flags before the identity instead of after (13 diffs); vf0C/vf14
+// vf0C/vf14
 // are emitted here as weak copies the target keeps in an earlier unit.
 
 // .bss owned by this unit (0x80488228-0x804885E8).
