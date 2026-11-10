@@ -556,11 +556,11 @@ void fn_802CDB5C(int pri) {
     cur = 0;
     for (i = r.lo; i < r.hi; e++, i++) {
         open = 0;
-        cnt = 0;
         dl = 0;
+        cnt = 0;
         tex = e->tex;
-        sp = &da.p[e->start];
         n = e->end - e->start;
+        sp = &da.p[e->start];
         for (j = 0; j < n; j++) {
             MLStrip s = *sp++;
             if (s.flags == (ctx->vis[s.ref] & 0x7F)) {
