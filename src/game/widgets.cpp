@@ -3581,3 +3581,10 @@ typedef char ColumnObservedAllocation[sizeof(PageTextPrefix)==0x264?1:-1];
 typedef char ColumnRowHeightOffset[((unsigned long)&((PageTextPrefix*)0)->rowHeight)==0x250?1:-1];
 typedef char ColumnListOffset[((unsigned long)&((PageTextPrefix*)0)->list)==0x254?1:-1];
 typedef char ResourceTextObservedAllocation[sizeof(ResourceTextPrefix)==0x2a0?1:-1];
+
+// Unit-owned globals (only declared extern above), in address order.
+StartupSharedPrefixNew lbl_80490920;
+KeyDetect lbl_80490934;
+unsigned long lbl_8055EFB0[2];
+unsigned long lbl_8055EFB8;
+unsigned char lbl_8055EFBC;
