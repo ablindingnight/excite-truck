@@ -3653,13 +3653,11 @@ u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
     return p;
 }
 
-extern char lbl_80333448[];  // this unit's string pool
 extern u8 lbl_8055E5A4;        // warned: ring vs box
 extern u8 lbl_8055E5A5;        // warned: ring vs ragdoll
 
 // Collides ring `p` against volume `o` by its type tag.
 void fn_801A2D50(u8* p, u8* o) {
-    char* pool = lbl_80333448;
     switch (S32(o, 0x18)) {
     case 'POLY':
         break;
@@ -3674,20 +3672,20 @@ void fn_801A2D50(u8* p, u8* o) {
     case 'BOX ':
         if (!lbl_8055E5A4) {
             lbl_8055E5A4 = 1;
-            fn_802E30C8("%s", pool + 0x22C);  // "Unsupported collision type: Ring-box"
+            fn_802E30C8("%s", "Unsupported collision type: Ring-box");
         }
         break;
     case 'RAGD':
         if (!lbl_8055E5A5) {
             lbl_8055E5A5 = 1;
-            fn_802E30C8("%s", pool + 0x254);  // "Unsupported collision type: Ring-Ragdoll"
+            fn_802E30C8("%s", "Unsupported collision type: Ring-Ragdoll");
         }
         break;
     case 'FLSR':
         fn_8019D378(o, p);
         break;
     default:
-        fn_802E317C(pool + 0x280, S32(o, 0x18));  // "Unsupported collision type: Ring-%x"
+        fn_802E317C("Unsupported collision type: Ring-%x", S32(o, 0x18));
         break;
     }
 }
