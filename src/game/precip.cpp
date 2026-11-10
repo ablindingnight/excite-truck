@@ -782,7 +782,7 @@ void SnowSystem::Update(void) {
     lastDir = cam.z;
 }
 
-static inline int GridYLimit(const s32& height, int edge) {
+static inline int GridYLimit(s32 height, int edge) {
     return height < edge ? height : edge;
 }
 
