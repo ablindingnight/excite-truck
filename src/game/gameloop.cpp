@@ -79,7 +79,7 @@ struct RaceSetup {
     RacerList racers;  // offset 0x20
     RaceKind kind;     // offset 0x3E4
     s32 unk3EC[2];     // offset 0x3EC
-    s32 unk3F4;        // offset 0x3F4
+    s32 unk3F4;        // offset 0x3F4: flags word (fn_8000C0E8 clears it, then sets bit 0)
 };
 
 class GameListener {
@@ -991,13 +991,13 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
 void fn_8000C0E8(RaceSetup* rs) {
     RaceSetup copy;
     copy = *rs;
-    RacerSlot* s;
     int i;
-    copy.unk3F4 = 1;
+    copy.unk3F4 = 0;
+    copy.unk3F4 |= 1;
     copy.racers.count = 1;
-    for (i = 0, s = rs->racers.slots; i < rs->racers.count; i++, s++) {
-        if (s->type == 'P') {
-            copy.racers.slots[0] = *s;
+    for (i = 0; i < rs->racers.count; i++) {
+        if (rs->racers.slots[i].type == 'P') {
+            copy.racers.slots[0] = rs->racers.slots[i];
         }
     }
     fn_8000BF20(&copy, NULL);
