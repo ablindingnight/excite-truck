@@ -2179,26 +2179,26 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = 0.61f + lbl_8055A488 + F32(d, 0x278) + F32(d, 0x7C) + lbl_8056215C * F32(d, 0x84);
-            F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + lbl_8056215C * F32(d, 0x84)));
+            F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         }
         if (U8(d, 0x9C)) {
-            f32 hi = (F32(d, 0x278) + F32(d, 0xA4) + F32(d, 0xAC) / 2.0f) - (0.61f + lbl_8055A488);
-            F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
+            f32 hi = (F32(d, 0x278) + (F32(d, 0xA4) + F32(d, 0xAC) / 2.0f)) - (0.61f + lbl_8055A488);
+            F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
         }
         f32 push = F32(d, 0xE8);
         if (push > 0.0f) {
             f32 lo = push + F32(d, 0x278);
-            F32(d, 0xC4) = lo > F32(d, 0xC4) ? lo : F32(d, 0xC4);
+            F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         } else if (push < 0.0f) {
             f32 hi = push + F32(d, 0x278);
-            F32(d, 0xC8) = hi < F32(d, 0xC8) ? hi : F32(d, 0xC8);
+            F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
         }
         u8* side = 0;
         u32 blocked = 0;
         f32 k = 2.0f;
-        if (!(F32(d, 0xC8) >= F32(d, 0xC4))) {
-            u32 which;
+        if (F32(d, 0xC8) < F32(d, 0xC4)) {
+            int which;
             blocked = U8(d, 0x74);
             if (!(!blocked || !U8(d, 0x9C))) {
                 u8 r;
@@ -2208,7 +2208,7 @@ void fn_8019743C(u8* d, u8* out) {
                 which = ((l & 0xFF) << 1) | (r & 0xFF);
                 if (!(which == 0 || which == 3)) {
                     which = (which >> 1) & 1;
-                    side = which == 0 ? d + 0x78 : d + 0xA0;
+                    side = which ? d + 0xA0 : d + 0x78;
                     int car = S32(side, 0x18);
                     blocked = fn_8019309C(d, car, fn_801930DC(d, car)) == 0;
                 } else {
@@ -2223,7 +2223,7 @@ void fn_8019743C(u8* d, u8* out) {
                         which = 1;
                         v = 0;
                     }
-                    side = which == 0 ? d + 0x78 : d + 0xA0;
+                    side = which ? d + 0xA0 : d + 0x78;
                     blocked = fn_8019309C(d, S32(side, 0x18), v) == 0;
                 }
             } else {
