@@ -307,6 +307,10 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+static inline ValPoint PointOr(ValueNode* n, const char* key, ValPoint def) { /* Helper name unproven */
+    return n->GetPointOr(key, def);
+}
+
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* elems[64];
     ValueNode* paths[64];
@@ -350,8 +354,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             e->model.off[0] = off.x;
             e->model.off[1] = off.y;
             e->model.off[2] = off.z;
-            ValPoint xy;
-            xy = en->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+            ValPoint xy = PointOr(en, "xy", MakePoint(0.0f, 0.0f));
             e->model.off[0] = e->model.off[0] + xy.x;
             e->model.off[1] = e->model.off[1] - xy.y;
             e->model.group = en->GetInt("group", -1);
