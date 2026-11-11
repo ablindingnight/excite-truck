@@ -1495,8 +1495,8 @@ void PlayerDriver_vf48(u8* p) {
             f32 z;
             f32 y;
             x = spin[0] * v[0] + v[1] * spin[3] + spin[6] * v[2];
-            y = Dot3(v[0], spin[1], v[1], spin[4], v[2], spin[7]);
             z = v[0] * spin[2] + spin[5] * v[1] + spin[8] * v[2];
+            y = Dot3(v[0], spin[1], v[1], spin[4], v[2], spin[7]);
             u.x = x;
             u.y = y;
             u.z = z;

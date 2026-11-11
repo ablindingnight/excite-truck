@@ -964,8 +964,8 @@ void PartSys::DrawRotating(Particle* p, int n) {
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = now - p->birth;
-        f32 t = age * invLife;
         f32 inv;
+        f32 t = age * invLife;
         f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         size = size > 0.001f ? size : 0.001f;
         inv = 1.0f / (1.414f * size);

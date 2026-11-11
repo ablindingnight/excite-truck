@@ -1597,8 +1597,8 @@ int fn_801C5B68(CamView* v, int idx) {
     if (p->target >= 0) {
         car = p->target;
     }
-    v->flags |= 5;
     ICar* c = (ICar*)fn_8017960C(car);
+    v->flags |= 5;
     f32 dt;
     if (fn_801C3B6C() > p->end) {
         dt = p->end - p->start;

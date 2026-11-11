@@ -589,8 +589,8 @@ void fn_80271624(int mode, u8* p) {
                 if (idx != S32(p, 0x150)) {
                     S32(p, 0x150) = idx;
                     RegionSphere* rs = &lbl_8049EDC8[idx];
-                    S32(p, 0x148) = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
                     fresh = 1;
+                    S32(p, 0x148) = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
                 }
             }
         } else {
