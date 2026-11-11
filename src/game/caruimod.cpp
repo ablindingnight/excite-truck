@@ -610,7 +610,38 @@ void* operator new(size_t size, const char* name);
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
-class MenuState {
+// The menu state interface (as in unlkmenu): its all-pure vtable is the 0x60 zero bytes that follow the item
+// vtables in .data.
+class IMenuState {
+public:
+    IMenuState(void) {}
+    virtual ~IMenuState(void) = 0;
+    virtual void Enter(void) = 0;
+    virtual void Exit(void) = 0;
+    virtual void Unk14(void) = 0;
+    virtual void Unk18(void) = 0;
+    virtual void Update(void) = 0;
+    virtual void Unk20(void) = 0;
+    virtual void Unk24(void) = 0;
+    virtual void Draw(void) = 0;
+    virtual void Unk2C(void) = 0;
+    virtual void Unk30(void) = 0;
+    virtual void Unk34(void) = 0;
+    virtual void Unk38(void) = 0;
+    virtual void Unk3C(void) = 0;
+    virtual void Unk40(void) = 0;
+    virtual void Unk44(void) = 0;
+    virtual void Unk48(void) = 0;
+    virtual void Unk4C(void) = 0;
+    virtual void Unk50(void) = 0;
+    virtual void Unk54(void) = 0;
+    virtual int Key(int key) = 0;
+    virtual void Unk5C(void) = 0;
+};
+
+inline IMenuState::~IMenuState(void) {}
+
+class MenuState : public IMenuState {
 public:
     MenuState(void) { unk14 = 0; }
     virtual ~MenuState(void) {}
