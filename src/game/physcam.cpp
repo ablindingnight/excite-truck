@@ -754,7 +754,7 @@ void fn_80271624(int mode, u8* p) {
                 d[1] = F32(p, 0xE8) - F32(p, 0x80);
                 d[2] = F32(p, 0xEC) - F32(p, 0x84);
                 f32 focus = PSVECDotProduct(d, (f32*)(p + 0x70));
-                focus = lbl_8055C598 >= lbl_80563F48 ? lbl_8055C598 : focus;
+                focus = lbl_8055C598 < lbl_80563F48 ? focus : lbl_8055C598;
                 F32(p, 0x1A0) = focus > 5.0f ? focus : 5.0f;
             }
         } else if (idx != -10) {

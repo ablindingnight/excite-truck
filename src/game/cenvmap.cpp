@@ -197,7 +197,7 @@ void fn_80202D50(EVec3 dir) {
             EnvTex* b = &lbl_8048897C.data[i];
             f32 t = (elev - (f32)a->idx) / ((f32)b->idx - (f32)a->idx);
             t = 1.0f < t ? 1.0f : t;
-            t = t > 0.0f ? t : 0.0f;
+            t = t <= 0.0f ? 0.0f : t;
             t = EnvLerp(0.0f, 1.0f, t);
             void* tb = fn_802CA294(b->tex);
             void* ta = fn_802CA294(a->tex);

@@ -294,7 +294,7 @@ void fn_801BDA74(int car, CarSetup* s) {
         WheelSetup* w = &s->wheels[i];
         int front = (i & 2) == 0;
         int left = (i & 1) == 0;
-        f32 share = front ? s->balance : 1.0f - s->balance;
+        f32 share = !front ? 1.0f - s->balance : s->balance;
         f32 load = 9.81f * (0.5f * share * s->mass);
         x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
                           w->unk18 - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,

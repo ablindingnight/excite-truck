@@ -342,7 +342,7 @@ extern "C" void fn_8020D2D4(void) {
                 if (arrow != 0) {
                     LayoutPane a = *arrow;
                     t = (now - lbl_8055EE9C - 0.4f) / (-0.4f);
-                    t = 1.0f < t ? 1.0f : t;
+                    t = 1.0f >= t ? t : 1.0f;
                     t = t > 0.0f ? t : 0.0f;
                     a.color = rightColor;
                     a.pos.x = a.pos.x + (0.0f + t * 10.0f);

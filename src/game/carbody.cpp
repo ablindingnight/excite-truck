@@ -2799,7 +2799,7 @@ void fn_80186DE8(u8* p) {
             sp = F32(car, 0x25D4);
             if (sp > lbl_80561EA0) {
                 cl = sp;
-                cl = cl <= lbl_80561EA4 ? cl : lbl_80561EA4;
+                cl = lbl_80561EA4 < cl ? lbl_80561EA4 : cl;
                 steerK = steerK * (LerpT(F32(car, 0x450), lbl_80561CD0, lbl_80561EA8 + lbl_80561EAC * cl));
             }
             if (sp > lbl_80561CAC) {

@@ -771,7 +771,7 @@ void* fn_802EAB28(void* arg) {
                     need = pcm * 2;
                     s32 rp = lbl_805600B0[0];
                     while (off + 1 <= n) {
-                        int space = lbl_805600B8 < rp ? rp - lbl_805600B8 : lbl_805600A4 - (lbl_805600B8 - rp);
+                        int space = lbl_805600B8 >= rp ? lbl_805600A4 - (lbl_805600B8 - rp) : rp - lbl_805600B8;
                         if (space < need) {
                             break;
                         }
