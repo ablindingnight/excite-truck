@@ -756,8 +756,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
             int last = b->n - 1;
             f32 t;
             V2 dir;
-            f32 px;
-            f32 pz;
+            V2 nrm;
             V2 base;
             f32 inv;
             int c;
@@ -786,8 +785,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 base.z = seg[0].z + z2 * t;
                 perp.x *= inv;
                 perp.z *= inv;
-                px = perp.x;
-                pz = perp.z;
+                nrm = perp;
             }
             rt = rainbowTypes.t;
             for (c = 0; c < count; c++) {
@@ -795,8 +793,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 f32 off = params[2] * (half + ((f32)c - half * (f32)count));
                 V2 p;
                 int ty;
-                p.z = base.z + pz * off;
-                p.x = base.x + px * off;
+                p.z = base.z + nrm.z * off;
+                p.x = base.x + nrm.x * off;
                 if (rainbow) {
                     ty = *rt;
                 } else {
