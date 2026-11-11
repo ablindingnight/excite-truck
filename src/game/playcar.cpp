@@ -1211,7 +1211,6 @@ void PlayerDriver_vf48(u8* p) {
     f32 s;
     u8* car;
     RVec3 f2;
-    RumbleMsg msg;
     f32 wob;
     RVec3 w;
     f32 lim;
@@ -1385,7 +1384,7 @@ void PlayerDriver_vf48(u8* p) {
             Rumble* r;
             r = fn_801D0BF8(S32(p, 0x3C), 0);
             if (r) {
-                msg.pad = 0;
+                RumbleMsg msg = {0};
                 msg.kind = ((Gearbox*)PTR(p, 0x38))->Busy();
                 if (!((DmgView*)PTR(PTR(p, 0x34), 0x270))->Current()[0x28]) {
                     r->Play(PTR(p, 0x34), &msg);
