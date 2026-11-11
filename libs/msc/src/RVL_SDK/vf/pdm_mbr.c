@@ -14,8 +14,8 @@ s32 VFipdm_mbr_check_master_boot_record(u8* buf, u32 total_sectors, u32* is_mast
 
     for (part_cnt = 0; part_cnt < 4; part_cnt++, buf += 16) {
         start_sector[part_cnt] = 0;
-        start_sector[part_cnt] = buf[0x1C6] + (buf[0x1C7] << 8) + (buf[0x1C8] << 16) + (buf[0x1C9] << 24);
-        num_sectors[part_cnt] = buf[0x1CA] + (buf[0x1CB] << 8) + (buf[0x1CC] << 16) + (buf[0x1CD] << 24);
+        start_sector[part_cnt] = (buf[0x1C9] << 24) + ((buf[0x1C8] << 16) + ((buf[0x1C7] << 8) + buf[0x1C6]));
+        num_sectors[part_cnt] = (buf[0x1CD] << 24) + ((buf[0x1CC] << 16) + ((buf[0x1CB] << 8) + buf[0x1CA]));
         if (start_sector[part_cnt] != 0 && num_sectors[part_cnt] != 0) {
             if (part_cnt == 0) {
                 *is_master_boot = 1;
