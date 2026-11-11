@@ -285,23 +285,22 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
 void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out) {
     s16 ch;
     s16 sb;
-    u32 flags;
     s32* pb;
     s32* pa;
     s32* pc2;
     s32* pc;
     s32* p;
     s32* outbuf2;
-    s32 t0, t1;
+    s32 t0, t1;  /* t1 also holds the block-flags word: one variable in the original (register colouring) */
     s32 tmp0[12];
     s32 tmp1[12];
     s32 tmp2[12];
 
     outbuf2 = outbuf + 0x440;
     for (ch = 0; ch < d->channels; ch++) {
-        flags = *block_flags;
-        if (flags & 7) {
-            if (flags & 1) {
+        t1 = *block_flags;
+        if (t1 & 7) {
+            if (t1 & 1) {
                 pb = prev;
                 pc2 = outbuf2;
                 pa = work[0];
@@ -348,7 +347,7 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                     pc++;
                 }
             }
-        } else if (flags & 8) {
+        } else if (t1 & 8) {
             pa = work[0];
             for (sb = 0; sb < 2; sb++) {
                 fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
@@ -401,7 +400,7 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                 pa += 36;
                 pb += 18;
             }
-        } else if (flags & 0x10) {
+        } else if (t1 & 0x10) {
             pa = work[d->band_count - 1];
             pa[0] = 0; pa[1] = 0; pa[2] = 0; pa[3] = 0; pa[4] = 0; pa[5] = 0;
             pa[6] = 0; pa[7] = 0; pa[8] = 0; pa[9] = 0; pa[10] = 0; pa[11] = 0;
