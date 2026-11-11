@@ -386,7 +386,7 @@ void fn_801E0890(BoostMan* m) {
             }
             fn_80160B14(b);
             if (!ok) {
-                m->areas.RemoveAt(m->areas.count - 1);
+                m->areas.RemoveAt(m->areas.Count() - 1);
             }
         }
         fn_80131818(t);
