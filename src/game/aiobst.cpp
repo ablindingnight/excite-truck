@@ -568,7 +568,6 @@ struct Opts {
     u8 side;
 };
 
-extern const f32 lbl_80561828;  // 64
 struct Bins {
     // Marks the bins an obstacle covers with its distance ahead.
     void Add(Obst* o, View* v, u8 side, f32 range) {
@@ -585,24 +584,24 @@ struct Bins {
                 case 0: {
                     f32 t = (s - o->rad - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
-                    lo = LERP(firstBin, lbl_80561828, t);
+                    lo = LERP(firstBin, 64.0f, t);
                     t = (lbl_8055E2A4 + (s + o->rad) - -0.5f * kWidth) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
-                    hi = LERP(firstBin, lbl_80561828, t);
+                    hi = LERP(firstBin, 64.0f, t);
                     break;
                 }
                 case 2: {
                     f32 t = (s + lbl_8055E2A4 - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     lo = 0;
                     CLAMP01(t);
-                    hi = LERP(firstBin, lbl_80561828, t);
+                    hi = LERP(firstBin, 64.0f, t);
                     break;
                 }
                 case 1: {
                     f32 t = (s - -kWidth * 0.5f) / (kWidth * 0.5f - -kWidth * 0.5f);
                     CLAMP01(t);
                     hi = 64;
-                    lo = LERP(firstBin, lbl_80561828, t);
+                    lo = LERP(firstBin, 64.0f, t);
                     break;
                 }
                 default:

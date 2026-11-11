@@ -430,10 +430,7 @@ void AIDriver_vf44(u8* d) {
     F32(d, 0x22C) = lbl_8055E3C8;
 }
 
-extern const f32 lbl_80562168;  // 0.1
-extern const f32 lbl_80562174;  // 2.0
 extern const f32 lbl_8056216C;  // 22.2 (80 km/h)
-extern const f32 lbl_80562170;  // 2.2 (8 km/h)
 
 void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
     if (other) {
@@ -447,14 +444,14 @@ void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
                 f32 s = PSVECDotProduct(other + 0x118, other + 0x54);
                 if (s > 4.4444447f) {
                     if ((f32)__fabs(PSVECDotProduct(other + 0x118, other + 0x3C) / s) > 0.176f) {
-                        F32(d, 0x2A8) += lbl_80562168;
+                        F32(d, 0x2A8) += 0.1f;
                     }
                 }
             }
         }
         u32 t = U32(other, 0x10);
         if ((t == 'ACAR' || t == 'PCAR') && fn_80193524(CAR(d), other)) {
-            F32(d, 0x2A8) += lbl_80562168;
+            F32(d, 0x2A8) += 0.1f;
         }
     }
     if (kind < 1000 && PSVECDotProduct(dir, CAR(d) + 0x88) < 0.0f) {
@@ -468,16 +465,16 @@ void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
         if ((f32)__fabs(PSVECDotProduct(&n, CAR(d) + 0x88)) > 0.5f) {
             f32 v = F32(d, 0x270);
             if (v < lbl_8056216C) {
-                if (kind != 0x6D || v < lbl_80562170) {
+                if (kind != 0x6D || v < 2.2222223f) {
                     if (S32(d, 0x268) != 1 || kind != 0x6D) {
-                        F32(d, 0x2A0) += lbl_80562174;
+                        F32(d, 0x2A0) += 2.0f;
                     }
                 }
             }
         }
     }
     if (kind == 0x3EA) {
-        F32(d, 0x2A0) += lbl_80562174;
+        F32(d, 0x2A0) += 2.0f;
     }
     switch (kind) {
     case 0x6D:
@@ -1161,11 +1158,8 @@ extern const f32 lbl_80562160;
 extern const f32 lbl_8056216C;
 extern "C" const f32 lbl_8056217C;
 extern const f32 lbl_805621C0;  // line switch length (1.5)
-extern const f32 lbl_805621F0;
-extern const f32 lbl_805621F4;
 extern const f32 lbl_805621F8;
 extern const f32 lbl_805621FC;
-extern const f32 lbl_80562200;
 extern u32 lbl_8055D430;  // debug flags
 f32 fn_801931AC(f32 t, f32 a, f32 b, f32 len);
 f32 fn_801948B0(u8* d, f32 t, int steer);
@@ -1237,12 +1231,12 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(d, 0xC) = F32(out, 0x0);
     F32(d, 0x10) = F32(out, 0x4);
     U8(d, 0x14) = 1;
-    LineAhead(d, lbl_805621F0 * ahead, 0, (f32*)(out + 0x8), 0);
+    LineAhead(d, 0.65f * ahead, 0, (f32*)(out + 0x8), 0);
     F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
         f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + lbl_8056217C) - st));
-        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + (lbl_80562144 + k * lbl_80562140) * lbl_805621F4);
+        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + (lbl_80562144 + k * lbl_80562140) * -0.19999999f);
     }
     f32 side = fn_801948B0(d, t, 0);
     F32(out, 0x0) += F32(d, 0x58) * side;
@@ -1257,7 +1251,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
         s32 lead = S32(d, 0x2C4);
         if (lead != -1) {
             Pair* pr = lbl_8055E0D0->Rec(S32(d, 0x290))->table[lead];
-            if (pr->dist2 < lbl_80562200) {
+            if (pr->dist2 < 2.5e3f) {
                 u8* car = fn_8017960C(lead);
                 V2 rel;
                 fn_80137788(pr, S32(d, 0x290), &rel);
@@ -2122,9 +2116,6 @@ void fn_801971AC(u8* d, V2* io) {
 
 f32 fn_801973FC(const V2* n, const V2* a, const V2* b);
 
-extern const f32 lbl_8056226C;  // 4 / 59.94 (four frames)
-extern const f32 lbl_80562268;  // 0.9
-extern const f32 lbl_8056222C;  // 40.0
 
 void fn_8019724C(u8* d, V2* io) {
     if (F32(d, 0x270) > 4.4444447f) {
@@ -2141,22 +2132,22 @@ void fn_8019724C(u8* d, V2* io) {
         dir.y *= inv;
         if (fn_8015FBCC(CAR(d), &hit, 0, o)) {
             f32 t = F32(d, 0x26C);
-            f32 hi = lbl_8056226C + F32(d, 0x1F8);
-            f32 lo = t - lbl_80562268;
+            f32 hi = 0.066733405f + F32(d, 0x1F8);
+            f32 lo = t - 0.9f;
             t = t < hi ? t : hi;
             t = t > lo ? t : lo;
             F32(d, 0x1F8) = t;
             F32(d, 0x20C) = fn_801973FC(&dir, &hit, io);
             io->x = hit.x;
             io->y = hit.y;
-            if (F32(d, 0x270) > lbl_8056222C) {
+            if (F32(d, 0x270) > 4.0e1f) {
                 S32(d, 0x2D0) |= 0x40;
             }
             S32(d, 0x2D0) |= 0x800;
         } else {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1F8);
-            if (dt < lbl_80562268) {
-                f32 k = F32(d, 0x20C) * (1.0f - dt / lbl_80562268);
+            if (dt < 0.9f) {
+                f32 k = F32(d, 0x20C) * (1.0f - dt / 0.9f);
                 io->x = io->x + dir.x * k;
                 io->y = io->y + dir.y * k;
             }
