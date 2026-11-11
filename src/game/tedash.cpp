@@ -263,8 +263,6 @@ InlineVec<Brush, 16> lbl_804BE7D8;
 InlineVec<Stat, 32> lbl_804BFA70;
 Cursor lbl_804BFF80;
 
-s32 lbl_8055CEA0 = 1;
-
 extern "C" {
 
 const char* fn_802B5B18(int i) {
@@ -705,6 +703,8 @@ s16 fn_802B6ED8(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_80
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : x + 0.5f); }
 
 extern const f32 kWorldScale;
+s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list strings)
+
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
