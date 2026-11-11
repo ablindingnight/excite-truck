@@ -1721,9 +1721,10 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         stuntLabel[i].Set(l->label);
         stuntValue[i].Set(l->value);
     }
+    const char* blank = "";
     for (; i < ARRAY_COUNT(stuntLabel); i++) {
-        stuntLabel[i].Set("");
-        stuntValue[i].Set("");
+        stuntLabel[i].Set(blank);
+        stuntValue[i].Set(blank);
     }
     fn_802AE168(anim);
     switch (state) {
