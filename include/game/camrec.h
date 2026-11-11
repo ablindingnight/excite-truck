@@ -66,10 +66,7 @@ struct CamRec {
     u32 wF0[6];         // offset 0xF0
     u32 w108;
     u32 w10C;
-    u32 w110;
-    u32 w114;
-    u32 w118;
-    u32 w11C;
+    u32 w110[4];        // offset 0x110
     CamVec3 vel;        // offset 0x120
     CamVec3 carVel;     // offset 0x12C
     u8 b138;            // offset 0x138
