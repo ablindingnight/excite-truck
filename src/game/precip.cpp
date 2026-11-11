@@ -1101,7 +1101,7 @@ Mist::Mist(ValueNode* vn) {
     v = vn->GetVec3("v");
     tex = fn_802CAC28(vn->GetValue("texture"), 0);
     pointScale = log2(0.5f / size);
-    ValVec3 c = vn->GetVec3("color");
+    const ValVec3& c = vn->GetVec3("color");
     color = MistColor(Alpha(c.x), Alpha(c.z), Alpha(c.y));
     density = vn->GetFloat("density");
     if (!fn_801EA140(&center)) {
