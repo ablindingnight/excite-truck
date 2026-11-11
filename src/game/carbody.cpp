@@ -2480,8 +2480,13 @@ void fn_80186DE8(u8* p) {
             t.y = lbl_80561CAC;
             t.z = lbl_80561CAC;
         }
-        m->force = CbSolVec4(m->force.x + f.x, m->force.y + f.y, m->force.z + f.z);
-        m->torque = CbSolVec4(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
+        BVec F(m->force.x, m->force.y, m->force.z);
+        F.x += f.x;
+        F.y += f.y;
+        F.z += f.z;
+        BVec T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
+        m->force = CbSolVec4(F.x, F.y, F.z);
+        m->torque = CbSolVec4(T.x, T.y, T.z);
         if (PSVECDotProduct(car + 0x124, car + 0x124) > lbl_80561CE4) {
             PSVECNormalize(car + 0x124, car + 0x124);
             F32(car, 0x124) = F32(car, 0x124) * lbl_80561D34;
