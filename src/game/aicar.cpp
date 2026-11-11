@@ -396,7 +396,7 @@ void AIDriver_vf3C(u8* d, RVec3* pt, RVec3* imp, int a, u8* other) {
                 if (cur == id) {
                     RigidBody* rb = (RigidBody*)fn_8017960C(cur);
                     f32 s = 2000.0f + m / 5000.0f;
-                    s = s > 5000.0f ? 5000.0f : s;
+                    s = s > 5000.0f ? s : 5000.0f;
                     RVec3 v;
                     v.x = 500.0f;
                     v.y = s;
