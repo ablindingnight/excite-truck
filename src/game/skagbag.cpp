@@ -326,8 +326,8 @@ SkagBag::SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used)
         s->Unplace(pt, half);
         at[0] = pt[0] + half * lbl_802FAAD0.dx[q];
         at[1] = pt[1] + half * lbl_802FAAD0.dy[q];
-        p->Place(at, size);
         taken[q]++;
+        p->Place(at, size);
     }
     for (int k = 0; k < 4; k++) {
         *used[k] = taken[k];

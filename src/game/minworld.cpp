@@ -276,8 +276,8 @@ void fn_80252C90(void) {
     for (i = 0; i < n; i++) {
         fn_8025280C(&bodies[i], lbl_8055F300.speed);
     }
-    s = lbl_80498D00;
     fn_801BEDD4();
+    s = lbl_80498D00;
     for (i = 0; n > i; i++, s++) {
         b = &bodies[i];
         w = &wheels[i];

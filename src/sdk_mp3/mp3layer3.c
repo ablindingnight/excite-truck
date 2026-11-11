@@ -424,8 +424,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                 tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
                 p = &out->sxr[2][(sb << 2) + (sb << 1)];
                 fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp2);
-                t0 = p[0] - p[3] - p[4];
                 t1 = p[1] - p[2] - p[5];
+                t0 = p[0] - p[3] - p[4];
                 tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
                 fn_800C3088(pa, tmp0, tmp1, tmp2);

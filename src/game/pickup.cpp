@@ -802,8 +802,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 } else {
                     ty = type;
                 }
-                rt++;
                 m->Add(ty, p, 0.0f);
+                rt++;
             }
             along += spacing;
         }

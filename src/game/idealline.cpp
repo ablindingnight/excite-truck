@@ -343,8 +343,8 @@ int LineFollower::Step(V2* p) {
                 pos.y = s->pos.y;
                 f32 y2 = p->y;
                 off.y = y2 - pos.y;
-                dir.x = s->dir.x;
                 dir.y = s->dir.y;
+                dir.x = s->dir.x;
                 a = (dir.x * off.x + dir.y * off.y) / s->len;
                 if (a < 1.0f) {
                     t = t > a ? t : a;

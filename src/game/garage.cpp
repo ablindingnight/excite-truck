@@ -568,8 +568,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem(lbl_80498C30),
                 };
                 MenuDesc desc = {0, 0, (int (*)(int*))fn_8024DAD8, 0, 0};
-                desc.layout = lbl_8055FC8C ? "carchoose2a_w.lyt" : "carchoose2a.lyt";
                 desc.items = items;
+                desc.layout = lbl_8055FC8C ? "carchoose2a_w.lyt" : "carchoose2a.lyt";
                 HeapMark mark("choosevehicle1");
                 r = fn_802146BC(&desc, -999, -999, 1);
             }

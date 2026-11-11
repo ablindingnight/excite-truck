@@ -2064,8 +2064,8 @@ int fn_8019E500(u8* p, u8* q) {
     ax[1].ext = F32(q, 0x28);
     ax[2].ext = F32(q, 0x2C);
     ax[2].dir = *(PVec3*)&fr.m[6];
-    int i;
     bool hit = false;
+    int i;
     f32 r = 0.75f;
     for (i = 0; i < 3; i++) {
         if (i == 1) {

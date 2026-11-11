@@ -1694,8 +1694,8 @@ int fn_801C5B68(CamView* v, int idx) {
     }
     v->fov = p->fov;
     CamPose* saved = (CamPose*)(s + 0x148) + idx;
-    *saved = *v;
     IVec3* heading = (IVec3*)(s + 0x208) + idx;
+    *saved = *v;
     *heading = c->heading;
     v->car = car;
     v->modeA = 0xB;

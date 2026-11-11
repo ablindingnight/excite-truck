@@ -128,8 +128,8 @@ void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 
     v[0].pos.y = p->y + sy;
     v[0].pos.z = p->z + sz;
     v[2].pos.x = p->x + sx * -1.0f;
-    v[2].pos.y = p->y + -1.0f * sy;
     v[2].pos.z = p->z + sz * -1.0f;
+    v[2].pos.y = p->y + -1.0f * sy;
     w = 2.0f * size;
     d.x = sx + w * m->right.x;
     d.y = sy + w * m->right.y;

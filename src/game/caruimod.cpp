@@ -1133,8 +1133,8 @@ void CarUIScreen::LoadView(const char* view) {
             zero.z = 0.0f;
             const ValVec3& v = n->GetVec3Or("camera_offset", zero);
             camOffset.x = v.x;
-            camOffset.z = v.z;
             camOffset.y = v.y;
+            camOffset.z = v.z;
             ValueNodeV* w = (ValueNodeV*)((ValueNode*)n)->FindChild("wheels");
             if (w) {
                 lbl_80344890[0].hit = w->GetFloat("lf_hit", 0.0f);

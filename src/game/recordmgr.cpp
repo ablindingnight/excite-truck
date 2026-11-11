@@ -416,8 +416,8 @@ void fn_801AEF28(RaceSetup* s) {
         if (!CarTypeIsReal(type, s->car)) {
             break;
         }
-        t->e[i].type = type;
         t->e[i].driver = s->e[i].driver;
+        t->e[i].type = type;
         order[i] = i;
         s32 nv = t->n;
         nv++;

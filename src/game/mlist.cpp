@@ -635,8 +635,8 @@ void fn_802CDDC8(MList* m, u32 base) {
     for (i = 0; i < m->e.n; i++) {
         MLBatch* e = &m->e.p[i];
         Swap32(&e->start);
-        Swap32(&e->end);
         e->tex = -2;
+        Swap32(&e->end);
     }
     Relocate(m->objs, base);
     for (i = 0; i < m->numObjs; i++) {

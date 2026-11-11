@@ -255,8 +255,8 @@ int fn_8023EEF8(void) {
         MenuItem("lbutton", 3, "B - Free More Blocks", 4, 0),
         MenuItem(lbl_804987E0),
     };
-    MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
     lbl_8055F1C4 = 0;
+    MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
     desc.layout = fn_8023E5A8();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;

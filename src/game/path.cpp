@@ -319,8 +319,8 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         q.y = a->rot.y * g + b->rot.y * f;
         q.x = a->rot.x * g + b->rot.x * f;
         f32 inv = 1.0f / (f32)sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-        q.x *= inv;
         q.y *= inv;
+        q.x *= inv;
         q.z *= inv;
         q.w *= inv;
         ToMatrix(m, q);

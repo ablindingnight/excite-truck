@@ -1394,8 +1394,8 @@ inline void Challenge::Init(void) {
                 TVec3 e1;
                 TVec3 e2;
                 TVec3 n3;
-                t->ends[0].x = a.x;
                 t->ends[0].y = 0.0f;
+                t->ends[0].x = a.x;
                 t->ends[0].z = a.z;
                 SetXYZ(&t->ends[1], b.x, 0.0f, b.z);
                 t->mid.x = (a.x + b.x) * 0.5f;

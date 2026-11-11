@@ -1146,8 +1146,8 @@ inline void* SimpleHeap::Alloc(s32 size) {
             split = s;
         }
         if (split) {
-            split->next = next;
             *best = split;
+            split->next = next;
         } else {
             *best = next;
         }

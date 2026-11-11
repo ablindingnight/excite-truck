@@ -667,8 +667,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             if (lbl_803583C8[j].active) {
                 Vec3 rel;
                 f32 size;
-                rel.x = lbl_803583C8[j].pos.x - basis.pos.x;
                 rel.y = lbl_803583C8[j].pos.y - basis.pos.y;
+                rel.x = lbl_803583C8[j].pos.x - basis.pos.x;
                 rel.z = 0.0f - basis.pos.z;
                 MulVecT(&rel, &rel, &basis);
                 {

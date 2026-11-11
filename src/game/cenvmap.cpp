@@ -266,8 +266,8 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         f32 len = sqrt(h.x * h.x + h.y * h.y);
         len = 0.01f > len ? 0.01f : len;
         f32 s = 1.0f / len;
-        h.x = h.x * s * -1.0f;
         h.y = h.y * s * -1.0f;
+        h.x = h.x * s * -1.0f;
         f32 a = atan2(-h.x, h.y);
         EVec2 p;
         p.x = -181.01926f;

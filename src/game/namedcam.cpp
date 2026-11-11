@@ -457,8 +457,8 @@ void fn_80276DC8(int slot) {
     CamRec* src = (CamRec*)fn_802678E4(slot);
     lbl_804A0C60[slot] = *src;
     CamRec* rec = &lbl_804A0C60[slot];
-    look = rec->pose;
     lbl_804A15C0[slot] = 0.0f;
+    look = rec->pose;
     if (!fn_80276068(rec->mode) || !S32(src->car, 0x24)) {
         lbl_804A0C60[slot].mode = 4;
         f32 d = fn_802704E0(4, 0.0f);
@@ -492,11 +492,10 @@ void fn_80276DC8(int slot) {
     PSVECNormalize(&car.rot.m[6], &car.rot.m[6]);
     fn_801E9DC4(&rec->h1EC);
     o = lbl_802FA818;
-    __typeof__(axis.v[2]) axis_v_2 = 0.017453292f * o.rot.v[2];
     rel.pos = o.pos;
     axis.v[0] = 0.017453292f * o.rot.v[0];
     axis.v[1] = 0.017453292f * o.rot.v[1];
-    axis.v[2] = axis_v_2;
+    axis.v[2] = 0.017453292f * o.rot.v[2];
     f32 scale = F32(src->car, 0x5E4);
     rel.pos.v[0] *= scale;
     rel.pos.v[1] *= scale;

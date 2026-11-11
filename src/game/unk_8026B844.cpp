@@ -768,8 +768,8 @@ void fn_8026C014(int player) {
             CamQuat q;
             MtxToQuat(&car->frame, &q);
             if (id == lbl_8049A168.car) {
-                CamQuat qs;
                 CamVec p;
+                CamQuat qs;
                 fn_8012F57C(&qs, &lbl_8049A168.rot, &q, 0.05f);
                 if (!((s32)lbl_8055F4E4 & 2)) {
                     QuatToMtx(&qs, &tgt.rot);

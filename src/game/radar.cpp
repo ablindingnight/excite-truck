@@ -162,8 +162,8 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     V2 d;
     V2 screen;
     V2 size;
-    size.x = bg->size.x;
     f32 sizeY = bg->size.y;
+    size.x = bg->size.x;
     size.y = sizeY;
     corner.x = origin.x + size.x;
     corner.y = origin.y + size.y;

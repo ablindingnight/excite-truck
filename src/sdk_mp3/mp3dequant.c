@@ -325,8 +325,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
                 b = mixed_map[i];
                 idx = lbl_802F39E8[b] * *preflag + sf_long[b];
-                m = lbl_802F3A00[row][idx];
                 e = e0 + lbl_802F3A8C[row][idx];
+                m = lbl_802F3A00[row][idx];
                 x = v;
                 if (v < 0) {
                     x = -v;

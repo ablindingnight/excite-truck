@@ -879,8 +879,8 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     }
     v.y = vel->z;
     v.x = vel->x;
-    d.x = at->x - p->origin.x;
     d.y = at->z - p->origin.z;
+    d.x = at->x - p->origin.x;
     f32 s2 = v.x * v.x + v.y * v.y;
     if (AbsF(s2) <= lbl_80558DC4[0]) {
         return;

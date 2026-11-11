@@ -1252,8 +1252,8 @@ int fn_8013CBC0(CarState* zm, int car) {
     len = 0.01f > len ? 0.01f : len;
     ab.x *= 1.0f / len;
     ab.y *= 1.0f / len;
-    V2 n = ab;
     a.x += ab.x * (0.65f + wa);
+    V2 n = ab;
     a.y += ab.y * (0.65f + wa);
     perp.x = n.y;
     perp.y = -n.x;

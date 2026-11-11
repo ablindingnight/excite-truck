@@ -391,8 +391,8 @@ void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
         choices[i].text = 0;
     }
     McChoiceState state;
-    state.unk14 = 0;
     state.vt = lbl_80343148;
+    state.unk14 = 0;
     state.accept = 1;
     state.alt = 1;
     if (cfg->layout) {

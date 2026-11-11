@@ -138,8 +138,8 @@ void fn_8013BAE4(s32 n) {
     fn_8013B7B4(tbl, n);
     fn_8013B6C0(&lvl, &frac, fn_801E87A8()->level);
     Catchup* lo = &tbl[lvl];
-    f32 b0 = lo[0].begin;
     f32 b1 = lo[1].begin;
+    f32 b0 = lo[0].begin;
     lbl_8042F8B8.begin = Lerp(frac, b0, b1);
     f32 e0 = lo[0].effect;
     f32 e1 = lo[1].effect;

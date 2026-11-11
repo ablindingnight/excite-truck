@@ -948,8 +948,8 @@ extern "C" {
 
 void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     s32* idx = (s32*)(data + 0x58);
-    const Corner* c1 = (Corner*)(data + 0x10) + idx[1];
     const Corner* c0 = (Corner*)(data + 0x10) + idx[0];
+    const Corner* c1 = (Corner*)(data + 0x10) + idx[1];
     q->c[0] = *c0;
     q->c[1] = *c1;
     q->c[2] = *((Corner*)(data + 0x10) + idx[2]);

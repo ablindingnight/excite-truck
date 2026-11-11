@@ -188,8 +188,8 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
     TVec3 a;
     TVec3 b;
     a.x = p->x - side->x;
-    b.x = p->x + side->x;
     a.y = p->y - side->y;
+    b.x = p->x + side->x;
     b.y = p->y + side->y;
     a.z = p->z - side->z;
     b.z = p->z + side->z;

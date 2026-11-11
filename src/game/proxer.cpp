@@ -236,8 +236,8 @@ void Proxer::Update(int i) {
             y = lapLen - y;
         }
         r->vel.x = f->latSpeed;
-        r->pos.x = x;
         r->pos.y = y;
+        r->pos.x = x;
         old = r->vel.y;
         r->vel.y = f->speed;
         if (r->flipped) {

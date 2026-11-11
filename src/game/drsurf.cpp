@@ -554,9 +554,8 @@ void fn_802D4ECC(Surf* s) {
             f32 w1 = (1.0f / 255) * v->w1;
             const BVec* bb = &lbl_804DB068[v->b1];
             V3 p;
-            __typeof__(p.y) p_y = v->y + w0 * ba->y;
+            p.y = v->y + w0 * ba->y;
             p.x = v->x + w0 * ba->x;
-            p.y = p_y;
             p.z = v->z + ba->z * w0;
             f32 xv = bb->x;
             p.x = p.x + xv * w1;
