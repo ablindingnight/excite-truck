@@ -169,13 +169,13 @@ public:
     virtual void Enter(void);
     virtual void Changed(int item);
     virtual void Unk24(void);
-    // Restarts the announcer preview at the current announcer volume (runs right after construction, while no
-    // sample is loaded: MWCC folds the null test into a branch but keeps the body, as in the original).
-    void ResetPreview(void) {
+    // Restarts the announcer preview at volume v. The menu calls it only when a sample is loaded; right after
+    // construction none is, so MWCC turns the caller's test into a branch over the (kept) body, as in the target.
+    void ResetPreview(f32 v) {
         if (sound) {
             sound->Rewind();
         }
-        sound->SetVolume(*announcer);
+        sound->SetVolume(v);
     }
     void UpdateMixerName(void) {
         s32 i = *mixer;
@@ -278,7 +278,9 @@ void fn_8023CC84(const char* layout) {
         char mixerName[0x100];
         SoundOptions opts(&lbl_8055F16C, &lbl_8055F164, &lbl_8055F17C, &mixer, mixerName, &lbl_8055F168,
                           &lbl_8055F170, &lbl_8055F174);
-        opts.ResetPreview();
+        if (opts.sound) {
+            opts.ResetPreview(lbl_8055F168);
+        }
         MenuStrList list;
         int i;
         fn_8022D228(&list, 0x11, 0x20);
