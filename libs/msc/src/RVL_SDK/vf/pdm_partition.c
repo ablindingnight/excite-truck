@@ -10,13 +10,13 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
     u32 num_sectors[4];
     u32 is_mbr;
     u32 num_success;
-    u32 found;
     u32 part_id;
     u16 part_cnt;
     u16 ext_cnt;
     u32 base_sector;
     u32 start_sector;
     u32 num_sector;
+    u32 found;
     s32 err;
 
     part_id = p_part->part_id;
