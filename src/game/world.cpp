@@ -1275,6 +1275,10 @@ void fn_801E95DC(void) {
     }
 }
 
+static inline ValPoint BoundPoint(ValueNode* nd, const char* key) { /* Helper name unproven */
+    return nd->GetPoint(key);
+}
+
 void fn_801E96D8(RaceSetup* s) {
     EventInfo* ev = (EventInfo*)GetEvent(s->event);
     const char* file = ev->node->GetString("wall_file", 0);
@@ -1293,7 +1297,7 @@ void fn_801E96D8(RaceSetup* s) {
                 int idx = 1;
                 int count = 0;
                 WVec prev;
-                ValPoint p0 = nd->GetPoint("bound0");
+                ValPoint p0 = BoundPoint(nd, "bound0");
                 prev.x = p0.x;
                 prev.y = 0.0f;
                 prev.z = p0.y;
