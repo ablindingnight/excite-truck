@@ -57,8 +57,6 @@ extern void* lbl_803426B0[];
 extern void* lbl_80342734[];
 extern void* lbl_80342618[];
 extern s32 lbl_8055F1F4;
-extern u8 lbl_8055F1FC;
-extern u32 lbl_8055F200;
 
 ModuleTag lbl_8055F1E8;
 UnkStatic123s lbl_80498810;
@@ -66,6 +64,8 @@ JoinSlot lbl_80498828[2];
 UnkStatic7F lbl_8055F1F0;
 s32 lbl_8055F1F4;
 s32 lbl_8055F1F8;
+u8 lbl_8055F1FC;
+u32 lbl_8055F200;
 
 extern "C" {
 
@@ -187,7 +187,6 @@ static inline void CopyName(const char* src, int n, char* dst) {
 }
 
 extern void* lbl_80342650[];
-extern char lbl_8055BD60[8];  // ""
 
 extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
@@ -201,7 +200,7 @@ inline void CarSel::SetSlot(s32 s) {
     *slot = s;
     S32(car, 0xD8) = *slot;
     if (*slot < 0) {
-        CopyName(lbl_8055BD60, 0x20, name);
+        CopyName("", 0x20, name);
     } else {
         CopyName(fn_802E85B8(*slot), 0x20, name);
     }
@@ -796,10 +795,10 @@ CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
     p->cur = 0;
     p->slot = slot;
     p->active = 1;
-    CopyName(lbl_8055BD60, 0x20, p->name);
+    CopyName("", 0x20, p->name);
     S32(p->car, 0xD8) = *p->slot;
     if (*p->slot < 0) {
-        CopyName(lbl_8055BD60, 0x20, p->name);
+        CopyName("", 0x20, p->name);
     } else {
         const char* nm = fn_802E85B8(*p->slot);
         CopyName(nm, 0x20, p->name);
