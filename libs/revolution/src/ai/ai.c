@@ -34,8 +34,10 @@ typedef struct {
 } STRUCT_TIMELOG;
 STRUCT_TIMELOG __AIprofile;
 
+#ifndef GAME_REXE01  // not in Excite Truck's ai.o (unreferenced; the shipped .sbss starts at __AI_init_flag)
 OSTime __ai_src_time_start;
 OSTime __ai_src_time_end;
+#endif
 
 // prototypes
 STRUCT_TIMELOG* __ai_src_get_time(void);
