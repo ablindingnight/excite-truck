@@ -270,10 +270,11 @@ void fn_801BDA74(int car, CarSetup* s) {
     x->row[18] = MVec4(lock, lock, 0.0f, 0.0f);
     f32 a = DEG(-0.1);
     f32 b = DEG(0.1);
+    __typeof__(x->row[6]) x_row_6 = MVec4(0.5f * s->airDrag * 1.29f, 0.0f, 0.0f, s->collideCmHeight - s->cmHeight);
     x->row[19] = MVec4(a, -a, b, -b);
     x->row[20] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     x->row[21] = MVec4(0.0f, 0.0f, 0.5f, 0.5f);
-    x->row[6] = MVec4(0.5f * s->airDrag * 1.29f, 0.0f, 0.0f, s->collideCmHeight - s->cmHeight);
+    x->row[6] = x_row_6;
     x->row[22] = MVec4(s->brake * s->unk11C, s->brake * s->unk11C, s->brake * (1.0f - s->unk11C),
                        s->brake * (1.0f - s->unk11C));
     {

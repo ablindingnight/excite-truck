@@ -1466,8 +1466,9 @@ void PlayerDriver_vf48(u8* p) {
             sn = sin(a);
             cs = cos(a);
             t = kOne - cs;
+            __typeof__(spin[1]) spin_1 = ay * (ax * t) + sn * az;
             spin[0] = cs + (ax * ax) * t;
-            spin[1] = ay * (ax * t) + sn * az;
+            spin[1] = spin_1;
             spin[2] = az * (ax * t) - sn * ay;
             spin[3] = (ax * t) * ay - sn * az;
             spin[4] = cs + t * (ay * ay);

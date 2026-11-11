@@ -943,8 +943,9 @@ void ShardSys::Draw(void) {
                 sn = sin(ang);
                 f32 cs = cos(ang);
                 f32 c1 = 1.0f - cs;
+                __typeof__(r.m[0][1]) r_m_0_1 = y * (c1 * x) + sn * z;
                 r.m[0][0] = cs + c1 * (x * x);
-                r.m[0][1] = y * (c1 * x) + sn * z;
+                r.m[0][1] = r_m_0_1;
                 r.m[0][2] = z * (c1 * x) - sn * y;
                 r.m[1][0] = y * (c1 * x) - sn * z;
                 r.m[1][1] = cs + c1 * (y * y);

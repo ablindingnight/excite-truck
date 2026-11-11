@@ -630,9 +630,10 @@ void fn_80271624(int mode, u8* p) {
                     }
                     f32 e = CamEase(f);
                     f32 v[3];
+                    __typeof__(v[2]) v_2 = TvLerp(tv->from[2], tv->to[2], e);
                     v[0] = TvLerp(tv->from[0], tv->to[0], e);
                     v[1] = TvLerp(tv->from[1], tv->to[1], e);
-                    v[2] = TvLerp(tv->from[2], tv->to[2], e);
+                    v[2] = v_2;
                     tv->pos[0] = v[0];
                     tv->pos[1] = v[1];
                     tv->pos[2] = v[2];

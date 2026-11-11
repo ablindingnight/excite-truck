@@ -492,10 +492,11 @@ void fn_80276DC8(int slot) {
     PSVECNormalize(&car.rot.m[6], &car.rot.m[6]);
     fn_801E9DC4(&rec->h1EC);
     o = lbl_802FA818;
+    __typeof__(axis.v[2]) axis_v_2 = 0.017453292f * o.rot.v[2];
     rel.pos = o.pos;
     axis.v[0] = 0.017453292f * o.rot.v[0];
     axis.v[1] = 0.017453292f * o.rot.v[1];
-    axis.v[2] = 0.017453292f * o.rot.v[2];
+    axis.v[2] = axis_v_2;
     f32 scale = F32(src->car, 0x5E4);
     rel.pos.v[0] *= scale;
     rel.pos.v[1] *= scale;

@@ -2716,9 +2716,10 @@ void fn_80186DE8(u8* p) {
             w->contact[0] = c->pts[j].x;
             w->contact[1] = c->pts[j].y;
             f32 nrm[3];
+            __typeof__(nrm[1]) nrm_1 = c->pts[9 + j].y;
             w->contact[2] = c->pts[j].z;
             nrm[0] = c->pts[9 + j].x;
-            nrm[1] = c->pts[9 + j].y;
+            nrm[1] = nrm_1;
             nrm[2] = c->pts[9 + j].z;
             w->local[0] = x->pts[j].x;
             w->local[2] = x->pts[j].z;

@@ -1603,10 +1603,11 @@ void fn_80195F6C(u8* d) {
         V2 pos;
         V2 dir;
         IdealPoint* s = il.seg;
+        __typeof__(dir.x) dir_x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
         pos.x = s->pos.x + il.t * (s->next->pos.x - s->pos.x);
         pos.y = s->pos.y + il.t * (s->next->pos.y - s->pos.y);
         dir.y = s->dir.y + il.t * (s->next->dir.y - s->dir.y);
-        dir.x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
+        dir.x = dir_x;
         f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
         dir.x *= inv;
         dir.y *= inv;

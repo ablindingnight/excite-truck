@@ -245,9 +245,10 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     f32 dz;
     f32 h = SplineD(col[0], col[1], col[2], col[3], fz, (fz * fz), s3, &dz);
     GVec n;
+    __typeof__(n.x) n_x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, (fz * fz), (fz * fz) * fz);
     n.y = 1.0f / lbl_8055E990->scaleX;
     n.z = -dz;
-    n.x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, (fz * fz), (fz * fz) * fz);
+    n.x = n_x;
     PSVECNormalize(&n, &n);
     *normal = n;
         return h;

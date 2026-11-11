@@ -101,6 +101,7 @@ void fn_8024BE04(u8* p) {
         fn_802C974C(0.2f, 1000.0f, 1.5707964f);
         fn_802C8638(vp);
         MTVtx v[4];
+        __typeof__(v[2].pos) v_2_pos = MTVec(0.0f, 1.0f, 0.0f);
         const u16 idx[6] = {0, 1, 2, 1, 3, 2};
         v[0].pos = MTVec(0.0f, 0.0f, 0.0f);
         v[0].color = 0xFFFFFFFF;
@@ -110,7 +111,7 @@ void fn_8024BE04(u8* p) {
         v[1].color = 0xFFFFFFFF;
         v[1].u = 1.0f;
         v[1].v = 0.0f;
-        v[2].pos = MTVec(0.0f, 1.0f, 0.0f);
+        v[2].pos = v_2_pos;
         v[2].color = 0xFFFFFFFF;
         v[2].u = 0.0f;
         v[2].v = 1.0f;
