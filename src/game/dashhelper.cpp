@@ -478,7 +478,8 @@ void fn_8000E3B4(int player) {
             fn_80010074(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
             break;
         case 2:
-            fn_80010074(-1, 0x12, "%d", 1.0f, x10 + fn_800108C8("000", 1.0f), ty, row->a);
+            f32 x = x10 + fn_800108C8("000", 1.0f);
+            fn_80010074(-1, 0x12, "%d", 1.0f, x, ty, row->a);
             fn_80010074(-1, 0x11, "%s", 1.0f, x10 + fn_800108C8("000 ", 1.0f), ty, row);
             break;
         case 3:
