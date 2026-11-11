@@ -410,7 +410,6 @@ extern "C" void fn_8020E598(Hud *h) {
     if (h->air != 0) {
         float speed;
         float ground;
-        HudVec dir;
         float mag;
         float inv;
         int boost;
@@ -426,7 +425,7 @@ extern "C" void fn_8020E598(Hud *h) {
             HudPart_Hide(h->air);
         }
         ground = fn_801E9FDC((short *)(h->vehicle + 0x6C), VF32(h->vehicle, 0x60), VF32(h->vehicle, 0x68));
-        dir = ((HudCar *)h->vehicle)->vel;
+        HudVec dir = ((HudCar *)h->vehicle)->vel;
         mag = PSVECMag(&dir);
         mag = mag > lbl_80563388 ? mag : lbl_80563388;
         inv = lbl_80563368 / mag;

@@ -617,7 +617,6 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     DMtx m2;
     BRot tilt;
     BRot turn;
-    DVec3 root;
     BVec v;
     BVec g;
     BVec up;
@@ -771,7 +770,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     e2.z = 0.0f;
     Mat3FromEuler((Mat3*)&turn, (Vec3*)&e2);
     Mat3Mul((Mat3*)&pose[0].rot, (Mat3*)&turn, (Mat3*)&pose[0].rot);
-    root = *(DVec3*)&pose[0].pos;
+    DVec3 root = *(DVec3*)&pose[0].pos;
     for (int i = 0; i < n; i++) {
         pose[i].pos.x -= root.x;
         pose[i].pos.y -= root.y;

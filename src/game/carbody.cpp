@@ -635,7 +635,6 @@ void CarBody_vf08(u8* p, u8* desc) {
     fn_801345D8(path, 0x50, "%s.car/physics.val", (char*)(p + 0x234));
     CbValueTable* table = fn_80131808(path);
     ValVec3C head;
-    ValVec3C back;
     CbValueNode* chassis = table->FindChild("Chassis");
     F32(p, 0x5B4) = chassis->GetFloat("chase_camera_dist", 0.0f);
     F32(p, 0x5B8) = chassis->GetFloat("chase_camera_height", 0.0f);
@@ -644,7 +643,7 @@ void CarBody_vf08(u8* p, u8* desc) {
     F32(p, 0x5C8) = head.y;
     F32(p, 0x5D0) = 0.2f * head.x;
     F32(p, 0x5D4) = head.y + 3.0f;
-    back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
+    ValVec3C back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
     F32(p, 0x5CC) = head.z;
     F32(p, 0x5D8) = head.z;
     F32(p, 0x5D0) = back.x;
@@ -2507,11 +2506,10 @@ void fn_80186DE8(u8* p) {
         CbSolCx* e;
         f32 s6;
         int landing;
-        CbVec4 grip4;
         int wet2;
         f32 cut;
         e = &cx[i];
-        grip4 = CbVec4(x->vB0);
+        CbVec4 grip4 = CbVec4(x->vB0);
         air = lbl_80561CD0 - F32(car, 0x25D4);
         if (air > lbl_80561CD0) {
             air = lbl_80561CD0;
@@ -2556,7 +2554,6 @@ void fn_80186DE8(u8* p) {
         }
         f32 slip;
         grip = st->grip * wet;
-        CbVec4 v;
         slip = st->slip * wet;
         f32 gas;
         f32 steerK;
@@ -2610,7 +2607,7 @@ void fn_80186DE8(u8* p) {
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
         }
-        v = CbVec4(x->pts[6]);
+        CbVec4 v = CbVec4(x->pts[6]);
         f32 brake;
         s6 = v.w;
         if (F32(car, 0x2618) > lbl_80561CFC) {
@@ -2686,7 +2683,6 @@ void fn_80186DE8(u8* p) {
         CbVec4 w5(x->v140);
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
-        CbVec4 half;
         CbWheel* w;
         F32(car, 0x25D0) = rpm.x / lbl_80561CC0;
         F32(car, 0x25D4) = PSVECMag(0x118 + car);
@@ -2725,7 +2721,7 @@ void fn_80186DE8(u8* p) {
             f32 comp = c->pts[5 + j].w;
             if (comp > lbl_80561E90) {
                 c->pts[5 + j] = CbSolVec4(lbl_80561CAC, lbl_80561CAC, lbl_80561CAC);
-                half = CbVec4(c->v30);
+                CbVec4 half = CbVec4(c->v30);
                 half[j] = half[j] * lbl_80561CDC;
                 c->v30 = half.Sol();
             }

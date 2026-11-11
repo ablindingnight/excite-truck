@@ -695,11 +695,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         SFMarker* m = lbl_8055D5B4;
         Vec2 tp;
         Vec2 c;
-        Vec3 p;
         Vec3 rel;
         c.x = x + w * 0.5f;
         c.y = y - h * 0.5f;
-        p = tr->pos;
+        Vec3 p = tr->pos;
         tp.x = p.x;
         tp.y = p.z;
         rel.x = m->pos.x - basis.pos.x;

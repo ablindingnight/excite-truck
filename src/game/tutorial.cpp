@@ -1853,9 +1853,8 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             TVec2* w = pts;
             for (k = 0; k < 3; w++, k++) {
                 char key[0x10];
-                ValPoint p;
                 fn_801345D8(key, sizeof(key), "bound%d", k);
-                p = place->GetPoint(key);
+                ValPoint p = place->GetPoint(key);
                 w->x = p.x;
                 w->z = p.y;
             }
