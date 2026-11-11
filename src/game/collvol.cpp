@@ -112,7 +112,7 @@ public:
     virtual void vf24(void);           // 0x24
     virtual void vf28(void);           // 0x28
     virtual s32 vf2C(void);            // 0x2C
-    virtual void vf30(f32 t, struct CollPacket* a, struct CollPacket* b, s32* na, s32* nb);  // 0x30
+    virtual void vf30(f32 t, struct CollPacket* a, const struct CollPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(struct CollPacket* p);  // 0x34
     virtual void vf38(u8* out);  // 0x38
     virtual void vf3C(void);           // 0x3C
@@ -290,7 +290,7 @@ static inline void AxisAngle(CVec3* m, const CVec3* v) {
 
 extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t);
 
-void CollVolume::vf30(f32 t, CollPacket* a, CollPacket* b, s32* na, s32* nb) {
+void CollVolume::vf30(f32 t, CollPacket* a, const CollPacket* b, s32* na, s32* nb) {
     CMtx ma;
     CMtx mb;
     CVec3 va;
