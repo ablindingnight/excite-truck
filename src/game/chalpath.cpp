@@ -293,11 +293,10 @@ struct PathScreenBuf {
             sound = 0;
         }
         lbl_8055F3EC = 0;
-        int i;
-        for (i = 0; i < numEvents; i++) {
+        for (int i = 0; i < numEvents; i++) {
             delete events.data[i];
         }
-        for (i = 0; i < numLevels; i++) {
+        for (int i = 0; i < numLevels; i++) {
             delete levels.data[i];
         }
     }
