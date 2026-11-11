@@ -534,7 +534,8 @@ struct CbWheelSetup {
 struct CbSetup {
     f32 mass;                                                           // 0x00
     f32 f04, f08, f0C, f10, f14, f18, f1C, f20, f24, f28, f2C, f30;    // 0x04
-    s32 i34, i38, i3C, i40, i44, i48, i4C;                              // 0x34
+    s32 i34;                                                            // 0x34
+    s32 i38[6];                                                         // 0x38
     f32 f50, f54, f58, f5C, f60, f64, f68, f6C, f70, f74, f78, f7C;    // 0x50
     CbWheelSetup wheels[4];                                             // 0x80
     f32 f110, f114, f118, f11C, f120, f124, f128;                       // 0x110
