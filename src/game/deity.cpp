@@ -1066,7 +1066,6 @@ static inline void ReleaseCar(DeityCar* c) {
     fn_801CB3AC(c->index);
 }
 
-extern const f32 lbl_805625DC;  // 1 / 59.94 (one frame)
 
 void fn_801B2364(void) {
     fn_801B146C();
@@ -1088,7 +1087,7 @@ void fn_801B2364(void) {
         }
     }
     if (lbl_8055E6A8 == 1 && IsLoadingActive()) {
-        lbl_8055E6AC += lbl_805625DC;
+        lbl_8055E6AC += 0.016683351f;
     }
     if (lbl_8055E6A8 == 1 && now > lbl_8055E6AC) {
         fn_802E30C8("deity: green flag!");

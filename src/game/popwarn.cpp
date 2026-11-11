@@ -75,8 +75,6 @@ extern void* lbl_80343780[];
 extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
-extern const f32 lbl_80563898;  // 1.0f
-extern const f32 lbl_8056389C;  // 0.7f
 
 s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
@@ -291,8 +289,8 @@ struct CupText {
         font = 0;
         color = -1;
         flags = 9;
-        scale = lbl_80563898;
-        f10 = lbl_80563898;
+        scale = 1.0f;
+        f10 = 1.0f;
         font = fn_80232578(name);
     }
     ~CupText(void) {
@@ -314,7 +312,7 @@ public:
         tile = fn_8023512C("tile_cup.art");
         tracks = gxGetImage("e3_trks.img");
         text = new ("font") CupText("uifnt_o.gtx");
-        text->scale = lbl_8056389C;
+        text->scale = 0.7f;
         text->flags = (text->flags & ~7) | 4;
         text->flags = (text->flags & ~0x58) | 0x10;
         count = 2;
@@ -1117,8 +1115,6 @@ void MenuArt::Update(void) {
 extern "C" void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 extern "C" f32 fn_80235F64(u8* text, int flag, f32 v);
 extern "C" void fn_802353F4(u8* text, int flag, f32 x, f32 y, f32 z);
-extern const f32 lbl_805638C8;  // 370.0
-extern const f32 lbl_805638B0;  // 0.0
 
 // Draws the scrolling warning text, wrapping the scroll offset at the box width.
 void MenuArt::Draw(void) {
@@ -1129,8 +1125,8 @@ void MenuArt::Draw(void) {
     if (scroll > fw) {
         scroll -= fw;
     }
-    int wide = scroll > lbl_805638C8;
-    fn_802353F4(image, wide, sx + scroll, (sy - fh) + fn_80235F64(image, wide, scroll), lbl_805638B0);
+    int wide = scroll > 3.7e2f;
+    fn_802353F4(image, wide, sx + scroll, (sy - fh) + fn_80235F64(image, wide, scroll), 0.0f);
 }
 extern "C" {
 

@@ -510,13 +510,12 @@ void fn_80276DC8(int slot) {
     fn_80276098(&src->pose, &rel, slot, 0x22, src->fov, 0.017453292f * o.fov, 2.0f);
 }
 
-extern const f32 lbl_80564054;  // -1.0
 
 f32 fn_80277704(int i) {
     if (lbl_8049FD58[i].active) {
         return (lbl_8055E3C8 - lbl_8049FD58[i].start) / lbl_8049FD58[i].dur;
     }
-    return lbl_80564054;
+    return -1.0f;
 }
 
 void fn_80277740(void) {
@@ -541,26 +540,22 @@ int fn_80277754(CamReader* r) {
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strcpy(char* d, const char* s);
-extern const f32 lbl_80564048;  // 0.0
-extern const f32 lbl_8056404C;  // 1.0
-extern const f32 lbl_80564070;  // default fov, pi/2
-extern const f32 lbl_80564074;  // house fov, 85 degrees
 
 // Identity pose at the origin with the default fov.
 static inline void ResetCam(NamedCam* c) {
-    c->pose.rot.m[0] = lbl_8056404C;
-    c->pose.rot.m[1] = lbl_80564048;
-    c->pose.rot.m[2] = lbl_80564048;
-    c->pose.rot.m[3] = lbl_80564048;
-    c->pose.rot.m[4] = lbl_8056404C;
-    c->pose.rot.m[5] = lbl_80564048;
-    c->pose.rot.m[6] = lbl_80564048;
-    c->pose.rot.m[7] = lbl_80564048;
-    c->pose.rot.m[8] = lbl_8056404C;
-    c->pose.pos.v[0] = lbl_80564048;
-    c->pose.pos.v[1] = lbl_80564048;
-    c->pose.pos.v[2] = lbl_80564048;
-    c->fov = lbl_80564070;
+    c->pose.rot.m[0] = 1.0f;
+    c->pose.rot.m[1] = 0.0f;
+    c->pose.rot.m[2] = 0.0f;
+    c->pose.rot.m[3] = 0.0f;
+    c->pose.rot.m[4] = 1.0f;
+    c->pose.rot.m[5] = 0.0f;
+    c->pose.rot.m[6] = 0.0f;
+    c->pose.rot.m[7] = 0.0f;
+    c->pose.rot.m[8] = 1.0f;
+    c->pose.pos.v[0] = 0.0f;
+    c->pose.pos.v[1] = 0.0f;
+    c->pose.pos.v[2] = 0.0f;
+    c->fov = 1.5707964f;
     c->name[0] = 0;
 }
 
@@ -586,7 +581,7 @@ void fn_80277828(void) {
         lbl_8055F5A0 = n + 1;
         c->valid = 1;
     }
-    c->fov = lbl_80564074;
+    c->fov = 1.4835298f;
     strcpy(lbl_8055F59C->name, "house");
 }
 

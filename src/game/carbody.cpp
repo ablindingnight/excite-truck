@@ -313,11 +313,8 @@ extern "C" {
 }  // extern "C"
 
 extern const f32 lbl_80561CA0;  // torque unit scale
-extern const f32 lbl_80561CA4;  // 1e-5
-extern const f32 lbl_80561CA8;  // 5252 (hp = torque * rpm / 5252)
 extern const f32 lbl_80561CAC;        // 0.0
 extern const f32 lbl_80561CB0;  // -2.0
-extern const f32 lbl_80561CB4;  // 8000
 extern const f32 lbl_80561CB8;  // 0.3
 extern const f32 lbl_80561CBC;  // 1e-4
 
@@ -331,17 +328,17 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
     F32(p, 0x28) = v[3];
     F32(p, 0x18) = lbl_80561CA0 * (v[5]);
-    f32 hp = lbl_80561CA0 * (lbl_80561CA8 * v[0] / FMax(v[1], lbl_80561CA4));
+    f32 hp = lbl_80561CA0 * (5252.0f * v[0] / FMax(v[1], 1.0e-5f));
     F32(p, 0x24) = lbl_80561CAC;
     f32 r0 = v[3];
     f32 peak = v[2] * lbl_80561CA0;
     f32 d = F32(p, 0x1C) - r0;
-    f32 a = (hp - peak) / FMax(d * d, lbl_80561CA4);
+    f32 a = (hp - peak) / FMax(d * d, 1.0e-5f);
     f32 top = F32(p, 0x28);
     f32 red = v[4];
     f32 low = lbl_80561CA0 * (lbl_80561CB8 * v[2]);
     f32 peak2 = lbl_80561CA0 * v[2];
-    F32(p, 0x20) = hp / lbl_80561CB4;
+    F32(p, 0x20) = hp / 8.0e3f;
     F32(p, 0x0) = a;
     F32(p, 0x4) = F32(p, 0x18) + lbl_80561CB0 * a * r0;
     F32(p, 0x8) = peak + a * (r0 * r0);
@@ -352,12 +349,11 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x10) = F32(p, 0x18) + lbl_80561CB0 * b * top;
 }
 
-extern const f32 lbl_80561CC4;
 extern const f32 lbl_80561CC8;
 
 void fn_801819A0(u8* p, const u8* cfg, f32 a, f32 b, f32 c) {
     f32 v[6];
-    v[0] = F32(cfg, 0x54) * a / lbl_80561CC4;
+    v[0] = F32(cfg, 0x54) * a / 746.0f;
     v[2] = F32(cfg, 0x50) * a / lbl_80561CC8;
     v[1] = F32(cfg, 0x5C) * c;
     v[3] = F32(cfg, 0x58) * b;
@@ -2928,7 +2924,6 @@ void fn_80186DE8(u8* p) {
 void vf20__10CollVolumeFv(u8* p);
 extern const f32 lbl_80561CAC;  // 0.0
 extern const f32 lbl_80561CDC;  // 0.5
-extern const f32 lbl_80561D90;  // -5.0
 extern const f32 lbl_80561D9C;  // 1/60 s
 extern const f32 lbl_80561DE4;  // -1.0
 extern const f32 lbl_80561E5C;  // -1.5
@@ -2994,7 +2989,7 @@ void fn_80188A80(u8* p) {
     Scale(&a, &a, lbl_80561DE4);
     AddScaled(&f, &a, acc, lbl_80561E5C);
     AddScaled(&f, &f, ang, lbl_80561EE4);
-    AddScaled(&f, &f, vel, lbl_80561D90);
+    AddScaled(&f, &f, vel, -5.0f);
     AddScaled(vel, vel, &f, lbl_80561D9C);
     AddScaled(ang, ang, vel, lbl_80561D9C);
     Scale(acc, acc, lbl_80561EE8);
@@ -3492,8 +3487,6 @@ void fn_8018AF04(u8* p);
 void fn_802E30C8(const char* fmt, ...);
 void vf20__10CollVolumeFv(u8* p);
 void fn_801BDA74(s32 id, u8* mass);
-extern const f32 lbl_80561D54;
-extern const f32 lbl_80561D58;
 extern const f32 lbl_80561CD0;
 
 // Re-applies the tuned body setup (mass, inertia, elements, gearing) after a change.
@@ -3516,8 +3509,8 @@ void fn_8018A180(u8* p) {
     F32(p, 0x34) = F32(p, 0x45C);
     F32(p, 0x38) = F32(p, 0x460);
     vf20__10CollVolumeFv(p);
-    ((RigidBody*)p)->SetMass(F32(p, 0x32C) / lbl_80561D54, F32(p, 0x330) / lbl_80561D58, F32(p, 0x334) / lbl_80561D58,
-                             F32(p, 0x338) / lbl_80561D58);
+    ((RigidBody*)p)->SetMass(F32(p, 0x32C) / 0.4545f, F32(p, 0x330) / 0.042279866f, F32(p, 0x334) / 0.042279866f,
+                             F32(p, 0x338) / 0.042279866f);
     F32(p, 0xD4) = F32(p, 0x32C);
     F32(p, 0xE4) = lbl_80561CD0 / F32(p, 0x32C);
     fn_801BDA74(S32(p, 0x1EC), p + 0x32C);

@@ -181,11 +181,10 @@ void fn_8018C50C(u8* p) {}
 void fn_8018C510(u8* p) {}
 
 f32 PSVECDistance(const f32* a, const f32* b);
-extern const f32 lbl_80561F70;  // large distance
 
 // Index of the damage point nearest to pos (entry 0 is skipped).
 int fn_8018C514(u8* p, const f32* pos) {
-    f32 best = lbl_80561F70;
+    f32 best = 1.0e7f;
     int idx = 0;
     for (int i = 1; i < *(s32*)PTR(p, 0x26C); i++) {
         f32 d = PSVECDistance(pos, (f32*)(PTR(p, 0x26C) + i * 0x34 + 0x20));
@@ -233,10 +232,6 @@ void fn_80279CD8(CarState* s);
 u8* fn_801769CC(void);
 }
 extern const f32 lbl_80561F74;  // 0.0
-extern const f32 lbl_80561F78;  // pi/2
-extern const f32 lbl_80561F7C;  // 1818.0
-extern const f32 lbl_80561F80;  // 0.4545
-extern const f32 lbl_80561F84;  // -0.0001
 extern const f32 lbl_80561F88;  // 1.0
 extern const f32 lbl_80561F8C;  // 0.5
 
@@ -260,12 +255,12 @@ void fn_8018C5A0(u8* p, u8* desc) {
             o.z = lbl_80561F74;
             ToWorld(&v, &o, s->on);
             s->hub = fn_8018C514(p, &v.x);
-            s->limit = lbl_80561F78;
+            s->limit = 1.5707964f;
         }
     }
     S32(p, 0x5F8) = *(s32*)PTR(p, 0x26C);
-    F32(p, 0x5F4) = lbl_80561F7C / (lbl_80561F80 * F32(desc, 0x8));
-    if (F32(p, 0x314) >= lbl_80561F84) {
+    F32(p, 0x5F4) = 1818.0f / (0.4545f * F32(desc, 0x8));
+    if (F32(p, 0x314) >= -0.0001f) {
         F32(p, 0x5F4) = F32(p, 0x5F4) * F32(p, 0x314);
     } else {
         F32(p, 0x5F4) = (f32)__fabs(F32(p, 0x314));
@@ -332,19 +327,7 @@ u8* fn_801769CC(void);
 }
 extern const f32 lbl_80561F74;  // 0.0
 extern const f32 lbl_80561F88;  // 1.0
-extern const f32 lbl_80561F90;  // 4.905
-extern const f32 lbl_80561F94;  // 0.4
 extern const f32 lbl_80561F98;  // 0.3
-extern const f32 lbl_80561F9C;  // 5.0
-extern const f32 lbl_80561FA0;  // -5.0
-extern const f32 lbl_80561FA4;  // 0.0002
-extern const f32 lbl_80561FA8;  // 1/59.94
-extern const f32 lbl_80561FAC;  // 20.0
-extern const f32 lbl_80561FB0;  // -20.0
-extern const f32 lbl_80561FB4;  // 0.045
-extern const f32 lbl_80561FB8;  // 2000.0
-extern const f32 lbl_80561FBC;  // -0.045
-extern const f32 lbl_80561FC0;  // 2.0
 extern const f32 lbl_80561FC4;  // -1.0
 
 extern "C" {
@@ -402,8 +385,8 @@ void fn_8018CB3C(u8* p) {
             arm.x = h.x - at.x;
             arm.y = h.y - at.y;
             arm.z = h.z - at.z;
-            v2.y += lbl_80561F90;
-            Scale(&v2, &v2, lbl_80561F94);
+            v2.y += 4.905f;
+            Scale(&v2, &v2, 0.4f);
             if (fn_80129D18(4, 4) < 3) {
                 v2.x += v1.x * lbl_80561F98;
                 v2.y += v1.y * lbl_80561F98;
@@ -416,24 +399,24 @@ void fn_8018CB3C(u8* p) {
             EVec axw;
             MulVec(&axw, &ax, (DMat3*)(p + 0x3C));
             f32 t = -PSVECDotProduct(&torque.x, &axw.x);
-            t = ClampF(t, lbl_80561FA0, lbl_80561F9C);
+            t = ClampF(t, -5.0f, 5.0f);
             f32 w = s->spin + t;
-            s->spin = w - lbl_80561FA4 * (lbl_80561FA8 * w);
-            s->spin = ClampF(s->spin, lbl_80561FB0, lbl_80561FAC);
+            s->spin = w - 0.0002f * (0.016683351f * w);
+            s->spin = ClampF(s->spin, -2.0e1f, 2.0e1f);
             if (s->angle > lbl_80561F88) {
                 s->angle = lbl_80561F88;
                 s->spin = Lower(s->spin, lbl_80561F74);
-            } else if (s->angle < lbl_80561FB4) {
+            } else if (s->angle < 0.044999998f) {
                 if ((U32(fn_801769CC(), 0x4) & 0x4000) && s->spin < lbl_80561F74 && fn_80129D18(4, 10) < 1) {
                     s->angle = lbl_80561F74;
                     s->spin = lbl_80561F74;
                     s->state = 0;
                 } else {
-                    s->spin = s->spin + lbl_80561FA8 * (lbl_80561FB8 * (lbl_80561FB4 - s->angle));
+                    s->spin = s->spin + 0.016683351f * (2.0e3f * (0.044999998f - s->angle));
                 }
             }
-            s->angle = s->angle + lbl_80561FA8 * s->spin;
-            s->angle = MaxF(s->angle, lbl_80561FBC);
+            s->angle = s->angle + 0.016683351f * s->spin;
+            s->angle = MaxF(s->angle, -0.044999998f);
             Mtx33 m;
             m.pos = s->on->pos;
             EVec* hub = (EVec*)(p + 0xD94) + s->hub;
@@ -453,9 +436,9 @@ void fn_8018CB3C(u8* p) {
             }
             s->spin = lbl_80561F74;
         } else if (s->on && s->state == 4) {
-            s->angle = s->angle + lbl_80561FA8 * s->spin;
+            s->angle = s->angle + 0.016683351f * s->spin;
             if (s->angle < lbl_80561F74 || s->angle > s->limit) {
-                s->angle = lbl_80561FC0 * ClampF(s->angle, lbl_80561F74, s->limit) - s->angle;
+                s->angle = 2.0f * ClampF(s->angle, lbl_80561F74, s->limit) - s->angle;
                 s->spin = -s->spin;
             }
             Mtx33 m;
@@ -872,25 +855,9 @@ struct GlassMsg {
 };
 
 void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
-extern const f32 lbl_80561FE4;  // -0.5
 extern const f32 lbl_80561F88;  // 1.0
 extern const f32 lbl_80561F98;  // 0.3
 extern const f32 lbl_80561FC4;  // -1
-extern const f32 lbl_80561FD0;  // 0.2
-extern const f32 lbl_80561FD4;  // 0.1
-extern const f32 lbl_80561FE8;  // 3
-extern const f32 lbl_80561FEC;  // 10
-extern const f32 lbl_80561FF4;  // 0.01
-extern const f32 lbl_80561FF8;  // -0.1
-extern const f32 lbl_80561FFC;  // 0.001
-extern const f32 lbl_80562000;  // 1500
-extern const f32 lbl_80562004;  // 15000
-extern const f32 lbl_80562008;  // 30000
-extern const f32 lbl_8056200C;  // 13.333333
-extern const f32 lbl_80562010;  // 300000
-extern const f32 lbl_80562014;  // 100000
-extern const f32 lbl_80562018;  // 1.8
-extern const f32 lbl_8056201C;  // 2.25
 extern const f32 lbl_80562020;  // 300
 extern const f32 lbl_80562024;  // 0.35
 extern const f32 lbl_80562028;  // 1/150000
@@ -910,7 +877,7 @@ f32 PSVECSquareDistance(const f32* a, const f32* b);
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > lbl_80558DC4[0]; }
-static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < lbl_80561FE8 + F32(car, 0x26D8); }
+static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < 3.0f + F32(car, 0x26D8); }
 
 // Which corner of the car a body-space point is nearest: 0/1 front left/right, 3/2 rear left/right.
 static inline int HitCorner(const AVec* at) {
@@ -936,7 +903,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     DentVec w;
     DentVec r;
     DVec c;
-    f32 inv = lbl_80561FF8 / F32(p, 0xD4);
+    f32 inv = -0.1f / F32(p, 0xD4);
     F32(p, 0x26F0) += imp->v[0] * inv;
     F32(p, 0x26F4) += imp->v[1] * inv;
     F32(p, 0x26F8) += imp->v[2] * inv;
@@ -965,8 +932,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     }
     da = *at;
     f32 mag = PSVECMag(di.v);
-    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && F32(p, 0x2690) < lbl_80561FFC) {
-        if (mag < lbl_80562000) {
+    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && F32(p, 0x2690) < 0.001f) {
+        if (mag < 1.5e3f) {
             return;
         }
         if (HitTooSoon(p)) {
@@ -981,7 +948,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         if (other >= 0) {
             hm *= lbl_80561F98;
             if (S32(p, 0x1F0) != 0x50 && !Boosting(p)) {
-                if (Boosting(fn_8017960C(other)) || hm > lbl_80562004) {
+                if (Boosting(fn_8017960C(other)) || hm > 1.5e4f) {
                     if (F32(p, 0x25D4) < F32(fn_8017960C(other), 0x25D4)) {
                         fn_8018A174(p);
                     }
@@ -991,10 +958,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             hm *= lbl_8055A460;
         }
         if (other < 0 || !Boosting(fn_8017960C(other))) {
-            if (hm < lbl_80562008) {
+            if (hm < 3.0e4f) {
                 return;
             }
-            if (other < 0 && F32(p, 0x25D4) < lbl_8056200C && hm < lbl_80562010) {
+            if (other < 0 && F32(p, 0x25D4) < 13.333333f && hm < 3.0e5f) {
                 return;
             }
         }
@@ -1004,15 +971,15 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         fn_8018E330(p);
     }
     DentNode* best = 0;
-    f32 bestD = lbl_80562014;
+    f32 bestD = 1.0e5f;
     for (int i = 1; i < S32(p, 0x5F8); i++) {
         DentNode* d = (DentNode*)(PTR(p, 0x26C) + 4) + i;
         if (!d->fixed) {
-            cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * lbl_80562018;
-            cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * lbl_80562018;
-            cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * lbl_80562018;
+            cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * 1.8f;
+            cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * 1.8f;
+            cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * 1.8f;
             f32 dd = PSVECSquareDistance(&cand.x, da.v);
-            if (dd < lbl_8056201C && dd < bestD) {
+            if (dd < 2.25f && dd < bestD) {
                 best = d;
                 bestD = dd;
             }
@@ -1048,10 +1015,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             f32 a = t < moved ? t : moved;
             if (a > lbl_80561F74) {
                 f32 r2 = PSVECDotProduct(&r.x, &r.x);
-                if (lbl_80561FD4 > r2) {
-                    r2 = lbl_80561FD4;
+                if (0.1f > r2) {
+                    r2 = 0.1f;
                 }
-                f32 s = lbl_80561FD0 / r2;
+                f32 s = 0.2f / r2;
                 if (lbl_80561F88 < s) {
                     s = lbl_80561F88;
                 }
@@ -1095,8 +1062,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                                 sl->valid = 0;
                             }
                             if (sl->state == 2) {
-                                sl->angle = sl->angle > lbl_80561FF4 ? sl->angle : lbl_80561FF4;
-                                sl->spin = sl->spin > lbl_80561FD0 ? sl->spin : lbl_80561FD0;
+                                sl->angle = sl->angle > 0.01f ? sl->angle : 0.01f;
+                                sl->spin = sl->spin > 0.2f ? sl->spin : 0.2f;
                             }
                         }
                     } else {
@@ -1109,9 +1076,9 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         c.x = lo->x + (lo + 1)->x;
                         c.y = lo->y + hi->y;
                         c.z = lo->z + (lo + 1)->z;
-                        c.x *= lbl_80561FE4;
-                        c.y *= lbl_80561FE4;
-                        c.z *= lbl_80561FE4;
+                        c.x *= -0.5f;
+                        c.y *= -0.5f;
+                        c.z *= -0.5f;
                         fn_801BF2A4(p, 1 << t->bit, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
                     }
                 }
@@ -1151,7 +1118,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         if (hood->state != 3) {
                             hood->state = 2;
                             hood->valid = 0;
-                            hood->spin = lbl_80561FEC;
+                            hood->spin = 1.0e1f;
                             hood->angle = hood->angle > lbl_80561F8C ? hood->angle : lbl_80561F8C;
                         }
                     }
@@ -1166,7 +1133,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         s32 st = S32(p, 0x268C);
         if (st == 0) {
             if (mag > lbl_80562020) {
-                f32 cap = kind != 0x70 ? lbl_80561FD4 : lbl_80562024;
+                f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
                 f32 v = F32(p, 0x2690) += add;
@@ -1183,7 +1150,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             }
         } else if (st >= 1 && st <= 4) {
             if (mag > lbl_80562020) {
-                f32 cap = kind != 0x70 ? lbl_80561FD4 : lbl_80562024;
+                f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
                 f32 v = F32(p, 0x2690) += add;
@@ -1232,8 +1199,6 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
 
 extern const f32 lbl_80562038;  // 255
 extern const f32 lbl_80561F88;  // 1.0
-extern const f32 lbl_8056203C;  // -0.508
-extern const f32 lbl_80562040;  // 1.016
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -1249,7 +1214,7 @@ static inline u8 PackDent(f32 v) {
 static inline f32 UnpackDent(u8 b) {
     f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
     t = FMax(t, lbl_80561F74);
-    return lbl_8056203C + t * lbl_80562040;
+    return -0.508f + t * 1.016f;
 }
 
 extern "C" {
@@ -1426,8 +1391,8 @@ void fn_8018F76C(u8* p, int i) {
     WVec3 vel;
     ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&hub);
     f32 s = F32(w, 0x23AC);
-    if ((f32)__fabs(s) < lbl_80561F9C) {
-        s = s < lbl_80561F74 ? lbl_80561FA0 : lbl_80561F9C;
+    if ((f32)__fabs(s) < 5.0f) {
+        s = s < lbl_80561F74 ? -5.0f : 5.0f;
     }
     f32 spin = F32(w, 0x23AC);
     WVec3 imp;
@@ -1462,9 +1427,9 @@ void fn_8018F9B4(u8* p) {
             c.x = lo->x + (lo + 1)->x;
             c.y = lo->y + hi->y;
             c.z = lo->z + (lo + 1)->z;
-            c.x *= lbl_80561FE4;
-            c.y *= lbl_80561FE4;
-            c.z *= lbl_80561FE4;
+            c.x *= -0.5f;
+            c.y *= -0.5f;
+            c.z *= -0.5f;
             fn_801BF2A4(p, 1 << bone, &c, lo, lo + 1, *(s32*)((u8*)t + 0x34), (u8*)t + 0x38);
             w->state = 3;
             w->flag78 = 0;
@@ -1482,18 +1447,14 @@ ModuleTag lbl_8055E500;  // this unit's module tag
 
 extern "C" {
 
-extern const f32 lbl_80562058;
-extern const f32 lbl_8056205C;
-extern const f32 lbl_80562060;
-extern const f32 lbl_80562064;
 
 // Unit start-up: register the module tag and fill the damage table's computed entries.
 void fn_8018FACC(void) {
     RegisterModuleTag(&lbl_8055E500);
-    lbl_80332840[0].axis.x = lbl_80562058;
-    lbl_80332840[1].axis.x = lbl_8056205C;
-    lbl_80332840[8].axis.y = lbl_80562060;
-    lbl_80332840[9].axis.y = lbl_80562064;
+    lbl_80332840[0].axis.x = -0.6981317f;
+    lbl_80332840[1].axis.x = 0.6981317f;
+    lbl_80332840[8].axis.y = 1.2217305f;
+    lbl_80332840[9].axis.y = -1.2217305f;
 }
 
 }  // extern "C"

@@ -505,15 +505,6 @@ extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
 extern const f32 lbl_80563F44;  // -1.0
 extern const f32 lbl_80563F50;  // 1.0
-extern const f32 lbl_80563F54;  // -2.0
-extern const f32 lbl_80563F58;  // 3.0
-extern const f32 lbl_80563F5C;
-extern const f32 lbl_80563F60;
-extern const f32 lbl_80563F64;
-extern const f32 lbl_80563F68;  // minimum focus distance
-extern const f32 lbl_80563F6C;  // overhead camera height
-extern const f32 lbl_80563F70;  // fallback grid size
-extern const f32 lbl_80563F74;
 extern const f32 lbl_80563F78;  // fallback height above ground
 extern f32 lbl_80499050[12];    // last camera frame
 int fn_80129D90(int seed, int lo, int hi);  // random int
@@ -694,7 +685,7 @@ void fn_80271624(int mode, u8* p) {
                 break;
             case 5: {
                 f32 move[3];
-                move[0] = lbl_80563F5C;
+                move[0] = 0.4f;
                 move[1] = lbl_80563F50;
                 move[2] = lbl_80563F48;
                 lbl_8055F480 = 1;
@@ -740,7 +731,7 @@ void fn_80271624(int mode, u8* p) {
                 fn_80275938(p);
                 break;
             case 6:
-                fn_80275B9C(p, lbl_80563F60, lbl_80563F64, lbl_80563F50);
+                fn_80275B9C(p, 6.0f, 1.9f, lbl_80563F50);
                 break;
             case 10:
                 fn_80275D0C(p);
@@ -763,12 +754,12 @@ void fn_80271624(int mode, u8* p) {
                 d[2] = F32(p, 0xEC) - F32(p, 0x84);
                 f32 focus = PSVECDotProduct(d, (f32*)(p + 0x70));
                 focus = lbl_8055C598 >= lbl_80563F48 ? lbl_8055C598 : focus;
-                F32(p, 0x1A0) = focus > lbl_80563F68 ? focus : lbl_80563F68;
+                F32(p, 0x1A0) = focus > 5.0f ? focus : 5.0f;
             }
         } else if (idx != -10) {
             f32 off[3];
             off[0] = lbl_80563F48;
-            off[1] = lbl_80563F6C;
+            off[1] = 1.0e3f;
             off[2] = lbl_80563F48;
             Mat3 down;
             down.m[0] = lbl_80563F50;
@@ -785,8 +776,8 @@ void fn_80271624(int mode, u8* p) {
             *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
         }
     } else {
-        F32(p, 0x7C) = lbl_80563F70 * ((f32)(int)(lbl_80563F40 + (lbl_80563F74 + F32(p, 0xE4) / lbl_80563F70)) - lbl_80563F74);
-        F32(p, 0x84) = lbl_80563F70 * ((f32)(int)(lbl_80563F40 + (lbl_80563F74 + F32(p, 0xEC) / lbl_80563F70)) - lbl_80563F74);
+        F32(p, 0x7C) = 100.041f * ((f32)(int)(lbl_80563F40 + (5.0e1f + F32(p, 0xE4) / 100.041f)) - 5.0e1f);
+        F32(p, 0x84) = 100.041f * ((f32)(int)(lbl_80563F40 + (5.0e1f + F32(p, 0xEC) / 100.041f)) - 5.0e1f);
         fn_801E9DC4(p + 0x1EC);
         if (!fn_801E9E30(p + 0x1EC, (f32*)(p + 0x7C))) {
             F32(p, 0x80) = fn_801E9DDC(p + 0x1EC, F32(p, 0xE4), F32(p, 0xEC));
@@ -1011,8 +1002,6 @@ void* memmove(void* d, const void* s, u32 n);
 extern f32 lbl_80558DC4[];  // epsilon
 }
 extern const f32 lbl_80563F50;  // 1.0
-extern const f32 lbl_80563F8C;  // 2.0
-extern const f32 lbl_80563F90;  // 4.0
 
 // Works out this region's heading windows on `line`: where the sphere's circle crosses the line
 // (two crossings = one window, four = two), falling back to the nearest line point +- radius.
@@ -1056,13 +1045,13 @@ void CamRegion::Prepare(u8* line) {
         rel.x = s.x - center.x;
         f32 yv = center.y;
         rel.y = s.y - yv;
-        f32 b = lbl_80563F8C * (dir.x * rel.x + rel.y * dir.y);
-        f32 disc = b * b - lbl_80563F90 * a * (rel.x * rel.x + rel.y * rel.y - r2);
+        f32 b = 2.0f * (dir.x * rel.x + rel.y * dir.y);
+        f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);
         if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
             f32 q = (f32)sqrt(disc);
             n = 2;
-            sol[0] = (-b - q) / (lbl_80563F8C * a);
-            sol[1] = (-b + q) / (lbl_80563F8C * a);
+            sol[0] = (-b - q) / (2.0f * a);
+            sol[1] = (-b + q) / (2.0f * a);
         }
         for (int j = 0; j < n; j++) {
             if (fn_802726EC(sol[j], lbl_80563F48, lbl_80563F50)) {
@@ -1205,8 +1194,6 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
 extern "C" {
 
 }  // extern "C"
-extern const f32 lbl_80563F94;  // 0.75: old "fov" values to new_fov units
-extern const f32 lbl_80563F98;  // 20.0
 
 // One "cam" table: position, extras, field of view ("new_fov", or old-style "fov" * 0.75), type and
 // flags, plus an optional end pose ("x_a"...) the camera moves to.
@@ -1218,7 +1205,7 @@ int TvCamera::Load(ValueNode* t) {
         if (t->Has("new_fov")) {
             fov = t->GetFloat("new_fov");
         } else {
-            fov = lbl_80563F94 * t->GetFloat("fov");
+            fov = 0.75f * t->GetFloat("fov");
         }
         type = fn_80271FAC(t->GetValue("type"));
         ex[0] = t->GetFloat("ex_1", lbl_80563F48);
@@ -1257,12 +1244,12 @@ int TvCamera::Load(ValueNode* t) {
             exFrom[2] = ex[2];
             fovFrom = fov;
             to[0] = t->GetFloat("x_a", pos[0]);
-            to[1] = t->GetFloat("y_a", lbl_80563F98 + pos[1]);
+            to[1] = t->GetFloat("y_a", 2.0e1f + pos[1]);
             to[2] = t->GetFloat("z_a", pos[2]);
             if (t->Has("new_fov_a")) {
                 fovTo = t->GetFloat("new_fov_a");
             } else if (t->Has("fov_a")) {
-                fovTo = lbl_80563F94 * t->GetFloat("fov_a");
+                fovTo = 0.75f * t->GetFloat("fov_a");
             } else {
                 fovTo = fovFrom;
             }

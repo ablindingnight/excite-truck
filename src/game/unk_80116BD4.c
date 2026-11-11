@@ -5740,7 +5740,6 @@ void fn_80121BF4(f32 *a)
     a[15] = x4i;
 }
 
-extern const f32 lbl_80561230;
 void fn_80121C68(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, m, mh;

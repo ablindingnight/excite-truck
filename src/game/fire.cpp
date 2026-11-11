@@ -1202,10 +1202,9 @@ void GroundFire::Toggle(int idx, int on) {
     }
 }
 
-extern const f32 lbl_80564604;  // cos 15 degrees
 
 // The car turned more than 15 degrees from axis a.
-static inline int Turned(const Vec* a, const Vec* b) { return PSVECDotProduct(a, b) < lbl_80564604; }
+static inline int Turned(const Vec* a, const Vec* b) { return PSVECDotProduct(a, b) < 0.9659f; }
 
 int GroundFire::Moved(const FireCar* c) {
     f32 lim = 0.25f;

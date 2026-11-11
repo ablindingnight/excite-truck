@@ -17,17 +17,8 @@ struct Mat3 {
 
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
-extern const f32 lbl_80563FA8;
 extern const f32 lbl_80563FB4;  // pi/4
 extern const f32 lbl_80563FAC;
-extern const f32 lbl_80563FB0;
-extern const f32 lbl_80563FF0;
-extern const f32 lbl_80563FF4;
-extern const f32 lbl_80563FF8;
-extern const f32 lbl_80564010;
-extern const f32 lbl_80564014;
-extern const f32 lbl_80564018;
-extern const f32 lbl_8056401C;
 
 struct Vec3;
 void Mat3FromEuler(Mat3* out, const Vec3* euler);  // Y, then X, then Z (racing.cpp)
@@ -51,8 +42,8 @@ void fn_80273B4C(u8* p) {
     u8* car = PTR(p, 0x140);
     if (car) {
         f32 euler[3];
-        f32 side = U8(car, 0x260C) ? lbl_80563FA8 : lbl_80563FAC;
-        f32 zero = lbl_80563FB0;
+        f32 side = U8(car, 0x260C) ? -1.0f : lbl_80563FAC;
+        f32 zero = 0.0f;
         f32 ang = zero * lbl_80563FB4;
         euler[0] = zero;
         euler[1] = ang * side;
@@ -119,12 +110,9 @@ extern const f32 lbl_80563FDC;
 f32 fn_8018AE3C(u8* car);
 f32 fn_8018AE44(u8* car);
 f32 fn_8018AE4C(u8* car);
-extern const f32 lbl_80563FC0;
 extern const f32 lbl_80563FC4;
 extern const f32 lbl_80563FC8;
 extern const f32 lbl_80563FCC;
-extern const f32 lbl_80563FD0;
-extern const f32 lbl_80563FD4;
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FE0;
 
@@ -152,12 +140,12 @@ void fn_80273BD0(u8* p) {
     f32 flipEuler[3];
     CVec3 w;
     if (c->snap) {
-        c->up.x = lbl_80563FB0;
+        c->up.x = 0.0f;
         c->up.y = lbl_80563FAC;
-        c->up.z = lbl_80563FB0;
-        c->upVel.x = lbl_80563FB0;
-        c->upVel.y = lbl_80563FB0;
-        c->upVel.z = lbl_80563FB0;
+        c->up.z = 0.0f;
+        c->upVel.x = 0.0f;
+        c->upVel.y = 0.0f;
+        c->upVel.z = 0.0f;
     }
     c->frame = c->carFrame;
     u8* car = c->car;
@@ -173,7 +161,7 @@ void fn_80273BD0(u8* p) {
         n.z = c->carFrame.m[5];
     } else {
         f32 t = (PSVECDotProduct(&n.x, &c->carFrame.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
-        f32 s = lbl_80563FB0 > t ? lbl_80563FB0 : t;
+        f32 s = 0.0f > t ? 0.0f : t;
         n.x = n.x * s;
         n.y = n.y * s;
         n.z = n.z * s;
@@ -181,7 +169,7 @@ void fn_80273BD0(u8* p) {
         n.y = n.y + c->carFrame.m[4] * (lbl_80563FAC - s);
         n.z = n.z + c->carFrame.m[5] * (lbl_80563FAC - s);
     }
-    f32 k = c->snap ? lbl_80563FB0 : lbl_80563FC0;
+    f32 k = c->snap ? 0.0f : 0.95f;
     c->up.x = c->up.x * k;
     c->up.y = c->up.y * k;
     c->up.z = c->up.z * k;
@@ -201,25 +189,25 @@ void fn_80273BD0(u8* p) {
         c->upVel.x = c->upVel.x + bounce.x * lbl_80563FCC;
         c->upVel.y = c->upVel.y + bounce.y * lbl_80563FCC;
         c->upVel.z = c->upVel.z + bounce.z * lbl_80563FCC;
-        f32 f = lbl_80563FD0 * (lbl_80563FD4 * fn_8018AE4C(c->car));
+        f32 f = 5.0f * (-0.005f * fn_8018AE4C(c->car));
         c->frame.t.x = c->frame.t.x + c->carFrame.m[6] * f;
         c->frame.t.y = c->frame.t.y + c->carFrame.m[7] * f;
         c->frame.t.z = c->frame.t.z + c->carFrame.m[8] * f;
-        f32 g = lbl_80563FD8 * (lbl_80563FD0 * (lbl_80563FD4 * (fn_8018AE44(c->car) - lbl_80563FDC * c->upVel.y)));
+        f32 g = lbl_80563FD8 * (5.0f * (-0.005f * (fn_8018AE44(c->car) - lbl_80563FDC * c->upVel.y)));
         c->frame.t.x = c->frame.t.x + c->carFrame.m[3] * g;
         c->frame.t.y = c->frame.t.y + c->carFrame.m[4] * g;
         c->frame.t.z = c->frame.t.z + c->carFrame.m[5] * g;
     }
     fn_80273B4C(p);
     euler[0] = *(f32*)(c->car + 0x5C0);
-    euler[1] = lbl_80563FB0;
-    euler[2] = lbl_80563FB0;
+    euler[1] = 0.0f;
+    euler[2] = 0.0f;
     Mat3FromEuler(&rot, (const Vec3*)euler);
     Mat3Mul((Mat3*)&c->frame, &rot, (Mat3*)&c->frame);
     if (c->car[0x260C]) {
-        flipEuler[0] = lbl_80563FB0;
+        flipEuler[0] = 0.0f;
         flipEuler[1] = lbl_80563FE0;
-        flipEuler[2] = lbl_80563FB0;
+        flipEuler[2] = 0.0f;
         Mat3FromEuler(&flip, (const Vec3*)flipEuler);
         Mat3Mul((Mat3*)&c->frame, &flip, (Mat3*)&c->frame);
     }
@@ -227,8 +215,6 @@ void fn_80273BD0(u8* p) {
 
 
 void fn_80274460(u8* p);
-extern const f32 lbl_80563FE4;
-extern const f32 lbl_80563FE8;
 extern const f32 lbl_80563FEC;
 
 // Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
@@ -242,9 +228,9 @@ void fn_80274268(u8* p) {
     CVec3 v;
     CVec3 w;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
-    v.z = lbl_80563FEC + (F32(car, 0x2458) - lbl_80563FE4);
-    v.x = lbl_80563FB0;
-    v.y = lbl_80563FE8;
+    v.z = lbl_80563FEC + (F32(car, 0x2458) - 1.397f);
+    v.x = 0.0f;
+    v.y = 0.8f;
     MulVec(&w, &v, (CFrame*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0x7C) + w.x;
     F32(p, 0x80) = F32(p, 0x80) + w.y;
@@ -263,14 +249,14 @@ void fn_80274460(u8* p) {
     CVec3 v;
     CVec3 w;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
-    euler[0] = lbl_80563FB0;
+    euler[0] = 0.0f;
     euler[1] = lbl_80563FE0;
-    euler[2] = lbl_80563FB0;
+    euler[2] = 0.0f;
     Mat3FromEuler(&rot, (const Vec3*)euler);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0x58));
-    v.x = lbl_80563FB0;
-    v.y = lbl_80563FE8;
-    v.z = lbl_80563FB0;
+    v.x = 0.0f;
+    v.y = 0.8f;
+    v.z = 0.0f;
     MulVec(&w, &v, (CFrame*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0x7C) + w.x;
     F32(p, 0x80) = F32(p, 0x80) + w.y;
@@ -278,7 +264,7 @@ void fn_80274460(u8* p) {
 }
 
 void fn_80274660(u8* unused, u8* p) {
-    f32 zero = lbl_80563FB0;
+    f32 zero = 0.0f;
     f32 one = lbl_80563FAC;
     F32(p, 0x5C) = zero;
     F32(p, 0x58) = one;
@@ -293,7 +279,7 @@ void fn_80274660(u8* unused, u8* p) {
     F32(p, 0x80) = zero;
     F32(p, 0x84) = zero;
     f32 axis[3];
-    axis[0] = lbl_80563FF0;
+    axis[0] = 1.5707964f;
     axis[1] = zero;
     axis[2] = zero;
     Mat3 rot;
@@ -304,12 +290,12 @@ void fn_80274660(u8* unused, u8* p) {
     F32(p, 0x84) = F32(p, 0xEC);
     f32 h;
     if (S32(p, 0x10) == 10) {
-        h = lbl_80563FF4;
+        h = 10.1f;
     } else {
-        h = lbl_80563FF8;
+        h = 5.0e1f;
     }
     F32(p, 0x80) += h;
-    F32(p, 0x124) = lbl_80563FB0;
+    F32(p, 0x124) = 0.0f;
 }
 
 void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
@@ -320,11 +306,6 @@ double atan(double x);
 extern f32 lbl_80558DC4[];  // epsilon
 extern const f32 lbl_80563FC4;
 extern const f32 lbl_80563FD8;
-extern const f32 lbl_80563FFC;  // fov limits
-extern const f32 lbl_80564000;
-extern const f32 lbl_80564004;
-extern const f32 lbl_80564008;
-extern const f32 lbl_8056400C;
 
 // Aims the camera frame (0x58) from its position (0x7C) at the look point (0x4C), with world y as up
 // (the car's forward axis when looking straight down). A positive `dist` pulls the camera toward that
@@ -342,27 +323,27 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
         F32(p, 0x70) = F32(p, 0xD8);
         F32(p, 0x78) = F32(p, 0xE0);
     }
-    CsVec up(lbl_80563FB0, lbl_80563FAC, lbl_80563FB0);
+    CsVec up(0.0f, lbl_80563FAC, 0.0f);
     PSVECCrossProduct(&up.x, (f32*)(p + 0x70), (f32*)(p + 0x58));
     PSVECCrossProduct((f32*)(p + 0x70), (f32*)(p + 0x58), (f32*)(p + 0x64));
     Orthonormalize(p);
     f32 d = PSVECDistance((f32*)(p + 0x7C), (f32*)(p + 0x4C));
-    if (dist > lbl_80563FB0) {
+    if (dist > 0.0f) {
         f32 k = (lbl_80563FAC - stiff) * (d - dist);
         F32(p, 0x7C) = F32(p, 0x7C) + F32(p, 0x70) * k;
         F32(p, 0x80) = F32(p, 0x80) + F32(p, 0x74) * k;
         F32(p, 0x84) = F32(p, 0x84) + F32(p, 0x78) * k;
     }
     d = PSVECDistance((f32*)(p + 0x7C), (f32*)(p + 0x4C));
-    f32 lo = lbl_80563FFC;
-    f32 v = lbl_80564000;
-    f32 half = lbl_80564004;
-    f32 inv = zoom > lbl_80564008 ? lbl_80563FAC / zoom : lbl_80563FAC;
-    f32 w = lbl_8056400C * inv;
+    f32 lo = 0.32724923f;
+    f32 v = 1.9634954f;
+    f32 half = 1.1780972f;
+    f32 inv = zoom > 0.1f ? lbl_80563FAC / zoom : lbl_80563FAC;
+    f32 w = 30.5f * inv;
     f32 a = lbl_80563FD8 * (f32)atan(w / d * (f32)tan(half * lbl_80563FC4));
     v = v < a ? v : a;
     v = v > lo ? v : lo;
-    if (fov > lbl_80563FB0) {
+    if (fov > 0.0f) {
         F32(p, 0xBC) = fov;
         F32(p, 0x194) = fov;
     } else {
@@ -371,9 +352,9 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
         F32(p, 0xBC) = f;
         F32(p, 0x194) = f;
     }
-    F32(p, 0x120) = lbl_80563FB0;
-    F32(p, 0x124) = lbl_80563FB0;
-    F32(p, 0x128) = lbl_80563FB0;
+    F32(p, 0x120) = 0.0f;
+    F32(p, 0x124) = 0.0f;
+    F32(p, 0x128) = 0.0f;
 }
 
 
@@ -382,12 +363,12 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
 void fn_802749FC(u8* p, const CVec3* move) {
     CamState* c = (CamState*)p;
     if (c->snap) {
-        c->up.x = lbl_80563FB0;
+        c->up.x = 0.0f;
         c->up.y = lbl_80563FAC;
-        c->up.z = lbl_80563FB0;
-        c->upVel.x = lbl_80563FB0;
-        c->upVel.y = lbl_80563FB0;
-        c->upVel.z = lbl_80563FB0;
+        c->up.z = 0.0f;
+        c->upVel.x = 0.0f;
+        c->upVel.y = 0.0f;
+        c->upVel.z = 0.0f;
     }
     CVec3 n;
     CVec3 pos;
@@ -405,7 +386,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
         n.z = c->carFrame.m[5];
     } else {
         f32 t = (PSVECDotProduct(&n.x, &c->carFrame.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
-        f32 s = lbl_80563FB0 > t ? lbl_80563FB0 : t;
+        f32 s = 0.0f > t ? 0.0f : t;
         n.x = n.x * s;
         n.y = n.y * s;
         n.z = n.z * s;
@@ -413,7 +394,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
         n.y = n.y + c->carFrame.m[4] * (lbl_80563FAC - s);
         n.z = n.z + c->carFrame.m[5] * (lbl_80563FAC - s);
     }
-    f32 k = c->snap ? lbl_80563FB0 : lbl_80563FDC;
+    f32 k = c->snap ? 0.0f : lbl_80563FDC;
     c->up.x = c->up.x * k;
     c->up.y = c->up.y * k;
     c->up.z = c->up.z * k;
@@ -435,16 +416,15 @@ void fn_80274EA8(u8* p) {
     d[1] = F32(p, 0x80) - F32(p, 0xE8);
     d[2] = F32(p, 0x84) - F32(p, 0xEC);
     f32 m = PSVECMag(d);
-    if (m > lbl_80564010) {
-        f32 s = -(m - lbl_80564010) / m;
+    if (m > 183.0f) {
+        f32 s = -(m - 183.0f) / m;
         F32(p, 0x7C) = F32(p, 0x7C) + d[0] * s;
         F32(p, 0x80) = F32(p, 0x80) + d[1] * s;
         F32(p, 0x84) = F32(p, 0x84) + d[2] * s;
     }
-    fn_80274730(p, lbl_80563FA8, lbl_80564014, lbl_80564018, lbl_8056401C);
+    fn_80274730(p, -1.0f, 25.0f, 6.0f, 0.15f);
 }
 
-extern const f32 lbl_80564020;  // small angle
 double sin(double x);
 double cos(double x);
 
@@ -473,10 +453,6 @@ extern CamPreset lbl_802FA7A4;
 extern CamPreset lbl_802FA7C0;
 extern CamPreset lbl_802FA7DC;
 extern CamPreset lbl_802FA7F8;
-extern const f32 lbl_80564024;  // degrees to radians
-extern const f32 lbl_80564028;
-extern const f32 lbl_8056402C;
-extern const f32 lbl_80564030;
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FDC;
 void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
@@ -484,7 +460,7 @@ void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
 static inline void RotFromVec(Mat3* r, const CamVec& w) {
     f32 a = PSVECMag(&w.x);
-    if (a > lbl_80564020) {
+    if (a > 0.0001f) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563FAC / a;
         x = inv * w.x;
@@ -503,14 +479,14 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
         r->m[7] = z * (k * y) - s * x;
         r->m[8] = c + k * (z * z);
     } else {
-        r->m[1] = lbl_80563FB0;
+        r->m[1] = 0.0f;
         r->m[0] = lbl_80563FAC;
-        r->m[2] = lbl_80563FB0;
-        r->m[3] = lbl_80563FB0;
+        r->m[2] = 0.0f;
+        r->m[3] = 0.0f;
         r->m[4] = lbl_80563FAC;
-        r->m[5] = lbl_80563FB0;
-        r->m[6] = lbl_80563FB0;
-        r->m[7] = lbl_80563FB0;
+        r->m[5] = 0.0f;
+        r->m[6] = 0.0f;
+        r->m[7] = 0.0f;
         r->m[8] = lbl_80563FAC;
     }
 }
@@ -529,9 +505,9 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 void fn_802750C4(u8* p, f32 k, f32 dist) {
     f32 d[3];
     f32 up[3];
-    up[0] = lbl_80563FB0;
+    up[0] = 0.0f;
     up[1] = lbl_80563FAC;
-    up[2] = lbl_80563FB0;
+    up[2] = 0.0f;
     fn_8026E850((f32*)(p + 0x7C), (f32*)(p + 0xE4), p, up);
     d[0] = F32(p, 0xE4) - F32(p, 0x7C);
     d[1] = F32(p, 0xE8) - F32(p, 0x80);
@@ -554,11 +530,11 @@ void fn_802751AC(u8* p) {
     Mat3 rot;
     f32 z = c.off.z;
     CamVec off(c.off.x, c.off.y, z);
-    RotFromVec(&rot, c.rot * lbl_80564024);
+    RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
     f32 fovv = c.fov;
-    F32(p, 0xBC) = lbl_80564024 * fovv;
+    F32(p, 0xBC) = 0.017453292f * fovv;
 }
 
 // As fn_802751AC, but the offset follows the car's first point (0x2450) instead of the preset's.
@@ -566,14 +542,14 @@ void fn_80275410(u8* p) {
     CamPreset c;
     u8* car = PTR(p, 0x140);
     c = lbl_802FA7A4;
-    CamVec off = *(CVec3*)(car + 0x2450) + CamVec(lbl_80563FE8, lbl_80564028, lbl_8056402C);
+    CamVec off = *(CVec3*)(car + 0x2450) + CamVec(0.8f, 0.65f, -1.75f);
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
-    RotFromVec(&rot, c.rot * lbl_80564024);
+    RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
     f32 fovv = c.fov;
-    F32(p, 0xBC) = lbl_80564024 * fovv;
+    F32(p, 0xBC) = 0.017453292f * fovv;
 }
 
 // As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
@@ -581,14 +557,14 @@ void fn_802756A4(u8* p) {
     CamPreset c;
     u8* car = PTR(p, 0x140);
     c = lbl_802FA7C0;
-    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(lbl_80564030, lbl_80563FDC, lbl_80563FD8);
+    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, lbl_80563FDC, lbl_80563FD8);
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
-    RotFromVec(&rot, c.rot * lbl_80564024);
+    RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
     f32 fovv = c.fov;
-    F32(p, 0xBC) = lbl_80564024 * fovv;
+    F32(p, 0xBC) = 0.017453292f * fovv;
 }
 
 void fn_80275938(u8* p) {
@@ -597,11 +573,11 @@ void fn_80275938(u8* p) {
     Mat3 rot;
     f32 z = c.off.z;
     CamVec off(c.off.x, c.off.y, z);
-    RotFromVec(&rot, c.rot * lbl_80564024);
+    RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34(p + 0x7C, &off, p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
     f32 fovv = c.fov;
-    F32(p, 0xBC) = lbl_80564024 * fovv;
+    F32(p, 0xBC) = 0.017453292f * fovv;
 }
 
 double fmod(double x, double y);
@@ -613,7 +589,6 @@ f32 lbl_8055F588;         // last ground height
 extern const double lbl_80564038;  // 2 pi
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FC4;
-extern const f32 lbl_80564040;
 
 
 // Orbits the camera around its target at `radius`, keeping it above the ground.
@@ -626,7 +601,7 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     CsVec pos;
     CsVec off;
     off.x = c;
-    off.y = lbl_80563FB0;
+    off.y = 0.0f;
     off.z = s;
     pos.x = F32(p, 0xE4) + off.x;
     pos.y = F32(p, 0xE8) + off.y;
@@ -641,11 +616,11 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     }
     pos.y += height;
     f32 up[3];
-    up[0] = lbl_80563FB0;
+    up[0] = 0.0f;
     up[1] = lbl_80563FAC;
-    up[2] = lbl_80563FB0;
+    up[2] = 0.0f;
     fn_8026E850(&pos.x, (f32*)(p + 0xE4), p, up);
-    F32(p, 0xBC) = lbl_80564040;
+    F32(p, 0xBC) = 1.0471976f;
 }
 
 void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
@@ -662,9 +637,9 @@ void fn_80275D0C(u8* p) {
     f.m[6] = F32(p, 0xD8);
     f.m[7] = F32(p, 0xDC);
     f.m[8] = F32(p, 0xE0);
-    f.m[3] = lbl_80563FB0;
+    f.m[3] = 0.0f;
     f.m[4] = lbl_80563FAC;
-    f.m[5] = lbl_80563FB0;
+    f.m[5] = 0.0f;
     PSVECCrossProduct(&f.m[3], &f.m[6], &f.m[0]);
     PSVECCrossProduct(&f.m[6], &f.m[0], &f.m[3]);
     Mat3 rot;
@@ -672,11 +647,11 @@ void fn_80275D0C(u8* p) {
     f32 y = c.off.y;
     f32 z = c.off.z;
     CamVec off(x, y, z);
-    RotFromVec(&rot, c.rot * lbl_80564024);
+    RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34(p + 0x7C, &off, (u8*)&f);
     Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)&f);
     f32 fovv = c.fov;
-    F32(p, 0xBC) = lbl_80564024 * fovv;
+    F32(p, 0xBC) = 0.017453292f * fovv;
 }
 
 void fn_80275FC0(u8* p) {

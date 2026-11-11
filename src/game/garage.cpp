@@ -1103,8 +1103,6 @@ u8* fn_8025007C(int n) {
 f32 fn_80214D48(void);
 extern const f32 lbl_80563960;
 extern const f32 lbl_80563964;
-extern const f32 lbl_80563968;
-extern const f32 lbl_8056396C;
 extern const f32 lbl_80563970;
 
 static inline void UpdateSlotAnims(u8* p) {
@@ -1112,17 +1110,17 @@ static inline void UpdateSlotAnims(u8* p) {
     SlotAnim* e;
     f32 dt;
     dt = fn_80214D48();
-    F32(p, 0x28) = F32(p, 0x28) + lbl_80563968 * ((f32)S32(p, 0x2C) - F32(p, 0x28));
+    F32(p, 0x28) = F32(p, 0x28) + 0.2f * ((f32)S32(p, 0x2C) - F32(p, 0x28));
     for (i = 0; i < S32(p, 0x1C); i++) {
         e = &((SlotAnim*)PTR(p, 0x18))[i];
         if (e->sel != e->shown) {
-            e->t = e->t + lbl_8056396C * dt;
+            e->t = e->t + 6.0f * dt;
             if (e->t >= lbl_80563964) {
                 e->shown = e->sel;
                 e->t = e->t - lbl_80563970;
             }
         } else {
-            f32 t = e->t + lbl_8056396C * dt;
+            f32 t = e->t + 6.0f * dt;
             if (lbl_80563960 < t) {
                 t = lbl_80563960;
             }
@@ -1137,18 +1135,18 @@ void fn_80250108(u8* p) {
     f32 dt = fn_80214D48();
     int i;
     SlotAnim* slot;
-    F32(p, 0x28) = F32(p, 0x28) + lbl_80563968 * ((f32)S32(p, 0x2C) - F32(p, 0x28));
+    F32(p, 0x28) = F32(p, 0x28) + 0.2f * ((f32)S32(p, 0x2C) - F32(p, 0x28));
     for (i = 0; i < S32(p, 0x1C); i++) {
         slot = &((SlotAnim*)PTR(p, 0x18))[i];
         e = slot;
         if (e->sel != e->shown) {
-            e->t = e->t + lbl_8056396C * dt;
+            e->t = e->t + 6.0f * dt;
             if (e->t >= lbl_80563964) {
                 e->shown = e->sel;
                 e->t = e->t - lbl_80563970;
             }
         } else {
-            f32 t = e->t + lbl_8056396C * dt;
+            f32 t = e->t + 6.0f * dt;
             if (lbl_80563960 < t) {
                 t = lbl_80563960;
             }
@@ -1213,9 +1211,6 @@ int fn_80250204(u8* p, int key) {
 
 }  // extern "C"
 
-extern const f32 lbl_80563980;  // 0.5
-extern const f32 lbl_80563984;  // 255.0
-extern const f32 lbl_80563988;  // 0.8
 extern "C" {
 f32 fn_80235EF0(u8* art, int part);
 f32 fn_80235F64(u8* art, int part);
@@ -1236,7 +1231,7 @@ static inline f32 Clamp01(f32 v) {
     return t > lbl_80563960 ? t : lbl_80563960;
 }
 
-static inline int RoundF(f32 v) { return (int)(v < lbl_80563960 ? v - lbl_80563980 : v + lbl_80563980); }
+static inline int RoundF(f32 v) { return (int)(v < lbl_80563960 ? v - 0.5f : v + 0.5f); }
 
 // Scales `c` by the tint `t`, per channel.
 static inline u32 TintColor(u32 c, u32 t) {
@@ -1275,11 +1270,11 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
                 part = 4;
             }
             f32 t = (alpha - lbl_80563960) / lbl_80563964;
-            f32 pw = fn_80235EF0(PTR(p, 0x24), part) * (lbl_80563980 + Clamp01(t) * lbl_80563980);
-            f32 ph = fn_80235F64(PTR(p, 0x24), part) * (lbl_80563980 + Clamp01(t) * lbl_80563980);
-            int a = RoundF(lbl_80563984 * fade);
+            f32 pw = fn_80235EF0(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
+            f32 ph = fn_80235F64(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
+            int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(PTR(p, 0x24), part, (a << 24) | 0xFFFFFF, (x + lbl_80563980 * w) - lbl_80563980 * pw,
+            fn_802354A0(PTR(p, 0x24), part, (a << 24) | 0xFFFFFF, (x + 0.5f * w) - 0.5f * pw,
                         k == 0 ? y + ph : y - h, lbl_80563960, pw, ph);
         }
     }
@@ -1289,10 +1284,10 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
     f32 u1 = ic->u1;
     f32 v1 = ic->v1;
     f32 v2 = ic->v2;
-    fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
-                lbl_80563988 * w, lbl_80563988 * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
-    fn_80231220(x + lbl_80563980 * (w - lbl_80563988 * w), y - lbl_80563980 * (h - lbl_80563988 * h),
-                lbl_80563988 * w, lbl_80563988 * h, ic->texE, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
+    fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
+                0.8f * w, 0.8f * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
+    fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
+                0.8f * w, 0.8f * h, ic->texE, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
                 ic->u2, v2);
 }
 

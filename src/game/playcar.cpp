@@ -96,20 +96,16 @@ public:
 
 extern const f32 lbl_8056208C;
 extern const f32 lbl_80562090;
-extern const f32 lbl_80562094;
-extern const f32 lbl_805620AC;
 extern const f32 lbl_80562138;
 #define kZero lbl_8056208C
 #define kOne lbl_80562090
-#define kNegOne lbl_80562094
-#define k255 lbl_805620AC
+#define kNegOne -1.0f
+#define k255 255.0f
 #define kTwo lbl_80562138
-extern const f32 lbl_80562084;
 extern const f32 lbl_805620A4;
-extern const f32 lbl_805620B8;
-#define kNegThree lbl_80562084
+#define kNegThree -3.0f
 #define kSix lbl_805620A4
-#define k65535 lbl_805620B8
+#define k65535 65535.0f
 
 #define CMIN(a, b) ((a) < (b) ? (a) : (b))
 #define CMAX(a, b) ((a) > (b) ? (a) : (b))
@@ -1158,35 +1154,10 @@ extern u8 lbl_8055E52B;
 extern u8 lbl_8055E52C;
 extern f32 lbl_8055E3C8;  // race time
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
-extern const f32 lbl_80562080;  // 0.5
-extern const f32 lbl_80562098;  // 0.4
-extern const f32 lbl_805620A8;  // 17.777779
 extern const f32 lbl_805620BC;  // 10
-extern const f32 lbl_805620C0;  // 0.1
-extern const f32 lbl_805620D0;  // 0.25
-extern const f32 lbl_805620D4;  // 0.9
-extern const f32 lbl_805620D8;  // 4.4444447
-extern const f32 lbl_805620DC;  // 1.7777778
-extern const f32 lbl_805620E0;  // 3.5555556
-extern const f32 lbl_805620E4;  // -20
-extern const f32 lbl_805620E8;  // -0.1
-extern const f32 lbl_805620EC;  // 30000
 extern const f32 lbl_805620F0;  // -2
-extern const f32 lbl_805620F4;  // -3000
-extern const f32 lbl_805620F8;  // -3.5555556
-extern const f32 lbl_805620FC;  // 6.6666665
-extern const f32 lbl_80562100;  // 0.6
-extern const f32 lbl_80562104;  // 3500
-extern const f32 lbl_80562108;  // 0.009
-extern const f32 lbl_8056210C;  // 0.033
-extern const f32 lbl_80562110;  // 0.8
-extern const f32 lbl_80562114;  // 0.00396
-extern const f32 lbl_80562118;  // 0.2
 extern const double lbl_80562120;  // 1.0
 extern const f32 lbl_80562128;  // -0.05
-extern const f32 lbl_8056212C;  // 0.0001
-extern const f32 lbl_80562130;  // -0.9
-extern const f32 lbl_80562134;  // 19.68504
 
 class RigidBody {
 public:
@@ -1274,15 +1245,15 @@ void PlayerDriver_vf48(u8* p) {
     u8* c4;
     st = ((Gearbox*)PTR(p, 0x38))->Steer(sp);
     fn_8018ADA4(PTR(p, 0x34), dir * (kZero + st));
-    if (((Gearbox*)PTR(p, 0x38))->Clutch() < lbl_805620D0) {
+    if (((Gearbox*)PTR(p, 0x38))->Clutch() < 0.25f) {
         fn_8018ADB4(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Throttle());
     } else {
         fn_8018ADB4(PTR(p, 0x34), kZero);
     }
     U8(PTR(p, 0x34), 0x260E) = ((Gearbox*)PTR(p, 0x38))->v30();
-    air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : lbl_80562080;
+    air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : 0.5f;
     car = PTR(p, 0x34);
-    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && lbl_805620D4 < F32(car, 0x25F4) && fwd < lbl_805620D8 &&
+    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && 0.9f < F32(car, 0x25F4) && fwd < 4.4444447f &&
         S32(car, 0x2620) >= 3 && !lbl_8055E52A) {
         f32 roll;
         f32 boost;
@@ -1296,20 +1267,20 @@ void PlayerDriver_vf48(u8* p) {
         steer = MaxF(MinF(kOne, F32(PTR(p, 0x34), 0x25F0)), kNegOne);
         u8* c2;
         c2 = PTR(p, 0x34);
-        boost = MinF(kOne, (F32(c2, 0x25D4) - lbl_805620DC) / lbl_805620E0);
+        boost = MinF(kOne, (F32(c2, 0x25D4) - 1.7777778f) / 3.5555556f);
         boost = MaxF(boost, kZero);
-        roll = MaxF(MinF(kOne, (steer * -F32(c2, 0x128)) * lbl_805620E4), kZero);
+        roll = MaxF(MinF(kOne, (steer * -F32(c2, 0x128)) * -2.0e1f), kZero);
         k = kOne - (kOne - kZero) * roll * (steer * steer);
         rx.x *= k;
         rx.y *= k;
         f32 slow;
         rx.z *= k;
-        slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / lbl_805620A8), kZero);
-        g = slow * (lbl_805620E8 * (steer * AbsF(steer)));
+        slow = MaxF(MinF(kOne, kOne - F32(PTR(p, 0x34), 0x25D4) / 17.777779f), kZero);
+        g = slow * (-0.1f * (steer * AbsF(steer)));
         rx.x += F32(car, 0x3C) * g;
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
-        m = lbl_805620EC * air * F32(PTR(p, 0x34), 0x25F8);
+        m = 3.0e4f * air * F32(PTR(p, 0x34), 0x25F8);
         rx.x *= m;
         rx.y *= m;
         rx.z *= m;
@@ -1317,7 +1288,7 @@ void PlayerDriver_vf48(u8* p) {
         at.y = F32(car, 0x64) + F32(car, 0x58) * lbl_805620F0;
         at.z = F32(car, 0x68) + F32(car, 0x5C) * lbl_805620F0;
         if (fn_8018B06C(PTR(p, 0x34)) < 0) {
-            if ((f32)__fabs(fwd) < lbl_805620D8) {
+            if ((f32)__fabs(fwd) < 4.4444447f) {
                 rx.x *= kNegOne;
                 rx.y *= kNegOne;
                 rx.z *= kNegOne;
@@ -1329,7 +1300,7 @@ void PlayerDriver_vf48(u8* p) {
         }
         ((RigidBody*)PTR(p, 0x34))->AddForceAt(&rx, &at);
     }
-    if (S32(PTR(p, 0x34), 0x2620) >= 3 && ((Gearbox*)PTR(p, 0x38))->Speed() > lbl_805620C0) {
+    if (S32(PTR(p, 0x34), 0x2620) >= 3 && ((Gearbox*)PTR(p, 0x38))->Speed() > 0.1f) {
         f32 lean;
         f32 q;
         u8* c3;
@@ -1340,7 +1311,7 @@ void PlayerDriver_vf48(u8* p) {
         f.x = F32(c3, 0x54) + F32(c3, 0x48) * kZero;
         f32 b;
         f.y = F32(c3, 0x58) + kZero * F32(c3, 0x4C);
-        k = lbl_805620F4 * air;
+        k = -3.0e3f * air;
         f.z = F32(c3, 0x5C) + kZero * F32(c3, 0x50);
         f.x *= k;
         f.y *= k;
@@ -1352,7 +1323,7 @@ void PlayerDriver_vf48(u8* p) {
         at2.x = F32(c3, 0x60) + F32(c3, 0x54) * lbl_805620F0;
         at2.y = F32(c3, 0x64) + F32(c3, 0x58) * lbl_805620F0;
         at2.z = F32(c3, 0x68) + F32(c3, 0x5C) * lbl_805620F0;
-        if (fwd > lbl_805620F8) {
+        if (fwd > -3.5555556f) {
             ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
         }
     }
@@ -1368,19 +1339,19 @@ void PlayerDriver_vf48(u8* p) {
     if (((Gearbox*)PTR(p, 0x38))->v34() || S32(p, 0x30) == 3) {
         fn_8018ADD4(PTR(p, 0x34), -1);
         car = PTR(p, 0x34);
-        if (VDot(car + 0x118, 0x54 + car) < lbl_805620FC ||
-            ((Gearbox*)PTR(p, 0x38))->Throttle() > lbl_80562100) {
+        if (VDot(car + 0x118, 0x54 + car) < 6.6666665f ||
+            ((Gearbox*)PTR(p, 0x38))->Throttle() > 0.6f) {
             fn_8018ADB4(PTR(p, 0x34), MaxF(kOne, ((Gearbox*)PTR(p, 0x38))->Throttle()));
         } else {
             fn_8018ADBC(PTR(p, 0x34), kOne);
             cl = kZero;
-            if (F32(PTR(p, 0x34), 0x25D0) < lbl_80562104) {
+            if (F32(PTR(p, 0x34), 0x25D0) < 3.5e3f) {
                 fn_8018ADB4(PTR(p, 0x34), MaxF(kOne, ((Gearbox*)PTR(p, 0x38))->Throttle()));
             }
         }
     } else if (B8(p, 0x4)) {
         if (F32(PTR(p, 0x34), 0x25CC) > kZero || fn_8018B06C(PTR(p, 0x34)) > 0 ||
-            ((Gearbox*)PTR(p, 0x38))->Throttle() > lbl_80562080) {
+            ((Gearbox*)PTR(p, 0x38))->Throttle() > 0.5f) {
             fn_8018ADEC(PTR(p, 0x34));
         }
     } else {
@@ -1437,7 +1408,7 @@ void PlayerDriver_vf48(u8* p) {
     }
     sum = kZero;
     mag = kZero;
-    ((f32*)(0x20 + p))[lbl_8055E3C4 % 4] = (yaw + s * (lbl_80562098 * side)) * lbl_805620C0;
+    ((f32*)(0x20 + p))[lbl_8055E3C4 % 4] = (yaw + s * (0.4f * side)) * 0.1f;
     for (i = 0; i < 4; i++) {
         f32 h;
         h = ((f32*)(p + 0x20))[i];
@@ -1448,14 +1419,14 @@ void PlayerDriver_vf48(u8* p) {
     int odd;
     f32 gb;
     wob *= F32(p, 0x1C);
-    wob *= lbl_80562108;
+    wob *= 0.009f;
     c4 = PTR(p, 0x34);
     grip = F32(c4, 0x2570) + F32(c4, 0x24FC);
     rough = VMag(c4 + 0x26B4);
     lim = MinF(kOne, F32(PTR(p, 0x34), 0x264C) * lbl_805620BC);
-    ga = lbl_8056210C * rough + lim;
-    F32(p, 0x40) = lbl_80562110 * F32(p, 0x40) + lbl_80562114 * rough;
-    gb = F32(p, 0x40) + lbl_80562118 * MaxF(MinF(kOne, grip), kZero);
+    ga = 0.033000004f * rough + lim;
+    F32(p, 0x40) = 0.8f * F32(p, 0x40) + 0.0039600004f * rough;
+    gb = F32(p, 0x40) + 0.2f * MaxF(MinF(kOne, grip), kZero);
     fn_8018AE54(PTR(p, 0x34));
     odd = (lbl_8055E3C4 >> 1) & 1;
     if (!fn_801796B4() && fn_801CF050() && !fn_801796C4() &&
@@ -1469,11 +1440,11 @@ void PlayerDriver_vf48(u8* p) {
         f32 airt;
         c5 = PTR(p, 0x34);
         fmod(lbl_8055E3C8, lbl_80562120);
-        buzz = (lbl_805620D0 * ga + lbl_805620D0 * gb) * (odd ? kNegOne : kOne);
-        ((Gearbox*)PTR(p, 0x38))->v50(kZero, fn_8018AE4C(c5) * lbl_805620D0, wob + buzz);
+        buzz = (0.25f * ga + 0.25f * gb) * (odd ? kNegOne : kOne);
+        ((Gearbox*)PTR(p, 0x38))->v50(kZero, fn_8018AE4C(c5) * 0.25f, wob + buzz);
         f32 turn;
         c5 = PTR(p, 0x34);
-        sr = F32(c5, 0x25D4) / lbl_805620D8;
+        sr = F32(c5, 0x25D4) / 4.4444447f;
         sr = sr < kOne ? sr : kOne;
         str = kOne * MaxF(sr, kZero);
         w.x = F32(c5, 0x124) * lbl_80562128;
@@ -1481,7 +1452,7 @@ void PlayerDriver_vf48(u8* p) {
         w.z = F32(c5, 0x12C) * lbl_80562128;
         a = VMag(&w);
         f32 slip;
-        if (a > lbl_8056212C) {
+        if (a > 0.0001f) {
             f32 cs;
             f32 inv;
             inv = kOne / a;
@@ -1535,15 +1506,15 @@ void PlayerDriver_vf48(u8* p) {
             u.y = v[0] * spin[1] + spin[4] * v[1] + v[2] * spin[7];
             u.z = Dot3(v[0], spin[2], v[1], spin[5], v[2], spin[8]);
         }
-        slip = MaxF(kZero, kOne - lbl_80562080 * (F32(c5, 0x2488) + F32(c5, 0x2414)));
+        slip = MaxF(kZero, kOne - 0.5f * (F32(c5, 0x2488) + F32(c5, 0x2414)));
         str *= slip;
-        ref = MaxF(lbl_805620C0, F32(PTR(p, 0x34), 0x25D4));
+        ref = MaxF(0.1f, F32(PTR(p, 0x34), 0x25D4));
         turn = VDot(0x118 + PTR(p, 0x34), &u) / ref;
-        turn = MaxF(MinF(lbl_805620D4, lbl_805620BC * turn), lbl_80562130);
+        turn = MaxF(MinF(0.9f, lbl_805620BC * turn), -0.9f);
         c6 = PTR(p, 0x34);
-        sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / lbl_805620D0), kZero);
+        sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / 0.25f), kZero);
         airt = MaxF(F32(c6, 0x23B8), kZero) + MaxF(F32(c6, 0x242C), kZero);
-        str *= MinF(lbl_80562134 * airt, kOne);
+        str *= MinF(19.68504f * airt, kOne);
         ((Gearbox*)PTR(p, 0x38))->v54(str);
         ((Gearbox*)PTR(p, 0x38))->v58(ga, gb);
         turn *= sl;

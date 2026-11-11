@@ -306,26 +306,10 @@ struct ObMesh {
     ObMeshPart** parts;  // offset 0x14
 };
 
-extern const f32 lbl_80562480;  // 1.5
-extern const f32 lbl_80562484;  // 9.81
-extern const f32 lbl_80562488;  // 0.03
-extern const f32 lbl_8056248C;  // 0.4
-extern const f32 lbl_80562490;  // 0.2
-extern const f32 lbl_80562494;  // 3
-extern const f32 lbl_80562498;  // 437992.1
 extern const f32 lbl_8056249C;  // 0.8
-extern const f32 lbl_805624A0;  // 50000
 extern const f32 lbl_805624A4;  // -1
-extern const f32 lbl_805624A8;  // 0.0762
 extern const f32 lbl_805624AC;  // 1
-extern const f32 lbl_805624B0;  // 0.3
 extern const double lbl_805624B8;  // pi/2
-extern const f32 lbl_805624C0;  // 0.305
-extern const f32 lbl_805624C4;  // 0.61
-extern const f32 lbl_805624C8;  // 0.0254
-extern const f32 lbl_805624CC;  // 0.9
-extern const f32 lbl_805624D0;  // 0.016683351
-extern const f32 lbl_805624D4;  // 2
 extern f32 lbl_80558DC4[];      // FLT_EPSILON
 
 extern "C" {
@@ -485,7 +469,7 @@ public:
         hy = y;
         hz = z;
         a34 = 0;
-        bound = lbl_80562490 + (f32)sqrt(z * z + (x * x + y * y));
+        bound = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
     }
     virtual ~BoxShape(void);
     virtual void vf38(void);
@@ -566,12 +550,12 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     vf20__10CollVolumeFv(p);
     shape = 0;
     corners = 1;
-    k = lbl_80562480 * (lbl_80562484 * q->mass / lbl_80562488);
+    k = 1.5f * (9.81f * q->mass / 0.03f);
     skin = q->skin;
     origin.x = lbl_8056247C;
     origin.y = lbl_8056247C;
     origin.z = lbl_8056247C;
-    spring = lbl_8056248C * k;
+    spring = 0.4f * k;
     s32 kind = q->kind;
     switch (q->type) {
     case 0:
@@ -596,15 +580,15 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 7:
-        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, ObFrameOf(p), lbl_80562498, lbl_8056249C, q->a, q->b);
+        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, ObFrameOf(p), 437992.1f, lbl_8056249C, q->a, q->b);
         U8(p, 0x221) = 1;
         corners = 0;
         break;
     case 12: {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
-            s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, lbl_805624A0,
-                            lbl_80562490, q->a, lbl_80562478 * q->b, q->a);
+            s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, 5.0e4f,
+                            0.2f, q->a, lbl_80562478 * q->b, q->a);
         }
         shape = s;
         kind = 110;
@@ -621,7 +605,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, c, spring);
         c.z *= lbl_805624A4;
         AddCornerV(p, c, spring);
-        c = RVec3(lbl_805624A8, q->a * lbl_80562478, q->c * lbl_80562478);
+        c = RVec3(0.0762f, q->a * lbl_80562478, q->c * lbl_80562478);
         AddCornerV(p, c, spring);
         c.z *= lbl_805624A4;
         AddCornerV(p, c, spring);
@@ -640,7 +624,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
-            box = fn_801A2354(box, p + 0x3C, origin, p, k, skin, lbl_805624B0, lbl_805624B0, lbl_805624B0);
+            box = fn_801A2354(box, p + 0x3C, origin, p, k, skin, 0.3f, 0.3f, 0.3f);
         }
         fn_801A0444(shape, box);
         corners = 0;
@@ -751,28 +735,28 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     case 11: {
         f32 hx = (q->b - q->a) / 2.0f;
         f32 hy = (q->d - q->c) / 2.0f;
-        RVec3 c(origin.x, lbl_805624C0 + q->c, q->f - lbl_805624C0);
-        CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, lbl_805624C0, c);
+        RVec3 c(origin.x, 0.305f + q->c, q->f - 0.305f);
+        CollShape* ball = new ("barrier-sphere") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, 0.305f, c);
         ((CollVolume*)p)->AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
-            s = fn_801A2354(s, p + 0x3C, RVec3(hx - q->a, hy - q->c, q->f - lbl_805624C0), p, k, skin, hx, hy,
-                            lbl_805624C4);
+            s = fn_801A2354(s, p + 0x3C, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), p, k, skin, hx, hy,
+                            0.61f);
         }
         shape = s;
-        AddCornerV(p, RVec3(q->a, q->c - lbl_805624C8, q->e), spring);
-        AddCornerV(p, RVec3(q->b, q->c - lbl_805624C8, q->e), spring);
-        AddCornerV(p, RVec3(q->a, q->c - lbl_805624C8, q->f), spring);
-        AddCornerV(p, RVec3(q->b, q->c - lbl_805624C8, q->f), spring);
-        AddCornerV(p, RVec3(q->a, q->d - lbl_805624C8, q->f + q->g), spring);
-        AddCornerV(p, RVec3(q->b, q->d - lbl_805624C8, q->f + q->g), spring);
+        AddCornerV(p, RVec3(q->a, q->c - 0.0254f, q->e), spring);
+        AddCornerV(p, RVec3(q->b, q->c - 0.0254f, q->e), spring);
+        AddCornerV(p, RVec3(q->a, q->c - 0.0254f, q->f), spring);
+        AddCornerV(p, RVec3(q->b, q->c - 0.0254f, q->f), spring);
+        AddCornerV(p, RVec3(q->a, q->d - 0.0254f, q->f + q->g), spring);
+        AddCornerV(p, RVec3(q->b, q->d - 0.0254f, q->f + q->g), spring);
         corners = 0;
         break;
     }
     case 13:
     case 18:
-        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, ObFrameOf(p), lbl_805624CC * k, skin, q->a, q->b * lbl_80562478 - q->a);
-        F32(p, 0x238) = lbl_805624D0 * q->c / q->a;
+        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, ObFrameOf(p), 0.9f * k, skin, q->a, q->b * lbl_80562478 - q->a);
+        F32(p, 0x238) = 0.016683351f * q->c / q->a;
         AddCornerV(p, RVec3(q->a, q->a, lbl_8056247C), spring * lbl_80562478);
         corners = 1;
         break;
@@ -832,7 +816,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         U8(p, 0x1E8) = corners;
     }
     for (BodyCorner* c = *(BodyCorner**)(p + 0xD0); c; c = c->next) {
-        c->friction = lbl_805624D4;
+        c->friction = 2.0f;
     }
     *(Pose12*)(p + 0x1EC) = *(Pose12*)(p + 0x3C);
     S32(p, 0x224) = 0;
@@ -869,7 +853,6 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
 extern const f32 lbl_8056247C;  // 0.0
 extern const f32 lbl_805624AC;  // 1.0
 extern const f32 lbl_805624A4;  // -1.0
-extern const f32 lbl_805624D8;  // 0.01
 extern const f32 lbl_80562478;  // 0.5
 
 static inline double AbsD(double v) { return __fabs(v); }
@@ -883,7 +866,7 @@ void fn_801ABB54(u8* p) {
         lim = lim < ad ? lim : ad;
         f32 sign = d > lbl_8056247C ? lbl_805624AC : lbl_805624A4;
         imp = -sign * lim;
-    } else if (ad > lbl_805624D8) {
+    } else if (ad > 0.01f) {
         imp = -d * lbl_80562478;
     }
     F32(p, 0x124) = F32(p, 0x124) + F32(p, 0x54) * imp;
@@ -1006,14 +989,13 @@ struct HitVisit {
 };
 
 extern void* lbl_803357F0[];
-extern const f32 lbl_805624E8;  // 16/9
 
 extern "C" {
 
 void fn_801AC0A0(u8* p, const f32* v, const f32* at, int force, u8* extra) {
     if (force >= 100 && !U8(p, 0x220)) {
         f32 r = F32(p, 0xD4);
-        f32 k = lbl_805624E8 * r;
+        f32 k = 1.7777778f * r;
         f32 k2 = k * k;
         if (PSVECDotProduct(v, v) > k2) {
             HitVisit h;
@@ -1341,7 +1323,6 @@ void fn_801C2694(s32 rope, f32 (*out)[3], s32* n, f32* d, f32* c, f32* b, f32* a
 void fn_801796CC(int kind, void* msg, int size);
 extern const f32 lbl_8056247C;  // 0.0
 extern const f32 lbl_805624AC;  // 1.0
-extern const f32 lbl_80562510;  // -10000.0
 
 // Samples the fence rope and sends each linked post pair its span of points.
 void fn_801ACF94(void) {
@@ -1363,7 +1344,7 @@ void fn_801ACF94(void) {
         c[1] = lbl_805624AC;
         c[2] = lbl_8056247C;
         d[0] = lbl_8056247C;
-        d[1] = lbl_80562510;
+        d[1] = -1.0e4f;
         d[2] = lbl_8056247C;
         fn_801C2694(lbl_8055E5F0, out, &n, d, c, b, a);
         for (int i = 0; i < lbl_8055E5EC; i++) {
@@ -1449,7 +1430,6 @@ void fn_801AD28C(u8* p, const CVec3* a, CollVolume* other, const CVec3* b, f32 x
     F32(p, 0x28) = len;
 }
 
-extern const f32 lbl_80562518;  // 0.001
 double sqrt(double x);
 
 // Applies the joint's spring (beyond the rest length) and damping between the two attachment points.
@@ -1474,7 +1454,7 @@ void fn_801AD394(u8* p) {
     F32(p, 0x30) = (f32)sqrt(hxx + hzz);
     f32 stretch = len - F32(p, 0x28);
     F32(p, 0x2C) = stretch;
-    if (len > lbl_80562518 && len < F32(p, 0x28) + F32(p, 0x24)) {
+    if (len > 0.001f && len < F32(p, 0x28) + F32(p, 0x24)) {
         CVec3 dir;
         CVec3 force;
         CVec3 va;

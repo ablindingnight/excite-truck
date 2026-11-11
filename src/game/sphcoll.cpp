@@ -360,7 +360,6 @@ struct PolyPush {
 
 extern const f32 lbl_805622D0;  // 0.0
 extern const f32 lbl_805622D4;  // 0.001
-extern const f32 lbl_805622D8;  // 0.01
 
 extern "C" {
 
@@ -438,7 +437,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         dd.z += cv->axis.z * t;
         m = PSVECMag(&dd.x);
         pen = cv->radius - m;
-        if (m > lbl_805622D8 && pen > lbl_805622D4) {
+        if (m > 0.01f && pen > lbl_805622D4) {
             q = &push[count++];
             sum += pen * pen;
             q->n.x = dd.x * (lbl_805622DC / m);
@@ -636,14 +635,6 @@ f32 fn_8018AE7C(u8* car);
 void fn_802C1A0C(PlayerCtx* c, int car);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 }
-extern const f32 lbl_805622EC;  // 1.524 (5 ft)
-extern const f32 lbl_805622F0;  // -1.524
-extern const f32 lbl_805622F4;  // 0.95
-extern const f32 lbl_805622F8;  // 0.8
-extern const f32 lbl_805622FC;  // 222500
-extern const f32 lbl_80562304;  // 8.888889
-extern const f32 lbl_8056230C;  // 10000
-extern const f32 lbl_80562310;  // 6.6666665
 
 // Resolves one contact between volumes p and q at point x along normal n (pointing into p) with compression s:
 // volumes tagged 1000+ only report the touch; otherwise a spring push at heights clamped to +-5 ft, and while
@@ -726,10 +717,10 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     pq.y = pt->y;
     pq.z = pt->z;
     if (pb && qb) {
-        f32 ha = MaxF(MinF(lbl_805622EC, ((CFrame*)PTR(p, 0xC))->t.y - pt->y), lbl_805622F0);
-        f32 hb = MaxF(MinF(lbl_805622EC, ((CFrame*)PTR(q, 0xC))->t.y - pt->y), lbl_805622F0);
-        pa.y = pt->y + lbl_805622F4 * ha;
-        pq.y = pt->y + lbl_805622F4 * hb;
+        f32 ha = MaxF(MinF(1.5239999f, ((CFrame*)PTR(p, 0xC))->t.y - pt->y), -1.5239999f);
+        f32 hb = MaxF(MinF(1.5239999f, ((CFrame*)PTR(q, 0xC))->t.y - pt->y), -1.5239999f);
+        pa.y = pt->y + 0.95f * ha;
+        pq.y = pt->y + 0.95f * hb;
     }
     if (pb) {
         pb->VelAt(&va, pt);
@@ -751,11 +742,11 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     f32 vn = PSVECDotProduct(&rel, n);
     f32 st = MaxF(F32(p, 0x10), F32(q, 0x10));
     if (vn > lbl_805622D0) {
-        st *= lbl_805622F8;
+        st *= 0.8f;
     }
     f32 k = s * st;
-    if (k > lbl_805622FC) {
-        k = lbl_805622FC;
+    if (k > 2.225e5f) {
+        k = 2.225e5f;
     }
     f32 kk = lbl_805622E8 * k;
     imp.x = n->x * kk;
@@ -800,7 +791,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         f32 ima = pb ? InvMass(F32(pb, 0xD4)) : lbl_805622D0;
         f32 imb = qb ? InvMass(F32(qb, 0xD4)) : lbl_805622D0;
         f32 e = lbl_805622D0;
-        if (-vn < lbl_80562304) {
+        if (-vn < 8.888889f) {
             e = lbl_80562300;
         }
         f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(rp, n) / (ima + imb + VDot(n, &tt));
@@ -855,8 +846,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                     fast = 0;
                 }
             }
-            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= lbl_8056230C &&
-                F32(pb, 0x25D4) > lbl_80562310 && VE(q)->v30()) {
+            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= 1.0e4f &&
+                F32(pb, 0x25D4) > 6.6666665f && VE(q)->v30()) {
                 f32 sc = fn_8018AE7C((u8*)pb);
                 J.x *= sc;
                 J.y *= sc;
@@ -999,10 +990,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
 }
 
 extern const f32 lbl_8056231C;
-extern const f32 lbl_80562320;
 extern const f32 lbl_80562324;
-extern const f32 lbl_80562328;
-extern const f32 lbl_80562330;
 extern const f32 lbl_805622D4;
 extern const f32 lbl_8056232C;
 extern const f32 lbl_805622D0;
@@ -1056,8 +1044,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         d[1] = d[1] + vt.y * lbl_8056231C;
         d[2] = d[2] + vt.z * lbl_8056231C;
         f32 dm = PSVECMag(d);
-        if (dm > lbl_80562320) {
-            f32 s = lbl_80562320 / dm;
+        if (dm > 0.02f) {
+            f32 s = 0.02f / dm;
             d[0] *= s;
             d[1] *= s;
             d[2] *= s;
@@ -1065,14 +1053,14 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f.x = vt.x * lbl_80562324;
         f.y = vt.y * lbl_80562324;
         f.z = vt.z * lbl_80562324;
-        f32 value = lbl_80562328;
+        f32 value = -2.4e3f;
         f32 m = F32(o, 0xD4) * value;
         f.x = f.x + d[0] * m;
         f.y = f.y + d[1] * m;
         f.z = f.z + d[2] * m;
         f32 fm = PSVECMag(&f.x);
         f32 lim = k * F32(p, 0x14);
-        lim = lim > lbl_80562320 ? lim : lbl_80562320;
+        lim = lim > 0.02f ? lim : 0.02f;
         if (fm > lim) {
             f32 s = lim / fm;
             f.x *= s;
@@ -1089,7 +1077,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         t.z = nrm.z * w;
         o->AddTorque(&t);
         VE(p)->v1C(&imp, &pt, surf, 0);
-        f32 e = lbl_80562330 * fn_8019DF88((u8*)o + 0x60, &v, (u8*)o + 0x148, &pt, &nrm.x, F32(o, 0xD4), lbl_805622D0);
+        f32 e = 0.33f * fn_8019DF88((u8*)o + 0x60, &v, (u8*)o + 0x148, &pt, &nrm.x, F32(o, 0xD4), lbl_805622D0);
         if (e > lbl_805622D0) {
             fr.x = nrm.x * e;
             fr.y = nrm.y * e;
@@ -1172,8 +1160,6 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
 }
 
 extern const f32 lbl_80562300;  // 0.2
-extern const f32 lbl_80562334;  // 4.4444447
-extern const f32 lbl_80562338;  // 0.254
 extern const f32 lbl_8056233C;  // 0.025025027
 extern "C" void fn_802E30C8(const char* fmt, ...);
 extern "C" void fn_802E317C(const char* fmt, ...);
@@ -1219,7 +1205,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     f32 comp;
     f32 len = sqrt(PSVECDotProduct(&d, &d));
     comp = lbl_80562300 + (-len + r);
-    if (len < lbl_805622D8) {
+    if (len < 0.01f) {
         if (debug) {
             fn_802E30C8("-collide_explicit_sphere_box: delta_length = %f", len);
         }
@@ -1232,14 +1218,14 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             if (debug) {
                 fn_802E30C8("tunneling: %1.2f", len);
             }
-            if (len < lbl_80562334) {
+            if (len < 4.4444447f) {
                 if (debug) {
                     fn_802E30C8("too slow");
                 }
                 return 0;
             }
-            comp = lbl_80562338;
-            if (len < lbl_805622D8) {
+            comp = 0.254f;
+            if (len < 0.01f) {
                 return 0;
             }
         } else if (rb) {
@@ -1267,13 +1253,13 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             d.y = back.y - c->y;
             d.z = back.z - c->z;
             len = PSVECMag(&d.x);
-            if (len < lbl_805622D8) {
+            if (len < 0.01f) {
                 if (debug) {
                     fn_802E30C8("-collide_explicit_sphere_box: (2) delta_length = %f", len);
                 }
                 return 0;
             }
-            comp = lbl_80562338;
+            comp = 0.254f;
         } else {
             return 0;
         }
@@ -1309,7 +1295,6 @@ f32 PSVECSquareDistance(const void* a, const void* b);
 extern f32 lbl_8055A4C0;           // 0.8, car-on-car friction
 extern const f32 lbl_80562308;     // 0.05
 extern const f32 lbl_80562340;     // 0.0016683352
-extern const f32 lbl_80562344;     // 2.8
 
 // Sphere p against box q (half extents 0x24..0x2C, bounding radius 0x30, end-cap flags at 0x34), the box
 // optionally offset by `off` in its own frame. Clamps the sphere centre into the box (`dir`, a direction in box
@@ -1436,7 +1421,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             bool pa = (pf & mask) != 0;
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
                 f32 fr = lbl_8055A4C0;
-                f32 t = lbl_80562344 * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
+                f32 t = 2.8f * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
                 fr *= MaxF(MinF(lbl_805622E0, t), lbl_805622D0);
                 if (pa) {
                     fp = fr;
@@ -1687,7 +1672,6 @@ void fn_8019D378(u8* p, u8* q) {
 }
 
 void PSVECCrossProduct(const void* a, const void* b, void* out);
-extern const f32 lbl_80562348;  // parallel-line threshold
 
 static inline f32 Det33(f32 m[3][3]) {
     return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) + m[0][1] * (m[1][2] * m[2][0] - m[1][0] * m[2][2]) +
@@ -1704,7 +1688,7 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
     w.v[2] = p1[2] - p0[2];
     PSVECCrossProduct(d0, d1, n.v);
     f32 nn = PSVECDotProduct(n.v, n.v);
-    if (nn > lbl_80562348) {
+    if (nn > 1.0000001e-6f) {
         m[0][0] = w.v[0];
         m[0][1] = d1[0];
         m[0][2] = n.v[0];
@@ -2400,14 +2384,13 @@ u8* fn_8019F3D4(u8* p, int del) {
     return p;
 }
 
-extern const f32 lbl_8056237C;
 
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
 void fn_8019F414(u8* p) {
     u8* o = PTR(p, 0x4);
     u8* m = PTR(p, 0x54);
     PVec3 t = *(PVec3*)(m + 0x30);
-    f32 lift = lbl_8056237C + F32(p, 0x24) + F32(m, 0xC);
+    f32 lift = 0.06f + F32(p, 0x24) + F32(m, 0xC);
     t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
     t.v[2] = t.v[2] - F32(o, 0x38);
@@ -2512,18 +2495,8 @@ void fn_8019F6F0(u8* p) {
 
 extern const f32 lbl_80562300;
 extern const f32 lbl_80562380;  // 1.5
-extern const f32 lbl_80562384;  // -3
-extern const f32 lbl_80562388;  // -30
-extern const f32 lbl_8056238C;  // 2pi
 extern const double lbl_80562390;  // 2pi
-extern const f32 lbl_80562398;  // 0.0254
-extern const f32 lbl_8056239C;  // pi
-extern const f32 lbl_805623A0;  // 0.4
-extern const f32 lbl_805623A4;  // 4pi/3
-extern const f32 lbl_805623A8;  // 500
 extern const f32 lbl_805623AC;  // 10
-extern const f32 lbl_805623B0;  // 1000
-extern const f32 lbl_805623B4;
 extern const f32 lbl_805622E8;  // 0.5
 extern f32 lbl_8055E3C8;  // race time
 extern "C" double fn_801E9DDC(u8* hint, f32 x, f32 z);
@@ -2600,8 +2573,8 @@ void fn_8019F780(u8* p) {
                     acc[1] = acc[1] + vt.y * lbl_8056231C;
                     acc[2] = acc[2] + vt.z * lbl_8056231C;
                     f32 am = PSVECMag(acc);
-                    if (am > lbl_80562320) {
-                        f32 s = lbl_80562320 / am;
+                    if (am > 0.02f) {
+                        f32 s = 0.02f / am;
                         acc[0] *= s;
                         acc[1] *= s;
                         acc[2] *= s;
@@ -2610,11 +2583,11 @@ void fn_8019F780(u8* p) {
                     imp.x = nrm.x * k;
                     imp.y = nrm.y * k;
                     imp.z = nrm.z * k;
-                    f32 c = lbl_80562384 * F32(rb, 0xD4);
+                    f32 c = -3.0f * F32(rb, 0xD4);
                     f.x = vt.x * c;
                     f.y = vt.y * c;
                     f.z = vt.z * c;
-                    f32 g = lbl_80562388 * F32(rb, 0xD4);
+                    f32 g = -3.0e1f * F32(rb, 0xD4);
                     f.x = Lerp_hm(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
@@ -2656,21 +2629,21 @@ void fn_8019F780(u8* p) {
         RVec3 up;
         f32 sub = F32(p, 0x50) - F32(p, 0x38) + F32(p, 0x24);
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
-        f32 ph = fmod(F32(p, 0x34) + lbl_8056238C * lbl_8055E3C8 / 2.0f, lbl_80562390);
+        f32 ph = fmod(F32(p, 0x34) + 6.2831855f * lbl_8055E3C8 / 2.0f, lbl_80562390);
         f32 s = sin(ph);
-        sub += lbl_80562398 * (lbl_805622E0 + s);
+        sub += 0.0254f * (lbl_805622E0 + s);
         if (sub > lbl_805622D0) {
             f32 r = F32(p, 0x24);
-            f32 area = lbl_8056239C * (r * r);
-            f32 vol = lbl_805623A0 * (lbl_805623A4 * r * (r * r));
-            f32 dk = -area * (lbl_805623A8 + lbl_805623AC * PSVECMag(&bv.x));
+            f32 area = 3.1415927f * (r * r);
+            f32 vol = 0.4f * (4.1887903f * r * (r * r));
+            f32 dk = -area * (5.0e2f + lbl_805623AC * PSVECMag(&bv.x));
             drag.x = bv.x * dk;
             drag.y = bv.y * dk;
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
-            f32 lift = lbl_805623B0 + lbl_8056232C * sub;
+            f32 lift = 1.0e3f + lbl_8056232C * sub;
             sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
-            up.y = lbl_805623B4 * (lift * (vol * sub));
+            up.y = 9.81f * (lift * (vol * sub));
             up.x = lbl_805622D0;
             up.z = lbl_805622D0;
             rb->AddForceAt(&up, (RVec3*)(p + 0x34));
@@ -2929,7 +2902,7 @@ void fn_801A0464(u8* p, u8* q) {
                     n.y = wp.v[1] - bw.y;
                     n.z = wp.v[2] - bw.z;
                     f32 len = PSVECMag(&n.x);
-                    if (len > lbl_805622D8) {
+                    if (len > 0.01f) {
                         f32 inv = lbl_805622E0 / len;
                         n.x *= inv;
                         n.y *= inv;
