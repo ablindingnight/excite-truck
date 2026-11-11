@@ -255,6 +255,12 @@ void fn_80252C78(void) {
     lbl_8055F2F8--;
 }
 
+static inline void SetV3(MWVec3* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_80252C90(void) {
     MWWheels* w;
     int n;
@@ -275,26 +281,14 @@ void fn_80252C90(void) {
     for (i = 0; n > i; i++, s++) {
         b = &bodies[i];
         w = &wheels[i];
-        s->mtx.pos.x = b->pos.x;
-        s->mtx.pos.y = b->pos.y;
-        s->mtx.pos.z = b->pos.z;
-        s->mtx.x.x = b->x.x;
-        s->mtx.x.y = b->x.y;
-        s->mtx.x.z = b->x.z;
-        s->mtx.y.x = b->y.x;
         c = contacts[i].w;
-        s->mtx.y.y = b->y.y;
-        s->mtx.y.z = b->y.z;
         int j;
-        s->mtx.z.x = b->z.x;
-        s->mtx.z.y = b->z.y;
-        s->mtx.z.z = b->z.z;
-        s->vel.x = b->vel.x;
-        s->vel.y = b->vel.y;
-        s->vel.z = b->vel.z;
-        s->avel.x = b->accel.x;
-        s->avel.y = b->accel.y;
-        s->avel.z = b->accel.z;
+        SetV3(&s->mtx.pos, b->pos.x, b->pos.y, b->pos.z);
+        SetV3(&s->mtx.x, b->x.x, b->x.y, b->x.z);
+        SetV3(&s->mtx.y, b->y.x, b->y.y, b->y.z);
+        SetV3(&s->mtx.z, b->z.x, b->z.y, b->z.z);
+        SetV3(&s->vel, b->vel.x, b->vel.y, b->vel.z);
+        SetV3(&s->avel, b->accel.x, b->accel.y, b->accel.z);
         for (j = 0; j < 4; j++) {
             s->spin[j] = w->spin[j];
         }
