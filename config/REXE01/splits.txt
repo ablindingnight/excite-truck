@@ -2072,10 +2072,12 @@ RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp:
 RVL_SDK/hbm/nw4hbm/ut/ut_TagProcessorBase.cpp:
 	.text       start:0x8010C7DC end:0x8010D9E4
 	.data       start:0x80329458 end:0x80329530
+	.sdata2     start:0x80561170 end:0x80561178
 
 RVL_SDK/hbm/nw4hbm/ut/ut_TextWriterBase.cpp:
 	.text       start:0x8010D9E4 end:0x80116644
 	.data       start:0x80329530 end:0x80329B28
+	.sdata2     start:0x80561178 end:0x80561190
 
 game/unk_80116644.c:
 	.text       start:0x80116644 end:0x801166C8
@@ -2095,7 +2097,7 @@ game/unk_80116BD4.c:
 	.bss        start:0x8041D508 end:0x8041D728
 	.sdata      start:0x80559938 end:0x80559954
 	.sbss       start:0x8055DEC0 end:0x8055DF00
-	.sdata2     start:0x80561170 end:0x80561238
+	.sdata2     start:0x80561190 end:0x80561238
 
 game/unk_80127398.c:
 	.text       start:0x80127398 end:0x801274C8
