@@ -762,7 +762,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFont.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_ResFontBase.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_TagProcessorBase.cpp"),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/ut/ut_TextWriterBase.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/ut/ut_TextWriterBase.cpp"),
         ],
     }
 )
@@ -1151,7 +1151,6 @@ config.libs.append(
             Object(NonMatching, "game/unk_8020DE74.cpp"),
             Object(NonMatching, "game/unk_8020F3B4.c"),
             Object(Matching, "game/unk_800241DC.c", cflags=cflags_runtime, mw_version="GC/3.0a5.2", extra_cflags=["-Cpp_exceptions on"]),
-            Object(NonMatching, "game/unk_80116644.c", cflags=cflags_runtime, mw_version="GC/3.0a5.2"),
             Object(Matching, "game/unk_8002B0A0.c"),
             Object(Matching, "game/unk_8002B0B0.c", cflags=cflags_runtime, extra_cflags=["-Cpp_exceptions on"]),
             Object(NonMatching, "game/uiapi.cpp"),
