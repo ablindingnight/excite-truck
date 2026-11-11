@@ -208,6 +208,12 @@ struct TVec2 {
     f32 z;
 };
 static inline f32 Dot2(f32 ax, f32 bx, f32 az, f32 bz) { return ax * bx + az * bz; }
+static inline TVec2 Mid2(const TVec2& a, const TVec2& b) { /* Helper name unproven */
+    TVec2 r;
+    r.x = a.x + (b.x - a.x) / 2.0f;
+    r.z = a.z + 0.5f * (b.z - a.z);
+    return r;
+}
 
 struct TPath {
     s32 count;  // offset 0x0
@@ -1876,9 +1882,7 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             }
             {
                 f32 inv;
-                pos.x = pts[best].x + (pts[(best + 1) % 3].x - pts[best].x) / 2.0f;
-                f32 zv = pts[best].z;
-                pos.z = zv + 0.5f * (pts[(best + 1) % 3].z - zv);
+                pos = Mid2(pts[best], pts[(best + 1) % 3]);
                 dir.x = pts[(best + 2) % 3].x - pos.x;
                 dir.z = pts[(best + 2) % 3].z - pos.z;
                 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
