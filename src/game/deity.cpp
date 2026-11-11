@@ -1334,24 +1334,27 @@ void fn_801B2D28(DeityStatus* s) {
     memset(&s->leaderLap, 0, 0x1C);
     s->leaderLap = fn_801B307C();
     s->first = fn_801B2F40(0);
+    s32 m = lbl_8055E6A8;
     if (lbl_8055E691) {
-        s32 m = lbl_8055E6A8;
-        s->a574 = 0;
-        s->a578 = 0;
-        s->green = lbl_8055E6A4;
-        s->left = fn_801B306C();
-        (void)m;
+        m = 0;
     }
+    s->a574 = m;
+    s->a578 = m;
+    s->green = lbl_8055E6A4;
+    s->left = fn_801B306C();
     s->laps = lbl_8055E680;
     for (int i = 0; i < lbl_8055E678; i++) {
         s->cars[i] = *lbl_8055E684[i].State();
     }
-    if (fn_801E89EC()) {
-        s->countdown = 0;
-    } else if (lbl_8055E6A0) {
-        s->countdown = (int)(lbl_8055E6A4 - lbl_8055E3C8) + 1;
+    if (!fn_801E89EC()) {
+        if (lbl_8055E6A0) {
+            f32 now = lbl_8055E3C8;
+            s->countdown = (int)(lbl_8055E6A4 - now) + 1;
+        } else {
+            s->countdown = -1;
+        }
     } else {
-        s->countdown = -1;
+        s->countdown = 0;
     }
 }
 
