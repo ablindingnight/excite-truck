@@ -57,7 +57,6 @@ static UnkStatic123s lbl_8042FC70;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E234 = MakeILPos(0x7F00, 0);
 static inline s32 NoModel(void) { return -1; }
-s32 lbl_8055E254 = NoModel();  // the spin-trigger model, loaded on first use
 
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
@@ -1449,6 +1448,18 @@ int sprintf(char* buf, const char* fmt, ...);
 }
 
 
+// .sbss in address order: these come before the stunt-text local statics' guard bytes.
+ILayout* lbl_8055E238;
+ILayout* lbl_8055E23C;
+ILayout* lbl_8055E240;
+ILayout* lbl_8055E244;
+ILayout* lbl_8055E248;
+f32 lbl_8055E24C;  // high-speed threshold
+s32 lbl_8055E250;
+s32 lbl_8055E254 = NoModel();  // the spin-trigger model, loaded on first use
+s32 lbl_8055E258;  // pickups alive
+
+
 namespace {
 inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
     CarHud* h;
@@ -2491,7 +2502,7 @@ void fn_80167834(void);
 void fn_8016A0B0(void);
 }
 
-extern BetaMaster* lbl_8055E268;
+BetaMaster* lbl_8055E268;
 extern ILayout* lbl_8055E238;
 extern ILayout* lbl_8055E23C;
 extern ILayout* lbl_8055E240;
