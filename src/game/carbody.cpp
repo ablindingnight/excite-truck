@@ -1650,7 +1650,7 @@ void fn_80183E7C(u8* p) {
         } else {
             F32(p, 0x2614) = lbl_80561CAC;
         }
-        if (F32(p, 0x2614) >= lbl_80561D44) {
+        if (!(F32(p, 0x2614) < lbl_80561D44)) {
             if (F32(p, 0x4C) > lbl_80561CDC) {
                 F32(p, 0x2614) = lbl_80561CAC;
             } else if ((f32)__fabs(F32(p, 0x58)) <= lbl_80561CDC) {
@@ -1714,7 +1714,7 @@ void fn_80183E7C(u8* p) {
     F32(p, 0x25A4) = nx;
     f32 len = PSVECMag(p + 0x25A4);
     F32(p, 0x25AC) = nz;
-    if (len <= lbl_80561CCC) {
+    if (!(len > lbl_80561CCC)) {
         F32(p, 0x25A4) = lbl_80561CAC;
         F32(p, 0x25A8) = lbl_80561CD0;
         F32(p, 0x25AC) = lbl_80561CAC;
