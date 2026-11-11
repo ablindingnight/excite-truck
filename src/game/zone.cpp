@@ -1617,8 +1617,8 @@ void Gate::Init(ValueNode* node, f32 w) {
     ValPoint n = GetPt(node, "tan");
     ValPoint q;
     Perp(&n);
-    q.y = c.y + n.y * w;
     q.x = c.x + n.x * w;
+    q.y = c.y + n.y * w;
     b.y = 0.0f;
     a.y = 0.0f;
     b.x = q.x;
