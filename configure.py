@@ -1235,7 +1235,7 @@ config.libs.append(
             Object(NonMatching, "game/pathcareer.cpp"),
             Object(NonMatching, "game/evpath.cpp"),
             Object(NonMatching, "game/efxman.cpp"),
-            Object(NonMatching, "game/smoke.cpp"),
+            Object(Matching, "game/smoke.cpp"),
             Object(NonMatching, "game/sparks.cpp"),
             Object(NonMatching, "game/skid.cpp"),
             Object(NonMatching, "game/partman.cpp"),

@@ -59,7 +59,9 @@ struct SVec {
     f32 z;
 };
 
-struct SmokeDesc {
+// The particle emitter description (PartParams in partman/precip); its constructor sets the defaults.
+struct PartParams {
+    PartParams(void);
     s32 kind;       // offset 0x0
     s32 max;        // offset 0x4
     f32 size0;      // offset 0x8
@@ -127,10 +129,9 @@ ValueNodeV* fn_80287E80(SmokeModel* model, const char* name);
 ValVec3 fn_80287ED0(SmokeModel* model, const char* node, const char* key);
 const SmokePart* fn_80288060(SmokeModel* model, int i);
 SmokeModel* fn_80288208(s32 i);
-void* fn_8028E2F8(SmokeDesc* desc, const char* name, const char* tex);
+void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
-void fn_8028E61C(SmokeDesc* desc);
 void* memset(void* dst, int c, size_t n);
 }
 
@@ -370,8 +371,7 @@ void EngineSmokeMan::InitPos(void) {
 }
 
 void EngineSmokeMan::InitLight(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x60;
     e.size0 = 1.5f;
     e.size1 = 0.2f;
@@ -400,8 +400,7 @@ void EngineSmokeMan::InitLight(void) {
 }
 
 void EngineSmokeMan::InitHeavy(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0xA0;
     e.size0 = 1.5f;
     e.size1 = 0.25f;
@@ -430,8 +429,7 @@ void EngineSmokeMan::InitHeavy(void) {
 }
 
 void EngineSmokeMan::InitFire(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x100;
     e.size0 = 1.7f;
     e.size1 = 0.4f;
@@ -504,8 +502,7 @@ void ExhaustSmokeMan::Clear(void) {
 }
 
 void ExhaustSmokeMan::InitLight(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x80;
     e.size0 = 0.2f;
     e.size1 = 1.0f;
@@ -531,8 +528,7 @@ void ExhaustSmokeMan::InitLight(void) {
 }
 
 void ExhaustSmokeMan::InitDark(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x60;
     e.size0 = 1.75f;
     e.size1 = 1.0f;
@@ -581,8 +577,7 @@ FireSmokeMan::~FireSmokeMan(void) {
 }
 
 void FireSmokeMan::InitSmall(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x60;
     e.size0 = 1.5f;
     e.size1 = 0.15f;
@@ -611,8 +606,7 @@ void FireSmokeMan::InitSmall(void) {
 }
 
 void FireSmokeMan::InitLarge(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x80;
     e.size0 = 2.75f;
     e.size1 = 0.1f;
@@ -671,8 +665,7 @@ void RadiatorSmokeMan::Update(int i, int state) {
 }
 
 void RadiatorSmokeMan::InitEmitter(void) {
-    SmokeDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x80;
     e.size0 = 1.7f;
     e.size1 = 0.4f;
