@@ -224,6 +224,8 @@ const char* lbl_8032E540[15] = {
     "roll", "car_throw", "jump_combo", "car_hit_car", "car_hit_car", "crash", "ring",
 };
 
+f32 lbl_8055A02C = 100.0f;  // close-call speed
+
 const char* lbl_8032E668[16] = {
     "Stunt:AIR",       "Stunt:LANDING_BOOST", "Stunt:OFFROAD",   "Stunt:DRIFT",       "Stunt:TREE_RUN",
     "Stunt:TURBO_TREE_RUN", "Stunt:HISPEED",  "Stunt:360",       "Stunt:ROLL",        "Stunt:CAR_THROW",

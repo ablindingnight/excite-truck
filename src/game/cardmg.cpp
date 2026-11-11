@@ -864,7 +864,7 @@ extern const f32 lbl_80562028;  // 1/150000
 extern const f32 lbl_8056202C;  // 0.6
 extern const f32 lbl_80562030;  // 0.03
 extern const f32 lbl_80562034;  // 0.9
-extern const f32 lbl_8055A460;  // 4
+f32 lbl_8055A460 = 4.0f;  // 4
 extern f32 lbl_80558DC4[];      // FLT_EPSILON
 int fn_80189BDC(u8* p);
 u8* fn_8017960C(s32 car);

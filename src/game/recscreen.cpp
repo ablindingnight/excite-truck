@@ -19,7 +19,7 @@ void fn_80235380(u8* p);
 
 void operator delete(void* p);
 
-extern s32 lbl_8055C390;
+s32 lbl_8055C390 = -1;
 
 ModuleTag lbl_8055F3A8;
 UnkStatic123s lbl_80498EB8;

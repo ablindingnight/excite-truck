@@ -1292,7 +1292,7 @@ u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
 
 extern const f32 lbl_805622E8;  // 0.5
 f32 PSVECSquareDistance(const void* a, const void* b);
-extern f32 lbl_8055A4C0;           // 0.8, car-on-car friction
+f32 lbl_8055A4C0 = 0.8f;           // 0.8, car-on-car friction
 extern const f32 lbl_80562308;     // 0.05
 extern const f32 lbl_80562340;     // 0.0016683352
 
@@ -4332,6 +4332,8 @@ s32 fn_801A51B0(u8* p) {
 u32 fn_801A51CC(u8* p) { return U32(p, 0x34); }
 
 void fn_801A51D4(u8* p, u32 v) { U32(p, 0x34) = v; }
+
+u8 lbl_8055A518 = 1;  // unused in ET (its users are gone); last object of .sdata
 
 
 

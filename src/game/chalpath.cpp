@@ -488,7 +488,7 @@ static inline void BuildMap(PathScreenBuf* s) {
     }
 }
 
-extern s32 lbl_8055C400;
+s32 lbl_8055C400 = -1;
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);

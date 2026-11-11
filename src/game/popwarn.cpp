@@ -685,6 +685,7 @@ int fn_8024762C(void) {
     return 0;
 }
 
+s32 lbl_8055BEA8 = 4;
 s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
@@ -792,6 +793,8 @@ void fn_80247A0C(void) {
 void fn_80247AAC(void) { lbl_8055BEB4 = fn_80214D04(); }
 
 // Challenge difficulty menu.
+s32 lbl_8055BEC0 = -1;
+
 int fn_80247AD0(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80247A0C, 0, 0),
@@ -1011,6 +1014,9 @@ extern "C" {
 
 }  // extern "C"
 
+s32 lbl_8055BEF0 = 0x352;
+f32 lbl_8055BEF4 = 0.7f;
+
 static inline void RestartRamps(u8* o) {
     s32 b;
     s32 a;
@@ -1032,7 +1038,6 @@ void fn_80248398(void) {
 
 }  // extern "C"
 
-extern f32 lbl_8055BEF4;  // 0.7f
 
 typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
 
