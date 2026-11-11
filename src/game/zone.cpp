@@ -1027,7 +1027,7 @@ public:
     void DrawScore(int p, CarState* c);
     void DrawMissedFlag(int p, CarState* c);
     void DrawGateBonus(int p, CarState* c);
-    void DrawRing(Gate* g, int c);
+    void DrawRing(const Gate* g, int c);
     CarState* GetCar(int i) { return &cars[i]; }
     int Paused(f32 now) { return 0; }
     ZoneLevel* CurLevel(void) const { return &levels->levels[level]; }
@@ -2286,7 +2286,7 @@ struct RingMtx {
     Vec3 pos;
 };
 
-void ZoneMaster::DrawRing(Gate* g, int c) {
+void ZoneMaster::DrawRing(const Gate* g, int c) {
     RingMtx m;
     f32 s;
     m.x.Set(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
