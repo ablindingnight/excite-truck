@@ -273,8 +273,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         EVec2 p;
         p.x = -181.01926f;
         p.y = 181.01926f;
-        f32 na = -a;
-        Rotate(&p, na);
+        Rotate(&p, -a);
         fn_802C8E00(-1, 0, p.x, 0.0f, p.y, -0.20710647f, -0.20710647f);
         Rotate(&p, -1.5707963705062866);
         fn_802C8E00(-1, 0, p.x, 0.0f, p.y, 1.2071065f, -0.20710647f);
