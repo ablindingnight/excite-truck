@@ -218,10 +218,11 @@ int fn_8026A698(u8* p, int i) {
                 s->spin = (f32)__fabs(s->spin);
             }
         }
+        f32 swing = 2.3561945f;  // 3*pi/4
         if (s->spin > 0.0f) {
-            s->yaw += 2.3561945f;
+            s->yaw += swing;
         } else {
-            s->yaw -= 2.3561945f;
+            s->yaw -= swing;
         }
         s->spin *= -0.1f;
         s->target.x = F32(p, 0xE4);
