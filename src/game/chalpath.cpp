@@ -1096,7 +1096,7 @@ void fn_802621F0(u8* p) {
     fn_802354A0(PTR(p, 0x20), part, x, y, lbl_80563B90, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
     if (U8(p, 0x1C) && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
-        u32 c = (alpha << 24) | (tile & 0xFF0000) | (tile & 0xFFFF);
+        u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
         f32 hw = 0.5f * (f32)S32(p, 0xC);
         f32 hh = 0.5f * (f32)S32(p, 0x10);
         fn_802354A0(PTR(p, 0x20), part, x - grow * hw, y + grow * hh, lbl_80563B90, (lbl_80563B88 + grow) * (f32)S32(p, 0xC),
