@@ -76,6 +76,8 @@ int fn_80138C28(Motion* m, f32* t, f32* miss) {
     return 0;
 }
 
+enum CatchupCase { CU_NONE = -1, CU_DECEL = -2, CU_BRAKE = -3, CU_MISS = -4, CU_HIT = -5 };  /* Enum names unproven */
+
 f32 fn_80138DF4(Motion* m) {
     f32 r;
     if (!fn_80138BFC(m->Dp())) {
@@ -85,9 +87,9 @@ f32 fn_80138DF4(Motion* m) {
             if (fn_80138C28(m, &t, &miss)) {
                 f32 n = m->v2 + m->a2 * t - m->v1;
                 r = n / MaxF(t, 0.01f);
-                lbl_8055E100 = -5;
+                lbl_8055E100 = CU_HIT;
             } else {
-                lbl_8055E100 = -4;
+                lbl_8055E100 = CU_MISS;
                 r = miss;
             }
         } else {
@@ -97,10 +99,10 @@ f32 fn_80138DF4(Motion* m) {
             if (fn_80138BE4(m->Dv(), m->Dp())) {
                 r = -r;
             }
-            lbl_8055E100 = fn_80138BE4(m->Dv(), m->Dp()) ? -3 : -2;
+            lbl_8055E100 = fn_80138BE4(m->Dv(), m->Dp()) ? CU_BRAKE : CU_DECEL;
         }
     } else {
-        lbl_8055E100 = -1;
+        lbl_8055E100 = CU_NONE;
         r = 0.0f;
     }
     return r;
