@@ -562,7 +562,8 @@ void fn_8018DA5C(u8* p, u8* m) {
             v.y = 0.0f;
             v.z = 0.0f;
             f32 z = F32(pt, 0x28);
-            f32 az = (f32)__fabs(z);
+            double az_d = __fabs(z);
+            f32 az = az_d;
             v.x += roll * (-0.3f * (F32(pt, 0x20) * (az - 0.7f)));
             v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
             v.z += -0.5f * z * roll;

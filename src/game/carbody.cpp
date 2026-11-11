@@ -3203,7 +3203,8 @@ void fn_8018956C(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, in
             if (mag > 0.1f) {
                 PSVECNormalize(&dir, &dir);
             }
-            f32 a = __fabs(PSVECDotProduct(&dir, p + 0x118));
+            double a_d = __fabs(PSVECDotProduct(&dir, p + 0x118));
+            f32 a = a_d;
             f32 b = __fabs(PSVECDotProduct(&dir, other + 0x118));
             f32 d = b - a;
             if (d > 6.6666665f && b > 1.5f * a) {
