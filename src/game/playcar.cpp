@@ -1156,7 +1156,6 @@ extern f32 lbl_8055E3C8;  // race time
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern const f32 lbl_805620BC;  // 10
 extern const f32 lbl_805620F0;  // -2
-extern const double lbl_80562120;  // 1.0
 extern const f32 lbl_80562128;  // -0.05
 
 class RigidBody {
@@ -1439,7 +1438,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 sr;
         f32 airt;
         c5 = PTR(p, 0x34);
-        fmod(lbl_8055E3C8, lbl_80562120);
+        fmod(lbl_8055E3C8, 1.0);
         buzz = (0.25f * ga + 0.25f * gb) * (odd ? kNegOne : kOne);
         ((Gearbox*)PTR(p, 0x38))->v50(kZero, fn_8018AE4C(c5) * 0.25f, wob + buzz);
         f32 turn;

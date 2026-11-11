@@ -1100,7 +1100,6 @@ WidgetFragment* fn_8021F678(WidgetFragment* self,int x,int y,int width,int heigh
 }
 
 extern "C" {
-extern const float lbl_80563518;extern u32 lbl_8033E7F4[];
 void fn_8021FA98(WidgetFragment *self, int x, int y);
 void fn_8021FC40(WidgetFragment* self,void* context);
 void fn_8021FD68(WidgetFragment* self);

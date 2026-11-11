@@ -309,7 +309,6 @@ struct ObMesh {
 extern const f32 lbl_8056249C;  // 0.8
 extern const f32 lbl_805624A4;  // -1
 extern const f32 lbl_805624AC;  // 1
-extern const double lbl_805624B8;  // pi/2
 extern f32 lbl_80558DC4[];      // FLT_EPSILON
 
 extern "C" {
@@ -641,8 +640,8 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         ObVec3 v = start;
         AddCornerV(p, v, spring);
         f32 m[9];
-        cs = cos(lbl_805624B8);
-        f32 sn = sin(lbl_805624B8);
+        cs = cos(1.5707963705062866);
+        f32 sn = sin(1.5707963705062866);
         m[0] = cs;
         m[1] = lbl_8056247C;
         m[2] = -sn;

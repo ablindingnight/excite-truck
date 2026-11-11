@@ -104,7 +104,6 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 int fn_801EA098(const s16* hint, f32* pos, f32* normal, int* flags, f32 x, f32 z);
 
 double cos(double x);
-extern const double lbl_80563FB8;  // ground tilt limit (radians)
 extern const f32 lbl_80563FDC;
 
 f32 fn_8018AE3C(u8* car);
@@ -154,7 +153,7 @@ void fn_80273BD0(u8* p) {
     c->frame.t.y = c->frame.t.y + w.y;
     c->frame.t.z = c->frame.t.z + w.z;
     int flags = 0;
-    static f32 cosLimit = (f32)cos(lbl_80563FB8);
+    static f32 cosLimit = (f32)cos(0.5235987901687622);
     if (!fn_801EA098((s16*)(c->car + 0x6C), &pos.x, &n.x, &flags, c->carFrame.t.x, c->carFrame.t.z)) {
         n.x = c->carFrame.m[3];
         n.y = c->carFrame.m[4];
@@ -379,7 +378,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
     c->frame.t.y = c->frame.t.y + w.y;
     c->frame.t.z = c->frame.t.z + w.z;
     int flags = 0;
-    static f32 cosLimit = (f32)cos(lbl_80563FB8);
+    static f32 cosLimit = (f32)cos(0.5235987901687622);
     if (!fn_801EA098((s16*)(c->car + 0x6C), &pos.x, &n.x, &flags, c->carFrame.t.x, c->carFrame.t.z)) {
         n.x = c->carFrame.m[3];
         n.y = c->carFrame.m[4];
@@ -586,7 +585,6 @@ double cos(double x);
 int fn_801E9E30(u8* ground, f32* pos);
 extern f32 lbl_8055E3C8;         // game time
 f32 lbl_8055F588;         // last ground height
-extern const double lbl_80564038;  // 2 pi
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FC4;
 
@@ -595,7 +593,7 @@ extern const f32 lbl_80563FC4;
 static inline f32 CsLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
-    F32(p, 0x15C) = fmod(speed * lbl_8055E3C8, lbl_80564038);
+    F32(p, 0x15C) = fmod(speed * lbl_8055E3C8, 6.2831854820251465);
     f32 s = radius * (f32)sin(F32(p, 0x15C));
     f32 c = radius * (f32)cos(F32(p, 0x15C));
     CsVec pos;

@@ -1453,8 +1453,6 @@ f32 PSVECMag(const void* v);
 void PSVECNormalize(const void* a, void* b);
 f32 PSVECDotProduct(const void* a, const void* b);
 extern u8* lbl_8055E908;
-extern const double lbl_80561E80;  // 2 pi
-extern const double lbl_80561ED8;  // 4503599627370496 (int -> float bias)
 extern const f32 lbl_80561CB0, lbl_80561CC0, lbl_80561CDC, lbl_80561DE4, lbl_80561E5C, lbl_80561CCC, lbl_80561CD0, lbl_80561CD8, lbl_80561CE4, lbl_80561CFC,
     lbl_80561D00, lbl_80561D04, lbl_80561D2C, lbl_80561D34, lbl_80561D38, lbl_80561D44, lbl_80561D50,
     lbl_80561D60, lbl_80561D98, lbl_80561DA0, lbl_80561DA4, lbl_80561DC0, lbl_80561DD0, lbl_80561DEC,
@@ -2633,7 +2631,7 @@ void fn_80186DE8(u8* p) {
             CbVec4 s1(0.0f, 0.0f, 0.0f, 0.0f);
             CbVec4 s0(0.0f, 0.0f, 0.0f, 0.0f);
             s1[wh] = (a - lbl_80561E6C) * (a - lbl_80561E70) * (lbl_80561E74 * a) * lbl_80561E78;
-            b = fmod(lbl_80561E7C + a, lbl_80561E80);
+            b = fmod(lbl_80561E7C + a, 6.2831854820251465);
             x->v130 = s1.Sol();
             s0[wh] = -((b - lbl_80561E6C) * (b - lbl_80561E70) * (lbl_80561E74 * b)) * lbl_80561E78;
             x->v140 = s0.Sol();
@@ -2704,7 +2702,7 @@ void fn_80186DE8(u8* p) {
             f32 spin = w1[j];
             w->loadN = load / lbl_80561CC0;
             w->spin = spin;
-            w1[j] = fmod(lbl_80561E6C + spin, lbl_80561E80);
+            w1[j] = fmod(lbl_80561E6C + spin, 6.2831854820251465);
             w->prevSlip = w->slip;
             w->slip = w2[j];
             w->steer = asin(steer * w4[j] + w3[j]);
@@ -2928,11 +2926,7 @@ extern const f32 lbl_80561D9C;  // 1/60 s
 extern const f32 lbl_80561DE4;  // -1.0
 extern const f32 lbl_80561E5C;  // -1.5
 extern const f32 lbl_80561EE0;  // 0.5/60
-extern const f32 lbl_80561EE4;  // -100.0
 extern const f32 lbl_80561EE8;  // 0.95
-extern const f32 lbl_80561EEC;  // 1 - 0.95
-extern const f32 lbl_80561EF0;  // 15 degrees
-extern const f32 lbl_80561EF4;  // -2.5 degrees
 
 static inline f32 SwayMin(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 SwayMax(f32 a, f32 b) { return a > b ? a : b; }
@@ -2988,19 +2982,19 @@ void fn_80188A80(u8* p) {
     SwayRotate(&a, (BVec*)(p + 0x16C), (f32*)(p + 0x3C));
     Scale(&a, &a, lbl_80561DE4);
     AddScaled(&f, &a, acc, lbl_80561E5C);
-    AddScaled(&f, &f, ang, lbl_80561EE4);
+    AddScaled(&f, &f, ang, -1.0e2f);
     AddScaled(&f, &f, vel, -5.0f);
     AddScaled(vel, vel, &f, lbl_80561D9C);
     AddScaled(ang, ang, vel, lbl_80561D9C);
     Scale(acc, acc, lbl_80561EE8);
-    AddScaled(acc, acc, &a, lbl_80561EEC);
+    AddScaled(acc, acc, &a, 0.050000012f);
     acc->z = lbl_80561CAC;
     acc->y = lbl_80561CAC;
-    if (ang->z < lbl_80561EF4) {
-        ang->z = lbl_80561EF4;
+    if (ang->z < -0.04363323f) {
+        ang->z = -0.04363323f;
         vel->z = SwayMax(vel->z, lbl_80561CAC);
     }
-    ang->z = SwayMin(lbl_80561EF0, ang->z);
+    ang->z = SwayMin(0.2617994f, ang->z);
 }
 
 u32 DeityCar_vf7C(u8* p) { return 0; }

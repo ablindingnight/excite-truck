@@ -310,9 +310,7 @@ extern u32 lbl_8055F508;        // the orbit camera's last update time (ms)
 extern f32 lbl_8055F50C;        // its yaw
 extern f32 lbl_8055F510;        // its pitch
 extern u32 lbl_8055F514;        // the pad camera's last update time (ms)
-extern const double lbl_80563DD0;
 extern const f32 lbl_80563DF0;  // 30 degrees
-extern const f32 lbl_80563DFC;  // 10.0f
 extern const f32 lbl_80563E00;  // 2 degrees
 int fn_802D3EBC(void);
 int fn_80137CFC(int player);
@@ -596,7 +594,7 @@ void fn_8026C014(int player) {
         f32 x;
         f32 z;
         lbl_8055F508 = now;
-        speed = 4.0f * ((lbl_80563DFC * dt) / 4.0f);
+        speed = 4.0f * ((1.0e1f * dt) / 4.0f);
         yawRate = dt * lbl_80563DF0;
         fovRate = dt * lbl_80563E00;
         lo = 0.2617994f;
@@ -670,7 +668,7 @@ void fn_8026C014(int player) {
         f32 lift;
         lbl_8055F514 = now;
         turn = dt * lbl_80563DF0;
-        speed = 0.25f * (lbl_80563DFC * dt);
+        speed = 0.25f * (1.0e1f * dt);
         fovRate = dt * lbl_80563E00;
         t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
         lo = 0.2617994f;
