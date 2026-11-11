@@ -323,8 +323,8 @@ void AchClearSession(void) {
     memset(&s_race, 0, sizeof(AchStats));
 }
 
-void AchMerge(AchStats* dst, AchStats* src) {
-    AchModelStat* s;
+void AchMerge(AchStats* dst, const AchStats* src) {
+    const AchModelStat* s;
     AchModelStat* d;
     u32 i;
     int found;
