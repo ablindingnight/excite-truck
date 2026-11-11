@@ -560,13 +560,13 @@ ResourceSet* fn_8012AFE0(const char* path, const char* name) {
 }
 
 // Stripped from ET; only their strings remain.
-void ResCacheSets(void) {
+static void ResCacheSets(void) {
     fn_802E30C8("tracks,tracks2,");
     fn_802E30C8("car,car2,");
     fn_802E30C8("uicar.res");
 }
 
-void ResCacheReport(const char* name, s32 bytes, s32 ms, f32 kps) {
+static void ResCacheReport(const char* name, s32 bytes, s32 ms, f32 kps) {
     fn_802E30C8("rescache: %s: copied %d bytes in %d ms (%.1f K/s)", name, bytes, ms, kps);
 }
 
