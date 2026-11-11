@@ -71,5 +71,5 @@ void fn_801274C0(void) {
 CallbackList lbl_8041D728[5];
 
 /* .sbss owned by this unit (0x8055DF00-0x8055DF09). */
-char lbl_8055DF00[8];
 char lbl_8055DF08;
+char lbl_8055DF00[8];

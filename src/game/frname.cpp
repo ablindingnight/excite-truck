@@ -31,11 +31,10 @@ static inline void CopyName(const char* src, int n, char* dst) {
         }
     }
 }
-s32 lbl_8055F3C4;
-
 ModuleTag lbl_8055F3B8;
 UnkStatic123s lbl_80498ED0;
 UnkStatic7F lbl_8055F3C0;
+s32 lbl_8055F3C4;
 
 // One car icon's texture rectangles.
 struct IconEntry {

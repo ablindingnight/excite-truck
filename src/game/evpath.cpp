@@ -144,17 +144,6 @@ struct AnimName {
 };
 
 ModuleTag lbl_8055F670;
-u8 lbl_8055F67C;
-UIObjects* lbl_8055F680;
-bool lbl_8055F684;
-u8 lbl_8055F685;
-s32 lbl_8055F688;
-s32 lbl_8055F68C;
-s32 lbl_8055F690;
-s32 lbl_8055F694;
-u32 lbl_8055F698;
-s32 lbl_8055F69C;
-u8 lbl_8055F6A0;  // first showing of the cup screen: advance to the next cup
 
 // The "cup unlocked" flash shown in the unlock message box (menu item type 5).
 class EventUnlockFx : public MenuState {
@@ -169,6 +158,17 @@ public:
 
 static UnkStatic123s lbl_804B2FF8;            // this unit's end-of-menu tag
 UnkStatic7F lbl_8055F678;
+u8 lbl_8055F67C;
+UIObjects* lbl_8055F680;
+bool lbl_8055F684;
+u8 lbl_8055F685;
+s32 lbl_8055F688;
+s32 lbl_8055F68C;
+s32 lbl_8055F690;
+s32 lbl_8055F694;
+u32 lbl_8055F698;
+s32 lbl_8055F69C;
+u8 lbl_8055F6A0;  // first showing of the cup screen: advance to the next cup
 static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
 // Index of a cup bar in the current path's list (the bar is held as an s32 handle).
