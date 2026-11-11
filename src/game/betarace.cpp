@@ -1355,7 +1355,9 @@ struct StuntKind {
     int Is(s32 t) const { return type == t; }
 };
 
-extern const StuntKind lbl_802F9410[6];
+const StuntKind lbl_802F9410[6] = {
+    {0, "air", 0}, {2, "off", 0}, {3, "drift", 0}, {4, "tree", 0}, {14, "ring", 0}, {7, "360", 0},
+};
 
 struct HiNames {
     const char* a;     // offset 0x0
@@ -2331,9 +2333,6 @@ void BetaCar::DrawResults(ILayout* l, int view) {
 }
 #pragma inline_depth(smart)
 
-const StuntKind lbl_802F9410[6] = {
-    {0, "air", 0}, {2, "off", 0}, {3, "drift", 0}, {4, "tree", 0}, {14, "ring", 0}, {7, "360", 0},
-};
 
 void BetaCar::StopBonus(void) {
     if (result.dnf) {
