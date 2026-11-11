@@ -610,6 +610,22 @@ void* operator new(size_t size, const char* name);
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
+// The custom-view interface (as in achview): its all-pure vtable is the 0x28 zero bytes after IMenuState's in .data.
+// Declared first: MWCC emits a unit's weak vtables in reverse declaration order.
+class IMenuCustomView {
+public:
+    virtual ~IMenuCustomView(void) = 0;
+    virtual void SetCar(const char* name) = 0;
+    virtual void Unk10(void) = 0;
+    virtual void Update(f32 dt, int x, int y, int w, int h) = 0;
+    virtual void SetupCamera(void) = 0;
+    virtual void Draw(void) = 0;
+    virtual int Unk20(void) = 0;
+    virtual void Unk24(void) = 0;
+};
+
+inline IMenuCustomView::~IMenuCustomView(void) {}
+
 // The menu state interface (as in unlkmenu): its all-pure vtable is the 0x60 zero bytes that follow the item
 // vtables in .data.
 class IMenuState {
@@ -692,7 +708,7 @@ struct ResourceLoader {
     s32 refs;               // offset 0x24
 };
 
-class CarUIScreen {
+class CarUIScreen : public IMenuCustomView {
 public:
     CarUIScreen(int mode);
     virtual ~CarUIScreen(void);
