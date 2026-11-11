@@ -19,9 +19,8 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
     u32 num_sector;
     s32 err;
 
-    found = 0;
     part_id = p_part->part_id;
-    p_part->start_sector = found;
+    p_part->start_sector = 0;
     p_part->total_sector = p_part->p_disk->disk_info.total_sectors;
 
     err = VFipdm_disk_physical_read(p_part->p_disk, buf, 0, 1, 512, &num_success);
@@ -31,6 +30,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
 
     VFipdm_mbr_check_master_boot_record(buf, p_part->p_disk->disk_info.total_sectors, &is_mbr);
     if (is_mbr != 0) {
+        found = 0;
         start_sectors[0] = buf[0x1C6] + (buf[0x1C7] << 8) + (buf[0x1C8] << 16) + (buf[0x1C9] << 24);
         start_sectors[1] = buf[0x1D6] + (buf[0x1D7] << 8) + (buf[0x1D8] << 16) + (buf[0x1D9] << 24);
         start_sectors[2] = buf[0x1E6] + (buf[0x1E7] << 8) + (buf[0x1E8] << 16) + (buf[0x1E9] << 24);
@@ -101,7 +101,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
         if (part_id >= 2) {
             return 7;
         }
-        p_part->start_sector = found;
+        p_part->start_sector = 0;
         p_part->total_sector = p_part->p_disk->disk_info.total_sectors;
     }
     return 0;
