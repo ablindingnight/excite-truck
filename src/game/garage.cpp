@@ -450,7 +450,7 @@ int IdentGetCurrentSlot(void);
 void CarStatsInit(void);
 void CarStatsShutdown(void);
 extern u8 lbl_8055FC8C;            // widescreen
-extern const char lbl_8055B860[];  // ""
+extern const char lbl_8055B860[8];  // ""
 
 // Heap use at the start of a screen, for leak checks.
 class HeapMark {

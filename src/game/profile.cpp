@@ -478,7 +478,7 @@ struct ProfileMenuDesc {
     int (*poll)(int*); int unkC,unk10;
 };
 extern char lbl_8055BAC0[8];
-extern char lbl_8055B860[];
+extern char lbl_8055B860[8];
 int fn_802146BC(ProfileMenuDesc*, int, int, int);
 void fn_802149C4(const char*);
 void fn_802149FC(const char*);
