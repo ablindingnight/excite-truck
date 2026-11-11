@@ -898,8 +898,7 @@ void fn_801945F8(u8* d, const char* why) {
 }
 
 static inline f32 Blend(u8* d, u8* a, u8* b, int o) {
-    f32 t = Clamp01((F32(d, 0x26C) - F32(d, 0x2DC)) / F32(b, 0x0));
-    return F32(a, o) + t * (F32(b, o) - F32(a, o));
+    return LerpT(Clamp01((F32(d, 0x26C) - F32(d, 0x2DC)) / F32(b, 0x0)), F32(a, o), F32(b, o));
 }
 
 void fn_80194624(u8* d) {
