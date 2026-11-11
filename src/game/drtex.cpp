@@ -407,9 +407,9 @@ void fn_802D81C4(GXTexDesc* d) {
         Swap32(&pal[i]);
     }
     fn_801282EC(0x20);
+    u8* tmp = new ("tmp_tx8") u8[w * h / 2];
+    memcpy(tmp, tex, w * h / 2);
     row = w / 2;
-    u8* tmp = new ("tmp_tx8") u8[row * h];
-    memcpy(tmp, tex, row * h);
     int tw = row / 4;
     int y;
     const u8* src = tmp;
