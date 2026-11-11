@@ -224,8 +224,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
                 b = short_map[i] >> 4;
                 idx = sf_short[b][w];
-                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
                 m = lbl_802F3A00[row][idx];
+                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
                 if (x < 0) {
                     x = -x;
                 }
@@ -325,8 +325,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
                 b = mixed_map[i];
                 idx = lbl_802F39E8[b] * *preflag + sf_long[b];
-                e = e0 + lbl_802F3A8C[row][idx];
                 m = lbl_802F3A00[row][idx];
+                e = e0 + lbl_802F3A8C[row][idx];
                 x = v;
                 if (v < 0) {
                     x = -v;
@@ -406,8 +406,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     continue;
                 }
                 idx = sf_short[short_map[i] >> 4][w];
-                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
                 m = lbl_802F3A00[row][idx];
+                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
                 if (e > 0x33) {
                     out->sxr[w][k] = 0;
                     continue;

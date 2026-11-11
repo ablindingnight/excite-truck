@@ -315,8 +315,8 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                     fn_800C2DBC(pa + 18, pb, pb + 17);
                     pa += 36;
                     pb += 18;
-                    pc2++;
                     pc++;
+                    pc2++;
                 }
             } else {
                 pa = work[0];
