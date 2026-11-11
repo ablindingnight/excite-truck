@@ -188,7 +188,7 @@ public:
     int* value;  // offset 0x10
 };
 
-// A static 0x40-byte record: an int and a ValueLabel showing it. Only the label is constructed (by __sinit); the
+// A static 0x28-byte record (the target .bss: 0x80498958-0x80498980): an int and a ValueLabel showing it. Only the label is constructed (by __sinit); the
 // rest stays zero.
 struct PopWarnValue {
     PopWarnValue(void) : label(&index) {}
@@ -196,7 +196,6 @@ struct PopWarnValue {
     int index;         // offset 0x0
     u8 unk4[0x10];     // offset 0x4
     ValueLabel label;  // offset 0x14
-    u8 unk28[0x18];    // offset 0x28
 };
 
 PopWarnValue lbl_80498958;
