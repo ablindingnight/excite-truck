@@ -283,10 +283,6 @@ f32 lbl_8055FCC0;     // size scale
 
 const char* lbl_8055D038 = "null.tex";
 s32 lbl_8055D03C = -1;  // lightmap
-char lbl_8055D050[] = "mip-0";
-const char* lbl_8055D058 = lbl_8055D050;
-s32 lbl_8055D06C = -2;
-u8 lbl_8055D07D = 1;    // mip0 streaming on
 
 extern "C" {
 
@@ -371,6 +367,9 @@ char* fn_802CA2A8(char* dst, int n, const char* name) {
     }
     return dst;
 }
+
+char lbl_8055D050[] = "mip-0";
+const char* lbl_8055D058 = lbl_8055D050;
 
 s32 fn_802CA380(const char* name) {
     char buf[32];
@@ -772,6 +771,8 @@ s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
     return t - lbl_8055FCB0;
 }
 
+s32 lbl_8055D06C = -2;
+
 void fn_802CB228(s32 id) {
     TexEntry* t = &lbl_8055FCB0[id];
     fn_802D8FB4(t->gx);
@@ -820,6 +821,8 @@ void* fn_802CB38C(void* res, u32 data, s32 kind) {
 void fn_802CB3F4(void* gx) { fn_802D8FB4(gx); }
 
 void fn_802CB3F8(const char* name, const char* what) {}
+
+u8 lbl_8055D07D = 1;    // mip0 streaming on
 
 s32 fn_802CB3FC(s32 id) {
     TTHeader* h = lbl_8055FCB0[id].res;
@@ -1110,7 +1113,7 @@ void TexCacheInflate(s32 k) { fn_802E30C8("texcache: won't inflate cache to %dK"
 
 void TexZHint(s32 id) {
     fn_802E30C8("the z hint is %x", lbl_8055FCB0[id].res->zhint);
-    fn_802E317C("%s", "texture.cpp");
+    fn_802E317C("texture.cpp");
 }
 
 }  // extern "C"
