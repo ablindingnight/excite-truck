@@ -142,13 +142,6 @@ static u8 lbl_805584A0[0x18];    // OSMutex
 static u8 lbl_805584B8[0x328];   // OSThread
 static u8 lbl_805587E0[0x80];    // ID3v1 tag
 
-s32 lbl_8055D25C = -1;  // decoded sample rate
-s32 lbl_8055D260 = -1;  // rate the voices play at
-volatile s32 lbl_8055D264 = -1;  // rate wanted
-s32 lbl_8055D268 = 2;   // decoded channels
-s32 lbl_8055D26C = 2;   // channels in the PCM ring
-f32 lbl_8055D270 = 1.0f;
-
 ModuleTag lbl_80560058;
 u8 lbl_80560060;  // reader in use
 volatile u8 lbl_80560061;  // SD inserted
@@ -268,6 +261,13 @@ FileReader::~FileReader(void) {
 extern "C" {
 
 void fn_802E9BCC(Mp3Reader* r) { delete r; }
+
+s32 lbl_8055D25C = -1;  // decoded sample rate
+s32 lbl_8055D260 = -1;  // rate the voices play at
+volatile s32 lbl_8055D264 = -1;  // rate wanted
+s32 lbl_8055D268 = 2;   // decoded channels
+s32 lbl_8055D26C = 2;   // channels in the PCM ring
+f32 lbl_8055D270 = 1.0f;
 
 const char* lbl_8055D274 = "EXCITE TRUCK";
 

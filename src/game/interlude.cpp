@@ -331,7 +331,6 @@ extern s32 lbl_8055E864;
 extern void (*lbl_8055E868)(void);
 extern Menu* lbl_8055E86C;
 extern s32 lbl_8055E870;
-extern f32 lbl_8055A958;    // duration
 
 // One car's standing AI order, set by think events: 0 = none, 1 = follow the line, 2 = drive to a point,
 // 3 = follow a car, 4 = follow a car along the line, 5 = drive a donut.
@@ -505,6 +504,8 @@ int fn_801C34CC(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
 f32 fn_801C34F4(f32 x) { return 180.0f * x / 3.1415927f; }
 
 int fn_801C3508(u32 mask, int i) { return (mask & (1 << i)) != 0; }
+
+f32 lbl_8055A958 = 30.0f;  // interlude duration
 
 // A "who" name to a car mask: nobody, all, last, first, player, the eve leader, even or odd lineup
 // slots, or a lineup index (counted from the end when negative).
@@ -2520,7 +2521,7 @@ void fn_801C855C(void) {
     lbl_8055E820 = 0;
 }
 
-u8 lbl_80337474[0x38] = {
+u8 lbl_80337474[] = {
     0xC8, 0xD0, 0x1C, 0x2E, 0x13, 0x26, 0x23, 0x17, 0x1A, 0x1B, 0xFF, 0x1E, 0x30, 0x2E, 0x20, 0x12, 0x21, 0x22, 0x23,
     0x17, 0x24, 0x25, 0x26, 0x32, 0x31, 0x18, 0x19, 0x10, 0x13, 0x1F, 0x14, 0x16, 0x2F, 0x11, 0x2D, 0x15, 0x2C, 0x02,
     0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0xD3, 0x0E, 0x92, 0x34, 0x39, 0x0C, 0x4A, 0xFF,
