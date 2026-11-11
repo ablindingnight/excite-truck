@@ -829,7 +829,8 @@ public:
 
     int Sliding(const RaceCarRec* rc, u8 was, f32 spd) {
         if (NearZero(rc->f2690) && spd > 5.0f && ground < 0.5f) {
-            f32 side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            double d = __fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            f32 side = d;
             return side > spd * (was ? 0.15f : 0.35f);
         }
         return 0;
