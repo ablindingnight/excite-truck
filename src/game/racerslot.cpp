@@ -252,7 +252,8 @@ int fn_8026A698(u8* p, int i) {
         SVec d;
         SetV3(&d, at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
         f32 xv = s->vel.x;
-        SetXYZ(&s->vel, xv + 0.2f * (d.x - xv), s->vel.y + 0.2f * (d.y - s->vel.y), s->vel.z + 0.2f * (d.z - s->vel.z));
+        f32 blend = 0.2f;
+        SetXYZ(&s->vel, xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
         v = s->vel;
         s->pos.x += v.x * 1.0f;
         s->pos.y += v.y * 1.0f;
