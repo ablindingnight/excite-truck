@@ -317,8 +317,8 @@ SkagBag::SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used)
         do {
             q = (q + 1) & 3;
         } while (Retry(t, 100) && taken[q] >= src[q]->count);
-        SkagPoint* p = &data[count++];
         SkagPoint* s = &src[q]->data[taken[q]];
+        SkagPoint* p = &data[count++];
         p->id = s->id;
         memcpy(p->slots, s->slots, sizeof(p->slots));
         f32 at[2];

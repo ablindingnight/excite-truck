@@ -206,8 +206,8 @@ void fn_80294CCC(const Vec* p, const Vec* r, const Vec* u, f32 w, f32 h, u32 col
     v[1].pos.y = ry + u->y * h;
     v[1].pos.z = rz + u->z * h;
     v[2].pos.x = lx + u->x * nh;
-    v[2].pos.y = ly + u->y * nh;
     v[3].pos.x = rx + u->x * nh;
+    v[2].pos.y = ly + u->y * nh;
     v[2].pos.z = lz + u->z * nh;
     v[3].pos.y = ry + u->y * nh;
     v[3].pos.z = rz + u->z * nh;

@@ -4583,8 +4583,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         u8 *wd2 = dst;
                         u8 *ws2 = src;
                         for (i = 0; i < 8; i++) {
-                            ((u32 *)wd2)[0] = ((u32 *)ws2)[0];
                             ((u32 *)wd2)[1] = ((u32 *)ws2)[1];
+                            ((u32 *)wd2)[0] = ((u32 *)ws2)[0];
                             wd2 += pitch;
                             ws2 += pitch;
                         }

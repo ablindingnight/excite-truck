@@ -795,8 +795,8 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 f32 off = params[2] * (half + ((f32)c - half * (f32)count));
                 V2 p;
                 int ty;
-                p.x = base.x + px * off;
                 p.z = base.z + pz * off;
+                p.x = base.x + px * off;
                 if (rainbow) {
                     ty = *rt;
                 } else {

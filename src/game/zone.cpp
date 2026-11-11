@@ -1211,8 +1211,8 @@ int fn_8013CBC0(CarState* zm, int car) {
     V2 q;
     V2 a;
     V2 b;
-    V2 ab;
     V2 perp;
+    V2 ab;
     V2 pa;
     V2 qa;
     V2 pb;

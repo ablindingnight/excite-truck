@@ -1268,8 +1268,8 @@ void debug_event(void) {
         }
         case 4: {
             TeleportEvent* tp = (TeleportEvent*)e;
-            int i;
             int k = 0;
+            int i;
             for (i = 0; i < lbl_8055E804; i++) {
                 if (!fn_801C3508(tp->mask, i) || !CarTypeIsReal(((ICar*)fn_8017960C(i))->player, 0)) {
                     continue;

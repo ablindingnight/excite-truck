@@ -756,8 +756,8 @@ void fn_802CF10C(u32 count) {
                 k += w;
             }
         } else {
-            int w;
             int y;
+            int w;
             u16 c = cap->data[0];
             w = cap->w;
             for (y = 0; y < cap->h; y++) {

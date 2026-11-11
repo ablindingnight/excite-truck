@@ -238,8 +238,8 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
             v = &lbl_80487578[nv];
             v->pos.x = tp.x + s->p0.x * h1 + h3 * a.x;
             v->pos.y = tp.y + s->p0.y * h1 + a.y * h3;
-            v->pos.z = tp.z + s->p0.z * h1 + a.z * h3;
             v->u = 0.0f;
+            v->pos.z = tp.z + s->p0.z * h1 + a.z * h3;
             v->v = t;
             v->color = c;
             nv++;

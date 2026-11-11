@@ -1361,8 +1361,8 @@ void fn_802D6C78(void) {
                 o++;
             }
         }
-        LCQueueWait(0);
         q->count = 0;
+        LCQueueWait(0);
     }
     SetGQR6();
     q = &lbl_804CEC3C;

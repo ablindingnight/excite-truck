@@ -1287,8 +1287,8 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
     k = k >= 1 ? 1 : k;
     IconEntry* ic = &((IconPool*)PTR(p, 0xC8))->entries[e->icon[k]];
     f32 u1 = ic->u1;
-    f32 v1 = ic->v1;
     f32 v2 = ic->v2;
+    f32 v1 = ic->v1;
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
                 0.8f * w, 0.8f * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),

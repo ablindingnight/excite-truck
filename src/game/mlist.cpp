@@ -446,8 +446,8 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     MCam cam;
     const MCam* v = fn_802C86DC();
     cam = *v;
-    lbl_804C5610 = cam;
     MMtx33 rt = cam.r;
+    lbl_804C5610 = cam;
     Transpose(&rt);
     MVec3 t;
     MulVecT(&t, &cam.t, &cam.r);

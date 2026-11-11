@@ -268,8 +268,8 @@ void fn_801E41E0(const DVec3* pos, u32 color, f32 size) {
     DVtx v[3];
     t.v = 0.0f;
     t.u = 0.0f;
-    v[0] = t;
     t.color = color;
+    v[0] = t;
     v[1] = t;
     v[2] = t;
     u16 idx[3] = {0, 1, 2};

@@ -284,8 +284,8 @@ void fn_801BDA74(int car, CarSetup* s) {
         f32 x0 = 3559.99976f * s->loadFactor;
         f32 x1 = 8900.0f * s->loadFactor;
         f32 sl = 0.25f * s->slip;
-        f32 b0 = 104856.312f * g * sl;
         f32 b1 = 161887.922f * g * sl;
+        f32 b0 = 104856.312f * g * sl;
         f32 kb = (b1 - b0) / (x1 - x0);
         f32 ka = (a1 - (1.46f * g)) / (x1 - x0);
         x->row[11] = x->row[10] = MVec4((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);

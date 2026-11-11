@@ -4031,8 +4031,8 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     b = a;
     fn_802C77F0(lbl_80559ED8, box);
     __typeof__(c.x) c_x = box[0] + (box[1] - box[0]) * 0.5f;
-    c.z = box[4] + (box[5] - box[4]) * 0.5f;
     c.y = box[2] + (box[3] - box[2]) * 0.5f;
+    c.z = box[4] + (box[5] - box[4]) * 0.5f;
     n.z = c.z * -1.0f;
     n.y = c.y * -1.0f;
     c.x = c_x;

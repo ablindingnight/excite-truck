@@ -1234,8 +1234,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             rb->VelAt(&v, c);
             f32 xv = c->x;
             cp.x = xv + v.x * lbl_8056233C;
-            cp.y = c->y + v.y * lbl_8056233C;
             cp.z = c->z + v.z * lbl_8056233C;
+            cp.y = c->y + v.y * lbl_8056233C;
             ToBoxSpace(&l, &cp, &f);
             if (debug) {
                 fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);

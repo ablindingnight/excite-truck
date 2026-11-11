@@ -1845,8 +1845,8 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
         place = node->FindChild(buf);
         if (place) {
             TVec2 pts[3];
-            TVec2 pos;
             TVec2 dir;
+            TVec2 pos;
             int k;
             int best;
             f32 max;

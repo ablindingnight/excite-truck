@@ -237,8 +237,8 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rfoot.z = m2.z;
     DVec3 pelvis;
     pelvis.x = 0.5f * lhip.x + 0.5f * rhip.x;
-    pelvis.y = 0.5f * lhip.y + 0.5f * rhip.y - 1.27f;
     pelvis.z = 0.5f * lhip.z + 0.5f * rhip.z;
+    pelvis.y = 0.5f * lhip.y + 0.5f * rhip.y - 1.27f;
     d->body.row[0].x = 1.0f;
     d->body.row[0].y = 0.0f;
     d->body.row[0].z = 0.0f;

@@ -263,8 +263,8 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
     v.v[0] = s->p0.v[0] + e * (s->p1.v[0] - s->p0.v[0]);
     out->pos.v[0] = v.v[0];
     out->pos.v[1] = v.v[1];
-    out->pos.v[2] = v.v[2];
     *fov = s->fov0 + e * (s->fov1 - s->fov0);
+    out->pos.v[2] = v.v[2];
 }
 
 NamedCam* fn_80276A44(const char* name) {
