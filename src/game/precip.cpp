@@ -272,8 +272,8 @@ const char* lbl_8055CBBC = "snow.tex";
 const char* lbl_8055CBC0 = "rain.tex";
 
 ModuleTag lbl_8055F878;
-f32 lbl_8055F880;
-f32 lbl_8055F884;
+f32 lbl_8055F880 = log2(10.0);
+f32 lbl_8055F884 = log2(2.0);
 SnowSystem* lbl_8055F888;
 RainSystem* lbl_8055F88C;
 s32 lbl_8055F890;
@@ -284,14 +284,6 @@ f32 lbl_8055F8A0;
 s32 lbl_8055F8A4;
 Mist* lbl_804BCFA8[4];
 
-struct WeatherScales {
-    WeatherScales(void) {
-        lbl_8055F880 = log2(10.0);
-        lbl_8055F884 = log2(2.0);
-    }
-};
-
-static WeatherScales sScales;
 
 DropSource lbl_804BCFB8[8];
 
