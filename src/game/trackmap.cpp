@@ -626,7 +626,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         f32 fade;
         int part;
         TruckDraw* d;
-        if (i == fn_801E866C(map->player)) {
+        bool self = i == fn_801E866C(map->player);
+        if (self) {
             continue;
         }
         fn_801EA9A0(i);
@@ -714,7 +715,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             rel.y *= s;
             rel.z *= s;
         }
-        if (!(PSVECDotProduct(&rel, &rel) >= (w / 2.0f) * (w * 0.5f))) {
+        if (PSVECDotProduct(&rel, &rel) < (w / 2.0f) * (w * 0.5f)) {
             Vec2 delta;
             f32 size;
             f32 fade;
