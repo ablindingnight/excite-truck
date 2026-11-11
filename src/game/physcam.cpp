@@ -1085,7 +1085,7 @@ void CamRegion::Prepare(u8* line) {
             lo += wrap;
         }
         f32 hi = mid + rad;
-        if (wrap < rad - mid) {
+        if (rad > wrap - mid) {
             hi -= wrap;
         }
         (&lo1)[0] = fn_80272428(line, &center.x, lo, mid, r2);
