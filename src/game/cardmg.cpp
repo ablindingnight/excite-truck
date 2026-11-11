@@ -184,7 +184,7 @@ f32 PSVECDistance(const f32* a, const f32* b);
 
 // Index of the damage point nearest to pos (entry 0 is skipped).
 int fn_8018C514(u8* p, const f32* pos) {
-    f32 best = 1.0e7f;
+    f32 best = 10000000.0f;
     int idx = 0;
     for (int i = 1; i < *(s32*)PTR(p, 0x26C); i++) {
         f32 d = PSVECDistance(pos, (f32*)(PTR(p, 0x26C) + i * 0x34 + 0x20));
@@ -402,7 +402,7 @@ void fn_8018CB3C(u8* p) {
             t = ClampF(t, -5.0f, 5.0f);
             f32 w = s->spin + t;
             s->spin = w - 0.0002f * (0.016683351f * w);
-            s->spin = ClampF(s->spin, -2.0e1f, 2.0e1f);
+            s->spin = ClampF(s->spin, -20.0f, 20.0f);
             if (s->angle > lbl_80561F88) {
                 s->angle = lbl_80561F88;
                 s->spin = Lower(s->spin, lbl_80561F74);
@@ -412,7 +412,7 @@ void fn_8018CB3C(u8* p) {
                     s->spin = lbl_80561F74;
                     s->state = 0;
                 } else {
-                    s->spin = s->spin + 0.016683351f * (2.0e3f * (0.044999998f - s->angle));
+                    s->spin = s->spin + 0.016683351f * (2000.0f * (0.044999998f - s->angle));
                 }
             }
             s->angle = s->angle + 0.016683351f * s->spin;
@@ -933,7 +933,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     da = *at;
     f32 mag = PSVECMag(di.v);
     if (!(U32(fn_801769CC(), 0x4) & 0x4000) && F32(p, 0x2690) < 0.001f) {
-        if (mag < 1.5e3f) {
+        if (mag < 1500.0f) {
             return;
         }
         if (HitTooSoon(p)) {
@@ -948,7 +948,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         if (other >= 0) {
             hm *= lbl_80561F98;
             if (S32(p, 0x1F0) != 0x50 && !Boosting(p)) {
-                if (Boosting(fn_8017960C(other)) || hm > 1.5e4f) {
+                if (Boosting(fn_8017960C(other)) || hm > 15000.0f) {
                     if (F32(p, 0x25D4) < F32(fn_8017960C(other), 0x25D4)) {
                         fn_8018A174(p);
                     }
@@ -958,10 +958,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             hm *= lbl_8055A460;
         }
         if (other < 0 || !Boosting(fn_8017960C(other))) {
-            if (hm < 3.0e4f) {
+            if (hm < 30000.0f) {
                 return;
             }
-            if (other < 0 && F32(p, 0x25D4) < 13.333333f && hm < 3.0e5f) {
+            if (other < 0 && F32(p, 0x25D4) < 13.333333f && hm < 300000.0f) {
                 return;
             }
         }
@@ -971,7 +971,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         fn_8018E330(p);
     }
     DentNode* best = 0;
-    f32 bestD = 1.0e5f;
+    f32 bestD = 100000.0f;
     for (int i = 1; i < S32(p, 0x5F8); i++) {
         DentNode* d = (DentNode*)(PTR(p, 0x26C) + 4) + i;
         if (!d->fixed) {
@@ -1118,7 +1118,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         if (hood->state != 3) {
                             hood->state = 2;
                             hood->valid = 0;
-                            hood->spin = 1.0e1f;
+                            hood->spin = 10.0f;
                             hood->angle = hood->angle > lbl_80561F8C ? hood->angle : lbl_80561F8C;
                         }
                     }

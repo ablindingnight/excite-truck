@@ -196,7 +196,7 @@ static inline f32 Ease(f32 x) {
 void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     CamRect* r = &lbl_8049A218[*cam];
     f32 e = Ease(r->v[3]);
-    f32 t = (r->v[1] - lbl_80563E78) / 2.0e1f;
+    f32 t = (r->v[1] - lbl_80563E78) / 20.0f;
     t = lbl_80563E30 < t ? lbl_80563E30 : t;
     t = t > lbl_80563E78 ? t : lbl_80563E78;
     f32 k = lbl_80563E78 + t * lbl_80563E30;
@@ -295,7 +295,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         t = (rv - lbl_80563E78) / lbl_80563E30;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
-        up = lbl_80563E88 * (4.0e2f + t * lbl_80563E90);
+        up = lbl_80563E88 * (400.0f + t * lbl_80563E90);
         down = onGround ? 6.6733403f : 0.33366704f;
         if (h < r->v[1]) {
             lo = r->v[1] - down;
@@ -553,7 +553,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up4.x);
     if (!fn_801769F8()) {
         f32 b2 = lbl_80563E88 + c->blend;
-        c->blend = b2 < 1.0e2f ? b2 : 1.0e2f;
+        c->blend = b2 < 100.0f ? b2 : 100.0f;
     }
 }
 

@@ -732,7 +732,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     up.y = 1.0f;
     up.z = 0.0f;
     g.x = 0.0f;
-    g.y = -1.0e3f;
+    g.y = -1000.0f;
     g.z = 0.0f;
     fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
     n = 32;

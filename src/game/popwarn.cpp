@@ -1125,7 +1125,7 @@ void MenuArt::Draw(void) {
     if (scroll > fw) {
         scroll -= fw;
     }
-    int wide = scroll > 3.7e2f;
+    int wide = scroll > 370.0f;
     fn_802353F4(image, wide, sx + scroll, (sy - fh) + fn_80235F64(image, wide, scroll), 0.0f);
 }
 extern "C" {

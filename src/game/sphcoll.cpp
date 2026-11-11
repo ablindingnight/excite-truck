@@ -745,8 +745,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         st *= 0.8f;
     }
     f32 k = s * st;
-    if (k > 2.225e5f) {
-        k = 2.225e5f;
+    if (k > 222500.0f) {
+        k = 222500.0f;
     }
     f32 kk = lbl_805622E8 * k;
     imp.x = n->x * kk;
@@ -846,7 +846,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                     fast = 0;
                 }
             }
-            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= 1.0e4f &&
+            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= 10000.0f &&
                 F32(pb, 0x25D4) > 6.6666665f && VE(q)->v30()) {
                 f32 sc = fn_8018AE7C((u8*)pb);
                 J.x *= sc;
@@ -1053,7 +1053,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f.x = vt.x * lbl_80562324;
         f.y = vt.y * lbl_80562324;
         f.z = vt.z * lbl_80562324;
-        f32 value = -2.4e3f;
+        f32 value = -2400.0f;
         f32 m = F32(o, 0xD4) * value;
         f.x = f.x + d[0] * m;
         f.y = f.y + d[1] * m;
@@ -1688,7 +1688,7 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
     w.v[2] = p1[2] - p0[2];
     PSVECCrossProduct(d0, d1, n.v);
     f32 nn = PSVECDotProduct(n.v, n.v);
-    if (nn > 1.0000001e-6f) {
+    if (nn > 0.0000010000001f) {
         m[0][0] = w.v[0];
         m[0][1] = d1[0];
         m[0][2] = n.v[0];
@@ -2586,7 +2586,7 @@ void fn_8019F780(u8* p) {
                     f.x = vt.x * c;
                     f.y = vt.y * c;
                     f.z = vt.z * c;
-                    f32 g = -3.0e1f * F32(rb, 0xD4);
+                    f32 g = -30.0f * F32(rb, 0xD4);
                     f.x = Lerp_hm(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
@@ -2635,12 +2635,12 @@ void fn_8019F780(u8* p) {
             f32 r = F32(p, 0x24);
             f32 area = 3.1415927f * (r * r);
             f32 vol = 0.4f * (4.1887903f * r * (r * r));
-            f32 dk = -area * (5.0e2f + lbl_805623AC * PSVECMag(&bv.x));
+            f32 dk = -area * (500.0f + lbl_805623AC * PSVECMag(&bv.x));
             drag.x = bv.x * dk;
             drag.y = bv.y * dk;
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
-            f32 lift = 1.0e3f + lbl_8056232C * sub;
+            f32 lift = 1000.0f + lbl_8056232C * sub;
             sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
             up.y = 9.81f * (lift * (vol * sub));
             up.x = lbl_805622D0;

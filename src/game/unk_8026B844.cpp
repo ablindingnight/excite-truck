@@ -132,7 +132,7 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& move) {
     f32 turn = 3.1415927f;
     f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
-    f32 speed = lbl_80563D94 * (1.0e2f * (lbl_80563D94 + t * lbl_80563DA0));
+    f32 speed = lbl_80563D94 * (100.0f * (lbl_80563D94 + t * lbl_80563DA0));
     f32 x;
     f32 z;
     lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.x0));
@@ -187,7 +187,7 @@ void fn_8026B8A0(void) {
     if (gate && !gate(mx, my)) {
         free = 0;
     }
-    dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F4FC) / 1.0e3f, 0.033333335f);
+    dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F4FC) / 1000.0f, 0.033333335f);
     lbl_8055F4FC = fn_802E2C20();
     right = lbl_80499050.rot.axes[0];
     right.y = lbl_80563D78;
@@ -197,7 +197,7 @@ void fn_8026B8A0(void) {
         Loop1_fn_8026B8A0(pad, dt, in, move);
     }
     {
-        f32 rate = 1.0e2f;
+        f32 rate = 100.0f;
         f32 side = lbl_80563D78;
         f32 vert = side;
         if (fn_802E4A1C(0x1E)) {
@@ -216,21 +216,21 @@ void fn_8026B8A0(void) {
     }
     h = lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z);
     if (free) {
-        f32 t = CamMax(CamMin(lbl_80563D94, (h - 2.0e1f) / 4.8e2f), lbl_80563D78);
+        f32 t = CamMax(CamMin(lbl_80563D94, (h - 20.0f) / 480.0f), lbl_80563D78);
         f32 px = lbl_80563D78;
-        f32 pan = 5.0e1f * (lbl_80563D94 + t * lbl_80563DC0);
+        f32 pan = 50.0f * (lbl_80563D94 + t * lbl_80563DC0);
         f32 py = px;
         f32 a;
         f32 b;
         if (mx < 0x50) {
-            px = lbl_80563D98 + (f32)mx / 8.0e1f;
+            px = lbl_80563D98 + (f32)mx / 80.0f;
         } else if (mx > lbl_8055CFF0 - 0x50) {
-            px = (f32)(mx - (lbl_8055CFF0 - 0x50)) / 8.0e1f;
+            px = (f32)(mx - (lbl_8055CFF0 - 0x50)) / 80.0f;
         }
         if (my < 0x3C) {
-            py = lbl_80563D98 + (f32)my / 6.0e1f;
+            py = lbl_80563D98 + (f32)my / 60.0f;
         } else if (my > lbl_8055CFF4 - 0x3C) {
-            py = (f32)(my - (lbl_8055CFF4 - 0x3C)) / 6.0e1f;
+            py = (f32)(my - (lbl_8055CFF4 - 0x3C)) / 60.0f;
         }
         a = dt * (px * pan);
         b = dt * (-py * pan);
@@ -495,7 +495,7 @@ void fn_8026C014(int player) {
             CamSet(&lbl_8049A1C0.spin, lbl_80563D78, lbl_80563D78, lbl_80563D78);
             lbl_8055F502 = 1;
         }
-        dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F504) / 1.0e3f, 0.033333335f);
+        dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F504) / 1000.0f, 0.033333335f);
         lbl_8055F504 = fn_802E2C20();
         CamScale(&lbl_8049A1C0.vel, 0.7f);
         CamScale(&lbl_8049A1C0.spin, 0.7f);
@@ -594,7 +594,7 @@ void fn_8026C014(int player) {
         f32 x;
         f32 z;
         lbl_8055F508 = now;
-        speed = 4.0f * ((1.0e1f * dt) / 4.0f);
+        speed = 4.0f * ((10.0f * dt) / 4.0f);
         yawRate = dt * lbl_80563DF0;
         fovRate = dt * lbl_80563E00;
         lo = 0.2617994f;
@@ -668,7 +668,7 @@ void fn_8026C014(int player) {
         f32 lift;
         lbl_8055F514 = now;
         turn = dt * lbl_80563DF0;
-        speed = 0.25f * (1.0e1f * dt);
+        speed = 0.25f * (10.0f * dt);
         fovRate = dt * lbl_80563E00;
         t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
         lo = 0.2617994f;
@@ -899,13 +899,13 @@ void fn_8026DDD8(s32 mode) {
         CamCar* car;
         lbl_8049A168.offset.x = lbl_80563D78;
         lbl_8049A168.offset.y = lbl_80563DA0;
-        lbl_8049A168.offset.z = -1.0e1f;
+        lbl_8049A168.offset.z = -10.0f;
         lbl_8049A168.side.x = lbl_80563D94;
         lbl_8049A168.side.y = lbl_80563D78;
         lbl_8049A168.side.z = lbl_80563D78;
         lbl_8049A168.dir.x = lbl_80563D78 * lbl_80563D98;
         lbl_8049A168.dir.y = lbl_80563DA0 * lbl_80563D98;
-        lbl_8049A168.dir.z = -1.0e1f * lbl_80563D98;
+        lbl_8049A168.dir.z = -10.0f * lbl_80563D98;
         PSVECNormalize(&lbl_8049A168.dir, &lbl_8049A168.dir);
         PSVECCrossProduct(&lbl_8049A168.dir, &lbl_8049A168.side, &lbl_8049A168.up);
         lbl_8049A168.car = fn_8026A344(0);

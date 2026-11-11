@@ -759,7 +759,7 @@ void fn_80271624(int mode, u8* p) {
         } else if (idx != -10) {
             f32 off[3];
             off[0] = lbl_80563F48;
-            off[1] = 1.0e3f;
+            off[1] = 1000.0f;
             off[2] = lbl_80563F48;
             Mat3 down;
             down.m[0] = lbl_80563F50;
@@ -776,8 +776,8 @@ void fn_80271624(int mode, u8* p) {
             *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
         }
     } else {
-        F32(p, 0x7C) = 100.041f * ((f32)(int)(lbl_80563F40 + (5.0e1f + F32(p, 0xE4) / 100.041f)) - 5.0e1f);
-        F32(p, 0x84) = 100.041f * ((f32)(int)(lbl_80563F40 + (5.0e1f + F32(p, 0xEC) / 100.041f)) - 5.0e1f);
+        F32(p, 0x7C) = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + F32(p, 0xE4) / 100.041f)) - 50.0f);
+        F32(p, 0x84) = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + F32(p, 0xEC) / 100.041f)) - 50.0f);
         fn_801E9DC4(p + 0x1EC);
         if (!fn_801E9E30(p + 0x1EC, (f32*)(p + 0x7C))) {
             F32(p, 0x80) = fn_801E9DDC(p + 0x1EC, F32(p, 0xE4), F32(p, 0xEC));
@@ -1244,7 +1244,7 @@ int TvCamera::Load(ValueNode* t) {
             exFrom[2] = ex[2];
             fovFrom = fov;
             to[0] = t->GetFloat("x_a", pos[0]);
-            to[1] = t->GetFloat("y_a", 2.0e1f + pos[1]);
+            to[1] = t->GetFloat("y_a", 20.0f + pos[1]);
             to[2] = t->GetFloat("z_a", pos[2]);
             if (t->Has("new_fov_a")) {
                 fovTo = t->GetFloat("new_fov_a");

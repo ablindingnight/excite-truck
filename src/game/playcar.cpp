@@ -1268,7 +1268,7 @@ void PlayerDriver_vf48(u8* p) {
         c2 = PTR(p, 0x34);
         boost = MinF(kOne, (F32(c2, 0x25D4) - 1.7777778f) / 3.5555556f);
         boost = MaxF(boost, kZero);
-        roll = MaxF(MinF(kOne, (steer * -F32(c2, 0x128)) * -2.0e1f), kZero);
+        roll = MaxF(MinF(kOne, (steer * -F32(c2, 0x128)) * -20.0f), kZero);
         k = kOne - (kOne - kZero) * roll * (steer * steer);
         rx.x *= k;
         rx.y *= k;
@@ -1279,7 +1279,7 @@ void PlayerDriver_vf48(u8* p) {
         rx.x += F32(car, 0x3C) * g;
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
-        m = 3.0e4f * air * F32(PTR(p, 0x34), 0x25F8);
+        m = 30000.0f * air * F32(PTR(p, 0x34), 0x25F8);
         rx.x *= m;
         rx.y *= m;
         rx.z *= m;
@@ -1310,7 +1310,7 @@ void PlayerDriver_vf48(u8* p) {
         f.x = F32(c3, 0x54) + F32(c3, 0x48) * kZero;
         f32 b;
         f.y = F32(c3, 0x58) + kZero * F32(c3, 0x4C);
-        k = -3.0e3f * air;
+        k = -3000.0f * air;
         f.z = F32(c3, 0x5C) + kZero * F32(c3, 0x50);
         f.x *= k;
         f.y *= k;
@@ -1344,7 +1344,7 @@ void PlayerDriver_vf48(u8* p) {
         } else {
             fn_8018ADBC(PTR(p, 0x34), kOne);
             cl = kZero;
-            if (F32(PTR(p, 0x34), 0x25D0) < 3.5e3f) {
+            if (F32(PTR(p, 0x34), 0x25D0) < 3500.0f) {
                 fn_8018ADB4(PTR(p, 0x34), MaxF(kOne, ((Gearbox*)PTR(p, 0x38))->Throttle()));
             }
         }

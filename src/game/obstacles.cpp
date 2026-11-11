@@ -586,7 +586,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     case 12: {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
-            s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, 5.0e4f,
+            s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, 50000.0f,
                             0.2f, q->a, lbl_80562478 * q->b, q->a);
         }
         shape = s;
@@ -1343,7 +1343,7 @@ void fn_801ACF94(void) {
         c[1] = lbl_805624AC;
         c[2] = lbl_8056247C;
         d[0] = lbl_8056247C;
-        d[1] = -1.0e4f;
+        d[1] = -10000.0f;
         d[2] = lbl_8056247C;
         fn_801C2694(lbl_8055E5F0, out, &n, d, c, b, a);
         for (int i = 0; i < lbl_8055E5EC; i++) {

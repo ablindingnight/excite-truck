@@ -1251,7 +1251,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
         s32 lead = S32(d, 0x2C4);
         if (lead != -1) {
             Pair* pr = lbl_8055E0D0->Rec(S32(d, 0x290))->table[lead];
-            if (pr->dist2 < 2.5e3f) {
+            if (pr->dist2 < 2500.0f) {
                 u8* car = fn_8017960C(lead);
                 V2 rel;
                 fn_80137788(pr, S32(d, 0x290), &rel);
@@ -2140,7 +2140,7 @@ void fn_8019724C(u8* d, V2* io) {
             F32(d, 0x20C) = fn_801973FC(&dir, &hit, io);
             io->x = hit.x;
             io->y = hit.y;
-            if (F32(d, 0x270) > 4.0e1f) {
+            if (F32(d, 0x270) > 40.0f) {
                 S32(d, 0x2D0) |= 0x40;
             }
             S32(d, 0x2D0) |= 0x800;
