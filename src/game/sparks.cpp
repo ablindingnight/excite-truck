@@ -849,7 +849,7 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
         Vec q[4];
         AddScaled(&q[0], &s->pos, &cam->rot[0], -0.0375f);
         AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
-        AddScaled(&q[2], &p, &cam->rot[0], -sign * 0.0375f);
+        AddScaled(&q[2], &p, &cam->rot[0], sign * -0.0375f);
         AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
         fn_802C8E00(color, 0, q[0].x, q[0].y, q[0].z, 0.0f, 1.0f);
         fn_802C8E00(color, 0, q[1].x, q[1].y, q[1].z, 1.0f, 1.0f);
