@@ -489,7 +489,7 @@ config.libs.append(
             TpRevolution("homebuttonLib/HBMController.cpp", Matching),
             TpRevolution("homebuttonLib/HBMRemoteSpk.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_pane.cpp", Matching),
-            TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_material.cpp", NonMatching),
+            TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_material.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_common.cpp", Matching),
             TpRevolution("homebuttonLib/nw4hbm/lyt/lyt_group.cpp", Matching),
         ],

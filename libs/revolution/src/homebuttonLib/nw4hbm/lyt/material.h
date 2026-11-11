@@ -107,6 +107,18 @@ namespace nw4hbm {
 
             void SetColorElement(u32 colorType, s16 value);
 
+            void SetTevColor(u32 idx, const GXColorS10& value) { mTevCols[idx] = value; }
+            void SetTevKColor(u32 idx, ut::Color value) { mTevKCols[idx] = value; }
+            void SetTexSRT(u32 idx, const TexSRT& value) { GetTexSRTAry()[idx] = value; }
+            void SetChanCtrl(const ChanCtrl& value) { *GetChanCtrlAry() = value; }
+            void SetMatColor(ut::Color value) { *GetMatColAry() = value; }
+            void SetTevSwapMode(u32 idx, const TevSwapMode& value) { GetTevSwapAry()[idx] = value; }
+            void SetIndTexSRT(u32 idx, const TexSRT& value) { GetIndTexSRTAry()[idx] = value; }
+            void SetIndirectStage(u32 idx, const IndirectStage& value) { GetIndirectStageAry()[idx] = value; }
+            void SetTevStage(u32 idx, const TevStage& value) { GetTevStageAry()[idx] = value; }
+            void SetAlphaCompare(const AlphaCompare& value) { *GetAlphaComparePtr() = value; }
+            void SetBlendMode(const BlendMode& value) { *GetBlendModePtr() = value; }
+
             void SetTexCoordGen(u32 idx, TexCoordGen value) {
                 NW4HBM_ASSERT(180, idx < mGXMemNum.texCoordGen);
                 GetTexCoordGenAry()[idx] = value;
