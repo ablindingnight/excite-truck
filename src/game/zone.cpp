@@ -305,7 +305,7 @@ class Timer {
 public:
     Timer(f32 len);
     f32 Now(void);
-    f32 Frac(void);
+    f32 Progress(void);
 
     void Start(void) { start = Now(); }
     int Active(void) {
@@ -374,7 +374,7 @@ struct CarState {
     CarState(void);
     f32 BonusScale(void) {
         if (tC8.Active()) {
-            return Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.5f, 1.0f, tC8.Frac())));
+            return Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.5f, 1.0f, tC8.Progress())));
         }
         return 1.0f;
     }
@@ -1998,7 +1998,7 @@ extern "C" void fn_zone_LevelTitle(Layout* l) {
 void ZoneMaster::DrawLevel(int p, CarState* c) {
     if (level > 0) {
         if (t74.Active()) {
-            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Frac())));
+            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
             LayoutItem* it = mainLyt->Find("middle_message");
             if (it) {
                 LayoutItem m;
@@ -2022,7 +2022,7 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
                 }
             }
         } else if (t6C.Active()) {
-            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t6C.Frac())));
+            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t6C.Progress())));
             LayoutItem* it = mainLyt->Find("middle_message");
             if (it) {
                 LayoutItem m;
@@ -2038,7 +2038,7 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
 
 void ZoneMaster::DrawMissed(int p, CarState* c) {
     if (c->tA8.Active()) {
-        f32 t = c->tA8.Frac();
+        f32 t = c->tA8.Progress();
         u32 col = (fn_8013F438(t) << 24) | 0xFF7F00;
         V2 a;
         V2 b;
@@ -2171,14 +2171,14 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
         EventRing::Entry* e;
         DrawClock(this, c->clock);
         if (t7C.Active()) {
-            f32 t = Ease(t7C.Frac());
+            f32 t = Ease(t7C.Progress());
             LayoutItem* a = mainLyt->Find("timer_increase_0");
             LayoutItem item;
             fn_80147CEC(&item, a, mainLyt->Find("timer_increase_1"), t);
             fn_801474EC(&item, "+%.0f", f98);
         }
         if (t84.Active()) {
-            f32 t = Ease(t84.Frac());
+            f32 t = Ease(t84.Progress());
             LayoutItem* a = mainLyt->Find("timer_decrease_0");
             LayoutItem item;
             fn_80147CEC(&item, a, mainLyt->Find("timer_decrease_1"), t);
@@ -2211,7 +2211,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
 void ZoneMaster::DrawScore(int p, CarState* c) {
     int score = c->score - c->timeBonus;
     if (c->t98.Active() && c->bonus > 50) {
-        f32 f = 1.0f - c->t98.Frac();
+        f32 f = 1.0f - c->t98.Progress();
         score = c->score - (int)(c->bonus * f);
     }
     UpdateScoreOverlays(fn_801E866C(p), score);
@@ -2221,7 +2221,7 @@ void ZoneMaster::DrawMissedFlag(int p, CarState* c) {
     if (!c->tA8.Active() && c->tA0.Active()) {
         LayoutItem* a = mainLyt->Find("missed_start");
         LayoutItem* b = mainLyt->Find("missed_end");
-        f32 t = c->tA0.Frac();
+        f32 t = c->tA0.Progress();
         fn_80147ABC(a, b, (const char*)a->unk1C, t * t);
     }
 }
@@ -2231,7 +2231,7 @@ void ZoneMaster::DrawGateBonus(int p, CarState* c) {
         LayoutArt* a0;
         LayoutArt* a1;
         LayoutArt* a2;
-        c->tD8.Frac();
+        c->tD8.Progress();
         a0 = mainLyt->FindArt("bonus_star_art");
         a1 = mainLyt->FindArt("gate_star_art");
         a2 = mainLyt->FindArt("score_star_art");
@@ -2251,7 +2251,7 @@ void ZoneMaster::DrawGateBonus(int p, CarState* c) {
                             Lerp(0.0f, 1.0f,
                                  Clamp01(InvLerp(c->tD8.len / 2, c->tD8.len, fn_8013CB3C() - c->tD8.start))));
             } else {
-                fn_80147BD0(&s1, &s2, -1, 0xFFFFFF, tex[3], Clamp01(c->tD8.Frac() * 2.0f));
+                fn_80147BD0(&s1, &s2, -1, 0xFFFFFF, tex[3], Clamp01(c->tD8.Progress() * 2.0f));
             }
         }
     }

@@ -101,8 +101,7 @@ static inline Sound* LoadGradeSound(void) {
     return fn_80207848("gradeup.sfx", 1);
 }
 
-namespace {
-
+// Interval timer on the race clock; its inline methods are shared with zone and crushmaster.
 class Timer {
 public:
     Timer(f32 duration);
@@ -112,6 +111,8 @@ public:
     f32 duration;  // offset 0x0
     f32 start;     // offset 0x4
 };
+
+namespace {
 
 class Overlay {
 public:
