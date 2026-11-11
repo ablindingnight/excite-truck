@@ -2275,11 +2275,14 @@ void fn_8019743C(u8* d, u8* out) {
         F32(d, 0xE8) = 0.0f;
     }
     if (F32(d, 0xE0) > 0.05f) {
-        f32 x = F32(d, 0xE4);
+        f32 at = F32(d, 0xE4);
         U8(d, 0x250) = 1;
-        f32 w = F32(d, 0xE0);
-        F32(out, 0x0) = F32(out, 0x0) + w * ((F32(d, 0x48) + F32(d, 0x58) * x) - F32(out, 0x0));
-        F32(out, 0x4) = F32(out, 0x4) + w * ((F32(d, 0x4C) + F32(d, 0x5C) * x) - F32(out, 0x4));
+        V2 tgt;
+        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
+        tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
+        V2 c = LerpV2(*(V2*)out, tgt, F32(d, 0xE0));
+        ((V2*)out)->x = c.x;
+        ((V2*)out)->y = c.y;
     }
     if (decay) {
         F32(d, 0xE0) = F32(d, 0xE0) * (0.99f * 0.99f);
