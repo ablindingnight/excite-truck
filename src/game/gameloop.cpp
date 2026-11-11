@@ -68,13 +68,17 @@ struct RacerList {
     s32 count;           // offset 0x3C0
 };
 
+// Event index and race flags (copied as one 8-byte block).
+struct RaceKind {
+    s32 event;  // offset 0x0
+    u32 flags;  // offset 0x4
+};
+
 struct RaceSetup {
     char track[0x20];  // offset 0x0
     RacerList racers;  // offset 0x20
-    s32 event;         // offset 0x3E4
-    u32 flags;         // offset 0x3E8
-    s32 unk3EC;        // offset 0x3EC
-    s32 unk3F0;        // offset 0x3F0
+    RaceKind kind;     // offset 0x3E4
+    s32 unk3EC[2];     // offset 0x3EC
     s32 unk3F4;        // offset 0x3F4
 };
 
@@ -478,7 +482,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_802108C8();
     fn_802B8744();
     fn_801769EC();
-    fn_8000AF04(rs->flags);
+    fn_8000AF04(rs->kind.flags);
     for (i = 0, c = lbl_8034F5B8; i < 4; c++, i++) {
         memset(c, 0, sizeof(*c));
         cam = lbl_8034F5D8[0];
