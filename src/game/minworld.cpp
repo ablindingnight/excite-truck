@@ -4,11 +4,6 @@
 #include "game/common.h"
 
 struct MWVec2 {
-    MWVec2(void) {}
-    MWVec2(f32 ax, f32 ay) {
-        x = ax;
-        y = ay;
-    }
     f32 x, y;
 };
 
@@ -148,7 +143,9 @@ extern "C" {
 
 void fn_802526E0(MWMtx* m) {
     f32 a = fn_80129DC4(0, 0.0f, 6.2831855f);
-    MWVec2 d(1.0f, 0.0f);
+    MWVec2 d;
+    d.x = 1.0f;
+    d.y = 0.0f;
     Rotate(&d, a);
     XZ(&m->pos, &d);
     Scale3(&m->pos, 325.0f);
@@ -163,8 +160,9 @@ static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p = b->pos;
-    MWVec2 d(p.x, p.z);
-    MWVec2 t;
+    MWVec2 d;
+    d.x = p.x;
+    d.y = p.z;
     MWVec2 e;
     f32 len;
     if (d.x * d.x + d.y * d.y < 1.0f) {
@@ -186,7 +184,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         e.x = e.x * k;
         e.y = e.y * k;
     }
-    t = e;
+    MWVec2 t = e;
     {
         f32 tmp = t.y;
         t.y = t.x;
