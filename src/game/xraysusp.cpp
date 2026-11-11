@@ -29,8 +29,9 @@ int fn_801E3534(const Joint* j);
 void fn_801E353C(Joint* j, f32 angle);
 void fn_801E35D4(Joint* j, const Mat3* r);
 f32 fn_801F159C(void* w);
-void fn_80015A20(Mat3* out, const ValVec3* angles);
 }  // extern "C"
+struct Vec3;
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
 f32 PSVECDotProduct(const void* a, const void* b);
@@ -224,7 +225,7 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
         turn.x = 0.0f;
         turn.y = 3.1415927f;
         turn.z = 0.0f;
-        fn_80015A20(&r, &turn);
+        Mat3FromEuler(&r, (const Vec3*)&turn);
         Mat3Mul((Mat3*)&hub, &r, (Mat3*)&hub);
     }
     fn_802C744C(s->hub, &hub);

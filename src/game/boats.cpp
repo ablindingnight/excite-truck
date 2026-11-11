@@ -17,11 +17,9 @@ struct Mtx33 {
     f32 m[9];
 };
 
-extern "C" {
-void fn_80015A20(Mtx33* out, const ValVec3* angles);
-}
-
 struct Mat3;
+struct Vec3;
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 template <typename T>
@@ -120,11 +118,12 @@ void fn_802C2488(void) {
         m.origin.z = 0.0f;
         bob = sin(3.1415927f * (b.phase + lbl_8055E3C8));
         f32 now = lbl_8055E3C8;
-        roll = 0.017453292f * (6.0f * (f32)sin(0.5f * (3.1415927f * (b.phase + now))));
+        f32 s = sin(0.5f * (3.1415927f * (b.phase + now)));
+        roll = 0.017453292f * (6.0f * s);
         ang.x = roll;
         ang.y = 0.0f;
         ang.z = roll;
-        fn_80015A20(&rot, &ang);
+        Mat3FromEuler((Mat3*)&rot, (const Vec3*)&ang);
         Mat3Mul((Mat3*)&m, (const Mat3*)&rot, (const Mat3*)&m);
         m.origin.x += b.pos.x;
         m.origin.y += b.pos.y;
