@@ -185,8 +185,9 @@ extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator ne
 extern int OSDisableInterrupts(void);
 // Copies `size` bytes to "ARAM" (main memory here) and flushes them.
 void fn_802E4D84(void *dst, void *src, int size, int dir) {
-    memcpy(dst, src, size);
-    DCFlushRange(dst, size);
+    u8* d = (u8*)dst;
+    memcpy(d, src, size);
+    DCFlushRange(d, size);
 }
 
 extern unsigned char lbl_8055FFA5;
@@ -706,6 +707,17 @@ extern void fn_801282EC(int align);
 extern void fn_801282F4(void);
 extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator new[](size, tag)
 
+// Drops a reference to a cached sample, freeing its data with the last one.
+void fn_802E5D5C(void *arg0) {
+    if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
+        fn_802E317C(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
+    }
+    if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
+        fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
+        *(void **)((char *)arg0 + 0xAC) = 0;
+    }
+}
+
 // Creates a streaming sample: a zeroed `size`-byte buffer in a free slot that `fill(arg)` keeps topped up.
 SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(void *, int, int), int arg) {
     int free = -1;
@@ -752,16 +764,6 @@ void fn_802E5FE4(void *arg0) {
     *(int *)((char *)arg0 + 0x94) = 0;
 }
 
-// Drops a reference to a cached sample, freeing its data with the last one.
-void fn_802E5D5C(void *arg0) {
-    if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
-        fn_802E317C(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
-    }
-    if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
-        fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
-        *(void **)((char *)arg0 + 0xAC) = 0;
-    }
-}
 
 float fn_802E6040(void *arg0) {
     if (arg0 != 0) return *(float *)((char *)arg0 + 0xA4);
