@@ -180,13 +180,12 @@ void fn_80202BFC(s32 rt) {
 }
 
 // Picks (and blends) the sky band for a view direction.
+template <class O> static inline void TMulEq(O* o, f32 k) { o->x *= k; o->y *= k; o->z *= k; }  /* Helper name unproven */
 void fn_80202D50(EVec3 dir) {
     f32 m = PSVECMag(&dir);
     m = m > 0.001f ? m : 0.001f;
     f32 s = 1.0f / m;
-    dir.y *= s;
-    dir.x *= s;
-    dir.z *= s;
+    TMulEq(&dir, s);
     f32 y = -dir.y;
     f32 elev = 180.0f * (f32)asin(0.0f > y ? 0.0f : y) / 3.1415927f;
     void* result = 0;

@@ -1514,6 +1514,7 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 inline void ExhaustTorchMan::Loop1_DrawEdges(const Vec* right, const Vec* up) {
     for (int i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {
@@ -1525,9 +1526,7 @@ inline void ExhaustTorchMan::Loop1_DrawEdges(const Vec* right, const Vec* up) {
                 fn_801BFD34(&entries[i].pos, &part->pos, c);
                 Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
                 Vec p;
-                p.x = entries[i].pos.x + entries[i].rot[1].x * entries[i].len;
-                p.y = entries[i].pos.y + entries[i].rot[1].y * entries[i].len;
-                p.z = entries[i].pos.z + entries[i].rot[1].z * entries[i].len;
+                TAddS(&p, &entries[i].pos, &entries[i].rot[1], entries[i].len);
                 DrawEdge(&p, entries[i].frame, right, up, 0.4f * entries[i].len);
             }
         }

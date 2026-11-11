@@ -902,6 +902,7 @@ void fn_80254568(Vec3a* out, s32 model, const char* name) {
     *out = *(const Vec3a*)&f->pos;
 }
 
+template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
     memset(p, 0, sizeof(CarPose));
     p->valid = 1;
@@ -942,9 +943,7 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
         lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
         lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;
-        lbl_80498E18.x = lbl_80498E18.x + p->frame.b.v[1].x * 1.2283f;
-        lbl_80498E18.y = lbl_80498E18.y + p->frame.b.v[1].y * 1.2283f;
-        lbl_80498E18.z = lbl_80498E18.z + p->frame.b.v[1].z * 1.2283f;
+        TAddS(&lbl_80498E18, &lbl_80498E18, &p->frame.b.v[1], 1.2283f);
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);
             f32 back;

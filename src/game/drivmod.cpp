@@ -494,15 +494,14 @@ extern "C" {
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 // Poses the rider's bones on the skeleton points: each bone sits on its point (in the model's frame f)
 // and, when it has a child, is turned from its bind direction to aim at the child.
+template <class O, class A, class B> static inline void TSub(O* o, const A* a, const B* b) { o->x = a->x - b->x; o->y = a->y - b->y; o->z = a->z - b->z; }  /* Helper name unproven */
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
     const BoneLink* p = links;
     for (int i = 0; i < n; i++, p++) {
         BonePose* o = &out[p->index];
         const BRot* b = (const BRot*)(bind + p->index * 0x38);
         BVec v;
-        v.x = pts[p->point].x - f->pos.x;
-        v.y = pts[p->point].y - f->pos.y;
-        v.z = pts[p->point].z - f->pos.z;
+        TSub(&v, &pts[p->point], &f->pos);
         {
             f32 x = Dot3(v.x, f->rot.rx.x, v.y, f->rot.rx.y, v.z, f->rot.rx.z);
             f32 y = Dot3(v.x, f->rot.ry.x, v.y, f->rot.ry.y, v.z, f->rot.ry.z);
