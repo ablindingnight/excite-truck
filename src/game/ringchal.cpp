@@ -606,7 +606,7 @@ struct PlayerData {
         b8 = 0;
         fC = 0.0f;
     }
-    u8 Stuck(void);
+    int Stuck(void);
     struct RaceCarRec* Car(void);
     s32 score;  // offset 0x0
     s32 index;  // offset 0x4
@@ -2612,7 +2612,7 @@ inline f32 ArenaTimer::Get(void) { return t; }
 
 inline RaceCarRec* PlayerData::Car(void) { return fn_8017960C(index); }
 
-inline u8 PlayerData::Stuck(void) { return b8; }
+inline int PlayerData::Stuck(void) { return b8; }
 
 inline void Arena::SetName(char* buf, int n) { SET_NAME(this, buf, n); }
 
