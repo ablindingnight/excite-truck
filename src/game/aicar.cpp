@@ -1442,9 +1442,11 @@ void fn_80195B28(u8* d, f32 v) {
     bool on = S32(fn_801769CC(), 4) != 0x180201;
     if (on) {
         int one = w->mode == 1;
-        f32* tbl = lbl_80333308;
+        f32* tbl;
         if (one) {
-            tbl += 3;
+            tbl = lbl_80333308 + 3;
+        } else {
+            tbl = lbl_80333308;
         }
         w->t0 = w->now;
         w->next = fn_80129DC4(3, tbl[0], tbl[1]);
