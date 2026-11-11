@@ -119,6 +119,13 @@ static inline int ColorByte(f32 f) {
     return v < 255 ? v : 255;
 }
 
+// Clamp written with the conversion repeated (the default-colour path): the target converts twice for the last
+// channel and branches, where ColorByte keeps one int and clamps branch-free.
+static inline int ColorByte2(f32 f) {  /* Helper name unproven */
+    int v = (int)f > 0 ? (int)f : 0;
+    return v < 255 ? v : 255;
+}
+
 static inline u32 MakeColor(u8 r, u8 g, u8 b) { return 0xFF000000 | r << 16 | g << 8 | b; }
 
 static const QuadIdx lbl_802FA9B0 = {{0, 1, 2, 1, 2, 3}};
@@ -364,7 +371,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
             }
             type = n->GetInt("light_type", 0);
         } else {
-            c = MakeColor(ColorByte(255.0f * def.x), ColorByte(255.0f * def.y), ColorByte(255.0f * def.z));
+            c = MakeColor(ColorByte2(255.0f * def.x), ColorByte2(255.0f * def.y), ColorByte2(255.0f * def.z));
             w = rad;
             h = rad;
             type = 0;
