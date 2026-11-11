@@ -343,7 +343,8 @@ f32 fn_802BF02C(f32 x) {
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802BF160(void) {
-    if (lbl_8055CF6C == -1) {
+    s32 id = lbl_8055CF6C;
+    if (id == -1) {
         return;
     }
     f32 k = fn_802BEFB4();
@@ -365,7 +366,7 @@ void fn_802BF160(void) {
         m.m[1][3] = off;
         fn_802C9900(fn_802BF02C(a));
         fn_802D3D94(0, &m);
-        fn_802C7040(lbl_8055CF6C);
+        fn_802C7040(id);
     }
     fn_802C9904();
     fn_802D3D80();

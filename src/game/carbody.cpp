@@ -3710,6 +3710,7 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 // Copies the flapping parts' simulated points (0x26C4 flag, 0x26C8 aerial) into the car model's point
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
 void fn_8018A9F0(u8* p, u8* m) {
+    f32 zero = lbl_80561CAC;
     if (PTR(p, 0x26C4)) {
         BVec* pos = 0;
         BVec* old = 0;
@@ -3739,7 +3740,7 @@ void fn_8018A9F0(u8* p, u8* m) {
     CbVec4 h = *(CbSolVec*)(x + 0x70);
     for (int i = 0; i < 4; i++) {
         BVec* o = (BVec*)(m + 0xE24) + ((s32*)(PTR(p, 0x26C0) + 0xCC))[i];
-        SetXYZ(o, lbl_80561CAC, F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), lbl_80561CAC);
+        SetXYZ(o, zero, F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), zero);
     }
     S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
 }
