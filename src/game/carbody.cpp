@@ -1300,6 +1300,13 @@ struct CbSolCx {
     s32 surface[4];     // offset 0x4, per wheel
 };
 
+// A wheel's contact plane, copied as one block.
+struct CbPlane {
+    f32 nRight;     // offset 0x0, ground normal . body right
+    f32 nFwd;       // offset 0x4, ground normal . body forward
+    f32 ground[3];  // offset 0x8, contact plane anchor
+};
+
 // A wheel's per-step state in the car body (4 of them at 0x23AC).
 struct CbWheel {
     CbWheel(void) {}
@@ -1316,9 +1323,7 @@ struct CbWheel {
     f32 local[3];    // offset 0x30, body-space mount point
     f32 v3C;         // offset 0x3C
     f32 v40;         // offset 0x40
-    f32 nRight;      // offset 0x44, ground normal . body right
-    f32 nFwd;        // offset 0x48, ground normal . body forward
-    f32 ground[3];   // offset 0x4C, contact plane anchor
+    CbPlane plane;   // offset 0x44
     f32 normal[3];   // offset 0x58, contact plane normal
     f32 groundH;     // offset 0x64
     f32 comp;        // offset 0x68
@@ -1566,7 +1571,7 @@ void fn_80183E7C(u8* p) {
     fn_801BEB1C(S32(p, 0x1EC), &sol);
     CbWheel* w = (CbWheel*)(p + 0x23AC);
     for (int i = 0; i < 4; i++, w++) {
-        *(HVec*)w->ground = *(HVec*)&sol->v150[i];
+        *(HVec*)w->plane.ground = *(HVec*)&sol->v150[i];
         *(HVec*)w->normal = *(HVec*)&sol->v110[i];
     }
     if (!U8(p, 0x260D)) {
@@ -2716,8 +2721,8 @@ void fn_80186DE8(u8* p) {
             w->local[1] = x->pts[j].y - w6[j];
             u32 fl;
             f32 up = PSVECDotProduct(nrm, car + 0x54);
-            w->nRight = PSVECDotProduct(nrm, car + 0x3C);
-            w->nFwd = up;
+            w->plane.nRight = PSVECDotProduct(nrm, car + 0x3C);
+            w->plane.nFwd = up;
             w->grounded = nrm[1] > lbl_80561CCC;
             f32 comp = c->pts[5 + j].w;
             if (comp > lbl_80561E90) {
@@ -2735,7 +2740,7 @@ void fn_80186DE8(u8* p) {
                 }
                 w->comp = d;
                 int sid = e->surface[j];
-                w->groundH = fn_802B03C0(w->ground);
+                w->groundH = fn_802B03C0(w->plane.ground);
                 w->sound = fn_801D04A8(sid)->sound;
             } else {
                 w->comp = lbl_80561CAC;
