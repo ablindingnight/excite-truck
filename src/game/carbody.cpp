@@ -2716,11 +2716,12 @@ void fn_80186DE8(u8* p) {
             w->contact[0] = c->pts[j].x;
             w->contact[1] = c->pts[j].y;
             f32 nrm[3];
+            __typeof__(nrm[2]) nrm_2 = c->pts[9 + j].z;
             __typeof__(nrm[1]) nrm_1 = c->pts[9 + j].y;
             w->contact[2] = c->pts[j].z;
             nrm[0] = c->pts[9 + j].x;
             nrm[1] = nrm_1;
-            nrm[2] = c->pts[9 + j].z;
+            nrm[2] = nrm_2;
             w->local[0] = x->pts[j].x;
             w->local[2] = x->pts[j].z;
             w->local[1] = x->pts[j].y - w6[j];
@@ -3102,8 +3103,9 @@ void fn_80188E2C(u8* p, u8* buf) {
     u8* o = wheels;
     for (int i = 0; i < 4; i++) {
         HVec a = *(HVec*)(w + 0x30);
+        __typeof__(a.y) a_y = a.y - F32(p, 0x34);
         a.x = a.x - F32(p, 0x30);
-        a.y = a.y - F32(p, 0x34);
+        a.y = a_y;
         a.z = a.z - F32(p, 0x38);
         HVec b = a;
         a.y = a.y + F32(w, 0xC);

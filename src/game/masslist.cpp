@@ -257,11 +257,12 @@ void fn_801BDA74(int car, CarSetup* s) {
     CrossSet* x = &lbl_8055E79C[car];
     MassSet* m = &lbl_8055E794[car];
     int i;
+    __typeof__(x->row[5]) x_row_5 = MVec4(0.189215347f, 0.189215347f, 0.189215347f, 0.189215347f);
     lbl_8055E7A0[car] = 0;
     m->mass = mass;
     m->invMass = inv;
     x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
-    x->row[5] = MVec4(0.189215347f, 0.189215347f, 0.189215347f, 0.189215347f);
+    x->row[5] = x_row_5;
     for (i = 0; i < 4; i++) {
         x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
                           54.0f * 0.0254f * ((i & 2) ? -1.0f : 1.0f));
@@ -401,9 +402,10 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->v90 = MVec4(0.0f, 0.0f, 0.0f);
     MVec3 v;
     TScale(&v, &mtx->basis[2], a);
+    __typeof__(s->v60) s_v60 = MVec4(0.0f, 0.0f, 0.0f);
     __typeof__(c->v20) c_v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     s->vel = MVec4(v.x, v.y, v.z);
-    s->v60 = MVec4(0.0f, 0.0f, 0.0f);
+    s->v60 = s_v60;
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v20 = c_v20;
     MVec4 k = x->row[7];

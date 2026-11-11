@@ -444,8 +444,9 @@ void fn_802D479C(Surf* s) {
             f32 wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
+            __typeof__(a.x) a_x = (1.0f / 255) * v->a[0];
             __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
-            a.x = (1.0f / 255) * v->a[0];
+            a.x = a_x;
             a.y = a_y;
             a.z = (1.0f / 255) * v->a[2];
             V3 b;
@@ -556,8 +557,9 @@ void fn_802D4ECC(Surf* s) {
             f32 w1 = (1.0f / 255) * v->w1;
             const BVec* bb = &lbl_804DB068[v->b1];
             V3 p;
+            __typeof__(p.x) p_x = v->x + w0 * ba->x;
             p.y = v->y + w0 * ba->y;
-            p.x = v->x + w0 * ba->x;
+            p.x = p_x;
             p.z = v->z + ba->z * w0;
             f32 xv = bb->x;
             __typeof__(p.z) p_z = p.z + bb->z * w1;
@@ -1282,9 +1284,10 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1400);
             pout = out;
             for (int i = 0; i < pc; i++) {
+                __typeof__(out[1]) out_1 = ((f32*)in)[1];
                 __typeof__(out[2]) out_2 = ((f32*)in)[2];
                 out[0] = ((f32*)in)[0];
-                out[1] = ((f32*)in)[1];
+                out[1] = out_1;
                 out[2] = out_2;
                 in += 0x14;
                 out += 3;
@@ -1409,9 +1412,10 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1000);
             pout = out;
             for (int i = 0; i < pc; i++) {
+                __typeof__(out[1]) out_11 = ((f32*)in)[1];
                 __typeof__(out[2]) out_2 = ((f32*)in)[2];
                 out[0] = ((f32*)in)[0];
-                out[1] = ((f32*)in)[1];
+                out[1] = out_11;
                 out[2] = out_2;
                 in += 0x10;
                 out += 3;
