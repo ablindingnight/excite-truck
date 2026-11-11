@@ -200,20 +200,26 @@ public:
 
 // Per-car race state (the vtable 0x10 accessor returns it). NOTE: the offset comments are relative
 // to the owning DeityCar (State() returns car + 4); subtract 4 for offsets within DState.
+// Grid slot: the car in front in the same column and the column offset.
+struct DGridSlot {
+    DCar* ahead;  // offset 0x0
+    f32 lane;     // offset 0x4
+};
+
 struct DState {
     u32 flags;   // offset 0x4
     s32 place;   // offset 0x8
-    u8 padC[0x14 - 0xC];
+    s32 wC;      // offset 0xC
+    f32 f10;     // offset 0x10
     s32 lap;     // offset 0x14
-    u8 pad18[0x1C - 0x18];
+    f32 f18;     // offset 0x18
     f32 best;    // offset 0x1C
     f32 last;    // offset 0x20
     f32 qual;    // offset 0x24
     s32 mode;    // offset 0x28
     u8 hold;     // offset 0x2C
     f32 holdTime;  // offset 0x30
-    DCar* ahead;   // offset 0x34, the car in front in the same grid column
-    f32 lane;      // offset 0x38, grid column offset
+    DGridSlot grid;  // offset 0x34
 };
 
 class DeityCar {
@@ -1239,12 +1245,12 @@ void fn_801B2910(void) {
         DeityCar* c = &lbl_8055E684[lbl_80435C30[i]];
         DState* st = DS((u8*)c + 0x4);
         if ((i & 1) || solo) {
-            st->ahead = lastRight;
-            st->lane = right;
+            st->grid.ahead = lastRight;
+            st->grid.lane = right;
             lastRight = c->Car();
         } else {
-            st->ahead = lastLeft;
-            st->lane = left;
+            st->grid.ahead = lastLeft;
+            st->grid.lane = left;
             lastLeft = c->Car();
         }
     }
@@ -1314,7 +1320,7 @@ f32 fn_801B306C(void);
 struct DeityStatus {
     u8 pad0[0x39C];
     s32 countdown;  // offset 0x39C
-    u8 cars[8][0x38];  // offset 0x3A0
+    DState cars[8];  // offset 0x3A0
     s32 leaderLap;  // offset 0x560
     s32 first;      // offset 0x564
     s32 laps;       // offset 0x568
@@ -1338,11 +1344,7 @@ void fn_801B2D28(DeityStatus* s) {
     }
     s->laps = lbl_8055E680;
     for (int i = 0; i < lbl_8055E678; i++) {
-        u32* src = (u32*)lbl_8055E684[i].State();
-        u32* dst = (u32*)s->cars[i];
-        for (int k = 0; k < 14; k++) {
-            dst[k] = src[k];
-        }
+        s->cars[i] = *lbl_8055E684[i].State();
     }
     if (fn_801E89EC()) {
         s->countdown = 0;
