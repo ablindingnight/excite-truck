@@ -323,7 +323,8 @@ void fn_8027A8B4(CarSetup* s, const TweakMul* m) {
 }  // extern "C"
 
 // The rival registry table: its weak dtor sits right after this unit's __sinit (rule: address-only use is
-// deferred to the end of the unit). The function that used it was stripped from the shipped game.
+// deferred to the end of the unit). The function that used it was stripped from the shipped game, and so was any
+// data it owned (the target has no RegTable object in .bss/.sbss): delete[] needs the dtor's address but no data.
 struct RegTable {
     RegTable(void) { count = 0; }
     ~RegTable(void) {}
@@ -331,4 +332,4 @@ struct RegTable {
     s32 count;
 };
 
-void fn_RegTableUser(void) { static RegTable t; }
+void fn_RegTableUser(RegTable* t) { delete[] t; }  /* Helper name unproven */
