@@ -380,7 +380,7 @@ static inline int MaskLevel(int n) {
     return 0;
 }
 
-void fn_802AFE64(GroundStack* s, s16 x, s16 y, s16 size, s16 unk6, f32 scale, u16* e0, u16* e1, u16* e3, u16* e2);
+void fn_802AFE64(GroundStack* s, s16 x, s16 y, s16 size, int unk6, f32 scale, u16* e0, u16* e1, u16* e3, u16* e2);
 void fn_802AFEA4(GroundStack* s, s16 size);
 u16* fn_802AFEC0(int n);
 int fn_802AFF54(GroundList* l);
@@ -774,7 +774,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
     }
 }
 
-void fn_802AFE64(GroundStack* s, s16 x, s16 y, s16 size, s16 unk6, f32 scale, u16* e0, u16* e1, u16* e3, u16* e2) {
+void fn_802AFE64(GroundStack* s, s16 x, s16 y, s16 size, int unk6, f32 scale, u16* e0, u16* e1, u16* e3, u16* e2) {
     GroundNode* n = &s->nodes[s->count++];
     n->x = x;
     n->y = y;

@@ -1212,7 +1212,7 @@ static inline u8 PackDent(f32 v) {
 #define DMG_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // A packed dent byte back to its offset.
-static inline f32 UnpackDent(u8 b) {
+static inline f32 UnpackDent(int b) {
     f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
     t = FMax(t, lbl_80561F74);
     return -0.508f + t * 1.016f;

@@ -260,7 +260,7 @@ void fn_80233DD8(GTextFont* f, u32 color);
 void fn_80233E34(GTextFont* f, const UIXform* m, u32 color);
 void fn_80233E80(GTextFont* f, u32 color);
 void fn_80233EBC(void);
-void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
+void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
 
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
@@ -1019,7 +1019,7 @@ void fn_80233E80(GTextFont* f, u32 color) {
 
 void fn_80233EBC(void) { fn_802C8D74(); }
 
-void fn_80233EC0(GTextFont* f, u16 c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
+void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
     if (c != ' ') {
         u32 color = lbl_8055F050;
         UIVert v[4];
