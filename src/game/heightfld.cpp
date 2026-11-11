@@ -611,17 +611,11 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
             if (n >= 3) {
                 int k = -1;
                 f32 m = 0.0f;
-                if (k < 0 || __fabs(d->terms[0].k) < __fabs(m)) {
-                    k = 0;
-                    m = d->terms[0].k;
-                }
-                f32 t1 = d->terms[1].k;
-                if (k < 0 || (float)__fabs(t1) < (float)__fabs(m)) {
-                    k = 1;
-                    m = t1;
-                }
-                if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[2].k)) {
-                    k = 2;
+                for (int j = 0; j < 3; j++) {
+                    if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[j].k)) {
+                        k = j;
+                        m = d->terms[j].k;
+                    }
                 }
                 if (AbsF(d->terms[k].k) < AbsF(dh)) {
                     d->terms[k].k = dh;

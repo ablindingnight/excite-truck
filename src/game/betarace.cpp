@@ -3236,7 +3236,7 @@ inline Pickup::Pickup(ValueNode* n) {
         b[1] = 0.0f;
         b[2] = fwd[1];
         PSVECCrossProduct(b, a, cr);
-        if (cr[1] > 0.0f) {
+        if (!(cr[1] <= 0.0f)) {
             angle = acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
         } else {
             angle = -(f32)acos(dir[0] * fwd[0] + dir[1] * fwd[1]);

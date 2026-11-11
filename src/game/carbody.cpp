@@ -2897,7 +2897,7 @@ void fn_80186DE8(u8* p) {
             a.w = a.w * lbl_80561CAC;
         }
         x->pts[6] = a.Sol();
-        if (rpm.x >= lbl_80561ECC) {
+        if (!(rpm.x < lbl_80561ECC)) {
             rpm.x = rpm.x;
         } else {
             rpm.x = lbl_80561ECC;
@@ -2997,7 +2997,7 @@ void fn_80188A80(u8* p) {
     AddScaled(acc, acc, &a, 0.050000012f);
     acc->z = lbl_80561CAC;
     acc->y = lbl_80561CAC;
-    if (ang->z < -0.04363323f) {
+    if (!(ang->z >= -0.04363323f)) {
         ang->z = -0.04363323f;
         vel->z = SwayMax(vel->z, lbl_80561CAC);
     }

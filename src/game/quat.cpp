@@ -49,7 +49,7 @@ extern "C" void fn_8012F57C(Quat* out, Quat* a, const Quat* b, f32 t) {
     f32 zv = b->z;
     f32 cosom = a->w * b->w + a->x * b->x + a->y * b->y + a->z * zv;
     f32 sinom;
-    if (cosom < 0.0f) {
+    if (!(cosom >= 0.0f)) {
         cosom = -cosom;
         a->x *= -1.0f;
         a->y *= -1.0f;

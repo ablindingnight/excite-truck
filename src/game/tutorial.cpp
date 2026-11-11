@@ -1415,7 +1415,7 @@ inline void Challenge::Init(void) {
                 PSVECNormalize(&e1, &e1);
                 PSVECNormalize(&e2, &e2);
                 PSVECCrossProduct(&e1, &e2, &n3);
-                if (n3.y > 0.0f) {
+                if (!(n3.y <= 0.0f)) {
                     t->dir.x = a.x - t->mid.x;
                     t->dir.z = a.z - t->mid.z;
                 } else {
