@@ -7335,12 +7335,11 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         u32 o3 = (a0 - a2 - b4 + 0x7F) >> 8;
         u32 o4 = (a0 - a2 + b4 + 0x7F) >> 8;
         u32 o5 = (a1 - a3 - b3 + 0x7F) >> 8;
-        u32 o6 = (a1 + a3 - b2 + 0x7F) >> 8;
         u32 o7 = (a0 + a2 - b0 + 0x7F) >> 8;
         u32 w0 = ((o0 & 0xFF) << 16) | (o1 & 0xFF);
         u32 w1 = ((o2 & 0xFF) << 16) | (o3 & 0xFF);
         u32 w2 = ((o4 & 0xFF) << 16) | (o5 & 0xFF);
-        u32 w3 = ((o6 & 0xFF) << 16) | (o7 & 0xFF);
+        u32 w3 = ((((a1 + a3 - b2 + 0x7F) >> 8) & 0xFF) << 16) | (o7 & 0xFF);
         w0 |= w0 << 8;
         w1 |= w1 << 8;
         w2 |= w2 << 8;
