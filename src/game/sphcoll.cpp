@@ -2081,11 +2081,12 @@ int fn_8019E500(u8* p, u8* q) {
         e.a.z = aa->dir.v[2];
         for (int j = 0; j < 4; j++) {
             e.pos = fr.t;
-            f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
+            f32 one = 1.0f;
+            f32 k = ea * ((j & 1) ? -one : one);
             e.pos.x += aa->dir.v[0] * k;
             e.pos.y += aa->dir.v[1] * k;
             e.pos.z += aa->dir.v[2] * k;
-            k = eb * ((j & 2) ? -1.0f : 1.0f);
+            k = eb * ((j & 2) ? -one : one);
             e.pos.x += ab->dir.v[0] * k;
             e.pos.y += ab->dir.v[1] * k;
             e.pos.z += ab->dir.v[2] * k;

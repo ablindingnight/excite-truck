@@ -2011,9 +2011,10 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
                     m->t18C.Start();
                     ka = fn_8017960C(a);
                     f32 xv = ka->mtx.basis[2].x;
-                    tgt.x = ka->mtx.origin.x + xv * 50.0f;
-                    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * 50.0f;
-                    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * 50.0f;
+                    f32 ahead = 50.0f;
+                    tgt.x = ka->mtx.origin.x + xv * ahead;
+                    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * ahead;
+                    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * ahead;
                     v = fn_8017960C(victim);
                     imp.x = tgt.x - v->mtx.origin.x;
                     imp.y = tgt.y - v->mtx.origin.y;

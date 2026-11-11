@@ -434,9 +434,10 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 imp.y = f.y * k;
                 imp.z = f.z * k;
             }
-            if (v.y > 0.44444445f && car->airborne == 0) {
+            f32 climbMax = 0.44444445f;
+            if (v.y > climbMax && car->airborne == 0) {
                 f32 q = 0.1f * v.y;
-                q = 0.44444445f < q ? 0.44444445f : q;
+                q = climbMax < q ? climbMax : q;
                 imp.y = -q * (car->mass / 0.016683351f);
             }
             pen = pen + extra;

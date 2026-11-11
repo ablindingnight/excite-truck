@@ -607,7 +607,8 @@ void CarIconWidget::Draw(void) {
     fw = (f32)w;
     fh = (f32)h;
     f32 pad = 3.0f;
-    fn_802354A0(art, valid, sx - pad, pad + sy, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    f32 border = 6.0f;
+    fn_802354A0(art, valid, sx - pad, pad + sy, 0.0f, border + fw, border + fh, -1);
     e = &(*(IconEntry**)set)[index];
     y = sy;
     x = sx;

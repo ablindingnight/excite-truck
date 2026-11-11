@@ -960,13 +960,14 @@ static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  
 void PartSys::DrawRotating(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
     f32 now = lbl_8055F738;
-    f32 shade = 0.5f * shading;
+    f32 half = 0.5f;
+    f32 shade = half * shading;
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = now - p->birth;
         f32 inv;
         f32 t = age * invLife;
-        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
+        f32 size = half * (sizeConst + sizeRamp * age + half * sizeAccel * Sq(age));
         size = size > 0.001f ? size : 0.001f;
         inv = 1.0f / (1.414f * size);
         f32 twoPi = 6.2831855f;
