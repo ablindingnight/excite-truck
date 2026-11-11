@@ -148,7 +148,6 @@ volatile s32 lbl_8055D264 = -1;  // rate wanted
 s32 lbl_8055D268 = 2;   // decoded channels
 s32 lbl_8055D26C = 2;   // channels in the PCM ring
 f32 lbl_8055D270 = 1.0f;
-const char* lbl_8055D274 = "EXCITE TRUCK";
 
 ModuleTag lbl_80560058;
 u8 lbl_80560060;  // reader in use
@@ -269,6 +268,8 @@ FileReader::~FileReader(void) {
 extern "C" {
 
 void fn_802E9BCC(Mp3Reader* r) { delete r; }
+
+const char* lbl_8055D274 = "EXCITE TRUCK";
 
 const char* fn_802E9BEC(int err) {
     switch (err) {
