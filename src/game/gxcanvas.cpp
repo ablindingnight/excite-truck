@@ -793,9 +793,19 @@ void fn_802C4C80(gxStamp* st) {
 }
 
 void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
+    int ox;
+    int oy;
     int skip;
+    int colStart;
+    u16* lut;
+    int row;
+    int colEnd;
     int n;
     int opaque;
+    u8* run;
+    int col;
+    int rowEnd;
+    u8 k;
     gxCanvas* c = lbl_8055FC00;
     if (c->flags & 4) {
         return;
@@ -806,13 +816,12 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
     if (frame >= st->frames) {
         return;
     }
-    int ox = x - st->ox;
-    int oy = y - st->oy;
-    int row = c->cy0 - oy < 0 ? 0 : c->cy0 - oy;
-    int rowEnd = st->h < c->cy1 - oy ? st->h : c->cy1 - oy;
-    u16* lut;
-    int colStart = c->cx0 - ox < 0 ? 0 : c->cx0 - ox;
-    int colEnd = st->w < c->cx1 - ox ? st->w : c->cx1 - ox;
+    ox = x - st->ox;
+    oy = y - st->oy;
+    row = c->cy0 - oy < 0 ? 0 : c->cy0 - oy;
+    rowEnd = st->h < c->cy1 - oy ? st->h : c->cy1 - oy;
+    colStart = c->cx0 - ox < 0 ? 0 : c->cx0 - ox;
+    colEnd = st->w < c->cx1 - ox ? st->w : c->cx1 - ox;
     if (pal) {
         if (c->fmt == 3) {
             lut = pal;
@@ -825,9 +834,9 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
         lut = st->pal565;
     }
     for (; row < rowEnd; row++) {
-        u8* run = st->rows[st->h * frame + row];
+        run = st->rows[st->h * frame + row];
         u16* d = fn_802C3044(lbl_8055FC00, ox, row + oy);
-    int col = 0;
+    col = 0;
     while (col < colEnd) {
         n = *run++;
         if (n & 0x80) {
@@ -850,7 +859,7 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
             col += skip;
         }
         if (opaque) {
-            for (u8 k = n; k != 0; k--) {
+            for (k = n; k != 0; k--) {
                 *d++ = lut[*run++];
                 col++;
             }

@@ -2380,15 +2380,18 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
 }
 
 void BetaCar::DrawWinner(ILayout* l) const {
-    const BetaCar* c;
-    int best = -1;
-    const BetaMaster* m = master;
     int i;
+    int best;
+    const BetaMaster* m;
+    const BetaCar* c;
+    const BetaCar* b;
+    best = -1;
+    m = master;
     for (i = 0, c = m->cars; i < m->nCars; i++, c++) {
         if (best < 0) {
             best = i;
         } else {
-            const BetaCar* b = &m->cars[best];
+            b = &m->cars[best];
             if (b->result.total < c->result.total) {
                 best = i;
             } else if (b->result.total == c->result.total && b->result.place > c->result.place) {
