@@ -111,7 +111,6 @@ Remote lbl_80505978[4];
 void* lbl_80507258[4];
 WPADConnectCallback lbl_80507268[4];
 s32 lbl_80507278[4];
-s8 lbl_8055D230[8] = {6, 6, 6, 6};
 
 
 extern "C" {
@@ -338,6 +337,7 @@ void fn_802E7DDC(Remote* r, const KStatus* k) {
     r->acc[2] = 0.01f * -k->accX;
 }
 
+s8 lbl_8055D230[8] = {6, 6, 6, 6};
 void fn_802E7FD0(void) {
     s32 now = fn_802E2C20();
     if (lbl_80560010 < now && now - lbl_80560010 < 15) {

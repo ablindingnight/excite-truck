@@ -550,7 +550,6 @@ public:
     u8 dolby;  // offset 0x18
 };
 
-static const MenuDesc lbl_802FA040 = {"options.lyt", 0, 0, 0, 0};
 
 extern "C" {
 
@@ -580,6 +579,7 @@ void fn_80239A94(void) { lbl_8055BAC8 = fn_80214D04(); }
 
 void fn_80239AB8(void) { fn_80214CB4(lbl_8055BAC8); }
 
+static const MenuDesc lbl_802FA040 = {"options.lyt", 0, 0, 0, 0};
 void fn_80239AC0(void) {
     int done = 0;
     MenuDesc desc;

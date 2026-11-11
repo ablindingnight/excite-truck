@@ -78,7 +78,6 @@ extern f32 lbl_80558DC4[];  // FLT_EPSILON
 extern const f32 lbl_80563898;  // 1.0f
 extern const f32 lbl_8056389C;  // 0.7f
 
-s32 lbl_8055BEAC = -1;
 s32 lbl_8055BEB0 = -1;
 s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
@@ -690,6 +689,7 @@ int fn_8024762C(void) {
     return 0;
 }
 
+s32 lbl_8055BEAC = -1;
 void fn_8024768C(void) {
     fn_80214CB4(lbl_8055BEAC);
     for (int i = 1; i < lbl_802FA3B4[lbl_8055F26C].count; i++) {

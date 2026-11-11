@@ -689,7 +689,6 @@ ValueNode* lbl_8055EC70;
 SolBuilder* lbl_8055EC74;
 s32 lbl_8055EC78;
 u8 lbl_8055EC7C;
-s32 lbl_8055B1C8 = -20000;
 
 static inline void Lift(OFrame* f, f32 h) {
     f->pos.x += f->y.x * h;
@@ -1371,6 +1370,7 @@ int fn_801F9D70(RaceDesc* r) {
     return found;
 }
 
+s32 lbl_8055B1C8 = -20000;
 void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC38 = 0;
     fn_801F94CC("race.res/obstacle.val");

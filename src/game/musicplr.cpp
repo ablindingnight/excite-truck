@@ -90,7 +90,6 @@ u8 lbl_8055EDDC;                // playing
 int lbl_8055EDE0;               // current song
 volatile int lbl_8055EDE4;      // requested song
 s32 lbl_8055EDE8;               // time of the request
-const char* lbl_8055B560[2] = {"mus_ui", "mus_credits"};
 MusicTrack lbl_804892C0[2];
 
 extern "C" {
@@ -125,6 +124,7 @@ void fn_8020A03C(int ident, int event) {
     }
 }
 
+const char* lbl_8055B560[2] = {"mus_ui", "mus_credits"};
 void fn_8020A100(void) {
     if (lbl_8055EDD0) {
         f32 fade = 1.0f;

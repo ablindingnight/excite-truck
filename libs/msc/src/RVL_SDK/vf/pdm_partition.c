@@ -52,14 +52,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                 return err;
             }
             VFipdm_mbr_check_master_boot_record(buf, p_part->p_disk->disk_info.total_sectors, &is_mbr);
-            if (is_mbr == 0) {
-                if (part_id == found) {
-                    p_part->start_sector = start_sector;
-                    p_part->total_sector = num_sector;
-                    return 0;
-                }
-                found++;
-            } else {
+            if (is_mbr != 0) {
                 // Extended partition: entry 0 of each EPBR is a logical drive, entry 1 links the next EPBR.
                 base_sector = start_sectors[part_cnt];
                 start_sector = base_sector;
@@ -95,6 +88,13 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                         ext_cnt = 0;
                     }
                 }
+            } else {
+                if (part_id == found) {
+                    p_part->start_sector = start_sector;
+                    p_part->total_sector = num_sector;
+                    return 0;
+                }
+                found++;
             }
         }
     } else {

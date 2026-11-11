@@ -171,15 +171,6 @@ struct ActionPrompt {
     const char* label;  // offset 0x8
 };
 
-ActionPrompt lbl_802FB8F0[7] = {
-    {0x1, "\\dpad", NULL},
-    {0xF, "\\minus", NULL},
-    {0x15, "\\plus", NULL},
-    {0x14, "\\A", NULL},
-    {0x13, "\\2", NULL},
-    {0x10, "\\1", NULL},
-    {0x11, "\\1", NULL},
-};
 
 // Five-word static built by an inline constructor (first word stored first).
 class ReplayStatic {
@@ -285,6 +276,15 @@ static inline f32 Clamp01(f32 x) {
     return MAX(v, 0.0f);
 }
 
+ActionPrompt lbl_802FB8F0[7] = {
+    {0x1, "\\dpad", NULL},
+    {0xF, "\\minus", NULL},
+    {0x15, "\\plus", NULL},
+    {0x14, "\\A", NULL},
+    {0x13, "\\2", NULL},
+    {0x10, "\\1", NULL},
+    {0x11, "\\1", NULL},
+};
 void fn_80008684(int camera) {
     s32 action;
     ActionPrompt* prompt;

@@ -252,7 +252,6 @@ extern "C" {
 
 void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
 void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
-DrawFn lbl_8055B9A8 = fn_80231D84;
 
 
 void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
@@ -496,6 +495,7 @@ void fn_80232024(const char** s, u32* color) {
     }
 }
 
+DrawFn lbl_8055B9A8 = fn_80231D84;
 void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale, f32 z,
                  f32 xs, f32 spacing) {
     u32 c;
