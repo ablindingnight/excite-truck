@@ -1147,8 +1147,6 @@ void fn_802B87F4(void) {
     }
 }
 
-extern const f32 lbl_80564CA0;  // 1.0
-extern const f32 lbl_80564CA4;  // 1.4396
 
 void fn_802B8848(void) {
     u8 m[0x30];
@@ -1163,7 +1161,7 @@ void fn_802B8848(void) {
     }
     fn_80230B5C(m);
     fn_802C8638(m);
-    fn_802C974C(lbl_80564CA0, 1000.0f, lbl_80564CA4);
+    fn_802C974C(1.0f, 1000.0f, 1.4396f);
     fn_802B86F8();
     fn_802B676C();
     if (lbl_8055FA38 != 2 && lbl_8055FA38 != 3) {
