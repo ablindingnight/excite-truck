@@ -2311,7 +2311,7 @@ void fn_80183E7C(u8* p) {
             if (l < r) {
                 r = l;
             }
-            int side = F32(p, 0x2628) <= F32(p, 0x262C) ? 2 : 1;
+            int side = F32(p, 0x2628) > F32(p, 0x262C) ? 1 : 2;
             if ((f32)__fabs(gap) < lbl_80561D38 && now - r < lbl_80561CD0 && held &&
                 (S32(p, 0x263C) == 0 || side == S32(p, 0x263C))) {
                 S32(p, 0x2638) = side;

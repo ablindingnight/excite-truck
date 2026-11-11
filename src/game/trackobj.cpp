@@ -423,16 +423,16 @@ public:
     f32 f50;       // offset 0x50
 };
 
-class BoxVol : public CollShape {
+class BoxShape : public CollShape {
 public:
-    BoxVol(f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(0, 0, 'BOX ', k, s) {
+    BoxShape(f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(0, 0, 'BOX ', k, s) {
         hy = y * 0.5f;
         hx = x * 0.5f;
         hz = z * 0.5f;
         f34 = 0;
         radius = 0.2f + (f32)sqrt(hx * hx + hy * hy + hz * hz);
     }
-    virtual ~BoxVol(void);
+    virtual ~BoxShape(void);
     virtual void vf38(void);
     f32 hx;      // offset 0x24
     f32 hy;      // offset 0x28
@@ -2001,7 +2001,7 @@ CollShape* fn_801FC048(const ObstacleDesc* d) {
 
 CollShape* fn_801FC12C(const ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:wallvol") BoxVol(k, 0.2f, d->shape.f[0], d->shape.f[1], d->shape.f[2]);
+    return new ("ewcv:wallvol") BoxShape(k, 0.2f, d->shape.f[0], d->shape.f[1], d->shape.f[2]);
 }
 }
 
