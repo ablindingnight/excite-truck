@@ -269,7 +269,7 @@ static inline f32 Clamp01(f32 x) {
 
 extern "C" {
 
-int fn_8019309C(u8* d, int car, u8 v) {
+int fn_8019309C(u8* d, int car, int v) {
     u8* o = lbl_804349C0[car];
     int r = 0;
     if (o && U8(o, 0x2A4)) {
