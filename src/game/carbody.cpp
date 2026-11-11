@@ -2812,7 +2812,9 @@ void fn_80186DE8(u8* p) {
             slide = lbl_80561CAC;
         }
         cut = lbl_80561CD0;
-        if (!player) {
+        if (player) {
+            cut = lbl_80561CAC;
+        } else {
             if (S32(car, 0x267C)) {
                 f32 s = lbl_80561D2C * steerK - lbl_80561D38 * F32(car, 0x128);
                 if (s > cut) {
@@ -2823,8 +2825,6 @@ void fn_80186DE8(u8* p) {
                     steerK = s;
                 }
             }
-        } else {
-            cut = lbl_80561CAC;
         }
         gas = throttle;
         if (slide > lbl_80561CAC && S32(car, 0x2620) > 2) {
