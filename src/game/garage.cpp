@@ -842,16 +842,21 @@ static inline void InitSlotStrip(u8* p, GarageList* list) {
 
 // The car slot list (vtable lbl_803444D8, over the slot strip lbl_8034453C): one animated slot and one entry
 // per car of `list`, starting on the car `car` points at.
+// Reference-counted car icon manager shared by the car menus.
+inline IconPool* AcquireCarIcons(void) {  /* Helper name unproven */
+    if (lbl_8055F2E8 == 0) {
+        lbl_8055F2E4 = new ("cimgr") IconPool;
+    }
+    lbl_8055F2E8++;
+    return lbl_8055F2E4;
+}
+
 u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {
     InitSlotStrip(p, list);
     S32(p, 0x2C) = 0;
     *(void**)p = lbl_803444D8;
     F32(p, 0x28) = S32(p, 0x2C);
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") IconPool;
-    }
-    lbl_8055F2E8++;
-    PTR(p, 0xC8) = (u8*)lbl_8055F2E4;
+    PTR(p, 0xC8) = (u8*)AcquireCarIcons();
     PTR(p, 0xD0) = (u8*)list;
     PTR(p, 0x30) = (u8*)color;
     PTR(p, 0x34) = (u8*)car;
