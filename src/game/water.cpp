@@ -236,11 +236,13 @@ public:
     u8 valid;            // offset 0x2C5C
 };
 
-// MATCHING-AID: unused in this build; keeps the "gen_surf.tex" literal at its pool slot (its user is gone).
-static const char* sSurfTex = "gen_surf.tex";
+const char* lbl_8055CF68 = "gen_surf.mod";
+// Unused in ET: only its texture name survives in .data.
+static const char* SurfTex(void) { return "gen_surf.tex"; }  /* Helper name unproven */
 s32 lbl_8055CF6C = -1;
 u8 lbl_8055CF70 = 1;
 u8 lbl_8055CF71 = 1;
+f32 lbl_8055CF74 = 4.0f;
 
 ModuleTag lbl_8055FAD0;
 
@@ -269,7 +271,6 @@ static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 
-const char* lbl_8055CF68 = "gen_surf.mod";
 u32 fn_802BECE4(const char* s, u32 def) {
     int r = 0;
     int g = 0;
@@ -546,7 +547,6 @@ WaterEnvMap::WaterEnvMap(void) {
     scale = 1.0f;
 }
 
-f32 lbl_8055CF74 = 4.0f;
 WaterEnvMap::~WaterEnvMap(void) {
     if (target != -2) {
         fn_802CB228(target);
