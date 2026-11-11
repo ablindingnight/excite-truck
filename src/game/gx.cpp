@@ -704,10 +704,7 @@ void fn_802CF10C(u32 count) {
     }
     lbl_8055FD44++;
     lbl_8055FD4C++;
-    if (lbl_8055FD4C < 5) {
-        return;
-    }
-    if (!lbl_8055FD50 && !cap->active) {
+    if (lbl_8055FD4C < 5 || (!lbl_8055FD50 && !cap->active)) {
         return;
     }
     if (cap->pending) {
