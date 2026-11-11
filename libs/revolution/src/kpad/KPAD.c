@@ -1476,7 +1476,8 @@ void KPADInit(void) {
     while (WPADGetStatus() != 3) {
     }
 
-    for (i = 0; i < WPAD_MAX_CONTROLLERS; i++) {
+    i = 0;
+    do {
         kp = &inside_kpads[i];
 
         kp->is_dpd_enabled = TRUE;
@@ -1503,7 +1504,7 @@ void KPADInit(void) {
         kp->btn_repeat_pulse = 0;
         kp->btn_cl_repeat_delay = KPAD_BTN_NO_RPT_DELAY;
         kp->btn_cl_repeat_pulse = 0;
-    }
+    } while (++i < WPAD_MAX_CONTROLLERS);
 
     KPADReset();
     OSRegisterVersion(__KPADVersion);
@@ -1514,12 +1515,12 @@ void KPADReset(void) {
 
     KPADSetObjInterval(kp_obj_interval);
 
-    kp_err_dist_speedM_1 = -1.0f / kp_err_dist_speed;
-    kp_err_dist_speed_1 = 1.0f / kp_err_dist_speed;
     kobj_frame_min.x = -1.0f + kp_err_outside_frame;
     kobj_frame_max.x = 1.0f - kp_err_outside_frame;
     kobj_frame_min.y = -((f32)KPAD_DPD_RESO_WY / KPAD_DPD_RESO_WX) + kp_err_outside_frame;
     kobj_frame_max.y =  ((f32)KPAD_DPD_RESO_WY / KPAD_DPD_RESO_WX) - kp_err_outside_frame;
+    kp_err_dist_speed_1 = 1.0f / kp_err_dist_speed;
+    kp_err_dist_speedM_1 = -1.0f / kp_err_dist_speed;
     kp_ah_circle_radius2 = kp_ah_circle_radius * kp_ah_circle_radius;
 
     kp = &inside_kpads[WPAD_MAX_CONTROLLERS - 1];
