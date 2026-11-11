@@ -19,7 +19,7 @@ struct DFrame : DBasis {
 };
 
 struct DVtx {
-    f32 x, y, z;  // offset 0x0
+    DVec3 pos;    // offset 0x0
     u32 color;    // offset 0xC
     f32 u, v;     // offset 0x10
 };
@@ -79,9 +79,9 @@ static inline void MulVec(DVec3* out, const DVec3* in, const DFrame* m) {
 }
 
 static inline void AddScaled(DVtx* o, const DVec3* a, const DVec3* b, f32 k) {
-    o->x = a->x + b->x * k;
-    o->y = a->y + b->y * k;
-    o->z = a->z + b->z * k;
+    o->pos.x = a->x + b->x * k;
+    o->pos.y = a->y + b->y * k;
+    o->pos.z = a->z + b->z * k;
 }
 
 static inline u32 DbgColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
@@ -182,9 +182,9 @@ void fn_801E3C88(void) {
 
 // Arrow head (a four-sided pyramid) at pos pointing along dir.
 static inline void AddV(DVtx* o, const DVtx* a, const DVec3* b) {
-    o->x = a->x + b->x;
-    o->y = a->y + b->y;
-    o->z = a->z + b->z;
+    o->pos.x = a->pos.x + b->x;
+    o->pos.y = a->pos.y + b->y;
+    o->pos.z = a->pos.z + b->z;
 }
 
 void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
@@ -195,9 +195,9 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
     SetLength(&b.z, -size);
     SetLength(&b.x, w / 2);
     SetLength(&b.y, w / 2);
-    v[0].x = 0.0f;
-    v[0].y = 0.0f;
-    v[0].z = 0.0f;
+    v[0].pos.x = 0.0f;
+    v[0].pos.y = 0.0f;
+    v[0].pos.z = 0.0f;
     AddScaled(&v[1], &b.z, &b.x, -1.0f);
     AddScaled(&v[2], &b.z, &b.x, 1.0f);
     AddScaled(&v[3], &b.z, &b.y, -1.0f);
@@ -274,21 +274,21 @@ void fn_801E41E0(const DVec3* pos, u32 color, f32 size) {
     v[2] = t;
     u16 idx[3] = {0, 1, 2};
     DCam* cam = fn_802C86DC();
-    v[0].x = pos->x + cam->up.x * size;
-    v[0].y = pos->y + cam->up.y * size;
-    v[0].z = pos->z + cam->up.z * size;
-    v[1].x = pos->x + cam->up.x * (0.5f * -size);
-    v[1].y = pos->y + cam->up.y * (0.5f * -size);
-    v[1].z = pos->z + cam->up.z * (0.5f * -size);
-    v[1].x += cam->right.x * (0.866f * size);
-    v[1].y += cam->right.y * (0.866f * size);
-    v[1].z += cam->right.z * (0.866f * size);
-    v[2].x = pos->x + cam->up.x * (0.5f * -size);
-    v[2].y = pos->y + cam->up.y * (0.5f * -size);
-    v[2].z = pos->z + cam->up.z * (0.5f * -size);
-    v[2].x += cam->right.x * (0.866f * -size);
-    v[2].y += cam->right.y * (0.866f * -size);
-    v[2].z += cam->right.z * (0.866f * -size);
+    v[0].pos.x = pos->x + cam->up.x * size;
+    v[0].pos.y = pos->y + cam->up.y * size;
+    v[0].pos.z = pos->z + cam->up.z * size;
+    v[1].pos.x = pos->x + cam->up.x * (0.5f * -size);
+    v[1].pos.y = pos->y + cam->up.y * (0.5f * -size);
+    v[1].pos.z = pos->z + cam->up.z * (0.5f * -size);
+    v[1].pos.x += cam->right.x * (0.866f * size);
+    v[1].pos.y += cam->right.y * (0.866f * size);
+    v[1].pos.z += cam->right.z * (0.866f * size);
+    v[2].pos.x = pos->x + cam->up.x * (0.5f * -size);
+    v[2].pos.y = pos->y + cam->up.y * (0.5f * -size);
+    v[2].pos.z = pos->z + cam->up.z * (0.5f * -size);
+    v[2].pos.x += cam->right.x * (0.866f * -size);
+    v[2].pos.y += cam->right.y * (0.866f * -size);
+    v[2].pos.z += cam->right.z * (0.866f * -size);
     fn_802C8BD0(lbl_8055EA6C);
     fn_802C8DB8(v, 3, idx, 3);
     fn_802C8D74();
