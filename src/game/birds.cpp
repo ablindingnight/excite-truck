@@ -259,9 +259,7 @@ void fn_802A86A4(void) {
         BoidDesc d;
         f = lbl_804BD6C4.data[i];
         memset(&d, 0, 0);
-        d.pos.x = f->pt.x;
-        d.pos.y = f->pt.y;
-        d.pos.z = f->pt.z;
+        SetXYZ(&d.pos, f->pt.x, f->pt.y, f->pt.z);
         d.turn = f->flockTurn;
         d.radius = f->flockRad;
         d.speedMax = f->flockSpeed;
