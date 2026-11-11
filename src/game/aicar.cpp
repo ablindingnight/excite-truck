@@ -280,7 +280,7 @@ int fn_8019309C(u8* d, int car, u8 v) {
     return r;
 }
 
-u8 fn_801930DC(u8* d, int car) {
+int fn_801930DC(u8* d, int car) {
     u8* o = lbl_804349C0[car];
     if (o && U8(o, 0x2A4)) {
         return U8(o, 0x2FD);
@@ -2216,7 +2216,7 @@ void fn_8019743C(u8* d, u8* out) {
                     if ((which & 2) && (v = fn_801930DC(d, S32(d, 0x90))) != 0) {
                         which = 1;
                         v = 1;
-                    } else if ((r & 1) && (v = fn_801930DC(d, S32(d, 0xB8))) != 0) {
+                    } else if ((which & 1) && (v = fn_801930DC(d, S32(d, 0xB8))) != 0) {
                         which = 0;
                         v = 1;
                     } else {
@@ -2228,7 +2228,7 @@ void fn_8019743C(u8* d, u8* out) {
                 }
             } else {
                 which = blocked == 0;
-                side = blocked == 0 ? d + 0xA0 : d + 0x78;
+                side = blocked ? d + 0x78 : d + 0xA0;
                 blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
             }
             if (which != 0) {
