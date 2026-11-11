@@ -864,12 +864,13 @@ void* fn_802EAB28(void* arg) {
 int fn_802EB7D4(void* dst, int n, int ch) {
     u16* out = (u16*)dst;
     s32 nch = lbl_8055D26C;
-    if (lbl_805600B8 == lbl_805600B0[ch]) {
+    s32 wr = lbl_805600B8;
+    if (wr == lbl_805600B0[ch]) {
         memset(dst, 0, n);
         lbl_805600C0[ch]++;
-    } else if (lbl_805600B0[ch] < lbl_805600B8) {
+    } else if (lbl_805600B0[ch] < wr) {
         int want = n * nch;
-        int avail = lbl_805600B8 > want - lbl_805600B0[ch] ? want : lbl_805600B8 - lbl_805600B0[ch];
+        int avail = want < wr - lbl_805600B0[ch] ? want : wr - lbl_805600B0[ch];
         if (avail < want && lbl_805600C0[ch]) {
             memset(dst, 0, n);
             lbl_805600C0[ch]++;
@@ -893,7 +894,7 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         }
     } else {
         int want = n * nch;
-        int total = lbl_805600A4 - (lbl_805600B0[ch] - lbl_805600B8);
+        int total = lbl_805600A4 - (lbl_805600B0[ch] - wr);
         int toEnd = lbl_805600A4 - lbl_805600B0[ch];
         int avail = want < toEnd ? want : toEnd;
         if (total < want && lbl_805600C0[ch]) {
