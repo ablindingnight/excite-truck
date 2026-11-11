@@ -86,7 +86,7 @@ void fn_8024B6AC(u8* p);
 void operator delete(void* p);
 
 extern const NameEntry lbl_802FA4B0[3];
-char lbl_804989AC[0x24];
+extern char lbl_804989AC[0x24];  // defined after lbl_80498998 (.bss order)
 
 // Per-car multiplayer unlock flags.
 struct UnlockEntry {
@@ -129,6 +129,7 @@ static inline void CopyName(const char* s, int n, char* d) {
 
 ModuleTag lbl_8055F280;
 UnkStatic123s lbl_80498998;
+char lbl_804989AC[0x24];
 UnkStatic7F lbl_8055F288;
 UnlockList* lbl_8055F28C;
 u8 lbl_8055F290;

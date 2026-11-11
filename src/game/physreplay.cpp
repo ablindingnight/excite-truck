@@ -101,11 +101,11 @@ struct ReplayEvents {
 };
 
 ReplayEvents lbl_80435C70;
+ModuleTag lbl_8055E6C8;
 u8 lbl_8055E6D0;
 s32 lbl_8055E6D4;
 Replay* lbl_8055E6D8;
 u8* lbl_8055E6DC;
-ModuleTag lbl_8055E6C8;
 
 extern s32 lbl_8055E3C4;  // game time
 

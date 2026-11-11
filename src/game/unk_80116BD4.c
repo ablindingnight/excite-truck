@@ -8764,24 +8764,24 @@ const u8 lbl_802F8A40[16][64] = {
     62, 63, 54, 55, 46, 47, 38, 39, 30, 31, 22, 23, 14, 15, 6, 7
 };
 
-/* .bss owned by this unit (0x8041D508-0x8041D728), in address order. */
-u8 lbl_8041D508[0x100];
-s32 lbl_8041D608[8];
-u8 lbl_8041D628[0x80];
+/* .bss owned by this unit (0x8041D508-0x8041D728), in REVERSE address order: this C unit emits globals last-defined first. */
 u8 lbl_8041D6A8[0x80];
+u8 lbl_8041D628[0x80];
+s32 lbl_8041D608[8];
+u8 lbl_8041D508[0x100];
 
-/* .sbss owned by this unit (0x8055DEC0-0x8055DF00), in address order. */
-s64 lbl_8055DEC0;
-s32 (*lbl_8055DEC8)(s32);
-s32 lbl_8055DECC;
-s32 lbl_8055DED0;
-void *lbl_8055DED4;
-s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);
-s32 lbl_8055DEDC;
-s32 lbl_8055DEE0[2];
-s32 lbl_8055DEE8;
-s32 lbl_8055DEEC;  /* unreferenced (a gap in the target) */
-u32 lbl_8055DEF0;
-u32 lbl_8055DEF4;
-void *lbl_8055DEF8;
+/* .sbss owned by this unit (0x8055DEC0-0x8055DF00), in REVERSE address order: this C unit emits globals last-defined first. */
 void *lbl_8055DEFC;
+void *lbl_8055DEF8;
+u32 lbl_8055DEF4;
+u32 lbl_8055DEF0;
+s32 lbl_8055DEEC;  /* unreferenced (a gap in the target) */
+s32 lbl_8055DEE8;
+s32 lbl_8055DEE0[2];
+s32 lbl_8055DEDC;
+s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);
+void *lbl_8055DED4;
+s32 lbl_8055DED0;
+s32 lbl_8055DECC;
+s32 (*lbl_8055DEC8)(s32);
+s64 lbl_8055DEC0;

@@ -813,8 +813,8 @@ extern void *fn_8020A860();
 extern int fn_80208E90(void *, int);
 
 /* .bss owned by this unit (0x804892D0-0x80489BE0), in address order. */
-char lbl_804892D0[0x900];
 unsigned char lbl_80489BD0[0x10];
+char lbl_804892D0[0x900];
 
 /* Module statics (.sbss 0x8055EDF0-0x8055EE18, in address order); their constructors are this unit's __sinit
    (0x8020BCB8, formerly the separate unit unk_8020BCB8). */
