@@ -67,6 +67,9 @@ void fn_801274C0(void) {
     RegisterModuleTag__FP9ModuleTag(lbl_8055DF00);
 }
 
+/* Its static-initializer table entry (the C++ __sinit of the original unit). */
+__declspec(section ".ctors") static void (*const lbl_802ED11C)(void) = fn_801274C0;
+
 /* .bss owned by this unit (0x8041D728-0x8041D78C): callback lists -1..3. */
 CallbackList lbl_8041D728[5];
 
