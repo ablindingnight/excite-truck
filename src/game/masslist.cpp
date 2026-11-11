@@ -4,6 +4,13 @@
 // from the strings.
 #include "game/common.h"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
@@ -410,9 +417,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
         f32 xv = x->row[i].x;
-        in.x = xv;
-        in.y = x->row[i].y;
-        in.z = x->row[i].z;
+        SetXYZ(&in, xv, x->row[i].y, x->row[i].z);
         MVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;

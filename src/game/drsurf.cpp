@@ -7,6 +7,13 @@
 #include "game/common.h"
 #include "revolution/GX/GXTypes.h"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 struct GXVtxDescList {
     int attr;
     int type;
@@ -554,9 +561,7 @@ void fn_802D4ECC(Surf* s) {
             p.x = p.x + xv * w1;
             p.y = p.y + bb->y * w1;
             p.z = p.z + bb->z * w1;
-            o->x = p.x;
-            o->y = p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib];
-            o->z = p.z;
+            SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
             v++;
             o++;
         }
@@ -565,13 +570,6 @@ void fn_802D4ECC(Surf* s) {
         GXSetArray(0xD, s->uv, 4);
         GXCallDisplayList(s->dl, s->dlSize);
     }
-}
-
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
 }
 
 void fn_802D50B4(Surf* s) {

@@ -5,6 +5,13 @@
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 struct IVec3 {
     f32 x;
     f32 y;
@@ -1130,13 +1137,6 @@ void fn_801B8E28(int car);
 
 // The interlude player, once per frame: runs every event whose time has come, in order. A wait (cars to
 // cross a point) or a fade still running holds the queue and pauses the clock.
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
 void debug_event(void) {
     if (lbl_8055E7E1) {
         fn_801769E0();
@@ -1303,9 +1303,7 @@ void debug_event(void) {
                         CamPose f;
                         f = car->pose.place.frame;
                         IVec3 euler;
-                        euler.x = 0.0f;
-                        euler.y = tp->yaw;
-                        euler.z = 0.0f;
+                        SetXYZ(&euler, 0.0f, tp->yaw, 0.0f);
                         Mat3 r;
                         fn_80015A20(&r, &euler);
                         Mat3Mul(&f.rot, &r, &f.rot);

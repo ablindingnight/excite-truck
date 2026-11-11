@@ -4,6 +4,13 @@
 #include <math.h>
 #include "game/common.h"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void* operator new(size_t size, const char* tag);
 
 struct Vec2 {
@@ -472,13 +479,6 @@ static inline f32 Ease(f32 t) {
 }
 
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
@@ -556,9 +556,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         basis.pos.x = tpos.x;
         basis.pos.y = tpos.y;
         basis.pos.z = 0.0f;
-        basis.fwd.x = dir.x;
-        basis.fwd.y = dir.y;
-        basis.fwd.z = 0.0f;
+        SetXYZ(&basis.fwd, dir.x, dir.y, 0.0f);
     }
     PSVECNormalize(&basis.fwd, &basis.fwd);
     basis.up.x = 0.0f;

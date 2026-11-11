@@ -5,6 +5,13 @@
 #include "game/common.h"
 #include <string.h>
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
@@ -2643,9 +2650,7 @@ void fn_80186DE8(u8* p) {
             player = 1;
         }
         CbFrame fr;
-        fr.rows[0].x = m->rot[0].x;
-        fr.rows[0].y = m->rot[0].y;
-        fr.rows[0].z = m->rot[0].z;
+        SetXYZ(&fr.rows[0], m->rot[0].x, m->rot[0].y, m->rot[0].z);
         fr.rows[1].x = m->rot[1].x;
         fr.rows[1].y = m->rot[1].y;
         fr.rows[1].z = m->rot[1].z;
@@ -3700,13 +3705,6 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 
 // Copies the flapping parts' simulated points (0x26C4 flag, 0x26C8 aerial) into the car model's point
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
 void fn_8018A9F0(u8* p, u8* m) {
     if (PTR(p, 0x26C4)) {
         BVec* pos = 0;

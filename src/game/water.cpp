@@ -6,6 +6,13 @@
 // animated surface rings. Names are guesses apart from the strings.
 #include "game/common.h"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void* operator new(size_t size, const char* tag);
 
 extern "C" {
@@ -776,13 +783,6 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 extern const f32 lbl_80564E24;  // -10
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -834,9 +834,7 @@ void WaterSystem::Draw(void) {
         p.y += fwd.y * dist;
         p.z += fwd.z * dist;
         PVec rel;
-        rel.x = p.x - cam.pos.x;
-        rel.y = p.y - cam.pos.y;
-        rel.z = p.z - cam.pos.z;
+        SetXYZ(&rel, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
         f32 depth = rel.x * cam.z.x + rel.y * cam.z.y + rel.z * cam.z.z;
         fn_802BED90(&rel);
         f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
