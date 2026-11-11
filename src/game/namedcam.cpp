@@ -254,7 +254,7 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
     f32 e = Ease(t);
     f32 q[4];
     fn_8012F57C(q, lbl_8049FD58[slot].q0, lbl_8049FD58[slot].q1, e);
-    CamShot* s = &lbl_8049FD58[slot];
+    const CamShot* s = &lbl_8049FD58[slot];
     QuatToPose(out, q);
     CamVec3 v;
     v.v[2] = s->p0.v[2] + e * (s->p1.v[2] - s->p0.v[2]);
