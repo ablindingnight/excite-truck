@@ -153,6 +153,16 @@ static inline void Swap4(u8* p) {
     p[2] = t;
 }
 
+/* Helper name unproven: the header swap uses a byte-swap loop (the target's code), unlike Swap4 . */
+static inline void Swap4Loop(u8* p) {
+    u8* b = (u8*)p;
+    for (int k = 0; k < 2; k++) {
+        u8 t = b[k];
+        b[k] = b[3 - k];
+        b[3 - k] = t;
+    }
+}
+
 static inline void FourCC(char* s, u32 v) {
     *(u32*)s = v;
     Swap4((u8*)s);
@@ -405,19 +415,19 @@ void fn_8012A7FC(void) {
 }
 
 void fn_8012A80C(ResSetHeader* h) {
-    Swap4((u8*)&h->magic);
-    Swap4((u8*)&h->headerSize);
-    Swap4((u8*)&h->version);
-    Swap4((u8*)&h->flags);
-    Swap4((u8*)&h->fileSize);
-    Swap4((u8*)&h->createTime);
-    Swap4((u8*)&h->baseOffset);
-    Swap4((u8*)&h->unk1C);
-    Swap4((u8*)&h->resCount);
-    Swap4((u8*)&h->loadSize);
-    Swap4((u8*)&h->unk28);
-    Swap4((u8*)&h->tocCrc);
-    Swap4((u8*)&h->unk30);
+    Swap4Loop((u8*)&h->magic);
+    Swap4Loop((u8*)&h->headerSize);
+    Swap4Loop((u8*)&h->version);
+    Swap4Loop((u8*)&h->flags);
+    Swap4Loop((u8*)&h->fileSize);
+    Swap4Loop((u8*)&h->createTime);
+    Swap4Loop((u8*)&h->baseOffset);
+    Swap4Loop((u8*)&h->unk1C);
+    Swap4Loop((u8*)&h->resCount);
+    Swap4Loop((u8*)&h->loadSize);
+    Swap4Loop((u8*)&h->unk28);
+    Swap4Loop((u8*)&h->tocCrc);
+    Swap4Loop((u8*)&h->unk30);
 }
 
 int fn_8012AA60(ResourceSet* set, s32 size) {
