@@ -541,7 +541,6 @@ void fn_802E27B8(Video* v) {
 // Only its strings survive in the game.
 void KernelErrorHandler(u16 err) {
     fn_802E30C8("error_handler(%x)", err);
-    fn_802E30C8("%s", lbl_8034CCE0[0].name);
 }
 
 void stack_check(void) {

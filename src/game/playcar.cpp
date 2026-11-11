@@ -72,8 +72,8 @@ public:
 };
 
 extern void* lbl_80333018[];
-extern f32 lbl_8055A468;
-extern f32 lbl_8055A46C;
+f32 lbl_8055A468 = 7.5f;
+f32 lbl_8055A46C = 12.5f;
 
 static inline void SetMode(u8* p, int on) {
     B8(p, 0x25) = on;

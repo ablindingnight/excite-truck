@@ -143,7 +143,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
 void fn_80144B44(MVec3* v, f32 x, f32 y, f32 z);
 void StatsUpdate__Fv(MVec3* v);  // vector default constructor (empty, out of line)
-extern s32 lbl_8055A920;
+s32 lbl_8055A920 = -1;
 MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
 MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w);
 MVec4* fn_801BF164(MVec4* out, const MVec4* in);
