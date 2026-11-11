@@ -63,9 +63,7 @@ struct CamRec {
     s32 lastFrame;      // offset 0xB8
     f32 fov;            // offset 0xBC
     CamPose carFrame;   // offset 0xC0
-    u32 wF0[6];         // offset 0xF0
-    u32 w108;
-    u32 w10C;
+    u32 wF0[8];         // offset 0xF0
     u32 w110[4];        // offset 0x110
     CamVec3 vel;        // offset 0x120
     CamVec3 carVel;     // offset 0x12C
@@ -80,13 +78,8 @@ struct CamRec {
     f32 f154;           // offset 0x154
     f32 f158;           // offset 0x158
     f32 f15C;           // offset 0x15C
-    u32 w160[3];        // offset 0x160
-    f32 f16C;           // offset 0x16C
-    f32 f170;           // offset 0x170
-    f32 f174;           // offset 0x174
-    u32 w178[2];        // offset 0x178
-    f32 f180;           // offset 0x180
-    f32 f184;           // offset 0x184
+    u32 w160[6];        // offset 0x160
+    u32 w178[4];        // offset 0x178
     CamLink link;       // offset 0x188
     f32 f18C;           // offset 0x18C
     f32 f190;           // offset 0x190
