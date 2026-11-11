@@ -745,7 +745,6 @@ void fn_802D5B8C(const Surf* s) {
     off[0] = lbl_804DB068[1].x;
     off[1] = lbl_804DB068[1].y;
     f32 k = lbl_804DB068[1].z;
-    f32 u0 = off[0];
     f32 v0 = off[1];
     c = col;
     f32* t = uv;
@@ -756,7 +755,7 @@ void fn_802D5B8C(const Surf* s) {
         p++;
         c++;
         src++;
-        t[0] = suv[0] + u0;
+        t[0] = suv[0] + off[0];
         t[1] = suv[1] + v0;
         suv += 2;
         t += 2;
