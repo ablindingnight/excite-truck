@@ -505,7 +505,7 @@ const char* lbl_8055CA80 = "firefull.tex";
 const char* lbl_8055CA84 = "bfface.tex";
 const char* lbl_8055CA88 = "bfedge.tex";
 // Unused in ET: only its texture name survives in .data.
-static const char* FireBaseTex(void) { return "firebase.tex"; }
+static const char* FireBaseTex(void) { return "firebase.tex"; }  /* Helper name unproven */
 const char* lbl_8055CA8C = "fireboost.tex";
 
 static const int lbl_802FA9F0[8] = {0, 7, 3, 2, 5, 4, 6, 1};
