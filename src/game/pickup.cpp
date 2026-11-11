@@ -175,8 +175,7 @@ struct PickupTrack {
 };
 
 struct PickupCounts {
-    s32 n[5];  // offset 0x0
-    s32 done;  // offset 0x14
+    s32 n[6];  // offset 0x0: per-type counts, [5] = all groups done
 };
 
 extern "C" PickupType* get_pickup_type_info(int type);
@@ -653,7 +652,7 @@ void fn_801683F4(PickupCounts* out, int player) {
                 Loop1_fn_801683F4(g, i, rec, lo, hi, res);
             }
         }
-        res.done = done;
+        res.n[5] = done;
     }
     lbl_80430260[player].pos[0] = rec->pos[0];
     lbl_80430260[player].pos[1] = rec->pos[1];
