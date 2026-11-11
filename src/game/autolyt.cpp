@@ -140,10 +140,12 @@ LytFile* fn_8022E0EC(const char* name) {
 
 void fn_8022E4BC(LytFile* f) { fn_8012C4D8(f); }
 
+// From layout functions the linker stripped: only their messages survive in .data.
+static const char* CantWriteMsg(void) { return "Can't write %s"; }        /* Helper name unproven */
+static const char* CorruptLayoutMsg(void) { return "Corrupt layout %s"; }  /* Helper name unproven */
+
 // Builds a plain column of labels and widgets for a menu that has no layout file.
 LytFile* fn_8022E4C0(const MenuDesc* desc) {
-    // From layout functions the linker stripped.
-    static const char* unused[] = {"Can't write %s", "Corrupt layout %s"};
     LytFile* f = new ("autolyt") LytFile;
     memset(f, 0, sizeof(LytFile));
     f->elems = new ("autoitem") LytElem[0x100];
