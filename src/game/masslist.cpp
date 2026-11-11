@@ -474,7 +474,7 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     if (pen > 0.2f) {
         return;
     }
-    if (PSVECDotProduct(n, &nrm) < -0.2f) {
+    if (!(PSVECDotProduct(n, &nrm) >= -0.2f)) {
         return;
     }
     f32 k = 2.5f * (0.2f + pen);
