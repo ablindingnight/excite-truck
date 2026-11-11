@@ -414,8 +414,9 @@ void fn_802D81C4(GXTexDesc* d) {
     int y;
     const u8* src = tmp;
     for (y = 0; y < h; y++) {
-        for (int x = 0; x < row; x++) {
-            tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = src[x];
+        const u8* wa = src;
+        for (int x = 0; x < row; wa++, x++) {
+            tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = *wa;
         }
         src += row;
     }
@@ -437,8 +438,9 @@ void fn_802D86BC(GXTexDesc* d) {
     int tw = w / 8;
     const u8* src = tmp;
     for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = src[x];
+        const u8* wa = src;
+        for (int x = 0; x < w; wa++, x++) {
+            tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = *wa;
         }
         src += w;
     }

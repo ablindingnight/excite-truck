@@ -798,10 +798,11 @@ inline void Ball::vf28(u8* buf) {
     } else {
         BMtx t;
         int i;
-        for (i = 0; i < 4; i++) {
+        BVec3* wa = t.rot;
+        for (i = 0; i < 4; i++, wa++) {
             const BVec3* a = &world.rot[i];
             const BVec3* b = &prev.rot[i];
-            BVec3* d = &t.rot[i];
+            BVec3* d = wa;
             d->x = LerpT(k, b->x, a->x);
             d->y = LerpT(k, b->y, a->y);
             d->z = LerpT(k, b->z, a->z);

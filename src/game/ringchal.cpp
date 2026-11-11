@@ -1817,8 +1817,9 @@ inline void RingResults::Load(void) {
 
 inline void RingChalMaster::vf40(void) {
     int i;
-    for (i = 0; i < arena.nFiles; i++) {
-        ObjSet* s = &arena.sets->data[i];
+    int wo = 0;
+    for (i = 0; i < arena.nFiles; wo += sizeof(arena.sets->data[0]), i++) {
+        ObjSet* s = (ObjSet*)((u8*)arena.sets->data + wo);
         if (s->active) {
             int j;
             int off;

@@ -181,7 +181,9 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame skin[32];
     int i;
     if (n > 0) {
-        for (i = 0; i < n; i++) {
+        BFrame* wa = world;
+        BFrame* wb = wa;
+        for (i = 0; i < n; wa++, wb++, i++) {
             const Bone* b = &set->bones[i];
             BFrame local = b->rest;
             BFrame parent;
@@ -215,8 +217,8 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             v.z *= -1.0f;
             fn_801BFD34(&a.t, &v, &local);
             Mat3Mul((Mat3*)&a, (const Mat3*)&t, (const Mat3*)&local);
-            fn_801BFD34(&world[i].t, &a.t, &parent);
-            Mat3Mul((Mat3*)&world[i], (const Mat3*)&a, (const Mat3*)&parent);
+            fn_801BFD34(&wa->t, &a.t, &parent);
+            Mat3Mul((Mat3*)wb, (const Mat3*)&a, (const Mat3*)&parent);
         }
     }
     world[0].t.x = pose[0].x;

@@ -1183,10 +1183,11 @@ void fn_80268358(CamRec* c) {
     f32 t;
     f32 half = lbl_80563C6C;
     zero = lbl_80563C20;
-    for (int i = 0; i < 2; i++) {
+    int wo = 0;
+    for (int i = 0; i < 2; i++, wo += sizeof(out[0])) {
         int j;
         int k;
-        MountView* o = &out[i];
+        MountView* o = (MountView*)((u8*)out + wo);
         o->a.x = zero;
         o->a.y = zero;
         o->a.z = zero;

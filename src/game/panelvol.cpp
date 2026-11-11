@@ -747,10 +747,11 @@ void PanelVol::vf28(u8* buf) {
     } else {
         RMtx t;
         int i;
-        for (i = 0; i < 4; i++) {
+        RVec3* wa = t.rot;
+        for (i = 0; i < 4; i++, wa++) {
             const RVec3* a = &world.rot[i];
             const RVec3* b = &prev.rot[i];
-            RVec3* d = &t.rot[i];
+            RVec3* d = wa;
             SetXYZ(d, b->x + k * (a->x - b->x), b->y + k * (a->y - b->y), b->z + k * (a->z - b->z));
         }
         out->mtx = t;

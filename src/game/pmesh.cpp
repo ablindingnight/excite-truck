@@ -343,8 +343,9 @@ void fn_801CFA48(PMesh* m) {
     for (i = 0; i < m->numVerts; i++) {
         SwapVec(&m->verts[i]);
     }
-    for (i = 0; i < m->numTris; i++) {
-        SwapTri(&m->tris[i]);
+    int wo = 0;
+    for (i = 0; i < m->numTris; i++, wo += sizeof(m->tris[0])) {
+        SwapTri((PTri*)((u8*)m->tris + wo));
     }
 }
 #pragma pop
