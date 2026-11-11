@@ -489,6 +489,12 @@ static inline void BuildMap(PathScreenBuf* s) {
 }
 
 s32 lbl_8055C400 = -1;
+// The difficulty node's highlight frame (used by fn_802625D4).
+static f32 sStart = -100.0f;
+static f32 kSmall = 0.05f;
+static f32 kBig = 0.1f;
+static f32 kGrow = 0.5f;
+static f32 kShrink = 0.5f;
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);
@@ -1154,11 +1160,6 @@ void fn_80230F6C(u32* color);
 
 // Difficulty node: its tile and label; while selected a highlight frame grows and shrinks around it.
 void fn_802625D4(u8* p) {
-    static f32 sStart = -100.0f;
-    static f32 kSmall = 0.05f;
-    static f32 kBig = 0.1f;
-    static f32 kGrow = 0.5f;
-    static f32 kShrink = 0.5f;
     f32 x;
     f32 y;
     u32 color;
