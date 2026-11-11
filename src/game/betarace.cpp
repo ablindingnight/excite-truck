@@ -378,6 +378,13 @@ struct Coins {
 
 extern "C" {
 
+// .sdata in address order (tuning values before the first function's strings).
+f32 lbl_80559EB0 = 1.5f;
+f32 lbl_80559EB4 = 1.0f;  // score factor
+f32 lbl_80559EB8 = 0.3f;
+f32 lbl_80559EBC = 0.3f;  // starting meter of the ACAR
+s32 lbl_80559EC0 = 3;
+
 void fn_80149588(TextElem* e, f32 secs) {
     char buf[0x20];
     fn_80130980(buf, sizeof(buf), 3, secs);
@@ -937,11 +944,12 @@ struct TexRef {
 };
 
 extern s32 lbl_8055E258;  // pickups alive
-extern s32 lbl_80559ECC;
-extern s32 lbl_80559ED0;
-extern s32 lbl_80559ED4;
-extern s32 lbl_80559ED8;
-extern s32 lbl_80559EDC;
+f32 lbl_80559EC8 = 1.0f;  // spin trigger wobble speed
+s32 lbl_80559ECC = -1;
+s32 lbl_80559ED0 = -1;
+s32 lbl_80559ED4 = -1;
+s32 lbl_80559ED8 = -1;
+s32 lbl_80559EDC = -1;
 extern s32 lbl_8055E254;
 
 // Trigger colours: five shades per palette.
