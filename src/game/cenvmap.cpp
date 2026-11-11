@@ -195,7 +195,7 @@ void fn_80202D50(EVec3 dir) {
         if (e->idx > elev) {
             EnvTex* a = &lbl_8048897C.data[i - 1];
             EnvTex* b = &lbl_8048897C.data[i];
-            f32 t = (elev - (f32)a->idx) / ((f32)b->idx - (f32)a->idx);
+            f32 t = (elev - (f32)a->idx) / (f32)(b->idx - a->idx);
             t = 1.0f < t ? 1.0f : t;
             t = t <= 0.0f ? 0.0f : t;
             t = EnvLerp(0.0f, 1.0f, t);
