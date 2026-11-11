@@ -84,7 +84,7 @@ int fn_8024CC54(int* slot, int (*confirm)(int), int create);
 extern u8 lbl_8055F2D0[8];
 // Physical view of original 8055F2C8..8055F2D0. Accessed bytes are at
 // +0,+1,+2,+4; reserved gaps are observed address gaps, not inferred flags.
-struct ProfileFlagSpan { u8 flagC8, flagC9, flagCA, reservedCB, flagCC, reservedCD[3]; };
+struct ProfileFlagSpan { u8 flagC8, flagC9; s8 flagCA; u8 reservedCB, flagCC, reservedCD[3]; };
 extern ProfileFlagSpan profileFlags;
 #define lbl_8055F2C8 profileFlags.flagC8
 #define lbl_8055F2C9 profileFlags.flagC9
@@ -506,7 +506,7 @@ int fn_8024C768(void) {
     ProfileMenuDesc desc={"demoprofile.lyt",0,0,0,0};
     desc.items=items;
     fn_8024C464();
-    if (!(signed char)lbl_8055F2CA) {
+    if (!lbl_8055F2CA) {
         lbl_8055F2CC=1;
         lbl_8055F2CA=1;
     }
