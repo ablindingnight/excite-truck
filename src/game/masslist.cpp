@@ -376,6 +376,13 @@ static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
 // NonMatching: 441/443; the target copies x->row[7] through two more temporaries (frame 32 bytes larger).
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     MassSet* s = &lbl_8055E794[car];
     ContactSet* c = &lbl_8055E798[car];
@@ -411,9 +418,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
         f32 xv = x->row[i].x;
-        in.x = xv;
-        in.y = x->row[i].y;
-        in.z = x->row[i].z;
+        SetXYZ(&in, xv, x->row[i].y, x->row[i].z);
         MVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;

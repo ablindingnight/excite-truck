@@ -732,6 +732,13 @@ void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b) { Sub(out, a, b); }
 
 }  // extern "C"
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void PanelVol::vf28(u8* buf) {
     PanelPose* out = (PanelPose*)(buf + a8);
     f32 k = lbl_8055E460;
@@ -744,9 +751,7 @@ void PanelVol::vf28(u8* buf) {
             const RVec3* a = &world.rot[i];
             const RVec3* b = &prev.rot[i];
             RVec3* d = &t.rot[i];
-            d->x = b->x + k * (a->x - b->x);
-            d->y = b->y + k * (a->y - b->y);
-            d->z = b->z + k * (a->z - b->z);
+            SetXYZ(d, b->x + k * (a->x - b->x), b->y + k * (a->y - b->y), b->z + k * (a->z - b->z));
         }
         out->mtx = t;
     }

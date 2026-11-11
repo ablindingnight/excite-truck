@@ -2047,6 +2047,13 @@ struct TubeVol {
 
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 int fn_8019E500(u8* p, u8* q) {
     TubeVol* t;
     CFrame fr = *(CFrame*)VE(q)->v50();
@@ -2076,9 +2083,7 @@ int fn_8019E500(u8* p, u8* q) {
         e.b.x = ab->dir.v[0];
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
-        e.a.x = aa->dir.v[0];
-        e.a.y = aa->dir.v[1];
-        e.a.z = aa->dir.v[2];
+        SetXYZ(&e.a, aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (int j = 0; j < 4; j++) {
             e.pos = fr.t;
             f32 one = 1.0f;

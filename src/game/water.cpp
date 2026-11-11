@@ -776,6 +776,13 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 extern const f32 lbl_80564E24;  // -10
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -837,9 +844,7 @@ void WaterSystem::Draw(void) {
         for (int c = 0; c < 16; c++) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
-            v->pos.x = p.x + side.x * u;
-            v->pos.y = p.y + side.y * u;
-            v->pos.z = p.z + side.z * u;
+            SetXYZ(&v->pos, p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
             v->color = col;
             PVec s;
             fn_802C8E70(&v->pos, &s);

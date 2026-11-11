@@ -1336,6 +1336,13 @@ inline void Challenge::Collect(void) {
     }
 }
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 inline void Challenge::Init(void) {
     const char* name = "growcoin.mod";
     model = fn_802C6FC0(name, 0, 0);
@@ -1390,9 +1397,7 @@ inline void Challenge::Init(void) {
                 t->ends[0].x = a.x;
                 t->ends[0].y = 0.0f;
                 t->ends[0].z = a.z;
-                t->ends[1].x = b.x;
-                t->ends[1].y = 0.0f;
-                t->ends[1].z = b.z;
+                SetXYZ(&t->ends[1], b.x, 0.0f, b.z);
                 t->mid.x = (a.x + b.x) * 0.5f;
                 t->mid.z = (a.z + b.z) / 2.0f;
                 Delta2 d1;

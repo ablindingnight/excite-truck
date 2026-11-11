@@ -242,6 +242,13 @@ void fn_802A85C8(void) {
     lbl_804BD6C4.n = 0;
 }
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_802A86A4(void) {
     Boid* b;
     f32 r;
@@ -268,9 +275,7 @@ void fn_802A86A4(void) {
         for (j = 0; j < f->birds.n; j++) {
             b = &f->birds.data[j];
             BVec off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));
-            d.pos.x = f->lead.pos.x + off.x;
-            d.pos.y = f->lead.pos.y + off.y;
-            d.pos.z = f->lead.pos.z + off.z;
+            SetXYZ(&d.pos, f->lead.pos.x + off.x, f->lead.pos.y + off.y, f->lead.pos.z + off.z);
             InitBoid(b, &d);
         }
     }

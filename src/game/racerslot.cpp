@@ -138,6 +138,13 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 int fn_8026A698(u8* p, int i) {
     u8* car = PTR(p, 0x140);
     RacerSlot* s = &lbl_80499E60[i];
@@ -245,9 +252,7 @@ int fn_8026A698(u8* p, int i) {
         SVec d;
         SetV3(&d, at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
         f32 xv = s->vel.x;
-        s->vel.x = xv + 0.2f * (d.x - xv);
-        s->vel.y = s->vel.y + 0.2f * (d.y - s->vel.y);
-        s->vel.z = s->vel.z + 0.2f * (d.z - s->vel.z);
+        SetXYZ(&s->vel, xv + 0.2f * (d.x - xv), s->vel.y + 0.2f * (d.y - s->vel.y), s->vel.z + 0.2f * (d.z - s->vel.z));
         v = s->vel;
         s->pos.x += v.x * 1.0f;
         s->pos.y += v.y * 1.0f;

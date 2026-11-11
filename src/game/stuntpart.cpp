@@ -375,6 +375,13 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
@@ -400,9 +407,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         Vec n;
         Vec c;
         Vec sum;
-        w[0].x = car->wheel1.x;
-        w[0].y = 0.0f;
-        w[0].z = car->wheel1.z;
+        SetXYZ(&w[0], car->wheel1.x, 0.0f, car->wheel1.z);
         w[1].x = car->wheel3.x;
         w[1].y = 0.0f;
         f32 wheel3Z = car->wheel3.z;

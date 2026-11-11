@@ -567,6 +567,13 @@ void fn_802D4ECC(Surf* s) {
     }
 }
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_802D50B4(Surf* s) {
     DirYMorphVtx* v;
     int n = s->nverts;
@@ -581,9 +588,7 @@ void fn_802D50B4(Surf* s) {
                 p.x = v->x + lbl_804C56F0.x * w;
                 p.y = v->y + lbl_804C56F0.y * w;
                 p.z = v->z + lbl_804C56F0.z * w;
-                o->x = p.x;
-                o->y = p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib];
-                o->z = p.z;
+                SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
             }

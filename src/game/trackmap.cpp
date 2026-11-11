@@ -472,6 +472,13 @@ static inline f32 Ease(f32 t) {
 }
 
 
+template <class T>
+static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
@@ -701,9 +708,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         Vec3 p = tr->pos;
         tp.x = p.x;
         tp.y = p.z;
-        rel.x = m->pos.x - basis.pos.x;
-        rel.y = m->pos.y - basis.pos.y;
-        rel.z = 0.0f - basis.pos.z;
+        SetXYZ(&rel, m->pos.x - basis.pos.x, m->pos.y - basis.pos.y, 0.0f - basis.pos.z);
         MulVecT(&rel, &rel, &basis);
         {
             f32 s = w / 2.0f / radius;
