@@ -2253,7 +2253,7 @@ void fn_8019743C(u8* d, u8* out) {
         } else if (pos > F32(d, 0xC8)) {
             diff = F32(d, 0xC8) - pos;
         }
-        if (!((f32)__fabs(diff) <= 0.01f)) {
+        if ((f32)__fabs(diff) > 0.01f) {
             if (fn_8019700C(S32(d, 0xDC))) {
                 S32(d, 0x2D0) |= 0x40;
                 F32(out, 0x8) -= 2.2222223f;
