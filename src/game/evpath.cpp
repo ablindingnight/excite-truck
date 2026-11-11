@@ -1960,11 +1960,6 @@ inline void ScoreAccumulator::Enter(void) {
     }
 }
 
-extern "C" {
-
-void fn_80287360(u8* p) {}
-
-}  // extern "C"
 
 inline void EventUnlockFx::Enter(void) {
     start = fn_8023659C();
