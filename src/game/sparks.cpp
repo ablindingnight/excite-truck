@@ -606,10 +606,14 @@ void fn_8028B4CC(void) {
     }
 }
 
+/* Helper names unproven */
+static inline int IMaxS(int a, int b) { return a > b ? a : b; }
+static inline int IMinS(int a, int b) { return a < b ? a : b; }
+
 int fn_8028B500(const void* evp) {
     const ImpactEv* ev = (const ImpactEv*)evp;
     f32 mag = PSVECMag(&ev->v18);
-    int n = MIN(MAX((int)(0.002f * mag), 0), 0x60);
+    int n = IMinS(IMaxS((int)(0.002f * mag), 0), 0x60);
     s16 hint = fn_80287B24(ev->car)->hint;
     if (n > 0) {
         f32 k = 0.0003f * mag;
