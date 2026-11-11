@@ -1122,17 +1122,17 @@ void CarUIScreen::Init(const char* view) {
 }
 
 void CarUIScreen::LoadView(const char* view) {
-    if (fn_8012C33C("carview.val")) {
-        ValueTableV* t = fn_80131808("carview.val");
+    const char* file = "carview.val";
+    if (fn_8012C33C(file)) {
+        ValueTableV* t = fn_80131808(file);
         if (t->HasChild(view)) {
             ValueNodeV* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
-            ValVec3 v;
             ValVec3 zero;
             zero.x = 0.0f;
             zero.y = 0.0f;
             zero.z = 0.0f;
-            v = n->GetVec3Or("camera_offset", zero);
+            const ValVec3& v = n->GetVec3Or("camera_offset", zero);
             camOffset.x = v.x;
             camOffset.z = v.z;
             ValueNodeV* w = (ValueNodeV*)((ValueNode*)n)->FindChild("wheels");
@@ -1148,11 +1148,11 @@ void CarUIScreen::LoadView(const char* view) {
                 lbl_80344890[3].angle = w->GetFloat("rr_angle", 0.0f);
             }
         } else {
-            fn_802E30C8("CarUIModel: Can't find Val table %s in Val file %s!!!", view, "carview.val");
+            fn_802E30C8("CarUIModel: Can't find Val table %s in Val file %s!!!", view, file);
         }
         fn_80131818(t);
     } else {
-        fn_802E30C8("CarUIModel: Can't load Valfile %s!!!!", "carview.val");
+        fn_802E30C8("CarUIModel: Can't load Valfile %s!!!!", file);
     }
 }
 
