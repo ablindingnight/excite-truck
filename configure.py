@@ -547,7 +547,7 @@ config.libs.append(
             TpRevolution("gx/GXInit.c", Matching),
             TpRevolution("gx/GXFifo.c", Matching),
             TpRevolution("gx/GXTexture.c", Matching),
-            TpRevolution("kpad/KPAD.c", NonMatching),
+            TpRevolution("kpad/KPAD.c", Matching),
             TpRevolution("ai/ai.c", Matching),
             TpRevolution("os/OS.c", Matching, mw_version="GC/3.0a5"),
             TpRevolution("os/OSReset.c", Matching, mw_version="GC/3.0a5"),

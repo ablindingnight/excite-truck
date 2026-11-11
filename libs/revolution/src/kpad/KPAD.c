@@ -66,7 +66,7 @@ static f32 kp_fs_acc_max = 2.1f;
 KPADInsideStatus inside_kpads[WPAD_MAX_CONTROLLERS];
 static Vec2 Vec2_0 = {0.0f, 0.0f};
 
-void DEBUGPrint(const char* fmt, ...) {
+static void DEBUGPrint(const char* fmt, ...) {
     va_list va;
 }
 
