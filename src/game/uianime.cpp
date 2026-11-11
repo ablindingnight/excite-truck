@@ -49,7 +49,7 @@ void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
 
-char lbl_80498664[100];  // anim file for the next push
+extern char lbl_80498664[100];  // anim file for the next push (defined after lbl_80498650)
 
 // Its empty ctor makes UiAnimKey's implicit ctor non-trivial: the array new passes a real (weak) ctor, `def` inlines it.
 struct KeyBase {
@@ -281,6 +281,7 @@ inline UiSpecialList::UiSpecialList(ValueTable* t) {
 ModuleTag lbl_8055F0A8;
 
 UnkStatic123s lbl_80498650;
+char lbl_80498664[100];  // anim file for the next push
 UiAnimList* lbl_8055F0B0;     // pending present anims
 UiAnimList* lbl_8055F0B4;     // pending unpresent anims
 UiSpecialList* lbl_8055F0B8;  // pending special anims

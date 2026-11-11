@@ -206,8 +206,8 @@ struct FileNode {
 ModuleTag lbl_8055FF30;
 u8 lbl_8055FF38[8];   // the FileDisk
 void* lbl_8055FF40;   // no node
-FileNode lbl_804FBAA0[0x10];
 u8 lbl_804DBAA0[0x20000];  // read buffer
+FileNode lbl_804FBAA0[0x10];
 
 void* FileDisk::operator new(size_t size, const char* tag) { return lbl_8055FF38; }
 
