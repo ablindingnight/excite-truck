@@ -2063,6 +2063,51 @@ Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
 
 }  // extern "C"
 
+void fn_80157560(Tracker* t) {
+    ValueTable* vt = fn_80131810("stunts.val");
+    ValueTable* def = fn_80131808("stuntdef.val");
+    ValueNode* node;
+    const char* name;
+    if (!vt) {
+        vt = def;
+    }
+    name = t->Name();
+    if (vt->HasChild(name)) {
+        node = vt->FindChild(name);
+    } else if (def->HasChild(name)) {
+        node = def->FindChild(name);
+    } else {
+        node = def->FindChild("default");
+    }
+    if (node) {
+        ValueNode* r;
+        int i;
+        for (r = node->GetChildAt(0), i = 0; r; r = node->GetChildAt(++i)) {
+            s32 rank = r->GetIntValue("rank");
+            const char* adj = r->GetString("adj", "");
+            s32 thresh = r->GetInt("thresh", 0);
+            f32 pts = r->GetFloat("pts", 0.0f);
+            struct Rank* e;
+            if (pts < 0.0f) {
+                pts = def->FindChild("default")->GetChildAt(i)->GetFloat("pts");
+            }
+            t->ranks.a.count++;
+            e = &t->ranks.a.data[rank];
+            e->count = 0;
+            e->scored = 0;
+            e->natural = 0;
+            e->total = 0.0f;
+            e->pts = pts;
+            e->thresh = thresh;
+            fn_801345D8(e->adj, sizeof(e->adj), "%s ", adj);
+        }
+    }
+    if (vt != def) {
+        fn_80131818(vt);
+    }
+    fn_80131818(def);
+}
+
 RingTracker::RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
     int ok;
     car2 = c;
@@ -2136,50 +2181,6 @@ CountSound::CountSound(const char* a, const char* b, int car) {
 
 extern "C" {
 
-void fn_80157560(Tracker* t) {
-    ValueTable* vt = fn_80131810("stunts.val");
-    ValueTable* def = fn_80131808("stuntdef.val");
-    ValueNode* node;
-    const char* name;
-    if (!vt) {
-        vt = def;
-    }
-    name = t->Name();
-    if (vt->HasChild(name)) {
-        node = vt->FindChild(name);
-    } else if (def->HasChild(name)) {
-        node = def->FindChild(name);
-    } else {
-        node = def->FindChild("default");
-    }
-    if (node) {
-        ValueNode* r;
-        int i;
-        for (r = node->GetChildAt(0), i = 0; r; r = node->GetChildAt(++i)) {
-            s32 rank = r->GetIntValue("rank");
-            const char* adj = r->GetString("adj", "");
-            s32 thresh = r->GetInt("thresh", 0);
-            f32 pts = r->GetFloat("pts", 0.0f);
-            struct Rank* e;
-            if (pts < 0.0f) {
-                pts = def->FindChild("default")->GetChildAt(i)->GetFloat("pts");
-            }
-            t->ranks.a.count++;
-            e = &t->ranks.a.data[rank];
-            e->count = 0;
-            e->scored = 0;
-            e->natural = 0;
-            e->total = 0.0f;
-            e->pts = pts;
-            e->thresh = thresh;
-            fn_801345D8(e->adj, sizeof(e->adj), "%s ", adj);
-        }
-    }
-    if (vt != def) {
-        fn_80131818(vt);
-    }
-    fn_80131818(def);
-}
 
 void fn_801584D4(s32 type, int car, int rank) {
     int i;
