@@ -518,6 +518,26 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     lbl_8055F294 = 0;
     delete (EvListBuf*)lbl_8055F28C;
     lbl_8055F28C = 0;
+    if (r == -1) {
+        __dt__7UITableFv(&stats, 0);
+        __dt__7DynoTexFv(&tex, 0);
+        loc.cur = 0;
+        loc.data = 0;
+        loc.count = 0;
+        loc.cap = 0;
+        events.f18 = -1;
+        events.cur = 0;
+        events.env = 0;
+        if (pairs) {
+            delete[] pairs->alloc;
+            pairs->items = 0;
+            pairs->count = 0;
+            pairs->cap = 0;
+            operator delete(pairs);
+            pairs = 0;
+        }
+        return 0;
+    }
     __dt__7UITableFv(&stats, 0);
     __dt__7DynoTexFv(&tex, 0);
     loc.cur = 0;
@@ -535,7 +555,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         operator delete(pairs);
         pairs = 0;
     }
-    return r != -1;
+    return 1;
 }
 
 u8* fn_8024A110(u8* p, int del) {
