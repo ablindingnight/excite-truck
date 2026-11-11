@@ -1008,14 +1008,14 @@ struct CarPlace {
     }
     CamPose frame;  // offset 0x0
     IVec3 vel;      // offset 0x30
-    f32 unk3C;
+    u32 unk3C;      // offset 0x3C
     s16 node;       // offset 0x40
 };
 
 // A car's start pose (the place plus more).
 struct CarPose {
     CarPlace place;
-    u8 pad44[0xC];
+    u32 w44[3];  // offset 0x44
 };
 
 
