@@ -76,8 +76,6 @@ extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
 
-s32 lbl_8055BEB0 = -1;
-s32 lbl_8055BEB4 = -1;
 extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEC0;
 extern void* lbl_803435A0[];
@@ -688,6 +686,8 @@ int fn_8024762C(void) {
 }
 
 s32 lbl_8055BEAC = -1;
+s32 lbl_8055BEB0 = -1;
+s32 lbl_8055BEB4 = -1;
 void fn_8024768C(void) {
     fn_80214CB4(lbl_8055BEAC);
     for (int i = 1; i < lbl_802FA3B4[lbl_8055F26C].count; i++) {
