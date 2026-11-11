@@ -281,7 +281,8 @@ void fn_801BDA74(int car, CarSetup* s) {
         f32 ka = (a1 - (1.46f * g)) / (x1 - x0);
         x->row[11] = x->row[10] = MVec4((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);
     }
-    for (i = 0; i < 4; i++) {
+    i = 0;
+    do {
         WheelSetup* w = &s->wheels[i];
         int front = (i & 2) == 0;
         int left = (i & 1) == 0;
@@ -290,7 +291,7 @@ void fn_801BDA74(int car, CarSetup* s) {
         x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
                           w->unk18 - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
                           (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
-    }
+    } while (++i < 4);
     x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
     x->row[13] = MVec4(s->wheels[0].bump, s->wheels[1].bump, s->wheels[2].bump, s->wheels[3].bump);
     x->row[14] = MVec4(s->wheels[0].rebound, s->wheels[1].rebound, s->wheels[2].rebound, s->wheels[3].rebound);

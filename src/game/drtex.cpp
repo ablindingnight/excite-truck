@@ -429,9 +429,10 @@ void fn_802D86BC(GXTexDesc* d) {
     u32 h = d->h;
     u8* tex = img->tex;
     u32* pal = img->pal;
-    for (int i = 0; i < 256; i++) {
+    int i = 0;
+    do {
         Swap32(&pal[i]);
-    }
+    } while (++i < 256);
     fn_801282EC(0x20);
     u8* tmp = new ("pal8_tmp") u8[w * h];
     memcpy(tmp, tex, w * h);
