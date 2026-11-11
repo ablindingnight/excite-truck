@@ -547,12 +547,13 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     f32 sn = sin(a);
                     f32 cs = cos(a);
                     f32 t = 1.0f - cs;
+                    __typeof__(r.ry.y) r_ry_y = cs + t * (ay * ay);
                     __typeof__(r.ry.x) r_ry_x = ay * (t * ax) - sn * az;
                     r.rx.x = cs + t * (ax * ax);
                     r.rx.y = ay * (t * ax) + sn * az;
                     r.rx.z = az * (t * ax) - sn * ay;
                     r.ry.x = r_ry_x;
-                    r.ry.y = cs + t * (ay * ay);
+                    r.ry.y = r_ry_y;
                     r.ry.z = az * (ay * t) + ax * sn;
                     r.rz.x = az * (t * ax) + sn * ay;
                     r.rz.y = az * (t * ay) - sn * ax;

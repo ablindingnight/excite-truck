@@ -803,8 +803,9 @@ inline void Ball::vf28(u8* buf) {
             const BVec3* a = &world.rot[i];
             const BVec3* b = &prev.rot[i];
             BVec3* d = wa;
+            __typeof__(d->x) d_x = LerpT(k, b->x, a->x);
             __typeof__(d->z) d_z = LerpT(k, b->z, a->z);
-            d->x = LerpT(k, b->x, a->x);
+            d->x = d_x;
             d->y = LerpT(k, b->y, a->y);
             d->z = d_z;
         }

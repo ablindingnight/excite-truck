@@ -326,8 +326,9 @@ void Wheel::vf28(u8* buf) {
         const RVec3* b = (const RVec3*)&world;
         RVec3* w = d;
         for (int i = 0; i < 4; w++, i++) {
+            __typeof__(w->x) w_x = Lerp(a[i].x, b[i].x, t);
             __typeof__(w->z) w_z = Lerp(a[i].z, b[i].z, t);
-            w->x = Lerp(a[i].x, b[i].x, t);
+            w->x = w_x;
             w->y = Lerp(a[i].y, b[i].y, t);
             w->z = w_z;
         }

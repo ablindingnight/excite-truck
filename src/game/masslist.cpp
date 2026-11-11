@@ -401,10 +401,11 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->v90 = MVec4(0.0f, 0.0f, 0.0f);
     MVec3 v;
     TScale(&v, &mtx->basis[2], a);
+    __typeof__(c->v20) c_v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     s->vel = MVec4(v.x, v.y, v.z);
     s->v60 = MVec4(0.0f, 0.0f, 0.0f);
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v20 = c_v20;
     MVec4 k = x->row[7];
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);

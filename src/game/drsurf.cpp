@@ -444,8 +444,9 @@ void fn_802D479C(Surf* s) {
             f32 wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
+            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
             a.x = (1.0f / 255) * v->a[0];
-            a.y = (1.0f / 255) * v->a[1];
+            a.y = a_y;
             a.z = (1.0f / 255) * v->a[2];
             V3 b;
             o->x = v->x + a.x * wa;
@@ -521,8 +522,9 @@ void fn_802D4C44(Surf* s) {
             wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
+            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
             a.x = (1.0f / 255) * v->a[0];
-            a.y = (1.0f / 255) * v->a[1];
+            a.y = a_y;
             a.z = (1.0f / 255) * v->a[2];
             V3 b;
             b.x = (1.0f / 255) * v->b[0];
@@ -558,9 +560,10 @@ void fn_802D4ECC(Surf* s) {
             p.x = v->x + w0 * ba->x;
             p.z = v->z + ba->z * w0;
             f32 xv = bb->x;
+            __typeof__(p.z) p_z = p.z + bb->z * w1;
             p.x = p.x + xv * w1;
             p.y = p.y + bb->y * w1;
-            p.z = p.z + bb->z * w1;
+            p.z = p_z;
             SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
             v++;
             o++;
@@ -1279,9 +1282,10 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1400);
             pout = out;
             for (int i = 0; i < pc; i++) {
+                __typeof__(out[2]) out_2 = ((f32*)in)[2];
                 out[0] = ((f32*)in)[0];
                 out[1] = ((f32*)in)[1];
-                out[2] = ((f32*)in)[2];
+                out[2] = out_2;
                 in += 0x14;
                 out += 3;
             }
@@ -1405,9 +1409,10 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1000);
             pout = out;
             for (int i = 0; i < pc; i++) {
+                __typeof__(out[2]) out_2 = ((f32*)in)[2];
                 out[0] = ((f32*)in)[0];
                 out[1] = ((f32*)in)[1];
-                out[2] = ((f32*)in)[2];
+                out[2] = out_2;
                 in += 0x10;
                 out += 3;
             }

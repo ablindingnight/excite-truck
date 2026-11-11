@@ -3283,8 +3283,9 @@ void fn_8018956C(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, in
         f32 dy = y2 - fr.pos.y;
         f32 dz = at->z - fr.pos.z;
         HVec lp;
+        __typeof__(lp.y) lp_y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
         lp.x = HitDot(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
-        lp.y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
+        lp.y = lp_y;
         lp.z = HitDot(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);
         HVec li;
         if (&li == &hit) {
