@@ -583,9 +583,7 @@ void fn_802D50B4(Surf* s) {
             for (int i = n; i > 0; i--) {
                 f32 w = v->w;
                 V3 p;
-                p.x = v->x + lbl_804C56F0.x * w;
-                p.y = v->y + lbl_804C56F0.y * w;
-                p.z = v->z + lbl_804C56F0.z * w;
+                SetXYZ(&p, v->x + lbl_804C56F0.x * w, v->y + lbl_804C56F0.y * w, v->z + lbl_804C56F0.z * w);
                 SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
@@ -1350,9 +1348,7 @@ void fn_802D6C78(void) {
                 f32 yv = d.y;
                 p.y = v->y + yv * w;
                 p.z = v->z + d.z * w;
-                o->x = p.x;
-                o->y = p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib];
-                o->z = p.z;
+                SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
             }
