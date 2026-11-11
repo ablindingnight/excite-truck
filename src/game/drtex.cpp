@@ -141,12 +141,11 @@ static inline void StrCopy(char* d, const char* s, int n) {
 
 static inline void Swap32(void* p) {
     u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
+    for (int k = 0; k < 2; k++) {
+        u8 t = b[k];
+        b[k] = b[3 - k];
+        b[3 - k] = t;
+    }
 }
 
 static inline u8 MipMapped(s32 n) { return n > 2; }
@@ -429,10 +428,9 @@ void fn_802D86BC(GXTexDesc* d) {
     u32 h = d->h;
     u8* tex = img->tex;
     u32* pal = img->pal;
-    int i = 0;
-    do {
+    for (int i = 0; i < 256; i++) {
         Swap32(&pal[i]);
-    } while (++i < 256);
+    }
     fn_801282EC(0x20);
     u8* tmp = new ("pal8_tmp") u8[w * h];
     memcpy(tmp, tex, w * h);
