@@ -744,9 +744,8 @@ void fn_802D5B8C(const Surf* s) {
     c = col;
     f32* t = uv;
     for (i = 0; i < n; i++) {
-        f32 f = 1.0f - PSVECSquareDistance(p, &d) * k;
         u32 a = *src;
-        int x = MAX((int)((u8)a * f), 0);
+        int x = MAX((int)((u8)a * (1.0f - PSVECSquareDistance(p, &d) * k)), 0);
         *c = (a & ~0xFF) | (x < 0xFF ? x : 0xFF);
         p++;
         c++;

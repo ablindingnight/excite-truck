@@ -416,8 +416,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         *(MVec4*)&c->pts[9 + i] = MVec4(0.0f, 0.0f, 0.0f);
         *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
-        f32 xv = x->row[i].x;
-        SetXYZ(&in, xv, x->row[i].y, x->row[i].z);
+        SetXYZ(&in, x->row[i].x, x->row[i].y, x->row[i].z);
         MVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;

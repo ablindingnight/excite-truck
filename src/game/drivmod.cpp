@@ -319,8 +319,7 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     DVec3 lmid;
     lmid.x = 0.5f * lh.x + 0.5f * ls.x;
     lmid.y = lh.y / 2.0f + 0.5f * ls.y - 0.2032f;
-    f32 z2 = ls.z;
-    lmid.z = 0.5f * lh.z + 0.5f * z2;
+    lmid.z = 0.5f * lh.z + 0.5f * ls.z;
     DVec3 rs = *(DVec3*)fn_801FFB08(skel, "rshoulder");
     DVec3 rh;
     fn_801E3488(&rh, d->rhand);

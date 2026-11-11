@@ -1169,10 +1169,9 @@ void fn_802346C8(void) {
                         continue;
                     }
                     const char* next;
-                    f32 xsv = lbl_8055F06C[i].xs;
                     const char* p = lbl_8055F06C[i].text + j;
                     u16 c = DecodeUTF8(p, &next);
-                    x += xsv * f->glyphs[c].pre;
+                    x += lbl_8055F06C[i].xs * f->glyphs[c].pre;
                     f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
                     if (c != ' ') {
                         f32 u0 = f->glyphs[c].u0;

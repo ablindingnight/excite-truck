@@ -234,11 +234,10 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     f32 col[4];
     f32 dcol[4];
     for (int i = 0; i < 4; i++) {
-        f32 p0 = g[0][i];
         f32 p1 = g[1][i];
         f32 p2 = g[2][i];
         f32 p3 = g[3][i];
-        col[i] = SplineD(p0, p1, p2, p3, fx, t2, t3, &dcol[i]);
+        col[i] = SplineD(g[0][i], p1, p2, p3, fx, t2, t3, &dcol[i]);
     }
     {
     f32 s3;

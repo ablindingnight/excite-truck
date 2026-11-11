@@ -1232,8 +1232,7 @@ int fn_8013CBC0(CarState* zm, int car) {
     p.x = pos.x;
     p.y = pos.z;
     dir.x = t->dirX;
-    f32 dirZv = t->dirZ;
-    dir.y = dirZv;
+    dir.y = t->dirZ;
     q.x = p.x + dir.x * -0.083416760f;
     q.y = p.y + dir.y * -0.083416760f;
     a.x = g->a.x;
