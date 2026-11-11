@@ -418,7 +418,9 @@ struct BVec {
 
 // A bone's rotation, as three rows.
 struct BRot {
-    BVec r[3];
+    BVec rx;  // offset 0x0
+    BVec ry;  // offset 0xC
+    BVec rz;  // offset 0x18
 };
 
 // A posed bone: rotation and position in the model's frame.
@@ -502,9 +504,9 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
         v.y = pts[p->point].y - f->pos.y;
         v.z = pts[p->point].z - f->pos.z;
         {
-            f32 x = Dot3(v.x, f->rot.r[0].x, v.y, f->rot.r[0].y, v.z, f->rot.r[0].z);
-            f32 y = Dot3(v.x, f->rot.r[1].x, v.y, f->rot.r[1].y, v.z, f->rot.r[1].z);
-            f32 z = Dot3(v.x, f->rot.r[2].x, v.y, f->rot.r[2].y, v.z, f->rot.r[2].z);
+            f32 x = Dot3(v.x, f->rot.rx.x, v.y, f->rot.rx.y, v.z, f->rot.rx.z);
+            f32 y = Dot3(v.x, f->rot.ry.x, v.y, f->rot.ry.y, v.z, f->rot.ry.z);
+            f32 z = Dot3(v.x, f->rot.rz.x, v.y, f->rot.rz.y, v.z, f->rot.rz.z);
             v.x = x;
             v.y = y;
             v.z = z;
@@ -516,9 +518,9 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             c.y = pts[p->child].y - f->pos.y;
             c.z = pts[p->child].z - f->pos.z;
             {
-                f32 x = Dot3(c.x, f->rot.r[0].x, c.y, f->rot.r[0].y, c.z, f->rot.r[0].z);
-                f32 y = Dot3(c.x, f->rot.r[1].x, c.y, f->rot.r[1].y, c.z, f->rot.r[1].z);
-                f32 z = Dot3(c.x, f->rot.r[2].x, c.y, f->rot.r[2].y, c.z, f->rot.r[2].z);
+                f32 x = Dot3(c.x, f->rot.rx.x, c.y, f->rot.rx.y, c.z, f->rot.rx.z);
+                f32 y = Dot3(c.x, f->rot.ry.x, c.y, f->rot.ry.y, c.z, f->rot.ry.z);
+                f32 z = Dot3(c.x, f->rot.rz.x, c.y, f->rot.rz.y, c.z, f->rot.rz.z);
                 c.x = x;
                 c.y = y;
                 c.z = z;
@@ -536,7 +538,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                 u.y = d.y * k;
                 u.z = d.z * k;
                 BVec axis;
-                PSVECCrossProduct(&b->r[0].x, &u.x, &axis.x);
+                PSVECCrossProduct(&b->rx.x, &u.x, &axis.x);
                 f32 a = PSVECMag(&axis.x);
                 BRot r;
                 if (a > 0.0001f) {
@@ -547,27 +549,25 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     f32 sn = sin(a);
                     f32 cs = cos(a);
                     f32 t = 1.0f - cs;
-                    r.r[0].x = cs + t * (ax * ax);
-                    r.r[0].y = ay * (t * ax) + sn * az;
-                    r.r[0].z = az * (t * ax) - sn * ay;
-                    r.r[1].x = ay * (t * ax) - sn * az;
-                    r.r[1].y = cs + t * (ay * ay);
-                    r.r[1].z = az * (ay * t) + ax * sn;
-                    r.r[2].x = az * (t * ax) + sn * ay;
-                    r.r[2].y = az * (t * ay) - sn * ax;
-                    r.r[2].z = cs + t * (az * az);
+                    r.rx.x = cs + t * (ax * ax);
+                    r.rx.y = ay * (t * ax) + sn * az;
+                    r.rx.z = az * (t * ax) - sn * ay;
+                    r.ry.x = ay * (t * ax) - sn * az;
+                    r.ry.y = cs + t * (ay * ay);
+                    r.ry.z = az * (ay * t) + ax * sn;
+                    r.rz.x = az * (t * ax) + sn * ay;
+                    r.rz.y = az * (t * ay) - sn * ax;
+                    r.rz.z = cs + t * (az * az);
                 } else {
-                    SetIdentity(&r.r[0].x);
+                    SetIdentity(&r.rx.x);
                 }
-                MulM(&m.r[0].x, &b->r[0].x, &r.r[0].x);
+                MulM(&m.rx.x, &b->rx.x, &r.rx.x);
             } else {
-                SetIdentity(&m.r[0].x);
+                SetIdentity(&m.rx.x);
             }
             o->rot = m;
         } else {
-            o->rot.r[0] = b->r[0];
-            o->rot.r[1] = b->r[1];
-            o->rot.r[2] = b->r[2];
+            o->rot = *b;
         }
     }
 }
@@ -706,19 +706,19 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         sn = sin(ang);
         f32 cs = cos(ang);
         f32 t = 1.0f - cs;
-        rot.r[0].x = cs + t * (ax * ax);
-        rot.r[0].y = ay * (t * ax) + sn * az;
-        rot.r[0].z = az * (t * ax) - sn * ay;
-        rot.r[1].x = ay * (t * ax) - sn * az;
-        rot.r[1].y = cs + t * (ay * ay);
-        rot.r[1].z = az * (t * ay) + sn * ax;
-        rot.r[2].x = az * (t * ax) + sn * ay;
-        rot.r[2].y = az * (t * ay) - sn * ax;
-        rot.r[2].z = cs + t * (Sq_hm(az));
+        rot.rx.x = cs + t * (ax * ax);
+        rot.rx.y = ay * (t * ax) + sn * az;
+        rot.rx.z = az * (t * ax) - sn * ay;
+        rot.ry.x = ay * (t * ax) - sn * az;
+        rot.ry.y = cs + t * (ay * ay);
+        rot.ry.z = az * (t * ay) + sn * ax;
+        rot.rz.x = az * (t * ax) + sn * ay;
+        rot.rz.y = az * (t * ay) - sn * ax;
+        rot.rz.z = cs + t * (Sq_hm(az));
     } else {
-        SetIdentity(&rot.r[0].x);
+        SetIdentity(&rot.rx.x);
     }
-    MulM(&d->rest.row[0].x, &d->body.row[0].x, &rot.r[0].x);
+    MulM(&d->rest.row[0].x, &d->body.row[0].x, &rot.rx.x);
     d->rest.pos = d->body.pos;
     fn_801E3284(&d->wheelMtx, d->wheel, &m);
     a.x = 0.0f;
@@ -739,7 +739,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     DBone* bone = bones;
     for (int k = 0; k < n; bone++, k++) {
         if (k) {
-            MulM(&pose[k].rot.r[0].x, &bone->m.row[0].x, &rot.r[0].x);
+            MulM(&pose[k].rot.rx.x, &bone->m.row[0].x, &rot.rx.x);
             MulVec((DVec3*)&pose[k].pos, &bone->m.pos, (DMtx*)&rot);
         } else {
             pose[k] = *(BonePose*)bone;
@@ -759,12 +759,12 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
     links = lbl_802F9D00;
     fn_802009CC(pose, pts, links.l, 6, (u8*)bones, (BonePose*)&m);
-    pose[9].pos.x = pose[9].pos.x + pose[8].rot.r[0].x * lbl_80563064;
-    pose[9].pos.y = pose[9].pos.y + pose[8].rot.r[0].y * lbl_80563064;
-    pose[9].pos.z = pose[9].pos.z + pose[8].rot.r[0].z * lbl_80563064;
-    pose[6].pos.x = pose[6].pos.x + pose[5].rot.r[0].x * lbl_80563064;
-    pose[6].pos.y = pose[6].pos.y + pose[5].rot.r[0].y * lbl_80563064;
-    pose[6].pos.z = pose[6].pos.z + pose[5].rot.r[0].z * lbl_80563064;
+    pose[9].pos.x = pose[9].pos.x + pose[8].rot.rx.x * lbl_80563064;
+    pose[9].pos.y = pose[9].pos.y + pose[8].rot.rx.y * lbl_80563064;
+    pose[9].pos.z = pose[9].pos.z + pose[8].rot.rx.z * lbl_80563064;
+    pose[6].pos.x = pose[6].pos.x + pose[5].rot.rx.x * lbl_80563064;
+    pose[6].pos.y = pose[6].pos.y + pose[5].rot.rx.y * lbl_80563064;
+    pose[6].pos.z = pose[6].pos.z + pose[5].rot.rx.z * lbl_80563064;
     e2.x = d->yaw;
     e2.y = 0.0f;
     e2.z = 0.0f;
