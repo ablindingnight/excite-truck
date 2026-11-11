@@ -2576,7 +2576,7 @@ inline void RingChalMaster::vf0C(void) {
             }
         }
     }
-    if (vf24() && lbl_8055E3C8 - fA0 >= 2.25f) {
+    if (vf24() && !(lbl_8055E3C8 - fA0 < 2.25f)) {
         results.Update(arena.f30 + (int)arena.timer.t, arena.f30, (int)arena.timer.t);
     }
 }
