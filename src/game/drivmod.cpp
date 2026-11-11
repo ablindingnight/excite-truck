@@ -627,10 +627,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     DVec3 off2;
     int cnt;
     int n;
-    if (!show) {
-        return;
-    }
-    if (!d) {
+    if (!show || !d) {
         return;
     }
     m = *(DMtx*)car;
