@@ -92,7 +92,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                 if (part_id == found) {
                     p_part->start_sector = start_sector;
                     p_part->total_sector = num_sector;
-                    return 0;
+                    break;
                 }
                 found++;
             }
