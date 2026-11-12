@@ -376,7 +376,8 @@ int fn_8016A15C(const char* name) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
-            lbl_80430340.data[i].Enable();
+            RingSet* set = &lbl_80430340.data[i];
+            set->Enable();
             found = 1;
         }
     }
