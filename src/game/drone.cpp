@@ -61,7 +61,7 @@ public:
     virtual void Apply(void);
     virtual void Unk1C(void);
     virtual void Draw(TObj* list);
-    virtual void DrawTree(void* tree);
+    virtual void DrawTree(struct TNode* tree);
     virtual void Add(void* scene, TObj* o, s32 id);
     virtual void Link(int a, void* b, int c, void* d, int e);
 };
