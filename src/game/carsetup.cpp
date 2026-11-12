@@ -189,6 +189,9 @@ static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
 // MATCHING-AID: keeps the literal on the right of the product; the real form is unknown.
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
+/* Helper name unproven */
+static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
+
 void fn_80279F58(CarSetup* s, ValueTable* t) {
     fn_80279D40(s);
     ValueNode* c = t->FindChild("Chassis");
@@ -258,7 +261,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
         w->bumpstopRate = Lbf(c->GetFloat("bumpstop_rate", 0.0f)) / 0.0254f;
     }
     s->speedSteering = c->GetFloat("speed_sensitive_steering", 0.65f);
-    s->wheelLock = 0.017453292f * c->GetFloat("wheel_lock", 27.5f);
+    s->wheelLock = DegToRad(c->GetFloat("wheel_lock", 27.5f));
 }
 
 void fn_8027A714(CarSetup* s, const char* name) {
