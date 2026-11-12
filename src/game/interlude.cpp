@@ -3127,7 +3127,53 @@ ModuleTag lbl_8055E7D0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E7D8 = MakeILPos(0xFFFF, 0);
 UnkStatic7F lbl_8055E7DC;
+bool lbl_8055E7E0;     // hidden
+u8 lbl_8055E7E1;
+u8 lbl_8055E7E2;     // active
+u8 lbl_8055E7E3;
+f32 lbl_8055E7E4;    // start offset
+u8 lbl_8055E7E8;
+u8 lbl_8055E7E9;
+s32 lbl_8055E7EC;  // fade frame
+s32 lbl_8055E7F0;    // events
+s32 lbl_8055E7F4;
+Event* lbl_8055E7F8; // the event list
+u8 lbl_8055E7FC;
+s32 lbl_8055E800;
+s32 lbl_8055E804;    // cars
+s32 lbl_8055E808;
+bool lbl_8055E80C;
+u8 lbl_8055E80D;     // global event time on
+f32 lbl_8055E810;    // global event time
 s32 lbl_8055E814;
-s32 lbl_8055E82C;
-u8 lbl_8055E839;
+s8 lbl_8055E818;
+s8 lbl_8055E819;
+s32 lbl_8055E81C;    // current menu
+s32 lbl_8055E820;    // current item
+s32 lbl_8055E824;    // editor key slot
+s32 lbl_8055E828;    // selected event
+s32 lbl_8055E82C;    // first listed event
+f32 lbl_8055E830;  // editor camera transition time
+f32 lbl_8055E834;
+u8 lbl_8055E838;     // editing
+u8 lbl_8055E839;     // listing
+u8 lbl_8055E83A;
+u8 lbl_8055E83B;
+u8 lbl_8055E83C;
+u8 lbl_8055E83D;
+bool lbl_8055E83E;
+bool lbl_8055E83F;
 bool lbl_8055E840;
+bool lbl_8055E841;
+s32 lbl_8055E844;
+s32 lbl_8055E848;
+f32 lbl_8055E84C;
+s32 lbl_8055E850;
+s32 lbl_8055E854;
+f32 lbl_8055E858;
+f32 lbl_8055E85C;
+f32 lbl_8055E860;
+s32 lbl_8055E864;
+void (*lbl_8055E868)(void);
+Menu* lbl_8055E86C;
+s32 lbl_8055E870;
