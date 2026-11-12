@@ -438,7 +438,7 @@ void fn_802CDAB4(void* ctx, s32 id, TMtx* m);
 int fn_802CDB20(void* ctx, s32 id);
 void fn_802CDAFC(void* ctx, s32 id);
 void* fn_802C7A3C(f32 u, f32 v, f32 w);
-extern const u16 lbl_802F9B20[6] = {0, 1, 2, 2, 1, 3};
+extern u16 lbl_802F9B20[6];
 }
 
 static inline void Swap32(u8* p) {
