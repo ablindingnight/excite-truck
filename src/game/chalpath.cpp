@@ -528,12 +528,15 @@ int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
 // Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
 // "difficulty unlocked" popup when that race completed the path.
 void fn_8026003C(void) {
-    s32 driver = GetDriver(0)->id;
+    s32 event;
+    s32 arg;
+    s32 track;
+    s32 driver;
+    driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
     u32 color = GetDriver(0)->color;
-    s32 arg;
-    s32 event = ((ChalEvent*)SCREEN_BUF->evObjs[SCREEN_BUF->event])->Id();
-    s32 track = GetEvent(event)->track;
+    event = ((ChalEvent*)SCREEN_BUF->evObjs[SCREEN_BUF->event])->Id();
+    track = GetEvent(event)->track;
     arg = SCREEN_BUF->arg;
     if (fn_8025FECC((u8*)&vehicle, (u8*)&color, track, arg)) {
         VehicleInfo* v = FindVehicle(vehicle);

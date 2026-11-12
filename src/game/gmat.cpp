@@ -542,16 +542,16 @@ void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
     int c;
-    GList* lp;
+    int bit;
     bool first;
     u32 m;
-    int bit;
+    GList* lp;
     int n;
     GVec* verts;
-    s32 old;
-    int i;
     InlineVec<GTex, 6>* texs;
+    int i;
     int k;
+    s32 old;
 
     fn_802B1BEC();
     if (g->verts.Count() > 0) {
