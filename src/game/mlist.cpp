@@ -485,7 +485,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         *vp = vis[bp->sphere] ? fn_802CCBC4(bp, eye, a, b) : 0;
         bp++;
     }
-    ca = m->c;
+    ca = MLArray<MLPiece>(m->c);
     const MLPiece* cp = ca.p;
     vp = vis + k;
     for (i = 0; i < ca.n; i++) {
