@@ -232,9 +232,6 @@ public:
             }
         }
     }
-    virtual void Hit(void) {}
-    virtual void Changed(void) {}
-    virtual void Gone(void) {}
     virtual void Added(TreeObj* o) {
         ValueNode* n = o->Config();
         if (n) {
@@ -248,6 +245,9 @@ public:
             }
         }
     }
+    virtual void Gone(void) {}
+    virtual void Changed(void) {}
+    virtual void Hit(void) {}
 };
 
 TreeHit lbl_8055FB40;
