@@ -294,9 +294,10 @@ struct TrailerTarget {
 
 struct TrailerTargets {
     void Drop(s32 id) {
-        for (int k = 0; k < 3; k++) {
-            if (t[k].id == id) {
-                t[k].id = -1;
+        TrailerTarget* p = t;
+        for (int k = 0; k < 3; k++, p++) {
+            if (p->id == id) {
+                p->id = -1;
             }
         }
     }
@@ -340,8 +341,8 @@ struct RaceEntries {
 // Points each racer entry's trailer fields at its trailer body.
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801B916C(RaceEntries* r) {
-    for (int i = 0; i < r->count; i++) {
-        RaceEntry* e = &r->entries[i];
+    RaceEntry* e = r->entries;
+    for (int i = 0; i < r->count; i++, e++) {
         Trailer* t;
         if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
             t = lbl_80436D28[e->trailer];
