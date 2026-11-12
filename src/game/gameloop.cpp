@@ -261,7 +261,7 @@ void fn_802B8C88(void);
 void fn_802B8C98(void);
 void fn_80148218(void);
 int fn_8014821C(int key);
-void fn_80148224(void);
+void Drag__11EditHandlerFPC2V2Pv(void);
 void fn_80148228(void);
 void fn_8014822C(void);
 void fn_8021095C(void);
@@ -322,7 +322,7 @@ GameMode lbl_802FBC90[25] = {
     {fn_8000ACB0, fn_8000ACDC, NULL, fn_80204A50, NULL},
     {fn_801DE154, fn_801DE5C4, NULL, fn_801DE12C, fn_801DE150},
     {fn_802B8848, fn_802B8998, fn_802B87F4, fn_802B8C88, fn_802B8C98},
-    {fn_80148218, fn_8014821C, fn_80148224, fn_80148228, fn_8014822C},
+    {fn_80148218, fn_8014821C, Drag__11EditHandlerFPC2V2Pv, fn_80148228, fn_8014822C},
     {fn_8000AC98, fn_8000AC9C, fn_8000ACA4, fn_8000ACA8, fn_8000ACAC},
     {fn_8021095C, fn_802111E4, fn_802112AC, fn_802113D8, fn_802114C4},
 };
