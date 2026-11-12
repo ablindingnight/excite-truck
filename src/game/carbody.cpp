@@ -2528,7 +2528,7 @@ void fn_80186DE8(u8* p) {
         e = &cx[i];
         CbVec4 grip4 = CbVec4(x->vB0);
         air = lbl_80561CD0 - F32(car, 0x25D4);
-        if (air > lbl_80561CD0) {
+        if (lbl_80561CD0 < air) {
             air = lbl_80561CD0;
         }
         if (air > lbl_80561CAC) {
@@ -2746,7 +2746,7 @@ void fn_80186DE8(u8* p) {
             if (nrm[1] > lbl_80561CCC) {
                 f32 d = comp - lbl_80561E94;
                 grounded++;
-                if (d < lbl_80561CAC) {
+                if (lbl_80561CAC > d) {
                     d = lbl_80561CAC;
                 }
                 w->comp = d;
@@ -2765,7 +2765,7 @@ void fn_80186DE8(u8* p) {
         if (ds * F32(car, 0x25F0) > lbl_80561CAC) {
             lim = lbl_80561E98;
         }
-        if (ds > lim) {
+        if (lim < ds) {
             ds = lim;
         }
         if (ds < -lim) {
@@ -2814,7 +2814,7 @@ void fn_80186DE8(u8* p) {
             }
         }
         slide = (f32)__fabs(F32(car, 0x25CC)) - lbl_80561EB0 * (f32)__fabs(F32(car, 0x25D8)) - lbl_80561D44;
-        if (slide < lbl_80561CAC) {
+        if (lbl_80561CAC > slide) {
             slide = lbl_80561CAC;
         }
         cut = lbl_80561CD0;
@@ -2823,7 +2823,7 @@ void fn_80186DE8(u8* p) {
         } else {
             if (S32(car, 0x267C)) {
                 f32 s = lbl_80561D2C * steerK - lbl_80561D38 * F32(car, 0x128);
-                if (s > cut) {
+                if (cut < s) {
                     s = cut;
                 }
                 steerK = lbl_80561DE4;
@@ -2840,7 +2840,7 @@ void fn_80186DE8(u8* p) {
         brake = F32(car, 0x25E8);
         f32 rpmT = rpm.x / lbl_80561CC0;
         throttle = lbl_80561EB4 * (lbl_80561EB8 - rpmT);
-        if (throttle < gas) {
+        if (gas > throttle) {
             throttle = gas;
         }
         if (rpmT > ground[12]) {
@@ -2886,7 +2886,7 @@ void fn_80186DE8(u8* p) {
             out = out > lbl_80561CAC ? out : lbl_80561CAC;
             out = out < throttle ? out : throttle;
             boosting = 1;
-            if (F32(car, 0x258C) <= lbl_80561DC0 && !U8(car, 0x259C)) {
+            if (lbl_80561DC0 >= F32(car, 0x258C) && !U8(car, 0x259C)) {
                 boosting = 0;
             }
             if (!boosting) {
@@ -2901,7 +2901,7 @@ void fn_80186DE8(u8* p) {
             a.w = a.w * lbl_80561CAC;
         }
         x->pts[6] = a.Sol();
-        if (!(rpm.x < lbl_80561ECC)) {
+        if (!(lbl_80561ECC > rpm.x)) {
             rpm.x = rpm.x;
         } else {
             rpm.x = lbl_80561ECC;
