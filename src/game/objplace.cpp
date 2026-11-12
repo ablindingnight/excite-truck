@@ -448,9 +448,7 @@ inline void MatPlacer::Rebuild(void) {
         int share = spread / placers.count;
         ObjectPlacer* p = placers.data[i];
         int lim = free;
-        if (share < free) {
-            lim = share;
-        }
+        lim = share < free ? share : lim;
         if (lim > 0) {
             int gap = order[i & 127] % lim;
             for (int k = 0; k < gap; k++) {

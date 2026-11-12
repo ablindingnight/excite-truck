@@ -63,9 +63,7 @@ static inline int AlphaByte(f32 a) {
     int v = (int)(255.0f * a);
     v = v > 0 ? v : 0;
     int c = 0xFF;
-    if (v < 0xFF) {
-        c = v;
-    }
+    c = v < 0xFF ? v : c;
     return c;
 }
 
