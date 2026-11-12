@@ -146,8 +146,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         fn_80230B5C(&cam);
         fn_802C8638(&cam);
         fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-        f32 h = lbl_8055FBA0 + 1;
         f32 w = lbl_8055FB9C + 1;
+        f32 h = lbl_8055FBA0 + 1;
         f32 x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
         f32 y0 = 1.0f + lbl_8055FBA0 / 2.0f;
         if (bg->image) {

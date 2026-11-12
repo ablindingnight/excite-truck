@@ -193,8 +193,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size) {
     quad = map[q];
     s[1] = (pt[1] - c) / size;
     s[0] = (pt[0] - c) / size;
-    const f32* u = lbl_802FAAD0.axes[quad];
     const f32* v = lbl_802FAAD0.axes[(quad + 1) & 3];
+    const f32* u = lbl_802FAAD0.axes[quad];
     x = u[0] * s[0] + u[1] * s[1];
     y = v[0] * s[0] + v[1] * s[1];
 }
@@ -203,8 +203,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size) {
 inline void SkagPoint::Unplace(f32* out, f32 size) const {
     f32 c = size / 2.0f;
     f32 sx = x * size;
-    const f32* u = lbl_802FAAD0.axes[quad];
     const f32* v = lbl_802FAAD0.axes[(quad + 1) & 3];
+    const f32* u = lbl_802FAAD0.axes[quad];
     out[1] = c + u[1] * (sx / 2) + v[1] * ((y * size) / 2);
     out[0] = c + u[0] * (sx / 2) + v[0] * ((y * size) / 2);
 }

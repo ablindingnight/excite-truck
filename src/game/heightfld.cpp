@@ -198,8 +198,8 @@ static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3,
     f32 m1 = 0.5f * (p2 - p0);
     f32 m2 = 0.5f * (p3 - p1);
     f32 d = p2 - p1;
-    f32 c3 = m2 + m1 - 2.0f * d;
     f32 c2 = 3.0f * d - 2.0f * m1 - m2;
+    f32 c3 = m2 + m1 - 2.0f * d;
     if (deriv) {
         *deriv = m1 + (3.0f * c3 * t2 + 2.0f * c2 * t);
     }
@@ -527,8 +527,8 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         int ox = lx ^ 1;
         int oz = lz ^ 1;
         h = t->base + t->scale * t->h[lx][lz];
-        f32 hx = t->base + t->scale * t->h[ox][lz];
         f32 hz = t->base + t->scale * t->h[lx][oz];
+        f32 hx = t->base + t->scale * t->h[ox][lz];
         for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
             f32 w = lbl_804424B0[l->weight];
             h += w * (l->base + l->scale * l->h[lx][lz]);

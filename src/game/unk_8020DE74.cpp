@@ -304,8 +304,8 @@ static inline void HudPart_SetAlpha(HudPart *p, float alpha) {
 
 static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
     if (out == in) {
-        float x = in->x;
         float y = in->y;
+        float x = in->x;
         float z = in->z;
         out->x = x * m[0] + y * m[3] + z * m[6];
         out->y = x * m[1] + y * m[4] + z * m[7];
