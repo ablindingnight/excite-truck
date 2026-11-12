@@ -106,14 +106,25 @@ int fn_8024C550(void) {
     return 0;
 }
 
+// The name entry screen's setup (dead in the shipped build; only its strings remain).
+/* Helper names unproven */
+void* LoadNameLayout(const char* name);
+int LoadNameFont(const char* name);
+void* FindNameWidget(void* lyt, const char* name);
+void SetNameText(void* w, const char* fmt, ...);
+
+static void SetupNameEntry(int upper, const char* name, int len) {
+    void* lyt = LoadNameLayout("profile_name.lyt");
+    int font = LoadNameFont("uifnt.gtx");
+    const char* shift = upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
+    SetNameText(FindNameWidget(lyt, "name_field"), "%*.*s", len, len, name);
+    SetNameText(FindNameWidget(lyt, "name_widget"), shift, font);
+}
+
 int fn_8024C6F4(int slot) {
-    const char* message;
     int allowed = 0;
-    const char* title;
     if (IdentIsSlotEmpty(slot)) {
-        message=fn_80131234("Profile:CONFIRM_CREATE");
-        title=fn_80131234("Profile:TITLE");
-        if (!fn_80215214(title, message, 0)) goto finished;
+        if (!fn_80215214(fn_80131234("Profile:TITLE"), fn_80131234("Profile:CONFIRM_CREATE"), 0)) goto finished;
     }
     allowed=1;
 finished:
