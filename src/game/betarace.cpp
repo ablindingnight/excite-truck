@@ -2388,7 +2388,7 @@ void BetaCar::DrawWinner(ILayout* l) const {
     const BetaCar* b;
     best = -1;
     m = master;
-    for (i = 0, c = m->cars; i < m->nCars; i++, c++) {
+    for (i = 0, c = m->cars; i < m->nCars; c++, i++) {
         if (best < 0) {
             best = i;
         } else {

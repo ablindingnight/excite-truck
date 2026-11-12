@@ -337,7 +337,7 @@ void AchMerge(AchStats* dst, const AchStats* src) {
     for (i = 0, s = src->models; i < NUM_MODELS; i++, s++) {
         found = FALSE;
         empty = -1;
-        for (j = 0, d = dst->models; !found && j < NUM_MODELS; j++, d++) {
+        for (j = 0, d = dst->models; !found && j < NUM_MODELS; d++, j++) {
             if (empty < 0 && d->name[0] == '\0') {
                 empty = j;
             } else if (strcasecmp(d->name, s->name) == 0) {

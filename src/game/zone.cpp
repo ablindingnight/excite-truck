@@ -2732,7 +2732,7 @@ inline void ZoneMaster::vf10(void) {
     t8C.start = -999.0f;
     i288 = fn_8013D18C(0);
     int off = 0;
-    for (i = 0; i < nCars; off += sizeof(cars[0]), i++) {
+    for (i = 0; i < nCars; i++, off += sizeof(cars[0])) {
         c = (CarState*)((u8*)cars + off);
         memset(c->hits, 0, sizeof(c->hits));
         c->tC0.start = -999.0f;
