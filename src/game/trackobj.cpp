@@ -1936,9 +1936,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             fn_801E87D4(so);
         }
     } else {
-        if (o->node) {
-            sol = o->node->GetInt("sol_id", -1);
-        }
+        sol = o->node ? o->node->GetInt("sol_id", -1) : -1;
         StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
         if (flags & 0x80) {
             fn_801FBCF4(&lbl_8055EC50, so);
