@@ -342,7 +342,7 @@ struct RaceEntries {
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801B916C(RaceEntries* r) {
     RaceEntry* e = r->entries;
-    for (int i = 0; i < r->count; i++, e++) {
+    for (int i = 0; i < r->count; e++, i++) {
         Trailer* t;
         if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
             t = lbl_80436D28[e->trailer];
