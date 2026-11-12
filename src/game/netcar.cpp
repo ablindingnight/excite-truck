@@ -411,8 +411,8 @@ void NetCar::Snap(void) {
     s.mtx.pos.z = ptab[0].pos.v[2];
     s.vel.x = 0.0f;
     s.vel.y = 0.0f;
-    s.vel.z = 0.0f;
     s.a3C = 0;
+    s.vel.z = 0.0f;
     fn_801E9DC4(&s.hint);
     SetState(&s);
     ptab[2] = ptab[0];

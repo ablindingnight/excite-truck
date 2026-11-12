@@ -333,8 +333,8 @@ extern "C" {
 // parabola through the torque peak and the hp point below it, another from the peak down to 30% at redline.
 void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
-    F32(p, 0x28) = v[3];
     F32(p, 0x18) = lbl_80561CA0 * (v[5]);
+    F32(p, 0x28) = v[3];
     f32 hp = lbl_80561CA0 * (5252.0f * v[0] / FMax(v[1], 0.00001f));
     F32(p, 0x24) = lbl_80561CAC;
     f32 r0 = v[3];

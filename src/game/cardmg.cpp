@@ -1269,8 +1269,8 @@ void fn_8018F2C0(u8* p, u8* q) {
     U8(p, 0x1CA4) = 0;
     S32(p, 0x1D28) = U8(q, 0x2AF);
     U8(p, 0x1D24) = 0;
-    S32(p, 0x1DA8) = U8(q, 0x2B0);
     U8(p, 0x1DA4) = 0;
+    S32(p, 0x1DA8) = U8(q, 0x2B0);
     S32(p, 0x1E3C) = S32(q, 0x29C);
 }
 

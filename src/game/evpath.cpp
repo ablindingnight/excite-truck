@@ -1183,8 +1183,8 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
         if (res->improved && c->EventId() == res->event) {
             int delta = res->delta;
             start = i;
-            acc.sel = i;
             acc.inner = c;
+            acc.sel = i;
             if (delta > 0) {
                 int best = c->Best();
                 ScoreTally* t = new ("ScoreAccumulator") ScoreTally(best - delta, best);

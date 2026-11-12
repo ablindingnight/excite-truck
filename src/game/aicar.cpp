@@ -371,8 +371,8 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
     side.y = -dir.x;
     rel.x = in->x - org.x;
     rel.y = in->y - org.y;
-    out->x = rel.x * side.x + rel.y * side.y;
     out->y = rel.x * dir.x + rel.y * dir.y;
+    out->x = rel.x * side.x + rel.y * side.y;
 }
 
 void fn_801933FC(u8* d, V2* v) { fn_8019330C(v, v, CAR(d) + 0x70); }

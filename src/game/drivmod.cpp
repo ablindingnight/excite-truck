@@ -243,11 +243,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->body.row[0].y = 0.0f;
     d->body.row[1].x = 0.0f;
     d->body.row[0].z = 0.0f;
-    d->body.row[1].y = 1.0f;
     d->body.row[1].z = 0.0f;
+    d->body.row[1].y = 1.0f;
     d->body.row[2].z = 1.0f;
-    d->body.row[2].x = 0.0f;
     d->body.pos.x = 0.0f;
+    d->body.row[2].x = 0.0f;
     d->body.row[2].y = 0.0f;
     d->body.pos.y = 0.0f;
     d->body.pos.z = 0.0f;
