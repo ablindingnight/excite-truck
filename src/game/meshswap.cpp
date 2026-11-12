@@ -116,7 +116,8 @@ void fn_801D1C68(MeshHeader* m, u32 base) {
     i = Loop2_fn_801D1C68(m);
     i = Loop3_fn_801D1C68(m);
     for (i = 0; i < m->numBones; i++) {
-        m->bones[i].Swap();
+        MeshBone* b = &m->bones[i];
+        b->Swap();
     }
 }
 
