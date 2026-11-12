@@ -99,8 +99,8 @@ struct MenuRange {
 };
 
 inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
-    name = n;
     type = 9;
+    name = n;
     data = v;
     arg0 = *(const int*)&r.lo;
     arg1 = *(const int*)&r.hi;
