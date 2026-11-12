@@ -442,7 +442,7 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
     d.y = c->y - lbl_804BE0B0.cam.pos.y;
     d.z = c->z - lbl_804BE0B0.cam.pos.z;
     f32 depth = PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[2]);
-    f32 r = radius * k;
+    f32 r = k * radius;
     if (depth + r < lbl_804BE0B0.znear || depth - r > lbl_804BE0B0.zfar) {
         return 0;
     }

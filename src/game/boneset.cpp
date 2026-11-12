@@ -130,7 +130,7 @@ static inline void QuatToMtx(BMtx33* m, const BQuat* q) {
     m->yy = 1.0f - (xx + zz);
     m->zy = yz - wx;
     m->xz = xz - wy;
-    m->yz = yz + wx;
+    m->yz = wx + yz;
     m->zz = 1.0f - (xx + yy);
 }
 

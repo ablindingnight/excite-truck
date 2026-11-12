@@ -452,7 +452,7 @@ static inline void QuatToFrame(IFrame* f, const IQuat* q) {
     m[2][1] = yz - wx;
     m[0][2] = xz - wy;
     m[2][2] = 1.0f - (xx + yy);
-    m[1][2] = yz + wx;
+    m[1][2] = wx + yz;
 }
 
 extern "C" {

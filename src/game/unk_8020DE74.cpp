@@ -311,9 +311,9 @@ static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
         out->y = x * m[1] + y * m[4] + z * m[7];
         out->z = x * m[2] + y * m[5] + z * m[8];
     } else {
-        out->x = in->x * m[0] + in->y * m[3] + in->z * m[6];
-        out->y = in->x * m[1] + in->y * m[4] + in->z * m[7];
-        out->z = in->x * m[2] + in->y * m[5] + in->z * m[8];
+        out->x = m[0] * in->x + in->y * m[3] + in->z * m[6];
+        out->y = m[1] * in->x + in->y * m[4] + in->z * m[7];
+        out->z = m[2] * in->x + in->y * m[5] + in->z * m[8];
     }
 }
 

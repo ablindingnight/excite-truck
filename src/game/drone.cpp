@@ -421,7 +421,7 @@ static inline void QuatToMtx(BMtx33* m, const Quat* q) {
     f32 m11 = 1.0f - (xx + zz);
     f32 m22 = 1.0f - (xx + yy);
     f32 zy = yz - wx;
-    f32 yz1 = yz + wx;
+    f32 yz1 = wx + yz;
     f32 zx = xz + wy;
     f32 xz1 = xz - wy;
     f32 yx = xy - wz;

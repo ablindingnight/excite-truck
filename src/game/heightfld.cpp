@@ -167,7 +167,7 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     int n = 0;
     int m;
     for (;;) {
-        if (n + r[1] > lx) {
+        if (r[1] + n > lx) {
             m = r[0];
             break;
         }
@@ -198,7 +198,7 @@ static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3,
     f32 m1 = 0.5f * (p2 - p0);
     f32 m2 = 0.5f * (p3 - p1);
     f32 d = p2 - p1;
-    f32 c3 = m1 + m2 - 2.0f * d;
+    f32 c3 = m2 + m1 - 2.0f * d;
     f32 c2 = 3.0f * d - 2.0f * m1 - m2;
     if (deriv) {
         *deriv = m1 + (3.0f * c3 * t2 + 2.0f * c2 * t);
@@ -541,7 +541,7 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         f32 sz = (lz & 1 ? -1.0f : 1.0f) / g->scaleZ;
         normal->x = -sx * hx;
         normal->z = -hz * sz;
-        normal->y = __fabs(sz * sx);
+        normal->y = __fabs(sx * sz);
         PSVECNormalize(normal, normal);
         return h;
     }

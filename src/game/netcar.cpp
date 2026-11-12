@@ -381,7 +381,7 @@ static inline void QuatToMtx(TMtx* m, const TQuat* q) {
     f32 xx = x * x2;
     f32 yy = y * y2;
     f32 zz = z * z2;
-    f32 wx = w * x2;
+    f32 wx = x2 * w;
     f32 yz = y * z2;
     f32 wy;
     f32 xz;
@@ -392,10 +392,10 @@ static inline void QuatToMtx(TMtx* m, const TQuat* q) {
     m->y.y = 1.0f - (xx + zz);
     m->y.z = yz + wx;
     m->z.y = yz - wx;
-    wy = w * y2;
-    xz = x * z2;
-    wz = w * z2;
-    xy = x * y2;
+    wy = y2 * w;
+    xz = z2 * x;
+    wz = z2 * w;
+    xy = y2 * x;
     m->z.x = xz + wy;
     m->x.z = xz - wy;
     m->y.x = xy - wz;
