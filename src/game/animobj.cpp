@@ -52,13 +52,20 @@ struct PointSlot {
     u32 color;      // offset 0x3C
 };
 
-class AnimObj {
+// The world object base (world.cpp); its empty Update/PostDraw live there.
+class WObj {
+public:
+    virtual ~WObj(void) {}
+    virtual void Update(void);    // 0xC
+    virtual void Draw(void) = 0;  // 0x10
+    virtual void PostDraw(void);  // 0x14
+};
+
+class AnimObj : public WObj {
 public:
     AnimObj(void);
     virtual ~AnimObj(void) {}
-    virtual void vf0C(void) {}
     virtual void Draw(void) = 0;
-    virtual void vf14(void) {}
     virtual f32 Depth(void);
     virtual void vf1C(void);
     virtual void Set(const AnimSlot* s);
@@ -173,7 +180,7 @@ f32 AnimObj::Depth(void) {
 
 ModuleTag lbl_8055EB80;
 
-// vf0C/vf14
+// WObj::Update/PostDraw
 // are emitted here as weak copies the target keeps in an earlier unit.
 
 // .bss owned by this unit (0x80488228-0x804885E8).
