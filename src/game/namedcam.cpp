@@ -150,7 +150,7 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
 }
 
 // Starts transition `slot` from pose a to pose b over `dur` (nothing to do when they already match).
-void fn_80276098(const CamPose* a, CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
+void fn_80276098(const CamPose* a, const CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
     if (AbsF(fovA - fovB) <= lbl_80558DC4[0] && SamePose(a, b)) {
         return;
     }
