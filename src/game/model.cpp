@@ -721,6 +721,15 @@ ModelInfo* fn_802C6B44(const char* name) {
     return 0;
 }
 
+// The model visibility toggle report (dead in the shipped build; only its strings remain).
+static void ReportModelToggle(const char* name, s32 i, int on) {
+    if (on) {
+        fn_802E30C8("%s %d ok ON", name, i);
+    } else {
+        fn_802E30C8("%s %d ok OFF", name, i);
+    }
+}
+
 void fn_802C6C20(ModelInfo* m) { fn_8012C4E4(m, fn_802C5E6C, m); }
 
 void fn_802C6C30(void) {}
@@ -821,6 +830,16 @@ s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix) {
         fn_802E30C8("mrModelLoad(%s) in scene!", name);
     }
     return fn_802C6DC4(name, fn_802C6B44(name), inst, prefix);
+}
+
+// The async model loader's checks (dead in the shipped build; only its strings remain).
+static void AsyncModelChecks(const char* name, s32 have, s32 need, int created) {
+    if (have < need) {
+        fn_802E317C("ModelLoadAsync(%s): buffer too small (%d < %d)!", name, have, need);
+    }
+    if (!created) {
+        fn_802E317C("ModelLoadAsync(%s): AsyncResourceCreate fails!", name);
+    }
 }
 
 void fn_802C703C(s32 i) { fn_802C6C38(i); }
