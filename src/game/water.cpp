@@ -146,7 +146,7 @@ static const PtTable sAlpha = {{
 }};
 
 static const RingTable sRings = {{
-    {0.65f, 0.0f, 0.0f}, {0.65f, 0.25f, 2.0943952f}, {0.65f, 0.65f, 4.1887903f},
+    {0.65f, 0.0f, 0.0f}, {0.65f, 0.25f, 2.07345128f}, {0.65f, 0.5f, 4.1783185f},
 }};
 
 static const TexMtx sRingMtx = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}}};
