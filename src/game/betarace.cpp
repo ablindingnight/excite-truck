@@ -3239,7 +3239,8 @@ inline Pickup::Pickup(ValueNode* n) {
         b[1] = 0.0f;
         b[2] = fwd[1];
         PSVECCrossProduct(b, a, cr);
-        if (!(cr[1] <= 0.0f)) {
+        bool ccw = cr[1] > 0.0f;
+        if (ccw) {
             angle = acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
         } else {
             angle = -(f32)acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
@@ -3251,9 +3252,10 @@ inline Pickup::Pickup(ValueNode* n) {
         vol->SetSurface(1000);
         hC0 = fn_801FB1F4(1);
         hB8 = fn_801FA8E0(vol, m, hC0);
-        vol->half[0] = hx;
-        vol->half[1] = hy;
-        vol->half[2] = hz;
+        BoxShape* shape = vol;
+        shape->half[0] = hx;
+        shape->half[1] = hy;
+        shape->half[2] = hz;
     }
 }
 
