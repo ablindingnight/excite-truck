@@ -622,7 +622,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                 k = -1;
                 m = 0.0f;
                 for (j = 0; j < 3; j++) {
-                    if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[j].k)) {
+                    if (k < 0 || (float)__fabs(d->terms[j].k) < (float)__fabs(m)) {
                         k = j;
                         m = d->terms[j].k;
                     }
