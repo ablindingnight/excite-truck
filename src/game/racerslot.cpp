@@ -146,7 +146,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 int fn_8026A698(u8* p, int i) {
-    f32*r;
+    f32* r;
     u8* car = PTR(p, 0x140);
     RacerSlot* s = &lbl_80499E60[i];
     int ok = 1;
