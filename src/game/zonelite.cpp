@@ -214,6 +214,16 @@ void fn_802A93A4(void) {
     }
 }
 
+/* Helper name unproven */
+static inline LapState* LapAt(int view) {
+    return &lbl_804BD790[view];
+}
+
+/* Helper name unproven */
+static inline s32 LapShown(int view) {
+    return lbl_804BD790[view].shown;
+}
+
 void fn_802A9428(void) {
     if (!lbl_8055F8F0) {
         return;
@@ -224,7 +234,7 @@ void fn_802A9428(void) {
     int view = fn_801E85B4();
     int car = fn_801E866C(-1);
     s32 lap = fn_801EA9A0(car)->lap;
-    s = &lbl_804BD790[view];
+    s = LapAt(view);
     if (car != s->car || lap < s->lap) {
         lbl_804BD790[view].hold = 0.0f;
         s->car = car;
@@ -239,7 +249,7 @@ void fn_802A9428(void) {
     } else {
         s->hold -= fn_801E7E24();
     }
-    shown = lbl_804BD790[view].shown;
+    shown = LapShown(view);
     s32 laps = fn_801E7E3C()->laps;
     if (lbl_8055F8F1 || shown >= laps) {
         which = 3;

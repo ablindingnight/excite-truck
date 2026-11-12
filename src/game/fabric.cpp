@@ -400,8 +400,13 @@ static inline void SetAnchor(Anchor* a, const TVec* v, int i) {
     a->pos = *(const PVec*)&v[i];
 }
 
+/* Helper name unproven */
+static inline int Rows(Fabric* f) {
+    return f->rows;
+}
+
 void fn_801F5664(Fabric* f, int style) {
-    int rows = f->rows;
+    int rows = Rows(f);
     int cols = f->cols;
     int n;
     Anchor* a;

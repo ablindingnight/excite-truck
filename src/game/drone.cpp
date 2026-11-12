@@ -157,6 +157,8 @@ struct LinearDrone {
 // A drone moving along a Hermite path (0x70).
 struct HermiteDrone {
 public:
+    HermitePathData* PathData(void);
+public:
     HermiteDrone(void) {
         name = 0;
         entry = 0;
@@ -770,8 +772,13 @@ void HermiteDrone::Turn(f32 u) {
     QuatToFrame(&frame, &q);
 }
 
+/* Helper name unproven */
+inline HermitePathData* HermiteDrone::PathData(void) {
+    return entry->data;
+}
+
 void HermiteDrone::UpdateLoop(f32 dt) {
-    HermitePathData* data = entry->data;
+    HermitePathData* data = PathData();
     HermiteKey* k = data->Loop(seg);
     f32 nt = t + dt;
     f32 u = k->rate * nt;

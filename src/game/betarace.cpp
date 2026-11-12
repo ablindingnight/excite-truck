@@ -693,6 +693,8 @@ namespace {
 // The results-screen animation of one player: place, bonus count-up, grade and stunt list.
 class FinishAnimation {
 public:
+    const StuntLine* LineAt(const StuntList* s, int i);
+public:
     FinishAnimation(void) : anim(0), bonusSnd(0), noBonusSnd(0), transitionSnd(0) {}
     ~FinishAnimation(void) { Release(); }
     void Reset(void) {
@@ -1778,6 +1780,11 @@ inline const char* CleanRaceName(int i) {
 
 char lbl_80559F0C[] = "";
 
+/* Helper name unproven */
+inline const StuntLine* FinishAnimation::LineAt(const StuntList* s, int i) {
+    return &s->lines.a.data[i];
+}
+
 int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     const StuntLine* l;
     int i;
@@ -1825,7 +1832,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         grade2.Set("");
     }
     for (i = 0; i < s->lines.a.count; i++) {
-        l = &s->lines.a.data[i];
+        l = LineAt(s, i);
         stuntLabel[i].Set(l->label);
         stuntValue[i].Set(l->value);
     }

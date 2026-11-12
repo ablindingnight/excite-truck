@@ -292,6 +292,12 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
    makes the structure exact; only the row pointer / address registers differ in the two inner loops. */
 #pragma push
 #pragma opt_unroll_loops off
+/* Helper name unproven */
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;
     for (int k = 0; k < 13; k++) {
@@ -320,7 +326,7 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&t->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&t->h[b][a]);
+                Swap16(AtP(t->h, b)[a]);
             }
         }
         Swap32(&t->x);
@@ -353,7 +359,7 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&l->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&l->h[b][a]);
+                Swap16(AtP(l->h, b)[a]);
             }
         }
         Swap32(&l->weight);
@@ -646,11 +652,17 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     }
 }
 
+/* Helper name unproven */
+template <class T>
+static inline T& AtR(T* p, int i) {
+    return p[i];
+}
+
 void fn_801DD808(void) {
     Deform* d = lbl_80446F18;
     for (int i = 0; i < lbl_8055E9A8[0]; i++, d++) {
         *d->out = d->base + d->terms[0].k * lbl_804424B0[d->terms[0].weight] + d->terms[1].k * lbl_804424B0[d->terms[1].weight] +
-                  d->terms[2].k * lbl_804424B0[d->terms[2].weight];
+                  d->terms[2].k * lbl_804424B0[AtR(d->terms, 2).weight];
     }
 }
 

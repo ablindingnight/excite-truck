@@ -249,6 +249,11 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
+/* Helper name unproven */
+static inline Flock* FlockAt(int i) {
+    return lbl_804BD6C4.data[i];
+}
+
 void fn_802A86A4(void) {
     Boid* b;
     f32 r;
@@ -257,7 +262,7 @@ void fn_802A86A4(void) {
     for (i = 0; i < lbl_804BD6C4.n; i++) {
         Flock* f;
         BoidDesc d;
-        f = lbl_804BD6C4.data[i];
+        f = FlockAt(i);
         memset(&d, 0, 0);
         SetXYZ(&d.pos, f->pt.x, f->pt.y, f->pt.z);
         d.turn = f->flockTurn;

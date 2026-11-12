@@ -413,6 +413,8 @@ struct ShadowRef {
 // A static object with a shadow, drawn as an animated model (0x58).
 class StaticObject : public AnimModel {
 public:
+    f32 Extend(void);
+public:
     StaticObject(const char* name, const char* model, FacingFn fn, const ShadowDesc* s, int vis);
     virtual ~StaticObject(void);
     virtual void Draw(void);
@@ -2116,6 +2118,11 @@ static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
+/* Helper name unproven */
+inline f32 StaticObject::Extend(void) {
+    return shadow.extend;
+}
+
 void StaticObject::vf1C(void) {
     f32 s = fn_801E88F0(-1);
     f32 s2 = s * s;
@@ -2124,7 +2131,7 @@ void StaticObject::vf1C(void) {
     f32 a;
     if (d2 > shadow.cutoff * shadow.cutoff) {
         f32 d = (f32)sqrt(d2);
-        f32 e = shadow.extend;
+        f32 e = Extend();
         f32 t = FMax(FMin(Unlerp(d - shadow.cutoff, 0.0f, 5.0f), 1.0f), 0.0f);
         a = Lerp(e, 0.0f, t);
     } else {

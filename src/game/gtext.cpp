@@ -345,10 +345,15 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
+/* Helper name unproven */
+static inline ArtItem* ItemAt(int off) {
+    return (ArtItem*)((u8*)lbl_8049846C.data + off);
+}
+
 void fn_80231780(const UIXform* m) {
     int off = 0;
     for (int i = 0; i < lbl_8049846C.count; i++, off += sizeof(lbl_8049846C.data[0])) {
-        ArtItem* it = (ArtItem*)((u8*)lbl_8049846C.data + off);
+        ArtItem* it = ItemAt(off);
         EscSeq* e = &lbl_80497F14.data[it->esc];
         u32 color = e->takeColor ? it->color : fn_80230B9C((it->color & 0xFF000000) | 0xFFFFFF);
         if (e->art) {

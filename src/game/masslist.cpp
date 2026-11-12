@@ -386,6 +386,12 @@ static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
 template <class O, class V> static inline void TScale(O* o, const V* v, f32 k) { o->x = v->x * k; o->y = v->y * k; o->z = v->z * k; }  /* Helper name unproven */
+/* Helper name unproven */
+template <class T>
+static inline T& AtR(T* p, int i) {
+    return p[i];
+}
+
 void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     MassSet* s = &lbl_8055E794[car];
     ContactSet* c = &lbl_8055E798[car];
@@ -395,7 +401,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
     MtxToQuat(mtx, &q);
     s->quat = MVec4(-q.x, -q.y, -q.z, q.w);
-    s->rot[0] = MVec4(mtx->basis[0].x, mtx->basis[0].y, mtx->basis[0].z);
+    AtR(s->rot, 0) = MVec4(mtx->basis[0].x, mtx->basis[0].y, mtx->basis[0].z);
     s->rot[1] = MVec4(mtx->basis[1].x, mtx->basis[1].y, mtx->basis[1].z);
     s->rot[2] = MVec4(mtx->basis[2].x, mtx->basis[2].y, mtx->basis[2].z);
     s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
@@ -459,6 +465,12 @@ void PSVECNormalize(const CVec3* src, CVec3* dst);
 
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
+/* Helper name unproven */
+template <class T>
+static inline T* AtP(T* p, int i) {
+    return &p[i];
+}
+
 void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];
     CVec3 p(*(CVec3*)&cs->pts[i]);
@@ -497,7 +509,7 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     f32 zv = pt->z;
     r.z = LerpT(k, zv, ref.z);
     ref = r;
-    *(MVec4*)&cs->ref[i] = MVec4(ref.x, ref.y, ref.z);
+    *(MVec4*)AtP(cs->ref, i) = MVec4(ref.x, ref.y, ref.z);
     *(MVec4*)&cs->nrm[i] = MVec4(nrm.x, nrm.y, nrm.z);
 }
 
