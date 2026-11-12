@@ -339,8 +339,8 @@ public:
     GameLoopStatic(void) {
         unk0 = 0;
         unk4 = 123;
-        unk8 = 0;
         unkC = 0;
+        unk8 = 0;
         unk10 = 0;
     }
     u32 unk0;

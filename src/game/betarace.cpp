@@ -4534,8 +4534,8 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     int i;
     for (i = 0; i < 16; i++) {
         StuntEvent* e = &h->pool[i];
-        e->hud = h;
         e->car = car;
+        e->hud = h;
         h->free.PushFront(e);
     }
     h->current = 0;

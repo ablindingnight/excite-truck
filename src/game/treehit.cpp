@@ -354,8 +354,8 @@ u8* fn_802C1500(TMtx* t, int cls) {
 static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     f32* o = (f32*)o_;
     o[0] = x;
-    o[1] = y;
     o[2] = z;
+    o[1] = y;
 }
 void fn_802C1550(void) {
     int i;

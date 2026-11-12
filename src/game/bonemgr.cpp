@@ -26,8 +26,8 @@ public:
 class StackAlloc : public AllocBuf {
 public:
     StackAlloc(const char* n, u8* b, s32 s) : AllocBuf(b) {
-        name = n;
         used = 0;
+        name = n;
         size = s;
     }
     virtual ~StackAlloc(void) { delete[] buf; }

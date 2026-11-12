@@ -163,8 +163,8 @@ static inline void ToMatrix(PathMtx* m, const Quat& q) {
     f32 yz = q.y * z2;
     f32 wy = q.w * y2;
     f32 wz = q.w * z2;
-    m->m[0][0] = 1.0f - (yy + zz);
     m->m[0][1] = xy + wz;
+    m->m[0][0] = 1.0f - (yy + zz);
     m->m[0][2] = xz - wy;
     m->m[1][0] = xy - wz;
     m->m[1][1] = 1.0f - (xx + zz);

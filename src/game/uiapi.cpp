@@ -1425,8 +1425,8 @@ struct UIHotKey {
     UIHotKey(void* p, void* a, u16 k) {
         fn_80218F34((WidgetFragment*)this, 0, 0, 0, 0, 0);
         *(void**)this = lbl_8033D590;
-        param = p;
         action = a;
+        param = p;
         key = k;
     }
 };
@@ -1821,8 +1821,8 @@ struct UIYesNoHandler {
     void* owner;
     u8 defaultNo;
     UIYesNoHandler(u8 d) {
-        vtable = lbl_8033D420;
         owner = 0;
+        vtable = lbl_8033D420;
         defaultNo = d;
     }
 };

@@ -33,8 +33,8 @@ struct MTVec {
     MTVec(void) {}
     MTVec(f32 ax, f32 ay, f32 az) {
         x = ax;
-        y = ay;
         z = az;
+        y = ay;
     }
     f32 x, y, z;
 };

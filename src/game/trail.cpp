@@ -302,10 +302,10 @@ static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
         out->x.y = xy;
         out->x.z = xz;
         out->y.x = yx;
-        out->y.y = yy;
         out->y.z = yz;
-        out->z.x = zx;
+        out->y.y = yy;
         out->z.y = zy;
+        out->z.x = zx;
         out->z.z = zz;
     } else {
         out->x.x = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);

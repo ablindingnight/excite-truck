@@ -446,13 +446,13 @@ static inline void QuatToFrame(IFrame* f, const IQuat* q) {
     f32 wz = q->w * z2;
     m[0][0] = 1.0f - (yy + zz);
     m[1][0] = xy - wz;
-    m[2][0] = xz + wy;
     m[0][1] = xy + wz;
+    m[2][0] = xz + wy;
     m[1][1] = 1.0f - (xx + zz);
     m[2][1] = yz - wx;
     m[0][2] = xz - wy;
-    m[1][2] = yz + wx;
     m[2][2] = 1.0f - (xx + yy);
+    m[1][2] = yz + wx;
 }
 
 extern "C" {
@@ -705,8 +705,8 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
         m->m[2] = z * (t * x) - s * y;
         m->m[3] = y * (t * x) - s * z;
         m->m[4] = c + t * (y * y);
-        m->m[5] = z * (t * y) + s * x;
         m->m[6] = z * (t * x) + s * y;
+        m->m[5] = z * (t * y) + s * x;
         m->m[7] = z * (t * y) - s * x;
         m->m[8] = c + t * (z * z);
     } else {

@@ -175,8 +175,8 @@ class FriendlyNames : public MenuState {
 public:
     FriendlyNames(void) {
         names.data = storage;
-        names.count = 0;
         names.cap = 30;
+        names.count = 0;
         lbl_8055F3C4 = (s32)this;
     }
     virtual ~FriendlyNames(void) { lbl_8055F3C4 = 0; }

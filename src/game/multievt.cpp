@@ -221,8 +221,8 @@ struct EvEntryBuf {
 // An event list with room for 0x80 entries on the stack.
 struct EvListBuf {
     EvListBuf(void) {
-        count = 0;
         items = buf;
+        count = 0;
         cap = 0x80;
     }
     ~EvListBuf(void) {

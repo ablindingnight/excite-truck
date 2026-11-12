@@ -74,8 +74,8 @@ struct MenuItem {
 struct MenuRange {
     MenuRange(void) {}
     MenuRange(f32 a, f32 b) {
-        lo = a;
         hi = b;
+        lo = a;
     }
     f32 lo, hi;
 };

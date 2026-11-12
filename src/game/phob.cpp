@@ -326,8 +326,8 @@ struct MsgBuf {
 struct PhysClock {
     PhysClock(void) { Reset(); }
     void Reset(void) {
-        f10 = 0;
         resync = 1;
+        f10 = 0;
         last = 0;
     }
     s32 frame;   // offset 0x0

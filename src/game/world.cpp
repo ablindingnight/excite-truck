@@ -233,16 +233,16 @@ double sqrt(double x);
 struct WallVol {
     WallVol(f32 w, f32 h, f32 l) {
         fC = 0;
-        f4 = 0;
         f8 = 0;
-        shape = 'BOX ';
+        f4 = 0;
         f10 = 0.0f;
+        shape = 'BOX ';
         f14 = 0.0f;
         f20 = 100;
         f1C = 0;
         vtbl = __vt__8BoxShape;
-        width = w;
         height = h;
+        width = w;
         length = l;
         f34 = 0;
         radius = w + (f32)sqrt(w * w + h * h + l * l);

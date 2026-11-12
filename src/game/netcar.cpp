@@ -10,8 +10,8 @@ void* operator new[](size_t size, const char* tag);
 struct TVec {
     TVec(void) {}
     TVec(f32 ax, f32 ay, f32 az) {
-        x = ax;
         y = ay;
+        x = ax;
         z = az;
     }
     f32 x, y, z;
@@ -388,10 +388,10 @@ static inline void QuatToMtx(TMtx* m, const TQuat* q) {
     f32 wz;
     f32 xy;
     m->x.x = 1.0f - (yy + zz);
-    m->y.y = 1.0f - (xx + zz);
     m->z.z = 1.0f - (xx + yy);
-    m->z.y = yz - wx;
+    m->y.y = 1.0f - (xx + zz);
     m->y.z = yz + wx;
+    m->z.y = yz - wx;
     wy = w * y2;
     xz = x * z2;
     wz = w * z2;

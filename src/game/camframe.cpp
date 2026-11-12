@@ -93,13 +93,13 @@ static inline void QuatToMtx(CamFrame* f, const Quat* q) {
     f32 wz = q->w * z2;
     m[0][0] = 1.0f - (yy + zz);
     m[1][0] = xy - wz;
-    m[2][0] = xz + wy;
     m[0][1] = xy + wz;
+    m[2][0] = xz + wy;
     m[1][1] = 1.0f - (xx + zz);
     m[2][1] = yz - wx;
     m[0][2] = xz - wy;
-    m[1][2] = yz + wx;
     m[2][2] = 1.0f - (xx + yy);
+    m[1][2] = yz + wx;
 }
 
 ModuleTag lbl_8055F518;

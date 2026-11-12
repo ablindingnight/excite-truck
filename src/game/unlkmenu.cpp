@@ -17,8 +17,8 @@ Unlockable* GetUnlockable(int i);
 struct MenuItem {
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
         type = t;
-        name = n;
         data = d;
+        name = n;
         arg0 = a0;
         arg1 = a1;
     }

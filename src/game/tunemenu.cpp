@@ -19,10 +19,10 @@ static inline int FloatBits(f32 f) { return *(int*)&f; }
 
 struct MenuItem {
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
         name = n;
-        data = d;
+        type = t;
         arg0 = a0;
+        data = d;
         arg1 = a1;
     }
     const char* name;

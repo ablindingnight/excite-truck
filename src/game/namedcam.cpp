@@ -198,11 +198,11 @@ static inline void QuatToPose(CamPose* p, const f32* q) {
     m[0][0] = 1.0f - (yy + zz);
     m[1][0] = xy - wz;
     m[2][0] = xz + wy;
-    m[0][1] = xy + wz;
     m[1][1] = 1.0f - (xx + zz);
+    m[0][1] = xy + wz;
     m[2][1] = yz - wx;
-    m[0][2] = xz - wy;
     m[1][2] = yz + wx;
+    m[0][2] = xz - wy;
     m[2][2] = 1.0f - (xx + yy);
 }
 
@@ -427,15 +427,15 @@ static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
         m->m[0] = c + t * (x * x);
         m->m[1] = t * x * y + s * z;
         m->m[2] = t * x * z - s * y;
-        m->m[3] = t * x * y - s * z;
         m->m[4] = c + t * (y * y);
-        m->m[5] = t * y * z + s * x;
+        m->m[3] = t * x * y - s * z;
         m->m[6] = t * x * z + s * y;
+        m->m[5] = t * y * z + s * x;
         m->m[7] = t * y * z - s * x;
         m->m[8] = c + t * (z * z);
     } else {
-        m->m[1] = 0.0f;
         m->m[0] = 1.0f;
+        m->m[1] = 0.0f;
         m->m[2] = 0.0f;
         m->m[3] = 0.0f;
         m->m[4] = 1.0f;

@@ -141,8 +141,8 @@ static inline void MAdd(Vec* out, const Vec* a, const Vec* d, f32 s) {
 
 static inline void Lift(Vec* v, f32 y) {
     v->x = 0.0f;
-    v->y = y;
     v->z = 0.0f;
+    v->y = y;
 }
 
 static inline void Identity(Frame* f) {

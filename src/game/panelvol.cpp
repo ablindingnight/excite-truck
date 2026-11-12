@@ -734,8 +734,8 @@ void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b) { Sub(out, a, b); }
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
     v->y = y;
+    v->x = x;
     v->z = z;
 }
 

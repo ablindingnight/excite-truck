@@ -307,8 +307,8 @@ static inline void ShakeMul(ShakeMat* pd, const ShakeMat* pa, const ShakeMat* pb
         d.m[2][0] = t20;
         d.m[0][1] = t01;
         d.m[1][1] = t11;
-        d.m[2][1] = t21;
         d.m[0][2] = t02;
+        d.m[2][1] = t21;
         d.m[1][2] = t12;
         d.m[2][2] = t22;
     } else {
@@ -359,15 +359,15 @@ static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
         r->m[0][0] = c + k * (x * x);
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
-        r->m[1][0] = y * (k * x) - s * z;
         r->m[1][1] = c + k * (y * y);
-        r->m[1][2] = z * (k * y) + s * x;
+        r->m[1][0] = y * (k * x) - s * z;
         r->m[2][0] = z * (k * x) + s * y;
+        r->m[1][2] = z * (k * y) + s * x;
         r->m[2][1] = z * (k * y) - s * x;
         r->m[2][2] = c + k * (z * z);
     } else {
-        r->m[0][1] = lbl_80563C20;
         r->m[0][0] = lbl_80563C2C;
+        r->m[0][1] = lbl_80563C20;
         r->m[0][2] = lbl_80563C20;
         r->m[1][0] = lbl_80563C20;
         r->m[1][1] = lbl_80563C2C;

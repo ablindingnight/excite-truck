@@ -378,8 +378,8 @@ static __inline void QuatToMtx(const CamQuat* q, CamRot* r) {
     r->axes[1].y = lbl_80563D94 - (xx + zz);
     r->axes[1].z = yz + wx;
     r->axes[2].x = xz + wy;
-    r->axes[2].y = yz - wx;
     r->axes[2].z = lbl_80563D94 - (xx + yy);
+    r->axes[2].y = yz - wx;
 }
 
 static __inline void CamSet(CamVec* v, f32 x, f32 y, f32 z) {
