@@ -237,9 +237,8 @@ void fn_801D94DC(MorphRegion** head, ValueNode* node, const char* key, ValueTabl
 }
 
 void fn_801D9654(OmlList** head, ValueNode* node, const char* key, int unused) {
-    int i;
     ValueNode* child;
-    for (i = 0; (child = node->GetChildAt(i)) != NULL; i++) {
+    for (int i = 0; (child = node->GetChildAt(i)) != NULL; i++) {
         if (strcmp(child->GetName(), key) == 0) {
             OmlList* l = new (key) OmlList(child);
             l->next = *head;
