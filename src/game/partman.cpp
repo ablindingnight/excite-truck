@@ -485,6 +485,14 @@ int TypeTable::Release(PartSys* s) {
     return 0;
 }
 
+// The type table dump (dead in the shipped build; only its strings remain).
+static void DumpTypeTable(const char* name, const TypeTable* t) {
+    fn_802E30C8("%s: %d systems", name, t->count);
+    for (int i = 0; i < t->count; i++) {
+        fn_802E30C8("\t%2d: %d, %d", i, t->e[i].refs, t->e[i].sys);
+    }
+}
+
 extern "C" {
 
 void fn_8028EFC4(SysList* buckets, SysList* l) {
@@ -770,6 +778,13 @@ void PartSys::SetParams(const PartParams* p) {
     Reset();
 }
 
+// The particle count check on reload (dead in the shipped build; only its string remains).
+static void CheckMaxParticles(s32 have, s32 want) {
+    if (have != want) {
+        fn_802E30C8("particle: max_particles mismatch!  ignoring...");
+    }
+}
+
 void PartSys::Add(const V3* pos, const V3* vel, f32 angVel, f32 size) {
     if (!lbl_8055F73C && !lbl_8055F74C) {
         lbl_8055F74C = 1;
@@ -803,6 +818,11 @@ void PartSys::Add(const V3* pos, const V3* vel, f32 angVel, f32 size) {
         parts[tail] = p;
         tail = (tail + 1) % cap;
     }
+}
+
+// The particle editor hook (dead in the shipped build; only its string remains).
+static void NoEditInterface(void) {
+    fn_802E30C8("particle: tried to create editing interface in non-edit mode");
 }
 
 void PartSys::Integrate(V3* out, const Particle* p, f32 age) {
