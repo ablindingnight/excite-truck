@@ -1494,3 +1494,13 @@ u8 fn_802524A8(u8* p, int i) { return U8(PTR(p, 0x4) + i * 0x48, 0x41); }
 s32 fn_802524BC(u8* p, int i) { return S32(PTR(p, 0x4) + i * 0x48, 0x44); }
 
 }  // extern "C"
+
+// The car stat/colour captions shared with uicar (dead in this unit; only their strings remain).
+/* Helper name unproven */
+void* LoadCaptionFont(const char* name);
+
+static void GarageCaptions(char* buf, int color, int stat, int line) {
+    fn_801345D8(buf, 0x20, "UICar:COLOR%d", color);
+    LoadCaptionFont("uifnt_o.gtx");
+    fn_801345D8(buf, 0x20, "UICar:STAT_%i_TEXT_%i", stat, line);
+}
