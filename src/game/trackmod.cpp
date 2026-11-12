@@ -95,15 +95,84 @@ public:
     virtual void Draw2(void* ctx);          // 0x14
 };
 
+struct Rot {
+    Rot(void);
+    s32 id;        // offset 0x0
+    f32 pos[3];    // offset 0x4
+    TMat3* rot;    // offset 0x10
+    f32 speed;     // offset 0x14
+};
+
+class RotList : public TrackInst {
+public:
+    RotList(void) {
+        rots = new ("rotator tab") Rot[16];
+        count = 0;
+    }
+    virtual ~RotList(void);
+    virtual void Draw(void* ctx);
+
+    Rot* rots;  // offset 0x4
+    s32 count;  // offset 0x8
+};
+
+struct XFade {
+    f32 pos[3];    // offset 0x0
+    void* model;   // offset 0xC
+    f32 scale;     // offset 0x10
+    f32 start;     // offset 0x14
+    s32 id;        // offset 0x18
+};
+
+class XFadeList : public TrackInst {
+public:
+    void DrawFade(XFade** vis, int i);
+public:
+    XFadeList(void) { count = 0; }
+    virtual ~XFadeList(void);
+    virtual void Draw(void* ctx);
+    virtual int Kind(void);
+    virtual void Draw2(void* ctx);
+
+    XFade fades[48];  // offset 0x4
+    s32 count;        // offset 0x544
+};
+
+struct Scroll {
+    void* model;  // offset 0x0
+    s32 id;       // offset 0x4
+    f32 u;        // offset 0x8
+    f32 v;        // offset 0xC
+};
+
+class ScrollList : public TrackInst {
+public:
+    ScrollList(void) { count = 0; }
+    virtual ~ScrollList(void);
+    virtual void Draw(void* ctx);
+    virtual int Kind(void);
+    virtual void Draw2(void* ctx);
+
+    Scroll scrolls[16];  // offset 0x4
+    s32 count;           // offset 0x104
+};
+
+class FacingTestInst : public TrackInst {
+public:
+    FacingTestInst(u8* d, s32 i) {
+        data = d;
+        id = i;
+    }
+    virtual ~FacingTestInst(void);
+    virtual void Draw(void* ctx);
+
+    u8* data;  // offset 0x4
+    s32 id;    // offset 0x8
+};
+
 class GenericTMH : public TrackMod {
 public:
     virtual ~GenericTMH(void);
-    virtual void Draw(TObj* list);
-};
-
-class PointFacingTMH : public TrackMod {
-public:
-    virtual ~PointFacingTMH(void);
     virtual void Draw(TObj* list);
 };
 
@@ -112,6 +181,21 @@ public:
     virtual ~AxisFacingTMH(void);
     virtual void Draw(TObj* list);
     virtual void DrawTree(TNode* tree);
+};
+
+class PointFacingTMH : public TrackMod {
+public:
+    virtual ~PointFacingTMH(void);
+    virtual void Draw(TObj* list);
+};
+
+class MultiFacingTMH : public TrackMod {
+public:
+    MultiFacingTMH(void) { tex = fn_802CAC28("turn.tex", 0); }
+    virtual ~MultiFacingTMH(void);
+    virtual void Draw(TObj* list);
+
+    void* tex;  // offset 0x4
 };
 
 class SkyTMH : public TrackMod {
@@ -220,26 +304,6 @@ public:
 };
 
 // One rotating model (0x18).
-struct Rot {
-    Rot(void);
-    s32 id;        // offset 0x0
-    f32 pos[3];    // offset 0x4
-    TMat3* rot;    // offset 0x10
-    f32 speed;     // offset 0x14
-};
-
-class RotList : public TrackInst {
-public:
-    RotList(void) {
-        rots = new ("rotator tab") Rot[16];
-        count = 0;
-    }
-    virtual ~RotList(void);
-    virtual void Draw(void* ctx);
-
-    Rot* rots;  // offset 0x4
-    s32 count;  // offset 0x8
-};
 
 class RotatorTMH : public TrackMod {
 public:
@@ -252,15 +316,6 @@ public:
     RotList* list;  // offset 0x4
 };
 
-class MultiFacingTMH : public TrackMod {
-public:
-    MultiFacingTMH(void) { tex = fn_802CAC28("turn.tex", 0); }
-    virtual ~MultiFacingTMH(void);
-    virtual void Draw(TObj* list);
-
-    void* tex;  // offset 0x4
-};
-
 class OptTerrainTMH : public TrackMod {
 public:
     virtual ~OptTerrainTMH(void);
@@ -270,27 +325,6 @@ public:
 };
 
 // One cross-fading model (0x1C).
-struct XFade {
-    f32 pos[3];    // offset 0x0
-    void* model;   // offset 0xC
-    f32 scale;     // offset 0x10
-    f32 start;     // offset 0x14
-    s32 id;        // offset 0x18
-};
-
-class XFadeList : public TrackInst {
-public:
-    void DrawFade(XFade** vis, int i);
-public:
-    XFadeList(void) { count = 0; }
-    virtual ~XFadeList(void);
-    virtual void Draw(void* ctx);
-    virtual int Kind(void);
-    virtual void Draw2(void* ctx);
-
-    XFade fades[48];  // offset 0x4
-    s32 count;        // offset 0x544
-};
 
 struct XFader {
     f32 pos[3];   // offset 0x0
@@ -330,23 +364,20 @@ public:
     virtual void Draw(TObj* list);
 };
 
+class ScrollingTMH : public TrackMod {
+public:
+    ScrollingTMH(void) { list = 0; }
+    virtual ~ScrollingTMH(void);
+    virtual void Draw(TObj* list);
+    virtual void Add(void* scene, TObj* o, s32 id);
+
+    ScrollList* list;  // offset 0x4
+};
+
 class PinkTriangleTMH : public TrackMod {
 public:
     virtual ~PinkTriangleTMH(void);
     virtual void Draw(TObj* list);
-};
-
-class FacingTestInst : public TrackInst {
-public:
-    FacingTestInst(u8* d, s32 i) {
-        data = d;
-        id = i;
-    }
-    virtual ~FacingTestInst(void);
-    virtual void Draw(void* ctx);
-
-    u8* data;  // offset 0x4
-    s32 id;    // offset 0x8
 };
 
 class FacingTestTMH : public TrackMod {
@@ -357,34 +388,6 @@ public:
 };
 
 // One scrolling-texture model (0x10).
-struct Scroll {
-    void* model;  // offset 0x0
-    s32 id;       // offset 0x4
-    f32 u;        // offset 0x8
-    f32 v;        // offset 0xC
-};
-
-class ScrollList : public TrackInst {
-public:
-    ScrollList(void) { count = 0; }
-    virtual ~ScrollList(void);
-    virtual void Draw(void* ctx);
-    virtual int Kind(void);
-    virtual void Draw2(void* ctx);
-
-    Scroll scrolls[16];  // offset 0x4
-    s32 count;           // offset 0x104
-};
-
-class ScrollingTMH : public TrackMod {
-public:
-    ScrollingTMH(void) { list = 0; }
-    virtual ~ScrollingTMH(void);
-    virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
-
-    ScrollList* list;  // offset 0x4
-};
 
 static inline f32 Angle(f32 a) { return a; }
 
