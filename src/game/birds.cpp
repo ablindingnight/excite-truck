@@ -384,12 +384,12 @@ void fn_802A8DE8(void) {
     int j;
     int off;
     Boid* b;
+    int boff;
     int i;
     for (i = 0, off = 0; i < lbl_804BD6C4.n; off += sizeof(Flock*), i++) {
         f = *(Flock**)((u8*)lbl_804BD6C4.data + off);
-        int off = 0;
-        for (j = 0; j < f->birds.n; off += sizeof(f->birds.data[0]), j++) {
-            b = (Boid*)((u8*)f->birds.data + off);
+        for (j = 0, boff = 0; j < f->birds.n; boff += sizeof(f->birds.data[0]), j++) {
+            b = (Boid*)((u8*)f->birds.data + boff);
             BirdFrame m;
             m.pos.x = b->pos.x;
             m.pos.y = b->pos.y;
