@@ -2835,9 +2835,7 @@ void fn_80186DE8(u8* p) {
         gas = throttle;
         if (slide > lbl_80561CAC && S32(car, 0x2620) > 2) {
             gas = lbl_80561CD0 - cut;
-            if (gas > throttle) {
-                gas = throttle;
-            }
+            gas = gas > throttle ? throttle : gas;
         }
         brake = F32(car, 0x25E8);
         f32 rpmT = rpm.x / lbl_80561CC0;

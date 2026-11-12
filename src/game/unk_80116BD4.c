@@ -7533,9 +7533,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                         } else {
                             BINK_GETBITS(v, width);
                             val = mask | (v & (sign - 1));
-                            if (v & sign) {
-                                val = -val;
-                            }
+                            val = v & sign ? -val : val;
                             tmp[coef] = val;
                         }
                         BINK_GETBIT(bit);
@@ -7544,9 +7542,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                         } else {
                             BINK_GETBITS(v, width);
                             val = mask | ((sign - 1) & v);
-                            if (v & sign) {
-                                val = -val;
-                            }
+                            val = v & sign ? -val : val;
                             tmp[coef + 1] = val;
                         }
                         BINK_GETBIT(bit);
@@ -7555,9 +7551,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                         } else {
                             BINK_GETBITS(v, width);
                             val = mask | (v & (sign - 1));
-                            if (v & sign) {
-                                val = -val;
-                            }
+                            val = v & sign ? -val : val;
                             tmp[coef + 2] = val;
                         }
                         BINK_GETBIT(bit);
@@ -7566,18 +7560,14 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                         } else {
                             BINK_GETBITS(v, width);
                             val = mask | (v & (sign - 1));
-                            if (v & sign) {
-                                val = -val;
-                            }
+                            val = v & sign ? -val : val;
                             tmp[coef + 3] = val;
                         }
                         continue;
                     case 3:
                         BINK_GETBITS(v, width);
                         val = mask | (v & (sign - 1));
-                        if (v & sign) {
-                            val = -val;
-                        }
+                        val = v & sign ? -val : val;
                         *p = 0;
                         tmp[e >> 2] = val;
                         break;
