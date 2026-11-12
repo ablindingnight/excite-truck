@@ -528,7 +528,9 @@ static inline int Dim(u32 c) {
     return v > 0xFF ? 0xFF : v;
 }
 
-static inline u32 DimColor(u8 r, u8 g, u8 b) { return 0xFF000000 | r << 16 | g << 8 | b; }
+/* Helper name unproven */
+static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+static inline u32 DimColor(u8 r, u8 g, u8 b) { return ARGB(0xFF, r, g, b); }
 
 static inline CarInfo* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
