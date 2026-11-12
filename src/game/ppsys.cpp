@@ -485,8 +485,9 @@ void fn_801C2170(PSys* s, const PSysDesc* d, const void* owner) {
     s->nStick = 0;
     s->nAnchor = 0;
     s->nLink = 0;
+    i = 0;
     if (d->nVerts > 0) {
-        for (i = 0; i < d->nVerts; i++) {
+        for (; i < d->nVerts; i++) {
             const PVertDesc* v = &d->verts[i];
             RVec3 p;
             Transform(&p, v->pos, (const RMtx*)owner);
