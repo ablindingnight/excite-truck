@@ -2564,7 +2564,8 @@ inline void RingChalMaster::vf0C(void) {
                     break;
                 }
                 if (!NearZeroF(a)) {
-                    f32 t = (lbl_8055E3C8 - arena.stats->data[k].time) / b;
+                    f32 lo = 0.0f;
+                    f32 t = ((lbl_8055E3C8 - arena.stats->data[k].time) - lo) / (b - lo);
                     CLAMP01(t);
                     f32 v = a + t * (0.0f - a);
                     RSound* cheer = arena.sLongCheer;
