@@ -1089,7 +1089,7 @@ static inline int ClampA(f32 v, int a) {
     return b < a ? b : a;
 }
 
-static inline u32 MistColor(u8 r, u8 g, u8 b) { return 0xFF000000 | r << 16 | g << 8 | b; }
+static inline u32 MistColor(u8 r, u8 g, u8 b) { return g << 8 | (0xFF000000 | r << 16) | b; }
 
 static inline u32 MistColorV(const ValVec3& c) { return MistColor(Alpha(c.x), Alpha(c.y), Alpha(c.z)); }  /* Helper name unproven */
 
