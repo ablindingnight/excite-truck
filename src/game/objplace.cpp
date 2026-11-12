@@ -471,8 +471,8 @@ static inline void ScaledRow(f32* d, double x, double y, double z, f32 k) {
     f32 b = (f32)y * k;
     f32 c = (f32)z * k;
     d[0] = a;
-    d[1] = b;
     d[2] = c;
+    d[1] = b;
 }
 
 inline void ObjectPlacer::Spin(void) {
