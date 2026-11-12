@@ -652,17 +652,14 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     }
 }
 
-/* Helper name unproven */
-template <class T>
-static inline T& AtR(T* p, int i) {
-    return p[i];
-}
-
 void fn_801DD808(void) {
     Deform* d = lbl_80446F18;
     for (int i = 0; i < lbl_8055E9A8[0]; i++, d++) {
-        *d->out = d->base + d->terms[0].k * lbl_804424B0[d->terms[0].weight] + d->terms[1].k * lbl_804424B0[d->terms[1].weight] +
-                  d->terms[2].k * lbl_804424B0[AtR(d->terms, 2).weight];
+        f32 v = d->base;
+        for (int j = 0; j < 3; j++) {
+            v += d->terms[j].k * lbl_804424B0[d->terms[j].weight];
+        }
+        *d->out = v;
     }
 }
 
