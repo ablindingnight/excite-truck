@@ -105,6 +105,7 @@ struct ReaderList {
     ClassReader r[4];
 };
 
+s32 lbl_8055B1C8 = -20000;
 static const SkipList sSkip = {{"floater", "gfx", 0}};
 static const TypeList sTypes = {{
     "ball",  "box1",    "box2",    "wedge",         "cone",      "barrel",      "wall",    "post",
@@ -1375,7 +1376,6 @@ int fn_801F9D70(RaceDesc* r) {
     return found;
 }
 
-s32 lbl_8055B1C8 = -20000;
 void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC38 = 0;
     fn_801F94CC("race.res/obstacle.val");
