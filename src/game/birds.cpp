@@ -257,8 +257,8 @@ static inline Flock* FlockAt(int i) {
 void fn_802A86A4(void) {
     Boid* b;
     f32 r;
-    int i;
     int j;
+    int i;
     for (i = 0; i < lbl_804BD6C4.n; i++) {
         Flock* f;
         BoidDesc d;

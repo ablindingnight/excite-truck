@@ -351,8 +351,9 @@ static inline ArtItem* ItemAt(int off) {
 }
 
 void fn_80231780(const UIXform* m) {
+    int i;
     int off = 0;
-    for (int i = 0; i < lbl_8049846C.count; i++, off += sizeof(lbl_8049846C.data[0])) {
+    for (i = 0; i < lbl_8049846C.count; i++, off += sizeof(lbl_8049846C.data[0])) {
         ArtItem* it = ItemAt(off);
         EscSeq* e = &lbl_80497F14.data[it->esc];
         u32 color = e->takeColor ? it->color : fn_80230B9C((it->color & 0xFF000000) | 0xFFFFFF);

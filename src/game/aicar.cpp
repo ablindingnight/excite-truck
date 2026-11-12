@@ -2179,7 +2179,7 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + lbl_8056215C * F32(d, 0x84)));
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + F32(d, 0x84) * lbl_8056215C));
             F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         }
         if (U8(d, 0x9C)) {
@@ -2348,7 +2348,7 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
         u8* o = VI(fn_801B2ED0(id))->v18();
         if (o) {
             U8(d, 0xFC) = 1;
-            f32 s = 1.1f * (v.y * F32(o, 0x3C) + v.x * F32(o, 0x38));
+            f32 s = 1.1f * (F32(o, 0x3C) * v.y + v.x * F32(o, 0x38));
             F32(d, 0xF8) = b;
             S32(d, 0x114) = id;
             F32(d, 0x108) = F32(d, 0x278) + F32(d, 0x27C) * a;

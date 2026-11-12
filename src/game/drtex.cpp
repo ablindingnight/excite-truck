@@ -414,8 +414,8 @@ void fn_802D81C4(GXTexDesc* d) {
     memcpy(tmp, tex, n);
     row = w / 2;
     int tw = row / 4;
-    int y;
     const u8* src = tmp;
+    int y;
     for (y = 0; y < h; y++) {
         wa = src;
         for (int x = 0; x < row; wa++, x++) {

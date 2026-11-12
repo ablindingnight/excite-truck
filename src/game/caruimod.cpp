@@ -975,9 +975,10 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         f32 offX = offY;
         f32 d = dist;
         int w2 = (f32)ceil(w / fn_802C9A50());
-        f32 hh = 0.5f * (f32)h;
+        f32 hw;
         f32 nd;
-        f32 hw = 0.5f * (f32)w2;
+        f32 hh = 0.5f * (f32)h;
+        hw = 0.5f * (f32)w2;
         f32 cx;
         f32 cy = (f32)y + hh;
         x -= (w2 - w) / 2;

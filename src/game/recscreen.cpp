@@ -410,8 +410,8 @@ void RecordIcon::Draw(void) {
     f32 fh;
     f32 border = 6.0f;
     fn_80230C30(&sx, &sy, this->x, this->y);
-    fw = (f32)w;
     fh = (f32)h;
+    fw = (f32)w;
     f32 pad = 3.0f;
     fn_802354A0(art, valid, sx - pad, pad + sy, 0.0f, border + fw, border + fh, -1);
     e = &(*(IconEntry**)icons)[icon];

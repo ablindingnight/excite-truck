@@ -229,8 +229,9 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
 }
 
 f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
+    f32 t3;
     f32 t2 = fx * fx;
-    f32 t3 = t2 * fx;
+    t3 = t2 * fx;
     f32 col[4];
     f32 dcol[4];
     for (int i = 0; i < 4; i++) {
@@ -610,13 +611,17 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     d->terms[2].weight = 0;
     d->terms[2].k = 0.0f;
     for (int i = 0; i < 75; i++) {
+        int k;
+        f32 m;
+        f32 dh;
+        int j;
         lbl_804424B0[i] = 1.0f;
-        f32 dh = fn_801DCF0C(x, z) - h0;
+        dh = fn_801DCF0C(x, z) - h0;
         if (!(AbsF(dh) <= lbl_80558DC4[0])) {
             if (n >= 3) {
-                int k = -1;
-                f32 m = 0.0f;
-                for (int j = 0; j < 3; j++) {
+                k = -1;
+                m = 0.0f;
+                for (j = 0; j < 3; j++) {
                     if (k < 0 || (float)__fabs(m) > (float)__fabs(d->terms[j].k)) {
                         k = j;
                         m = d->terms[j].k;

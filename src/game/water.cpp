@@ -478,11 +478,7 @@ WaterEnvMap::WaterEnvMap(void) {
     if (lbl_8055FAFC == 0) {
         Skybox* sb = new ("skybox") Skybox;
         if (sb) {
-            if (fn_8012C33C("env_sun.tex")) {
-                sb->sun = fn_802CAC28("env_sun.tex", 0);
-            } else {
-                sb->sun = -2;
-            }
+            sb->sun = fn_8012C33C("env_sun.tex") ? fn_802CAC28("env_sun.tex", 0) : -2;
             for (int i = 0; i < 6; i++) {
                 sb->faces[i] = fn_802CB128(0x100, 0x100, 0, 0x60);
                 Identity(&sb->frames[i]);
@@ -836,8 +832,8 @@ void WaterSystem::Draw(void) {
         p.y += fwd.y * dist;
         p.z += fwd.z * dist;
         PVec rel;
-        SetXYZ(&rel, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
         f32 depth = rel.x * cam.z.x + rel.y * cam.z.y + rel.z * cam.z.z;
+        SetXYZ(&rel, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
         fn_802BED90(&rel);
         f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
         u32 col = fn_802C03E0(fn_80147C50(f * f, lbl_8055FAE4, lbl_8055FAE8));

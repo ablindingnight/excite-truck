@@ -697,6 +697,7 @@ void fn_802CF048(int on) {
 void fn_802CF104(void) { fn_802CF048(1); }
 
 void fn_802CF10C(u32 count) {
+    u16* buf;
     Capture* cap = &lbl_804C5710;
     fn_802CEF90();
     if (lbl_8055FD44 == 4000) {
@@ -724,7 +725,7 @@ void fn_802CF10C(u32 count) {
     } else if (lbl_8055FD4C % 2 != 0) {
         return;
     }
-    u16* buf = lbl_804C9760.cur;
+    buf = lbl_804C9760.cur;
     DCInvalidateRange(buf, lbl_804C9760.w * lbl_804C9760.h * 2);
     if (lbl_8055FD50) {
         for (int y = (lbl_8055FD4C >> 2) & 1; y < lbl_804C9760.h; y += 2) {
@@ -743,14 +744,15 @@ void fn_802CF10C(u32 count) {
     if (cap->active) {
         u16* dst = lbl_804C9760.cur;
         if (lbl_8055FD4C % 60 < 30) {
-            int w = cap->w;
             int y;
+            int w = cap->w;
             int k = 0;
             for (y = 0; y < cap->h; y++) {
-                u16* d = &dst[lbl_804C9760.w * (y + cap->y) + cap->x];
+                u16* d = &dst[lbl_804C9760.w * (cap->y + y) + cap->x];
                 u16* s = &cap->data[k];
+                int x;
                 u16* sp = s;
-                for (int x = 0; x < w; sp++, x++) {
+                for (x = 0; x < w; sp++, x++) {
                     d[x] = *sp;
                 }
                 k += w;

@@ -2075,6 +2075,7 @@ int fn_8019E500(u8* p, u8* q) {
         EdgeFrame e;
         BoxAxis* ab = &ax[(i + 2) % 3];
         BoxAxis* aa = &ax[(i + 1) % 3];
+        int j;
         BoxAxis* ai = (BoxAxis*)((char*)ax + i * (int)sizeof(BoxAxis));
         e.axis.x = ai->dir.v[0];
         e.axis.y = ai->dir.v[1];
@@ -2085,7 +2086,7 @@ int fn_8019E500(u8* p, u8* q) {
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
         SetXYZ(&e.a, aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
-        for (int j = 0; j < 4; j++) {
+        for (j = 0; j < 4; j++) {
             e.pos = fr.t;
             f32 one = 1.0f;
             f32 k = ea * ((j & 1) ? -one : one);

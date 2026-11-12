@@ -672,8 +672,8 @@ void fn_802B6AC0(void) {
     }
     lbl_8055FA18.Reset();
     lbl_804BE7D8.count = 0;
-    const char* dir = fn_802B6A70(lbl_8055FA38);
     u32 h;
+    const char* dir = fn_802B6A70(lbl_8055FA38);
     fn_801345D8(pat, 0x40, "%s*.tga", dir);
     h = fn_802E3BB4(pat, name, 0x20);
     if (h == -1) {
@@ -1072,10 +1072,11 @@ void fn_802B8510(int op) {
         Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
         Brush tmp = *b;
         u32 w;
+        u32 x;
         u32 h;
         b->w = h = tmp.h;
         b->h = w = tmp.w;
-        for (u32 x = 0; x < b->w; x++) {
+        for (x = 0; x < b->w; x++) {
             int r = w * (x + 1) - 1;
             int l = (h - x - 1) * w;
             for (u32 y = 0; y < b->h; y++) {

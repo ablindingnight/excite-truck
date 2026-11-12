@@ -1024,7 +1024,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[0].pos.z = pos.z + a.z * -size + b.z * size;
         f32 posY = pos.y;
         q[0].pos.y = posY + a.y * -size + b.y * size;
-        SetXYZ(&q[1].pos, q[0].pos.x + a.x * two, q[0].pos.y + a.y * two, q[0].pos.z + two * a.z);
+        SetXYZ(&q[1].pos, q[0].pos.x + two * a.x, q[0].pos.y + two * a.y, q[0].pos.z + two * a.z);
         __typeof__(q[2].pos.z) q_2_pos_z = q[1].pos.z + b.z * mtwo;
         q[2].pos.x = Lerp_hm(q[1].pos.x, mtwo, b.x);
         q[2].pos.y = q[1].pos.y + b.y * mtwo;

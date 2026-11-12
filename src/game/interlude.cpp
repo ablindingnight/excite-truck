@@ -1160,6 +1160,7 @@ void debug_event(void) {
     if (lbl_8055E7E8) {
         lbl_8055E7E8 = fn_801E8838() != 0;
     }
+    Message* msg;
     u8* s;
     int blocked = 0;
     if (lbl_8055E7FC && lbl_8055E800 > 4 && !fn_80202B00()) {
@@ -1170,7 +1171,7 @@ void debug_event(void) {
         lbl_8055E7E4 = -lbl_8055E3C8;
     }
     s = lbl_80437D88;
-    Message* msg = (Message*)&lbl_80437E24;
+    msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
         Event* e = &lbl_8055E7F8[lbl_8055E7F4];
         if (!(t >= e->time)) {

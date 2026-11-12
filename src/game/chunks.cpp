@@ -287,8 +287,9 @@ void fn_80292698(void) {
             f32 y = inv * v.y;
             z = inv * v.z;
             f32 sn = SinF(ang);
+            f32 k;
             f32 c = cos(ang);
-            f32 k = 1.0f - c;
+            k = 1.0f - c;
             __typeof__(s->rot.x.y) s_rot_x_y = y * (k * x) + z * sn;
             s->rot.x.x = c + k * (x * x);
             s->rot.x.y = s_rot_x_y;

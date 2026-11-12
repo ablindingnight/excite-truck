@@ -537,8 +537,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
             pairs->count = 0;
             pairs->cap = 0;
             operator delete(pairs);
-            pairs = 0;
         }
+        pairs = 0;
         return 0;
     }
     __dt__7UITableFv(&stats, 0);
@@ -556,8 +556,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         pairs->count = 0;
         pairs->cap = 0;
         operator delete(pairs);
-        pairs = 0;
     }
+    pairs = 0;
     return 1;
 }
 

@@ -1496,7 +1496,7 @@ void PlayerDriver_vf48(u8* p) {
             f32 x;
             f32 z;
             f32 y;
-            x = spin[0] * v[0] + v[1] * spin[3] + spin[6] * v[2];
+            x = spin[0] * v[0] + v[1] * spin[3] + v[2] * spin[6];
             z = v[0] * spin[2] + spin[5] * v[1] + spin[8] * v[2];
             y = Dot3(v[0], spin[1], v[1], spin[4], v[2], spin[7]);
             u.x = x;
@@ -1504,7 +1504,7 @@ void PlayerDriver_vf48(u8* p) {
             u.z = z;
         } else {
             u.x = Dot3(v[0], spin[0], v[1], spin[3], v[2], spin[6]);
-            u.y = v[0] * spin[1] + spin[4] * v[1] + v[2] * spin[7];
+            u.y = v[0] * spin[1] + spin[4] * v[1] + spin[7] * v[2];
             u.z = Dot3(v[0], spin[2], v[1], spin[5], v[2], spin[8]);
         }
         slip = MaxF(kZero, kOne - 0.5f * (F32(c5, 0x2488) + F32(c5, 0x2414)));

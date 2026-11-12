@@ -286,8 +286,9 @@ void fn_80270EC4(u8* car, u32 id) {
                 qsort(refs, n, sizeof(AngleRef), fn_80270D4C);
                 f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
                 int i;
+                int last;
                 AngleRef* ref = refs;
-                int last = n - 1;
+                last = n - 1;
                 for (i = 0; i < last; ref++, i++) {
                     fn_80270DB0(ref, &refs[i + 1], wrap);
                 }
@@ -1070,7 +1071,7 @@ void CamRegion::Prepare(u8* line) {
         f32 yv = center.y;
         rel.x = s.x - center.x;
         rel.y = s.y - yv;
-        f32 b = 2.0f * (dir.x * rel.x + rel.y * dir.y);
+        f32 b = 2.0f * (dir.x * rel.x + dir.y * rel.y);
         f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);
         if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
             f32 q = (f32)sqrt(disc);

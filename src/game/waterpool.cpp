@@ -732,8 +732,8 @@ void fn_8029D644(WaterPool* p) {
             PoolVtx* b = rows[1 - (j & 1)];
             for (int i = 0; i < p->nx; i++) {
                 PoolVtx* av = (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx));
-                PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
                 fn_8029DB78(p, av, i, j);
+                PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
                 fn_802C8E00(bv->color, i > 0, bv->pos.x, bv->pos.y, bv->pos.z, bv->s, bv->t);
                 fn_802C8E00(av->color, i > 0, av->pos.x, av->pos.y, av->pos.z, av->s, av->t);
             }

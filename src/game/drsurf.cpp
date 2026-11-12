@@ -637,8 +637,8 @@ void fn_802D5270(Surf* s) {
             o->y = a.y * w0;
             o->z = a.z * w0;
             o->x += b.x * w1;
-            o->y = o->y + w1 * b.y;
-            o->z = o->z + w1 * b.z;
+            o->y = o->y + b.y * w1;
+            o->z = o->z + b.z * w1;
             o++;
             v++;
             p = (const V3*)((u8*)p + 0x10);
@@ -1253,8 +1253,8 @@ void fn_802D6C78(void) {
         src += c * 0x14;
         pc = 0;
         u8* pdst = 0;
-        f32* pout = 0;
         u8* cur = LC_BUF(0);
+        f32* pout = 0;
         for (;;) {
             LCQueueWait(0);
             if (pc > 0) {

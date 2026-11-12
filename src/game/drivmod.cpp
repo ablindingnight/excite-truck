@@ -543,9 +543,11 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                 BRot r;
                 if (a > 0.0001f) {
                     f32 inv = 1.0f / a;
+                    f32 az;
+                    f32 ax;
                     f32 ay = inv * axis.y;
-                    f32 ax = inv * axis.x;
-                    f32 az = inv * axis.z;
+                    ax = inv * axis.x;
+                    az = inv * axis.z;
                     f32 sn = sin(a);
                     f32 cs = cos(a);
                     f32 t = 1.0f - cs;
@@ -557,7 +559,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     r.ry.x = r_ry_x;
                     r.ry.y = r_ry_y;
                     r.rz.x = az * (t * ax) + sn * ay;
-                    r.ry.z = az * (ay * t) + ax * sn;
+                    r.ry.z = az * (ay * t) + sn * ax;
                     r.rz.z = cs + t * (az * az);
                     r.rz.y = az * (t * ay) - sn * ax;
                 } else {
