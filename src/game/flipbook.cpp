@@ -108,12 +108,12 @@ FlipBook* lbl_8055F788;
 extern "C" {
 
 void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 v1, f32 v2) {
-    f32 sx;
+    f32 sz;
     f32 sy;
     const CamMtx* m;
     f32 w;
     int i;
-    f32 sz;
+    f32 sx;
     V3 d;
     f32 uv[4][2];
     m = fn_802C86DC();

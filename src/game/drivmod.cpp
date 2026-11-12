@@ -610,7 +610,7 @@ static inline double AbsDbl(double v) { return __fabs(v); }
 
 static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
 void fn_80201018(DriverModel* d, const u8* car, int show) {
-    BonePose pose[32];
+    DVec3 off2;
     DBone bones[32];
     BVec pts[32];
     RiderLinks links;
@@ -627,7 +627,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     BVec e1;
     BVec e2;
     DVec3 off;
-    DVec3 off2;
+    BonePose pose[32];
     int cnt;
     int n;
     if (!show || !d) {
