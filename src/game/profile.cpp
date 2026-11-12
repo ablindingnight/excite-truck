@@ -82,14 +82,10 @@ int fn_8024C768(void);
 int fn_8024CC54(int* slot, int (*confirm)(int), int create);
 
 extern u8 lbl_8055F2D0[8];
-// Physical view of original 8055F2C8..8055F2D0. Accessed bytes are at
-// +0,+1,+2,+4; reserved gaps are observed address gaps, not inferred flags.
-struct ProfileFlagSpan { u8 flagC8, flagC9; s8 flagCA; u8 reservedCB, flagCC, reservedCD[3]; };
-extern ProfileFlagSpan profileFlags;
-#define lbl_8055F2C8 profileFlags.flagC8
-#define lbl_8055F2C9 profileFlags.flagC9
-#define lbl_8055F2CA profileFlags.flagCA
-#define lbl_8055F2CC profileFlags.flagCC
+extern u8 lbl_8055F2C8;
+extern u8 lbl_8055F2C9;
+extern s8 lbl_8055F2CA;
+extern u8 lbl_8055F2CC;
 
 void fn_8024C370(void) {}
 
@@ -468,7 +464,11 @@ int lbl_80498A48[4];
 char lbl_80498A58[4][18];
 char lbl_80498AA0[4][100];
 char* lbl_8055F2C4;
-ProfileFlagSpan profileFlags;
+u8 lbl_8055F2C8;
+u8 lbl_8055F2C9;
+s8 lbl_8055F2CA;
+u8 lbl_8055F2CB;  // no surviving user; keeps lbl_8055F2CC at its address
+u8 lbl_8055F2CC;
 u8 lbl_8055F2D0[8];
 
 
