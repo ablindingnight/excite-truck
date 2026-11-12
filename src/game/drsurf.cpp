@@ -636,7 +636,7 @@ void fn_802D5270(Surf* s) {
             o->x = a.x * w0;
             o->y = a.y * w0;
             o->z = a.z * w0;
-            o->x += w1 * b.x;
+            o->x += b.x * w1;
             o->y = o->y + w1 * b.y;
             o->z = o->z + w1 * b.z;
             o++;
