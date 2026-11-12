@@ -1246,7 +1246,7 @@ void fn_801838C8(u8* p) {
     (*(CbFx**)(p + 0x2584))->Reset();
 }
 
-void fn_80183DF8(u8* p) {
+void vf14__7CarBodyFv(u8* p) {
     if (PTR(p, 0x328)) {
         fn_8018F538(p, p + 0x1E44);
         fn_80279C00(PTR(p, 0x328), p + 0x1E44);
@@ -2432,7 +2432,7 @@ void fn_80183E7C(u8* p) {
 
 u32 DeityCar_vf58(u8* p) { return 0; }
 
-void fn_80186DE4(u8* p) { fn_8018A8A8(p); }
+void vf5C__7CarBodyFv(u8* p) { fn_8018A8A8(p); }
 
 }  // extern "C"
 
@@ -2969,7 +2969,7 @@ static inline void SwayRotate(BVec* out, const BVec* v, const f32* m) {
 // Per-frame body update: the effect parts, the settle timer, and the body sway, a damped spring
 // (velocity 0x2654, angle 0x2660) driven by the filtered body-space acceleration (0x266C); only the
 // pitch is kept, held between -2.5 and 15 degrees.
-void fn_80188A80(u8* p) {
+void vf20__7CarBodyFv(u8* p) {
     BVec a;
     BVec f;
     vf20__10CollVolumeFv(p);
@@ -3036,7 +3036,7 @@ static inline f32 Len2( f32 z,f32 x) { return sqrt(x * x + z * z); }
 // Fills this car's render snapshot (0xFA8 bytes at buf + 0x8): the body pose interpolated between the last
 // two physics steps, state flags and gauges, and the four wheels (interpolated hub positions, suspension and
 // spin). If a wheel sinks below its contact height, the whole body is lifted by the deepest one.
-void fn_80188E2C(u8* p, u8* buf) {
+void vf28__7CarBodyFv(u8* p, u8* buf) {
     SnapPose tmp;
     u8* m = buf + S32(p, 0x8);
     f32 t = lbl_8055E460;
@@ -3201,7 +3201,7 @@ f32 PSVECDotProduct(const void* a, const void* b);
 // Collision response: scales the impulse `imp` at the world point `at` by the mass ratio of the two cars
 // for a car-on-car hit (and drops it when this car is the heavier one hit from the front), by the body
 // stiffness otherwise, and passes it on in centre-of-mass space when it is large enough.
-void fn_8018956C(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
+void vf4C__7CarBodyFv(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
     fn_80189C64(p);
     f32 mag = PSVECMag(imp);
     int carHit = other && kind == 0x6D;
@@ -3392,7 +3392,7 @@ void fn_8018A750(u8* p);
 
 // Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
 // 0x3C and the surface at 0x40) at rest: clears the impulses, wheel loads and gear state.
-void fn_80189CB4(u8* p, const u8* s) {
+void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     CbFrame frame;
     BVec off;
     BVec rotated;
@@ -3804,7 +3804,7 @@ f32 fn_8018AE7C(u8* p) {
     return 0.5f;
 }
 
-void fn_8018AF00(u8* p) {}
+void vf58__7CarBodyFv(u8* p) {}
 
 }  // extern "C"
 
@@ -3854,7 +3854,7 @@ u32 fn_8018B06C(u8* p) { return U32(lbl_8055E918 + S32(p, 0x1EC) * 0x9C, 0x14); 
 
 u32 fn_8018B084(u8* p) { return U32(lbl_8055E918 + S32(p, 0x1EC) * 0x9C, 0x20); }
 
-void fn_8018B09C(u8* p, const RVec3* a, const RVec3* b, int c, void* d) {
+void vf48__7CarBodyFv(u8* p, const RVec3* a, const RVec3* b, int c, void* d) {
     ((RigidBody*)p)->OnHit(a, b, c, d);
     F32(p, 0x26DC) = lbl_8055E3C8;
 }
@@ -3906,7 +3906,7 @@ extern u8* lbl_8055E918;
 // CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
 // part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,
 // flags), then the ground lookup at prev's position. Both sizes read are 0x44 bytes.
-void fn_8018B0D8(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
+void vf30__7CarBodyFv(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
     int teleport = (prev->flags >> 9) & 1;
     if (teleport) {
         vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, cur, na, nb);
@@ -4016,7 +4016,7 @@ s32 fn_801363A0(u8* seg, u8* pos);
 
 // Writes the car's state into a network/replay packet: engine and control values, then per wheel
 // (steer angle, suspension, spin, slip) and its contact flags.
-int fn_8018BA54(u8* p, u8* pk) {
+int vf34__7CarBodyFv(u8* p, u8* pk) {
     ((RigidBody*)p)->vf34((RPacket*)pk);
     U16(pk, 0x20) = Pack(F32(p, 0x25D0), -2000.0f, 12000.0f, 65535.0f);
     U8(pk, 0x22) = Pack(F32(p, 0x25F0), -1.2f, 1.2f, 255.0f);
@@ -4049,7 +4049,7 @@ int fn_8018BA54(u8* p, u8* pk) {
     return 0x44;
 }
 
-void fn_8018BDEC(u8* p) {
+void vf24__7CarBodyFv(u8* p) {
     f32 m[12];
     f32* mtx = m;
     f32 z = 0.0f;
@@ -4099,8 +4099,8 @@ u32 fn_8018BF54(u8* p) { return 0; }
 
 void fn_8018BF5C(u8* p) {}
 
-void fn_8018BF60(u8* p) {}
+void vf1C__7CarBodyFv(u8* p) {}
 
-int fn_8018BF64(void) { return 0x44; }
+int vf2C__7CarBodyFv(void) { return 0x44; }
 
 }  // extern "C"

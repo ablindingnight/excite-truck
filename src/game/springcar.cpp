@@ -245,15 +245,15 @@ public:
 extern "C" {
 void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
 void CarBody_vf10(CarBody* b);              // CarBody::Reset
-void fn_80183DF8(CarBody* b);
-void fn_80186DE4(CarBody* b);
-void fn_80188E2C(CarBody* b, u8* buf);
-void fn_8018956C(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
-void fn_80189CB4(CarBody* b);
-void fn_8018AF00(CarBody* b);
-void fn_8018B09C(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
-void fn_8018B0D8(CarBody* b, f32 t, int a, int bb, int* na, int* nb);
-int fn_8018BA54(CarBody* b, u8* p);
+void vf14__7CarBodyFv(CarBody* b);
+void vf5C__7CarBodyFv(CarBody* b);
+void vf28__7CarBodyFv(CarBody* b, u8* buf);
+void vf4C__7CarBodyFv(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
+void SetState__7CarBodyFPC9BodyState(CarBody* b);
+void vf58__7CarBodyFv(CarBody* b);
+void vf48__7CarBodyFv(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
+void vf30__7CarBodyFv(CarBody* b, f32 t, int a, int bb, int* na, int* nb);
+int vf34__7CarBodyFv(CarBody* b, u8* p);
 void fn_8017B3A8(CarBody* b, const TVec* imp, const TVec* at);
 Course* fn_801B83A0(void);
 int fn_801E9E30(s16* h, TPos* pos);
@@ -339,7 +339,7 @@ void SpringCar::CheckLost(void) {
 
 void SpringCar::Update(void) {
     u32 i;
-    fn_80186DE4(this);
+    vf5C__7CarBodyFv(this);
     CheckLost();
     ctl->Update();
     if (lifting && lbl_8055A518) {
@@ -370,7 +370,7 @@ void SpringCar::Reset(void) {
 #pragma pop
 
 void SpringCar::vf14(void) {
-    fn_80183DF8(this);
+    vf14__7CarBodyFv(this);
     ctl->vf34();
 }
 
@@ -526,7 +526,7 @@ void SpringCar::HitWall(WallObj* w) {
 }
 
 void SpringCar::vf48(const TVec* a, const TVec* b, int kind, int c) {
-    fn_8018B09C(this, a, b, kind, c);
+    vf48__7CarBodyFv(this, a, b, kind, c);
     ctl->vf38(a, b, kind, c);
     if (kind == 0x6D) {
         lift.Reset();
@@ -534,7 +534,7 @@ void SpringCar::vf48(const TVec* a, const TVec* b, int kind, int c) {
 }
 
 void SpringCar::vf4C(const TVec* a, const TVec* b, int kind, int c) {
-    fn_8018956C(this, a, b, kind, c);
+    vf4C__7CarBodyFv(this, a, b, kind, c);
     ctl->vf3C(a, b, kind, c);
     if (kind == 0x6D) {
         lift.Reset();
@@ -542,13 +542,13 @@ void SpringCar::vf4C(const TVec* a, const TVec* b, int kind, int c) {
 }
 
 void SpringCar::vf58(void) {
-    fn_8018AF00(this);
+    vf58__7CarBodyFv(this);
     ctl->vf40();
 }
 
 void SpringCar::vf54(void) {
     int i;
-    fn_80189CB4(this);
+    SetState__7CarBodyFPC9BodyState(this);
     dead = 1;
     ctl->vf44();
     for (i = 0; i < 8; i++) {
@@ -560,20 +560,20 @@ int SpringCar::vf2C(u8* buf) { return ctl->vf18(buf + 0x44) + 0x44; }
 
 void SpringCar::vf30(f32 t, int a, int b, int* na, int* nb) {
     int x, y, x2, y2;
-    fn_8018B0D8(this, t, a, b, &x, &y);
+    vf30__7CarBodyFv(this, t, a, b, &x, &y);
     ctl->vf1C(t, a + x, b + y, &x2, &y2);
     *na = x + x2;
     *nb = y + y2;
 }
 
 int SpringCar::vf34(u8* p) {
-    u8* q = p + fn_8018BA54(this, p);
+    u8* q = p + vf34__7CarBodyFv(this, p);
     q += ctl->vf20(q);
     return q - p;
 }
 
 void SpringCar::vf28(u8* buf) {
-    fn_80188E2C(this, buf);
+    vf28__7CarBodyFv(this, buf);
     SaveRec* r = (SaveRec*)(buf + slot);
     r->ctl = ctl->vf14();
 }
