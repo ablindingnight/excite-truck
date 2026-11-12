@@ -180,8 +180,7 @@ f32 AnimObj::Depth(void) {
 
 ModuleTag lbl_8055EB80;
 
-// WObj::Update/PostDraw
-// are emitted here as weak copies the target keeps in an earlier unit.
+// (WObj::Update/PostDraw are defined in world.cpp; AnimObj only inherits them.)
 
 // .bss owned by this unit (0x80488228-0x804885E8).
 u8 lbl_80488228[0x3C0];
