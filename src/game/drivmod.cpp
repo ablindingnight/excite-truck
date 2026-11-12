@@ -209,7 +209,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lhip.y = y2 + bones[7].m.pos.y;
     lhip.z = bones[7].m.pos.z + d->butt.z;
     DVec3 lknee;
-    lknee.x = bones[8].m.pos.x + d->butt.x;
+    lknee.x = d->butt.x + bones[8].m.pos.x;
     lknee.y = bones[8].m.pos.y + d->butt.y;
     f32 zv = d->butt.z;
     lknee.z = zv + bones[8].m.pos.z;
@@ -219,7 +219,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rhip.z = bones[4].m.pos.z + d->butt.z;
     DVec3 rknee;
     rknee.x = bones[5].m.pos.x + d->butt.x;
-    rknee.y = bones[5].m.pos.y + d->butt.y;
+    rknee.y = d->butt.y + bones[5].m.pos.y;
     rknee.z = bones[5].m.pos.z + d->butt.z;
     lfoot.x = bones[9].m.pos.x;
     f32 y_ = bones[9].m.pos.y;

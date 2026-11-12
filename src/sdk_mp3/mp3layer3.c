@@ -350,7 +350,7 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
         } else if (t1 & 8) {
             pa = work[0];
             for (sb = 0; sb < 2; sb++) {
-                fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                fn_800C18A0(&out->xr[(sb << 1) + (sb << 4)], pa);
                 fn_800C21D8(pa, pa + 17);
                 pa += 36;
             }
@@ -410,7 +410,7 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
             pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
             pa = work[0];
             for (sb = 0; sb < d->band_count - 1; sb++) {
-                p = &out->sxr[0][(sb << 2) + (sb << 1)];
+                p = &out->sxr[0][(sb << 1) + (sb << 2)];
                 fn_800C1E88(p, (s32*)lbl_802F3FB8, tmp0);
                 t0 = p[0] - p[3] - p[4];
                 t1 = p[1] - p[2] - p[5];
@@ -1989,7 +1989,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     t0 = b[31] + b[30] + (b[24] + b[28]);
     out[47] = -(b[16] + t0);
     t1 = b[14] + (b[15] + b[12]);
-    out[46] = -(b[8] + t1);
+    out[46] = -(t1 + b[8]);
     t2 = b[22] + (b[23] + b[20]);
     out[45] = -(t2 + t0);
     out[44] = -(b[6] + (b[7] + b[4]));
@@ -2010,7 +2010,7 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     out[35] = -(t7 + t8);
     t9 = t6 + (b[9] - b[10] - b[11]);
     out[34] = -t9;
-    out[33] = -(b[17] + t8);
+    out[33] = -(t8 + b[17]);
     t14 = b[1];
     out[0] = t14;
     t14 = -t14;

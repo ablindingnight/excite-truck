@@ -165,7 +165,7 @@ void fn_802BE8B4(short x, short z, int size) {
     int counts[6];
     memset(counts, 0, sizeof(counts));
     if (size == 4) {
-        for (short px = x - size; px <= x + size; px += 2) {
+        for (short px = x - size; px <= size + x; px += 2) {
             for (short pz = z - size; pz <= z + size; pz += 2) {
                 for (int i = 0; i < 6; i++) {
                     int w = fn_802BBD38(px, pz, i);

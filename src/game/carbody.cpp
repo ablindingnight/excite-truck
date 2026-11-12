@@ -849,7 +849,7 @@ void fn_80182DF4(u8* p) {
     f32 xSide = maxX - h;
     f32 xFront = maxX - 0.44999998f;
     f32 zFrontMid = 0.5f * (zFront + zMid);
-    f32 ySide = minY + h;
+    f32 ySide = h + minY;
     f32 yFront = 0.44999998f + minY;
     f32 nb = -b;
     f32 yr = 0.254f + yRear;
@@ -2774,7 +2774,7 @@ void fn_80186DE8(u8* p) {
         F32(car, 0x25F0) = F32(car, 0x25F0) + ds;
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
-        throttle = Clamp01(F32(car, 0x25E0) + water[1]);
+        throttle = Clamp01(water[1] + F32(car, 0x25E0));
         if (!(U32(fn_801769CC(), 4) & 0x4000) && !NearZero(F32(car, 0x2690))) {
             throttle = lbl_80561CAC;
             F32(car, 0x25E4) = lbl_80561CD0;
@@ -2869,7 +2869,7 @@ void fn_80186DE8(u8* p) {
         if (boosting && F32(car, 0x25E0) > lbl_80561CDC) {
             vmax = lbl_80561D60 * fn_80181A48(car) - lbl_80561DA4;
         }
-        vmax = vmax + lbl_80561D60 * (lbl_8055E4E8[0] * F32(car, 0x5EC));
+        vmax = vmax + lbl_80561D60 * (F32(car, 0x5EC) * lbl_8055E4E8[0]);
         off = fn_802B02C8(car + 0x60);
         wet2 = 0;
         if (fn_802BF4F0() && F32(car, 0x2558) < fn_802BF590()) {

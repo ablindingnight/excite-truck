@@ -1265,7 +1265,7 @@ int fn_8013CBC0(CarState* zm, int car) {
     c0 = perp.x * pa.x + pa.y * perp.y;
     qa.y = q.y - a.y;
     c1 = perp.x * qa.x + perp.y * qa.y;
-    if (c0 * c1 <= 0.0f) {
+    if (c1 * c0 <= 0.0f) {
         r = 1;
         if (perp.y * pa.x + -perp.x * pa.y > 0.0f || qa.x * perp.y + -perp.x * qa.y > 0.0f) {
             pb.x = p.x - b.x;

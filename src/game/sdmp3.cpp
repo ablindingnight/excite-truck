@@ -624,7 +624,7 @@ void* fn_802EAB28(void* arg) {
                 int off = 0;
                 if (!lbl_80560098 && strncmp((char*)lbl_805600A8, "ID3", 3) == 0) {
                     u8* b = lbl_805600A8;
-                    int tagSize = (b[6] << 21) + (b[7] << 14) + (b[8] << 7) + b[9] + 10;
+                    int tagSize = (b[7] << 14) + (b[6] << 21) + (b[8] << 7) + b[9] + 10;
                     u16 ver = (b[3] << 8) | b[4];
                     if (tagSize < n) {
                         int p = 10;
@@ -637,7 +637,7 @@ void* fn_802EAB28(void* arg) {
                                     break;
                                 }
                                 f = (char*)lbl_805600A8 + p;
-                                fsz = ((u8)f[3] << 14) + ((u8)f[4] << 7) + (u8)f[5] + 6;
+                                fsz = ((u8)f[4] << 7) + ((u8)f[3] << 14) + (u8)f[5] + 6;
                                 if (f[0] == 'T') {
                                     txt = f + 7;
                                     if (!strncmp(f, "TT2", 3)) {
@@ -662,7 +662,7 @@ void* fn_802EAB28(void* arg) {
                                     break;
                                 }
                                 char* f = (char*)lbl_805600A8 + p;
-                                int len = ((u8)f[4] << 21) + ((u8)f[5] << 14) + ((u8)f[6] << 7) + (u8)f[7];
+                                int len = ((u8)f[5] << 14) + ((u8)f[4] << 21) + ((u8)f[6] << 7) + (u8)f[7];
                                 int tl = len - 1;
                                 int fsz = len + 10;
                                 if (f[0] == 'T' && tl > 0) {

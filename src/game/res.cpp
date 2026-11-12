@@ -1863,14 +1863,14 @@ extern "C" void fn_8012EE80(StreamBuf* b) {
             if (s->state == 1 && s->res->Poll(0)) {
                 s->state = 2;
             }
-            if (s->pos + b->size > end) {
+            if (b->size + s->pos > end) {
                 end = s->pos + b->size;
             }
         }
     }
     s = slots;
     for (i = 0; i < 2; i++, s++) {
-        if ((s->state == 0 && s->res) || (s->state == 2 && s->pos + b->size < b->pos)) {
+        if ((s->state == 0 && s->res) || (s->state == 2 && b->size + s->pos < b->pos)) {
             s32 start;
             s32 n;
             s->pos = end;

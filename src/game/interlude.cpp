@@ -1327,7 +1327,7 @@ void debug_event(void) {
                     fn_802E317C("interlude: unhandled teleport where %d", tp->where);
                     break;
                 }
-                SetXYZ(&place.vel, tp->speed * place.frame.rot.m[6], place.frame.rot.m[7] * tp->speed, place.frame.rot.m[8] * tp->speed);
+                SetXYZ(&place.vel, tp->speed * place.frame.rot.m[6], place.frame.rot.m[7] * tp->speed, tp->speed * place.frame.rot.m[8]);
                 ((CarObj*)car)->Place(&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);

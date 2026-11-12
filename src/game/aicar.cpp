@@ -2188,10 +2188,10 @@ void fn_8019743C(u8* d, u8* out) {
         }
         f32 push = F32(d, 0xE8);
         if (push > 0.0f) {
-            f32 lo = push + F32(d, 0x278);
+            f32 lo = F32(d, 0x278) + push;
             F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         } else if (push < 0.0f) {
-            f32 hi = push + F32(d, 0x278);
+            f32 hi = F32(d, 0x278) + push;
             F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
         }
         u8* side = 0;
