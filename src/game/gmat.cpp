@@ -260,6 +260,8 @@ inline void ClearRange(T* p, T* end) {
 
 struct GMat {
     GMat(ValueNode* node, ValueNode* tune);
+    void LoadMaps(ValueNode* node);
+    const char* LayerName(int i);
     ~GMat(void);
     u8 crystal;                       // offset 0x0
     u8 merged;                        // offset 0x1
@@ -386,6 +388,24 @@ inline void GLayer::Load(ValueNode* ground, const char* mname, ValueNode* tune) 
     surface[0] = ground->GetInt("onroad_surface_type", 0);
 }
 
+/* Helper name unproven */
+inline const char* GMat::LayerName(int i) {
+    if (i >= 0 && i < layers.count) {
+        return layers.data[i].name;
+    }
+    return "<unknown>";
+}
+
+/* Helper name unproven */
+inline void GMat::LoadMaps(ValueNode* node) {
+    name = node->GetValue("name");
+    worldmap = fn_802B0628(node->GetString("worldmap", 0));
+    oceanmap = fn_802B0628(node->GetString("oceanmap", "oceanmap.tex"));
+    if (oceanmap == -2) {
+        oceanmap = worldmap;
+    }
+}
+
 inline GMat::GMat(ValueNode* node, ValueNode* tune) {
     crystal = !fn_802B05E4() && !fn_802B06D4();
     ValueNode* ground;
@@ -406,12 +426,7 @@ inline GMat::GMat(ValueNode* node, ValueNode* tune) {
     if (layers.count == 0) {
         fn_802E317C("gmat: mat %s contains no layers", name);
     }
-    name = node->GetValue("name");
-    worldmap = fn_802B0628(node->GetString("worldmap", 0));
-    oceanmap = fn_802B0628(node->GetString("oceanmap", "oceanmap.tex"));
-    if (oceanmap == -2) {
-        oceanmap = worldmap;
-    }
+    LoadMaps(node);
 }
 
 void fn_802B0B20(ValueNode* node, ValueNode* tune) {
@@ -701,12 +716,7 @@ void fn_802B1BF0(GMat* g, GVec* out, int i) { *out = g->verts.data[i]; }
 
 int fn_802B1C14(GMat* g) { return g->layers.count; }
 
-const char* fn_802B1C1C(GMat* g, int i) {
-    if (i >= 0 && i < g->layers.count) {
-        return g->layers.data[i].name;
-    }
-    return "<unknown>";
-}
+const char* fn_802B1C1C(GMat* g, int i) { return g->LayerName(i); }
 
 s32 fn_802B1C50(GMat* g, int i, int offroad) {
     if (i >= 0 && i < g->layers.count) {
