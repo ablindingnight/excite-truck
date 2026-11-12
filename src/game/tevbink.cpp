@@ -571,7 +571,7 @@ struct SimpleHeap {
             HeapBlock* next = b->next;
             s32 hdr = (align + 0x10) & ~align;
             if (rest > hdr + 0x20) {
-                HeapBlock* s = (HeapBlock*)((u8*)b + align + n + 1);
+                HeapBlock* s = (HeapBlock*)((u8*)b + align + (n + 1));
                 s->magic = 0xABCFEED0;
                 s->next = 0;
                 s->size = rest - ((align + 0x10) & ~align);
