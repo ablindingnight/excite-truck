@@ -253,7 +253,7 @@ extern "C" {
 void fn_8018C510(void);
 void fn_801AFC38(void);
 void fn_801BD790(void);
-void fn_801BF1B8(u8* p, int a);
+void fn_801BF1B8(u8* p, u8 a);
 int fn_801B2F2C(u8* p);
 void fn_801C1C7C(u8* p);
 void fn_801D21B4(u8* p);
