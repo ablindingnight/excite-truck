@@ -2831,7 +2831,7 @@ static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
 static inline void HitGroup(u8* p, u8* q) {
     u8* pb;
     u8* qb = PTR(q, 0x4);
-    if (qb && (pb = PTR(p, 0x4)) != 0 && F32(pb, 0xD4) < F32(qb, 0xD4)) {
+    if (qb && (pb = PTR(p, 0x4)) != 0 && F32(qb, 0xD4) > F32(pb, 0xD4)) {
         ((VGroup*)q)->v10(p);
         return;
     }

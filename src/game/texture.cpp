@@ -147,7 +147,7 @@ struct SimpleHeap {
         HeapBlock** pp;
         HeapBlock* q;
         for (pp = &used; (q = *pp) != 0; pp = &q->next) {
-            if (q == b) {
+            if (b == q) {
                 *pp = b->next;
                 break;
             }

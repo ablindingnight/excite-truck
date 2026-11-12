@@ -182,7 +182,7 @@ struct VecBase {
     int CanAdd(void) const { return count + 1 <= cap; }
     int Find(const T& v) const {
         for (int j = 0; j < count; j++) {
-            if (v == data[j]) {
+            if (data[j] == v) {
                 return j;
             }
         }

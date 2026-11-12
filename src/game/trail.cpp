@@ -288,7 +288,7 @@ struct TBasis {
 
 // out = a * b
 static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
-    if (out == a || out == b) {
+    if (a == out || out == b) {
         f32 xx = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
         f32 yx = Dot(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
         f32 zx = Dot(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
