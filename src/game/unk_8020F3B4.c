@@ -213,9 +213,10 @@ long fn_8020F9F4(void) {
 }
 
 void *fn_8020FAF0(const char *name) {
+    char *e;
     char *base = (char *)fn_8020F5F0(IdentGetCurrentSlot());
-    char *e = base;
     long i;
+    e = base;
     for (i = 0; i < 64; e += 100, i++) {
         if (strcasecmp(e + 4, name) == 0) {
             return base + i * 100;
