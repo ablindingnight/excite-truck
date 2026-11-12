@@ -312,10 +312,6 @@ public:
     f32 lod;     // offset 0x10
 };
 
-class SparkStub {
-public:
-    ~SparkStub(void);
-};
 
 struct TerChunk {
     Chunks* sys;    // offset 0x0
@@ -387,7 +383,13 @@ void fn_8028A784(void) {
 
 }  // extern "C"
 
-SparkStub::~SparkStub(void) {}
+// Chunks' destructor, emitted here (named so the Chunks vtable pairs; the class's vtable stays in chunks.cpp).
+extern "C" Chunks* __dt__6ChunksFv(Chunks* c, short del) {
+    if (c && del > 0) {
+        operator delete(c);
+    }
+    return c;
+}
 
 extern "C" {
 
