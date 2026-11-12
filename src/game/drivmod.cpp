@@ -496,6 +496,9 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 template <class O, class A, class B> static inline void TSub(O* o, const A* a, const B* b) { o->x = a->x - b->x; o->y = a->y - b->y; o->z = a->z - b->z; }  /* Helper name unproven */
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
     const BoneLink* p = links;
+    if (n <= 0) {
+        return;
+    }
     for (int i = 0; i < n; i++, p++) {
         BonePose* o = &out[p->index];
         const BRot* b = (const BRot*)(bind + p->index * 0x38);
@@ -531,12 +534,11 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             BRot m;
             if (len > 0.001f) {
                 f32 k = -1.0f / len;
-                BVec u;
-                u.x = d.x * k;
-                u.y = d.y * k;
-                u.z = d.z * k;
+                d.x *= k;
+                d.y *= k;
+                d.z *= k;
                 BVec axis;
-                PSVECCrossProduct(&b->rx.x, &u.x, &axis.x);
+                PSVECCrossProduct(&b->rx.x, &d.x, &axis.x);
                 f32 a = PSVECMag(&axis.x);
                 BRot r;
                 if (a > 0.0001f) {
