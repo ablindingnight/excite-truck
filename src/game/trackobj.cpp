@@ -85,109 +85,8 @@ struct ShadowDesc {
     s32 count;              // offset 0x8C
 };
 
-// An object class read from a value table (0x10C).
-class ObjDesc {
-public:
-    char name[0x20];    // offset 0x0
-    ObjDesc* next;      // offset 0x20: next class
-    ObjDesc* sibling;   // offset 0x24: next part of a composite
-    f32 drop;           // offset 0x28
-    u8 forbidden;       // offset 0x2C
-    OFrame frame;       // offset 0x30
-    u8 hasFrame;        // offset 0x60
-    char model[0x10];   // offset 0x61
-    void* handle;       // offset 0x74
-    ShadowDesc shadow;  // offset 0x78
-
-    ObjDesc(void);
-    ObjDesc(int) {
-        shadow.model = 0;
-        shadow.extend = 0.0f;
-        shadow.cutoff = 0.0f;
-        shadow.count = 0;
-        sibling = 0;
-        next = 0;
-        drop = -10.0f;
-        hasFrame = 1;
-        memset(name, 'a', sizeof(name));
-        memset(model, 'a', sizeof(model));
-        handle = (void*)-1;
-    }
-    virtual ~ObjDesc(void) {}
-    virtual void Read(PlacedObj* o, ValueNode* vn);
-    virtual void Create(const PlacedObj* o) = 0;
-    virtual void Draw(const OFrame* f) const;
-    virtual void Props(void* p, PlacedObj* o);
-    virtual f32 vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-};
-
-// The physical description of an obstacle (0x84).
-struct ObstacleDesc {
-    ObstacleDesc(void);
-    void Place(ValueNode* n, OFrame f, u32 fl) {
-        frame = f;
-        node = n;
-        if (fl & 1) {
-            flags = fl;
-        }
-    }
-    u32 tag;          // offset 0x0
-    u32 size;         // offset 0x4
-    f32 mass;         // offset 0x8
-    f32 inertia[3];   // offset 0xC
-    OFrame frame;     // offset 0x18
-    s32 surface;      // offset 0x48
-    f32 friction;     // offset 0x4C
-    s32 kind;         // offset 0x50
-    u32 flags;        // offset 0x54
-    union {
-        f32 f[9];
-        char name[0x24];
-    } shape;          // offset 0x58
-    s32 solId;        // offset 0x7C
-    ValueNode* node;  // offset 0x80
-};
-
-namespace {
-class AnimDesc : public ObjDesc {
-public:
-    AnimDesc(ValueNode* vn);
-    virtual ~AnimDesc(void);
-    virtual void Create(const PlacedObj* o);
-    OFrame place;            // offset 0x10C
-    const char* animModel;   // offset 0x13C
-    const char* streams[8];  // offset 0x140
-    s32 numStreams;          // offset 0x160
-    u8 looped;               // offset 0x164
-    u8 streaming;            // offset 0x165
-};
-}  // namespace
-
-class SoundDesc : public ObjDesc {
-public:
-    SoundDesc(void) : ObjDesc(0) {}
-    virtual ~SoundDesc(void);
-    virtual void Create(const PlacedObj* o);
-    virtual void Props(void* p, PlacedObj* o);
-};
-
-class ObstacleObjDesc : public ObjDesc {
-public:
-public:
-    ObstacleObjDesc(ValueNode* vn);
-    virtual ~ObstacleObjDesc(void);
-    virtual void Read(PlacedObj* o, ValueNode* vn);
-    virtual void Create(const PlacedObj* o);
-    virtual void Draw(const OFrame* f) const;
-    virtual void Props(void* p, PlacedObj* o);
-    ObstacleDesc phys;   // offset 0x10C
-    u32 flags;           // offset 0x190
-    const char* effect;  // offset 0x194
-    s32 event;           // offset 0x198
-    ValueNode* props;    // offset 0x19C
-};
+class ObjDesc;
+class ObstacleObjDesc;
 
 struct ClassReader {
     int (*match)(const char* type);
@@ -531,6 +430,112 @@ public:
     u8 noDraw;            // offset 0x50
     StaticObject* next;   // offset 0x54
 };
+
+// An object class read from a value table (0x10C).
+class ObjDesc {
+public:
+    char name[0x20];    // offset 0x0
+    ObjDesc* next;      // offset 0x20: next class
+    ObjDesc* sibling;   // offset 0x24: next part of a composite
+    f32 drop;           // offset 0x28
+    u8 forbidden;       // offset 0x2C
+    OFrame frame;       // offset 0x30
+    u8 hasFrame;        // offset 0x60
+    char model[0x10];   // offset 0x61
+    void* handle;       // offset 0x74
+    ShadowDesc shadow;  // offset 0x78
+
+    ObjDesc(void);
+    ObjDesc(int) {
+        shadow.model = 0;
+        shadow.extend = 0.0f;
+        shadow.cutoff = 0.0f;
+        shadow.count = 0;
+        sibling = 0;
+        next = 0;
+        drop = -10.0f;
+        hasFrame = 1;
+        memset(name, 'a', sizeof(name));
+        memset(model, 'a', sizeof(model));
+        handle = (void*)-1;
+    }
+    virtual ~ObjDesc(void) {}
+    virtual void Read(PlacedObj* o, ValueNode* vn);
+    virtual void Create(const PlacedObj* o) = 0;
+    virtual void Draw(const OFrame* f) const;
+    virtual void Props(void* p, PlacedObj* o);
+    virtual f32 vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+};
+
+// The physical description of an obstacle (0x84).
+struct ObstacleDesc {
+    ObstacleDesc(void);
+    void Place(ValueNode* n, OFrame f, u32 fl) {
+        frame = f;
+        node = n;
+        if (fl & 1) {
+            flags = fl;
+        }
+    }
+    u32 tag;          // offset 0x0
+    u32 size;         // offset 0x4
+    f32 mass;         // offset 0x8
+    f32 inertia[3];   // offset 0xC
+    OFrame frame;     // offset 0x18
+    s32 surface;      // offset 0x48
+    f32 friction;     // offset 0x4C
+    s32 kind;         // offset 0x50
+    u32 flags;        // offset 0x54
+    union {
+        f32 f[9];
+        char name[0x24];
+    } shape;          // offset 0x58
+    s32 solId;        // offset 0x7C
+    ValueNode* node;  // offset 0x80
+};
+
+class ObstacleObjDesc : public ObjDesc {
+public:
+public:
+    ObstacleObjDesc(ValueNode* vn);
+    virtual ~ObstacleObjDesc(void);
+    virtual void Read(PlacedObj* o, ValueNode* vn);
+    virtual void Create(const PlacedObj* o);
+    virtual void Draw(const OFrame* f) const;
+    virtual void Props(void* p, PlacedObj* o);
+    ObstacleDesc phys;   // offset 0x10C
+    u32 flags;           // offset 0x190
+    const char* effect;  // offset 0x194
+    s32 event;           // offset 0x198
+    ValueNode* props;    // offset 0x19C
+};
+
+namespace {
+class AnimDesc : public ObjDesc {
+public:
+    AnimDesc(ValueNode* vn);
+    virtual ~AnimDesc(void);
+    virtual void Create(const PlacedObj* o);
+    OFrame place;            // offset 0x10C
+    const char* animModel;   // offset 0x13C
+    const char* streams[8];  // offset 0x140
+    s32 numStreams;          // offset 0x160
+    u8 looped;               // offset 0x164
+    u8 streaming;            // offset 0x165
+};
+}  // namespace
+
+class SoundDesc : public ObjDesc {
+public:
+    SoundDesc(void) : ObjDesc(0) {}
+    virtual ~SoundDesc(void);
+    virtual void Create(const PlacedObj* o);
+    virtual void Props(void* p, PlacedObj* o);
+};
+
+
 
 struct RaceSlot {
     s32 type;       // offset 0x0
