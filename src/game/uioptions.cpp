@@ -186,7 +186,6 @@ void* fn_80232578(const char* font);
 void fn_802328D4(void* font);
 int fn_802399DC(int unused);
 int fn_802399AC(void);
-extern char lbl_8055BAC0[8];
 extern char lbl_8055BABC[4];
 extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
@@ -396,6 +395,11 @@ ModuleTag lbl_8055F100;
 static UnkStatic123s lbl_804986F8;
 static OptValues sCur;    // lbl_8049870C
 static OptValues sSaved;  // lbl_80498730
+#pragma explicit_zero_data on
+char lbl_8055BAB8[4] = "";  // shared empty menu-item names
+char lbl_8055BABC[4] = "";
+char lbl_8055BAC0[8] = "";
+#pragma explicit_zero_data reset
 s32 lbl_8055BAC8 = -1;
 UnkStatic7F lbl_8055F108;
 EraseButton* lbl_8055F10C;
