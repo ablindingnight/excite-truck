@@ -1380,8 +1380,8 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
     if (a > lbl_80563F9C) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563F50 / a;
-        x = inv * w[0];
         y = inv * w[1];
+        x = inv * w[0];
         z = inv * w[2];
         s = (f32)sin(a);
         c = (f32)cos(a);

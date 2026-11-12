@@ -1186,8 +1186,8 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
     mid.z = g->a.z + (g->b.z - g->a.z) * 0.5f;
     half = PSVECDistance(&g->a, &g->b) / 2.0f;
-    ring.x = mid.x;
     ring.y = g->ringY;
+    ring.x = mid.x;
     f32 zv = mid.z;
     ring.z = zv;
     f32 dtv = t->dt;

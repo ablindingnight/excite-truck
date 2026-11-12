@@ -744,8 +744,8 @@ int fn_8001B308(const Vec2* pos, int art, int part) {
 void fn_8001B450(int index) { lbl_803583C8[index].Reset(); }
 
 static inline void LerpVec2(Vec2* out, const Vec2* a, const Vec2* b, f32 t) {
-    out->x = a->x + t * (b->x - a->x);
     out->y = a->y + t * (b->y - a->y);
+    out->x = a->x + t * (b->x - a->x);
 }
 
 void fn_8001B478(int index, f32 width) {

@@ -18,8 +18,8 @@ void* operator new[](size_t size, const char* tag);
 
 struct UiPose {
     UiPose(ValPoint p) {
-        x = p.x;
         y = p.y;
+        x = p.x;
         z = 0.0f;
         m[0] = 1.0f;
         m[1] = 0.0f;

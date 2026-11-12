@@ -718,8 +718,8 @@ void HermiteDrone::Start(HermiteEntry* e) {
 }
 
 template <class O, class A> static inline void Sc(O* o, const A* a, f32 s) {
-    o->x = a->x * s;
     o->y = a->y * s;
+    o->x = a->x * s;
     o->z = a->z * s;
 }
 template <class O, class A> static inline void AS(O* o, const A* a, f32 s) {

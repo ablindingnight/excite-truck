@@ -919,8 +919,8 @@ struct CVec4 {
     }
     CVec4(const CVec4& o) {
         x = o.x;
-        y = o.y;
         z = o.z;
+        y = o.y;
         w = o.w;
     }
     f32 x, y, z, w;

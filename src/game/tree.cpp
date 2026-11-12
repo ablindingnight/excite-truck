@@ -931,11 +931,11 @@ static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
                             a = (1.0f < a) ? 1.0f : a;
                             TMtx m;
                             f32 s = tr->mtx.rot[1].y;
-                            m.rot[0].x = cam.rot[0].x * s;
                             m.rot[0].y = cam.rot[0].y * s;
+                            m.rot[0].x = cam.rot[0].x * s;
                             m.rot[0].z = cam.rot[0].z * s;
-                            m.rot[1].x = cam.rot[1].x * s;
                             m.rot[1].y = cam.rot[1].y * s;
+                            m.rot[1].x = cam.rot[1].x * s;
                             m.rot[1].z = cam.rot[1].z * s;
                             m.rot[2].x = cam.rot[2].x * s;
                             m.rot[2].y = cam.rot[2].y * s;

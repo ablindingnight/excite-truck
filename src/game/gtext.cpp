@@ -332,8 +332,8 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
         t.z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
     } else {
         out->x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
         out->z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+        out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
     }
 }
 
