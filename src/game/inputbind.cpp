@@ -80,10 +80,379 @@ void fn_8013358C(int section, const char* key, const char* s);
 void fn_802E317C(const char* fmt, ...);
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
-extern char lbl_8055A850[4];
-extern char lbl_80333D18[];
-extern NamePair lbl_802F9588[21];
-extern BindEntry lbl_803342D0[0x7A];
+}
+
+// This unit's data, in the target's order (names from the symbol map).
+extern "C" {
+char lbl_80333D18[] = "Joytick Up";
+char lbl_80333D24[] = "Joy Down";
+char lbl_80333D30[] = "Joystick Down";
+char lbl_80333D40[] = "Joy Left";
+char lbl_80333D4C[] = "Joystick Left";
+char lbl_80333D5C[] = "Joy Right";
+char lbl_80333D68[] = "Joystick Right";
+char lbl_80333D78[] = "C-Stick Up";
+char lbl_80333D84[] = "C-Stick Down";
+char lbl_80333D94[] = "C-Stick Left";
+char lbl_80333DA4[] = "JB Right";
+char lbl_80333DB0[] = "C-Stick Right";
+char lbl_80333DC0[] = "Left Trigger";
+char lbl_80333DD0[] = "Right Trigger";
+char lbl_80333DE0[] = "Button 1";
+char lbl_80333DEC[] = "A Button";
+char lbl_80333DF8[] = "Button 2";
+char lbl_80333E04[] = "B Button";
+char lbl_80333E10[] = "Button 3";
+char lbl_80333E1C[] = "X Button";
+char lbl_80333E28[] = "Button 4";
+char lbl_80333E34[] = "Y Button";
+char lbl_80333E40[] = "Button 5";
+char lbl_80333E4C[] = "Z Button";
+char lbl_80333E58[] = "Button 6";
+char lbl_80333E64[] = "Left Trigger Click";
+char lbl_80333E78[] = "Button 7";
+char lbl_80333E84[] = "Right Trigger Click";
+char lbl_80333E98[] = "POV Front";
+char lbl_80333EA4[] = "D-Pad Up";
+char lbl_80333EB0[] = "POV Back";
+char lbl_80333EBC[] = "D-Pad Down";
+char lbl_80333EC8[] = "POV Left";
+char lbl_80333ED4[] = "D-Pad Left";
+char lbl_80333EE0[] = "POV Right";
+char lbl_80333EEC[] = "D-Pad Right";
+char lbl_80333EF8[] = "JoyAXPlus";
+char lbl_80333F04[] = "JoyAYPlus";
+char lbl_80333F10[] = "JoyBXPlus";
+char lbl_80333F1C[] = "JoyBYPlus";
+char lbl_80333F28[] = "JoyAXMinus";
+char lbl_80333F34[] = "JoyAYMinus";
+char lbl_80333F40[] = "JoyBXMinus";
+char lbl_80333F4C[] = "JoyBYMinus";
+char lbl_80333F58[] = "JoyALeft";
+char lbl_80333F64[] = "JoyARight";
+char lbl_80333F70[] = "JoyADown";
+char lbl_80333F7C[] = "JoyBLeft";
+char lbl_80333F88[] = "JoyBRight";
+char lbl_80333F94[] = "JoyBDown";
+char lbl_80333FA0[] = "JoyCLeft";
+char lbl_80333FAC[] = "JC Right";
+char lbl_80333FB8[] = "JoyCRight";
+char lbl_80333FC4[] = "JoyCDown";
+char lbl_80333FD0[] = "JoyDLeft";
+char lbl_80333FDC[] = "JD Right";
+char lbl_80333FE8[] = "JoyDRight";
+char lbl_80333FF4[] = "JoyDDown";
+char lbl_80334000[] = "Button 8";
+char lbl_8033400C[] = "Button 9";
+char lbl_80334018[] = "Button 10";
+char lbl_80334024[] = "Button10";
+char lbl_80334030[] = "Button 11";
+char lbl_8033403C[] = "Button11";
+char lbl_80334048[] = "Button 12";
+char lbl_80334054[] = "Button12";
+char lbl_80334060[] = "Button 13";
+char lbl_8033406C[] = "Button13";
+char lbl_80334078[] = "Button 14";
+char lbl_80334084[] = "Button14";
+char lbl_80334090[] = "Button 15";
+char lbl_8033409C[] = "Button15";
+char lbl_803340A8[] = "Button 16";
+char lbl_803340B4[] = "Button16";
+char lbl_803340C0[] = "Button 17";
+char lbl_803340CC[] = "Button 18";
+char lbl_803340D8[] = "Button 19";
+char lbl_803340E4[] = "Button 20";
+char lbl_803340F0[] = "Button 21";
+char lbl_803340FC[] = "Button 22";
+char lbl_80334108[] = "Button 23";
+char lbl_80334114[] = "Button 24";
+char lbl_80334120[] = "Button 25";
+char lbl_8033412C[] = "Button 26";
+char lbl_80334138[] = "Button 27";
+char lbl_80334144[] = "Button 28";
+char lbl_80334150[] = "Button 29";
+char lbl_8033415C[] = "Button 30";
+char lbl_80334168[] = "Button 31";
+char lbl_80334174[] = "Button 32";
+char lbl_80334180[] = "POVFront";
+char lbl_8033418C[] = "POVRight";
+char lbl_80334198[] = "MouseDown";
+char lbl_803341A4[] = "MouseLeft";
+char lbl_803341B0[] = "MouseRight";
+char lbl_803341BC[] = "Key_LBRACKET";
+char lbl_803341CC[] = "Key_RBRACKET";
+char lbl_803341DC[] = "Key_SEMICOLON";
+char lbl_803341EC[] = "Key_QUOTE";
+char lbl_803341F8[] = "Key_COMMA";
+char lbl_80334204[] = "Key_PERIOD";
+char lbl_80334210[] = "Key_SLASH";
+char lbl_8033421C[] = "Key_MINUS";
+char lbl_80334228[] = "Key_EQUAL";
+char lbl_80334234[] = "Key_SHIFT";
+char lbl_80334240[] = "KeySHIFT";
+char lbl_8033424C[] = "Key_CTRL";
+char lbl_80334258[] = "Key_RSHIFT";
+char lbl_80334264[] = "KeyRSHIFT";
+char lbl_80334270[] = "Key_RCTRL";
+char lbl_8033427C[] = "KeyRCTRL";
+char lbl_80334288[] = "Key_SPACE";
+char lbl_80334294[] = "KeySPACE";
+char lbl_803342A0[] = "Key_DOWN";
+char lbl_803342AC[] = "Key_LEFT";
+char lbl_803342B8[] = "Key_RIGHT";
+char lbl_803342C4[] = "KeyRIGHT";
+char lbl_8055A520[] = "Joy Up";
+char lbl_8055A528[] = "JB Up";
+char lbl_8055A530[] = "JB Down";
+char lbl_8055A538[] = "JB Left";
+char lbl_8055A540[] = "Joy DX-";
+char lbl_8055A548[] = "Joy DY-";
+char lbl_8055A550[] = "Joy AX+";
+char lbl_8055A558[] = "Joy AY+";
+char lbl_8055A560[] = "Joy BX+";
+char lbl_8055A568[] = "Joy BY+";
+char lbl_8055A570[] = "Joy AX-";
+char lbl_8055A578[] = "Joy AY-";
+char lbl_8055A580[] = "Joy BX-";
+char lbl_8055A588[] = "Joy BY-";
+char lbl_8055A590[] = "JoyAUp";
+char lbl_8055A598[] = "JoyBUp";
+char lbl_8055A5A0[] = "JC Left";
+char lbl_8055A5A8[] = "JC Up";
+char lbl_8055A5B0[] = "JoyCUp";
+char lbl_8055A5B8[] = "JC Down";
+char lbl_8055A5C0[] = "Joy CX+";
+char lbl_8055A5C8[] = "Joy CX-";
+char lbl_8055A5D0[] = "Joy CY+";
+char lbl_8055A5D8[] = "Joy CY-";
+char lbl_8055A5E0[] = "JD Left";
+char lbl_8055A5E8[] = "JD Up";
+char lbl_8055A5F0[] = "JoyDUp";
+char lbl_8055A5F8[] = "JD Down";
+char lbl_8055A600[] = "Joy DX+";
+char lbl_8055A608[] = "Joy DY+";
+char lbl_8055A610[] = "Button1";
+char lbl_8055A618[] = "Button2";
+char lbl_8055A620[] = "Button3";
+char lbl_8055A628[] = "Button4";
+char lbl_8055A630[] = "Button5";
+char lbl_8055A638[] = "Button6";
+char lbl_8055A640[] = "Button7";
+char lbl_8055A648[] = "Button8";
+char lbl_8055A650[] = "Button9";
+char lbl_8055A658[] = "Btn17";
+char lbl_8055A660[] = "Btn18";
+char lbl_8055A668[] = "Btn19";
+char lbl_8055A670[] = "Btn20";
+char lbl_8055A678[] = "Btn21";
+char lbl_8055A680[] = "Btn22";
+char lbl_8055A688[] = "Btn23";
+char lbl_8055A690[] = "Btn24";
+char lbl_8055A698[] = "Btn26";
+char lbl_8055A6A0[] = "Btn27";
+char lbl_8055A6A8[] = "Btn28";
+char lbl_8055A6B0[] = "Btn29";
+char lbl_8055A6B8[] = "Btn30";
+char lbl_8055A6C0[] = "Btn31";
+char lbl_8055A6C8[] = "Btn32";
+char lbl_8055A6D0[] = "BtnXX";
+char lbl_8055A6D8[] = "POVLeft";
+char lbl_8055A6E0[] = "POVBack";
+char lbl_8055A6E8[] = "POV Any";
+char lbl_8055A6F0[] = "POVAny";
+char lbl_8055A6F8[] = "M Up";
+char lbl_8055A700[] = "MouseUp";
+char lbl_8055A708[] = "M Down";
+char lbl_8055A710[] = "M Left";
+char lbl_8055A718[] = "M Right";
+char lbl_8055A720[] = "Key_A";
+char lbl_8055A728[] = "Key_B";
+char lbl_8055A730[] = "Key_C";
+char lbl_8055A738[] = "Key_D";
+char lbl_8055A740[] = "Key_E";
+char lbl_8055A748[] = "Key_F";
+char lbl_8055A750[] = "Key_G";
+char lbl_8055A758[] = "Key_H";
+char lbl_8055A760[] = "Key_I";
+char lbl_8055A768[] = "Key_J";
+char lbl_8055A770[] = "Key_K";
+char lbl_8055A778[] = "Key_L";
+char lbl_8055A780[] = "Key_M";
+char lbl_8055A788[] = "Key_N";
+char lbl_8055A790[] = "Key_O";
+char lbl_8055A798[] = "Key_Q";
+char lbl_8055A7A0[] = "Key_R";
+char lbl_8055A7A8[] = "Key_S";
+char lbl_8055A7B0[] = "Key_U";
+char lbl_8055A7B8[] = "Key_V";
+char lbl_8055A7C0[] = "Key_W";
+char lbl_8055A7C8[] = "Key_X";
+char lbl_8055A7D0[] = "Key_Y";
+char lbl_8055A7D8[] = "Key_Z";
+char lbl_8055A7E0[] = "Key_6";
+char lbl_8055A7E8[] = "Key_7";
+char lbl_8055A7F0[] = "Key_8";
+char lbl_8055A7F8[] = "Key_9";
+char lbl_8055A800[] = "Key_0";
+char lbl_8055A808[] = "KeyCTRL";
+char lbl_8055A810[] = "Key_INS";
+char lbl_8055A818[] = "KeyINS";
+char lbl_8055A820[] = "Key_DEL";
+char lbl_8055A828[] = "KeyDEL";
+char lbl_8055A830[] = "Key_UP";
+char lbl_8055A838[] = "KeyUP";
+char lbl_8055A840[] = "KeyDOWN";
+char lbl_8055A848[] = "KeyLEFT";
+char lbl_8055A850[] = "Unknown";
+
+extern const NamePair lbl_802F9588[21] = {
+    {lbl_8055A520, lbl_80333D18},
+    {lbl_80333D24, lbl_80333D30},
+    {lbl_80333D40, lbl_80333D4C},
+    {lbl_80333D5C, lbl_80333D68},
+    {lbl_8055A528, lbl_80333D78},
+    {lbl_8055A530, lbl_80333D84},
+    {lbl_8055A538, lbl_80333D94},
+    {lbl_80333DA4, lbl_80333DB0},
+    {lbl_8055A540, lbl_80333DC0},
+    {lbl_8055A548, lbl_80333DD0},
+    {lbl_80333DE0, lbl_80333DEC},
+    {lbl_80333DF8, lbl_80333E04},
+    {lbl_80333E10, lbl_80333E1C},
+    {lbl_80333E28, lbl_80333E34},
+    {lbl_80333E40, lbl_80333E4C},
+    {lbl_80333E58, lbl_80333E64},
+    {lbl_80333E78, lbl_80333E84},
+    {lbl_80333E98, lbl_80333EA4},
+    {lbl_80333EB0, lbl_80333EBC},
+    {lbl_80333EC8, lbl_80333ED4},
+    {lbl_80333EE0, lbl_80333EEC},
+};
+
+BindEntry lbl_803342D0[0x7A] = {
+    {lbl_8055A550, lbl_80333EF8, 2, 0x10, 0x0, {0}, 0},
+    {lbl_8055A558, lbl_80333F04, 2, 0x11, 0x0, {0}, 0},
+    {lbl_8055A560, lbl_80333F10, 2, 0x12, 0x0, {0}, 0},
+    {lbl_8055A568, lbl_80333F1C, 2, 0x13, 0x0, {0}, 0},
+    {lbl_8055A570, lbl_80333F28, 2, 0x18, 0x0, {0}, 0},
+    {lbl_8055A578, lbl_80333F34, 2, 0x19, 0x0, {0}, 0},
+    {lbl_8055A580, lbl_80333F40, 2, 0x1A, 0x0, {0}, 0},
+    {lbl_8055A588, lbl_80333F4C, 2, 0x1B, 0x0, {0}, 0},
+    {lbl_80333D40, lbl_80333F58, 2, 0x0, 0x0, {0}, 0},
+    {lbl_80333D5C, lbl_80333F64, 2, 0x1, 0x0, {0}, 0},
+    {lbl_8055A520, lbl_8055A590, 2, 0x2, 0x0, {0}, 0},
+    {lbl_80333D24, lbl_80333F70, 2, 0x3, 0x0, {0}, 0},
+    {lbl_8055A538, lbl_80333F7C, 2, 0x4, 0x0, {0}, 0},
+    {lbl_80333DA4, lbl_80333F88, 2, 0x5, 0x0, {0}, 0},
+    {lbl_8055A528, lbl_8055A598, 2, 0x6, 0x0, {0}, 0},
+    {lbl_8055A530, lbl_80333F94, 2, 0x7, 0x0, {0}, 0},
+    {lbl_8055A5A0, lbl_80333FA0, 2, 0x8, 0x0, {0}, 0},
+    {lbl_80333FAC, lbl_80333FB8, 2, 0x9, 0x0, {0}, 0},
+    {lbl_8055A5A8, lbl_8055A5B0, 2, 0xA, 0x0, {0}, 0},
+    {lbl_8055A5B8, lbl_80333FC4, 2, 0xB, 0x0, {0}, 0},
+    {lbl_8055A5C0, lbl_8055A5C0, 2, 0x14, 0x0, {0}, 0},
+    {lbl_8055A5C8, lbl_8055A5C8, 2, 0x1C, 0x0, {0}, 0},
+    {lbl_8055A5D0, lbl_8055A5D0, 2, 0x15, 0x0, {0}, 0},
+    {lbl_8055A5D8, lbl_8055A5D8, 2, 0x1D, 0x0, {0}, 0},
+    {lbl_8055A5E0, lbl_80333FD0, 2, 0xC, 0x0, {0}, 0},
+    {lbl_80333FDC, lbl_80333FE8, 2, 0xD, 0x0, {0}, 0},
+    {lbl_8055A5E8, lbl_8055A5F0, 2, 0xE, 0x0, {0}, 0},
+    {lbl_8055A5F8, lbl_80333FF4, 2, 0xF, 0x0, {0}, 0},
+    {lbl_8055A600, lbl_8055A600, 2, 0x16, 0x0, {0}, 0},
+    {lbl_8055A540, lbl_8055A540, 2, 0x1E, 0x0, {0}, 0},
+    {lbl_8055A608, lbl_8055A608, 2, 0x17, 0x0, {0}, 0},
+    {lbl_8055A548, lbl_8055A548, 2, 0x1F, 0x0, {0}, 0},
+    {lbl_80333DE0, lbl_8055A610, 3, 0x0, 0x0, {0}, 0},
+    {lbl_80333DF8, lbl_8055A618, 3, 0x1, 0x0, {0}, 0},
+    {lbl_80333E10, lbl_8055A620, 3, 0x2, 0x0, {0}, 0},
+    {lbl_80333E28, lbl_8055A628, 3, 0x3, 0x0, {0}, 0},
+    {lbl_80333E40, lbl_8055A630, 3, 0x4, 0x0, {0}, 0},
+    {lbl_80333E58, lbl_8055A638, 3, 0x5, 0x0, {0}, 0},
+    {lbl_80333E78, lbl_8055A640, 3, 0x6, 0x0, {0}, 0},
+    {lbl_80334000, lbl_8055A648, 3, 0x7, 0x0, {0}, 0},
+    {lbl_8033400C, lbl_8055A650, 3, 0x8, 0x0, {0}, 0},
+    {lbl_80334018, lbl_80334024, 3, 0x9, 0x0, {0}, 0},
+    {lbl_80334030, lbl_8033403C, 3, 0xA, 0x0, {0}, 0},
+    {lbl_80334048, lbl_80334054, 3, 0xB, 0x0, {0}, 0},
+    {lbl_80334060, lbl_8033406C, 3, 0xC, 0x0, {0}, 0},
+    {lbl_80334078, lbl_80334084, 3, 0xD, 0x0, {0}, 0},
+    {lbl_80334090, lbl_8033409C, 3, 0xE, 0x0, {0}, 0},
+    {lbl_803340A8, lbl_803340B4, 3, 0xF, 0x0, {0}, 0},
+    {lbl_803340C0, lbl_8055A658, 3, 0x10, 0x0, {0}, 0},
+    {lbl_803340CC, lbl_8055A660, 3, 0x11, 0x0, {0}, 0},
+    {lbl_803340D8, lbl_8055A668, 3, 0x12, 0x0, {0}, 0},
+    {lbl_803340E4, lbl_8055A670, 3, 0x13, 0x0, {0}, 0},
+    {lbl_803340F0, lbl_8055A678, 3, 0x14, 0x0, {0}, 0},
+    {lbl_803340FC, lbl_8055A680, 3, 0x15, 0x0, {0}, 0},
+    {lbl_80334108, lbl_8055A688, 3, 0x16, 0x0, {0}, 0},
+    {lbl_80334114, lbl_8055A690, 3, 0x17, 0x0, {0}, 0},
+    {lbl_80334120, lbl_8055A698, 3, 0x18, 0x0, {0}, 0},
+    {lbl_8033412C, lbl_8055A6A0, 3, 0x19, 0x0, {0}, 0},
+    {lbl_80334138, lbl_8055A6A8, 3, 0x1A, 0x0, {0}, 0},
+    {lbl_80334144, lbl_8055A6B0, 3, 0x1B, 0x0, {0}, 0},
+    {lbl_80334150, lbl_8055A6B8, 3, 0x1C, 0x0, {0}, 0},
+    {lbl_8033415C, lbl_8055A6C0, 3, 0x1D, 0x0, {0}, 0},
+    {lbl_80334168, lbl_8055A6C8, 3, 0x1E, 0x0, {0}, 0},
+    {lbl_80334174, lbl_8055A6D0, 3, 0x1F, 0x0, {0}, 0},
+    {lbl_80333EC8, lbl_8055A6D8, 4, 0x8, 0x0, {0}, 0},
+    {lbl_80333E98, lbl_80334180, 4, 0x1, 0x0, {0}, 0},
+    {lbl_80333EE0, lbl_8033418C, 4, 0x2, 0x0, {0}, 0},
+    {lbl_80333EB0, lbl_8055A6E0, 4, 0x4, 0x0, {0}, 0},
+    {lbl_8055A6E8, lbl_8055A6F0, 4, 0xF, 0x0, {0}, 0},
+    {lbl_8055A6F8, lbl_8055A700, 5, 0x2, 0x0, {0}, 0},
+    {lbl_8055A708, lbl_80334198, 5, 0x3, 0x0, {0}, 0},
+    {lbl_8055A710, lbl_803341A4, 5, 0x0, 0x0, {0}, 0},
+    {lbl_8055A718, lbl_803341B0, 5, 0x1, 0x0, {0}, 0},
+    {lbl_8055A720, 0, 1, 0x1E, 0x0, {0}, 0},
+    {lbl_8055A728, 0, 1, 0x30, 0x0, {0}, 0},
+    {lbl_8055A730, 0, 1, 0x2E, 0x0, {0}, 0},
+    {lbl_8055A738, 0, 1, 0x20, 0x0, {0}, 0},
+    {lbl_8055A740, 0, 1, 0x12, 0x0, {0}, 0},
+    {lbl_8055A748, 0, 1, 0x21, 0x0, {0}, 0},
+    {lbl_8055A750, 0, 1, 0x22, 0x0, {0}, 0},
+    {lbl_8055A758, 0, 1, 0x23, 0x0, {0}, 0},
+    {lbl_8055A760, 0, 1, 0x17, 0x0, {0}, 0},
+    {lbl_8055A768, 0, 1, 0x24, 0x0, {0}, 0},
+    {lbl_8055A770, 0, 1, 0x25, 0x0, {0}, 0},
+    {lbl_8055A778, 0, 1, 0x26, 0x0, {0}, 0},
+    {lbl_8055A780, 0, 1, 0x32, 0x0, {0}, 0},
+    {lbl_8055A788, 0, 1, 0x31, 0x0, {0}, 0},
+    {lbl_8055A790, 0, 1, 0x18, 0x0, {0}, 0},
+    {lbl_8055A798, 0, 1, 0x10, 0x0, {0}, 0},
+    {lbl_8055A7A0, 0, 1, 0x13, 0x0, {0}, 0},
+    {lbl_8055A7A8, 0, 1, 0x1F, 0x0, {0}, 0},
+    {lbl_8055A7B0, 0, 1, 0x16, 0x0, {0}, 0},
+    {lbl_8055A7B8, 0, 1, 0x2F, 0x0, {0}, 0},
+    {lbl_8055A7C0, 0, 1, 0x11, 0x0, {0}, 0},
+    {lbl_8055A7C8, 0, 1, 0x2D, 0x0, {0}, 0},
+    {lbl_8055A7D0, 0, 1, 0x15, 0x0, {0}, 0},
+    {lbl_8055A7D8, 0, 1, 0x2C, 0x0, {0}, 0},
+    {lbl_8055A7E0, 0, 1, 0x7, 0x0, {0}, 0},
+    {lbl_8055A7E8, 0, 1, 0x8, 0x0, {0}, 0},
+    {lbl_8055A7F0, 0, 1, 0x9, 0x0, {0}, 0},
+    {lbl_8055A7F8, 0, 1, 0xA, 0x0, {0}, 0},
+    {lbl_8055A800, 0, 1, 0xB, 0x0, {0}, 0},
+    {lbl_803341BC, 0, 1, 0x1A, 0x0, {0}, 0},
+    {lbl_803341CC, 0, 1, 0x1B, 0x0, {0}, 0},
+    {lbl_803341DC, 0, 1, 0x27, 0x0, {0}, 0},
+    {lbl_803341EC, 0, 1, 0x28, 0x0, {0}, 0},
+    {lbl_803341F8, 0, 1, 0x33, 0x0, {0}, 0},
+    {lbl_80334204, 0, 1, 0x34, 0x0, {0}, 0},
+    {lbl_80334210, 0, 1, 0x35, 0x0, {0}, 0},
+    {lbl_8033421C, 0, 1, 0xC, 0x0, {0}, 0},
+    {lbl_80334228, 0, 1, 0xD, 0x0, {0}, 0},
+    {lbl_80334234, lbl_80334240, 1, 0xFD, 0x0, {0}, 0},
+    {lbl_8033424C, lbl_8055A808, 1, 0xFE, 0x0, {0}, 0},
+    {lbl_80334258, lbl_80334264, 1, 0x36, 0x0, {0}, 0},
+    {lbl_80334270, lbl_8033427C, 1, 0x9D, 0x0, {0}, 0},
+    {lbl_8055A810, lbl_8055A818, 1, 0xD2, 0x0, {0}, 0},
+    {lbl_8055A820, lbl_8055A828, 1, 0xD3, 0x0, {0}, 0},
+    {lbl_80334288, lbl_80334294, 1, 0x39, 0x0, {0}, 1},
+    {lbl_8055A830, lbl_8055A838, 1, 0xC8, 0x0, {0}, 0},
+    {lbl_803342A0, lbl_8055A840, 1, 0xD0, 0x0, {0}, 0},
+    {lbl_803342AC, lbl_8055A848, 1, 0xCB, 0x0, {0}, 0},
+    {lbl_803342B8, lbl_803342C4, 1, 0xCD, 0x0, {0}, 0},
+};
 }
 
 ModuleTag lbl_8055E5C0;
@@ -182,8 +551,8 @@ void fn_801A9110(Binding* b, const char* name);
 void fn_801A91B0(Binding* b, BindEntry* e);
 BindEntry* fn_801A9234(Binding* b);
 
-NamePair* fn_801A75B4(const char* name) {
-    NamePair* p = lbl_802F9588;
+const NamePair* fn_801A75B4(const char* name) {
+    const NamePair* p = lbl_802F9588;
     int i;
     for (i = 0; i < 21; i++, p++) {
         if (!strcasecmp(p->name, name)) {
@@ -329,7 +698,7 @@ void fn_801A7DFC(const char* key, const char* name, int section) {
 void fn_801A7E54(char* out, int len, Binding* b) {
     BindEntry* e = fn_801A9234(b);
     if (e) {
-        NamePair* p = fn_801A75B4(e->name);
+        const NamePair* p = fn_801A75B4(e->name);
         if (p) {
             StrNCopy(out, p->text, len);
         } else {
@@ -687,4 +1056,8 @@ BindEntry* fn_801A9234(Binding* b) {
     }
     return 0;
 }
+}
+
+extern "C" {
+char lbl_80334F84[0x5A4] = "ControlStrings:JoyAXPlus\0\0\0\0ControlStrings:JoyAYPlus\0\0\0\0ControlStrings:JoyBXPlus\0\0\0\0ControlStrings:JoyBYPlus\0\0\0\0ControlStrings:JoyAXMinus\0\0\0ControlStrings:JoyAYMinus\0\0\0ControlStrings:JoyBXMinus\0\0\0ControlStrings:JoyBYMinus\0\0\0\0\0\0\0ControlStrings:JoyALeft\0ControlStrings:JoyARight\0\0\0\0ControlStrings:JoyAUp\0\0\0\0\0\0\0ControlStrings:JoyADown\0ControlStrings:JoyBLeft\0ControlStrings:JoyBRight\0\0\0\0ControlStrings:JoyBUp\0\0\0\0\0\0\0ControlStrings:JoyBDown\0ControlStrings:Button1\0\0ControlStrings:Button2\0\0ControlStrings:Button3\0\0ControlStrings:Button4\0\0ControlStrings:Button5\0\0ControlStrings:Button6\0\0ControlStrings:Button7\0\0ControlStrings:Button8\0\0ControlStrings:Button9\0\0ControlStrings:Button10\0ControlStrings:Button11\0ControlStrings:Button12\0ControlStrings:Button13\0ControlStrings:Button14\0ControlStrings:Button15\0ControlStrings:Button16\0ControlStrings:POVLeft\0\0ControlStrings:POVRight\0ControlStrings:POVFront\0ControlStrings:POVBack\0\0ControlStrings:POVAny\0\0\0ControlStrings:MouseUp\0\0ControlStrings:MouseDown\0\0\0\0ControlStrings:MouseLeft\0\0\0\0ControlStrings:MouseRight\0\0\0ControlStrings:MouseButtonLeft\0\0ControlStrings:MouseButtonMiddle\0\0\0\0ControlStrings:MouseButtonRight\0ControlStrings:KeySHIFT\0ControlStrings:KeyCTRL\0\0ControlStrings:KeyRSHIFT\0\0\0\0\0\0\0\0ControlStrings:KeyRCTRL\0ControlStrings:KeyINS\0\0\0ControlStrings:KeyDEL\0\0\0ControlStrings:KeySPACE\0ControlStrings:KeyUP\0\0\0\0ControlStrings:KeyDOWN\0\0ControlStrings:KeyLEFT\0\0ControlStrings:KeyRIGHT\0ControlStrings:Unknown";
 }
