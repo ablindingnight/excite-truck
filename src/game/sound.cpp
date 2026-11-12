@@ -148,19 +148,6 @@ public:
     s32 event;        // offset 0x50
 };
 
-class Sound2D : public GameSound {
-public:
-    Sound2D(const char* name, int cls);
-    virtual ~Sound2D(void) {}
-    virtual void Update(Listener* l, int n);
-
-    u8 pad54[0x10];
-    f32 pan;        // offset 0x64
-    f32 depth;      // offset 0x68
-    u8 panDirty;    // offset 0x6C
-    u8 depthDirty;  // offset 0x6D
-};
-
 class Sound3D : public GameSound {
 public:
     Sound3D(const char* name, int cls, ValVec3* vel, ValVec3* pos);
@@ -176,6 +163,19 @@ public:
     f32 radius;     // offset 0x6C
     ValVec3* vel;   // offset 0x70
     ValVec3* pos;   // offset 0x74
+};
+
+class Sound2D : public GameSound {
+public:
+    Sound2D(const char* name, int cls);
+    virtual ~Sound2D(void) {}
+    virtual void Update(Listener* l, int n);
+
+    u8 pad54[0x10];
+    f32 pan;        // offset 0x64
+    f32 depth;      // offset 0x68
+    u8 panDirty;    // offset 0x6C
+    u8 depthDirty;  // offset 0x6D
 };
 
 class SoundDash : public Sound2D {
