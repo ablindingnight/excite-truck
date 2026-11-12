@@ -28,12 +28,15 @@ public:
     virtual void Play(f32 t, const ValVec3* pos) = 0;
 };
 
+/* Helper name unproven */
+static inline void* LoadBook(ValueNode* node) {
+    const char* resource = node->GetValue("resource");
+    return fn_80296B10(resource, node->FindChild("config"));
+}
+
 class FlipBookElem : public FXElem {
 public:
-    FlipBookElem(ValueNode* node) {
-        const char* resource = node->GetValue("resource");
-        book = fn_80296B10(resource, node->FindChild("config"));
-    }
+    FlipBookElem(ValueNode* node) { book = LoadBook(node); }
     virtual ~FlipBookElem(void) {
         if (book) {
             fn_80296D28(book);
@@ -88,9 +91,6 @@ public:
 
 extern "C" FXElem* fn_802971B0(ValueNode* node);
 
-static FXElemType lbl_8055CA38[] = {
-    {fn_802971B0, "FlipBookElem"},
-};
 
 ModuleTag lbl_8055F790;
 
@@ -102,6 +102,10 @@ extern "C" FXElem* fn_802971B0(ValueNode* node) {
     }
     return elem;
 }
+
+static FXElemType lbl_8055CA38[] = {
+    {fn_802971B0, "FlipBookElem"},
+};
 
 static FXElem* CreateElem(ValueNode* node) {
     int found = 0;
