@@ -715,7 +715,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             rel.y *= s;
             rel.z *= s;
         }
-        if (PSVECDotProduct(&rel, &rel) < (w / 2.0f) * (w * 0.5f)) {
+        if (!(PSVECDotProduct(&rel, &rel) >= (w / 2.0f) * (w * 0.5f))) {
             Vec2 delta;
             f32 size;
             f32 fade;
