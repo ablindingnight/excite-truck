@@ -4430,7 +4430,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                             u8 *d1 = dst + pitch;
                             u16 *s = (u16 *)tmp;
                             for (i = 0; i < 8; i++) {
-                                u16 w;
+                                u32 w;
                                 w = s[0];
                                 w = ((w & 0xFF00) << 16) | ((w & 0xFF00) << 8) | ((w & 0xFF) << 8) | (w & 0xFF);
                                 ((u32 *)d0)[0] = w;
