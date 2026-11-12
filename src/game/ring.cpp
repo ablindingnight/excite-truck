@@ -388,7 +388,8 @@ void fn_8016A240(const char* name) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
-            lbl_80430340.data[i].Disable();
+            RingSet* set = &lbl_80430340.data[i];
+            set->Disable();
         }
     }
 }
