@@ -208,6 +208,8 @@ static inline unsigned long HalveAlpha(unsigned long color) {
 
 // Draws the sound menu: music volume, effects volume and the third item, the selection highlight,
 // and the left/right arrows that fade out at the ends of a slider.
+/* Helper name unproven */
+static inline int PaneInRange(long i) { return i >= 0 && i < 5; }
 extern "C" void fn_8020D2D4(void) {
     float camera[12];
     float now;
@@ -289,7 +291,7 @@ extern "C" void fn_8020D2D4(void) {
                     fn_80147940(lbl_8055EEA0, &glow, "menu_artset", 1);
                 }
             }
-            if (selected && i >= 0 && i < 5) {
+            if (selected && PaneInRange(i)) {
                 int canDec = 1;
                 int canInc = 1;
                 char arrowName[0x20];
