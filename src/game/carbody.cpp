@@ -1445,7 +1445,7 @@ public:
 
 extern "C" {
 void fn_80190E6C(void);
-u8 fn_801C5B60(void);
+int fn_801C5B60(void);
 void fn_80196A9C(u8* p);
 void fn_801C56AC(void);
 void fn_801BEDA8(CbSolMass** m, CbSolContact** c, CbSolCross** x, CbSolCx** cx, s32* n);
