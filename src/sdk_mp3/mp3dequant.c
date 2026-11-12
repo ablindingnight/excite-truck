@@ -229,9 +229,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 if (x < 0) {
                     x = -x;
                 }
-                if (x > 0x1FFF) {
-                    x = 0x1FFF;
-                }
+                x = x > 0x1FFF ? 0x1FFF : x;
                 if ((x & 0x1F00) == 0) {
                     p = lbl_802F34E8[x];
                     if (m == 1) {
