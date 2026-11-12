@@ -448,7 +448,7 @@ struct F4 {
 };
 
 extern PlayerObj* lbl_80488648[8];
-extern F4 lbl_802F99F8;
+extern const F4 lbl_802F99F8 = {{1.0f, 1.0f, 2.0f, 2.0f}};  // aspect scale per split count
 
 static inline PlayerObj* GetPlayer(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
