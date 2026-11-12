@@ -64,23 +64,34 @@ void fn_8027DAF4(void) {
 int fn_8027DE68(int i);
 
 VehicleList* fn_8027DB40(u32 flags) {
-    int all = flags & 1;
-    int unlocked;
-    int showAll = (flags >> 1) & 1;
-    int n;
     int limit;
-    int lockedOut = (flags >> 2) & 1;
+    VehicleInfo* v;
+    int unlocked;
+    Unlockable* u;
+    int showAll;
+    int all;
+    int n;
+    int i;
+    VehicleList* list;
+    int j;
+    int lockedOut;
+    Unlockable* w;
+    int maxPoints;
+    bool checkSpecial;
+    all = flags & 1;
+    showAll = (flags >> 1) & 1;
+    lockedOut = (flags >> 2) & 1;
     if (IsUnlockAll()) {
         all = 1;
     }
-    int maxPoints = GetMaxExcitePoints();
+    maxPoints = GetMaxExcitePoints();
     limit = 0;
     if (!all && !fn_8027DE68(0)) {
         limit = 1;
     }
     n = 0;
-    for (int i = 0; i < GetUnlockableCount(); i++) {
-        Unlockable* u = GetUnlockable(i);
+    for (i = 0; i < GetUnlockableCount(); i++) {
+        u = GetUnlockable(i);
         if (limit && u->points > maxPoints) {
             continue;
         }
@@ -94,17 +105,17 @@ VehicleList* fn_8027DB40(u32 flags) {
     if (IsCareerComplete()) {
         n++;
     }
-    VehicleList* list = fn_8025007C(n);
-    bool checkSpecial = !showAll;
-    for (int i = 0; i < GetUnlockableCount(); i++) {
-        Unlockable* u = GetUnlockable(i);
-        if (limit && u->points > maxPoints) {
+    list = fn_8025007C(n);
+    checkSpecial = !showAll;
+    for (j = 0; j < GetUnlockableCount(); j++) {
+        w = GetUnlockable(j);
+        if (limit && w->points > maxPoints) {
             continue;
         }
-        if (u && !strcasecmp(u->type, "CAR") && CountVehiclesNamed(u->name) > 0) {
-            VehicleInfo* v = FindVehicleNamed(u->name, 0);
+        if (w && !strcasecmp(w->type, "CAR") && CountVehiclesNamed(w->name) > 0) {
+            v = FindVehicleNamed(w->name, 0);
             unlocked = 1;
-            if (!all && !IsCarUnlocked(u->name)) {
+            if (!all && !IsCarUnlocked(w->name)) {
                 unlocked = 0;
             }
             int special = 0;
@@ -114,8 +125,8 @@ VehicleList* fn_8027DB40(u32 flags) {
             if (!unlocked && lockedOut) {
                 continue;
             }
-            int sp = special && (all || (checkSpecial && IsSpecialChassisUnlocked(u->name)));
-            list->Add(u->name, unlocked, sp);
+            int sp = special && (all || (checkSpecial && IsSpecialChassisUnlocked(w->name)));
+            list->Add(w->name, unlocked, sp);
         }
     }
     if (IsExtremeChassisUnlocked()) {
