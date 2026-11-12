@@ -285,6 +285,7 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
 }
 
 static inline f32 AddMul_hm(f32 a, f32 b, f32 c) { return a + c * b; }  /* Helper name unproven */
+static inline f32 Corner(f32 p, f32 d, f32 n) { return p + d * 0.5f + n * 0.5f; }  /* Helper name unproven */
 void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     V2 n = *dir;
     ValMatrix m;
@@ -302,7 +303,7 @@ void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     pts[0].x = pos->x + dir->x * -0.5f;
     pts[0].y = 0.0f;
     pts[0].z = pos->y + dir->y * -0.5f;
-    f32 ax = pos->x + dir->x * 0.5f + n.x * 0.5f;
+    f32 ax = Corner(pos->x, dir->x, n.x);
     f32 ay = AddMul_hm(pos->y, 0.5f, dir->y) + n.y * 0.5f;
     pts[1].x = ax;
     pts[1].y = 0.0f;

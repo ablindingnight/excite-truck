@@ -1380,7 +1380,7 @@ void fn_8018F76C(u8* p, int i) {
     fn_801BEB30(S32(p, 0x1EC), &x);
     CVec4 c;
     PColor pc = *(PColor*)(x + 0x70);
-    c = *(CVec4*)&pc;
+    c = CVec4(*(CVec4*)&pc);
     (&c.x)[i] *= 0.15f;
     *(CVec4*)(x + 0x70) = c;
     WFrame m = *(WFrame*)(p + 0x3C);
