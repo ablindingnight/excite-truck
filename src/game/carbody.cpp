@@ -289,7 +289,6 @@ extern F32Pair lbl_8055E4E0;
 extern u8* lbl_8055E918;
 extern s32 lbl_8055E4D0;
 extern s32 lbl_8055E4D4;
-extern u8 lbl_8055E4F6;
 f32 lbl_8055A3A0 = 1.0f;  // physics writes it
 f32 lbl_8055A3A4 = 0.9f;  // offroad speed factor
 f32 lbl_8055A3A8 = 0.9f;  // water speed factor
@@ -314,6 +313,8 @@ f32 lbl_8055E4E8[2];
 f32 lbl_8055E4F0;
 u8 lbl_8055E4F4;
 u8 lbl_8055E4F5;
+u8 lbl_8055E4F6;
+u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 
 extern "C" {
 
@@ -606,7 +607,6 @@ void fn_801D108C(s32 car);
 int fn_8020503C(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 void fn_80182DF4(u8* p);
-extern u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 void vf20__10CollVolumeFv(u8* p);
 }  // extern "C"
 struct PlayerLook;
