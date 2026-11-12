@@ -185,7 +185,9 @@ static inline void ScaleAdd(PVec* v, f32 k, const PVec* a) {
     v->z += a->z;
 }
 
-static inline u32 FogColor(u8 r, u8 b, u8 g) { return 0xFF000000 | (r << 16) | (g << 8) | b; }
+/* Helper name unproven */
+static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+
 
 ModuleTag lbl_8055F810;
 s32 lbl_8055F818;  // effect names
@@ -385,7 +387,7 @@ void fn_8029F658(ValueNode* node) {
     white.y = 1.0f;
     white.z = 1.0f;
     fc = node->GetVec3Or("fog_color", white);
-    d->fogColor = FogColor((int)(255.0f * fc.x), (int)(255.0f * fc.z), (int)(255.0f * fc.y));
+    d->fogColor = ARGB(0xFF, 255.0f * fc.x, 255.0f * fc.y, 255.0f * fc.z);
     d->repeat = node->GetInt("repeat", 1);
     const ValVec3& dp = node->GetVec3Or("dpos", zero3);
     d->dpos.x = dp.x;
