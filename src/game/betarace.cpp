@@ -4652,7 +4652,7 @@ inline void BetaMaster::a1(void) {
             lim = 3600.0f;
         }
         timer.limit = lim;
-        timer.limit0 = lim;
+        timer.limit0 = timer.limit;
     }
     if (fn_80179650() > 1) {
         timer.finishTimeout = 30.99f;
