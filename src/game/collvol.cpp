@@ -269,8 +269,8 @@ static inline void AxisAngle(CVec3* m, const CVec3* v) {
         m[0].x = c + t * (x * x);
         m[0].z = z * tx - s * y;
         m[0].y = y * tx + s * z;
-        m[1].x = y * tx - s * z;
         m[1].y = c + t * (y * y);
+        m[1].x = y * tx - s * z;
         m[2].x = z * tx + s * y;
         m[1].z = z * ty + s * x;
         m[2].z = c + t * (z * z);

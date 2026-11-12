@@ -475,8 +475,8 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
         r->m[3] = y * (k * x) - s * z;
         r->m[6] = z * (k * x) + s * y;
         r->m[5] = z * (k * y) + s * x;
-        r->m[7] = z * (k * y) - s * x;
         r->m[8] = c + k * (z * z);
+        r->m[7] = z * (k * y) - s * x;
     } else {
         r->m[0] = lbl_80563FAC;
         r->m[1] = 0.0f;

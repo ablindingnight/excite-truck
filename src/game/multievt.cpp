@@ -222,8 +222,8 @@ struct EvEntryBuf {
 struct EvListBuf {
     EvListBuf(void) {
         items = buf;
-        count = 0;
         cap = 0x80;
+        count = 0;
     }
     ~EvListBuf(void) {
         items = 0;

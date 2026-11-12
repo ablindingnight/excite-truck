@@ -11,8 +11,8 @@ struct TVec {
     TVec(void) {}
     TVec(f32 ax, f32 ay, f32 az) {
         y = ay;
-        x = ax;
         z = az;
+        x = ax;
     }
     f32 x, y, z;
 };

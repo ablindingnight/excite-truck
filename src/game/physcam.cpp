@@ -1393,8 +1393,8 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
         r->m[4] = c + k * (y * y);
         r->m[6] = z * (k * x) + s * y;
         r->m[5] = z * (k * y) + s * x;
-        r->m[7] = z * (k * y) - s * x;
         r->m[8] = c + k * (z * z);
+        r->m[7] = z * (k * y) - s * x;
     } else {
         r->m[0] = lbl_80563F50;
         r->m[1] = lbl_80563F48;

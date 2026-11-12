@@ -363,8 +363,8 @@ static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
         r->m[1][0] = y * (k * x) - s * z;
         r->m[2][0] = z * (k * x) + s * y;
         r->m[1][2] = z * (k * y) + s * x;
-        r->m[2][1] = z * (k * y) - s * x;
         r->m[2][2] = c + k * (z * z);
+        r->m[2][1] = z * (k * y) - s * x;
     } else {
         r->m[0][0] = lbl_80563C2C;
         r->m[0][1] = lbl_80563C20;
