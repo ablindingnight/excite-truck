@@ -178,6 +178,7 @@ struct Skybox {
     WVert quad[4];     // offset 0x13C
     u16 idx[6];        // offset 0x19C
     u8 drawn;          // offset 0x1A8
+    u8 pad1A9[0x1B8 - 0x1A9];  // offset 0x1A9: 12 more bytes, not touched in this unit (target new Skybox = 0x1B8)
 };
 
 class WaterBase {
