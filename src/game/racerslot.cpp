@@ -146,6 +146,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 int fn_8026A698(u8* p, int i) {
+    f32*r;
     u8* car = PTR(p, 0x140);
     RacerSlot* s = &lbl_80499E60[i];
     int ok = 1;
@@ -189,7 +190,7 @@ int fn_8026A698(u8* p, int i) {
     }
     if (!s->active) {
         f32 room[2] = {1000.0f, 1000.0f};
-        f32* r = room;
+        r = room;
         for (int k = 0; k < 2; k++) {
             SVec from = *(const SVec*)(p + 0xE4);
             SVec side;
