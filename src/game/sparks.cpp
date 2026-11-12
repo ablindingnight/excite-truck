@@ -831,34 +831,36 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
     m.m[1][2] = m.m[2][1];
     m.m[2][1] = t;
     MulMat(&m, &m, (const Mat3*)cam);
-    for (int i = 0; i < count; i++) {
-        u32 color;
-        Spark* s = &pts[i];
-        Vec d;
-        Vec p;
-        f32 yv = s->pos.y;
-        p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->pos.x;
-        p.y = yv + s->vel.y * (5.0f * -dt) - prev->pos.y;
-        f32 a = invLife * (now - s->t);
-        color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
-        p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->pos.z;
-        MulVec(&p, &p, (const Vec*)&m);
-        p.x = p.x + cam->pos.x;
-        p.y = p.y + cam->pos.y;
-        p.z = p.z + cam->pos.z;
-        d.x = p.x - s->pos.x;
-        d.y = p.y - s->pos.y;
-        d.z = p.z - s->pos.z;
-        f32 sign = PSVECDotProduct(&cam->rot[1], &d) > 0.0f ? 1.0f : -1.0f;
-        Vec q[4];
-        AddScaled(&q[0], &s->pos, &cam->rot[0], -0.0375f);
-        AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
-        AddScaled(&q[2], &p, &cam->rot[0], sign * -0.0375f);
-        AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
-        fn_802C8E00(color, 0, q[0].x, q[0].y, q[0].z, 0.0f, 1.0f);
-        fn_802C8E00(color, 0, q[1].x, q[1].y, q[1].z, 1.0f, 1.0f);
-        fn_802C8E00(color, 1, q[2].x, q[2].y, q[2].z, 0.0f, 0.0f);
-        fn_802C8E00(color, 1, q[3].x, q[3].y, q[3].z, 1.0f, 0.0f);
+    if (count > 0) {
+        for (int i = 0; i < count; i++) {
+            u32 color;
+            Spark* s = &pts[i];
+            Vec d;
+            Vec p;
+            f32 yv = s->pos.y;
+            p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->pos.x;
+            p.y = yv + s->vel.y * (5.0f * -dt) - prev->pos.y;
+            f32 a = invLife * (now - s->t);
+            color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
+            p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->pos.z;
+            MulVec(&p, &p, (const Vec*)&m);
+            p.x = p.x + cam->pos.x;
+            p.y = p.y + cam->pos.y;
+            p.z = p.z + cam->pos.z;
+            d.x = p.x - s->pos.x;
+            d.y = p.y - s->pos.y;
+            d.z = p.z - s->pos.z;
+            f32 sign = PSVECDotProduct(&cam->rot[1], &d) > 0.0f ? 1.0f : -1.0f;
+            Vec q[4];
+            AddScaled(&q[0], &s->pos, &cam->rot[0], -0.0375f);
+            AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
+            AddScaled(&q[2], &p, &cam->rot[0], sign * -0.0375f);
+            AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
+            fn_802C8E00(color, 0, q[0].x, q[0].y, q[0].z, 0.0f, 1.0f);
+            fn_802C8E00(color, 0, q[1].x, q[1].y, q[1].z, 1.0f, 1.0f);
+            fn_802C8E00(color, 1, q[2].x, q[2].y, q[2].z, 0.0f, 0.0f);
+            fn_802C8E00(color, 1, q[3].x, q[3].y, q[3].z, 1.0f, 0.0f);
+        }
     }
     fn_802C8E48();
 }

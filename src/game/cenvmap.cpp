@@ -191,19 +191,21 @@ void fn_80202D50(EVec3 dir) {
     void* result = 0;
     EnvTex* e = lbl_8048897C.data + 1;
     int count = lbl_8048897C.n;
-    for (int i = 1; i < count; i++, e++) {
-        if (e->idx > elev) {
-            EnvTex* a = &lbl_8048897C.data[i - 1];
-            EnvTex* b = &lbl_8048897C.data[i];
-            f32 t = (elev - (f32)a->idx) / (f32)(b->idx - a->idx);
-            t = 1.0f < t ? 1.0f : t;
-            t = t > 0.0f ? t : 0.0f;
-            t = EnvLerp(0.0f, 1.0f, t);
-            void* tb = fn_802CA294(b->tex);
-            void* ta = fn_802CA294(a->tex);
-            fn_802D94E4(fn_802CA294(lbl_8055ED0C), ta, tb, t);
-            result = fn_802CA294(lbl_8055ED0C);
-            break;
+    if (count > 0) {
+        for (int i = 1; i < count; i++, e++) {
+            if (e->idx > elev) {
+                EnvTex* a = &lbl_8048897C.data[i - 1];
+                EnvTex* b = &lbl_8048897C.data[i];
+                f32 t = (elev - (f32)a->idx) / (f32)(b->idx - a->idx);
+                t = 1.0f < t ? 1.0f : t;
+                t = t > 0.0f ? t : 0.0f;
+                t = EnvLerp(0.0f, 1.0f, t);
+                void* tb = fn_802CA294(b->tex);
+                void* ta = fn_802CA294(a->tex);
+                fn_802D94E4(fn_802CA294(lbl_8055ED0C), ta, tb, t);
+                result = fn_802CA294(lbl_8055ED0C);
+                break;
+            }
         }
     }
     if (!result) {

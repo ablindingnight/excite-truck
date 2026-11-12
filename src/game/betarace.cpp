@@ -3733,6 +3733,9 @@ inline void BetaMaster::vf48(void) {
         }
     }
     col = lbl_8055E230.value;
+    if (puddles.a.count <= 0) {
+        return;
+    }
     for (i = 0; i < puddles.a.count; i++) {
         Puddle* p = puddles.a.data[i];
         if (p->b10) {

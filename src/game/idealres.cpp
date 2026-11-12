@@ -238,8 +238,10 @@ void fn_801381B4(IdealLineRes* res) {
     Swap4(&res->len[3]);
     Swap4(&res->total);
     Swap4(&res->nrelocs);
-    for (i = 0; i < res->nrelocs; i++) {
-        Swap4(&res->relocs[i]);
+    if (res->nrelocs > 0) {
+        for (i = 0; i < res->nrelocs; i++) {
+            Swap4(&res->relocs[i]);
+        }
     }
     for (i = 0; i < res->nrelocs; i++) {
         u32* r = (u32*)((u8*)res + res->relocs[i]);

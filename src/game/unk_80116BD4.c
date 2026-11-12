@@ -2638,6 +2638,9 @@ void fn_8011AE68(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
     s16 *out = (s16 *)arg0;
     u32 i;
     u32 v;
+    if (arg2 <= 0) {
+        return;
+    }
     for (i = 0; i < arg2; i++) {
         v = (s32)(*arg1++ * farg0);
         if (v < -32768) v = -32768;

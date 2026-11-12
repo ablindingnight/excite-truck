@@ -398,9 +398,11 @@ void fn_802D81C4(GXTexDesc* d) {
     int i;
     u8* p = tex;
     int n = w * h / 2;
-    for (i = 0; i < n; i++) {
-        *p = *p >> 4 | *p << 4;
-        p++;
+    if (n > 0) {
+        for (i = 0; i < n; i++) {
+            *p = *p >> 4 | *p << 4;
+            p++;
+        }
     }
     u32* pal = img->pal;
     for (i = 0; i < 16; i++) {

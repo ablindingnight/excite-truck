@@ -467,6 +467,9 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
         }
         AddStick(s, e[i].a, e[i].b, e[i].extra, stiff);
     }
+    if (np <= 0) {
+        return;
+    }
     for (i = 0; i < np; i++, p++) {
         if (p->at) {
             AddAnchorAt(s, p->idx, p->mtx, p->at);
