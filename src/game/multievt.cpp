@@ -700,7 +700,7 @@ extern "C" {
 void fn_801332D0(int slot, const char* name, s32* value);
 void fn_80133348(int slot, const char* name, s32 value);
 void fn_8027BCD0(EvListBuf* list);
-int fn_8024B070(s32* key, u8* list);
+int fn_8024B070(s32* key, const u8* list);
 
 // Multiplayer event choice: starts from the remembered track/event, runs the pickers and remembers the
 // result. Returns 0 when backed out.
@@ -925,9 +925,9 @@ struct EvList {
     s32 count;       // offset 0x4
 };
 
-static inline int FindById(EvList* list, s32* key) {
+static inline int FindById(const EvList* list, const s32* key) {
     for (int i = 0; i < list->count; i++) {
-        EvEntry& e = list->items[i];
+        const EvEntry& e = list->items[i];
         if (e.id == *key) {
             return i;
         }
@@ -935,15 +935,15 @@ static inline int FindById(EvList* list, s32* key) {
     return -1;
 }
 
-int fn_8024B070(s32* key, u8* list) {
-    int i = FindById((EvList*)list, key);
+int fn_8024B070(s32* key, const u8* list) {
+    int i = FindById((const EvList*)list, key);
     const char* sel = i >= 0 ? ((EvList*)list)->items[i].group : 0;
     if (fn_80215228()) {
         lbl_8055F298 = 0;
     }
-    while (lbl_8055F298 || fn_8024A6EC(&sel, list)) {
+    while (lbl_8055F298 || fn_8024A6EC(&sel, (u8*)list)) {
         lbl_8055F298 = 0;
-        if (fn_8024ACB4(key, sel, list)) {
+        if (fn_8024ACB4(key, sel, (u8*)list)) {
             lbl_8055F298 = 1;
             break;
         }
