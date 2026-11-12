@@ -116,7 +116,7 @@ public:
     virtual ~ObjDesc(void) {}
     virtual void Read(PlacedObj* o, ValueNode* vn);
     virtual void Create(const PlacedObj* o) = 0;
-    virtual void Draw(const OFrame* f);
+    virtual void Draw(const OFrame* f) const;
     virtual void Props(void* p, PlacedObj* o);
     virtual f32 vf1C(void);
     virtual void vf20(void);
@@ -180,7 +180,7 @@ public:
     virtual ~ObstacleObjDesc(void);
     virtual void Read(PlacedObj* o, ValueNode* vn);
     virtual void Create(const PlacedObj* o);
-    virtual void Draw(const OFrame* f);
+    virtual void Draw(const OFrame* f) const;
     virtual void Props(void* p, PlacedObj* o);
     ObstacleDesc phys;   // offset 0x10C
     u32 flags;           // offset 0x190
@@ -1765,7 +1765,7 @@ void ObstacleObjDesc::Read(PlacedObj* o, ValueNode* vn) {
     }
 }
 
-void ObstacleObjDesc::Draw(const OFrame* f) {
+void ObstacleObjDesc::Draw(const OFrame* f) const {
     int mode;
     if (flags & 1) {
         mode = FacingMode(f, &f->z);
