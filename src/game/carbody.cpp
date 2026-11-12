@@ -3897,7 +3897,7 @@ static inline void PkCopy(void* dst, const void* src, int n) {
     }
 }
 
-int vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(u8* p, f32 t, CbPacket* a, const CbPacket* b, s32* na, s32* nb);
+int vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(u8* p, f32 t, const CbPacket* a, const CbPacket* b, s32* na, s32* nb);
 void fn_8018ADB4(u8* p, f32 v);
 void fn_8018ADBC(u8* p, f32 v);
 void fn_801E9DD0(s16* surface, f32 x, f32 z);
@@ -3906,20 +3906,20 @@ extern u8* lbl_8055E918;
 // CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
 // part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,
 // flags), then the ground lookup at prev's position. Both sizes read are 0x44 bytes.
-void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
+void fn_8018B0D8(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
     int teleport = (prev->flags >> 9) & 1;
     if (teleport) {
         vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, cur, na, nb);
     } else {
         vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, prev, na, nb);
     }
-    F32(p, 0x25D8) = F32(p, 0x25CC) = F32(p, 0x25D4) = PSVECMag(p + 0x118);
+    F32(p, 0x25D4) = F32(p, 0x25CC) = F32(p, 0x25D8) = PSVECMag(p + 0x118);
     f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
     f32 v1 = PkUnpack(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
     F32(p, 0x25D0) = LerpT(t, v1, v0);
     v0 = PkUnpack(prev->steer, 255.0f, -1.2f, 2.4f);
     v1 = PkUnpack(cur->steer, 255.0f, -1.2f, 2.4f);
-    F32(p, 0x25DC) = F32(p, 0x25F0) = LerpT(t, v1, v0);
+    F32(p, 0x25F0) = F32(p, 0x25DC) = LerpT(t, v1, v0);
     if (cur->boost) {
         f32 boost;
         if (teleport) {
@@ -3932,7 +3932,7 @@ void fn_8018B0D8(u8* p, f32 t, CbPacket* cur, const CbPacket* prev, s32* na, s32
     F32(p, 0x24A8) = 0.0f;
     F32(p, 0x251C) = 0.0f;
     F32(p, 0x25F8) = 1.0f;
-    F32(p, 0x23C0) = F32(p, 0x2434) = F32(p, 0x25F0) * F32(p, 0x5B0);
+    F32(p, 0x2434) = F32(p, 0x23C0) = F32(p, 0x25F0) * F32(p, 0x5B0);
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
     F32(p, 0x25E8) = 1.0f;
