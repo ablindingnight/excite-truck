@@ -3039,10 +3039,10 @@ inline void BetaMaster::vfF4(void) {
                     break;
                 }
                 ValPoint pt = n->GetPoint(buf);
-                pts[k].y = pt.y;
                 pts[k].x = pt.x;
-                c.y += pt.y;
-                c.x += pt.x;
+                pts[k].y = pt.y;
+                c.x += pts[k].x;
+                c.y += pts[k].y;
             }
             c.x *= 1.0f / k;
             c.y *= 1.0f / k;
