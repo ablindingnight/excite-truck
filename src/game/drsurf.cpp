@@ -1246,13 +1246,13 @@ void fn_802D6C78(void) {
         u8* dst = (u8*)next->dst;
         c = n > 0x100 ? 0x100 : n;
         next++;
+        int buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x14);
         n -= c;
         src += c * 0x14;
         pc = 0;
         u8* pdst = 0;
         f32* pout = 0;
-        int buf = 1;
         u8* cur = LC_BUF(0);
         for (;;) {
             LCQueueWait(0);
