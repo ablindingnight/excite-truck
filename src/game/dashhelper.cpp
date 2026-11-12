@@ -970,8 +970,9 @@ void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     f32 y1 = y + lbl_80560264;
     f32 h0 = fn_80235F64(lbl_8055D4CC, 4);
     f32 h = h0 * scale;
+    f32 half = MulQ(h, 0.5f);
     size = 10.0f + h;
-    f32 by = 5.0f + (y1 + MulQ(h, 0.5f));
+    f32 by = 5.0f + (y1 + half);
     bx = x - 5.0f;
     fn_80010E94(lbl_8055D4D0, 4, bx, by, size, size);
     fn_80010E94(lbl_8055D4D0, 5, bx + size, by, 640.0f, size);
