@@ -1513,7 +1513,7 @@ void PlayerDriver_vf48(u8* p) {
         turn = VDot(0x118 + PTR(p, 0x34), &u) / ref;
         turn = MaxF(MinF(0.9f, lbl_805620BC * turn), -0.9f);
         c6 = PTR(p, 0x34);
-        sl = MaxF(MinF(kOne, __fabsf(F32(c6, 0x25F0)) / 0.25f), kZero);
+        sl = MaxF(MinF(kOne, (f32)__fabs(F32(c6, 0x25F0)) / 0.25f), kZero);
         airt = MaxF(F32(c6, 0x23B8), kZero) + MaxF(F32(c6, 0x242C), kZero);
         str *= MinF(19.68504f * airt, kOne);
         ((Gearbox*)PTR(p, 0x38))->v54(str);
