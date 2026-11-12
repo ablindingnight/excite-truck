@@ -1653,7 +1653,7 @@ int Obstacle_ASE::Begin(int reverse) {
             dir.Set(Lerp(dir1.x, dir2.x, td), Lerp(dir1.y, dir2.y, td), Lerp(dir1.z, dir2.z, td));
             f32 speed = Lerp(speed1, speed2, ts);
             Vec vel(0.0f, 0.0f, 0.0f);
-            if ((f32)__fabs(PSVECDotProduct(&dir, &dir)) <= lbl_80558DC4[0] || (f32)__fabs(speed) <= lbl_80558DC4[0]) {
+            if (lbl_80558DC4[0] >= (f32)__fabs(PSVECDotProduct(&dir, &dir)) || lbl_80558DC4[0] >= (f32)__fabs(speed)) {
                 bodies.data[i]->Place(1);
             } else {
                 PSVECNormalize(&dir, &dir);

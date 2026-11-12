@@ -2851,7 +2851,7 @@ void fn_80186DE8(u8* p) {
         if (bk < brake) {
             brake = bk;
         }
-        if (F32(car, 0x25D4) > lbl_80561DA4 && lbl_80561DA4 + lbl_80561EC4 * F32(car, 0x25D4) < F32(car, 0x25CC)) {
+        if (F32(car, 0x25D4) > lbl_80561DA4 && F32(car, 0x25CC) > lbl_80561DA4 + lbl_80561EC4 * F32(car, 0x25D4)) {
             throttle = lbl_80561CAC;
         }
         if (!NearZero(F32(car, 0x2650))) {

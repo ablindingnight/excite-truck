@@ -2244,7 +2244,7 @@ void fn_8019743C(u8* d, u8* out) {
                 k *= 2.0f;
             }
         }
-        if (blocked && (U8(d, 0x2FD) || F32(side, 0x8) < 0.61f)) {
+        if (blocked && (U8(d, 0x2FD) || 0.61f > F32(side, 0x8))) {
             S32(d, 0x2D0) |= 0x40;
         }
         f32 pos = F32(d, 0x278) + 0.5f * F32(d, 0x27C);

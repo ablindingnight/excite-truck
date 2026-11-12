@@ -2522,7 +2522,7 @@ inline void RingChalMaster::vf0C(void) {
                 if (n) {
                     arena.f34 += n;
                     RSound* tally = arena.sTally;
-                    if (tally && !tally->busy && arena.f30 != arena.f34) {
+                    if (tally && !tally->busy && arena.f34 != arena.f30) {
                         tally->stop = 0;
                         tally->loop = 1;
                         tally->playing = 1;
@@ -2600,7 +2600,7 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         d.x = a.x - b.x;
         b.y = car->pos.z;
         d.y = a.y - b.y;
-        if ((f32)sqrt(d.x * d.x + d.y * d.y) < t->radius) {
+        if (t->radius > (f32)sqrt(d.x * d.x + d.y * d.y)) {
             data[cur].b30 = 0;
             f10 = next;
             teles->data[f10].b30 = 1;

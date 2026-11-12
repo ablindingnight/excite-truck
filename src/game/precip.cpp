@@ -1161,7 +1161,7 @@ void Mist::Update(void) {
     } else {
         a = density * (1.0f - (f32)sqrt(d2) / rad);
     }
-    if (((f32)__fabs(a) <= lbl_80558DC4[0]) != ((f32)__fabs(alpha) <= lbl_80558DC4[0])) {
+    if ((lbl_80558DC4[0] >= (f32)__fabs(a)) != (lbl_80558DC4[0] >= (f32)__fabs(alpha))) {
         fn_802C990C(color);
     }
     fn_802C2B78(0.5f, 50.0f, a);
