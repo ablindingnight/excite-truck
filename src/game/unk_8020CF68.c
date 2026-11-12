@@ -212,7 +212,7 @@ extern "C" void fn_8020D2D4(void) {
     float camera[12];
     float now;
     SoundMenuLabels labels;
-    unsigned long i;
+    long i;
 
     if (lbl_8055EE80 != 0) {
         ((void (*)(void))lbl_8055EE80)();
