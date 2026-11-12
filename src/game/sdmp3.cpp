@@ -145,8 +145,8 @@ static u8 lbl_805587E0[0x80];    // ID3v1 tag
 ModuleTag lbl_80560058;
 u8 lbl_80560060;  // reader in use
 volatile u8 lbl_80560061;  // SD inserted
-u8 lbl_80560062;  // thread running
-u8 lbl_80560063;  // thread finished
+volatile u8 lbl_80560062;  // thread running
+volatile u8 lbl_80560063;  // thread finished
 Signal lbl_80560068;  // SD changed
 Signal lbl_80560070;  // track list changed
 s32 lbl_80560078;     // track requested
@@ -263,7 +263,7 @@ extern "C" {
 void fn_802E9BCC(Mp3Reader* r) { delete r; }
 
 s32 lbl_8055D25C = -1;  // decoded sample rate
-s32 lbl_8055D260 = -1;  // rate the voices play at
+volatile s32 lbl_8055D260 = -1;  // rate the voices play at
 volatile s32 lbl_8055D264 = -1;  // rate wanted
 s32 lbl_8055D268 = 2;   // decoded channels
 s32 lbl_8055D26C = 2;   // channels in the PCM ring
@@ -973,9 +973,9 @@ void fn_802EBE2C(void) {
     lbl_805600D0 = 0;
     OSInitMutex(lbl_805584A0);
     fn_802E9CF0();
-    lbl_80560063 = 0;
     fn_802E3DCC();
     lbl_80560062 = 1;
+    lbl_80560063 = 0;
     if (!OSCreateThread(lbl_805584B8, fn_802EAB28, 0, lbl_805544A0 + 0x3FE0, 0x3FE0, 14, 1)) {
         fn_802E317C("mp3: can't create thread");
     }
