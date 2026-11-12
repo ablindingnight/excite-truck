@@ -1322,7 +1322,6 @@ void fn_801E96D8(RaceSetup* s) {
                         WVec cur;
                         WMtx mtx;
                         WVec c;
-                        WVec up;
                         f32 len;
                         WallVol* wv;
                         cur.x = p.x;
@@ -1337,11 +1336,10 @@ void fn_801E96D8(RaceSetup* s) {
                         mtx.z.z = cur.z - prev.z;
                         mtx.pos = c;
                         len = PSVECMag(&mtx.z) / 2.0f;
-                        up.x = 0.0f;
                         PSVECNormalize(&mtx.z, &mtx.z);
-                        up.z = 0.0f;
-                        up.y = 1.0f;
-                        mtx.y = up;
+                        mtx.y.x = 0.0f;
+                        mtx.y.z = 0.0f;
+                        mtx.y.y = 1.0f;
                         PSVECCrossProduct(&mtx.y, &mtx.z, &mtx.x);
                         mtx.pos.y += 125.0f;
                         if (right) {
