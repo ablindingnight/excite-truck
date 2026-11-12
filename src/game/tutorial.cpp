@@ -1380,7 +1380,6 @@ inline void Challenge::Init(void) {
                 TVec2* c = &p->pts[i % p->count];
                 TVec2* b = &p->pts[(i - 1) % p->count];
                 Delta2 d;
-                Delta2 e;
                 d.x = b->x - c->x;
                 d.z = b->z - c->z;
                 if (d.x * d.x + d.z * d.z > max) {
