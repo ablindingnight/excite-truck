@@ -964,11 +964,11 @@ Surf* fn_802D62E4(Surf* s) {
 }
 
 /* Helper name unproven: accessor for the surface vertex format (a getter; the call-site value goes through it). */
-static inline u32 SurfVFmt(Surf* s) {
+static inline u32 SurfVFmt(const Surf* s) {
     return s->vfmt;
 }
 
-void fn_802D62FC(Surf* s, void** dl, u32* size) {
+void fn_802D62FC(const Surf* s, void** dl, u32* size) {
     u32 key = SurfVFmt(s);
     DLEntry* e = lbl_804CA438;
     u8 b = s->b9;
