@@ -396,15 +396,7 @@ public:
         }
         return finished;
     }
-    void ShowMessage(int player) {
-        const char* msg = 0;
-        if (lbl_8055D350->unk30->impaired) {
-            msg = "Your car is impaired";
-        }
-        if (msg) {
-            fn_8001071C(msg, player);
-        }
-    }
+    void ShowMessage(int player);
 
     f32 times[4];  // offset 0x4
     bool done;     // offset 0x14
@@ -436,12 +428,7 @@ struct MenuItem {
 
 class ResultsOverlay : public GameOverlay {
 public:
-    ResultsOverlay(void) {
-        art = fn_8023512C("uielems.art");
-        popup = fn_8023512C("popup1.art");
-        layout = fn_80145E70("resmenu_lyt.val");
-        Reset();
-    }
+    ResultsOverlay(void);
     virtual ~ResultsOverlay(void);
     virtual void Enter(void);
     virtual void Reset(void) {
@@ -805,6 +792,44 @@ void fn_80005C20(void) {
     f32 dt = (now - lbl_8055D348) / 1000.0f;
     lbl_8055D34C = MAX(0.0f, dt);
     lbl_8055D348 = now;
+}
+
+inline const char* ClosureOverlay::GetName(void) { return "ClosureOverlay"; }
+
+inline void ClosureOverlay::DrawContinue(void) {
+    f32 x;
+    f32 y;
+    if (fn_801B83A0()->vf64() && fn_801B83A0()->vf68() && !IsDone()) {
+        x = fn_80011E44() - 132.0f;
+        y = 95.0f + fn_80011E60();
+        fn_8000FBE8(x - 35.0f, y, 1.0f);
+        fn_8000FF88(0xFFFFFFFF, 0x11, "Continue", 0.6f, x, y);
+    }
+}
+
+inline int ClosureOverlay::IsDone(void) { return done; }
+
+inline void ClosureOverlay::ShowMessage(int player) {
+    const char* msg = 0;
+    if (lbl_8055D350->unk30->impaired) {
+        msg = "Your car is impaired";
+    }
+    if (msg) {
+        fn_8001071C(msg, player);
+    }
+}
+
+inline const char* ArenaIntroOverlay::GetName(void) { return "ArenaIntroOverlay"; }
+
+inline const char* IntroOverlay::GetName(void) { return "IntroOverlay"; }
+
+inline const char* ResultsOverlay::GetName(void) { return "ResultsOverlay"; }
+
+inline ResultsOverlay::ResultsOverlay(void) {
+    art = fn_8023512C("uielems.art");
+    popup = fn_8023512C("popup1.art");
+    layout = fn_80145E70("resmenu_lyt.val");
+    Reset();
 }
 
 void fn_80005C88(void) {
@@ -1312,28 +1337,16 @@ inline int ClosureOverlay::HandleKey(int player, u32 type, int key) {
     return 0;
 }
 
-inline void ClosureOverlay::DrawContinue(void) {
-    f32 x;
-    f32 y;
-    if (fn_801B83A0()->vf64() && fn_801B83A0()->vf68() && !IsDone()) {
-        x = fn_80011E44() - 132.0f;
-        y = 95.0f + fn_80011E60();
-        fn_8000FBE8(x - 35.0f, y, 1.0f);
-        fn_8000FF88(0xFFFFFFFF, 0x11, "Continue", 0.6f, x, y);
-    }
-}
 
-inline int ClosureOverlay::IsDone(void) { return done; }
 
-inline const char* ClosureOverlay::GetName(void) { return "ClosureOverlay"; }
+
+
 
 inline ArenaIntroOverlay::~ArenaIntroOverlay(void) {}
 
 inline int ArenaIntroOverlay::IsFullScreen(void) { return 1; }
 
-inline const char* ArenaIntroOverlay::GetName(void) { return "ArenaIntroOverlay"; }
 
-inline const char* IntroOverlay::GetName(void) { return "IntroOverlay"; }
 
 inline ResultsOverlay::~ResultsOverlay(void) {
     if (layout) {
@@ -1373,7 +1386,7 @@ inline int ResultsOverlay::HandleKey(int player, u32 type, int key) {
     return HandleMenuKey(player, type, key);
 }
 
-inline const char* ResultsOverlay::GetName(void) { return "ResultsOverlay"; }
+
 
 inline void ReplayOverlay::Update(void) {
     if (lbl_8055D350->event->type & 0x200) {
