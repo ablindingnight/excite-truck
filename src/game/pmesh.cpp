@@ -112,7 +112,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
         lp.z = pos->z;
     }
     int n = 0;
-    int max = *count;
+    s16 max = *count;
     for (int i = 0; i < mesh->numCells; i++) {
         PCell* c = &mesh->cells[i];
         if (PSVECSquareDistance(&c->center, &lp) > (c->radius + radius) * (c->radius + radius)) {
@@ -163,7 +163,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 PVec3 cp = proj;
                 if (outside == 1) {
                     int k1;
-                    int k0 = outIdx[0];
+                    u32 k0 = outIdx[0];
                     cp.x = proj.x + t->edge[k0].x * (-ed[k0]);
                     cp.y = proj.y + t->edge[k0].y * (-ed[k0]);
                     cp.z = proj.z + t->edge[k0].z * (-ed[k0]);

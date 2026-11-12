@@ -2384,7 +2384,7 @@ void fn_80183E7C(u8* p) {
     } else {
         F32(p, 0x26A8) = F32(p, 0x26A8) + lbl_80561D9C;
     }
-    u8 stuck = F32(p, 0x26A8) > lbl_80561CD8;
+    s8 stuck = F32(p, 0x26A8) > lbl_80561CD8;
     if (stuck != U8(p, 0x26AC)) {
         U8(p, 0x26AC) = stuck;
         fn_801BF1B8(PTR(p, 0x1EC), stuck);
@@ -3889,7 +3889,7 @@ static inline f32 PkNorm(u32 v, f32 lo, f32 range) {
 }
 static inline f32 PkUnpack(u32 v, f32 q, f32 lo, f32 span) { return lo + PkNorm(v, 0.0f, q) * span; }
 
-static inline void PkCopy(void* dst, const void* src, int n) {
+static inline void PkCopy(void* dst, const void* src, s16 n) {
     u8* d = (u8*)dst;
     const u8* s = (const u8*)src;
     while (n-- > 0) {

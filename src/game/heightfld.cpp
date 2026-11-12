@@ -519,7 +519,7 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* normal, int lx, int lz, f32 h) {
+static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* normal, int lx, u16 lz, f32 h) {
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         if (normal) {
