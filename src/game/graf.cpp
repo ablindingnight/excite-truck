@@ -68,7 +68,7 @@ public:
 
 class GrafVisitor {
 public:
-    virtual void Visit(GModel* m, void* res, s32 handle);  // 0x8
+    virtual void Visit(GModel* m, void* res, s32 handle) = 0;  // 0x8
 };
 
 struct GrafFactory {
@@ -189,9 +189,6 @@ GModelHandler* fn_801F224C(void);
 GModelHandler* fn_801EB0E8(void);
 }
 
-s32 lbl_8055AFB8 = -1;  // psky.mod
-s32 lbl_8055AFBC = -1;  // litening.mod
-
 const GrafFactory lbl_802F9A08[25] = {
     {"Simple Model", fn_801F1D68},     {"Point-Facing", fn_801F1DA4}, {"Axis-Facing", fn_801F1DE4},
     {"Sky", fn_801F1E24},              {"Multi-Facing", fn_801F2064}, {"Rotator", fn_801F2020},
@@ -203,6 +200,9 @@ const GrafFactory lbl_802F9A08[25] = {
     {"Fabric", fn_801F78F0},           {"Facing Test", fn_801F220C},  {"Scrolling", fn_801F224C},
     {"Sanity", fn_801EB0E8},
 };
+
+s32 lbl_8055AFB8 = -1;  // psky.mod
+s32 lbl_8055AFBC = -1;  // litening.mod
 
 ModuleTag lbl_8055EB88;
 u32 lbl_8055EB90 = GColor(0xFF, 0xFF, 0, 0);
