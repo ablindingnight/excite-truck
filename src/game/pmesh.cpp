@@ -112,7 +112,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
         lp.z = pos->z;
     }
     int n = 0;
-    s16 max = *count;
+    int max = *count;
     for (int i = 0; i < mesh->numCells; i++) {
         PCell* c = &mesh->cells[i];
         if (PSVECSquareDistance(&c->center, &lp) > (c->radius + radius) * (c->radius + radius)) {
