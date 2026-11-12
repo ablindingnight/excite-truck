@@ -65,7 +65,7 @@ struct GarageFlags {
         unk0 = -1;
         alt = 0;
     }
-    u32 unk0;              // offset 0x0, profile slot
+    s32 unk0;              // offset 0x0, profile slot
     u8 alt;                // offset 0x4
     u8 pad5[0x3];
     GaragePair pairs[4];   // offset 0x8
@@ -436,7 +436,7 @@ void fn_80257C10(const char* chassis);
 int fn_80128314(int heap);
 int fn_80265D58(void);
 void fn_8024EA1C(u8* p);
-u32 fn_8024EB94(u8* p);
+s32 fn_8024EB94(u8* p);
 u8* fn_8024EB9C(u8* p, int i);
 void fn_8024EBAC(u8* p, s32 v, int set);
 u32 fn_8024EBE4(u8* p);
@@ -739,7 +739,7 @@ extern "C" {
 
 void fn_8024EA1C(u8* p) { ShowSelColor(p); }
 
-u32 fn_8024EB94(u8* p) { return U32(p, 0x1c); }
+s32 fn_8024EB94(u8* p) { return S32(p, 0x1c); }
 
 u8* fn_8024EB9C(u8* p, int i) { return PTR(p, 0xCC) + i * 0x14; }
 
