@@ -255,8 +255,11 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     f32 a = f->acc;
     e = lbl_8055C4B8;
     f32 st = lbl_8055C4B4;
+    f32 hi = lbl_80563C2C;
     f32 x = (a - st) / (e - st);
-    f->t = ShakeEase(FovRemap(ClampF(x)));
+    x = hi < x ? hi : x;
+    x = x > lbl_80563C20 ? x : lbl_80563C20;
+    f->t = ShakeEase(FovRemap(x));
 }
 
 f32 PSVECDistance(const f32* a, const f32* b);
