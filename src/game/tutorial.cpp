@@ -1706,7 +1706,9 @@ void fn_80147940(Layout* l, GartElem* e, const char* set, int part);
 void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
 }
 
-static u8 lbl_8055E308;  // warned about the elems
+}  // namespace
+u8 lbl_8055E308;  // warned about the elems
+namespace {
 
 static inline void DrawEntry(ChalList* list, TextElem* el, int i, TextElem* e1, TextElem* e2, GartElem* but, GartElem* star) {
     TextElem te = *el;
