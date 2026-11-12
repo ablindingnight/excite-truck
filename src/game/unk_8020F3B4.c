@@ -333,6 +333,7 @@ void fn_8020FE90(void) {
 void fn_8020FEF0(long dir) {
     long sel = lbl_8055EEE0;
     long page;
+    long count;
     long max;
     if (sel == -2 && lbl_8055EEBC > 0) {
         if (dir == 1) {
@@ -357,14 +358,15 @@ void fn_8020FEF0(long dir) {
             max = page;
         }
         lbl_8055EEE4 = max;
+        count = lbl_8055EEBC;
         if (old == max) {
             return;
         }
     }
-    if (lbl_8055EEBC == 0) {
+    if (count == 0) {
         lbl_8055EEE0 = -2;
-    } else if (sel >= 0 && sel + max * 10 >= lbl_8055EEBC) {
-        lbl_8055EEE0 = (lbl_8055EEBC - 1) % 10;
+    } else if (sel >= 0 && sel + max * 10 >= count) {
+        lbl_8055EEE0 = (count - 1) % 10;
     }
     if (lbl_8055EEE0 >= 0) {
         fn_8020FE90();
