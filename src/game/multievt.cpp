@@ -16,6 +16,9 @@
 const char* lbl_8055BF10 = "last_mp_event_count";
 const char* lbl_8055BF14 = "last_mp_eve";
 const char* lbl_8055BF18 = "last_mp_difficulty";
+char lbl_8055BF1C[] = "Easy";
+char lbl_8055BF24[] = "Medium";
+char lbl_8055BF2C[] = "Hard";
 
 // A list widget: the base data comes first, the vptr after it.
 class VC {
@@ -85,7 +88,8 @@ void fn_8024B6AC(u8* p);
 
 void operator delete(void* p);
 
-extern const NameEntry lbl_802FA4B0[3];
+// The difficulty names (Difficulty picker page and the replay movie path).
+extern const NameEntry lbl_802FA4B0[3] = {{0, lbl_8055BF1C}, {1, lbl_8055BF24}, {2, lbl_8055BF2C}};
 extern char lbl_804989AC[0x24];  // defined after lbl_80498998 (.bss order)
 
 // Per-car multiplayer unlock flags.
