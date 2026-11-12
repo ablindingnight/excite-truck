@@ -587,8 +587,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     f32 base = fn_801DCF0C(x, z);
     f32 h0;
     f32 saved[75];
-    int i;
-    for (i = 0; i < 75; i++) {
+    for (int i = 0; i < 75; i++) {
         saved[i] = lbl_804424B0[i];
         lbl_804424B0[i] = 0.0f;
     }
@@ -604,7 +603,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     d->terms[2].weight = 0;
     d->terms[2].k = 0.0f;
     int n = 0;
-    for (i = 0; i < 75; i++) {
+    for (int i = 0; i < 75; i++) {
         lbl_804424B0[i] = 1.0f;
         f32 dh = fn_801DCF0C(x, z) - h0;
         if (!(AbsF(dh) <= lbl_80558DC4[0])) {
@@ -629,7 +628,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
         }
         lbl_804424B0[i] = 0.0f;
     }
-    for (i = 0; i < 75; i++) {
+    for (int i = 0; i < 75; i++) {
         lbl_804424B0[i] = saved[i];
     }
     int any = 0;

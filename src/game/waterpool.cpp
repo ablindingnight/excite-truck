@@ -722,16 +722,15 @@ void fn_8029D644(WaterPool* p) {
     fn_802C8BD0(p->tex);
     if (fn_802C8DBC(n)) {
         PoolVtx* rows[2];
-        int i;
         rows[0] = p->verts;
         rows[1] = p->verts + p->nx;
-        for (i = 0; i < p->nx; i++) {
+        for (int i = 0; i < p->nx; i++) {
             fn_8029DB78(p, (PoolVtx*)((u8*)rows[0] + i * (int)sizeof(PoolVtx)), i, 0);
         }
         for (int j = 1; j < p->ny; j++) {
             PoolVtx* a = rows[j & 1];
             PoolVtx* b = rows[1 - (j & 1)];
-            for (i = 0; i < p->nx; i++) {
+            for (int i = 0; i < p->nx; i++) {
                 PoolVtx* av = (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx));
                 PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
                 fn_8029DB78(p, av, i, j);

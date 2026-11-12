@@ -381,8 +381,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     fn_801332D0(0, lbl_8055BF10, eve);
     fn_801332D0(0, lbl_8055BF14, track);
     EvPairs* pairs = new ("ci-list") EvPairs;
-    int i;
-    for (i = 0; i < GetNumEvents(); i++) {
+    for (int i = 0; i < GetNumEvents(); i++) {
         u8* ev = GetEvent(i);
         const char* name = GetTrack(S32(ev, 0x4))->name;
         if ((testing ? fn_8024958C : fn_80249660)(ev, name)) {
@@ -413,7 +412,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     loc.events = &events;
     loc.cur = 0;
     loc.count = 0;
-    for (i = 0; i < (*loc.pairs)->count; i++) {
+    for (int i = 0; i < (*loc.pairs)->count; i++) {
         int found = 0;
         const char* name = (*loc.pairs)->items[i].track;
         const char* env = GetTrackEnviron(name);
@@ -448,7 +447,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     *(void**)&tex = lbl_80343C30;
     tex.f2C = 0;
     tex.vt2 = lbl_80343C30 + 3;
-    for (i = 0; i < unlocks->count; i++) {
+    for (int i = 0; i < unlocks->count; i++) {
         char buf[0x21];
         const char* name = ((VN*)PTR(GetEvent(unlocks->entries[i].id), 0x20))->v14("name");
         const char* prefix = "career_";

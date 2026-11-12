@@ -554,12 +554,11 @@ void DrawLoadingScreen(int alpha, f32 t) {
     if (!lbl_8055D646 && show_goals && GetNumPlayers() == 1) {
         f32 slide = 4.0f * SCurve(t);
         f32 panel_x = lbl_8055CFF0 * slide - 160.0f;
-        int i;
 
         fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, lbl_8055D658);
         int rows[3] = {10, 8, 9};
         int* row = rows;
-        for (i = 0; i < sizeof(rows) / sizeof(rows[0]); row++, i++) {
+        for (int i = 0; i < sizeof(rows) / sizeof(rows[0]); row++, i++) {
             int kind = *row;
             const char* label = "";
             char value[0x40] = {0};
