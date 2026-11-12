@@ -746,8 +746,8 @@ void fn_802D5B8C(const Surf* s) {
     off[1] = lbl_804DB068[1].y;
     f32 k = lbl_804DB068[1].z;
     f32 v0 = off[1];
-    c = col;
     f32* t = uv;
+    c = col;
     for (i = 0; i < n; i++) {
         u32 a = *src;
         int x = MAX((int)((u8)a * (1.0f - PSVECSquareDistance(p, &d) * k)), 0);

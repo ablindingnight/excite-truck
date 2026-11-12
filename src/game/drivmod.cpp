@@ -543,8 +543,8 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                 BRot r;
                 if (a > 0.0001f) {
                     f32 inv = 1.0f / a;
-                    f32 ax = inv * axis.x;
                     f32 ay = inv * axis.y;
+                    f32 ax = inv * axis.x;
                     f32 az = inv * axis.z;
                     f32 sn = sin(a);
                     f32 cs = cos(a);
@@ -749,8 +749,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         pose[k].pos.y = yv + d->butt.y;
         pose[k].pos.z = pose[k].pos.z + d->butt.z;
     }
-    f32 lean = lbl_80563094 * F32(car, 0x23C);
     e1.y = F32(car, 0x3C) * lbl_80563090;
+    f32 lean = lbl_80563094 * F32(car, 0x23C);
     e1.z = 2.5f * -F32(car, 0x238) + F32(car, 0x3C) * -0.17453292f;
     lean = MaxF(MinF(lbl_80563090, lean), -0.2617994f);
     e1.x = 1.5f * F32(car, 0x240) - lean;

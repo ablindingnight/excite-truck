@@ -839,8 +839,8 @@ void fn_80182DF4(u8* p) {
     BVec front(0.7f, 0.1f, 1.0f);
     f32 a = maxX - 0.45000002f;
     f32 b = 0.8f * a;
-    f32 yRear = 0.36f + minY;
     f32 yMid = 0.45000002f + minY;
+    f32 yRear = 0.36f + minY;
     zRear = maxZ - 0.45000002f;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);

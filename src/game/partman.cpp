@@ -967,8 +967,8 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 void PartSys::DrawRotating(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
     f32 half = 0.5f;
-    f32 now = lbl_8055F738;
     f32 shade = half * shading;
+    f32 now = lbl_8055F738;
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = now - p->birth;

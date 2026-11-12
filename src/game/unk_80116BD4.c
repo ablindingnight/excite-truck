@@ -4342,8 +4342,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     s32 i;
 
     rowSkip = pitch * 8 - width;
-    idx = 0;
     skipCount = 0;
+    idx = 0;
     bits.start = data;
     bits.next = data;
     bits.count = 0;

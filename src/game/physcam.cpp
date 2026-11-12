@@ -1043,8 +1043,8 @@ void CamRegion::Prepare(u8* line) {
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
         f32 a = dir.x * dir.x + dir.y * dir.y;
-        rel.x = s.x - center.x;
         f32 yv = center.y;
+        rel.x = s.x - center.x;
         rel.y = s.y - yv;
         f32 b = 2.0f * (dir.x * rel.x + rel.y * dir.y);
         f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);

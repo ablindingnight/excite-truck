@@ -189,8 +189,8 @@ void fn_80202D50(EVec3 dir) {
     f32 y = -dir.y;
     f32 elev = 180.0f * (f32)asin(0.0f > y ? 0.0f : y) / 3.1415927f;
     void* result = 0;
-    EnvTex* e = lbl_8048897C.data + 1;
     int count = lbl_8048897C.n;
+    EnvTex* e = lbl_8048897C.data + 1;
     if (count > 0) {
         for (int i = 1; i < count; i++, e++) {
             if (e->idx > elev) {
