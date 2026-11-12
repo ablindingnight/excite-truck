@@ -542,10 +542,10 @@ void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
     int c;
-    int bit;
+    GList* lp;
     bool first;
     u32 m;
-    GList* lp;
+    int bit;
     int n;
     GVec* verts;
     InlineVec<GTex, 6>* texs;

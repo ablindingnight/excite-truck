@@ -892,18 +892,18 @@ static inline int HitCorner(const AVec* at) {
 static inline double AbsDbl(double v) { return __fabs(v); }
 
 void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind) {
-    GlassMsg msg;
-    AVec di;
-    AVec da;
-    AVec h;
-    DentVec cand;
-    AVec g0;
     DentVec nd;
     DentVec dg;
     DentVec c0;
     DentVec w;
     DentVec r;
     DVec c;
+    GlassMsg msg;
+    AVec di;
+    AVec da;
+    AVec h;
+    DentVec cand;
+    AVec g0;
     f32 inv = -0.1f / F32(p, 0xD4);
     F32(p, 0x26F0) += imp->v[0] * inv;
     F32(p, 0x26F4) += imp->v[1] * inv;

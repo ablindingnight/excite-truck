@@ -2694,10 +2694,10 @@ inline void ZoneMaster::vf10(void) {
     void* tr;
     u32 k;
     Vec3* p;
-    Gate* g;
+    int lv;
     ZoneLevel* l;
     int j;
-    int lv;
+    Gate* g;
     int i;
     lbl_8055E1BC = 0;
     b294 = 0;

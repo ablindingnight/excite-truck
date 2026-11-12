@@ -433,10 +433,10 @@ int fn_801E1048(int car) {
     int r;
     CarRec* rec;
     Wheel* ws;
-    int j;
+    int hit;
     int i;
     Wheel* w;
-    int hit;
+    int j;
     m = lbl_8055EA10;
     r = m != 0;
     if (r) {

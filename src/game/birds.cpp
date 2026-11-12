@@ -382,9 +382,9 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
 void fn_802A8DE8(void) {
     Flock* f;
     int j;
-    int i;
-    Boid* b;
     int off;
+    Boid* b;
+    int i;
     for (i = 0, off = 0; i < lbl_804BD6C4.n; off += sizeof(Flock*), i++) {
         f = *(Flock**)((u8*)lbl_804BD6C4.data + off);
         int off = 0;

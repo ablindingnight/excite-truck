@@ -528,17 +528,17 @@ int fn_802CDB20(MList* m, int i) {
 
 void fn_802CDB5C(int pri) {
     int j;
-    u8* dl;
+    MLBatch* e;
     MList* m;
-    int n;
+    RenderCtx* ctx;
     int i;
     int o;
     void* cur;
     s32 tex;
     int open;
-    RenderCtx* ctx;
+    int n;
     MLStrip* sp;
-    MLBatch* e;
+    u8* dl;
     s32 cnt;
     void* id;
     fn_801293C8("mlist: flush");
