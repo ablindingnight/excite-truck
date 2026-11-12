@@ -75,7 +75,7 @@ extern "C" void fn_80257C10(void) {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         *(MenuItem*)&lbl_80498E50,
     };
-    MenuDesc desc = {"garage.lyt", items, NULL, 0, 0};
+    MenuDesc desc = {"$garage.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
 }
 
