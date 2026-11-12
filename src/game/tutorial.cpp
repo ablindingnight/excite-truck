@@ -1380,6 +1380,7 @@ inline void Challenge::Init(void) {
                 TVec2* c = &p->pts[i % p->count];
                 TVec2* b = &p->pts[(i - 1) % p->count];
                 Delta2 d;
+                Delta2 e;
                 d.x = b->x - c->x;
                 d.z = b->z - c->z;
                 if (d.x * d.x + d.z * d.z > max) {
@@ -1865,15 +1866,16 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             }
             {
                 Delta2 d;
+                Delta2 e;
                 f32 len;
                 d.z = pts[2].z - pts[0].z;
                 f32 xv = pts[0].x;
                 d.x = pts[2].x - xv;
                 best = 2;
                 max = d.x * d.x + d.z * d.z;
-                d.x = pts[0].x - pts[1].x;
-                d.z = pts[0].z - pts[1].z;
-                len = d.x * d.x + d.z * d.z;
+                e.x = pts[0].x - pts[1].x;
+                e.z = pts[0].z - pts[1].z;
+                len = e.x * e.x + e.z * e.z;
                 if (len > max) {
                     max = len;
                     best = 0;
