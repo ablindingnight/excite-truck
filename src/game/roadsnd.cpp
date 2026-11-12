@@ -135,17 +135,14 @@ static inline f32 Ramp_hm(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi
 void RoadSound::Update(void) {
     char* c = car;
     int surface = 0;
-    int i = 0;
     for (int w = 0; w < 4; w++) {
         s32 s = *(s32*)(c + 0x2410 + w * 0x74);
-        if (s > surface) {
-            surface = s;
-        }
+        surface = s > surface ? s : surface;
     }
     f32 gain = 0.25f * *(s32*)(c + 0x2620);
     f32 speed = *(f32*)(c + 0x25D4);
-    for (; i < count; i++) {
-        if (entries[i].surface == fn_801D04A8(surface)->type) {
+    for (int i = 0; i < count; i++) {
+        if (fn_801D04A8(surface)->type == entries[i].surface) {
             RoadSoundVoice* v = entries[i].voice;
             if (v) {
                 f32 vol;
@@ -169,4 +166,4 @@ void RoadSound::Update(void) {
 }
 
 // NonMatching: the target emits the vtable first in .data (our compiler puts it last), and
-// Update's surface max and FPR allocation differ.
+// Update's FPR allocation for its loop constants differs.
