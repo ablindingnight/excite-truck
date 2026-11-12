@@ -87,20 +87,8 @@ extern u8 lbl_8055F2C9;
 extern s8 lbl_8055F2CA;
 extern u8 lbl_8055F2CC;
 
-void fn_8024C370(void) {}
 
-int fn_8024C524(void) {
-    fn_802E712C();
-    MemCardSystemLoad();
-    fn_8024C464();
-    return 0;
-}
 
-int fn_8024C550(void) {
-    fn_802E6FBC();
-    fn_8024C464();
-    return 0;
-}
 
 // The name entry screen's setup (dead in the shipped build; only its strings remain).
 /* Helper names unproven */
@@ -109,67 +97,13 @@ int LoadNameFont(const char* name);
 void* FindNameWidget(void* lyt, const char* name);
 void SetNameText(void* w, const char* fmt, ...);
 
-static void SetupNameEntry(int upper, const char* name, int len) {
-    void* lyt = LoadNameLayout("profile_name.lyt");
-    int font = LoadNameFont("uifnt.gtx");
-    const char* shift = upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
-    SetNameText(FindNameWidget(lyt, "name_field"), "%*.*s", len, len, name);
-    SetNameText(FindNameWidget(lyt, "name_widget"), shift, font);
-}
 
-int fn_8024C6F4(int slot) {
-    int allowed = 0;
-    if (IdentIsSlotEmpty(slot)) {
-        if (!fn_80215214(fn_80131234("Profile:TITLE"), fn_80131234("Profile:CONFIRM_CREATE"), 0)) goto finished;
-    }
-    allowed=1;
-finished:
-    return allowed;
-}
 
-void fn_8024CBF4(void) {
-    u8* available = lbl_8055F2D0;
-    for (int i = 0; i < 4; i++, available++) {
-        if (!*available) {
-            fn_80214B44(i + 1);
-        }
-    }
-    fn_80214CB4(IdentGetCurrentSlot());
-}
 
-int fn_8024CEF0(int slot){
-if(IdentIsSlotEmpty(slot))return 1;
-const char* message="Do you really want overwrite this profile?";
-const char* title="Create Profile";
-return fn_80215214(title,message,0);
-}
 
-int fn_8024CF38(int* slot) { return fn_8024CC54(slot, fn_8024CEF0, 1); }
-int fn_8024CF48(int* slot) { return fn_8024CC54(slot, 0, 0); }
 
-int fn_8024CF54(void) {
-    lbl_8055F2C8 = 1;
-    return fn_8024C768();
-}
 
-void fn_8024CF60(void) {
-    int slot;
-    if (fn_8024CF38(&slot)) {
-        IdentSelectSlot(slot);
-        IdentClearSlot();
-        IdentSetSlotName(IdentGetDefaultName(slot));
-        if (fn_802E8D84()) {
-            fn_802E7128();
-        }
-    }
-}
 
-void fn_8024CFB4(void) {
-    int slot;
-    if (fn_8024CF48(&slot)) {
-        IdentSelectSlot(slot);
-    }
-}
 
 struct ProfileTextFields {
     u8 pad0[0x10];
@@ -182,58 +116,11 @@ struct ProfileTextFields {
 
 }
 
-void ProfileTextState::Enter(void) {
-    ProfileTextFields* self=(ProfileTextFields*)this;
-    int fontHeight = fn_80232B70(self->font);
-    self->scale = (f32)self->height / (f32)fontHeight;
-}
 
 extern "C" {
 
-// Slot label and selection-icon refresh, 8024C464-8024C524.
-void fn_8024C464(void) {
-    char* name = &lbl_80498A00[0][0];
-    int* icon = lbl_80498A48;
-    for (int slot = 0; slot < 4; slot++, name += 18, icon++) {
-        fn_801345D8(name, 18, "%s", IdentGetSlotName(slot));
-        if (!IdentIsSlotEmpty(slot) && slot == IdentGetCurrentSlot()) {
-            if (IdentIsSlotUsed(slot)) *icon = 2;
-            else *icon = 1;
-        } else *icon = 0;
-    }
-}
 
-int fn_8024C578(int slot) {
-    if (IdentIsSlotEmpty(slot)) {
-        char name[18] = {0};
-        if (fn_8023FAD4(name, 18)) {
-            IdentSelectSlot(slot);
-            IdentClearSlot();
-            IdentSetSlotName(name);
-            fn_802E6FBC();
-            fn_8024C464();
-            return 1;
-        }
-        return 0;
-    }
-    lbl_8055F2C4 = lbl_80498A00[slot];
-    IdentSelectSlot(slot);
-    fn_8024C464();
-    return 1;
-}
 
-void fn_8024C628(void) {
-    int current = IdentGetCurrentSlot();
-    
-    for (int slot = 0; slot < 4; slot++) {
-        unsigned int valid=1;
-        for (int j = 0; j < 3; j++) if (!fn_8027B8E4(j, slot)) valid = 0;
-        for (int j = 0; j < 2; j++) if (!fn_8027B984(j, slot)) valid = 0;
-        if (valid) fn_80214A9C(slot + 1);
-        else fn_80214A9C(slot + 11);
-        if (slot == current) fn_80214CB4((slot << 1) + valid);
-    }
-}
 
 // Only observed fields are named; this does not assert a recovered class hierarchy.
 struct ProfileCursorFields {
@@ -245,26 +132,6 @@ struct ProfileCursorFields {
 };
 }
 
-int ProfileTextState::Key(int key) {
-    ProfileCursorFields* self=(ProfileCursorFields*)this;
-    switch (key) {
-    case 0x6F: {
-        int length = strlen(self->text);
-        int next = self->cursor + 1;
-        if(length < next) next=length; self->cursor=next;
-        self->dirty = 1;
-        break;
-    }
-    case 0x20: {
-        self->dirty = 1;
-        int next = self->cursor - 1;
-        self->cursor = next < 0 ? 0 : next;
-        break;
-    }
-    default: return 0;
-    }
-    return 1;
-}
 
 extern "C" {
 
@@ -288,20 +155,6 @@ extern "C" {extern const f32 lbl_80563944,lbl_80563948,lbl_8056394C;}
 extern "C" const f32 lbl_80563944;
 extern "C" const f32 lbl_80563948;
 extern "C" const f32 lbl_8056394C;
-void ProfileKeyboardState::Enter(void) {
-    ProfileKeyboardFitFields* self=(ProfileKeyboardFitFields*)this;
-    f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height*lbl_80563944;cellWidth=width/lbl_80563948;
-    f32 textWidth = fn_8023293C(self->font, "BS", self->widthScale);
-    textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-lbl_8056394C)/textWidth;
-    int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-lbl_8056394C;f32 fitHeight=heightGap/(f32)fontHeight;
-    self->scale = fitHeight < fitWidth ? fitHeight : fitWidth;
-    self->upper=0;self->upper=!self->upper;
-    const char* key = self->upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
-const char* src;int n;char* dst;src=fn_80131234(key);dst=self->shiftLabel;n=10;
-    while ((*dst++ = *src++) != 0) {
-        if (--n <= 0) { dst[-1] = 0; break; }
-    }
-}
 
 extern "C" {
 
@@ -321,31 +174,8 @@ struct ProfileTextDrawFields {
 };
 }
 
-extern "C" {extern const f32 lbl_80563930,lbl_80563940;extern const char lbl_8055C08C[6];}
+extern "C" {extern const f32 lbl_80563930,lbl_80563940;}
 inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, lbl_80563930, widthScale);}
-void ProfileTextState::Draw(void) {
-    ProfileTextDrawFields* self=(ProfileTextDrawFields*)this;
-    f32 x, y;
-    fn_80230C30(&x, &y, self->x, self->y);
-    if (self->active) self->color = 0xFFFFFFFF;
-    else {
-        self->color = 0xFF000000;
-        int height = self->height;
-        f32 width = fn_8023293C(self->font, self->text, self->widthScale);
-        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, lbl_80563940);
-    }
-    // Use the observed font payload through a typed inline call.
-    // The original method name and inline boundary remain unknown.
-    f32 callY=y;f32 callX=x;this->font.DrawCoordinatesNew(self->stringObject,callX,callY);
-    // Original prefix starts at sp+0x10; capacity 18 is inferred from slot names,
-    // not independently recoverable from the non-bounds-checked sprintf call.
-    char prefix[18];
-    sprintf(prefix, lbl_8055C08C, self->cursor, self->cursor, self->text);
-    f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
-    f32 cursorX = x + width;
-    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930, y, lbl_80563930 + cursorX,
-               y - (f32)self->height, lbl_80563940);
-}
 
 extern "C" {
 
@@ -363,7 +193,6 @@ struct ProfileKeyboardCleanupFields {
 };
 }
 
-ProfileKeyboardState::~ProfileKeyboardState(void) {}
 
 extern "C" {
 }
@@ -380,26 +209,6 @@ void fn_801308F4(char*, int, u32);
 // Achievement result is retained as an opaque register-sized word: both this
 // build's producer and consumer are four-byte stubs, so no pointee type is inferred.
 static inline void ProfileCopyLabelNew(const char* src,int n,char* dst){while((*dst++=*src++)!=0){if(--n<=0){dst[-1]=0;break;}}}
-void fn_8024CAAC(int emptyAvailable) {
-    char* name = &lbl_80498A58[0][0];
-    char* description = &lbl_80498AA0[0][0];
-    u8* available;int slot=0;available=lbl_8055F2D0;
-    for (; slot < 4; slot++, name += 18, description += 100, available++) {
-        if (IdentIsSlotEmpty(slot)) {
-            const char* src = fn_80131234("PlayerName:EMPTY");
-            ProfileCopyLabelNew(src,18,name);
-            memset(description, 0, 100);
-            *available = emptyAvailable;
-        } else {
-            char key[100];
-            fn_801345D8(key, 100, "PlayerName:%d", slot + 1);
-            const char* src = fn_80131234(key);
-            ProfileCopyLabelNew(src,18,name);
-            fn_801308F4(description, 100, AchievementsGetForSlot(0, slot));
-            *available = 1;
-        }
-    }
-}
 
 
 struct ProfileKeyboardDrawFields {
@@ -417,40 +226,6 @@ void fn_80234AFC(const void*, f32, f32, const char*, ...);
 }
 
 extern const f32 lbl_80563954;  // 0.5
-void ProfileKeyboardState::Draw(void) {
-    ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
-    f32 x, y;
-    fn_80230C30(&x, &y, self->x, self->y);
-    f32 cellHeight;
-    f32 cellWidth = (f32)self->width / 10.0f;
-    cellHeight = (f32)self->height * 0.25f;
-    f32 top;
-    f32 left = x + cellWidth * (f32)self->selectedColumn;
-    top = y - cellHeight * (f32)self->selectedRow;
-    // right/bottom are unused: the target still converts column+1 and row+1 (xoris/stw) but drops the float math.
-    f32 right = x + cellWidth * (f32)(self->selectedColumn + 1);
-    f32 bottom = y - cellHeight * (f32)(self->selectedRow + 1);
-    f32 border = 4.0f;
-    fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
-    fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
-    fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
-    fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
-    y = y - cellHeight * lbl_80563954;
-    f32 startX = x + cellWidth * lbl_80563954;
-    for (int row = 0; row < 4; row++) {
-        x = startX;
-        for (int column = 0; column < 10; column++) {
-            if (row == 3 && column == 9) fn_80234AFC(&self->font, x, y, "%cOK", 1);
-            else if (row == 3 && column == 8) fn_80234AFC(&self->font, x, y, "%cBS", 1);
-            else {
-                const char* keys = self->upper ? "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ. " : "1234567890abcdefghijklmnopqrstuvwxyz. ";
-                fn_80234AFC(&self->font, x, y, "%c%c", 1, keys[row * 10 + column]);
-            }
-            x = x + cellWidth;
-        }
-        y = y - cellHeight;
-    }
-}
 
 extern "C" {
 
@@ -493,6 +268,106 @@ extern char lbl_8055B860[8];
 int fn_802146BC(ProfileMenuDesc*, int, int, int);
 void fn_802149C4(const char*);
 void fn_802149FC(const char*);
+
+
+
+struct ProfileKeyboardInputFields {
+    u8 pad0[0x44]; char* text; int cursor;
+    u8 pad4C[0x14]; u8 dirty; u8 pad61[3];
+    int selectedColumn,selectedRow;
+    bool upper; char shiftLabel[10]; u8 pad77;
+};
+}
+
+
+extern "C" {
+
+}
+
+// Definitions in address order.
+extern "C" {
+void fn_8024C370(void) {}
+
+}
+
+ProfileKeyboardState::~ProfileKeyboardState(void) {}
+
+extern "C" {
+// Slot label and selection-icon refresh, 8024C464-8024C524.
+void fn_8024C464(void) {
+    char* name = &lbl_80498A00[0][0];
+    int* icon = lbl_80498A48;
+    for (int slot = 0; slot < 4; slot++, name += 18, icon++) {
+        fn_801345D8(name, 18, "%s", IdentGetSlotName(slot));
+        if (!IdentIsSlotEmpty(slot) && slot == IdentGetCurrentSlot()) {
+            if (IdentIsSlotUsed(slot)) *icon = 2;
+            else *icon = 1;
+        } else *icon = 0;
+    }
+}
+
+int fn_8024C524(void) {
+    fn_802E712C();
+    MemCardSystemLoad();
+    fn_8024C464();
+    return 0;
+}
+
+int fn_8024C550(void) {
+    fn_802E6FBC();
+    fn_8024C464();
+    return 0;
+}
+
+int fn_8024C578(int slot) {
+    if (IdentIsSlotEmpty(slot)) {
+        char name[18] = {0};
+        if (fn_8023FAD4(name, 18)) {
+            IdentSelectSlot(slot);
+            IdentClearSlot();
+            IdentSetSlotName(name);
+            fn_802E6FBC();
+            fn_8024C464();
+            return 1;
+        }
+        return 0;
+    }
+    lbl_8055F2C4 = lbl_80498A00[slot];
+    IdentSelectSlot(slot);
+    fn_8024C464();
+    return 1;
+}
+
+void fn_8024C628(void) {
+    int current = IdentGetCurrentSlot();
+    
+    for (int slot = 0; slot < 4; slot++) {
+        unsigned int valid=1;
+        for (int j = 0; j < 3; j++) if (!fn_8027B8E4(j, slot)) valid = 0;
+        for (int j = 0; j < 2; j++) if (!fn_8027B984(j, slot)) valid = 0;
+        if (valid) fn_80214A9C(slot + 1);
+        else fn_80214A9C(slot + 11);
+        if (slot == current) fn_80214CB4((slot << 1) + valid);
+    }
+}
+
+static void SetupNameEntry(int upper, const char* name, int len) {
+    void* lyt = LoadNameLayout("profile_name.lyt");
+    int font = LoadNameFont("uifnt.gtx");
+    const char* shift = upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
+    SetNameText(FindNameWidget(lyt, "name_field"), name, len);
+    SetNameText(FindNameWidget(lyt, "name_widget"), shift, font);
+}
+
+int fn_8024C6F4(int slot) {
+    int allowed = 0;
+    if (IdentIsSlotEmpty(slot)) {
+        if (!fn_80215214(fn_80131234("Profile:TITLE"), fn_80131234("Profile:CONFIRM_CREATE"), 0)) goto finished;
+    }
+    allowed=1;
+finished:
+    return allowed;
+}
 
 int fn_8024C768(void) {
     ProfileMenuItem items[] = {
@@ -540,6 +415,37 @@ int fn_8024C768(void) {
     return result!=-1;
 }
 
+void fn_8024CAAC(int emptyAvailable) {
+    char* name = &lbl_80498A58[0][0];
+    char* description = &lbl_80498AA0[0][0];
+    u8* available;int slot=0;available=lbl_8055F2D0;
+    for (; slot < 4; slot++, name += 18, description += 100, available++) {
+        if (IdentIsSlotEmpty(slot)) {
+            const char* src = fn_80131234("PlayerName:EMPTY");
+            ProfileCopyLabelNew(src,18,name);
+            memset(description, 0, 100);
+            *available = emptyAvailable;
+        } else {
+            char key[100];
+            fn_801345D8(key, 100, "PlayerName:%d", slot + 1);
+            const char* src = fn_80131234(key);
+            ProfileCopyLabelNew(src,18,name);
+            fn_801308F4(description, 100, AchievementsGetForSlot(0, slot));
+            *available = 1;
+        }
+    }
+}
+
+void fn_8024CBF4(void) {
+    u8* available = lbl_8055F2D0;
+    for (int i = 0; i < 4; i++, available++) {
+        if (!*available) {
+            fn_80214B44(i + 1);
+        }
+    }
+    fn_80214CB4(IdentGetCurrentSlot());
+}
+
 int fn_8024CC54(int* slot, int (*confirm)(int), int create) {
     ProfileMenuItem items[] = {
         ProfileMenuItem(lbl_8055BAC0,8,(const void*)fn_8024CBF4,0,0),
@@ -569,12 +475,106 @@ int fn_8024CC54(int* slot, int (*confirm)(int), int create) {
     return 1;
 }
 
-struct ProfileKeyboardInputFields {
-    u8 pad0[0x44]; char* text; int cursor;
-    u8 pad4C[0x14]; u8 dirty; u8 pad61[3];
-    int selectedColumn,selectedRow;
-    bool upper; char shiftLabel[10]; u8 pad77;
-};
+int fn_8024CEF0(int slot){
+if(IdentIsSlotEmpty(slot))return 1;
+const char* message="Do you really want overwrite this profile?";
+const char* title="Create Profile";
+return fn_80215214(title,message,0);
+}
+
+int fn_8024CF38(int* slot) { return fn_8024CC54(slot, fn_8024CEF0, 1); }
+int fn_8024CF48(int* slot) { return fn_8024CC54(slot, 0, 0); }
+
+int fn_8024CF54(void) {
+    lbl_8055F2C8 = 1;
+    return fn_8024C768();
+}
+
+void fn_8024CF60(void) {
+    int slot;
+    if (fn_8024CF38(&slot)) {
+        IdentSelectSlot(slot);
+        IdentClearSlot();
+        IdentSetSlotName(IdentGetDefaultName(slot));
+        if (fn_802E8D84()) {
+            fn_802E7128();
+        }
+    }
+}
+
+void fn_8024CFB4(void) {
+    int slot;
+    if (fn_8024CF48(&slot)) {
+        IdentSelectSlot(slot);
+    }
+}
+
+}
+
+void ProfileTextState::Enter(void) {
+    ProfileTextFields* self=(ProfileTextFields*)this;
+    int fontHeight = fn_80232B70(self->font);
+    self->scale = (f32)self->height / (f32)fontHeight;
+}
+
+int ProfileTextState::Key(int key) {
+    ProfileCursorFields* self=(ProfileCursorFields*)this;
+    switch (key) {
+    case 0x6F: {
+        int length = strlen(self->text);
+        int next = self->cursor + 1;
+        if(length < next) next=length; self->cursor=next;
+        self->dirty = 1;
+        break;
+    }
+    case 0x20: {
+        self->dirty = 1;
+        int next = self->cursor - 1;
+        self->cursor = next < 0 ? 0 : next;
+        break;
+    }
+    default: return 0;
+    }
+    return 1;
+}
+
+void ProfileTextState::Draw(void) {
+    ProfileTextDrawFields* self=(ProfileTextDrawFields*)this;
+    f32 x, y;
+    fn_80230C30(&x, &y, self->x, self->y);
+    if (self->active) self->color = 0xFFFFFFFF;
+    else {
+        self->color = 0xFF000000;
+        int height = self->height;
+        f32 width = fn_8023293C(self->font, self->text, self->widthScale);
+        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, lbl_80563940);
+    }
+    // Use the observed font payload through a typed inline call.
+    // The original method name and inline boundary remain unknown.
+    f32 callY=y;f32 callX=x;this->font.DrawCoordinatesNew(self->stringObject,callX,callY);
+    // Original prefix starts at sp+0x10; capacity 18 is inferred from slot names,
+    // not independently recoverable from the non-bounds-checked sprintf call.
+    char prefix[18];
+    sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
+    f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
+    f32 cursorX = x + width;
+    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930, y, lbl_80563930 + cursorX,
+               y - (f32)self->height, lbl_80563940);
+}
+
+void ProfileKeyboardState::Enter(void) {
+    ProfileKeyboardFitFields* self=(ProfileKeyboardFitFields*)this;
+    f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height*lbl_80563944;cellWidth=width/lbl_80563948;
+    f32 textWidth = fn_8023293C(self->font, "BS", self->widthScale);
+    textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-lbl_8056394C)/textWidth;
+    int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-lbl_8056394C;f32 fitHeight=heightGap/(f32)fontHeight;
+    self->scale = fitHeight < fitWidth ? fitHeight : fitWidth;
+    self->upper=0;self->upper=!self->upper;
+    const char* key = self->upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
+const char* src;int n;char* dst;src=fn_80131234(key);dst=self->shiftLabel;n=10;
+    while ((*dst++ = *src++) != 0) {
+        if (--n <= 0) { dst[-1] = 0; break; }
+    }
 }
 
 int ProfileKeyboardState::Key(int key) {
@@ -626,6 +626,37 @@ int ProfileKeyboardState::Key(int key) {
     return 1;
 }
 
-extern "C" {
-
+void ProfileKeyboardState::Draw(void) {
+    ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
+    f32 x, y;
+    fn_80230C30(&x, &y, self->x, self->y);
+    f32 cellHeight;
+    f32 cellWidth = (f32)self->width / 10.0f;
+    cellHeight = (f32)self->height * 0.25f;
+    f32 top;
+    f32 left = x + cellWidth * (f32)self->selectedColumn;
+    top = y - cellHeight * (f32)self->selectedRow;
+    // right/bottom are unused: the target still converts column+1 and row+1 (xoris/stw) but drops the float math.
+    f32 right = x + cellWidth * (f32)(self->selectedColumn + 1);
+    f32 bottom = y - cellHeight * (f32)(self->selectedRow + 1);
+    f32 border = 4.0f;
+    fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
+    fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
+    fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
+    fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
+    y = y - cellHeight * lbl_80563954;
+    f32 startX = x + cellWidth * lbl_80563954;
+    for (int row = 0; row < 4; row++) {
+        x = startX;
+        for (int column = 0; column < 10; column++) {
+            if (row == 3 && column == 9) fn_80234AFC(&self->font, x, y, "%cOK", 1);
+            else if (row == 3 && column == 8) fn_80234AFC(&self->font, x, y, "%cBS", 1);
+            else {
+                const char* keys = self->upper ? "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ. " : "1234567890abcdefghijklmnopqrstuvwxyz. ";
+                fn_80234AFC(&self->font, x, y, "%c%c", 1, keys[row * 10 + column]);
+            }
+            x = x + cellWidth;
+        }
+        y = y - cellHeight;
+    }
 }
