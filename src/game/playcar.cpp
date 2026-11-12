@@ -1623,3 +1623,15 @@ u8 fn_80193064(u8* p) { return U8(p, 0x13); }
 
 
 }  // extern "C"
+
+// Hand-built vtables / pointer tables of this unit, in the target's .data order (vtappend.py).
+extern "C" {
+void vf18__7IDriverFv(void);
+void vf1C__7IDriverFiiPiPi(void);
+void vf20__7IDriverFv(void);
+void vf34__7IDriverFv(void);
+void vf40__7IDriverFv(void);
+void* lbl_80332F40[33] = {(void*)0, (void*)0, (void*)fn_80192F58, (void*)fn_80192ED0, (void*)fn_80190B7C, (void*)fn_80190C04, (void*)fn_80192C7C, (void*)fn_80192E3C, (void*)fn_80192C68, (void*)fn_8019150C, (void*)fn_801914F8, (void*)fn_80191A98, (void*)fn_80192E20, (void*)fn_80190B60, (void*)fn_80190C8C, (void*)fn_80192C4C, (void*)fn_80192BFC, (void*)fn_80192D98, (void*)fn_80192D10, (void*)fn_80192BE8, (void*)fn_80192C38, (void*)fn_80192C24, (void*)fn_80192C10, (void*)fn_8019305C, (void*)fn_80193064, (void*)fn_80192F6C, (void*)fn_8019157C, (void*)fn_80191568, (void*)fn_80191688, (void*)fn_80190CBC, (void*)fn_801902A0, (void*)fn_80190CA8, (void*)fn_8018FF84};
+void* lbl_80332FC4[21] = {(void*)0, (void*)0, (void*)PlayerDriver_vf08, (void*)PlayerDriver_vf0C, (void*)PlayerDriver_vf10, (void*)PlayerDriver_vf14, (void*)vf18__7IDriverFv, (void*)vf1C__7IDriverFiiPiPi, (void*)vf20__7IDriverFv, (void*)PlayerDriver_vf24, (void*)PlayerDriver_vf28, (void*)PlayerDriver_vf2C, (void*)PlayerDriver_vf30, (void*)vf34__7IDriverFv, (void*)PlayerDriver_vf38, (void*)PlayerDriver_vf3C, (void*)vf40__7IDriverFv, (void*)PlayerDriver_vf44, (void*)PlayerDriver_vf48, (void*)PlayerDriver_vf4C, (void*)PlayerDriver_vf50};
+void* lbl_80333018[80] = {(void*)0, (void*)0, (void*)fn_8018FE8C, (void*)fn_8018FFC4, (void*)fn_80190184, (void*)fn_801901F0, (void*)fn_80191108, (void*)fn_80191178, (void*)fn_80191240, (void*)fn_801902B4, (void*)fn_80190360, (void*)fn_80190E70, (void*)fn_80190EAC, (void*)fn_80190F90, (void*)fn_80190F94, (void*)fn_80190FA8, (void*)fn_80191060, (void*)fn_80191064, (void*)fn_80190388, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0x69647269, (void*)0x7665723A, (void*)0x20536574, (void*)0x43617220, (void*)0x6E6F7420, (void*)0x6F766572, (void*)0x72696464, (void*)0x656E0000, (void*)0};
+}

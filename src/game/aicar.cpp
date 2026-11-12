@@ -2824,3 +2824,21 @@ void fn_80198EA0(int car) { fn_80198E7C(car); }
 u32 AIDriver_vf14(u8* d) { return 0; }
 
 }  // extern "C"
+
+// Hand-built vtables / pointer tables of this unit, in the target's .data order (vtappend.py).
+extern "C" {
+void SetCar__7IDriverFPv(void);
+void vf18__7IDriverFv(void);
+void vf1C__7IDriverFiiPiPi(void);
+void vf20__7IDriverFv(void);
+void vf2C__7IDriverFv(void);
+void vf34__7IDriverFv(void);
+void vf40__7IDriverFv(void);
+void Flags__7IDriverFv(void);
+void vf30__7IDriverFv(void);
+void vf38__7IDriverFv(void);
+void vf3C__7IDriverFv(void);
+void vf44__7IDriverFv(void);
+void* lbl_80333348[18] = {(void*)0, (void*)0, (void*)AIDriver_vf08, (void*)AIDriver_vf0C, (void*)SetCar__7IDriverFPv, (void*)AIDriver_vf14, (void*)vf18__7IDriverFv, (void*)vf1C__7IDriverFiiPiPi, (void*)vf20__7IDriverFv, (void*)AIDriver_Connect, (void*)AIDriver_vf28, (void*)vf2C__7IDriverFv, (void*)AIDriver_vf30, (void*)vf34__7IDriverFv, (void*)AIDriver_vf38, (void*)AIDriver_vf3C, (void*)vf40__7IDriverFv, (void*)AIDriver_vf44};
+void* lbl_80333390[46] = {(void*)0, (void*)0, (void*)fn_80198DD0, (void*)0, (void*)SetCar__7IDriverFPv, (void*)Flags__7IDriverFv, (void*)vf18__7IDriverFv, (void*)vf1C__7IDriverFiiPiPi, (void*)vf20__7IDriverFv, (void*)0, (void*)0, (void*)vf2C__7IDriverFv, (void*)vf30__7IDriverFv, (void*)vf34__7IDriverFv, (void*)vf38__7IDriverFv, (void*)vf3C__7IDriverFv, (void*)vf40__7IDriverFv, (void*)vf44__7IDriverFv, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0x69647269, (void*)0x7665723A, (void*)0x20536574, (void*)0x43617220, (void*)0x6E6F7420, (void*)0x6F766572, (void*)0x72696464, (void*)0x656E0000};
+}
