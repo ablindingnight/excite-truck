@@ -142,7 +142,8 @@ void RoadSound::Update(void) {
     f32 gain = 0.25f * *(s32*)(c + 0x2620);
     f32 speed = *(f32*)(c + 0x25D4);
     for (int i = 0; i < count; i++) {
-        if (fn_801D04A8(surface)->type == entries[i].surface) {
+        int type = fn_801D04A8(surface)->type;
+        if (type == entries[i].surface) {
             RoadSoundVoice* v = entries[i].voice;
             if (v) {
                 f32 vol;
