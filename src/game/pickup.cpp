@@ -581,26 +581,6 @@ static inline void SubVec(f32* out, const f32* a, const f32* b) {
     out[2] = a[2] - b[2];
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801683F4(PickupGroup* g, int i, RaceCarRec* rec, V2& lo, V2& hi, PickupCounts& res) {
-    int j;
-    for (j = 0; j < g->count; j++) {
-        Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
-        if (p->Live()) {
-            f32 l[3];
-            f32 rad;
-            SubVec(l, p->pos, rec->pos);
-            RotVec(l, rec->rot, l);
-            rad = p->type ? p->type->radius : 0.0f;
-            if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
-                p->taken = 1;
-                res.n[p->type ? p->type->type : 6]++;
-                break;
-            }
-        }
-    }
-}
-
 void fn_801683F4(PickupCounts* out, int player) {
     PickupCounts res;
     RaceCarRec* rec;
@@ -649,7 +629,24 @@ void fn_801683F4(PickupCounts* out, int player) {
                         continue;
                     }
                 }
-                Loop1_fn_801683F4(g, i, rec, lo, hi, res);
+                {
+                    int j;
+                    for (j = 0; j < g->count; j++) {
+                        Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
+                        if (p->Live()) {
+                            f32 l[3];
+                            f32 rad;
+                            SubVec(l, p->pos, rec->pos);
+                            RotVec(l, rec->rot, l);
+                            rad = p->type ? p->type->radius : 0.0f;
+                            if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
+                                p->taken = 1;
+                                res.n[p->type ? p->type->type : 6]++;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         res.n[5] = done;
