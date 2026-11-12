@@ -166,9 +166,11 @@ u8 lbl_8055E521;
 u8 lbl_8055E522;
 u8 lbl_8055E523;
 s32 lbl_8055E524;
+u8 lbl_8055E528;
 u8 lbl_8055E529;
 u8 lbl_8055E52A;
 u8 lbl_8055E52B;
+u8 lbl_8055E52C;
 
 extern "C" {
 
