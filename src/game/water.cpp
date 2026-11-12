@@ -163,7 +163,6 @@ static const IdxTable sShimQuad = {{0, 1, 2, 2, 1, 3}};
 
 // The shared reflection cube (0x1B8).
 struct Skybox {
-    Skybox(void);
     ~Skybox(void) {
         for (int i = 0; i < 6; i++) {
             fn_802CB228(faces[i]);
@@ -471,85 +470,86 @@ static inline void Identity(Frame* f) {
     f->pos.z = 0.0f;
 }
 
-inline Skybox::Skybox(void) {
-    if (fn_8012C33C("env_sun.tex")) {
-        sun = fn_802CAC28("env_sun.tex", 0);
-    } else {
-        sun = -2;
-    }
-    for (int i = 0; i < 6; i++) {
-        faces[i] = fn_802CB128(0x100, 0x100, 0, 0x60);
-        Identity(&frames[i]);
-    }
-    frames[1].x.x = -1.0f;
-    frames[1].x.y = 0.0f;
-    frames[1].x.z = 0.0f;
-    frames[1].z.x = 0.0f;
-    frames[1].z.y = 0.0f;
-    frames[1].z.z = -1.0f;
-    frames[2].x.x = 0.0f;
-    frames[2].x.y = 0.0f;
-    frames[2].x.z = -1.0f;
-    frames[2].z.x = 1.0f;
-    frames[2].z.y = 0.0f;
-    frames[2].z.z = 0.0f;
-    frames[3].x.x = 0.0f;
-    frames[3].x.y = 0.0f;
-    frames[3].x.z = 1.0f;
-    frames[3].z.x = -1.0f;
-    frames[3].z.y = 0.0f;
-    frames[3].z.z = 0.0f;
-    frames[4].y.x = 0.0f;
-    frames[4].y.y = 0.0f;
-    frames[4].y.z = -1.0f;
-    frames[4].z.x = 0.0f;
-    frames[4].z.y = 1.0f;
-    frames[4].z.z = 0.0f;
-    frames[5].y.x = 0.0f;
-    frames[5].y.y = 0.0f;
-    frames[5].y.z = 1.0f;
-    frames[5].z.x = 0.0f;
-    frames[5].z.y = -1.0f;
-    frames[5].z.z = 0.0f;
-    quad[0].pos.x = -1.0f;
-    quad[0].pos.y = 1.0f;
-    quad[0].pos.z = 1.0f;
-    quad[0].color = 0xFFFFFFFF;
-    quad[0].u = 0.0f;
-    quad[0].v = 0.0f;
-    quad[1].pos.x = 1.0f;
-    quad[1].pos.y = 1.0f;
-    quad[1].pos.z = 1.0f;
-    quad[1].color = 0xFFFFFFFF;
-    quad[1].u = 1.0f;
-    quad[1].v = 0.0f;
-    quad[2].pos.x = -1.0f;
-    quad[2].pos.y = -1.0f;
-    quad[2].pos.z = 1.0f;
-    quad[2].color = 0xFFFFFFFF;
-    quad[2].u = 0.0f;
-    quad[2].v = 1.0f;
-    quad[3].pos.x = 1.0f;
-    quad[3].pos.y = -1.0f;
-    quad[3].pos.z = 1.0f;
-    quad[3].color = 0xFFFFFFFF;
-    quad[3].u = 1.0f;
-    quad[3].v = 1.0f;
-    idx[0] = 0;
-    idx[1] = 1;
-    idx[2] = 2;
-    idx[3] = 1;
-    idx[4] = 2;
-    idx[5] = 3;
-    drawn = 0;
-}
 
 WaterEnvMap::WaterEnvMap(void) {
     target = fn_802CB128(0x100, 0x100, 0, 0);
     world = LoadModel("worldmodel.mod");
     envModel = LoadModel("wenv_mod.mod");
     if (lbl_8055FAFC == 0) {
-        lbl_8055FB00 = new ("skybox") Skybox;
+        Skybox* sb = new ("skybox") Skybox;
+        if (sb) {
+            if (fn_8012C33C("env_sun.tex")) {
+                sb->sun = fn_802CAC28("env_sun.tex", 0);
+            } else {
+                sb->sun = -2;
+            }
+            for (int i = 0; i < 6; i++) {
+                sb->faces[i] = fn_802CB128(0x100, 0x100, 0, 0x60);
+                Identity(&sb->frames[i]);
+            }
+            sb->frames[1].x.x = -1.0f;
+            sb->frames[1].x.y = 0.0f;
+            sb->frames[1].x.z = 0.0f;
+            sb->frames[1].z.x = 0.0f;
+            sb->frames[1].z.y = 0.0f;
+            sb->frames[1].z.z = -1.0f;
+            sb->frames[2].x.x = 0.0f;
+            sb->frames[2].x.y = 0.0f;
+            sb->frames[2].x.z = -1.0f;
+            sb->frames[2].z.x = 1.0f;
+            sb->frames[2].z.y = 0.0f;
+            sb->frames[2].z.z = 0.0f;
+            sb->frames[3].x.x = 0.0f;
+            sb->frames[3].x.y = 0.0f;
+            sb->frames[3].x.z = 1.0f;
+            sb->frames[3].z.x = -1.0f;
+            sb->frames[3].z.y = 0.0f;
+            sb->frames[3].z.z = 0.0f;
+            sb->frames[4].y.x = 0.0f;
+            sb->frames[4].y.y = 0.0f;
+            sb->frames[4].y.z = -1.0f;
+            sb->frames[4].z.x = 0.0f;
+            sb->frames[4].z.y = 1.0f;
+            sb->frames[4].z.z = 0.0f;
+            sb->frames[5].y.x = 0.0f;
+            sb->frames[5].y.y = 0.0f;
+            sb->frames[5].y.z = 1.0f;
+            sb->frames[5].z.x = 0.0f;
+            sb->frames[5].z.y = -1.0f;
+            sb->frames[5].z.z = 0.0f;
+            sb->quad[0].pos.x = -1.0f;
+            sb->quad[0].pos.y = 1.0f;
+            sb->quad[0].pos.z = 1.0f;
+            sb->quad[0].color = 0xFFFFFFFF;
+            sb->quad[0].u = 0.0f;
+            sb->quad[0].v = 0.0f;
+            sb->quad[1].pos.x = 1.0f;
+            sb->quad[1].pos.y = 1.0f;
+            sb->quad[1].pos.z = 1.0f;
+            sb->quad[1].color = 0xFFFFFFFF;
+            sb->quad[1].u = 1.0f;
+            sb->quad[1].v = 0.0f;
+            sb->quad[2].pos.x = -1.0f;
+            sb->quad[2].pos.y = -1.0f;
+            sb->quad[2].pos.z = 1.0f;
+            sb->quad[2].color = 0xFFFFFFFF;
+            sb->quad[2].u = 0.0f;
+            sb->quad[2].v = 1.0f;
+            sb->quad[3].pos.x = 1.0f;
+            sb->quad[3].pos.y = -1.0f;
+            sb->quad[3].pos.z = 1.0f;
+            sb->quad[3].color = 0xFFFFFFFF;
+            sb->quad[3].u = 1.0f;
+            sb->quad[3].v = 1.0f;
+            sb->idx[0] = 0;
+            sb->idx[1] = 1;
+            sb->idx[2] = 2;
+            sb->idx[3] = 1;
+            sb->idx[4] = 2;
+            sb->idx[5] = 3;
+            sb->drawn = 0;
+        }
+        lbl_8055FB00 = sb;
     }
     lbl_8055FAFC++;
     sky = lbl_8055FB00;
