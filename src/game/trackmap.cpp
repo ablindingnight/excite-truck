@@ -480,6 +480,7 @@ static inline f32 Ease(f32 t) {
 
 
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
+    SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
     Basis basis;
@@ -698,7 +699,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     {
         Truck* tr = fn_8017960C(fn_801E866C(map->player));
-        SFMarker* m = lbl_8055D5B4;
+        m = lbl_8055D5B4;
         Vec2 tp;
         Vec2 c;
         Vec3 rel;

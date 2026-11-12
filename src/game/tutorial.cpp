@@ -1344,6 +1344,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 inline void Challenge::Init(void) {
+    ValueNode* n;
     const char* name = "growcoin.mod";
     model = fn_802C6FC0(name, 0, 0);
     if (model == -1) {
@@ -1367,7 +1368,7 @@ inline void Challenge::Init(void) {
         color = -1;
     }
     {
-        ValueNode* n = node;
+        n = node;
         tokens.count = 0;
         if (n && HasNode(n, "end")) {
             Token* t = &tokens.data[tokens.count++];

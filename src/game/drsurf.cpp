@@ -723,6 +723,7 @@ void fn_802D5ACC(Surf* s) {
 
 
 void fn_802D5B8C(const Surf* s) {
+    f32* t;
     u32* col;
     f32* uv;
     int n = s->nverts;
@@ -746,7 +747,7 @@ void fn_802D5B8C(const Surf* s) {
     off[1] = lbl_804DB068[1].y;
     f32 k = lbl_804DB068[1].z;
     f32 v0 = off[1];
-    f32* t = uv;
+    t = uv;
     c = col;
     for (i = 0; i < n; i++) {
         u32 a = *src;
