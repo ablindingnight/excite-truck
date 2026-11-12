@@ -488,7 +488,7 @@ void fn_801945F8(u8* d, const char* why);
 
 void fn_8019386C(u8* d) { fn_80193CE0(d); }
 
-void fn_80193870(u8* d) { fn_801945F8(d, "console"); }
+inline void fn_80193870(u8* d) { fn_801945F8(d, "console"); }
 
 void fn_80193878(u8* d) {
     RVec3 pos;
