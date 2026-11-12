@@ -262,10 +262,10 @@ extern "C" {
 
 void fn_802E9BCC(Mp3Reader* r) { delete r; }
 
-s32 lbl_8055D25C = -1;  // decoded sample rate
+volatile s32 lbl_8055D25C = -1;  // decoded sample rate
 volatile s32 lbl_8055D260 = -1;  // rate the voices play at
 volatile s32 lbl_8055D264 = -1;  // rate wanted
-s32 lbl_8055D268 = 2;   // decoded channels
+volatile s32 lbl_8055D268 = 2;   // decoded channels
 s32 lbl_8055D26C = 2;   // channels in the PCM ring
 f32 lbl_8055D270 = 1.0f;
 
