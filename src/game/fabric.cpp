@@ -721,8 +721,8 @@ void fn_801F6880(const Fabric* f) {
             int c;
             for (c = 0; c < f->cols; c++) {
                 int i = c + (r - 1) * f->cols;
-                TVec* p = &f->cur[i];
                 DrawVert* d = &f->draw[i];
+                TVec* p = &f->cur[i];
                 f32 u = d->u;
                 f32 x = p->x;
                 f32 y = p->y;

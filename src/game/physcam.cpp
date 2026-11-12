@@ -639,8 +639,8 @@ void fn_80271624(int mode, u8* p) {
                     tv->pos[2] = v[2];
                     f32 x[3];
                     x[0] = TvLerp(tv->exFrom[0], tv->exTo[0], e);
-                    f32 from = tv->exFrom[1];
                     f32 to = tv->exTo[1];
+                    f32 from = tv->exFrom[1];
                     x[1] = TvLerp(from, to, e);
                     x[2] = TvLerp(tv->exFrom[2], tv->exTo[2], e);
                     tv->ex[0] = x[0];

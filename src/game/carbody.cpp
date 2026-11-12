@@ -341,8 +341,8 @@ void fn_8018185C(const u8* p, f32* v) {
     f32 peak = v[2] * lbl_80561CA0;
     f32 d = F32(p, 0x1C) - r0;
     f32 a = (hp - peak) / FMax(d * d, 0.00001f);
-    f32 top = F32(p, 0x28);
     f32 red = v[4];
+    f32 top = F32(p, 0x28);
     f32 low = lbl_80561CA0 * (lbl_80561CB8 * v[2]);
     f32 peak2 = lbl_80561CA0 * v[2];
     F32(p, 0x20) = hp / 8000.0f;
