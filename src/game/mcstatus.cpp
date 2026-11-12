@@ -120,10 +120,10 @@ void MemCardDialogBg::Unload(void) {
 }
 
 // The "Accept" hint at (x, y): the A button art when loaded, else "A - Accept".
-static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
+static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* label) {
     if (bg->image2) {
-        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, "Accept", 1.0f)), 3.0f + y, lbl_80563830);
-        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, "Accept");
+        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, label, 1.0f)), 3.0f + y, lbl_80563830);
+        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, label);
     } else {
         fn_802337A0(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, lbl_80563830, 0.5f, 1.0f, "A");
     }
@@ -133,6 +133,9 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
 // one is accepted or the check callback reports a result.
 static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
     int sel = cfg->select;
+    f32 ax = 155.0f;
+    f32 ay = -140.0f;
+    const char* accept = "Accept";
     for (;;) {
         int r;
         Camera cam;
@@ -213,7 +216,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
-        DrawAccept(bg, 155.0f, -140.0f);
+        DrawAccept(bg, ax, ay, accept);
         fn_802C9A70(1);
         fn_802C855C();
         fn_802C2B48();
