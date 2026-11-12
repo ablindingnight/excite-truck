@@ -465,7 +465,7 @@ public:
     struct Rank* r;
     int i;
 
-        fn_802E30C8("\n%s:", Label());
+        fn_802E30C8("\r\n%s:", Label());
         fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
         fn_802E30C8("--------------------------------------------------");
         total = 0.0f;
