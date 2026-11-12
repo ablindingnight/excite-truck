@@ -105,12 +105,10 @@ struct Rot {
 
 class RotList : public TrackInst {
 public:
-    RotList(void) {
-        rots = new ("rotator tab") Rot[16];
-        count = 0;
-    }
+    RotList(void);
     virtual ~RotList(void);
     virtual void Draw(void* ctx);
+    void Check(void);
 
     Rot* rots;  // offset 0x4
     s32 count;  // offset 0x8
@@ -235,6 +233,7 @@ public:
     virtual void Init(TObj* o);
     virtual void Apply(void);
     virtual void Draw(TObj* list);
+    void Default(void);
 
     f32 dir[3];  // offset 0x4
     u32 color;   // offset 0x10
@@ -345,6 +344,7 @@ public:
     virtual void Init(TObj* o);
     virtual void Draw(TObj* list);
     virtual void Add(void* scene, TObj* o, s32 id);
+    XFadeList* List(void* scene);
 
     XFader* faders;   // offset 0x4
     XFadeList* list;  // offset 0x8
@@ -772,13 +772,7 @@ inline void SunTMH::Apply(void) {
     PVec d;
     f32 ny;
     f32 h;
-    if (color == 0) {
-        color = 0xFDFEE7;
-        dir[0] = 0.0f;
-        dir[1] = 250.0f;
-        dir[2] = -150.0f;
-        fn_802E30C8("trackmod: track has no sun, making one up.");
-    }
+    Default();
     if (*fn_801E1F44() == 1) {
         color = 0x75889B;
         dir[0] = 0.0f;
@@ -803,6 +797,17 @@ inline void SunTMH::Apply(void) {
     fn_802E30C8("suntmh: sun envmap coords are %.3f %.3f", 0.5f + 0.28901735f * -d.x / (1.0f + ny),
                 0.5f + 0.28901735f * -d.z / (1.0f + ny));
     fn_802C9A1C((TVec*)&d);
+}
+
+/* Helper name unproven */
+inline void SunTMH::Default(void) {
+    if (color == 0) {
+        color = 0xFDFEE7;
+        dir[0] = 0.0f;
+        dir[1] = 250.0f;
+        dir[2] = -150.0f;
+        fn_802E30C8("trackmod: track has no sun, making one up.");
+    }
 }
 
 inline void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
@@ -926,6 +931,7 @@ inline void RotatorTMH::Draw(TObj* list) {
     }
 }
 
+
 inline void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
     RotList* l;
     f32 speed;
@@ -939,9 +945,7 @@ inline void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
     l = list;
     speed = o->d30;
     rid = o->d2C;
-    if (l->count >= 16) {
-        fn_802E317C("trackmod: exceeded rotator limit");
-    }
+    l->Check();
     r = &l->rots[l->count];
     r->id = rid;
     r->pos[0] = o->pos[0];
@@ -1008,12 +1012,7 @@ inline void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     XFadeList* l;
     XFade* f;
     f32 b[6];
-    if (!list) {
-        XFadeList* nl = new ("xfaderMLO") XFadeList;
-        list = nl;
-        fn_802CD320(scene, nl);
-    }
-    l = list;
+    l = List(scene);
     if (l->count >= 48) {
         fn_802E317C("trackmod: exceeded xfader limit!");
     }
@@ -1027,6 +1026,16 @@ inline void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     f->start = o->d30;
     l->fades[l->count].id = id;
     l->count++;
+}
+
+/* Helper name unproven */
+inline XFadeList* XFaderTMH::List(void* scene) {
+    if (!list) {
+        XFadeList* nl = new ("xfaderMLO") XFadeList;
+        list = nl;
+        fn_802CD320(scene, nl);
+    }
+    return list;
 }
 
 inline void FlareSourceTMH::Swap(TObj* o) {
@@ -1100,13 +1109,13 @@ inline void FacingTestTMH::Add(void* scene, TObj* o, s32 id) {
 
 inline void TrackMod::DrawTree(TNode* tree) {}
 
-FacingTestInst::~FacingTestInst(void) {}
+inline FacingTestInst::~FacingTestInst(void) {}
 
-ScrollList::~ScrollList(void) {}
+inline ScrollList::~ScrollList(void) {}
 
-XFadeList::~XFadeList(void) {}
+inline XFadeList::~XFadeList(void) {}
 
-RotList::~RotList(void) { delete[] rots; }
+inline RotList::~RotList(void) { delete[] rots; }
 
 static inline void Mat3MulD(TMat3* out, const TMat3* l, const TMat3* r) {
     if (out == l || out == r) {
@@ -1240,3 +1249,16 @@ inline void FacingTestInst::Draw(void* ctx) {
 inline int TrackInst::Kind(void) { return -1; }
 
 inline void TrackInst::Draw2(void* ctx) {}
+
+
+inline RotList::RotList(void) {
+    rots = new ("rotator tab") Rot[16];
+    count = 0;
+}
+
+/* Helper name unproven */
+inline void RotList::Check(void) {
+    if (count >= 16) {
+        fn_802E317C("trackmod: exceeded rotator limit");
+    }
+}
