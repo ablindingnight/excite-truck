@@ -2366,7 +2366,7 @@ void fn_80183E7C(u8* p) {
     } else {
         F32(p, 0x26A8) = F32(p, 0x26A8) + lbl_80561D9C;
     }
-    s8 stuck = F32(p, 0x26A8) > lbl_80561CD8;
+    u32 stuck = F32(p, 0x26A8) > lbl_80561CD8;
     if (stuck != U8(p, 0x26AC)) {
         U8(p, 0x26AC) = stuck;
         fn_801BF1B8(PTR(p, 0x1EC), stuck);
