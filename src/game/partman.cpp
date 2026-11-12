@@ -167,6 +167,10 @@ struct TypeEntry {
     s32 refs;       // offset 0x14
 };
 
+struct PartTweak2 {
+    virtual ~PartTweak2(void);
+};
+
 struct TypeTable {
     TypeTable(void) { count = 0; }
     TypeEntry e[64];  // offset 0x0
@@ -1049,10 +1053,6 @@ void PartSys::DrawRotating(Particle* p, int n) {
     }
     batch.Flush();
 }
-
-struct PartTweak2 {
-    virtual ~PartTweak2(void);
-};
 
 PartTweak2::~PartTweak2(void) {}
 
