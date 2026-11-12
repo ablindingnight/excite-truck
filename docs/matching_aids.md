@@ -168,3 +168,10 @@ real aids with `MATCHING-AID:` as they are reviewed. Data-placement pragmas (`se
 | Named offset/cell walkers (walker above the counter, 2026-11-06): replay fn_80008684, physcol fn_801E22D0, uicar fn_80241820, treehit Hit (also a repeated guard) | replay.cpp, physcol.cpp, uicar.cpp, treehit.cpp | named offset walker in place of the compiler one, see each tag | various |
 | Literal kept right of a product (carsetup) and scale copied to a local (proxer), real forms unproven | carsetup.cpp, proxer.cpp | see the `MATCHING-AID:` comment at the site | various |
 | MP3 window fn_800C1E88: every product operand a named local, declaration order from esclimb (2026-11-07) | sdk_mp3/mp3layer3.c | named product operands; real names and grouping unknown | various |
+| AnimObj::AnimObj (animobj) | src/game/animobj.cpp | axes[0].x/y stored twice (once before the vtable pointer); original source unknown (member or base initialiser?) | Claude, tagged 2026-11 |
+| fn_8017D404 (ball) | src/game/ball.cpp | one-field local struct `sp_` so the field is numbered as a temp (structpair.py) | Claude, tagged 2026-11 |
+| LayoutBoost inline (crashmode) | src/game/crashmode.cpp | inline helper parameter assigned before it is read; the value only shapes the register allocation | Claude, tagged 2026-11 |
+| RotToQuat inline (interlude) | src/game/interlude.cpp | one-use copy of q ranks the register above m; real form unknown | Claude, tagged 2026-11 |
+| fn_8028E240 (partman) | src/game/partman.cpp | one-field local struct `sp_` (structpair.py) | Claude, tagged 2026-11 |
+| fn_8028BA44 (sparks) | src/game/sparks.cpp | single-use float local sets the load order; real form unknown | Claude, tagged 2026-11 |
+| ValueNodeImpl ctor loop (valtable) | src/game/valtable.cpp | `self = this` pointer local moves the loop down the register order (selfloop.py); real form unknown | Claude, tagged 2026-11 |
