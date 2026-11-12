@@ -1168,3 +1168,21 @@ float lbl_804FC680[4];
 char lbl_804FC690[0x30];
 unsigned char lbl_804FC6C0[0x140];
 unsigned char lbl_804FC800[0xB0];
+
+// This unit's .data strings, in address order (strdata.py).
+extern "C" {
+char lbl_8034D210[0x70] = "reacquire %d!\n\0\0Spu: Can't fit %s into ARAM (%d bytes)\0\0 %2d: %16s : 0x%08x %d\0\0aram_base: %08x  last_end: %08x";
+char lbl_8034D280[0x104] = "Spu: %s has wrong version (%x != %x)\0\0\0\0spu: unknown arq request %p (vs %p)\0aram addr = %x\0\0copying noise to ARAM...\0\0\0\0filled ARAM with noise!\0Spu Test!\0\0\0spotter.sfx\0got sample\0\0got channel\0going into loop\0done with loop\0\0released channel\0\0\0\0forgot sample!";
+char lbl_8034D384[] = "spu: chan[%d] is ready";
+char lbl_8034D39C[] = "spu: WPAD connect callback(%d) : %s";
+char lbl_8034D3C0[0x90] = "disconnect\0\0+SpuBegin\0\0\0aram_buf\0\0\0\0spu: aram_base: %x -- %x (%dK)\0\0SpuSample\0\0\0SpuChannel\0\0Spucache\0\0\0\0Spu: can't acquire voice %d\0zero_buf";
+char lbl_8034D450[] = "Spu: channel %s still in use";
+char lbl_8034D470[] = "Spu: sample %s still in use";
+char lbl_8034D490[] = "Spu: caching %s";
+char lbl_8034D4A0[0x88] = "Spu: couldn't cache %s\0\0Spu: out of samples (%s)\0\0\0\0spu: %s is not a GameCube ADPCM format file (%x != %x)\0\0spu: %s is misaligned (%p)!";
+char lbl_8034D528[] = "Spu: sample %s still in use by %d channels";
+char lbl_8034D554[] = "spu: out of samples for stream %s";
+char lbl_8034D578[] = "stream_buf";
+char lbl_8034D584[] = "Spu: stream %s still in use by %d channels";
+char lbl_8034D5B0[0xC8] = "Spu: channel %d/%s is still playing\0spu: switching to mode %d\0\0\0spu: bad sound mode %d\0\0spu: bad sample type %d\0spu: can't open stream %s\0\0\0spu: queued track %s\0\0\0\0spu: sound stream destroy timeout!";
+}
