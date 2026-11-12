@@ -401,8 +401,7 @@ Sound* fn_80207848(const char* name, int flags);
 
 // Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).
 static inline void RedrawNodes(void) {
-    int i;
-    for (i = 0; i < SCREEN->numEvents; i++) {
+    for (int i = 0; i < SCREEN->numEvents; i++) {
         if (!lbl_8055F3EB) {
             SCREEN->events[i]->Dim();
             SCREEN->events[i]->Refresh();
@@ -415,7 +414,7 @@ static inline void RedrawNodes(void) {
             SCREEN->events[i]->Refresh();
         }
     }
-    for (i = 0; i < SCREEN->numLevels; i++) {
+    for (int i = 0; i < SCREEN->numLevels; i++) {
         if (!lbl_8055F3EB) {
             if (i == SCREEN->level) {
                 SCREEN->levels[i]->Select();

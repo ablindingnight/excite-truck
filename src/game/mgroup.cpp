@@ -122,8 +122,7 @@ struct OmlList {
     OmlList(ValueNode* node) {
         char groupKey[0x20];
         char modelKey[0x20];
-        int k;
-        for (k = 0; k < groups.cap; k++) {
+        for (int k = 0; k < groups.cap; k++) {
             fn_801345D8(groupKey, sizeof(groupKey), "gidx%d", k);
             int g = node->GetInt(groupKey, -1);
             if (g < 0) {
@@ -133,7 +132,7 @@ struct OmlList {
             *groups.Next() = gp;
         }
         int n = Min(1 << groups.count, models.cap);
-        for (k = 0; k < n; k++) {
+        for (int k = 0; k < n; k++) {
             fn_801345D8(modelKey, sizeof(modelKey), "model%d", k);
             s32 m = fn_802C6FC0(node->GetValue(modelKey), 0, 0);
             *models.Next() = m;
