@@ -409,8 +409,8 @@ void fn_802D81C4(GXTexDesc* d) {
         Swap32(&pal[i]);
     }
     fn_801282EC(0x20);
-    u8* tmp = new ("tmp_tx8") u8[w * h / 2];
-    memcpy(tmp, tex, w * h / 2);
+    u8* tmp = new ("tmp_tx8") u8[n];
+    memcpy(tmp, tex, n);
     row = w / 2;
     int tw = row / 4;
     int y;
