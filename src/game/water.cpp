@@ -180,14 +180,6 @@ struct Skybox {
     u8 pad1A9[0x1B8 - 0x1A9];  // offset 0x1A9: 12 more bytes, not touched in this unit (target new Skybox = 0x1B8)
 };
 
-class WaterBase {
-public:
-    virtual ~WaterBase(void);
-    virtual void Reflect(void* cam, f32 fov) = 0;
-    virtual void Draw(void) = 0;
-    virtual int IsValid(void) = 0;
-};
-
 class EnvBase {
 public:
     virtual ~EnvBase(void);
@@ -196,6 +188,14 @@ public:
     virtual int IsValid(void) = 0;
     virtual f32 Scale(void) = 0;
     virtual void Mirror(Frame* out, const Frame* in, const PVec* up);
+};
+
+class WaterBase {
+public:
+    virtual ~WaterBase(void);
+    virtual void Reflect(void* cam, f32 fov) = 0;
+    virtual void Draw(void) = 0;
+    virtual int IsValid(void) = 0;
 };
 
 class WaterEnvMap : public EnvBase {
