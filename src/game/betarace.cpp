@@ -564,6 +564,12 @@ struct CarResult {
     u8 dnf;            // offset 0x34
 };
 
+// The root of the collision shapes: only a virtual destructor.
+class CollShapeBase {
+public:
+    virtual ~CollShapeBase(void) {}
+};
+
 // One line of the stunt summary on the results screen.
 class StuntDisplay {
 public:
@@ -578,38 +584,8 @@ public:
     virtual void SetReady(u8 r) = 0;
 };
 
-class StuntLine : public StuntDisplay {
-public:
-    StuntLine(void) {}
-    virtual ~StuntLine(void) {}
-    virtual void Text0(const char* fmt, ...) {
-        va_list ap;
-        va_start(ap, fmt);
-        vsprintf(label, fmt, ap);
-        va_end(ap);
-    }
-    virtual void Text1(const char* fmt, ...) {
-        va_list ap;
-        va_start(ap, fmt);
-        vsprintf(mid, fmt, ap);
-        va_end(ap);
-    }
-    virtual void Text2(const char* fmt, ...) {
-        va_list ap;
-        va_start(ap, fmt);
-        vsprintf(value, fmt, ap);
-        va_end(ap);
-    }
-    virtual void SetValue(f32 v) {}
-    virtual void SetPoints(s32 v) { xF4 = v; }
-    virtual void SetType(s32 t) {}
-    virtual void Stop(void) {}
-    virtual void SetReady(u8 r) {}
-    char label[0x50];  // offset 0x4
-    char mid[0x50];    // offset 0x54
-    char value[0x50];  // offset 0xA4
-    s32 xF4;           // offset 0xF4
-};
+class StuntLine;
+class StuntList;
 
 class StuntFactory {
 public:
@@ -617,11 +593,100 @@ public:
     virtual StuntDisplay* Alloc(void) = 0;
 };
 
-class StuntList : public StuntFactory {
+class Body {
 public:
-    virtual ~StuntList(void) {}
-    virtual StuntLine* Alloc(void);
-    FixedList<StuntLine, 16> lines;  // offset 0x4
+    virtual ValueNode* Info(void);  // 0x8
+    virtual void vf0C(void);
+    virtual const f32* Pos(void);   // 0x10
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void SetActive(int on);  // 0x20
+    virtual void vf24(void);
+    virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
+};
+
+// A point or invincibility token placed by the pickup system; spins once it is live.
+class Token {
+public:
+    Token(Body* b) {
+        const f32* p;
+        body = b;
+        p = b->Pos();
+        pos[0] = p[0];
+        pos[1] = p[1];
+        pos[2] = p[2];
+    }
+    Body* body;      // offset 0x0
+    u8 active;       // offset 0x4
+    f32 pos[3];      // offset 0x8
+    f32 start;       // offset 0x14
+    void Hide(void) {
+        f32 m[12];
+        f32 vel[3];
+        f32 spin[3];
+        m[0] = 1.0f;
+        m[1] = 0.0f;
+        m[2] = 0.0f;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = 0.0f;
+        m[7] = 0.0f;
+        m[8] = 1.0f;
+        m[9] = 0.0f;
+        m[10] = 0.0f;
+        m[11] = 0.0f;
+        m[10] = -9999.0f;
+        spin[0] = 0.0f;
+        spin[1] = 0.0f;
+        spin[2] = 0.0f;
+        vel[0] = 0.0f;
+        vel[1] = 0.0f;
+        vel[2] = 0.0f;
+        body->SetState(m, vel, spin);
+        body->SetActive(0);
+        start = lbl_8055E3C8 + 10.0f;
+    }
+    void Show(void) {
+        f32 m[12];
+        f32 vel[3];
+        f32 spin[3];
+        m[0] = 1.0f;
+        m[1] = 0.0f;
+        m[2] = 0.0f;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = 0.0f;
+        m[7] = 0.0f;
+        m[8] = 1.0f;
+        m[9] = 0.0f;
+        m[10] = 0.0f;
+        m[11] = 0.0f;
+        m[9] = pos[0];
+        m[10] = pos[1];
+        m[11] = pos[2];
+        spin[0] = 0.0f;
+        spin[1] = 0.0f;
+        spin[2] = 0.0f;
+        vel[0] = 0.0f;
+        vel[1] = 0.0f;
+        vel[2] = 0.0f;
+        body->SetState(m, vel, spin);
+    }
+    virtual int Ready(void) { return 0; }  // vptr at 0x18
+};
+
+class PointToken : public Token {
+public:
+    PointToken(Body* b) : Token(b) {}
+};
+
+class InvToken : public Token {
+public:
+    InvToken(Body* b) : Token(b) {}
+    virtual int Ready(void) { return 1; }
 };
 
 namespace {
@@ -879,6 +944,47 @@ public:
     u8 pad1261[0x1268 - 0x1261];
     s32 racer;             // offset 0x1268
 };
+
+class StuntLine : public StuntDisplay {
+public:
+    StuntLine(void) {}
+    virtual ~StuntLine(void) {}
+    virtual void Text0(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(label, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text1(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(mid, fmt, ap);
+        va_end(ap);
+    }
+    virtual void Text2(const char* fmt, ...) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsprintf(value, fmt, ap);
+        va_end(ap);
+    }
+    virtual void SetValue(f32 v) {}
+    virtual void SetPoints(s32 v) { xF4 = v; }
+    virtual void SetType(s32 t) {}
+    virtual void Stop(void) {}
+    virtual void SetReady(u8 r) {}
+    char label[0x50];  // offset 0x4
+    char mid[0x50];    // offset 0x54
+    char value[0x50];  // offset 0xA4
+    s32 xF4;           // offset 0xF4
+};
+
+class StuntList : public StuntFactory {
+public:
+    virtual ~StuntList(void) {}
+    virtual StuntLine* Alloc(void);
+    FixedList<StuntLine, 16> lines;  // offset 0x4
+};
+
 
 class Meter {
 public:
@@ -2965,11 +3071,6 @@ inline void BetaMaster::vfF4(void) {
 }
 #pragma dont_inline reset
 
-// The root of the collision shapes: only a virtual destructor.
-class CollShapeBase {
-public:
-    virtual ~CollShapeBase(void) {}
-};
 
 // The abstract collision shape (collvol.cpp's CollShape; shape tag at +0x18, mass at +0x20).
 class CollShape : public CollShapeBase {
@@ -3290,101 +3391,6 @@ public:
     virtual int Ready(void);  // 0x8
 };
 
-class Body {
-public:
-    virtual ValueNode* Info(void);  // 0x8
-    virtual void vf0C(void);
-    virtual const f32* Pos(void);   // 0x10
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void SetActive(int on);  // 0x20
-    virtual void vf24(void);
-    virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
-};
-
-// A point or invincibility token placed by the pickup system; spins once it is live.
-class Token {
-public:
-    Token(Body* b) {
-        const f32* p;
-        body = b;
-        p = b->Pos();
-        pos[0] = p[0];
-        pos[1] = p[1];
-        pos[2] = p[2];
-    }
-    Body* body;      // offset 0x0
-    u8 active;       // offset 0x4
-    f32 pos[3];      // offset 0x8
-    f32 start;       // offset 0x14
-    void Hide(void) {
-        f32 m[12];
-        f32 vel[3];
-        f32 spin[3];
-        m[0] = 1.0f;
-        m[1] = 0.0f;
-        m[2] = 0.0f;
-        m[3] = 0.0f;
-        m[4] = 1.0f;
-        m[5] = 0.0f;
-        m[6] = 0.0f;
-        m[7] = 0.0f;
-        m[8] = 1.0f;
-        m[9] = 0.0f;
-        m[10] = 0.0f;
-        m[11] = 0.0f;
-        m[10] = -9999.0f;
-        spin[0] = 0.0f;
-        spin[1] = 0.0f;
-        spin[2] = 0.0f;
-        vel[0] = 0.0f;
-        vel[1] = 0.0f;
-        vel[2] = 0.0f;
-        body->SetState(m, vel, spin);
-        body->SetActive(0);
-        start = lbl_8055E3C8 + 10.0f;
-    }
-    void Show(void) {
-        f32 m[12];
-        f32 vel[3];
-        f32 spin[3];
-        m[0] = 1.0f;
-        m[1] = 0.0f;
-        m[2] = 0.0f;
-        m[3] = 0.0f;
-        m[4] = 1.0f;
-        m[5] = 0.0f;
-        m[6] = 0.0f;
-        m[7] = 0.0f;
-        m[8] = 1.0f;
-        m[9] = 0.0f;
-        m[10] = 0.0f;
-        m[11] = 0.0f;
-        m[9] = pos[0];
-        m[10] = pos[1];
-        m[11] = pos[2];
-        spin[0] = 0.0f;
-        spin[1] = 0.0f;
-        spin[2] = 0.0f;
-        vel[0] = 0.0f;
-        vel[1] = 0.0f;
-        vel[2] = 0.0f;
-        body->SetState(m, vel, spin);
-    }
-    virtual int Ready(void) { return 0; }  // vptr at 0x18
-};
-
-class PointToken : public Token {
-public:
-    PointToken(Body* b) : Token(b) {}
-};
-
-class InvToken : public Token {
-public:
-    InvToken(Body* b) : Token(b) {}
-    virtual int Ready(void) { return 1; }
-};
 
 struct ViewOpts {
     u8 pad0[0x10];
