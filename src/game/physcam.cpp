@@ -66,7 +66,6 @@ f32 lbl_8055C598 = -1.0f;  // focus distance override (< 0: use the target)
 // One camera region record (its vptr follows the data).
 class CamRegion {
 public:
-    void PrepareLong2(u8* line);
 public:
     u8* cam;         // offset 0x0, null when unused
     f32 lo1;         // offset 0x4, first heading window
@@ -863,6 +862,31 @@ int RegionSphere::Load(ValueNode* t) {
 extern "C" {
 
 }  // extern "C"
+// The region writer behind the region file (dead in the shipped build; only its strings remain).
+/* Helper names unproven */
+void WriteText(void* f, const char* fmt, ...);
+const char* EventTypeName(int type);
+
+static void SaveRegionSphere(void* f, const RegionSphere* r) {
+    WriteText(f, "table region_sphere\r\n");
+    WriteText(f, "\tlocation_x\t%.3f\r\n", r->pos[0]);
+    WriteText(f, "\tlocation_y\t%.3f\r\n", r->pos[1]);
+    WriteText(f, "\tlocation_z\t%.3f\r\n", r->pos[2]);
+    WriteText(f, "\tradius\t%.3f\r\n", r->radius);
+    WriteText(f, "\tgroup\t%d\r\n", r->group);
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        if (r->events[i >> 5] & (1 << (i & 31))) {
+            WriteText(f, "\tevent%d\t%s\r\n", n++, EventTypeName(i));
+        }
+    }
+    WriteText(f, "\tevent_type_sanity\t%08x%08x\r\n", r->events[0], r->events[1]);
+    WriteText(f, "\tcamera_count\t%d\r\n", r->cameraCount);
+    for (int j = 0; j < r->cameraCount; j++) {
+        WriteText(f, "\tcamera%d\t%d\r\n", j, r->cameras[j]);
+    }
+}
+
 void RegionSphere::Reset(void) {
     u8* p = (u8*)this;
     F32(p, 0x0) = 0.0f;
@@ -1007,9 +1031,9 @@ extern const f32 lbl_80563F50;  // 1.0
 // Works out this region's heading windows on `line`: where the sphere's circle crosses the line
 // (two crossings = one window, four = two), falling back to the nearest line point +- radius.
 /* Helper name unproven: reads the second longitude range of a region line. */
-inline void CamRegion::PrepareLong2(u8* line) {
-    fn_8027264C("start_long_2", line, (&lo1)[2]);
-    fn_8027264C("end_long_2", line, (&lo1)[3]);
+static inline void PrepareLong2(u8* line, const f32* lo) {
+    fn_8027264C("start_long_2", line, lo[2]);
+    fn_8027264C("end_long_2", line, lo[3]);
 }
 
 void CamRegion::Prepare(u8* line) {
@@ -1130,7 +1154,7 @@ void CamRegion::Prepare(u8* line) {
     fn_8027264C("start_long", line, (&lo1)[0]);
     fn_8027264C("end_long", line, (&lo1)[1]);
     if (dual) {
-        PrepareLong2(line);
+        PrepareLong2(line, &lo1);
     }
 }
 extern "C" {
@@ -1263,6 +1287,37 @@ int TvCamera::Load(ValueNode* t) {
         return 1;
     }
     return 0;
+}
+
+// The camera writer behind the camera file (dead in the shipped build; only its strings remain).
+/* Helper names unproven */
+const char* CamTypeName(int type);
+const char* BoolName(int v);
+
+static void SaveTvCamera(void* f, const TvCamera* c) {
+    WriteText(f, "table cam\r\n");
+    WriteText(f, "\ttype\t\t%s\r\n", CamTypeName(c->type));
+    WriteText(f, "\tfunky_fov\t\t%s\r\n", BoolName(c->flags & 1));
+    WriteText(f, "\tshakey\t\t%s\r\n", BoolName(c->flags & 2));
+    WriteText(f, "\trumble\t\t%s\r\n", BoolName(c->flags & 4));
+    WriteText(f, "\tfocus_blur\t\t%s\r\n", BoolName(c->flags & 8));
+    WriteText(f, "\tx\t\t%1.1f\r\n", c->pos[0]);
+    WriteText(f, "\ty\t\t%1.1f\r\n", c->pos[1]);
+    WriteText(f, "\tz\t\t%1.1f\r\n", c->pos[2]);
+    WriteText(f, "\tex_1\t\t%1.1f\r\n", c->ex[0]);
+    WriteText(f, "\tex_2\t\t%1.1f\r\n", c->ex[1]);
+    WriteText(f, "\tex_3\t\t%1.1f\r\n", c->ex[2]);
+    WriteText(f, "\tnew_fov\t\t%1.1f\r\n", c->fov);
+    if (c->moves) {
+        WriteText(f, "\tx_a\t\t%1.1f\r\n", c->to[0]);
+        WriteText(f, "\ty_a\t\t%1.1f\r\n", c->to[1]);
+        WriteText(f, "\tz_a\t\t%1.1f\r\n", c->to[2]);
+        WriteText(f, "\tex_1_a\t\t%1.1f\r\n", c->exTo[0]);
+        WriteText(f, "\tex_2_a\t\t%1.1f\r\n", c->exTo[1]);
+        WriteText(f, "\tex_3_a\t\t%1.1f\r\n", c->exTo[2]);
+        WriteText(f, "\tnew_fov_a\t\t%1.1f\r\n", c->fovTo);
+    }
+    WriteText(f, "NICE_CAMERA_NAME");
 }
 extern "C" {
 
@@ -1457,6 +1512,14 @@ void camera_car(u8* p, int ci) {
 }
 
 }  // extern "C"
+// Saving the edited camera set (dead in the shipped build; only its strings remain).
+/* Helper names unproven */
+void SaveCameraFiles(const char* qrs, const char* val, const char* txt);
+
+static void SaveCameras(void) {
+    SaveCameraFiles("qcamera3.qrs", "qcamera3.val", "camera3.txt");
+}
+
 CamRegion::~CamRegion(void) {}
 extern "C" {
 
