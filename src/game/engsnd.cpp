@@ -111,18 +111,6 @@ struct Car {
 
 // A fade window: full between lo and hi, fading out over 1/invLo below and 1/invHi above.
 struct Window {
-    void Load(ValueNode* n) {
-        f32 g = n->GetFloat("gain", 1.0f);
-        f32 t4 = n->GetFloat("t4", 110000.0f);
-        f32 t3 = n->GetFloat("t3", 100000.0f);
-        f32 t2 = n->GetFloat("t2", -100000.0f);
-        f32 t1 = n->GetFloat("t1", -110000.0f);
-        lo = t2;
-        hi = t3;
-        invLo = 1.0f / (t2 - t1);
-        invHi = 1.0f / (t4 - t3);
-        gain = g;
-    }
 
     f32 lo;     // offset 0x0
     f32 hi;     // offset 0x4
@@ -130,6 +118,20 @@ struct Window {
     f32 invHi;  // offset 0xC
     f32 gain;   // offset 0x10
 };
+
+/* Helper name unproven */
+static inline void LoadWindow(Window* w, ValueNode* n) {
+    f32 g = n->GetFloat("gain", 1.0f);
+    f32 t4 = n->GetFloat("t4", 110000.0f);
+    f32 t3 = n->GetFloat("t3", 100000.0f);
+    f32 t2 = n->GetFloat("t2", -100000.0f);
+    f32 t1 = n->GetFloat("t1", -110000.0f);
+    w->lo = t2;
+    w->hi = t3;
+    w->invLo = 1.0f / (t2 - t1);
+    w->invHi = 1.0f / (t4 - t3);
+    w->gain = g;
+}
 
 struct EngineSample {
     GameSound* snd;  // offset 0x0
@@ -151,11 +153,7 @@ static UnkStatic123 lbl_804892A8;
 class EngineSound {
 public:
     EngineSound(Car* car) {
-        if (lbl_8055EDBC == 0) {
-            lbl_8055EDB8 = 0.0f;
-            fn_80127C90(fn_80209904, "engsnd");
-        }
-        lbl_8055EDBC++;
+        Register();
         ValueNode* child;
         this->car = car;
         count = 0;
@@ -192,8 +190,8 @@ public:
                     count--;
                 } else {
                     e->snd->player = car->player;
-                    e->throttle.Load(child->FindChild("throttle"));
-                    e->rpm.Load(child->FindChild("rpm"));
+                    LoadWindow(&e->throttle, child->FindChild("throttle"));
+                    LoadWindow(&e->rpm, child->FindChild("rpm"));
                     e->invRpm = 1.0f / child->GetFloat("sample_rpm");
                 }
             }
@@ -203,6 +201,7 @@ public:
         fadeIn = 0.0f;
     }
     virtual ~EngineSound(void);
+    void Register(void);
     virtual void Update(int muted);
 
     EngineSample samples[6];  // offset 0x4
@@ -214,6 +213,15 @@ public:
     f32 rpm;                  // offset 0x150
     f32 fadeIn;               // offset 0x154
 };
+
+/* Helper name unproven */
+inline void EngineSound::Register(void) {
+    if (lbl_8055EDBC == 0) {
+        lbl_8055EDB8 = 0.0f;
+        fn_80127C90(fn_80209904, "engsnd");
+    }
+    lbl_8055EDBC++;
+}
 
 static inline f32 Smooth(f32 a) {
     f32 aa = a * a;
