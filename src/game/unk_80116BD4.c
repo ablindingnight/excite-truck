@@ -4494,8 +4494,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                             u32 p = *pattern.cur++;
                             u32 w;
                             w = (c0 & BINK_PAT2_C0[p & 3]) | (c1 & BINK_PAT2_C1[p & 3]);
-                            ((u32 *)d0)[0] = w;
                             ((u32 *)d1)[0] = w;
+                            ((u32 *)d0)[0] = w;
                             w = (c0 & BINK_PAT2_C0[(p >> 2) & 3]) | (c1 & BINK_PAT2_C1[(p >> 2) & 3]);
                             ((u32 *)d0)[1] = w;
                             ((u32 *)d1)[1] = w;
@@ -4503,8 +4503,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                             ((u32 *)d0)[2] = w;
                             ((u32 *)d1)[2] = w;
                             w = (c0 & BINK_PAT2_C0[p >> 6]) | (c1 & BINK_PAT2_C1[p >> 6]);
-                            ((u32 *)d0)[3] = w;
                             ((u32 *)d1)[3] = w;
+                            ((u32 *)d0)[3] = w;
                             d0 = d1 + pitch;
                             d1 = d0 + pitch;
                         }
@@ -4742,8 +4742,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 {
                     u8 *wd4 = dst;
                     for (i = 0; i < 8; i++) {
-                        ((u32 *)wd4)[0] = c;
                         ((u32 *)wd4)[1] = c;
+                        ((u32 *)wd4)[0] = c;
                         wd4 += pitch;
                     }
                 }

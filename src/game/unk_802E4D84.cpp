@@ -1050,8 +1050,8 @@ void fn_802E6264(void) {
                     {
                         AXPBSRC src;
                         memset(&src, 0, sizeof(src));
-                        src.ratioHi = 1;
                         src.ratioLo = 0;
+                        src.ratioHi = 1;
                         src.currentAddressFrac = 0;
                         AXSetVoiceSrcType(v->vpb, 1);
                         AXSetVoiceSrc(v->vpb, &src);

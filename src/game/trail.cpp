@@ -799,8 +799,8 @@ void DustTrail::Impact(const TrailEvent* e) {
         rot.x.x = cs;
         rot.x.y = 0.0f;
         rot.x.z = -sn;
-        rot.y.x = 0.0f;
         rot.y.y = 1.0f;
+        rot.y.x = 0.0f;
         rot.y.z = 0.0f;
         rot.z.x = sn;
         rot.z.y = 0.0f;

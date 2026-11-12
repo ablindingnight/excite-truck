@@ -363,8 +363,8 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     m[2] = -s;
     m[3] = 0.0f;
     m[4] = 1.0f;
-    m[5] = 0.0f;
     m[6] = s;
+    m[5] = 0.0f;
     m[7] = 0.0f;
     m[8] = c;
     MulM(m, &b->vel, &b->vel);

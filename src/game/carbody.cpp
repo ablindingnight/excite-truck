@@ -2711,8 +2711,8 @@ void fn_80186DE8(u8* p) {
             f32 load = w0[j];
             w->load = load;
             f32 spin = w1[j];
-            w->loadN = load / lbl_80561CC0;
             w->spin = spin;
+            w->loadN = load / lbl_80561CC0;
             w1[j] = fmod(lbl_80561E6C + spin, 6.2831854820251465);
             w->prevSlip = w->slip;
             w->slip = w2[j];
@@ -2725,8 +2725,8 @@ void fn_80186DE8(u8* p) {
             __typeof__(nrm[1]) nrm_1 = c->pts[9 + j].y;
             w->contact[2] = c->pts[j].z;
             nrm[0] = c->pts[9 + j].x;
-            nrm[1] = nrm_1;
             nrm[2] = nrm_2;
+            nrm[1] = nrm_1;
             w->local[0] = x->pts[j].x;
             w->local[2] = x->pts[j].z;
             w->local[1] = x->pts[j].y - w6[j];
@@ -3655,8 +3655,8 @@ void fn_8018A750(u8* p) {
                 v->w34 = lbl_80561CD0;
                 v->w30 = lbl_80561CDC;
                 v[1] = v[0];
-                edges[i].a = i * 2;
                 edges[i].b = i * 2 + 1;
+                edges[i].a = i * 2;
                 edges[i].extra = lbl_80561CAC;
                 edges[i].stiff = lbl_80561CD0 - F32(PTR(p, 0x26C0) + i * 8, 0xA8);
                 pins[i].idx = i * 2;

@@ -547,8 +547,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         }
         tpos.x = tr->pos.x;
         tpos.y = tr->pos.z;
-        basis.right.x = 1.0f;
         basis.right.y = 0.0f;
+        basis.right.x = 1.0f;
         basis.right.z = 0.0f;
         basis.up.x = 0.0f;
         basis.up.y = 0.0f;

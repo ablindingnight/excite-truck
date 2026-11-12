@@ -241,13 +241,13 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     pelvis.y = 0.5f * lhip.y + 0.5f * rhip.y - 1.27f;
     d->body.row[0].x = 1.0f;
     d->body.row[0].y = 0.0f;
-    d->body.row[0].z = 0.0f;
     d->body.row[1].x = 0.0f;
+    d->body.row[0].z = 0.0f;
     d->body.row[1].y = 1.0f;
     d->body.row[1].z = 0.0f;
     d->body.row[2].x = 0.0f;
-    d->body.row[2].y = 0.0f;
     d->body.row[2].z = 1.0f;
+    d->body.row[2].y = 0.0f;
     d->body.pos.x = 0.0f;
     d->body.pos.y = 0.0f;
     d->body.pos.z = 0.0f;
@@ -265,8 +265,8 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     DVertDesc verts[7];
     verts[0].pos = lhip;
     verts[0].w34 = 1.0f;
-    verts[0].w30 = 1.0f;
     verts[1].pos = lknee;
+    verts[0].w30 = 1.0f;
     verts[1].w34 = 1.0f;
     verts[1].w30 = 1.0f;
     verts[2].pos = lfoot;
@@ -364,8 +364,8 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
         {4, 5, 0.0f, 0.0f}, {1, 6, -0.5f, 0.1f}, {4, 6, -0.5f, 0.1f},
     };
     DVertDesc verts[7];
-    verts[0].pos = ls;
     verts[0].w34 = 1.0f;
+    verts[0].pos = ls;
     verts[0].w30 = 1.0f;
     verts[1].pos = lmid;
     verts[1].w34 = 1.0f;
@@ -551,13 +551,13 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     f32 t = 1.0f - cs;
                     __typeof__(r.ry.y) r_ry_y = cs + t * (ay * ay);
                     __typeof__(r.ry.x) r_ry_x = ay * (t * ax) - sn * az;
-                    r.rx.x = cs + t * (ax * ax);
                     r.rx.y = ay * (t * ax) + sn * az;
+                    r.rx.x = cs + t * (ax * ax);
                     r.rx.z = az * (t * ax) - sn * ay;
                     r.ry.x = r_ry_x;
                     r.ry.y = r_ry_y;
-                    r.ry.z = az * (ay * t) + ax * sn;
                     r.rz.x = az * (t * ax) + sn * ay;
+                    r.ry.z = az * (ay * t) + ax * sn;
                     r.rz.y = az * (t * ay) - sn * ax;
                     r.rz.z = cs + t * (az * az);
                 } else {
@@ -710,8 +710,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         rot.rx.z = az * (t * ax) - sn * ay;
         rot.ry.x = ay * (t * ax) - sn * az;
         rot.ry.y = cs + t * (ay * ay);
-        rot.ry.z = az * (t * ay) + sn * ax;
         rot.rz.x = az * (t * ax) + sn * ay;
+        rot.ry.z = az * (t * ay) + sn * ax;
         rot.rz.y = az * (t * ay) - sn * ax;
         rot.rz.z = cs + t * (Sq_hm(az));
     } else {

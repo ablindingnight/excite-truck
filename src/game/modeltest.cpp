@@ -110,8 +110,8 @@ void fn_8024BE04(u8* p) {
         v[1].pos = MTVec(1.0f, 0.0f, 0.0f);
         v[1].color = 0xFFFFFFFF;
         v[1].u = 1.0f;
-        v[1].v = 0.0f;
         v[2].pos = v_2_pos;
+        v[1].v = 0.0f;
         v[2].color = 0xFFFFFFFF;
         v[2].u = 0.0f;
         v[2].v = 1.0f;

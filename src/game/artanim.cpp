@@ -444,8 +444,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 } else {
                     key->q[0] = 0.0f;
                     key->q[1] = 0.0f;
-                    key->q[2] = 0.0f;
                     key->q[3] = 1.0f;
+                    key->q[2] = 0.0f;
                 }
             } else {
                 const char* q = f->GetString("q", "0,0,0,1");
@@ -699,8 +699,8 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 m[1][0] = xy - wz;
                 m[1][1] = 1.0f - (xx + zz);
                 m[1][2] = yz + wx;
-                m[2][0] = xz + wy;
                 m[2][1] = yz - wx;
+                m[2][0] = xz + wy;
                 m[2][2] = 1.0f - (xx + yy);
                 m[3][0] = pos[0] * ps;
                 m[3][1] = pos[1] * ps;

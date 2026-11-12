@@ -216,8 +216,8 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
         v = &lbl_80487578[nv + 1];
         v->pos = s->p1;
         v->u = 1.0f;
-        v->v = 0.0f;
         v->color = c0;
+        v->v = 0.0f;
         nv += 2;
         lbl_8055EAA8 = nv;
         for (i = 1; i <= n; i++) {

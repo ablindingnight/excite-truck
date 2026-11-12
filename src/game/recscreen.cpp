@@ -281,8 +281,8 @@ void fn_8025C204(int event, int difficulty) {
     CarIconTable* set = lbl_8055F2E4;
     ScoreRow rows[5];
     RecordIcon icons[5];
-    icons[0].icons = set;
     icons[0].visible = 0;
+    icons[0].icons = set;
     icons[1].icons = set;
     icons[1].visible = 0;
     icons[2].icons = set;

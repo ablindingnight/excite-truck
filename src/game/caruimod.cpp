@@ -1033,8 +1033,8 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 c = cos(pitch);
             f32 s = sin(pitch);
             Mtx33 rx;
-            rx.m[0] = 1.0f;
             rx.m[1] = 0.0f;
+            rx.m[0] = 1.0f;
             rx.m[2] = 0.0f;
             rx.m[3] = 0.0f;
             rx.m[4] = c;
@@ -1540,8 +1540,8 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
     for (i = 0; i < 150; i++, n += 2) {
         u16* q = &idx[i * 9];
         q[0] = 0;
-        q[1] = n;
         q[2] = n + 2;
+        q[1] = n;
         q[3] = n;
         q[4] = n + 1;
         q[5] = n + 2;

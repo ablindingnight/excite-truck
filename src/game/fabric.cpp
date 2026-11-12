@@ -455,8 +455,8 @@ void fn_801F5664(Fabric* f, int style) {
         fn_802E317C("mesh: invalid anchor style %d", style);
         break;
     }
-    f->anchors = a;
     f->numAnchors = n;
+    f->anchors = a;
 }
 }
 
@@ -552,8 +552,8 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
     } else {
         int c = ClampI((int)(3.0f * (w * q->colDensity)), 2, 8);
         int r = ClampI((int)(3.0f * (h * q->rowDensity)), 2, 4);
-        f->cols = c;
         f->rows = r;
+        f->cols = c;
     }
     umin = FMin(q->c[0].u, FMin(q->c[1].u, FMin(q->c[2].u, q->c[3].u)));
     umax = FMax(q->c[0].u, FMax(q->c[1].u, FMax(q->c[2].u, q->c[3].u)));
