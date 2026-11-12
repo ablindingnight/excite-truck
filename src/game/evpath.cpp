@@ -1138,7 +1138,7 @@ int fn_80283E28(void);
 // The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
 // marker, the selected event's title, best time and map; after a result the improved event's score counts
 // up first. Returns 1 when an event was picked (its index in *event).
-int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path) {
+int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     int diff = br->Difficulty();
     ScoreAccumulator acc;
     if (res->newly[2]) {
@@ -1394,7 +1394,7 @@ extern "C" {
 VehicleList* fn_8025007C(int n);
 void fn_80263F30(int lastTier, int finalTier, int a);
 int fn_8027F958(s32* bracket, EvPath* path);
-int fn_802812B4(s32* event, EvBracket* br, EvResult* res, EvPath* path);
+int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path);
 void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg);
 
 // The career event browser: starts on the selected event (or the first one not yet unlocked), then lets the

@@ -171,10 +171,10 @@ static inline void StrNCopy(char* dst, const char* src, int len) {
 extern "C" {
 
 void fn_801A7628(void);
-f32 fn_801A7F98(Binding* b);
-f32 fn_801A85E8(Binding* b);
-int fn_801A8A10(Binding* b);
-int fn_801A8E38(Binding* b);
+f32 fn_801A7F98(const Binding* b);
+f32 fn_801A85E8(const Binding* b);
+int fn_801A8A10(const Binding* b);
+int fn_801A8E38(const Binding* b);
 int fn_801A8EE4(Binding* b);
 int ControlExists(const Binding* b);
 void fn_801A90A4(char* out, int len, Binding* b);
@@ -343,7 +343,7 @@ void fn_801A7E54(char* out, int len, Binding* b) {
 
 void fn_801A7F8C(void) { lbl_8055E5C8 = 0; }
 
-f32 fn_801A7F98(Binding* b) {
+f32 fn_801A7F98(const Binding* b) {
     JoyStatus* p;
     if (!ControlExists(b)) {
         return 0.0f;
@@ -464,7 +464,7 @@ f32 fn_801A7F98(Binding* b) {
     return 0.0f;
 }
 
-f32 fn_801A85E8(Binding* b) {
+f32 fn_801A85E8(const Binding* b) {
     if (b->type == 1) {
         return 0.0f;
     } else {
@@ -481,7 +481,7 @@ f32 fn_801A85E8(Binding* b) {
     }
 }
 
-int fn_801A8A10(Binding* b) {
+int fn_801A8A10(const Binding* b) {
     if (b->type == 1) {
         return 0;
     } else {
@@ -498,7 +498,7 @@ int fn_801A8A10(Binding* b) {
     }
 }
 
-int fn_801A8E38(Binding* b) { return fn_801A7F98(b) > 0.2f; }
+int fn_801A8E38(const Binding* b) { return fn_801A7F98(b) > 0.2f; }
 
 int fn_801A8E68(Binding* b) {
     switch (b->type) {

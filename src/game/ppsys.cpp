@@ -39,7 +39,7 @@ struct PLink {
     f32 d;      // offset 0xC
     f32 e;      // offset 0x10
     f32 f;      // offset 0x14
-    void* g;    // offset 0x18
+    const void* g;    // offset 0x18
 };
 
 // Setup records.
@@ -264,7 +264,7 @@ static inline void AddAnchor(PSys* s, s32 idx, const RMtx* m, const RVec3* at) {
 }
 
 // Reconstructed from the target: the name and the split into a helper are unproven.
-static inline void AddLink(PSys* s, s32 a, s32 b, f32 c, const RVec3* axis, void* g) {
+static inline void AddLink(PSys* s, s32 a, s32 b, f32 c, const RVec3* axis, const void* g) {
     PLink* k = &s->links[s->nLink++];
     k->a = a;
     k->b = b;
@@ -479,7 +479,7 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     }
 }
 
-void fn_801C2170(PSys* s, const PSysDesc* d, void* owner) {
+void fn_801C2170(PSys* s, const PSysDesc* d, const void* owner) {
     int i;
     s->nPart = 0;
     s->nStick = 0;

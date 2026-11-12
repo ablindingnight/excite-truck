@@ -105,7 +105,7 @@ static inline f32 AbsF(f32 x) { double a = __fabs(x); return a; }
 
 static inline int Near(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
 
-static inline int SamePose(CamPose* a, CamPose* b) {
+static inline int SamePose(const CamPose* a, const CamPose* b) {
     int same = Near(PSVECSquareDistance(&a->pos, &b->pos));
     if (same) {
         same = Near(PSVECSquareDistance(&a->rot.m[0], &b->rot.m[0]));
@@ -150,7 +150,7 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
 }
 
 // Starts transition `slot` from pose a to pose b over `dur` (nothing to do when they already match).
-void fn_80276098(CamPose* a, CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
+void fn_80276098(const CamPose* a, CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
     if (AbsF(fovA - fovB) <= lbl_80558DC4[0] && SamePose(a, b)) {
         return;
     }
