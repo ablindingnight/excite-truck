@@ -2212,7 +2212,7 @@ void fn_8019743C(u8* d, u8* out) {
                     int car = S32(side, 0x18);
                     blocked = fn_8019309C(d, car, fn_801930DC(d, car)) == 0;
                 } else {
-                    u8 v;
+                    int v;
                     if ((which & 2) && (v = fn_801930DC(d, S32(d, 0x90))) != 0) {
                         which = 1;
                         v = 1;
