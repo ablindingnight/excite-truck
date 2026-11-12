@@ -202,13 +202,13 @@ public:
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
-    virtual void vf14(void) {}
+    virtual void vf14(int p) {}
     virtual void vf18(void) {}
     virtual int vf1C(int car) { return vf20(car); }
     virtual int vf20(int car) = 0;
     virtual int vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
+    virtual int Started1C(int car);
+    virtual int Started20(int car);
     virtual int vf30(void) { return 0; }
     virtual int vf34(void) { return 0; }
     virtual f32 vf38(void);
@@ -228,21 +228,21 @@ public:
     virtual void vf70(void) {}
     virtual void vf74(void) {}
     virtual void vf78(void) {}
-    virtual int vf7C(void) { return 0; }
+    virtual int vf7C(int p) { return 0; }
     virtual int vf80(void) { return 0; }
     virtual int vf84(void) { return 0; }
     virtual int vf88(void) { return 0; }
     virtual int vf8C(int p, int key);
     virtual void vf90(struct RaceCarRec* a, struct RaceCarRec* b, void* p, const f32* hit) {}
     virtual void vf94(struct RaceCarRec* rc) {}
-    virtual void vf98(void);
+    virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
     virtual int vfA0(int a, int b, int c);
     virtual void vfA4(struct RaceCarRec* rc) {}
     virtual void vfA8(int a, int b);
     virtual void vfAC(int car);
-    virtual int vfB0(void) { return 0; }
-    virtual void vfB4(void) {}
+    virtual int vfB0(int a, int b, int c) { return 0; }
+    virtual void vfB4(int car, struct Damage* d) {}
     virtual void vfB8(void* r) = 0;
     virtual int vfBC(void) { return 0; }
     virtual void vfC0(void);
@@ -1280,19 +1280,19 @@ public:
     virtual int vfDC(void);
     virtual void vfA8(int a, int b);
     virtual void vf40(void);
-    virtual void a4(void);
-    virtual void a3(void);
-    virtual void a2(void);
-    virtual void a1(void);
     virtual void a0(void);
+    virtual void a4(void);
+    virtual void a1(void);
+    virtual void a2(void);
+    virtual void a3(void);
+    virtual void b0(void);
+    virtual void b1(void);
     virtual void b2(StuntEvt* e, int car);
     void b2Body(StuntEvt* e, int car);
-    virtual void b1(void);
-    virtual void b0(void);
-    virtual void c3(void);
-    virtual void c2(Body* b, int car);
-    virtual void c1(void);
     virtual void c0(Body* b);
+    virtual void c1(void);
+    virtual void c2(Body* b, int car);
+    virtual void c3(void);
     BetaCar* CarFor(RaceCarRec* rc) { return &cars[rc->index]; }
     int AllDone(int n) {
         int i;
@@ -4577,6 +4577,7 @@ inline CarHud::CarHud(int car, int acar) {
 }
 
 inline void BetaMaster::a1(void) {
+    const char* star = "betatex2.tex";
     int i = 0;
     nCars = lbl_8055E4D0;
     if (nCars > 0) {
@@ -4596,7 +4597,7 @@ inline void BetaMaster::a1(void) {
             fn_801345D8(key, sizeof(key), "icon_set");
             fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, key, &set);
             if (!set) {
-                cars[i].tex[2] = fn_802CAC28("betatex2.tex", 0);
+                cars[i].tex[2] = fn_802CAC28(star, 0);
             } else {
                 char prefix[8];
                 char file[0x40];
@@ -4607,7 +4608,7 @@ inline void BetaMaster::a1(void) {
                     cars[i].tex[2] = fn_802CAC28(file, 0);
                 } else {
                     fn_802E30C8("Couldn't find star icon texture %s!", file);
-                    cars[i].tex[2] = fn_802CAC28("betatex2.tex", 0);
+                    cars[i].tex[2] = fn_802CAC28(star, 0);
                 }
             }
         }
