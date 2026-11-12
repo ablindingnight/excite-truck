@@ -595,6 +595,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     if (!fixed) {
         base = h0;
     }
+    int n = 0;
     d->base = h0 + (*out - base);
     d->terms[0].weight = 0;
     d->terms[0].k = 0.0f;
@@ -602,7 +603,6 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     d->terms[1].k = 0.0f;
     d->terms[2].weight = 0;
     d->terms[2].k = 0.0f;
-    int n = 0;
     for (int i = 0; i < 75; i++) {
         lbl_804424B0[i] = 1.0f;
         f32 dh = fn_801DCF0C(x, z) - h0;
