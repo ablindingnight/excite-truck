@@ -130,7 +130,7 @@ public:
     virtual s32 vf2C(RPacket* p);     // 0x2C
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
-    virtual void vf38(void);          // 0x38
+    virtual void vf38(u8* buf);       // 0x38
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual void vf44(void);          // 0x44
@@ -161,9 +161,12 @@ public:
     virtual void Reset(void);
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
-    virtual void OnHit(void);       // 0x48
-    virtual void OnImpulse(void);   // 0x4C
-    virtual void OnImpulses(void);  // 0x50
+    virtual void vf18(void);
+    virtual void vf3C(void);
+    virtual int vf40(void);
+    virtual void OnHit(const RVec3* p, const RVec3* n, int i, void* o);  // 0x48
+    virtual void OnImpulse(const RVec3* p, const RVec3* n, int i, void* a, void* b);  // 0x4C
+    virtual void OnImpulses(RVec3* a, RVec3* b);  // 0x50
     void Update(void);
     void AddTorque(const RVec3* t);
     u8 padD0[0x118 - 0xD0];

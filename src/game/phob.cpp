@@ -476,7 +476,7 @@ void fn_801778C0(void) {
 
 int fn_80177980(Phob* p) { return 0; }
 
-int fn_80177988(Phob* p) { return 1; }
+int vf44__10CollVolumeFv(Phob* p) { return 1; }  // CollVolume::vf44 (named so the vtables pair)
 
 void fn_80177990(void) {
     int i;
