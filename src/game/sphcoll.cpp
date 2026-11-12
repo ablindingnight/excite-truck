@@ -340,6 +340,8 @@ ModuleTag lbl_8055E590;
 UnkStaticFFFF lbl_8055E598;
 UnkStaticFFFF lbl_8055E59C;
 u8* lbl_8055E5A0;  // track collision mesh
+u8 lbl_8055E5A4;        // warned: ring vs box
+u8 lbl_8055E5A5;        // warned: ring vs ragdoll
 
 extern "C" {
 
@@ -3628,8 +3630,6 @@ u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
     return p;
 }
 
-extern u8 lbl_8055E5A4;        // warned: ring vs box
-extern u8 lbl_8055E5A5;        // warned: ring vs ragdoll
 
 // Collides ring `p` against volume `o` by its type tag.
 void fn_801A2D50(u8* p, u8* o) {
