@@ -251,9 +251,8 @@ const char* lbl_8032E9E0[15] = {
 
 ModuleTag lbl_8055E280;
 UnkStatic7F lbl_8055E288;
-static FixedList<StuntWatcher*, 8> lbl_8042FD34;
-
 f32 lbl_8042FD08[8];  // per-car score scale
+static FixedList<StuntWatcher*, 8> lbl_8042FD34;
 
 
 // One car's stunt meter (betarace's Meter): the tracker array below and every tracker implement it.
