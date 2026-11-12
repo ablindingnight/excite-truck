@@ -363,8 +363,8 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
     f32 len = (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
     len = 0.01f > len ? 0.01f : len;
     f32 inv = 1.0f / len;
-    dir.y *= inv;
     dir.x *= inv;
+    dir.y *= inv;
     org.x = F32(m, 0x24);
     org.y = F32(m, 0x2C);
     side.x = dir.y;

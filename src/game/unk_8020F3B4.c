@@ -334,8 +334,8 @@ void fn_8020FE90(void) {
 void fn_8020FEF0(long dir) {
     long sel = lbl_8055EEE0;
     long page;
-    long count;
     long max;
+    long count;
     if (sel == -2 && lbl_8055EEBC > 0) {
         if (dir == 1) {
             lbl_8055EEE0 = -1;
