@@ -180,8 +180,8 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame world[32];
     BFrame skin[32];
     int i;
+    BFrame* wa = world;
     if (n > 0) {
-        BFrame* wa = world;
         BFrame* wb = wa;
         for (i = 0; i < n; wa++, wb++, i++) {
             const Bone* b = &set->bones[i];
