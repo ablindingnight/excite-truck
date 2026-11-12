@@ -35,13 +35,19 @@ BOOL __OSInIPL;
 #if defined(VERSION_R4QE01)
 #define OS_BUILD_DATE "Apr 24 2007"
 #define OS_BUILD_TIME "11:50:47"
+#define OS_BUILD_ID "0x4199_60831"
+#elif defined(VERSION_REXE01)
+#define OS_BUILD_DATE "Sep 21 2006"
+#define OS_BUILD_TIME "14:32:13"
+#define OS_BUILD_ID "0x4200_60422"
 #else
 #define OS_BUILD_DATE "Jan  9 2007"
 #define OS_BUILD_TIME "01:54:01"
+#define OS_BUILD_ID "0x4199_60831"
 #endif
 
 const char* __OSVersion =
-    "<< RVL_SDK - OS \trelease build: " OS_BUILD_DATE " " OS_BUILD_TIME " (0x4199_60831) >>";
+    "<< RVL_SDK - OS \trelease build: " OS_BUILD_DATE " " OS_BUILD_TIME " (" OS_BUILD_ID ") >>";
 
 static void OSExceptionInit(void);
 
