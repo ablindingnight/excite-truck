@@ -1614,7 +1614,6 @@ extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
 extern "C" s32 fn_802ECEEC(void);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
-extern "C" s32 lbl_802F9EA4[];
 extern "C" u8 lbl_8055B860;
 // Plays a movie inside the playvid layout (skipped while a movie cannot play).
 extern "C" void fn_8021481C(const char* movie) {
