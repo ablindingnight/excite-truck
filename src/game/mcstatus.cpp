@@ -3,7 +3,6 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
-#include "game/mcdialog.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 #include <string.h>
@@ -61,6 +60,26 @@ int fn_802E47B8(void);
 void fn_80129AFC(void);
 double sin(double x);
 }
+
+// The save progress bar ("mem_bar.art"; vtable lbl_803430E8, dtor fn_80246428).
+class MemBar : public MenuState {
+public:
+    MemBar(f32 f) {
+        frac = f;
+        art = fn_8023512C("mem_bar.art");
+    }
+    virtual ~MemBar(void) {
+        if (art) {
+            fn_80235380(art);
+        }
+    }
+    virtual void Draw(void);
+
+    f32 frac;  // offset 0x18
+    u8* art;   // offset 0x1C
+};
+
+#include "game/mcdialog.h"
 
 struct Camera {
     u8 data[0x30];
@@ -450,24 +469,6 @@ void fn_80246210(void) {
 }
 
 }  // extern "C"
-
-// The save progress bar ("mem_bar.art"; vtable lbl_803430E8, dtor fn_80246428).
-class MemBar : public MenuState {
-public:
-    MemBar(f32 f) {
-        frac = f;
-        art = fn_8023512C("mem_bar.art");
-    }
-    virtual ~MemBar(void) {
-        if (art) {
-            fn_80235380(art);
-        }
-    }
-    virtual void Draw(void);
-
-    f32 frac;  // offset 0x18
-    u8* art;   // offset 0x1C
-};
 
 extern const MenuDesc lbl_802FA350;  // "mc_dialog.lyt"
 extern UnkStatic123s lbl_80498890;  // menu end tag (menusel.cpp)
