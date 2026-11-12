@@ -599,8 +599,8 @@ void fn_80271624(int mode, u8* p) {
         if (idx >= 0) {
             TvCamera* tv = &lbl_8049A2C8[S32(p, 0x148)];
             if (tv->moves) {
+                CamRegion* r = &lbl_8049F9D8[idx];
                 if (lbl_8055F564) {
-                    CamRegion* r = &lbl_8049F9D8[idx];
                     f32 f = lbl_80563F48;
                     f32 h = lbl_8055F568;
                     f32 lo = r->lo1;
