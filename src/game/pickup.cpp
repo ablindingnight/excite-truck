@@ -564,8 +564,8 @@ static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 /* Helper name unproven: rotates v by the 3x3 matrix m (out may be v). */
 static inline void RotVec(f32* out, const f32* m, const f32* v) {
     f32 y = v[0] * m[3] + v[1] * m[4] + v[2] * m[5];
-    f32 x = v[0] * m[0] + v[1] * m[1] + v[2] * m[2];
     f32 z = v[0] * m[6] + v[1] * m[7] + v[2] * m[8];
+    f32 x = v[0] * m[0] + v[1] * m[1] + v[2] * m[2];
     out[0] = x;
     out[1] = y;
     out[2] = z;

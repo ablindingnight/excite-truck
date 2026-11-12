@@ -152,8 +152,8 @@ static inline void Normalize(Quat& q) {
 }
 static inline void ToMatrix(PathMtx* m, const Quat& q) {
     f32 x2 = q.x + q.x;
-    f32 y2 = q.y + q.y;
     f32 xx = q.x * x2;
+    f32 y2 = q.y + q.y;
     f32 z2 = q.z + q.z;
     f32 yy = y2 * q.y;
     f32 zz = q.z * z2;

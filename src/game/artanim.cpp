@@ -632,9 +632,9 @@ static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {
         out[1] = y;
         out[2] = z;
     } else {
-        out[0] = m[2][0] * in[2] + (in[0] * m[0][0] + in[1] * m[1][0]);
+        out[0] = m[2][0] * in[2] + (m[0][0] * in[0] + in[1] * m[1][0]);
         out[1] = in[2] * m[2][1] + (in[0] * m[0][1] + in[1] * m[1][1]);
-        out[2] = in[2] * m[2][2] + (m[0][2] * in[0] + in[1] * m[1][2]);
+        out[2] = m[2][2] * in[2] + (m[0][2] * in[0] + in[1] * m[1][2]);
     }
 }
 
