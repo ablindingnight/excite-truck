@@ -181,6 +181,8 @@ void fn_80202BFC(s32 rt) {
 
 // Picks (and blends) the sky band for a view direction.
 template <class O> static inline void TMulEq(O* o, f32 k) { o->x *= k; o->y *= k; o->z *= k; }  /* Helper name unproven */
+/* Helper name unproven */
+static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 void fn_80202D50(EVec3 dir) {
     f32 m = PSVECMag(&dir);
     m = m > 0.001f ? m : 0.001f;
@@ -189,27 +191,25 @@ void fn_80202D50(EVec3 dir) {
     f32 y = -dir.y;
     f32 elev = 180.0f * (f32)asin(0.0f > y ? 0.0f : y) / 3.1415927f;
     void* result = 0;
-    int count = lbl_8048897C.n;
     EnvTex* e = lbl_8048897C.data + 1;
-    if (count > 0) {
-        for (int i = 1; i < count; i++, e++) {
-            if (e->idx > elev) {
-                EnvTex* a = &lbl_8048897C.data[i - 1];
-                EnvTex* b = &lbl_8048897C.data[i];
-                f32 t = (elev - (f32)a->idx) / (f32)(b->idx - a->idx);
-                t = 1.0f < t ? 1.0f : t;
-                t = t > 0.0f ? t : 0.0f;
-                t = EnvLerp(0.0f, 1.0f, t);
-                void* tb = fn_802CA294(b->tex);
-                void* ta = fn_802CA294(a->tex);
-                fn_802D94E4(fn_802CA294(lbl_8055ED0C), ta, tb, t);
-                result = fn_802CA294(lbl_8055ED0C);
-                break;
-            }
+    for (int i = 1; i < lbl_8048897C.n; e++, i++) {
+        if (e->idx > elev) {
+            EnvTex* b = &lbl_8048897C.data[i];
+            EnvTex* a = &lbl_8048897C.data[i - 1];
+            f32 t = InvLerp(a->idx, b->idx, elev);
+            t = 1.0f < t ? 1.0f : t;
+            t = t > 0.0f ? t : 0.0f;
+            t = EnvLerp(0.0f, 1.0f, t);
+            void* tb = fn_802CA294(b->tex);
+            void* ta = fn_802CA294(a->tex);
+            fn_802D94E4(fn_802CA294(lbl_8055ED0C), ta, tb, t);
+            result = fn_802CA294(lbl_8055ED0C);
+            break;
         }
     }
     if (!result) {
-        result = fn_802CA294(lbl_8048897C.data[lbl_8048897C.n - 1].tex);
+        int last = lbl_8048897C.n - 1;
+        result = fn_802CA294(lbl_8048897C.data[last].tex);
     }
     fn_802D30DC(result);
 }
