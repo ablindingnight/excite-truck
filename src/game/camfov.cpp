@@ -320,7 +320,8 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     m = lbl_80563EA8 + lbl_8049A208[2];
     top = top > m ? top : m;
     k = (lift - lbl_8049A208[2]) / (top - lbl_8049A208[2]);
-    k = lbl_80563E30 < k ? lbl_80563E30 : k;
+    f32 kMax = lbl_80563E30;
+    k = kMax < k ? kMax : k;
     k = k > lbl_80563E78 ? k : lbl_80563E78;
     k = lbl_80563E78 + k * lbl_80563E30;
     pos[1] = pos[1] + lbl_8049A208[0] * k;
