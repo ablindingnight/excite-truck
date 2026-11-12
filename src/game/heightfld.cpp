@@ -294,8 +294,8 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
 #pragma opt_unroll_loops off
 /* Helper name unproven */
 template <class T>
-static inline T* AtP(T* p, int i) {
-    return &p[i];
+static inline T& AtR(T* p, int i) {
+    return p[i];
 }
 
 void fn_801DC32C(GroundHeader* g) {
@@ -326,7 +326,7 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&t->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(AtP(t->h, b)[a]);
+                Swap16(&AtR(t->h, b)[a]);
             }
         }
         Swap32(&t->x);
@@ -359,7 +359,7 @@ void fn_801DC32C(GroundHeader* g) {
         Swap32(&l->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(AtP(l->h, b)[a]);
+                Swap16(&AtR(l->h, b)[a]);
             }
         }
         Swap32(&l->weight);
