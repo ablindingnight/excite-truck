@@ -575,25 +575,6 @@ void fn_802A5384(WeatherCfg* c) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802A53B0(int m, Droplet* d, DropObj* o, ValVec3& vel) {
-    int k2 = 0;
-    if (m > 0) for (; k2 < m; k2++) {
-        f32 a = fn_80287BC8(0.0f, 1.0f);
-        f32 b = fn_80287BC8(0.0f, 1.0f);
-        ValVec3 p;
-        p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
-        p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
-        f32 originZ = d->origin.z;
-        p.z = originZ + d->sv.z * a + d->tv.z * b;
-        Mul(&o->frame, &p, &p);
-        p.x = p.x + o->frame.pos.x;
-        p.y = p.y + o->frame.pos.y;
-        p.z = p.z + o->frame.pos.z;
-        fn_8028E584(lbl_8055F894, (const PVec*)&p, &vel);
-    }
-}
-
 static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
     o->x = a->x + b->x * s;
     o->y = a->y + b->y * s;
@@ -607,6 +588,7 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[2] = z;
 }
 void fn_802A53B0(DropHit* hits, int n) {
+    int k2;
     if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0] || !lbl_8055F894) {
         return;
     }
@@ -618,13 +600,14 @@ void fn_802A53B0(DropHit* hits, int n) {
     dir.z = r->vel.z * inv;
     for (int i = 0; i < n; hits++, i++) {
         Droplet* d;
+        int j;
         DropSource* s = &lbl_804BCFB8[hits->source];
         if (hits->dist > 56.25f || !hits->enabled || s->count < 1) {
             continue;
         }
         d = s->drops;
         DropObj* o = hits->obj;
-        int j = 0;
+        j = 0;
         if (s->count > 0) for (; j < s->count; d++, j++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
@@ -639,7 +622,24 @@ void fn_802A53B0(DropHit* hits, int n) {
             ValVec3 vel;
             SetV3(&vel, dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
             MadV(&vel, &hits->obj->vel, &vel, 3.0f);
-            Loop1_fn_802A53B0(fn_80287B5C(cnt) + 1, d, o, vel);
+            {
+                int m = fn_80287B5C(cnt) + 1;
+                k2 = 0;
+                if (m > 0) for (; k2 < m; k2++) {
+                    f32 a = fn_80287BC8(0.0f, 1.0f);
+                    f32 b = fn_80287BC8(0.0f, 1.0f);
+                    ValVec3 p;
+                    p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
+                    p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
+                    f32 originZ = d->origin.z;
+                    p.z = originZ + d->sv.z * a + d->tv.z * b;
+                    Mul(&o->frame, &p, &p);
+                    p.x = p.x + o->frame.pos.x;
+                    p.y = p.y + o->frame.pos.y;
+                    p.z = p.z + o->frame.pos.z;
+                    fn_8028E584(lbl_8055F894, (const PVec*)&p, &vel);
+                }
+            }
         }
     }
 }
