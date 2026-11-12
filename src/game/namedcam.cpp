@@ -427,8 +427,8 @@ static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
         m->m[0] = c + t * (x * x);
         m->m[1] = t * x * y + s * z;
         m->m[2] = t * x * z - s * y;
-        m->m[4] = c + t * (y * y);
         m->m[3] = t * x * y - s * z;
+        m->m[4] = c + t * (y * y);
         m->m[6] = t * x * z + s * y;
         m->m[5] = t * y * z + s * x;
         m->m[8] = c + t * (z * z);
