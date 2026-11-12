@@ -378,8 +378,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 /* Helper name unproven: whether the wall is still ramping. */
 inline int SpringWall::Ramping(void) {
-    // MATCHING-AID: comma expression; the discarded dist test is still emitted. Real form unknown.
-    return this->dist < 0.0f, time < ramp;
+    return time < ramp;
 }
 
 void SpringWall::Apply(SpringCar* car, TVec* acc) {
