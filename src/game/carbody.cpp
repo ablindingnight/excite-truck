@@ -3871,10 +3871,10 @@ static inline f32 PkNorm(u32 v, f32 lo, f32 range) {
 }
 static inline f32 PkUnpack(u32 v, f32 q, f32 lo, f32 span) { return lo + PkNorm(v, 0.0f, q) * span; }
 
-static inline void PkCopy(void* dst, const void* src, s16 n) {
+static inline void PkCopy(void* dst, const void* src, int n) {
     u8* d = (u8*)dst;
     const u8* s = (const u8*)src;
-    while (n-- > 0) {
+    while (--n >= 0) {
         *d++ = *s++;
     }
 }
