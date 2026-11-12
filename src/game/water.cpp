@@ -488,8 +488,8 @@ WaterEnvMap::WaterEnvMap(void) {
                 Identity(&sb->frames[i]);
             }
             sb->frames[1].x.y = 0.0f;
-            sb->frames[1].x.x = -1.0f;
             sb->frames[1].x.z = 0.0f;
+            sb->frames[1].x.x = -1.0f;
             sb->frames[1].z.x = 0.0f;
             sb->frames[1].z.y = 0.0f;
             sb->frames[1].z.z = -1.0f;

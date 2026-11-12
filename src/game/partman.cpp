@@ -1008,8 +1008,8 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[3].pos.x = q[0].pos.x + b.x * mtwo;
         q[3].pos.y = q[0].pos.y + b.y * mtwo;
         q[3].pos.z = q[0].pos.z + b.z * mtwo;
-        q[0].u = 0.0f;
         q[1].u = 1.0f;
+        q[0].u = 0.0f;
         q[0].v = 0.0f;
         q[2].u = 1.0f;
         q[1].v = 0.0f;

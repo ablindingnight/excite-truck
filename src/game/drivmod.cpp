@@ -245,10 +245,10 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->body.row[0].z = 0.0f;
     d->body.row[1].y = 1.0f;
     d->body.row[1].z = 0.0f;
-    d->body.row[2].x = 0.0f;
     d->body.row[2].z = 1.0f;
-    d->body.row[2].y = 0.0f;
+    d->body.row[2].x = 0.0f;
     d->body.pos.x = 0.0f;
+    d->body.row[2].y = 0.0f;
     d->body.pos.y = 0.0f;
     d->body.pos.z = 0.0f;
     DVec3 off;
@@ -365,8 +365,8 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     };
     DVertDesc verts[7];
     verts[0].w34 = 1.0f;
-    verts[0].pos = ls;
     verts[0].w30 = 1.0f;
+    verts[0].pos = ls;
     verts[1].pos = lmid;
     verts[1].w34 = 1.0f;
     verts[1].w30 = 1.0f;
@@ -558,8 +558,8 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     r.ry.y = r_ry_y;
                     r.rz.x = az * (t * ax) + sn * ay;
                     r.ry.z = az * (ay * t) + ax * sn;
-                    r.rz.y = az * (t * ay) - sn * ax;
                     r.rz.z = cs + t * (az * az);
+                    r.rz.y = az * (t * ay) - sn * ax;
                 } else {
                     SetIdentity(&r.rx.x);
                 }

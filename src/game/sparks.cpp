@@ -949,8 +949,8 @@ void ShardSys::Draw(void) {
                 r.m[0][0] = cs + c1 * (x * x);
                 r.m[0][1] = r_m_0_1;
                 r.m[1][0] = y * (c1 * x) - sn * z;
-                r.m[0][2] = z * (c1 * x) - sn * y;
                 r.m[1][1] = cs + c1 * (y * y);
+                r.m[0][2] = z * (c1 * x) - sn * y;
                 r.m[2][0] = z * (c1 * x) + sn * y;
                 r.m[1][2] = z * (y * c1) + sn * x;
                 r.m[2][1] = z * (c1 * y) - sn * x;

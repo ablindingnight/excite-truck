@@ -1469,8 +1469,8 @@ void PlayerDriver_vf48(u8* p) {
             spin[0] = cs + (ax * ax) * t;
             spin[1] = spin_1;
             spin[3] = (ax * t) * ay - sn * az;
-            spin[2] = az * (ax * t) - sn * ay;
             spin[4] = cs + t * (ay * ay);
+            spin[2] = az * (ax * t) - sn * ay;
             spin[6] = (t * ax) * az + sn * ay;
             spin[5] = az * (ay * t) + sn * ax;
             spin[7] = az * (ay * t) - sn * ax;
