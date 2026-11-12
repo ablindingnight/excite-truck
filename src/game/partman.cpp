@@ -84,7 +84,7 @@ struct Particle {
     V3 pos;      // offset 0x0
     V3 vel;      // offset 0xC
     f32 birth;   // offset 0x18
-    s8 rot;      // offset 0x1C
+    u8 rot;      // offset 0x1C
     u8 frame;    // offset 0x1D
     u8 spin;     // offset 0x1E
     f32 angVel;  // offset 0x20
@@ -900,8 +900,9 @@ void PartSys::DrawSprites(Particle* p, int n) {
         r = Byte(255.0f * (redConst + redRamp * t));
         a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
         color = (a << 24) | (r << 16) | (g << 8) | b;
-        ua = ((p->rot + 1) & 2) >> 1;
-        ub = (p->rot >> 1) & 1;
+        int rot = p->rot;
+        ua = ((rot + 1) & 2) >> 1;
+        ub = (rot >> 1) & 1;
         PVtx q[4];
         d1X = d1.x;
         q[0].pos.x = pos.x + d1X * size;
