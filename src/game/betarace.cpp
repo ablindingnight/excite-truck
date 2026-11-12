@@ -1670,6 +1670,8 @@ inline const char* CleanRaceName(int i) {
 }
 }  // namespace
 
+char lbl_80559F0C[] = "";
+
 int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     const StuntLine* l;
     int i;
@@ -1721,10 +1723,9 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         stuntLabel[i].Set(l->label);
         stuntValue[i].Set(l->value);
     }
-    const char* blank = "";
     for (; i < ARRAY_COUNT(stuntLabel); i++) {
-        stuntLabel[i].Set(blank);
-        stuntValue[i].Set(blank);
+        stuntLabel[i].Set(lbl_80559F0C);
+        stuntValue[i].Set(lbl_80559F0C);
     }
     fn_802AE168(anim);
     switch (state) {
