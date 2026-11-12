@@ -2029,30 +2029,20 @@ void fn_80183E7C(u8* p) {
         fn_801796CC(14, &id, 4);
     }
     f32 t2588 = F32(p, 0x2588) - lbl_80561D9C;
-    if (t2588 < lbl_80561CAC) {
-        t2588 = lbl_80561CAC;
-    }
+    t2588 = t2588 > lbl_80561CAC ? t2588 : lbl_80561CAC;
     f32 t2590 = F32(p, 0x2590) - lbl_80561D9C;
     F32(p, 0x2588) = t2588;
-    if (t2590 < lbl_80561CAC) {
-        t2590 = lbl_80561CAC;
-    }
+    t2590 = t2590 > lbl_80561CAC ? t2590 : lbl_80561CAC;
     f32 boost = F32(p, 0x258C) - lbl_80561D9C;
     F32(p, 0x2590) = t2590;
-    if (boost < lbl_80561E10) {
-        boost = lbl_80561E10;
-    }
+    boost = boost > lbl_80561E10 ? boost : lbl_80561E10;
     F32(p, 0x258C) = boost;
     f32 pad = F32(p, 0x25BC);
     if (pad > lbl_80558DC4[0]) {
-        if (pad < boost) {
-            pad = boost;
-        }
+        pad = pad > boost ? pad : boost;
         f32 left = F32(p, 0x25BC) - lbl_80561D9C;
         F32(p, 0x258C) = pad;
-        if (left < lbl_80561CAC) {
-            left = lbl_80561CAC;
-        }
+        left = left > lbl_80561CAC ? left : lbl_80561CAC;
         F32(p, 0x25BC) = left;
         if (!fn_8014E708(S32(p, 0x1EC))) {
             s32 id = S32(p, 0x1EC);
@@ -2144,17 +2134,13 @@ void fn_80183E7C(u8* p) {
         }
     }
     f32 heat = F32(p, 0x25A0) - lbl_80561D9C * cool;
-    if (heat < lbl_80561CAC) {
-        heat = lbl_80561CAC;
-    }
+    heat = heat > lbl_80561CAC ? heat : lbl_80561CAC;
     F32(p, 0x25A0) = heat;
     U8(p, 0x259C) = 0;
     if (lbl_8055E4F4) {
         if (!NearZero(F32(p, 0x2690)) && U32(p, 0x10) == 'PCAR') {
             f32 h = heatTune.v[7];
-            if (heat < h) {
-                h = heat;
-            }
+            h = h < heat ? h : heat;
             F32(p, 0x25A0) = h;
         }
         if (F32(p, 0x258C) < lbl_80561D00 && U8(p, 0x260D) && F32(p, 0x2618) < lbl_80561D40 &&
@@ -2214,9 +2200,7 @@ void fn_80183E7C(u8* p) {
         f32 yaw = lbl_80561E20 * F32(p, 0x25D8) * F32(p, 0x25F0) * F32(p, 0x5B0);
         f32 sp = PSVECMag(p + 0x118);
         f32 m = lbl_80561CD0;
-        if (sp > m) {
-            m = sp;
-        }
+        m = m > sp ? m : sp;
         BVec dir;
         f32 inv = lbl_80561CD0 / m;
         dir.x = F32(p, 0x118) * inv;
@@ -2308,9 +2292,7 @@ void fn_80183E7C(u8* p) {
             f32 l = F32(p, 0x2628);
             f32 r = F32(p, 0x262C);
             f32 gap = l - r;
-            if (l < r) {
-                r = l;
-            }
+            r = r < l ? r : l;
             int side = F32(p, 0x2628) > F32(p, 0x262C) ? 1 : 2;
             if ((f32)__fabs(gap) < lbl_80561D38 && now - r < lbl_80561CD0 && held &&
                 (S32(p, 0x263C) == 0 || side == S32(p, 0x263C))) {
