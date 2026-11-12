@@ -486,6 +486,12 @@ public:
     virtual void Save(void) = 0;
 };
 
+class IOverlayCmd {
+public:
+    virtual ~IOverlayCmd(void) {}
+    virtual void Draw(void) = 0;
+};
+
 class Layout;
 
 // Something the overlay editor can drag, click and label.
@@ -1022,12 +1028,6 @@ struct BoxCmd {
     const char* elem;  // offset 0x0
     const char* art;   // offset 0x4
     u32 color;         // offset 0x8
-};
-
-class IOverlayCmd {
-public:
-    virtual ~IOverlayCmd(void) {}
-    virtual void Draw(void) = 0;
 };
 
 // A list of text/gart/box draw commands against a layout, read from a .val node.
