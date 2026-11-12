@@ -364,7 +364,7 @@ void fn_801EB66C(void* p, u32 base) {
     }
 }
 
-void fn_801EB6A4(void) {}
+void Swap__8TrackModFP4TObj(void) {}
 
 void init_display_list(GNode* root) {
     GNode* n = root;
@@ -402,11 +402,11 @@ void init_display_list(GNode* root) {
     }
 }
 
-void fn_801EB800(GModelHandler* h, void* a, void* b) { h->vf28(b, a); }
+void Link__8TrackModFiPviPvi(GModelHandler* h, void* a, void* b) { h->vf28(b, a); }
 
-void fn_801EB81C(void) {}
+void Add__8TrackModFPvP4TObjl(void) {}
 
-void fn_801EB820(void) {}
+void Init__8TrackModFP4TObj(void) {}
 
 void fn_801EB824(GNode* root) {
     GrafReleaser v;
@@ -431,7 +431,7 @@ void fn_801EB90C(void) {
     }
 }
 
-void fn_801EB968(void) {}
+void Apply__8TrackModFv(void) {}
 
 void fn_801EB96C(GModelHandler** slot, GModelHandler* (*create)(void)) { *slot = create(); }
 
@@ -532,7 +532,7 @@ void fn_801EBCAC(void) {
     }
 }
 
-void fn_801EBD14(void) {}
+void Unk1C__8TrackModFv(void) {}
 
 void fn_801EBD18(int view) {
     if (fn_801E85A4() > 1) {
@@ -675,5 +675,5 @@ void GrafReleaser::Visit(GModel* m, void* res, s32 handle) {
     }
 }
 
-extern "C" void fn_801EC19C(void) {}
+extern "C" void Unk14__8TrackModFv(void) {}
 

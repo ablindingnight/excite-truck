@@ -322,6 +322,7 @@ public:
     virtual void Swap(TObj* o);
     virtual void Draw(TObj* list);
     virtual void Link(int a, void* b, int c, void* d, int e);
+    virtual void Unk30(void);  // 0x30
 };
 
 // One cross-fading model (0x1C).
@@ -468,7 +469,6 @@ void fn_801F3158(f32* dst, const f32* src);
 f32 fn_801F3174(f32 y, f32 x);
 void fn_801F3198(TVec* v);
 void fn_801F3E60(void);
-void fn_801F3E64(void);
 
 extern const f32 lbl_80562F48;  // -1.0
 
@@ -562,7 +562,7 @@ AxisFacingTMH::~AxisFacingTMH(void) {}
 
 GenericTMH::~GenericTMH(void) {}
 
-void GenericTMH::Draw(TObj* list) {
+inline void GenericTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         fn_802C7040(list->model);
     }
@@ -587,7 +587,7 @@ extern "C" inline void fn_801F2570(TNode* n) {
     }
 }
 
-void AxisFacingTMH::Draw(TObj* list) {
+inline void AxisFacingTMH::Draw(TObj* list) {
     TFrame f;
     fn_801F1C24(&f);
     fn_802C7730(&f);
@@ -596,7 +596,7 @@ void AxisFacingTMH::Draw(TObj* list) {
     }
 }
 
-void PointFacingTMH::Draw(TObj* list) {
+inline void PointFacingTMH::Draw(TObj* list) {
     TFrame f;
     fn_801F1C24(&f);
     fn_802C7730(&f);
@@ -629,7 +629,7 @@ static inline int FaceSeg(TObj* o, f32*& pos, TCam* cam) {
     return seg;
 }
 
-void MultiFacingTMH::Draw(TObj* list) {
+inline void MultiFacingTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TCam* cam = fn_802C86DC();
         PVec c4;
@@ -694,7 +694,7 @@ SkyTMH::~SkyTMH(void) { obj = 0; }
 
 #pragma push
 #pragma ppc_unroll_instructions_limit 60
-void SkyTMH::Swap(TObj* o) {
+inline void SkyTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     int i;
     for (i = 0; i < 32; i++, p += 16) {
@@ -706,9 +706,9 @@ void SkyTMH::Swap(TObj* o) {
 }
 #pragma pop
 
-void SkyTMH::Init(TObj* o) { obj = o; }
+inline void SkyTMH::Init(TObj* o) { obj = o; }
 
-void SkyTMH::Draw(TObj* list) {
+inline void SkyTMH::Draw(TObj* list) {
     TCam* cam;
     f32* c;
     f32* cone;
@@ -742,7 +742,7 @@ void SkyTMH::Draw(TObj* list) {
     }
 }
 
-void SunTMH::Swap(TObj* o) {
+inline void SunTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -752,7 +752,7 @@ void SunTMH::Swap(TObj* o) {
 
 SunTMH::~SunTMH(void) { fn_802C9994(-1); }
 
-void SunTMH::Init(TObj* o) {
+inline void SunTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     dir[0] = ((f32*)d)[1];
@@ -805,17 +805,17 @@ inline void SunTMH::Apply(void) {
     fn_802C9A1C((TVec*)&d);
 }
 
-void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
+inline void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
 
 AmbientColorTMH::~AmbientColorTMH(void) {}
 
-void AmbientColorTMH::Init(TObj* o) {
+inline void AmbientColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void AmbientColorTMH::Apply(void) {
+inline void AmbientColorTMH::Apply(void) {
     if (*fn_801E1F44() == 1) {
         fn_802C9950(0xFF646464);
     } else {
@@ -823,17 +823,17 @@ void AmbientColorTMH::Apply(void) {
     }
 }
 
-void AmbientColorTMH::Draw(TObj* list) { fn_802E317C("AmbientColorTMH: shouldn't draw!"); }
+inline void AmbientColorTMH::Draw(TObj* list) { fn_802E317C("AmbientColorTMH: shouldn't draw!"); }
 
 ShadowColorTMH::~ShadowColorTMH(void) {}
 
-void ShadowColorTMH::Init(TObj* o) {
+inline void ShadowColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void ShadowColorTMH::Swap(TObj* o) {
+inline void ShadowColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -841,7 +841,7 @@ void ShadowColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-void ShadowColorTMH::Apply(void) {
+inline void ShadowColorTMH::Apply(void) {
     if (set) {
         fn_80297990(color);
     } else {
@@ -849,11 +849,11 @@ void ShadowColorTMH::Apply(void) {
     }
 }
 
-void ShadowColorTMH::Draw(TObj* list) { fn_802E317C("ShadowColorTMH: shouldn't draw!"); }
+inline void ShadowColorTMH::Draw(TObj* list) { fn_802E317C("ShadowColorTMH: shouldn't draw!"); }
 
 SunIntensityTMH::~SunIntensityTMH(void) {}
 
-void SunIntensityTMH::Swap(TObj* o) {
+inline void SunIntensityTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -861,13 +861,13 @@ void SunIntensityTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-void SunIntensityTMH::Init(TObj* o) {
+inline void SunIntensityTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     value = (u8)*(u32*)d / 255.0f;
     set = 1;
 }
 
-void SunIntensityTMH::Apply(void) {
+inline void SunIntensityTMH::Apply(void) {
     if (set) {
         fn_802923EC(value);
     } else {
@@ -875,17 +875,17 @@ void SunIntensityTMH::Apply(void) {
     }
 }
 
-void SunIntensityTMH::Draw(TObj* list) { fn_802E317C("SunIntensityTMH: shouldn't draw!"); }
+inline void SunIntensityTMH::Draw(TObj* list) { fn_802E317C("SunIntensityTMH: shouldn't draw!"); }
 
 FogColorTMH::~FogColorTMH(void) {}
 
-void FogColorTMH::Init(TObj* o) {
+inline void FogColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void FogColorTMH::Swap(TObj* o) {
+inline void FogColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -893,7 +893,7 @@ void FogColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-void FogColorTMH::Apply(void) {
+inline void FogColorTMH::Apply(void) {
     if (set) {
         fn_802C990C(color);
     } else {
@@ -901,9 +901,9 @@ void FogColorTMH::Apply(void) {
     }
 }
 
-void FogColorTMH::Draw(TObj* list) { fn_802E317C("FogColorTMH: shouldn't draw!"); }
+inline void FogColorTMH::Draw(TObj* list) { fn_802E317C("FogColorTMH: shouldn't draw!"); }
 
-void RotatorTMH::Swap(TObj* o) {
+inline void RotatorTMH::Swap(TObj* o) {
     u8* p = (u8*)o + 0x18;
     int i;
     for (i = 0; i < 3; i++, p += 12) {
@@ -914,7 +914,7 @@ void RotatorTMH::Swap(TObj* o) {
     Swap32((u8*)&o->slot);
 }
 
-void RotatorTMH::Draw(TObj* list) {
+inline void RotatorTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TMtx m;
         f32 a = list->d30 * fn_801E7E18();
@@ -926,7 +926,7 @@ void RotatorTMH::Draw(TObj* list) {
     }
 }
 
-void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
+inline void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
     RotList* l;
     f32 speed;
     s32 rid;
@@ -954,17 +954,17 @@ void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
 
 Rot::Rot(void) {}
 
-extern "C" void fn_801F3E64(void) {}
+inline void OptTerrainTMH::Unk30(void) {}
 
-void OptTerrainTMH::Swap(TObj* o) {
+inline void OptTerrainTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     Swap32(p);
     o->d2C = 1 << (o->d2C - 1);
 }
 
-void OptTerrainTMH::Draw(TObj* list) {}
+inline void OptTerrainTMH::Draw(TObj* list) {}
 
-void OptTerrainTMH::Link(int a, void* b, int c, void* d, int e) {
+inline void OptTerrainTMH::Link(int a, void* b, int c, void* d, int e) {
     fn_802CD33C(b, c, 0);
     fn_802CD33C(d, e, 0);
 }
@@ -975,16 +975,16 @@ static inline void XFaderTeardown(XFader* faders) {}
 
 XFaderTMH::~XFaderTMH(void) { XFaderTeardown(faders); }
 
-void XFaderTMH::Swap(TObj* o) {
+inline void XFaderTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     for (int i = 0; i < 2; i++) {
         Swap32(p + i * 4);
     }
 }
 
-void XFaderTMH::Init(TObj* o) {}
+inline void XFaderTMH::Init(TObj* o) {}
 
-void XFaderTMH::Draw(TObj* list) {
+inline void XFaderTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         s32 i = list->slot;
         if (i >= 0 && i < 48) {
@@ -1004,7 +1004,7 @@ static inline f32 MidOf(f32 lo, f32 hi, f32 s) {
     return lo + d * s;
 }
 
-void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
+inline void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     XFadeList* l;
     XFade* f;
     f32 b[6];
@@ -1029,18 +1029,18 @@ void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     l->count++;
 }
 
-void FlareSourceTMH::Swap(TObj* o) {
+inline void FlareSourceTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     for (int i = 0; i < 5; i++) {
         Swap32(p + i * 4);
     }
 }
 
-void FlareSourceTMH::Init(TObj* o) { fn_802E317C("trackmod: local flare sources not support"); }
+inline void FlareSourceTMH::Init(TObj* o) { fn_802E317C("trackmod: local flare sources not support"); }
 
-void FlareSourceTMH::Draw(TObj* list) {}
+inline void FlareSourceTMH::Draw(TObj* list) {}
 
-void WaterTMH::Swap(TObj* o) {
+inline void WaterTMH::Swap(TObj* o) {
     u8* p;
     int i;
     fn_802E317C("Water objects not currently supported");
@@ -1052,13 +1052,13 @@ void WaterTMH::Swap(TObj* o) {
     }
 }
 
-void WaterTMH::Draw(TObj* list) {}
+inline void WaterTMH::Draw(TObj* list) {}
 
 ScrollingTMH::~ScrollingTMH(void) {}
 
-void ScrollingTMH::Draw(TObj* list) {}
+inline void ScrollingTMH::Draw(TObj* list) {}
 
-void ScrollingTMH::Add(void* scene, TObj* o, s32 id) {
+inline void ScrollingTMH::Add(void* scene, TObj* o, s32 id) {
     ScrollList* l;
     Scroll* s;
     ValueNode* vn;
@@ -1082,9 +1082,9 @@ void ScrollingTMH::Add(void* scene, TObj* o, s32 id) {
     l->count++;
 }
 
-void PinkTriangleTMH::Draw(TObj* list) {}
+inline void PinkTriangleTMH::Draw(TObj* list) {}
 
-void FacingTestTMH::Draw(TObj* list) {
+inline void FacingTestTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         void* model = list->model;
         if (fn_801F1CF0((u8*)&list->d2C)) {
@@ -1093,12 +1093,12 @@ void FacingTestTMH::Draw(TObj* list) {
     }
 }
 
-void FacingTestTMH::Add(void* scene, TObj* o, s32 id) {
+inline void FacingTestTMH::Add(void* scene, TObj* o, s32 id) {
     u8* data = (u8*)&o->d2C;
     fn_802CD320(scene, new ("mlfto") FacingTestInst(data, id));
 }
 
-void TrackMod::DrawTree(TNode* tree) {}
+inline void TrackMod::DrawTree(TNode* tree) {}
 
 FacingTestInst::~FacingTestInst(void) {}
 
@@ -1141,7 +1141,7 @@ static inline void Mat3MulD(TMat3* out, const TMat3* l, const TMat3* r) {
     }
 }
 
-void RotList::Draw(void* ctx) {
+inline void RotList::Draw(void* ctx) {
     int i = 0;
     if (count > 0) {
     for (; i < count; i++) {
@@ -1169,7 +1169,7 @@ void RotList::Draw(void* ctx) {
     }
     }
 }
-void XFadeList::Draw(void* ctx) {}
+inline void XFadeList::Draw(void* ctx) {}
 
 inline void XFadeList::DrawFade(XFade** vis, int i) {
     XFade* f = vis[i];
@@ -1181,7 +1181,7 @@ inline void XFadeList::DrawFade(XFade** vis, int i) {
     }
 }
 
-void XFadeList::Draw2(void* ctx) {
+inline void XFadeList::Draw2(void* ctx) {
     XFade* vis[48];
     int n = 0;
     int i;
@@ -1195,13 +1195,13 @@ void XFadeList::Draw2(void* ctx) {
     }
 }
 
-int XFadeList::Kind(void) { return 4; }
+inline int XFadeList::Kind(void) { return 4; }
 
-int ScrollList::Kind(void) { return 3; }
+inline int ScrollList::Kind(void) { return 3; }
 
-void ScrollList::Draw(void* ctx) {}
+inline void ScrollList::Draw(void* ctx) {}
 
-void ScrollList::Draw2(void* ctx) {
+inline void ScrollList::Draw2(void* ctx) {
     f32 uv[2];
     f32 m[4][3];
     f32 t = fn_801E7E18();
@@ -1231,12 +1231,12 @@ void ScrollList::Draw2(void* ctx) {
     }
 }
 
-void FacingTestInst::Draw(void* ctx) {
+inline void FacingTestInst::Draw(void* ctx) {
     if (fn_802CDB20(ctx, id) && !fn_801F1CF0(data)) {
         fn_802CDAFC(ctx, id);
     }
 }
 
-int TrackInst::Kind(void) { return -1; }
+inline int TrackInst::Kind(void) { return -1; }
 
-void TrackInst::Draw2(void* ctx) {}
+inline void TrackInst::Draw2(void* ctx) {}
