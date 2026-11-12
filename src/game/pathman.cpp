@@ -213,7 +213,7 @@ PathMover* fn_801DA8C8(const char* object, const char* path) {
     int n = 0;
     int any = strcmp(object, "*") == 0;
     int off = 0;
-    for (i = 0; i < m->count; i++, off += sizeof(m->clients[0])) {
+    for (i = 0; i < m->count; off += sizeof(m->clients[0]), i++) {
         PathClient* c = (PathClient*)((u8*)m->clients + off);
         if ((any || strcmp(c->name, object) == 0) && fn_801D9FC4(c->follower, path)) {
             found[n++] = c;
