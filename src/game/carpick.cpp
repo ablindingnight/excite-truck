@@ -302,6 +302,7 @@ extern "C" int fn_8025ECBC(int* key);
 extern "C" void fn_8025F274(u8* p);
 extern "C" void fn_8025F46C(CarPickScreen* s);
 extern "C" u8 lbl_8055B860;
+extern char lbl_8055BAC0[8];  // "" (shared menu-item name)
 
 extern "C" {
 
@@ -327,7 +328,7 @@ void fn_8025E034(void) {
     screen.all = screen.lists[2];
     fn_8025F46C(&screen);
     MenuItem items[] = {
-        MenuItem("", 8, (void*)fn_8025F274, 0, 0),
+        MenuItem(lbl_8055BAC0, 8, (void*)fn_8025F274, 0, 0),
         MenuItem("#cup_name_1", screen.names[0].name),
         MenuItem("#cup_select_1", 2, &screen.names[0].state, 0, 0),
         MenuItem("#cup_name_2", screen.names[1].name),
