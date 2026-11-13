@@ -299,11 +299,11 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
  * identical to the original in a PPC simulation (callees run from the original). NonMatching: 649/649, same
  * opcodes. */
 void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out) {
-    s16 ch;
-    s16 sb;
-    s32* pb;
     s32* pa;
     s32* pc2;
+    s16 ch;
+    s32* pb;
+    s16 sb;
     s32* pc;
     s32* outbuf2;
     s32 t0, t1;  /* t1 also holds the block-flags word: one variable in the original (register colouring) */
