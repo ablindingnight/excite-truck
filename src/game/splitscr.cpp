@@ -198,7 +198,7 @@ static inline void DividerVertex(u32 color, int idx, f32 x, f32 y) {
     fn_802C8E00(color, idx, p.x, p.y, p.z, 0.0f, 0.0f);
 }
 
-static inline f32 GridToWorld_hm(int v, f32 cell) { return (f32)v * cell; }  /* Helper name unproven */
+static inline f32 GridToWorld_hm(int v, f32 cell) { return cell * (f32)v; }  /* Helper name unproven */
 void fn_80205D5C(void) {
     fn_802C8CBC(-1);
     fn_802C8DBC(0x10);
