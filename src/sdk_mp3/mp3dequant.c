@@ -403,21 +403,22 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
             }
             for (i = 36; i < d->short_end; i++) {
                 v = in[i];
+                x = v;
                 w = mixed_map[i] & 0xF;
                 k = ++cnt[w];
                 if (e0 > 0x33 || v == 0) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
+                t = (s16)(subblock_gain[w] * 2) + e0;
                 idx = sf_short[short_map[i] >> 4][w];
                 m = lbl_802F3A00[row][idx];
-                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
+                e = lbl_802F3A8C[row][idx] + t;
                 if (e > 0x33) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
                 /* NB: no absolute value in this part of the original */
-                x = v;
                 if (v > 0x1FFF) {
                     x = 0x1FFF;
                 }
