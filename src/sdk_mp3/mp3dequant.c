@@ -20,7 +20,9 @@ static inline s32 Pow43(s32 x, const s32* c) {
  * path from the block flags, builds the line-to-band map on first use, and dequantizes each line:
  * |x| < 256 via the pow43 table, larger via the 32-segment quadratic table, scaled by the scalefactor exponent.
  * Behaviour verified identical to the original in a PPC simulation (76 random granules, including the original's
- * quirks in the mixed short part: no absolute value, and a second shift). NonMatching: 1278/1278, same opcodes. */
+ * quirks in the mixed short part: no absolute value, and a second shift). NonMatching: 1278/1278, same opcodes.
+ * Local names differ per loop (the long loop reads the sample into m, the mixed short loop into idx): each named
+ * local is one register-allocation node, and these roles reproduce the original's colouring (namerole.py). */
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
@@ -118,18 +120,18 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
             } else {
                 for (i = 0; i < d->long_end; i++) {
-                    v = in[i];
-                    x = v;
-                    if (v == 0) {
+                    m = in[i];
+                    x = m;
+                    if (m == 0) {
                         out->xr[i] = 0;
                         continue;
                     }
                     b = long_map[i];
                     idx = lbl_802F39E8[b] * *preflag + sf_long[b];
                     e = lbl_802F3A8C[row][idx];
-                    m = lbl_802F3A00[row][idx];
-                    if (v < 0) {
-                        x = -v;
+                    v = lbl_802F3A00[row][idx];
+                    if (m < 0) {
+                        x = -m;
                     }
                     if (x > 0x1FFF) {
                         x = 0x1FFF;
@@ -137,7 +139,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     e += e0;
                     if ((x & 0x1F00) == 0) {
                         r = lbl_802F34E8[x];
-                        if (m == 1) {
+                        if (v == 1) {
                             t = (s32)(((s64)r * g) >> 20);
                             if (e > 20) {
                                 t >>= e - 20;
@@ -145,7 +147,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                                 t <<= 20 - e;
                             }
                         } else {
-                            p = (g * m) >> 4;
+                            p = (g * v) >> 4;
                             if (e > 20) {
                                 t = (s32)(((s64)p * r) >> 24);
                                 e -= 8;
@@ -167,7 +169,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     } else {
                         c = lbl_8031C098[x >> 8];
                         r = Pow43(x, c);
-                        if (m == 1) {
+                        if (v == 1) {
                             t = r * g;
                             if (e > 20) {
                                 t >>= e - 20;
@@ -175,7 +177,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                                 t <<= 20 - e;
                             }
                         } else {
-                            p = g * m;
+                            p = g * v;
                             e -= 8;
                             t = (s32)(((s64)p * r) >> 8);
                             if (e < 20) {
@@ -185,7 +187,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                             }
                         }
                     }
-                    if (v < 0) {
+                    if (m < 0) {
                         out->xr[i] = -t;
                     } else {
                         out->xr[i] = t;
@@ -402,24 +404,24 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
             }
             for (i = 36; i < d->short_end; i++) {
-                v = in[i];
-                x = v;
+                idx = in[i];
+                x = idx;
                 w = mixed_map[i] & 0xF;
                 k = ++cnt[w];
-                if (e0 > 0x33 || v == 0) {
+                if (e0 > 0x33 || idx == 0) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
                 t = (s16)(subblock_gain[w] * 2) + e0;
-                idx = sf_short[short_map[i] >> 4][w];
-                m = lbl_802F3A00[row][idx];
-                e = lbl_802F3A8C[row][idx] + t;
+                v = sf_short[short_map[i] >> 4][w];
+                m = lbl_802F3A00[row][v];
+                e = lbl_802F3A8C[row][v] + t;
                 if (e > 0x33) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
                 /* NB: no absolute value in this part of the original */
-                if (v > 0x1FFF) {
+                if (idx > 0x1FFF) {
                     x = 0x1FFF;
                 }
                 if ((x & 0x1F00) == 0) {
@@ -473,7 +475,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                 }
-                if (v < 0) {
+                if (idx < 0) {
                     out->sxr[w][k] = -r;
                 } else {
                     out->sxr[w][k] = r;
