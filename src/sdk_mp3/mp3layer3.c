@@ -2077,8 +2077,9 @@ void fn_800C51BC(s32* dst, s32* src, s32* c) {
         d = dst[3];
         u = d + s;
         dst[3] = u;
+        s = d - s;
         u = c[3];
-        src[3] = (s32) ((((s64) (d - s)) * u) >> 24);
+        src[3] = (s32) ((u * ((s64) s)) >> 24);
         dst += 4;
         src += 4;
         c += 4;
