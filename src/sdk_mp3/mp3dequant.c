@@ -136,59 +136,59 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     }
                     e += e0;
                     if ((x & 0x1F00) == 0) {
-                        p = lbl_802F34E8[x];
+                        r = lbl_802F34E8[x];
                         if (m == 1) {
-                            r = (s32)(((s64)p * g) >> 20);
+                            t = (s32)(((s64)r * g) >> 20);
                             if (e > 20) {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             } else {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             }
                         } else {
-                            t = (g * m) >> 4;
+                            p = (g * m) >> 4;
                             if (e > 20) {
-                                r = (s32)(((s64)t * p) >> 24);
+                                t = (s32)(((s64)p * r) >> 24);
                                 e -= 8;
                                 if (e < 20) {
-                                    r <<= 20 - e;
+                                    t <<= 20 - e;
                                 } else {
-                                    r >>= e - 20;
+                                    t >>= e - 20;
                                 }
                             } else {
-                                r = (s32)(((s64)t * p) >> 20);
+                                t = (s32)(((s64)p * r) >> 20);
                                 e -= 4;
                                 if (e < 20) {
-                                    r <<= 20 - e;
+                                    t <<= 20 - e;
                                 } else {
-                                    r >>= e - 20;
+                                    t >>= e - 20;
                                 }
                             }
                         }
                     } else {
                         c = lbl_8031C098[x >> 8];
-                        p = Pow43(x, c);
+                        r = Pow43(x, c);
                         if (m == 1) {
-                            r = p * g;
+                            t = r * g;
                             if (e > 20) {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             } else {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             }
                         } else {
-                            t = g * m;
+                            p = g * m;
                             e -= 8;
-                            r = (s32)(((s64)t * p) >> 8);
+                            t = (s32)(((s64)p * r) >> 8);
                             if (e < 20) {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             } else {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             }
                         }
                     }
                     if (v < 0) {
-                        out->xr[i] = -r;
+                        out->xr[i] = -t;
                     } else {
-                        out->xr[i] = r;
+                        out->xr[i] = t;
                     }
                 }
                 for (; i < 576; i++) {
