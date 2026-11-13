@@ -20,6 +20,18 @@ static inline s32 MP3_GetSign(BitStream* bs, u8* buf) {
     return (buf[(p >> 3) & 0x1FFF] >> (avail - 1)) & 1;
 }
 
+/* Helper name unproven. The quad decoders' sign read: same bit as MP3_GetSign, but the byte is kept in its own
+ * variable and p is reused for the shift (the register colouring of MP3_DecodeQuads needs both). */
+static inline s32 MP3_GetSignQ(BitStream* bs, u8* buf) {
+    u32 p = bs->pos;
+    u8 b;
+
+    bs->pos = p + 1;
+    b = buf[(p >> 3) & 0x1FFF];
+    p = 8 - (p & 7);
+    return (b >> (p - 1)) & 1;
+}
+
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start) {
     s32 nregions;
@@ -185,16 +197,16 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track
         w = (e >> 2) & 1;
         x = (e >> 1) & 1;
         y = e & 1;
-        if (v && MP3_GetSign(bs, buf)) {
+        if (v && MP3_GetSignQ(bs, buf)) {
             v = -v;
         }
-        if (w && MP3_GetSign(bs, buf)) {
+        if (w && MP3_GetSignQ(bs, buf)) {
             w = -w;
         }
-        if (x && MP3_GetSign(bs, buf)) {
+        if (x && MP3_GetSignQ(bs, buf)) {
             x = -x;
         }
-        if (y && MP3_GetSign(bs, buf)) {
+        if (y && MP3_GetSignQ(bs, buf)) {
             y = -y;
         }
         q[0] = v;
@@ -226,16 +238,16 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 trac
         s16 x = (e >> 1) & 1;
         s16 y = e & 1;
 
-        if (v && MP3_GetSign(bs, buf)) {
+        if (v && MP3_GetSignQ(bs, buf)) {
             v = -v;
         }
-        if (w && MP3_GetSign(bs, buf)) {
+        if (w && MP3_GetSignQ(bs, buf)) {
             w = -w;
         }
-        if (x && MP3_GetSign(bs, buf)) {
+        if (x && MP3_GetSignQ(bs, buf)) {
             x = -x;
         }
-        if (y && MP3_GetSign(bs, buf)) {
+        if (y && MP3_GetSignQ(bs, buf)) {
             y = -y;
         }
         q[0] = v;
