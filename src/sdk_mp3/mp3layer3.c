@@ -2218,11 +2218,13 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
  * From ChatGPT's candidate B (round 23), verified against the original in a PPC simulation (40/40) and by
  * ChatGPT (792 cases). NonMatching: 661/661, identical opcode sequence, register numbers differ. */
 void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
-    s32 b;
+    s32 b2;
     s32 i;
     s32* left;
-    s32* right;
+    s32 b;
     s32 a;
+    s32 a2;
+    s32* right;
     if (flags & 7) {
         right = g[1].xr;
         left = g[0].xr;
@@ -2238,10 +2240,10 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
         right = g[1].xr;
         left = g[0].xr;
         for (i = 0; i < 36; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a2 = *left;
+            b2 = *right;
+            *(left++) = a2 + b2;
+            *(right++) = a2 - b2;
         }
 
         right = (s32 *) (((u8 *) g) + 0x2430);
