@@ -81,17 +81,18 @@ s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 blo
             s16 y;
 
             if (tbl == 13 || tbl == 16) {
-                u32 b0;
                 u32 p = d->pos;
                 s32 sh = 16 - (p & 7);
-                u32 b1;
+                u32 b0;
                 u32 idx = (p >> 3) & 0x1FFF;
+                u32 wd;
 
                 d->pos = p + 4;
                 b0 = buf[idx++];
                 idx &= 0x1FFF;
-                b1 = buf[idx];
-                bits |= ((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 4) & 0xF) << 12;
+                wd = b0 << 8;
+                wd |= buf[idx];
+                bits |= ((wd & lbl_802F3F54[sh]) >> (sh - 4) & 0xF) << 12;
                 d->pos -= 20;
             } else {
                 d->pos -= 16;
@@ -159,24 +160,27 @@ void MP3_DecodeQuads(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 track
         u32 code;
         u32 p = bs->pos;
         s16 v;
-        u32 b0;
         s16 w;
         s16 x;
         s32 sh;
-        u32 b1;
+        u32 np;
+        u32 b0;
         u32 idx;
         u8 e;
         s16 y;
+        u32 wd;
 
-        bs->pos = p + 6;
+        np = p + 6;
+        bs->pos = np;
         idx = (p >> 3) & 0x1FFF;
         sh = 16 - (p & 7);
         b0 = buf[idx++];
         idx &= 0x1FFF;
-        b1 = buf[idx];
-        code = (u16)((((b0 << 8) | b1) & lbl_802F3F54[sh]) >> (sh - 6));
+        wd = b0 << 8;
+        wd |= buf[idx];
+        code = (u16)((wd & lbl_802F3F54[sh]) >> (sh - 6));
         e = lbl_8031C2E0[code];
-        bs->pos = p + 6 - (e >> 4);
+        bs->pos = np - (e >> 4);
         v = (e >> 3) & 1;
         w = (e >> 2) & 1;
         x = (e >> 1) & 1;
