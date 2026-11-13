@@ -26,6 +26,7 @@ static inline s32 Pow43(s32 x, const s32* c) {
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
+    u16 me;
     const s32* c;
     s16 idx;
     u32 e0;
@@ -48,6 +49,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
     s32 w;
     s16 g;
     s32 r;
+    s16 sv;
 
     if (d->unk9CC[3] == 0) {
         d->unk9CC[3] = 1;
@@ -214,9 +216,9 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
             }
             for (i = 0; i < d->short_end; i++) {
-                v = in[i];
-                x = v;
-                if (v > 0x1FFF) {
+                sv = in[i];
+                x = sv;
+                if (sv > 0x1FFF) {
                     x = 0x1FFF;
                 }
                 w = short_map[i] & 0xF;
@@ -287,7 +289,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                 }
-                if (v < 0) {
+                if (sv < 0) {
                     out->sxr[w][k] = -r;
                 } else {
                     out->sxr[w][k] = r;
@@ -415,8 +417,8 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 t = (s16)(subblock_gain[w] * 2) + e0;
                 v = sf_short[short_map[i] >> 4][w];
                 m = lbl_802F3A00[row][v];
-                e = lbl_802F3A8C[row][v] + t;
-                if (e > 0x33) {
+                me = lbl_802F3A8C[row][v] + t;
+                if (me > 0x33) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
@@ -428,30 +430,30 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     p = lbl_802F34E8[x];
                     if (m == 1) {
                         r = (s32)(((s64)p * g) >> 20);
-                        if (e > 20) {
-                            r >>= e - 20;
+                        if (me > 20) {
+                            r >>= me - 20;
                         } else {
-                            r <<= 20 - e;
+                            r <<= 20 - me;
                         }
                     } else {
                         t = (g * m) >> 4;
-                        if (e > 20) {
-                            e -= 8;
+                        if (me > 20) {
+                            me -= 8;
                             r = (s32)(((s64)t * p) >> 24);
-                            if (e < 20) {
-                                r <<= 20 - e;
+                            if (me < 20) {
+                                r <<= 20 - me;
                             } else {
-                                r >>= e - 20;
+                                r >>= me - 20;
                             }
                         } else {
                             r = (s32)(((s64)t * p) >> 20);
-                            e -= 4;
-                            if (e < 20) {
-                                r <<= 20 - e;
+                            me -= 4;
+                            if (me < 20) {
+                                r <<= 20 - me;
                             } else {
-                                r >>= e - 20;
+                                r >>= me - 20;
                             }
-                            r <<= 20 - e; /* NB: the original shifts a second time here */
+                            r <<= 20 - me; /* NB: the original shifts a second time here */
                         }
                     }
                 } else {
@@ -459,19 +461,19 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     p = Pow43(x, c);
                     if (m == 1) {
                         r = p * g;
-                        if (e > 20) {
-                            r >>= e - 20;
+                        if (me > 20) {
+                            r >>= me - 20;
                         } else {
-                            r <<= 20 - e;
+                            r <<= 20 - me;
                         }
                     } else {
                         t = g * m;
-                        e -= 8;
+                        me -= 8;
                         r = (s32)(((s64)t * p) >> 8);
-                        if (e < 20) {
-                            r <<= 20 - e;
+                        if (me < 20) {
+                            r <<= 20 - me;
                         } else {
-                            r >>= e - 20;
+                            r >>= me - 20;
                         }
                     }
                 }
