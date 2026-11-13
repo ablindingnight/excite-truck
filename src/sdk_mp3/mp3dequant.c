@@ -10,7 +10,8 @@
 
 /* Helper name unproven: quadratic approximation of |x|^(4/3) from a 4-coefficient table row. */
 static inline s32 Pow43(s32 x, const s32* c) {
-    s32 q = (s32)(((s64)(x * x) * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20);
+    s32 xx = x * x;
+    s32 q = (s32)(((s64)xx * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20);
     return (q + c[2] >> 4) + c[3];
 }
 
@@ -116,24 +117,24 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     out->xr[i] = 0;
                 }
             } else {
-                int off = 0;
-                for (i = 0; i < d->long_end; off += sizeof(out->xr[0]), i++) {
+                for (i = 0; i < d->long_end; i++) {
                     v = in[i];
+                    x = v;
                     if (v == 0) {
-                        *(s32*)((u8*)out->xr + off) = 0;
+                        out->xr[i] = 0;
                         continue;
                     }
                     b = long_map[i];
                     idx = lbl_802F39E8[b] * *preflag + sf_long[b];
-                    e = e0 + lbl_802F3A8C[row][idx];
+                    e = lbl_802F3A8C[row][idx];
                     m = lbl_802F3A00[row][idx];
-                    x = v;
                     if (v < 0) {
                         x = -v;
                     }
                     if (x > 0x1FFF) {
                         x = 0x1FFF;
                     }
+                    e += e0;
                     if ((x & 0x1F00) == 0) {
                         p = lbl_802F34E8[x];
                         if (m == 1) {
@@ -185,9 +186,9 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                     if (v < 0) {
-                        *(s32*)((u8*)out->xr + off) = -r;
+                        out->xr[i] = -r;
                     } else {
-                        *(s32*)((u8*)out->xr + off) = r;
+                        out->xr[i] = r;
                     }
                 }
                 for (; i < 576; i++) {
@@ -223,13 +224,17 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     continue;
                 }
                 b = short_map[i] >> 4;
+                t = (s16)(subblock_gain[w] * 2);
                 idx = sf_short[b][w];
+                e = lbl_802F3A8C[row][idx];
                 m = lbl_802F3A00[row][idx];
-                e = lbl_802F3A8C[row][idx] + ((s16)(subblock_gain[w] * 2) + e0);
                 if (x < 0) {
                     x = -x;
                 }
-                x = x > 0x1FFF ? 0x1FFF : x;
+                e = e + (t + e0);
+                if (x > 0x1FFF) {
+                    x = 0x1FFF;
+                }
                 if ((x & 0x1F00) == 0) {
                     p = lbl_802F34E8[x];
                     if (m == 1) {
