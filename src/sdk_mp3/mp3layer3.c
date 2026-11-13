@@ -2087,14 +2087,13 @@ void fn_800C51BC(s32* dst, s32* src, s32* c) {
         src[2] = (s32) ((wide_difference * u) >> 24);
         s = src[3];
         d = dst[3];
-        u = d + s;
-        dst[3] = u;
+        dst[3] = d + s;
         s = d - s;
         u = c[3];
-        src[3] = (s32) ((u * ((s64) s)) >> 24);
+        c += 4;
+        src[3] = (s32) ((((s64) s) * u) >> 24);
         dst += 4;
         src += 4;
-        c += 4;
     }
 
 }
