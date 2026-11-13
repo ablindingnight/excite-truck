@@ -2233,11 +2233,11 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
 
     } else
         if (flags & 8) {
-        left = g[0].xr;
         right = g[1].xr;
+        left = g[0].xr;
         for (i = 0; i < 36; i++) {
-            b = *right;
             a = *left;
+            b = *right;
             *(left++) = a + b;
             *(right++) = a - b;
         }
