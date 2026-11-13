@@ -1936,7 +1936,8 @@ int Text_ASE::State(void) { return state; }
 int Text_ASE::Begin(int reverse) {
     if (state == 1) {
         lbl_80442310.duration = length;
-        lbl_80442310.start = lbl_8055E3C8;
+        const f32 start = lbl_8055E3C8;
+        lbl_80442310.start = start;
         CopyName(lbl_80442310.title, title, 0x40);
         CopyName(lbl_80442310.text, text, 0x40);
         state = 3;

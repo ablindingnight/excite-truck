@@ -49,12 +49,13 @@ void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     pos.x = x;
     pos.y = y;
     pos.z = z;
+    f32 vScale = -2.0f;
     for (i = 0; i < 4; i++) {
         f32 u = (i & 1) ? 1.0f : 0.0f;
         f32 v = (i & 2) ? 1.0f : 0.0f;
         f32 a = size * ((2.0f * u - 1.0f) * sign[flags & 1]);
         f32 b;
-        b = size * ((1.0f + -2.0f * v) * sign[flags & 2]);
+        b = size * ((1.0f + vScale * v) * sign[flags & 2]);
         ValVec3 p;
         MadV3(&p.x, &pos.x, &right->m[0], a);
         AddScaledV3(&p.x, &up->m[3], b);

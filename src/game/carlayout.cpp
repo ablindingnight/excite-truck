@@ -98,7 +98,6 @@ void fn_80278A28(LayoutBone* b) {
 void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, const char* car) {
     if (boneTable) {
         int w;
-        LayoutLink* lk;
         int n;
         int i;
         l->numBones = 0;
@@ -134,8 +133,8 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
         }
         ValueNode* child;
         l->numLinks = 0;
-        n = 0;
-        while (NULL != (child = boneTable->GetChild(n++))) {
+        int childIndex = 0;
+        while (NULL != (child = boneTable->GetChild(childIndex++))) {
             if (strcasecmp(child->GetName(), "link") == 0) {
                 l->numLinks++;
             }
@@ -145,17 +144,17 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
         l->numLinks = n;
         while (NULL != (child = boneTable->GetChild(n++))) {
             if (strcasecmp(child->GetName(), "link") == 0) {
-                lk = &l->links[l->numLinks++];
-                lk->i = child->GetIntValue("i");
-                lk->j = child->GetIntValue("j");
-                lk->linear = child->GetFloat("linear");
-                lk->planar = child->GetFloat("planar");
-                lk->pop = child->GetFloat("pop", 0.0f);
-                if (lk->i < 1 || lk->i >= 162) {
-                    fn_802E317C("layout: link: \"i\" out of range (%d)", lk->i);
+                LayoutLink* link = &l->links[l->numLinks++];
+                link->i = child->GetIntValue("i");
+                link->j = child->GetIntValue("j");
+                link->linear = child->GetFloat("linear");
+                link->planar = child->GetFloat("planar");
+                link->pop = child->GetFloat("pop", 0.0f);
+                if (link->i < 1 || link->i >= 162) {
+                    fn_802E317C("layout: link: \"i\" out of range (%d)", link->i);
                 }
-                if (lk->j < 1 || lk->j >= 162) {
-                    fn_802E317C("layout: link: \"i\" out of range (%d)", lk->j);
+                if (link->j < 1 || link->j >= 162) {
+                    fn_802E317C("layout: link: \"i\" out of range (%d)", link->j);
                 }
             }
         }

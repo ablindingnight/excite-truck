@@ -540,6 +540,14 @@ void fn_80217D84(Window* win) {
     win->menuCur = win->menu[next].id;
 }
 
+/* Helper name unproven */
+static inline s32 GetWidgetOrigin(Widget* cw, s32& cy, int& bestScore) {
+    s32 cx = cw->x;
+    cy = cw->y;
+    bestScore = 100000;
+    return cx;
+}
+
 void fn_80217EC0(Window* win, int horizontal, int negative) {
     s32 cx;
     int n;
@@ -567,9 +575,7 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
     }
     cw = win->menu[cur].w;
     best = cur;
-    cx = cw->x;
-    cy = cw->y;
-    bestScore = 100000;
+    cx = GetWidgetOrigin(cw, cy, bestScore);
     for (i = 0; i < n; i++) {
 
         if (i == cur) {

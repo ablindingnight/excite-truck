@@ -435,8 +435,8 @@ static inline void RedrawNodes(void) {
 // Builds the map: a "pathcontrol" node per difficulty (at most 3) and an "eventcontrol" node per event
 // (at most 6 each), and the level-up sound.
 static inline void BuildMap(PathScreenBuf* s) {
-    int i;
     int j;
+    int i;
     s->numEvents = 0;
     s->numLevels = lbl_8055F3E4->NumLevels();
     memset(s->evObjs, 0, sizeof(s->evObjs));

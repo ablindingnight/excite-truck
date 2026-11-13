@@ -578,7 +578,8 @@ static void fn_800053CC(void) {
     if (fn_801298E8(v, 0)) {
         r = 10.0f;
         x = 300.0f * v[0];
-        y = 200.0f * v[1];
+        f32 yCoord = v[1];
+        y = 200.0f * yCoord;
         len = sqrt(Dot4_hm(v[0], v[1], v[0], v[1]));
         fn_80010B80(x, y, r, r, 0x800000FF);
     }

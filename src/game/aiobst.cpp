@@ -268,6 +268,11 @@ void fn_8015EE14(ValueNode* list, Track* trk) {
     }
 }
 
+/* Helper name unproven */
+static inline ValPoint ReadObstaclePoint(ValueNode* n) {
+    return n->GetPoint("p");
+}
+
 void fn_8015EF84(ValueNode* list) {
     int erased = 0;
     if (list) {
@@ -276,7 +281,7 @@ void fn_8015EF84(ValueNode* list) {
         for (i = 0; (n = list->GetChildAt(i)) != 0; i++) {
             if (fn_8015ED54(n)) {
                 erased++;
-                ValPoint t = n->GetPoint("p");
+                ValPoint t = ReadObstaclePoint(n);
                 ValPoint p = t;
                 f32 r2 = n->GetFloat("rad");
                 s32 j;

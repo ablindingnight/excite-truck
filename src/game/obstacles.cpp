@@ -616,10 +616,13 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         if (shape) {
             shape = fn_8019FFD8(shape, p + 0x3C, p);
         }
+        const f32 directionComponent = lbl_805624AC;
         f32 r = q->a * lbl_80562478;
-        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, -(q->c * lbl_80562478 - r)),
-                    RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
-        fn_801A0258(shape, RVec3(lbl_8056247C, lbl_8056247C, lbl_80562478 * q->c - r),
+        const f32 firstCenterXY = lbl_8056247C;
+        fn_801A0258(shape, RVec3(firstCenterXY, firstCenterXY, -(q->c * lbl_80562478 - r)),
+                    RVec3(directionComponent, directionComponent, directionComponent), r, k, skin);
+        const f32 secondCenterXY = lbl_8056247C;
+        fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, lbl_80562478 * q->c - r),
                     RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
@@ -1195,7 +1198,8 @@ void fn_801AC544(u8* p) {
                         FenceVert* v = &verts[nv++];
                         v->pos.x = b.x * (1.0f - t) + a.x * t;
                         v->pos.y = b.y * (1.0f - t) + a.y * t;
-                        v->pos.z = b.z * (1.0f - t) + a.z * t;
+                        f32 zv = b.z;
+                        v->pos.z = zv * (1.0f - t) + a.z * t;
                         v->w34 = 1.0f;
                         v->w30 = 1.0f;
                     }

@@ -160,6 +160,16 @@ long fn_8020F6FC(void) {
 }
 
 extern long fn_80129D18(long seed, long range);
+
+/* Helper name unproven */
+static inline void ShuffleEntry(long i) {
+    long index = fn_80129D18(6, lbl_804902C4.m_count);
+    long *e = lbl_804902C4.m_entries;
+    long temp = e[i];
+    e[i] = e[index];
+    e[index] = temp;
+}
+
 void fn_8020F730(void) {
     long count = lbl_804900AC.m_count;
     long i;
@@ -170,11 +180,7 @@ void fn_8020F730(void) {
             *slot = i;
         }
         for (i = 0; i < lbl_804902C4.m_count; i++) {
-            long index = fn_80129D18(6, lbl_804902C4.m_count);
-            long *e = lbl_804902C4.m_entries;
-            long temp = e[i];
-            e[i] = e[index];
-            e[index] = temp;
+            ShuffleEntry(i);
         }
     }
     lbl_8055EEC4 = 0;

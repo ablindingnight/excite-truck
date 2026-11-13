@@ -898,6 +898,20 @@ void fn_801CC470(void) {
     lbl_8055E884 = new ("StatsModule") AwardsMgr;
 }
 
+/* Helper name unproven */
+static inline void ResetAwardState(AwardsMgr* m) {
+    m->q.head = 0;
+    m->q.tail = &m->q.head;
+    memset(m->popups, 0, sizeof(m->popups));
+    m->place = 0;
+    m->score = 0;
+    m->grade = -1;
+    m->rank = -1;
+    m->time = -999.0f;
+    m->hasTime = 0;
+    m->results.Reset();
+}
+
 static inline void ResetAwards(AwardsMgr* m) {
     if (!m->paused) {
         for (int i = 0; i < m->handlers.n; i++) {
@@ -905,20 +919,20 @@ static inline void ResetAwards(AwardsMgr* m) {
                 m->handlers.data[i]->stat->Revert();
             }
         }
-        m->q.head = 0;
-        m->q.tail = &m->q.head;
-        memset(m->popups, 0, sizeof(m->popups));
-        m->place = 0;
-        m->score = 0;
-        m->grade = -1;
-        m->rank = -1;
-        m->time = -999.0f;
-        m->hasTime = 0;
-        m->results.Reset();
+        ResetAwardState(m);
     }
 }
 
-void fn_801CC594(AwardsMgr* m) { ResetAwards(m); }
+void fn_801CC594(AwardsMgr* m) {
+    if (!m->paused) {
+        for (int i = 0; i < m->handlers.n; i++) {
+            if (m->handlers.data[i]) {
+                m->handlers.data[i]->stat->Revert();
+            }
+        }
+        ResetAwardState(m);
+    }
+}
 
 void fn_801CC768(LayoutObj* l, f32 speed) {
     if (speed != l->speed) {

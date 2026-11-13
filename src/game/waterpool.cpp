@@ -876,8 +876,10 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     if (at->y - r > p->origin.y - 0.1f) {
         return;
     }
-    v.y = vel->z;
-    v.x = vel->x;
+    f32 velocityZ = vel->z;
+    v.y = velocityZ;
+    f32 velocityX = vel->x;
+    v.x = velocityX;
     d.y = at->z - p->origin.z;
     d.x = at->x - p->origin.x;
     f32 s2 = v.x * v.x + v.y * v.y;
@@ -886,7 +888,8 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     }
     f32 dy = at->y - p->origin.y;
     f32 depth = sqrt(r * r - dy * dy);
-    f32 speed = sqrt(v.x * v.x + v.y * v.y);
+    const f32 y = v.y;
+    f32 speed = sqrt(v.x * v.x + y * y);
     f32 inv = 1.0f / speed;
     q.x = d.x + v.x * (depth * inv);
     f32 yv = d.y;

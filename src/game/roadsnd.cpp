@@ -147,7 +147,8 @@ void RoadSound::Update(void) {
             RoadSoundVoice* v = entries[i].voice;
             if (v) {
                 f32 vol;
-                if (speed < entries[i].speed2) {
+                f32 middleSpeed = entries[i].speed2;
+                if (speed < middleSpeed) {
                     vol = Lerp(Clamp01((speed - entries[i].speed1) / (entries[i].speed2 - entries[i].speed1)), 0.0f, entries[i].vol2);
                 } else {
                     vol = Lerp(Clamp01((speed - entries[i].speed2) / (entries[i].speed3 - entries[i].speed2)), entries[i].vol2, entries[i].vol3);

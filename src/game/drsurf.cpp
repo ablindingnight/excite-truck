@@ -972,7 +972,7 @@ static inline u32 SurfVFmt(const Surf* s) {
 void fn_802D62FC(const Surf* s, void** dl, u32* size) {
     u32 key = SurfVFmt(s);
     DLEntry* e = lbl_804CA438;
-    u8 b = s->b9;
+    const u8 b = s->b9;
     for (int i = lbl_8055FDF0; i > 0; i--) {
         if (e->key == key && e->b == b) {
             *dl = e->dl;

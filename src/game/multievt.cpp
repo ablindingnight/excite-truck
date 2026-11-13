@@ -147,13 +147,26 @@ extern "C" {
 // fn_802494F8..fn_80249588 are popwarn.cpp's ValueLabel/PopWarnValue inline methods (moved 2026-11-02).
 
 
+/* Helper name unproven */
+static inline int FindUnlockByOffset(u8* car) {
+    UnlockList* l = lbl_8055F28C;
+    unsigned offset = 0;
+    for (int i = 0; i < l->count; i++, offset += sizeof(UnlockEntry)) {
+        UnlockEntry* entry = (UnlockEntry*)((u8*)l->entries + offset);
+        if (entry->id == S32(car, 0x0)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 int fn_8024958C(u8* car, const char* track) {
     u32 ok = S32(car, 0x8) == 0x180302;
     if (ok) {
         ok = FindUnlock(car) != -1;
     }
     if (ok) {
-        ok = lbl_8055F28C->entries[FindUnlock(car)].unlocked;
+        ok = lbl_8055F28C->entries[FindUnlockByOffset(car)].unlocked;
     }
     return ok;
 }

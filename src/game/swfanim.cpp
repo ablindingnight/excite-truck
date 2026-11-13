@@ -71,6 +71,7 @@ struct Sw2 {
 
 class SwfAnim {
 public:
+    void SwapShapeData(u32 i);
     SwfAnim();
     ~SwfAnim();
     void DrawItem(const Sw2Item* it);
@@ -185,6 +186,16 @@ void SwfAnim::Reset() {
     first = 0;
 }
 
+/* Helper name unproven */
+inline void SwfAnim::SwapShapeData(u32 i) {
+    SwfSwap16(&data->shapes[i].tex);
+    SwfSwap32(&data->shapes[i].color);
+    for (int j = 0; j < 4; j++) {
+        SwfSwap32(&data->shapes[i].pts[j][0]);
+        SwfSwap32(&data->shapes[i].pts[j][1]);
+    }
+}
+
 void SwfAnim::LoadFile(const char* name) {
     int k;
     Sw2Frame* f;
@@ -234,12 +245,7 @@ void SwfAnim::LoadFile(const char* name) {
     i = 0;
     if (data->numShapes != 0) {
         for (; i < data->numShapes; i++) {
-            SwfSwap16(&data->shapes[i].tex);
-            SwfSwap32(&data->shapes[i].color);
-            for (j = 0; j < 4; j++) {
-                SwfSwap32(&data->shapes[i].pts[j][0]);
-                SwfSwap32(&data->shapes[i].pts[j][1]);
-            }
+            SwapShapeData(i);
         }
     }
     for (i = 0; i < data->numFrames; i++) {

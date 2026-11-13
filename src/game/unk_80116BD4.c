@@ -1289,6 +1289,11 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     return p;
 }
 
+/* Helper name unproven */
+static inline StreamTrack* SelectStreamTrack(StreamTrack* tracks, s32 index) {
+    return tracks + index;
+}
+
 // Decodes the current frame of a stream player: updates the timing history, copies each audio track's decoded
 // packets into its ring (dropping the oldest data on overflow), then decodes the video. Returns 1 when playback is
 // done, otherwise 0.
@@ -1390,7 +1395,7 @@ s32 fn_801186B8(StreamPlayer *p) {
                     over = len - room;
                     p->tracks[j].readPtr += over;
                     level = OSDisableInterrupts();
-                    p->tracks[j].available -= over;
+                    SelectStreamTrack(p->tracks, j)->available -= over;
                     OSRestoreInterrupts(level);
                     t = &p->tracks[j];
                     if (t->readPtr >= t->ringEnd) {
@@ -1398,7 +1403,7 @@ s32 fn_801186B8(StreamPlayer *p) {
                     }
                 }
                 level = OSDisableInterrupts();
-                p->tracks[j].available += len;
+                SelectStreamTrack(p->tracks, j)->available += len;
                 OSRestoreInterrupts(level);
                 t = &p->tracks[j];
                 room = t->ringEnd - t->writePtr;

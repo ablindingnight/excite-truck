@@ -1328,12 +1328,13 @@ inline void CrushMaster::vf0C(void) {
     if (fn_801B306C() >= 0.0f) {
         endTime = now + timeout;
     }
+    f32 inactiveTurbo = 0.9f;
     for (i = 0; i < nCars; i++) {
         if (cars[i].human && lbl_8043038C.infTurbo) {
             fn_8017960C(i)->turbo = 0.0f;
         }
         if (!cars[i].human && !cars[i].active) {
-            fn_8017960C(i)->turbo = 0.9f;
+            fn_8017960C(i)->turbo = inactiveTurbo;
         }
     }
     if (!vf24()) {

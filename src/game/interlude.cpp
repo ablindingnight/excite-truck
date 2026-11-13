@@ -1915,6 +1915,11 @@ void fn_801C7524(void) {
     sprintf(lbl_804380F0, "%.2f", lbl_8055E7F8[lbl_8055E828].time);
 }
 
+/* Helper name unproven */
+static inline CamEvent* AsCameraEvent(Event* events, int index) {
+    return (CamEvent*)&events[index];
+}
+
 void fn_801C756C(void) {
     if (lbl_8055E7F0 > 0) {
         f32 t = atof(lbl_804380F0);
@@ -1924,9 +1929,11 @@ void fn_801C756C(void) {
                 order = lbl_8055E7F8[i].order;
             }
         }
-        CamEvent* e = (CamEvent*)&lbl_8055E7F8[lbl_8055E828];
+        Event* events = lbl_8055E7F8;
+        const int index = lbl_8055E828;
+        CamEvent* e = AsCameraEvent(events, index);
         if (e->type == 1) {
-            e->end = t + (e->end - e->time);
+            e->end = t + (e->end - events[index].time);
         }
         lbl_8055E7F8[lbl_8055E828].time = fn_801C3450(t);
         lbl_8055E7F8[lbl_8055E828].order = order + 1;

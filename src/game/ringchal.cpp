@@ -2469,7 +2469,9 @@ inline void RingChalMaster::vf0C(void) {
                     arena.ClearGems();
                 }
             }
-            if (players.data[i]->score != arena.f34) {
+            s32 playerScore = players.data[i]->score;
+            s32 arenaScore = arena.f34;
+            if (playerScore != arenaScore) {
                 players.data[i]->score = arena.f34;
             }
             if (b9C && arena.b49) {

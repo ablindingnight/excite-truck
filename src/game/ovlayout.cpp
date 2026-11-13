@@ -1070,7 +1070,6 @@ static inline int CountChildAt(ValueNode* n, const char* name) {
 }
 
 static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
-    int i;
     int c;
     ValueNode* e;
     DynArray<TextCmd>* at;
@@ -1080,7 +1079,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     name = "text_cmd";
     c = CountChildAt(n, name);
     at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
-    for (i = 0;; i++) {
+    for (int i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
@@ -1095,7 +1094,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     name = "gart_cmd";
     c = CountChildAt(n, name);
     ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
-    for (i = 0;; i++) {
+    for (int i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
@@ -1111,7 +1110,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     name = "box_cmd";
     c = CountChildAt(n, name);
     ab = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
-    for (i = 0;; i++) {
+    for (int i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;

@@ -520,7 +520,8 @@ static inline void SetV(TVec& v, f32 x, f32 y, f32 z) {
 static inline void ReadCyl(TreeType* t, ValueNode* n, TVec& c) {
     ValVec3 p1 = n->GetVec3("cyl_p1");
     ValVec3 p2 = n->GetVec3("cyl_p2");
-    SetV(c, MidF(p1.x, p2.x), MidF(p1.y, p2.y), MidF(p1.z, p2.z));
+    f32 firstX = p1.x;
+    SetV(c, MidF(firstX, p2.x), MidF(p1.y, p2.y), MidF(p1.z, p2.z));
     t->cyl.center = c;
     t->cyl.axis.x = p1.x - p2.x;
     t->cyl.axis.y = p1.y - p2.y;
@@ -771,82 +772,86 @@ static inline void Settle(TreeRec* tr) {
     }
 }
 
-void fn_802BD814(void) {
-    lbl_8055FAAC = 0;
-    lbl_8055FAA8 = 0;
-    for (int i = 0; i < lbl_804C00D4.n; i++) {
-        TreeType* t = &lbl_804C00D4.data[i];
-        if (t->set) {
-            TArray<TCell>* frames = t->set->frames;
-            TArray<TreeRec>* list = t->set->list;
-            TArray<TCell>* near;
+/* Helper name unproven */
+static inline void DrawTreeType(TreeType* t) {
+    if (t->set) {
+        TArray<TCell>* frames = t->set->frames;
+        TArray<TreeRec>* list = t->set->list;
+        TArray<TCell>* near;
+        fn_802C8BD0(fn_802C28C0());
+        fn_802DC71C(t->nearId, t->nearTex);
+        for (int j = 0; j < frames->n; j++) {
+            TCell* c = &frames->data[j];
+            f32 k = Step(c->fade, 0.375f, 0.475f);
+            k = (1.0f < k) ? 1.0f : k;
+            k = (k > 0.0f) ? k : 0.0f;
+            f32 a = Lerp(0.0f, 1.0f, k);
+            if (Live(c) && a > 0.1f) {
+                s32 id = t->nearId;
+                s32 tris = t->nearTris;
+                for (int n = c->first; n < c->first + c->count; n++) {
+                    TreeRec* tr = &list->data[n];
+                    Settle(tr);
+                    fn_802DCAE4(id, &tr->mtx, a);
+                    lbl_8055FAA8++;
+                    lbl_8055FAAC += tris;
+                }
+                c->fade = -1.0f;
+            }
+        }
+        fn_802DC8B4();
+        fn_802C8D74();
+        near = t->set->near;
+        TArray<TreeRec>* list2 = t->set->list;
+        if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
-            fn_802DC71C(t->nearId, t->nearTex);
-            for (int j = 0; j < frames->n; j++) {
-                TCell* c = &frames->data[j];
-                f32 k = Step(c->fade, 0.375f, 0.475f);
-                k = (1.0f < k) ? 1.0f : k;
-                k = (k > 0.0f) ? k : 0.0f;
-                f32 a = Lerp(0.0f, 1.0f, k);
-                if (Live(c) && a > 0.1f) {
-                    s32 id = t->nearId;
-                    s32 tris = t->nearTris;
-                    for (int n = c->first; n < c->first + c->count; n++) {
-                        TreeRec* tr = &list->data[n];
-                        Settle(tr);
-                        fn_802DCAE4(id, &tr->mtx, a);
-                        lbl_8055FAA8++;
-                        lbl_8055FAAC += tris;
+            fn_802DC71C(t->farId, t->farTex);
+            TMtx m;
+            TMtx cam;
+            fn_801F1C24(&cam);
+            for (int j = 0; j < near->n; j++) {
+                TCell* c = &near->data[j];
+                if (Live(c)) {
+                    f32 k = Step(c->fade, 0.525f, 0.625f);
+                    k = (1.0f < k) ? 1.0f : k;
+                    k = (k > 0.0f) ? k : 0.0f;
+                    f32 a = Lerp(1.0f, 0.0f, k);
+                    if (a > 0.1f) {
+                        s32 id = t->farId;
+                        s32 tris = t->farTris;
+                        for (int n = c->first; n < c->first + c->count; n++) {
+                            TreeRec* tr = &list2->data[n];
+                            Settle(tr);
+                            f32 s = tr->mtx.rot[1].y;
+                            m.pos = tr->mtx.pos;
+                            m.rot[0].x = cam.rot[0].x * s;
+                            m.rot[0].y = cam.rot[0].y * s;
+                            m.rot[0].z = cam.rot[0].z * s;
+                            m.rot[1].x = cam.rot[1].x * s;
+                            m.rot[1].y = cam.rot[1].y * s;
+                            m.rot[1].z = cam.rot[1].z * s;
+                            m.rot[2].x = cam.rot[2].x * s;
+                            m.rot[2].y = cam.rot[2].y * s;
+                            m.rot[2].z = cam.rot[2].z * s;
+                            fn_802DCAE4(id, &m, a);
+                            lbl_8055FAA8++;
+                            lbl_8055FAAC += tris;
+                        }
                     }
                     c->fade = -1.0f;
                 }
             }
             fn_802DC8B4();
             fn_802C8D74();
-            near = t->set->near;
-            TArray<TreeRec>* list2 = t->set->list;
-            if (t->farTris <= 10) {
-                fn_802C8BD0(fn_802C28C0());
-                fn_802DC71C(t->farId, t->farTex);
-                TMtx m;
-                TMtx cam;
-                fn_801F1C24(&cam);
-                for (int j = 0; j < near->n; j++) {
-                    TCell* c = &near->data[j];
-                    if (Live(c)) {
-                        f32 k = Step(c->fade, 0.525f, 0.625f);
-                        k = (1.0f < k) ? 1.0f : k;
-                        k = (k > 0.0f) ? k : 0.0f;
-                        f32 a = Lerp(1.0f, 0.0f, k);
-                        if (a > 0.1f) {
-                            s32 id = t->farId;
-                            s32 tris = t->farTris;
-                            for (int n = c->first; n < c->first + c->count; n++) {
-                                TreeRec* tr = &list2->data[n];
-                                Settle(tr);
-                                f32 s = tr->mtx.rot[1].y;
-                                m.pos = tr->mtx.pos;
-                                m.rot[0].x = cam.rot[0].x * s;
-                                m.rot[0].y = cam.rot[0].y * s;
-                                m.rot[0].z = cam.rot[0].z * s;
-                                m.rot[1].x = cam.rot[1].x * s;
-                                m.rot[1].y = cam.rot[1].y * s;
-                                m.rot[1].z = cam.rot[1].z * s;
-                                m.rot[2].x = cam.rot[2].x * s;
-                                m.rot[2].y = cam.rot[2].y * s;
-                                m.rot[2].z = cam.rot[2].z * s;
-                                fn_802DCAE4(id, &m, a);
-                                lbl_8055FAA8++;
-                                lbl_8055FAAC += tris;
-                            }
-                        }
-                        c->fade = -1.0f;
-                    }
-                }
-                fn_802DC8B4();
-                fn_802C8D74();
-            }
         }
+    }
+}
+
+void fn_802BD814(void) {
+    lbl_8055FAAC = 0;
+    lbl_8055FAA8 = 0;
+    for (int i = 0; i < lbl_804C00D4.n; i++) {
+        DrawTreeType(&lbl_804C00D4.data[i]);
     }
 }
 

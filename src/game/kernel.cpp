@@ -220,6 +220,7 @@ u32 fn_802E176C(u32 x) { return 1 << (32 - __cntlzw(x)); }
 // A colour ramp: column k holds (k - 128, row - 128) in its two channels.
 void fn_802E1780(u8* dst, u32 w, u32 pitch) {
     u8* p;
+    const u32 columns = w >> 3;
     int a;
     int b;
     int k;
@@ -227,7 +228,7 @@ void fn_802E1780(u8* dst, u32 w, u32 pitch) {
     a = 0;
     b = 0;
     for (row = 0; row < 4; row++) {
-        for (k = 0; k < w >> 3; k++) {
+        for (k = 0; k < columns; k++) {
             p = &dst[(k + row * pitch) * 2];
             p[0] = a - k + 0x80;
             p[1] = b - row + 0x80;
@@ -251,7 +252,8 @@ void fn_802E1804(u8* dst, const u8* src, int w, u32 h, int bpp) {
     out = 0;
     pitch = w * bpp;
     for (y = 0; y < (h >> 2); y++) {
-        off = y * 4 * pitch;
+        const u32 row = y * 4;
+        off = row * pitch;
         for (k = 0; k < (pitch >> 3); k++, off += 8) {
             d = (u32*)(dst + out);
             for (int r = 0; r < 4; r++) {

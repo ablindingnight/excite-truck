@@ -293,8 +293,9 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                     c = c > 0.0f ? c : 0.0f;
                     k.q.w = Lerp(-1.0f, 2.0f, c);
                 } else {
-                    u32 pz = (u32)(v >> 32) >> 16;
+                    u32 pz;
                     u32 py = (u32)(v >> 32) & 0xFFFF;
+                    pz = (u32)(v >> 32) >> 16;
                     u32 px = (u32)(v >> 16) & 0xFFFF;
                     c = AMIN(1.0f, Dequant(px, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;

@@ -162,7 +162,8 @@ f32 fn_802E78A4(f32 x) {
     return Lerp(v, (f32)__fabs(v) * v, 0.0f);
 }
 
-void fn_802E7920(s32 chan, s32 a) {
+void fn_802E7920(s32 chanArg, s32 a) {
+    const s32 chan = chanArg;
     Remote* r = &lbl_80505978[chan];
     s32 now = fn_802E2C20();
     int off = fn_802D9BF0();

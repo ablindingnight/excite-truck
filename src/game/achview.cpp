@@ -249,6 +249,14 @@ public:
     u8* env;           // offset 0xA8
 };
 
+/* Helper name unproven */
+struct TrophyRow {
+    explicit TrophyRow(const u8* row) : category(S32(row, 0x18)), level(S32(row, 0xC8)) {}
+
+    s32 category;
+    s32 level;
+};
+
 // The trophy's menu widget: the viewer, the level and its caption.
 class TrophyController : public MenuState {
 public:
@@ -258,6 +266,13 @@ public:
         level = lvl;
         text[0] = 0;
         shownLevel = lvl;
+    }
+    TrophyController(AchievementTrophyModel* v, const TrophyRow& row) {
+        view = v;
+        category = row.category;
+        level = row.level;
+        text[0] = 0;
+        shownLevel = row.level;
     }
     virtual ~TrophyController(void) {}
     virtual void Enter(void);
@@ -383,7 +398,7 @@ int fn_80259224(u8* p) {
     if (fn_8025921C()) {
         ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), 5);
     } else {
-        ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), S32(p, 0xC8));
+        ctl = new ("trophycontroller") TrophyController(&view, TrophyRow(p));
     }
     s32 level = S32(p, 0xC8);
     s32 cat = S32(p, 0x18);
@@ -485,10 +500,12 @@ int fn_8025978C(u8* p) {
     s32 barColor[7];
     s32 levels[7];
     s32* vals[7];
+    s32* lp;
     u32 i;
-    s32* lp = levels;
+    lp = levels;
     for (i = 0; i < 7; i++, lp++) {
-        cat = lbl_80344EA0[i].category;
+        s32 category = lbl_80344EA0[i].category;
+        cat = category;
         if (cat == S32(p, 0x18)) {
             iconColor[i] = 9;
             barColor[i] = 8;

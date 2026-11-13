@@ -240,11 +240,29 @@ static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
     return h;
 }
 
+/* Helper name unproven */
+static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
+    f32 lo;
+    f32 hi;
+    f32 up;
+    f32 down;
+    up = lbl_80563E88 * (400.0f + t * lbl_80563E90);
+    down = onGround ? 6.6733403f : 0.33366704f;
+    if (h < r->v[1]) {
+        lo = r->v[1] - down;
+        h = h > lo ? h : lo;
+        r->v[1] = h;
+    } else {
+        hi = r->v[1] + up;
+        h = h < hi ? h : hi;
+        r->v[1] = h;
+    }
+}
+
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
 void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 avg;
-    f32 lo;
     f32 v;
     f32 h;
     u8* car;
@@ -253,10 +271,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     bool onGround;
     const s16* hint;
     f32 lift;
-    f32 hi;
-    f32 down;
     f32 h2;
-    f32 up;
     f32 h0;
     f32 h1;
     f32 zoom;
@@ -295,17 +310,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         t = (rv - lbl_80563E78) / lbl_80563E30;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
-        up = lbl_80563E88 * (400.0f + t * lbl_80563E90);
-        down = onGround ? 6.6733403f : 0.33366704f;
-        if (h < r->v[1]) {
-            lo = r->v[1] - down;
-            h = h > lo ? h : lo;
-            r->v[1] = h;
-        } else {
-            hi = r->v[1] + up;
-            h = h < hi ? h : hi;
-            r->v[1] = h;
-        }
+        EaseGroundHeight(t, onGround, h, r);
         zoom = fn_8026A520(S32(car, 0x1EC)) > lbl_80563E78;
         if (zoom != lbl_80563E78) {
             v = 0.04170838f + r->v[3];
@@ -511,7 +516,9 @@ void fn_8026F420(int mode, int prev, u8* p) {
     c->tf = c->view;
     c->view.pos.v[1] = c->view.pos.v[1] - lbl_80563EA8;
     if (seven || U8(c->car, 0x260C)) {
-        c->view.pos.v[0] = c->pos.v[0] * lbl_80563E58 - c->tf.pos.v[0];
+        f32 positionX = c->pos.v[0];
+        f32 frameX = c->tf.pos.v[0];
+        c->view.pos.v[0] = positionX * lbl_80563E58 - frameX;
         f32 scaledY = c->pos.v[1] * lbl_80563E58;
         c->view.pos.v[1] = scaledY - c->tf.pos.v[1];
         c->view.pos.v[2] = c->pos.v[2] * lbl_80563E58 - c->tf.pos.v[2];
@@ -599,7 +606,8 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             k = lbl_80563E30 - 0.35f * k;
             break;
         }
-        f32 dist = 7.0f + k * F32(c->car, 0x5B4);
+        f32 radius = F32(c->car, 0x5B4);
+        f32 dist = 7.0f + k * radius;
         f32 lift = CarHeight(c->car) + 2.7f;
         c->fov = fn_8026ECE4(p, &dist);
         target = c->pos;
@@ -767,7 +775,8 @@ void fn_802704E4(u8* p) {
     target = c->pos;
     target.v[1] += MulF(wide ? 2.5f : lbl_80563E58, F32(c->car, 0x5E4));
     if ((f32)__fabs(on - c->lastOn) <= lbl_80558DC4[0]) {
-        int below = F32(c->car, 0x25D8) < -0.1f;
+        f32 altitude = F32(c->car, 0x25D8);
+        int below = altitude < -0.1f;
         int moving = !((f32)__fabs(on) <= lbl_80558DC4[0]);
         d.x = target.v[0] - c->tf.pos.v[0];
         d.y = target.v[1] - c->tf.pos.v[1];

@@ -115,8 +115,9 @@ void fn_801D1C68(MeshHeader* m, u32 base) {
     i = Loop1_fn_801D1C68(m);
     i = Loop2_fn_801D1C68(m);
     i = Loop3_fn_801D1C68(m);
-    for (i = 0; i < m->numBones; i++) {
-        MeshBone* b = &m->bones[i];
+    unsigned offset = 0;
+    for (i = 0; i < m->numBones; i++, offset += sizeof(*m->bones)) {
+        MeshBone* b = (MeshBone*)((u8*)m->bones + offset);
         b->Swap();
     }
 }

@@ -206,19 +206,23 @@ static inline void AddAll(PathGroup* g, PathClient** found, int n) {
     }
 }
 
-PathMover* fn_801DA8C8(const char* object, const char* path) {
-    int i;
-    PathMan* m = lbl_8055E984;
-    PathClient* found[0x200];
+/* Helper name unproven */
+static inline int FindMatchingClients(PathMan* m, PathClient** found, const char* object, const char* path) {
     int n = 0;
     int any = strcmp(object, "*") == 0;
-    int off = 0;
-    for (i = 0; i < m->count; off += sizeof(m->clients[0]), i++) {
-        PathClient* c = (PathClient*)((u8*)m->clients + off);
+    PathClient* c = m->clients;
+    for (int i = 0; i < m->count; c++, i++) {
         if ((any || strcmp(c->name, object) == 0) && fn_801D9FC4(c->follower, path)) {
             found[n++] = c;
         }
     }
+    return n;
+}
+
+PathMover* fn_801DA8C8(const char* object, const char* path) {
+    PathMan* m = lbl_8055E984;
+    PathClient* found[0x200];
+    const int n = FindMatchingClients(m, found, object, path);
     PathGroup* g = 0;
     if (n > 0) {
         g = new ("pathmanpath") PathGroup(path, n);

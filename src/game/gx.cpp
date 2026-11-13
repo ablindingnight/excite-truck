@@ -1870,20 +1870,21 @@ void fn_802D2218(void) {
     }
     fn_802D1678();
     RMtx id;
-    id.rot.m[0][0] = 1.0f;
-    id.rot.m[0][1] = 0.0f;
-    id.rot.m[0][2] = 0.0f;
-    id.rot.m[1][0] = 0.0f;
-    id.rot.m[1][1] = 1.0f;
-    id.rot.m[1][2] = 0.0f;
-    id.rot.m[2][0] = 0.0f;
-    id.rot.m[2][1] = 0.0f;
-    id.rot.m[2][2] = 1.0f;
-    id.pos.x = 0.0f;
-    id.pos.y = 0.0f;
-    id.pos.z = 0.0f;
+    RMtx* const identity = &id;
+    identity->rot.m[0][0] = 1.0f;
+    identity->rot.m[0][1] = 0.0f;
+    identity->rot.m[0][2] = 0.0f;
+    identity->rot.m[1][0] = 0.0f;
+    identity->rot.m[1][1] = 1.0f;
+    identity->rot.m[1][2] = 0.0f;
+    identity->rot.m[2][0] = 0.0f;
+    identity->rot.m[2][1] = 0.0f;
+    identity->rot.m[2][2] = 1.0f;
+    identity->pos.x = 0.0f;
+    identity->pos.y = 0.0f;
+    identity->pos.z = 0.0f;
     f32 pm[3][4];
-    fn_802D0DD4(pm, &id);
+    fn_802D0DD4(pm, identity);
     GXLoadPosMtxImm(pm, 0);
     f32 hw = 0.5f * lbl_804C9778.vw;
     f32 hh = 0.5f * lbl_804C9778.vh;
@@ -1913,7 +1914,8 @@ void fn_802D2218(void) {
         f32 p[3];
         p[0] = hw * (i & 1 ? -1 : 1);
         p[1] = hh * (i & 2 ? -1 : 1);
-        WGPIPE.f = p[0];
+        const f32 x = p[0];
+        WGPIPE.f = x;
         WGPIPE.f = p[1];
         p[2] = 1.99999f;
         WGPIPE.f = p[2];
@@ -2093,7 +2095,9 @@ V3* fn_802D2D04(void) { return &lbl_804C97D0.dir; }
 GXRenderModeObj* fn_802D2D14(void) { return lbl_8055FD64; }
 
 void fn_802D2D1C(void) {
-    InvertR(&lbl_804CA2D8, &lbl_804C56C0);
+    const RMtx* camera = &lbl_804C56C0;
+    RMtx* const world = &lbl_804CA2D8;
+    InvertR(world, camera);
     GXSetCurrentMtx(0);
 }
 
@@ -2219,20 +2223,21 @@ void fn_802D3360(void) {
 
 void fn_802D3420(void) {
     RMtx id;
-    id.rot.m[0][0] = 1.0f;
-    id.rot.m[0][1] = 0.0f;
-    id.rot.m[0][2] = 0.0f;
-    id.rot.m[1][0] = 0.0f;
-    id.rot.m[1][1] = 1.0f;
-    id.rot.m[1][2] = 0.0f;
-    id.rot.m[2][0] = 0.0f;
-    id.rot.m[2][1] = 0.0f;
-    id.rot.m[2][2] = 1.0f;
-    id.pos.x = 0.0f;
-    id.pos.y = 0.0f;
-    id.pos.z = 0.0f;
+    RMtx* const identity = &id;
+    identity->rot.m[0][0] = 1.0f;
+    identity->rot.m[0][1] = 0.0f;
+    identity->rot.m[0][2] = 0.0f;
+    identity->rot.m[1][0] = 0.0f;
+    identity->rot.m[1][1] = 1.0f;
+    identity->rot.m[1][2] = 0.0f;
+    identity->rot.m[2][0] = 0.0f;
+    identity->rot.m[2][1] = 0.0f;
+    identity->rot.m[2][2] = 1.0f;
+    identity->pos.x = 0.0f;
+    identity->pos.y = 0.0f;
+    identity->pos.z = 0.0f;
     f32 pm[3][4];
-    fn_802D0DD4(pm, &id);
+    fn_802D0DD4(pm, identity);
     GXLoadPosMtxImm(pm, 0);
     f32 o[4][4];
     C_MTXOrtho(o, 0.0f, 480.0f, 0.0f, 640.0f, 1.0f, 2.0f);

@@ -922,7 +922,8 @@ void fn_802CB82C(s32 id) {
         TexEntry* t = &lbl_8055FCB0[id];
         fn_802CB3F4(t->mip0);
         t->mip0 = 0;
-        c->heapRef->heap->Free(t->mip0Mem);
+        SimpleHeap* heap = c->heapRef->heap;
+        heap->Free(t->mip0Mem);
         t->mip0Mem = 0;
         fn_802CB3F8(t->name, "quick-unload");
     } else if (s->state == 1) {
@@ -1100,7 +1101,8 @@ static inline int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l) {
         d->name = t->name;
         fn_802CBD30(&c->discards, &c->freeDiscards, d);
         t->mip0 = 0;
-        c->heapRef->heap->Free(t->mip0Mem);
+        SimpleHeap* heap = c->heapRef->heap;
+        heap->Free(t->mip0Mem);
         t->mip0Mem = 0;
         ok = 1;
         fn_802CB3F8(t->name, "DISCARDING");

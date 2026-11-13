@@ -1835,7 +1835,7 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
     UIYesNoHandler handler(defaultNo);
     MenuItem items[] = {
         MenuItem("__first", 5, &handler, 0, 0),
-        MenuItem("title", title, 4),
+        MenuItem("title", title, CaptionContext(4)),
         MenuItem("message", message, 4),
         MenuItem("yes", 0, NULL, -2, 0),
         MenuItem("no", 0, NULL, -3, 0),

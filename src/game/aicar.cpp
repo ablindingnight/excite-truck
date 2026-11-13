@@ -347,7 +347,8 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     org.y = F32(m, 0x2C);
     side.x = dir.y;
     side.y = -dir.x;
-    r.x = Dot4_hm(side.x, dir.x, in->x, in->y) + org.x;
+    f32 inputX = in->x;
+    r.x = Dot4_hm(side.x, dir.x, inputX, in->y) + org.x;
     r.y = side.y * in->x + dir.y * in->y + org.y;
     out->x = r.x;
     out->y = r.y;
@@ -948,7 +949,8 @@ f32 fn_801948B0(u8* d, f32 t, int steer) {
     f32 push = 0.0f;
     if (steer && U8(d, 0x14)) {
         f32 x = F32(d, 0x8);
-        f32 over = gain / 2.0f + (f32)__fabs(x) - F32(d, 0x274);
+        f64 absWide = __fabs(x);
+        f32 over = gain / 2.0f + (f32)absWide - F32(d, 0x274);
         over = over > 0.0f ? over : 0.0f;
         f32 sign = x > 0.0f ? 1.0f : -1.0f;
         push = -sign * over;
@@ -1169,7 +1171,8 @@ void fn_80137788(Pair* p, int car, V2* out);
 static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
     V2 r;
     r.x = LerpF(a.x, b.x, t);
-    r.y = LerpF(a.y, b.y, t);
+    f32 fromY = a.y;
+    r.y = LerpF(fromY, b.y, t);
     return r;
 }
 
@@ -2354,7 +2357,9 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
         u8* o = VI(fn_801B2ED0(id))->v18();
         if (o) {
             U8(d, 0xFC) = 1;
-            f32 s = 1.1f * (F32(o, 0x3C) * v.y + v.x * F32(o, 0x38));
+            const f32 vx = v.x;
+            const f32 vy = v.y;
+            f32 s = 1.1f * (F32(o, 0x3C) * vy + vx * F32(o, 0x38));
             F32(d, 0xF8) = b;
             S32(d, 0x114) = id;
             F32(d, 0x108) = F32(d, 0x278) + F32(d, 0x27C) * a;

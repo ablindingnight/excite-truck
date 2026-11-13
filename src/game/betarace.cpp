@@ -2019,7 +2019,8 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         flash[2] = t > 0.0f ? t : 0.0f;
         t = flash[3] - 0.016683351f;
         flash[3] = t > 0.0f ? t : 0.0f;
-        t = flash[4] - 0.016683351f;
+        f32 flashTime = flash[4];
+        t = flashTime - 0.016683351f;
         flash[4] = t > 0.0f ? t : 0.0f;
     }
     if (moving) {
@@ -4054,7 +4055,8 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     fn_802C77F0(lbl_80559ED8, box);
     __typeof__(c.x) c_x = box[0] + (box[1] - box[0]) * 0.5f;
     c.y = box[2] + (box[3] - box[2]) * 0.5f;
-    c.z = box[4] + (box[5] - box[4]) * 0.5f;
+    const f32 minZ = box[4];
+    c.z = minZ + (box[5] - minZ) * 0.5f;
     n.z = c.z * -1.0f;
     n.y = c.y * -1.0f;
     c.x = c_x;

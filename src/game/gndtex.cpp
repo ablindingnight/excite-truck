@@ -551,7 +551,8 @@ void fn_802DC440(void) {
 
 void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
     fn_802DBBE4(verts, nverts);
-    u8 a = PMin(PMax(Round(255.0f * lbl_804DB068[1].z), 0), 0xFF);
+    f32 opacity = lbl_804DB068[1].z;
+    u8 a = PMin(PMax(Round(255.0f * opacity), 0), 0xFF);
     if (a != lbl_8055FEA0) {
         GXColor c;
         c.a = a;

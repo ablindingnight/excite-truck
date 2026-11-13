@@ -3784,7 +3784,9 @@ void fn_801A34D0(u8* p, RVec3* lo, RVec3* hi) {
     lo->x = lx < b.x ? lx : b.x;
     lo->y = lo->y < b.y ? lo->y : b.y;
     lo->z = lo->z < b.z ? lo->z : b.z;
-    hi->x = b.x < hi->x ? hi->x : b.x;
+    f32 bx = b.x;
+    f32 hx = hi->x;
+    hi->x = hx > bx ? hx : bx;
     hi->y = hi->y > b.y ? hi->y : b.y;
     hi->z = hi->z > b.z ? hi->z : b.z;
     hi->x += 1.5f;

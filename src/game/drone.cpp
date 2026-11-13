@@ -777,6 +777,12 @@ inline HermitePathData* HermiteDrone::PathData(void) {
     return entry->data;
 }
 
+/* Helper name unproven */
+static inline HermiteKey* NextLoopKey(HermitePathData* path, int segment) {
+    int count = path->count;
+    return path->keys + (count + (segment + 1)) % count;
+}
+
 void HermiteDrone::UpdateLoop(f32 dt) {
     HermitePathData* data = PathData();
     HermiteKey* k = data->Loop(seg);
@@ -791,8 +797,10 @@ void HermiteDrone::UpdateLoop(f32 dt) {
         k = entry->data->Loop(seg);
         q0 = q1;
         v0 = v1;
-        q1 = entry->data->Loop(seg + 1)->rot;
-        v1 = entry->data->Loop(seg + 1)->v;
+        HermitePathData* nextPath = entry->data;
+        q1 = NextLoopKey(nextPath, seg)->rot;
+        nextPath = entry->data;
+        v1 = NextLoopKey(nextPath, seg)->v;
     }
     HermitePathData* d = entry->data;
     HermiteKey* keys = d->keys;
@@ -853,12 +861,14 @@ extern "C" void fn_801FEC74(HermiteDrone* d);
 
 void HermiteDrone::UpdateRestock(f32 dt) {
     HermiteKey* k = entry->data->Clamp(seg);
-    f32 nt = t + dt;
+    f32 nt;
+    f32 priorTime = t;
+    nt = priorTime + dt;
     f32 u = k->rate * nt;
     if (u < 1.0f) {
         t = nt;
     } else if (seg + 2 < entry->data->count) {
-        t = t + (dt - 1.0f / k->rate);
+        t = priorTime + (dt - 1.0f / k->rate);
         u = u - 1.0f;
         seg++;
         k = entry->data->Clamp(seg);

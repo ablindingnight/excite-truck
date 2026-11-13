@@ -676,7 +676,8 @@ void fn_80271624(int mode, u8* p) {
             }
             if (tv->flags & 1) {
                 fn_80266170(p + 0x178, fn_802E2C20(), fn_801769F8(), fresh, F32(p, 0xBC));
-                f32 fov = F32(p, 0x180) + F32(p, 0x184) * (F32(p, 0xBC) - F32(p, 0x180));
+                f32 fovBlend = F32(p, 0x184);
+                f32 fov = F32(p, 0x180) + fovBlend * (F32(p, 0xBC) - F32(p, 0x180));
                 F32(p, 0x194) = fov;
                 F32(p, 0xBC) = fov;
             }

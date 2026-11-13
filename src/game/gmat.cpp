@@ -627,8 +627,19 @@ void fn_802B14B4(GMat* g) {
 }
 
 void fn_802B1758(GMat* g) {
+    s32 tex;
+    int n;
+    f32 scale;
+    GVec* verts;
+    GStrip* s;
+    f32 x;
+    int k;
+    f32 near;
+    f32 y;
+    f32 far;
+    f32 z;
     if (g->lists[0].head && g->worldmap != -2) {
-        s32 tex = g->worldmap;
+        tex = g->worldmap;
         BVec m;
         m.z = 1.0f;
         m.x = 1.0f / (1024.0f * kWorldScale);
@@ -636,14 +647,12 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
-        int n;
-        GVec* verts = g->verts.data;
+        verts = g->verts.data;
         n = g->verts.count;
         for (GBlock* b = g->lists[0].head; b; b = b->next) {
             fn_802DC464(verts, n, (u16*)b->data, b->count);
         }
-        GStrip* s;
-        for (int k = 0; k < g->strips.count; k++) {
+        for (k = 0; k < g->strips.count; k++) {
             s = &g->strips.data[k];
             m.z = s->alpha;
             fn_802DAA18(fn_802DA704(1, &m, 1));
@@ -653,8 +662,7 @@ void fn_802B1758(GMat* g) {
         fn_802C8D74();
     }
     if (g->crystal && g->oceanmap != -2) {
-        s32 tex = g->oceanmap;
-        f32 scale;
+        tex = g->oceanmap;
         if (tex == g->worldmap) {
             scale = 1.0f / (1024.0f * kWorldScale);
         } else {
@@ -667,23 +675,22 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
-        f32 near = -2.0f + 1024.0f * kWorldScale / 2.0f;
-        int k;
+        near = -2.0f + 1024.0f * kWorldScale / 2.0f;
         GVec* c = lbl_804BE190;
         for (k = 0; k < 4; k++, c++) {
-            f32 x = near * (f32)((k & 1) ? -1 : 1);
-            f32 z = near * (f32)((k & 2) ? -1 : 1);
-            f32 y = fn_801DCF48(0, x, z);
+            x = near * (f32)((k & 1) ? -1 : 1);
+            z = near * (f32)((k & 2) ? -1 : 1);
+            y = fn_801DCF48(0, x, z);
             c->x = x;
             c->y = y;
             c->z = z;
         }
-        f32 far = 2048.0f * kWorldScale;
+        far = 2048.0f * kWorldScale;
         c = &lbl_804BE190[4];
-        for (int k = 4; k < 8; k++, c++) {
-            f32 x = (f32)((k & 1) ? -1 : 1) * far;
-            f32 z = (f32)((k & 2) ? -1 : 1) * far;
-            f32 y = fn_801DCF48(0, x, z);
+        for (k = 4; k < 8; k++, c++) {
+            x = (f32)((k & 1) ? -1 : 1) * far;
+            z = (f32)((k & 2) ? -1 : 1) * far;
+            y = fn_801DCF48(0, x, z);
             c->x = x;
             c->y = y;
             c->z = z;

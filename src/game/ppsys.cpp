@@ -238,8 +238,11 @@ static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
     PStick* k = &s->sticks[s->nStick++];
     k->a = a;
     k->b = b;
-    k->rest = extra + PSVECDistance(&s->pos[a], &s->pos[b]);
-    k->stiff = __fabs(stiff);
+    f32 distance = PSVECDistance(&s->pos[a], &s->pos[b]);
+    f64 absStiff = __fabs(stiff);
+    k->rest = extra + distance;
+    f32 roundedStiff = absStiff;
+    k->stiff = roundedStiff;
     k->slack = stiff < -0.001f;
 }
 
@@ -472,7 +475,8 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     }
     for (i = 0; i < np; i++, p++) {
         if (p->at) {
-            AddAnchorAt(s, p->idx, p->mtx, p->at);
+            const RMtx* matrix = p->mtx;
+            AddAnchorAt(s, p->idx, matrix, p->at);
         } else {
             AddAnchorAt(s, p->idx, p->mtx, &s->pos[p->idx]);
         }

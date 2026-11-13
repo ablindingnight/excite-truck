@@ -663,8 +663,9 @@ static inline int HasLap(int q) { return IsLapDone() || q; }
 static inline int JustFinished(int q) { return HasLap(q) && lbl_8055D350->stats->lapTime < 5.0f; }
 
 int RacingOverlay::ShowLapInfo(void) {
+    RaceInfo* race = lbl_8055D350;
     int q = IsQualifying();
-    return JustFinished(q) || lbl_8055D350->stats->lap > lbl_8055D350->info->laps;
+    return JustFinished(q) || race->stats->lap > race->info->laps;
 }
 
 enum { STATE_IDLE, STATE_LAP, STATE_TIMED };

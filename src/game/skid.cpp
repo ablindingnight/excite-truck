@@ -425,24 +425,25 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
 }
 
 void fn_8028DDF0(SkidEntry* e, int n) {
+    SkidEntry* current = e;
     if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
         return;
     }
     f32 maxd = 40000.0f;
     f32 now = fn_801E7E18();
-    for (int i = 0; i < n; i++, e++) {
-        if (e->dist < maxd && e->car->surface == lbl_804B3490[e->index] && e->active) {
+    for (int i = 0; i < n; i++, current++) {
+        if (current->dist < maxd && current->car->surface == lbl_804B3490[current->index] && current->active) {
             for (int w = 0; w < 4; w++) {
-                fn_8028D89C(e, w, now);
+                fn_8028D89C(current, w, now);
             }
         } else {
-            int k = e->index;
+            int k = current->index;
             lbl_8055F720[k * 4 + 0].type = -1;
             lbl_8055F720[k * 4 + 1].type = -1;
             lbl_8055F720[k * 4 + 2].type = -1;
             lbl_8055F720[k * 4 + 3].type = -1;
         }
-        lbl_804B3490[e->index] = e->car->surface;
+        lbl_804B3490[current->index] = current->car->surface;
     }
 }
 

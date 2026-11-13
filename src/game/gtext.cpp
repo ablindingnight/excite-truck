@@ -398,10 +398,11 @@ static inline const char* EName(const EscSeq* e) { return e->name; }
 
 static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, f32* adv) {
     if (*s == '\\') {
+        ArtItem* it;
         for (int i = 0; i < lbl_80497F14.count; i++) {
             EscSeq* e = &lbl_80497F14.data[i];
             if (strncasecmp(s + 1, EName(e), strlen(lbl_80497F14.data[i].name)) == 0) {
-                ArtItem* it = &lbl_8049846C.data[lbl_8049846C.count++];
+                it = &lbl_8049846C.data[lbl_8049846C.count++];
                 f32 post = 0.0f;
                 it->esc = i;
                 if (e->art) {
@@ -514,7 +515,6 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
     f32 py;
     f32 px;
     const char* str;
-    int outline;
     int passes;
     str = s;
     px = x;
@@ -529,7 +529,7 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
     f32 lh = f->height * scale * fn_8022EDC4()->scale;
     fn_80233BF0(str, f, &px, &py, align, scale, xs);
     while (passes > 0) {
-        outline = passes == 2;
+        const bool outline = passes == 2;
         GTextFont* ff = f;
         u32 cc = c;
         if (outline) {

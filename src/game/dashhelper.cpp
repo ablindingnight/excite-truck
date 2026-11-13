@@ -967,12 +967,12 @@ extern const f32 lbl_80560264;  // 1
 void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     f32 size;
     f32 bx;
-    f32 y1 = y + lbl_80560264;
+    y += lbl_80560264;
     f32 h0 = fn_80235F64(lbl_8055D4CC, 4);
     f32 h = h0 * scale;
     f32 half = MulQ(h, 0.5f);
     size = 10.0f + h;
-    f32 by = 5.0f + (y1 + half);
+    f32 by = 5.0f + (y + half);
     bx = x - 5.0f;
     fn_80010E94(lbl_8055D4D0, 4, bx, by, size, size);
     fn_80010E94(lbl_8055D4D0, 5, bx + size, by, 640.0f, size);
@@ -1331,7 +1331,8 @@ void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
     pw = w - (a + fn_80235EF0(art, 3));
     b = fn_80235F64(art, 2);
     p.y = b + (y - h);
-    fn_802354A0(art, 5, p.x, p.y, 0.0f, pw, b, color);
+    f32 height = b;
+    fn_802354A0(art, 5, p.x, p.y, 0.0f, pw, height, color);
 
     pw = fn_80235EF0(art, 0);
     a = fn_80235F64(art, 0);

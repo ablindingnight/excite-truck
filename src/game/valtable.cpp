@@ -288,8 +288,9 @@ public:
     }
     void ResolveParents(void) {
         int i;
-        for (i = 0; i < count; i++) {
-            const char* pn = nodes[i].parentName;
+        unsigned offset;
+        for (i = 0, offset = 0; i < count; offset += sizeof(ValueFileNode), ++i) {
+            const char* pn = ((ValueFileNode*)((u8*)nodes + offset))->parentName;
             if (pn && *pn) {
                 int found = 0;
                 int j;
@@ -299,14 +300,15 @@ public:
                             fn_802E317C("valtab: table \"%s\" parented to self!", pn);
                         }
                         if (found) {
-                            fn_802E317C("valtab: table \"%s\" has ambiguous parent \"%s\"", nodes[i].GetName(), pn);
+                            fn_802E317C("valtab: table \"%s\" has ambiguous parent \"%s\"", ((ValueFileNode*)((u8*)nodes + offset))->GetName(), pn);
                         }
+                        ValueFileNode* child = (ValueFileNode*)((u8*)nodes + offset);
                         found = 1;
-                        nodes[i].parent = &nodes[j];
+                        child->parent = &nodes[j];
                     }
                 }
                 if (!found) {
-                    fn_802E317C("valtab: table \"%s\" has missing parent \"%s\"", nodes[i].GetName(), pn);
+                    fn_802E317C("valtab: table \"%s\" has missing parent \"%s\"", ((ValueFileNode*)((u8*)nodes + offset))->GetName(), pn);
                 }
             }
         }

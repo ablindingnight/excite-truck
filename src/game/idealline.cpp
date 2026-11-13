@@ -126,6 +126,8 @@ struct TimeArray {
 };
 
 class IdealFollower : public LineFollower {
+    bool IsTrackJump(bool moved, ILPos& old, bool jump);
+
 public:
     IdealFollower(int withTimes, CenterLine* line);
     virtual ~IdealFollower(void);
@@ -548,6 +550,16 @@ static inline bool Differ(const ILPos& a, const ILPos& b) {
     return diff;
 }
 
+/* Helper name unproven */
+inline bool IdealFollower::IsTrackJump(bool moved, ILPos& old, bool jump) {
+    if (!moved) {
+        if (!Differ(old, il)) {
+            jump = false;
+        }
+    }
+    return jump;
+}
+
 int IdealFollower::Track(V2* p, f32* progress) {
     bool moved;
     int r;
@@ -596,11 +608,7 @@ int IdealFollower::Track(V2* p, f32* progress) {
     travel = il.seg->dist + il.seg->len * il.t;
     lateral = Dot4(dir.y, -dir.x, off.x, off.y);
     jump = true;
-    if (!moved) {
-        if (!Differ(old, il)) {
-            jump = false;
-        }
-    }
+    jump = IsTrackJump(moved, old, jump);
     if (!jump) {
         f32 ls;
         speed = travel - oldTravel;

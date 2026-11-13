@@ -152,6 +152,7 @@ static UnkStatic123 lbl_804892A8;
 
 class EngineSound {
 public:
+    void UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol);
     EngineSound(Car* car) {
         Register();
         ValueNode* child;
@@ -258,6 +259,41 @@ EngineSound::~EngineSound(void) {
 }
 
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
+/* Helper name unproven */
+inline void EngineSound::UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol) {
+    f32 a = 1.0f;
+    if (r < e->rpm.lo) {
+        a = (e->rpm.lo - r) * e->rpm.invLo;
+        a = 1.0f - ((1.0f < a) ? 1.0f : a);
+    } else if (r > e->rpm.hi) {
+        a = (r - e->rpm.hi) * e->rpm.invHi;
+        a = 1.0f - ((1.0f < a) ? 1.0f : a);
+    }
+    f32 sa = Smooth(a);
+    f32 ga = sa * e->rpm.gain;
+    f32 b = 1.0f;
+    if (t < e->throttle.lo) {
+        b = (e->throttle.lo - t) * e->throttle.invLo;
+        b = 1.0f - ((1.0f < b) ? 1.0f : b);
+    } else if (t > e->throttle.hi) {
+        b = (t - e->throttle.hi) * e->throttle.invHi;
+        b = 1.0f - ((1.0f < b) ? 1.0f : b);
+    }
+    f32 sb = Smooth(b);
+    f32 gb = sb * e->throttle.gain;
+    f32 level = lbl_8055EDB8 * ga * gb;
+    e->snd->Play();
+    e->snd->SetPitch(r * e->invRpm);
+    f32 d = level - e->level;
+    if (0.2f < d) {
+        d = 0.2f;
+    }
+    d = (d > -0.2f) ? d : -0.2f;
+    e->level += d;
+    e->snd->SetVolume((0.5f + 0.5f * fadeIn) * (e->level * vol));
+}
+
 void EngineSound::Update(int muted) {
     f32 r;
     f32 t;
@@ -286,36 +322,7 @@ void EngineSound::Update(int muted) {
     }
     EngineSample* e = samples;
     for (int i = 0; i < count; e++, i++) {
-        f32 a = 1.0f;
-        if (r < e->rpm.lo) {
-            a = (e->rpm.lo - r) * e->rpm.invLo;
-            a = 1.0f - ((1.0f < a) ? 1.0f : a);
-        } else if (r > e->rpm.hi) {
-            a = (r - e->rpm.hi) * e->rpm.invHi;
-            a = 1.0f - ((1.0f < a) ? 1.0f : a);
-        }
-        f32 sa = Smooth(a);
-        f32 ga = sa * e->rpm.gain;
-        f32 b = 1.0f;
-        if (t < e->throttle.lo) {
-            b = (e->throttle.lo - t) * e->throttle.invLo;
-            b = 1.0f - ((1.0f < b) ? 1.0f : b);
-        } else if (t > e->throttle.hi) {
-            b = (t - e->throttle.hi) * e->throttle.invHi;
-            b = 1.0f - ((1.0f < b) ? 1.0f : b);
-        }
-        f32 sb = Smooth(b);
-        f32 gb = sb * e->throttle.gain;
-        f32 level = lbl_8055EDB8 * ga * gb;
-        e->snd->Play();
-        e->snd->SetPitch(r * e->invRpm);
-        f32 d = level - e->level;
-        if (0.2f < d) {
-            d = 0.2f;
-        }
-        d = (d > -0.2f) ? d : -0.2f;
-        e->level += d;
-        e->snd->SetVolume((0.5f + 0.5f * fadeIn) * (e->level * vol));
+        UpdateSample(r, e, t, vol);
     }
 }
 

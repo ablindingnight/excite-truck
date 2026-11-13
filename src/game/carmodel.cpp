@@ -865,25 +865,24 @@ struct P2 {
     };
 };
 
-// Each vertex is built in three named locals and copied into the zero-filled array.
+// Each vertex is built in a three-element local array and copied to its destination.
 static inline void SetVtx(P2* v, f32 x, f32 y, f32 s, f32 t) {
-    P2 a;
-    P2 b;
-    P2 c;
-    a.a = x;
-    a.b = y;
-    b.a = 0.0f;
-    b.ib = 0xFFFFFFFF;
-    c.a = s;
-    c.b = t;
-    v[0] = a;
-    v[1] = b;
-    v[2] = c;
+    P2 vtx[3];
+    vtx[0].a = x;
+    vtx[0].b = y;
+    vtx[1].a = 0.0f;
+    vtx[1].ib = 0xFFFFFFFF;
+    vtx[2].a = s;
+    vtx[2].b = t;
+    v[0] = vtx[0];
+    v[1] = vtx[1];
+    v[2] = vtx[2];
 }
 
 extern "C" {
 
 void fn_801ED718(CarModel* m) {
+    Vec k;
     fn_802C974C(0.1f, 20.0f, fn_801E8738(-1));
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
@@ -919,7 +918,6 @@ void fn_801ED718(CarModel* m) {
             b[i].y = 0.0f;
             b[i].z = 0.0f;
         }
-        Vec k;
         k.x = 0.0f;
         k.y = 0.0254f;
         k.z = 0.127f;

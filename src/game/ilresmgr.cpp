@@ -262,16 +262,21 @@ public:
         }
         return 0;
     }
+    /* Helper name unproven */
+    IdealLineRes* SelectLine(int k) {
+        IdealLineRes* l = lines.a.data[k].line;
+        if (!l) {
+            l = lines.a.data[(k + 1) % lines.a.count].line;
+        }
+        return l;
+    }
     virtual IdealLineRes* Get(int car) {
         CarLine* c = &cars[car];
         f32 now = lbl_8055E3C8;
         if (now >= c->next) {
             if (InRegion(fn_8017960C(car))) {
                 int k = fn_80129D90(4, 0, lines.a.count);
-                IdealLineRes* l = lines.a.data[k].line;
-                if (!l) {
-                    l = lines.a.data[(k + 1) % lines.a.count].line;
-                }
+                IdealLineRes* l = SelectLine(k);
                 c->next = now + fn_80129DC4(4, minT, maxT);
                 cars[car].line = l;
             } else {
@@ -438,8 +443,7 @@ static inline void InitSingle(SingleLine* s, LineSource* center) {
 
 static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
     const char* prefix = "line";
-    int i;
-    for (i = 1;; i++) {
+    for (int i = 1;; i++) {
         char key[0x10];
         char sideKey[0x20];
         const char* name;
@@ -478,7 +482,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         ValueNode* regs = set->FindChild("legal_transition_regions");
         if (regs) {
             ValueNode* r;
-            for (i = 0; (r = regs->GetChildAt(i)) != 0 && !s->regions.a.Full(); i++) {
+            for (int i = 0; (r = regs->GetChildAt(i)) != 0 && !s->regions.a.Full(); i++) {
                 s->regions.a.data[s->regions.a.count++] = fn_801399FC(r);
             }
         }
