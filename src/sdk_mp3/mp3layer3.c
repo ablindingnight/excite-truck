@@ -1256,6 +1256,8 @@ void fn_800C34B4(s32* dst, u8* src, s32 win, s32 mode) {
  * over the 1024-entry ring v (positions pos + off and pos + 0x3E0 - off), clamped to 16 bits. Math verified
  * against a simulation of the original (60/60). Even groups read the hi sample then the lo sample, odd groups lo then hi; then w[k] and
  * w[k+8] into locals, then the four MACs in order (fn_800C3960 style); z declared before x (2026-11-08, 66 -> 83).
+ * Which local name holds which role differs per group (each name is one register-allocation node for the whole
+ * function): names chosen by namerole.py, 2026-11-13, 82.9 -> 94.1.
  * NonMatching: 251/251, scheduling and colouring. */
 /* Helper name unproven: the 64-bit product of the synthesis windows, through an inline. */
 static inline s64 Mul64(s32 a, s32 b) { return (s64)a * b; }
@@ -1280,25 +1282,25 @@ void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
         a += Mul64(z, u);
         b += Mul64(z, -y);
         i = (pos + 0x60) & 0x3ff;
-        x = v[i];
+        y = v[i];
         i = (pos + 0x380) & 0x3ff;
-        z = v[i];
-        y = w[1];
-        u = w[9];
-        a += Mul64(x, y);
-        b += Mul64(x, u);
-        a += Mul64(z, -u);
-        b += Mul64(z, y);
-        i = (pos + 0x360) & 0x3ff;
-        z = v[i];
-        i = (pos + 0x80) & 0x3ff;
         x = v[i];
+        z = w[1];
+        u = w[9];
+        a += Mul64(y, z);
+        b += Mul64(y, u);
+        a += Mul64(x, -u);
+        b += Mul64(x, z);
+        i = (pos + 0x360) & 0x3ff;
+        x = v[i];
+        i = (pos + 0x80) & 0x3ff;
+        z = v[i];
         y = w[2];
         u = w[10];
-        a += Mul64(x, y);
-        b += Mul64(x, u);
-        a += Mul64(z, u);
-        b += Mul64(z, -y);
+        a += Mul64(z, y);
+        b += Mul64(z, u);
+        a += Mul64(x, u);
+        b += Mul64(x, -y);
         i = (pos + 0xe0) & 0x3ff;
         x = v[i];
         i = (pos + 0x300) & 0x3ff;
@@ -1320,15 +1322,15 @@ void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
         a += Mul64(z, u);
         b += Mul64(z, -y);
         i = (pos + 0x160) & 0x3ff;
-        x = v[i];
-        i = (pos + 0x280) & 0x3ff;
         z = v[i];
+        i = (pos + 0x280) & 0x3ff;
+        x = v[i];
         y = w[5];
         u = w[13];
-        a += Mul64(x, y);
-        b += Mul64(x, u);
-        a += Mul64(z, -u);
-        b += Mul64(z, y);
+        a += Mul64(z, y);
+        b += Mul64(z, u);
+        a += Mul64(x, -u);
+        b += Mul64(x, y);
         i = (pos + 0x260) & 0x3ff;
         z = v[i];
         i = (pos + 0x180) & 0x3ff;
@@ -1340,15 +1342,15 @@ void fn_800C3574(s32* v, const s32* w, s32 pos, u8* out, s32 mode) {
         a += Mul64(z, u);
         b += Mul64(z, -y);
         i = (pos + 0x1e0) & 0x3ff;
-        x = v[i];
+        u = v[i];
         i = (pos + 0x200) & 0x3ff;
-        z = v[i];
+        x = v[i];
         y = w[7];
-        u = w[15];
-        a += Mul64(x, y);
-        b += Mul64(x, u);
-        a += Mul64(z, -u);
-        b += Mul64(z, y);
+        z = w[15];
+        a += Mul64(u, y);
+        b += Mul64(u, z);
+        a += Mul64(x, -z);
+        b += Mul64(x, y);
         sa = (s32)(a >> 25);
         sb = (s32)(b >> 25);
         if ((sa >> 31) != (sa >> 15)) sa = (sa >> 31) ^ 0x7FFF;
