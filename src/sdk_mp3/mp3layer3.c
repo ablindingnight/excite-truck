@@ -334,31 +334,31 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
                     pc2++;
                 }
             } else {
-                pa = work[0];
+                pb = work[0];
                 pc2 = outbuf2;
-                pb = prev;
+                pa = prev;
                 pc = outbuf;
                 for (sb = 0; sb < d->band_count; sb++) {
-                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pb);
                     if (*block_flags & 2) {
                         if (!(sb & 1)) {
-                            fn_800C2590(pa, pb, pc, pc2);
+                            fn_800C2590(pb, pa, pc, pc2);
                         } else {
-                            fn_800C280C(pa, pb, pc, pc2);
+                            fn_800C280C(pb, pa, pc, pc2);
                         }
-                        fn_800C2F98(pa + 18, pb, pb + 17);
+                        fn_800C2F98(pb + 18, pa, pa + 17);
                     }
                     if (*block_flags & 4) {
                         if (!(sb & 1)) {
-                            fn_800C2A88(pa, pb, pc, pc2);
+                            fn_800C2A88(pb, pa, pc, pc2);
                         } else {
-                            fn_800C2C18(pa, pb, pc, pc2);
+                            fn_800C2C18(pb, pa, pc, pc2);
                         }
-                        fn_800C2DBC(pa + 18, pb, pb + 17);
+                        fn_800C2DBC(pb + 18, pa, pa + 17);
                     }
-                    pa += 36;
+                    pb += 36;
                     pc2++;
-                    pb += 18;
+                    pa += 18;
                     pc++;
                 }
             }
