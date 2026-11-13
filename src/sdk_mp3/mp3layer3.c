@@ -308,9 +308,9 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* bloc
     s32* p;
     s32* outbuf2;
     s32 t0, t1;  /* t1 also holds the block-flags word: one variable in the original (register colouring) */
-    s32 tmp0[12];
-    s32 tmp1[12];
     s32 tmp2[12];
+    s32 tmp1[12];
+    s32 tmp0[12];
 
     outbuf2 = outbuf + 0x440;
     for (ch = 0; ch < d->channels; ch++) {
