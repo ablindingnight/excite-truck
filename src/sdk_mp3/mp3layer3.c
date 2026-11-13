@@ -2218,21 +2218,33 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
  * From ChatGPT's candidate B (round 23), verified against the original in a PPC simulation (40/40) and by
  * ChatGPT (792 cases). NonMatching: 661/661, identical opcode sequence, register numbers differ. */
 void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
-    s32 b2;
+    s32 b4;
     s32 i;
+    s32 b5;
+    s32 b7;
+    s32 b8;
+    s32 b3;
+    s32 b6;
+    s32 b9;
     s32* left;
-    s32 b;
-    s32 a;
+    s32 a5;
+    s32 a6;
+    s32 a7;
+    s32 a3;
+    s32 a8;
+    s32 b2;
+    s32 a9;
+    s32 a4;
     s32 a2;
     s32* right;
     if (flags & 7) {
         right = g[1].xr;
         left = g[0].xr;
         for (i = 0; i < count0; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a3 = *left;
+            b3 = *right;
+            *(left++) = a3 + b3;
+            *(right++) = a3 - b3;
         }
 
     } else
@@ -2249,28 +2261,28 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
         right = (s32 *) (((u8 *) g) + 0x2430);
         left = (s32 *) (((u8 *) g) + 0x30);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a4 = *left;
+            b4 = *right;
+            *(left++) = a4 + b4;
+            *(right++) = a4 - b4;
         }
 
         right = (s32 *) (((u8 *) g) + 0x2D30);
         left = (s32 *) (((u8 *) g) + 0x930);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a5 = *left;
+            b5 = *right;
+            *(left++) = a5 + b5;
+            *(right++) = a5 - b5;
         }
 
         right = (s32 *) (((u8 *) g) + 0x3630);
         left = (s32 *) (((u8 *) g) + 0x1230);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a6 = *left;
+            b6 = *right;
+            *(left++) = a6 + b6;
+            *(right++) = a6 - b6;
         }
 
     } else
@@ -2278,28 +2290,28 @@ void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
         left = (s32 *) (((u8 *) g) + 0x0000);
         right = (s32 *) (((u8 *) g) + 0x2400);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a7 = *left;
+            b7 = *right;
+            *(left++) = a7 + b7;
+            *(right++) = a7 - b7;
         }
 
         right = (s32 *) (((u8 *) g) + 0x2D00);
         left = (s32 *) (((u8 *) g) + 0x0900);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a8 = *left;
+            b8 = *right;
+            *(left++) = a8 + b8;
+            *(right++) = a8 - b8;
         }
 
         right = (s32 *) (((u8 *) g) + 0x3600);
         left = (s32 *) (((u8 *) g) + 0x1200);
         for (i = 0; i < count1; i++) {
-            a = *left;
-            b = *right;
-            *(left++) = a + b;
-            *(right++) = a - b;
+            a9 = *left;
+            b9 = *right;
+            *(left++) = a9 + b9;
+            *(right++) = a9 - b9;
         }
 
     }
