@@ -452,16 +452,15 @@ void fn_80276DC8(int slot) {
     CamRec* rec = &lbl_804A0C60[slot];
     lbl_804A15C0[slot] = 0.0f;
     look = rec->pose;
-    if (!fn_80276068(rec->mode) || !S32(src->car, 0x24)) {
-        lbl_804A0C60[slot].mode = 4;
+    if (!fn_80276068(rec->nextMode) || !S32(src->car, 0x24)) {
+        lbl_804A0C60[slot].nextMode = 4;
         f32 d = fn_802704E0(4, 0.0f);
-        CamPose* f = &lbl_804A0C60[slot].carFrame;
-        look.pos.v[0] = f->pos.v[0] + f->rot.m[6] * d;
-        look.pos.v[1] = f->pos.v[1] + f->rot.m[7] * d;
-        look.pos.v[2] = f->pos.v[2] + f->rot.m[8] * d;
-        look.rot.m[6] = f->rot.m[6];
-        look.rot.m[7] = f->rot.m[7];
-        look.rot.m[8] = f->rot.m[8];
+        look.pos.v[0] = lbl_804A0C60[slot].carFrame.pos.v[0] + lbl_804A0C60[slot].carFrame.rot.m[6] * d;
+        look.pos.v[1] = lbl_804A0C60[slot].carFrame.pos.v[1] + lbl_804A0C60[slot].carFrame.rot.m[7] * d;
+        look.pos.v[2] = lbl_804A0C60[slot].carFrame.pos.v[2] + lbl_804A0C60[slot].carFrame.rot.m[8] * d;
+        look.rot.m[6] = lbl_804A0C60[slot].carFrame.rot.m[6];
+        look.rot.m[7] = lbl_804A0C60[slot].carFrame.rot.m[7];
+        look.rot.m[8] = lbl_804A0C60[slot].carFrame.rot.m[8];
         look.rot.m[3] = 0.0f;
         look.rot.m[4] = 1.0f;
         look.rot.m[5] = 0.0f;

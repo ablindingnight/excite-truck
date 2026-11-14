@@ -545,21 +545,22 @@ void fn_802D4ECC(Surf* s) {
     if (out) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
+            V3 p;
+            f32 w0, w1, wa, b, a, wb;
             const BVec* ba = &lbl_804DB068[v->b0];
             const BVec* bb = &lbl_804DB068[v->b1];
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            V3 p;
+            w0 = (1.0f / 255) * v->w0;
+            w1 = (1.0f / 255) * v->w1;
             p.y = v->y + ba->y * w0;
             p.x = v->x + ba->x * w0;
             p.z = v->z + ba->z * w0;
             p.x = p.x + bb->x * w1;
             p.y = p.y + bb->y * w1;
             p.z = p.z + bb->z * w1;
-            f32 a = (1.0f / 255) * v->da;
-            f32 b = (1.0f / 255) * v->db;
-            f32 wb = lbl_804CA308[v->ib];
-            f32 wa = lbl_804CA308[v->ia];
+            a = (1.0f / 255) * v->da;
+            b = (1.0f / 255) * v->db;
+            wa = lbl_804CA308[v->ia];
+            wb = lbl_804CA308[v->ib];
             o->x = p.x;
             o->y = p.y + a * wa + b * wb;
             o->z = p.z;
