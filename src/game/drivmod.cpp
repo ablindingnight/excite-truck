@@ -693,7 +693,11 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     d->body.pos.y = d->body.pos.y + off.y;
     d->body.pos.z = d->body.pos.z + off.z;
     f32 roll = -F32(car, 0x238);
-    roll = MaxF(MinF(lbl_80563080, roll), -lbl_80563080);
+    f32 lim = lbl_80563080;
+    if (lim < roll) {
+        roll = lim;
+    }
+    roll = MaxF(roll, -lim);
     v.x = F32(car, 0x240) + d->yaw;
     v.y = 0.0f;
     v.z = roll;

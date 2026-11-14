@@ -536,11 +536,14 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         h = t->base + t->scale * t->h[lx][lz];
         f32 hz = t->base + t->scale * t->h[lx][oz];
         f32 hx = t->base + t->scale * t->h[ox][lz];
-        for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-            f32 w = lbl_804424B0[l->weight];
-            h += w * (l->base + l->scale * l->h[lx][lz]);
-            hz += w * (l->base + l->scale * l->h[lx][oz]);
-            hx += w * (l->base + l->scale * l->h[ox][lz]);
+        if (t->layer >= 0) {
+            GroundHeader* gg = lbl_8055E990;
+            for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
+                f32 w = lbl_804424B0[l->weight];
+                h += w * (l->base + l->scale * l->h[lx][lz]);
+                hz += w * (l->base + l->scale * l->h[lx][oz]);
+                hx += w * (l->base + l->scale * l->h[ox][lz]);
+            }
         }
         hz -= h;
         hx -= h;
@@ -553,9 +556,11 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         return h;
     }
     h = t->base + t->scale * t->h[lx][lz];
-    for (GLayer* l = LayerAt(t->layer); l; l = LayerAt(l->next)) {
-        f32 basev = l->base;
-        h += lbl_804424B0[l->weight] * (basev + l->scale * l->h[lx][lz]);
+    if (t->layer >= 0) {
+        GroundHeader* gg = lbl_8055E990;
+        for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
+            h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
+        }
     }
     return h;
 }
@@ -568,9 +573,9 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
         if (!fn_801DC258(&h, 0, 0, normal, x, z)) {
             h = 0.0f;
             if (normal) {
-                normal->x = h;
+                normal->x = 0.0f;
                 normal->y = 1.0f;
-                normal->z = h;
+                normal->z = 0.0f;
             }
         }
         return h;

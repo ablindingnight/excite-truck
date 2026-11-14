@@ -177,7 +177,6 @@ void fn_8020F730(void) {
     long i;
     lbl_804902C4.m_count = 0;
     if (count == 0) {
-        lbl_8055EEC4 = 0;
         return;
     }
     for (i = 0; i < count; i++) {

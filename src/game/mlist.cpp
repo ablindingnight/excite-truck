@@ -489,13 +489,12 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     for (i = 0; i < ca.n; i++) {
         if (cp->flags == (vis[cp->ref] & 0x7F)) {
             u8 r = Cull(&cp->s);
-            lbl_804C5480[k] = lbl_8055FCE0;
-            *vp = r;
+            lbl_804C5480[k++] = lbl_8055FCE0;
+            *vp++ = r;
         } else {
-            *vp = 0;
+            k++;
+            *vp++ = 0;
         }
-        k++;
-        vp++;
         cp++;
     }
     for (i = 0; i < m->numObjs; i++) {

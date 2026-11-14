@@ -664,11 +664,7 @@ void CarBody_vf08(u8* p, u8* desc) {
     F32(p, 0x5C0) = 0.0174f * chassis->GetFloat("head_pitch");
     const char* treeClasses = "light\0medium\0heavy\0\0";
     const char* key = "treehit_class";
-    if (chassis->Has(key)) {
-        S32(p, 0x5E8) = chassis->GetEnum(key, treeClasses);
-    } else {
-        S32(p, 0x5E8) = 1;
-    }
+    S32(p, 0x5E8) = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
     GetPlayerLook((PlayerLook*)(p + 0x2C4), S32(p, 0x25C));
     fn_801B86BC(S32(desc, 0xE0), p + 0x2C4);
     U8(p, 0x25C0) = (U32(FindVehicle(S32(p, 0x25C)), 0xA0) >> 2) & 1;
@@ -2424,6 +2420,10 @@ extern "C" {
 // and the body state into the solver records, step the solver, then per car apply drag, boost, lift and
 // air-control forces, read the solved pose and velocities back, rebuild the four wheels' contact state, and work
 // out the throttle/brake/steer limits (water, offroad, airborne, boost) before the drive model update.
+// MATCHING-AID: invented helpers (the target materialises these compares as values, mfcr); unproven.
+static inline int CarHot(u8* car) { return F32(car, 0x258C) > lbl_80561DC0; }
+static inline int CarOnGas(u8* car) { return F32(car, 0x25E0) > lbl_80561CDC; }
+
 void fn_80186DE8(u8* p) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2538,7 +2538,6 @@ void fn_80186DE8(u8* p) {
         f32 hb;
         st = fn_801D04A8(surf);
         f32 bk;
-        wet = lbl_80561CD0;
         if (!NearZero(F32(car, 0x2650))) {
             f32 d = (lbl_80561D2C - F32(car, 0x2650) - lbl_80561CFC) / lbl_80561CFC;
             if (lbl_80561CD0 < d) {
@@ -2550,6 +2549,8 @@ void fn_80186DE8(u8* p) {
                 d = lbl_80561CAC;
             }
             wet = lbl_80561D00 + d * lbl_80561DD0;
+        } else {
+            wet = lbl_80561CD0;
         }
         f32 slip;
         grip = st->grip * wet;
@@ -2584,10 +2585,7 @@ void fn_80186DE8(u8* p) {
             }
             if (F32(car, 0x258C) > lbl_80561CB0 || F32(car, 0x25E4) > lbl_80561CFC || F32(car, 0x5EC) > lbl_80561CCC) {
                 f32 fwd = PSVECDotProduct(car + 0x3C, car + 0x118);
-                f32 b = F32(car, 0x25E4);
-                if (lbl_80561CD8 + F32(car, 0x258C) > b) {
-                    b = lbl_80561CD8 + F32(car, 0x258C);
-                }
+                f32 b = FMax(lbl_80561CD8 + F32(car, 0x258C), F32(car, 0x25E4));
                 f32 k = lbl_80561E58 * (-fwd * F32(car, 0xD4)) * Clamp01(b);
                 AddScaled(force, car + 0x3C, k);
             }
@@ -2725,13 +2723,10 @@ void fn_80186DE8(u8* p) {
                 c->v30 = half.Sol();
             }
             fl = w->flags & 0xE;
-            if (nrm[1] > lbl_80561CCC) {
+            if (w->grounded) {
                 f32 d = comp - lbl_80561E94;
                 grounded++;
-                if (lbl_80561CAC > d) {
-                    d = lbl_80561CAC;
-                }
-                w->comp = d;
+                w->comp = d > lbl_80561CAC ? d : lbl_80561CAC;
                 int sid = e->surface[j];
                 w->groundH = fn_802B03C0(w->plane.ground);
                 w->sound = fn_801D04A8(sid)->sound;
@@ -2743,16 +2738,11 @@ void fn_80186DE8(u8* p) {
         S32(car, 0x2620) = grounded;
         c->v10 = w1.Sol();
         ds = F32(car, 0x25DC) - F32(car, 0x25F0);
-        lim = lbl_80561E9C;
-        if (ds * F32(car, 0x25F0) > lbl_80561CAC) {
-            lim = lbl_80561E98;
-        }
+        lim = ds * F32(car, 0x25F0) > lbl_80561CAC ? lbl_80561E98 : lbl_80561E9C;
         if (lim < ds) {
             ds = lim;
         }
-        if (ds < -lim) {
-            ds = -lim;
-        }
+        ds = FMax(ds, -lim);
         F32(car, 0x25F0) = F32(car, 0x25F0) + ds;
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
@@ -2764,21 +2754,15 @@ void fn_80186DE8(u8* p) {
         if (F32(car, 0x2588) > lbl_80561DC0) {
             U32(car, 0x268C) = 10;
             if (F32(car, 0x25D4) > lbl_80561D60 * heatTune.v[11]) {
-                f32 b = heatTune.v[10];
-                if (F32(car, 0x25E4) > b) {
-                    b = F32(car, 0x25E4);
-                }
-                F32(car, 0x25E4) = b;
-                throttle = heatTune.v[9];
-                if (F32(car, 0x25E0) < throttle) {
-                    throttle = F32(car, 0x25E0);
-                }
+                F32(car, 0x25E4) = FMax(F32(car, 0x25E4), heatTune.v[10]);
+                throttle = F32(car, 0x25E0) < heatTune.v[9] ? F32(car, 0x25E0) : heatTune.v[9];
             }
         } else if ((U32(fn_801769CC(), 4) & 0x80000) && F32(car, 0x25A0) > lbl_80561D04) {
             U32(car, 0x268C) = 6;
         } else {
             U32(car, 0x268C) = 0;
         }
+        int down = S32(car, 0x2620) >= 3;
         steerK = F32(car, 0x25F0);
         if (player) {
             f32 sp;
@@ -2808,31 +2792,22 @@ void fn_80186DE8(u8* p) {
                 if (cut < s) {
                     s = cut;
                 }
-                steerK = lbl_80561DE4;
-                if (s > lbl_80561DE4) {
-                    steerK = s;
-                }
+                steerK = FMax(s, lbl_80561DE4);
             }
         }
         gas = throttle;
-        if (slide > lbl_80561CAC && S32(car, 0x2620) > 2) {
-            gas = lbl_80561CD0 - cut;
-            gas = gas > throttle ? throttle : gas;
+        if (slide > lbl_80561CAC && down) {
+            gas = throttle < lbl_80561CD0 - cut ? throttle : lbl_80561CD0 - cut;
         }
         brake = F32(car, 0x25E8);
         f32 rpmT = rpm.x / lbl_80561CC0;
-        throttle = lbl_80561EB4 * (lbl_80561EB8 - rpmT);
-        if (gas > throttle) {
-            throttle = gas;
-        }
+        throttle = FMax(gas, lbl_80561EB4 * (lbl_80561EB8 - rpmT));
         if (rpmT > ground[12]) {
             throttle = lbl_80561CAC;
         }
         hold = F32(car, 0x25EC);
         bk = Clamp01((rpmT - lbl_80561EBC - lbl_80561EC0 * throttle) / lbl_80561EC0);
-        if (bk < brake) {
-            brake = bk;
-        }
+        brake = bk < brake ? bk : brake;
         if (F32(car, 0x25D4) > lbl_80561DA4 && F32(car, 0x25CC) > lbl_80561DA4 + lbl_80561EC4 * F32(car, 0x25D4)) {
             throttle = lbl_80561CAC;
         }
@@ -2845,10 +2820,10 @@ void fn_80186DE8(u8* p) {
         boosting = 1;
         F32(car, 0x25FC) = throttle;
         vmax = F32(car, 0x5A8);
-        if (F32(car, 0x258C) <= lbl_80561DC0 && !U8(car, 0x259C)) {
+        if (!CarHot(car) && !U8(car, 0x259C)) {
             boosting = 0;
         }
-        if (boosting && F32(car, 0x25E0) > lbl_80561CDC) {
+        if (boosting && CarOnGas(car)) {
             vmax = lbl_80561D60 * fn_80181A48(car) - lbl_80561DA4;
         }
         vmax = vmax + lbl_80561D60 * (F32(car, 0x5EC) * lbl_8055E4E8[0]);
@@ -2862,19 +2837,25 @@ void fn_80186DE8(u8* p) {
         } else if (off) {
             vmax = vmax * lbl_8055A3A4;
         }
-        out = throttle;
         if (F32(car, 0x25D4) > vmax && brake > lbl_80561CDC && U32(car, 0x10) == 'PCAR') {
             out = lbl_80561CD0 - lbl_80561EC8 * (F32(car, 0x25D4) - vmax);
-            out = out > lbl_80561CAC ? out : lbl_80561CAC;
-            out = out < throttle ? out : throttle;
+            if (lbl_80561CAC > out) {
+                out = lbl_80561CAC;
+            }
+            if (throttle < out) {
+                out = throttle;
+            }
             boosting = 1;
-            if (lbl_80561DC0 >= F32(car, 0x258C) && !U8(car, 0x259C)) {
+            if (!CarHot(car) && !U8(car, 0x259C)) {
                 boosting = 0;
             }
             if (!boosting) {
-                out = LerpT(Clamp01(lbl_80561CD0 + F32(car, 0x258C)), out, throttle);
+                throttle = LerpT(Clamp01(lbl_80561CD0 + F32(car, 0x258C)), out, throttle);
+            } else {
+                throttle = out;
             }
         }
+        out = throttle;
         F32(car, 0x25F4) = out;
         F32(car, 0x25F8) = brake;
         a = CbVec4(x->pts[6]);
@@ -2883,11 +2864,7 @@ void fn_80186DE8(u8* p) {
             a.w = a.w * lbl_80561CAC;
         }
         x->pts[6] = a.Sol();
-        if (!(lbl_80561ECC > rpm.x)) {
-            rpm.x = rpm.x;
-        } else {
-            rpm.x = lbl_80561ECC;
-        }
+        rpm.x = rpm.x > lbl_80561ECC ? rpm.x : lbl_80561ECC;
         rpm.w = ground[0];
         c->pts[4] = rpm.Sol();
         if (rpmT >= lbl_80561ED0) {
