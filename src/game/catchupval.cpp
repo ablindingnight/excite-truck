@@ -12,7 +12,7 @@ void fn_8013B6C0(s32* lvl, f32* frac, s32 strength);
 int fn_80179630(int i);
 int fn_801B2F24(void);
 int fn_801B2F40(int i);
-double fn_801B2F90(int a, int b);
+f32 fn_801B2F90(int a, int b);
 }
 
 struct Strength {
@@ -115,7 +115,7 @@ void fn_8013B950(void) {
             }
         }
         if (found && fn_801B2ED0(leader)->GetRacer()->place > found->place) {
-            double d = fn_801B2F90(leader, id);
+            f32 d = fn_801B2F90(leader, id);
             lbl_8042F8A8.dist = d;
             lbl_8042F8A8.car = id;
             lbl_8042F8A8.active = lbl_8042F8A8.dist < 1000.0f;
