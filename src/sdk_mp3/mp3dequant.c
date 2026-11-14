@@ -23,8 +23,8 @@ static inline s32 Pow43(s32 x, const s32* c) {
  * path from the block flags, builds the line-to-band map on first use, and dequantizes each line:
  * |x| < 256 via the pow43 table, larger via the 32-segment quadratic table, scaled by the scalefactor exponent.
  * Behaviour verified identical to the original in a PPC simulation (76 random granules, including the original's
- * quirks in the mixed short part: no absolute value, and a second shift). Matching. What decides the colouring here (colwhy.py):
- * one shared set of locals for the four loops (the first range of a variable keeps the named local, later ranges
+ * quirks in the mixed short part: no absolute value, and a second shift). Matching.
+ * What decides the colouring here (colwhy.py): one shared set of locals for the four loops (the first range of a variable keeps the named local, later ranges
  * become objects numbered by the variable's first appearance), so the gain index shares the sample variable m and
  * the edge-copy loops count with p; Pow43 gets the table row expression directly and adds c[3] last. The short
  * loops keep the reduced exponent in a second variable (e2) and the gain product in its own local (gv). The two

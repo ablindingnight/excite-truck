@@ -222,18 +222,36 @@ void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l) {
     }
 }
 
+/* The eight alias-reduction butterflies of one subband boundary (Q24, cs / ca tables); lo walks down from the last
+ * line of the lower subband, hi up from the first line of the upper one. Helper name unproven */
+static inline void MP3_AliasButterflies(s32* lo, s32* hi) {
+    s32 i;
+    s32 cs;
+    s32 ca;
+    s32 t0;
+    s32 t1;
+
+    for (i = 0; i < 8; i++) {
+        cs = lbl_802F33C8[i];
+        ca = lbl_802F33E8[i];
+        t0 = (s32)(((s64)*lo * cs) >> 24) - (s32)(((s64)*hi * ca) >> 24);
+        t1 = (s32)(((s64)*hi * cs) >> 24) + (s32)(((s64)*lo * ca) >> 24);
+        *lo = t0;
+        *hi = t1;
+        lo--;
+        hi++;
+    }
+}
+
+/* At the default limit (100) the optimizer unrolls the 8-tap loops completely (their weight is 97); the original
+ * leaves them to the back end (two butterflies per pass, count 4). */
+#pragma push
+#pragma opt_unroll_instr_count 90
 /* Alias reduction between subbands (Q24 butterflies with the cs^2 / cs*ca tables). With a non-zero
  * block-type field the butterflies run on every subband boundary below sblim and the spectrum from
  * start up to sblim*18 is cleared; otherwise only the boundary between subbands 0 and 1 is processed. */
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g) {
-    s32 ca;
-    s32* lo;
-    s32 cs;
-    s32* hi;
     s32 j;
-    s32 bd;
-    s32 bu;
-    s32 i;
     s16 idx;
     s8 ch;
     s32 end = sblim * 18;
@@ -243,16 +261,7 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
         for (ch = 0; ch < channels; g++, ch++) {
             for (sb = 1; sb < sblim; sb++) {
                 idx = (sb << 4) + (sb << 1);
-                hi = &g->xr[idx];
-                lo = &g->xr[idx - 1];
-                for (i = 0; i < 8; i++) {
-                    bu = *lo;
-                    cs = lbl_802F33C8[i];
-                    bd = hi[i];
-                    ca = lbl_802F33E8[i];
-                    *lo-- = (s32)(((s64)bu * cs) >> 24) - (s32)(((s64)bd * ca) >> 24);
-                    hi[i] = (s32)(((s64)bd * cs) >> 24) + (s32)(((s64)bu * ca) >> 24);
-                }
+                MP3_AliasButterflies(&g->xr[idx - 1], &g->xr[idx]);
             }
             for (j = start; j < end; j++) {
                 g->xr[j] = 0;
@@ -260,19 +269,11 @@ void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* 
         }
     } else {
         for (ch = 0; ch < channels; g++, ch++) {
-            hi = &g->xr[18];
-            lo = &g->xr[17];
-            for (i = 0; i < 8; i++) {
-                bd = *lo;
-                ca = lbl_802F33C8[i];
-                bu = hi[i];
-                cs = lbl_802F33E8[i];
-                *lo-- = (s32)(((s64)bd * ca) >> 24) - (s32)(((s64)bu * cs) >> 24);
-                hi[i] = (s32)(((s64)bu * ca) >> 24) + (s32)(((s64)bd * cs) >> 24);
-            }
+            MP3_AliasButterflies(&g->xr[17], &g->xr[18]);
         }
     }
 }
+#pragma pop
 
 /* Find the next frame sync word (fn_800BDD7C): twelve 1 bits after at least four 0 bits. Matches. */
 s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos) {
