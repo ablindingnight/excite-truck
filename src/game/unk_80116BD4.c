@@ -7695,14 +7695,15 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
 // `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
 // split, 2 = group of 4, 3 = single coefficient.
 void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
+    s32 i;
+    s32 planes;
+    s32 nm;
     s32 k;
     u8* start;
-    s32 planes;
-    u8* end;
     u32 bit;
+    u8* end;
     u8* p;
     s32 mask;
-    s32 i;
     s32 nzCount;
     u32 n = 0;
     u8* nz_p;
@@ -7735,6 +7736,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
     mask = 1 << planes;
     nzCount = 0;
     for (k = planes + 1; k != 0; k--) {
+        nm = -mask;
         nz_p = nz;
         for (i = 0; i < nzCount; i++) {
             if (avail == 0) {
@@ -7749,7 +7751,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
             }
             ;
             if (bit & 1) {
-                block[*nz_p] += (block[*nz_p] < 0) ? (-mask) : (mask);
+                block[*nz_p] += (block[*nz_p] < 0) ? nm : (mask);
                 if ((n++) == limit) {
                     goto done;
                 }
@@ -7819,7 +7821,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                                 avail--;
                             }
                             ;
-                            block[e] = (bit & 1) ? (-mask) : (mask);
+                            block[e] = (bit & 1) ? nm : (mask);
                             if ((n++) == limit) {
                                 goto done;
                             }
@@ -7850,7 +7852,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                                 avail--;
                             }
                             ;
-                            block[e + 1] = (bit & 1) ? (-mask) : (mask);
+                            block[e + 1] = (bit & 1) ? nm : (mask);
                             if ((n++) == limit) {
                                 goto done;
                             }
@@ -7881,7 +7883,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                                 avail--;
                             }
                             ;
-                            block[e + 2] = (bit & 1) ? (-mask) : (mask);
+                            block[e + 2] = (bit & 1) ? nm : (mask);
                             if ((n++) == limit) {
                                 goto done;
                             }
@@ -7912,7 +7914,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                                 avail--;
                             }
                             ;
-                            block[e + 3] = (bit & 1) ? (-mask) : (mask);
+                            block[e + 3] = (bit & 1) ? nm : (mask);
                             if ((n++) != limit) {
                                 continue;
                             }
@@ -7934,7 +7936,7 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                             avail--;
                         }
                             ;
-                            block[e] = (bit & 1) ? (-mask) : (mask);
+                            block[e] = (bit & 1) ? nm : (mask);
                             if ((n++) == limit) {
                             goto done;
                         }
