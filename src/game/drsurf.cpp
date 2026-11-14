@@ -434,8 +434,8 @@ void fn_802D479C(Surf* s) {
             f32 wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
-            f32 a_x = (1.0f / 255) * v->a[0];
-            f32 a_y = (1.0f / 255) * v->a[1];
+            __typeof__(a.x) a_x = (1.0f / 255) * v->a[0];
+            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
             a.x = a_x;
             a.y = a_y;
             a.z = (1.0f / 255) * v->a[2];
@@ -513,7 +513,7 @@ void fn_802D4C44(Surf* s) {
             wa = lbl_804CA308[v->ia];
             f32 wb = lbl_804CA308[v->ib];
             V3 a;
-            f32 a_y = (1.0f / 255) * v->a[1];
+            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
             a.x = (1.0f / 255) * v->a[0];
             a.y = a_y;
             a.z = (1.0f / 255) * v->a[2];
@@ -547,13 +547,13 @@ void fn_802D4ECC(Surf* s) {
             f32 w1 = (1.0f / 255) * v->w1;
             const BVec* bb = &lbl_804DB068[v->b1];
             V3 p;
-            f32 p_z1 = v->z + ba->z * w0;
-            f32 p_x = v->x + w0 * ba->x;
+            __typeof__(p.z) p_z1 = v->z + ba->z * w0;
+            __typeof__(p.x) p_x = v->x + w0 * ba->x;
             p.y = v->y + w0 * ba->y;
             p.x = p_x;
             p.z = p_z1;
             f32 xv = bb->x;
-            f32 p_z = p.z + bb->z * w1;
+            __typeof__(p.z) p_z = p.z + bb->z * w1;
             p.x = p.x + xv * w1;
             p.y = p.y + bb->y * w1;
             p.z = p_z;
@@ -712,54 +712,65 @@ void fn_802D5ACC(Surf* s) {
 }
 
 
-void fn_802D5B8C(const Surf* s) {
-    int n = s->nverts;
-    u32* col = (u32*)fn_802CFF64(n * 4);
-    f32* uv = (f32*)fn_802CFF64(n * 8);
-    if (!col || !uv) {
-        return;
-    }
-    V3* p = (V3*)s->verts;
-    u32* src = (u32*)s->attr;
-    u32* c = col;
-    f32* suv;
-    f32* t;
+// A vertex colour with its low byte (the fog amount) as a field: the target inserts it with rlwimi.
+union FogColor {
+    u32 w;
+    struct {
+        u32 rgb : 24;
+        u32 a : 8;
+    } f;
+};
+
+// Helper name unproven: the body of fn_802D5B8C once its two buffers exist (the target numbers n, col and uv above
+// the surface parameter, as arguments of an inline are).
+static inline void SurfFog(int n, u32* col, f32* uv, const Surf* s) {
     int i;
+    f32* t;
+    f32* suv;
+    u32* c;
+    u32* src;
+    V3* p;
+    p = (V3*)s->verts;
+    src = (u32*)s->attr;
+    c = col;
     V3 d;
     // Both frames read as twelve floats (three axis rows, then the position); the offset is rotated by the ROWS.
+    const f32* g = (const f32*)lbl_804DB068;
     const f32* a = (const f32*)&lbl_804C56C0;
     const f32* m = (const f32*)&lbl_804C5690;
-    d.z = a[11] - m[11];
     d.x = a[9] - m[9];
     d.y = a[10] - m[10];
+    d.z = a[11] - m[11];
     {
-        f32 ry = m[1];
-        f32 rz = m[2];
-        f32 x = d.x * m[0] + d.y * ry + d.z * rz;
-        f32 uy = m[4];
-        f32 uz = m[5];
-        f32 y = d.x * m[3] + d.y * uy + d.z * uz;
-        f32 vy = m[7];
-        f32 vz = m[8];
-        f32 z = d.x * m[6] + d.y * vy + d.z * vz;
+        f32 rx = m[0];
+        f32 x = d.z * m[2] + (d.x * rx + d.y * m[1]);
+        f32 ux = m[3];
+        f32 y = d.z * m[5] + (d.x * ux + d.y * m[4]);
+        f32 vx = m[6];
+        f32 z = d.z * m[8] + (d.x * vx + d.y * m[7]);
         d.x = x;
         d.y = y;
         d.z = z;
     }
     f32 off[2];
-    off[0] = lbl_804DB068[1].x;
-    off[1] = lbl_804DB068[1].y;
-    f32 k = lbl_804DB068[1].z;
+    off[0] = g[3];
+    off[1] = g[4];
+    f32 k = g[5];
     suv = (f32*)s->uv;
     t = uv;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n;) {
         f32 dist = PSVECSquareDistance(p, &d);
         u32 v = *src;
         int x = MAX((int)((u8)v * (1.0f - dist * k)), 0);
-        *c = (v & ~0xFF) | (x < 0xFF ? x : 0xFF);
+        int lo = x < 0xFF ? x : 0xFF;
+        FogColor o;
+        o.w = v & ~0xFF;
+        o.f.a = lo;
+        *c = o.w;
         p++;
-        c++;
         src++;
+        c++;
+        i++;
         t[0] = suv[0] + off[0];
         t[1] = suv[1] + off[1];
         suv += 2;
@@ -769,6 +780,16 @@ void fn_802D5B8C(const Surf* s) {
     GXSetArray(0xB, col, 4);
     GXSetArray(0xD, uv, 8);
     GXCallDisplayList(s->dl, s->dlSize);
+}
+
+void fn_802D5B8C(const Surf* s) {
+    int n = s->nverts;
+    u32* col = (u32*)fn_802CFF64(n * 4);
+    f32* uv = (f32*)fn_802CFF64(n * 8);
+    if (!col || !uv) {
+        return;
+    }
+    SurfFog(n, col, uv, s);
 }
 
 void fn_802D5DE8(u32 fmt) {
