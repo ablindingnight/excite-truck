@@ -746,9 +746,11 @@ s32 ISD_ReadCardRegister(ISDDevice* dev, s32 reg, u32* buf, u32 size) {
     u32 resp_type;
     u32 rca;
     s32 rc;
+    u32 cmd;
 
     rca = dev->rca;
     resp_type = 3;
+    cmd = reg;
     if (isd_heap < 0) {
         rc = ISD_ERR;
         goto exit;
@@ -814,7 +816,7 @@ s32 ISD_ReadCardRegister(ISDDevice* dev, s32 reg, u32* buf, u32 size) {
         goto exit;
     }
 
-    rc = __ISDSendCommand(dev->fd, reg, 3, resp_type, rca, NULL, 0, 0, 0, buf, NULL, NULL);
+    rc = __ISDSendCommand(dev->fd, cmd, 3, resp_type, rca, NULL, 0, 0, 0, buf, NULL, NULL);
     isd_busy = 0;
 
 exit:
