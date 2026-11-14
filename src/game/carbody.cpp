@@ -3023,15 +3023,15 @@ static inline f32 Len2( f32 z,f32 x) { return sqrt(x * x + z * z); }
 void vf28__7CarBodyFv(u8* p, u8* buf) {
     SnapPose tmp;
     u8* m = buf + S32(p, 0x8);
-    f32 t = lbl_8055E460;
     memset(m, 0, 0xFA8);
     SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
-    if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
         *pose = *(SnapPose*)(p + 0x70);
     } else {
         const f32* cur = (const f32*)(p + 0x70);
         const f32* prev = (const f32*)(p + 0xA0);
         f32* o = (f32*)&tmp;
+        f32 t = lbl_8055E460;
         for (int i = 0; i < 12; i++) {
             o[i] = LerpT(t, prev[i], cur[i]);
         }
@@ -3098,11 +3098,11 @@ void vf28__7CarBodyFv(u8* p, u8* buf) {
         a.y = a.y + F32(w, 0xC);
         b.y = b.y + F32(w, 0x1C);
         HVec c;
+        f32 tWheel = lbl_8055E460;
+        c.z = LerpT(tWheel, b.z, a.z);
+        c.y = LerpT(tWheel, b.y, a.y);
         f32 xv = b.x;
-        c.y = LerpT(lbl_8055E460, b.y, a.y);
-        c.x = LerpT(lbl_8055E460, xv, a.x);
-        f32 zv = b.z;
-        c.z = LerpT(lbl_8055E460, zv, a.z);
+        c.x = LerpT(tWheel, xv, a.x);
         F32(o, 0x0) = c.x;
         F32(o, 0x4) = c.y;
         F32(o, 0x8) = c.z;
