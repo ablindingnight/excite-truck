@@ -552,30 +552,34 @@ void fn_800C1A80(s32* a, s32* b, s32* out) {
 
 /* 9-point IMDCT core. Formulas derived from a symbolic trace of the original and checked against a PPC
  * simulation of it on random inputs (200/200 identical). Products are 64 x 64-bit: the constants are
- * long long. NonMatching: 155/155 with the same opcodes, scheduled differently. */
+ * long long.
+ * The sums are spelled so that the compiler builds the original's expression trees (tools/scan/treecmp.py: all
+ * nine outputs equal), u comes after d35 (the statement order reproduces the original's instruction order in a
+ * replay of both scheduling passes), and the declaration order is the one an exact replay of the register
+ * allocator needs. NonMatching (registers only): the inner sum s08 + s26 of u is numbered like a local of its
+ * own in the original, here it is an expression temporary. */
 #define MP3_Q20(x, k) ((s32)(((s64)(x) * (k)) >> 20))
 void fn_800C1C1C(s32* in, s32* out) {
-    s32 i0 = in[0];
-    s32 i1 = in[1];
-    s32 i2 = in[2];
-    s32 i4 = in[4];
-    s32 i3 = in[3];
-    s32 s26;
-    s32 i6 = in[6];
-    s32 i7 = in[7];
-    s32 i8 = in[8];
-    s32 s08;
-    s32 s35;
-    s32 s17;
-    s32 d17;
-    s32 d62;
-    s32 d80;
+    s32 i0;
+    s32 i1;
     s32 d35;
-    s32 t;
-    s32 i5 = in[5];
-    s32 u;
-    s32 m;
+    s32 d62;
+    s32 s17;
+    s32 d80;
+    s32 s35;
+    s32 s08;
+    s32 s26;
+    s32 i2;
+    s32 i6;
+    s32 i3;
+    s32 i7;
+    s32 i5;
     s32 x4;
+    s32 m;
+    s32 u;
+    s32 i4;
+    s32 i8;
+    s32 d17;
     s32 a;
     s32 b;
     s32 c;
@@ -584,17 +588,25 @@ void fn_800C1C1C(s32* in, s32* out) {
     s32 f;
     s32 g;
     s32 h;
+    i0 = in[0];
+    i1 = in[1];
+    i2 = in[2];
+    i4 = in[4];
+    i3 = in[3];
+    i6 = in[6];
+    i7 = in[7];
+    i8 = in[8];
+    i5 = in[5];
     d62 = i6 - i2;
     d17 = i1 - i7;
     a = MP3_Q20(d17, -1816186LL);
     s08 = i8 + i0;
     s26 = i6 + i2;
     s35 = i3 + i5;
-    t = s08 + s26;
-    u = s35 + t;
     d80 = i8 - i0;
     s17 = i1 + i7;
     d35 = i3 - i5;
+    u = s08 + s35 + s26;
     x4 = i4 + s17;
     b = MP3_Q20(s26 - s08, 1970683LL);
     c = MP3_Q20(s35 - s08, -364166LL);
@@ -611,8 +623,8 @@ void fn_800C1C1C(s32* in, s32* out) {
     out[4] = m - b - c;
     out[6] = x4 * -2 + u;
     out[5] = a - e - f;
-    out[7] = a + (g + e);
-    out[8] = m + (c + d);
+    out[7] = g + a + e;
+    out[8] = c + m + d;
 }
 
 #undef MP3_Q20
