@@ -197,15 +197,20 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, const u8* buf, u32 ctx, s32 unused, s
         d->unk10 = (d->unk14 - (mdb * 8)) - (frame_bits - ((const s16 (*)[2]) lbl_80560DA8)[d->channels - 1][prot]);
     }
     d->count1_end = ((const s16 (*)[3]) lbl_802F34D8)[d->lsf][d->sr_index];
-    if (((d->unk10 < 0) && (d->unkC == 0)) && (((s32) (((-d->unk10) + 0x200000u) - d->unkC)) > 0x200000)) {
-        for (gr = 0; gr < ngr; gr++) {
-            for (i = 0; i < 0x480; i++) {
-                *(lbl_8055DD88++) = 0;
+    if ((d->unk10 < 0) && (d->unkC == 0)) {
+        n = -d->unk10;
+        n += 0x200000;
+        n -= d->unkC;
+        if (n > 0x200000) {
+            for (gr = 0; gr < ngr; gr++) {
+                for (i = 0; i < 0x480; i++) {
+                    *(lbl_8055DD88++) = 0;
+                }
+
             }
 
+            return 0;
         }
-
-        return 0;
     }
     for (gr = 0; gr < ngr; gr++) {
         for (ch = 0; ch < d->channels; ch++) {
