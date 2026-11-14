@@ -35,7 +35,7 @@ public:
     s32 count;         // offset 0x180
 };
 
-// GetVec3Or takes its default by value.
+// GetVec3Or takes its default by const reference.
 class ValueNodeV {
 public:
     virtual const char* GetName(void);
@@ -50,7 +50,7 @@ public:
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
     virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
+    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);
 };
 
 struct LightVtx {
@@ -362,7 +362,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
         s32 type;
         if (fn_80287E20(model, name)) {
             n = fn_80287E80(model, name);
-            const ValVec3& v = n->GetVec3Or("color", def);
+            const ValVec3& v = n->GetVec3Or("color", ValVec3(def));
             c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.y), ColorByte(255.0f * v.z));
             r = n->GetFloat("rad", rad);
             w = n->GetFloat("width", -1.0f);
