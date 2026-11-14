@@ -180,7 +180,7 @@ void fn_8026B260(void) {
     }
 }
 
-// NonMatching: the jump-radius loop gets different float registers (14 instructions).
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 static inline f32 Sq(f32 x) { return x * x; }
 
 void fn_8026B3D4(int player) {

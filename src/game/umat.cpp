@@ -173,7 +173,7 @@ void fn_802B57B8(void) {
     }
 }
 
-// NonMatching: the inlined Free() loop swaps two callee-saved registers (6 instructions).
+// Every function matches (2026-11-14 audit) and the unit is linked from source (11c2690f6).
 void fn_802B5808(void) {
     {
         int i;

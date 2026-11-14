@@ -275,5 +275,4 @@ void fn_802792EC(CarLayout* l) {
 
 }  // extern "C"
 
-// NonMatching: register numbering in fn_80278A64 and fn_80279004 differs (every function has the
-// target's instruction count and shape).
+// Every function matches (2026-11-14 audit) and the unit is linked from source (11c2690f6).

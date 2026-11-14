@@ -128,6 +128,7 @@ static inline void ZSub(ZVec* d, const ZVec* a, const ZVec* b) {
 
 static inline f32 ZMax(f32& a, const f32& b) { return a > b ? a : b; }
 
+// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     lbl_804BD704 = vb;
     f32 xv = vb.x;

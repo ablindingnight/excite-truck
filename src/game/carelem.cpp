@@ -156,4 +156,4 @@ void CarElemMgr::vf1C(s32 car) { lbl_8055E908[car].Update(car); }
 
 void CarElemMgr::vf0C(void) { lbl_8055E908 = new ("carelem") CarElem[lbl_8055E8F8]; }
 
-// NonMatching: Compute colors its float registers differently (18 diffs, same instructions).
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.

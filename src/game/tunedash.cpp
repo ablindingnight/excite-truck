@@ -252,4 +252,4 @@ void fn_80204A50(void) { fn_80204330(); }
 
 }  // extern "C"
 
-// NonMatching: fn_802044E8 colors its saved registers differently (36 diffs, registers only).
+// Every function matches (2026-11-14 audit). Not linked yet: linking it changes the DOL (flipcheck 2026-11-14).

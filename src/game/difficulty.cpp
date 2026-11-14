@@ -196,5 +196,4 @@ int fn_802054EC(const char* key, int level, int event) {
 
 }  // extern "C"
 
-// NonMatching: fn_80204CFC, fn_80204EA0 and fn_8020503C swap the registers of the inlined Get's
-// object and result (55 diffs, registers only).
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.

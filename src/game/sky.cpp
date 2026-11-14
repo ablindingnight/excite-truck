@@ -125,8 +125,7 @@ void fn_802C0FD4(s32* inst) {
 
 void fn_802C1018(void) { fn_802C0FD4(&lbl_8055FB18); }
 
-// NonMatching: the target keeps &m in r31 across the camera call (3 extra instructions); the sinit
-// is one of the epilogue-scheduled kind.
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 void fn_802C1020(void) {
     if (lbl_8055FB14 != -1) {
         SkyMtx m;

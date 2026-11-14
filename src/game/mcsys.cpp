@@ -245,4 +245,4 @@ int fn_802E721C(u32 cookie, u32 version, s32 size) {
 
 }  // extern "C"
 
-// NonMatching: MemCardSystemLoad numbers its saved registers differently (69 diffs, registers only).
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.

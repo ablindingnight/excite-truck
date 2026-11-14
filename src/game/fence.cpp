@@ -78,8 +78,7 @@ void fn_802A0AFC(void) {
 
 void fn_802A0B50(void) {}
 
-// NonMatching: the hoisted float constants get different callee-saved registers (1.0 lands in f27
-// in the target).
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 void fn_802A0B54(void) {
     int i;
     fn_802C8BD0(lbl_8055CB68);

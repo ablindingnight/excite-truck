@@ -164,4 +164,4 @@ int fn_801E47BC(int key) {
 
 }  // extern "C"
 
-// NonMatching: the sinit is one of the epilogue-scheduled kind.
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.

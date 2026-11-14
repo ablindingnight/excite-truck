@@ -186,5 +186,6 @@ void fn_80297C3C(void* model, const ValMatrix* mtx, u32 color, f32 alpha, f32 ra
 
 }  // extern "C"
 
-// NonMatching: the sinit is one of the epilogue-scheduled kind, and .sdata2 holds 1.0 before 0.0
-// in the target; every assignment order that puts 1.0 first changes fn_80297AFC's loads.
+// NonMatching (data): every function matches (2026-11-14 audit), but linking still changes the DOL (flipcheck
+// 2026-11-14): .sdata2 holds 1.0 before 0.0 in the target; every assignment order that puts 1.0 first changes
+// fn_80297AFC's loads.

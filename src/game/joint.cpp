@@ -283,5 +283,4 @@ ValVec3* fn_801E3630(Joint* j) { return &j->base.origin; }
 
 }  // extern "C"
 
-// NonMatching: needs the Pool base (pool.cpp) symbols to link; fn_801E353C keeps &r in r31 in the
-// target, and fn_801E2CCC/fn_801E2DEC number a few registers differently.
+// NonMatching (link): needs the Pool base (pool.cpp) symbols to link. Every function matches (2026-11-14 audit).

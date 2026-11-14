@@ -353,5 +353,4 @@ void fn_801D9B58(void) {
 
 }  // extern "C"
 
-// NonMatching: fn_801D9654 (the inlined OmlList ctor's count register) and fn_801D9B58 (the overlay
-// list loop registers) number registers differently.
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.

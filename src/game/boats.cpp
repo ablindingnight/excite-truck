@@ -90,8 +90,7 @@ void fn_802C2410(void) {
     lbl_804C109C.count = 0;
 }
 
-// NonMatching: the target hoists the float constants with 0.6 in f25 (ours: f31) and puts
-// `i = 0` before the zero-trip guard; this explicit guard is the closest form found so far.
+// Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 void fn_802C2488(void) {
     int i;
     i = 0;
