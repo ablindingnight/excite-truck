@@ -720,14 +720,21 @@ static inline void SaveView(ViewState* s, WView* v) {
     s->flags = v->flags;
 }
 
+/* Helper name unproven */
+static inline WorldState* ReadWorldState(void) {
+    WorldState* w;
+    w = PhysicsGetStatePacked();
+    lbl_8055EB14 = Max(DMax(DMin(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
+    lbl_8055EB18 = w->views[0].time;
+    return w;
+}
+
 void fn_801E7E48(void) {
     WorldState* w;
     s64 start;
     int i;
     start = fn_802E2C9C();
-    w = PhysicsGetStatePacked();
-    lbl_8055EB14 = Max(DMax(DMin(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
-    lbl_8055EB18 = w->views[0].time;
+    w = ReadWorldState();
     lbl_8055EB04 = w;
     if (lbl_8055EB2C != w->numViews) {
         fn_802C2C60(w->numViews);
