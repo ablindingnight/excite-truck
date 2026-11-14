@@ -151,8 +151,6 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
     int active = 0;
     s32 idx;
     u16 key;
-    u8 b;
-    int i;
     if (!m->ownerOnly || lbl_8055DFD4 == -1 || lbl_8055DFD4 == chan) {
         active = 1;
     }
@@ -160,10 +158,11 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
     if (active) {
         fn_80129508(p, chan, m);
     }
-    for (i = 0; i < 14; i++) {
-        idx = lbl_804223C0[i];
+    const s32* mapping = lbl_804223C0;
+    for (int i = 0; i < 14; ++mapping, ++i) {
+        idx = *mapping;
         if (idx >= 0 && (key = m->keys[i]) != 0 && active) {
-            b = p->status.buttons[idx];
+            const u8 b = p->status.buttons[idx];
             if (b) {
                 p->changed = 1;
                 if (!p->prev[i]) {

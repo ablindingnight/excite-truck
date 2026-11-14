@@ -1914,8 +1914,9 @@ extern "C" void fn_8012EE80(StreamBuf* b) {
             if (s->state == 1 && s->res->Poll(0)) {
                 s->state = 2;
             }
-            if (b->size + s->pos > range.end) {
-                range.end = s->pos + b->size;
+            const s32 slotEnd = s->pos + b->size;
+            if (slotEnd > range.end) {
+                range.end = slotEnd;
             }
         }
     }
