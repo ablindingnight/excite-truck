@@ -990,11 +990,11 @@ void fn_80194AF4(u8* d, RVec3* out, RVec3* a, RVec3* b, f32 t) {
 
 f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
     f32 s;
-    f32 m = (f32)fmod(x, p);
-    if (m > p / 2.0f) {
-        m = p - m;
+    x = (f32)fmod(x, p);
+    if (x > p / 2.0f) {
+        x = p - x;
     }
-    f32 t = m / (p / 2.0f);
+    f32 t = x / (p / 2.0f);
     if (t < -1.0f) {
         s = -1.0f;
     } else if (t > 1.0f) {
@@ -2057,12 +2057,15 @@ struct Hit {
 };
 
 int fn_8019703C(const u8* d, const u8* p) {
+    f32 z;
     f32 x;
+    f32 ax;
     int any = 0;
-    f32 z = F32(p, 0x8);
+    z = F32(p, 0x8);
     x = F32(p, 0x4);
     int fast = F32(d, 0x270) > 2.2222223f;
-    bool near = (f32)__fabs(x) < lbl_8055A488 + 1.1f * lbl_8055A488;
+    ax = (f32)__fabs(x);
+    bool near = ax < lbl_8055A488 + 1.1f * lbl_8055A488;
     if (!(S32(d, 0x2D0) & 1) && fast && near) {
         if (x > 0.0f) {
             f32 v = F32(d, 0x278) + x;

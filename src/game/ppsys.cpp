@@ -539,22 +539,27 @@ static inline T* AtP(T* p, int i) {
     return &p[i];
 }
 
+/* Helper name unproven. */
+static inline void ApplyAcceleration(PSys* s, const RVec3* a) {
+    RVec3* acc;
+    int i;
+    for (i = 0; i < s->nPart; i++) {
+        acc = &s->acc[i];
+        AddTo(acc, a);
+    }
+}
+
 void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
-    RVec3* p = out;
     s->org = *org;
     s->up = *up;
     RVec3 a;
     Scale(&a, f, 0.0110011f);
-    int i;
-    int off;
-    for (i = 0, off = 0; i < s->nPart; off += sizeof(RVec3), i++) {
-        AddTo((RVec3*)((u8*)s->acc + off), &a);
-    }
+    ApplyAcceleration(s, &a);
     fn_801C1B60(s);
     s32 k = PSysCount(s);
     for (int j = 0; j < s->nPart; j++) {
-        Set(p, AtP(s->pos, j));
-        p++;
+        Set(out, AtP(s->pos, j));
+        out++;
     }
     *n = k;
 }

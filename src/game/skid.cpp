@@ -431,19 +431,22 @@ void fn_8028DDF0(SkidEntry* e, int n) {
     }
     f32 maxd = 40000.0f;
     f32 now = fn_801E7E18();
-    for (int i = 0; i < n; i++, current++) {
-        if (current->dist < maxd && current->car->surface == lbl_804B3490[current->index] && current->active) {
+    u32* track = lbl_804B3490;
+    int none = -1;
+    int i;
+    for (i = 0; i < n; i++, current++) {
+        if (current->dist < maxd && current->car->surface == track[current->index] && current->active) {
             for (int w = 0; w < 4; w++) {
                 fn_8028D89C(current, w, now);
             }
         } else {
             int k = current->index;
-            lbl_8055F720[k * 4 + 0].type = -1;
-            lbl_8055F720[k * 4 + 1].type = -1;
-            lbl_8055F720[k * 4 + 2].type = -1;
-            lbl_8055F720[k * 4 + 3].type = -1;
+            lbl_8055F720[k * 4 + 0].type = none;
+            lbl_8055F720[k * 4 + 1].type = none;
+            lbl_8055F720[k * 4 + 2].type = none;
+            lbl_8055F720[k * 4 + 3].type = none;
         }
-        lbl_804B3490[current->index] = current->car->surface;
+        track[current->index] = current->car->surface;
     }
 }
 

@@ -436,7 +436,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
             p->pts[1].x = s[1].x + car->pos.x;
             p->pts[1].y = s[1].y + car->pos.y;
             p->pts[1].z = s[1].z + car->pos.z;
-            f32 adt = (f32)AbsD(dt);
+            dt = (f32)AbsD(dt);
             for (int i = 1; i < 8; i++) {
                 Vec a = *(const Vec*)&car->spin;
                 f32 t = i / 8.0f;
@@ -449,7 +449,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 sum.z = b.z + a.z;
                 AddScaled(&p->pts[i * 2], &p->pts[i * 2 - 2], &sum, 0.125f);
                 AddScaled(&p->pts[i * 2 + 1], &p->pts[i * 2 - 1], &sum, 0.125f);
-                if (!(adt <= lbl_80558DC4[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
+                if (!(dt <= lbl_80558DC4[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
