@@ -1316,10 +1316,10 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
     f32 nx;
     CamPt d;
     CamPt pt;
-    d.x = LerpK(t, F32(seg, 0x8), F32(next, 0x8));
-    d.y = LerpK(t, F32(seg, 0xC), F32(next, 0xC));
     pos.x = LerpK(t, F32(seg, 0x0), F32(next, 0x0));
     pos.y = LerpK(t, F32(seg, 0x4), F32(next, 0x4));
+    d.x = LerpK(t, F32(seg, 0x8), F32(next, 0x8));
+    d.y = LerpK(t, F32(seg, 0xC), F32(next, 0xC));
     inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
     F32(rec, 0x28) = lbl_80563C20;
     f32 yv;

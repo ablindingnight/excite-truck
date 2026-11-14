@@ -157,8 +157,8 @@ struct CollPacket {
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
 static inline f32 Unlerp(f32 a, f32 b, f32 x) {
-    f32 t = (x - a) / (b - a);
-    CLAMP01(t);
+    f32 t = MIN(1.0f, (x - a) / (b - a));
+    t = MAX(t, 0.0f);
     return t;
 }
 
@@ -346,9 +346,10 @@ void CollVolume::Update(void) {
 extern "C" void fn_8017A800(void) {}
 
 s32 CollVolume::vf34(CollPacket* p) {
-    f32(*m)[3] = (f32(*)[3]) & mtx;
     f32 v[3];
     f32 q[4];
+    f32* qp;
+    f32(*m)[3] = (f32(*)[3]) & mtx;
     f32 tr;
     f32 th;
     f32 sn;
@@ -362,11 +363,13 @@ s32 CollVolume::vf34(CollPacket* p) {
         q[1] = inv * (m[2][0] - m[0][2]);
         q[2] = inv * (m[0][1] - m[1][0]);
     } else {
+        qp = q;
+        int i;
         int k;
         int j;
-        int i = 0;
         f32 r;
         f32 inv;
+        i = 0;
         if (m[1][1] > m[0][0]) {
             i = 1;
         }
@@ -377,10 +380,10 @@ s32 CollVolume::vf34(CollPacket* p) {
         k = (j + 1) % 3;
         r = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
         inv = 0.5f / r;
-        q[i] = 0.5f * r;
-        q[3] = inv * (m[j][k] - m[k][j]);
-        q[j] = inv * (m[j][i] + m[i][j]);
-        q[k] = inv * (m[i][k] + m[k][i]);
+        qp[i] = 0.5f * r;
+        qp[3] = inv * (m[j][k] - m[k][j]);
+        qp[j] = inv * (m[j][i] + m[i][j]);
+        qp[k] = inv * (m[i][k] + m[k][i]);
     }
     th = acos(q[3]);
     sn = sin(th);

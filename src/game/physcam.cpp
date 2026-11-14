@@ -497,6 +497,12 @@ struct Words12 {
     u32 w[12];
 };
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+// A camera frame: rotation rows then position (the layout of Words12).
+struct CamFrame {
+    Mat3 rot;
+    f32 pos[3];
+};
+
 extern "C" {
 void fn_802704D4(int to, u8* cam);
 f32 PSVECDotProduct(const f32* a, const f32* b);
@@ -1472,18 +1478,17 @@ void camera_car(u8* p, int ci) {
     switch (v->type) {
     case 34: {
         *(Words12*)(p + 0x58) = *(Words12*)(p + 0xC0);
+        CamFrame f;
         f32 w[3];
+        f.pos[0] = v->off[0];
+        f.pos[1] = v->off[1];
+        f.pos[2] = v->off[2];
         w[0] = lbl_80563F4C * v->rot[0];
-        w[1] = v->rot[1] * lbl_80563F4C;
-        f32 off[3];
-        off[0] = v->off[0];
-        w[2] = v->rot[2] * lbl_80563F4C;
-        off[1] = v->off[1];
-        off[2] = v->off[2];
-        Mat3 rot;
-        CamRotFromVec(&rot, w);
-        fn_801BFD34(p + 0x7C, off, p + 0xC0);
-        Mat3Mul((Mat3*)(p + 0x58), &rot, (Mat3*)(p + 0xC0));
+        w[1] = lbl_80563F4C * v->rot[1];
+        w[2] = lbl_80563F4C * v->rot[2];
+        CamRotFromVec(&f.rot, w);
+        fn_801BFD34(p + 0x7C, f.pos, p + 0xC0);
+        Mat3Mul((Mat3*)(p + 0x58), &f.rot, (Mat3*)(p + 0xC0));
         f32 fovv = v->fov;
         F32(p, 0xBC) = lbl_80563F4C * fovv;
         break;

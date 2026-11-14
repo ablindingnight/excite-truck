@@ -47,15 +47,12 @@ struct Vec {
 };
 
 // A vector passed by value (GetVec3Or's default).
-struct V3 {
+struct V3 : ValVec3 {
     V3(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
     }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 // GetVec3Or takes its default by value.
@@ -73,7 +70,7 @@ public:
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
     virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, V3 def);
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
     virtual ValPoint GetPoint(const char* key);
     virtual ValPoint GetPointOr(const char* key, const ValPoint& def);
     virtual ValMatrix GetMatrix(const char* key);

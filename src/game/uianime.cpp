@@ -17,20 +17,6 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
 struct UiPose {
-    UiPose(ValPoint p) {
-        y = p.y;
-        x = p.x;
-        z = 0.0f;
-        m[0] = 1.0f;
-        m[1] = 0.0f;
-        m[2] = 0.0f;
-        m[3] = 0.0f;
-        m[4] = 1.0f;
-        m[5] = 0.0f;
-        m[6] = 0.0f;
-        m[7] = 0.0f;
-        m[8] = 1.0f;
-    }
     f32 m[9];       // offset 0x0
     f32 x, y, z;    // offset 0x24
 };
@@ -295,13 +281,26 @@ u8 lbl_8055F0C7;
 
 static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
     ValPoint r;
-    r.x = LerpT(f, a.x, b.x);
     r.y = LerpT(f, a.y, b.y);
+    r.x = LerpT(f, a.x, b.x);
     return r;
 }
 
-static inline void* MakeObj(const UiPose& p, f32 s, f32 a) {
-    void* o = fn_8022EDE4(&p, a);
+static inline void* MakeObj(ValPoint p, f32 s, f32 a) {
+    UiPose pose;
+    pose.y = p.y;
+    pose.x = p.x;
+    pose.z = 0.0f;
+    pose.m[0] = 1.0f;
+    pose.m[1] = 0.0f;
+    pose.m[2] = 0.0f;
+    pose.m[3] = 0.0f;
+    pose.m[4] = 1.0f;
+    pose.m[5] = 0.0f;
+    pose.m[6] = 0.0f;
+    pose.m[7] = 0.0f;
+    pose.m[8] = 1.0f;
+    void* o = fn_8022EDE4(&pose, a);
     *(f32*)((u8*)o + 0x38) = s;
     return o;
 }
@@ -317,16 +316,16 @@ static inline void* EvalTrack(UiAnimTrack* tr, f32 time) {
         }
         if (k == -1) {
             UiAnimKey* a = &tr->keys[0];
-            obj = MakeObj(UiPose(a->p), a->scale, a->alpha);
+            obj = MakeObj(a->p, a->scale, a->alpha);
         } else if (k == tr->n - 1) {
-            obj = MakeObj(UiPose(tr->keys[tr->n - 1].p), tr->keys[tr->n - 1].scale, tr->keys[tr->n - 1].alpha);
+            obj = MakeObj(tr->keys[tr->n - 1].p, tr->keys[tr->n - 1].scale, tr->keys[tr->n - 1].alpha);
         } else {
             UiAnimKey* a = &tr->keys[k];
             UiAnimKey* b = &tr->keys[k + 1];
             f32 dt = b->t - a->t;
             dt = dt > 0.0001f ? dt : 0.0001f;
             f32 f = (time - a->t) / dt;
-            obj = MakeObj(UiPose(Lerp2(a->p, b->p, f)), LerpT(f, a->scale, b->scale), LerpT(f, a->alpha, b->alpha));
+            obj = MakeObj(Lerp2(a->p, b->p, f), LerpT(f, a->scale, b->scale), LerpT(f, a->alpha, b->alpha));
         }
     } else {
         obj = fn_8022EE9C();

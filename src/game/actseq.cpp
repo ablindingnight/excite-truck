@@ -71,15 +71,12 @@ struct Vec {
 };
 
 // A vector passed by value (GetVec3Or's default).
-struct V3 {
+struct V3 : ValVec3 {
     V3(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
     }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 class Sound3D {
@@ -823,7 +820,7 @@ public:
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
     virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, V3 def);
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
 };
 
 extern "C" {
@@ -1634,12 +1631,12 @@ int Obstacle_ASE::Load(ValueNode* t) {
         speed1 = t->GetFloat("speed1", 0.0f);
         speed2 = t->GetFloat("speed2", speed1);
         dir1 = ((ValueNodeV*)t)->GetVec3Or("dir1", V3(0.0f, 0.0f, 0.0f));
-        dir2 = ((ValueNodeV*)t)->GetVec3Or("dir2", *(V3*)&dir1);
+        dir2 = ((ValueNodeV*)t)->GetVec3Or("dir2", *(ValVec3*)&dir1);
         throwPt = ((ValueNodeV*)t)->GetVec3Or("throw_pt", V3(0.0f, 0.0f, 0.0f));
         resetTimeout = (int)(59.94f * t->GetFloat("reset_timeout", -1.0f));
-        ok = 1;
         fn_801D0800(this);
         state = 1;
+        ok = 1;
     } else {
         fn_802E30C8("ObstacleActionSequenceEvent: required value \"group_id\" was negative or not present");
     }
