@@ -722,6 +722,7 @@ public:
     }
     int Update(const CarResult* r, const StuntList* s, s32 coins);
     void Setup(void);
+    void Create(void);
 
     s32 state;              // offset 0x0
     f32 bonusStart;         // offset 0x4
@@ -2862,16 +2863,20 @@ s32 fn_80204CF0(void);  // difficulty
 s32 fn_802ADF34(ArtAnimMan* anim, const char* file, const AnimBinding* table);
 }
 
-#pragma dont_inline on
+// Helper name unproven: creates one finish animation. Setup stays a call because this inlined body, with Setup
+// expanded, is over the inline size limit.
+inline void FinishAnimation::Create(void) {
+    anim = new ("artanim_man") ArtAnimMan(2);
+    Setup();
+}
+
 inline void BetaMaster::vfF8(void) {
     int i;
     for (i = 0; i < ARRAY_COUNT(anims); i++) {
-        anims[i].anim = new ("artanim_man") ArtAnimMan(2);
-        anims[i].Setup();
+        anims[i].Create();
     }
     coins.obj = fn_80145E70("bonanza.val");
 }
-#pragma dont_inline reset
 
 // The original recomputes the two string addresses inside the 9-iteration loop;
 // loop-invariant motion was off for this function (see KC_to_TC_Setup_LICM_negatives_2026-11-04.md).
