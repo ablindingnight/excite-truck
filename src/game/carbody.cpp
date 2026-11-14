@@ -3916,10 +3916,10 @@ void vf30__7CarBodyFv(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s
     F32(p, 0x24A8) = 0.0f;
     F32(p, 0x251C) = 0.0f;
     F32(p, 0x25F8) = 1.0f;
+    F32(p, 0x25E8) = 1.0f;
     F32(p, 0x2434) = F32(p, 0x23C0) = F32(p, 0x25F0) * F32(p, 0x5B0);
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
-    F32(p, 0x25E8) = 1.0f;
     fn_8018ADB4(p, LerpT(t, v1, v0));
     v0 = PkUnpack(prev->brake, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->brake, 255.0f, 0.0f, 1.0f);

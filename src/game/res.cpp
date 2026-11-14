@@ -1260,9 +1260,10 @@ int AsyncResourceSet::StartLoad(const char* name) {
     char path0[0x40];
     int ok = 0;
     do {
+        char* path;
         s32 size;
         int sector;
-        char* path = fn_8012B314(name, path0, tries);
+        path = fn_8012B314(name, path0, tries);
         if (!path) {
             break;
         }
