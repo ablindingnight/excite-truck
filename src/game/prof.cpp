@@ -42,11 +42,6 @@ struct ProfWatch {
 
 typedef void (*ProfCallback)(int);
 
-struct ProfHooks {
-    ProfCallback callbacks[4];  // offset 0x0
-    ProfWatch watches[16];      // offset 0x10
-};
-
 struct ProfTrace {
     const char* file;  // offset 0x0
     s32 line;          // offset 0x4
@@ -64,7 +59,9 @@ void fn_80127D58(void (*fn)(void));
 
 ModuleTag lbl_8055DF10;
 ProfSlot lbl_8041D790[16];
-ProfHooks lbl_8041DC10;
+// Two separate arrays (with the slots that makes three objects, so the reset function shares one base register).
+ProfCallback lbl_8041DC10[4];
+ProfWatch lbl_8041DC20[16];
 FixedArray<s32, 16> lbl_8041DEE0;
 ProfTrace lbl_8041DF30[3];
 
@@ -106,7 +103,7 @@ void ProfRestartTrace(void) { fn_802E30C8("prof: restarting trace system!"); }
 
 int fn_80127538(void) {
     memset(lbl_8041D790, 0, sizeof(lbl_8041D790));
-    memset(lbl_8041DC10.callbacks, 0, sizeof(lbl_8041DC10.callbacks));
+    memset(lbl_8041DC10, 0, sizeof(lbl_8041DC10));
     fn_80127968();
     fn_80127C90(fn_80127968, "ProfUpdate");
     lbl_8055DF18 = 0;
@@ -159,15 +156,15 @@ void fn_8012766C(void) {
     lbl_8055DF28 = 0;
     lbl_8055DF3C = 0;
     lbl_8055DF38 = 0;
-    for (i = 0; i < sizeof(lbl_8041DC10.watches) / sizeof(lbl_8041DC10.watches[0]); i++) {
-        if (lbl_8041DC10.watches[i].active) {
-            *lbl_8041DC10.watches[i].target = 0;
+    for (i = 0; i < sizeof(lbl_8041DC20) / sizeof(lbl_8041DC20[0]); i++) {
+        if (lbl_8041DC20[i].active) {
+            *lbl_8041DC20[i].target = 0;
         }
     }
     lbl_8055DF40 = fn_802E2C20();
     for (i = 0; i < 4; i++) {
-        if (lbl_8041DC10.callbacks[i]) {
-            lbl_8041DC10.callbacks[i](0);
+        if (lbl_8041DC10[i]) {
+            lbl_8041DC10[i](0);
         }
     }
 }
