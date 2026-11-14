@@ -1077,7 +1077,7 @@ config.libs.append(
             Object(NonMatching, "game/unk_801BD620.cpp"),
             Object(NonMatching, "game/masslist.cpp"),
             Object(Matching, "game/panelvol.cpp"),
-            Object(NonMatching, "game/ppsys.cpp"),
+            Object(Matching, "game/ppsys.cpp"),
             Object(NonMatching, "game/interlude.cpp"),
             Object(NonMatching, "game/awards.cpp"),
             Object(Matching, "game/dmginfo.cpp"),
