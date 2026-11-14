@@ -3240,6 +3240,11 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+static inline void SetLowerXY(RVec3* out, const RVec3& a, f32 k, f32 y) {
+    out->x = a.x - k;
+    out->y = y;
+}
+
 void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
     PVec3 org;
     PVec3 axis;
@@ -3256,8 +3261,8 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         RVec3 la;
         RVec3 lb;
         SetV3(&lb, b.x - k, b.y - k, b.z - k);
-        la.y = a.y - k;
-        la.x = a.x - k;
+        const struct { f32 y; } bias = {a.y - k};
+        SetLowerXY(&la, a, k, bias.y);
         const f32 laZ = a.z - k;
         la.z = laZ;
         SetV(&mn, la.x < lb.x ? la.x : lb.x, MinF(la.y, lb.y), MinF(la.z, lb.z));
