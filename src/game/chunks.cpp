@@ -290,7 +290,7 @@ void fn_80292698(void) {
             f32 k;
             f32 c = cos(ang);
             k = 1.0f - c;
-            __typeof__(s->rot.x.y) s_rot_x_y = y * (k * x) + z * sn;
+            f32 s_rot_x_y = y * (k * x) + z * sn;
             s->rot.x.x = c + k * (x * x);
             s->rot.x.y = s_rot_x_y;
             s->rot.x.z = z * (k * x) - sn * y;

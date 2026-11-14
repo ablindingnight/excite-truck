@@ -1611,7 +1611,7 @@ void fn_80195F6C(u8* d) {
         V2 pos;
         V2 dir;
         IdealPoint* s = il.seg;
-        __typeof__(dir.x) dir_x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
+        f32 dir_x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
         pos.x = s->pos.x + il.t * (s->next->pos.x - s->pos.x);
         pos.y = s->pos.y + il.t * (s->next->pos.y - s->pos.y);
         dir.y = s->dir.y + il.t * (s->next->dir.y - s->dir.y);

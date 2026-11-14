@@ -2700,8 +2700,8 @@ void fn_80186DE8(u8* p) {
             w->contact[0] = c->pts[j].x;
             w->contact[1] = c->pts[j].y;
             f32 nrm[3];
-            __typeof__(nrm[2]) nrm_2 = c->pts[9 + j].z;
-            __typeof__(nrm[1]) nrm_1 = c->pts[9 + j].y;
+            f32 nrm_2 = c->pts[9 + j].z;
+            f32 nrm_1 = c->pts[9 + j].y;
             w->contact[2] = c->pts[j].z;
             nrm[0] = c->pts[9 + j].x;
             nrm[2] = nrm_2;
@@ -3256,7 +3256,7 @@ void vf4C__7CarBodyFv(u8* p, const HVec* imp, const HVec* at, int kind, u8* othe
         f32 dy = y2 - fr.pos.y;
         f32 dz = at->z - fr.pos.z;
         HVec lp;
-        __typeof__(lp.y) lp_y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
+        f32 lp_y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
         lp.x = HitDot(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
         lp.y = lp_y;
         lp.z = HitDot(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);

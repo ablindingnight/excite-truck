@@ -249,7 +249,7 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
     const CamShot* s = &lbl_8049FD58[slot];
     QuatToPose(out, q);
     CamVec3 v;
-    __typeof__(v.v[1]) v_v_1 = s->p0.v[1] + e * (s->p1.v[1] - s->p0.v[1]);
+    f32 v_v_1 = s->p0.v[1] + e * (s->p1.v[1] - s->p0.v[1]);
     v.v[2] = s->p0.v[2] + e * (s->p1.v[2] - s->p0.v[2]);
     v.v[1] = v_v_1;
     v.v[0] = s->p0.v[0] + e * (s->p1.v[0] - s->p0.v[0]);

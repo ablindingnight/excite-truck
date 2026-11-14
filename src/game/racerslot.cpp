@@ -272,7 +272,7 @@ int fn_8026A698(u8* p, int i) {
     f.rot.m[7] = 0.0f;
     f.rot.m[8] = 1.0f;
     f32 orbit[3];
-    __typeof__(orbit[1]) orbit_1 = s->yaw + s->t * s->spin;
+    f32 orbit_1 = s->yaw + s->t * s->spin;
     orbit[0] = 0.0f;
     orbit[1] = orbit_1;
     orbit[2] = 0.0f;

@@ -716,8 +716,8 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (lbl_8055FA38 == 5) {
         V2 a;
         V2 c;
-        __typeof__(a.y) a_y = 2.0f * (f32)fn_802B6ED8(cz, 0, nh);
-        __typeof__(a.x) a_x = 2.0f * (f32)fn_802B6E7C(cx, 0, nw);
+        f32 a_y = 2.0f * (f32)fn_802B6ED8(cz, 0, nh);
+        f32 a_x = 2.0f * (f32)fn_802B6E7C(cx, 0, nw);
         a.y = a_y;
         a.x = a_x;
         c.y = 2.0f * (f32)fn_802B6ED8(cz, nh - 1, nh);
