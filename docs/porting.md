@@ -38,3 +38,31 @@ The Wii is big-endian with 32-bit pointers; typical PC targets are little-endian
 
 - Never commit Nintendo binaries, disc images or extracted assets. `orig/` and extracted files stay local.
 - The port reads assets from the player's own disc through an extractor tool.
+
+## 6. Two routes to a PC build
+
+- **Decomp port (our main route).** The finished decompilation is compiled natively for the PC, with the Wii SDK
+  replaced by a host layer (section 7). The result is readable, moddable source.
+- **Static recompilation (a possible earlier route).** A tool translates the game's machine code (PowerPC, from the
+  player's DOL) into C automatically and compiles it with the same host layer. Hookshot
+  (https://git.notrexed.dev/Hookshot/Hookshot, a Switch 2 game recompiled to Windows/Linux) and woohoo-flight-school
+  (Pilotwings Resort, 3DS) work this way. It does not need 100% decomp, but the code is not human-readable.
+  The two routes can share one host layer, so recompiled functions could be swapped for decompiled ones one at a time.
+
+## 7. Distribution and architecture (modelled on Hookshot)
+
+- **No game data in the repository.** No DOL, no assets, no keys. The player supplies their own Excite Truck disc
+  (REXE01) dump. A builder program verifies the dump (hash of the expected version), extracts what it needs, and
+  builds or installs locally. It never modifies the player's files.
+- **Host layer** (replaces the Wii SDK, keeps the game code unchanged):
+  - Graphics: GX calls recorded and replayed on a modern API (Vulkan or OpenGL), TEV stages turned into shaders.
+  - Audio: AX/DSP voices mixed on the CPU and played through SDL; the game's own MP3 (TMCC) and Bink audio decoders
+    are part of the decompiled code and run natively.
+  - Video: RAD Bink 1 decoder is in the decompiled source (unk_80116BD4) and runs natively.
+  - Input: WPAD (Wii Remote tilt steering, buttons) mapped to controllers through SDL - tilt from a gamepad stick or
+    gyro, plus keyboard. Tilt steering is the central control, so its mapping needs real playtesting.
+  - Files: DVD reads served from the extracted disc folder; NAND saves stored in a per-user folder.
+- **Releases.** Nothing is published until the port is complete and tested end to end (all modes, saves, audio,
+  video, controls). Licence to be decided before release (Hookshot uses GPL-3.0-or-later).
+- **README shape** (follow Hookshot's): what it is, "no game files included", status table, install and play,
+  supplying your dump, troubleshooting, controls/options, build from source, how it works, credits, licence.
