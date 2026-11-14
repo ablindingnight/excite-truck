@@ -165,23 +165,27 @@ extern long fn_80129D18(long seed, long range);
 static inline void ShuffleEntry(long i) {
     long index = fn_80129D18(6, lbl_804902C4.m_count);
     long *e = lbl_804902C4.m_entries;
-    long temp = e[i];
-    e[i] = e[index];
-    e[index] = temp;
+    long *from = &e[i];
+    long *to = &e[index];
+    long temp = *from;
+    *from = *to;
+    *to = temp;
 }
 
 void fn_8020F730(void) {
     long count = lbl_804900AC.m_count;
     long i;
     lbl_804902C4.m_count = 0;
-    if (count != 0) {
-        for (i = 0; i < count; i++) {
-            long *slot = &lbl_804902C4.m_entries[lbl_804902C4.m_count++];
-            *slot = i;
-        }
-        for (i = 0; i < lbl_804902C4.m_count; i++) {
-            ShuffleEntry(i);
-        }
+    if (count == 0) {
+        lbl_8055EEC4 = 0;
+        return;
+    }
+    for (i = 0; i < count; i++) {
+        long *slot = &lbl_804902C4.m_entries[lbl_804902C4.m_count++];
+        *slot = i;
+    }
+    for (i = 0; i < lbl_804902C4.m_count; i++) {
+        ShuffleEntry(i);
     }
     lbl_8055EEC4 = 0;
 }

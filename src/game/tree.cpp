@@ -777,11 +777,12 @@ static inline void DrawTreeType(TreeType* t) {
     if (t->set) {
         TArray<TCell>* frames = t->set->frames;
         TArray<TreeRec>* list = t->set->list;
+        TCell* c;
         TArray<TCell>* near;
         fn_802C8BD0(fn_802C28C0());
         fn_802DC71C(t->nearId, t->nearTex);
         for (int j = 0; j < frames->n; j++) {
-            TCell* c = &frames->data[j];
+            c = &frames->data[j];
             f32 k = Step(c->fade, 0.375f, 0.475f);
             k = (1.0f < k) ? 1.0f : k;
             k = (k > 0.0f) ? k : 0.0f;
