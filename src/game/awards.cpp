@@ -3,7 +3,7 @@
 // a value that beats them queues a "live update" pop-up (awards_lyt.val). It also takes the place, score,
 // grade and race time once per race, feeds achievements and the high-score table, and runs the records
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
-// animation setup (fn_801CDE00) and the pop-up draw are placeholders. Names are guesses apart from the strings.
+// animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
 
 extern "C" {
