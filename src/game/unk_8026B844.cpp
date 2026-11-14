@@ -282,15 +282,13 @@ typedef struct BlimpCam {
     s32 car;         // offset 0x50
     u8 pad54[4];
 } BlimpCam;
-// The applied frame and the keyboard camera's motion.
-typedef struct CamBody {
-    CamFrame frame;  // offset 0x0
-    CamVec vel;      // offset 0x30
-    CamVec spin;     // offset 0x3C
-} CamBody;
 
 BlimpCam lbl_8049A168;
-CamBody lbl_8049A1C0;
+// The applied frame and the keyboard camera's motion: three separate objects (with the blimp camera the unit's
+// functions reference three or more, so they share one base register as in the original).
+CamFrame lbl_8049A1C0;
+CamVec lbl_8049A1F0;  // velocity
+CamVec lbl_8049A1FC;  // spin
 
 extern const f32 lbl_80563D98;  // -1.0f
 extern const f32 lbl_80563D9C;  // 0.5f
@@ -488,17 +486,17 @@ void fn_8026C014(int player) {
         spin.y = lbl_80563D78;
         spin.z = lbl_80563D78;
         if (!lbl_8055F501) {
-            CamSet(&lbl_8049A1C0.vel, lbl_80563D78, lbl_80563D78, lbl_80563D78);
+            CamSet(&lbl_8049A1F0, lbl_80563D78, lbl_80563D78, lbl_80563D78);
             lbl_8055F501 = 1;
         }
         if (!lbl_8055F502) {
-            CamSet(&lbl_8049A1C0.spin, lbl_80563D78, lbl_80563D78, lbl_80563D78);
+            CamSet(&lbl_8049A1FC, lbl_80563D78, lbl_80563D78, lbl_80563D78);
             lbl_8055F502 = 1;
         }
         dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F504) / 1000.0f, 0.033333335f);
         lbl_8055F504 = fn_802E2C20();
-        CamScale(&lbl_8049A1C0.vel, 0.7f);
-        CamScale(&lbl_8049A1C0.spin, 0.7f);
+        CamScale(&lbl_8049A1F0, 0.7f);
+        CamScale(&lbl_8049A1FC, 0.7f);
         shift = fn_802E4A1C(0xFD);
         ctrl = 0;
         if (fn_802E4A1C(0xFE) || fn_802E4A1C(0x3A)) {
@@ -561,18 +559,18 @@ void fn_8026C014(int player) {
             lbl_8055F47C = CamMax(CamMin(hi, lbl_8055F47C), lo);
         }
         if (!CamIsZero(&spin)) {
-            CamCopy(&lbl_8049A1C0.spin, &spin);
+            CamCopy(&lbl_8049A1FC, &spin);
         }
         if (!CamIsZero(&move)) {
-            CamCopy(&lbl_8049A1C0.vel, &move);
+            CamCopy(&lbl_8049A1F0, &move);
         }
-        const CamVec* v = &lbl_8049A1C0.vel;
+        const CamVec* v = &lbl_8049A1F0;
         const CamRot* rot = &lbl_80499050.rot;
         CamMulVec(&w, v, rot);
         lbl_80499050.pos.x = lbl_80499050.pos.x + w.x;
         lbl_80499050.pos.y = lbl_80499050.pos.y + w.y;
         lbl_80499050.pos.z = lbl_80499050.pos.z + w.z;
-        Mat3FromEuler__FP4Mat3PC4Vec3(&m, &lbl_8049A1C0.spin);
+        Mat3FromEuler__FP4Mat3PC4Vec3(&m, &lbl_8049A1FC);
         Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &m, &lbl_80499050.rot);
     } else if (pad.w44[3] & 0x10) {
         // Orbit: the left stick turns about the vertical and tilts, the d-pad moves.
@@ -709,7 +707,7 @@ void fn_8026C014(int player) {
                 break;
             }
             case 3: {
-                CamFrame* f = &lbl_8049A1C0.frame;
+                CamFrame* f = &lbl_8049A1C0;
                 f32 s = speed * fn_8026B844(pad.y1);
                 f32 u;
                 lbl_80499050.pos.x = lbl_80499050.pos.x + f->rot.axes[0].x * s;
@@ -872,7 +870,7 @@ void fn_8026DAA8(CamView* c) {
     c->shake[0] = lbl_80563D78;
     c->shake[1] = lbl_80563D78;
     c->shake[2] = lbl_80563D78;
-    CopyFrame(&lbl_8049A1C0.frame, &c->frame);
+    CopyFrame(&lbl_8049A1C0, &c->frame);
 }
 
 void* fn_8026DDD0(void) {
