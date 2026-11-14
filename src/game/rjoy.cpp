@@ -285,12 +285,25 @@ void fn_802E7D0C(void) {
     lbl_8056000C = 0;
 }
 
+namespace {
+
+extern const f32 kMinAxis;
+
+}  // namespace
+
 static inline f32 Clamp1(f32 x) {
     f32 r = 1.0f;
     r = r < x ? r : x;
-    r = r > -1.0f ? r : -1.0f;
+    r = r > kMinAxis ? r : kMinAxis;
     return r;
 }
+
+namespace {
+
+// Keep the axis floor in its retail small-data slot.
+const f32 kMinAxis = -1.0f;
+
+}  // namespace
 
 void fn_802E7DDC(Remote* r, const KStatus* k) {
     u32 hold = k->hold;
