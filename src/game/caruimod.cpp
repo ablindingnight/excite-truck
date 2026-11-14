@@ -337,7 +337,9 @@ void CarUIModel::Unload(void) {
 }
 
 void CarUIModel::LoadEfx(const char* path) {
-    int i;
+    struct {
+        int index;
+    } joint;
     if (efx == -1) {
         char file[0x100];
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
@@ -372,10 +374,10 @@ void CarUIModel::LoadEfx(const char* path) {
             zero.y = 0.0f;
             zero.z = 0.0f;
             ValueNodeV* r = t->FindChild("at_rest");
-            for (i = 0; i < numBones; i++) {
+            for (joint.index = 0; joint.index < numBones; joint.index++) {
                 char key[0x20];
-                fn_801345D8(key, 0x20, "%d", i);
-                ValVec3& bone = bones[i];
+                fn_801345D8(key, 0x20, "%d", joint.index);
+                ValVec3& bone = bones[joint.index];
                 bone = r->GetVec3Or(key, zero);
             }
         } else {

@@ -500,6 +500,11 @@ static inline f32 ScreenTop(void) {
     return 0.5f * lbl_8055CFF4;
 }
 
+/* Helper name unproven */
+static inline f32 GoalsPanelSlide(f32 t) {
+    return 4.0f * SCurve(t);
+}
+
 void DrawLoadingScreen(int alpha, f32 t) {
     f32 offset;
     f32 x0;
@@ -541,7 +546,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
     show_goals = !lbl_8055D647;
     if (!lbl_8055D646 && lbl_8055D647) {
         f32 panelOrigin = 225.0f;
-        f32 slide = 4.0f * SCurve(t);
+        f32 slide = GoalsPanelSlide(t);
         f32 box_h = 140.0f;
         f32 box_y = 0.5f * box_h - 80.0f;
         f32 box_x = lbl_8055CFF0 * slide - panelOrigin;
