@@ -262,15 +262,16 @@ void fn_802A9428(void) {
 }
 
 void fn_802A9574(void) {
+    // A counted-down loop over both views (the compiler unrolls it; the stores stay in source order).
     LapState* s = lbl_804BD790;
-    s[0].lap = -1;
-    s[0].shown = -1;
-    s[0].car = -1;
-    s[0].hold = 0.0f;
-    s[1].lap = -1;
-    s[1].shown = -1;
-    s[1].car = -1;
-    s[1].hold = 0.0f;
+    int n = 2;
+    while (n--) {
+        s->lap = -1;
+        s->shown = -1;
+        s->car = -1;
+        s->hold = 0.0f;
+        s++;
+    }
 }
 
 void fn_802A95A8(const ZV2* pos, const ZV2* dir) { fn_802A9090(pos, dir); }
