@@ -915,6 +915,8 @@ static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
     }
 }
 
+static inline SimpleHeap* TextureHeap(TexCache* c) { return c->heapRef->heap; }
+
 void fn_802CB82C(s32 id) {
     TexCache* c = lbl_8055FCBC;
     MipSlot* s = &c->slots[id];
@@ -922,7 +924,7 @@ void fn_802CB82C(s32 id) {
         TexEntry* t = &lbl_8055FCB0[id];
         fn_802CB3F4(t->mip0);
         t->mip0 = 0;
-        SimpleHeap* heap = c->heapRef->heap;
+        SimpleHeap* heap = TextureHeap(c);
         heap->Free(t->mip0Mem);
         t->mip0Mem = 0;
         fn_802CB3F8(t->name, "quick-unload");
