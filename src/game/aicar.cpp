@@ -815,6 +815,9 @@ static inline int Expr1_fn_80194324(f32 dt) {
     return dt < 1.5f;
 }
 
+/* Helper name unproven */
+static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) { return ay * bx + -ax * by; }
+
 void fn_80194324(u8* d) {
     if (IsLoadingActive()) {
         S32(d, 0x2D0) |= 0x10;
@@ -828,10 +831,10 @@ void fn_80194324(u8* d) {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1D0);
             f32 v;
             if (Expr1_fn_80194324(dt)) {
-                f32 b = F32(d, 0x17C) * F32(d, 0x180) + -F32(d, 0x178) * F32(d, 0x184);
-                v = b + (dt / 1.5f) * (F32(d, 0x1B0) * F32(d, 0x1B4) + -F32(d, 0x1AC) * F32(d, 0x1B8) - b);
+                f32 b = Cross2(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x180), F32(d, 0x184));
+                v = b + (dt / 1.5f) * (Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8)) - b);
             } else {
-                v = F32(d, 0x1B0) * F32(d, 0x1B4) + -F32(d, 0x1AC) * F32(d, 0x1B8);
+                v = Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8));
             }
             ok = (f32)__fabs(v) < lim;
         }
