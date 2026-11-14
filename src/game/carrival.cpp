@@ -30,6 +30,10 @@ struct RegTable {
     s32 count;            // offset 0x30
 };
 
+// Stripped from the shipped game: its delete[] makes the compiler emit RegTable's weak dtor right here, at the
+// start of the unit (0x8027AA08), before fn_8027AA48.
+void fn_RegTableUser(RegTable* t) { delete[] t; }  /* Helper name unproven */
+
 extern "C" {
 RegUser* fn_8027ABF8(s32 id);
 s32 fn_8027AC08(RegUser* u, s32 key);

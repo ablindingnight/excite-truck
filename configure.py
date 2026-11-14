@@ -1227,7 +1227,7 @@ config.libs.append(
             Object(Matching, "game/cartype.cpp"),
             Object(Matching, "game/camdefs.cpp"),
             Object(Matching, "game/carstate.cpp"),
-            Object(NonMatching, "game/carsetup.cpp"),
+            Object(Matching, "game/carsetup.cpp"),
             Object(Matching, "game/carrival.cpp"),
             Object(Matching, "game/carreg.cpp"),
             Object(Matching, "game/eventpath.cpp"),
