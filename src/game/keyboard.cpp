@@ -22,7 +22,7 @@ f32 fn_8023659C(void);  // seconds
 void fn_80221E7C(void* state);
 }
 
-double fmod(double x, double y);
+extern "C" double fmod(double x, double y);
 
 
 
@@ -338,16 +338,13 @@ void NameChooser::Draw(void) {
     u32 color;
     int n;
     int last;
-    int blink;
+    bool blink;
     int i;
     f32 nx = 50.0f + px;
     f32 ny = 37.0f + py;
     n = max - 1;
     int len = Length();
-    last = n - 1;
-    if (len < last) {
-        last = len;
-    }
+    last = len < n - 1 ? len : n - 1;
     blink = (f32)fmod(fn_8023659C(), 0.6f) > 0.3f;
     for (i = 0; i < n; i++) {
         int cursor = 0;
