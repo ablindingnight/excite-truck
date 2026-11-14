@@ -2725,8 +2725,12 @@ void fn_80198530(u8* d) {
         fn_8018ADCC(CAR(d), grip);
     }
     int pit = 0;
-    if (S32(CAR(d), 0x1F0) == 0x50 && F32(d, 0x26C) - F32((u8*)LINK(d)->Body(), 0x26D8) < 3.0f) {
-        pit = 1;
+    if (S32(CAR(d), 0x1F0) == 0x50) {
+        f32 own = F32(d, 0x26C);
+        f32 other = F32((u8*)LINK(d)->Body(), 0x26D8);
+        if (own - other < 3.0f) {
+            pit = 1;
+        }
     }
     if (pit) {
         S32(d, 0x2D0) |= 0x800;

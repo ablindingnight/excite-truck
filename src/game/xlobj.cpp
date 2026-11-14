@@ -947,7 +947,8 @@ static inline Item* DrawEntryStrips(Item* it, TexEntry* te, void* verts, int nve
                 u16** d = c->data;
                 st = d[j];
                 fn_802DC280(verts, nverts, st, st[0] + 1);
-                lbl_8055FA6C += Tris(d[j][0] - 1);
+                int count = d[j][0];
+                lbl_8055FA6C += Tris(count - 1);
             }
             c = c->next;
         } while (c);
@@ -993,7 +994,8 @@ void fn_802BB0FC(void* verts, int nverts) {
                                 d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                lbl_8055FA6C += Tris(d[j][0] - 1);
+                                int count = d[j][0];
+                                lbl_8055FA6C += Tris(count - 1);
                             }
                             c = c->next;
                         } while (c);
@@ -1064,7 +1066,8 @@ void fn_802BB3B8(void* verts, int nverts) {
                                 d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                lbl_8055FA6C += Tris(d[j][0] - 1);
+                                int count = d[j][0];
+                                lbl_8055FA6C += Tris(count - 1);
                             }
                             c = c->next;
                         } while (c);

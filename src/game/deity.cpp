@@ -1425,9 +1425,9 @@ void fn_801B30E0(int i) {
     LineFollower* l = c->Line();
     IdealPoint* best;
     if (c->ideal.seg) {
-        IdealPoint* first = l->line->points;
         u32 want = c->ideal.seg->ilpos;
-        IdealPoint* p = first;
+        IdealPoint* p = l->line->points;
+        struct { IdealPoint* point; } start = { p };
         s32 bestD = 0x7FFFFFFF;
         best = 0;
         do {
@@ -1440,7 +1440,7 @@ void fn_801B30E0(int i) {
                 best = p;
             }
             p = p->next;
-        } while (p != first);
+        } while (p != start.point);
     } else {
         best = 0;
     }

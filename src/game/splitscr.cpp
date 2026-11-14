@@ -198,7 +198,6 @@ static inline void DividerVertex(u32 color, int idx, f32 x, f32 y) {
     fn_802C8E00(color, idx, p.x, p.y, p.z, 0.0f, 0.0f);
 }
 
-static inline f32 GridToWorld_hm(int v, f32 cell) { return cell * (f32)v; }  /* Helper name unproven */
 void fn_80205D5C(void) {
     fn_802C8CBC(-1);
     fn_802C8DBC(0x10);
@@ -207,7 +206,8 @@ void fn_80205D5C(void) {
     f32 ws[4] = {1.5f * w, w, w, 1.5f * w};
     f32 cx = (f32)lbl_8055CFF0 / 2.0f;
     for (int i = 0; i < 4; i++) {
-        DividerVertex(0x00404040, i > 0, cx + ws[i], GridToWorld_hm(lbl_8055CFF4, ys[i]));
+        f32 height = (f32)lbl_8055CFF4;
+        DividerVertex(0x00404040, i > 0, cx + ws[i], ys[i] * height);
         DividerVertex(0xFF404040, i > 0, cx, (f32)lbl_8055CFF4 * ys[i]);
     }
     for (int i = 0; i < 4; i++) {

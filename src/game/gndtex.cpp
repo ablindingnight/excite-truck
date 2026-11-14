@@ -521,7 +521,16 @@ void fn_802DC134(void) { fn_802DBDD8(); }
 void fn_802DC138(void* verts, int nverts, const u16* idx, int n) {
     fn_802DB778(0);
     fn_802DBCFC(verts, nverts);
-    DrawStrips(idx, n);
+    const u16* p = idx;
+    int left = n;
+    while (left > 0) {
+        u16 c = *p++;
+        GXBegin(0xA0, 0, c);
+        left -= c + 1;
+        for (int i = 0; i < c; i++) {
+            WGPIPE.us = *p++;
+        }
+    }
 }
 
 void fn_802DC278(void) { fn_802DBD88(); }
@@ -531,7 +540,16 @@ void fn_802DC27C(void) { fn_802DBDD8(); }
 void fn_802DC280(void* verts, int nverts, const u16* idx, int n) {
     fn_802DB778(1);
     fn_802DBC70(verts, nverts);
-    DrawStrips(idx, n);
+    const u16* p = idx;
+    int left = n;
+    while (left > 0) {
+        u16 c = *p++;
+        GXBegin(0xA0, 0, c);
+        left -= c + 1;
+        for (int i = 0; i < c; i++) {
+            WGPIPE.us = *p++;
+        }
+    }
 }
 
 void fn_802DC3C0(s32 tex) {
@@ -562,7 +580,16 @@ void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
         lbl_8055FEA0 = a;
         GXSetTevColor(1, c);
     }
-    DrawStrips(idx, n);
+    const u16* p = idx;
+    int left = n;
+    while (left > 0) {
+        u16 c = *p++;
+        GXBegin(0xA0, 0, c);
+        left -= c + 1;
+        for (int i = 0; i < c; i++) {
+            WGPIPE.us = *p++;
+        }
+    }
 }
 
 GModel* fn_802DC628(GModel* m) { return m; }

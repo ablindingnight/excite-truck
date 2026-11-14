@@ -323,7 +323,8 @@ static inline f32 OscValue(Osc* o) {
         t = 2.0f * o->half - t;
     }
     t /= o->half;
-    return o->min + Smooth(t) * (o->max - o->min);
+    f32 factor = Smooth(t);
+    return Lerp(o->min, o->max, factor);
 }
 
 extern "C" {
