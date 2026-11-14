@@ -931,13 +931,15 @@ public:
         }
         return 0;
     }
+    /* Helper name unproven */
+    void SetInterpolatedMorph(int t, f32 a, f32 b) {
+        Set(Lerp(a, b, Ramp(t, 0.0f, length)));
+    }
     virtual void Update(void) {
         if (state == 2) {
             int t = lbl_8055E3C4 - startFrame - delay;
             if (t >= 0) {
-                f32 b = to;
-                    f32 a = from;
-                    Set(Lerp(a, b, Ramp(t, 0.0f, length)));
+                SetInterpolatedMorph(t, from, to);
             }
             if (t >= length) {
                 state = 3;
