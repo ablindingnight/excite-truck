@@ -1486,9 +1486,10 @@ void fn_80011A5C(int n) {
         lbl_80350EB0.left = -160.0f + l;
         lbl_80350EB0.right = 160.0f - r;
     }
-    rows = ((lbl_8055D4A0 > 1) + 1) * 2;
-    cols = ((lbl_8055D4A0 > 2) + 1) * 2;
-    for (i = 0; i < lbl_8055D4A0; i++) {
+    int cnt = lbl_8055D4A0;
+    rows = ((cnt > 1) + 1) * 2;
+    cols = ((cnt > 2) + 1) * 2;
+    for (i = 0; i < cnt; i++) {
         lbl_80350F28[i].top = 480.0f / rows - views[i].top;
         lbl_80350F28[i].bottom = -480.0f / rows + views[i].bottom;
         lbl_80350F28[i].left = -640.0f / cols + views[i].left;
