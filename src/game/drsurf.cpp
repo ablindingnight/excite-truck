@@ -423,31 +423,34 @@ void fn_802D45C0(Surf* s) {
     }
 }
 
+// Helper name unproven: the arguments are evaluated right to left (z, y, x), as the target converts them.
+static inline void SetV(V3* o, f32 x, f32 y, f32 z) {
+    o->x = x;
+    o->y = y;
+    o->z = z;
+}
+
 void fn_802D479C(Surf* s) {
     MorphVtx* v;
     int n = s->nverts;
     v = (MorphVtx*)s->verts;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
+        MorphVtx* m = v;
         V3* o = out;
         for (int i = n; i > 0; i--) {
-            f32 wa = lbl_804CA308[v->ia];
-            f32 wb = lbl_804CA308[v->ib];
+            f32 wb = lbl_804CA308[m->ib];
+            f32 wa = lbl_804CA308[m->ia];
             V3 a;
-            __typeof__(a.x) a_x = (1.0f / 255) * v->a[0];
-            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
-            a.x = a_x;
-            a.y = a_y;
-            a.z = (1.0f / 255) * v->a[2];
+            SetV(&a, (1.0f / 255) * m->a[0], (1.0f / 255) * m->a[1], (1.0f / 255) * m->a[2]);
             V3 b;
+            SetV(&b, (1.0f / 255) * m->b[0], (1.0f / 255) * m->b[1], (1.0f / 255) * m->b[2]);
+            m++;
             o->x = v->x + a.x * wa;
-            b.x = (1.0f / 255) * v->b[0];
-            b.y = (1.0f / 255) * v->b[1];
-            b.z = (1.0f / 255) * v->b[2];
             o->y = v->y + a.y * wa;
             o->z = v->z + a.z * wa;
             o->x = o->x + b.x * wb;
-            o->y = o->y + wb * b.y;
+            o->y = o->y + b.y * wb;
             o->z = o->z + b.z * wb;
             v++;
             o++;
@@ -542,22 +545,24 @@ void fn_802D4ECC(Surf* s) {
     if (out) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
-            f32 w0 = (1.0f / 255) * v->w0;
             const BVec* ba = &lbl_804DB068[v->b0];
-            f32 w1 = (1.0f / 255) * v->w1;
             const BVec* bb = &lbl_804DB068[v->b1];
+            f32 w0 = (1.0f / 255) * v->w0;
+            f32 w1 = (1.0f / 255) * v->w1;
             V3 p;
-            __typeof__(p.z) p_z1 = v->z + ba->z * w0;
-            __typeof__(p.x) p_x = v->x + w0 * ba->x;
-            p.y = v->y + w0 * ba->y;
-            p.x = p_x;
-            p.z = p_z1;
-            f32 xv = bb->x;
-            __typeof__(p.z) p_z = p.z + bb->z * w1;
-            p.x = p.x + xv * w1;
+            p.y = v->y + ba->y * w0;
+            p.x = v->x + ba->x * w0;
+            p.z = v->z + ba->z * w0;
+            p.x = p.x + bb->x * w1;
             p.y = p.y + bb->y * w1;
-            p.z = p_z;
-            SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
+            p.z = p.z + bb->z * w1;
+            f32 a = (1.0f / 255) * v->da;
+            f32 b = (1.0f / 255) * v->db;
+            f32 wb = lbl_804CA308[v->ib];
+            f32 wa = lbl_804CA308[v->ia];
+            o->x = p.x;
+            o->y = p.y + a * wa + b * wb;
+            o->z = p.z;
             v++;
             o++;
         }
@@ -577,10 +582,18 @@ void fn_802D50B4(Surf* s) {
         if (!Queue(&lbl_804D6C44, n, v, out)) {
             V3* o = out;
             for (int i = n; i > 0; i--) {
+                f32 a = (1.0f / 255) * v->da;
+                f32 b = (1.0f / 255) * v->db;
+                f32 wb = lbl_804CA308[v->ib];
+                f32 wa = lbl_804CA308[v->ia];
                 f32 w = v->w;
                 V3 p;
-                SetXYZ(&p, v->x + lbl_804C56F0.x * w, v->y + lbl_804C56F0.y * w, v->z + lbl_804C56F0.z * w);
-                SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
+                p.x = v->x + lbl_804C56F0.x * w;
+                p.y = v->y + lbl_804C56F0.y * w;
+                p.z = v->z + lbl_804C56F0.z * w;
+                o->x = p.x;
+                o->y = p.y + a * wa + b * wb;
+                o->z = p.z;
                 v++;
                 o++;
             }
