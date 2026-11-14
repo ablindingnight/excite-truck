@@ -996,9 +996,10 @@ TreeType* fn_802BE008(TCell* c) {
     TreeType* t = lbl_804C00D4.data;
     for (int i = 0; i < lbl_804C00D4.n; i++, t++) {
         if (t->set) {
-            TArray<TCell>* a = t->set->near;
+            const struct { const TArray<TCell>* cells; } range = {t->set->near};
             in = 0;
-            if (c >= a->data && c < a->data + a->n) {
+            TCell* const start = range.cells->data;
+            if (c >= start && c < start + range.cells->n) {
                 in = 1;
             }
             if (in) {
