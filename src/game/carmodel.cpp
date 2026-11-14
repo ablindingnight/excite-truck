@@ -936,7 +936,7 @@ void fn_801ED718(CarModel* m) {
         b[20] = b[1];
         b[21] = b[21];  // the target loads and rewrites both
         b[22] = b[22];
-        fn_801EC714(&m->speedoSlider, &b[4].y, &b[5].x);
+        fn_801EC714(&m->speedoSlider, &b[4].x, &b[5].x);
         fn_802C70AC(m->chassis, &m->frame, fn_802C7A34(1, &b[1], 22), 0xFFFFFFFF);
         fn_802C70AC(m->models[1], &m->frame, 0, m->car->groupMask & 0xFFFDFF9F);
     }
