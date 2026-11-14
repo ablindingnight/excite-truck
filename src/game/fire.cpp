@@ -1549,18 +1549,18 @@ inline void ExhaustTorchMan::TransformTorchPart(int i, const TorchPart* part) {
 
 void ExhaustTorchMan::DrawFaces(void) {
     int i;
-    for (i = 0; i < fn_80287B14(); i++) {
-        if (entries[i].on) {
+    TorchEntry* entry;
+    for (i = 0, entry = entries; i < fn_80287B14(); ++entry, ++i) {
+        if (entry->on) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const TorchPart* part = fn_80288060(model, k);
                 TransformTorchPart(i, part);
                 Vec p;
-                p.x = entries[i].pos.x + entries[i].rot[1].x * entries[i].len;
-                p.y = entries[i].pos.y + entries[i].rot[1].y * entries[i].len;
-                p.z = entries[i].pos.z + entries[i].rot[1].z * entries[i].len;
-                DrawFace(&entries[i], entries[i].frame, entries[i].len);
+                const f32 length = entry->len;
+                TAddS(&p, &entries[i].pos, &entries[i].rot[1], length);
+                DrawFace(entry, entry->frame, length);
             }
         }
     }

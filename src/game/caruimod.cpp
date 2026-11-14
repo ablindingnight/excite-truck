@@ -856,6 +856,7 @@ static inline void ReleaseLoader(const char* name) {
 }
 
 static inline int AcquireLoader(const char* name) {
+    ResourceLoader* l;
     int idle = -1;
     for (int i = 0; i < lbl_8055F33C; i++) {
         if (lbl_80498E08[i]->IsIdle()) {
@@ -865,7 +866,7 @@ static inline int AcquireLoader(const char* name) {
             return 1;
         }
     }
-    ResourceLoader* l = lbl_80498E08[idle];
+    l = lbl_80498E08[idle];
     CopyName(l->name, name, 0x20);
     if (fn_8012CC20(l->set, l->name)) {
         l->refs = 1;
