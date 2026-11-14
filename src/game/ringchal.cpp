@@ -360,26 +360,16 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-// MATCHING-AID: expanded forms of Stop/StrCopyN for the functions under #pragma dont_inline below (the original
-// inlines these helpers there but calls the class methods defined after them; only the pragma + these reproduce it).
+// MATCHING-AID: expanded form of Stop for vf10, which is still under #pragma dont_inline (the original inlines Stop
+// there but calls the Arena methods). The real mechanism is known now: inline callees of an inlined helper stay calls
+// when the helper's expanded body is over the compiler's size limit (see vf0C's Arena::Step); vf10's helper split
+// has not been found yet (an Arena reset helper comes out just under the limit and expands everything).
 #define STOP_SOUND(s_)                                                                                                 \
     do {                                                                                                               \
         RSound* snd_ = (s_);                                                                                           \
         if (snd_) {                                                                                                    \
             snd_->stop = 1;                                                                                            \
             snd_->f4C = 0;                                                                                             \
-        }                                                                                                              \
-    } while (0)
-#define STR_COPY_N(dst_, src_, len_)                                                                                   \
-    do {                                                                                                               \
-        const char* s_ = (src_);                                                                                       \
-        char* d_ = (dst_);                                                                                             \
-        int n_ = (len_);                                                                                               \
-        while ((*d_++ = *s_++) != 0) {                                                                                 \
-            if (--n_ <= 0) {                                                                                           \
-                d_[-1] = 0;                                                                                            \
-                break;                                                                                                 \
-            }                                                                                                          \
         }                                                                                                              \
     } while (0)
 
@@ -2528,8 +2518,6 @@ inline void RingChalMaster::vf4C(int view) {
     }
     DrawRings();
 }
-#pragma dont_inline on
-#pragma dont_inline reset
 
 inline void ArenaTimer::Draw(ILayout* l) {
     char buf[0x20];
