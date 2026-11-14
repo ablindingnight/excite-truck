@@ -432,7 +432,6 @@ public:
     virtual void Shutdown(void) {}
     virtual void Load(void) {
         char buf[0x10];
-        int i;
         ValueTable* cmds;
         int n;
         pages.count = 0;
@@ -442,19 +441,19 @@ public:
             n++;
             fn_801345D8(buf, sizeof(buf), "desc%d", n);
         } while (node->Has(buf));
-        for (i = 0; i < n - 1; i++) {
-            HelpPage* p = &pages.data[pages.count++];
+        for (int i = 0; i < n - 1; i++) {
+            const struct { HelpPage* page; } entry = {&pages.data[pages.count++]};
             int k = i + 1;
             fn_801345D8(buf, sizeof(buf), "desc%d", k);
-            p->desc = node->GetValue(buf);
+            entry.page->desc = node->GetValue(buf);
             fn_801345D8(buf, sizeof(buf), "lyt%d", k);
-            p->lyt = 0;
+            entry.page->lyt = 0;
             if (node->Has(buf)) {
                 const char* name = node->GetValue(buf);
                 if (cmds) {
                     ValueNode* d = cmds->FindChild(name);
                     if (d) {
-                        p->lyt = fn_80146C2C(lbl_8055E2E4, d);
+                        entry.page->lyt = fn_80146C2C(lbl_8055E2E4, d);
                     }
                 }
             }

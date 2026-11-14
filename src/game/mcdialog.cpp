@@ -61,30 +61,36 @@ int fn_8023F91C(int* result);
 int fn_8023F964(int* result);
 int fn_8023F9E8(void);
 
+static inline MenuItem MakeSavingTitle(CardTask* task) {
+    const struct { int length; } label = {strlen(task->Title())};
+    return MenuItem("title", task->Title(), CaptionContext(label.length));
+}
+
 void fn_8023E5B4(CardTask* task) {
     s32 now = fn_802E2C20();
     lbl_8055F1B0 = task;
     lbl_8055F1B4 = now + 1500;
     lbl_8055F1BC = 0;
     lbl_8055F1B8 = now + 1000;
-    MenuStrList* list = (MenuStrList*)__nw__FUlPCc(0x14, "string_list");
-    if (list) {
-        list = fn_8022D228(list, 14, 32);
+    struct { MenuStrList* list; } strings;
+    strings.list = (MenuStrList*)__nw__FUlPCc(0x14, "string_list");
+    if (strings.list) {
+        strings.list = fn_8022D228(strings.list, 14, 32);
     }
     for (int i = 0; i < 14; i++) {
-        fn_8022D350(list, "SAVING", 0);
+        fn_8022D350(strings.list, "SAVING", 0);
     }
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023F874, 0, 0),
         MenuItem(lbl_8055BABC, 8, (void*)fn_8023F870, 1, 0),
-        MenuItem("title", task->Title(), CaptionContext(strlen(task->Title()))),
-        MenuItem("circle_list", 10, list, 0, 0),
+        MakeSavingTitle(task),
+        MenuItem("circle_list", 10, strings.list, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {"msaving.lyt", items, fn_8023F878, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
-    fn_8022D2BC(list, 1);
+    fn_8022D2BC(strings.list, 1);
 }
 
 void fn_8023E7A8(int status) {
