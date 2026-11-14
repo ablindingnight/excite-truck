@@ -2383,6 +2383,13 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
 static inline int SignDiffers(f32 a, f32 b) { return (s32)(*(u32*)&b & 0x80000000) != (s32)(*(u32*)&a & 0x80000000); }
 static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
+static inline void UpdateFollowLine(u8* d, f32 gap, f32 dir, f32 cur) {
+    f32 to = F32(d, 0xF8) - gap * dir;
+    f32 from = F32(d, 0x278);
+    f32 t = Clamp01(Unlerp(cur, 0.0f, F32(d, 0xEC)));
+    F32(d, 0xF4) = LerpF(from, to, t);
+}
+
 // Following: while the driver tails another car (0xFC), pick the side to pass on, ease the lateral line toward a
 // point beside it and match its speed; then pull the target point toward the follow line by the follow weight,
 // which fades out once the car is no longer close.
@@ -2424,10 +2431,7 @@ void fn_80197BD0(u8* d, u8* out) {
                 }
                 f32 cur = F32(d, 0x54);
                 f32 dir = F32(d, 0x10C) > 0.0f ? 1.0f : -1.0f;
-                f32 to = F32(d, 0xF8) - gap * dir;
-                f32 from = F32(d, 0x278);
-                f32 t = Clamp01(Unlerp(cur, 0.0f, F32(d, 0xEC)));
-                F32(d, 0xF4) = LerpF(from, to, t);
+                UpdateFollowLine(d, gap, dir, cur);
                 f32 u = Clamp01((F32(d, 0xEC) - 4.0f) / -3.3f);
                 F32(d, 0xF0) = LerpF(F32(d, 0xF0), LerpF(0.0f, 1.0f, u), 0.5f);
                 if (!fn_80193184(d, S32(d, 0x114))) {
