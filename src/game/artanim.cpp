@@ -673,8 +673,7 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 pos[2] = k0->pos[2] + u * (k1->pos[2] - k0->pos[2]);
                 pos[1] = k0->pos[1] + u * (k1->pos[1] - k0->pos[1]);
                 pos[0] = k0->pos[0] + u * (k1->pos[0] - k0->pos[0]);
-                f32 scalev = parent->scale;
-                f32 ps = parent ? scalev : 1.0f;
+                f32 ps = parent ? parent->scale : 1.0f;
                 if (parent) {
                     pos[0] = pos[0] + parent->pos[0];
                     pos[1] = pos[1] + parent->pos[1];
