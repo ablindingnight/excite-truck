@@ -92,8 +92,8 @@ s32 fn_80204354(void) { return fn_802E2C20() - lbl_8055ED48; }
 int fn_8020437C(void) { return fn_80204354() < 3500; }
 
 void fn_802043B0(u32* color) {
-    f32 t = ((f32)fn_80204354() - 2500.0f) / 1000.0f;
-    t = MIN(1.0f, t);
+    f32 ms = (f32)fn_80204354();
+    f32 t = MIN(1.0f, (ms - 2500.0f) / 1000.0f);
     t = MAX(t, 0.0f);
     *color &= 0x00FFFFFF;
     *color |= (int)Lerp(255.0f, 0.0f, t) << 24;

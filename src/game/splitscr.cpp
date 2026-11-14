@@ -100,7 +100,6 @@ static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline f32 Clamp01(f32 x) { return Max(Min(x, 1.0f), 0.0f); }
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 Unit(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
 
 ModuleTag lbl_8055ED60;
 UnkStaticFFFF lbl_8055ED68;
@@ -110,7 +109,7 @@ extern "C" {
 
 // One vertex at (x, y) in bar space: x in [-1, 1] across the divider, y in [0, 1] down the screen.
 void fn_802057A8(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
-    f32 px = (f32)lbl_8055CFF0 * Lerp(0.49f, 0.51f, Unit(x, -1.0f, 1.0f));
+    f32 px = (f32)lbl_8055CFF0 * Lerp(0.49f, 0.51f, (x - -1.0f) / 2.0f);
     f32 py = (f32)lbl_8055CFF4 * Lerp(0.93f, 0.07f, y);
     VtxPos p(px, py, 0.0f);
     fn_802C8E00(color, idx, p.x, p.y, p.z, u, v);
