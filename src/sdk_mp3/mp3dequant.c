@@ -29,7 +29,6 @@ static inline s32 Pow43(s32 x, const s32* c) {
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
-    u16 me;
     const s32* c;
     s16 idx;
     u32 e0;
@@ -51,7 +50,6 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
     s32 w;
     s16 g;
     s32 r;
-    s16 sv;
 
     if (d->unk9CC[3] == 0) {
         d->unk9CC[3] = 1;
@@ -80,11 +78,11 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
             lt = lbl_802F3B84;
             st = lbl_802F3D18;
         }
-        for (w = 0; w < 21; w++) {
-            long_edges[w] = lt[w];
+        for (p = 0; p < 21; p++) {
+            long_edges[p] = lt[p];
         }
-        for (w = 0; w < 36; w++) {
-            short_edges[w] = st[w];
+        for (p = 0; p < 36; p++) {
+            short_edges[p] = st[p];
         }
         d->long_end = long_edges[20];
         d->short_end = short_edges[35];
@@ -218,9 +216,9 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
             }
             for (i = 0; i < d->short_end; i++) {
-                sv = in[i];
-                x = sv;
-                if (sv > 0x1FFF) {
+                m = in[i];
+                x = m;
+                if (m > 0x1FFF) {
                     x = 0x1FFF;
                 }
                 w = short_map[i] & 0xF;
@@ -230,71 +228,71 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     continue;
                 }
                 b = short_map[i] >> 4;
-                t = (s16)(subblock_gain[w] * 2);
+                p = (s16)(subblock_gain[w] * 2);
                 idx = sf_short[b][w];
                 e = lbl_802F3A8C[row][idx];
-                m = lbl_802F3A00[row][idx];
+                v = lbl_802F3A00[row][idx];
                 if (x < 0) {
                     x = -x;
                 }
-                e = e + (t + e0);
+                e = e + (p + e0);
                 if (x > 0x1FFF) {
                     x = 0x1FFF;
                 }
                 if ((x & 0x1F00) == 0) {
-                    p = lbl_802F34E8[x];
-                    if (m == 1) {
-                        r = (s32)(((s64)p * g) >> 20);
+                    r = lbl_802F34E8[x];
+                    if (v == 1) {
+                        t = (s32)(((s64)r * g) >> 20);
                         if (e > 20) {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = (g * m) >> 4;
+                        p = (g * v) >> 4;
                         if (e > 20) {
-                            r = (s32)(((s64)t * p) >> 24);
+                            t = (s32)(((s64)p * r) >> 24);
                             e -= 8;
                             if (e < 20) {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             } else {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             }
                         } else {
-                            r = (s32)(((s64)t * p) >> 20);
+                            t = (s32)(((s64)p * r) >> 20);
                             e -= 4;
                             if (e < 20) {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             } else {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             }
                         }
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = Pow43(x, c);
-                    if (m == 1) {
-                        r = p * g;
+                    r = Pow43(x, c);
+                    if (v == 1) {
+                        t = r * g;
                         if (e > 20) {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = g * m;
+                        p = g * v;
                         e -= 8;
-                        r = (s32)(((s64)t * p) >> 8);
+                        t = (s32)(((s64)p * r) >> 8);
                         if (e < 20) {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         } else {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         }
                     }
                 }
-                if (sv < 0) {
-                    out->sxr[w][k] = -r;
+                if (m < 0) {
+                    out->sxr[w][k] = -t;
                 } else {
-                    out->sxr[w][k] = r;
+                    out->sxr[w][k] = t;
                 }
             }
             for (i /= 3; i < 192; i++) {
@@ -327,18 +325,18 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                 }
             }
             for (i = 0; i < 36; i++) {
-                v = in[i];
-                x = v;
-                if (e0 > 0x33 || v == 0) {
+                m = in[i];
+                x = m;
+                if (e0 > 0x33 || m == 0) {
                     out->xr[i] = 0;
                     continue;
                 }
                 b = mixed_map[i];
                 idx = lbl_802F39E8[b] * *preflag + sf_long[b];
                 e = lbl_802F3A8C[row][idx];
-                m = lbl_802F3A00[row][idx];
-                if (v < 0) {
-                    x = -v;
+                v = lbl_802F3A00[row][idx];
+                if (m < 0) {
+                    x = -m;
                 }
                 if (x > 0x1FFF) {
                     x = 0x1FFF;
@@ -352,137 +350,137 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     x = 0x1FFF;
                 }
                 if ((x & 0x1F00) == 0) {
-                    p = lbl_802F34E8[x];
-                    if (m == 1) {
-                        r = (s32)(((s64)p * g) >> 20);
+                    r = lbl_802F34E8[x];
+                    if (v == 1) {
+                        t = (s32)(((s64)r * g) >> 20);
                         if (e > 20) {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = (g * m) >> 4;
+                        p = (g * v) >> 4;
                         if (e > 20) {
-                            r = (s32)(((s64)t * p) >> 24);
+                            t = (s32)(((s64)p * r) >> 24);
                             e -= 8;
                             if (e < 20) {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             } else {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             }
                         } else {
-                            r = (s32)(((s64)t * p) >> 20);
+                            t = (s32)(((s64)p * r) >> 20);
                             e -= 4;
                             if (e < 20) {
-                                r <<= 20 - e;
+                                t <<= 20 - e;
                             } else {
-                                r >>= e - 20;
+                                t >>= e - 20;
                             }
                         }
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = Pow43(x, c);
-                    if (m == 1) {
-                        r = p * g;
+                    r = Pow43(x, c);
+                    if (v == 1) {
+                        t = r * g;
                         if (e > 20) {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = g * m;
+                        p = g * v;
                         e -= 8;
-                        r = (s32)(((s64)t * p) >> 8);
+                        t = (s32)(((s64)p * r) >> 8);
                         if (e < 20) {
-                            r <<= 20 - e;
+                            t <<= 20 - e;
                         } else {
-                            r >>= e - 20;
+                            t >>= e - 20;
                         }
                     }
                 }
-                if (v < 0) {
-                    out->xr[i] = -r;
+                if (m < 0) {
+                    out->xr[i] = -t;
                 } else {
-                    out->xr[i] = r;
+                    out->xr[i] = t;
                 }
             }
             for (i = 36; i < d->short_end; i++) {
-                idx = in[i];
-                x = idx;
+                m = in[i];
+                x = m;
                 w = mixed_map[i] & 0xF;
                 k = ++cnt[w];
-                if (e0 > 0x33 || idx == 0) {
+                if (e0 > 0x33 || m == 0) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
-                t = (s16)(subblock_gain[w] * 2) + e0;
-                v = sf_short[short_map[i] >> 4][w];
-                m = lbl_802F3A00[row][v];
-                me = lbl_802F3A8C[row][v] + t;
-                if (me > 0x33) {
+                p = (s16)(subblock_gain[w] * 2) + e0;
+                idx = sf_short[short_map[i] >> 4][w];
+                v = lbl_802F3A00[row][idx];
+                e = lbl_802F3A8C[row][idx] + p;
+                if (e > 0x33) {
                     out->sxr[w][k] = 0;
                     continue;
                 }
                 /* NB: no absolute value in this part of the original */
-                if (idx > 0x1FFF) {
+                if (m > 0x1FFF) {
                     x = 0x1FFF;
                 }
                 if ((x & 0x1F00) == 0) {
-                    p = lbl_802F34E8[x];
-                    if (m == 1) {
-                        r = (s32)(((s64)p * g) >> 20);
-                        if (me > 20) {
-                            r >>= me - 20;
+                    r = lbl_802F34E8[x];
+                    if (v == 1) {
+                        t = (s32)(((s64)r * g) >> 20);
+                        if (e > 20) {
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - me;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = (g * m) >> 4;
-                        if (me > 20) {
-                            me -= 8;
-                            r = (s32)(((s64)t * p) >> 24);
-                            if (me < 20) {
-                                r <<= 20 - me;
+                        p = (g * v) >> 4;
+                        if (e > 20) {
+                            e -= 8;
+                            t = (s32)(((s64)p * r) >> 24);
+                            if (e < 20) {
+                                t <<= 20 - e;
                             } else {
-                                r >>= me - 20;
+                                t >>= e - 20;
                             }
                         } else {
-                            r = (s32)(((s64)t * p) >> 20);
-                            me -= 4;
-                            if (me < 20) {
-                                r <<= 20 - me;
+                            t = (s32)(((s64)p * r) >> 20);
+                            e -= 4;
+                            if (e < 20) {
+                                t <<= 20 - e;
                             } else {
-                                r >>= me - 20;
+                                t >>= e - 20;
                             }
-                            r <<= 20 - me; /* NB: the original shifts a second time here */
+                            t <<= 20 - e; /* NB: the original shifts a second time here */
                         }
                     }
                 } else {
                     c = lbl_8031C098[x >> 8];
-                    p = Pow43(x, c);
-                    if (m == 1) {
-                        r = p * g;
-                        if (me > 20) {
-                            r >>= me - 20;
+                    r = Pow43(x, c);
+                    if (v == 1) {
+                        t = r * g;
+                        if (e > 20) {
+                            t >>= e - 20;
                         } else {
-                            r <<= 20 - me;
+                            t <<= 20 - e;
                         }
                     } else {
-                        t = g * m;
-                        me -= 8;
-                        r = (s32)(((s64)t * p) >> 8);
-                        if (me < 20) {
-                            r <<= 20 - me;
+                        p = g * v;
+                        e -= 8;
+                        t = (s32)(((s64)p * r) >> 8);
+                        if (e < 20) {
+                            t <<= 20 - e;
                         } else {
-                            r >>= me - 20;
+                            t >>= e - 20;
                         }
                     }
                 }
-                if (idx < 0) {
-                    out->sxr[w][k] = -r;
+                if (m < 0) {
+                    out->sxr[w][k] = -t;
                 } else {
-                    out->sxr[w][k] = r;
+                    out->sxr[w][k] = t;
                 }
             }
             for (i /= 3; i < 192; i++) {
