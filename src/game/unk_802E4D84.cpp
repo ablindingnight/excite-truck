@@ -896,7 +896,9 @@ void fn_802E6264(void) {
     int wasPlaying;
     SpuSample *s;
     int starting;
-    unsigned int used;
+    struct {
+        unsigned int used;
+    } remoteState;
     unsigned int remotes;
     unsigned int start;
     unsigned int loop;
@@ -905,7 +907,7 @@ void fn_802E6264(void) {
     if (lbl_8055FFA4) {
         lbl_8055FFA4 = 0;
         lbl_8055FFA6 = 1;
-        used = 0;
+        remoteState.used = 0;
         if (lbl_8055FF8C != lbl_8055D1D0) {
             lbl_8055D1D0 = lbl_8055FF8C;
             fn_802E30C8(msg + 0x3C4);
@@ -1093,7 +1095,7 @@ void fn_802E6264(void) {
                     mix.vAuxCL = 32767.0f * (right * back);
                     AXSetVoiceMix(v->vpb, &mix);
                     remotes = v->remotes;
-                    used |= remotes;
+                    remoteState.used |= remotes;
                     if (remotes) {
                         AXSetVoiceRmtOn(v->vpb, 1);
                     } else {
@@ -1114,15 +1116,15 @@ void fn_802E6264(void) {
             }
         }
         OSRestoreInterrupts(level);
-        lbl_804FC658[lbl_8055FFAC++] = used;
+        lbl_804FC658[lbl_8055FFAC++] = remoteState.used;
         if (lbl_8055FFAC >= 10) {
             lbl_8055FFAC = 0;
         }
         int off = 0;
         for (i = 0; i < 10; off += sizeof(lbl_804FC658[0]), i++) {
-            used |= *(unsigned int*)((u8*)lbl_804FC658 + off);
+            remoteState.used |= *(unsigned int*)((u8*)lbl_804FC658 + off);
         }
-        lbl_8055FFA8 = used;
+        lbl_8055FFA8 = remoteState.used;
         lbl_8055FFA6 = 0;
     }
 }

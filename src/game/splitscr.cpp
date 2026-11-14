@@ -231,9 +231,8 @@ void fn_80205FCC(void) {
     static LocString start("SplitScreen:START");
     fn_80010188(0.75f, -1, 0xC, 0.5f * (f32)lbl_8055CFF0, 3.0f + 0.07f * (f32)lbl_8055CFF4, start.Get());
     f32 height = (f32)lbl_8055CFF4;
-    f32 factor = 0.93f;
     f32 margin = 4.0f;
-    height *= factor;
+    height = 0.93f * height;
     f32 y = height + margin;
     fn_80010188(0.75f, -1, 0x24, 0.5f * (f32)lbl_8055CFF0, y, finish.Get());
     fn_802C8638(&saved);

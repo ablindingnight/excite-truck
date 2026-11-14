@@ -546,6 +546,11 @@ static inline void Loop1_fn_802B9108(s16 sz, Grid& g) {
     }
 }
 
+/* Helper name unproven */
+static inline int GroundItemCount(void) {
+    return lbl_8055FA80->count;
+}
+
 void fn_802B9108(s16 size) {
     int d = size * 2;
     Grid g(size);
@@ -579,7 +584,7 @@ void fn_802B9108(s16 size) {
         int start;
         for (int y = size - 0x200; y < 0x200; y += d) {
             GroundCell* cell = fn_802BE844(x, y, size);
-            start = lbl_8055FA80->count;
+            start = GroundItemCount();
             int dd;
             int s = g.size;
             dd = s * 2;
