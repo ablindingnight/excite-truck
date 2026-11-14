@@ -69,7 +69,6 @@ struct GarageFlags {
     u8 alt;                // offset 0x4
     u8 pad5[0x3];
     GaragePair pairs[4];   // offset 0x8
-    char points[0x70];     // offset 0x48, "#unlock_pts" text
 };
 
 extern "C" {
@@ -96,6 +95,7 @@ static UnkStatic123 lbl_80498C30;
 UnkStatic7F lbl_8055F2E0;
 extern s32 lbl_8055F2E8;
 static GarageFlags lbl_80498C48;
+static char lbl_80498C90[0x70];  // "#unlock_pts" text; its own object (third in .bss, so the menu shares one base)
 extern u8* lbl_8055F2EC;
 
 class VList {
@@ -556,7 +556,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_custom_4", 5, &panel.bars[3], 0, 0),
                     MenuItem("#stat_text_5", panel.text[4]),
                     MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
-                    MenuItem("#unlock_pts", lbl_80498C48.points),
+                    MenuItem("#unlock_pts", lbl_80498C90),
                     MenuItem("#locker", 2, cars.data + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", bars[bar]),
                     MenuItem("#races_run", (char*)cars.data + 0x3C),
