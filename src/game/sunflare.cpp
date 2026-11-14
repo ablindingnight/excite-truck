@@ -204,8 +204,10 @@ void fn_80291C7C(const Sprite* s, int sun) {
     VecP u;
     VecP v;
     p.z = 0.0f;
-    f32 x = (f32)fabs(p.x - 0.5f * lbl_8055CFF0);
-    int alpha = Mul(s->color >> 24, LinStep(x, 0.2f * lbl_8055CFF0, lbl_8055CFF0 / 2.0f, 1.0f, 0.25f));
+    f32 delta = p.x - 0.5f * lbl_8055CFF0;
+    f64 distance = fabs(delta);
+    f32 x = distance;
+    int alpha = Mul(s->color >> 24, LinStep(x, 0.2f * lbl_8055CFF0, 0.5f * lbl_8055CFF0, 1.0f, 0.25f));
     if (alpha > 0) {
         u32 color = (alpha << 24) | (s->color & 0xFFFFFF);
         if (!sun) {
@@ -214,7 +216,10 @@ void fn_80291C7C(const Sprite* s, int sun) {
             sn = sin(a);
             f32 cs = cos(a);
             u.Set(cs, sn, 0.0f);
-            v.Set(sn, -cs, 0.0f);
+            cs = -cs;
+            v.x = sn;
+            v.y = cs;
+            v.z = 0.0f;
         } else {
             u.x = -0.70711f;
             u.y = 0.70711f;
