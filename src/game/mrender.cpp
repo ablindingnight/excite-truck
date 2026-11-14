@@ -478,30 +478,36 @@ void fn_802C8E48(void) {
     lbl_8055FC70 = 2;
 }
 
+// World point to screen: camera space first (the camera read as twelve floats: three axes, then the position),
+// then the viewport mapping.
 void fn_802C8E70(const VecP* p, VecP* out) {
-    Camera* c = &lbl_804C1410;
+    const f32* m = (const f32*)&lbl_804C1410;
     f32 z;
     f32 y;
-    f32 x = p->x - c->pos.x;
+    f32 x = p->x - m[9];
     out->x = x;
-    y = p->y - c->pos.y;
+    y = p->y - m[10];
     out->y = y;
-    z = p->z - c->pos.z;
+    z = p->z - m[11];
     out->z = z;
-    f32 z2 = c->rot.right.z;
-    f32 rx = z * z2 + (x * c->rot.right.x + y * c->rot.right.y);
-    f32 zv = c->rot.up.z;
-    f32 ry = z * zv + (x * c->rot.up.x + y * c->rot.up.y);
-    f32 z_ = c->rot.fwd.z;
-    f32 rz = z * z_ + (x * c->rot.fwd.x + y * c->rot.fwd.y);
-    out->x = rx;
-    out->y = ry;
-    out->z = rz;
+    f32 ry = m[1];
+    f32 rz = m[2];
+    f32 vx = x * m[0] + y * ry + z * rz;
+    f32 uy = m[4];
+    f32 uz = m[5];
+    f32 vy = x * m[3] + y * uy + z * uz;
+    f32 fy = m[7];
+    f32 fz = m[8];
+    f32 vz = x * m[6] + y * fy + z * fz;
+    out->x = vx;
+    out->y = vy;
+    out->z = vz;
     f32 depth = lbl_8055FC38 > out->z ? lbl_8055FC38 : out->z;
     f32 k = 1.0f / (lbl_8055FC44 * depth);
-    out->x = lbl_8055FC5C + 0.5f * lbl_8055FC64 * (1.0f + k * out->x);
-    f32 yv = out->y;
-    out->y = lbl_8055FC60 + 0.5f * lbl_8055FC68 * (1.0f + lbl_8055FC6C * (k * -yv));
+    f32 sx = k * out->x;
+    f32 sy = lbl_8055FC6C * (k * -out->y);
+    out->x = lbl_8055FC5C + 0.5f * lbl_8055FC64 * (1.0f + sx);
+    out->y = lbl_8055FC60 + 0.5f * lbl_8055FC68 * (1.0f + sy);
 }
 
 f32 fn_802C8FEC(void) { return lbl_8055FC6C; }
@@ -882,4 +888,4 @@ void fn_802CA0A0(Flare* f) { f->Done(); }
 
 }  // extern "C"
 
-// NonMatching: fn_802C83CC (stfsu addressing), fn_802C8E70 and Flare::Draw (register numbering) still differ.
+// NonMatching: fn_802C83CC (stfsu addressing) and Flare::Draw (register numbering) still differ.
