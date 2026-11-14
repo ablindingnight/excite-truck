@@ -385,12 +385,11 @@ void fn_802168EC(Window* w, Widget* widget, int group) { fn_80218C98(w, widget, 
 s32 fn_802168F0(Window* w) {
     Window* prev;
     BOOL started;
-    f32 one;
+    f32 tOut;
+    f32 zero;
     f32 rate;
     f32 t;
     f32 rateOut;
-    f32 zero;
-    f32 tOut;
     s32 b;
     WinFade fade;
     lbl_8055EF78++;
@@ -420,10 +419,8 @@ s32 fn_802168F0(Window* w) {
     fn_80217734(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
     fn_80211F64();
     fn_80211F64();
-    t = 1.0f;
     rate = 1.0f / FadeMax(fade.in, 0.01f);
-    one = 1.0f;
-    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? t : 0.0f;
+    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? 1.0f : 0.0f;
     started = 0;
     lbl_8055EF94 = t;
     while (!lbl_8055EF70) {
@@ -432,7 +429,7 @@ s32 fn_802168F0(Window* w) {
             if (lbl_8055EF88->update) {
                 lbl_8055EF88->update(lbl_8055EF88);
             }
-            if (t < one) {
+            if (t < 1.0f) {
                 fn_8021747C(lbl_8055EF88, 1, &fade, t);
             } else {
                 if (!started) {
@@ -449,7 +446,7 @@ s32 fn_802168F0(Window* w) {
         }
         fn_8021662C();
         t += rate * fn_80214D48();
-        lbl_8055EF94 = FadeMin(t, one);
+        lbl_8055EF94 = FadeMin(t, 1.0f);
         if (fn_8012742C()) {
             lbl_8055EF74 = -1;
             break;
@@ -462,8 +459,8 @@ s32 fn_802168F0(Window* w) {
         fn_802368D0();
     }
     fn_8021747C(w, 0, &fade, 0.0f);
+    rateOut = 1.0f / FadeMax(fade.out, 0.01f);
     tOut = 1.0f;
-    rateOut = tOut / FadeMax(fade.out, 0.01f);
     if ((f32)__fabs(fade.out) <= lbl_80558DC4[0]) {
         tOut = 0.0f;
     }

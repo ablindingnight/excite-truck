@@ -418,6 +418,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 u = 1.0f < u ? 1.0f : u;
                 u = u > 0.0f ? u : 0.0f;
                 extra = Lerp(0.0f, 6.6666665f + -d, u);
+                pen = 0.0f;
             }
             total = extra + pen;
             f32 yv = n.y;

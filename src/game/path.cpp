@@ -150,26 +150,26 @@ static inline void Normalize(Quat& q) {
     q.w *= inv;
 }
 static inline void ToMatrix(PathMtx* m, const Quat& q) {
-    f32 x2 = q.x + q.x;
-    f32 xx = q.x * x2;
     f32 y2 = q.y + q.y;
     f32 z2 = q.z + q.z;
-    f32 yy = y2 * q.y;
+    f32 x2 = q.x + q.x;
+    f32 yy = q.y * y2;
     f32 zz = q.z * z2;
-    f32 xy = q.x * y2;
+    f32 xx = q.x * x2;
     f32 wx = q.w * x2;
-    f32 xz = q.x * z2;
     f32 yz = q.y * z2;
     f32 wy = q.w * y2;
+    f32 xz = q.x * z2;
+    f32 xy = q.x * y2;
     f32 wz = q.w * z2;
-    m->m[0][1] = xy + wz;
     m->m[0][0] = 1.0f - (yy + zz);
-    m->m[0][2] = xz - wy;
-    m->m[1][0] = xy - wz;
     m->m[1][1] = 1.0f - (xx + zz);
-    m->m[1][2] = yz + wx;
-    m->m[2][0] = wy + xz;
+    m->m[2][0] = xz + wy;
+    m->m[1][0] = xy - wz;
+    m->m[0][1] = xy + wz;
     m->m[2][1] = yz - wx;
+    m->m[0][2] = xz - wy;
+    m->m[1][2] = yz + wx;
     m->m[2][2] = 1.0f - (xx + yy);
 }
 static inline int MinI(int a, int b) { return (b < a) ? b : a; }
@@ -319,11 +319,11 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
         q.x = a->rot.x * g + b->rot.x * f;
         f32 inv = 1.0f / (f32)sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
         q.y *= inv;
-        q.x *= inv;
         q.z *= inv;
+        q.x *= inv;
         q.w *= inv;
         ToMatrix(m, q);
-        f32 rate = 1.0f / MaxF(b->t - a->t, 0.00001f);
+        f32 rate = 1.0f / MaxF(0.00001f, b->t - a->t);
         V3 d;
         SubV3(&d.x, &b->pos.x, &a->pos.x);
         vel->x = d.x * rate;

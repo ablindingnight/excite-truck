@@ -553,6 +553,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
         for (int k = 0; k < 2; k++) {
             fn_802C8DBC(10);
             for (int j = 0; j < 5; j++) {
+                f32 bx, by, bz;
                 f32 fj = j;
                 f32 ang = 1.5707964f + 1.75f * ((fj - 1.0f) / 5.0f) + (k ? 3.1415927f : 0.0f);
                 if (p->sparkFlip) {
@@ -560,14 +561,18 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) / 2.0f;
                 f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
-                Vec base;
-                base.x = m.pos.x + m.rot[0].x * cx + m.rot[2].x * sz;
-                base.y = m.pos.y + m.rot[0].y * cx + m.rot[2].y * sz;
-                base.z = m.pos.z + m.rot[0].z * cx + m.rot[2].z * sz;
+                bx = m.pos.x + m.rot[0].x * cx;
+                by = m.pos.y + m.rot[0].y * cx;
+                bz = m.pos.z + m.rot[0].z * cx;
+                bx = bx + m.rot[2].x * sz;
+                by = by + m.rot[2].y * sz;
+                bz = bz + m.rot[2].z * sz;
                 fj *= 0.25f;
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
-                    v[i] = base;
+                    v[i].x = bx;
+                    v[i].y = by;
+                    v[i].z = bz;
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
                     AddScaled(&v[i], &v[i], (const Vec*)&m.rot[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;

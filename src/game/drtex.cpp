@@ -430,7 +430,7 @@ void fn_802D86BC(GXTexDesc* d) {
     const u8* wa;
     TexImage* img = d->data;
     s32 w = d->w;
-    u32 h = d->h;
+    s32 h = d->h;
     u8* tex = img->tex;
     u32* pal = img->pal;
     for (int i = 0; i < 256; i++) {
@@ -440,13 +440,13 @@ void fn_802D86BC(GXTexDesc* d) {
     u8* tmp = new ("pal8_tmp") u8[w * h];
     memcpy(tmp, tex, w * h);
     int tw = w / 8;
-    const u8* src = tmp;
+    int off = 0;
     for (int y = 0; y < h; y++) {
-        wa = src;
+        wa = tmp + off;
         for (int x = 0; x < w; wa++, x++) {
             tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = *wa;
         }
-        src += w;
+        off += w;
     }
     delete[] tmp;
 }

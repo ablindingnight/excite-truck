@@ -2973,7 +2973,9 @@ void vf20__7CarBodyFv(u8* p) {
     BVec* ang = (BVec*)(p + 0x2660);
     BVec* acc = (BVec*)(p + 0x266C);
     SwayRotate(&a, (BVec*)(p + 0x16C), (f32*)(p + 0x3C));
-    Scale(&a, &a, lbl_80561DE4);
+    a.x *= lbl_80561DE4;
+    a.y *= lbl_80561DE4;
+    a.z *= lbl_80561DE4;
     AddScaled(&f, &a, acc, lbl_80561E5C);
     AddScaled(&f, &f, ang, -100.0f);
     AddScaled(&f, &f, vel, -5.0f);
@@ -2983,7 +2985,7 @@ void vf20__7CarBodyFv(u8* p) {
     AddScaled(acc, acc, &a, 0.050000012f);
     acc->z = lbl_80561CAC;
     acc->y = lbl_80561CAC;
-    if (!(ang->z >= -0.04363323f)) {
+    if (ang->z < -0.04363323f) {
         ang->z = -0.04363323f;
         vel->z = SwayMax(vel->z, lbl_80561CAC);
     }
