@@ -886,7 +886,6 @@ void PartSys::DrawSprites(Particle* p, int n) {
     QuadBatch batch;
     for (i = 0; i < n; p++, i++) {
         f32 t;
-        int ua;
         u8 a;
         age = t0 - p->birth;
         u8 g;
@@ -896,7 +895,6 @@ void PartSys::DrawSprites(Particle* p, int n) {
         Integrate(&pos, p, age);
         f32 fade;
         u8 b;
-        int ub;
         m = *fn_802C86DC();
         V3 d;
         u32 color;
@@ -912,18 +910,17 @@ void PartSys::DrawSprites(Particle* p, int n) {
         a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
         color = (a << 24) | (r << 16) | (g << 8) | b;
         int rot = p->rot;
-        ua = ((rot + 1) & 2) >> 1;
-        ub = (rot >> 1) & 1;
+        const struct { int v, u; } uv = {(rot >> 1) & 1, ((rot + 1) & 2) >> 1};
         PVtx q[4];
         SetSpriteCorner(q[0].pos, size, d1, pos);
         SetSpriteCorner(q[1].pos, size, d2, pos);
         SetSpriteCorner(q[2].pos, -size, d1, pos);
         SetSpriteCorner(q[3].pos, -size, d2, pos);
         q[0].color = q[1].color = q[2].color = q[3].color = color;
-        q[0].u = q[1].v = ua;
-        q[0].v = q[3].u = ub;
-        q[1].u = q[2].v = 1 - ub;
-        q[2].u = q[3].v = 1 - ua;
+        q[0].u = q[1].v = uv.u;
+        q[0].v = q[3].u = uv.v;
+        q[1].u = q[2].v = 1 - uv.v;
+        q[2].u = q[3].v = 1 - uv.u;
         batch.Add(q);
     }
     batch.Flush();
