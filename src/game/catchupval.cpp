@@ -137,19 +137,15 @@ void fn_8013BAE4(s32 n) {
     lbl_8042F8A8.active = 0;
     fn_8013B7B4(tbl, n);
     fn_8013B6C0(&lvl, &frac, fn_801E87A8()->level);
-    Catchup* lo = &tbl[lvl];
-    f32 b1 = lo[1].begin;
-    f32 b0 = lo[0].begin;
-    lbl_8042F8B8.begin = Lerp(frac, b0, b1);
-    f32 e0 = lo[0].effect;
-    f32 e1 = lo[1].effect;
-    lbl_8042F8B8.effect = Lerp(frac, e0, e1);
-    f32 s0 = lo[0].speed;
-    f32 s1 = lo[1].speed;
-    lbl_8042F8B8.speed = Lerp(frac, s0, s1);
-    f32 c0 = lo[0].compare;
-    f32 c1 = lo[1].compare;
-    lbl_8042F8B8.compare = Lerp(frac, c0, c1);
+    // The four settings are blended as an array of floats: a counted-down loop the compiler unrolls.
+    const f32* lo = (const f32*)&tbl[lvl];
+    f32 t = frac;
+    f32* d = (f32*)&lbl_8042F8B8;
+    int k = 4;
+    while (k--) {
+        *d++ = Lerp(t, lo[0], lo[4]);
+        lo++;
+    }
     cnt = (int)Round(lbl_8042F8B8.compare);
     cnt = cnt > 1 ? cnt : 1;
     lbl_8055E170 = cnt < n - 1 ? cnt : n - 1;
