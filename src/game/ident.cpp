@@ -199,14 +199,14 @@ void IdentSaveEvent(int event) {
     case 3:
         IdentNotify(1);
     case 4:
-        for (i = 0; i < NUM_SLOTS; i++) {
+        for (int i = 0; i < NUM_SLOTS; i++) {
             if (lbl_8055D46C->slots[i].state != 0) {
                 lbl_8055D46C->slots[i].state = 1;
             }
         }
         break;
     case 5:
-        for (i = 0; i < NUM_SLOTS; i++) {
+        for (int i = 0; i < NUM_SLOTS; i++) {
             if (lbl_8055D46C->slots[i].state != 0) {
                 lbl_8055D46C->slots[i].state = 2;
             }
@@ -228,26 +228,13 @@ static inline void StrCopyN(char* d, int n, const char* s) {
 }
 
 void IdentResetAll(void) {
-    int n;
-    char* dst;
-    const char* src;
-    int i;
 
     lbl_8055D46C->current = 0;
-    for (i = 0; i < NUM_SLOTS; i++) {
-        src = "";
-        n = NAME_LEN;
-
+    for (int i = 0; i < NUM_SLOTS; i++) {
         lbl_8055D46C->slots[i].state = 0;
-        dst = lbl_8055D46C->slots[i].name;
-        while ((*dst++ = *src++) != '\0') {
-            if (--n <= 0) {
-                dst[-1] = '\0';
-                break;
-            }
-        }
+        StrCopyN(lbl_8055D46C->slots[i].name, NAME_LEN, "");
     }
-    for (i = 0; i < NUM_SLOTS; i++) {
+    for (int i = 0; i < NUM_SLOTS; i++) {
         const char* src;
         int n;
         char* dst;
