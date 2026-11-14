@@ -382,7 +382,8 @@ extern s32 lbl_8055CFF4;  // screen height
 extern u8 lbl_8055FE58;
 extern void* lbl_8055FE1C;
 extern void* lbl_8055FE20;
-extern s32 lbl_8055FE24;
+struct GXTex;
+extern GXTex* lbl_8055FE24;  // drtex.cpp's render target (null when drawing to the frame buffer)
 extern u8 lbl_8055FE39;
 extern u32 lbl_804DB458[4];
 

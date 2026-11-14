@@ -8,7 +8,8 @@ extern void fn_8021889C(void);
 
 extern void *lbl_8055EF88;
 extern s32 lbl_8055EF78;
-extern u32 lbl_8055EF7C;
+struct Window;
+extern struct Window* lbl_8055EF7C;  /* widgetwin.cpp's top window */
 extern u32 lbl_8055EF8C;
 extern void (*lbl_8055EF90)(void);
 extern u8 lbl_8055EF70;
