@@ -1022,7 +1022,7 @@ config.libs.append(
             Object(NonMatching, "game/aistub.cpp"),
             Object(Matching, "game/pushpass.cpp"),
             Object(NonMatching, "game/aiskill.cpp"),
-            Object(NonMatching, "game/catchupval.cpp"),
+            Object(Matching, "game/catchupval.cpp"),
             Object(Matching, "game/lineinfo.cpp"),
             Object(Matching, "game/carclass.cpp"),
             Object(Matching, "game/subtask.cpp"),

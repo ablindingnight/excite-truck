@@ -143,7 +143,8 @@ void fn_8013BAE4(s32 n) {
     f32* d = (f32*)&lbl_8042F8B8;
     int k = 4;
     while (k--) {
-        *d++ = Lerp(t, lo[0], lo[4]);
+        const f32 value = lo[0] + t * (lo[4] - lo[0]);
+        *d++ = value;
         lo++;
     }
     cnt = (int)Round(lbl_8042F8B8.compare);
