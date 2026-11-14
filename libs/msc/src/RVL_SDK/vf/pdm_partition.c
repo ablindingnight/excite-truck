@@ -18,12 +18,16 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
     u16 part_cnt;
     u16 ext_cnt;
     s32 err;
+    u32 read_sectors;
+    u16 bps;
 
     part_id = p_part->part_id;
+    read_sectors = 1;
+    bps = 512;
     p_part->start_sector = 0;
     p_part->total_sector = p_part->p_disk->disk_info.total_sectors;
 
-    err = VFipdm_disk_physical_read(p_part->p_disk, buf, 0, 1, 512, &num_success);
+    err = VFipdm_disk_physical_read(p_part->p_disk, buf, 0, read_sectors, bps, &num_success);
     if (err != 0) {
         return err;
     }
@@ -47,7 +51,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                 return 7;
             }
 
-            err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, 1, 512, &num_success);
+            err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, read_sectors, bps, &num_success);
             if (err != 0) {
                 return err;
             }
@@ -60,7 +64,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                     if (ext_cnt == 0) {
                         start_sector = start_sector + (buf[0x1C6] + (buf[0x1C7] << 8) + (buf[0x1C8] << 16) + (buf[0x1C9] << 24));
                         num_sector = buf[0x1CA] + (buf[0x1CB] << 8) + (buf[0x1CC] << 16) + (buf[0x1CD] << 24);
-                        err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, 1, 512, &num_success);
+                        err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, read_sectors, bps, &num_success);
                         if (err != 0) {
                             return err;
                         }
@@ -76,7 +80,7 @@ s32 VFipdm_part_get_start_sector(struct PDM_PARTITION* p_part) {
                         if (start_sector == 0 || num_sector == 0) {
                             break;
                         }
-                        err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, 1, 512, &num_success);
+                        err = VFipdm_disk_physical_read(p_part->p_disk, buf, start_sector, read_sectors, bps, &num_success);
                         if (err != 0) {
                             return err;
                         }
