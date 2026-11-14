@@ -542,21 +542,29 @@ void fn_80168104(void) {
     }
 }
 
+/* Helper name unproven */
+static inline void RefreshPickupGroup(PickupObjMan* m, PickupGroup* g) {
+    int j;
+    g->done = 1;
+    for (j = 0; j < g->count; j++) {
+        if (m->objs.data[g->first + j].Live()) {
+            g->done = 0;
+            break;
+        }
+    }
+}
+
 void fn_80168328(void) {
     PickupObjMan* m = lbl_8055E354;
-    int i;
+    struct {
+        int i;
+        PickupGroup* group;
+    } scan;
     fn_801678D8();
-    for (i = 0; i < m->groups.count; i++) {
-        PickupGroup* g = &m->groups.data[i];
-        if (!g->done) {
-            int j;
-            g->done = 1;
-            for (j = 0; j < g->count; j++) {
-                if (m->objs.data[g->first + j].Live()) {
-                    g->done = 0;
-                    break;
-                }
-            }
+    for (scan.i = 0; scan.i < m->groups.count; scan.i++) {
+        scan.group = &m->groups.data[scan.i];
+        if (!scan.group->done) {
+            RefreshPickupGroup(m, scan.group);
         }
     }
 }

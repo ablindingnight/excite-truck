@@ -758,7 +758,9 @@ public:
     virtual void ToggleEdit(void) { editing = !editing; }
     virtual u8 IsEditing(void) { return editing; }
     virtual void Edit(void) {
-        int i;
+        struct {
+            int i;
+        } edit;
         EditContext* c;
         EditRect* r;
         u32 col;
@@ -802,8 +804,8 @@ public:
             }
             {
                 c = ctx;
-                for (i = 0; i < c->rects->a.count; i++) {
-                    r = &c->rects->a.data[i];
+                for (edit.i = 0; edit.i < c->rects->a.count; edit.i++) {
+                    r = &c->rects->a.data[edit.i];
                     if (r->target && c->active && r->target == c->active->target) {
                         continue;
                     }
@@ -834,7 +836,7 @@ public:
                 }
             }
             int off = 0;
-            for (i = 0; i < arts->a.count; off += sizeof(arts->a.data[0]), i++) {
+            for (edit.i = 0; edit.i < arts->a.count; off += sizeof(arts->a.data[0]), edit.i++) {
                 a = (ArtElem*)((u8*)arts->a.data + off);
                 c = ctx;
                 other = c->hover && a == c->hover->target ? 0 : 1;
@@ -844,8 +846,8 @@ public:
                     DrawInfo(a);
                 }
             }
-            for (i = 0; i < garts->a.count; i++) {
-                g = &garts->a.data[i];
+            for (edit.i = 0; edit.i < garts->a.count; edit.i++) {
+                g = &garts->a.data[edit.i];
                 c = ctx;
                 other = c->hover && g == c->hover->target ? 0 : 1;
                 if (other) {
