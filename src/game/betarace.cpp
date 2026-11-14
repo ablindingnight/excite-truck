@@ -1361,6 +1361,7 @@ public:
     virtual ~BetaMaster(void);
     virtual void vfF8(void);
     virtual void vfFC(void);
+    void LoadLevel(void);
     virtual void vfF4(void);
     virtual void vf10(void);
     virtual void vf0C(void);
@@ -2975,8 +2976,10 @@ inline void BetaMaster::vfFC(void) {
     }
 }
 
-#pragma dont_inline on
-inline void BetaMaster::vfF4(void) {
+// Helper name unproven: reads the tuning values, the star triggers and the puddles. It is one inlined body (its
+// locals take ascending stack slots), and being over the compiler's inline size limit it keeps Pickup's
+// constructor a call - no dont_inline pragma needed.
+inline void BetaMaster::LoadLevel(void) {
     TuneRef ref;
     int loaded;
     int i;
@@ -2999,8 +3002,7 @@ inline void BetaMaster::vfF4(void) {
             int d = fn_80204CF0();
             int nd = n->Has("difficulty_level") ? fn_80204BB4(n->GetValue("difficulty_level")) : d;
             if (nd == d) {
-                Pickup* p = new ("trigger") Pickup(n);
-                stars.Add(p);
+                stars.Add(new ("trigger") Pickup(n));
             }
         }
         fn_80131818(t);
@@ -3013,8 +3015,7 @@ inline void BetaMaster::vfF4(void) {
         ValueNode* n;
         for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
             if (n->Has("bound0")) {
-                Pickup* p = new ("trigger") Pickup(n);
-                stars.Add(p);
+                stars.Add(new ("trigger") Pickup(n));
             }
         }
     }
@@ -3025,8 +3026,8 @@ inline void BetaMaster::vfF4(void) {
             V2 pts[32];
             char buf[0x20];
             f32 pos[3];
-            V2 c;
             V2 d;
+            V2 c;
             int k;
             int j;
             f32 maxd;
@@ -3057,12 +3058,13 @@ inline void BetaMaster::vfF4(void) {
                 maxd = maxd > dd ? maxd : dd;
             }
             r = sqrt(maxd);
+            f32 z = c.y;
+            h = fn_801EA0E8(c.x, z);
             pos[0] = c.x;
-            h = fn_801EA0E8(c.x, c.y);
             pos[1] = h;
-            pos[2] = c.y;
-            // Puddle's constructor and Push are written out: the original inlines them here, and the dont_inline
-            // around this function (which keeps Pickup's constructor a call) would stop them.
+            pos[2] = z;
+            // Puddle's constructor and Push are written out: inside this big inlined body they would stay calls,
+            // and the target has them expanded here.
             Puddle* q = (Puddle*)operator new(sizeof(Puddle), "puddle");
             if (q) {
                 q->x = pos[0];
@@ -3077,7 +3079,8 @@ inline void BetaMaster::vfF4(void) {
         fn_80131818(t);
     }
 }
-#pragma dont_inline reset
+
+inline void BetaMaster::vfF4(void) { LoadLevel(); }
 
 
 // The abstract collision shape (collvol.cpp's CollShape; shape tag at +0x18, mass at +0x20).

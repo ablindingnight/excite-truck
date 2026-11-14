@@ -156,6 +156,22 @@ void fn_8020C140(void) {
 }
 #pragma pop
 
+/* Helper name unproven */
+struct HeapGuard {
+    u8 open;
+    HeapGuard() {
+        open = fn_80128690();
+        if (!open) {
+            fn_80128684();
+        }
+    }
+    ~HeapGuard() {
+        if (!open) {
+            fn_80128678();
+        }
+    }
+};
+
 void fn_8020C2AC(void) {
     lbl_8055EE40 = 0;
     lbl_8055EE48 = fn_8020A5F0();
@@ -182,10 +198,7 @@ void fn_8020C2AC(void) {
         }
         if (!*loaded && fn_8012E938(song)) {
             fn_8012E81C(song);
-            u8 open = fn_80128690();
-            if (!open) {
-                fn_80128684();
-            }
+            HeapGuard guard;
             fn_802064D0(lbl_80489C50);
             if (t->name[0]) {
                 t->snd = fn_80207848(t->name, 0);
@@ -195,9 +208,6 @@ void fn_8020C2AC(void) {
                 t->snd->SetDepth(0.0f);
             }
             *loaded = 1;
-            if (!open) {
-                fn_80128678();
-            }
         }
     }
     fn_8020C140();
