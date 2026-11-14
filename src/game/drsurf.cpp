@@ -504,29 +504,29 @@ void fn_802D4C44(Surf* s) {
     if (out) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
-            f32 wa;
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
             const BVec* ba = &lbl_804DB068[v->b0];
             const BVec* bb = &lbl_804DB068[v->b1];
+            f32 w0 = (1.0f / 255) * v->w0;
+            f32 w1 = (1.0f / 255) * v->w1;
             V3 p;
-            p.x = v->x + ba->x * w0 + bb->x * w1;
-            p.y = v->y + ba->y * w0 + bb->y * w1;
-            p.z = v->z + ba->z * w0 + bb->z * w1;
-            wa = lbl_804CA308[v->ia];
+            p.y = v->y + ba->y * w0;
+            p.x = v->x + ba->x * w0;
+            p.z = v->z + ba->z * w0;
+            p.y = p.y + bb->y * w1;
+            p.x = p.x + bb->x * w1;
+            p.z = p.z + bb->z * w1;
             f32 wb = lbl_804CA308[v->ib];
+            f32 wa = lbl_804CA308[v->ia];
             V3 a;
-            __typeof__(a.y) a_y = (1.0f / 255) * v->a[1];
-            a.x = (1.0f / 255) * v->a[0];
-            a.y = a_y;
-            a.z = (1.0f / 255) * v->a[2];
+            SetV(&a, (1.0f / 255) * v->a[0], (1.0f / 255) * v->a[1], (1.0f / 255) * v->a[2]);
             V3 b;
-            b.x = (1.0f / 255) * v->b[0];
-            b.y = (1.0f / 255) * v->b[1];
-            b.z = (1.0f / 255) * v->b[2];
-            o->x = p.x + a.x * wa + b.x * wb;
-            o->y = p.y + a.y * wa + b.y * wb;
-            o->z = p.z + a.z * wa + b.z * wb;
+            SetV(&b, (1.0f / 255) * v->b[0], (1.0f / 255) * v->b[1], (1.0f / 255) * v->b[2]);
+            o->x = p.x + a.x * wa;
+            o->y = p.y + a.y * wa;
+            o->z = p.z + a.z * wa;
+            o->x = o->x + b.x * wb;
+            o->y = o->y + b.y * wb;
+            o->z = o->z + b.z * wb;
             v++;
             o++;
         }
@@ -1266,12 +1266,26 @@ static inline void SetGQR6(void) {
 #define LC_BUF(i) ((u8*)0xE0000000 + ((i) << 13))
 
 void fn_802D6C78(void) {
-    DeformQueue* q = &lbl_804CAC38;
-    for (int k = 0; k < q->count; k++) {
-        DeformJob* j = &q->jobs[k];
-        Skin2((const SkinVtx*)j->src, (V3*)j->dst, j->n);
+    DeformQueue* q;
+    for (int k = 0; k < lbl_804CAC38.count; k++) {
+        DeformJob* j = &lbl_804CAC38.jobs[k];
+        int n = j->n;
+        for (int i = 0; i < n; i++) {
+            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
+            V3* o = &((V3*)j->dst)[i];
+            const BVec* a = &lbl_804DB068[v->b0];
+            const BVec* b = &lbl_804DB068[v->b1];
+            f32 w0 = (1.0f / 255) * v->w0;
+            f32 w1 = (1.0f / 255) * v->w1;
+            o->x = v->x + a->x * w0;
+            o->y = v->y + a->y * w0;
+            o->z = v->z + a->z * w0;
+            o->x = o->x + b->x * w1;
+            o->y = o->y + b->y * w1;
+            o->z = o->z + b->z * w1;
+        }
     }
-    q->count = 0;
+    lbl_804CAC38.count = 0;
     SetGQR6();
     SetGQR6();
     q = &lbl_804D2C40;
@@ -1281,14 +1295,14 @@ void fn_802D6C78(void) {
         int left = q->count - 1;
         int c;
         int n = next->n;
-        u8* src = (u8*)next->src;
+        YMorphVtx* src = (YMorphVtx*)next->src;
         u8* dst = (u8*)next->dst;
         c = n > 0x100 ? 0x100 : n;
         next++;
         int buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x14);
         n -= c;
-        src += c * 0x14;
+        src += c;
         pc = 0;
         u8* pdst = 0;
         u8* cur = LC_BUF(0);
@@ -1305,7 +1319,7 @@ void fn_802D6C78(void) {
             if (n == 0 && left > 0) {
                 n = next->n;
                 left--;
-                src = (u8*)next->src;
+                src = (YMorphVtx*)next->src;
                 dst = (u8*)next->dst;
                 next++;
             }
@@ -1314,7 +1328,7 @@ void fn_802D6C78(void) {
                 cur = LC_BUF(buf);
                 buf = 1 - buf;
                 LCLoadData(cur, src, (c * 0x14 + 0x1F) & ~0x1F);
-                src += c * 0x14;
+                src += c;
                 n -= c;
             }
             if (pc == 0) {
@@ -1323,9 +1337,9 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1400);
             pout = out;
             for (int i = 0; i < pc; i++) {
-                f32 x = ((f32*)in)[0];
-                f32 y = ((f32*)in)[1];
                 f32 z = ((f32*)in)[2];
+                f32 y = ((f32*)in)[1];
+                f32 x = ((f32*)in)[0];
                 out[0] = x;
                 out[1] = y;
                 out[2] = z;
@@ -1343,7 +1357,7 @@ void fn_802D6C78(void) {
         DeformJob* next = q->jobs;
         int n = next->n;
         f32* pout;
-        u8* src = (u8*)next->src;
+        DirYMorphVtx* src = (DirYMorphVtx*)next->src;
         int pc;
         u8* dst = (u8*)next->dst;
         next++;
@@ -1351,7 +1365,7 @@ void fn_802D6C78(void) {
         int c = n > 0xE0 ? 0xE0 : n;
         LCLoadData(LC_BUF(0), src, c * 0x18);
         n -= c;
-        src += c * 0x18;
+        src += c;
         pc = 0;
         u8* pdst = 0;
         pout = 0;
@@ -1369,7 +1383,7 @@ void fn_802D6C78(void) {
             if (n == 0 && left > 0) {
                 n = next->n;
                 left--;
-                src = (u8*)next->src;
+                src = (DirYMorphVtx*)next->src;
                 dst = (u8*)next->dst;
                 next++;
             }
@@ -1378,7 +1392,7 @@ void fn_802D6C78(void) {
                 cur = LC_BUF(buf);
                 buf = 1 - buf;
                 LCLoadData(cur, src, (c * 0x18 + 0x1F) & ~0x1F);
-                src += c * 0x18;
+                src += c;
                 n -= c;
             }
             if (pc == 0) {
@@ -1410,13 +1424,13 @@ void fn_802D6C78(void) {
         int n = next->n;
         u8* pdst;
         int pc;
-        u8* src = (u8*)next->src;
+        DirVtx* src = (DirVtx*)next->src;
         u8* dst = (u8*)next->dst;
         next++;
         int c = n > 0x100 ? 0x100 : n;
         LCLoadData(LC_BUF(0), src, c * 0x10);
         n -= c;
-        src += c * 0x10;
+        src += c;
         pc = 0;
         pdst = 0;
         f32* pout = 0;
@@ -1434,7 +1448,7 @@ void fn_802D6C78(void) {
             if (n == 0 && left > 0) {
                 n = next->n;
                 left--;
-                src = (u8*)next->src;
+                src = (DirVtx*)next->src;
                 dst = (u8*)next->dst;
                 next++;
             }
@@ -1443,7 +1457,7 @@ void fn_802D6C78(void) {
                 cur = LC_BUF(buf);
                 buf = 1 - buf;
                 LCLoadData(cur, src, (c * 0x10 + 0x1F) & ~0x1F);
-                src += c * 0x10;
+                src += c;
                 n -= c;
             }
             if (pc == 0) {
@@ -1452,9 +1466,9 @@ void fn_802D6C78(void) {
             f32* out = (f32*)(LC_BUF(buf) + 0x1000);
             pout = out;
             for (int i = 0; i < pc; i++) {
-                f32 x = ((f32*)in)[0];
-                f32 y = ((f32*)in)[1];
                 f32 z = ((f32*)in)[2];
+                f32 y = ((f32*)in)[1];
+                f32 x = ((f32*)in)[0];
                 out[0] = x;
                 out[1] = y;
                 out[2] = z;
