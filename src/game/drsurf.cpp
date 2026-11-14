@@ -1265,6 +1265,30 @@ static inline void SetGQR6(void) {
 
 #define LC_BUF(i) ((u8*)0xE0000000 + ((i) << 13))
 
+// Helper name unproven: the two-bone queue. Each vertex indexes the job's source and destination (the target reloads
+// both every time).
+static inline void FlushSkin(DeformQueue* q) {
+    for (int k = 0; k < q->count; k++) {
+        DeformJob* j = &q->jobs[k];
+        int n = j->n;
+        for (int i = 0; i < n; i++) {
+            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
+            V3* o = &((V3*)j->dst)[i];
+            const BVec* a = &lbl_804DB068[v->b0];
+            const BVec* b = &lbl_804DB068[v->b1];
+            f32 w0 = (1.0f / 255) * v->w0;
+            f32 w1 = (1.0f / 255) * v->w1;
+            o->x = v->x + a->x * w0;
+            o->y = v->y + a->y * w0;
+            o->z = v->z + a->z * w0;
+            o->x = o->x + b->x * w1;
+            o->y = o->y + b->y * w1;
+            o->z = o->z + b->z * w1;
+        }
+    }
+    q->count = 0;
+}
+
 // Helper name unproven: the y-morph queue (the target numbers its locals in ascending declaration order, as the
 // locals of an inline are).
 static inline void FlushYMorph(DeformQueue* q) {
@@ -1323,15 +1347,10 @@ static inline void FlushYMorph(DeformQueue* q) {
             if (pc == 0) {
                 break;
             }
-            f32* out = (f32*)(LC_BUF(buf) + 0x1400);
-            pout = out;
+            pout = (f32*)(LC_BUF(buf) + 0x1400);
+            f32* out = pout;
             for (int i = 0; i < pc; i++) {
-                f32 z = ((f32*)in)[2];
-                f32 y = ((f32*)in)[1];
-                f32 x = ((f32*)in)[0];
-                out[0] = x;
-                out[1] = y;
-                out[2] = z;
+                SetXYZ((V3*)out, ((f32*)in)[0], ((f32*)in)[1], ((f32*)in)[2]);
                 in += 0x14;
                 out += 3;
             }
@@ -1343,25 +1362,7 @@ static inline void FlushYMorph(DeformQueue* q) {
 
 void fn_802D6C78(void) {
     DeformQueue* q;
-    for (int k = 0; k < lbl_804CAC38.count; k++) {
-        DeformJob* j = &lbl_804CAC38.jobs[k];
-        int n = j->n;
-        for (int i = 0; i < n; i++) {
-            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
-            V3* o = &((V3*)j->dst)[i];
-            const BVec* a = &lbl_804DB068[v->b0];
-            const BVec* b = &lbl_804DB068[v->b1];
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            o->x = v->x + a->x * w0;
-            o->y = v->y + a->y * w0;
-            o->z = v->z + a->z * w0;
-            o->x = o->x + b->x * w1;
-            o->y = o->y + b->y * w1;
-            o->z = o->z + b->z * w1;
-        }
-    }
-    lbl_804CAC38.count = 0;
+    FlushSkin(&lbl_804CAC38);
     SetGQR6();
     SetGQR6();
     FlushYMorph(&lbl_804D2C40);
@@ -1498,15 +1499,10 @@ void fn_802D6C78(void) {
             if (pc == 0) {
                 break;
             }
-            f32* out = (f32*)(LC_BUF(buf) + 0x1000);
-            pout = out;
+            pout = (f32*)(LC_BUF(buf) + 0x1000);
+            f32* out = pout;
             for (int i = 0; i < pc; i++) {
-                f32 z = ((f32*)in)[2];
-                f32 y = ((f32*)in)[1];
-                f32 x = ((f32*)in)[0];
-                out[0] = x;
-                out[1] = y;
-                out[2] = z;
+                SetXYZ((V3*)out, ((f32*)in)[0], ((f32*)in)[1], ((f32*)in)[2]);
                 in += 0x10;
                 out += 3;
             }
