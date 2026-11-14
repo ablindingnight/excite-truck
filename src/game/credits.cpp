@@ -555,7 +555,10 @@ void CreditsFade::Enter(void) {
 }
 
 void CreditsFade::Update(void) {
-    if((f32)__fabs((f64)(*(volatile f32*)&saved))<=(*(const volatile f32*)lbl_80558DC4)) {Finish(0);fn_80216CA8();}
+    if ((f32)__fabs(saved) <= lbl_80558DC4[0]) {
+        Finish(0);
+        fn_80216CA8();
+    }
     f32 next=value-fn_80214D48();
     value=(0.0f)>next?(0.0f):next;
     if(fn_802645C0())result+=fn_80214D48();
