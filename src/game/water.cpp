@@ -329,12 +329,17 @@ f32 fn_802BEFB4(void) {
 }
 
 static inline f32 Unlerp_hm(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }  /* Helper name unproven */
+// Maps x from [x0, x1] onto [y0, y1], clamped to the segment.
+/* Helper name unproven */
+static inline f32 MapClamped_hm(f32 x0, f32 x1, f32 y0, f32 y1, f32 x) {
+    f32 u = FMax(FMin(Unlerp_hm(x, x0, x1), 1.0f), 0.0f);
+    return y0 + u * (y1 - y0);
+}
 f32 fn_802BF02C(f32 x) {
     PtTable t = sAlpha;
     for (unsigned int i = 1; i < 7; i++) {
         if (t.p[i].x > x) {
-            f32 u = FMax(FMin(Unlerp_hm(x, t.p[i - 1].x, t.p[i].x), 1.0f), 0.0f);
-            return t.p[i - 1].y + u * (t.p[i].y - t.p[i - 1].y);
+            return MapClamped_hm(t.p[i - 1].x, t.p[i].x, t.p[i - 1].y, t.p[i].y, x);
         }
     }
     return t.p[6].y;

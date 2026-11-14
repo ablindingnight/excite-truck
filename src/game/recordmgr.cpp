@@ -461,7 +461,6 @@ void fn_801AF65C(void) {
 
 void fn_801AF6FC(void) {
     RaceState* st = (RaceState*)lbl_80435740;
-    RaceEntries* t = &st->entries;
     int i;
     int mode = fn_801769B8();
     int notRace = mode != 2;
@@ -480,14 +479,14 @@ void fn_801AF6FC(void) {
     }
     if (mode == 1) {
         int i;
-        int count = t->n;
+        int count = st->entries.n;
         for (i = 0; i < count; i++) {
             st->best[i].a = fn_801AE9E0(i, &st->best[i].b);
         }
     }
-    qsort(t->order, t->n, 4, (mode == 1) ? fn_801AEB58 : fn_801AEAA4);
-    for (int i = 0; i < t->n; i++) {
-        lbl_8055E624->r[t->order[i]].place = i + 1;
+    qsort(st->entries.order, st->entries.n, 4, (mode == 1) ? fn_801AEB58 : fn_801AEAA4);
+    for (int i = 0; i < st->entries.n; i++) {
+        lbl_8055E624->r[st->entries.order[i]].place = i + 1;
     }
     fn_801AEBD0();
     fn_801AE628(fn_80137C4C());
@@ -496,8 +495,8 @@ void fn_801AF6FC(void) {
     }
     fn_801AE79C(mode);
     if (mode == 1) {
-        for (int i = 0; i < t->n; i++) {
-            int idx = t->order[i];
+        for (int i = 0; i < st->entries.n; i++) {
+            int idx = st->entries.order[i];
             fn_801AF9EC(idx, 0);
             fn_801B3208(idx, i);
         }

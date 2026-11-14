@@ -2069,11 +2069,11 @@ int fn_8019E500(u8* p, u8* q) {
     CFrame fr = *(CFrame*)VE(q)->v50();
     BoxAxis ax[3] = {0};
     ax[0].dir = *(PVec3*)&fr.m[0];
-    ax[0].ext = F32(q, 0x24);
     ax[1].dir = *(PVec3*)&fr.m[3];
+    ax[2].dir = *(PVec3*)&fr.m[6];
+    ax[0].ext = F32(q, 0x24);
     ax[1].ext = F32(q, 0x28);
     ax[2].ext = F32(q, 0x2C);
-    ax[2].dir = *(PVec3*)&fr.m[6];
     bool hit = false;
     int i;
     f32 r = 0.75f;
@@ -2097,12 +2097,11 @@ int fn_8019E500(u8* p, u8* q) {
         SetXYZ(&e.a, aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (j = 0; j < 4; j++) {
             e.pos = fr.t;
-            f32 one = 1.0f;
-            f32 k = ea * ((j & 1) ? -one : one);
+            f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
             e.pos.x += aa->dir.v[0] * k;
             e.pos.y += aa->dir.v[1] * k;
             e.pos.z += aa->dir.v[2] * k;
-            k = eb * ((j & 2) ? -one : one);
+            k = eb * ((j & 2) ? -1.0f : 1.0f);
             e.pos.x += ab->dir.v[0] * k;
             e.pos.y += ab->dir.v[1] * k;
             e.pos.z += ab->dir.v[2] * k;

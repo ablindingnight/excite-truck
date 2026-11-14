@@ -1488,13 +1488,12 @@ void fn_80011A5C(int n) {
     cols = ((lbl_8055D4A0 > 2) + 1) * 2;
     for (i = 0; i < lbl_8055D4A0; i++) {
         lbl_80350F28[i].top = 480.0f / rows - views[i].top;
-        lbl_80350ED8[i] = views[i];
         lbl_80350F28[i].bottom = -480.0f / rows + views[i].bottom;
         lbl_80350F28[i].left = -640.0f / cols + views[i].left;
-        f32 rightv = views[i].right;
-        lbl_80350F28[i].right = 640.0f / cols - rightv;
+        lbl_80350F28[i].right = 640.0f / cols - views[i].right;
         lbl_80350F28[i].centerX = (lbl_80350F28[i].left + lbl_80350F28[i].right) / 2;
         lbl_80350F28[i].centerY = (lbl_80350F28[i].top + lbl_80350F28[i].bottom) / 2;
+        lbl_80350ED8[i] = views[i];
     }
     lbl_8055D4A4 = 1;
 }

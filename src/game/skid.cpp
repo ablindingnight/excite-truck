@@ -334,75 +334,40 @@ void fn_8028D7C0(int i) {
     }
 }
 
+/* Helper name unproven */
+static inline void ScaleVec_hm(Vec* out, const Vec* v, f32 k) {
+    out->x = v->x * k;
+    out->y = v->y * k;
+    out->z = v->z * k;
+}
+
 static inline void FillPoint(SkidPt* p, const SkidCar* car, const SkidWheel* w, const SkidType* t) {
     Vec side;
     p->pos.x = w->v0C.x;
     p->pos.y = w->v0C.y;
     p->pos.z = w->v0C.z;
-    p->d1.x = car->vel.x * 0.1f;
-    p->d1.y = car->vel.y * 0.1f;
-    p->d1.z = car->vel.z * 0.1f;
+    ScaleVec_hm(&p->d1, &car->vel, 0.1f);
     PSVECCrossProduct(&car->dir, &w->v18, &side);
     if (!(w->flags & 8)) {
-        p->d2.x = side.x * 0.225f;
-        p->d2.y = side.y * 0.225f;
-        p->d2.z = side.z * 0.225f;
+        ScaleVec_hm(&p->d2, &side, 0.225f);
     } else {
-        p->d2.x = side.x * 0.025f;
-        p->d2.y = side.y * 0.025f;
-        p->d2.z = side.z * 0.025f;
+        ScaleVec_hm(&p->d2, &side, 0.025f);
     }
-    int a = (int)(65535.0f * (t->bias + t->slope * (w->slip - MAX(0.0f, t->thresh))));
+    f32 th = t->thresh;
+    f32 slip = w->slip;
+    int a = (int)(65535.0f * (t->bias + t->slope * (slip - MAX(0.0f, th))));
     a = MAX(a, 0);
     p->alpha = MIN(a, 0xFFFF);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidType* t, int idx, SkidPt* p, SkidCar* car, SkidWheel* w) {
-    SkidPt*q;
-    SkidStrip*s;
-    if (slot->type == type) {
-        if (now > 0.2f + slot->time) {
-            s = &t->strips[idx];
-            p = &s->pts[s->n];
-            FillPoint(p, car, w, t);
-            p->on = 1;
-            s->n++;
-            t->total++;
-            slot->time = now;
-        } else {
-            s = &t->strips[idx];
-            p = &s->pts[s->n - 1];
-            FillPoint(p, car, w, t);
-        }
-    } else {
-        s = &t->strips[idx];
-        p = &s->pts[s->n];
-        q = &s->pts[s->n + 1];
-        FillPoint(p, car, w, t);
-        p->on = 0;
-        q->pos.x = p->pos.x;
-        q->pos.y = p->pos.y;
-        q->pos.z = p->pos.z;
-        q->d2.x = p->d2.x;
-        q->d2.y = p->d2.y;
-        q->d2.z = p->d2.z;
-        q->d1.x = p->d1.x;
-        q->d1.y = p->d1.y;
-        q->d1.z = p->d1.z;
-        q->alpha = p->alpha;
-        q->on = 1;
-        s->n += 2;
-        t->total += 2;
-    }
-}
-
 void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
-    SkidPt* p = 0;
+    SkidStrip* s;
+    SkidPt* q;
     int type;
     SkidSlot* slot;
     SkidType* t;
+    SkidPt* p;
     SkidCar* car = e->car;
     w = &car->wheels[wi];
     int idx = wi + e->index * 4;
@@ -414,7 +379,40 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
             skid = 1;
         }
         if (skid) {
-            Loop1_fn_8028D89C(slot, type, now, t, idx, p, car, w);
+            if (slot->type == type) {
+                if (now > 0.2f + slot->time) {
+                    s = &t->strips[idx];
+                    p = &s->pts[s->n];
+                    FillPoint(p, car, w, t);
+                    p->on = 1;
+                    s->n++;
+                    t->total++;
+                    slot->time = now;
+                } else {
+                    s = &t->strips[idx];
+                    p = &s->pts[s->n - 1];
+                    FillPoint(p, car, w, t);
+                }
+            } else {
+                s = &t->strips[idx];
+                p = &s->pts[s->n];
+                q = &s->pts[s->n + 1];
+                FillPoint(p, car, w, t);
+                p->on = 0;
+                q->pos.x = p->pos.x;
+                q->pos.y = p->pos.y;
+                q->pos.z = p->pos.z;
+                q->d2.x = p->d2.x;
+                q->d2.y = p->d2.y;
+                q->d2.z = p->d2.z;
+                q->d1.x = p->d1.x;
+                q->d1.y = p->d1.y;
+                q->d1.z = p->d1.z;
+                q->alpha = p->alpha;
+                q->on = 1;
+                s->n += 2;
+                t->total += 2;
+            }
             slot->type = type;
         } else {
             slot->type = -1;
