@@ -556,10 +556,12 @@ void fn_800C1A80(s32* a, s32* b, s32* out) {
  * The sums are spelled so that the compiler builds the original's expression trees (tools/scan/treecmp.py: all
  * nine outputs equal), u comes after d35 (the statement order reproduces the original's instruction order in a
  * replay of both scheduling passes), and the declaration order is the one an exact replay of the register
- * allocator needs. NonMatching (registers only): the inner sum s08 + s26 of u is numbered like a local of its
- * own in the original, here it is an expression temporary. */
+ * allocator needs. The partial sum t is built up on its own (t = s26; t += s08) because the original numbers it
+ * like a local, not like an expression temporary. Three spellings are forced by operand order alone:
+ * d35 + d62 for g, "- -d80" in the argument of h, and -(x4 + x4) + u for out[6]. */
 #define MP3_Q20(x, k) ((s32)(((s64)(x) * (k)) >> 20))
 void fn_800C1C1C(s32* in, s32* out) {
+    s32 t;
     s32 i0;
     s32 i1;
     s32 d35;
@@ -606,25 +608,27 @@ void fn_800C1C1C(s32* in, s32* out) {
     d80 = i8 - i0;
     s17 = i1 + i7;
     d35 = i3 - i5;
-    u = s08 + s35 + s26;
+    t = s26;
+    t += s08;
+    u = s35 + t;
     x4 = i4 + s17;
     b = MP3_Q20(s26 - s08, 1970683LL);
     c = MP3_Q20(s35 - s08, -364166LL);
     d = MP3_Q20(s35 - s26, -1606512LL);
     e = MP3_Q20(d62 + d80, -717267LL);
     f = MP3_Q20(d35 - d80, -2065296LL);
-    g = MP3_Q20(d62 + d35, -1348028LL);
-    h = MP3_Q20(d35 - d62 + d80, -1816186LL);
+    g = MP3_Q20(d35 + d62, -1348028LL);
+    h = MP3_Q20(d35 - d62 - -d80, -1816186LL);
     m = i4 * 2 - s17;
     out[0] = x4 + u;
     out[1] = g - (a + f);
     out[2] = d - (m + b);
     out[3] = h;
     out[4] = m - b - c;
-    out[6] = x4 * -2 + u;
+    out[6] = -(x4 + x4) + u;
     out[5] = a - e - f;
     out[7] = g + a + e;
-    out[8] = c + m + d;
+    out[8] = d + m + c;
 }
 
 #undef MP3_Q20
