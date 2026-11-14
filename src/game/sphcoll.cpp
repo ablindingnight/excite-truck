@@ -417,8 +417,10 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
 
     pl = ((PolyVol*)o)->planes;
     for (int i = 0; i < S32(o, 0xBC); pl++, i++) {
-        a = (f32)__fabs(PSVECDotProduct(&lv, &pl->n));
-        d = (PSVECDotProduct(&lc, &pl->n) - pl->d) + a;
+        f64 mag = __fabs(PSVECDotProduct(&lv, &pl->n));
+        a = (f32)mag;
+        f32 distance = PSVECDotProduct(&lc, &pl->n) - pl->d;
+        d = distance + a;
         if (d >= lbl_805622D4) {
             sum += d * d;
             q = &push[count++];

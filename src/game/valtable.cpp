@@ -302,7 +302,7 @@ public:
                         if (found) {
                             fn_802E317C("valtab: table \"%s\" has ambiguous parent \"%s\"", ((ValueFileNode*)((u8*)nodes + offset))->GetName(), pn);
                         }
-                        ValueFileNode* child = (ValueFileNode*)((u8*)nodes + offset);
+                        ValueFileNode* child = (ValueFileNode*)((uintptr_t)offset + (uintptr_t)nodes);
                         found = 1;
                         child->parent = &nodes[j];
                     }

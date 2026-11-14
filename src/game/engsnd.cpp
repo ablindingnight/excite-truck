@@ -284,7 +284,8 @@ inline void EngineSound::UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol) {
     f32 gb = sb * e->throttle.gain;
     f32 level = lbl_8055EDB8 * ga * gb;
     e->snd->Play();
-    e->snd->SetPitch(r * e->invRpm);
+    f32 pitch = r * e->invRpm;
+    e->snd->SetPitch(pitch);
     f32 d = level - e->level;
     if (0.2f < d) {
         d = 0.2f;
@@ -303,7 +304,8 @@ void EngineSound::Update(int muted) {
     int local;
     int i;
     f32 rpmv = car->rpm;
-    rpm = rpmFactor * rpmv;
+    f32 rScaled = rpmFactor * rpmv;
+    rpm = rScaled;
     fadeIn = LerpT(0.05f, fadeIn, 1.0f);
     r = rpm;
     t = car->throttle;
@@ -311,7 +313,8 @@ void EngineSound::Update(int muted) {
     n = fn_80178CA4();
     for (i = 0; i < n; i++) {
         me = car->player;
-        if (fn_8026A344(i) == me) {
+        int owner = fn_8026A344(i);
+        if (owner == me) {
             local = 1;
             break;
         }
