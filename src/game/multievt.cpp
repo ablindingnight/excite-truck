@@ -150,8 +150,9 @@ extern "C" {
 /* Helper name unproven */
 static inline int FindUnlockByOffset(u8* car) {
     UnlockList* l = lbl_8055F28C;
-    unsigned offset = 0;
-    for (int i = 0; i < l->count; i++, offset += sizeof(UnlockEntry)) {
+    unsigned offset;
+    int i;
+    for (i = 0, offset = 0; i < l->count; offset += sizeof(UnlockEntry), i++) {
         UnlockEntry* entry = (UnlockEntry*)((u8*)l->entries + offset);
         if (entry->id == S32(car, 0x0)) {
             return i;

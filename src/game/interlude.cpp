@@ -740,6 +740,14 @@ static inline void CopyV(IVec3* d, const ValVec3& s) {
     d->z = s.z;
 }
 
+static inline void LoadCameraPose(CamEvent* c, ValueNode* n, const ValVec3& o) {
+    c->origin.x = o.x;
+    c->origin.y = o.y;
+    c->origin.z = o.z;
+    const ValVec3& dir = n->GetVec3("dir");
+    AxisAngleToRot(&c->rot, dir);
+}
+
 void fn_801C3D88(const char* name) {
     memset(lbl_8055E7F8, 0, 64 * sizeof(Event));
     for (int i = 0; i < 64; i++) {
@@ -800,11 +808,7 @@ void fn_801C3D88(const char* name) {
             f32 fov = n->GetFloat("fov", 90.0f);
             c->fov = 0.017453292f * fov;
             const ValVec3& o = n->GetVec3("origin");
-            c->origin.x = o.x;
-            c->origin.y = o.y;
-            c->origin.z = o.z;
-            const ValVec3& dir = n->GetVec3("dir");
-            AxisAngleToRot(&c->rot, dir);
+            LoadCameraPose(c, n, o);
             CopyV(&c->v, n->GetVec3Or("v", XV3(0.0f, 0.0f, 0.0f)));
             CopyV(&c->av, n->GetVec3Or("av", XV3(0.0f, 0.0f, 0.0f)));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
