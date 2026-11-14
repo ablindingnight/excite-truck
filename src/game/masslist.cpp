@@ -452,6 +452,11 @@ void fn_801BEB30(int car, CrossSet** out) { *out = &lbl_8055E79C[car]; }
 // A vector with a field-by-field copy (copied through float registers).
 struct CVec3 {
     CVec3(void) {}
+    CVec3(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
     CVec3(const CVec3& o) {
         x = o.x;
         y = o.y;
@@ -473,41 +478,26 @@ static inline T* AtP(T* p, int i) {
 
 void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];
-    CVec3 p(*(CVec3*)&cs->pts[i]);
-    CVec3 ref(*(CVec3*)&cs->ref[i]);
-    CVec3 nrm(*(CVec3*)&cs->nrm[i]);
-    CVec3 d;
-    d.x = p.x - ref.x;
-    d.y = p.y - ref.y;
-    d.z = p.z - ref.z;
+    CVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
+    CVec3 ref(cs->ref[i].p.x, cs->ref[i].p.y, cs->ref[i].p.z);
+    CVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
+    CVec3 d(p.x - ref.x, p.y - ref.y, p.z - ref.z);
     f32 base = PSVECDotProduct(&d, &nrm);
     CVec3 e;
     e.x = p.x - pt->x;
     e.y = p.y - pt->y;
     e.z = p.z - pt->z;
     f32 pen = PSVECDotProduct(&e, n) - base;
-    if (pen > 0.2f || !(PSVECDotProduct(n, &nrm) >= -0.2f)) {
+    if (pen > 0.2f || PSVECDotProduct(n, &nrm) < -0.2f) {
         return;
     }
     f32 k = 2.5f * (0.2f + pen);
     k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
-    CVec3 nn;
-    nn.z = LerpT(k, n->z, nrm.z);
-    f32 yv = nrm.y;
-    f32 xv;
-    f32 y2 = n->y;
-    nn.y = LerpT(k, y2, yv);
-    xv = nrm.x;
-    f32 x2 = n->x;
-    nn.x = LerpT(k, x2, xv);
+    CVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
     nrm = nn;
     PSVECNormalize(&nrm, &nrm);
-    CVec3 r;
-    r.x = LerpT(k, pt->x, ref.x);
-    r.y = LerpT(k, pt->y, ref.y);
-    f32 zv = pt->z;
-    r.z = LerpT(k, zv, ref.z);
+    CVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
     ref = r;
     *(MVec4*)AtP(cs->ref, i) = MVec4(ref.x, ref.y, ref.z);
     *(MVec4*)&cs->nrm[i] = MVec4(nrm.x, nrm.y, nrm.z);

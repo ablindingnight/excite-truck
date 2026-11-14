@@ -258,11 +258,16 @@ static inline void AxisAngle(CVec3* m, const CVec3* v) {
     f32 a = PSVECMag(v);
     if (a > 0.0001f) {
         f32 inv = 1.0f / a;
-        f32 x = inv * v->x;
-        f32 y = inv * v->y;
-        f32 z = inv * v->z;
-        f32 s = sin(a);
-        f32 c = cos(a);
+        f32 z;
+        f32 y;
+        f32 s;
+        f32 x;
+        f32 c;
+        x = inv * v->x;
+        y = inv * v->y;
+        z = inv * v->z;
+        s = sin(a);
+        c = cos(a);
         f32 t = 1.0f - c;
         f32 tx = t * x;
         f32 ty = t * y;

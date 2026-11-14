@@ -2240,9 +2240,9 @@ void fn_8019743C(u8* d, u8* out) {
                 blocked = fn_8019309C(d, S32(side, 0x18), 1) == 0;
             }
             if (which != 0) {
-                S32(d, 0xC8) = S32(d, 0xC4);
+                F32(d, 0xC8) = F32(d, 0xC4);
             } else {
-                S32(d, 0xC4) = S32(d, 0xC8);
+                F32(d, 0xC4) = F32(d, 0xC8);
             }
         } else {
             if (U8(d, 0x74) && (u8)fn_80193110(d, S32(d, 0x90))) {
@@ -2252,8 +2252,11 @@ void fn_8019743C(u8* d, u8* out) {
                 k *= 2.0f;
             }
         }
-        if (blocked && (U8(d, 0x2FD) || 0.61f > F32(side, 0x8))) {
-            S32(d, 0x2D0) |= 0x40;
+        if (blocked) {
+            f32 room = F32(side, 0x8);
+            if (U8(d, 0x2FD) || room < 0.61f) {
+                S32(d, 0x2D0) |= 0x40;
+            }
         }
         f32 pos = F32(d, 0x278) + 0.5f * F32(d, 0x27C);
         if (pos < F32(d, 0xC4)) {
@@ -2296,12 +2299,14 @@ void fn_8019743C(u8* d, u8* out) {
         V2 tgt;
         tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
         tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
-        V2 c = LerpV2(*(V2*)out, tgt, F32(d, 0xE0));
+        f32 xv = ((V2*)out)->x;
+        f32 yv = ((V2*)out)->y;
+        V2 c = LerpV2(F32(d, 0xE0), xv, yv, tgt);
         ((V2*)out)->x = c.x;
         ((V2*)out)->y = c.y;
     }
     if (decay) {
-        F32(d, 0xE0) = F32(d, 0xE0) * (0.99f * 0.99f);
+        F32(d, 0xE0) *= 0.99f * 0.99f;
     }
 }
 

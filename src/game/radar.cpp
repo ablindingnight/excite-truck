@@ -87,6 +87,14 @@ static inline f32 Clamp01(f32 t) {
 // Stripped by the linker; its constants come first in the pool.
 f32 RadarClampStub(f32 t) { return Clamp01(t); }
 
+/* Helper name unproven */
+static inline f32 Remap(f32 x, f32 inLo, f32 inHi, f32 outLo, f32 outHi) {
+    f32 hi = outHi;
+    f32 lo = outLo;
+    f32 t = Clamp01((x - inLo) / (inHi - inLo));
+    return lo + t * (hi - lo);
+}
+
 extern "C" {
 
 void fn_801390B0(Layout* l, V2* pos, V2* dir, int focus, f32 scale, f32 alpha) {
@@ -201,7 +209,8 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
             }
             MulVec(m, *(V3*)(car + 0x54), &v);
             d.x = v.x;
-            d.y = v.z * -1.0f;
+            d.y = v.z;
+            d.y *= -1.0f;
             len = sqrt(d.x * d.x + d.y * d.y);
             if (0.01f > len) {
                 len = 0.01f;
@@ -225,8 +234,8 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
                     p.z *= k;
                 }
             }
-            screen.x = origin.x + Clamp01((p.x - -range) / (range - -range)) * (corner.x - origin.x);
-            screen.y = origin.y + Clamp01((p.z - range) / (-range - range)) * (corner.y - origin.y);
+            screen.x = Remap(p.x, -range, range, origin.x, corner.x);
+            screen.y = Remap(p.z, range, -range, origin.y, corner.y);
             fn_801390B0(l, &screen, &d, i == self, scale, alpha);
         }
         fn_802C8E48();

@@ -536,6 +536,7 @@ void fn_8000E874(int player) {
     f32 pad;
     f32 maxSlide;
     DashRow* row;
+    u32 barColor;
     int i;
 
     if (lbl_80351214.count < 1) {
@@ -551,13 +552,15 @@ void fn_8000E874(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0))) + top;
+    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0)));
+    y = y + top;
     pad = lbl_80351214.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
+    barColor = lbl_8055D48C.value;
     for (i = 0, row = lbl_80351214.rows; i < lbl_80351214.count; row++, i++) {
-        char buf[20];
-        int part2;
+        char buf[16];
         int part;
+        int part2;
         part = fn_8000DFA8(row->type);
         part2 = fn_8000DFC0(row->type);
         f32 w = fn_80235EF0(lbl_80351214.art, part) + pad;
@@ -576,6 +579,7 @@ void fn_8000E874(int player) {
         f32 size;
         f32 bw;
         f32 bh;
+        f32 cy;
         case 1:
             fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.1f, x9, ty, row);
             break;
@@ -611,9 +615,9 @@ void fn_8000E874(int player) {
         case 7:
             fn_8000DFD8(row, fn_8000E338(row->a), x5, ty);
             {
-                bw = 89.0f;
+                bw = 2.0f;
                 bh = 17.0f;
-                fn_800109E4(lbl_8055D48C.value, x5 + row->c * bw / 100.0f - 5.0f, ty + bh * 0.5f, 2.0f, bh);
+                fn_800109E4(barColor, x5 + MulQ(row->c, 89.0f) / 100.0f - 1.0f, ty + bh * 0.5f, bw, bh);
             }
             break;
         case 8:
@@ -623,10 +627,11 @@ void fn_8000E874(int player) {
             fn_8000E15C(row, 0xFF2D2DC8, x5, ty);
             break;
         case 10:
+            size = 20.0f;
+            cy = ty + 0.5f * size;
             fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.0f, x9, ty, row);
             if (row->b >= 0) {
-                size = 20.0f;
-                fn_80010E94(lbl_8055D4CC, row->b, x9, ty + 0.5f * size, size, size);
+                fn_80010E94(lbl_8055D4CC, row->b, x9, cy, size, size);
             }
             break;
         }
@@ -634,8 +639,8 @@ void fn_8000E874(int player) {
         y -= h - 1.0f;
     }
     {
-        int part2;
         int part;
+        int part2;
         part = fn_8000DFA8(0);
         part2 = fn_8000DFC0(0);
         fn_80235EF0(lbl_80351214.art, part);
