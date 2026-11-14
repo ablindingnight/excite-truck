@@ -719,6 +719,14 @@ static inline void SaveColor(u8* p, s32 c) {
 }
 
 // Saves the selected colour for the car and shows it (tint and "UICar:COLOR%d" label).
+static inline void DisplaySelectedColor(u8* p, VehicleInfo* v) {
+    *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
+    ShowCarColor(p);
+    fn_801345D8((char*)(p + 0xE0), 0x100, lbl_8034287C, ((GarageSel*)p)->sel + 1);
+    const char* str = fn_80131234(p + 0xE0);
+    CopyName(str, 0x100, (char*)(p + 0xE0));
+}
+
 static inline void ShowSelColor(u8* p) {
     VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
     if (lbl_80498C48.alt) {
@@ -728,11 +736,7 @@ static inline void ShowSelColor(u8* p) {
         s32 c = S32(p, 0x2C);
         GetVehicleColor(v, 0)[1] = c;
     }
-    *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
-    ShowCarColor(p);
-    fn_801345D8((char*)(p + 0xE0), 0x100, lbl_8034287C, ((GarageSel*)p)->sel + 1);
-    const char* str = fn_80131234(p + 0xE0);
-    CopyName(str, 0x100, (char*)(p + 0xE0));
+    DisplaySelectedColor(p, v);
 }
 
 extern "C" {
@@ -1305,13 +1309,25 @@ void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
 }
 
 // Colour list input: left/right pick the previous/next colour; bumping an end plays the error cue.
+static inline void ShowChangedColor(u8* p) {
+    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    if (lbl_80498C48.alt) {
+        const struct { s32 selected; } paint = {S32(p, 0x2C)};
+        GetVehicleColor(v, 0)[0] = paint.selected;
+    } else {
+        const struct { s32 selected; } paint = {S32(p, 0x2C)};
+        GetVehicleColor(v, 0)[1] = paint.selected;
+    }
+    DisplaySelectedColor(p, v);
+}
+
 int fn_8025157C(u8* p, int key) {
     switch (key) {
     case 0x125:
         if (S32(p, 0x2C) > 0) {
             s32 c = --S32(p, 0x2C);
             SaveColor(p, c);
-            ShowSelColor(p);
+            ShowChangedColor(p);
         } else {
             fn_80216D28();
             fn_80214D50(1);
@@ -1321,7 +1337,7 @@ int fn_8025157C(u8* p, int key) {
         if (S32(p, 0x2C) < S32(p, 0x1C) - 1) {
             s32 c = ++S32(p, 0x2C);
             SaveColor(p, c);
-            ShowSelColor(p);
+            ShowChangedColor(p);
         } else {
             fn_80216D28();
             fn_80214D50(1);
