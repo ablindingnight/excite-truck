@@ -333,6 +333,40 @@ void fn_80203380(EFrame* m) {
 
 // Object silhouettes: a camera-facing w x h quad over each of the n points.
 #pragma opt_strength_reduction off
+// Helper name unproven: ENV_PROJECT as an inline that reads the frame as twelve floats (the target addresses the
+// global frame through one register, with no folded offset-0 load).
+static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx, f32& sy) {
+    const f32* f = (const f32*)m;
+    d.x = w.x - f[9];
+    d.y = w.y - f[10];
+    d.z = w.z - f[11];
+    {
+    f32 rx = f[0];
+    f32 ry = f[1];
+    f32 x = d.z * f[2] + (d.y * ry + d.x * rx);
+    f32 ux = f[3];
+    f32 uy = f[4];
+    f32 y = d.z * f[5] + (d.y * uy + d.x * ux);
+    f32 vx = f[6];
+    f32 vy = f[7];
+    f32 z = d.z * f[8] + (d.y * vy + d.x * vx);
+    d.x = x;
+    d.y = y;
+    d.z = z;
+    }
+    {
+    f32 len = PSVECMag(&d);
+    if (0.01f > len) {
+    len = 0.01f;
+    }
+    f32 s = 1.0f / len;
+    d.x *= s;
+    d.y *= s;
+    d.z *= s;
+    }
+    sx = 73.98844f * d.x / (1.0f + d.y);
+    sy = 73.98844f * d.z / (1.0f + d.y);
+}
 void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;
@@ -341,6 +375,9 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
         fn_802D3ECC(lbl_8055ECF0);
     }
     if (fn_802C8DBC(n * 8)) {
+        int k;
+        int hi;
+        int lo;
         for (int i = 0; i < n; i++) {
             EVec3* p = (EVec3*)((u8*)pts + i * stride);
             EVec3 q;
@@ -356,22 +393,26 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                 f32 s = 1.0f / len;
                 side.x *= s;
                 side.y *= s;
-                for (int k = 0; k < 4; k++) {
+                for (k = 0; k < 4; k++) {
                     q = *p;
                     f32 sx, sy;
-                    if (k & 1) {
+                    lo = k & 1;
+                    if (lo) {
                         q.x += side.x * w;
                         q.z += side.y * w;
                     } else {
                         q.x -= side.x * w;
                         q.z -= side.y * w;
                     }
-                    if (k & 2) {
+                    hi = k & 2;
+                    if (hi) {
                         q.y += h;
                     }
                     EVec3 e;
-                    ENV_PROJECT((&lbl_80488B88), q, e, sx, sy);
-                    fn_802C8E00(0xFF404040, k >= 2, sx, 0.0f, sy, (k & 2) ? 1.0f : 0.0f, (k & 1) ? 1.0f : 0.0f);
+                    EnvProject(&lbl_80488B88, q, e, sx, sy);
+                    f32 u = hi ? 1.0f : 0.0f;
+                    f32 v = lo ? 1.0f : 0.0f;
+                    fn_802C8E00(0xFF404040, k >= 2, sx, 0.0f, sy, u, v);
                 }
             }
         }
