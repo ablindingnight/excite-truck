@@ -98,6 +98,44 @@ typedef struct Bundle8011 {
         avail--;                \
     }
 
+// Reads the escape bit; when it is clear, also reads `width` value bits into v.
+#define BINK_GETESC(flag, v, width)            \
+    if (avail == 0) {                          \
+        bit = *next;                           \
+        next++;                                \
+        if (!(bit & 1)) {                      \
+            v = bit >> 1;                      \
+            value = bit >> ((width) + 1);      \
+            avail = 31 - (width);              \
+            flag = 0;                          \
+        } else {                               \
+            value = bit >> 1;                  \
+            avail = 31;                        \
+            flag = 1;                          \
+        }                                      \
+    } else {                                   \
+        avail--;                               \
+        if (!(value & 1)) {                    \
+            if (avail < (width)) {             \
+                bit = *next;                   \
+                next++;                        \
+                value >>= 1;                   \
+                v = value | (bit << avail);    \
+                value = bit >> ((width) - avail);\
+                avail = avail + 32 - (width);  \
+                flag = 0;                      \
+            } else {                           \
+                v = value >> 1;                \
+                value >>= (width) + 1;         \
+                avail -= (width);              \
+                flag = 0;                      \
+            }                                  \
+        } else {                               \
+            value >>= 1;                       \
+            flag = 1;                          \
+        }                                      \
+    }
+
 // Reads `width` bits into v from the reader state held in value/avail/next.
 #define BINK_GETBITS(v, width)                                    \
     if (avail < (width)) {                                        \
@@ -7353,9 +7391,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
     u32 width;
     u8 *start;
     u32 bit;
-    u32 coef;
-    u32 v;
-    u32 e;
+    u32 esc;
     u8 *end;
     u8 *p;
     s32 mask;
@@ -7365,7 +7401,10 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
     u32 value;
     u32 avail;
     s32 sign;
-    u8 list[128];
+    s32 low;
+    u32 e;
+    u32 v;
+    u8 list[144];
     s16 tmp[64] = {0};
 
     avail = bits->count;
@@ -7383,6 +7422,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
     mask = 1 << (planes - 1);
     for (width = planes; width > 1; width--) {
         sign = 1 << (width - 1);
+        low = sign - 1;
         p = start;
         while (p < end) {
             e = *p;
@@ -7391,62 +7431,57 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                 if (bit & 1) {
                     switch (e & 3) {
                     case 0:
-                        coef = e >> 2;
-                        *p = ((coef + 4) << 2) + 1;
+                        e = e >> 2;
+                        *p = ((e + 4) << 2) + 1;
                         goto group4;
                     case 1:
-                        coef = e >> 2;
-                        *p = (coef << 2) + 2;
-                        end[0] = ((coef + 4) << 2) + 2;
-                        end[1] = ((coef + 8) << 2) + 2;
-                        end[2] = ((coef + 12) << 2) + 2;
-                        end += 3;
+                        e = e >> 2;
+                        *p = (e << 2) + 2;
+                        *end++ = ((e + 4) << 2) + 2;
+                        *end++ = ((e + 8) << 2) + 2;
+                        *end++ = ((e + 12) << 2) + 2;
                         continue;
                     case 2:
                         *p = 0;
-                        coef = e >> 2;
+                        e = e >> 2;
                         p++;
                     group4:
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef) << 2) + 3;
+                        BINK_GETESC(esc, v, width);
+                        if (esc) {
+                            *--start = ((e) << 2) + 3;
                         } else {
-                            BINK_GETBITS(v, width);
-                            val = mask | (v & (sign - 1));
+                            val = mask | (v & low);
                             val = v & sign ? -val : val;
-                            tmp[coef] = val;
+                            tmp[e] = val;
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 1) << 2) + 3;
+                        BINK_GETESC(esc, v, width);
+                        if (esc) {
+                            *--start = ((e + 1) << 2) + 3;
                         } else {
-                            BINK_GETBITS(v, width);
-                            val = mask | ((sign - 1) & v);
+                            val = mask | (v & low);
                             val = v & sign ? -val : val;
-                            tmp[coef + 1] = val;
+                            tmp[e + 1] = val;
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 2) << 2) + 3;
+                        BINK_GETESC(esc, v, width);
+                        if (esc) {
+                            *--start = ((e + 2) << 2) + 3;
                         } else {
-                            BINK_GETBITS(v, width);
-                            val = mask | (v & (sign - 1));
+                            val = mask | (v & low);
                             val = v & sign ? -val : val;
-                            tmp[coef + 2] = val;
+                            tmp[e + 2] = val;
                         }
-                        BINK_GETBIT(bit);
-                        if (bit & 1) {
-                            *--start = ((coef + 3) << 2) + 3;
+                        BINK_GETESC(esc, v, width);
+                        if (esc) {
+                            *--start = ((e + 3) << 2) + 3;
                         } else {
-                            BINK_GETBITS(v, width);
-                            val = mask | (v & (sign - 1));
+                            val = mask | (v & low);
                             val = v & sign ? -val : val;
-                            tmp[coef + 3] = val;
+                            tmp[e + 3] = val;
                         }
                         continue;
                     case 3:
                         BINK_GETBITS(v, width);
-                        val = mask | (v & (sign - 1));
+                        val = mask | (v & low);
                         val = v & sign ? -val : val;
                         *p = 0;
                         tmp[e >> 2] = val;
@@ -7467,49 +7502,48 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
                 if (bit & 1) {
                     switch (e & 3) {
                     case 0:
-                        coef = e >> 2;
-                        *p = ((coef + 4) << 2) + 1;
+                        e = e >> 2;
+                        *p = ((e + 4) << 2) + 1;
                         goto group4s;
                     case 1:
-                        coef = e >> 2;
-                        *p = (coef << 2) + 2;
-                        end[0] = ((coef + 4) << 2) + 2;
-                        end[1] = ((coef + 8) << 2) + 2;
-                        end[2] = ((coef + 12) << 2) + 2;
-                        end += 3;
+                        e = e >> 2;
+                        *p = (e << 2) + 2;
+                        *end++ = ((e + 4) << 2) + 2;
+                        *end++ = ((e + 8) << 2) + 2;
+                        *end++ = ((e + 12) << 2) + 2;
                         continue;
                     case 2:
                         *p = 0;
-                        coef = e >> 2;
+                        e = e >> 2;
                         p++;
                     group4s:
                         BINK_GETBIT(bit);
                         if (bit & 1) {
-                            *--start = ((coef) << 2) + 3;
+                            *--start = ((e) << 2) + 3;
                         } else {
                             BINK_GETBIT(bit);
-                            tmp[coef] = -(bit & 1) | 1;
+                            tmp[e] = -(bit & 1) | 1;
                         }
                         BINK_GETBIT(bit);
                         if (bit & 1) {
-                            *--start = ((coef + 1) << 2) + 3;
+                            *--start = ((e + 1) << 2) + 3;
                         } else {
                             BINK_GETBIT(bit);
-                            tmp[coef + 1] = -(bit & 1) | 1;
+                            tmp[e + 1] = -(bit & 1) | 1;
                         }
                         BINK_GETBIT(bit);
                         if (bit & 1) {
-                            *--start = ((coef + 2) << 2) + 3;
+                            *--start = ((e + 2) << 2) + 3;
                         } else {
                             BINK_GETBIT(bit);
-                            tmp[coef + 2] = -(bit & 1) | 1;
+                            tmp[e + 2] = -(bit & 1) | 1;
                         }
                         BINK_GETBIT(bit);
                         if (bit & 1) {
-                            *--start = ((coef + 3) << 2) + 3;
+                            *--start = ((e + 3) << 2) + 3;
                         } else {
                             BINK_GETBIT(bit);
-                            tmp[coef + 3] = -(bit & 1) | 1;
+                            tmp[e + 3] = -(bit & 1) | 1;
                         }
                         continue;
                     case 3:
