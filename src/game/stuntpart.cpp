@@ -386,11 +386,12 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
         p->trig = 0;
-        f32 g = MIN(p->grow + 2.0f * dt, 1.0f);
-        p->grow = g;
+        const struct { f32 value;
+        } growth = {MIN(p->grow + 2.0f * dt, 1.0f)};
+        p->grow = growth.value;
         f32 s = MIN(1.0f, (p->power - 0.35f) / 0.65f);
         s = MAX(s, 0.0f);
-        p->alpha = Lerp(0.0f, g, s);
+        p->alpha = Lerp(0.0f, growth.value, s);
     } else {
         p->grow = MAX(p->grow - 5.0f * dt, 0.0f);
         p->alpha = MAX(p->alpha - 5.0f * dt, 0.0f);
