@@ -347,10 +347,10 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     org.y = F32(m, 0x2C);
     side.x = dir.y;
     side.y = -dir.x;
-    f32 inputX = in->x;
+    const struct { f32 value; } inputX = {in->x};
     f32 inputY = in->y;
-    f32 vx = Dot4_hm(side.x, dir.x, inputX, inputY);
-    f32 vy = Dot4_hm(side.y, dir.y, inputX, inputY);
+    f32 vx = Dot4_hm(side.x, dir.x, inputX.value, inputY);
+    f32 vy = Dot4_hm(side.y, dir.y, inputX.value, inputY);
     r.x = vx + org.x;
     r.y = vy + org.y;
     out->x = r.x;
