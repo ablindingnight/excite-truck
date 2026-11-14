@@ -524,14 +524,8 @@ int fn_802CDB20(MList* m, int i) {
     return lbl_8055DFC4->vis[k] != 0;
 }
 
-static inline void DrawStrip(const MLStrip& s, int tex) {
-    MLPrim* pr = s.prim;
-    fn_802D6B08(pr);
-    fn_802CC550(tex, lbl_804C5480[s.ref], pr->size);
-}
-
 void fn_802CDB5C(int pri) {
-    MLBatch* e;
+    MLPrim* pr;
     MList* m;
     RenderCtx* ctx;
     int i;
@@ -556,9 +550,9 @@ void fn_802CDB5C(int pri) {
     id = fn_802D0514(&ident);
     fn_802D0610(id);
     ctx->mtx[0] = id;
-    e = &ea.p[r.lo];
     cur = 0;
-    for (i = r.lo; i < r.hi; e++, i++) {
+    for (i = r.lo; i < r.hi; i++) {
+        MLBatch* e = &ea.p[i];
         open = 0;
         dl = 0;
         cnt = 0;
@@ -585,7 +579,9 @@ void fn_802CDB5C(int pri) {
                     dl = 0x10 + dl;
                     cnt++;
                 }
-                DrawStrip(s, tex);
+                pr = s.prim;
+                fn_802D6B08(pr);
+                fn_802CC550(tex, lbl_804C5480[s.ref], pr->size);
                 dl = dl + 0x10;
                 cnt++;
             }
