@@ -660,7 +660,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     } else if (dst->fmt == 4) {
         do {
             u32 ia;
-            int n = w;
+            struct { int remaining; } row = {w};
             do {
                 u32 p = *s++;
                 u8 qb = ((*d & 0x1F) << 3) + 1;
@@ -672,7 +672,7 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
                 u32 r = ((ia * qr + a * ((p >> 16) & 0xFF)) * 0x10101) >> 24;
                 u32 g = ((ia * qg + a * ((p >> 8) & 0xFF)) * 0x10101) >> 24;
                 *d++ = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
-            } while (--n > 0);
+            } while (--row.remaining > 0);
             s += sskip;
             d += dskip;
         } while (--h > 0);

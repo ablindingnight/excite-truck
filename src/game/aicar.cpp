@@ -2437,9 +2437,9 @@ void fn_80197BD0(u8* d, u8* out) {
                 if (busy && SignDiffers(off, F32(d, 0xCC))) {
                     fn_8019309C(d, S32(d, 0xDC), 0);
                 }
-                f32 cur = F32(d, 0x54);
+                const struct { f32 value; } currentOffset = {F32(d, 0x54)};
                 f32 dir = F32(d, 0x10C) > 0.0f ? 1.0f : -1.0f;
-                UpdateFollowLine(d, gap, dir, cur);
+                UpdateFollowLine(d, gap, dir, currentOffset.value);
                 f32 u = Clamp01((F32(d, 0xEC) - 4.0f) / -3.3f);
                 F32(d, 0xF0) = LerpF(F32(d, 0xF0), LerpF(0.0f, 1.0f, u), 0.5f);
                 if (!fn_80193184(d, S32(d, 0x114))) {
