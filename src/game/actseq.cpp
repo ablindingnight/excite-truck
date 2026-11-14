@@ -1369,9 +1369,9 @@ public:
             if (!phase) {
                 if (now - start > delay) {
                     SurfEntry* e;
-                    int off = 0;
-                    int i;
-                    for (i = 0; i < entries.count; off += sizeof(SurfEntry), ++i) {
+                    int off;
+                    int i = 0;
+                    for (off = 0; i < entries.count; off += sizeof(SurfEntry), ++i) {
                         e = (SurfEntry*)((u8*)entries.data + off);
                         e->obj->SetSurface(surftype);
                         e->obj->SetMode(e->mode);

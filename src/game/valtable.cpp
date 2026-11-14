@@ -270,14 +270,9 @@ public:
 class ValueFile : public ValueTable {
 public:
     ValueFile(void) {
-        int i;
         nodes = (ValueFileNode*)data;
         Swap4((u8*)&count);
         Swap4((u8*)&unk8);
-        for (i = 0; i < count; i++) {
-            new (&nodes[i]) ValueFileNode(this);
-            nodes[i].file = this;
-        }
         ResolveParents();
     }
     virtual ValueNode* GetChild(int index) {
@@ -289,6 +284,10 @@ public:
     void ResolveParents(void) {
         int i;
         unsigned offset;
+        for (int k = 0; k < count; k++) {
+            new (&nodes[k]) ValueFileNode(this);
+            nodes[k].file = this;
+        }
         for (i = 0, offset = 0; i < count; offset += sizeof(ValueFileNode), ++i) {
             const char* pn = ((ValueFileNode*)((u8*)nodes + offset))->parentName;
             if (pn && *pn) {
