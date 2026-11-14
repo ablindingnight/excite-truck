@@ -1986,6 +1986,46 @@ inline int CrushSubTaskMgr::vf14(void) { return 0; }
 
 inline int CrushSubTaskMgr::vf1C(void) { return 0; }
 
+// Helper name unproven: an awesome kill throws the victim ahead of the killer.
+static inline void Punt(int a, int victim) {
+    ValVec3 tgt;
+    ValVec3 imp;
+    RaceCarRec* ka;
+    RaceCarRec* v;
+    f32 len;
+    ka = fn_8017960C(a);
+    f32 xv = ka->mtx.basis[2].x;
+    f32 ahead = 50.0f;
+    tgt.x = ka->mtx.origin.x + xv * ahead;
+    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * ahead;
+    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * ahead;
+    v = fn_8017960C(victim);
+    imp.x = tgt.x - v->mtx.origin.x;
+    imp.y = tgt.y - v->mtx.origin.y;
+    imp.z = tgt.z - v->mtx.origin.z;
+    len = PSVECMag(&imp);
+    len = 0.01f > len ? 0.01f : len;
+    {
+        f32 inv = 1.0f / len;
+        imp.x *= inv;
+        imp.y *= inv;
+        imp.z *= inv;
+    }
+    {
+        f32 curFD4 = v->fD4;
+        f32 kk = 40.0f * curFD4 / 0.0166833512f;
+        imp.x *= kk;
+        imp.y *= kk;
+        imp.z *= kk;
+    }
+    f32 fD4v = v->fD4;
+    imp.y = 17.777779f * fD4v / 0.0166833512f;
+    ValVec3 at = v->mtx.origin;
+    at.y += 0.5f;
+    fn_8017B3A8(v, &imp, &at);
+    fn_8018F9B4(v);
+}
+
 inline void CrushSubTaskMgr::vf18(int a, int b) {
     if (master->vf20(a) && master->vf20(b)) {
         CrushMaster* m;
@@ -2024,44 +2064,8 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
                     m->cars[a].bonus = Round(v);
                 }
                 if (grade == 2) {
-                    ValVec3 tgt;
-                    ValVec3 imp;
-                    RaceCarRec* ka;
-                    RaceCarRec* v;
-                    f32 len;
                     m->t18C.Start();
-                    ka = fn_8017960C(a);
-                    f32 xv = ka->mtx.basis[2].x;
-                    f32 ahead = 50.0f;
-                    tgt.x = ka->mtx.origin.x + xv * ahead;
-                    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * ahead;
-                    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * ahead;
-                    v = fn_8017960C(victim);
-                    imp.x = tgt.x - v->mtx.origin.x;
-                    imp.y = tgt.y - v->mtx.origin.y;
-                    imp.z = tgt.z - v->mtx.origin.z;
-                    len = PSVECMag(&imp);
-                    len = 0.01f > len ? 0.01f : len;
-                    {
-                        f32 inv = 1.0f / len;
-                        imp.x *= inv;
-                        imp.y *= inv;
-                        imp.z *= inv;
-                    }
-                    {
-                        f32 curFD4 = v->fD4;
-                        f32 kk = 40.0f * curFD4 / 0.0166833512f;
-                        imp.x *= kk;
-                        imp.y *= kk;
-                        imp.z *= kk;
-                    }
-                    f32 fD4v = v->fD4;
-                    imp.y = 17.777779f * fD4v / 0.0166833512f;
-                    ValVec3 originv = v->mtx.origin;
-                    ValVec3 at = originv;
-                    at.y += 0.5f;
-                    fn_8017B3A8(v, &imp, &at);
-                    fn_8018F9B4(v);
+                    Punt(a, victim);
                 }
             } else if (!m->t184.Running()) {
                 m->t184.Start();
