@@ -393,52 +393,53 @@ void NetCar::Extrapolate(Blend* b) {
 }
 
 static inline void QuatToMtx(TMtx* m, const TQuat* q) {
-    f32 x = q->x;
-    f32 y = q->y;
-    f32 z = q->z;
-    f32 w = q->w;
-    f32 x2 = x + x;
-    f32 y2 = y + y;
-    f32 z2 = z + z;
-    f32 xx = x * x2;
-    f32 yy = y * y2;
-    f32 zz = z * z2;
-    f32 wx = x2 * w;
-    f32 yz = y * z2;
-    f32 wy;
-    f32 xz;
-    f32 wz;
-    f32 xy;
-    m->x.x = 1.0f - (yy + zz);
-    m->z.z = 1.0f - (xx + yy);
-    m->y.y = 1.0f - (xx + zz);
-    m->y.z = yz + wx;
-    m->z.y = yz - wx;
-    wy = y2 * w;
-    xz = z2 * x;
-    wz = z2 * w;
-    xy = y2 * x;
-    m->z.x = xz + wy;
-    m->x.z = xz - wy;
-    m->y.x = xy - wz;
-    m->x.y = xy + wz;
+    f32 x2 = q->x + q->x;
+    f32 y2 = q->y + q->y;
+    f32 z2 = q->z + q->z;
+    f32 xx = q->x * x2;
+    f32 yy = q->y * y2;
+    f32 zz = q->z * z2;
+    f32 wx = q->w * x2;
+    f32 yz = q->y * z2;
+    f32 wy = q->w * y2;
+    f32 xz = q->x * z2;
+    f32 wz = q->w * z2;
+    f32 xy = q->x * y2;
+    f32 m00 = 1.0f - (yy + zz);
+    f32 m11 = 1.0f - (xx + zz);
+    f32 m22 = 1.0f - (xx + yy);
+    f32 zy = yz - wx;
+    f32 yz1 = wx + yz;
+    f32 zx = xz + wy;
+    f32 xz1 = xz - wy;
+    f32 yx = xy - wz;
+    f32 xy1 = xy + wz;
+    m->x.x = m00;
+    m->y.y = m11;
+    m->z.y = zy;
+    m->z.x = zx;
+    m->y.x = yx;
+    m->x.y = xy1;
+    m->x.z = xz1;
+    m->y.z = yz1;
+    m->z.z = m22;
 }
 
 void NetCar::Snap(void) {
     BodyState s;
     s.hint = -1;
     QuatToMtx(&s.mtx, (const TQuat*)&ptab[0].rot);
-    s.mtx.pos.x = ptab[0].pos.v[0];
-    s.mtx.pos.y = ptab[0].pos.v[1];
-    s.mtx.pos.z = ptab[0].pos.v[2];
+    const PVec* p = &ptab[0].pos;
+    s.mtx.pos.x = p->v[0];
+    s.mtx.pos.y = p->v[1];
+    s.mtx.pos.z = p->v[2];
     s.vel.x = 0.0f;
     s.vel.y = 0.0f;
     s.a3C = 0;
     s.vel.z = 0.0f;
     fn_801E9DC4(&s.hint);
     SetState(&s);
-    ptab[2] = ptab[0];
-    ptab[1] = ptab[2];
+    ptab[1] = ptab[2] = ptab[0];
     {
         TVec z(0.0f, 0.0f, 0.0f);
         ptab[1].frame--;

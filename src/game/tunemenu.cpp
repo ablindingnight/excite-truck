@@ -1,6 +1,7 @@
 // Tuning menu (0x80257C10-0x80257FB8): the garage screen's sliders for a car's handling scales.
 // Names are guesses apart from the layout and element names.
 #include "game/common.h"
+#include "game/menu.h"
 
 // Handling scales edited by the garage sliders.
 struct TuneScales {
@@ -17,32 +18,8 @@ struct TuneScales {
 
 static inline int FloatBits(f32 f) { return *(int*)&f; }
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        name = n;
-        type = t;
-        arg0 = a0;
-        data = d;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
 extern "C" {
 TuneScales* fn_8027A798(void);  // the current car's scales
-int fn_802146BC(MenuDesc* desc, int x, int y, int a);
 extern char lbl_8055B860[8];
 }
 
@@ -52,28 +29,30 @@ static UnkStatic123 lbl_80498E50;
 extern "C" void fn_80257C10(void) {
     TuneScales* t = fn_8027A798();
     int steps = 30;
+    f32 lo = 0.25f;
+    f32 hi = 1.75f;
     MenuItem items[] = {
-        MenuItem("mass", 9, &t->mass, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("mass", 9, &t->mass, FloatBits(lo), FloatBits(hi)),
         MenuItem("mass", 2, &steps, 0, 0),
-        MenuItem("mass_moment", 9, &t->massMoment, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("mass_moment", 9, &t->massMoment, FloatBits(lo), FloatBits(hi)),
         MenuItem("mass_moment", 2, &steps, 0, 0),
-        MenuItem("power", 9, &t->power, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("power", 9, &t->power, FloatBits(lo), FloatBits(hi)),
         MenuItem("power", 2, &steps, 0, 0),
-        MenuItem("gear_ratio", 9, &t->gearRatio, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("gear_ratio", 9, &t->gearRatio, FloatBits(lo), FloatBits(hi)),
         MenuItem("gear_ratio", 2, &steps, 0, 0),
-        MenuItem("spring", 9, &t->spring, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("spring", 9, &t->spring, FloatBits(lo), FloatBits(hi)),
         MenuItem("spring", 2, &steps, 0, 0),
-        MenuItem("bump", 9, &t->bump, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("bump", 9, &t->bump, FloatBits(lo), FloatBits(hi)),
         MenuItem("bump", 2, &steps, 0, 0),
-        MenuItem("rebound", 9, &t->rebound, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("rebound", 9, &t->rebound, FloatBits(lo), FloatBits(hi)),
         MenuItem("rebound", 2, &steps, 0, 0),
-        MenuItem("grip", 9, &t->grip, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("grip", 9, &t->grip, FloatBits(lo), FloatBits(hi)),
         MenuItem("grip", 2, &steps, 0, 0),
-        MenuItem("slip", 9, &t->slip, FloatBits(0.25f), FloatBits(1.75f)),
+        MenuItem("slip", 9, &t->slip, FloatBits(lo), FloatBits(hi)),
         MenuItem("slip", 2, &steps, 0, 0),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
-        *(MenuItem*)&lbl_80498E50,
+        MenuItem(lbl_80498E50),
     };
     MenuDesc desc = {"$garage.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);

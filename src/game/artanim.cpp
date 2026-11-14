@@ -219,16 +219,17 @@ int fn_802AC174(const char* s) {
 }
 
 u32 fn_802AC1BC(const char* s) {
+    u32 flags = 0;
+    int hasH = 0;
+    int hasV = 0;
     ArtJustify table[8] = {
         {"left", 1, 1},   {"right", 2, 1},       {"center", 4, 1},  {"top", 8, 0},
         {"middle", 0x10, 0}, {"baseline", 0x20, 0}, {"bottom", 0x40, 0}, {0, 0, 0},
     };
-    u32 flags = 0;
-    int hasH = 0;
-    int hasV = 0;
     for (ArtJustify* e = table; e->name; e++) {
         if (strstr(s, e->name)) {
-            flags = (e->horiz ? flags & ~7 : flags & 7) | e->flag;
+            flags = (e->horiz ? flags & ~7 : flags & 7);
+            flags |= e->flag;
             hasH = hasH || e->horiz;
             hasV = hasV || !e->horiz;
         }

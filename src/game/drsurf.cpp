@@ -582,15 +582,16 @@ void fn_802D50B4(Surf* s) {
         if (!Queue(&lbl_804D6C44, n, v, out)) {
             V3* o = out;
             for (int i = n; i > 0; i--) {
-                f32 a = (1.0f / 255) * v->da;
-                f32 b = (1.0f / 255) * v->db;
-                f32 wb = lbl_804CA308[v->ib];
-                f32 wa = lbl_804CA308[v->ia];
-                f32 w = v->w;
+                f32 a, wa, wb, w, b;
                 V3 p;
+                w = v->w;
                 p.x = v->x + lbl_804C56F0.x * w;
                 p.y = v->y + lbl_804C56F0.y * w;
                 p.z = v->z + lbl_804C56F0.z * w;
+                a = (1.0f / 255) * v->da;
+                b = (1.0f / 255) * v->db;
+                wb = lbl_804CA308[v->ib];
+                wa = lbl_804CA308[v->ia];
                 o->x = p.x;
                 o->y = p.y + a * wa + b * wb;
                 o->z = p.z;

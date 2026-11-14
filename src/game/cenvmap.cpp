@@ -13,8 +13,10 @@ struct EVec2 {
 };
 
 struct EFrame {
-    EVec3 x;    // offset 0x0
-    EVec3 y;    // offset 0xC
+    struct {
+        EVec3 x;    // offset 0x0
+        EVec3 y;    // offset 0xC
+    };
     EVec3 z;    // offset 0x18
     EVec3 pos;  // offset 0x24
 };
@@ -131,10 +133,10 @@ static inline void Flatten(EVec3* o, const EVec3* v, f32 k) {
 }
 
 static inline void Rotate(EVec2* p, f32 a) {
+    f32 x = p->x;
     f32 c = cos(a);
     f32 s = sin(a);
-    f32 x = p->x;
-    p->x = x * c - p->y * s;
+    p->x = p->x * c - p->y * s;
     p->y = x * s + p->y * c;
 }
 
@@ -214,6 +216,15 @@ void fn_80202D50(EVec3 dir) {
     fn_802D30DC(result);
 }
 
+/* Helper name unproven */
+static inline EVec3 MakeVec3(f32 x, f32 y, f32 z) {
+    EVec3 r;
+    r.x = x;
+    r.y = y;
+    r.z = z;
+    return r;
+}
+
 void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
     if ((f32)__fabs(f->z.y) < 0.999f) {
         EVec3 d;
@@ -241,11 +252,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         out->x.y *= -1.0f;
         out->x.z *= -1.0f;
     } else {
-        EVec3 up;
-        up.x = 0.0f;
-        up.y = 0.0f;
-        up.z = 1.0f;
-        fn_80202D50(up);
+        fn_80202D50(MakeVec3(0.0f, 0.0f, 1.0f));
         fn_802C8BD0(lbl_8055ED00);
         out->x.x = 1.0f;
         out->x.y = 0.0f;
@@ -268,13 +275,15 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         f32 len = sqrt(h.x * h.x + h.y * h.y);
         len = 0.01f > len ? 0.01f : len;
         f32 s = 1.0f / len;
-        h.y = h.y * s * -1.0f;
-        h.x = h.x * s * -1.0f;
-        f32 a = atan2(-h.x, h.y);
+        h.x *= s;
+        h.y *= s;
+        h.x *= -1.0f;
+        h.y *= -1.0f;
+        f32 a = -(f32)atan2(-h.x, h.y);
         EVec2 p;
         p.x = -181.01926f;
         p.y = 181.01926f;
-        Rotate(&p, -a);
+        Rotate(&p, a);
         fn_802C8E00(-1, 0, p.x, 0.0f, p.y, -0.20710647f, -0.20710647f);
         Rotate(&p, -1.5707963705062866);
         fn_802C8E00(-1, 0, p.x, 0.0f, p.y, 1.2071065f, -0.20710647f);
