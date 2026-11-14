@@ -1473,10 +1473,6 @@ struct StuntKind {
     int Is(s32 t) const { return type == t; }
 };
 
-const StuntKind lbl_802F9410[6] = {
-    {0, "air", 0}, {2, "off", 0}, {3, "drift", 0}, {4, "tree", 0}, {14, "ring", 0}, {7, "360", 0},
-};
-
 struct HiNames {
     const char* a;     // offset 0x0
     const char* b;     // offset 0x4
@@ -1597,6 +1593,10 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
         static LocString sRing("Stunt:RING");
         static LocString s360("Stunt:360");
     }
+    // The stunt table is a static of this inline function: the target addresses it by its own symbol.
+    static const StuntKind kinds[6] = {
+        {0, "air", 0}, {2, "off", 0}, {3, "drift", 0}, {4, "tree", 0}, {14, "ring", 0}, {7, "360", 0},
+    };
     pal = fn_8026B0C0(view);
     {
         u8 done[6];
@@ -1610,19 +1610,19 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
         for (; it.Valid(); it.Next()) {
             if (it->Value() > 0.5f) {
                 int i;
-                for (i = 0; i < ARRAY_COUNT(lbl_802F9410); i++) {
+                for (i = 0; i < ARRAY_COUNT(kinds); i++) {
                     char buf[0x20];
                     ArtElem* a;
-                    fn_801345D8(buf, sizeof(buf), "%s_star", lbl_802F9410[i].name);
+                    fn_801345D8(buf, sizeof(buf), "%s_star", kinds[i].name);
                     a = l->FindArt(buf);
                     if (a) {
                         ArtElem e = *a;
                         e.pos.x = e.pos.x - e.w / 2.0f - 4.0f * e.w / 2.0f;
-                        if (lbl_802F9410[i].Is(it->Type()) && !done[i]) {
+                        if (kinds[i].Is(it->Type()) && !done[i]) {
                             char name[0x20];
                             TextElem* t;
                             f32 j;
-                            fn_801345D8(name, sizeof(name), "stunt_%s", lbl_802F9410[i].name);
+                            fn_801345D8(name, sizeof(name), "stunt_%s", kinds[i].name);
                             t = l->Find(name);
                             if (t) {
                                 TextElem te = *t;
@@ -1709,10 +1709,10 @@ inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
                     f32 p = Remap(0.0f, 0.2f, 0.0f, 1.0f, age);
                     ArtElem* sa = 0;
                     int i;
-                    for (i = 0; i < ARRAY_COUNT(lbl_802F9410); i++) {
-                        if (lbl_802F9410[i].Is(cur->Type())) {
+                    for (i = 0; i < ARRAY_COUNT(kinds); i++) {
+                        if (kinds[i].Is(cur->Type())) {
                             char buf[0x20];
-                            sprintf(buf, "%s_star", lbl_802F9410[i].name);
+                            sprintf(buf, "%s_star", kinds[i].name);
                             sa = l->FindArt(buf);
                             break;
                         }
