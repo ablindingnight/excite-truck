@@ -1135,7 +1135,8 @@ inline void CrushMaster::vfF8(void) {
             memset(c->f10, 0, 8);
         }
     }
-    t = fn_8000AC38()->vals->FindChild((const char*)fn_80204EA0("crush_table"));
+    const char* key = (const char*)fn_80204EA0("crush_table");
+    t = fn_8000AC38()->vals->FindChild(key);
     timeout = t->GetFloat("timeout", 180.0f);
     lbl_8043038C.speedA = 0.44444445f * t->GetFloat("ai_speed_a", 160.0f);
     lbl_8043038C.speedB = 0.44444445f * t->GetFloat("ai_speed_b", 100.0f);
@@ -1157,8 +1158,7 @@ inline void CrushMaster::vfF8(void) {
             for (k = 0;; k++) {
                 char name[0x20];
                 fn_801345D8(name, 0x20, "point%d", k);
-                int curCount = spawns.count;
-                if (!sp->Has(name) || curCount + 1 > spawns.cap) {
+                if (!sp->Has(name) || spawns.count + 1 > spawns.cap) {
                     break;
                 }
                 {
