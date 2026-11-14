@@ -2565,7 +2565,7 @@ void fn_8019F780(u8* p) {
                 RVec3 f;
                 RVec3 fr;
                 CFrame* m = (CFrame*)PTR(p, 0xC);
-                MulVec(&w, (RVec3*)&corners[i], m);
+                MulVec(&w, (RVec3*)corners + i, m);
                 w.x = w.x + m->t.x;
                 w.y = w.y + m->t.y;
                 w.z = w.z + m->t.z;

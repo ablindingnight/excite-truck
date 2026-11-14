@@ -474,38 +474,38 @@ void NetCar::Rotate(Blend* b) {
     fn_801A70EC(&q1, &ptab[1], &ptab[0], now);
     fn_801A70EC(&q2, &ptab[2], &ptab[1], now);
     fn_8012F57C(&q, &q2, &q1, t);
-    tr = mtx.x.x + mtx.y.y + mtx.z.z;
     k = b->k;
     t = t + dt;
+    tr = mtx.x.x + mtx.y.y + mtx.z.z;
+    f32(*m)[3] = (f32(*)[3])&mtx;
     if (tr > 0.0f) {
         f32 s = sqrt(1.0f + tr);
         f32 inv = 0.5f / s;
         cur.w = 0.5f * s;
-        cur.x = inv * (mtx.y.z - mtx.z.y);
-        cur.y = inv * (mtx.z.x - mtx.x.z);
-        cur.z = inv * (mtx.x.y - mtx.y.x);
+        cur.x = inv * (m[1][2] - m[2][1]);
+        cur.y = inv * (m[2][0] - m[0][2]);
+        cur.z = inv * (m[0][1] - m[1][0]);
     } else {
+        int l;
         f32* c = &cur.x;
-        f32* m = &mtx.x.x;
         s32 i = 0;
         int j;
-        int l;
         f32 s;
         f32 inv;
-        if (m[4] > m[0]) {
+        if (m[1][1] > m[0][0]) {
             i = 1;
         }
-        if (m[8] > m[i * 3 + i]) {
+        if (m[2][2] > m[i][i]) {
             i = 2;
         }
         j = (i + 1) % 3;
         l = (j + 1) % 3;
-        s = sqrt(1.0f + (m[i * 3 + i] - (m[j * 3 + j] + m[l * 3 + l])));
+        s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[l][l])));
         inv = 0.5f / s;
         c[i] = 0.5f * s;
-        cur.w = inv * (m[j * 3 + l] - m[l * 3 + j]);
-        c[j] = inv * (m[i * 3 + j] + m[j * 3 + i]);
-        c[l] = inv * (m[i * 3 + l] + m[l * 3 + i]);
+        cur.w = inv * (m[j][l] - m[l][j]);
+        c[j] = inv * (m[i][j] + m[j][i]);
+        c[l] = inv * (m[i][l] + m[l][i]);
     }
     fn_8012F57C(&q, &cur, &q, k);
     QuatToMtx(&mtx, &q);

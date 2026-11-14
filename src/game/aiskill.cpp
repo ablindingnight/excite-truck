@@ -249,14 +249,16 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
         span = (f32)(n - 1);
     }
     for (i = 0; i < n; i++) {
-        lbl_8042F858.entries[slots[i].idx].start = lbl_8042F858.base - (f32)i / span * sk.x;
+        f32 t = (f32)i / span;
+        lbl_8042F858.entries[slots[i].idx].start = lbl_8042F858.base - t * sk.x;
     }
     for (i = 0; i < n; i++) {
         slots[i].score += fn_80129D90(3, -2, 2);
     }
     qsort(slots, n, sizeof(SkillSlot), fn_8013A6C4);
     for (i = 0; i < n; i++) {
-        lbl_8042F858.entries[slots[i].idx].race = lbl_8042F858.base - (f32)i / span * sk.x;
+        f32 t = (f32)i / span;
+        lbl_8042F858.entries[slots[i].idx].race = lbl_8042F858.base - t * sk.x;
     }
     for (i = 0; i < n; i++) {
         SkillSlot* e = &slots[i];
@@ -264,7 +266,8 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
         int idx;
         int hasStart;
         for (int j = 0; j < nd; j++) {
-            if (e->driver == bonus[j].id) {
+            s32 id = bonus[j].id;
+            if (id == e->driver) {
                 d = (u8*)GetDriver(j);
             }
         }

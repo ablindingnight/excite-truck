@@ -1433,9 +1433,10 @@ void fn_802D6C78(void) {
                 f32 w = v->w;
                 V3 p;
                 p.y = v->y + d.y * w;
+                f32 ta = a * lbl_804CA308[v->ia];
                 p.x = v->x + d.x * w;
                 p.z = v->z + d.z * w;
-                SetXYZ(o, p.x, p.y + a * lbl_804CA308[v->ia] + b * lbl_804CA308[v->ib], p.z);
+                SetXYZ(o, p.x, p.y + ta + b * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
             }

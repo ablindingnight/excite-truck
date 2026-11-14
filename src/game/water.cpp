@@ -798,6 +798,7 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 extern const f32 lbl_80564E24;  // -10
+extern const f32 lbl_80564E20;  // 1024
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -809,6 +810,7 @@ void WaterSystem::Draw(void) {
     fn_802C98DC(&sx, &nearZ, &farZ, &dz);
     f32 tilt = h * cam.z.y;
     f32 far = 0.95f * farZ;
+    f32 nd = nearZ;
     sx = sx * (f32)sqrt(1.5625);
     WVert* verts = fn_802DD42C(0x6000);
     f32 vx = fn_802C9C50();
@@ -844,25 +846,35 @@ void WaterSystem::Draw(void) {
         if (r == 63) {
             p.y = cam.pos.y;
         }
-        f32 dist = nearZ + t * (far - nearZ) + tilt;
+        f32 dist = nd + t * (far - nd) + tilt;
         p.x += fwd.x * dist;
         p.y += fwd.y * dist;
         p.z += fwd.z * dist;
+        PVec lc;
         PVec rel;
-        f32 depth = rel.x * cam.z.x + rel.y * cam.z.y + rel.z * cam.z.z;
-        SetXYZ(&rel, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
+        PVec d;
+        SetXYZ(&d, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
+        lc.x = d.x * cam.x.x + d.y * cam.x.y + d.z * cam.x.z;
+        lc.y = d.x * cam.y.x + d.y * cam.y.y + d.z * cam.y.z;
+        lc.z = d.x * cam.z.x + d.y * cam.z.y + d.z * cam.z.z;
+        rel = d;
+        f32 depth = lc.z;
         fn_802BED90(&rel);
         f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
         u32 col = fn_802C03E0(fn_80147C50(f * f, lbl_8055FAE4, lbl_8055FAE8));
         for (int c = 0; c < 16; c++) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
-            SetXYZ(&v->pos, p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
+            PVec wp;
+            SetXYZ(&wp, p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
+            v->pos = wp;
             v->color = col;
             PVec s;
             fn_802C8E70(&v->pos, &s);
-            v->u = 0.5f + ((s.x - vx + cx) / 640.0f - 0.5f) * k;
-            v->v = 0.5f + 0.75f * (((s.y - vy + cy) / 480.0f - 0.5f) * k);
+            v->u = (s.x - vx + cx) / 640.0f;
+            v->v = (s.y - vy + cy) / 480.0f;
+            v->u = 0.5f + (v->u - 0.5f) * k;
+            v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
     }
     fn_802DBE4C();
@@ -872,7 +884,7 @@ void WaterSystem::Draw(void) {
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(1.0f / sh, 0, lbl_8055FAEC);
     fn_802C8BD0(env->Target());
-    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (1024.0f * 2.0f), deep, mask, deepCol);
+    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * 2.0f), deep, mask, deepCol);
     fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);
     fn_802DD228();
     fn_802C8D74();
@@ -885,10 +897,10 @@ void WaterSystem::Draw(void) {
     nz += 0.001f;
     PVec c;
     MadV3(&c.x, &cam2.pos.x, &cam2.z.x, nz);
-    f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.z.y);
+    f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.y.y);
     PVec q;
     MadV3(&q.x, &c.x, &cam2.y.x, sc);
-    PVec ax = cam2.x;
+    PVec ax = cam2.z;
     ax.y = 0.0f;
     PVec upv;
     upv.x = 0.0f;
