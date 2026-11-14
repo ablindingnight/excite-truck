@@ -143,8 +143,10 @@ void fn_802A7EEC(void) {
         *q = i;
     }
     qsort(order, fn_801EA994(), sizeof(int), fn_802A7E08);
-    f32 nearDist = 100.0f;
-    f32 farDist = 7056.0f;
+    f32 nearDist;
+    f32 farDist;
+    farDist = 7056.0f;
+    nearDist = 100.0f;
     for (i = 0, q = order; i < fn_801EA994(); q++, i++) {
         int car = *q;
         TagCar* c;
