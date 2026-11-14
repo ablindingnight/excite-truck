@@ -7456,7 +7456,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
         s32 a4 = t[3] + t[5];
         s32 a5 = t[5] - t[3];
         s32 a6 = t[7] + t[1];
-        u32 a7 = t[1] - t[7];
+        s32 a7 = t[1] - t[7];
         s32 b0 = a6 + a4;
         s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
         s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
