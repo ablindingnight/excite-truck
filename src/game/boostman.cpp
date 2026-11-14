@@ -426,6 +426,11 @@ inline Bound* NewBound(s32 n) {
     return b;
 }
 
+/* Helper name unproven */
+static inline BoostArea& AreaAt(BoostArea* areas, int index) {
+    return areas[index];
+}
+
 extern "C" {
 
 int fn_801E1048(int car) {
@@ -451,7 +456,7 @@ int fn_801E1048(int car) {
                 p.y += rec->pos.y;
                 p.z += rec->pos.z;
                 hit = 0;
-                if (m->areas.data[i].bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
+                if (AreaAt(m->areas.data, i).bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
                     hit = 1;
                 }
                 if (hit) {

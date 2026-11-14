@@ -1643,6 +1643,11 @@ int Obstacle_ASE::Load(ValueNode* t) {
     return ok;
 }
 
+/* Helper name unproven */
+static inline f32 MotionMagnitude(f32 value) {
+    return (f32)__fabs(value);
+}
+
 int Obstacle_ASE::Begin(int reverse) {
     if (state == 1) {
         for (int i = 0; i < bodies.count; i++) {
@@ -1652,7 +1657,8 @@ int Obstacle_ASE::Begin(int reverse) {
             dir.Set(Lerp(dir1.x, dir2.x, td), Lerp(dir1.y, dir2.y, td), Lerp(dir1.z, dir2.z, td));
             f32 speed = Lerp(speed1, speed2, ts);
             Vec vel(0.0f, 0.0f, 0.0f);
-            if (lbl_80558DC4[0] >= (f32)__fabs(PSVECDotProduct(&dir, &dir)) || lbl_80558DC4[0] >= (f32)__fabs(speed)) {
+            if (MotionMagnitude(PSVECDotProduct(&dir, &dir)) <= lbl_80558DC4[0] ||
+                MotionMagnitude(speed) <= lbl_80558DC4[0]) {
                 bodies.data[i]->Place(1);
             } else {
                 PSVECNormalize(&dir, &dir);

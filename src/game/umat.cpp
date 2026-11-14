@@ -177,10 +177,18 @@ void fn_802B57B8(void) {
 void fn_802B5808(void) {
     {
         int i;
-        UMat* m;
+        struct {
+            UMat* material;
+        } item;
         for (i = 0; i < lbl_804BE4AC.count; i++) {
-            m = &lbl_804BE4AC.data[i];
-            m->Free();
+            item.material = &lbl_804BE4AC.data[i];
+            UMat& material = *item.material;
+            for (int k = 0; k < 4; k++) {
+                fn_802B5404(&material.road[k].tex);
+            }
+            if (material.sky != -1) {
+                mrModelUnload(material.sky);
+            }
         }
     }
     {
