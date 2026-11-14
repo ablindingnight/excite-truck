@@ -715,7 +715,7 @@ void fn_802CF10C(u32 count) {
         u16* src = lbl_804C9760.cur;
         for (int y = 0; y < cap->h; y++) {
             memcpy(&cap->data[y * cap->w],
-                   &src[lbl_804C9760.w * (y + cap->y) + cap->x], cap->w * 2);
+                   src + cap->x + lbl_804C9760.w * (y + cap->y), cap->w * 2);
         }
     }
     if (cap->active) {
@@ -728,8 +728,9 @@ void fn_802CF10C(u32 count) {
     }
     buf = lbl_804C9760.cur;
     DCInvalidateRange(buf, lbl_804C9760.w * lbl_804C9760.h * 2);
+    int y = (lbl_8055FD4C >> 2) & 1;
     if (lbl_8055FD50) {
-        for (int y = (lbl_8055FD4C >> 2) & 1; y < lbl_804C9760.h; y += 2) {
+        for (; y < lbl_804C9760.h; y += 2) {
             int i;
             int d;
             int x;

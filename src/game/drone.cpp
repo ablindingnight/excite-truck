@@ -441,7 +441,10 @@ static inline void QuatToMtx(BMtx33* m, const Quat* q) {
 
 static inline void MtxToQuatAxis(f32 (*m)[3], Quat* q) {
     f32* v = &q->x;
-    int i = m[1][1] > m[0][0];
+    int i = 0;
+    if (m[1][1] > m[0][0]) {
+        i = 1;
+    }
     if (m[2][2] > m[i][i]) {
         i = 2;
     }
@@ -457,7 +460,7 @@ static inline void MtxToQuatAxis(f32 (*m)[3], Quat* q) {
 
 static inline void MtxToQuat(const BMtx33* f, Quat* q) {
     const f32(*m)[3] = (const f32(*)[3])f;
-    f32 tr = f->xx + f->yy + f->zz;
+    f32 tr = m[0][0] + m[1][1] + m[2][2];
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
         q->w = 0.5f * s;

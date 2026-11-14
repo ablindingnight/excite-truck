@@ -1576,10 +1576,10 @@ void fn_80183E7C(u8* p) {
         *(HVec*)w->plane.ground = *(HVec*)&sol->v150[i];
         *(HVec*)w->normal = *(HVec*)&sol->v110[i];
     }
-    if (!U8(p, 0x260D)) {
-        F32(p, 0x2598) = lbl_80561CAC;
-    } else {
+    if (U8(p, 0x260D)) {
         F32(p, 0x2598) = F32(p, 0x2598) + lbl_80561D9C;
+    } else {
+        F32(p, 0x2598) = lbl_80561CAC;
     }
     f32 stun = F32(p, 0x2650) - lbl_80561D9C;
     stun = stun > lbl_80561CAC ? stun : lbl_80561CAC;
@@ -1634,14 +1634,15 @@ void fn_80183E7C(u8* p) {
         still = 0;
     }
     if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
-        if (S32(p, 0x2620) > 2 || F32(p, 0x4C) >= lbl_80561DB4) {
-            F32(p, 0x2614) = lbl_80561CAC;
-        } else if (S32(p, 0x2620) == 0 || (f32)__fabs(F32(p, 0x2614)) > lbl_80558DC4[0] || F32(p, 0x4C) < lbl_80561CAC) {
-            f32 t = F32(p, 0x2614) + lbl_80561D9C;
-            int slow = F32(p, 0x25D4) < lbl_80561D50;
-            F32(p, 0x2614) = t;
-            if (slow) {
-                F32(p, 0x2614) = t + lbl_80561DB8;
+        if (S32(p, 0x2620) <= 2 && F32(p, 0x4C) < lbl_80561DB4) {
+            if (S32(p, 0x2620) == 0 || !((f32)__fabs(F32(p, 0x2614)) <= lbl_80558DC4[0]) || F32(p, 0x4C) < lbl_80561CAC) {
+                f32 t = F32(p, 0x2614) + lbl_80561D9C;
+                F32(p, 0x2614) = t;
+                if (F32(p, 0x25D4) < lbl_80561D50) {
+                    F32(p, 0x2614) = t + lbl_80561DB8;
+                }
+            } else {
+                F32(p, 0x2614) = lbl_80561CAC;
             }
         } else {
             F32(p, 0x2614) = lbl_80561CAC;
@@ -1649,7 +1650,7 @@ void fn_80183E7C(u8* p) {
         if (!(F32(p, 0x2614) < lbl_80561D44)) {
             if (F32(p, 0x4C) > lbl_80561CDC) {
                 F32(p, 0x2614) = lbl_80561CAC;
-            } else if ((f32)__fabs(F32(p, 0x58)) <= lbl_80561CDC) {
+            } else if (!((f32)__fabs(F32(p, 0x58)) > lbl_80561CDC)) {
                 f32 side = -F32(p, 0x40);
                 if ((f32)__fabs(-F32(p, 0x40)) < lbl_80561CCC) {
                     side = lbl_80561D00;
@@ -1674,16 +1675,14 @@ void fn_80183E7C(u8* p) {
     }
     if (S32(p, 0x2620) == 0) {
         S32(p, 0x2648) = 7;
-    } else if (S32(p, 0x2620) < 3) {
-        if (S32(p, 0x2648) == 0) {
-            S32(p, 0x2648) = 1;
-        }
-    } else {
+    } else if (S32(p, 0x2620) >= 3) {
         S32(p, 0x2648) = 0;
         U8(p, 0x2624) = 0;
         U8(p, 0x2625) = 0;
+    } else if (S32(p, 0x2648) == 0 && S32(p, 0x2620) < 3) {
+        S32(p, 0x2648) = 1;
     }
-    if (S32(p, 0x2648) > 0 && S32(p, 0x2648) < 7) {
+    if (S32(p, 0x2648) >= 1 && S32(p, 0x2648) <= 6) {
         BVec t;
         t.x = F32(p, 0x124) * lbl_80561DBC;
         t.y = F32(p, 0x128) * lbl_80561DBC;
@@ -1708,17 +1707,17 @@ void fn_80183E7C(u8* p) {
     f32 nx = LerpT(lbl_80561D0C, F32(p, 0x25A4), up.x);
     F32(p, 0x25A8) = ny;
     F32(p, 0x25A4) = nx;
-    f32 len = PSVECMag(p + 0x25A4);
     F32(p, 0x25AC) = nz;
-    if (!(len > lbl_80561CCC)) {
-        F32(p, 0x25A4) = lbl_80561CAC;
-        F32(p, 0x25A8) = lbl_80561CD0;
-        F32(p, 0x25AC) = lbl_80561CAC;
-    } else {
+    f32 len = PSVECMag(p + 0x25A4);
+    if (len > lbl_80561CCC) {
         f32 inv = lbl_80561CD0 / len;
         F32(p, 0x25A4) = F32(p, 0x25A4) * inv;
         F32(p, 0x25A8) = F32(p, 0x25A8) * inv;
         F32(p, 0x25AC) = F32(p, 0x25AC) * inv;
+    } else {
+        F32(p, 0x25A4) = lbl_80561CAC;
+        F32(p, 0x25A8) = lbl_80561CD0;
+        F32(p, 0x25AC) = lbl_80561CAC;
     }
     f32 dn;
     if (F32(p, 0x2590) > lbl_80561DC0 && (dn = PSVECDotProduct(p + 0x25A4, p + 0x118)) > lbl_80561DC0 &&
@@ -1788,7 +1787,7 @@ void fn_80183E7C(u8* p) {
         if (!fn_802B04D4(p + 0x60)) {
             if (ramp) {
                 if (tilt < lbl_80561DD0 && F32(p, 0x2618) > lbl_80561CDC) {
-                    if ((f32)__fabs(lbl_8055E4F0) > lbl_80558DC4[0]) {
+                    if (!((f32)__fabs(lbl_8055E4F0) <= lbl_80558DC4[0])) {
                         (*(CbFx**)(p + 0x2584))->v24();
                     }
                     F32(p, 0x2590) = lbl_8055E4F0;

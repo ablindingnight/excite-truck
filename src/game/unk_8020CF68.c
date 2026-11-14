@@ -150,11 +150,27 @@ typedef struct SoundMenuLabels {
     const char *names[3];
 } SoundMenuLabels;
 
+const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
+extern char lbl_8055B630[6], lbl_8055B638[3], lbl_8055B63C[7];
+extern void fn_80230B5C(void *);
+extern void fn_802C8638(void *);
+extern void fn_802C974C(float, float, float);
+extern void fn_800109E4(unsigned long, float, float, float, float);
+extern const char *fn_80131234(const char *);
+extern void fn_801473F8(int, const char *, const char *, ...);
+extern void fn_801345D8(char *, int, const char *, ...);
+extern int fn_8000C69C(void);
+extern void fn_80230F78(unsigned char *, float *, unsigned long *, int);
+extern void fn_80147940(int, void *, const char *, int);
+extern void fn_80147230(void *, const char *, ...);
+extern void fn_801476C4(void *);
+extern void fn_80011A2C(void);
+extern void fn_802C9904(void);
+
+#pragma cplusplus on
 // A text box from the layout (0x20 bytes); color at 0x18.
 typedef struct LayoutVec {
-    float x;
-    float y;
-    float z;
+    float v[3];
 } LayoutVec;
 
 typedef struct LayoutText {
@@ -175,24 +191,6 @@ typedef struct LayoutPane {
     unsigned long color;
 } LayoutPane;
 
-const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
-extern char lbl_8055B630[6], lbl_8055B638[3], lbl_8055B63C[7];
-extern void fn_80230B5C(void *);
-extern void fn_802C8638(void *);
-extern void fn_802C974C(float, float, float);
-extern void fn_800109E4(unsigned long, float, float, float, float);
-extern const char *fn_80131234(const char *);
-extern void fn_801473F8(int, const char *, const char *, ...);
-extern void fn_801345D8(char *, int, const char *, ...);
-extern int fn_8000C69C(void);
-extern void fn_80230F78(unsigned char *, float *, unsigned long *, int);
-extern void fn_80147940(int, void *, const char *, int);
-extern void fn_80147230(void *, const char *, ...);
-extern void fn_801476C4(void *);
-extern void fn_80011A2C(void);
-extern void fn_802C9904(void);
-
-#pragma cplusplus on
 // The sound menu layout: slot 0x0C finds a text box, slot 0x14 a picture pane.
 class SoundMenuLayout {
 public:
@@ -209,7 +207,13 @@ static inline unsigned long HalveAlpha(unsigned long color) {
 // Draws the sound menu: music volume, effects volume and the third item, the selection highlight,
 // and the left/right arrows that fade out at the ends of a slider.
 /* Helper name unproven */
-static inline int PaneInRange(long i) { return i >= 0 && i < 5; }
+static inline float Lerp(float a, float d, float t) { return a + t * d; }
+/* Helper name unproven */
+static inline float Ramp(float now, float start, float delay, float len) {
+    float t = (now - start - delay) / len;
+    t = 1.0f < t ? 1.0f : t;
+    return t > 0.0f ? t : 0.0f;
+}
 extern "C" void fn_8020D2D4(void) {
     float camera[12];
     float now;
@@ -229,7 +233,7 @@ extern "C" void fn_8020D2D4(void) {
     }
     labels = lbl_802F9E58;
     if (lbl_8055EEA0 != 0) {
-        for (i = 0; i < 3; i++) {
+        for (i = 0; i < sizeof(labels.names) / sizeof(labels.names[0]); i++) {
             char value[0x20] = {0};
             char paneName[0x20];
             char textName[0x20];
@@ -273,25 +277,25 @@ extern "C" void fn_8020D2D4(void) {
             }
             pane = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(paneName);
             if (pane != 0) {
-                LayoutPane back = *pane;
+                LayoutPane back;
+                back = *pane;
                 if (i == 2 && fn_8020CF68() == 0) {
                     back.color = HalveAlpha(back.color);
                 }
                 fn_80147940(lbl_8055EEA0, &back, "menu_artset", selected ? 1 : 2);
                 if (selected) {
-                    LayoutPane glow = *pane;
+                    LayoutPane glow;
+                    glow = *pane;
                     float grow = 1.0f + scale;
-                    glow.w = pane->w * grow;
-                    float hv = pane->h;
-                    glow.h = grow * hv;
-                    glow.pos.x = glow.pos.x - 0.5f * pane->w * scale;
-                    float yv = glow.pos.y;
-                    glow.pos.y = yv - 0.5f * pane->h * scale;
-                    glow.color = ((unsigned long)alpha << 24) | (pane->color & 0x00FFFFFF);
+                    glow.pos.v[0] = glow.pos.v[0] - 0.5f * glow.w * scale;
+                    glow.pos.v[1] = glow.pos.v[1] - 0.5f * glow.h * scale;
+                    glow.w = glow.w * grow;
+                    glow.h = glow.h * grow;
+                    glow.color = ((unsigned long)alpha << 24) | (glow.color & 0x00FFFFFF);
                     fn_80147940(lbl_8055EEA0, &glow, "menu_artset", 1);
                 }
             }
-            if (selected && PaneInRange(i)) {
+            if (selected && i >= 0 && (i < 5 || i == 4)) {
                 int canDec = 1;
                 int canInc = 1;
                 char arrowName[0x20];
@@ -317,37 +321,31 @@ extern "C" void fn_8020D2D4(void) {
                 leftColor = 0xFFFFFFFF;
                 rightColor = 0xFFFFFFFF;
                 if (!canDec) {
-                    t = (now - lbl_8055EE98 - 0.0f) / 0.2f;
-                    t = 1.0f < t ? 1.0f : t;
-                    t = t > 0.0f ? t : 0.0f;
-                    leftColor = ((unsigned long)(int)(255.0f + t * (-255.0f)) << 24) | 0x00FFFFFF;
+                    t = Ramp(now, lbl_8055EE98, 0.0f, 0.2f);
+                    leftColor = ((unsigned long)(int)Lerp(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
                 }
                 if (!canInc) {
-                    t = (now - lbl_8055EE9C - 0.0f) / 0.2f;
-                    t = 1.0f < t ? 1.0f : t;
-                    t = t > 0.0f ? t : 0.0f;
-                    rightColor = ((unsigned long)(int)(255.0f + t * (-255.0f)) << 24) | 0x00FFFFFF;
+                    t = Ramp(now, lbl_8055EE9C, 0.0f, 0.2f);
+                    rightColor = ((unsigned long)(int)Lerp(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
                 }
                 fn_801345D8(arrowName, 0x20, "%s_left_arrow", textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
-                    LayoutPane a = *arrow;
-                    t = (now - lbl_8055EE98 - 0.4f) / (-0.4f);
-                    t = 1.0f < t ? 1.0f : t;
-                    t = t > 0.0f ? t : 0.0f;
+                    LayoutPane a;
+                    a = *arrow;
+                    t = Ramp(now, lbl_8055EE98, 0.4f, -0.4f);
                     a.color = leftColor;
-                    a.pos.x = a.pos.x - (0.0f + t * 10.0f);
+                    a.pos.v[0] = a.pos.v[0] - Lerp(0.0f, 10.0f, t);
                     fn_80147940(lbl_8055EEA0, &a, "left_arrow_art", 1);
                 }
                 fn_801345D8(arrowName, 0x20, "%s_right_arrow", textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
                 if (arrow != 0) {
-                    LayoutPane a = *arrow;
-                    t = (now - lbl_8055EE9C - 0.4f) / (-0.4f);
-                    t = 1.0f >= t ? t : 1.0f;
-                    t = t > 0.0f ? t : 0.0f;
+                    LayoutPane a;
+                    a = *arrow;
+                    t = Ramp(now, lbl_8055EE9C, 0.4f, -0.4f);
                     a.color = rightColor;
-                    a.pos.x = a.pos.x + (0.0f + t * 10.0f);
+                    a.pos.v[0] = a.pos.v[0] + Lerp(0.0f, 10.0f, t);
                     fn_80147940(lbl_8055EEA0, &a, "right_arrow_art", 1);
                 }
             }
