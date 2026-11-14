@@ -210,12 +210,27 @@ f32 fn_801A63C4(s32 a, s32 b) { return 0.0192f * fn_801A6390(a, b) / 0.016683351
 
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); } /* Helper name unproven */
 void fn_801A63F4(TVec* out, const TVec* a, const TVec* b, const TVec* t) {
-    out->z = LerpF(t->z, a->z, b->z);
-    const f32 yWeight = t->y;
-    const f32 endY = b->y;
-    const f32 startY = a->y;
+    f32 startX;
+    f32 endX;
+    f32 xWeight;
+    f32 startY;
+    f32 endY;
+    f32 yWeight;
+    f32 startZ;
+    f32 endZ;
+    f32 zWeight;
+    endZ = b->z;
+    startZ = a->z;
+    endY = b->y;
+    startY = a->y;
+    zWeight = t->z;
+    endX = b->x;
+    startX = a->x;
+    yWeight = t->y;
+    xWeight = t->x;
+    out->z = LerpF(zWeight, startZ, endZ);
     out->y = LerpF(yWeight, startY, endY);
-    out->x = LerpF(t->x, a->x, b->x);
+    out->x = LerpF(xWeight, startX, endX);
 }
 }
 

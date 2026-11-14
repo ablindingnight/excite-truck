@@ -549,18 +549,16 @@ static inline s32 GetWidgetOrigin(Widget* cw, s32& cy, int& bestScore) {
 }
 
 void fn_80217EC0(Window* win, int horizontal, int negative) {
-    s32 cx;
     int n;
-    Widget* wd;
-    Widget* cw;
-    s32 cy;
+    int i;
     int cur;
     int best;
+    s32 cx;
+    Widget* cw;
     int bestScore;
     int score;
     s32 dx;
     s32 dy;
-    int i;
 
     n = win->menuCount;
 
@@ -568,14 +566,16 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
         return;
     }
     cur = -1;
-    for (i = 0; i < n; i++) {
-        if (win->menuCur == win->menu[i].id) {
-            cur = i;
+    for (int first = 0; first < n; first++) {
+        if (win->menuCur == win->menu[first].id) {
+            cur = first;
         }
     }
     cw = win->menu[cur].w;
+    Widget* wd;
     best = cur;
-    cx = GetWidgetOrigin(cw, cy, bestScore);
+    struct { s32 y; } origin;
+    cx = GetWidgetOrigin(cw, origin.y, bestScore);
     for (i = 0; i < n; i++) {
 
         if (i == cur) {
@@ -586,7 +586,7 @@ void fn_80217EC0(Window* win, int horizontal, int negative) {
             continue;
         }
         dx = cx - wd->x;
-        dy = cy - wd->y;
+        dy = origin.y - wd->y;
         if (horizontal) {
             if (dx * Sign(negative) <= 10) {
                 continue;
