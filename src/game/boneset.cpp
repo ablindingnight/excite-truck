@@ -236,35 +236,33 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     return fn_802C7A38(0, skin, nd);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline s32 Loop1_fn_801E65BC(int n, Bone* b, const BFrame* p, BFrame* skin, s32 nd) {
-    for (int i = 0; i < n; i++, b++, p++) {
-        if (b->dest >= 0) {
+s32 fn_801E65BC(const BoneSet* set, const BFrame* world, int n, BFrame* root) {
+    BFrame skin[32];
+    if (root) {
+        *root = world[0];
+    }
+    const Bone* b = set->bones;
+    const BFrame* p = world;
+    s32 nd = set->numDest;
+    for (int i = 0; i < n; b++, p++, i++) {
+        s32 d = b->dest;
+        if (d >= 0) {
             BFrame w = *p;
             BMtx33 l = b->rest.r;
-            BFrame* s = &skin[b->dest];
             fn_801C7254(&l);
+            BFrame* s = &skin[d];
             Mat3Mul((Mat3*)s, (const Mat3*)&w, (const Mat3*)&l);
             BVec tmp;
             StatsUpdate__Fv(&tmp);
             fn_801E67B4(&tmp, &b->rest.t, s);
-            fn_801C0E60(&s->t, &b->rest.t, &tmp);
-            fn_801BFE7C(&s->t, &s->t, &w.t);
-            fn_801C0E60(&s->t, &s->t, &b->rest.t);
+            BVec* t = &s->t;
+            fn_801C0E60(t, &b->rest.t, &tmp);
+            const BVec* t2 = &s->t;
+            fn_801BFE7C(t, t2, &w.t);
+            fn_801C0E60(t, t2, &b->rest.t);
         }
     }
     return fn_802C7A38(0, skin, nd);
-}
-
-s32 fn_801E65BC(BoneSet* set, const BFrame* world, int n, BFrame* root) {
-    const BFrame* p = world;
-    BFrame skin[32];
-    if (root) {
-        *root = p[0];
-    }
-    Bone* b = set->bones;
-    s32 nd = set->numDest;
-    return Loop1_fn_801E65BC(n, b, p, skin, nd);
 }
 
 void fn_801E67B4(BVec* out, const BVec* in, const BFrame* m) {

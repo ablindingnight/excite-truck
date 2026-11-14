@@ -589,17 +589,19 @@ void fn_802AD30C(ArtAnim* a) {
 }
 
 void fn_802AD414(ArtAnim* a, f32 t) {
-    ArtPath* p;
-    int k;
     int i;
     s32* dst;
+    ArtPath* p;
+    int k;
     for (i = 0; i < a->nPaths; i++) {
         p = &a->paths[i];
         for (k = 0; k < p->nKeys - 1; k++) {
-            if (t >= p->keys[k].t && t <= 0.001f + p->keys[k + 1].t) {
+            ArtKey* key = &p->keys[k];
+            ArtKey* next = &p->keys[k + 1];
+            if (t >= key->t && t <= 0.001f + next->t) {
                 dst = a->elems[p->elem].dst;
                 if (dst) {
-                    *dst = p->keys[k].signal;
+                    *dst = key->signal;
                 }
                 break;
             }

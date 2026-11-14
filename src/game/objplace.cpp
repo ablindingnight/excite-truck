@@ -225,9 +225,16 @@ struct ObjRot {
     f32 scale;  // offset 0x24
 };
 
+// The rotation part of an ObjRot as three rows (copied row by row).
+struct ObjRows {
+    OVec r0;  // offset 0x0
+    OVec r1;  // offset 0xC
+    OVec r2;  // offset 0x18
+};
+
 struct ObjXform {
-    ObjRot rot;  // offset 0x0 (scale slot unused)
-    OVec pos;    // offset 0x24
+    ObjRows rot;  // offset 0x0
+    OVec pos;     // offset 0x24
 };
 
 struct ObjList {
@@ -587,6 +594,7 @@ void fn_802B2D94(SetPlacer* set) {
 
 void MatPlacer::Draw(void) {
     for (int i = 0; i < placers.count; i++) {
+        ObjXform x;
         ObjBlock* b;
         ObjectPlacer* p = placers.data[i];
         b = p->list.head;
@@ -602,16 +610,21 @@ void MatPlacer::Draw(void) {
             fn_801F1C24(face);
             ObjRot* r = p->rots;
             for (int k = 0; k < 16; k++, r++) {
-                for (int j = 0; j < 9; j++) {
-                    r->m[j] = face[j] * r->scale;
+                f32* d = r->m;
+                const f32* f = face;
+                for (int j = 0; j < 3; j++, d += 3, f += 3) {
+                    f32 s = r->scale;
+                    d[0] = f[0] * s;
+                    d[1] = f[1] * s;
+                    d[2] = f[2] * s;
                 }
             }
         } else if (p->sway > 0.0f) {
             f32 t = fn_801E7E18();
             ObjRot* r = p->rots;
-            for (s32 k = 0; k < 16; k++, r++) {
-                r->m[3] = p->sway * (f32)sin(fmod(3.1415927f * k / 5.0f + t, 6.2831855f));
-                r->m[5] = p->sway * (f32)cos(fmod(3.1415927f * k / 5.0f + (2.0f * t), 6.2831855f));
+            for (int k = 0; k < sizeof(p->rots) / sizeof(p->rots[0]); k++, r++) {
+                r->m[3] = p->sway * (f32)sin((f32)fmod(3.1415927f * k / 5.0f + t, 6.2831855f));
+                r->m[5] = p->sway * (f32)cos((f32)fmod(3.1415927f * k / 5.0f + (2.0f * t), 6.2831855f));
             }
         }
         fn_802C8BD0(fn_802C28C0());
@@ -620,11 +633,10 @@ void MatPlacer::Draw(void) {
             int n = b->count;
             for (int k = 0; k < n; k++) {
                 ObjLoc* l = &b->data[k];
-                ObjXform x;
                 x.pos.x = l->pos.x;
                 x.pos.y = l->pos.y;
                 x.pos.z = l->pos.z;
-                *(ObjRot*)&x.rot = p->rots[l->kind & 15];
+                x.rot = *(const ObjRows*)p->rots[l->kind & 15].m;
                 fn_802DCAE4(p->model->info, &x, l->scale);
             }
             b = b->next;

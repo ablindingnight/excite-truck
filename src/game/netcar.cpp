@@ -359,14 +359,18 @@ void NetCar::Update(void) {
     lastLink = l;
 }
 
-static inline double DL(double t, double ti, double tj, double tk) { return ((t + t - tj) - tk) / ((ti - tj) * (ti - tk)); }
+static inline double DL(double t, double ti, double tj, double tk) {
+    double den = (ti - tj) * (ti - tk);
+    return ((t + t - tj) - tk) / den;
+}
 
 void NetCar::Extrapolate(Blend* b) {
     s32 now = lbl_8055E3C4;
     f32 s = fn_801A63C4(now, ptab[0].frame);
-    TVec d;
     TVec p;
+    TVec d;
     TVec r;
+    TVec r2;
     p.x = fn_801A6370(ptab[0].pos.v[0], v[0].x, acc.x, s);
     p.y = fn_801A6370(ptab[0].pos.v[1], v[0].y, acc.y, s);
     p.z = fn_801A6370(ptab[0].pos.v[2], v[0].z, acc.z, s);
@@ -374,18 +378,18 @@ void NetCar::Extrapolate(Blend* b) {
         f32 t1 = fn_801A63C4(ptab[1].frame, ptab[2].frame);
         f32 t0 = fn_801A63C4(ptab[0].frame, ptab[2].frame);
         f32 tn = fn_801A63C4(now, ptab[2].frame);
+        double b0 = DL(tn, t0, 0.0, t1);
         double b1 = DL(tn, t1, 0.0, t0);
         double b2 = DL(tn, 0.0, t1, t0);
-        double b0 = DL(tn, t0, 0.0, t1);
         d.x = ptab[0].pos.v[0] * b0 + (ptab[2].pos.v[0] * b2 + ptab[1].pos.v[0] * b1);
-        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + b1 * ptab[1].pos.v[1]);
-        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + b1 * ptab[1].pos.v[2]);
+        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + ptab[1].pos.v[1] * b1);
+        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + ptab[1].pos.v[2] * b1);
     }
     fn_801A63F4(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;
     Update__10CollVolumeFv(this);
-    fn_801A63F4(&r, &vel, &d, &b->at);
-    vel = r;
+    fn_801A63F4(&r2, &vel, &d, &b->at);
+    vel = r2;
 }
 
 static inline void QuatToMtx(TMtx* m, const TQuat* q) {

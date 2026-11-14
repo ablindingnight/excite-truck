@@ -1402,9 +1402,12 @@ void fn_8018F76C(u8* p, int i) {
     }
     f32 spin = F32(w, 0x23AC);
     WVec3 imp;
-    imp.x = m.basis[0].x * spin + F32(p, 0x124);
-    imp.y = m.basis[0].y * spin + F32(p, 0x128);
-    imp.z = m.basis[0].z * spin + F32(p, 0x12C);
+    imp.x = m.basis[0].x * spin;
+    imp.y = m.basis[0].y * spin;
+    imp.z = m.basis[0].z * spin;
+    imp.x += F32(p, 0x124);
+    imp.y += F32(p, 0x128);
+    imp.z += F32(p, 0x12C);
     fn_801AFC44(S32(p, 0x1EC), i, &m, &vel, &imp);
     U32(w, 0x241C) |= 8;
 }
