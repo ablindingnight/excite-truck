@@ -216,10 +216,10 @@ void CarGear::Compute(int car) {
         }
         Gear* cur = &gears[g - 1];
         f32 hi = c->f25D8;
-        f32 lo = c->f25CC;
-        f32 down = cur->down1 + load * (cur->down0 - cur->down1);
         f32 top = 1.12f * hi;
+        f32 lo = c->f25CC;
         f32 speed = (lo + 0.15f * (top - lo)) / f24;
+        f32 down = GearLerp(cur->down1, cur->down0, load);
         if (g > 0) {
             if (speed > cur->up) {
                 if (g < count) {

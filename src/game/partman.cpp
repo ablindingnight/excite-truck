@@ -859,6 +859,13 @@ static inline u8 Byte(f32 x) {
 
 static inline f32 Sq(f32 x) { return x * x; }
 
+/* Helper name unproven */
+static inline void SetSpriteCorner(V3& out, f32 scale, const V3& d, const V3& p) {
+    out.x = p.x + d.x * scale;
+    out.y = p.y + d.y * scale;
+    out.z = p.z + d.z * scale;
+}
+
 void PartSys::DrawSprites(Particle* p, int n) {
     f32 t0;
     CamMtx* cam;
@@ -883,7 +890,6 @@ void PartSys::DrawSprites(Particle* p, int n) {
         u8 a;
         age = t0 - p->birth;
         u8 g;
-        f32 d1X;
         t = age * invLife;
         size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         V3 pos;
@@ -909,26 +915,15 @@ void PartSys::DrawSprites(Particle* p, int n) {
         ua = ((rot + 1) & 2) >> 1;
         ub = (rot >> 1) & 1;
         PVtx q[4];
-        d1X = d1.x;
-        q[0].pos.x = pos.x + d1X * size;
-        q[0].pos.y = pos.y + d1.y * size;
-        q[0].pos.z = pos.z + d1.z * size;
-        q[1].pos.y = pos.y + d2.y * size;
-        q[1].pos.x = pos.x + d2.x * size;
-        const f32 baseZ = pos.z;
-        const f32 deltaZ = d2.z;
-        q[1].pos.z = baseZ + deltaZ * size;
-        q[2].pos.x = pos.x + d1.x * -size;
-        q[2].pos.y = pos.y + d1.y * -size;
-        q[2].pos.z = pos.z + d1.z * -size;
-        q[3].pos.x = pos.x + d2.x * -size;
-        q[3].pos.y = pos.y + d2.y * -size;
-        q[3].pos.z = pos.z + d2.z * -size;
+        SetSpriteCorner(q[0].pos, size, d1, pos);
+        SetSpriteCorner(q[1].pos, size, d2, pos);
+        SetSpriteCorner(q[2].pos, -size, d1, pos);
+        SetSpriteCorner(q[3].pos, -size, d2, pos);
         q[0].color = q[1].color = q[2].color = q[3].color = color;
-        q[1].v = q[0].u = ua;
-        q[3].u = q[0].v = ub;
-        q[2].v = q[1].u = 1 - ub;
-        q[3].v = q[2].u = 1 - ua;
+        q[0].u = q[1].v = ua;
+        q[0].v = q[3].u = ub;
+        q[1].u = q[2].v = 1 - ub;
+        q[2].u = q[3].v = 1 - ua;
         batch.Add(q);
     }
     batch.Flush();

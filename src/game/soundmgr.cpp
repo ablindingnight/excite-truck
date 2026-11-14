@@ -454,19 +454,19 @@ int SoundManager::IsPositional(int cls) {
 }
 
 void SoundManager::Remove(GameSound* s) {
-    int cls = s->cls;
+    const struct { int index; } cls = { s->cls };
     GameSound** p = NULL;
-    for (int i = 0; i < classes[cls].count; i++) {
-        if (classes[cls].first[i] == s) {
-            p = &classes[cls].first[i];
+    for (int i = 0; i < classes[cls.index].count; i++) {
+        if (classes[cls.index].first[i] == s) {
+            p = &classes[cls.index].first[i];
             break;
         }
     }
     if (p) {
         all.count--;
-        classes[cls].count--;
+        classes[cls.index].count--;
         memmove(p, p + 1, (all.count - (p - all.first)) * sizeof(GameSound*));
-        for (int c = cls + 1; c < 9; c++) {
+        for (int c = cls.index + 1; c < 9; c++) {
             classes[c].first--;
         }
     } else {
