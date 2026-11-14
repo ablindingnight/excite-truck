@@ -136,6 +136,8 @@ struct CarRes {
     ValueTable* values;     // offset 0x2134
 };
 
+struct Joint;
+
 struct GaugePair {
     f32 val;    // offset 0x0
     f32 angle;  // offset 0x4
@@ -149,7 +151,7 @@ struct Gauge {
     }
     ~Gauge(void);
 
-    s32 bone;              // offset 0x0
+    Joint* bone;           // offset 0x0
     f32 min;               // offset 0x4
     f32 max;               // offset 0x8
     GaugePair pairs[8];    // offset 0xC
@@ -218,8 +220,8 @@ public:
     LodEntry* lods;         // offset 0x170
     s32* lodCount;          // offset 0x174
     s32 chassis;            // offset 0x178
-    s32 wheelBone;          // offset 0x17C
-    s32 shiftLight;         // offset 0x180
+    Joint* wheelBone;       // offset 0x17C
+    Joint* shiftLight;      // offset 0x180
     void* rider;            // offset 0x184
     CarRes* res;            // offset 0x188
     Gauge speedometer;      // offset 0x18C
@@ -258,11 +260,11 @@ public:
 };
 
 extern "C" {
-s32 fn_801E3004(s32 model, const char* name, s32 a);
+Joint* fn_801E3004(s32 model, const char* name, s32 a);
 int fn_801E320C(s32 model, const char* name);
-void fn_801E323C(s32 bone);
-void fn_801E34E4(s32 bone, const Frame* f);
-void fn_801E353C(s32 bone, f32 angle);
+void fn_801E323C(Joint* bone);
+void fn_801E34E4(Joint* bone, const Frame* f);
+void fn_801E353C(Joint* bone, f32 angle);
 s32 fn_801E7E2C(void);
 s32 fn_801E866C(s32 a);
 f32 fn_801E8738(s32 a);

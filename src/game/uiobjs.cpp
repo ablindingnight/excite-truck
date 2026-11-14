@@ -12,9 +12,10 @@ void fn_80235380(int img);
 f32 fn_80235EF0(int img, int frame);  // width
 f32 fn_80235F64(int img, int frame);  // height
 void fn_802354A0(int img, f32 x, f32 y, f32 z, f32 w, f32 h, int frame, int a);
-int fn_80232578(const char* name);  // load font
-void fn_802328D4(int font);
-int fn_80232B70(int font);  // font height
+struct GTextFont;
+GTextFont* fn_80232578(const char* name);  // load font
+void fn_802328D4(GTextFont* font);
+int fn_80232B70(GTextFont* font);  // font height
 f32 fn_80209028(void);      // effects volume
 }
 
@@ -112,7 +113,7 @@ struct TextStyle {
         fn_802328D4(font);
         font = 0;
     }
-    int font;    // offset 0x0
+    GTextFont* font;  // offset 0x0
     u32 color;   // offset 0x4
     u32 flags;   // offset 0x8
     f32 scale;   // offset 0xC

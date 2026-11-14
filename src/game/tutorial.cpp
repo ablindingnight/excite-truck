@@ -1702,7 +1702,7 @@ struct TextElem : ElemHead {
     f32 f10;     // offset 0x10
     u32 w14;    // offset 0x14
     u32 color;  // offset 0x18
-    u32 w1C;    // offset 0x1C
+    const char* defText;  // offset 0x1C
 };
 
 struct GartElem : ElemHead {

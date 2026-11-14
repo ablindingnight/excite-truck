@@ -285,7 +285,7 @@ struct RaceCarRec {
     u8 pad1F4[0x260 - 0x1F4];
     u8 slot;  // offset 0x260
     u8 pad261[0x270C - 0x261];
-    s32 f270C;  // offset 0x270C
+    Controller* ctl;  // offset 0x270C
 };
 
 struct CarStateOut {
@@ -981,9 +981,9 @@ s32 fn_80178CA4(void) { return lbl_8055E444; }
 void fn_80178CAC(int a, int b) {
     s32 ma;
     s32 mb;
-    s32 xa;
+    Controller* xa;
     int i;
-    s32 xb;
+    Controller* xb;
     s32* slot;
     RaceCarRec* ra;
     RaceCarRec* rb;
@@ -1005,12 +1005,12 @@ void fn_80178CAC(int a, int b) {
     kb = rb->kind;
     ma = ra->model;
     mb = rb->model;
-    xb = rb->f270C;
-    xa = ra->f270C;
+    xb = rb->ctl;
+    xa = ra->ctl;
     ((SpringCar*)ra)->SetController(0);
     ((SpringCar*)rb)->SetController(0);
-    ((SpringCar*)ra)->SetController((Controller*)xb);
-    ((SpringCar*)rb)->SetController((Controller*)xa);
+    ((SpringCar*)ra)->SetController(xb);
+    ((SpringCar*)rb)->SetController(xa);
     ra->kind = kb;
     rb->kind = ka;
     ra->model = mb;

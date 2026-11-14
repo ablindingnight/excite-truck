@@ -16,7 +16,7 @@ struct TextElem {
     f32 scale;         // offset 0x10
     u32 just;          // offset 0x14
     u32 color;         // offset 0x18
-    u32 unk1C;         // offset 0x1C
+    const char* defText;  // offset 0x1C
 };
 
 struct Box {

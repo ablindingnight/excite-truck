@@ -45,7 +45,7 @@ class CollShape {
 public:
     CollShape(const CMtx* m) {
         mtx = m;
-        a4 = 0;
+        owner = 0;
         a8 = 0;
         f18 = 0x424F5820;
         stiff = 50000.0f;
@@ -67,7 +67,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void);
     virtual f32 Radius(void);  // 0x3C
-    s32 a4;          // offset 0x4
+    class CollVolume* owner;  // offset 0x4
     s32 a8;          // offset 0x8
     const CMtx* mtx;  // offset 0xC
     f32 stiff;       // offset 0x10

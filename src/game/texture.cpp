@@ -46,8 +46,8 @@ struct GXTexDesc {
     s32 fmt;      // offset 0x20
     s32 w;        // offset 0x24
     s32 h;        // offset 0x28
-    u32 data;     // offset 0x2C
-    s32 user;     // offset 0x30
+    struct TexImage* data;  // offset 0x2C (relocated TTHeader::data)
+    struct GXTex* user;     // offset 0x30
 };
 
 struct TexEntry {
@@ -397,8 +397,8 @@ void fn_802CA3F4(GXTexDesc* d, const TTHeader* h, s32 mode, u32 data, s32 user) 
     d->fmt = h->fmt;
     d->w = h->w;
     d->h = h->h;
-    d->data = h->data;
-    d->user = data;
+    d->data = (struct TexImage*)h->data;
+    d->user = (struct GXTex*)data;
     if (user == 2) {
         d->flags |= 1;
     } else if (user == 6) {
