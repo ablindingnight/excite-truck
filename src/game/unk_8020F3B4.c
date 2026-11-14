@@ -113,7 +113,6 @@ void fn_8020F5C8(void) {
     lbl_8055EEF5 = 1;
     lbl_8055EEF4 = 1;
 }
-#pragma dont_inline reset
  
 void fn_8020F5DC(void) {
     lbl_8055EEF6 = 0;
@@ -137,7 +136,6 @@ long fn_8020F608(long arg0, long arg1) {
         *(long *)(ptr + i * 100) = arg0;
     }
 }
-#pragma dont_inline reset
  
 void fn_8020F6E0(long arg0, long arg1) {
     if (arg1 != 0) {
@@ -548,7 +546,6 @@ extern "C" void fn_802103BC(void) {
     lbl_8055EED0 = 0;
 }
 #pragma pop
-#pragma dont_inline reset
 extern long fn_80009C84(void);
 extern int fn_801B85CC(void);
 extern unsigned char lbl_8055EEC0;

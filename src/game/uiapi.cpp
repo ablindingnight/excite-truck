@@ -1732,7 +1732,6 @@ extern "C" void fn_80214CB4(s32 arg0) {
         ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D3B0);
     }
 }
-#pragma dont_inline reset
 
 extern "C" s32 fn_802168E4(void);
 extern "C" s32 fn_80218120(s32);
@@ -1901,11 +1900,9 @@ extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4
 
 extern "C" void fn_802152C8(void) {
 }
-#pragma dont_inline reset
 
 extern "C" s32 fn_802192A4(void *, s32);
 extern "C" void fn_802152C8(void);
-#pragma dont_inline reset
 extern "C" s32 fn_802152CC(void) {
     fn_802152C8();
     return 0;
@@ -2246,7 +2243,6 @@ extern "C" void fn_80215A48(void *arg0) {
     (*(MenuState **)(self + 0x244))->Unk4C();
 }
 
-#pragma dont_inline reset
 extern "C" void fn_80215A74(void *arg0) {
     u8 *self = (u8 *)arg0;
     self[0x19] = 0;
