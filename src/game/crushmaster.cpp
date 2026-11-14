@@ -1969,6 +1969,7 @@ inline int CrushSubTaskMgr::vf1C(void) { return 0; }
 
 inline void CrushSubTaskMgr::vf18(int a, int b) {
     if (master->vf20(a) && master->vf20(b)) {
+        CrushMaster* m;
         int victim = -1;
         if (fn_80171EC0(a)) {
             victim = b;
@@ -1977,7 +1978,6 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
         }
         if (victim != -1) {
             int grade;
-            CrushMaster* m;
             if (a == victim) {
                 a = b;
             }
@@ -2001,7 +2001,8 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
                 if (m->AliveAI() == 0) {
                     f32 left = m->endTime - now;
                     left = 0.0f > left ? 0.0f : left;
-                    m->cars[a].bonus = Round(0.5f + left);
+                    f32 v = 0.5f + left;
+                    m->cars[a].bonus = Round(v);
                 }
                 if (grade == 2) {
                     ValVec3 tgt;
