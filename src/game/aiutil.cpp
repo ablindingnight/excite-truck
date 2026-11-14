@@ -5,6 +5,8 @@
 // The game mode base (amaster.cpp); its empty vf44 lives here.
 class GameMode {
 public:
+    int vf24(void);  // slot 0x24 (virtual in amaster.cpp; declared plainly here so no vtable is emitted)
+    f32 vf38(void);  // slot 0x38
     void vf44(void);
 };
 
@@ -84,9 +86,9 @@ f32 fn_80160BE0(const V2* a, const V2* b) {
     return d.x * d.x + d.y * d.y;
 }
 
-int GameMode_vf24(void) { return 0; }
+int GameMode::vf24(void) { return 0; }
 
-f32 GameMode_vf38(void) { return 5.0f; }
+f32 GameMode::vf38(void) { return 5.0f; }
 
 void GameMode::vf44(void) {}
 

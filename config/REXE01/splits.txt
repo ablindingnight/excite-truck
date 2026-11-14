@@ -2780,7 +2780,7 @@ game/placecar.cpp:
 game/amaster.cpp:
 	.text       start:0x801B81E0 end:0x801B8B84
 	.ctors      start:0x802ED274 end:0x802ED278
-	.data       start:0x80336740 end:0x80336890
+	.data       start:0x80336740 end:0x80336990
 	.bss        start:0x80436D08 end:0x80436D28
 	.sdata      start:0x8055A910 end:0x8055A914
 	.sbss       start:0x8055E738 end:0x8055E754

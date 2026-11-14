@@ -57,8 +57,8 @@ public:
     virtual int vf1C(int car);
     virtual int vf20(int car);
     virtual int vf24(void);
-    virtual int vf28(int car);
-    virtual int vf2C(int car);
+    virtual int Started1C(int car);
+    virtual int Started20(int car);
     virtual int vf30(void);
     virtual int vf34(void);
     virtual f32 vf38(void);
@@ -85,7 +85,7 @@ public:
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
-    virtual void vf98(int a, int b);
+    virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
     virtual int vfA0(int a, int b, int c);
     virtual void vfA4(int p);
@@ -121,10 +121,10 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car);
+    virtual int vf20(int car) = 0;
     virtual int vf24(void);
-    virtual int vf28(int car);
-    virtual int vf2C(int car);
+    virtual int Started1C(int car);
+    virtual int Started20(int car);
     virtual int vf30(void);
     virtual int vf34(void);
     virtual f32 vf38(void);
@@ -146,7 +146,7 @@ public:
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
-    virtual void vf98(int a, int b);
+    virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
     virtual int vfA0(int a, int b, int c);
     virtual void vfA4(int p);
@@ -154,7 +154,7 @@ public:
     virtual void vfAC(int car);
     virtual int vfB0(int a, int b, int c);
     virtual void vfB4(int car, Damage* d);
-    virtual void vfB8(int p);
+    virtual void vfB8(int p) = 0;
     virtual int vfBC(void);
     virtual void vfC0(void);
     virtual void vfC4(void);
@@ -171,9 +171,6 @@ public:
     virtual int vfF0(void);
     virtual void vfF4(void);
 
-    int Collide(int a, int b);
-    int Started1C(int car);
-    int Started20(int car);
     void FillResults(void* r);
     int Reset(void);
 };
@@ -191,12 +188,12 @@ public:
     virtual void vfB8(int p) {}
     virtual void vfC0(void) {}
     virtual void vfC4(void) {}
-    virtual void vf98(int a, int b) {}
+    virtual int Collide(int a, int b) {}
     virtual f32 vf38(void) { return 4.0f; }
     virtual int vf54(int p) { return (GetNumPlayers() > 1) ? 0x160B : 0x564B; }
     virtual int vf100(void) { return 1; }
-    virtual int vf28(int car) { return 1; }
-    virtual int vf2C(int car) { return 1; }
+    virtual int Started1C(int car) { return 1; }
+    virtual int Started20(int car) { return 1; }
     virtual int vfD4(int car) { return 0; }
 };
 
@@ -271,7 +268,7 @@ void fn_801B83A8(void) {
     lbl_8055E750 = 0.0f;
 }
 
-void GameMode_vf10(void) {}
+void GameMode::vf10(void) {}
 
 void fn_801B841C(void) {
     lbl_8055E744->vf0C();
@@ -283,19 +280,19 @@ void fn_801B841C(void) {
     }
 }
 
-void GameMode_vf0C(void) {}
+void GameMode::vf0C(void) {}
 
 void fn_801B848C(int p) { lbl_8055E744->vf14(p); }
 
 void fn_801B84A4(int p) { lbl_8055E744->vf4C(p); }
 
-void GameMode_vf4C(void) {}
+void GameMode::vf4C(int p) {}
 
 void fn_801B84C0(int p) { lbl_8055E744->vf50(p); }
 
 int fn_801B84D8(int p) { return lbl_8055E744->vf54(p); }
 
-int GameMode_vf54(void) { return 0; }
+int GameMode::vf54(int p) { return 0; }
 
 void fn_801B84F8(void) {
     lbl_8055E748 = 1;
@@ -308,16 +305,16 @@ int fn_801B851C(int car) {
     if (fn_80161BB8(car)) {
         return 0;
     }
-    return lbl_8055E744->vf28(car);
+    return lbl_8055E744->Started1C(car);
 }
 
-int fn_801B8570(int car) { return lbl_8055E744->vf2C(car) && !fn_80161B94(); }
+int fn_801B8570(int car) { return lbl_8055E744->Started20(car) && !fn_80161B94(); }
 
 int fn_801B85CC(void) { return lbl_8055E744->vf24(); }
 
 void fn_801B85E0(int a, int b, int c, int d) { lbl_8055E744->vf90(a, b, c, d); }
 
-void fn_801B8610(int a, int b) { lbl_8055E744->vf98(a, b); }
+void fn_801B8610(int a, int b) { lbl_8055E744->Collide(a, b); }
 
 int fn_801B8630(int a, int b, int c) {
     if (fn_80161BDC(a, b, c)) {
