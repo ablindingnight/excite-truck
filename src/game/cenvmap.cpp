@@ -345,9 +345,9 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
             EVec3* p = (EVec3*)((u8*)pts + i * stride);
             EVec3 q;
             EVec3 d;
-            d.x = p->x - (&lbl_80488B88)->pos.x;
             d.z = p->z - (&lbl_80488B88)->pos.z;
             d.y = p->y - (&lbl_80488B88)->pos.y;
+            d.x = p->x - (&lbl_80488B88)->pos.x;
             EVec2 side;
             side.x = d.z;
             side.y = -d.x;

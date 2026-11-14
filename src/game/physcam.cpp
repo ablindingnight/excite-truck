@@ -1058,16 +1058,18 @@ void CamRegion::Prepare(u8* line) {
     V2 pt;
     V2 d1;
     V2 d2;
-    center.x = F32(cam, 0x0);
-    center.y = F32(cam, 0x8);
+    f32 cx = F32(cam, 0x0);
+    f32 cy = F32(cam, 0x8);
+    center.x = cx;
+    center.y = cy;
     f32 wrap;
     f32 rad = F32(cam, 0xC);
     wrap = *(f32*)(PTR(line, 0x2C) + 8);
     f32 r2 = rad * rad;
     S32(line, 0xC) = fn_80270D1C(S32(cam, 0x5C));
-    int k = 0;
-    u8* seg;
     u8* first = PTR(PTR(line, 0x2C), 0x1C);
+    u8* seg;
+    int k = 0;
     int done = 0;
     seg = first;
     do {
@@ -1094,8 +1096,8 @@ void CamRegion::Prepare(u8* line) {
             if (fn_802726EC(sol[j], lbl_80563F48, lbl_80563F50)) {
                 f32 v = F32(seg, 0x1C) + F32(seg, 0x18) * sol[j];
                 if (k < 4) {
-                    (&lo1)[k] = v;
-                    fn_80270B00("  solution: %.3f", (&lo1)[k++]);
+                    (&lo1)[k++] = v;
+                    fn_80270B00("  solution: %.3f", (&lo1)[k - 1]);
                 } else {
                     fn_80270B00("    too many solutions, discarding %.3f", v);
                 }

@@ -453,11 +453,20 @@ extern "C" EnvBase* fn_802BF6AC(void) {
 
 inline EnvBase::~EnvBase(void) {}
 
-static inline s32 LoadModel(const char* name) {
+static inline void LoadModel(s32* out, const char* name) {
     if (fn_8012C33C(name)) {
-        return fn_802C6FC0(name, 0, 0);
+        *out = fn_802C6FC0(name, 0, 0);
+    } else {
+        *out = -1;
     }
-    return -1;
+}
+
+static inline void LoadTex(s32* out, const char* name) { /* Helper name unproven */
+    if (fn_8012C33C(name)) {
+        *out = fn_802CAC28(name, 0);
+    } else {
+        *out = -2;
+    }
 }
 
 static inline void Identity(Frame* f) {
@@ -470,30 +479,31 @@ static inline void Identity(Frame* f) {
     f->z.x = 0.0f;
     f->z.y = 0.0f;
     f->z.z = 1.0f;
-    f->pos.x = 0.0f;
-    f->pos.y = 0.0f;
-    f->pos.z = 0.0f;
 }
 
 
 WaterEnvMap::WaterEnvMap(void) {
     target = fn_802CB128(0x100, 0x100, 0, 0);
-    world = LoadModel("worldmodel.mod");
-    envModel = LoadModel("wenv_mod.mod");
+    LoadModel(&world, "worldmodel.mod");
+    LoadModel(&envModel, "wenv_mod.mod");
     if (lbl_8055FAFC == 0) {
         Skybox* sb = new ("skybox") Skybox;
         if (sb) {
-            sb->sun = fn_8012C33C("env_sun.tex") ? fn_802CAC28("env_sun.tex", 0) : -2;
+            LoadTex(&sb->sun, "env_sun.tex");
             for (int i = 0; i < 6; i++) {
                 sb->faces[i] = fn_802CB128(0x100, 0x100, 0, 0x60);
-                Identity(&sb->frames[i]);
+                Frame* f = &sb->frames[i];
+                Identity(f);
+                sb->frames[i].pos.x = 0.0f;
+                sb->frames[i].pos.y = 0.0f;
+                sb->frames[i].pos.z = 0.0f;
             }
-            sb->frames[1].x.y = 0.0f;
-            sb->frames[1].x.z = 0.0f;
             sb->frames[1].z.x = 0.0f;
-            sb->frames[1].x.x = -1.0f;
             sb->frames[1].z.y = 0.0f;
             sb->frames[1].z.z = -1.0f;
+            sb->frames[1].x.x = -1.0f;
+            sb->frames[1].x.y = 0.0f;
+            sb->frames[1].x.z = 0.0f;
             sb->frames[2].x.x = 0.0f;
             sb->frames[2].x.y = 0.0f;
             sb->frames[2].x.z = -1.0f;
