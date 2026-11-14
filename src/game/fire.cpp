@@ -79,15 +79,12 @@ struct FVec {
 };
 
 // A vector passed by value (the default of the model vector lookup).
-struct V3 {
+struct V3 : ValVec3 {
     V3(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
     }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct FireDesc {
@@ -165,7 +162,7 @@ f32 fn_80287BC8(f32 lo, f32 hi);
 int fn_80287E20(FireModel* model, const char* name);
 ValueNodeV* fn_80287E80(FireModel* model, const char* name);
 ValVec3 fn_80287ED0(FireModel* model, const char* node, const char* key);
-ValVec3 fn_80287F90(FireModel* model, const char* node, const char* key, V3 def);
+ValVec3 fn_80287F90(FireModel* model, const char* node, const char* key, ValVec3 def);
 const TorchPart* fn_80288060(FireModel* model, int i);
 FireModel* fn_80288208(s32 i);
 void fn_80288A40(const Vec* p, const Vec* v);
