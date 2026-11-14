@@ -545,9 +545,10 @@ void DrawLoadingScreen(int alpha, f32 t) {
     fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88000005f, 0.0f, 1.0f);
     show_goals = !lbl_8055D647;
     if (!lbl_8055D646 && lbl_8055D647) {
+        f32 box_h;
         f32 panelOrigin = 225.0f;
         f32 slide = GoalsPanelSlide(t);
-        f32 box_h = 140.0f;
+        box_h = 140.0f;
         f32 box_y = 0.5f * box_h - 80.0f;
         f32 box_x = lbl_8055CFF0 * slide - panelOrigin;
 
