@@ -788,7 +788,7 @@ void* fn_802EAB28(void* arg) {
                         for (i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
                             if (SyncAt(lbl_805600A8 + off + i)) {
                                 if (i) {
-                                    u8* b = lbl_805600A8 + off;
+                                    const u8* b = lbl_805600A8 + off;
                                     fn_802E30C8("mp3: found inner frame sync at %d (%x,%x,%x,%x)", i, b[0], b[1], b[2],
                                                 b[3]);
                                 }
