@@ -1237,7 +1237,21 @@ int AsyncResourceSet::Restart(const char* name) {
             StartLoad(set.name);
         }
     }
-    Stop();
+    switch (state) {
+    case 2:
+        if (handle != -1) {
+            fn_802E7548(handle);
+            handle = -1;
+        }
+        set.Unload();
+        break;
+    case 3:
+        fn_8012BA1C(&set);
+        fn_8012BC24(&lbl_8055E000, &set);
+        set.Unload();
+        break;
+    }
+    state = 1;
     tries = 0;
     return Begin(name);
 }
