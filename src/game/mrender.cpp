@@ -888,4 +888,3 @@ void fn_802CA0A0(Flare* f) { f->Done(); }
 
 }  // extern "C"
 
-// NonMatching: fn_802C83CC (stfsu addressing) and Flare::Draw (register numbering) still differ.
