@@ -479,6 +479,9 @@ static inline f32 Ease(f32 t) {
 }
 
 
+/* Helper name unproven */
+static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -533,8 +536,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         scale = 1.0f / (map->width / 2.0f);
         t = (fn_801EA9A0(view)->truck->speed / 0.44444445f - map->minSpeed) /
             (map->maxSpeed - map->minSpeed);
-        t = Max(Min(1.0f, t), 0.0f);
-        radius = map->minWidth + t * (map->maxWidth - map->minWidth);
+        radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
         fn_80136468(&path, fn_80178C9C(), dist);
     }
     {

@@ -351,7 +351,7 @@ static __inline void MtxToQuat(const CamFrame* f, CamQuat* q) {
         q->y = s * (m[2][0] - m[0][2]);
         q->z = s * (m[0][1] - m[1][0]);
     } else {
-        MtxToQuatAxis((f32(*)[3])f, q);
+        MtxToQuatAxis((f32(*)[3])m, q);
     }
 }
 
@@ -362,24 +362,30 @@ static __inline void QuatToMtx(const CamQuat* q, CamRot* r) {
     f32 xx = q->x * x2;
     f32 yy = q->y * y2;
     f32 zz = q->z * z2;
-    f32 xz = q->x * z2;
-    f32 wz;
-    f32 xy = q->x * y2;
     f32 wx = q->w * x2;
     f32 yz = q->y * z2;
     f32 wy = q->w * y2;
-    wz = q->w * z2;
+    f32 xz = q->x * z2;
+    f32 wz = q->w * z2;
+    f32 xy = q->x * y2;
     r->axes[0].x = lbl_80563D94 - (yy + zz);
-    r->axes[0].y = xy + wz;
-    r->axes[0].z = xz - wy;
     r->axes[1].x = xy - wz;
-    r->axes[1].y = lbl_80563D94 - (xx + zz);
-    r->axes[1].z = yz + wx;
     r->axes[2].x = xz + wy;
-    r->axes[2].z = lbl_80563D94 - (xx + yy);
+    r->axes[0].y = xy + wz;
+    r->axes[1].y = lbl_80563D94 - (xx + zz);
     r->axes[2].y = yz - wx;
+    r->axes[0].z = xz - wy;
+    r->axes[1].z = yz + wx;
+    r->axes[2].z = lbl_80563D94 - (xx + yy);
 }
 
+/* Helper name unproven */
+static __inline void QuatCopy(CamQuat* d, const CamQuat* s) {
+    d->x = s->x;
+    d->y = s->y;
+    d->z = s->z;
+    d->w = s->w;
+}
 static __inline void CamSet(CamVec* v, f32 x, f32 y, f32 z) {
     v->x = x;
     v->y = y;
@@ -412,7 +418,8 @@ static __inline void CamIdentity(CamRot* r) {
 // Moves a frame by a vector in its own axes.
 static __inline void CamMove(CamFrame* f, const CamVec* local) {
     CamVec w;
-    CamMulVec(&w, local, &f->rot);
+    const CamRot* rot = &f->rot;
+    CamMulVec(&w, local, rot);
     f->pos.x = f->pos.x + w.x;
     f->pos.y = f->pos.y + w.y;
     f->pos.z = f->pos.z + w.z;
@@ -498,16 +505,13 @@ void fn_8026C014(int player) {
         CamScale(&lbl_8049A1F0, 0.7f);
         CamScale(&lbl_8049A1FC, 0.7f);
         shift = fn_802E4A1C(0xFD);
-        ctrl = 0;
-        if (fn_802E4A1C(0xFE) || fn_802E4A1C(0x3A)) {
-            ctrl = 1;
-        }
+        ctrl = fn_802E4A1C(0xFE) || fn_802E4A1C(0x3A);
         {
             f32 moveRate[4] = {1.0f, 0.1f, 10.0f, 0.01f};
             f32 turnRate[4] = {0.05f, 0.0125f, 0.15f, 0.0025f};
             f32 frames = dt / 0.033333335f;
-            speed = frames * moveRate[shift * 2 | ctrl];
-            turn = frames * turnRate[shift * 2 | ctrl];
+            speed = frames * moveRate[(shift << 1) | ctrl];
+            turn = frames * turnRate[(shift << 1) | ctrl];
         }
         if (fn_802E4A1C(0x1E)) {
             move.z = speed;
@@ -564,9 +568,8 @@ void fn_8026C014(int player) {
         if (!CamIsZero(&move)) {
             CamCopy(&lbl_8049A1F0, &move);
         }
-        const CamVec* v = &lbl_8049A1F0;
         const CamRot* rot = &lbl_80499050.rot;
-        CamMulVec(&w, v, rot);
+        CamMulVec(&w, &lbl_8049A1F0, rot);
         lbl_80499050.pos.x = lbl_80499050.pos.x + w.x;
         lbl_80499050.pos.y = lbl_80499050.pos.y + w.y;
         lbl_80499050.pos.z = lbl_80499050.pos.z + w.z;
@@ -580,7 +583,8 @@ void fn_8026C014(int player) {
         CamVec pitchE;
         CamVec v;
         u32 now = fn_802E2C20();
-        f32 dt = CAM_MAX(0.001f * (f32)(now - lbl_8055F508), 0.1f);
+        u32 last = lbl_8055F508;
+        f32 dt;
         f32 speed;
         f32 yawRate;
         f32 fovRate;
@@ -592,6 +596,7 @@ void fn_8026C014(int player) {
         f32 x;
         f32 z;
         lbl_8055F508 = now;
+        dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
         speed = 4.0f * ((10.0f * dt) / 4.0f);
         yawRate = dt * lbl_80563DF0;
         fovRate = dt * lbl_80563E00;
@@ -654,7 +659,8 @@ void fn_8026C014(int player) {
     } else {
         // Stick flight of the current camera; the trigger and a button boost it.
         u32 now = fn_802E2C20();
-        f32 dt = CAM_MAX(0.001f * (f32)(now - lbl_8055F514), 0.1f);
+        u32 last = lbl_8055F514;
+        f32 dt;
         f32 speed;
         f32 turn;
         f32 fovRate;
@@ -665,17 +671,19 @@ void fn_8026C014(int player) {
         f32 roll;
         f32 lift;
         lbl_8055F514 = now;
+        dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
         turn = dt * lbl_80563DF0;
         speed = 0.25f * (10.0f * dt);
         fovRate = dt * lbl_80563E00;
-        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
         lo = 0.2617994f;
         hi = 2.443461f;
+        t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
+        t = lbl_80563D94 + t * lbl_80563DA0;
         boost = lbl_80563D94;
         if (pad.keys[6]) {
             boost = 4.0f;
         }
-        speed = speed * boost * (lbl_80563D94 + t * lbl_80563DA0);
+        speed = speed * (boost * t);
         roll = lbl_80563D78;
         if (pad.w40 & 8) {
             roll = speed;
@@ -748,13 +756,15 @@ void fn_8026C014(int player) {
             CamRot r;
             PSVECCrossProduct(&up, &f->rot.axes[2], &f->rot.axes[0]);
             PSVECCrossProduct(&f->rot.axes[2], &f->rot.axes[0], &f->rot.axes[1]);
-            r.axes[0] = f->rot.axes[0];
-            r.axes[2] = f->rot.axes[2];
+            CamSet(&r.axes[0], f->rot.axes[0].x, f->rot.axes[0].y, f->rot.axes[0].z);
+            CamSet(&r.axes[2], f->rot.axes[2].x, f->rot.axes[2].y, f->rot.axes[2].z);
             PSVECCrossProduct(&r.axes[2], &r.axes[0], &r.axes[1]);
             PSVECNormalize(&r.axes[0], &r.axes[0]);
             PSVECNormalize(&r.axes[1], &r.axes[1]);
             PSVECCrossProduct(&r.axes[0], &r.axes[1], &r.axes[2]);
-            f->rot = r;
+            CamCopy(&f->rot.axes[0], &r.axes[0]);
+            CamCopy(&f->rot.axes[1], &r.axes[1]);
+            CamCopy(&f->rot.axes[2], &r.axes[2]);
         }
     } else if ((s32)lbl_8055F4E0 == 2 && player) {
         s32 id = fn_8026A344(0);
@@ -777,9 +787,9 @@ void fn_8026C014(int player) {
                 p.x = lbl_8049A168.pos.x + lbl_80563D9C * (car->frame.pos.x - lbl_8049A168.pos.x);
                 p.y = lbl_8049A168.pos.y + lbl_80563D9C * (car->frame.pos.y - lbl_8049A168.pos.y);
                 p.z = lbl_8049A168.pos.z + (car->frame.pos.z - lbl_8049A168.pos.z) / 2.0f;
-                lbl_8049A168.rot = qs;
-                tgt.pos = p;
-                lbl_8049A168.pos = p;
+                QuatCopy(&lbl_8049A168.rot, &qs);
+                CamCopy(&tgt.pos, &p);
+                CamCopy(&lbl_8049A168.pos, &p);
             } else {
                 tgt = car->frame;
                 lbl_8049A168.rot = q;
