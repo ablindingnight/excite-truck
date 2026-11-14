@@ -295,21 +295,19 @@ struct Camera {
 extern "C" {
 Camera* fn_802C86DC(void);
 void fn_8018F76C(RaceCarRec* car, int wheel);
-void fn_8001DAE0(struct Timer* t, f32 len);
 }
 
-extern "C" f32 fn_8001DAE8(struct Timer* t);  // time
-extern "C" f32 fn_8001DAF0(struct Timer* t);  // progress
-
+// Interval timer on the race clock (0x8001DAE0..), shared with zone and stdoverlay.
 struct Timer {
-    Timer(f32 len) { fn_8001DAE0(this, len); }
+    Timer(f32 len);
+    f32 Now(void);
+    f32 Progress(void);
     int Running(void) {
-        f32 t = fn_8001DAE8(this) - start;
+        f32 t = Now() - start;
         return t >= 0.0f && t < len;
     }
-    void Start(void) { start = fn_8001DAE8(this); }
+    void Start(void) { start = Now(); }
     void Clear(void) { start = -999.0f; }
-    f32 Progress(void) { return fn_8001DAF0(this); }
     f32 len;    // offset 0x0
     f32 start;  // offset 0x4
 };
@@ -740,6 +738,7 @@ public:
     virtual int vf68(void);
     virtual int vf8C(int p, int key);
     virtual void* vfE8(void);
+    void DrawKills(int car);
     int AliveAI(void) {
         int n = 0;
         int i;
@@ -1566,6 +1565,50 @@ extern "C" {
 static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
 }
 
+// Helper name unproven: the kill icon column (its locals colour as an inlined body).
+inline void CrushMaster::DrawKills(int car) {
+    CrushCar* cc;
+    int n;
+    Box* icon;
+    Box* hit;
+    TextElem* col;
+    int i;
+    cc = &cars[car];
+    n = nCars - 1;
+    icon = layout.p->FindBox("ring_set_icon");
+    hit = layout.p->FindBox("ring_set_hit");
+    if (!hit) {
+        hit = icon;
+    }
+    col = layout.p->Find("score_column");
+    for (i = 0; i < n; i++) {
+        bool killed = i < cc->f8;
+        Box b = *icon;
+        int pts;
+        b.pos.y += i * hit->h;
+        if (!killed) {
+            b.color.all = 0x66FFFFFF;
+        }
+        fn_80147940(layout.p, &b, "star_art", 0);
+        if (cc->f10[i]) {
+            V2 save = b.pos;
+            b.pos.x += 5.0f;
+            b.pos.y += 4.0f;
+            fn_80147940(layout.p, &b, "star_art", 0);
+            b.pos = save;
+        }
+        pts = killed ? lbl_8043038C.pointsPerKill * (cc->f10[i] + 1) : 0;
+        if (pts) {
+            TextElem t = *col;
+            f32 xv = b.pos.x;
+            f32 yv = b.pos.y;
+            t.pos.x = xv + b.w / 2.0f;
+            t.pos.y = yv + b.h / 2.0f;
+            fn_80147230(&t, "%d", pts);
+        }
+    }
+}
+
 inline void CrushMaster::vf4C(int view) {
     int car = fn_801E866C(view);
     int radar = 1;
@@ -1573,52 +1616,12 @@ inline void CrushMaster::vf4C(int view) {
         radar = 0;
     }
     if (layout.p) {
-        CrushCar* cc;
-        Box* icon;
-        int n;
-        Box* hit;
-        TextElem* col;
-        int i;
+        char buf[0x20];
         if (radar && vf20(car)) {
             fn_80139318(layout.p, radarTex, car, 140.0f);
         }
-        cc = &cars[car];
-        n = nCars - 1;
-        icon = layout.p->FindBox("ring_set_icon");
-        hit = layout.p->FindBox("ring_set_hit");
-        if (!hit) {
-            hit = icon;
-        }
-        col = layout.p->Find("score_column");
-        for (i = 0; i < n; i++) {
-            bool killed = i < cc->f8;
-            Box b = *icon;
-            int pts;
-            b.pos.y += i * hit->h;
-            if (!killed) {
-                b.color.all = 0x66FFFFFF;
-            }
-            fn_80147940(layout.p, &b, "star_art", 0);
-            if (cc->f10[i]) {
-                V2 save = b.pos;
-                b.pos.x += 5.0f;
-                b.pos.y += 4.0f;
-                fn_80147940(layout.p, &b, "star_art", 0);
-                b.pos = save;
-            }
-            pts = killed ? lbl_8043038C.pointsPerKill * (cc->f10[i] + 1) : 0;
-            if (pts) {
-                TextElem t = *col;
-                f32 yv;
-                f32 xv = b.pos.x;
-                t.pos.x = xv + b.w / 2.0f;
-                yv = b.pos.y;
-                t.pos.y = yv + b.h / 2.0f;
-                fn_80147230(&t, "%d", pts);
-            }
-        }
+        DrawKills(car);
         {
-            char buf[0x20];
             if (lbl_8043038C.timeInSeconds) {
                 f32 left = endTime - fn_801E7E18();
                 left = 0.0f > left ? 0.0f : left;
