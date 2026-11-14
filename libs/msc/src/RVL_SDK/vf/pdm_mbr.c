@@ -6,16 +6,19 @@ s32 VFipdm_mbr_check_master_boot_record(u8* buf, u32 total_sectors, u32* is_mast
     u32 start_sector[4];
     u32 num_sectors[4];
     s16 part_cnt;
+    // The original reads the sector through a volatile pointer: the eight table bytes are loaded strictly in
+    // source order (the scheduler only keeps volatile accesses in order), and the dead zero store stays.
+    volatile u8* p = buf;
 
     *is_master_boot = 0;
-    if (buf[0x1FE] != 0x55 || buf[0x1FF] != 0xAA) {
+    if (p[0x1FE] != 0x55 || p[0x1FF] != 0xAA) {
         return 2;
     }
 
-    for (part_cnt = 0; part_cnt < 4; part_cnt++, buf += 16) {
+    for (part_cnt = 0; part_cnt < 4; part_cnt++, p += 16) {
         start_sector[part_cnt] = 0;
-        start_sector[part_cnt] = ((buf[0x1C8] + (buf[0x1C9] << 8)) << 16) + ((buf[0x1C7] << 8) + buf[0x1C6]);
-        num_sectors[part_cnt] = (((buf[0x1CD] << 8) + buf[0x1CC]) << 16) + (buf[0x1CA] + (buf[0x1CB] << 8));
+        start_sector[part_cnt] = p[0x1C6] + (p[0x1C7] << 8) + (p[0x1C8] << 16) + (p[0x1C9] << 24);
+        num_sectors[part_cnt] = p[0x1CA] + (p[0x1CB] << 8) + (p[0x1CC] << 16) + (p[0x1CD] << 24);
         if (start_sector[part_cnt] != 0 && num_sectors[part_cnt] != 0) {
             if (part_cnt == 0) {
                 *is_master_boot = 1;
