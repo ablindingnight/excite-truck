@@ -44,7 +44,6 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
     s16 x;
     s32 b;
     s16 m;
-    s16 gi;
     s32 p;
     s32 ch;
     const s16* st;
@@ -81,11 +80,11 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
             lt = lbl_802F3B84;
             st = lbl_802F3D18;
         }
-        for (i = 0; i < 21; i++) {
-            long_edges[i] = lt[i];
+        for (w = 0; w < 21; w++) {
+            long_edges[w] = lt[w];
         }
-        for (i = 0; i < 36; i++) {
-            short_edges[i] = st[i];
+        for (w = 0; w < 36; w++) {
+            short_edges[w] = st[w];
         }
         d->long_end = long_edges[20];
         d->short_end = short_edges[35];
@@ -95,16 +94,16 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
     for (ch = 0; ch < d->channels; ch++) {
         row = *sf_scale;
         if (d->mode_ext & 2) {
-            gi = *global_gain - 2;
+            m = *global_gain - 2;
         } else {
-            gi = *global_gain;
+            m = *global_gain;
         }
-        if (gi < 0) {
-            gi = 0;
+        if (m < 0) {
+            m = 0;
         }
-        e0 = lbl_802F38E8[gi];
+        e0 = lbl_802F38E8[m];
         flags = *block_flags;
-        g = lbl_80560DB0[gi & 3];
+        g = lbl_80560DB0[m & 3];
 
         if (flags & 7) {
             /* long blocks */
