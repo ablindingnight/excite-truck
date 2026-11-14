@@ -175,7 +175,7 @@ struct Osc {
     f32 max;    // offset 0x4
     f32 half;   // offset 0x8
     f32 start;  // offset 0xC
-    f32 Period(void) { return 2.0f * half; }
+    f32 Period(void) const { return 2.0f * half; }
 };
 
 struct Role : Osc {
@@ -317,7 +317,7 @@ static inline f32 Smooth(f32 t) {
     }
 }
 
-static inline f32 OscValue(Osc* o) {
+static inline f32 OscValue(const Osc* o) {
     f32 t = fmod(lbl_8055E318 - o->start, o->Period());
     if (t > o->half) {
         t = 2.0f * o->half - t;
@@ -555,7 +555,7 @@ void fn_80166E54(Role* r);
 void fn_80166E68(Ramp* r, f32 v);
 void fn_80166F3C(f32* t, f32 lo, f32 hi);
 int fn_80166F78(f32* t);
-f32 fn_80166F90(Role* r);
+f32 fn_80166F90(const Role* r);
 void fn_8016707C(OrbitCarState* s, OrbitCar* car);
 
 static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
@@ -668,7 +668,7 @@ void fn_80166F3C(f32* t, f32 lo, f32 hi) { *t = lbl_8055E318 + fn_80129DC4(3, lo
 
 int fn_80166F78(f32* t) { return lbl_8055E318 > *t; }
 
-f32 fn_80166F90(Role* r) { return OscValue(r); }
+f32 fn_80166F90(const Role* r) { return OscValue(r); }
 
 static inline void SetRole(OrbitCarState* s, Role* r) {
     if (s->role) {
