@@ -528,7 +528,9 @@ int fn_802CDB20(MList* m, int i) {
 }
 
 void fn_802CDB5C(int pri) {
-    int j;
+    struct {
+        int j;
+    } strip;
     MLBatch* e;
     MList* m;
     RenderCtx* ctx;
@@ -563,7 +565,7 @@ void fn_802CDB5C(int pri) {
         tex = e->tex;
         n = e->end - e->start;
         sp = &da.p[e->start];
-        for (j = 0; j < n; j++) {
+        for (strip.j = 0; strip.j < n; strip.j++) {
             MLStrip s = *sp++;
             if (s.flags == (ctx->vis[s.ref] & 0x7F)) {
                 if (!open) {

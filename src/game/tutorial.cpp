@@ -1787,14 +1787,16 @@ inline int ChalList::Draw(int a) {
         but = (GartElem*)lbl_8055E2E0->Elem("sel_but");
         star = (GartElem*)lbl_8055E2E0->Elem("pass_star");
         if (e1 && e2) {
-            int i;
-            for (i = 1; i <= lbl_8042FDEC.count; i++) {
+            struct {
+                int i;
+            } entry;
+            for (entry.i = 1; entry.i <= lbl_8042FDEC.count; entry.i++) {
                 char name[0xA];
                 TextElem* el;
-                fn_801345D8(name, sizeof(name), "elem%d", i);
+                fn_801345D8(name, sizeof(name), "elem%d", entry.i);
                 el = (TextElem*)lbl_8055E2E0->Find(name);
                 if (el) {
-                    DrawEntry(this, el, i, e1, e2, but, star);
+                    DrawEntry(this, el, entry.i, e1, e2, but, star);
                 } else if (!lbl_8055E308) {
                     lbl_8055E308 = 1;
                     fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");

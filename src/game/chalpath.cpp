@@ -524,6 +524,14 @@ int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
     return r;
 }
 
+/* Helper name unproven */
+static inline void RebuildMapAfterRace(s32 arg) {
+    ClearPlayer(0);
+    AchievementsClearSession();
+    lbl_8055F3E4 = fn_8027B878(arg);
+    BuildMap(SCREEN_BUF);
+}
+
 // Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
 // "difficulty unlocked" popup when that race completed the path.
 void fn_8026003C(void) {
@@ -559,10 +567,7 @@ void fn_8026003C(void) {
         run.which = arg;
         run.out = out;
         fn_8023BF4C(&run);
-        ClearPlayer(0);
-        AchievementsClearSession();
-        lbl_8055F3E4 = fn_8027B878(arg);
-        BuildMap(SCREEN_BUF);
+        RebuildMapAfterRace(arg);
         RedrawNodes();
         bool nowComplete = SCREEN_BUF->AllComplete();
         if (fn_802E8D84()) {

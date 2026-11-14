@@ -413,6 +413,8 @@ struct TorchEntry {
 
 class ExhaustTorchMan {
 public:
+    void TransformTorchPart(int i, const TorchPart* part);
+public:
     void Loop1_DrawEdges(const Vec* right, const Vec* up);
 public:
     ExhaustTorchMan(void);
@@ -1539,18 +1541,22 @@ void ExhaustTorchMan::DrawEdges(void) {
     Loop1_DrawEdges(right, up);
 }
 
+/* Helper name unproven */
+inline void ExhaustTorchMan::TransformTorchPart(int i, const TorchPart* part) {
+    const FireCar* c = fn_80287B24(i);
+    fn_801BFD34(&entries[i].pos, &part->pos, c);
+    Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
+}
+
 void ExhaustTorchMan::DrawFaces(void) {
     int i;
-    const FireCar* c;
     for (i = 0; i < fn_80287B14(); i++) {
         if (entries[i].on) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const TorchPart* part = fn_80288060(model, k);
-                c = fn_80287B24(i);
-                fn_801BFD34(&entries[i].pos, &part->pos, c);
-                Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
+                TransformTorchPart(i, part);
                 Vec p;
                 p.x = entries[i].pos.x + entries[i].rot[1].x * entries[i].len;
                 p.y = entries[i].pos.y + entries[i].rot[1].y * entries[i].len;
