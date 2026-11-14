@@ -7479,22 +7479,22 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 // Reads the AC coefficients of an 8x8 DCT block (block[0], the DC, is set by the caller) bit plane by bit plane,
 // using the same coefficient list scheme as the residue reader, then stores them in natural order.
 void fn_80126018(s16 *block, BitReader8011 *bits) {
-    u32 value;
-    u32 *next;
-    u32 avail;
+    u32 planes;
+    u32 width;
+    u8 *start;
     u32 bit;
     u32 coef;
     u32 v;
     u32 e;
-    u32 width;
-    u32 planes;
+    u8 *end;
+    u8 *p;
     s32 mask;
-    s32 sign;
+    u32 *next;
     s32 val;
     s32 i;
-    u8 *p;
-    u8 *start;
-    u8 *end;
+    u32 value;
+    u32 avail;
+    s32 sign;
     u8 list[128];
     s16 tmp[64] = {0};
 
