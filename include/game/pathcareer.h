@@ -116,7 +116,7 @@ void LoadModeEves(int mode);
 void SetNumPlayers(int n);
 DriverInfo* GetDriver(int i);
 VehicleInfo* GetVehicle(int i);
-void SetPlayer(int i, long driver, unsigned long vehicle, long x);
+void SetPlayer(int i, long driver, long vehicle, unsigned long color);
 void SetPlayerName(const char* name, int i);
 void ClearPlayer(int i);
 void AchSetScoreLimiter(unsigned char on);

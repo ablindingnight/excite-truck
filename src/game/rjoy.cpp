@@ -23,8 +23,8 @@ void* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
 void fn_80128684(void);
 void KPADEnableDPD(s32 chan);
-void fn_800484E4(s32 chan);
-s32 fn_80047C0C(s32 chan, void* status, u32 n);  // KPADRead
+void KPADDisableDPD(s32 chan);
+s32 KPADRead(s32 chan, void* status, u32 n);
 
 typedef void (*WPADConnectCallback)(s32 chan, s32 result);
 typedef void (*WPADInfoCallback)(s32 chan, s32 result);
@@ -353,7 +353,7 @@ void fn_802E7FD0(void) {
             if (paused) {
                 KPADEnableDPD(i);
             } else {
-                fn_800484E4(i);
+                KPADDisableDPD(i);
             }
         }
     }
@@ -384,7 +384,7 @@ void fn_802E7FD0(void) {
             }
         }
         s32 probe = WPADProbe(chan, type);
-        if (fn_80047C0C(chan, r->kpad, 1) >= 1 && probe == 0 && r->present) {
+        if (KPADRead(chan, r->kpad, 1) >= 1 && probe == 0 && r->present) {
             int err = r->kpad[0].err;
             if (err != *last) {
                 fn_802E30C8("rjoy: #%d: %s -> %s", chan, fn_802E77C0(*last), fn_802E77C0(err));
