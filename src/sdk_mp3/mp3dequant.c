@@ -12,7 +12,10 @@
 static inline s32 Pow43(s32 x, const s32* c) {
     s32 xx = x * x;
     s32 q = (s32)(((s64)xx * c[0]) >> 20) + (s32)(((s64)c[1] * x) >> 20);
-    return (q + c[2] >> 4) + c[3];
+    q += c[2];
+    q >>= 4;
+    q += c[3];
+    return q;
 }
 
 /* Dequantization of one granule for every channel (fn_800BF048). On first use, copies the scalefactor-band edges for
