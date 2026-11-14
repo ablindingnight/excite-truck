@@ -411,13 +411,13 @@ void RecordIcon::Draw(void) {
     f32 u0;
     f32 fw;
     f32 fh;
-    f32 border = 6.0f;
     fn_80230C30(&sx, &sy, this->x, this->y);
-    fh = (f32)h;
+    c = valid;
     fw = (f32)w;
-    f32 pad = 3.0f;
-    fn_802354A0(art, valid, sx - pad, pad + sy, 0.0f, border + fw, border + fh, -1);
-    e = &(*(IconEntry**)icons)[icon];
+    fh = (f32)h;
+    f32 shadowY = 3.0f + sy;
+    fn_802354A0(art, c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    e = &icons->data[icon];
     y = sy;
     x = sx;
     u0 = e->u0;

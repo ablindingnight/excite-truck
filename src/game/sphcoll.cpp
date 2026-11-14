@@ -1987,12 +1987,18 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
     RVec3 ld;
     f32 tmin;
     f32 tmax;
-    f32 dy = from->y - m->t.y;
-    f32 mm = m->m[0];
-    lp.x = Dot3((from->x - m->t.x), mm, dy, m->m[1], (from->z - m->t.z), m->m[2]);
-    lp.z = Dot3((from->x - m->t.x), m->m[6], dy, m->m[7], (from->z - m->t.z), m->m[8]);
-    lp.y = Dot3((from->x - m->t.x), m->m[3], dy, m->m[4], (from->z - m->t.z), m->m[5]);
-    MulVec(&ld, dir, m);
+    lp.x = from->x - m->t.x;
+    lp.y = from->y - m->t.y;
+    lp.z = from->z - m->t.z;
+    {
+        f32 x = Dot3(lp.x, m->m[0], lp.y, m->m[1], lp.z, m->m[2]);
+        f32 y = Dot3(lp.x, m->m[3], lp.y, m->m[4], lp.z, m->m[5]);
+        f32 z = Dot3(lp.x, m->m[6], lp.y, m->m[7], lp.z, m->m[8]);
+        lp.x = x;
+        lp.y = y;
+        lp.z = z;
+    }
+    MulVecT(&ld, dir, m);
     tmin = -1e8f;
     tmax = 1e8f;
     if (fn_8019E1F4(&tmin, &tmax, lp.x, ld.x, hx) && fn_8019E1F4(&tmin, &tmax, lp.y, ld.y, hy) &&

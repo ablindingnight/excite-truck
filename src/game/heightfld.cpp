@@ -631,7 +631,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                     d->terms[k].k = dh;
                     d->terms[k].weight = i;
                 }
-            } else {
+            } else if (n < 3) {
                 d->terms[n].weight = i;
                 n++;
                 d->terms[n - 1].k = dh;
@@ -643,14 +643,10 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
         lbl_804424B0[i] = saved[i];
     }
     int any = 0;
-    if (!(__fabs(d->terms[0].k) <= lbl_80558DC4[0])) {
-        any = 1;
-    }
-    if (!((float)__fabs(d->terms[1].k) <= lbl_80558DC4[0])) {
-        any = 1;
-    }
-    if (!((float)__fabs(d->terms[2].k) <= lbl_80558DC4[0])) {
-        any = 1;
+    for (int i = 0; i < 3; i++) {
+        if (!((float)__fabs(d->terms[i].k) <= lbl_80558DC4[0])) {
+            any = 1;
+        }
     }
     if (!any) {
         lbl_8055E9A8[0]--;

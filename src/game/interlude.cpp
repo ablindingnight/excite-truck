@@ -29,7 +29,18 @@ struct V2 {
 
 static inline V2 XZ(const IVec3& v) { return V2(v.x, v.z); }
 
-static inline V2 operator-(const V2& a, const V2& b) { return V2(a.x - b.x, a.y - b.y); }
+static inline V2 operator-(const V2& a, const V2& b) {
+    V2 r;
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    return r;
+}
+
+static inline V2& operator-=(V2& a, const V2& b) {
+    a.x -= b.x;
+    a.y -= b.y;
+    return a;
+}
 
 struct IMtx {
     u32 w[12];
@@ -2090,7 +2101,9 @@ static inline f32 Angle(const V2& b, const V2& a) {
         na.y *= inv;
         pa = &na;
     }
-    f32 lb = b.x * b.x + b.y * b.y;
+    f32 by = b.y;
+    f32 bx = b.x;
+    f32 lb = bx * bx + by * by;
     if (!((f32)__fabs(lb - 1.0f) <= lbl_80558DC4[0])) {
         nb = b;
         f32 inv = 1.0f / (f32)sqrt(lb);
@@ -2120,8 +2133,10 @@ void fn_801C7C04(void) {
         break;
     case 0:
         e->pt = XZ(lbl_80438480);
-        e->offset = XZ(lbl_80438498) - e->pt;
-        e->yaw = Angle(V2(0.0f, 1.0f), XZ(lbl_8043848C) - XZ(lbl_80438480));
+        e->offset = XZ(lbl_80438498);
+        e->offset -= e->pt;
+        V2 dir = XZ(lbl_8043848C) - XZ(lbl_80438480);
+        e->yaw = Angle(V2(0.0f, 1.0f), dir);
         break;
     case 1:
     default:

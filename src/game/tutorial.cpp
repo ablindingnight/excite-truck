@@ -1841,7 +1841,6 @@ PathSet* fn_80156A40(void);
 }
 
 inline int ChallengeBase::Query(void* carp, int idx, int c) {
-    TCar* car = (TCar*)carp;
     speed[idx] = 0.0f;
     if (node) {
         char buf[0x10];
@@ -1850,8 +1849,8 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
         place = node->FindChild(buf);
         if (place) {
             TVec2 pts[3];
-            TVec2 dir;
             TVec2 pos;
+            TVec2 dir;
             int k;
             int best;
             f32 max;
@@ -1921,8 +1920,9 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 dir.z *= inv;
                 fn_8013530C(&it, -1);
             }
-            fn_801B7C8C(car, &pos, &dir);
+            fn_801B7C8C((TCar*)carp, &pos, &dir);
             spd = 0.44444445f * place->GetFloat("speed", 0.0f);
+            TCar* car = (TCar*)carp;
             car->vel.x = car->fwd.x * spd;
             car->vel.y = car->fwd.y * spd;
             car->vel.z = car->fwd.z * spd;
