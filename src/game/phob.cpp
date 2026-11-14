@@ -633,6 +633,18 @@ static inline void Loop1_fn_80177F40(int net, u8 paused) {
     }
 }
 
+/* Helper name unproven */
+static inline u8 EnterPhysicsPause(int& busy, u8& paused) {
+    u8 saved;
+    saved = lbl_8055E3BD;
+    busy = fn_802D3EBC();
+    if (busy) {
+        lbl_8055E3BD = 1;
+    }
+    paused = lbl_8055E3BD;
+    return saved;
+}
+
 void fn_80177F40(void) {
     u8 saved;
     int busy;
@@ -645,12 +657,7 @@ void fn_80177F40(void) {
     lbl_8055E45D = lbl_8055E45C;
     lbl_8055E45F = lbl_8055E45E;
     fn_80177AE4(0);
-    saved = lbl_8055E3BD;
-    busy = fn_802D3EBC();
-    if (busy) {
-        lbl_8055E3BD = 1;
-    }
-    paused = lbl_8055E3BD;
+    saved = EnterPhysicsPause(busy, paused);
     lbl_80430870.len = 0;
     fn_80265D84();
     fn_801B2364();

@@ -595,7 +595,8 @@ void RigidBody::Update(void) {
         }
         {
             rr = Rot();
-            Mul(rr, rr, &r.rot);
+            RMat33* rotation = &r.rot;
+            Mul(rr, rr, rotation);
         }
     }
     {
