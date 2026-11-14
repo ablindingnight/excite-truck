@@ -131,6 +131,8 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
         q[1] = s * (m[2][0] - m[0][2]);
         q[2] = s * (m[0][1] - m[1][0]);
     } else {
+        // The components are written by axis index here, through their own pointer.
+        f32* o = q;
         int i = 0;
         if (m[1][1] > m[0][0]) {
             i = 1;
@@ -141,11 +143,11 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
         int j = (i + 1) % 3;
         int k = (j + 1) % 3;
         f32 s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
-        q[i] = 0.5f * s;
+        o[i] = 0.5f * s;
         s = 0.5f / s;
-        q[3] = s * (m[j][k] - m[k][j]);
-        q[j] = s * (m[i][j] + m[j][i]);
-        q[k] = s * (m[i][k] + m[k][i]);
+        o[3] = s * (m[j][k] - m[k][j]);
+        o[j] = s * (m[i][j] + m[j][i]);
+        o[k] = s * (m[i][k] + m[k][i]);
     }
 }
 
@@ -154,30 +156,20 @@ void fn_80276098(const CamPose* a, const CamPose* b, int slot, int kind, f32 fov
     if (AbsF(fovA - fovB) <= lbl_80558DC4[0] && SamePose(a, b)) {
         return;
     }
-    CamShot* s = &lbl_8049FD58[slot];
-    s->dur = dur;
-    s->start = lbl_8055E3C8;
-    f32 q[4];
-    PoseToQuat(a, q);
-    s->q0[0] = q[0];
-    s->q0[1] = q[1];
-    s->q0[2] = q[2];
-    s->q0[3] = q[3];
-    s->p0.v[0] = a->pos.v[0];
-    s->p0.v[1] = a->pos.v[1];
-    s->p0.v[2] = a->pos.v[2];
-    s->fov0 = fovA;
-    PoseToQuat(b, q);
-    s->q1[0] = q[0];
-    s->q1[1] = q[1];
-    s->q1[2] = q[2];
-    s->q1[3] = q[3];
-    s->p1.v[0] = b->pos.v[0];
-    s->p1.v[1] = b->pos.v[1];
-    s->p1.v[2] = b->pos.v[2];
-    s->fov1 = fovB;
-    s->kind = kind;
-    s->active = 1;
+    lbl_8049FD58[slot].dur = dur;
+    lbl_8049FD58[slot].start = lbl_8055E3C8;
+    PoseToQuat(a, lbl_8049FD58[slot].q0);
+    lbl_8049FD58[slot].p0.v[0] = a->pos.v[0];
+    lbl_8049FD58[slot].p0.v[1] = a->pos.v[1];
+    lbl_8049FD58[slot].p0.v[2] = a->pos.v[2];
+    lbl_8049FD58[slot].fov0 = fovA;
+    PoseToQuat(b, lbl_8049FD58[slot].q1);
+    lbl_8049FD58[slot].p1.v[0] = b->pos.v[0];
+    lbl_8049FD58[slot].p1.v[1] = b->pos.v[1];
+    lbl_8049FD58[slot].p1.v[2] = b->pos.v[2];
+    lbl_8049FD58[slot].fov1 = fovB;
+    lbl_8049FD58[slot].kind = kind;
+    lbl_8049FD58[slot].active = 1;
 }
 
 // The rotation of a unit quaternion (x, y, z, w).
