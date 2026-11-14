@@ -564,6 +564,12 @@ static inline f32 CamEase(f32 x) {
 // camera's type. Without TV cameras it uses a grid-snapped default; with no region, an overhead view.
 static inline f32 TvLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
+    f32 w[3];
+    fn_80274F74(p, w, fov);
+    fn_802715C4(w, (u8*)tv);
+}
+
 void fn_80271624(int mode, u8* p) {
     u8* track = ((CamCarCtl*)PTR(PTR(p, 0x140), 0x270))->Track();
     int group;
@@ -718,9 +724,7 @@ void fn_80271624(int mode, u8* p) {
             }
             case 0: {
                 f32 fov = fn_802715F0((u8*)tv);
-                f32 w[3];
-                fn_80274F74(p, w, fov);
-                fn_802715C4(w, (u8*)tv);
+                UpdateFixedTvCamera(p, fov, tv);
                 break;
             }
             case 17:

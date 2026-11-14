@@ -310,14 +310,14 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     strcpy(text, msg);
     char* p = text;
     while (strlen(p)) {
-        char* brk = 0;
+        struct { char* brk; } wrap = { 0 };
         char line[0x200] = {0};
         char* d = line;
         u32 i = 0;
         while (i < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
             char* c = &p[i];
             if (*c == ' ') {
-                brk = c;
+                wrap.brk = c;
             } else if (*c == '^') {
                 *c = ' ';
             }
@@ -327,21 +327,21 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
         }
         char keep = 0;
         if (i != strlen(p)) {
-            if (!brk) {
-                brk = &p[i];
+            if (!wrap.brk) {
+                wrap.brk = &p[i];
                 keep = p[i];
             }
-            *brk = 0;
+            *wrap.brk = 0;
         } else {
-            brk = &p[i] - 1;
+            wrap.brk = &p[i] - 1;
         }
         fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
         fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
         if (!keep) {
-            p = brk + 1;
+            p = wrap.brk + 1;
         } else {
-            *brk = keep;
-            p = brk;
+            *wrap.brk = keep;
+            p = wrap.brk;
         }
         y -= 20.0f;
     }

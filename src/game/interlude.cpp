@@ -1805,13 +1805,7 @@ static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
     }
 }
 
-// Add camera: a move from the current editor camera to the destination one over the transition time,
-// stored as linear and angular velocities in the current camera's frame.
-void fn_801C6E40(void) {
-    lbl_8055E830 = atof(lbl_804380F0);
-    CamEvent* e = (CamEvent*)fn_801C3C80();
-    e->type = 1;
-    CamPose* cur = (CamPose*)&lbl_804381F0;
+static inline void InitCameraEvent(CamEvent* e, CamPose* cur) {
     e->fov = lbl_8055E834;
     e->origin.x = cur->pos.x;
     e->origin.y = cur->pos.y;
@@ -1844,6 +1838,15 @@ void fn_801C6E40(void) {
         e->v.y = 0.0f;
         e->v.z = 0.0f;
     }
+}
+
+// Add camera: a move from the current editor camera to the destination one over the transition time,
+// stored as linear and angular velocities in the current camera's frame.
+void fn_801C6E40(void) {
+    lbl_8055E830 = atof(lbl_804380F0);
+    CamEvent* e = (CamEvent*)fn_801C3C80();
+    e->type = 1;
+    InitCameraEvent(e, (CamPose*)&lbl_804381F0);
     sprintf(lbl_80437FC0, "Camera added at %.2f seconds", e->time);
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
     fn_801C957C(0);
