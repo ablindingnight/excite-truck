@@ -947,6 +947,12 @@ void fn_802BAFF8(GroundCell* cell, u16** strip) {
 
 static inline int Tris(int n) { return n < 0 ? 0 : n; }
 
+// Add the clamped triangle count for a strip after drawing it.
+static inline void AddStripTriangles(int triangles) {
+    const int total = lbl_8055FA6C;
+    lbl_8055FA6C = triangles + total;
+}
+
 /* Helper name unproven: draws every item strip of one texture entry. */
 static inline Item* DrawEntryStrips(Item* it, TexEntry* te, void* verts, int nverts) {
     u16*st;
@@ -962,8 +968,7 @@ static inline Item* DrawEntryStrips(Item* it, TexEntry* te, void* verts, int nve
                 u16** d = c->data;
                 st = d[j];
                 fn_802DC280(verts, nverts, st, st[0] + 1);
-                int count = d[j][0];
-                lbl_8055FA6C += Tris(count - 1);
+                AddStripTriangles(Tris(d[j][0] - 1));
             }
             c = c->next;
         } while (c);
@@ -1009,8 +1014,7 @@ void fn_802BB0FC(void* verts, int nverts) {
                                 d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                int count = d[j][0];
-                                lbl_8055FA6C += Tris(count - 1);
+                                AddStripTriangles(Tris(d[j][0] - 1));
                             }
                             c = c->next;
                         } while (c);
@@ -1081,8 +1085,7 @@ void fn_802BB3B8(void* verts, int nverts) {
                                 d = c->data;
                                 st = d[j];
                                 fn_802DC138(verts, nverts, st, st[0] + 1);
-                                int count = d[j][0];
-                                lbl_8055FA6C += Tris(count - 1);
+                                AddStripTriangles(Tris(d[j][0] - 1));
                             }
                             c = c->next;
                         } while (c);

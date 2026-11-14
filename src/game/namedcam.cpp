@@ -628,10 +628,10 @@ void fn_80277A14(CamRec* c, int slot) {
     frame.pos.v[0] = c->carFrame.pos.v[0];
     frame.pos.v[1] = c->carFrame.pos.v[1];
     frame.pos.v[2] = c->carFrame.pos.v[2];
-    f32 yaw = Atan2F(c->carFrame.rot.m[6], c->carFrame.rot.m[8]);
+    const struct { f32 value; } yawState = { Atan2F(c->carFrame.rot.m[6], c->carFrame.rot.m[8]) };
     Mat3* rot = (Mat3*)&frame.rot;
-    f32 cy = CosF(yaw);
-    f32 sy = SinF(yaw);
+    f32 cy = CosF(yawState.value);
+    f32 sy = SinF(yawState.value);
     frame.rot.m[0] = cy;
     frame.rot.m[1] = 0.0f;
     frame.rot.m[2] = -sy;
