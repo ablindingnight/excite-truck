@@ -1426,7 +1426,14 @@ static inline int TocHas(ResToc* toc, const char* name) {
 static inline QueueNode* Loop1_fn_8012D908(QueueNode* n, QueueNode* found, const char* name) {
     while (n && !found) {
         ResToc* toc = GetToc(n->name);
-        if (TocHas(toc, name)) {
+        bool present = false;
+        for (u32 i = 0; i < toc->count; i++) {
+            if (!strcasecmp(toc->entries[i].name, name)) {
+                present = true;
+                break;
+            }
+        }
+        if (present) {
             found = n;
         }
         fn_8012C4D8(toc);

@@ -286,6 +286,11 @@ public:
         return fn_801B306C() > 0.0f ? cars[0].line : cars[car].line;
     }
     virtual void Reset(void);
+    inline void StoreSnappedLine(int car, IdealLineRes* line) {
+        f32 now = lbl_8055E3C8;
+        cars[car].next = now + fn_80129DC4(4, minT, maxT);
+        cars[car].line = line;
+    }
     virtual void Snap(int car, const f32* pos) {
         V2 p;
         f32 best;
@@ -307,12 +312,7 @@ public:
                 best = dd;
             }
         }
-        {
-            IdealLineRes* l = lines.a.data[bi].line;
-            f32 now = lbl_8055E3C8;
-            cars[car].next = now + fn_80129DC4(4, minT, maxT);
-            cars[car].line = l;
-        }
+        StoreSnappedLine(car, lines.a.data[bi].line);
     }
     virtual void Switch(int car) {
     struct { IdealLineRes* l; IdealLineRes* cur; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */

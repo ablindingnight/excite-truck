@@ -3252,7 +3252,8 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         SetV3(&lb, b.x - k, b.y - k, b.z - k);
         la.y = a.y - k;
         la.x = a.x - k;
-        la.z = a.z - k;
+        const f32 laZ = a.z - k;
+        la.z = laZ;
         SetV(&mn, MinF(la.x, lb.x), MinF(la.y, lb.y), MinF(la.z, lb.z));
         *lo = mn;
     }
