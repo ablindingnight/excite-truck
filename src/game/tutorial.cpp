@@ -527,11 +527,9 @@ public:
         ChallengeBase::Update();
         Collect();
     }
-    virtual void Start(void) {
+    void StartTokens(int& i) {
         Token* t;
         int j;
-        int i;
-        ChallengeBase::Start();
         got = 0;
         time = 0.0f;
         passed = 0;
@@ -554,6 +552,19 @@ public:
                 fn_802A95AC(1);
             }
         }
+    }
+
+    virtual void Start(void) {
+        int i;
+        ChallengeBase::Start();
+        StartTokens(i);
+    }
+
+    // The derived starts use separate page and token counters.
+    void StartDerivedChallenge(void) {
+        ChallengeBase::Start();
+        int tokenIndex;
+        StartTokens(tokenIndex);
     }
     virtual int IsDone(void) const { return result != 0; }
     virtual int IsPassed(void) const { return result == 1; }
@@ -658,7 +669,7 @@ public:
     }
     virtual void Start(void) {
         int i;
-        Challenge::Start();
+        StartDerivedChallenge();
         for (i = 0; i < stunts.count; i++) {
             stunts.data[i].done = 0;
         }
@@ -738,7 +749,7 @@ public:
     }
     int OutOfTime(void) { return time > limit; }
     virtual void Start(void) {
-        Challenge::Start();
+        StartDerivedChallenge();
         passedScore = 0;
         ended = 0;
         f574 = 0.0f;
