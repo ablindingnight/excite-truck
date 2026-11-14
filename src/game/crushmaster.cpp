@@ -1130,7 +1130,10 @@ inline void CrushMaster::vfF8(void) {
         cars[i].fC = 0;
         cars[i].f8 = 0;
         cars[i].bonus = 0;
-        memset(cars[i].f10, 0, 8);
+        {
+            CrushCar* c = &cars[i];
+            memset(c->f10, 0, 8);
+        }
     }
     t = fn_8000AC38()->vals->FindChild((const char*)fn_80204EA0("crush_table"));
     timeout = t->GetFloat("timeout", 180.0f);
