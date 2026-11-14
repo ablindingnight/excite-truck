@@ -462,28 +462,27 @@ s32* fn_80217BD8(Window* win, s32 id, Widget* wd) {
 void fn_80217C4C(Window* win) {
     int n = win->menuCount;
     int next;
+    int i;
     int cur;
     int vis;
     Widget* wd;
-    int idx;
-    int i;
     if (n < 1) {
         return;
     }
     cur = -1;
     vis = 0;
-    for (i = 0; i < n; i++) {
-        if (win->menuCur == win->menu[i].id) {
-            cur = i;
+    for (int j = 0; j < n; j++) {
+        if (win->menuCur == win->menu[j].id) {
+            cur = j;
         }
-        wd = win->menu[i].w;
+        wd = win->menu[j].w;
         if (Visible(wd) && wd->enabled) {
             vis++;
         }
     }
     next = -1;
     for (i = 1; i < n; i++) {
-        idx = (cur + i) % n;
+        int idx = (cur + i) % n;
         Widget* wd = win->menu[idx].w;
         if (Visible(wd) && wd->enabled) {
             next = idx;

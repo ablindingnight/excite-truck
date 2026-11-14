@@ -485,20 +485,16 @@ void fn_802DBF30(void) {
     fn_802DEE1C();
 }
 
-static inline void DrawStrips(const u16* idx, int n) {
-    const u16* p = idx;
-    int left = n;
-    while (left > 0) {
-        u16 c = *p++;
+void fn_802DBF54(const u16* idx, int n) {
+    while (n > 0) {
+        u16 c = *idx++;
         GXBegin(0xA0, 0, c);
-        left -= c + 1;
+        n -= c + 1;
         for (int i = 0; i < c; i++) {
-            WGPIPE.us = *p++;
+            WGPIPE.us = *idx++;
         }
     }
 }
-
-void fn_802DBF54(const u16* idx, int n) { DrawStrips(idx, n); }
 
 void fn_802DC078(void* verts, int nverts, const u16* idx, int n, int first, int layer) {
     fn_802DBA1C(lbl_8055FEBA);
