@@ -29,7 +29,6 @@ static inline s32 Pow43(s32 x, const s32* c) {
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
-    const s32* c;
     s16 idx;
     u32 e0;
     s32 k;
@@ -128,8 +127,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         out->xr[i] = 0;
                         continue;
                     }
-                    b = long_map[i];
-                    idx = lbl_802F39E8[b] * *preflag + sf_long[b];
+                    idx = lbl_802F39E8[long_map[i]] * *preflag + sf_long[long_map[i]];
                     v = lbl_802F3A00[row][idx];
                     e = lbl_802F3A8C[row][idx];
                     if (m < 0) {
@@ -169,8 +167,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                             }
                         }
                     } else {
-                        c = lbl_8031C098[x >> 8];
-                        r = Pow43(x, c);
+                        r = Pow43(x, lbl_8031C098[x >> 8]);
                         if (v == 1) {
                             t = r * g;
                             if (e > 20) {
@@ -269,8 +266,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                 } else {
-                    c = lbl_8031C098[x >> 8];
-                    r = Pow43(x, c);
+                    r = Pow43(x, lbl_8031C098[x >> 8]);
                     if (v == 1) {
                         t = r * g;
                         if (e > 20) {
@@ -331,8 +327,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                     out->xr[i] = 0;
                     continue;
                 }
-                b = mixed_map[i];
-                idx = lbl_802F39E8[b] * *preflag + sf_long[b];
+                idx = lbl_802F39E8[mixed_map[i]] * *preflag + sf_long[mixed_map[i]];
                 e = lbl_802F3A8C[row][idx];
                 v = lbl_802F3A00[row][idx];
                 if (m < 0) {
@@ -379,8 +374,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                 } else {
-                    c = lbl_8031C098[x >> 8];
-                    r = Pow43(x, c);
+                    r = Pow43(x, lbl_8031C098[x >> 8]);
                     if (v == 1) {
                         t = r * g;
                         if (e > 20) {
@@ -457,8 +451,7 @@ void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s
                         }
                     }
                 } else {
-                    c = lbl_8031C098[x >> 8];
-                    r = Pow43(x, c);
+                    r = Pow43(x, lbl_8031C098[x >> 8]);
                     if (v == 1) {
                         t = r * g;
                         if (e > 20) {
