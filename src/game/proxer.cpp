@@ -135,6 +135,8 @@ typedef int (Proxer::*PairCmp)(Pair* a, Pair* b);
 
 class Proxer {
 public:
+    /* Helper name unproven */
+    Pair* PairAt(int index) { return &pairs[index]; }
     Proxer(s32 n);
     ~Proxer(void);
     void Build(void);
@@ -332,7 +334,7 @@ void Proxer::Process(void) {
     fn_80137C54(-1);
     n = count * (count - 1) / 2;
     for (k = 0; k < n; k++) {
-        Pair* p = &pairs[k];
+        Pair* p = PairAt(k);
         CarRec* a = Rec(p->a);
         CarRec* b = Rec(p->b);
         f32 dy;
