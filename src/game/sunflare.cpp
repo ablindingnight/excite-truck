@@ -199,7 +199,7 @@ static inline f32 LinStep(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) {
     return y0 + t * (y1 - y0);
 }
 
-void fn_80291C7C(Sprite* s, int sun) {
+void fn_80291C7C(const Sprite* s, int sun) {
     VecP p = s->pos;
     VecP u;
     VecP v;
