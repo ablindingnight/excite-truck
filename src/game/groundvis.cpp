@@ -305,18 +305,18 @@ void fn_802AE7F4(void) {
     dist[5] = 3.0f * (64.0f * lbl_80564AF0);
     dist[6] = 2.0f * (128.0f * lbl_80564AF0);
     dist[7] = 256.0f * lbl_80564AF0;
-    f32 diag = 1.4142f * (0.5f * lbl_80564AF0);
     f32 sum = dist[0];
+    int scale = 2;
     f32* out = &lbl_804BE090[1];
-    struct {
-        int scale;
-    } lod;
-    lod.scale = 2;
-    for (int i = 1; i < 8; i++) {
-        out[i - 1] = sum;
-        f32 d = diag * (f32)(lod.scale * 2 + lod.scale);
-        sum += d > dist[i] ? d : dist[i];
-        lod.scale *= 2;
+    f32* next = &dist[1];
+    for (int i = 0; i < 7; i++) {
+        f32 size = *next;
+        f32 d = (1.4142f * (0.5f * lbl_80564AF0)) * (f32)(scale * 2 + scale);
+        *out = sum;
+        sum += d > size ? d : size;
+        scale *= 2;
+        out++;
+        next++;
     }
     fn_802BEAB0();
     lbl_8055F97C = 0xFA;

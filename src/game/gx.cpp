@@ -402,9 +402,6 @@ char lbl_804C9830[0x100];    // screenshot name
 TexState lbl_804C9930;
 ShotBuf lbl_804C9940;
 VisTests lbl_804C9984;
-PointLight lbl_804CA088[7];
-GXLightObj lbl_804CA118[7];
-RMtx lbl_804CA2D8;
 
 struct GPMetric {
     s32 id;
@@ -435,6 +432,9 @@ static inline u16 BlendKey(int v) { return v; }
 extern const u16 lbl_8055FD08 = BlendKey(0x100);
 u16 lbl_8055FD0A = BlendKey(0x405);
 u16 lbl_8055FD0C = BlendKey(0x401);
+PointLight lbl_804CA088[7];
+GXLightObj lbl_804CA118[7];
+RMtx lbl_804CA2D8;
 s64 lbl_8055FD10;   // draw sync time
 u8 lbl_8055FD18;
 u8 lbl_8055FD19;
