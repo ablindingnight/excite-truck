@@ -230,6 +230,8 @@ void SafeDeleteArray(T*& p) {
 
 namespace {
 
+extern const char kRoadInhibitsSkags[];
+
 template <class T>
 struct Chunk : VecBase<T> {
     void Init(T* d, int n) {
@@ -604,7 +606,7 @@ void fn_802B9108(s16 size) {
                     }
                     lbl_8055FA80->Next() = it;
                     int inhibit = 0;
-                    if (it->type == 2 && fn_802B59CC()->GetBool("road_inhibits_skags", 1)) {
+                    if (it->type == 2 && fn_802B59CC()->GetBool(kRoadInhibitsSkags, 1)) {
                         inhibit = 1;
                     }
                     if (inhibit) {
@@ -1140,3 +1142,9 @@ void fn_802BB674(const char* name, int slot) {
 }  // extern "C"
 
 const f32 lbl_80564CB0 = 2.0f;
+
+namespace {
+
+const char kRoadInhibitsSkags[] = "road_inhibits_skags";
+
+}  // namespace
