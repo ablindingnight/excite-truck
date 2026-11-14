@@ -1330,13 +1330,12 @@ inline void CrushMaster::vf0C(void) {
     if (fn_801B306C() >= 0.0f) {
         endTime = now + timeout;
     }
-    f32 inactiveTurbo = 0.9f;
     for (i = 0; i < nCars; i++) {
         if (cars[i].human && lbl_8043038C.infTurbo) {
             fn_8017960C(i)->turbo = 0.0f;
         }
         if (!cars[i].human && !cars[i].active) {
-            fn_8017960C(i)->turbo = inactiveTurbo;
+            fn_8017960C(i)->turbo = 0.9f;
         }
     }
     if (!vf24()) {
@@ -1354,7 +1353,8 @@ inline void CrushMaster::vf0C(void) {
         {
             f32 left = endTime - now;
             left = 0.0f > left ? 0.0f : left;
-            if ((f32)__fabs(left) <= lbl_80558DC4[0] && AliveAI() > 0) {
+            f32 mag = __fabs(left);
+            if (mag <= lbl_80558DC4[0] && AliveAI() > 0) {
                 StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
                 StrCopyN(results.bB2, "", 0x14);
                 StrCopyN(results.bC6, "", 0x14);
