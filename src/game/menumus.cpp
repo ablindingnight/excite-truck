@@ -384,5 +384,6 @@ void fn_8020C920(const char* track) {
 
 }  // extern "C"
 
-// NonMatching: our build unrolls fn_8020C140's second volume loop (the target keeps it counted),
-// and fn_8020C2AC/fn_8020C59C/fn_8020C920 number a few saved registers differently.
+// NonMatching: fn_8020C2AC still issues the hoisted constant 1 one store later than the target; case 2
+// there loads song before the loaded flag (swapping it here fixes that row but lowers objdiff's score until
+// the constant also moves). fn_8020C140 is now exact.

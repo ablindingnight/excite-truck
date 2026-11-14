@@ -74,11 +74,10 @@ void fn_801E4E44(void) {
         if (lbl_8055EAAC > 2) {
             fn_802D68C4(lbl_80487578, lbl_8055EAA8, lbl_80487B18, lbl_8055EAAC);
         }
-        int n = lbl_8055EAA8;
+        lbl_80487578[0] = lbl_80487578[lbl_8055EAA8 - 2];
+        lbl_80487578[1] = lbl_80487578[lbl_8055EAA8 - 1];
         lbl_8055EAA8 = 2;
         lbl_8055EAAC = 0;
-        lbl_80487578[0] = lbl_80487578[n - 2];
-        lbl_80487578[1] = lbl_80487578[n - 1];
     }
 }
 
