@@ -7695,20 +7695,20 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
 // `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
 // split, 2 = group of 4, 3 = single coefficient.
 void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
-    u32 value;
-    u32* next;
-    u32 n = 0;
     s32 planes;
+    u8* start;
+    u8* end;
+    u8* p;
     u32 bit;
     s32 mask;
     s32 nzCount;
     s32 i;
-    u32 e;
+    u32 n = 0;
     u8* nz_p;
-    u8* p;
-    u8* start;
+    u32* next;
+    u32 value;
     u32 avail;
-    u8* end;
+    u32 e;
     u8 nz[64];
     u8 list[128];
     avail = bits->count;
