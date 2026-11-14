@@ -253,6 +253,9 @@ void fn_80291E64(FlareSet* fs) {
     end.x = start.x + dir.x * fs->rodLength;
     end.y = start.y + dir.y * fs->rodLength;
     end.z = start.z + dir.z * fs->rodLength;
+    f32 startX;
+    f32 startY;
+    f32 startZ;
     f32 slideK = fs->screen.x / lbl_8055CFF0;
     f32 step = 1.0f / fs->count;
     Flare* f = fs->flares;
@@ -261,8 +264,10 @@ void fn_80291E64(FlareSet* fs) {
         t = (1.0f < t) ? 1.0f : t;
         t = (t > 0.0f) ? t : 0.0f;
         VecP p;
-        f32 startZ = start.z;
-        p.Set(start.x + t * (end.x - start.x), start.y + t * (end.y - start.y), startZ + t * (end.z - start.z));
+        startZ = start.z;
+        startY = start.y;
+        startX = start.x;
+        p.Set(startX + t * (end.x - startX), startY + t * (end.y - startY), startZ + t * (end.z - startZ));
         fn_802C8E70(&p, &f->pos);
         if (f->visible && fn_802C8FF4(&f->pos, 0.0f)) {
             fn_802C8C04(f->tex);
