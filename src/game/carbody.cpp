@@ -3015,7 +3015,14 @@ void fn_8018DA5C(u8* p, u8* m);
 u32 fn_8018B06C(u8* p);
 void fn_8018A9F0(u8* p, u8* m);
 double sqrt(double);
-static inline f32 Len2( f32 z,f32 x) { return sqrt(x * x + z * z); }
+static inline void LerpSnapshotMatrix(SnapPose* out, const SnapPose* previous, const SnapPose* current, f32 t) {
+    f32* o = (f32*)out;
+    const f32* prev = (const f32*)previous;
+    const f32* cur = (const f32*)current;
+    for (int i = 0; i < 12; i++) {
+        *o++ = LerpT(t, *prev++, *cur++);
+    }
+}
 
 // Fills this car's render snapshot (0xFA8 bytes at buf + 0x8): the body pose interpolated between the last
 // two physics steps, state flags and gauges, and the four wheels (interpolated hub positions, suspension and
@@ -3028,13 +3035,7 @@ void vf28__7CarBodyFv(u8* p, u8* buf) {
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
         *pose = *(SnapPose*)(p + 0x70);
     } else {
-        const f32* cur = (const f32*)(p + 0x70);
-        const f32* prev = (const f32*)(p + 0xA0);
-        f32* o = (f32*)&tmp;
-        f32 t = lbl_8055E460;
-        for (int i = 0; i < 12; i++) {
-            o[i] = LerpT(t, prev[i], cur[i]);
-        }
+        LerpSnapshotMatrix(&tmp, (const SnapPose*)(p + 0xA0), (const SnapPose*)(p + 0x70), lbl_8055E460);
         *pose = tmp;
     }
     *(s16*)((u8*)pose + 0x30) = *(s16*)(p + 0x6C);
@@ -3046,7 +3047,11 @@ void vf28__7CarBodyFv(u8* p, u8* buf) {
         flags |= 0x20;
     }
     F32(m, 0x34) = F32(p, 0x25D0);
-    F32(m, 0x4C) = Len2( F32(p, 0x120),F32(p, 0x118));
+    const f32 speedZ = F32(p, 0x120);
+    const f32 zz = speedZ * speedZ;
+    const f32& speedX = F32(p, 0x118);
+    const f32 xx = speedX * speedX;
+    F32(m, 0x4C) = sqrt(xx + zz);
     F32(m, 0x3C) = F32(p, 0x25F0);
     F32(m, 0x38) = F32(p, 0x25F4);
     F32(m, 0x40) = F32(p, 0x25E4);
@@ -3090,19 +3095,22 @@ void vf28__7CarBodyFv(u8* p, u8* buf) {
     u8* o = wheels;
     for (int i = 0; i < 4; i++) {
         HVec a = *(HVec*)(w + 0x30);
-        __typeof__(a.y) a_y = a.y - F32(p, 0x34);
+        const f32 offsetY = a.y - F32(p, 0x34);
         a.x = a.x - F32(p, 0x30);
-        a.y = a_y;
+        a.y = offsetY;
         a.z = a.z - F32(p, 0x38);
         HVec b = a;
         a.y = a.y + F32(w, 0xC);
         b.y = b.y + F32(w, 0x1C);
         HVec c;
-        f32 tWheel = lbl_8055E460;
-        c.z = LerpT(tWheel, b.z, a.z);
-        c.y = LerpT(tWheel, b.y, a.y);
-        f32 xv = b.x;
-        c.x = LerpT(tWheel, xv, a.x);
+        const f32& priorX = b.x;
+        const f32 tWheel = lbl_8055E460;
+        const f32 wheelZ = LerpT(tWheel, b.z, a.z);
+        const f32 wheelY = LerpT(tWheel, b.y, a.y);
+        const f32 wheelX = LerpT(tWheel, priorX, a.x);
+        c.x = wheelX;
+        c.y = wheelY;
+        c.z = wheelZ;
         F32(o, 0x0) = c.x;
         F32(o, 0x4) = c.y;
         F32(o, 0x8) = c.z;
