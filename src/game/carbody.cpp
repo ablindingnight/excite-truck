@@ -1331,7 +1331,7 @@ struct CbWheel {
     f32 v40;         // offset 0x40
     CbPlane plane;   // offset 0x44
     f32 normal[3];   // offset 0x58, contact plane normal
-    f32 groundH;     // offset 0x64
+    s32 groundH;     // offset 0x64, fn_802B03C0's result (an int)
     f32 comp;        // offset 0x68
     s8 sound;        // offset 0x6C
     u32 flags;       // offset 0x70
@@ -1452,7 +1452,7 @@ void fn_801BEDA8(CbSolMass** m, CbSolContact** c, CbSolCross** x, CbSolCx** cx, 
 void fn_801BEDD4(void);
 void fn_801BF1B4(void);
 SurfType* fn_801D04A8(int i);
-f32 fn_802B03C0(const f32* p);
+int fn_802B03C0(const f32* p);
 int fn_802B02C8(const u8* p);
 int fn_802BF4F0(void);
 f32 fn_802BF590(void);
