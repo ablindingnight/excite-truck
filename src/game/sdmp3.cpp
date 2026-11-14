@@ -518,9 +518,6 @@ void fn_802EAA08(void) {
 }
 
 static inline bool ChannelsOk(const MP3Info* info) { return info->channels == 1 || info->channels == 2; }
-static inline bool InRange(s32 v, s32 lo, s32 hi) { return v >= lo && v <= hi; }
-static inline bool RangeOk(const MP3Info* info) { return InRange(info->sampleRate, 8000, 60000); }
-static inline bool FormatOk(const MP3Info* info) { return ChannelsOk(info) && RangeOk(info); }
 static inline bool PcmOk(const MP3Info* info) { return info->pcmBytes != 0 && (u32)info->pcmBytes <= 0x1200; }
 
 int fn_802EAA58(MP3Info* info, int strict) {
@@ -534,8 +531,19 @@ int fn_802EAA58(MP3Info* info, int strict) {
             return 0;
         }
     }
+    bool format = false;
     int ok = 0;
-    if (FormatOk(info) && PcmOk(info)) {
+    if (ChannelsOk(info)) {
+        const s32 rate = info->sampleRate;
+        bool validRate = false;
+        if (rate >= 8000 && rate <= 60000) {
+            validRate = true;
+        }
+        if (validRate) {
+            format = true;
+        }
+    }
+    if (format && PcmOk(info)) {
         ok = 1;
     }
     return ok;
