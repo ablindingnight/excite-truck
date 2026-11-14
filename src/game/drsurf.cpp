@@ -1265,48 +1265,37 @@ static inline void SetGQR6(void) {
 
 #define LC_BUF(i) ((u8*)0xE0000000 + ((i) << 13))
 
-void fn_802D6C78(void) {
-    DeformQueue* q;
-    for (int k = 0; k < lbl_804CAC38.count; k++) {
-        DeformJob* j = &lbl_804CAC38.jobs[k];
-        int n = j->n;
-        for (int i = 0; i < n; i++) {
-            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
-            V3* o = &((V3*)j->dst)[i];
-            const BVec* a = &lbl_804DB068[v->b0];
-            const BVec* b = &lbl_804DB068[v->b1];
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            o->x = v->x + a->x * w0;
-            o->y = v->y + a->y * w0;
-            o->z = v->z + a->z * w0;
-            o->x = o->x + b->x * w1;
-            o->y = o->y + b->y * w1;
-            o->z = o->z + b->z * w1;
-        }
-    }
-    lbl_804CAC38.count = 0;
-    SetGQR6();
-    SetGQR6();
-    q = &lbl_804D2C40;
+// Helper name unproven: the y-morph queue (the target numbers its locals in ascending declaration order, as the
+// locals of an inline are).
+static inline void FlushYMorph(DeformQueue* q) {
     if (q->count) {
-        int pc;
-        DeformJob* next = q->jobs;
-        int left = q->count - 1;
+        int left;
+        DeformJob* next;
+        int n;
+        YMorphVtx* src;
+        u8* dst;
         int c;
-        int n = next->n;
-        YMorphVtx* src = (YMorphVtx*)next->src;
-        u8* dst = (u8*)next->dst;
+        int buf;
+        u8* cur;
+        int pc;
+        u8* pdst;
+        f32* pout;
+        u8* in;
+        next = q->jobs;
+        left = q->count - 1;
+        n = next->n;
+        src = (YMorphVtx*)next->src;
+        dst = (u8*)next->dst;
         next++;
         c = n > 0x100 ? 0x100 : n;
-        u8* cur = LC_BUF(0);
-        int buf = 1;
+        cur = LC_BUF(0);
+        buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x14);
         n -= c;
         src += c;
         pc = 0;
-        u8* pdst = 0;
-        f32* pout = 0;
+        pdst = 0;
+        pout = 0;
         for (;;) {
             LCQueueWait(0);
             if (pc > 0) {
@@ -1314,7 +1303,7 @@ void fn_802D6C78(void) {
             }
             pdst = dst;
             pc = c;
-            u8* in = cur;
+            in = cur;
             dst += c * 0xC;
             if (n == 0 && left > 0) {
                 n = next->n;
@@ -1350,25 +1339,61 @@ void fn_802D6C78(void) {
         LCQueueWait(0);
         lbl_804D2C40.count = 0;
     }
+}
+
+void fn_802D6C78(void) {
+    DeformQueue* q;
+    for (int k = 0; k < lbl_804CAC38.count; k++) {
+        DeformJob* j = &lbl_804CAC38.jobs[k];
+        int n = j->n;
+        for (int i = 0; i < n; i++) {
+            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
+            V3* o = &((V3*)j->dst)[i];
+            const BVec* a = &lbl_804DB068[v->b0];
+            const BVec* b = &lbl_804DB068[v->b1];
+            f32 w0 = (1.0f / 255) * v->w0;
+            f32 w1 = (1.0f / 255) * v->w1;
+            o->x = v->x + a->x * w0;
+            o->y = v->y + a->y * w0;
+            o->z = v->z + a->z * w0;
+            o->x = o->x + b->x * w1;
+            o->y = o->y + b->y * w1;
+            o->z = o->z + b->z * w1;
+        }
+    }
+    lbl_804CAC38.count = 0;
+    SetGQR6();
+    SetGQR6();
+    FlushYMorph(&lbl_804D2C40);
     SetGQR6();
     q = &lbl_804D6C44;
     if (q->count) {
-        int left = q->count - 1;
-        DeformJob* next = q->jobs;
-        int n = next->n;
+        DirYMorphVtx* v;
         f32* pout;
-        DirYMorphVtx* src = (DirYMorphVtx*)next->src;
+        u8* pdst;
         int pc;
-        u8* dst = (u8*)next->dst;
+        u8* cur;
+        int buf;
+        int c;
+        u8* dst;
+        DirYMorphVtx* src;
+        int n;
+        DeformJob* next;
+        int left;
+        left = q->count - 1;
+        next = q->jobs;
+        n = next->n;
+        src = (DirYMorphVtx*)next->src;
+        dst = (u8*)next->dst;
         next++;
-        int c = n > 0xE0 ? 0xE0 : n;
-        u8* cur = LC_BUF(0);
-        int buf = 1;
+        c = n > 0xE0 ? 0xE0 : n;
+        cur = LC_BUF(0);
+        buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x18);
         n -= c;
         src += c;
         pc = 0;
-        u8* pdst = 0;
+        pdst = 0;
         pout = 0;
         for (;;) {
             LCQueueWait(0);
@@ -1377,7 +1402,7 @@ void fn_802D6C78(void) {
             }
             pdst = dst;
             pc = c;
-            DirYMorphVtx* v = (DirYMorphVtx*)cur;
+            v = (DirYMorphVtx*)cur;
             dst += c * 0xC;
             if (n == 0 && left > 0) {
                 n = next->n;
@@ -1397,17 +1422,18 @@ void fn_802D6C78(void) {
             if (pc == 0) {
                 break;
             }
-            V3* o = (V3*)(LC_BUF(buf) + 0x1500);
-            pout = (f32*)o;
-            for (int i = pc; i > 0; i--) {
+            pout = (f32*)(LC_BUF(buf) + 0x1500);
+            V3* o = (V3*)pout;
+            for (int i = 0; i < pc; i++) {
+                f32 a = (1.0f / 255) * v->da;
+                f32 b = (1.0f / 255) * v->db;
                 V3 d = lbl_804C56F0;
                 f32 w = v->w;
                 V3 p;
+                p.y = v->y + d.y * w;
                 p.x = v->x + d.x * w;
-                f32 yv = d.y;
-                p.y = v->y + yv * w;
                 p.z = v->z + d.z * w;
-                SetXYZ(o, p.x, p.y + (1.0f / 255) * v->da * lbl_804CA308[v->ia] + (1.0f / 255) * v->db * lbl_804CA308[v->ib], p.z);
+                SetXYZ(o, p.x, p.y + a * lbl_804CA308[v->ia] + b * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
             }
@@ -1418,23 +1444,33 @@ void fn_802D6C78(void) {
     SetGQR6();
     q = &lbl_804CEC3C;
     if (q->count) {
-        DeformJob* next = q->jobs;
-        int left = q->count - 1;
-        int n = next->n;
+        u8* in;
+        f32* pout;
         u8* pdst;
         int pc;
-        DirVtx* src = (DirVtx*)next->src;
-        u8* dst = (u8*)next->dst;
+        u8* cur;
+        int buf;
+        int c;
+        u8* dst;
+        DirVtx* src;
+        int n;
+        DeformJob* next;
+        int left;
+        next = q->jobs;
+        left = q->count - 1;
+        n = next->n;
+        src = (DirVtx*)next->src;
+        dst = (u8*)next->dst;
         next++;
-        int c = n > 0x100 ? 0x100 : n;
-        u8* cur = LC_BUF(0);
-        int buf = 1;
+        c = n > 0x100 ? 0x100 : n;
+        cur = LC_BUF(0);
+        buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x10);
         n -= c;
         src += c;
         pc = 0;
         pdst = 0;
-        f32* pout = 0;
+        pout = 0;
         for (;;) {
             LCQueueWait(0);
             if (pc > 0) {
@@ -1442,7 +1478,7 @@ void fn_802D6C78(void) {
             }
             pdst = dst;
             pc = c;
-            u8* in = cur;
+            in = cur;
             dst += c * 0xC;
             if (n == 0 && left > 0) {
                 n = next->n;
