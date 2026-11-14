@@ -231,12 +231,12 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, const u8* buf, u32 ctx, s32 unused, s
         if (flags[gr][0] & 0xF) {
             MP3_Antialias(d->band_count, d->long_end, d->channels, flags[gr][0], d->gr_out);
         }
-        MP3_IMDCT(d, d->imdct_work[0], d->imdct_prev[0], d->imdct_out, flags[gr], d->gr_out);
+        MP3_IMDCT(d, d->imdct_work, d->imdct_prev, d->imdct_out, flags[gr], d->gr_out);
         if (mode == 0) {
-            fn_800C4CF4(d, d->synth_buf, d->imdct_out, lbl_8055DD88, d->channels, mode);
+            fn_800C4CF4(d, d->synth_buf, d->imdct_out[0], lbl_8055DD88, d->channels, mode);
             lbl_8055DD88 += d->channels * 0x240;
         } else {
-            fn_800C4CF4(d, d->synth_buf, d->imdct_out, lbl_8055DD88, d->channels, mode);
+            fn_800C4CF4(d, d->synth_buf, d->imdct_out[0], lbl_8055DD88, d->channels, mode);
             lbl_8055DD88 += 0x240;
         }
     }

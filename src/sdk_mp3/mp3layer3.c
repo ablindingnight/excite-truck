@@ -296,173 +296,137 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
 /* IMDCT and overlap-add for one granule of every channel (fn_800C0E7C): per subband the 18-point IMDCT, the
  * long/start/stop window stages, or for short and mixed blocks three 6-point transforms per window
  * (fn_800C1E88 plus an inline butterfly) and fn_800C3088; then the overlap pass into prev. Behaviour verified
- * identical to the original in a PPC simulation (callees run from the original). NonMatching: 649/649, same
- * opcodes. */
-void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out) {
+ * identical to the original in a PPC simulation (callees run from the original). NonMatching: 649/649, the
+ * same instructions, registers differ in the mixed-block loops. What the target shows (allocator replay): no
+ * hand-stepped pointers - every buffer is indexed by ch and sb (work[ch][sb], prev[ch][sb], outbuf[ch][sb]) and
+ * strength-reduced by the compiler; the subband row index of the long-block loops sits in a reused local (t0),
+ * which is why it is not folded into the first call. */
+void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*outbuf)[32], u32* block_flags,
+               MP3ChannelBuf* out) {
     s32* pa;
-    s32* pc2;
     s16 ch;
-    s32* pb;
     s16 sb;
-    s32* pc;
-    s32* outbuf2;
+    s32 (*outbuf2)[32];
     s32 t0, t1;  /* t1 also holds the block-flags word: one variable in the original (register colouring) */
     s32 tmp2[12];
     s32 tmp1[12];
     s32 tmp0[12];
 
-    outbuf2 = outbuf + 0x440;
+    outbuf2 = outbuf + 34;
     for (ch = 0; ch < d->channels; ch++) {
-        t1 = *block_flags;
+        t1 = block_flags[ch];
         if (t1 & 7) {
             if (t1 & 1) {
-                pb = prev;
-                pc2 = outbuf2;
-                pa = work[0];
-                pc = outbuf;
                 for (sb = 0; sb < d->band_count; sb++) {
-                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pa);
+                    t0 = (sb << 4) + (sb << 1);
+                    fn_800C18A0(&out[ch].xr[t0], work[ch][sb]);
                     if (!(sb & 1)) {
-                        fn_800C2590(pa, pb, pc, pc2);
+                        fn_800C2590(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                     } else {
-                        fn_800C280C(pa, pb, pc, pc2);
+                        fn_800C280C(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                     }
-                    fn_800C2DBC(pa + 18, pb, pb + 17);
-                    pa += 36;
-                    pb += 18;
-                    pc++;
-                    pc2++;
+                    fn_800C2DBC(work[ch][sb] + 18, prev[ch][sb], prev[ch][sb] + 17);
                 }
             } else {
-                pb = work[0];
-                pc2 = outbuf2;
-                pa = prev;
-                pc = outbuf;
                 for (sb = 0; sb < d->band_count; sb++) {
-                    fn_800C18A0(&out->xr[(sb << 4) + (sb << 1)], pb);
-                    if (*block_flags & 2) {
+                    t0 = (sb << 4) + (sb << 1);
+                    fn_800C18A0(&out[ch].xr[t0], work[ch][sb]);
+                    if (block_flags[ch] & 2) {
                         if (!(sb & 1)) {
-                            fn_800C2590(pb, pa, pc, pc2);
+                            fn_800C2590(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                         } else {
-                            fn_800C280C(pb, pa, pc, pc2);
+                            fn_800C280C(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                         }
-                        fn_800C2F98(pb + 18, pa, pa + 17);
+                        fn_800C2F98(work[ch][sb] + 18, prev[ch][sb], prev[ch][sb] + 17);
                     }
-                    if (*block_flags & 4) {
+                    if (block_flags[ch] & 4) {
                         if (!(sb & 1)) {
-                            fn_800C2A88(pb, pa, pc, pc2);
+                            fn_800C2A88(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                         } else {
-                            fn_800C2C18(pb, pa, pc, pc2);
+                            fn_800C2C18(work[ch][sb], prev[ch][sb], &outbuf[ch][sb], &outbuf2[ch][sb]);
                         }
-                        fn_800C2DBC(pb + 18, pa, pa + 17);
+                        fn_800C2DBC(work[ch][sb] + 18, prev[ch][sb], prev[ch][sb] + 17);
                     }
-                    pb += 36;
-                    pc2++;
-                    pa += 18;
-                    pc++;
                 }
             }
         } else if (t1 & 8) {
-            pa = work[0];
             for (sb = 0; sb < 2; sb++) {
-                fn_800C18A0(&out->xr[(sb << 1) + (sb << 4)], pa);
-                fn_800C21D8(pa, pa + 17);
-                pa += 36;
+                t0 = (sb << 4) + (sb << 1);
+                fn_800C18A0(&out[ch].xr[t0], work[ch][sb]);
+                fn_800C21D8(work[ch][sb], work[ch][sb] + 17);
             }
-            pa = work[d->band_count - 1];
+            pa = work[ch][d->band_count - 1];
             pa[0] = 0; pa[1] = 0; pa[2] = 0; pa[3] = 0; pa[4] = 0; pa[5] = 0;
             pa[6] = 0; pa[7] = 0; pa[8] = 0; pa[9] = 0; pa[10] = 0; pa[11] = 0;
             pa[12] = 0; pa[13] = 0; pa[14] = 0; pa[15] = 0; pa[16] = 0; pa[17] = 0;
             pa[18] = 0; pa[19] = 0; pa[20] = 0; pa[21] = 0; pa[22] = 0; pa[23] = 0;
             pa[24] = 0; pa[25] = 0; pa[26] = 0; pa[27] = 0; pa[28] = 0; pa[29] = 0;
             pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
-            pa = work[2];
             for (sb = 2; sb < d->band_count - 1; sb++) {
-                fn_800C1E88(&out->sxr[0][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp0);
-                t0 = out->sxr[0][(sb << 2) + (sb << 1)] - out->sxr[0][(sb << 2) + (sb << 1) + 3] - out->sxr[0][(sb << 2) + (sb << 1) + 4];
-                t1 = out->sxr[0][(sb << 2) + (sb << 1) + 1] - out->sxr[0][(sb << 2) + (sb << 1) + 2] - out->sxr[0][(sb << 2) + (sb << 1) + 5];
+                fn_800C1E88(&out[ch].sxr[0][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp0);
+                t0 = out[ch].sxr[0][(sb << 2) + (sb << 1)] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[0][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 5];
                 tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C1E88(&out->sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
-                t0 = out->sxr[1][(sb << 2) + (sb << 1)] - out->sxr[1][(sb << 2) + (sb << 1) + 3] - out->sxr[1][(sb << 2) + (sb << 1) + 4];
-                t1 = out->sxr[1][(sb << 2) + (sb << 1) + 1] - out->sxr[1][(sb << 2) + (sb << 1) + 2] - out->sxr[1][(sb << 2) + (sb << 1) + 5];
+                fn_800C1E88(&out[ch].sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
+                t0 = out[ch].sxr[1][(sb << 2) + (sb << 1)] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[1][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 5];
                 tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C1E88(&out->sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
-                t1 = out->sxr[2][(sb << 2) + (sb << 1) + 1] - out->sxr[2][(sb << 2) + (sb << 1) + 2] - out->sxr[2][(sb << 2) + (sb << 1) + 5];
-                t0 = out->sxr[2][(sb << 2) + (sb << 1)] - out->sxr[2][(sb << 2) + (sb << 1) + 3] - out->sxr[2][(sb << 2) + (sb << 1) + 4];
+                fn_800C1E88(&out[ch].sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
+                t0 = out[ch].sxr[2][(sb << 2) + (sb << 1)] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[2][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 5];
                 tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C3088(pa, tmp0, tmp1, tmp2);
-                pa += 36;
+                fn_800C3088(work[ch][sb], tmp0, tmp1, tmp2);
             }
-            pa = work[0];
-            pb = prev;
-            pc = outbuf;
             for (sb = 0; sb < d->band_count; sb++) {
                 if (!(sb & 1)) {
-                    fn_800C1F6C(pc, pa, pb);
+                    fn_800C1F6C(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 } else {
-                    fn_800C2090(pc, pa, pb);
+                    fn_800C2090(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 }
-                pc++;
-                pb[0] = pa[18]; pb[1] = pa[19]; pb[2] = pa[20]; pb[3] = pa[21]; pb[4] = pa[22]; pb[5] = pa[23];
-                pb[6] = pa[24]; pb[7] = pa[25]; pb[8] = pa[26]; pb[9] = pa[27]; pb[10] = pa[28]; pb[11] = pa[29];
-                pb[12] = pa[30]; pb[13] = pa[31]; pb[14] = pa[32]; pb[15] = pa[33]; pb[16] = pa[34]; pb[17] = pa[35];
-                pa += 36;
-                pb += 18;
+                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20]; prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
+                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26]; prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
+                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32]; prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
             }
         } else if (t1 & 0x10) {
-            pa = work[d->band_count - 1];
+            pa = work[ch][d->band_count - 1];
             pa[0] = 0; pa[1] = 0; pa[2] = 0; pa[3] = 0; pa[4] = 0; pa[5] = 0;
             pa[6] = 0; pa[7] = 0; pa[8] = 0; pa[9] = 0; pa[10] = 0; pa[11] = 0;
             pa[12] = 0; pa[13] = 0; pa[14] = 0; pa[15] = 0; pa[16] = 0; pa[17] = 0;
             pa[18] = 0; pa[19] = 0; pa[20] = 0; pa[21] = 0; pa[22] = 0; pa[23] = 0;
             pa[24] = 0; pa[25] = 0; pa[26] = 0; pa[27] = 0; pa[28] = 0; pa[29] = 0;
             pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
-            pa = work[0];
             for (sb = 0; sb < d->band_count - 1; sb++) {
-                fn_800C1E88(&out->sxr[0][(sb << 1) + (sb << 2)], (s32*)lbl_802F3FB8, tmp0);
-                t0 = out->sxr[0][(sb << 1) + (sb << 2)] - out->sxr[0][(sb << 1) + (sb << 2) + 3] - out->sxr[0][(sb << 1) + (sb << 2) + 4];
-                t1 = out->sxr[0][(sb << 1) + (sb << 2) + 1] - out->sxr[0][(sb << 1) + (sb << 2) + 2] - out->sxr[0][(sb << 1) + (sb << 2) + 5];
+                fn_800C1E88(&out[ch].sxr[0][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp0);
+                t0 = out[ch].sxr[0][(sb << 2) + (sb << 1)] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[0][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 5];
                 tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C1E88(&out->sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
-                t0 = out->sxr[1][(sb << 2) + (sb << 1)] - out->sxr[1][(sb << 2) + (sb << 1) + 3] - out->sxr[1][(sb << 2) + (sb << 1) + 4];
-                t1 = out->sxr[1][(sb << 2) + (sb << 1) + 1] - out->sxr[1][(sb << 2) + (sb << 1) + 2] - out->sxr[1][(sb << 2) + (sb << 1) + 5];
+                fn_800C1E88(&out[ch].sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
+                t0 = out[ch].sxr[1][(sb << 2) + (sb << 1)] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[1][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 5];
                 tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C1E88(&out->sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
-                t1 = out->sxr[2][(sb << 2) + (sb << 1) + 1] - out->sxr[2][(sb << 2) + (sb << 1) + 2] - out->sxr[2][(sb << 2) + (sb << 1) + 5];
-                t0 = out->sxr[2][(sb << 2) + (sb << 1)] - out->sxr[2][(sb << 2) + (sb << 1) + 3] - out->sxr[2][(sb << 2) + (sb << 1) + 4];
+                fn_800C1E88(&out[ch].sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
+                t0 = out[ch].sxr[2][(sb << 2) + (sb << 1)] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 4];
+                t1 = out[ch].sxr[2][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 5];
                 tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
                 tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
-                fn_800C3088(pa, tmp0, tmp1, tmp2);
-                pa += 36;
+                fn_800C3088(work[ch][sb], tmp0, tmp1, tmp2);
             }
-            pa = work[0];
-            pb = prev;
-            pc = outbuf;
             for (sb = 0; sb < d->band_count; sb++) {
                 if (!(sb & 1)) {
-                    fn_800C1F6C(pc, pa, pb);
+                    fn_800C1F6C(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 } else {
-                    fn_800C2090(pc, pa, pb);
+                    fn_800C2090(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 }
-                pc++;
-                pb[0] = pa[18]; pb[1] = pa[19]; pb[2] = pa[20]; pb[3] = pa[21]; pb[4] = pa[22]; pb[5] = pa[23];
-                pb[6] = pa[24]; pb[7] = pa[25]; pb[8] = pa[26]; pb[9] = pa[27]; pb[10] = pa[28]; pb[11] = pa[29];
-                pb[12] = pa[30]; pb[13] = pa[31]; pb[14] = pa[32]; pb[15] = pa[33]; pb[16] = pa[34]; pb[17] = pa[35];
-                pa += 36;
-                pb += 18;
+                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20]; prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
+                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26]; prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
+                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32]; prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
             }
         }
-        block_flags++;
-        work += 32;
-        out++;
-        outbuf2 += 32;
-        outbuf += 32;
-        prev += 0x240;
     }
 }
 

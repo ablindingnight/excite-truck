@@ -67,8 +67,8 @@ typedef struct MP3Decoder {
     MP3ChannelBuf gr_out[2];  /* 0xAB0 */
     s32 synth_buf[0x800];     /* 0x52B0 */
     s32 imdct_work[2][32][36]; /* 0x72B0 */
-    s32 imdct_prev[2][576];   /* 0x96B0 */
-    s32 imdct_out[0x480];     /* 0xA8B0 */
+    s32 imdct_prev[2][32][18]; /* 0x96B0 */
+    s32 imdct_out[36][32];    /* 0xA8B0 */
     s16 huff_out[2][2][600];  /* 0xBAB0: Huffman-decoded lines [gr][ch] */
     u8 ring[0x2000];          /* 0xCD70: main data ring buffer */
     s32 frame_bytes;          /* 0xED70 */
@@ -137,7 +137,8 @@ void MP3_DecodeQuadsB(BitStream* bs, s32 end, u8* buf, s16* out, s32 i, s32 trac
 s32 MP3_DecodeBigValues(HuffState* d, u8* buf, s16* out, s32 big_values, u32 block_flags, s32 region0,
                         s32 region1, s16 count1_table, s32 track, s16* table_select, s16* zero_start);
 void MP3_Reorder32(u32* dst, u32* src, s32 mode);
-void MP3_IMDCT(MP3Decoder* d, s32 (*work)[36], s32* prev, s32* outbuf, u32* block_flags, MP3ChannelBuf* out);
+void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*outbuf)[32], u32* block_flags,
+               MP3ChannelBuf* out);
 void fn_800C18A0(s32* in, s32* out);
 void fn_800C1984(s32* in, s32* out);
 void fn_800C1A80(s32* a, s32* b, s32* out);
