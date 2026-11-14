@@ -551,6 +551,7 @@ public:
 };
 
 namespace {
+struct PlayerData;
 class Arena : public Preloader {
 public:
     int Loop3_CountDynos(int n);
@@ -563,6 +564,8 @@ public:
     void Init(void);
     int CountFiles(ValueNode* cfg);
     int CountRingSets(void);
+    void Step(PlayerData* pd);
+    void Tally(void);
     int PointValue(void);
     void SetName(char* buf, int n);
     void ShowSetGems(void);
@@ -1448,6 +1451,162 @@ inline RingChalMaster::~RingChalMaster(void) {
 
 
 
+
+// Helper name unproven: one player's ring-set logic for a frame. An inlined body, so the Arena methods defined
+// after it stay calls while vf0C itself inlines StrCopyN (no dont_inline pragma needed).
+inline void Arena::Step(PlayerData* pd) {
+    char name[0x1E];
+    SetName(name, 0x1E);
+    if (!pd->Stuck() && !b49) {
+        RaceCarRec* car = pd->Car();
+        int hit;
+        int left;
+        stats->At(curSet)->score = timer.Get();
+        hit = fn_8016A30C(car->Rings());
+        left = fn_8016A780(name, car->Rings());
+        if (left == 0 && !b4A) {
+            b4A = 1;
+            ActivateRingSet();
+        }
+        if (b4A && f24 == -1) {
+            ShowSetGems();
+        }
+        if ((hit > 0 || left == fn_8016A878(name) || (left > 0 && fn_8015A404(car) > 1)) && b4A) {
+            stats->At(curSet)->time = Time();
+            Deactivate(curSet);
+            if (hit > 0) {
+                stats->At(curSet)->done = 1;
+                f34 = f30;
+                {
+                    int pts = stats->At(curSet)->best;
+                    f30 += pts;
+                    difficulty++;
+                }
+                if (difficulty > 2) {
+                    difficulty = 2;
+                }
+                if (sRingHit) {
+                    if (fn_80141FA0(sRingHit)) {
+                        fn_80144C54(sRingHit);
+                    }
+                    fn_80142B60(sRingHit);
+                }
+                if (sCheerHit) {
+                    if (fn_80141FA0(sCheerHit)) {
+                        fn_80144C54(sCheerHit);
+                    }
+                    fn_80142B60(sCheerHit);
+                }
+                if (stats->At(curSet)->best == 10 || stats->At(curSet)->best == 15) {
+                    if (sLongCheer) {
+                        fn_80142B60(sLongCheer);
+                    }
+                }
+            } else {
+                if (--difficulty < 0) {
+                    difficulty = 0;
+                }
+            }
+            if (curSet < nSets - 1) {
+                b4A = 0;
+                curSet++;
+                stats->At(curSet)->best = PointValue();
+                ActivateObjSet();
+            } else {
+                b48 = 1;
+                b49 = 1;
+            }
+        } else {
+            sets->At(curSet)->CheckTeleport((Phob*)car);
+        }
+    } else if (f24 != -1) {
+        ClearGems();
+    }
+}
+
+// Helper name unproven: the countdown, score tally and cheer fade.
+inline void Arena::Tally(void) {
+    if (!b49) {
+        f28 += 0.0166833512f;
+        if (f28 > 1.75f) {
+            f28 = 0.0f;
+        }
+        int expired = timer.t <= 0.0f;
+        if (expired) {
+            b49 = 1;
+        } else if (fn_801B306C() <= 0.0f) {
+            timer.t -= 0.0166833512f;
+        }
+    }
+    if (curSet > 0) {
+        int k = curSet - 1;
+        if (b48) {
+            k = curSet;
+        }
+        if (f34 < f30 && stats->data[k].done) {
+            SetStat* st = &stats->data[k];
+            f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (f30 - f34));
+            f32 u = (lbl_8055E3C8 - st->time - lo) / ((0.25f + lo) - lo);
+            CLAMP01(u);
+            int n = Lerp(0.0f, 1.0f, u);
+            if (n) {
+                f34 += n;
+                RSound* tally = sTally;
+                if (tally && !tally->busy && f34 != f30) {
+                    tally->stop = 0;
+                    tally->loop = 1;
+                    tally->playing = 1;
+                }
+                tally = sTally;
+                if (f34 == f30 && tally && tally->busy) {
+                    tally->stop = 1;
+                    tally->f4C = 0;
+                }
+            }
+        }
+        if (sLongCheer && stats->data[k].done) {
+            f32 b = 0.0f;
+            f32 a = 0.0f;
+            int lvl;
+            switch (stats->data[k].best) {
+            case 5:
+                lvl = 0;
+                break;
+            case 10:
+                lvl = 1;
+                break;
+            case 15:
+                lvl = 2;
+                break;
+            default:
+                fn_802E317C("Freestyle::get_ring_point_value_from_difficulty - Unknown point value mapping");
+                lvl = 0;
+                break;
+            }
+            switch (lvl) {
+            case 1:
+                a = 0.8f;
+                b = 1.0f;
+                break;
+            case 2:
+                a = 1.0f;
+                b = 2.5f;
+                break;
+            }
+            if (!NearZeroF(a)) {
+                f32 lo = 0.0f;
+                f32 t = ((lbl_8055E3C8 - stats->data[k].time) - lo) / (b - lo);
+                CLAMP01(t);
+                f32 v = a + t * (0.0f - a);
+                RSound* cheer = sLongCheer;
+                if (v != cheer->vol) {
+                    cheer->dirty = 1;
+                    cheer->vol = v;
+                }
+            }
+        }
+    }
+}
 
 #pragma dont_inline on
 inline void RingChalMaster::vf10(void) {
@@ -2379,7 +2538,6 @@ inline void ArenaTimer::Draw(ILayout* l) {
     fn_801475D0(l, "timer", "%s", buf);
 }
 
-#pragma dont_inline on
 inline void RingChalMaster::vf0C(void) {
     f32 rt = fn_801B306C();
     if (!bA8 && rt < 6.75f) {
@@ -2396,78 +2554,10 @@ inline void RingChalMaster::vf0C(void) {
         int i;
         for (i = 0; i < players.count; i++) {
             if (!vf24()) {
-                char name[0x1E];
-                PlayerData* pd;
                 if (players.data[i]->b8) {
                     players.data[i]->fC += 0.0166833512f;
                 }
-                pd = players.data[i];
-                arena.SetName(name, 0x1E);
-                if (!pd->Stuck() && !arena.b49) {
-                    RaceCarRec* car = pd->Car();
-                    int hit;
-                    int left;
-                    arena.stats->At(arena.curSet)->score = arena.timer.Get();
-                    hit = fn_8016A30C(car->Rings());
-                    left = fn_8016A780(name, car->Rings());
-                    if (left == 0 && !arena.b4A) {
-                        arena.b4A = 1;
-                        arena.ActivateRingSet();
-                    }
-                    if (arena.b4A && arena.f24 == -1) {
-                        arena.ShowSetGems();
-                    }
-                    if ((hit > 0 || left == fn_8016A878(name) || (left > 0 && fn_8015A404(car) > 1)) && arena.b4A) {
-                        arena.stats->At(arena.curSet)->time = Time();
-                        arena.Deactivate(arena.curSet);
-                        if (hit > 0) {
-                            arena.stats->At(arena.curSet)->done = 1;
-                            arena.f34 = arena.f30;
-                            {
-                                int pts = arena.stats->At(arena.curSet)->best;
-                                arena.f30 += pts;
-                                arena.difficulty++;
-                            }
-                            if (arena.difficulty > 2) {
-                                arena.difficulty = 2;
-                            }
-                            if (arena.sRingHit) {
-                                if (fn_80141FA0(arena.sRingHit)) {
-                                    fn_80144C54(arena.sRingHit);
-                                }
-                                fn_80142B60(arena.sRingHit);
-                            }
-                            if (arena.sCheerHit) {
-                                if (fn_80141FA0(arena.sCheerHit)) {
-                                    fn_80144C54(arena.sCheerHit);
-                                }
-                                fn_80142B60(arena.sCheerHit);
-                            }
-                            if (arena.stats->At(arena.curSet)->best == 10 || arena.stats->At(arena.curSet)->best == 15) {
-                                if (arena.sLongCheer) {
-                                    fn_80142B60(arena.sLongCheer);
-                                }
-                            }
-                        } else {
-                            if (--arena.difficulty < 0) {
-                                arena.difficulty = 0;
-                            }
-                        }
-                        if (arena.curSet < arena.nSets - 1) {
-                            arena.b4A = 0;
-                            arena.curSet++;
-                            arena.stats->At(arena.curSet)->best = arena.PointValue();
-                            arena.ActivateObjSet();
-                        } else {
-                            arena.b48 = 1;
-                            arena.b49 = 1;
-                        }
-                    } else {
-                        arena.sets->At(arena.curSet)->CheckTeleport((Phob*)car);
-                    }
-                } else if (arena.f24 != -1) {
-                    arena.ClearGems();
-                }
+                arena.Step(players.data[i]);
             }
             s32 playerScore = players.data[i]->score;
             s32 arenaScore = arena.f34;
@@ -2479,13 +2569,13 @@ inline void RingChalMaster::vf0C(void) {
                     fA0 = lbl_8055E3C8;
                 }
                 if (arena.b48) {
-                    STR_COPY_N(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
-                    STR_COPY_N(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
-                    STR_COPY_N(results.complete, "", 0x14);
+                    StrCopyN(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+                    StrCopyN(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+                    StrCopyN(results.complete, "", 0x14);
                 } else {
-                    STR_COPY_N(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
-                    STR_COPY_N(results.bB2, "", 0x14);
-                    STR_COPY_N(results.bC6, "", 0x14);
+                    StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+                    StrCopyN(results.bB2, "", 0x14);
+                    StrCopyN(results.bC6, "", 0x14);
                 }
                 {
                     int tb = (int)arena.timer.t;
@@ -2496,94 +2586,12 @@ inline void RingChalMaster::vf0C(void) {
                 b9C = 0;
             }
         }
-        if (!arena.b49) {
-            arena.f28 += 0.0166833512f;
-            if (arena.f28 > 1.75f) {
-                arena.f28 = 0.0f;
-            }
-            int expired = arena.timer.t <= 0.0f;
-            if (expired) {
-                arena.b49 = 1;
-            } else if (fn_801B306C() <= 0.0f) {
-                arena.timer.t -= 0.0166833512f;
-            }
-        }
-        if (arena.curSet > 0) {
-            int k = arena.curSet - 1;
-            if (arena.b48) {
-                k = arena.curSet;
-            }
-            if (arena.f34 < arena.f30 && arena.stats->data[k].done) {
-                SetStat* st = &arena.stats->data[k];
-                f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (arena.f30 - arena.f34));
-                f32 u = (lbl_8055E3C8 - st->time - lo) / ((0.25f + lo) - lo);
-                CLAMP01(u);
-                f32 from = 0.0f;
-                f32 to = 1.0f;
-                int n = Lerp(from, to, u);
-                if (n) {
-                    arena.f34 += n;
-                    RSound* tally = arena.sTally;
-                    if (tally && !tally->busy && arena.f34 != arena.f30) {
-                        tally->stop = 0;
-                        tally->loop = 1;
-                        tally->playing = 1;
-                    }
-                    tally = arena.sTally;
-                    if (arena.f34 == arena.f30 && tally && tally->busy) {
-                        tally->stop = 1;
-                        tally->f4C = 0;
-                    }
-                }
-            }
-            if (arena.sLongCheer && arena.stats->data[k].done) {
-                f32 b = 0.0f;
-                f32 a = 0.0f;
-                int lvl;
-                switch (arena.stats->data[k].best) {
-                case 5:
-                    lvl = 0;
-                    break;
-                case 10:
-                    lvl = 1;
-                    break;
-                case 15:
-                    lvl = 2;
-                    break;
-                default:
-                    fn_802E317C("Freestyle::get_ring_point_value_from_difficulty - Unknown point value mapping");
-                    lvl = 0;
-                    break;
-                }
-                switch (lvl) {
-                case 1:
-                    a = 0.8f;
-                    b = 1.0f;
-                    break;
-                case 2:
-                    a = 1.0f;
-                    b = 2.5f;
-                    break;
-                }
-                if (!NearZeroF(a)) {
-                    f32 lo = 0.0f;
-                    f32 t = ((lbl_8055E3C8 - arena.stats->data[k].time) - lo) / (b - lo);
-                    CLAMP01(t);
-                    f32 v = a + t * (0.0f - a);
-                    RSound* cheer = arena.sLongCheer;
-                    if (v != cheer->vol) {
-                        cheer->dirty = 1;
-                        cheer->vol = v;
-                    }
-                }
-            }
-        }
+        arena.Tally();
     }
     if (vf24() && !(lbl_8055E3C8 - fA0 < 2.25f)) {
         results.Update(arena.f30 + (int)arena.timer.t, arena.f30, (int)arena.timer.t);
     }
 }
-#pragma dont_inline reset
 
 inline void ObjSet::CheckTeleport(Phob* car) {
     ObjTeleport* data;
