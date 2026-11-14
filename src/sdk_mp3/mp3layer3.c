@@ -293,14 +293,29 @@ u32 MP3_PeekBitsRing(u8* buf, u32 n, u32* pos) {
     return (u16)((((b0 << 16) | (b1 << 8) | b2) & lbl_802F3F54[sh]) >> (sh - n));
 }
 
+/* The two extra outputs of the 6-point transform (rotation by lbl_8031D5C8). Helper name unproven */
+static inline void MP3_ShortRotate(s32* in, s32* tmp) {
+    s32 t0;
+    s32 t1;
+    s32 c0;
+    s32 c1;
+
+    t0 = in[0] - in[3] - in[4];
+    t1 = in[1] - in[2] - in[5];
+    c0 = lbl_8031D5C8[0];
+    c1 = lbl_8031D5C8[1];
+    tmp[1] = (s32)(((s64)t0 * c0) >> 20) + (s32)(((s64)t1 * c1) >> 20);
+    tmp[7] = (s32)(((s64)t0 * c1) >> 20) + (s32)(((s64)t1 * -c0) >> 20);
+}
+
 /* IMDCT and overlap-add for one granule of every channel (fn_800C0E7C): per subband the 18-point IMDCT, the
  * long/start/stop window stages, or for short and mixed blocks three 6-point transforms per window
  * (fn_800C1E88 plus an inline butterfly) and fn_800C3088; then the overlap pass into prev. Behaviour verified
- * identical to the original in a PPC simulation (callees run from the original). NonMatching: 649/649, the
- * same instructions, registers differ in the mixed-block loops. What the target shows (allocator replay): no
- * hand-stepped pointers - every buffer is indexed by ch and sb (work[ch][sb], prev[ch][sb], outbuf[ch][sb]) and
- * strength-reduced by the compiler; the subband row index of the long-block loops sits in a reused local (t0),
- * which is why it is not folded into the first call. */
+ * identical to the original in a PPC simulation (callees run from the original). Matching. What the target shows
+ * (allocator replay): no hand-stepped pointers - every buffer is indexed by ch and sb (work[ch][sb],
+ * prev[ch][sb], outbuf[ch][sb]) and strength-reduced by the compiler; the subband row index of the long-block
+ * loops sits in a reused local (t0), which is why it is not folded into the first call; the rotation after each
+ * 6-point transform is an inlined helper (its locals are numbered above the loop temporaries). */
 void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*outbuf)[32], u32* block_flags,
                MP3ChannelBuf* out) {
     s32* pa;
@@ -364,20 +379,11 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*ou
             pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
             for (sb = 2; sb < d->band_count - 1; sb++) {
                 fn_800C1E88(&out[ch].sxr[0][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp0);
-                t0 = out[ch].sxr[0][(sb << 2) + (sb << 1)] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[0][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 5];
-                tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[0][(sb << 2) + (sb << 1)], tmp0);
                 fn_800C1E88(&out[ch].sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
-                t0 = out[ch].sxr[1][(sb << 2) + (sb << 1)] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[1][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 5];
-                tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[1][(sb << 2) + (sb << 1)], tmp1);
                 fn_800C1E88(&out[ch].sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
-                t0 = out[ch].sxr[2][(sb << 2) + (sb << 1)] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[2][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 5];
-                tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[2][(sb << 2) + (sb << 1)], tmp2);
                 fn_800C3088(work[ch][sb], tmp0, tmp1, tmp2);
             }
             for (sb = 0; sb < d->band_count; sb++) {
@@ -400,20 +406,11 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*ou
             pa[30] = 0; pa[31] = 0; pa[32] = 0; pa[33] = 0; pa[34] = 0; pa[35] = 0;
             for (sb = 0; sb < d->band_count - 1; sb++) {
                 fn_800C1E88(&out[ch].sxr[0][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp0);
-                t0 = out[ch].sxr[0][(sb << 2) + (sb << 1)] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[0][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[0][(sb << 2) + (sb << 1) + 5];
-                tmp0[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp0[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[0][(sb << 2) + (sb << 1)], tmp0);
                 fn_800C1E88(&out[ch].sxr[1][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp1);
-                t0 = out[ch].sxr[1][(sb << 2) + (sb << 1)] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[1][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[1][(sb << 2) + (sb << 1) + 5];
-                tmp1[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp1[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[1][(sb << 2) + (sb << 1)], tmp1);
                 fn_800C1E88(&out[ch].sxr[2][(sb << 2) + (sb << 1)], (s32*)lbl_802F3FB8, tmp2);
-                t0 = out[ch].sxr[2][(sb << 2) + (sb << 1)] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 3] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 4];
-                t1 = out[ch].sxr[2][(sb << 2) + (sb << 1) + 1] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 2] - out[ch].sxr[2][(sb << 2) + (sb << 1) + 5];
-                tmp2[1] = (s32)(((s64)t0 * lbl_8031D5C8[0]) >> 20) + (s32)(((s64)t1 * lbl_8031D5C8[1]) >> 20);
-                tmp2[7] = (s32)(((s64)t0 * lbl_8031D5C8[1]) >> 20) + (s32)(((s64)t1 * -lbl_8031D5C8[0]) >> 20);
+                MP3_ShortRotate(&out[ch].sxr[2][(sb << 2) + (sb << 1)], tmp2);
                 fn_800C3088(work[ch][sb], tmp0, tmp1, tmp2);
             }
             for (sb = 0; sb < d->band_count; sb++) {
