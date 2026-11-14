@@ -313,28 +313,17 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     const f32* x = (const f32*)a;
     const f32* y = (const f32*)b;
     for (int i = 0; i < 12; i++) {
-        d[i] = Lerp(x[i], y[i], t);
+        *d++ = Lerp(*x++, *y++, t);
     }
 }
 
 void Wheel::vf28(u8* buf) {
     WheelPose* p = (WheelPose*)(buf + a8);
-    f32 t = lbl_8055E460;
-    if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
         p->mtx = world;
     } else {
         RMtx m;
-        RVec3* d = (RVec3*)&m;
-        const RVec3* a = (const RVec3*)&prev;
-        const RVec3* b = (const RVec3*)&world;
-        RVec3* w = d;
-        for (int i = 0; i < 4; w++, i++) {
-            __typeof__(w->x) w_x = Lerp(a[i].x, b[i].x, t);
-            __typeof__(w->z) w_z = Lerp(a[i].z, b[i].z, t);
-            w->x = w_x;
-            w->y = Lerp(a[i].y, b[i].y, t);
-            w->z = w_z;
-        }
+        LerpMtx(&m, &prev, &world, lbl_8055E460);
         p->mtx = m;
     }
     p->hint = hint[0];

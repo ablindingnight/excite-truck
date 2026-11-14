@@ -789,26 +789,23 @@ void Ball::PickDrop(f32* xz, s16* h) {
     }
 }
 
+static inline void LerpMtx(BMtx* out, const BMtx* a, const BMtx* b, f32 t) {
+    f32* d = (f32*)out;
+    const f32* x = (const f32*)a;
+    const f32* y = (const f32*)b;
+    for (int i = 0; i < 12; i++) {
+        *d++ = LerpT(t, *x++, *y++);
+    }
+}
+
 inline void Ball::vf28(u8* buf) {
     u8* o = buf + a8;
     BMtx* out = (BMtx*)o;
-    f32 k = lbl_8055E460;
-    if ((f32)__fabs(k - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
         *out = world;
     } else {
         BMtx t;
-        int i;
-        BVec3* wa = t.rot;
-        for (i = 0; i < 4; i++, wa++) {
-            const BVec3* a = &world.rot[i];
-            const BVec3* b = &prev.rot[i];
-            BVec3* d = wa;
-            __typeof__(d->x) d_x = LerpT(k, b->x, a->x);
-            __typeof__(d->z) d_z = LerpT(k, b->z, a->z);
-            d->x = d_x;
-            d->y = LerpT(k, b->y, a->y);
-            d->z = d_z;
-        }
+        LerpMtx(&t, &prev, &world, lbl_8055E460);
         *out = t;
     }
     *(s16*)(o + 0x30) = hint[0];

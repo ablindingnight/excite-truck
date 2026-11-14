@@ -1487,6 +1487,8 @@ void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec*
     fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
 }
 
+static inline void Vertex(u32 c, int idx, const Vec& p, f32 u, f32 v) { fn_802C8E00(c, idx, p.x, p.y, p.z, u, v); }  /* Helper name unproven */
+
 void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     Vec c[4];
     f32 u0;
@@ -1498,18 +1500,18 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     AddScaled(&c[1], &c[0], &m->rot[1], 2.0f * len);
     AddScaled(&c[2], &c[0], &m->rot[2], 2.0f * len);
     AddScaled(&c[3], &c[1], &m->rot[2], 2.0f * len);
-    fn_802C8E00(0xC0FFFFFF, 0, c[0].x, c[0].y, c[0].z, u0, v0);
-    fn_802C8E00(0xC0FFFFFF, 0, c[1].x, c[1].y, c[1].z, u1, v0);
-    fn_802C8E00(0xC0FFFFFF, 1, c[2].x, c[2].y, c[2].z, u0, v1);
-    fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
+    Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
+    Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
+    Vertex(0xC0FFFFFF, 1, c[2], u0, v1);
+    Vertex(0xC0FFFFFF, 1, c[3], u1, v1);
     AddScaled(&c[0], &m->pos, &m->rot[0], -len);
     AddScaled(&c[1], &c[0], &m->rot[1], 2.0f * len);
     AddScaled(&c[2], &c[0], &m->rot[0], 2.0f * len);
     AddScaled(&c[3], &c[1], &m->rot[0], 2.0f * len);
-    fn_802C8E00(0xC0FFFFFF, 0, c[0].x, c[0].y, c[0].z, u0, v0);
-    fn_802C8E00(0xC0FFFFFF, 0, c[1].x, c[1].y, c[1].z, u1, v0);
-    fn_802C8E00(0xC0FFFFFF, 1, c[2].x, c[2].y, c[2].z, u0, v1);
-    fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
+    Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
+    Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
+    Vertex(0xC0FFFFFF, 1, c[2], u0, v1);
+    Vertex(0xC0FFFFFF, 1, c[3], u1, v1);
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.

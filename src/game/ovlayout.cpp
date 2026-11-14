@@ -1283,8 +1283,19 @@ void fn_80147940(ILayout* l, GartElem* b, const char* set, int part) {
 
 static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
     V2 r;
-    r.x = a.x + t * (b.x - a.x);
-    r.y = a.y + t * (b.y - a.y);
+    f32 ax = a.x;
+    f32 ay = a.y;
+    r.x = ax + t * (b.x - ax);
+    r.y = ay + t * (b.y - ay);
+    return r;
+}
+
+static inline f32 LayLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+
+static inline V2 LayLerpV2(const V2& a, const V2& b, f32 t) { /* Helper name unproven */
+    V2 r;
+    r.y = LayLerp(a.y, b.y, t);
+    r.x = LayLerp(a.x, b.x, t);
     return r;
 }
 
@@ -1334,10 +1345,9 @@ u32 fn_80147C50(u32 a, u32 b, f32 t) {
     return (c3 << 24) | (c2 << 16) | (c1 << 8) | c0;
 }
 
-static inline f32 LayLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
-    V2 p = LerpV2(a->pos, b->pos, t);
+    V2 p = LayLerpV2(a->pos, b->pos, t);
     f32 s = LayLerp(a->scale, b->scale, t);
     *out = *a;
     out->pos = p;

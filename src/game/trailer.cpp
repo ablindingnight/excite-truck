@@ -382,15 +382,11 @@ void Trailer::Init(void* desc) {
     }
     f32 cb[6];
     fn_802C77F0(car->model, cb);
-    if (low) {
-        cd = RVec3(0.0f, 0.0f, cb[4] - 0.1524f);
-    } else {
-        cd = RVec3(0.0f, 0.4318f, cb[4] - 0.2032f);
-    }
+    cd = low ? RVec3(0.0f, 0.0f, cb[4] - 0.1524f) : RVec3(0.0f, 0.4318f, cb[4] - 0.2032f);
     RVec3 q;
     fn_801B8CC0(&q, car->model, "hitch", cd);
     hitchCar = q;
-    hitchCar.y = q.y + 0.127f;
+    hitchCar.y += 0.127f;
 }
 
 void Trailer::Reset(void) {

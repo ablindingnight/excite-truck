@@ -739,21 +739,24 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
+static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
+    f32* d = (f32*)out;
+    const f32* x = (const f32*)a;
+    const f32* y = (const f32*)b;
+    for (int i = 0; i < 12; i++) {
+        *d++ = Lerp(*x++, *y++, t);
+    }
+}
+
 void PanelVol::vf28(u8* buf) {
     PanelPose* out = (PanelPose*)(buf + a8);
-    f32 k = lbl_8055E460;
-    if ((f32)__fabs(k - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
         out->mtx = world;
     } else {
         RMtx t;
-        int i;
-        RVec3* wa = t.rot;
-        for (i = 0; i < 4; i++, wa++) {
-            const RVec3* a = &world.rot[i];
-            const RVec3* b = &prev.rot[i];
-            RVec3* d = wa;
-            SetXYZ(d, b->x + k * (a->x - b->x), b->y + k * (a->y - b->y), b->z + k * (a->z - b->z));
-        }
+        LerpMtx(&t, &prev, &world, lbl_8055E460);
         out->mtx = t;
     }
     out->hint = hint[0];
