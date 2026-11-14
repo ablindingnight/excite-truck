@@ -3254,7 +3254,7 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         la.x = a.x - k;
         const f32 laZ = a.z - k;
         la.z = laZ;
-        SetV(&mn, MinF(la.x, lb.x), MinF(la.y, lb.y), MinF(la.z, lb.z));
+        SetV(&mn, la.x < lb.x ? la.x : lb.x, MinF(la.y, lb.y), MinF(la.z, lb.z));
         *lo = mn;
     }
     {
@@ -3263,7 +3263,7 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
         RVec3 hb;
         SetV3(&hb, b.x + k, b.y + k, b.z + k);
         SetV3(&ha, a.x + k, a.y + k, a.z + k);
-        SetV(&mx, MaxF(ha.x, hb.x), MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
+        SetV(&mx, ha.x > hb.x ? ha.x : hb.x, MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
         *hi = mx;
     }
 }
@@ -4017,6 +4017,19 @@ static inline void Swap16(u8* b) {
     b[1] = t;
 }
 
+/* Helper name unproven */
+static inline void SwapStaticObjectHeader(u8* l) {
+    u8* objs = l + 0x4;
+    Swap32(l + 0x0);
+    Swap32(l + 0x8);
+    Swap32(objs);
+    Swap32(l + 0xC);
+    Swap32(l + 0x10);
+    fn_801A4768((s32*)objs, (s32)l);
+    fn_801A4780((s32*)(l + 0x10), (s32)l);
+    fn_801A4798((s32*)(l + 0xC), (s32)l);
+}
+
 // Loads the static-object list resource ('SOBL'): on first load byte-swaps it, turns its offsets into
 // pointers and sets up each object.
 u8* fn_801A4548(const char* name) {
@@ -4024,15 +4037,7 @@ u8* fn_801A4548(const char* name) {
     bool swapped = 0;
     u8* l = (u8*)fn_8012C370(name, 'SOBL', &info, 0, 0, &swapped);
     if (l && swapped) {
-        u8* objs = l + 0x4;
-        Swap32(l + 0x0);
-        Swap32(l + 0x8);
-        Swap32(objs);
-        Swap32(l + 0xC);
-        Swap32(l + 0x10);
-        fn_801A4768((s32*)objs, (s32)l);
-        fn_801A4780((s32*)(l + 0x10), (s32)l);
-        fn_801A4798((s32*)(l + 0xC), (s32)l);
+        SwapStaticObjectHeader(l);
         int i;
         for (i = 0; i < S32(l, 0x0); i++) {
             Swap32(PTR(l, 0x4) + i * 4);
