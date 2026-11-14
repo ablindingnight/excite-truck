@@ -2,8 +2,10 @@
 // initializer of their queue. Compiled with the game flags (-proc generic); split from unk_80116BD4, whose
 // Bink code is built for gekko scheduling. fn_801274C0 imported verbatim from the upstream project
 // (github.com/orangedude27/excite-truck, CC0; file src/auto/text_801274C0_.c). Unit name is provisional.
-#include <types.h>
+#include "game/common.h"
 #include <revolution/OS/OSAlarm.h>
+
+extern "C" {
 
 extern void* fn_802ECC74(void*);
 extern void fn_80127F70(void*);
@@ -61,18 +63,13 @@ void fn_8012748C(s32 arg0) {
     fn_802E300C(arg0);
 }
 
-extern char lbl_8055DF00[8];
-extern void RegisterModuleTag__FP9ModuleTag(void *queue);
-void fn_801274C0(void) {
-    RegisterModuleTag__FP9ModuleTag(lbl_8055DF00);
-}
-
-/* Its static-initializer table entry (the C++ __sinit of the original unit). */
-__declspec(section ".ctors") static void (*const lbl_802ED11C)(void) = fn_801274C0;
 
 /* .bss owned by this unit (0x8041D728-0x8041D78C): callback lists -1..3. */
 CallbackList lbl_8041D728[5];
 
+}  // extern "C"
+
 /* .sbss owned by this unit (0x8055DF00-0x8055DF09). */
+ModuleTag lbl_8055DF00;  // the unit's module tag: its constructor is the static initializer (0x801274C0)
+extern "C" char lbl_8055DF08;
 char lbl_8055DF08;
-char lbl_8055DF00[8];
