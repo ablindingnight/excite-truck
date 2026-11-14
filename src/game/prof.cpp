@@ -63,7 +63,10 @@ ProfSlot lbl_8041D790[16];
 ProfCallback lbl_8041DC10[4];
 ProfWatch lbl_8041DC20[16];
 FixedArray<s32, 16> lbl_8041DEE0;
-ProfTrace lbl_8041DF30[3];
+struct ProfTraceBuffer {
+    ProfTrace entries[3];
+} __attribute__((aligned(8)));
+ProfTraceBuffer lbl_8041DF30;
 
 u64 lbl_8055DF18;  // total time
 u64 lbl_8055DF20;  // last time
@@ -119,8 +122,8 @@ void fn_801275AC(void) {
         fn_802E30C8("=======================================================");
         fn_802E30C8("prof: trace list %d", lbl_8055DF44);
         for (i = 0; i < lbl_8055DF44; i++) {
-            fn_802E30C8(" %08d : %8d : %s:%d", lbl_8041DF30[i].time, lbl_8041DF30[i + 1].time - lbl_8041DF30[i].time,
-                        lbl_8041DF30[i].file, lbl_8041DF30[i].line);
+            fn_802E30C8(" %08d : %8d : %s:%d", lbl_8041DF30.entries[i].time, lbl_8041DF30.entries[i + 1].time - lbl_8041DF30.entries[i].time,
+                        lbl_8041DF30.entries[i].file, lbl_8041DF30.entries[i].line);
         }
         fn_802E30C8("=======================================================");
     }

@@ -31,6 +31,14 @@ public:
     f32 t;           // offset 0xC
 };
 
+struct RMtx;
+struct RVec3;
+
+class RigidBody {
+public:
+    void SetState(const RMtx* m, const RVec3* vel, const RVec3* angvel);
+};
+
 extern "C" {
 int strcmp(const char* a, const char* b);
 char* strstr(const char* s, const char* sub);
@@ -51,7 +59,6 @@ int fn_801DA688(PathFollower* p);
 f32 fn_801DA6B8(PathFollower* p);
 f32 fn_801DD88C(f32 x, f32 z);  // ground height
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
-void fn_8017CFFC(void* obj, PathMtx* m, V3* vel, V3* angvel);
 void fn_8029F458(const char* name, void* obj);
 void fn_801D0DDC(class Updatable* u);  // register
 void fn_801D0DFC(class Updatable* u);  // unregister
@@ -59,6 +66,17 @@ void fn_801D0DFC(class Updatable* u);  // unregister
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
+
+// A path follower made by the path manager.
+class PathMover {
+public:
+    virtual ~PathMover(void) {}
+    virtual f32 Length(void) = 0;
+    virtual f32 Time(void) = 0;
+    virtual void Start(f32 speed) = 0;
+    virtual int Done(void) = 0;
+    virtual void Reset(void) = 0;
+};
 
 class Updatable {
 public:
@@ -73,17 +91,6 @@ public:
 class ConsoleCmd {
 public:
     virtual int Run(const char* args) = 0;
-};
-
-// A path follower made by the path manager.
-class PathMover {
-public:
-    virtual ~PathMover(void) {}
-    virtual f32 Length(void) = 0;
-    virtual f32 Time(void) = 0;
-    virtual void Start(f32 speed) = 0;
-    virtual int Done(void) = 0;
-    virtual void Reset(void) = 0;
 };
 
 static inline void StrCopy(char* d, const char* s, int n) {
@@ -327,7 +334,7 @@ inline void PathMan::vf14(void) {
                 if (c->grounded) {
                     mtx.pos.y = fn_801EA0E8(mtx.pos.x, mtx.pos.z) + c->groundOffset;
                 }
-                fn_8017CFFC(c->obj, &mtx, &vel, &spin);
+                ((RigidBody*)c->obj)->SetState((const RMtx*)&mtx, (const RVec3*)&vel, (const RVec3*)&spin);
             } else if (!lbl_8055E980) {
                 lbl_8055E980 = 1;
                 fn_802E30C8("%s", "pathman: would have used uninitialized memory before");

@@ -3,6 +3,19 @@
 // the groups' states. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
 
+namespace {
+extern char kOverlay[8];
+extern char kStartTime[8];
+extern char kStopTime[8];
+extern char kRegionIndex[8];
+extern char kGroupIndexFmt[8];
+extern char kModelNameFmt[8];
+extern char kGroupName[8];
+extern char kTerrainRegion[];
+extern char kMissingRegion[];
+extern char kMorphRegion[];
+}
+
 extern "C" {
 int strcmp(const char* a, const char* b);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
@@ -51,13 +64,13 @@ void fn_802E317C(const char* fmt, ...);
 // One terrain region moved by a morph group.
 struct MorphRegion {
     MorphRegion(ValueNode* node, ValueTable* regions) {
-        start = node->GetFloat("start_t");
-        stop = node->GetFloat("stop_t");
-        const char* name = node->GetValue("terr_region");
+        start = node->GetFloat(kStartTime);
+        stop = node->GetFloat(kStopTime);
+        const char* name = node->GetValue(kTerrainRegion);
         if (!regions->HasChild(name)) {
-            fn_802E317C("mgroup: mmorph.txt refers to nonexistent region \"%s\"", name);
+            fn_802E317C(kMissingRegion, name);
         }
-        index = regions->FindChild(name)->GetIntValue("index");
+        index = regions->FindChild(name)->GetIntValue(kRegionIndex);
         next = NULL;
     }
     f32 start;          // offset 0x0
@@ -90,7 +103,7 @@ extern "C" void fn_801D98F0(MorphRegion** head);
 
 struct MorphGroup {
     MorphGroup(ValueNode* node, ValueTable* regionTable) {
-        const char* s = node->GetValue("name");
+        const char* s = node->GetValue(kGroupName);
         char* d = name;
         int n = sizeof(name);
         while ((*d++ = *s++) != '\0') {
@@ -100,7 +113,7 @@ struct MorphGroup {
             }
         }
         regions = NULL;
-        fn_801D94DC(&regions, node, "morph_region", regionTable);
+        fn_801D94DC(&regions, node, kMorphRegion, regionTable);
         next = NULL;
         t = 0.0f;
     }
@@ -123,7 +136,7 @@ struct OmlList {
         char groupKey[0x20];
         char modelKey[0x20];
         for (int k = 0; k < groups.cap; k++) {
-            fn_801345D8(groupKey, sizeof(groupKey), "gidx%d", k);
+            fn_801345D8(groupKey, sizeof(groupKey), kGroupIndexFmt, k);
             int g = node->GetInt(groupKey, -1);
             if (g < 0) {
                 break;
@@ -133,7 +146,7 @@ struct OmlList {
         }
         int n = Min(1 << groups.count, models.cap);
         for (int k = 0; k < n; k++) {
-            fn_801345D8(modelKey, sizeof(modelKey), "model%d", k);
+            fn_801345D8(modelKey, sizeof(modelKey), kModelNameFmt, k);
             s32 m = fn_802C6FC0(node->GetValue(modelKey), 0, 0);
             *models.Next() = m;
         }
@@ -156,12 +169,26 @@ OmlList* lbl_8055E964;       // overlay model lists
 u8 lbl_8055E968;             // groups locked
 MorphGroup* lbl_8055E96C;    // morph groups
 
+namespace {
+char kOverlay[8] = "oml";
+char kStartTime[8] = "start_t";
+char kStopTime[8] = "stop_t";
+char kRegionIndex[8] = "index";
+char kGroupIndexFmt[8] = "gidx%d";
+char kModelNameFmt[8] = "model%d";
+char kGroupName[8] = "name";
+}
+
+#pragma force_active on
+// The retail image retains these strings from the morph-group debug commands.
+static char kLockedMessage[] = "mgroups are maxed and locked.";
+static char kUnlockedMessage[] = "mgroups are zeroed and unlocked.";
+#pragma force_active reset
+
 extern "C" {
 
 // Splits scale over the 2^n combinations of n group weights.
 void fn_801D9120(f32* out, const f32* w, int n, f32 scale) {
-    // From debug functions the linker stripped.
-    static const char* unused[] = {"mgroups are maxed and locked.", "mgroups are zeroed and unlocked."};
     f32 last = w[n - 1];
     if (n == 1) {
         f32 rest = 1.0f - last;
@@ -202,7 +229,7 @@ void fn_801D9284(void) {
             fn_801D9394(&lbl_8055E96C, morph->FindChild("morph_groups"), "morph_group", regions);
             ValueTable* wl = fn_80131810("wlmodels.val");
             if (wl) {
-                fn_801D9654(&lbl_8055E964, wl->FindChild("oml_lists"), "oml", 0);
+                fn_801D9654(&lbl_8055E964, wl->FindChild("oml_lists"), kOverlay, 0);
                 fn_801D91D8();
                 fn_80131818(wl);
             }
@@ -246,6 +273,17 @@ void fn_801D9654(OmlList** head, ValueNode* node, const char* key, int unused) {
         }
     }
 }
+
+
+}  // extern "C"
+
+namespace {
+char kTerrainRegion[] = "terr_region";
+char kMissingRegion[] = "mgroup: mmorph.txt refers to nonexistent region \"%s\"";
+char kMorphRegion[] = "morph_region";
+}
+
+extern "C" {
 
 void fn_801D985C(MorphGroup** head);
 void fn_801D9948(OmlList** head);

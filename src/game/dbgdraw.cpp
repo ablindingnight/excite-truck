@@ -210,7 +210,7 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
         AddV(&v[i], &v[i], pos);
     }
     v[0].color = dark;
-    u16 idx[6] = {0, 1, 3, 0, 3, 2};
+    u16 idx[6] = {0, 1, 2, 0, 4, 3};
     fn_802C8BD0(lbl_8055EA6C);
     fn_802C8DB8(v, 5, idx, 6);
     fn_802C8D74();

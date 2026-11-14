@@ -121,15 +121,12 @@ struct Perspective {
 };
 
 struct Pool {
-    Pool(const char* name, int count, int size);
+    Pool(const char* name, long count, long size);
+    void* Alloc(void);
+    void Free(void* item);
     virtual ~Pool(void);
     u8 pad4[0x1C];
 };
-
-extern "C" {
-void* fn_8012A2D8(Pool* p);
-void fn_8012A364(Pool* p, void* item);
-}
 
 // A pooled flare.
 struct Flare {
@@ -815,7 +812,7 @@ void* Flare::operator new(size_t size, const char* tag) {
     if (lbl_8055FC98 == 0) {
         lbl_8055FC9C = new ("DrawListWrapper::pool") Pool("DrawListWrapper::pool", 0x10, 0x18);
     }
-    void* p = fn_8012A2D8(lbl_8055FC9C);
+    void* p = lbl_8055FC9C->Alloc();
     if (p) {
         lbl_8055FC98++;
     }
@@ -823,7 +820,7 @@ void* Flare::operator new(size_t size, const char* tag) {
 }
 
 void Flare::operator delete(void* p) {
-    fn_8012A364(lbl_8055FC9C, p);
+    lbl_8055FC9C->Free(p);
     if (--lbl_8055FC98 == 0) {
         delete lbl_8055FC9C;
         lbl_8055FC9C = NULL;

@@ -446,8 +446,6 @@ void fn_80176CC8(void) {
         lbl_80430418.set = 0;
     }
     switch (lbl_8055E3F4) {
-    case 0:
-        break;
     case 1:
         fn_80178DD4(lbl_8055E3DC);
         lbl_8055E3F4 = 2;

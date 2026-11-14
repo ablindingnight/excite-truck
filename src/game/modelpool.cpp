@@ -30,6 +30,11 @@ int fn_801345A4(LoadPool* pool, int i);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
+namespace {
+extern char kModelPoolTag[];
+extern char kLoadPoolTag[];
+}
+
 struct ModelPool;
 
 struct ModelSlot {
@@ -67,9 +72,9 @@ struct ModelPool {
     ModelPool(s32 n, s32 m, s32 slotSize) {
         count = n;
         max = m;
-        LoadPool* lp = (LoadPool*)operator new(0x10, "loadpool");
+        LoadPool* lp = (LoadPool*)operator new(0x10, kLoadPoolTag);
         loads = lp ? fn_8013420C(lp, max, slotSize) : lp;
-        slots = new ("modelpool") ModelSlot[count];
+        slots = new (kModelPoolTag) ModelSlot[count];
         time = 0;
     }
     ~ModelPool(void) {
@@ -83,6 +88,11 @@ struct ModelPool {
     s32 max;           // offset 0xC
     s32 time;          // offset 0x10
 };
+
+namespace {
+char kModelPoolTag[] = "modelpool";
+char kLoadPoolTag[] = "loadpool";
+}
 
 ModuleTag lbl_8055FCF0;
 

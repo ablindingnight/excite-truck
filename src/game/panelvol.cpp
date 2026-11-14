@@ -48,7 +48,7 @@ public:
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(RPacket* p);     // 0x2C
+    virtual s32 vf2C(void);           // 0x2C
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
     virtual void vf38(u8* p);         // 0x38
@@ -78,6 +78,12 @@ public:
     ~RigidBody(void) {}
     virtual void Init(BodyDesc* d);
     virtual void Reset(void);
+    virtual void vf18(void);
+    virtual s32 vf2C(void);
+    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual s32 vf34(RPacket* p);
+    virtual void vf3C(void);
+    virtual int vf40(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
@@ -191,6 +197,13 @@ void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
+namespace {
+extern const f32 kNegate;
+extern const f32 kPanelU;
+extern const f32 kPanelV;
+extern const f32 kAxisTolerance;
+}
+
 extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
@@ -200,7 +213,8 @@ void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
 void fn_80144DC8(RMtx* m);
-const RMtx* fn_801602B4(Phob* car);
+const RMtx* Mtx__10RaceCarRecFv(Phob* car);
+void StatsUpdate__Fv(void* p);
 void fn_8017E388(RMtx* m);
 CollShape* fn_801A25F8(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
 void fn_8019EECC(CollVolume* v, RVec3* c);
@@ -341,11 +355,14 @@ extern "C" {
 
 PanelVol* fn_801BF214(void) { return new ("panel") PanelVol; }
 
-// A vector whose empty default constructor is out of line: the original calls it for each local (the linker
-// folded every such empty ctor into one function, labelled StatsUpdate__Fv in symbols.txt).
+// The retail linker folds this empty initializer to StatsUpdate.
 struct WVec : RVec3 {
-    WVec(void);
+    WVec(void) { StatsUpdate__Fv(this); }
 };
+
+inline PanelVert::PanelVert(void) { fn_801BFEB0(this); }
+
+static inline f32 PanelSurfaceOffset(void) { return kPanelV; }
 
 static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32*& ids) {
     int i;
@@ -356,7 +373,7 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     p->car = fn_801C0168(p->owner);
     fn_801C014C(p, off);
     WVec neg;
-    fn_801C0124(&neg, off, -1.0f);
+    fn_801C0124(&neg, off, kNegate);
     CollShape* s = fn_801C00F8(p, 0);
     if (s && fn_801C00F0(s) == 'SPHR') {
         fn_801C00B8(s, &neg);
@@ -395,8 +412,8 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
         RVec3 c;
         fn_80144B44(&c, (i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
         fn_801BFD34(&verts[i].p, &c, &m);
-        verts[i].u = 4.545f;
-        verts[i].v = 0.127f;
+        verts[i].u = kPanelU;
+        verts[i].v = kPanelV;
     }
     WVec pts[4];
     for (int k = 0; k < 4; k++) {
@@ -409,12 +426,12 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     PanelLink links[2];
     for (i = 0; i < n; ids++, i++) {
         links[i].id = *ids;
-        links[i].mtx = fn_801602B4(car);
+        links[i].mtx = Mtx__10RaceCarRecFv(car);
         links[i].c = 0;
     }
     fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
     av = fn_801BF754(car);
-    const RMtx* cm = fn_801602B4(car);
+    const RMtx* cm = Mtx__10RaceCarRecFv(car);
     fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
 }
 
@@ -484,7 +501,7 @@ void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts) {
     Sub(&m.rot[0], &pts[p->e0b], &pts[p->e0a]);
     Sub(&m.rot[1], &pts[p->e1b], &pts[p->e1a]);
     PSVECCrossProduct(&m.rot[0], &m.rot[1], &m.rot[2]);
-    if (PSVECDotProduct(&m.rot[2], &m.rot[2]) > 0.0001f) {
+    if (PSVECDotProduct(&m.rot[2], &m.rot[2]) > kAxisTolerance) {
         Orthonormalize((Mat3*)m.rot);
     } else {
         Identity((Mat3*)m.rot);
@@ -572,6 +589,19 @@ PanelVol::~PanelVol(void) {
     fn_801C1C7C(strip);
 }
 
+namespace {
+// Template instantiation places the allocation tag after the vtable.
+template <class T> struct PanelAllocTag {
+    static char text[];
+};
+
+// Define these values in their emission order to match the float pool.
+const f32 kNegate = -1.0f;
+const f32 kPanelU = 4.545f;
+const f32 kPanelV = 0.127f;
+const f32 kAxisTolerance = 0.0001f;
+}
+
 void PanelVol::Init(BodyDesc* d) {
     RVec3 c;
     RVec3 b;
@@ -594,7 +624,7 @@ void PanelVol::Init(BodyDesc* d) {
     c.x = 0.0f;
     a.y = 0.0f;
     b.z = 0.0f;
-    void* mem = operator new(0x34, "panelvol");
+    void* mem = operator new(0x34, PanelAllocTag<PanelVol>::text);
     CollShape* s = (CollShape*)mem;
     if (mem) {
         f32 scale = 0.25f;
@@ -672,7 +702,7 @@ void PanelVol::vf1C(void) {
         return;
     }
     f32 xv = nrm.x;
-    f32 k = 0.127f;
+    const f32 k = PanelSurfaceOffset();
     p.x += xv * k;
     p.y += nrm.y * k;
     p.z += nrm.z * k;
@@ -764,4 +794,8 @@ void PanelVol::vf28(u8* buf) {
     q->model = model;
     q->part = part;
     q->car = car;
+}
+
+namespace {
+template <class T> char PanelAllocTag<T>::text[] = "panelvol";
 }

@@ -4,6 +4,23 @@
 // blocking with a timeout where the caller needs a result. Names are guesses apart from the strings.
 #include "game/common.h"
 
+namespace {
+extern char kPackBanner[];
+extern char kBannerResource[];
+extern char kBannerName[];
+extern char kNandFailure[];
+extern char kStartWrite[];
+extern char kCloseComplete[];
+extern char kWrote[];
+extern char kWriteComplete[];
+extern char kCloseStart[];
+extern char kOpenComplete[];
+extern char kWriteStart[];
+extern char kCreateComplete[];
+extern char kOpenStart[];
+extern char kCreateStart[];
+}
+
 extern "C" {
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);
@@ -97,15 +114,21 @@ const char* lbl_8034DA08[] = {
     0,
 };
 
+#pragma push
+#pragma explicit_zero_data on
+// Retail keeps the shared empty dialog ID in initialized small data.
+static char sDialogId[8] = "";
+#pragma pop
+
 Dialog lbl_8034DB28[8] = {
-    {"", "NAND:NOSAVING", "mc_savefile.lyt", 0, 0, 2, {{"NAND:YES", 1}, {"NAND:CANCEL", 0}}},
-    {"", "NAND:CORRUPTED", 0, 0, 0, 2, {{"NAND:CONTINUE_NOLOAD", 0}, {"NAND:DELETE_FILE", 1}}},
-    {"", "NAND:SYS_INSSPACE", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
-    {"", "NAND:SYS_INSINODE", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
-    {"", "NAND:WEAR_CORRUPT", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
-    {"", "NAND:MAXFILES", 0, 0, 0, 1, {{"NAND:CANCEL", 0}}},
-    {"", "NAND:MAXBLOCKS", 0, 0, 0, 1, {{"NAND:CANCEL", 0}}},
-    {"", "NAND:SAVEFILE_OK", "mc_savefile.lyt", 0, 0, 2, {{"NAND:YES", 1}, {"NAND:NO", 0}}},
+    {sDialogId, "NAND:NOSAVING", "mc_savefile.lyt", 0, 0, 2, {{"NAND:YES", 1}, {"NAND:CANCEL", 0}}},
+    {sDialogId, "NAND:CORRUPTED", 0, 0, 0, 2, {{"NAND:CONTINUE_NOLOAD", 0}, {"NAND:DELETE_FILE", 1}}},
+    {sDialogId, "NAND:SYS_INSSPACE", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
+    {sDialogId, "NAND:SYS_INSINODE", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
+    {sDialogId, "NAND:WEAR_CORRUPT", 0, 0, 0, 2, {{"NAND:CONTINUE_NOSAVE", 0}, {"NAND:RETURN_TO_MENU", 1}}},
+    {sDialogId, "NAND:MAXFILES", 0, 0, 0, 1, {{"NAND:CANCEL", 0}}},
+    {sDialogId, "NAND:MAXBLOCKS", 0, 0, 0, 1, {{"NAND:CANCEL", 0}}},
+    {sDialogId, "NAND:SAVEFILE_OK", "mc_savefile.lyt", 0, 0, 2, {{"NAND:YES", 1}, {"NAND:NO", 0}}},
 };
 
 ModuleTag lbl_80560018;
@@ -418,7 +441,7 @@ inline void fn_802E9010(void) {
     SaveTask* t = &lbl_80507288;
     switch (lbl_80507288.state) {
     case 2:
-        fn_802E91D8(&t->w, "banner.bin", t->banner, t->bannerSize);
+        fn_802E91D8(&t->w, kBannerName, t->banner, t->bannerSize);
         lbl_80507288.state = 3;
         break;
     case 3:
@@ -474,19 +497,19 @@ inline void fn_802E91D8(Writer* w, const char* name, const void* buf, u32 len) {
     w->done = 0;
     w->result = 0;
     w->state = 2;
-    fn_802E30C8("rmemcard: Starting to write %db to %s", len, name);
+    fn_802E30C8(kStartWrite, len, name);
 }
 
 inline void fn_802E95CC(s32 result, void* block);
 
 // Starts one NAND call; a refused call ends the write.
-#define NAND_START(call, name, next, closeOnFail)      {                                                         w->done = 0;                                          w->result = 0;                                        s32 r = call;                                         if (r != 0) {                                             fn_802E30C8("rmemcard: %s failed (%d)", name, r);             w->state = 0;                                         w->err = r;                                           if (closeOnFail) {                                        NANDClose(w->file);                               }                                                 } else {                                                  w->state = next;                                  }                                                 }
+#define NAND_START(call, name, next, closeOnFail)      {                                                         w->done = 0;                                          w->result = 0;                                        s32 r = call;                                         if (r != 0) {                                             fn_802E30C8(kNandFailure, name, r);             w->state = 0;                                         w->err = r;                                           if (closeOnFail) {                                        NANDClose(w->file);                               }                                                 } else {                                                  w->state = next;                                  }                                                 }
 
 inline void fn_802E9254(Writer* w) {
     s32 res;
     switch (w->state) {
     case 2:
-        NAND_START(NANDCreateAsync(w->name, 0x30, 0, fn_802E95CC, &w->user), "NANDCreateAsync", 3, 0);
+        NAND_START(NANDCreateAsync(w->name, 0x30, 0, fn_802E95CC, &w->user), kCreateStart, 3, 0);
         break;
     case 3:
         if (!w->done) {
@@ -494,14 +517,14 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0 || res == -6) {
-            NAND_START(NANDOpenAsync(w->name, w->file, 2, fn_802E95CC, &w->user), "NANDOpenAsync", 4, 0);
+            NAND_START(NANDOpenAsync(w->name, w->file, 2, fn_802E95CC, &w->user), kOpenStart, 4, 0);
         } else {
             if (res == -11) {
                 lbl_80560034 = 1;
                 fn_802E888C(5);
             }
             res = w->result;
-            fn_802E30C8("rmemcard: %s failed (%d)", "NANDCreateAsync", res);
+            fn_802E30C8(kNandFailure, kCreateComplete, res);
             w->err = res;
             w->state = 0;
         }
@@ -512,9 +535,9 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0) {
-            NAND_START(NANDWriteAsync(w->file, w->buf, w->len, fn_802E95CC, &w->user), "NANDWriteAsync", 5, 1);
+            NAND_START(NANDWriteAsync(w->file, w->buf, w->len, fn_802E95CC, &w->user), kWriteStart, 5, 1);
         } else {
-            fn_802E30C8("rmemcard: %s failed (%d)", "NANDOpenAsync", res);
+            fn_802E30C8(kNandFailure, kOpenComplete, res);
             w->err = res;
             w->state = 0;
         }
@@ -525,9 +548,9 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == (s32)w->len) {
-            NAND_START(NANDCloseAsync(w->file, fn_802E95CC, &w->user), "NANDCloseAsync", 6, 1);
+            NAND_START(NANDCloseAsync(w->file, fn_802E95CC, &w->user), kCloseStart, 6, 1);
         } else {
-            fn_802E30C8("rmemcard: %s failed (%d)", "NANDWriteAsync", res);
+            fn_802E30C8(kNandFailure, kWriteComplete, res);
             w->err = res;
             w->state = 0;
             NANDClose(w->file);
@@ -540,9 +563,9 @@ inline void fn_802E9254(Writer* w) {
         res = w->result;
         if (res == 0) {
             w->state = 1;
-            fn_802E30C8("rmemcard: Wrote %db to %s", w->len, w->name);
+            fn_802E30C8(kWrote, w->len, w->name);
         } else {
-            fn_802E30C8("rmemcard: %s failed (%d)", "NANDCloseAsync", res);
+            fn_802E30C8(kNandFailure, kCloseComplete, res);
             w->err = res;
             w->state = 0;
             NANDClose(w->file);
@@ -572,8 +595,8 @@ int fn_802E95E0(const char* what, void (*poll)(void)) {
 
 inline void* LoadBanner(s32* size) {
     u8 tmp[8];
-    fn_8012E81C("mcbanner.res");
-    return fn_8012C370("out\\banner.bin", 'RVBN', tmp, size, 0, 0);
+    fn_8012E81C(kBannerResource);
+    return fn_8012C370(kPackBanner, 'RVBN', tmp, size, 0, 0);
 }
 
 int fn_802E967C(const char* name, const void* data, s32 size) {
@@ -639,3 +662,32 @@ void fn_802E9888(void) {}
 
 }  // extern "C"
 
+namespace {
+// Keep these diagnostic strings in their retail order, including the retained duplicate labels.
+char kPackBanner[16] = "out\\banner.bin";
+char kBannerResource[16] = "mcbanner.res";
+char kBannerName[12] = "banner.bin";
+char kNandFailure[28] = "rmemcard: %s failed (%d)";
+char kStartWrite[40] = "rmemcard: Starting to write %db to %s";
+char kCloseComplete[16] = "NANDCloseAsync";
+char kWrote[28] = "rmemcard: Wrote %db to %s";
+char kWriteComplete[15] = "NANDWriteAsync";
+char kCloseStart[15] = "NANDCloseAsync";
+#pragma force_active on
+char kCloseRepeat[15] = "NANDCloseAsync";
+#pragma force_active reset
+char kOpenComplete[14] = "NANDOpenAsync";
+char kWriteStart[15] = "NANDWriteAsync";
+#pragma force_active on
+char kWriteRepeat[20] = "NANDWriteAsync";
+#pragma force_active reset
+__attribute__((aligned(4))) char kCreateComplete[16] = "NANDCreateAsync";
+char kOpenStart[16] = "NANDOpenAsync";
+#pragma force_active on
+char kOpenRepeat[16] = "NANDOpenAsync";
+#pragma force_active reset
+char kCreateStart[16] = "NANDCreateAsync";
+#pragma force_active on
+char kCreateRepeat[16] = "NANDCreateAsync";
+#pragma force_active reset
+}
