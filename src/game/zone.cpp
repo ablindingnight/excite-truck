@@ -1494,7 +1494,8 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                 for (j = 0; child->GetChildAt(j) != 0; j++) {
                     g = child->GetChildAt(j);
                     if (fn_8013CB44("Zone", g)) {
-                        l->gates[k++].Init(g, w);
+                        l->gates[k].Init(g, w);
+                        k++;
                     }
                 }
             }
@@ -1503,7 +1504,6 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                 if (gt->ring) {
                     int nn = l->n;
                     Gate* a = 0;
-                    Gate* b = 0;
                     int k;
                     for (k = 1; k < nn; k++) {
                         a = &l->gates[(nn + (j - k)) % nn];
@@ -1511,6 +1511,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                             break;
                         }
                     }
+                    Gate* b = 0;
                     for (k = 1; k < nn; k++) {
                         b = &l->gates[(j + (nn + k)) % nn];
                         if (!b->ring) {

@@ -490,6 +490,7 @@ int fn_8012AC98(const char* name) { return fn_8012AC28(name, 0); }
 int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     ResToc* toc;
     int ok;
+    ResEntry* entries;
     ResEntry* e;
     u32 i;
     if (!lbl_8055DFFC) {
@@ -508,15 +509,16 @@ int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     if (set->hdr.loadSize != toc->loadSize) {
         fn_802E317C("res(%s): TOC mismatch (load_size) (%d != %d)", set, set->hdr.loadSize, toc->loadSize);
     }
-    e = toc->entries;
+    entries = toc->entries;
+    e = entries;
     ok = 1;
-    for (i = 0; i < toc->count; i++, e++) {
+    for (i = 0; i < toc->count; e++, i++) {
         if (e->offset + e->size <= size && !fn_8012A470(set, i, e, base)) {
             ok = 0;
             break;
         }
     }
-    set->entries = toc->entries;
+    set->entries = entries;
     set->toc = toc;
     return ok;
 }

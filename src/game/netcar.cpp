@@ -469,6 +469,7 @@ void NetCar::Rotate(Blend* b) {
     TQuat q2;
     TQuat q;
     TQuat cur;
+    f32* c;
     f32 tr;
     f32 k;
     fn_801A70EC(&q1, &ptab[1], &ptab[0], now);
@@ -487,7 +488,7 @@ void NetCar::Rotate(Blend* b) {
         cur.z = inv * (m[0][1] - m[1][0]);
     } else {
         int l;
-        f32* c = &cur.x;
+        c = &cur.x;
         s32 i = 0;
         int j;
         f32 s;
