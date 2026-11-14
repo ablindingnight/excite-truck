@@ -248,13 +248,21 @@ static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
 
 // Reconstructed from the target: the name and the split into a helper are unproven.
 // dst = transpose of m's rotation applied to src (src may be dst).
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void MulRotT(RVec3* dst, const RVec3& src, const RMtx* m) {
-    f32 x = src.x * m->rot[0].x + src.y * m->rot[0].y + src.z * m->rot[0].z;
-    f32 y = src.x * m->rot[1].x + src.y * m->rot[1].y + src.z * m->rot[1].z;
-    f32 z = src.x * m->rot[2].x + src.y * m->rot[2].y + src.z * m->rot[2].z;
-    dst->x = x;
-    dst->y = y;
-    dst->z = z;
+    if (dst == &src) {
+        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[0].y, src.z, m->rot[0].z);
+        f32 y = Dot3(src.x, m->rot[1].x, src.y, m->rot[1].y, src.z, m->rot[1].z);
+        f32 z = Dot3(src.x, m->rot[2].x, src.y, m->rot[2].y, src.z, m->rot[2].z);
+        dst->x = x;
+        dst->y = y;
+        dst->z = z;
+    } else {
+        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[0].y, src.z, m->rot[0].z);
+        dst->y = Dot3(src.x, m->rot[1].x, src.y, m->rot[1].y, src.z, m->rot[1].z);
+        dst->z = Dot3(src.x, m->rot[2].x, src.y, m->rot[2].y, src.z, m->rot[2].z);
+    }
 }
 
 static inline void AddAnchor(PSys* s, s32 idx, const RMtx* m, const RVec3* at) {
@@ -322,7 +330,6 @@ void fn_801C1320(PSys* s) {
     }
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // dst = rotation of m applied to src, with the aliasing guard of the inline.
 static inline void MulRot(RVec3* dst, const RVec3& src, const RMtx* m) {

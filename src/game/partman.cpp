@@ -990,21 +990,19 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 
 void PartSys::DrawRotating(Particle* p, int n) {
     CamMtx* cam = fn_802C86DC();
-    f32 half = 0.5f;
-    f32 shade = half * shading;
     f32 now = lbl_8055F738;
+    f32 shade = 0.5f * shading;
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = now - p->birth;
         f32 inv;
         f32 t = age * invLife;
-        f32 size = half * (sizeConst + sizeRamp * age + half * sizeAccel * Sq(age));
-        f32 twoPi = 6.2831855f;
+        f32 size = 0.5f * (sizeConst + sizeRamp * age + 0.5f * sizeAccel * Sq(age));
         size = size > 0.001f ? size : 0.001f;
         inv = 1.0f / (1.414f * size);
-        f32 ang = (f32)fmod(twoPi * (f32)p->spin / 256.0f + p->angVel * age * (angConst + angRamp * t),
+        f32 ang = (f32)fmod(6.2831855f * (f32)p->spin / 256.0f + p->angVel * age * (angConst + angRamp * t),
                             6.2831855f);
-        ang = twoPi + ang;
+        ang = 6.2831855f + ang;
         V3 pos;
         Integrate(&pos, p, age);
         V3 a;

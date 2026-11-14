@@ -5,7 +5,11 @@
 #include "game/common.h"
 #include "game/menu.h"
 #include "game/menustate.h"
-#include <string.h>
+extern "C" {
+size_t strlen(const char* s);
+char* strcpy(char* d, const char* s);
+char* strcat(char* d, const char* s);
+}
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))

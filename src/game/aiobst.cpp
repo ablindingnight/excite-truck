@@ -664,6 +664,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
         o = lbl_8055E2A0->a.data[seg];
         vel = &rc->vel;
         opts.Init();
+        found = 0;
         for (i = 0; i < 64; i++) {
             bins.bins[i].dist = range;
             bins.bins[i].type = 0;
@@ -682,7 +683,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 Vec2 xz;
                 xz.SetXZ(p);
                 {
-                    Obst car = {0};
+                    Obst car = {};
                     car.pos = xz;
                     car.rad = 2.0f;
                     bins.Add(&car, &v, opts.side, range);

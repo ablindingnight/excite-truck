@@ -186,11 +186,10 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
         for (i = 0; i < n; wa++, wb++, i++) {
             const Bone* b = &set->bones[i];
             BFrame local = b->rest;
-            BMtx33 t;
             BFrame parent;
             BMtx33 rot;
             BVec v;
-            BFrame a;
+            BMtx33 t;
             if (b->parent < 1) {
                 parent.r.xx = 1.0f;
                 parent.r.xy = 0.0f;
@@ -209,6 +208,7 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             }
             QuatToMtx(&rot, &pose[i + 1]);
             BMtx33 m = local.r;
+            BFrame a;
             Transpose(&m);
             MtxMul(t, m, rot);
             MulVec(&v, &local.t, &t);

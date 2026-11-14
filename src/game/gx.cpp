@@ -1803,11 +1803,10 @@ void fn_802D1C04(void) {
     lbl_8055FD70 = 0;
     RMtx inv;
     Invert(&inv, &lbl_804C56C0);
-    V3 p;
-    fn_801BFD34(&p, &lbl_804C5690.pos, &inv);
-    Mat3 r;
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&r, &lbl_804C5690.rot, &inv);
-    fn_802D0DD4(lbl_804C5650, (RMtx*)&r);
+    RMtx w;
+    fn_801BFD34(&w.pos, &lbl_804C5690.pos, &inv);
+    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&w.rot, &lbl_804C5690.rot, &inv);
+    fn_802D0DD4(lbl_804C5650, &w);
     GXLoadPosMtxImm(lbl_804C5650, 0);
     if (lbl_8055FD19) {
         lbl_8055FD19 = 0;
@@ -1817,20 +1816,19 @@ void fn_802D1C04(void) {
     case 2:
     case 3: {
         // Projected texture: express the model frame in the projector's look-at frame.
-        f32 m[3][4];
         f32 b[3][4];
-        f32 s[3][4];
-        f32 t[3][4];
-        f32 st[3][4];
         RMtx look;
-        fn_802C8588(&look, &lbl_804C56C0.pos, &lbl_804C5690.pos);
         RMtx li;
+        RMtx lw;
+        f32 m[3][4];
+        f32 t[3][4];
+        f32 s[3][4];
+        f32 st[3][4];
+        fn_802C8588(&look, &lbl_804C56C0.pos, &lbl_804C5690.pos);
         Invert(&li, &look);
-        V3 lp;
-        fn_801BFD34(&lp, &lbl_804C5690.pos, &li);
-        Mat3 lr;
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lr, &lbl_804C5690.rot, &li);
-        fn_802D0DD4(m, (RMtx*)&lr);
+        fn_801BFD34(&lw.pos, &lbl_804C5690.pos, &li);
+        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lw.rot, &lbl_804C5690.rot, &li);
+        fn_802D0DD4(m, &lw);
         PSMTXInvXpose(m, b);
         PSMTXScale(s, 0.5f, -0.5f, 0.0f);
         PSMTXTrans(t, 0.5f, 0.5f, 1.0f);
@@ -1842,13 +1840,22 @@ void fn_802D1C04(void) {
     case 1:
     case 5: {
         f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
-        m[0][0] = 0.5f * lbl_804C5690.rot.m[0][0];
         Mat3 rotv = lbl_804C5690.rot;
-        m[0][1] = 0.5f * lbl_804C5690.rot.m[1][0];
-        m[0][2] = 0.5f * rotv.m[2][0];
-        m[1][0] = 0.5f * lbl_804C5690.rot.m[0][1];
-        m[1][1] = 0.5f * lbl_804C5690.rot.m[1][1];
-        m[1][2] = 0.5f * lbl_804C5690.rot.m[2][1];
+        f32 t = rotv.m[0][1];
+        rotv.m[0][1] = rotv.m[1][0];
+        rotv.m[1][0] = t;
+        t = rotv.m[0][2];
+        rotv.m[0][2] = rotv.m[2][0];
+        rotv.m[2][0] = t;
+        t = rotv.m[1][2];
+        rotv.m[1][2] = rotv.m[2][1];
+        rotv.m[2][1] = t;
+        m[0][0] = 0.5f * rotv.m[0][0];
+        m[0][1] = 0.5f * rotv.m[0][1];
+        m[0][2] = 0.5f * rotv.m[0][2];
+        m[1][0] = 0.5f * rotv.m[1][0];
+        m[1][1] = 0.5f * rotv.m[1][1];
+        m[1][2] = 0.5f * rotv.m[1][2];
         GXLoadTexMtxImm(m, 0x2A, 1);
         break;
     }
@@ -1858,6 +1865,7 @@ void fn_802D1C04(void) {
     }
     f32 n[3][4];
     fn_802D0DD4(n, &lbl_804C5690);
+    n[0][3] = n[1][3] = n[2][3] = 0.0f;
     GXLoadNrmMtxImm(n, 0);
     if (lbl_804C5700.mode == 2) {
         fn_802D1B58();

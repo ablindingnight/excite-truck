@@ -240,7 +240,7 @@ static inline u8 Cull(const MLSphere* sp) {
 
 extern "C" {
 
-void fn_802CCBC0(const MMtx33* r, F4 a, F4 b, F4 c) {}
+void fn_802CCBC0(const MMtx33* r, const F4& a, const F4& b, const F4& c) {}
 
 u8 fn_802CCBC4(const MLBox* e, MVec4 eye, f32 a, f32 b) {
     MVec4 w;
@@ -444,9 +444,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     }
     MLArray<MLSphere> sa = m->a;
     MCam cam;
-    const MCam* v = fn_802C86DC();
-    cam = *v;
-    lbl_804C5610 = cam;
+    cam = lbl_804C5610 = *fn_802C86DC();
     MMtx33 rt = cam.r;
     Transpose(&rt);
     MVec3 t;

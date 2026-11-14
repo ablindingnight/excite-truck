@@ -119,13 +119,13 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
             continue;
         }
         int j;
-        int limit = c->end;
-        for (j = c->first; j < limit; j++) {
+        for (j = c->first; j < c->end; j++) {
             PTri* t = &mesh->tris[j];
             f32 dist = t->d - PSVECDotProduct(&lp, &t->n);
             if (-dist > radius || -dist < 0.0f) {
                 continue;
             }
+            PVec3* edge = t->edge;
             PVec3 proj;
             proj.x = lp.x + t->n.x * dist;
             proj.y = lp.y + t->n.y * dist;
@@ -164,9 +164,9 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 if (outside == 1) {
                     int k1;
                     int k0 = outIdx[0];
-                    cp.x = proj.x + t->edge[k0].x * (-ed[k0]);
-                    cp.y = proj.y + t->edge[k0].y * (-ed[k0]);
-                    cp.z = proj.z + t->edge[k0].z * (-ed[k0]);
+                    cp.x = proj.x + edge[k0].x * (-ed[k0]);
+                    cp.y = proj.y + edge[k0].y * (-ed[k0]);
+                    cp.z = proj.z + edge[k0].z * (-ed[k0]);
                     k1 = (k0 + 1) % 3;
                     PVec3 a = tv[k0];
                     PVec3 b = tv[k1];
@@ -198,9 +198,9 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                     if (!(flags & (1 << (k0 + 3)))) {
                         continue;
                     }
-                    cp.x = proj.x + t->edge[k0].x * (-ed[k0]);
-                    cp.y = proj.y + t->edge[k0].y * (-ed[k0]);
-                    cp.z = proj.z + t->edge[k0].z * (-ed[k0]);
+                    cp.x = proj.x + edge[k0].x * (-ed[k0]);
+                    cp.y = proj.y + edge[k0].y * (-ed[k0]);
+                    cp.z = proj.z + edge[k0].z * (-ed[k0]);
                 }
                 if (PSVECSquareDistance(&cp, &lp) < radius * radius && n < max) {
                     PVec3 w;
@@ -214,10 +214,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                         w.y = cp.y;
                         w.z = cp.z;
                     }
-                    out[n].x = w.x;
-                    out[n].y = w.y;
-                    out[n].z = w.z;
-                    n++;
+                    out[n++] = w;
                 }
             }
         next:;
