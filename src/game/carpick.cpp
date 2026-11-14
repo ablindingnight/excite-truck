@@ -573,11 +573,14 @@ struct IconEntry {
 };
 
 // Scales each colour channel by 255*255/65536, alpha forced opaque.
+/* Helper ARGB unproven */
+static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+
 static inline u32 DimColor(u32 c) {
     int b = (u8)c * 255 * 255 / 256 / 256;
     int g = (u8)(c >> 8) * 255 * 255 / 256 / 256;
     int r = (u8)(c >> 16) * 255 * 255 / 256 / 256;
-    return 0xFF000000 | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+    return ARGB(0xFF, r, g, b);
 }
 
 extern "C" {

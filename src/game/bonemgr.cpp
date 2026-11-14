@@ -18,16 +18,16 @@ void operator delete[](void* p);
 
 class AllocBuf {
 public:
-    AllocBuf(u8* b) { buf = b; }
     virtual ~AllocBuf(void) { buf = 0; }
     u8* buf;  // offset 0x4
 };
 
 class StackAlloc : public AllocBuf {
 public:
-    StackAlloc(const char* n, u8* b, s32 s) : AllocBuf(b) {
+    StackAlloc(const char* n, u8* b, s32 s) {
         used = 0;
         size = s;
+        buf = b;
         name = n;
     }
     virtual ~StackAlloc(void) { delete[] buf; }
@@ -201,12 +201,19 @@ void fn_802DA52C(void) {
     m->dirty = 0;
 }
 
+/* Helper NewWords unproven */
+static inline BoneWords* NewWords(BoneMgr* m, int start, const u32* w, int n) {
+    int bytes = n * 4;
+    BoneWords* words = (BoneWords*)m->alloc.Alloc(sizeof(BoneWords) - 4 + bytes);
+    words->start = start;
+    words->count = n;
+    memcpy(words->data, w, bytes);
+    return words;
+}
+
 BoneCmd* fn_802DA550(int start, const BVec* v, int n, int wstart, const u32* w, int wn) {
     BoneMgr* m = lbl_8055FE5C;
-    BoneWords* words = (BoneWords*)m->alloc.Alloc(sizeof(BoneWords) - 4 + wn * 4);
-    words->start = wstart;
-    words->count = wn;
-    memcpy(words->data, w, wn * 4);
+    BoneWords* words = NewWords(m, wstart, w, wn);
     return m->NewCmd(start, v, n, n * sizeof(BVec), 0, words);
 }
 

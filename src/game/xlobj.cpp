@@ -283,10 +283,12 @@ struct Cell {
                 }
                 tail = c;
                 c->next = 0;
-                slot = &tail->Next();
+                slot = &tail->data[tail->count];
+                tail->count++;
             }
         } else {
-            slot = &tail->Next();
+            slot = &tail->data[tail->count];
+            tail->count++;
         }
         return slot;
     }
@@ -396,8 +398,12 @@ struct Grid {
     }
     void Add(Item* it, int x, int y);
     void Put(Item* it, int x, int y) {
-        int d = size * 2;
-        Cell<Item*>* c = &cells[(y - size + 0x200) / d * (0x400 / d) + (x - size + 0x200) / d];
+        int d;
+        int s = size;
+        d = s * 2;
+        int cx = (x - s + 0x200) / d;
+        int cy = (y - s + 0x200) / d;
+        Cell<Item*>* c = &cells[cy * (0x400 / d) + cx];
         Item** slot = c->Alloc(pool);
         if (slot) {
             *slot = it;
@@ -621,8 +627,12 @@ inline s16 Obj::X(void) { return x; }
 inline Obj* Item::AsObj(void) { return (Obj*)this; }
 
 inline void Grid::Add(Item* it, int x, int y) {
-    int d = size * 2;
-    Cell<Item*>* c = &cells[(y - size + 0x200) / d * (0x400 / d) + (x - size + 0x200) / d];
+    int d;
+    int s = size;
+    d = s * 2;
+    int cx = (x - s + 0x200) / d;
+    int cy = (y - s + 0x200) / d;
+    Cell<Item*>* c = &cells[cy * (0x400 / d) + cx];
     Item** slot = c->Alloc(pool);
     if (slot) {
         *slot = it;
