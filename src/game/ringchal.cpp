@@ -1536,9 +1536,7 @@ inline void Arena::Tally(void) {
         if (f34 < f30 && stats->data[k].done) {
             SetStat* st = &stats->data[k];
             f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (f30 - f34));
-            f32 u = (lbl_8055E3C8 - st->time - lo) / ((0.25f + lo) - lo);
-            CLAMP01(u);
-            int n = Lerp(0.0f, 1.0f, u);
+            int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, Time() - st->time));
             if (n) {
                 f34 += n;
                 RSound* tally = sTally;
