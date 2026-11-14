@@ -568,6 +568,8 @@ void fn_8000E874(int player) {
         f32 x = Lerp(5.0f + lbl_8055CFF0, right, row->slide);
         f32 ty;
         f32 x5;
+        f32 bw;
+        f32 size;
         f32 x9;
         f32 xr;
         fn_80235EF0(lbl_80351214.art, part2);
@@ -576,8 +578,6 @@ void fn_8000E874(int player) {
         xr = x + w;
         ty = 1.0f + (y - h / 2.0f);
         switch (row->type) {
-        f32 size;
-        f32 bw;
         f32 bh;
         f32 cy;
         case 1:
