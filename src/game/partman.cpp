@@ -897,7 +897,8 @@ void PartSys::DrawSprites(Particle* p, int n) {
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
         d.z = m.pos.z - pos.z;
-        fade = Clamp01(nearAlpha + PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist) * (1.0f - nearAlpha));
+        f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
+        fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         b = Byte(255.0f * (blueConst + blueRamp * t));
         u8 r;
         g = Byte(255.0f * (greenConst + greenRamp * t));
@@ -923,7 +924,7 @@ void PartSys::DrawSprites(Particle* p, int n) {
         q[3].pos.x = pos.x + d2.x * -size;
         q[3].pos.y = pos.y + d2.y * -size;
         q[3].pos.z = pos.z + d2.z * -size;
-        q[3].color = q[2].color = q[1].color = q[0].color = color;
+        q[0].color = q[1].color = q[2].color = q[3].color = color;
         q[1].v = q[0].u = ua;
         q[3].u = q[0].v = ub;
         q[2].v = q[1].u = 1 - ub;

@@ -348,8 +348,11 @@ void fn_8019321C(V2* out, const V2* in, const u8* m) {
     side.x = dir.y;
     side.y = -dir.x;
     f32 inputX = in->x;
-    r.x = Dot4_hm(side.x, dir.x, inputX, in->y) + org.x;
-    r.y = side.y * in->x + dir.y * in->y + org.y;
+    f32 inputY = in->y;
+    f32 vx = Dot4_hm(side.x, dir.x, inputX, inputY);
+    f32 vy = Dot4_hm(side.y, dir.y, inputX, inputY);
+    r.x = vx + org.x;
+    r.y = vy + org.y;
     out->x = r.x;
     out->y = r.y;
 }
