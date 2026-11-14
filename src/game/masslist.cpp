@@ -481,7 +481,10 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     CVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
     CVec3 ref(cs->ref[i].p.x, cs->ref[i].p.y, cs->ref[i].p.z);
     CVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
-    CVec3 d(p.x - ref.x, p.y - ref.y, p.z - ref.z);
+    CVec3 d;
+    d.x = p.x - ref.x;
+    d.y = p.y - ref.y;
+    d.z = p.z - ref.z;
     f32 base = PSVECDotProduct(&d, &nrm);
     CVec3 e;
     e.x = p.x - pt->x;
