@@ -536,10 +536,9 @@ static inline CarInfo* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void CarChunks::Loop1_InitColors(u32 i) {
-    u32 c;
-    c = CarAt(i)->color;
-    colors[i].dim = DimColor(Dim(c >> 16), Dim(c >> 8), Dim(c));
-    colors[i].full = c;
+    const struct { u32 value; } full = {CarAt(i)->color};
+    colors[i].dim = DimColor(Dim(full.value >> 16), Dim(full.value >> 8), Dim(full.value));
+    colors[i].full = full.value;
 }
 
 void CarChunks::InitColors(void) {
