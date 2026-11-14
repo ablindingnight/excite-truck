@@ -1621,7 +1621,8 @@ inline void CrushMaster::vf4C(int view) {
     if (layout.p) {
         char buf[0x20];
         if (radar && vf20(car)) {
-            fn_80139318(layout.p, radarTex, car, 140.0f);
+            f32 range = 140.0f;
+            fn_80139318(layout.p, radarTex, car, range);
         }
         DrawKills(car);
         {
