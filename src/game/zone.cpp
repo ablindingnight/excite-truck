@@ -2303,6 +2303,7 @@ struct RingMtx {
 void ZoneMaster::DrawRing(const Gate* g, int c) {
     RingMtx m;
     f32 s;
+    f32 size = 20.0f;
     m.x.Set(g->a.x - g->b.x, g->a.y - g->b.y, g->a.z - g->b.z);
     {
         Vec3 mid = g->Center();
@@ -2311,7 +2312,7 @@ void ZoneMaster::DrawRing(const Gate* g, int c) {
     PSVECNormalize(&m.x, &m.x);
     m.y.Set(0.0f, 1.0f, 0.0f);
     PSVECCrossProduct(&m.x, &m.y, &m.z);
-    s = PSVECDistance(&g->a, &g->b) / 20.0f;
+    s = PSVECDistance(&g->a, &g->b) / size;
     m.x.x *= s;
     m.x.y *= s;
     m.x.z *= s;
