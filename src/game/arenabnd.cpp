@@ -175,17 +175,17 @@ Bound* fn_801399FC(ValueNode* n) {
     return b;
 }
 
-int fn_80139B70(Bound* b, f32 x, f32 y);
+int fn_80139B70(const Bound* b, f32 x, f32 y);
 
 int fn_80139B5C(u8* car, Bound* b) { return fn_80139B70(b, *(f32*)(car + 0x60), *(f32*)(car + 0x68)); }
 
-int fn_80139B70(Bound* b, f32 x, f32 y) {
-    BoundPt* p = b->pts;
+int fn_80139B70(const Bound* b, f32 x, f32 y) {
+    const BoundPt* p = b->pts;
     int n = b->n;
     int c = 0;
     int i;
     for (i = 0; i < n; p++, i++) {
-        BoundPt* q = &b->pts[(i + 1) % n];
+        const BoundPt* q = &b->pts[(i + 1) % n];
         bool up = p->y < q->y;
         if (up) {
             if (y < p->y || y > q->y) {
@@ -213,7 +213,7 @@ int fn_80139B70(Bound* b, f32 x, f32 y) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80139C5C(int limit, BoundPt* p, V2& lo, V2& hi) {
+static inline void Loop1_fn_80139C5C(int limit, const BoundPt* p, V2& lo, V2& hi) {
     int i;
     for (i = 1; i < limit; i++, p++) {
         lo.x = MinF(p->x, lo.x);
@@ -223,11 +223,11 @@ static inline void Loop1_fn_80139C5C(int limit, BoundPt* p, V2& lo, V2& hi) {
     }
 }
 
-V2 fn_80139C5C(Bound* b) {
+V2 fn_80139C5C(const Bound* b) {
     V2 lo;
     V2 hi;
     V2 r;
-    BoundPt* p = &b->pts[1];
+    const BoundPt* p = &b->pts[1];
     int i;
     hi.x = b->pts[0].x;
     hi.y = b->pts[0].y;
