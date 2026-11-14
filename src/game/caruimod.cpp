@@ -375,7 +375,8 @@ void CarUIModel::LoadEfx(const char* path) {
             for (i = 0; i < numBones; i++) {
                 char key[0x20];
                 fn_801345D8(key, 0x20, "%d", i);
-                bones[i] = r->GetVec3Or(key, zero);
+                ValVec3& bone = bones[i];
+                bone = r->GetVec3Or(key, zero);
             }
         } else {
             memset(bones, sizeof(bones), 0);
@@ -498,7 +499,9 @@ void CarUIModel::DrawEfx(void) {
         b->z = p.z * -1.0f;
         s32* bs = boneset;
         if (bs) {
-            Lift((Vec*)&bones[bs[0x33]], wheelY[0] - offset.y);
+            const f32 wheelHeight = wheelY[0];
+            const f32 baseHeight = offset.y;
+            Lift((Vec*)&bones[bs[0x33]], wheelHeight - baseHeight);
             Lift((Vec*)&bones[bs[0x34]], wheelY[1] - offset.y);
             Lift((Vec*)&bones[bs[0x35]], wheelY[2] - offset.y);
             Lift((Vec*)&bones[bs[0x36]], wheelY[3] - offset.y);

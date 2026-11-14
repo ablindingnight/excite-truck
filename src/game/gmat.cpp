@@ -688,12 +688,12 @@ void fn_802B1758(GMat* g) {
         far = 2048.0f * kWorldScale;
         c = &lbl_804BE190[4];
         for (k = 4; k < 8; k++, c++) {
-            x = (f32)((k & 1) ? -1 : 1) * far;
-            z = (f32)((k & 2) ? -1 : 1) * far;
-            y = fn_801DCF48(0, x, z);
-            c->x = x;
+            z = (f32)((k & 1) ? -1 : 1) * far;
+            x = (f32)((k & 2) ? -1 : 1) * far;
+            y = fn_801DCF48(0, z, x);
+            c->x = z;
             c->y = y;
-            c->z = z;
+            c->z = x;
         }
         u16 idx[14] = {6, 0, 2, 6, 4, 5, 1, 6, 3, 1, 5, 7, 6, 2};
         fn_802DC464(lbl_804BE190, 8, idx, 14);

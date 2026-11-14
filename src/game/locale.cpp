@@ -348,6 +348,7 @@ void fn_801305C4(char* buf, s32 size, const Unit* u, int mode, f32 value) {
 }
 
 char* fn_8013072C(char* buf, s32 size, s32 value) {
+    int offset;
     int neg = value < 0;
     s32 groups;
     s32 n;
@@ -367,9 +368,10 @@ char* fn_8013072C(char* buf, s32 size, s32 value) {
     } else {
         lead = n < 100 ? 2 : 3;
     }
-    int len = groups * 4 + lead;
-    len += neg;
-    p = &buf[len];
+    offset = groups * 4;
+    offset += lead;
+    offset += neg;
+    p = (char*)((uintptr_t)offset + (uintptr_t)buf);
     p[1] = 0;
     if (value == 0) {
         *p-- = '0';

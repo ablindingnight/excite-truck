@@ -1384,7 +1384,9 @@ s32 fn_801186B8(StreamPlayer *p) {
                 fn_8011C274(lbl_8055DED4, p->queue);
             }
             while (remaining != 0) {
-                t = &p->tracks[j];
+                uintptr_t writeOffset;
+                uintptr_t decodeOffset = (uintptr_t)j * sizeof(StreamTrack);
+                t = (StreamTrack *)(decodeOffset + (uintptr_t)p->tracks);
                 room = t->ringSize - t->available;
                 fn_8011B94C((BinkAudio8011 *)t->handle, &out, &len, src, &src);
                 if (len > remaining) {
@@ -1392,12 +1394,14 @@ s32 fn_801186B8(StreamPlayer *p) {
                 }
                 remaining -= len;
                 if (len > room) {
+                    uintptr_t readOffset;
                     over = len - room;
                     p->tracks[j].readPtr += over;
                     level = OSDisableInterrupts();
                     SelectStreamTrack(p->tracks, j)->available -= over;
                     OSRestoreInterrupts(level);
-                    t = &p->tracks[j];
+                    readOffset = (uintptr_t)j * sizeof(StreamTrack);
+                    t = (StreamTrack *)(readOffset + (uintptr_t)p->tracks);
                     if (t->readPtr >= t->ringEnd) {
                         t->readPtr -= t->ringSize;
                     }
@@ -1405,7 +1409,8 @@ s32 fn_801186B8(StreamPlayer *p) {
                 level = OSDisableInterrupts();
                 SelectStreamTrack(p->tracks, j)->available += len;
                 OSRestoreInterrupts(level);
-                t = &p->tracks[j];
+                writeOffset = (uintptr_t)j * sizeof(StreamTrack);
+                t = (StreamTrack *)(writeOffset + (uintptr_t)p->tracks);
                 room = t->ringEnd - t->writePtr;
                 if (room < len) {
                     if (room != 0) {

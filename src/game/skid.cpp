@@ -399,7 +399,7 @@ static inline void Loop1_fn_8028D89C(SkidSlot* slot, int type, f32 now, SkidType
 
 void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
-    SkidPt* p;
+    SkidPt* p = 0;
     int type;
     SkidSlot* slot;
     SkidType* t;
