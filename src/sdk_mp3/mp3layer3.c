@@ -392,9 +392,12 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*ou
                 } else {
                     fn_800C2090(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 }
-                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20]; prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
-                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26]; prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
-                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32]; prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
+                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20];
+                prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
+                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26];
+                prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
+                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32];
+                prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
             }
         } else if (t1 & 0x10) {
             pa = work[ch][d->band_count - 1];
@@ -419,9 +422,12 @@ void MP3_IMDCT(MP3Decoder* d, s32 (*work)[32][36], s32 (*prev)[32][18], s32 (*ou
                 } else {
                     fn_800C2090(&outbuf[ch][sb], work[ch][sb], prev[ch][sb]);
                 }
-                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20]; prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
-                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26]; prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
-                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32]; prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
+                prev[ch][sb][0] = work[ch][sb][18]; prev[ch][sb][1] = work[ch][sb][19]; prev[ch][sb][2] = work[ch][sb][20];
+                prev[ch][sb][3] = work[ch][sb][21]; prev[ch][sb][4] = work[ch][sb][22]; prev[ch][sb][5] = work[ch][sb][23];
+                prev[ch][sb][6] = work[ch][sb][24]; prev[ch][sb][7] = work[ch][sb][25]; prev[ch][sb][8] = work[ch][sb][26];
+                prev[ch][sb][9] = work[ch][sb][27]; prev[ch][sb][10] = work[ch][sb][28]; prev[ch][sb][11] = work[ch][sb][29];
+                prev[ch][sb][12] = work[ch][sb][30]; prev[ch][sb][13] = work[ch][sb][31]; prev[ch][sb][14] = work[ch][sb][32];
+                prev[ch][sb][15] = work[ch][sb][33]; prev[ch][sb][16] = work[ch][sb][34]; prev[ch][sb][17] = work[ch][sb][35];
             }
         }
     }
