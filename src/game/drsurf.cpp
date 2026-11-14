@@ -1297,15 +1297,15 @@ void fn_802D6C78(void) {
         int n = next->n;
         YMorphVtx* src = (YMorphVtx*)next->src;
         u8* dst = (u8*)next->dst;
-        c = n > 0x100 ? 0x100 : n;
         next++;
+        c = n > 0x100 ? 0x100 : n;
+        u8* cur = LC_BUF(0);
         int buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x14);
         n -= c;
         src += c;
         pc = 0;
         u8* pdst = 0;
-        u8* cur = LC_BUF(0);
         f32* pout = 0;
         for (;;) {
             LCQueueWait(0);
@@ -1348,7 +1348,7 @@ void fn_802D6C78(void) {
             }
         }
         LCQueueWait(0);
-        q->count = 0;
+        lbl_804D2C40.count = 0;
     }
     SetGQR6();
     q = &lbl_804D6C44;
@@ -1361,16 +1361,15 @@ void fn_802D6C78(void) {
         int pc;
         u8* dst = (u8*)next->dst;
         next++;
-        int buf;
         int c = n > 0xE0 ? 0xE0 : n;
+        u8* cur = LC_BUF(0);
+        int buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x18);
         n -= c;
         src += c;
         pc = 0;
         u8* pdst = 0;
         pout = 0;
-        u8* cur = LC_BUF(0);
-        buf = 1;
         for (;;) {
             LCQueueWait(0);
             if (pc > 0) {
@@ -1413,8 +1412,8 @@ void fn_802D6C78(void) {
                 o++;
             }
         }
-        q->count = 0;
         LCQueueWait(0);
+        lbl_804D6C44.count = 0;
     }
     SetGQR6();
     q = &lbl_804CEC3C;
@@ -1428,14 +1427,14 @@ void fn_802D6C78(void) {
         u8* dst = (u8*)next->dst;
         next++;
         int c = n > 0x100 ? 0x100 : n;
+        u8* cur = LC_BUF(0);
+        int buf = 1;
         LCLoadData(LC_BUF(0), src, c * 0x10);
         n -= c;
         src += c;
         pc = 0;
         pdst = 0;
         f32* pout = 0;
-        int buf = 1;
-        u8* cur = LC_BUF(0);
         for (;;) {
             LCQueueWait(0);
             if (pc > 0) {
@@ -1477,7 +1476,7 @@ void fn_802D6C78(void) {
             }
         }
         LCQueueWait(0);
-        q->count = 0;
+        lbl_804CEC3C.count = 0;
     }
 }
 
