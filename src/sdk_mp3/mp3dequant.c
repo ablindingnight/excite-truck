@@ -23,9 +23,11 @@ static inline s32 Pow43(s32 x, const s32* c) {
  * path from the block flags, builds the line-to-band map on first use, and dequantizes each line:
  * |x| < 256 via the pow43 table, larger via the 32-segment quadratic table, scaled by the scalefactor exponent.
  * Behaviour verified identical to the original in a PPC simulation (76 random granules, including the original's
- * quirks in the mixed short part: no absolute value, and a second shift). NonMatching: 1278/1278, same opcodes.
- * Local names differ per loop (the long loop reads the sample into m, the mixed short loop into idx): each named
- * local is one register-allocation node, and these roles reproduce the original's colouring (namerole.py). */
+ * quirks in the mixed short part: no absolute value, and a second shift). NonMatching: 1278/1278, same opcodes,
+ * registers differ in the short and mixed loops. What decides the colouring here (colwhy.py): one shared set of
+ * locals for the four loops (the first range of a variable keeps the named local, later ranges become objects
+ * numbered by the variable's first appearance), so the gain index shares the sample variable m and the edge-copy
+ * loops count with p; Pow43 gets the table row expression directly and adds c[3] last. */
 void MP3_Dequantize(MP3Decoder* d, u8* long_map, u8* short_map, u8* mixed_map, s16* long_edges, s16* short_edges,
                     u32* block_flags, MP3ChannelBuf* out, s16* in, s16* global_gain, s16* subblock_gain,
                     s16* sf_scale, s16* sf_long, s16 (*sf_short)[3], s16* preflag) {
