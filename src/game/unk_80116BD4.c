@@ -1708,16 +1708,14 @@ void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
     }
 }
 
-extern void AXSetVoiceState(s32);
+extern void AXSetVoiceState(void *vpb, s32 state);
 void fn_8011943C(void *arg0, s32 arg1) {
-    s32 temp_r0;
-    s32 temp_r3;
-    temp_r0 = *(s32 *)arg0;
-    if (temp_r0 != 0) {
-        ((void (*)())AXSetVoiceState)(temp_r0, arg1);
+    void *v;
+    if ((v = *(void **)arg0) != NULL) {
+        AXSetVoiceState(v, arg1);
     }
-    if ((temp_r3 = *(s32 *)((u8 *)arg0 + 4)) != 0) {
-        ((void (*)())AXSetVoiceState)(temp_r3, arg1);
+    if ((v = *(void **)((u8 *)arg0 + 4)) != NULL) {
+        AXSetVoiceState(v, arg1);
     }
 }
 
