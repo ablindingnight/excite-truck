@@ -434,6 +434,7 @@ public:
     void Update(int score, int kills, int bonus);
     void Reset(void);
     void Load(void);
+    void Init(void);
     volatile s32 state;  // offset 0x0
     f32 start;         // offset 0x4
     u8 b8;             // offset 0x8
@@ -739,6 +740,7 @@ public:
     virtual int vf8C(int p, int key);
     virtual void* vfE8(void);
     void DrawKills(int car);
+    void LoadTuning(ValueNode* t);
     int AliveAI(void) {
         int n = 0;
         int i;
@@ -1117,26 +1119,14 @@ inline CrushMaster::~CrushMaster(void) {
     gxForgetTexture(radarTex);
 }
 
-#pragma dont_inline on
-inline void CrushMaster::vfF8(void) {
-    int i;
-    ValueNode* t;
-    layout.p = (ILayout*)fn_80145E70("crushlyt.val");
-    nCars = fn_801EA994();
-    for (i = 0; i < nCars; i++) {
-        cars[i].human = fn_80171EC0(i);
-        cars[i].active = 1;
-        cars[i].f18 = -1.0f;
-        cars[i].fC = 0;
-        cars[i].f8 = 0;
-        cars[i].bonus = 0;
-        {
-            CrushCar* c = &cars[i];
-            memset(c->f10, 0, 8);
-        }
-    }
-    const char* key = (const char*)fn_80204EA0("crush_table");
-    t = fn_8000AC38()->vals->FindChild(key);
+// Helper name unproven: a table of the config file by (hashed) name.
+static inline ValueNode* FindTable(const char* name) {
+    const char* key = (const char*)fn_80204EA0(name);
+    return fn_8000AC38()->vals->FindChild(key);
+}
+
+// Helper name unproven: reads the crush_table tuning values.
+inline void CrushMaster::LoadTuning(ValueNode* t) {
     timeout = t->GetFloat("timeout", 180.0f);
     lbl_8043038C.speedA = 0.44444445f * t->GetFloat("ai_speed_a", 160.0f);
     lbl_8043038C.speedB = 0.44444445f * t->GetFloat("ai_speed_b", 100.0f);
@@ -1150,6 +1140,30 @@ inline void CrushMaster::vfF8(void) {
     lbl_8043038C.awesome = t->GetFloat("cr_awesome", 30.0f);
     lbl_8043038C.killDist = t->GetFloat("killfactor_dist", 1.0f);
     lbl_8043038C.killSpeed = t->GetFloat("killfactor_speed", 0.2f);
+}
+
+// Helper name unproven: results set-up. Load and Reset stay out of line here (an inlined body does not
+// expand inlines defined after it), which is what the target shows; no pragma is needed.
+inline void CrushResults::Init(void) {
+    layout = new ("ArtAnimManager") ArtAnimManager(1);
+    Load();
+    Reset();
+}
+
+inline void CrushMaster::vfF8(void) {
+    int i;
+    layout.p = (ILayout*)fn_80145E70("crushlyt.val");
+    nCars = fn_801EA994();
+    for (i = 0; i < nCars; i++) {
+        cars[i].human = fn_80171EC0(i);
+        cars[i].active = 1;
+        cars[i].f18 = -1.0f;
+        cars[i].fC = 0;
+        cars[i].f8 = 0;
+        cars[i].bonus = 0;
+        cars[i].ClearHist();
+    }
+    LoadTuning(FindTable("crush_table"));
     spawns.count = 0;
     {
         ValueNode* sp = fn_8000AC38()->vals->FindChild("spawns");
@@ -1170,13 +1184,10 @@ inline void CrushMaster::vfF8(void) {
             }
         }
     }
-    results.layout = new ("ArtAnimManager") ArtAnimManager(1);
-    results.Load();
-    results.Reset();
+    results.Init();
     fn_802E30C8("crush: timeout %.0f (%.0f->%.0f at (%.0f->%.0f)", timeout, lbl_8043038C.speedA / 0.44444445f,
                 lbl_8043038C.speedB / 0.44444445f, lbl_8043038C.speedATime, lbl_8043038C.speedBTime);
 }
-#pragma dont_inline reset
 
 inline void CrushResults::Reset(void) {
     state = 0;
