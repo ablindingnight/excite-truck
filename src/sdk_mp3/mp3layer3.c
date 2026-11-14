@@ -2218,105 +2218,33 @@ void MP3_Reorder32(u32* dst, u32* src, s32 mode) {
 
 /* Mid/side stereo: left = a + b, right = a - b over the long spectrum (count0 lines), the mixed layout (36 long
  * lines plus count1 lines of each short window from line 12) or the three short windows (count1 lines each).
- * From ChatGPT's candidate B (round 23), verified against the original in a PPC simulation (40/40) and by
- * ChatGPT (792 cases). NonMatching: 661/661, identical opcode sequence, register numbers differ. */
-void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
-    s32 b4;
+ * The eight loops are one inline helper: each expansion gets its own counter and temporaries, which is what the
+ * original register colouring needs (left r5 / right r7 in every loop). */
+/* Helper name unproven */
+static inline void MP3_MidSide(s32* left, s32* right, s32 n) {
     s32 i;
-    s32 b5;
-    s32 b7;
-    s32 b8;
-    s32 b3;
-    s32 b6;
-    s32 b9;
-    s32* left;
-    s32 a5;
-    s32 a6;
-    s32 a7;
-    s32 a3;
-    s32 a8;
-    s32 b2;
-    s32 a9;
-    s32 a4;
-    s32 a2;
-    s32* right;
+    s32 a;
+    s32 b;
+    for (i = 0; i < n; i++) {
+        a = *left;
+        b = *right;
+        *(left++) = a + b;
+        *(right++) = a - b;
+    }
+}
+
+void fn_800C57B0(s32 count0, s32 count1, u32 flags, MP3ChannelBuf* g) {
     if (flags & 7) {
-        right = g[1].xr;
-        left = g[0].xr;
-        for (i = 0; i < count0; i++) {
-            a3 = *left;
-            b3 = *right;
-            *(left++) = a3 + b3;
-            *(right++) = a3 - b3;
-        }
-
-    } else
-        if (flags & 8) {
-        right = g[1].xr;
-        left = g[0].xr;
-        for (i = 0; i < 36; i++) {
-            a2 = *left;
-            b2 = *right;
-            *(left++) = a2 + b2;
-            *(right++) = a2 - b2;
-        }
-
-        right = (s32 *) (((u8 *) g) + 0x2430);
-        left = (s32 *) (((u8 *) g) + 0x30);
-        for (i = 0; i < count1; i++) {
-            a4 = *left;
-            b4 = *right;
-            *(left++) = a4 + b4;
-            *(right++) = a4 - b4;
-        }
-
-        right = (s32 *) (((u8 *) g) + 0x2D30);
-        left = (s32 *) (((u8 *) g) + 0x930);
-        for (i = 0; i < count1; i++) {
-            a5 = *left;
-            b5 = *right;
-            *(left++) = a5 + b5;
-            *(right++) = a5 - b5;
-        }
-
-        right = (s32 *) (((u8 *) g) + 0x3630);
-        left = (s32 *) (((u8 *) g) + 0x1230);
-        for (i = 0; i < count1; i++) {
-            a6 = *left;
-            b6 = *right;
-            *(left++) = a6 + b6;
-            *(right++) = a6 - b6;
-        }
-
-    } else
-        if (flags & 16) {
-        left = (s32 *) (((u8 *) g) + 0x0000);
-        right = (s32 *) (((u8 *) g) + 0x2400);
-        for (i = 0; i < count1; i++) {
-            a7 = *left;
-            b7 = *right;
-            *(left++) = a7 + b7;
-            *(right++) = a7 - b7;
-        }
-
-        right = (s32 *) (((u8 *) g) + 0x2D00);
-        left = (s32 *) (((u8 *) g) + 0x0900);
-        for (i = 0; i < count1; i++) {
-            a8 = *left;
-            b8 = *right;
-            *(left++) = a8 + b8;
-            *(right++) = a8 - b8;
-        }
-
-        right = (s32 *) (((u8 *) g) + 0x3600);
-        left = (s32 *) (((u8 *) g) + 0x1200);
-        for (i = 0; i < count1; i++) {
-            a9 = *left;
-            b9 = *right;
-            *(left++) = a9 + b9;
-            *(right++) = a9 - b9;
-        }
-
+        MP3_MidSide(g[0].xr, g[1].xr, count0);
+    } else if (flags & 8) {
+        MP3_MidSide(g[0].xr, g[1].xr, 36);
+        MP3_MidSide(&g[0].sxr[0][12], &g[1].sxr[0][12], count1);
+        MP3_MidSide(&g[0].sxr[1][12], &g[1].sxr[1][12], count1);
+        MP3_MidSide(&g[0].sxr[2][12], &g[1].sxr[2][12], count1);
+    } else if (flags & 16) {
+        MP3_MidSide(g[0].sxr[0], g[1].sxr[0], count1);
+        MP3_MidSide(g[0].sxr[1], g[1].sxr[1], count1);
+        MP3_MidSide(g[0].sxr[2], g[1].sxr[2], count1);
     }
 }
 
