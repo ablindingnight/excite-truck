@@ -1641,9 +1641,24 @@ void Gate::Scale(f32 f) {
     d = PSVECDistance(&a, &b);
 #define s (f / d)
     {
-        Vec3 mid(a.x + (b.x - a.x) * 0.5f, a.y + (b.y - a.y) * 0.5f, a.z + (b.z - a.z) * 0.5f);
-        a = Vec3(mid.x + s * (a.x - mid.x), mid.y + s * (a.y - mid.y), mid.z + s * (a.z - mid.z));
-        b = Vec3(mid.x + s * (b.x - mid.x), mid.y + s * (b.y - mid.y), mid.z + s * (b.z - mid.z));
+        f32 ay;
+        f32 az;
+        f32 ax;
+        f32 bx;
+        f32 by;
+        f32 bz;
+        bz = b.z;
+        az = a.z;
+        by = b.y;
+        ay = a.y;
+        bx = b.x;
+        ax = a.x;
+        f32 mz = az + (bz - az) * 0.5f;
+        f32 my = ay + (by - ay) * 0.5f;
+        f32 mx = ax + (bx - ax) * 0.5f;
+        Vec3 mid(mx, my, mz);
+        a = Vec3(mid.x + s * (ax - mid.x), mid.y + s * (ay - mid.y), mid.z + s * (az - mid.z));
+        b = Vec3(mid.x + s * (bx - mid.x), mid.y + s * (by - mid.y), mid.z + s * (bz - mid.z));
     }
 #undef s
 }
