@@ -493,6 +493,27 @@ void fn_80168020(void) {
     }
 }
 
+/* Helper name unproven */
+static inline void DrawPickup(int k) {
+    Pickup* p = &lbl_8055E354->objs.data[k];
+    if (p->type && p->type->handle && !p->taken) {
+        u32 col = p->type ? p->type->color : 0xFFFFFFFF;
+        int o1 = fn_802C9994(col);
+        u32 o2 = fn_802C9950(((col >> 24) >> 1) << 24 | (((col >> 16) & 0xFF) >> 1) << 16 |
+                             (((col >> 8) & 0xFF) >> 1) << 8 | ((col & 0xFF) >> 1));
+        SpinXform* x;
+        fn_802C9900((f32)(col >> 24) / 255.0f);
+        x = &lbl_8042FF60[((s32)p->type / 12) & 15];
+        x->pos[0] = p->pos[0];
+        x->pos[1] = p->pos[1];
+        x->pos[2] = p->pos[2];
+        fn_802C744C(p->type->handle, x);
+        fn_802C9994(o1);
+        fn_802C9950(o2);
+        fn_802C9904();
+    }
+}
+
 void fn_80168104(void) {
     Camera* cam = fn_802C86DC();
     V2 c;
@@ -501,9 +522,6 @@ void fn_80168104(void) {
     c.z = cam->z;
     for (i = 0; i < lbl_8055E354->groups.count; i++) {
         PickupGroup* g;
-        Pickup* p;
-        u32 col;
-        int o1;
         g = &lbl_8055E354->groups.data[i];
         if (g->enabled) {
             if (g->hasBound) {
@@ -516,24 +534,8 @@ void fn_80168104(void) {
             }
             {
                 int j;
-                for (j = 0; j < g->count; j++) {
-                    p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
-                    if (p->type && p->type->handle && !p->taken) {
-                        col = p->type ? p->type->color : 0xFFFFFFFF;
-                        o1 = fn_802C9994(col);
-                        u32 o2 = fn_802C9950(((col >> 24) >> 1) << 24 | (((col >> 16) & 0xFF) >> 1) << 16 |
-                                             (((col >> 8) & 0xFF) >> 1) << 8 | ((col & 0xFF) >> 1));
-                        SpinXform* x;
-                        fn_802C9900((f32)(col >> 24) / 255.0f);
-                        x = &lbl_8042FF60[((s32)p->type / 12) & 15];
-                        x->pos[0] = p->pos[0];
-                        x->pos[1] = p->pos[1];
-                        x->pos[2] = p->pos[2];
-                        fn_802C744C(p->type->handle, x);
-                        fn_802C9994(o1);
-                        fn_802C9950(o2);
-                        fn_802C9904();
-                    }
+                for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
+                    DrawPickup(lbl_8055E354->groups.data[i].first + j);
                 }
             }
         }

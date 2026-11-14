@@ -1599,7 +1599,7 @@ void fn_80195F6C(u8* d) {
     fn_80135B9C((LineFollower*)PTR(d, 0x164), ahead, 0, 0, (f32*)(d + 0x50), &il);
     F32(d, 0x54) = speedScale;
     *(ILPos*)(d + 0x68) = il;
-    if (il.seg->type == 3) {
+    if (((ILPos*)(d + 0x68))->seg->type == 3) {
         F32(d, 0x50) = 40.0f;
     }
     if (il.seg) {
