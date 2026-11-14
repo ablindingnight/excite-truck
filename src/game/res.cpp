@@ -1900,35 +1900,32 @@ extern "C" int fn_8012EDA8(StreamBuf* b, const char* name, u32 type, u32* info) 
 extern "C" s32 fn_8012EE78(StreamBuf* b) { return b->pos; }
 
 extern "C" void fn_8012EE80(StreamBuf* b) {
-    int i;
     StreamSlot* s;
-    struct {
-        s32 end;
-    } range;
-    StreamSlot* slots;
-    slots = b->slots;
-    s = slots;
-    range.end = b->pos;
-    for (i = 0; i < 2; i++, s++) {
+    const struct {
+        StreamSlot* first;
+    } slots = {b->slots};
+    s = slots.first;
+    s32 streamEnd = b->pos;
+    for (int i = 0; i < 2; i++, s++) {
         if (s->state) {
             if (s->state == 1 && s->res->Poll(0)) {
                 s->state = 2;
             }
             const s32 slotEnd = s->pos + b->size;
-            if (slotEnd > range.end) {
-                range.end = slotEnd;
+            if (slotEnd > streamEnd) {
+                streamEnd = slotEnd;
             }
         }
     }
-    s = slots;
-    for (i = 0; i < 2; i++, s++) {
-        if ((s->state == 0 && s->res) || (s->state == 2 && b->size + s->pos < b->pos)) {
+    s = slots.first;
+    for (int i = 0; i < 2; i++, s++) {
+        if ((s->state == 0 && s->res) || (s->state == 2 && s->pos + b->size < b->pos)) {
             s32 start;
             s32 n;
-            s->pos = range.end;
-            start = range.end;
+            s->pos = streamEnd;
+            start = streamEnd;
             n = b->size;
-            range.end += n;
+            streamEnd += n;
             if (start + n > b->total) {
                 n = b->total - start;
             }
