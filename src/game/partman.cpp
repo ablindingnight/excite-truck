@@ -405,8 +405,8 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
         p->redRamp = p->greenRamp = p->blueRamp = vn->GetFloat("Bright_ramp", 0.0f);
         p->redConst = p->greenConst = p->blueConst = vn->GetFloat("Bright_constant", 0.0f);
     } else if (vn->Has("Start_color") || vn->Has("End_color")) {
-        ValVec3 start = vn->GetVec3Or("Start_color", V3c(0.0f, 0.0f, 0.0f));
-        ValVec3 end = vn->GetVec3Or("End_color", V3c(0.0f, 0.0f, 0.0f));
+        ValVec3 start = vn->GetVec3Or("Start_color", ValVec3(V3c(0.0f, 0.0f, 0.0f)));
+        ValVec3 end = vn->GetVec3Or("End_color", ValVec3(V3c(0.0f, 0.0f, 0.0f)));
         p->redRamp = end.x - start.x;
         p->redConst = start.x;
         p->greenRamp = end.y - start.y;
@@ -422,7 +422,7 @@ void fn_8028E654(PartParams* p, ValueNode* vn) {
         p->blueConst = vn->GetFloat("Blue_constant", 0.0f);
     }
     if (vn->Has("tint_override")) {
-        ValVec3 tint = vn->GetVec3Or("tint_override", V3c(0.0f, 0.0f, 0.0f));
+        ValVec3 tint = vn->GetVec3Or("tint_override", ValVec3(V3c(0.0f, 0.0f, 0.0f)));
         p->redRamp = 0.0f;
         p->redConst = tint.x;
         p->greenRamp = 0.0f;

@@ -351,7 +351,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             }
             e->handle = fn_802C6FC0(model, 0, 0);
             e->model.scale = en->GetFloat("scale", 1.0f);
-            const ValVec3& off = en->GetVec3Or("offset", MakeVec3(0.0f, 0.0f, 0.0f));
+            const ValVec3& off = en->GetVec3Or("offset", ValVec3(MakeVec3(0.0f, 0.0f, 0.0f)));
             e->model.off[0] = off.x;
             e->model.off[1] = off.y;
             e->model.off[2] = off.z;

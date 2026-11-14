@@ -624,8 +624,16 @@ void fn_801683F4(PickupCounts* out, int player) {
             lo.x = LoEdge(x, w);
             lo.z = LoEdge(l[2], dims->len);
             hi.x = HiEdge(l[0], dims->wid);
-            hi.z = HiEdge(l[2], dims->len);
-            r = SqrtF(Len2_hm(dims->len, dims->wid));
+            const f32 edgeLen = dims->len;
+            f32 upper = MAX(l[2], 0.0f);
+            const f32 pad = 1.1f * edgeLen;
+            const f32 len = dims->len;
+            const f32 wid = dims->wid;
+            hi.z = upper + pad;
+            const f32 lengthSquared = len * len;
+            const f32 widthSquared = wid * wid;
+            const f32 radiusSquared = widthSquared + lengthSquared;
+            r = SqrtF(radiusSquared);
         }
         for (i = 0; i < lbl_8055E354->groups.count; i++) {
             PickupGroup* g = &lbl_8055E354->groups.data[i];

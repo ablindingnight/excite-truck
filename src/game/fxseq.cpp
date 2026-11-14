@@ -125,7 +125,8 @@ int FXSeqNode::Init(ValueNode* node) {
     FXElem* e = CreateElem(node);
     if (e) {
         start = node->GetFloat("start_t");
-        const ValVec3& v = node->GetVec3Or("offset", Vec3(0.0f, 0.0f, 0.0f));
+        const ValVec3 zero = Vec3(0.0f, 0.0f, 0.0f);
+        const ValVec3& v = node->GetVec3Or("offset", ValVec3(zero));
         offset.x = v.x;
         offset.y = v.y;
         offset.z = v.z;

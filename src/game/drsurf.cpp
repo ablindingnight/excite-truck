@@ -244,8 +244,9 @@ s32 lbl_8055FE00;   // y-morph vertices
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
-    if (out == in) {
+template <class Position>
+static inline void MulVec(V3* out, const Position* in, const Mat3* m, const void* pos) {
+    if (out == pos) {
         f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
         f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
         f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
@@ -257,6 +258,10 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
         out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
         out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
+}
+
+static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
+    MulVec(out, in, m, in);
 }
 
 static inline void MulVecR(V3* out, const V3* in, const Mat3* m) {
@@ -583,16 +588,22 @@ void fn_802D50B4(Surf* s) {
         if (!Queue(&lbl_804D6C44, n, v, out)) {
             V3* o = out;
             for (int i = n; i > 0; i--) {
-                f32 a, wa, wb, w, b;
+                f32 a;
+                f32 wa;
+                f32 wb;
+                f32 w;
+                f32 b;
                 V3 p;
                 w = v->w;
                 p.x = v->x + lbl_804C56F0.x * w;
                 p.y = v->y + lbl_804C56F0.y * w;
                 p.z = v->z + lbl_804C56F0.z * w;
+                const int ia = v->ia;
+                wa = lbl_804CA308[ia];
+                const int ib = v->ib;
+                wb = lbl_804CA308[ib];
                 a = (1.0f / 255) * v->da;
                 b = (1.0f / 255) * v->db;
-                wb = lbl_804CA308[v->ib];
-                wa = lbl_804CA308[v->ia];
                 o->x = p.x;
                 o->y = p.y + a * wa + b * wb;
                 o->z = p.z;
@@ -609,16 +620,15 @@ void fn_802D50B4(Surf* s) {
 
 void fn_802D5270(Surf* s) {
     int n;
-    const V3* p;
+    const SkinVtx* position;  // Position address used by the transform overlap check.
     V3* out;
     const SkinMtx* ma;
     V3* o;
-    SkinVtx* v;
-    v = (SkinVtx*)s->verts;
+    const SkinVtx* v = (const SkinVtx*)s->verts;
     n = s->nverts;
     out = (V3*)fn_802CFF64(0xC * n);
     if (out) {
-        p = (const V3*)v;
+        position = v;
         o = out;
         int i;
         for (i = n; i > 0; i--) {
@@ -630,11 +640,11 @@ void fn_802D5270(Surf* s) {
             mb = &lbl_804DAC48[v->b1 >> 2];
             w0 = v->w0 * (1.0f / 255);
             w1 = v->w1 * (1.0f / 255);
-            MulVec(&a, p, &ma->rot);
+            MulVec(&a, v, &ma->rot, position);
             a.x += ma->pos.x;
             a.y = a.y + ma->pos.y;
             a.z = a.z + ma->pos.z;
-            MulVec(&b, p, &mb->rot);
+            MulVec(&b, v, &mb->rot, position);
             b.x = b.x + mb->pos.x;
             b.y = b.y + mb->pos.y;
             b.z += mb->pos.z;
@@ -646,7 +656,7 @@ void fn_802D5270(Surf* s) {
             o->z = o->z + b.z * w1;
             o++;
             v++;
-            p = (const V3*)((u8*)p + 0x10);
+            position++;
         }
         GXSetArray(9, out, 0xC);
         GXSetArray(0xA, s->attr, 3);

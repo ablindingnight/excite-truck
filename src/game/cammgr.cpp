@@ -1305,6 +1305,12 @@ struct CamPt {
 };
 
 static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
+static inline void ScalePerpendicular(CamPt* d, f32 inv) {
+    const f32 x = d->x * inv;
+    d->x = d->y * inv;
+    d->y = -x;
+}
+
 // Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
 // (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
@@ -1313,7 +1319,6 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
     next = PTR(seg, 0x14);
     f32 sn;
     CamPt pos;
-    f32 nx;
     CamPt d;
     CamPt pt;
     pos.x = LerpK(t, F32(seg, 0x0), F32(next, 0x0));
@@ -1321,18 +1326,14 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
     d.x = LerpK(t, F32(seg, 0x8), F32(next, 0x8));
     d.y = LerpK(t, F32(seg, 0xC), F32(next, 0xC));
     inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
-    F32(rec, 0x28) = lbl_80563C20;
-    f32 yv;
-    nx = d.x * inv;
     f32 px;
-    yv = d.y;
     f32 c;
     f32 off;
-    d.x = yv * inv;
-    d.y = -nx;
+    ScalePerpendicular(&d, inv);
     off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
-    pt.x = pos.x + off * d.x;
+    pt.x = pos.x + d.x * off;
     pt.y = pos.y + d.y * off;
+    F32(rec, 0x28) = lbl_80563C20;
     F32(rec, 0x24) = pt.x;
     F32(rec, 0x2C) = pt.y;
     fn_801EA140((f32*)(rec + 0x24));
@@ -1846,3 +1847,7 @@ s32 lbl_8055C4EC = 1500;
 f32 lbl_8055C4F0 = 4.0f;
 f32 lbl_8055C4F4 = 4.0f;
 
+CamRec::CamRec(void) {
+    fn_80265DD8(reinterpret_cast<u8*>(w160));
+    fn_80266120(reinterpret_cast<u8*>(w178));
+}

@@ -18,18 +18,22 @@ void operator delete[](void* p);
 
 class AllocBuf {
 public:
+    AllocBuf(const char* n, s32 s, u8* b) {
+        name = n;
+        used = 0;
+        size = s;
+        buf = b;
+    }
     virtual ~AllocBuf(void) { buf = 0; }
     u8* buf;  // offset 0x4
+    const char* name;  // offset 0x8
+    volatile s32 size;  // offset 0xC
+    volatile s32 used;  // offset 0x10
 };
 
 class StackAlloc : public AllocBuf {
 public:
-    StackAlloc(const char* n, u8* b, s32 s) {
-        used = 0;
-        size = s;
-        buf = b;
-        name = n;
-    }
+    StackAlloc(const char* n, u8* b, s32 s) : AllocBuf(n, s, b) {}
     virtual ~StackAlloc(void) { delete[] buf; }
     void* Alloc(const s32& n) {
         s32 a = (n + 3) & ~3;
@@ -44,9 +48,6 @@ public:
         used = a + used + 8;
         return p;
     }
-    const char* name;  // offset 0x8
-    volatile s32 size;  // offset 0xC
-    volatile s32 used;  // offset 0x10
 };
 
 struct BVec {

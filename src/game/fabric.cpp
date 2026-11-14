@@ -323,7 +323,7 @@ void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
-    const ValVec3& cr = vn->GetVec3Or("color", white);
+    const ValVec3& cr = vn->GetVec3Or("color", ValVec3(white));
     ValVec3 c = cr;
     MulVec(&out->pos, &p, m);
     out->pos.x += m->t[0];

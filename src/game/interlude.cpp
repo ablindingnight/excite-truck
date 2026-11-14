@@ -820,8 +820,8 @@ void fn_801C3D88(const char* name) {
             c->fov = 0.017453292f * fov;
             const ValVec3& o = n->GetVec3("origin");
             LoadCameraPose(c, n, o);
-            CopyV(&c->v, n->GetVec3Or("v", XV3(0.0f, 0.0f, 0.0f)));
-            CopyV(&c->av, n->GetVec3Or("av", XV3(0.0f, 0.0f, 0.0f)));
+            CopyV(&c->v, n->GetVec3Or("v", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
+            CopyV(&c->av, n->GetVec3Or("av", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
             c->accel = n->GetBool("accel", 1);
             c->target = fn_801C3A00(fn_801C3954(n->GetString("who", "nobody")));

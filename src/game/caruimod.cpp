@@ -27,7 +27,7 @@ struct Mtx33 {
 struct Mat3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
-// GetVec3Or takes its default by value.
+// GetVec3Or takes its default by const reference.
 class ValueNodeV {
 public:
     virtual const char* GetName(void);
@@ -42,7 +42,7 @@ public:
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
     virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
+    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);
 };
 
 class ValueTableV {
@@ -378,7 +378,7 @@ void CarUIModel::LoadEfx(const char* path) {
                 char key[0x20];
                 fn_801345D8(key, 0x20, "%d", joint.index);
                 ValVec3& bone = bones[joint.index];
-                bone = r->GetVec3Or(key, zero);
+                bone = r->GetVec3Or(key, ValVec3(zero));
             }
         } else {
             memset(bones, sizeof(bones), 0);
@@ -1151,6 +1151,15 @@ void CarUIScreen::Init(const char* view) {
     Activate();
 }
 
+/* Helper name unproven */
+static inline ValVec3 ViewDefault(f32 x, f32 y, f32 z) {
+    ValVec3 v;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+}
+
 void CarUIScreen::LoadView(const char* view) {
     const char* file = "carview.val";
     if (fn_8012C33C(file)) {
@@ -1158,11 +1167,8 @@ void CarUIScreen::LoadView(const char* view) {
         if (t->HasChild(view)) {
             ValueNodeV* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
-            ValVec3 zero;
-            zero.x = 0.0f;
-            zero.y = 0.0f;
-            zero.z = 0.0f;
-            const ValVec3& v = n->GetVec3Or("camera_offset", zero);
+            const ValVec3 zero = ViewDefault(0.0f, 0.0f, 0.0f);
+            const ValVec3& v = n->GetVec3Or("camera_offset", ValVec3(zero));
             camOffset.x = v.x;
             camOffset.y = v.y;
             camOffset.z = v.z;

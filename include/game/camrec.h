@@ -43,7 +43,7 @@ struct CamPrev {
 
 // One player's camera record.
 struct CamRec {
-    CamRec(void);  // fn_8026A600 (out of line, after this unit)
+    CamRec(void);  // fn_8026A600 (defined in cammgr.cpp)
     s32 w0;             // offset 0x0
     s32 w4;             // offset 0x4
     f32 f8;             // offset 0x8
