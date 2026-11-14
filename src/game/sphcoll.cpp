@@ -1358,7 +1358,8 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     c.z = F32(p, 0x3C);
     ToBoxSpace(&l, &c, &f);
     if (!dir || l.x * dir->x > lbl_805622D0 || F32(q, 0x28) < (f32)__fabs(dir->y)) {
-        Clip(&l.x, F32(q, 0x24), &in, 1);
+        f32* localX = &l.x;
+        Clip(localX, F32(q, 0x24), &in, 1);
     }
     Clip(&l.y, F32(q, 0x28), &in, 2);
     caps = U32(q, 0x34);
