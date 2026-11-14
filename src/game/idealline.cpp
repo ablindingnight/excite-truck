@@ -687,6 +687,11 @@ ILPos fn_80136594(LineFollower* f, V2* p) {
     return r;
 }
 
+/* Helper name unproven */
+static inline bool SameIdealSegment(const IdealFollower* o, const IdealFollower* f) {
+    return o->il.seg == f->il.seg;
+}
+
 f32 fn_801365C4(const IdealFollower* f, const IdealFollower* o) {
     bool same;
     int back;
@@ -699,7 +704,7 @@ f32 fn_801365C4(const IdealFollower* f, const IdealFollower* o) {
         return 0.0f;
     }
     n = f->times.n;
-    same = o->il.seg == f->il.seg;
+    same = SameIdealSegment(o, f);
     back = same ? -2 : -1;
     i = (((s32)f->Rel(f->il.seg->ilpos) >> 16) + (n + back)) % n;
     j = (i + 1) % n;

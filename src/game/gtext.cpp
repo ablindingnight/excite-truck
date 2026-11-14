@@ -1122,13 +1122,14 @@ void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f3
     lbl_8055F06C[lbl_8055F058.count].x = x;
     lbl_8055F06C[lbl_8055F058.count].y = y;
     lbl_8055F06C[lbl_8055F058.count].scale = scale;
+    int& count = *&lbl_8055F058.count;
     if (wide) {
-        lbl_8055F06C[lbl_8055F058.count].xs = 0.45f * scale;
+        lbl_8055F06C[count].xs = 0.45f * scale;
     } else {
-        lbl_8055F06C[lbl_8055F058.count].xs = scale;
+        lbl_8055F06C[count].xs = scale;
     }
-    fn_8023423C(lbl_8055F058.count, align);
-    lbl_8055F058.count++;
+    fn_8023423C(count, align);
+    (count)++;
 }
 
 int fn_80234654(void) {

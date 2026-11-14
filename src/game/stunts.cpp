@@ -341,10 +341,12 @@ public:
     virtual s32 Total(void) const { return 0; }
     virtual void Fill(StuntList* l) const {
         int n = 0;
-        int i;
+        struct {
+            int i;
+        } rank;
         StuntText* line;
-        for (i = 0; i < ranks.a.count; i++) {
-            n += ranks.a.data[i].scored;
+        for (rank.i = 0; rank.i < ranks.a.count; rank.i++) {
+            n += ranks.a.data[rank.i].scored;
         }
         line = l->Add();
         if (line) {
@@ -355,8 +357,8 @@ public:
             line->Text1("%d", n);
             line->SetType(Type());
             total = 0.0f;
-            for (i = 0; i < ranks.a.count; i++) {
-                total += ranks.a.data[i].total;
+            for (rank.i = 0; rank.i < ranks.a.count; rank.i++) {
+                total += ranks.a.data[rank.i].total;
             }
             pts = total;
             line->Text2("%s", fn_8023139C(buf, sizeof(buf), pts));
