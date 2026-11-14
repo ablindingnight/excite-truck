@@ -259,16 +259,6 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-// In place, with no alias test.
-static inline void MulVecSelf(V3* v, const Mat3* m) {
-    f32 x = Dot3(v->x, m->m[0][0], v->y, m->m[1][0], v->z, m->m[2][0]);
-    f32 y = Dot3(v->x, m->m[0][1], v->y, m->m[1][1], v->z, m->m[2][1]);
-    f32 z = Dot3(v->x, m->m[0][2], v->y, m->m[1][2], v->z, m->m[2][2]);
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
 static inline void MulVecR(V3* out, const V3* in, const Mat3* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
@@ -723,41 +713,55 @@ void fn_802D5ACC(Surf* s) {
 
 
 void fn_802D5B8C(const Surf* s) {
-    f32* t;
-    u32* col;
-    f32* uv;
     int n = s->nverts;
-    col = (u32*)fn_802CFF64(n * 4);
-    uv = (f32*)fn_802CFF64(n * 8);
+    u32* col = (u32*)fn_802CFF64(n * 4);
+    f32* uv = (f32*)fn_802CFF64(n * 8);
     if (!col || !uv) {
         return;
     }
-    u32* src = (u32*)s->attr;
-    int i;
     V3* p = (V3*)s->verts;
-    u32* c;
-    f32* suv = (f32*)s->uv;
+    u32* src = (u32*)s->attr;
+    u32* c = col;
+    f32* suv;
+    f32* t;
+    int i;
     V3 d;
-    d.x = lbl_804C56C0.pos.x - lbl_804C5690.pos.x;
-    d.y = lbl_804C56C0.pos.y - lbl_804C5690.pos.y;
-    d.z = lbl_804C56C0.pos.z - lbl_804C5690.pos.z;
-    MulVecSelf(&d, &lbl_804C5690.rot);
+    // Both frames read as twelve floats (three axis rows, then the position); the offset is rotated by the ROWS.
+    const f32* a = (const f32*)&lbl_804C56C0;
+    const f32* m = (const f32*)&lbl_804C5690;
+    d.z = a[11] - m[11];
+    d.x = a[9] - m[9];
+    d.y = a[10] - m[10];
+    {
+        f32 ry = m[1];
+        f32 rz = m[2];
+        f32 x = d.x * m[0] + d.y * ry + d.z * rz;
+        f32 uy = m[4];
+        f32 uz = m[5];
+        f32 y = d.x * m[3] + d.y * uy + d.z * uz;
+        f32 vy = m[7];
+        f32 vz = m[8];
+        f32 z = d.x * m[6] + d.y * vy + d.z * vz;
+        d.x = x;
+        d.y = y;
+        d.z = z;
+    }
     f32 off[2];
     off[0] = lbl_804DB068[1].x;
     off[1] = lbl_804DB068[1].y;
     f32 k = lbl_804DB068[1].z;
-    f32 v0 = off[1];
+    suv = (f32*)s->uv;
     t = uv;
-    c = col;
     for (i = 0; i < n; i++) {
-        u32 a = *src;
-        int x = MAX((int)((u8)a * (1.0f - PSVECSquareDistance(p, &d) * k)), 0);
-        *c = (a & ~0xFF) | (x < 0xFF ? x : 0xFF);
+        f32 dist = PSVECSquareDistance(p, &d);
+        u32 v = *src;
+        int x = MAX((int)((u8)v * (1.0f - dist * k)), 0);
+        *c = (v & ~0xFF) | (x < 0xFF ? x : 0xFF);
         p++;
         c++;
         src++;
         t[0] = suv[0] + off[0];
-        t[1] = suv[1] + v0;
+        t[1] = suv[1] + off[1];
         suv += 2;
         t += 2;
     }
