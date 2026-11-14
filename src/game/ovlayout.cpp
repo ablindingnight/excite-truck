@@ -1429,6 +1429,12 @@ LayoutOffset::~LayoutOffset(void) {
 
 extern "C" void fn_80148218(void) {}
 
+extern "C" int fn_8014821C(int key) { return 0; }
+
+extern "C" void fn_80148228(void) {}
+
+extern "C" void fn_8014822C(void) {}
+
 inline BoxCmd* OverlayCmd::BoxAt(int i) {
     return &boxes->a.data[i];
 }
