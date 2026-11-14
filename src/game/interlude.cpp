@@ -444,26 +444,26 @@ static inline void FrameToQuat(const IFrame* f, IQuat* q) { RotToQuat((const Mat
 static inline void QuatToFrame(IFrame* f, const IQuat* q) {
     f32(*m)[3] = (f32(*)[3])f;
     f32 x2 = q->x + q->x;
-    f32 xx = q->x * x2;
     f32 y2 = q->y + q->y;
     f32 z2 = q->z + q->z;
-    f32 xy = q->x * y2;
-    f32 xz = q->x * z2;
+    f32 xx = q->x * x2;
     f32 yy = q->y * y2;
-    f32 yz = q->y * z2;
     f32 zz = q->z * z2;
     f32 wx = q->w * x2;
     f32 wy = q->w * y2;
+    f32 xz = q->x * z2;
+    f32 yz = q->y * z2;
     f32 wz = q->w * z2;
+    f32 xy = q->x * y2;
     m[0][0] = 1.0f - (yy + zz);
+    m[1][1] = 1.0f - (xx + zz);
+    m[2][0] = xz + wy;
+    m[2][1] = yz - wx;
     m[1][0] = xy - wz;
     m[0][1] = xy + wz;
-    m[2][0] = xz + wy;
-    m[1][1] = 1.0f - (xx + zz);
-    m[2][1] = yz - wx;
     m[0][2] = xz - wy;
+    m[1][2] = yz + wx;
     m[2][2] = 1.0f - (xx + yy);
-    m[1][2] = wx + yz;
 }
 
 extern "C" {

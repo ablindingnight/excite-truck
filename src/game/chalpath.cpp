@@ -1104,9 +1104,11 @@ void fn_802621F0(u8* p) {
     if (U8(p, 0x1C) && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
         u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
-        f32 hw = 0.5f * (f32)S32(p, 0xC);
-        f32 hh = 0.5f * (f32)S32(p, 0x10);
-        fn_802354A0(PTR(p, 0x20), part, x - grow * hw, y + grow * hh, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),
+        f32 hw = (f32)S32(p, 0xC) / 2.0f;
+        f32 hh = (f32)S32(p, 0x10) / 2.0f;
+        f32 nx = x - grow * hw;
+        f32 ny = y + grow * hh;
+        fn_802354A0(PTR(p, 0x20), part, nx, ny, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),
                     (1.0f + grow) * (f32)S32(p, 0x10), c);
     }
     fn_80232BA4(EV->Name(), PTR(p, 0x24), 15.0f + x, y + sTextY, color, 0x11, 0.65f, lbl_80563B90, 1.0f);

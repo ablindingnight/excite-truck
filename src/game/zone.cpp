@@ -1458,9 +1458,9 @@ f32 fn_8013E300(const V2* v);
 }  // extern "C"
 
 ZoneLevels::ZoneLevels(ValueTable* t) {
-    int i;
-    ValueNode* child;
     int lvl;
+    ValueNode* child;
+    int i;
     n = fn_8013DDD4(t, "ZoneLevel");
     levels = new ("ZoneLevel[]") ZoneLevel[n];
     lvl = 0;
@@ -1470,7 +1470,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
             ZoneLevel* prev = lvl > 0 ? levels : 0;
             ZoneLevel* l = &levels[lvl];
             s32 j;
-            char buf[0x80];
+            char buf[32];
             if (prev) {
                 l->n = prev->n;
                 l->gates = new ("zone[]") Gate[l->n];

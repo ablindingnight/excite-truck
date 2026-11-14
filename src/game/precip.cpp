@@ -612,6 +612,7 @@ void fn_802A53B0(DropHit* hits, int n) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
             f32 dot = PSVECDotProduct(&dir, &nrm);
+            ValVec3 vel;
             PVec c;
             PSVECCrossProduct(&d->sv, &d->tv, &c);
             int cnt = -dot * (2.5f * PSVECMag(&c));
@@ -619,7 +620,6 @@ void fn_802A53B0(DropHit* hits, int n) {
                 continue;
             }
             f32 k = -2.0f * dot;
-            ValVec3 vel;
             SetV3(&vel, dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
             MadV(&vel, &hits->obj->vel, &vel, 3.0f);
             {

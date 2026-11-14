@@ -217,8 +217,8 @@ inline void ActZone::Load(ValueNode* n) {
     Bound* b;
     int start;
     f32 best;
-    V2 d;
     s16 h[4];
+    V2 d;
     seq = fn_801D4888(n->GetValue("act_seq"));
     draw = n->GetBool("should_draw", 1);
     lap = n->GetInt("lap", 0);
