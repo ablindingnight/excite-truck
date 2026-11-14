@@ -20,7 +20,7 @@ pattern matches, so treat them as a guide.
 - `src/game/physcam.cpp`: 111
 - `src/game/evpath.cpp`: 58
 - `src/game/achview.cpp`: 46
-- `src/game/uicar.cpp`: 46
+- `src/game/mroll.cpp`: 46
 
 ## Byte-offset pointer arithmetic ((u8*)p + 0xNN): 257 uses in 14 files
 

@@ -1181,8 +1181,8 @@ config.libs.append(
             Object(Matching, "game/controls.cpp"),
             Object(NonMatching, "game/mcdialog.cpp"),
             Object(NonMatching, "game/nameent.cpp"),
-            # uicar.cpp was built without loop optimisation: its unrolled stat/focus loops re-read memory each pass
-            Object(NonMatching, "game/uicar.cpp", extra_cflags=["-opt noloop"]),
+            # mroll.cpp (was uicar.cpp; original name from its own "mroll.cpp: get_player_info" message) was built without loop optimisation: its unrolled stat/focus loops re-read memory each pass
+            Object(NonMatching, "game/mroll.cpp", extra_cflags=["-opt noloop"]),
             Object(Matching, "game/menusel.cpp"),
             Object(NonMatching, "game/mcstatus.cpp"),
             Object(Matching, "game/unk_80243460.c"),

@@ -1511,7 +1511,7 @@ s32 fn_802524BC(u8* p, int i) { return S32(PTR(p, 0x4) + i * 0x48, 0x44); }
 
 }  // extern "C"
 
-// The car stat/colour captions shared with uicar (dead in this unit; only their strings remain).
+// The car stat/colour captions shared with mroll (dead in this unit; only their strings remain).
 /* Helper name unproven */
 void* LoadCaptionFont(const char* name);
 
