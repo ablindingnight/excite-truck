@@ -8,8 +8,8 @@
 #include "mp3dec.h"
 #include "mp3layer3_tables.inc"
 
-static u32 lbl_8055DD90;  /* arena end */
 static u32 lbl_8055DD94;  /* arena current */
+static u32 lbl_8055DD90;  /* arena end */
 
 static inline s32 MP3_GetSign(BitStream* bs, u8* buf) {
     u32 p = bs->pos;
@@ -1575,11 +1575,43 @@ void fn_800C3960(s32* v, const s32* w, s32 pos, u8* out, s32 mask, s32 mode) {
     }
 }
 
+/* TMCCMP3Init (fn_800C3CDC), formerly MP3_Create: API name from the game's "mp3: TMCCMP3Init fails"
+ * diagnostic at the verified caller (strongly supported, not an original linker symbol). */
+MP3Decoder* TMCCMP3Init(u8* header, u32 b, s32 buf, s32 size) {
+    MP3Decoder* d;
+
+    MP3_ArenaInit(buf, size);
+    d = MP3_ArenaAlloc(sizeof(MP3Decoder));
+    MP3_Fill((u32*)d, 0, sizeof(MP3Decoder));
+    d->lsf = 0;
+    d->unk8 = 0;
+    d->unkC = 0;
+    d->unk14 = 0;
+    d->unk18 = 0;
+    d->unk9CC[0] = 0;
+    d->unk9CC[1] = 0;
+    d->unk9CC[2] = 0;
+    d->unk9CC[3] = 0;
+    d->unk9CC[4] = 0;
+    d->unk9CC[5] = 0;
+    d->unk9CC[6] = 0;
+    d->is_init = 0;
+    d->unk27C = 0x400;
+    d->unk278 = b;
+    MP3_ParseHeader(d, header);
+    return d;
+}
+
+/* Frees a decoder: the arena is a bump allocator, so resetting it to the decoder's address releases it. */
+void MP3_Delete(u32 p) {
+    MP3_ArenaSet(p);
+}
+
 /* Scalefactor decode (fn_800C3DA0): MPEG-1 scalefactors with scfsi reuse from granule 0, or MPEG-2 LSF
  * scalefactors with the scalefac_compress partitions (separate intensity-stereo table for the right channel),
  * for long, short and mixed blocks; also sets the region counts, preflag and intensity scale. Rewritten from
  * the original's structure (math from ChatGPT round 24); behaviour verified against the original in a PPC
- * simulation (400 random cases, bit reader from the original). NonMatching: 871 of 879. */
+ * simulation (400 random cases, bit reader from the original). Matches. */
 void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0, s16 (*sf_short)[3], s16 part2_3,
                  s16 sfc, s16* scfsi, s8 gr, s8 ch, s16* bound, s16* region0, s16* region1, s16* preflag,
                  s16* is_scale) {
@@ -1939,38 +1971,6 @@ void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0
             }
         }
     }
-}
-
-/* TMCCMP3Init (fn_800C3CDC), formerly MP3_Create: API name from the game's "mp3: TMCCMP3Init fails"
- * diagnostic at the verified caller (strongly supported, not an original linker symbol). */
-MP3Decoder* TMCCMP3Init(u8* header, u32 b, s32 buf, s32 size) {
-    MP3Decoder* d;
-
-    MP3_ArenaInit(buf, size);
-    d = MP3_ArenaAlloc(sizeof(MP3Decoder));
-    MP3_Fill((u32*)d, 0, sizeof(MP3Decoder));
-    d->lsf = 0;
-    d->unk8 = 0;
-    d->unkC = 0;
-    d->unk14 = 0;
-    d->unk18 = 0;
-    d->unk9CC[0] = 0;
-    d->unk9CC[1] = 0;
-    d->unk9CC[2] = 0;
-    d->unk9CC[3] = 0;
-    d->unk9CC[4] = 0;
-    d->unk9CC[5] = 0;
-    d->unk9CC[6] = 0;
-    d->is_init = 0;
-    d->unk27C = 0x400;
-    d->unk278 = b;
-    MP3_ParseHeader(d, header);
-    return d;
-}
-
-/* Frees a decoder: the arena is a bump allocator, so resetting it to the decoder's address releases it. */
-void MP3_Delete(u32 p) {
-    MP3_ArenaSet(p);
 }
 
 void MP3_ArenaInit(s32 base, s32 size) {

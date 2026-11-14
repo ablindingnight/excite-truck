@@ -506,10 +506,10 @@ config.libs.append(
         "cflags": [*cflags_rvl_tp, "-use_lmw_stmw on", "-inline noauto", "-i src/sdk_mp3"],
         "progress_category": "sdk",
         "objects": [
-            Object(NonMatching, "sdk_mp3/mp3frame.c"),
-            Object(NonMatching, "sdk_mp3/mp3decode.c"),
-            Object(NonMatching, "sdk_mp3/mp3dequant.c"),
-            Object(NonMatching, "sdk_mp3/mp3layer3.c"),
+            Object(Matching, "sdk_mp3/mp3frame.c"),
+            Object(Matching, "sdk_mp3/mp3decode.c"),
+            Object(Matching, "sdk_mp3/mp3dequant.c"),
+            Object(Matching, "sdk_mp3/mp3layer3.c"),
         ],
     }
 )
