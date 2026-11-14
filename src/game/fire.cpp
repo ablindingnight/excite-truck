@@ -412,7 +412,6 @@ class ExhaustTorchMan {
 public:
     void TransformTorchPart(int i, const TorchPart* part);
 public:
-    void Loop1_DrawEdges(const Vec* right, const Vec* up);
 public:
     ExhaustTorchMan(void);
     ~ExhaustTorchMan(void);
@@ -1515,35 +1514,31 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
-inline void ExhaustTorchMan::Loop1_DrawEdges(const Vec* right, const Vec* up) {
-    for (int i = 0; i < fn_80287B14(); i++) {
-        if (entries[i].on) {
-            FireModel* model = fn_80288208(i);
-            int n = model->nParts;
-            for (int k = 0; k < n; k++) {
-                const TorchPart* part = fn_80288060(model, k);
-                const FireCar* c = fn_80287B24(i);
-                fn_801BFD34(&entries[i].pos, &part->pos, c);
-                Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
-                Vec p;
-                TAddS(&p, &entries[i].pos, &entries[i].rot[1], entries[i].len);
-                DrawEdge(&p, entries[i].frame, right, up, 0.4f * entries[i].len);
-            }
-        }
-    }
-}
-
-void ExhaustTorchMan::DrawEdges(void) {
-    const Vec* right = fn_802C86DC()->rot;
-    const Vec* up = &fn_802C86DC()->rot[1];
-    Loop1_DrawEdges(right, up);
-}
-
 /* Helper name unproven */
 inline void ExhaustTorchMan::TransformTorchPart(int i, const TorchPart* part) {
     const FireCar* c = fn_80287B24(i);
     fn_801BFD34(&entries[i].pos, &part->pos, c);
     Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
+}
+
+void ExhaustTorchMan::DrawEdges(void) {
+    TorchEntry* entry;
+    const Vec* right = fn_802C86DC()->rot;
+    const Vec* up = &fn_802C86DC()->rot[1];
+    int i;
+    for (i = 0, entry = entries; i < fn_80287B14(); ++entry, ++i) {
+        if (entry->on) {
+            FireModel* model = fn_80288208(i);
+            int n = model->nParts;
+            for (int k = 0; k < n; k++) {
+                const TorchPart* part = fn_80288060(model, k);
+                TransformTorchPart(i, part);
+                Vec p;
+                TAddS(&p, &entries[i].pos, &entries[i].rot[1], entry->len);
+                DrawEdge(&p, entry->frame, right, up, 0.4f * entry->len);
+            }
+        }
+    }
 }
 
 void ExhaustTorchMan::DrawFaces(void) {
