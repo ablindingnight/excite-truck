@@ -372,8 +372,10 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
     side.y = -dir.x;
     rel.x = in->x - org.x;
     rel.y = in->y - org.y;
-    out->y = rel.x * dir.x + rel.y * dir.y;
-    out->x = rel.x * side.x + rel.y * side.y;
+    const f32 xValue = Dot4_hm(rel.x, rel.y, side.x, side.y);
+    const f32 yValue = Dot4_hm(rel.x, rel.y, dir.x, dir.y);
+    out->y = yValue;
+    out->x = xValue;
 }
 
 void fn_801933FC(u8* d, V2* v) { fn_8019330C(v, v, CAR(d) + 0x70); }
