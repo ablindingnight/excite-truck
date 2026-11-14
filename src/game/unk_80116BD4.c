@@ -7782,10 +7782,9 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
                         case 1:
                             e = e >> 2;
                             *p = (e << 2) + 2;
-                            end[0] = ((e + 4) << 2) + 2;
-                            end[1] = ((e + 8) << 2) + 2;
-                            end[2] = ((e + 12) << 2) + 2;
-                            end += 3;
+                            *end++ = ((e + 4) << 2) + 2;
+                            *end++ = ((e + 8) << 2) + 2;
+                            *end++ = ((e + 12) << 2) + 2;
                             continue;
 
                         case 2:
