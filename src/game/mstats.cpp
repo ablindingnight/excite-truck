@@ -49,14 +49,25 @@ const char* StatsGetLabel(u32 type);
 
 extern "C" int fn_80247624(void);  // career mode active
 
+class UITable;
+extern "C" {
+const char* Get__7UITableFiiPi(UITable*, int, int, int*);
+// Retail callers pass the style in a full register. Set stores its low byte.
+void Set__7UITableFiiPCcc(UITable*, int, int, const char*, int);
+}
+
 // A text grid shown by a menu list element.
 class UITable {
 public:
     UITable(int rows, int cols, const int* widths);
     ~UITable(void);
     void Clear(void);
-    const char* GetCell(int row, int col, int unk);
-    void SetCell(int row, int col, const char* text, int style);
+    const char* GetCell(int row, int col, int* flag) {
+        return Get__7UITableFiiPi(this, row, col, flag);
+    }
+    void SetCell(int row, int col, const char* text, int style) {
+        Set__7UITableFiiPCcc(this, row, col, text, style);
+    }
     int Rows(void) { return rows; }
 
     u8 pad0[0x8];

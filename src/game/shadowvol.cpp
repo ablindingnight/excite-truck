@@ -59,6 +59,11 @@ static inline f32 MakeF32(f32 v) { return v; }
 static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
+namespace {
+extern const f32 kFadeUpper;
+extern const f32 kFadeLower;
+extern const f32 kFadeRange;
+}
 ModuleTag lbl_8055F798;
 extern const f32 lbl_8055F7A0 = MakeF32(0.78539819f);
 int lbl_8055F7A4;            // caster count
@@ -147,9 +152,9 @@ void fn_80297AFC(void) {
     f32 zero;
     f32 one;
     ValVec3 camPos = fn_802C86DC()->pos;
-    zero = 0.0f;
-    one = 1.0f;
-    range = 5.0f;
+    zero = kFadeLower;
+    one = kFadeUpper;
+    range = kFadeRange;
     for (int i = 0; i < lbl_8055F7AC; i++) {
         StaticShadow* s = &lbl_8055F7A8[i];
         f32 scale = fn_801E88F0(-1);
@@ -186,6 +191,9 @@ void fn_80297C3C(void* model, const ValMatrix* mtx, u32 color, f32 alpha, f32 ra
 
 }  // extern "C"
 
-// NonMatching (data): every function matches (2026-11-14 audit), but linking still changes the DOL (flipcheck
-// 2026-11-14): .sdata2 holds 1.0 before 0.0 in the target; every assignment order that puts 1.0 first changes
-// fn_80297AFC's loads.
+// The pool defines the upper bound before the lower bound.
+namespace {
+const f32 kFadeUpper = 1.0f;
+const f32 kFadeLower = 0.0f;
+const f32 kFadeRange = 5.0f;
+}
