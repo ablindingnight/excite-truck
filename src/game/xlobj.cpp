@@ -244,6 +244,9 @@ struct Chunk : VecBase<T> {
     Chunk* next;  // offset 0xC
 };
 
+}  // namespace
+
+// Not in the unnamed namespace: its "buffer_list[]" string has its own symbol in the original.
 template <class T>
 struct Pool {
     Pool(int n) : arr(n) {
@@ -265,6 +268,8 @@ struct Pool {
     T* buf;                // offset 0x0
     Arr<Chunk<T> > arr;    // offset 0x4
 };
+
+namespace {
 
 template <class T>
 struct Cell {
