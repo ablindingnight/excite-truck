@@ -1256,7 +1256,34 @@ int AsyncResourceSet::Restart(const char* name) {
     return Begin(name);
 }
 
-int AsyncResourceSet::StartLoad(const char* name) { return Begin(name); }
+int AsyncResourceSet::StartLoad(const char* name) {
+    char path0[0x40];
+    int ok = 0;
+    do {
+        s32 size;
+        int sector;
+        char* path = fn_8012B314(name, path0, tries);
+        if (!path) {
+            break;
+        }
+        ok = 0;
+        sector = fn_8012AC28(path, &size);
+        if (sector != -1) {
+            fileSize = bufSize;
+            if (fileSize <= bufSize) {
+                handle = fn_802E748C(sector, buf, fileSize);
+                if (handle != -1) {
+                    state = 2;
+                    set.Init(name, path, 0, sector);
+                    ok = 1;
+                    deadline = fn_802E2C20() + 500 + fileSize / 3000;
+                }
+            }
+        }
+        tries++;
+    } while (!ok);
+    return ok;
+}
 
 void AsyncResourceSet::Reset(void) { Stop(); }
 

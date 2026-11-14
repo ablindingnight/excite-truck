@@ -869,6 +869,7 @@ extern "C" static inline int fn_80169928(int j, int i, int ny, int nx) {
 
 
 inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
+    f32 off;
     Bound* b;
     int np;
     f32 e[4];
@@ -924,7 +925,6 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         f32 t = (0.5f * rest + (f32)i * params[0]) / w;
         f32 l;
         int ny;
-        f32 off;
         int j;
         V2 pa = Lerp2(*p0, *p1, t);
         V2 pb = Lerp2(*p3, *p2, t);
