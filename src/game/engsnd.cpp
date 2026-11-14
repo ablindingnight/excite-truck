@@ -282,7 +282,8 @@ inline void EngineSound::UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol) {
     }
     f32 sb = Smooth(b);
     f32 gb = sb * e->throttle.gain;
-    f32 level = lbl_8055EDB8 * ga * gb;
+    const struct { f32 value; } masterGain = {lbl_8055EDB8 * ga};
+    f32 level = masterGain.value * gb;
     e->snd->Play();
     f32 pitch = r * e->invRpm;
     e->snd->SetPitch(pitch);
