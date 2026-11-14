@@ -17,9 +17,9 @@ struct Motion {
     f32 v2;  // offset 0x10
     f32 a2;  // offset 0x14
 
-    f32 Dp(void) { return p2 - p1; }
-    f32 Dv(void) { return v2 - v1; }
-    f32 Da(void) { return a2 - a1; }
+    f32 Dp(void) const { return p2 - p1; }
+    f32 Dv(void) const { return v2 - v1; }
+    f32 Da(void) const { return a2 - a1; }
 };
 
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
@@ -37,7 +37,7 @@ int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * lbl_80558DC4[0]; }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
-int fn_80138C28(Motion* m, f32* t, f32* miss) {
+int fn_80138C28(const Motion* m, f32* t, f32* miss) {
     f32 a;
     f32 hi;
     f32 b;
@@ -78,7 +78,7 @@ int fn_80138C28(Motion* m, f32* t, f32* miss) {
 
 enum CatchupCase { CU_NONE = -1, CU_DECEL = -2, CU_BRAKE = -3, CU_MISS = -4, CU_HIT = -5 };  /* Enum names unproven */
 
-f32 fn_80138DF4(Motion* m) {
+f32 fn_80138DF4(const Motion* m) {
     f32 r;
     if (!fn_80138BFC(m->Dp())) {
         if (!fn_80138BFC(m->Da())) {
@@ -108,7 +108,7 @@ f32 fn_80138DF4(Motion* m) {
     return r;
 }
 
-f32 fn_80138F38(Motion* m) {
+f32 fn_80138F38(const Motion* m) {
     f32 t;
     if (m->v2 > 0.0f && m->a2 < 0.0f && fn_80138C28(m, &t, 0)) {
         f32 a2v = m->a2;
