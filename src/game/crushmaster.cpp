@@ -1406,12 +1406,17 @@ inline int CrushMaster::vf24(void) { return finishTime > 0.0f; }
 
 inline int CrushMaster::vf54(void) { return 8; }
 
-static inline V2 FindSpot(const ValVec3* p) {
+// Helper name unproven: a free spot near p, dropped onto the ground. The spot is copied out of the call's
+// temporary (the target keeps the returned pair above both locals and block-copies it).
+static inline void SpotDst(ValVec3* dst, const ValVec3* p) {
     V2 c;
     c.x = p->x;
     c.y = p->z;
-    V2 spot = fn_80171FF0(&c, 99, 15.0f, 5.0f);
-    return spot;
+    V2 np = (const V2&)fn_80171FF0(&c, 99, 15.0f, 5.0f);
+    dst->x = np.x;
+    dst->y = 0.0f;
+    dst->z = np.y;
+    dst->y = fn_801DCF48(0, np.x, np.y);
 }
 
 static inline void NormV2(V2* d) {
@@ -1457,11 +1462,7 @@ inline void CrushMaster::vfA8(int car) {
         at.y = rec->mtx.origin.z;
         if (fn_802B04D4(pos) || !fn_80171E3C(at)) {
             {
-                V2 np = FindSpot(pos);
-                dst.x = np.x;
-                dst.y = 0.0f;
-                dst.z = np.y;
-                dst.y = fn_801DCF48(0, np.x, np.y);
+                SpotDst(&dst, pos);
             }
             jump = 0;
             if (fn_802B04D4(pos) && !fn_80171DE4(&at)) {
