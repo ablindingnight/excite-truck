@@ -809,131 +809,213 @@ void fn_800C21D8(s32* a, s32* b) {
     *b2-- = (s32)(((s64)x * c1) >> 20);
 }
 
-/* IMDCT overlap-add, all nine steps windowed: out1[i*64] = Q20(cur[i] * w[2i]) + prev[i],
- * out2[-i*64] = Q20(cur[i] * w[2i+1]) + prev[17-i] (table walked with *w++). Steps 5-6 compute both
- * products first, which is where the original needs r31. NonMatching: same size and opcodes. */
+/* IMDCT overlap-add, all nine steps windowed: out1[i*64] = Q20(cur[i] * w[i][0]) + prev[i],
+ * out2[-i*64] = Q20(cur[i] * w[i][1]) + prev[17-i]; the table holds one pair of window values per step
+ * (walked as pairs through a cast; declaring the table itself as pairs lets the compiler fold the pointer away).
+ * Shape notes (each one is needed for the match and follows from how the compiler treats the statements):
+ * - the pair pointer steps once at the end of a step (a plain s32 pointer stepped by 2 is folded to constants);
+ * - the two products live in per-step locals, which the compiler folds into the two stores;
+ * - a window local is folded into its use only where it is assigned for the last time. The original computes
+ *   both products before the first store in steps 7 and 8 only, so the second window value must be assigned for
+ *   the last time in both: odd steps use their own local (d1). */
 void fn_800C2590(s32* cur, s32* prev, s32* out1, s32* out2) {
-    s32* w = lbl_8031D670;
-    s32 x, c0, c1, y0, y1;
+    s32 (*w)[2] = (s32 (*)[2])lbl_8031D670;
+    s32 x;
+    s32 c0, c1;
+    s32 d1;
 
     x = cur[0];
-    c0 = *w++;
-    c1 = *w++;
-    out1[0] = (s32)(((s64)x * c0) >> 20) + prev[0];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[0] = y1 + prev[17];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[0] = y0 + prev[0];
+        out2[0] = y1 + prev[17];
+    }
+    w++;
     x = cur[1];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    out1[64] = y0 + prev[1];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-64] = y1 + prev[16];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[64] = y0 + prev[1];
+        out2[-64] = y1 + prev[16];
+    }
+    w++;
     x = cur[2];
-    c0 = *w++;
-    c1 = *w++;
-    out1[128] = (s32)(((s64)x * c0) >> 20) + prev[2];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-128] = y1 + prev[15];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[128] = y0 + prev[2];
+        out2[-128] = y1 + prev[15];
+    }
+    w++;
     x = cur[3];
-    c0 = *w++;
-    c1 = *w++;
-    out1[192] = (s32)(((s64)x * c0) >> 20) + prev[3];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-192] = y1 + prev[14];
-    c0 = cur[4];
-    c1 = *w++;
-    x = *w++;
-    out1[256] = (s32)(((s64)c0 * c1) >> 20) + prev[4];
-    out2[-256] = (s32)(((s64)c0 * x) >> 20) + prev[13];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[192] = y0 + prev[3];
+        out2[-192] = y1 + prev[14];
+    }
+    w++;
+    x = cur[4];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[256] = y0 + prev[4];
+        out2[-256] = y1 + prev[13];
+    }
+    w++;
     x = cur[5];
-    c0 = *w++;
-    c1 = *w++;
-    out1[320] = (s32)(((s64)x * c0) >> 20) + prev[5];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-320] = y1 + prev[12];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[320] = y0 + prev[5];
+        out2[-320] = y1 + prev[12];
+    }
+    w++;
     x = cur[6];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out1[384] = y0 + prev[6];
-    out2[-384] = y1 + prev[11];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[384] = y0 + prev[6];
+        out2[-384] = y1 + prev[11];
+    }
+    w++;
     x = cur[7];
-    c0 = *w++;
-    c1 = *w++;
-    out1[448] = (s32)(((s64)x * c0) >> 20) + prev[7];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-448] = y1 + prev[10];
-    c1 = cur[8];
-    x = *w++;
-    c0 = *w++;
-    out1[512] = (s32)(((s64)c1 * x) >> 20) + prev[8];
-    out2[-512] = (s32)(((s64)c1 * c0) >> 20) + prev[9];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[448] = y0 + prev[7];
+        out2[-448] = y1 + prev[10];
+    }
+    w++;
+    x = cur[8];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[512] = y0 + prev[8];
+        out2[-512] = y1 + prev[9];
+    }
+    w++;
 }
 
 
 /* Like fn_800C2590 with the other window table (lbl_8031D6B8) and alternating signs on prev: even steps
  * add to out1 and subtract from out2, odd steps the reverse (verified against a simulation of the
- * original). NonMatching: 159/159, same opcodes. */
+ * original). Same shape as fn_800C2590, see the notes there. */
 void fn_800C280C(s32* cur, s32* prev, s32* out1, s32* out2) {
-    s32* w = lbl_8031D6B8;
-    s32 x, c0, c1, y0, y1;
+    s32 (*w)[2] = (s32 (*)[2])lbl_8031D6B8;
+    s32 x;
+    s32 c0, c1;
+    s32 d1;
 
     x = cur[0];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    out1[0] = y0 + prev[0];
-    out2[0] = (s32)(((s64)x * c1) >> 20) - prev[17];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[0] = y0 + prev[0];
+        out2[0] = y1 - prev[17];
+    }
+    w++;
     x = cur[1];
-    c0 = *w++;
-    c1 = *w++;
-    out1[64] = (s32)(((s64)x * c0) >> 20) - prev[1];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-64] = y1 + prev[16];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[64] = y0 - prev[1];
+        out2[-64] = y1 + prev[16];
+    }
+    w++;
     x = cur[2];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    out1[128] = y0 + prev[2];
-    out2[-128] = (s32)(((s64)x * c1) >> 20) - prev[15];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[128] = y0 + prev[2];
+        out2[-128] = y1 - prev[15];
+    }
+    w++;
     x = cur[3];
-    c0 = *w++;
-    c1 = *w++;
-    out1[192] = (s32)(((s64)x * c0) >> 20) - prev[3];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-192] = y1 + prev[14];
-    c0 = cur[4];
-    c1 = *w++;
-    x = *w++;
-    out1[256] = (s32)(((s64)c0 * c1) >> 20) + prev[4];
-    out2[-256] = (s32)(((s64)c0 * x) >> 20) - prev[13];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[192] = y0 - prev[3];
+        out2[-192] = y1 + prev[14];
+    }
+    w++;
+    x = cur[4];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[256] = y0 + prev[4];
+        out2[-256] = y1 - prev[13];
+    }
+    w++;
     x = cur[5];
-    c0 = *w++;
-    c1 = *w++;
-    out1[320] = (s32)(((s64)x * c0) >> 20) - prev[5];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-320] = y1 + prev[12];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[320] = y0 - prev[5];
+        out2[-320] = y1 + prev[12];
+    }
+    w++;
     x = cur[6];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    out1[384] = y0 + prev[6];
-    out2[-384] = (s32)(((s64)x * c1) >> 20) - prev[11];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[384] = y0 + prev[6];
+        out2[-384] = y1 - prev[11];
+    }
+    w++;
     x = cur[7];
-    c0 = *w++;
-    c1 = *w++;
-    y0 = (s32)(((s64)x * c0) >> 20);
-    out1[448] = y0 - prev[7];
-    y1 = (s32)(((s64)x * c1) >> 20);
-    out2[-448] = y1 + prev[10];
-    c1 = cur[8];
-    x = *w++;
-    c0 = *w++;
-    y0 = (s32)(((s64)c1 * x) >> 20);
-    out1[512] = y0 + prev[8];
-    out2[-512] = (s32)(((s64)c1 * c0) >> 20) - prev[9];
+    c0 = (*w)[0];
+    d1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * d1) >> 20);
+        out1[448] = y0 - prev[7];
+        out2[-448] = y1 + prev[10];
+    }
+    w++;
+    x = cur[8];
+    c0 = (*w)[0];
+    c1 = (*w)[1];
+    {
+        s32 y0 = (s32)(((s64)x * c0) >> 20);
+        s32 y1 = (s32)(((s64)x * c1) >> 20);
+        out1[512] = y0 + prev[8];
+        out2[-512] = y1 - prev[9];
+    }
+    w++;
 }
 
 
