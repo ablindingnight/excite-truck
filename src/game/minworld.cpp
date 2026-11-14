@@ -159,7 +159,7 @@ void fn_802526E0(MWMtx* m) {
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 void fn_8025280C(MWBody* b, f32 speed) {
-    MWVec4 p = b->pos;
+    MWVec4 p(b->pos.x, b->pos.y, b->pos.z);
     MWVec2 d;
     d.x = p.x;
     d.y = p.z;
@@ -201,15 +201,18 @@ void fn_8025280C(MWBody* b, f32 speed) {
         MWVec4 a;
         MWVec4 n;
         MWVec4 fwd;
-        f32 radial = -2.5f * (b->z.x * e.x + b->z.z * e.y);
+        f32 radial;
+        MWVec2 zz;
+        zz.x = b->z.x;
+        zz.y = b->z.z;
+        radial = -2.5f * (zz.x * e.x + zz.y * e.y);
         f32 h;
         f32 depth;
-        MWVec4 zv = b->z;
         b->vel = MWVec4(t.x, b->vel.y, t.y);
-        fwd = zv;
+        fwd = MWVec4(b->z.x, b->z.y, b->z.z);
         a = b->accel;
         a.y = radial;
-        up = b->x;
+        up = MWVec4(b->x.x, b->x.y, b->x.z);
         h = fn_801DCF48((MWVec3*)&n, p.x, p.z);
         depth = p.y - h;
         depth = 0.0f > depth ? 0.0f : depth;

@@ -1360,12 +1360,11 @@ void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
 }
 
 static inline void Rotate(Vec2* v, f32 angle) {
+    f32 x = v->x;
     f32 c = cos(angle);
     f32 s = sin(angle);
-    f32 y = v->y;
-    f32 x = v->x;
-    v->x = x * c - y * s;
-    v->y = x * s + y * c;
+    v->x = v->x * c - v->y * s;
+    v->y = x * s + v->y * c;
 }
 
 void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 start, f32 step,
@@ -1380,24 +1379,27 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
     }
     fn_802C8B98(tex, fn_8022EDC4());
     fn_801E4F20(segs * 4);
+    f32 sn = sin(start);
     d.x = cos(start);
     ratio = h / w;
-    d.y = sin(start);
+    d.y = sn;
     p.x = d.x * w;
     p.y = d.y * w;
-    fn_801E4F3C(color, 0, x + p.x, y + p.y, 0.0f, Lerp(u0, u1, ArcU(d.x)),
-                Lerp(v0, v1, ArcV(d.y)));
-    fn_801E4F3C(color, 0, x + ratio * p.x, y + ratio * p.y, 0.0f,
-                Lerp(u0, u1, ArcU(ratio * d.x)),
-                Lerp(v0, v1, ArcV(ratio * d.y)));
+    f32 u = Lerp(u0, u1, ArcU(d.x));
+    f32 t = Lerp(v0, v1, ArcV(d.y));
+    fn_801E4F3C(color, 0, x + p.x, y + p.y, 0.0f, u, t);
+    u = Lerp(u0, u1, ArcU(ratio * d.x));
+    t = Lerp(v0, v1, ArcV(ratio * d.y));
+    fn_801E4F3C(color, 0, x + ratio * p.x, y + ratio * p.y, 0.0f, u, t);
     for (i = 0; i < segs; i++) {
         Rotate(&p, step);
         Rotate(&d, step);
-        fn_801E4F3C(color, 1, x + p.x, y + p.y, 0.0f, Lerp(u0, u1, ArcU(d.x)),
-                    Lerp(v0, v1, ArcV(d.y)));
-        fn_801E4F3C(color, 1, x + ratio * p.x, y + ratio * p.y, 0.0f,
-                    Lerp(u0, u1, ArcU(ratio * d.x)),
-                    Lerp(v0, v1, ArcV(ratio * d.y)));
+        u = Lerp(u0, u1, ArcU(d.x));
+        t = Lerp(v0, v1, ArcV(d.y));
+        fn_801E4F3C(color, 1, x + p.x, y + p.y, 0.0f, u, t);
+        u = Lerp(u0, u1, ArcU(ratio * d.x));
+        t = Lerp(v0, v1, ArcV(ratio * d.y));
+        fn_801E4F3C(color, 1, x + ratio * p.x, y + ratio * p.y, 0.0f, u, t);
     }
     fn_801E4FF4();
     fn_802C8D74();

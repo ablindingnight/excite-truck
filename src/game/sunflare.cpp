@@ -191,17 +191,21 @@ void fn_80291B9C(FlareSet* fs, const VecP* p, f32 depth) {
     }
 }
 
+/* Helper name unproven */
+static inline f32 LinStep(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) {
+    f32 t = (x - x0) / (x1 - x0);
+    t = MIN(1.0f, t);
+    t = MAX(t, 0.0f);
+    return y0 + t * (y1 - y0);
+}
+
 void fn_80291C7C(Sprite* s, int sun) {
     VecP p = s->pos;
     VecP u;
     VecP v;
     p.z = 0.0f;
     f32 x = (f32)fabs(p.x - 0.5f * lbl_8055CFF0);
-    f32 edge = 0.2f * lbl_8055CFF0;
-    f32 t = (x - edge) / (lbl_8055CFF0 / 2.0f - edge);
-    t = (1.0f < t) ? 1.0f : t;
-    t = (t > 0.0f) ? t : 0.0f;
-    int alpha = Mul(s->color >> 24, 1.0f + Mul(t, -0.75f));
+    int alpha = Mul(s->color >> 24, LinStep(x, 0.2f * lbl_8055CFF0, lbl_8055CFF0 / 2.0f, 1.0f, 0.25f));
     if (alpha > 0) {
         u32 color = (alpha << 24) | (s->color & 0xFFFFFF);
         if (!sun) {

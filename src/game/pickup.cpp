@@ -569,13 +569,15 @@ void fn_80168328(void) {
     }
 }
 
+static inline f32 Len2_hm(f32 x, f32 y) { return x * x + y * y; }  /* Helper name unproven */
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 /* Helper name unproven: rotates v by the 3x3 matrix m (out may be v). */
-static inline void RotVec(f32* out, const f32* m, const f32* v) {
-    f32 y = v[0] * m[3] + v[1] * m[4] + v[2] * m[5];
-    f32 z = v[0] * m[6] + v[1] * m[7] + v[2] * m[8];
-    f32 x = v[0] * m[0] + v[1] * m[1] + v[2] * m[2];
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+static inline void RotVec(f32* out, const f32* m, const f32* in) {
+    f32 x = Dot3(in[0], m[0], in[1], m[1], in[2], m[2]);
+    f32 y = Dot3(in[0], m[3], in[1], m[4], in[2], m[5]);
+    f32 z = Dot3(in[0], m[6], in[1], m[7], in[2], m[8]);
     out[0] = x;
     out[1] = y;
     out[2] = z;
@@ -583,7 +585,7 @@ static inline void RotVec(f32* out, const f32* m, const f32* v) {
 
 // Helper names unproven: the size is an inline argument (target loads it before the compare).
 static inline f32 LoEdge(f32 v, f32 size) { return MIN(v, 0.0f) - 1.1f * size; }
-static inline f32 HiEdge(f32 v, f32 size) { return MAX(v, 0.0f) + 1.1f * size; }
+static inline f32 HiEdge(f32 v, f32 size) { f32 m = MAX(v, 0.0f); return m + 1.1f * size; }
 /* Helper name unproven: out = a - b. */
 static inline void SubVec(f32* out, const f32* a, const f32* b) {
     out[0] = a[0] - b[0];
@@ -623,7 +625,7 @@ void fn_801683F4(PickupCounts* out, int player) {
             lo.z = LoEdge(l[2], dims->len);
             hi.x = HiEdge(l[0], dims->wid);
             hi.z = HiEdge(l[2], dims->len);
-            r = SqrtF(dims->wid * dims->wid + dims->len * dims->len);
+            r = SqrtF(Len2_hm(dims->len, dims->wid));
         }
         for (i = 0; i < lbl_8055E354->groups.count; i++) {
             PickupGroup* g = &lbl_8055E354->groups.data[i];
@@ -642,8 +644,8 @@ void fn_801683F4(PickupCounts* out, int player) {
                 {
                     int j;
                     for (j = 0; j < g->count; j++) {
-                        Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
-                        if (p->Live()) {
+                        if (lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j].Live()) {
+                            Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
                             f32 l[3];
                             f32 rad;
                             SubVec(l, p->pos, rec->pos);
@@ -695,7 +697,6 @@ inline int CoinStripPickupMaker::Match(const char* name) {
     return strncasecmp(name, p, strlen(p)) == 0;
 }
 
-static inline f32 Len2_hm(f32 x, f32 y) { return x * x + y * y; }  /* Helper name unproven */
 inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     int rainbow;
     int count;
