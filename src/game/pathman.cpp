@@ -208,10 +208,14 @@ static inline void AddAll(PathGroup* g, PathClient** found, int n) {
 
 /* Helper name unproven */
 static inline int FindMatchingClients(PathMan* m, PathClient** found, const char* object, const char* path) {
-    int n = 0;
-    int any = strcmp(object, "*") == 0;
-    PathClient* c = m->clients;
-    for (int i = 0; i < m->count; c++, i++) {
+    int n;
+    PathClient* c;
+    bool any;
+    int i;
+    n = 0;
+    any = strcmp(object, "*") == 0;
+    c = m->clients;
+    for (i = 0; i < m->count; c++, i++) {
         if ((any || strcmp(c->name, object) == 0) && fn_801D9FC4(c->follower, path)) {
             found[n++] = c;
         }

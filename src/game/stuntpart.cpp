@@ -742,13 +742,14 @@ void fn_802ABC2C(void) {
 static inline void OffsetStuntPosition(Vec& pos, const StuntMtx* m, f32 ang, f32 a, f32 b) {
     Vec x = *(const Vec*)&m->rot[0];
     Vec z = *(const Vec*)&m->rot[2];
+    *(WV3*)&pos = *(const WV3*)&m->pos;
     AddScaled(&pos, &pos, &x, a * (f32)cos(ang));
     AddScaled(&pos, &pos, &z, b * (f32)sin(ang));
 }
 
 void fn_802ABC80(const StuntMtx* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
     f32 ang = fn_80287BC8(-3.1415927f, 3.1415927f);
-    Vec pos = *(const Vec*)&m->pos;
+    Vec pos;
     OffsetStuntPosition(pos, m, ang, a, b);
     AddScaled(&pos, &pos, (const Vec*)&m->rot[1], fn_80287BC8(0.0f, 2.0f * c));
     fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);

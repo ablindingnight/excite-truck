@@ -135,10 +135,12 @@ void fn_802DD5F4(void) {
 
 void fn_802DD63C(int n) {
     lbl_804DB6A0.count = n;
-    Streak* s = lbl_804DB6A0.s;
-    for (int i = 0; i < lbl_804DB6A0.count; i++) {
-        int c = lbl_804DB6A0.count;
-        if (c < 3) {
+    int i;
+    Streak* s;
+    int count;
+    s = lbl_804DB6A0.s;
+    for (i = 0; i < (count = lbl_804DB6A0.count); i++) {
+        if (count < 3) {
             s->x0 = -1.0f;
             s->x1 = 1.0f;
             s->u0 = 0.0f;
@@ -154,12 +156,12 @@ void fn_802DD63C(int n) {
             s->u0 = 0.5f;
             s->u1 = 1.0f;
         }
-        if (c == 1) {
+        if (count == 1) {
             s->y0 = 1.0f;
             s->y1 = -1.0f;
             s->v0 = 0.0f;
             s->v1 = 1.0f;
-        } else if (i < (c + 1) / 2) {
+        } else if (i < (count + 1) / 2) {
             s->y0 = 1.0f;
             s->y1 = 0.0f;
             s->v0 = 0.0f;

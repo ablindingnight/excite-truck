@@ -2360,9 +2360,15 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
         u8* o = VI(fn_801B2ED0(id))->v18();
         if (o) {
             U8(d, 0xFC) = 1;
-            const f32 vx = v.x;
-            const f32 vy = v.y;
-            f32 s = 1.1f * (F32(o, 0x3C) * vy + vx * F32(o, 0x38));
+            f32 ox;
+            f32 vy;
+            f32 oy;
+            f32 vx;
+            vy = v.y;
+            oy = F32(o, 0x3C);
+            ox = F32(o, 0x38);
+            vx = v.x;
+            f32 s = 1.1f * (ox * vx + oy * vy);
             F32(d, 0xF8) = b;
             S32(d, 0x114) = id;
             F32(d, 0x108) = F32(d, 0x278) + F32(d, 0x27C) * a;

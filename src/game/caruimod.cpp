@@ -798,22 +798,46 @@ static inline void CreateLoader(void) {
     lbl_8055F33C++;
 }
 
+static inline void RemoveIdleLoader(ResourceLoader* loader, ResourceLoader** slot, int index) {
+    if (loader) {
+        fn_8012D8A8(loader->set);
+        delete loader;
+    }
+    lbl_8055F33C--;
+    memmove(slot, slot + 1, (lbl_8055F33C - index) * 4);
+}
+
+static inline void ReportNoIdleLoader(void) {
+    fn_802E317C("ResourceLoader::DestroyOne - didn't find an idle ResourceLoader - did you forget to call "
+                "ResourceLoader::Unload?");
+}
+
+/* Helper name unproven. */
+static inline void DestroyFirstLoader(void) {
+    ResourceLoader* l;
+    ResourceLoader** p;
+    int i;
+    for (i = 0; i < lbl_8055F33C; i++) {
+        if (lbl_80498E08[i]->IsIdle()) {
+            l = lbl_80498E08[i];
+            p = &lbl_80498E08[i];
+            RemoveIdleLoader(l, p, i);
+            return;
+        }
+    }
+    ReportNoIdleLoader();
+}
+
 static inline void DestroyLoader(void) {
     for (int i = 0; i < lbl_8055F33C; i++) {
         if (lbl_80498E08[i]->IsIdle()) {
             ResourceLoader* l = lbl_80498E08[i];
             ResourceLoader** p = &lbl_80498E08[i];
-            if (l) {
-                fn_8012D8A8(l->set);
-                delete l;
-            }
-            lbl_8055F33C--;
-            memmove(p, p + 1, (lbl_8055F33C - i) * 4);
+            RemoveIdleLoader(l, p, i);
             return;
         }
     }
-    fn_802E317C("ResourceLoader::DestroyOne - didn't find an idle ResourceLoader - did you forget to call "
-                "ResourceLoader::Unload?");
+    ReportNoIdleLoader();
 }
 
 static inline void ReleaseLoader(const char* name) {
@@ -1194,7 +1218,7 @@ CarUIScreen::~CarUIScreen(void) {
     Deactivate();
     delete model;
     gxForgetTexture(tex);
-    DestroyLoader();
+    DestroyFirstLoader();
     DestroyLoader();
 }
 
