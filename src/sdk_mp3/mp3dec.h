@@ -108,15 +108,15 @@ void MP3_IntensityStereo(MP3Decoder* d, u8* long_map, s16* long_edges, u32 flags
                          s16 (*sf_short)[3], s16* is_scale, s16 bound);
 void fn_800BD710(MP3Decoder* d, s32 ch, s32 sf, s32* r, s32* l);
 void MP3_Antialias(s32 sblim, s32 start, s8 channels, s32 mixed, MP3ChannelBuf* g);
-s32 MP3_FindSync(u32 ctx, u8* buf, s32* pos);
-u32 MP3_GetBits(u32 unused, u8* buf, s16 n, s32* pos);
+s32 MP3_FindSync(u32 ctx, const u8* buf, s32* pos);
+u32 MP3_GetBits(u32 unused, const u8* buf, s16 n, s32* pos);
 u32 MP3_GetBitsRing(u8* buf, s32 n, u32* pos);
 void fn_800C3DA0(MP3Decoder* d, u8* ring, u32 flags, s16* sf_long, s16* sf_long0, s16 (*sf_short)[3], s16 part2_3,
                  s16 sfc, s16* scfsi, s8 gr, s8 ch, s16* bound, s16* region0, s16* region1, s16* preflag,
                  s16* is_scale);
 /* TMCCMP3Decode: formerly MP3_DecodeFrame. Name from the diagnostic string "mp3: TMCCMP3Decode returns ..."
  * at its verified caller (strongly supported API name, not an original linker symbol). */
-s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode);
+s32 TMCCMP3Decode(MP3Decoder* d, s16* out, const u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode);
 /* TMCCMP3GetInfo: formerly MP3_GetInfo. Name from the directly identified Wii Photo Channel counterpart
  * (its caller prints "TMCCMP3GetInfo() failed."); not an original Excite Truck symbol. ET's version keeps
  * its own void signature (Photo's returns a status). */

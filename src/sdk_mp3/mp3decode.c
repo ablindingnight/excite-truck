@@ -10,7 +10,7 @@ static s32 lbl_8055DD8C;
  * "mp3: TMCCMP3Decode returns ..." diagnostic at the verified caller, not a linker symbol): header, side info, main data, then per granule the scalefactors, Huffman
  * decode, dequantization, stereo processing, antialias, IMDCT and synthesis. Draft: 931 of 933; behaviour verified against the original in a PPC simulation
  * (200 random frames, heavy stages stubbed, bit readers from the original). */
-s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
+s32 TMCCMP3Decode(MP3Decoder* d, s16* out, const u8* buf, u32 ctx, s32 unused, s32* frame_bytes, s32 mode) {
     u32 bits;
     s16 table_select[2][2][3];
     s8 gr;
@@ -40,14 +40,16 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
     s8 window_switching[2][2];
     s8 mixed[2][2];
     s8 ch;
-    u8* p;
+    u8* ring;
+    const u8* p;
+    u8 c;
     s16 global_gain[2][2];
     s16 big_values[2][2];
     s16 preflag[2][2];
     s16 bound[2];
     d->unk278 = ctx;
+    n = d->unk8 = 0;
     lbl_8055DD88 = out;
-    d->unk8 = 0;
     if (((s16) MP3_FindSync(d->unk278, buf, &d->unk8)) == 0) {
         return 8;
     }
@@ -172,16 +174,18 @@ s32 TMCCMP3Decode(MP3Decoder* d, s16* out, u8* buf, u32 ctx, s32 unused, s32* fr
 
     }
 
-    if (d->unk8 < 0) {
+    if (d->unk8 < n) {
         n = (end >> 3) - ((d->unk8 >> 3) + d->unk278);
     } else {
-        n = end >> 3;
-        n = n - (d->unk8 >> 3);
+        n = (end >> 3) - (d->unk8 >> 3);
     }
     d->unk18 = d->unk14 >> 3;
     p = buf + (d->unk8 >> 3);
     while (n != 0) {
-        d->ring[d->unk18 & 0x1FFF] = *(p++);
+        c = *(p++);
+        ring = d->ring;
+        ring += d->unk18 & 0x1FFF;
+        *ring = c;
         d->unk18++;
         n--;
     }
