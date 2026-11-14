@@ -2083,27 +2083,17 @@ void fn_800C4CF4(MP3Decoder* d, s32* buf, s32* vb, s16* out, s8 channels, s32 mo
 
 /* DCT-32 for one synthesis step: reorder, the five butterfly stages (lbl_8031D7C0), then the output
  * recombination of the textbook dct64 (out[32+k] = -out0[k], out[k] = out1[k], out[16] = 0), written as the
- * original's hand-optimised running sums: decompiled from the target's instructions (tools/scan/exprdec.py),
- * operands in target order, values used twice as temps t0..t14 (declaration order from a hill climb).
+ * original's hand-optimised running sums: three accumulators (a, c, d) that are updated in place, each staying
+ * in one register in the original, and the sums in ascending index order (the compiler emits X + Y + Z as
+ * Z, X, Y, which is the order of the loads in the original).
  * An in-place b[x] += b[y] array chain is NOT it (MWCC keeps the array stores: 254 instructions).
- * Verified equal to the previous transcription on random inputs. Returns 0. NonMatching: 216/216, registers differ. */
+ * Verified equal to the previous transcription on random inputs. Returns 0. */
 s32 fn_800C4E5C(s32* in, s32* out) {
     s32 b[32];
-    s32 t0;
-    s32 t3;
-    s32 t4;
-    s32 t1;
-    s32 t5;
-    s32 t6;
-    s32 t2;
-    s32 t7;
-    s32 t8;
-    s32 t9;
-    s32 t10;
-    s32 t11;
-    s32 t12;
-    s32 t13;
-    s32 t14;
+    s32 a;
+    s32 c;
+    s32 d;
+    s32 t;
     MP3_Reorder32((u32 *) b, (u32 *) in, 0);
     fn_800C51BC(b, b + 16, lbl_8031D7C0);
     fn_800C5298(b, b + 8, lbl_8031D7C0 + 16);
@@ -2111,55 +2101,54 @@ s32 fn_800C4E5C(s32* in, s32* out) {
     fn_800C5508(b, b + 2, lbl_8031D7C0 + 28);
     fn_800C55D8(b, b + 1, lbl_8031D7C0 + 30);
     out[48] = -b[0];
-    t0 = b[31] + b[30] + (b[24] + b[28]);
-    out[47] = -(b[16] + t0);
-    t1 = b[14] + (b[15] + b[12]);
-    out[46] = -(t1 + b[8]);
-    t2 = b[22] + (b[23] + b[20]);
-    out[45] = -(t2 + t0);
-    out[44] = -(b[6] + (b[7] + b[4]));
-    t3 = t0 + (b[26] + b[27] - b[24]);
-    out[43] = -(t2 + t3);
-    t4 = b[11] + (t1 + b[10]);
-    out[42] = -t4;
-    out[41] = -(b[19] + (t3 + b[18]));
+    a = b[31] + b[30] + (b[24] + b[28]);
+    out[47] = -(b[16] + a);
+    c = b[12] + b[14] + b[15];
+    out[46] = -(b[8] + c);
+    d = b[20] + b[22] + b[23];
+    out[45] = -(d + a);
+    out[44] = -(b[4] + b[6] + b[7]);
+    a += b[26] + b[27] - b[24];
+    out[43] = -(d + a);
+    c += b[10] + b[11];
+    out[42] = -c;
+    out[41] = -(b[18] + b[19] + a);
     out[40] = -(b[2] + b[3]);
-    t5 = t3 + (b[29] - b[28]);
-    out[39] = -(b[19] + (t5 + b[18]));
-    t6 = t4 + (b[13] - b[12]);
-    out[38] = -t6;
-    t7 = t2 + (b[21] - b[20]);
-    out[37] = -(t7 + t5);
-    out[36] = -(b[6] + (b[7] + b[5]));
-    t8 = t5 + (b[25] - b[26] - b[27]);
-    out[35] = -(t7 + t8);
-    t9 = t6 + (b[9] - b[10] - b[11]);
-    out[34] = -t9;
-    out[33] = -(t8 + b[17]);
-    t14 = b[1];
-    out[0] = t14;
-    t14 = -t14;
-    t10 = t8 - b[30];
-    out[1] = b[17] + t10;
-    out[2] = t9 - b[14];
-    t11 = t7 - b[22];
-    out[3] = t11 + t10;
+    a += b[29] - b[28];
+    out[39] = -(b[18] + b[19] + a);
+    c += b[13] - b[12];
+    out[38] = -c;
+    d += b[21] - b[20];
+    out[37] = -(d + a);
+    out[36] = -(b[5] + b[6] + b[7]);
+    a += b[25] - b[26] - b[27];
+    out[35] = -(d + a);
+    c += b[9] - b[10] - b[11];
+    out[34] = -c;
+    out[33] = -(b[17] + a);
+    t = b[1];
+    out[0] = t;
+    a -= b[30];
+    out[1] = b[17] + a;
+    out[2] = c - b[14];
+    d -= b[22];
+    out[3] = d + a;
     out[4] = b[5] + b[7];
-    t12 = t10 + (b[27] - b[25]);
-    out[5] = t11 + t12;
-    out[6] = b[13] + (b[15] + b[11]);
-    t13 = t12 + b[19];
-    out[7] = t13;
+    a += b[27] - b[25];
+    out[5] = d + a;
+    out[6] = b[11] + b[13] + b[15];
+    a += b[19];
+    out[7] = a;
     out[8] = b[3];
-    out[9] = t13 - b[29];
+    out[9] = a - b[29];
     out[10] = b[11] + b[15];
-    out[11] = b[27] + (b[31] + b[23]);
+    out[11] = b[23] + b[27] + b[31];
     out[12] = b[7];
     out[13] = b[23] + b[31];
     out[14] = b[15];
     out[15] = b[31];
-    out[32] = t14;
     out[16] = 0;
+    out[32] = -t;
     return 0;
 }
 
