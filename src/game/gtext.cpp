@@ -63,6 +63,8 @@ struct TextItem {
 };
 
 struct IngameText {
+    /* Helper name unproven */
+    void Advance() { count++; }
     GTextFont* font;  // offset 0x0
     int count;   // offset 0x4
 };
@@ -1122,14 +1124,14 @@ void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f3
     lbl_8055F06C[lbl_8055F058.count].x = x;
     lbl_8055F06C[lbl_8055F058.count].y = y;
     lbl_8055F06C[lbl_8055F058.count].scale = scale;
-    int& count = *&lbl_8055F058.count;
+    int& count = lbl_8055F058.count;
     if (wide) {
         lbl_8055F06C[count].xs = 0.45f * scale;
     } else {
         lbl_8055F06C[count].xs = scale;
     }
     fn_8023423C(count, align);
-    (count)++;
+    lbl_8055F058.Advance();
 }
 
 int fn_80234654(void) {

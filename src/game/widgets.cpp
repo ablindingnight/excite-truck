@@ -2556,7 +2556,9 @@ extern int lbl_8055FBE4;
 // NonMatching: clean two-argument menu draw remains41 original-address words off.
 void fn_80221F9C(WidgetFragment* self, void* context) {
     MenuEntryCountPrefix* list;
-    int ty;
+    struct {
+        int ty;
+    } row;
     int top;
     int i;
     int y;
@@ -2588,7 +2590,7 @@ void fn_80221F9C(WidgetFragment* self, void* context) {
         if (col == f->row) {
             fn_802C3424(x, y + 10, x + 50, y + 10 + list->count * 10, background);
             top = y + 11;
-            ty = y + 12;
+            row.ty = y + 12;
             i = 0;
             off = 0;
             for (; i < list->count; i++) {
@@ -2599,10 +2601,10 @@ void fn_80221F9C(WidgetFragment* self, void* context) {
                 if (i == f->column) {
                     c = highlight;
                 }
-                fn_802C4F58(x + 2, ty, (const char*)fn_8022D97C(list, i), c);
+                fn_802C4F58(x + 2, row.ty, (const char*)fn_8022D97C(list, i), c);
                 off += 10;
                 top += 10;
-                ty += 10;
+                row.ty += 10;
             }
         }
         x += 50;

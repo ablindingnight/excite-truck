@@ -160,8 +160,11 @@ FanCell* fn_802BE844(short x, short z, int size) {
 }
 
 void fn_802BE8B4(short x, short z, int size) {
-    int k;
-    u32 mask = 0;
+    struct {
+        u32 mask;
+        int k;
+    } sample;
+    sample.mask = 0;
     int counts[6];
     memset(counts, 0, sizeof(counts));
     if (size == 4) {
@@ -171,18 +174,18 @@ void fn_802BE8B4(short x, short z, int size) {
                     int w = fn_802BBD38(px, pz, i);
                     counts[i] += w;
                     if (w) {
-                        mask |= 1 << i;
+                        sample.mask |= 1 << i;
                     }
                 }
             }
         }
     } else {
         int h = size / 2;
-        for (k = 0; k < 4; k++) {
-            short px = x + ((k & 1) ? h : -h);
-            short pz = z + ((k & 2) ? h : -h);
+        for (sample.k = 0; sample.k < 4; sample.k++) {
+            short px = x + ((sample.k & 1) ? h : -h);
+            short pz = z + ((sample.k & 2) ? h : -h);
             FanCell* c = fn_802BE844(px, pz, h);
-            mask |= c->bits & 0x3F;
+            sample.mask |= c->bits & 0x3F;
             counts[(c->bits >> 6) & 7]++;
         }
     }
@@ -192,7 +195,7 @@ void fn_802BE8B4(short x, short z, int size) {
             best = i;
         }
     }
-    SetMaterial(fn_802BE844(x, z, size), mask, best);
+    SetMaterial(fn_802BE844(x, z, size), sample.mask, best);
 }
 
 void fn_802BEAB0(void) {
