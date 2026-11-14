@@ -156,9 +156,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Average of two sideways samples, blended toward a squared response curve (blend 0 in this build).
 f32 fn_802E78A4(f32 x) {
-    f32 a = fn_802E7824(0.05f + x, 0.1f);
-    f32 b = fn_802E7824(x - 0.05f, 0.1f);
-    f32 v = 0.5f * (b + a);
+    f32 v = 0.5f * (fn_802E7824(x - 0.05f, 0.1f) + fn_802E7824(0.05f + x, 0.1f));
     return Lerp(v, (f32)__fabs(v) * v, 0.0f);
 }
 
