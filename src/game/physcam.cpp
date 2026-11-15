@@ -3,6 +3,7 @@
 // checks and the angle/range helpers. Written against raw field offsets; the large routines and the
 // static-array initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/camrect.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -144,15 +145,15 @@ extern const f32 lbl_8055F560 = lbl_80563F9C;
 
 extern "C" int fn_80273494(int x);
 
-extern "C" {
-
-void fn_80270AE8(f32* p) {
+CamRect::CamRect(void) {
     f32 z = 0.0f;
-    p[0] = z;
-    p[1] = z;
-    p[3] = z;
-    p[2] = z;
+    v[0] = z;
+    v[1] = z;
+    v[3] = z;
+    v[2] = z;
 }
+
+extern "C" {
 
 void fn_80270B00(const char* fmt, ...) {}
 

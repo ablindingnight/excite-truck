@@ -4,6 +4,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/camframe.h"
+#include "game/camrect.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -19,13 +20,6 @@ double atan(double x);
 }
 
 extern f32 lbl_8049A208[];
-
-// A screen rectangle; its out-of-line constructor (fn_80270AE8, in physcam.cpp) zeroes it.
-class CamRect {
-public:
-    CamRect(void);
-    f32 v[4];
-};
 
 extern CamRect lbl_8049A218[4];
 
