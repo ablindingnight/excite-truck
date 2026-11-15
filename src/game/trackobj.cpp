@@ -1228,7 +1228,7 @@ ObjDesc* fn_801F96C8(const char* name) {
     return d;
 }
 
-void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
+void fn_801F973C(ObjDesc* d, const PlacedObj* parent, u32 flags) {
     if (flags & 2) {
         u32 f;
         ObjDesc* c;
@@ -1249,7 +1249,7 @@ void fn_801F973C(ObjDesc* d, PlacedObj* parent, u32 flags) {
         }
     }
     if (flags & 1) {
-        fn_80204018(d, parent);
+        fn_80204018(d, (PlacedObj*)parent);
     }
 }
 
