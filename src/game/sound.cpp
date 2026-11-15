@@ -478,8 +478,9 @@ void Sound3D::PreUpdate(Listener* l, int n) {
             if (PSVECDotProduct(&d, &d) < (200.0f + radius) * (200.0f + radius)) {
                 f32 v = volume;
                 audible = 1;
+                f32 r = ((const Sound3D*)this)->radius;  // const view: a separate expression, loaded here (a const getter in the original?)
                 v = (v < 1.0f) ? v : 1.0f;
-                f32 g = v * Attenuation(&d, radius);
+                f32 g = v * Attenuation(&d, r);
                 f32 cur = gain;
                 gain = (cur > g) ? cur : g;
             }
