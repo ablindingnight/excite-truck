@@ -439,8 +439,6 @@ extern "C" void fn_80211FF0(void) {
 extern "C" s32 fn_8012C33C(s32);
 extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
-extern "C" void *fn_802228B0(void *, const char *, s32, s32);
-extern "C" void *fn_802226D4(void *, const char *);
 // Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
 class UIImageRef : public UIImage {  /* Class name unproven */
 public:
@@ -623,12 +621,9 @@ extern "C" WidgetFragment* fn_8021B2B0(WidgetFragment*, int, int, const char*, i
 extern "C" WidgetFragment* fn_8021D044(WidgetFragment*, int, int, void*, const char*, int, int, int, int);
 extern "C" WidgetFragment* fn_8021D6A0(WidgetFragment*, int, int, void*, void*, const char*, int, int, int);
 extern "C" WidgetFragment* fn_8021B460(WidgetFragment*, UIDesc*, const char*, void*);
-extern "C" void* fn_80222530(void*, const char*, const char*);
 extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_8021B9AC(WidgetFragment*, UIDesc*, void*, void*);
 extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
 extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_8022435C(WidgetFragment*, void*, UIDesc*, void*, void*);
 extern "C" WidgetFragment* fn_8021A5B8(WidgetFragment*, const char*, u8, u8, int, float);
 extern "C" WidgetFragment* fn_80219A28(WidgetFragment*, UIDesc*, const char*, void*);
 extern "C" WidgetFragment* fn_80219870(WidgetFragment*, int, int, const char*, void*, int);
@@ -641,7 +636,6 @@ extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, in
 extern "C" WidgetFragment* fn_8021BD98(WidgetFragment* self, int x, int y, void* value, float scale, const char* format, float bias, int height);
 extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, float, const char*, float, int);
 extern "C" WidgetFragment* fn_8021BEC0(WidgetFragment*, int, int, void*, int, int, int, int);
-extern "C" WidgetFragment* fn_8021CA0C(WidgetFragment*, int, int, int, int, void*);
 extern "C" WidgetFragment* fn_8021C97C(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021C344(WidgetFragment*, int, int, void*, int, int, int, int, const char*, int);
 extern "C" WidgetFragment* fn_8021D7C8(WidgetFragment*, int, int, int, int, int, void*);
@@ -657,7 +651,6 @@ extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022886C(WidgetFragment*, UIDesc*, void*, void*);
 extern "C" WidgetFragment* fn_802286E4(WidgetFragment*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_80224B54(WidgetFragment*, void*, UIDesc*);
 extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
 extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
@@ -873,8 +866,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             widgets[count++] = p;
             break;
         }
-        void* image = operator new(0xc, "gTextImage");
-        if (image) image = fn_80222530(image, d->style, (const char*)text->value);
+        void* image = new ("gTextImage") ResourcePrefix(d->style, (const char*)text->value);
         p = (WidgetFragment*)operator new(0x258, "gText");
         if (p) p = fn_8021995C(p, d->x, d->y, d->kind, image, 0);
         widgets[count++] = p;
@@ -882,8 +874,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 31: {
         UIStyle* column = FindStyle(styles, d->name, 0xd);
-        p = (WidgetFragment*)operator new(0x264, "Column");
-        if (p) p = fn_8021B9AC(p, d, column ? column->value : (void*)lbl_8055EF2C, column ? column->arg1 : 0);
+        p = (WidgetFragment*)new ("Column") Column((FormattedChoiceDescriptor*)d, (UITable*)(column ? column->value : (void*)lbl_8055EF2C), (int)(column ? column->arg1 : 0));
         widgets[count++] = p;
         break;
     }
@@ -926,8 +917,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             handler = (void*)fn_80212338;
         }
         void* watched = value ? value->value : 0;
-        p = (WidgetFragment*)operator new(0x28c, "FadeButton");
-        if (p) p = fn_8022435C(p, image, d, handler, watched);
+        p = (WidgetFragment*)new ("FadeButton") FadeButton(image, (WidgetDesc*)d, (int (*)(void*))handler, (int*)watched);
         widgets[count++] = p;
         break;
     }
@@ -950,8 +940,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         if (strstr(path, ".img")) {
             p = (WidgetFragment*)operator new(0x258, "imgstamproll");
             if (p) {
-                void* image = operator new(0x10, "imgimg");
-                if (image) image = fn_802228B0(image, path, d->dx, d->dy);
+                void* image = new ("imgimg") AnimationPrefix(path, d->dx, d->dy);
                 p = fn_8021995C(p, d->x, d->y, d->kind, image, watched);
             }
             widgets[count++] = p;
@@ -1090,8 +1079,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             widgets[count++] = p;
             break;
         case 4:
-            p = (WidgetFragment*)operator new(0x25c, "SpinSldr");
-            if (p) p = fn_8021CA0C(p, d->x + 15, d->y, d->dx - 30, d->dy, target);
+            p = (WidgetFragment*)new ("SpinSldr") SpinSldr(d->x + 15, d->y, d->dx - 30, d->dy, (ObservedValueProvider*)target);
             widgets[count++] = p;
             p = (WidgetFragment*)operator new(0x25c, "SpinArrow");
             if (p) p = fn_8021C97C(p, d->x + 1, d->y + 2, fn_80215270(0, 2), -1, target);
@@ -1333,8 +1321,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     case 43: {
         UIStyle* text = FindStyle(styles, d->style, 3);
-        p = (WidgetFragment*)operator new(0x2a0, "TextBox");
-        if (p) p = fn_80224B54(p, text ? text->value : 0, d);
+        p = (WidgetFragment*)new ("TextBox") TextBox((int)(text ? text->value : 0), (WidgetDesc*)d);
         widgets[count++] = p;
         break;
     }

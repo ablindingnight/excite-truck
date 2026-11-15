@@ -136,10 +136,34 @@ public:
     float height;    // 0xC
 };
 
+struct FormattedChoiceDescriptor;
+struct ObservedValueProvider;
+class UITable;
+
 // Concrete widgets defined in widgets.cpp and built by uiapi's factory. Names are the retail allocation tags
 // passed to operator new (class names unproven). Fields are still read through widgets.cpp's observed views,
 // so the storage here is opaque; declared in reverse retail .data order (vtables come out reversed).
-class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage") */
+class Column : public UIWidget {  /* Class name unproven (allocation tag "Column"); vtable lbl_8033F0FC */
+public:
+    Column(FormattedChoiceDescriptor* desc, UITable* provider, int column);  // fn_8021B9AC
+    virtual ~Column(void);  // fn_8021BBA0
+    virtual void Slot28(void);  // fn_8021BC20
+    unsigned char fields244[0x20];  // 0x244, read through widgets.cpp views
+};
+
+class SpinSldr : public UIWidget {  /* Class name unproven (allocation tag "SpinSldr"); vtable lbl_8033ED44 */
+public:
+    SpinSldr(int x, int y, int dx, int dy, ObservedValueProvider* provider);  // fn_8021CA0C
+    virtual ~SpinSldr(void);  // fn_8021CAD4
+    virtual void Slot24(void* context);  // fn_8021CB4C
+    virtual void Slot28(void);  // fn_8021CBBC
+    virtual void Slot3C(int a, int b);  // fn_8021CD04
+    virtual void Slot40(int a, int b);  // fn_8021CEAC
+    virtual void Slot4C(int x, int y);  // fn_8021CE8C
+    unsigned char fields244[0x18];  // 0x244, read through widgets.cpp views
+};
+
+class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage"); vtable lbl_8033E3D4 */
 public:
     MenuImage(WidgetDesc* desc, void* context);  // fn_80223AB4
     virtual ~MenuImage(void);  // fn_80223B94
@@ -147,28 +171,49 @@ public:
     virtual void Slot7C(void);  // fn_80223CC4
     unsigned char fields244[0x24];  // 0x244, read through widgets.cpp views
 };
-class DynamicLoadBackground : public UIWidget {  /* Class name unproven (allocation tag "DynamicLoadBackground") */
+class DynamicLoadBackground : public UIWidget {  /* Class name unproven (allocation tag "DynamicLoadBackground"); vtable lbl_8033E2CC */
 public:
     DynamicLoadBackground(WidgetDesc* desc);  // fn_802241C8
     virtual ~DynamicLoadBackground(void);  // fn_802242A4
     virtual void Slot28(void);  // fn_80224328
     unsigned char fields244[0x14];  // 0x244, read through widgets.cpp views
 };
-class RotImage : public UIWidget {  /* Class name unproven (allocation tag "RotImage") */
+class FadeButton : public UIWidget {  /* Class name unproven (allocation tag "FadeButton"); vtable lbl_8033E248 */
+public:
+    FadeButton(void* context, WidgetDesc* desc, int (*callback)(void*) , int* frame);  // fn_8022435C
+    virtual ~FadeButton(void);  // fn_802244C8
+    virtual void Slot14(void);  // fn_8022455C
+    virtual void Slot28(void);  // fn_802248FC
+    virtual int Slot64(int key);  // fn_80224A38
+    virtual int Slot6C(int key);  // fn_80224B0C
+    virtual void Slot74(int key, void* value);  // fn_80224864
+    virtual void Slot7C(void);  // fn_802245C8
+    unsigned char fields244[0x48];  // 0x244, read through widgets.cpp views
+};
+
+class TextBox : public UIWidget {  /* Class name unproven (allocation tag "TextBox"); vtable lbl_8033E1C4 */
+public:
+    TextBox(int context, WidgetDesc* desc);  // fn_80224B54
+    virtual ~TextBox(void);  // fn_80224D40
+    virtual void Slot28(void);  // fn_80224E74
+    unsigned char fields244[0x5C];  // 0x244, read through widgets.cpp views
+};
+
+class RotImage : public UIWidget {  /* Class name unproven (allocation tag "RotImage"); vtable lbl_8033E0BC */
 public:
     RotImage(WidgetDesc* desc);  // fn_802269A8
     virtual ~RotImage(void);  // fn_80226AD0
     virtual void Slot28(void);  // fn_80226B6C
     unsigned char fields244[0x1C];  // 0x244, read through widgets.cpp views
 };
-class ColorBackground : public UIWidget {  /* Class name unproven (allocation tag "ColorBackground") */
+class ColorBackground : public UIWidget {  /* Class name unproven (allocation tag "ColorBackground"); vtable lbl_8033DFB4 */
 public:
     ColorBackground(WidgetDesc* desc);  // fn_802270DC
     virtual ~ColorBackground(void);  // fn_80227244
     virtual void Slot28(void);  // fn_802272D4
     unsigned char fields244[0x30];  // 0x244, read through widgets.cpp views
 };
-class TabBox : public UIWidget {  /* Class name unproven (allocation tag "TabBox") */
+class TabBox : public UIWidget {  /* Class name unproven (allocation tag "TabBox"); vtable lbl_8033DEAC */
 public:
     TabBox(WidgetDesc* desc);  // fn_80227D00
     virtual ~TabBox(void);  // fn_80227D64
