@@ -359,7 +359,7 @@ extern "C" {
 extern const f32 lbl_80563C18,lbl_80563C1C;
 void fn_8022ACFC(void*,const char*,f32,f32,f32*,f32*,f32*,f32*);
 u32 fn_8022AA84(void*);
-void fn_8022BD40(void*,const char*,int,int,f32,f32,f32,f32,f32,f32);
+void fn_8022BD40(void*,f32,f32,f32,f32,f32,f32,const char*,int,int);
 void fn_80264A5C(f32,f32);
 
 void fn_80230C30(f32*,f32*,int,int);
@@ -625,7 +625,7 @@ void CreditsFireText::Draw(void) {
         u32 flags=fn_8022AA84(font);
         if(flags&2)drawX-=delta;
         else if(flags&4)drawX-=(0.5f)*delta;
-        fn_8022BD40(font,text,0,0,drawX,(f32)y,(0.0f),full.right-full.left,full.bottom-full.top,(1.0f));
+        fn_8022BD40(font,drawX,(f32)y,(0.0f),full.right-full.left,full.bottom-full.top,(1.0f),text,0,0);
         text[cutoff]=saved;
         if(!complete) {
             f32 fraction=progress-(f32)cutoff;

@@ -7345,19 +7345,21 @@ extern const s32 lbl_802F7A40[];
 // Dequantizes (inter table `q`) and inverse-transforms a block, adding the result to the motion source src.
 void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride) {
     s32 tmp[64];
-    s32 *quant = (s32 *)((u8 *)lbl_802F7A40 + (q << 8));
-    s32 *t = tmp;
     s32 i;
+    s32 *t = tmp;
+    s32 *quant = (s32 *)((u8 *)lbl_802F7A40 + (q << 8));
 
-    for (i = 0; i < 8; i++) {
-        s32 s1 = block[8];
-        s32 s3 = block[24];
-        s32 s2 = block[16];
-        s32 s4 = block[32];
-        s32 s5 = block[40];
-        s32 s6 = block[48];
-        s32 s7 = block[56];
-        if ((s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0) {
+    for (i = 8; i != 0; --i) {
+        s32 s1, s3, s4, s5, s6, s7, s2;
+        s6 = block[48];
+        s5 = block[40];
+        s4 = block[32];
+        s3 = block[24];
+        s7 = block[56];
+        s1 = block[8];
+        s2 = block[16];
+        // The cast keeps CodeWarrior from reassociating the zero-test ORs.
+        if (((s7 | (s32)((u32)s6 | (u32)s5)) | ((s4 | s3) | (s1 | s2))) == 0) {
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -7379,18 +7381,18 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
             s32 a1 = d0 - d4;
             s32 a2 = d6 + d2;
             s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
-            s32 e3 = a0 - a2;
             s32 e0 = a0 + a2;
+            s32 e3 = a0 - a2;
+            s32 d1 = (s1 * quant[8]) >> 11;
             s32 e1 = a1 + a3;
             s32 e2 = a1 - a3;
-            s32 d1 = (s1 * quant[8]) >> 11;
             s32 d3 = (s3 * quant[24]) >> 11;
-            s32 d7 = (s7 * quant[56]) >> 11;
             s32 d5 = (s5 * quant[40]) >> 11;
+            s32 d7 = (s7 * quant[56]) >> 11;
+            s32 a7 = d1 - d7;
+            s32 a6 = d1 + d7;
             s32 a4 = d5 + d3;
             s32 a5 = d5 - d3;
-            s32 a6 = d1 + d7;
-            s32 a7 = d1 - d7;
             s32 b0 = a4 + a6;
             s32 b1 = BINK_MUL(BINK_A3, a7 + a5);
             s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
@@ -7410,17 +7412,25 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
         }
     }
     t = tmp;
-    for (i = 0; i < 8; i++) {
-        s32 a0 = t[4] + t[0];
-        s32 a1 = t[0] - t[4];
-        s32 a2 = t[2] + t[6];
-        s32 a3 = BINK_MUL(BINK_A1, t[2] - t[6]) - a2;
-        s32 a4 = t[3] + t[5];
-        s32 a5 = t[5] - t[3];
-        s32 a6 = t[7] + t[1];
-        s32 a7 = t[1] - t[7];
-        s32 b0 = a6 + a4;
+    for (i = 8; i != 0; --i) {
+        s32 x0 = t[0];
+        s32 x1 = t[1];
+        s32 x2 = t[2];
+        s32 x3 = t[3];
+        s32 x4 = t[4];
+        s32 x5 = t[5];
+        s32 x6 = t[6];
+        s32 x7 = t[7];
+        s32 a2 = x2 + x6;
+        s32 a3 = BINK_MUL(BINK_A1, x2 - x6) - a2;
+        s32 a5 = x5 - x3;
+        s32 a4 = x3 + x5;
+        s32 a7 = x1 - x7;
+        s32 a6 = x7 + x1;
         s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
+        s32 b0 = a6 + a4;
+        s32 a0 = x4 + x0;
+        s32 a1 = x0 - x4;
         s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
         s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
         s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;

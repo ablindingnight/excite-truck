@@ -79,8 +79,8 @@ struct Hitch {
 class CarBody;
 
 extern "C" {
-void fn_801AD148(Hitch* h, const RVec3* at, f32 k, f32 len, CarBody* car);
-void fn_801AD28C(Hitch* h, const RVec3* at, f32 k, f32 len, CarBody* car, const RVec3* carAt);
+void fn_801AD148(Hitch* h, const RVec3* at, CarBody* car, f32 k, f32 len);
+void fn_801AD28C(Hitch* h, const RVec3* at, CarBody* car, const RVec3* carAt, f32 k, f32 len);
 void fn_801AD394(Hitch* h);
 }
 
@@ -251,13 +251,13 @@ inline void Trailer::Reglue(void) {
         at.x = hitchLocal.x + offset.x;
         at.y = hitchLocal.y + offset.y;
         at.z = hitchLocal.z + offset.z;
-        fn_801AD148(&hitch, &at, 175196.86f, 0.305f * 10.0f, car);  // 10 feet
+        fn_801AD148(&hitch, &at, car, 175196.86f, 0.305f * 10.0f);  // 10 feet
     } else {
         RVec3 at;
         at.x = hitchLocal.x + offset.x;
         at.y = hitchLocal.y + offset.y;
         at.z = hitchLocal.z + offset.z;
-        fn_801AD28C(&hitch, &at, 175196.86f, 10.0f, car, &hitchCar);
+        fn_801AD28C(&hitch, &at, car, &hitchCar, 175196.86f, 10.0f);
     }
 }
 
