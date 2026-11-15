@@ -441,6 +441,23 @@ extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
 extern "C" void *fn_802228B0(void *, const char *, s32, s32);
 extern "C" void *fn_802226D4(void *, const char *);
+// Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
+class UIImageRef : public UIImage {  /* Class name unproven */
+public:
+    UIImageRef(const char* n, int f) {
+        flags = f;
+        name = n;
+    }
+    virtual ~UIImageRef(void);
+    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
+    virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void);
+    virtual void Extra(void);  /* Helper name unproven */
+
+    const char* name;  // 0x4
+    int flags;         // 0x8
+};
+
 // make_image's drawers (class names unproven): "stp" sprite tables and "cvs" canvases.
 class StpImage : public UIImage {
 public:
@@ -637,38 +654,17 @@ extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, vo
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_802230A4(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
-extern "C" WidgetFragment* fn_80223AB4(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022886C(WidgetFragment*, UIDesc*, void*, void*);
 extern "C" WidgetFragment* fn_802286E4(WidgetFragment*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_802241C8(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80224B54(WidgetFragment*, void*, UIDesc*);
 extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
-extern "C" WidgetFragment* fn_802269A8(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
-extern "C" WidgetFragment* fn_802270DC(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_80227D00(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_8021FF34(WidgetFragment*, UIDesc*, void*, int, float, float);
 extern "C" WidgetFragment* fn_80228418(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022855C(WidgetFragment*, UIDesc*, void*, void*);
 
-// Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
-class UIImageRef : public UIImage {  /* Class name unproven */
-public:
-    UIImageRef(const char* n, int f) {
-        flags = f;
-        name = n;
-    }
-    virtual ~UIImageRef(void);
-    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
-    virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
-    virtual int Frames(void);
-    virtual void Extra(void);  /* Helper name unproven */
-
-    const char* name;  // 0x4
-    int flags;         // 0x8
-};
 
 // The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
 class OptionPair : public MenuWidget {
@@ -1300,8 +1296,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 38: {
         UIStyle* menu = FindStyle(styles, d->style, 0xe);
-        p = (WidgetFragment*)operator new(0x268, "MenuImage");
-        if (p) p = fn_80223AB4(p, d, menu ? menu->value : (void*)lbl_8055EF30);
+        p = (WidgetFragment*)new ("MenuImage") MenuImage((WidgetDesc*)d, menu ? menu->value : (void*)lbl_8055EF30);
         widgets[count++] = p;
         break;
     }
@@ -1333,8 +1328,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 41:
-        p = (WidgetFragment*)operator new(0x258, "DynamicLoadBackground");
-        if (p) p = fn_802241C8(p, d);
+        p = (WidgetFragment*)new ("DynamicLoadBackground") DynamicLoadBackground((WidgetDesc*)d);
         widgets[count++] = p;
         break;
     case 43: {
@@ -1352,8 +1346,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 45:
-        p = (WidgetFragment*)operator new(0x260, "RotImage");
-        if (p) p = fn_802269A8(p, d);
+        p = (WidgetFragment*)new ("RotImage") RotImage((WidgetDesc*)d);
         widgets[count++] = p;
         break;
     case 46:
@@ -1362,8 +1355,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         widgets[count++] = p;
         break;
     case 47:
-        p = (WidgetFragment*)operator new(0x274, "ColorBackground");
-        if (p) p = fn_802270DC(p, d);
+        p = (WidgetFragment*)new ("ColorBackground") ColorBackground((WidgetDesc*)d);
         widgets[count++] = p;
         break;
     case 48: {
@@ -1376,8 +1368,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 51:
-        p = (WidgetFragment*)operator new(0x248, "TabBox");
-        if (p) p = fn_80227D00(p, d);
+        p = (WidgetFragment*)new ("TabBox") TabBox((WidgetDesc*)d);
         widgets[count++] = p;
         break;
     case 50: {
@@ -1447,20 +1438,6 @@ public:
     void* update;       // 0x434 per-frame dialog update
     void* funcs[4];     // 0x438 mapped UI functions (0x440 = back)
     u8 pad448[0xDE8 - 0x448];
-};
-// Key binding widget: calls its mapped action when the key is pressed.
-class UIHotKey : public UIWidget {  /* Class name unproven */
-public:
-    virtual ~UIHotKey(void);
-    virtual int Slot64(int key);
-    u16 key;            // 0x244
-    void* action;       // 0x248
-    void* param;        // 0x24C
-    UIHotKey(void* p, void* a, u16 k) : UIWidget(0, 0, 0, 0, 0) {
-        action = a;
-        param = p;
-        key = k;
-    }
 };
 
 extern "C" UILayout* fn_8022E0EC(const char*);

@@ -304,7 +304,7 @@ public:
 extern "C" {
 f32 PSVECDotProduct(const void* a, const void* b);
 double sqrt(double x);
-void fn_801E3FC8(u8* c, u32 color, f32 r);
+void fn_801E3FC8(u8* c, f32 r, u32 color);
 void fn_801E44F4(u8* m, f32 a, f32 b, f32 c, u32 color);
 void fn_801CFA48(u8* p);
 void fn_801CFF14(u8* p);
@@ -2358,7 +2358,7 @@ void fn_8019F1D4(const u8* p, RVec3* lo, RVec3* hi) {
 void fn_8019F248(u8* p) {
     f32 r = F32(p, 0x24);
     r = r > 0.2f ? r : 0.2f;
-    fn_801E3FC8(p + 0x34, lbl_8055E598.value, r);
+    fn_801E3FC8(p + 0x34, r, lbl_8055E598.value);
 }
 
 void fn_802E30C8(const char* fmt, ...);
@@ -3641,7 +3641,7 @@ u8* fn_801A2C9C(u8* p) { return p + 0x44; }
 
 f32 fn_801A2CA4(u8* p) { return F32(p, 0x178); }
 
-void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, lbl_8055E598.value, F32(p, 0x24)); }
+void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
 
 u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
     fn_8019ECC4(p, a, swap);
@@ -3716,7 +3716,7 @@ void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
     }
 }
 
-void fn_801A3174(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, lbl_8055E598.value, F32(p, 0x24) + F32(p, 0x28)); }
+void fn_801A3174(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
 
 u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) {
     U32(p, 0xC) = a;

@@ -63,6 +63,22 @@ public:
     void* stylePtr;                               // 0x240
 };
 
+// uiapi's key binding widget (lbl_8033D590): calls its mapped action when the key is pressed. Declared before UIImage
+// because its vtable follows UIImage's in uiapi .data (vtables come out in reverse declaration order).
+class UIHotKey : public UIWidget {  /* Class name unproven */
+public:
+    virtual ~UIHotKey(void);
+    virtual int Slot64(int key);
+    unsigned short key;            // 0x244
+    void* action;       // 0x248
+    void* param;        // 0x24C
+    UIHotKey(void* p, void* a, unsigned short k) : UIWidget(0, 0, 0, 0, 0) {
+        action = a;
+        param = p;
+        key = k;
+    }
+};
+
 // An image drawer (the "img"/"art"/"cvs"/"stp" resources and the text references): abstract base of
 // uiapi lbl_8033D504/D528/D54C and widgets lbl_8033F998/9BC/9E0; its own vtable is lbl_8033D570 (uiapi).
 class UIImage {  /* Class name unproven */
@@ -78,7 +94,33 @@ public:
 struct gArtSet;
 struct GTextFont;
 
-// widgets.cpp's image drawers (lbl_8033F998 / 9BC / 9E0). uiapi's make_image builds the first two.
+// widgets.cpp's image drawers (lbl_8033F998 / 9BC / 9E0). uiapi's make_image builds AnimationPrefix and ImagePrefix.
+// Declared in reverse .data order: MWCC emits vtables in reverse class declaration order.
+class ResourcePrefix : public UIImage {  /* Class name unproven */
+public:
+    ResourcePrefix(const char* path, const char* text);
+    virtual ~ResourcePrefix(void);
+    virtual void Draw(int x, int y, int unused, unsigned int frame);
+    virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void) { return 1; }
+    virtual void Extra(void) {}  /* Helper name unproven */
+
+    GTextFont* resource;  // 0x4
+    const char* text;     // 0x8
+};
+
+class ImagePrefix : public UIImage {  /* Class name unproven */
+public:
+    ImagePrefix(const char* path);  // "aimg"
+    virtual ~ImagePrefix(void);
+    virtual void Draw(int x, int y, int unused, unsigned int frame);
+    virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void) { return 1; }
+    virtual void Extra(void) {}  /* Helper name unproven */
+
+    gArtSet* image;  // 0x4
+};
+
 class AnimationPrefix : public UIImage {  /* Class name unproven */
 public:
     AnimationPrefix(const char* path, int width, int height);  // "iimg"
@@ -94,29 +136,44 @@ public:
     float height;    // 0xC
 };
 
-class ImagePrefix : public UIImage {  /* Class name unproven */
+// Concrete widgets defined in widgets.cpp and built by uiapi's factory. Names are the retail allocation tags
+// passed to operator new (class names unproven). Fields are still read through widgets.cpp's observed views,
+// so the storage here is opaque; declared in reverse retail .data order (vtables come out reversed).
+class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage") */
 public:
-    ImagePrefix(const char* path);  // "aimg"
-    virtual ~ImagePrefix(void);
-    virtual void Draw(int x, int y, int unused, unsigned int frame);
-    virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
-    virtual int Frames(void) { return 1; }
-    virtual void Extra(void) {}  /* Helper name unproven */
-
-    gArtSet* image;  // 0x4
+    MenuImage(WidgetDesc* desc, void* context);  // fn_80223AB4
+    virtual ~MenuImage(void);  // fn_80223B94
+    virtual void Slot28(void);  // fn_80223C20
+    virtual void Slot7C(void);  // fn_80223CC4
+    unsigned char fields244[0x24];  // 0x244, read through widgets.cpp views
 };
-
-class ResourcePrefix : public UIImage {  /* Class name unproven */
+class DynamicLoadBackground : public UIWidget {  /* Class name unproven (allocation tag "DynamicLoadBackground") */
 public:
-    ResourcePrefix(const char* path, const char* text);
-    virtual ~ResourcePrefix(void);
-    virtual void Draw(int x, int y, int unused, unsigned int frame);
-    virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
-    virtual int Frames(void) { return 1; }
-    virtual void Extra(void) {}  /* Helper name unproven */
-
-    GTextFont* resource;  // 0x4
-    const char* text;     // 0x8
+    DynamicLoadBackground(WidgetDesc* desc);  // fn_802241C8
+    virtual ~DynamicLoadBackground(void);  // fn_802242A4
+    virtual void Slot28(void);  // fn_80224328
+    unsigned char fields244[0x14];  // 0x244, read through widgets.cpp views
+};
+class RotImage : public UIWidget {  /* Class name unproven (allocation tag "RotImage") */
+public:
+    RotImage(WidgetDesc* desc);  // fn_802269A8
+    virtual ~RotImage(void);  // fn_80226AD0
+    virtual void Slot28(void);  // fn_80226B6C
+    unsigned char fields244[0x1C];  // 0x244, read through widgets.cpp views
+};
+class ColorBackground : public UIWidget {  /* Class name unproven (allocation tag "ColorBackground") */
+public:
+    ColorBackground(WidgetDesc* desc);  // fn_802270DC
+    virtual ~ColorBackground(void);  // fn_80227244
+    virtual void Slot28(void);  // fn_802272D4
+    unsigned char fields244[0x30];  // 0x244, read through widgets.cpp views
+};
+class TabBox : public UIWidget {  /* Class name unproven (allocation tag "TabBox") */
+public:
+    TabBox(WidgetDesc* desc);  // fn_80227D00
+    virtual ~TabBox(void);  // fn_80227D64
+    virtual void Slot28(void);  // fn_80227DE8
+    unsigned char fields244[0x4];  // 0x244, read through widgets.cpp views
 };
 
 #endif
