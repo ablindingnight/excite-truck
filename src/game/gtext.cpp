@@ -430,6 +430,39 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
     return 0;
 }
 
+/* Helper name unproven */
+static inline int EscDrawT(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, f32* adv) {
+    if (*s == '\\') {
+        ArtItem* it;
+        for (int i = 0; i < lbl_80497F14.count; i++) {
+            EscSeq* e = &lbl_80497F14.data[i];
+            if (strncasecmp(s + 1, EName(e), strlen(lbl_80497F14.data[i].name)) == 0) {
+                it = &lbl_8049846C.data[lbl_8049846C.count++];
+                f32 post = 0.0f;
+                it->esc = i;
+                if (e->art) {
+                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    it->h = h * e->scale;
+                    it->w = (k * e->scale) * fn_80235EF0(e->art, e->artIdx);
+                    post = e->scale * (e->postspace * k);
+                } else {
+                    it->w = h * e->scale;
+                    it->h = h * e->scale;
+                }
+                it->x = x;
+                it->y = y + 0.5f * (it->h - h);
+                it->z = z;
+                it->color = color;
+                if (adv) {
+                    *adv = it->w + post;
+                }
+                return strlen(e->name) + 1;
+            }
+        }
+    }
+    return 0;
+}
+
 static inline const char* EscName(const int& i) { return lbl_80497F14.data[i].name; }
 
 static inline int EscAdv(const char* const& s, f32 h, double& adv) {
@@ -1147,6 +1180,8 @@ int fn_80234654(void) {
 void fn_802346C8(void) {
     for (int passes = (lbl_8055F058.font->outline != NULL) + 1; passes > 0; passes--) {
         GTextFont* f;
+        u32* cp;
+        TextItem* it;
         if (passes == 2) {
             f = lbl_8055F058.font->outline;
         } else {
@@ -1156,23 +1191,23 @@ void fn_802346C8(void) {
         int n = fn_80234654() * 4;
         if (n > 0 && fn_802C8DBC(n)) {
             for (int i = 0; i < lbl_8055F058.count; i++) {
-                f32 h = f->height * lbl_8055F06C[i].scale;
+                it = &lbl_8055F06C[i];
+                f32 h = f->height * it->scale;
                 f32 y1;
-                f32 y0 = lbl_8055F06C[i].y;
+                f32 y0 = it->y;
                 y1 = h + y0;
                 int j;
-                u32* cp;
                 if (passes == 2) {
-                    cp = &lbl_8055F06C[i].masked;
+                    cp = &it->masked;
                 } else {
-                    cp = &lbl_8055F06C[i].color;
+                    cp = &it->color;
                 }
-                f32 x = lbl_8055F06C[i].x;
+                f32 x = it->x;
                 strlen(lbl_8055F06C[i].text);
                 j = 0;
                 while (lbl_8055F06C[i].text[j]) {
                     f32 adv = h;
-                    int skip = EscDraw(lbl_8055F06C[i].text + j, x, y0, 0.0f, h, *cp, &adv);
+                    int skip = EscDrawT(lbl_8055F06C[i].text + j, x, y1, 0.0f, h, *cp, &adv);
                     if (skip > 0) {
                         j += skip;
                         x += adv;
@@ -1181,8 +1216,9 @@ void fn_802346C8(void) {
                     const char* next;
                     const char* p = lbl_8055F06C[i].text + j;
                     u16 c = DecodeUTF8(p, &next);
-                    x += lbl_8055F06C[i].xs * f->glyphs[c].pre;
-                    f32 x1 = x + f->glyphs[c].width * lbl_8055F06C[i].scale;
+                    int len = next - p;
+                    x += it->xs * f->glyphs[c].pre;
+                    f32 x1 = x + it->scale * f->glyphs[c].width;
                     if (c != ' ') {
                         f32 u0 = f->glyphs[c].u0;
                         f32 v0 = f->glyphs[c].v0;
@@ -1191,9 +1227,9 @@ void fn_802346C8(void) {
                         fn_802C8E00(*cp, 1, x, y0, 0.0f, f->glyphs[c].u0, f->glyphs[c].v1);
                         fn_802C8E00(*cp, 1, x1, y0, 0.0f, f->glyphs[c].u1, f->glyphs[c].v1);
                     }
-                    j += next - (lbl_8055F06C[i].text + j);
-                    x += f->glyphs[c].width * lbl_8055F06C[i].scale;
-                    x += lbl_8055F06C[i].xs * f->glyphs[c].post;
+                    j += len;
+                    x += it->scale * f->glyphs[c].width;
+                    x += it->xs * f->glyphs[c].post;
                 }
             }
             fn_802C8E48();

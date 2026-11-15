@@ -85,7 +85,7 @@ int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* model, int a, int b);
 void mrModelUnload(s32 model);
 void fn_802C7040(s32 model);
-void fn_802C9648(void);
+void fn_802C9648(f32 scale);
 void fn_802C967C(void);
 void fn_802D3D6C(void);
 void fn_802D3D80(void);
@@ -140,26 +140,15 @@ struct RingTable {
     } r[3];
 };
 
-static const PtTable sAlpha = {{
-    {0.0f, 0.6f}, {0.62831855f, 0.4f}, {1.2566371f, 0.0f}, {3.1415927f, 0.0f},
-    {5.340708f, 1.0f}, {5.969026f, 1.0f}, {6.2831855f, 0.6f},
-}};
 
-static const RingTable sRings = {{
-    {0.65f, 0.0f, 0.0f}, {0.65f, 0.25f, 2.07345128f}, {0.65f, 0.5f, 4.1783185f},
-}};
 
-static const TexMtx sRingMtx = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}}};
 
 struct IdxTable {
     u16 i[6];
 };
 
-static const IdxTable sQuad = {{0, 1, 2, 2, 1, 3}};
 
-static const TexMtx sShimMtx = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
 
-static const IdxTable sShimQuad = {{0, 1, 2, 2, 1, 3}};
 
 // The shared reflection cube (0x1B8).
 struct Skybox {
@@ -336,7 +325,10 @@ static inline f32 MapClamped_hm(f32 x0, f32 x1, f32 y0, f32 y1, f32 x) {
     return y0 + u * (y1 - y0);
 }
 f32 fn_802BF02C(f32 x) {
-    PtTable t = sAlpha;
+    PtTable t = {{
+        {0.0f, 0.6f}, {0.62831855f, 0.4f}, {1.2566371f, 0.0f}, {3.1415927f, 0.0f},
+        {5.340708f, 1.0f}, {5.969026f, 1.0f}, {6.2831855f, 0.6f},
+    }};
     for (unsigned int i = 1; i < 7; i++) {
         if (t.p[i].x > x) {
             return MapClamped_hm(t.p[i - 1].x, t.p[i].x, t.p[i - 1].y, t.p[i].y, x);
@@ -348,14 +340,15 @@ f32 fn_802BF02C(f32 x) {
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802BF160(void) {
-    s32 id = lbl_8055CF6C;
-    if (id == -1) {
+    if (lbl_8055CF6C == -1) {
         return;
     }
     f32 k = fn_802BEFB4();
     lbl_8055FAF8 += k * fn_801E7E24();
-    RingTable rings = sRings;
-    fn_802C9648();
+    RingTable rings = {{
+        {0.65f, 0.0f, 0.0f}, {0.65f, 0.25f, 2.07345128f}, {0.65f, 0.5f, 4.1783185f},
+    }};
+    fn_802C9648(1.01f);
     fn_802D3D6C();
     for (u32 i = 0; i < 3; i++) {
         f32 a = fmod(lbl_8055FAF8 + rings.r[i].phase, 6.2831855f);
@@ -364,14 +357,15 @@ void fn_802BF160(void) {
         w = 1.0f - rings.r[i].scale;
         f32 s = FMax(FMin((c - -1.0f) / 2.0f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
-        TexMtx m = sRingMtx;
-        f32 off = -(1.0f / rings.r[i].scale) * h;
+        TexMtx m = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}}};
+        f32 inv = 1.0f / rings.r[i].scale;
+        f32 off = -inv * h;
         m.m[0][3] = rings.r[i].y;
-        m.m[1][1] = (1.0f + (1.0f / rings.r[i].scale) * (1.0f - (h + rings.r[i].scale))) - off;
+        m.m[1][1] = (1.0f + inv * (1.0f - (h + rings.r[i].scale))) - off;
         m.m[1][3] = off;
         fn_802C9900(fn_802BF02C(a));
         fn_802D3D94(0, &m);
-        fn_802C7040(id);
+        fn_802C7040(lbl_8055CF6C);
     }
     fn_802C9904();
     fn_802D3D80();
@@ -674,7 +668,7 @@ void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
     if (s->sun == -2) {
         return;
     }
-    IdxTable idx = sQuad;
+    IdxTable idx = {{0, 1, 2, 2, 1, 3}};
     f32 r = 0.3f * scale;
     WVert v[4];
     for (int i = 0; i < 4; i++) {
@@ -878,7 +872,7 @@ void WaterSystem::Draw(void) {
         }
     }
     fn_802DBE4C();
-    TexMtx m = sShimMtx;
+    TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
@@ -916,7 +910,7 @@ void WaterSystem::Draw(void) {
     e1.x = q.x + fw.x * 10.0f;
     e1.y = q.y + fw.y * 10.0f;
     e1.z = q.z + fw.z * 10.0f;
-    IdxTable qi = sShimQuad;
+    IdxTable qi = {{0, 1, 2, 2, 1, 3}};
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
         sv[i].pos = *((i & 1) ? &e1 : &e0);

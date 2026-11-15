@@ -73,6 +73,8 @@ struct DBone {
 
 // Particle-system descriptors (ppsys.cpp).
 struct DVertDesc {
+    DVertDesc(void) {}
+    DVertDesc(const DVec3& p, f32 a, f32 b) : pos(p), w34(a), w30(b) {}
     DVec3 pos;  // offset 0x0
     f32 w34;    // offset 0xC
     f32 w30;    // offset 0x10
@@ -203,42 +205,40 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.y = d->butt.y - bones[0].m.pos.y;
     d->butt.z = d->butt.z - bones[0].m.pos.z;
     DVec3 lhip;
-    f32 xv = bones[7].m.pos.x;
-    lhip.x = xv + d->butt.x;
-    f32 y2 = d->butt.y;
-    lhip.y = y2 + bones[7].m.pos.y;
+    lhip.x = bones[7].m.pos.x + d->butt.x;
+    lhip.y = bones[7].m.pos.y + d->butt.y;
     lhip.z = bones[7].m.pos.z + d->butt.z;
     DVec3 lknee;
-    lknee.x = d->butt.x + bones[8].m.pos.x;
+    lknee.x = bones[8].m.pos.x + d->butt.x;
     lknee.y = bones[8].m.pos.y + d->butt.y;
-    f32 zv = d->butt.z;
-    lknee.z = zv + bones[8].m.pos.z;
+    lknee.z = bones[8].m.pos.z + d->butt.z;
     DVec3 rhip;
     rhip.x = bones[4].m.pos.x + d->butt.x;
     rhip.y = bones[4].m.pos.y + d->butt.y;
     rhip.z = bones[4].m.pos.z + d->butt.z;
     DVec3 rknee;
     rknee.x = bones[5].m.pos.x + d->butt.x;
-    rknee.y = d->butt.y + bones[5].m.pos.y;
+    rknee.y = bones[5].m.pos.y + d->butt.y;
     rknee.z = bones[5].m.pos.z + d->butt.z;
-    lfoot.x = bones[9].m.pos.x;
-    f32 y_ = bones[9].m.pos.y;
-    lfoot.y = y_;
-    lfoot.z = bones[9].m.pos.z;
-    DVec3 m2;
-    DVec3 m1 = Mid(lfoot, lknee);
+    lfoot = bones[9].m.pos;
+    DVec3 pelvis;
+    DVec3 m1;
+    m1.x = lfoot.x + 0.5f * (lknee.x - lfoot.x);
+    m1.y = lfoot.y + 0.5f * (lknee.y - lfoot.y);
+    m1.z = lfoot.z + 0.5f * (lknee.z - lfoot.z);
     lfoot.x = m1.x;
-    f32 yv = m1.y;
-    lfoot.y = yv;
+    lfoot.y = m1.y;
     lfoot.z = m1.z;
-    m2 = Mid(bones[6].m.pos, rknee);
+    DVec3 m2;
+    m2.x = bones[6].m.pos.x + 0.5f * (rknee.x - bones[6].m.pos.x);
+    m2.y = bones[6].m.pos.y + 0.5f * (rknee.y - bones[6].m.pos.y);
+    m2.z = bones[6].m.pos.z + 0.5f * (rknee.z - bones[6].m.pos.z);
     rfoot.x = m2.x;
     rfoot.y = m2.y;
     rfoot.z = m2.z;
-    DVec3 pelvis;
-    pelvis.x = 0.5f * lhip.x + 0.5f * rhip.x;
-    pelvis.z = 0.5f * lhip.z + 0.5f * rhip.z;
-    pelvis.y = 0.5f * lhip.y + 0.5f * rhip.y - 1.27f;
+    pelvis.x = lhip.x * 0.5f + rhip.x * 0.5f;
+    pelvis.y = lhip.y * 0.5f + rhip.y * 0.5f - 1.27f;
+    pelvis.z = lhip.z * 0.5f + rhip.z * 0.5f;
     d->body.row[0].x = 1.0f;
     d->body.row[0].y = 0.0f;
     d->body.row[1].x = 0.0f;
@@ -258,37 +258,25 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->body.pos.z = d->body.pos.z + off.z;
     d->rest = d->body;
     fn_801E33E4(&d->wheelMtx, d->wheel);
+    DVertDesc verts[7] = {
+        DVertDesc(lhip, 1.0f, 1.0f),
+        DVertDesc(lknee, 1.0f, 1.0f),
+        DVertDesc(lfoot, 1.0f, 1.0f),
+        DVertDesc(rhip, 1.0f, 1.0f),
+        DVertDesc(rknee, 1.0f, 1.0f),
+        DVertDesc(rfoot, 1.0f, 1.0f),
+        DVertDesc(pelvis, 1.0f, 1.0f),
+    };
     DEdgeDesc edges[6] = {
         {0, 1, 0.0f, 0.0f}, {1, 2, 0.0f, 0.0f}, {3, 4, 0.0f, 0.0f},
         {4, 5, 0.0f, 0.0f}, {1, 6, -0.5f, 0.1f}, {4, 6, -0.5f, 0.1f},
     };
-    DVertDesc verts[7];
-    verts[0].pos = lhip;
-    verts[0].w34 = 1.0f;
-    verts[1].pos = lknee;
-    verts[0].w30 = 1.0f;
-    verts[1].w34 = 1.0f;
-    verts[1].w30 = 1.0f;
-    verts[2].pos = lfoot;
-    verts[2].w34 = 1.0f;
-    verts[2].w30 = 1.0f;
-    verts[3].pos = rhip;
-    verts[3].w34 = 1.0f;
-    verts[3].w30 = 1.0f;
-    verts[4].pos = rknee;
-    verts[4].w34 = 1.0f;
-    verts[4].w30 = 1.0f;
-    verts[5].pos = rfoot;
-    verts[5].w34 = 1.0f;
-    verts[5].w30 = 1.0f;
-    verts[6].pos = pelvis;
-    verts[6].w34 = 1.0f;
-    verts[6].w30 = 1.0f;
     DPinDesc pins[5] = {
         {0, &d->rest, 0}, {2, &d->wheelMtx, &lh}, {3, &d->rest, 0}, {5, &d->wheelMtx, &rh}, {6, &d->body, 0},
     };
-    d->sys = fn_801C1BA4(7, 6, 5);
-    fn_801C1CBC(d->sys, 7, verts, 6, edges, 5, pins);
+    u8* sys = fn_801C1BA4(7, 6, 5);
+    fn_801C1CBC(sys, 7, verts, 6, edges, 5, pins);
+    d->sys = sys;
     d->fC4 = 0.0f;
     d->fCC = 0.0f;
     d->fC8 = 0.0f;
@@ -359,37 +347,25 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     d->body.pos.z = d->body.pos.z + off.z;
     d->rest = d->body;
     fn_801E33E4(&d->wheelMtx, d->wheel);
+    DVertDesc verts[7] = {
+        DVertDesc(ls, 1.0f, 1.0f),
+        DVertDesc(lmid, 1.0f, 1.0f),
+        DVertDesc(lh, 1.0f, 1.0f),
+        DVertDesc(rs, 1.0f, 1.0f),
+        DVertDesc(rmid, 1.0f, 1.0f),
+        DVertDesc(rh, 1.0f, 1.0f),
+        DVertDesc(chest, 1.0f, 1.0f),
+    };
     DEdgeDesc edges[6] = {
         {0, 1, 0.0f, 0.0f}, {1, 2, 0.0f, 0.0f}, {3, 4, 0.0f, 0.0f},
         {4, 5, 0.0f, 0.0f}, {1, 6, -0.5f, 0.1f}, {4, 6, -0.5f, 0.1f},
     };
-    DVertDesc verts[7];
-    verts[0].w34 = 1.0f;
-    verts[0].w30 = 1.0f;
-    verts[0].pos = ls;
-    verts[1].pos = lmid;
-    verts[1].w34 = 1.0f;
-    verts[1].w30 = 1.0f;
-    verts[2].pos = lh;
-    verts[2].w34 = 1.0f;
-    verts[2].w30 = 1.0f;
-    verts[3].pos = rs;
-    verts[3].w34 = 1.0f;
-    verts[3].w30 = 1.0f;
-    verts[4].pos = rmid;
-    verts[4].w34 = 1.0f;
-    verts[4].w30 = 1.0f;
-    verts[5].pos = rh;
-    verts[5].w34 = 1.0f;
-    verts[5].w30 = 1.0f;
-    verts[6].pos = chest;
-    verts[6].w34 = 1.0f;
-    verts[6].w30 = 1.0f;
     DPinDesc pins[5] = {
         {0, &d->rest, 0}, {2, &d->wheelMtx, 0}, {3, &d->rest, 0}, {5, &d->wheelMtx, 0}, {6, &d->body, 0},
     };
-    d->sys = fn_801C1BA4(7, 6, 5);
-    fn_801C1CBC(d->sys, 7, verts, 6, edges, 5, pins);
+    u8* sys = fn_801C1BA4(7, 6, 5);
+    fn_801C1CBC(sys, 7, verts, 6, edges, 5, pins);
+    d->sys = sys;
     d->fC4 = 0.0f;
     d->fCC = 0.0f;
     d->fC8 = 0.0f;

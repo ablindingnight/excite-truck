@@ -1217,7 +1217,7 @@ static inline u8 PackDent(f32 v) {
 #define DMG_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // A packed dent byte back to its offset.
-static inline f32 UnpackDent(int b) {
+static inline f32 UnpackDent(u32 b) {
     f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
     t = FMax(t, lbl_80561F74);
     return -0.508f + t * 1.016f;
@@ -1226,56 +1226,28 @@ static inline f32 UnpackDent(int b) {
 extern "C" {
 
 // Restores the damage state saved by fn_8018F538.
-void fn_8018F2C0(u8* p, u8* q) {
+void fn_8018F2C0(u8* p, const u8* q) {
     f32 h = F32(q, 0x290);
     F32(p, 0x2690) = h;
     F32(p, 0x2694) = h;
-    S32(p, 0x268C) = S32(q, 0x298);
     F32(p, 0x2698) = F32(q, 0x294);
-    u8* o = q;
+    S32(p, 0x268C) = S32(q, 0x298);
+    const u8* o = q;
     u8* d = p;
     for (int i = 0; i < S32(p, 0x5F8); o += 4, i++, d += 0xC) {
         F32(d, 0x5FC) = UnpackDent(o[0]);
         F32(d, 0x600) = UnpackDent(o[1]);
-        F32(d, 0x604) = UnpackDent(o[2]);
+        f32 z = UnpackDent(o[2]);
+        F32(d, 0x604) = z;
         F32(d, 0xD94) = F32(d, 0x5FC);
         F32(d, 0xD98) = F32(d, 0x600);
-        F32(d, 0xD9C) = F32(d, 0x604);
+        F32(d, 0xD9C) = z;
     }
-    S32(p, 0x15A8) = U8(q, 0x2A0);
-    U8(p, 0x15A4) = 0;
-    S32(p, 0x1628) = U8(q, 0x2A1);
-    U8(p, 0x1624) = 0;
-    S32(p, 0x16A8) = U8(q, 0x2A2);
-    U8(p, 0x16A4) = 0;
-    S32(p, 0x1728) = U8(q, 0x2A3);
-    U8(p, 0x1724) = 0;
-    S32(p, 0x17A8) = U8(q, 0x2A4);
-    U8(p, 0x17A4) = 0;
-    S32(p, 0x1828) = U8(q, 0x2A5);
-    U8(p, 0x1824) = 0;
-    S32(p, 0x18A8) = U8(q, 0x2A6);
-    U8(p, 0x18A4) = 0;
-    S32(p, 0x1928) = U8(q, 0x2A7);
-    U8(p, 0x1924) = 0;
-    S32(p, 0x19A8) = U8(q, 0x2A8);
-    U8(p, 0x19A4) = 0;
-    S32(p, 0x1A28) = U8(q, 0x2A9);
-    U8(p, 0x1A24) = 0;
-    S32(p, 0x1AA8) = U8(q, 0x2AA);
-    U8(p, 0x1AA4) = 0;
-    S32(p, 0x1B28) = U8(q, 0x2AB);
-    U8(p, 0x1B24) = 0;
-    S32(p, 0x1BA8) = U8(q, 0x2AC);
-    U8(p, 0x1BA4) = 0;
-    S32(p, 0x1C28) = U8(q, 0x2AD);
-    U8(p, 0x1C24) = 0;
-    S32(p, 0x1CA8) = U8(q, 0x2AE);
-    U8(p, 0x1CA4) = 0;
-    S32(p, 0x1D28) = U8(q, 0x2AF);
-    U8(p, 0x1D24) = 0;
-    U8(p, 0x1DA4) = 0;
-    S32(p, 0x1DA8) = U8(q, 0x2B0);
+    u8* s = p;
+    for (int i = 0; i < 17; i++, s += 0x80) {
+        S32(s, 0x15A8) = q[0x2A0 + i];
+        U8(s, 0x15A4) = 0;
+    }
     S32(p, 0x1E3C) = S32(q, 0x29C);
 }
 
