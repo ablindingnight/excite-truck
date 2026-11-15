@@ -1,4 +1,4 @@
-// Unregistered draft: all 27 bodies implemented; code residuals and data extent/ownership limits remain.
+// Collision sounds and their replay messages (0x801B32C8-0x801B45E0).
 typedef unsigned char u8;
 typedef unsigned int u32;
 class ModuleTag;void RegisterModuleTag(ModuleTag*);
@@ -90,7 +90,15 @@ struct V3 {float x,y,z;};
 struct CollisionMessage {V3 velocity,position,vectorA,vectorB;int car,kind;CollisionMessage(){}CollisionMessage(const CollisionMessage& other):velocity(other.velocity),position(other.position),vectorA(other.vectorA),vectorB(other.vectorB),car(other.car),kind(other.kind){}};
 struct SurfaceMessage {V3 velocity,position;short material,padding;int car;};
 struct EffectMessage {V3 position,velocity,vector;float impact;int car,kind;};
-struct SoundMessage {int type;V3 position;float amplitude;SoundMessage(int code,V3 p,float gain):type(code),position(p),amplitude(gain){}};
+struct SoundMessage {
+    int type;
+    V3 position;
+    float amplitude;
+
+    SoundMessage(int code, V3 p, float gain) : position(p), amplitude(gain) {
+        type = code;
+    }
+};
 typedef char CollisionMessageSize[(sizeof(CollisionMessage)==0x38)?1:-1];
 typedef char SurfaceMessageSize[(sizeof(SurfaceMessage)==0x20)?1:-1];
 typedef char EffectMessageSize[(sizeof(EffectMessage)==0x30)?1:-1];
@@ -102,12 +110,18 @@ float PSVECMag(const V3*);
 void fn_801B5360(int,const void*,int);
 void fn_801B85E0(Body*,Body*,const V3*,const V3*);
 void fn_801B3084(Body*,Body*,const V3*,const V3*);
+int fn_801B3DC0(Manager*,u32,u32);
+void fn_801B3E24(Manager*,const Vec3*,Contact*,Contact*,int,float);
+int fn_801B4428(const Node*,const Node*);
+Node* fn_801B447C(Manager*,Node*,int);
+void* fn_801B4570(Manager*,u32);
 inline void ScaleVInto(const V3& p,const float& f,V3& result){result.x=p.x*f;result.y=p.y*f;result.z=p.z*f;}
 
 
 inline bool CollisionAbove(float value,float threshold){return value>threshold;}
 inline float CollisionMin(float limit,float value){if(limit<value)return limit;return value;}
 int fn_801B32C8(const Contact* self,int kind){int result=0;int kinds[2];kinds[0]=self->kind;int selected=-1;kinds[1]=kind;if(kinds[0]==109)selected=0;else if(kinds[1]==109)selected=1; if(selected!=-1)switch(kinds[!selected]){case 1:case 110:result=1;break;}return result;}
+
 Body* fn_801B3338(Contact* self) {
  Body* p=self->body;
  if(p){bool car=false;u32 tag=p->tag;
@@ -115,25 +129,95 @@ Body* fn_801B3338(Contact* self) {
  if(car)return p;}
  return 0;
 }
-int fn_801B3390(){return 0x14;}
-int fn_801B3398(const Message* input){Message message=*input;fn_801796CC(1,&message,0x38);return 0x38;}
-void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=fn_801B3B70(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
-void fn_801B34A4(){fn_801B3DBC(lbl_8055E6C0);memset(lbl_80435C50,0,0x20);}
-void fn_801B3B24(){}
-void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
-Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)fn_801B3C64,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
-Entry* fn_801B3C64(Entry* self){self->vtable=lbl_80335DAC;self->a=lbl_80562624;self->b=lbl_80562624;self->c=lbl_80562624;self->d=lbl_80562624;self->e=lbl_80562624;self->f=lbl_80562624;self->sound=0;return self;}
-void fn_801B3DBC(Manager* self){fn_801B435C(self);}
-}  // extern "C"
-int Sound::vf14(void) { return 0; }
-extern "C" {
-int fn_801B4428(const Node* a,const Node* b){if(a->key<b->key)return -1;if(a->key>b->key)return 1;fn_802E317C(lbl_80335D80);return 0;}
-Node* fn_801B447C(Manager* self,Node* nodes,int count){if(count==1)return nodes;int middle=count/2;if(middle>0)nodes[middle].left=fn_801B447C(self,nodes,middle);int remaining=count-middle-1;if(remaining>0)nodes[middle].right=fn_801B447C(self,nodes+middle+1,remaining);return nodes+middle;}
-Node* fn_801B4528(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return fn_801B4528(self,node->left,key);return 0;}if(key>node->key){if(node->right)return fn_801B4528(self,node->right,key);return 0;}return node;}
-void* fn_801B4570(Manager* self,u32 key){Pool* pool=(Pool*)self;Node* node=fn_801B4528(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
 
+int fn_801B3390(){return 0x14;}
+
+int fn_801B3398(const Message* input){Message message=*input;fn_801796CC(1,&message,0x38);return 0x38;}
+
+void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=fn_801B3B70(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
+
+void fn_801B34A4(){fn_801B3DBC(lbl_8055E6C0);memset(lbl_80435C50,0,0x20);}
+
+// Preserve the by-value position copy in the sound packet construction.
+#pragma push
+#pragma opt_propagation off
+void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inputA,const V3* inputB,int kind){
+ V3 vectorA=*inputA;V3 vectorB=*inputB;
+ if(!first->body){Contact* temp=first;first=second;second=temp;ScaleVInto(vectorA,lbl_80562620,vectorA);ScaleVInto(vectorB,lbl_80562620,vectorB);if(second)kind=second->kind;}
+ V3 firstVelocity,relative,secondVelocity;
+ VelAt__9RigidBodyFP5RVec3PC5RVec3(first->body,&firstVelocity,position);
+ if(second&&second->body)VelAt__9RigidBodyFP5RVec3PC5RVec3(second->body,&secondVelocity,position);
+ else{secondVelocity.x=lbl_80562624;secondVelocity.y=lbl_80562624;secondVelocity.z=lbl_80562624;}
+ relative.x=firstVelocity.x-secondVelocity.x;relative.y=firstVelocity.y-secondVelocity.y;relative.z=firstVelocity.z-secondVelocity.z;
+ float impact=PSVECDotProduct(&vectorB,&vectorA);
+ bool allowed=true;int special=0;u32 offset=(u32)kind-107u;if(offset<=3u){if((1u<<offset)&13u)special=1;}if(!special&&kind>=8)allowed=false;
+ Body* firstCar=fn_801B3338(first);
+ if(firstCar&&allowed&&impact*impact>lbl_80562628&&PSVECDotProduct(&relative,&relative)>lbl_8056262C){
+  Body* secondCar=second?fn_801B3338(second):0;
+  CollisionMessage message;
+  float ay;
+  float ax;
+  float bx;
+  float sumy;
+  float by;
+  float bz;
+  float sumx;
+  float az;
+  float sumz;
+  float firstX = firstVelocity.x;
+  const float half = lbl_80562630;
+  ax = firstX * half;
+  ay = firstVelocity.y * half;
+  az = firstVelocity.z * half;
+  bx = secondVelocity.x * half;
+  by = secondVelocity.y * half;
+  bz = secondVelocity.z * half;
+  sumx = ax + bx;
+  sumy = ay + by;
+  sumz = az + bz;
+  message.velocity.x = sumx;
+  message.velocity.y = sumy;
+  message.velocity.z = sumz;
+  message.vectorA=vectorA;message.position=*position;message.vectorB=vectorB;message.kind=kind;message.car=firstCar->id;
+  fn_801796CC(1,(const Message*)&message,0x38);
+  CollisionMessage queued=message;fn_801B5360(15,&queued,0x38);
+  if(secondCar){ScaleVInto(message.velocity,lbl_80562620,message.velocity);message.car=secondCar->id;fn_801796CC(1,(const Message*)&message,0x38);CollisionMessage queuedOther=message;fn_801B5360(15,&queuedOther,0x38);}
+ }
+ if(PSVECDotProduct(&firstVelocity,&firstVelocity)>lbl_80562634&&fn_801B32C8(first,kind)){
+  SurfaceMessage surface;surface.position=*position;surface.velocity=firstVelocity;surface.material=first->body->material;surface.car=firstCar?firstCar->id:-1;fn_801796CC(0,(const Message*)&surface,0x20);
+ }
+ if(firstCar&&kind<8&&lbl_80435C50[firstCar->id]<lbl_8055E3C4){
+  EffectMessage effect;effect.position=*position;effect.velocity=firstVelocity;effect.vector=vectorB;effect.impact=impact;effect.car=firstCar->id;effect.kind=kind;fn_801796CC(5,(const Message*)&effect,0x30);lbl_80435C50[firstCar->id]=lbl_8055E3C4;
+ }
+ if(firstCar&&kind==109){Body* other=fn_801B3338(second);fn_801B85E0(firstCar,other,position,&vectorA);fn_801B3084(firstCar,other,position,&vectorA);}
+ V3 magnitudeVector;if(kind==110)ScaleVInto(vectorA,lbl_80562638,magnitudeVector);else magnitudeVector=vectorA;
+ if(!fn_801B3DC0(lbl_8055E6C0,(u32)first,(u32)second)&&CollisionAbove(PSVECDotProduct(&magnitudeVector,&magnitudeVector),lbl_8056263C)){
+  float magnitude=PSVECMag(&magnitudeVector);float capped=CollisionMin(lbl_80562640,magnitude);
+  float amplitude=lbl_80562644+lbl_80562648*(capped/lbl_80562640);
+  SoundMessage message(1234,*position,amplitude);fn_801B5360(1,&message,0x14);
+  fn_801B3E24(lbl_8055E6C0,(const Vec3*)position,first,second,kind,amplitude);
+ }
+}
+#pragma pop
+
+void fn_801B3B24(){}
+
+void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
+
+Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)fn_801B3C64,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
+
+inline void EntryCleanup(Entry* self){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}}}
+
+void* fn_801B3BD4(Entry* self,int destroy){if(self){EntryCleanup(self);if(destroy>0)__dl__FPv(self);}return self;}
+
+Entry* fn_801B3C64(Entry* self){self->vtable=lbl_80335DAC;self->a=lbl_80562624;self->b=lbl_80562624;self->c=lbl_80562624;self->d=lbl_80562624;self->e=lbl_80562624;self->f=lbl_80562624;self->sound=0;return self;}
+
+void* fn_801B3C98(Entry* self,int destroy){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}if(destroy>0)__dl__FPv(self);}return self;}
 
 Manager* fn_801B3D24(Manager* self,int destroy){if(self){for(int i=0;i<6;i++)__dla__FPv(self->pools[i].items);__destroy_arr(self->entries,(void*)fn_801B3BD4,0x2c,16);if(destroy>0)__dl__FPv(self);}return self;}
+
+void fn_801B3DBC(Manager* self){fn_801B435C(self);}
+
 int fn_801B3DC0(Manager* self,u32 first,u32 second){
  Entry* entry=self->entries;
  int found=0;
@@ -146,16 +230,8 @@ int fn_801B3DC0(Manager* self,u32 first,u32 second){
  }
  return found;
 }
-void fn_801B3FD8(Manager* self){int pool=0;unsigned int at=0;for(;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){SoundTuple* item=(SoundTuple*)self->pools[pool].items+i;item->name=lbl_802F9630[first+i].name;item->gain=lbl_802F9630[first+i].gain;}}}
-inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
-inline u32 NodeKeyFromInfoNew(const KeyInfo* row){int second=row->second;int first=row->first;if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
-void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))fn_801B4428);self->root=fn_801B447C(self,self->nodes,43);}
-void fn_801B42D0(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=fn_802077A4(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
-void fn_801B435C(Manager* self){for(int i=0;i<16;i++){self->entries[i].key1=0;self->entries[i].key2=0;self->entries[i].time=lbl_80562650;}}
 
-inline void EntryCleanup(Entry* self){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}}}
-void* fn_801B3C98(Entry* self,int destroy){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}if(destroy>0)__dl__FPv(self);}return self;}
-void* fn_801B3BD4(Entry* self,int destroy){if(self){EntryCleanup(self);if(destroy>0)__dl__FPv(self);}return self;}
+inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 
 void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* second,int secondKind,float amplitude){
  u32 key=PairKey(first->kind,secondKind);
@@ -177,44 +253,33 @@ void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* seco
  }
 }
 
-void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inputA,const V3* inputB,int kind){
- V3 vectorA=*inputA;V3 vectorB=*inputB;
- if(!first->body){Contact* temp=first;first=second;second=temp;ScaleVInto(vectorA,lbl_80562620,vectorA);ScaleVInto(vectorB,lbl_80562620,vectorB);if(second)kind=second->kind;}
- V3 firstVelocity,relative,secondVelocity;
- VelAt__9RigidBodyFP5RVec3PC5RVec3(first->body,&firstVelocity,position);
- if(second&&second->body)VelAt__9RigidBodyFP5RVec3PC5RVec3(second->body,&secondVelocity,position);
- else{secondVelocity.x=lbl_80562624;secondVelocity.y=lbl_80562624;secondVelocity.z=lbl_80562624;}
- relative.x=firstVelocity.x-secondVelocity.x;relative.y=firstVelocity.y-secondVelocity.y;relative.z=firstVelocity.z-secondVelocity.z;
- float impact=PSVECDotProduct(&vectorB,&vectorA);
- bool allowed=true;int special=0;u32 offset=(u32)kind-107u;if(offset<=3u){if((1u<<offset)&13u)special=1;}if(!special&&kind>=8)allowed=false;
- Body* firstCar=fn_801B3338(first);
- if(firstCar&&allowed&&impact*impact>lbl_80562628&&PSVECDotProduct(&relative,&relative)>lbl_8056262C){
-  Body* secondCar=second?fn_801B3338(second):0;
-  CollisionMessage message;
-float ay;float ax=firstVelocity.x*lbl_80562630;ay=firstVelocity.y*lbl_80562630;float az=firstVelocity.z*lbl_80562630;float bx=secondVelocity.x*lbl_80562630;float by=secondVelocity.y*lbl_80562630;float bz=secondVelocity.z*lbl_80562630;float sumx=ax+bx;float sumy=ay+by;float sumz=az+bz;message.velocity.x=sumx;message.velocity.y=sumy;message.velocity.z=sumz;
-  message.vectorA=vectorA;message.position=*position;message.vectorB=vectorB;message.kind=kind;message.car=firstCar->id;
-  fn_801796CC(1,(const Message*)&message,0x38);
-  CollisionMessage queued=message;fn_801B5360(15,&queued,0x38);
-  if(secondCar){ScaleVInto(message.velocity,lbl_80562620,message.velocity);message.car=secondCar->id;fn_801796CC(1,(const Message*)&message,0x38);CollisionMessage queuedOther=message;fn_801B5360(15,&queuedOther,0x38);}
- }
- if(PSVECDotProduct(&firstVelocity,&firstVelocity)>lbl_80562634&&fn_801B32C8(first,kind)){
-  SurfaceMessage surface;surface.position=*position;surface.velocity=firstVelocity;surface.material=first->body->material;surface.car=firstCar?firstCar->id:-1;fn_801796CC(0,(const Message*)&surface,0x20);
- }
- if(firstCar&&kind<8&&lbl_80435C50[firstCar->id]<lbl_8055E3C4){
-  EffectMessage effect;effect.position=*position;effect.velocity=firstVelocity;effect.vector=vectorB;effect.impact=impact;effect.car=firstCar->id;effect.kind=kind;fn_801796CC(5,(const Message*)&effect,0x30);lbl_80435C50[firstCar->id]=lbl_8055E3C4;
- }
- if(firstCar&&kind==109){Body* other=fn_801B3338(second);fn_801B85E0(firstCar,other,position,&vectorA);fn_801B3084(firstCar,other,position,&vectorA);}
- V3 magnitudeVector;if(kind==110)ScaleVInto(vectorA,lbl_80562638,magnitudeVector);else magnitudeVector=vectorA;
- if(!fn_801B3DC0(lbl_8055E6C0,(u32)first,(u32)second)&&CollisionAbove(PSVECDotProduct(&magnitudeVector,&magnitudeVector),lbl_8056263C)){
-  float magnitude=PSVECMag(&magnitudeVector);float capped=CollisionMin(lbl_80562640,magnitude);
-  float amplitude=lbl_80562644+lbl_80562648*(capped/lbl_80562640);
-  SoundMessage message(1234,*position,amplitude);fn_801B5360(1,&message,0x14);
-  fn_801B3E24(lbl_8055E6C0,(const Vec3*)position,first,second,kind,amplitude);
- }
-}
-}
+}  // extern "C"
 
-// Research data fragment; exact original tables, proposed unit ownership only.
+int Sound::vf14(void) { return 0; }
+
+extern "C" {
+
+void fn_801B3FD8(Manager* self){int pool=0;unsigned int at=0;for(;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){SoundTuple* item=(SoundTuple*)self->pools[pool].items+i;item->name=lbl_802F9630[first+i].name;item->gain=lbl_802F9630[first+i].gain;}}}
+
+inline u32 NodeKeyFromInfoNew(const KeyInfo* row){int second=row->second;int first=row->first;if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
+
+void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))fn_801B4428);self->root=fn_801B447C(self,self->nodes,43);}
+
+void fn_801B42D0(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=fn_802077A4(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
+
+void fn_801B435C(Manager* self){for(int i=0;i<16;i++){self->entries[i].key1=0;self->entries[i].key2=0;self->entries[i].time=lbl_80562650;}}
+
+int fn_801B4428(const Node* a,const Node* b){if(a->key<b->key)return -1;if(a->key>b->key)return 1;fn_802E317C(lbl_80335D80);return 0;}
+
+Node* fn_801B447C(Manager* self,Node* nodes,int count){if(count==1)return nodes;int middle=count/2;if(middle>0)nodes[middle].left=fn_801B447C(self,nodes,middle);int remaining=count-middle-1;if(remaining>0)nodes[middle].right=fn_801B447C(self,nodes+middle+1,remaining);return nodes+middle;}
+
+Node* fn_801B4528(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return fn_801B4528(self,node->left,key);return 0;}if(key>node->key){if(node->right)return fn_801B4528(self,node->right,key);return 0;}return node;}
+
+void* fn_801B4570(Manager* self,u32 key){Pool* pool=(Pool*)self;Node* node=fn_801B4528(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
+
+}  // extern "C"
+
+// Collision sound pools and the table of material pairs.
 extern "C" {
 char lbl_80335C80[]="crash1.sfx";
 char lbl_80335C8C[]="crash2.sfx";
@@ -302,7 +367,7 @@ ModuleTag lbl_8055E6B8;
 Manager* lbl_8055E6C0;
 }
 
-// Named original literal scalars; trailing metadata bytes are not invented.
+// Collision sound constants.
 extern "C" {
 __declspec(section ".sdata2") extern const float lbl_80562620=-1.0f;
 __declspec(section ".sdata2") extern const float lbl_80562624=0.0f;
