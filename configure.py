@@ -997,7 +997,7 @@ config.libs.append(
             Object(Matching, "game/scratch.cpp"),
             Object(Matching, "game/joy.cpp"),
             Object(Matching, "game/sysinit.cpp"),
-            Object(NonMatching, "game/random.cpp"),
+            Object(Matching, "game/random.cpp"),
             Object(Matching, "game/pool.cpp"),
             Object(NonMatching, "game/res.cpp"),
             Object(Matching, "game/strtab.cpp"),
