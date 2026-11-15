@@ -514,6 +514,16 @@ static inline void DrawPickup(int k) {
     }
 }
 
+/* Helper name unproven */
+static inline void DrawGroup(int i) {
+    int j;
+    for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
+        DrawPickup(lbl_8055E354->groups.data[i].first + j);
+    }
+}
+
+#pragma push
+#pragma opt_dead_assignments off
 void fn_80168104(void) {
     Camera* cam = fn_802C86DC();
     V2 c;
@@ -532,15 +542,11 @@ void fn_80168104(void) {
                     continue;
                 }
             }
-            {
-                int j;
-                for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
-                    DrawPickup(lbl_8055E354->groups.data[i].first + j);
-                }
-            }
+            DrawGroup(i);
         }
     }
 }
+#pragma pop
 
 /* Helper name unproven */
 static inline void RefreshPickupGroup(PickupObjMan* m, PickupGroup* g) {
