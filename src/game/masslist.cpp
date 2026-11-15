@@ -39,6 +39,35 @@ struct MVec4 {
     f32 w;
 };
 
+struct MLV3 {
+    MLV3(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+    f32 x, y, z;
+};
+
+struct MLF {
+    MLF(f32 a) { v = a; }
+    f32 v;
+};
+
+/* Helper names unproven (MLV3, MLF, MLVec4, Set): the solver-record 4-vector family (carbody CbVec4, minworld MWV4). */
+struct MLVec4 {
+    MLVec4(MVec4 s) {
+        MLF f(s.w);
+        Set(MLV3(s.x, s.y, s.z), f);
+    }
+    void Set(const MLV3& p, MLF w_) {
+        x = p.x;
+        y = p.y;
+        z = p.z;
+        w = w_.v;
+    }
+    f32 x, y, z, w;
+};
+
 struct MassSet {
     MassSet(void);
     MVec4 pos;      // offset 0x0
@@ -382,7 +411,6 @@ static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
     }
 }
 
-// NonMatching: 441/443; the target copies x->row[7] through two more temporaries (frame 32 bytes larger).
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
 template <class O, class V> static inline void TScale(O* o, const V* v, f32 k) { o->x = v->x * k; o->y = v->y * k; o->z = v->z * k; }  /* Helper name unproven */
@@ -414,17 +442,20 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->v60 = s_v60;
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v20 = c_v20;
-    MVec4 k = x->row[7];
+    MLVec4 k(x->row[7]);
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);
     *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     for (int i = 0; i < 4; i++) {
-        *(MVec4*)&c->nrm[i] = MVec4(0.0f, 1.0f, 0.0f, -100.0f);
-        *(MVec4*)&c->ref[i] = MVec4(0.0f, -100.0f, 0.0f);
-        *(MVec4*)&c->pts[9 + i] = MVec4(0.0f, 0.0f, 0.0f);
-        *(MVec4*)&c->pts[5 + i] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+        // The record as 16-byte rows, walked per wheel (retail keeps one pointer c + 16*i): row 4 = pts[i],
+        // 9 = pts[5 + i], 13 = pts[9 + i], 17 = nrm[i], 21 = ref[i].
+        MVec4* q = (MVec4*)c + i;
+        q[17] = MVec4(0.0f, 1.0f, 0.0f, -100.0f);
+        q[21] = MVec4(0.0f, -100.0f, 0.0f);
+        q[13] = MVec4(0.0f, 0.0f, 0.0f);
+        q[9] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         MVec3 in;
         SetXYZ(&in, x->row[i].x, x->row[i].y, x->row[i].z);
         MVec3 out;
@@ -432,7 +463,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         out.x += mtx->origin.x;
         out.y += mtx->origin.y;
         out.z += mtx->origin.z;
-        *(MVec4*)&c->pts[i] = MVec4(out.x, out.y, out.z);
+        q[4] = MVec4(out.x, out.y, out.z);
     }
     memset(e, 0, sizeof(CxEntry));
     fn_801E9DC4(e);
