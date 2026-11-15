@@ -356,9 +356,12 @@ public:
             line->Text0("%s", StatsLabel());
             line->Text1("%d", n);
             line->SetType(Type());
+            struct {
+                int i;
+            } points;
             total = 0.0f;
-            for (rank.i = 0; rank.i < ranks.a.count; rank.i++) {
-                total += ranks.a.data[rank.i].total;
+            for (points.i = 0; points.i < ranks.a.count; points.i++) {
+                total += ranks.a.data[points.i].total;
             }
             pts = total;
             line->Text2("%s", fn_8023139C(buf, sizeof(buf), pts));
