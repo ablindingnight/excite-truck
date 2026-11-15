@@ -198,7 +198,7 @@ struct BoneArg {
 
 class CarModel : public AnimObj {
 public:
-    CarModel(Racer* r, CarDef* d);
+    CarModel(Racer* r, const CarDef* d);
     virtual ~CarModel(void);
     virtual void Draw(void);
     virtual void vf14(void);
@@ -534,7 +534,7 @@ void fn_801EEC68(CarModel* m);
 void fn_801ECCE0(CarModel* m, u32 pass);
 }
 
-CarModel::CarModel(Racer* r, CarDef* d) {
+CarModel::CarModel(Racer* r, const CarDef* d) {
     car = 0;
     index = r->index;
     if (index == 0) {
@@ -545,11 +545,11 @@ CarModel::CarModel(Racer* r, CarDef* d) {
     StrCat(buf, ".car", 64);
     fn_8012E81C(buf);
     res = (CarRes*)fn_802792E4(d->name);
-    fn_801EA59C(r->index, 0, d);
-    s32 driver = d->driver;
+    fn_801EA59C(r->index, 0, (CarDef*)d);
     models = drawModels;
     lods = lodTable;
     lodCount = &numLods;
+    s32 driver = d->driver;
     s32 inst = driver >= 0 ? r->index : 0;
     char dir[64];
     fn_801345D8(dir, 64, "%s.car", d->name);

@@ -172,7 +172,7 @@ public:
 
 class CarModel : public AnimObj {
 public:
-    CarModel(Racer* r, CarDef* d);
+    CarModel(Racer* r, const CarDef* d);
     u8 pad4[0x4E4 - 0x4];
 };
 
