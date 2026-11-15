@@ -107,12 +107,13 @@ static inline void SwfSwap16(void* p) {
 
 static inline void SwfSwap32(void* p) {
     u8 t;
-    t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[3];
-    ((u8*)p)[3] = t;
-    t = ((u8*)p)[1];
-    ((u8*)p)[1] = ((u8*)p)[2];
-    ((u8*)p)[2] = t;
+    u8* b = (u8*)p;
+    t = b[0];
+    b[0] = b[3];
+    b[3] = t;
+    t = b[1];
+    b[1] = b[2];
+    b[2] = t;
 }
 
 static inline int SwfChannel(int c, const s8& mul, const s8& add) {
@@ -198,9 +199,10 @@ inline void SwfAnim::SwapShapeData(u32 i) {
 
 void SwfAnim::LoadFile(const char* name) {
     int k;
+    Sw2Item* it;
+    u32 n;
     Sw2Frame* f;
     int j;
-    Sw2Item* it;
     u32 size = 0;
     u8 firstLoad = 0;
     u8 swapped = 0;
@@ -217,6 +219,7 @@ void SwfAnim::LoadFile(const char* name) {
     if (!swapped) {
         return;
     }
+    u8* base = (u8*)data;
     SwfSwap32(&data->fps);
     SwfSwap32(&data->numFrames);
     SwfSwap32(&data->numTextures);
@@ -227,7 +230,6 @@ void SwfAnim::LoadFile(const char* name) {
     SwfSwap32(&data->shapes);
     SwfSwap32(&data->cxforms);
     SwfSwap32(&data->frames);
-    u8* base = (u8*)data;
     data->textures = (Sw2Texture*)(base + (u32)data->textures);
     data->shapes = (Sw2Shape*)(base + (u32)data->shapes);
     data->cxforms = (Sw2Cxform*)(base + (u32)data->cxforms);
@@ -248,8 +250,8 @@ void SwfAnim::LoadFile(const char* name) {
             SwapShapeData(i);
         }
     }
-    for (i = 0; i < data->numFrames; i++) {
-        f = &data->frames[i];
+    for (n = 0; n < data->numFrames; n++) {
+        f = &data->frames[n];
         SwfSwap16(&f->count);
         for (j = 0; j < f->count; j++) {
             it = &f->items[j];
