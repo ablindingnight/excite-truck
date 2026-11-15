@@ -12,6 +12,7 @@
 #include "game/menu.h"
 #include "game/menuwidget_inl.h"
 #include "game/gxcanvas.h"
+#include "game/uiwidget.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
@@ -62,7 +63,6 @@ public:
   virtual void vf21();    // vtable 0x5C
 };
 
-extern "C" void fn_8021915C(void *, unsigned int);
 
 extern "C" void fn_80221E7C(void*);
 extern "C" void* fn_80215270(int, int);
@@ -436,57 +436,64 @@ extern "C" void fn_80211FF0(void) {
     }
 }
 
-extern "C" void* lbl_8033D528[];
-extern "C" void* lbl_8033D504[];
 extern "C" s32 fn_8012C33C(s32);
 extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
 extern "C" void *fn_802228B0(void *, const char *, s32, s32);
 extern "C" void *fn_802226D4(void *, const char *);
+// make_image's drawers (class names unproven): "stp" sprite tables and "cvs" canvases.
+class StpImage : public UIImage {
+public:
+    StpImage(s32 name) { value = fn_802C49E8(name); }
+    virtual ~StpImage(void);
+    virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void);
+    virtual void DrawFrame(int x, int y, int frame);
+    s32 value;  // 0x4
+};
+
+class CvsImage : public UIImage {
+public:
+    CvsImage(char* name, s32 div) {
+        void* c;
+        if (fn_8012C33C((s32)name)) {
+            c = (void*)fn_802C2DD4((s32)name);
+            value = c;
+            count = *(s32*)((char*)c + 12) / div;
+        } else {
+            value = 0;
+            count = 0;
+        }
+        divisor = div;
+    }
+    virtual ~CvsImage(void);
+    virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void);
+    virtual void DrawFrame(int x, int y, unsigned int frame);
+    void* value;  // 0x4
+    s32 count;    // 0x8
+    s32 divisor;  // 0xC
+};
+
 extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct ObjA { void *vtable; void *value; };
-    struct ObjB { void *vtable; void *value; s32 count; s32 divisor; };
     char *name = strrchr(arg0, 0x2e);
-    ObjA *a;
-    ObjB *b;
-    void *c;
     if (strcasecmp(name + 1, "stp") == 0) {
-        a = (ObjA *)operator new(8, "simg");
-        if (a) { a->vtable = lbl_8033D528; a->value = (void *)fn_802C49E8((s32)arg0); }
-        return a;
+        return new ("simg") StpImage((s32)arg0);
     }
     if (strcasecmp(name + 1, "cvs") == 0) {
-        b = (ObjB *)operator new(16, "cimg");
-        if (b) {
-            b->vtable = lbl_8033D504;
-            if (fn_8012C33C((s32)arg0)) {
-                c = (void *)fn_802C2DD4((s32)arg0); b->value = c;
-                b->count = *(s32 *)((char *)c + 12) / arg1;
-            } else { b->value = 0; b->count = 0; }
-            b->divisor = arg1;
-        }
-        return b;
+        return new ("cimg") CvsImage(arg0, arg1);
     }
     if (strcasecmp(name + 1, "img") == 0) {
-        c = operator new(16, "iimg");
-        if (c) c = fn_802228B0(c, arg0, arg2, arg3);
-        return c;
+        return new ("iimg") AnimationPrefix(arg0, arg2, arg3);
     }
     if (strcasecmp(name + 1, "art") == 0) {
-        c = operator new(8, "aimg");
-        if (c) c = fn_802226D4(c, arg0);
-        return c;
+        return new ("aimg") ImagePrefix(arg0);
     }
     fn_802E317C("make_image: unknown extension %s", name + 1);
     return 0;
 }
 
-extern "C" s32 fn_802121D4(s32 arg0, s32 arg1) {
-    if (arg0 != 0 && arg1 > 0) {
-        operator delete((void*)arg0);
-    }
-    return arg0;
-}
+
 
 extern s32 (*lbl_8055EF0C)(s32 *);
 extern "C" s32 fn_80212214(s32 arg0) {
@@ -572,9 +579,6 @@ struct UIWidgetView {
     void* style;        // 0x240
 };
 
-extern "C" void* lbl_8033D54C[];
-extern "C" void* lbl_8033D480[];
-extern "C" void* lbl_8033D590[];
 extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
 extern "C" f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
@@ -626,7 +630,6 @@ extern "C" WidgetFragment* fn_8021C344(WidgetFragment*, int, int, void*, int, in
 extern "C" WidgetFragment* fn_8021D7C8(WidgetFragment*, int, int, int, int, int, void*);
 extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
-extern "C" WidgetFragment* fn_80218F34(WidgetFragment*, int, int, int, int, int);
 extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_80220E48(WidgetFragment*, int, int, int, int, void*, int);
@@ -651,15 +654,20 @@ extern "C" WidgetFragment* fn_80228418(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022855C(WidgetFragment*, UIDesc*, void*, void*);
 
 // Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
-struct UIImageRef {
-    void* vtable;
-    const char* name;
-    int flags;
+class UIImageRef : public UIImage {  /* Class name unproven */
+public:
     UIImageRef(const char* n, int f) {
-        vtable = lbl_8033D54C;
         flags = f;
         name = n;
     }
+    virtual ~UIImageRef(void);
+    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
+    virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
+    virtual int Frames(void);
+    virtual void Extra(void);  /* Helper name unproven */
+
+    const char* name;  // 0x4
+    int flags;         // 0x8
 };
 
 // The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
@@ -692,12 +700,34 @@ public:
     }
 };
 
-struct UICustom {
-    u8 base[0x244];
-    UICustomHandler* handler;
-    UICustom(int x, int y, int dx, int dy, int kind, UICustomHandler* h) {
-        fn_80218F34((WidgetFragment*)this, x, y, x + dx, y + dy, kind);
-        *(void**)this = lbl_8033D480;
+class UICustom : public UIWidget {  /* Class name unproven */
+public:
+    virtual ~UICustom(void);
+    virtual void Slot0C(void);
+    virtual void Slot10(void);
+    virtual void Slot14(void);
+    virtual void Slot1C(int x, int y);
+    virtual void Slot24(void* context);
+    virtual void Slot28(void);
+    virtual void Slot30(void);
+    virtual void Slot34(void);
+    virtual void Slot38(void);
+    virtual void Slot3C(int a, int b);
+    virtual void Slot40(int a, int b);
+    virtual void Slot44(void);
+    virtual void Slot48(void);
+    virtual void Slot4C(int x, int y);
+    virtual void Slot58(void);
+    virtual void Slot5C(void);
+    virtual void* Slot60(void);
+    virtual int Slot64(int key);
+    virtual int Slot68(void);
+    virtual void Slot74(int key, void* value);
+    virtual void Slot7C(void);
+    virtual void Slot80(void);
+
+    UICustomHandler* handler;  // 0x244
+    UICustom(int x, int y, int dx, int dy, int kind, UICustomHandler* h) : UIWidget(x, y, x + dx, y + dy, kind) {
         handler = h;
         h->unk14 = (int)this;
         h->x = x;
@@ -1419,14 +1449,14 @@ public:
     u8 pad448[0xDE8 - 0x448];
 };
 // Key binding widget: calls its mapped action when the key is pressed.
-struct UIHotKey {
-    u8 base[0x244];
+class UIHotKey : public UIWidget {  /* Class name unproven */
+public:
+    virtual ~UIHotKey(void);
+    virtual int Slot64(int key);
     u16 key;            // 0x244
     void* action;       // 0x248
     void* param;        // 0x24C
-    UIHotKey(void* p, void* a, u16 k) {
-        fn_80218F34((WidgetFragment*)this, 0, 0, 0, 0, 0);
-        *(void**)this = lbl_8033D590;
+    UIHotKey(void* p, void* a, u16 k) : UIWidget(0, 0, 0, 0, 0) {
         action = a;
         param = p;
         key = k;
@@ -1660,8 +1690,6 @@ extern "C" s32 fn_80214A38(s32 arg0) {
     return result;
 }
 
-extern "C" void fn_802192AC(void*);
-extern "C" void fn_80219354(void*);
 extern "C" void fn_80214A9C(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
@@ -1781,7 +1809,6 @@ extern "C" void fn_80214D50(s32 arg0) {
 extern "C" void fn_80214A9C(s32);
 extern "C" void fn_80214AF0(s32);
 extern "C" s32 fn_802152CC(void);
-extern "C" void* lbl_8033D420[];
 
 // UIOkBox: title + message with a single OK button (group 31 is hidden while it shows).
 #pragma push
@@ -1820,16 +1847,13 @@ extern "C" void fn_80214FD8(const char* title, const char* message) {
 }
 
 // Custom handler of the yes/no box: remembers which answer starts selected.
-struct UIYesNoHandler {
-    void* vtable;
-    int x, y, dx, dy;
-    void* owner;
-    u8 defaultNo;
-    UIYesNoHandler(u8 d) {
-        owner = 0;
-        vtable = lbl_8033D420;
-        defaultNo = d;
-    }
+class UIYesNoHandler : public MenuState {  /* Class name unproven */
+public:
+    UIYesNoHandler(u8 d) { defaultNo = d; }
+    virtual ~UIYesNoHandler(void) {}
+    virtual void Enter(void);
+    virtual int Key(int key);
+    u8 defaultNo;  // 0x18
 };
 
 // UIYesNoBox: returns 1 for yes.
@@ -1856,12 +1880,7 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
     return yes;
 }
 
-extern "C" s32 fn_80215194(s32 arg0, s32 arg1) {
-    if (arg0 != 0 && arg1 > 0) {
-        operator delete((void*)arg0);
-    }
-    return arg0;
-}
+
 
 // 0x802151D4 is MenuState's deleting dtor (the in-class ~MenuState in menustate.h, slot 2 of __vt__9MenuState);
 // our compiler emits that weak copy after the last function instead of here.
@@ -1904,40 +1923,26 @@ extern "C" void fn_80215298(s32 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 arg4
 extern "C" void fn_802152C8(void) {
 }
 
-extern "C" s32 fn_802192A4(void *, s32);
 extern "C" void fn_802152C8(void);
 extern "C" s32 fn_802152CC(void) {
     fn_802152C8();
     return 0;
 }
-extern "C" void *fn_802152F0(void *arg0, int arg1) {
-    if (arg0 != 0) {
-        fn_8021915C(arg0, 0);
-        if (arg1 > 0) operator delete(arg0);
-    }
-    return arg0;
-}
+UICustom::~UICustom(void) {}
 
-extern "C" s32 fn_80215348(void *arg0, s32 arg1) {
-    if (arg0 != 0) {
-        fn_8021915C(arg0, 0);
-        if (arg1 > 0) {
-            operator delete(arg0);
-        }
-    }
-    return (s32)arg0;
-}
+UIHotKey::~UIHotKey(void) {}
 
 void MenuState::Enter(void) {
 }
 
 extern "C" s32 fn_802168BC(s32);
-extern "C" void fn_8021915C(void *, unsigned int);
 int MenuState::Key(int key) {
     return 0;
 }
 
-extern "C" s32 fn_802153AC(void *arg0, u32 arg1) {
+int UIHotKey::Slot64(int p_arg1) {
+    void * arg0 = (void *)this;
+    u32 arg1 = (u32)p_arg1;
     s32 (*callback)(s32);
     if (arg1 == *(u16 *)((char *)arg0 + 0x244)) {
         callback = *(s32 (**)(s32))((char *)arg0 + 0x248);
@@ -1949,117 +1954,116 @@ extern "C" s32 fn_802153AC(void *arg0, u32 arg1) {
     return 0;
 }
 
-extern "C" void fn_80215414(void) {
+void UIWidget::Slot0C(void) {
 
 }
 
-extern "C" void fn_80215418(void) {
+void UIWidget::Slot10(void) {
 
 }
 
-extern "C" void fn_8021541C(void) {
+void UIWidget::Slot14(void) {
 
 }
 
-extern "C" void fn_80215420(void) {
+void UIWidget::Slot28(void) {
 
 }
 
-extern "C" void fn_80215424(void) {
+void UIWidget::Slot30(void) {
 
 }
 
-extern "C" void fn_80215428(void *arg0) {
+void UIWidget::Slot34(void) {
+    void * arg0 = (void *)this;
     *(u8 *)((char *)arg0 + 0x19) = 1;
     if (*(u8 *)((char *)arg0 + 0x1A) != 0) {
         *(u8 *)((char *)arg0 + 0x234) = 1;
     }
 }
 
-extern "C" void fn_80215444(void *arg0) {
+void UIWidget::Slot38(void) {
+    void * arg0 = (void *)this;
     *(u8 *)((char *)arg0 + 0x19) = 0;
     if (*(u8 *)((char *)arg0 + 0x1A) != 0) {
         *(u8 *)((char *)arg0 + 0x234) = 1;
     }
 }
 
-extern "C" void fn_80215464(void) {
+void UIWidget::Slot3C(int, int) {
 
 }
 
-extern "C" void fn_80215468(void) {
+void UIWidget::Slot40(int, int) {
 
 }
 
-extern "C" void fn_8021546C(void) {
+void UIWidget::Slot44(void) {
 
 }
 
-extern "C" void fn_80215470(void) {
+void UIWidget::Slot48(void) {
 
 }
 
-extern "C" void fn_80215474(void) {
+void UIWidget::Slot4C(int, int) {
 
 }
 
-extern "C" void fn_80215478(void* arg0) {
+void UIWidget::Slot58(void) {
+    void* arg0 = (void*)this;
     *(u8*)((char*)arg0 + 0x18) = 1;
 }
 
-extern "C" void fn_80215484(void* arg0) {
+void UIWidget::Slot5C(void) {
+    void* arg0 = (void*)this;
     *(u8*)((char*)arg0 + 0x18) = 0;
 }
 
-extern "C" s32 fn_80215490(void) {
+void* UIWidget::Slot60(void) {
     return 0;
 }
 
-extern "C" s32 fn_80215498(void) {
+int UIWidget::Slot68(void) {
     return 0;
 }
 
-extern "C" void fn_802154A0(void *arg0) {
+void UIWidget::Slot74(int, void*) {
+    void * arg0 = (void *)this;
     if (*(u8 *)((char *)arg0 + 0x1A) != 0) {
         *(u8 *)((char *)arg0 + 0x234) = 1;
     }
 }
 
-extern "C" u32 fn_802154B8(void) { return 1; }
+int UIImage::Frames(void) { return 1; }
 
-extern "C" s32 fn_802154C0(s32 arg0, s32 arg1) {
-    if (arg0 != 0 && arg1 > 0) {
-        operator delete((void*)arg0);
-    }
-    return arg0;
-}
+UIImageRef::~UIImageRef(void) {}
 
-extern "C" void fn_80215500(void) {
+void UIImageRef::Extra(void) {
 
 }
 
-extern "C" void fn_80215504(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+void UIImageRef::DrawAt(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
+    void * arg0 = (void *)this;
     fn_8022BAD0(*(s32 *)((char *)arg0 + 8), arg1, arg2, 0, arg4, arg5, *(const char **)((char *)arg0 + 4), arg6, 1.0f, 0);
 }
 
-extern "C" void fn_80215544(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
+    void * arg0 = (void *)this;
+    s32 arg3 = (s32)p_arg3;
+    s32 arg4 = (s32)p_arg4;
+    s32 arg5 = (s32)p_arg5;
+    s32 arg6 = (s32)p_arg6;
     fn_8022AC1C(*(s32 *)((char *)arg0 + 8), *(s32 *)((char *)arg0 + 4), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-extern "C" s32 fn_802155AC(void) {
+int UIImageRef::Frames(void) {
     return 4;
 }
 
 extern "C" void fn_802C4C80(void*);
-extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
-    if (arg0 != 0) {
-        *(void**)arg0 = lbl_8033D528;
-        fn_802C4C80(((void**)arg0)[1]);
-        if (arg1 > 0) {
-            operator delete(arg0);
-        }
-    }
-    return arg0;
+StpImage::~StpImage(void) {
+    fn_802C4C80((void*)value);
 }
 
 extern "C" char* strrchr(const char *, int);
@@ -2067,7 +2071,8 @@ extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
-extern "C" void fn_80215618(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
+void StpImage::DrawFrame(int arg1, int arg2, int arg3) {
+    void * arg0 = (void *)this;
     s32 rem = arg3 % fn_802C4F14(*(s32 *)((char *)arg0 + 4));
     fn_802C4C90(*(s32 *)((char *)arg0 + 4), arg1, arg2, rem, 0);
 }
@@ -2076,7 +2081,12 @@ extern "C" void fn_802C4F2C(int, int *, int *);
 extern "C" int fn_802C4EE4(int);
 extern "C" int fn_802C4EFC(int);
 // Screen rectangle of an image drawn at (x, y), allowing for the image's origin.
-extern "C" void fn_8021568C(void* self, s32 x, s32 y, s32* left, s32* top, s32* right, s32* bottom) {
+void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_bottom) {
+    void* self = (void*)this;
+    s32* left = (s32*)p_left;
+    s32* top = (s32*)p_top;
+    s32* right = (s32*)p_right;
+    s32* bottom = (s32*)p_bottom;
     int ox = 0;
     int oy = 0;
     fn_802C4F2C(((s32*)self)[1], &ox, &oy);
@@ -2086,7 +2096,8 @@ extern "C" void fn_8021568C(void* self, s32 x, s32 y, s32* left, s32* top, s32* 
     *bottom = *top + fn_802C4EFC(((s32*)self)[1]);
 }
 
-extern "C" s32 fn_80215730(void *arg0) {
+int StpImage::Frames(void) {
+    void * arg0 = (void *)this;
     return fn_802C4F14(*(s32*)((u8*)arg0 + 4));
 }
 
@@ -2095,25 +2106,20 @@ extern "C" void fn_802C4F2C(int, int *, int *);
 extern "C" int fn_802C4EE4(int);
 extern "C" int fn_802C4EFC(int);
 extern "C" s32 fn_802C2FC4(s32);
-extern "C" void *fn_80215738(void *arg0, s32 arg1) {
-    s32 old;
-    if (arg0 != 0) {
-        old = *(s32 *)((char *)arg0 + 4);
-        *(void **)arg0 = lbl_8033D504;
-        if (old != 0) fn_802C2FC4(old);
-        if (arg1 > 0) operator delete(arg0);
-    }
-    return arg0;
+CvsImage::~CvsImage(void) {
+    if (value != 0) fn_802C2FC4((s32)value);
 }
 
-void fn_802157A8(int arg0, int arg1, int arg2, unsigned int arg3) {
+void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
+    int arg0 = (int)this;
     unsigned int r7 = *(unsigned int *)(arg0 + 0xC);
     int r8 = *(int *)(arg0 + 4);
     unsigned int rem = arg3 % r7;
     if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - *(int *)(arg0 + 8) * rem);
 }
 
-void fn_802157DC(void *arg0, int arg1, int arg2, int *arg3, int *arg4, int *arg5, int *arg6) {
+void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* arg6) {
+    void * arg0 = (void *)this;
     int var_r0;
     *arg3 = arg1;
     *arg4 = arg2;
@@ -2123,15 +2129,23 @@ void fn_802157DC(void *arg0, int arg1, int arg2, int *arg3, int *arg4, int *arg5
     *arg6 = *arg4 + *(int *)((char *)arg0 + 8);
 }
 
-extern "C" s32 fn_8021581C(void *arg0) {
+int CvsImage::Frames(void) {
+    void * arg0 = (void *)this;
     return ((s32 *)arg0)[0xC / 4];
 }
 
-extern "C" void fn_80215824(void) {
+void UIImage::Draw(int, int, int, unsigned int) {
 
 }
 
-extern "C" void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6) {
+void UIImage::DrawAt(int p_arg1, int p_arg2, int p_arg3, int p_arg4, int p_arg5, int p_arg6) {
+    void * self = (void *)this;
+    void * arg1 = (void *)p_arg1;
+    void * arg2 = (void *)p_arg2;
+    void * arg3 = (void *)p_arg3;
+    void * arg4 = (void *)p_arg4;
+    void * arg5 = (void *)p_arg5;
+    void * arg6 = (void *)p_arg6;
     struct Obj {
         virtual ~Obj();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
         virtual void v1();
@@ -2140,7 +2154,8 @@ extern "C" void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void
     ((Obj *)self)->v2(arg1, arg2, arg3, arg6);
 }
 
-extern "C" s32 fn_8021583C(void *arg0, s32 unused1, s32 unused2, s32 arg1, s32 arg2) {
+int UIImage::Hit(int unused1, int unused2, int arg1, int arg2) {
+    void * arg0 = (void *)this;
     struct Local {
         virtual ~Local();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
         virtual void f1();
@@ -2158,7 +2173,8 @@ extern "C" s32 fn_8021583C(void *arg0, s32 unused1, s32 unused2, s32 arg1, s32 a
     return result;
 }
 
-extern "C" void fn_802158C8(void *arg0) {
+void UICustom::Slot0C(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf1();
 }
@@ -2171,68 +2187,82 @@ public:
     virtual void vf3();
 };
 
-extern "C" void fn_802158DC(void *arg0) {
+void UICustom::Slot10(void) {
+    void * arg0 = (void *)this;
     Vf4Obj *obj = *(Vf4Obj **)((char *)arg0 + 0x244);
     obj->vf2();
 }
 
-extern "C" void fn_802158F0(void *arg0) {
+void UICustom::Slot14(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf3();
 }
 
-extern "C" void fn_80215904(void *arg0) {
-    fn_802192AC(arg0);
+void UICustom::Slot7C(void) {
+    void * arg0 = (void *)this;
+    UIWidget::Slot7C();
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf5();
 }
 
-extern "C" void fn_80215944(void *arg0) {
-    fn_80219354(arg0);
+void UICustom::Slot80(void) {
+    void * arg0 = (void *)this;
+    UIWidget::Slot80();
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf6();
 }
 
-extern "C" void fn_80215984(void *arg0) {
+void UICustom::Slot3C(int, int) {
+    void * arg0 = (void *)this;
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf10();
 }
 
-extern "C" void fn_80215998(void *arg0) {
+void UICustom::Slot40(int, int) {
+    void * arg0 = (void *)this;
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf11();
 }
 
-extern "C" void fn_802159AC(void *arg0) {
+void UICustom::Slot44(void) {
+    void * arg0 = (void *)this;
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf13();
 }
 
-extern "C" void fn_802159C0(void *arg0) {
+void UICustom::Slot48(void) {
+    void * arg0 = (void *)this;
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf14();
 }
 
-extern "C" void fn_802159D4(void *arg0) {
+void* UICustom::Slot60(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf19();
 }
 
-extern "C" void fn_802159E8(void *arg0) {
+void UICustom::Slot74(int, void*) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf4();
 }
 
-extern "C" void fn_802159FC(void *arg0) {
+void UICustom::Slot4C(int, int) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf12();
 }
 
-extern "C" void fn_80215A10(void *arg0) {
+void UICustom::Slot58(void) {
+    void * arg0 = (void *)this;
     *(u8 *)((u8 *)arg0 + 0x18) = 1;
     ((VfObj *)*(void **)((u8 *)arg0 + 0x244))->vf15();
 }
 
-extern "C" void fn_80215A2C(void *arg0) {
+void UICustom::Slot5C(void) {
+    void * arg0 = (void *)this;
     *(u8 *)((u8 *)arg0 + 0x18) = 0;
     ((VfObj *)*(void **)((u8 *)arg0 + 0x244))->vf16();
 }
 
-extern "C" void fn_80215A48(void *arg0) {
+void UICustom::Slot34(void) {
+    void * arg0 = (void *)this;
     u8 *self = (u8 *)arg0;
     self[0x19] = 1;
     if (self[0x1A]) {
@@ -2241,7 +2271,8 @@ extern "C" void fn_80215A48(void *arg0) {
     (*(MenuState **)(self + 0x244))->Unk4C();
 }
 
-extern "C" void fn_80215A74(void *arg0) {
+void UICustom::Slot38(void) {
+    void * arg0 = (void *)this;
     u8 *self = (u8 *)arg0;
     self[0x19] = 0;
     if (self[0x1A]) {
@@ -2249,7 +2280,8 @@ extern "C" void fn_80215A74(void *arg0) {
     }
     (*(MenuState **)(self + 0x244))->Unk50();
 }
-extern "C" s32 fn_80215AA4(void *arg0, s32 arg1) {
+int UICustom::Slot64(int arg1) {
+    void * arg0 = (void *)this;
     class Callback {
     public:
         virtual ~Callback(); virtual void f1(); virtual void f2(); virtual void f3();
@@ -2261,59 +2293,64 @@ extern "C" s32 fn_80215AA4(void *arg0, s32 arg1) {
     };
     Callback *obj = *(Callback **)((u8 *)arg0 + 0x244);
     if (obj->call() != 0) return 1;
-    return fn_802192A4(arg0, arg1);
+    return UIWidget::Slot64(arg1);
 }
 
-extern "C" void fn_80215B08(void *arg0) {
+int UICustom::Slot68(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf21();
 }
 
-extern "C" void fn_80215B1C(void *arg0) {
+void UICustom::Slot24(void*) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf7();
 }
 
-extern "C" void fn_80215B30(void *arg0) {
+void UICustom::Slot28(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf8();
 }
 
-extern "C" void fn_80215B44(void *arg0) {
+void UICustom::Slot30(void) {
+    void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
     obj->vf9();
 }
 
-extern "C" void fn_802191F0(void*, s32, s32);
-extern "C" void fn_80215B58(void *arg0, s32 arg1, s32 arg2) {
-    fn_802191F0(arg0, arg1, arg2);
+void UICustom::Slot1C(int arg1, int arg2) {
+    void * arg0 = (void *)this;
+    UIWidget::Slot1C(arg1, arg2);
     ((void **)*(void ***)((char *)arg0 + 0x244))[1] = (void *)arg1;
     ((void **)*(void ***)((char *)arg0 + 0x244))[2] = (void *)arg2;
 }
 
-extern "C" s32 fn_80215BAC(void) {
+int UIWidget::Slot18(void) {
     return -1;
 }
 
-extern "C" void fn_80215BB4(void) {
+void UIWidget::Slot2C(void) {
 
 }
 
-extern "C" void fn_80215BB8(void) {
+void UIWidget::Slot50(void) {
 
 }
 
-extern "C" void fn_80215BBC(void) {
+void UIWidget::Slot54(void) {
 
 }
 
-extern "C" s32 fn_80215BC0(void) {
+int UIWidget::Slot6C(int) {
     return 0;
 }
 
 extern "C" void fn_80214CB4(s32);
 extern "C" void fn_80230E90(s32);
-extern "C" s32 fn_80215BC8(void *arg0, s32 arg1, s32 arg2) {
+int UIWidget::Slot70(int arg1, int arg2) {
+    void * arg0 = (void *)this;
     s32 var_r6;
 
     var_r6 = 0;
@@ -2324,15 +2361,17 @@ extern "C" s32 fn_80215BC8(void *arg0, s32 arg1, s32 arg2) {
     return var_r6;
 }
 
-extern "C" s32 fn_80215C08(void *arg0) {
+int UIWidget::Slot78(void) {
+    void * arg0 = (void *)this;
     return *(s32 *)((char *)arg0 + 0xC) - *(s32 *)((char *)arg0 + 4);
 }
 
-extern "C" void fn_80215C18(void *arg0) {
+void UIYesNoHandler::Enter(void) {
+    void * arg0 = (void *)this;
     fn_80214CB4(*(u8 *)((char *)arg0 + 0x18) == 0);
 }
 
-extern "C" s32 fn_80215C28(s32 arg0, s32 arg1) {
+int UIYesNoHandler::Key(int arg1) {
     switch (arg1) {
     case 0x125:
         fn_80214CB4(0);
@@ -2475,18 +2514,9 @@ void Unk50__9MenuStateFv(void);
 void Unk54__9MenuStateFv(void);
 void Unk5C__9MenuStateFv(void);
 void Update__9MenuStateFv(void);
-void fn_80219264(WidgetFragment* self,int x,int y);
-void fn_802192A0(WidgetFragment*,void*);
 }
 
 // Virtual tables of the raw-offset handler/widget objects above (vptrs stored by hand), in .data order.
 // CLEANUP: become real classes once the slot functions are methods.
 extern "C" {
-void* lbl_8033D420[24] = {0, 0, (void*)fn_80215194, (void*)fn_80215C18, (void*)Exit__9MenuStateFv, (void*)Unk14__9MenuStateFv, (void*)Unk18__9MenuStateFv, (void*)Update__9MenuStateFv, (void*)Unk20__9MenuStateFv, (void*)Unk24__9MenuStateFP8gxCanvas, (void*)Draw__9MenuStateFv, (void*)Unk2C__9MenuStateFv, (void*)Unk30__9MenuStateFv, (void*)Unk34__9MenuStateFv, (void*)Unk38__9MenuStateFv, (void*)Unk3C__9MenuStateFv, (void*)Unk40__9MenuStateFv, (void*)Unk44__9MenuStateFv, (void*)Unk48__9MenuStateFv, (void*)Unk4C__9MenuStateFv, (void*)Unk50__9MenuStateFv, (void*)Unk54__9MenuStateFv, (void*)fn_80215C28, (void*)Unk5C__9MenuStateFv};
-void* lbl_8033D480[33] = {0, 0, (void*)fn_802152F0, (void*)fn_802158C8, (void*)fn_802158DC, (void*)fn_802158F0, (void*)fn_80215BAC, (void*)fn_80215B58, (void*)fn_80219264, (void*)fn_80215B1C, (void*)fn_80215B30, (void*)fn_80215BB4, (void*)fn_80215B44, (void*)fn_80215A48, (void*)fn_80215A74, (void*)fn_80215984, (void*)fn_80215998, (void*)fn_802159AC, (void*)fn_802159C0, (void*)fn_802159FC, (void*)fn_80215BB8, (void*)fn_80215BBC, (void*)fn_80215A10, (void*)fn_80215A2C, (void*)fn_802159D4, (void*)fn_80215AA4, (void*)fn_80215B08, (void*)fn_80215BC0, (void*)fn_80215BC8, (void*)fn_802159E8, (void*)fn_80215C08, (void*)fn_80215904, (void*)fn_80215944};
-void* lbl_8033D504[9] = {0, 0, (void*)fn_80215738, (void*)fn_80215828, (void*)fn_80215824, (void*)fn_802157DC, (void*)fn_8021583C, (void*)fn_8021581C, (void*)fn_802157A8};
-void* lbl_8033D528[9] = {0, 0, (void*)fn_802155B4, (void*)fn_80215828, (void*)fn_80215824, (void*)fn_8021568C, (void*)fn_8021583C, (void*)fn_80215730, (void*)fn_80215618};
-void* lbl_8033D54C[9] = {0, 0, (void*)fn_802154C0, (void*)fn_80215504, (void*)fn_80215824, (void*)fn_80215544, (void*)fn_8021583C, (void*)fn_802155AC, (void*)fn_80215500};
-void* lbl_8033D570[8] = {0, 0, (void*)fn_802121D4, (void*)fn_80215828, (void*)fn_80215824, 0, (void*)fn_8021583C, (void*)fn_802154B8};
-void* lbl_8033D590[33] = {0, 0, (void*)fn_80215348, (void*)fn_80215414, (void*)fn_80215418, (void*)fn_8021541C, (void*)fn_80215BAC, (void*)fn_802191F0, (void*)fn_80219264, (void*)fn_802192A0, (void*)fn_80215420, (void*)fn_80215BB4, (void*)fn_80215424, (void*)fn_80215428, (void*)fn_80215444, (void*)fn_80215464, (void*)fn_80215468, (void*)fn_8021546C, (void*)fn_80215470, (void*)fn_80215474, (void*)fn_80215BB8, (void*)fn_80215BBC, (void*)fn_80215478, (void*)fn_80215484, (void*)fn_80215490, (void*)fn_802153AC, (void*)fn_80215498, (void*)fn_80215BC0, (void*)fn_80215BC8, (void*)fn_802154A0, (void*)fn_80215C08, (void*)fn_802192AC, (void*)fn_80219354};
 }
