@@ -708,26 +708,32 @@ ILPos fn_80136594(LineFollower* f, V2* p) {
     return r;
 }
 
-/* Helper name unproven */
-static inline bool SameIdealSegment(const IdealFollower* o, const IdealFollower* f) {
-    return o->il.seg == f->il.seg;
+static inline u32 RelativeIdealPosition(const IdealFollower* f, CenterLine* line, u32 pos) {
+    u32 base = f->base;
+    if (base) {
+        return (pos - base + line->total) % line->total;
+    }
+    return pos;
 }
 
 f32 fn_801365C4(const IdealFollower* f, const IdealFollower* o) {
+    IdealPoint* own;
+    IdealPoint* theirs;
     bool same;
+    const struct { CenterLine* value; } line = {f->line};
     int back;
     int i;
     int j;
     s32 n;
     f32 a;
     f32 b;
-    if (!f->line || !o->il.seg || !f->il.seg || o->times.n != f->times.n) {
+    if (!line.value || !(theirs = o->il.seg) || !(own = f->il.seg) || o->times.n != f->times.n) {
         return 0.0f;
     }
     n = f->times.n;
-    same = SameIdealSegment(o, f);
+    same = own == theirs;
     back = same ? -2 : -1;
-    i = (((s32)f->Rel(f->il.seg->ilpos) >> 16) + (n + back)) % n;
+    i = (((s32)RelativeIdealPosition(f, line.value, own->ilpos) >> 16) + (n + back)) % n;
     j = (i + 1) % n;
     a = Lerp(o->times.data[i], o->times.data[j], f->il.t);
     if (same) {
