@@ -624,7 +624,6 @@ extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
-extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 
 
 // The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
@@ -1191,12 +1190,10 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 39: {
         UIStyle* movie = FindStyle(styles, d->style, 3);
         if (movie) {
-            p = (WidgetFragment*)operator new(0x268, "MovieWidget");
-            if (p) p = fn_80223CF0(p, d, movie->value);
+            p = (WidgetFragment*)new ("MovieWidget") MovieWidget((WidgetDesc*)d, (const char*)movie->value);
             widgets[count++] = p;
         } else {
-            p = (WidgetFragment*)operator new(0x268, "MovieWidget");
-            if (p) p = fn_80223CF0(p, d, 0);
+            p = (WidgetFragment*)new ("MovieWidget") MovieWidget((WidgetDesc*)d, (const char*)0);
             widgets[count++] = p;
         }
         break;

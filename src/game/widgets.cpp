@@ -431,10 +431,9 @@ extern "C" {
 void fn_8022375C(WidgetFragment*);
 
 struct LargeImage355 {char base[0x244];float x,y,width,height;int frame;const char* name;bool flag;char pad25d[3];void* image;int resource;};
-extern u32 lbl_8033E350[];extern int lbl_8055CFF0,lbl_8055CFF4;extern const float lbl_80563538;
+extern int lbl_8055CFF0,lbl_8055CFF4;extern const float lbl_80563538;
 int fn_802C9A58();
 inline int Round355(float value){return (int)(value<(0.0f)?value-(0.5f):(0.5f)+value);}
-WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name);
 struct RollingRow;
 #include "game/uilists.h"
 typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
@@ -597,8 +596,6 @@ void fn_802237D0(WidgetFragment* self);
 void fn_802237DC(WidgetFragment* self);
 int fn_802237E8(WidgetFragment* self);
 int fn_802237F0(WidgetFragment* self,int index);
-void fn_80224160(WidgetFragment* self);
-void fn_8022419C(WidgetFragment* self);
 }
 
 
@@ -640,8 +637,7 @@ struct TwoCleanupPrefix {char base[0x250];void* image;char gap254[12];UIContext*
 struct ThreeCleanupPrefix {char base[0x280];void* image;UIContext* assetFirst;UIContext* assetSecond;};
 struct TimedFocusPrefix {char base[0x24c];float stamp;char gap250[4];int token;int* focus;char gap25c[4];unsigned char active,inactive;char gap262[6];float value,previous;};
 extern "C" {
-extern u32 lbl_8033E350[];void fn_802ECFF4(void*);
-WidgetFragment* fn_80223FAC(WidgetFragment* self,int destroy);
+void fn_802ECFF4(void*);
 }
 
 struct PairImage248 {char base[0x248];void* first;void* second;};
@@ -742,7 +738,6 @@ struct RenderRequestPrefix {char base[0x244];float x,y,w,h;void* resource;const 
 struct ImageDescriptorPrefix {char base[0x244];float x,y;int value;void* image;float width,height,alpha;UIContext* asset;void* context;};
 extern "C" {
 void* fn_802ECF08(const char*,int);int fn_802ED040(void*);int fn_802ECF90(void*,const char*);
-void fn_80224028(WidgetFragment* self);
 }
 
 struct ToggleImagePrefix {char base[0x244];int frame,mode;float elapsed;void* context;int token;int* focus;int(*callback)(void*);bool active,pressed;char gap262[2];int speed;float alpha,blend,x,y,width,height;void* image;UIContext* asset;UIContext* scope;};
@@ -2528,8 +2523,7 @@ void MenuImage::Slot28(void) {
     WidgetFragment* self = (WidgetFragment*)this;ImageAlphaPrefix* f=(ImageAlphaPrefix*)self;f->asset->alpha=(1.0f)-f->blend;float zero=(0.0f);if(f->asset->alpha>zero&&f->image){FullDrawStatePrefix scope;const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);fn_802C5320(f->image,0,f->x,f->y,zero,f->width,f->height);fn_8022EDB8();}}
 void MenuImage::Slot7C(void) {
     WidgetFragment* self = (WidgetFragment*)this;TweenPrefix* f=(TweenPrefix*)self;if(f->selected==f->state[3])f->blend=(0.0f);else f->blend=(1.0f);Slot7C__8UIWidgetFv(self);}
-WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* name){
- __ct__8UIWidgetFP10WidgetDesc(self,desc);LargeImage355* f=(LargeImage355*)self;self->vtable=lbl_8033E350;f->name=0;f->flag=0;f->resource=-2;f->image=0;
+MovieWidget::MovieWidget(WidgetDesc* desc,const char* name) : UIWidget(desc) {WidgetFragment* self=(WidgetFragment*)this;LargeImage355* f=(LargeImage355*)self;f->name=0;f->flag=0;f->resource=-2;f->image=0;
  if(!fn_802C9A58()&&((WidgetDispatch*)self)->Slot78()>600&&self->bottom-self->top>460){
  int left=lbl_8055CFF0/2+Round355(1.3333333f*(float)(self->left-lbl_8055CFF0/2));
  int top=lbl_8055CFF4/2+Round355((float)(self->top-lbl_8055CFF4/2));
@@ -2538,12 +2532,11 @@ WidgetFragment* fn_80223CF0(WidgetFragment* self,WidgetDesc* desc,const char* na
  self->left=left;self->top=top;self->right=left+width;self->bottom=top+height;
  }
  fn_80230C30(&f->x,&f->y,self->left,self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->height=(float)(self->bottom-self->top);
- if(name)f->name=name;else f->name=desc->name;bool flag=desc->fielda4!=0;f->frame=0;f->flag=flag;return self;
-}
-WidgetFragment* fn_80223FAC(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E350;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802ECFF4(f->resource);__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80224028(WidgetFragment* self){Slot7C__8UIWidgetFv(self);RenderRequestPrefix* f=(RenderRequestPrefix*)self;if(!f->resource){if(f->name){f->resource=fn_802ECF08(f->name,!f->notify);if(!f->resource&&f->notify){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}}}else{if(f->notify&&fn_802ED040(f->resource)){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}if(f->name&&!fn_802ECF90(f->resource,f->name)){fn_802ECFF4(f->resource);fn_802E30C8("MovieWidget: loading '%s'",f->name);f->resource=fn_802ECF08(f->name,!f->notify);}}if(f->resource)fn_802ECFEC(f->resource);}
-void fn_80224160(WidgetFragment* self){Slot80__8UIWidgetFv(self);RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802ECFEC(f->resource);}
-void fn_8022419C(WidgetFragment* self){RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802ED038(f->resource,f->x,f->y,f->w,f->h);}
+ if(name)f->name=name;else f->name=desc->name;bool flag=desc->fielda4!=0;f->frame=0;f->flag=flag;}
+MovieWidget::~MovieWidget(void) {WidgetFragment* self=(WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802ECFF4(f->resource);}
+void MovieWidget::Slot7C(void) {Slot7C__8UIWidgetFv(((WidgetFragment*)this));RenderRequestPrefix* f=(RenderRequestPrefix*)((WidgetFragment*)this);if(!f->resource){if(f->name){f->resource=fn_802ECF08(f->name,!f->notify);if(!f->resource&&f->notify){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}}}else{if(f->notify&&fn_802ED040(f->resource)){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}if(f->name&&!fn_802ECF90(f->resource,f->name)){fn_802ECFF4(f->resource);fn_802E30C8("MovieWidget: loading '%s'",f->name);f->resource=fn_802ECF08(f->name,!f->notify);}}if(f->resource)fn_802ECFEC(f->resource);}
+void MovieWidget::Slot80(void) {Slot80__8UIWidgetFv(((WidgetFragment*)this));RenderPrefix* f=(RenderPrefix*)((WidgetFragment*)this);if(f->resource)fn_802ECFEC(f->resource);}
+void MovieWidget::Slot28(void) {RenderPrefix* f=(RenderPrefix*)((WidgetFragment*)this);if(f->resource)fn_802ED038(f->resource,f->x,f->y,f->w,f->h);}
 DynamicLoadBackground::DynamicLoadBackground(WidgetDesc* desc) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->w=(float)desc->dx;f->h=(float)desc->dy;char path[256];sprintf(path,"*uibig.res/%s",desc->name);f->resource=gxGetImage(path);if(!f->resource)fn_802E30C8("Couldn't load the image %s",path);}
 DynamicLoadBackground::~DynamicLoadBackground(void) {WidgetFragment* self=(WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802C519C(f->resource);f->resource=0;}
 void DynamicLoadBackground::Slot28(void) {

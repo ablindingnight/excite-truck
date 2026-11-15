@@ -704,6 +704,16 @@ public:
     virtual void Slot7C(void);  // fn_80223CC4
     unsigned char fields244[0x24];  // 0x244, read through widgets.cpp views
 };
+class MovieWidget : public UIWidget {  /* Class name unproven (allocation tag "MovieWidget"); vtable lbl_8033E350 */
+public:
+    MovieWidget(struct WidgetDesc* desc, const char* name);  // fn_80223CF0
+    virtual ~MovieWidget(void);                  // fn_80223FAC
+    virtual void Slot28(void);                   // fn_8022419C
+    virtual void Slot7C(void);                   // fn_80224028
+    virtual void Slot80(void);                   // fn_80224160
+    unsigned char fields244[0x24];  // 0x244, read through widgets.cpp's LargeImage355/RenderRequestPrefix views
+};
+
 class DynamicLoadBackground : public UIWidget {  /* Class name unproven (allocation tag "DynamicLoadBackground"); vtable lbl_8033E2CC */
 public:
     DynamicLoadBackground(WidgetDesc* desc);  // fn_802241C8
