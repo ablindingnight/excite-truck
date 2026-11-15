@@ -182,7 +182,9 @@ void fn_80202BFC(s32 rt) {
 }
 
 // Picks (and blends) the sky band for a view direction.
+}
 template <class O> static inline void TMulEq(O* o, f32 k) { o->x *= k; o->y *= k; o->z *= k; }  /* Helper name unproven */
+extern "C" {
 /* Helper name unproven */
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 void fn_80202D50(EVec3 dir) {

@@ -71,7 +71,7 @@ public:
     virtual ~VDtor(void);
 };
 
-extern void* lbl_80333018[];
+extern "C" void* lbl_80333018[];
 f32 lbl_8055A468 = 7.5f;
 f32 lbl_8055A46C = 12.5f;
 
@@ -151,7 +151,7 @@ void operator delete[](void* p);
 void* operator new[](unsigned long n, const char* tag);
 
 extern s32 lbl_8055E3C4;
-extern void* lbl_80332FC4[];
+extern "C" void* lbl_80332FC4[];
 
 u8* lbl_804349A0[4];
 u8* lbl_804349B0[4];
@@ -369,7 +369,7 @@ u8* fn_8018FF84(u8* p, int del) {
 
 }  // extern "C"
 
-extern void* lbl_80332F40[];  // replay recorder vtable
+extern "C" void* lbl_80332F40[];  // replay recorder vtable
 extern u8 lbl_8055E528;
 int OptProfile(void);
 

@@ -316,7 +316,7 @@ extern void* lbl_80343D18[];
 extern void* lbl_80343C30[];
 extern void* lbl_80343CA8[];
 extern u8 lbl_8055F291;
-extern char lbl_8055B860[8];
+extern "C" char lbl_8055B860[8];
 extern char lbl_8055BAC0[8];
 extern char lbl_8055BABC[4];
 extern char lbl_8055BAB8[4];
@@ -925,7 +925,6 @@ u8* fn_8024AFF8(u8* p, int del) {
 }
 
 int fn_80215228(void);
-extern u8 lbl_8055F298;
 
 struct EvEntry {
     s32 id;             // offset 0x0
@@ -1049,11 +1048,13 @@ struct GroupVec {
 extern void* lbl_80343BD0[];
 void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 
+}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
+extern "C" {
 
 u8* fn_8024B3E8(u8* p, EvList* list) {
     PTR(p, 0x74) = (u8*)list;

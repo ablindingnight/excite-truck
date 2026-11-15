@@ -386,7 +386,7 @@ IVec3 lbl_8043848C;
 IVec3 lbl_80438498;
 char lbl_804384A8[0x100];      // think: who
 char lbl_804385A8[0x100];      // think: except
-extern u8 lbl_80337474[];         // debug key table
+extern "C" u8 lbl_80337474[];         // debug key table
 
 static const char* const lbl_80562950 = "debug\0camera\0effect\0sound\0teleport\0think\0wait\0text\0\0\0\0";
 static const char* const lbl_80562954 = "world_pt\0entry\0start";
@@ -2136,12 +2136,14 @@ void fn_801C7C04(void) {
         e->pt = XZ(lbl_80438498);
         break;
     case 0:
+    {
         e->pt = XZ(lbl_80438480);
         e->offset = XZ(lbl_80438498);
         e->offset -= e->pt;
         V2 dir = XZ(lbl_8043848C) - XZ(lbl_80438480);
         e->yaw = Angle(V2(0.0f, 1.0f), dir);
         break;
+    }
     case 1:
     default:
         fn_802E317C("Interlude Editor: I'm not set up to handle where type %d", e->where);

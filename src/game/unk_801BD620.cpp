@@ -46,7 +46,7 @@ ModuleTag lbl_8055E778;  // registered by this unit's __sinit (0x801BD620)
 
 // The unit's float constants are named objects defined after fn_801BA088 (in the target's .sdata2 order), so MWCC
 // does not fold them: the target adds 0 + 12 for real and keeps the zero first in every `zero + K`.
-extern const f32 lbl_805627A8, lbl_805627AC, lbl_805627B0, lbl_805627B4, lbl_805627B8, lbl_805627BC, lbl_805627C0, lbl_805627C4, lbl_805627C8, lbl_805627CC, lbl_805627D0, lbl_805627D4, lbl_805627D8, lbl_805627DC, lbl_805627E0, lbl_805627E4, lbl_805627E8, lbl_805627EC, lbl_805627F0, lbl_805627F4, lbl_805627F8, lbl_805627FC, lbl_80562800, lbl_80562804, lbl_80562808, lbl_8056280C, lbl_80562810, lbl_80562814, lbl_80562818, lbl_8056281C, lbl_80562820, lbl_80562824, lbl_80562828, lbl_8056282C, lbl_80562830, lbl_80562834;
+extern "C" const f32 lbl_805627A8, lbl_805627AC, lbl_805627B0, lbl_805627B4, lbl_805627B8, lbl_805627BC, lbl_805627C0, lbl_805627C4, lbl_805627C8, lbl_805627CC, lbl_805627D0, lbl_805627D4, lbl_805627D8, lbl_805627DC, lbl_805627E0, lbl_805627E4, lbl_805627E8, lbl_805627EC, lbl_805627F0, lbl_805627F4, lbl_805627F8, lbl_805627FC, lbl_80562800, lbl_80562804, lbl_80562808, lbl_8056280C, lbl_80562810, lbl_80562814, lbl_80562818, lbl_8056281C, lbl_80562820, lbl_80562824, lbl_80562828, lbl_8056282C, lbl_80562830, lbl_80562834;
 extern "C" {
 
 float fn_8002B0A0(double x);  // fabsf wrapper

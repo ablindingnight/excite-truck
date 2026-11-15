@@ -282,7 +282,9 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
 }
 
 static inline f32 AddMul_hm(f32 a, f32 b, f32 c) { return a + c * b; }  /* Helper name unproven */
+}
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
+extern "C" {
 static inline f32 Corner(f32 p, f32 d, f32 n) { return p + d * 0.5f + n * 0.5f; }  /* Helper name unproven */
 void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     V2 n = *dir;

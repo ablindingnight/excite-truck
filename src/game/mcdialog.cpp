@@ -62,7 +62,7 @@ int fn_8023F964(int* result);
 int fn_8023F9E8(void);
 
 static inline MenuItem MakeSavingTitle(CardTask* task) {
-    const struct { int length; } label = {strlen(task->Title())};
+    const struct { int length; } label = {(int)strlen(task->Title())};
     return MenuItem("title", task->Title(), CaptionContext(label.length));
 }
 

@@ -12,6 +12,7 @@ const f32 lbl_80563BC8 = 1.5f;  // flash time
 extern s32 fn_80230E90(s32);
 extern f32 fn_8023659C(void);
 extern s32 fn_80214AF0(s32);
+extern void fn_80214A9C(s32);
 extern void __dl__FPv(void *p);  /* operator delete */
 extern const char *fn_80131234(const char *key);
 extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32, s32);

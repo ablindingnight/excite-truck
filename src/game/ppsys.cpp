@@ -540,11 +540,13 @@ static inline s32 PSysCount(PSys* s) {
     return s->nPart;
 }
 
+}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
+extern "C" {
 
 /* Helper name unproven. */
 static inline void ApplyAcceleration(PSys* s, const RVec3* a) {

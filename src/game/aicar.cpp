@@ -190,8 +190,8 @@ extern u32 lbl_8055D430;
 extern s32 lbl_8055E3C4;
 extern f32 lbl_8055E3C8;
 extern f32 __float_epsilon[];
-extern void* lbl_80333348[];  // AIDriver vtable
-extern void* lbl_80333390[];  // IDriver vtable
+extern "C" void* lbl_80333348[];  // AIDriver vtable
+extern "C" void* lbl_80333390[];  // IDriver vtable
 
 struct AIVecBase {
     ~AIVecBase(void) { data = 0; }
@@ -1086,7 +1086,6 @@ struct ILPos {
     s32 mode;         // offset 0x8
 };
 
-extern f32 lbl_8055A48C;  // -100000
 void fn_80135B9C(LineFollower* f, f32 dist, V2* outPos, V2* outDir, f32* outSpeed, ILPos* outIl);
 
 void fn_80194FD0(u8* d, u8* out, f32 t);
@@ -1170,9 +1169,9 @@ f32 fn_80194FC8(u8* d) { return fn_8013B744(CARID(d)); }
 
 }  // extern "C"
 
-extern const f32 lbl_80562140;  // 1.0
+extern "C" const f32 lbl_80562140;  // 1.0
 extern "C" const f32 lbl_80562144;  // 0.0
-extern const f32 lbl_80562160;
+extern "C" const f32 lbl_80562160;
 extern const f32 lbl_8056216C;
 extern "C" const f32 lbl_8056217C;
 extern const f32 lbl_805621C0;  // line switch length (1.5)
@@ -1416,11 +1415,13 @@ void fn_801959AC(u8* d) {
     fn_801942F0(d, F32(d, 0x26C) - F32(d, 0x1F4) > 1.0f);
     switch (S32(d, 0x260)) {
     case 1:
+    {
         f32 off = F32(d, 0x264);
         if ((f32)__fabs(F32(d, 0x278) - off) < 0.61f) {
             S32(d, 0x260) = 2;
         }
         break;
+    }
     case 2:
         if (F32(d, 0x270) < 0.44444445f) {
             fn_80193CD4(d);
@@ -1965,7 +1966,7 @@ void fn_80196C90(u8* d) {
     F32(d, 0x148) = F32(d, 0x144);
 }
 
-void fn_80137788(Pair* p, int car, V2* out);
+extern "C++" void fn_80137788(Pair* p, int car, V2* out);
 void fn_801377EC(Pair* p, int car, V2* out);
 int fn_8019799C(u8* d, u8* p);
 int fn_8019703C(const u8* d, const u8* p);

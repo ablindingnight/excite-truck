@@ -593,11 +593,13 @@ s32 fn_802BD0C8(TreeType* t) {
     return n;
 }
 
+}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
+extern "C" {
 
 void fn_802BD0F4(TreeType* t) {
     TreeRec* tr;

@@ -231,9 +231,9 @@ void fn_80279B28(u8* block, CarState* out);
 void fn_80279CD8(CarState* s);
 u8* fn_801769CC(void);
 }
-extern const f32 lbl_80561F74;  // 0.0
-extern const f32 lbl_80561F88;  // 1.0
-extern const f32 lbl_80561F8C;  // 0.5
+extern "C" const f32 lbl_80561F74;  // 0.0
+extern "C" const f32 lbl_80561F88;  // 1.0
+extern "C" const f32 lbl_80561F8C;  // 0.5
 
 extern "C" {
 
@@ -325,10 +325,10 @@ void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 s32 fn_80129D18(int a, int b);
 u8* fn_801769CC(void);
 }
-extern const f32 lbl_80561F74;  // 0.0
-extern const f32 lbl_80561F88;  // 1.0
-extern const f32 lbl_80561F98;  // 0.3
-extern const f32 lbl_80561FC4;  // -1.0
+extern "C" const f32 lbl_80561F74;  // 0.0
+extern "C" const f32 lbl_80561F88;  // 1.0
+extern "C" const f32 lbl_80561F98;  // 0.3
+extern "C" const f32 lbl_80561FC4;  // -1.0
 
 extern "C" {
 

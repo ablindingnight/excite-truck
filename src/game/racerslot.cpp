@@ -127,12 +127,14 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+}
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
     v->x = x;
     v->y = y;
     v->z = z;
 }
+extern "C" {
 
 int fn_8026A698(u8* p, int i) {
     f32* r;

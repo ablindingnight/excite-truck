@@ -259,7 +259,7 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
-extern const f32 lbl_80563960;  // 0.0
+extern "C" const f32 lbl_80563960;  // 0.0
 extern "C" u8* fn_8023512C(const char* name);
 extern "C" void fn_802E317C(const char* fmt, ...);
 
@@ -949,7 +949,7 @@ public:
 };
 
 extern "C" UIObjects* fn_80258354(void);
-extern const f32 lbl_80563964;  // 1.0
+extern "C" const f32 lbl_80563964;  // 1.0
 
 // The car unlock screen's state (vtable __vt__12UnlockScreen): walks `list`, revealing each unlocked car with the
 // trophy cue.
@@ -958,7 +958,7 @@ void fn_80236954(const char* event);
 void fn_80214AF0(int s);
 f32 fn_80214D48(void);
 }
-extern const f32 lbl_80563970;  // 2.0
+extern "C" const f32 lbl_80563970;  // 2.0
 
 static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 

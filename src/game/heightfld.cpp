@@ -304,10 +304,12 @@ int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
 #pragma push
 #pragma opt_unroll_loops off
 /* Helper name unproven */
+}
 template <class T>
 static inline T& AtR(T* p, int i) {
     return p[i];
 }
+extern "C" {
 
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;

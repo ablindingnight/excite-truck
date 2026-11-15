@@ -200,8 +200,8 @@ u8* fn_801A973C(u8* p, int del) {
 
 }  // extern "C"
 
-extern const f32 lbl_8056247C;  // 0.0
-extern const f32 lbl_80562478;  // 0.5
+extern "C" const f32 lbl_8056247C;  // 0.0
+extern "C" const f32 lbl_80562478;  // 0.5
 
 // A contact corner (corners.cpp), kept in a body's list at 0xD0.
 struct BodyCorner {
@@ -306,9 +306,9 @@ struct ObMesh {
     ObMeshPart** parts;  // offset 0x14
 };
 
-extern const f32 lbl_8056249C;  // 0.8
-extern const f32 lbl_805624A4;  // -1
-extern const f32 lbl_805624AC;  // 1
+extern "C" const f32 lbl_8056249C;  // 0.8
+extern "C" const f32 lbl_805624A4;  // -1
+extern "C" const f32 lbl_805624AC;  // 1
 extern f32 __float_epsilon[];      // FLT_EPSILON
 
 extern "C" {

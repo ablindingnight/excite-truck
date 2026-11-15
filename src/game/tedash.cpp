@@ -562,11 +562,13 @@ void fn_802B67C8(const char* name) {
     fn_80147FF0(b, b->color);
 }
 
+}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
+extern "C" {
 
 void fn_802B6804(void) {
     Stat* s;

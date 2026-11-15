@@ -792,7 +792,7 @@ void DustTrail::Impact(const TrailEvent* e) {
         fn_80287B24(e->who);
         h = 0.5f * (f32)__fabs(e->vel.y);
         m.y = e->dir;
-        PSVECCrossProduct(&m.y, &TVec(0.0f, 0.0f, 1.0f), &m.x);
+        PSVECCrossProduct(&m.y, &(const TVec&)TVec(0.0f, 0.0f, 1.0f), &m.x);
         PSVECCrossProduct(&m.x, &m.y, &m.z);
         cs = cos(3.1415927f / n);
         sn = sin(3.1415927f / n);

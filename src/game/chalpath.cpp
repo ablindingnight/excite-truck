@@ -914,7 +914,7 @@ void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 
 }  // extern "C"
 
-extern const f32 lbl_80563B90;  // 0.0
+extern "C" const f32 lbl_80563B90;  // 0.0
 
 // Animated widget base (vtable lbl_8033D618).
 class AnimWidget {

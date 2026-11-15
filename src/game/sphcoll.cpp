@@ -133,11 +133,11 @@ struct Xform {
     XVec3 pos;   // offset 0x24
 };
 
-extern void* lbl_80333968[];
-extern void* lbl_80333818[];
-extern void* lbl_803337C8[];
-extern void* __vt__8BoxShape[];
-extern void* lbl_80333868[];
+extern "C" void* lbl_80333968[];
+extern "C" void* lbl_80333818[];
+extern "C" void* lbl_803337C8[];
+extern "C" void* __vt__8BoxShape[];
+extern "C" void* lbl_80333868[];
 
 class VEx;
 
@@ -162,8 +162,8 @@ struct PolyVol {
     PolyPlane planes[8];   // offset 0x3C
 };
 
-extern void* lbl_80333778[];
-extern void* lbl_803336F8[];
+extern "C" void* lbl_80333778[];
+extern "C" void* lbl_803336F8[];
 extern const f32 lbl_8056234C;  // 2.0f
 
 struct Pose12s {
@@ -332,9 +332,9 @@ void fn_801A4868(u8* p, u32 v);
 void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
 
-extern void* lbl_803339B8[];
-extern void* __vt__9TubeShape[];
-extern void* lbl_80333728[];
+extern "C" void* lbl_803339B8[];
+extern "C" void* __vt__9TubeShape[];
+extern "C" void* lbl_80333728[];
 
 ModuleTag lbl_8055E590;
 UnkStaticFFFF lbl_8055E598;
@@ -360,8 +360,8 @@ struct PolyPush {
     f32 d;    // offset 0xC
 };
 
-extern const f32 lbl_805622D0;  // 0.0
-extern const f32 lbl_805622D4;  // 0.001
+extern "C" const f32 lbl_805622D0;  // 0.0
+extern "C" const f32 lbl_805622D4;  // 0.001
 
 extern "C" {
 
@@ -2058,12 +2058,14 @@ struct TubeVol {
 
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
+}
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
     v->x = x;
     v->y = y;
     v->z = z;
 }
+extern "C" {
 
 int fn_8019E500(u8* p, u8* q) {
     TubeVol* t;
@@ -3593,9 +3595,9 @@ void fn_801A26FC(u8* p, u8* o) {
             Shift(&x, &c);
             RVec3 at;
             RVec3 push;
-            fn_801C28A8(S32(p, 0x30), &x, &HalfExtents::Read(box), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
+            fn_801C28A8(S32(p, 0x30), &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
-                fn_801B34DC(o, 0, &at, &push, &RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0).x, U32(p, 0x20));
+                fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0)).x, U32(p, 0x20));
             }
         }
     } else if (S32(o, 0x18) == 'BOX ') {
@@ -3615,7 +3617,7 @@ void fn_801A26FC(u8* p, u8* o) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
-            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
+            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
         }
     } else if (S32(o, 0x18) == 'POLY') {
         s32 n = 0;
@@ -3626,7 +3628,7 @@ void fn_801A26FC(u8* p, u8* o) {
             RVec3 hit;
             f32 depth;
             RVec3 dir;
-            if (fn_80198F64(&pts[i].x, (u32)o, &hit.x, &depth, &dir.x, &RVec3C(lbl_805622D0, lbl_805622D0, lbl_805622D0).x, 0.25f)) {
+            if (fn_80198F64(&pts[i].x, (u32)o, &hit.x, &depth, &dir.x, &((const RVec3C&)RVec3C(lbl_805622D0, lbl_805622D0, lbl_805622D0)).x, 0.25f)) {
                 MulAdd(&pts[i].x, &pts[i].x, &dir.x, depth);
             }
         }

@@ -413,12 +413,14 @@ static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
 
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
+}
 template <class O, class V> static inline void TScale(O* o, const V* v, f32 k) { o->x = v->x * k; o->y = v->y * k; o->z = v->z * k; }  /* Helper name unproven */
 /* Helper name unproven */
 template <class T>
 static inline T& AtR(T* p, int i) {
     return p[i];
 }
+extern "C" {
 
 void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     MassSet* s = &lbl_8055E794[car];
@@ -502,10 +504,12 @@ void PSVECNormalize(const CVec3* src, CVec3* dst);
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
 /* Helper name unproven */
+}
 template <class T>
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
+extern "C" {
 
 void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];

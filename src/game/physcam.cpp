@@ -257,7 +257,7 @@ void fn_80270DB0(AngleRef* a, AngleRef* b, f32 wrap) {
     *AngleLo(b) = v;
 }
 
-void qsort(void* base, u32 n, u32 size, s32 (*cmp)(u8*, const u8*));
+void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 
 // Collects the usable regions for `car`, then (when id bit 8 is set) makes each camera group's
 // heading windows tile the full circle: sorted by start, neighbours meet halfway.
@@ -283,7 +283,7 @@ void fn_80270EC4(u8* car, u32 id) {
                 r++;
             }
             if (n > 0) {
-                qsort(refs, n, sizeof(AngleRef), fn_80270D4C);
+                qsort(refs, n, sizeof(AngleRef), (int (*)(const void*, const void*))fn_80270D4C);
                 f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
                 int i;
                 int last;

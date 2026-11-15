@@ -1313,11 +1313,13 @@ int fn_80283AC8(void) {
 extern "C" {
 
 // Selects the next event that has an unlock condition and shows its title, description and best time.
+}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T& AtR(T* p, int i) {
     return p[i];
 }
+extern "C" {
 
 int fn_80283B58(void) {
     int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);

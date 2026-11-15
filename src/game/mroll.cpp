@@ -256,12 +256,12 @@ extern char lbl_8034287C[];  // "UICar:COLOR%d"
 static inline s32 Min(s32 a, s32 b) { return b < a ? b : a; }
 
 // The body colour chooser of the car picker.
-extern const f32 lbl_80563758;  // 0.0
-extern const f32 lbl_80563764;  // 1.0
-extern const f32 lbl_80563768;  // 1000.0
-extern const f32 lbl_8056376C;  // 250.0
-extern const f32 lbl_80563770;  // -1.0
-extern const f32 lbl_8056377C;  // 5.0
+extern "C" const f32 lbl_80563758;  // 0.0
+extern "C" const f32 lbl_80563764;  // 1.0
+extern "C" const f32 lbl_80563768;  // 1000.0
+extern "C" const f32 lbl_8056376C;  // 250.0
+extern "C" const f32 lbl_80563770;  // -1.0
+extern "C" const f32 lbl_8056377C;  // 5.0
 extern "C" {
 f32 fn_8023659C(void);
 void fn_80216D28(void);

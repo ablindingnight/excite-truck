@@ -838,7 +838,9 @@ inline int CoinBoxPickupMaker::Match(const char* name) {
     return strncasecmp(name, p, strlen(p)) == 0;
 }
 
-extern "C" static inline int fn_801698B8(int j, int i, int ny, int nx) {
+extern "C" {
+
+static inline int fn_801698B8(int j, int i, int ny, int nx) {
     int lo;
     int hi;
     int v;
@@ -861,7 +863,7 @@ extern "C" static inline int fn_801698B8(int j, int i, int ny, int nx) {
     return r;
 }
 
-extern "C" static inline int fn_80169928(int j, int i, int ny, int nx) {
+static inline int fn_80169928(int j, int i, int ny, int nx) {
     if (i > nx - i) {
         i = nx - i;
     }
@@ -882,6 +884,7 @@ extern "C" static inline int fn_80169928(int j, int i, int ny, int nx) {
     return r;
 }
 
+}  // extern "C"
 
 inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* params) {
     f32 off;
