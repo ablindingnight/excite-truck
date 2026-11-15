@@ -2643,24 +2643,30 @@ static inline void SetV3(RVec3* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
+static inline f32 ControlsLateral(const V2& v, u8* d) {
+    f32 ay = F32(d, 0x44);
+    f32 ax = F32(d, 0x40);
+    return v.y * ax + -v.x * ay;
+}
+
 // The AI driver's per-frame controls: steering toward the line (or the recovery steer when it is far off), the
 // throttle/brake/gear from fn_80196250 with speed caps, launch and pit overrides, the reverse-out push, the
 // turbo decision and an extra downhill push along the ground when the car is over the turbo speed.
 void fn_80198530(u8* d) {
+    f32 stopped;
     f32 throttle = 1.0f;
+    stopped = 0.0f;
     f32 brake = 0.0f;
     f32 steer;
-    int rev = F32(d, 0x28) < 0.0f;
+    int rev = F32(d, 0x28) < stopped;
     int wide = rev ? F32(d, 0x24) < -1.0f : F32(d, 0x24) > 1.0f;
     if (wide) {
         V2 v;
         v.x = 0.0f;
         v.y = 1.0f;
-        f32 ay = F32(d, 0x44);
-        f32 ax = F32(d, 0x40);
-        f32 lat = v.y * ax + -v.x * ay;
+        f32 lat = ControlsLateral(v, d);
         if (rev) {
-            f32 t = Clamp01(Ramp((f32)__fabs(brake), 0.0f, 0.05f));
+            f32 t = Clamp01(Ramp((f32)__fabs(stopped), 0.0f, 0.05f));
             throttle = LerpF(1.0f, 0.0f, t);
             steer = (lat + 0.9f * F32(CAR(d), 0x128)) / F32(d, 0x24C);
             steer = MIN(1.0f, steer);
@@ -2718,8 +2724,8 @@ void fn_80198530(u8* d) {
     }
     switch (S32(d, 0x260)) {
     case 2:
-        throttle = 0.0f;
         brake = 0.5f;
+        throttle = 0.0f;
         break;
     case 1:
         if (F32(d, 0x270) > 8.888889f) {
