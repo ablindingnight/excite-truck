@@ -642,15 +642,12 @@ extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, vo
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
 extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_80220E48(WidgetFragment*, int, int, int, int, void*, int);
 extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_802230A4(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
-extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
-extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021FF34(WidgetFragment*, UIDesc*, void*, int, float, float);
 
 
@@ -1193,8 +1190,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 20: {
         UIStyle* view = FindStyle(styles, d->style, 0xb);
-        p = (WidgetFragment*)operator new(0x260, "VScrollBar");
-        if (p) p = fn_80220E48(p, d->x - 3, d->y + 21, d->dx, d->dy - 40,
+        p = (WidgetFragment*)new ("VScrollBar") ScrollBar(d->x - 3, d->y + 21, d->dx, d->dy - 40,
                                view ? view->value : (void*)&sDefaultView, 0);
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
@@ -1223,8 +1219,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 21: {
         UIStyle* view = FindStyle(styles, d->style, 0xb);
-        p = (WidgetFragment*)operator new(0x260, "HScrollBar");
-        if (p) p = fn_80220E48(p, d->x + 21, d->y, d->dx - 40, d->dy,
+        p = (WidgetFragment*)new ("HScrollBar") ScrollBar(d->x + 21, d->y, d->dx - 40, d->dy,
                                view ? view->value : (void*)&sDefaultView, 1);
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
@@ -1330,8 +1325,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         widgets[count++] = p;
         break;
     case 46:
-        p = (WidgetFragment*)operator new(0x264, "ControlButton");
-        if (p) p = fn_80226CBC(p, d);
+        p = (WidgetFragment*)new ("ControlButton") ControlButton((WidgetDesc*)d);
         widgets[count++] = p;
         break;
     case 47:
@@ -1342,8 +1336,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* tabs = FindStyle(styles, d->style, 0xf);
         UIStyle* text = FindStyle(styles, d->style, 3);
         void* first = tabs ? tabs->value : (void*)lbl_8055EF34;
-        p = (WidgetFragment*)operator new(0x25c, "TopTabDisplay");
-        if (p) p = fn_80227E84(p, first, d, text ? text->value : 0);
+        p = (WidgetFragment*)new ("TopTabDisplay") TopTabDisplay(first, (WidgetDesc*)d, text ? text->value : 0);
         widgets[count++] = p;
         break;
     }

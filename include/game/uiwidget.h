@@ -176,6 +176,22 @@ public:
     unsigned char fields244[0x18];  // 0x244, read through widgets.cpp views
 };
 
+extern "C" void fn_802C519C(void*);
+class ScrollBar : public UIWidget {  /* Class name unproven (allocation tags "VScrollBar"/"HScrollBar"); vtable lbl_8033E770 */
+public:
+    ScrollBar(int x, int y, int width, int height, void* view, int vertical);  // fn_80220E48
+    virtual ~ScrollBar(void) { fn_802C519C(track); fn_802C519C(marker); }  // inline: TU-end copy fn_8022A054
+    virtual void Slot24(void* context);  // fn_80221544
+    virtual void Slot28(void);           // fn_80221970
+    virtual void Slot3C(int a, int b);   // fn_80220F90
+    virtual void Slot40(int a, int b);   // fn_80221538
+    virtual void Slot4C(int x, int y);   // fn_802213A4
+    void* view;                  // 0x244
+    void* track;                 // 0x248
+    void* marker;                // 0x24C
+    unsigned char rest250[0x10]; // 0x250, read through widgets.cpp's ScrollbarPrefix
+};
+
 class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage"); vtable lbl_8033E3D4 */
 public:
     MenuImage(WidgetDesc* desc, void* context);  // fn_80223AB4
@@ -219,6 +235,14 @@ public:
     virtual void Slot28(void);  // fn_80226B6C
     unsigned char fields244[0x1C];  // 0x244, read through widgets.cpp views
 };
+class ControlButton : public UIWidget {  /* Class name unproven (allocation tag "ControlButton"); vtable lbl_8033E038 */
+public:
+    ControlButton(struct WidgetDesc* desc);  // fn_80226CBC
+    virtual ~ControlButton(void);            // fn_80226F00
+    virtual void Slot28(void);               // fn_80226F94
+    unsigned char fields244[0x20];  // 0x244, read through widgets.cpp views
+};
+
 class ColorBackground : public UIWidget {  /* Class name unproven (allocation tag "ColorBackground"); vtable lbl_8033DFB4 */
 public:
     ColorBackground(WidgetDesc* desc);  // fn_802270DC
@@ -226,6 +250,18 @@ public:
     virtual void Slot28(void);  // fn_802272D4
     unsigned char fields244[0x30];  // 0x244, read through widgets.cpp views
 };
+class TopTabDisplay : public UIWidget {  /* Class name unproven (allocation tag "TopTabDisplay"); vtable lbl_8033DF30 */
+public:
+    TopTabDisplay(void* first, struct WidgetDesc* desc, void* second);  // fn_80227E84
+    virtual ~TopTabDisplay(void);  // fn_80227F5C
+    virtual void Slot28(void);     // fn_80228010
+    bool flag;                     // 0x244
+    unsigned char gap245[3];
+    void* first;                   // 0x248
+    void* second;                  // 0x24C
+    unsigned char rest250[0xC];    // 0x250, read through widgets.cpp views
+};
+
 class TabBox : public UIWidget {  /* Class name unproven (allocation tag "TabBox"); vtable lbl_8033DEAC */
 public:
     TabBox(WidgetDesc* desc);  // fn_80227D00
