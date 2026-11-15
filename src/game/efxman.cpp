@@ -149,11 +149,6 @@ struct EfxShort {
     s16 x;
 };
 
-struct EfxFloat {
-    EfxFloat(f32 v) { x = v; }
-    f32 x;
-};
-
 class Viewer {
 public:
     virtual ~Viewer(void);  // 0x08 (the arena master GameMode: slot 0 is its destructor)
@@ -316,10 +311,11 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
 
 ModuleTag lbl_8055F6A8;
 static inline s16 EfxS(s16 v) { return v; }  /* Helper name unproven */
-s16 lbl_8055F6B0 = EfxS(0x100);
-s16 lbl_8055F6B2 = EfxS(0x405);
-s16 lbl_8055F6B4 = EfxS(0x401);
-EfxFloat lbl_8055F6B8(0.7853982f);
+static inline f32 DefaultEfxAngle(f32 value) { return value; }
+extern const s16 lbl_8055F6B0 = EfxS(0x100);
+extern const s16 lbl_8055F6B2 = EfxS(0x405);
+extern const s16 lbl_8055F6B4 = EfxS(0x401);
+extern const f32 lbl_8055F6B8 = DefaultEfxAngle(0.7853982f);
 u8 lbl_8055F6BC;
 s32 lbl_8055F6C0;      // callback count
 EfxInfo* lbl_8055F6C4;
