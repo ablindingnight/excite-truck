@@ -29,9 +29,9 @@ static inline f32 LerpF(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 // A LogoMover's motion state (from 0x18): eases from (fromX, fromY) to (toX, toY).
 struct LogoMotion {
-    LogoMotion(f32 time) {
+    LogoMotion(f32 time, s32 easing = 2) {
         rate = 1.0f / time;
-        ease = 2;
+        ease = easing;
         t = 1.0f;
         Reset(2);
     }
@@ -69,7 +69,7 @@ struct LogoMotion {
 // (popwarn.cpp), the event path's cup markers (evpath.cpp).
 class LogoMover : public MenuState {
 public:
-    LogoMover(f32 time) : m(time) {}
+    LogoMover(f32 time, s32 easing = 2) : m(time, easing) {}
     // Leaves the item hidden (written out: a call here would make the dtor store the vptr first).
     virtual ~LogoMover(void) {
         m.active = 0;

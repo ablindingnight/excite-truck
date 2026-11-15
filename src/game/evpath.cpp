@@ -1030,9 +1030,8 @@ inline void EvEventBar::Reset(void) {
     }
 }
 
-inline EvEventBar::EvEventBar(void) : LogoMover(0.2f) {
+inline EvEventBar::EvEventBar(void) : LogoMover(0.2f, 1) {
     contest = 0;
-    m.ease = 1;
     lbl_804B30D8.Add((u8*)this);
     Reset();
 }
